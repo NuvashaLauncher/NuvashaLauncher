@@ -1,0 +1,12 @@
+# Build artifacts
+/build/
+/build-debug/
+
+# Core dumps
+/core
+/core.*
+
+# Editor files
+*~
+*.swp
+*.swo
