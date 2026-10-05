@@ -8,17 +8,20 @@
 
 #include "aml-create-instance-dialog.h"
 
+#include "aml-version-row.h"
+
 struct _AmlCreateInstanceDialog
 {
   AdwDialog parent_instance;
 
   AmlInstanceManager *manager;
+  AmlSettings *settings;
 
   /* Directory picked with the file chooser, or NULL to keep the default. */
   char *directory;
 
   GtkWidget *name_row;
-  GtkWidget *version_row;
+  GtkWidget *version_row; /* AmlVersionRow, filled when the dialog opens */
   GtkWidget *directory_row;
   GtkWidget *error_label;
   GtkWidget *create_button;
@@ -46,14 +49,15 @@ update_create_button (AmlCreateInstanceDialog *self)
 {
   g_autofree char *name =
     g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->name_row)));
-  g_autofree char *version =
-    g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->version_row)));
+  const char *version =
+    aml_version_row_get_selected (AML_VERSION_ROW (self->version_row));
 
   g_strstrip (name);
-  g_strstrip (version);
 
+  /* The version row answers nothing while it is loading or failed, so
+   * the dialog waits until a version from the list is picked. */
   gtk_widget_set_sensitive (self->create_button,
-                            name[0] != '\0' && version[0] != '\0');
+                            name[0] != '\0' && version != NULL);
 }
 
 static void
@@ -79,16 +83,22 @@ on_create_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   AmlCreateInstanceDialog *self = user_data;
   g_autofree char *name =
     g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->name_row)));
-  g_autofree char *version =
-    g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->version_row)));
+  const char *version =
+    aml_version_row_get_selected (AML_VERSION_ROW (self->version_row));
   g_autoptr (GError) error = NULL;
   g_autoptr (AmlInstance) instance = NULL;
 
   g_strstrip (name);
-  g_strstrip (version);
 
-  /* Only vanilla exists until the loaders are added; the combo row has
-   * a single entry, so the selection cannot be anything else. */
+  /* The Create button is insensitive without a version, so this only
+   * guards against the row being emptied underneath it. */
+  if (version == NULL)
+    {
+      show_error (self, "Pick a Minecraft version from the list.");
+      return;
+    }
+
+  /* Only vanilla exists until the loaders are added. */
   instance = aml_instance_manager_create (self->manager, name, self->directory,
                                           version, AML_LOADER_VANILLA, NULL,
                                           &error);
@@ -150,12 +160,9 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->name_row), "Name");
   adw_entry_row_set_activates_default (ADW_ENTRY_ROW (self->name_row), TRUE);
 
-  /* Free text until Mojang's version metadata exists: phase 6 replaces
-   * this row with a list of the real versions. */
-  self->version_row = adw_entry_row_new ();
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->version_row),
-                                 "Minecraft Version");
-  adw_entry_row_set_activates_default (ADW_ENTRY_ROW (self->version_row), TRUE);
+  /* The real versions of Mojang's manifest, fetched when the dialog is
+   * created; the row fills itself and says so while it works. */
+  self->version_row = GTK_WIDGET (aml_version_row_new ());
 
   const char *loaders[] = { "Vanilla", NULL };
   GtkWidget *loader_row = adw_combo_row_new ();
@@ -228,21 +235,30 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
 
   g_signal_connect (self->name_row, "notify::text", G_CALLBACK (on_input_changed),
                     self);
-  g_signal_connect (self->version_row, "notify::text",
+  g_signal_connect (self->version_row, "notify::selected",
                     G_CALLBACK (on_input_changed), self);
 
   update_create_button (self);
 }
 
 AmlCreateInstanceDialog *
-aml_create_instance_dialog_new (AmlInstanceManager *manager)
+aml_create_instance_dialog_new (AmlInstanceManager *manager,
+                                AmlSettings        *settings)
 {
   g_return_val_if_fail (AML_IS_INSTANCE_MANAGER (manager), NULL);
+  g_return_val_if_fail (AML_IS_SETTINGS (settings), NULL);
 
   AmlCreateInstanceDialog *self =
     g_object_new (AML_TYPE_CREATE_INSTANCE_DIALOG, NULL);
 
   self->manager = g_object_ref (manager);
+  self->settings = g_object_ref (settings);
+
+  /* The widget tree is built before there are settings to ask, so the
+   * versions are fetched now. Nothing is picked until the user picks
+   * it: the row knows no version of its own. */
+  aml_version_row_load (AML_VERSION_ROW (self->version_row), self->settings,
+                        NULL);
 
   return self;
 }
@@ -253,6 +269,7 @@ aml_create_instance_dialog_dispose (GObject *object)
   AmlCreateInstanceDialog *self = AML_CREATE_INSTANCE_DIALOG (object);
 
   g_clear_object (&self->manager);
+  g_clear_object (&self->settings);
 
   G_OBJECT_CLASS (aml_create_instance_dialog_parent_class)->dispose (object);
 }

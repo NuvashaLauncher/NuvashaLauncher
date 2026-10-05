@@ -11,6 +11,7 @@
 #include <adwaita.h>
 
 #include "aml-instance-manager.h"
+#include "aml-settings.h"
 
 G_BEGIN_DECLS
 
@@ -20,9 +21,11 @@ G_DECLARE_FINAL_TYPE (AmlCreateInstanceDialog, aml_create_instance_dialog,
                       AML, CREATE_INSTANCE_DIALOG, AdwDialog)
 
 /* Returns a floating dialog, like every other GTK widget. Presenting it
- * takes ownership of that reference. The dialog keeps its own reference
- * on @manager until it is destroyed. */
-AmlCreateInstanceDialog *aml_create_instance_dialog_new (AmlInstanceManager *manager);
+ * takes ownership of that reference. The dialog keeps its own
+ * references on @manager and @settings until it is destroyed. The
+ * Minecraft versions are fetched when the dialog opens. */
+AmlCreateInstanceDialog *aml_create_instance_dialog_new (AmlInstanceManager *manager,
+                                                         AmlSettings        *settings);
 
 G_END_DECLS
 

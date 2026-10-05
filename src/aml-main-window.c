@@ -9,12 +9,14 @@
 #include "aml-main-window.h"
 #include "aml-create-instance-dialog.h"
 #include "aml-instance-page.h"
+#include "aml-settings.h"
 
 struct _AmlMainWindow
 {
   AdwApplicationWindow parent_instance;
 
   AmlInstanceManager *manager;
+  AmlSettings *settings;
 
   /* The navigation stack: the grid is its first page, the page of an
    * instance is pushed on top of it. */
@@ -30,7 +32,6 @@ G_DEFINE_FINAL_TYPE (AmlMainWindow, aml_main_window, ADW_TYPE_APPLICATION_WINDOW
  * feature is built: nothing may pretend to work. */
 static const char *pending_actions[] = {
   "download-modpack", /* phase 13 */
-  "settings",
   "shortcuts",
 };
 
@@ -40,9 +41,80 @@ on_create_instance (GSimpleAction *action G_GNUC_UNUSED,
                     gpointer       user_data)
 {
   AmlMainWindow *self = user_data;
-  GtkWidget *dialog = GTK_WIDGET (aml_create_instance_dialog_new (self->manager));
+  GtkWidget *dialog = GTK_WIDGET (
+    aml_create_instance_dialog_new (self->manager, self->settings));
 
   adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
+}
+
+/* What the row of a setting says when there is nothing to report. */
+static const char *snapshots_subtitle =
+  "Also list snapshots and the versions Mojang no longer serves";
+
+/* Written the moment it is switched. When the file cannot be written
+ * the setting keeps the value it had, the switch goes back to it and
+ * the row says why: the dialog and the file never disagree. */
+static void
+on_show_snapshots_toggled (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
+                           gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  AdwSwitchRow *row = ADW_SWITCH_ROW (object);
+  gboolean active = adw_switch_row_get_active (row);
+  gboolean stored = aml_settings_get_show_snapshots (self->settings);
+  g_autoptr (GError) error = NULL;
+
+  if (active == stored)
+    return;
+
+  if (aml_settings_set_show_snapshots (self->settings, active, &error))
+    {
+      adw_action_row_set_subtitle (ADW_ACTION_ROW (row),
+                                   snapshots_subtitle);
+      return;
+    }
+
+  adw_switch_row_set_active (row, stored);
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), error->message);
+}
+
+static void
+on_settings (GSimpleAction *action G_GNUC_UNUSED,
+             GVariant      *parameter G_GNUC_UNUSED,
+             gpointer       user_data)
+{
+  AmlMainWindow *self = user_data;
+  AdwDialog *dialog = adw_preferences_dialog_new ();
+  GtkWidget *page = adw_preferences_page_new ();
+  GtkWidget *group = adw_preferences_group_new ();
+  GtkWidget *row = adw_switch_row_new ();
+
+  adw_dialog_set_title (dialog, "Settings");
+  adw_preferences_dialog_set_search_enabled (ADW_PREFERENCES_DIALOG (dialog),
+                                             FALSE);
+
+  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (group), "Versions");
+  adw_preferences_group_set_description (ADW_PREFERENCES_GROUP (group),
+                                         "What the launcher lists when an "
+                                         "instance is created or edited.");
+
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), "Show Snapshots");
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), snapshots_subtitle);
+  adw_switch_row_set_active (ADW_SWITCH_ROW (row),
+                             aml_settings_get_show_snapshots (self->settings));
+
+  /* Connected after the value was set, so opening the dialog never
+   * writes anything by itself. */
+  g_signal_connect (row, "notify::active",
+                    G_CALLBACK (on_show_snapshots_toggled), self);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), row);
+
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+                            ADW_PREFERENCES_GROUP (group));
+  adw_preferences_dialog_add (ADW_PREFERENCES_DIALOG (dialog),
+                              ADW_PREFERENCES_PAGE (page));
+
+  adw_dialog_present (dialog, GTK_WIDGET (self));
 }
 
 static void
@@ -72,7 +144,7 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
 static const GActionEntry window_entries[] = {
   { .name = "create-instance", .activate = on_create_instance },
   { .name = "download-modpack" },
-  { .name = "settings" },
+  { .name = "settings", .activate = on_settings },
   { .name = "shortcuts" },
   { .name = "about", .activate = on_about },
 };
@@ -154,7 +226,8 @@ on_card_clicked (GtkButton *button, gpointer user_data)
 
   adw_navigation_view_push (
     self->navigation,
-    ADW_NAVIGATION_PAGE (aml_instance_page_new (self->manager, instance)));
+    ADW_NAVIGATION_PAGE (aml_instance_page_new (self->manager, instance,
+                                                self->settings)));
 }
 
 /* One card of the instance grid. The button holds everything but Play,
@@ -403,6 +476,7 @@ aml_main_window_new (GtkApplication *application, AmlInstanceManager *manager)
   GtkWidget *scroll = NULL;
 
   self->manager = g_object_ref (manager);
+  self->settings = aml_settings_new ();
 
   g_signal_connect (factory, "setup", G_CALLBACK (setup_card), self);
   g_signal_connect (factory, "bind", G_CALLBACK (bind_card), self);
@@ -438,6 +512,7 @@ aml_main_window_dispose (GObject *object)
   AmlMainWindow *self = AML_MAIN_WINDOW (object);
 
   g_clear_object (&self->manager);
+  g_clear_object (&self->settings);
 
   G_OBJECT_CLASS (aml_main_window_parent_class)->dispose (object);
 }
