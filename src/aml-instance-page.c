@@ -277,6 +277,23 @@ java_status_refresh (AmlInstancePage *self)
         }
     }
 
+  /* A usable JVM needs AWT's X11 bridge; warn for a headless runtime
+   * even when nothing else is wrong with the selection. */
+  if (message == NULL)
+    {
+      if (effective == NULL && current != NULL)
+        effective = aml_java_select (detected, current, NULL, 0);
+      else if (effective == NULL)
+        effective = aml_java_select (detected, NULL,
+                                     aml_settings_get_default_java_path (
+                                       self->settings),
+                                     0);
+
+      if (effective != NULL && effective->headless)
+        message = "Minecraft needs a non-headless Java: on Arch use the "
+                  "jre-openjdk package, not jre-openjdk-headless";
+    }
+
   adw_action_row_set_subtitle (ADW_ACTION_ROW (row), message);
 }
 

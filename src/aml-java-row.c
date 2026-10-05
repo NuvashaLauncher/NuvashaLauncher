@@ -111,10 +111,11 @@ java_label (AmlJava *java)
   if (java->major_version == 0)
     return g_strdup_printf ("Custom: %s", java->executable);
 
-  return g_strdup_printf ("%s %d (%s) — %s",
+  return g_strdup_printf ("%s %d (%s%s) — %s",
                           java->vendor != NULL ? java->vendor : "Java",
                           java->major_version,
                           java->arch != NULL ? java->arch : "unknown",
+                          java->headless ? ", headless" : "",
                           name);
 }
 
