@@ -1,0 +1,523 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
+/* Tests for the AmlInstance model: loader strings, name sanitization,
+ * validation and JSON round trip. Runs headless and touches no
+ * directories. */
+
+#include "aml-instance.h"
+
+#include <glib.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define TEST_UUID "11111111-2222-3333-4444-555555555555"
+
+/* Parses test JSON. The returned node belongs to the parser and stays
+ * valid as long as the parser lives. */
+static JsonParser *
+parse_json (const char *text)
+{
+  g_autoptr (GError) error = NULL;
+  JsonParser *parser = json_parser_new ();
+
+  if (!json_parser_load_from_data (parser, text, -1, &error))
+    g_error ("test json does not parse: %s", error->message);
+
+  return parser;
+}
+
+static char *
+prop_string (AmlInstance *instance, const char *property)
+{
+  char *value = NULL;
+
+  g_object_get (instance, property, &value, NULL);
+  return value;
+}
+
+static void
+assert_safe_name (const char *name)
+{
+  g_assert_nonnull (name);
+  g_assert_cmpstr (name, !=, "");
+  g_assert_null (strstr (name, "/"));
+  g_assert_null (strstr (name, ".."));
+  g_assert_cmpint (name[0], !=, '.');
+}
+
+static void
+test_loader_strings (void)
+{
+  const AmlLoader loaders[] = {
+    AML_LOADER_VANILLA, AML_LOADER_FABRIC, AML_LOADER_FORGE,
+    AML_LOADER_NEOFORGE, AML_LOADER_QUILT
+  };
+  const char *names[] = {
+    "vanilla", "fabric", "forge", "neoforge", "quilt"
+  };
+
+  for (guint i = 0; i < G_N_ELEMENTS (loaders); i++)
+    {
+      g_assert_cmpstr (aml_loader_to_string (loaders[i]), ==, names[i]);
+
+      AmlLoader parsed = AML_LOADER_VANILLA;
+      g_assert_true (aml_loader_from_string (names[i], &parsed));
+      g_assert_cmpint (parsed, ==, loaders[i]);
+    }
+
+  AmlLoader unknown = AML_LOADER_VANILLA;
+  g_assert_false (aml_loader_from_string ("sodium", &unknown));
+  g_assert_false (aml_loader_from_string (NULL, &unknown));
+  g_assert_null (aml_loader_to_string ((AmlLoader) 99));
+
+  g_print ("ok - loader strings\n");
+}
+
+static void
+test_sanitize_name (void)
+{
+  g_autofree char *plain = aml_instance_sanitize_name ("Hello World");
+  g_assert_cmpstr (plain, ==, "Hello World");
+
+  g_autofree char *slash = aml_instance_sanitize_name ("a/b");
+  g_assert_cmpstr (slash, ==, "a-b");
+
+  g_autofree char *dot_dot = aml_instance_sanitize_name ("..");
+  g_assert_cmpstr (dot_dot, ==, "instance");
+
+  g_autofree char *dots = aml_instance_sanitize_name ("...");
+  g_assert_cmpstr (dots, ==, "instance");
+
+  g_autofree char *empty = aml_instance_sanitize_name ("");
+  g_assert_cmpstr (empty, ==, "instance");
+
+  g_autofree char *null_name = aml_instance_sanitize_name (NULL);
+  g_assert_cmpstr (null_name, ==, "instance");
+
+  g_autofree char *blanks = aml_instance_sanitize_name ("   ");
+  g_assert_cmpstr (blanks, ==, "instance");
+
+  g_autofree char *hidden = aml_instance_sanitize_name (".hidden");
+  g_assert_cmpstr (hidden, ==, "hidden");
+
+  g_autofree char *inner = aml_instance_sanitize_name ("a..b");
+  g_assert_cmpstr (inner, ==, "a.b");
+
+  g_autofree char *padded = aml_instance_sanitize_name ("  padded  ");
+  g_assert_cmpstr (padded, ==, "padded");
+
+  g_autofree char *escape =
+    aml_instance_sanitize_name ("../../../etc/passwd");
+  assert_safe_name (escape);
+
+  g_autofree char *utf8 =
+    aml_instance_sanitize_name ("Caf\xc3\xa9" "/Montr\xc3\xa9" "al");
+  g_assert_cmpstr (utf8, ==, "Caf\xc3\xa9" "-Montr\xc3\xa9" "al");
+
+  g_autofree char *long_name = g_strnfill (100, 'a');
+  g_autofree char *capped = aml_instance_sanitize_name (long_name);
+  assert_safe_name (capped);
+  g_assert_cmpuint (strlen (capped), <=, 64);
+
+  g_print ("ok - name sanitization\n");
+}
+
+static void
+test_new_defaults (void)
+{
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlInstance) instance =
+    aml_instance_new (NULL, "Test", "/tmp/aml-instance-test", "1.21.1",
+                      AML_LOADER_VANILLA, &error);
+
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+
+  const char *id = aml_instance_get_id (instance);
+  g_assert_nonnull (id);
+  g_assert_true (g_uuid_string_is_valid (id));
+
+  g_autofree char *jvm_args = prop_string (instance, "jvm-args");
+  g_autofree char *loader_version = prop_string (instance, "loader-version");
+  g_autofree char *java_path = prop_string (instance, "java-path");
+  g_autofree char *icon = prop_string (instance, "icon");
+
+  g_assert_cmpstr (jvm_args, ==, "-Xmx2G");
+  g_assert_null (loader_version);
+  g_assert_null (java_path);
+  g_assert_null (icon);
+
+  g_assert_true (aml_instance_validate (instance, &error));
+  g_assert_no_error (error);
+
+  g_print ("ok - instance defaults\n");
+}
+
+static void
+test_new_rejects_bad_values (void)
+{
+  g_autoptr (GError) error = NULL;
+
+  /* A relative directory is not usable as an instance directory. */
+  g_autoptr (AmlInstance) relative =
+    aml_instance_new (NULL, "Test", "relative/path", "1.21.1",
+                      AML_LOADER_VANILLA, &error);
+  g_assert_null (relative);
+  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+  g_clear_error (&error);
+
+  g_autoptr (AmlInstance) no_directory =
+    aml_instance_new (NULL, "Test", NULL, "1.21.1",
+                      AML_LOADER_VANILLA, &error);
+  g_assert_null (no_directory);
+  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+  g_clear_error (&error);
+
+  /* An empty name must never become an instance. */
+  g_autoptr (AmlInstance) blank_name =
+    aml_instance_new (NULL, "", "/tmp/aml-instance-test", "1.21.1",
+                      AML_LOADER_VANILLA, &error);
+  g_assert_null (blank_name);
+  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+  g_clear_error (&error);
+
+  g_autoptr (AmlInstance) spaces_name =
+    aml_instance_new (NULL, "   ", "/tmp/aml-instance-test", "1.21.1",
+                      AML_LOADER_VANILLA, &error);
+  g_assert_null (spaces_name);
+  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+  g_clear_error (&error);
+
+  g_autoptr (AmlInstance) no_version =
+    aml_instance_new (NULL, "Test", "/tmp/aml-instance-test", "",
+                      AML_LOADER_VANILLA, &error);
+  g_assert_null (no_version);
+  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+  g_clear_error (&error);
+
+  /* An unknown loader value is refused before it reaches the property. */
+  g_autoptr (AmlInstance) bad_loader =
+    aml_instance_new (NULL, "Test", "/tmp/aml-instance-test", "1.21.1",
+                      (AmlLoader) 99, &error);
+  g_assert_null (bad_loader);
+  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+  g_clear_error (&error);
+
+  g_autoptr (AmlInstance) bad_id =
+    aml_instance_new ("not-a-uuid", "Test", "/tmp/aml-instance-test",
+                      "1.21.1", AML_LOADER_VANILLA, &error);
+  g_assert_null (bad_id);
+  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+  g_clear_error (&error);
+
+  /* The root directory is never an instance directory. */
+  g_autoptr (AmlInstance) root =
+    aml_instance_new (NULL, "Test", "/", "1.21.1",
+                      AML_LOADER_VANILLA, &error);
+  g_assert_null (root);
+  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+  g_clear_error (&error);
+
+  g_print ("ok - invalid instance values are rejected\n");
+}
+
+static void
+test_validate (void)
+{
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlInstance) instance =
+    aml_instance_new (NULL, "Valid", "/tmp/aml-instance-test", "1.21.1",
+                      AML_LOADER_NEOFORGE, &error);
+
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+  g_assert_true (aml_instance_validate (instance, &error));
+  g_assert_no_error (error);
+
+  /* An empty name breaks validation. */
+  g_object_set (instance, "name", "", NULL);
+  g_assert_false (aml_instance_validate (instance, &error));
+  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+  g_clear_error (&error);
+  g_object_set (instance, "name", "Valid", NULL);
+
+  /* So do empty JVM arguments. */
+  g_object_set (instance, "jvm-args", "", NULL);
+  g_assert_false (aml_instance_validate (instance, &error));
+  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+  g_clear_error (&error);
+  g_object_set (instance, "jvm-args", "-Xmx2G", NULL);
+
+  /* A directory with ".." inside is not canonical. */
+  g_autoptr (AmlInstance) escaping =
+    g_object_new (AML_TYPE_INSTANCE,
+                  "id", TEST_UUID,
+                  "name", "Escaping",
+                  "directory", "/tmp/aml-instance-test/../elsewhere",
+                  "minecraft-version", "1.21.1",
+                  "loader", AML_LOADER_VANILLA,
+                  NULL);
+  g_assert_false (aml_instance_validate (escaping, &error));
+  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+  g_clear_error (&error);
+
+  /* An object built without any field reports the missing id. */
+  g_autoptr (AmlInstance) empty = g_object_new (AML_TYPE_INSTANCE, NULL);
+  g_assert_false (aml_instance_validate (empty, &error));
+  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_MISSING_FIELD);
+  g_clear_error (&error);
+
+  /* Empty means "not set" for the nullable fields. */
+  g_object_set (instance, "loader-version", "", NULL);
+  g_autofree char *loader_version =
+    prop_string (instance, "loader-version");
+  g_assert_null (loader_version);
+
+  g_print ("ok - instance validation\n");
+}
+
+static void
+test_json_round_trip (void)
+{
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlInstance) original =
+    aml_instance_new (NULL, "Fabric Pack", "/tmp/aml-instance-fabric",
+                      "1.21.1", AML_LOADER_FABRIC, &error);
+
+  g_assert_no_error (error);
+  g_assert_nonnull (original);
+
+  g_object_set (original,
+                "loader-version", "0.16.9",
+                "icon", "applications-games-symbolic",
+                "java-path", "/usr/bin/java",
+                "jvm-args", "-Xmx4G -Xms1G",
+                NULL);
+
+  JsonNode *node = aml_instance_to_json (original);
+  g_assert_nonnull (node);
+
+  g_autoptr (AmlInstance) copy =
+    aml_instance_new_from_json (node, &error);
+  json_node_unref (node);
+
+  g_assert_no_error (error);
+  g_assert_nonnull (copy);
+
+  g_assert_cmpstr (aml_instance_get_id (copy), ==,
+                   aml_instance_get_id (original));
+
+  const char *fields[] = {
+    "name", "directory", "minecraft-version", "loader-version", "icon",
+    "java-path", "jvm-args"
+  };
+
+  for (guint i = 0; i < G_N_ELEMENTS (fields); i++)
+    {
+      g_autofree char *expected = prop_string (original, fields[i]);
+      g_autofree char *actual = prop_string (copy, fields[i]);
+      g_assert_cmpstr (actual, ==, expected);
+    }
+
+  AmlLoader loader = AML_LOADER_VANILLA;
+  g_object_get (copy, "loader", &loader, NULL);
+  g_assert_cmpint (loader, ==, AML_LOADER_FABRIC);
+
+  g_print ("ok - json round trip\n");
+}
+
+/* An instance object without one of the required members. */
+static JsonNode *
+build_instance_json (const char *skip_member)
+{
+  static const char *members[] = {
+    "id", "name", "directory", "minecraft_version", "loader",
+    "loader_version"
+  };
+  static const char *values[] = {
+    TEST_UUID, "Test", "/tmp/aml-instance-test", "1.21.1", "fabric",
+    "0.16.9"
+  };
+
+  g_autoptr (JsonBuilder) builder = json_builder_new ();
+
+  json_builder_begin_object (builder);
+
+  for (guint i = 0; i < G_N_ELEMENTS (members); i++)
+    {
+      if (g_strcmp0 (members[i], skip_member) == 0)
+        continue;
+
+      json_builder_set_member_name (builder, members[i]);
+      json_builder_add_string_value (builder, values[i]);
+    }
+
+  json_builder_end_object (builder);
+
+  return json_builder_get_root (builder);
+}
+
+static void
+test_missing_fields (void)
+{
+  static const char *required[] = {
+    "id", "name", "directory", "minecraft_version", "loader"
+  };
+
+  for (guint i = 0; i < G_N_ELEMENTS (required); i++)
+    {
+      g_autoptr (GError) error = NULL;
+      JsonNode *node = build_instance_json (required[i]);
+
+      g_autoptr (AmlInstance) instance =
+        aml_instance_new_from_json (node, &error);
+
+      json_node_unref (node);
+
+      g_assert_null (instance);
+      g_assert_error (error, AML_INSTANCE_ERROR,
+                      AML_INSTANCE_ERROR_MISSING_FIELD);
+    }
+
+  g_print ("ok - missing fields fail cleanly\n");
+}
+
+static void
+test_malformed_json (void)
+{
+  g_autoptr (GError) error = NULL;
+
+  /* Not a JSON object at all. */
+  {
+    g_autoptr (JsonParser) parser = parse_json ("42");
+    g_autoptr (AmlInstance) instance =
+      aml_instance_new_from_json (json_parser_get_root (parser), &error);
+    g_assert_null (instance);
+    g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+    g_clear_error (&error);
+  }
+
+  {
+    g_autoptr (JsonParser) parser = parse_json ("[1, 2]");
+    g_autoptr (AmlInstance) instance =
+      aml_instance_new_from_json (json_parser_get_root (parser), &error);
+    g_assert_null (instance);
+    g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+    g_clear_error (&error);
+  }
+
+  /* Wrong types for fields that must be strings. */
+  {
+    g_autofree char *text =
+      g_strdup_printf ("{\"id\": 42, \"name\": \"Test\", "
+                       "\"directory\": \"/tmp/aml-instance-test\", "
+                       "\"minecraft_version\": \"1.21.1\", "
+                       "\"loader\": \"vanilla\"}");
+    g_autoptr (JsonParser) parser = parse_json (text);
+    g_autoptr (AmlInstance) instance =
+      aml_instance_new_from_json (json_parser_get_root (parser), &error);
+    g_assert_null (instance);
+    g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+    g_clear_error (&error);
+  }
+
+  {
+    g_autofree char *text =
+      g_strdup_printf ("{\"id\": \"%s\", \"name\": \"Test\", "
+                       "\"directory\": \"/tmp/aml-instance-test\", "
+                       "\"minecraft_version\": \"1.21.1\", "
+                       "\"loader\": 7}",
+                       TEST_UUID);
+    g_autoptr (JsonParser) parser = parse_json (text);
+    g_autoptr (AmlInstance) instance =
+      aml_instance_new_from_json (json_parser_get_root (parser), &error);
+    g_assert_null (instance);
+    g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+    g_clear_error (&error);
+  }
+
+  /* An unknown loader name. */
+  {
+    g_autofree char *text =
+      g_strdup_printf ("{\"id\": \"%s\", \"name\": \"Test\", "
+                       "\"directory\": \"/tmp/aml-instance-test\", "
+                       "\"minecraft_version\": \"1.21.1\", "
+                       "\"loader\": \"sodium\"}",
+                       TEST_UUID);
+    g_autoptr (JsonParser) parser = parse_json (text);
+    g_autoptr (AmlInstance) instance =
+      aml_instance_new_from_json (json_parser_get_root (parser), &error);
+    g_assert_null (instance);
+    g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+    g_clear_error (&error);
+  }
+
+  /* Empty JVM arguments are not usable either. */
+  {
+    g_autofree char *text =
+      g_strdup_printf ("{\"id\": \"%s\", \"name\": \"Test\", "
+                       "\"directory\": \"/tmp/aml-instance-test\", "
+                       "\"minecraft_version\": \"1.21.1\", "
+                       "\"loader\": \"vanilla\", \"jvm_args\": \"\"}",
+                       TEST_UUID);
+    g_autoptr (JsonParser) parser = parse_json (text);
+    g_autoptr (AmlInstance) instance =
+      aml_instance_new_from_json (json_parser_get_root (parser), &error);
+    g_assert_null (instance);
+    g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+    g_clear_error (&error);
+  }
+
+  g_print ("ok - malformed json fails cleanly\n");
+}
+
+static void
+test_optional_fields (void)
+{
+  g_autoptr (GError) error = NULL;
+
+  /* Absent optional fields become NULL, "jvm_args" gets the default. */
+  g_autofree char *text =
+    g_strdup_printf ("{\"id\": \"%s\", \"name\": \"Minimal\", "
+                     "\"directory\": \"/tmp/aml-instance-minimal\", "
+                     "\"minecraft_version\": \"1.21.1\", "
+                     "\"loader\": \"vanilla\"}",
+                     TEST_UUID);
+  g_autoptr (JsonParser) parser = parse_json (text);
+  g_autoptr (AmlInstance) instance =
+    aml_instance_new_from_json (json_parser_get_root (parser), &error);
+
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+
+  g_autofree char *loader_version = prop_string (instance, "loader-version");
+  g_autofree char *java_path = prop_string (instance, "java-path");
+  g_autofree char *jvm_args = prop_string (instance, "jvm-args");
+
+  g_assert_null (loader_version);
+  g_assert_null (java_path);
+  g_assert_cmpstr (jvm_args, ==, "-Xmx2G");
+
+  g_print ("ok - optional fields\n");
+}
+
+int
+main (int argc, char **argv)
+{
+  (void) argc;
+  (void) argv;
+
+  test_loader_strings ();
+  test_sanitize_name ();
+  test_new_defaults ();
+  test_new_rejects_bad_values ();
+  test_validate ();
+  test_json_round_trip ();
+  test_missing_fields ();
+  test_malformed_json ();
+  test_optional_fields ();
+
+  return EXIT_SUCCESS;
+}
