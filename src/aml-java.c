@@ -16,12 +16,18 @@
 #include <string.h>
 #include <unistd.h>
 
-/* Where Linux keeps JDK bundles. */
-static const char *jvm_roots[] = {
-  "/usr/lib/jvm",
-  "/usr/lib64/jvm",
-  NULL
-};
+/* True when this JVM reports only command-line English: its home lacks
+ * lib/libawt_xawt.so, so there is no AWT glue for a windowed UI. */
+static gboolean
+java_has_xawt (const char *executable)
+{
+  g_autofree char *dir = g_path_get_dirname (executable);
+  g_autofree char *home = g_path_get_dirname (dir);
+  g_autofree char *libawt =
+    g_build_filename (home, "lib", "libawt_xawt.so", NULL);
+
+  return g_file_test (libawt, G_FILE_TEST_EXISTS);
+}
 
 GQuark
 aml_java_error_quark (void)
@@ -323,6 +329,7 @@ probe_communicate (GObject      *source G_GNUC_UNUSED,
   java->major_version = major;
   java->arch = g_steal_pointer (&arch);
   java->vendor = g_steal_pointer (&vendor_out);
+  java->headless = !java_has_xawt (java->executable);
 
   g_task_return_pointer (probe->task, java, (GDestroyNotify) aml_java_free);
   probe_destroyed (probe);
@@ -503,39 +510,102 @@ aml_java_probe_list_finish (GAsyncResult  *result,
 
 static void
 add_candidate (GPtrArray  *candidates,
+               const char *path);
+
+/* Search-gate: @home/bin/java and @home/jre/bin/java. */
+static void
+add_jvm_home (GPtrArray  *candidates,
+              const char *home)
+{
+  g_autofree char *bin_java = g_build_filename (home, "bin", "java", NULL);
+  g_autofree char *jre_java =
+    g_build_filename (home, "jre", "bin", "java", NULL);
+
+  add_candidate (candidates, bin_java);
+  add_candidate (candidates, jre_java);
+}
+
+static void
+add_root_scandir (GPtrArray  *candidates,
+                  const char *root)
+{
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GDir) dir = g_dir_open (root, 0, &error);
+
+  if (dir == NULL)
+    return;
+
+  for (const char *name = g_dir_read_name (dir); name != NULL;
+       name = g_dir_read_name (dir))
+    {
+      g_autofree char *home = g_build_filename (root, name, NULL);
+
+      add_jvm_home (candidates, home);
+    }
+}
+
+/* Built-in subtrees whose subdirectories are treated as JVM homes. */
+static char **
+default_roots (void)
+{
+  const char *home = g_get_home_dir ();
+  static const char *system[] = {
+    "/usr/lib/jvm",
+    "/usr/lib64/jvm",
+    "/usr/java",
+    "/usr/local/java",
+    "/opt",
+    NULL
+  };
+  g_autofree char *jdks = g_build_filename (home, ".jdks", NULL);
+  g_autofree char *sdkman = g_build_filename (home, ".sdkman",
+                                              "candidates", "java", NULL);
+  g_autofree char *asdf = g_build_filename (home, ".asdf", "installs",
+                                            "java", NULL);
+  g_autofree char *mise = g_build_filename (home, ".local", "share", "mise",
+                                            "installs", "java", NULL);
+  char **out = g_new0 (char *, G_N_ELEMENTS (system) + 5);
+  guint n = 0;
+
+  for (guint i = 0; system[i] != NULL; i++)
+    out[n++] = g_strdup (system[i]);
+
+  out[n++] = g_steal_pointer (&jdks);
+  out[n++] = g_steal_pointer (&sdkman);
+  out[n++] = g_steal_pointer (&asdf);
+  out[n++] = g_steal_pointer (&mise);
+  out[n++] = NULL;
+
+  return out;
+}
+
+/* Only executable regular files are candidates: directories, devices
+ * and scripts that are not executable cannot be probed. */
+static void
+add_candidate (GPtrArray  *candidates,
                const char *path)
 {
   if (path == NULL || *path == '\0')
     return;
 
-  if (g_file_test (path, G_FILE_TEST_IS_EXECUTABLE))
+  if (g_file_test (path, G_FILE_TEST_IS_REGULAR) &&
+      g_file_test (path, G_FILE_TEST_IS_EXECUTABLE))
     g_ptr_array_add (candidates, g_strdup (path));
 }
 
+/* The system the Fedora, Arch etc. layout plus $JAVA_HOME and PATH. */
 static char **
 collect_candidates (void)
 {
   g_autoptr (GPtrArray) candidates =
     g_ptr_array_new_with_free_func (g_free);
   const char *java_home = g_getenv ("JAVA_HOME");
+  char **roots = default_roots ();
 
-  for (guint i = 0; jvm_roots[i] != NULL; i++)
-    {
-      g_autoptr (GError) error = NULL;
-      g_autoptr (GDir) dir = g_dir_open (jvm_roots[i], 0, &error);
+  for (guint i = 0; roots[i] != NULL; i++)
+    add_root_scandir (candidates, roots[i]);
 
-      if (dir == NULL)
-        continue;
-
-      for (const char *name = g_dir_read_name (dir); name != NULL;
-           name = g_dir_read_name (dir))
-        {
-          g_autofree char *candidate =
-            g_build_filename (jvm_roots[i], name, "bin", "java", NULL);
-
-          add_candidate (candidates, candidate);
-        }
-    }
+  g_strfreev (roots);
 
   if (java_home != NULL && *java_home != '\0')
     {
@@ -551,6 +621,51 @@ collect_candidates (void)
   g_ptr_array_add (candidates, NULL);
 
   return (char **) g_ptr_array_free (g_steal_pointer (&candidates), FALSE);
+}
+
+/* For aml_java_detect_list: only the caller's roots are scanned. */
+static char **
+collect_candidates_list (char **roots)
+{
+  g_autoptr (GPtrArray) candidates =
+    g_ptr_array_new_with_free_func (g_free);
+
+  for (guint i = 0; roots != NULL && roots[i] != NULL; i++)
+    add_root_scandir (candidates, roots[i]);
+
+  g_ptr_array_add (candidates, NULL);
+
+  return (char **) g_ptr_array_free (g_steal_pointer (&candidates), FALSE);
+}
+
+/* The same real installation can be reached through several spellings
+ * (/usr/lib/jvm/default vs /usr/lib/jvm/java-25-openjdk): probe the
+ * first path for each, no second one. */
+static char **
+dedupe_candidates (char **candidates)
+{
+  g_autoptr (GHashTable) seen =
+    g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+  g_autoptr (GPtrArray) out =
+    g_ptr_array_new_with_free_func (g_free);
+
+  for (guint i = 0; candidates != NULL && candidates[i] != NULL; i++)
+    {
+      g_autofree char *real = realpath (candidates[i], NULL);
+      const char *key = real != NULL ? real : candidates[i];
+
+      if (!g_hash_table_contains (seen, key))
+        {
+          g_hash_table_insert (seen, g_strdup (key), GINT_TO_POINTER (1));
+          /* Probe the canonical path when there is one: the result
+           * always points at the real install, not a symlink. */
+          g_ptr_array_add (out, g_strdup (key));
+        }
+    }
+
+  g_ptr_array_add (out, NULL);
+
+  return (char **) g_ptr_array_free (g_steal_pointer (&out), FALSE);
 }
 
 typedef struct
@@ -583,12 +698,32 @@ aml_java_detect_async (GCancellable       *cancellable,
                        gpointer            user_data)
 {
   g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
-  g_autofree char **candidates = NULL;
+  g_auto (GStrv) collected = collect_candidates ();
+  g_auto (GStrv) candidates = dedupe_candidates (collected);
   Detect *detect = NULL;
 
   g_task_set_check_cancellable (task, FALSE);
 
-  candidates = collect_candidates ();
+  detect = g_new0 (Detect, 1);
+  detect->detect_task = g_steal_pointer (&task);
+
+  aml_java_probe_list_async (g_steal_pointer (&candidates), cancellable,
+                             detected, detect);
+}
+
+void
+aml_java_detect_list_async (char            **roots,
+                            GCancellable    *cancellable,
+                            GAsyncReadyCallback callback,
+                            gpointer         user_data)
+{
+  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
+  g_auto (GStrv) collected = collect_candidates_list (roots);
+  g_auto (GStrv) candidates = dedupe_candidates (collected);
+  Detect *detect = NULL;
+
+  g_task_set_check_cancellable (task, FALSE);
+
   detect = g_new0 (Detect, 1);
   detect->detect_task = g_steal_pointer (&task);
 
@@ -599,6 +734,15 @@ aml_java_detect_async (GCancellable       *cancellable,
 GPtrArray *
 aml_java_detect_finish (GAsyncResult  *result,
                         GError       **error)
+{
+  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
+
+  return g_task_propagate_pointer (G_TASK (result), error);
+}
+
+GPtrArray *
+aml_java_detect_list_finish (GAsyncResult  *result,
+                             GError       **error)
 {
   g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
 
