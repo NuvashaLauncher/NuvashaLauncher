@@ -369,6 +369,159 @@ test_probing_fake_scripts_and_dedup (void)
   g_ptr_array_free (call.javas, TRUE);
 }
 
+/* The same GSubprocess test harness, pointed at a roots list. */
+static void
+test_detect_list_jre_layout_and_dedup (void)
+{
+  g_autofree char *base = g_dir_make_tmp ("aml-detect-XXXXXX", NULL);
+  g_autofree char *root = g_build_filename (base, "jvm", NULL);
+  g_autofree char *jre_home = g_build_filename (root, "jre-8-home", NULL);
+  g_autofree char *jre_home_bin =
+    g_build_filename (jre_home, "jre", "bin", NULL);
+  g_autofree char *jre_home_lib =
+    g_build_filename (jre_home, "jre", "lib", NULL);
+  g_autofree char *real_home = g_build_filename (root, "real-25", NULL);
+  g_autofree char *std_link = g_build_filename (root, "default", NULL);
+  g_autofree char *plain = g_build_filename (root, "plain", NULL);
+  g_autofree char *plain_bin = g_build_filename (plain, "bin", NULL);
+  g_autofree char *head_home = g_build_filename (root, "headless-25", NULL);
+  char *roots[3];
+  JavaCall call = { 0 };
+  guint found_jre = 0;
+  guint found_real = 0;
+  guint found_head = 0;
+
+  g_assert_cmpint (g_mkdir_with_parents (root, 0755), ==, 0);
+  g_assert_cmpint (g_mkdir_with_parents (jre_home_bin, 0755), ==, 0);
+  g_assert_cmpint (g_mkdir_with_parents (jre_home_lib, 0755), ==, 0);
+  g_autofree char *real_home_bin = g_build_filename (real_home, "bin", NULL);
+  g_autofree char *real_home_lib = g_build_filename (real_home, "lib", NULL);
+  g_autofree char *head_home_bin = g_build_filename (head_home, "bin", NULL);
+  g_autofree char *real_libawt =
+    g_build_filename (real_home, "lib", "libawt_xawt.so", NULL);
+  g_autofree char *jre_libawt =
+    g_build_filename (jre_home_lib, "libawt_xawt.so", NULL);
+  g_autofree char *plain_javasrc = NULL;
+  g_assert_cmpint (g_mkdir_with_parents (real_home_bin, 0755), ==, 0);
+  g_assert_cmpint (g_mkdir_with_parents (real_home_lib, 0755), ==, 0);
+  g_assert_cmpint (g_mkdir_with_parents (plain_bin, 0755), ==, 0);
+  g_assert_cmpint (g_mkdir_with_parents (head_home_bin, 0755), ==, 0);
+
+  /* Real installs fake relevant files. */
+  g_autofree char *jre_java =
+    write_fake_java (jre_home_bin, "java", report_oracle_18);
+  g_autofree char *real_java = write_fake_java (real_home_bin, "java",
+                                                report_openjdk_25);
+  g_autofree char *head_java = write_fake_java (head_home_bin, "java",
+                                                report_openjdk_25);
+
+  /* The real java 8 layout carries lib/libawt_xawt.so inside jre/lib. */
+  g_file_set_contents (jre_libawt, "fake", -1, NULL);
+
+  /* The real java 25 carries it in <home>/lib. */
+  g_file_set_contents (real_libawt, "fake", -1, NULL);
+
+  /* A "default" directory that is a symlink to the main install: the
+   * scan must list the install once, not twice. */
+  symlink (real_home, std_link);
+
+  /* A candidate that is not executable: skipped. */
+  g_autofree char *plain_java =
+    write_fake_java (plain_bin, "java", report_openjdk_21);
+
+  chmod (plain_java, 0644);
+
+  roots[0] = root;
+  roots[1] = NULL;
+
+  aml_java_detect_list_async (roots, NULL, list_finished, &call);
+  run_one (&call.run);
+
+  g_assert_no_error (call.error);
+  g_assert_nonnull (call.javas);
+
+  for (guint i = 0; i < call.javas->len; i++)
+    {
+      AmlJava *java = g_ptr_array_index (call.javas, i);
+
+      if (g_str_has_suffix (java->executable, "jre-8-home/jre/bin/java"))
+        {
+          found_jre++;
+          g_assert_false (java->headless);
+        }
+      else if (g_strstr_len (java->executable, -1, "real-25/bin/java") != NULL ||
+               g_strstr_len (java->executable, -1, "default/bin/java") != NULL)
+        {
+          found_real++;
+          g_assert_false (java->headless);
+        }
+      else if (g_str_has_suffix (java->executable, "headless-25/bin/java"))
+        {
+          found_head++;
+          g_assert_true (java->headless);
+        }
+      else
+        g_error ("unexpected entry: %s", java->executable);
+    }
+
+  /* The symlinked "default" installed loses: must be probed only once. */
+  g_assert_cmpuint (found_jre, ==, 1);
+  g_assert_cmpuint (found_real, ==, 1);
+  g_assert_cmpuint (found_head, ==, 1);
+
+  g_ptr_array_free (call.javas, TRUE);
+}
+
+static void
+test_detect_headless_roots (void)
+{
+  g_autofree char *base = g_dir_make_tmp ("aml-java-root-XXXXXX", NULL);
+  g_autofree char *root = g_build_filename (base, "jvm", NULL);
+  g_autofree char *full = g_build_filename (root, "jdk-full", NULL);
+  g_autofree char *bare = g_build_filename (root, "jdk-bare", NULL);
+  char *roots[2];
+  JavaCall call = { 0 };
+
+  g_autofree char *full_bin = g_build_filename (full, "bin", NULL);
+  g_autofree char *full_lib = g_build_filename (full, "lib", NULL);
+  g_autofree char *bare_bin = g_build_filename (bare, "bin", NULL);
+  g_autofree char *full_libawt =
+    g_build_filename (full, "lib", "libawt_xawt.so", NULL);
+
+  g_assert_cmpint (g_mkdir_with_parents (full_bin, 0755), ==, 0);
+  g_assert_cmpint (g_mkdir_with_parents (full_lib, 0755), ==, 0);
+  g_assert_cmpint (g_mkdir_with_parents (bare_bin, 0755), ==, 0);
+
+  g_autofree char *full_java = write_fake_java (full_bin, "java",
+                                                report_openjdk_25);
+  g_autofree char *bare_java = write_fake_java (bare_bin, "java",
+                                                report_openjdk_25);
+  g_file_set_contents (full_libawt, "fake", -1, NULL);
+
+  roots[0] = root;
+  roots[1] = NULL;
+  aml_java_detect_list_async (roots, NULL, list_finished, &call);
+  run_one (&call.run);
+
+  g_assert_no_error (call.error);
+  g_assert_nonnull (call.javas);
+  g_assert_cmpuint (call.javas->len, ==, 2);
+
+  for (guint i = 0; i < call.javas->len; i++)
+    {
+      AmlJava *java = g_ptr_array_index (call.javas, i);
+
+      if (g_strstr_len (java->executable, -1, "jdk-full") != NULL)
+        g_assert_false (java->headless);
+      else if (g_strstr_len (java->executable, -1, "jdk-bare") != NULL)
+        g_assert_true (java->headless);
+      else
+        g_error ("unexpected entry: %s", java->executable);
+    }
+
+  g_ptr_array_free (call.javas, TRUE);
+}
+
 static void
 test_probing_parses_the_report (void)
 {
@@ -421,6 +574,12 @@ main (void)
 
   test_probing_parses_the_report ();
   g_print ("ok - probing a script parses its known report\n");
+
+  test_detect_list_jre_layout_and_dedup ();
+  g_print ("ok - jre layout is found, symlink dirs dedup and non-executables are skipped\n");
+
+  test_detect_headless_roots ();
+  g_print ("ok - libawt_xawt.so presence decides the headless flag\n");
 
   return 0;
 }
