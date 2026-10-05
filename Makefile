@@ -58,7 +58,7 @@ build-debug/%.o: src/%.c | build-debug
 	$(CC) $(CFLAGS) $(DBGFLAGS) $(PKG_CFLAGS) -c -o $@ $<
 
 build/tests/%: tests/%.c $(TESTLIBOBJS) | build/tests
-	$(CC) $(CFLAGS) $(RELFLAGS) $(PKG_CFLAGS) \
+	$(CC) $(CFLAGS) $(RELFLAGS) -Isrc $(PKG_CFLAGS) \
 		-DAML_DATA_DIR=\"$(CURDIR)/data\" -DAML_BIN=\"$(CURDIR)/$(BIN)\" \
 		-o $@ $< $(TESTLIBOBJS) $(PKG_LIBS)
 

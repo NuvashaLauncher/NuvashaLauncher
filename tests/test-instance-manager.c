@@ -1,0 +1,983 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
+/* Tests for AmlInstanceManager: persistence, atomic saves, duplication,
+ * deletion and path validation. Only temporary directories are used
+ * (never the real data directory) and everything runs headless: no
+ * application is ever launched. */
+
+#include "aml-instance-manager.h"
+
+#include <glib.h>
+#include <glib/gstdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+/* ---------------------------------------------------------- *
+ * Helpers
+ * ---------------------------------------------------------- */
+
+typedef struct
+{
+  GMainLoop *loop;
+  GError *error;
+  gpointer result;
+  gboolean success;
+  gboolean timed_out;
+  guint watchdog;
+} AsyncCall;
+
+static char *
+make_tmp_dir (void)
+{
+  g_autoptr (GError) error = NULL;
+  char *dir = g_dir_make_tmp ("aml-test-XXXXXX", &error);
+
+  g_assert_no_error (error);
+  g_assert_nonnull (dir);
+  return dir;
+}
+
+/* Synchronous recursive delete, test cleanup only. Symlinks are
+ * removed, not followed. */
+static void
+remove_recursive (const char *path)
+{
+  g_autoptr (GFile) file = g_file_new_for_path (path);
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GFileInfo) info =
+    g_file_query_info (file, G_FILE_ATTRIBUTE_STANDARD_TYPE,
+                       G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, NULL, &error);
+
+  if (info == NULL)
+    return;
+
+  if (g_file_info_get_file_type (info) == G_FILE_TYPE_DIRECTORY)
+    {
+      g_autoptr (GFileEnumerator) enumerator =
+        g_file_enumerate_children (file, G_FILE_ATTRIBUTE_STANDARD_NAME,
+                                   G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+                                   NULL, &error);
+
+      if (enumerator != NULL)
+        {
+          GFileInfo *child = NULL;
+
+          while ((child =
+                    g_file_enumerator_next_file (enumerator, NULL, NULL)) != NULL)
+            {
+              g_autoptr (GFile) child_file =
+                g_file_get_child (file, g_file_info_get_name (child));
+              g_autofree char *child_path = g_file_get_path (child_file);
+              g_object_unref (child);
+              remove_recursive (child_path);
+            }
+        }
+    }
+
+  g_file_delete (file, NULL, NULL);
+}
+
+static void
+write_file (const char *path, const char *contents)
+{
+  g_autofree char *parent = g_path_get_dirname (path);
+  g_autoptr (GError) error = NULL;
+
+  g_assert_cmpint (g_mkdir_with_parents (parent, 0755), ==, 0);
+
+  if (!g_file_set_contents (path, contents, -1, &error))
+    g_error ("cannot write %s: %s", path, error->message);
+}
+
+static char *
+read_file (const char *path)
+{
+  g_autoptr (GError) error = NULL;
+  char *contents = NULL;
+
+  if (!g_file_get_contents (path, &contents, NULL, &error))
+    g_error ("cannot read %s: %s", path, error->message);
+
+  return contents;
+}
+
+static guint
+count_entries (const char *path)
+{
+  GDir *dir = g_dir_open (path, 0, NULL);
+  guint count = 0;
+
+  if (dir == NULL)
+    return 0;
+
+  while (g_dir_read_name (dir) != NULL)
+    count++;
+
+  g_dir_close (dir);
+  return count;
+}
+
+static char *
+prop_string (AmlInstance *instance, const char *property)
+{
+  char *value = NULL;
+
+  g_object_get (instance, property, &value, NULL);
+  return value;
+}
+
+static guint
+manager_count (AmlInstanceManager *manager)
+{
+  return g_list_model_get_n_items (
+    G_LIST_MODEL (aml_instance_manager_get_instances (manager)));
+}
+
+static gboolean
+async_timeout (gpointer user_data)
+{
+  AsyncCall *call = user_data;
+
+  call->timed_out = TRUE;
+  g_main_loop_quit (call->loop);
+  return G_SOURCE_REMOVE;
+}
+
+/* Runs the main loop until the pending operation reports back, with a
+ * watchdog so a lost callback fails the test instead of hanging. */
+static void
+async_call_run (AsyncCall *call)
+{
+  call->watchdog = g_timeout_add_seconds (15, async_timeout, call);
+  g_main_loop_run (call->loop);
+
+  if (!call->timed_out)
+    g_source_remove (call->watchdog);
+
+  g_assert_false (call->timed_out);
+}
+
+static void
+async_call_clear (AsyncCall *call)
+{
+  /* GMainLoop is refcounted but is not a GObject, so g_clear_object
+   * would not work here. */
+  if (call->loop != NULL)
+    {
+      g_main_loop_unref (call->loop);
+      call->loop = NULL;
+    }
+
+  g_clear_error (&call->error);
+}
+
+static void
+duplicate_finished (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  AsyncCall *call = user_data;
+
+  call->result =
+    aml_instance_manager_duplicate_finish (AML_INSTANCE_MANAGER (source),
+                                           result, &call->error);
+  g_main_loop_quit (call->loop);
+}
+
+static void
+delete_finished (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  AsyncCall *call = user_data;
+
+  call->success =
+    aml_instance_manager_delete_finish (AML_INSTANCE_MANAGER (source),
+                                        result, &call->error);
+  g_main_loop_quit (call->loop);
+}
+
+static void
+open_folder_finished (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  AsyncCall *call = user_data;
+
+  call->success =
+    aml_instance_manager_open_folder_finish (AML_INSTANCE_MANAGER (source),
+                                             result, &call->error);
+  g_main_loop_quit (call->loop);
+}
+
+/* ---------------------------------------------------------- *
+ * Tests
+ * ---------------------------------------------------------- */
+
+static void
+test_create_and_persist (void)
+{
+  g_autofree char *data_dir = make_tmp_dir ();
+  g_autoptr (GError) error = NULL;
+
+  g_autoptr (AmlInstanceManager) manager =
+    aml_instance_manager_new (data_dir);
+  g_assert_nonnull (aml_instance_manager_get_instances (manager));
+  g_assert_cmpuint (manager_count (manager), ==, 0);
+
+  AmlInstance *instance =
+    aml_instance_manager_create (manager, "Pack One", NULL, "1.21.1",
+                                 AML_LOADER_FABRIC, "0.16.9", &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+  g_assert_cmpuint (manager_count (manager), ==, 1);
+
+  /* The default directory lives below <data>/instances/ and is named
+   * after the sanitized name plus a part of the id. */
+  g_autofree char *directory = prop_string (instance, "directory");
+  g_autofree char *instances_root =
+    g_build_filename (data_dir, "instances", NULL);
+  g_assert_true (g_str_has_prefix (directory, instances_root));
+  g_assert_nonnull (strstr (directory, "Pack One-"));
+  g_assert_true (g_file_test (directory, G_FILE_TEST_IS_DIR));
+
+  /* The metadata file carries format version 1 and one entry. */
+  g_autofree char *metadata_path =
+    g_build_filename (data_dir, "instances.json", NULL);
+  g_assert_true (g_file_test (metadata_path, G_FILE_TEST_EXISTS));
+
+  g_autofree char *text = read_file (metadata_path);
+  g_autoptr (JsonParser) parser = json_parser_new ();
+  g_assert_true (json_parser_load_from_data (parser, text, -1, &error));
+  g_assert_no_error (error);
+
+  JsonNode *root = json_parser_get_root (parser);
+  g_assert_true (JSON_NODE_HOLDS_OBJECT (root));
+
+  JsonObject *object = json_node_get_object (root);
+  JsonNode *version = json_object_get_member (object, "version");
+  g_assert_nonnull (version);
+  g_assert_cmpint (json_node_get_value_type (version), ==, G_TYPE_INT64);
+  g_assert_cmpint (json_node_get_int (version), ==, 1);
+
+  JsonNode *array = json_object_get_member (object, "instances");
+  g_assert_true (JSON_NODE_HOLDS_ARRAY (array));
+  g_assert_cmpuint (json_array_get_length (json_node_get_array (array)), ==, 1);
+
+  /* A fresh manager reads the same instance back. */
+  g_autoptr (AmlInstanceManager) fresh = aml_instance_manager_new (data_dir);
+  g_assert_true (aml_instance_manager_load (fresh, &error));
+  g_assert_no_error (error);
+  g_assert_cmpuint (manager_count (fresh), ==, 1);
+
+  g_autoptr (AmlInstance) loaded =
+    g_list_model_get_item (
+      G_LIST_MODEL (aml_instance_manager_get_instances (fresh)), 0);
+  g_assert_cmpstr (aml_instance_get_id (loaded), ==,
+                   aml_instance_get_id (instance));
+
+  g_autofree char *loaded_name = prop_string (loaded, "name");
+  g_autofree char *loaded_version = prop_string (loaded, "minecraft-version");
+  g_autofree char *loaded_loader_version =
+    prop_string (loaded, "loader-version");
+  g_autofree char *loaded_directory = prop_string (loaded, "directory");
+
+  g_assert_cmpstr (loaded_name, ==, "Pack One");
+  g_assert_cmpstr (loaded_version, ==, "1.21.1");
+  g_assert_cmpstr (loaded_loader_version, ==, "0.16.9");
+  g_assert_cmpstr (loaded_directory, ==, directory);
+
+  g_assert_true (aml_instance_manager_get_by_id (
+    fresh, aml_instance_get_id (instance)) == loaded);
+
+  g_object_unref (instance);
+  remove_recursive (data_dir);
+
+  g_print ("ok - create and persistence\n");
+}
+
+static void
+test_create_explicit_directory (void)
+{
+  g_autofree char *data_dir = make_tmp_dir ();
+  g_autofree char *chosen = g_build_filename (data_dir, "chosen", NULL);
+  g_autoptr (GError) error = NULL;
+
+  g_autoptr (AmlInstanceManager) manager =
+    aml_instance_manager_new (data_dir);
+
+  AmlInstance *instance =
+    aml_instance_manager_create (manager, "Chosen", chosen, "1.20.4",
+                                 AML_LOADER_QUILT, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+
+  g_autofree char *directory = prop_string (instance, "directory");
+  g_assert_cmpstr (directory, ==, chosen);
+  g_assert_true (g_file_test (chosen, G_FILE_TEST_IS_DIR));
+
+  g_object_unref (instance);
+  remove_recursive (data_dir);
+
+  g_print ("ok - explicit directory\n");
+}
+
+static void
+test_create_sanitized_name (void)
+{
+  g_autofree char *data_dir = make_tmp_dir ();
+  g_autoptr (GError) error = NULL;
+
+  g_autoptr (AmlInstanceManager) manager =
+    aml_instance_manager_new (data_dir);
+
+  /* The display name may contain anything, but the directory derived
+   * from it must stay inside <data>/instances and look like a plain
+   * single path component. */
+  AmlInstance *instance =
+    aml_instance_manager_create (manager, "../../evil", NULL, "1.21.1",
+                                 AML_LOADER_VANILLA, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+
+  g_autofree char *directory = prop_string (instance, "directory");
+  g_autofree char *instances_root =
+    g_build_filename (data_dir, "instances", NULL);
+  g_autofree char *leaf = g_path_get_basename (directory);
+
+  g_assert_true (g_str_has_prefix (directory, instances_root));
+  g_assert_null (strstr (directory, ".."));
+  g_assert_null (strstr (leaf, "/"));
+  g_assert_true (g_file_test (directory, G_FILE_TEST_IS_DIR));
+
+  g_object_unref (instance);
+  remove_recursive (data_dir);
+
+  g_print ("ok - awkward name still gets a safe directory\n");
+}
+
+static void
+test_path_validation (void)
+{
+  g_autofree char *data_dir = make_tmp_dir ();
+  g_autoptr (GError) error = NULL;
+
+  g_autoptr (AmlInstanceManager) manager =
+    aml_instance_manager_new (data_dir);
+
+  AmlInstance *first =
+    aml_instance_manager_create (manager, "One", NULL, "1.21.1",
+                                 AML_LOADER_VANILLA, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (first);
+
+  g_autofree char *first_directory = prop_string (first, "directory");
+
+  /* A relative path is refused. */
+  g_autoptr (AmlInstance) relative =
+    aml_instance_manager_create (manager, "Two", "relative/path", "1.21.1",
+                                 AML_LOADER_VANILLA, NULL, &error);
+  g_assert_null (relative);
+  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
+                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_clear_error (&error);
+
+  /* A path with ".." inside is refused and never created. */
+  g_autofree char *escape =
+    g_build_filename (data_dir, "instances", "..", "escape", NULL);
+  g_autoptr (AmlInstance) escaping =
+    aml_instance_manager_create (manager, "Three", escape, "1.21.1",
+                                 AML_LOADER_VANILLA, NULL, &error);
+  g_assert_null (escaping);
+  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
+                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_clear_error (&error);
+
+  g_autofree char *escape_canonical = g_canonicalize_filename (escape, NULL);
+  g_assert_false (g_file_test (escape_canonical, G_FILE_TEST_EXISTS));
+
+  /* The filesystem root is refused. */
+  g_autoptr (AmlInstance) root =
+    aml_instance_manager_create (manager, "Four", G_DIR_SEPARATOR_S, "1.21.1",
+                                 AML_LOADER_VANILLA, NULL, &error);
+  g_assert_null (root);
+  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
+                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_clear_error (&error);
+
+  /* The directory of an existing instance is refused. */
+  g_autoptr (AmlInstance) same =
+    aml_instance_manager_create (manager, "Five", first_directory, "1.21.1",
+                                 AML_LOADER_VANILLA, NULL, &error);
+  g_assert_null (same);
+  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
+                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_clear_error (&error);
+
+  /* A directory containing an existing instance is refused. */
+  g_autofree char *parent = g_path_get_dirname (first_directory);
+  g_autoptr (AmlInstance) containing =
+    aml_instance_manager_create (manager, "Six", parent, "1.21.1",
+                                 AML_LOADER_VANILLA, NULL, &error);
+  g_assert_null (containing);
+  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
+                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_clear_error (&error);
+
+  /* A directory inside an existing instance is refused too. */
+  g_autofree char *inside =
+    g_build_filename (first_directory, "nested", NULL);
+  g_autoptr (AmlInstance) nested =
+    aml_instance_manager_create (manager, "Seven", inside, "1.21.1",
+                                 AML_LOADER_VANILLA, NULL, &error);
+  g_assert_null (nested);
+  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
+                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_clear_error (&error);
+  g_assert_false (g_file_test (inside, G_FILE_TEST_EXISTS));
+
+  /* None of the refused paths changed the list. */
+  g_assert_cmpuint (manager_count (manager), ==, 1);
+
+  g_object_unref (first);
+  remove_recursive (data_dir);
+
+  g_print ("ok - path validation\n");
+}
+
+static void
+test_load_missing_file (void)
+{
+  g_autofree char *data_dir = make_tmp_dir ();
+  g_autoptr (GError) error = NULL;
+
+  g_autoptr (AmlInstanceManager) manager =
+    aml_instance_manager_new (data_dir);
+
+  /* First run: no file at all is a success with an empty list. */
+  g_assert_true (aml_instance_manager_load (manager, &error));
+  g_assert_no_error (error);
+  g_assert_cmpuint (manager_count (manager), ==, 0);
+
+  remove_recursive (data_dir);
+
+  g_print ("ok - missing metadata file\n");
+}
+
+static void
+assert_quarantined (const char *data_dir, const char *original_text)
+{
+  g_autofree char *metadata_path =
+    g_build_filename (data_dir, "instances.json", NULL);
+  g_autofree char *corrupt_path =
+    g_build_filename (data_dir, "instances.json.corrupt", NULL);
+
+  /* The unreadable file is kept, never deleted, and the real file is
+   * gone so the next start starts empty. */
+  g_assert_false (g_file_test (metadata_path, G_FILE_TEST_EXISTS));
+  g_assert_true (g_file_test (corrupt_path, G_FILE_TEST_EXISTS));
+
+  g_autofree char *kept = read_file (corrupt_path);
+  g_assert_cmpstr (kept, ==, original_text);
+}
+
+static void
+test_corrupt_file (void)
+{
+  g_autofree char *data_dir = make_tmp_dir ();
+  g_autofree char *metadata_path =
+    g_build_filename (data_dir, "instances.json", NULL);
+  const char *garbage = "this is { not json";
+  write_file (metadata_path, garbage);
+
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlInstanceManager) manager =
+    aml_instance_manager_new (data_dir);
+
+  g_assert_false (aml_instance_manager_load (manager, &error));
+  g_assert_nonnull (error);
+  g_clear_error (&error);
+
+  g_assert_cmpuint (manager_count (manager), ==, 0);
+  assert_quarantined (data_dir, garbage);
+
+  remove_recursive (data_dir);
+
+  g_print ("ok - corrupt metadata is quarantined\n");
+}
+
+static void
+test_missing_field_file (void)
+{
+  g_autofree char *data_dir = make_tmp_dir ();
+  g_autofree char *metadata_path =
+    g_build_filename (data_dir, "instances.json", NULL);
+  g_autofree char *text =
+    g_strdup ("{\"version\": 1, \"instances\": [{"
+              "\"id\": \"11111111-2222-3333-4444-555555555555\","
+              "\"name\": \"Broken\"}]}");
+  write_file (metadata_path, text);
+
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlInstanceManager) manager =
+    aml_instance_manager_new (data_dir);
+
+  /* An entry without the required fields is a corrupt file, reported
+   * as an error instead of crashing. */
+  g_assert_false (aml_instance_manager_load (manager, &error));
+  g_assert_nonnull (error);
+  g_clear_error (&error);
+
+  g_assert_cmpuint (manager_count (manager), ==, 0);
+  assert_quarantined (data_dir, text);
+
+  remove_recursive (data_dir);
+
+  g_print ("ok - instance with missing fields\n");
+}
+
+static void
+test_version_mismatch (void)
+{
+  g_autofree char *data_dir = make_tmp_dir ();
+  g_autofree char *metadata_path =
+    g_build_filename (data_dir, "instances.json", NULL);
+  const char *text = "{\"version\": 2, \"instances\": []}";
+  write_file (metadata_path, text);
+
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlInstanceManager) manager =
+    aml_instance_manager_new (data_dir);
+
+  g_assert_false (aml_instance_manager_load (manager, &error));
+  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
+                  AML_INSTANCE_MANAGER_ERROR_CORRUPT);
+  g_clear_error (&error);
+
+  g_assert_cmpuint (manager_count (manager), ==, 0);
+  assert_quarantined (data_dir, text);
+
+  remove_recursive (data_dir);
+
+  g_print ("ok - unsupported metadata version\n");
+}
+
+static void
+test_atomic_save_failure (void)
+{
+  if (geteuid () == 0)
+    {
+      g_print ("skip - a read only directory does not stop root\n");
+      return;
+    }
+
+  g_autofree char *data_dir = make_tmp_dir ();
+  g_autoptr (GError) error = NULL;
+
+  g_autoptr (AmlInstanceManager) manager =
+    aml_instance_manager_new (data_dir);
+
+  AmlInstance *instance =
+    aml_instance_manager_create (manager, "Durable", NULL, "1.21.1",
+                                 AML_LOADER_VANILLA, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+
+  g_autofree char *metadata_path =
+    g_build_filename (data_dir, "instances.json", NULL);
+  g_autofree char *before = read_file (metadata_path);
+  g_assert_cmpuint (count_entries (data_dir), ==, 2);
+
+  /* Without write permission on the directory the save must fail
+   * without touching the old file and without leaving a temporary
+   * file behind. */
+  g_assert_cmpint (g_chmod (data_dir, 0500), ==, 0);
+
+  g_assert_false (aml_instance_manager_save (manager, &error));
+  g_assert_nonnull (error);
+  g_clear_error (&error);
+
+  g_assert_cmpint (g_chmod (data_dir, 0700), ==, 0);
+
+  g_autofree char *after = read_file (metadata_path);
+  g_assert_cmpstr (after, ==, before);
+  g_assert_cmpuint (count_entries (data_dir), ==, 2);
+
+  g_object_unref (instance);
+  remove_recursive (data_dir);
+
+  g_print ("ok - failed save leaves the old file intact\n");
+}
+
+static void
+test_rename (void)
+{
+  g_autofree char *data_dir = make_tmp_dir ();
+  g_autoptr (GError) error = NULL;
+
+  g_autoptr (AmlInstanceManager) manager =
+    aml_instance_manager_new (data_dir);
+
+  AmlInstance *instance =
+    aml_instance_manager_create (manager, "Original", NULL, "1.21.1",
+                                 AML_LOADER_VANILLA, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+
+  g_assert_true (aml_instance_manager_rename (manager, instance,
+                                              "  Renamed Pack  ", &error));
+  g_assert_no_error (error);
+
+  g_autofree char *name = prop_string (instance, "name");
+  g_assert_cmpstr (name, ==, "Renamed Pack");
+
+  /* The new name is on disk. */
+  g_autoptr (AmlInstanceManager) fresh = aml_instance_manager_new (data_dir);
+  g_assert_true (aml_instance_manager_load (fresh, &error));
+  g_assert_no_error (error);
+  g_assert_cmpuint (manager_count (fresh), ==, 1);
+
+  g_autoptr (AmlInstance) loaded =
+    g_list_model_get_item (
+      G_LIST_MODEL (aml_instance_manager_get_instances (fresh)), 0);
+  g_autofree char *loaded_name = prop_string (loaded, "name");
+  g_assert_cmpstr (loaded_name, ==, "Renamed Pack");
+
+  /* A blank name is refused and the old name survives. */
+  g_assert_false (aml_instance_manager_rename (manager, instance, "   ",
+                                               &error));
+  g_assert_nonnull (error);
+  g_clear_error (&error);
+
+  g_free (name);
+  name = prop_string (instance, "name");
+  g_assert_cmpstr (name, ==, "Renamed Pack");
+
+  /* Renaming an instance the manager does not know fails. */
+  g_autoptr (AmlInstance) stranger =
+    aml_instance_new (NULL, "Stranger", "/tmp/aml-test-stranger", "1.21.1",
+                      AML_LOADER_VANILLA, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (stranger);
+
+  g_assert_false (aml_instance_manager_rename (manager, stranger,
+                                               "Renamed", &error));
+  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
+                  AML_INSTANCE_MANAGER_ERROR_NOT_FOUND);
+  g_clear_error (&error);
+
+  g_object_unref (instance);
+  remove_recursive (data_dir);
+
+  g_print ("ok - rename\n");
+}
+
+static void
+test_duplicate (void)
+{
+  g_autofree char *data_dir = make_tmp_dir ();
+  g_autoptr (GError) error = NULL;
+
+  g_autoptr (AmlInstanceManager) manager =
+    aml_instance_manager_new (data_dir);
+
+  AmlInstance *instance =
+    aml_instance_manager_create (manager, "Original", NULL, "1.21.1",
+                                 AML_LOADER_FABRIC, "0.16.9", &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+
+  g_autofree char *directory = prop_string (instance, "directory");
+  g_autofree char *options_path =
+    g_build_filename (directory, "options.txt", NULL);
+  write_file (options_path, "fov:90");
+
+  g_autofree char *level_path =
+    g_build_filename (directory, "saves", "world", "level.dat", NULL);
+  write_file (level_path, "level data");
+
+  g_autofree char *link_path = g_build_filename (directory, "link", NULL);
+  g_autoptr (GFile) link = g_file_new_for_path (link_path);
+  g_assert_true (g_file_make_symbolic_link (link, "options.txt", NULL,
+                                            &error));
+  g_assert_no_error (error);
+
+  AsyncCall call = { 0 };
+  call.loop = g_main_loop_new (NULL, FALSE);
+
+  aml_instance_manager_duplicate_async (manager, instance, NULL,
+                                        duplicate_finished, &call);
+  async_call_run (&call);
+  g_assert_no_error (call.error);
+  g_assert_nonnull (call.result);
+
+  AmlInstance *copy = call.result;
+  g_assert_cmpstr (aml_instance_get_id (copy), !=,
+                   aml_instance_get_id (instance));
+  g_assert_cmpstr (aml_instance_get_id (copy), !=, "");
+  g_assert_true (g_uuid_string_is_valid (aml_instance_get_id (copy)));
+
+  g_autofree char *copy_name = prop_string (copy, "name");
+  g_autofree char *copy_directory = prop_string (copy, "directory");
+  g_autofree char *copy_loader_version = prop_string (copy, "loader-version");
+  g_assert_cmpstr (copy_name, ==, "Copy of Original");
+  g_assert_cmpstr (copy_directory, !=, directory);
+  g_assert_cmpstr (copy_loader_version, ==, "0.16.9");
+
+  /* The files were copied, including the nested directory. */
+  g_autofree char *copied_options_path =
+    g_build_filename (copy_directory, "options.txt", NULL);
+  g_autofree char *copied_options = read_file (copied_options_path);
+  g_assert_cmpstr (copied_options, ==, "fov:90");
+
+  g_autofree char *copied_level_path =
+    g_build_filename (copy_directory, "saves", "world", "level.dat", NULL);
+  g_autofree char *copied_level = read_file (copied_level_path);
+  g_assert_cmpstr (copied_level, ==, "level data");
+
+  /* The symlink still is a symlink pointing at its own copy. */
+  g_autofree char *copied_link_path =
+    g_build_filename (copy_directory, "link", NULL);
+  g_assert_true (g_file_test (copied_link_path, G_FILE_TEST_IS_SYMLINK));
+
+  g_autofree char *copied_link_contents = read_file (copied_link_path);
+  g_assert_cmpstr (copied_link_contents, ==, "fov:90");
+
+  /* Both instances are registered and both survive a reload. */
+  g_assert_cmpuint (manager_count (manager), ==, 2);
+
+  g_autoptr (AmlInstanceManager) fresh = aml_instance_manager_new (data_dir);
+  g_assert_true (aml_instance_manager_load (fresh, &error));
+  g_assert_no_error (error);
+  g_assert_cmpuint (manager_count (fresh), ==, 2);
+  g_assert_nonnull (aml_instance_manager_get_by_id (
+    fresh, aml_instance_get_id (instance)));
+  g_assert_nonnull (aml_instance_manager_get_by_id (
+    fresh, aml_instance_get_id (copy)));
+
+  async_call_clear (&call);
+  g_object_unref (copy);
+  g_object_unref (instance);
+  remove_recursive (data_dir);
+
+  g_print ("ok - duplication\n");
+}
+
+static void
+test_duplicate_without_directory (void)
+{
+  g_autofree char *data_dir = make_tmp_dir ();
+  g_autoptr (GError) error = NULL;
+
+  g_autoptr (AmlInstanceManager) manager =
+    aml_instance_manager_new (data_dir);
+
+  AmlInstance *instance =
+    aml_instance_manager_create (manager, "Vanishing", NULL, "1.21.1",
+                                 AML_LOADER_VANILLA, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+
+  g_autofree char *directory = prop_string (instance, "directory");
+  g_autofree char *instances_root =
+    g_build_filename (data_dir, "instances", NULL);
+
+  g_assert_cmpuint (count_entries (instances_root), ==, 1);
+  g_assert_cmpint (g_rmdir (directory), ==, 0);
+  g_assert_cmpuint (count_entries (instances_root), ==, 0);
+
+  /* Copying a directory that is gone fails with an error, creates
+   * nothing and keeps the list untouched. */
+  AsyncCall call = { 0 };
+  call.loop = g_main_loop_new (NULL, FALSE);
+
+  aml_instance_manager_duplicate_async (manager, instance, NULL,
+                                        duplicate_finished, &call);
+  async_call_run (&call);
+  g_assert_error (call.error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND);
+  g_assert_null (call.result);
+  g_assert_cmpuint (manager_count (manager), ==, 1);
+  g_assert_cmpuint (count_entries (instances_root), ==, 0);
+
+  async_call_clear (&call);
+  g_object_unref (instance);
+  remove_recursive (data_dir);
+
+  g_print ("ok - duplication without a source directory\n");
+}
+
+static void
+test_delete_metadata_only (void)
+{
+  g_autofree char *data_dir = make_tmp_dir ();
+  g_autoptr (GError) error = NULL;
+
+  g_autoptr (AmlInstanceManager) manager =
+    aml_instance_manager_new (data_dir);
+
+  AmlInstance *instance =
+    aml_instance_manager_create (manager, "Kept", NULL, "1.21.1",
+                                 AML_LOADER_VANILLA, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+
+  g_autofree char *directory = prop_string (instance, "directory");
+
+  AsyncCall call = { 0 };
+  call.loop = g_main_loop_new (NULL, FALSE);
+
+  aml_instance_manager_delete_async (manager, instance, FALSE, NULL,
+                                     delete_finished, &call);
+  async_call_run (&call);
+  g_assert_no_error (call.error);
+  g_assert_true (call.success);
+
+  g_assert_cmpuint (manager_count (manager), ==, 0);
+  g_assert_true (g_file_test (directory, G_FILE_TEST_IS_DIR));
+
+  g_autoptr (AmlInstanceManager) fresh = aml_instance_manager_new (data_dir);
+  g_assert_true (aml_instance_manager_load (fresh, &error));
+  g_assert_no_error (error);
+  g_assert_cmpuint (manager_count (fresh), ==, 0);
+
+  async_call_clear (&call);
+  g_object_unref (instance);
+  remove_recursive (data_dir);
+
+  g_print ("ok - delete keeps the directory on request\n");
+}
+
+static void
+test_delete_with_directory (void)
+{
+  g_autofree char *data_dir = make_tmp_dir ();
+  g_autoptr (GError) error = NULL;
+
+  g_autoptr (AmlInstanceManager) manager =
+    aml_instance_manager_new (data_dir);
+
+  AmlInstance *instance =
+    aml_instance_manager_create (manager, "Gone", NULL, "1.21.1",
+                                 AML_LOADER_VANILLA, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+
+  g_autofree char *directory = prop_string (instance, "directory");
+  g_autofree char *level_path =
+    g_build_filename (directory, "saves", "level.dat", NULL);
+  write_file (level_path, "data");
+  g_assert_true (g_file_test (directory, G_FILE_TEST_IS_DIR));
+
+  AsyncCall call = { 0 };
+  call.loop = g_main_loop_new (NULL, FALSE);
+
+  aml_instance_manager_delete_async (manager, instance, TRUE, NULL,
+                                     delete_finished, &call);
+  async_call_run (&call);
+  g_assert_no_error (call.error);
+  g_assert_true (call.success);
+
+  g_assert_cmpuint (manager_count (manager), ==, 0);
+  g_assert_false (g_file_test (directory, G_FILE_TEST_EXISTS));
+
+  g_autoptr (AmlInstanceManager) fresh = aml_instance_manager_new (data_dir);
+  g_assert_true (aml_instance_manager_load (fresh, &error));
+  g_assert_no_error (error);
+  g_assert_cmpuint (manager_count (fresh), ==, 0);
+
+  async_call_clear (&call);
+  g_object_unref (instance);
+  remove_recursive (data_dir);
+
+  g_print ("ok - delete removes the directory\n");
+}
+
+static void
+test_delete_unregistered (void)
+{
+  g_autofree char *data_dir = make_tmp_dir ();
+  g_autoptr (GError) error = NULL;
+
+  g_autoptr (AmlInstanceManager) manager =
+    aml_instance_manager_new (data_dir);
+
+  g_autoptr (AmlInstance) stranger =
+    aml_instance_new (NULL, "Stranger", "/tmp/aml-test-stranger", "1.21.1",
+                      AML_LOADER_VANILLA, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (stranger);
+
+  AsyncCall call = { 0 };
+  call.loop = g_main_loop_new (NULL, FALSE);
+
+  aml_instance_manager_delete_async (manager, stranger, FALSE, NULL,
+                                     delete_finished, &call);
+  async_call_run (&call);
+  g_assert_error (call.error, AML_INSTANCE_MANAGER_ERROR,
+                  AML_INSTANCE_MANAGER_ERROR_NOT_FOUND);
+  g_assert_false (call.success);
+
+  async_call_clear (&call);
+  remove_recursive (data_dir);
+
+  g_print ("ok - delete of an unregistered instance\n");
+}
+
+static void
+test_open_folder_without_directory (void)
+{
+  g_autofree char *data_dir = make_tmp_dir ();
+  g_autoptr (GError) error = NULL;
+
+  g_autoptr (AmlInstanceManager) manager =
+    aml_instance_manager_new (data_dir);
+
+  AmlInstance *instance =
+    aml_instance_manager_create (manager, "Folderless", NULL, "1.21.1",
+                                 AML_LOADER_VANILLA, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+
+  g_autofree char *directory = prop_string (instance, "directory");
+  g_assert_cmpint (g_rmdir (directory), ==, 0);
+
+  /* The directory is gone, so nothing is launched: the test fails
+   * with an error instead of needing a file manager. */
+  AsyncCall call = { 0 };
+  call.loop = g_main_loop_new (NULL, FALSE);
+
+  aml_instance_manager_open_folder_async (manager, instance, NULL,
+                                          open_folder_finished, &call);
+  async_call_run (&call);
+  g_assert_error (call.error, AML_INSTANCE_MANAGER_ERROR,
+                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_false (call.success);
+
+  async_call_clear (&call);
+  g_object_unref (instance);
+  remove_recursive (data_dir);
+
+  g_print ("ok - open folder of a missing directory\n");
+}
+
+int
+main (int argc, char **argv)
+{
+  (void) argc;
+  (void) argv;
+
+  test_create_and_persist ();
+  test_create_explicit_directory ();
+  test_create_sanitized_name ();
+  test_path_validation ();
+  test_load_missing_file ();
+  test_corrupt_file ();
+  test_missing_field_file ();
+  test_version_mismatch ();
+  test_atomic_save_failure ();
+  test_rename ();
+  test_duplicate ();
+  test_duplicate_without_directory ();
+  test_delete_metadata_only ();
+  test_delete_with_directory ();
+  test_delete_unregistered ();
+  test_open_folder_without_directory ();
+
+  return EXIT_SUCCESS;
+}
