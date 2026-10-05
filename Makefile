@@ -35,11 +35,14 @@ DBGDEPS := $(DBGOBJS:.o=.d)
 # owns main().
 TESTLIBSRCS := $(filter-out src/main.c,$(SRCS))
 TESTLIBOBJS := $(patsubst src/%.c,build/%.o,$(TESTLIBSRCS))
+TESTLIBDBGOBJS := $(patsubst src/%.c,build-debug/%.o,$(TESTLIBSRCS))
 TESTSRCS    := $(wildcard tests/test-*.c)
 TESTBINS    := $(patsubst tests/%.c,build/tests/%,$(TESTSRCS))
 TESTDEPS    := $(addsuffix .d,$(TESTBINS))
+TESTDBGBINS := $(patsubst tests/%.c,build-debug/tests/%,$(TESTSRCS))
+TESTDBGDEPS := $(addsuffix .d,$(TESTDBGBINS))
 
-.PHONY: all debug test clean install
+.PHONY: all debug test test-debug clean install
 
 all: $(if $(SRCS),$(BIN))
 
@@ -68,6 +71,17 @@ test: $(if $(SRCS),$(BIN)) $(TESTBINS)
 	@set -e; for t in $(TESTBINS); do echo "RUN  $$t"; ./$$t; done; \
 	echo "PASS $(words $(TESTBINS)) test(s)"
 
+# Same tests, but every test and every src object is built with
+# AddressSanitizer and UndefinedBehaviorSanitizer into build-debug/.
+build-debug/tests/%: tests/%.c $(TESTLIBDBGOBJS) | build-debug/tests
+	$(CC) $(CFLAGS) $(DBGFLAGS) -Isrc $(PKG_CFLAGS) \
+		-DAML_DATA_DIR=\"$(CURDIR)/data\" -DAML_BIN=\"$(CURDIR)/$(BIN)\" \
+		-o $@ $< $(TESTLIBDBGOBJS) $(PKG_LIBS)
+
+test-debug: $(if $(SRCS),$(DBGBIN)) $(TESTDBGBINS)
+	@set -e; for t in $(TESTDBGBINS); do echo "RUN  $$t"; ./$$t; done; \
+	echo "PASS $(words $(TESTDBGBINS)) test(s)"
+
 install: $(if $(SRCS),$(BIN))
 	install -Dm755 $(BIN) $(DESTDIR)$(PREFIX)/bin/AML
 	install -Dm644 data/io.github.Flia7.AML.desktop \
@@ -76,7 +90,7 @@ install: $(if $(SRCS),$(BIN))
 clean:
 	rm -rf build build-debug
 
-build build-debug build/tests:
+build build-debug build/tests build-debug/tests:
 	mkdir -p $@
 
--include $(RELDEPS) $(DBGDEPS) $(TESTDEPS)
+-include $(RELDEPS) $(DBGDEPS) $(TESTDEPS) $(TESTDBGDEPS)
