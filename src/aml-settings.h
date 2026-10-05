@@ -44,6 +44,16 @@ gboolean aml_settings_set_show_snapshots (AmlSettings *self,
                                           gboolean     value,
                                           GError     **error);
 
+/* The global default Java executable, or NULL for "the one that fits
+ * each instance best". Borrowed from the object, NULL when unset. */
+const char *aml_settings_get_default_java_path (AmlSettings *self);
+
+/* Same write-through contract as the snapshots setter: the object only
+ * ever agrees with the file. */
+gboolean aml_settings_set_default_java_path (AmlSettings *self,
+                                             const char *path,
+                                             GError    **error);
+
 G_END_DECLS
 
 #endif /* AML_SETTINGS_H */

@@ -14,14 +14,16 @@
 #define SETTINGS_SUBDIR "AML"
 #define SETTINGS_FILE "config.json"
 
-/* The one key the file holds for now. */
+/* The keys the file holds for now. */
 #define SHOW_SNAPSHOTS_KEY "show-snapshots"
+#define DEFAULT_JAVA_PATH_KEY "default-java-path"
 
 struct _AmlSettings
 {
   GObject parent_instance;
 
   gboolean show_snapshots;
+  char *default_java_path;
   char *filename;
 };
 
@@ -83,6 +85,18 @@ load (AmlSettings *self)
   if (node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
       json_node_get_value_type (node) == G_TYPE_BOOLEAN)
     self->show_snapshots = json_node_get_boolean (node);
+
+  node = json_object_get_member (object, DEFAULT_JAVA_PATH_KEY);
+
+  if (node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
+      json_node_get_value_type (node) == G_TYPE_STRING)
+    {
+      const char *path = json_node_get_string (node);
+
+      g_free (self->default_java_path);
+      self->default_java_path =
+        (path != NULL && *path != '\0') ? g_strdup (path) : NULL;
+    }
 }
 
 static gboolean
@@ -108,6 +122,14 @@ save (AmlSettings *self, GError **error)
   json_builder_begin_object (builder);
   json_builder_set_member_name (builder, SHOW_SNAPSHOTS_KEY);
   json_builder_add_boolean_value (builder, self->show_snapshots);
+
+  /* NULL means auto-select the closest compatible one per instance. */
+  json_builder_set_member_name (builder, DEFAULT_JAVA_PATH_KEY);
+  if (self->default_java_path != NULL)
+    json_builder_add_string_value (builder, self->default_java_path);
+  else
+    json_builder_add_null_value (builder);
+
   json_builder_end_object (builder);
 
   json_generator_set_root (generator, json_builder_get_root (builder));
@@ -167,11 +189,45 @@ aml_settings_set_show_snapshots (AmlSettings *self,
   return FALSE;
 }
 
+const char *
+aml_settings_get_default_java_path (AmlSettings *self)
+{
+  g_return_val_if_fail (AML_IS_SETTINGS (self), NULL);
+
+  return self->default_java_path;
+}
+
+gboolean
+aml_settings_set_default_java_path (AmlSettings *self,
+                                    const char *path,
+                                    GError    **error)
+{
+  char *previous = NULL;
+
+  g_return_val_if_fail (AML_IS_SETTINGS (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  previous = self->default_java_path;
+  self->default_java_path = g_strdup (path);
+
+  if (save (self, error))
+    {
+      g_free (previous);
+      return TRUE;
+    }
+
+  /* The file did not change, so neither does the answer. */
+  g_free (self->default_java_path);
+  self->default_java_path = previous;
+  return FALSE;
+}
+
 static void
 aml_settings_finalize (GObject *object)
 {
   AmlSettings *self = AML_SETTINGS (object);
 
+  g_free (self->default_java_path);
   g_free (self->filename);
 
   G_OBJECT_CLASS (aml_settings_parent_class)->finalize (object);
