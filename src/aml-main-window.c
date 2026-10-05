@@ -8,12 +8,17 @@
 
 #include "aml-main-window.h"
 #include "aml-create-instance-dialog.h"
+#include "aml-instance-page.h"
 
 struct _AmlMainWindow
 {
   AdwApplicationWindow parent_instance;
 
   AmlInstanceManager *manager;
+
+  /* The navigation stack: the grid is its first page, the page of an
+   * instance is pushed on top of it. */
+  AdwNavigationView *navigation;
 
   /* Switches between the empty state and the instance grid. */
   GtkWidget *stack;
@@ -129,12 +134,39 @@ set_menu_item_tooltip (GtkWidget  *root,
     }
 }
 
-/* One card of the instance grid. The children are appended in this
- * order and bind_card() walks them in the same order. */
+/* Opens the page of the instance this card shows. The id is put on the
+ * button when the card is bound, so a card that lost its instance
+ * simply does nothing. */
+static void
+on_card_clicked (GtkButton *button, gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  const char *id = g_object_get_data (G_OBJECT (button), "aml-instance-id");
+  AmlInstance *instance = NULL;
+
+  if (id == NULL)
+    return;
+
+  instance = aml_instance_manager_get_by_id (self->manager, id);
+
+  if (instance == NULL)
+    return;
+
+  adw_navigation_view_push (
+    self->navigation,
+    ADW_NAVIGATION_PAGE (aml_instance_page_new (self->manager, instance)));
+}
+
+/* One card of the instance grid. The button holds everything but Play,
+ * so clicking the card opens the instance page; the children are
+ * appended in this order and bind_card() walks them in the same
+ * order. */
 static GtkWidget *
-create_card (void)
+create_card (AmlMainWindow *self)
 {
   GtkWidget *card = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
+  GtkWidget *open = gtk_button_new ();
+  GtkWidget *content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
   GtkWidget *icon = gtk_image_new_from_icon_name ("applications-games-symbolic");
   GtkWidget *name = gtk_label_new (NULL);
   GtkWidget *version = gtk_label_new (NULL);
@@ -165,9 +197,15 @@ create_card (void)
   gtk_widget_set_sensitive (play, FALSE);
   gtk_widget_set_tooltip_text (play, "Available in a later version");
 
-  gtk_box_append (GTK_BOX (card), icon);
-  gtk_box_append (GTK_BOX (card), name);
-  gtk_box_append (GTK_BOX (card), version);
+  gtk_box_append (GTK_BOX (content), icon);
+  gtk_box_append (GTK_BOX (content), name);
+  gtk_box_append (GTK_BOX (content), version);
+
+  gtk_button_set_child (GTK_BUTTON (open), content);
+  gtk_widget_set_hexpand (open, TRUE);
+  g_signal_connect (open, "clicked", G_CALLBACK (on_card_clicked), self);
+
+  gtk_box_append (GTK_BOX (card), open);
   gtk_box_append (GTK_BOX (card), play);
 
   return card;
@@ -176,9 +214,9 @@ create_card (void)
 static void
 setup_card (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
             gpointer                  item,
-            gpointer                  user_data G_GNUC_UNUSED)
+            gpointer                  user_data)
 {
-  gtk_list_item_set_child (GTK_LIST_ITEM (item), create_card ());
+  gtk_list_item_set_child (GTK_LIST_ITEM (item), create_card (user_data));
 }
 
 static void
@@ -193,6 +231,8 @@ bind_card (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
   g_autofree char *subtitle = NULL;
   AmlLoader loader = AML_LOADER_VANILLA;
   GtkWidget *card = NULL;
+  GtkWidget *open = NULL;
+  GtkWidget *content = NULL;
   GtkWidget *icon = NULL;
   GtkWidget *name_label = NULL;
   GtkWidget *version_label = NULL;
@@ -220,12 +260,17 @@ bind_card (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
     subtitle = g_strdup (minecraft_version);
 
   card = gtk_list_item_get_child (list_item);
-  icon = gtk_widget_get_first_child (card);
+  open = gtk_widget_get_first_child (card);
+  content = gtk_widget_get_first_child (open);
+  icon = gtk_widget_get_first_child (content);
   name_label = gtk_widget_get_next_sibling (icon);
   version_label = gtk_widget_get_next_sibling (name_label);
 
   gtk_label_set_text (GTK_LABEL (name_label), name);
   gtk_label_set_text (GTK_LABEL (version_label), subtitle);
+
+  g_object_set_data_full (G_OBJECT (open), "aml-instance-id",
+                          g_strdup (aml_instance_get_id (instance)), g_free);
 }
 
 static void
@@ -326,7 +371,17 @@ aml_main_window_init (AmlMainWindow *self)
 
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
   adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), self->stack);
-  adw_application_window_set_content (ADW_APPLICATION_WINDOW (self), toolbar);
+
+  self->navigation = ADW_NAVIGATION_VIEW (adw_navigation_view_new ());
+
+  /* The grid is the first page and stays in the view for good; the
+   * page of an instance is pushed on top of it and dropped again. */
+  adw_navigation_view_add (self->navigation,
+                           adw_navigation_page_new_with_tag (toolbar, "AML",
+                                                             "home"));
+
+  adw_application_window_set_content (ADW_APPLICATION_WINDOW (self),
+                                      GTK_WIDGET (self->navigation));
 
   gtk_window_set_title (GTK_WINDOW (self), "AML");
   gtk_window_set_default_size (GTK_WINDOW (self), 960, 640);
@@ -349,8 +404,8 @@ aml_main_window_new (GtkApplication *application, AmlInstanceManager *manager)
 
   self->manager = g_object_ref (manager);
 
-  g_signal_connect (factory, "setup", G_CALLBACK (setup_card), NULL);
-  g_signal_connect (factory, "bind", G_CALLBACK (bind_card), NULL);
+  g_signal_connect (factory, "setup", G_CALLBACK (setup_card), self);
+  g_signal_connect (factory, "bind", G_CALLBACK (bind_card), self);
 
   /* gtk_no_selection_new() and gtk_grid_view_new() take ownership of
    * the references they get, so both references are created here and
