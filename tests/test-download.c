@@ -1,0 +1,888 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
+/* Tests for aml-download. A tiny libsoup server on the loopback
+ * interface stands in for the network, so the tests are hermetic and
+ * headless: they need neither the internet nor a display. Every test
+ * uses its own temporary directory. */
+
+#include "aml-download.h"
+
+#include <glib.h>
+#include <glib/gstdio.h>
+#include <libsoup/soup.h>
+#include <stdlib.h>
+#include <string.h>
+
+/* ---------------------------------------------------------- *
+ * Fixture: one server for every test
+ * ---------------------------------------------------------- */
+
+#define FILE_BODY_SIZE (300 * 1024)
+#define BIG_BODY_SIZE (512 * 1024)
+
+#define WRONG_BODY "this is not the body anyone asked for"
+#define JSON_BODY "{\"kind\": \"test\", \"value\": 42}"
+
+typedef struct
+{
+  SoupServer *server;
+  char *base;           /* "http://127.0.0.1:port", no trailing slash */
+  GString *file_body;   /* served at /file, /flaky and /json-bad */
+  GString *big_body;    /* served at /big, for the cancellation test */
+  guint hits;           /* requests seen, reset by every test */
+  guint flaky_failures; /* 5xx answers still to give at /flaky */
+} Fixture;
+
+static Fixture fixture;
+
+static void
+reply_with (SoupServerMessage *message, guint status,
+            const char *content_type, const char *body, gsize length)
+{
+  soup_server_message_set_status (message, status, NULL);
+
+  if (body != NULL)
+    soup_server_message_set_response (message, content_type, SOUP_MEMORY_COPY,
+                                      body, length);
+}
+
+static void
+server_handler (SoupServer *server, SoupServerMessage *message,
+                const char *path, GHashTable *query, gpointer user_data)
+{
+  Fixture *self = user_data;
+
+  (void) server;
+  (void) query;
+
+  self->hits++;
+
+  if (g_str_equal (path, "/file"))
+    reply_with (message, 200, "application/octet-stream",
+                self->file_body->str, self->file_body->len);
+  else if (g_str_equal (path, "/big"))
+    reply_with (message, 200, "application/octet-stream", self->big_body->str,
+                self->big_body->len);
+  else if (g_str_equal (path, "/wrong"))
+    reply_with (message, 200, "application/octet-stream", WRONG_BODY,
+                strlen (WRONG_BODY));
+  else if (g_str_equal (path, "/flaky"))
+    {
+      if (self->flaky_failures > 0)
+        {
+          self->flaky_failures--;
+          reply_with (message, 500, NULL, NULL, 0);
+          return;
+        }
+
+      reply_with (message, 200, "application/octet-stream",
+                  self->file_body->str, self->file_body->len);
+    }
+  else if (g_str_equal (path, "/limited"))
+    {
+      soup_message_headers_append (
+        soup_server_message_get_response_headers (message), "Retry-After", "0");
+      reply_with (message, 429, NULL, NULL, 0);
+    }
+  else if (g_str_equal (path, "/json"))
+    reply_with (message, 200, "application/json", JSON_BODY,
+                strlen (JSON_BODY));
+  else
+    reply_with (message, 404, NULL, NULL, 0);
+}
+
+static GString *
+make_body (gsize size)
+{
+  GString *body = g_string_sized_new (size);
+
+  for (gsize i = 0; i < size; i++)
+    g_string_append_c (body, (char) ('a' + (i % 26)));
+
+  return body;
+}
+
+static void
+free_body (gpointer data)
+{
+  g_string_free (data, TRUE);
+}
+
+static void
+fixture_start (void)
+{
+  g_autoptr (GError) error = NULL;
+  GSList *uris = NULL;
+  char *uri_string = NULL;
+
+  fixture.server = soup_server_new ("server-header", "aml-test", NULL);
+
+  if (!soup_server_listen_local (fixture.server, 0, 0, &error))
+    g_error ("the test server cannot listen: %s", error->message);
+
+  soup_server_add_handler (fixture.server, "/", server_handler, &fixture,
+                           NULL);
+
+  uris = soup_server_get_uris (fixture.server);
+
+  if (uris == NULL)
+    g_error ("the test server has no address");
+
+  uri_string = g_uri_to_string (uris->data);
+  fixture.base = g_strdup (uri_string);
+
+  /* The URL of the server keeps its trailing slash, every path in the
+   * tests starts with a slash of its own. */
+  if (fixture.base[0] != '\0')
+    {
+      gsize length = strlen (fixture.base);
+
+      if (fixture.base[length - 1] == '/')
+        fixture.base[length - 1] = '\0';
+    }
+
+  g_free (uri_string);
+  g_slist_free_full (uris, (GDestroyNotify) g_uri_unref);
+
+  fixture.file_body = make_body (FILE_BODY_SIZE);
+  fixture.big_body = make_body (BIG_BODY_SIZE);
+}
+
+static void
+fixture_stop (void)
+{
+  soup_server_disconnect (fixture.server);
+  g_clear_object (&fixture.server);
+  g_clear_pointer (&fixture.file_body, free_body);
+  g_clear_pointer (&fixture.big_body, free_body);
+  g_clear_pointer (&fixture.base, g_free);
+}
+
+static char *
+server_url (const char *path)
+{
+  return g_strconcat (fixture.base, path, NULL);
+}
+
+/* ---------------------------------------------------------- *
+ * Helpers
+ * ---------------------------------------------------------- */
+
+static char *
+hash_of (const void *data, gsize length, GChecksumType type)
+{
+  return g_compute_checksum_for_data (type, data, length);
+}
+
+static char *
+make_test_dir (void)
+{
+  g_autoptr (GError) error = NULL;
+  char *dir = g_dir_make_tmp ("aml-test-XXXXXX", &error);
+
+  g_assert_no_error (error);
+  g_assert_nonnull (dir);
+
+  return dir;
+}
+
+/* Removes a flat test directory, temporary files included. */
+static void
+remove_test_dir (const char *path)
+{
+  GDir *dir = g_dir_open (path, 0, NULL);
+
+  if (dir != NULL)
+    {
+      const char *name = NULL;
+
+      while ((name = g_dir_read_name (dir)) != NULL)
+        {
+          g_autofree char *child = g_build_filename (path, name, NULL);
+          g_remove (child);
+        }
+
+      g_dir_close (dir);
+    }
+
+  g_rmdir (path);
+}
+
+/* Files in the test directory: anything but the destination itself is
+ * a temporary file left behind. */
+static guint
+dir_entry_count (const char *path)
+{
+  GDir *dir = g_dir_open (path, 0, NULL);
+  guint count = 0;
+
+  g_assert_nonnull (dir);
+
+  while (g_dir_read_name (dir) != NULL)
+    count++;
+
+  g_dir_close (dir);
+
+  return count;
+}
+
+static char *
+read_text_file (const char *path)
+{
+  char *contents = NULL;
+
+  g_assert_true (g_file_get_contents (path, &contents, NULL, NULL));
+
+  return contents;
+}
+
+/* ---------------------------------------------------------- *
+ * One run of the main loop with one or more requests in flight
+ * ---------------------------------------------------------- */
+
+typedef struct
+{
+  GMainLoop *loop;
+  guint pending; /* requests that have not reported back yet */
+  guint watchdog;
+  gboolean timed_out;
+  GCancellable *cancellable;
+} AsyncRun;
+
+typedef struct
+{
+  AsyncRun *run;
+  GError *error;
+  gboolean success;
+  JsonParser *parser;
+  guint progress_calls;
+  goffset progress_done;
+  goffset progress_total;
+  gboolean cancel_on_progress;
+} AsyncCall;
+
+static void
+call_finished (AsyncCall *call)
+{
+  if (--call->run->pending == 0)
+    g_main_loop_quit (call->run->loop);
+}
+
+/* A callback that never arrives fails the test instead of hanging. */
+static gboolean
+async_timeout (gpointer user_data)
+{
+  AsyncRun *run = user_data;
+
+  run->timed_out = TRUE;
+  g_main_loop_quit (run->loop);
+
+  return G_SOURCE_REMOVE;
+}
+
+static void
+async_run_init (AsyncRun *run)
+{
+  run->loop = g_main_loop_new (NULL, FALSE);
+  run->cancellable = g_cancellable_new ();
+}
+
+static void
+async_run_wait (AsyncRun *run)
+{
+  run->watchdog = g_timeout_add_seconds (30, async_timeout, run);
+
+  if (run->pending > 0)
+    g_main_loop_run (run->loop);
+
+  if (!run->timed_out)
+    g_source_remove (run->watchdog);
+
+  g_assert_false (run->timed_out);
+}
+
+static void
+async_run_clear (AsyncRun *run)
+{
+  /* GMainLoop is refcounted but is not a GObject. */
+  if (run->loop != NULL)
+    {
+      g_main_loop_unref (run->loop);
+      run->loop = NULL;
+    }
+
+  g_clear_object (&run->cancellable);
+}
+
+static void
+async_call_clear (AsyncCall *call)
+{
+  g_clear_error (&call->error);
+  g_clear_object (&call->parser);
+}
+
+static void
+progress_cb (goffset bytes_done, goffset total, gpointer user_data)
+{
+  AsyncCall *call = user_data;
+
+  call->progress_calls++;
+  call->progress_done = bytes_done;
+  call->progress_total = total;
+
+  if (call->cancel_on_progress && bytes_done > 0)
+    g_cancellable_cancel (call->run->cancellable);
+}
+
+static void
+download_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                   gpointer user_data)
+{
+  AsyncCall *call = user_data;
+
+  call->success = aml_download_file_finish (result, &call->error);
+  call_finished (call);
+}
+
+static void
+json_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+               gpointer user_data)
+{
+  AsyncCall *call = user_data;
+
+  call->parser = aml_download_json_finish (result, &call->error);
+  call_finished (call);
+}
+
+static void
+call_file (AsyncRun *run, AsyncCall *call, const char *url,
+           const char *dest_path, const char *expected_hash,
+           GChecksumType hash_type)
+{
+  call->run = run;
+  run->pending++;
+
+  aml_download_file_async (url, dest_path, expected_hash, hash_type,
+                           run->cancellable, progress_cb, download_finished,
+                           call);
+}
+
+static void
+call_json (AsyncRun *run, AsyncCall *call, const char *url)
+{
+  call->run = run;
+  run->pending++;
+
+  aml_download_json_async (url, run->cancellable, json_finished, call);
+}
+
+/* ---------------------------------------------------------- *
+ * Tests
+ * ---------------------------------------------------------- */
+
+static void
+test_successful_download (void)
+{
+  g_autofree char *dir = make_test_dir ();
+  g_autofree char *dest = g_build_filename (dir, "game.jar", NULL);
+  g_autofree char *url = server_url ("/file");
+  g_autofree char *expected =
+    hash_of (fixture.file_body->str, fixture.file_body->len,
+             G_CHECKSUM_SHA256);
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+  g_autofree char *contents = NULL;
+
+  fixture.hits = 0;
+
+  async_run_init (&run);
+  call_file (&run, &call, url, dest, expected, G_CHECKSUM_SHA256);
+  async_run_wait (&run);
+
+  g_assert_no_error (call.error);
+  g_assert_true (call.success);
+  g_assert_cmpuint (fixture.hits, ==, 1);
+
+  /* Progress was reported and ended where the file ended. */
+  g_assert_cmpuint (call.progress_calls, >, 0);
+  g_assert_cmpint (call.progress_done, ==, (goffset) FILE_BODY_SIZE);
+  g_assert_cmpint (call.progress_total, ==, (goffset) FILE_BODY_SIZE);
+
+  contents = read_text_file (dest);
+  g_assert_cmpmem (contents, FILE_BODY_SIZE, fixture.file_body->str,
+                   fixture.file_body->len);
+
+  /* The temporary file is gone: the directory holds the destination. */
+  g_assert_cmpuint (dir_entry_count (dir), ==, 1);
+
+  async_call_clear (&call);
+  async_run_clear (&run);
+  remove_test_dir (dir);
+
+  g_print ("ok - successful download\n");
+}
+
+static void
+test_checksum_mismatch (void)
+{
+  g_autofree char *dir = make_test_dir ();
+  g_autofree char *dest = g_build_filename (dir, "game.jar", NULL);
+  g_autofree char *url = server_url ("/wrong");
+  g_autofree char *expected =
+    hash_of (fixture.file_body->str, fixture.file_body->len,
+             G_CHECKSUM_SHA256);
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+
+  fixture.hits = 0;
+
+  async_run_init (&run);
+  call_file (&run, &call, url, dest, expected, G_CHECKSUM_SHA256);
+  async_run_wait (&run);
+
+  g_assert_error (call.error, AML_DOWNLOAD_ERROR,
+                  AML_DOWNLOAD_ERROR_CHECKSUM);
+  g_assert_false (call.success);
+  /* A wrong hash repeats the transfer exactly once. */
+  g_assert_cmpuint (fixture.hits, ==, 2);
+  g_assert_false (g_file_test (dest, G_FILE_TEST_EXISTS));
+  g_assert_cmpuint (dir_entry_count (dir), ==, 0);
+
+  async_call_clear (&call);
+  async_run_clear (&run);
+  remove_test_dir (dir);
+
+  g_print ("ok - checksum mismatch fails and is retried once\n");
+}
+
+static void
+test_cached_reuse (void)
+{
+  g_autofree char *dir = make_test_dir ();
+  g_autofree char *dest = g_build_filename (dir, "game.jar", NULL);
+  g_autofree char *url = server_url ("/file");
+  g_autofree char *expected =
+    hash_of (fixture.file_body->str, fixture.file_body->len,
+             G_CHECKSUM_SHA1);
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+  g_autofree char *contents = NULL;
+
+  g_assert_true (g_file_set_contents (dest, fixture.file_body->str,
+                                      fixture.file_body->len, NULL));
+
+  fixture.hits = 0;
+
+  async_run_init (&run);
+  call_file (&run, &call, url, dest, expected, G_CHECKSUM_SHA1);
+  async_run_wait (&run);
+
+  g_assert_no_error (call.error);
+  g_assert_true (call.success);
+  g_assert_cmpuint (fixture.hits, ==, 0);
+  g_assert_cmpuint (call.progress_calls, ==, 0);
+
+  contents = read_text_file (dest);
+  g_assert_cmpmem (contents, FILE_BODY_SIZE, fixture.file_body->str,
+                   fixture.file_body->len);
+
+  async_call_clear (&call);
+  async_run_clear (&run);
+  remove_test_dir (dir);
+
+  g_print ("ok - a matching cache skips the download\n");
+}
+
+static void
+test_corrupt_cache_redownload (void)
+{
+  g_autofree char *dir = make_test_dir ();
+  g_autofree char *dest = g_build_filename (dir, "game.jar", NULL);
+  g_autofree char *url = server_url ("/file");
+  g_autofree char *expected =
+    hash_of (fixture.file_body->str, fixture.file_body->len,
+             G_CHECKSUM_SHA512);
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+  g_autofree char *contents = NULL;
+
+  g_assert_true (g_file_set_contents (dest, "stale bytes", -1, NULL));
+
+  fixture.hits = 0;
+
+  async_run_init (&run);
+  call_file (&run, &call, url, dest, expected, G_CHECKSUM_SHA512);
+  async_run_wait (&run);
+
+  g_assert_no_error (call.error);
+  g_assert_true (call.success);
+  g_assert_cmpuint (fixture.hits, ==, 1);
+
+  contents = read_text_file (dest);
+  g_assert_cmpmem (contents, FILE_BODY_SIZE, fixture.file_body->str,
+                   fixture.file_body->len);
+  g_assert_cmpuint (dir_entry_count (dir), ==, 1);
+
+  async_call_clear (&call);
+  async_run_clear (&run);
+  remove_test_dir (dir);
+
+  g_print ("ok - a corrupt cache entry is downloaded again\n");
+}
+
+static void
+test_cancellation (void)
+{
+  g_autofree char *dir = make_test_dir ();
+  g_autofree char *dest = g_build_filename (dir, "game.jar", NULL);
+  g_autofree char *url = server_url ("/big");
+  g_autofree char *expected =
+    hash_of (fixture.big_body->str, fixture.big_body->len, G_CHECKSUM_SHA256);
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+  g_autofree char *contents = NULL;
+
+  /* A file is already there: cancelling must leave it alone. */
+  g_assert_true (g_file_set_contents (dest, "original", -1, NULL));
+
+  fixture.hits = 0;
+
+  async_run_init (&run);
+  call.cancel_on_progress = TRUE;
+  call_file (&run, &call, url, dest, expected, G_CHECKSUM_SHA256);
+  async_run_wait (&run);
+
+  g_assert_error (call.error, AML_DOWNLOAD_ERROR, AML_DOWNLOAD_ERROR_CANCELLED);
+  g_assert_false (call.success);
+  g_assert_cmpuint (fixture.hits, ==, 1);
+  g_assert_cmpuint (call.progress_calls, >=, 2);
+
+  /* The old file is untouched and no temporary file is left. */
+  g_assert_cmpuint (dir_entry_count (dir), ==, 1);
+  contents = read_text_file (dest);
+  g_assert_cmpstr (contents, ==, "original");
+
+  async_call_clear (&call);
+  async_run_clear (&run);
+  remove_test_dir (dir);
+
+  g_print ("ok - cancellation leaves no temporary file\n");
+}
+
+static void
+test_cancellation_before_start (void)
+{
+  g_autofree char *dir = make_test_dir ();
+  g_autofree char *dest = g_build_filename (dir, "game.jar", NULL);
+  g_autofree char *url = server_url ("/file");
+  g_autofree char *expected =
+    hash_of (fixture.file_body->str, fixture.file_body->len,
+             G_CHECKSUM_SHA256);
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+
+  fixture.hits = 0;
+
+  async_run_init (&run);
+  g_cancellable_cancel (run.cancellable);
+  call_file (&run, &call, url, dest, expected, G_CHECKSUM_SHA256);
+  async_run_wait (&run);
+
+  g_assert_error (call.error, AML_DOWNLOAD_ERROR, AML_DOWNLOAD_ERROR_CANCELLED);
+  g_assert_cmpuint (fixture.hits, ==, 0);
+  g_assert_cmpuint (dir_entry_count (dir), ==, 0);
+
+  async_call_clear (&call);
+  async_run_clear (&run);
+  remove_test_dir (dir);
+
+  g_print ("ok - a cancelled request never reaches the server\n");
+}
+
+static void
+test_retry_on_server_error (void)
+{
+  g_autofree char *dir = make_test_dir ();
+  g_autofree char *dest = g_build_filename (dir, "game.jar", NULL);
+  g_autofree char *url = server_url ("/flaky");
+  g_autofree char *expected =
+    hash_of (fixture.file_body->str, fixture.file_body->len,
+             G_CHECKSUM_SHA256);
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+  g_autofree char *contents = NULL;
+
+  fixture.hits = 0;
+  fixture.flaky_failures = 2;
+
+  async_run_init (&run);
+  call_file (&run, &call, url, dest, expected, G_CHECKSUM_SHA256);
+  async_run_wait (&run);
+
+  g_assert_no_error (call.error);
+  g_assert_true (call.success);
+  g_assert_cmpuint (fixture.hits, ==, 3);
+  g_assert_cmpuint (fixture.flaky_failures, ==, 0);
+
+  contents = read_text_file (dest);
+  g_assert_cmpmem (contents, FILE_BODY_SIZE, fixture.file_body->str,
+                   fixture.file_body->len);
+
+  async_call_clear (&call);
+  async_run_clear (&run);
+  remove_test_dir (dir);
+
+  g_print ("ok - a server error is retried until it works\n");
+}
+
+static void
+test_not_found_is_not_retried (void)
+{
+  g_autofree char *dir = make_test_dir ();
+  g_autofree char *dest = g_build_filename (dir, "game.jar", NULL);
+  g_autofree char *url = server_url ("/missing");
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+
+  fixture.hits = 0;
+
+  async_run_init (&run);
+  call_file (&run, &call, url, dest, NULL, G_CHECKSUM_SHA256);
+  async_run_wait (&run);
+
+  g_assert_error (call.error, AML_DOWNLOAD_ERROR, AML_DOWNLOAD_ERROR_HTTP);
+  g_assert_false (call.success);
+  g_assert_cmpuint (fixture.hits, ==, 1);
+  g_assert_false (g_file_test (dest, G_FILE_TEST_EXISTS));
+  g_assert_cmpuint (dir_entry_count (dir), ==, 0);
+
+  async_call_clear (&call);
+  async_run_clear (&run);
+  remove_test_dir (dir);
+
+  g_print ("ok - a 404 fails without a retry\n");
+}
+
+static void
+test_rate_limit (void)
+{
+  g_autofree char *dir = make_test_dir ();
+  g_autofree char *dest = g_build_filename (dir, "game.jar", NULL);
+  g_autofree char *url = server_url ("/limited");
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+
+  fixture.hits = 0;
+
+  async_run_init (&run);
+  call_file (&run, &call, url, dest, NULL, G_CHECKSUM_SHA256);
+  async_run_wait (&run);
+
+  g_assert_error (call.error, AML_DOWNLOAD_ERROR,
+                  AML_DOWNLOAD_ERROR_RATE_LIMITED);
+  g_assert_false (call.success);
+  /* Retry-After: 0 makes every wait immediate, the attempts remain. */
+  g_assert_cmpuint (fixture.hits, ==, 3);
+  g_assert_cmpuint (dir_entry_count (dir), ==, 0);
+
+  async_call_clear (&call);
+  async_run_clear (&run);
+  remove_test_dir (dir);
+
+  g_print ("ok - a rate limited answer retries and gives up as 429\n");
+}
+
+static void
+test_json_download (void)
+{
+  g_autofree char *url = server_url ("/json");
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+  JsonNode *root = NULL;
+  JsonObject *object = NULL;
+
+  fixture.hits = 0;
+
+  async_run_init (&run);
+  call_json (&run, &call, url);
+  async_run_wait (&run);
+
+  g_assert_no_error (call.error);
+  g_assert_nonnull (call.parser);
+  g_assert_cmpuint (fixture.hits, ==, 1);
+
+  root = json_parser_get_root (call.parser);
+  g_assert_nonnull (root);
+  g_assert_true (JSON_NODE_HOLDS_OBJECT (root));
+
+  object = json_node_get_object (root);
+  g_assert_cmpstr (json_object_get_string_member (object, "kind"), ==, "test");
+  g_assert_cmpint (json_object_get_int_member (object, "value"), ==, 42);
+
+  async_call_clear (&call);
+  async_run_clear (&run);
+
+  g_print ("ok - json download parses the body\n");
+}
+
+static void
+test_json_not_found (void)
+{
+  g_autofree char *url = server_url ("/missing");
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+
+  fixture.hits = 0;
+
+  async_run_init (&run);
+  call_json (&run, &call, url);
+  async_run_wait (&run);
+
+  g_assert_error (call.error, AML_DOWNLOAD_ERROR, AML_DOWNLOAD_ERROR_HTTP);
+  g_assert_null (call.parser);
+  g_assert_cmpuint (fixture.hits, ==, 1);
+
+  async_call_clear (&call);
+  async_run_clear (&run);
+
+  g_print ("ok - a json request reports the http status\n");
+}
+
+static void
+test_invalid_url (void)
+{
+  g_autofree char *dir = make_test_dir ();
+  g_autofree char *dest = g_build_filename (dir, "game.jar", NULL);
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+
+  fixture.hits = 0;
+
+  async_run_init (&run);
+  call_file (&run, &call, "not a url at all", dest, NULL, G_CHECKSUM_SHA256);
+  async_run_wait (&run);
+
+  g_assert_error (call.error, AML_DOWNLOAD_ERROR, AML_DOWNLOAD_ERROR_NETWORK);
+  g_assert_cmpuint (fixture.hits, ==, 0);
+  g_assert_cmpuint (dir_entry_count (dir), ==, 0);
+
+  async_call_clear (&call);
+  async_run_clear (&run);
+  remove_test_dir (dir);
+
+  g_print ("ok - an unusable url fails before any request\n");
+}
+
+/* Nothing listens on port 1: the transport fails, gets retried and
+ * finally surfaces as a network error of our own domain. */
+static void
+test_connection_refused (void)
+{
+  g_autofree char *dir = make_test_dir ();
+  g_autofree char *dest = g_build_filename (dir, "game.jar", NULL);
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+
+  fixture.hits = 0;
+
+  async_run_init (&run);
+  call_file (&run, &call, "http://127.0.0.1:1/file", dest, NULL,
+             G_CHECKSUM_SHA256);
+  async_run_wait (&run);
+
+  g_assert_error (call.error, AML_DOWNLOAD_ERROR, AML_DOWNLOAD_ERROR_NETWORK);
+  g_assert_false (call.success);
+  g_assert_cmpuint (fixture.hits, ==, 0);
+  g_assert_cmpuint (dir_entry_count (dir), ==, 0);
+
+  async_call_clear (&call);
+  async_run_clear (&run);
+  remove_test_dir (dir);
+
+  g_print ("ok - a refused connection is a network error\n");
+}
+
+#define MANY_DOWNLOADS 10
+
+static void
+test_many_at_once (void)
+{
+  g_autofree char *dir = make_test_dir ();
+  g_autofree char *url = server_url ("/file");
+  g_autofree char *expected =
+    hash_of (fixture.file_body->str, fixture.file_body->len,
+             G_CHECKSUM_SHA256);
+  AsyncRun run = { 0 };
+  AsyncCall calls[MANY_DOWNLOADS] = { 0 };
+  char *destinations[MANY_DOWNLOADS] = { 0 };
+
+  fixture.hits = 0;
+
+  async_run_init (&run);
+
+  for (guint i = 0; i < MANY_DOWNLOADS; i++)
+    {
+      g_autofree char *name = g_strdup_printf ("f%u.jar", i);
+
+      destinations[i] = g_build_filename (dir, name, NULL);
+      call_file (&run, &calls[i], url, destinations[i], expected,
+                 G_CHECKSUM_SHA256);
+    }
+
+  async_run_wait (&run);
+
+  for (guint i = 0; i < MANY_DOWNLOADS; i++)
+    {
+      g_autofree char *contents = NULL;
+
+      g_assert_no_error (calls[i].error);
+      g_assert_true (calls[i].success);
+
+      contents = read_text_file (destinations[i]);
+      g_assert_cmpmem (contents, FILE_BODY_SIZE, fixture.file_body->str,
+                       fixture.file_body->len);
+
+      async_call_clear (&calls[i]);
+    }
+
+  g_assert_cmpuint (fixture.hits, ==, MANY_DOWNLOADS);
+  g_assert_cmpuint (dir_entry_count (dir), ==, MANY_DOWNLOADS);
+
+  for (guint i = 0; i < MANY_DOWNLOADS; i++)
+    g_free (destinations[i]);
+
+  async_run_clear (&run);
+  remove_test_dir (dir);
+
+  g_print ("ok - many downloads share the transfer slots\n");
+}
+
+int
+main (int argc, char **argv)
+{
+  (void) argc;
+  (void) argv;
+
+  fixture_start ();
+
+  test_successful_download ();
+  test_checksum_mismatch ();
+  test_cached_reuse ();
+  test_corrupt_cache_redownload ();
+  test_cancellation ();
+  test_cancellation_before_start ();
+  test_retry_on_server_error ();
+  test_not_found_is_not_retried ();
+  test_rate_limit ();
+  test_json_download ();
+  test_json_not_found ();
+  test_invalid_url ();
+  test_connection_refused ();
+  test_many_at_once ();
+
+  fixture_stop ();
+
+  return EXIT_SUCCESS;
+}
