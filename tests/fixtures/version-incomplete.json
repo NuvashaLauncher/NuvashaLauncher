@@ -1,0 +1,5 @@
+{
+  "type": "release",
+  "mainClass": "net.minecraft.client.main.Main",
+  "libraries": []
+}

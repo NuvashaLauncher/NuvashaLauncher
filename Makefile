@@ -66,6 +66,7 @@ build-debug/%.o: src/%.c | build-debug
 build/tests/%: tests/%.c $(TESTLIBOBJS) | build/tests
 	$(CC) $(CFLAGS) $(RELFLAGS) -Isrc $(PKG_CFLAGS) \
 		-DAML_DATA_DIR=\"$(CURDIR)/data\" -DAML_BIN=\"$(CURDIR)/$(BIN)\" \
+		-DAML_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
 		-o $@ $< $(TESTLIBOBJS) $(PKG_LIBS)
 
 # Tests never open a display: the only test that runs the launcher runs it
@@ -79,6 +80,7 @@ test: $(if $(SRCS),$(BIN)) $(TESTBINS)
 build-debug/tests/%: tests/%.c $(TESTLIBDBGOBJS) | build-debug/tests
 	$(CC) $(CFLAGS) $(DBGFLAGS) -Isrc $(PKG_CFLAGS) \
 		-DAML_DATA_DIR=\"$(CURDIR)/data\" -DAML_BIN=\"$(CURDIR)/$(BIN)\" \
+		-DAML_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
 		-o $@ $< $(TESTLIBDBGOBJS) $(PKG_LIBS)
 
 test-debug: $(if $(SRCS),$(DBGBIN)) $(TESTDBGBINS)

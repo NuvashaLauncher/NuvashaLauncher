@@ -1,0 +1,21 @@
+{
+  "latest": {
+    "release": "1.21.1",
+    "snapshot": "24w33one"
+  },
+  "versions": [
+    {
+      "id": "1.21.1",
+      "type": "release",
+      "url": "https://piston-meta.mojang.com/v1/packages/924a2dcd8bdc31f8e9d36229811c298b3537bbc7/1.21.1.json",
+      "releaseTime": "2024-08-08T12:00:00+00:00"
+    },
+    {
+      "id": "1.20.6",
+      "type": "release",
+      "url": "https://piston-meta.mojang.com/v1/packages/1111111111111111111111111111111111111111/1.20.6.json",
+      "releaseTime": "2024-04-29T10:00:00+00:00",
+      "sha1": "1111111111111111111111111111111111111111"
+    }
+  ]
+}

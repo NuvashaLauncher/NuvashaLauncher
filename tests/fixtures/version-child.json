@@ -1,0 +1,36 @@
+{
+  "id": "fabric-loader-0.16.9-1.21.1",
+  "type": "release",
+  "mainClass": "net.fabricmc.loader.impl.launch.knot.KnotClient",
+  "inheritsFrom": "1.21.1",
+  "arguments": {
+    "jvm": [
+      "-DFabricMcEmu= net.minecraft.client.main.Main "
+    ],
+    "game": []
+  },
+  "libraries": [
+    {
+      "name": "net.fabricmc:fabric-loader:0.16.9",
+      "downloads": {
+        "artifact": {
+          "path": "net/fabricmc/fabric-loader/0.16.9/fabric-loader-0.16.9.jar",
+          "sha1": "b1e2d3c4a5968778696a5b4c3d2e1f0a9b8c7d6e",
+          "size": 1234567,
+          "url": "https://maven.fabricmc.net/net/fabricmc/fabric-loader/0.16.9/fabric-loader-0.16.9.jar"
+        }
+      }
+    },
+    {
+      "name": "org.ow2.asm:asm:9.7",
+      "downloads": {
+        "artifact": {
+          "path": "org/ow2/asm/asm/9.7/asm-9.7.jar",
+          "sha1": "9d2f0d0e1f2a3b4c5d6e7f8091a2b3c4d5e6f708",
+          "size": 118641,
+          "url": "https://maven.fabricmc.net/org/ow2/asm/asm/9.7/asm-9.7.jar"
+        }
+      }
+    }
+  ]
+}
