@@ -14,6 +14,9 @@
 #include "aml-instance-page.h"
 
 #include "aml-version-row.h"
+#include "aml-java.h"
+#include "aml-java-row.h"
+#include "aml-minecraft-versions.h"
 
 struct _AmlInstancePage
 {
@@ -29,6 +32,12 @@ struct _AmlInstancePage
   GtkWidget *toast_overlay;
   GtkWidget *icon_row;
   GtkWidget *icon_image;
+
+  /* The Java row plus what we know about it. Row load = detection
+   * finishes; description load = the Minecraft version's javaVersion.  */
+  GtkWidget *java_row;
+  int required_java;        /* 0 means "never found one / unknown" */
+  GCancellable *cancellable;
 };
 
 G_DEFINE_FINAL_TYPE (AmlInstancePage, aml_instance_page,
@@ -160,6 +169,11 @@ on_jvm_args_apply (AdwEntryRow *row, gpointer user_data)
     }
 }
 
+static void
+on_manifest_loaded (GObject *source G_GNUC_UNUSED,
+                    GAsyncResult *result,
+                    gpointer user_data);
+
 /* Picking another version stores it the way the name row stores a
  * name. The row answers nothing while it is still loading the list or
  * after it failed, so there is no version to store then. */
@@ -194,6 +208,230 @@ on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
 
   /* The card in the grid shows the version this instance runs. */
   refresh_in_grid (self);
+
+  /* Its javaVersion requirement may differ: check the compatibility
+   * warning again, using the manifest cache. */
+  g_cancellable_cancel (self->cancellable);
+  g_clear_object (&self->cancellable);
+  self->cancellable = g_cancellable_new ();
+  aml_version_manifest_fetch_async (AML_VERSION_MANIFEST_URL,
+                                    self->cancellable, on_manifest_loaded,
+                                    g_object_ref (self));
+}
+
+/* ---------------------------------------------------------- *
+ * The Java row
+ * ---------------------------------------------------------- */
+
+static void
+java_status_refresh (AmlInstancePage *self)
+{
+  AmlJavaRow *row = AML_JAVA_ROW (self->java_row);
+  const AmlJava *effective = NULL;
+  const char *global = NULL;
+  const char *message = NULL;
+  GPtrArray *detected;
+  g_autofree char *current = NULL;
+
+  if (self->java_row == NULL || !aml_java_row_get_ready (row))
+    return;
+
+  detected = aml_java_row_get_detected (row);
+  current = instance_string (self->instance, "java-path");
+
+  if (detected->len == 0 && current == NULL)
+    message = "No Java installation was found on this system";
+
+  if (message == NULL && self->required_java > 0)
+    {
+      if (current != NULL)
+        effective = aml_java_select (detected, current, NULL,
+                                     self->required_java);
+      else
+        {
+          global = aml_settings_get_default_java_path (self->settings);
+          effective = aml_java_select (detected, NULL, global,
+                                       self->required_java);
+        }
+
+      if (effective == NULL && (current != NULL || global != NULL))
+        message = "The configured Java was not detected; make sure it "
+                  "is still a usable java executable";
+      else if (effective == NULL)
+        {
+          g_autofree char *description = g_strdup_printf (
+            "No detected Java satisfies the requirement of Java %d+",
+            self->required_java);
+
+          adw_action_row_set_subtitle (ADW_ACTION_ROW (row), description);
+          return;
+        }
+      else if (effective->major_version < self->required_java)
+        {
+          g_autofree char *description = g_strdup_printf (
+            "This game needs Java %d or newer, selected Java is %d",
+            self->required_java, effective->major_version);
+
+          adw_action_row_set_subtitle (ADW_ACTION_ROW (row), description);
+          return;
+        }
+    }
+
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), message);
+}
+
+static void
+on_description_loaded (GObject *source G_GNUC_UNUSED,
+                       GAsyncResult *result,
+                       gpointer user_data)
+{
+  AmlInstancePage *self = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlVersionDescription) description =
+    aml_version_load_finish (result, &error);
+
+  if (description != NULL && description->java_version != NULL)
+    self->required_java = description->java_version->major_version;
+  else
+    self->required_java = 0;
+
+  java_status_refresh (self);
+  g_object_unref (self);
+}
+
+static void
+on_manifest_loaded (GObject *source G_GNUC_UNUSED,
+                    GAsyncResult *result,
+                    gpointer user_data)
+{
+  AmlInstancePage *self = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlVersionManifest) manifest =
+    aml_version_manifest_fetch_finish (result, &error);
+  g_autofree char *version = instance_string (self->instance,
+                                              "minecraft-version");
+
+  g_clear_object (&self->cancellable);
+
+  if (manifest == NULL)
+    {
+      java_status_refresh (self);
+      g_object_unref (self);
+      return;
+    }
+
+  self->cancellable = g_cancellable_new ();
+  aml_version_load_async (manifest, version, self->cancellable,
+                          on_description_loaded, g_object_ref (self));
+  g_object_unref (self);
+}
+
+/* Picks the row of the Java entry the user has chosen and writes it to
+ * the instance: NULL for "Default". On writing failure the row and the
+ * instance go back to the stored path and the row says why. */
+static void
+on_java_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
+                  gpointer user_data)
+{
+  AmlInstancePage *self = user_data;
+  AmlJavaRow *row = AML_JAVA_ROW (object);
+  const char *path = aml_java_row_get_selected_path (row);
+  g_autofree char *current = instance_string (self->instance, "java-path");
+  g_autoptr (GError) error = NULL;
+  const char *next;
+
+  if (path == NULL)
+    return; /* still loading or failed: nothing valid to store */
+
+  next = (path[0] != '\0') ? path : NULL;
+
+  if (g_strcmp0 (current, next) == 0)
+    {
+      java_status_refresh (self);
+      return;
+    }
+
+  g_object_set (self->instance, "java-path", next, NULL);
+
+  if (!aml_instance_manager_save (self->manager, &error))
+    {
+      g_object_set (self->instance, "java-path", current, NULL);
+      show_toast (self, error->message);
+      aml_java_row_select_path (row, current);
+      return;
+    }
+
+  java_status_refresh (self);
+}
+
+static void
+custom_java_probed (GObject *source G_GNUC_UNUSED,
+                    GAsyncResult *result,
+                    gpointer user_data)
+{
+  AmlInstancePage *self = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlJava) probe = aml_java_probe_finish (result, &error);
+
+  if (probe == NULL)
+    {
+      show_toast (self, error != NULL
+                        ? error->message
+                        : "the chosen file does not report a Java version");
+      g_object_unref (self);
+      return;
+    }
+
+  /* The custom entry goes into the row; selecting it fires our
+   * notify::selected handler so the instance is updated from there. */
+  aml_java_row_set_custom (AML_JAVA_ROW (self->java_row), probe->executable,
+                           g_steal_pointer (&probe));
+  g_object_unref (self);
+}
+
+static void
+on_custom_java_chosen (GObject *dialog, GAsyncResult *result,
+                       gpointer user_data)
+{
+  AmlInstancePage *self = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GFile) file =
+    gtk_file_dialog_open_finish (GTK_FILE_DIALOG (dialog), result, &error);
+
+  g_object_unref (dialog);
+
+  if (file == NULL)
+    {
+      if (error != NULL &&
+          !g_error_matches (error, GTK_DIALOG_ERROR,
+                            GTK_DIALOG_ERROR_DISMISSED) &&
+          !g_error_matches (error, GTK_DIALOG_ERROR,
+                            GTK_DIALOG_ERROR_CANCELLED))
+        show_toast (self, error->message);
+
+      g_object_unref (self);
+      return;
+    }
+
+  g_autofree char *path = g_file_get_path (file);
+
+  aml_java_probe_async (path, NULL, custom_java_probed,
+                        g_object_ref (self));
+  g_object_unref (self);
+}
+
+static void
+on_custom_java_clicked (GtkButton *button G_GNUC_UNUSED,
+                        gpointer user_data)
+{
+  AmlInstancePage *self = user_data;
+  GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
+  GtkFileDialog *dialog = gtk_file_dialog_new ();
+
+  gtk_file_dialog_set_title (dialog, "Choose Java executable");
+  gtk_file_dialog_open (dialog,
+                        GTK_IS_WINDOW (root) ? GTK_WINDOW (root) : NULL,
+                        NULL, on_custom_java_chosen, g_object_ref (self));
 }
 
 /* ---------------------------------------------------------- *
@@ -487,6 +725,8 @@ create_settings_page (AmlInstancePage *self)
   g_autofree char *loader_version =
     instance_string (self->instance, "loader-version");
   g_autofree char *jvm_args = instance_string (self->instance, "jvm-args");
+  g_autofree char *java_path =
+    instance_string (self->instance, "java-path");
   GtkWidget *name_row = adw_entry_row_new ();
   GtkWidget *version_row = GTK_WIDGET (aml_version_row_new ());
   GtkWidget *jvm_args_row = adw_entry_row_new ();
@@ -546,9 +786,33 @@ create_settings_page (AmlInstancePage *self)
                                           : "None"));
 
   /* Java */
+  GtkWidget *java_row = GTK_WIDGET (aml_java_row_new ());
+  GtkWidget *custom_java_row = adw_action_row_new ();
+  GtkWidget *custom_java_button = gtk_button_new_with_label ("Choose…");
+
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (java), "Java");
+
+  g_signal_connect (java_row, "notify::selected",
+                    G_CALLBACK (on_java_selected), self);
+  aml_java_row_set_default_entry_label (AML_JAVA_ROW (java_row), "Default");
+  aml_java_row_load (AML_JAVA_ROW (java_row), java_path);
+  self->java_row = java_row;
+
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (custom_java_row),
+                                 "Custom Java…");
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (custom_java_row),
+                               "Pick a java executable AML does not detect");
+  gtk_widget_set_valign (custom_java_button, GTK_ALIGN_CENTER);
+  g_signal_connect (custom_java_button, "clicked",
+                    G_CALLBACK (on_custom_java_clicked), self);
+  adw_action_row_add_suffix (ADW_ACTION_ROW (custom_java_row),
+                             custom_java_button);
+  adw_action_row_set_activatable_widget (ADW_ACTION_ROW (custom_java_row),
+                                         custom_java_button);
+
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (java), java_row);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (java),
-                             value_row ("Java Installation", "Default"));
+                             custom_java_row);
 
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (jvm_args_row),
                                  "JVM Arguments");
@@ -557,6 +821,14 @@ create_settings_page (AmlInstancePage *self)
   g_signal_connect (jvm_args_row, "apply", G_CALLBACK (on_jvm_args_apply),
                     self);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (java), jvm_args_row);
+
+  /* The Java row's compatibility warning needs the javaVersion field of
+   * the instance's version document; fetching is offline-friendly via
+   * the cache. */
+  self->cancellable = g_cancellable_new ();
+  aml_version_manifest_fetch_async (AML_VERSION_MANIFEST_URL,
+                                    self->cancellable, on_manifest_loaded,
+                                    g_object_ref (self));
 
   /* Actions */
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (actions), "Actions");
@@ -671,6 +943,10 @@ aml_instance_page_dispose (GObject *object)
   self->toast_overlay = NULL;
   self->icon_row = NULL;
   self->icon_image = NULL;
+  self->java_row = NULL;
+
+  g_cancellable_cancel (self->cancellable);
+  g_clear_object (&self->cancellable);
 
   G_OBJECT_CLASS (aml_instance_page_parent_class)->dispose (object);
 }
