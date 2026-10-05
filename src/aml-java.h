@@ -28,13 +28,15 @@ GQuark aml_java_error_quark (void);
 
 /* One Java runtime. @executable is the path that was probed, @arch the
  * os.arch of that JVM ("64-bit"/"32-bit" when only the -version
- * banner could be read) and @vendor what `java -version` reports, e.g.
- * "OpenJDK". */
+ * banner could be read), @vendor what `java -version` reports, e.g.
+ * "OpenJDK". @headless is TRUE when the JVM is missing AWT's X11
+ * bridge and cannot run a game. */
 typedef struct {
   char *executable;
   char *arch;
   char *vendor;
   int major_version; /* 8, 17, 21, 25, ... */
+  gboolean headless;
 } AmlJava;
 
 void aml_java_free (AmlJava *java);
@@ -95,15 +97,32 @@ void aml_java_probe_list_async (char            **executables,
 GPtrArray *aml_java_probe_list_finish (GAsyncResult  *result,
                                        GError       **error);
 
-/* Probes every candidate Linux has at hand: bin/java inside each entry
- * of /usr/lib/jvm and /usr/lib64/jvm, $JAVA_HOME/bin/java and the
+/* Probes every candidate Linux has at hand: bin/java and
+ * jre/bin/java inside each entry of the default search roots
+ * (/usr/lib/jvm, /usr/lib64/jvm, /usr/java, /usr/local/java, /opt,
+ * ~/.jdks, ~/.sdkman/candidates/java, ~/.asdf/installs/java,
+ * ~/.local/share/mise/installs/java), $JAVA_HOME/bin/java and the
  * "java" on $PATH. Same result shape as aml_java_probe_list_finish(). */
-void aml_java_detect_async (GCancellable       *cancellable,
+void aml_java_detect_async (GCancellable        *cancellable,
                             GAsyncReadyCallback callback,
-                            gpointer            user_data);
+                            gpointer              user_data);
 
 GPtrArray *aml_java_detect_finish (GAsyncResult  *result,
                                    GError       **error);
+
+/* Same as aml_java_detect_async(), but over caller-given roots only:
+ * for each root every subdirectory is treated as a possible JVM home
+ * with both <home>/bin/java and <home>/jre/bin/java checked. This is
+ * what a headless test uses to scan fake VMs in a temp directory.
+ * Unlike aml_java_detect_async() it never reaches $JAVA_HOME, $PATH
+ * or anything outside the given roots. */
+void aml_java_detect_list_async (char            **roots,
+                                 GCancellable    *cancellable,
+                                 GAsyncReadyCallback callback,
+                                 gpointer         user_data);
+
+GPtrArray *aml_java_detect_list_finish (GAsyncResult  *result,
+                                        GError       **error);
 
 G_END_DECLS
 
