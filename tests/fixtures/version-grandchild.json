@@ -1,0 +1,16 @@
+{
+  "id": "my-profile",
+  "type": "release",
+  "inheritsFrom": "fabric-loader-0.16.9-1.21.1",
+  "arguments": {
+    "game": [
+      "--quickPlayPath",
+      "${quickPlayPath}"
+    ]
+  },
+  "libraries": [
+    {
+      "name": "com.example:quickplay:1.0"
+    }
+  ]
+}

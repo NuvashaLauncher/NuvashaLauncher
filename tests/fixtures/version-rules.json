@@ -1,0 +1,84 @@
+{
+  "id": "rules-fixture",
+  "type": "release",
+  "mainClass": "net.minecraft.client.main.Main",
+  "libraries": [
+    {
+      "name": "linux-only",
+      "rules": [
+        { "action": "allow", "os": { "name": "linux" } }
+      ]
+    },
+    {
+      "name": "windows-only",
+      "rules": [
+        { "action": "allow", "os": { "name": "windows" } }
+      ]
+    },
+    {
+      "name": "osx-only",
+      "rules": [
+        { "action": "allow", "os": { "name": "osx" } }
+      ]
+    },
+    {
+      "name": "x86-only",
+      "rules": [
+        { "action": "allow", "os": { "arch": "x86" } }
+      ]
+    },
+    {
+      "name": "arm64-only",
+      "rules": [
+        { "action": "allow", "os": { "arch": "arm64" } }
+      ]
+    },
+    {
+      "name": "aarch64-only",
+      "rules": [
+        { "action": "allow", "os": { "arch": "aarch64" } }
+      ]
+    },
+    {
+      "name": "unconditional",
+      "rules": [
+        { "action": "allow" }
+      ]
+    },
+    {
+      "name": "allow-then-disallow",
+      "rules": [
+        { "action": "allow" },
+        { "action": "disallow", "os": { "name": "linux" } }
+      ]
+    },
+    {
+      "name": "disallow-osx-then-allow",
+      "rules": [
+        { "action": "disallow", "os": { "name": "osx" } },
+        { "action": "allow" }
+      ]
+    },
+    {
+      "name": "demo-only",
+      "rules": [
+        { "action": "allow", "features": { "is_demo_user": true } }
+      ]
+    },
+    {
+      "name": "not-demo",
+      "rules": [
+        { "action": "allow", "features": { "is_demo_user": false } }
+      ]
+    },
+    {
+      "name": "kernel-6-only",
+      "rules": [
+        { "action": "allow", "os": { "version": "^6\\..*" } }
+      ]
+    },
+    {
+      "name": "no-rules"
+    }
+  ]
+}

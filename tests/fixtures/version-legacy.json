@@ -1,0 +1,91 @@
+{
+  "id": "1.5.2",
+  "type": "release",
+  "mainClass": "net.minecraft.launchwrapper.Launch",
+  "assets": "pre-1.6",
+  "assetIndex": {
+    "id": "legacy",
+    "sha1": "db8bb40a89c8b5d0e0e0f0d0c0b0a09080706050",
+    "size": 123456,
+    "totalSize": 104462160,
+    "url": "https://piston-meta.mojang.com/v1/packages/db8bb40a89c8b5d0e0e0f0d0c0b0a09080706050/legacy.json"
+  },
+  "downloads": {
+    "client": {
+      "sha1": "f0e0d0c0b0a090807060504030201000f0e0d0c0",
+      "size": 2653712,
+      "url": "https://piston-data.mojang.com/v1/objects/f0e0d0c0b0a090807060504030201000f0e0d0c0/client.jar"
+    }
+  },
+  "javaVersion": {
+    "component": "jre-legacy",
+    "majorVersion": 8
+  },
+  "minecraftArguments": "--username ${auth_player_name} --session ${auth_session} --version ${version_name} --gameDir ${game_directory} --assetsDir ${assets_root} --tweakClass net.fabricmc.loader.launch.knot.KnotClient",
+  "libraries": [
+    {
+      "name": "org.lwjgl.lwjgl:lwjgl-platform:2.9.0",
+      "natives": {
+        "linux": "natives-linux",
+        "osx": "natives-osx",
+        "windows": "natives-windows"
+      },
+      "extract": {
+        "exclude": [ "META-INF/" ]
+      },
+      "downloads": {
+        "classifiers": {
+          "natives-linux": {
+            "path": "org/lwjgl/lwjgl/lwjgl-platform/2.9.0/lwjgl-platform-2.9.0-natives-linux.jar",
+            "sha1": "2ba5dcb11048147f1a74eff2deb192c001321f77",
+            "size": 569061,
+            "url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.0/lwjgl-platform-2.9.0-natives-linux.jar"
+          },
+          "natives-osx": {
+            "path": "org/lwjgl/lwjgl/lwjgl-platform/2.9.0/lwjgl-platform-2.9.0-natives-osx.jar",
+            "sha1": "6621b382cb14cc409b041d8d72829156a87c31aa",
+            "size": 518924,
+            "url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.0/lwjgl-platform-2.9.0-natives-osx.jar"
+          },
+          "natives-windows": {
+            "path": "org/lwjgl/lwjgl/lwjgl-platform/2.9.0/lwjgl-platform-2.9.0-natives-windows.jar",
+            "sha1": "3f11873dc8e84c854ec7c5a8fd2e869f8aaef764",
+            "size": 609967,
+            "url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.0/lwjgl-platform-2.9.0-natives-windows.jar"
+          }
+        }
+      }
+    },
+    {
+      "name": "org.scala-lang:scala-library:2.10.2",
+      "downloads": {
+        "artifact": {
+          "path": "org/scala-lang/scala-library/2.10.2/scala-library-2.10.2.jar",
+          "sha1": "2122969f2b4c0d9d0e0f0d0c0b0a090807060504",
+          "size": 682041,
+          "url": "https://libraries.minecraft.net/org/scala-lang/scala-library/2.10.2/scala-library-2.10.2.jar"
+        }
+      }
+    },
+    {
+      "name": "com.example:windows-only:1.0",
+      "downloads": {
+        "artifact": {
+          "path": "com/example/windows-only/1.0/windows-only-1.0.jar",
+          "sha1": "aa11bb22cc33dd44ee55ff66778899aabbccdde0",
+          "size": 4096,
+          "url": "https://libraries.minecraft.net/com/example/windows-only/1.0/windows-only-1.0.jar"
+        }
+      },
+      "rules": [
+        { "action": "allow", "os": { "name": "windows" } }
+      ]
+    },
+    {
+      "name": "com.example:linux-only:1.0",
+      "rules": [
+        { "action": "allow", "os": { "name": "linux" } }
+      ]
+    }
+  ]
+}

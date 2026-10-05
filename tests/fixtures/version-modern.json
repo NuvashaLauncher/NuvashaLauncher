@@ -1,0 +1,147 @@
+{
+  "id": "1.21.1",
+  "type": "release",
+  "mainClass": "net.minecraft.client.main.Main",
+  "assets": "1.21",
+  "assetIndex": {
+    "id": "1.21",
+    "sha1": "abfaa525f923f807df8b4e4d29c1b5e3a104adbe",
+    "size": 597035,
+    "totalSize": 483782790,
+    "url": "https://piston-meta.mojang.com/v1/packages/abfaa525f923f807df8b4e4d29c1b5e3a104adbe/1.21.json"
+  },
+  "downloads": {
+    "client": {
+      "sha1": "e877b6a07acd633fb3bb475002175cec036e7b87",
+      "size": 41483720,
+      "url": "https://piston-data.mojang.com/v1/objects/e877b6a07acd633fb3bb475002175cec036e7b87/client.jar"
+    },
+    "server": {
+      "sha1": "f1f78ab9cbb9d7d4e2c1f0f0a0e1e6f2d0e0d0c0",
+      "size": 45000000,
+      "url": "https://piston-data.mojang.com/v1/objects/f1f78ab9cbb9d7d4e2c1f0f0a0e1e6f2d0e0d0c0/server.jar"
+    }
+  },
+  "javaVersion": {
+    "component": "java-runtime-delta",
+    "majorVersion": 21
+  },
+  "logging": {
+    "client": {
+      "argument": "-Dlog4j.configurationFile=${path}",
+      "type": "log4j2-xml",
+      "file": {
+        "id": "client-1.21.xml",
+        "sha1": "39384bd14c0606d812afec88d8aff595b2587dd9",
+        "size": 1073,
+        "url": "https://piston-data.mojang.com/v1/objects/39384bd14c0606d812afec88d8aff595b2587dd9/client-1.21.xml"
+      }
+    }
+  },
+  "arguments": {
+    "jvm": [
+      "-Djava.library.path=${natives_directory}",
+      "-cp",
+      "${classpath}",
+      {
+        "rules": [ { "action": "allow", "os": { "name": "osx" } } ],
+        "value": "-XstartOnFirstThread"
+      },
+      {
+        "rules": [ { "action": "allow", "os": { "name": "windows" } } ],
+        "value": "-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump"
+      },
+      {
+        "rules": [ { "action": "allow", "os": { "name": "linux" } } ],
+        "value": "-Xss1M"
+      },
+      {
+        "rules": [ { "action": "allow", "os": { "arch": "x86" } } ],
+        "value": "-XX:+UseSerialGC"
+      },
+      {
+        "rules": [ { "action": "allow", "features": { "is_demo_user": true } } ],
+        "value": "-Dminecraft.launcher.brand=AML"
+      }
+    ],
+    "game": [
+      "--username",
+      "${auth_player_name}",
+      "--version",
+      "${version_name}",
+      "--gameDir",
+      "${game_directory}",
+      "--assetsDir",
+      "${assets_root}",
+      {
+        "rules": [ { "action": "allow", "features": { "is_demo_user": true } } ],
+        "value": "--demo"
+      },
+      {
+        "rules": [ { "action": "allow", "features": { "has_custom_resolution": true } } ],
+        "value": [ "--width", "1280", "--height", "720" ]
+      },
+      {
+        "rules": [ { "action": "allow", "features": { "has_quick_plays_support": true } } ],
+        "value": "--quickPlayPath"
+      }
+    ],
+    "default-user-jvm": [
+      {
+        "value": [ "-Xms2G", "-Xmx4G" ]
+      }
+    ]
+  },
+  "libraries": [
+    {
+      "name": "org.lwjgl:lwjgl:3.3.3",
+      "downloads": {
+        "artifact": {
+          "path": "org/lwjgl/lwjgl/3.3.3/lwjgl-3.3.3.jar",
+          "sha1": "554836d32f2391b4c38a008189834c16de15d123",
+          "size": 729357,
+          "url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/3.3.3/lwjgl-3.3.3.jar"
+        }
+      }
+    },
+    {
+      "name": "com.mojang:jtracy:1.14.38:natives-linux",
+      "downloads": {
+        "artifact": {
+          "path": "com/mojang/jtracy/1.14.38/jtracy-1.14.38-natives-linux.jar",
+          "sha1": "d2433300f8a4e99595d513546d19ecddc3eaa15e",
+          "size": 256636,
+          "url": "https://libraries.minecraft.net/com/mojang/jtracy/1.14.38/jtracy-1.14.38-natives-linux.jar"
+        }
+      },
+      "rules": [
+        { "action": "allow", "os": { "name": "linux" } }
+      ]
+    },
+    {
+      "name": "ca.weblite:java-objc-bridge:1.1",
+      "downloads": {
+        "artifact": {
+          "path": "ca/weblite/java-objc-bridge/1.1/java-objc-bridge-1.1.jar",
+          "sha1": "1227f9e0666314f9de41477e3ec277e542ed7f7b",
+          "size": 1330045,
+          "url": "https://libraries.minecraft.net/ca/weblite/java-objc-bridge/1.1/java-objc-bridge-1.1.jar"
+        }
+      },
+      "rules": [
+        { "action": "allow", "os": { "name": "osx" } }
+      ]
+    },
+    {
+      "name": "org.lwjgl:lwjgl-glfw:3.3.3",
+      "downloads": {
+        "artifact": {
+          "path": "org/lwjgl/lwjgl-glfw/3.3.3/lwjgl-glfw-3.3.3.jar",
+          "sha1": "63f042e5c1b5d1e0e6b9e0f4d7a3c8b2e1f0a9d7",
+          "size": 123456,
+          "url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-glfw/3.3.3/lwjgl-glfw-3.3.3.jar"
+        }
+      }
+    }
+  ]
+}
