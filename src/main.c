@@ -11,22 +11,44 @@
 #include <adwaita.h>
 #include <gtk/gtk.h>
 
+#include "aml-instance-manager.h"
+#include "aml-main-window.h"
+
+static void
+on_quit (GSimpleAction *action G_GNUC_UNUSED,
+         GVariant      *parameter G_GNUC_UNUSED,
+         gpointer       user_data)
+{
+  g_application_quit (G_APPLICATION (user_data));
+}
+
+static const GActionEntry app_entries[] = {
+  { .name = "quit", .activate = on_quit },
+};
+
 static void
 on_activate (GApplication *app, gpointer user_data G_GNUC_UNUSED)
 {
-  GtkWidget *window = adw_application_window_new (GTK_APPLICATION (app));
-  GtkWidget *toolbar_view = adw_toolbar_view_new ();
-  GtkWidget *header_bar = adw_header_bar_new ();
-  GtkWidget *status_page = adw_status_page_new ();
+  GtkWindow *window = gtk_application_get_active_window (GTK_APPLICATION (app));
 
-  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar_view), header_bar);
-  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar_view), status_page);
-  adw_application_window_set_content (ADW_APPLICATION_WINDOW (window),
-                                      toolbar_view);
+  /* One window only: a second launch presents the window that exists
+   * instead of opening another one. */
+  if (window != NULL)
+    {
+      gtk_window_present (window);
+      return;
+    }
 
-  gtk_window_set_title (GTK_WINDOW (window), "AML");
-  gtk_window_set_default_size (GTK_WINDOW (window), 960, 640);
-  gtk_window_present (GTK_WINDOW (window));
+  g_autoptr (AmlInstanceManager) manager = aml_instance_manager_new (NULL);
+  g_autoptr (GError) error = NULL;
+
+  if (!aml_instance_manager_load (manager, &error))
+    g_warning ("cannot read the instance list: %s", error->message);
+
+  AmlMainWindow *main_window =
+    aml_main_window_new (GTK_APPLICATION (app), manager);
+
+  gtk_window_present (GTK_WINDOW (main_window));
 }
 
 int
@@ -53,6 +75,8 @@ main (int argc, char **argv)
 
   app = adw_application_new ("io.github.Flia7.AML",
                              G_APPLICATION_DEFAULT_FLAGS);
+  g_action_map_add_action_entries (G_ACTION_MAP (app), app_entries,
+                                   G_N_ELEMENTS (app_entries), app);
   g_signal_connect (app, "activate", G_CALLBACK (on_activate), NULL);
 
   return g_application_run (G_APPLICATION (app), argc, argv);
