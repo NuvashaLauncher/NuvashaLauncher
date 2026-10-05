@@ -10,7 +10,10 @@ PREFIX     ?= /usr/local
 
 # Libraries AML links against. Never add an X11 package here: AML is
 # Wayland only and must not link anything X11 related.
-PKGS := gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive
+# gio-unix-2.0 is the Linux part of GIO itself (no display involved) and
+# provides the output stream that writes a download into its temporary
+# file descriptor.
+PKGS := gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive gio-unix-2.0
 
 # pkg-config prints -I paths; use -isystem so warnings are only about our
 # own code and not about the GTK/GLib headers themselves.
