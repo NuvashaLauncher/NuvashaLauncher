@@ -1,0 +1,11 @@
+# Copyright (C) 2026 Flia
+# SPDX-License-Identifier: GPL-3.0-only
+
+[Desktop Entry]
+Type=Application
+Name=AML
+Comment=Another Minecraft Launcher
+Exec=AML
+Icon=io.github.Flia7.AML
+Terminal=false
+Categories=Game;
