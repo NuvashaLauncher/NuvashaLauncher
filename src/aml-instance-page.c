@@ -13,12 +13,15 @@
 
 #include "aml-instance-page.h"
 
+#include "aml-version-row.h"
+
 struct _AmlInstancePage
 {
   AdwNavigationPage parent_instance;
 
   AmlInstanceManager *manager;
   AmlInstance *instance;
+  AmlSettings *settings;
 
   /* Borrowed from the widget tree of the page. Cleared in dispose(),
    * because the tree can go away while a running operation still keeps
@@ -155,6 +158,42 @@ on_jvm_args_apply (AdwEntryRow *row, gpointer user_data)
       gtk_editable_set_text (GTK_EDITABLE (row), current);
       return;
     }
+}
+
+/* Picking another version stores it the way the name row stores a
+ * name. The row answers nothing while it is still loading the list or
+ * after it failed, so there is no version to store then. */
+static void
+on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
+                     gpointer user_data)
+{
+  AmlInstancePage *self = user_data;
+  AmlVersionRow *row = AML_VERSION_ROW (object);
+  const char *version = aml_version_row_get_selected (row);
+  g_autofree char *current =
+    instance_string (self->instance, "minecraft-version");
+  g_autoptr (GError) error = NULL;
+
+  if (version == NULL)
+    return;
+
+  if (g_strcmp0 (version, current) == 0)
+    return;
+
+  g_object_set (self->instance, "minecraft-version", version, NULL);
+
+  if (!aml_instance_manager_save (self->manager, &error))
+    {
+      /* The edit never reached the file: the instance and the row go
+       * back to the version that is still stored. */
+      g_object_set (self->instance, "minecraft-version", current, NULL);
+      show_toast (self, error->message);
+      aml_version_row_select (row, current);
+      return;
+    }
+
+  /* The card in the grid shows the version this instance runs. */
+  refresh_in_grid (self);
 }
 
 /* ---------------------------------------------------------- *
@@ -449,6 +488,7 @@ create_settings_page (AmlInstancePage *self)
     instance_string (self->instance, "loader-version");
   g_autofree char *jvm_args = instance_string (self->instance, "jvm-args");
   GtkWidget *name_row = adw_entry_row_new ();
+  GtkWidget *version_row = GTK_WIDGET (aml_version_row_new ());
   GtkWidget *jvm_args_row = adw_entry_row_new ();
   GtkWidget *general = adw_preferences_group_new ();
   GtkWidget *minecraft = adw_preferences_group_new ();
@@ -487,12 +527,16 @@ create_settings_page (AmlInstancePage *self)
               "folder-open-symbolic", G_CALLBACK (on_open_folder_clicked),
               self);
 
-  /* Minecraft: read only until version and loader picking arrive. */
+  /* Minecraft: the list of versions comes from Mojang's manifest,
+   * fetched as the page is built. The version this instance runs stays
+   * in the list even when the filter would hide its type. */
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (minecraft),
                                    "Minecraft");
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (minecraft),
-                             value_row ("Minecraft Version",
-                                        minecraft_version));
+  g_signal_connect (version_row, "notify::selected",
+                    G_CALLBACK (on_version_selected), self);
+  aml_version_row_load (AML_VERSION_ROW (version_row), self->settings,
+                        minecraft_version);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (minecraft), version_row);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (minecraft),
                              value_row ("Loader", loader));
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (minecraft),
@@ -557,10 +601,12 @@ create_placeholder_page (const char *title)
 }
 
 AmlInstancePage *
-aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance)
+aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
+                       AmlSettings *settings)
 {
   g_return_val_if_fail (AML_IS_INSTANCE_MANAGER (manager), NULL);
   g_return_val_if_fail (AML_IS_INSTANCE (instance), NULL);
+  g_return_val_if_fail (AML_IS_SETTINGS (settings), NULL);
 
   AmlInstancePage *self = g_object_new (AML_TYPE_INSTANCE_PAGE, NULL);
   GtkWidget *stack = adw_view_stack_new ();
@@ -571,6 +617,7 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance)
 
   self->manager = g_object_ref (manager);
   self->instance = g_object_ref (instance);
+  self->settings = g_object_ref (settings);
 
   adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (stack),
                                        create_settings_page (self),
@@ -635,6 +682,7 @@ aml_instance_page_finalize (GObject *object)
 
   g_clear_object (&self->manager);
   g_clear_object (&self->instance);
+  g_clear_object (&self->settings);
 
   G_OBJECT_CLASS (aml_instance_page_parent_class)->finalize (object);
 }
