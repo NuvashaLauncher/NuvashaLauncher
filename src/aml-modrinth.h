@@ -98,6 +98,10 @@ void aml_modrinth_project_free (AmlModrinthProject *project);
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (AmlModrinthProject, aml_modrinth_project_free)
 
+/* A copy of @project, so that a list of rows can own its own of what it
+ * shows. (transfer full) */
+AmlModrinthProject *aml_modrinth_project_copy (AmlModrinthProject *project);
+
 /* What one search asked for. @loader is NULL for the content that does
  * not need one, and @categories is a GPtrArray of const char* that may
  * be NULL. */
@@ -238,6 +242,11 @@ void aml_modrinth_dependency_free (AmlModrinthDependency *dependency);
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (AmlModrinthDependency,
                                aml_modrinth_dependency_free)
 
+/* A copy of @dependency, so that a caller can hold it without keeping
+ * the version it came from alive. (transfer full) */
+AmlModrinthDependency *aml_modrinth_dependency_copy (
+    AmlModrinthDependency *dependency);
+
 /* One published version of a project: the files it is made of and what
  * it needs beside them. */
 typedef struct {
@@ -257,6 +266,10 @@ typedef struct {
 void aml_modrinth_version_free (AmlModrinthVersion *version);
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (AmlModrinthVersion, aml_modrinth_version_free)
+
+/* A copy of @version, so that something can be kept after the list it
+ * was read from is gone. (transfer full) */
+AmlModrinthVersion *aml_modrinth_version_copy (AmlModrinthVersion *version);
 
 /* The file an install writes: the primary one, or the first when the
  * version marks none as primary. NULL when the version holds no file.
@@ -285,6 +298,26 @@ void aml_modrinth_versions_async (const char        *project_id,
  * NULL on error. */
 GPtrArray *aml_modrinth_versions_finish (GAsyncResult  *result,
                                          GError       **error);
+
+/* The categories Modrinth publishes for @type, which is what the filter
+ * of a Browse page offers. They come from the tags projects are tagged
+ * with, so the list is Modrinth's own and not one AML made up. */
+void aml_modrinth_categories_async (AmlContentType      type,
+                                    GCancellable       *cancellable,
+                                    GAsyncReadyCallback callback,
+                                    gpointer            user_data);
+
+/* (transfer full) the char* names, sorted. NULL on error. */
+GPtrArray *aml_modrinth_categories_finish (GAsyncResult  *result,
+                                           GError       **error);
+
+/* The categories out of what the tags endpoint answered, the ones of
+ * @type only. This is what the fetch above parses, and what a test
+ * hands a fixture to. (transfer full) */
+GPtrArray *aml_modrinth_categories_from_json (const char     *json,
+                                              gssize          length,
+                                              AmlContentType  type,
+                                              GError        **error);
 
 /* The same, out of what /project/<id>/version answered: what fits, and
  * only that, newest first. (transfer full) */
