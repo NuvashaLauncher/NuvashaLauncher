@@ -30,6 +30,16 @@
  * processors with a Java, which is what aml_loaders_install_async()
  * does, and hands back what the game then runs.
  *
+ * Which versions of those two AML installs is what their install profiles
+ * allow. The current ones it follows whole: every processor of the client
+ * side, with the artifacts it needs fetched out of the maven the loader
+ * publishes, which is what NeoForge 21 and newer and Forge 1.20.5 and
+ * newer ask for. The generations before those fetch their mappings from
+ * Mojang's own maven instead, which is not a repository this module knows
+ * about, so their profiles come out of it half-fulfilled: the install
+ * stops there, with what the processor that failed said about it, rather
+ * than producing a game that cannot start.
+ *
  * Nothing here writes into an instance: a loader is installed into its own
  * directory under the shared data directory, and the launcher runs the
  * game from the instance. */
@@ -233,7 +243,9 @@ typedef void (*AmlLoadersProgressFunc) (const char *stage,
  * AML_LOADERS_ERROR_INSTALLER when the installer cannot be read or one of
  * its processors fails, in which case the error carries what the
  * processor printed, and AML_LOADERS_ERROR_GENERATION for a version whose
- * install profile is of a shape this does not run.
+ * install profile is of a shape this does not run. Either way the install
+ * stops with what went wrong in words rather than going on to a game that
+ * would not start.
  *
  * AML_LOADERS_ERROR_UNSUPPORTED for a loader that publishes no installer. */
 void aml_loaders_install_async (AmlLoader              loader,
