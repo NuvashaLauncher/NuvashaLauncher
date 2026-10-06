@@ -529,8 +529,9 @@ on_card_clicked (GtkButton *button, gpointer user_data)
 
   adw_navigation_view_push (
     self->navigation,
-    ADW_NAVIGATION_PAGE (aml_instance_page_new (self->manager, instance,
-                                                self->settings)));
+    ADW_NAVIGATION_PAGE (
+      aml_instance_page_new (self->manager, instance, self->settings,
+                             window_launcher (self, id))));
 }
 
 /* Play while the instance is idle, Stop while it is busy, and the state
