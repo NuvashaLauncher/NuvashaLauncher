@@ -1,0 +1,41 @@
+{
+  "id": "fabric-loader-0.19.5-1.20.1",
+  "inheritsFrom": "1.20.1",
+  "releaseTime": "2026-10-05T19:48:06+0000",
+  "time": "2026-10-05T19:48:06+0000",
+  "type": "release",
+  "mainClass": "net.fabricmc.loader.impl.launch.knot.KnotClient",
+  "arguments": {
+    "game": [],
+    "jvm": [
+      "-DFabricMcEmu= net.minecraft.client.main.Main "
+    ]
+  },
+  "libraries": [
+    {
+      "name": "org.ow2.asm:asm:9.10.1",
+      "url": "https://maven.fabricmc.net/",
+      "md5": "6d1dd0482c03a6dc1807d9d004456021",
+      "sha1": "c29635c8a7afa03d74b33c1884df8abb2b3f3dcc",
+      "sha256": "03d99a74ad1ee5c71334ef67437f4ef4fe3488caa7c96d8645abc73c8e2017d4",
+      "size": 126122
+    },
+    {
+      "name": "net.fabricmc:sponge-mixin:0.17.4+mixin.0.8.7",
+      "url": "https://maven.fabricmc.net/",
+      "sha1": "3d0d2ba9f0b6a1a9e5e1e4d1cf1e4f7b1a2c3d4e5",
+      "sha256": "6f0b0d1a5b6d0b4c1b2a3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718",
+      "size": 355500
+    },
+    {
+      "name": "net.fabricmc:fabric-loader:0.19.5",
+      "url": "https://maven.fabricmc.net/",
+      "sha1": "b50ad385829d0000000000000000000000000000"
+    },
+    {
+      "name": "ca.weblite:java-objc-bridge:1.1",
+      "url": "https://maven.fabricmc.net/",
+      "sha1": "1227f9e0666314f9de41477e3ec277e542ed7f7b"
+    }
+  ]
+}

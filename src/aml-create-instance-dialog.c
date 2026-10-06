@@ -8,6 +8,8 @@
 
 #include "aml-create-instance-dialog.h"
 
+#include "aml-loader-row.h"
+#include "aml-loaders.h"
 #include "aml-version-row.h"
 
 struct _AmlCreateInstanceDialog
@@ -22,6 +24,7 @@ struct _AmlCreateInstanceDialog
 
   GtkWidget *name_row;
   GtkWidget *version_row; /* AmlVersionRow, filled when the dialog opens */
+  GtkWidget *loader_row; /* AmlLoaderRow, filled when the dialog opens */
   GtkWidget *directory_row;
   GtkWidget *error_label;
   GtkWidget *create_button;
@@ -51,13 +54,55 @@ update_create_button (AmlCreateInstanceDialog *self)
     g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->name_row)));
   const char *version =
     aml_version_row_get_selected (AML_VERSION_ROW (self->version_row));
+  AmlLoader loader =
+    aml_loader_row_get_loader (AML_LOADER_ROW (self->loader_row));
+  gboolean loader_ready = TRUE;
 
   g_strstrip (name);
+
+  /* A loader that is not vanilla needs a version of it, and its row only
+   * answers when it knows one. */
+  if (loader != AML_LOADER_VANILLA)
+    loader_ready =
+      aml_loader_row_get_version (AML_LOADER_ROW (self->loader_row)) != NULL;
 
   /* The version row answers nothing while it is loading or failed, so
    * the dialog waits until a version from the list is picked. */
   gtk_widget_set_sensitive (self->create_button,
-                            name[0] != '\0' && version != NULL);
+                            name[0] != '\0' && version != NULL &&
+                            loader_ready);
+}
+
+/* A loader needs a Minecraft version to say which of its versions run it,
+   so the loader row is told which version is picked whenever that
+   changes. */
+static void
+on_version_selected (GObject *object G_GNUC_UNUSED,
+                     GParamSpec *pspec G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlCreateInstanceDialog *self = user_data;
+  const char *version =
+    aml_version_row_get_selected (AML_VERSION_ROW (self->version_row));
+
+  aml_loader_row_load (AML_LOADER_ROW (self->loader_row), self->settings,
+                       aml_loader_row_get_loader (AML_LOADER_ROW (
+                                                    self->loader_row)),
+                       NULL, version);
+  update_create_button (self);
+}
+
+static void
+on_loader_changed (AmlLoaderRow *row, gpointer user_data)
+{
+  AmlCreateInstanceDialog *self = user_data;
+  const char *version =
+    aml_version_row_get_selected (AML_VERSION_ROW (self->version_row));
+
+  /* Which loader it is decides whether there is anything to load at all,
+     and which versions it has for the Minecraft version. */
+  aml_loader_row_load (row, self->settings, aml_loader_row_get_loader (row),
+                       NULL, version);
+  update_create_button (self);
 }
 
 static void
@@ -85,6 +130,10 @@ on_create_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
     g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->name_row)));
   const char *version =
     aml_version_row_get_selected (AML_VERSION_ROW (self->version_row));
+  AmlLoader loader =
+    aml_loader_row_get_loader (AML_LOADER_ROW (self->loader_row));
+  const char *loader_version =
+    aml_loader_row_get_version (AML_LOADER_ROW (self->loader_row));
   g_autoptr (GError) error = NULL;
   g_autoptr (AmlInstance) instance = NULL;
 
@@ -98,9 +147,15 @@ on_create_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
       return;
     }
 
-  /* Only vanilla exists until the loaders are added. */
+  if (loader != AML_LOADER_VANILLA && loader_version == NULL)
+    {
+      show_error (self,
+                  "Pick a version of the loader, or pick another loader.");
+      return;
+    }
+
   instance = aml_instance_manager_create (self->manager, name, self->directory,
-                                          version, AML_LOADER_VANILLA, NULL,
+                                          version, loader, loader_version,
                                           &error);
   if (instance == NULL)
     {
@@ -164,11 +219,9 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
    * created; the row fills itself and says so while it works. */
   self->version_row = GTK_WIDGET (aml_version_row_new ());
 
-  const char *loaders[] = { "Vanilla", NULL };
-  GtkWidget *loader_row = adw_combo_row_new ();
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (loader_row), "Loader");
-  adw_combo_row_set_model (ADW_COMBO_ROW (loader_row),
-                           G_LIST_MODEL (gtk_string_list_new (loaders)));
+  /* The loader and the version of it. Filled when the dialog opens and
+     again whenever the Minecraft version above changes. */
+  self->loader_row = GTK_WIDGET (aml_loader_row_new ());
 
   /* What AmlInstanceManager derives when no directory is picked:
    * <data dir>/instances. */
@@ -193,7 +246,7 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
   GtkWidget *group = adw_preferences_group_new ();
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), self->name_row);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), self->version_row);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), loader_row);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), self->loader_row);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), self->directory_row);
 
   GtkWidget *page = adw_preferences_page_new ();
@@ -236,7 +289,9 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
   g_signal_connect (self->name_row, "notify::text", G_CALLBACK (on_input_changed),
                     self);
   g_signal_connect (self->version_row, "notify::selected",
-                    G_CALLBACK (on_input_changed), self);
+                    G_CALLBACK (on_version_selected), self);
+  g_signal_connect (self->loader_row, "changed",
+                    G_CALLBACK (on_loader_changed), self);
 
   update_create_button (self);
 }
@@ -259,6 +314,11 @@ aml_create_instance_dialog_new (AmlInstanceManager *manager,
    * it: the row knows no version of its own. */
   aml_version_row_load (AML_VERSION_ROW (self->version_row), self->settings,
                         NULL);
+
+  /* Vanilla is picked from the start: it is what an instance is without a
+     loader, and it has no versions of its own to wait for. */
+  aml_loader_row_load (AML_LOADER_ROW (self->loader_row), self->settings,
+                       AML_LOADER_VANILLA, NULL, NULL);
 
   return self;
 }

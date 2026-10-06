@@ -19,6 +19,7 @@
 #define DEFAULT_JAVA_PATH_KEY "default-java-path"
 #define LOG_LINE_LIMIT_KEY "log-line-limit"
 #define OPEN_LOGS_AFTER_CRASH_KEY "open-logs-after-crash"
+#define SHOW_UNSTABLE_LOADERS_KEY "show-unstable-loaders"
 
 /* A stored limit below this is not a number a log can be trimmed to. */
 #define LOG_LINE_LIMIT_FLOOR 1
@@ -31,6 +32,7 @@ struct _AmlSettings
   char *default_java_path;
   guint log_line_limit;
   gboolean open_logs_after_crash;
+  gboolean show_unstable_loaders;
   char *filename;
 };
 
@@ -123,6 +125,12 @@ load (AmlSettings *self)
   if (node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
       json_node_get_value_type (node) == G_TYPE_BOOLEAN)
     self->open_logs_after_crash = json_node_get_boolean (node);
+
+  node = json_object_get_member (object, SHOW_UNSTABLE_LOADERS_KEY);
+
+  if (node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
+      json_node_get_value_type (node) == G_TYPE_BOOLEAN)
+    self->show_unstable_loaders = json_node_get_boolean (node);
 }
 
 static gboolean
@@ -161,6 +169,9 @@ save (AmlSettings *self, GError **error)
 
   json_builder_set_member_name (builder, OPEN_LOGS_AFTER_CRASH_KEY);
   json_builder_add_boolean_value (builder, self->open_logs_after_crash);
+
+  json_builder_set_member_name (builder, SHOW_UNSTABLE_LOADERS_KEY);
+  json_builder_add_boolean_value (builder, self->show_unstable_loaders);
 
   json_builder_end_object (builder);
 
@@ -317,6 +328,35 @@ aml_settings_set_open_logs_after_crash (AmlSettings *self,
 
   /* The file did not change, so neither does the answer. */
   self->open_logs_after_crash = previous;
+  return FALSE;
+}
+
+gboolean
+aml_settings_get_show_unstable_loaders (AmlSettings *self)
+{
+  g_return_val_if_fail (AML_IS_SETTINGS (self), FALSE);
+
+  return self->show_unstable_loaders;
+}
+
+gboolean
+aml_settings_set_show_unstable_loaders (AmlSettings *self,
+                                        gboolean     value,
+                                        GError     **error)
+{
+  gboolean previous;
+
+  g_return_val_if_fail (AML_IS_SETTINGS (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  previous = self->show_unstable_loaders;
+  self->show_unstable_loaders = value;
+
+  if (save (self, error))
+    return TRUE;
+
+  /* The file did not change, so neither does the answer. */
+  self->show_unstable_loaders = previous;
   return FALSE;
 }
 

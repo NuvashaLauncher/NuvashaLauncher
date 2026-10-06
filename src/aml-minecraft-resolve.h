@@ -255,6 +255,25 @@ void aml_resolve_version_async (AmlVersionManifest *manifest,
 AmlResolvedVersion *aml_resolve_version_finish (GAsyncResult  *result,
                                                 GError       **error);
 
+/* The same work for a document that is not in @manifest: the loader
+ * profile of an instance, already merged over the Minecraft version it
+ * inherits from, which is what aml_loaders_profile_finish() hands back.
+ *
+ * @version_id is the id of the merged document, which is what the client
+ * jar and the asset index file are named after; @data_dir, @natives_dir
+ * and @asset_base_url mean here what they mean in
+ * aml_resolve_version_async(). @description is not modified. */
+void aml_resolve_description_async (AmlVersionDescription *description,
+                                    const char             *version_id,
+                                    const char             *data_dir,
+                                    const char             *natives_dir,
+                                    const char             *asset_base_url,
+                                    GCancellable           *cancellable,
+                                    AmlResolveProgressFunc   progress,
+                                    gpointer                progress_data,
+                                    GAsyncReadyCallback     callback,
+                                    gpointer                user_data);
+
 G_END_DECLS
 
 #endif /* AML_MINECRAFT_RESOLVE_H */

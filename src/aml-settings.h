@@ -5,13 +5,14 @@
 /* AmlSettings: the small file of choices the whole application shares,
  * <config dir>/AML/config.json.
  *
- * One object, four options so far: whether the version lists also show
+ * One object, five options so far: whether the version lists also show
  * snapshots and the versions Mojang no longer serves, which Java an
- * instance runs with when it picks none, how many lines the log of a
- * running game keeps and whether the log folder is opened when a game
- * crashes. The file is read once when the object is created and written
- * on every change; a file that is missing, unreadable or nonsense leaves
- * the defaults in place instead of failing. */
+ * instance runs with when it picks none, whether the loader lists also
+ * show the versions a loader does not call stable, how many lines the
+ * log of a running game keeps and whether the log folder is opened when
+ * a game crashes. The file is read once when the object is created and
+ * written on every change; a file that is missing, unreadable or
+ * nonsense leaves the defaults in place instead of failing. */
 
 #ifndef AML_SETTINGS_H
 #define AML_SETTINGS_H
@@ -77,6 +78,14 @@ gboolean aml_settings_set_log_line_limit (AmlSettings *self,
 gboolean aml_settings_get_open_logs_after_crash (AmlSettings *self);
 
 gboolean aml_settings_set_open_logs_after_crash (AmlSettings *self,
+                                                 gboolean     value,
+                                                 GError     **error);
+
+/* FALSE unless the file says otherwise, so a loader list holds the
+ * versions that loader calls stable and nothing else. */
+gboolean aml_settings_get_show_unstable_loaders (AmlSettings *self);
+
+gboolean aml_settings_set_show_unstable_loaders (AmlSettings *self,
                                                  gboolean     value,
                                                  GError     **error);
 
