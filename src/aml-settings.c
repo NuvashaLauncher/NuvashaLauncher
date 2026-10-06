@@ -17,6 +17,11 @@
 /* The keys the file holds for now. */
 #define SHOW_SNAPSHOTS_KEY "show-snapshots"
 #define DEFAULT_JAVA_PATH_KEY "default-java-path"
+#define LOG_LINE_LIMIT_KEY "log-line-limit"
+#define OPEN_LOGS_AFTER_CRASH_KEY "open-logs-after-crash"
+
+/* A stored limit below this is not a number a log can be trimmed to. */
+#define LOG_LINE_LIMIT_FLOOR 1
 
 struct _AmlSettings
 {
@@ -24,6 +29,8 @@ struct _AmlSettings
 
   gboolean show_snapshots;
   char *default_java_path;
+  guint log_line_limit;
+  gboolean open_logs_after_crash;
   char *filename;
 };
 
@@ -97,6 +104,25 @@ load (AmlSettings *self)
       self->default_java_path =
         (path != NULL && *path != '\0') ? g_strdup (path) : NULL;
     }
+
+  node = json_object_get_member (object, LOG_LINE_LIMIT_KEY);
+
+  if (node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
+      json_node_get_value_type (node) == G_TYPE_INT64)
+    {
+      gint64 stored = json_node_get_int (node);
+
+      /* A limit that is not a usable number is left at the default
+       * rather than carried into the running log. */
+      if (stored >= LOG_LINE_LIMIT_FLOOR && stored <= G_MAXUINT)
+        self->log_line_limit = (guint) stored;
+    }
+
+  node = json_object_get_member (object, OPEN_LOGS_AFTER_CRASH_KEY);
+
+  if (node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
+      json_node_get_value_type (node) == G_TYPE_BOOLEAN)
+    self->open_logs_after_crash = json_node_get_boolean (node);
 }
 
 static gboolean
@@ -129,6 +155,12 @@ save (AmlSettings *self, GError **error)
     json_builder_add_string_value (builder, self->default_java_path);
   else
     json_builder_add_null_value (builder);
+
+  json_builder_set_member_name (builder, LOG_LINE_LIMIT_KEY);
+  json_builder_add_int_value (builder, (gint64) self->log_line_limit);
+
+  json_builder_set_member_name (builder, OPEN_LOGS_AFTER_CRASH_KEY);
+  json_builder_add_boolean_value (builder, self->open_logs_after_crash);
 
   json_builder_end_object (builder);
 
@@ -222,6 +254,72 @@ aml_settings_set_default_java_path (AmlSettings *self,
   return FALSE;
 }
 
+guint
+aml_settings_get_log_line_limit (AmlSettings *self)
+{
+  g_return_val_if_fail (AML_IS_SETTINGS (self), 0);
+
+  return self->log_line_limit;
+}
+
+gboolean
+aml_settings_set_log_line_limit (AmlSettings *self,
+                                 guint        limit,
+                                 GError     **error)
+{
+  guint previous;
+
+  g_return_val_if_fail (AML_IS_SETTINGS (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (limit < LOG_LINE_LIMIT_FLOOR)
+    {
+      g_set_error (error, AML_SETTINGS_ERROR, AML_SETTINGS_ERROR_INVALID,
+                   "the log of a running game keeps at least %d line",
+                   LOG_LINE_LIMIT_FLOOR);
+      return FALSE;
+    }
+
+  previous = self->log_line_limit;
+  self->log_line_limit = limit;
+
+  if (save (self, error))
+    return TRUE;
+
+  /* The file did not change, so neither does the answer. */
+  self->log_line_limit = previous;
+  return FALSE;
+}
+
+gboolean
+aml_settings_get_open_logs_after_crash (AmlSettings *self)
+{
+  g_return_val_if_fail (AML_IS_SETTINGS (self), FALSE);
+
+  return self->open_logs_after_crash;
+}
+
+gboolean
+aml_settings_set_open_logs_after_crash (AmlSettings *self,
+                                        gboolean     value,
+                                        GError     **error)
+{
+  gboolean previous;
+
+  g_return_val_if_fail (AML_IS_SETTINGS (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  previous = self->open_logs_after_crash;
+  self->open_logs_after_crash = value;
+
+  if (save (self, error))
+    return TRUE;
+
+  /* The file did not change, so neither does the answer. */
+  self->open_logs_after_crash = previous;
+  return FALSE;
+}
+
 static void
 aml_settings_finalize (GObject *object)
 {
@@ -245,4 +343,5 @@ static void
 aml_settings_init (AmlSettings *self)
 {
   self->filename = settings_filename ();
+  self->log_line_limit = AML_SETTINGS_DEFAULT_LOG_LINE_LIMIT;
 }
