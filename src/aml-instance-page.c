@@ -4,17 +4,18 @@
 
 /* AmlInstancePage: the page of one instance.
  *
- * The settings page is where the instance itself is edited so far:
- * every edit is written through AmlInstanceManager, so what the page
- * shows is what instances.json holds. Resource Packs, Shader Packs and
- * Mods say that they are not available yet instead of pretending to
- * work. Logs shows what the game of this instance printed, through the
- * launcher the window shares. Duplicating, opening the folder and
- * deleting run as asynchronous GIO operations and never block the main
- * loop. */
+ * The settings page is where the instance itself is edited: every edit
+ * is written through AmlInstanceManager, so what the page shows is what
+ * instances.json holds. Resource Packs, Shader Packs and Mods are one
+ * content page with a different content type, which reads the folder of
+ * the instance and asks Modrinth only about what fits it. Logs shows
+ * what the game of this instance printed, through the launcher the
+ * window shares. Duplicating, opening the folder and deleting run as
+ * asynchronous GIO operations and never block the main loop. */
 
 #include "aml-instance-page.h"
 
+#include "aml-content-page.h"
 #include "aml-version-row.h"
 #include "aml-java.h"
 #include "aml-java-row.h"
@@ -938,20 +939,6 @@ create_settings_page (AmlInstancePage *self)
   return page;
 }
 
-/* One honest placeholder: no rows, no buttons, nothing that looks
- * like it works. */
-static GtkWidget *
-create_placeholder_page (const char *title)
-{
-  GtkWidget *page = adw_status_page_new ();
-
-  adw_status_page_set_title (ADW_STATUS_PAGE (page), title);
-  adw_status_page_set_description (ADW_STATUS_PAGE (page),
-                                   "This feature is not available yet.");
-
-  return page;
-}
-
 AmlInstancePage *
 aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
                        AmlSettings *settings, AmlLauncher *launcher)
@@ -978,13 +965,16 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
                                        "settings", "Settings",
                                        "preferences-system-symbolic");
   adw_view_stack_add_titled_with_icon (
-    ADW_VIEW_STACK (stack), create_placeholder_page ("Resource Packs"),
+    ADW_VIEW_STACK (stack),
+    GTK_WIDGET (aml_content_page_new (instance, AML_CONTENT_RESOURCE_PACK)),
     "resource-packs", "Resource Packs", "image-x-generic-symbolic");
   adw_view_stack_add_titled_with_icon (
-    ADW_VIEW_STACK (stack), create_placeholder_page ("Shader Packs"),
+    ADW_VIEW_STACK (stack),
+    GTK_WIDGET (aml_content_page_new (instance, AML_CONTENT_SHADER_PACK)),
     "shader-packs", "Shader Packs", "applications-graphics-symbolic");
   adw_view_stack_add_titled_with_icon (
-    ADW_VIEW_STACK (stack), create_placeholder_page ("Mods"),
+    ADW_VIEW_STACK (stack),
+    GTK_WIDGET (aml_content_page_new (instance, AML_CONTENT_MOD)),
     "mods", "Mods", "view-list-symbolic");
 
   /* The logs of the instance are the logs of the launcher the window
