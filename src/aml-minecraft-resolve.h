@@ -114,12 +114,14 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC (AmlResolveFile, aml_resolve_file_free)
 
 /* Every jar this version needs on this machine, in the order of the
  * document: the artifact of each applicable library, followed by its
- * natives jar when it has one.
+ * natives jar when it publishes one the old way.
  *
  * A library whose coordinate carries a classifier that starts with
- * "natives", the way Mojang has written them since 1.20.5, is one of
- * those natives jars: its artifact is unpacked instead of going on the
- * classpath. (transfer full)
+ * "natives", the way Mojang has written them since 1.20.5, is an
+ * ordinary jar as far as this module is concerned: it is fetched and it
+ * goes on the classpath, because that is where LWJGL, JNA and netty
+ * find the natives they unpack themselves. Only the "natives" table of
+ * an older document means a jar to unpack. (transfer full)
  *
  * @libraries_dir is the directory the jars belong below. Each path is
  * the published path of the jar when it has one, and the maven path of

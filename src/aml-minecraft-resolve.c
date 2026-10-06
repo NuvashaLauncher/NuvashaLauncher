@@ -352,31 +352,6 @@ resolve_file_new (const char *path, const char *url, const char *sha1,
 /* Where the jar of @library belongs: its own maven path, which already
    carries the classifier of a natives jar. NULL when the coordinates
    make no path. */
-/* The classifier of a coordinate, or NULL when it has none. */
-static char *
-coordinate_classifier (const char *coordinate)
-{
-  g_auto (GStrv) parts = g_strsplit (coordinate, ":", -1);
-
-  return g_strv_length (parts) == 4 ? g_steal_pointer (&parts[3]) : NULL;
-}
-
-/* TRUE when the library is a natives jar rather than one for the
-   classpath.
- *
- * Two spellings exist. The older one keeps the jar of the library in
-   "downloads.artifact" and publishes the natives of this machine under a
-   classifier of the "natives" table. The newer one (1.20.5 onwards)
- * writes the natives as a library of their own whose coordinate carries
-   the classifier, with the rules of that platform, and nothing else. */
-static gboolean
-library_is_natives (const AmlLibrary *library)
-{
-  g_autofree char *classifier = coordinate_classifier (library->name);
-
-  return classifier != NULL && g_str_has_prefix (classifier, "natives");
-}
-
 static char *
 library_file_path (const AmlLibrary *library, const char *classifier,
                    const char *libraries_dir)
@@ -462,12 +437,20 @@ aml_resolve_library_files (AmlVersionDescription *description,
       if (!aml_library_allowed (library, context))
         continue;
 
+      /* The jar of the library goes on the classpath, whatever its
+         coordinate says. Since 1.20.5 the natives are published as
+         libraries of their own whose coordinate carries the classifier,
+         and those jars belong on the classpath too: the document points
+         LWJGL, JNA and netty at the directories where they unpack
+         themselves out of the jars they find there. */
       if (library->artifact != NULL)
         add_file (files, library, library->artifact, NULL, libraries_dir,
-                  library_is_natives (library));
+                  FALSE);
 
-      /* The older spelling: the natives of this machine sit under a
-         classifier the library points at. */
+      /* The older spelling: the library keeps its own jar in
+         "downloads.artifact" and publishes the natives of this machine
+         under a classifier of the "natives" table. Those are unpacked
+         into java.library.path instead of being run from. */
       classifier = aml_resolve_native_classifier (library, context);
 
       if (classifier != NULL)
