@@ -89,6 +89,11 @@ AmlAccount *aml_account_new_offline (const char *name, GError **error);
 /* (transfer full) */
 AmlAccount *aml_account_copy (const AmlAccount *account);
 
+/* An account as a boxed type, which is what makes it something a signal
+ * can carry: the receiver is handed a copy of its own. */
+#define AML_TYPE_ACCOUNT (aml_account_get_type ())
+GType aml_account_get_type (void);
+
 /* What a user reads: "Microsoft" or "Offline". Never NULL. */
 const char *aml_account_type_name (AmlAccountType type);
 

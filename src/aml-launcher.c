@@ -27,6 +27,7 @@
 
 #include "aml-launcher.h"
 
+#include "aml-auth-microsoft.h"
 #include "aml-java.h"
 #include "aml-loaders.h"
 #include "aml-minecraft-resolve.h"
@@ -53,14 +54,15 @@ aml_launch_error_quark (void)
 /* One table for the enum type of the signal parameter and the names the
  * enum members are spelled with. */
 static const GEnumValue launch_state_values[] = {
-  { AML_LAUNCH_PREPARING,   "AML_LAUNCH_PREPARING",   "Preparing"   },
-  { AML_LAUNCH_DOWNLOADING, "AML_LAUNCH_DOWNLOADING", "Downloading" },
-  { AML_LAUNCH_LAUNCHING,   "AML_LAUNCH_LAUNCHING",   "Launching"   },
-  { AML_LAUNCH_RUNNING,     "AML_LAUNCH_RUNNING",     "Running"     },
-  { AML_LAUNCH_STOPPING,    "AML_LAUNCH_STOPPING",    "Stopping"    },
-  { AML_LAUNCH_STOPPED,     "AML_LAUNCH_STOPPED",     "Stopped"     },
-  { AML_LAUNCH_CRASHED,     "AML_LAUNCH_CRASHED",     "Crashed"     },
-  { AML_LAUNCH_FAILED,      "AML_LAUNCH_FAILED",      "Failed"      },
+  { AML_LAUNCH_PREPARING,      "AML_LAUNCH_PREPARING",      "Preparing"     },
+  { AML_LAUNCH_DOWNLOADING,    "AML_LAUNCH_DOWNLOADING",    "Downloading"   },
+  { AML_LAUNCH_LAUNCHING,      "AML_LAUNCH_LAUNCHING",      "Launching"     },
+  { AML_LAUNCH_RUNNING,        "AML_LAUNCH_RUNNING",        "Running"       },
+  { AML_LAUNCH_STOPPING,       "AML_LAUNCH_STOPPING",       "Stopping"      },
+  { AML_LAUNCH_STOPPED,        "AML_LAUNCH_STOPPED",        "Stopped"       },
+  { AML_LAUNCH_CRASHED,        "AML_LAUNCH_CRASHED",        "Crashed"       },
+  { AML_LAUNCH_FAILED,         "AML_LAUNCH_FAILED",         "Failed"        },
+  { AML_LAUNCH_NEEDS_SIGN_IN,  "AML_LAUNCH_NEEDS_SIGN_IN",  "Needs sign-in" },
   { 0, NULL, NULL }
 };
 
@@ -100,35 +102,35 @@ aml_launch_state_is_busy (AmlLaunchState state)
 }
 
 /* ---------------------------------------------------------- *
- * The offline UUID
+ * The session
  * ---------------------------------------------------------- */
 
-/* The UUID java hands out for an offline player: the MD5 of
- * "OfflinePlayer:<name>" as a name based UUID, which means the version
- * nibble is 3 and the variant bits are the IETF ones. */
-char *
-aml_launch_offline_uuid (const char *name)
+/* What the game is told about the player, in the four words the version
+ * document writes its placeholders for.
+ *
+ * An offline account has no token of its own and the game is told the one
+ * it cannot use, so that the argument is there with or without a real
+ * account behind it: that argument is also what tells the game the
+ * session is not a real one. */
+AmlLaunchSession
+aml_launch_session_for (const AmlAccount *account)
 {
-  g_autofree char *seed = NULL;
-  g_autoptr (GChecksum) checksum = NULL;
-  guint8 digest[16];
-  gsize length = sizeof digest;
+  AmlLaunchSession session = { NULL, NULL, NULL, NULL };
 
-  g_return_val_if_fail (name != NULL, NULL);
+  g_return_val_if_fail (account != NULL, session);
 
-  seed = g_strconcat ("OfflinePlayer:", name, NULL);
-  checksum = g_checksum_new (G_CHECKSUM_MD5);
-  g_checksum_update (checksum, (const guchar *) seed, (gssize) strlen (seed));
-  g_checksum_get_digest (checksum, digest, &length);
+  session.name = account->name != NULL ? account->name : "";
+  session.uuid = account->uuid != NULL ? account->uuid : "";
+  session.user_type = account->type == AML_ACCOUNT_MICROSOFT
+                        ? AML_LAUNCH_MICROSOFT_USER_TYPE
+                        : AML_LAUNCH_OFFLINE_USER_TYPE;
+  session.access_token = account->type == AML_ACCOUNT_MICROSOFT &&
+                                 account->access_token != NULL &&
+                                 *account->access_token != '\0'
+                           ? account->access_token
+                           : AML_LAUNCH_OFFLINE_TOKEN;
 
-  digest[6] = (digest[6] & 0x0f) | 0x30; /* version 3 */
-  digest[8] = (digest[8] & 0x3f) | 0x80; /* IETF variant */
-
-  return g_strdup_printf (
-    "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
-    digest[0], digest[1], digest[2], digest[3], digest[4], digest[5],
-    digest[6], digest[7], digest[8], digest[9], digest[10], digest[11],
-    digest[12], digest[13], digest[14], digest[15]);
+  return session;
 }
 
 /* ---------------------------------------------------------- *
@@ -237,6 +239,7 @@ add_shell_words (GPtrArray *argv, const char *line, GError **error)
 
 GPtrArray *
 aml_launch_build_arguments (const AmlResolvedVersion *resolved,
+                            const AmlLaunchSession   *session,
                             const char             *java_executable,
                             const char             *game_directory,
                             const char             *jvm_args,
@@ -244,9 +247,9 @@ aml_launch_build_arguments (const AmlResolvedVersion *resolved,
 {
   g_autoptr (GHashTable) placeholders = NULL;
   g_autoptr (GPtrArray) argv = NULL;
-  g_autofree char *uuid = NULL;
 
   g_return_val_if_fail (resolved != NULL, NULL);
+  g_return_val_if_fail (session != NULL, NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
   if (resolved->main_class == NULL || resolved->main_class[0] == '\0')
@@ -258,19 +261,16 @@ aml_launch_build_arguments (const AmlResolvedVersion *resolved,
       return NULL;
     }
 
-  uuid = aml_launch_offline_uuid (AML_LAUNCH_OFFLINE_NAME);
   placeholders = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
-  /* The session, which is an offline one until accounts exist. */
-  put_placeholder (placeholders, "auth_player_name",
-                   AML_LAUNCH_OFFLINE_NAME);
-  put_placeholder (placeholders, "auth_uuid", uuid);
-  put_placeholder (placeholders, "auth_access_token",
-                   AML_LAUNCH_OFFLINE_TOKEN);
+  /* Who the player is: the account, not a name AML made up. */
+  put_placeholder (placeholders, "auth_player_name", session->name);
+  put_placeholder (placeholders, "auth_uuid", session->uuid);
+  put_placeholder (placeholders, "auth_access_token", session->access_token);
   put_placeholder (placeholders, "auth_session", "");
   put_placeholder (placeholders, "auth_xuid", "");
   put_placeholder (placeholders, "clientid", "");
-  put_placeholder (placeholders, "user_type", AML_LAUNCH_OFFLINE_USER_TYPE);
+  put_placeholder (placeholders, "user_type", session->user_type);
   put_placeholder (placeholders, "user_properties", "{}");
   put_placeholder (placeholders, "launcher_name", AML_LAUNCHER_NAME);
   put_placeholder (placeholders, "launcher_version", AML_LAUNCHER_VERSION);
@@ -459,6 +459,11 @@ struct _AmlLauncher
   AmlResolvedVersion *resolved;
   GSubprocess *process;
 
+  /* The accounts a launch plays as. The active one of them is read when
+     the command line is built, so a token that was refreshed a moment
+     earlier is the one the game is run with. */
+  AmlAccounts *accounts;
+
   /* The Java this launch chose. A loader that has to be installed first
    * needs one before the game is resolved, so the choice is made once and
    * kept. */
@@ -485,6 +490,20 @@ static guint aml_launcher_signals[AML_LAUNCHER_N_SIGNALS];
 
 static void on_resolved (GObject *source, GAsyncResult *result,
                          gpointer user_data);
+
+static void launcher_needs_sign_in (AmlLauncher *self, const char *reason);
+
+/* The account a launch plays as, or NULL when there is none. A launcher
+ * made without a store is a launcher with no account, which is what a
+ * test that drives one step at a time is. */
+static AmlAccount *
+active_account (AmlLauncher *self)
+{
+  if (self->accounts == NULL)
+    return NULL;
+
+  return aml_accounts_get_active (self->accounts);
+}
 
 /* ---------------------------------------------------------- *
  * The log
@@ -1118,13 +1137,29 @@ run_the_game (AmlLauncher *self)
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
   g_autofree char *jvm_args = NULL;
+  AmlAccount *account = NULL;
+  AmlLaunchSession session;
 
   if (self->stop_requested || self->resolved == NULL)
     return;
 
+  /* The active account, read here rather than when the launch was asked
+     for: it may be one that was signed in again while the game was still
+     being downloaded. */
+  account = active_account (self);
+
+  if (account == NULL)
+    {
+      launcher_needs_sign_in (self, "the account is gone");
+      return;
+    }
+
+  session = aml_launch_session_for (account);
+
   g_object_get (self->instance, "jvm-args", &jvm_args, NULL);
 
-  argv = aml_launch_build_arguments (self->resolved, self->java_executable,
+  argv = aml_launch_build_arguments (self->resolved, &session,
+                                     self->java_executable,
                                      self->game_directory, jvm_args, &error);
 
   if (argv == NULL)
@@ -1132,6 +1167,13 @@ run_the_game (AmlLauncher *self)
       launcher_failed (self, error->message);
       return;
     }
+
+  /* Who the game is about to run as. The token is not in this line: the
+     command line that is logged by the spawn carries it redacted, and
+     this one is about the account. */
+  log_line (self, TAG_STATE, "playing as %s (%s)",
+            account->name != NULL ? account->name : "an account",
+            aml_account_type_name (account->type));
 
   log_line (self, TAG_STATE, "Java %d at %s", self->java_major_version,
             self->java_executable);
@@ -1585,6 +1627,128 @@ on_manifest_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
  * Starting and stopping
  * ---------------------------------------------------------- */
 
+/* The first request of a launch: the version manifest, and from there
+ * everything a launch needs before the game can start. It is a function
+ * of its own because an account that had to be signed in again carries
+ * on from here with the token it just got. */
+static void
+start_preparing (AmlLauncher *self)
+{
+  log_line (self, TAG_STATE, "preparing Minecraft %s",
+            self->version != NULL ? self->version : "this instance");
+
+  aml_version_manifest_fetch_async (AML_VERSION_MANIFEST_URL,
+                                    self->cancellable, on_manifest_ready,
+                                    g_object_ref (self));
+}
+
+/* A sign-in that has to happen again, said as a state of its own: nothing
+ * is running, nothing is broken, and the account is what the user has to
+ * take care of. A token that cannot be traded for a new one is dropped
+ * from the store, so that the account says it needs a sign-in wherever it
+ * is shown instead of pretending to be ready. */
+static void
+launcher_needs_sign_in (AmlLauncher *self, const char *reason)
+{
+  AmlAccount *account = active_account (self);
+  g_autofree char *detail = NULL;
+
+  if (account != NULL)
+    {
+      AmlAccount *without = aml_account_copy (account);
+      g_clear_pointer (&without->access_token, g_free);
+      g_clear_pointer (&without->refresh_token, g_free);
+      without->expires_at = 0;
+
+      /* A store that cannot be written is not a launch that is broken:
+         the state still says what the user has to do. */
+      aml_accounts_update (self->accounts, without, NULL);
+      aml_account_free (without);
+    }
+
+  detail = g_strdup_printf ("%s: open the users menu and sign in as \"%s\" "
+                            "again",
+                            reason,
+                            account != NULL && account->name != NULL
+                              ? account->name
+                              : "the account");
+
+  log_line (self, TAG_STATE, "%s", detail);
+  set_state (self, AML_LAUNCH_NEEDS_SIGN_IN, detail);
+}
+
+/* A new token for an account whose old one has run out. */
+static void
+on_account_refreshed (GObject      *source G_GNUC_UNUSED,
+                      GAsyncResult *result,
+                      gpointer      user_data)
+{
+  g_autoptr (AmlLauncher) self = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlAccount) account = NULL;
+
+  account = aml_auth_refresh_finish (result, &error);
+
+  if (self->stop_requested)
+    return;
+
+  if (account == NULL)
+    {
+      if (error != NULL &&
+          g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+        {
+          log_line (self, TAG_STATE,
+                    "the launch was cancelled before the game started");
+          set_state (self, AML_LAUNCH_STOPPED, NULL);
+          return;
+        }
+
+      launcher_needs_sign_in (
+          self, error != NULL ? error->message : "the account could not be "
+                                                     "signed in again");
+      return;
+    }
+
+  /* The refreshed token is what the rest of the launch runs with, and it
+     is stored so that the next launch does not have to ask again. */
+  if (!aml_accounts_update (self->accounts, account, &error))
+    log_line (self, TAG_STATE,
+              "the refreshed token could not be stored: %s", error->message);
+
+  start_preparing (self);
+}
+
+/* The account a launch runs as, or the reason there is none. An account
+ * whose token has run out is signed in again before anything is
+ * downloaded, because a game that is going to need a token later can
+ * fail now in words instead. */
+static gboolean
+account_for_launch (AmlLauncher *self)
+{
+  AmlAccount *account = active_account (self);
+
+  if (account == NULL)
+    {
+      launcher_failed (self, "there is no account to play as: open the users "
+                             "menu in the header and add one");
+      return FALSE;
+    }
+
+  if (account->type == AML_ACCOUNT_OFFLINE)
+    return TRUE;
+
+  if (aml_account_token_is_valid (account, g_get_real_time () / 1000000))
+    return TRUE;
+
+  log_line (self, TAG_STATE, "signing \"%s\" in again before launching",
+            account->name != NULL ? account->name : "the account");
+
+  aml_auth_refresh_async (account, self->cancellable, on_account_refreshed,
+                          g_object_ref (self));
+
+  return FALSE;
+}
+
 void
 aml_launcher_start (AmlLauncher *self)
 {
@@ -1621,12 +1785,14 @@ aml_launcher_start (AmlLauncher *self)
   self->java_major_version = 0;
 
   set_state (self, AML_LAUNCH_PREPARING, self->version);
-  log_line (self, TAG_STATE, "preparing Minecraft %s",
-            self->version != NULL ? self->version : "this instance");
 
-  aml_version_manifest_fetch_async (AML_VERSION_MANIFEST_URL,
-                                    self->cancellable, on_manifest_ready,
-                                    g_object_ref (self));
+  /* Without an account there is nobody to play as, and nothing to
+     download for. An account that has to be signed in again is signed in
+     again first, and carries on from here when it has one. */
+  if (!account_for_launch (self))
+    return;
+
+  start_preparing (self);
 }
 
 void
@@ -1715,12 +1881,15 @@ aml_launcher_get_crash_report_directory (AmlLauncher *self)
 }
 
 AmlLauncher *
-aml_launcher_new (AmlInstance *instance, AmlSettings *settings)
+aml_launcher_new (AmlInstance *instance,
+                  AmlSettings *settings,
+                  AmlAccounts *accounts)
 {
   AmlLauncher *self;
 
   g_return_val_if_fail (AML_IS_INSTANCE (instance), NULL);
   g_return_val_if_fail (settings == NULL || AML_IS_SETTINGS (settings), NULL);
+  g_return_val_if_fail (accounts == NULL || AML_IS_ACCOUNTS (accounts), NULL);
 
   self = g_object_new (AML_TYPE_LAUNCHER, NULL);
   self->instance = g_object_ref (instance);
@@ -1728,9 +1897,20 @@ aml_launcher_new (AmlInstance *instance, AmlSettings *settings)
   if (settings != NULL)
     self->settings = g_object_ref (settings);
 
+  if (accounts != NULL)
+    self->accounts = g_object_ref (accounts);
+
   g_object_get (instance, "directory", &self->game_directory, NULL);
 
   return self;
+}
+
+AmlAccounts *
+aml_launcher_get_accounts (AmlLauncher *self)
+{
+  g_return_val_if_fail (AML_IS_LAUNCHER (self), NULL);
+
+  return self->accounts;
 }
 
 static void
@@ -1756,6 +1936,7 @@ aml_launcher_finalize (GObject *object)
   g_clear_pointer (&self->resolved, aml_resolved_version_free);
   g_clear_object (&self->instance);
   g_clear_object (&self->settings);
+  g_clear_object (&self->accounts);
   g_clear_pointer (&self->lines, g_ptr_array_unref);
   g_free (self->detail);
   g_free (self->version);
