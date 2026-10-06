@@ -1,0 +1,1541 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
+/* The Modrinth API v2, read with the download module's asynchronous
+ * requests.
+ *
+ * The endpoints this uses, all of them GET unless said otherwise:
+ *
+ *   /search                       what a Browse page lists
+ *   /project/<id>                 what a detail page shows
+ *   /project/<id>/version         what a version list is read from,
+ *                                 already narrowed by game_versions
+ *                                 and loaders
+ *   /version_file/<sha1>          which version a file on disk is
+ *   /version_file/<sha1>/update   POST, whether that file has something
+ *                                 newer that fits this instance
+ *
+ * What the server narrows is checked again here: a body only ever
+ * becomes versions that fit the Minecraft version and the loader that
+ * were asked for. That is what keeps an incompatible version out of
+ * every list, and it is one rule in one place,
+ * aml_modrinth_version_fits(), rather than a copy of it per caller.
+ *
+ * Every function is called from the thread-default main context that
+ * answers it, normally the GTK main loop, and nothing here blocks it:
+ * the requests are the download module's, and the only work done on the
+ * main loop is parsing a body that has already arrived. */
+
+#include "aml-modrinth.h"
+
+#include "aml-download.h"
+
+#include <json-glib/json-glib.h>
+#include <string.h>
+
+GQuark
+aml_modrinth_error_quark (void)
+{
+  return g_quark_from_static_string ("aml-modrinth-error");
+}
+
+/* ---------------------------------------------------------- *
+ * The kinds of content
+ * ---------------------------------------------------------- */
+
+const char *
+aml_content_type_to_string (AmlContentType type)
+{
+  switch (type)
+    {
+    case AML_CONTENT_RESOURCE_PACK:
+      return "resourcepack";
+    case AML_CONTENT_SHADER_PACK:
+      return "shader";
+    case AML_CONTENT_MOD:
+    default:
+      return "mod";
+    }
+}
+
+const char *
+aml_content_type_title (AmlContentType type)
+{
+  switch (type)
+    {
+    case AML_CONTENT_RESOURCE_PACK:
+      return "Resource Packs";
+    case AML_CONTENT_SHADER_PACK:
+      return "Shader Packs";
+    case AML_CONTENT_MOD:
+    default:
+      return "Mods";
+    }
+}
+
+const char *
+aml_content_type_folder (AmlContentType type)
+{
+  switch (type)
+    {
+    case AML_CONTENT_RESOURCE_PACK:
+      return "resourcepacks";
+    case AML_CONTENT_SHADER_PACK:
+      return "shaderpacks";
+    case AML_CONTENT_MOD:
+    default:
+      return "mods";
+    }
+}
+
+gboolean
+aml_content_type_needs_loader (AmlContentType type)
+{
+  return type == AML_CONTENT_MOD;
+}
+
+const char *
+aml_content_type_extension (AmlContentType type)
+{
+  return aml_content_type_needs_loader (type) ? ".jar" : ".zip";
+}
+
+const char *
+aml_content_type_icon (AmlContentType type)
+{
+  switch (type)
+    {
+    case AML_CONTENT_RESOURCE_PACK:
+      return "image-x-generic-symbolic";
+    case AML_CONTENT_SHADER_PACK:
+      return "applications-graphics-symbolic";
+    case AML_CONTENT_MOD:
+    default:
+      return "view-list-symbolic";
+    }
+}
+
+/* ---------------------------------------------------------- *
+ * Reading a JSON answer
+ * ---------------------------------------------------------- */
+
+static JsonObject *
+object_of (JsonNode *node)
+{
+  if (node == NULL || !JSON_NODE_HOLDS_OBJECT (node))
+    return NULL;
+
+  return json_node_get_object (node);
+}
+
+static JsonNode *
+root_node (const char *json, gssize length, GError **error)
+{
+  g_autoptr (JsonParser) parser = json_parser_new ();
+  g_autoptr (GError) parse_error = NULL;
+  JsonNode *root = NULL;
+
+  if (!json_parser_load_from_data (parser, json != NULL ? json : "",
+                                   json != NULL ? length : 0, &parse_error))
+    {
+      g_propagate_error (error, parse_error);
+      return NULL;
+    }
+
+  root = json_parser_get_root (parser);
+
+  if (root == NULL)
+    {
+      g_set_error_literal (error, AML_MODRINTH_ERROR,
+                           AML_MODRINTH_ERROR_PARSE,
+                           "the answer holds no JSON");
+      return NULL;
+    }
+
+  /* The copy is what outlives the parser. */
+  return json_node_copy (root);
+}
+
+/* The string @name of the object @node, or NULL. A field that is there
+ * but is not a string counts as absent, so a malformed answer cannot
+ * reach a list as an empty string where words were meant. */
+static char *
+object_string (JsonNode *node, const char *name)
+{
+  JsonNode *member = json_object_get_member (object_of (node), name);
+
+  if (member == NULL || !JSON_NODE_HOLDS_VALUE (member) ||
+      json_node_get_value_type (member) != G_TYPE_STRING)
+    return NULL;
+
+  return json_node_dup_string (member);
+}
+
+static gboolean
+object_boolean (JsonNode *node, const char *name, gboolean fallback)
+{
+  JsonNode *member = json_object_get_member (object_of (node), name);
+
+  if (member == NULL || !JSON_NODE_HOLDS_VALUE (member) ||
+      json_node_get_value_type (member) != G_TYPE_BOOLEAN)
+    return fallback;
+
+  return json_node_get_boolean (member);
+}
+
+static gint64
+object_int (JsonNode *node, const char *name, gint64 fallback)
+{
+  JsonNode *member = json_object_get_member (object_of (node), name);
+  GType type = G_TYPE_INVALID;
+
+  if (member == NULL || !JSON_NODE_HOLDS_VALUE (member))
+    return fallback;
+
+  type = json_node_get_value_type (member);
+
+  if (type != G_TYPE_INT64 && type != G_TYPE_DOUBLE)
+    return fallback;
+
+  return (gint64) json_node_get_int (member);
+}
+
+/* Every string of the array @name, as a GPtrArray of char* the caller
+ * owns. Never NULL: a field that is absent is an empty list. */
+static GPtrArray *
+object_string_array (JsonNode *node, const char *name)
+{
+  GPtrArray *strings = g_ptr_array_new_with_free_func (g_free);
+  JsonNode *member = json_object_get_member (object_of (node), name);
+
+  if (member == NULL || !JSON_NODE_HOLDS_ARRAY (member))
+    return strings;
+
+  {
+    JsonArray *array = json_node_get_array (member);
+    guint length = json_array_get_length (array);
+
+    for (guint i = 0; i < length; i++)
+      {
+        JsonNode *item = json_array_get_element (array, i);
+
+        if (JSON_NODE_HOLDS_VALUE (item) &&
+            json_node_get_value_type (item) == G_TYPE_STRING)
+          g_ptr_array_add (strings, json_node_dup_string (item));
+      }
+  }
+
+  return strings;
+}
+
+static gboolean
+string_array_has (GPtrArray *strings, const char *value)
+{
+  if (strings == NULL || value == NULL)
+    return FALSE;
+
+  for (guint i = 0; i < strings->len; i++)
+    {
+      if (g_strcmp0 (g_ptr_array_index (strings, i), value) == 0)
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
+/* One value as the JSON array Modrinth takes the narrowings as. */
+static char *
+string_array_json (const char *value)
+{
+  g_autoptr (JsonBuilder) builder = json_builder_new ();
+  g_autoptr (JsonNode) root = NULL;
+
+  json_builder_begin_array (builder);
+  json_builder_add_string_value (builder, value != NULL ? value : "");
+  json_builder_end_array (builder);
+  root = json_builder_get_root (builder);
+
+  return json_to_string (root, FALSE);
+}
+
+/* ---------------------------------------------------------- *
+ * Projects
+ * ---------------------------------------------------------- */
+
+void
+aml_modrinth_project_free (AmlModrinthProject *project)
+{
+  if (project == NULL)
+    return;
+
+  g_free (project->project_id);
+  g_free (project->slug);
+  g_free (project->title);
+  g_free (project->description);
+  g_free (project->author);
+  g_free (project->icon_url);
+  g_free (project);
+}
+
+/* One entry of a /search answer. Everything a result row shows is here,
+ * so that listing a page of results costs no request per row. */
+static AmlModrinthProject *
+project_from_hit (JsonNode *hit)
+{
+  AmlModrinthProject *project = g_new0 (AmlModrinthProject, 1);
+
+  project->project_id = object_string (hit, "project_id");
+  project->slug = object_string (hit, "slug");
+  project->title = object_string (hit, "title");
+  project->description = object_string (hit, "description");
+  project->author = object_string (hit, "author");
+  project->icon_url = object_string (hit, "icon_url");
+  project->downloads = (guint64) object_int (hit, "downloads", 0);
+  project->followers = (guint64) object_int (hit, "follows", 0);
+
+  if (project->title == NULL)
+    project->title = g_strdup (project->slug != NULL ? project->slug : "");
+
+  if (project->description == NULL)
+    project->description = g_strdup ("");
+
+  if (project->author == NULL)
+    project->author = g_strdup ("");
+
+  if (project->project_id == NULL)
+    project->project_id = g_strdup (project->slug != NULL ? project->slug : "");
+
+  return project;
+}
+
+void
+aml_modrinth_details_free (AmlModrinthDetails *details)
+{
+  if (details == NULL)
+    return;
+
+  g_free (details->project_id);
+  g_free (details->slug);
+  g_free (details->title);
+  g_free (details->description);
+  g_free (details->author);
+  g_free (details->icon_url);
+  g_free (details->body);
+  g_free (details->license);
+  g_free (details->source_url);
+  g_free (details->issues_url);
+  g_free (details->wiki_url);
+  g_clear_pointer (&details->game_versions, g_ptr_array_unref);
+  g_clear_pointer (&details->categories, g_ptr_array_unref);
+  g_clear_pointer (&details->loaders, g_ptr_array_unref);
+  g_free (details);
+}
+
+AmlModrinthDetails *
+aml_modrinth_details_from_json (const char *json, gssize length,
+                                GError **error)
+{
+  g_autoptr (JsonNode) root = root_node (json, length, error);
+  JsonNode *team = NULL; /* borrowed from @root */
+  AmlModrinthDetails *details = NULL;
+
+  if (root == NULL)
+    return NULL;
+
+  details = g_new0 (AmlModrinthDetails, 1);
+  details->project_id = object_string (root, "id");
+  details->slug = object_string (root, "slug");
+  details->title = object_string (root, "title");
+  details->description = object_string (root, "description");
+  details->body = object_string (root, "body");
+  details->icon_url = object_string (root, "icon_url");
+  details->source_url = object_string (root, "source_url");
+  details->issues_url = object_string (root, "issues_url");
+  details->wiki_url = object_string (root, "wiki_url");
+  details->downloads = (guint64) object_int (root, "downloads", 0);
+  details->followers = (guint64) object_int (root, "followers", 0);
+  details->game_versions = object_string_array (root, "game_versions");
+  details->categories = object_string_array (root, "categories");
+  details->loaders = object_string_array (root, "loaders");
+
+  /* The license is an object with an id, not a string. */
+  details->license =
+    object_string (json_object_get_member (object_of (root), "license"), "id");
+
+  /* A search answer names an author and a project answer holds the team
+   * instead, so that a row and a detail page show the same name. */
+  details->author = object_string (root, "author");
+
+  if (details->author == NULL)
+    {
+      team = json_object_get_member (object_of (root), "team");
+
+      if (team != NULL && JSON_NODE_HOLDS_ARRAY (team) &&
+          json_array_get_length (json_node_get_array (team)) > 0)
+        details->author = object_string (
+            json_array_get_element (json_node_get_array (team), 0), "name");
+    }
+
+  if (details->project_id == NULL)
+    {
+      g_set_error_literal (error, AML_MODRINTH_ERROR,
+                           AML_MODRINTH_ERROR_PARSE,
+                           "the project answer holds no id");
+      aml_modrinth_details_free (details);
+      return NULL;
+    }
+
+  if (details->title == NULL)
+    details->title = g_strdup (details->project_id);
+
+  if (details->description == NULL)
+    details->description = g_strdup ("");
+
+  if (details->body == NULL)
+    details->body = g_strdup (details->description);
+
+  if (details->author == NULL)
+    details->author = g_strdup ("");
+
+  return details;
+}
+
+/* ---------------------------------------------------------- *
+ * Searches
+ * ---------------------------------------------------------- */
+
+void
+aml_modrinth_search_free (AmlModrinthSearch *search)
+{
+  if (search == NULL)
+    return;
+
+  g_free (search->query);
+  g_free (search->minecraft_version);
+  g_free (search->loader);
+  g_clear_pointer (&search->categories, g_ptr_array_unref);
+  g_free (search);
+}
+
+void
+aml_modrinth_results_free (AmlModrinthResults *results)
+{
+  if (results == NULL)
+    return;
+
+  g_clear_pointer (&results->projects, g_ptr_array_unref);
+  g_free (results);
+}
+
+/* One facet: an array with "name:value" in it. Modrinth reads an AND
+ * between the arrays and an OR inside one. */
+static void
+facet_add (GPtrArray *facets, const char *name, const char *value)
+{
+  g_autoptr (GPtrArray) inner = g_ptr_array_new_with_free_func (g_free);
+  g_autofree char *facet = g_strdup_printf ("%s:%s", name, value);
+
+  g_ptr_array_add (inner, g_steal_pointer (&facet));
+  g_ptr_array_add (facets, g_steal_pointer (&inner));
+}
+
+char *
+aml_modrinth_facets (const AmlModrinthSearch *search)
+{
+  g_autoptr (GPtrArray) facets =
+    g_ptr_array_new_with_free_func ((GDestroyNotify) g_ptr_array_unref);
+  g_autoptr (JsonBuilder) builder = json_builder_new ();
+  g_autoptr (JsonNode) root = NULL;
+
+  g_return_val_if_fail (search != NULL, g_strdup ("[[\"project_type:mod\"]]"));
+
+  facet_add (facets, "project_type", aml_content_type_to_string (search->type));
+
+  if (search->minecraft_version != NULL && *search->minecraft_version != '\0')
+    facet_add (facets, "versions", search->minecraft_version);
+
+  /* Only a mod is narrowed by loader: the game loads a resource pack
+   * and a shader pack itself, whatever runs it. */
+  if (aml_content_type_needs_loader (search->type) && search->loader != NULL &&
+      *search->loader != '\0')
+    facet_add (facets, "categories", search->loader);
+
+  if (search->categories != NULL)
+    {
+      for (guint i = 0; i < search->categories->len; i++)
+        {
+          const char *category = g_ptr_array_index (search->categories, i);
+
+          if (category != NULL && *category != '\0')
+            facet_add (facets, "categories", category);
+        }
+    }
+
+  /* The builder holds one root, so the outer array is opened once and
+   * every facet goes into it. */
+  json_builder_begin_array (builder);
+
+  for (guint i = 0; i < facets->len; i++)
+    {
+      GPtrArray *inner = g_ptr_array_index (facets, i);
+
+      json_builder_begin_array (builder);
+
+      for (guint j = 0; j < inner->len; j++)
+        json_builder_add_string_value (builder, g_ptr_array_index (inner, j));
+
+      json_builder_end_array (builder);
+    }
+
+  json_builder_end_array (builder);
+
+  root = json_builder_get_root (builder);
+
+  return json_to_string (root, FALSE);
+}
+
+char *
+aml_modrinth_search_url (const AmlModrinthSearch *search)
+{
+  g_autofree char *facets = NULL;
+  g_autofree char *query = NULL;
+  g_autofree char *escaped = NULL;
+
+  g_return_val_if_fail (search != NULL, NULL);
+
+  facets = aml_modrinth_facets (search);
+  query = g_uri_escape_string (search->query != NULL ? search->query : "",
+                              NULL, FALSE);
+  escaped = g_uri_escape_string (facets, NULL, FALSE);
+
+  return g_strdup_printf (
+      AML_MODRINTH_URL "/search?query=%s&facets=%s&offset=%u&limit=%u", query,
+      escaped, search->offset, search->limit > 0 ? search->limit : 20);
+}
+
+AmlModrinthResults *
+aml_modrinth_results_from_json (const char *json, gssize length,
+                                GError **error)
+{
+  g_autoptr (JsonNode) root = root_node (json, length, error);
+  AmlModrinthResults *results = NULL;
+  JsonNode *hits = NULL;
+
+  if (root == NULL)
+    return NULL;
+
+  hits = json_object_get_member (object_of (root), "hits");
+
+  if (hits == NULL || !JSON_NODE_HOLDS_ARRAY (hits))
+    {
+      g_set_error_literal (error, AML_MODRINTH_ERROR,
+                           AML_MODRINTH_ERROR_PARSE,
+                           "the search answer holds no hits");
+      return NULL;
+    }
+
+  results = g_new0 (AmlModrinthResults, 1);
+  results->projects =
+    g_ptr_array_new_with_free_func ((GDestroyNotify) aml_modrinth_project_free);
+  results->total_hits = (guint64) object_int (root, "total_hits", 0);
+
+  {
+    JsonArray *array = json_node_get_array (hits);
+    guint length = json_array_get_length (array);
+
+    for (guint i = 0; i < length; i++)
+      {
+        JsonNode *hit = json_array_get_element (array, i);
+
+        /* A hit that is not an object has no title and no id, so there
+         * is nothing a row could show for it. */
+        if (object_of (hit) == NULL)
+          continue;
+
+        g_ptr_array_add (results->projects, project_from_hit (hit));
+      }
+  }
+
+  return results;
+}
+
+/* ---------------------------------------------------------- *
+ * Versions
+ * ---------------------------------------------------------- */
+
+const char *
+aml_modrinth_dependency_to_string (AmlModrinthDependencyType type)
+{
+  switch (type)
+    {
+    case AML_DEPENDENCY_OPTIONAL:
+      return "optional";
+    case AML_DEPENDENCY_EMBEDDED:
+      return "embedded";
+    case AML_DEPENDENCY_INCOMPATIBLE:
+      return "incompatible";
+    case AML_DEPENDENCY_REQUIRED:
+    default:
+      return "required";
+    }
+}
+
+/* Modrinth writes nothing for "required", which is the kind an install
+ * has to fetch, so a dependency without the field is that one. */
+static AmlModrinthDependencyType
+dependency_type_from_string (const char *value)
+{
+  if (g_strcmp0 (value, "optional") == 0)
+    return AML_DEPENDENCY_OPTIONAL;
+  if (g_strcmp0 (value, "embedded") == 0)
+    return AML_DEPENDENCY_EMBEDDED;
+  if (g_strcmp0 (value, "incompatible") == 0)
+    return AML_DEPENDENCY_INCOMPATIBLE;
+
+  return AML_DEPENDENCY_REQUIRED;
+}
+
+void
+aml_modrinth_file_free (AmlModrinthFile *file)
+{
+  if (file == NULL)
+    return;
+
+  g_free (file->filename);
+  g_free (file->url);
+  g_free (file->sha1);
+  g_free (file->sha512);
+  g_free (file);
+}
+
+void
+aml_modrinth_dependency_free (AmlModrinthDependency *dependency)
+{
+  if (dependency == NULL)
+    return;
+
+  g_free (dependency->project_id);
+  g_free (dependency->version_id);
+  g_free (dependency->file_name);
+  g_free (dependency);
+}
+
+static AmlModrinthDependency *
+dependency_copy (AmlModrinthDependency *dependency)
+{
+  AmlModrinthDependency *copy = NULL;
+
+  if (dependency == NULL)
+    return NULL;
+
+  copy = g_new0 (AmlModrinthDependency, 1);
+  copy->type = dependency->type;
+  copy->project_id = g_strdup (dependency->project_id);
+  copy->version_id = g_strdup (dependency->version_id);
+  copy->file_name = g_strdup (dependency->file_name);
+
+  return copy;
+}
+
+void
+aml_modrinth_version_free (AmlModrinthVersion *version)
+{
+  if (version == NULL)
+    return;
+
+  g_free (version->version_id);
+  g_free (version->project_id);
+  g_free (version->name);
+  g_free (version->version_number);
+  g_free (version->changelog);
+  g_free (version->date_published);
+  g_clear_pointer (&version->game_versions, g_ptr_array_unref);
+  g_clear_pointer (&version->loaders, g_ptr_array_unref);
+  g_clear_pointer (&version->files, g_ptr_array_unref);
+  g_clear_pointer (&version->dependencies, g_ptr_array_unref);
+  g_free (version);
+}
+
+AmlModrinthFile *
+aml_modrinth_version_primary_file (AmlModrinthVersion *version)
+{
+  AmlModrinthFile *first = NULL;
+
+  if (version == NULL || version->files == NULL)
+    return NULL;
+
+  for (guint i = 0; i < version->files->len; i++)
+    {
+      AmlModrinthFile *file = g_ptr_array_index (version->files, i);
+
+      if (first == NULL)
+        first = file;
+
+      if (file->primary)
+        return file;
+    }
+
+  return first;
+}
+
+/* One file of a version answer, or NULL when it names no file and no
+ * url, which is nothing to download. */
+static AmlModrinthFile *
+file_from_node (JsonNode *node)
+{
+  g_autofree char *filename = object_string (node, "filename");
+  g_autofree char *url = object_string (node, "url");
+  g_autofree char *sha1 = NULL;
+  g_autofree char *sha512 = NULL;
+  AmlModrinthFile *file = NULL;
+
+  if (filename == NULL || url == NULL)
+    return NULL;
+
+  {
+    JsonNode *hashes = json_object_get_member (object_of (node), "hashes");
+
+    if (hashes != NULL)
+      {
+        sha1 = object_string (hashes, "sha1");
+        sha512 = object_string (hashes, "sha512");
+      }
+  }
+
+  file = g_new0 (AmlModrinthFile, 1);
+  file->filename = g_steal_pointer (&filename);
+  file->url = g_steal_pointer (&url);
+  file->sha1 = g_steal_pointer (&sha1);
+  file->sha512 = g_steal_pointer (&sha512);
+  file->primary = object_boolean (node, "primary", FALSE);
+  file->size = (goffset) object_int (node, "size", 0);
+
+  return file;
+}
+
+static AmlModrinthDependency *
+dependency_from_node (JsonNode *node)
+{
+  g_autofree char *type = object_string (node, "dependency_type");
+  AmlModrinthDependency *dependency = g_new0 (AmlModrinthDependency, 1);
+
+  dependency->type = dependency_type_from_string (type);
+  dependency->project_id = object_string (node, "project_id");
+  dependency->version_id = object_string (node, "version_id");
+  dependency->file_name = object_string (node, "file_name");
+
+  return dependency;
+}
+
+/* One version answer, or NULL when there is nothing installable in it:
+ * without an id it cannot be asked about again, and without a file
+ * there is nothing to download. */
+static AmlModrinthVersion *
+version_from_node (JsonNode *node)
+{
+  AmlModrinthVersion *version = NULL;
+  JsonNode *array_node = NULL;
+
+  if (object_of (node) == NULL)
+    return NULL;
+
+  version = g_new0 (AmlModrinthVersion, 1);
+  version->version_id = object_string (node, "id");
+  version->project_id = object_string (node, "project_id");
+  version->name = object_string (node, "name");
+  version->version_number = object_string (node, "version_number");
+  version->changelog = object_string (node, "changelog");
+  version->date_published = object_string (node, "date_published");
+  version->downloads = (guint64) object_int (node, "downloads", 0);
+  version->game_versions = object_string_array (node, "game_versions");
+  version->loaders = object_string_array (node, "loaders");
+
+  version->files =
+    g_ptr_array_new_with_free_func ((GDestroyNotify) aml_modrinth_file_free);
+  array_node = json_object_get_member (object_of (node), "files");
+
+  if (array_node != NULL && JSON_NODE_HOLDS_ARRAY (array_node))
+    {
+      JsonArray *array = json_node_get_array (array_node);
+      guint length = json_array_get_length (array);
+
+      for (guint i = 0; i < length; i++)
+        {
+          AmlModrinthFile *file =
+            file_from_node (json_array_get_element (array, i));
+
+          if (file != NULL)
+            g_ptr_array_add (version->files, file);
+        }
+    }
+
+  version->dependencies = g_ptr_array_new_with_free_func (
+      (GDestroyNotify) aml_modrinth_dependency_free);
+  array_node = json_object_get_member (object_of (node), "dependencies");
+
+  if (array_node != NULL && JSON_NODE_HOLDS_ARRAY (array_node))
+    {
+      JsonArray *array = json_node_get_array (array_node);
+      guint length = json_array_get_length (array);
+
+      for (guint i = 0; i < length; i++)
+        {
+          JsonNode *item = json_array_get_element (array, i);
+
+          if (object_of (item) != NULL)
+            g_ptr_array_add (version->dependencies, dependency_from_node (item));
+        }
+    }
+
+  if (version->version_id == NULL || version->files->len == 0)
+    {
+      aml_modrinth_version_free (version);
+      return NULL;
+    }
+
+  if (version->project_id == NULL)
+    version->project_id = g_strdup ("");
+
+  if (version->name == NULL)
+    version->name = g_strdup (version->version_id);
+
+  if (version->version_number == NULL)
+    version->version_number = g_strdup ("");
+
+  if (version->changelog == NULL)
+    version->changelog = g_strdup ("");
+
+  if (version->date_published == NULL)
+    version->date_published = g_strdup ("");
+
+  return version;
+}
+
+AmlModrinthVersion *
+aml_modrinth_version_from_json (const char *json, gssize length,
+                                GError **error)
+{
+  g_autoptr (JsonNode) root = root_node (json, length, error);
+  AmlModrinthVersion *version = NULL;
+
+  if (root == NULL)
+    return NULL;
+
+  version = version_from_node (root);
+
+  if (version == NULL)
+    {
+      g_set_error_literal (error, AML_MODRINTH_ERROR,
+                           AML_MODRINTH_ERROR_PARSE,
+                           "the answer is not a version with a file");
+      return NULL;
+    }
+
+  return version;
+}
+
+/* The one rule of compatibility.
+ *
+ * A mod runs on one Minecraft version and one loader; a resource pack
+ * and a shader pack are loaded by the game itself, so the Minecraft
+ * version is all that decides them. FALSE is the answer that keeps an
+ * incompatible version out of every list. */
+gboolean
+aml_modrinth_version_fits (AmlModrinthVersion *version, AmlContentType type,
+                          const char *minecraft_version, const char *loader)
+{
+  if (version == NULL || minecraft_version == NULL ||
+      *minecraft_version == '\0')
+    return FALSE;
+
+  if (!string_array_has (version->game_versions, minecraft_version))
+    return FALSE;
+
+  if (!aml_content_type_needs_loader (type) || loader == NULL ||
+      *loader == '\0')
+    return TRUE;
+
+  /* A mod that names no loader is one the loader runs itself, so it is
+   * nothing to offer for an instance that has one. */
+  if (version->loaders == NULL || version->loaders->len == 0)
+    return FALSE;
+
+  return string_array_has (version->loaders, loader);
+}
+
+/* Newest first, which is the order a list of versions is read in. The
+ * dates are ISO 8601 in UTC, so the order of the strings is the order
+ * of the moments they name. */
+static int
+compare_by_date (gconstpointer a, gconstpointer b)
+{
+  const AmlModrinthVersion *left = *(const AmlModrinthVersion *const *) a;
+  const AmlModrinthVersion *right = *(const AmlModrinthVersion *const *) b;
+
+  return strcmp (right->date_published, left->date_published);
+}
+
+GPtrArray *
+aml_modrinth_versions_from_json (const char *json, gssize length,
+                                 AmlContentType type,
+                                 const char *minecraft_version,
+                                 const char *loader, GError **error)
+{
+  g_autoptr (JsonParser) parser = json_parser_new ();
+  g_autoptr (GError) parse_error = NULL;
+  GPtrArray *versions = NULL;
+  JsonNode *root = NULL;
+  JsonArray *array = NULL;
+  guint count = 0;
+  guint compatible = 0;
+
+  if (!json_parser_load_from_data (parser, json != NULL ? json : "",
+                                   json != NULL ? length : 0, &parse_error))
+    {
+      g_propagate_error (error, parse_error);
+      return NULL;
+    }
+
+  root = json_parser_get_root (parser);
+
+  if (root == NULL || !JSON_NODE_HOLDS_ARRAY (root))
+    {
+      g_set_error_literal (error, AML_MODRINTH_ERROR,
+                           AML_MODRINTH_ERROR_PARSE,
+                           "the versions answer is not a list");
+      return NULL;
+    }
+
+  versions = g_ptr_array_new_with_free_func (
+      (GDestroyNotify) aml_modrinth_version_free);
+  array = json_node_get_array (root);
+  count = json_array_get_length (array);
+
+  for (guint i = 0; i < count; i++)
+    {
+      AmlModrinthVersion *version =
+        version_from_node (json_array_get_element (array, i));
+
+      if (version == NULL)
+        continue;
+
+      /* The server was already asked for these, so what is left here is
+       * the check that keeps an incompatible version out of the list. */
+      if (!aml_modrinth_version_fits (version, type, minecraft_version,
+                                      loader))
+        {
+          aml_modrinth_version_free (version);
+          continue;
+        }
+
+      g_ptr_array_add (versions, version);
+      compatible++;
+    }
+
+  if (compatible == 0)
+    {
+      g_autofree char *message = aml_modrinth_no_compatible_message (
+          type, minecraft_version, loader);
+
+      g_ptr_array_unref (versions);
+      g_set_error (error, AML_MODRINTH_ERROR, AML_MODRINTH_ERROR_NOT_FOUND,
+                   "%s", message);
+      return NULL;
+    }
+
+  g_ptr_array_sort (versions, compare_by_date);
+
+  return versions;
+}
+
+/* ---------------------------------------------------------- *
+ * The requests
+ * ---------------------------------------------------------- */
+
+/* What a request hands its parsed answer to. */
+typedef void (*AnswerFunc) (GTask *task, JsonNode *root);
+
+/* What an HTTP 404 means to a request: for an update check it is the
+ * answer that nothing is newer, for a hash lookup it says the file is
+ * not one Modrinth published. */
+typedef enum {
+  AML_NOT_FOUND_IS_ERROR, /* the answer came from a known place */
+  AML_NOT_FOUND_IS_ABSENT /* nothing there is an answer, not a failure */
+} AmlNotFoundRule;
+
+typedef struct {
+  AnswerFunc answer;
+  AmlNotFoundRule not_found;
+  void *data;
+  GDestroyNotify free_data;
+} Request;
+
+static void
+request_free (gpointer data)
+{
+  Request *request = data;
+
+  if (request->data != NULL && request->free_data != NULL)
+    request->free_data (request->data);
+
+  g_free (request);
+}
+
+static GTask *
+request_new (GCancellable *cancellable, GAsyncReadyCallback callback,
+             gpointer user_data, AnswerFunc answer, AmlNotFoundRule not_found,
+             void *data, GDestroyNotify free_data)
+{
+  GTask *task = g_task_new (NULL, cancellable, callback, user_data);
+  Request *request = g_new0 (Request, 1);
+
+  request->answer = answer;
+  request->not_found = not_found;
+  request->data = data;
+  request->free_data = free_data;
+
+  /* Cancellation is reported in this module's own domain, so GTask must
+   * not replace the error with G_IO_ERROR_CANCELLED. */
+  g_task_set_check_cancellable (task, FALSE);
+  g_task_set_task_data (task, request, request_free);
+
+  return task;
+}
+
+/* One way out of a request: an error of this module's domain, so that a
+ * caller can tell an answer AML cannot use from a network that is not
+ * there. What the download module said is kept, since it names the url
+ * that failed. */
+static void
+fail (GTask *task, GError *error)
+{
+  GError *wrapped = NULL;
+
+  if (g_task_return_error_if_cancelled (task))
+    {
+      g_task_return_error (
+          task, g_error_new_literal (AML_MODRINTH_ERROR,
+                                     AML_MODRINTH_ERROR_NETWORK,
+                                     "the request was cancelled"));
+      return;
+    }
+
+  if (error->domain == AML_DOWNLOAD_ERROR)
+    {
+      if (error->code == AML_DOWNLOAD_ERROR_RATE_LIMITED)
+        wrapped = g_error_new_literal (
+            AML_MODRINTH_ERROR, AML_MODRINTH_ERROR_RATE_LIMIT,
+            "Modrinth is asking AML to slow down, too many requests");
+      else if (error->code == AML_DOWNLOAD_ERROR_HTTP)
+        wrapped = g_error_new (AML_MODRINTH_ERROR, AML_MODRINTH_ERROR_HTTP,
+                               "%s", error->message);
+      else
+        wrapped = g_error_new (AML_MODRINTH_ERROR, AML_MODRINTH_ERROR_NETWORK,
+                               "%s", error->message);
+    }
+  else
+    wrapped = g_error_new (AML_MODRINTH_ERROR, AML_MODRINTH_ERROR_PARSE,
+                           "%s", error->message);
+
+  g_error_free (error);
+  g_task_return_error (task, wrapped);
+}
+
+/* The download module writes the status into its own message, which is
+ * the one place the code of an HTTP error lives. */
+static gboolean
+error_is_not_found (const GError *error)
+{
+  return error->domain == AML_DOWNLOAD_ERROR &&
+         error->code == AML_DOWNLOAD_ERROR_HTTP &&
+         strstr (error->message, "HTTP 404") != NULL;
+}
+
+static void
+json_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+            gpointer user_data)
+{
+  g_autoptr (GTask) task = user_data;
+  Request *request = g_task_get_task_data (task);
+  g_autoptr (JsonParser) parser = NULL;
+  g_autoptr (GError) error = NULL;
+  JsonNode *root = NULL;
+
+  parser = aml_download_json_finish (result, &error);
+
+  if (parser == NULL)
+    {
+      if (error_is_not_found (error) &&
+          request->not_found == AML_NOT_FOUND_IS_ABSENT)
+        {
+          g_clear_error (&error);
+          g_task_return_pointer (task, NULL, NULL);
+          return;
+        }
+
+      if (error_is_not_found (error))
+        {
+          g_clear_error (&error);
+          g_task_return_error (
+              task, g_error_new_literal (AML_MODRINTH_ERROR,
+                                         AML_MODRINTH_ERROR_NOT_FOUND,
+                                         "Modrinth does not know this file"));
+          return;
+        }
+
+      fail (task, g_steal_pointer (&error));
+      return;
+    }
+
+  root = json_parser_get_root (parser);
+
+  if (root == NULL)
+    {
+      g_task_return_error (
+          task, g_error_new_literal (AML_MODRINTH_ERROR,
+                                     AML_MODRINTH_ERROR_PARSE,
+                                     "the answer holds no JSON"));
+      return;
+    }
+
+  /* The node is copied out of the parser, so nothing of it outlives
+   * this call. */
+  request->answer (task, json_node_copy (root));
+}
+
+static void
+get_async (const char *url, GCancellable *cancellable,
+           GAsyncReadyCallback callback, gpointer user_data,
+           AnswerFunc answer, AmlNotFoundRule not_found)
+{
+  g_autoptr (GTask) task =
+    request_new (cancellable, callback, user_data, answer, not_found, NULL,
+                 NULL);
+
+  aml_download_json_async (url, cancellable, json_ready,
+                           g_steal_pointer (&task));
+}
+
+/* ---------------------------------------------------------- *
+ * Searches
+ * ---------------------------------------------------------- */
+
+static void
+search_answer (GTask *task, JsonNode *root)
+{
+  g_autofree char *json = json_to_string (root, FALSE);
+  g_autoptr (GError) error = NULL;
+  AmlModrinthResults *results = NULL;
+
+  results = aml_modrinth_results_from_json (json, -1, &error);
+
+  if (results == NULL)
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  g_task_return_pointer (task, results,
+                         (GDestroyNotify) aml_modrinth_results_free);
+}
+
+void
+aml_modrinth_search_async (const AmlModrinthSearch *search,
+                           GCancellable *cancellable,
+                           GAsyncReadyCallback callback, gpointer user_data)
+{
+  g_autofree char *url = NULL;
+
+  g_return_if_fail (search != NULL);
+
+  url = aml_modrinth_search_url (search);
+  get_async (url, cancellable, callback, user_data, search_answer,
+             AML_NOT_FOUND_IS_ERROR);
+}
+
+AmlModrinthResults *
+aml_modrinth_search_finish (GAsyncResult *result, GError **error)
+{
+  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
+
+  return g_task_propagate_pointer (G_TASK (result), error);
+}
+
+static void
+details_answer (GTask *task, JsonNode *root)
+{
+  g_autofree char *json = json_to_string (root, FALSE);
+  g_autoptr (GError) error = NULL;
+  AmlModrinthDetails *details = NULL;
+
+  details = aml_modrinth_details_from_json (json, -1, &error);
+
+  if (details == NULL)
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  g_task_return_pointer (task, details,
+                         (GDestroyNotify) aml_modrinth_details_free);
+}
+
+void
+aml_modrinth_details_async (const char *project_id, GCancellable *cancellable,
+                            GAsyncReadyCallback callback, gpointer user_data)
+{
+  g_autofree char *url = NULL;
+
+  g_return_if_fail (project_id != NULL);
+
+  url = g_strdup_printf (AML_MODRINTH_URL "/project/%s",
+                         g_uri_escape_string (project_id, NULL, FALSE));
+  get_async (url, cancellable, callback, user_data, details_answer,
+             AML_NOT_FOUND_IS_ERROR);
+}
+
+AmlModrinthDetails *
+aml_modrinth_details_finish (GAsyncResult *result, GError **error)
+{
+  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
+
+  return g_task_propagate_pointer (G_TASK (result), error);
+}
+
+/* ---------------------------------------------------------- *
+ * The versions of a project
+ * ---------------------------------------------------------- */
+
+/* What a request has to remember about the instance it is asked for, so
+ * that the answer is checked against the same one. */
+typedef struct {
+  AmlContentType type;
+  char *minecraft_version;
+  char *loader;
+} InstanceAsk;
+
+static void
+instance_ask_free (gpointer data)
+{
+  InstanceAsk *ask = data;
+
+  g_free (ask->minecraft_version);
+  g_free (ask->loader);
+  g_free (ask);
+}
+
+static InstanceAsk *
+instance_ask_new (AmlContentType type, const char *minecraft_version,
+                  const char *loader)
+{
+  InstanceAsk *ask = g_new0 (InstanceAsk, 1);
+
+  ask->type = type;
+  ask->minecraft_version = g_strdup (minecraft_version);
+  ask->loader = loader != NULL ? g_strdup (loader) : NULL;
+
+  return ask;
+}
+
+static void
+versions_answer (GTask *task, JsonNode *root)
+{
+  Request *request = g_task_get_task_data (task);
+  InstanceAsk *asked = request->data;
+  g_autofree char *json = json_to_string (root, FALSE);
+  g_autoptr (GError) error = NULL;
+  GPtrArray *versions = NULL;
+
+  versions = aml_modrinth_versions_from_json (json, -1, asked->type,
+                                              asked->minecraft_version,
+                                              asked->loader, &error);
+
+  if (versions == NULL)
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  g_task_return_pointer (task, versions, (GDestroyNotify) g_ptr_array_unref);
+}
+
+void
+aml_modrinth_versions_async (const char *project_id, AmlContentType type,
+                             const char *minecraft_version, const char *loader,
+                             GCancellable *cancellable,
+                             GAsyncReadyCallback callback, gpointer user_data)
+{
+  g_autoptr (GTask) task = NULL;
+  g_autofree char *game_versions = NULL;
+  g_autofree char *loaders = NULL;
+  g_autofree char *url = NULL;
+
+  g_return_if_fail (project_id != NULL);
+  g_return_if_fail (minecraft_version != NULL);
+
+  /* Modrinth reads the loader of a resource pack and of a shader pack as
+   * "minecraft": the game loads those itself. */
+  game_versions = string_array_json (minecraft_version);
+  loaders = string_array_json (aml_content_type_needs_loader (type) &&
+                                       loader != NULL
+                                   ? loader
+                                   : "minecraft");
+
+  url = g_strdup_printf (
+      AML_MODRINTH_URL "/project/%s/version?game_versions=%s&loaders=%s",
+      g_uri_escape_string (project_id, NULL, FALSE),
+      g_uri_escape_string (game_versions, NULL, FALSE),
+      g_uri_escape_string (loaders, NULL, FALSE));
+
+  task = request_new (cancellable, callback, user_data, versions_answer,
+                      AML_NOT_FOUND_IS_ERROR,
+                      instance_ask_new (type, minecraft_version, loader),
+                      instance_ask_free);
+
+  aml_download_json_async (url, cancellable, json_ready,
+                           g_steal_pointer (&task));
+}
+
+GPtrArray *
+aml_modrinth_versions_finish (GAsyncResult *result, GError **error)
+{
+  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
+
+  return g_task_propagate_pointer (G_TASK (result), error);
+}
+
+/* ---------------------------------------------------------- *
+ * One version out of the hash of a file
+ * ---------------------------------------------------------- */
+
+static void
+version_answer (GTask *task, JsonNode *root)
+{
+  g_autofree char *json = json_to_string (root, FALSE);
+  g_autoptr (GError) error = NULL;
+  AmlModrinthVersion *version = NULL;
+
+  version = aml_modrinth_version_from_json (json, -1, &error);
+
+  if (version == NULL)
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  g_task_return_pointer (task, version,
+                         (GDestroyNotify) aml_modrinth_version_free);
+}
+
+void
+aml_modrinth_version_by_hash_async (const char *sha1, GCancellable *cancellable,
+                                    GAsyncReadyCallback callback,
+                                    gpointer user_data)
+{
+  g_autofree char *url = NULL;
+
+  g_return_if_fail (sha1 != NULL);
+
+  url = g_strdup_printf (AML_MODRINTH_URL "/version_file/%s?algorithm=sha1",
+                         g_uri_escape_string (sha1, NULL, FALSE));
+  get_async (url, cancellable, callback, user_data, version_answer,
+             AML_NOT_FOUND_IS_ERROR);
+}
+
+AmlModrinthVersion *
+aml_modrinth_version_by_hash_finish (GAsyncResult *result, GError **error)
+{
+  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
+
+  return g_task_propagate_pointer (G_TASK (result), error);
+}
+
+/* ---------------------------------------------------------- *
+ * An update out of the hash of a file
+ * ---------------------------------------------------------- */
+
+static void
+update_answer (GTask *task, JsonNode *root)
+{
+  Request *request = g_task_get_task_data (task);
+  InstanceAsk *asked = request->data;
+  g_autofree char *json = json_to_string (root, FALSE);
+  g_autoptr (GError) error = NULL;
+  AmlModrinthVersion *version = NULL;
+
+  version = aml_modrinth_version_from_json (json, -1, &error);
+
+  if (version == NULL)
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  /* Modrinth was asked for something that fits this instance, so
+   * anything else it answered is not an update this instance can take. */
+  if (!aml_modrinth_version_fits (version, asked->type,
+                                  asked->minecraft_version, asked->loader))
+    {
+      aml_modrinth_version_free (version);
+      g_task_return_pointer (task, NULL, NULL);
+      return;
+    }
+
+  g_task_return_pointer (task, version,
+                         (GDestroyNotify) aml_modrinth_version_free);
+}
+
+void
+aml_modrinth_update_by_hash_async (AmlContentType type, const char *sha1,
+                                   const char *minecraft_version,
+                                   const char *loader, GCancellable *cancellable,
+                                   GAsyncReadyCallback callback,
+                                   gpointer user_data)
+{
+  g_autoptr (GTask) task = NULL;
+  g_autofree char *url = NULL;
+  g_autofree char *game_versions = NULL;
+  g_autofree char *loaders = NULL;
+  g_autofree char *body = NULL;
+
+  g_return_if_fail (sha1 != NULL);
+  g_return_if_fail (minecraft_version != NULL);
+
+  /* Both narrowings are already JSON arrays, so the body is written
+   * around them rather than through a builder. */
+  game_versions = string_array_json (minecraft_version);
+  loaders = string_array_json (aml_content_type_needs_loader (type) &&
+                                       loader != NULL
+                                   ? loader
+                                   : "minecraft");
+
+  body = g_strdup_printf ("{\"game_versions\":%s,\"loaders\":%s}",
+                          game_versions, loaders);
+
+  url = g_strdup_printf (
+      AML_MODRINTH_URL "/version_file/%s/update?algorithm=sha1",
+      g_uri_escape_string (sha1, NULL, FALSE));
+
+  task = request_new (cancellable, callback, user_data, update_answer,
+                      AML_NOT_FOUND_IS_ABSENT,
+                      instance_ask_new (type, minecraft_version, loader),
+                      instance_ask_free);
+
+  aml_download_json_post_async (url, body, AML_MODRINTH_USER_AGENT, cancellable,
+                                json_ready, g_steal_pointer (&task));
+}
+
+AmlModrinthVersion *
+aml_modrinth_update_by_hash_finish (GAsyncResult *result, GError **error)
+{
+  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
+
+  return g_task_propagate_pointer (G_TASK (result), error);
+}
+
+/* ---------------------------------------------------------- *
+ * What an install of a version needs
+ * ---------------------------------------------------------- */
+
+char *
+aml_modrinth_no_compatible_message (AmlContentType type,
+                                    const char *minecraft_version,
+                                    const char *loader)
+{
+  const char *version = minecraft_version != NULL ? minecraft_version : "";
+
+  if (aml_content_type_needs_loader (type))
+    return g_strdup_printf ("No compatible version found for Minecraft %s and %s.",
+                            version, loader != NULL ? loader : "");
+
+  return g_strdup_printf ("No compatible version found for Minecraft %s.",
+                          version);
+}
+
+GPtrArray *
+aml_modrinth_resolve_install (AmlModrinthVersion *version,
+                              GHashTable *installed, GPtrArray **conflicts,
+                              GError **error)
+{
+  GPtrArray *pending = NULL;
+
+  g_return_val_if_fail (version != NULL, NULL);
+
+  if (conflicts != NULL)
+    *conflicts = g_ptr_array_new_with_free_func (
+        (GDestroyNotify) aml_modrinth_dependency_free);
+
+  if (version->dependencies == NULL)
+    return g_ptr_array_new_with_free_func (
+        (GDestroyNotify) aml_modrinth_dependency_free);
+
+  /* What @version says it does not run with, but only for what is
+   * actually installed: a conflict with something that is not there is
+   * nothing to decide about. */
+  if (conflicts != NULL)
+    {
+      for (guint i = 0; i < version->dependencies->len; i++)
+        {
+          AmlModrinthDependency *dependency =
+            g_ptr_array_index (version->dependencies, i);
+
+          if (dependency->type != AML_DEPENDENCY_INCOMPATIBLE ||
+              dependency->project_id == NULL || installed == NULL)
+            continue;
+
+          if (!g_hash_table_contains (installed, dependency->project_id))
+            continue;
+
+          g_ptr_array_add (*conflicts, dependency_copy (dependency));
+        }
+    }
+
+  pending = g_ptr_array_new_with_free_func (
+      (GDestroyNotify) aml_modrinth_dependency_free);
+
+  for (guint i = 0; i < version->dependencies->len; i++)
+    {
+      AmlModrinthDependency *dependency =
+        g_ptr_array_index (version->dependencies, i);
+      gboolean already = FALSE;
+
+      /* Embedded is inside the file, optional is a choice and
+       * incompatible is a conflict: only what the version cannot run
+       * without is fetched. */
+      if (dependency->type != AML_DEPENDENCY_REQUIRED)
+        continue;
+
+      /* A dependency that names no project names nothing that could be
+       * fetched, so the install cannot go on as if it did not exist. */
+      if (dependency->project_id == NULL)
+        {
+          g_set_error_literal (error, AML_MODRINTH_ERROR,
+                               AML_MODRINTH_ERROR_PARSE,
+                               "this version requires a dependency that "
+                               "names no project");
+          g_ptr_array_unref (pending);
+          return NULL;
+        }
+
+      if (installed != NULL &&
+          g_hash_table_contains (installed, dependency->project_id))
+        continue;
+
+      /* The same project twice is one file: installing it twice would
+       * leave two copies of it in the folder. */
+      for (guint j = 0; j < pending->len && !already; j++)
+        {
+          AmlModrinthDependency *one = g_ptr_array_index (pending, j);
+
+          already = g_strcmp0 (one->project_id, dependency->project_id) == 0;
+        }
+
+      if (already)
+        continue;
+
+      g_ptr_array_add (pending, dependency_copy (dependency));
+    }
+
+  return pending;
+}
