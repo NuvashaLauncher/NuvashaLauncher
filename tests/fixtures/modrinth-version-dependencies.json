@@ -1,0 +1,44 @@
+{
+  "name": "Iris 1.7.6 for Minecraft 1.20.1",
+  "version_number": "1.7.6+1.20.1",
+  "changelog": "This backports a few bug fixes from Iris 1.8, as well as adding compatibility for Sodium 0.5.12.",
+  "date_published": "2025-03-03T00:22:55.778804Z",
+  "downloads": 11081091,
+  "id": "s5eFLITc",
+  "project_id": "YL57xq9U",
+  "author_id": "DzLrfrbK",
+  "featured": false,
+  "version_type": "release",
+  "status": "listed",
+  "requested_status": null,
+  "environment": "client_only",
+  "game_versions": [
+    "1.20.1"
+  ],
+  "loaders": [
+    "fabric",
+    "quilt"
+  ],
+  "files": [
+    {
+      "id": "vl7iVcGg",
+      "hashes": {
+        "sha512": "f1337b0441c31269bd3bfcb28647d521326a83e73128c1ac8d065615f8a5a4ca1e8c96a468b356584236ece5b164ec8d8a52b1878064f4e391ecf4f32885e301",
+        "sha1": "880c0b9ce38bb4997645793407c1801df83f4233"
+      },
+      "url": "https://cdn.modrinth.com/data/YL57xq9U/versions/s5eFLITc/iris-1.7.6%2Bmc1.20.1.jar",
+      "filename": "iris-1.7.6+mc1.20.1.jar",
+      "primary": true,
+      "size": 2726899,
+      "file_type": null
+    }
+  ],
+  "dependencies": [
+    {
+      "version_id": "ryOMVRuG",
+      "project_id": "AANobbMI",
+      "file_name": null,
+      "dependency_type": "required"
+    }
+  ]
+}
