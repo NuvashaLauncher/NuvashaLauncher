@@ -1027,6 +1027,9 @@ struct ResolveRequest
   char *virtual_dir;
   char *natives_dir;
   char *client_jar;
+  /* The jar a loader patched instead of the one the document names: a
+     file that is already there, so nothing is fetched for it. */
+  char *client_jar_override;
   char *logging_path;
   char *asset_index_id;   /* the file name of the index, "<id>.json" */
   char *asset_index_name; /* what the game calls it */
@@ -1150,6 +1153,7 @@ request_free (ResolveRequest *request)
   g_free (request->virtual_dir);
   g_free (request->natives_dir);
   g_free (request->client_jar);
+  g_free (request->client_jar_override);
   g_free (request->logging_path);
   g_free (request->asset_index_id);
   g_free (request->asset_index_name);
@@ -1301,14 +1305,24 @@ build_result (ResolveRequest *request, GError **error)
       return NULL;
     }
 
+  /* A loader that patches the client jar produced one already: it is the
+     jar the game runs from, and the one at the end of the class path,
+     which is where the class loader finds the classes of the game. */
+  {
+    const char *client_jar = request->client_jar_override != NULL
+                               ? request->client_jar_override
+                               : request->client_jar;
+
+    resolved->client_jar = g_strdup (client_jar);
+    resolved->classpath =
+      aml_resolve_classpath (request->description, request->context,
+                             request->libraries_dir, client_jar);
+  }
+
   resolved->version_id = g_strdup (request->description->id);
-  resolved->client_jar = g_strdup (request->client_jar);
   resolved->natives_directory = g_strdup (request->natives_dir);
   resolved->library_directory = g_strdup (request->libraries_dir);
   resolved->main_class = g_strdup (request->description->main_class);
-  resolved->classpath =
-    aml_resolve_classpath (request->description, request->context,
-                           request->libraries_dir, request->client_jar);
 
   if (resolved->classpath == NULL)
     {
@@ -1447,7 +1461,9 @@ resolve_dependencies (ResolveRequest *request)
 
   request->stage = "dependencies";
   request->done = 0;
-  request->total = files->len + 1; /* the client jar */
+  /* The client jar, whether it is fetched from the document or handed in
+     by a loader that patched one. */
+  request->total = files->len + 1;
 
   if (description->logging != NULL && description->logging->file != NULL &&
       description->logging->file->url != NULL)
@@ -1488,8 +1504,15 @@ resolve_dependencies (ResolveRequest *request)
                      file->sha1);
     }
 
-  download_file (request, resolve_natives, description->client->url,
-                 request->client_jar, description->client->sha1);
+  /* A loader that patches the client jar produced one already: it is run
+     as it is, and nothing is fetched for it. Counting it as one of the
+     files keeps the progress of a loader instance the same as it is
+     without one. */
+  if (request->client_jar_override != NULL)
+    report (request);
+  else
+    download_file (request, resolve_natives, description->client->url,
+                   request->client_jar, description->client->sha1);
 
   if (request->logging_path != NULL)
     download_file (request, resolve_natives, description->logging->file->url,
@@ -2067,6 +2090,7 @@ aml_resolve_version_async (AmlVersionManifest *manifest,
 void
 aml_resolve_description_async (AmlVersionDescription *description,
                                const char             *version_id,
+                               const char             *client_jar,
                                const char             *data_dir,
                                const char             *natives_dir,
                                const char             *asset_base_url,
@@ -2080,6 +2104,8 @@ aml_resolve_description_async (AmlVersionDescription *description,
 
   g_return_if_fail (AML_IS_VERSION_DESCRIPTION (description));
   g_return_if_fail (version_id != NULL);
+  g_return_if_fail (client_jar == NULL || g_file_test (client_jar,
+                                                      G_FILE_TEST_IS_REGULAR));
 
   request = request_new (version_id, data_dir, natives_dir, asset_base_url,
                          cancellable, progress, progress_data, callback,
@@ -2088,6 +2114,9 @@ aml_resolve_description_async (AmlVersionDescription *description,
   /* The document is the one the caller merged: there is no manifest to
      follow an inheritsFrom from, because it has been followed already. */
   request->description = g_object_ref (description);
+
+  if (client_jar != NULL)
+    request->client_jar_override = g_strdup (client_jar);
 
   if (!request_make_directories (request))
     {
