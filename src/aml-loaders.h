@@ -24,11 +24,15 @@
  * fetches everything from the library list of the merged document.
  *
  * The other two, NeoForge and Forge, publish an installer instead of a
- * document: see aml_loaders_install_async(), which is what they need.
+ * document. Their installer is a jar that carries an install profile: the
+ * version document to merge over the Minecraft one, and a list of
+ * processors that patch the client jar. This module runs those
+ * processors with a Java, which is what aml_loaders_install_async()
+ * does, and hands back what the game then runs.
  *
- * Nothing here starts a process or writes into an instance: this module
- * asks the loaders what they offer and hands back a document, and the
- * resolve module and the launcher do the rest. */
+ * Nothing here writes into an instance: a loader is installed into its own
+ * directory under the shared data directory, and the launcher runs the
+ * game from the instance. */
 
 #ifndef AML_LOADERS_H
 #define AML_LOADERS_H
@@ -46,9 +50,14 @@ G_BEGIN_DECLS
 /* Quilt Meta. */
 #define AML_QUILT_META_URL "https://meta.quiltmc.org/v3"
 
-/* The maven repository Forge and NeoForge publish their installers in. */
+/* The maven repository NeoForge and Forge publish their installers in,
+ * and where the artifacts of a profile are fetched from. */
 #define AML_NEOFORGE_MAVEN_URL "https://maven.neoforged.net/releases"
 #define AML_FORGE_MAVEN_URL "https://maven.minecraftforge.net"
+
+/* Where a loader is installed, under the same data directory the resolve
+ * module writes the games it fetches into. */
+#define AML_LOADERS_SUBDIR "loaders"
 
 #define AML_LOADERS_ERROR (aml_loaders_error_quark ())
 
@@ -56,7 +65,9 @@ typedef enum {
   AML_LOADERS_ERROR_UNSUPPORTED, /* AML does not install this loader */
   AML_LOADERS_ERROR_NO_VERSIONS, /* the loader has nothing for that game version */
   AML_LOADERS_ERROR_NO_MAVEN,    /* a library names no maven address */
-  AML_LOADERS_ERROR_INSTALLER    /* the installer did not do its work */
+  AML_LOADERS_ERROR_INSTALLER,   /* the installer could not be read or run */
+  AML_LOADERS_ERROR_GENERATION   /* the version is of a generation whose
+                                  * install profile is not run here */
 } AmlLoadersError;
 
 GQuark aml_loaders_error_quark (void);
@@ -95,6 +106,21 @@ gboolean aml_loader_is_supported (AmlLoader loader);
  * "NeoForge". Never NULL. */
 const char *aml_loader_display_name (AmlLoader loader);
 
+/* TRUE when a loader is installed by running the installer it publishes
+ * rather than by fetching a version document of its own: NeoForge and
+ * Forge do, Fabric and Quilt do not. This is what tells the launcher
+ * which of the two ways of running a loader an instance needs. */
+gboolean aml_loader_publishes_an_installer (AmlLoader loader);
+
+/* TRUE when @loader_version of @loader is a version that runs
+ * @game_version. Both of the loaders that publish an installer name
+ * their versions after the Minecraft version they run, so the question is
+ * answered by the name: Forge puts a dash between the two
+ * ("1.20.1-47.2.0") and NeoForge a dot ("26.3.0.51-beta"). */
+gboolean aml_loaders_version_runs_game (AmlLoader      loader,
+                                        const char    *loader_version,
+                                        const char    *game_version);
+
 /* The versions of @loader that run @game_version, newest first, as the
  * loader publishes them. Nothing is filtered out here: what the user
  * asked to see is decided where the list is shown, so that a list that
@@ -125,6 +151,22 @@ GPtrArray *aml_loaders_versions_from_json (const char  *json,
                                            gssize       length,
                                            GError      **error);
 
+/* The versions out of what the maven of a loader that publishes an
+ * installer answered, newest first: everything it holds, as
+ * {"versions": ["..."]}, of which only the ones named after
+ * @game_version are versions of it. What the loader published after the
+ * Minecraft version in a name is read for a pre-release, so that
+ * "26.3.0.51-beta" is not stable and "1.20.1-47.2.0" is, even though
+ * both names carry a dash.
+ *
+ * AML_LOADERS_ERROR_NO_VERSIONS when the answer holds no version of that
+ * game. (transfer full) */
+GPtrArray *aml_loaders_maven_versions_from_json (AmlLoader      loader,
+                                                 const char    *game_version,
+                                                 const char    *json,
+                                                 gssize         length,
+                                                 GError       **error);
+
 /* The version document @loader_version of @loader for @game_version, in
  * the shape AML resolves: the libraries that publish a maven address
  * instead of a download get the download that address means, and nothing
@@ -142,6 +184,73 @@ void aml_loaders_profile_async (AmlLoader           loader,
 /* (transfer full) */
 AmlVersionDescription *aml_loaders_profile_finish (GAsyncResult  *result,
                                                   GError       **error);
+
+/* ---------------------------------------------------------- *
+ * The loaders that publish an installer
+ * ---------------------------------------------------------- */
+
+/* What an installer leaves behind for the game: the version document to
+ * merge over the Minecraft one, and the jar the game starts from. */
+typedef struct {
+  AmlVersionDescription *description; /* transfer full, never NULL */
+  char *client_jar;                   /* transfer full, never NULL */
+} AmlLoaderInstall;
+
+void aml_loader_install_free (AmlLoaderInstall *install);
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (AmlLoaderInstall, aml_loader_install_free)
+
+/* What an install is doing, for a caller that shows it: @stage is a short
+ * line of words, @done of @total files is how far along it is. Called on
+ * the caller's main context. */
+typedef void (*AmlLoadersProgressFunc) (const char *stage,
+                                        guint       done,
+                                        guint       total,
+                                        gpointer    user_data);
+
+/* Installs @loader_version of @loader and returns what the instance then
+ * runs.
+ *
+ * @game_document is the document of @game_version, the Minecraft version
+ * the loader runs: it is where the client jar the installer patches comes
+ * from, and the document that comes back is merged over it by the caller,
+ * the same merge a profile inherits from a parent.
+ *
+ * @java_executable runs the processors, so it is the Java the game runs
+ * with afterwards. @data_dir is where the loader is installed, under the
+ * "loaders" directory of it; NULL means the shared data directory, the
+ * one the resolve module fetches games into.
+ *
+ * Nothing is installed twice: what a previous install left is used as it
+ * is when it is all there.
+ *
+ * The jar the processors leave behind is also told which distribution it
+ * is, in the manifest of the jar, because the loader of the game reads
+ * that one line before it loads anything and stops with "the installation
+ * is corrupted" when the jar says nothing. A jar that already says it is
+ * left as it is.
+ *
+ * AML_LOADERS_ERROR_INSTALLER when the installer cannot be read or one of
+ * its processors fails, in which case the error carries what the
+ * processor printed, and AML_LOADERS_ERROR_GENERATION for a version whose
+ * install profile is of a shape this does not run.
+ *
+ * AML_LOADERS_ERROR_UNSUPPORTED for a loader that publishes no installer. */
+void aml_loaders_install_async (AmlLoader              loader,
+                                const char            *game_version,
+                                const char            *loader_version,
+                                AmlVersionDescription *game_document,
+                                const char            *java_executable,
+                                const char            *data_dir,
+                                GCancellable          *cancellable,
+                                AmlLoadersProgressFunc  progress,
+                                gpointer                progress_data,
+                                GAsyncReadyCallback     callback,
+                                gpointer                user_data);
+
+/* (transfer full). NULL on error. */
+AmlLoaderInstall *aml_loaders_install_finish (GAsyncResult  *result,
+                                              GError       **error);
 
 /* The document a profile is, with the downloads its libraries mean: the
  * same work the fetch above does once the answer is parsed, and what a

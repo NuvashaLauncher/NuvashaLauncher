@@ -459,6 +459,12 @@ struct _AmlLauncher
   AmlResolvedVersion *resolved;
   GSubprocess *process;
 
+  /* The Java this launch chose. A loader that has to be installed first
+   * needs one before the game is resolved, so the choice is made once and
+   * kept. */
+  char *java_executable;
+  int java_major_version;
+
   /* How the process ended, filled in when it is gone. */
   gboolean exited;
   gboolean exited_normally;
@@ -1055,6 +1061,86 @@ no_java_reason (AmlLauncher *self, const char *instance_java,
     "with", self->version);
 }
 
+/* The Java a launch runs with: the one the instance asks for, the one the
+ * settings ask for, or the newest one that runs what the game needs.
+ *
+ * @required is the Java the document of the game asks for, which the
+ * merged document of a loader names as its Minecraft version does. */
+static const AmlJava *
+choose_java (AmlLauncher *self, GPtrArray *javas, int required,
+             char       **instance_java, const char **global_java)
+{
+  const AmlJava *java = NULL;
+
+  g_object_get (self->instance, "java-path", instance_java, NULL);
+
+  if (self->settings != NULL)
+    *global_java = aml_settings_get_default_java_path (self->settings);
+  else
+    *global_java = NULL;
+
+  java = aml_java_select (javas, *instance_java, *global_java, required);
+
+  if (java == NULL)
+    {
+      launcher_failed (self,
+                       no_java_reason (self, *instance_java, *global_java));
+      return NULL;
+    }
+
+  /* A JVM without AWT's window bridge cannot open the window the game
+     draws in, so this is worth refusing before the game starts. */
+  if (java->headless)
+    {
+      launcher_failed (self,
+                       "the selected Java is a headless one: the game "
+                       "needs a Java that can open a window");
+      return NULL;
+    }
+
+  return java;
+}
+
+static void
+remember_java (AmlLauncher *self, const AmlJava *java)
+{
+  g_free (self->java_executable);
+  self->java_executable = g_strdup (java->executable);
+  self->java_major_version = java->major_version;
+}
+
+/* The last step of every launch: the arguments the game is started with,
+ * and the game. Everything before this has only been deciding what they
+ * will be. */
+static void
+run_the_game (AmlLauncher *self)
+{
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GPtrArray) argv = NULL;
+  g_autofree char *jvm_args = NULL;
+
+  if (self->stop_requested || self->resolved == NULL)
+    return;
+
+  g_object_get (self->instance, "jvm-args", &jvm_args, NULL);
+
+  argv = aml_launch_build_arguments (self->resolved, self->java_executable,
+                                     self->game_directory, jvm_args, &error);
+
+  if (argv == NULL)
+    {
+      launcher_failed (self, error->message);
+      return;
+    }
+
+  log_line (self, TAG_STATE, "Java %d at %s", self->java_major_version,
+            self->java_executable);
+
+  /* The spawn reports its own failure as the Failed state; the error is
+     only here for a caller that asked for one. */
+  aml_launcher_spawn (self, argv, NULL);
+}
+
 static void
 on_java_detected (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                   gpointer user_data)
@@ -1062,12 +1148,9 @@ on_java_detected (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   AmlLauncher *self = user_data;
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) javas = aml_java_detect_finish (result, &error);
-  g_autoptr (GError) build_error = NULL;
-  g_autoptr (GPtrArray) argv = NULL;
   g_autofree char *instance_java = NULL;
-  g_autofree char *jvm_args = NULL;
-  const AmlJava *java = NULL;
   const char *global_java = NULL;
+  const AmlJava *java = NULL;
 
   if (javas == NULL)
     {
@@ -1084,53 +1167,21 @@ on_java_detected (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
-  g_object_get (self->instance, "java-path", &instance_java, "jvm-args",
-                &jvm_args, NULL);
-  global_java = self->settings != NULL
-                  ? aml_settings_get_default_java_path (self->settings)
-                  : NULL;
-
-  java = aml_java_select (javas, instance_java, global_java,
-                          self->resolved != NULL
-                            ? self->resolved->java_major_version
-                            : 0);
+  java = choose_java (self, javas,
+                      self->resolved != NULL
+                        ? self->resolved->java_major_version
+                        : 0,
+                      &instance_java, &global_java);
 
   if (java == NULL)
     {
-      launcher_failed (self,
-                       no_java_reason (self, instance_java, global_java));
       g_object_unref (self);
       return;
     }
 
-  /* A JVM without AWT's window bridge cannot open the window the game
-     draws in, so this is worth refusing before the game starts. */
-  if (java->headless)
-    {
-      launcher_failed (self,
-                       "the selected Java is a headless one: the game "
-                       "needs a Java that can open a window");
-      g_object_unref (self);
-      return;
-    }
+  remember_java (self, java);
+  run_the_game (self);
 
-  argv = aml_launch_build_arguments (self->resolved, java->executable,
-                                     self->game_directory, jvm_args,
-                                     &build_error);
-
-  if (argv == NULL)
-    {
-      launcher_failed (self, build_error->message);
-      g_object_unref (self);
-      return;
-    }
-
-  log_line (self, TAG_STATE, "Java %d at %s", java->major_version,
-            java->executable);
-
-  /* The spawn reports its own failure as the Failed state; the error is
-     only here for a caller that asked for one. */
-  aml_launcher_spawn (self, argv, NULL);
   g_object_unref (self);
 }
 
@@ -1160,6 +1211,15 @@ on_resolved (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
      the moment the command line starts being built. */
   g_clear_pointer (&self->resolved, aml_resolved_version_free);
   self->resolved = resolved;
+
+  /* A loader that was installed on the way here already chose the Java it
+     is installed and run with. */
+  if (self->java_executable != NULL)
+    {
+      run_the_game (self);
+      g_object_unref (self);
+      return;
+    }
 
   set_state (self, AML_LAUNCH_LAUNCHING, "choosing Java");
 
@@ -1211,8 +1271,10 @@ on_resolve_progress (const AmlResolveProgress *progress, gpointer user_data)
 typedef struct {
   AmlLauncher *launcher; /* the reference this work holds */
   AmlVersionManifest *manifest;
-  AmlVersionDescription *profile; /* the document of the loader */
+  AmlLoader loader;
+  AmlVersionDescription *profile; /* the document the loader adds */
   char *game_version;
+  char *loader_version;
 } LoaderRequest;
 
 static void
@@ -1222,7 +1284,157 @@ loader_request_free (LoaderRequest *request)
   g_clear_object (&request->profile);
   g_clear_object (&request->launcher);
   g_free (request->game_version);
+  g_free (request->loader_version);
   g_free (request);
+}
+
+static void on_install_done (GObject *source, GAsyncResult *result,
+                             gpointer user_data);
+static void on_install_progress (const char *stage, guint done, guint total,
+                                 gpointer user_data);
+
+/* The Java that runs the processors of an install is the Java the game
+   runs, so it is chosen once and kept for the launch itself. */
+static void
+on_java_for_the_install (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                         gpointer user_data)
+{
+  LoaderRequest *request = user_data;
+  AmlLauncher *self = request->launcher;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GPtrArray) javas = aml_java_detect_finish (result, &error);
+  g_autofree char *instance_java = NULL;
+  const char *global_java = NULL;
+  const AmlJava *java = NULL;
+  int required = 0;
+
+  if (javas == NULL)
+    {
+      launch_finished_with_error (self, g_steal_pointer (&error));
+      loader_request_free (request);
+      return;
+    }
+
+  if (self->stop_requested)
+    {
+      loader_request_free (request);
+      return;
+    }
+
+  /* The Java version the game asks for is the one the Minecraft document
+     names: a loader document of its own does not say. */
+  if (request->profile != NULL && request->profile->java_version != NULL)
+    required = request->profile->java_version->major_version;
+
+  java = choose_java (self, javas, required, &instance_java, &global_java);
+
+  if (java == NULL)
+    {
+      loader_request_free (request);
+      return;
+    }
+
+  remember_java (self, java);
+  log_line (self, TAG_STATE, "installing %s %s with Java %d at %s",
+            aml_loader_display_name (request->loader), request->loader_version,
+            java->major_version, java->executable);
+
+  aml_loaders_install_async (
+    request->loader, request->game_version, request->loader_version,
+    request->profile, java->executable, NULL, self->cancellable,
+    on_install_progress, self, on_install_done, request);
+}
+
+static void
+on_install_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                 gpointer user_data)
+{
+  LoaderRequest *request = user_data;
+  AmlLauncher *self = request->launcher;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlLoaderInstall) install = NULL;
+  g_autoptr (AmlVersionDescription) merged = NULL;
+
+  install = aml_loaders_install_finish (result, &error);
+
+  if (install == NULL)
+    {
+      launch_finished_with_error (self, g_steal_pointer (&error));
+      loader_request_free (request);
+      return;
+    }
+
+  if (self->stop_requested)
+    {
+      loader_request_free (request);
+      return;
+    }
+
+  /* What the loader added to the game: its own document over the one of
+     the Minecraft version, and the client jar its processors patched. */
+  merged = aml_version_description_merge (request->profile, install->description);
+
+  aml_resolve_description_async (merged, merged->id, install->client_jar, NULL,
+                                 NULL, NULL, self->cancellable,
+                                 on_resolve_progress, self, on_resolved,
+                                 g_object_ref (self));
+  loader_request_free (request);
+}
+
+/* What an install is fetching, which is a handful of files out of the
+   loader's own maven: the same numbers as the resolve reports, so the
+   state a screen shows is the same shape whichever is running. */
+static void
+on_install_progress (const char *stage, guint done, guint total,
+                     gpointer user_data)
+{
+  AmlLauncher *self = user_data;
+  guint percent;
+  g_autofree char *detail = NULL;
+
+  if (self->stop_requested || total == 0)
+    return;
+
+  percent = (done * 100) / total;
+
+  if (percent == self->last_percent)
+    return;
+
+  self->last_percent = percent;
+  detail = g_strdup_printf ("%s %u%%", stage, percent);
+  set_state (self, AML_LAUNCH_DOWNLOADING, detail);
+}
+
+/* The document of the Minecraft version, for a loader that has to be
+ * installed: the install patches its client jar, so it is the document of
+ * the game that is wanted first. */
+static void
+on_game_document (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                  gpointer user_data)
+{
+  LoaderRequest *request = user_data;
+  AmlLauncher *self = request->launcher;
+  g_autoptr (GError) error = NULL;
+  AmlVersionDescription *document = aml_version_load_finish (result, &error);
+
+  if (document == NULL)
+    {
+      launch_finished_with_error (self, g_steal_pointer (&error));
+      loader_request_free (request);
+      return;
+    }
+
+  request->profile = document;
+
+  if (self->stop_requested)
+    {
+      loader_request_free (request);
+      return;
+    }
+
+  set_state (self, AML_LAUNCH_LAUNCHING, "choosing Java");
+
+  aml_java_detect_async (self->cancellable, on_java_for_the_install, request);
 }
 
 static void
@@ -1245,7 +1457,7 @@ on_vanilla_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   merged = aml_version_description_merge (vanilla, request->profile);
 
-  aml_resolve_description_async (merged, merged->id, NULL, NULL, NULL,
+  aml_resolve_description_async (merged, merged->id, NULL, NULL, NULL, NULL,
                                  self->cancellable, on_resolve_progress, self,
                                  on_resolved, g_object_ref (self));
   loader_request_free (request);
@@ -1290,7 +1502,23 @@ resolve_with_a_loader (AmlLauncher        *self,
 
   request->launcher = g_object_ref (self);
   request->manifest = g_object_ref (manifest);
+  request->loader = loader;
   request->game_version = g_strdup (self->version);
+  request->loader_version = g_strdup (loader_version);
+
+  /* A loader that publishes an installer is installed before the game it
+     runs is resolved: its processors patch the client jar the game then
+     starts from, so the document of the Minecraft version comes first. */
+  if (aml_loader_publishes_an_installer (loader))
+    {
+      log_line (self, TAG_STATE, "installing %s %s for %s",
+                aml_loader_display_name (loader), loader_version,
+                self->version != NULL ? self->version : "");
+
+      aml_version_load_async (manifest, request->game_version,
+                              self->cancellable, on_game_document, request);
+      return;
+    }
 
   log_line (self, TAG_STATE, "asking %s for %s %s",
             aml_loader_display_name (loader), loader_version,
@@ -1386,6 +1614,11 @@ aml_launcher_start (AmlLauncher *self)
   self->cancellable = g_cancellable_new ();
   self->stop_requested = FALSE;
   self->last_percent = 0;
+
+  /* The Java of the launch before this one says nothing about this one:
+     a loader that has to be installed first chooses its own. */
+  g_clear_pointer (&self->java_executable, g_free);
+  self->java_major_version = 0;
 
   set_state (self, AML_LAUNCH_PREPARING, self->version);
   log_line (self, TAG_STATE, "preparing Minecraft %s",
@@ -1527,6 +1760,7 @@ aml_launcher_finalize (GObject *object)
   g_free (self->detail);
   g_free (self->version);
   g_free (self->game_directory);
+  g_free (self->java_executable);
 
   G_OBJECT_CLASS (aml_launcher_parent_class)->finalize (object);
 }

@@ -262,9 +262,14 @@ AmlResolvedVersion *aml_resolve_version_finish (GAsyncResult  *result,
  * @version_id is the id of the merged document, which is what the client
  * jar and the asset index file are named after; @data_dir, @natives_dir
  * and @asset_base_url mean here what they mean in
- * aml_resolve_version_async(). @description is not modified. */
+ * aml_resolve_version_async(). @description is not modified.
+ *
+ * @client_jar, when it is not NULL, is a jar on disk that runs instead
+ * of the one the document names, which is what a loader that patches the
+ * client installs; nothing is fetched for it and it has to exist. */
 void aml_resolve_description_async (AmlVersionDescription *description,
                                     const char             *version_id,
+                                    const char             *client_jar,
                                     const char             *data_dir,
                                     const char             *natives_dir,
                                     const char             *asset_base_url,

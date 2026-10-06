@@ -182,6 +182,174 @@ test_empty_and_broken_answers (void)
 }
 
 /* ---------------------------------------------------------- *
+ * The loaders that publish an installer
+ * ---------------------------------------------------------- */
+
+static void
+test_which_loaders_publish_an_installer (void)
+{
+  /* The two that serve a version document of their own and the two that
+     publish an installer are installed in different ways, and the launcher
+     asks which it is dealing with. */
+  g_assert_false (aml_loader_publishes_an_installer (AML_LOADER_VANILLA));
+  g_assert_false (aml_loader_publishes_an_installer (AML_LOADER_FABRIC));
+  g_assert_false (aml_loader_publishes_an_installer (AML_LOADER_QUILT));
+  g_assert_true (aml_loader_publishes_an_installer (AML_LOADER_NEOFORGE));
+  g_assert_true (aml_loader_publishes_an_installer (AML_LOADER_FORGE));
+
+  g_print ("ok - the loaders that publish an installer are told apart\n");
+}
+
+/* Which versions of a loader run which Minecraft version: both name their
+   versions after the game they run, Forge with a dash between the two and
+   NeoForge with a dot. */
+static void
+test_compatibility_filtering (void)
+{
+  /* Forge: "1.20.1-47.2.0" runs 1.20.1 and nothing else, so a longer game
+     version is not a prefix match. */
+  g_assert_true (aml_loaders_version_runs_game (AML_LOADER_FORGE,
+                                                "1.20.1-47.2.0", "1.20.1"));
+  g_assert_false (aml_loaders_version_runs_game (AML_LOADER_FORGE,
+                                                 "1.20.1-47.2.0", "1.20"));
+  g_assert_false (aml_loaders_version_runs_game (AML_LOADER_FORGE,
+                                                 "1.20.1-47.2.0", "1.20.2"));
+  g_assert_true (aml_loaders_version_runs_game (AML_LOADER_FORGE,
+                                                "1.21-51.0.33", "1.21"));
+
+  /* NeoForge: "26.3.0.51-beta" runs 26.3, and a version of another game
+     does not. */
+  g_assert_true (aml_loaders_version_runs_game (AML_LOADER_NEOFORGE,
+                                                "26.3.0.51-beta", "26.3"));
+  g_assert_true (aml_loaders_version_runs_game (AML_LOADER_NEOFORGE,
+                                                "21.1.256", "21.1"));
+  g_assert_false (aml_loaders_version_runs_game (AML_LOADER_NEOFORGE,
+                                                 "21.1.256", "21.11"));
+  g_assert_false (aml_loaders_version_runs_game (AML_LOADER_NEOFORGE,
+                                                 "20.2.3-beta", "26.3"));
+
+  /* A loader that publishes no installer is not asked the question: its
+     versions are its own and name no game. */
+  g_assert_false (aml_loaders_version_runs_game (AML_LOADER_FABRIC,
+                                                 "0.19.5", "26.3"));
+  g_assert_false (aml_loaders_version_runs_game (AML_LOADER_NEOFORGE, NULL,
+                                                 "26.3"));
+  g_assert_false (aml_loaders_version_runs_game (AML_LOADER_NEOFORGE,
+                                                 "26.3.0.51-beta", NULL));
+
+  g_print ("ok - the versions of a loader are told apart by their names\n");
+}
+
+/* The versions of NeoForge for one Minecraft version, out of everything
+   its maven holds. */
+static void
+test_neoforge_version_list (void)
+{
+  g_autofree char *json = NULL;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GPtrArray) versions = NULL;
+
+  if (!g_file_get_contents (AML_TEST_FIXTURES "/neoforge-versions.json", &json,
+                            NULL, &error))
+    g_error ("the fixture cannot be read: %s", error->message);
+
+  /* The maven holds every version NeoForge ever published, for every game;
+     only the ones named after the game that was asked for are versions of
+     it. */
+  versions = aml_loaders_maven_versions_from_json (AML_LOADER_NEOFORGE, "26.3",
+                                                    json, -1, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (versions);
+  g_assert_cmpuint (versions->len, ==, 3);
+  g_assert_cmpstr (version_at (versions, 0)->version, ==, "26.3.0.51-beta");
+  g_assert_cmpstr (version_at (versions, 2)->version, ==, "26.3.0.49-beta");
+
+  /* Every NeoForge of this game version is a beta, which is what the
+     suffix says. */
+  g_assert_false (version_at (versions, 0)->stable);
+  g_assert_false (version_at (versions, 1)->stable);
+  g_assert_false (version_at (versions, 2)->stable);
+
+  /* Another game version out of the same answer. */
+  g_clear_pointer (&versions, g_ptr_array_unref);
+  versions = aml_loaders_maven_versions_from_json (AML_LOADER_NEOFORGE,
+                                                    "21.1", json, -1, &error);
+  g_assert_no_error (error);
+  g_assert_cmpuint (versions->len, ==, 3);
+  g_assert_cmpstr (version_at (versions, 0)->version, ==, "21.1.256");
+
+  /* These are releases: nothing follows their numbers. */
+  g_assert_true (version_at (versions, 0)->stable);
+  g_assert_true (version_at (versions, 2)->stable);
+
+  /* A game no version of NeoForge runs. */
+  g_clear_pointer (&versions, g_ptr_array_unref);
+  versions = aml_loaders_maven_versions_from_json (AML_LOADER_NEOFORGE,
+                                                    "1.20.1", json, -1,
+                                                    &error);
+  g_assert_null (versions);
+  g_assert_error (error, AML_LOADERS_ERROR, AML_LOADERS_ERROR_NO_VERSIONS);
+
+  g_print ("ok - a NeoForge maven is read and filtered by game version\n");
+}
+
+/* The same for Forge, whose names carry a dash and whose releases are
+   releases even with a dash in the name. */
+static void
+test_forge_version_list (void)
+{
+  g_autofree char *json = NULL;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GPtrArray) versions = NULL;
+
+  if (!g_file_get_contents (AML_TEST_FIXTURES "/forge-versions.json", &json,
+                            NULL, &error))
+    g_error ("the fixture cannot be read: %s", error->message);
+
+  versions = aml_loaders_maven_versions_from_json (AML_LOADER_FORGE, "1.20.1",
+                                                    json, -1, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (versions);
+  g_assert_cmpuint (versions->len, ==, 3);
+
+  /* Newest first, and the numbers compared as numbers: 47.10 would be
+     newer than 47.9, which sorting them as text would get wrong. */
+  g_assert_cmpstr (version_at (versions, 0)->version, ==, "1.20.1-47.3.0");
+  g_assert_cmpstr (version_at (versions, 1)->version, ==, "1.20.1-47.2.0");
+  g_assert_cmpstr (version_at (versions, 2)->version, ==, "1.20.1-47.1.7");
+
+  /* The dash in a Forge version is what joins the game version to its own
+     numbers, so these are releases and not pre-releases. */
+  g_assert_true (version_at (versions, 0)->stable);
+  g_assert_true (version_at (versions, 2)->stable);
+
+  g_clear_pointer (&versions, g_ptr_array_unref);
+  versions = aml_loaders_maven_versions_from_json (AML_LOADER_FORGE, "1.16.5",
+                                                    json, -1, &error);
+  g_assert_no_error (error);
+  g_assert_cmpuint (versions->len, ==, 1);
+  g_assert_cmpstr (version_at (versions, 0)->version, ==, "1.16.5-36.2.34");
+
+  g_print ("ok - a Forge maven is read and filtered by game version\n");
+}
+
+/* An answer that is not a list of versions is refused, whatever the
+   loader. */
+static void
+test_a_maven_that_answers_nothing (void)
+{
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GPtrArray) versions = NULL;
+
+  versions = aml_loaders_maven_versions_from_json (
+    AML_LOADER_FORGE, "1.20.1", "{\"status\": 404}", -1, &error);
+  g_assert_null (versions);
+  g_assert_error (error, AML_LOADERS_ERROR, AML_LOADERS_ERROR_NO_VERSIONS);
+
+  g_print ("ok - a maven that answers nothing is refused\n");
+}
+
+/* ---------------------------------------------------------- *
  * The document of a loader version
  * ---------------------------------------------------------- */
 
@@ -390,6 +558,11 @@ main (void)
   test_fabric_version_list ();
   test_quilt_version_list ();
   test_empty_and_broken_answers ();
+  test_which_loaders_publish_an_installer ();
+  test_compatibility_filtering ();
+  test_neoforge_version_list ();
+  test_forge_version_list ();
+  test_a_maven_that_answers_nothing ();
   test_fabric_profile ();
   test_quilt_profile ();
   test_profile_without_a_maven_address ();
