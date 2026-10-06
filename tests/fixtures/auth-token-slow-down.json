@@ -1,0 +1,4 @@
+{
+  "error": "slow_down",
+  "error_description": "AADSTS70016: Polling too frequently. Increase the interval."
+}

@@ -1,0 +1,4 @@
+{
+  "error": "expired_token",
+  "error_description": "AADSTS70008: The provided code has expired. The user must sign in again."
+}
