@@ -204,7 +204,8 @@ test_token_expiry (void)
   g_clear_pointer (&account->access_token, g_free);
   g_assert_false (aml_account_token_is_valid (account, now));
 
-  g_clear_pointer (&account, g_free);
+  /* The next account is a new one, not the old one emptied out. */
+  g_clear_pointer (&account, aml_account_free);
   account = microsoft_account (0, "token");
   g_assert_false (aml_account_token_is_valid (account, now));
 
