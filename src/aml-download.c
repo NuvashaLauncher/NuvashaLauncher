@@ -97,6 +97,8 @@ typedef struct
   char *dest_path;       /* NULL for a JSON request */
   char *expected_hash;   /* NULL: nothing to verify */
   GChecksumType hash_type;
+  char *body;            /* NULL: a GET request */
+  char *user_agent;      /* NULL: the session's own */
   AmlDownloadProgressFunc progress;
   gpointer user_data;
   gboolean json;
@@ -299,6 +301,8 @@ request_free (DownloadRequest *request)
   g_free (request->url);
   g_free (request->dest_path);
   g_free (request->expected_hash);
+  g_free (request->body);
+  g_free (request->user_agent);
   g_free (request);
 }
 
@@ -909,7 +913,9 @@ start_attempt (DownloadRequest *request)
   request->http_status = 0;
   request->attempts++;
 
-  request->message = soup_message_new (SOUP_METHOD_GET, request->url);
+  request->message = soup_message_new (
+      request->body != NULL ? SOUP_METHOD_POST : SOUP_METHOD_GET,
+      request->url);
 
   if (request->message == NULL)
     {
@@ -920,6 +926,16 @@ start_attempt (DownloadRequest *request)
                                  "\"%s\" is not a usable download url", url));
       return;
     }
+
+  if (request->body != NULL)
+    soup_message_set_request_body_from_bytes (
+        request->message, "application/json",
+        g_bytes_new (request->body, strlen (request->body)));
+
+  if (request->user_agent != NULL)
+    soup_message_headers_replace (
+        soup_message_get_request_headers (request->message), "User-Agent",
+        request->user_agent);
 
   if (request->json)
     {
@@ -1098,4 +1114,44 @@ aml_download_json_finish (GAsyncResult *result, GError **error)
   g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
 
   return g_task_propagate_pointer (G_TASK (result), error);
+}
+
+void
+aml_download_json_post_async (const char           *url,
+                              const char           *body,
+                              const char           *user_agent,
+                              GCancellable         *cancellable,
+                              GAsyncReadyCallback   callback,
+                              gpointer              user_data)
+{
+  g_return_if_fail (url != NULL);
+  g_return_if_fail (body != NULL);
+
+  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
+
+  /* See aml_download_file_async(). */
+  g_task_set_check_cancellable (task, FALSE);
+
+  if (!usable_url (url))
+    {
+      g_autofree char *shown = url_for_message (url);
+
+      g_task_return_new_error (task, AML_DOWNLOAD_ERROR,
+                               AML_DOWNLOAD_ERROR_NETWORK,
+                               "\"%s\" is not a usable request url", shown);
+      return;
+    }
+
+  DownloadRequest *request = g_new0 (DownloadRequest, 1);
+
+  request->task = g_steal_pointer (&task);
+  request->url = g_strdup (url);
+  request->body = g_strdup (body);
+  request->user_agent = g_strdup (user_agent);
+  request->json = TRUE;
+  request->user_data = user_data;
+  request->fd = -1;
+  request->total = -1;
+
+  start_transfer (request);
 }

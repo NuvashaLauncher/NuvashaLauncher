@@ -91,6 +91,22 @@ void aml_download_json_async (const char       *url,
 JsonParser *aml_download_json_finish (GAsyncResult *result,
                                       GError     **error);
 
+/* Posts @body as "application/json" to @url and parses the answer the
+ * way aml_download_json_async() does, with the same retry and rate
+ * limit rules.
+ *
+ * @user_agent replaces the User-Agent of the session for this one
+ * request, which is what a service that wants to be told which client
+ * it is talking to asks for. NULL keeps the session's own.
+ *
+ * The returned parser is owned by the caller. */
+void aml_download_json_post_async (const char       *url,
+                                   const char       *body,
+                                   const char       *user_agent,
+                                   GCancellable     *cancellable,
+                                   GAsyncReadyCallback callback,
+                                   gpointer                user_data);
+
 G_END_DECLS
 
 #endif /* AML_DOWNLOAD_H */
