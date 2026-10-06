@@ -15,6 +15,7 @@
  * version and one for another loader) are shaped after real ones, and
  * the fixture that carries all four dependency kinds says so inside. */
 
+#include "aml-content-page.h"
 #include "aml-modrinth.h"
 
 #include <glib.h>
@@ -511,6 +512,188 @@ test_dependency_without_project (void)
 }
 
 /* ---------------------------------------------------------- *
+ * The files of an instance
+ * ---------------------------------------------------------- */
+
+static void
+test_folder_and_disabled_names (void)
+{
+  g_autofree char *mods = NULL;
+  g_autofree char *packs = NULL;
+  g_autofree char *disabled = NULL;
+  g_autofree char *enabled = NULL;
+  g_autofree char *again = NULL;
+
+  mods = aml_content_folder_path ("/tmp/instance", AML_CONTENT_MOD);
+  packs = aml_content_folder_path ("/tmp/instance",
+                                   AML_CONTENT_RESOURCE_PACK);
+  g_assert_cmpstr (mods, ==, "/tmp/instance/mods");
+  g_assert_cmpstr (packs, ==, "/tmp/instance/resourcepacks");
+
+  /* Disabling puts the suffix on the name, which is what the loaders and
+   * the game stop loading; enabling takes it off again. */
+  disabled = aml_content_disabled_name ("sodium.jar", FALSE);
+  g_assert_cmpstr (disabled, ==, "sodium.jar.disabled");
+
+  enabled = aml_content_disabled_name (disabled, TRUE);
+  g_assert_cmpstr (enabled, ==, "sodium.jar");
+
+  /* A name that carries it twice does not get it twice. */
+  again = aml_content_disabled_name (disabled, FALSE);
+  g_assert_cmpstr (again, ==, "sodium.jar.disabled");
+
+  g_print ("ok - a disabled file is the same file with a suffix on\n");
+}
+
+/* What the last scan of the test answered, and the loop that waits for
+ * it. */
+static GPtrArray *scanned = NULL;
+static GMainLoop *scanning = NULL;
+
+static void
+on_scan_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                  gpointer user_data G_GNUC_UNUSED)
+{
+  g_clear_pointer (&scanned, g_ptr_array_unref);
+  scanned = aml_content_scan_finish (result, NULL);
+  g_main_loop_quit (scanning);
+}
+
+/* Reads a content folder and waits for it, which is the asynchronous
+ * way the page does the same. (transfer full) */
+static GPtrArray *
+scan (const char *instance, AmlContentType type)
+{
+  GPtrArray *files = NULL;
+
+  scanned = NULL;
+  scanning = g_main_loop_new (NULL, FALSE);
+  aml_content_scan_async (instance, type, NULL, on_scan_finished, NULL);
+  g_main_loop_run (scanning);
+
+  /* GMainLoop is refcounted but is not a GObject, so it cannot be given
+   * to g_clear_object(). */
+  g_main_loop_unref (scanning);
+  scanning = NULL;
+
+  files = scanned;
+  scanned = NULL;
+
+  return files;
+}
+
+static void
+test_scan_and_toggle (void)
+{
+  g_autofree char *instance = NULL;
+  g_autofree char *folder_path = NULL;
+  g_autoptr (GPtrArray) lithium = NULL;
+  g_autofree char *renamed = NULL;
+  g_autofree char *back = NULL;
+  g_autofree char *same = NULL;
+  g_autoptr (GFile) folder = NULL;
+  g_autoptr (GFile) file = NULL;
+  g_autoptr (GError) error = NULL;
+
+  instance = g_dir_make_tmp ("aml-content-XXXXXX", NULL);
+  g_assert_nonnull (instance);
+
+  folder_path = aml_content_folder_path (instance, AML_CONTENT_MOD);
+  folder = g_file_new_for_path (folder_path);
+  g_assert_true (g_file_make_directory_with_parents (folder, NULL, &error));
+  g_assert_no_error (error);
+
+  /* One mod, one mod that was disabled, and a file that is not a mod. */
+  file = g_file_get_child (folder, "sodium-fabric.jar");
+  g_assert_true (g_file_replace_contents (file, "a", 1, NULL, FALSE,
+                                          G_FILE_CREATE_NONE, NULL, NULL,
+                                          &error));
+  g_clear_object (&file);
+  file = g_file_get_child (folder, "lithium.jar.disabled");
+  g_assert_true (g_file_replace_contents (file, "b", 1, NULL, FALSE,
+                                          G_FILE_CREATE_NONE, NULL, NULL,
+                                          &error));
+  g_clear_object (&file);
+  file = g_file_get_child (folder, "notes.txt");
+  g_assert_true (g_file_replace_contents (file, "c", 1, NULL, FALSE,
+                                          G_FILE_CREATE_NONE, NULL, NULL,
+                                          &error));
+  g_assert_no_error (error);
+
+  lithium = scan (instance, AML_CONTENT_MOD);
+
+  /* Only the mods are listed, and both are: a disabled one is still in
+     the folder and the user has to see it to enable it again. */
+  g_assert_nonnull (lithium);
+  g_assert_cmpuint (lithium->len, ==, 2);
+
+  {
+    AmlContentFile *disabled = g_ptr_array_index (lithium, 0);
+    AmlContentFile *enabled = g_ptr_array_index (lithium, 1);
+
+    /* Sorted by name, and the suffix is not part of the name a user
+       reads. */
+    g_assert_cmpstr (disabled->filename, ==, "lithium.jar");
+    g_assert_false (disabled->enabled);
+    g_assert_cmpstr (disabled->sha1, ==,
+                     "e9d71f5ee7c92d6dc9e92ffdad17b8bd49418f98");
+
+    g_assert_cmpstr (enabled->filename, ==, "sodium-fabric.jar");
+    g_assert_true (enabled->enabled);
+    g_assert_cmpstr (enabled->sha1, ==,
+                     "86f7e437faa5a7fce15d1ddcb9eaeaea377667b8");
+  }
+
+  /* Enabling it takes the suffix off, and disabling it puts it back. */
+  {
+    const char *disabled_path =
+      ((AmlContentFile *) g_ptr_array_index (lithium, 0))->path;
+    g_autofree char *enabled_path =
+      g_build_filename (folder_path, "lithium.jar", NULL);
+
+    /* A disabled file is loaded again by taking the suffix off. */
+    g_free (back);
+    back = aml_content_set_disabled (disabled_path, TRUE, &error);
+    g_assert_no_error (error);
+    g_assert_cmpstr (back, ==, enabled_path);
+    g_assert_true (g_file_test (back, G_FILE_TEST_EXISTS));
+
+    /* Asking for the state a file is already in is not a rename. */
+    same = aml_content_set_disabled (back, TRUE, &error);
+    g_assert_no_error (error);
+    g_assert_cmpstr (same, ==, back);
+    g_assert_true (g_file_test (same, G_FILE_TEST_EXISTS));
+
+    /* And it goes back to being a file the loader skips. */
+    renamed = aml_content_set_disabled (back, FALSE, &error);
+    g_assert_no_error (error);
+    g_assert_cmpstr (renamed, ==, disabled_path);
+    g_assert_true (g_file_test (renamed, G_FILE_TEST_EXISTS));
+  }
+
+  /* The folder is read again with the file disabled under its new name,
+     and the resource pack folder of an instance that has none is
+     simply empty. */
+  {
+    g_autoptr (GPtrArray) again = scan (instance, AML_CONTENT_MOD);
+
+    g_assert_cmpuint (again->len, ==, 2);
+    g_assert_false (((AmlContentFile *) g_ptr_array_index (again, 0))->enabled);
+  }
+
+  {
+    g_autoptr (GPtrArray) none = scan (instance, AML_CONTENT_SHADER_PACK);
+
+    /* A folder that does not exist holds no files, which is what an
+       instance that never installed a shader pack looks like. */
+    g_assert_nonnull (none);
+    g_assert_cmpuint (none->len, ==, 0);
+  }
+
+  g_print ("ok - the folder is read, and enable and disable rename it\n");
+}
+
+/* ---------------------------------------------------------- *
  * The content kinds
  * ---------------------------------------------------------- */
 
@@ -563,6 +746,8 @@ main (int argc, char **argv)
   g_test_add_func ("/modrinth/dependency-broken",
                    test_dependency_without_project);
   g_test_add_func ("/modrinth/content-types", test_content_types);
+  g_test_add_func ("/modrinth/folder", test_folder_and_disabled_names);
+  g_test_add_func ("/modrinth/scan", test_scan_and_toggle);
 
   return g_test_run ();
 }
