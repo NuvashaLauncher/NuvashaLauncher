@@ -621,8 +621,10 @@ aml_modrinth_dependency_free (AmlModrinthDependency *dependency)
   g_free (dependency);
 }
 
-static AmlModrinthDependency *
-dependency_copy (AmlModrinthDependency *dependency)
+/* A copy of a dependency, so a caller can hold it without keeping the
+ * version it came from alive. (transfer full) */
+AmlModrinthDependency *
+aml_modrinth_dependency_copy (AmlModrinthDependency *dependency)
 {
   AmlModrinthDependency *copy = NULL;
 
@@ -634,6 +636,27 @@ dependency_copy (AmlModrinthDependency *dependency)
   copy->project_id = g_strdup (dependency->project_id);
   copy->version_id = g_strdup (dependency->version_id);
   copy->file_name = g_strdup (dependency->file_name);
+
+  return copy;
+}
+
+AmlModrinthProject *
+aml_modrinth_project_copy (AmlModrinthProject *project)
+{
+  AmlModrinthProject *copy = NULL;
+
+  if (project == NULL)
+    return NULL;
+
+  copy = g_new0 (AmlModrinthProject, 1);
+  copy->project_id = g_strdup (project->project_id);
+  copy->slug = g_strdup (project->slug);
+  copy->title = g_strdup (project->title);
+  copy->description = g_strdup (project->description);
+  copy->author = g_strdup (project->author);
+  copy->icon_url = g_strdup (project->icon_url);
+  copy->downloads = project->downloads;
+  copy->followers = project->followers;
 
   return copy;
 }
@@ -655,6 +678,60 @@ aml_modrinth_version_free (AmlModrinthVersion *version)
   g_clear_pointer (&version->files, g_ptr_array_unref);
   g_clear_pointer (&version->dependencies, g_ptr_array_unref);
   g_free (version);
+}
+
+AmlModrinthVersion *
+aml_modrinth_version_copy (AmlModrinthVersion *version)
+{
+  AmlModrinthVersion *copy = NULL;
+
+  if (version == NULL)
+    return NULL;
+
+  copy = g_new0 (AmlModrinthVersion, 1);
+  copy->version_id = g_strdup (version->version_id);
+  copy->project_id = g_strdup (version->project_id);
+  copy->name = g_strdup (version->name);
+  copy->version_number = g_strdup (version->version_number);
+  copy->changelog = g_strdup (version->changelog);
+  copy->date_published = g_strdup (version->date_published);
+  copy->downloads = version->downloads;
+  copy->game_versions = g_ptr_array_new_with_free_func (g_free);
+  copy->loaders = g_ptr_array_new_with_free_func (g_free);
+  copy->files = g_ptr_array_new_with_free_func (
+      (GDestroyNotify) aml_modrinth_file_free);
+  copy->dependencies = g_ptr_array_new_with_free_func (
+      (GDestroyNotify) aml_modrinth_dependency_free);
+
+  for (guint i = 0; i < version->game_versions->len; i++)
+    g_ptr_array_add (copy->game_versions,
+                     g_strdup (g_ptr_array_index (version->game_versions, i)));
+
+  for (guint i = 0; i < version->loaders->len; i++)
+    g_ptr_array_add (copy->loaders,
+                     g_strdup (g_ptr_array_index (version->loaders, i)));
+
+  for (guint i = 0; i < version->files->len; i++)
+    {
+      AmlModrinthFile *file = g_ptr_array_index (version->files, i);
+      AmlModrinthFile *file_copy = g_new0 (AmlModrinthFile, 1);
+
+      file_copy->filename = g_strdup (file->filename);
+      file_copy->url = g_strdup (file->url);
+      file_copy->sha1 = g_strdup (file->sha1);
+      file_copy->sha512 = g_strdup (file->sha512);
+      file_copy->size = file->size;
+      file_copy->primary = file->primary;
+      g_ptr_array_add (copy->files, file_copy);
+    }
+
+  for (guint i = 0; i < version->dependencies->len; i++)
+    g_ptr_array_add (
+        copy->dependencies,
+        aml_modrinth_dependency_copy (
+            g_ptr_array_index (version->dependencies, i)));
+
+  return copy;
 }
 
 AmlModrinthFile *
@@ -1306,6 +1383,115 @@ aml_modrinth_versions_finish (GAsyncResult *result, GError **error)
 }
 
 /* ---------------------------------------------------------- *
+ * The categories a search can be narrowed by
+ * ---------------------------------------------------------- */
+
+static int
+compare_names (gconstpointer a, gconstpointer b)
+{
+  return g_strcmp0 (*(const char *const *) a, *(const char *const *) b);
+}
+
+GPtrArray *
+aml_modrinth_categories_from_json (const char *json, gssize length,
+                                   AmlContentType type, GError **error)
+{
+  g_autoptr (JsonParser) parser = json_parser_new ();
+  g_autoptr (GError) parse_error = NULL;
+  GPtrArray *names = NULL;
+  JsonNode *root = NULL;
+  JsonArray *array = NULL;
+  const char *wanted = aml_content_type_to_string (type);
+
+  if (!json_parser_load_from_data (parser, json != NULL ? json : "",
+                                   json != NULL ? length : 0, &parse_error))
+    {
+      g_propagate_error (error, parse_error);
+      return NULL;
+    }
+
+  root = json_parser_get_root (parser);
+
+  if (root == NULL || !JSON_NODE_HOLDS_ARRAY (root))
+    {
+      g_set_error_literal (error, AML_MODRINTH_ERROR,
+                           AML_MODRINTH_ERROR_PARSE,
+                           "the categories answer is not a list");
+      return NULL;
+    }
+
+  names = g_ptr_array_new_with_free_func (g_free);
+  array = json_node_get_array (root);
+
+  for (guint i = 0; i < json_array_get_length (array); i++)
+    {
+      g_autofree char *item_type = NULL;
+      g_autofree char *name = NULL;
+      JsonNode *item = json_array_get_element (array, i);
+
+      if (object_of (item) == NULL)
+        continue;
+
+      /* One project type publishes one list of categories, so the
+       * other kinds' categories are not offered here. */
+      item_type = object_string (item, "project_type");
+      name = object_string (item, "name");
+
+      if (name == NULL || g_strcmp0 (item_type, wanted) != 0)
+        continue;
+
+      g_ptr_array_add (names, g_steal_pointer (&name));
+    }
+
+  g_ptr_array_sort (names, compare_names);
+
+  return names;
+}
+
+static void
+categories_answer (GTask *task, JsonNode *root)
+{
+  g_autofree char *json = json_to_string (root, FALSE);
+  g_autoptr (GError) error = NULL;
+  Request *request = g_task_get_task_data (task);
+  GPtrArray *names = NULL;
+
+  names = aml_modrinth_categories_from_json (
+      json, -1, (AmlContentType) GPOINTER_TO_INT (request->data), &error);
+
+  if (names == NULL)
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  g_task_return_pointer (task, names, (GDestroyNotify) g_ptr_array_unref);
+}
+
+void
+aml_modrinth_categories_async (AmlContentType type, GCancellable *cancellable,
+                               GAsyncReadyCallback callback,
+                               gpointer user_data)
+{
+  g_autofree char *url = g_strdup_printf (AML_MODRINTH_URL "/tag/category");
+  g_autoptr (GTask) task = NULL;
+
+  task = request_new (cancellable, callback, user_data, categories_answer,
+                      AML_NOT_FOUND_IS_ERROR,
+                      GINT_TO_POINTER ((int) type), NULL);
+  aml_download_json_async (url, cancellable, json_ready,
+                           g_steal_pointer (&task));
+}
+
+GPtrArray *
+aml_modrinth_categories_finish (GAsyncResult *result, GError **error)
+{
+  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
+
+  return g_task_propagate_pointer (G_TASK (result), error);
+}
+
+/* ---------------------------------------------------------- *
  * One version out of the hash of a file
  * ---------------------------------------------------------- */
 
@@ -1487,7 +1673,7 @@ aml_modrinth_resolve_install (AmlModrinthVersion *version,
           if (!g_hash_table_contains (installed, dependency->project_id))
             continue;
 
-          g_ptr_array_add (*conflicts, dependency_copy (dependency));
+          g_ptr_array_add (*conflicts, aml_modrinth_dependency_copy (dependency));
         }
     }
 
@@ -1534,7 +1720,7 @@ aml_modrinth_resolve_install (AmlModrinthVersion *version,
       if (already)
         continue;
 
-      g_ptr_array_add (pending, dependency_copy (dependency));
+      g_ptr_array_add (pending, aml_modrinth_dependency_copy (dependency));
     }
 
   return pending;
