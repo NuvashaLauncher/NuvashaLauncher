@@ -252,6 +252,23 @@ on_log_limit_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
 /* Same contract as the snapshots switch: written at once, and put back
    what the file says when the file says no. */
 static void
+on_show_unstable_loaders_toggled (GObject *object,
+                                  GParamSpec *pspec G_GNUC_UNUSED,
+                                  gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  AdwSwitchRow *row = ADW_SWITCH_ROW (object);
+  gboolean active = adw_switch_row_get_active (row);
+
+  if (active == aml_settings_get_show_unstable_loaders (self->settings))
+    return;
+
+  if (!aml_settings_set_show_unstable_loaders (self->settings, active, NULL))
+    adw_switch_row_set_active (
+      row, aml_settings_get_show_unstable_loaders (self->settings));
+}
+
+static void
 on_open_logs_after_crash_toggled (GObject *object,
                                   GParamSpec *pspec G_GNUC_UNUSED,
                                   gpointer user_data)
@@ -278,12 +295,14 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   GtkWidget *page = adw_preferences_page_new ();
   GtkWidget *versions_group = adw_preferences_group_new ();
   GtkWidget *java_group = adw_preferences_group_new ();
+  GtkWidget *loaders_group = adw_preferences_group_new ();
   GtkWidget *logs_group = adw_preferences_group_new ();
   GtkWidget *row = adw_switch_row_new ();
   GtkWidget *java_row = GTK_WIDGET (aml_java_row_new ());
   GtkWidget *custom_row = adw_action_row_new ();
   GtkWidget *custom_button = gtk_button_new_with_label ("Choose…");
   GtkWidget *limit_row = NULL;
+  GtkWidget *unstable_row = adw_switch_row_new ();
   GtkWidget *crash_row = adw_switch_row_new ();
   SettingsJava *ctx = g_new0 (SettingsJava, 1);
 
@@ -349,6 +368,26 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (java_group), java_row);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (java_group), custom_row);
 
+  /* Loaders */
+  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (loaders_group),
+                                   "Loaders");
+  adw_preferences_group_set_description (ADW_PREFERENCES_GROUP (loaders_group),
+                                         "What the loader version lists "
+                                         "hold.");
+
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (unstable_row),
+                                 "Show Unstable Loader Versions");
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (unstable_row),
+                               "Also list the versions a loader does not "
+                               "call stable");
+  adw_switch_row_set_active (
+    ADW_SWITCH_ROW (unstable_row),
+    aml_settings_get_show_unstable_loaders (self->settings));
+  g_signal_connect (unstable_row, "notify::active",
+                    G_CALLBACK (on_show_unstable_loaders_toggled), self);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (loaders_group),
+                             unstable_row);
+
   /* Logs */
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (logs_group), "Logs");
   adw_preferences_group_set_description (ADW_PREFERENCES_GROUP (logs_group),
@@ -383,6 +422,8 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
                             ADW_PREFERENCES_GROUP (versions_group));
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                             ADW_PREFERENCES_GROUP (java_group));
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+                            ADW_PREFERENCES_GROUP (loaders_group));
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                             ADW_PREFERENCES_GROUP (logs_group));
   adw_preferences_dialog_add (ADW_PREFERENCES_DIALOG (dialog),

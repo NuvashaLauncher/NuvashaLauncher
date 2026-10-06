@@ -28,6 +28,7 @@
 #include "aml-launcher.h"
 
 #include "aml-java.h"
+#include "aml-loaders.h"
 #include "aml-minecraft-resolve.h"
 #include "aml-minecraft-versions.h"
 
@@ -1199,6 +1200,106 @@ on_resolve_progress (const AmlResolveProgress *progress, gpointer user_data)
     set_state (self, AML_LAUNCH_PREPARING, self->version);
 }
 
+/* ---------------------------------------------------------- *
+ * What the loader of an instance adds to its game
+ * ---------------------------------------------------------- */
+
+/* The document of a loader version is a version document of its own that
+ * inherits from a Minecraft version, so a loader instance runs that
+ * document merged over the one it inherits from: the same merge a
+ * profile inherits from its parent. */
+typedef struct {
+  AmlLauncher *launcher; /* the reference this work holds */
+  AmlVersionManifest *manifest;
+  AmlVersionDescription *profile; /* the document of the loader */
+  char *game_version;
+} LoaderRequest;
+
+static void
+loader_request_free (LoaderRequest *request)
+{
+  g_clear_object (&request->manifest);
+  g_clear_object (&request->profile);
+  g_clear_object (&request->launcher);
+  g_free (request->game_version);
+  g_free (request);
+}
+
+static void
+on_vanilla_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                   gpointer user_data)
+{
+  LoaderRequest *request = user_data;
+  AmlLauncher *self = request->launcher;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlVersionDescription) vanilla =
+    aml_version_load_finish (result, &error);
+  g_autoptr (AmlVersionDescription) merged = NULL;
+
+  if (vanilla == NULL)
+    {
+      launch_finished_with_error (self, g_steal_pointer (&error));
+      loader_request_free (request);
+      return;
+    }
+
+  merged = aml_version_description_merge (vanilla, request->profile);
+
+  aml_resolve_description_async (merged, merged->id, NULL, NULL, NULL,
+                                 self->cancellable, on_resolve_progress, self,
+                                 on_resolved, g_object_ref (self));
+  loader_request_free (request);
+}
+
+static void
+on_profile_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                   gpointer user_data)
+{
+  LoaderRequest *request = user_data;
+  AmlLauncher *self = request->launcher;
+  g_autoptr (GError) error = NULL;
+  AmlVersionDescription *profile =
+    aml_loaders_profile_finish (result, &error);
+
+  if (profile == NULL)
+    {
+      launch_finished_with_error (self, g_steal_pointer (&error));
+      loader_request_free (request);
+      return;
+    }
+
+  request->profile = profile;
+
+  if (self->stop_requested)
+    {
+      loader_request_free (request);
+      return;
+    }
+
+  aml_version_load_async (request->manifest, request->game_version,
+                          self->cancellable, on_vanilla_loaded, request);
+}
+
+static void
+resolve_with_a_loader (AmlLauncher        *self,
+                       AmlVersionManifest *manifest,
+                       AmlLoader           loader,
+                       const char         *loader_version)
+{
+  LoaderRequest *request = g_new0 (LoaderRequest, 1);
+
+  request->launcher = g_object_ref (self);
+  request->manifest = g_object_ref (manifest);
+  request->game_version = g_strdup (self->version);
+
+  log_line (self, TAG_STATE, "asking %s for %s %s",
+            aml_loader_display_name (loader), loader_version,
+            self->version != NULL ? self->version : "");
+
+  aml_loaders_profile_async (loader, request->game_version, loader_version,
+                             self->cancellable, on_profile_loaded, request);
+}
+
 static void
 on_manifest_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                    gpointer user_data)
@@ -1220,6 +1321,31 @@ on_manifest_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       g_object_unref (self);
       return;
     }
+
+  {
+    g_autofree char *loader_version = NULL;
+    AmlLoader loader = AML_LOADER_VANILLA;
+
+    g_object_get (self->instance, "loader", &loader, "loader-version",
+                  &loader_version, NULL);
+
+    if (loader != AML_LOADER_VANILLA)
+      {
+        /* An instance that names a loader this build does not install, or
+           that has no loader version, is a broken instance rather than a
+           game to run: saying so is better than running the wrong thing. */
+        if (!aml_loader_is_supported (loader))
+          launcher_failed (self, "this build of AML does not install "
+                                 "that loader");
+        else if (loader_version == NULL || *loader_version == '\0')
+          launcher_failed (self, "the instance has no loader version");
+        else
+          resolve_with_a_loader (self, manifest, loader, loader_version);
+
+        g_object_unref (self);
+        return;
+      }
+  }
 
   aml_resolve_version_async (manifest, self->version, NULL, NULL, NULL,
                              self->cancellable, on_resolve_progress, self,

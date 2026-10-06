@@ -1,0 +1,58 @@
+[
+  {
+    "loader": {
+      "maven": "org.quiltmc:quilt-loader:0.30.2-beta.1",
+      "version": "0.30.2-beta.1",
+      "build": 1,
+      "separator": ".",
+      "file_size": 1550096,
+      "hashes": {
+        "sha1": "bed0a01be87c4378d9002611d9642e8f9e9c2cff"
+      }
+    },
+    "launcherMeta": {
+      "version": 2,
+      "min_java_version": 21,
+      "libraries": {}
+    }
+  },
+  {
+    "loader": {
+      "maven": "org.quiltmc:quilt-loader:0.30.1",
+      "version": "0.30.1",
+      "build": 1,
+      "separator": "."
+    },
+    "launcherMeta": {
+      "version": 2,
+      "min_java_version": 21,
+      "libraries": {}
+    }
+  },
+  {
+    "loader": {
+      "maven": "org.quiltmc:quilt-loader:0.18.4-pre.3",
+      "version": "0.18.4-pre.3",
+      "build": 3,
+      "separator": "."
+    },
+    "launcherMeta": {
+      "version": 2,
+      "min_java_version": 17,
+      "libraries": {}
+    }
+  },
+  {
+    "loader": {
+      "maven": "org.quiltmc:quilt-loader:0.28.1",
+      "version": "0.28.1",
+      "build": 1,
+      "separator": "."
+    },
+    "launcherMeta": {
+      "version": 2,
+      "min_java_version": 21,
+      "libraries": {}
+    }
+  }
+]

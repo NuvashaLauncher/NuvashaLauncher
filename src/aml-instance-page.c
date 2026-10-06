@@ -19,6 +19,7 @@
 #include "aml-java.h"
 #include "aml-java-row.h"
 #include "aml-launcher.h"
+#include "aml-loader-row.h"
 #include "aml-logs-page.h"
 #include "aml-minecraft-versions.h"
 
@@ -43,6 +44,12 @@ struct _AmlInstancePage
   GtkWidget *java_row;
   int required_java;        /* 0 means "never found one / unknown" */
   GCancellable *cancellable;
+
+  /* The loader and the version of it, and what the instance runs now, so
+     that a change that cannot be written goes back to it. */
+  GtkWidget *loader_row;
+  AmlLoader loader;
+  char *loader_version;
 };
 
 G_DEFINE_FINAL_TYPE (AmlInstancePage, aml_instance_page,
@@ -214,6 +221,13 @@ on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
   /* The card in the grid shows the version this instance runs. */
   refresh_in_grid (self);
 
+  /* A loader has one set of versions per Minecraft version, so the list
+     is asked again for the version that was picked. */
+  aml_loader_row_load (AML_LOADER_ROW (self->loader_row), self->settings,
+                       aml_loader_row_get_loader (AML_LOADER_ROW (
+                                                    self->loader_row)),
+                       self->loader_version, version);
+
   /* Its javaVersion requirement may differ: check the compatibility
    * warning again, using the manifest cache. */
   g_cancellable_cancel (self->cancellable);
@@ -222,6 +236,53 @@ on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
   aml_version_manifest_fetch_async (AML_VERSION_MANIFEST_URL,
                                     self->cancellable, on_manifest_loaded,
                                     g_object_ref (self));
+}
+
+/* ---------------------------------------------------------- *
+ * The loader and the version of it
+ * ---------------------------------------------------------- */
+
+/* The loader and its version are what the instance runs, so they are
+   written through the manager the way the Minecraft version above is. A
+   version the row answers nothing for is nothing to store. */
+static void
+on_loader_changed (AmlLoaderRow *row, gpointer user_data)
+{
+  AmlInstancePage *self = user_data;
+  AmlLoader loader = aml_loader_row_get_loader (row);
+  const char *version = aml_loader_row_get_version (row);
+  g_autofree char *minecraft =
+    instance_string (self->instance, "minecraft-version");
+  g_autoptr (GError) error = NULL;
+
+  /* While the row is loading, or when the loader has no version for this
+     Minecraft version, there is no choice to store. */
+  if (loader != AML_LOADER_VANILLA && version == NULL)
+    return;
+
+  g_object_set (self->instance, "loader", loader, "loader-version",
+                loader == AML_LOADER_VANILLA ? NULL : version, NULL);
+
+  if (!aml_instance_manager_save (self->manager, &error))
+    {
+      /* The edit never reached the file: the instance and the row go back
+         to the loader the instance runs. */
+      g_object_set (self->instance, "loader", self->loader, "loader-version",
+                    self->loader_version, NULL);
+      show_toast (self, error->message);
+      aml_loader_row_load (row, self->settings, self->loader,
+                           self->loader_version, minecraft);
+      return;
+    }
+
+  self->loader = loader;
+  g_free (self->loader_version);
+  self->loader_version = g_strdup (loader == AML_LOADER_VANILLA
+                                     ? NULL
+                                     : version);
+
+  /* The card in the grid shows what the instance runs. */
+  refresh_in_grid (self);
 }
 
 /* ---------------------------------------------------------- *
@@ -690,19 +751,6 @@ on_delete_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
  * Rows
  * ---------------------------------------------------------- */
 
-/* A row that only displays a value: nothing can activate it. */
-static GtkWidget *
-value_row (const char *title, const char *value)
-{
-  GtkWidget *row = adw_action_row_new ();
-
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), title);
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), value);
-  gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), FALSE);
-
-  return row;
-}
-
 /* A row whose title, its whole area and its suffix button all do the
  * same thing. */
 static GtkWidget *
@@ -799,13 +847,23 @@ create_settings_page (AmlInstancePage *self)
   aml_version_row_load (AML_VERSION_ROW (version_row), self->settings,
                         minecraft_version);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (minecraft), version_row);
+  /* The loader and one of its versions: changing either of them changes
+     what this instance runs, so both are stored like the version above. */
+  {
+    AmlLoader loader = AML_LOADER_VANILLA;
+
+    g_object_get (self->instance, "loader", &loader, NULL);
+    self->loader = loader;
+    self->loader_version = g_steal_pointer (&loader_version);
+  }
+
+  self->loader_row = GTK_WIDGET (aml_loader_row_new ());
+  g_signal_connect (self->loader_row, "changed",
+                    G_CALLBACK (on_loader_changed), self);
+  aml_loader_row_load (AML_LOADER_ROW (self->loader_row), self->settings,
+                       self->loader, self->loader_version, minecraft_version);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (minecraft),
-                             value_row ("Loader", loader));
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (minecraft),
-                             value_row ("Loader Version",
-                                        loader_version != NULL
-                                          ? loader_version
-                                          : "None"));
+                             self->loader_row);
 
   /* Java */
   GtkWidget *java_row = GTK_WIDGET (aml_java_row_new ());
@@ -987,6 +1045,7 @@ aml_instance_page_finalize (GObject *object)
   g_clear_object (&self->instance);
   g_clear_object (&self->settings);
   g_clear_object (&self->launcher);
+  g_free (self->loader_version);
 
   G_OBJECT_CLASS (aml_instance_page_parent_class)->finalize (object);
 }

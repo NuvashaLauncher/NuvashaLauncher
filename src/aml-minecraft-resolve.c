@@ -1878,22 +1878,13 @@ resolve_assets (ResolveRequest *request)
  * Entry point
  * ---------------------------------------------------------- */
 
+/* What the resolve needs to know about the document, once there is one:
+   where its logging file goes and what its asset index is called. Both
+   are asked of the document alone, whether it came from the manifest or
+   from a loader profile merged over it. */
 static void
-version_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
-                gpointer user_data)
+description_ready (ResolveRequest *request)
 {
-  ResolveRequest *request = user_data;
-  g_autoptr (GError) error = NULL;
-
-  request->description = aml_version_load_finish (result, &error);
-
-  if (request->description == NULL)
-    {
-      request_fail (request, g_steal_pointer (&error));
-      resolve_finish (request);
-      return;
-    }
-
   /* The configuration log4j is given keeps the name the document gave
      it, or a plain one when it gave none. */
   if (request->description->logging != NULL &&
@@ -1937,30 +1928,45 @@ version_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   resolve_dependencies (request);
 }
 
-void
-aml_resolve_version_async (AmlVersionManifest *manifest,
-                           const char         *version_id,
-                           const char         *data_dir,
-                           const char         *natives_dir,
-                           const char         *asset_base_url,
-                           GCancellable       *cancellable,
-                           AmlResolveProgressFunc progress,
-                           gpointer              progress_data,
-                           GAsyncReadyCallback   callback,
-                           gpointer              user_data)
+static void
+version_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                gpointer user_data)
 {
-  ResolveRequest *request;
+  ResolveRequest *request = user_data;
   g_autoptr (GError) error = NULL;
-  g_autofree char *name = NULL;
-  g_autofree char *jar = NULL;
 
-  g_return_if_fail (AML_IS_VERSION_MANIFEST (manifest));
-  g_return_if_fail (version_id != NULL);
+  request->description = aml_version_load_finish (result, &error);
 
-  request = g_new0 (ResolveRequest, 1);
+  if (request->description == NULL)
+    {
+      request_fail (request, g_steal_pointer (&error));
+      resolve_finish (request);
+      return;
+    }
+
+  description_ready (request);
+}
+
+/* Everything a resolve needs before it knows which document it resolves:
+   where the files go, how it may be cancelled and who to tell about the
+ * progress. The description is added by the caller. */
+static ResolveRequest *
+request_new (const char         *version_id,
+             const char         *data_dir,
+             const char         *natives_dir,
+             const char         *asset_base_url,
+             GCancellable       *cancellable,
+             AmlResolveProgressFunc progress,
+             gpointer              progress_data,
+             GAsyncReadyCallback   callback,
+             gpointer              user_data)
+{
+  ResolveRequest *request = g_new0 (ResolveRequest, 1);
+  g_autofree char *name = safe_name (version_id);
+  g_autofree char *jar = g_strconcat (name, ".jar", NULL);
+
   request->task = g_task_new (NULL, cancellable, callback, user_data);
   g_task_set_check_cancellable (request->task, FALSE);
-  request->manifest = g_object_ref (manifest);
   request->version_id = g_strdup (version_id);
   request->data_dir = data_dir != NULL
                         ? g_strdup (data_dir)
@@ -1991,15 +1997,12 @@ aml_resolve_version_async (AmlVersionManifest *manifest,
                                                 g_free, g_free);
   request->natives =
     g_ptr_array_new_with_free_func ((GDestroyNotify) aml_resolve_file_free);
-
-  name = safe_name (version_id);
   request->versions_dir =
     g_build_filename (request->data_dir, "versions", name, NULL);
-  jar = g_strconcat (name, ".jar", NULL);
   request->client_jar = g_build_filename (request->versions_dir, jar, NULL);
 
   /* Whatever the caller cancels must stop this too, and only this: the
-     cancellable below is cancelled on a failure as well, which the
+     cancellable above is cancelled on a failure as well, which the
      caller knows nothing about. */
   request->caller = cancellable != NULL ? g_object_ref (cancellable) : NULL;
 
@@ -2008,17 +2011,91 @@ aml_resolve_version_async (AmlVersionManifest *manifest,
       g_cancellable_connect (cancellable, G_CALLBACK (g_cancellable_cancel),
                              request->cancellable, NULL);
 
+  return request;
+}
+
+/* The directories the resolve writes into have to be there before
+   anything is fetched into them. */
+static gboolean
+request_make_directories (ResolveRequest *request)
+{
+  g_autoptr (GError) error = NULL;
+
   if (!ensure_directory (request->libraries_dir, &error) ||
       !ensure_directory (request->assets_dir, &error) ||
       !ensure_directory (request->versions_dir, &error))
     {
       request_fail (request, g_steal_pointer (&error));
+      return FALSE;
+    }
+
+  return TRUE;
+}
+
+void
+aml_resolve_version_async (AmlVersionManifest *manifest,
+                           const char         *version_id,
+                           const char         *data_dir,
+                           const char         *natives_dir,
+                           const char         *asset_base_url,
+                           GCancellable       *cancellable,
+                           AmlResolveProgressFunc progress,
+                           gpointer              progress_data,
+                           GAsyncReadyCallback   callback,
+                           gpointer              user_data)
+{
+  ResolveRequest *request;
+
+  g_return_if_fail (AML_IS_VERSION_MANIFEST (manifest));
+  g_return_if_fail (version_id != NULL);
+
+  request = request_new (version_id, data_dir, natives_dir, asset_base_url,
+                         cancellable, progress, progress_data, callback,
+                         user_data);
+  request->manifest = g_object_ref (manifest);
+
+  if (!request_make_directories (request))
+    {
       resolve_finish (request);
       return;
     }
 
   aml_version_load_async (manifest, version_id, request->cancellable,
                           version_loaded, request);
+}
+
+void
+aml_resolve_description_async (AmlVersionDescription *description,
+                               const char             *version_id,
+                               const char             *data_dir,
+                               const char             *natives_dir,
+                               const char             *asset_base_url,
+                               GCancellable           *cancellable,
+                               AmlResolveProgressFunc   progress,
+                               gpointer                progress_data,
+                               GAsyncReadyCallback     callback,
+                               gpointer                user_data)
+{
+  ResolveRequest *request;
+
+  g_return_if_fail (AML_IS_VERSION_DESCRIPTION (description));
+  g_return_if_fail (version_id != NULL);
+
+  request = request_new (version_id, data_dir, natives_dir, asset_base_url,
+                         cancellable, progress, progress_data, callback,
+                         user_data);
+
+  /* The document is the one the caller merged: there is no manifest to
+     follow an inheritsFrom from, because it has been followed already. */
+  request->description = g_object_ref (description);
+
+  if (!request_make_directories (request))
+    {
+      resolve_finish (request);
+      return;
+    }
+
+  description_ready (request);
 }
 
 AmlResolvedVersion *
