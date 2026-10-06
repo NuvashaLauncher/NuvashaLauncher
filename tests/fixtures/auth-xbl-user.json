@@ -1,0 +1,12 @@
+{
+  "IssueInstant": "2026-10-06T14:23:31.1234567Z",
+  "NotAfter": "2026-10-07T14:23:31.1234567Z",
+  "Token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.xbl.user.token",
+  "DisplayClaims": {
+    "xui": [
+      {
+        "uhs": "8535f6e5f7c14b9dbd6d1c48a4c1b8a3"
+      }
+    ]
+  }
+}

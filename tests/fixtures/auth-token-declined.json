@@ -1,0 +1,4 @@
+{
+  "error": "authorization_declined",
+  "error_description": "AADSTS65004: User declined to consent to access the app."
+}

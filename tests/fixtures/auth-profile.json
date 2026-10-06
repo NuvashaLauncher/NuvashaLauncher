@@ -1,0 +1,16 @@
+{
+  "id": "069a79f444e94726a5befca90e38aaf5",
+  "name": "Notch",
+  "skins": [
+    {
+      "id": "0f0d5a2b-1c4d-6e8f-0a2b4c6d8e0f",
+      "state": "ACTIVE",
+      "url": "https://textures.minecraft.net/texture/0f0d5a2b1c4d6e8f0a2b4c6d8e0f1a3b5c7d9e0f2a4b6c8",
+      "variant": "classic",
+      "metadata": {
+        "model": "default"
+      }
+    }
+  ],
+  "capes": []
+}

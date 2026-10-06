@@ -1,0 +1,5 @@
+{
+  "path": "/authentication/login_with_xbox",
+  "errorMessage": "Invalid app registration, see https://aka.ms/AppRegInfo",
+  "errorCode": 403
+}

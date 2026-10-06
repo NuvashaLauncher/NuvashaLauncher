@@ -1,0 +1,8 @@
+{
+  "error": "invalid_request",
+  "error_description": "AADSTS700016: Application with identifier '00000000-402b-4cd3-a82b-c45ab2f1d3f7' was not found in the directory '9188040d-6c67-4c5b-b112-36a304b66dad'. This can happen if the application has not been installed by the administrator of the tenant or consented to by any user in the tenant.",
+  "error_codes": [700016],
+  "timestamp": "2026-10-06T14:23:31.0000000Z",
+  "trace_id": "62b1023c-e486-431a-b76a-dc390a3b0101",
+  "correlation_id": "25cff788-3162-418c-abd5-f9cc61d88d96"
+}

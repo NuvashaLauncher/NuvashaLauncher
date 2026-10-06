@@ -1,0 +1,5 @@
+{
+  "path": "/entitlements/mcstore",
+  "errorMessage": "The user token is invalid or expired.",
+  "errorCode": 401
+}

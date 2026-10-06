@@ -1,0 +1,9 @@
+{
+  "token_type": "Bearer",
+  "scope": "XboxLive.signin User.Read offline_access",
+  "expires_in": 3599,
+  "ext_expires_in": 3599,
+  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.microsoft.access.token",
+  "refresh_token": "M.R3_BAY.the-refresh-token",
+  "id_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.id.token"
+}
