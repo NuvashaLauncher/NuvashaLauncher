@@ -91,6 +91,23 @@ void aml_download_json_async (const char       *url,
 JsonParser *aml_download_json_finish (GAsyncResult *result,
                                       GError     **error);
 
+/* The hexadecimal digest of the bytes of @file, read in chunks and
+ * never blocking the caller's main context. This is what a download is
+ * verified against, and what a file already on disk is identified by.
+ *
+ * G_IO_ERROR_NOT_FOUND when there is no such file.
+ *
+ * (transfer full) the digest, lowercase and hexadecimal. */
+void aml_download_file_hash_async (GFile            *file,
+                                  GChecksumType      type,
+                                  GCancellable     *cancellable,
+                                  GAsyncReadyCallback callback,
+                                  gpointer                user_data);
+
+/* (transfer full). NULL on error. */
+char *aml_download_file_hash_finish (GAsyncResult *result,
+                                     GError     **error);
+
 /* Posts @body as "application/json" to @url and parses the answer the
  * way aml_download_json_async() does, with the same retry and rate
  * limit rules.
