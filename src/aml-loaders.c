@@ -31,7 +31,8 @@ static const AmlLoader supported[] = {
   AML_LOADER_VANILLA,
   AML_LOADER_FABRIC,
   AML_LOADER_QUILT,
-  AML_LOADER_NEOFORGE
+  AML_LOADER_NEOFORGE,
+  AML_LOADER_FORGE
 };
 
 #define SUPPORTED_COUNT (G_N_ELEMENTS (supported))
@@ -1239,7 +1240,7 @@ typedef struct {
   char *loader_version;
   char *java;            /* the java that runs the processors */
   char *root;            /* where this loader version is installed */
-  char *maven_dir;       /* <root>/maven: the artifacts of the profile */
+  char *libraries_dir;   /* where the artifacts of the profile go */
   char *installer;       /* the installer jar of this version */
   char *client_jar;      /* the client jar of the game version */
   char *patched_jar;     /* what the processors made of it */
@@ -1280,7 +1281,7 @@ install_request_free (gpointer data)
   g_free (request->loader_version);
   g_free (request->java);
   g_free (request->root);
-  g_free (request->maven_dir);
+  g_free (request->libraries_dir);
   g_free (request->installer);
   g_free (request->client_jar);
   g_free (request->patched_jar);
@@ -1360,7 +1361,7 @@ artifact_path (InstallRequest *request, const char *coordinate)
   if (relative == NULL || !aml_resolve_entry_name_is_safe (relative))
     return NULL;
 
-  return g_build_filename (request->maven_dir, relative, NULL);
+  return g_build_filename (request->libraries_dir, relative, NULL);
 }
 
 /* The artifact @coordinate names out of the maven of the loader. What a
@@ -1390,7 +1391,7 @@ queue_artifact (InstallRequest *request, const char *coordinate,
   if (relative == NULL || !aml_resolve_entry_name_is_safe (relative))
     return;
 
-  path = g_build_filename (request->maven_dir, relative, NULL);
+  path = g_build_filename (request->libraries_dir, relative, NULL);
 
   if (g_file_test (path, G_FILE_TEST_IS_REGULAR))
     return;
@@ -1668,8 +1669,11 @@ profile_data (InstallRequest *request, const char *name)
 static const char *
 installer_data (InstallRequest *request, const char *name)
 {
+  /* The root of an install is where its artifacts are, which is the
+     directory the games keep their libraries in: that is where the
+     documents of the loaders say to find them. */
   if (g_str_equal (name, "ROOT"))
-    return request->root;
+    return request->data_dir;
 
   if (g_str_equal (name, "INSTALLER"))
     return request->installer;
@@ -2296,7 +2300,18 @@ stage_run (InstallRequest *request)
       }
   }
 
+  /* The class path of a processor is the jar of the processor and the jars
+     it runs with: NeoForge names its tool among them and Forge does not,
+     and a tool that is not on its own class path has no class to run. */
   classpath = g_string_new (NULL);
+
+  {
+    g_autofree char *own = artifact_path (request, tool);
+
+    if (own != NULL)
+      g_string_append (classpath, own);
+  }
+
   node = json_object_get_member (processor, "classpath");
 
   if (node != NULL && JSON_NODE_HOLDS_ARRAY (node))
@@ -2517,7 +2532,12 @@ aml_loaders_install_async (AmlLoader              loader,
   request->root = g_build_filename (request->data_dir, AML_LOADERS_SUBDIR,
                                     aml_loader_to_string (loader),
                                     loader_version, NULL);
-  request->maven_dir = g_build_filename (request->root, "maven", NULL);
+
+  /* The artifacts of a profile go into the library directory of the games,
+     which is where the document of the loader names them: the patched
+     client jar among them, by its own coordinates. */
+  request->libraries_dir = g_build_filename (request->data_dir, "libraries",
+                                             NULL);
 
   jar_name = g_strdup_printf ("%s-%s-installer.jar",
                               aml_loader_to_string (loader), loader_version);
