@@ -4,13 +4,15 @@
 
 /* The AML main window: header bar menus, the instance grid and the
  * empty state. Instances are shown exactly as AmlInstanceManager keeps
- * them; nothing here launches or downloads anything yet. */
+ * them; the Play button of a card starts the game through the launcher
+ * of that instance and follows it while it runs. */
 
 #include "aml-main-window.h"
 #include "aml-create-instance-dialog.h"
 #include "aml-instance-page.h"
 #include "aml-java-row.h"
 #include "aml-java.h"
+#include "aml-launcher.h"
 #include "aml-settings.h"
 
 struct _AmlMainWindow
@@ -19,6 +21,10 @@ struct _AmlMainWindow
 
   AmlInstanceManager *manager;
   AmlSettings *settings;
+
+  /* One launcher per instance, keyed by its id, so the card of an
+     instance and its page always talk about the same launch. */
+  GHashTable *launchers;
 
   /* The navigation stack: the grid is its first page, the page of an
    * instance is pushed on top of it. */
@@ -222,6 +228,46 @@ on_settings_custom_clicked (GtkButton *button G_GNUC_UNUSED,
                         settings_java_ref (ctx));
 }
 
+/* Written the moment the value changes. A spin row can produce a value
+ * for every click of its arrows, so the number that is already stored is
+ * skipped rather than written over and over. */
+static void
+on_log_limit_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
+                      gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  AdwSpinRow *row = ADW_SPIN_ROW (object);
+  guint limit = (guint) adw_spin_row_get_value (row);
+
+  if (limit == aml_settings_get_log_line_limit (self->settings))
+    return;
+
+  /* A limit that cannot be written leaves the row showing the number the
+     settings file holds. */
+  if (!aml_settings_set_log_line_limit (self->settings, limit, NULL))
+    adw_spin_row_set_value (
+      row, aml_settings_get_log_line_limit (self->settings));
+}
+
+/* Same contract as the snapshots switch: written at once, and put back
+   what the file says when the file says no. */
+static void
+on_open_logs_after_crash_toggled (GObject *object,
+                                  GParamSpec *pspec G_GNUC_UNUSED,
+                                  gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  AdwSwitchRow *row = ADW_SWITCH_ROW (object);
+  gboolean active = adw_switch_row_get_active (row);
+
+  if (active == aml_settings_get_open_logs_after_crash (self->settings))
+    return;
+
+  if (!aml_settings_set_open_logs_after_crash (self->settings, active, NULL))
+    adw_switch_row_set_active (
+      row, aml_settings_get_open_logs_after_crash (self->settings));
+}
+
 static void
 on_settings (GSimpleAction *action G_GNUC_UNUSED,
              GVariant      *parameter G_GNUC_UNUSED,
@@ -232,10 +278,13 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   GtkWidget *page = adw_preferences_page_new ();
   GtkWidget *versions_group = adw_preferences_group_new ();
   GtkWidget *java_group = adw_preferences_group_new ();
+  GtkWidget *logs_group = adw_preferences_group_new ();
   GtkWidget *row = adw_switch_row_new ();
   GtkWidget *java_row = GTK_WIDGET (aml_java_row_new ());
   GtkWidget *custom_row = adw_action_row_new ();
   GtkWidget *custom_button = gtk_button_new_with_label ("Choose…");
+  GtkWidget *limit_row = NULL;
+  GtkWidget *crash_row = adw_switch_row_new ();
   SettingsJava *ctx = g_new0 (SettingsJava, 1);
 
   ctx->refs = 1;
@@ -300,10 +349,42 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (java_group), java_row);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (java_group), custom_row);
 
+  /* Logs */
+  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (logs_group), "Logs");
+  adw_preferences_group_set_description (ADW_PREFERENCES_GROUP (logs_group),
+                                         "What the logs page keeps of what a "
+                                         "game prints.");
+
+  limit_row = adw_spin_row_new (
+    gtk_adjustment_new (aml_settings_get_log_line_limit (self->settings), 100,
+                        100000, 500, 5000, 0),
+    0, 0);
+  adw_spin_row_set_digits (ADW_SPIN_ROW (limit_row), 0);
+  adw_spin_row_set_numeric (ADW_SPIN_ROW (limit_row), TRUE);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (limit_row),
+                                 "Line Limit");
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (limit_row),
+                               "How many lines are kept before the oldest "
+                               "are dropped");
+  g_signal_connect (limit_row, "notify::value",
+                    G_CALLBACK (on_log_limit_changed), self);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (logs_group), limit_row);
+
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (crash_row),
+                                 "Open Log Folder After Crash");
+  adw_switch_row_set_active (
+    ADW_SWITCH_ROW (crash_row),
+    aml_settings_get_open_logs_after_crash (self->settings));
+  g_signal_connect (crash_row, "notify::active",
+                    G_CALLBACK (on_open_logs_after_crash_toggled), self);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (logs_group), crash_row);
+
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                             ADW_PREFERENCES_GROUP (versions_group));
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                             ADW_PREFERENCES_GROUP (java_group));
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+                            ADW_PREFERENCES_GROUP (logs_group));
   adw_preferences_dialog_add (ADW_PREFERENCES_DIALOG (dialog),
                               ADW_PREFERENCES_PAGE (page));
 
@@ -400,6 +481,34 @@ set_menu_item_tooltip (GtkWidget  *root,
     }
 }
 
+/* The launcher of one instance, made when it is first asked for. It is
+ * the one launcher the card and the page of that instance share, which
+ * is what keeps a game from being started twice. */
+static AmlLauncher *
+window_launcher (AmlMainWindow *self, const char *instance_id)
+{
+  AmlLauncher *launcher = NULL;
+  AmlInstance *instance = NULL;
+
+  if (instance_id == NULL)
+    return NULL;
+
+  launcher = g_hash_table_lookup (self->launchers, instance_id);
+
+  if (launcher != NULL)
+    return launcher;
+
+  instance = aml_instance_manager_get_by_id (self->manager, instance_id);
+
+  if (instance == NULL)
+    return NULL;
+
+  launcher = aml_launcher_new (instance, self->settings);
+  g_hash_table_insert (self->launchers, g_strdup (instance_id), launcher);
+
+  return launcher;
+}
+
 /* Opens the page of the instance this card shows. The id is put on the
  * button when the card is bound, so a card that lost its instance
  * simply does nothing. */
@@ -424,10 +533,84 @@ on_card_clicked (GtkButton *button, gpointer user_data)
                                                 self->settings)));
 }
 
-/* One card of the instance grid. The button holds everything but Play,
- * so clicking the card opens the instance page; the children are
- * appended in this order and bind_card() walks them in the same
- * order. */
+/* Play while the instance is idle, Stop while it is busy, and the state
+ * of the launch under the button while there is one to show. */
+static void
+card_update (GtkWidget *play, GtkWidget *state, AmlLauncher *launcher)
+{
+  gboolean busy = aml_launch_state_is_busy (aml_launcher_get_state (launcher));
+  const char *detail = aml_launcher_get_state_detail (launcher);
+
+  gtk_button_set_label (GTK_BUTTON (play), busy ? "Stop" : "Play");
+
+  /* The state line is the widget right above the button; a card that has
+     no room for one simply shows no state. */
+  if (state != NULL)
+    {
+      gtk_label_set_text (GTK_LABEL (state), detail != NULL ? detail : "");
+      gtk_widget_set_visible (state, detail != NULL && *detail != '\0');
+    }
+}
+
+static void
+on_card_launcher_state (AmlLauncher *launcher, AmlLaunchState state G_GNUC_UNUSED,
+                        const char *detail G_GNUC_UNUSED, gpointer user_data)
+{
+  GtkWidget *play = user_data;
+
+  card_update (play, gtk_widget_get_prev_sibling (play), launcher);
+}
+
+/* The card follows the launcher of the instance it shows. The card
+ * takes a reference of its own, so a launcher that goes away first
+ * cannot leave the card pointing at nothing. */
+static void
+card_set_launcher (GtkWidget *play, AmlLauncher *launcher)
+{
+  /* Stealing keeps the reference the card took in one place instead of
+   * leaving it to the notify of whatever is put there next. */
+  gpointer previous = g_object_steal_data (G_OBJECT (play), "aml-launcher");
+
+  if (previous != NULL)
+    {
+      g_signal_handlers_disconnect_by_data (previous, play);
+      g_object_unref (previous);
+    }
+
+  if (launcher == NULL)
+    return;
+
+  g_object_set_data_full (G_OBJECT (play), "aml-launcher",
+                          g_object_ref (launcher), g_object_unref);
+
+  /* The connection goes with the card, so a card that outlives several
+     launchers never follows one of them twice. */
+  g_signal_connect_object (launcher, "state",
+                           G_CALLBACK (on_card_launcher_state), play, 0);
+}
+
+static void
+on_play_clicked (GtkButton *button, gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  const char *id = g_object_get_data (G_OBJECT (button), "aml-instance-id");
+  AmlLauncher *launcher = window_launcher (self, id);
+
+  if (launcher == NULL)
+    return;
+
+  /* One button for both: what a busy instance needs is a stop, and what
+     an idle one needs is a play. */
+  if (aml_launch_state_is_busy (aml_launcher_get_state (launcher)))
+    aml_launcher_stop (launcher);
+  else
+    aml_launcher_start (launcher);
+}
+
+/* One card of the instance grid. The button holds everything but Play
+ * and the state, so clicking the card opens the instance page; the
+ * children are appended in this order and bind_card() walks them in the
+ * same order. */
 static GtkWidget *
 create_card (AmlMainWindow *self)
 {
@@ -437,6 +620,7 @@ create_card (AmlMainWindow *self)
   GtkWidget *icon = gtk_image_new_from_icon_name ("applications-games-symbolic");
   GtkWidget *name = gtk_label_new (NULL);
   GtkWidget *version = gtk_label_new (NULL);
+  GtkWidget *state = gtk_label_new (NULL);
   GtkWidget *play = gtk_button_new_with_label ("Play");
 
   gtk_widget_set_margin_top (card, 12);
@@ -459,10 +643,12 @@ create_card (AmlMainWindow *self)
   gtk_widget_set_halign (version, GTK_ALIGN_CENTER);
   gtk_widget_add_css_class (version, "dim-label");
 
-  /* Launching comes with phase 9: until then the button says so
-   * instead of pretending to start the game. */
-  gtk_widget_set_sensitive (play, FALSE);
-  gtk_widget_set_tooltip_text (play, "Available in a later version");
+  /* What the launch is doing: empty while nothing runs. */
+  gtk_label_set_ellipsize (GTK_LABEL (state), PANGO_ELLIPSIZE_END);
+  gtk_label_set_max_width_chars (GTK_LABEL (state), 20);
+  gtk_widget_set_halign (state, GTK_ALIGN_CENTER);
+  gtk_widget_add_css_class (state, "dim-label");
+  gtk_widget_set_visible (state, FALSE);
 
   gtk_box_append (GTK_BOX (content), icon);
   gtk_box_append (GTK_BOX (content), name);
@@ -473,7 +659,10 @@ create_card (AmlMainWindow *self)
   g_signal_connect (open, "clicked", G_CALLBACK (on_card_clicked), self);
 
   gtk_box_append (GTK_BOX (card), open);
+  gtk_box_append (GTK_BOX (card), state);
   gtk_box_append (GTK_BOX (card), play);
+
+  g_signal_connect (play, "clicked", G_CALLBACK (on_play_clicked), self);
 
   return card;
 }
@@ -489,9 +678,10 @@ setup_card (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
 static void
 bind_card (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
            gpointer                  item,
-           gpointer                  user_data G_GNUC_UNUSED)
+           gpointer                  user_data)
 {
   GtkListItem *list_item = GTK_LIST_ITEM (item);
+  AmlMainWindow *self = user_data;
   AmlInstance *instance = AML_INSTANCE (gtk_list_item_get_item (list_item));
   g_autofree char *name = NULL;
   g_autofree char *minecraft_version = NULL;
@@ -503,7 +693,11 @@ bind_card (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
   GtkWidget *icon = NULL;
   GtkWidget *name_label = NULL;
   GtkWidget *version_label = NULL;
+  GtkWidget *state_label = NULL;
+  GtkWidget *play = NULL;
+  const char *id = NULL;
   const char *loader_name = NULL;
+  AmlLauncher *launcher = NULL;
 
   if (instance == NULL)
     return;
@@ -533,11 +727,24 @@ bind_card (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
   name_label = gtk_widget_get_next_sibling (icon);
   version_label = gtk_widget_get_next_sibling (name_label);
 
+  /* The state line and the button sit under the card that opens. */
+  state_label = gtk_widget_get_next_sibling (open);
+  play = gtk_widget_get_next_sibling (state_label);
+
   gtk_label_set_text (GTK_LABEL (name_label), name);
   gtk_label_set_text (GTK_LABEL (version_label), subtitle);
 
-  g_object_set_data_full (G_OBJECT (open), "aml-instance-id",
-                          g_strdup (aml_instance_get_id (instance)), g_free);
+  id = aml_instance_get_id (instance);
+  g_object_set_data_full (G_OBJECT (open), "aml-instance-id", g_strdup (id),
+                          g_free);
+
+  /* The launcher of this instance: the button follows it from here on.
+     The id on the button above is what the click handlers go by. */
+  launcher = window_launcher (self, id);
+  card_set_launcher (play, launcher);
+
+  if (launcher != NULL)
+    card_update (play, state_label, launcher);
 }
 
 static void
@@ -550,6 +757,31 @@ update_visible_page (AmlMainWindow *self)
                                     n_items > 0 ? "instances" : "empty");
 }
 
+/* An instance that is gone leaves its launcher behind: a game running
+ * for it is asked to stop, because there is nothing left to run. The
+ * table holds one entry per instance, so walking it is cheap. */
+static void
+drop_launchers_of_removed_instances (AmlMainWindow *self)
+{
+  GHashTableIter iter;
+  gpointer key = NULL;
+  gpointer value = NULL;
+
+  g_hash_table_iter_init (&iter, self->launchers);
+
+  while (g_hash_table_iter_next (&iter, &key, &value))
+    {
+      AmlLauncher *launcher = value;
+
+      if (aml_instance_manager_get_by_id (self->manager, (const char *) key)
+            != NULL)
+        continue;
+
+      aml_launcher_stop (launcher);
+      g_hash_table_iter_remove (&iter);
+    }
+}
+
 static void
 on_instances_changed (AmlMainWindow *self,
                       GListModel    *model G_GNUC_UNUSED,
@@ -558,6 +790,7 @@ on_instances_changed (AmlMainWindow *self,
                       guint          added G_GNUC_UNUSED)
 {
   update_visible_page (self);
+  drop_launchers_of_removed_instances (self);
 }
 
 static void
@@ -672,6 +905,11 @@ aml_main_window_new (GtkApplication *application, AmlInstanceManager *manager)
   self->manager = g_object_ref (manager);
   self->settings = aml_settings_new ();
 
+  /* The table owns the launchers: the key is the id of the instance and
+     the value is its launcher. */
+  self->launchers = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
+                                           g_object_unref);
+
   g_signal_connect (factory, "setup", G_CALLBACK (setup_card), self);
   g_signal_connect (factory, "bind", G_CALLBACK (bind_card), self);
 
@@ -705,6 +943,10 @@ aml_main_window_dispose (GObject *object)
 {
   AmlMainWindow *self = AML_MAIN_WINDOW (object);
 
+  /* A running game keeps its own launcher alive through the process
+     readers, so dropping the table here never kills a game in front of
+     the user; it only lets go of the ones that are not running. */
+  g_clear_pointer (&self->launchers, g_hash_table_unref);
   g_clear_object (&self->manager);
   g_clear_object (&self->settings);
 
