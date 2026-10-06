@@ -1108,6 +1108,25 @@ aml_download_json_async (const char *url,
   start_transfer (request);
 }
 
+void
+aml_download_file_hash_async (GFile *file, GChecksumType type,
+                              GCancellable *cancellable,
+                              GAsyncReadyCallback callback,
+                              gpointer user_data)
+{
+  g_return_if_fail (G_IS_FILE (file));
+
+  hash_file_async (file, type, cancellable, callback, user_data);
+}
+
+char *
+aml_download_file_hash_finish (GAsyncResult *result, GError **error)
+{
+  g_return_val_if_fail (G_IS_TASK (result), NULL);
+
+  return hash_file_finish (result, error);
+}
+
 JsonParser *
 aml_download_json_finish (GAsyncResult *result, GError **error)
 {
