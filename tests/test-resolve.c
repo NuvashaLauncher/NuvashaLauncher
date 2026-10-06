@@ -493,6 +493,12 @@ test_native_classifiers (void)
 
 /* A library whose coordinate carries a classifier that is not a natives
    one is an ordinary jar, even when the rules name a single system. */
+/* A classifier in the coordinate does not make a jar one to unpack:
+   since 1.20.5 Mojang writes the natives as libraries of their own
+   whose coordinate carries the classifier, and those jars belong on the
+   classpath, because that is where LWJGL, JNA and netty find the
+   natives they unpack themselves. Only the "natives" table of an older
+   document says what is to be unpacked. */
 static void
 test_classifier_is_not_natives (void)
 {
@@ -501,24 +507,38 @@ test_classifier_is_not_natives (void)
       " {\"name\": \"io.netty:netty-transport-native-epoll:4.2.16:linux-x86_64\","
       "  \"downloads\": {\"artifact\": {\"path\":"
       "   \"io/netty/epoll/4.2.16/epoll-linux-x86_64.jar\","
-      "   \"sha1\": \"aa\", \"url\": \"http://x/epoll.jar\"}}}]}");
+      "   \"sha1\": \"aa\", \"url\": \"http://x/epoll.jar\"}}},"
+      " {\"name\": \"org.lwjgl:lwjgl:3.4.3:natives-linux\","
+      "  \"downloads\": {\"artifact\": {\"path\":"
+      "   \"org/lwjgl/lwjgl/3.4.3/lwjgl-3.4.3-natives-linux.jar\","
+      "   \"sha1\": \"bb\", \"url\": \"http://x/lwjgl-natives.jar\"}}}]}");
   g_autoptr (AmlRuleContext) context =
     aml_rule_context_new_for ("linux", "x86_64", NULL);
   g_autofree char *libraries =
     g_build_filename ("/data", "libraries", NULL);
   g_autofree char *classpath =
     aml_resolve_classpath (description, context, libraries, NULL);
+  g_autoptr (GPtrArray) files =
+    aml_resolve_library_files (description, context, libraries);
   g_auto (GStrv) entries = NULL;
 
-  g_assert_cmpuint (description->libraries->len, ==, 1);
+  g_assert_cmpuint (description->libraries->len, ==, 2);
+  g_assert_cmpuint (files->len, ==, 2);
+
+  /* Neither of them is a jar to unpack. */
+  g_assert_false (((AmlResolveFile *) g_ptr_array_index (files, 0))->natives);
+  g_assert_false (((AmlResolveFile *) g_ptr_array_index (files, 1))->natives);
 
   entries = g_strsplit (classpath, ":", -1);
-  g_assert_cmpuint (g_strv_length (entries), ==, 1);
+  g_assert_cmpuint (g_strv_length (entries), ==, 2);
   g_assert_cmpstr (entries[0], ==,
                    "/data/libraries/io/netty/epoll/4.2.16/"
                    "epoll-linux-x86_64.jar");
+  g_assert_cmpstr (entries[1], ==,
+                   "/data/libraries/org/lwjgl/lwjgl/3.4.3/"
+                   "lwjgl-3.4.3-natives-linux.jar");
 
-  g_print ("ok - only a natives classifier makes a jar one to unpack\n");
+  g_print ("ok - a coordinate classifier does not make a jar one to unpack\n");
 }
 
 static void
@@ -599,21 +619,24 @@ test_classpath_order (void)
   g_assert_nonnull (classpath);
 
   entries = g_strsplit (classpath, ":", -1);
-  g_assert_cmpuint (g_strv_length (entries), ==, 3);
+  g_assert_cmpuint (g_strv_length (entries), ==, 4);
 
   /* The libraries of the document, in the order it lists them. The
-     library of another system is left out, and so are the natives:
-     jtracy is written as a library whose coordinate carries the
-     classifier, which is a jar to unpack, not one to run code from. */
+     library of another system is left out. jtracy is written as a
+     library whose coordinate carries the classifier, which since 1.20.5
+     is a jar for the classpath: the document tells LWJGL and JNA where
+     to unpack the natives they find in it. */
   g_assert_cmpstr (entries[0], ==,
                    "/data/libraries/org/lwjgl/lwjgl/3.3.3/lwjgl-3.3.3.jar");
   g_assert_cmpstr (entries[1], ==,
+                   "/data/libraries/com/mojang/jtracy/1.14.38/"
+                   "jtracy-1.14.38-natives-linux.jar");
+  g_assert_cmpstr (entries[2], ==,
                    "/data/libraries/org/lwjgl/lwjgl-glfw/3.3.3/"
                    "lwjgl-glfw-3.3.3.jar");
   g_assert_null (strstr (classpath, "java-objc-bridge"));
-  g_assert_null (strstr (classpath, "jtracy"));
   /* The client jar goes last. */
-  g_assert_cmpstr (entries[2], ==, client);
+  g_assert_cmpstr (entries[3], ==, client);
 
   legacy_classpath = aml_resolve_classpath (legacy, context, libraries, client);
 
