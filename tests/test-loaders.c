@@ -20,6 +20,7 @@
 
 #include <glib.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifndef AML_TEST_FIXTURES
 #define AML_TEST_FIXTURES "tests/fixtures"
@@ -549,6 +550,116 @@ test_profile_without_a_maven_address (void)
   g_print ("ok - a profile with no usable maven address is refused\n");
 }
 
+/* ---------------------------------------------------------- *
+ * What the two ways of installing refuse
+ * ---------------------------------------------------------- */
+
+/* Both entry points refuse what the other one is for, and they say which
+ * of them to use instead. These answers arrive through the main loop, as
+ * every answer of this module does. */
+
+typedef struct
+{
+  GMainLoop *loop;
+  GError *error;
+  AmlLoaderInstall *install;
+  AmlVersionDescription *profile;
+  guint watchdog;
+} Wait;
+
+static gboolean
+watchdog_fired (gpointer user_data)
+{
+  Wait *wait = user_data;
+
+  g_main_loop_quit (wait->loop);
+
+  return G_SOURCE_REMOVE;
+}
+
+static void
+on_install_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                     gpointer user_data)
+{
+  Wait *wait = user_data;
+
+  wait->install = aml_loaders_install_finish (result, &wait->error);
+  g_main_loop_quit (wait->loop);
+}
+
+static void
+on_profile_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                     gpointer user_data)
+{
+  Wait *wait = user_data;
+
+  wait->profile = aml_loaders_profile_finish (result, &wait->error);
+  g_main_loop_quit (wait->loop);
+}
+
+/* A loader that publishes a version document of its own has no installer,
+   and asking for one says so instead of looking for a jar that is not
+   there. */
+static void
+test_install_of_a_loader_that_publishes_none (void)
+{
+  g_autofree char *json = NULL;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlVersionDescription) document = NULL;
+  Wait wait = { 0 };
+
+  if (!g_file_get_contents (AML_TEST_FIXTURES "/fabric-profile.json", &json,
+                            NULL, &error))
+    g_error ("the fixture cannot be read: %s", error->message);
+
+  document = aml_loaders_profile_from_json (json, -1, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (document);
+
+  wait.loop = g_main_loop_new (NULL, FALSE);
+  wait.watchdog = g_timeout_add_seconds (20, watchdog_fired, &wait);
+
+  aml_loaders_install_async (AML_LOADER_FABRIC, "1.20.1", "0.19.5", document,
+                             "/bin/true", NULL, NULL, NULL, NULL,
+                             on_install_finished, &wait);
+
+  g_main_loop_run (wait.loop);
+  g_source_remove (wait.watchdog);
+  g_main_loop_unref (wait.loop);
+
+  g_assert_null (wait.install);
+  g_assert_error (wait.error, AML_LOADERS_ERROR, AML_LOADERS_ERROR_UNSUPPORTED);
+  g_assert_nonnull (strstr (wait.error->message, "Fabric"));
+  g_clear_error (&wait.error);
+
+  g_print ("ok - a loader with no installer is refused for an install\n");
+}
+
+/* The other way round: a loader that publishes an installer has no
+   profile to fetch, and the answer names the install that has it. */
+static void
+test_profile_of_a_loader_that_publishes_an_installer (void)
+{
+  Wait wait = { 0 };
+
+  wait.loop = g_main_loop_new (NULL, FALSE);
+  wait.watchdog = g_timeout_add_seconds (20, watchdog_fired, &wait);
+
+  aml_loaders_profile_async (AML_LOADER_FORGE, "1.20.1", "1.20.1-47.2.0",
+                             NULL, on_profile_finished, &wait);
+
+  g_main_loop_run (wait.loop);
+  g_source_remove (wait.watchdog);
+  g_main_loop_unref (wait.loop);
+
+  g_assert_null (wait.profile);
+  g_assert_error (wait.error, AML_LOADERS_ERROR, AML_LOADERS_ERROR_UNSUPPORTED);
+  g_assert_nonnull (strstr (wait.error->message, "aml_loaders_install_async"));
+  g_clear_error (&wait.error);
+
+  g_print ("ok - a loader with no profile is refused for one\n");
+}
+
 int
 main (void)
 {
@@ -566,6 +677,8 @@ main (void)
   test_fabric_profile ();
   test_quilt_profile ();
   test_profile_without_a_maven_address ();
+  test_install_of_a_loader_that_publishes_none ();
+  test_profile_of_a_loader_that_publishes_an_installer ();
 
   return EXIT_SUCCESS;
 }
