@@ -14,6 +14,7 @@
 #include "aml-java.h"
 #include "aml-launcher.h"
 #include "aml-settings.h"
+#include "aml-users-popover.h"
 
 struct _AmlMainWindow
 {
@@ -21,6 +22,13 @@ struct _AmlMainWindow
 
   AmlInstanceManager *manager;
   AmlSettings *settings;
+
+  /* The accounts a launch plays as, and the popover in the header that
+     shows them and the two ways of adding one. The window owns the store
+     for as long as it is open, and every launcher of an instance is
+     handed the same one. */
+  AmlAccounts *accounts;
+  AmlUsersPopover *users_popover;
 
   /* One launcher per instance, keyed by its id, so the card of an
      instance and its page always talk about the same launch. */
@@ -544,7 +552,7 @@ window_launcher (AmlMainWindow *self, const char *instance_id)
   if (instance == NULL)
     return NULL;
 
-  launcher = aml_launcher_new (instance, self->settings);
+  launcher = aml_launcher_new (instance, self->settings, self->accounts);
   g_hash_table_insert (self->launchers, g_strdup (instance_id), launcher);
 
   return launcher;
@@ -844,12 +852,16 @@ aml_main_window_init (AmlMainWindow *self)
   GtkWidget *add_button = gtk_menu_button_new ();
   GtkWidget *users_button = gtk_menu_button_new ();
   GtkWidget *app_menu_button = gtk_menu_button_new ();
-  GtkWidget *users_child = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *users_popover = gtk_popover_new ();
-  GtkWidget *users_hint = gtk_label_new ("No accounts yet");
+  GtkWidget *users_child = NULL;
   GtkWidget *empty_page = adw_status_page_new ();
   GtkWidget *toolbar = adw_toolbar_view_new ();
   GtkWidget *add_popover = NULL;
+
+  /* The settings and the accounts are the window's own: every launcher of
+     an instance is handed the same ones, so the whole window agrees on
+     what a launch does and as whom it plays. */
+  self->settings = aml_settings_new ();
+  self->accounts = aml_accounts_new ();
 
   g_action_map_add_action_entries (G_ACTION_MAP (self), window_entries,
                                    G_N_ELEMENTS (window_entries), self);
@@ -876,19 +888,15 @@ aml_main_window_init (AmlMainWindow *self)
     set_menu_item_tooltip (add_popover, "Download Modpack",
                            "Available in a later version");
 
-  /* End of the header: Users, then the application menu. The window
-   * controls are drawn by the header bar after them. */
-  gtk_box_append (GTK_BOX (users_child),
-                  gtk_image_new_from_icon_name ("avatar-default-symbolic"));
-  gtk_box_append (GTK_BOX (users_child), gtk_label_new ("Users"));
+  /* End of the header: who is playing, then the application menu. The
+   * button shows the avatar and the name of the active account, and what
+   * is behind it is the list of the accounts this copy of AML has, which
+   * is also where a new one is added. */
+  self->users_popover = aml_users_popover_new (self->accounts);
+  users_child = aml_users_popover_get_button_content (self->users_popover);
   gtk_menu_button_set_child (GTK_MENU_BUTTON (users_button), users_child);
-
-  gtk_widget_set_margin_start (users_hint, 12);
-  gtk_widget_set_margin_end (users_hint, 12);
-  gtk_widget_set_margin_top (users_hint, 12);
-  gtk_widget_set_margin_bottom (users_hint, 12);
-  gtk_popover_set_child (GTK_POPOVER (users_popover), users_hint);
-  gtk_menu_button_set_popover (GTK_MENU_BUTTON (users_button), users_popover);
+  gtk_menu_button_set_popover (GTK_MENU_BUTTON (users_button),
+                              GTK_WIDGET (self->users_popover));
 
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (app_menu_button),
                                  "open-menu-symbolic");
@@ -945,7 +953,6 @@ aml_main_window_new (GtkApplication *application, AmlInstanceManager *manager)
   GtkWidget *scroll = NULL;
 
   self->manager = g_object_ref (manager);
-  self->settings = aml_settings_new ();
 
   /* The table owns the launchers: the key is the id of the instance and
      the value is its launcher. */
@@ -991,6 +998,8 @@ aml_main_window_dispose (GObject *object)
   g_clear_pointer (&self->launchers, g_hash_table_unref);
   g_clear_object (&self->manager);
   g_clear_object (&self->settings);
+  g_clear_object (&self->accounts);
+  g_clear_object (&self->users_popover);
 
   G_OBJECT_CLASS (aml_main_window_parent_class)->dispose (object);
 }

@@ -648,7 +648,7 @@ aml_auth_profile_uuid (const char *id)
       g_string_append_c (out, g_ascii_tolower (id[i]));
     }
 
-  return g_string_free (out, FALSE);
+  return g_string_free (g_steal_pointer (&out), FALSE);
 }/* ---------------------------------------------------------- *
  * One request of the chain
  *

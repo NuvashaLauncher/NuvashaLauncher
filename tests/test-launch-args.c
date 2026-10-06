@@ -94,40 +94,112 @@ resolved_new (const char *version_id)
 }
 
 /* ---------------------------------------------------------- *
- * The offline UUID
+ * Who a launch runs as
  * ---------------------------------------------------------- */
 
+/* The session of an account is what the game is told: the name and the
+ * UUID of the account itself, its token, and the user type that says
+ * which kind of account it is. An offline account has no token of its
+ * own and is given the one the game cannot authenticate with, which is
+ * also what says the session is not a real one. */
 static void
-test_offline_uuid (void)
+test_session_of_an_account (void)
 {
-  g_autofree char *notch = aml_launch_offline_uuid ("Notch");
-  g_autofree char *player = aml_launch_offline_uuid (AML_LAUNCH_OFFLINE_NAME);
-  g_autofree char *player_again =
-    aml_launch_offline_uuid (AML_LAUNCH_OFFLINE_NAME);
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlAccount) offline = aml_account_new_offline ("Flia", &error);
+  AmlLaunchSession session;
 
-  /* What java.util.UUID.nameUUIDFromBytes() computes for
-     "OfflinePlayer:<name>", which is how a launcher derives the id of an
-     offline player. The value for Notch is the one every offline player
-     list has carried for years. */
-  g_assert_cmpstr (notch, ==,
-                   "b50ad385-829d-3141-a216-7e7d7539ba7f");
+  g_assert_no_error (error);
 
-  g_assert_cmpstr (player, ==,
-                   "a01e3843-e521-3998-958a-f459800e4d11");
-  g_assert_cmpstr (player_again, ==, player);
+  session = aml_launch_session_for (offline);
+  g_assert_cmpstr (session.name, ==, "Flia");
+  g_assert_cmpstr (session.uuid, ==, "41b05633-42e0-3a6f-b64b-6b64448dccdd");
+  g_assert_cmpstr (session.access_token, ==, AML_LAUNCH_OFFLINE_TOKEN);
+  g_assert_cmpstr (session.user_type, ==, AML_LAUNCH_OFFLINE_USER_TYPE);
 
-  /* The shape of a name based UUID: version 3 and the IETF variant. */
-  g_assert_cmpint (player[14], ==, '3');
-  g_assert_true (g_str_has_prefix (player + 19, "8") ||
-                 g_str_has_prefix (player + 19, "9") ||
-                 g_str_has_prefix (player + 19, "a") ||
-                 g_str_has_prefix (player + 19, "b"));
-
-  /* A different name is a different UUID. */
+  /* A Microsoft account is its own name, its own UUID and its own token,
+     and the user type that says it is a real one. */
   {
-    g_autofree char *flia = aml_launch_offline_uuid ("Flia");
+    g_autoptr (AmlAccount) microsoft = g_new0 (AmlAccount, 1);
+    g_autoptr (AmlAccount) without_token = NULL;
 
-    g_assert_cmpstr (flia, ==, "41b05633-42e0-3a6f-b64b-6b64448dccdd");
+    microsoft->type = AML_ACCOUNT_MICROSOFT;
+    microsoft->id = g_strdup ("069a79f444e94726a5befca90e38aaf5");
+    microsoft->name = g_strdup ("Notch");
+    microsoft->uuid = g_strdup ("069a79f4-44e9-4726-a5be-fca90e38aaf5");
+    microsoft->access_token = g_strdup ("the-token-of-the-session");
+
+    session = aml_launch_session_for (microsoft);
+    g_assert_cmpstr (session.name, ==, "Notch");
+    g_assert_cmpstr (session.uuid, ==, "069a79f4-44e9-4726-a5be-fca90e38aaf5");
+    g_assert_cmpstr (session.access_token, ==, "the-token-of-the-session");
+    g_assert_cmpstr (session.user_type, ==, AML_LAUNCH_MICROSOFT_USER_TYPE);
+
+    /* An account whose token is gone cannot be given one that is not
+       there: the offline token is what the game is told rather than a
+       null it would not survive. */
+    without_token = aml_account_copy (microsoft);
+    g_clear_pointer (&without_token->access_token, g_free);
+
+    session = aml_launch_session_for (without_token);
+    g_assert_cmpstr (session.access_token, ==, AML_LAUNCH_OFFLINE_TOKEN);
+    g_assert_cmpstr (session.user_type, ==, AML_LAUNCH_MICROSOFT_USER_TYPE);
+  }
+}
+
+/* The command line of a launch carries the account, token and all: what
+   the game is told is what the launcher does not make up. */
+static void
+test_arguments_carry_the_account (void)
+{
+  g_autoptr (AmlResolvedVersion) resolved = resolved_new ("1.20.1");
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GPtrArray) argv = NULL;
+  g_autoptr (AmlAccount) account = g_new0 (AmlAccount, 1);
+  AmlLaunchSession session;
+
+  account->type = AML_ACCOUNT_MICROSOFT;
+  account->id = g_strdup ("069a79f444e94726a5befca90e38aaf5");
+  account->name = g_strdup ("Notch");
+  account->uuid = g_strdup ("069a79f4-44e9-4726-a5be-fca90e38aaf5");
+  account->access_token = g_strdup ("the-token-of-the-session");
+
+  session = aml_launch_session_for (account);
+
+  resolved->jvm_arguments = strings (NULL);
+  resolved->game_arguments =
+    strings ("--username", "${auth_player_name}", "--uuid", "${auth_uuid}",
+             "--accessToken", "${auth_access_token}", "--userType",
+             "${user_type}", NULL);
+  resolved->logging_argument = NULL;
+
+  argv = aml_launch_build_arguments (resolved, &session, "/usr/bin/java",
+                                     "/home/u/games/one", NULL, &error);
+
+  g_assert_no_error (error);
+  g_assert_nonnull (argv);
+
+  /* This document says nothing about the natives or the classpath, so
+     AML adds both before the main class: java, the library path, "-cp",
+     the classpath, the main class and then the six words of the game
+     arguments. */
+  g_assert_cmpstr (at (argv, 4), ==, "net.minecraft.client.main.Main");
+  g_assert_cmpstr (at (argv, 5), ==, "--username");
+  g_assert_cmpstr (at (argv, 6), ==, "Notch");
+  g_assert_cmpstr (at (argv, 7), ==, "--uuid");
+  g_assert_cmpstr (at (argv, 8), ==, "069a79f4-44e9-4726-a5be-fca90e38aaf5");
+  g_assert_cmpstr (at (argv, 9), ==, "--accessToken");
+  g_assert_cmpstr (at (argv, 10), ==, "the-token-of-the-session");
+  g_assert_cmpstr (at (argv, 11), ==, "--userType");
+  g_assert_cmpstr (at (argv, 12), ==, "msa");
+
+  /* The token is in the command line and never in what is shown of it: the
+     only form of a command line AML prints is the redacted one. */
+  {
+    g_autofree char *shown = aml_launch_redact (argv);
+
+    g_assert_null (strstr (shown, "the-token-of-the-session"));
+    g_assert_nonnull (strstr (shown, "--accessToken '***'"));
   }
 }
 
@@ -174,9 +246,10 @@ test_build_arguments_modern (void)
   g_autoptr (AmlResolvedVersion) resolved = resolved_new ("1.20.1");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
+  g_autoptr (AmlAccount) account = aml_account_new_offline ("Flia", NULL);
+  AmlLaunchSession session;
   guint classpaths = 0;
   guint library_paths = 0;
-  g_autofree char *offline = aml_launch_offline_uuid (AML_LAUNCH_OFFLINE_NAME);
 
   /* What a 1.20.1 document carries: the library path and the classpath
      already, and the game arguments with their placeholders. */
@@ -193,7 +266,9 @@ test_build_arguments_modern (void)
     g_strdup ("-Dlog4j.configurationFile=/home/u/.local/share/AML/logging/"
               "client-1.20.1.xml");
 
-  argv = aml_launch_build_arguments (resolved, "/usr/bin/java",
+  session = aml_launch_session_for (account);
+
+  argv = aml_launch_build_arguments (resolved, &session, "/usr/bin/java",
                                      "/home/u/games/one", "-Xmx2G -Xss1M",
                                      &error);
 
@@ -238,12 +313,12 @@ test_build_arguments_modern (void)
   g_assert_cmpstr (at (argv, 6), ==, resolved->logging_argument);
   g_assert_cmpstr (at (argv, 7), ==, "net.minecraft.client.main.Main");
   g_assert_cmpstr (at (argv, 8), ==, "--username");
-  g_assert_cmpstr (at (argv, 9), ==, AML_LAUNCH_OFFLINE_NAME);
+  g_assert_cmpstr (at (argv, 9), ==, "Flia");
   g_assert_cmpstr (at (argv, 11), ==, "1.20.1");
   g_assert_cmpstr (at (argv, 13), ==, "/home/u/games/one");
   g_assert_cmpstr (at (argv, 15), ==, "/home/u/.local/share/AML/assets");
   g_assert_cmpstr (at (argv, 17), ==, "12");
-  g_assert_cmpstr (at (argv, 19), ==, offline);
+  g_assert_cmpstr (at (argv, 19), ==, account->uuid);
   g_assert_cmpstr (at (argv, 21), ==, AML_LAUNCH_OFFLINE_USER_TYPE);
   g_assert_cmpstr (at (argv, 23), ==, "1.20.1");
 }
@@ -258,8 +333,12 @@ test_build_arguments_legacy (void)
   g_autoptr (AmlResolvedVersion) resolved = resolved_new ("1.8.9");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
+  g_autoptr (AmlAccount) account = aml_account_new_offline ("Flia", NULL);
+  AmlLaunchSession session;
   guint classpath = 0;
   guint main_class = 0;
+
+  session = aml_launch_session_for (account);
 
   /* What a 1.8.9 document carries: no "arguments" object at all, only
      the one line of game arguments, and nothing for the JVM. */
@@ -272,7 +351,7 @@ test_build_arguments_legacy (void)
              "--versionType", "${version_type}", NULL);
   resolved->logging_argument = NULL;
 
-  argv = aml_launch_build_arguments (resolved, "/usr/bin/java",
+  argv = aml_launch_build_arguments (resolved, &session, "/usr/bin/java",
                                      "/home/u/games/one", NULL, &error);
 
   g_assert_no_error (error);
@@ -301,7 +380,7 @@ test_build_arguments_legacy (void)
 
   g_assert_cmpuint (main_class, >, classpath);
   g_assert_cmpstr (at (argv, main_class + 1), ==, "--username");
-  g_assert_cmpstr (at (argv, main_class + 2), ==, AML_LAUNCH_OFFLINE_NAME);
+  g_assert_cmpstr (at (argv, main_class + 2), ==, "Flia");
   g_assert_cmpstr (at (argv, main_class + 4), ==, "1.8.9");
   g_assert_cmpstr (at (argv, main_class + 6), ==, "/home/u/games/one");
   g_assert_cmpstr (at (argv, main_class + 14), ==, "legacy");
@@ -313,12 +392,15 @@ test_build_arguments_failures (void)
   g_autoptr (AmlResolvedVersion) resolved = resolved_new ("1.20.1");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
+  g_autoptr (AmlAccount) account = aml_account_new_offline ("Flia", NULL);
+  AmlLaunchSession session;
 
+  session = aml_launch_session_for (account);
   resolved->jvm_arguments = strings (NULL);
   resolved->game_arguments = strings ("--demo", NULL);
   g_clear_pointer (&resolved->main_class, g_free);
 
-  argv = aml_launch_build_arguments (resolved, "/usr/bin/java",
+  argv = aml_launch_build_arguments (resolved, &session, "/usr/bin/java",
                                      "/home/u/games/one", NULL, &error);
 
   g_assert_null (argv);
@@ -329,7 +411,7 @@ test_build_arguments_failures (void)
   /* JVM arguments that are not a command line fail the launch instead of
      being split by guesswork. */
   resolved->main_class = g_strdup ("net.minecraft.client.main.Main");
-  argv = aml_launch_build_arguments (resolved, "/usr/bin/java",
+  argv = aml_launch_build_arguments (resolved, &session, "/usr/bin/java",
                                      "/home/u/games/one", "-Xmx2G \"unclosed",
                                      &error);
 
@@ -379,8 +461,8 @@ main (void)
 {
   g_print ("# Launch argument tests\n");
 
-  test_offline_uuid ();
-  g_print ("ok - the offline UUID is the one java derives\n");
+  test_session_of_an_account ();
+  g_print ("ok - a launch runs as the account it is given\n");
 
   test_substitute_known_and_unknown ();
   g_print ("ok - known placeholders are replaced, unknown ones are kept\n");
@@ -393,6 +475,9 @@ main (void)
 
   test_build_arguments_failures ();
   g_print ("ok - a document without a main class or bad jvm args fails\n");
+
+  test_arguments_carry_the_account ();
+  g_print ("ok - the command line carries the account and no token in print\n");
 
   test_redact ();
   g_print ("ok - the token is redacted everywhere the command line shows\n");

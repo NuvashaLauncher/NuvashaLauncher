@@ -116,6 +116,23 @@ name_is_a_player_name (const char *name, const char **why)
   return TRUE;
 }
 
+GType
+aml_account_get_type (void)
+{
+  static gsize type_id = 0;
+
+  if (g_once_init_enter (&type_id))
+    {
+      GType type = g_boxed_type_register_static ("AmlAccount",
+                                                (GBoxedCopyFunc) aml_account_copy,
+                                                (GBoxedFreeFunc) aml_account_free);
+
+      g_once_init_leave (&type_id, type);
+    }
+
+  return type_id;
+}
+
 AmlAccount *
 aml_account_new_offline (const char *name, GError **error)
 {

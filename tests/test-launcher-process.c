@@ -250,7 +250,7 @@ static void
 test_output_and_clean_exit (void)
 {
   g_autoptr (AmlInstance) instance = new_instance ("clean");
-  g_autoptr (AmlLauncher) launcher = aml_launcher_new (instance, NULL);
+  g_autoptr (AmlLauncher) launcher = aml_launcher_new (instance, NULL, NULL);
   g_autoptr (GPtrArray) argv = NULL;
   g_autoptr (GError) error = NULL;
   Watch watch = { 0 };
@@ -292,7 +292,7 @@ static void
 test_exit_code_makes_a_crash (void)
 {
   g_autoptr (AmlInstance) instance = new_instance ("crash");
-  g_autoptr (AmlLauncher) launcher = aml_launcher_new (instance, NULL);
+  g_autoptr (AmlLauncher) launcher = aml_launcher_new (instance, NULL, NULL);
   g_autoptr (GPtrArray) argv = NULL;
   g_autoptr (GError) error = NULL;
   Watch watch = { 0 };
@@ -330,7 +330,7 @@ test_crash_report_makes_a_crash (void)
   g_assert_true (g_file_set_contents (report, "a crash\n", -1, NULL));
 
   instance = new_instance ("reported");
-  launcher = aml_launcher_new (instance, NULL);
+  launcher = aml_launcher_new (instance, NULL, NULL);
 
   /* A game that ends with zero still crashed when it wrote a report
      while it was running, which is what the report is for. */
@@ -365,7 +365,7 @@ test_old_crash_report_does_not_count (void)
   make_an_hour_old (report);
 
   instance = new_instance ("oldreport");
-  launcher = aml_launcher_new (instance, NULL);
+  launcher = aml_launcher_new (instance, NULL, NULL);
 
   argv = argv_of (write_script ("oldreport.sh", "exit 0"));
 
@@ -386,7 +386,7 @@ test_child_environment (void)
 {
   const char *display = g_getenv ("DISPLAY");
   g_autoptr (AmlInstance) instance = new_instance ("environment");
-  g_autoptr (AmlLauncher) launcher = aml_launcher_new (instance, NULL);
+  g_autoptr (AmlLauncher) launcher = aml_launcher_new (instance, NULL, NULL);
   g_autoptr (GPtrArray) argv = NULL;
   g_autoptr (GError) error = NULL;
   g_autofree char *expected_display =
@@ -430,7 +430,7 @@ static void
 test_child_inherits_the_rest_of_the_environment (void)
 {
   g_autoptr (AmlInstance) instance = new_instance ("inherited");
-  g_autoptr (AmlLauncher) launcher = aml_launcher_new (instance, NULL);
+  g_autoptr (AmlLauncher) launcher = aml_launcher_new (instance, NULL, NULL);
   g_autoptr (GPtrArray) argv = NULL;
   g_autoptr (GError) error = NULL;
   Watch watch = { 0 };
@@ -458,7 +458,7 @@ static void
 test_duplicate_launch_prevention (void)
 {
   g_autoptr (AmlInstance) instance = new_instance ("single");
-  g_autoptr (AmlLauncher) launcher = aml_launcher_new (instance, NULL);
+  g_autoptr (AmlLauncher) launcher = aml_launcher_new (instance, NULL, NULL);
   g_autoptr (GPtrArray) argv = NULL;
   g_autoptr (GError) error = NULL;
   Watch watch = { 0 };
@@ -529,7 +529,7 @@ static void
 test_stop_ends_the_game (void)
 {
   g_autoptr (AmlInstance) instance = new_instance ("stop");
-  g_autoptr (AmlLauncher) launcher = aml_launcher_new (instance, NULL);
+  g_autoptr (AmlLauncher) launcher = aml_launcher_new (instance, NULL, NULL);
   g_autoptr (GPtrArray) argv = NULL;
   g_autoptr (GError) error = NULL;
   Watch running = { 0 };
@@ -566,7 +566,7 @@ static void
 test_stop_forces_a_game_that_ignores_sigterm (void)
 {
   g_autoptr (AmlInstance) instance = new_instance ("forced");
-  g_autoptr (AmlLauncher) launcher = aml_launcher_new (instance, NULL);
+  g_autoptr (AmlLauncher) launcher = aml_launcher_new (instance, NULL, NULL);
   g_autoptr (GPtrArray) argv = NULL;
   g_autoptr (GError) error = NULL;
   Watch running = { 0 };
@@ -604,7 +604,7 @@ static void
 test_line_limit_and_clear (void)
 {
   g_autoptr (AmlInstance) instance = new_instance ("limit");
-  g_autoptr (AmlLauncher) launcher = aml_launcher_new (instance, NULL);
+  g_autoptr (AmlLauncher) launcher = aml_launcher_new (instance, NULL, NULL);
   g_autoptr (GPtrArray) argv = NULL;
   g_autoptr (GError) error = NULL;
   Watch watch = { 0 };
@@ -651,7 +651,7 @@ test_spawn_failure_is_a_failure (void)
 {
   g_autofree char *missing = g_build_filename (root, "not-a-java", NULL);
   g_autoptr (AmlInstance) instance = new_instance ("missing");
-  g_autoptr (AmlLauncher) launcher = aml_launcher_new (instance, NULL);
+  g_autoptr (AmlLauncher) launcher = aml_launcher_new (instance, NULL, NULL);
   g_autoptr (GPtrArray) argv = argv_of (g_steal_pointer (&missing));
   g_autoptr (GError) error = NULL;
 

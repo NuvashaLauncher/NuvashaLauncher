@@ -26,16 +26,19 @@
  * second launch while one is in flight, so the same game never runs
  * twice.
  *
- * Until accounts exist the session is an offline one: the player name
- * "Player", the UUID java derives from that name offline and a token
- * the game cannot use, which is why that token is redacted everywhere it
- * could be printed. */
+ * A launch runs as the active account of aml-accounts.h: its name, its
+ * UUID, its access token and the user type that goes with the kind of
+ * account it is. An account whose token has run out is refreshed before
+ * the launch starts, and one that cannot be refreshed leaves the launch
+ * in the Needs sign-in state, which is a state a user can act on rather
+ * than a game that will not start. */
 
 #ifndef AML_LAUNCHER_H
 #define AML_LAUNCHER_H
 
 #include <gio/gio.h>
 
+#include "aml-accounts.h"
 #include "aml-instance.h"
 #include "aml-minecraft-resolve.h"
 #include "aml-settings.h"
@@ -49,12 +52,12 @@ G_BEGIN_DECLS
  * the game is told instead of one that was invented. */
 #define AML_LAUNCHER_VERSION "dev"
 
-/* The offline session: the name every offline launch runs under, the
- * token the game cannot authenticate with and the user type that goes
- * with it. */
-#define AML_LAUNCH_OFFLINE_NAME "Player"
+/* What the game is told about an offline session: a token it cannot
+ * authenticate with, and the user type that says the session is no real
+ * account. A Microsoft session is told "msa" and a token of its own. */
 #define AML_LAUNCH_OFFLINE_TOKEN "0"
 #define AML_LAUNCH_OFFLINE_USER_TYPE "legacy"
+#define AML_LAUNCH_MICROSOFT_USER_TYPE "msa"
 
 /* The window the game opens in, which is what ${resolution_width} and
  * ${resolution_height} mean. */
@@ -83,14 +86,15 @@ GQuark aml_launch_error_quark (void);
 /* What a launch is doing, and what it did. A state only ever comes from
  * something that really happened. */
 typedef enum {
-  AML_LAUNCH_PREPARING,   /* the manifest, the resolve and the Java */
-  AML_LAUNCH_DOWNLOADING, /* the resolve is fetching files */
-  AML_LAUNCH_LAUNCHING,   /* the command line is being built and run */
-  AML_LAUNCH_RUNNING,     /* the game is up */
-  AML_LAUNCH_STOPPING,    /* a stop was asked for and not finished */
-  AML_LAUNCH_STOPPED,     /* the game ended by itself, or was stopped */
-  AML_LAUNCH_CRASHED,     /* it ended with a failure */
-  AML_LAUNCH_FAILED       /* it never started */
+  AML_LAUNCH_PREPARING,        /* the manifest, the resolve and the Java */
+  AML_LAUNCH_DOWNLOADING,      /* the resolve is fetching files */
+  AML_LAUNCH_LAUNCHING,        /* the command line is being built and run */
+  AML_LAUNCH_RUNNING,          /* the game is up */
+  AML_LAUNCH_STOPPING,         /* a stop was asked for and not finished */
+  AML_LAUNCH_STOPPED,          /* the game ended by itself, or was stopped */
+  AML_LAUNCH_CRASHED,          /* it ended with a failure */
+  AML_LAUNCH_FAILED,           /* it never started */
+  AML_LAUNCH_NEEDS_SIGN_IN     /* the account has to sign in again */
 } AmlLaunchState;
 
 /* The type of the state, which the "state" signal carries. */
@@ -98,19 +102,31 @@ typedef enum {
 GType aml_launch_state_get_type (void);
 
 /* The same string the enum member spells: "Preparing", "Downloading",
- * "Launching", "Running", "Stopping", "Stopped", "Crashed" or
- * "Failed". Never NULL. */
+ * "Launching", "Running", "Stopping", "Stopped", "Crashed", "Failed" or
+ * "Needs sign-in". Never NULL. */
 const char *aml_launch_state_to_string (AmlLaunchState state);
 
 /* TRUE for the states a launch passes through and lives in: everything
  * from Preparing to Stopping. A game in any of them is a game that must
- * not be started a second time. */
+ * not be started a second time. A launch that needs a sign-in is not
+ * busy: nothing is running and the user can start it again. */
 gboolean aml_launch_state_is_busy (AmlLaunchState state);
 
-/* The UUID the game gives an offline player, the way java does it for
- * "OfflinePlayer:<name>": the MD5 of the name with the version 3 and
- * the IETF variant bits set. (transfer full) */
-char *aml_launch_offline_uuid (const char *name);
+/* What a launch runs as: the account, in the four words the game is
+ * told about the player. */
+typedef struct {
+  const char *name;
+  const char *uuid;         /* dashed, as the account carries it */
+  const char *access_token; /* an offline session gets the token it
+                             * cannot use, so the argument is never
+                             * missing */
+  const char *user_type;    /* "msa" or "legacy" */
+} AmlLaunchSession;
+
+/* The session of an account: its own name and UUID, its token, and the
+ * user type that says which kind of account it is. Every member points
+ * into @account, which the caller keeps. */
+AmlLaunchSession aml_launch_session_for (const AmlAccount *account);
 
 /* @value with every ${name} @placeholders holds replaced by the value
  * for that name. A name the table does not hold is left exactly as the
@@ -132,20 +148,22 @@ char *aml_launch_substitute (const char  *value,
  *
  * The placeholders the document wrote are replaced by the values of this
  * machine: the paths the resolve module handed over, the instance
- * directory, and the offline session. Both the modern "arguments" object
- * and the legacy "minecraftArguments" line arrive in @resolved, so both
- * end up the same way here.
+ * directory, and @session, which is what the player is called, who they
+ * are and the token the game authenticates with. Both the modern
+ * "arguments" object and the legacy "minecraftArguments" line arrive in
+ * @resolved, so both end up the same way here.
  *
  * @resolved is what aml_resolve_version_finish() returned and is not
- * modified, @java_executable the java this launch runs with,
- * @game_directory the directory the game runs in, which is also the
- * ${game_directory} of the arguments, and @jvm_args the line the
- * instance stores.
+ * modified, @session what aml_launch_session_for() returned, @java_executable
+ * the java this launch runs with, @game_directory the directory the game
+ * runs in, which is also the ${game_directory} of the arguments, and
+ * @jvm_args the line the instance stores.
  *
  * Fails with AML_LAUNCH_ERROR_NO_MAIN_CLASS when the document names no
  * main class and with AML_LAUNCH_ERROR_ARGUMENTS when the JVM arguments
  * of the instance do not parse as a command line. (transfer full) */
 GPtrArray *aml_launch_build_arguments (const AmlResolvedVersion *resolved,
+                                      const AmlLaunchSession   *session,
                                       const char             *java_executable,
                                       const char             *game_directory,
                                       const char             *jvm_args,
@@ -180,11 +198,18 @@ enum {
   AML_LAUNCHER_N_SIGNALS
 };
 
-/* An instance to launch and the settings that decide how much of its
- * log is kept and whether a crash opens the log folder. @settings may be
- * NULL in a test that does not care about them. */
-AmlLauncher *aml_launcher_new (AmlInstance *instance,
-                               AmlSettings *settings);
+/* An instance to launch, the settings that decide how much of its log is
+ * kept and whether a crash opens the log folder, and the accounts a
+ * launch runs as. @settings may be NULL in a test that does not care
+ * about them, and so may @accounts, in which case there is no account to
+ * play as and a launch says so. */
+AmlLauncher *aml_launcher_new (AmlInstance  *instance,
+                               AmlSettings  *settings,
+                               AmlAccounts  *accounts);
+
+/* The accounts a launch runs as, or NULL when the launcher was made
+ * without any. Borrowed. */
+AmlAccounts *aml_launcher_get_accounts (AmlLauncher *self);
 
 /* The instance this launcher belongs to. Borrowed. */
 AmlInstance *aml_launcher_get_instance (AmlLauncher *self);
