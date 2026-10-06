@@ -310,6 +310,53 @@ test_fabric_profile (void)
   g_print ("ok - a Fabric profile becomes a document that merges over it\n");
 }
 
+/* Quilt publishes its libraries without a hash at all, so the document
+   has to be usable even when nothing can be verified. */
+static void
+test_quilt_profile (void)
+{
+  g_autofree char *json = NULL;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlVersionDescription) profile = NULL;
+  const AmlLibrary *library = NULL;
+
+  if (!g_file_get_contents (AML_TEST_FIXTURES "/quilt-profile.json", &json,
+                            NULL, &error))
+    g_error ("the fixture cannot be read: %s", error->message);
+
+  profile = aml_loaders_profile_from_json (json, -1, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (profile);
+
+  g_assert_cmpstr (profile->id, ==, "quilt-loader-0.30.1-26.3");
+  g_assert_cmpstr (profile->inherits_from, ==, "26.3");
+  g_assert_cmpstr (profile->main_class, ==,
+                   "org.quiltmc.loader.impl.launch.knot.KnotClient");
+  g_assert_cmpuint (profile->libraries->len, ==, 4);
+
+  /* One jvm argument and one that only macOS gets, like a document of
+     Mojang's own. */
+  g_assert_cmpuint (profile->jvm_arguments->len, ==, 2);
+
+  library = find_library (profile, "org.quiltmc:quilt-json5:1.0.4+final");
+  g_assert_nonnull (library);
+  g_assert_nonnull (library->artifact);
+  g_assert_cmpstr (library->artifact->url, ==,
+                   "https://maven.quiltmc.org/repository/release/org/quiltmc/"
+                   "quilt-json5/1.0.4+final/quilt-json5-1.0.4+final.jar");
+
+  /* A library that publishes no hash is fetched without one: there is
+     nothing to verify, which the resolve module allows. */
+  g_assert_null (library->artifact->sha1);
+
+  library = find_library (profile, "org.ow2.asm:asm:9.9");
+  g_assert_nonnull (library);
+  g_assert_cmpstr (library->artifact->sha1, ==,
+                   "c29635c8a7afa03d74b33c1884df8abb2b3f3dcc");
+
+  g_print ("ok - a Quilt profile is a document, with or without hashes\n");
+}
+
 static void
 test_profile_without_a_maven_address (void)
 {
@@ -344,6 +391,7 @@ main (void)
   test_quilt_version_list ();
   test_empty_and_broken_answers ();
   test_fabric_profile ();
+  test_quilt_profile ();
   test_profile_without_a_maven_address ();
 
   return EXIT_SUCCESS;

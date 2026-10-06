@@ -1,0 +1,44 @@
+{
+  "id": "quilt-loader-0.30.1-26.3",
+  "inheritsFrom": "26.3",
+  "type": "release",
+  "releaseTime": "2026-09-01T10:00:00+0000",
+  "mainClass": "org.quiltmc.loader.impl.launch.knot.KnotClient",
+  "arguments": {
+    "game": [],
+    "jvm": [
+      "-Dquilt.launch.java.agent=...",
+      {
+        "rules": [
+          {
+            "action": "allow",
+            "os": {
+              "name": "osx"
+            }
+          }
+        ],
+        "value": "-XstartOnFirstThread"
+      }
+    ]
+  },
+  "libraries": [
+    {
+      "name": "net.fabricmc:sponge-mixin:0.15.4+mixin.0.8.7",
+      "url": "https://maven.fabricmc.net/"
+    },
+    {
+      "name": "org.quiltmc:quilt-json5:1.0.4+final",
+      "url": "https://maven.quiltmc.org/repository/release/"
+    },
+    {
+      "name": "org.ow2.asm:asm:9.9",
+      "url": "https://maven.fabricmc.net/",
+      "sha1": "c29635c8a7afa03d74b33c1884df8abb2b3f3dcc"
+    },
+    {
+      "name": "org.quiltmc:quilt-loader:0.30.1",
+      "url": "https://maven.quiltmc.org/repository/release/",
+      "sha1": "bed0a01be87c4378d9002611d9642e8f9e9c2cff"
+    }
+  ]
+}
