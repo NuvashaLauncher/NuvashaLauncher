@@ -1,0 +1,63 @@
+{
+  "id": "AANobbMI",
+  "slug": "sodium",
+  "project_type": "mod",
+  "title": "Sodium",
+  "description": "A high-performance rendering engine replacement for Minecraft, which greatly improves frame rates and reduces micro-stutter.",
+  "body": "**Latest News**\n\nSodium is a rendering engine for Minecraft.\n\n## Requirements\n\n- Fabric, Quilt or NeoForge\n",
+  "status": "approved",
+  "requested_status": null,
+  "additional_categories": [],
+  "categories": ["optimization"],
+  "client_side": "required",
+  "server_side": "unsupported",
+  "team": "4reLOAKe",
+  "body_url": null,
+  "moderator_message": null,
+  "published": "2021-01-03T00:53:34.185936+00:00",
+  "updated": "2026-09-20T21:27:06.329936+00:00",
+  "license": {
+    "id": "LicenseRef-Polyform-Shield-1.0.0",
+    "name": "",
+    "url": "https://github.com/CaffeineMC/sodium/blob/dev/LICENSE.md"
+  },
+  "versions": ["OihdIimA", "ryOMVRuG"],
+  "followers": 41479,
+  "downloads": 237896647,
+  "icon_url": "https://cdn.modrinth.com/data/AANobbMI/295862f4724dc3f78df3447ad6072b2dcd3ef0c9_96.webp",
+  "color": null,
+  "thread_id": "C0dImWcA",
+  "monetization_status": "monetized",
+  "loaders": ["fabric", "neoforge", "quilt"],
+  "source_url": "https://github.com/CaffeineMC/sodium",
+  "issues_url": "https://github.com/CaffeineMC/sodium/issues",
+  "wiki_url": "https://github.com/CaffeineMC/sodium/wiki",
+  "discord_url": "https://caffeinemc.net/discord",
+  "donation_urls": [
+    {
+      "id": "ko-fi",
+      "platform": "Ko-fi",
+      "url": "https://caffeinemc.net/donate"
+    }
+  ],
+  "game_versions": ["1.19.2", "1.20.1", "1.21.1"],
+  "gallery": [
+    {
+      "url": "https://cdn.modrinth.com/data/AANobbMI/images/d84313e6f57dc9e7896961dbd2dfc2689d482758_350.webp",
+      "raw_url": "https://cdn.modrinth.com/data/AANobbMI/images/d84313e6f57dc9e7896961dbd2dfc2689d482758.webp",
+      "featured": false,
+      "title": "Underwater Lighting Improvements",
+      "description": "Sodium fixes many graphical issues",
+      "created": "2023-06-15T21:35:39.891789Z",
+      "ordering": 0
+    }
+  ],
+  "featured_gallery": null,
+  "extended_description": null,
+  "environment": "client_only",
+  "approved_at": "2021-01-03T00:55:00.000000+00:00",
+  "queued_at": null,
+  "disclosure_types": [],
+  "donation_urls_all": null,
+  "organization": "CaffeineMC"
+}

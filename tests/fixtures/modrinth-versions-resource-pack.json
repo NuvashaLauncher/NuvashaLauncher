@@ -1,0 +1,64 @@
+[
+  {
+    "name": "[1.20.1] Faithful 32x – June 2026",
+    "version_number": "1.20.1-june-2026",
+    "changelog": "Rebuilt pack.",
+    "date_published": "2026-06-19T17:16:05.903153Z",
+    "downloads": 2100000,
+    "id": "VgTWEXF2",
+    "project_id": "w0TnApzs",
+    "author_id": "kQw0gTdS",
+    "featured": false,
+    "version_type": "release",
+    "status": "listed",
+    "requested_status": null,
+    "environment": "client_and_server",
+    "game_versions": ["1.20", "1.20.1"],
+    "loaders": ["minecraft"],
+    "files": [
+      {
+        "id": "GZR0yVvP",
+        "hashes": {
+          "sha512": "924fa489a4e5877541e28bd51ef1839fca887e7deab5857ca3d6c18dd831b684918556b28072516f29f22039374043e6de4eefa697bc3979d3c568d090fd5862",
+          "sha1": "7084d82b48844f7c1b625e157463c4d7b87a82d3"
+        },
+        "url": "https://cdn.modrinth.com/data/w0TnApzs/versions/VgTWEXF2/Faithful%2032x%20-%201.20.1.zip",
+        "filename": "Faithful 32x - 1.20.1.zip",
+        "primary": true,
+        "size": 11088963
+      }
+    ],
+    "dependencies": []
+  },
+  {
+    "name": "[1.20] Faithful 32x – May 2026",
+    "version_number": "1.20-may-2026",
+    "changelog": "",
+    "date_published": "2026-05-19T17:16:05.903153Z",
+    "downloads": 1900000,
+    "id": "VgTWEXF1",
+    "project_id": "w0TnApzs",
+    "author_id": "kQw0gTdS",
+    "featured": false,
+    "version_type": "release",
+    "status": "listed",
+    "requested_status": null,
+    "environment": "client_and_server",
+    "game_versions": ["1.20"],
+    "loaders": ["minecraft"],
+    "files": [
+      {
+        "id": "GZR0yVvQ",
+        "hashes": {
+          "sha512": "824fa489a4e5877541e28bd51ef1839fca887e7deab5857ca3d6c18dd831b684918556b28072516f29f22039374043e6de4eefa697bc3979d3c568d090fd5862",
+          "sha1": "6084d82b48844f7c1b625e157463c4d7b87a82d3"
+        },
+        "url": "https://cdn.modrinth.com/data/w0TnApzs/versions/VgTWEXF1/Faithful%2032x%20-%201.20.zip",
+        "filename": "Faithful 32x - 1.20.zip",
+        "primary": true,
+        "size": 11000000
+      }
+    ],
+    "dependencies": []
+  }
+]

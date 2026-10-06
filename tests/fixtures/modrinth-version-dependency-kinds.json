@@ -1,0 +1,68 @@
+{
+  "name": "Example 1.0.0 for Fabric 1.20.1",
+  "version_number": "1.0.0",
+  "changelog": "Composed from real Modrinth dependency entries so that all four dependency kinds appear in one answer, which no single published version has.",
+  "date_published": "2025-04-01T12:00:00.000000Z",
+  "downloads": 1234,
+  "id": "DepKind01",
+  "project_id": "example00",
+  "author_id": "example0",
+  "featured": false,
+  "version_type": "release",
+  "status": "listed",
+  "requested_status": null,
+  "environment": "client_only",
+  "game_versions": [
+    "1.20.1"
+  ],
+  "loaders": [
+    "fabric",
+    "quilt"
+  ],
+  "files": [
+    {
+      "id": "DepKindFile",
+      "hashes": {
+        "sha1": "6666666666666666666666666666666666666666",
+        "sha512": "f2f3f1a7d8b8b8c8d8e8f8a8b8c8d8e8f8a8b8c8d8e8f8a8b8c8d8e8f8a8b8c8d8e8f8a8b8c8d8e8f8a8b8c8d8e8f8a8b8c8d8e8f8a8b8c8d8e8f8a8b"
+      },
+      "url": "https://cdn.modrinth.com/data/example00/versions/DepKind01/example-1.0.0.jar",
+      "filename": "example-1.0.0.jar",
+      "primary": true,
+      "size": 100000,
+      "file_type": null
+    }
+  ],
+  "dependencies": [
+    {
+      "version_id": "ryOMVRuG",
+      "project_id": "AANobbMI",
+      "file_name": null,
+      "dependency_type": "required"
+    },
+    {
+      "version_id": null,
+      "project_id": "w0TnApzs",
+      "file_name": null,
+      "dependency_type": "optional"
+    },
+    {
+      "version_id": null,
+      "project_id": "tgaOHodt",
+      "file_name": null,
+      "dependency_type": "embedded"
+    },
+    {
+      "version_id": null,
+      "project_id": "4ZqxOvjD",
+      "file_name": null,
+      "dependency_type": "incompatible"
+    },
+    {
+      "version_id": "OihdIimA",
+      "project_id": "AANobbMI",
+      "file_name": null,
+      "dependency_type": "required"
+    }
+  ]
+}

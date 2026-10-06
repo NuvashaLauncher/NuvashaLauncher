@@ -1,0 +1,33 @@
+{
+  "game_versions": ["1.20.1"],
+  "loaders": ["fabric", "quilt"],
+  "environment": "client_only",
+  "id": "mhZtY2lR",
+  "project_id": "AANobbMI",
+  "author_id": "TEZXhE2U",
+  "featured": false,
+  "name": "Sodium 0.5.8",
+  "version_number": "mc1.20.1-0.5.8",
+  "changelog": "- Fixed compatibility with Fabric API 0.95.3+.",
+  "changelog_url": null,
+  "date_published": "2024-02-01T20:32:58.348027Z",
+  "downloads": 5095849,
+  "version_type": "release",
+  "status": "listed",
+  "requested_status": null,
+  "files": [
+    {
+      "id": "Z12Z3hV1",
+      "hashes": {
+        "sha1": "bdd6b8ac84b46ae56a3bbb761ce430c48e42e00d",
+        "sha512": "313c281c5b08b100521a0eabd969d453617904a9a6e70ed03a0a9d1ac7dae0baa91afe1c18b372a9d229b3b3c1a0fa456e17d8b864a9ac557808f666c75d1213"
+      },
+      "url": "https://cdn.modrinth.com/data/AANobbMI/versions/mhZtY2lR/sodium-fabric-0.5.8%2Bmc1.20.1.jar",
+      "filename": "sodium-fabric-0.5.8+mc1.20.1.jar",
+      "primary": true,
+      "size": 942134,
+      "file_type": null
+    }
+  ],
+  "dependencies": []
+}
