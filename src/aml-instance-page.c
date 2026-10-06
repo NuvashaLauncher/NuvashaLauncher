@@ -4,18 +4,22 @@
 
 /* AmlInstancePage: the page of one instance.
  *
- * Settings is the only real page so far: every edit is written through
- * AmlInstanceManager, so what the page shows is what instances.json
- * holds. Resource Packs, Shader Packs, Mods and Logs say that they are
- * not available yet instead of pretending to work. Duplicating,
- * opening the folder and deleting run as asynchronous GIO operations
- * and never block the main loop. */
+ * The settings page is where the instance itself is edited so far:
+ * every edit is written through AmlInstanceManager, so what the page
+ * shows is what instances.json holds. Resource Packs, Shader Packs and
+ * Mods say that they are not available yet instead of pretending to
+ * work. Logs shows what the game of this instance printed, through the
+ * launcher the window shares. Duplicating, opening the folder and
+ * deleting run as asynchronous GIO operations and never block the main
+ * loop. */
 
 #include "aml-instance-page.h"
 
 #include "aml-version-row.h"
 #include "aml-java.h"
 #include "aml-java-row.h"
+#include "aml-launcher.h"
+#include "aml-logs-page.h"
 #include "aml-minecraft-versions.h"
 
 struct _AmlInstancePage
@@ -25,6 +29,7 @@ struct _AmlInstancePage
   AmlInstanceManager *manager;
   AmlInstance *instance;
   AmlSettings *settings;
+  AmlLauncher *launcher;
 
   /* Borrowed from the widget tree of the page. Cleared in dispose(),
    * because the tree can go away while a running operation still keeps
@@ -891,11 +896,12 @@ create_placeholder_page (const char *title)
 
 AmlInstancePage *
 aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
-                       AmlSettings *settings)
+                       AmlSettings *settings, AmlLauncher *launcher)
 {
   g_return_val_if_fail (AML_IS_INSTANCE_MANAGER (manager), NULL);
   g_return_val_if_fail (AML_IS_INSTANCE (instance), NULL);
   g_return_val_if_fail (AML_IS_SETTINGS (settings), NULL);
+  g_return_val_if_fail (AML_IS_LAUNCHER (launcher), NULL);
 
   AmlInstancePage *self = g_object_new (AML_TYPE_INSTANCE_PAGE, NULL);
   GtkWidget *stack = adw_view_stack_new ();
@@ -907,6 +913,7 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
   self->manager = g_object_ref (manager);
   self->instance = g_object_ref (instance);
   self->settings = g_object_ref (settings);
+  self->launcher = g_object_ref (launcher);
 
   adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (stack),
                                        create_settings_page (self),
@@ -921,8 +928,11 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack), create_placeholder_page ("Mods"),
     "mods", "Mods", "view-list-symbolic");
+
+  /* The logs of the instance are the logs of the launcher the window
+     shares with the card, so the game can be watched from here. */
   adw_view_stack_add_titled_with_icon (
-    ADW_VIEW_STACK (stack), create_placeholder_page ("Logs"),
+    ADW_VIEW_STACK (stack), GTK_WIDGET (aml_logs_page_new (launcher)),
     "logs", "Logs", "text-x-generic-symbolic");
 
   /* The header holds only this switcher: AdwHeaderBar adds the back
@@ -976,6 +986,7 @@ aml_instance_page_finalize (GObject *object)
   g_clear_object (&self->manager);
   g_clear_object (&self->instance);
   g_clear_object (&self->settings);
+  g_clear_object (&self->launcher);
 
   G_OBJECT_CLASS (aml_instance_page_parent_class)->finalize (object);
 }
