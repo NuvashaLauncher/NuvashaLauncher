@@ -175,7 +175,15 @@ save (AmlSettings *self, GError **error)
 
   json_builder_end_object (builder);
 
-  json_generator_set_root (generator, json_builder_get_root (builder));
+  /* The builder hands out a copy of what it built and the generator makes
+     a copy of what it is given: the first one is this function's to let
+     go of when it is done with it. */
+  {
+    g_autoptr (JsonNode) root = json_builder_get_root (builder);
+
+    json_generator_set_root (generator, root);
+  }
+
   json_generator_set_pretty (generator, TRUE);
   data = json_generator_to_data (generator, &length);
 
