@@ -36,6 +36,14 @@
 /* Results on a page of Browse. */
 #define RESULTS_PER_PAGE 20
 
+/* The most rows the list keeps. A search that matches thousands of
+ * projects would otherwise grow the widget tree without end, and each
+ * row is a handful of widgets. The oldest rows go first: the user who
+ * scrolled to the bottom of a long list is reading the newest, and the
+ * ones above are the ones a new search would have replaced anyway. */
+#define MAX_RESULT_ROWS 400
+#define RESULT_ROWS_TRIM 200
+
 /* How long the words of a search entry rest before they are asked for,
  * so that typing is not one request per letter. Long enough to be past a
  * fast typist, short enough that the list is not forgotten. */
@@ -76,9 +84,9 @@ struct _AmlContentPage
   GtkWidget *search_entry;
   GtkWidget *search_bar;
   GtkWidget *filter_box;
-  GtkWidget *previous;
-  GtkWidget *next;
-  GtkWidget *page_label;
+  GtkWidget *loading_more; /* spinner row at the bottom of the list */
+  GtkWidget *retry_row;    /* inline retry row when a page fails */
+  GtkWidget *retry_label;
   GtkWidget *spinner;
 
   /* What the folder holds, and the row of each file. The rows point
@@ -101,6 +109,14 @@ struct _AmlContentPage
   gboolean categories_loaded;
   gboolean browse_searched;
 
+  /* The infinite scroll: whether a page is on its way, the projects
+   * already listed (so a page is never added twice) and the cancellable
+   * of the page being fetched. */
+  gboolean loading_page;
+  gboolean pending_append;
+  GHashTable *seen_ids; /* project id -> NULL */
+  GCancellable *more;   /* the next page, cancelled by a new search */
+
   /* The page of a project that was pushed above this one, and what it
    * asked for. */
   AdwPreferencesGroup *details_versions;
@@ -120,7 +136,7 @@ typedef struct {
   guint index;
 } UpdateRun;
 
-static void run_search (AmlContentPage *self);
+static void run_search (AmlContentPage *self, gboolean append);
 static void reload_installed (AmlContentPage *self);
 static void update_run_next (UpdateRun *run);
 
@@ -1603,18 +1619,82 @@ on_refresh_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 static void on_install_clicked (GtkButton *button, gpointer user_data);
 static void on_result_activated (AdwActionRow *row, gpointer user_data);
 static void on_category_toggled (GtkCheckButton *button, gpointer user_data);
+static void on_scroll_changed (GtkAdjustment *adjustment, gpointer user_data);
 
+/* The list is scrolled to its end: ask for the next page. Only one page
+ * is ever on its way, and there is nothing to ask for once the total is
+ * reached, so the signal is answered with a flag rather than by
+ * counting.
+ *
+ * GTK4 has no edge-reached signal on GtkScrolledWindow, so the adjustment
+ * is watched instead: a scroll to the bottom puts the value at the upper
+ * bound. */
 static void
-results_arrived (AmlContentPage *self, AmlModrinthResults *results)
+on_scroll_changed (GtkAdjustment *adjustment, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+  gdouble at_end;
+
+  if (self->loading_page)
+    return;
+
+  if (self->offset >= self->total_hits)
+    return;
+
+  at_end = gtk_adjustment_get_upper (adjustment) -
+           gtk_adjustment_get_page_size (adjustment) -
+           gtk_adjustment_get_step_increment (adjustment);
+
+  if (gtk_adjustment_get_value (adjustment) < at_end)
+    return;
+
+  self->offset += RESULTS_PER_PAGE;
+  run_search (self, TRUE);
+}
+
+/* A page that failed can be asked for again from the row that says it
+ * failed. The offset is already where the page starts, so the same
+ * question is asked again. */
+static void
+on_retry_page_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+
+  if (self->loading_page)
+    return;
+
+  gtk_widget_set_visible (self->retry_row, FALSE);
+  run_search (self, TRUE);
+}
+
+/* The rows of a page of results. @append is FALSE for a new search or a
+ * new filter, which starts the list over, and TRUE for the next page,
+ * which is added to what is already there. */
+static void
+results_arrived (AmlContentPage *self, AmlModrinthResults *results,
+                 gboolean append)
 {
   guint shown = 0;
 
-  take_rows_out (&self->result_rows,
-                 ADW_PREFERENCES_GROUP (self->results_group));
-  g_clear_pointer (&self->results, g_ptr_array_unref);
-  self->results = g_ptr_array_new_with_free_func (
-      (GDestroyNotify) aml_modrinth_project_free);
-  self->total_hits = results->total_hits;
+  if (!append)
+    {
+      take_rows_out (&self->result_rows,
+                     ADW_PREFERENCES_GROUP (self->results_group));
+      g_clear_pointer (&self->results, g_ptr_array_unref);
+      self->results = g_ptr_array_new_with_free_func (
+          (GDestroyNotify) aml_modrinth_project_free);
+      self->total_hits = results->total_hits;
+      g_hash_table_remove_all (self->seen_ids);
+
+      /* A new search starts at the top of the list. */
+      {
+        GtkAdjustment *adjustment =
+          gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (
+            self->results_scroller));
+
+        gtk_adjustment_set_value (adjustment, gtk_adjustment_get_lower (adjustment));
+      }
+    }
 
   for (guint i = 0; i < results->projects->len; i++)
     {
@@ -1628,9 +1708,15 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results)
       g_autofree char *author = NULL;
       g_autofree char *count = NULL;
 
+      /* A project already listed is not listed twice: the same answer can
+       * come back for two pages that overlap. */
+      if (g_hash_table_contains (self->seen_ids, project->project_id))
+        continue;
+
+      g_hash_table_add (self->seen_ids, g_strdup (project->project_id));
+
       adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
                                      project->title);
-      /* A description is text, not markup: an "&" in one is an "&". */
       /* A description is text, not markup: an "&" in one is an "&". */
       adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
       adw_action_row_set_subtitle (ADW_ACTION_ROW (row), project->description);
@@ -1682,21 +1768,52 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results)
       shown++;
     }
 
+  /* The offset is where the next page starts, which is the end of what
+     is listed now. */
+  self->offset += shown;
+
+  /* The list does not grow without end: past the cap the oldest rows go,
+     and the scroll is put back where it was, so the user stays on the
+     same project rather than being thrown to the top. */
+  if (self->result_rows != NULL &&
+      g_list_length (self->result_rows) > MAX_RESULT_ROWS)
+    {
+      GtkAdjustment *adjustment =
+        gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (
+          self->results_scroller));
+      gdouble at = gtk_adjustment_get_value (adjustment);
+      gdouble removed = 0;
+
+      for (guint i = 0; i < RESULT_ROWS_TRIM; i++)
+        {
+          GList *oldest = self->result_rows;
+          GtkWidget *row = oldest->data;
+          gint height = gtk_widget_get_height (row);
+
+          removed += height > 0 ? height : 48;
+
+          self->result_rows = g_list_delete_link (self->result_rows, oldest);
+          adw_preferences_group_remove (ADW_PREFERENCES_GROUP (
+                                          self->results_group),
+                                        row);
+        }
+
+      gtk_adjustment_set_value (adjustment,
+                                MAX (at - removed,
+                                     gtk_adjustment_get_lower (adjustment)));
+    }
+
   {
-    gboolean empty = shown == 0;
-    g_autofree char *page_text = NULL;
+    gboolean empty = self->results->len == 0;
 
     gtk_widget_set_visible (self->results_status, empty);
     gtk_widget_set_visible (self->results_scroller, !empty);
+    gtk_widget_set_visible (self->loading_more, FALSE);
+    gtk_widget_set_visible (self->retry_row, FALSE);
 
-    page_text = g_strdup_printf ("Showing %u to %u of %" G_GUINT64_FORMAT,
-                                 empty ? 0 : self->offset + 1,
-                                 self->offset + shown, self->total_hits);
-    gtk_label_set_text (GTK_LABEL (self->page_label), page_text);
-
-    gtk_widget_set_sensitive (self->previous, self->offset > 0);
-    gtk_widget_set_sensitive (
-        self->next, (guint64) (self->offset + shown) < self->total_hits);
+    /* Nothing more to ask for once the total is reached. */
+    if (self->offset >= self->total_hits)
+      gtk_widget_set_visible (self->loading_more, FALSE);
   }
 }
 
@@ -1707,9 +1824,11 @@ search_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   AmlContentPage *self = user_data;
   g_autoptr (GError) error = NULL;
   g_autoptr (AmlModrinthResults) results = NULL;
+  gboolean append = self->pending_append;
 
   results = aml_modrinth_search_finish (result, &error);
   set_busy (self, FALSE);
+  self->loading_page = FALSE;
 
   if (results == NULL)
     {
@@ -1718,20 +1837,31 @@ search_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       g_clear_pointer (&self->results, g_ptr_array_unref);
       gtk_widget_set_visible (self->results_status, TRUE);
       gtk_widget_set_visible (self->results_group, FALSE);
+      gtk_widget_set_visible (self->loading_more, FALSE);
 
-      if (error != NULL && !g_error_matches (error, G_IO_ERROR,
-                                             G_IO_ERROR_CANCELLED))
+      /* A page that failed is offered again from the list itself. */
+      if (append)
+        {
+          g_autofree char *message =
+            error != NULL ? g_strdup (error->message)
+                          : g_strdup ("the next page could not be loaded");
+
+          gtk_label_set_text (GTK_LABEL (self->retry_label), message);
+          gtk_widget_set_visible (self->retry_row, TRUE);
+        }
+      else if (error != NULL &&
+               !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         adw_status_page_set_description (ADW_STATUS_PAGE (self->results_status),
                                          error->message);
 
       return;
     }
 
-  results_arrived (self, results);
+  results_arrived (self, results, append);
 }
 
 static void
-run_search (AmlContentPage *self)
+run_search (AmlContentPage *self, gboolean append)
 {
   g_autoptr (AmlModrinthSearch) search = g_new0 (AmlModrinthSearch, 1);
 
@@ -1745,29 +1875,25 @@ run_search (AmlContentPage *self)
   search->offset = self->offset;
   search->limit = RESULTS_PER_PAGE;
 
+  /* A new search or a new filter cancels the page that was on its way
+   * and starts the list over. */
+  if (!append)
+    {
+      g_cancellable_cancel (self->more);
+      g_clear_object (&self->more);
+      self->more = g_cancellable_new ();
+      self->offset = 0;
+    }
+
+  self->loading_page = TRUE;
+  self->pending_append = append;
   set_busy (self, TRUE);
-  aml_modrinth_search_async (search, self->browse, search_ready, self);
-}
 
-static void
-on_previous_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
-{
-  AmlContentPage *self = user_data;
+  /* The spinner at the bottom says a page is on its way. */
+  gtk_widget_set_visible (self->loading_more, TRUE);
+  gtk_widget_set_visible (self->retry_row, FALSE);
 
-  if (self->offset < RESULTS_PER_PAGE)
-    return;
-
-  self->offset -= RESULTS_PER_PAGE;
-  run_search (self);
-}
-
-static void
-on_next_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
-{
-  AmlContentPage *self = user_data;
-
-  self->offset += RESULTS_PER_PAGE;
-  run_search (self);
+  aml_modrinth_search_async (search, self->more, search_ready, self);
 }
 
 static gboolean
@@ -1780,7 +1906,7 @@ on_search_timeout (gpointer user_data)
   self->query =
     g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->search_entry)));
   self->offset = 0;
-  run_search (self);
+  run_search (self, FALSE);
 
   return G_SOURCE_REMOVE;
 }
@@ -1998,7 +2124,7 @@ on_category_toggled (GtkCheckButton *button, gpointer user_data)
     }
 
   self->offset = 0;
-  run_search (self);
+  run_search (self, FALSE);
 }
 
 static void
@@ -2309,7 +2435,7 @@ on_stack_switched (GObject *stack, GParamSpec *pspec G_GNUC_UNUSED,
     return;
 
   self->browse_searched = TRUE;
-  run_search (self);
+  run_search (self, FALSE);
 }
 
 static void
@@ -2325,10 +2451,12 @@ build_browse (AmlContentPage *self)
   GtkWidget *filter_scroller = gtk_scrolled_window_new ();
   GtkWidget *content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   GtkWidget *scroller = gtk_scrolled_window_new ();
-  GtkWidget *bottom = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *previous = gtk_button_new_with_label ("Previous");
-  GtkWidget *next = gtk_button_new_with_label ("Next");
-  GtkWidget *page_label = gtk_label_new ("");
+  GtkWidget *loading_more = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  GtkWidget *loading_spinner = gtk_spinner_new ();
+  GtkWidget *loading_label = gtk_label_new ("Loading more…");
+  GtkWidget *retry_row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  GtkWidget *retry_label = gtk_label_new (NULL);
+  GtkWidget *retry_button = gtk_button_new_with_label ("Retry");
   AdwPreferencesGroup *group =
     ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
 
@@ -2408,30 +2536,48 @@ build_browse (AmlContentPage *self)
   gtk_widget_set_visible (scroller, FALSE);
   gtk_box_append (GTK_BOX (box), content);
 
-  gtk_widget_set_margin_top (bottom, 6);
-  gtk_widget_set_margin_bottom (bottom, 6);
-  gtk_widget_set_margin_start (bottom, 12);
-  gtk_widget_set_margin_end (bottom, 12);
-  gtk_box_append (GTK_BOX (bottom), previous);
+  /* The bottom of the list: a spinner while the next page is on its way
+     and a retry row when one failed. Neither is a button the user has to
+     press to see more: the list asks for the next page itself when it is
+     scrolled to the end. */
+  gtk_widget_set_halign (loading_more, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (loading_more, GTK_ALIGN_CENTER);
+  gtk_widget_set_margin_top (loading_more, 12);
+  gtk_widget_set_margin_bottom (loading_more, 12);
+  gtk_widget_set_visible (loading_more, FALSE);
+  gtk_box_append (GTK_BOX (loading_more), loading_spinner);
+  gtk_box_append (GTK_BOX (loading_more), loading_label);
+  adw_preferences_group_add (group, loading_more);
 
-  page_label = gtk_label_new ("");
-  gtk_widget_add_css_class (page_label, "dim-label");
-  gtk_widget_set_hexpand (page_label, TRUE);
-  gtk_widget_set_halign (page_label, GTK_ALIGN_CENTER);
-  gtk_box_append (GTK_BOX (bottom), page_label);
+  gtk_widget_set_halign (retry_row, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (retry_row, GTK_ALIGN_CENTER);
+  gtk_widget_set_margin_top (retry_row, 12);
+  gtk_widget_set_margin_bottom (retry_row, 12);
+  gtk_widget_set_visible (retry_row, FALSE);
+  gtk_label_set_wrap (GTK_LABEL (retry_label), TRUE);
+  gtk_widget_add_css_class (retry_label, "dim-label");
+  gtk_box_append (GTK_BOX (retry_row), retry_label);
+  gtk_box_append (GTK_BOX (retry_row), retry_button);
+  adw_preferences_group_add (group, retry_row);
 
-  gtk_box_append (GTK_BOX (bottom), next);
-  gtk_box_append (GTK_BOX (box), bottom);
+  self->loading_more = loading_more;
+  self->retry_row = retry_row;
+  self->retry_label = retry_label;
 
-  g_signal_connect (previous, "clicked", G_CALLBACK (on_previous_clicked),
-                    self);
-  g_signal_connect (next, "clicked", G_CALLBACK (on_next_clicked), self);
+  g_signal_connect (retry_button, "clicked",
+                    G_CALLBACK (on_retry_page_clicked), self);
 
-  self->previous = previous;
-  self->next = next;
-  self->page_label = page_label;
-  gtk_widget_set_sensitive (previous, FALSE);
-  gtk_widget_set_sensitive (next, FALSE);
+  /* The list asks for the next page when it is scrolled to the end.
+     GTK4 has no edge-reached signal on GtkScrolledWindow, so the
+     adjustment is watched instead: when the user scrolls to the bottom,
+     the value is at the upper bound. */
+  {
+    GtkAdjustment *adjustment =
+      gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (scroller));
+
+    g_signal_connect (adjustment, "value-changed",
+                      G_CALLBACK (on_scroll_changed), self);
+  }
 
   adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (self->stack), box,
                                       "browse", "Browse",
@@ -2528,6 +2674,9 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
   self->browse = g_cancellable_new ();
   self->scan = g_cancellable_new ();
   self->transfer = g_cancellable_new ();
+  self->more = g_cancellable_new ();
+  self->seen_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
+                                          NULL);
   self->categories = g_ptr_array_new_with_free_func (g_free);
   self->projects = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                           NULL);
@@ -2612,9 +2761,9 @@ aml_content_page_dispose (GObject *object)
   self->search_entry = NULL;
   self->search_bar = NULL;
   self->filter_box = NULL;
-  self->previous = NULL;
-  self->next = NULL;
-  self->page_label = NULL;
+  self->loading_more = NULL;
+  self->retry_row = NULL;
+  self->retry_label = NULL;
   self->spinner = NULL;
   self->details_versions = NULL;
 
@@ -2627,9 +2776,12 @@ aml_content_page_dispose (GObject *object)
   g_cancellable_cancel (self->browse);
   g_cancellable_cancel (self->scan);
   g_cancellable_cancel (self->transfer);
+  g_cancellable_cancel (self->more);
   g_clear_object (&self->browse);
   g_clear_object (&self->scan);
   g_clear_object (&self->transfer);
+  g_clear_object (&self->more);
+  g_clear_pointer (&self->seen_ids, g_hash_table_unref);
 
   G_OBJECT_CLASS (aml_content_page_parent_class)->dispose (object);
 }
