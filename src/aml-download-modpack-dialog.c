@@ -153,6 +153,7 @@ dialog_forget_widgets (AmlDownloadModpackDialog *self)
   details_watch (&self->version_row, NULL);
   details_watch (&self->install_button, NULL);
   details_watch (&self->details_error, NULL);
+  details_watch (&self->name_entry, NULL);
   details_watch (&self->install_bar, NULL);
   details_watch (&self->install_count, NULL);
   details_watch (&self->install_cancel, NULL);
@@ -987,7 +988,7 @@ build_details_page (AmlDownloadModpackDialog *self)
                          self->project->title);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (instance_group),
                              name_entry);
-  self->name_entry = name_entry;
+  details_watch (&self->name_entry, name_entry);
 
   g_autofree char *default_directory = g_build_filename (
       g_get_user_data_dir (), "AML", "instances", NULL);
@@ -1624,6 +1625,40 @@ on_optional_install (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 }
 
 
+/* The name the pack gives itself is what the instance follows. The name
+ * field shows the Modrinth project title until the pack is read; a field
+ * still holding that title, or holding nothing, is replaced by the pack's
+ * own name. A name the user typed is kept exactly as typed. */
+static void
+adopt_pack_name (AmlDownloadModpackDialog *self)
+{
+  const char *pack_name = self->modpack != NULL ? self->modpack->name : NULL;
+  const char *typed = NULL;
+
+  if (pack_name == NULL || *pack_name == '\0')
+    return;
+
+  if (self->name_entry != NULL)
+    {
+      typed = gtk_editable_get_text (GTK_EDITABLE (self->name_entry));
+
+      if (typed != NULL && *typed != '\0' &&
+          g_strcmp0 (typed, self->project != NULL ? self->project->title : NULL)
+            != 0)
+        return; /* the user named it: that is what it is called */
+
+      gtk_editable_set_text (GTK_EDITABLE (self->name_entry), pack_name);
+    }
+
+  if (self->instance_name == NULL || *self->instance_name == '\0' ||
+      g_strcmp0 (self->instance_name,
+                 self->project != NULL ? self->project->title : NULL) == 0)
+    {
+      g_free (self->instance_name);
+      self->instance_name = g_strdup (pack_name);
+    }
+}
+
 /* Fetch the .mrpack, parse it, and decide if the user has options. */
 
 static void
@@ -1668,6 +1703,9 @@ on_pack_downloaded (GObject *source G_GNUC_UNUSED,
       operation_done (user_data);
       return;
     }
+
+  /* The pack is known now, so the instance takes its name. */
+  adopt_pack_name (self);
 
   {
     g_autoptr (GPtrArray) optional =
