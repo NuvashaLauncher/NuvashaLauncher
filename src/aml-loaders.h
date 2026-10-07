@@ -65,6 +65,12 @@ G_BEGIN_DECLS
 #define AML_NEOFORGE_MAVEN_URL "https://maven.neoforged.net/releases"
 #define AML_FORGE_MAVEN_URL "https://maven.minecraftforge.net"
 
+/* The host the version list API of those two hangs off. NeoForge keeps
+ * its repository under /releases but its API on the host itself, so the
+ * two are not the same base. */
+#define AML_NEOFORGE_API_URL "https://maven.neoforged.net"
+#define AML_FORGE_API_URL "https://maven.minecraftforge.net"
+
 /* Where a loader is installed, under the same data directory the resolve
  * module writes the games it fetches into. */
 #define AML_LOADERS_SUBDIR "loaders"
