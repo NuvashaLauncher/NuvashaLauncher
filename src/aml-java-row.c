@@ -323,14 +323,27 @@ void
 aml_java_row_set_default_entry_for (AmlJavaRow *self,
                                     const AmlJava *java)
 {
+  g_autofree char *label = java != NULL ? java_label ((AmlJava *) java)
+                                        : g_strdup ("Default");
   GtkStringList *list = NULL;
   const char *items[2];
 
   g_return_if_fail (AML_IS_JAVA_ROW (self));
 
+  /* Replacing the first string makes the combo row emit its selection
+   * again, which lands back here through the caller's handler. When the
+   * label would not change there is nothing to do, and stopping here is
+   * what keeps that from being an endless recursion. */
+  if (self->ready && self->names->len > 0 &&
+      g_strcmp0 (self->names->pdata[0], label) == 0)
+    {
+      g_free (self->default_label);
+      self->default_label = g_steal_pointer (&label);
+      return;
+    }
+
   g_free (self->default_label);
-  self->default_label = java != NULL ? java_label ((AmlJava *) java)
-                                     : g_strdup ("Default");
+  self->default_label = g_steal_pointer (&label);
 
   if (!self->ready || self->names->len == 0)
     return;
