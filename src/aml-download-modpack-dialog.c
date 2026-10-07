@@ -469,7 +469,20 @@ run_search (AmlDownloadModpackDialog *self)
     AML_MODRINTH_URL "/search?query=%s&facets=%s&offset=%u&limit=%u",
     escaped_query, escaped_facets, self->offset, RESULTS_PER_PAGE);
 
-  aml_download_json_async (url, self->search, on_search_done, self);
+  /* The callback holds a reference: closing the dialog while a search
+   * is in flight finalizes it, and a callback that then reads self would
+   * be reading freed memory. */
+  aml_download_json_async (url, self->search, on_search_done,
+                           g_object_ref (self));
+}
+
+/* Every operation of this dialog hands its callback a reference it gives
+   back here: the dialog may be closed, and finalized, while the work is
+   still going on. */
+static void
+operation_done (gpointer user_data)
+{
+  g_object_unref (user_data);
 }
 
 static void
@@ -487,15 +500,17 @@ on_search_done (GObject *source G_GNUC_UNUSED,
 
   if (parser == NULL)
     {
-      if (g_error_matches (error, AML_DOWNLOAD_ERROR,
-                           AML_DOWNLOAD_ERROR_CANCELLED))
-        return;
+      if (!g_error_matches (error, AML_DOWNLOAD_ERROR,
+                            AML_DOWNLOAD_ERROR_CANCELLED))
+        {
+          adw_status_page_set_title (ADW_STATUS_PAGE (self->results_status),
+                                     "Could not search Modrinth");
+          adw_status_page_set_description (
+            ADW_STATUS_PAGE (self->results_status), error->message);
+          results_arrived (self, NULL);
+        }
 
-      adw_status_page_set_title (ADW_STATUS_PAGE (self->results_status),
-                                 "Could not search Modrinth");
-      adw_status_page_set_description (ADW_STATUS_PAGE (self->results_status),
-                                       error->message);
-      results_arrived (self, NULL);
+      operation_done (user_data);
       return;
     }
 
@@ -509,10 +524,12 @@ on_search_done (GObject *source G_GNUC_UNUSED,
       adw_status_page_set_description (
         ADW_STATUS_PAGE (self->results_status), error->message);
       results_arrived (self, NULL);
+      operation_done (user_data);
       return;
     }
 
   results_arrived (self, results);
+  operation_done (user_data);
 }
 
 static void
@@ -899,15 +916,17 @@ on_versions_answer (GObject *source G_GNUC_UNUSED,
 
   if (parser == NULL)
     {
-      if (g_error_matches (error, AML_DOWNLOAD_ERROR,
-                           AML_DOWNLOAD_ERROR_CANCELLED))
-        return;
+      if (!g_error_matches (error, AML_DOWNLOAD_ERROR,
+                            AML_DOWNLOAD_ERROR_CANCELLED))
+        {
+          adw_status_page_set_title (
+            ADW_STATUS_PAGE (self->results_status), "Could not load versions");
+          adw_status_page_set_description (
+            ADW_STATUS_PAGE (self->results_status), error->message);
+          gtk_widget_set_visible (self->results_status, TRUE);
+        }
 
-      adw_status_page_set_title (
-        ADW_STATUS_PAGE (self->results_status), "Could not load versions");
-      adw_status_page_set_description (
-        ADW_STATUS_PAGE (self->results_status), error->message);
-      gtk_widget_set_visible (self->results_status, TRUE);
+      operation_done (user_data);
       return;
     }
 
@@ -922,6 +941,7 @@ on_versions_answer (GObject *source G_GNUC_UNUSED,
                                  "Could not load versions");
       adw_status_page_set_description (
         ADW_STATUS_PAGE (self->results_status), error->message);
+      operation_done (user_data);
       return;
     }
 
@@ -938,6 +958,7 @@ on_versions_answer (GObject *source G_GNUC_UNUSED,
   }
 
   gtk_widget_set_sensitive (self->install_button, self->versions->len > 0);
+  operation_done (user_data);
 }
 
 static void
@@ -956,7 +977,8 @@ dialog_details_open (AmlDownloadModpackDialog *self)
   g_clear_object (&self->fetch);
   self->fetch = g_cancellable_new ();
 
-  aml_download_json_async (url, self->fetch, on_versions_answer, self);
+  aml_download_json_async (url, self->fetch, on_versions_answer,
+                           g_object_ref (self));
 }
 
 
@@ -1234,18 +1256,22 @@ on_install_done (GObject *source G_GNUC_UNUSED,
 
   if (instance == NULL)
     {
-      if (g_error_matches (error, AML_MODPACK_ERROR,
-                           AML_MODPACK_ERROR_CANCELLED) ||
-          g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-        return;
+      if (!g_error_matches (error, AML_MODPACK_ERROR,
+                            AML_MODPACK_ERROR_CANCELLED) &&
+          !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+        {
+          self->fail_is_install = TRUE;
+          push_error (self, "Could not install the modpack", error->message,
+                      G_CALLBACK (on_error_retry_install));
+        }
 
-      self->fail_is_install = TRUE;
-      push_error (self, "Could not install the modpack", error->message,
-                  G_CALLBACK (on_error_retry_install));
+      operation_done (user_data);
       return;
     }
 
+  /* The dialog closes itself on success; the reference goes with it. */
   adw_dialog_close (ADW_DIALOG (self));
+  operation_done (user_data);
 }
 
 static void
@@ -1298,7 +1324,7 @@ start_install (AmlDownloadModpackDialog *self)
 
   aml_modpack_install_async (self->modpack, self->manager, name, directory,
                              chosen, self->fetch, on_install_progress,
-                             on_install_done, self);
+                             on_install_done, g_object_ref (self));
 }
 
 static GtkWidget *
@@ -1404,13 +1430,15 @@ on_pack_downloaded (GObject *source G_GNUC_UNUSED,
 
   if (!aml_download_file_finish (result, &error))
     {
-      if (g_error_matches (error, AML_DOWNLOAD_ERROR,
-                           AML_DOWNLOAD_ERROR_CANCELLED))
-        return;
+      if (!g_error_matches (error, AML_DOWNLOAD_ERROR,
+                            AML_DOWNLOAD_ERROR_CANCELLED))
+        {
+          self->fail_is_install = FALSE;
+          push_error (self, "Pack could not be fetched", error->message,
+                      G_CALLBACK (on_error_retry_fetch));
+        }
 
-      self->fail_is_install = FALSE;
-      push_error (self, "Pack could not be fetched", error->message,
-                  G_CALLBACK (on_error_retry_fetch));
+      operation_done (user_data);
       return;
     }
 
@@ -1422,6 +1450,7 @@ on_pack_downloaded (GObject *source G_GNUC_UNUSED,
       self->fail_is_install = FALSE;
       push_error (self, "Invalid pack", error->message,
                   G_CALLBACK (on_error_retry_fetch));
+      operation_done (user_data);
       return;
     }
 
@@ -1430,6 +1459,7 @@ on_pack_downloaded (GObject *source G_GNUC_UNUSED,
       self->fail_is_install = FALSE;
       push_error (self, "The pack does not define its install",
                   error->message, G_CALLBACK (on_error_retry_fetch));
+      operation_done (user_data);
       return;
     }
 
@@ -1443,10 +1473,14 @@ on_pack_downloaded (GObject *source G_GNUC_UNUSED,
 
         adw_navigation_view_push (ADW_NAVIGATION_VIEW (self->nav),
                                   ADW_NAVIGATION_PAGE (page));
+        operation_done (user_data);
         return;
       }
   }
 
+  /* start_install starts an operation of its own, which holds its own
+   * reference from here on. */
+  operation_done (user_data);
   start_install (self);
 }
 
@@ -1504,6 +1538,6 @@ dialog_start_features (AmlDownloadModpackDialog *self)
 
     aml_download_file_async (file->url, self->pack_path, file->sha1,
                              G_CHECKSUM_SHA1, self->fetch, NULL,
-                             on_pack_downloaded, self);
+                             on_pack_downloaded, g_object_ref (self));
   }
 }
