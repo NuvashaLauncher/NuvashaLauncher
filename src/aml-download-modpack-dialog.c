@@ -15,6 +15,7 @@
 
 #include "aml-dialogs.h"
 #include "aml-download.h"
+#include "aml-icons.h"
 #include "aml-modpack.h"
 #include "aml-modrinth.h"
 
@@ -202,85 +203,6 @@ aml_download_modpack_dialog_new (AmlInstanceManager *manager)
 }
 
 /* ---------------------------------------------------------- *
- * Helpers
- * ---------------------------------------------------------- */
-
-/* Minecraft version names ranked the way a user thinks: by part, the
- * way "1.21.2" sits above "1.9.4". */
-static gint
-mc_version_cmp (const char *a, const char *b)
-{
-  g_auto (GStrv) pa = g_strsplit (a, ".", -1);
-  g_auto (GStrv) pb = g_strsplit (b, ".", -1);
-
-  for (guint i = 0; ; i++)
-    {
-      const char *sa = pa[i];
-      const char *sb = pb[i];
-
-      if (sa == NULL && sb == NULL)
-        return 0;
-
-      if (sa == NULL)
-        return -1;
-
-      if (sb == NULL)
-        return 1;
-
-      {
-        glong an = strtol (sa, NULL, 10);
-        glong bn = strtol (sb, NULL, 10);
-
-        if (an != bn)
-          return an < bn ? -1 : 1;
-      }
-    }
-}
-
-static const char *
-project_loader_name (AmlModrinthProject *project)
-{
-  /* Modrinth tags a project with its loaders; the first of the ones
-   * AML knows is the one the summary shows, falling back to vanilla. */
-  static const char *known[] = { "fabric", "forge", "neoforge", "quilt" };
-
-  if (project->categories != NULL)
-    {
-      for (guint i = 0; i < project->categories->len; i++)
-        {
-          const char *tag = g_ptr_array_index (project->categories, i);
-
-          for (guint j = 0; j < G_N_ELEMENTS (known); j++)
-            if (g_str_equal (tag, known[j]))
-              return known[j];
-        }
-    }
-
-  return "vanilla";
-}
-
-/* The newest Minecraft version the project lists, the way the rows of
- * the browser page show it. */
-static const char *
-project_minecraft_name (AmlModrinthProject *project)
-{
-  const char *latest = NULL;
-
-  if (project->versions != NULL)
-    {
-      for (guint i = 0; i < project->versions->len; i++)
-        {
-          const char *version = g_ptr_array_index (project->versions, i);
-
-          if (latest == NULL || mc_version_cmp (version, latest) > 0)
-            latest = version;
-        }
-    }
-
-  return latest != NULL ? latest : "?";
-}
-
-/* ---------------------------------------------------------- *
  * The browser page
  * ---------------------------------------------------------- */
 
@@ -379,6 +301,23 @@ result_row_activated (AdwActionRow *row G_GNUC_UNUSED, gpointer user_data)
   dialog_details_open (self);
 }
 
+/* Puts the project icon in @icon when it has been fetched; the
+ * placeholder stays when there is none. The widget is held for the length
+ * of the fetch, so a row that goes away first is still there to be told. */
+static void
+modpack_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                    gpointer user_data)
+{
+  GtkWidget *icon = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autofree char *path = aml_icon_load_finish (result, &error);
+
+  if (path != NULL)
+    aml_icon_widget_set_file (icon, path);
+
+  g_object_unref (icon);
+}
+
 /* The rows of a page of results. @append is FALSE for a new search, which
  * starts the list over, and TRUE for the next page, which is added to what
  * is already there. */
@@ -422,11 +361,7 @@ results_arrived (AmlDownloadModpackDialog *self, AmlModrinthResults *results,
           AmlModrinthProject *project =
               g_ptr_array_index (results->projects, i);
           GtkWidget *row = adw_action_row_new ();
-          GtkWidget *about = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-          GtkWidget *by = gtk_label_new (NULL);
-          GtkWidget *count = gtk_label_new (NULL);
-          g_autofree char *author = NULL;
-          g_autofree char *downloads = NULL;
+          GtkWidget *icon = aml_icon_widget_new ("view-list-symbolic");
 
           /* The same project is never listed twice, however the pages
              overlap. */
@@ -435,6 +370,9 @@ results_arrived (AmlDownloadModpackDialog *self, AmlModrinthResults *results,
 
           g_hash_table_add (self->seen_ids, g_strdup (project->project_id));
 
+          /* The icon, then the name and the description under it: the
+             author, the download count, the game version and the loader
+             are what the details page is for. */
           adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
                                          project->title);
           adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row),
@@ -443,28 +381,13 @@ results_arrived (AmlDownloadModpackDialog *self, AmlModrinthResults *results,
                                        project->description);
           adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 2);
 
-          author = g_strdup_printf ("by %s", project->author);
-          gtk_label_set_text (GTK_LABEL (by), author);
-          gtk_widget_add_css_class (by, "dim-label");
-          gtk_widget_add_css_class (by, "caption");
-          gtk_label_set_xalign (GTK_LABEL (by), 0);
-          gtk_box_append (GTK_BOX (about), by);
+          gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
+          aml_icon_load_async (project->icon_url, NULL, modpack_icon_ready,
+                               g_object_ref (icon));
 
-          downloads = g_strdup_printf (
-              "%" G_GUINT64_FORMAT " downloads · %s · %s",
-              project->downloads, project_minecraft_name (project),
-              project_loader_name (project));
-          gtk_label_set_text (GTK_LABEL (count), downloads);
-          gtk_widget_add_css_class (count, "dim-label");
-          gtk_widget_add_css_class (count, "caption");
-          gtk_label_set_xalign (GTK_LABEL (count), 0);
-          gtk_box_append (GTK_BOX (about), count);
-
-          adw_action_row_add_prefix (ADW_ACTION_ROW (row), about);
+          adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
           adw_action_row_set_activatable_widget (ADW_ACTION_ROW (row),
                                                  NULL);
-
-          gtk_widget_set_valign (about, GTK_ALIGN_CENTER);
 
           g_ptr_array_add (self->hits,
                            aml_modrinth_project_copy (project));
