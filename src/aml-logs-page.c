@@ -200,11 +200,15 @@ update_controls (AmlLogsPage *self)
 {
   g_autofree char *directory =
     aml_launcher_get_log_directory (self->launcher);
+  AmlLaunchState state = aml_launcher_get_state (self->launcher);
   const char *detail = aml_launcher_get_state_detail (self->launcher);
 
-  gtk_label_set_text (
-    GTK_LABEL (self->state),
-    aml_launch_state_to_string (aml_launcher_get_state (self->launcher)));
+  /* A game that ended by itself says nothing here: "Stopped" is the
+     resting state of the page, not a piece of news. */
+  gtk_label_set_text (GTK_LABEL (self->state),
+                      state == AML_LAUNCH_STOPPED
+                        ? ""
+                        : aml_launch_state_to_string (state));
   gtk_label_set_text (GTK_LABEL (self->detail), detail != NULL ? detail : "");
 
   /* Offering to open a folder that is not there is offering something

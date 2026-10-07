@@ -871,13 +871,23 @@ on_row_icon_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
   row_set_icon (GTK_IMAGE (user_data), AML_INSTANCE (object));
 }
 
-/* One row of the instance list. The Settings button holds the window of
- * the instance, and every button is wired when the row is created; the
- * instance id is put on each button when the row is bound, so a button
- * of a row that lost its instance simply does nothing. */
+/* One row of the instance list: an AdwActionRow of the boxed list,
+ * the same kind of row the content pages and the modpack browser use,
+ * so the list is sized and margined exactly like theirs. Every button
+ * is wired here and carries the instance id, which is what the click
+ * handlers go by. */
 static GtkWidget *
-create_row (AmlMainWindow *self)
+create_instance_row (gpointer item, gpointer user_data)
 {
+  AmlMainWindow *self = user_data;
+  AmlInstance *instance = AML_INSTANCE (item);
+  g_autofree char *name = NULL;
+  g_autofree char *minecraft_version = NULL;
+  g_autofree char *subtitle = NULL;
+  AmlLoader loader = AML_LOADER_VANILLA;
+  const char *id = NULL;
+  const char *loader_name = NULL;
+  AmlLauncher *launcher = NULL;
   GtkWidget *row = adw_action_row_new ();
   GtkWidget *icon = gtk_image_new_from_icon_name ("applications-games-symbolic");
   GtkWidget *settings = gtk_button_new_from_icon_name ("emblem-system-symbolic");
@@ -887,21 +897,30 @@ create_row (AmlMainWindow *self)
   GtkWidget *play_icon = gtk_image_new_from_icon_name ("media-playback-start-symbolic");
   GtkWidget *play_label = gtk_label_new ("Play");
 
+  g_object_get (instance,
+                "name", &name,
+                "minecraft-version", &minecraft_version,
+                "loader", &loader,
+                NULL);
+
+  loader_name = aml_loader_to_string (loader);
+  if (loader_name != NULL && loader_name[0] != '\0')
+    {
+      g_autofree char *capitalized = g_strdup (loader_name);
+
+      /* "fabric" is written as "Fabric" in the row. */
+      capitalized[0] = g_ascii_toupper (capitalized[0]);
+      subtitle = g_strdup_printf ("%s %s", minecraft_version, capitalized);
+    }
+  else
+    subtitle = g_strdup (minecraft_version);
+
   /* Names and versions are plain text and may hold an "&". */
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
   adw_action_row_set_title_lines (ADW_ACTION_ROW (row), 1);
   adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 1);
-
-  /* Each row is its own card, set off the window background, with a
-     little space between rows. */
-  gtk_widget_add_css_class (row, "card");
-  gtk_widget_set_margin_top (row, 6);
-  gtk_widget_set_margin_bottom (row, 6);
-
-  /* AdwActionRow is a GtkListBoxRow: put in a GtkListView its focus
-     handler would grab focus through GtkListBox and complain that the
-     row is not in one. Tab moves through the buttons instead. */
-  gtk_widget_set_can_focus (row, FALSE);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), name);
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), subtitle);
 
   gtk_image_set_pixel_size (GTK_IMAGE (icon), 48);
   gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
@@ -946,79 +965,11 @@ create_row (AmlMainWindow *self)
                     G_CALLBACK (on_row_folder_clicked), self);
   g_signal_connect (play, "clicked", G_CALLBACK (on_play_clicked), self);
 
-  /* The icon and the buttons are found again when the row is bound. */
-  g_object_set_data (G_OBJECT (row), "aml-icon", icon);
-  g_object_set_data (G_OBJECT (row), "aml-settings", settings);
-  g_object_set_data (G_OBJECT (row), "aml-folder", folder);
-  g_object_set_data (G_OBJECT (row), "aml-play", play);
-
-  return row;
-}
-
-static void
-setup_row (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
-           gpointer                  item,
-           gpointer                  user_data)
-{
-  gtk_list_item_set_child (GTK_LIST_ITEM (item), create_row (user_data));
-  /* Only an activatable item can be clicked on to open its instance. */
-  gtk_list_item_set_activatable (GTK_LIST_ITEM (item), TRUE);
-}
-
-static void
-bind_row (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
-          gpointer                  item,
-          gpointer                  user_data)
-{
-  GtkListItem *list_item = GTK_LIST_ITEM (item);
-  AmlMainWindow *self = user_data;
-  AmlInstance *instance = AML_INSTANCE (gtk_list_item_get_item (list_item));
-  g_autofree char *name = NULL;
-  g_autofree char *minecraft_version = NULL;
-  g_autofree char *subtitle = NULL;
-  AmlLoader loader = AML_LOADER_VANILLA;
-  GtkWidget *row = NULL;
-  GtkWidget *icon = NULL;
-  GtkWidget *settings = NULL;
-  GtkWidget *folder = NULL;
-  GtkWidget *play = NULL;
-  const char *id = NULL;
-  const char *loader_name = NULL;
-  AmlLauncher *launcher = NULL;
-
-  if (instance == NULL)
-    return;
-
-  g_object_get (instance,
-                "name", &name,
-                "minecraft-version", &minecraft_version,
-                "loader", &loader,
-                NULL);
-
-  loader_name = aml_loader_to_string (loader);
-  if (loader_name != NULL && loader_name[0] != '\0')
-    {
-      g_autofree char *capitalized = g_strdup (loader_name);
-
-      /* "fabric" is written as "Fabric" in the row. */
-      capitalized[0] = g_ascii_toupper (capitalized[0]);
-      subtitle = g_strdup_printf ("%s %s", minecraft_version, capitalized);
-    }
-  else
-    subtitle = g_strdup (minecraft_version);
-
-  row = gtk_list_item_get_child (list_item);
-  icon = g_object_get_data (G_OBJECT (row), "aml-icon");
-  play = g_object_get_data (G_OBJECT (row), "aml-play");
-  settings = g_object_get_data (G_OBJECT (row), "aml-settings");
-  folder = g_object_get_data (G_OBJECT (row), "aml-folder");
-
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), name);
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), subtitle);
-
+  /* The icon follows the instance's; the connection goes with the
+     image, so a row that is destroyed stops following it on its own. */
   row_set_icon (GTK_IMAGE (icon), instance);
-  g_signal_connect (instance, "notify::icon",
-                    G_CALLBACK (on_row_icon_changed), icon);
+  g_signal_connect_object (instance, "notify::icon",
+                           G_CALLBACK (on_row_icon_changed), icon, 0);
 
   id = aml_instance_get_id (instance);
 
@@ -1031,47 +982,32 @@ bind_row (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
   g_object_set_data_full (G_OBJECT (play), "aml-instance-id", g_strdup (id),
                           g_free);
 
-  /* The launcher of this instance: the button follows it from here on.
-     The id on the button above is what the click handlers go by. */
+  /* The launcher of this instance: the button follows it from here on. */
   launcher = window_launcher (self, id);
   row_set_launcher (play, launcher);
 
   if (launcher != NULL)
     row_update (play, launcher);
-}
 
-/* A list item that is handed to another instance must not keep following
- * the icon of the one it was bound to. */
-static void
-unbind_row (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
-            gpointer                  item,
-            gpointer                  user_data G_GNUC_UNUSED)
-{
-  GtkListItem *list_item = GTK_LIST_ITEM (item);
-  AmlInstance *instance = AML_INSTANCE (gtk_list_item_get_item (list_item));
-  GtkWidget *row = gtk_list_item_get_child (list_item);
-  GtkWidget *icon = NULL;
+  /* A click anywhere on the row, outside its buttons, opens the
+     instance. An AdwActionRow is not activatable by default. */
+  gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
 
-  if (instance == NULL || row == NULL)
-    return;
-
-  icon = g_object_get_data (G_OBJECT (row), "aml-icon");
-
-  if (icon != NULL)
-    g_signal_handlers_disconnect_by_data (instance, icon);
+  return row;
 }
 
 /* A row clicked anywhere but on its buttons opens the instance. The
- * position comes from the selection-less model, which holds the rows in
- * the same order as the manager. */
+ * row's index comes from the boxed list, which holds the rows in the
+ * same order as the manager. */
 static void
-on_row_activate (GtkListView *list G_GNUC_UNUSED, guint position,
+on_row_activate (GtkListBox *list G_GNUC_UNUSED, GtkListBoxRow *row,
                  gpointer user_data)
 {
   AmlMainWindow *self = user_data;
   GListStore *instances = aml_instance_manager_get_instances (self->manager);
   AmlInstance *instance =
-    g_list_model_get_item (G_LIST_MODEL (instances), position);
+    g_list_model_get_item (G_LIST_MODEL (instances),
+                           gtk_list_box_row_get_index (row));
 
   if (instance == NULL)
     return;
@@ -1240,8 +1176,6 @@ aml_main_window_new (GtkApplication *application, AmlInstanceManager *manager)
                                       "application", application,
                                       NULL);
   GListStore *instances = aml_instance_manager_get_instances (manager);
-  GtkListItemFactory *factory = gtk_signal_list_item_factory_new ();
-  GtkNoSelection *selection = NULL;
   GtkWidget *list = NULL;
   GtkWidget *scroll = NULL;
 
@@ -1252,22 +1186,24 @@ aml_main_window_new (GtkApplication *application, AmlInstanceManager *manager)
   self->launchers = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                            g_object_unref);
 
-  g_signal_connect (factory, "setup", G_CALLBACK (setup_row), self);
-  g_signal_connect (factory, "bind", G_CALLBACK (bind_row), self);
-  g_signal_connect (factory, "unbind", G_CALLBACK (unbind_row), self);
-
-  /* gtk_no_selection_new() and gtk_list_view_new() take ownership of
-   * the references they get, so both references are created here and
-   * handed over. The store itself stays owned by the manager. */
-  selection = gtk_no_selection_new (g_object_ref (G_LIST_MODEL (instances)));
-  list = gtk_list_view_new (GTK_SELECTION_MODEL (selection),
-                            GTK_LIST_ITEM_FACTORY (factory));
-  /* A click on the row opens the instance, no double click on the
-     action row itself: the row activates with a single click. */
-  gtk_list_view_set_single_click_activate (GTK_LIST_VIEW (list), TRUE);
-  g_signal_connect (list, "activate", G_CALLBACK (on_row_activate), self);
-  gtk_widget_set_margin_start (list, 12);
-  gtk_widget_set_margin_end (list, 12);
+  /* The instances are a boxed list, the same list the content pages and
+     the modpack browser use: full width rows with hairlines between
+     them instead of cards on a margin. The top row's corners are
+     square, because the list is flush with the top of the window. */
+  list = gtk_list_box_new ();
+  gtk_widget_add_css_class (list, "boxed-list");
+  gtk_widget_add_css_class (list, "flush-top");
+  gtk_widget_add_css_class (list, "flush-bottom");
+  /* The card background of the list only covers its rows: the space
+     under them is the window background, the same colour as the hairline
+     between two rows, instead of the whole window being card coloured. */
+  gtk_widget_set_valign (list, GTK_ALIGN_START);
+  gtk_list_box_set_selection_mode (GTK_LIST_BOX (list),
+                                   GTK_SELECTION_NONE);
+  g_signal_connect (list, "row-activated", G_CALLBACK (on_row_activate),
+                    self);
+  gtk_list_box_bind_model (GTK_LIST_BOX (list), G_LIST_MODEL (instances),
+                           create_instance_row, self, NULL);
 
   scroll = gtk_scrolled_window_new ();
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroll), list);

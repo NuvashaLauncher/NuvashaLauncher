@@ -1899,8 +1899,8 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
       GtkWidget *row = adw_action_row_new ();
       GtkWidget *icon = aml_icon_widget_new (
           aml_content_type_icon (self->type));
-      GtkWidget *suffix = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
-      GtkWidget *install = gtk_button_new_with_label ("Install");
+      GtkWidget *install = gtk_button_new_from_icon_name (
+          "folder-download-symbolic");
 
       /* A project already listed is not listed twice: the same answer can
        * come back for two pages that overlap. */
@@ -1934,9 +1934,15 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
       gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
       start_row_icon (icon, project->icon_url);
 
+      /* The button is only the download icon, centered on the row: the
+         label is the tooltip and the accessible name. */
       gtk_widget_add_css_class (install, "suggested-action");
       gtk_widget_set_valign (install, GTK_ALIGN_CENTER);
-      gtk_box_append (GTK_BOX (suffix), install);
+      gtk_widget_set_halign (install, GTK_ALIGN_CENTER);
+      gtk_widget_set_tooltip_text (install, "Install");
+      gtk_accessible_update_property (GTK_ACCESSIBLE (install),
+                                      GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                      "Install", -1);
 
       /* The rows point into the list the page owns, so the projects
        * live exactly as long as the rows that show them. */
@@ -1947,7 +1953,7 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
                          g_ptr_array_index (self->results, shown));
 
       adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
-      adw_action_row_add_suffix (ADW_ACTION_ROW (row), suffix);
+      adw_action_row_add_suffix (ADW_ACTION_ROW (row), install);
 
       /* The whole row opens the project; the button installs the newest
        * version of it that fits this instance. An AdwActionRow is not
@@ -2668,6 +2674,10 @@ build_installed (AmlContentPage *self)
       ADW_STATUS_PAGE (self->installed_status),
       "Browse for something to put into the folder of this instance.");
 
+  /* The list is flush with the top of the tab: the top row's corners
+     are square, so the first row does not float over the background. */
+  gtk_widget_add_css_class (GTK_WIDGET (group), "flush-top");
+
   self->installed_group = GTK_WIDGET (group);
   self->installed_scroller = scroller;
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
@@ -2735,6 +2745,10 @@ build_browse (AmlContentPage *self)
 
   self->search_entry = search_entry;
   self->search_bar = search_bar;
+  gtk_widget_add_css_class (search_bar, "content-search-bar");
+  /* A field about a quarter wider than the one the placeholder alone
+     would ask for, so there is more room for the words typed into it. */
+  gtk_widget_set_size_request (search_entry, 390, -1);
   gtk_widget_set_hexpand (search_entry, TRUE);
   gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_entry),
                                          "Search Modrinth");
@@ -2760,7 +2774,7 @@ build_browse (AmlContentPage *self)
   gtk_box_append (GTK_BOX (top), search_bar);
 
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (filter_button),
-                                 "view-continuous-symbolic");
+                                 "view-more-symbolic");
   gtk_widget_set_tooltip_text (filter_button, "Filter by category");
   gtk_accessible_update_property (GTK_ACCESSIBLE (filter_button),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL, "Filter",
@@ -2796,6 +2810,10 @@ build_browse (AmlContentPage *self)
       ADW_STATUS_PAGE (self->results_status),
       "Type what to look for, or browse everything Modrinth has for this "
       "instance.");
+  /* The list is flush with the top of the tab: the top row's corners
+     are square, so the first row does not float over the background. */
+  gtk_widget_add_css_class (GTK_WIDGET (group), "flush-top");
+
   self->results_group = GTK_WIDGET (group);
   self->results_scroller = scroller;
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
