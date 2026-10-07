@@ -13,6 +13,7 @@
 
 #include "aml-download-modpack-dialog.h"
 
+#include "aml-dialogs.h"
 #include "aml-download.h"
 #include "aml-modpack.h"
 #include "aml-modrinth.h"
@@ -170,8 +171,7 @@ aml_download_modpack_dialog_init (AmlDownloadModpackDialog *self)
   self->versions = NULL;
 
   adw_dialog_set_title (ADW_DIALOG (self), "Download Modpack");
-  adw_dialog_set_content_width (ADW_DIALOG (self), 720);
-  adw_dialog_set_content_height (ADW_DIALOG (self), 560);
+  aml_dialog_set_standard_size (ADW_DIALOG (self));
 
   self->nav = adw_navigation_view_new ();
   adw_dialog_set_child (ADW_DIALOG (self), self->nav);

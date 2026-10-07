@@ -8,6 +8,7 @@
 
 #include "aml-create-instance-dialog.h"
 
+#include "aml-dialogs.h"
 #include "aml-loader-row.h"
 #include "aml-loaders.h"
 #include "aml-version-row.h"
@@ -209,6 +210,9 @@ static void
 aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
 {
   adw_dialog_set_title (ADW_DIALOG (self), "Create Instance");
+
+  /* The same size as the other way of getting an instance. */
+  aml_dialog_set_standard_size (ADW_DIALOG (self));
 
   self->name_row = adw_entry_row_new ();
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->name_row), "Name");
