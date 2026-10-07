@@ -40,6 +40,14 @@ struct _AmlInstancePage
   GtkWidget *icon_row;
   GtkWidget *icon_image;
 
+  /* The Directory row: the path, the two buttons that act on it and the
+     spinner that shows a move in progress. A move in progress makes them
+     insensitive, so a second one cannot start on top of it. */
+  GtkWidget *directory_row;
+  GtkWidget *directory_open;
+  GtkWidget *directory_change;
+  GtkWidget *directory_spinner;
+
   /* The Java row plus what we know about it. Row load = detection
    * finishes; description load = the Minecraft version's javaVersion.  */
   GtkWidget *java_row;
@@ -648,6 +656,138 @@ on_open_folder_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
                                           g_object_ref (self));
 }
 
+/* ---------------------------------------------------------- *
+ * Changing the directory
+ * ---------------------------------------------------------- */
+
+/* The row says where the instance is, and which of the two things may be
+ * done to it right now. A running game has its files open where they are,
+ * so neither button does anything until it has stopped. */
+static void
+update_directory_row (AmlInstancePage *self)
+{
+  gboolean running =
+    aml_launch_state_is_busy (aml_launcher_get_state (self->launcher));
+
+  if (self->directory_row == NULL)
+    return;
+
+  adw_action_row_set_subtitle (
+    ADW_ACTION_ROW (self->directory_row),
+    instance_string (self->instance, "directory"));
+
+  gtk_widget_set_sensitive (self->directory_open, !running);
+  gtk_widget_set_sensitive (self->directory_change, !running);
+}
+
+static void
+set_moving (AmlInstancePage *self, gboolean moving)
+{
+  gtk_widget_set_visible (self->directory_spinner, moving);
+  gtk_widget_set_sensitive (self->directory_open, !moving);
+  gtk_widget_set_sensitive (self->directory_change, !moving);
+}
+
+static void
+on_change_directory_ready (GObject *source, GAsyncResult *result,
+                           gpointer user_data)
+{
+  AmlInstancePage *self = user_data;
+  g_autoptr (GError) error = NULL;
+
+  if (aml_instance_manager_change_directory_finish (
+        AML_INSTANCE_MANAGER (source), result, &error))
+    {
+      /* The instance stores the new path; the row reads it from there, so
+         what it says is what the file says. */
+      update_directory_row (self);
+    }
+  else if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+    {
+      show_toast (self, error->message);
+    }
+
+  set_moving (self, FALSE);
+  update_directory_row (self);
+
+  g_object_unref (self);
+}
+
+static void
+on_directory_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  AmlInstancePage *self = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GFile) file =
+    gtk_file_dialog_select_folder_finish (GTK_FILE_DIALOG (source), result,
+                                          &error);
+
+  /* The chooser being dismissed is not a failure and there is nothing to
+     report for it. */
+  if (file == NULL)
+    {
+      if (error != NULL &&
+          !g_error_matches (error, GTK_DIALOG_ERROR,
+                            GTK_DIALOG_ERROR_CANCELLED) &&
+          !g_error_matches (error, GTK_DIALOG_ERROR,
+                            GTK_DIALOG_ERROR_DISMISSED))
+        show_toast (self, error->message);
+
+      g_object_unref (self);
+      return;
+    }
+
+  {
+    g_autofree char *path = g_file_get_path (file);
+    g_autofree char *canonical = NULL;
+
+    /* Said before anything is touched, so a path that cannot work is
+       refused with its reason and the instance stays as it was. */
+    if (!aml_instance_manager_check_new_directory (self->manager,
+                                                   self->instance, path,
+                                                   &canonical, &error))
+      {
+        show_toast (self, error->message);
+        g_object_unref (self);
+        return;
+      }
+
+    set_moving (self, TRUE);
+
+    aml_instance_manager_change_directory_async (
+      self->manager, self->instance, canonical, NULL,
+      on_change_directory_ready, g_object_ref (self));
+  }
+
+  g_object_unref (self);
+}
+
+static void
+on_change_directory_clicked (GtkButton *button G_GNUC_UNUSED,
+                             gpointer user_data)
+{
+  AmlInstancePage *self = user_data;
+  GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
+  g_autoptr (GtkFileDialog) dialog = gtk_file_dialog_new ();
+
+  /* A game that is running has its files where the instance says they
+     are; moving them out from under it would break the game and the move
+     at the same time. */
+  if (aml_launch_state_is_busy (aml_launcher_get_state (self->launcher)))
+    {
+      show_toast (self, "The game is running; stop it before moving its "
+                   "directory");
+      return;
+    }
+
+  gtk_file_dialog_set_title (dialog, "Choose a Directory");
+  gtk_file_dialog_select_folder (dialog,
+                                 GTK_IS_WINDOW (root) ? GTK_WINDOW (root)
+                                                      : NULL,
+                                 NULL, on_directory_chosen,
+                                 g_object_ref (self));
+}
+
 static void
 on_duplicate_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 {
@@ -840,9 +980,40 @@ create_settings_page (AmlInstancePage *self)
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (general), self->icon_row);
   update_icon_row (self);
 
-  button_row (ADW_PREFERENCES_GROUP (general), "Directory", directory,
-              "folder-open-symbolic", G_CALLBACK (on_open_folder_clicked),
-              self);
+  /* Directory: where the files are, and the two things that can be done
+     to them. Opening and changing are separate on purpose: one only
+     looks, the other moves every file. */
+  self->directory_row = adw_action_row_new ();
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->directory_row),
+                                 "Directory");
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (self->directory_row),
+                               directory);
+
+  self->directory_open = gtk_button_new_with_label ("Open Folder");
+  gtk_widget_add_css_class (self->directory_open, "flat");
+  gtk_widget_set_valign (self->directory_open, GTK_ALIGN_CENTER);
+  g_signal_connect (self->directory_open, "clicked",
+                    G_CALLBACK (on_open_folder_clicked), self);
+
+  self->directory_change = gtk_button_new_with_label ("Change");
+  gtk_widget_add_css_class (self->directory_change, "flat");
+  gtk_widget_set_valign (self->directory_change, GTK_ALIGN_CENTER);
+  g_signal_connect (self->directory_change, "clicked",
+                    G_CALLBACK (on_change_directory_clicked), self);
+
+  self->directory_spinner = gtk_spinner_new ();
+  gtk_widget_set_valign (self->directory_spinner, GTK_ALIGN_CENTER);
+  gtk_widget_set_visible (self->directory_spinner, FALSE);
+
+  adw_action_row_add_suffix (ADW_ACTION_ROW (self->directory_row),
+                             self->directory_spinner);
+  adw_action_row_add_suffix (ADW_ACTION_ROW (self->directory_row),
+                             self->directory_open);
+  adw_action_row_add_suffix (ADW_ACTION_ROW (self->directory_row),
+                             self->directory_change);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (general),
+                             self->directory_row);
+  update_directory_row (self);
 
   /* Minecraft: the list of versions comes from Mojang's manifest,
    * fetched as the page is built. The version this instance runs stays
@@ -952,6 +1123,16 @@ create_settings_page (AmlInstancePage *self)
   return page;
 }
 
+/* The Directory row follows the launch: a running game makes both of its
+   buttons insensitive, and stopping it makes them answer again. */
+static void
+on_page_launcher_state (AmlLauncher *launcher G_GNUC_UNUSED,
+                        AmlLaunchState state G_GNUC_UNUSED,
+                        const char *detail G_GNUC_UNUSED, gpointer user_data)
+{
+  update_directory_row (user_data);
+}
+
 AmlInstancePage *
 aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
                        AmlSettings *settings, AmlLauncher *launcher)
@@ -972,6 +1153,11 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
   self->instance = g_object_ref (instance);
   self->settings = g_object_ref (settings);
   self->launcher = g_object_ref (launcher);
+
+  /* The Directory row cannot move files out from under a running game, so
+     it follows the state of the launch the page shares with the card. */
+  g_signal_connect_object (launcher, "state",
+                           G_CALLBACK (on_page_launcher_state), self, 0);
 
   adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (stack),
                                        create_settings_page (self),
@@ -1032,6 +1218,10 @@ aml_instance_page_dispose (GObject *object)
   self->icon_row = NULL;
   self->icon_image = NULL;
   self->java_row = NULL;
+  self->directory_row = NULL;
+  self->directory_open = NULL;
+  self->directory_change = NULL;
+  self->directory_spinner = NULL;
 
   g_cancellable_cancel (self->cancellable);
   g_clear_object (&self->cancellable);

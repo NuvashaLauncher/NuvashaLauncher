@@ -107,10 +107,15 @@ default_instance_directory (AmlInstanceManager *self,
 /* Checks that @directory may become an instance directory: absolute,
  * without "..", not the filesystem root and neither overlapping nor
  * nested with the directory of an instance that already exists.
- * Returns the canonical path. */
+ * Returns the canonical path.
+ *
+ * @moved is the instance whose directory is being changed, or NULL when
+ * a new one is being made: an instance never overlaps itself, so the one
+ * being moved is not counted against it. */
 static gboolean
 check_instance_directory (AmlInstanceManager  *self,
                           const char          *directory,
+                          AmlInstance         *moved,
                           char               **canonical,
                           GError             **error)
 {
@@ -148,6 +153,9 @@ check_instance_directory (AmlInstanceManager  *self,
         g_list_model_get_item (G_LIST_MODEL (self->instances), i);
       g_autofree char *other_name = instance_name (other);
       g_autofree char *other_directory = instance_directory (other);
+
+      if (other == moved)
+        continue;
 
       if (path_contains (path, other_directory) ||
           path_contains (other_directory, path))
@@ -522,7 +530,7 @@ aml_instance_manager_create (AmlInstanceManager *self,
 
   if (directory != NULL)
     {
-      if (!check_instance_directory (self, directory, &path, error))
+      if (!check_instance_directory (self, directory, NULL, &path, error))
         return NULL;
     }
   else
@@ -530,7 +538,7 @@ aml_instance_manager_create (AmlInstanceManager *self,
       g_autofree char *derived =
         default_instance_directory (self, name, id);
 
-      if (!check_instance_directory (self, derived, &path, error))
+      if (!check_instance_directory (self, derived, NULL, &path, error))
         return NULL;
     }
 
@@ -1135,7 +1143,7 @@ aml_instance_manager_duplicate_async (AmlInstanceManager *self,
   g_autofree char *canonical = NULL;
   g_autoptr (GError) local_error = NULL;
 
-  if (!check_instance_directory (self, directory, &canonical, &local_error))
+  if (!check_instance_directory (self, directory, NULL, &canonical, &local_error))
     {
       g_task_return_error (task, g_steal_pointer (&local_error));
       return;
@@ -1581,6 +1589,250 @@ gboolean
 aml_instance_manager_delete_finish (AmlInstanceManager *self,
                                     GAsyncResult *result,
                                     GError **error)
+{
+  g_return_val_if_fail (g_task_is_valid (result, self), FALSE);
+
+  return g_task_propagate_boolean (G_TASK (result), error);
+}
+
+/* ---------------------------------------------------------- *
+ * Change directory
+ *
+ * The files are copied to the new place first and the metadata is
+ * written only once they are all there, so a move that fails leaves the
+ * old directory and the stored path exactly as they were. The old copy is
+ * removed at the very end: a directory that outlives the change is a
+ * leftover, while a directory that went before the metadata did would be
+ * files with nothing pointing at them.
+ * ---------------------------------------------------------- */
+
+gboolean
+aml_instance_manager_check_new_directory (AmlInstanceManager  *self,
+                                          AmlInstance         *instance,
+                                          const char          *directory,
+                                          char               **canonical,
+                                          GError             **error)
+{
+  g_autofree char *path = NULL;
+  g_autofree char *current = NULL;
+
+  g_return_val_if_fail (AML_IS_INSTANCE_MANAGER (self), FALSE);
+  g_return_val_if_fail (AML_IS_INSTANCE (instance), FALSE);
+  g_return_val_if_fail (canonical == NULL || *canonical == NULL, FALSE);
+
+  if (!g_list_store_find (self->instances, instance, NULL))
+    {
+      g_set_error (error, AML_INSTANCE_MANAGER_ERROR,
+                   AML_INSTANCE_MANAGER_ERROR_NOT_FOUND,
+                   "the instance is not registered");
+      return FALSE;
+    }
+
+  if (!check_instance_directory (self, directory, instance, &path, error))
+    return FALSE;
+
+  g_object_get (instance, "directory", &current, NULL);
+
+  /* The directory it already has is not a change, and asking for it
+     would move a directory onto itself. */
+  if (g_strcmp0 (path, current) == 0)
+    {
+      g_set_error (error, AML_INSTANCE_MANAGER_ERROR,
+                   AML_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+                   "the directory is already \"%s\"", path);
+      return FALSE;
+    }
+
+  /* An existing directory is not touched: something else put it there
+     and the files of this instance must not land on top of it. */
+  if (g_file_test (path, G_FILE_TEST_EXISTS))
+    {
+      g_set_error (error, AML_INSTANCE_MANAGER_ERROR,
+                   AML_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+                   "\"%s\" already exists", path);
+      return FALSE;
+    }
+
+  /* The directory the new one hangs off has to be there already. Left to
+     find out during the copy, this would be reported as a file that
+     cannot be written, which says nothing about why. */
+  {
+    g_autofree char *parent = g_path_get_dirname (path);
+
+    if (!g_file_test (parent, G_FILE_TEST_IS_DIR))
+      {
+        g_set_error (error, AML_INSTANCE_MANAGER_ERROR,
+                     AML_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+                     "the directory \"%s\" does not exist", parent);
+        return FALSE;
+      }
+  }
+
+  if (canonical != NULL)
+    *canonical = g_steal_pointer (&path);
+
+  return TRUE;
+}
+
+typedef struct
+{
+  AmlInstanceManager *self;
+  GTask *task;
+  AmlInstance *instance;
+
+  char *old_directory;
+  char *new_directory;
+  GFile *destination;
+} MoveData;
+
+static void
+move_data_free (MoveData *data)
+{
+  g_clear_object (&data->task);
+  g_clear_object (&data->self);
+  g_clear_object (&data->instance);
+  g_clear_object (&data->destination);
+  g_free (data->old_directory);
+  g_free (data->new_directory);
+  g_free (data);
+}
+
+static void
+move_return_error (MoveData *data, GError *error)
+{
+  g_task_return_error (data->task, error);
+  move_data_free (data);
+}
+
+/* Puts @instance back to the directory it had and drops whatever landed
+ * in the new one. Nothing about the old directory is touched: it was
+ * never modified. */
+static void
+move_undo (MoveData *data, gboolean restore_instance)
+{
+  if (restore_instance)
+    g_object_set (data->instance, "directory", data->old_directory, NULL);
+
+  if (data->destination != NULL)
+    g_file_delete (data->destination, NULL, NULL);
+}
+
+/* The move has already happened and been saved. What is left is a
+ * directory that now holds a second copy of files that exist somewhere
+ * else; failing to remove it leaves files behind rather than taking any
+ * away, so the change stands and the leftover is said out loud. */
+static void
+move_old_removed (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                  gpointer user_data)
+{
+  MoveData *data = user_data;
+  g_autoptr (GError) error = NULL;
+
+  if (!delete_tree_finish (result, &error))
+    g_warning ("the old directory \"%s\" could not be removed: %s",
+               data->old_directory, error->message);
+
+  g_task_return_boolean (data->task, TRUE);
+  move_data_free (data);
+}
+
+static void
+move_copy_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                 gpointer user_data)
+{
+  MoveData *data = user_data;
+  g_autoptr (GError) error = NULL;
+
+  if (!copy_tree_finish (result, &error))
+    {
+      move_undo (data, FALSE);
+      move_return_error (data, g_steal_pointer (&error));
+      return;
+    }
+
+  /* The files are all in the new place; only now does the stored path
+     change, and the file that records it is written whole. */
+  g_object_set (data->instance, "directory", data->new_directory, NULL);
+
+  if (!aml_instance_manager_save (data->self, &error))
+    {
+      move_undo (data, TRUE);
+      move_return_error (data, g_steal_pointer (&error));
+      return;
+    }
+
+  /* The old directory is now a second copy of a directory that exists.
+     Taking it away is the last thing done. */
+  {
+    g_autoptr (GFile) old = g_file_new_for_path (data->old_directory);
+
+    delete_tree_async (old, NULL, move_old_removed, data);
+  }
+}
+
+void
+aml_instance_manager_change_directory_async (AmlInstanceManager *self,
+                                             AmlInstance *instance,
+                                             const char *directory,
+                                             GCancellable *cancellable,
+                                             GAsyncReadyCallback callback,
+                                             gpointer user_data)
+{
+  g_return_if_fail (AML_IS_INSTANCE_MANAGER (self));
+  g_return_if_fail (AML_IS_INSTANCE (instance));
+
+  g_autoptr (GTask) task = g_task_new (self, cancellable, callback, user_data);
+  g_autofree char *path = NULL;
+  g_autofree char *old_directory = NULL;
+  g_autoptr (GError) local_error = NULL;
+
+  if (!aml_instance_manager_check_new_directory (self, instance, directory,
+                                                 &path, &local_error))
+    {
+      g_task_return_error (task, g_steal_pointer (&local_error));
+      return;
+    }
+
+  g_object_get (instance, "directory", &old_directory, NULL);
+
+  MoveData *data = g_new0 (MoveData, 1);
+  data->self = g_object_ref (self);
+  data->task = g_steal_pointer (&task);
+  data->instance = g_object_ref (instance);
+  data->old_directory = g_steal_pointer (&old_directory);
+  data->new_directory = g_strdup (path);
+  data->destination = g_file_new_for_path (path);
+
+  /* An instance whose directory is gone has nothing to move: the path is
+     changed and saved, which is all that is left to do. */
+  if (!g_file_test (data->old_directory, G_FILE_TEST_IS_DIR))
+    {
+      g_object_set (instance, "directory", data->new_directory, NULL);
+
+      if (!aml_instance_manager_save (self, &local_error))
+        {
+          g_object_set (instance, "directory", data->old_directory, NULL);
+          move_return_error (data, g_steal_pointer (&local_error));
+          return;
+        }
+
+      g_task_return_boolean (data->task, TRUE);
+      move_data_free (data);
+      return;
+    }
+
+  {
+    g_autoptr (GFile) source = g_file_new_for_path (data->old_directory);
+
+    copy_tree_async (source, data->destination, cancellable, move_copy_ready,
+                     data);
+  }
+}
+
+gboolean
+aml_instance_manager_change_directory_finish (AmlInstanceManager *self,
+                                               GAsyncResult *result,
+                                               GError **error)
 {
   g_return_val_if_fail (g_task_is_valid (result, self), FALSE);
 
