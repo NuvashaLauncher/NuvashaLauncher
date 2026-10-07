@@ -1240,10 +1240,15 @@ file_row (AmlContentPage *self, AmlContentFile *file)
   GtkWidget *remove = gtk_button_new_with_label ("Remove");
 
   /* A file name and a path are plain text: markup off first, because
-     either may hold an "&". */
+     either may hold an "&". The path is kept to two lines so a long one
+     does not make this row taller than the one above it; the whole path
+     is the row's tooltip. */
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), file->filename);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (row), file->path);
+  adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 2);
+  adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (row), FALSE);
+  gtk_widget_set_tooltip_text (row, file->path);
 
   /* The same square as a browse row, with the icon of what this kind of
      file is: a file on disk has no icon of its own to fetch. */
@@ -1820,7 +1825,11 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
       adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
                                      project->title);
       adw_action_row_set_subtitle (ADW_ACTION_ROW (row), project->description);
+      /* Two lines at most, ending in an ellipsis when the description is
+         longer: every row is then the same height, whatever it holds.
+         The whole description is on the details page. */
       adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 2);
+      adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (row), FALSE);
 
       gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
       start_row_icon (icon, project->icon_url);

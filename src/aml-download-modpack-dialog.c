@@ -419,7 +419,11 @@ results_arrived (AmlDownloadModpackDialog *self, AmlModrinthResults *results,
                                          project->title);
           adw_action_row_set_subtitle (ADW_ACTION_ROW (row),
                                        project->description);
+          /* Two lines at most, ending in an ellipsis when the
+             description is longer: every row is the same height, and the
+             whole description is on the details page. */
           adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 2);
+          adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (row), FALSE);
 
           gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
           start_modpack_icon (icon, project->icon_url);
