@@ -1144,22 +1144,46 @@ on_pick_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
  * Installed: the rows and what can be done to them
  * ---------------------------------------------------------- */
 
-static void
+/* Disables or enables one file by renaming it, and updates the one row it
+ * is about. The folder is not read again: a rescan rebuilds every row and
+ * asks Modrinth about every file a second time, and until it finished the
+ * file still said it was enabled, so a fast second toggle tried to rename
+ * a path that had already moved. TRUE when the file moved. */
+static gboolean
 toggle_file (AmlContentPage *self, AmlContentFile *file)
 {
   g_autoptr (GError) error = NULL;
   g_autofree char *renamed = NULL;
+  g_autofree char *old_path = g_strdup (file->path);
+  GtkWidget *row = NULL;
 
   renamed = aml_content_set_disabled (file->path, !file->enabled, &error);
 
   if (renamed == NULL)
     {
       show_error (self, "The file cannot be renamed", error);
-      return;
+      return FALSE;
     }
 
-  show_toast (self, file->enabled ? "Disabled" : "Enabled");
-  reload_installed (self);
+  g_free (file->path);
+  file->path = g_steal_pointer (&renamed);
+  file->enabled = !file->enabled;
+
+  /* The row the file is about follows the new path, and the table that
+     finds a row by its path is told, so nothing else has to move. */
+  row = g_hash_table_lookup (self->rows, old_path);
+
+  if (row != NULL)
+    {
+      g_hash_table_remove (self->rows, old_path);
+      g_hash_table_insert (self->rows, g_strdup (file->path), row);
+      adw_action_row_set_subtitle (ADW_ACTION_ROW (row), file->path);
+      gtk_widget_set_tooltip_text (row, file->path);
+    }
+
+  show_toast (self, file->enabled ? "Enabled" : "Disabled");
+
+  return TRUE;
 }
 
 static void
@@ -1178,17 +1202,21 @@ file_row_refresh (GtkWidget *row)
 }
 
 /* The switch of a mod row: on means the mod loads, off means its file
- * carries the disabled suffix. The rename goes through the same path the
- * menu used to, and the list is read again once it is done, so the switch
- * and the file cannot disagree for long. */
+ * carries the disabled suffix. The rename updates the row it is about, so
+ * only the switch the user touched moves. When the rename fails the
+ * switch stays where it was, rather than showing a state the file does
+ * not have. */
 static gboolean
 on_mod_toggled (GtkSwitch *sw, gboolean state G_GNUC_UNUSED, gpointer user_data)
 {
   AmlContentPage *self = user_data;
   AmlContentFile *file = g_object_get_data (G_OBJECT (sw), "aml-file");
 
-  if (file != NULL)
-    toggle_file (self, file);
+  if (file == NULL || !toggle_file (self, file))
+    return TRUE;
+
+  gtk_widget_set_tooltip_text (GTK_WIDGET (sw),
+                               file->enabled ? "Disable" : "Enable");
 
   return FALSE;
 }
