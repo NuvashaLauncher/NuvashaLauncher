@@ -233,17 +233,56 @@ on_row_activated (AdwActionRow *row, gpointer user_data)
 }
 
 static void
+on_remove_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  AmlUsersPopover *self = user_data;
+  const char *id = g_object_get_data (G_OBJECT (source), "aml-account-id");
+  const char *response =
+    adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
+
+  if (id != NULL && g_strcmp0 (response, "remove") == 0)
+    {
+      g_autoptr (GError) error = NULL;
+
+      if (!aml_accounts_remove (self->accounts, id, &error))
+        show_error (self, error->message);
+    }
+
+  g_object_unref (self);
+}
+
+/* Removing an account throws away its saved sign-in for good, so it is
+ * asked for first. */
+static void
 on_remove_clicked (GtkButton *button, gpointer user_data)
 {
   AmlUsersPopover *self = user_data;
   const char *id = account_id_of (button);
-  g_autoptr (GError) error = NULL;
+  const char *name = g_object_get_data (G_OBJECT (button), "aml-account-name");
+  g_autofree char *heading = NULL;
+  AdwAlertDialog *alert = NULL;
 
   if (id == NULL)
     return;
 
-  if (!aml_accounts_remove (self->accounts, id, &error))
-    show_error (self, error->message);
+  heading = g_strdup_printf (
+    "Remove %s?", name != NULL && *name != '\0' ? name : "this account");
+
+  alert = ADW_ALERT_DIALOG (adw_alert_dialog_new (
+      heading, "The account is removed from AML and its saved sign-in is "
+               "forgotten. The game itself is not touched."));
+  adw_alert_dialog_set_heading_use_markup (alert, FALSE);
+  adw_alert_dialog_set_body_use_markup (alert, FALSE);
+  adw_alert_dialog_add_response (alert, "cancel", "Cancel");
+  adw_alert_dialog_add_response (alert, "remove", "Remove");
+  adw_alert_dialog_set_response_appearance (alert, "remove",
+                                            ADW_RESPONSE_DESTRUCTIVE);
+  adw_alert_dialog_set_default_response (alert, "cancel");
+  adw_alert_dialog_set_close_response (alert, "cancel");
+  g_object_set_data_full (G_OBJECT (alert), "aml-account-id",
+                          g_strdup (id), g_free);
+  adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL, on_remove_chosen,
+                           g_object_ref (self));
 }
 
 /* One account as a row of the list. The whole row chooses the account it
@@ -310,6 +349,8 @@ append_account_row (AmlUsersPopover *self, const AmlAccount *account)
   gtk_widget_set_valign (remove, GTK_ALIGN_CENTER);
   g_object_set_data_full (G_OBJECT (remove), "aml-account-id",
                           g_strdup (account->id), g_free);
+  g_object_set_data_full (G_OBJECT (remove), "aml-account-name",
+                          g_strdup (account->name), g_free);
   g_signal_connect (remove, "clicked", G_CALLBACK (on_remove_clicked), self);
   adw_action_row_add_suffix (ADW_ACTION_ROW (row), remove);
 

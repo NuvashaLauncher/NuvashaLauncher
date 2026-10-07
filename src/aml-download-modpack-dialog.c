@@ -680,9 +680,8 @@ build_browse_page (AmlDownloadModpackDialog *self)
 
   self->results_group = adw_preferences_group_new ();
 
-  /* The list is flush with the top of the page: the top row's corners
-     are square, so the first row does not float over the background. */
-  gtk_widget_add_css_class (self->results_group, "flush-top");
+  /* A margin above the card, the way a boxed list is meant to sit. */
+  gtk_widget_set_margin_top (self->results_group, 12);
 
   self->search_entry = gtk_search_entry_new ();
   gtk_widget_set_hexpand (self->search_entry, TRUE);
@@ -750,7 +749,7 @@ build_browse_page (AmlDownloadModpackDialog *self)
                              "Nothing to show yet");
   adw_status_page_set_description (
     ADW_STATUS_PAGE (self->results_status),
-    "No modpack matches what was asked for. Try another word.");
+    "No modpack matches what was asked for. Try another word");
   gtk_stack_add_named (GTK_STACK (self->results_stack),
                        self->results_status, "empty");
 
@@ -1619,7 +1618,7 @@ build_optional_page (AmlDownloadModpackDialog *self,
   adw_preferences_group_set_description (
     ADW_PREFERENCES_GROUP (heading),
     "The pack lists these files but says they are not needed. Nothing of "
-    "them is installed unless you ask. Default is off.");
+    "them is installed unless you ask. Default is off");
 
   g_clear_pointer (&self->opt_switch_rows, g_ptr_array_unref);
   self->opt_switch_rows = g_ptr_array_new ();

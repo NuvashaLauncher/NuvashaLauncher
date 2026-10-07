@@ -50,7 +50,9 @@ update_add_button (AmlOfflineAccountDialog *self)
 
   gtk_widget_set_sensitive (self->add_button, account != NULL);
 
-  if (account != NULL)
+  /* An empty entry is not a mistake, it is one no one has typed in yet:
+     only a name that was really typed and refused gets a sentence. */
+  if (account != NULL || name[0] == '\0')
     clear_error (self);
   else
     show_error (self, error->message);

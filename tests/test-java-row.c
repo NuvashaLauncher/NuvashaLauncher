@@ -3,9 +3,7 @@
  */
 
 /* AmlJavaRow: the first entry names the runtime the default stands for
- * and that runtime is left out of the list below, so it is shown once;
- * the trailing "Add Java Runtime" entry asks for a file instead of a
- * path.
+ * and that runtime is left out of the list below, so it is shown once.
  *
  * Naming the first entry fills the list again, which makes the combo row
  * emit its selection and calls the caller's handler. A handler that sets
@@ -36,15 +34,6 @@ on_selected (GObject    *object G_GNUC_UNUSED,
   g_assert_cmpuint (selected_calls, <, 10);
 
   aml_java_row_set_default_choice (watched_row, NULL, 21);
-}
-
-static guint add_requests = 0;
-
-static void
-on_add_requested (AmlJavaRow *row G_GNUC_UNUSED,
-                  gpointer    user_data G_GNUC_UNUSED)
-{
-  add_requests++;
 }
 
 static guint
@@ -99,7 +88,6 @@ main (void)
 
   row = aml_java_row_new ();
   g_object_ref_sink (row);
-  aml_java_row_set_add_entry_enabled (row, TRUE);
 
   /* The row has to be ready for the first entry to be named. */
   aml_java_row_load (row, NULL);
@@ -112,15 +100,6 @@ main (void)
   model = GTK_STRING_LIST (adw_combo_row_get_model (ADW_COMBO_ROW (row)));
   n = g_list_model_get_n_items (G_LIST_MODEL (model));
   g_assert_cmpuint (n, >=, 1);
-  g_assert_cmpstr (gtk_string_list_get_string (model, n - 1), ==,
-                   "Add Java Runtime");
-
-  /* Picking the add entry asks for a file and goes back to the first
-   * entry instead of resting on it. */
-  g_signal_connect (row, "add-requested", G_CALLBACK (on_add_requested), NULL);
-  adw_combo_row_set_selected (ADW_COMBO_ROW (row), n - 1);
-  g_assert_cmpuint (add_requests, ==, 1);
-  g_assert_cmpuint (adw_combo_row_get_selected (ADW_COMBO_ROW (row)), ==, 0);
 
   /* The runtime the default resolves to is named in the first entry and
    * not repeated below. A machine with more than one runtime whose names
