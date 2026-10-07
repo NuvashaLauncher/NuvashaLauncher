@@ -402,6 +402,36 @@ start_modpack_icon (GtkWidget *icon, const char *url)
 /* The rows of a page of results. @append is FALSE for a new search, which
  * starts the list over, and TRUE for the next page, which is added to what
  * is already there. */
+/* The description as one run of words: a row caps its subtitle at two
+ * lines by wrapping, and an explicit blank line in the text would slip a
+ * third one past that. Same folding the content rows do. */
+static char *
+one_line (const char *text)
+{
+  g_autoptr (GString) out = g_string_new (NULL);
+  gboolean space = FALSE;
+
+  if (text == NULL)
+    return g_strdup ("");
+
+  for (const char *p = text; *p != '\0'; p++)
+    {
+      if (g_ascii_isspace (*p))
+        {
+          space = TRUE;
+          continue;
+        }
+
+      if (space && out->len > 0)
+        g_string_append_c (out, ' ');
+
+      space = FALSE;
+      g_string_append_c (out, *p);
+    }
+
+  return g_string_free (g_steal_pointer (&out), FALSE);
+}
+
 static void
 results_arrived (AmlDownloadModpackDialog *self, AmlModrinthResults *results,
                  gboolean append)
@@ -460,8 +490,11 @@ results_arrived (AmlDownloadModpackDialog *self, AmlModrinthResults *results,
                                               FALSE);
           adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
                                          project->title);
-          adw_action_row_set_subtitle (ADW_ACTION_ROW (row),
-                                       project->description);
+          {
+            g_autofree char *line = one_line (project->description);
+
+            adw_action_row_set_subtitle (ADW_ACTION_ROW (row), line);
+          }
           /* Two lines at most, ending in an ellipsis when the
              description is longer: every row is the same height, and the
              whole description is on the details page. */
