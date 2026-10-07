@@ -168,7 +168,7 @@ update_the_button (AmlUsersPopover *self)
       self->active_name = g_strdup ("");
 
       gtk_widget_set_tooltip_text (GTK_WIDGET (self),
-                                   "No account yet: launches play offline");
+                                   "No account yet: add one to play");
       return;
     }
 
