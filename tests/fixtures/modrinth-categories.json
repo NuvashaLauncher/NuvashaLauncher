@@ -1,0 +1,8 @@
+[
+  { "project_type": "mod", "name": "adventure", "header": "categories", "icon": "" },
+  { "project_type": "mod", "name": "worldgen", "header": "features", "icon": "" },
+  { "project_type": "shader", "name": "colored-lighting", "header": "features", "icon": "" },
+  { "project_type": "shader", "name": "bloom", "header": "features", "icon": "" },
+  { "project_type": "modpack", "name": "kitchen-sink", "header": "categories", "icon": "" },
+  { "project_type": "resourcepack", "name": "512x+", "header": "resolutions", "icon": "" }
+]

@@ -1812,21 +1812,36 @@ on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
   return GDK_EVENT_STOP;
 }
 
+static void categories_ready (GObject *source, GAsyncResult *result,
+                              gpointer user_data);
+static void fill_categories (AmlContentPage *self, GPtrArray *categories);
+
 static void
-categories_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
-                  gpointer user_data)
+load_categories (AmlContentPage *self)
+{
+  g_autofree char *project_type =
+    aml_modrinth_project_type_for_content (self->type);
+
+  self->categories_loaded = TRUE;
+  aml_modrinth_categories_async (project_type, self->browse,
+                                 categories_ready, self);
+}
+
+static void
+load_categories_again (GtkWidget *button G_GNUC_UNUSED, gpointer user_data)
 {
   AmlContentPage *self = user_data;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (GPtrArray) categories = NULL;
-  GtkWidget *child = NULL;
 
-  categories = aml_modrinth_categories_finish (result, &error);
+  self->categories_loaded = FALSE;
+  load_categories (self);
+}
 
-  if (categories == NULL || self->filter_box == NULL)
-    return;
-
-  child = gtk_widget_get_first_child (self->filter_box);
+/* Fills the popover with the categories, grouped under the heading
+ * Modrinth puts them under, with readable labels. */
+static void
+fill_categories (AmlContentPage *self, GPtrArray *categories)
+{
+  GtkWidget *child = gtk_widget_get_first_child (self->filter_box);
 
   while (child != NULL)
     {
@@ -1836,32 +1851,107 @@ categories_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       child = next;
     }
 
-  for (guint i = 0; i < categories->len; i++)
-    {
-      const char *name = g_ptr_array_index (categories, i);
-      GtkWidget *button = gtk_check_button_new_with_label (name);
+  {
+    g_autofree char *current = NULL;
 
+    for (guint i = 0; i < categories->len; i++)
+      {
+        AmlModrinthCategory *category = g_ptr_array_index (categories, i);
+        GtkWidget *button = NULL;
 
-      gtk_widget_add_css_class (button, "flat");
-      g_object_set_data_full (G_OBJECT (button), "aml-category",
-                              g_strdup (name), g_free);
-      g_signal_connect (button, "toggled", G_CALLBACK (on_category_toggled),
-                        self);
-      gtk_box_append (GTK_BOX (self->filter_box), button);
-    }
+        if (g_strcmp0 (current, category->header) != 0)
+          {
+            g_autofree char *heading_label =
+              category->header != NULL
+                  ? aml_modrinth_category_label (category->header)
+                  : g_strdup ("Other");
+            GtkWidget *heading = gtk_label_new (heading_label);
+
+            g_free (current);
+            current = g_strdup (category->header != NULL ? category->header
+                                                        : "other");
+
+            gtk_label_set_xalign (GTK_LABEL (heading), 0.0);
+            gtk_widget_add_css_class (heading, "caption");
+            gtk_widget_add_css_class (heading, "dim-label");
+            gtk_box_append (GTK_BOX (self->filter_box), heading);
+          }
+
+        {
+          g_autofree char *label_text =
+            aml_modrinth_category_label (category->name);
+
+          button = gtk_check_button_new_with_label (label_text);
+        }
+
+        gtk_widget_add_css_class (button, "flat");
+        g_object_set_data_full (G_OBJECT (button), "aml-category",
+                                g_strdup (category->name), g_free);
+        g_signal_connect (button, "toggled", G_CALLBACK (on_category_toggled),
+                          self);
+        gtk_box_append (GTK_BOX (self->filter_box), button);
+      }
+  }
 }
 
 static void
-on_filter_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+categories_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                  gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GPtrArray) categories = NULL;
+
+  categories = aml_modrinth_categories_finish (result, &error);
+
+  if (self->filter_box == NULL)
+    return;
+
+  /* A failed request is said so, with a way to try again: an empty list
+   * of check buttons reads as "no categories", not as a failure. */
+  if (categories == NULL)
+    {
+      GtkWidget *child = gtk_widget_get_first_child (self->filter_box);
+
+      while (child != NULL)
+        {
+          GtkWidget *next = gtk_widget_get_next_sibling (child);
+
+          gtk_box_remove (GTK_BOX (self->filter_box), child);
+          child = next;
+        }
+
+      {
+        GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
+        GtkWidget *label = gtk_label_new (
+            error != NULL ? error->message : "Could not load categories");
+        GtkWidget *retry = gtk_button_new_with_label ("Retry");
+
+        gtk_label_set_wrap (GTK_LABEL (label), TRUE);
+        gtk_widget_set_size_request (box, 220, -1);
+        gtk_box_append (GTK_BOX (box), label);
+        gtk_box_append (GTK_BOX (box), retry);
+
+        gtk_box_append (GTK_BOX (self->filter_box), box);
+        g_signal_connect (retry, "clicked",
+                          G_CALLBACK (load_categories_again), self);
+      }
+
+      return;
+    }
+
+  fill_categories (self, categories);
+}
+
+static void
+on_filter_clicked (GtkWidget *widget G_GNUC_UNUSED, gpointer user_data)
 {
   AmlContentPage *self = user_data;
 
   if (self->categories_loaded)
     return;
 
-  self->categories_loaded = TRUE;
-  aml_modrinth_categories_async (self->type, self->browse, categories_ready,
-                                 self);
+  load_categories (self);
 }
 
 static void
@@ -2264,7 +2354,9 @@ build_browse (AmlContentPage *self)
   gtk_widget_set_valign (filter_button, GTK_ALIGN_CENTER);
   gtk_widget_add_css_class (filter_button, "flat");
   gtk_menu_button_set_popover (GTK_MENU_BUTTON (filter_button), popover);
-  g_signal_connect (filter_button, "activate",
+  /* A click opens the popover but does not emit "activate" on the
+     menu button, so the load hangs off the popover's "show" instead. */
+  g_signal_connect (popover, "show",
                     G_CALLBACK (on_filter_clicked), self);
   gtk_box_append (GTK_BOX (top), filter_button);
 

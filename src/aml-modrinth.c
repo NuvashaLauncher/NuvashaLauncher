@@ -1423,22 +1423,77 @@ aml_modrinth_versions_finish (GAsyncResult *result, GError **error)
  * The categories a search can be narrowed by
  * ---------------------------------------------------------- */
 
-static int
-compare_names (gconstpointer a, gconstpointer b)
+void
+aml_modrinth_category_free (AmlModrinthCategory *category)
 {
-  return g_strcmp0 (*(const char *const *) a, *(const char *const *) b);
+  if (category == NULL)
+    return;
+
+  g_free (category->name);
+  g_free (category->header);
+  g_free (category);
+}
+
+/* "colored-lighting" is what a facet is built from and "Colored Lighting"
+ * is what a person reads; the two are kept apart so the slug is never
+ * changed on the way out. */
+char *
+aml_modrinth_category_label (const char *name)
+{
+  g_autofree char *spaced = NULL;
+
+  if (name == NULL || *name == '\0')
+    return g_strdup ("");
+
+  spaced = g_strdelimit (g_strdup (name), "-_", ' ');
+
+  /* Title-case each word: the first letter after a space goes upper
+     case, the rest keep their shape, so "512x+" stays "512x+". */
+  {
+    gboolean word_start = TRUE;
+
+    for (char *p = spaced; *p != '\0'; p++)
+      {
+        if (*p == ' ')
+          {
+            word_start = TRUE;
+            continue;
+          }
+
+        if (word_start && g_ascii_isalpha (*p))
+          *p = g_ascii_toupper (*p);
+
+        word_start = FALSE;
+      }
+  }
+
+  return g_steal_pointer (&spaced);
+}
+
+char *
+aml_modrinth_project_type_for_content (AmlContentType type)
+{
+  return g_strdup (aml_content_type_to_string (type));
+}
+
+static int
+compare_by_name (gconstpointer a, gconstpointer b)
+{
+  const AmlModrinthCategory *left = *(AmlModrinthCategory *const *) a;
+  const AmlModrinthCategory *right = *(AmlModrinthCategory *const *) b;
+
+  return g_strcmp0 (left->name, right->name);
 }
 
 GPtrArray *
 aml_modrinth_categories_from_json (const char *json, gssize length,
-                                   AmlContentType type, GError **error)
+                                   const char *project_type, GError **error)
 {
   g_autoptr (JsonParser) parser = json_parser_new ();
   g_autoptr (GError) parse_error = NULL;
-  GPtrArray *names = NULL;
+  GPtrArray *categories = NULL;
   JsonNode *root = NULL;
   JsonArray *array = NULL;
-  const char *wanted = aml_content_type_to_string (type);
 
   if (!json_parser_load_from_data (parser, json != NULL ? json : "",
                                    json != NULL ? length : 0, &parse_error))
@@ -1457,33 +1512,46 @@ aml_modrinth_categories_from_json (const char *json, gssize length,
       return NULL;
     }
 
-  names = g_ptr_array_new_with_free_func (g_free);
+  categories =
+    g_ptr_array_new_with_free_func ((GDestroyNotify) aml_modrinth_category_free);
   array = json_node_get_array (root);
 
   for (guint i = 0; i < json_array_get_length (array); i++)
     {
       g_autofree char *item_type = NULL;
       g_autofree char *name = NULL;
+      g_autofree char *header = NULL;
+      AmlModrinthCategory *category = NULL;
       JsonNode *item = json_array_get_element (array, i);
 
       if (object_of (item) == NULL)
         continue;
 
-      /* One project type publishes one list of categories, so the
-       * other kinds' categories are not offered here. */
+      /* One project type publishes one list of categories, so the other
+       * kinds' categories are not offered here. This is also what keeps a
+       * pack page from offering "fabric". */
       item_type = object_string (item, "project_type");
       name = object_string (item, "name");
 
-      if (name == NULL || g_strcmp0 (item_type, wanted) != 0)
+      if (name == NULL || g_strcmp0 (item_type, project_type) != 0)
         continue;
 
-      g_ptr_array_add (names, g_steal_pointer (&name));
+      header = object_string (item, "header");
+
+      category = g_new0 (AmlModrinthCategory, 1);
+      category->name = g_steal_pointer (&name);
+      category->header = g_steal_pointer (&header);
+      g_ptr_array_add (categories, category);
     }
 
-  g_ptr_array_sort (names, compare_names);
+  g_ptr_array_sort (categories, compare_by_name);
 
-  return names;
+  return categories;
 }
+
+/* The whole tag list, kept for the session: every page that asks for the
+ * categories of any project type is answered out of this one answer. */
+static char *categories_json = NULL;
 
 static void
 categories_answer (GTask *task, JsonNode *root)
@@ -1491,31 +1559,55 @@ categories_answer (GTask *task, JsonNode *root)
   g_autofree char *json = json_to_string (root, FALSE);
   g_autoptr (GError) error = NULL;
   Request *request = g_task_get_task_data (task);
-  GPtrArray *names = NULL;
+  GPtrArray *categories = NULL;
 
-  names = aml_modrinth_categories_from_json (
-      json, -1, (AmlContentType) GPOINTER_TO_INT (request->data), &error);
+  categories = aml_modrinth_categories_from_json (
+      json, -1, (const char *) request->data, &error);
 
-  if (names == NULL)
+  if (categories == NULL)
     {
       g_task_return_error (task, g_steal_pointer (&error));
       return;
     }
 
-  g_task_return_pointer (task, names, (GDestroyNotify) g_ptr_array_unref);
+  /* The whole answer is kept for the session; every project type is
+   * answered out of this one. */
+  g_clear_pointer (&categories_json, g_free);
+  categories_json = g_strdup (json);
+
+  g_task_return_pointer (task, categories, (GDestroyNotify) g_ptr_array_unref);
 }
 
 void
-aml_modrinth_categories_async (AmlContentType type, GCancellable *cancellable,
+aml_modrinth_categories_async (const char        *project_type,
+                               GCancellable      *cancellable,
                                GAsyncReadyCallback callback,
-                               gpointer user_data)
+                               gpointer           user_data)
 {
   g_autofree char *url = g_strdup_printf (AML_MODRINTH_URL "/tag/category");
   g_autoptr (GTask) task = NULL;
 
+  /* The whole tag list is fetched once for the session and every project
+   * type is answered out of that single answer. */
+  if (categories_json != NULL)
+    {
+      g_autoptr (GTask) cached = g_task_new (NULL, cancellable, callback,
+                                             user_data);
+      g_autoptr (GError) error = NULL;
+      GPtrArray *categories = aml_modrinth_categories_from_json (
+          categories_json, -1, project_type, &error);
+
+      if (categories == NULL)
+        g_task_return_error (cached, g_steal_pointer (&error));
+      else
+        g_task_return_pointer (cached, categories,
+                               (GDestroyNotify) g_ptr_array_unref);
+
+      return;
+    }
+
   task = request_new (cancellable, callback, user_data, categories_answer,
-                      AML_NOT_FOUND_IS_ERROR,
-                      GINT_TO_POINTER ((int) type), NULL);
+                      AML_NOT_FOUND_IS_ERROR, g_strdup (project_type), g_free);
   aml_download_json_async (url, cancellable, json_ready,
                            g_steal_pointer (&task));
 }
