@@ -167,6 +167,17 @@ test_icon_decode (void)
   g_assert_cmpstr (gtk_stack_get_visible_child_name (GTK_STACK (icon)), ==,
                    "icon");
 
+  /* What is shown is tied to the square: an icon whose source is larger
+     than the square must not make its row taller, which is what the
+     pixel size is for. */
+  {
+    GtkWidget *shown = gtk_stack_get_visible_child (GTK_STACK (icon));
+
+    g_assert_true (GTK_IS_IMAGE (shown));
+    g_assert_cmpint (gtk_image_get_pixel_size (GTK_IMAGE (shown)), ==,
+                     AML_ICON_SIZE);
+  }
+
   /* A missing answer changes nothing. */
   g_assert_false (aml_icon_widget_set_file (icon, NULL));
 
