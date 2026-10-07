@@ -32,10 +32,15 @@ AmlJavaRow *aml_java_row_new (void);
 void aml_java_row_set_default_entry_label (AmlJavaRow *self,
                                            const char *label);
 
-/* Names the first entry after @java, the one the default would pick, and
- * shows it at once; a NULL @java puts the plain label back. */
-void aml_java_row_set_default_entry_for (AmlJavaRow *self,
-                                         const AmlJava *java);
+/* The Java the default resolves to: the detected runtime that matches
+ * @global_path, or, when there is none, the closest compatible one for
+ * @required_major (0 means "not known yet", so nothing is resolved). The
+ * first entry is named after it and that same runtime is taken out of
+ * the detected list, so it is shown once, as the default. Set before or
+ * after load(); a change after load() fills the list again. */
+void aml_java_row_set_default_choice (AmlJavaRow *self,
+                                      const char *global_path,
+                                      int         required_major);
 
 /* Appends an "Add Java Runtime" entry. Picking it emits ::add-requested
  * and the row goes back to what was selected, so the caller can ask for

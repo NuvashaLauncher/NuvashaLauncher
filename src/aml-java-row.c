@@ -34,6 +34,13 @@ struct _AmlJavaRow
   GPtrArray *names; /* the titles shown in the model */
   char *default_label;
 
+  /* What the first entry stands for: the Java the default resolves to.
+   * The global default path and the game's required version decide it;
+   * that runtime is named in the first entry and left out of the list
+   * below so it is not shown twice. */
+  char *default_path;
+  int required_major;
+
   /* The trailing "Add Java Runtime" entry: off by default, and where
    * it sits when on, so selecting it asks for a file instead of a path. */
   gboolean add_enabled;
@@ -130,24 +137,42 @@ fill (AmlJavaRow *self)
 {
   GPtrArray *names = g_ptr_array_new_with_free_func (g_free);
   GPtrArray *ids = g_ptr_array_new_with_free_func (g_free);
+  const AmlJava *fallback = NULL;
+  g_autofree char *wanted_real =
+    self->wanted != NULL ? realpath (self->wanted, NULL) : NULL;
   guint position = 0;
 
-  g_ptr_array_add (names, g_strdup (self->default_label));
+  /* The Java the default stands for: named in the first entry, and left
+     out of the list below when it is one of the detected runtimes even
+     so. */
+  if (self->default_path != NULL || self->required_major > 0)
+    fallback = aml_java_select (self->javas, NULL, self->default_path,
+                                self->required_major);
+
+  if (fallback != NULL)
+    g_ptr_array_add (names, java_label ((AmlJava *) fallback));
+  else
+    g_ptr_array_add (names, g_strdup (self->default_label));
   g_ptr_array_add (ids, NULL);
 
   for (guint i = 0; i < self->javas->len; i++)
     {
       AmlJava *java = g_ptr_array_index (self->javas, i);
       g_autofree char *real = realpath (java->executable, NULL);
-      g_autofree char *wanted_real =
-        self->wanted != NULL ? realpath (self->wanted, NULL) : NULL;
+      gboolean is_wanted =
+        wanted_real != NULL &&
+        g_strcmp0 (real != NULL ? real : java->executable, wanted_real) == 0;
+
+      /* The runtime the default resolves to is the first entry; it does
+         not belong in the list again, unless the instance itself asked
+         for it and so needs its row to be selectable. */
+      if (java == fallback && !is_wanted)
+        continue;
 
       g_ptr_array_add (names, java_label (java));
       g_ptr_array_add (ids, g_strdup (java->executable));
 
-      if (wanted_real != NULL &&
-          g_strcmp0 (real != NULL ? real : java->executable,
-                     wanted_real) == 0)
+      if (is_wanted)
         position = names->len - 1;
     }
 
@@ -320,47 +345,25 @@ aml_java_row_set_default_entry_label (AmlJavaRow *self,
 }
 
 void
-aml_java_row_set_default_entry_for (AmlJavaRow *self,
-                                    const AmlJava *java)
+aml_java_row_set_default_choice (AmlJavaRow *self,
+                                 const char *global_path,
+                                 int         required_major)
 {
-  g_autofree char *label = java != NULL ? java_label ((AmlJava *) java)
-                                        : g_strdup ("Default");
-  GtkStringList *list = NULL;
-  const char *items[2];
-
   g_return_if_fail (AML_IS_JAVA_ROW (self));
 
-  /* Replacing the first string makes the combo row emit its selection
-   * again, which lands back here through the caller's handler. When the
-   * label would not change there is nothing to do, and stopping here is
-   * what keeps that from being an endless recursion. */
-  if (self->ready && self->names->len > 0 &&
-      g_strcmp0 (self->names->pdata[0], label) == 0)
-    {
-      g_free (self->default_label);
-      self->default_label = g_steal_pointer (&label);
-      return;
-    }
-
-  g_free (self->default_label);
-  self->default_label = g_steal_pointer (&label);
-
-  if (!self->ready || self->names->len == 0)
+  /* Filling the list again makes the combo row emit its selection, which
+   * lands back here through the caller's handler. Doing nothing when the
+   * choice is the same is what keeps that from being an endless
+   * recursion. */
+  if (g_strcmp0 (self->default_path, global_path) == 0 &&
+      self->required_major == required_major)
     return;
 
-  /* The first entry is replaced in place: building the model again would
-   * move the selection and look like the user had chosen a second time. */
-  g_free (self->names->pdata[0]);
-  self->names->pdata[0] = g_strdup (self->default_label);
+  g_set_str (&self->default_path, global_path);
+  self->required_major = required_major;
 
-  list = GTK_STRING_LIST (adw_combo_row_get_model (ADW_COMBO_ROW (self)));
-
-  if (list == NULL)
-    return;
-
-  items[0] = self->default_label;
-  items[1] = NULL;
-  gtk_string_list_splice (list, 0, 1, items);
+  if (self->ready)
+    fill (self);
 }
 
 void
@@ -526,6 +529,7 @@ aml_java_row_finalize (GObject *object)
   aml_java_free (self->probed);
   g_free (self->wanted);
   g_free (self->default_label);
+  g_free (self->default_path);
 
   G_OBJECT_CLASS (aml_java_row_parent_class)->finalize (object);
 }
@@ -556,6 +560,8 @@ aml_java_row_init (AmlJavaRow *self)
   self->ids = g_ptr_array_new_with_free_func (g_free);
   self->names = g_ptr_array_new_with_free_func (g_free);
   self->default_label = g_strdup ("Default");
+  self->default_path = NULL;
+  self->required_major = 0;
   self->add_enabled = FALSE;
   self->add_position = GTK_INVALID_LIST_POSITION;
   self->last_selection = 0;
