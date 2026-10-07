@@ -4,6 +4,8 @@
 
 #include "aml-logs-page.h"
 
+#include <gdk/gdkevents.h>
+
 struct _AmlLogsPage
 {
   GtkBox parent_instance;
@@ -16,12 +18,20 @@ struct _AmlLogsPage
   GtkWidget *open;
   GtkWidget *view;
   GtkWidget *scroller;
+  GtkWidget *search_bar;
+  GtkWidget *search_entry;
 
   /* How many lines the text view holds, and whether the user is looking
      at the end of the log: a view that has been scrolled up to read
      something stays where it is. */
   guint rendered;
   gboolean following;
+
+  /* The search only ever hides lines, never loses them: the words live
+   * here, the view shows the ones that match. Clearing the search puts
+   * every line back. */
+  GPtrArray *lines; /* char*, one per line, in order */
+  gboolean filtered;
 };
 
 G_DEFINE_FINAL_TYPE (AmlLogsPage, aml_logs_page, GTK_TYPE_BOX)
@@ -30,33 +40,72 @@ static void scroll_to_end (AmlLogsPage *self);
 
 /* ---------------------------------------------------------- *
  * The lines
+ *
+ * The lines live in self->lines and the text view is only a picture of
+ * them. That is what lets a search hide lines without losing any of
+ * them: clearing the search puts them all back, and a line that arrives
+ * while a search is on is kept even when it does not match.
  * ---------------------------------------------------------- */
 
-/* The whole log as it is now: what the page shows when it appears and
-   after a clear. New lines are appended instead of read back.
+/* Writes the lines that pass the current search into the view: one line
+   per row and nothing else, so the view never grows an empty row at the
+   end. A search that matches nothing leaves the view empty rather than
+   showing the last line it happened to have. */
+static void
+show_lines (AmlLogsPage *self)
+{
+  GtkTextBuffer *buffer =
+    gtk_text_view_get_buffer (GTK_TEXT_VIEW (self->view));
+  g_autofree char *needle = NULL;
+  GString *built = NULL;
+  guint shown = 0;
 
-   The buffer holds one line per line of the log and nothing else, so a
-   line is written after a newline and the view never grows an empty row
-   at the end. */
+  if (self->search_entry != NULL)
+    needle = g_strdup (gtk_editable_get_text (
+                         GTK_EDITABLE (self->search_entry)));
+
+  built = g_string_new (NULL);
+
+  for (guint i = 0; i < self->lines->len; i++)
+    {
+      const char *line = g_ptr_array_index (self->lines, i);
+
+      if (needle != NULL && *needle != '\0' &&
+          strstr (line, needle) == NULL)
+        continue;
+
+      if (built->len > 0)
+        g_string_append_c (built, '\n');
+
+      g_string_append (built, line);
+      shown++;
+    }
+
+  gtk_text_buffer_set_text (buffer, built->str, -1);
+  self->rendered = shown;
+
+  g_string_free (built, TRUE);
+}
+
+/* The whole log as it is now: what the page shows when it appears and
+   after a clear. */
 static void
 reload_log (AmlLogsPage *self)
 {
   g_autofree char *text = aml_launcher_get_log_text (self->launcher);
-  GtkTextBuffer *buffer =
-    gtk_text_view_get_buffer (GTK_TEXT_VIEW (self->view));
-  guint lines = 0;
 
-  for (const char *p = text; *p != '\0'; p++)
+  g_ptr_array_set_size (self->lines, 0);
+
+  if (text != NULL && *text != '\0')
     {
-      if (*p == '\n')
-        lines++;
+      g_auto (GStrv) split = g_strsplit (text, "\n", -1);
+
+      for (guint i = 0; split != NULL && split[i] != NULL; i++)
+        g_ptr_array_add (self->lines, g_strdup (split[i]));
     }
 
-  if (text[0] != '\0')
-    lines++;
-
-  gtk_text_buffer_set_text (buffer, text, -1);
-  self->rendered = lines;
+  self->filtered = FALSE;
+  show_lines (self);
   self->following = TRUE;
   scroll_to_end (self);
 }
@@ -64,45 +113,82 @@ reload_log (AmlLogsPage *self)
 static void
 append_line (AmlLogsPage *self, const char *line)
 {
-  GtkTextBuffer *buffer =
-    gtk_text_view_get_buffer (GTK_TEXT_VIEW (self->view));
-  GtkTextIter start;
-  GtkTextIter end;
   guint limit = aml_launcher_get_line_limit (self->launcher);
 
-  gtk_text_buffer_get_start_iter (buffer, &start);
-  gtk_text_buffer_get_end_iter (buffer, &end);
+  g_ptr_array_add (self->lines, g_strdup (line));
 
-  /* One newline in front of every line but the first. */
-  if (!gtk_text_iter_equal (&start, &end))
-    {
-      gtk_text_buffer_insert (buffer, &end, "\n", 1);
-      gtk_text_buffer_get_end_iter (buffer, &end);
-    }
-
-  gtk_text_buffer_insert (buffer, &end, line, -1);
-  self->rendered++;
-
-  /* The launcher drops the oldest line when its log is full, so the view
+  /* The launcher drops the oldest line when its log is full, so the page
      drops the same one and stays the same log. */
-  while (self->rendered > limit)
-    {
-      GtkTextIter after;
+  while (self->lines->len > limit)
+    g_ptr_array_remove_index (self->lines, 0);
 
-      gtk_text_buffer_get_start_iter (buffer, &start);
-      after = start;
-
-      /* The whole first line, with the newline that ends it. */
-      if (!gtk_text_iter_forward_to_line_end (&after) ||
-          !gtk_text_iter_forward_char (&after))
-        break;
-
-      gtk_text_buffer_delete (buffer, &start, &after);
-      self->rendered--;
-    }
+  show_lines (self);
 
   if (self->following)
     scroll_to_end (self);
+}
+
+/* ---------------------------------------------------------- *
+ * Searching the lines
+ * ---------------------------------------------------------- */
+
+/* What is typed only ever changes what the view shows. Nothing is
+   removed from self->lines, so an empty entry brings back every line
+   there ever was. */
+static void
+on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlLogsPage *self = user_data;
+  gboolean had_search = self->filtered;
+
+  self->filtered =
+    self->search_entry != NULL &&
+    *gtk_editable_get_text (GTK_EDITABLE (self->search_entry)) != '\0';
+
+  show_lines (self);
+
+  /* Coming out of a search the end is not where the view was left, so it
+     is scrolled there again: after clearing a search the user wants the
+     live tail, not the one line they had found. */
+  if (had_search && !self->filtered)
+    {
+      self->following = TRUE;
+      scroll_to_end (self);
+    }
+}
+
+/* Escape means "forget what I typed". This bar can be closed as well, so
+ * Escape does both and the focus goes back to the page: a bar closed with
+ * words still in it looks like a search that is still on.
+ *
+ * GTK4 has no key-press-event signal and no stop-searching signal on
+ * GtkSearchEntry, so the key is taken with a controller of its own. It is
+ * added after the one inside the search entry and both run on the bubble
+ * phase, so this one is asked first. */
+static gboolean
+on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED, guint keyval,
+               guint keycode G_GNUC_UNUSED, GdkModifierType state
+                 G_GNUC_UNUSED,
+               gpointer user_data)
+{
+  AmlLogsPage *self = user_data;
+
+  if (keyval != GDK_KEY_Escape)
+    return GDK_EVENT_PROPAGATE;
+
+  if (*gtk_editable_get_text (GTK_EDITABLE (self->search_entry)) != '\0')
+    {
+      gtk_editable_set_text (GTK_EDITABLE (self->search_entry), "");
+      self->filtered = FALSE;
+      show_lines (self);
+      self->following = TRUE;
+      scroll_to_end (self);
+    }
+
+  gtk_search_bar_set_search_mode (GTK_SEARCH_BAR (self->search_bar), FALSE);
+  gtk_widget_grab_focus (GTK_WIDGET (self));
+
+  return GDK_EVENT_STOP;
 }
 
 /* ---------------------------------------------------------- *
@@ -269,6 +355,7 @@ aml_logs_page_new (AmlLauncher *launcher)
 
   self = g_object_new (AML_TYPE_LOGS_PAGE, NULL);
   self->launcher = g_object_ref (launcher);
+  self->lines = g_ptr_array_new_with_free_func (g_free);
 
   gtk_orientable_set_orientation (GTK_ORIENTABLE (self),
                                   GTK_ORIENTATION_VERTICAL);
@@ -300,6 +387,37 @@ aml_logs_page_new (AmlLauncher *launcher)
   gtk_box_append (GTK_BOX (row), self->open);
 
   gtk_box_append (GTK_BOX (self), row);
+
+  /* Searching the log: a bar over the lines, closed until Ctrl+F opens
+   * it. The lines are kept either way, so nothing here can lose one. */
+  self->search_bar = gtk_search_bar_new ();
+  self->search_entry = gtk_search_entry_new ();
+  gtk_widget_set_hexpand (self->search_entry, TRUE);
+  gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (self->search_entry),
+                                         "Search the log");
+  gtk_search_bar_set_child (GTK_SEARCH_BAR (self->search_bar),
+                            self->search_entry);
+  gtk_search_bar_set_key_capture_widget (GTK_SEARCH_BAR (self->search_bar),
+                                         GTK_WIDGET (self));
+  g_signal_connect (self->search_entry, "changed",
+                    G_CALLBACK (on_search_changed), self);
+  {
+    GtkEventController *keys = gtk_event_controller_key_new ();
+
+    gtk_event_controller_set_propagation_phase (keys, GTK_PHASE_BUBBLE);
+    gtk_widget_add_controller (self->search_entry, keys);
+    g_signal_connect (keys, "key-pressed", G_CALLBACK (on_search_key), self);
+  }
+
+  {
+    GtkWidget *search_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+
+    gtk_widget_set_margin_bottom (search_box, 6);
+    gtk_widget_set_margin_start (search_box, 12);
+    gtk_widget_set_margin_end (search_box, 12);
+    gtk_box_append (GTK_BOX (search_box), self->search_bar);
+    gtk_box_append (GTK_BOX (self), search_box);
+  }
 
   /* The lines themselves. Read only: this is what the game printed,
      nothing to write into. */
@@ -363,6 +481,7 @@ aml_logs_page_finalize (GObject *object)
   AmlLogsPage *self = AML_LOGS_PAGE (object);
 
   g_clear_object (&self->launcher);
+  g_clear_pointer (&self->lines, g_ptr_array_unref);
 
   G_OBJECT_CLASS (aml_logs_page_parent_class)->finalize (object);
 }

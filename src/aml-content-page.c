@@ -37,8 +37,9 @@
 #define RESULTS_PER_PAGE 20
 
 /* How long the words of a search entry rest before they are asked for,
- * so that typing is not one request per letter. */
-#define SEARCH_DELAY_MS 500
+ * so that typing is not one request per letter. Long enough to be past a
+ * fast typist, short enough that the list is not forgotten. */
+#define SEARCH_DELAY_MS 300
 
 struct _AmlContentPage
 {
@@ -73,6 +74,7 @@ struct _AmlContentPage
   GtkWidget *results_scroller;
   GtkWidget *results_status;
   GtkWidget *search_entry;
+  GtkWidget *search_bar;
   GtkWidget *filter_box;
   GtkWidget *previous;
   GtkWidget *next;
@@ -1782,6 +1784,34 @@ on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
     g_timeout_add (SEARCH_DELAY_MS, on_search_timeout, self);
 }
 
+/* Escape means "forget what I typed". The bar of this page is always
+ * open, so there is nothing for Escape to close and it would be swallowed
+ * without clearing anything.
+ *
+ * GTK4 has no key-press-event signal and no stop-searching signal on
+ * GtkSearchEntry, so the key is taken with a controller of its own. It is
+ * added after the one inside the search entry and both run on the bubble
+ * phase, so this one is asked first.
+ *
+ * Clearing the text makes the entry emit "changed", which is what starts
+ * the search again, this time for everything. */
+static gboolean
+on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
+               guint keyval, guint keycode G_GNUC_UNUSED,
+               GdkModifierType state G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+
+  if (keyval != GDK_KEY_Escape)
+    return GDK_EVENT_PROPAGATE;
+
+  if (*gtk_editable_get_text (
+        GTK_EDITABLE (self->search_entry)) != '\0')
+    gtk_editable_set_text (GTK_EDITABLE (self->search_entry), "");
+
+  return GDK_EVENT_STOP;
+}
+
 static void
 categories_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                   gpointer user_data)
@@ -2199,14 +2229,28 @@ build_browse (AmlContentPage *self)
     ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
 
   self->search_entry = search_entry;
+  self->search_bar = search_bar;
   gtk_widget_set_hexpand (search_entry, TRUE);
   gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_entry),
                                          "Search Modrinth");
   gtk_search_bar_set_child (GTK_SEARCH_BAR (search_bar), search_entry);
   gtk_search_bar_set_key_capture_widget (GTK_SEARCH_BAR (search_bar),
                                          GTK_WIDGET (self));
+
+  /* Search is what this page is for, so the entry is there from the
+     start: the user should be able to type without first asking for the
+     box to appear. Ctrl+F and Escape still work on it. */
+  gtk_search_bar_set_search_mode (GTK_SEARCH_BAR (search_bar), TRUE);
+
   g_signal_connect (search_entry, "changed",
                     G_CALLBACK (on_search_changed), self);
+  {
+    GtkEventController *keys = gtk_event_controller_key_new ();
+
+    gtk_event_controller_set_propagation_phase (keys, GTK_PHASE_BUBBLE);
+    gtk_widget_add_controller (search_entry, keys);
+    g_signal_connect (keys, "key-pressed", G_CALLBACK (on_search_key), self);
+  }
 
   gtk_box_append (GTK_BOX (top), search_bar);
 
@@ -2459,6 +2503,7 @@ aml_content_page_dispose (GObject *object)
   self->results_scroller = NULL;
   self->results_status = NULL;
   self->search_entry = NULL;
+  self->search_bar = NULL;
   self->filter_box = NULL;
   self->previous = NULL;
   self->next = NULL;
