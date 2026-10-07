@@ -275,6 +275,8 @@ aml_modrinth_project_free (AmlModrinthProject *project)
   g_free (project->description);
   g_free (project->author);
   g_free (project->icon_url);
+  g_clear_pointer (&project->versions, g_ptr_array_unref);
+  g_clear_pointer (&project->categories, g_ptr_array_unref);
   g_free (project);
 }
 
@@ -293,6 +295,8 @@ project_from_hit (JsonNode *hit)
   project->icon_url = object_string (hit, "icon_url");
   project->downloads = (guint64) object_int (hit, "downloads", 0);
   project->followers = (guint64) object_int (hit, "follows", 0);
+  project->versions = object_string_array (hit, "versions");
+  project->categories = object_string_array (hit, "categories");
 
   if (project->title == NULL)
     project->title = g_strdup (project->slug != NULL ? project->slug : "");
@@ -657,6 +661,26 @@ aml_modrinth_project_copy (AmlModrinthProject *project)
   copy->icon_url = g_strdup (project->icon_url);
   copy->downloads = project->downloads;
   copy->followers = project->followers;
+
+  copy->versions = g_ptr_array_new_with_free_func (g_free);
+
+  if (project->versions != NULL)
+    {
+      for (guint i = 0; i < project->versions->len; i++)
+        g_ptr_array_add (
+            copy->versions,
+            g_strdup (g_ptr_array_index (project->versions, i)));
+    }
+
+  copy->categories = g_ptr_array_new_with_free_func (g_free);
+
+  if (project->categories != NULL)
+    {
+      for (guint i = 0; i < project->categories->len; i++)
+        g_ptr_array_add (
+            copy->categories,
+            g_strdup (g_ptr_array_index (project->categories, i)));
+    }
 
   return copy;
 }
