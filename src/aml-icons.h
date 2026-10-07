@@ -27,8 +27,11 @@ G_BEGIN_DECLS
  * put in it. Nothing is downloaded here. */
 GtkWidget *aml_icon_widget_new (const char *placeholder_icon_name);
 
-/* Puts @path in @widget, scaled to fit the square and never stretched. */
-void aml_icon_widget_set_file (GtkWidget *widget, const char *path);
+/* Puts @path in @widget, scaled to fit the square and never stretched.
+ * TRUE when the file could be decoded and is now shown, FALSE when it
+ * could not, in which case @widget keeps the placeholder it already
+ * has: an image the toolkit cannot read must not become a blank hole. */
+gboolean aml_icon_widget_set_file (GtkWidget *widget, const char *path);
 
 /* Fetches @url into the icon cache and calls @callback when it is there.
  * The answer is the path of the cached file, or NULL when there is no

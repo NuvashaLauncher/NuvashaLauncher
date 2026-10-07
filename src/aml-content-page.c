@@ -1753,8 +1753,10 @@ icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_autoptr (GError) error = NULL;
   g_autofree char *path = aml_icon_load_finish (result, &error);
 
-  if (path != NULL)
-    aml_icon_widget_set_file (icon, path);
+  if (path != NULL && !aml_icon_widget_set_file (icon, path))
+    g_debug ("the icon for \"%s\" could not be decoded",
+             (const char *) g_object_get_data (G_OBJECT (icon),
+                                               "aml-icon-url"));
 
   g_object_unref (icon);
 }
@@ -1762,6 +1764,8 @@ icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 start_row_icon (GtkWidget *icon, const char *url)
 {
+  g_object_set_data_full (G_OBJECT (icon), "aml-icon-url", g_strdup (url),
+                          g_free);
   aml_icon_load_async (url, NULL, icon_ready, g_object_ref (icon));
 }
 

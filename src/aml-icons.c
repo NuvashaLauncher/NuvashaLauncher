@@ -83,7 +83,11 @@ icon_downloaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   active--;
 
   if (!aml_download_file_finish (result, &error))
-    g_task_return_error (load->task, g_steal_pointer (&error));
+    {
+      g_debug ("the icon \"%s\" could not be fetched: %s", load->url,
+               error != NULL ? error->message : "unknown error");
+      g_task_return_error (load->task, g_steal_pointer (&error));
+    }
   else
     g_task_return_pointer (load->task, g_strdup (load->path), g_free);
 
@@ -102,12 +106,13 @@ icon_pump (void)
       GTask *task = load->task;
 
       /* A load whose row went away before its turn has nothing to draw
-         into; its task is answered as cancelled and it is dropped. */
+         into; its task is answered as cancelled and it is dropped. The
+         one reference the task has is the one held here, so it is given
+         back once, by icon_load_free(), and not by hand first. */
       if (g_cancellable_is_cancelled (g_task_get_cancellable (task)))
         {
           g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_CANCELLED,
                                    "the icon is no longer wanted");
-          g_object_unref (task);
           icon_load_free (load);
           continue;
         }
@@ -200,21 +205,39 @@ aml_icon_widget_new (const char *placeholder_icon_name)
   return stack;
 }
 
-void
+gboolean
 aml_icon_widget_set_file (GtkWidget *widget, const char *path)
 {
+  g_autoptr (GFile) file = NULL;
+  g_autoptr (GdkTexture) texture = NULL;
   GtkWidget *picture = NULL;
 
   if (widget == NULL || !GTK_IS_STACK (widget) || path == NULL)
-    return;
+    return FALSE;
+
+  /* Decoding the bytes here, once, does two things: it proves that this
+     machine can read the format Modrinth served (usually WebP), and it
+     hands the picture a texture that is ready to draw instead of asking
+     it to read the file a second time. A file that does not decode
+     leaves the placeholder in place rather than an empty square. */
+  file = g_file_new_for_path (path);
+  texture = gdk_texture_new_from_file (file, NULL);
+
+  if (texture == NULL)
+    {
+      g_debug ("the icon \"%s\" could not be decoded", path);
+      return FALSE;
+    }
 
   /* Scaled to fit and never stretched: a wide icon is shown wide and a
      tall one tall, inside the same square. */
-  picture = gtk_picture_new_for_filename (path);
+  picture = gtk_picture_new_for_paintable (GDK_PAINTABLE (texture));
   gtk_picture_set_content_fit (GTK_PICTURE (picture),
                                GTK_CONTENT_FIT_CONTAIN);
   gtk_picture_set_can_shrink (GTK_PICTURE (picture), TRUE);
 
   gtk_stack_add_named (GTK_STACK (widget), picture, "icon");
   gtk_stack_set_visible_child_name (GTK_STACK (widget), "icon");
+
+  return TRUE;
 }
