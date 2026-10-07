@@ -99,6 +99,7 @@ struct _AmlContentPage
   GList *result_rows;    /* the rows of the Browse group */
   GList *detail_rows;    /* the rows of the page of a project */
   GHashTable *projects; /* project id -> NULL */
+  GHashTable *project_icons; /* project id -> icon url the browser saw */
 
   /* The search: what was asked for, what came back, and where the list
    * stands. */
@@ -140,6 +141,8 @@ typedef struct {
 static void run_search (AmlContentPage *self, gboolean append);
 static void reload_installed (AmlContentPage *self);
 static void update_run_next (UpdateRun *run);
+static void installed_icon_lookup (AmlContentPage *self, GtkWidget *row,
+                                   const char *project_id);
 
 /* One answer of an asynchronous request that only reads the page. The
  * page is weakly held: a page can be closed while a search, a scan or a
@@ -1255,9 +1258,11 @@ file_row (AmlContentPage *self, AmlContentFile *file)
   gtk_widget_set_tooltip_text (row, file->path);
 
   /* The same square as a browse row, with the icon of what this kind of
-     file is: a file on disk has no icon of its own to fetch. */
+     file is until the project it belongs to is known; the icon the
+     browser saw for that project replaces it then. */
   gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
   adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
+  g_object_set_data (G_OBJECT (row), "aml-icon", icon);
 
   gtk_widget_add_css_class (update, "flat");
   gtk_widget_set_valign (update, GTK_ALIGN_CENTER);
@@ -1373,6 +1378,10 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         g_hash_table_add (self->projects, g_strdup (file->project_id));
 
       file_row_refresh (row);
+
+      /* The browser's icon of the project the file belongs to, which the
+         row carries from here on. */
+      installed_icon_lookup (self, row, file->project_id);
     }
 
   /* Modrinth does not know this file, or the network is not there: it
@@ -1778,6 +1787,86 @@ start_row_icon (GtkWidget *icon, const char *url)
   aml_icon_load_async (url, NULL, icon_ready, g_object_ref (icon));
 }
 
+/* An installed file that Modrinth knows: the icon the browser showed for
+ * its project is what the row should carry too. The url is remembered
+ * from the browser when it was seen there, and a project that was not is
+ * asked Modrinth for once. */
+typedef struct {
+  PageWatch *watch;   /* the page, weakly held */
+  GtkWidget *row;     /* the row whose icon is wanted, held for the wait */
+  char *project_id;
+} InstalledIcon;
+
+static void
+installed_icon_free (InstalledIcon *lookup)
+{
+  page_watch_free (lookup->watch);
+  g_object_unref (lookup->row);
+  g_free (lookup->project_id);
+  g_free (lookup);
+}
+
+static void
+installed_icon_details (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                        gpointer user_data)
+{
+  InstalledIcon *lookup = user_data;
+  AmlContentPage *self = lookup->watch->page;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlModrinthDetails) details = NULL;
+
+  details = aml_modrinth_details_finish (result, &error);
+
+  if (self != NULL && details != NULL && details->icon_url != NULL &&
+      *details->icon_url != '\0')
+    {
+      GtkWidget *icon = NULL;
+
+      g_hash_table_insert (self->project_icons, g_strdup (lookup->project_id),
+                           g_strdup (details->icon_url));
+
+      icon = g_object_get_data (G_OBJECT (lookup->row), "aml-icon");
+
+      if (icon != NULL)
+        start_row_icon (icon, details->icon_url);
+    }
+
+  installed_icon_free (lookup);
+}
+
+static void
+installed_icon_lookup (AmlContentPage *self, GtkWidget *row,
+                       const char *project_id)
+{
+  const char *known = NULL;
+
+  if (project_id == NULL || *project_id == '\0')
+    return;
+
+  known = g_hash_table_lookup (self->project_icons, project_id);
+
+  if (known != NULL)
+    {
+      GtkWidget *icon = g_object_get_data (G_OBJECT (row), "aml-icon");
+
+      if (icon != NULL)
+        start_row_icon (icon, known);
+
+      return;
+    }
+
+  {
+    InstalledIcon *lookup = g_new0 (InstalledIcon, 1);
+
+    lookup->watch = page_watch_new (self);
+    lookup->row = g_object_ref (row);
+    lookup->project_id = g_strdup (project_id);
+
+    aml_modrinth_details_async (project_id, self->scan, installed_icon_details,
+                                lookup);
+  }
+}
+
 static void
 results_arrived (AmlContentPage *self, AmlModrinthResults *results,
                  gboolean append)
@@ -1819,6 +1908,13 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
         continue;
 
       g_hash_table_add (self->seen_ids, g_strdup (project->project_id));
+
+      /* What the browser saw, remembered for the installed rows of the
+         same project. */
+      if (project->icon_url != NULL && *project->icon_url != '\0')
+        g_hash_table_insert (self->project_icons,
+                             g_strdup (project->project_id),
+                             g_strdup (project->icon_url));
 
       /* The icon, then the name and the description under it. Nothing
          else: who wrote it, how often it was taken, which game version
@@ -2408,6 +2504,14 @@ on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   if (body != NULL)
     gtk_label_set_text (GTK_LABEL (body), details->body);
 
+  /* The details page of the browser saw the icon too, so the installed
+     row of the same project can use it. */
+  if (self->details_project != NULL && details->icon_url != NULL &&
+      *details->icon_url != '\0')
+    g_hash_table_insert (self->project_icons,
+                         g_strdup (self->details_project),
+                         g_strdup (details->icon_url));
+
   author = g_strdup_printf ("%s  ·  by %s", details->license != NULL
                                                    ? details->license
                                                    : "",
@@ -2850,6 +2954,8 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
   self->categories = g_ptr_array_new_with_free_func (g_free);
   self->projects = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                           NULL);
+  self->project_icons = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
+                                               g_free);
 
   g_object_get (instance, "directory", &directory, NULL);
 
@@ -2968,6 +3074,7 @@ aml_content_page_finalize (GObject *object)
   g_clear_pointer (&self->files, g_ptr_array_unref);
   g_clear_pointer (&self->rows, g_hash_table_unref);
   g_clear_pointer (&self->projects, g_hash_table_unref);
+  g_clear_pointer (&self->project_icons, g_hash_table_unref);
   g_clear_pointer (&self->categories, g_ptr_array_unref);
   g_clear_pointer (&self->results, g_ptr_array_unref);
   g_list_free (self->installed_rows);
