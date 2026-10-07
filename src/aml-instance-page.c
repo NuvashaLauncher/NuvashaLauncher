@@ -771,6 +771,12 @@ button_row (AdwPreferencesGroup *group,
   gtk_widget_add_css_class (button, "flat");
   gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
   gtk_widget_set_tooltip_text (button, title);
+
+  /* The row carries the title for a reader; the button is only its icon,
+     so it needs a name of its own for a screen reader to say. */
+  gtk_accessible_update_property (GTK_ACCESSIBLE (button),
+                                GTK_ACCESSIBLE_PROPERTY_LABEL, title, -1);
+
   g_signal_connect (button, "clicked", callback, user_data);
 
   adw_action_row_add_suffix (ADW_ACTION_ROW (row), button);
