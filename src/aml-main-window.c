@@ -46,9 +46,9 @@ struct _AmlMainWindow
      what the window shows; an instance opens a dialog over it. */
   GtkWidget *stack;
 
-  /* Says what happened without the user asking: a game that crashed,
-     an operation that failed. */
-  GtkWidget *toasts;
+  /* What a launch ended with, which is worth reading after it happened:
+     a toast is gone in seconds, a banner stays until it is dismissed. */
+  GtkWidget *banner;
 };
 
 G_DEFINE_FINAL_TYPE (AmlMainWindow, aml_main_window, ADW_TYPE_APPLICATION_WINDOW)
@@ -452,10 +452,35 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
   adw_dialog_present (dialog, GTK_WIDGET (self));
 }
 
+/* The shortcuts the window answers to, in the list the Shortcuts dialog
+ * shows and as the accelerators registered at the end of init. */
+static void
+on_shortcuts (GSimpleAction *action G_GNUC_UNUSED,
+              GVariant      *parameter G_GNUC_UNUSED,
+              gpointer       user_data)
+{
+  AmlMainWindow *self = user_data;
+  AdwDialog *dialog = adw_shortcuts_dialog_new ();
+  AdwShortcutsSection *general = adw_shortcuts_section_new ("General");
+
+  adw_shortcuts_section_add (
+    general, adw_shortcuts_item_new ("Show Shortcuts", "F1"));
+  adw_shortcuts_section_add (
+    general, adw_shortcuts_item_new ("Create Instance", "<primary>n"));
+  adw_shortcuts_section_add (
+    general, adw_shortcuts_item_new ("Settings", "<primary>comma"));
+  adw_shortcuts_section_add (
+    general, adw_shortcuts_item_new ("Quit", "<primary>q"));
+
+  adw_shortcuts_dialog_add (ADW_SHORTCUTS_DIALOG (dialog), general);
+  adw_dialog_present (dialog, GTK_WIDGET (self));
+}
+
 static const GActionEntry window_entries[] = {
   { .name = "create-instance", .activate = on_create_instance },
   { .name = "download-modpack", .activate = on_download_modpack },
   { .name = "settings", .activate = on_settings },
+  { .name = "shortcuts", .activate = on_shortcuts },
   { .name = "about", .activate = on_about },
 };
 
@@ -480,6 +505,7 @@ create_app_menu (void)
   g_menu_append (general, "Settings", "win.settings");
   g_menu_append_section (menu, NULL, G_MENU_MODEL (general));
 
+  g_menu_append (rest, "Keyboard Shortcuts", "win.shortcuts");
   g_menu_append (rest, "About AML", "win.about");
   g_menu_append_section (menu, NULL, G_MENU_MODEL (rest));
 
@@ -514,17 +540,23 @@ set_menu_item_tooltip (GtkWidget  *root,
     }
 }
 
+/* The banner is dismissed by its own button. */
+static void
+on_banner_dismiss (AdwBanner *banner, gpointer user_data G_GNUC_UNUSED)
+{
+  adw_banner_set_revealed (banner, FALSE);
+}
+
 /* What a launch ends with is said out loud: a crash, a launch that never
-   got to the game, and an account that has to sign in again. Doing
-   nothing visible, which is what the window used to do for all but a
-   crash, looks exactly like a Play button that does not work. */
+   got to the game, and an account that has to sign in again. It stays in
+   a banner until it is read, so a reason cannot be missed the way a
+   second-long toast is. */
 static void
 on_window_launcher_state (AmlLauncher *launcher G_GNUC_UNUSED,
                           AmlLaunchState state,
                           const char *detail, gpointer user_data)
 {
   AmlMainWindow *self = user_data;
-  AdwToast *toast = NULL;
   g_autofree char *message = NULL;
   const char *what = NULL;
 
@@ -546,15 +578,17 @@ on_window_launcher_state (AmlLauncher *launcher G_GNUC_UNUSED,
       return;
     }
 
+  if (self->banner == NULL)
+    return;
+
   if (detail != NULL && *detail != '\0')
     message = g_strdup_printf ("%s: %s", what, detail);
   else
     message = g_strdup (what);
 
-  toast = adw_toast_new (message);
-  adw_toast_set_use_markup (toast, FALSE);
-  adw_toast_set_timeout (toast, 8);
-  adw_toast_overlay_add_toast (ADW_TOAST_OVERLAY (self->toasts), toast);
+  adw_banner_set_use_markup (ADW_BANNER (self->banner), FALSE);
+  adw_banner_set_title (ADW_BANNER (self->banner), message);
+  adw_banner_set_revealed (ADW_BANNER (self->banner), TRUE);
 }
 
 /* The launcher of one instance, made when it is first asked for. It is
@@ -738,27 +772,6 @@ close_dialogs_of_removed_instances (AmlMainWindow *self)
     adw_dialog_force_close (g_ptr_array_index (doomed, i));
 }
 
-/* Opens the dialog of the instance this row is for: its Settings page.
- * The id is put on the button when the row is bound, so a row that lost
- * its instance simply does nothing. */
-static void
-on_open_instance_clicked (GtkButton *button, gpointer user_data)
-{
-  AmlMainWindow *self = user_data;
-  const char *id = g_object_get_data (G_OBJECT (button), "aml-instance-id");
-  AmlInstance *instance = NULL;
-
-  if (id == NULL)
-    return;
-
-  instance = aml_instance_manager_get_by_id (self->manager, id);
-
-  if (instance == NULL)
-    return;
-
-  open_instance_dialog (self, instance);
-}
-
 /* Play while the instance is idle, Stop while it is busy. */
 static void
 row_update (GtkWidget *play, AmlLauncher *launcher)
@@ -928,7 +941,6 @@ create_instance_row (gpointer item, gpointer user_data)
   AmlLauncher *launcher = NULL;
   GtkWidget *row = adw_action_row_new ();
   GtkWidget *icon = gtk_image_new_from_icon_name ("applications-games-symbolic");
-  GtkWidget *settings = gtk_button_new_from_icon_name ("emblem-system-symbolic");
   GtkWidget *play = gtk_button_new ();
   GtkWidget *play_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   GtkWidget *play_icon = gtk_image_new_from_icon_name ("media-playback-start-symbolic");
@@ -963,13 +975,6 @@ create_instance_row (gpointer item, gpointer user_data)
   gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
   adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
 
-  gtk_widget_set_valign (settings, GTK_ALIGN_CENTER);
-  gtk_widget_add_css_class (settings, "flat");
-  gtk_widget_set_tooltip_text (settings, "Settings");
-  gtk_accessible_update_property (GTK_ACCESSIBLE (settings),
-                                  GTK_ACCESSIBLE_PROPERTY_LABEL, "Settings",
-                                  -1);
-
   gtk_image_set_pixel_size (GTK_IMAGE (play_icon), 16);
   gtk_box_append (GTK_BOX (play_box), play_icon);
   gtk_box_append (GTK_BOX (play_box), play_label);
@@ -985,11 +990,8 @@ create_instance_row (gpointer item, gpointer user_data)
   g_object_set_data (G_OBJECT (play), "aml-icon", play_icon);
   g_object_set_data (G_OBJECT (play), "aml-label", play_label);
 
-  adw_action_row_add_suffix (ADW_ACTION_ROW (row), settings);
   adw_action_row_add_suffix (ADW_ACTION_ROW (row), play);
 
-  g_signal_connect (settings, "clicked",
-                    G_CALLBACK (on_open_instance_clicked), self);
   g_signal_connect (play, "clicked", G_CALLBACK (on_play_clicked), self);
 
   /* The icon follows the instance's; the connection goes with the
@@ -1000,10 +1002,8 @@ create_instance_row (gpointer item, gpointer user_data)
 
   id = aml_instance_get_id (instance);
 
-  /* The buttons all lead back to this instance; the id is what their
-     click handlers go by. */
-  g_object_set_data_full (G_OBJECT (settings), "aml-instance-id",
-                          g_strdup (id), g_free);
+  /* The button leads back to this instance; the id is what its click
+     handler goes by. */
   g_object_set_data_full (G_OBJECT (play), "aml-instance-id", g_strdup (id),
                           g_free);
 
@@ -1163,7 +1163,7 @@ aml_main_window_init (AmlMainWindow *self)
    * only way to create an instance. */
   adw_status_page_set_title (ADW_STATUS_PAGE (empty_page), "No Instances Yet");
   adw_status_page_set_description (ADW_STATUS_PAGE (empty_page),
-                                   "Use the + button in the header to create one.");
+                                   "Use the + button in the header to create one");
   gtk_widget_set_hexpand (empty_page, TRUE);
   gtk_widget_set_vexpand (empty_page, TRUE);
 
@@ -1177,15 +1177,18 @@ aml_main_window_init (AmlMainWindow *self)
   adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), self->stack);
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
 
-  /* A toast is how the window says something the user did not ask for: a
-   game that crashed, an operation that failed. Without it the only way
-   * to find out is to open the logs. */
-  self->toasts = adw_toast_overlay_new ();
-  adw_toast_overlay_set_child (ADW_TOAST_OVERLAY (self->toasts),
-                               GTK_WIDGET (toolbar));
+  /* A launch that ends badly is said in a banner under the header, where
+     it stays until it is read: a toast is gone in seconds, which is
+     exactly when a reason is worth having. */
+  self->banner = adw_banner_new ("");
+  adw_banner_set_button_label (ADW_BANNER (self->banner), "Dismiss");
+  adw_banner_set_revealed (ADW_BANNER (self->banner), FALSE);
+  g_signal_connect (self->banner, "button-clicked",
+                    G_CALLBACK (on_banner_dismiss), NULL);
+  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), self->banner);
 
   adw_application_window_set_content (ADW_APPLICATION_WINDOW (self),
-                                      GTK_WIDGET (self->toasts));
+                                      GTK_WIDGET (toolbar));
 
   gtk_window_set_title (GTK_WINDOW (self), "AML");
   gtk_window_set_default_size (GTK_WINDOW (self), 960, 640);
@@ -1206,6 +1209,23 @@ aml_main_window_new (GtkApplication *application, AmlInstanceManager *manager)
 
   self->manager = g_object_ref (manager);
 
+  /* The standard shortcuts, registered on the application because the
+     window is not the one that owns them. */
+  {
+    const char *create[] = { "<primary>n", NULL };
+    const char *settings[] = { "<primary>comma", NULL };
+    const char *shortcuts[] = { "F1", NULL };
+    const char *quit[] = { "<primary>q", NULL };
+
+    gtk_application_set_accels_for_action (application, "win.create-instance",
+                                           create);
+    gtk_application_set_accels_for_action (application, "win.settings",
+                                           settings);
+    gtk_application_set_accels_for_action (application, "win.shortcuts",
+                                           shortcuts);
+    gtk_application_set_accels_for_action (application, "app.quit", quit);
+  }
+
   /* The table owns the launchers: the key is the id of the instance and
      the value is its launcher. */
   self->launchers = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
@@ -1217,13 +1237,10 @@ aml_main_window_new (GtkApplication *application, AmlInstanceManager *manager)
                                                   g_free, NULL);
 
   /* The instances are a boxed list, the same list the content pages and
-     the modpack browser use: full width rows with hairlines between
-     them instead of cards on a margin. The top row's corners are
-     square, because the list is flush with the top of the window. */
+     the modpack browser use, on a margin the way a boxed list is meant
+     to sit: its card has round corners on every side. */
   list = gtk_list_box_new ();
   gtk_widget_add_css_class (list, "boxed-list");
-  gtk_widget_add_css_class (list, "flush-top");
-  gtk_widget_add_css_class (list, "flush-bottom");
   /* The card background of the list only covers its rows: the space
      under them is the window background, the same colour as the hairline
      between two rows, instead of the whole window being card coloured. */
@@ -1237,6 +1254,10 @@ aml_main_window_new (GtkApplication *application, AmlInstanceManager *manager)
 
   scroll = gtk_scrolled_window_new ();
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroll), list);
+  gtk_widget_set_margin_top (scroll, 12);
+  gtk_widget_set_margin_bottom (scroll, 12);
+  gtk_widget_set_margin_start (scroll, 12);
+  gtk_widget_set_margin_end (scroll, 12);
   gtk_widget_set_hexpand (scroll, TRUE);
   gtk_widget_set_vexpand (scroll, TRUE);
   gtk_stack_add_named (GTK_STACK (self->stack), scroll, "instances");

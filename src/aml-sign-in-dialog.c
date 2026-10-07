@@ -248,6 +248,9 @@ aml_sign_in_dialog_init (AmlSignInDialog *self)
      a page of Microsoft's own. */
   self->code_label = gtk_label_new (NULL);
   gtk_widget_add_css_class (self->code_label, "title-1");
+  /* The code is there to be read and typed somewhere else: letting it be
+     selected means it can be copied instead. */
+  gtk_label_set_selectable (GTK_LABEL (self->code_label), TRUE);
   gtk_widget_set_visible (self->code_label, FALSE);
 
   self->uri_label = gtk_label_new (NULL);
@@ -297,7 +300,6 @@ aml_sign_in_dialog_init (AmlSignInDialog *self)
   gtk_box_append (GTK_BOX (body), self->retry_button);
 
   GtkWidget *close_button = gtk_button_new_with_label ("Cancel");
-  gtk_widget_add_css_class (close_button, "suggested-action");
   g_signal_connect (close_button, "clicked", G_CALLBACK (on_close_clicked),
                     self);
 

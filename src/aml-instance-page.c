@@ -595,11 +595,10 @@ on_custom_java_chosen (GObject *dialog, GAsyncResult *result,
   g_object_unref (self);
 }
 
-/* The "Add Java Runtime" entry of the list was picked: ask for the
- * executable, and on_custom_java_chosen puts what comes back in the
- * list. */
+/* The "Add Java Runtime" row was pressed: ask for the executable, and
+ * on_custom_java_chosen puts what comes back in the list. */
 static void
-on_add_java_requested (AmlJavaRow *row G_GNUC_UNUSED, gpointer user_data)
+on_add_java_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   AmlInstancePage *self = user_data;
   GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
@@ -1148,17 +1147,16 @@ create_settings_page (AmlInstancePage *self)
                              aml_loader_row_get_version_row (
                                self->loader_row));
 
-  /* Java: choosing another executable is one entry of the list, so the
-     row is the only thing in the group. */
+  /* Java: the installations detection found, then a row that adds one it
+     did not report. */
   GtkWidget *java_row = GTK_WIDGET (aml_java_row_new ());
+  GtkWidget *add_java_row = adw_action_row_new ();
+  GtkWidget *choose_java = gtk_button_new_with_label ("Choose…");
 
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (java), "Java");
 
   g_signal_connect (java_row, "notify::selected",
                     G_CALLBACK (on_java_selected), self);
-  g_signal_connect (java_row, "add-requested",
-                    G_CALLBACK (on_add_java_requested), self);
-  aml_java_row_set_add_entry_enabled (AML_JAVA_ROW (java_row), TRUE);
   /* Known before the scan lands, so the first fill already names the
      default and leaves its runtime out of the list. The required version
      is not known yet and is set once the manifest loads. */
@@ -1168,7 +1166,19 @@ create_settings_page (AmlInstancePage *self)
   aml_java_row_load (AML_JAVA_ROW (java_row), java_path);
   self->java_row = java_row;
 
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (add_java_row),
+                                      FALSE);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (add_java_row),
+                                 "Add Java Runtime");
+  gtk_widget_set_valign (choose_java, GTK_ALIGN_CENTER);
+  g_signal_connect (choose_java, "clicked",
+                    G_CALLBACK (on_add_java_clicked), self);
+  adw_action_row_add_suffix (ADW_ACTION_ROW (add_java_row), choose_java);
+  adw_action_row_set_activatable_widget (ADW_ACTION_ROW (add_java_row),
+                                         choose_java);
+
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (java), java_row);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (java), add_java_row);
 
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (jvm_args_row),
                                  "JVM Arguments");

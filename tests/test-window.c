@@ -39,18 +39,21 @@ count_criticals (GLogLevelFlags   log_level,
   return g_log_writer_default (log_level, fields, n_fields, NULL);
 }
 
+/* The row of the instance list: opening an instance is activating its
+ * row, and the row is the only activatable one in the window. */
 static GtkWidget *
-find_with_data (GtkWidget *widget, const char *key)
+find_activatable_row (GtkWidget *widget)
 {
   for (GtkWidget *child = gtk_widget_get_first_child (widget); child != NULL;
        child = gtk_widget_get_next_sibling (child))
     {
       GtkWidget *found = NULL;
 
-      if (g_object_get_data (G_OBJECT (child), key) != NULL)
+      if (GTK_IS_LIST_BOX_ROW (child) &&
+          gtk_list_box_row_get_activatable (GTK_LIST_BOX_ROW (child)))
         return child;
 
-      found = find_with_data (child, key);
+      found = find_activatable_row (child);
 
       if (found != NULL)
         return found;
@@ -151,7 +154,7 @@ advance (gpointer user_data)
       return G_SOURCE_CONTINUE;
 
     case 1:
-      widget = find_with_data (GTK_WIDGET (run->window), "aml-instance-id");
+      widget = find_activatable_row (GTK_WIDGET (run->window));
 
       if (widget == NULL)
         {
@@ -159,7 +162,9 @@ advance (gpointer user_data)
           return G_SOURCE_CONTINUE;
         }
 
-      g_signal_emit_by_name (widget, "clicked");
+      g_signal_emit_by_name (
+        gtk_widget_get_ancestor (widget, GTK_TYPE_LIST_BOX), "row-activated",
+        widget);
       return G_SOURCE_CONTINUE;
 
     case 2: /* the dialog of the instance is presented */

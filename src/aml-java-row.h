@@ -42,12 +42,6 @@ void aml_java_row_set_default_choice (AmlJavaRow *self,
                                       const char *global_path,
                                       int         required_major);
 
-/* Appends an "Add Java Runtime" entry. Picking it emits ::add-requested
- * and the row goes back to what was selected, so the caller can ask for
- * a file and hand it to aml_java_row_set_custom(). Off unless turned on. */
-void aml_java_row_set_add_entry_enabled (AmlJavaRow *self,
-                                         gboolean    enabled);
-
 /* Fetches the detected installations and puts them in the list,
  * followed by whatever custom path @wanted names when detection did not
  * report it. @wanted == NULL selects the first entry. Loading again

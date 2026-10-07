@@ -63,6 +63,7 @@ struct _AmlContentPage
   /* Borrowed from the widget tree of the page, and cleared in dispose()
    * because a request can answer after the tree is gone. */
   GtkWidget *toasts;
+  GtkWidget *banner; /* what a failure is said in, until it is read */
   GtkWidget *stack;
 
   /* The row that decides between Installed and Browse: the actions of
@@ -214,13 +215,30 @@ show_toast (AmlContentPage *self, const char *message)
 }
 
 static void
+on_banner_dismiss (AdwBanner *banner G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+
+  if (self->banner != NULL)
+    adw_banner_set_revealed (ADW_BANNER (self->banner), FALSE);
+}
+
+/* A failure is said in a banner that stays until it is read: a toast is
+ * gone in seconds, and a file that could not be installed is worth more
+ * than that. */
+static void
 show_error (AmlContentPage *self, const char *what, GError *error)
 {
   g_autofree char *message = g_strdup_printf (
       "%s: %s", what,
       error != NULL ? error->message : "something went wrong");
 
-  show_toast (self, message);
+  if (self->banner == NULL)
+    return;
+
+  adw_banner_set_use_markup (ADW_BANNER (self->banner), FALSE);
+  adw_banner_set_title (ADW_BANNER (self->banner), message);
+  adw_banner_set_revealed (ADW_BANNER (self->banner), TRUE);
 }
 
 /* A spinner says that something is on its way, and nothing about how
@@ -2235,9 +2253,8 @@ on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
     g_timeout_add (SEARCH_DELAY_MS, on_search_timeout, self);
 }
 
-/* Escape means "forget what I typed". The bar of this page is always
- * open, so there is nothing for Escape to close and it would be swallowed
- * without clearing anything.
+/* Escape first forgets what was typed, and closes the field when there
+ * is nothing left to forget.
  *
  * GTK4 has no key-press-event signal and no stop-searching signal on
  * GtkSearchEntry, so the key is taken with a controller of its own. It is
@@ -2256,9 +2273,12 @@ on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
   if (keyval != GDK_KEY_Escape)
     return GDK_EVENT_PROPAGATE;
 
+  /* Escape first forgets what was typed, then closes the field. */
   if (*gtk_editable_get_text (
         GTK_EDITABLE (self->search_entry)) != '\0')
     gtk_editable_set_text (GTK_EDITABLE (self->search_entry), "");
+  else
+    gtk_search_bar_set_search_mode (GTK_SEARCH_BAR (self->search_bar), FALSE);
 
   return GDK_EVENT_STOP;
 }
@@ -2779,11 +2799,11 @@ build_installed (AmlContentPage *self)
                              "Nothing installed yet");
   adw_status_page_set_description (
       ADW_STATUS_PAGE (self->installed_status),
-      "Browse for something to put into the folder of this instance.");
+      "Browse for something to put into the folder of this instance");
 
-  /* The list is flush with the top of the tab: the top row's corners
-     are square, so the first row does not float over the background. */
-  gtk_widget_add_css_class (GTK_WIDGET (group), "flush-top");
+  /* A margin above the card, the way a boxed list is meant to sit: the
+     top row's corners stay round instead of being cut off by the tab. */
+  gtk_widget_set_margin_top (GTK_WIDGET (group), 12);
 
   self->installed_group = GTK_WIDGET (group);
   self->installed_scroller = scroller;
@@ -2833,6 +2853,7 @@ build_browse (AmlContentPage *self)
 {
   GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   GtkWidget *top = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  GtkWidget *search_button = gtk_toggle_button_new ();
   GtkWidget *search_bar = gtk_search_bar_new ();
   GtkWidget *search_entry = gtk_search_entry_new ();
   GtkWidget *filter_button = gtk_menu_button_new ();
@@ -2852,7 +2873,6 @@ build_browse (AmlContentPage *self)
 
   self->search_entry = search_entry;
   self->search_bar = search_bar;
-  gtk_widget_add_css_class (search_bar, "content-search-bar");
   /* A field about a quarter wider than the one the placeholder alone
      would ask for, so there is more room for the words typed into it. */
   gtk_widget_set_size_request (search_entry, 390, -1);
@@ -2862,11 +2882,6 @@ build_browse (AmlContentPage *self)
   gtk_search_bar_set_child (GTK_SEARCH_BAR (search_bar), search_entry);
   gtk_search_bar_set_key_capture_widget (GTK_SEARCH_BAR (search_bar),
                                          GTK_WIDGET (self));
-
-  /* Search is what this page is for, so the entry is there from the
-     start: the user should be able to type without first asking for the
-     box to appear. Ctrl+F and Escape still work on it. */
-  gtk_search_bar_set_search_mode (GTK_SEARCH_BAR (search_bar), TRUE);
 
   g_signal_connect (search_entry, "changed",
                     G_CALLBACK (on_search_changed), self);
@@ -2878,6 +2893,18 @@ build_browse (AmlContentPage *self)
     g_signal_connect (keys, "key-pressed", G_CALLBACK (on_search_key), self);
   }
 
+  /* Search is asked for by its own button and the field is closed until
+     then: the entry is not a band sitting over the list for no reason. */
+  gtk_button_set_icon_name (GTK_BUTTON (search_button),
+                            "system-search-symbolic");
+  gtk_widget_add_css_class (search_button, "flat");
+  gtk_widget_set_valign (search_button, GTK_ALIGN_CENTER);
+  gtk_widget_set_tooltip_text (search_button, "Search");
+  gtk_accessible_update_property (GTK_ACCESSIBLE (search_button),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL, "Search", -1);
+  g_object_bind_property (search_bar, "search-mode-enabled", search_button,
+                          "active", G_BINDING_BIDIRECTIONAL);
+  gtk_box_append (GTK_BOX (top), search_button);
   gtk_box_append (GTK_BOX (top), search_bar);
 
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (filter_button),
@@ -2923,10 +2950,9 @@ build_browse (AmlContentPage *self)
   adw_status_page_set_description (
       ADW_STATUS_PAGE (self->results_status),
       "Type what to look for, or browse everything Modrinth has for this "
-      "instance.");
-  /* The list is flush with the top of the tab: the top row's corners
-     are square, so the first row does not float over the background. */
-  gtk_widget_add_css_class (GTK_WIDGET (group), "flush-top");
+      "instance");
+  /* A margin above the card, the way a boxed list is meant to sit. */
+  gtk_widget_set_margin_top (GTK_WIDGET (group), 12);
 
   self->results_group = GTK_WIDGET (group);
   self->results_scroller = scroller;
@@ -3030,6 +3056,15 @@ build_bar (AmlContentPage *self)
   gtk_widget_set_margin_start (self->bar, 12);
   gtk_widget_set_margin_end (self->bar, 12);
 
+  /* A failure is said in a banner above the row, where it stays until it
+     is read; what a toast says is an operation that just worked. */
+  self->banner = adw_banner_new ("");
+  adw_banner_set_button_label (ADW_BANNER (self->banner), "Dismiss");
+  adw_banner_set_revealed (ADW_BANNER (self->banner), FALSE);
+  g_signal_connect (self->banner, "button-clicked",
+                    G_CALLBACK (on_banner_dismiss), self);
+
+  gtk_box_append (GTK_BOX (inner), self->banner);
   gtk_box_append (GTK_BOX (inner), self->bar);
   gtk_box_append (GTK_BOX (inner), self->stack);
 
@@ -3117,7 +3152,7 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
           adw_status_page_set_description (
               ADW_STATUS_PAGE (status),
               "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge "
-              "in the settings of this instance first.");
+              "in the settings of this instance first");
           gtk_box_append (GTK_BOX (self), status);
 
           return self;
@@ -3155,6 +3190,7 @@ aml_content_page_dispose (GObject *object)
   /* The widget tree may be freed while the page is still answering a
    * request of its own: nothing of it is touched afterwards. */
   self->toasts = NULL;
+  self->banner = NULL;
   self->stack = NULL;
   self->bar = NULL;
   self->bar_spacer = NULL;

@@ -26,57 +26,6 @@ static const GActionEntry app_entries[] = {
   { .name = "quit", .activate = on_quit },
 };
 
-/* The one place AML's own styling lives. A boxed list that is flush
- * with the top of its area gets square top corners, and one that is
- * flush with the bottom gets square bottom corners: on the first or the
- * last row and on the list itself, whose card background is what the
- * row shows through. */
-static const char app_css[] =
-  ".flush-top list.boxed-list,"
-  ".flush-top list.boxed-list > row:first-child,"
-  "list.boxed-list.flush-top,"
-  "list.boxed-list.flush-top > row:first-child {"
-  "  border-top-left-radius: 0;"
-  "  border-top-right-radius: 0;"
-  "}"
-  ".flush-bottom list.boxed-list,"
-  ".flush-bottom list.boxed-list > row:last-child,"
-  "list.boxed-list.flush-bottom,"
-  "list.boxed-list.flush-bottom > row:last-child {"
-  "  border-bottom-left-radius: 0;"
-  "  border-bottom-right-radius: 0;"
-  "}"
-  /* The search field of a content page wears the colours of any other
-     entry: the search bar around it paints no band of its own and does
-     not dim the entry when the window loses focus. */
-  "searchbar.content-search-bar > revealer > box,"
-  "searchbar.content-search-bar > revealer > box:backdrop {"
-  "  background: none;"
-  "  box-shadow: none;"
-  "}"
-  "searchbar.content-search-bar > revealer > box:backdrop > * {"
-  "  filter: none;"
-  "}";
-
-static void
-load_app_css (void)
-{
-  static gboolean loaded = FALSE;
-
-  if (loaded)
-    return;
-
-  GtkCssProvider *provider = gtk_css_provider_new ();
-
-  gtk_css_provider_load_from_string (provider, app_css);
-  gtk_style_context_add_provider_for_display (
-    gdk_display_get_default (), GTK_STYLE_PROVIDER (provider),
-    GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-
-  g_object_unref (provider);
-  loaded = TRUE;
-}
-
 static void
 on_activate (GApplication *app, gpointer user_data G_GNUC_UNUSED)
 {
@@ -89,8 +38,6 @@ on_activate (GApplication *app, gpointer user_data G_GNUC_UNUSED)
       gtk_window_present (window);
       return;
     }
-
-  load_app_css ();
 
   g_autoptr (AmlInstanceManager) manager = aml_instance_manager_new (NULL);
   g_autoptr (GError) error = NULL;
