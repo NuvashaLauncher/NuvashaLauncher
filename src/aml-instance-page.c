@@ -46,9 +46,10 @@ struct _AmlInstancePage
   int required_java;        /* 0 means "never found one / unknown" */
   GCancellable *cancellable;
 
-  /* The loader and the version of it, and what the instance runs now, so
-     that a change that cannot be written goes back to it. */
-  GtkWidget *loader_row;
+  /* The two loader rows, plain AdwComboRows added to the Minecraft group,
+     and what the instance runs now, so that a change that cannot be
+     written goes back to it. */
+  AmlLoaderRow *loader_row;
   AmlLoader loader;
   char *loader_version;
 };
@@ -224,9 +225,8 @@ on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
 
   /* A loader has one set of versions per Minecraft version, so the list
      is asked again for the version that was picked. */
-  aml_loader_row_load (AML_LOADER_ROW (self->loader_row), self->settings,
-                       aml_loader_row_get_loader (AML_LOADER_ROW (
-                                                    self->loader_row)),
+  aml_loader_row_load (self->loader_row, self->settings,
+                       aml_loader_row_get_loader (self->loader_row),
                        self->loader_version, version);
 
   /* Its javaVersion requirement may differ: check the compatibility
@@ -864,13 +864,20 @@ create_settings_page (AmlInstancePage *self)
     self->loader_version = g_steal_pointer (&loader_version);
   }
 
-  self->loader_row = GTK_WIDGET (aml_loader_row_new ());
+  self->loader_row = aml_loader_row_new ();
   g_signal_connect (self->loader_row, "changed",
                     G_CALLBACK (on_loader_changed), self);
-  aml_loader_row_load (AML_LOADER_ROW (self->loader_row), self->settings,
+  aml_loader_row_load (self->loader_row, self->settings,
                        self->loader, self->loader_version, minecraft_version);
+
+  /* Rows of the same Minecraft group, drawn and behaving like the version
+     row above. */
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (minecraft),
-                             self->loader_row);
+                             aml_loader_row_get_loader_row (
+                               self->loader_row));
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (minecraft),
+                             aml_loader_row_get_version_row (
+                               self->loader_row));
 
   /* Java */
   GtkWidget *java_row = GTK_WIDGET (aml_java_row_new ());
@@ -1028,6 +1035,11 @@ aml_instance_page_dispose (GObject *object)
 
   g_cancellable_cancel (self->cancellable);
   g_clear_object (&self->cancellable);
+
+  /* The loader rows are the page's. Their handlers go with them, so the
+   * rows the widget tree may still hold cannot call back into a page
+   * that is on its way out. */
+  g_clear_object (&self->loader_row);
 
   G_OBJECT_CLASS (aml_instance_page_parent_class)->dispose (object);
 }

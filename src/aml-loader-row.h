@@ -33,7 +33,12 @@ G_BEGIN_DECLS
 
 #define AML_TYPE_LOADER_ROW (aml_loader_row_get_type ())
 
-G_DECLARE_FINAL_TYPE (AmlLoaderRow, aml_loader_row, AML, LOADER_ROW, GtkBox)
+/* Not a widget: the two rows are plain AdwComboRows that a screen adds
+ * to the AdwPreferencesGroup it already has, so they are drawn and drop
+ * their popups the same way as every other dropdown on that page. An
+ * AdwComboRow that is not a row of a group has no list box to press
+ * into, and pressing it does nothing at all. */
+G_DECLARE_FINAL_TYPE (AmlLoaderRow, aml_loader_row, AML, LOADER_ROW, GObject)
 
 /* "changed" is what a screen stores the choice with: ask get_loader()
  * and get_version() and write them down. */
@@ -42,9 +47,15 @@ enum {
   AML_LOADER_ROW_N_SIGNALS
 };
 
-/* Picks @loader, and @loader_version of it for @game_version. Nothing is
- * loaded when @loader is vanilla, which has no versions. */
+/* Makes the two rows, holding vanilla and no version until loaded. */
 AmlLoaderRow *aml_loader_row_new (void);
+
+/* The "Loader" row. Add it to the group of the page, next to the
+ * dropdowns that are already there. */
+GtkWidget *aml_loader_row_get_loader_row (AmlLoaderRow *self);
+
+/* The "Loader Version" row, for the same group. */
+GtkWidget *aml_loader_row_get_version_row (AmlLoaderRow *self);
 
 /* Loads the versions of @loader for @game_version, picking
    @loader_version, and remembers @game_version for the loads that come
