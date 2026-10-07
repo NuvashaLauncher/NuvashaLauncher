@@ -434,7 +434,7 @@ test_versions_of_a_shader (void)
     g_autoptr (AmlModrinthVersion) fitted =
       aml_modrinth_version_copy (g_ptr_array_index (versions, 0));
     g_autoptr (AmlModrinthVersion) other_game =
-      aml_modrinth_version_copy (version_from_fixture (json, "r2.1"));
+      version_from_fixture (json, "r2.1");
 
     g_assert_nonnull (fitted);
     g_assert_nonnull (other_game);
