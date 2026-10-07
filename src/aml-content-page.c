@@ -80,6 +80,12 @@ struct _AmlContentPage
   GtkWidget *installed_scroller;
   GtkWidget *installed_status;
   GtkWidget *update_all;
+
+  /* Update All first checks every file, then asks once. This is the list
+     of updates it found and where applying them has got to. */
+  gboolean updating;
+  GPtrArray *updates; /* UpdateItem* */
+  guint update_index;
   GtkWidget *results_group;
   GtkWidget *results_scroller;
   GtkWidget *results_status;
@@ -134,15 +140,29 @@ struct _AmlContentPage
 
 G_DEFINE_FINAL_TYPE (AmlContentPage, aml_content_page, GTK_TYPE_BOX)
 
-/* The update of every file Modrinth knows, one after the other. */
+/* One file that has a newer version, and what to install for it. */
+typedef struct {
+  AmlModrinthVersion *version; /* the newer version, owned */
+  char *title;
+  char *path;
+  gboolean disabled;
+} UpdateItem;
+
+/* The check for newer versions of everything Modrinth knows, and the
+ * answer it built while it went. */
 typedef struct {
   AmlContentPage *page; /* weakly held */
   guint index;
+  GPtrArray *items; /* UpdateItem* */
 } UpdateRun;
 
 static void run_search (AmlContentPage *self, gboolean append);
 static void reload_installed (AmlContentPage *self);
-static void update_run_next (UpdateRun *run);
+static void update_check_next (UpdateRun *run);
+static void update_batch_next (AmlContentPage *self);
+/* A plan that could not be carried out stops where it is; a batch it was
+ * part of goes on to the next one. */
+static void plan_stopped (AmlContentPage *self);
 static void installed_icon_lookup (AmlContentPage *self, GtkWidget *row,
                                    const char *project_id);
 
@@ -711,8 +731,19 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     {
       if (run->page != NULL)
         {
-          set_busy (run->page, FALSE);
-          show_error (run->page, "The file could not be installed", error);
+          AmlContentPage *page = run->page;
+
+          /* A batch stops at the first file that fails rather than going
+             on to the next with half of it missing. */
+          if (page->updating)
+            {
+              g_clear_pointer (&page->updates, g_ptr_array_unref);
+              page->update_index = 0;
+              page->updating = FALSE;
+            }
+
+          set_busy (page, FALSE);
+          show_error (page, "The file could not be installed", error);
         }
 
       g_clear_error (&error);
@@ -745,8 +776,15 @@ fetch_next (FetchRun *run)
     {
       if (self != NULL)
         {
-          set_busy (self, FALSE);
-          reload_installed (self);
+          if (self->updating)
+            /* One update of the batch is in: start the next one. The
+               list is read once, when the whole batch is done. */
+            update_batch_next (self);
+          else
+            {
+              set_busy (self, FALSE);
+              reload_installed (self);
+            }
         }
 
       fetch_free (run);
@@ -983,27 +1021,39 @@ on_plan_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 static void
 show_plan (AmlContentPage *self, PlanRun *plan)
 {
-  g_autofree char *heading = g_strdup_printf (
-      "%s \"%s\"?", plan->replaces != NULL ? "Update" : "Install",
-      plan->title);
-  g_autofree char *body = plan_text (plan);
-  AdwAlertDialog *alert =
-    ADW_ALERT_DIALOG (adw_alert_dialog_new (heading, body));
+  /* An update of the whole list was confirmed once, as a whole: this plan
+     is not asked for again, it is simply carried out. */
+  if (self->updating)
+    {
+      start_fetch (self, plan->files);
+      plan->files = NULL; /* the fetch owns them now */
+      plan_free (plan);
+      return;
+    }
 
-  adw_alert_dialog_set_heading_use_markup (alert, FALSE);
-  adw_alert_dialog_set_body_use_markup (alert, FALSE);
-  adw_alert_dialog_add_response (alert, "cancel", "Cancel");
-  adw_alert_dialog_add_response (
-      alert, "install",
-      plan_has_conflicts (plan) ? "Install Anyway" : "Install");
-  adw_alert_dialog_set_response_appearance (alert, "install",
-                                            ADW_RESPONSE_SUGGESTED);
-  adw_alert_dialog_set_default_response (alert, "cancel");
-  adw_alert_dialog_set_close_response (alert, "cancel");
+  {
+    g_autofree char *heading = g_strdup_printf (
+        "%s \"%s\"?", plan->replaces != NULL ? "Update" : "Install",
+        plan->title);
+    g_autofree char *body = plan_text (plan);
+    AdwAlertDialog *alert =
+      ADW_ALERT_DIALOG (adw_alert_dialog_new (heading, body));
 
-  g_object_set_data (G_OBJECT (alert), "aml-plan", plan);
-  adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL, on_plan_chosen,
-                           g_object_ref (self));
+    adw_alert_dialog_set_heading_use_markup (alert, FALSE);
+    adw_alert_dialog_set_body_use_markup (alert, FALSE);
+    adw_alert_dialog_add_response (alert, "cancel", "Cancel");
+    adw_alert_dialog_add_response (
+        alert, "install",
+        plan_has_conflicts (plan) ? "Install Anyway" : "Install");
+    adw_alert_dialog_set_response_appearance (alert, "install",
+                                              ADW_RESPONSE_SUGGESTED);
+    adw_alert_dialog_set_default_response (alert, "cancel");
+    adw_alert_dialog_set_close_response (alert, "cancel");
+
+    g_object_set_data (G_OBJECT (alert), "aml-plan", plan);
+    adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL, on_plan_chosen,
+                             g_object_ref (self));
+  }
 }
 
 /* What @version needs that the plan does not have yet. A dependency
@@ -1023,7 +1073,7 @@ plan_take (PlanRun *plan, AmlModrinthVersion *version)
       if (self != NULL)
         {
           show_error (self, "This cannot be installed", error);
-          set_busy (self, FALSE);
+          plan_stopped (self);
         }
 
       return FALSE;
@@ -1067,7 +1117,7 @@ plan_versions_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         {
           show_toast (self, error != NULL ? error->message
                                           : "no compatible version");
-          set_busy (self, FALSE);
+          plan_stopped (self);
         }
 
       plan_free (plan);
@@ -1641,8 +1691,155 @@ reload_installed (AmlContentPage *self)
                           page_watch_new (self));
 }
 
-/* The newer version Modrinth has for one file, or the words that it has
- * nothing newer for. */
+/* Update All: check every file Modrinth knows, ask once with the whole
+ * list of what is newer, then install that list. Nothing is downloaded
+ * before the list is confirmed. */
+
+static void
+update_item_free (UpdateItem *item)
+{
+  if (item == NULL)
+    return;
+
+  aml_modrinth_version_free (item->version);
+  g_free (item->title);
+  g_free (item->path);
+  g_free (item);
+}
+
+/* Starts the next one of a confirmed batch. When the last one is in, the
+ * list is read again and the batch is over. */
+static void
+update_batch_next (AmlContentPage *self)
+{
+  UpdateItem *item = NULL;
+
+  if (self->updates == NULL || self->update_index >= self->updates->len)
+    {
+      guint done = self->updates != NULL ? self->updates->len : 0;
+
+      g_clear_pointer (&self->updates, g_ptr_array_unref);
+      self->update_index = 0;
+      self->updating = FALSE;
+      set_busy (self, FALSE);
+
+      if (done > 0)
+        {
+          g_autofree char *message = g_strdup_printf (
+            "Updated %u %s", done, done == 1 ? "item" : "items");
+
+          show_toast (self, message);
+          reload_installed (self);
+        }
+
+      return;
+    }
+
+  item = g_ptr_array_index (self->updates, self->update_index);
+  self->update_index++;
+
+  /* The batch was confirmed once, as a whole: this plan is not asked for
+     again, it is simply carried out. */
+  set_busy (self, TRUE);
+  start_plan (self, aml_modrinth_version_copy (item->version), item->title,
+              item->path, item->disabled);
+}
+
+static void
+plan_stopped (AmlContentPage *self)
+{
+  if (self->updating)
+    update_batch_next (self);
+  else
+    set_busy (self, FALSE);
+}
+
+/* What the confirmation was answered with. */
+static void
+on_update_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+  UpdateRun *run = g_object_get_data (G_OBJECT (source), "aml-update-run");
+  const char *response =
+    adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
+
+  if (run == NULL || self == NULL)
+    {
+      g_object_unref (self);
+      return;
+    }
+
+  if (g_strcmp0 (response, "update") != 0)
+    {
+      g_clear_pointer (&run->items, g_ptr_array_unref);
+      g_free (run);
+      g_object_unref (self);
+      return;
+    }
+
+  /* The whole list was confirmed: install each one. */
+  self->updates = g_steal_pointer (&run->items);
+  self->update_index = 0;
+  self->updating = TRUE;
+  g_free (run);
+  update_batch_next (self);
+
+  g_object_unref (self);
+}
+
+/* The check is over: what is newer is asked for in one question, and an
+ * empty answer is said as such. */
+static void
+update_check_done (AmlContentPage *self, UpdateRun *run)
+{
+  g_object_set_data (G_OBJECT (self), "aml-update-run", NULL);
+  set_busy (self, FALSE);
+
+  if (run->items->len == 0)
+    {
+      show_toast (self, "Everything is up to date");
+      g_clear_pointer (&run->items, g_ptr_array_unref);
+      g_free (run);
+      return;
+    }
+
+  {
+    const char *what = self->type == AML_CONTENT_MOD
+                         ? "mods"
+                         : self->type == AML_CONTENT_RESOURCE_PACK
+                             ? "resource packs"
+                             : "shader packs";
+    g_autofree char *heading = g_strdup_printf ("Update the following %s", what);
+    g_autoptr (GString) body = g_string_new (NULL);
+    AdwAlertDialog *alert = NULL;
+
+    for (guint i = 0; i < run->items->len; i++)
+      {
+        UpdateItem *item = g_ptr_array_index (run->items, i);
+
+        if (i > 0)
+          g_string_append_c (body, '\n');
+
+        g_string_append (body, item->title);
+      }
+
+    alert = ADW_ALERT_DIALOG (adw_alert_dialog_new (heading, body->str));
+    adw_alert_dialog_set_heading_use_markup (alert, FALSE);
+    adw_alert_dialog_set_body_use_markup (alert, FALSE);
+    adw_alert_dialog_add_response (alert, "cancel", "Cancel");
+    adw_alert_dialog_add_response (alert, "update", "Update");
+    adw_alert_dialog_set_response_appearance (alert, "update",
+                                              ADW_RESPONSE_SUGGESTED);
+    adw_alert_dialog_set_default_response (alert, "cancel");
+    adw_alert_dialog_set_close_response (alert, "cancel");
+    g_object_set_data (G_OBJECT (alert), "aml-update-run", run);
+    adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL, on_update_chosen,
+                             g_object_ref (self));
+  }
+}
+
+/* The newer version Modrinth has for one file, or nothing when there is
+ * none. Either way the check goes on to the next file. */
 static void
 on_update_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                  gpointer user_data)
@@ -1652,6 +1849,7 @@ on_update_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_autoptr (GError) error = NULL;
   AmlModrinthVersion *update = NULL;
   AmlContentFile *file = NULL;
+  UpdateRun *run = NULL;
 
   if (self == NULL)
     {
@@ -1661,40 +1859,48 @@ on_update_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   update = aml_modrinth_update_by_hash_finish (result, &error);
   file = g_object_get_data (G_OBJECT (self), "aml-update-file");
+  run = g_object_get_data (G_OBJECT (self), "aml-update-run");
 
-  set_busy (self, FALSE);
-
-  if (update == NULL)
-    {
-      /* Nothing newer is the answer the page shows as up to date. */
-      show_toast (self, error != NULL ? error->message : "Up to date");
-      update_run_next (g_object_get_data (G_OBJECT (self), "aml-update-run"));
-      page_watch_free (watch);
-      return;
-    }
-
-  if (file == NULL)
+  if (run == NULL)
     {
       aml_modrinth_version_free (update);
       page_watch_free (watch);
       return;
     }
 
-  set_busy (self, TRUE);
-  start_plan (self, update,
-              file->version_name != NULL ? file->version_name : file->filename,
-              file->path, !file->enabled);
+  if (update != NULL && file != NULL)
+    {
+      UpdateItem *item = g_new0 (UpdateItem, 1);
+
+      item->version = update; /* owned from here */
+      item->title = g_strdup (file->version_name != NULL ? file->version_name
+                                                         : file->filename);
+      item->path = g_strdup (file->path);
+      item->disabled = !file->enabled;
+      g_ptr_array_add (run->items, item);
+    }
+  else
+    {
+      /* Nothing newer, or the question could not be answered: neither is
+         an update to install. */
+      aml_modrinth_version_free (update);
+      g_clear_error (&error);
+    }
+
+  update_check_next (run);
   page_watch_free (watch);
 }
 
-/* The update of every file Modrinth knows, one after the other. */
+/* One file after another, so a folder of twenty does not open twenty
+ * requests at once. */
 static void
-update_run_next (UpdateRun *run)
+update_check_next (UpdateRun *run)
 {
   AmlContentPage *self = run != NULL ? run->page : NULL;
 
   if (self == NULL)
     {
+      g_clear_pointer (&run->items, g_ptr_array_unref);
       g_free (run);
       return;
     }
@@ -1717,9 +1923,7 @@ update_run_next (UpdateRun *run)
       return;
     }
 
-  g_object_set_data (G_OBJECT (self), "aml-update-run", NULL);
-  g_free (run);
-  set_busy (self, FALSE);
+  update_check_done (self, run);
 }
 
 static void
@@ -1730,9 +1934,11 @@ on_update_all_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 
   run->page = self;
   g_object_add_weak_pointer (G_OBJECT (self), (gpointer *) &run->page);
+  run->items =
+    g_ptr_array_new_with_free_func ((GDestroyNotify) update_item_free);
   g_object_set_data (G_OBJECT (self), "aml-update-run", run);
   set_busy (self, TRUE);
-  update_run_next (run);
+  update_check_next (run);
 }
 
 static void
@@ -3222,6 +3428,12 @@ aml_content_page_dispose (GObject *object)
   g_clear_object (&self->transfer);
   g_clear_object (&self->more);
   g_clear_pointer (&self->seen_ids, g_hash_table_unref);
+
+  /* A batch of updates that was still being applied is not applied any
+     more: the plans and fetches hold the page weakly and stop. */
+  g_clear_pointer (&self->updates, g_ptr_array_unref);
+  self->update_index = 0;
+  self->updating = FALSE;
 
   G_OBJECT_CLASS (aml_content_page_parent_class)->dispose (object);
 }
