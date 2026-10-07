@@ -514,9 +514,10 @@ set_menu_item_tooltip (GtkWidget  *root,
     }
 }
 
-/* A game that crashed is said out loud: a user watching the game, not
-   the window, would otherwise find out only by noticing it had
-   stopped. */
+/* What a launch ends with is said out loud: a crash, a launch that never
+   got to the game, and an account that has to sign in again. Doing
+   nothing visible, which is what the window used to do for all but a
+   crash, looks exactly like a Play button that does not work. */
 static void
 on_window_launcher_state (AmlLauncher *launcher G_GNUC_UNUSED,
                           AmlLaunchState state,
@@ -525,13 +526,30 @@ on_window_launcher_state (AmlLauncher *launcher G_GNUC_UNUSED,
   AmlMainWindow *self = user_data;
   AdwToast *toast = NULL;
   g_autofree char *message = NULL;
+  const char *what = NULL;
 
-  if (state != AML_LAUNCH_CRASHED)
-    return;
+  switch (state)
+    {
+    case AML_LAUNCH_CRASHED:
+      what = "Minecraft crashed";
+      break;
 
-  message = g_strdup_printf ("Minecraft crashed%s%s",
-                             detail != NULL && *detail != '\0' ? ": " : "",
-                             detail != NULL ? detail : "");
+    case AML_LAUNCH_FAILED:
+      what = "Minecraft could not start";
+      break;
+
+    case AML_LAUNCH_NEEDS_SIGN_IN:
+      what = "Minecraft needs a sign-in";
+      break;
+
+    default:
+      return;
+    }
+
+  if (detail != NULL && *detail != '\0')
+    message = g_strdup_printf ("%s: %s", what, detail);
+  else
+    message = g_strdup (what);
 
   toast = adw_toast_new (message);
   adw_toast_set_use_markup (toast, FALSE);
