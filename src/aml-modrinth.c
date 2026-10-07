@@ -259,6 +259,39 @@ string_array_json (const char *value)
   return json_to_string (root, FALSE);
 }
 
+/* TRUE when a version tagged @version_loader runs on an instance whose
+ * loader is @instance_loader. Quilt runs Fabric mods, so a version that
+ * only names Fabric is still a version of a Quilt instance. */
+static gboolean
+loader_runs (const char *instance_loader, const char *version_loader)
+{
+  if (g_strcmp0 (instance_loader, version_loader) == 0)
+    return TRUE;
+
+  return g_strcmp0 (instance_loader, "quilt") == 0 &&
+         g_strcmp0 (version_loader, "fabric") == 0;
+}
+
+/* The loaders a request for @loader asks Modrinth for, as the JSON array
+ * it takes: a Quilt instance asks for Fabric versions as well. */
+static char *
+loaders_json (const char *loader)
+{
+  g_autoptr (JsonBuilder) builder = json_builder_new ();
+  g_autoptr (JsonNode) root = NULL;
+
+  json_builder_begin_array (builder);
+  json_builder_add_string_value (builder, loader);
+
+  if (g_strcmp0 (loader, "quilt") == 0)
+    json_builder_add_string_value (builder, "fabric");
+
+  json_builder_end_array (builder);
+  root = json_builder_get_root (builder);
+
+  return json_to_string (root, FALSE);
+}
+
 /* ---------------------------------------------------------- *
  * Projects
  * ---------------------------------------------------------- */
@@ -444,6 +477,22 @@ facet_add (GPtrArray *facets, const char *name, const char *value)
   g_ptr_array_add (facets, g_steal_pointer (&inner));
 }
 
+/* The loader facet: Quilt and Fabric in one array, because Modrinth reads
+ * an OR inside it and Quilt runs Fabric mods. */
+static void
+facet_add_loaders (GPtrArray *facets, const char *loader)
+{
+  g_autoptr (GPtrArray) inner = g_ptr_array_new_with_free_func (g_free);
+  g_autofree char *facet = g_strdup_printf ("categories:%s", loader);
+
+  g_ptr_array_add (inner, g_steal_pointer (&facet));
+
+  if (g_strcmp0 (loader, "quilt") == 0)
+    g_ptr_array_add (inner, g_strdup ("categories:fabric"));
+
+  g_ptr_array_add (facets, g_steal_pointer (&inner));
+}
+
 char *
 aml_modrinth_facets (const AmlModrinthSearch *search)
 {
@@ -463,7 +512,7 @@ aml_modrinth_facets (const AmlModrinthSearch *search)
    * and a shader pack itself, whatever runs it. */
   if (aml_content_type_needs_loader (search->type) && search->loader != NULL &&
       *search->loader != '\0')
-    facet_add (facets, "categories", search->loader);
+    facet_add_loaders (facets, search->loader);
 
   if (search->categories != NULL)
     {
@@ -962,7 +1011,13 @@ aml_modrinth_version_fits (AmlModrinthVersion *version, AmlContentType type,
   if (version->loaders == NULL || version->loaders->len == 0)
     return FALSE;
 
-  return string_array_has (version->loaders, loader);
+  for (guint i = 0; i < version->loaders->len; i++)
+    {
+      if (loader_runs (loader, g_ptr_array_index (version->loaders, i)))
+        return TRUE;
+    }
+
+  return FALSE;
 }
 
 /* Newest first, which is the order a list of versions is read in. The
@@ -1399,7 +1454,7 @@ aml_modrinth_versions_async (const char *project_id, AmlContentType type,
   if (aml_content_type_needs_loader (type) && loader != NULL &&
       *loader != '\0')
     {
-      loaders = string_array_json (loader);
+      loaders = loaders_json (loader);
       escaped_loaders = g_uri_escape_string (loaders, NULL, FALSE);
     }
 
