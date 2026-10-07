@@ -2636,7 +2636,7 @@ build_installed (AmlContentPage *self)
   gtk_widget_set_sensitive (self->update_all, FALSE);
   gtk_box_append (GTK_BOX (actions), self->update_all);
   gtk_box_append (GTK_BOX (actions),
-                  toolbar_button ("folder-open-symbolic", "Open Folder",
+                  toolbar_button ("folder-symbolic", "Open Folder",
                                   G_CALLBACK (on_open_folder_clicked), self));
   gtk_box_append (GTK_BOX (actions),
                   toolbar_button ("view-refresh-symbolic", "Refresh",
