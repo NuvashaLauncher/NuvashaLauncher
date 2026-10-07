@@ -230,6 +230,20 @@ test_compatibility_filtering (void)
   g_assert_false (aml_loaders_version_runs_game (AML_LOADER_NEOFORGE,
                                                  "20.2.3-beta", "26.3"));
 
+  /* Modern NeoForge drops the leading "1." of a Minecraft version and
+     writes a missing patch as 0, so the question is asked with the real
+     Minecraft version the user picked. */
+  g_assert_true (aml_loaders_version_runs_game (AML_LOADER_NEOFORGE,
+                                                "21.1.256", "1.21.1"));
+  g_assert_false (aml_loaders_version_runs_game (AML_LOADER_NEOFORGE,
+                                                 "21.1.256", "1.21"));
+  g_assert_true (aml_loaders_version_runs_game (AML_LOADER_NEOFORGE,
+                                                "21.0.5", "1.21"));
+  g_assert_true (aml_loaders_version_runs_game (AML_LOADER_NEOFORGE,
+                                                "20.2.3-beta", "1.20.2"));
+  g_assert_false (aml_loaders_version_runs_game (AML_LOADER_NEOFORGE,
+                                                 "20.2.3-beta", "1.20.1"));
+
   /* A loader that publishes no installer is not asked the question: its
      versions are its own and name no game. */
   g_assert_false (aml_loaders_version_runs_game (AML_LOADER_FABRIC,
@@ -283,6 +297,15 @@ test_neoforge_version_list (void)
   /* These are releases: nothing follows their numbers. */
   g_assert_true (version_at (versions, 0)->stable);
   g_assert_true (version_at (versions, 2)->stable);
+
+  /* The same list asked for with the real Minecraft version the user
+     picked, which NeoForge spells without the leading "1.". */
+  g_clear_pointer (&versions, g_ptr_array_unref);
+  versions = aml_loaders_maven_versions_from_json (AML_LOADER_NEOFORGE,
+                                                   "1.21.1", json, -1, &error);
+  g_assert_no_error (error);
+  g_assert_cmpuint (versions->len, ==, 3);
+  g_assert_cmpstr (version_at (versions, 0)->version, ==, "21.1.256");
 
   /* A game no version of NeoForge runs. */
   g_clear_pointer (&versions, g_ptr_array_unref);
