@@ -98,6 +98,8 @@ struct _AmlDownloadModpackDialog
 
   char *directory;     /* where the instance goes, NULL for the default */
   char *instance_name; /* what the user typed on the details page */
+  char *icon_path;     /* the fetched icon of the pack, NULL when it has
+                          none; the new instance is given it */
 };
 
 G_DEFINE_FINAL_TYPE (AmlDownloadModpackDialog, aml_download_modpack_dialog,
@@ -191,6 +193,8 @@ dialog_dispose (GObject *object)
   g_free (self->directory);
   g_free (self->instance_name);
   self->instance_name = NULL;
+  g_free (self->icon_path);
+  self->icon_path = NULL;
 
   G_OBJECT_CLASS (aml_download_modpack_dialog_parent_class)->dispose (object);
 }
@@ -1133,6 +1137,27 @@ on_versions_answer (GObject *source G_GNUC_UNUSED,
   operation_done (user_data);
 }
 
+/* The icon of the project, kept in the shared icon cache. It is put on
+ * the instance that the pack becomes, so an instance made from a pack
+ * shows the pack's icon like any other instance icon. The reference the
+ * load holds keeps the dialog alive until the answer is in. */
+static void
+project_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                    gpointer user_data)
+{
+  AmlDownloadModpackDialog *self = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autofree char *path = aml_icon_load_finish (result, &error);
+
+  if (path != NULL)
+    {
+      g_free (self->icon_path);
+      self->icon_path = g_steal_pointer (&path);
+    }
+
+  g_object_unref (self);
+}
+
 static void
 dialog_details_open (AmlDownloadModpackDialog *self)
 {
@@ -1148,6 +1173,13 @@ dialog_details_open (AmlDownloadModpackDialog *self)
 
   g_clear_object (&self->fetch);
   self->fetch = g_cancellable_new ();
+
+  /* A stale icon of another project has no business on this one. */
+  g_clear_pointer (&self->icon_path, g_free);
+
+  if (self->project->icon_url != NULL && *self->project->icon_url != '\0')
+    aml_icon_load_async (self->project->icon_url, self->fetch,
+                         project_icon_ready, g_object_ref (self));
 
   aml_download_json_async (url, self->fetch, on_versions_answer,
                            g_object_ref (self));
@@ -1478,6 +1510,19 @@ on_install_done (GObject *source G_GNUC_UNUSED,
 
       operation_done (user_data);
       return;
+    }
+
+  /* The instance shows the pack's icon. It is set and saved before the
+     dialog closes; a save that fails leaves the instance without one
+     rather than losing the install. */
+  if (self->icon_path != NULL &&
+      g_file_test (self->icon_path, G_FILE_TEST_IS_REGULAR))
+    {
+      g_object_set (instance, "icon", self->icon_path, NULL);
+
+      if (!aml_instance_manager_save (self->manager, &error))
+        g_warning ("the icon of the new instance could not be saved: %s",
+                   error->message);
     }
 
   /* The dialog closes itself on success; the reference goes with it. */
