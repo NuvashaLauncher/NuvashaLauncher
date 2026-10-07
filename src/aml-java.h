@@ -58,7 +58,9 @@ gboolean aml_java_parse_version (const char  *output,
                                  char       **vendor);
 
 /* The closest Java that still satisfies the instance: the compatible
- * one with the smallest major version, NULL when none fits. */
+ * one with the smallest major version, NULL when none fits. A runtime
+ * that can open a window beats a headless one, even a newer major,
+ * because a headless runtime cannot show the game at all. */
 AmlJava *aml_java_best_compatible (GPtrArray *javas, int required_major);
 
 /* Picks the Java an instance will run with: the instance setting wins,
