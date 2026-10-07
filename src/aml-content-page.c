@@ -2135,7 +2135,7 @@ build_installed (AmlContentPage *self)
   AdwPreferencesGroup *group =
     ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
 
-  self->update_all = toolbar_button ("software-update-symbolic", "Update All",
+  self->update_all = toolbar_button ("software-update-available-symbolic", "Update All",
                                      G_CALLBACK (on_update_all_clicked), self);
   gtk_widget_set_sensitive (self->update_all, FALSE);
   gtk_box_append (GTK_BOX (actions), self->update_all);
@@ -2180,8 +2180,9 @@ build_installed (AmlContentPage *self)
   gtk_widget_set_visible (scroller, FALSE);
   gtk_box_append (GTK_BOX (box), content);
 
-  adw_view_stack_add_titled (ADW_VIEW_STACK (self->stack), box, "installed",
-                             "Installed");
+  adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (self->stack), box,
+                                      "installed", "Installed",
+                                      "view-list-symbolic");
 }
 
 /* The list of what Modrinth has for this instance is asked for when
@@ -2255,7 +2256,7 @@ build_browse (AmlContentPage *self)
   gtk_box_append (GTK_BOX (top), search_bar);
 
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (filter_button),
-                                 "view-filter-symbolic");
+                                 "view-continuous-symbolic");
   gtk_widget_set_tooltip_text (filter_button, "Filter by category");
   gtk_accessible_update_property (GTK_ACCESSIBLE (filter_button),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL, "Filter",
@@ -2327,8 +2328,9 @@ build_browse (AmlContentPage *self)
   gtk_widget_set_sensitive (previous, FALSE);
   gtk_widget_set_sensitive (next, FALSE);
 
-  adw_view_stack_add_titled (ADW_VIEW_STACK (self->stack), box, "browse",
-                             "Browse");
+  adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (self->stack), box,
+                                      "browse", "Browse",
+                                      "system-search-symbolic");
 }
 
 /* ---------------------------------------------------------- *
