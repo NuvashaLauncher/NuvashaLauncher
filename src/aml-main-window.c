@@ -299,35 +299,6 @@ on_open_logs_after_crash_toggled (GObject *object,
       row, aml_settings_get_open_logs_after_crash (self->settings));
 }
 
-/* What removing installed content does, chosen from two: move it to the
- * Trash or delete it for good. Written at once, and put back to what the
- * file says when the file says no. */
-static void
-on_delete_mode_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
-                         gpointer user_data)
-{
-  AmlMainWindow *self = user_data;
-  AdwComboRow *row = ADW_COMBO_ROW (object);
-  guint selected = adw_combo_row_get_selected (row);
-  gboolean to_trash = (selected == 0);
-  g_autoptr (GError) error = NULL;
-
-  if (to_trash == aml_settings_get_delete_to_trash (self->settings))
-    return;
-
-  if (aml_settings_set_delete_to_trash (self->settings, to_trash, &error))
-    {
-      adw_action_row_set_subtitle (ADW_ACTION_ROW (row), NULL);
-      return;
-    }
-
-  adw_combo_row_set_selected (
-    row, aml_settings_get_delete_to_trash (self->settings) ? 0 : 1);
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (row),
-                               error != NULL ? error->message
-                                             : "the setting was not written");
-}
-
 static void
 on_settings (GSimpleAction *action G_GNUC_UNUSED,
              GVariant      *parameter G_GNUC_UNUSED,
@@ -336,9 +307,6 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   AmlMainWindow *self = user_data;
   AdwDialog *dialog = adw_preferences_dialog_new ();
   GtkWidget *page = adw_preferences_page_new ();
-  GtkWidget *general_group = adw_preferences_group_new ();
-  GtkWidget *delete_row = adw_combo_row_new ();
-  g_autoptr (GtkStringList) delete_model = NULL;
   GtkWidget *versions_group = adw_preferences_group_new ();
   GtkWidget *java_group = adw_preferences_group_new ();
   GtkWidget *logs_group = adw_preferences_group_new ();
@@ -369,25 +337,6 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
                                              FALSE);
   g_object_set_data_full (G_OBJECT (dialog), "settings-java", ctx,
                           settings_java_unref);
-
-  /* General: what removing installed content does. The model is built
-     before the selection is set and the handler connected, so opening
-     the dialog never writes anything by itself. */
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (general_group),
-                                   "General");
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (delete_row),
-                                 "Delete Installed Content");
-  delete_model = gtk_string_list_new ((const char * const[]) {
-    "Move to Trash", "Delete Permanently", NULL });
-  adw_combo_row_set_model (ADW_COMBO_ROW (delete_row),
-                           G_LIST_MODEL (delete_model));
-  adw_combo_row_set_selected (
-    ADW_COMBO_ROW (delete_row),
-    aml_settings_get_delete_to_trash (self->settings) ? 0 : 1);
-  g_signal_connect (delete_row, "notify::selected",
-                    G_CALLBACK (on_delete_mode_selected), self);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (general_group),
-                             delete_row);
 
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (versions_group),
                                    "Versions");
@@ -466,8 +415,6 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
                     G_CALLBACK (on_open_logs_after_crash_toggled), self);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (logs_group), crash_row);
 
-  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
-                            ADW_PREFERENCES_GROUP (general_group));
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                             ADW_PREFERENCES_GROUP (versions_group));
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),

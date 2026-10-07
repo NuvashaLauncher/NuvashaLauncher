@@ -5,16 +5,14 @@
 /* AmlSettings: the small file of choices the whole application shares,
  * <config dir>/AML/config.json.
  *
- * One object, six options so far: whether the version lists also show
+ * One object, five options so far: whether the version lists also show
  * snapshots and the versions Mojang no longer serves, which Java an
  * instance runs with when it picks none, whether the loader lists also
  * show the versions a loader does not call stable, how many lines the
- * log of a running game keeps, whether the log folder is opened when a
- * game crashes, and whether removing installed content moves it to the
- * Trash instead of deleting it. The file is read once when the object is
- * created and written on every change; a file that is missing,
- * unreadable or nonsense leaves the defaults in place instead of
- * failing. */
+ * log of a running game keeps and whether the log folder is opened when
+ * a game crashes. The file is read once when the object is created and
+ * written on every change; a file that is missing, unreadable or
+ * nonsense leaves the defaults in place instead of failing. */
 
 #ifndef AML_SETTINGS_H
 #define AML_SETTINGS_H
@@ -90,15 +88,6 @@ gboolean aml_settings_get_show_unstable_loaders (AmlSettings *self);
 gboolean aml_settings_set_show_unstable_loaders (AmlSettings *self,
                                                  gboolean     value,
                                                  GError     **error);
-
-/* TRUE unless the file says otherwise: removing installed content moves
- * it to the Trash, where it can be brought back. FALSE deletes it for
- * good. */
-gboolean aml_settings_get_delete_to_trash (AmlSettings *self);
-
-gboolean aml_settings_set_delete_to_trash (AmlSettings *self,
-                                           gboolean     value,
-                                           GError     **error);
 
 G_END_DECLS
 

@@ -96,11 +96,6 @@ GPtrArray *aml_content_scan_finish (GAsyncResult  *result,
 AmlContentPage *aml_content_page_new (AmlInstance     *instance,
                                       AmlContentType  type);
 
-/* What the trash button of an installed row does: TRUE moves the file to
- * the Trash, FALSE deletes it for good. TRUE unless set otherwise. */
-void aml_content_page_set_delete_to_trash (AmlContentPage *self,
-                                           gboolean        to_trash);
-
 G_END_DECLS
 
 #endif /* AML_CONTENT_PAGE_H */
