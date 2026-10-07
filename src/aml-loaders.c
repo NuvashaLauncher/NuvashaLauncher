@@ -499,7 +499,10 @@ aml_loaders_versions_for_display (GPtrArray  *published,
 
   /* Nothing was asked for, or what was asked for is not there: the
      newest stable version is what an install picks. The list is newest
-     first, so the first stable one is the newest. */
+     first, so the first stable one is the newest. A list that holds no
+     stable version at all (a loader that has only beta releases for this
+     Minecraft version, with unstable versions asked for) falls back to
+     its newest, rather than leaving nothing picked. */
   if (position == G_MAXUINT)
     {
       for (guint i = 0; i < shown->len; i++)
@@ -512,6 +515,9 @@ aml_loaders_versions_for_display (GPtrArray  *published,
               break;
             }
         }
+
+      if (position == G_MAXUINT && shown->len > 0)
+        position = 0;
     }
 
   if (selected != NULL)
