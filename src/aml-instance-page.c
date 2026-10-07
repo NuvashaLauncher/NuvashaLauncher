@@ -603,8 +603,9 @@ on_custom_java_chosen (GObject *dialog, GAsyncResult *result,
   g_object_unref (self);
 }
 
-/* The "Add Java…" entry of the list was picked: ask for the executable,
- * and on_custom_java_chosen puts what comes back in the list. */
+/* The "Add Java Runtime" entry of the list was picked: ask for the
+ * executable, and on_custom_java_chosen puts what comes back in the
+ * list. */
 static void
 on_add_java_requested (AmlJavaRow *row G_GNUC_UNUSED, gpointer user_data)
 {

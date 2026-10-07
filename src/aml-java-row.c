@@ -13,7 +13,6 @@
 #include "aml-java-row.h"
 
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
 static void custom_loaded (GObject*, GAsyncResult*, gpointer);
@@ -35,8 +34,8 @@ struct _AmlJavaRow
   GPtrArray *names; /* the titles shown in the model */
   char *default_label;
 
-  /* The trailing "Add Java…" entry: off by default, and where it sits
-   * when on, so selecting it asks for a file instead of a path. */
+  /* The trailing "Add Java Runtime" entry: off by default, and where
+   * it sits when on, so selecting it asks for a file instead of a path. */
   gboolean add_enabled;
   guint add_position;
   guint last_selection;
@@ -114,22 +113,16 @@ show_error (AmlJavaRow *self, const char *message)
 static char *
 java_label (AmlJava *java)
 {
-  g_autofree char *real = realpath (java->executable, NULL);
-  const char *executable = real != NULL ? real : java->executable;
-  g_autofree char *dir = g_path_get_dirname (executable);
-  g_autofree char *root = g_path_get_dirname (dir);
-  const char *slash = strrchr (root, '/');
-  const char *name = slash != NULL ? slash + 1 : root;
-
   if (java->major_version == 0)
     return g_strdup_printf ("Custom: %s", java->executable);
 
-  return g_strdup_printf ("%s %d (%s%s) — %s",
+  /* Just what the runtime calls itself: "OpenJDK 25". The architecture,
+     the headless flag and the folder it lives in are left out; the row's
+     subtitle is where a runtime that cannot run the game is called
+     out. */
+  return g_strdup_printf ("%s %d",
                           java->vendor != NULL ? java->vendor : "Java",
-                          java->major_version,
-                          java->arch != NULL ? java->arch : "unknown",
-                          java->headless ? ", headless" : "",
-                          name);
+                          java->major_version);
 }
 
 static void
@@ -173,7 +166,7 @@ fill (AmlJavaRow *self)
 
   if (self->add_enabled)
     {
-      g_ptr_array_add (names, g_strdup ("Add Java…"));
+      g_ptr_array_add (names, g_strdup ("Add Java Runtime"));
       self->add_position = names->len - 1;
     }
 
@@ -487,8 +480,8 @@ aml_java_row_set_custom (AmlJavaRow *self,
 
   fill (self);
 
-  /* The probed entry is the last one that has a path: the "Add Java…"
-     entry, when it is on, sits after it and has none. */
+  /* The probed entry is the last one that has a path: the "Add Java
+     Runtime" entry, when it is on, sits after it and has none. */
   if (self->ready)
     adw_combo_row_set_selected (ADW_COMBO_ROW (self), self->ids->len - 1);
 }
