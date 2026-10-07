@@ -39,6 +39,7 @@ struct _AmlInstancePage
   GtkWidget *toast_overlay;
   GtkWidget *icon_row;
   GtkWidget *icon_image;
+  GtkWidget *stack; /* the AdwViewStack holding the pages of the instance */
 
   /* The Directory row: the path, the two buttons that act on it and the
      spinner that shows a move in progress. A move in progress makes them
@@ -140,6 +141,53 @@ refresh_in_grid (AmlInstancePage *self)
   g_list_store_splice (store, position, 1, &item, 1);
 }
 
+/* The content pages read the loader and the Minecraft version of the
+ * instance when they are built, so changing either of them has to build
+ * them again: the Mods page in particular keeps saying "No mod loader"
+ * until it is built for the loader the instance now runs. */
+static void
+rebuild_content_pages (AmlInstancePage *self)
+{
+  static const struct {
+    AmlContentType type;
+    const char *name;
+    const char *title;
+    const char *icon;
+  } pages[] = {
+    { AML_CONTENT_RESOURCE_PACK, "resource-packs", "Resource Packs",
+      "image-x-generic-symbolic" },
+    { AML_CONTENT_SHADER_PACK, "shader-packs", "Shader Packs",
+      "applications-graphics-symbolic" },
+    { AML_CONTENT_MOD, "mods", "Mods", "view-list-symbolic" },
+  };
+  g_autofree char *visible = NULL;
+
+  if (self->stack == NULL)
+    return;
+
+  visible = g_strdup (adw_view_stack_get_visible_child_name (
+                        ADW_VIEW_STACK (self->stack)));
+
+  for (guint i = 0; i < G_N_ELEMENTS (pages); i++)
+    {
+      GtkWidget *old = adw_view_stack_get_child_by_name (
+        ADW_VIEW_STACK (self->stack), pages[i].name);
+
+      if (old != NULL)
+        adw_view_stack_remove (ADW_VIEW_STACK (self->stack), old);
+
+      adw_view_stack_add_titled_with_icon (
+        ADW_VIEW_STACK (self->stack),
+        GTK_WIDGET (aml_content_page_new (self->instance, pages[i].type)),
+        pages[i].name, pages[i].title, pages[i].icon);
+    }
+
+  /* What the user was looking at is not thrown away by the rebuild. */
+  if (visible != NULL)
+    adw_view_stack_set_visible_child_name (ADW_VIEW_STACK (self->stack),
+                                           visible);
+}
+
 /* ---------------------------------------------------------- *
  * Saving the editable rows
  * ---------------------------------------------------------- */
@@ -238,6 +286,10 @@ on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
   /* The card in the grid shows the version this instance runs. */
   refresh_in_grid (self);
 
+  /* Resource Packs and Shader Packs are narrowed to the Minecraft
+     version, so they are built again for the version that was picked. */
+  rebuild_content_pages (self);
+
   /* A loader has one set of versions per Minecraft version, so the list
      is asked again for the version that was picked. */
   aml_loader_row_load (self->loader_row, self->settings,
@@ -311,6 +363,11 @@ on_loader_changed (AmlLoaderRow *row, gpointer user_data)
 
   /* The card in the grid shows what the instance runs. */
   refresh_in_grid (self);
+
+  /* A mod runs on a loader, and a resource pack or a shader pack is
+     loaded by the game, so all three content pages depend on what was
+     picked here and are built again. */
+  rebuild_content_pages (self);
 }
 
 /* ---------------------------------------------------------- *
@@ -1212,6 +1269,10 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
     ADW_VIEW_STACK (stack), GTK_WIDGET (aml_logs_page_new (launcher)),
     "logs", "Logs", "text-x-generic-symbolic");
 
+  /* Kept so that the content pages can be built again when the loader or
+     the Minecraft version changes. */
+  self->stack = stack;
+
   /* The header holds only this switcher. There is no back button here:
    the tab bar of the window is what says which instance is open, and
    closing that tab is what leaves it. */
@@ -1251,6 +1312,7 @@ aml_instance_page_dispose (GObject *object)
   self->toast_overlay = NULL;
   self->icon_row = NULL;
   self->icon_image = NULL;
+  self->stack = NULL;
   self->java_row = NULL;
   self->directory_row = NULL;
   self->directory_open = NULL;
