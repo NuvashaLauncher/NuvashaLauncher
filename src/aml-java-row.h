@@ -32,6 +32,17 @@ AmlJavaRow *aml_java_row_new (void);
 void aml_java_row_set_default_entry_label (AmlJavaRow *self,
                                            const char *label);
 
+/* Names the first entry after @java, the one the default would pick, and
+ * shows it at once; a NULL @java puts the plain label back. */
+void aml_java_row_set_default_entry_for (AmlJavaRow *self,
+                                         const AmlJava *java);
+
+/* Appends an "Add Java…" entry. Picking it emits ::add-requested and the
+ * row goes back to what was selected, so the caller can ask for a file
+ * and hand it to aml_java_row_set_custom(). Off unless turned on. */
+void aml_java_row_set_add_entry_enabled (AmlJavaRow *self,
+                                         gboolean    enabled);
+
 /* Fetches the detected installations and puts them in the list,
  * followed by whatever custom path @wanted names when detection did not
  * report it. @wanted == NULL selects the first entry. Loading again
