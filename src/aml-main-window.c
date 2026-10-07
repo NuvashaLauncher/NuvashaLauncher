@@ -816,6 +816,48 @@ row_set_launcher (GtkWidget *play, AmlLauncher *launcher)
                            G_CALLBACK (on_row_launcher_state), play, 0);
 }
 
+/* Stopping a running game closes it and loses whatever it has not saved,
+ * so it is asked for before it happens. */
+static void
+on_stop_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  AmlLauncher *launcher = user_data;
+  const char *response =
+    adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
+
+  if (launcher != NULL && g_strcmp0 (response, "stop") == 0)
+    aml_launcher_stop (launcher);
+
+  g_clear_object (&launcher);
+}
+
+static void
+confirm_stop (AmlMainWindow *self, AmlLauncher *launcher)
+{
+  AmlInstance *instance = aml_launcher_get_instance (launcher);
+  g_autofree char *name = NULL;
+  g_autofree char *heading = NULL;
+  AdwAlertDialog *alert = NULL;
+
+  g_object_get (instance, "name", &name, NULL);
+  heading = g_strdup_printf (
+    "Stop %s?", name != NULL && *name != '\0' ? name : "the game");
+
+  alert = ADW_ALERT_DIALOG (adw_alert_dialog_new (
+      heading, "The game is running and will close. Progress since the last "
+               "save is lost."));
+  adw_alert_dialog_set_heading_use_markup (alert, FALSE);
+  adw_alert_dialog_set_body_use_markup (alert, FALSE);
+  adw_alert_dialog_add_response (alert, "cancel", "Keep Playing");
+  adw_alert_dialog_add_response (alert, "stop", "Stop");
+  adw_alert_dialog_set_response_appearance (alert, "stop",
+                                            ADW_RESPONSE_DESTRUCTIVE);
+  adw_alert_dialog_set_default_response (alert, "cancel");
+  adw_alert_dialog_set_close_response (alert, "cancel");
+  adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL, on_stop_chosen,
+                           g_object_ref (launcher));
+}
+
 static void
 on_play_clicked (GtkButton *button, gpointer user_data)
 {
@@ -829,7 +871,7 @@ on_play_clicked (GtkButton *button, gpointer user_data)
   /* One button for both: what a busy instance needs is a stop, and what
      an idle one needs is a play. */
   if (aml_launch_state_is_busy (aml_launcher_get_state (launcher)))
-    aml_launcher_stop (launcher);
+    confirm_stop (self, launcher);
   else
     aml_launcher_start (launcher);
 }
