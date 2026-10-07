@@ -16,6 +16,7 @@
 
 #include "aml-loaders.h"
 
+#include "aml-download.h"
 #include "aml-minecraft-resolve.h"
 
 #include <glib.h>
@@ -551,6 +552,68 @@ test_profile_without_a_maven_address (void)
 }
 
 /* ---------------------------------------------------------- *
+ * What a version list shows
+ * ---------------------------------------------------------- */
+
+/* The display policy: unstable versions are hidden unless the setting
+ * asks for them, a version an instance runs is kept whatever its state,
+ * and the newest stable one is preselected. */
+static void
+test_versions_for_display (void)
+{
+  g_autofree char *json = NULL;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GPtrArray) published = NULL;
+  g_autoptr (GPtrArray) shown = NULL;
+  guint selected = 0;
+
+  if (!g_file_get_contents (AML_TEST_FIXTURES "/fabric-loader-list.json",
+                            &json, NULL, &error))
+    g_error ("the fixture cannot be read: %s", error->message);
+
+  published = aml_loaders_versions_from_json (json, -1, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (published);
+
+  /* Stable only, and the newest stable version is picked. */
+  shown = aml_loaders_versions_for_display (published, FALSE, NULL, &selected);
+  g_assert_nonnull (shown);
+  g_assert_cmpuint (shown->len, >, 0);
+  g_assert_cmpuint (selected, ==, 0);
+  g_assert_cmpstr (version_at (shown, selected)->version, ==, "0.19.5");
+
+  for (guint i = 0; i < shown->len; i++)
+    g_assert_true (version_at (shown, i)->stable);
+
+  /* Asking for unstable versions shows the whole list. */
+  g_clear_pointer (&shown, g_ptr_array_unref);
+  shown = aml_loaders_versions_for_display (published, TRUE, NULL, &selected);
+  g_assert_cmpuint (shown->len, ==, published->len);
+  g_assert_cmpstr (version_at (shown, selected)->version, ==, "0.19.5");
+
+  /* An instance that runs an unstable version keeps it even when the
+     setting hides unstable versions, and that version is the pick. */
+  g_clear_pointer (&shown, g_ptr_array_unref);
+  shown = aml_loaders_versions_for_display (published, FALSE,
+                                            "0.10.7+build.214", &selected);
+  g_assert_cmpuint (selected, <, shown->len);
+  g_assert_cmpstr (version_at (shown, selected)->version, ==,
+                   "0.10.7+build.214");
+
+  /* Nothing published is nothing to pick. */
+  {
+    g_autoptr (GPtrArray) none = g_ptr_array_new ();
+
+    g_clear_pointer (&shown, g_ptr_array_unref);
+    shown = aml_loaders_versions_for_display (none, TRUE, NULL, &selected);
+    g_assert_cmpuint (shown->len, ==, 0);
+    g_assert_cmpuint (selected, ==, G_MAXUINT);
+  }
+
+  g_print ("ok - a list hides unstable versions but keeps a chosen one\n");
+}
+
+/* ---------------------------------------------------------- *
  * What the two ways of installing refuse
  * ---------------------------------------------------------- */
 
@@ -564,6 +627,7 @@ typedef struct
   GError *error;
   AmlLoaderInstall *install;
   AmlVersionDescription *profile;
+  GPtrArray *versions;
   guint watchdog;
 } Wait;
 
@@ -595,6 +659,50 @@ on_profile_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   wait->profile = aml_loaders_profile_finish (result, &wait->error);
   g_main_loop_quit (wait->loop);
+}
+
+static void
+on_versions_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                      gpointer user_data)
+{
+  Wait *wait = user_data;
+
+  wait->versions = aml_loaders_versions_finish (result, &wait->error);
+  g_main_loop_quit (wait->loop);
+}
+
+/* A load that was cancelled hands no list to the screen that started it,
+   which is what lets the screen drop an answer that belongs to a game
+   version or a loader it has moved on from. */
+static void
+test_cancelled_versions_deliver_nothing (void)
+{
+  g_autoptr (GCancellable) cancellable = g_cancellable_new ();
+  Wait wait = { 0 };
+
+  wait.loop = g_main_loop_new (NULL, FALSE);
+  wait.watchdog = g_timeout_add_seconds (20, watchdog_fired, &wait);
+
+  /* Cancelled before it starts, so nothing is asked of the network: the
+     request is what the last screen left behind. */
+  g_cancellable_cancel (cancellable);
+
+  aml_loaders_versions_async (AML_LOADER_FABRIC, "1.20.1", cancellable,
+                              on_versions_finished, &wait);
+
+  g_main_loop_run (wait.loop);
+  g_source_remove (wait.watchdog);
+  g_main_loop_unref (wait.loop);
+
+  g_assert_null (wait.versions);
+  g_assert_nonnull (wait.error);
+  g_assert_true (
+    g_error_matches (wait.error, AML_DOWNLOAD_ERROR,
+                     AML_DOWNLOAD_ERROR_CANCELLED) ||
+    g_error_matches (wait.error, G_IO_ERROR, G_IO_ERROR_CANCELLED));
+  g_clear_error (&wait.error);
+
+  g_print ("ok - a cancelled version load hands nothing to a screen\n");
 }
 
 /* A loader that publishes a version document of its own has no installer,
@@ -674,11 +782,13 @@ main (void)
   test_neoforge_version_list ();
   test_forge_version_list ();
   test_a_maven_that_answers_nothing ();
+  test_versions_for_display ();
   test_fabric_profile ();
   test_quilt_profile ();
   test_profile_without_a_maven_address ();
   test_install_of_a_loader_that_publishes_none ();
   test_profile_of_a_loader_that_publishes_an_installer ();
+  test_cancelled_versions_deliver_nothing ();
 
   return EXIT_SUCCESS;
 }
