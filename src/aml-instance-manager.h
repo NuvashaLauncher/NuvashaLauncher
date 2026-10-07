@@ -52,6 +52,12 @@ gboolean aml_instance_manager_save (AmlInstanceManager *self,
  * AmlInstance. */
 GListStore *aml_instance_manager_get_instances (AmlInstanceManager *self);
 
+/* The directory a new instance of @name would land in when the caller
+ * names none: <data dir>/instances/<name>-<short id>, with a fresh id.
+ * (transfer full) */
+char *aml_instance_manager_default_directory (AmlInstanceManager *self,
+                                              const char *name);
+
 /* The registered instance with this id, or NULL. Borrowed from the
  * store. */
 AmlInstance *aml_instance_manager_get_by_id (AmlInstanceManager *self,

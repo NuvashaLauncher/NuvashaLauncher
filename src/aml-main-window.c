@@ -9,6 +9,7 @@
 
 #include "aml-main-window.h"
 #include "aml-create-instance-dialog.h"
+#include "aml-download-modpack-dialog.h"
 #include "aml-instance-page.h"
 #include "aml-java-row.h"
 #include "aml-java.h"
@@ -47,7 +48,6 @@ G_DEFINE_FINAL_TYPE (AmlMainWindow, aml_main_window, ADW_TYPE_APPLICATION_WINDOW
 /* Menu entries that exist from the start but stay disabled until their
  * feature is built: nothing may pretend to work. */
 static const char *pending_actions[] = {
-  "download-modpack", /* phase 13 */
   "shortcuts",
 };
 
@@ -59,6 +59,18 @@ on_create_instance (GSimpleAction *action G_GNUC_UNUSED,
   AmlMainWindow *self = user_data;
   GtkWidget *dialog = GTK_WIDGET (
     aml_create_instance_dialog_new (self->manager, self->settings));
+
+  adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
+}
+
+static void
+on_download_modpack (GSimpleAction *action G_GNUC_UNUSED,
+                     GVariant      *parameter G_GNUC_UNUSED,
+                     gpointer       user_data)
+{
+  AmlMainWindow *self = user_data;
+  GtkWidget *dialog = GTK_WIDGET (aml_download_modpack_dialog_new (
+    self->manager));
 
   adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
 }
@@ -467,7 +479,7 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
 
 static const GActionEntry window_entries[] = {
   { .name = "create-instance", .activate = on_create_instance },
-  { .name = "download-modpack" },
+  { .name = "download-modpack", .activate = on_download_modpack },
   { .name = "settings", .activate = on_settings },
   { .name = "shortcuts" },
   { .name = "about", .activate = on_about },
@@ -503,8 +515,8 @@ create_app_menu (void)
 }
 
 /* GtkPopoverMenu builds its item widgets itself and ignores any
- * "tooltip-text" item attribute, so the tooltip of the disabled entry
- * is attached to the item widget after the popover was built. */
+ * "tooltip-text" item attribute, so the tooltip of an entry is attached
+ * to the item widget after the popover was built. */
 static void
 set_menu_item_tooltip (GtkWidget  *root,
                        const char *label_text,
@@ -886,7 +898,7 @@ aml_main_window_init (AmlMainWindow *self)
     gtk_menu_button_get_popover (GTK_MENU_BUTTON (add_button)));
   if (add_popover != NULL)
     set_menu_item_tooltip (add_popover, "Download Modpack",
-                           "Available in a later version");
+                           "Search Modrinth and install a modpack");
 
   /* End of the header: who is playing, then the application menu. The
    * button shows the avatar and the name of the active account, and what
