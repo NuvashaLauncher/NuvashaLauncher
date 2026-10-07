@@ -1144,10 +1144,6 @@ on_pick_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
  * Installed: the rows and what can be done to them
  * ---------------------------------------------------------- */
 
-static void on_remove_chosen (GObject *source, GAsyncResult *result,
-                              gpointer user_data);
-static void on_update_clicked (GtkButton *button, gpointer user_data);
-
 static void
 toggle_file (AmlContentPage *self, AmlContentFile *file)
 {
@@ -1167,33 +1163,9 @@ toggle_file (AmlContentPage *self, AmlContentFile *file)
 }
 
 static void
-remove_file (AmlContentPage *self, AmlContentFile *file)
-{
-  g_autofree char *heading =
-    g_strdup_printf ("Remove \"%s\"?", file->filename);
-  g_autofree char *body =
-    g_strdup_printf ("\"%s\" is deleted from this instance.", file->path);
-  AdwAlertDialog *alert =
-    ADW_ALERT_DIALOG (adw_alert_dialog_new (heading, body));
-
-  adw_alert_dialog_set_heading_use_markup (alert, FALSE);
-  adw_alert_dialog_set_body_use_markup (alert, FALSE);
-  adw_alert_dialog_add_response (alert, "cancel", "Cancel");
-  adw_alert_dialog_add_response (alert, "remove", "Remove");
-  adw_alert_dialog_set_response_appearance (alert, "remove",
-                                            ADW_RESPONSE_DESTRUCTIVE);
-  adw_alert_dialog_set_default_response (alert, "cancel");
-  adw_alert_dialog_set_close_response (alert, "cancel");
-  g_object_set_data (G_OBJECT (alert), "aml-file", file);
-  adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL, on_remove_chosen,
-                           g_object_ref (self));
-}
-
-static void
 file_row_refresh (GtkWidget *row)
 {
   AmlContentFile *file = g_object_get_data (G_OBJECT (row), "aml-file");
-  GtkWidget *update = g_object_get_data (G_OBJECT (row), "aml-update");
 
   if (file == NULL || !GTK_IS_WIDGET (row))
     return;
@@ -1203,32 +1175,22 @@ file_row_refresh (GtkWidget *row)
   adw_preferences_row_set_title (
       ADW_PREFERENCES_ROW (row),
       file->version_name != NULL ? file->version_name : file->filename);
-
-  /* Only a file Modrinth knows can be asked what is newer. */
-  gtk_widget_set_sensitive (update, file->project_id != NULL);
 }
 
-/* Two things can be done to one installed file: stop loading it, or
- * take it out of the instance. Each button of the popover carries the
- * file it is about, so the row does not have to be looked up. */
-static void
-on_toggle_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+/* The switch of a mod row: on means the mod loads, off means its file
+ * carries the disabled suffix. The rename goes through the same path the
+ * menu used to, and the list is read again once it is done, so the switch
+ * and the file cannot disagree for long. */
+static gboolean
+on_mod_toggled (GtkSwitch *sw, gboolean state G_GNUC_UNUSED, gpointer user_data)
 {
   AmlContentPage *self = user_data;
-  AmlContentFile *file = g_object_get_data (G_OBJECT (button), "aml-file");
+  AmlContentFile *file = g_object_get_data (G_OBJECT (sw), "aml-file");
 
   if (file != NULL)
     toggle_file (self, file);
-}
 
-static void
-on_remove_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
-{
-  AmlContentPage *self = user_data;
-  AmlContentFile *file = g_object_get_data (G_OBJECT (button), "aml-file");
-
-  if (file != NULL)
-    remove_file (self, file);
+  return FALSE;
 }
 
 static GtkWidget *
@@ -1236,15 +1198,6 @@ file_row (AmlContentPage *self, AmlContentFile *file)
 {
   GtkWidget *row = adw_action_row_new ();
   GtkWidget *icon = aml_icon_widget_new (aml_content_type_icon (self->type));
-  GtkWidget *suffix = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *update = gtk_button_new_with_label ("Update");
-  GtkWidget *menu_button = gtk_menu_button_new ();
-  GtkWidget *icon_more = gtk_image_new_from_icon_name ("view-more-symbolic");
-  GtkWidget *popover = gtk_popover_new ();
-  GtkWidget *items = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-  GtkWidget *toggle = gtk_button_new_with_label (file->enabled ? "Disable"
-                                                               : "Enable");
-  GtkWidget *remove = gtk_button_new_with_label ("Remove");
 
   /* A file name and a path are plain text: markup off first, because
      either may hold an "&". The path is kept to two lines so a long one
@@ -1264,52 +1217,28 @@ file_row (AmlContentPage *self, AmlContentFile *file)
   adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
   g_object_set_data (G_OBJECT (row), "aml-icon", icon);
 
-  gtk_widget_add_css_class (update, "flat");
-  gtk_widget_set_valign (update, GTK_ALIGN_CENTER);
-  gtk_widget_set_tooltip_text (update, "Look for a newer version");
-  g_object_set_data (G_OBJECT (update), "aml-file", file);
+  /* Only a mod is something that can be turned off: a resource pack or a
+     shader pack is loaded whenever it is present, so neither has a
+     switch. */
+  if (self->type == AML_CONTENT_MOD)
+    {
+      GtkWidget *sw = gtk_switch_new ();
 
-  gtk_image_set_pixel_size (GTK_IMAGE (icon_more), 16);
-  gtk_widget_set_valign (menu_button, GTK_ALIGN_CENTER);
-  gtk_menu_button_set_child (GTK_MENU_BUTTON (menu_button), icon_more);
+      gtk_switch_set_active (GTK_SWITCH (sw), file->enabled);
+      gtk_widget_set_valign (sw, GTK_ALIGN_CENTER);
+      gtk_widget_set_tooltip_text (sw,
+                                   file->enabled ? "Disable" : "Enable");
+      gtk_accessible_update_property (GTK_ACCESSIBLE (sw),
+                                      GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                      "Enabled", -1);
+      g_object_set_data (G_OBJECT (sw), "aml-file", file);
+      g_signal_connect (sw, "state-set", G_CALLBACK (on_mod_toggled), self);
+      adw_action_row_add_suffix (ADW_ACTION_ROW (row), sw);
+    }
 
-  /* The button is only the three dot icon; the row title says which
-     file, but the button needs a name of its own to be announced. */
-  gtk_widget_set_tooltip_text (menu_button, "More actions");
-  gtk_accessible_update_property (GTK_ACCESSIBLE (menu_button),
-                                  GTK_ACCESSIBLE_PROPERTY_LABEL,
-                                  "More actions", -1);
-
-  /* Two flat rows in the popover, the way GNOME writes a menu of two
-     things. */
-  gtk_widget_add_css_class (toggle, "flat");
-  gtk_widget_add_css_class (remove, "flat");
-  gtk_widget_set_margin_top (items, 6);
-  gtk_widget_set_margin_bottom (items, 6);
-  gtk_widget_set_margin_start (items, 6);
-  gtk_widget_set_margin_end (items, 6);
-  gtk_box_append (GTK_BOX (items), toggle);
-  gtk_box_append (GTK_BOX (items), remove);
-  gtk_popover_set_child (GTK_POPOVER (popover), items);
-
-  /* Each button carries the file it acts on. */
-  g_object_set_data (G_OBJECT (toggle), "aml-file", file);
-  g_object_set_data (G_OBJECT (remove), "aml-file", file);
-  g_signal_connect (toggle, "clicked", G_CALLBACK (on_toggle_clicked), self);
-  g_signal_connect (remove, "clicked", G_CALLBACK (on_remove_clicked), self);
-
-  gtk_menu_button_set_popover (GTK_MENU_BUTTON (menu_button), popover);
-
-  gtk_box_append (GTK_BOX (suffix), update);
-  gtk_box_append (GTK_BOX (suffix), menu_button);
-  adw_action_row_add_suffix (ADW_ACTION_ROW (row), suffix);
-
-  /* The buttons on the row carry the file they act on, so nothing on
-   * it has to know where the file came from. */
+  /* The row carries the file it is about, so the switch does not have to
+     know where the file came from. */
   g_object_set_data (G_OBJECT (row), "aml-file", file);
-  g_object_set_data (G_OBJECT (row), "aml-update", update);
-  g_object_set_data (G_OBJECT (update), "aml-file", file);
-  g_signal_connect (update, "clicked", G_CALLBACK (on_update_clicked), self);
 
   file_row_refresh (row);
 
@@ -1517,31 +1446,6 @@ reload_installed (AmlContentPage *self)
                           page_watch_new (self));
 }
 
-static void
-on_remove_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
-{
-  AmlContentPage *self = user_data;
-  AmlContentFile *file = g_object_get_data (G_OBJECT (source), "aml-file");
-  const char *response =
-    adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
-  g_autoptr (GFile) to_remove = NULL;
-  g_autoptr (GError) error = NULL;
-
-  if (file == NULL || g_strcmp0 (response, "remove") != 0)
-    return;
-
-  to_remove = g_file_new_for_path (file->path);
-
-  if (!g_file_delete (to_remove, NULL, &error))
-    {
-      show_error (self, "The file cannot be removed", error);
-      return;
-    }
-
-  show_toast (self, "Removed");
-  reload_installed (self);
-}
-
 /* The newer version Modrinth has for one file, or the words that it has
  * nothing newer for. */
 static void
@@ -1634,23 +1538,6 @@ on_update_all_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   g_object_set_data (G_OBJECT (self), "aml-update-run", run);
   set_busy (self, TRUE);
   update_run_next (run);
-}
-
-static void
-on_update_clicked (GtkButton *button, gpointer user_data)
-{
-  AmlContentPage *self = user_data;
-  AmlContentFile *file = g_object_get_data (G_OBJECT (button), "aml-file");
-
-  if (file == NULL || file->sha1 == NULL || file->project_id == NULL)
-    return;
-
-  g_object_set_data (G_OBJECT (self), "aml-update-file", file);
-  set_busy (self, TRUE);
-  aml_modrinth_update_by_hash_async (self->type, file->sha1,
-                                     self->minecraft_version, self->loader,
-                                     self->browse, on_update_ready,
-                                     page_watch_new (self));
 }
 
 static void

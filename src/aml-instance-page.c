@@ -38,15 +38,16 @@ struct _AmlInstancePage
    * this page alive. */
   GtkWidget *toast_overlay;
   GtkWidget *icon_row;
-  GtkWidget *icon_image;
+  GtkWidget *icon_path_label; /* the icon path inside the chooser button */
   GtkWidget *stack; /* the AdwViewStack holding the pages of the instance */
 
-  /* The Directory row: the path, the two buttons that act on it and the
-     spinner that shows a move in progress. A move in progress makes them
-     insensitive, so a second one cannot start on top of it. */
+  /* The Directory row: the chooser button that says where the instance is
+     and the spinner that shows a move in progress. A move in progress
+     makes the button insensitive, so a second one cannot start on top of
+     it. */
   GtkWidget *directory_row;
-  GtkWidget *directory_open;
   GtkWidget *directory_change;
+  GtkWidget *directory_path_label; /* the path inside the chooser button */
   GtkWidget *directory_spinner;
 
   /* The Java row plus what we know about it. Row load = detection
@@ -606,36 +607,48 @@ on_custom_java_clicked (GtkButton *button G_GNUC_UNUSED,
  * The icon row
  * ---------------------------------------------------------- */
 
+/* A button that shows a folder, the path it is about and the arrow that
+ * says pressing it chooses another one. The label is handed back so the
+ * row can put the new path in it after the choice. */
+static GtkWidget *
+path_button (const char *path, GtkWidget **label)
+{
+  GtkWidget *button = gtk_button_new ();
+  GtkWidget *box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  GtkWidget *image = gtk_image_new_from_icon_name ("folder-symbolic");
+  GtkWidget *text = gtk_label_new (path);
+  GtkWidget *arrow = gtk_image_new_from_icon_name ("pan-end-symbolic");
+
+  /* A path is long, and the middle of it is what tells two paths apart.
+     The cap keeps a deep path from making the row as wide as itself. */
+  gtk_label_set_ellipsize (GTK_LABEL (text), PANGO_ELLIPSIZE_MIDDLE);
+  gtk_label_set_max_width_chars (GTK_LABEL (text), 30);
+
+  gtk_widget_set_valign (image, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (text, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (arrow, GTK_ALIGN_CENTER);
+
+  gtk_box_append (GTK_BOX (box), image);
+  gtk_box_append (GTK_BOX (box), text);
+  gtk_box_append (GTK_BOX (box), arrow);
+  gtk_button_set_child (GTK_BUTTON (button), box);
+
+  if (label != NULL)
+    *label = text;
+
+  return button;
+}
+
 static void
 update_icon_row (AmlInstancePage *self)
 {
   g_autofree char *icon = instance_string (self->instance, "icon");
 
-  if (self->icon_row == NULL || self->icon_image == NULL)
+  if (self->icon_path_label == NULL)
     return;
 
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (self->icon_row),
-                               icon != NULL ? icon : "Default");
-
-  if (icon != NULL && g_file_test (icon, G_FILE_TEST_IS_REGULAR))
-    {
-      g_autoptr (GFile) file = g_file_new_for_path (icon);
-      g_autoptr (GError) error = NULL;
-      g_autoptr (GdkTexture) texture = gdk_texture_new_from_file (file, &error);
-
-      if (texture != NULL)
-        {
-          gtk_image_set_from_paintable (GTK_IMAGE (self->icon_image),
-                                        GDK_PAINTABLE (texture));
-          return;
-        }
-
-      /* Not a readable image: fall back to the placeholder instead of
-       * showing a broken picture. */
-    }
-
-  gtk_image_set_from_icon_name (GTK_IMAGE (self->icon_image),
-                                "applications-games-symbolic");
+  gtk_label_set_text (GTK_LABEL (self->icon_path_label),
+                      icon != NULL ? icon : "Default");
 }
 
 static void
@@ -736,9 +749,9 @@ on_open_folder_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
  * Changing the directory
  * ---------------------------------------------------------- */
 
-/* The row says where the instance is, and which of the two things may be
- * done to it right now. A running game has its files open where they are,
- * so neither button does anything until it has stopped. */
+/* The row says where the instance is, and whether it may be moved right
+ * now. A running game has its files open where they are, so the button
+ * does nothing until it has stopped. */
 static void
 update_directory_row (AmlInstancePage *self)
 {
@@ -748,11 +761,14 @@ update_directory_row (AmlInstancePage *self)
   if (self->directory_row == NULL)
     return;
 
-  adw_action_row_set_subtitle (
-    ADW_ACTION_ROW (self->directory_row),
-    instance_string (self->instance, "directory"));
+  if (self->directory_path_label != NULL)
+    {
+      g_autofree char *directory =
+        instance_string (self->instance, "directory");
 
-  gtk_widget_set_sensitive (self->directory_open, !running);
+      gtk_label_set_text (GTK_LABEL (self->directory_path_label), directory);
+    }
+
   gtk_widget_set_sensitive (self->directory_change, !running);
 }
 
@@ -760,7 +776,6 @@ static void
 set_moving (AmlInstancePage *self, gboolean moving)
 {
   gtk_widget_set_visible (self->directory_spinner, moving);
-  gtk_widget_set_sensitive (self->directory_open, !moving);
   gtk_widget_set_sensitive (self->directory_change, !moving);
 }
 
@@ -1021,7 +1036,7 @@ create_settings_page (AmlInstancePage *self)
   GtkWidget *minecraft = adw_preferences_group_new ();
   GtkWidget *java = adw_preferences_group_new ();
   GtkWidget *actions = adw_preferences_group_new ();
-  GtkWidget *change_icon = gtk_button_new_with_label ("Change");
+  GtkWidget *change_icon = NULL;
   GtkWidget *delete_row = NULL;
 
   /* Names, paths and arguments are text from the user or the disk: none
@@ -1045,11 +1060,13 @@ create_settings_page (AmlInstancePage *self)
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->icon_row),
                                       FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->icon_row), "Icon");
-  self->icon_image = gtk_image_new ();
-  gtk_image_set_pixel_size (GTK_IMAGE (self->icon_image), 32);
-  adw_action_row_add_prefix (ADW_ACTION_ROW (self->icon_row), self->icon_image);
 
+  /* The button is the path and the chooser at once: pressing it picks a
+     file, and what it picked is written in it. */
+  change_icon = path_button (NULL, &self->icon_path_label);
+  gtk_widget_add_css_class (change_icon, "flat");
   gtk_widget_set_valign (change_icon, GTK_ALIGN_CENTER);
+  gtk_widget_set_tooltip_text (change_icon, "Choose an Icon");
   g_signal_connect (change_icon, "clicked",
                     G_CALLBACK (on_change_icon_clicked), self);
   adw_action_row_add_suffix (ADW_ACTION_ROW (self->icon_row), change_icon);
@@ -1058,26 +1075,19 @@ create_settings_page (AmlInstancePage *self)
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (general), self->icon_row);
   update_icon_row (self);
 
-  /* Directory: where the files are, and the two things that can be done
-     to them. Opening and changing are separate on purpose: one only
-     looks, the other moves every file. */
+  /* Directory: where the files are. Pressing the button moves every file
+     to another folder, which is the only thing the row does. */
   self->directory_row = adw_action_row_new ();
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->directory_row),
                                       FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->directory_row),
                                  "Directory");
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (self->directory_row),
-                               directory);
 
-  self->directory_open = gtk_button_new_with_label ("Open Folder");
-  gtk_widget_add_css_class (self->directory_open, "flat");
-  gtk_widget_set_valign (self->directory_open, GTK_ALIGN_CENTER);
-  g_signal_connect (self->directory_open, "clicked",
-                    G_CALLBACK (on_open_folder_clicked), self);
-
-  self->directory_change = gtk_button_new_with_label ("Change");
+  self->directory_change = path_button (directory,
+                                        &self->directory_path_label);
   gtk_widget_add_css_class (self->directory_change, "flat");
   gtk_widget_set_valign (self->directory_change, GTK_ALIGN_CENTER);
+  gtk_widget_set_tooltip_text (self->directory_change, "Change the Directory");
   g_signal_connect (self->directory_change, "clicked",
                     G_CALLBACK (on_change_directory_clicked), self);
 
@@ -1088,9 +1098,9 @@ create_settings_page (AmlInstancePage *self)
   adw_action_row_add_suffix (ADW_ACTION_ROW (self->directory_row),
                              self->directory_spinner);
   adw_action_row_add_suffix (ADW_ACTION_ROW (self->directory_row),
-                             self->directory_open);
-  adw_action_row_add_suffix (ADW_ACTION_ROW (self->directory_row),
                              self->directory_change);
+  adw_action_row_set_activatable_widget (ADW_ACTION_ROW (self->directory_row),
+                                         self->directory_change);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (general),
                              self->directory_row);
   update_directory_row (self);
@@ -1311,12 +1321,12 @@ aml_instance_page_dispose (GObject *object)
    * the instance stay, so those operations can still finish. */
   self->toast_overlay = NULL;
   self->icon_row = NULL;
-  self->icon_image = NULL;
+  self->icon_path_label = NULL;
   self->stack = NULL;
   self->java_row = NULL;
   self->directory_row = NULL;
-  self->directory_open = NULL;
   self->directory_change = NULL;
+  self->directory_path_label = NULL;
   self->directory_spinner = NULL;
 
   g_cancellable_cancel (self->cancellable);
