@@ -54,6 +54,17 @@ struct _AmlContentPage
    * because a request can answer after the tree is gone. */
   GtkWidget *toasts;
   GtkWidget *stack;
+
+  /* The row that decides between Installed and Browse: the actions of
+   * the list being shown on the left, the switcher on the right. Only
+   * one of the two action boxes is a child of it at a time. */
+  GtkWidget *bar;
+  GtkWidget *bar_spacer; /* takes the room between the actions and the
+                            switcher, so the switcher sits at the right */
+  GtkWidget *switcher;
+  GtkWidget *installed_actions;
+  GtkWidget *browse_actions;
+
   GtkWidget *installed_group;
   GtkWidget *installed_scroller;
   GtkWidget *installed_status;
@@ -2110,11 +2121,11 @@ build_installed (AmlContentPage *self)
   gtk_widget_set_visible (self->spinner, FALSE);
   gtk_box_append (GTK_BOX (actions), self->spinner);
 
-  gtk_widget_set_margin_top (actions, 6);
-  gtk_widget_set_margin_bottom (actions, 6);
-  gtk_widget_set_margin_start (actions, 12);
-  gtk_widget_set_margin_end (actions, 12);
-  gtk_box_append (GTK_BOX (box), actions);
+  /* The actions belong to the toolbar row above both lists, not to this
+     one of them: they are the same row whichever list is shown, and
+     moving them keeps a download in progress from being thrown away by a
+     visit to the other list. */
+  self->installed_actions = actions;
 
   self->installed_status = adw_status_page_new ();
   adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->installed_status),
@@ -2145,6 +2156,9 @@ build_installed (AmlContentPage *self)
 
 /* The list of what Modrinth has for this instance is asked for when
  * Browse is looked at, not when the instance page is opened. */
+/* Defined with the row it moves into, further down. */
+static void move_actions_into_bar (AmlContentPage *self, gboolean browsing);
+
 static void
 on_stack_switched (GObject *stack, GParamSpec *pspec G_GNUC_UNUSED,
                    gpointer user_data)
@@ -2152,8 +2166,12 @@ on_stack_switched (GObject *stack, GParamSpec *pspec G_GNUC_UNUSED,
   AmlContentPage *self = user_data;
   const char *visible = adw_view_stack_get_visible_child_name (
       ADW_VIEW_STACK (stack));
+  gboolean browsing = g_strcmp0 (visible, "browse") == 0;
 
-  if (g_strcmp0 (visible, "browse") != 0 || self->browse_searched)
+  /* The row shows the actions of whichever list is on top. */
+  move_actions_into_bar (self, browsing);
+
+  if (!browsing || self->browse_searched)
     return;
 
   self->browse_searched = TRUE;
@@ -2215,11 +2233,7 @@ build_browse (AmlContentPage *self)
   gtk_widget_set_size_request (filter_scroller, 220, -1);
   gtk_popover_set_child (GTK_POPOVER (popover), filter_scroller);
 
-  gtk_widget_set_margin_top (top, 6);
-  gtk_widget_set_margin_bottom (top, 6);
-  gtk_widget_set_margin_start (top, 12);
-  gtk_widget_set_margin_end (top, 12);
-  gtk_box_append (GTK_BOX (box), top);
+  self->browse_actions = top;
 
   self->results_status = adw_status_page_new ();
   adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->results_status),
@@ -2271,6 +2285,79 @@ build_browse (AmlContentPage *self)
 
   adw_view_stack_add_titled (ADW_VIEW_STACK (self->stack), box, "browse",
                              "Browse");
+}
+
+/* ---------------------------------------------------------- *
+ * The row that decides between Installed and Browse
+ *
+ * A row of the page, not a second header bar. A header bar here would
+ * carry a title and a close button over content that has neither, and
+ * would put two bars between the top of the tab and the list. It is a
+ * plain box: the actions of the list being shown on the left, the
+ * switcher on the right, because which list is shown is what the right
+ * end of a toolbar row is for.
+ * ---------------------------------------------------------- */
+
+static void
+build_bar (AmlContentPage *self)
+{
+  GtkWidget *inner = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+
+  self->bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  self->switcher = adw_view_switcher_new ();
+
+  /* The actions go in before this and the switcher after it, so the
+     switcher ends up at the right end of the row however many actions
+     there are. Aligning inside a box would not move it: a box gives every
+     child its own width. */
+  self->bar_spacer = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+  gtk_widget_set_hexpand (self->bar_spacer, TRUE);
+
+  adw_view_switcher_set_policy (ADW_VIEW_SWITCHER (self->switcher),
+                                ADW_VIEW_SWITCHER_POLICY_WIDE);
+  adw_view_switcher_set_stack (ADW_VIEW_SWITCHER (self->switcher),
+                               ADW_VIEW_STACK (self->stack));
+  gtk_widget_set_valign (self->switcher, GTK_ALIGN_CENTER);
+
+  gtk_box_append (GTK_BOX (self->bar), self->bar_spacer);
+  gtk_box_append (GTK_BOX (self->bar), self->switcher);
+
+  gtk_widget_set_margin_top (self->bar, 6);
+  gtk_widget_set_margin_bottom (self->bar, 6);
+  gtk_widget_set_margin_start (self->bar, 12);
+  gtk_widget_set_margin_end (self->bar, 12);
+
+  gtk_box_append (GTK_BOX (inner), self->bar);
+  gtk_box_append (GTK_BOX (inner), self->stack);
+
+  /* One overlay over the row and the list, so a message about either one
+     is said in the same place. */
+  self->toasts = adw_toast_overlay_new ();
+  adw_toast_overlay_set_child (ADW_TOAST_OVERLAY (self->toasts), inner);
+  gtk_box_append (GTK_BOX (self), self->toasts);
+}
+
+/* The actions of the list being shown go into the row, at its left, and
+   the ones of the other list come out. A widget with no parent is the one
+   that belongs here, because only one list holds them at a time. */
+static void
+move_actions_into_bar (AmlContentPage *self, gboolean browsing)
+{
+  GtkWidget *wanted = browsing ? self->browse_actions
+                               : self->installed_actions;
+  GtkWidget *other = browsing ? self->installed_actions
+                              : self->browse_actions;
+
+  if (self->bar == NULL)
+    return;
+
+  if (other != NULL && gtk_widget_get_parent (other) == self->bar)
+    gtk_box_remove (GTK_BOX (self->bar), other);
+
+  /* At the front, which is the left end of the row: everything after it
+     is the spacer and then the switcher. */
+  if (wanted != NULL && gtk_widget_get_parent (wanted) != self->bar)
+    gtk_box_insert_child_after (GTK_BOX (self->bar), wanted, NULL);
 }
 
 AmlContentPage *
@@ -2342,23 +2429,8 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
   g_signal_connect (self->stack, "notify::visible-child-name",
                     G_CALLBACK (on_stack_switched), self);
 
-  {
-    GtkWidget *switcher = adw_view_switcher_new ();
-    GtkWidget *header = adw_header_bar_new ();
-
-    adw_view_switcher_set_policy (ADW_VIEW_SWITCHER (switcher),
-                                  ADW_VIEW_SWITCHER_POLICY_WIDE);
-    adw_view_switcher_set_stack (ADW_VIEW_SWITCHER (switcher),
-                                 ADW_VIEW_STACK (self->stack));
-    adw_header_bar_set_title_widget (ADW_HEADER_BAR (header), switcher);
-
-    self->toasts = adw_toast_overlay_new ();
-    adw_toast_overlay_set_child (ADW_TOAST_OVERLAY (self->toasts),
-                                 self->stack);
-
-    gtk_box_append (GTK_BOX (self), header);
-    gtk_box_append (GTK_BOX (self), self->toasts);
-  }
+  build_bar (self);
+  move_actions_into_bar (self, FALSE);
 
   reload_installed (self);
 
@@ -2374,6 +2446,11 @@ aml_content_page_dispose (GObject *object)
    * request of its own: nothing of it is touched afterwards. */
   self->toasts = NULL;
   self->stack = NULL;
+  self->bar = NULL;
+  self->bar_spacer = NULL;
+  self->switcher = NULL;
+  self->installed_actions = NULL;
+  self->browse_actions = NULL;
   self->installed_group = NULL;
   self->installed_scroller = NULL;
   self->installed_status = NULL;
