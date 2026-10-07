@@ -2253,8 +2253,9 @@ on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
     g_timeout_add (SEARCH_DELAY_MS, on_search_timeout, self);
 }
 
-/* Escape first forgets what was typed, and closes the field when there
- * is nothing left to forget.
+/* Escape means "forget what I typed". The bar of this page is always
+ * open, so there is nothing for Escape to close and it would be swallowed
+ * without clearing anything.
  *
  * GTK4 has no key-press-event signal and no stop-searching signal on
  * GtkSearchEntry, so the key is taken with a controller of its own. It is
@@ -2273,12 +2274,9 @@ on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
   if (keyval != GDK_KEY_Escape)
     return GDK_EVENT_PROPAGATE;
 
-  /* Escape first forgets what was typed, then closes the field. */
   if (*gtk_editable_get_text (
         GTK_EDITABLE (self->search_entry)) != '\0')
     gtk_editable_set_text (GTK_EDITABLE (self->search_entry), "");
-  else
-    gtk_search_bar_set_search_mode (GTK_SEARCH_BAR (self->search_bar), FALSE);
 
   return GDK_EVENT_STOP;
 }
@@ -2853,7 +2851,6 @@ build_browse (AmlContentPage *self)
 {
   GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   GtkWidget *top = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *search_button = gtk_toggle_button_new ();
   GtkWidget *search_bar = gtk_search_bar_new ();
   GtkWidget *search_entry = gtk_search_entry_new ();
   GtkWidget *filter_button = gtk_menu_button_new ();
@@ -2873,6 +2870,7 @@ build_browse (AmlContentPage *self)
 
   self->search_entry = search_entry;
   self->search_bar = search_bar;
+  gtk_widget_add_css_class (search_bar, "content-search-bar");
   /* A field about a quarter wider than the one the placeholder alone
      would ask for, so there is more room for the words typed into it. */
   gtk_widget_set_size_request (search_entry, 390, -1);
@@ -2882,6 +2880,11 @@ build_browse (AmlContentPage *self)
   gtk_search_bar_set_child (GTK_SEARCH_BAR (search_bar), search_entry);
   gtk_search_bar_set_key_capture_widget (GTK_SEARCH_BAR (search_bar),
                                          GTK_WIDGET (self));
+
+  /* Search is what this page is for, so the entry is there from the
+     start: the user should be able to type without first asking for the
+     box to appear. Ctrl+F and Escape still work on it. */
+  gtk_search_bar_set_search_mode (GTK_SEARCH_BAR (search_bar), TRUE);
 
   g_signal_connect (search_entry, "changed",
                     G_CALLBACK (on_search_changed), self);
@@ -2893,18 +2896,6 @@ build_browse (AmlContentPage *self)
     g_signal_connect (keys, "key-pressed", G_CALLBACK (on_search_key), self);
   }
 
-  /* Search is asked for by its own button and the field is closed until
-     then: the entry is not a band sitting over the list for no reason. */
-  gtk_button_set_icon_name (GTK_BUTTON (search_button),
-                            "system-search-symbolic");
-  gtk_widget_add_css_class (search_button, "flat");
-  gtk_widget_set_valign (search_button, GTK_ALIGN_CENTER);
-  gtk_widget_set_tooltip_text (search_button, "Search");
-  gtk_accessible_update_property (GTK_ACCESSIBLE (search_button),
-                                  GTK_ACCESSIBLE_PROPERTY_LABEL, "Search", -1);
-  g_object_bind_property (search_bar, "search-mode-enabled", search_button,
-                          "active", G_BINDING_BIDIRECTIONAL);
-  gtk_box_append (GTK_BOX (top), search_button);
   gtk_box_append (GTK_BOX (top), search_bar);
 
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (filter_button),

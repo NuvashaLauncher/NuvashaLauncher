@@ -26,6 +26,39 @@ static const GActionEntry app_entries[] = {
   { .name = "quit", .activate = on_quit },
 };
 
+/* The search field of a content page wears the colours of any other
+ * entry: the search bar around it paints no band of its own and does not
+ * dim the entry when the window loses focus. The bar is always open, so
+ * what it holds should not look like a band over the list. */
+static const char app_css[] =
+  "searchbar.content-search-bar > revealer > box,"
+  "searchbar.content-search-bar > revealer > box:backdrop {"
+  "  background: none;"
+  "  box-shadow: none;"
+  "}"
+  "searchbar.content-search-bar > revealer > box:backdrop > * {"
+  "  filter: none;"
+  "}";
+
+static void
+load_app_css (void)
+{
+  static gboolean loaded = FALSE;
+
+  if (loaded)
+    return;
+
+  GtkCssProvider *provider = gtk_css_provider_new ();
+
+  gtk_css_provider_load_from_string (provider, app_css);
+  gtk_style_context_add_provider_for_display (
+    gdk_display_get_default (), GTK_STYLE_PROVIDER (provider),
+    GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+  g_object_unref (provider);
+  loaded = TRUE;
+}
+
 static void
 on_activate (GApplication *app, gpointer user_data G_GNUC_UNUSED)
 {
@@ -38,6 +71,8 @@ on_activate (GApplication *app, gpointer user_data G_GNUC_UNUSED)
       gtk_window_present (window);
       return;
     }
+
+  load_app_css ();
 
   g_autoptr (AmlInstanceManager) manager = aml_instance_manager_new (NULL);
   g_autoptr (GError) error = NULL;
