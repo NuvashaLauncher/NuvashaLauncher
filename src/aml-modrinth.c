@@ -1372,15 +1372,20 @@ aml_modrinth_versions_async (const char *project_id, AmlContentType type,
                              GCancellable *cancellable,
                              GAsyncReadyCallback callback, gpointer user_data)
 {
-  g_autoptr (GTask) task = NULL;
+  g_autoptr (GTask) task_ref = NULL;
   g_autofree char *game_versions = NULL;
   g_autofree char *loaders = NULL;
+  g_autofree char *escaped_id = NULL;
+  g_autofree char *escaped_game = NULL;
+  g_autofree char *escaped_loaders = NULL;
   g_autofree char *url = NULL;
 
   g_return_if_fail (project_id != NULL);
   g_return_if_fail (minecraft_version != NULL);
 
   game_versions = string_array_json (minecraft_version);
+  escaped_id = g_uri_escape_string (project_id, NULL, FALSE);
+  escaped_game = g_uri_escape_string (game_versions, NULL, FALSE);
 
   /* Only a mod is asked for by loader.
    *
@@ -1393,27 +1398,27 @@ aml_modrinth_versions_async (const char *project_id, AmlContentType type,
    * having no compatible version. */
   if (aml_content_type_needs_loader (type) && loader != NULL &&
       *loader != '\0')
-    loaders = string_array_json (loader);
+    {
+      loaders = string_array_json (loader);
+      escaped_loaders = g_uri_escape_string (loaders, NULL, FALSE);
+    }
 
-  if (loaders != NULL)
+  if (escaped_loaders != NULL)
     url = g_strdup_printf (
         AML_MODRINTH_URL "/project/%s/version?game_versions=%s&loaders=%s",
-        g_uri_escape_string (project_id, NULL, FALSE),
-        g_uri_escape_string (game_versions, NULL, FALSE),
-        g_uri_escape_string (loaders, NULL, FALSE));
+        escaped_id, escaped_game, escaped_loaders);
   else
     url = g_strdup_printf (
         AML_MODRINTH_URL "/project/%s/version?game_versions=%s",
-        g_uri_escape_string (project_id, NULL, FALSE),
-        g_uri_escape_string (game_versions, NULL, FALSE));
+        escaped_id, escaped_game);
 
-  task = request_new (cancellable, callback, user_data, versions_answer,
-                      AML_NOT_FOUND_IS_ERROR,
-                      instance_ask_new (type, minecraft_version, loader),
-                      instance_ask_free);
+  task_ref = request_new (cancellable, callback, user_data, versions_answer,
+                          AML_NOT_FOUND_IS_ERROR,
+                          instance_ask_new (type, minecraft_version, loader),
+                          instance_ask_free);
 
   aml_download_json_async (url, cancellable, json_ready,
-                           g_steal_pointer (&task));
+                           g_steal_pointer (&task_ref));
 }
 
 GPtrArray *
