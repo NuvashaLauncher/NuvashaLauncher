@@ -100,6 +100,7 @@ struct _AmlContentPage
   GList *detail_rows;    /* the rows of the page of a project */
   GHashTable *projects; /* project id -> NULL */
   GHashTable *project_icons; /* project id -> icon url the browser saw */
+  GHashTable *project_descriptions; /* project id -> what it is */
 
   /* The search: what was asked for, what came back, and where the list
    * stands. */
@@ -1177,7 +1178,6 @@ toggle_file (AmlContentPage *self, AmlContentFile *file)
     {
       g_hash_table_remove (self->rows, old_path);
       g_hash_table_insert (self->rows, g_strdup (file->path), row);
-      adw_action_row_set_subtitle (ADW_ACTION_ROW (row), file->path);
       gtk_widget_set_tooltip_text (row, file->path);
     }
 
@@ -1199,6 +1199,50 @@ file_row_refresh (GtkWidget *row)
   adw_preferences_row_set_title (
       ADW_PREFERENCES_ROW (row),
       file->version_name != NULL ? file->version_name : file->filename);
+}
+
+/* At most the first two sentences of @text. A terminator only ends a
+ * sentence at the end of the text or before a space, so "e.g." and
+ * "3.5" do not count as two of them. */
+static char *
+first_two_sentences (const char *text)
+{
+  gsize length = strlen (text);
+  gsize end = 0;
+  guint sentences = 0;
+
+  for (gsize i = 0; i < length && sentences < 2; i++)
+    {
+      char c = text[i];
+
+      if ((c == '.' || c == '!' || c == '?') &&
+          (i + 1 == length || g_ascii_isspace (text[i + 1])))
+        {
+          sentences++;
+          end = i + 1;
+        }
+    }
+
+  if (sentences < 2)
+    return g_strdup (text);
+
+  /* @end is right after the second terminator, so the space behind it is
+     already outside the slice. */
+  return g_strndup (text, end);
+}
+
+/* What an installed file's project is, under its name. What the file is
+ * called and where it lives is what the row's tooltip is for. */
+static void
+row_show_description (GtkWidget *row, const char *description)
+{
+  g_autofree char *short_text = NULL;
+
+  if (row == NULL || description == NULL || *description == '\0')
+    return;
+
+  short_text = first_two_sentences (description);
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), short_text);
 }
 
 /* The switch of a mod row: on means the mod loads, off means its file
@@ -1301,12 +1345,10 @@ file_row (AmlContentPage *self, AmlContentFile *file)
   GtkWidget *icon = aml_icon_widget_new (aml_content_type_icon (self->type));
 
   /* A file name and a path are plain text: markup off first, because
-     either may hold an "&". The path is kept to two lines so a long one
-     does not make this row taller than the one above it; the whole path
-     is the row's tooltip. */
+     either may hold an "&". Where the file lives is the row's tooltip;
+     under the name goes what the project is, once Modrinth says so. */
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), file->filename);
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), file->path);
   adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 2);
   adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (row), FALSE);
   gtk_widget_set_tooltip_text (row, file->path);
@@ -1821,18 +1863,32 @@ installed_icon_details (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   details = aml_modrinth_details_finish (result, &error);
 
-  if (self != NULL && details != NULL && details->icon_url != NULL &&
-      *details->icon_url != '\0')
+  if (self != NULL && details != NULL)
     {
       GtkWidget *icon = NULL;
 
-      g_hash_table_insert (self->project_icons, g_strdup (lookup->project_id),
-                           g_strdup (details->icon_url));
+      /* What the project is, under the file's name, and the icon. Both
+         are remembered for the rows of the same project, rebuilt or
+         reached through the browser. */
+      if (details->description != NULL && *details->description != '\0')
+        {
+          g_hash_table_insert (self->project_descriptions,
+                               g_strdup (lookup->project_id),
+                               g_strdup (details->description));
+          row_show_description (lookup->row, details->description);
+        }
 
-      icon = g_object_get_data (G_OBJECT (lookup->row), "aml-icon");
+      if (details->icon_url != NULL && *details->icon_url != '\0')
+        {
+          g_hash_table_insert (self->project_icons,
+                               g_strdup (lookup->project_id),
+                               g_strdup (details->icon_url));
 
-      if (icon != NULL)
-        start_row_icon (icon, details->icon_url);
+          icon = g_object_get_data (G_OBJECT (lookup->row), "aml-icon");
+
+          if (icon != NULL)
+            start_row_icon (icon, details->icon_url);
+        }
     }
 
   installed_icon_free (lookup);
@@ -1843,11 +1899,18 @@ installed_icon_lookup (AmlContentPage *self, GtkWidget *row,
                        const char *project_id)
 {
   const char *known = NULL;
+  const char *description = NULL;
 
   if (project_id == NULL || *project_id == '\0')
     return;
 
   known = g_hash_table_lookup (self->project_icons, project_id);
+  description = g_hash_table_lookup (self->project_descriptions, project_id);
+
+  /* A description the browser already read goes in without asking again,
+     even when the icon still has to be fetched. */
+  if (description != NULL)
+    row_show_description (row, description);
 
   if (known != NULL)
     {
@@ -1919,6 +1982,11 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
         g_hash_table_insert (self->project_icons,
                              g_strdup (project->project_id),
                              g_strdup (project->icon_url));
+
+      if (project->description != NULL && *project->description != '\0')
+        g_hash_table_insert (self->project_descriptions,
+                             g_strdup (project->project_id),
+                             g_strdup (project->description));
 
       /* The icon, then the name and the description under it. Nothing
          else: who wrote it, how often it was taken, which game version
@@ -2520,13 +2588,20 @@ on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   if (body != NULL)
     gtk_label_set_text (GTK_LABEL (body), details->body);
 
-  /* The details page of the browser saw the icon too, so the installed
-     row of the same project can use it. */
-  if (self->details_project != NULL && details->icon_url != NULL &&
-      *details->icon_url != '\0')
-    g_hash_table_insert (self->project_icons,
-                         g_strdup (self->details_project),
-                         g_strdup (details->icon_url));
+  /* The details page of the browser saw the icon and the description
+     too, so the installed row of the same project can use them. */
+  if (self->details_project != NULL)
+    {
+      if (details->icon_url != NULL && *details->icon_url != '\0')
+        g_hash_table_insert (self->project_icons,
+                             g_strdup (self->details_project),
+                             g_strdup (details->icon_url));
+
+      if (details->description != NULL && *details->description != '\0')
+        g_hash_table_insert (self->project_descriptions,
+                             g_strdup (self->details_project),
+                             g_strdup (details->description));
+    }
 
   author = g_strdup_printf ("%s  ·  by %s", details->license != NULL
                                                    ? details->license
@@ -2991,6 +3066,8 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
                                           NULL);
   self->project_icons = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                                g_free);
+  self->project_descriptions = g_hash_table_new_full (g_str_hash, g_str_equal,
+                                                      g_free, g_free);
 
   g_object_get (instance, "directory", &directory, NULL);
 
@@ -3110,6 +3187,7 @@ aml_content_page_finalize (GObject *object)
   g_clear_pointer (&self->rows, g_hash_table_unref);
   g_clear_pointer (&self->projects, g_hash_table_unref);
   g_clear_pointer (&self->project_icons, g_hash_table_unref);
+  g_clear_pointer (&self->project_descriptions, g_hash_table_unref);
   g_clear_pointer (&self->categories, g_ptr_array_unref);
   g_clear_pointer (&self->results, g_ptr_array_unref);
   g_list_free (self->installed_rows);
