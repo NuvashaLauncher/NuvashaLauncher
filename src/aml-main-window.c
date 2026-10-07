@@ -2,10 +2,10 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* The AML main window: header bar menus, the instance grid and the
- * empty state. Instances are shown exactly as AmlInstanceManager keeps
- * them; the Play button of a card starts the game through the launcher
- * of that instance and follows it while it runs. */
+/* The AML main window: header bar menus and the vertical list of
+ * instances, shown exactly as AmlInstanceManager keeps them, with an
+ * empty state behind it. The Play button of a row starts the game
+ * through the launcher of that instance and follows it while it runs. */
 
 #include "aml-main-window.h"
 #include "aml-create-instance-dialog.h"
@@ -31,11 +31,11 @@ struct _AmlMainWindow
   AmlAccounts *accounts;
   AmlUsersPopover *users_popover;
 
-  /* One launcher per instance, keyed by its id, so the card of an
+  /* One launcher per instance, keyed by its id, so the row of an
      instance and its window always talk about the same launch. */
   GHashTable *launchers;
 
-  /* Switches between the empty state and the instance grid. The grid is
+  /* Switches between the empty state and the instance list. The list is
      what the window shows; an instance is a window of its own. */
   GtkWidget *stack;
 
@@ -508,9 +508,9 @@ set_menu_item_tooltip (GtkWidget  *root,
     }
 }
 
-/* A game that crashed is said out loud: the card shows the reason, but a
-   user watching the game, not the card, would otherwise find out only
-   by noticing it had stopped. */
+/* A game that crashed is said out loud: a user watching the game, not
+   the window, would otherwise find out only by noticing it had
+   stopped. */
 static void
 on_window_launcher_state (AmlLauncher *launcher G_GNUC_UNUSED,
                           AmlLaunchState state,
@@ -534,7 +534,7 @@ on_window_launcher_state (AmlLauncher *launcher G_GNUC_UNUSED,
 }
 
 /* The launcher of one instance, made when it is first asked for. It is
- * the one launcher the card and the page of that instance share, which
+ * the one launcher the row and the page of that instance share, which
  * is what keeps a game from being started twice. */
 static AmlLauncher *
 window_launcher (AmlMainWindow *self, const char *instance_id)
@@ -622,7 +622,7 @@ on_instance_renamed (AmlInstance *instance, GParamSpec *pspec G_GNUC_UNUSED,
 
 /* Opens @instance: the window it already has, brought forward, or a new
  * one of its own. The instance is a window, so two of them can be looked
- * at side by side and the grid is left where it is. */
+ * at side by side and the list is left where it is. */
 static void
 open_instance_window (AmlMainWindow *self, AmlInstance *instance)
 {
@@ -702,11 +702,11 @@ close_windows_of_removed_instances (AmlMainWindow *self)
     gtk_window_destroy (g_ptr_array_index (doomed, i));
 }
 
-/* Opens the page of the instance this card shows. The id is put on the
- * button when the card is bound, so a card that lost its instance
- * simply does nothing. */
+/* Opens the window of the instance this row is for: its Settings page.
+ * The id is put on the button when the row is bound, so a row that lost
+ * its instance simply does nothing. */
 static void
-on_card_clicked (GtkButton *button, gpointer user_data)
+on_open_instance_clicked (GtkButton *button, gpointer user_data)
 {
   AmlMainWindow *self = user_data;
   const char *id = g_object_get_data (G_OBJECT (button), "aml-instance-id");
@@ -723,41 +723,82 @@ on_card_clicked (GtkButton *button, gpointer user_data)
   open_instance_window (self, instance);
 }
 
-/* Play while the instance is idle, Stop while it is busy, and the state
- * of the launch under the button while there is one to show. */
+/* The folder button says when it could not open the folder, the way an
+ * other failing operation is said: a toast. */
 static void
-card_update (GtkWidget *play, GtkWidget *state, AmlLauncher *launcher)
+on_row_folder_ready (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  g_autoptr (GError) error = NULL;
+
+  if (!aml_instance_manager_open_folder_finish (AML_INSTANCE_MANAGER (source),
+                                                result, &error))
+    {
+      AdwToast *toast = adw_toast_new (error->message);
+
+      adw_toast_set_use_markup (toast, FALSE);
+      adw_toast_overlay_add_toast (ADW_TOAST_OVERLAY (self->toasts), toast);
+    }
+
+  g_object_unref (self);
+}
+
+static void
+on_row_folder_clicked (GtkButton *button, gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  const char *id = g_object_get_data (G_OBJECT (button), "aml-instance-id");
+  AmlInstance *instance = NULL;
+
+  if (id == NULL)
+    return;
+
+  instance = aml_instance_manager_get_by_id (self->manager, id);
+
+  if (instance == NULL)
+    return;
+
+  aml_instance_manager_open_folder_async (self->manager, instance, NULL,
+                                          on_row_folder_ready,
+                                          g_object_ref (self));
+}
+
+/* Play while the instance is idle, Stop while it is busy. */
+static void
+row_update (GtkWidget *play, AmlLauncher *launcher)
 {
   gboolean busy = aml_launch_state_is_busy (aml_launcher_get_state (launcher));
-  const char *detail = aml_launcher_get_state_detail (launcher);
+  GtkWidget *icon = g_object_get_data (G_OBJECT (play), "aml-icon");
+  GtkWidget *label = g_object_get_data (G_OBJECT (play), "aml-label");
 
-  gtk_button_set_label (GTK_BUTTON (play), busy ? "Stop" : "Play");
+  gtk_label_set_label (GTK_LABEL (label), busy ? "Stop" : "Play");
+  gtk_image_set_from_icon_name (GTK_IMAGE (icon),
+                                busy ? "media-playback-stop-symbolic"
+                                     : "media-playback-start-symbolic");
+  gtk_widget_set_tooltip_text (play, busy ? "Stop" : "Play");
 
-  /* The state line is the widget right above the button; a card that has
-     no room for one simply shows no state. */
-  if (state != NULL)
-    {
-      gtk_label_set_text (GTK_LABEL (state), detail != NULL ? detail : "");
-      gtk_widget_set_visible (state, detail != NULL && *detail != '\0');
-    }
+  /* The green belongs to a game that is about to start, not to a stop:
+     an idle row asks, a running one only allows stopping. */
+  if (busy)
+    gtk_widget_remove_css_class (play, "suggested-action");
+  else
+    gtk_widget_add_css_class (play, "suggested-action");
 }
 
 static void
-on_card_launcher_state (AmlLauncher *launcher, AmlLaunchState state G_GNUC_UNUSED,
-                        const char *detail G_GNUC_UNUSED, gpointer user_data)
+on_row_launcher_state (AmlLauncher *launcher, AmlLaunchState state G_GNUC_UNUSED,
+                       const char *detail G_GNUC_UNUSED, gpointer user_data)
 {
-  GtkWidget *play = user_data;
-
-  card_update (play, gtk_widget_get_prev_sibling (play), launcher);
+  row_update (GTK_WIDGET (user_data), launcher);
 }
 
-/* The card follows the launcher of the instance it shows. The card
- * takes a reference of its own, so a launcher that goes away first
- * cannot leave the card pointing at nothing. */
+/* The row follows the launcher of the instance it shows. The row takes a
+ * reference of its own, so a launcher that goes away first cannot leave
+ * the row pointing at nothing. */
 static void
-card_set_launcher (GtkWidget *play, AmlLauncher *launcher)
+row_set_launcher (GtkWidget *play, AmlLauncher *launcher)
 {
-  /* Stealing keeps the reference the card took in one place instead of
+  /* Stealing keeps the reference the row took in one place instead of
    * leaving it to the notify of whatever is put there next. */
   gpointer previous = g_object_steal_data (G_OBJECT (play), "aml-launcher");
 
@@ -773,10 +814,10 @@ card_set_launcher (GtkWidget *play, AmlLauncher *launcher)
   g_object_set_data_full (G_OBJECT (play), "aml-launcher",
                           g_object_ref (launcher), g_object_unref);
 
-  /* The connection goes with the card, so a card that outlives several
+  /* The connection goes with the row, so a row that outlives several
      launchers never follows one of them twice. */
   g_signal_connect_object (launcher, "state",
-                           G_CALLBACK (on_card_launcher_state), play, 0);
+                           G_CALLBACK (on_row_launcher_state), play, 0);
 }
 
 static void
@@ -797,24 +838,12 @@ on_play_clicked (GtkButton *button, gpointer user_data)
     aml_launcher_start (launcher);
 }
 
-/* The icon of one card, which is the first child of the content box. The
- * card is built by create_card() and walked the same way here and in
- * bind_card(). */
-static GtkWidget *
-card_icon (GtkWidget *card)
-{
-  GtkWidget *open = gtk_widget_get_first_child (card);
-  GtkWidget *content = open != NULL ? gtk_widget_get_first_child (open) : NULL;
-
-  return content != NULL ? gtk_widget_get_first_child (content) : NULL;
-}
-
 /* Puts the icon of @instance in @image, or the game square when it has
- * none or its file cannot be read. A card follows the icon of its
+ * none or its file cannot be read. A row follows the icon of its
  * instance, so an icon chosen on the instance page and the icon a
  * modpack install gives an instance both land here. */
 static void
-card_set_icon (GtkImage *image, AmlInstance *instance)
+row_set_icon (GtkImage *image, AmlInstance *instance)
 {
   g_autofree char *path = NULL;
 
@@ -836,84 +865,110 @@ card_set_icon (GtkImage *image, AmlInstance *instance)
 }
 
 static void
-on_card_icon_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
-                      gpointer user_data)
+on_row_icon_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
+                     gpointer user_data)
 {
-  card_set_icon (GTK_IMAGE (user_data), AML_INSTANCE (object));
+  row_set_icon (GTK_IMAGE (user_data), AML_INSTANCE (object));
 }
 
-/* One card of the instance grid. The button holds everything but Play
- * and the state, so clicking the card opens the instance page; the
- * children are appended in this order and bind_card() walks them in the
- * same order. */
+/* One row of the instance list. The Settings button holds the window of
+ * the instance, and every button is wired when the row is created; the
+ * instance id is put on each button when the row is bound, so a button
+ * of a row that lost its instance simply does nothing. */
 static GtkWidget *
-create_card (AmlMainWindow *self)
+create_row (AmlMainWindow *self)
 {
-  GtkWidget *card = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
-  GtkWidget *open = gtk_button_new ();
-  GtkWidget *content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
+  GtkWidget *row = adw_action_row_new ();
   GtkWidget *icon = gtk_image_new_from_icon_name ("applications-games-symbolic");
-  GtkWidget *name = gtk_label_new (NULL);
-  GtkWidget *version = gtk_label_new (NULL);
-  GtkWidget *state = gtk_label_new (NULL);
-  GtkWidget *play = gtk_button_new_with_label ("Play");
+  GtkWidget *settings = gtk_button_new_from_icon_name ("emblem-system-symbolic");
+  GtkWidget *folder = gtk_button_new_from_icon_name ("folder-symbolic");
+  GtkWidget *play = gtk_button_new ();
+  GtkWidget *play_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  GtkWidget *play_icon = gtk_image_new_from_icon_name ("media-playback-start-symbolic");
+  GtkWidget *play_label = gtk_label_new ("Play");
 
-  gtk_widget_set_margin_top (card, 12);
-  gtk_widget_set_margin_bottom (card, 12);
-  gtk_widget_set_margin_start (card, 12);
-  gtk_widget_set_margin_end (card, 12);
+  /* Names and versions are plain text and may hold an "&". */
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
+  adw_action_row_set_title_lines (ADW_ACTION_ROW (row), 1);
+  adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 1);
 
-  /* The square the icon of the instance is shown in; the placeholder is
-   * replaced when the instance has an icon. */
-  gtk_image_set_pixel_size (GTK_IMAGE (icon), 96);
-  gtk_widget_set_size_request (icon, 96, 96);
-  gtk_widget_set_halign (icon, GTK_ALIGN_CENTER);
+  /* Each row is its own card, set off the window background, with a
+     little space between rows. */
+  gtk_widget_add_css_class (row, "card");
+  gtk_widget_set_margin_top (row, 6);
+  gtk_widget_set_margin_bottom (row, 6);
 
-  gtk_label_set_ellipsize (GTK_LABEL (name), PANGO_ELLIPSIZE_END);
-  gtk_label_set_max_width_chars (GTK_LABEL (name), 16);
-  gtk_widget_set_halign (name, GTK_ALIGN_CENTER);
+  /* AdwActionRow is a GtkListBoxRow: put in a GtkListView its focus
+     handler would grab focus through GtkListBox and complain that the
+     row is not in one. Tab moves through the buttons instead. */
+  gtk_widget_set_can_focus (row, FALSE);
 
-  gtk_label_set_ellipsize (GTK_LABEL (version), PANGO_ELLIPSIZE_END);
-  gtk_label_set_max_width_chars (GTK_LABEL (version), 16);
-  gtk_widget_set_halign (version, GTK_ALIGN_CENTER);
-  gtk_widget_add_css_class (version, "dim-label");
+  gtk_image_set_pixel_size (GTK_IMAGE (icon), 48);
+  gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
+  adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
 
-  /* What the launch is doing: empty while nothing runs. */
-  gtk_label_set_ellipsize (GTK_LABEL (state), PANGO_ELLIPSIZE_END);
-  gtk_label_set_max_width_chars (GTK_LABEL (state), 20);
-  gtk_widget_set_halign (state, GTK_ALIGN_CENTER);
-  gtk_widget_add_css_class (state, "dim-label");
-  gtk_widget_set_visible (state, FALSE);
+  gtk_widget_set_valign (settings, GTK_ALIGN_CENTER);
+  gtk_widget_add_css_class (settings, "flat");
+  gtk_widget_set_tooltip_text (settings, "Settings");
+  gtk_accessible_update_property (GTK_ACCESSIBLE (settings),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL, "Settings",
+                                  -1);
 
-  gtk_box_append (GTK_BOX (content), icon);
-  gtk_box_append (GTK_BOX (content), name);
-  gtk_box_append (GTK_BOX (content), version);
+  gtk_widget_set_valign (folder, GTK_ALIGN_CENTER);
+  gtk_widget_add_css_class (folder, "flat");
+  gtk_widget_set_tooltip_text (folder, "Open Folder");
+  gtk_accessible_update_property (GTK_ACCESSIBLE (folder),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                  "Open Folder", -1);
 
-  gtk_button_set_child (GTK_BUTTON (open), content);
-  gtk_widget_set_hexpand (open, TRUE);
-  g_signal_connect (open, "clicked", G_CALLBACK (on_card_clicked), self);
+  gtk_image_set_pixel_size (GTK_IMAGE (play_icon), 16);
+  gtk_box_append (GTK_BOX (play_box), play_icon);
+  gtk_box_append (GTK_BOX (play_box), play_label);
+  gtk_button_set_child (GTK_BUTTON (play), play_box);
+  gtk_widget_set_valign (play, GTK_ALIGN_CENTER);
+  gtk_widget_add_css_class (play, "suggested-action");
+  gtk_widget_set_tooltip_text (play, "Play");
+  gtk_accessible_update_property (GTK_ACCESSIBLE (play),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL, "Play", -1);
 
-  gtk_box_append (GTK_BOX (card), open);
-  gtk_box_append (GTK_BOX (card), state);
-  gtk_box_append (GTK_BOX (card), play);
+  /* The play state swaps the icon and the label, so they are known by
+     the button itself rather than walked for. */
+  g_object_set_data (G_OBJECT (play), "aml-icon", play_icon);
+  g_object_set_data (G_OBJECT (play), "aml-label", play_label);
 
+  adw_action_row_add_suffix (ADW_ACTION_ROW (row), settings);
+  adw_action_row_add_suffix (ADW_ACTION_ROW (row), folder);
+  adw_action_row_add_suffix (ADW_ACTION_ROW (row), play);
+
+  g_signal_connect (settings, "clicked",
+                    G_CALLBACK (on_open_instance_clicked), self);
+  g_signal_connect (folder, "clicked",
+                    G_CALLBACK (on_row_folder_clicked), self);
   g_signal_connect (play, "clicked", G_CALLBACK (on_play_clicked), self);
 
-  return card;
+  /* The icon and the buttons are found again when the row is bound. */
+  g_object_set_data (G_OBJECT (row), "aml-icon", icon);
+  g_object_set_data (G_OBJECT (row), "aml-settings", settings);
+  g_object_set_data (G_OBJECT (row), "aml-folder", folder);
+  g_object_set_data (G_OBJECT (row), "aml-play", play);
+
+  return row;
 }
 
 static void
-setup_card (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
-            gpointer                  item,
-            gpointer                  user_data)
-{
-  gtk_list_item_set_child (GTK_LIST_ITEM (item), create_card (user_data));
-}
-
-static void
-bind_card (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
+setup_row (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
            gpointer                  item,
            gpointer                  user_data)
+{
+  gtk_list_item_set_child (GTK_LIST_ITEM (item), create_row (user_data));
+  /* Only an activatable item can be clicked on to open its instance. */
+  gtk_list_item_set_activatable (GTK_LIST_ITEM (item), TRUE);
+}
+
+static void
+bind_row (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
+          gpointer                  item,
+          gpointer                  user_data)
 {
   GtkListItem *list_item = GTK_LIST_ITEM (item);
   AmlMainWindow *self = user_data;
@@ -922,12 +977,10 @@ bind_card (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
   g_autofree char *minecraft_version = NULL;
   g_autofree char *subtitle = NULL;
   AmlLoader loader = AML_LOADER_VANILLA;
-  GtkWidget *card = NULL;
-  GtkWidget *open = NULL;
+  GtkWidget *row = NULL;
   GtkWidget *icon = NULL;
-  GtkWidget *name_label = NULL;
-  GtkWidget *version_label = NULL;
-  GtkWidget *state_label = NULL;
+  GtkWidget *settings = NULL;
+  GtkWidget *folder = NULL;
   GtkWidget *play = NULL;
   const char *id = NULL;
   const char *loader_name = NULL;
@@ -947,62 +1000,84 @@ bind_card (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
     {
       g_autofree char *capitalized = g_strdup (loader_name);
 
-      /* "fabric" is written as "Fabric" in the card. */
+      /* "fabric" is written as "Fabric" in the row. */
       capitalized[0] = g_ascii_toupper (capitalized[0]);
       subtitle = g_strdup_printf ("%s %s", minecraft_version, capitalized);
     }
   else
     subtitle = g_strdup (minecraft_version);
 
-  card = gtk_list_item_get_child (list_item);
-  open = gtk_widget_get_first_child (card);
-  icon = card_icon (card);
-  name_label = gtk_widget_get_next_sibling (icon);
-  version_label = gtk_widget_get_next_sibling (name_label);
+  row = gtk_list_item_get_child (list_item);
+  icon = g_object_get_data (G_OBJECT (row), "aml-icon");
+  play = g_object_get_data (G_OBJECT (row), "aml-play");
+  settings = g_object_get_data (G_OBJECT (row), "aml-settings");
+  folder = g_object_get_data (G_OBJECT (row), "aml-folder");
 
-  /* The state line and the button sit under the card that opens. */
-  state_label = gtk_widget_get_next_sibling (open);
-  play = gtk_widget_get_next_sibling (state_label);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), name);
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), subtitle);
 
-  gtk_label_set_text (GTK_LABEL (name_label), name);
-  gtk_label_set_text (GTK_LABEL (version_label), subtitle);
-
-  card_set_icon (GTK_IMAGE (icon), instance);
+  row_set_icon (GTK_IMAGE (icon), instance);
   g_signal_connect (instance, "notify::icon",
-                    G_CALLBACK (on_card_icon_changed), icon);
+                    G_CALLBACK (on_row_icon_changed), icon);
 
   id = aml_instance_get_id (instance);
-  g_object_set_data_full (G_OBJECT (open), "aml-instance-id", g_strdup (id),
+
+  /* The buttons all lead back to this instance; the id is what their
+     click handlers go by. */
+  g_object_set_data_full (G_OBJECT (settings), "aml-instance-id",
+                          g_strdup (id), g_free);
+  g_object_set_data_full (G_OBJECT (folder), "aml-instance-id",
+                          g_strdup (id), g_free);
+  g_object_set_data_full (G_OBJECT (play), "aml-instance-id", g_strdup (id),
                           g_free);
 
   /* The launcher of this instance: the button follows it from here on.
      The id on the button above is what the click handlers go by. */
   launcher = window_launcher (self, id);
-  card_set_launcher (play, launcher);
+  row_set_launcher (play, launcher);
 
   if (launcher != NULL)
-    card_update (play, state_label, launcher);
+    row_update (play, launcher);
 }
 
 /* A list item that is handed to another instance must not keep following
  * the icon of the one it was bound to. */
 static void
-unbind_card (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
-             gpointer                  item,
-             gpointer                  user_data G_GNUC_UNUSED)
+unbind_row (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
+            gpointer                  item,
+            gpointer                  user_data G_GNUC_UNUSED)
 {
   GtkListItem *list_item = GTK_LIST_ITEM (item);
   AmlInstance *instance = AML_INSTANCE (gtk_list_item_get_item (list_item));
-  GtkWidget *card = gtk_list_item_get_child (list_item);
+  GtkWidget *row = gtk_list_item_get_child (list_item);
   GtkWidget *icon = NULL;
 
-  if (instance == NULL || card == NULL)
+  if (instance == NULL || row == NULL)
     return;
 
-  icon = card_icon (card);
+  icon = g_object_get_data (G_OBJECT (row), "aml-icon");
 
   if (icon != NULL)
     g_signal_handlers_disconnect_by_data (instance, icon);
+}
+
+/* A row clicked anywhere but on its buttons opens the instance. The
+ * position comes from the selection-less model, which holds the rows in
+ * the same order as the manager. */
+static void
+on_row_activate (GtkListView *list G_GNUC_UNUSED, guint position,
+                 gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  GListStore *instances = aml_instance_manager_get_instances (self->manager);
+  AmlInstance *instance =
+    g_list_model_get_item (G_LIST_MODEL (instances), position);
+
+  if (instance == NULL)
+    return;
+
+  open_instance_window (self, instance);
+  g_object_unref (instance);
 }
 
 static void
@@ -1136,7 +1211,7 @@ aml_main_window_init (AmlMainWindow *self)
   gtk_widget_set_hexpand (self->stack, TRUE);
   gtk_widget_set_vexpand (self->stack, TRUE);
 
-  /* The grid is the content of the window: an instance is a window of
+  /* The list is the content of the window: an instance is a window of
      its own and is never a page here. */
   adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), self->stack);
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
@@ -1167,7 +1242,7 @@ aml_main_window_new (GtkApplication *application, AmlInstanceManager *manager)
   GListStore *instances = aml_instance_manager_get_instances (manager);
   GtkListItemFactory *factory = gtk_signal_list_item_factory_new ();
   GtkNoSelection *selection = NULL;
-  GtkWidget *grid = NULL;
+  GtkWidget *list = NULL;
   GtkWidget *scroll = NULL;
 
   self->manager = g_object_ref (manager);
@@ -1177,21 +1252,25 @@ aml_main_window_new (GtkApplication *application, AmlInstanceManager *manager)
   self->launchers = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                            g_object_unref);
 
-  g_signal_connect (factory, "setup", G_CALLBACK (setup_card), self);
-  g_signal_connect (factory, "bind", G_CALLBACK (bind_card), self);
-  g_signal_connect (factory, "unbind", G_CALLBACK (unbind_card), self);
+  g_signal_connect (factory, "setup", G_CALLBACK (setup_row), self);
+  g_signal_connect (factory, "bind", G_CALLBACK (bind_row), self);
+  g_signal_connect (factory, "unbind", G_CALLBACK (unbind_row), self);
 
-  /* gtk_no_selection_new() and gtk_grid_view_new() take ownership of
+  /* gtk_no_selection_new() and gtk_list_view_new() take ownership of
    * the references they get, so both references are created here and
    * handed over. The store itself stays owned by the manager. */
   selection = gtk_no_selection_new (g_object_ref (G_LIST_MODEL (instances)));
-  grid = gtk_grid_view_new (GTK_SELECTION_MODEL (selection),
+  list = gtk_list_view_new (GTK_SELECTION_MODEL (selection),
                             GTK_LIST_ITEM_FACTORY (factory));
-  gtk_grid_view_set_min_columns (GTK_GRID_VIEW (grid), 1);
-  gtk_grid_view_set_max_columns (GTK_GRID_VIEW (grid), 5);
+  /* A click on the row opens the instance, no double click on the
+     action row itself: the row activates with a single click. */
+  gtk_list_view_set_single_click_activate (GTK_LIST_VIEW (list), TRUE);
+  g_signal_connect (list, "activate", G_CALLBACK (on_row_activate), self);
+  gtk_widget_set_margin_start (list, 12);
+  gtk_widget_set_margin_end (list, 12);
 
   scroll = gtk_scrolled_window_new ();
-  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroll), grid);
+  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroll), list);
   gtk_widget_set_hexpand (scroll, TRUE);
   gtk_widget_set_vexpand (scroll, TRUE);
   gtk_stack_add_named (GTK_STACK (self->stack), scroll, "instances");

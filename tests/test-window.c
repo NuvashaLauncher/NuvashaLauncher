@@ -8,8 +8,8 @@
  * checked: a widget that is still parented when it is disposed logs a
  * Gtk critical, and a page that is destroyed while one of its own
  * handlers is running crashes. Both have happened here before, so the
- * instance grid is opened, the window of an instance is opened, the
- * instance is renamed (which rebinds its card) and both windows are
+ * instance list is opened, the window of an instance is opened, the
+ * instance is renamed (which rebinds its row) and both windows are
  * closed, with every Gtk critical counted.
  *
  * Everything lives under a temporary XDG root, so the real settings and
@@ -102,7 +102,7 @@ find_instance_window (GApplication *application, const char *id)
 
 typedef struct {
   GApplication *application;
-  GtkWindow *window;          /* the window of the grid */
+  GtkWindow *window;          /* the window of the list */
   GtkWindow *instance_window; /* the window of the instance */
   char *instance_id;
   guint step;
@@ -134,8 +134,8 @@ advance (gpointer user_data)
 
   switch (run->step++)
     {
-    case 0: /* the grid binds its card a little after the window is up */
-      /* The grid is the only window so far. */
+    case 0: /* the list binds its row a little after the window is up */
+      /* The list is the only window so far. */
       g_assert_cmpuint (g_list_length (windows), ==, 1);
       return G_SOURCE_CONTINUE;
 
@@ -181,7 +181,7 @@ advance (gpointer user_data)
           return G_SOURCE_CONTINUE;
         }
 
-      /* A rename rebinds the card: the instance leaves the store and
+      /* A rename rebinds the row: the instance leaves the store and
          comes back while its window is open. */
       gtk_editable_set_text (GTK_EDITABLE (widget), "Renamed");
       g_signal_emit_by_name (widget, "apply");
