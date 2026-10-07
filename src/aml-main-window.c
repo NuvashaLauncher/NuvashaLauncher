@@ -1106,6 +1106,9 @@ aml_main_window_init (AmlMainWindow *self)
   gtk_menu_button_set_child (GTK_MENU_BUTTON (users_button), users_child);
   gtk_menu_button_set_popover (GTK_MENU_BUTTON (users_button),
                               GTK_WIDGET (self->users_popover));
+  /* The child is a box around the avatar, so the menu button does not
+     recognize it as an icon button and would draw a frame behind it. */
+  gtk_widget_add_css_class (users_button, "flat");
   /* The button is an icon and nothing else, so it needs to be named for
      what it opens rather than read from a label that is not there. */
   gtk_accessible_update_property (GTK_ACCESSIBLE (users_button),
