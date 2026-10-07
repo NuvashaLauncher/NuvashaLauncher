@@ -8,8 +8,10 @@
 
 #include <string.h>
 
-/* Default JVM arguments of a new instance. */
-#define DEFAULT_JVM_ARGS "-Xmx2G"
+/* Default JVM arguments of a new instance: none. The version document
+ * already carries the heap the game needs, and a guess that is wrong for
+ * a machine the user never asked about is worse than nothing. */
+#define DEFAULT_JVM_ARGS ""
 
 /* Longest sanitized name in bytes, so that the directory leaf
  * "<name>-<short id>" always fits into a file name. */
@@ -280,7 +282,11 @@ aml_instance_validate (AmlInstance *self, GError **error)
   if (!validate_text (self->java_path, "Java path", TRUE, error))
     return FALSE;
 
-  if (!validate_text (self->jvm_args, "JVM arguments", FALSE, error))
+  /* JVM arguments are the one free text field that may be empty: empty is
+   * what an instance has when the user has not written anything, and the
+   * launcher then adds nothing of its own. */
+  if (self->jvm_args != NULL && *self->jvm_args != '\0' &&
+      !validate_text (self->jvm_args, "JVM arguments", TRUE, error))
     return FALSE;
 
   return TRUE;
@@ -415,7 +421,9 @@ get_loader (JsonObject *object, AmlLoader *loader, GError **error)
   return TRUE;
 }
 
-/* "jvm_args" is optional; when it is there it must hold a value. */
+/* "jvm_args" is optional and may be an empty string: an instance the
+   * user never gave any arguments to has none, and the launcher adds
+   * nothing from it. */
 static gboolean
 get_jvm_args (JsonObject *object, const char **jvm_args, GError **error)
 {
@@ -437,10 +445,10 @@ get_jvm_args (JsonObject *object, const char **jvm_args, GError **error)
 
   const char *string = json_node_get_string (node);
 
-  if (string == NULL || string[0] == '\0')
+  if (string == NULL)
     {
       g_set_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID,
-                   "instance field \"jvm_args\" must not be empty");
+                   "instance field \"jvm_args\" must not be null");
       return FALSE;
     }
 
@@ -569,8 +577,7 @@ aml_instance_to_json (AmlInstance *self)
   add_optional_member (builder, "icon", self->icon);
   add_optional_member (builder, "java_path", self->java_path);
 
-  json_builder_set_member_name (builder, "jvm_args");
-  json_builder_add_string_value (builder, self->jvm_args);
+  add_optional_member (builder, "jvm_args", self->jvm_args);
 
   json_builder_end_object (builder);
 

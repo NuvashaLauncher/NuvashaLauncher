@@ -144,7 +144,7 @@ test_new_defaults (void)
   g_autofree char *java_path = prop_string (instance, "java-path");
   g_autofree char *icon = prop_string (instance, "icon");
 
-  g_assert_cmpstr (jvm_args, ==, "-Xmx2G");
+  g_assert_cmpstr (jvm_args, ==, "");
   g_assert_null (loader_version);
   g_assert_null (java_path);
   g_assert_null (icon);
@@ -243,11 +243,11 @@ test_validate (void)
   g_clear_error (&error);
   g_object_set (instance, "name", "Valid", NULL);
 
-  /* So do empty JVM arguments. */
+  /* JVM arguments are the one text field that may be empty: that is what
+     an instance the user never wrote any for has. */
   g_object_set (instance, "jvm-args", "", NULL);
-  g_assert_false (aml_instance_validate (instance, &error));
-  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
-  g_clear_error (&error);
+  g_assert_true (aml_instance_validate (instance, &error));
+  g_assert_no_error (error);
   g_object_set (instance, "jvm-args", "-Xmx2G", NULL);
 
   /* A directory with ".." inside is not canonical. */
@@ -454,7 +454,8 @@ test_malformed_json (void)
     g_clear_error (&error);
   }
 
-  /* Empty JVM arguments are not usable either. */
+  /* Empty JVM arguments are what an instance has by default, so a file
+     that says so is read, not refused. */
   {
     g_autofree char *text =
       g_strdup_printf ("{\"id\": \"%s\", \"name\": \"Test\", "
@@ -465,6 +466,26 @@ test_malformed_json (void)
     g_autoptr (JsonParser) parser = parse_json (text);
     g_autoptr (AmlInstance) instance =
       aml_instance_new_from_json (json_parser_get_root (parser), &error);
+    g_autofree char *jvm_args = NULL;
+
+    g_assert_no_error (error);
+    g_assert_nonnull (instance);
+    g_object_get (instance, "jvm-args", &jvm_args, NULL);
+    g_assert_cmpstr (jvm_args, ==, "");
+  }
+
+  /* A null one is not a value, though. */
+  {
+    g_autofree char *text =
+      g_strdup_printf ("{\"id\": \"%s\", \"name\": \"Test\", "
+                       "\"directory\": \"/tmp/aml-instance-test\", "
+                       "\"minecraft_version\": \"1.21.1\", "
+                       "\"loader\": \"vanilla\", \"jvm_args\": null}",
+                       TEST_UUID);
+    g_autoptr (JsonParser) parser = parse_json (text);
+    g_autoptr (AmlInstance) instance =
+      aml_instance_new_from_json (json_parser_get_root (parser), &error);
+
     g_assert_null (instance);
     g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
     g_clear_error (&error);
@@ -478,7 +499,8 @@ test_optional_fields (void)
 {
   g_autoptr (GError) error = NULL;
 
-  /* Absent optional fields become NULL, "jvm_args" gets the default. */
+  /* Absent optional fields become NULL, "jvm_args" gets the default, which
+   * is none. */
   g_autofree char *text =
     g_strdup_printf ("{\"id\": \"%s\", \"name\": \"Minimal\", "
                      "\"directory\": \"/tmp/aml-instance-minimal\", "
@@ -498,7 +520,7 @@ test_optional_fields (void)
 
   g_assert_null (loader_version);
   g_assert_null (java_path);
-  g_assert_cmpstr (jvm_args, ==, "-Xmx2G");
+  g_assert_cmpstr (jvm_args, ==, "");
 
   g_print ("ok - optional fields\n");
 }

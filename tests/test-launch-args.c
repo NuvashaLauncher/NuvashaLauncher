@@ -324,6 +324,62 @@ test_build_arguments_modern (void)
 }
 
 /* ---------------------------------------------------------- *
+ * A document and no instance arguments
+ * ---------------------------------------------------------- */
+
+/* An instance nobody wrote arguments for stores an empty string, which
+ * is the default of a new instance. Nothing of it reaches the command
+ * line: the line a modern document builds is the same one it builds with
+ * no instance arguments at all. */
+static void
+test_build_arguments_without_jvm_args (void)
+{
+  g_autoptr (AmlResolvedVersion) resolved = resolved_new ("1.20.1");
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GPtrArray) with_empty = NULL;
+  g_autoptr (GPtrArray) with_none = NULL;
+  g_autoptr (AmlAccount) account = aml_account_new_offline ("Flia", NULL);
+  AmlLaunchSession session;
+
+  resolved->jvm_arguments =
+    strings ("-Djava.library.path=${natives_directory}", "-cp",
+             "${classpath}", NULL);
+  resolved->game_arguments =
+    strings ("--username", "${auth_player_name}", "--version",
+             "${version_name}", "--gameDir", "${game_directory}",
+             "--assetsDir", "${assets_root}", "--assetIndex",
+             "${assets_index_name}", "--uuid", "${auth_uuid}", "--userType",
+             "${user_type}", "--versionType", "${version_type}", NULL);
+  resolved->logging_argument =
+    g_strdup ("-Dlog4j.configurationFile=/home/u/.local/share/AML/logging/"
+              "client-1.20.1.xml");
+
+  session = aml_launch_session_for (account);
+
+  with_empty = aml_launch_build_arguments (resolved, &session, "/usr/bin/java",
+                                           "/home/u/games/one", "", &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (with_empty);
+
+  /* A missing value must behave the same, in case an instance written by
+     hand left the field out entirely. */
+  with_none = aml_launch_build_arguments (resolved, &session, "/usr/bin/java",
+                                         "/home/u/games/one", NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (with_none);
+
+  g_assert_cmpuint (with_empty->len, ==, with_none->len);
+  g_assert_cmpuint (with_empty->len, ==, 6 + 16);
+
+  for (guint i = 0; i < with_empty->len; i++)
+    g_assert_cmpstr (at (with_empty, i), ==, at (with_none, i));
+
+  /* Nothing that looks like a heap size was invented for it. */
+  for (guint i = 0; i < with_empty->len; i++)
+    g_assert_null (strstr (at (with_empty, i), "-Xmx"));
+}
+
+/* ---------------------------------------------------------- *
  * A legacy document
  * ---------------------------------------------------------- */
 
@@ -469,6 +525,9 @@ main (void)
 
   test_build_arguments_modern ();
   g_print ("ok - a modern document builds the command line it documents\n");
+
+  test_build_arguments_without_jvm_args ();
+  g_print ("ok - no jvm arguments adds nothing to the command line\n");
 
   test_build_arguments_legacy ();
   g_print ("ok - a legacy document gets the library path and classpath\n");
