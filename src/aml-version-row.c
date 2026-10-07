@@ -126,12 +126,25 @@ fill (AmlVersionRow *self, AmlVersionManifest *manifest)
       g_ptr_array_add (ids, g_strdup (entry->id));
     }
 
+  /* Nothing was asked for, or what was asked for is not there: the
+     newest version is what a new instance is made with. The manifest is
+     newest first, so that is the first entry that was kept. */
+  if (position == GTK_INVALID_LIST_POSITION && ids->len > 0)
+    position = 0;
+
+  /* The model is replaced with the row marked as not ready, so the
+     selection it makes on its own (GtkSingleSelection picks the first
+     item) is not read by a screen as a version the user picked. Once the
+     real selection is in place, the row says so a single time, and that
+     answer is the version the screens store. */
   set_entries (self, g_steal_pointer (&ids), position);
 
   self->ready = TRUE;
   gtk_widget_set_sensitive (GTK_WIDGET (self), TRUE);
   gtk_widget_set_visible (self->retry, FALSE);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self), NULL);
+
+  g_object_notify (G_OBJECT (self), "selected");
 }
 
 /* ---------------------------------------------------------- *
