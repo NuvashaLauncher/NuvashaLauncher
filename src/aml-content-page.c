@@ -1566,6 +1566,19 @@ on_open_folder_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   AmlContentPage *self = user_data;
   g_autofree char *uri = NULL;
 
+  /* The folder may not exist yet on a fresh instance: asking the desktop
+     to open a path that is not there only confuses it. Create it first,
+     empty, ready for files. */
+  if (g_mkdir_with_parents (self->folder, 0755) != 0)
+    {
+      g_autofree char *message =
+        g_strdup_printf ("Cannot create \"%s\": %s", self->folder,
+                         g_strerror (errno));
+
+      show_toast (self, message);
+      return;
+    }
+
   uri = g_filename_to_uri (self->folder, NULL, NULL);
 
   if (uri == NULL)
