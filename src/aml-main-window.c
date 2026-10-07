@@ -1092,10 +1092,10 @@ aml_main_window_init (AmlMainWindow *self)
     set_menu_item_tooltip (add_popover, "Download Modpack",
                            "Search Modrinth and install a modpack");
 
-  /* End of the header: who is playing, then the application menu. The
-   * button shows the avatar and the name of the active account, and what
-   * is behind it is the list of the accounts this copy of AML has, which
-   * is also where a new one is added. */
+  /* End of the header: the accounts, then the application menu. The
+   * button shows the avatar of the active account, and what is behind it
+   * is the list of the accounts this copy of AML has, which is also where
+   * a new one is added. */
   self->users_popover = aml_users_popover_new (self->accounts);
   /* A widget is created with a floating reference, and set_popover()
      below sinks that one for the button. The window keeps a reference of
@@ -1106,14 +1106,19 @@ aml_main_window_init (AmlMainWindow *self)
   gtk_menu_button_set_child (GTK_MENU_BUTTON (users_button), users_child);
   gtk_menu_button_set_popover (GTK_MENU_BUTTON (users_button),
                               GTK_WIDGET (self->users_popover));
+  /* The button is an icon and nothing else, so it needs to be named for
+     what it opens rather than read from a label that is not there. */
+  gtk_accessible_update_property (GTK_ACCESSIBLE (users_button),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL, "Accounts",
+                                  -1);
 
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (app_menu_button),
                                  "open-menu-symbolic");
   gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (app_menu_button),
                                   G_MENU_MODEL (app_menu));
 
-  adw_header_bar_pack_end (ADW_HEADER_BAR (header), users_button);
   adw_header_bar_pack_end (ADW_HEADER_BAR (header), app_menu_button);
+  adw_header_bar_pack_end (ADW_HEADER_BAR (header), users_button);
 
   /* The empty state has no button in the middle: the "+" menu is the
    * only way to create an instance. */
