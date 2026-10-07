@@ -204,12 +204,13 @@ typedef struct {
   GtkWidget *dropdown;  /* owned: the versions to choose from */
   GtkWidget *download;  /* owned: the button that starts the install */
   char *project_id;     /* owned */
+  char *author;         /* owned: who the search answer named */
 } DetailsWatch;
 
 static DetailsWatch *
 details_watch_new (AmlContentPage *self, GtkWidget *body, GtkWidget *meta,
                    GtkWidget *dropdown, GtkWidget *download,
-                   const char *project_id)
+                   const char *project_id, const char *author)
 {
   DetailsWatch *watch = g_new0 (DetailsWatch, 1);
 
@@ -220,6 +221,7 @@ details_watch_new (AmlContentPage *self, GtkWidget *body, GtkWidget *meta,
   watch->dropdown = g_object_ref (dropdown);
   watch->download = g_object_ref (download);
   watch->project_id = g_strdup (project_id);
+  watch->author = g_strdup (author);
 
   return watch;
 }
@@ -236,6 +238,7 @@ details_watch_free (DetailsWatch *watch)
   g_clear_object (&watch->dropdown);
   g_clear_object (&watch->download);
   g_free (watch->project_id);
+  g_free (watch->author);
   g_free (watch);
 }
 
@@ -2893,10 +2896,20 @@ on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                          g_strdup (watch->project_id),
                          g_strdup (details->description));
 
-  author = g_strdup_printf ("%s  ·  by %s", details->license != NULL
-                                                   ? details->license
-                                                   : "",
-                            details->author);
+  /* A project answer does not name an author: it carries the team as a
+     project id. The search answer is what named the author, and that
+     name is kept when the project answer has none to replace it. */
+  if (details->author != NULL && *details->author != '\0')
+    {
+      g_free (watch->author);
+      watch->author = g_strdup (details->author);
+    }
+
+  author = g_strdup_printf ("%s  ·  by %s",
+                            details->license != NULL && *details->license != '\0'
+                              ? details->license
+                              : "",
+                            watch->author != NULL ? watch->author : "");
   gtk_label_set_text (GTK_LABEL (watch->meta), author);
 
   /* Only versions that fit this instance are asked for, and only those
@@ -3008,7 +3021,7 @@ open_project_page (AmlContentPage *self, AmlModrinthProject *project)
   aml_modrinth_details_async (
       project->project_id, self->browse, on_details_ready,
       details_watch_new (self, body, meta, dropdown, download,
-                         project->project_id));
+                         project->project_id, project->author));
 }
 
 static void
