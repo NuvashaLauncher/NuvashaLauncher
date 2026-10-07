@@ -141,6 +141,35 @@ static void run_search (AmlContentPage *self, gboolean append);
 static void reload_installed (AmlContentPage *self);
 static void update_run_next (UpdateRun *run);
 
+/* One answer of an asynchronous request that only reads the page. The
+ * page is weakly held: a page can be closed while a search, a scan or a
+ * version lookup of its own is still running, and the answer must then
+ * do nothing rather than touch memory that is gone. */
+typedef struct {
+  AmlContentPage *page; /* weak */
+} PageWatch;
+
+static PageWatch *
+page_watch_new (AmlContentPage *self)
+{
+  PageWatch *watch = g_new0 (PageWatch, 1);
+
+  watch->page = self;
+  g_object_add_weak_pointer (G_OBJECT (self), (gpointer *) &watch->page);
+
+  return watch;
+}
+
+static void
+page_watch_free (PageWatch *watch)
+{
+  if (watch->page != NULL)
+    g_object_remove_weak_pointer (G_OBJECT (watch->page),
+                                  (gpointer *) &watch->page);
+
+  g_free (watch);
+}
+
 /* ---------------------------------------------------------- *
  * Small helpers
  * ---------------------------------------------------------- */
@@ -1073,11 +1102,18 @@ static void
 on_pick_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  PageWatch *watch = user_data;
+  AmlContentPage *self = watch->page;
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
   const char *title = NULL;
   AmlModrinthVersion *version = NULL;
+
+  if (self == NULL)
+    {
+      page_watch_free (watch);
+      return;
+    }
 
   versions = aml_modrinth_versions_finish (result, &error);
 
@@ -1086,6 +1122,7 @@ on_pick_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       set_busy (self, FALSE);
       show_toast (self, error != NULL ? error->message
                                       : "no compatible version");
+      page_watch_free (watch);
       return;
     }
 
@@ -1093,6 +1130,7 @@ on_pick_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   version = g_ptr_array_steal_index (versions, 0);
   start_plan (self, version, title != NULL ? title : "the file", NULL, FALSE);
   set_busy (self, FALSE);
+  page_watch_free (watch);
 }
 
 /* ---------------------------------------------------------- *
@@ -1372,9 +1410,16 @@ static void
 scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
             gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  PageWatch *watch = user_data;
+  AmlContentPage *self = watch->page;
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) files = NULL;
+
+  if (self == NULL)
+    {
+      page_watch_free (watch);
+      return;
+    }
 
   files = aml_content_scan_finish (result, &error);
 
@@ -1384,6 +1429,7 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                                              G_IO_ERROR_CANCELLED))
         show_error (self, "The folder cannot be read", error);
 
+      page_watch_free (watch);
       return;
     }
 
@@ -1423,6 +1469,8 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     run->cancellable = g_object_ref (self->scan);
     identify_next (run);
   }
+
+  page_watch_free (watch);
 }
 
 static void
@@ -1445,7 +1493,8 @@ reload_installed (AmlContentPage *self)
   g_cancellable_cancel (previous);
   g_clear_object (&previous);
 
-  aml_content_scan_async (directory, self->type, self->scan, scan_ready, self);
+  aml_content_scan_async (directory, self->type, self->scan, scan_ready,
+                          page_watch_new (self));
 }
 
 static void
@@ -1479,12 +1528,20 @@ static void
 on_update_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                  gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  PageWatch *watch = user_data;
+  AmlContentPage *self = watch->page;
   g_autoptr (GError) error = NULL;
-  AmlModrinthVersion *update =
-    aml_modrinth_update_by_hash_finish (result, &error);
-  AmlContentFile *file = g_object_get_data (G_OBJECT (self),
-                                            "aml-update-file");
+  AmlModrinthVersion *update = NULL;
+  AmlContentFile *file = NULL;
+
+  if (self == NULL)
+    {
+      page_watch_free (watch);
+      return;
+    }
+
+  update = aml_modrinth_update_by_hash_finish (result, &error);
+  file = g_object_get_data (G_OBJECT (self), "aml-update-file");
 
   set_busy (self, FALSE);
 
@@ -1493,12 +1550,14 @@ on_update_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       /* Nothing newer is the answer the page shows as up to date. */
       show_toast (self, error != NULL ? error->message : "Up to date");
       update_run_next (g_object_get_data (G_OBJECT (self), "aml-update-run"));
+      page_watch_free (watch);
       return;
     }
 
   if (file == NULL)
     {
       aml_modrinth_version_free (update);
+      page_watch_free (watch);
       return;
     }
 
@@ -1506,6 +1565,7 @@ on_update_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   start_plan (self, update,
               file->version_name != NULL ? file->version_name : file->filename,
               file->path, !file->enabled);
+  page_watch_free (watch);
 }
 
 /* The update of every file Modrinth knows, one after the other. */
@@ -1533,7 +1593,8 @@ update_run_next (UpdateRun *run)
       aml_modrinth_update_by_hash_async (self->type, file->sha1,
                                          self->minecraft_version,
                                          self->loader, self->browse,
-                                         on_update_ready, self);
+                                         on_update_ready,
+                                         page_watch_new (self));
       return;
     }
 
@@ -1568,7 +1629,8 @@ on_update_clicked (GtkButton *button, gpointer user_data)
   set_busy (self, TRUE);
   aml_modrinth_update_by_hash_async (self->type, file->sha1,
                                      self->minecraft_version, self->loader,
-                                     self->browse, on_update_ready, self);
+                                     self->browse, on_update_ready,
+                                     page_watch_new (self));
 }
 
 static void
@@ -1837,11 +1899,19 @@ static void
 search_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
               gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  PageWatch *watch = user_data;
+  AmlContentPage *self = watch->page;
   g_autoptr (GError) error = NULL;
   g_autoptr (AmlModrinthResults) results = NULL;
-  gboolean append = self->pending_append;
+  gboolean append = FALSE;
 
+  if (self == NULL)
+    {
+      page_watch_free (watch);
+      return;
+    }
+
+  append = self->pending_append;
   results = aml_modrinth_search_finish (result, &error);
   set_busy (self, FALSE);
   self->loading_page = FALSE;
@@ -1867,13 +1937,19 @@ search_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         }
       else if (error != NULL &&
                !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-        adw_status_page_set_description (ADW_STATUS_PAGE (self->results_status),
-                                         error->message);
+        {
+          g_autofree char *escaped = g_markup_escape_text (error->message, -1);
 
+          adw_status_page_set_description (ADW_STATUS_PAGE (self->results_status),
+                                           escaped);
+        }
+
+      page_watch_free (watch);
       return;
     }
 
   results_arrived (self, results, append);
+  page_watch_free (watch);
 }
 
 static void
@@ -1909,7 +1985,8 @@ run_search (AmlContentPage *self, gboolean append)
   gtk_widget_set_visible (self->loading_more, TRUE);
   gtk_widget_set_visible (self->retry_row, FALSE);
 
-  aml_modrinth_search_async (search, self->more, search_ready, self);
+  aml_modrinth_search_async (search, self->more, search_ready,
+                             page_watch_new (self));
 }
 
 static gboolean
@@ -1979,7 +2056,7 @@ load_categories (AmlContentPage *self)
 
   self->categories_loaded = TRUE;
   aml_modrinth_categories_async (project_type, self->browse,
-                                 categories_ready, self);
+                                 categories_ready, page_watch_new (self));
 }
 
 static void
@@ -2053,14 +2130,24 @@ static void
 categories_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                   gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  PageWatch *watch = user_data;
+  AmlContentPage *self = watch->page;
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) categories = NULL;
+
+  if (self == NULL)
+    {
+      page_watch_free (watch);
+      return;
+    }
 
   categories = aml_modrinth_categories_finish (result, &error);
 
   if (self->filter_box == NULL)
-    return;
+    {
+      page_watch_free (watch);
+      return;
+    }
 
   /* A failed request is said so, with a way to try again: an empty list
    * of check buttons reads as "no categories", not as a failure. */
@@ -2092,10 +2179,12 @@ categories_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                           G_CALLBACK (load_categories_again), self);
       }
 
+      page_watch_free (watch);
       return;
     }
 
   fill_categories (self, categories);
+  page_watch_free (watch);
 }
 
 static void
@@ -2158,7 +2247,8 @@ on_install_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   set_busy (self, TRUE);
   aml_modrinth_versions_async (project->project_id, self->type,
                                self->minecraft_version, self->loader,
-                               self->browse, on_pick_ready, self);
+                               self->browse, on_pick_ready,
+                               page_watch_new (self));
 }
 
 /* ---------------------------------------------------------- *
@@ -2399,8 +2489,14 @@ build_installed (AmlContentPage *self)
   /* The actions belong to the toolbar row above both lists, not to this
      one of them: they are the same row whichever list is shown, and
      moving them keeps a download in progress from being thrown away by a
-     visit to the other list. */
+     visit to the other list.
+
+     The row of the other list is taken out of the bar when the lists are
+     switched, so this one is held here: without it, taking it out would
+     be the last reference to it and would destroy the box and the
+     spinner inside it while self->spinner still points at them. */
   self->installed_actions = actions;
+  g_object_ref_sink (actions);
 
   self->installed_status = adw_status_page_new ();
   adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->installed_status),
@@ -2528,6 +2624,7 @@ build_browse (AmlContentPage *self)
   gtk_popover_set_child (GTK_POPOVER (popover), filter_scroller);
 
   self->browse_actions = top;
+  g_object_ref_sink (top);
 
   self->results_status = adw_status_page_new ();
   adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->results_status),
@@ -2765,8 +2862,11 @@ aml_content_page_dispose (GObject *object)
   self->bar = NULL;
   self->bar_spacer = NULL;
   self->switcher = NULL;
-  self->installed_actions = NULL;
-  self->browse_actions = NULL;
+  /* The two action rows are held with a reference of their own, see
+     build_installed() and build_browse(); giving it back is what lets
+     them go when the page does. */
+  g_clear_object (&self->installed_actions);
+  g_clear_object (&self->browse_actions);
   self->installed_group = NULL;
   self->installed_scroller = NULL;
   self->installed_status = NULL;
