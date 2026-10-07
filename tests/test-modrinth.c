@@ -209,6 +209,75 @@ test_project_details (void)
  * Which versions fit
  * ---------------------------------------------------------- */
 
+/* The tag list holds every project type; only the current page's type
+ * and its readable grouping survive. */
+static void
+test_categories_filter_by_project_type (void)
+{
+  g_autofree char *json = read_fixture ("modrinth-categories.json");
+  g_autoptr (GPtrArray) shaders = NULL;
+  g_autoptr (GPtrArray) modpacks = NULL;
+  g_autoptr (GPtrArray) resourcepacks = NULL;
+  AmlModrinthCategory *category = NULL;
+
+  shaders = aml_modrinth_categories_from_json (json, -1, "shader", NULL);
+  g_assert_nonnull (shaders);
+  g_assert_cmpuint (shaders->len, ==, 2);
+
+  category = g_ptr_array_index (shaders, 0);
+  g_assert_cmpstr (category->name, ==, "bloom");
+  g_assert_cmpstr (category->header, ==, "features");
+
+  category = g_ptr_array_index (shaders, 1);
+  g_assert_cmpstr (category->name, ==, "colored-lighting");
+
+  modpacks = aml_modrinth_categories_from_json (json, -1, "modpack", NULL);
+  g_assert_cmpuint (modpacks->len, ==, 1);
+  g_assert_cmpstr (
+      ((AmlModrinthCategory *) g_ptr_array_index (modpacks, 0))->name, ==,
+      "kitchen-sink");
+
+  resourcepacks =
+      aml_modrinth_categories_from_json (json, -1, "resourcepack", NULL);
+  g_assert_cmpuint (resourcepacks->len, ==, 1);
+
+  g_print ("ok - categories are filtered by project type\n");
+}
+
+static void
+test_category_labels (void)
+{
+  g_autofree char *one = aml_modrinth_category_label ("colored-lighting");
+  g_autofree char *two = aml_modrinth_category_label ("512x+");
+  g_autofree char *three = aml_modrinth_category_label ("kitchen-sink");
+
+  g_assert_cmpstr (one, ==, "Colored Lighting");
+  g_assert_cmpstr (two, ==, "512x+");
+  g_assert_cmpstr (three, ==, "Kitchen Sink");
+
+  g_print ("ok - category labels are readable\n");
+}
+
+/* Filtering by category puts the real slugs in the facets. */
+static void
+test_facets_with_categories (void)
+{
+  g_autoptr (AmlModrinthSearch) search =
+    search_new (AML_CONTENT_SHADER_PACK, "", "1.20.1", NULL);
+  g_autofree char *facets = NULL;
+
+  search->categories = g_ptr_array_new_with_free_func (g_free);
+  g_ptr_array_add (search->categories, g_strdup ("colored-lighting"));
+
+  facets = aml_modrinth_facets (search);
+
+  g_assert_cmpstr (facets, ==,
+                   "[[\"project_type:shader\"],[\"versions:1.20.1\"],"
+                   "[\"categories:colored-lighting\"]]");
+
+  g_print ("ok - selected categories build facets\n");
+}
+
 static void
 test_versions_of_a_mod (void)
 {
@@ -850,6 +919,11 @@ main (int argc, char **argv)
 
   g_test_add_func ("/modrinth/facets-mod", test_facets_of_a_mod_search);
   g_test_add_func ("/modrinth/facets-pack", test_facets_of_a_pack_search);
+  g_test_add_func ("/modrinth/categories-by-type",
+                   test_categories_filter_by_project_type);
+  g_test_add_func ("/modrinth/category-labels", test_category_labels);
+  g_test_add_func ("/modrinth/facets-with-categories",
+                   test_facets_with_categories);
   g_test_add_func ("/modrinth/search-url", test_search_url_paginates);
   g_test_add_func ("/modrinth/search-results", test_search_results);
   g_test_add_func ("/modrinth/search-empty", test_search_without_hits);

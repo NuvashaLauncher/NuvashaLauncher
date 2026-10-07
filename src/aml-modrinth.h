@@ -304,24 +304,58 @@ void aml_modrinth_versions_async (const char        *project_id,
 GPtrArray *aml_modrinth_versions_finish (GAsyncResult  *result,
                                          GError       **error);
 
-/* The categories Modrinth publishes for @type, which is what the filter
- * of a Browse page offers. They come from the tags projects are tagged
- * with, so the list is Modrinth's own and not one AML made up. */
-void aml_modrinth_categories_async (AmlContentType      type,
-                                    GCancellable       *cancellable,
-                                    GAsyncReadyCallback callback,
-                                    gpointer            user_data);
+/* One category Modrinth publishes for a project type.
+ *
+ * @name is the slug, and it is what a facet is built from, so it is sent
+ * exactly as Modrinth wrote it. @header is the group Modrinth files the
+ * category under ("features", "categories", "resolutions"), which is
+ * what a popover lists the categories under; it may be NULL. */
+typedef struct {
+  char *name;
+  char *header;
+} AmlModrinthCategory;
 
-/* (transfer full) the char* names, sorted. NULL on error. */
+void aml_modrinth_category_free (AmlModrinthCategory *category);
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (AmlModrinthCategory,
+                               aml_modrinth_category_free)
+
+/* What a user reads for @name: "colored-lighting" becomes "Colored
+ * Lighting" and "512x+" stays "512x+", because a number with a sign is
+ * not a phrase to be capitalised. (transfer full) */
+char *aml_modrinth_category_label (const char *name);
+
+/* What Modrinth calls a kind of project in the tags endpoint: "mod",
+ * "resourcepack", "shader" or "modpack". (transfer full) */
+char *aml_modrinth_project_type_for_content (AmlContentType type);
+
+/* The categories Modrinth publishes for @project_type, which is what
+ * the filter of a Browse page offers. They come from the tags projects
+ * are tagged with, so the list is Modrinth's own and not one AML made
+ * up.
+ *
+ * The whole tag list is fetched once and kept for as long as the process
+ * runs: every page that opens afterwards is answered from that, so
+ * opening a second instance does not ask Modrinth for the same 126 tags
+ * again. A caller that waits while the fetch is in flight and cancels
+ * stops waiting and is answered as cancelled; the fetch itself carries
+ * on for the others. */
+void aml_modrinth_categories_async (const char        *project_type,
+                                    GCancellable      *cancellable,
+                                    GAsyncReadyCallback callback,
+                                    gpointer           user_data);
+
+/* (transfer full) the AmlModrinthCategory*, sorted by name. NULL on
+ * error. */
 GPtrArray *aml_modrinth_categories_finish (GAsyncResult  *result,
                                            GError       **error);
 
 /* The categories out of what the tags endpoint answered, the ones of
- * @type only. This is what the fetch above parses, and what a test
- * hands a fixture to. (transfer full) */
+ * @project_type only, sorted by name. This is what the fetch above
+ * parses, and what a test hands a fixture to. (transfer full) */
 GPtrArray *aml_modrinth_categories_from_json (const char     *json,
                                               gssize          length,
-                                              AmlContentType  type,
+                                              const char     *project_type,
                                               GError        **error);
 
 /* The same, out of what /project/<id>/version answered: what fits, and
