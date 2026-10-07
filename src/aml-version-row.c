@@ -126,10 +126,14 @@ fill (AmlVersionRow *self, AmlVersionManifest *manifest)
       g_ptr_array_add (ids, g_strdup (entry->id));
     }
 
-  /* Nothing was asked for, or what was asked for is not there: the
-     newest version is what a new instance is made with. The manifest is
-     newest first, so that is the first entry that was kept. */
-  if (position == GTK_INVALID_LIST_POSITION && ids->len > 0)
+  /* Nothing was asked for: the newest version is what a new instance is
+     made with, and the manifest is newest first, so that is the first
+     entry that was kept. A version was asked for but is not in the list
+     (an instance that runs a version the manifest no longer holds) is
+     left with nothing picked, so that opening the instance never changes
+     the version it runs. */
+  if (position == GTK_INVALID_LIST_POSITION && ids->len > 0 &&
+      self->wanted == NULL)
     position = 0;
 
   /* The model is replaced with the row marked as not ready, so the
