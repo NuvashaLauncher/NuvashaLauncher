@@ -797,6 +797,51 @@ on_play_clicked (GtkButton *button, gpointer user_data)
     aml_launcher_start (launcher);
 }
 
+/* The icon of one card, which is the first child of the content box. The
+ * card is built by create_card() and walked the same way here and in
+ * bind_card(). */
+static GtkWidget *
+card_icon (GtkWidget *card)
+{
+  GtkWidget *open = gtk_widget_get_first_child (card);
+  GtkWidget *content = open != NULL ? gtk_widget_get_first_child (open) : NULL;
+
+  return content != NULL ? gtk_widget_get_first_child (content) : NULL;
+}
+
+/* Puts the icon of @instance in @image, or the game square when it has
+ * none or its file cannot be read. A card follows the icon of its
+ * instance, so an icon chosen on the instance page and the icon a
+ * modpack install gives an instance both land here. */
+static void
+card_set_icon (GtkImage *image, AmlInstance *instance)
+{
+  g_autofree char *path = NULL;
+
+  g_object_get (instance, "icon", &path, NULL);
+
+  if (path != NULL && g_file_test (path, G_FILE_TEST_IS_REGULAR))
+    {
+      g_autoptr (GFile) file = g_file_new_for_path (path);
+      g_autoptr (GdkTexture) texture = gdk_texture_new_from_file (file, NULL);
+
+      if (texture != NULL)
+        {
+          gtk_image_set_from_paintable (image, GDK_PAINTABLE (texture));
+          return;
+        }
+    }
+
+  gtk_image_set_from_icon_name (image, "applications-games-symbolic");
+}
+
+static void
+on_card_icon_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
+                      gpointer user_data)
+{
+  card_set_icon (GTK_IMAGE (user_data), AML_INSTANCE (object));
+}
+
 /* One card of the instance grid. The button holds everything but Play
  * and the state, so clicking the card opens the instance page; the
  * children are appended in this order and bind_card() walks them in the
@@ -818,8 +863,8 @@ create_card (AmlMainWindow *self)
   gtk_widget_set_margin_start (card, 12);
   gtk_widget_set_margin_end (card, 12);
 
-  /* Instance icons are not part of this phase, so every card shows the
-   * same square placeholder. */
+  /* The square the icon of the instance is shown in; the placeholder is
+   * replaced when the instance has an icon. */
   gtk_image_set_pixel_size (GTK_IMAGE (icon), 96);
   gtk_widget_set_size_request (icon, 96, 96);
   gtk_widget_set_halign (icon, GTK_ALIGN_CENTER);
@@ -879,7 +924,6 @@ bind_card (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
   AmlLoader loader = AML_LOADER_VANILLA;
   GtkWidget *card = NULL;
   GtkWidget *open = NULL;
-  GtkWidget *content = NULL;
   GtkWidget *icon = NULL;
   GtkWidget *name_label = NULL;
   GtkWidget *version_label = NULL;
@@ -912,8 +956,7 @@ bind_card (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
 
   card = gtk_list_item_get_child (list_item);
   open = gtk_widget_get_first_child (card);
-  content = gtk_widget_get_first_child (open);
-  icon = gtk_widget_get_first_child (content);
+  icon = card_icon (card);
   name_label = gtk_widget_get_next_sibling (icon);
   version_label = gtk_widget_get_next_sibling (name_label);
 
@@ -923,6 +966,10 @@ bind_card (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
 
   gtk_label_set_text (GTK_LABEL (name_label), name);
   gtk_label_set_text (GTK_LABEL (version_label), subtitle);
+
+  card_set_icon (GTK_IMAGE (icon), instance);
+  g_signal_connect (instance, "notify::icon",
+                    G_CALLBACK (on_card_icon_changed), icon);
 
   id = aml_instance_get_id (instance);
   g_object_set_data_full (G_OBJECT (open), "aml-instance-id", g_strdup (id),
@@ -935,6 +982,27 @@ bind_card (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
 
   if (launcher != NULL)
     card_update (play, state_label, launcher);
+}
+
+/* A list item that is handed to another instance must not keep following
+ * the icon of the one it was bound to. */
+static void
+unbind_card (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
+             gpointer                  item,
+             gpointer                  user_data G_GNUC_UNUSED)
+{
+  GtkListItem *list_item = GTK_LIST_ITEM (item);
+  AmlInstance *instance = AML_INSTANCE (gtk_list_item_get_item (list_item));
+  GtkWidget *card = gtk_list_item_get_child (list_item);
+  GtkWidget *icon = NULL;
+
+  if (instance == NULL || card == NULL)
+    return;
+
+  icon = card_icon (card);
+
+  if (icon != NULL)
+    g_signal_handlers_disconnect_by_data (instance, icon);
 }
 
 static void
@@ -1103,6 +1171,7 @@ aml_main_window_new (GtkApplication *application, AmlInstanceManager *manager)
 
   g_signal_connect (factory, "setup", G_CALLBACK (setup_card), self);
   g_signal_connect (factory, "bind", G_CALLBACK (bind_card), self);
+  g_signal_connect (factory, "unbind", G_CALLBACK (unbind_card), self);
 
   /* gtk_no_selection_new() and gtk_grid_view_new() take ownership of
    * the references they get, so both references are created here and
