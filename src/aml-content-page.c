@@ -29,6 +29,7 @@
 #include "aml-content-page.h"
 
 #include "aml-download.h"
+#include "aml-icons.h"
 
 #include <glib/gstdio.h>
 #include <string.h>
@@ -1189,10 +1190,11 @@ static GtkWidget *
 file_row (AmlContentPage *self, AmlContentFile *file)
 {
   GtkWidget *row = adw_action_row_new ();
+  GtkWidget *icon = aml_icon_widget_new (aml_content_type_icon (self->type));
   GtkWidget *suffix = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   GtkWidget *update = gtk_button_new_with_label ("Update");
   GtkWidget *menu_button = gtk_menu_button_new ();
-  GtkWidget *icon = gtk_image_new_from_icon_name ("view-more-symbolic");
+  GtkWidget *icon_more = gtk_image_new_from_icon_name ("view-more-symbolic");
   GtkWidget *popover = gtk_popover_new ();
   GtkWidget *items = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   GtkWidget *toggle = gtk_button_new_with_label (file->enabled ? "Disable"
@@ -1203,14 +1205,19 @@ file_row (AmlContentPage *self, AmlContentFile *file)
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (row), file->path);
 
+  /* The same square as a browse row, with the icon of what this kind of
+     file is: a file on disk has no icon of its own to fetch. */
+  gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
+  adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
+
   gtk_widget_add_css_class (update, "flat");
   gtk_widget_set_valign (update, GTK_ALIGN_CENTER);
   gtk_widget_set_tooltip_text (update, "Look for a newer version");
   g_object_set_data (G_OBJECT (update), "aml-file", file);
 
-  gtk_image_set_pixel_size (GTK_IMAGE (icon), 16);
+  gtk_image_set_pixel_size (GTK_IMAGE (icon_more), 16);
   gtk_widget_set_valign (menu_button, GTK_ALIGN_CENTER);
-  gtk_menu_button_set_child (GTK_MENU_BUTTON (menu_button), icon);
+  gtk_menu_button_set_child (GTK_MENU_BUTTON (menu_button), icon_more);
 
   /* The button is only the three dot icon; the row title says which
      file, but the button needs a name of its own to be announced. */
@@ -1670,6 +1677,30 @@ on_retry_page_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 /* The rows of a page of results. @append is FALSE for a new search or a
  * new filter, which starts the list over, and TRUE for the next page,
  * which is added to what is already there. */
+/* Puts the project icon in @icon when it has been fetched, and leaves
+   the placeholder in it when there is none. The widget is held for the
+   length of the fetch, so a row that goes away first is still a widget
+   when the answer arrives. */
+static void
+icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+            gpointer user_data)
+{
+  GtkWidget *icon = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autofree char *path = aml_icon_load_finish (result, &error);
+
+  if (path != NULL)
+    aml_icon_widget_set_file (icon, path);
+
+  g_object_unref (icon);
+}
+
+static void
+start_row_icon (GtkWidget *icon, const char *url)
+{
+  aml_icon_load_async (url, NULL, icon_ready, g_object_ref (icon));
+}
+
 static void
 results_arrived (AmlContentPage *self, AmlModrinthResults *results,
                  gboolean append)
@@ -1700,13 +1731,10 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
     {
       AmlModrinthProject *project = g_ptr_array_index (results->projects, i);
       GtkWidget *row = adw_action_row_new ();
-      GtkWidget *about = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-      GtkWidget *by = gtk_label_new (NULL);
+      GtkWidget *icon = aml_icon_widget_new (
+          aml_content_type_icon (self->type));
       GtkWidget *suffix = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
-      GtkWidget *downloads = gtk_label_new (NULL);
       GtkWidget *install = gtk_button_new_with_label ("Install");
-      g_autofree char *author = NULL;
-      g_autofree char *count = NULL;
 
       /* A project already listed is not listed twice: the same answer can
        * come back for two pages that overlap. */
@@ -1715,28 +1743,17 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
 
       g_hash_table_add (self->seen_ids, g_strdup (project->project_id));
 
+      /* The icon, then the name and the description under it. Nothing
+         else: who wrote it, how often it was taken, which game version
+         and which loader are what the details page is for. */
       adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
                                      project->title);
-      /* A description is text, not markup: an "&" in one is an "&". */
       adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
       adw_action_row_set_subtitle (ADW_ACTION_ROW (row), project->description);
-      adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 3);
+      adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 2);
 
-      /* Who published it and how often it was taken, in the small dim
-       * words GNOME uses for that. */
-      author = g_strdup_printf ("by %s", project->author);
-      count = format_downloads (project->downloads);
-      gtk_label_set_text (GTK_LABEL (by), author);
-      gtk_widget_add_css_class (by, "caption");
-      gtk_widget_add_css_class (by, "dim-label");
-      gtk_label_set_xalign (GTK_LABEL (by), 0);
-      gtk_box_append (GTK_BOX (about), by);
-
-      gtk_label_set_text (GTK_LABEL (downloads), count);
-      gtk_widget_add_css_class (downloads, "caption");
-      gtk_widget_add_css_class (downloads, "dim-label");
-      gtk_label_set_xalign (GTK_LABEL (downloads), 0);
-      gtk_box_append (GTK_BOX (about), downloads);
+      gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
+      start_row_icon (icon, project->icon_url);
 
       gtk_widget_add_css_class (install, "suggested-action");
       gtk_widget_set_valign (install, GTK_ALIGN_CENTER);
@@ -1750,9 +1767,8 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
       g_object_set_data (G_OBJECT (install), "aml-project",
                          g_ptr_array_index (self->results, shown));
 
-      adw_action_row_add_prefix (ADW_ACTION_ROW (row), about);
+      adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
       adw_action_row_add_suffix (ADW_ACTION_ROW (row), suffix);
-      gtk_widget_set_valign (about, GTK_ALIGN_CENTER);
 
       /* The whole row opens the project; the button installs the newest
        * version of it that fits this instance. */

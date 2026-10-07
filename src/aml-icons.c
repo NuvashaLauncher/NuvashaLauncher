@@ -1,0 +1,220 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
+#include "aml-icons.h"
+
+#include "aml-download.h"
+
+#include <errno.h>
+#include <glib/gstdio.h>
+#include <string.h>
+
+/* How many icons are fetched at the same time.
+ *
+ * Icons go through the same download module as everything else, which
+ * runs a handful of transfers at once and queues the rest. A list can ask
+ * for twenty icons in one go, and twenty transfers of a few kilobytes
+ * each would fill that queue and make the search that fills the list wait
+ * behind artwork. A couple at a time is plenty for a list a user
+ * scrolls. */
+#define ICONS_AT_ONCE 2
+
+char *
+aml_icon_cache_directory (void)
+{
+  return g_build_filename (g_get_user_cache_dir (), "AML", "icons", NULL);
+}
+
+/* The name a url is cached under: its SHA1, with the extension the url
+ * ends in so a file can be recognised for what it is. A url with no
+ * extension is cached as a .png, which is what Modrinth serves. */
+static char *
+cache_path_for (const char *url)
+{
+  g_autofree char *hash = g_compute_checksum_for_string (G_CHECKSUM_SHA1,
+                                                         url, -1);
+  g_autofree char *directory = aml_icon_cache_directory ();
+  g_autofree char *leaf = NULL;
+  const char *dot = strrchr (url, '.');
+  const char *extension = ".png";
+
+  if (dot != NULL && strlen (dot) <= 5)
+    extension = dot;
+
+  /* The query, if any, is not part of the file name. */
+  if (strchr (extension, '?') != NULL || strchr (extension, '/') != NULL)
+    extension = ".png";
+
+  leaf = g_strdup_printf ("%s%s", hash, extension);
+
+  return g_build_filename (directory, leaf, NULL);
+}
+
+typedef struct
+{
+  GTask *task;
+  char *url;
+  char *path;
+} IconLoad;
+
+static void icon_pump (void);
+
+/* The loads that are waiting for their turn, and how many are running. */
+static GQueue pending = G_QUEUE_INIT;
+static guint active = 0;
+
+static void
+icon_load_free (IconLoad *load)
+{
+  g_clear_object (&load->task);
+  g_free (load->url);
+  g_free (load->path);
+  g_free (load);
+}
+
+static void
+icon_downloaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                 gpointer user_data)
+{
+  IconLoad *load = user_data;
+  g_autoptr (GError) error = NULL;
+
+  active--;
+
+  if (!aml_download_file_finish (result, &error))
+    g_task_return_error (load->task, g_steal_pointer (&error));
+  else
+    g_task_return_pointer (load->task, g_strdup (load->path), g_free);
+
+  icon_load_free (load);
+
+  icon_pump ();
+}
+
+/* Starts a queued load when there is room for it. */
+static void
+icon_pump (void)
+{
+  while (active < ICONS_AT_ONCE && !g_queue_is_empty (&pending))
+    {
+      IconLoad *load = g_queue_pop_head (&pending);
+      GTask *task = load->task;
+
+      /* A load whose row went away before its turn has nothing to draw
+         into; its task is answered as cancelled and it is dropped. */
+      if (g_cancellable_is_cancelled (g_task_get_cancellable (task)))
+        {
+          g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_CANCELLED,
+                                   "the icon is no longer wanted");
+          g_object_unref (task);
+          icon_load_free (load);
+          continue;
+        }
+
+      active++;
+      aml_download_file_async (load->url, load->path, NULL, G_CHECKSUM_SHA1,
+                               g_task_get_cancellable (task), NULL,
+                               icon_downloaded, load);
+    }
+}
+
+void
+aml_icon_load_async (const char *url, GCancellable *cancellable,
+                     GAsyncReadyCallback callback, gpointer user_data)
+{
+  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback,
+                                       user_data);
+  g_autofree char *directory = NULL;
+  IconLoad *load = NULL;
+
+  g_task_set_check_cancellable (task, FALSE);
+
+  if (url == NULL || *url == '\0')
+    {
+      /* A project with no icon is not an error: there is simply nothing
+         to put in the row. */
+      g_task_return_pointer (task, NULL, NULL);
+      return;
+    }
+
+  directory = aml_icon_cache_directory ();
+
+  load = g_new0 (IconLoad, 1);
+  load->task = g_steal_pointer (&task);
+  load->url = g_strdup (url);
+  load->path = cache_path_for (url);
+
+  /* A file already in the cache is the answer: no request is made for
+     something that is already on disk. */
+  if (g_file_test (load->path, G_FILE_TEST_IS_REGULAR))
+    {
+      g_task_return_pointer (load->task, g_strdup (load->path), g_free);
+      icon_load_free (load);
+      return;
+    }
+
+  if (g_mkdir_with_parents (directory, 0755) != 0)
+    {
+      g_task_return_new_error (load->task, G_IO_ERROR, G_IO_ERROR_FAILED,
+                              "cannot create \"%s\": %s", directory,
+                              g_strerror (errno));
+      icon_load_free (load);
+      return;
+    }
+
+  g_queue_push_tail (&pending, load);
+  icon_pump ();
+}
+
+char *
+aml_icon_load_finish (GAsyncResult *result, GError **error)
+{
+  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
+
+  return g_task_propagate_pointer (G_TASK (result), error);
+}
+
+/* ---------------------------------------------------------- *
+ * The widget
+ * ---------------------------------------------------------- */
+
+GtkWidget *
+aml_icon_widget_new (const char *placeholder_icon_name)
+{
+  GtkWidget *stack = gtk_stack_new ();
+  GtkWidget *placeholder = gtk_image_new_from_icon_name (
+      placeholder_icon_name != NULL ? placeholder_icon_name
+                                    : "image-x-generic-symbolic");
+
+  gtk_image_set_pixel_size (GTK_IMAGE (placeholder), 32);
+  gtk_widget_set_halign (placeholder, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (placeholder, GTK_ALIGN_CENTER);
+
+  /* The same square for every row, whatever is in it. */
+  gtk_widget_set_size_request (stack, AML_ICON_SIZE, AML_ICON_SIZE);
+
+  gtk_stack_add_named (GTK_STACK (stack), placeholder, "placeholder");
+  gtk_stack_set_visible_child_name (GTK_STACK (stack), "placeholder");
+
+  return stack;
+}
+
+void
+aml_icon_widget_set_file (GtkWidget *widget, const char *path)
+{
+  GtkWidget *picture = NULL;
+
+  if (widget == NULL || !GTK_IS_STACK (widget) || path == NULL)
+    return;
+
+  /* Scaled to fit and never stretched: a wide icon is shown wide and a
+     tall one tall, inside the same square. */
+  picture = gtk_picture_new_for_filename (path);
+  gtk_picture_set_content_fit (GTK_PICTURE (picture),
+                               GTK_CONTENT_FIT_CONTAIN);
+  gtk_picture_set_can_shrink (GTK_PICTURE (picture), TRUE);
+
+  gtk_stack_add_named (GTK_STACK (widget), picture, "icon");
+  gtk_stack_set_visible_child_name (GTK_STACK (widget), "icon");
+}
