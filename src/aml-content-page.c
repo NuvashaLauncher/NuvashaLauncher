@@ -84,6 +84,7 @@ struct _AmlContentPage
   GtkWidget *results_status;
   GtkWidget *search_entry;
   GtkWidget *search_bar;
+  GtkWidget *filter_button; /* the button the filter popover hangs off */
   GtkWidget *filter_box;
   GtkWidget *loading_more; /* spinner row at the bottom of the list */
   GtkWidget *retry_row;    /* inline retry row when a page fails */
@@ -2231,6 +2232,8 @@ fill_categories (AmlContentPage *self, GPtrArray *categories)
             gtk_label_set_xalign (GTK_LABEL (heading), 0.0);
             gtk_widget_add_css_class (heading, "caption");
             gtk_widget_add_css_class (heading, "dim-label");
+            gtk_widget_set_margin_top (heading, 6);
+            gtk_widget_set_margin_start (heading, 6);
             gtk_box_append (GTK_BOX (self->filter_box), heading);
           }
 
@@ -2242,6 +2245,10 @@ fill_categories (AmlContentPage *self, GPtrArray *categories)
         }
 
         gtk_widget_add_css_class (button, "flat");
+        /* The whole width of the popover is the target, so a category is
+           not a small checkbox at the left that has to be aimed at. */
+        gtk_widget_set_hexpand (button, TRUE);
+        gtk_widget_set_halign (button, GTK_ALIGN_FILL);
         g_object_set_data_full (G_OBJECT (button), "aml-category",
                                 g_strdup (category->name), g_free);
         g_signal_connect (button, "toggled", G_CALLBACK (on_category_toggled),
@@ -2323,6 +2330,24 @@ on_filter_clicked (GtkWidget *widget G_GNUC_UNUSED, gpointer user_data)
   load_categories (self);
 }
 
+/* The button says how many categories are narrowing the list, so a filter
+ * that is on is not forgotten behind a closed popover. */
+static void
+update_filter_button (AmlContentPage *self)
+{
+  g_autofree char *text = NULL;
+
+  if (self->filter_button == NULL)
+    return;
+
+  if (self->categories != NULL && self->categories->len > 0)
+    text = g_strdup_printf ("Filter (%u)", self->categories->len);
+  else
+    text = g_strdup ("Filter");
+
+  gtk_menu_button_set_label (GTK_MENU_BUTTON (self->filter_button), text);
+}
+
 static void
 on_category_toggled (GtkCheckButton *button, gpointer user_data)
 {
@@ -2353,6 +2378,7 @@ on_category_toggled (GtkCheckButton *button, gpointer user_data)
       self->categories = kept;
     }
 
+  update_filter_button (self);
   self->offset = 0;
   run_search (self, FALSE);
 }
@@ -2773,8 +2799,12 @@ build_browse (AmlContentPage *self)
 
   gtk_box_append (GTK_BOX (top), search_bar);
 
-  gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (filter_button),
-                                 "view-more-symbolic");
+  /* A button with words rather than a three-dot icon: the filter has to
+     be found, and a "view more" icon names neither the filter nor what
+     opening it does. The arrow says a popover is what is behind it. */
+  gtk_menu_button_set_label (GTK_MENU_BUTTON (filter_button), "Filter");
+  gtk_menu_button_set_always_show_arrow (GTK_MENU_BUTTON (filter_button),
+                                         TRUE);
   gtk_widget_set_tooltip_text (filter_button, "Filter by category");
   gtk_accessible_update_property (GTK_ACCESSIBLE (filter_button),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL, "Filter",
@@ -2782,6 +2812,7 @@ build_browse (AmlContentPage *self)
   gtk_widget_set_valign (filter_button, GTK_ALIGN_CENTER);
   gtk_widget_add_css_class (filter_button, "flat");
   gtk_menu_button_set_popover (GTK_MENU_BUTTON (filter_button), popover);
+  self->filter_button = filter_button;
   /* A click opens the popover but does not emit "activate" on the
      menu button, so the load hangs off the popover's "show" instead. */
   g_signal_connect (popover, "show",
@@ -2795,7 +2826,14 @@ build_browse (AmlContentPage *self)
   gtk_widget_set_margin_end (filter_box, 6);
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (filter_scroller),
                                  filter_box);
-  gtk_widget_set_size_request (filter_scroller, 220, -1);
+  /* Wide enough to read a category and its heading, and no taller than
+     the popover can be: a long list scrolls instead of running off the
+     screen. */
+  gtk_widget_set_size_request (filter_scroller, 280, -1);
+  gtk_scrolled_window_set_max_content_height (
+      GTK_SCROLLED_WINDOW (filter_scroller), 420);
+  gtk_scrolled_window_set_propagate_natural_height (
+      GTK_SCROLLED_WINDOW (filter_scroller), TRUE);
   gtk_popover_set_child (GTK_POPOVER (popover), filter_scroller);
 
   self->browse_actions = top;
@@ -3057,6 +3095,7 @@ aml_content_page_dispose (GObject *object)
   self->results_status = NULL;
   self->search_entry = NULL;
   self->search_bar = NULL;
+  self->filter_button = NULL;
   self->filter_box = NULL;
   self->loading_more = NULL;
   self->retry_row = NULL;
