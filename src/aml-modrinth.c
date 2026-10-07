@@ -400,8 +400,10 @@ aml_modrinth_details_from_json (const char *json, gssize length,
   details->license =
     object_string (json_object_get_member (object_of (root), "license"), "id");
 
-  /* A search answer names an author and a project answer holds the team
-   * instead, so that a row and a detail page show the same name. */
+  /* A search answer names an author; a project answer carries the team
+   * instead, and Modrinth writes that as the team's project id rather
+   * than as its members, so there is no name to take from it. Members
+   * are read anyway in case that ever stops being true. */
   details->author = object_string (root, "author");
 
   if (details->author == NULL)
