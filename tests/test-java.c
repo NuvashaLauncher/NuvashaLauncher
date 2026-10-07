@@ -218,6 +218,44 @@ test_best_compatible_prefers_closest (void)
   g_assert_null (aml_java_best_compatible (list, 26));
 }
 
+/* A headless runtime cannot show the game, so a windowed one that is
+ * newer wins over it; a headless one is still the answer when it is the
+ * only thing that fits. */
+static void
+test_best_compatible_prefers_windowed (void)
+{
+  g_autoptr (GPtrArray) list =
+    g_ptr_array_new_with_free_func ((GDestroyNotify) aml_java_free);
+  AmlJava *head = g_new0 (AmlJava, 1);
+  AmlJava *windowed = g_new0 (AmlJava, 1);
+  AmlJava *best = NULL;
+
+  head->executable = g_strdup ("/headless/8/bin/java");
+  head->major_version = 8;
+  head->headless = TRUE;
+
+  windowed->executable = g_strdup ("/windowed/21/bin/java");
+  windowed->major_version = 21;
+  windowed->headless = FALSE;
+
+  g_ptr_array_add (list, head);
+  g_ptr_array_add (list, windowed);
+
+  best = aml_java_best_compatible (list, 8);
+  g_assert_nonnull (best);
+  g_assert_cmpint (best->major_version, ==, 21);
+  g_assert_false (best->headless);
+
+  /* Only the headless one is left: it is still returned. */
+  g_ptr_array_remove_index (list, 1);
+
+  best = aml_java_best_compatible (list, 8);
+  g_assert_nonnull (best);
+  g_assert_true (best->headless);
+
+  g_print ("ok - a windowed Java beats a headless one\n");
+}
+
 static void
 test_compatibility_rule (void)
 {
@@ -399,8 +437,12 @@ test_detect_list_jre_layout_and_dedup (void)
   g_autofree char *head_home_bin = g_build_filename (head_home, "bin", NULL);
   g_autofree char *real_libawt =
     g_build_filename (real_home, "lib", "libawt_xawt.so", NULL);
+  /* An OpenJDK 8 JRE keeps the bridge under an architecture directory,
+     jre/lib/amd64/libawt_xawt.so. */
+  g_autofree char *jre_libawt_dir =
+    g_build_filename (jre_home_lib, "amd64", NULL);
   g_autofree char *jre_libawt =
-    g_build_filename (jre_home_lib, "libawt_xawt.so", NULL);
+    g_build_filename (jre_libawt_dir, "libawt_xawt.so", NULL);
   g_autofree char *plain_javasrc = NULL;
   g_assert_cmpint (g_mkdir_with_parents (real_home_bin, 0755), ==, 0);
   g_assert_cmpint (g_mkdir_with_parents (real_home_lib, 0755), ==, 0);
@@ -415,7 +457,8 @@ test_detect_list_jre_layout_and_dedup (void)
   g_autofree char *head_java = write_fake_java (head_home_bin, "java",
                                                 report_openjdk_25);
 
-  /* The real java 8 layout carries lib/libawt_xawt.so inside jre/lib. */
+  /* The real java 8 layout carries it under jre/lib/amd64. */
+  g_assert_cmpint (g_mkdir_with_parents (jre_libawt_dir, 0755), ==, 0);
   g_file_set_contents (jre_libawt, "fake", -1, NULL);
 
   /* The real java 25 carries it in <home>/lib. */
@@ -565,6 +608,8 @@ main (void)
 
   test_best_compatible_prefers_closest ();
   g_print ("ok - the closest compatible Java is preferred\n");
+
+  test_best_compatible_prefers_windowed ();
 
   test_select_instance_overrides_global ();
   g_print ("ok - instance, global then auto, in that order\n");

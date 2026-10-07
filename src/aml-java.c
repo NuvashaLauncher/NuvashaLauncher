@@ -16,17 +16,58 @@
 #include <string.h>
 #include <unistd.h>
 
-/* True when this JVM reports only command-line English: its home lacks
- * lib/libawt_xawt.so, so there is no AWT glue for a windowed UI. */
+/* TRUE when <base>/lib holds AWT's X11 bridge, either straight in lib/
+ * (OpenJDK 9 and newer) or under an architecture directory such as
+ * lib/amd64/ (OpenJDK 8). A headless package carries
+ * libawt_headless.so instead, so neither is there. */
+static gboolean
+home_has_xawt (const char *base)
+{
+  g_autofree char *lib = g_build_filename (base, "lib", NULL);
+  g_autofree char *direct = g_build_filename (lib, "libawt_xawt.so", NULL);
+  g_autoptr (GDir) dir = NULL;
+  const char *name = NULL;
+
+  if (g_file_test (direct, G_FILE_TEST_EXISTS))
+    return TRUE;
+
+  dir = g_dir_open (lib, 0, NULL);
+
+  if (dir == NULL)
+    return FALSE;
+
+  while ((name = g_dir_read_name (dir)) != NULL)
+    {
+      g_autofree char *sub =
+        g_build_filename (lib, name, "libawt_xawt.so", NULL);
+
+      if (g_file_test (sub, G_FILE_TEST_EXISTS))
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
+/* True when this JVM can open a window: its home, or the JRE a JDK keeps
+ * under jre/, holds AWT's X11 bridge. The executable is resolved first,
+ * because a /usr/bin/java or a jvm/default link points somewhere else. */
 static gboolean
 java_has_xawt (const char *executable)
 {
-  g_autofree char *dir = g_path_get_dirname (executable);
-  g_autofree char *home = g_path_get_dirname (dir);
-  g_autofree char *libawt =
-    g_build_filename (home, "lib", "libawt_xawt.so", NULL);
+  g_autofree char *real = realpath (executable, NULL);
+  g_autofree char *dir = NULL;
+  g_autofree char *home = NULL;
+  g_autofree char *jre = NULL;
 
-  return g_file_test (libawt, G_FILE_TEST_EXISTS);
+  if (real == NULL)
+    return FALSE;
+
+  /* <home>/bin/java -> <home>; a JDK's own JRE is <home>/jre. */
+  dir = g_path_get_dirname (real);
+  home = g_path_get_dirname (dir);
+  jre = g_build_filename (home, "jre", NULL);
+
+  return home_has_xawt (jre) || home_has_xawt (home);
 }
 
 GQuark
@@ -73,7 +114,8 @@ real_path (const char *path)
 AmlJava *
 aml_java_best_compatible (GPtrArray *javas, int required_major)
 {
-  AmlJava *best = NULL;
+  AmlJava *best = NULL;          /* the closest one that can open a window */
+  AmlJava *best_headless = NULL; /* only used when nothing else fits */
 
   g_return_val_if_fail (javas != NULL, NULL);
 
@@ -84,11 +126,20 @@ aml_java_best_compatible (GPtrArray *javas, int required_major)
       if (!aml_java_is_compatible (java, required_major))
         continue;
 
-      if (best == NULL || java->major_version < best->major_version)
+      /* A headless runtime cannot show the game, so one that can is
+         worth a larger major version: the game wants Java N or newer,
+         and a newer windowed Java runs it. */
+      if (java->headless)
+        {
+          if (best_headless == NULL ||
+              java->major_version < best_headless->major_version)
+            best_headless = java;
+        }
+      else if (best == NULL || java->major_version < best->major_version)
         best = java;
     }
 
-  return best;
+  return best != NULL ? best : best_headless;
 }
 
 /* True when @path resolves to the same file as the AmlJava this
