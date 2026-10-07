@@ -16,6 +16,7 @@
 #include "aml-dialogs.h"
 #include "aml-download.h"
 #include "aml-icons.h"
+#include "aml-markdown.h"
 #include "aml-modpack.h"
 #include "aml-modrinth.h"
 
@@ -66,12 +67,20 @@ struct _AmlDownloadModpackDialog
   gboolean searched;          /* the first search has been asked for */
   GHashTable *seen_ids;       /* project id -> NULL, no duplicate rows */
 
-  /* The details of a pack that comes and goes: versions of it. */
-  GPtrArray *versions; /* AmlModrinthVersion* of the details page */
-  GtkWidget *version_row; /* AdwComboRow */
+  /* The dialog of a pack, above the browser: the same one the mods,
+     resource packs and shader packs open, with the description in
+     Markdown and the versions in a drop-down over a Download button. */
+  AdwDialog *details_dialog;
+  GtkWidget *dropdown;       /* GtkDropDown, the versions to install */
+  GtkWidget *download_button;
+  GtkWidget *body;           /* the box the Markdown description goes in */
+  GtkWidget *meta;           /* license and author under the title */
+  GtkWidget *count;          /* the download count, at the left */
+
+  /* What the dialog of a pack holds while it is up. */
+  GPtrArray *versions; /* AmlModrinthVersion* of the details dialog */
   GtkWidget *name_entry;  /* AdwEntryRow */
   GtkWidget *directory_row;
-  GtkWidget *install_button;
   GtkWidget *details_error; /* inline words when versions fail or are empty */
 
   /* Widgets of the pages that fall on top of the stack. */
@@ -120,8 +129,6 @@ static GtkWidget * build_installing_page (AmlDownloadModpackDialog *self);
 static void dialog_ensure_installing_page (AmlDownloadModpackDialog *self);
 static void start_install (AmlDownloadModpackDialog *self);
 static void on_pick_directory (GtkButton *, gpointer);
-static void on_cancel_clicked (GtkButton *, gpointer);
-static void on_install_clicked (GtkButton *, gpointer);
 static void on_error_back (GtkButton *, gpointer);
 static void on_error_retry_fetch (GtkButton *, gpointer);
 static void on_error_retry_install (GtkButton *, gpointer);
@@ -130,6 +137,7 @@ static void on_optional_cancel (GtkButton *, gpointer);
 static void on_optional_install (GtkButton *, gpointer);
 static void dialog_details_open (AmlDownloadModpackDialog *self);
 static void dialog_start_features (AmlDownloadModpackDialog *self);
+static void on_modpack_download_clicked (GtkButton *, gpointer);
 
 /* Points @field at @widget and watches it: when the details page that
  * holds @widget is destroyed, @field becomes NULL before a request that
@@ -152,8 +160,17 @@ details_watch (GtkWidget **field, GtkWidget *widget)
 static void
 dialog_forget_widgets (AmlDownloadModpackDialog *self)
 {
-  details_watch (&self->version_row, NULL);
-  details_watch (&self->install_button, NULL);
+  if (self->details_dialog != NULL)
+    g_object_remove_weak_pointer (G_OBJECT (self->details_dialog),
+                                  (gpointer *) &self->details_dialog);
+
+  self->details_dialog = NULL;
+
+  details_watch (&self->dropdown, NULL);
+  details_watch (&self->download_button, NULL);
+  details_watch (&self->body, NULL);
+  details_watch (&self->meta, NULL);
+  details_watch (&self->count, NULL);
   details_watch (&self->details_error, NULL);
   details_watch (&self->name_entry, NULL);
   details_watch (&self->install_bar, NULL);
@@ -888,91 +905,103 @@ versions_of_answer (JsonNode *root, GError **error)
 }
 
 /* ---------------------------------------------------------- *
- * Page: Details
+ * The dialog of a pack
+ *
+ * The same one the mods, resource packs and shader packs open: the
+ * description in Markdown, and a foot with the versions in a drop-down
+ * over the button that installs the one shown. A pack becomes an
+ * instance of its own rather than a file in one, so the name it takes
+ * and where it goes are asked for here too, below the description.
  * ---------------------------------------------------------- */
 
+/* Empties a box, so the description can be built again. */
 static void
-build_details_page (AmlDownloadModpackDialog *self)
+clear_box (GtkWidget *box)
 {
-  /* the page itself is built every time; widget lifetimes track it. */
-  GtkWidget *toolbar = adw_toolbar_view_new ();
-  GtkWidget *header = adw_header_bar_new ();
+  GtkWidget *child = NULL;
+
+  while ((child = gtk_widget_get_first_child (box)) != NULL)
+    gtk_box_remove (GTK_BOX (box), child);
+}
+
+/* Words that are not Markdown and must read exactly as they are. */
+static GtkWidget *
+plain_label (const char *text)
+{
+  GtkWidget *label = gtk_label_new (text != NULL ? text : "");
+
+  gtk_label_set_wrap (GTK_LABEL (label), TRUE);
+  gtk_label_set_wrap_mode (GTK_LABEL (label), PANGO_WRAP_WORD_CHAR);
+  gtk_label_set_xalign (GTK_LABEL (label), 0);
+  gtk_label_set_selectable (GTK_LABEL (label), TRUE);
+
+  return label;
+}
+
+/* What a count of downloads reads in the fewest words that still say
+   what it is. */
+static char *
+format_downloads (guint64 downloads)
+{
+  if (downloads >= 1000000)
+    return g_strdup_printf ("%.1fM downloads", downloads / 1000000.0);
+  if (downloads >= 1000)
+    return g_strdup_printf ("%.1fk downloads", downloads / 1000.0);
+
+  return g_strdup_printf ("%" G_GUINT64_FORMAT " downloads", downloads);
+}
+
+static void
+build_details_dialog (AmlDownloadModpackDialog *self)
+{
+  GtkWidget *content = NULL;
+  GtkWidget *scroller = NULL;
+  GtkWidget *box = NULL;
   GtkWidget *page = NULL;
-  GtkWidget *scroller = gtk_scrolled_window_new ();
-  GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
-  GtkWidget *heading = adw_preferences_group_new ();
-  GtkWidget *title = gtk_label_new (self->project->title);
-  GtkWidget *meta = gtk_label_new (NULL);
-  GtkWidget *body = gtk_label_new (self->project->description);
-  GtkWidget *downloads = gtk_label_new (NULL);
-  GtkWidget *versions_group = adw_preferences_group_new ();
-  GtkWidget *instance_group = adw_preferences_group_new ();
-  GtkWidget *buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *cancel = gtk_button_new_with_label ("Cancel");
+  GtkWidget *heading = NULL;
+  GtkWidget *instance_group = NULL;
+  GtkWidget *name_entry = NULL;
+  GtkWidget *bar = NULL;
+  GtkWidget *pick_button = NULL;
+  AdwDialog *dialog = NULL;
+  g_autofree char *downloads = NULL;
 
-  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
+  /* The dialog of the pack before this one is gone: two of them at once
+     would both answer the same questions into the same fields. */
+  if (self->details_dialog != NULL)
+    adw_dialog_close (self->details_dialog);
 
-  gtk_widget_add_css_class (title, "title-2");
-  gtk_label_set_wrap (GTK_LABEL (title), TRUE);
-  gtk_label_set_xalign (GTK_LABEL (title), 0);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), title);
+  scroller = gtk_scrolled_window_new ();
+  box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 18);
+  heading = adw_preferences_group_new ();
 
-  meta = gtk_label_new (NULL);
-  {
-    g_autofree char *author = g_strdup_printf ("by %s", self->project->author);
+  /* The title, then who wrote it and how often it was taken, the same
+     three lines the other contents open with. */
+  page = gtk_label_new (self->project->title);
+  gtk_label_set_wrap (GTK_LABEL (page), TRUE);
+  gtk_label_set_xalign (GTK_LABEL (page), 0);
+  gtk_widget_add_css_class (page, "title-2");
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), page);
 
-    gtk_label_set_text (GTK_LABEL (meta), author);
-  }
-  gtk_widget_add_css_class (meta, "dim-label");
-  gtk_label_set_xalign (GTK_LABEL (meta), 0);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), meta);
+  details_watch (&self->meta, gtk_label_new (NULL));
+  gtk_label_set_xalign (GTK_LABEL (self->meta), 0);
+  gtk_widget_add_css_class (self->meta, "dim-label");
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), self->meta);
 
-  gtk_label_set_wrap (GTK_LABEL (body), TRUE);
-  gtk_label_set_wrap_mode (GTK_LABEL (body), PANGO_WRAP_WORD_CHAR);
-  gtk_label_set_xalign (GTK_LABEL (body), 0);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), body);
+  downloads = format_downloads (self->project->downloads);
+  details_watch (&self->count, gtk_label_new (downloads));
+  gtk_label_set_xalign (GTK_LABEL (self->count), 0);
+  gtk_widget_add_css_class (self->count, "dim-label");
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), self->count);
 
-  {
-    g_autofree char *downloads_str =
-      g_strdup_printf ("%" G_GUINT64_FORMAT " downloads", self->project->downloads);
+  /* The long description. The short one the search answered with stands
+     in until the long one arrives. */
+  details_watch (&self->body, gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
+  gtk_box_append (GTK_BOX (self->body),
+                  plain_label (self->project->description));
 
-    gtk_label_set_text (GTK_LABEL (downloads), downloads_str);
-  }
-  gtk_widget_add_css_class (downloads, "dim-label");
-  gtk_label_set_xalign (GTK_LABEL (downloads), 0);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), downloads);
-
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (versions_group),
-                                   "Version");
-
-  details_watch (&self->version_row, adw_combo_row_new ());
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->version_row),
-                                      FALSE);
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->version_row),
-                                 "Pack");
-  adw_combo_row_set_use_subtitle (ADW_COMBO_ROW (self->version_row), TRUE);
-  {
-    GtkStringList *strings = gtk_string_list_new (NULL);
-
-    if (self->versions != NULL)
-      {
-        for (guint i = 0; i < self->versions->len; i++)
-          {
-            AmlModrinthVersion *version =
-              g_ptr_array_index (self->versions, i);
-            char label[160];
-
-            version_row_label (version, label, sizeof label);
-            gtk_string_list_append (strings, label);
-          }
-      }
-
-    adw_combo_row_set_model (ADW_COMBO_ROW (self->version_row),
-                             G_LIST_MODEL (strings));
-    g_object_unref (strings);
-  }
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (versions_group),
-                             self->version_row);
+  gtk_box_append (GTK_BOX (box), heading);
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (self->body));
 
   /* Where a version list that failed to load, or that holds nothing to
      install, says so: it must not be a disabled button with no reason. */
@@ -981,36 +1010,37 @@ build_details_page (AmlDownloadModpackDialog *self)
   gtk_label_set_xalign (GTK_LABEL (self->details_error), 0);
   gtk_widget_add_css_class (self->details_error, "dim-label");
   gtk_widget_set_visible (self->details_error, FALSE);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (versions_group),
-                             self->details_error);
+  gtk_box_append (GTK_BOX (box), self->details_error);
 
+  /* A pack becomes an instance, so what it is called and where it goes
+     are asked for as well. */
+  instance_group = adw_preferences_group_new ();
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (instance_group),
                                    "Instance");
 
-  GtkWidget *name_entry = adw_entry_row_new ();
-
+  name_entry = adw_entry_row_new ();
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (name_entry), "Name");
-  adw_entry_row_set_activates_default (ADW_ENTRY_ROW (name_entry), TRUE);
-  gtk_editable_set_text (GTK_EDITABLE (name_entry),
-                         self->project->title);
+  gtk_editable_set_text (GTK_EDITABLE (name_entry), self->project->title);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (instance_group),
                              name_entry);
   details_watch (&self->name_entry, name_entry);
 
-  g_autofree char *default_directory = g_build_filename (
-      g_get_user_data_dir (), "AML", "instances", NULL);
+  {
+    g_autofree char *default_directory = g_build_filename (
+        g_get_user_data_dir (), "AML", "instances", NULL);
 
-  self->directory_row = adw_action_row_new ();
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->directory_row),
-                                      FALSE);
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->directory_row),
-                                 "Directory");
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (self->directory_row),
-                               default_directory);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (instance_group),
-                             self->directory_row);
-  GtkWidget *pick_button = gtk_button_new_with_label ("Choose…");
+    details_watch (&self->directory_row, adw_action_row_new ());
+    adw_preferences_row_set_use_markup (
+        ADW_PREFERENCES_ROW (self->directory_row), FALSE);
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->directory_row),
+                                   "Directory");
+    adw_action_row_set_subtitle (ADW_ACTION_ROW (self->directory_row),
+                                 default_directory);
+    adw_preferences_group_add (ADW_PREFERENCES_GROUP (instance_group),
+                               self->directory_row);
+  }
 
+  pick_button = gtk_button_new_with_label ("Choose…");
   gtk_widget_add_css_class (pick_button, "flat");
   gtk_widget_set_valign (pick_button, GTK_ALIGN_CENTER);
   adw_action_row_add_suffix (ADW_ACTION_ROW (self->directory_row),
@@ -1020,50 +1050,78 @@ build_details_page (AmlDownloadModpackDialog *self)
   g_signal_connect (pick_button, "clicked", G_CALLBACK (on_pick_directory),
                     self);
 
-  AdwPreferencesPage *page_less = ADW_PREFERENCES_PAGE (adw_preferences_page_new ());
+  gtk_box_append (GTK_BOX (box), instance_group);
 
-  adw_preferences_page_add (page_less, ADW_PREFERENCES_GROUP (heading));
-  adw_preferences_page_add (page_less, ADW_PREFERENCES_GROUP (versions_group));
-  adw_preferences_page_add (page_less, ADW_PREFERENCES_GROUP (instance_group));
-
-  buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  gtk_widget_set_margin_start (buttons, 12);
-  gtk_widget_set_margin_end (buttons, 12);
-  gtk_widget_set_margin_bottom (buttons, 12);
-  gtk_widget_set_halign (buttons, GTK_ALIGN_END);
-
-  cancel = gtk_button_new_with_label ("Cancel");
-  GtkWidget *install = gtk_button_new_with_label ("Install");
-
-  gtk_widget_add_css_class (install, "suggested-action");
-  /* Nothing can be installed before the versions have arrived. */
-  gtk_widget_set_sensitive (install, FALSE);
-
-  details_watch (&self->install_button, install);
-
-  gtk_box_append (GTK_BOX (buttons), cancel);
-  gtk_box_append (GTK_BOX (buttons), install);
-
-  g_signal_connect (cancel, "clicked", G_CALLBACK (on_cancel_clicked),
-                    self);
-  g_signal_connect (install, "clicked", G_CALLBACK (on_install_clicked),
-                    self);
-
-  gtk_box_append (GTK_BOX (box), GTK_WIDGET (page_less));
-  gtk_box_append (GTK_BOX (box), buttons);
-  gtk_widget_set_vexpand (GTK_WIDGET (page_less), TRUE);
+  gtk_widget_set_margin_top (box, 12);
+  gtk_widget_set_margin_bottom (box, 12);
+  gtk_widget_set_margin_start (box, 18);
+  gtk_widget_set_margin_end (box, 18);
 
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller), box);
   gtk_widget_set_vexpand (scroller, TRUE);
 
-  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), scroller);
+  /* The foot: every version the pack publishes, and the button that
+     installs the one shown. The newest is what it shows from the start. */
+  details_watch (&self->dropdown, gtk_drop_down_new (NULL, NULL));
+  gtk_widget_set_hexpand (self->dropdown, TRUE);
+  gtk_widget_set_valign (self->dropdown, GTK_ALIGN_CENTER);
 
-  page = GTK_WIDGET (adw_navigation_page_new (toolbar,
-                                              self->project->title));
-  adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (page), "details");
+  details_watch (&self->download_button, gtk_button_new_with_label ("Download"));
+  gtk_widget_add_css_class (self->download_button, "suggested-action");
+  gtk_widget_set_valign (self->download_button, GTK_ALIGN_CENTER);
+  /* Nothing can be installed before the versions have arrived. */
+  gtk_widget_set_sensitive (self->download_button, FALSE);
+  g_signal_connect (self->download_button, "clicked",
+                    G_CALLBACK (on_modpack_download_clicked), self);
 
-  adw_navigation_view_push (ADW_NAVIGATION_VIEW (self->nav),
-                            ADW_NAVIGATION_PAGE (page));
+  bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  gtk_box_append (GTK_BOX (bar), self->dropdown);
+  gtk_box_append (GTK_BOX (bar), self->download_button);
+  gtk_widget_set_margin_top (bar, 12);
+  gtk_widget_set_margin_bottom (bar, 12);
+  gtk_widget_set_margin_start (bar, 12);
+  gtk_widget_set_margin_end (bar, 12);
+
+  content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  gtk_box_append (GTK_BOX (content), scroller);
+  gtk_box_append (GTK_BOX (content),
+                  gtk_separator_new (GTK_ORIENTATION_HORIZONTAL));
+  gtk_box_append (GTK_BOX (content), bar);
+
+  /* A dialog of its own above the browser, so the browser keeps its own
+     header and its own pages underneath. */
+  dialog = adw_dialog_new ();
+  adw_dialog_set_title (dialog, self->project->title);
+  adw_dialog_set_content_width (dialog, 640);
+  adw_dialog_set_content_height (dialog, 640);
+  adw_dialog_set_child (dialog, content);
+
+  self->details_dialog = dialog;
+  g_object_add_weak_pointer (G_OBJECT (dialog),
+                             (gpointer *) &self->details_dialog);
+}
+
+/* The author the search answer named. A project answer does not name one:
+   it carries the team as the team's project id. */
+static void
+show_meta (AmlDownloadModpackDialog *self, const char *author)
+{
+  const char *who = author != NULL && *author != '\0'
+                      ? author
+                      : (self->project != NULL ? self->project->author : NULL);
+  g_autofree char *text = NULL;
+
+  if (self->meta == NULL)
+    return;
+
+  if (who == NULL || *who == '\0')
+    {
+      gtk_label_set_text (GTK_LABEL (self->meta), "");
+      return;
+    }
+
+  text = g_strdup_printf ("by %s", who);
+  gtk_label_set_text (GTK_LABEL (self->meta), text);
 }
 
 /* Get the modpack's list of published versions and show it on the
@@ -1117,15 +1175,6 @@ on_versions_answer (GObject *source G_GNUC_UNUSED,
   self->versions = versions;
   versions = NULL;
 
-  if (self->version_row != NULL)
-    {
-      GtkStringList *strings = build_version_strings (self->versions);
-
-      adw_combo_row_set_model (ADW_COMBO_ROW (self->version_row),
-                               G_LIST_MODEL (strings));
-      g_object_unref (strings);
-    }
-
   /* A project that publishes no pack file for this instance is not a
      failure of the network, but it must still say why the button does
      nothing. */
@@ -1134,8 +1183,80 @@ on_versions_answer (GObject *source G_GNUC_UNUSED,
                         "This project publishes no pack file AML can "
                         "install.");
 
-  if (self->install_button != NULL)
-    gtk_widget_set_sensitive (self->install_button, self->versions->len > 0);
+  if (self->dropdown != NULL)
+    {
+      GtkStringList *strings = build_version_strings (self->versions);
+
+      gtk_drop_down_set_model (GTK_DROP_DOWN (self->dropdown),
+                               G_LIST_MODEL (strings));
+      /* The newest version is what a user most often wants, so it is
+         what the drop-down shows from the start. */
+      gtk_drop_down_set_selected (GTK_DROP_DOWN (self->dropdown), 0);
+      g_object_unref (strings);
+    }
+
+  if (self->download_button != NULL)
+    gtk_widget_set_sensitive (self->download_button, self->versions->len > 0);
+
+  operation_done (user_data);
+}
+
+static void dialog_details_show_again (AmlDownloadModpackDialog *self);
+
+/* The long description of the pack, read once the dialog is up. */
+static void
+on_details_answer (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                   gpointer user_data)
+{
+  AmlDownloadModpackDialog *self = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlModrinthDetails) details = NULL;
+
+  details = aml_modrinth_details_finish (result, &error);
+
+  if (self->body == NULL)
+    {
+      operation_done (user_data);
+      return;
+    }
+
+  clear_box (self->body);
+
+  if (details == NULL)
+    {
+      if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+        gtk_box_append (GTK_BOX (self->body),
+                        plain_label (error != NULL ? error->message
+                                                   : "the pack cannot be read"));
+
+      operation_done (user_data);
+      return;
+    }
+
+  if (details->body != NULL && *details->body != '\0')
+    aml_markdown_render (GTK_BOX (self->body), details->body);
+  else
+    gtk_box_append (GTK_BOX (self->body),
+                    plain_label (details->description));
+
+  /* The license beside the author, the way the other contents say it. */
+  if (details->license != NULL && *details->license != '\0')
+    {
+      g_autofree char *who = g_strdup_printf ("by %s", details->author != NULL
+                                                        ? details->author
+                                                        : (self->project != NULL
+                                                               ? self->project->author
+                                                               : ""));
+      g_autofree char *text =
+        g_strdup_printf ("%s  ·  %s", details->license, who);
+
+      if (self->meta != NULL)
+        gtk_label_set_text (GTK_LABEL (self->meta), text);
+    }
+  else
+    {
+      show_meta (self, details->author);
+    }
 
   operation_done (user_data);
 }
@@ -1169,7 +1290,25 @@ dialog_details_open (AmlDownloadModpackDialog *self)
   g_autofree char *url =
     g_strdup_printf (AML_MODRINTH_URL "/project/%s/version", escaped_id);
 
-  build_details_page (self);
+  if (self->project == NULL)
+    return;
+
+  /* The dialog of a pack is built over the versions already read, so a
+     pack opened a second time comes up with them in it. */
+  build_details_dialog (self);
+  show_meta (self, self->project->author);
+
+  if (self->versions != NULL)
+    {
+      GtkStringList *strings = build_version_strings (self->versions);
+
+      gtk_drop_down_set_model (GTK_DROP_DOWN (self->dropdown),
+                               G_LIST_MODEL (strings));
+      gtk_drop_down_set_selected (GTK_DROP_DOWN (self->dropdown), 0);
+      g_object_unref (strings);
+    }
+
+  adw_dialog_present (self->details_dialog, GTK_WIDGET (self));
 
   if (self->fetch != NULL)
     g_cancellable_cancel (self->fetch);
@@ -1184,6 +1323,9 @@ dialog_details_open (AmlDownloadModpackDialog *self)
     aml_icon_load_async (self->project->icon_url, self->fetch,
                          project_icon_ready, g_object_ref (self));
 
+  /* The long description, and the versions of the pack beside it. */
+  aml_modrinth_details_async (self->project->project_id, self->fetch,
+                              on_details_answer, g_object_ref (self));
   aml_download_json_async (url, self->fetch, on_versions_answer,
                            g_object_ref (self));
 }
@@ -1192,15 +1334,6 @@ dialog_details_open (AmlDownloadModpackDialog *self)
 /* ---------------------------------------------------------- *
  * The other pages
  * ---------------------------------------------------------- */
-
-static void
-dialog_nav_pop_to_tag (AmlDownloadModpackDialog *self, const char *tag)
-{
-  if (self == NULL || self->nav == NULL)
-    return;
-
-  adw_navigation_view_pop_to_tag (ADW_NAVIGATION_VIEW (self->nav), tag);
-}
 
 static GtkWidget *
 build_error_page (AmlDownloadModpackDialog *self,
@@ -1338,12 +1471,13 @@ dialog_ensure_installing_page (AmlDownloadModpackDialog *self)
 
 /* Handler buttons patched around the pages. */
 
+/* The dialog of a pack is above the browser rather than a page in it, so
+   going back to it means putting it up again. */
 static void
-on_cancel_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+dialog_details_show_again (AmlDownloadModpackDialog *self)
 {
-  AmlDownloadModpackDialog *self = user_data;
-
-  dialog_nav_pop_to_tag (self, "browse");
+  if (self->details_dialog != NULL)
+    adw_dialog_present (self->details_dialog, GTK_WIDGET (self));
 }
 
 static void
@@ -1351,7 +1485,7 @@ on_error_back (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   AmlDownloadModpackDialog *self = user_data;
 
-  dialog_nav_pop_to_tag (self, "details");
+  dialog_details_show_again (self);
 }
 
 static void
@@ -1386,8 +1520,7 @@ on_install_cancel (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   if (self->fetch != NULL)
     g_cancellable_cancel (self->fetch);
 
-  adw_navigation_view_pop_to_tag (ADW_NAVIGATION_VIEW (self->nav),
-                                  "details");
+  dialog_details_show_again (self);
 }
 
 static void
@@ -1411,7 +1544,7 @@ on_pick_directory_selected (GObject *source,
                            GTK_DIALOG_ERROR_DISMISSED))
         return;
 
-      dialog_nav_pop_to_tag (self, "details");
+      dialog_details_show_again (self);
       return;
     }
 
@@ -1434,21 +1567,26 @@ on_pick_directory (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
                                  NULL, on_pick_directory_selected, self);
 }
 
+/* The Download button under the versions: it installs the version the
+   drop-down shows, and the dialog it was in has done its work. */
 static void
-on_install_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+on_modpack_download_clicked (GtkButton *button G_GNUC_UNUSED,
+                             gpointer user_data)
 {
   AmlDownloadModpackDialog *self = user_data;
   const char *name = NULL;
   guint selected = 0;
 
-  if (self->name_entry == NULL || self->version_row == NULL)
+  if (self->dropdown == NULL || self->versions == NULL)
     return;
 
-  name = gtk_editable_get_text (GTK_EDITABLE (self->name_entry));
-  selected = adw_combo_row_get_selected (ADW_COMBO_ROW (self->version_row));
+  selected = gtk_drop_down_get_selected (GTK_DROP_DOWN (self->dropdown));
 
-  if (self->versions == NULL || selected >= self->versions->len)
+  if (selected == GTK_INVALID_LIST_POSITION || selected >= self->versions->len)
     return;
+
+  if (self->name_entry != NULL)
+    name = gtk_editable_get_text (GTK_EDITABLE (self->name_entry));
 
   if (name == NULL || *name == '\0')
     name = self->project->title;
@@ -1461,6 +1599,11 @@ on_install_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 
   self->version = aml_modrinth_version_copy (
       g_ptr_array_index (self->versions, selected));
+
+  /* The install carries on in the browser below, so this dialog is done
+     and closes before the work is shown. */
+  if (self->details_dialog != NULL)
+    adw_dialog_close (self->details_dialog);
 
   dialog_start_features (self);
 }
@@ -1657,7 +1800,7 @@ on_optional_cancel (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   AmlDownloadModpackDialog *self = user_data;
 
-  dialog_nav_pop_to_tag (self, "details");
+  dialog_details_show_again (self);
 }
 
 static void
