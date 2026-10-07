@@ -60,10 +60,6 @@ struct _AmlContentPage
   char *loader; /* NULL for the content that needs none */
   char *folder; /* the folder of the instance this content lives in */
 
-  /* What the trash button does: move the file to the Trash or delete it
-   * for good, from the application setting. */
-  gboolean delete_to_trash;
-
   /* Borrowed from the widget tree of the page, and cleared in dispose()
    * because a request can answer after the tree is gone. */
   GtkWidget *toasts;
@@ -1231,25 +1227,12 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
   AmlContentPage *self = user_data;
   g_autoptr (GError) error = NULL;
 
-  if (self->delete_to_trash)
-    {
-      if (!g_file_trash_finish (G_FILE (source), result, &error))
-        show_error (self, "The file cannot be moved to Trash", error);
-      else
-        {
-          show_toast (self, "Moved to Trash");
-          reload_installed (self);
-        }
-    }
+  if (!g_file_delete_finish (G_FILE (source), result, &error))
+    show_error (self, "The file cannot be deleted", error);
   else
     {
-      if (!g_file_delete_finish (G_FILE (source), result, &error))
-        show_error (self, "The file cannot be deleted", error);
-      else
-        {
-          show_toast (self, "Deleted");
-          reload_installed (self);
-        }
+      show_toast (self, "Deleted");
+      reload_installed (self);
     }
 
   g_object_unref (self);
@@ -1274,18 +1257,12 @@ on_delete_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
     }
 
   target = g_file_new_for_path (path);
-
-  /* Both are a system call on the file and go through GIO off the main
-     loop; the ref on the page travels to on_deleted(). */
-  if (self->delete_to_trash)
-    g_file_trash_async (target, G_PRIORITY_DEFAULT, NULL, on_deleted, self);
-  else
-    g_file_delete_async (target, G_PRIORITY_DEFAULT, NULL, on_deleted, self);
+  /* Deleting is a system call on the file and goes through GIO off the
+     main loop; the ref on the page travels to on_deleted(). */
+  g_file_delete_async (target, G_PRIORITY_DEFAULT, NULL, on_deleted, self);
 }
 
-/* The trash button asks first, in the words of what it is about to do:
- * the file goes to the Trash where it can be brought back, or, when the
- * user chose that, it is deleted for good. */
+/* The trash button asks first, then deletes the file for good. */
 static void
 on_trash_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
@@ -1298,29 +1275,17 @@ on_trash_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   if (file == NULL)
     return;
 
-  if (self->delete_to_trash)
-    {
-      heading = g_strdup_printf ("Move \"%s\" to Trash?", file->filename);
-      body = g_strdup_printf ("\"%s\" is moved to the Trash and can be "
-                              "brought back from there.", file->path);
-    }
-  else
-    {
-      heading = g_strdup_printf ("Delete \"%s\" permanently?", file->filename);
-      body = g_strdup_printf ("\"%s\" is deleted and cannot be brought "
-                              "back.", file->path);
-    }
+  heading = g_strdup_printf ("Delete \"%s\" permanently?", file->filename);
+  body = g_strdup_printf ("\"%s\" is deleted and cannot be brought back.",
+                          file->path);
 
   alert = ADW_ALERT_DIALOG (adw_alert_dialog_new (heading, body));
   adw_alert_dialog_set_heading_use_markup (alert, FALSE);
   adw_alert_dialog_set_body_use_markup (alert, FALSE);
   adw_alert_dialog_add_response (alert, "cancel", "Cancel");
-  adw_alert_dialog_add_response (alert, "confirm",
-                                 self->delete_to_trash ? "Move to Trash"
-                                                       : "Delete");
-  adw_alert_dialog_set_response_appearance (
-    alert, "confirm", self->delete_to_trash ? ADW_RESPONSE_SUGGESTED
-                                            : ADW_RESPONSE_DESTRUCTIVE);
+  adw_alert_dialog_add_response (alert, "confirm", "Delete");
+  adw_alert_dialog_set_response_appearance (alert, "confirm",
+                                            ADW_RESPONSE_DESTRUCTIVE);
   adw_alert_dialog_set_default_response (alert, "cancel");
   adw_alert_dialog_set_close_response (alert, "cancel");
   g_object_set_data_full (G_OBJECT (alert), "aml-path",
@@ -1372,17 +1337,17 @@ file_row (AmlContentPage *self, AmlContentFile *file)
       adw_action_row_add_suffix (ADW_ACTION_ROW (row), sw);
     }
 
-  /* Every kind of file can go to the Trash. On a mod the button sits
-     after the switch, at the right end of the row. */
+  /* Every kind of file can be deleted. On a mod the button sits after
+     the switch, at the right end of the row. */
   {
     GtkWidget *trash = gtk_button_new_from_icon_name ("user-trash-symbolic");
 
     gtk_widget_add_css_class (trash, "flat");
     gtk_widget_set_valign (trash, GTK_ALIGN_CENTER);
-    gtk_widget_set_tooltip_text (trash, "Move to Trash");
+    gtk_widget_set_tooltip_text (trash, "Delete");
     gtk_accessible_update_property (GTK_ACCESSIBLE (trash),
                                     GTK_ACCESSIBLE_PROPERTY_LABEL,
-                                    "Move to Trash", -1);
+                                    "Delete", -1);
     g_object_set_data (G_OBJECT (trash), "aml-file", file);
     g_signal_connect (trash, "clicked", G_CALLBACK (on_trash_clicked), self);
     adw_action_row_add_suffix (ADW_ACTION_ROW (row), trash);
@@ -3014,7 +2979,6 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
   self = g_object_new (AML_TYPE_CONTENT_PAGE, NULL);
   self->instance = g_object_ref (instance);
   self->type = type;
-  self->delete_to_trash = TRUE; /* until the caller says otherwise */
   self->minecraft_version = instance_string (instance, "minecraft-version");
   self->browse = g_cancellable_new ();
   self->scan = g_cancellable_new ();
@@ -3082,14 +3046,6 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
   reload_installed (self);
 
   return self;
-}
-
-void
-aml_content_page_set_delete_to_trash (AmlContentPage *self, gboolean to_trash)
-{
-  g_return_if_fail (AML_IS_CONTENT_PAGE (self));
-
-  self->delete_to_trash = to_trash;
 }
 
 static void

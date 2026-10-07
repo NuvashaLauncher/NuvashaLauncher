@@ -20,7 +20,6 @@
 #define LOG_LINE_LIMIT_KEY "log-line-limit"
 #define OPEN_LOGS_AFTER_CRASH_KEY "open-logs-after-crash"
 #define SHOW_UNSTABLE_LOADERS_KEY "show-unstable-loaders"
-#define DELETE_TO_TRASH_KEY "delete-to-trash"
 
 /* A stored limit below this is not a number a log can be trimmed to. */
 #define LOG_LINE_LIMIT_FLOOR 1
@@ -34,7 +33,6 @@ struct _AmlSettings
   guint log_line_limit;
   gboolean open_logs_after_crash;
   gboolean show_unstable_loaders;
-  gboolean delete_to_trash;
   char *filename;
 };
 
@@ -133,12 +131,6 @@ load (AmlSettings *self)
   if (node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
       json_node_get_value_type (node) == G_TYPE_BOOLEAN)
     self->show_unstable_loaders = json_node_get_boolean (node);
-
-  node = json_object_get_member (object, DELETE_TO_TRASH_KEY);
-
-  if (node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
-      json_node_get_value_type (node) == G_TYPE_BOOLEAN)
-    self->delete_to_trash = json_node_get_boolean (node);
 }
 
 static gboolean
@@ -180,9 +172,6 @@ save (AmlSettings *self, GError **error)
 
   json_builder_set_member_name (builder, SHOW_UNSTABLE_LOADERS_KEY);
   json_builder_add_boolean_value (builder, self->show_unstable_loaders);
-
-  json_builder_set_member_name (builder, DELETE_TO_TRASH_KEY);
-  json_builder_add_boolean_value (builder, self->delete_to_trash);
 
   json_builder_end_object (builder);
 
@@ -379,35 +368,6 @@ aml_settings_set_show_unstable_loaders (AmlSettings *self,
   return FALSE;
 }
 
-gboolean
-aml_settings_get_delete_to_trash (AmlSettings *self)
-{
-  g_return_val_if_fail (AML_IS_SETTINGS (self), TRUE);
-
-  return self->delete_to_trash;
-}
-
-gboolean
-aml_settings_set_delete_to_trash (AmlSettings *self,
-                                  gboolean     value,
-                                  GError     **error)
-{
-  gboolean previous;
-
-  g_return_val_if_fail (AML_IS_SETTINGS (self), FALSE);
-  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
-
-  previous = self->delete_to_trash;
-  self->delete_to_trash = value;
-
-  if (save (self, error))
-    return TRUE;
-
-  /* The file did not change, so neither does the answer. */
-  self->delete_to_trash = previous;
-  return FALSE;
-}
-
 static void
 aml_settings_finalize (GObject *object)
 {
@@ -432,5 +392,4 @@ aml_settings_init (AmlSettings *self)
 {
   self->filename = settings_filename ();
   self->log_line_limit = AML_SETTINGS_DEFAULT_LOG_LINE_LIMIT;
-  self->delete_to_trash = TRUE;
 }
