@@ -27,7 +27,6 @@ struct _AmlUsersPopover
   GtkWidget *empty_label; /* what is said when there are none */
   GtkWidget *error_label; /* what went wrong, when something did */
   GtkWidget *avatar_image;
-  GtkWidget *button_name;    /* who the header button is about */
   GtkWidget *button_content; /* what the header button shows */
 
   /* Avatars are pictures of the internet: they are fetched after the row
@@ -164,7 +163,6 @@ update_the_button (AmlUsersPopover *self)
   if (account == NULL)
     {
       self->active_name = g_strdup ("");
-      gtk_label_set_text (GTK_LABEL (self->button_name), "No Account");
 
       gtk_widget_set_tooltip_text (GTK_WIDGET (self),
                                    "No account yet: launches play offline");
@@ -172,7 +170,6 @@ update_the_button (AmlUsersPopover *self)
     }
 
   self->active_name = g_strdup (account->name);
-  gtk_label_set_text (GTK_LABEL (self->button_name), account->name);
   set_avatar (self, GTK_IMAGE (self->avatar_image), account->avatar_url);
 
   {
@@ -495,30 +492,14 @@ aml_users_popover_init (AmlUsersPopover *self)
 
   gtk_popover_set_child (GTK_POPOVER (self), content);
 
-  /* What the header says about who is playing: the avatar and the name of
-     the active account, or the default avatar and "No Account" when there
-     is none. It is filled from the same store as the list, so the two
-     cannot disagree, and the arrow says a list of accounts is behind the
-     button. */
+  /* What the header says about who is playing: the avatar of the active
+     account, or the default one when there is none. It is filled from the
+     same store as the list, so the two cannot disagree. */
   self->avatar_image = gtk_image_new_from_icon_name ("avatar-default-symbolic");
-  gtk_image_set_pixel_size (GTK_IMAGE (self->avatar_image), 24);
   gtk_widget_set_valign (self->avatar_image, GTK_ALIGN_CENTER);
 
-  self->button_name = gtk_label_new (NULL);
-  gtk_label_set_ellipsize (GTK_LABEL (self->button_name), PANGO_ELLIPSIZE_END);
-  gtk_label_set_max_width_chars (GTK_LABEL (self->button_name), 16);
-  gtk_widget_set_valign (self->button_name, GTK_ALIGN_CENTER);
-
-  {
-    GtkWidget *arrow = gtk_image_new_from_icon_name ("pan-down-symbolic");
-
-    gtk_widget_set_valign (arrow, GTK_ALIGN_CENTER);
-
-    self->button_content = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-    gtk_box_append (GTK_BOX (self->button_content), self->avatar_image);
-    gtk_box_append (GTK_BOX (self->button_content), self->button_name);
-    gtk_box_append (GTK_BOX (self->button_content), arrow);
-  }
+  self->button_content = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+  gtk_box_append (GTK_BOX (self->button_content), self->avatar_image);
 }
 
 static void
