@@ -37,8 +37,11 @@ struct _AmlMainWindow
 
   /* The tabs: the grid is the first one and cannot be closed, and each
    * open instance has one of its own beside it. A tab holds the page of
-   * its instance, and closing it is what closes that tab. */
+   * its instance, and closing it is what closes that tab. The bar that
+   * shows them sits under the header and only exists once there is more
+   * than the grid to switch between. */
   AdwTabView *tabs;
+  GtkWidget *tab_bar;
 
   /* Switches between the empty state and the instance grid. */
   GtkWidget *stack;
@@ -665,9 +668,14 @@ open_instance_tab (AmlMainWindow *self, AmlInstance *instance)
 
   g_object_get (instance, "name", &name, NULL);
 
-  /* Not pinned, so the tab bar gives it a close button of its own. */
+  /* Not pinned, so the tab bar gives it a close button of its own. The
+     new page is brought to the front: a tab view only selects the page
+     it is given when nothing is selected yet, and the pinned grid tab is
+     always there, so a click on an instance would otherwise open a tab
+     the user never sees. */
   tab = adw_tab_view_append (self->tabs, page);
   adw_tab_page_set_title (tab, name != NULL ? name : "");
+  adw_tab_view_set_selected_page (self->tabs, tab);
   g_free (name);
 
   /* The connection goes with the tab: a page that goes away first leaves
@@ -994,6 +1002,22 @@ on_instances_changed (AmlMainWindow *self,
 }
 
 static void
+on_tab_pages_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
+                      gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+
+  /* The window may be on its way out when its tabs go away. */
+  if (self->tab_bar == NULL)
+    return;
+
+  /* One tab is the grid alone, which the header already names; the bar
+     earns its line once there is an instance to switch to. */
+  gtk_widget_set_visible (self->tab_bar,
+                          adw_tab_view_get_n_pages (ADW_TAB_VIEW (object)) > 1);
+}
+
+static void
 aml_main_window_init (AmlMainWindow *self)
 {
   g_autoptr (GMenu) add_menu = create_add_menu ();
@@ -1078,6 +1102,21 @@ aml_main_window_init (AmlMainWindow *self)
   adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar),
                                 GTK_WIDGET (self->tabs));
 
+  /* A tab view gives each page a background of its own, so the bars over
+     it are opaque with the shadow the HIG asks for there. */
+  adw_toolbar_view_set_top_bar_style (ADW_TOOLBAR_VIEW (toolbar),
+                                      ADW_TOOLBAR_RAISED);
+
+  /* The bar of the tabs, under the header: without it the tab view has
+     no visible tabs at all, so an instance opened beside the grid could
+     not be seen or switched to. It is hidden while the grid is the only
+     tab, and comes back whenever another one exists. */
+  self->tab_bar = GTK_WIDGET (adw_tab_bar_new ());
+  adw_tab_bar_set_view (ADW_TAB_BAR (self->tab_bar), self->tabs);
+  gtk_widget_set_visible (self->tab_bar, FALSE);
+  g_signal_connect_object (self->tabs, "notify::n-pages",
+                           G_CALLBACK (on_tab_pages_changed), self, 0);
+
   {
     AdwTabPage *grid_tab =
       adw_tab_view_append_pinned (self->tabs, self->stack);
@@ -1088,6 +1127,7 @@ aml_main_window_init (AmlMainWindow *self)
   }
 
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
+  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), self->tab_bar);
 
   /* A toast is how the window says something the user did not ask for: a
    game that crashed, an operation that failed. Without it the only way
@@ -1157,6 +1197,10 @@ static void
 aml_main_window_dispose (GObject *object)
 {
   AmlMainWindow *self = AML_MAIN_WINDOW (object);
+
+  /* The tab bar is borrowed from the widget tree, which goes away with
+     the window; a late notify must not touch it. */
+  self->tab_bar = NULL;
 
   /* A running game keeps its own launcher alive through the process
      readers, so dropping the table here never kills a game in front of
