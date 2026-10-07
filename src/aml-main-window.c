@@ -73,10 +73,6 @@ on_download_modpack (GSimpleAction *action G_GNUC_UNUSED,
   adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
 }
 
-/* What the row of a setting says when there is nothing to report. */
-static const char *snapshots_subtitle =
-  "Also list snapshots and the versions Mojang no longer serves";
-
 /* Written the moment it is switched. When the file cannot be written
  * the setting keeps the value it had, the switch goes back to it and
  * the row says why: the dialog and the file never disagree. */
@@ -94,11 +90,7 @@ on_show_snapshots_toggled (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
     return;
 
   if (aml_settings_set_show_snapshots (self->settings, active, &error))
-    {
-      adw_action_row_set_subtitle (ADW_ACTION_ROW (row),
-                                   snapshots_subtitle);
-      return;
-    }
+    return;
 
   adw_switch_row_set_active (row, stored);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (row), error->message);
@@ -313,7 +305,6 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   GtkWidget *page = adw_preferences_page_new ();
   GtkWidget *versions_group = adw_preferences_group_new ();
   GtkWidget *java_group = adw_preferences_group_new ();
-  GtkWidget *loaders_group = adw_preferences_group_new ();
   GtkWidget *logs_group = adw_preferences_group_new ();
   GtkWidget *row = adw_switch_row_new ();
   GtkWidget *java_row = GTK_WIDGET (aml_java_row_new ());
@@ -337,12 +328,8 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
 
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (versions_group),
                                    "Versions");
-  adw_preferences_group_set_description (ADW_PREFERENCES_GROUP (versions_group),
-                                         "What the launcher lists when an "
-                                         "instance is created or edited.");
 
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), "Show Snapshots");
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), snapshots_subtitle);
   adw_switch_row_set_active (ADW_SWITCH_ROW (row),
                              aml_settings_get_show_snapshots (self->settings));
 
@@ -352,13 +339,20 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
                     G_CALLBACK (on_show_snapshots_toggled), self);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (versions_group), row);
 
+  /* The loader versions live under the same choice: both say what the
+     version lists hold. */
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (unstable_row),
+                                 "Show unstable Mod Loader versions");
+  adw_switch_row_set_active (
+    ADW_SWITCH_ROW (unstable_row),
+    aml_settings_get_show_unstable_loaders (self->settings));
+  g_signal_connect (unstable_row, "notify::active",
+                    G_CALLBACK (on_show_unstable_loaders_toggled), self);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (versions_group),
+                             unstable_row);
+
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (java_group),
                                    "Java");
-  adw_preferences_group_set_description (ADW_PREFERENCES_GROUP (java_group),
-                                         "Used when an instance does not pick "
-                                         "a Java of its own. The first entry "
-                                         "picks the closest compatible install "
-                                         "automatically.");
 
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (java_row),
                                  "Default Java");
@@ -373,8 +367,6 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
 
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (custom_row),
                                  "Custom Java…");
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (custom_row),
-                               "Pick a java executable AML does not detect");
   gtk_widget_set_valign (custom_button, GTK_ALIGN_CENTER);
   g_signal_connect (custom_button, "clicked",
                     G_CALLBACK (on_settings_custom_clicked),
@@ -386,31 +378,8 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (java_group), java_row);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (java_group), custom_row);
 
-  /* Loaders */
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (loaders_group),
-                                   "Loaders");
-  adw_preferences_group_set_description (ADW_PREFERENCES_GROUP (loaders_group),
-                                         "What the loader version lists "
-                                         "hold.");
-
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (unstable_row),
-                                 "Show Unstable Loader Versions");
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (unstable_row),
-                               "Also list the versions a loader does not "
-                               "call stable");
-  adw_switch_row_set_active (
-    ADW_SWITCH_ROW (unstable_row),
-    aml_settings_get_show_unstable_loaders (self->settings));
-  g_signal_connect (unstable_row, "notify::active",
-                    G_CALLBACK (on_show_unstable_loaders_toggled), self);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (loaders_group),
-                             unstable_row);
-
   /* Logs */
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (logs_group), "Logs");
-  adw_preferences_group_set_description (ADW_PREFERENCES_GROUP (logs_group),
-                                         "What the logs page keeps of what a "
-                                         "game prints.");
 
   limit_row = adw_spin_row_new (
     gtk_adjustment_new (aml_settings_get_log_line_limit (self->settings), 100,
@@ -420,9 +389,6 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   adw_spin_row_set_numeric (ADW_SPIN_ROW (limit_row), TRUE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (limit_row),
                                  "Line Limit");
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (limit_row),
-                               "How many lines are kept before the oldest "
-                               "are dropped");
   g_signal_connect (limit_row, "notify::value",
                     G_CALLBACK (on_log_limit_changed), self);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (logs_group), limit_row);
@@ -440,8 +406,6 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
                             ADW_PREFERENCES_GROUP (versions_group));
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                             ADW_PREFERENCES_GROUP (java_group));
-  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
-                            ADW_PREFERENCES_GROUP (loaders_group));
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                             ADW_PREFERENCES_GROUP (logs_group));
   adw_preferences_dialog_add (ADW_PREFERENCES_DIALOG (dialog),

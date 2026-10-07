@@ -1065,8 +1065,6 @@ create_settings_page (AmlInstancePage *self)
 
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (custom_java_row),
                                  "Custom Java…");
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (custom_java_row),
-                               "Pick a java executable AML does not detect");
   gtk_widget_set_valign (custom_java_button, GTK_ALIGN_CENTER);
   g_signal_connect (custom_java_button, "clicked",
                     G_CALLBACK (on_custom_java_clicked), self);
@@ -1097,15 +1095,13 @@ create_settings_page (AmlInstancePage *self)
 
   /* Actions */
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (actions), "Actions");
-  button_row (ADW_PREFERENCES_GROUP (actions), "Duplicate",
-              "Create a copy of this instance", "edit-copy-symbolic",
-              G_CALLBACK (on_duplicate_clicked), self);
+  button_row (ADW_PREFERENCES_GROUP (actions), "Duplicate", NULL,
+              "edit-copy-symbolic", G_CALLBACK (on_duplicate_clicked), self);
   button_row (ADW_PREFERENCES_GROUP (actions), "Open Folder", NULL,
               "folder-open-symbolic", G_CALLBACK (on_open_folder_clicked),
               self);
   delete_row = button_row (ADW_PREFERENCES_GROUP (actions), "Delete Instance",
-                           "Remove this instance from disk",
-                           "user-trash-symbolic",
+                           NULL, "user-trash-symbolic",
                            G_CALLBACK (on_delete_clicked), self);
   gtk_widget_add_css_class (
     adw_action_row_get_activatable_widget (ADW_ACTION_ROW (delete_row)),
