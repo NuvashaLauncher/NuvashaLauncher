@@ -1034,6 +1034,11 @@ aml_main_window_init (AmlMainWindow *self)
    * is behind it is the list of the accounts this copy of AML has, which
    * is also where a new one is added. */
   self->users_popover = aml_users_popover_new (self->accounts);
+  /* A widget is created with a floating reference, and set_popover()
+     below sinks that one for the button. The window keeps a reference of
+     its own as well, so that dropping it in dispose() never frees a
+     popover the button still holds. */
+  g_object_ref_sink (self->users_popover);
   users_child = aml_users_popover_get_button_content (self->users_popover);
   gtk_menu_button_set_child (GTK_MENU_BUTTON (users_button), users_child);
   gtk_menu_button_set_popover (GTK_MENU_BUTTON (users_button),
