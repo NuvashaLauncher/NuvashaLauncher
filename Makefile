@@ -67,10 +67,13 @@ build/tests/%: tests/%.c $(TESTLIBOBJS) | build/tests
 	$(CC) $(CFLAGS) $(RELFLAGS) -Isrc $(PKG_CFLAGS) \
 		-DAML_DATA_DIR=\"$(CURDIR)/data\" -DAML_BIN=\"$(CURDIR)/$(BIN)\" \
 		-DAML_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
+		-DAML_SRC_DIR=\"$(CURDIR)/src\" \
 		-o $@ $< $(TESTLIBOBJS) $(PKG_LIBS)
 
-# Tests never open a display: the only test that runs the launcher runs it
-# with DISPLAY and WAYLAND_DISPLAY removed.
+# Tests never write to the real data directory and never touch the
+# network. Only the icon name audit opens a display, and it skips itself
+# when there is none; the test that runs the launcher runs it with DISPLAY
+# and WAYLAND_DISPLAY removed.
 test: $(if $(SRCS),$(BIN)) $(TESTBINS)
 	@set -e; for t in $(TESTBINS); do echo "RUN  $$t"; ./$$t; done; \
 	echo "PASS $(words $(TESTBINS)) test(s)"
@@ -81,6 +84,7 @@ build-debug/tests/%: tests/%.c $(TESTLIBDBGOBJS) | build-debug/tests
 	$(CC) $(CFLAGS) $(DBGFLAGS) -Isrc $(PKG_CFLAGS) \
 		-DAML_DATA_DIR=\"$(CURDIR)/data\" -DAML_BIN=\"$(CURDIR)/$(BIN)\" \
 		-DAML_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
+		-DAML_SRC_DIR=\"$(CURDIR)/src\" \
 		-o $@ $< $(TESTLIBDBGOBJS) $(PKG_LIBS)
 
 # The Wayland guard test runs the release launcher, so test-debug builds
