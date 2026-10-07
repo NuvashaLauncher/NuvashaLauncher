@@ -92,16 +92,13 @@ on_version_selected (GObject *object G_GNUC_UNUSED,
 }
 
 static void
-on_loader_changed (AmlLoaderRow *row, gpointer user_data)
+on_loader_changed (AmlLoaderRow *row G_GNUC_UNUSED, gpointer user_data)
 {
   AmlCreateInstanceDialog *self = user_data;
-  const char *version =
-    aml_version_row_get_selected (AML_VERSION_ROW (self->version_row));
 
-  /* Which loader it is decides whether there is anything to load at all,
-     and which versions it has for the Minecraft version. */
-  aml_loader_row_load (row, self->settings, aml_loader_row_get_loader (row),
-                       NULL, version);
+  /* The row reloads its own versions when the loader changes and tells
+     this handler again once one is picked; the dialog only has to say
+     whether Create may answer. */
   update_create_button (self);
 }
 

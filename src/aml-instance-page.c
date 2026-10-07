@@ -266,9 +266,21 @@ on_loader_changed (AmlLoaderRow *row, gpointer user_data)
     instance_string (self->instance, "minecraft-version");
   g_autoptr (GError) error = NULL;
 
+  /* A running game has the loader it started with; the change is not
+     written down under it. */
+  if (aml_launch_state_is_busy (aml_launcher_get_state (self->launcher)))
+    return;
+
   /* While the row is loading, or when the loader has no version for this
      Minecraft version, there is no choice to store. */
   if (loader != AML_LOADER_VANILLA && version == NULL)
+    return;
+
+  /* A load that settled on the version the instance already runs is not
+     a change. */
+  if (loader == self->loader &&
+      g_strcmp0 (loader == AML_LOADER_VANILLA ? NULL : version,
+                 self->loader_version) == 0)
     return;
 
   g_object_set (self->instance, "loader", loader, "loader-version",
@@ -1128,13 +1140,22 @@ create_settings_page (AmlInstancePage *self)
 }
 
 /* The Directory row follows the launch: a running game makes both of its
-   buttons insensitive, and stopping it makes them answer again. */
+   buttons insensitive, and stopping it makes them answer again. The
+   loader cannot be changed under a running game either, so both of its
+   rows follow the same state. */
 static void
 on_page_launcher_state (AmlLauncher *launcher G_GNUC_UNUSED,
-                        AmlLaunchState state G_GNUC_UNUSED,
-                        const char *detail G_GNUC_UNUSED, gpointer user_data)
+                        AmlLaunchState state, const char *detail G_GNUC_UNUSED,
+                        gpointer user_data)
 {
-  update_directory_row (user_data);
+  AmlInstancePage *self = user_data;
+
+  update_directory_row (self);
+
+  if (self->loader_row != NULL)
+    aml_loader_row_set_blocked (
+      self->loader_row,
+      aml_launch_state_is_busy (state));
 }
 
 AmlInstancePage *

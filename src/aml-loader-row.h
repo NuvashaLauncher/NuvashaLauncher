@@ -41,7 +41,10 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (AmlLoaderRow, aml_loader_row, AML, LOADER_ROW, GObject)
 
 /* "changed" is what a screen stores the choice with: ask get_loader()
- * and get_version() and write them down. */
+ * and get_version() and write them down. It fires when the user picks a
+ * version and once a load settles on one, so a screen is told about a
+ * preselected version too. Changing the loader reloads the version row
+ * here, with no help from the screen. */
 enum {
   AML_LOADER_ROW_SIGNAL_CHANGED,
   AML_LOADER_ROW_N_SIGNALS
@@ -74,6 +77,11 @@ AmlLoader aml_loader_row_get_loader (AmlLoaderRow *self);
  * loading, when the loader has nothing for that Minecraft version and
  * when the list could not be fetched. Vanilla has no version at all. */
 const char *aml_loader_row_get_version (AmlLoaderRow *self);
+
+/* Locks or unlocks both rows. While the game of the instance runs, a
+ * loader cannot be changed under it, so a screen locks the rows and
+ * unlocks them again when the game stops. */
+void aml_loader_row_set_blocked (AmlLoaderRow *self, gboolean blocked);
 
 G_END_DECLS
 

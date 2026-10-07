@@ -423,6 +423,59 @@ aml_loaders_versions_from_json (const char *json, gssize length,
   return versions_from_root (json_parser_get_root (parser), error);
 }
 
+GPtrArray *
+aml_loaders_versions_for_display (GPtrArray  *published,
+                                  gboolean    show_unstable,
+                                  const char *wanted,
+                                  guint      *selected)
+{
+  g_autoptr (GPtrArray) shown = g_ptr_array_new_with_free_func (
+    (GDestroyNotify) aml_loader_version_free);
+  guint position = G_MAXUINT;
+
+  g_return_val_if_fail (published != NULL, NULL);
+
+  for (guint i = 0; i < published->len; i++)
+    {
+      const AmlLoaderVersion *version = g_ptr_array_index (published, i);
+      AmlLoaderVersion *copy = NULL;
+
+      /* The version an instance already runs stays in the list even
+         when the user does not ask to see unstable versions. */
+      if (wanted != NULL && g_str_equal (version->version, wanted))
+        position = shown->len;
+      else if (!version->stable && !show_unstable)
+        continue;
+
+      copy = g_new0 (AmlLoaderVersion, 1);
+      copy->version = g_strdup (version->version);
+      copy->stable = version->stable;
+      g_ptr_array_add (shown, copy);
+    }
+
+  /* Nothing was asked for, or what was asked for is not there: the
+     newest stable version is what an install picks. The list is newest
+     first, so the first stable one is the newest. */
+  if (position == G_MAXUINT)
+    {
+      for (guint i = 0; i < shown->len; i++)
+        {
+          const AmlLoaderVersion *version = g_ptr_array_index (shown, i);
+
+          if (version->stable)
+            {
+              position = i;
+              break;
+            }
+        }
+    }
+
+  if (selected != NULL)
+    *selected = position;
+
+  return g_steal_pointer (&shown);
+}
+
 /* The versions a loader that has no meta service publishes: everything its
  * maven holds, as {"versions": ["..."]}, of which only the ones named
  * after the Minecraft version that was asked for are versions of it.
