@@ -88,7 +88,7 @@ get_session (void)
  * One request
  * ---------------------------------------------------------- */
 
-typedef struct
+typedef struct _DownloadRequest
 {
   GTask *task; /* the only reference: dropped when the request ends */
 
@@ -102,6 +102,12 @@ typedef struct
   AmlDownloadProgressFunc progress;
   gpointer user_data;
   gboolean json;
+
+  /* What runs once this request holds a slot: the cache check and then
+     the transfer for a file, the transfer alone for JSON. Holding the
+     slot from the very start is what keeps a whole version's assets from
+     opening thousands of files at once to hash them. */
+  void (*begin) (struct _DownloadRequest *request);
 
   /* One attempt at a time. */
   SoupMessage *message;
@@ -196,7 +202,7 @@ start_transfer (DownloadRequest *request)
     {
       running++;
       request->holds_slot = TRUE;
-      start_attempt (request);
+      request->begin (request);
       return;
     }
 
@@ -221,7 +227,7 @@ release_slot (DownloadRequest *request)
 
       running++;
       next->holds_slot = TRUE;
-      start_attempt (next);
+      next->begin (next);
     }
 }
 
@@ -458,8 +464,8 @@ file_request_start (DownloadRequest *request)
   if (request->expected_hash == NULL)
     {
       /* Without an expected hash there is nothing an existing file
-         could be compared against. */
-      start_transfer (request);
+         could be compared against. The slot is already held. */
+      start_attempt (request);
       return;
     }
 
@@ -492,9 +498,10 @@ cache_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
-  /* Missing, unreadable or stale: fetch it again. */
+  /* Missing, unreadable or stale: fetch it again. The slot is already
+     held, so this goes straight to the transfer. */
   g_clear_error (&error);
-  start_transfer (request);
+  start_attempt (request);
 }
 
 /* ---------------------------------------------------------- *
@@ -1061,8 +1068,9 @@ aml_download_file_async (const char *url,
   request->user_data = user_data;
   request->fd = -1;
   request->total = -1;
+  request->begin = file_request_start;
 
-  file_request_start (request);
+  start_transfer (request);
 }
 
 gboolean
@@ -1104,6 +1112,7 @@ aml_download_json_async (const char *url,
   request->user_data = user_data;
   request->fd = -1;
   request->total = -1;
+  request->begin = start_attempt;
 
   start_transfer (request);
 }
@@ -1171,6 +1180,7 @@ aml_download_json_post_async (const char           *url,
   request->user_data = user_data;
   request->fd = -1;
   request->total = -1;
+  request->begin = start_attempt;
 
   start_transfer (request);
 }
