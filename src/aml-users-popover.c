@@ -9,13 +9,13 @@
 
 /* How wide the list is: enough for a name and its kind to be read, and no
  * wider than the header the button of it sits in. */
-#define USERS_WIDTH 340
-#define USERS_ROWS_WIDTH 312
+#define USERS_WIDTH 360
+#define USERS_ROWS_WIDTH 336
 
 /* A skin is a picture of 64 by 64 and the face is 8 by 8 of it, in the
  * middle row. What is shown here is that face, at the size a row is
  * tall. */
-#define AVATAR_SIZE 32
+#define AVATAR_SIZE 40
 
 struct _AmlUsersPopover
 {
@@ -27,6 +27,7 @@ struct _AmlUsersPopover
   GtkWidget *empty_label; /* what is said when there are none */
   GtkWidget *error_label; /* what went wrong, when something did */
   GtkWidget *avatar_image;
+  GtkWidget *button_name;    /* who the header button is about */
   GtkWidget *button_content; /* what the header button shows */
 
   /* Avatars are pictures of the internet: they are fetched after the row
@@ -163,6 +164,7 @@ update_the_button (AmlUsersPopover *self)
   if (account == NULL)
     {
       self->active_name = g_strdup ("");
+      gtk_label_set_text (GTK_LABEL (self->button_name), "No Account");
 
       gtk_widget_set_tooltip_text (GTK_WIDGET (self),
                                    "No account yet: launches play offline");
@@ -170,6 +172,7 @@ update_the_button (AmlUsersPopover *self)
     }
 
   self->active_name = g_strdup (account->name);
+  gtk_label_set_text (GTK_LABEL (self->button_name), account->name);
   set_avatar (self, GTK_IMAGE (self->avatar_image), account->avatar_url);
 
   {
@@ -212,17 +215,18 @@ account_id_of (gpointer widget)
 }
 
 static void
-on_activated (GtkButton *button, gpointer user_data)
+on_row_activated (AdwActionRow *row, gpointer user_data)
 {
   AmlUsersPopover *self = user_data;
-  const char *id = account_id_of (button);
+  const char *id = account_id_of (row);
   g_autoptr (GError) error = NULL;
 
   if (id == NULL)
     return;
 
   /* One account is active and it is one of them: the store keeps that
-     true, and this only says which one. */
+     true, and this only says which one. Clicking the row that is already
+     active changes nothing, which the store says by not being changed. */
   if (!aml_accounts_set_active (self->accounts, id, &error))
     show_error (self, error->message);
 }
@@ -241,6 +245,10 @@ on_remove_clicked (GtkButton *button, gpointer user_data)
     show_error (self, error->message);
 }
 
+/* One account as a row of the list. The whole row chooses the account it
+ * is about: a click anywhere on it is the choice, rather than a small
+ * radio at the left that has to be aimed at. The account that is active
+ * carries a check mark, and the trash button takes an account out. */
 static void
 append_account_row (AmlUsersPopover *self, const AmlAccount *account)
 {
@@ -253,56 +261,45 @@ append_account_row (AmlUsersPopover *self, const AmlAccount *account)
     account->type == AML_ACCOUNT_MICROSOFT &&
     !aml_account_token_is_valid (account, g_get_real_time () / 1000000);
 
-  GtkWidget *row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
-  GtkWidget *button = gtk_check_button_new ();
+  GtkWidget *row = adw_action_row_new ();
   GtkWidget *image = gtk_image_new ();
-  GtkWidget *text = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-  GtkWidget *label = gtk_label_new (account->name);
-  GtkWidget *kind = NULL;
   GtkWidget *remove = gtk_button_new_from_icon_name ("user-trash-symbolic");
   g_autofree char *tooltip = NULL;
 
-  gtk_widget_set_margin_top (row, 6);
-  gtk_widget_set_margin_bottom (row, 6);
-  gtk_widget_set_margin_start (row, 12);
-  gtk_widget_set_margin_end (row, 12);
-
-  /* The radio marks the one account the launch runs as. Clicking it makes
-     that one the active one; clicking the one that is already active does
-     nothing, which the store says by not being changed. */
-  gtk_check_button_set_active (GTK_CHECK_BUTTON (button), is_active);
-  gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
-  g_signal_connect (button, "toggled", G_CALLBACK (on_activated), self);
-
-  set_avatar_icon (GTK_IMAGE (image));
-  set_avatar (self, GTK_IMAGE (image), account->avatar_url);
-  gtk_image_set_pixel_size (GTK_IMAGE (image), AVATAR_SIZE);
-  gtk_widget_set_valign (image, GTK_ALIGN_CENTER);
-
-  gtk_label_set_xalign (GTK_LABEL (label), 0.0);
-  gtk_widget_add_css_class (label, "heading");
-  gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_END);
+  /* The name and the kind are plain text: an account name may hold an
+     "&". Owned by the row, which is itself the clickable target. */
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), account->name);
 
   /* The kind of account is on every row: an offline session and a
      Microsoft one are not the same thing to play with, and the user is
      the one who has to know which one a launch will run as. An account
      whose token has run out says so here, which is earlier than finding
      it out from a launch that stops. */
-  if (needs_sign_in)
-    kind = gtk_label_new ("Microsoft · Needs sign-in");
-  else
-    kind = gtk_label_new (aml_account_type_name (account->type));
-
-  gtk_label_set_xalign (GTK_LABEL (kind), 0.0);
-  gtk_widget_add_css_class (kind, "dim-label");
-  gtk_widget_add_css_class (kind, "caption");
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (row),
+                               needs_sign_in ? "Microsoft · Needs sign-in"
+                                             : aml_account_type_name (
+                                                   account->type));
 
   if (needs_sign_in)
-    gtk_widget_add_css_class (kind, "warning");
+    gtk_widget_add_css_class (row, "warning");
 
-  gtk_box_append (GTK_BOX (text), label);
-  gtk_box_append (GTK_BOX (text), kind);
-  gtk_widget_set_hexpand (text, TRUE);
+  set_avatar_icon (GTK_IMAGE (image));
+  set_avatar (self, GTK_IMAGE (image), account->avatar_url);
+  gtk_image_set_pixel_size (GTK_IMAGE (image), AVATAR_SIZE);
+  gtk_widget_set_valign (image, GTK_ALIGN_CENTER);
+  adw_action_row_add_prefix (ADW_ACTION_ROW (row), image);
+
+  /* The mark of the one a launch plays as, at the far end of the row. */
+  if (is_active)
+    {
+      GtkWidget *check =
+        gtk_image_new_from_icon_name ("object-select-symbolic");
+
+      gtk_widget_add_css_class (check, "accent");
+      gtk_widget_set_valign (check, GTK_ALIGN_CENTER);
+      adw_action_row_add_suffix (ADW_ACTION_ROW (row), check);
+    }
 
   tooltip = g_strdup_printf ("Remove \"%s\"", account->name);
   gtk_widget_set_tooltip_text (remove, tooltip);
@@ -310,22 +307,20 @@ append_account_row (AmlUsersPopover *self, const AmlAccount *account)
                                   GTK_ACCESSIBLE_PROPERTY_LABEL, tooltip, -1);
   gtk_widget_add_css_class (remove, "flat");
   gtk_widget_set_valign (remove, GTK_ALIGN_CENTER);
-  g_signal_connect (remove, "clicked", G_CALLBACK (on_remove_clicked), self);
-
-  /* Which account a widget is about travels with the widget: the rows are
-     built again whenever the store changes, and a row is never asked
-     about anything else. */
-  g_object_set_data_full (G_OBJECT (button), "aml-account-id",
-                          g_strdup (account->id), g_free);
   g_object_set_data_full (G_OBJECT (remove), "aml-account-id",
                           g_strdup (account->id), g_free);
+  g_signal_connect (remove, "clicked", G_CALLBACK (on_remove_clicked), self);
+  adw_action_row_add_suffix (ADW_ACTION_ROW (row), remove);
 
-  gtk_box_append (GTK_BOX (row), button);
-  gtk_box_append (GTK_BOX (row), image);
-  gtk_box_append (GTK_BOX (row), text);
-  gtk_box_append (GTK_BOX (row), remove);
+  /* Which account a row is about travels with the row: the list is built
+     again whenever the store changes, and a row is never asked about
+     anything else. */
+  gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
+  g_object_set_data_full (G_OBJECT (row), "aml-account-id",
+                          g_strdup (account->id), g_free);
+  g_signal_connect (row, "activated", G_CALLBACK (on_row_activated), self);
 
-  gtk_box_append (GTK_BOX (self->list_box), row);
+  gtk_list_box_append (GTK_LIST_BOX (self->list_box), row);
 }
 
 /* ------------------------------------------------------ *
@@ -415,7 +410,7 @@ rebuild (AmlUsersPopover *self)
   self->avatars = g_cancellable_new ();
 
   while ((child = gtk_widget_get_first_child (self->list_box)) != NULL)
-    gtk_box_remove (GTK_BOX (self->list_box), child);
+    gtk_list_box_remove (GTK_LIST_BOX (self->list_box), child);
 
   gtk_widget_set_visible (self->empty_label, accounts->len == 0);
 
@@ -436,10 +431,15 @@ static void
 aml_users_popover_init (AmlUsersPopover *self)
 {
   GtkWidget *scrolled = gtk_scrolled_window_new ();
-  GtkWidget *rows = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  GtkWidget *rows = gtk_list_box_new ();
   GtkWidget *microsoft = gtk_button_new_with_label ("Add Microsoft Account");
   GtkWidget *offline = gtk_button_new_with_label ("Add Offline Account");
 
+  /* A row is chosen by clicking it, not by a selection the list keeps:
+     the active account is the store's business. The list scrolls instead
+     of the popover growing without end when there are many accounts. */
+  gtk_list_box_set_selection_mode (GTK_LIST_BOX (rows), GTK_SELECTION_NONE);
+  gtk_widget_add_css_class (rows, "boxed-list");
   gtk_widget_set_size_request (scrolled, USERS_WIDTH, -1);
   gtk_scrolled_window_set_propagate_natural_width (
       GTK_SCROLLED_WINDOW (scrolled), TRUE);
@@ -447,6 +447,10 @@ aml_users_popover_init (AmlUsersPopover *self)
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled),
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scrolled), rows);
+  gtk_scrolled_window_set_max_content_height (GTK_SCROLLED_WINDOW (scrolled),
+                                              420);
+  gtk_scrolled_window_set_propagate_natural_height (
+      GTK_SCROLLED_WINDOW (scrolled), TRUE);
   gtk_widget_set_size_request (rows, USERS_ROWS_WIDTH, -1);
 
   self->list_box = rows;
@@ -491,15 +495,30 @@ aml_users_popover_init (AmlUsersPopover *self)
 
   gtk_popover_set_child (GTK_POPOVER (self), content);
 
-  /* What the header says about who is playing: the avatar of the active
-     account, or the default one when there is none. It is filled from the
-     same store as the list, so the two cannot disagree. The name is not
-     shown beside it: the popover behind the button says who is playing. */
+  /* What the header says about who is playing: the avatar and the name of
+     the active account, or the default avatar and "No Account" when there
+     is none. It is filled from the same store as the list, so the two
+     cannot disagree, and the arrow says a list of accounts is behind the
+     button. */
   self->avatar_image = gtk_image_new_from_icon_name ("avatar-default-symbolic");
+  gtk_image_set_pixel_size (GTK_IMAGE (self->avatar_image), 24);
   gtk_widget_set_valign (self->avatar_image, GTK_ALIGN_CENTER);
 
-  self->button_content = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-  gtk_box_append (GTK_BOX (self->button_content), self->avatar_image);
+  self->button_name = gtk_label_new (NULL);
+  gtk_label_set_ellipsize (GTK_LABEL (self->button_name), PANGO_ELLIPSIZE_END);
+  gtk_label_set_max_width_chars (GTK_LABEL (self->button_name), 16);
+  gtk_widget_set_valign (self->button_name, GTK_ALIGN_CENTER);
+
+  {
+    GtkWidget *arrow = gtk_image_new_from_icon_name ("pan-down-symbolic");
+
+    gtk_widget_set_valign (arrow, GTK_ALIGN_CENTER);
+
+    self->button_content = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+    gtk_box_append (GTK_BOX (self->button_content), self->avatar_image);
+    gtk_box_append (GTK_BOX (self->button_content), self->button_name);
+    gtk_box_append (GTK_BOX (self->button_content), arrow);
+  }
 }
 
 static void
