@@ -84,7 +84,6 @@ struct _AmlContentPage
   GtkWidget *results_status;
   GtkWidget *search_entry;
   GtkWidget *search_bar;
-  GtkWidget *filter_button; /* the button the filter popover hangs off */
   GtkWidget *filter_box;
   GtkWidget *loading_more; /* spinner row at the bottom of the list */
   GtkWidget *retry_row;    /* inline retry row when a page fails */
@@ -2330,24 +2329,6 @@ on_filter_clicked (GtkWidget *widget G_GNUC_UNUSED, gpointer user_data)
   load_categories (self);
 }
 
-/* The button says how many categories are narrowing the list, so a filter
- * that is on is not forgotten behind a closed popover. */
-static void
-update_filter_button (AmlContentPage *self)
-{
-  g_autofree char *text = NULL;
-
-  if (self->filter_button == NULL)
-    return;
-
-  if (self->categories != NULL && self->categories->len > 0)
-    text = g_strdup_printf ("Filter (%u)", self->categories->len);
-  else
-    text = g_strdup ("Filter");
-
-  gtk_menu_button_set_label (GTK_MENU_BUTTON (self->filter_button), text);
-}
-
 static void
 on_category_toggled (GtkCheckButton *button, gpointer user_data)
 {
@@ -2378,7 +2359,6 @@ on_category_toggled (GtkCheckButton *button, gpointer user_data)
       self->categories = kept;
     }
 
-  update_filter_button (self);
   self->offset = 0;
   run_search (self, FALSE);
 }
@@ -2799,12 +2779,8 @@ build_browse (AmlContentPage *self)
 
   gtk_box_append (GTK_BOX (top), search_bar);
 
-  /* A button with words rather than a three-dot icon: the filter has to
-     be found, and a "view more" icon names neither the filter nor what
-     opening it does. The arrow says a popover is what is behind it. */
-  gtk_menu_button_set_label (GTK_MENU_BUTTON (filter_button), "Filter");
-  gtk_menu_button_set_always_show_arrow (GTK_MENU_BUTTON (filter_button),
-                                         TRUE);
+  gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (filter_button),
+                                 "view-more-symbolic");
   gtk_widget_set_tooltip_text (filter_button, "Filter by category");
   gtk_accessible_update_property (GTK_ACCESSIBLE (filter_button),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL, "Filter",
@@ -2812,7 +2788,6 @@ build_browse (AmlContentPage *self)
   gtk_widget_set_valign (filter_button, GTK_ALIGN_CENTER);
   gtk_widget_add_css_class (filter_button, "flat");
   gtk_menu_button_set_popover (GTK_MENU_BUTTON (filter_button), popover);
-  self->filter_button = filter_button;
   /* A click opens the popover but does not emit "activate" on the
      menu button, so the load hangs off the popover's "show" instead. */
   g_signal_connect (popover, "show",
@@ -3095,7 +3070,6 @@ aml_content_page_dispose (GObject *object)
   self->results_status = NULL;
   self->search_entry = NULL;
   self->search_bar = NULL;
-  self->filter_button = NULL;
   self->filter_box = NULL;
   self->loading_more = NULL;
   self->retry_row = NULL;
