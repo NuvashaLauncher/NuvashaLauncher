@@ -623,6 +623,29 @@ test_versions_for_display (void)
   g_assert_cmpstr (version_at (shown, selected)->version, ==,
                    "0.10.7+build.214");
 
+  /* A list that holds only unstable versions, with unstable ones asked
+     for, still picks its newest instead of nothing. */
+  {
+    static const char *const betas_ids[] = { "2.0.0-beta", "1.0.0-beta" };
+    g_autoptr (GPtrArray) betas =
+      g_ptr_array_new_with_free_func ((GDestroyNotify) aml_loader_version_free);
+
+    for (guint i = 0; i < G_N_ELEMENTS (betas_ids); i++)
+      {
+        AmlLoaderVersion *version = g_new0 (AmlLoaderVersion, 1);
+
+        version->version = g_strdup (betas_ids[i]);
+        version->stable = FALSE;
+        g_ptr_array_add (betas, version);
+      }
+
+    g_clear_pointer (&shown, g_ptr_array_unref);
+    shown = aml_loaders_versions_for_display (betas, TRUE, NULL, &selected);
+    g_assert_cmpuint (shown->len, ==, 2);
+    g_assert_cmpuint (selected, ==, 0);
+    g_assert_cmpstr (version_at (shown, 0)->version, ==, "2.0.0-beta");
+  }
+
   /* Nothing published is nothing to pick. */
   {
     g_autoptr (GPtrArray) none = g_ptr_array_new ();
