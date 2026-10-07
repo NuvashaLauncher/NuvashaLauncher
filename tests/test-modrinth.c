@@ -600,6 +600,15 @@ test_update_by_hash (void)
   g_assert_cmpstr (file->sha1, ==,
                    "bcdbf37d9494e405cba210d7a80ed58e756297b5");
 
+  /* The endpoint can also answer with the version already installed, and
+     the page must not offer that as an update: a version that carries
+     the file on disk is the same one. */
+  g_assert_false (aml_modrinth_version_has_hash (
+    update, "bdd6b8ac84b46ae56a3bbb761ce430c48e42e00d"));
+  g_assert_true (aml_modrinth_version_has_hash (
+    installed_version, "bdd6b8ac84b46ae56a3bbb761ce430c48e42e00d"));
+  g_assert_true (aml_modrinth_version_has_hash (update, file->sha1));
+
   g_print ("ok - the hash update answer is another version of the same "
            "project\n");
 }

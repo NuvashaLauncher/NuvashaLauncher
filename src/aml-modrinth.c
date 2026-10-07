@@ -829,6 +829,26 @@ aml_modrinth_version_primary_file (AmlModrinthVersion *version)
   return first;
 }
 
+gboolean
+aml_modrinth_version_has_hash (const AmlModrinthVersion *version,
+                               const char               *sha1)
+{
+  g_return_val_if_fail (version != NULL, FALSE);
+
+  if (sha1 == NULL || *sha1 == '\0' || version->files == NULL)
+    return FALSE;
+
+  for (guint i = 0; i < version->files->len; i++)
+    {
+      const AmlModrinthFile *file = g_ptr_array_index (version->files, i);
+
+      if (file->sha1 != NULL && g_ascii_strcasecmp (file->sha1, sha1) == 0)
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
 /* One file of a version answer, or NULL when it names no file and no
  * url, which is nothing to download. */
 static AmlModrinthFile *

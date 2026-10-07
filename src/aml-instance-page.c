@@ -40,6 +40,7 @@ struct _AmlInstancePage
   GtkWidget *icon_row;
   GtkWidget *icon_path_label; /* the icon path inside the chooser button */
   GtkWidget *stack; /* the AdwViewStack holding the pages of the instance */
+  GtkWidget *logs_page; /* the last page, kept so a rebuild can move it back */
 
   /* The Directory row: the chooser button that says where the instance is
      and the spinner that shows a move in progress. A move in progress
@@ -181,6 +182,17 @@ rebuild_content_pages (AmlInstancePage *self)
         ADW_VIEW_STACK (self->stack),
         GTK_WIDGET (aml_content_page_new (self->instance, pages[i].type)),
         pages[i].name, pages[i].title, pages[i].icon);
+    }
+
+  /* A page that is added again lands at the end, after Logs. Logs is put
+     back where it belongs, last, so the order of the switcher never
+     changes: Settings, Resource Packs, Shader Packs, Mods, Logs. */
+  if (self->logs_page != NULL)
+    {
+      adw_view_stack_remove (ADW_VIEW_STACK (self->stack), self->logs_page);
+      adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (self->stack),
+                                           self->logs_page, "logs", "Logs",
+                                           "utilities-terminal-symbolic");
     }
 
   /* What the user was looking at is not thrown away by the rebuild. */
@@ -1286,9 +1298,11 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
 
   /* The logs of the instance are the logs of the launcher the window
      shares with the row, so the game can be watched from here. */
-  adw_view_stack_add_titled_with_icon (
-    ADW_VIEW_STACK (stack), GTK_WIDGET (aml_logs_page_new (launcher)),
-    "logs", "Logs", "utilities-terminal-symbolic");
+  self->logs_page = GTK_WIDGET (aml_logs_page_new (launcher));
+  g_object_ref (self->logs_page);
+  adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (stack),
+                                       self->logs_page, "logs", "Logs",
+                                       "utilities-terminal-symbolic");
 
   /* Kept so that the content pages can be built again when the loader or
      the Minecraft version changes. */
@@ -1334,6 +1348,7 @@ aml_instance_page_dispose (GObject *object)
   self->icon_row = NULL;
   self->icon_path_label = NULL;
   self->stack = NULL;
+  g_clear_object (&self->logs_page);
   self->java_row = NULL;
   self->directory_row = NULL;
   self->directory_change = NULL;
