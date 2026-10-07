@@ -526,11 +526,14 @@ on_search_done (GObject *source G_GNUC_UNUSED,
             }
           else
             {
+              g_autofree char *escaped =
+                g_markup_escape_text (error->message, -1);
+
               adw_status_page_set_title (
                 ADW_STATUS_PAGE (self->error_status),
                 "Could not search Modrinth");
               adw_status_page_set_description (
-                ADW_STATUS_PAGE (self->error_status), error->message);
+                ADW_STATUS_PAGE (self->error_status), escaped);
               gtk_stack_set_visible_child_name (
                 GTK_STACK (self->results_stack), "error");
             }
@@ -555,10 +558,12 @@ on_search_done (GObject *source G_GNUC_UNUSED,
         }
       else
         {
+          g_autofree char *escaped = g_markup_escape_text (error->message, -1);
+
           adw_status_page_set_title (ADW_STATUS_PAGE (self->error_status),
                                      "Could not understand the answer");
           adw_status_page_set_description (
-            ADW_STATUS_PAGE (self->error_status), error->message);
+            ADW_STATUS_PAGE (self->error_status), escaped);
           gtk_stack_set_visible_child_name (
             GTK_STACK (self->results_stack), "error");
         }
@@ -924,6 +929,8 @@ build_details_page (AmlDownloadModpackDialog *self)
       g_get_user_data_dir (), "AML", "instances", NULL);
 
   self->directory_row = adw_action_row_new ();
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->directory_row),
+                                      FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->directory_row),
                                  "Directory");
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self->directory_row),
@@ -1102,7 +1109,12 @@ build_error_page (AmlDownloadModpackDialog *self,
   adw_status_page_set_icon_name (ADW_STATUS_PAGE (status),
                                  "dialog-error-symbolic");
   adw_status_page_set_title (ADW_STATUS_PAGE (status), what);
-  adw_status_page_set_description (ADW_STATUS_PAGE (status), message);
+  {
+    g_autofree char *escaped =
+      g_markup_escape_text (message != NULL ? message : "", -1);
+
+    adw_status_page_set_description (ADW_STATUS_PAGE (status), escaped);
+  }
 
   gtk_widget_add_css_class (retry_btn, "suggested-action");
   g_signal_connect (retry_btn, "clicked", retry, self);
@@ -1443,6 +1455,7 @@ build_optional_page (AmlDownloadModpackDialog *self,
       AmlModpackFile *file = g_ptr_array_index (optional_files, i);
       GtkWidget *row = adw_switch_row_new ();
 
+      adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
       adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), file->path);
       adw_switch_row_set_active (ADW_SWITCH_ROW (row), FALSE);
       gtk_widget_add_css_class (row, "dim-label");
