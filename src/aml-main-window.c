@@ -49,12 +49,6 @@ struct _AmlMainWindow
 
 G_DEFINE_FINAL_TYPE (AmlMainWindow, aml_main_window, ADW_TYPE_APPLICATION_WINDOW)
 
-/* Menu entries that exist from the start but stay disabled until their
- * feature is built: nothing may pretend to work. */
-static const char *pending_actions[] = {
-  "shortcuts",
-};
-
 static void
 on_create_instance (GSimpleAction *action G_GNUC_UNUSED,
                     GVariant      *parameter G_GNUC_UNUSED,
@@ -485,7 +479,6 @@ static const GActionEntry window_entries[] = {
   { .name = "create-instance", .activate = on_create_instance },
   { .name = "download-modpack", .activate = on_download_modpack },
   { .name = "settings", .activate = on_settings },
-  { .name = "shortcuts" },
   { .name = "about", .activate = on_about },
 };
 
@@ -508,7 +501,6 @@ create_app_menu (void)
   g_autoptr (GMenu) rest = g_menu_new ();
 
   g_menu_append (general, "Settings", "win.settings");
-  g_menu_append (general, "Keyboard Shortcuts", "win.shortcuts");
   g_menu_append_section (menu, NULL, G_MENU_MODEL (general));
 
   g_menu_append (rest, "About AML", "win.about");
@@ -913,15 +905,6 @@ aml_main_window_init (AmlMainWindow *self)
 
   g_action_map_add_action_entries (G_ACTION_MAP (self), window_entries,
                                    G_N_ELEMENTS (window_entries), self);
-
-  /* Present in the menus, disabled until the feature exists. */
-  for (gsize i = 0; i < G_N_ELEMENTS (pending_actions); i++)
-    {
-      GAction *action =
-        g_action_map_lookup_action (G_ACTION_MAP (self), pending_actions[i]);
-
-      g_simple_action_set_enabled (G_SIMPLE_ACTION (action), FALSE);
-    }
 
   /* Start of the header: the "+" menu. */
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (add_button),

@@ -1183,6 +1183,13 @@ file_row (AmlContentPage *self, AmlContentFile *file)
   gtk_widget_set_valign (menu_button, GTK_ALIGN_CENTER);
   gtk_menu_button_set_child (GTK_MENU_BUTTON (menu_button), icon);
 
+  /* The button is only the three dot icon; the row title says which
+     file, but the button needs a name of its own to be announced. */
+  gtk_widget_set_tooltip_text (menu_button, "More actions");
+  gtk_accessible_update_property (GTK_ACCESSIBLE (menu_button),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                  "More actions", -1);
+
   /* Two flat rows in the popover, the way GNOME writes a menu of two
      things. */
   gtk_widget_add_css_class (toggle, "flat");
