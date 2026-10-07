@@ -26,9 +26,9 @@ struct _AmlUsersPopover
 
   AmlAccounts *accounts;
 
-  GtkWidget *list_box;    /* the accounts, one row each */
-  GtkWidget *empty_label; /* what is said when there are none */
-  GtkWidget *error_label; /* what went wrong, when something did */
+  GtkWidget *list_box;      /* the accounts, one row each */
+  GtkWidget *list_scroller; /* what holds the list, hidden when it is empty */
+  GtkWidget *error_label;   /* what went wrong, when something did */
   GtkWidget *avatar_image;
   GtkWidget *button_content; /* what the header button shows */
 
@@ -413,10 +413,10 @@ rebuild (AmlUsersPopover *self)
   while ((child = gtk_widget_get_first_child (self->list_box)) != NULL)
     gtk_list_box_remove (GTK_LIST_BOX (self->list_box), child);
 
-  /* The empty list is not shown at all: an empty boxed list still draws
-     a blank card above the sentence there are no accounts for. */
-  gtk_widget_set_visible (self->empty_label, accounts->len == 0);
-  gtk_widget_set_visible (self->list_box, accounts->len > 0);
+  /* With no accounts the list is not there at all: an empty boxed list
+     still draws a blank card, and the scroller around it leaves a gap
+     above the two buttons that add one. */
+  gtk_widget_set_visible (self->list_scroller, accounts->len > 0);
 
   for (guint i = 0; i < accounts->len; i++)
     append_account_row (self, g_ptr_array_index (accounts, i));
@@ -458,14 +458,7 @@ aml_users_popover_init (AmlUsersPopover *self)
   gtk_widget_set_size_request (rows, USERS_ROWS_WIDTH, -1);
 
   self->list_box = rows;
-
-  self->empty_label = gtk_label_new ("No Accounts Yet");
-  gtk_label_set_wrap (GTK_LABEL (self->empty_label), TRUE);
-  gtk_label_set_justify (GTK_LABEL (self->empty_label), GTK_JUSTIFY_CENTER);
-  gtk_widget_set_margin_start (self->empty_label, 12);
-  gtk_widget_set_margin_end (self->empty_label, 12);
-  gtk_widget_set_margin_top (self->empty_label, 12);
-  gtk_widget_set_margin_bottom (self->empty_label, 12);
+  self->list_scroller = scrolled;
 
   self->error_label = gtk_label_new (NULL);
   gtk_label_set_wrap (GTK_LABEL (self->error_label), TRUE);
@@ -491,7 +484,6 @@ aml_users_popover_init (AmlUsersPopover *self)
 
   GtkWidget *content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_box_append (GTK_BOX (content), scrolled);
-  gtk_box_append (GTK_BOX (content), self->empty_label);
   gtk_box_append (GTK_BOX (content), microsoft);
   gtk_box_append (GTK_BOX (content), offline);
   gtk_box_append (GTK_BOX (content), self->error_label);
