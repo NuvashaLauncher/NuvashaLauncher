@@ -752,12 +752,13 @@ aml_instance_class_init (AmlInstanceClass *klass)
                          NULL,
                          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+  /* Settable, because an instance can be moved to another directory; the
+   manager does the moving and the saving around it. */
   properties[PROP_DIRECTORY] =
     g_param_spec_string ("directory", "Directory",
                          "Absolute instance directory",
                          NULL,
-                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY |
-                         G_PARAM_STATIC_STRINGS);
+                         G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   properties[PROP_MINECRAFT_VERSION] =
     g_param_spec_string ("minecraft-version", "Minecraft version",

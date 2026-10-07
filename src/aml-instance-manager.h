@@ -85,6 +85,43 @@ gboolean aml_instance_manager_rename (AmlInstanceManager *self,
                                       const char *new_name,
                                       GError **error);
 
+/* Says whether @directory may become the directory of @instance, and
+ * puts the canonical form of it in @canonical when that is not NULL.
+ *
+ * It must be absolute, must not contain "..", must be neither the
+ * filesystem root nor the directory the instance already has, must not
+ * be, contain or lie inside the directory of any other instance, must
+ * not exist yet, and the directory it hangs off must exist. This is the
+ * whole of what is checked before any file is touched, so a caller can
+ * refuse a bad path without starting a move. */
+gboolean aml_instance_manager_check_new_directory (AmlInstanceManager *self,
+                                                   AmlInstance *instance,
+                                                   const char *directory,
+                                                   char **canonical,
+                                                   GError **error);
+
+/* Moves the files of @instance to @directory and stores the new path.
+ *
+ * The files are copied first and the metadata is written whole only once
+ * they are all in place, so a failure at any point leaves the old
+ * directory and the stored path as they were; whatever reached the new
+ * directory is removed again. The old directory is deleted last, and
+ * failing to delete it leaves a leftover rather than taking anything
+ * away, so it does not undo the change.
+ *
+ * An instance whose old directory does not exist has nothing to move: the
+ * stored path is changed and saved, and that is all. */
+void aml_instance_manager_change_directory_async (AmlInstanceManager *self,
+                                                  AmlInstance *instance,
+                                                  const char *directory,
+                                                  GCancellable *cancellable,
+                                                  GAsyncReadyCallback callback,
+                                                  gpointer user_data);
+
+gboolean aml_instance_manager_change_directory_finish (AmlInstanceManager *self,
+                                                        GAsyncResult *result,
+                                                        GError **error);
+
 /* Copies the files of @source into a fresh directory, registers the
  * copy as "Copy of <name>" with a new id and saves. The copy appears in
  * the list only after its files were copied. */
