@@ -1375,19 +1375,32 @@ aml_modrinth_versions_async (const char *project_id, AmlContentType type,
   g_return_if_fail (project_id != NULL);
   g_return_if_fail (minecraft_version != NULL);
 
-  /* Modrinth reads the loader of a resource pack and of a shader pack as
-   * "minecraft": the game loads those itself. */
   game_versions = string_array_json (minecraft_version);
-  loaders = string_array_json (aml_content_type_needs_loader (type) &&
-                                       loader != NULL
-                                   ? loader
-                                   : "minecraft");
 
-  url = g_strdup_printf (
-      AML_MODRINTH_URL "/project/%s/version?game_versions=%s&loaders=%s",
-      g_uri_escape_string (project_id, NULL, FALSE),
-      g_uri_escape_string (game_versions, NULL, FALSE),
-      g_uri_escape_string (loaders, NULL, FALSE));
+  /* Only a mod is asked for by loader.
+   *
+   * A resource pack and a shader pack are not filtered by it at all, and
+   * they must not be: a shader version publishes the loaders that can
+   * read it, which are "iris", "optifine" and such, and no shader version
+   * publishes "minecraft". Asking Modrinth for a shader with
+   * loaders=minecraft answers with an empty list, which is how a shader
+   * that plainly supports the Minecraft version came to be reported as
+   * having no compatible version. */
+  if (aml_content_type_needs_loader (type) && loader != NULL &&
+      *loader != '\0')
+    loaders = string_array_json (loader);
+
+  if (loaders != NULL)
+    url = g_strdup_printf (
+        AML_MODRINTH_URL "/project/%s/version?game_versions=%s&loaders=%s",
+        g_uri_escape_string (project_id, NULL, FALSE),
+        g_uri_escape_string (game_versions, NULL, FALSE),
+        g_uri_escape_string (loaders, NULL, FALSE));
+  else
+    url = g_strdup_printf (
+        AML_MODRINTH_URL "/project/%s/version?game_versions=%s",
+        g_uri_escape_string (project_id, NULL, FALSE),
+        g_uri_escape_string (game_versions, NULL, FALSE));
 
   task = request_new (cancellable, callback, user_data, versions_answer,
                       AML_NOT_FOUND_IS_ERROR,

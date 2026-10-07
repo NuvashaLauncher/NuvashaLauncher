@@ -281,6 +281,124 @@ test_versions_of_a_pack (void)
   g_print ("ok - a pack is only listed for its Minecraft version\n");
 }
 
+/* The version of the fixture with this number, whatever its game
+   versions: the one object of the answer AML would refuse is needed on
+   its own to be asked about. (transfer full) */
+static AmlModrinthVersion *
+version_from_fixture (const char *json, const char *number)
+{
+  g_autoptr (JsonParser) parser = json_parser_new ();
+  g_autoptr (GError) error = NULL;
+  JsonArray *array = NULL;
+  guint length = 0;
+
+  g_assert_true (json_parser_load_from_data (parser, json, -1, &error));
+  g_assert_no_error (error);
+
+  array = json_node_get_array (json_parser_get_root (parser));
+  g_assert_nonnull (array);
+
+  length = json_array_get_length (array);
+
+  for (guint i = 0; i < length; i++)
+    {
+      JsonNode *item = json_array_get_element (array, i);
+      JsonObject *object = json_node_get_object (item);
+      const char *found = json_object_has_member (object, "version_number")
+                              ? json_object_get_string_member (
+                                  object, "version_number")
+                              : NULL;
+
+      if (g_strcmp0 (found, number) == 0)
+        {
+          g_autofree char *one = json_to_string (item, FALSE);
+
+          return aml_modrinth_version_from_json (one, -1, &error);
+        }
+    }
+
+  return NULL;
+}
+
+/* A shader is filtered by the Minecraft version and by nothing else.
+ *
+ * The fixture is what Modrinth answered for
+ * complementary-reimagined: three versions whose loaders are "iris" and
+ * "optifine", two of which list 1.20.1 and one of which does not. No
+ * version of that project publishes "minecraft", which is why asking for
+ * it by loader answered with nothing at all and a shader that plainly
+ * supports the game version was reported as having none. */
+static void
+test_versions_of_a_shader (void)
+{
+  g_autofree char *json =
+    read_fixture ("modrinth-shader-versions.json");
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GPtrArray) versions = NULL;
+  AmlModrinthVersion *version = NULL;
+
+  /* A loader is not asked for, and not asked about: the loaders a shader
+     publishes are the programs that can read it, not the one running
+     beside the game. */
+  versions = aml_modrinth_versions_from_json (
+      json, -1, AML_CONTENT_SHADER_PACK, "1.20.1", "fabric", &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (versions);
+
+  /* Only the two that list 1.20.1. The third does not, and is left out
+     here rather than shown and refused afterwards. */
+  g_assert_cmpuint (versions->len, ==, 2);
+
+  version = g_ptr_array_index (versions, 0);
+  g_assert_cmpstr (version->version_number, ==, "r5.9.3");
+
+  /* The loaders it does publish are kept, not overwritten: a details
+     page shows them and they are the reason the pack is usable at all. */
+  g_assert_cmpuint (version->loaders->len, ==, 2);
+  g_assert_cmpstr (g_ptr_array_index (version->loaders, 0), ==, "iris");
+  g_assert_cmpstr (g_ptr_array_index (version->loaders, 1), ==, "optifine");
+
+  /* The rule itself, on the fixture's own objects: a shader fits its
+     game version whatever loaders it names, and does not fit a game
+     version it does not list. */
+  {
+    g_autoptr (AmlModrinthVersion) fitted =
+      aml_modrinth_version_copy (g_ptr_array_index (versions, 0));
+    g_autoptr (AmlModrinthVersion) other_game =
+      aml_modrinth_version_copy (version_from_fixture (json, "r2.1"));
+
+    g_assert_nonnull (fitted);
+    g_assert_nonnull (other_game);
+
+    /* Whatever runs beside the game, the shader fits its version. */
+    g_assert_true (aml_modrinth_version_fits (fitted, AML_CONTENT_SHADER_PACK,
+                                             "1.20.1", "fabric"));
+    g_assert_true (aml_modrinth_version_fits (fitted, AML_CONTENT_SHADER_PACK,
+                                             "1.20.1", "iris"));
+    g_assert_true (aml_modrinth_version_fits (fitted, AML_CONTENT_SHADER_PACK,
+                                             "1.20.1", "optifine"));
+
+    /* A game version it does not list is refused, and a mod is still
+       narrowed by its loader: the rule is not weakened to make shaders
+       work. */
+    /* r5.9.3 lists 76 game versions and r2.1 lists neither 1.20.1 nor
+       1.21, so each is refused a version it does not name. */
+    g_assert_false (aml_modrinth_version_fits (fitted,
+                                              AML_CONTENT_SHADER_PACK,
+                                              "1.4.7", "iris"));
+    g_assert_false (aml_modrinth_version_fits (other_game,
+                                              AML_CONTENT_SHADER_PACK,
+                                              "1.21", "iris"));
+    g_assert_false (aml_modrinth_version_fits (other_game,
+                                              AML_CONTENT_SHADER_PACK,
+                                              "1.20.1", "iris"));
+    g_assert_false (aml_modrinth_version_fits (fitted, AML_CONTENT_MOD,
+                                               "1.20.1", "fabric"));
+  }
+
+  g_print ("ok - a shader is only listed for its Minecraft version\n");
+}
+
 static void
 test_no_compatible_version (void)
 {
@@ -738,6 +856,7 @@ main (int argc, char **argv)
   g_test_add_func ("/modrinth/project", test_project_details);
   g_test_add_func ("/modrinth/versions-mod", test_versions_of_a_mod);
   g_test_add_func ("/modrinth/versions-pack", test_versions_of_a_pack);
+  g_test_add_func ("/modrinth/versions-shader", test_versions_of_a_shader);
   g_test_add_func ("/modrinth/no-compatible", test_no_compatible_version);
   g_test_add_func ("/modrinth/version-by-hash", test_version_by_hash);
   g_test_add_func ("/modrinth/update-by-hash", test_update_by_hash);
