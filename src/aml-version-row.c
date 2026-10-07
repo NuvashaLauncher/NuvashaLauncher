@@ -126,14 +126,21 @@ fill (AmlVersionRow *self, AmlVersionManifest *manifest)
       g_ptr_array_add (ids, g_strdup (entry->id));
     }
 
+  /* A version that was asked for but the manifest does not hold at all
+     (an instance that runs a version Mojang has since removed) stays in
+     the list on its own, so opening the instance shows what it runs and
+     never changes it. */
+  if (self->wanted != NULL && position == GTK_INVALID_LIST_POSITION)
+    {
+      g_ptr_array_insert (ids, 0, g_strdup (self->wanted));
+      position = 0;
+    }
+
   /* Nothing was asked for: the newest version is what a new instance is
      made with, and the manifest is newest first, so that is the first
-     entry that was kept. A version was asked for but is not in the list
-     (an instance that runs a version the manifest no longer holds) is
-     left with nothing picked, so that opening the instance never changes
-     the version it runs. */
-  if (position == GTK_INVALID_LIST_POSITION && ids->len > 0 &&
-      self->wanted == NULL)
+     entry that was kept. */
+  if (self->wanted == NULL && position == GTK_INVALID_LIST_POSITION &&
+      ids->len > 0)
     position = 0;
 
   /* The model is replaced with the row marked as not ready, so the
