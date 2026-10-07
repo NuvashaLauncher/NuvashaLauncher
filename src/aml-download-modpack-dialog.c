@@ -631,7 +631,6 @@ build_browse_page (AmlDownloadModpackDialog *self)
   GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   GtkWidget *top = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   GtkWidget *scroller = gtk_scrolled_window_new ();
-  GtkWidget *clamp = adw_clamp_new ();
   GtkWidget *loading = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
   GtkWidget *loading_spinner = gtk_spinner_new ();
   GtkWidget *loading_label = gtk_label_new ("Loading modpacks…");
@@ -702,10 +701,10 @@ build_browse_page (AmlDownloadModpackDialog *self)
 
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-  adw_clamp_set_child (ADW_CLAMP (clamp), self->results_group);
-  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller), clamp);
-  gtk_widget_set_margin_start (clamp, 12);
-  gtk_widget_set_margin_end (clamp, 12);
+  /* The group is the whole width of the list: a row of the browser has to
+     cover it rather than sit centered in a clamp of its own. */
+  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
+                                 self->results_group);
   gtk_widget_set_vexpand (scroller, TRUE);
   gtk_stack_add_named (GTK_STACK (self->results_stack), scroller, "results");
 
