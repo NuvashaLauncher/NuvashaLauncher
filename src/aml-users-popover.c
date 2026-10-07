@@ -16,6 +16,8 @@
  * middle row. What is shown here is that face, at the size a row is
  * tall. */
 #define AVATAR_SIZE 40
+/* The header button shows the avatar alone, smaller than a row's. */
+#define HEADER_AVATAR_SIZE 24
 
 struct _AmlUsersPopover
 {
@@ -496,6 +498,8 @@ aml_users_popover_init (AmlUsersPopover *self)
      account, or the default one when there is none. It is filled from the
      same store as the list, so the two cannot disagree. */
   self->avatar_image = gtk_image_new_from_icon_name ("avatar-default-symbolic");
+  gtk_image_set_pixel_size (GTK_IMAGE (self->avatar_image),
+                            HEADER_AVATAR_SIZE);
   gtk_widget_set_valign (self->avatar_image, GTK_ALIGN_CENTER);
 
   self->button_content = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
