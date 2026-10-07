@@ -1221,6 +1221,41 @@ on_mod_toggled (GtkSwitch *sw, gboolean state G_GNUC_UNUSED, gpointer user_data)
   return FALSE;
 }
 
+static void
+on_trashed (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+  g_autoptr (GError) error = NULL;
+
+  if (!g_file_trash_finish (G_FILE (source), result, &error))
+    show_error (self, "The file cannot be moved to Trash", error);
+  else
+    {
+      show_toast (self, "Moved to Trash");
+      reload_installed (self);
+    }
+
+  g_object_unref (self);
+}
+
+/* Moving a file to the Trash is what the trash button does. It is a
+ * rename across the trash directory and the file's own, so it is quick
+ * but still goes through GIO off the main loop. */
+static void
+on_trash_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+  AmlContentFile *file = g_object_get_data (G_OBJECT (button), "aml-file");
+  g_autoptr (GFile) target = NULL;
+
+  if (file == NULL)
+    return;
+
+  target = g_file_new_for_path (file->path);
+  g_file_trash_async (target, G_PRIORITY_DEFAULT, NULL, on_trashed,
+                      g_object_ref (self));
+}
+
 static GtkWidget *
 file_row (AmlContentPage *self, AmlContentFile *file)
 {
@@ -1263,6 +1298,22 @@ file_row (AmlContentPage *self, AmlContentFile *file)
       g_signal_connect (sw, "state-set", G_CALLBACK (on_mod_toggled), self);
       adw_action_row_add_suffix (ADW_ACTION_ROW (row), sw);
     }
+
+  /* Every kind of file can go to the Trash. On a mod the button sits
+     after the switch, at the right end of the row. */
+  {
+    GtkWidget *trash = gtk_button_new_from_icon_name ("user-trash-symbolic");
+
+    gtk_widget_add_css_class (trash, "flat");
+    gtk_widget_set_valign (trash, GTK_ALIGN_CENTER);
+    gtk_widget_set_tooltip_text (trash, "Move to Trash");
+    gtk_accessible_update_property (GTK_ACCESSIBLE (trash),
+                                    GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                    "Move to Trash", -1);
+    g_object_set_data (G_OBJECT (trash), "aml-file", file);
+    g_signal_connect (trash, "clicked", G_CALLBACK (on_trash_clicked), self);
+    adw_action_row_add_suffix (ADW_ACTION_ROW (row), trash);
+  }
 
   /* The row carries the file it is about, so the switch does not have to
      know where the file came from. */
