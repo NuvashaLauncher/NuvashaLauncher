@@ -10,7 +10,7 @@
  * content page with a different content type, which reads the folder of
  * the instance and asks Modrinth only about what fits it. Logs shows
  * what the game of this instance printed, through the launcher the
- * window shares. Duplicating, opening the folder and deleting run as
+ * dialog shares. Duplicating, opening the folder and deleting run as
  * asynchronous GIO operations and never block the main loop. */
 
 #include "aml-instance-page.h"
@@ -1274,8 +1274,8 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
   self->stack = stack;
 
   /* The header holds only this switcher. There is no back button here:
-   the tab bar of the window is what says which instance is open, and
-   closing that tab is what leaves it. */
+   the dialog is named after the instance and its close button is what
+   leaves it. */
   adw_view_switcher_set_policy (ADW_VIEW_SWITCHER (switcher),
                                 ADW_VIEW_SWITCHER_POLICY_WIDE);
   adw_view_switcher_set_stack (ADW_VIEW_SWITCHER (switcher),
@@ -1291,9 +1291,9 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
   adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar),
                                 self->toast_overlay);
 
-  /* The tab holds this box, and the box holds the toolbar view of the
+  /* The dialog holds this box, and the box holds the toolbar view of the
      instance: there is no navigation page and no back button between the
-     tab bar and the five pages of the instance. */
+     switcher and the five pages of the instance. */
   gtk_box_append (GTK_BOX (self), toolbar);
   gtk_accessible_update_property (GTK_ACCESSIBLE (self),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL, name, -1);

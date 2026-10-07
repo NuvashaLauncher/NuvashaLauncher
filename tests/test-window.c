@@ -8,9 +8,9 @@
  * checked: a widget that is still parented when it is disposed logs a
  * Gtk critical, and a page that is destroyed while one of its own
  * handlers is running crashes. Both have happened here before, so the
- * instance list is opened, the window of an instance is opened, the
- * instance is renamed (which rebinds its row) and both windows are
- * closed, with every Gtk critical counted.
+ * instance list is opened, the dialog of an instance is presented (the
+ * same way the Settings dialog is), the instance is renamed (which
+ * rebinds its row) and both are closed, with every Gtk critical counted.
  *
  * Everything lives under a temporary XDG root, so the real settings and
  * accounts are never touched. No display means the test skips itself. */
@@ -81,20 +81,30 @@ find_entry_titled (GtkWidget *widget, const char *title)
   return NULL;
 }
 
-/* The window of an instance, found by the id that travels with it. */
-static GtkWindow *
-find_instance_window (GApplication *application, const char *id)
+/* The dialog of an instance, found by the id that travels with it. An
+ * AdwDialog is a widget, not a GtkWindow, so it lives in the widget tree
+ * of the window it was presented on. */
+static AdwDialog *
+find_instance_dialog (GtkWidget *widget, const char *id)
 {
-  GList *windows = gtk_application_get_windows (GTK_APPLICATION (application));
-
-  for (GList *item = windows; item != NULL; item = item->next)
+  for (GtkWidget *child = gtk_widget_get_first_child (widget); child != NULL;
+       child = gtk_widget_get_next_sibling (child))
     {
-      GtkWindow *window = item->data;
-      const char *other = g_object_get_data (G_OBJECT (window),
-                                             "aml-instance-id");
+      AdwDialog *found = NULL;
+      const char *other = NULL;
 
-      if (other != NULL && g_strcmp0 (other, id) == 0)
-        return window;
+      if (ADW_IS_DIALOG (child))
+        {
+          other = g_object_get_data (G_OBJECT (child), "aml-instance-id");
+
+          if (other != NULL && g_strcmp0 (other, id) == 0)
+            return ADW_DIALOG (child);
+        }
+
+      found = find_instance_dialog (child, id);
+
+      if (found != NULL)
+        return found;
     }
 
   return NULL;
@@ -102,8 +112,8 @@ find_instance_window (GApplication *application, const char *id)
 
 typedef struct {
   GApplication *application;
-  GtkWindow *window;          /* the window of the list */
-  GtkWindow *instance_window; /* the window of the instance */
+  GtkWindow *window;   /* the window of the list */
+  AdwDialog *dialog;   /* the dialog of the instance */
   char *instance_id;
   guint step;
 } Run;
@@ -113,10 +123,11 @@ finish (gpointer user_data)
 {
   Run *run = user_data;
 
-  /* Both windows are taken down while the loop still runs, so that what
-     their destruction logs is counted before the test decides. */
-  if (run->instance_window != NULL)
-    gtk_window_destroy (run->instance_window);
+  /* The dialog and the window are taken down while the loop still runs,
+     so that what their destruction logs is counted before the test
+     decides. */
+  if (run->dialog != NULL)
+    adw_dialog_force_close (run->dialog);
 
   gtk_window_destroy (run->window);
   g_application_quit (run->application);
@@ -151,29 +162,25 @@ advance (gpointer user_data)
       g_signal_emit_by_name (widget, "clicked");
       return G_SOURCE_CONTINUE;
 
-    case 2: /* the window of the instance is built */
-      run->instance_window = find_instance_window (run->application,
-                                                   run->instance_id);
+    case 2: /* the dialog of the instance is presented */
+      run->dialog = find_instance_dialog (GTK_WIDGET (run->window),
+                                          run->instance_id);
 
-      if (run->instance_window == NULL)
+      if (run->dialog == NULL)
         {
           run->step = 2;
           return G_SOURCE_CONTINUE;
         }
 
-      /* Opening an instance opens a window of its own, not a tab, and
-         the window is named after the instance and stays over the
-         launcher until it is closed. */
-      g_assert_cmpuint (g_list_length (windows), ==, 2);
-      g_assert_cmpstr (gtk_window_get_title (run->instance_window), ==,
-                       "Test");
-      g_assert_true (gtk_window_get_modal (run->instance_window));
-      g_assert_true (gtk_window_get_transient_for (run->instance_window) ==
-                     run->window);
+      /* Opening an instance presents a dialog over the launcher, like
+         the Settings dialog: no second window is opened, and the dialog
+         is named after the instance. */
+      g_assert_cmpuint (g_list_length (windows), ==, 1);
+      g_assert_cmpstr (adw_dialog_get_title (run->dialog), ==, "Test");
       return G_SOURCE_CONTINUE;
 
     default:
-      widget = find_entry_titled (GTK_WIDGET (run->instance_window), "Name");
+      widget = find_entry_titled (GTK_WIDGET (run->dialog), "Name");
 
       if (widget == NULL)
         {
@@ -182,7 +189,7 @@ advance (gpointer user_data)
         }
 
       /* A rename rebinds the row: the instance leaves the store and
-         comes back while its window is open. */
+         comes back while its dialog is open. */
       gtk_editable_set_text (GTK_EDITABLE (widget), "Renamed");
       g_signal_emit_by_name (widget, "apply");
 
@@ -289,7 +296,7 @@ main (int argc, char **argv)
   g_free (run.instance_id);
 
   g_assert_cmpuint (criticals, ==, 0);
-  g_print ("ok - an instance opens a window and both close cleanly\n");
+  g_print ("ok - an instance opens a dialog and both close cleanly\n");
 
   return EXIT_SUCCESS;
 }

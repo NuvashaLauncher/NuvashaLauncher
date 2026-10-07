@@ -2,15 +2,16 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* AmlInstancePage: what one tab of the window shows for a single
- * instance.
+/* AmlInstancePage: what the dialog of one instance shows.
  *
- * It is a tab page, not a navigation page: the tab bar of the window
- * already says which instance is open and closes it, so there is no back
- * button here and nothing in it takes the user back anywhere.
+ * It is a dialog page, not a navigation page: the dialog is already
+ * named after the instance and has its own close button, so there is no
+ * back button here and nothing in it takes the user back anywhere.
  *
  * Its own top bar holds the view switcher over the five pages of the
- * instance: Settings, Resource Packs, Shader Packs, Mods and Logs. */
+ * instance: Settings, Resource Packs, Shader Packs, Mods and Logs. When
+ * the page is put in an AdwDialog, that bar becomes the header of the
+ * dialog. */
 
 #ifndef AML_INSTANCE_PAGE_H
 #define AML_INSTANCE_PAGE_H
