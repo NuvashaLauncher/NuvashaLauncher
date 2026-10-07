@@ -49,7 +49,6 @@ main (int argc, char **argv)
   g_autoptr (GError) error = NULL;
   g_autofree char *directory = NULL;
   g_autofree char *mods_dir = NULL;
-  char *data_dir = NULL;
   AmlInstance *instance = NULL;
   AmlContentPage *page = NULL;
 
@@ -66,7 +65,7 @@ main (int argc, char **argv)
 
   g_autofree char *tmp = g_dir_make_tmp ("aml-openfolder-XXXXXX", &error);
   g_assert_no_error (error);
-  data_dir = g_build_filename (tmp, "data", NULL);
+  g_autofree char *data_dir = g_build_filename (tmp, "data", NULL);
   manager = aml_instance_manager_new (data_dir);
 
   instance = aml_instance_manager_create (manager, "Content", NULL, "1.21.1",
