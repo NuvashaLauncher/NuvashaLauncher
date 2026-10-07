@@ -127,11 +127,6 @@ struct _AmlContentPage
   GHashTable *seen_ids; /* project id -> NULL */
   GCancellable *more;   /* the next page, cancelled by a new search */
 
-  /* The page of a project that was pushed above this one, and what it
-   * asked for. */
-  AdwPreferencesGroup *details_versions;
-  char *details_project;
-
   guint debounce_source;
   GCancellable *browse;   /* searching and the categories of the filter */
   GCancellable *scan;     /* the folder, its hashes and their lookups */
@@ -158,6 +153,7 @@ typedef struct {
 
 static void run_search (AmlContentPage *self, gboolean append);
 static void reload_installed (AmlContentPage *self);
+static void open_project_page (AmlContentPage *self, AmlModrinthProject *project);
 static void update_check_next (UpdateRun *run);
 static void update_batch_next (AmlContentPage *self);
 /* A plan that could not be carried out stops where it is; a batch it was
@@ -192,6 +188,50 @@ page_watch_free (PageWatch *watch)
     g_object_remove_weak_pointer (G_OBJECT (watch->page),
                                   (gpointer *) &watch->page);
 
+  g_free (watch);
+}
+
+/* One answer of the dialog of a project while what it shows is being
+ * read: the page that opened it (weakly held), the group the versions
+ * go into, and the labels the details fill. The widgets are held, so an
+ * answer that arrives after the dialog is closed finds them still alive
+ * and fills them without the page; the page itself is only read while it
+ * is there. */
+typedef struct {
+  AmlContentPage *page;       /* weak */
+  AdwPreferencesGroup *group; /* owned */
+  GtkWidget *body;            /* owned */
+  GtkWidget *meta;            /* owned */
+  char *project_id;           /* owned */
+} DetailsWatch;
+
+static DetailsWatch *
+details_watch_new (AmlContentPage *self, AdwPreferencesGroup *group,
+                   GtkWidget *body, GtkWidget *meta, const char *project_id)
+{
+  DetailsWatch *watch = g_new0 (DetailsWatch, 1);
+
+  watch->page = self;
+  g_object_add_weak_pointer (G_OBJECT (self), (gpointer *) &watch->page);
+  watch->group = g_object_ref (group);
+  watch->body = g_object_ref (body);
+  watch->meta = g_object_ref (meta);
+  watch->project_id = g_strdup (project_id);
+
+  return watch;
+}
+
+static void
+details_watch_free (DetailsWatch *watch)
+{
+  if (watch->page != NULL)
+    g_object_remove_weak_pointer (G_OBJECT (watch->page),
+                                  (gpointer *) &watch->page);
+
+  g_clear_object (&watch->group);
+  g_clear_object (&watch->body);
+  g_clear_object (&watch->meta);
+  g_free (watch->project_id);
   g_free (watch);
 }
 
@@ -1171,42 +1211,6 @@ start_plan (AmlContentPage *self, AmlModrinthVersion *version,
   /* Show the plan first: the file itself is listed in it, and only the
    * fetch writes anything to the folder. */
   plan_next (plan);
-}
-
-/* The version a project publishes that fits the instance. */
-static void
-on_pick_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
-               gpointer user_data)
-{
-  PageWatch *watch = user_data;
-  AmlContentPage *self = watch->page;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (GPtrArray) versions = NULL;
-  const char *title = NULL;
-  AmlModrinthVersion *version = NULL;
-
-  if (self == NULL)
-    {
-      page_watch_free (watch);
-      return;
-    }
-
-  versions = aml_modrinth_versions_finish (result, &error);
-
-  if (versions == NULL)
-    {
-      set_busy (self, FALSE);
-      show_toast (self, error != NULL ? error->message
-                                      : "no compatible version");
-      page_watch_free (watch);
-      return;
-    }
-
-  title = g_object_get_data (G_OBJECT (self), "aml-pick-title");
-  version = g_ptr_array_steal_index (versions, 0);
-  start_plan (self, version, title != NULL ? title : "the file", NULL, FALSE);
-  set_busy (self, FALSE);
-  page_watch_free (watch);
 }
 
 /* ---------------------------------------------------------- *
@@ -2277,10 +2281,10 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
       adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
       adw_action_row_add_suffix (ADW_ACTION_ROW (row), install);
 
-      /* The whole row opens the project; the button installs the newest
-       * version of it that fits this instance. An AdwActionRow is not
-       * activatable by default, so the row itself is made one: a click
-       * on it, anywhere but the install button, activates the row. */
+      /* The whole row opens the project, and so does its download
+       * button: the version is chosen on the page. An AdwActionRow is
+       * not activatable by default, so the row itself is made one: a
+       * click on it, anywhere but the button, activates the row. */
       gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
       g_signal_connect (row, "activated", G_CALLBACK (on_result_activated),
                         self);
@@ -2695,13 +2699,9 @@ on_install_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   if (project == NULL)
     return;
 
-  g_object_set_data_full (G_OBJECT (self), "aml-pick-title",
-                          g_strdup (project->title), g_free);
-  set_busy (self, TRUE);
-  aml_modrinth_versions_async (project->project_id, self->type,
-                               self->minecraft_version, self->loader,
-                               self->browse, on_pick_ready,
-                               page_watch_new (self));
+  /* Choosing one is part of installing, so the button opens the page
+     that lists the versions rather than taking the newest unseen. */
+  open_project_page (self, project);
 }
 
 /* ---------------------------------------------------------- *
@@ -2709,15 +2709,22 @@ on_install_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
  * ---------------------------------------------------------- */
 
 static void
-on_version_install_clicked (GtkButton *button G_GNUC_UNUSED,
+on_version_install_clicked (GtkButton *button,
                             gpointer user_data G_GNUC_UNUSED)
 {
   AmlContentPage *self = g_object_get_data (G_OBJECT (button), "aml-page");
   AmlModrinthVersion *version =
     g_object_get_data (G_OBJECT (button), "aml-version");
+  GtkWidget *dialog = gtk_widget_get_ancestor (GTK_WIDGET (button),
+                                               ADW_TYPE_DIALOG);
 
   if (self == NULL || version == NULL)
     return;
+
+  /* The list has done its work once a version is taken from it; the
+     plan that follows is shown over the page, not over the list. */
+  if (dialog != NULL)
+    adw_dialog_close (ADW_DIALOG (dialog));
 
   set_busy (self, TRUE);
   start_plan (self, aml_modrinth_version_copy (version), version->name, NULL,
@@ -2728,23 +2735,22 @@ static void
 on_detail_versions_ready (GObject *source G_GNUC_UNUSED,
                           GAsyncResult *result, gpointer user_data)
 {
-  PageWatch *watch = user_data;
+  DetailsWatch *watch = user_data;
   AmlContentPage *self = watch->page;
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
-  AdwPreferencesGroup *group = NULL;
+
+  versions = aml_modrinth_versions_finish (result, &error);
 
   if (self == NULL)
     {
-      page_watch_free (watch);
+      details_watch_free (watch);
       return;
     }
 
-  group = self->details_versions;
-  versions = aml_modrinth_versions_finish (result, &error);
   set_busy (self, FALSE);
 
-  if (versions == NULL || group == NULL)
+  if (versions == NULL)
     {
       /* What a project publishes for nothing that fits is said in the
        * words the page shows everywhere else. */
@@ -2752,7 +2758,7 @@ on_detail_versions_ready (GObject *source G_GNUC_UNUSED,
                                             AML_MODRINTH_ERROR_NOT_FOUND))
         show_toast (self, error->message);
 
-      page_watch_free (watch);
+      details_watch_free (watch);
       return;
     }
 
@@ -2787,119 +2793,103 @@ on_detail_versions_ready (GObject *source G_GNUC_UNUSED,
       adw_action_row_add_suffix (ADW_ACTION_ROW (row), button);
       adw_action_row_set_activatable_widget (ADW_ACTION_ROW (row), button);
 
-      adw_preferences_group_add (group, row);
+      adw_preferences_group_add (watch->group, row);
       self->detail_rows = g_list_append (self->detail_rows, row);
     }
 
-  page_watch_free (watch);
+  /* The list was hidden while it had nothing in it. */
+  gtk_widget_set_visible (GTK_WIDGET (watch->group), versions->len > 0);
+
+  details_watch_free (watch);
 }
 
 static void
 on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                   gpointer user_data)
 {
-  PageWatch *watch = user_data;
+  DetailsWatch *watch = user_data;
   AmlContentPage *self = watch->page;
   g_autoptr (GError) error = NULL;
   g_autoptr (AmlModrinthDetails) details = NULL;
-  GtkWidget *body = NULL;
-  GtkWidget *meta = NULL;
   g_autofree char *author = NULL;
 
+  details = aml_modrinth_details_finish (result, &error);
+
+  /* The dialog can be closed while its details are on their way; the
+     answer then fills nothing. */
   if (self == NULL)
     {
-      page_watch_free (watch);
+      details_watch_free (watch);
       return;
     }
-
-  body = g_object_get_data (G_OBJECT (self), "aml-details-body");
-  meta = g_object_get_data (G_OBJECT (self), "aml-details-meta");
-
-  details = aml_modrinth_details_finish (result, &error);
 
   if (details == NULL)
     {
       set_busy (self, FALSE);
 
       /* The reason is shown where the body would have been, on the
-         details page that is already open, and not only in a toast that
-         may be behind it. */
-      if (body != NULL)
-        gtk_label_set_text (GTK_LABEL (body),
-                            error != NULL ? error->message
-                                          : "the project cannot be read");
+         dialog that is already open, and not only in a toast that may be
+         behind it. */
+      gtk_label_set_text (GTK_LABEL (watch->body),
+                          error != NULL ? error->message
+                                        : "the project cannot be read");
 
       show_toast (self, error != NULL ? error->message
                                       : "the project cannot be read");
-      page_watch_free (watch);
+      details_watch_free (watch);
       return;
     }
 
-  if (body != NULL)
-    gtk_label_set_text (GTK_LABEL (body), details->body);
+  gtk_label_set_text (GTK_LABEL (watch->body), details->body);
 
-  /* The details page of the browser saw the icon and the description
-     too, so the installed row of the same project can use them. */
-  if (self->details_project != NULL)
-    {
-      if (details->icon_url != NULL && *details->icon_url != '\0')
-        g_hash_table_insert (self->project_icons,
-                             g_strdup (self->details_project),
-                             g_strdup (details->icon_url));
+  /* The dialog of the browser saw the icon and the description too, so
+     the installed row of the same project can use them. */
+  if (details->icon_url != NULL && *details->icon_url != '\0')
+    g_hash_table_insert (self->project_icons,
+                         g_strdup (watch->project_id),
+                         g_strdup (details->icon_url));
 
-      if (details->description != NULL && *details->description != '\0')
-        g_hash_table_insert (self->project_descriptions,
-                             g_strdup (self->details_project),
-                             g_strdup (details->description));
-    }
+  if (details->description != NULL && *details->description != '\0')
+    g_hash_table_insert (self->project_descriptions,
+                         g_strdup (watch->project_id),
+                         g_strdup (details->description));
 
   author = g_strdup_printf ("%s  ·  by %s", details->license != NULL
                                                    ? details->license
                                                    : "",
                             details->author);
-  if (meta != NULL)
-    gtk_label_set_text (GTK_LABEL (meta), author);
+  gtk_label_set_text (GTK_LABEL (watch->meta), author);
 
   /* Only versions that fit this instance are asked for, and only those
-   * can reach the list. */
-  aml_modrinth_versions_async (self->details_project, self->type,
+     can reach the list. The watch goes on to the next answer, which is
+     the one that frees it. */
+  aml_modrinth_versions_async (watch->project_id, self->type,
                                self->minecraft_version, self->loader,
-                               self->browse, on_detail_versions_ready,
-                               page_watch_new (self));
-
-  page_watch_free (watch);
+                               self->browse, on_detail_versions_ready, watch);
 }
 
+/* The dialog of @project: what it is, and every version of it that fits
+ * this instance, each with its own Install button. It is opened both by
+ * activating a result row and by its download button, so the version is
+ * always chosen by the user and never picked unseen. */
 static void
-on_result_activated (AdwActionRow *row G_GNUC_UNUSED, gpointer user_data)
+open_project_page (AmlContentPage *self, AmlModrinthProject *project)
 {
-  AmlContentPage *self = user_data;
-  AmlModrinthProject *project =
-    g_object_get_data (G_OBJECT (row), "aml-project");
-  GtkWidget *view = NULL;
+  AdwDialog *dialog = NULL;
   GtkWidget *scroller = NULL;
   GtkWidget *box = NULL;
   GtkWidget *heading = NULL;
   GtkWidget *title = NULL;
   GtkWidget *meta = NULL;
   GtkWidget *body = NULL;
-  GtkWidget *page = NULL;
+  GtkWidget *versions = NULL;
   g_autofree char *author = NULL;
   g_autofree char *downloads = NULL;
 
   if (project == NULL)
     return;
 
-  /* The page of a project is pushed onto the navigation view of the
-   * window, which is where every other page of the instance is. */
-  view = gtk_widget_get_ancestor (GTK_WIDGET (self),
-                                  ADW_TYPE_NAVIGATION_VIEW);
-
-  if (view == NULL)
-    return;
-
   scroller = gtk_scrolled_window_new ();
-  page = GTK_WIDGET (adw_navigation_page_new (scroller, project->title));
   box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
   heading = adw_preferences_group_new ();
 
@@ -2925,17 +2915,13 @@ on_result_activated (AdwActionRow *row G_GNUC_UNUSED, gpointer user_data)
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading),
                              gtk_label_new (downloads));
 
-  self->details_versions = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
-  adw_preferences_group_set_title (self->details_versions,
+  versions = adw_preferences_group_new ();
+  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (versions),
                                    "Compatible versions");
-  gtk_widget_set_visible (GTK_WIDGET (self->details_versions), FALSE);
-  self->details_project = g_strdup (project->project_id);
-
-  g_object_set_data (G_OBJECT (self), "aml-details-body", body);
-  g_object_set_data (G_OBJECT (self), "aml-details-meta", meta);
+  gtk_widget_set_visible (versions, FALSE);
 
   gtk_box_append (GTK_BOX (box), heading);
-  gtk_box_append (GTK_BOX (box), GTK_WIDGET (self->details_versions));
+  gtk_box_append (GTK_BOX (box), versions);
   gtk_widget_set_margin_top (box, 12);
   gtk_widget_set_margin_bottom (box, 12);
   gtk_widget_set_margin_start (box, 12);
@@ -2943,19 +2929,30 @@ on_result_activated (AdwActionRow *row G_GNUC_UNUSED, gpointer user_data)
 
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller), box);
   gtk_widget_set_vexpand (scroller, TRUE);
-  adw_navigation_page_set_title (ADW_NAVIGATION_PAGE (page), project->title);
 
-  /* The page of the project holds the page it was opened from, so it
-   * stays alive for as long as it is on the screen. */
-  g_object_set_data_full (G_OBJECT (page), "aml-content-page",
-                          g_object_ref (self), g_object_unref);
-
-  adw_navigation_view_push (ADW_NAVIGATION_VIEW (view),
-                            ADW_NAVIGATION_PAGE (page));
+  /* The project is a dialog of its own: the instance keeps its header
+     and its pages underneath, and the dialog is named after the
+     project. It is where the version is chosen, so it holds the list of
+     them. */
+  dialog = adw_dialog_new ();
+  adw_dialog_set_title (dialog, project->title);
+  adw_dialog_set_content_width (dialog, 600);
+  adw_dialog_set_content_height (dialog, 600);
+  adw_dialog_set_child (dialog, scroller);
+  adw_dialog_present (dialog, GTK_WIDGET (self));
 
   set_busy (self, TRUE);
-  aml_modrinth_details_async (project->project_id, self->browse,
-                              on_details_ready, page_watch_new (self));
+  aml_modrinth_details_async (
+      project->project_id, self->browse, on_details_ready,
+      details_watch_new (self, ADW_PREFERENCES_GROUP (versions), body, meta,
+                         project->project_id));
+}
+
+static void
+on_result_activated (AdwActionRow *row, gpointer user_data)
+{
+  open_project_page (user_data,
+                     g_object_get_data (G_OBJECT (row), "aml-project"));
 }
 
 /* ---------------------------------------------------------- *
@@ -3415,7 +3412,6 @@ aml_content_page_dispose (GObject *object)
   self->retry_row = NULL;
   self->retry_label = NULL;
   self->spinner = NULL;
-  self->details_versions = NULL;
 
   if (self->debounce_source != 0)
     {
@@ -3462,7 +3458,6 @@ aml_content_page_finalize (GObject *object)
   g_free (self->loader);
   g_free (self->folder);
   g_free (self->query);
-  g_free (self->details_project);
 
   G_OBJECT_CLASS (aml_content_page_parent_class)->finalize (object);
 }
