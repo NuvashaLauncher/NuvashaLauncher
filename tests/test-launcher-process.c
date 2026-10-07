@@ -327,14 +327,22 @@ test_crash_report_makes_a_crash (void)
   Watch watch = { 0 };
 
   g_assert_cmpint (g_mkdir_with_parents (reports, 0755), ==, 0);
-  g_assert_true (g_file_set_contents (report, "a crash\n", -1, NULL));
 
   instance = new_instance ("reported");
   launcher = aml_launcher_new (instance, NULL, NULL);
 
   /* A game that ends with zero still crashed when it wrote a report
-     while it was running, which is what the report is for. */
-  argv = argv_of (write_script ("reported.sh", "exit 0"));
+     while it was running, which is what the report is for.
+     The fake game writes it as it dies, not the test before the launch:
+     the launcher compares the modification time against the second the
+     process started in, so a report written here would count only when
+     this happened to be the same second. */
+  {
+    g_autofree char *body =
+      g_strdup_printf ("printf 'a crash\\n' > '%s'\nexit 0", report);
+
+    argv = argv_of (write_script ("reported.sh", body));
+  }
 
   g_assert_true (aml_launcher_spawn (launcher, argv, &error));
   watch_until (&watch, launcher, AML_LAUNCH_CRASHED);
