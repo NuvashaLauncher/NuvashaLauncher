@@ -1113,8 +1113,13 @@ fail (GTask *task, GError *error)
 {
   GError *wrapped = NULL;
 
-  if (g_task_return_error_if_cancelled (task))
+  /* The cancellation is reported once, from here. The task must not be
+     answered by g_task_return_error_if_cancelled() first and by the
+     error below second: a GTask answers only once. */
+  if (g_cancellable_is_cancelled (g_task_get_cancellable (task)))
     {
+      g_clear_error (&error);
+
       g_task_return_error (
           task, g_error_new_literal (AML_MODRINTH_ERROR,
                                      AML_MODRINTH_ERROR_NETWORK,
