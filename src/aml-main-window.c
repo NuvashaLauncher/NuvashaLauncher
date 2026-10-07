@@ -481,7 +481,6 @@ create_app_menu (void)
   g_menu_append_section (menu, NULL, G_MENU_MODEL (general));
 
   g_menu_append (rest, "About AML", "win.about");
-  g_menu_append (rest, "Quit", "app.quit");
   g_menu_append_section (menu, NULL, G_MENU_MODEL (rest));
 
   return g_steal_pointer (&menu);
@@ -742,46 +741,6 @@ on_open_instance_clicked (GtkButton *button, gpointer user_data)
   open_instance_dialog (self, instance);
 }
 
-/* The folder button says when it could not open the folder, the way an
- * other failing operation is said: a toast. */
-static void
-on_row_folder_ready (GObject *source, GAsyncResult *result, gpointer user_data)
-{
-  AmlMainWindow *self = user_data;
-  g_autoptr (GError) error = NULL;
-
-  if (!aml_instance_manager_open_folder_finish (AML_INSTANCE_MANAGER (source),
-                                                result, &error))
-    {
-      AdwToast *toast = adw_toast_new (error->message);
-
-      adw_toast_set_use_markup (toast, FALSE);
-      adw_toast_overlay_add_toast (ADW_TOAST_OVERLAY (self->toasts), toast);
-    }
-
-  g_object_unref (self);
-}
-
-static void
-on_row_folder_clicked (GtkButton *button, gpointer user_data)
-{
-  AmlMainWindow *self = user_data;
-  const char *id = g_object_get_data (G_OBJECT (button), "aml-instance-id");
-  AmlInstance *instance = NULL;
-
-  if (id == NULL)
-    return;
-
-  instance = aml_instance_manager_get_by_id (self->manager, id);
-
-  if (instance == NULL)
-    return;
-
-  aml_instance_manager_open_folder_async (self->manager, instance, NULL,
-                                          on_row_folder_ready,
-                                          g_object_ref (self));
-}
-
 /* Play while the instance is idle, Stop while it is busy. */
 static void
 row_update (GtkWidget *play, AmlLauncher *launcher)
@@ -910,7 +869,6 @@ create_instance_row (gpointer item, gpointer user_data)
   GtkWidget *row = adw_action_row_new ();
   GtkWidget *icon = gtk_image_new_from_icon_name ("applications-games-symbolic");
   GtkWidget *settings = gtk_button_new_from_icon_name ("emblem-system-symbolic");
-  GtkWidget *folder = gtk_button_new_from_icon_name ("folder-symbolic");
   GtkWidget *play = gtk_button_new ();
   GtkWidget *play_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   GtkWidget *play_icon = gtk_image_new_from_icon_name ("media-playback-start-symbolic");
@@ -952,13 +910,6 @@ create_instance_row (gpointer item, gpointer user_data)
                                   GTK_ACCESSIBLE_PROPERTY_LABEL, "Settings",
                                   -1);
 
-  gtk_widget_set_valign (folder, GTK_ALIGN_CENTER);
-  gtk_widget_add_css_class (folder, "flat");
-  gtk_widget_set_tooltip_text (folder, "Open Folder");
-  gtk_accessible_update_property (GTK_ACCESSIBLE (folder),
-                                  GTK_ACCESSIBLE_PROPERTY_LABEL,
-                                  "Open Folder", -1);
-
   gtk_image_set_pixel_size (GTK_IMAGE (play_icon), 16);
   gtk_box_append (GTK_BOX (play_box), play_icon);
   gtk_box_append (GTK_BOX (play_box), play_label);
@@ -975,13 +926,10 @@ create_instance_row (gpointer item, gpointer user_data)
   g_object_set_data (G_OBJECT (play), "aml-label", play_label);
 
   adw_action_row_add_suffix (ADW_ACTION_ROW (row), settings);
-  adw_action_row_add_suffix (ADW_ACTION_ROW (row), folder);
   adw_action_row_add_suffix (ADW_ACTION_ROW (row), play);
 
   g_signal_connect (settings, "clicked",
                     G_CALLBACK (on_open_instance_clicked), self);
-  g_signal_connect (folder, "clicked",
-                    G_CALLBACK (on_row_folder_clicked), self);
   g_signal_connect (play, "clicked", G_CALLBACK (on_play_clicked), self);
 
   /* The icon follows the instance's; the connection goes with the
@@ -995,8 +943,6 @@ create_instance_row (gpointer item, gpointer user_data)
   /* The buttons all lead back to this instance; the id is what their
      click handlers go by. */
   g_object_set_data_full (G_OBJECT (settings), "aml-instance-id",
-                          g_strdup (id), g_free);
-  g_object_set_data_full (G_OBJECT (folder), "aml-instance-id",
                           g_strdup (id), g_free);
   g_object_set_data_full (G_OBJECT (play), "aml-instance-id", g_strdup (id),
                           g_free);
