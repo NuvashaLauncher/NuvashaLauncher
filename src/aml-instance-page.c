@@ -79,7 +79,7 @@ instance_string (AmlInstance *instance, const char *property)
   return value;
 }
 
-/* "fabric" is shown as "Fabric", the same way the grid card writes it. */
+/* "fabric" is shown as "Fabric", the same way the instance list writes it. */
 static char *
 loader_display_name (AmlInstance *instance)
 {
@@ -119,12 +119,12 @@ show_toast (AmlInstancePage *self, const char *message)
   adw_toast_overlay_add_toast (ADW_TOAST_OVERLAY (self->toast_overlay), toast);
 }
 
-/* The grid binds an item when it enters the store, so a card that was
+/* The list binds an item when it enters the store, so a row that was
  * already bound keeps what it shows: the instance has to leave the store
- * and come back at the same place for the card to be bound again. The
- * order of the cards does not change. */
+ * and come back at the same place for the row to be bound again. The
+ * order of the rows does not change. */
 static void
-refresh_in_grid (AmlInstancePage *self)
+refresh_in_list (AmlInstancePage *self)
 {
   GListStore *store = aml_instance_manager_get_instances (self->manager);
   guint position = 0;
@@ -219,7 +219,7 @@ on_name_apply (AdwEntryRow *row, gpointer user_data)
 
   /* The tab follows the name: the window watches the instance for this,
      because the tab is the window's and not the page's. */
-  refresh_in_grid (self);
+  refresh_in_list (self);
 }
 
 static void
@@ -283,8 +283,8 @@ on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
       return;
     }
 
-  /* The card in the grid shows the version this instance runs. */
-  refresh_in_grid (self);
+  /* The row shows the version this instance runs. */
+  refresh_in_list (self);
 
   /* Resource Packs and Shader Packs are narrowed to the Minecraft
      version, so they are built again for the version that was picked. */
@@ -361,8 +361,8 @@ on_loader_changed (AmlLoaderRow *row, gpointer user_data)
                                      ? NULL
                                      : version);
 
-  /* The card in the grid shows what the instance runs. */
-  refresh_in_grid (self);
+  /* The row shows what the instance runs. */
+  refresh_in_list (self);
 
   /* A mod runs on a loader, and a resource pack or a shader pack is
      loaded by the game, so all three content pages depend on what was
@@ -1242,7 +1242,7 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
   self->launcher = g_object_ref (launcher);
 
   /* The Directory row cannot move files out from under a running game, so
-     it follows the state of the launch the page shares with the card. */
+     it follows the state of the launch the page shares with the row. */
   g_signal_connect_object (launcher, "state",
                            G_CALLBACK (on_page_launcher_state), self, 0);
 
@@ -1264,7 +1264,7 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
     "mods", "Mods", "view-list-symbolic");
 
   /* The logs of the instance are the logs of the launcher the window
-     shares with the card, so the game can be watched from here. */
+     shares with the row, so the game can be watched from here. */
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack), GTK_WIDGET (aml_logs_page_new (launcher)),
     "logs", "Logs", "text-x-generic-symbolic");
