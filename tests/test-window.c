@@ -162,10 +162,14 @@ advance (gpointer user_data)
         }
 
       /* Opening an instance opens a window of its own, not a tab, and
-         the window is named after the instance. */
+         the window is named after the instance and stays over the
+         launcher until it is closed. */
       g_assert_cmpuint (g_list_length (windows), ==, 2);
       g_assert_cmpstr (gtk_window_get_title (run->instance_window), ==,
                        "Test");
+      g_assert_true (gtk_window_get_modal (run->instance_window));
+      g_assert_true (gtk_window_get_transient_for (run->instance_window) ==
+                     run->window);
       return G_SOURCE_CONTINUE;
 
     default:

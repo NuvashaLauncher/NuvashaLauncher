@@ -654,6 +654,12 @@ open_instance_window (AmlMainWindow *self, AmlInstance *instance)
   gtk_window_set_default_size (window, 900, 620);
   adw_application_window_set_content (ADW_APPLICATION_WINDOW (window), page);
 
+  /* The instance window stays over the launcher window and takes the
+     input while it is open, the way a dialog of a GNOME application
+     does, so the launcher is not moved between the two. */
+  gtk_window_set_transient_for (window, GTK_WINDOW (self));
+  gtk_window_set_modal (window, TRUE);
+
   /* The id travels with the window, which is what makes it findable
      again without the window keeping a table of its own. */
   g_object_set_data_full (G_OBJECT (window), "aml-instance-id",
