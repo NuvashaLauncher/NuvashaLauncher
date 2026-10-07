@@ -32,11 +32,18 @@ struct _AmlMainWindow
   AmlUsersPopover *users_popover;
 
   /* One launcher per instance, keyed by its id, so the row of an
-     instance and its window always talk about the same launch. */
+     instance and its dialog always talk about the same launch. */
   GHashTable *launchers;
 
+  /* The dialog of each instance that is open, keyed by its id. An
+     AdwDialog is not a window, so the window list of the application
+     cannot be asked about it; this is the bookkeeping that is. The
+     dialogs are held by the window they were presented on, so the table
+     holds borrowed pointers and only says which ones are open. */
+  GHashTable *instance_dialogs;
+
   /* Switches between the empty state and the instance list. The list is
-     what the window shows; an instance is a window of its own. */
+     what the window shows; an instance opens a dialog over it. */
   GtkWidget *stack;
 
   /* Says what happened without the user asking: a game that crashed,
@@ -569,34 +576,43 @@ window_launcher (AmlMainWindow *self, const char *instance_id)
 }
 
 /* ---------------------------------------------------------- *
- * The windows of the instances
+ * The dialogs of the instances
+ *
+ * An instance opens as an AdwDialog over the launcher, exactly like the
+ * Settings dialog: it is not resizable, it cannot be moved away from the
+ * window, and the page's own header bar becomes the header of the
+ * dialog. That is why the instance page is not put in a window of its
+ * own.
  * ---------------------------------------------------------- */
 
-/* The window @id is open in, or NULL. The id travels with the window,
-   so the window list of the application is all the bookkeeping there
-   is: a window that is closed is not in it any more, and the one that
-   holds the id is the one to bring forward. */
-static GtkWindow *
-window_of_instance (AmlMainWindow *self, const char *id)
+/* The dialog @id is open in, or NULL. The id travels with the dialog, so
+   the table of open dialogs is all the bookkeeping there is: a dialog
+   that is closed is no longer in it, and the one that holds the id is
+   the one to present again. */
+static AdwDialog *
+dialog_of_instance (AmlMainWindow *self, const char *id)
 {
-  GtkApplication *application = gtk_window_get_application (GTK_WINDOW (self));
-  GList *windows = gtk_application_get_windows (application);
+  if (id == NULL)
+    return NULL;
 
-  for (GList *item = windows; item != NULL; item = item->next)
-    {
-      GtkWindow *window = item->data;
-      const char *other = g_object_get_data (G_OBJECT (window),
-                                             "aml-instance-id");
-
-      if (other != NULL && g_strcmp0 (other, id) == 0)
-        return window;
-    }
-
-  return NULL;
+  return g_hash_table_lookup (self->instance_dialogs, id);
 }
 
-/* The window of an instance says the name of the instance, and says it
-   again when the name changes: a window left saying the old name is one
+/* A dialog that was closed is not open any more. AdwDialog emits this
+   while it is still alive, so the borrowed pointer leaves the table
+   before the dialog is freed. */
+static void
+on_instance_dialog_closed (AdwDialog *dialog, gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  const char *id = g_object_get_data (G_OBJECT (dialog), "aml-instance-id");
+
+  if (id != NULL)
+    g_hash_table_remove (self->instance_dialogs, id);
+}
+
+/* The dialog of an instance says the name of the instance, and says it
+   again when the name changes: a dialog left saying the old name is one
    the user cannot match to anything. */
 static void
 on_instance_renamed (AmlInstance *instance, GParamSpec *pspec G_GNUC_UNUSED,
@@ -604,41 +620,42 @@ on_instance_renamed (AmlInstance *instance, GParamSpec *pspec G_GNUC_UNUSED,
 {
   AmlMainWindow *self = user_data;
   const char *id = aml_instance_get_id (instance);
-  GtkWindow *window = NULL;
+  AdwDialog *dialog = NULL;
   char *name = NULL;
 
   if (id == NULL)
     return;
 
-  window = window_of_instance (self, id);
+  dialog = dialog_of_instance (self, id);
 
-  if (window == NULL)
+  if (dialog == NULL)
     return;
 
   g_object_get (instance, "name", &name, NULL);
-  gtk_window_set_title (window, name != NULL ? name : "");
+  adw_dialog_set_title (dialog, name != NULL ? name : "");
   g_free (name);
 }
 
-/* Opens @instance: the window it already has, brought forward, or a new
- * one of its own. The instance is a window, so two of them can be looked
- * at side by side and the list is left where it is. */
+/* Opens @instance: the dialog it already has, brought forward, or a new
+ * one over the launcher. The page's header bar carries the view switcher
+ * and, because it is inside an AdwDialog, the close button of the
+ * dialog. */
 static void
-open_instance_window (AmlMainWindow *self, AmlInstance *instance)
+open_instance_dialog (AmlMainWindow *self, AmlInstance *instance)
 {
   const char *id = aml_instance_get_id (instance);
-  GtkWindow *window = NULL;
+  AdwDialog *dialog = NULL;
   GtkWidget *page = NULL;
   char *name = NULL;
 
   if (id == NULL)
     return;
 
-  window = window_of_instance (self, id);
+  dialog = dialog_of_instance (self, id);
 
-  if (window != NULL)
+  if (dialog != NULL)
     {
-      gtk_window_present (window);
+      adw_dialog_present (dialog, GTK_WIDGET (self));
       return;
     }
 
@@ -648,61 +665,63 @@ open_instance_window (AmlMainWindow *self, AmlInstance *instance)
 
   g_object_get (instance, "name", &name, NULL);
 
-  window = GTK_WINDOW (adw_application_window_new (
-                         gtk_window_get_application (GTK_WINDOW (self))));
-  gtk_window_set_title (window, name != NULL ? name : "");
-  gtk_window_set_default_size (window, 900, 620);
-  adw_application_window_set_content (ADW_APPLICATION_WINDOW (window), page);
-
-  /* The instance window stays over the launcher window and takes the
-     input while it is open, the way a dialog of a GNOME application
-     does, so the launcher is not moved between the two. */
-  gtk_window_set_transient_for (window, GTK_WINDOW (self));
-  gtk_window_set_modal (window, TRUE);
-
-  /* The id travels with the window, which is what makes it findable
-     again without the window keeping a table of its own. */
-  g_object_set_data_full (G_OBJECT (window), "aml-instance-id",
-                          g_strdup (id), g_free);
+  dialog = adw_dialog_new ();
+  adw_dialog_set_title (dialog, name != NULL ? name : "");
+  /* The size the separate window used to have, so the lists inside have
+     the room they had. */
+  adw_dialog_set_content_width (dialog, 900);
+  adw_dialog_set_content_height (dialog, 620);
+  adw_dialog_set_child (dialog, page);
   g_free (name);
 
-  /* The connection goes with the window: a page that goes away first
+  /* The id travels with the dialog, which is what makes it findable
+     again and closable when its instance is deleted. */
+  g_object_set_data_full (G_OBJECT (dialog), "aml-instance-id",
+                          g_strdup (id), g_free);
+  g_hash_table_insert (self->instance_dialogs, g_strdup (id), dialog);
+  /* Weak, so that a dialog that outlives the window cannot call back
+     into a window that is gone. */
+  g_signal_connect_object (dialog, "closed",
+                           G_CALLBACK (on_instance_dialog_closed), self, 0);
+
+  /* The connection goes with the dialog: a page that goes away first
      leaves nothing to call back into. */
   g_signal_connect_object (instance, "notify::name",
                            G_CALLBACK (on_instance_renamed), self, 0);
 
-  gtk_window_present (window);
+  adw_dialog_present (dialog, GTK_WIDGET (self));
 }
 
-/* Closes the window of an instance that is no longer in the list, which
+/* Closes the dialog of an instance that is no longer in the list, which
  * is what deleting one does. A game that is still running keeps running:
- * its launcher is held by the table, not by the window. */
+ * its launcher is held by the table, not by the dialog. */
 static void
-close_windows_of_removed_instances (AmlMainWindow *self)
+close_dialogs_of_removed_instances (AmlMainWindow *self)
 {
-  GtkApplication *application = gtk_window_get_application (GTK_WINDOW (self));
-  GList *windows = gtk_application_get_windows (application);
+  GHashTableIter iter;
+  gpointer key = NULL;
+  gpointer value = NULL;
   g_autoptr (GPtrArray) doomed = g_ptr_array_new_with_free_func (
     g_object_unref);
 
-  /* Collect first: closing a window takes it out of the list being
+  /* Collect first: closing a dialog takes it out of the table being
      walked. */
-  for (GList *item = windows; item != NULL; item = item->next)
-    {
-      GtkWindow *window = item->data;
-      const char *id = g_object_get_data (G_OBJECT (window),
-                                          "aml-instance-id");
+  g_hash_table_iter_init (&iter, self->instance_dialogs);
 
-      if (id != NULL &&
-          aml_instance_manager_get_by_id (self->manager, id) == NULL)
-        g_ptr_array_add (doomed, g_object_ref (window));
+  while (g_hash_table_iter_next (&iter, &key, &value))
+    {
+      const char *id = key;
+      AdwDialog *dialog = value;
+
+      if (aml_instance_manager_get_by_id (self->manager, id) == NULL)
+        g_ptr_array_add (doomed, g_object_ref (dialog));
     }
 
   for (guint i = 0; i < doomed->len; i++)
-    gtk_window_destroy (g_ptr_array_index (doomed, i));
+    adw_dialog_force_close (g_ptr_array_index (doomed, i));
 }
 
-/* Opens the window of the instance this row is for: its Settings page.
+/* Opens the dialog of the instance this row is for: its Settings page.
  * The id is put on the button when the row is bound, so a row that lost
  * its instance simply does nothing. */
 static void
@@ -720,7 +739,7 @@ on_open_instance_clicked (GtkButton *button, gpointer user_data)
   if (instance == NULL)
     return;
 
-  open_instance_window (self, instance);
+  open_instance_dialog (self, instance);
 }
 
 /* The folder button says when it could not open the folder, the way an
@@ -1012,7 +1031,7 @@ on_row_activate (GtkListBox *list G_GNUC_UNUSED, GtkListBoxRow *row,
   if (instance == NULL)
     return;
 
-  open_instance_window (self, instance);
+  open_instance_dialog (self, instance);
   g_object_unref (instance);
 }
 
@@ -1061,10 +1080,10 @@ on_instances_changed (AmlMainWindow *self,
   update_visible_page (self);
   drop_launchers_of_removed_instances (self);
 
-  /* An instance that is gone has nothing to show, so its window goes
-     with it. This is how deleting an instance closes its window,
+  /* An instance that is gone has nothing to show, so its dialog goes
+     with it. This is how deleting an instance closes its dialog,
      whichever screen the delete was asked from. */
-  close_windows_of_removed_instances (self);
+  close_dialogs_of_removed_instances (self);
 }
 
 static void
@@ -1186,6 +1205,11 @@ aml_main_window_new (GtkApplication *application, AmlInstanceManager *manager)
   self->launchers = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                            g_object_unref);
 
+  /* The open instance dialogs are only bookkept here: the window they
+     are presented on owns them. */
+  self->instance_dialogs = g_hash_table_new_full (g_str_hash, g_str_equal,
+                                                  g_free, NULL);
+
   /* The instances are a boxed list, the same list the content pages and
      the modpack browser use: full width rows with hairlines between
      them instead of cards on a margin. The top row's corners are
@@ -1230,6 +1254,7 @@ aml_main_window_dispose (GObject *object)
      readers, so dropping the table here never kills a game in front of
      the user; it only lets go of the ones that are not running. */
   g_clear_pointer (&self->launchers, g_hash_table_unref);
+  g_clear_pointer (&self->instance_dialogs, g_hash_table_unref);
   g_clear_object (&self->manager);
   g_clear_object (&self->settings);
   g_clear_object (&self->accounts);
