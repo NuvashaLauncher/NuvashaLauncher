@@ -822,12 +822,16 @@ plan_next (PlanRun *plan)
       return;
     }
 
-  dependency = g_ptr_array_index (plan->queue, 0);
-  g_ptr_array_remove_index (plan->queue, 0);
+  /* The dependency is taken out of the queue without being freed: the
+     call below reads its project id, and freeing it first would be a
+     read of memory that is gone. It is freed once the call has copied
+     what it needs. */
+  dependency = g_ptr_array_steal_index (plan->queue, 0);
 
   aml_modrinth_versions_async (dependency->project_id, self->type,
                                self->minecraft_version, self->loader,
                                plan->cancellable, plan_versions_ready, plan);
+  aml_modrinth_dependency_free (dependency);
 }
 
 static void
