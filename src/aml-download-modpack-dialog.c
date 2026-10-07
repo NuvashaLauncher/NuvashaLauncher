@@ -412,6 +412,8 @@ results_arrived (AmlDownloadModpackDialog *self, AmlModrinthResults *results,
               g_ptr_array_index (results->projects, i);
           GtkWidget *row = adw_action_row_new ();
           GtkWidget *icon = aml_icon_widget_new ("view-list-symbolic");
+          GtkWidget *download = gtk_button_new_from_icon_name (
+              "folder-download-symbolic");
 
           /* The same project is never listed twice, however the pages
              overlap. */
@@ -453,6 +455,22 @@ results_arrived (AmlDownloadModpackDialog *self, AmlModrinthResults *results,
                              g_ptr_array_index (self->hits,
                                                 self->hits->len - 1));
           g_ptr_array_add (self->rows, row);
+
+          /* The download button does what a click on the row does: it
+             opens the details page, where the version is picked. */
+          gtk_widget_add_css_class (download, "suggested-action");
+          gtk_widget_set_valign (download, GTK_ALIGN_CENTER);
+          gtk_widget_set_halign (download, GTK_ALIGN_CENTER);
+          gtk_widget_set_tooltip_text (download, "Install");
+          gtk_accessible_update_property (GTK_ACCESSIBLE (download),
+                                          GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                          "Install", -1);
+          g_object_set_data (G_OBJECT (download), "aml-project",
+                             g_ptr_array_index (self->hits,
+                                                self->hits->len - 1));
+          g_signal_connect (download, "clicked",
+                            G_CALLBACK (result_row_activated), self);
+          adw_action_row_add_suffix (ADW_ACTION_ROW (row), download);
 
           g_signal_connect (row, "activated",
                             G_CALLBACK (result_row_activated), self);
@@ -661,6 +679,10 @@ build_browse_page (AmlDownloadModpackDialog *self)
   gtk_widget_set_vexpand (self->results_stack, TRUE);
 
   self->results_group = adw_preferences_group_new ();
+
+  /* The list is flush with the top of the page: the top row's corners
+     are square, so the first row does not float over the background. */
+  gtk_widget_add_css_class (self->results_group, "flush-top");
 
   self->search_entry = gtk_search_entry_new ();
   gtk_widget_set_hexpand (self->search_entry, TRUE);

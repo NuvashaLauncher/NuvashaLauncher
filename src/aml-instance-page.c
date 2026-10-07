@@ -1267,7 +1267,7 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
      shares with the row, so the game can be watched from here. */
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack), GTK_WIDGET (aml_logs_page_new (launcher)),
-    "logs", "Logs", "text-x-generic-symbolic");
+    "logs", "Logs", "utilities-terminal-symbolic");
 
   /* Kept so that the content pages can be built again when the loader or
      the Minecraft version changes. */
