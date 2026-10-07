@@ -6,10 +6,12 @@
 
 struct _AmlLoaderRow
 {
-  GtkBox parent_instance;
+  GObject parent_instance;
 
   AmlSettings *settings;
 
+  /* Plain AdwComboRows, owned here and added to a group by whoever made
+     this. Both hold a reference back, so either may go first. */
   GtkWidget *loader_row;
   GtkWidget *version_row;
   GtkWidget *retry;
@@ -28,7 +30,7 @@ struct _AmlLoaderRow
   gboolean ready;
 };
 
-G_DEFINE_FINAL_TYPE (AmlLoaderRow, aml_loader_row, GTK_TYPE_BOX)
+G_DEFINE_FINAL_TYPE (AmlLoaderRow, aml_loader_row, G_TYPE_OBJECT)
 
 static guint aml_loader_row_signals[AML_LOADER_ROW_N_SIGNALS];
 
@@ -266,37 +268,51 @@ aml_loader_row_new (void)
   for (guint i = 0; i < count; i++)
     names[i] = aml_loader_display_name (loaders[i]);
 
-  gtk_orientable_set_orientation (GTK_ORIENTABLE (self),
-                                  GTK_ORIENTATION_VERTICAL);
-
-  self->loader_row = adw_combo_row_new ();
+  self->loader_row = g_object_ref_sink (adw_combo_row_new ());
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->loader_row),
                                  "Loader");
   adw_combo_row_set_model (ADW_COMBO_ROW (self->loader_row),
                            G_LIST_MODEL (gtk_string_list_new (names)));
   adw_combo_row_set_selected (ADW_COMBO_ROW (self->loader_row), 0);
-  g_signal_connect (self->loader_row, "notify::selected",
-                    G_CALLBACK (on_selected), self);
-  gtk_box_append (GTK_BOX (self), self->loader_row);
 
-  self->version_row = adw_combo_row_new ();
+  self->version_row = g_object_ref_sink (adw_combo_row_new ());
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->version_row),
                                  "Loader Version");
-  self->retry = gtk_button_new_with_label ("Retry");
+  self->retry = g_object_ref_sink (gtk_button_new_with_label ("Retry"));
   gtk_widget_add_css_class (self->retry, "flat");
   gtk_widget_set_valign (self->retry, GTK_ALIGN_CENTER);
   gtk_widget_set_visible (self->retry, FALSE);
-  g_signal_connect (self->retry, "clicked", G_CALLBACK (on_retry_clicked),
-                    self);
   adw_action_row_add_suffix (ADW_ACTION_ROW (self->version_row), self->retry);
-  g_signal_connect (self->version_row, "notify::selected",
-                    G_CALLBACK (on_selected), self);
-  gtk_box_append (GTK_BOX (self), self->version_row);
+
+  /* Every handler is connected with the object, so a row that a group
+     still holds after this is gone cannot call back into it. */
+  g_signal_connect_object (self->loader_row, "notify::selected",
+                           G_CALLBACK (on_selected), self, 0);
+  g_signal_connect_object (self->version_row, "notify::selected",
+                           G_CALLBACK (on_selected), self, 0);
+  g_signal_connect_object (self->retry, "clicked",
+                           G_CALLBACK (on_retry_clicked), self, 0);
 
   show_loading (self);
   update_visibility (self);
 
   return self;
+}
+
+GtkWidget *
+aml_loader_row_get_loader_row (AmlLoaderRow *self)
+{
+  g_return_val_if_fail (AML_IS_LOADER_ROW (self), NULL);
+
+  return self->loader_row;
+}
+
+GtkWidget *
+aml_loader_row_get_version_row (AmlLoaderRow *self)
+{
+  g_return_val_if_fail (AML_IS_LOADER_ROW (self), NULL);
+
+  return self->version_row;
 }
 
 void
@@ -396,13 +412,18 @@ aml_loader_row_dispose (GObject *object)
 {
   AmlLoaderRow *self = AML_LOADER_ROW (object);
 
-  /* A load still in flight only holds a reference on this row; cancelling
-     it and dropping the settings stops it from writing into a row that is
-     on its way out. */
+  /* A load still in flight only holds a reference on this object;
+     cancelling it and dropping the settings stops it from writing into a
+     row that is on its way out. */
   g_cancellable_cancel (self->cancellable);
   g_clear_object (&self->cancellable);
   g_clear_object (&self->settings);
-  self->retry = NULL;
+
+  /* The rows are ours. A group that still holds one keeps it alive, and
+     its handlers went with this object. */
+  g_clear_object (&self->retry);
+  g_clear_object (&self->version_row);
+  g_clear_object (&self->loader_row);
 
   G_OBJECT_CLASS (aml_loader_row_parent_class)->dispose (object);
 }

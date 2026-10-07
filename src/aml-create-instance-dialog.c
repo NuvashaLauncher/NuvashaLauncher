@@ -24,7 +24,7 @@ struct _AmlCreateInstanceDialog
 
   GtkWidget *name_row;
   GtkWidget *version_row; /* AmlVersionRow, filled when the dialog opens */
-  GtkWidget *loader_row; /* AmlLoaderRow, filled when the dialog opens */
+  AmlLoaderRow *loader_row; /* its two rows are filled when it opens */
   GtkWidget *directory_row;
   GtkWidget *error_label;
   GtkWidget *create_button;
@@ -55,7 +55,7 @@ update_create_button (AmlCreateInstanceDialog *self)
   const char *version =
     aml_version_row_get_selected (AML_VERSION_ROW (self->version_row));
   AmlLoader loader =
-    aml_loader_row_get_loader (AML_LOADER_ROW (self->loader_row));
+    aml_loader_row_get_loader (self->loader_row);
   gboolean loader_ready = TRUE;
 
   g_strstrip (name);
@@ -64,7 +64,7 @@ update_create_button (AmlCreateInstanceDialog *self)
    * answers when it knows one. */
   if (loader != AML_LOADER_VANILLA)
     loader_ready =
-      aml_loader_row_get_version (AML_LOADER_ROW (self->loader_row)) != NULL;
+      aml_loader_row_get_version (self->loader_row) != NULL;
 
   /* The version row answers nothing while it is loading or failed, so
    * the dialog waits until a version from the list is picked. */
@@ -84,9 +84,8 @@ on_version_selected (GObject *object G_GNUC_UNUSED,
   const char *version =
     aml_version_row_get_selected (AML_VERSION_ROW (self->version_row));
 
-  aml_loader_row_load (AML_LOADER_ROW (self->loader_row), self->settings,
-                       aml_loader_row_get_loader (AML_LOADER_ROW (
-                                                    self->loader_row)),
+  aml_loader_row_load (self->loader_row, self->settings,
+                       aml_loader_row_get_loader (self->loader_row),
                        NULL, version);
   update_create_button (self);
 }
@@ -131,9 +130,9 @@ on_create_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   const char *version =
     aml_version_row_get_selected (AML_VERSION_ROW (self->version_row));
   AmlLoader loader =
-    aml_loader_row_get_loader (AML_LOADER_ROW (self->loader_row));
+    aml_loader_row_get_loader (self->loader_row);
   const char *loader_version =
-    aml_loader_row_get_version (AML_LOADER_ROW (self->loader_row));
+    aml_loader_row_get_version (self->loader_row);
   g_autoptr (GError) error = NULL;
   g_autoptr (AmlInstance) instance = NULL;
 
@@ -221,7 +220,7 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
 
   /* The loader and the version of it. Filled when the dialog opens and
      again whenever the Minecraft version above changes. */
-  self->loader_row = GTK_WIDGET (aml_loader_row_new ());
+  self->loader_row = aml_loader_row_new ();
 
   /* What AmlInstanceManager derives when no directory is picked:
    * <data dir>/instances. */
@@ -246,7 +245,10 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
   GtkWidget *group = adw_preferences_group_new ();
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), self->name_row);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), self->version_row);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), self->loader_row);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (group),
+                             aml_loader_row_get_loader_row (self->loader_row));
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (group),
+                             aml_loader_row_get_version_row (self->loader_row));
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), self->directory_row);
 
   GtkWidget *page = adw_preferences_page_new ();
@@ -317,7 +319,7 @@ aml_create_instance_dialog_new (AmlInstanceManager *manager,
 
   /* Vanilla is picked from the start: it is what an instance is without a
      loader, and it has no versions of its own to wait for. */
-  aml_loader_row_load (AML_LOADER_ROW (self->loader_row), self->settings,
+  aml_loader_row_load (self->loader_row, self->settings,
                        AML_LOADER_VANILLA, NULL, NULL);
 
   return self;
@@ -330,6 +332,9 @@ aml_create_instance_dialog_dispose (GObject *object)
 
   g_clear_object (&self->manager);
   g_clear_object (&self->settings);
+
+  /* The loader rows are the dialog's; their handlers go with them. */
+  g_clear_object (&self->loader_row);
 
   G_OBJECT_CLASS (aml_create_instance_dialog_parent_class)->dispose (object);
 }
