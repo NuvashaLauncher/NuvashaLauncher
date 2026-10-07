@@ -1137,6 +1137,7 @@ run_the_game (AmlLauncher *self)
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
   g_autofree char *jvm_args = NULL;
+  g_autofree char *offline_uuid = NULL;
   AmlAccount *account = NULL;
   AmlLaunchSession session;
 
@@ -1148,13 +1149,19 @@ run_the_game (AmlLauncher *self)
      being downloaded. */
   account = active_account (self);
 
-  if (account == NULL)
+  if (account != NULL)
+    session = aml_launch_session_for (account);
+  else
     {
-      launcher_needs_sign_in (self, "the account is gone");
-      return;
+      /* Nobody signed in: the game plays offline as Player, the name a
+         fresh Minecraft falls back to, with the UUID the game derives
+         from it so the same player is the same player every time. */
+      offline_uuid = aml_account_offline_uuid (AML_LAUNCH_OFFLINE_NAME);
+      session.name = AML_LAUNCH_OFFLINE_NAME;
+      session.uuid = offline_uuid;
+      session.user_type = AML_LAUNCH_OFFLINE_USER_TYPE;
+      session.access_token = AML_LAUNCH_OFFLINE_TOKEN;
     }
-
-  session = aml_launch_session_for (account);
 
   g_object_get (self->instance, "jvm-args", &jvm_args, NULL);
 
@@ -1172,8 +1179,9 @@ run_the_game (AmlLauncher *self)
      command line that is logged by the spawn carries it redacted, and
      this one is about the account. */
   log_line (self, TAG_STATE, "playing as %s (%s)",
-            account->name != NULL ? account->name : "an account",
-            aml_account_type_name (account->type));
+            account != NULL ? account->name : AML_LAUNCH_OFFLINE_NAME,
+            account != NULL ? aml_account_type_name (account->type)
+                            : "Offline");
 
   log_line (self, TAG_STATE, "Java %d at %s", self->java_major_version,
             self->java_executable);
@@ -1718,21 +1726,18 @@ on_account_refreshed (GObject      *source G_GNUC_UNUSED,
   start_preparing (self);
 }
 
-/* The account a launch runs as, or the reason there is none. An account
- * whose token has run out is signed in again before anything is
- * downloaded, because a game that is going to need a token later can
- * fail now in words instead. */
+/* The account a launch runs as. Nobody signed in is not a reason to
+ * refuse: the game starts offline as Player. An account whose token has
+ * run out is signed in again before anything is downloaded, because a
+ * game that is going to need a token later can fail now in words
+ * instead. */
 static gboolean
 account_for_launch (AmlLauncher *self)
 {
   AmlAccount *account = active_account (self);
 
   if (account == NULL)
-    {
-      launcher_failed (self, "there is no account to play as: open the users "
-                             "menu in the header and add one");
-      return FALSE;
-    }
+    return TRUE;
 
   if (account->type == AML_ACCOUNT_OFFLINE)
     return TRUE;

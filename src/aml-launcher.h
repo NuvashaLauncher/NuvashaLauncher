@@ -59,6 +59,10 @@ G_BEGIN_DECLS
 #define AML_LAUNCH_OFFLINE_USER_TYPE "legacy"
 #define AML_LAUNCH_MICROSOFT_USER_TYPE "msa"
 
+/* Who a game with nobody signed in plays as: the name a fresh Minecraft
+ * falls back to, and the one its offline UUID is derived from. */
+#define AML_LAUNCH_OFFLINE_NAME "Player"
+
 /* The window the game opens in, which is what ${resolution_width} and
  * ${resolution_height} mean. */
 #define AML_LAUNCH_WIDTH 854
