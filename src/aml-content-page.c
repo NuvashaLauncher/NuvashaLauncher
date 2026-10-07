@@ -1841,8 +1841,10 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
       adw_action_row_add_suffix (ADW_ACTION_ROW (row), suffix);
 
       /* The whole row opens the project; the button installs the newest
-       * version of it that fits this instance. */
-      adw_action_row_set_activatable_widget (ADW_ACTION_ROW (row), NULL);
+       * version of it that fits this instance. An AdwActionRow is not
+       * activatable by default, so the row itself is made one: a click
+       * on it, anywhere but the install button, activates the row. */
+      gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
       g_signal_connect (row, "activated", G_CALLBACK (on_result_activated),
                         self);
       g_signal_connect (install, "clicked",
@@ -2283,11 +2285,19 @@ static void
 on_detail_versions_ready (GObject *source G_GNUC_UNUSED,
                           GAsyncResult *result, gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  PageWatch *watch = user_data;
+  AmlContentPage *self = watch->page;
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
-  AdwPreferencesGroup *group = self->details_versions;
+  AdwPreferencesGroup *group = NULL;
 
+  if (self == NULL)
+    {
+      page_watch_free (watch);
+      return;
+    }
+
+  group = self->details_versions;
   versions = aml_modrinth_versions_finish (result, &error);
   set_busy (self, FALSE);
 
@@ -2299,6 +2309,7 @@ on_detail_versions_ready (GObject *source G_GNUC_UNUSED,
                                             AML_MODRINTH_ERROR_NOT_FOUND))
         show_toast (self, error->message);
 
+      page_watch_free (watch);
       return;
     }
 
@@ -2336,27 +2347,48 @@ on_detail_versions_ready (GObject *source G_GNUC_UNUSED,
       adw_preferences_group_add (group, row);
       self->detail_rows = g_list_append (self->detail_rows, row);
     }
+
+  page_watch_free (watch);
 }
 
 static void
 on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                   gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  PageWatch *watch = user_data;
+  AmlContentPage *self = watch->page;
   g_autoptr (GError) error = NULL;
   g_autoptr (AmlModrinthDetails) details = NULL;
-  GtkWidget *body = g_object_get_data (G_OBJECT (self), "aml-details-body");
-  GtkWidget *meta = g_object_get_data (G_OBJECT (self), "aml-details-meta");
+  GtkWidget *body = NULL;
+  GtkWidget *meta = NULL;
   g_autofree char *author = NULL;
-  g_autofree char *downloads = NULL;
+
+  if (self == NULL)
+    {
+      page_watch_free (watch);
+      return;
+    }
+
+  body = g_object_get_data (G_OBJECT (self), "aml-details-body");
+  meta = g_object_get_data (G_OBJECT (self), "aml-details-meta");
 
   details = aml_modrinth_details_finish (result, &error);
 
   if (details == NULL)
     {
       set_busy (self, FALSE);
+
+      /* The reason is shown where the body would have been, on the
+         details page that is already open, and not only in a toast that
+         may be behind it. */
+      if (body != NULL)
+        gtk_label_set_text (GTK_LABEL (body),
+                            error != NULL ? error->message
+                                          : "the project cannot be read");
+
       show_toast (self, error != NULL ? error->message
                                       : "the project cannot be read");
+      page_watch_free (watch);
       return;
     }
 
@@ -2374,7 +2406,10 @@ on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
    * can reach the list. */
   aml_modrinth_versions_async (self->details_project, self->type,
                                self->minecraft_version, self->loader,
-                               self->browse, on_detail_versions_ready, self);
+                               self->browse, on_detail_versions_ready,
+                               page_watch_new (self));
+
+  page_watch_free (watch);
 }
 
 static void
@@ -2405,8 +2440,8 @@ on_result_activated (AdwActionRow *row G_GNUC_UNUSED, gpointer user_data)
   if (view == NULL)
     return;
 
-  page = GTK_WIDGET (adw_navigation_page_new (scroller, NULL));
   scroller = gtk_scrolled_window_new ();
+  page = GTK_WIDGET (adw_navigation_page_new (scroller, project->title));
   box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
   heading = adw_preferences_group_new ();
 
@@ -2462,7 +2497,7 @@ on_result_activated (AdwActionRow *row G_GNUC_UNUSED, gpointer user_data)
 
   set_busy (self, TRUE);
   aml_modrinth_details_async (project->project_id, self->browse,
-                              on_details_ready, g_object_ref (self));
+                              on_details_ready, page_watch_new (self));
 }
 
 /* ---------------------------------------------------------- *
