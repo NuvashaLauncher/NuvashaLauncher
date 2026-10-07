@@ -41,6 +41,10 @@ struct _AmlMainWindow
 
   /* Switches between the empty state and the instance grid. */
   GtkWidget *stack;
+
+  /* Says what happened without the user asking: a game that crashed,
+     an operation that failed. */
+  GtkWidget *toasts;
 };
 
 G_DEFINE_FINAL_TYPE (AmlMainWindow, aml_main_window, ADW_TYPE_APPLICATION_WINDOW)
@@ -542,6 +546,31 @@ set_menu_item_tooltip (GtkWidget  *root,
     }
 }
 
+/* A game that crashed is said out loud: the card shows the reason, but a
+   user watching the game, not the card, would otherwise find out only
+   by noticing it had stopped. */
+static void
+on_window_launcher_state (AmlLauncher *launcher G_GNUC_UNUSED,
+                          AmlLaunchState state,
+                          const char *detail, gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  AdwToast *toast = NULL;
+  g_autofree char *message = NULL;
+
+  if (state != AML_LAUNCH_CRASHED)
+    return;
+
+  message = g_strdup_printf ("Minecraft crashed%s%s",
+                             detail != NULL && *detail != '\0' ? ": " : "",
+                             detail != NULL ? detail : "");
+
+  toast = adw_toast_new (message);
+  adw_toast_set_use_markup (toast, FALSE);
+  adw_toast_set_timeout (toast, 8);
+  adw_toast_overlay_add_toast (ADW_TOAST_OVERLAY (self->toasts), toast);
+}
+
 /* The launcher of one instance, made when it is first asked for. It is
  * the one launcher the card and the page of that instance share, which
  * is what keeps a game from being started twice. */
@@ -565,6 +594,13 @@ window_launcher (AmlMainWindow *self, const char *instance_id)
     return NULL;
 
   launcher = aml_launcher_new (instance, self->settings, self->accounts);
+
+  /* g_signal_connect_object drops the connection when either side goes
+     away, so the window outliving a launcher is not a dangling
+     pointer. */
+  g_signal_connect_object (launcher, "state",
+                           G_CALLBACK (on_window_launcher_state), self, 0);
+
   g_hash_table_insert (self->launchers, g_strdup (instance_id), launcher);
 
   return launcher;
@@ -942,8 +978,15 @@ aml_main_window_init (AmlMainWindow *self)
                            adw_navigation_page_new_with_tag (toolbar, "AML",
                                                              "home"));
 
+  /* A toast is how the window says something the user did not ask for: a
+   game that crashed, an operation that failed. Without it the only way
+   to find out is to open the logs. */
+  self->toasts = adw_toast_overlay_new ();
+  adw_toast_overlay_set_child (ADW_TOAST_OVERLAY (self->toasts),
+                               GTK_WIDGET (self->navigation));
+
   adw_application_window_set_content (ADW_APPLICATION_WINDOW (self),
-                                      GTK_WIDGET (self->navigation));
+                                      GTK_WIDGET (self->toasts));
 
   gtk_window_set_title (GTK_WINDOW (self), "AML");
   gtk_window_set_default_size (GTK_WINDOW (self), 960, 640);
