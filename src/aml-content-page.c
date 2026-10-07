@@ -30,6 +30,7 @@
 
 #include "aml-download.h"
 #include "aml-icons.h"
+#include "aml-markdown.h"
 
 #include <glib/gstdio.h>
 #include <string.h>
@@ -104,7 +105,6 @@ struct _AmlContentPage
   GHashTable *rows;     /* path -> row */
   GList *installed_rows; /* the rows of the Installed group */
   GList *result_rows;    /* the rows of the Browse group */
-  GList *detail_rows;    /* the rows of the page of a project */
   GHashTable *projects; /* project id -> NULL */
   GHashTable *project_icons; /* project id -> icon url the browser saw */
   GHashTable *project_descriptions; /* project id -> what it is */
@@ -192,30 +192,33 @@ page_watch_free (PageWatch *watch)
 }
 
 /* One answer of the dialog of a project while what it shows is being
- * read: the page that opened it (weakly held), the group the versions
- * go into, and the labels the details fill. The widgets are held, so an
- * answer that arrives after the dialog is closed finds them still alive
- * and fills them without the page; the page itself is only read while it
- * is there. */
+ * read: the page that opened it (weakly held), the widgets the details
+ * and the versions fill, and the name the plan is titled with. The
+ * widgets are held, so an answer that arrives after the dialog is closed
+ * finds them still alive and fills them without the page; the page
+ * itself is only read while it is there. */
 typedef struct {
-  AmlContentPage *page;       /* weak */
-  AdwPreferencesGroup *group; /* owned */
-  GtkWidget *body;            /* owned */
-  GtkWidget *meta;            /* owned */
-  char *project_id;           /* owned */
+  AmlContentPage *page; /* weak */
+  GtkWidget *body;      /* owned: the box the Markdown goes in */
+  GtkWidget *meta;      /* owned */
+  GtkWidget *dropdown;  /* owned: the versions to choose from */
+  GtkWidget *download;  /* owned: the button that starts the install */
+  char *project_id;     /* owned */
 } DetailsWatch;
 
 static DetailsWatch *
-details_watch_new (AmlContentPage *self, AdwPreferencesGroup *group,
-                   GtkWidget *body, GtkWidget *meta, const char *project_id)
+details_watch_new (AmlContentPage *self, GtkWidget *body, GtkWidget *meta,
+                   GtkWidget *dropdown, GtkWidget *download,
+                   const char *project_id)
 {
   DetailsWatch *watch = g_new0 (DetailsWatch, 1);
 
   watch->page = self;
   g_object_add_weak_pointer (G_OBJECT (self), (gpointer *) &watch->page);
-  watch->group = g_object_ref (group);
   watch->body = g_object_ref (body);
   watch->meta = g_object_ref (meta);
+  watch->dropdown = g_object_ref (dropdown);
+  watch->download = g_object_ref (download);
   watch->project_id = g_strdup (project_id);
 
   return watch;
@@ -228,9 +231,10 @@ details_watch_free (DetailsWatch *watch)
     g_object_remove_weak_pointer (G_OBJECT (watch->page),
                                   (gpointer *) &watch->page);
 
-  g_clear_object (&watch->group);
   g_clear_object (&watch->body);
   g_clear_object (&watch->meta);
+  g_clear_object (&watch->dropdown);
+  g_clear_object (&watch->download);
   g_free (watch->project_id);
   g_free (watch);
 }
@@ -272,6 +276,21 @@ show_toast (AmlContentPage *self, const char *message)
   /* Messages come from GError: plain text, never markup. */
   adw_toast_set_use_markup (toast, FALSE);
   adw_toast_overlay_add_toast (ADW_TOAST_OVERLAY (self->toasts), toast);
+}
+
+/* Words that are not Markdown and must read exactly as they are: an
+ * error, or a description with no markup of its own. */
+static GtkWidget *
+plain_label (const char *text)
+{
+  GtkWidget *label = gtk_label_new (text != NULL ? text : "");
+
+  gtk_label_set_wrap (GTK_LABEL (label), TRUE);
+  gtk_label_set_wrap_mode (GTK_LABEL (label), PANGO_WRAP_WORD_CHAR);
+  gtk_label_set_xalign (GTK_LABEL (label), 0);
+  gtk_label_set_selectable (GTK_LABEL (label), TRUE);
+
+  return label;
 }
 
 static void
@@ -677,6 +696,7 @@ typedef struct {
   char *sha1;
   char *label;
   char *replaces;
+  gboolean required; /* a dependency of what was asked for, not it */
 } InstallFile;
 
 static void
@@ -954,45 +974,35 @@ plan_free (PlanRun *plan)
   g_free (plan);
 }
 
-static gboolean
-plan_has_conflicts (PlanRun *plan)
-{
-  if (plan->version == NULL || plan->version->dependencies == NULL)
-    return FALSE;
-
-  for (guint i = 0; i < plan->version->dependencies->len; i++)
-    {
-      AmlModrinthDependency *dependency =
-        g_ptr_array_index (plan->version->dependencies, i);
-
-      if (dependency->type == AML_DEPENDENCY_INCOMPATIBLE)
-        return TRUE;
-    }
-
-  return FALSE;
-}
-
-/* What the user is asked to confirm: every file that will be written,
- * with any conflict said in as many words. */
+/* What the user is asked to confirm: the mods the install also needs,
+ * one per line, and any conflict said in as many words. NULL when there
+ * is nothing beside the file itself to say, which is the common case. */
 static char *
 plan_text (PlanRun *plan)
 {
-  g_autoptr (GPtrArray) lines = g_ptr_array_new_with_free_func (g_free);
-  g_autoptr (GPtrArray) notes = g_ptr_array_new_with_free_func (g_free);
-  g_autofree char *files_text = NULL;
-  const char *version = plan->version->version_number[0] != '\0'
-                          ? plan->version->version_number
-                          : plan->version->name;
-
-  g_ptr_array_add (lines, g_strdup_printf ("%s %s", plan->title, version));
+  g_autoptr (GString) text = g_string_new (NULL);
+  gboolean listed = FALSE;
 
   for (guint i = 0; i < plan->files->len; i++)
-    g_ptr_array_add (
-        lines, g_strdup (((InstallFile *) g_ptr_array_index (plan->files, i))
-                             ->label));
+    {
+      InstallFile *file = g_ptr_array_index (plan->files, i);
+
+      if (!file->required)
+        continue;
+
+      if (!listed)
+        {
+          g_string_append (text, "Required Mods\n");
+          listed = TRUE;
+        }
+
+      g_string_append_printf (text, "%s\n", file->label);
+    }
 
   if (plan->version->dependencies != NULL)
     {
+      g_autoptr (GString) notes = g_string_new (NULL);
+
       for (guint i = 0; i < plan->version->dependencies->len; i++)
         {
           AmlModrinthDependency *dependency =
@@ -1001,30 +1011,30 @@ plan_text (PlanRun *plan)
           if (dependency->type != AML_DEPENDENCY_INCOMPATIBLE)
             continue;
 
-          g_ptr_array_add (
+          g_string_append_printf (
               notes,
-              g_strdup_printf (
-                  "It does not run with %s, which this instance already has.",
-                  dependency->project_id != NULL ? dependency->project_id
-                                                  : "another file"));
+              "It does not run with %s, which this instance already has.\n",
+              dependency->project_id != NULL ? dependency->project_id
+                                              : "another file");
+        }
+
+      if (notes->len > 0)
+        {
+          if (text->len > 0)
+            g_string_append_c (text, '\n');
+
+          g_string_append (text, "Conflicts\n");
+          g_string_append (text, notes->str);
         }
     }
 
-  /* GLib's g_strjoinv wants a NULL-terminated char**; GPtrArray's pdata
-   * is not one, so the sentinel is added explicitly. */
-  g_ptr_array_add (lines, NULL);
-  files_text = g_strjoinv ("\n", (char **) lines->pdata);
+  while (text->len > 0 && text->str[text->len - 1] == '\n')
+    g_string_truncate (text, text->len - 1);
 
-  if (notes->len == 0)
-    return g_steal_pointer (&files_text);
+  if (text->len == 0)
+    return NULL;
 
-  {
-    g_ptr_array_add (notes, NULL);
-    g_autofree char *notes_text =
-      g_strjoinv ("\n", (char **) notes->pdata);
-
-    return g_strdup_printf ("%s\n\n%s", files_text, notes_text);
-  }
+  return g_string_free (g_steal_pointer (&text), FALSE);
 }
 
 static void
@@ -1072,9 +1082,12 @@ show_plan (AmlContentPage *self, PlanRun *plan)
     }
 
   {
-    g_autofree char *heading = g_strdup_printf (
-        "%s \"%s\"?", plan->replaces != NULL ? "Update" : "Install",
-        plan->title);
+    const char *action = plan->replaces != NULL ? "Update" : "Install";
+    /* The name Modrinth writes already holds the version: "Xaero's
+       Minimap 26.6.0". */
+    const char *title = plan->title != NULL ? plan->title : "the file";
+    g_autofree char *heading =
+      g_strdup_printf ("%s \"%s\"", action, title);
     g_autofree char *body = plan_text (plan);
     AdwAlertDialog *alert =
       ADW_ALERT_DIALOG (adw_alert_dialog_new (heading, body));
@@ -1082,9 +1095,7 @@ show_plan (AmlContentPage *self, PlanRun *plan)
     adw_alert_dialog_set_heading_use_markup (alert, FALSE);
     adw_alert_dialog_set_body_use_markup (alert, FALSE);
     adw_alert_dialog_add_response (alert, "cancel", "Cancel");
-    adw_alert_dialog_add_response (
-        alert, "install",
-        plan_has_conflicts (plan) ? "Install Anyway" : "Install");
+    adw_alert_dialog_add_response (alert, "install", "Confirm");
     adw_alert_dialog_set_response_appearance (alert, "install",
                                               ADW_RESPONSE_SUGGESTED);
     adw_alert_dialog_set_default_response (alert, "cancel");
@@ -1169,7 +1180,12 @@ plan_versions_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   file = install_file_of (version, NULL, FALSE);
 
   if (file != NULL)
-    g_ptr_array_add (plan->files, file);
+    {
+      /* This one is required by what was asked for, which is what the
+         confirmation lists apart from the file itself. */
+      file->required = TRUE;
+      g_ptr_array_add (plan->files, file);
+    }
 
   if (!plan_take (plan, version))
     {
@@ -2001,7 +2017,6 @@ on_refresh_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
  * Browse
  * ---------------------------------------------------------- */
 
-static void on_install_clicked (GtkButton *button, gpointer user_data);
 static void on_result_activated (AdwActionRow *row, gpointer user_data);
 static void on_category_toggled (GtkCheckButton *button, gpointer user_data);
 static void on_scroll_changed (GtkAdjustment *adjustment, gpointer user_data);
@@ -2216,8 +2231,6 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
       GtkWidget *row = adw_action_row_new ();
       GtkWidget *icon = aml_icon_widget_new (
           aml_content_type_icon (self->type));
-      GtkWidget *install = gtk_button_new_from_icon_name (
-          "folder-download-symbolic");
 
       /* A project already listed is not listed twice: the same answer can
        * come back for two pages that overlap. */
@@ -2260,36 +2273,20 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
       gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
       start_row_icon (icon, project->icon_url);
 
-      /* The button is only the download icon, centered on the row: the
-         label is the tooltip and the accessible name. */
-      gtk_widget_add_css_class (install, "suggested-action");
-      gtk_widget_set_valign (install, GTK_ALIGN_CENTER);
-      gtk_widget_set_halign (install, GTK_ALIGN_CENTER);
-      gtk_widget_set_tooltip_text (install, "Install");
-      gtk_accessible_update_property (GTK_ACCESSIBLE (install),
-                                      GTK_ACCESSIBLE_PROPERTY_LABEL,
-                                      "Install", -1);
-
       /* The rows point into the list the page owns, so the projects
        * live exactly as long as the rows that show them. */
       g_ptr_array_add (self->results, aml_modrinth_project_copy (project));
       g_object_set_data (G_OBJECT (row), "aml-project",
                          g_ptr_array_index (self->results, shown));
-      g_object_set_data (G_OBJECT (install), "aml-project",
-                         g_ptr_array_index (self->results, shown));
 
       adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
-      adw_action_row_add_suffix (ADW_ACTION_ROW (row), install);
 
-      /* The whole row opens the project, and so does its download
-       * button: the version is chosen on the page. An AdwActionRow is
-       * not activatable by default, so the row itself is made one: a
-       * click on it, anywhere but the button, activates the row. */
+      /* The whole row opens the project, where the version is chosen.
+       * An AdwActionRow is not activatable by default, so the row
+       * itself is made one: a click on it activates the row. */
       gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
       g_signal_connect (row, "activated", G_CALLBACK (on_result_activated),
                         self);
-      g_signal_connect (install, "clicked",
-                        G_CALLBACK (on_install_clicked), self);
 
       adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->results_group),
                                  row);
@@ -2689,46 +2686,90 @@ on_category_toggled (GtkCheckButton *button, gpointer user_data)
   run_search (self, FALSE);
 }
 
-static void
-on_install_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
-{
-  AmlContentPage *self = user_data;
-  AmlModrinthProject *project =
-    g_object_get_data (G_OBJECT (button), "aml-project");
-
-  if (project == NULL)
-    return;
-
-  /* Choosing one is part of installing, so the button opens the page
-     that lists the versions rather than taking the newest unseen. */
-  open_project_page (self, project);
-}
-
 /* ---------------------------------------------------------- *
  * The page of one project
  * ---------------------------------------------------------- */
 
+/* Empties a box, so what a dialog shows can be built again. */
 static void
-on_version_install_clicked (GtkButton *button,
-                            gpointer user_data G_GNUC_UNUSED)
+clear_box (GtkWidget *box)
 {
-  AmlContentPage *self = g_object_get_data (G_OBJECT (button), "aml-page");
-  AmlModrinthVersion *version =
-    g_object_get_data (G_OBJECT (button), "aml-version");
+  GtkWidget *child = NULL;
+
+  while ((child = gtk_widget_get_first_child (box)) != NULL)
+    gtk_box_remove (GTK_BOX (box), child);
+}
+
+/* What the download button would take: the version the dropdown shows,
+ * or NULL when none is chosen yet. */
+static AmlModrinthVersion *
+selected_version (GtkWidget *dropdown, GPtrArray *versions)
+{
+  guint index = gtk_drop_down_get_selected (GTK_DROP_DOWN (dropdown));
+
+  if (index == GTK_INVALID_LIST_POSITION || versions == NULL ||
+      index >= versions->len)
+    return NULL;
+
+  return g_ptr_array_index (versions, index);
+}
+
+/* What a version is called: the name Modrinth writes, which already
+ * holds the version itself. */
+static const char *
+version_name_of (AmlModrinthVersion *version)
+{
+  if (version->name != NULL && *version->name != '\0')
+    return version->name;
+
+  if (version->version_number != NULL && *version->version_number != '\0')
+    return version->version_number;
+
+  return version->version_id != NULL ? version->version_id : "the file";
+}
+
+/* The one button under the versions: it installs what the dropdown
+ * shows, and the dialog it was in has done its work. */
+static void
+on_version_download_clicked (GtkButton *button, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+  GtkWidget *dropdown = g_object_get_data (G_OBJECT (button), "aml-dropdown");
+  GPtrArray *versions = g_object_get_data (G_OBJECT (button), "aml-versions");
+  AmlModrinthVersion *version = NULL;
   GtkWidget *dialog = gtk_widget_get_ancestor (GTK_WIDGET (button),
                                                ADW_TYPE_DIALOG);
 
-  if (self == NULL || version == NULL)
+  if (self == NULL || dropdown == NULL || versions == NULL)
     return;
 
-  /* The list has done its work once a version is taken from it; the
-     plan that follows is shown over the page, not over the list. */
+  version = selected_version (dropdown, versions);
+
+  if (version == NULL)
+    return;
+
+  /* The plan that follows is shown over the page, not over the list. */
   if (dialog != NULL)
     adw_dialog_close (ADW_DIALOG (dialog));
 
   set_busy (self, TRUE);
-  start_plan (self, aml_modrinth_version_copy (version), version->name, NULL,
-              FALSE);
+  start_plan (self, aml_modrinth_version_copy (version),
+              version_name_of (version), NULL, FALSE);
+}
+
+/* What a version reads as in the dropdown: its name and the day it was
+ * published, so two versions of one project can be told apart. */
+static char *
+version_label (AmlModrinthVersion *version)
+{
+  if (version->date_published != NULL && *version->date_published != '\0')
+    {
+      g_autofree char *when = g_strndup (version->date_published, 10);
+
+      return g_strdup_printf ("%s  ·  %s", version_name_of (version), when);
+    }
+
+  return g_strdup (version_name_of (version));
 }
 
 static void
@@ -2762,43 +2803,33 @@ on_detail_versions_ready (GObject *source G_GNUC_UNUSED,
       return;
     }
 
-  for (guint i = 0; i < versions->len; i++)
-    {
-      AmlModrinthVersion *version = g_ptr_array_index (versions, i);
-      GtkWidget *row = adw_action_row_new ();
-      GtkWidget *button = gtk_button_new_with_label ("Install");
-      g_autofree char *subtitle = NULL;
+  {
+    GtkStringList *labels = gtk_string_list_new (NULL);
 
-      /* A name and a description are text, not markup: an "&" in one is
-         an "&", so markup is turned off before anything is put in. */
-      adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
-      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
-                                     version->name);
-      /* The words a user reads under a version: what it is called, when
-         it was published and how often it was taken. */
-      subtitle = g_strdup_printf (
-          "%s  ·  %s  ·  %" G_GUINT64_FORMAT " downloads",
-          version->version_number[0] != '\0' ? version->version_number
-                                             : version->version_id,
-          version->date_published, version->downloads);
-      adw_action_row_set_subtitle (ADW_ACTION_ROW (row), subtitle);
+    for (guint i = 0; i < versions->len; i++)
+      {
+        g_autofree char *label =
+          version_label (g_ptr_array_index (versions, i));
 
-      gtk_widget_add_css_class (button, "suggested-action");
-      gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
-      g_object_set_data (G_OBJECT (button), "aml-version",
-                         aml_modrinth_version_copy (version));
-      g_object_set_data (G_OBJECT (button), "aml-page", self);
-      g_signal_connect (button, "clicked",
-                        G_CALLBACK (on_version_install_clicked), self);
-      adw_action_row_add_suffix (ADW_ACTION_ROW (row), button);
-      adw_action_row_set_activatable_widget (ADW_ACTION_ROW (row), button);
+        gtk_string_list_append (labels, label);
+      }
 
-      adw_preferences_group_add (watch->group, row);
-      self->detail_rows = g_list_append (self->detail_rows, row);
-    }
+    gtk_drop_down_set_model (GTK_DROP_DOWN (watch->dropdown),
+                             G_LIST_MODEL (labels));
+    g_object_unref (labels);
+  }
 
-  /* The list was hidden while it had nothing in it. */
-  gtk_widget_set_visible (GTK_WIDGET (watch->group), versions->len > 0);
+  /* The newest version is what a user most often wants, so it is what
+     the dropdown shows from the start. */
+  gtk_drop_down_set_selected (GTK_DROP_DOWN (watch->dropdown), 0);
+  gtk_widget_set_sensitive (watch->download, versions->len > 0);
+
+  /* The button owns the versions from here: the watch is about to go. */
+  g_object_set_data_full (G_OBJECT (watch->download), "aml-versions",
+                          g_steal_pointer (&versions),
+                          (GDestroyNotify) g_ptr_array_unref);
+  g_object_set_data (G_OBJECT (watch->download), "aml-dropdown",
+                     watch->dropdown);
 
   details_watch_free (watch);
 }
@@ -2823,6 +2854,8 @@ on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
+  clear_box (watch->body);
+
   if (details == NULL)
     {
       set_busy (self, FALSE);
@@ -2830,9 +2863,10 @@ on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       /* The reason is shown where the body would have been, on the
          dialog that is already open, and not only in a toast that may be
          behind it. */
-      gtk_label_set_text (GTK_LABEL (watch->body),
-                          error != NULL ? error->message
-                                        : "the project cannot be read");
+      gtk_box_append (GTK_BOX (watch->body),
+                      plain_label (error != NULL
+                                       ? error->message
+                                       : "the project cannot be read"));
 
       show_toast (self, error != NULL ? error->message
                                       : "the project cannot be read");
@@ -2840,7 +2874,12 @@ on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
-  gtk_label_set_text (GTK_LABEL (watch->body), details->body);
+  /* The long description is Markdown: headings, links and images are
+     read and shown as widgets rather than as the raw text. */
+  if (details->body != NULL && *details->body != '\0')
+    aml_markdown_render (GTK_BOX (watch->body), details->body);
+  else
+    gtk_box_append (GTK_BOX (watch->body), plain_label (details->description));
 
   /* The dialog of the browser saw the icon and the description too, so
      the installed row of the same project can use them. */
@@ -2868,21 +2907,25 @@ on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                                self->browse, on_detail_versions_ready, watch);
 }
 
-/* The dialog of @project: what it is, and every version of it that fits
- * this instance, each with its own Install button. It is opened both by
- * activating a result row and by its download button, so the version is
- * always chosen by the user and never picked unseen. */
+/* The dialog of @project: what it is, every version of it that fits this
+ * instance, and the one button that installs the version chosen from
+ * them. It is opened by activating a result row, so the version is
+ * always chosen by the user and never picked unseen. The long
+ * description is Markdown and is shown as such. */
 static void
 open_project_page (AmlContentPage *self, AmlModrinthProject *project)
 {
   AdwDialog *dialog = NULL;
+  GtkWidget *content = NULL;
   GtkWidget *scroller = NULL;
   GtkWidget *box = NULL;
   GtkWidget *heading = NULL;
   GtkWidget *title = NULL;
   GtkWidget *meta = NULL;
   GtkWidget *body = NULL;
-  GtkWidget *versions = NULL;
+  GtkWidget *bar = NULL;
+  GtkWidget *dropdown = NULL;
+  GtkWidget *download = NULL;
   g_autofree char *author = NULL;
   g_autofree char *downloads = NULL;
 
@@ -2890,7 +2933,7 @@ open_project_page (AmlContentPage *self, AmlModrinthProject *project)
     return;
 
   scroller = gtk_scrolled_window_new ();
-  box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+  box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 18);
   heading = adw_preferences_group_new ();
 
   title = gtk_label_new (project->title);
@@ -2906,45 +2949,65 @@ open_project_page (AmlContentPage *self, AmlModrinthProject *project)
   gtk_widget_add_css_class (meta, "dim-label");
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), meta);
 
-  body = gtk_label_new (project->description);
-  gtk_label_set_wrap (GTK_LABEL (body), TRUE);
-  gtk_label_set_wrap_mode (GTK_LABEL (body), PANGO_WRAP_WORD_CHAR);
-  gtk_label_set_xalign (GTK_LABEL (body), 0);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), body);
-
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading),
                              gtk_label_new (downloads));
 
-  versions = adw_preferences_group_new ();
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (versions),
-                                   "Compatible versions");
-  gtk_widget_set_visible (versions, FALSE);
+  /* The long description. The short one the search answered with stands
+     in until the long one arrives. */
+  body = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+  gtk_box_append (GTK_BOX (body), plain_label (project->description));
 
   gtk_box_append (GTK_BOX (box), heading);
-  gtk_box_append (GTK_BOX (box), versions);
+  gtk_box_append (GTK_BOX (box), body);
+
   gtk_widget_set_margin_top (box, 12);
   gtk_widget_set_margin_bottom (box, 12);
-  gtk_widget_set_margin_start (box, 12);
-  gtk_widget_set_margin_end (box, 12);
+  gtk_widget_set_margin_start (box, 18);
+  gtk_widget_set_margin_end (box, 18);
 
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller), box);
   gtk_widget_set_vexpand (scroller, TRUE);
 
-  /* The project is a dialog of its own: the instance keeps its header
-     and its pages underneath, and the dialog is named after the
-     project. It is where the version is chosen, so it holds the list of
-     them. */
+  /* The foot of the dialog: every version this instance can take, and
+     the button that installs the one it shows. The newest is what it
+     shows from the start. */
+  dropdown = gtk_drop_down_new (NULL, NULL);
+  gtk_widget_set_hexpand (dropdown, TRUE);
+  gtk_widget_set_valign (dropdown, GTK_ALIGN_CENTER);
+
+  download = gtk_button_new_with_label ("Download");
+  gtk_widget_add_css_class (download, "suggested-action");
+  gtk_widget_set_valign (download, GTK_ALIGN_CENTER);
+  /* Nothing can be installed before the versions have arrived. */
+  gtk_widget_set_sensitive (download, FALSE);
+  g_signal_connect (download, "clicked",
+                    G_CALLBACK (on_version_download_clicked), self);
+
+  bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  gtk_box_append (GTK_BOX (bar), dropdown);
+  gtk_box_append (GTK_BOX (bar), download);
+  gtk_widget_set_margin_top (bar, 12);
+  gtk_widget_set_margin_bottom (bar, 12);
+  gtk_widget_set_margin_start (bar, 12);
+  gtk_widget_set_margin_end (bar, 12);
+
+  content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  gtk_box_append (GTK_BOX (content), scroller);
+  gtk_box_append (GTK_BOX (content),
+                  gtk_separator_new (GTK_ORIENTATION_HORIZONTAL));
+  gtk_box_append (GTK_BOX (content), bar);
+
   dialog = adw_dialog_new ();
   adw_dialog_set_title (dialog, project->title);
-  adw_dialog_set_content_width (dialog, 600);
-  adw_dialog_set_content_height (dialog, 600);
-  adw_dialog_set_child (dialog, scroller);
+  adw_dialog_set_content_width (dialog, 640);
+  adw_dialog_set_content_height (dialog, 640);
+  adw_dialog_set_child (dialog, content);
   adw_dialog_present (dialog, GTK_WIDGET (self));
 
   set_busy (self, TRUE);
   aml_modrinth_details_async (
       project->project_id, self->browse, on_details_ready,
-      details_watch_new (self, ADW_PREFERENCES_GROUP (versions), body, meta,
+      details_watch_new (self, body, meta, dropdown, download,
                          project->project_id));
 }
 
@@ -3453,7 +3516,6 @@ aml_content_page_finalize (GObject *object)
   g_clear_pointer (&self->results, g_ptr_array_unref);
   g_list_free (self->installed_rows);
   g_list_free (self->result_rows);
-  g_list_free (self->detail_rows);
   g_free (self->minecraft_version);
   g_free (self->loader);
   g_free (self->folder);
