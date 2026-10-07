@@ -72,6 +72,7 @@ struct _AmlDownloadModpackDialog
   GtkWidget *name_entry;  /* AdwEntryRow */
   GtkWidget *directory_row;
   GtkWidget *install_button;
+  GtkWidget *details_error; /* inline words when versions fail or are empty */
 
   /* Widgets of the pages that fall on top of the stack. */
   GtkWidget *install_bar;
@@ -127,6 +128,29 @@ static void on_optional_install (GtkButton *, gpointer);
 static void dialog_details_open (AmlDownloadModpackDialog *self);
 static void dialog_start_features (AmlDownloadModpackDialog *self);
 
+/* Points @field at @widget and watches it: when the details page that
+ * holds @widget is destroyed, @field becomes NULL before a request that
+ * is still running can touch it. */
+static void
+details_watch (GtkWidget **field, GtkWidget *widget)
+{
+  if (*field != NULL)
+    g_object_remove_weak_pointer (G_OBJECT (*field), (gpointer *) field);
+
+  *field = widget;
+
+  if (widget != NULL)
+    g_object_add_weak_pointer (G_OBJECT (widget), (gpointer *) field);
+}
+
+static void
+details_forget (AmlDownloadModpackDialog *self)
+{
+  details_watch (&self->version_row, NULL);
+  details_watch (&self->install_button, NULL);
+  details_watch (&self->details_error, NULL);
+}
+
 static void
 dialog_dispose (GObject *object)
 {
@@ -140,6 +164,8 @@ dialog_dispose (GObject *object)
 
   if (self->debounce != 0)
     g_source_remove (self->debounce);
+
+  details_forget (self);
 
   g_clear_object (&self->manager);
   g_clear_object (&self->search);
@@ -312,10 +338,22 @@ modpack_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_autoptr (GError) error = NULL;
   g_autofree char *path = aml_icon_load_finish (result, &error);
 
-  if (path != NULL)
-    aml_icon_widget_set_file (icon, path);
+  if (path != NULL && !aml_icon_widget_set_file (icon, path))
+    g_debug ("the icon for \"%s\" could not be decoded",
+             (const char *) g_object_get_data (G_OBJECT (icon),
+                                               "aml-icon-url"));
 
   g_object_unref (icon);
+}
+
+/* Kicks off one row's icon and remembers the url on the widget, so a
+ * failed decode can name it in the log. */
+static void
+start_modpack_icon (GtkWidget *icon, const char *url)
+{
+  g_object_set_data_full (G_OBJECT (icon), "aml-icon-url", g_strdup (url),
+                          g_free);
+  aml_icon_load_async (url, NULL, modpack_icon_ready, g_object_ref (icon));
 }
 
 /* The rows of a page of results. @append is FALSE for a new search, which
@@ -372,22 +410,26 @@ results_arrived (AmlDownloadModpackDialog *self, AmlModrinthResults *results,
 
           /* The icon, then the name and the description under it: the
              author, the download count, the game version and the loader
-             are what the details page is for. */
-          adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
-                                         project->title);
+             are what the details page is for. Markup off first: the
+             title and the description are plain Modrinth text and may
+             hold an "&". */
           adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row),
                                               FALSE);
+          adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
+                                         project->title);
           adw_action_row_set_subtitle (ADW_ACTION_ROW (row),
                                        project->description);
           adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 2);
 
           gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
-          aml_icon_load_async (project->icon_url, NULL, modpack_icon_ready,
-                               g_object_ref (icon));
+          start_modpack_icon (icon, project->icon_url);
 
           adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
-          adw_action_row_set_activatable_widget (ADW_ACTION_ROW (row),
-                                                 NULL);
+
+          /* An AdwActionRow is not activatable by default, so the row
+             itself is made one: a click anywhere on it opens the
+             details page. */
+          gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
 
           g_ptr_array_add (self->hits,
                            aml_modrinth_project_copy (project));
@@ -885,7 +927,9 @@ build_details_page (AmlDownloadModpackDialog *self)
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (versions_group),
                                    "Version");
 
-  self->version_row = adw_combo_row_new ();
+  details_watch (&self->version_row, adw_combo_row_new ());
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->version_row),
+                                      FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->version_row),
                                  "Pack");
   adw_combo_row_set_use_subtitle (ADW_COMBO_ROW (self->version_row), TRUE);
@@ -911,6 +955,16 @@ build_details_page (AmlDownloadModpackDialog *self)
   }
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (versions_group),
                              self->version_row);
+
+  /* Where a version list that failed to load, or that holds nothing to
+     install, says so: it must not be a disabled button with no reason. */
+  details_watch (&self->details_error, gtk_label_new (NULL));
+  gtk_label_set_wrap (GTK_LABEL (self->details_error), TRUE);
+  gtk_label_set_xalign (GTK_LABEL (self->details_error), 0);
+  gtk_widget_add_css_class (self->details_error, "dim-label");
+  gtk_widget_set_visible (self->details_error, FALSE);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (versions_group),
+                             self->details_error);
 
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (instance_group),
                                    "Instance");
@@ -964,8 +1018,10 @@ build_details_page (AmlDownloadModpackDialog *self)
   GtkWidget *install = gtk_button_new_with_label ("Install");
 
   gtk_widget_add_css_class (install, "suggested-action");
+  /* Nothing can be installed before the versions have arrived. */
+  gtk_widget_set_sensitive (install, FALSE);
 
-  self->install_button = install;
+  details_watch (&self->install_button, install);
 
   gtk_box_append (GTK_BOX (buttons), cancel);
   gtk_box_append (GTK_BOX (buttons), install);
@@ -995,6 +1051,17 @@ build_details_page (AmlDownloadModpackDialog *self)
 /* Get the modpack's list of published versions and show it on the
  * already-pushed details page. */
 static void
+show_details_error (AmlDownloadModpackDialog *self, const char *message)
+{
+  if (self->details_error == NULL)
+    return;
+
+  gtk_label_set_text (GTK_LABEL (self->details_error),
+                      message != NULL ? message : "");
+  gtk_widget_set_visible (self->details_error, message != NULL);
+}
+
+static void
 on_versions_answer (GObject *source G_GNUC_UNUSED,
                     GAsyncResult *result,
                     gpointer user_data)
@@ -1010,13 +1077,7 @@ on_versions_answer (GObject *source G_GNUC_UNUSED,
     {
       if (!g_error_matches (error, AML_DOWNLOAD_ERROR,
                             AML_DOWNLOAD_ERROR_CANCELLED))
-        {
-          adw_status_page_set_title (
-            ADW_STATUS_PAGE (self->results_status), "Could not load versions");
-          adw_status_page_set_description (
-            ADW_STATUS_PAGE (self->results_status), error->message);
-          gtk_widget_set_visible (self->results_status, TRUE);
-        }
+        show_details_error (self, error->message);
 
       operation_done (user_data);
       return;
@@ -1029,10 +1090,7 @@ on_versions_answer (GObject *source G_GNUC_UNUSED,
 
   if (versions == NULL)
     {
-      adw_status_page_set_title (ADW_STATUS_PAGE (self->results_status),
-                                 "Could not load versions");
-      adw_status_page_set_description (
-        ADW_STATUS_PAGE (self->results_status), error->message);
+      show_details_error (self, error->message);
       operation_done (user_data);
       return;
     }
@@ -1041,15 +1099,26 @@ on_versions_answer (GObject *source G_GNUC_UNUSED,
   self->versions = versions;
   versions = NULL;
 
-  {
-    GtkStringList *strings = build_version_strings (self->versions);
+  if (self->version_row != NULL)
+    {
+      GtkStringList *strings = build_version_strings (self->versions);
 
-    adw_combo_row_set_model (ADW_COMBO_ROW (self->version_row),
-                             G_LIST_MODEL (strings));
-    g_object_unref (strings);
-  }
+      adw_combo_row_set_model (ADW_COMBO_ROW (self->version_row),
+                               G_LIST_MODEL (strings));
+      g_object_unref (strings);
+    }
 
-  gtk_widget_set_sensitive (self->install_button, self->versions->len > 0);
+  /* A project that publishes no pack file for this instance is not a
+     failure of the network, but it must still say why the button does
+     nothing. */
+  if (self->versions->len == 0)
+    show_details_error (self,
+                        "This project publishes no pack file AML can "
+                        "install.");
+
+  if (self->install_button != NULL)
+    gtk_widget_set_sensitive (self->install_button, self->versions->len > 0);
+
   operation_done (user_data);
 }
 
@@ -1295,8 +1364,14 @@ static void
 on_install_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   AmlDownloadModpackDialog *self = user_data;
-  const char *name = gtk_editable_get_text (GTK_EDITABLE (self->name_entry));
-  guint selected = adw_combo_row_get_selected (ADW_COMBO_ROW (self->version_row));
+  const char *name = NULL;
+  guint selected = 0;
+
+  if (self->name_entry == NULL || self->version_row == NULL)
+    return;
+
+  name = gtk_editable_get_text (GTK_EDITABLE (self->name_entry));
+  selected = adw_combo_row_get_selected (ADW_COMBO_ROW (self->version_row));
 
   if (self->versions == NULL || selected >= self->versions->len)
     return;
