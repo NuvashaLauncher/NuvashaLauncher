@@ -81,6 +81,46 @@ find_entry_titled (GtkWidget *widget, const char *title)
   return NULL;
 }
 
+static GtkWidget *
+find_tab_view (GtkWidget *widget)
+{
+  for (GtkWidget *child = gtk_widget_get_first_child (widget); child != NULL;
+       child = gtk_widget_get_next_sibling (child))
+    {
+      GtkWidget *found = NULL;
+
+      if (ADW_IS_TAB_VIEW (child))
+        return child;
+
+      found = find_tab_view (child);
+
+      if (found != NULL)
+        return found;
+    }
+
+  return NULL;
+}
+
+static GtkWidget *
+find_tab_bar (GtkWidget *widget)
+{
+  for (GtkWidget *child = gtk_widget_get_first_child (widget); child != NULL;
+       child = gtk_widget_get_next_sibling (child))
+    {
+      GtkWidget *found = NULL;
+
+      if (ADW_IS_TAB_BAR (child))
+        return child;
+
+      found = find_tab_bar (child);
+
+      if (found != NULL)
+        return found;
+    }
+
+  return NULL;
+}
+
 typedef struct {
   GApplication *application;
   GtkWindow *window;
@@ -109,6 +149,14 @@ advance (gpointer user_data)
   switch (run->step++)
     {
     case 0: /* the grid binds its card a little after the window is up */
+      /* The grid is the only tab, so the tab bar has nothing to show. */
+      {
+        GtkWidget *bar = find_tab_bar (GTK_WIDGET (run->window));
+
+        g_assert_nonnull (bar);
+        g_assert_false (gtk_widget_get_visible (bar));
+      }
+
       return G_SOURCE_CONTINUE;
 
     case 1:
@@ -124,6 +172,24 @@ advance (gpointer user_data)
       return G_SOURCE_CONTINUE;
 
     case 2: /* the tab and its page are built */
+      {
+        AdwTabView *tabs = ADW_TAB_VIEW (
+          find_tab_view (GTK_WIDGET (run->window)));
+        AdwTabPage *page = NULL;
+
+        /* The click opens the instance beside the pinned grid tab, the
+           new tab is the one shown, and the bar that holds it is
+           visible, not a tab the user never sees. */
+        g_assert_nonnull (tabs);
+        g_assert_cmpuint (adw_tab_view_get_n_pages (tabs), ==, 2);
+        g_assert_true (gtk_widget_get_visible (
+          find_tab_bar (GTK_WIDGET (run->window))));
+
+        page = adw_tab_view_get_selected_page (tabs);
+        g_assert_nonnull (page);
+        g_assert_cmpstr (adw_tab_page_get_title (page), ==, "Test");
+      }
+
       return G_SOURCE_CONTINUE;
 
     default:
