@@ -2,9 +2,15 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* AmlInstancePage: the page of a single instance. Its header holds a
- * back button and a view switcher over the five pages of the instance:
- * Settings, Resource Packs, Shader Packs, Mods and Logs. */
+/* AmlInstancePage: what one tab of the window shows for a single
+ * instance.
+ *
+ * It is a tab page, not a navigation page: the tab bar of the window
+ * already says which instance is open and closes it, so there is no back
+ * button here and nothing in it takes the user back anywhere.
+ *
+ * Its own top bar holds the view switcher over the five pages of the
+ * instance: Settings, Resource Packs, Shader Packs, Mods and Logs. */
 
 #ifndef AML_INSTANCE_PAGE_H
 #define AML_INSTANCE_PAGE_H
@@ -19,14 +25,17 @@ G_BEGIN_DECLS
 
 #define AML_TYPE_INSTANCE_PAGE (aml_instance_page_get_type ())
 
+/* A box holding the toolbar view of the instance. AdwToolbarView is a
+ * final type and cannot be subclassed, so it is a child here rather than
+ * the parent. */
 G_DECLARE_FINAL_TYPE (AmlInstancePage, aml_instance_page, AML, INSTANCE_PAGE,
-                      AdwNavigationPage)
+                      GtkBox)
 
 /* Builds the page for @instance. @launcher is the launcher of that same
  * instance, which the Logs page follows. The page keeps its own
  * references on @manager, @instance, @settings and @launcher until it is
- * destroyed. Like every widget it starts with a floating reference: push
- * it into an AdwNavigationView, which takes that reference. */
+ * destroyed. Like every widget it starts with a floating reference:
+ * adw_tab_view_append() takes that reference. */
 AmlInstancePage *aml_instance_page_new (AmlInstanceManager *manager,
                                         AmlInstance       *instance,
                                         AmlSettings        *settings,

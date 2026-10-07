@@ -35,9 +35,10 @@ struct _AmlMainWindow
      instance and its page always talk about the same launch. */
   GHashTable *launchers;
 
-  /* The navigation stack: the grid is its first page, the page of an
-   * instance is pushed on top of it. */
-  AdwNavigationView *navigation;
+  /* The tabs: the grid is the first one and cannot be closed, and each
+   * open instance has one of its own beside it. A tab holds the page of
+   * its instance, and closing it is what closes that tab. */
+  AdwTabView *tabs;
 
   /* Switches between the empty state and the instance grid. */
   GtkWidget *stack;
@@ -562,6 +563,141 @@ window_launcher (AmlMainWindow *self, const char *instance_id)
   return launcher;
 }
 
+/* ---------------------------------------------------------- *
+ * The tabs
+ * ---------------------------------------------------------- */
+
+/* The id of the instance a tab is for, taken from the page inside it.
+   A tab of the grid has none. */
+static const char *
+tab_instance_id (AdwTabPage *tab)
+{
+  GtkWidget *child = adw_tab_page_get_child (tab);
+
+  return child != NULL
+           ? g_object_get_data (G_OBJECT (child), "aml-instance-id")
+           : NULL;
+}
+
+/* The tab of @id, or NULL when that instance is not open. */
+static AdwTabPage *
+tab_of_instance (AmlMainWindow *self, const char *id)
+{
+  int n = adw_tab_view_get_n_pages (self->tabs);
+
+  for (int i = 0; i < n; i++)
+    {
+      AdwTabPage *tab = adw_tab_view_get_nth_page (self->tabs, (guint) i);
+      const char *other = tab_instance_id (tab);
+
+      if (other != NULL && g_strcmp0 (other, id) == 0)
+        return tab;
+    }
+
+  return NULL;
+}
+
+/* The tab of an instance says its name, and says it again when the name
+   changes: a tab left saying the old name is a tab the user cannot
+   match to anything. */
+static void
+on_instance_renamed (AmlInstance *instance, GParamSpec *pspec G_GNUC_UNUSED,
+                     gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  const char *id = aml_instance_get_id (instance);
+  AdwTabPage *tab = NULL;
+
+  if (id == NULL)
+    return;
+
+  tab = tab_of_instance (self, id);
+
+  if (tab != NULL)
+    {
+      char *name = NULL;
+
+      g_object_get (instance, "name", &name, NULL);
+      adw_tab_page_set_title (tab, name != NULL ? name : "");
+      g_free (name);
+    }
+}
+
+/* Shows @instance in a tab: the one it already has, selected, or a new
+ * one beside the grid. Asking for an instance that is open again brings
+ * its tab forward rather than opening a second copy of it. */
+static void
+open_instance_tab (AmlMainWindow *self, AmlInstance *instance)
+{
+  const char *id = aml_instance_get_id (instance);
+  AdwTabPage *tab = NULL;
+  GtkWidget *page = NULL;
+  char *name = NULL;
+
+  if (id == NULL)
+    return;
+
+  tab = tab_of_instance (self, id);
+
+  if (tab != NULL)
+    {
+      adw_tab_view_set_selected_page (self->tabs, tab);
+      return;
+    }
+
+  page = GTK_WIDGET (
+    aml_instance_page_new (self->manager, instance, self->settings,
+                           window_launcher (self, id)));
+
+  /* The id travels with the page, which is what makes it findable again
+     without the window keeping a table of its own. */
+  g_object_set_data_full (G_OBJECT (page), "aml-instance-id", g_strdup (id),
+                          g_free);
+
+  g_object_get (instance, "name", &name, NULL);
+
+  /* Not pinned, so the tab bar gives it a close button of its own. */
+  tab = adw_tab_view_append (self->tabs, page);
+  adw_tab_page_set_title (tab, name != NULL ? name : "");
+  g_free (name);
+
+  /* The connection goes with the tab: a page that goes away first leaves
+     nothing to call back into. */
+  g_signal_connect_object (instance, "notify::name",
+                           G_CALLBACK (on_instance_renamed), self, 0);
+}
+
+/* Closes the tab of an instance that is no longer in the list, which is
+ * what deleting one does. A game that is still running keeps running:
+   * its launcher is held by the table, not by the page. */
+static void
+close_tabs_of_removed_instances (AmlMainWindow *self)
+{
+  for (;;)
+    {
+      AdwTabPage *doomed = NULL;
+      int n = adw_tab_view_get_n_pages (self->tabs);
+
+      for (int i = 0; i < n; i++)
+        {
+          AdwTabPage *tab = adw_tab_view_get_nth_page (self->tabs, (guint) i);
+          const char *id = tab_instance_id (tab);
+
+          if (id != NULL &&
+              aml_instance_manager_get_by_id (self->manager, id) == NULL)
+            {
+              doomed = tab;
+              break;
+            }
+        }
+
+      if (doomed == NULL)
+        return;
+
+      adw_tab_view_close_page (self->tabs, doomed);
+    }
+}
+
 /* Opens the page of the instance this card shows. The id is put on the
  * button when the card is bound, so a card that lost its instance
  * simply does nothing. */
@@ -580,11 +716,7 @@ on_card_clicked (GtkButton *button, gpointer user_data)
   if (instance == NULL)
     return;
 
-  adw_navigation_view_push (
-    self->navigation,
-    ADW_NAVIGATION_PAGE (
-      aml_instance_page_new (self->manager, instance, self->settings,
-                             window_launcher (self, id))));
+  open_instance_tab (self, instance);
 }
 
 /* Play while the instance is idle, Stop while it is busy, and the state
@@ -845,6 +977,11 @@ on_instances_changed (AmlMainWindow *self,
 {
   update_visible_page (self);
   drop_launchers_of_removed_instances (self);
+
+  /* An instance that is gone has nothing to show, so its tab goes with
+     it. This is how deleting an instance closes its tab, whichever screen
+     the delete was asked from. */
+  close_tabs_of_removed_instances (self);
 }
 
 static void
@@ -914,23 +1051,36 @@ aml_main_window_init (AmlMainWindow *self)
   gtk_widget_set_hexpand (self->stack, TRUE);
   gtk_widget_set_vexpand (self->stack, TRUE);
 
+  /* A tab view brings its own tab bar, and that bar is what says what is
+   * open. It sits in the window toolbar below the header, and the grid is
+   * its pinned first tab: the only tab the user cannot close, so there is
+   * always somewhere to go without closing the window.
+   *
+   * The tab view is the content of the window toolbar and not a page of
+   * itself: a page holds the grid and the instance pages, never the bar
+   * they are shown under. */
+  self->tabs = adw_tab_view_new ();
+  gtk_widget_set_vexpand (GTK_WIDGET (self->tabs), TRUE);
+  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar),
+                                GTK_WIDGET (self->tabs));
+
+  {
+    AdwTabPage *grid_tab =
+      adw_tab_view_append_pinned (self->tabs, self->stack);
+
+    adw_tab_page_set_title (grid_tab, "AML");
+    adw_tab_page_set_icon (grid_tab,
+                           g_themed_icon_new ("applications-games-symbolic"));
+  }
+
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
-  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), self->stack);
-
-  self->navigation = ADW_NAVIGATION_VIEW (adw_navigation_view_new ());
-
-  /* The grid is the first page and stays in the view for good; the
-   * page of an instance is pushed on top of it and dropped again. */
-  adw_navigation_view_add (self->navigation,
-                           adw_navigation_page_new_with_tag (toolbar, "AML",
-                                                             "home"));
 
   /* A toast is how the window says something the user did not ask for: a
    game that crashed, an operation that failed. Without it the only way
-   to find out is to open the logs. */
+   * to find out is to open the logs. */
   self->toasts = adw_toast_overlay_new ();
   adw_toast_overlay_set_child (ADW_TOAST_OVERLAY (self->toasts),
-                               GTK_WIDGET (self->navigation));
+                               GTK_WIDGET (toolbar));
 
   adw_application_window_set_content (ADW_APPLICATION_WINDOW (self),
                                       GTK_WIDGET (self->toasts));
