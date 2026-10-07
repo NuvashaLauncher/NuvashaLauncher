@@ -2,15 +2,15 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* Tests for the account a launch runs as: what happens when there is
+/* Tests for the account a launch runs as: playing offline when there is
  * none, and what happens when the one there is cannot be signed in
  * again.
  *
- * Nothing here waits for a service and nothing needs a display: both
- * refusals happen before anything is downloaded, and the second one
- * happens before anything is even asked for, because an account with no
- * refresh token has nothing to trade. The one request that does go out is
- * the manifest of a launch that is stopped again at once. */
+ * Nothing here waits for a service and nothing needs a display: the
+ * sign-in refusal happens before anything is asked for, because an
+ * account with no refresh token has nothing to trade, and every launch
+ * that gets past its gate is stopped again at once. The one request that
+ * does go out is the manifest of such a launch. */
 
 #include "aml-launcher.h"
 
@@ -155,11 +155,11 @@ microsoft_account (gboolean with_refresh_token)
  * No account at all
  * ---------------------------------------------------------- */
 
-/* A launch with nobody to play as says so and stops there. It does not
-   go out and download half of Minecraft for a game that cannot start,
-   and it does not fall back to a name nobody chose. */
+/* A launch with nobody to play as still starts: the game plays offline
+   as Player, the name a fresh Minecraft falls back to. The launch is
+   stopped again at once, before the manifest request it just made. */
 static void
-test_no_account_is_refused (void)
+test_no_account_plays_offline (void)
 {
   g_autoptr (AmlInstance) instance = new_instance ();
   g_autoptr (AmlAccounts) accounts = new_store ("no-accounts.json");
@@ -170,24 +170,29 @@ test_no_account_is_refused (void)
 
   aml_launcher_start (launcher);
 
-  g_assert_cmpint (aml_launcher_get_state (launcher), ==, AML_LAUNCH_FAILED);
-  g_assert_nonnull (aml_launcher_get_state_detail (launcher));
-  assert_log_has (launcher, "no account to play as");
-  assert_log_has (launcher, "add one");
+  /* Preparing means the gate let it through: a launch that stopped at an
+     account would be Failed before this. */
+  g_assert_cmpint (aml_launcher_get_state (launcher), ==, AML_LAUNCH_PREPARING);
+  assert_log_lacks (launcher, "no account to play as");
+  assert_log_has (launcher, "preparing Minecraft 1.20.1");
 
-  /* A launcher without any accounts at all says the same thing rather
-     than reading a store that is not there. */
+  aml_launcher_stop (launcher);
+
+  /* A launcher without any accounts at all behaves the same rather than
+     refusing to read a store that is not there. */
   {
     g_autoptr (AmlLauncher) bare = aml_launcher_new (instance, NULL, NULL);
 
     g_assert_null (aml_launcher_get_accounts (bare));
 
     aml_launcher_start (bare);
-    g_assert_cmpint (aml_launcher_get_state (bare), ==, AML_LAUNCH_FAILED);
-    assert_log_has (bare, "no account to play as");
+    g_assert_cmpint (aml_launcher_get_state (bare), ==, AML_LAUNCH_PREPARING);
+    assert_log_lacks (bare, "no account to play as");
+
+    aml_launcher_stop (bare);
   }
 
-  g_print ("ok - a launch with no account says to add one\n");
+  g_print ("ok - a launch with no account plays offline as Player\n");
 }
 
 /* ---------------------------------------------------------- *
@@ -324,7 +329,7 @@ main (void)
 
   root = directory;
 
-  test_no_account_is_refused ();
+  test_no_account_plays_offline ();
   test_a_dead_token_asks_for_a_sign_in ();
   test_a_ready_account_gets_past_the_gate ();
   test_the_state_has_a_name ();
