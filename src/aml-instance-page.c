@@ -26,7 +26,7 @@
 
 struct _AmlInstancePage
 {
-  AdwNavigationPage parent_instance;
+  GtkBox parent_instance;
 
   AmlInstanceManager *manager;
   AmlInstance *instance;
@@ -63,7 +63,7 @@ struct _AmlInstancePage
 };
 
 G_DEFINE_FINAL_TYPE (AmlInstancePage, aml_instance_page,
-                     ADW_TYPE_NAVIGATION_PAGE)
+                     GTK_TYPE_BOX)
 
 /* ---------------------------------------------------------- *
  * Helpers
@@ -163,7 +163,9 @@ on_name_apply (AdwEntryRow *row, gpointer user_data)
   g_autofree char *renamed = instance_string (self->instance, "name");
 
   gtk_editable_set_text (GTK_EDITABLE (row), renamed);
-  adw_navigation_page_set_title (ADW_NAVIGATION_PAGE (self), renamed);
+
+  /* The tab follows the name: the window watches the instance for this,
+     because the tab is the window's and not the page's. */
   refresh_in_grid (self);
 }
 
@@ -835,15 +837,9 @@ on_delete_ready (GObject *source, GAsyncResult *result, gpointer user_data)
       return;
     }
 
-  GtkWidget *view =
-    gtk_widget_get_ancestor (GTK_WIDGET (self), ADW_TYPE_NAVIGATION_VIEW);
-
-  /* Only go back if this page is the one on top; the user may have
-   * left it while the directory was being removed. */
-  if (view != NULL &&
-      adw_navigation_view_get_visible_page (ADW_NAVIGATION_VIEW (view)) ==
-      ADW_NAVIGATION_PAGE (self))
-    adw_navigation_view_pop (ADW_NAVIGATION_VIEW (view));
+  /* Nothing more to do here: the instance left the list, and the window
+     closes the tab of an instance that is no longer in it. Asking this
+     page to close itself would mean two places deciding the same thing. */
 
   g_object_unref (self);
 }
@@ -1178,8 +1174,9 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
     ADW_VIEW_STACK (stack), GTK_WIDGET (aml_logs_page_new (launcher)),
     "logs", "Logs", "text-x-generic-symbolic");
 
-  /* The header holds only this switcher: AdwHeaderBar adds the back
-   * button and the window controls by itself. */
+  /* The header holds only this switcher. There is no back button here:
+   the tab bar of the window is what says which instance is open, and
+   closing that tab is what leaves it. */
   adw_view_switcher_set_policy (ADW_VIEW_SWITCHER (switcher),
                                 ADW_VIEW_SWITCHER_POLICY_WIDE);
   adw_view_switcher_set_stack (ADW_VIEW_SWITCHER (switcher),
@@ -1189,15 +1186,18 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
   self->toast_overlay = adw_toast_overlay_new ();
   adw_toast_overlay_set_child (ADW_TOAST_OVERLAY (self->toast_overlay), stack);
 
+  gtk_widget_set_vexpand (toolbar, TRUE);
+  gtk_widget_set_hexpand (toolbar, TRUE);
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
   adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar),
                                 self->toast_overlay);
 
-  /* The title is for the screen reader and for the tooltip of a back
-   * button pushed above this page; the header itself shows the view
-   * switcher, never the instance name. */
-  adw_navigation_page_set_child (ADW_NAVIGATION_PAGE (self), toolbar);
-  adw_navigation_page_set_title (ADW_NAVIGATION_PAGE (self), name);
+  /* The tab holds this box, and the box holds the toolbar view of the
+     instance: there is no navigation page and no back button between the
+     tab bar and the five pages of the instance. */
+  gtk_box_append (GTK_BOX (self), toolbar);
+  gtk_accessible_update_property (GTK_ACCESSIBLE (self),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL, name, -1);
 
   return self;
 }
