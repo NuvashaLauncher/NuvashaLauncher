@@ -49,13 +49,21 @@ struct _AmlDownloadModpackDialog
   /* Browse page widgets. */
   GtkWidget *search_entry;
   GtkWidget *results_status;
+  GtkWidget *results_stack;   /* one state at a time: loading, results,
+                                 empty or error */
   GtkWidget *results_group;
   GtkWidget *spinner;
-  GtkWidget *previous;
-  GtkWidget *next;
-  GtkWidget *page_label;
+  GtkWidget *loading_more;    /* spinner row at the bottom of the list */
+  GtkWidget *retry_row;       /* inline retry row when a page fails */
+  GtkWidget *retry_label;
+  GtkWidget *more_button;     /* asks for the failed page again */
+  GtkWidget *error_status;    /* the status page of the error state */
   guint offset;
   guint64 total;
+  gboolean loading_page;      /* a page is on its way */
+  gboolean append;            /* the page being fetched follows the list */
+  gboolean searched;          /* the first search has been asked for */
+  GHashTable *seen_ids;       /* project id -> NULL, no duplicate rows */
 
   /* The details of a pack that comes and goes: versions of it. */
   GPtrArray *versions; /* AmlModrinthVersion* of the details page */
@@ -93,7 +101,7 @@ struct _AmlDownloadModpackDialog
 G_DEFINE_FINAL_TYPE (AmlDownloadModpackDialog, aml_download_modpack_dialog,
                      ADW_TYPE_DIALOG)
 
-static void run_search (AmlDownloadModpackDialog *self);
+static void run_search (AmlDownloadModpackDialog *self, gboolean append);
 static void set_busy (AmlDownloadModpackDialog *self, gboolean busy);
 static void on_search_done (GObject *, GAsyncResult *, gpointer);
 static void build_browse_page (AmlDownloadModpackDialog *self);
@@ -143,6 +151,7 @@ dialog_dispose (GObject *object)
   g_clear_pointer (&self->hits, g_ptr_array_unref);
   g_clear_pointer (&self->opt_switch_rows, g_ptr_array_unref);
   g_clear_pointer (&self->opt_files, g_ptr_array_unref);
+  g_clear_pointer (&self->seen_ids, g_hash_table_unref);
   g_free (self->pack_path);
   g_free (self->directory);
   g_free (self->instance_name);
@@ -169,6 +178,8 @@ aml_download_modpack_dialog_init (AmlDownloadModpackDialog *self)
   self->rows = NULL;
   self->hits = NULL;
   self->versions = NULL;
+  self->seen_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
+                                          NULL);
 
   adw_dialog_set_title (ADW_DIALOG (self), "Download Modpack");
   aml_dialog_set_standard_size (ADW_DIALOG (self));
@@ -279,7 +290,7 @@ on_search_timeout (gpointer user_data)
   AmlDownloadModpackDialog *self = user_data;
 
   self->debounce = 0;
-  run_search (self);
+  run_search (self, FALSE);
 
   return G_SOURCE_REMOVE;
 }
@@ -295,24 +306,44 @@ on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
   self->debounce = g_timeout_add (SEARCH_DELAY_MS, on_search_timeout, self);
 }
 
+/* The list is scrolled to its end: ask for the next page. Only one page
+ * is ever on its way and there is nothing to ask for once the total is
+ * reached.
+ *
+ * GTK4 has no edge-reached signal on GtkScrolledWindow, so the adjustment
+ * is watched instead. */
 static void
-on_previous (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+on_scroll_changed (GtkAdjustment *adjustment, gpointer user_data)
 {
   AmlDownloadModpackDialog *self = user_data;
+  gdouble at_end;
 
-  if (self->offset >= RESULTS_PER_PAGE)
-    self->offset -= RESULTS_PER_PAGE;
+  if (self->loading_page)
+    return;
 
-  run_search (self);
-}
+  if ((guint64) self->offset >= self->total)
+    return;
 
-static void
-on_next (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
-{
-  AmlDownloadModpackDialog *self = user_data;
+  at_end = gtk_adjustment_get_upper (adjustment) -
+           gtk_adjustment_get_page_size (adjustment) -
+           gtk_adjustment_get_step_increment (adjustment);
+
+  if (gtk_adjustment_get_value (adjustment) < at_end)
+    return;
 
   self->offset += RESULTS_PER_PAGE;
-  run_search (self);
+  run_search (self, TRUE);
+}
+
+/* A page that failed can be asked for again from the row that says so. */
+static void
+on_retry_page (AmlDownloadModpackDialog *self)
+{
+  if (self->loading_page)
+    return;
+
+  gtk_widget_set_visible (self->retry_row, FALSE);
+  run_search (self, TRUE);
 }
 
 static void
@@ -348,15 +379,41 @@ result_row_activated (AdwActionRow *row G_GNUC_UNUSED, gpointer user_data)
   dialog_details_open (self);
 }
 
+/* The rows of a page of results. @append is FALSE for a new search, which
+ * starts the list over, and TRUE for the next page, which is added to what
+ * is already there. */
 static void
-results_arrived (AmlDownloadModpackDialog *self, AmlModrinthResults *results)
+results_arrived (AmlDownloadModpackDialog *self, AmlModrinthResults *results,
+                 gboolean append)
 {
-  take_rows_out (&self->rows, ADW_PREFERENCES_GROUP (self->results_group));
-  g_clear_pointer (&self->hits, g_ptr_array_unref);
-  self->hits = g_ptr_array_new_with_free_func (
-      (GDestroyNotify) aml_modrinth_project_free);
+  guint shown = 0;
 
-  self->total = results != NULL ? results->total_hits : 0;
+  if (!append)
+    {
+      take_rows_out (&self->rows, ADW_PREFERENCES_GROUP (self->results_group));
+      g_clear_pointer (&self->hits, g_ptr_array_unref);
+      self->hits = g_ptr_array_new_with_free_func (
+          (GDestroyNotify) aml_modrinth_project_free);
+      self->total = results != NULL ? results->total_hits : 0;
+      g_hash_table_remove_all (self->seen_ids);
+
+      /* A new search starts at the top of the list. */
+      {
+        GtkWidget *scroller =
+          gtk_widget_get_ancestor (self->results_group,
+                                   GTK_TYPE_SCROLLED_WINDOW);
+
+        if (scroller != NULL)
+          {
+            GtkAdjustment *adjustment =
+              gtk_scrolled_window_get_vadjustment (
+                GTK_SCROLLED_WINDOW (scroller));
+
+            gtk_adjustment_set_value (adjustment,
+                                      gtk_adjustment_get_lower (adjustment));
+          }
+      }
+    }
 
   if (results != NULL)
     {
@@ -370,6 +427,13 @@ results_arrived (AmlDownloadModpackDialog *self, AmlModrinthResults *results)
           GtkWidget *count = gtk_label_new (NULL);
           g_autofree char *author = NULL;
           g_autofree char *downloads = NULL;
+
+          /* The same project is never listed twice, however the pages
+             overlap. */
+          if (g_hash_table_contains (self->seen_ids, project->project_id))
+            continue;
+
+          g_hash_table_add (self->seen_ids, g_strdup (project->project_id));
 
           adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
                                          project->title);
@@ -413,32 +477,30 @@ results_arrived (AmlDownloadModpackDialog *self, AmlModrinthResults *results)
                             G_CALLBACK (result_row_activated), self);
           adw_preferences_group_add (
               ADW_PREFERENCES_GROUP (self->results_group), row);
+          shown++;
         }
     }
 
-  {
-    guint shown = results != NULL ? results->projects->len : 0;
-    gboolean empty = shown == 0;
-    g_autofree char *text = NULL;
+  self->offset += shown;
 
-    gtk_widget_set_visible (self->results_status, empty);
-    gtk_widget_set_visible (self->page_label, !empty);
+  /* One state at a time: the list, the empty words, or the error. */
+  if (self->results_group != NULL)
+    {
+      gboolean empty = self->hits == NULL || self->hits->len == 0;
 
-    text = g_strdup_printf ("Page %u · %u shown of %" G_GUINT64_FORMAT,
-                            self->offset / RESULTS_PER_PAGE + 1, shown,
-                            self->total);
-    gtk_label_set_text (GTK_LABEL (self->page_label), text);
+      gtk_stack_set_visible_child_name (
+          GTK_STACK (self->results_stack), empty ? "empty" : "results");
+    }
 
-    gtk_widget_set_sensitive (self->previous, self->offset > 0);
-    gtk_widget_set_sensitive (self->next,
-                              self->offset + shown < self->total);
-  }
+  gtk_widget_set_visible (self->loading_more, FALSE);
+  gtk_widget_set_visible (self->retry_row, FALSE);
 
   set_busy (self, FALSE);
+  self->loading_page = FALSE;
 }
 
 static void
-run_search (AmlDownloadModpackDialog *self)
+run_search (AmlDownloadModpackDialog *self, gboolean append)
 {
   const char *query =
     gtk_editable_get_text (GTK_EDITABLE (self->search_entry));
@@ -458,16 +520,42 @@ run_search (AmlDownloadModpackDialog *self)
       self->debounce = 0;
     }
 
+  if (!append)
+    self->offset = 0;
+
+  self->loading_page = TRUE;
+  self->append = append;
+
   set_busy (self, TRUE);
+
+  /* The first page of a search shows the loading state; a page that is
+     added below what is already there shows a spinner at its end. */
+  if (!append)
+    gtk_stack_set_visible_child_name (GTK_STACK (self->results_stack),
+                                      "loading");
+  else
+    {
+      gtk_widget_set_visible (self->loading_more, TRUE);
+      gtk_widget_set_visible (self->retry_row, FALSE);
+    }
 
   escaped_query =
     g_uri_escape_string (query != NULL ? query : "", NULL, FALSE);
   escaped_facets = g_uri_escape_string ("[[\"project_type:modpack\"]]",
                                         NULL, FALSE);
 
-  url = g_strdup_printf (
-    AML_MODRINTH_URL "/search?query=%s&facets=%s&offset=%u&limit=%u",
-    escaped_query, escaped_facets, self->offset, RESULTS_PER_PAGE);
+  /* An empty search asks for the popular packs rather than for
+     everything by relevance: a list of what is used most is a better
+     place to land on than an arbitrary one. */
+  if (query == NULL || *query == '\0')
+    url = g_strdup_printf (
+      AML_MODRINTH_URL "/search?query=%s&facets=%s&index=downloads"
+                       "&offset=%u&limit=%u",
+      escaped_query, escaped_facets, self->offset, RESULTS_PER_PAGE);
+  else
+    url = g_strdup_printf (
+      AML_MODRINTH_URL "/search?query=%s&facets=%s&offset=%u&limit=%u",
+      escaped_query, escaped_facets, self->offset, RESULTS_PER_PAGE);
 
   /* The callback holds a reference: closing the dialog while a search
    * is in flight finalizes it, and a callback that then reads self would
@@ -503,11 +591,26 @@ on_search_done (GObject *source G_GNUC_UNUSED,
       if (!g_error_matches (error, AML_DOWNLOAD_ERROR,
                             AML_DOWNLOAD_ERROR_CANCELLED))
         {
-          adw_status_page_set_title (ADW_STATUS_PAGE (self->results_status),
-                                     "Could not search Modrinth");
-          adw_status_page_set_description (
-            ADW_STATUS_PAGE (self->results_status), error->message);
-          results_arrived (self, NULL);
+          self->loading_page = FALSE;
+
+          if (self->append)
+            {
+              /* A page that failed is offered again from the list. */
+              gtk_label_set_text (GTK_LABEL (self->retry_label),
+                                  error->message);
+              gtk_widget_set_visible (self->loading_more, FALSE);
+              gtk_widget_set_visible (self->retry_row, TRUE);
+            }
+          else
+            {
+              adw_status_page_set_title (
+                ADW_STATUS_PAGE (self->error_status),
+                "Could not search Modrinth");
+              adw_status_page_set_description (
+                ADW_STATUS_PAGE (self->error_status), error->message);
+              gtk_stack_set_visible_child_name (
+                GTK_STACK (self->results_stack), "error");
+            }
         }
 
       operation_done (user_data);
@@ -519,16 +622,29 @@ on_search_done (GObject *source G_GNUC_UNUSED,
 
   if (results == NULL)
     {
-      adw_status_page_set_title (ADW_STATUS_PAGE (self->results_status),
-                                 "Could not understand the answer");
-      adw_status_page_set_description (
-        ADW_STATUS_PAGE (self->results_status), error->message);
-      results_arrived (self, NULL);
+      self->loading_page = FALSE;
+
+      if (self->append)
+        {
+          gtk_label_set_text (GTK_LABEL (self->retry_label), error->message);
+          gtk_widget_set_visible (self->loading_more, FALSE);
+          gtk_widget_set_visible (self->retry_row, TRUE);
+        }
+      else
+        {
+          adw_status_page_set_title (ADW_STATUS_PAGE (self->error_status),
+                                     "Could not understand the answer");
+          adw_status_page_set_description (
+            ADW_STATUS_PAGE (self->error_status), error->message);
+          gtk_stack_set_visible_child_name (
+            GTK_STACK (self->results_stack), "error");
+        }
+
       operation_done (user_data);
       return;
     }
 
-  results_arrived (self, results);
+  results_arrived (self, results, self->append);
   operation_done (user_data);
 }
 
@@ -540,9 +656,24 @@ build_browse_page (AmlDownloadModpackDialog *self)
   GtkWidget *page = NULL;
   GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   GtkWidget *top = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *bottom = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   GtkWidget *scroller = gtk_scrolled_window_new ();
   GtkWidget *clamp = adw_clamp_new ();
+  GtkWidget *loading = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
+  GtkWidget *loading_spinner = gtk_spinner_new ();
+  GtkWidget *loading_label = gtk_label_new ("Loading modpacks…");
+  GtkWidget *loading_more = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  GtkWidget *more_spinner = gtk_spinner_new ();
+  GtkWidget *more_label = gtk_label_new ("Loading more…");
+  GtkWidget *retry_row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  GtkWidget *retry_label = gtk_label_new (NULL);
+  GtkWidget *retry_button = gtk_button_new_with_label ("Retry");
+
+  /* Exactly one of these is shown at any moment: the list, the words for
+     an empty answer, the error, or the spinner while the first page is
+     on its way. A status page that stayed under the results was the bug
+     this replaces. */
+  self->results_stack = gtk_stack_new ();
+  gtk_widget_set_vexpand (self->results_stack, TRUE);
 
   self->results_group = adw_preferences_group_new ();
 
@@ -566,18 +697,34 @@ build_browse_page (AmlDownloadModpackDialog *self)
   gtk_widget_set_margin_bottom (top, 6);
   gtk_box_append (GTK_BOX (box), top);
 
-  self->results_status = adw_status_page_new ();
-  adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->results_status),
-                                 "system-search-symbolic");
-  adw_status_page_set_title (ADW_STATUS_PAGE (self->results_status),
-                             "Nothing to show yet");
-  adw_status_page_set_description (
-    ADW_STATUS_PAGE (self->results_status),
-    "Type what to look for, or browse everything Modrinth has for this "
-    "kind of pack.");
-  gtk_box_append (GTK_BOX (box), self->results_status);
+  /* The list. The bottom of it holds a spinner while the next page is on
+     its way and a retry row when a page failed. */
+  gtk_widget_set_halign (loading_more, GTK_ALIGN_CENTER);
+  gtk_widget_set_margin_top (loading_more, 12);
+  gtk_widget_set_margin_bottom (loading_more, 12);
+  gtk_widget_set_visible (loading_more, FALSE);
+  gtk_box_append (GTK_BOX (loading_more), more_spinner);
+  gtk_box_append (GTK_BOX (loading_more), more_label);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->results_group),
+                             loading_more);
 
-  self->results_group = adw_preferences_group_new ();
+  gtk_widget_set_halign (retry_row, GTK_ALIGN_CENTER);
+  gtk_widget_set_margin_top (retry_row, 12);
+  gtk_widget_set_margin_bottom (retry_row, 12);
+  gtk_widget_set_visible (retry_row, FALSE);
+  gtk_label_set_wrap (GTK_LABEL (retry_label), TRUE);
+  gtk_widget_add_css_class (retry_label, "dim-label");
+  gtk_box_append (GTK_BOX (retry_row), retry_label);
+  gtk_box_append (GTK_BOX (retry_row), retry_button);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->results_group),
+                             retry_row);
+
+  self->loading_more = loading_more;
+  self->retry_row = retry_row;
+  self->retry_label = retry_label;
+
+  g_signal_connect_swapped (retry_button, "clicked",
+                            G_CALLBACK (on_retry_page), self);
 
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
@@ -586,8 +733,9 @@ build_browse_page (AmlDownloadModpackDialog *self)
   gtk_widget_set_margin_start (clamp, 12);
   gtk_widget_set_margin_end (clamp, 12);
   gtk_widget_set_vexpand (scroller, TRUE);
-  gtk_box_append (GTK_BOX (box), scroller);
+  gtk_stack_add_named (GTK_STACK (self->results_stack), scroller, "results");
 
+  /* An empty answer. */
   self->results_status = adw_status_page_new ();
   adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->results_status),
                                  "system-search-symbolic");
@@ -595,27 +743,38 @@ build_browse_page (AmlDownloadModpackDialog *self)
                              "Nothing to show yet");
   adw_status_page_set_description (
     ADW_STATUS_PAGE (self->results_status),
-    "Search, or browse the whole catalog: they all span what the game "
-    "can say.");
-  gtk_widget_set_visible (self->results_status, FALSE);
-  gtk_box_append (GTK_BOX (box), self->results_status);
+    "No modpack matches what was asked for. Try another word.");
+  gtk_stack_add_named (GTK_STACK (self->results_stack),
+                       self->results_status, "empty");
 
-  self->previous = gtk_button_new_with_label ("Previous");
-  self->next = gtk_button_new_with_label ("Next");
-  self->page_label = gtk_label_new ("");
-  gtk_widget_add_css_class (self->page_label, "dim-label");
-  gtk_label_set_xalign (GTK_LABEL (self->page_label), 0.5);
-  gtk_widget_set_hexpand (self->page_label, TRUE);
-  gtk_box_append (GTK_BOX (bottom), self->previous);
-  gtk_box_append (GTK_BOX (bottom), self->page_label);
-  gtk_box_append (GTK_BOX (bottom), self->next);
-  gtk_widget_set_margin_start (bottom, 12);
-  gtk_widget_set_margin_end (bottom, 12);
-  gtk_widget_set_margin_bottom (bottom, 12);
-  g_signal_connect (self->previous, "clicked", G_CALLBACK (on_previous),
-                    self);
-  g_signal_connect (self->next, "clicked", G_CALLBACK (on_next), self);
-  gtk_box_append (GTK_BOX (box), bottom);
+  /* A search that could not be made. */
+  self->error_status = adw_status_page_new ();
+  adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->error_status),
+                                 "dialog-error-symbolic");
+  gtk_stack_add_named (GTK_STACK (self->results_stack),
+                       self->error_status, "error");
+
+  /* The first page is on its way. */
+  gtk_widget_set_valign (loading, GTK_ALIGN_CENTER);
+  gtk_widget_set_halign (loading, GTK_ALIGN_CENTER);
+  gtk_box_append (GTK_BOX (loading), loading_spinner);
+  gtk_box_append (GTK_BOX (loading), loading_label);
+  gtk_spinner_start (GTK_SPINNER (loading_spinner));
+  gtk_stack_add_named (GTK_STACK (self->results_stack), loading, "loading");
+
+  gtk_stack_set_visible_child_name (GTK_STACK (self->results_stack),
+                                    "loading");
+  gtk_box_append (GTK_BOX (box), self->results_stack);
+
+  /* The list asks for the next page when it is scrolled to its end.
+     GTK4 has no edge-reached signal, so the adjustment is watched. */
+  {
+    GtkAdjustment *adjustment =
+      gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (scroller));
+
+    g_signal_connect (adjustment, "value-changed",
+                      G_CALLBACK (on_scroll_changed), self);
+  }
 
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
   adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), box);
@@ -625,6 +784,9 @@ build_browse_page (AmlDownloadModpackDialog *self)
 
   adw_navigation_view_add (ADW_NAVIGATION_VIEW (self->nav),
                            ADW_NAVIGATION_PAGE (page));
+
+  /* The page lands on the popular packs rather than on nothing. */
+  run_search (self, FALSE);
 }
 
 static void
