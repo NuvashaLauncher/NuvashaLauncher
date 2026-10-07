@@ -25,6 +25,19 @@ struct _AmlLoaderRow
   char *game_version;
   char *wanted;
 
+  /* The loader the row is showing or fetching for, so that a change the
+     row itself makes to the combo (putting the stored loader in place)
+     is not read back as a choice the user made. */
+  AmlLoader current;
+
+  /* TRUE while the game runs: neither combo answers then, and a screen
+     must not write down a choice made under it. */
+  gboolean blocked;
+
+  /* Whether the version row may answer at all: FALSE while it is loading
+     or has nothing to show, TRUE once a list is in place. */
+  gboolean interactive;
+
   /* Set only once the model holds the versions of the loader: a
      position in it means nothing before that. */
   gboolean ready;
@@ -38,19 +51,46 @@ static guint aml_loader_row_signals[AML_LOADER_ROW_N_SIGNALS];
  * The two rows
  * ---------------------------------------------------------- */
 
-/* The handler of both combos: the change belongs to the row a screen
-   stored, not to the combo it happened in, and a load that puts its own
-   list in place is not a choice the user made. */
+/* The handler of the version combo: the change belongs to the row a
+   screen stored, not to the combo it happened in, and a load that puts
+   its own list in place is not a choice the user made. */
 static void
-on_selected (GObject *object G_GNUC_UNUSED, GParamSpec *pspec G_GNUC_UNUSED,
-             gpointer user_data)
+on_version_selected (GObject *object G_GNUC_UNUSED,
+                     GParamSpec *pspec G_GNUC_UNUSED, gpointer user_data)
 {
   AmlLoaderRow *self = user_data;
 
-  if (!self->ready)
+  if (!self->ready || self->blocked)
     return;
 
   g_signal_emit (self, aml_loader_row_signals[AML_LOADER_ROW_SIGNAL_CHANGED], 0);
+}
+
+static void start_versions (AmlLoaderRow *self, AmlLoader loader,
+                            const char *wanted);
+static AmlLoader loader_at (guint position);
+
+/* Picking another loader is a question for the version list, so the row
+   asks it again itself: a screen never has to tell it to. */
+static void
+on_loader_selected (GObject *object G_GNUC_UNUSED,
+                    GParamSpec *pspec G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlLoaderRow *self = user_data;
+  AmlLoader loader = AML_LOADER_VANILLA;
+
+  if (self->blocked)
+    return;
+
+  /* What the row itself put in the combo, or a change already being
+     answered, is not a second question. */
+  loader = loader_at (
+    adw_combo_row_get_selected (ADW_COMBO_ROW (self->loader_row)));
+
+  if (loader == self->current)
+    return;
+
+  start_versions (self, loader, NULL);
 }
 
 /* The model of the first row holds one name per loader AML installs, in
@@ -83,6 +123,17 @@ update_visibility (AmlLoaderRow *self)
   gtk_widget_set_visible (self->version_row, !vanilla);
 }
 
+/* Both combos answer only when nothing else has locked them: a running
+   game locks both, and the version row also locks itself while it is
+   loading or has nothing to show. */
+static void
+update_sensitivity (AmlLoaderRow *self)
+{
+  gtk_widget_set_sensitive (self->loader_row, !self->blocked);
+  gtk_widget_set_sensitive (self->version_row,
+                            !self->blocked && self->interactive);
+}
+
 /* Puts @labels behind the model of the version row and picks @position,
    which is GTK_INVALID_LIST_POSITION for nothing. */
 static void
@@ -113,6 +164,16 @@ set_versions (AmlLoaderRow *self, GPtrArray *versions, guint position)
   adw_combo_row_set_selected (ADW_COMBO_ROW (self->version_row), position);
 }
 
+/* A screen stores a choice when it hears this; it is emitted whenever
+   what get_loader()/get_version() would answer changes, including while
+   a list loads (nothing to store then, which the guards on the screens
+   know). */
+static void
+emit_changed (AmlLoaderRow *self)
+{
+  g_signal_emit (self, aml_loader_row_signals[AML_LOADER_ROW_SIGNAL_CHANGED], 0);
+}
+
 static void
 show_loading (AmlLoaderRow *self)
 {
@@ -122,6 +183,7 @@ show_loading (AmlLoaderRow *self)
   list = gtk_string_list_new (loading);
 
   self->ready = FALSE;
+  self->interactive = FALSE;
   g_clear_pointer (&self->versions, g_ptr_array_unref);
   self->versions = g_ptr_array_new_with_free_func (
     (GDestroyNotify) aml_loader_version_free);
@@ -131,9 +193,10 @@ show_loading (AmlLoaderRow *self)
   adw_combo_row_set_selected (ADW_COMBO_ROW (self->version_row), 0);
 
   /* The row does not answer while it does not know the versions. */
-  gtk_widget_set_sensitive (self->version_row, FALSE);
   gtk_widget_set_visible (self->retry, FALSE);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self->version_row), NULL);
+  update_sensitivity (self);
+  emit_changed (self);
 }
 
 /* @retry is FALSE when trying again would not help, which is the case
@@ -146,6 +209,9 @@ show_error (AmlLoaderRow *self, const char *message, gboolean retry)
   const char *nothing[] = { "None", NULL };
 
   self->ready = FALSE;
+  /* The Retry button is a suffix of the row, so the row itself has to
+     answer clicks for it to be reachable. */
+  self->interactive = retry;
   g_clear_pointer (&self->versions, g_ptr_array_unref);
   self->versions = g_ptr_array_new_with_free_func (
     (GDestroyNotify) aml_loader_version_free);
@@ -156,54 +222,82 @@ show_error (AmlLoaderRow *self, const char *message, gboolean retry)
                               GTK_INVALID_LIST_POSITION);
 
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self->version_row), message);
-  /* The Retry button is a suffix of the row, so the row itself has to
-     answer clicks for it to be reachable. */
-  gtk_widget_set_sensitive (self->version_row, retry);
   gtk_widget_set_visible (self->retry, retry);
+  update_sensitivity (self);
+  emit_changed (self);
+}
+
+/* A loader that answered a real list that holds nothing for this
+   Minecraft version: not a failure a Retry could fix, so the row says
+   what is missing instead of offering one. */
+static void
+show_empty (AmlLoaderRow *self)
+{
+  g_autoptr (GtkStringList) list = NULL;
+  g_autofree char *message = NULL;
+  const char *nothing[] = { "None", NULL };
+
+  self->ready = FALSE;
+  self->interactive = FALSE;
+  g_clear_pointer (&self->versions, g_ptr_array_unref);
+  self->versions = g_ptr_array_new_with_free_func (
+    (GDestroyNotify) aml_loader_version_free);
+
+  list = gtk_string_list_new (nothing);
+  adw_combo_row_set_model (ADW_COMBO_ROW (self->version_row), G_LIST_MODEL (list));
+  adw_combo_row_set_selected (ADW_COMBO_ROW (self->version_row),
+                              GTK_INVALID_LIST_POSITION);
+
+  message = g_strdup_printf ("No compatible %s version found for Minecraft %s.",
+                             aml_loader_display_name (self->current),
+                             self->game_version != NULL ? self->game_version
+                                                        : "?");
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (self->version_row), message);
+  gtk_widget_set_visible (self->retry, FALSE);
+  update_sensitivity (self);
+  emit_changed (self);
 }
 
 /* Fills the version row from the versions a loader published. */
 static void
 fill (AmlLoaderRow *self, GPtrArray *published)
 {
-  g_autoptr (GPtrArray) shown =
-    g_ptr_array_new_with_free_func ((GDestroyNotify) aml_loader_version_free);
   gboolean unstable =
     self->settings != NULL && aml_settings_get_show_unstable_loaders (self->settings);
   guint position = GTK_INVALID_LIST_POSITION;
+  g_autoptr (GPtrArray) shown = NULL;
 
   self->ready = FALSE;
 
-  for (guint i = 0; i < published->len; i++)
-    {
-      const AmlLoaderVersion *version = g_ptr_array_index (published, i);
-      AmlLoaderVersion *copy = g_new0 (AmlLoaderVersion, 1);
-
-      copy->version = g_strdup (version->version);
-      copy->stable = version->stable;
-
-      if (self->wanted != NULL && g_str_equal (version->version, self->wanted))
-        position = shown->len;
-      else if (!version->stable && !unstable)
-        continue;
-
-      g_ptr_array_add (shown, copy);
-    }
+  shown = aml_loaders_versions_for_display (published, unstable, self->wanted,
+                                            &position);
 
   set_versions (self, g_steal_pointer (&shown), position);
 
   self->ready = TRUE;
-  gtk_widget_set_sensitive (self->version_row, TRUE);
+  self->interactive = TRUE;
   gtk_widget_set_visible (self->retry, FALSE);
 
   /* Nothing to pick is not the same as something to pick: the row says
      so instead of answering with a version. */
   if (self->versions->len == 0)
-    adw_action_row_set_subtitle (ADW_ACTION_ROW (self->version_row),
-                                 "This loader has no version for this "
-                                 "Minecraft version");
+    {
+      g_autofree char *message = g_strdup_printf (
+        "No compatible %s version found for Minecraft %s.",
+        aml_loader_display_name (self->current),
+        self->game_version != NULL ? self->game_version : "?");
+
+      adw_action_row_set_subtitle (ADW_ACTION_ROW (self->version_row), message);
+    }
   else
     adw_action_row_set_subtitle (ADW_ACTION_ROW (self->version_row), NULL);
+
+  update_sensitivity (self);
+
+  /* A version is in the list now, so the choice is settled: a screen
+     stores it or lets the Create button answer. */
+  if (position != GTK_INVALID_LIST_POSITION)
+    emit_changed (self);
 }
 
 /* ---------------------------------------------------------- *
@@ -226,6 +320,10 @@ versions_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
       if (versions != NULL)
         fill (self, versions);
+      else if (error != NULL &&
+               g_error_matches (error, AML_LOADERS_ERROR,
+                                AML_LOADERS_ERROR_NO_VERSIONS))
+        show_empty (self);
       else
         show_error (self, error->message, TRUE);
     }
@@ -249,6 +347,61 @@ on_retry_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
                        game_version);
 }
 
+/* Starts the fetch for @loader and remembers what was wanted. The
+   caller has already set the game version and the settings. */
+static void
+start_versions (AmlLoaderRow *self, AmlLoader loader, const char *wanted)
+{
+  const AmlLoader *loaders = aml_loaders_supported ();
+
+  /* What the row is showing is this loader now, so the change the combo
+     below is about to report is not read back as a user choice. */
+  self->current = loader;
+
+  g_free (self->wanted);
+  self->wanted = g_strdup (wanted);
+
+  /* The combo shows what was asked for, whether AML knows it or not, so
+     a screen that stores the choice stores what the user saw. */
+  for (guint i = 0; i < aml_loaders_supported_count (); i++)
+    {
+      if (loaders[i] == loader)
+        adw_combo_row_set_selected (ADW_COMBO_ROW (self->loader_row), i);
+    }
+
+  update_visibility (self);
+
+  g_cancellable_cancel (self->cancellable);
+  g_clear_object (&self->cancellable);
+  self->cancellable = g_cancellable_new ();
+
+  /* Vanilla has nothing to load. */
+  if (loader == AML_LOADER_VANILLA)
+    {
+      self->ready = FALSE;
+      self->interactive = FALSE;
+      g_clear_pointer (&self->versions, g_ptr_array_unref);
+      self->versions = g_ptr_array_new_with_free_func (
+        (GDestroyNotify) aml_loader_version_free);
+      update_sensitivity (self);
+      emit_changed (self);
+      return;
+    }
+
+  show_loading (self);
+
+  /* A loader needs a Minecraft version to say which of its versions run
+     it; without one there is nothing to ask for. */
+  if (self->game_version == NULL || *self->game_version == '\0')
+    {
+      show_error (self, "Pick a Minecraft version first", FALSE);
+      return;
+    }
+
+  aml_loaders_versions_async (loader, self->game_version, self->cancellable,
+                              versions_loaded, g_object_ref (self));
+}
+
 /* ---------------------------------------------------------- *
  * The public face
  * ---------------------------------------------------------- */
@@ -269,6 +422,8 @@ aml_loader_row_new (void)
     names[i] = aml_loader_display_name (loaders[i]);
 
   self->loader_row = g_object_ref_sink (adw_combo_row_new ());
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->loader_row),
+                                      FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->loader_row),
                                  "Loader");
   adw_combo_row_set_model (ADW_COMBO_ROW (self->loader_row),
@@ -276,6 +431,8 @@ aml_loader_row_new (void)
   adw_combo_row_set_selected (ADW_COMBO_ROW (self->loader_row), 0);
 
   self->version_row = g_object_ref_sink (adw_combo_row_new ());
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->version_row),
+                                      FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->version_row),
                                  "Loader Version");
   self->retry = g_object_ref_sink (gtk_button_new_with_label ("Retry"));
@@ -284,12 +441,14 @@ aml_loader_row_new (void)
   gtk_widget_set_visible (self->retry, FALSE);
   adw_action_row_add_suffix (ADW_ACTION_ROW (self->version_row), self->retry);
 
+  self->current = AML_LOADER_VANILLA;
+
   /* Every handler is connected with the object, so a row that a group
      still holds after this is gone cannot call back into it. */
   g_signal_connect_object (self->loader_row, "notify::selected",
-                           G_CALLBACK (on_selected), self, 0);
+                           G_CALLBACK (on_loader_selected), self, 0);
   g_signal_connect_object (self->version_row, "notify::selected",
-                           G_CALLBACK (on_selected), self, 0);
+                           G_CALLBACK (on_version_selected), self, 0);
   g_signal_connect_object (self->retry, "clicked",
                            G_CALLBACK (on_retry_clicked), self, 0);
 
@@ -322,54 +481,29 @@ aml_loader_row_load (AmlLoaderRow *self,
                      const char    *loader_version,
                      const char    *game_version)
 {
-  const AmlLoader *loaders = aml_loaders_supported ();
-
   g_return_if_fail (AML_IS_LOADER_ROW (self));
   g_return_if_fail (settings == NULL || AML_IS_SETTINGS (settings));
-
-  /* The loader row shows what was asked for, whether AML knows it or
-     not, so a screen that saves the choice stores what the user saw. */
-  for (guint i = 0; i < aml_loaders_supported_count (); i++)
-    {
-      if (loaders[i] == loader)
-        adw_combo_row_set_selected (ADW_COMBO_ROW (self->loader_row), i);
-    }
 
   g_set_object (&self->settings, settings);
 
   g_free (self->game_version);
   self->game_version = g_strdup (game_version);
-  g_free (self->wanted);
-  self->wanted = g_strdup (loader_version);
 
-  update_visibility (self);
+  start_versions (self, loader, loader_version);
+}
 
-  g_cancellable_cancel (self->cancellable);
-  g_clear_object (&self->cancellable);
-  self->cancellable = g_cancellable_new ();
+void
+aml_loader_row_set_blocked (AmlLoaderRow *self, gboolean blocked)
+{
+  g_return_if_fail (AML_IS_LOADER_ROW (self));
 
-  /* Vanilla has nothing to load. */
-  if (loader == AML_LOADER_VANILLA)
-    {
-      self->ready = FALSE;
-      g_clear_pointer (&self->versions, g_ptr_array_unref);
-      self->versions = g_ptr_array_new_with_free_func (
-        (GDestroyNotify) aml_loader_version_free);
-      return;
-    }
+  blocked = !!blocked;
 
-  show_loading (self);
+  if (self->blocked == blocked)
+    return;
 
-  /* A loader needs a Minecraft version to say which of its versions run
-     it; without one there is nothing to ask for. */
-  if (game_version == NULL || *game_version == '\0')
-    {
-      show_error (self, "Pick a Minecraft version first", FALSE);
-      return;
-    }
-
-  aml_loaders_versions_async (loader, game_version, self->cancellable,
-                              versions_loaded, g_object_ref (self));
+  self->blocked = blocked;
+  update_sensitivity (self);
 }
 
 AmlLoader

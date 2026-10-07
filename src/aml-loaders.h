@@ -177,6 +177,20 @@ GPtrArray *aml_loaders_maven_versions_from_json (AmlLoader      loader,
                                                  gssize         length,
                                                  GError       **error);
 
+/* What a version list shows of what a loader published: the versions
+ * @show_unstable keeps added to the ones the loader calls stable, and
+ * @wanted kept even when it would otherwise be hidden, because an
+ * instance that runs a version must never lose it just because it is old
+ * or unstable. Newest first.
+ *
+ * @selected is set to the position of @wanted when it is in the list,
+ * otherwise to the position of the newest stable version, and to
+ * G_MAXUINT when there is nothing to pick. (transfer full) */
+GPtrArray *aml_loaders_versions_for_display (GPtrArray  *published,
+                                             gboolean    show_unstable,
+                                             const char *wanted,
+                                             guint      *selected);
+
 /* The version document @loader_version of @loader for @game_version, in
  * the shape AML resolves: the libraries that publish a maven address
  * instead of a download get the download that address means, and nothing
