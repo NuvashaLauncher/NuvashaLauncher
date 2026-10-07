@@ -142,6 +142,19 @@ refresh_in_list (AmlInstancePage *self)
   g_list_store_splice (store, position, 1, &item, 1);
 }
 
+/* A content page of this instance, told what its trash button should do:
+ * move the file to the Trash or delete it, from the shared setting. */
+static AmlContentPage *
+content_page_for (AmlInstancePage *self, AmlContentType type)
+{
+  AmlContentPage *page = aml_content_page_new (self->instance, type);
+
+  aml_content_page_set_delete_to_trash (
+    page, aml_settings_get_delete_to_trash (self->settings));
+
+  return page;
+}
+
 /* The content pages read the loader and the Minecraft version of the
  * instance when they are built, so changing either of them has to build
  * them again: the Mods page in particular keeps saying "No mod loader"
@@ -179,7 +192,7 @@ rebuild_content_pages (AmlInstancePage *self)
 
       adw_view_stack_add_titled_with_icon (
         ADW_VIEW_STACK (self->stack),
-        GTK_WIDGET (aml_content_page_new (self->instance, pages[i].type)),
+        GTK_WIDGET (content_page_for (self, pages[i].type)),
         pages[i].name, pages[i].title, pages[i].icon);
     }
 
@@ -1263,15 +1276,15 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
                                        "preferences-system-symbolic");
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack),
-    GTK_WIDGET (aml_content_page_new (instance, AML_CONTENT_RESOURCE_PACK)),
+    GTK_WIDGET (content_page_for (self, AML_CONTENT_RESOURCE_PACK)),
     "resource-packs", "Resource Packs", "image-x-generic-symbolic");
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack),
-    GTK_WIDGET (aml_content_page_new (instance, AML_CONTENT_SHADER_PACK)),
+    GTK_WIDGET (content_page_for (self, AML_CONTENT_SHADER_PACK)),
     "shader-packs", "Shader Packs", "applications-graphics-symbolic");
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack),
-    GTK_WIDGET (aml_content_page_new (instance, AML_CONTENT_MOD)),
+    GTK_WIDGET (content_page_for (self, AML_CONTENT_MOD)),
     "mods", "Mods", "view-list-symbolic");
 
   /* The logs of the instance are the logs of the launcher the window
