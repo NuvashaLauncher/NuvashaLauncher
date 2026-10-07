@@ -232,6 +232,19 @@ aml_instance_manager_get_instances (AmlInstanceManager *self)
   return self->instances;
 }
 
+char *
+aml_instance_manager_default_directory (AmlInstanceManager *self,
+                                        const char *name)
+{
+  g_autofree char *id = NULL;
+
+  g_return_val_if_fail (AML_IS_INSTANCE_MANAGER (self), NULL);
+
+  id = g_uuid_string_random ();
+
+  return default_instance_directory (self, name, id);
+}
+
 AmlInstance *
 aml_instance_manager_get_by_id (AmlInstanceManager *self, const char *id)
 {
