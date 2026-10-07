@@ -16,8 +16,9 @@
  * middle row. What is shown here is that face, at the size a row is
  * tall. */
 #define AVATAR_SIZE 40
-/* The header button shows the avatar alone, smaller than a row's. */
-#define HEADER_AVATAR_SIZE 24
+/* The header button shows the avatar alone, at the size of the other
+ * header icons rather than a row's. */
+#define HEADER_AVATAR_SIZE 16
 
 struct _AmlUsersPopover
 {
