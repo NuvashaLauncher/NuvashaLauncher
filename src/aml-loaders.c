@@ -211,6 +211,26 @@ loader_maven (AmlLoader loader, const char **coordinate)
     }
 }
 
+/* The host the version list API of a maven loader hangs off. It is not
+ * always the base the artifacts live in: NeoForge keeps its repository
+ * under /releases while its API is on the host itself, so asking
+ * <repo>/api/... about it answers 404. NULL for a loader with no maven. */
+static const char *
+loader_maven_api (AmlLoader loader)
+{
+  switch (loader)
+    {
+    case AML_LOADER_NEOFORGE:
+      return AML_NEOFORGE_API_URL;
+
+    case AML_LOADER_FORGE:
+      return AML_FORGE_API_URL;
+
+    default:
+      return NULL;
+    }
+}
+
 gboolean
 aml_loader_publishes_an_installer (AmlLoader loader)
 {
@@ -228,6 +248,25 @@ loader_version_separator (AmlLoader loader)
   return loader == AML_LOADER_FORGE ? '-' : '.';
 }
 
+/* The prefix NeoForge writes in front of its own numbers for a Minecraft
+ * version. NeoForge drops the leading "1." of a modern Minecraft version
+ * and writes a missing patch as 0: 1.21.1 is "21.1.", 1.21 is "21.0.".
+ * A version that is not of the "1.x" shape, such as the snapshot "26.3",
+ * is used as it is. */
+static char *
+neoforge_game_prefix (const char *game_version)
+{
+  const char *own = game_version;
+
+  if (g_str_has_prefix (own, "1."))
+    own += 2;
+
+  if (strchr (own, '.') == NULL)
+    return g_strdup_printf ("%s.0.", own);
+
+  return g_strdup_printf ("%s.", own);
+}
+
 gboolean
 aml_loaders_version_runs_game (AmlLoader      loader,
                                const char    *loader_version,
@@ -243,8 +282,13 @@ aml_loaders_version_runs_game (AmlLoader      loader,
   if (!aml_loader_publishes_an_installer (loader))
     return FALSE;
 
-  prefix = g_strdup_printf ("%s%c", game_version,
-                            loader_version_separator (loader));
+  /* NeoForge names its versions after the Minecraft version in its own
+     way, so the prefix is not just the version and a separator. */
+  if (loader == AML_LOADER_NEOFORGE)
+    prefix = neoforge_game_prefix (game_version);
+  else
+    prefix = g_strdup_printf ("%s%c", game_version,
+                              loader_version_separator (loader));
 
   return g_str_has_prefix (loader_version, prefix);
 }
@@ -602,7 +646,7 @@ aml_loaders_versions_async (AmlLoader           loader,
 {
   VersionsRequest *request = NULL;
   const char *meta = NULL;
-  const char *maven = NULL;
+  const char *api = NULL;
   const char *coordinate = NULL;
   g_autofree char *url = NULL;
   g_autofree char *quoted_game = NULL;
@@ -610,7 +654,7 @@ aml_loaders_versions_async (AmlLoader           loader,
   g_return_if_fail (game_version != NULL);
 
   meta = loader_meta (loader);
-  maven = loader_maven (loader, &coordinate);
+  api = loader_maven_api (loader);
   quoted_game = g_uri_escape_string (game_version, NULL, FALSE);
 
   request = g_new0 (VersionsRequest, 1);
@@ -622,13 +666,15 @@ aml_loaders_versions_async (AmlLoader           loader,
 
   g_task_set_check_cancellable (request->task, FALSE);
 
-  if (maven != NULL)
+  if (api != NULL)
     {
       /* The maven of the loader holds every version it ever published,
          for every Minecraft version; which of them runs the one that was
          asked for is said by their names, and that is the compatibility
-         filter. */
-      url = g_strdup_printf ("%s/api/maven/versions/releases/%s", maven,
+         filter. The API hangs off the host, not off the repository path
+         the artifacts live under. */
+      loader_maven (loader, &coordinate);
+      url = g_strdup_printf ("%s/api/maven/versions/releases/%s", api,
                              coordinate);
     }
   else if (meta != NULL)
