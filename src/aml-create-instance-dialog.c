@@ -85,6 +85,14 @@ on_version_selected (GObject *object G_GNUC_UNUSED,
   const char *version =
     aml_version_row_get_selected (AML_VERSION_ROW (self->version_row));
 
+  /* While the Minecraft list loads, or when it failed, there is no
+     version to tell the loader row about. */
+  if (version == NULL)
+    {
+      update_create_button (self);
+      return;
+    }
+
   aml_loader_row_load (self->loader_row, self->settings,
                        aml_loader_row_get_loader (self->loader_row),
                        NULL, version);
