@@ -413,7 +413,10 @@ rebuild (AmlUsersPopover *self)
   while ((child = gtk_widget_get_first_child (self->list_box)) != NULL)
     gtk_list_box_remove (GTK_LIST_BOX (self->list_box), child);
 
+  /* The empty list is not shown at all: an empty boxed list still draws
+     a blank card above the sentence there are no accounts for. */
   gtk_widget_set_visible (self->empty_label, accounts->len == 0);
+  gtk_widget_set_visible (self->list_box, accounts->len > 0);
 
   for (guint i = 0; i < accounts->len; i++)
     append_account_row (self, g_ptr_array_index (accounts, i));
@@ -456,8 +459,7 @@ aml_users_popover_init (AmlUsersPopover *self)
 
   self->list_box = rows;
 
-  self->empty_label = gtk_label_new (
-      "No accounts yet. Add one to play as somebody of your own.");
+  self->empty_label = gtk_label_new ("No Accounts Yet");
   gtk_label_set_wrap (GTK_LABEL (self->empty_label), TRUE);
   gtk_label_set_justify (GTK_LABEL (self->empty_label), GTK_JUSTIFY_CENTER);
   gtk_widget_set_margin_start (self->empty_label, 12);
