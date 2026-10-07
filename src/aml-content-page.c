@@ -1201,34 +1201,52 @@ file_row_refresh (GtkWidget *row)
       file->version_name != NULL ? file->version_name : file->filename);
 }
 
-/* At most the first two sentences of @text. A terminator only ends a
- * sentence at the end of the text or before a space, so "e.g." and
- * "3.5" do not count as two of them. */
+/* The first @max_sentences sentences of @text (0 for all of it), with
+ * runs of whitespace folded into single spaces. A row caps its subtitle
+ * at two lines by wrapping, and an explicit blank line in the text would
+ * slip a third one past that. A terminator only ends a sentence at the
+ * end of the text or before a space, so "3.5" and "e.g." do not count. */
 static char *
-first_two_sentences (const char *text)
+description_line (const char *text, guint max_sentences)
 {
-  gsize length = strlen (text);
-  gsize end = 0;
+  g_autoptr (GString) out = g_string_new (NULL);
   guint sentences = 0;
+  gboolean space = FALSE;
+  gsize length = 0;
 
-  for (gsize i = 0; i < length && sentences < 2; i++)
+  if (text == NULL)
+    return g_strdup ("");
+
+  length = strlen (text);
+
+  for (gsize i = 0; i < length; i++)
     {
       char c = text[i];
 
-      if ((c == '.' || c == '!' || c == '?') &&
+      if (g_ascii_isspace (c))
+        {
+          space = TRUE;
+          continue;
+        }
+
+      if (space && out->len > 0)
+        g_string_append_c (out, ' ');
+
+      space = FALSE;
+      g_string_append_c (out, c);
+
+      if (max_sentences != 0 &&
+          (c == '.' || c == '!' || c == '?') &&
           (i + 1 == length || g_ascii_isspace (text[i + 1])))
         {
           sentences++;
-          end = i + 1;
+
+          if (sentences >= max_sentences)
+            break;
         }
     }
 
-  if (sentences < 2)
-    return g_strdup (text);
-
-  /* @end is right after the second terminator, so the space behind it is
-     already outside the slice. */
-  return g_strndup (text, end);
+  return g_string_free (g_steal_pointer (&out), FALSE);
 }
 
 /* What an installed file's project is, under its name. What the file is
@@ -1241,7 +1259,7 @@ row_show_description (GtkWidget *row, const char *description)
   if (row == NULL || description == NULL || *description == '\0')
     return;
 
-  short_text = first_two_sentences (description);
+  short_text = description_line (description, 2);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (row), short_text);
 }
 
@@ -1996,7 +2014,11 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
       adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
       adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
                                      project->title);
-      adw_action_row_set_subtitle (ADW_ACTION_ROW (row), project->description);
+      {
+        g_autofree char *line = description_line (project->description, 0);
+
+        adw_action_row_set_subtitle (ADW_ACTION_ROW (row), line);
+      }
       /* Two lines at most, ending in an ellipsis when the description is
          longer: every row is then the same height, whatever it holds.
          The whole description is on the details page. */
