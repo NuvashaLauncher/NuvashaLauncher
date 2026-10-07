@@ -8,9 +8,9 @@
  * checked: a widget that is still parented when it is disposed logs a
  * Gtk critical, and a page that is destroyed while one of its own
  * handlers is running crashes. Both have happened here before, so the
- * window is opened on an instance, its tab is opened, the instance is
- * renamed (which rebinds its card) and the window is closed, with every
- * Gtk critical counted.
+ * instance grid is opened, the window of an instance is opened, the
+ * instance is renamed (which rebinds its card) and both windows are
+ * closed, with every Gtk critical counted.
  *
  * Everything lives under a temporary XDG root, so the real settings and
  * accounts are never touched. No display means the test skips itself. */
@@ -81,41 +81,20 @@ find_entry_titled (GtkWidget *widget, const char *title)
   return NULL;
 }
 
-static GtkWidget *
-find_tab_view (GtkWidget *widget)
+/* The window of an instance, found by the id that travels with it. */
+static GtkWindow *
+find_instance_window (GApplication *application, const char *id)
 {
-  for (GtkWidget *child = gtk_widget_get_first_child (widget); child != NULL;
-       child = gtk_widget_get_next_sibling (child))
+  GList *windows = gtk_application_get_windows (GTK_APPLICATION (application));
+
+  for (GList *item = windows; item != NULL; item = item->next)
     {
-      GtkWidget *found = NULL;
+      GtkWindow *window = item->data;
+      const char *other = g_object_get_data (G_OBJECT (window),
+                                             "aml-instance-id");
 
-      if (ADW_IS_TAB_VIEW (child))
-        return child;
-
-      found = find_tab_view (child);
-
-      if (found != NULL)
-        return found;
-    }
-
-  return NULL;
-}
-
-static GtkWidget *
-find_tab_bar (GtkWidget *widget)
-{
-  for (GtkWidget *child = gtk_widget_get_first_child (widget); child != NULL;
-       child = gtk_widget_get_next_sibling (child))
-    {
-      GtkWidget *found = NULL;
-
-      if (ADW_IS_TAB_BAR (child))
-        return child;
-
-      found = find_tab_bar (child);
-
-      if (found != NULL)
-        return found;
+      if (other != NULL && g_strcmp0 (other, id) == 0)
+        return window;
     }
 
   return NULL;
@@ -123,7 +102,9 @@ find_tab_bar (GtkWidget *widget)
 
 typedef struct {
   GApplication *application;
-  GtkWindow *window;
+  GtkWindow *window;          /* the window of the grid */
+  GtkWindow *instance_window; /* the window of the instance */
+  char *instance_id;
   guint step;
 } Run;
 
@@ -132,8 +113,11 @@ finish (gpointer user_data)
 {
   Run *run = user_data;
 
-  /* The window is taken down while the loop still runs, so that what its
-     destruction logs is counted before the test decides. */
+  /* Both windows are taken down while the loop still runs, so that what
+     their destruction logs is counted before the test decides. */
+  if (run->instance_window != NULL)
+    gtk_window_destroy (run->instance_window);
+
   gtk_window_destroy (run->window);
   g_application_quit (run->application);
 
@@ -145,18 +129,14 @@ advance (gpointer user_data)
 {
   Run *run = user_data;
   GtkWidget *widget = NULL;
+  GList *windows = gtk_application_get_windows (GTK_APPLICATION (
+                                                  run->application));
 
   switch (run->step++)
     {
     case 0: /* the grid binds its card a little after the window is up */
-      /* The grid is the only tab, so the tab bar has nothing to show. */
-      {
-        GtkWidget *bar = find_tab_bar (GTK_WIDGET (run->window));
-
-        g_assert_nonnull (bar);
-        g_assert_false (gtk_widget_get_visible (bar));
-      }
-
+      /* The grid is the only window so far. */
+      g_assert_cmpuint (g_list_length (windows), ==, 1);
       return G_SOURCE_CONTINUE;
 
     case 1:
@@ -171,29 +151,25 @@ advance (gpointer user_data)
       g_signal_emit_by_name (widget, "clicked");
       return G_SOURCE_CONTINUE;
 
-    case 2: /* the tab and its page are built */
-      {
-        AdwTabView *tabs = ADW_TAB_VIEW (
-          find_tab_view (GTK_WIDGET (run->window)));
-        AdwTabPage *page = NULL;
+    case 2: /* the window of the instance is built */
+      run->instance_window = find_instance_window (run->application,
+                                                   run->instance_id);
 
-        /* The click opens the instance beside the pinned grid tab, the
-           new tab is the one shown, and the bar that holds it is
-           visible, not a tab the user never sees. */
-        g_assert_nonnull (tabs);
-        g_assert_cmpuint (adw_tab_view_get_n_pages (tabs), ==, 2);
-        g_assert_true (gtk_widget_get_visible (
-          find_tab_bar (GTK_WIDGET (run->window))));
+      if (run->instance_window == NULL)
+        {
+          run->step = 2;
+          return G_SOURCE_CONTINUE;
+        }
 
-        page = adw_tab_view_get_selected_page (tabs);
-        g_assert_nonnull (page);
-        g_assert_cmpstr (adw_tab_page_get_title (page), ==, "Test");
-      }
-
+      /* Opening an instance opens a window of its own, not a tab, and
+         the window is named after the instance. */
+      g_assert_cmpuint (g_list_length (windows), ==, 2);
+      g_assert_cmpstr (gtk_window_get_title (run->instance_window), ==,
+                       "Test");
       return G_SOURCE_CONTINUE;
 
     default:
-      widget = find_entry_titled (GTK_WIDGET (run->window), "Name");
+      widget = find_entry_titled (GTK_WIDGET (run->instance_window), "Name");
 
       if (widget == NULL)
         {
@@ -202,7 +178,7 @@ advance (gpointer user_data)
         }
 
       /* A rename rebinds the card: the instance leaves the store and
-         comes back while this page is what is running. */
+         comes back while its window is open. */
       gtk_editable_set_text (GTK_EDITABLE (widget), "Renamed");
       g_signal_emit_by_name (widget, "apply");
 
@@ -227,6 +203,8 @@ on_activate (GApplication *application, gpointer user_data)
 
   if (instance == NULL)
     g_error ("the instance cannot be created: %s", error->message);
+
+  run->instance_id = g_strdup (aml_instance_get_id (instance));
 
   /* The window keeps the manager for as long as it lives. */
   run->window = GTK_WINDOW (aml_main_window_new (GTK_APPLICATION (application),
@@ -304,8 +282,10 @@ main (int argc, char **argv)
   if (watchdog != 0)
     g_source_remove (watchdog);
 
+  g_free (run.instance_id);
+
   g_assert_cmpuint (criticals, ==, 0);
-  g_print ("ok - the window is built, rebinds a card and closes cleanly\n");
+  g_print ("ok - an instance opens a window and both close cleanly\n");
 
   return EXIT_SUCCESS;
 }
