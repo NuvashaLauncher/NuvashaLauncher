@@ -2935,6 +2935,7 @@ open_project_page (AmlContentPage *self, AmlModrinthProject *project)
   GtkWidget *heading = NULL;
   GtkWidget *title = NULL;
   GtkWidget *meta = NULL;
+  GtkWidget *count = NULL;
   GtkWidget *body = NULL;
   GtkWidget *bar = NULL;
   GtkWidget *dropdown = NULL;
@@ -2962,8 +2963,13 @@ open_project_page (AmlContentPage *self, AmlModrinthProject *project)
   gtk_widget_add_css_class (meta, "dim-label");
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), meta);
 
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading),
-                             gtk_label_new (downloads));
+  /* The count sits under the author, at the same left edge as the title
+     and the author above it: a label centres itself unless it is told
+     not to. */
+  count = gtk_label_new (downloads);
+  gtk_label_set_xalign (GTK_LABEL (count), 0);
+  gtk_widget_add_css_class (count, "dim-label");
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), count);
 
   /* The long description. The short one the search answered with stands
      in until the long one arrives. */
