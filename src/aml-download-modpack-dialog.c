@@ -115,6 +115,7 @@ static GtkWidget * build_error_page (AmlDownloadModpackDialog *self,
                                      GCallback retry,
                                      GCallback cancel);
 static GtkWidget * build_installing_page (AmlDownloadModpackDialog *self);
+static void dialog_ensure_installing_page (AmlDownloadModpackDialog *self);
 static void start_install (AmlDownloadModpackDialog *self);
 static void on_pick_directory (GtkButton *, gpointer);
 static void on_cancel_clicked (GtkButton *, gpointer);
@@ -143,12 +144,18 @@ details_watch (GtkWidget **field, GtkWidget *widget)
     g_object_add_weak_pointer (G_OBJECT (widget), (gpointer *) field);
 }
 
+/* Drops every weak pointer this dialog holds, so a widget that outlives,
+ * or is destroyed before, the signals still to come can never be touched
+ * through a stale field. */
 static void
-details_forget (AmlDownloadModpackDialog *self)
+dialog_forget_widgets (AmlDownloadModpackDialog *self)
 {
   details_watch (&self->version_row, NULL);
   details_watch (&self->install_button, NULL);
   details_watch (&self->details_error, NULL);
+  details_watch (&self->install_bar, NULL);
+  details_watch (&self->install_count, NULL);
+  details_watch (&self->install_cancel, NULL);
 }
 
 static void
@@ -165,7 +172,7 @@ dialog_dispose (GObject *object)
   if (self->debounce != 0)
     g_source_remove (self->debounce);
 
-  details_forget (self);
+  dialog_forget_widgets (self);
 
   g_clear_object (&self->manager);
   g_clear_object (&self->search);
@@ -1235,8 +1242,10 @@ build_installing_page (AmlDownloadModpackDialog *self)
 
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
 
-  self->install_bar = bar;
-  self->install_count = running;
+  /* Watched, so a progress callback that arrives after this page is
+   * popped can never write into a widget that is gone. */
+  details_watch (&self->install_bar, bar);
+  details_watch (&self->install_count, running);
 
   gtk_widget_set_vexpand (GTK_WIDGET (bar), FALSE);
   gtk_widget_add_css_class (bar, "progress");
@@ -1251,7 +1260,7 @@ build_installing_page (AmlDownloadModpackDialog *self)
 
   g_signal_connect (cancel_btn, "clicked", G_CALLBACK (on_install_cancel),
                     self);
-  self->install_cancel = cancel_btn;
+  details_watch (&self->install_cancel, cancel_btn);
 
   gtk_box_append (GTK_BOX (buttons), cancel_btn);
   gtk_widget_set_halign (buttons, GTK_ALIGN_CENTER);
@@ -1269,6 +1278,26 @@ build_installing_page (AmlDownloadModpackDialog *self)
   adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (page), "installing");
 
   return page;
+}
+
+/* Puts the installing page up unless one is already there. One install
+ * attempt has exactly one installing page: rebuilding it on the way to
+ * the actual install would push a second page with the same tag while the
+ * first is still transitioning in, which the navigation view refuses.
+ * The weak pointer is NULL once the page is gone, so a page built for a
+ * previous attempt that was popped is never reused. */
+static void
+dialog_ensure_installing_page (AmlDownloadModpackDialog *self)
+{
+  GtkWidget *page = NULL;
+
+  if (self->install_bar != NULL)
+    return;
+
+  page = build_installing_page (self);
+
+  adw_navigation_view_push (ADW_NAVIGATION_VIEW (self->nav),
+                            ADW_NAVIGATION_PAGE (page));
 }
 
 /* Handler buttons patched around the pages. */
@@ -1295,6 +1324,10 @@ on_error_retry_fetch (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   AmlDownloadModpackDialog *self = user_data;
 
   self->fail_is_install = FALSE;
+
+  /* Back onto the installing page the failed download left below the
+   * error, or onto the details page when there was never one. */
+  adw_navigation_view_pop (ADW_NAVIGATION_VIEW (self->nav));
   dialog_start_features (self);
 }
 
@@ -1303,6 +1336,8 @@ on_error_retry_install (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   AmlDownloadModpackDialog *self = user_data;
 
+  /* Back onto the installing page of the attempt that failed. */
+  adw_navigation_view_pop (ADW_NAVIGATION_VIEW (self->nav));
   start_install (self);
 }
 
@@ -1458,14 +1493,9 @@ start_install (AmlDownloadModpackDialog *self)
 
   g_return_if_fail (self->modpack != NULL);
 
-  /* The installing page is a fresh one on every attempt. */
-  adw_navigation_view_pop_to_tag (ADW_NAVIGATION_VIEW (self->nav),
-                                  "details");
-
-  GtkWidget *page = build_installing_page (self);
-
-  adw_navigation_view_push (ADW_NAVIGATION_VIEW (self->nav),
-                            ADW_NAVIGATION_PAGE (page));
+  /* The installing page the pack download put up is the one the install
+   * runs on. */
+  dialog_ensure_installing_page (self);
 
   name = self->instance_name;
 
@@ -1664,7 +1694,6 @@ static void
 dialog_start_features (AmlDownloadModpackDialog *self)
 {
   AmlModrinthFile *file = NULL;
-  GtkWidget *page = NULL;
 
   if (self->version == NULL || self->version->files == NULL)
     return;
@@ -1690,10 +1719,8 @@ dialog_start_features (AmlDownloadModpackDialog *self)
       return;
     }
 
-  page = build_installing_page (self);
-
-  adw_navigation_view_push (ADW_NAVIGATION_VIEW (self->nav),
-                            ADW_NAVIGATION_PAGE (page));
+  /* One installing page per attempt, reused rather than rebuilt. */
+  dialog_ensure_installing_page (self);
 
   /* Reset automatic labelling on each attempt. */
   if (self->install_count != NULL)
@@ -1710,6 +1737,7 @@ dialog_start_features (AmlDownloadModpackDialog *self)
     if (file->filename != NULL && *file->filename != '\0')
       name = file->filename;
 
+    g_free (self->pack_path);
     self->pack_path = g_build_filename (cache_dir, name, NULL);
 
     aml_download_file_async (file->url, self->pack_path, file->sha1,
