@@ -391,6 +391,20 @@ java_status_refresh (AmlInstancePage *self)
   detected = aml_java_row_get_detected (row);
   current = instance_string (self->instance, "java-path");
 
+  /* The first entry says "Default" instead of naming the Java it stands
+     for. Name it: that is the Java this instance runs with when it does
+     not point at one of its own. */
+  {
+    const char *global = aml_settings_get_default_java_path (self->settings);
+    const AmlJava *fallback = NULL;
+
+    if (global != NULL || self->required_java > 0)
+      fallback = aml_java_select (detected, NULL, global,
+                                  self->required_java);
+
+    aml_java_row_set_default_entry_for (row, fallback);
+  }
+
   if (detected->len == 0 && current == NULL)
     message = "No Java installation was found on this system";
 
@@ -589,9 +603,10 @@ on_custom_java_chosen (GObject *dialog, GAsyncResult *result,
   g_object_unref (self);
 }
 
+/* The "Add Java…" entry of the list was picked: ask for the executable,
+ * and on_custom_java_chosen puts what comes back in the list. */
 static void
-on_custom_java_clicked (GtkButton *button G_GNUC_UNUSED,
-                        gpointer user_data)
+on_add_java_requested (AmlJavaRow *row G_GNUC_UNUSED, gpointer user_data)
 {
   AmlInstancePage *self = user_data;
   GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
@@ -1140,34 +1155,21 @@ create_settings_page (AmlInstancePage *self)
                              aml_loader_row_get_version_row (
                                self->loader_row));
 
-  /* Java */
+  /* Java: choosing another executable is one entry of the list, so the
+     row is the only thing in the group. */
   GtkWidget *java_row = GTK_WIDGET (aml_java_row_new ());
-  GtkWidget *custom_java_row = adw_action_row_new ();
-  GtkWidget *custom_java_button = gtk_button_new_with_label ("Choose…");
 
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (java), "Java");
 
   g_signal_connect (java_row, "notify::selected",
                     G_CALLBACK (on_java_selected), self);
-  aml_java_row_set_default_entry_label (AML_JAVA_ROW (java_row), "Default");
+  g_signal_connect (java_row, "add-requested",
+                    G_CALLBACK (on_add_java_requested), self);
+  aml_java_row_set_add_entry_enabled (AML_JAVA_ROW (java_row), TRUE);
   aml_java_row_load (AML_JAVA_ROW (java_row), java_path);
   self->java_row = java_row;
 
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (custom_java_row),
-                                      FALSE);
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (custom_java_row),
-                                 "Custom Java…");
-  gtk_widget_set_valign (custom_java_button, GTK_ALIGN_CENTER);
-  g_signal_connect (custom_java_button, "clicked",
-                    G_CALLBACK (on_custom_java_clicked), self);
-  adw_action_row_add_suffix (ADW_ACTION_ROW (custom_java_row),
-                             custom_java_button);
-  adw_action_row_set_activatable_widget (ADW_ACTION_ROW (custom_java_row),
-                                         custom_java_button);
-
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (java), java_row);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (java),
-                             custom_java_row);
 
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (jvm_args_row),
                                  "JVM Arguments");

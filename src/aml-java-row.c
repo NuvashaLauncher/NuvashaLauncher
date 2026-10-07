@@ -35,6 +35,12 @@ struct _AmlJavaRow
   GPtrArray *names; /* the titles shown in the model */
   char *default_label;
 
+  /* The trailing "Add Java…" entry: off by default, and where it sits
+   * when on, so selecting it asks for a file instead of a path. */
+  gboolean add_enabled;
+  guint add_position;
+  guint last_selection;
+
   /* Selection the instance asked for; /"/" is the default entry. */
   char *wanted;
   gboolean probe_started;
@@ -48,6 +54,13 @@ struct _AmlJavaRow
 };
 
 G_DEFINE_FINAL_TYPE (AmlJavaRow, aml_java_row, ADW_TYPE_COMBO_ROW)
+
+enum {
+  SIGNAL_ADD_REQUESTED,
+  N_SIGNALS
+};
+
+static guint signals[N_SIGNALS];
 
 /* ---------------------------------------------------------- *
  * Rebuilding the visible list
@@ -155,10 +168,20 @@ fill (AmlJavaRow *self)
         position = names->len - 1;
     }
 
+  /* The ask-for-a-file entry is last and has no path of its own. */
+  self->add_position = GTK_INVALID_LIST_POSITION;
+
+  if (self->add_enabled)
+    {
+      g_ptr_array_add (names, g_strdup ("Add Java…"));
+      self->add_position = names->len - 1;
+    }
+
   g_clear_pointer (&self->ids, g_ptr_array_unref);
   self->ids = ids;
   self->ready = TRUE;
   put_model (self, names, position);
+  self->last_selection = adw_combo_row_get_selected (ADW_COMBO_ROW (self));
 
   gtk_widget_set_sensitive (GTK_WIDGET (self), TRUE);
   gtk_widget_set_visible (self->retry, FALSE);
@@ -255,6 +278,35 @@ on_retry_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   aml_java_row_load (self, self->wanted);
 }
 
+/* The row watches its own selection: the trailing add entry asks the
+ * caller for a Java instead of naming one, and the selection goes back to
+ * what it was so the list never rests on it. */
+static void
+on_selected_changed (GObject    *object,
+                     GParamSpec *pspec G_GNUC_UNUSED,
+                     gpointer    user_data G_GNUC_UNUSED)
+{
+  AmlJavaRow *self = AML_JAVA_ROW (object);
+  guint selected;
+
+  if (!self->ready || self->add_position == GTK_INVALID_LIST_POSITION)
+    return;
+
+  selected = adw_combo_row_get_selected (ADW_COMBO_ROW (self));
+
+  if (selected != self->add_position)
+    {
+      self->last_selection = selected;
+      return;
+    }
+
+  adw_combo_row_set_selected (
+    ADW_COMBO_ROW (self),
+    self->last_selection != GTK_INVALID_LIST_POSITION ? self->last_selection
+                                                      : 0);
+  g_signal_emit (self, signals[SIGNAL_ADD_REQUESTED], 0);
+}
+
 /* ---------------------------------------------------------- *
  * Public API
  * ---------------------------------------------------------- */
@@ -272,6 +324,51 @@ aml_java_row_set_default_entry_label (AmlJavaRow *self,
   g_return_if_fail (AML_IS_JAVA_ROW (self));
 
   g_set_str (&self->default_label, label);
+}
+
+void
+aml_java_row_set_default_entry_for (AmlJavaRow *self,
+                                    const AmlJava *java)
+{
+  GtkStringList *list = NULL;
+  const char *items[2];
+
+  g_return_if_fail (AML_IS_JAVA_ROW (self));
+
+  g_free (self->default_label);
+  self->default_label = java != NULL ? java_label ((AmlJava *) java)
+                                     : g_strdup ("Default");
+
+  if (!self->ready || self->names->len == 0)
+    return;
+
+  /* The first entry is replaced in place: building the model again would
+   * move the selection and look like the user had chosen a second time. */
+  g_free (self->names->pdata[0]);
+  self->names->pdata[0] = g_strdup (self->default_label);
+
+  list = GTK_STRING_LIST (adw_combo_row_get_model (ADW_COMBO_ROW (self)));
+
+  if (list == NULL)
+    return;
+
+  items[0] = self->default_label;
+  items[1] = NULL;
+  gtk_string_list_splice (list, 0, 1, items);
+}
+
+void
+aml_java_row_set_add_entry_enabled (AmlJavaRow *self, gboolean enabled)
+{
+  g_return_if_fail (AML_IS_JAVA_ROW (self));
+
+  if (self->add_enabled == enabled)
+    return;
+
+  self->add_enabled = enabled;
+
+  if (self->ready)
+    fill (self);
 }
 
 void
@@ -321,7 +418,8 @@ aml_java_row_get_selected_path (AmlJavaRow *self)
 
   position = adw_combo_row_get_selected (ADW_COMBO_ROW (self));
 
-  if (position == GTK_INVALID_LIST_POSITION || position >= self->ids->len)
+  if (position == GTK_INVALID_LIST_POSITION ||
+      position == self->add_position || position >= self->ids->len)
     return NULL;
 
   /* Entry 0 carries a NULL path: it is the global default. */
@@ -389,8 +487,10 @@ aml_java_row_set_custom (AmlJavaRow *self,
 
   fill (self);
 
+  /* The probed entry is the last one that has a path: the "Add Java…"
+     entry, when it is on, sits after it and has none. */
   if (self->ready)
-    adw_combo_row_set_selected (ADW_COMBO_ROW (self), self->names->len - 1);
+    adw_combo_row_set_selected (ADW_COMBO_ROW (self), self->ids->len - 1);
 }
 
 /* ---------------------------------------------------------- *
@@ -431,6 +531,10 @@ aml_java_row_class_init (AmlJavaRowClass *klass)
 
   object_class->dispose = aml_java_row_dispose;
   object_class->finalize = aml_java_row_finalize;
+
+  signals[SIGNAL_ADD_REQUESTED] =
+    g_signal_new ("add-requested", G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 }
 
 static void
@@ -446,6 +550,12 @@ aml_java_row_init (AmlJavaRow *self)
   self->ids = g_ptr_array_new_with_free_func (g_free);
   self->names = g_ptr_array_new_with_free_func (g_free);
   self->default_label = g_strdup ("Default");
+  self->add_enabled = FALSE;
+  self->add_position = GTK_INVALID_LIST_POSITION;
+  self->last_selection = 0;
+
+  g_signal_connect (self, "notify::selected",
+                    G_CALLBACK (on_selected_changed), NULL);
 
   self->retry = gtk_button_new_with_label ("Retry");
   gtk_widget_add_css_class (self->retry, "flat");
