@@ -1,0 +1,246 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
+/* The small pieces of the browser UI that have broken before.
+ *
+ * Rows take their title and subtitle as plain text: Modrinth titles and
+ * descriptions, file names and paths hold "&" and "<", and Pango reads
+ * them as markup unless the row is told not to. A row a user is meant to
+ * click is made activatable, because an AdwActionRow is not by default.
+ * An icon the toolkit cannot decode keeps the placeholder instead of an
+ * empty square. And a request that finishes after the page it belongs to
+ * is gone must not touch it.
+ *
+ * Everything here is local. No display means the widget part is skipped,
+ * never faked. */
+
+#include <gtk/gtk.h>
+#include <libadwaita-1/adwaita.h>
+
+#include <glib/gstdio.h>
+
+#include "aml-content-page.h"
+#include "aml-icons.h"
+#include "aml-instance-manager.h"
+#include "aml-modrinth.h"
+
+/* The titles the browser has to survive: an ampersand, a tag-like word
+ * and a name that reads like markup. */
+static const char *const markup_titles[] = {
+  "Fresh & Smooth",
+  "Guns&Fun",
+  "Ben 10 | Omnicraft - Alien Evolution & Omnitrix RPG",
+  "<b>x</b>",
+};
+
+static guint markup_warnings = 0;
+
+/* GTK logs through the structured writer, so the count is taken there
+ * and the message is still handed to the default writer to be printed
+ * like any other. */
+static GLogWriterOutput
+count_markup_warning (GLogLevelFlags   log_level,
+                      const GLogField *fields,
+                      gsize            n_fields,
+                      gpointer         user_data)
+{
+  const char *message = NULL;
+
+  (void) user_data;
+
+  for (gsize i = 0; i < n_fields; i++)
+    {
+      if (g_strcmp0 (fields[i].key, "MESSAGE") == 0)
+        message = fields[i].value;
+    }
+
+  if ((log_level & G_LOG_LEVEL_WARNING) != 0 &&
+      message != NULL && g_strstr_len (message, -1, "markup") != NULL)
+    markup_warnings++;
+
+  return g_log_writer_default (log_level, fields, n_fields, NULL);
+}
+
+static void
+test_markup (void)
+{
+  GtkWidget *group = adw_preferences_group_new ();
+
+  markup_warnings = 0;
+
+  for (guint i = 0; i < G_N_ELEMENTS (markup_titles); i++)
+    {
+      GtkWidget *row = adw_action_row_new ();
+
+      /* The order is the whole point: markup off first, then the text. */
+      adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
+      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
+                                     markup_titles[i]);
+      adw_action_row_set_subtitle (ADW_ACTION_ROW (row),
+                                   markup_titles[i]);
+      adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), row);
+    }
+
+  g_object_ref_sink (group);
+  g_object_unref (group);
+
+  g_assert_cmpuint (markup_warnings, ==, 0);
+  g_print ("ok - titles and descriptions with markup characters are plain\n");
+}
+
+static gboolean activated = FALSE;
+
+static void
+on_activated (AdwActionRow *row G_GNUC_UNUSED, gpointer user_data G_GNUC_UNUSED)
+{
+  activated = TRUE;
+}
+
+static void
+test_row_activation (void)
+{
+  GtkWidget *group = adw_preferences_group_new ();
+  GtkWidget *row = adw_action_row_new ();
+
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), "Clickable");
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), row);
+
+  /* An AdwActionRow is unactivatable until it is told otherwise; a click
+   * on a row that is not does nothing at all. */
+  g_assert_false (gtk_list_box_row_get_activatable (GTK_LIST_BOX_ROW (row)));
+
+  g_signal_connect (row, "activated", G_CALLBACK (on_activated), NULL);
+  gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
+  g_assert_true (gtk_list_box_row_get_activatable (GTK_LIST_BOX_ROW (row)));
+
+  adw_action_row_activate (ADW_ACTION_ROW (row));
+  g_assert_true (activated);
+
+  g_object_ref_sink (group);
+  g_object_unref (group);
+  g_print ("ok - a result row is activatable and its click is delivered\n");
+}
+
+/* A one pixel PNG, so the decode path has something that really is an
+ * image without a file to carry around. */
+static const char *const one_pixel_png_base64 =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4"
+  "z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==";
+
+static void
+test_icon_decode (void)
+{
+  g_autoptr (GError) error = NULL;
+  g_autofree char *tmp = g_dir_make_tmp ("aml-ui-icon-XXXXXX", &error);
+  g_autofree char *bad_path = NULL;
+  g_autofree char *good_path = NULL;
+  g_autofree guchar *png = NULL;
+  gsize png_len = 0;
+  GtkWidget *icon = NULL;
+
+  g_assert_no_error (error);
+  g_assert_nonnull (tmp);
+
+  bad_path = g_build_filename (tmp, "not-an-image.webp", NULL);
+  good_path = g_build_filename (tmp, "one-pixel.png", NULL);
+
+  g_assert_true (g_file_set_contents (bad_path, "this is not an image", -1,
+                                      &error));
+  g_assert_no_error (error);
+
+  png = g_base64_decode (one_pixel_png_base64, &png_len);
+  g_assert_true (g_file_set_contents (good_path, (const char *) png,
+                                      png_len, &error));
+  g_assert_no_error (error);
+
+  icon = aml_icon_widget_new ("image-x-generic-symbolic");
+
+  /* A file that cannot be decoded leaves the placeholder in place. */
+  g_assert_false (aml_icon_widget_set_file (icon, bad_path));
+  g_assert_cmpstr (gtk_stack_get_visible_child_name (GTK_STACK (icon)), ==,
+                   "placeholder");
+
+  /* A file that is an image is shown. */
+  g_assert_true (aml_icon_widget_set_file (icon, good_path));
+  g_assert_cmpstr (gtk_stack_get_visible_child_name (GTK_STACK (icon)), ==,
+                   "icon");
+
+  /* A missing answer changes nothing. */
+  g_assert_false (aml_icon_widget_set_file (icon, NULL));
+
+  g_object_ref_sink (icon);
+  g_object_unref (icon);
+
+  g_unlink (bad_path);
+  g_unlink (good_path);
+  g_rmdir (tmp);
+
+  g_print ("ok - an undecodable icon keeps the placeholder\n");
+}
+
+/* A page whose folder scan is still running when the page goes away must
+ * not be touched by the answer. Local only: the scan reads a directory,
+ * it never asks the network. */
+static void
+test_page_disposed_while_scanning (void)
+{
+  g_autoptr (GError) error = NULL;
+  g_autofree char *tmp = g_dir_make_tmp ("aml-ui-page-XXXXXX", &error);
+  g_autofree char *data_dir = NULL;
+  g_autoptr (AmlInstanceManager) manager = NULL;
+  AmlInstance *instance = NULL;
+  AmlContentPage *page = NULL;
+  gint64 deadline = 0;
+
+  g_assert_no_error (error);
+  g_assert_nonnull (tmp);
+
+  data_dir = g_build_filename (tmp, "data", NULL);
+  manager = aml_instance_manager_new (data_dir);
+  instance = aml_instance_manager_create (manager, "Dispose", NULL, "1.21.1",
+                                          AML_LOADER_FABRIC, "0.15.0",
+                                          &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+
+  /* The scan of this page is on its way when the page is dropped. */
+  page = aml_content_page_new (instance, AML_CONTENT_MOD);
+  g_object_ref_sink (page);
+  g_object_unref (page);
+
+  /* Let the cancelled scan answer to a page that is no longer there. */
+  deadline = g_get_monotonic_time () + 300 * G_TIME_SPAN_MILLISECOND;
+
+  while (g_get_monotonic_time () < deadline)
+    g_main_context_iteration (NULL, FALSE);
+
+  g_object_unref (instance);
+  g_print ("ok - a page disposed while scanning is not touched afterwards\n");
+}
+
+int
+main (int argc, char **argv)
+{
+  (void) argc;
+  (void) argv;
+
+  g_print ("# Browser UI\n");
+
+  if (!gtk_init_check ())
+    {
+      g_print ("skipped - no display, cannot build the widgets\n");
+      return EXIT_SUCCESS;
+    }
+
+  /* The markup audit counts through the structured log writer. */
+  g_log_set_writer_func (count_markup_warning, NULL, NULL);
+
+  test_markup ();
+  test_row_activation ();
+  test_icon_decode ();
+  test_page_disposed_while_scanning ();
+
+  return EXIT_SUCCESS;
+}
