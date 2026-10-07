@@ -92,6 +92,11 @@ typedef struct {
   char *icon_url;
   guint64 downloads;
   guint64 followers;
+
+  /* What the /search answer also said: every Minecraft version the
+   * project lists itself for, and what it tags itself with. */
+  GPtrArray *versions;   /* const char*, never NULL */
+  GPtrArray *categories; /* const char*, never NULL */
 } AmlModrinthProject;
 
 void aml_modrinth_project_free (AmlModrinthProject *project);
