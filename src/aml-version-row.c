@@ -292,6 +292,8 @@ aml_version_row_init (AmlVersionRow *self)
 {
   g_autoptr (GPtrArray) ids = g_ptr_array_new_with_free_func (g_free);
 
+  /* A Minecraft version is a name from Mojang, not markup. */
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self), FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self),
                                  "Minecraft Version");
 

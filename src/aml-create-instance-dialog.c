@@ -232,6 +232,8 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
     g_build_filename (g_get_user_data_dir (), "AML", "instances", NULL);
 
   self->directory_row = adw_action_row_new ();
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->directory_row),
+                                      FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->directory_row),
                                  "Directory");
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self->directory_row),

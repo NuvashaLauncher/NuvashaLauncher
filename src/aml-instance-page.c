@@ -950,6 +950,12 @@ create_settings_page (AmlInstancePage *self)
   GtkWidget *change_icon = gtk_button_new_with_label ("Change");
   GtkWidget *delete_row = NULL;
 
+  /* Names, paths and arguments are text from the user or the disk: none
+     of them is markup. */
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (name_row), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (jvm_args_row),
+                                      FALSE);
+
   gtk_widget_set_vexpand (page, TRUE);
 
   /* General */
@@ -962,6 +968,8 @@ create_settings_page (AmlInstancePage *self)
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (general), name_row);
 
   self->icon_row = adw_action_row_new ();
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->icon_row),
+                                      FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->icon_row), "Icon");
   self->icon_image = gtk_image_new ();
   gtk_image_set_pixel_size (GTK_IMAGE (self->icon_image), 32);
@@ -980,6 +988,8 @@ create_settings_page (AmlInstancePage *self)
      to them. Opening and changing are separate on purpose: one only
      looks, the other moves every file. */
   self->directory_row = adw_action_row_new ();
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->directory_row),
+                                      FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->directory_row),
                                  "Directory");
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self->directory_row),
@@ -1059,6 +1069,8 @@ create_settings_page (AmlInstancePage *self)
   aml_java_row_load (AML_JAVA_ROW (java_row), java_path);
   self->java_row = java_row;
 
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (custom_java_row),
+                                      FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (custom_java_row),
                                  "Custom Java…");
   gtk_widget_set_valign (custom_java_button, GTK_ALIGN_CENTER);

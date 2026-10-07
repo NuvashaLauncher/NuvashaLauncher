@@ -316,6 +316,14 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   GtkWidget *crash_row = adw_switch_row_new ();
   SettingsJava *ctx = g_new0 (SettingsJava, 1);
 
+  /* Every one of these rows can show a path or an error message from
+     GIO, which is plain text and may hold an "&". */
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (unstable_row),
+                                      FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (crash_row), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (custom_row), FALSE);
+
   ctx->refs = 1;
   ctx->owner = g_object_ref (self);
   ctx->row = AML_JAVA_ROW (java_row);
@@ -388,6 +396,7 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
     0, 0);
   adw_spin_row_set_digits (ADW_SPIN_ROW (limit_row), 0);
   adw_spin_row_set_numeric (ADW_SPIN_ROW (limit_row), TRUE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (limit_row), FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (limit_row),
                                  "Line Limit");
   g_signal_connect (limit_row, "notify::value",

@@ -1239,8 +1239,10 @@ file_row (AmlContentPage *self, AmlContentFile *file)
                                                                : "Enable");
   GtkWidget *remove = gtk_button_new_with_label ("Remove");
 
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), file->filename);
+  /* A file name and a path are plain text: markup off first, because
+     either may hold an "&". */
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), file->filename);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (row), file->path);
 
   /* The same square as a browse row, with the icon of what this kind of
@@ -1807,10 +1809,12 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
 
       /* The icon, then the name and the description under it. Nothing
          else: who wrote it, how often it was taken, which game version
-         and which loader are what the details page is for. */
+         and which loader are what the details page is for. Markup is
+         turned off before the title and the description go in, because
+         both are plain text from Modrinth and may hold an "&". */
+      adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
       adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
                                      project->title);
-      adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
       adw_action_row_set_subtitle (ADW_ACTION_ROW (row), project->description);
       adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 2);
 
@@ -2301,10 +2305,11 @@ on_detail_versions_ready (GObject *source G_GNUC_UNUSED,
       GtkWidget *button = gtk_button_new_with_label ("Install");
       g_autofree char *subtitle = NULL;
 
+      /* A name and a description are text, not markup: an "&" in one is
+         an "&", so markup is turned off before anything is put in. */
+      adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
       adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
                                      version->name);
-      /* A description is text, not markup: an "&" in one is an "&". */
-      adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
       /* The words a user reads under a version: what it is called, when
          it was published and how often it was taken. */
       subtitle = g_strdup_printf (

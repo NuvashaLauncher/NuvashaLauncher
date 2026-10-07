@@ -436,6 +436,8 @@ aml_java_row_class_init (AmlJavaRowClass *klass)
 static void
 aml_java_row_init (AmlJavaRow *self)
 {
+  /* A Java path is a file name and may hold an "&": it is plain text. */
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self), FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self),
                                  "Java Installation");
 
