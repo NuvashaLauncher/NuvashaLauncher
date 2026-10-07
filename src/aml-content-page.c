@@ -1827,7 +1827,7 @@ update_check_done (AmlContentPage *self, UpdateRun *run)
     adw_alert_dialog_set_heading_use_markup (alert, FALSE);
     adw_alert_dialog_set_body_use_markup (alert, FALSE);
     adw_alert_dialog_add_response (alert, "cancel", "Cancel");
-    adw_alert_dialog_add_response (alert, "update", "Update");
+    adw_alert_dialog_add_response (alert, "update", "Confirm");
     adw_alert_dialog_set_response_appearance (alert, "update",
                                               ADW_RESPONSE_SUGGESTED);
     adw_alert_dialog_set_default_response (alert, "cancel");
@@ -1868,7 +1868,11 @@ on_update_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
-  if (update != NULL && file != NULL)
+  /* The update endpoint answers with the newest version that fits, which
+     is still the installed one when the file is already the newest: a
+     version that carries the very file on disk is not an update. */
+  if (update != NULL && file != NULL &&
+      !aml_modrinth_version_has_hash (update, file->sha1))
     {
       UpdateItem *item = g_new0 (UpdateItem, 1);
 

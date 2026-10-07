@@ -281,6 +281,12 @@ AmlModrinthVersion *aml_modrinth_version_copy (AmlModrinthVersion *version);
  * Borrowed from @version. */
 AmlModrinthFile *aml_modrinth_version_primary_file (AmlModrinthVersion *version);
 
+/* TRUE when @version carries a file whose sha1 is @sha1: the update
+ * endpoint answers with the newest version that fits, and that version
+ * can be the one already installed. */
+gboolean aml_modrinth_version_has_hash (const AmlModrinthVersion *version,
+                                        const char               *sha1);
+
 /* The versions of @project_id that run @minecraft_version and, for a
  * mod, @loader, newest first.
  *
