@@ -150,6 +150,7 @@ struct _AmlContentPage
   GtkWidget *details_body;
   GtkWidget *details_dropdown;
   GtkWidget *details_download;
+  GtkWidget *details_dialog; /* weak: the dialog of the open project */
 };
 
 G_DEFINE_FINAL_TYPE (AmlContentPage, aml_content_page, GTK_TYPE_BOX)
@@ -211,41 +212,23 @@ page_watch_free (PageWatch *watch)
 }
 
 /* One answer of the dialog of a project while what it shows is being
- * read: the page that opened it (weakly held), the widgets the details
- * and the versions fill, and the name the plan is titled with. The
- * widgets are held, so an answer that arrives after the dialog is closed
- * finds them still alive and fills them without the page; the page
- * itself is only read while it is there.
- *
- * The dialog shows a spinner until both the long description and the
- * versions are in, then puts the whole content in at once. */
+ * read: the page that opened it, weakly held, and the project the
+ * versions are asked for. The page can be closed while a request is
+ * still running, so the answer does nothing instead of touching memory
+ * that is gone. */
 typedef struct {
-  AmlContentPage *page;       /* weak */
-  GtkWidget *body;            /* owned: the box the Markdown goes in */
-  GtkWidget *meta;            /* owned */
-  GtkWidget *count;           /* owned: the download count label */
-  GtkWidget *dropdown;        /* owned: the versions to choose from */
-  GtkWidget *download;        /* owned: the button that starts the install */
-  char *project_id;           /* owned */
-  char *author;               /* owned: who the search answer named */
+  AmlContentPage *page; /* weak */
+  char *project_id;     /* owned */
 } DetailsWatch;
 
 static DetailsWatch *
-details_watch_new (AmlContentPage *self, GtkWidget *body, GtkWidget *meta,
-                   GtkWidget *count, GtkWidget *dropdown, GtkWidget *download,
-                   const char *project_id, const char *author)
+details_watch_new (AmlContentPage *self, const char *project_id)
 {
   DetailsWatch *watch = g_new0 (DetailsWatch, 1);
 
   watch->page = self;
   g_object_add_weak_pointer (G_OBJECT (self), (gpointer *) &watch->page);
-  watch->body = g_object_ref (body);
-  watch->meta = g_object_ref (meta);
-  watch->count = g_object_ref (count);
-  watch->dropdown = g_object_ref (dropdown);
-  watch->download = g_object_ref (download);
   watch->project_id = g_strdup (project_id);
-  watch->author = g_strdup (author);
 
   return watch;
 }
@@ -257,14 +240,23 @@ details_watch_free (DetailsWatch *watch)
     g_object_remove_weak_pointer (G_OBJECT (watch->page),
                                   (gpointer *) &watch->page);
 
-  g_clear_object (&watch->body);
-  g_clear_object (&watch->meta);
-  g_clear_object (&watch->count);
-  g_clear_object (&watch->dropdown);
-  g_clear_object (&watch->download);
   g_free (watch->project_id);
-  g_free (watch->author);
   g_free (watch);
+}
+
+/* Points @field at @widget and watches it: when the widget is destroyed
+ * the field becomes NULL before anything can touch it. Used for the
+ * widgets of the dialog of a project, which the dialog owns. */
+static void
+watch_widget (GtkWidget **field, GtkWidget *widget)
+{
+  if (*field != NULL)
+    g_object_remove_weak_pointer (G_OBJECT (*field), (gpointer *) field);
+
+  *field = widget;
+
+  if (widget != NULL)
+    g_object_add_weak_pointer (G_OBJECT (widget), (gpointer *) field);
 }
 
 /* ---------------------------------------------------------- *
@@ -2824,31 +2816,26 @@ details_content (AmlContentPage *self)
   GtkWidget *box = NULL;
   GtkWidget *heading = NULL;
   GtkWidget *bar = NULL;
-  GtkWidget *heading_watch = NULL;
-  GtkWidget *meta_watch = NULL;
-  GtkWidget *count_watch = NULL;
+  GtkWidget *title = NULL;
+  GtkWidget *meta = NULL;
+  GtkWidget *count = NULL;
+  g_autofree char *downloads = NULL;
 
   scroller = gtk_scrolled_window_new ();
   box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 18);
   heading = adw_preferences_group_new ();
 
-  /* The title is already in the dialog; here we add the meta, count,
-     and the Markdown body. We need to know which labels were added to
-     the heading in open_project_page. The watch doesn't keep the heading,
-     but we can just build it fresh here since the content replaces the
-     spinner entirely. */
-
-  /* Rebuild the heading with title, meta, and count. */
-  {
-    GtkWidget *title = gtk_label_new (self->current_project_title);
-    gtk_label_set_wrap (GTK_LABEL (title), TRUE);
-    gtk_label_set_xalign (GTK_LABEL (title), 0);
-    gtk_widget_add_css_class (title, "title-2");
-    adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), title);
-  }
+  /* The title, then the license and author and the download count, the
+     same lines the other contents show. */
+  title = gtk_label_new (self->current_project_title);
+  gtk_label_set_wrap (GTK_LABEL (title), TRUE);
+  gtk_label_set_xalign (GTK_LABEL (title), 0);
+  gtk_widget_add_css_class (title, "title-2");
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), title);
 
   {
-    const char *who = self->details_author != NULL && *self->details_author != '\0'
+    const char *who = self->details_author != NULL &&
+                      *self->details_author != '\0'
                         ? self->details_author
                         : "";
     g_autofree char *text = NULL;
@@ -2859,33 +2846,34 @@ details_content (AmlContentPage *self)
     else
       text = g_strdup_printf ("by %s", who);
 
-    GtkWidget *meta = gtk_label_new (text);
+    meta = gtk_label_new (text);
     gtk_label_set_xalign (GTK_LABEL (meta), 0);
     gtk_widget_add_css_class (meta, "dim-label");
     adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), meta);
   }
 
-  {
-    g_autofree char *downloads = format_downloads (self->current_project_downloads);
+  downloads = format_downloads (self->current_project_downloads);
+  count = gtk_label_new (downloads);
+  gtk_label_set_xalign (GTK_LABEL (count), 0);
+  gtk_widget_add_css_class (count, "dim-label");
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), count);
 
-    GtkWidget *count = gtk_label_new (downloads);
-    gtk_label_set_xalign (GTK_LABEL (count), 0);
-    gtk_widget_add_css_class (count, "dim-label");
-    adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), count);
-  }
+  /* The long description, in Markdown: headings, links and images are
+     read and shown as widgets rather than as the raw text. */
+  watch_widget (&self->details_body, gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
 
-  /* The long description in Markdown. */
   if (self->details_problem != NULL)
-    gtk_box_append (GTK_BOX (self->details_body), plain_label (self->details_problem));
+    gtk_box_append (GTK_BOX (self->details_body),
+                    plain_label (self->details_problem));
   else if (self->details != NULL && self->details->body != NULL &&
            *self->details->body != '\0')
     aml_markdown_render (GTK_BOX (self->details_body), self->details->body);
-  else
+  else if (self->details != NULL)
     gtk_box_append (GTK_BOX (self->details_body),
                     plain_label (self->details->description));
 
   gtk_box_append (GTK_BOX (box), heading);
-  gtk_box_append (GTK_BOX (box), GTK_WIDGET (self->details_body));
+  gtk_box_append (GTK_BOX (box), self->details_body);
 
   gtk_widget_set_margin_top (box, 12);
   gtk_widget_set_margin_bottom (box, 12);
@@ -2897,6 +2885,17 @@ details_content (AmlContentPage *self)
 
   /* The foot: every version this instance can take, and the button that
      installs the one shown. The newest is what it shows from the start. */
+  watch_widget (&self->details_dropdown, gtk_drop_down_new (NULL, NULL));
+  gtk_widget_set_hexpand (self->details_dropdown, TRUE);
+  gtk_widget_set_valign (self->details_dropdown, GTK_ALIGN_CENTER);
+
+  watch_widget (&self->details_download, gtk_button_new_with_label ("Download"));
+  gtk_widget_add_css_class (self->details_download, "suggested-action");
+  gtk_widget_set_valign (self->details_download, GTK_ALIGN_CENTER);
+  gtk_widget_set_sensitive (self->details_download, FALSE);
+  g_signal_connect (self->details_download, "clicked",
+                    G_CALLBACK (on_version_download_clicked), self);
+
   bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   gtk_box_append (GTK_BOX (bar), self->details_dropdown);
   gtk_box_append (GTK_BOX (bar), self->details_download);
@@ -2919,31 +2918,19 @@ details_content (AmlContentPage *self)
 static void
 dialog_details_fill (AmlContentPage *self)
 {
-  AdwDialog *dialog = NULL;
-
-  if (self == NULL)
+  if (self == NULL || self->details_dialog == NULL)
     return;
 
   if (!self->details_ready || !self->versions_ready)
     return;
 
-  dialog = ADW_DIALOG (gtk_widget_get_ancestor (GTK_WIDGET (self->details_dropdown),
-                                                ADW_TYPE_DIALOG));
-
-  if (dialog == NULL)
-    return;
-
-  adw_dialog_set_child (dialog, details_content (self));
+  adw_dialog_set_child (ADW_DIALOG (self->details_dialog),
+                        details_content (self));
 
   if (self->versions_problem != NULL)
-    {
-      show_toast (self, self->versions_problem);
-    }
+    show_toast (self, self->versions_problem);
   else if (self->details_versions != NULL && self->details_versions->len == 0)
-    {
-      show_toast (self,
-                  "This project publishes nothing that fits this instance.");
-    }
+    show_toast (self, "This project publishes nothing that fits this instance.");
 
   if (self->details_versions != NULL && self->details_versions->len > 0)
     {
@@ -2959,12 +2946,23 @@ dialog_details_fill (AmlContentPage *self)
 
       gtk_drop_down_set_model (GTK_DROP_DOWN (self->details_dropdown),
                                G_LIST_MODEL (labels));
+      /* The newest version is what a user most often wants, so it is
+         what the dropdown shows from the start. */
       gtk_drop_down_set_selected (GTK_DROP_DOWN (self->details_dropdown), 0);
       g_object_unref (labels);
+
+      /* The button owns the versions from here, so the install it starts
+         does not depend on the page still holding them. */
+      g_object_set_data_full (G_OBJECT (self->details_download), "aml-versions",
+                              g_ptr_array_ref (self->details_versions),
+                              (GDestroyNotify) g_ptr_array_unref);
+      g_object_set_data (G_OBJECT (self->details_download), "aml-dropdown",
+                         self->details_dropdown);
     }
 
-  gtk_widget_set_sensitive (self->details_download,
-                            self->details_versions != NULL && self->details_versions->len > 0);
+  gtk_widget_set_sensitive (
+      self->details_download,
+      self->details_versions != NULL && self->details_versions->len > 0);
 }
 
 static void
@@ -3064,114 +3062,17 @@ static void
 open_project_page (AmlContentPage *self, AmlModrinthProject *project)
 {
   AdwDialog *dialog = NULL;
-  GtkWidget *content = NULL;
-  GtkWidget *scroller = NULL;
-  GtkWidget *box = NULL;
-  GtkWidget *heading = NULL;
-  GtkWidget *title = NULL;
-  GtkWidget *meta = NULL;
-  GtkWidget *count = NULL;
-  GtkWidget *body = NULL;
-  GtkWidget *bar = NULL;
-  GtkWidget *dropdown = NULL;
-  GtkWidget *download = NULL;
-  g_autofree char *author = NULL;
-  g_autofree char *downloads = NULL;
 
   if (project == NULL)
     return;
 
-  /* Store the project info in self so dialog_details_fill can rebuild
-     the heading when the dialog content is swapped in. */
+  /* What the dialog needs to rebuild its heading once the answers are
+     in. The dialog itself is built with a spinner and filled later. */
+  g_free (self->current_project_title);
   self->current_project_title = g_strdup (project->title);
   self->current_project_downloads = project->downloads;
+  g_free (self->details_author);
   self->details_author = g_strdup (project->author);
-
-  scroller = gtk_scrolled_window_new ();
-  box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 18);
-  heading = adw_preferences_group_new ();
-
-  title = gtk_label_new (project->title);
-  gtk_label_set_wrap (GTK_LABEL (title), TRUE);
-  gtk_label_set_xalign (GTK_LABEL (title), 0);
-  gtk_widget_add_css_class (title, "title-2");
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), title);
-
-  author = g_strdup_printf ("by %s", project->author);
-  downloads = format_downloads (project->downloads);
-  meta = gtk_label_new (author);
-  gtk_label_set_xalign (GTK_LABEL (meta), 0);
-  gtk_widget_add_css_class (meta, "dim-label");
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), meta);
-
-  /* The count sits under the author, at the same left edge as the title
-     and the author above it: a label centres itself unless it is told
-     not to. */
-  count = gtk_label_new (downloads);
-  gtk_label_set_xalign (GTK_LABEL (count), 0);
-  gtk_widget_add_css_class (count, "dim-label");
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), count);
-
-  /* The long description. The short one the search answered with stands
-     in until the long one arrives. */
-  body = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
-  gtk_box_append (GTK_BOX (body), plain_label (project->description));
-
-  gtk_box_append (GTK_BOX (box), heading);
-  gtk_box_append (GTK_BOX (box), body);
-
-  gtk_widget_set_margin_top (box, 12);
-  gtk_widget_set_margin_bottom (box, 12);
-  gtk_widget_set_margin_start (box, 18);
-  gtk_widget_set_margin_end (box, 18);
-
-  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller), box);
-  gtk_widget_set_vexpand (scroller, TRUE);
-
-  /* The foot of the dialog: every version this instance can take, and
-     the button that installs the one it shows. The newest is what it
-     shows from the start. */
-  dropdown = gtk_drop_down_new (NULL, NULL);
-  gtk_widget_set_hexpand (dropdown, TRUE);
-  gtk_widget_set_valign (dropdown, GTK_ALIGN_CENTER);
-
-  download = gtk_button_new_with_label ("Download");
-  gtk_widget_add_css_class (download, "suggested-action");
-  gtk_widget_set_valign (download, GTK_ALIGN_CENTER);
-  /* Nothing can be installed before the versions have arrived. */
-  gtk_widget_set_sensitive (download, FALSE);
-  g_signal_connect (download, "clicked",
-                    G_CALLBACK (on_version_download_clicked), self);
-
-  bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  gtk_box_append (GTK_BOX (bar), dropdown);
-  gtk_box_append (GTK_BOX (bar), download);
-  gtk_widget_set_margin_top (bar, 12);
-  gtk_widget_set_margin_bottom (bar, 12);
-  gtk_widget_set_margin_start (bar, 12);
-  gtk_widget_set_margin_end (bar, 12);
-
-  content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-  gtk_box_append (GTK_BOX (content), scroller);
-  gtk_box_append (GTK_BOX (content),
-                  gtk_separator_new (GTK_ORIENTATION_HORIZONTAL));
-  gtk_box_append (GTK_BOX (content), bar);
-
-  dialog = adw_dialog_new ();
-  adw_dialog_set_title (dialog, project->title);
-  adw_dialog_set_content_width (dialog, 640);
-  adw_dialog_set_content_height (dialog, 640);
-
-  /* Show a spinner until both the description and the versions are in. */
-  adw_dialog_set_child (dialog, loading_child ());
-
-  adw_dialog_present (dialog, GTK_WIDGET (self));
-
-  /* Store the widgets and project info in self so dialog_details_fill
-     can rebuild the heading and access them. */
-  self->details_body = body;
-  self->details_dropdown = dropdown;
-  self->details_download = download;
 
   self->details_ready = FALSE;
   self->versions_ready = FALSE;
@@ -3182,11 +3083,22 @@ open_project_page (AmlContentPage *self, AmlModrinthProject *project)
   g_free (self->versions_problem);
   self->versions_problem = NULL;
 
+  /* A dialog of its own above the page, showing a spinner until both the
+     description and the versions are in. */
+  dialog = adw_dialog_new ();
+  adw_dialog_set_title (dialog, project->title);
+  adw_dialog_set_content_width (dialog, 640);
+  adw_dialog_set_content_height (dialog, 640);
+  adw_dialog_set_child (dialog, loading_child ());
+
+  watch_widget (&self->details_dialog, GTK_WIDGET (dialog));
+
+  adw_dialog_present (dialog, GTK_WIDGET (self));
+
   set_busy (self, TRUE);
-  aml_modrinth_details_async (
-      project->project_id, self->browse, on_details_ready,
-      details_watch_new (self, body, meta, count, dropdown, download,
-                         project->project_id, project->author));
+  aml_modrinth_details_async (project->project_id, self->browse,
+                              on_details_ready,
+                              details_watch_new (self, project->project_id));
 }
 
 static void
@@ -3683,9 +3595,13 @@ aml_content_page_dispose (GObject *object)
   g_clear_object (&self->more);
   g_clear_pointer (&self->seen_ids, g_hash_table_unref);
 
-  g_clear_object (&self->details_body);
-  g_clear_object (&self->details_dropdown);
-  g_clear_object (&self->details_download);
+  /* The dialog of a project and the widgets in it are owned by the
+     dialog; the fields only watch them, so they are dropped and not
+     unrefed. */
+  watch_widget (&self->details_body, NULL);
+  watch_widget (&self->details_dropdown, NULL);
+  watch_widget (&self->details_download, NULL);
+  watch_widget (&self->details_dialog, NULL);
 
   /* A batch of updates that was still being applied is not applied any
      more: the plans and fetches hold the page weakly and stop. */
