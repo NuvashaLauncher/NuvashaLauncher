@@ -26,7 +26,6 @@ struct _AmlUsersPopover
   GtkWidget *list_box;    /* the accounts, one row each */
   GtkWidget *empty_label; /* what is said when there are none */
   GtkWidget *error_label; /* what went wrong, when something did */
-  GtkWidget *name_label;  /* the active account, in the button behind */
   GtkWidget *avatar_image;
   GtkWidget *button_content; /* what the header button shows */
 
@@ -165,16 +164,12 @@ update_the_button (AmlUsersPopover *self)
     {
       self->active_name = g_strdup ("");
 
-      gtk_label_set_text (GTK_LABEL (self->name_label), "Play Offline");
       gtk_widget_set_tooltip_text (GTK_WIDGET (self),
                                    "No account yet: launches play offline");
       return;
     }
 
   self->active_name = g_strdup (account->name);
-  gtk_label_set_text (GTK_LABEL (self->name_label), account->name);
-  gtk_label_set_ellipsize (GTK_LABEL (self->name_label),
-                           PANGO_ELLIPSIZE_END);
   set_avatar (self, GTK_IMAGE (self->avatar_image), account->avatar_url);
 
   {
@@ -496,21 +491,15 @@ aml_users_popover_init (AmlUsersPopover *self)
 
   gtk_popover_set_child (GTK_POPOVER (self), content);
 
-  /* What the header says about who is playing. The label is filled from
-     the same store as the list, so the two cannot disagree. */
+  /* What the header says about who is playing: the avatar of the active
+     account, or the default one when there is none. It is filled from the
+     same store as the list, so the two cannot disagree. The name is not
+     shown beside it: the popover behind the button says who is playing. */
   self->avatar_image = gtk_image_new_from_icon_name ("avatar-default-symbolic");
   gtk_widget_set_valign (self->avatar_image, GTK_ALIGN_CENTER);
 
-  self->name_label = gtk_label_new ("Play Offline");
-  gtk_widget_add_css_class (self->name_label, "heading");
-  gtk_label_set_ellipsize (GTK_LABEL (self->name_label),
-                           PANGO_ELLIPSIZE_END);
-
-  /* What the header button shows: the avatar and the name of the active
-     account, both of them filled in from the store. */
-  self->button_content = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  self->button_content = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_append (GTK_BOX (self->button_content), self->avatar_image);
-  gtk_box_append (GTK_BOX (self->button_content), self->name_label);
 }
 
 static void
