@@ -75,6 +75,23 @@ test_facets_of_a_mod_search (void)
   g_print ("ok - a mod search is narrowed by version and by loader\n");
 }
 
+/* Quilt runs Fabric mods, so a Quilt search asks Modrinth for both in one
+ * facet: the arrays are an AND and the values of one are an OR. */
+static void
+test_facets_of_a_quilt_search (void)
+{
+  g_autoptr (AmlModrinthSearch) search =
+    search_new (AML_CONTENT_MOD, "", "1.20.1", "quilt");
+  g_autofree char *facets = aml_modrinth_facets (search);
+
+  g_assert_cmpstr (
+      facets, ==,
+      "[[\"project_type:mod\"],[\"versions:1.20.1\"],"
+      "[\"categories:quilt\",\"categories:fabric\"]]");
+
+  g_print ("ok - a quilt search asks for quilt and fabric mods\n");
+}
+
 static void
 test_facets_of_a_pack_search (void)
 {
@@ -538,6 +555,17 @@ test_version_by_hash (void)
   g_assert_false (
       aml_modrinth_version_fits (version, AML_CONTENT_MOD, "1.21", "fabric"));
 
+  /* Quilt runs Fabric mods, so a version that names only Fabric is a
+     version of a Quilt instance too, and nothing else gets it. */
+  g_clear_pointer (&version->loaders, g_ptr_array_unref);
+  version->loaders = g_ptr_array_new_with_free_func (g_free);
+  g_ptr_array_add (version->loaders, g_strdup ("fabric"));
+
+  g_assert_true (aml_modrinth_version_fits (version, AML_CONTENT_MOD, "1.20.1",
+                                            "quilt"));
+  g_assert_false (aml_modrinth_version_fits (version, AML_CONTENT_MOD,
+                                             "1.20.1", "neoforge"));
+
   g_print ("ok - the hash of a file says which version it is\n");
 }
 
@@ -918,6 +946,7 @@ main (int argc, char **argv)
   g_test_init (&argc, &argv, NULL);
 
   g_test_add_func ("/modrinth/facets-mod", test_facets_of_a_mod_search);
+  g_test_add_func ("/modrinth/facets-quilt", test_facets_of_a_quilt_search);
   g_test_add_func ("/modrinth/facets-pack", test_facets_of_a_pack_search);
   g_test_add_func ("/modrinth/categories-by-type",
                    test_categories_filter_by_project_type);
