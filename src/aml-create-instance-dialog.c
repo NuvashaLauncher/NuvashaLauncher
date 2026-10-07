@@ -244,7 +244,7 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self->directory_row),
                                default_directory);
 
-  GtkWidget *pick_button = gtk_button_new_from_icon_name ("folder-open-symbolic");
+  GtkWidget *pick_button = gtk_button_new_from_icon_name ("folder-symbolic");
   gtk_widget_add_css_class (pick_button, "flat");
   gtk_widget_set_valign (pick_button, GTK_ALIGN_CENTER);
   gtk_widget_set_tooltip_text (pick_button, "Choose a folder");

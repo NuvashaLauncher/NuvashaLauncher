@@ -382,7 +382,7 @@ aml_logs_page_new (AmlLauncher *launcher)
                                 G_CALLBACK (on_clear_clicked), self);
   gtk_box_append (GTK_BOX (row), self->clear);
 
-  self->open = toolbar_button ("folder-open-symbolic", "Open Folder",
+  self->open = toolbar_button ("folder-symbolic", "Open Folder",
                                G_CALLBACK (on_open_clicked), self);
   gtk_box_append (GTK_BOX (row), self->open);
 

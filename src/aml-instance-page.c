@@ -1180,7 +1180,7 @@ create_settings_page (AmlInstancePage *self)
   button_row (ADW_PREFERENCES_GROUP (actions), "Duplicate", NULL,
               "edit-copy-symbolic", G_CALLBACK (on_duplicate_clicked), self);
   button_row (ADW_PREFERENCES_GROUP (actions), "Open Folder", NULL,
-              "folder-open-symbolic", G_CALLBACK (on_open_folder_clicked),
+              "folder-symbolic", G_CALLBACK (on_open_folder_clicked),
               self);
   delete_row = button_row (ADW_PREFERENCES_GROUP (actions), "Delete Instance",
                            NULL, "user-trash-symbolic",
