@@ -83,7 +83,9 @@ build-debug/tests/%: tests/%.c $(TESTLIBDBGOBJS) | build-debug/tests
 		-DAML_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
 		-o $@ $< $(TESTLIBDBGOBJS) $(PKG_LIBS)
 
-test-debug: $(if $(SRCS),$(DBGBIN)) $(TESTDBGBINS)
+# The Wayland guard test runs the release launcher, so test-debug builds
+# both binaries.
+test-debug: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS)
 	@set -e; for t in $(TESTDBGBINS); do echo "RUN  $$t"; ./$$t; done; \
 	echo "PASS $(words $(TESTDBGBINS)) test(s)"
 
