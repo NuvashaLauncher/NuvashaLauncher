@@ -5,11 +5,13 @@
 /* AmlDownloadModpackDialog: browsing Modrinth for modpacks and putting
  * one into a new instance.
  *
- * The flow is a navigation view with a Browse page, a Details page and
- * an Installing page, plus an error page the flow falls onto and a
- * page with the pack's optional files when it lists any. Nothing the
- * pack needs for its Minecraft version or its loader is asked of the
- * user: both come from what the pack says about itself. */
+ * The browser is a split view: the list of packs on the left, the pack
+ * that is opened on the right, and the list alone until one is. The
+ * pages that fall on top of it (installing, an error, the pack's
+ * optional files) cover the whole dialog and leave the open pack in its
+ * half underneath. Nothing the pack needs for its Minecraft version or
+ * its loader is asked of the user: both come from what the pack says
+ * about itself. */
 
 #include "aml-download-modpack-dialog.h"
 
@@ -67,10 +69,10 @@ struct _AmlDownloadModpackDialog
   gboolean searched;          /* the first search has been asked for */
   GHashTable *seen_ids;       /* project id -> NULL, no duplicate rows */
 
-  /* The dialog of a pack, above the browser: the same one the mods,
-     resource packs and shader packs open, with the description in
-     Markdown and the versions in a drop-down over a Download button. */
-  AdwDialog *details_dialog;
+  /* The browser is the left half; the pack that is opened is the right
+     half, empty until one is opened. */
+  GtkWidget *split;
+  GtkWidget *details_page;   /* weak: the page of the open pack */
   GtkWidget *dropdown;       /* GtkDropDown, the versions to install */
   GtkWidget *download_button;
   GtkWidget *body;           /* the box the Markdown description goes in */
@@ -171,12 +173,9 @@ details_watch (GtkWidget **field, GtkWidget *widget)
 static void
 dialog_forget_widgets (AmlDownloadModpackDialog *self)
 {
-  if (self->details_dialog != NULL)
-    g_object_remove_weak_pointer (G_OBJECT (self->details_dialog),
-                                  (gpointer *) &self->details_dialog);
+  self->split = NULL;
 
-  self->details_dialog = NULL;
-
+  details_watch (&self->details_page, NULL);
   details_watch (&self->dropdown, NULL);
   details_watch (&self->download_button, NULL);
   details_watch (&self->body, NULL);
@@ -828,8 +827,21 @@ build_browse_page (AmlDownloadModpackDialog *self)
                       G_CALLBACK (on_scroll_changed), self);
   }
 
+  /* The list is the left half; the pack that is opened is the right half,
+     empty until one is opened. Collapsed shows one page at a time, which
+     is the list alone. */
+  self->split = adw_navigation_split_view_new ();
+  gtk_widget_set_vexpand (self->split, TRUE);
+  adw_navigation_split_view_set_sidebar (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split),
+    adw_navigation_page_new (box, "Browse Modpacks"));
+  adw_navigation_split_view_set_collapsed (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split), TRUE);
+  adw_navigation_split_view_set_sidebar_width_fraction (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split), 0.5);
+
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
-  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), box);
+  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), self->split);
 
   page = GTK_WIDGET (adw_navigation_page_new (toolbar, "Browse Modpacks"));
   adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (page), "browse");
@@ -1008,29 +1020,77 @@ loading_child (void)
   return box;
 }
 
+/* Closes the open pack, leaving the list the whole dialog again. */
 static void
-build_details_dialog (AmlDownloadModpackDialog *self)
+close_details (AmlDownloadModpackDialog *self)
 {
-  AdwDialog *dialog = NULL;
+  if (self->split == NULL)
+    return;
 
-  /* The dialog of the pack before this one is gone: two of them at once
-     would both answer the same questions into the same fields. */
-  if (self->details_dialog != NULL)
-    adw_dialog_close (self->details_dialog);
+  adw_navigation_split_view_set_content (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split), NULL);
+  adw_navigation_split_view_set_collapsed (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split), TRUE);
+  self->details_page = NULL;
 
-  /* A dialog of its own above the browser, so the browser keeps its own
-     header and its own pages underneath. Nothing is shown in it until
-     the description and the versions are both in, so it does not fill
-     itself in piece by piece. */
-  dialog = adw_dialog_new ();
-  adw_dialog_set_title (dialog, self->project->title);
-  adw_dialog_set_content_width (dialog, 640);
-  adw_dialog_set_content_height (dialog, 640);
-  adw_dialog_set_child (dialog, loading_child ());
+  /* A half a pack wide is what the list needs; the room the other half
+     took goes back to the dialog. */
+  adw_dialog_set_content_width (ADW_DIALOG (self), AML_DIALOG_CONTENT_WIDTH);
+}
 
-  self->details_dialog = dialog;
-  g_object_add_weak_pointer (G_OBJECT (dialog),
-                             (gpointer *) &self->details_dialog);
+static void
+on_details_back (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  close_details (user_data);
+}
+
+/* The row above the body of an open pack: one back arrow that closes the
+ * half and gives the list the whole width back. */
+static GtkWidget *
+detail_body (AmlDownloadModpackDialog *self, GtkWidget *body)
+{
+  GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  GtkWidget *row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  GtkWidget *back = gtk_button_new_from_icon_name ("go-previous-symbolic");
+
+  gtk_widget_add_css_class (back, "flat");
+  gtk_widget_set_valign (back, GTK_ALIGN_CENTER);
+  gtk_widget_set_tooltip_text (back, "Back");
+  gtk_accessible_update_property (GTK_ACCESSIBLE (back),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL, "Back", -1);
+  g_signal_connect (back, "clicked", G_CALLBACK (on_details_back), self);
+
+  gtk_widget_set_margin_start (row, 6);
+  gtk_widget_set_margin_end (row, 6);
+  gtk_widget_set_margin_top (row, 6);
+  gtk_widget_set_margin_bottom (row, 6);
+  gtk_box_append (GTK_BOX (row), back);
+
+  gtk_widget_set_vexpand (body, TRUE);
+  gtk_box_append (GTK_BOX (box), row);
+  gtk_box_append (GTK_BOX (box), body);
+
+  return box;
+}
+
+/* Puts @body in the right half of the browser, beside the list, and takes
+ * the whole width of the list back to half. A pack shown before is
+ * replaced. */
+static void
+show_details_page (AmlDownloadModpackDialog *self, GtkWidget *body)
+{
+  GtkWidget *page = GTK_WIDGET (adw_navigation_page_new (
+    detail_body (self, body), self->project->title));
+
+  details_watch (&self->details_page, page);
+  adw_navigation_split_view_set_content (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split), ADW_NAVIGATION_PAGE (page));
+  adw_navigation_split_view_set_collapsed (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split), FALSE);
+
+  /* The pack opens to the side of the list, so the dialog widens by the
+     other half to keep both readable. */
+  adw_dialog_set_content_width (ADW_DIALOG (self), 1040);
 }
 
 /* The author the search answer named. A project answer does not name one:
@@ -1202,17 +1262,18 @@ details_content (AmlDownloadModpackDialog *self)
   return content;
 }
 
-/* Puts the real content in the dialog once both the description and the
+/* Puts the real content in the half once both the description and the
    versions are in. */
 static void
 dialog_details_fill (AmlDownloadModpackDialog *self)
 {
-  if (self->details_dialog == NULL)
+  if (self->details_page == NULL)
     return;
   if (!self->details_ready || !self->versions_ready)
     return;
 
-  adw_dialog_set_child (self->details_dialog, details_content (self));
+  adw_navigation_page_set_child (ADW_NAVIGATION_PAGE (self->details_page),
+                                 detail_body (self, details_content (self)));
 
   if (self->versions_problem != NULL)
     show_details_error (self, self->versions_problem);
@@ -1370,7 +1431,7 @@ dialog_details_open (AmlDownloadModpackDialog *self)
     return;
 
   /* Nothing is shown until the description and the versions are both in,
-     so the dialog does not fill itself in piece by piece. */
+     so the half does not fill itself in piece by piece. */
   self->details_ready = FALSE;
   self->versions_ready = FALSE;
   g_clear_pointer (&self->details, aml_modrinth_details_free);
@@ -1379,8 +1440,7 @@ dialog_details_open (AmlDownloadModpackDialog *self)
   g_free (self->versions_problem);
   self->versions_problem = NULL;
 
-  build_details_dialog (self);
-  adw_dialog_present (self->details_dialog, GTK_WIDGET (self));
+  show_details_page (self, loading_child ());
 
   if (self->fetch != NULL)
     g_cancellable_cancel (self->fetch);
@@ -1543,13 +1603,12 @@ dialog_ensure_installing_page (AmlDownloadModpackDialog *self)
 
 /* Handler buttons patched around the pages. */
 
-/* The dialog of a pack is above the browser rather than a page in it, so
-   going back to it means putting it up again. */
+/* The pack is shown in the half beside the browser rather than as a page,
+   so going back to it means taking the page on top off. */
 static void
 dialog_details_show_again (AmlDownloadModpackDialog *self)
 {
-  if (self->details_dialog != NULL)
-    adw_dialog_present (self->details_dialog, GTK_WIDGET (self));
+  adw_navigation_view_pop_to_tag (ADW_NAVIGATION_VIEW (self->nav), "browse");
 }
 
 static void
@@ -1672,11 +1731,8 @@ on_modpack_download_clicked (GtkButton *button G_GNUC_UNUSED,
   self->version = aml_modrinth_version_copy (
       g_ptr_array_index (self->versions, selected));
 
-  /* The install carries on in the browser below, so this dialog is done
-     and closes before the work is shown. */
-  if (self->details_dialog != NULL)
-    adw_dialog_close (self->details_dialog);
-
+  /* The install carries on over the browser: the installing page takes
+     the whole dialog, and the pack stays in its half underneath. */
   dialog_start_features (self);
 }
 
