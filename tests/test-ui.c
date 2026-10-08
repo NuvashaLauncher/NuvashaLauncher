@@ -213,10 +213,30 @@ find_by_type (GtkWidget *w, GType type)
   return NULL;
 }
 
+/* How many widgets of @type are under @w. */
+static guint
+count_by_type (GtkWidget *w, GType type)
+{
+  guint n = 0;
+
+  if (w == NULL)
+    return 0;
+
+  if (G_TYPE_CHECK_INSTANCE_TYPE (w, type))
+    n++;
+
+  for (GtkWidget *c = gtk_widget_get_first_child (w); c != NULL;
+       c = gtk_widget_get_next_sibling (c))
+    n += count_by_type (c, type);
+
+  return n;
+}
+
 /* A page of a kind of content opens as the list alone: the project is the
  * other half of a split view, and is only filled when one is opened. This
  * is the state the split has to start in, and moving the split without
- * meaning to would leave two empty columns. */
+ * meaning to would leave two empty columns. The switcher is icons only,
+ * because the bar it shares with the search row has no room for words. */
 static void
 test_content_page_starts_single (void)
 {
@@ -227,7 +247,7 @@ test_content_page_starts_single (void)
   AmlInstance *instance = NULL;
   AmlContentPage *page = NULL;
   GtkWidget *split = NULL;
-  GtkWidget *switcher = NULL;
+  GtkWidget *installed = NULL;
 
   g_assert_no_error (error);
   g_assert_nonnull (tmp);
@@ -244,16 +264,23 @@ test_content_page_starts_single (void)
   g_assert_nonnull (page);
 
   split = find_by_type (GTK_WIDGET (page), ADW_TYPE_NAVIGATION_SPLIT_VIEW);
-  switcher = find_by_type (GTK_WIDGET (page), ADW_TYPE_VIEW_SWITCHER);
 
   g_assert_nonnull (split);
-  g_assert_nonnull (switcher);
   g_assert_true (adw_navigation_split_view_get_collapsed (
     ADW_NAVIGATION_SPLIT_VIEW (split)));
   g_assert_null (adw_navigation_split_view_get_content (
     ADW_NAVIGATION_SPLIT_VIEW (split)));
-  g_assert_cmpint (adw_view_switcher_get_policy (ADW_VIEW_SWITCHER (switcher)),
-                   ==, ADW_VIEW_SWITCHER_POLICY_WIDE);
+
+  /* The switcher is icons only: the two buttons carry an icon and no
+     label, which is what keeps the row one line, and the Installed one
+     is the one on. */
+  g_assert_cmpuint (count_by_type (GTK_WIDGET (page), GTK_TYPE_TOGGLE_BUTTON),
+                    ==, 2);
+  installed = find_by_type (GTK_WIDGET (page), GTK_TYPE_TOGGLE_BUTTON);
+  g_assert_nonnull (installed);
+  g_assert_null (gtk_button_get_label (GTK_BUTTON (installed)));
+  g_assert_nonnull (gtk_button_get_icon_name (GTK_BUTTON (installed)));
+  g_assert_true (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (installed)));
 
   g_object_unref (instance);
   g_print ("ok - a content page opens as the list alone\n");

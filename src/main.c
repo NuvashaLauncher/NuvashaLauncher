@@ -29,7 +29,12 @@ static const GActionEntry app_entries[] = {
 /* The search field of a content page wears the colours of any other
  * entry: the search bar around it paints no band of its own and does not
  * dim the entry when the window loses focus. The bar is always open, so
- * what it holds should not look like a band over the list. */
+ * what it holds should not look like a band over the list.
+ *
+ * The half of a content page that holds the list is not a sidebar, it is
+ * the same page with a project beside it: it keeps the page colour
+ * instead of the sidebar colour a split view would give it, so the row
+ * of the search does not change colour when a project is opened. */
 static const char app_css[] =
   "searchbar.content-search-bar > revealer > box,"
   "searchbar.content-search-bar > revealer > box:backdrop {"
@@ -38,6 +43,11 @@ static const char app_css[] =
   "}"
   "searchbar.content-search-bar > revealer > box:backdrop > * {"
   "  filter: none;"
+  "}"
+  "navigation-split-view.content-split > .sidebar-pane,"
+  "navigation-split-view.content-split > .sidebar-pane:backdrop {"
+  "  background-color: transparent;"
+  "  color: inherit;"
   "}";
 
 static void
