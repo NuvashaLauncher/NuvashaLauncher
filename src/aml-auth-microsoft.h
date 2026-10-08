@@ -98,8 +98,8 @@ typedef enum {
 GQuark aml_auth_error_quark (void);
 
 /* The code a user has to type into a browser of their own, and where.
- * @message is what Microsoft says, which is the sentence to show a user
- * when there is one.
+ * @message is what Microsoft says about the sign-in, for a caller that
+ * would rather show its words than write its own.
  *
  * @device_code is what the token endpoint is polled with and the user
  * never sees it: it is the other half of the same pair the code they do

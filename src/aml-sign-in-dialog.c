@@ -22,12 +22,10 @@ struct _AmlSignInDialog
   GtkWidget *waiting_label;
   GtkWidget *instruction_label; /* what to do with the code */
   GtkWidget *code_label;
-  GtkWidget *copy_button;
   GtkWidget *uri_label;
   GtkWidget *open_button;
   GtkWidget *error_label;
   GtkWidget *retry_button;
-  GtkWidget *toast_overlay;
 
   /* What the chain polls with while the user is in the browser. It is
      freed with the dialog and never shown: the user types the code that
@@ -129,7 +127,6 @@ on_code_ready (GObject      *source G_GNUC_UNUSED,
 
   gtk_widget_set_visible (self->instruction_label, TRUE);
   gtk_widget_set_visible (self->code_label, TRUE);
-  gtk_widget_set_visible (self->copy_button, TRUE);
   gtk_widget_set_visible (self->uri_label, TRUE);
   gtk_widget_set_visible (self->open_button, TRUE);
 
@@ -187,7 +184,6 @@ begin_sign_in (AmlSignInDialog *self)
   clear_error (self);
   gtk_widget_set_visible (self->instruction_label, FALSE);
   gtk_widget_set_visible (self->code_label, FALSE);
-  gtk_widget_set_visible (self->copy_button, FALSE);
   gtk_widget_set_visible (self->uri_label, FALSE);
   gtk_widget_set_visible (self->open_button, FALSE);
   set_step (self, STEP_CODE);
@@ -214,30 +210,6 @@ static void
 on_open_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   open_the_page (user_data);
-}
-
-/* Copies the code, so a user who has the page open in a browser can paste
-   it there instead of reading it off the screen and typing it in. */
-static void
-on_copy_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
-{
-  AmlSignInDialog *self = user_data;
-
-  if (self->code == NULL || self->code->user_code == NULL)
-    return;
-
-  gdk_clipboard_set_text (gtk_widget_get_clipboard (GTK_WIDGET (self)),
-                          self->code->user_code);
-
-  if (self->toast_overlay != NULL)
-    adw_toast_overlay_add_toast (ADW_TOAST_OVERLAY (self->toast_overlay),
-                                 adw_toast_new ("Code copied"));
-}
-
-static void
-on_close_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
-{
-  adw_dialog_close (ADW_DIALOG (user_data));
 }
 
 /* Closing the dialog stops the waiting: the token endpoint is not polled
@@ -273,9 +245,8 @@ static void
 aml_sign_in_dialog_init (AmlSignInDialog *self)
 {
   GtkWidget *body = NULL;
-  GtkWidget *content = NULL;
-  GtkWidget *buttons = NULL;
-  GtkWidget *cancel = NULL;
+  GtkWidget *toolbar = NULL;
+  GtkWidget *header = NULL;
 
   adw_dialog_set_title (ADW_DIALOG (self), "Sign In");
   adw_dialog_set_content_width (ADW_DIALOG (self), 440);
@@ -292,22 +263,15 @@ aml_sign_in_dialog_init (AmlSignInDialog *self)
   gtk_label_set_xalign (GTK_LABEL (self->instruction_label), 0.5);
   gtk_widget_set_visible (self->instruction_label, FALSE);
 
-  /* The code itself: the one thing to act on, so the biggest thing here,
-     and monospace so its characters cannot be told apart from lookalikes.
-     It is selectable, and the button under it copies it in one go. */
+  /* The code is the one thing to act on, so it is the biggest thing here,
+     in monospace so its characters cannot be told apart from lookalikes,
+     and selectable so it can be copied by hand. */
   self->code_label = gtk_label_new (NULL);
   gtk_widget_add_css_class (self->code_label, "title-1");
   gtk_widget_add_css_class (self->code_label, "monospace");
   gtk_label_set_selectable (GTK_LABEL (self->code_label), TRUE);
   gtk_label_set_xalign (GTK_LABEL (self->code_label), 0.5);
   gtk_widget_set_visible (self->code_label, FALSE);
-
-  self->copy_button = icon_label_button ("edit-copy-symbolic", "Copy Code");
-  gtk_widget_add_css_class (self->copy_button, "flat");
-  gtk_widget_set_halign (self->copy_button, GTK_ALIGN_CENTER);
-  gtk_widget_set_visible (self->copy_button, FALSE);
-  g_signal_connect (self->copy_button, "clicked",
-                    G_CALLBACK (on_copy_clicked), self);
 
   self->open_button = icon_label_button ("web-browser-symbolic",
                                          "Open the Page");
@@ -359,36 +323,27 @@ aml_sign_in_dialog_init (AmlSignInDialog *self)
   gtk_widget_set_margin_start (body, 24);
   gtk_widget_set_margin_end (body, 24);
   gtk_widget_set_margin_top (body, 24);
-  gtk_widget_set_margin_bottom (body, 12);
+  gtk_widget_set_margin_bottom (body, 24);
   gtk_box_append (GTK_BOX (body), self->instruction_label);
   gtk_box_append (GTK_BOX (body), self->code_label);
-  gtk_box_append (GTK_BOX (body), self->copy_button);
   gtk_box_append (GTK_BOX (body), self->open_button);
   gtk_box_append (GTK_BOX (body), self->uri_label);
   gtk_box_append (GTK_BOX (body), self->waiting);
   gtk_box_append (GTK_BOX (body), self->error_label);
   gtk_box_append (GTK_BOX (body), self->retry_button);
 
-  cancel = gtk_button_new_with_label ("Cancel");
-  g_signal_connect (cancel, "clicked", G_CALLBACK (on_close_clicked), self);
+  /* A header bar of its own: a dialog closed by the button in its corner
+     is what every other dialog does, and it needs no Cancel at the
+     bottom. Inside an AdwDialog the header bar carries the dialog title
+     and that close button and nothing else; the back button it shows by
+     default has nothing to go back to here. */
+  header = adw_header_bar_new ();
+  adw_header_bar_set_show_back_button (ADW_HEADER_BAR (header), FALSE);
+  toolbar = adw_toolbar_view_new ();
+  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
+  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), body);
 
-  buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  gtk_widget_set_halign (buttons, GTK_ALIGN_END);
-  gtk_widget_set_margin_start (buttons, 24);
-  gtk_widget_set_margin_end (buttons, 24);
-  gtk_widget_set_margin_bottom (buttons, 24);
-  gtk_box_append (GTK_BOX (buttons), cancel);
-
-  content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-  gtk_box_append (GTK_BOX (content), body);
-  gtk_box_append (GTK_BOX (content), buttons);
-
-  /* A copy is said out loud where the code is, not in a window of its
-     own. */
-  self->toast_overlay = adw_toast_overlay_new ();
-  adw_toast_overlay_set_child (ADW_TOAST_OVERLAY (self->toast_overlay),
-                               content);
-  adw_dialog_set_child (ADW_DIALOG (self), self->toast_overlay);
+  adw_dialog_set_child (ADW_DIALOG (self), toolbar);
 }
 
 static void
