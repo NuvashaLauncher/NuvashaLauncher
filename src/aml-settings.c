@@ -20,6 +20,7 @@
 #define LOG_LINE_LIMIT_KEY "log-line-limit"
 #define OPEN_LOGS_AFTER_CRASH_KEY "open-logs-after-crash"
 #define SHOW_UNSTABLE_LOADERS_KEY "show-unstable-loaders"
+#define LANGUAGE_KEY "language"
 
 /* A stored limit below this is not a number a log can be trimmed to. */
 #define LOG_LINE_LIMIT_FLOOR 1
@@ -33,6 +34,7 @@ struct _AmlSettings
   guint log_line_limit;
   gboolean open_logs_after_crash;
   gboolean show_unstable_loaders;
+  char *language;
   char *filename;
 };
 
@@ -131,6 +133,16 @@ load (AmlSettings *self)
   if (node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
       json_node_get_value_type (node) == G_TYPE_BOOLEAN)
     self->show_unstable_loaders = json_node_get_boolean (node);
+
+  node = json_object_get_member (object, LANGUAGE_KEY);
+  if (node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
+      json_node_get_value_type (node) == G_TYPE_STRING)
+    {
+      const char *language = json_node_get_string (node);
+
+      if (language != NULL && *language != '\0')
+        self->language = g_strdup (language);
+    }
 }
 
 static gboolean
@@ -172,6 +184,11 @@ save (AmlSettings *self, GError **error)
 
   json_builder_set_member_name (builder, SHOW_UNSTABLE_LOADERS_KEY);
   json_builder_add_boolean_value (builder, self->show_unstable_loaders);
+
+  json_builder_set_member_name (builder, LANGUAGE_KEY);
+  json_builder_add_string_value (builder, self->language != NULL
+                                           ? self->language
+                                           : "system");
 
   json_builder_end_object (builder);
 
@@ -368,12 +385,46 @@ aml_settings_set_show_unstable_loaders (AmlSettings *self,
   return FALSE;
 }
 
+const char *
+aml_settings_get_language (AmlSettings *self)
+{
+  g_return_val_if_fail (AML_IS_SETTINGS (self), "system");
+
+  return self->language != NULL ? self->language : "system";
+}
+
+gboolean
+aml_settings_set_language (AmlSettings *self,
+                           const char *language,
+                           GError    **error)
+{
+  char *previous = NULL;
+
+  g_return_val_if_fail (AML_IS_SETTINGS (self), FALSE);
+  g_return_val_if_fail (language != NULL && *language != '\0', FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  previous = self->language;
+  self->language = g_strdup (language);
+
+  if (save (self, error))
+    {
+      g_free (previous);
+      return TRUE;
+    }
+
+  g_free (self->language);
+  self->language = previous;
+  return FALSE;
+}
+
 static void
 aml_settings_finalize (GObject *object)
 {
   AmlSettings *self = AML_SETTINGS (object);
 
   g_free (self->default_java_path);
+  g_free (self->language);
   g_free (self->filename);
 
   G_OBJECT_CLASS (aml_settings_parent_class)->finalize (object);

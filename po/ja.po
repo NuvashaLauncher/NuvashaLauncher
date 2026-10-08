@@ -1,0 +1,293 @@
+msgid ""
+msgstr ""
+"Language: ja\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Cancel"
+msgstr "キャンセル"
+
+msgid "Confirm"
+msgstr "確認"
+
+msgid "Delete"
+msgstr "削除"
+
+msgid "Retry"
+msgstr "再試行"
+
+msgid "Loading…"
+msgstr "読み込み中…"
+
+msgid "Download"
+msgstr "ダウンロード"
+
+msgid "Update All"
+msgstr "すべて更新"
+
+msgid "Open Folder"
+msgstr "フォルダを開く"
+
+msgid "Refresh"
+msgstr "再読み込み"
+
+msgid "Nothing installed yet"
+msgstr "なにもインストールされていません…"
+
+msgid "Browse for something to put into the folder of this instance"
+msgstr "このインスタンスのフォルダーに入れるものを参照します"
+
+msgid "Installed"
+msgstr "インストール済み"
+
+msgid "Loading more…"
+msgstr "読み込み中…"
+
+msgid "Search Modrinth"
+msgstr "Modrinth を検索"
+
+msgid "Filter by category"
+msgstr "カテゴリーで絞り込む"
+
+msgid "Filter"
+msgstr "絞り込み"
+
+msgid "Nothing to show yet"
+msgstr "表示するものはありません"
+
+msgid "Type what to look for, or browse everything Modrinth has for this instance"
+msgstr "何を探すかを入力するか、このインスタンスのModrinthのすべてを参照してください"
+
+msgid "Browse"
+msgstr "閲覧"
+
+msgid "No mod loader"
+msgstr "Modローダーがありません"
+
+msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
+msgstr "ModにはModローダーが必要です。先にこのインスタンスの設定でFabric、Quilt、Forge、NeoForgeを選んでください"
+
+msgid "Create Instance"
+msgstr "インスタンスを作成"
+
+msgid "Name"
+msgstr "名前"
+
+msgid "Directory"
+msgstr "フォルダー"
+
+msgid "Choose a folder"
+msgstr "フォルダーを選択"
+
+msgid "Create"
+msgstr "作成"
+
+msgid "Download Modpack"
+msgstr "Modpack をダウンロード"
+
+msgid "Loading modpacks…"
+msgstr "Modpack を読み込んでいます…"
+
+msgid "Search modpacks"
+msgstr "Modpack を検索"
+
+msgid "Close"
+msgstr "閉じる"
+
+msgid "Back"
+msgstr "戻る"
+
+msgid "Install"
+msgstr "インストール"
+
+msgid "Copy of %s"
+msgstr "%sのコピー"
+
+msgid "Choose Java executable"
+msgstr "Java 実行ファイルを選択"
+
+msgid "Choose an Icon"
+msgstr "アイコンを選択"
+
+msgid "Choose a Directory"
+msgstr "フォルダーを選択"
+
+msgid "Duplicated to \"%s\""
+msgstr "「%s」に複製しました"
+
+msgid "Delete \"%s\"?"
+msgstr "「%s」を削除しますか？"
+
+msgid "General"
+msgstr "一般"
+
+msgid "Icon"
+msgstr "アイコン"
+
+msgid "Change the Directory"
+msgstr "フォルダーを変更"
+
+msgid "Minecraft"
+msgstr "Minecraft"
+
+msgid "Choose…"
+msgstr "選択…"
+
+msgid "Java"
+msgstr "Java"
+
+msgid "Add Java Runtime"
+msgstr "Java ランタイムを追加"
+
+msgid "JVM Arguments"
+msgstr "JVM 引数"
+
+msgid "Actions"
+msgstr "アクション"
+
+msgid "Duplicate"
+msgstr "複製"
+
+msgid "Delete Instance"
+msgstr "インスタンスの削除。"
+
+msgid "Settings"
+msgstr "設定"
+
+msgid "Resource Packs"
+msgstr "リソースパック"
+
+msgid "Shader Packs"
+msgstr "シェーダーパック"
+
+msgid "Mods"
+msgstr "Mod"
+
+msgid "Logs"
+msgstr "ログ"
+
+msgid "Custom: %s"
+msgstr "カスタム：%s"
+
+msgid "the game was stopped by signal %d"
+msgstr "ゲームはシグナル%dによって停止されました"
+
+msgid "the game exited with code %d"
+msgstr "ゲームはコード%dで終了しました"
+
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Minecraft %sの互換性のある%sバージョンが見つかりません。"
+
+msgid "Loader"
+msgstr "Mod ローダー"
+
+msgid "Loader Version"
+msgstr "Mod ローダーのバージョン"
+
+msgid "Clear"
+msgstr "クリア"
+
+msgid "Search the log"
+msgstr "ログを検索"
+
+msgid "Versions"
+msgstr "バージョン"
+
+msgid "Show Snapshots"
+msgstr "スナップショットを表示"
+
+msgid "Show unstable Mod Loader versions"
+msgstr "不安定な Mod ローダーのバージョンを表示"
+
+msgid "Default Java"
+msgstr "デフォルトJava"
+
+msgid "Automatic (closest compatible)"
+msgstr "自動（最も近い互換版）"
+
+msgid "Custom Java…"
+msgstr "カスタムJava…"
+
+msgid "Language"
+msgstr "言語"
+
+msgid "Interface language"
+msgstr "インターフェース言語"
+
+msgid "Line Limit"
+msgstr "行数の上限"
+
+msgid "Open Log Folder After Crash"
+msgstr "クラッシュ後にログフォルダーを開く"
+
+msgid "About AML"
+msgstr "AMLについて"
+
+msgid "Keyboard Shortcuts"
+msgstr "キーボードショートカット"
+
+msgid "Stop"
+msgstr "停止"
+
+msgid "Play"
+msgstr "プレイ"
+
+msgid "Keep Playing"
+msgstr "プレイを続ける"
+
+msgid "Downloads"
+msgstr "ダウンロード"
+
+msgid "Accounts"
+msgstr "アカウント"
+
+msgid "No Instances Yet"
+msgstr "インスタンスはまだありません"
+
+msgid "Use the + button in the header to create one"
+msgstr "ヘッダーの+ボタンを使用して作成します"
+
+msgid "the loader cannot be resolved: %s"
+msgstr "Mod ローダーを特定できません：%s"
+
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Minecraft %sと%sの互換性のあるバージョンが見つかりません。"
+
+msgid "No compatible version found for Minecraft %s."
+msgstr "Minecraft %sの互換性のあるバージョンが見つかりません。"
+
+msgid "Add Offline Account"
+msgstr "オフラインアカウントを追加"
+
+msgid "Add"
+msgstr "追加"
+
+msgid "asking Microsoft for a code"
+msgstr "マイクロソフトにコードを尋ねる"
+
+msgid "waiting for the sign-in in the browser"
+msgstr "ブラウザでサインインを待っています"
+
+msgid "Sign In"
+msgstr "サインイン"
+
+msgid "Open the page in your browser, then enter this code:"
+msgstr "ブラウザでページを開き、次のコードを入力します。"
+
+msgid "Open the Page"
+msgstr "ページを開く"
+
+msgid "Try Again"
+msgstr "もう一度お試しください"
+
+msgid "Remove"
+msgstr "削除"
+
+msgid "Remove \"%s\""
+msgstr "「%s」を削除"
+
+msgid "Add Microsoft Account"
+msgstr "Microsoft アカウントを追加"
+
+msgid "Minecraft Version"
+msgstr "Minecraftバージョン"

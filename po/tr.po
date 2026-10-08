@@ -1,0 +1,293 @@
+msgid ""
+msgstr ""
+"Language: tr\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Cancel"
+msgstr "İptal"
+
+msgid "Confirm"
+msgstr "Onayla"
+
+msgid "Delete"
+msgstr "Sil"
+
+msgid "Retry"
+msgstr "Yeniden Dene"
+
+msgid "Loading…"
+msgstr "Yükleniyor…"
+
+msgid "Download"
+msgstr "İndir"
+
+msgid "Update All"
+msgstr "Tümünü Güncelle"
+
+msgid "Open Folder"
+msgstr "Klasörü Aç"
+
+msgid "Refresh"
+msgstr "Yenile"
+
+msgid "Nothing installed yet"
+msgstr "Henüz hiçbir şey kurulu değil"
+
+msgid "Browse for something to put into the folder of this instance"
+msgstr "Bu örneğin klasörüne eklenecek bir şey arayın"
+
+msgid "Installed"
+msgstr "Kurulu"
+
+msgid "Loading more…"
+msgstr "Daha fazlası yükleniyor…"
+
+msgid "Search Modrinth"
+msgstr "Modrinth’te ara"
+
+msgid "Filter by category"
+msgstr "Kategoriye göre filtrele"
+
+msgid "Filter"
+msgstr "Filtrele"
+
+msgid "Nothing to show yet"
+msgstr "Henüz gösterilecek bir şey yok"
+
+msgid "Type what to look for, or browse everything Modrinth has for this instance"
+msgstr "Aramak istediğinizi yazın veya Modrinth’in bu örnek için sunduğu her şeye göz atın"
+
+msgid "Browse"
+msgstr "Göz At"
+
+msgid "No mod loader"
+msgstr "Mod yükleyici yok"
+
+msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
+msgstr "Modlar için bir mod yükleyici gerekiyor. Önce bu örneğin ayarlarından Fabric, Quilt, Forge veya NeoForge seçin"
+
+msgid "Create Instance"
+msgstr "Örnek Oluştur"
+
+msgid "Name"
+msgstr "Ad"
+
+msgid "Directory"
+msgstr "Klasör"
+
+msgid "Choose a folder"
+msgstr "Bir klasör seç"
+
+msgid "Create"
+msgstr "Oluştur"
+
+msgid "Download Modpack"
+msgstr "Modpack indir"
+
+msgid "Loading modpacks…"
+msgstr "Modpack’ler yükleniyor…"
+
+msgid "Search modpacks"
+msgstr "Modpack’lerde ara"
+
+msgid "Close"
+msgstr "Kapat"
+
+msgid "Back"
+msgstr "Geri"
+
+msgid "Install"
+msgstr "Kur"
+
+msgid "Copy of %s"
+msgstr "%s kopyası"
+
+msgid "Choose Java executable"
+msgstr "Java çalıştırılabilir dosyasını seç"
+
+msgid "Choose an Icon"
+msgstr "Bir simge seç"
+
+msgid "Choose a Directory"
+msgstr "Bir klasör seç"
+
+msgid "Duplicated to \"%s\""
+msgstr "\"%s\" konumuna çoğaltıldı"
+
+msgid "Delete \"%s\"?"
+msgstr "\"%s\" silinsin mi?"
+
+msgid "General"
+msgstr "Genel"
+
+msgid "Icon"
+msgstr "Simge"
+
+msgid "Change the Directory"
+msgstr "Klasörü değiştir"
+
+msgid "Minecraft"
+msgstr "Minecraft"
+
+msgid "Choose…"
+msgstr "Seç…"
+
+msgid "Java"
+msgstr "Java"
+
+msgid "Add Java Runtime"
+msgstr "Java çalışma zamanı ekle"
+
+msgid "JVM Arguments"
+msgstr "JVM Argümanları"
+
+msgid "Actions"
+msgstr "Eylemler"
+
+msgid "Duplicate"
+msgstr "Çoğalt"
+
+msgid "Delete Instance"
+msgstr "Örneği sil"
+
+msgid "Settings"
+msgstr "Ayarlar"
+
+msgid "Resource Packs"
+msgstr "Kaynak Paketleri"
+
+msgid "Shader Packs"
+msgstr "Gölgelendirici Paketleri"
+
+msgid "Mods"
+msgstr "Modlar"
+
+msgid "Logs"
+msgstr "Günlükler"
+
+msgid "Custom: %s"
+msgstr "Özel: %s"
+
+msgid "the game was stopped by signal %d"
+msgstr "oyun %d sinyaliyle durduruldu"
+
+msgid "the game exited with code %d"
+msgstr "oyun %d koduyla sona erdi"
+
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Minecraft %s için uyumlu %s sürümü bulunamadı."
+
+msgid "Loader"
+msgstr "Yükleyici"
+
+msgid "Loader Version"
+msgstr "Yükleyici Sürümü"
+
+msgid "Clear"
+msgstr "Temizle"
+
+msgid "Search the log"
+msgstr "Günlükte ara"
+
+msgid "Versions"
+msgstr "Sürümler"
+
+msgid "Show Snapshots"
+msgstr "Anlık Görüntüleri Göster"
+
+msgid "Show unstable Mod Loader versions"
+msgstr "Kararsız mod yükleyici sürümlerini göster"
+
+msgid "Default Java"
+msgstr "Varsayılan Java"
+
+msgid "Automatic (closest compatible)"
+msgstr "Otomatik (en yakın uyumlu)"
+
+msgid "Custom Java…"
+msgstr "Özel Java…"
+
+msgid "Language"
+msgstr "Dil"
+
+msgid "Interface language"
+msgstr "Arayüz dili"
+
+msgid "Line Limit"
+msgstr "Satır sınırı"
+
+msgid "Open Log Folder After Crash"
+msgstr "Çökmeden sonra günlük klasörünü aç"
+
+msgid "About AML"
+msgstr "AML hakkında"
+
+msgid "Keyboard Shortcuts"
+msgstr "Klavye kısayolları"
+
+msgid "Stop"
+msgstr "Durdur"
+
+msgid "Play"
+msgstr "Oyna"
+
+msgid "Keep Playing"
+msgstr "Oynamaya devam et"
+
+msgid "Downloads"
+msgstr "İndirmeler"
+
+msgid "Accounts"
+msgstr "Hesaplar"
+
+msgid "No Instances Yet"
+msgstr "Henüz örnek yok"
+
+msgid "Use the + button in the header to create one"
+msgstr "Bir tane oluşturmak için başlıktaki + düğmesini kullanın"
+
+msgid "the loader cannot be resolved: %s"
+msgstr "yükleyici çözümlenemiyor: %s"
+
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Minecraft %s ve %s için uyumlu sürüm bulunamadı."
+
+msgid "No compatible version found for Minecraft %s."
+msgstr "Minecraft %s için uyumlu sürüm bulunamadı."
+
+msgid "Add Offline Account"
+msgstr "Çevrimdışı hesap ekle"
+
+msgid "Add"
+msgstr "Ekle"
+
+msgid "asking Microsoft for a code"
+msgstr "Microsoft’dan kod isteniyor"
+
+msgid "waiting for the sign-in in the browser"
+msgstr "tarayıcıda oturum açılması bekleniyor"
+
+msgid "Sign In"
+msgstr "Oturum aç"
+
+msgid "Open the page in your browser, then enter this code:"
+msgstr "Sayfayı tarayıcınızda açın, ardından bu kodu girin:"
+
+msgid "Open the Page"
+msgstr "Sayfayı Aç"
+
+msgid "Try Again"
+msgstr "Tekrar Dene"
+
+msgid "Remove"
+msgstr "Kaldır"
+
+msgid "Remove \"%s\""
+msgstr "\"%s\" kaldır"
+
+msgid "Add Microsoft Account"
+msgstr "Microsoft Hesabı Ekle"
+
+msgid "Minecraft Version"
+msgstr "Minecraft Sürümü"

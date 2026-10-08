@@ -1,0 +1,311 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: AML\n"
+"Language: es_AR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Language"
+msgstr "Idioma"
+
+msgid "Interface language"
+msgstr "Idioma de la interfaz"
+
+msgid "System default"
+msgstr "Predeterminado del sistema"
+
+msgid "Español (Argentina)"
+msgstr "Español (Argentina)"
+
+msgid "Español (España)"
+msgstr "Español (España)"
+
+msgid "Português (Brasil)"
+msgstr "Português (Brasil)"
+
+msgid "Restart AML to apply the language"
+msgstr "Reiniciá AML para aplicar el idioma"
+
+msgid "Settings"
+msgstr "Configuración"
+
+msgid "Versions"
+msgstr "Versiones"
+
+msgid "Show Snapshots"
+msgstr "Mostrar snapshots"
+
+msgid "Show unstable Mod Loader versions"
+msgstr "Mostrar versiones inestables de los mod loaders"
+
+msgid "Java"
+msgstr "Java"
+
+msgid "Default Java"
+msgstr "Java predeterminado"
+
+msgid "Automatic (closest compatible)"
+msgstr "Automático (compatible más cercano)"
+
+msgid "Custom Java…"
+msgstr "Java personalizado…"
+
+msgid "Logs"
+msgstr "Registros"
+
+msgid "Line Limit"
+msgstr "Límite de líneas"
+
+msgid "Open Log Folder After Crash"
+msgstr "Abrir la carpeta de registros después de un cierre inesperado"
+
+msgid "Choose…"
+msgstr "Elegir…"
+
+msgid "Retry"
+msgstr "Reintentar"
+
+msgid "Loading…"
+msgstr "Cargando…"
+
+msgid "Download"
+msgstr "Descargar"
+
+msgid "Loading more…"
+msgstr "Cargando más…"
+
+msgid "Name"
+msgstr "Nombre"
+
+msgid "Directory"
+msgstr "Carpeta"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Create"
+msgstr "Crear"
+
+
+msgid "Back"
+msgstr "Atrás"
+
+msgid "Install"
+msgstr "Instalar"
+
+msgid "General"
+msgstr "General"
+
+msgid "Icon"
+msgstr "Ícono"
+
+msgid "Minecraft"
+msgstr "Minecraft"
+
+msgid "Actions"
+msgstr "Acciones"
+
+msgid "Choose Java executable"
+msgstr "Elegí el ejecutable de Java"
+
+msgid "About AML"
+msgstr "Acerca de AML"
+
+msgid "Create Instance"
+msgstr "Crear instancia"
+
+msgid "Download Modpack"
+msgstr "Descargar modpack"
+
+msgid "Keyboard Shortcuts"
+msgstr "Atajos de teclado"
+
+msgid "Stop"
+msgstr "Detener"
+
+msgid "Play"
+msgstr "Jugar"
+
+msgid "No Instances Yet"
+msgstr "Todavía no hay instancias"
+
+msgid "Use the + button in the header to create one"
+msgstr "Usá el botón + del encabezado para crear una"
+
+msgid "Add"
+msgstr "Agregar"
+
+msgid "Try Again"
+msgstr "Intentar de nuevo"
+
+msgid "Add Microsoft Account"
+msgstr "Agregar cuenta de Microsoft"
+
+msgid "Add Offline Account"
+msgstr "Agregar cuenta sin conexión"
+
+msgid "Choose a folder"
+msgstr "Elegí una carpeta"
+
+msgid "Copy of %s"
+msgstr "Copia de %s"
+
+msgid "Choose an Icon"
+msgstr "Elegí un ícono"
+
+msgid "Choose a Directory"
+msgstr "Elegí una carpeta"
+
+msgid "Duplicated to \"%s\""
+msgstr "Duplicado como \"%s\""
+
+msgid "Delete \"%s\"?"
+msgstr "¿Eliminar \"%s\"?"
+
+msgid "Delete"
+msgstr "Eliminar"
+
+msgid "Change the Directory"
+msgstr "Cambiar la carpeta"
+
+msgid "Custom: %s"
+msgstr "Personalizado: %s"
+
+msgid "the game was stopped by signal %d"
+msgstr "el juego fue detenido por la señal %d"
+
+msgid "the game exited with code %d"
+msgstr "el juego terminó con el código %d"
+
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "No se encontró una versión compatible de %s para Minecraft %s."
+
+msgid "Keep Playing"
+msgstr "Seguir jugando"
+
+msgid "Downloads"
+msgstr "Descargas"
+
+msgid "Accounts"
+msgstr "Cuentas"
+
+msgid "the loader cannot be resolved: %s"
+msgstr "no se puede resolver el mod loader: %s"
+
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "No se encontró una versión compatible para Minecraft %s y %s."
+
+msgid "No compatible version found for Minecraft %s."
+msgstr "No se encontró una versión compatible para Minecraft %s."
+
+msgid "Sign In"
+msgstr "Iniciar sesión"
+
+msgid "Remove"
+msgstr "Eliminar"
+
+msgid "Remove \"%s\""
+msgstr "Eliminar \"%s\""
+
+msgid "Confirm"
+msgstr "Confirmar"
+
+msgid "Nothing installed yet"
+msgstr "Todavía no hay nada instalado"
+
+msgid "Browse for something to put into the folder of this instance"
+msgstr "Buscá algo para agregar a la carpeta de esta instancia"
+
+msgid "Installed"
+msgstr "Instalado"
+
+msgid "Search Modrinth"
+msgstr "Buscar en Modrinth"
+
+msgid "Filter by category"
+msgstr "Filtrar por categoría"
+
+msgid "Filter"
+msgstr "Filtrar"
+
+msgid "Nothing to show yet"
+msgstr "Todavía no hay nada para mostrar"
+
+msgid "Type what to look for, or browse everything Modrinth has for this instance"
+msgstr "Escribí qué buscás o explorá todo lo que Modrinth tiene para esta instancia"
+
+msgid "Browse"
+msgstr "Explorar"
+
+msgid "Loading modpacks…"
+msgstr "Cargando modpacks…"
+
+msgid "Open the page in your browser, then enter this code:"
+msgstr "Abrí la página en tu navegador e ingresá este código:"
+
+msgid "Open the Page"
+msgstr "Abrir la página"
+
+msgid "asking Microsoft for a code"
+msgstr "Solicitando un código a Microsoft"
+
+msgid "waiting for the sign-in in the browser"
+msgstr "Esperando el inicio de sesión en el navegador"
+
+msgid "Loader"
+msgstr "Mod loader"
+
+msgid "Loader Version"
+msgstr "Versión del mod loader"
+
+msgid "Minecraft Version"
+msgstr "Versión de Minecraft"
+
+msgid "Add Java Runtime"
+msgstr "Agregar Java"
+
+msgid "JVM Arguments"
+msgstr "Argumentos de la JVM"
+
+msgid "Resource Packs"
+msgstr "Packs de recursos"
+
+msgid "Shader Packs"
+msgstr "Packs de shaders"
+
+msgid "Update All"
+msgstr "Actualizar todo"
+
+msgid "Open Folder"
+msgstr "Abrir carpeta"
+
+msgid "Refresh"
+msgstr "Actualizar"
+
+msgid "Duplicate"
+msgstr "Duplicar"
+
+msgid "Delete Instance"
+msgstr "Eliminar instancia"
+
+msgid "Search modpacks"
+msgstr "Buscar modpacks"
+
+msgid "Close"
+msgstr "Cerrar"
+
+msgid "Clear"
+msgstr "Limpiar"
+
+msgid "Search the log"
+msgstr "Buscar en el registro"
+
+msgid "No mod loader"
+msgstr "No hay mod loader"
+
+msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
+msgstr "Los mods necesitan un mod loader. Primero elegí Fabric, Quilt, Forge o NeoForge en la configuración de esta instancia"
+
+msgid "Mods"
+msgstr "Mods"

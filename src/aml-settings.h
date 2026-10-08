@@ -89,6 +89,11 @@ gboolean aml_settings_set_show_unstable_loaders (AmlSettings *self,
                                                  gboolean     value,
                                                  GError     **error);
 
+const char *aml_settings_get_language (AmlSettings *self);
+gboolean aml_settings_set_language (AmlSettings *self,
+                                    const char *language,
+                                    GError    **error);
+
 G_END_DECLS
 
 #endif /* AML_SETTINGS_H */

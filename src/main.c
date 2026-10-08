@@ -12,7 +12,9 @@
 #include <gtk/gtk.h>
 
 #include "aml-instance-manager.h"
+#include "aml-i18n.h"
 #include "aml-main-window.h"
+#include "aml-settings.h"
 
 static void
 on_quit (GSimpleAction *action G_GNUC_UNUSED,
@@ -92,7 +94,10 @@ on_activate (GApplication *app, gpointer user_data G_GNUC_UNUSED)
   load_app_css ();
 
   g_autoptr (AmlInstanceManager) manager = aml_instance_manager_new (NULL);
+  g_autoptr (AmlSettings) settings = aml_settings_new ();
   g_autoptr (GError) error = NULL;
+
+  aml_i18n_init (aml_settings_get_language (settings));
 
   if (!aml_instance_manager_load (manager, &error))
     g_warning ("cannot read the instance list: %s", error->message);

@@ -3,6 +3,7 @@
  */
 
 #include "aml-logs-page.h"
+#include "aml-i18n.h"
 
 #include <gdk/gdkevents.h>
 
@@ -419,11 +420,11 @@ aml_logs_page_new (AmlLauncher *launcher)
   gtk_widget_add_css_class (self->detail, "dim-label");
   gtk_box_append (GTK_BOX (row), self->detail);
 
-  self->clear = toolbar_button ("edit-clear-symbolic", "Clear",
+  self->clear = toolbar_button ("edit-clear-symbolic", _("Clear"),
                                 G_CALLBACK (on_clear_clicked), self);
   gtk_box_append (GTK_BOX (row), self->clear);
 
-  self->open = toolbar_button ("folder-symbolic", "Open Folder",
+  self->open = toolbar_button ("folder-symbolic", _("Open Folder"),
                                G_CALLBACK (on_open_clicked), self);
   gtk_box_append (GTK_BOX (row), self->open);
 
@@ -435,7 +436,7 @@ aml_logs_page_new (AmlLauncher *launcher)
   self->search_entry = gtk_search_entry_new ();
   gtk_widget_set_hexpand (self->search_entry, TRUE);
   gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (self->search_entry),
-                                         "Search the log");
+                                         _("Search the log"));
   gtk_search_bar_set_child (GTK_SEARCH_BAR (self->search_bar),
                             self->search_entry);
   gtk_search_bar_set_key_capture_widget (GTK_SEARCH_BAR (self->search_bar),

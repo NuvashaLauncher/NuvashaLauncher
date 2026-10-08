@@ -1,0 +1,293 @@
+msgid ""
+msgstr ""
+"Language: ru\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Cancel"
+msgstr "Отмена"
+
+msgid "Confirm"
+msgstr "Подтверждение"
+
+msgid "Delete"
+msgstr "Удалить"
+
+msgid "Retry"
+msgstr "Повторить попытку"
+
+msgid "Loading…"
+msgstr "Загрузка…"
+
+msgid "Download"
+msgstr "Загрузить"
+
+msgid "Update All"
+msgstr "Обновить всё"
+
+msgid "Open Folder"
+msgstr "Открыть каталог"
+
+msgid "Refresh"
+msgstr "Обновление"
+
+msgid "Nothing installed yet"
+msgstr "Ничего не установлено…"
+
+msgid "Browse for something to put into the folder of this instance"
+msgstr "Найдите что-то, что нужно поместить в папку этого экземпляра"
+
+msgid "Installed"
+msgstr "Установлено"
+
+msgid "Loading more…"
+msgstr "Загрузка больше результатов..."
+
+msgid "Search Modrinth"
+msgstr "Поиск по Modrinth"
+
+msgid "Filter by category"
+msgstr "Фильтр по категории"
+
+msgid "Filter"
+msgstr "Фильтр"
+
+msgid "Nothing to show yet"
+msgstr "Здесь пока пусто"
+
+msgid "Type what to look for, or browse everything Modrinth has for this instance"
+msgstr "Введите, что искать, или просмотрите все, что есть у Modrinth для этого экземпляра"
+
+msgid "Browse"
+msgstr "Обзор"
+
+msgid "No mod loader"
+msgstr "Нет мод-загрузчика"
+
+msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
+msgstr "Модам нужен мод-загрузчик. Сначала выберите Fabric, Quilt, Forge или NeoForge в настройках этого экземпляра"
+
+msgid "Create Instance"
+msgstr "Создать экземпляр"
+
+msgid "Name"
+msgstr "ФИО"
+
+msgid "Directory"
+msgstr "Папка"
+
+msgid "Choose a folder"
+msgstr "Выберите папку"
+
+msgid "Create"
+msgstr "Создать"
+
+msgid "Download Modpack"
+msgstr "Скачать Modpack"
+
+msgid "Loading modpacks…"
+msgstr "Загрузка пакетов модов..."
+
+msgid "Search modpacks"
+msgstr "Поиск модпаков"
+
+msgid "Close"
+msgstr "Закрыть"
+
+msgid "Back"
+msgstr "Назад"
+
+msgid "Install"
+msgstr "Установка"
+
+msgid "Copy of %s"
+msgstr "Копия %s"
+
+msgid "Choose Java executable"
+msgstr "Выберите исполняемый файл Java"
+
+msgid "Choose an Icon"
+msgstr "Выберите иконку"
+
+msgid "Choose a Directory"
+msgstr "Выберите папку"
+
+msgid "Duplicated to \"%s\""
+msgstr "Создана копия в \"%s\""
+
+msgid "Delete \"%s\"?"
+msgstr "Удалить «%s»?"
+
+msgid "General"
+msgstr "Общее"
+
+msgid "Icon"
+msgstr "Значок"
+
+msgid "Change the Directory"
+msgstr "Изменить папку"
+
+msgid "Minecraft"
+msgstr "Minecraft"
+
+msgid "Choose…"
+msgstr "Выбрать…"
+
+msgid "Java"
+msgstr "Java"
+
+msgid "Add Java Runtime"
+msgstr "Добавить Java"
+
+msgid "JVM Arguments"
+msgstr "Аргументы JVM"
+
+msgid "Actions"
+msgstr "Действия"
+
+msgid "Duplicate"
+msgstr "Дублировать"
+
+msgid "Delete Instance"
+msgstr "Удалить экземпляр"
+
+msgid "Settings"
+msgstr "Настройки"
+
+msgid "Resource Packs"
+msgstr "Пакеты ресурсов"
+
+msgid "Shader Packs"
+msgstr "Наборы шейдеров"
+
+msgid "Mods"
+msgstr "Моды"
+
+msgid "Logs"
+msgstr "Журналы"
+
+msgid "Custom: %s"
+msgstr "Своё: %s"
+
+msgid "the game was stopped by signal %d"
+msgstr "игра была остановлена по сигналу %d"
+
+msgid "the game exited with code %d"
+msgstr "игра вышла с кодом %d"
+
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Совместимая %s версия для Minecraft %s не найдена."
+
+msgid "Loader"
+msgstr "Мод-загрузчик"
+
+msgid "Loader Version"
+msgstr "Версия мод-загрузчика"
+
+msgid "Clear"
+msgstr "Очистить"
+
+msgid "Search the log"
+msgstr "Поиск в журнале"
+
+msgid "Versions"
+msgstr "Версии"
+
+msgid "Show Snapshots"
+msgstr "Показать снимки"
+
+msgid "Show unstable Mod Loader versions"
+msgstr "Показывать нестабильные версии мод-загрузчиков"
+
+msgid "Default Java"
+msgstr "Java по умолчанию"
+
+msgid "Automatic (closest compatible)"
+msgstr "Автоматически (самая подходящая)"
+
+msgid "Custom Java…"
+msgstr "Пользовательская Java..."
+
+msgid "Language"
+msgstr "Язык"
+
+msgid "Interface language"
+msgstr "Язык интерфейса"
+
+msgid "Line Limit"
+msgstr "Ограничение строк"
+
+msgid "Open Log Folder After Crash"
+msgstr "Открыть папку журнала после сбоя"
+
+msgid "About AML"
+msgstr "О AML"
+
+msgid "Keyboard Shortcuts"
+msgstr "Горячі клавіши"
+
+msgid "Stop"
+msgstr "Остановить"
+
+msgid "Play"
+msgstr "Играть"
+
+msgid "Keep Playing"
+msgstr "Продолжить игру"
+
+msgid "Downloads"
+msgstr "Загрузки"
+
+msgid "Accounts"
+msgstr "Учётные записи"
+
+msgid "No Instances Yet"
+msgstr "Экземпляров пока нет"
+
+msgid "Use the + button in the header to create one"
+msgstr "Используйте кнопку + в заголовке, чтобы создать его"
+
+msgid "the loader cannot be resolved: %s"
+msgstr "не удалось определить мод-загрузчик: %s"
+
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Совместимые версии для Minecraft %s и %s не найдены."
+
+msgid "No compatible version found for Minecraft %s."
+msgstr "Совместимая версия для Minecraft %s не найдена."
+
+msgid "Add Offline Account"
+msgstr "Добавить офлайн-учётную запись"
+
+msgid "Add"
+msgstr "Добавить"
+
+msgid "asking Microsoft for a code"
+msgstr "попросить у Microsoft код"
+
+msgid "waiting for the sign-in in the browser"
+msgstr "ожидание авторизации в браузере"
+
+msgid "Sign In"
+msgstr "Войти"
+
+msgid "Open the page in your browser, then enter this code:"
+msgstr "Откройте страницу в браузере и введите этот код:"
+
+msgid "Open the Page"
+msgstr "Открыть страницу"
+
+msgid "Try Again"
+msgstr "Повторите попытку"
+
+msgid "Remove"
+msgstr "Снимите"
+
+msgid "Remove \"%s\""
+msgstr "Удалить \"%s\""
+
+msgid "Add Microsoft Account"
+msgstr "Добавить учётную запись Microsoft"
+
+msgid "Minecraft Version"
+msgstr "Версия Minecraft"

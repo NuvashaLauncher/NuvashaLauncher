@@ -3,6 +3,7 @@
  */
 
 #include "aml-loader-row.h"
+#include "aml-i18n.h"
 
 struct _AmlLoaderRow
 {
@@ -252,7 +253,7 @@ show_empty (AmlLoaderRow *self)
   adw_combo_row_set_selected (ADW_COMBO_ROW (self->version_row),
                               GTK_INVALID_LIST_POSITION);
 
-  message = g_strdup_printf ("No compatible %s version found for Minecraft %s.",
+  message = g_strdup_printf (_("No compatible %s version found for Minecraft %s."),
                              aml_loader_display_name (self->current),
                              self->game_version != NULL ? self->game_version
                                                         : "?");
@@ -429,7 +430,7 @@ aml_loader_row_new (void)
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->loader_row),
                                       FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->loader_row),
-                                 "Loader");
+                                  _("Loader"));
   {
     g_autoptr (GtkStringList) loaders_list = gtk_string_list_new (names);
 
@@ -442,8 +443,8 @@ aml_loader_row_new (void)
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->version_row),
                                       FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->version_row),
-                                 "Loader Version");
-  self->retry = g_object_ref_sink (gtk_button_new_with_label ("Retry"));
+                                  _("Loader Version"));
+  self->retry = g_object_ref_sink (gtk_button_new_with_label (_("Retry")));
   gtk_widget_add_css_class (self->retry, "flat");
   gtk_widget_set_valign (self->retry, GTK_ALIGN_CENTER);
   gtk_widget_set_visible (self->retry, FALSE);
