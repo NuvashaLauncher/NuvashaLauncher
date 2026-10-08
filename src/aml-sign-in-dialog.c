@@ -268,6 +268,9 @@ aml_sign_in_dialog_init (AmlSignInDialog *self)
                     self);
 
   GtkWidget *header = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
+  /* The waiting circle and the code are one group at the middle of the
+     dialog, rather than the left end of a row that reaches across it. */
+  gtk_widget_set_halign (header, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (header, GTK_ALIGN_CENTER);
   gtk_box_append (GTK_BOX (header), self->spinner);
   gtk_box_append (GTK_BOX (header), self->code_label);
