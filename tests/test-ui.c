@@ -191,6 +191,74 @@ test_icon_decode (void)
   g_print ("ok - an undecodable icon keeps the placeholder\n");
 }
 
+/* The first widget of @type under @w, or NULL. */
+static GtkWidget *
+find_by_type (GtkWidget *w, GType type)
+{
+  if (w == NULL)
+    return NULL;
+
+  if (G_TYPE_CHECK_INSTANCE_TYPE (w, type))
+    return w;
+
+  for (GtkWidget *c = gtk_widget_get_first_child (w); c != NULL;
+       c = gtk_widget_get_next_sibling (c))
+    {
+      GtkWidget *found = find_by_type (c, type);
+
+      if (found != NULL)
+        return found;
+    }
+
+  return NULL;
+}
+
+/* A page of a kind of content opens as the list alone: the project is the
+ * other half of a split view, and is only filled when one is opened. This
+ * is the state the split has to start in, and moving the split without
+ * meaning to would leave two empty columns. */
+static void
+test_content_page_starts_single (void)
+{
+  g_autoptr (GError) error = NULL;
+  g_autofree char *tmp = g_dir_make_tmp ("aml-ui-split-XXXXXX", &error);
+  g_autofree char *data_dir = NULL;
+  g_autoptr (AmlInstanceManager) manager = NULL;
+  AmlInstance *instance = NULL;
+  AmlContentPage *page = NULL;
+  GtkWidget *split = NULL;
+  GtkWidget *switcher = NULL;
+
+  g_assert_no_error (error);
+  g_assert_nonnull (tmp);
+
+  data_dir = g_build_filename (tmp, "data", NULL);
+  manager = aml_instance_manager_new (data_dir);
+  instance = aml_instance_manager_create (manager, "Split", NULL, "1.21.1",
+                                          AML_LOADER_FABRIC, "0.15.0",
+                                          &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+
+  page = aml_content_page_new (instance, AML_CONTENT_MOD);
+  g_assert_nonnull (page);
+
+  split = find_by_type (GTK_WIDGET (page), ADW_TYPE_NAVIGATION_SPLIT_VIEW);
+  switcher = find_by_type (GTK_WIDGET (page), ADW_TYPE_VIEW_SWITCHER);
+
+  g_assert_nonnull (split);
+  g_assert_nonnull (switcher);
+  g_assert_true (adw_navigation_split_view_get_collapsed (
+    ADW_NAVIGATION_SPLIT_VIEW (split)));
+  g_assert_null (adw_navigation_split_view_get_content (
+    ADW_NAVIGATION_SPLIT_VIEW (split)));
+  g_assert_cmpint (adw_view_switcher_get_policy (ADW_VIEW_SWITCHER (switcher)),
+                   ==, ADW_VIEW_SWITCHER_POLICY_WIDE);
+
+  g_object_unref (instance);
+  g_print ("ok - a content page opens as the list alone\n");
+}
+
 /* A page whose folder scan is still running when the page goes away must
  * not be touched by the answer. Local only: the scan reads a directory,
  * it never asks the network. */
@@ -251,6 +319,7 @@ main (int argc, char **argv)
   test_markup ();
   test_row_activation ();
   test_icon_decode ();
+  test_content_page_starts_single ();
   test_page_disposed_while_scanning ();
 
   return EXIT_SUCCESS;

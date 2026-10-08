@@ -132,7 +132,7 @@ struct _AmlContentPage
   GCancellable *scan;     /* the folder, its hashes and their lookups */
   GCancellable *transfer; /* what is being installed or updated */
 
-  /* The dialog of a project waits for the description and the versions
+  /* The page of a project waits for the description and the versions
      to arrive before showing anything. These are on the page so both
      callbacks can read them, unlike a temporary watch that gets freed. */
   gboolean details_ready;
@@ -142,7 +142,7 @@ struct _AmlContentPage
   char *details_problem;               /* why the description is not there */
   char *versions_problem;              /* why the versions are not there */
 
-  /* What the dialog of the currently-open project is titled with and
+  /* What the page of the currently-open project is titled with and
      what it shows, so the fill function can rebuild the heading. */
   char *current_project_title;
   guint64 current_project_downloads;
@@ -150,7 +150,8 @@ struct _AmlContentPage
   GtkWidget *details_body;
   GtkWidget *details_dropdown;
   GtkWidget *details_download;
-  GtkWidget *details_dialog; /* weak: the dialog of the open project */
+  GtkWidget *details_page; /* weak: the page of the open project */
+  GtkWidget *split;        /* the list on the left, the project on the right */
 };
 
 G_DEFINE_FINAL_TYPE (AmlContentPage, aml_content_page, GTK_TYPE_BOX)
@@ -211,7 +212,7 @@ page_watch_free (PageWatch *watch)
   g_free (watch);
 }
 
-/* One answer of the dialog of a project while what it shows is being
+/* One answer of the page of a project while what it shows is being
  * read: the page that opened it, weakly held, and the project the
  * versions are asked for. The page can be closed while a request is
  * still running, so the answer does nothing instead of touching memory
@@ -246,7 +247,7 @@ details_watch_free (DetailsWatch *watch)
 
 /* Points @field at @widget and watches it: when the widget is destroyed
  * the field becomes NULL before anything can touch it. Used for the
- * widgets of the dialog of a project, which the dialog owns. */
+ * widgets of the page of a project, which the page owns. */
 static void
 watch_widget (GtkWidget **field, GtkWidget *widget)
 {
@@ -2741,7 +2742,7 @@ version_name_of (AmlModrinthVersion *version)
 }
 
 /* The one button under the versions: it installs what the dropdown
- * shows, and the dialog it was in has done its work. */
+ * shows, and the page it was in has done its work. */
 static void
 on_version_download_clicked (GtkButton *button, gpointer user_data)
 {
@@ -2784,7 +2785,7 @@ version_label (AmlModrinthVersion *version)
   return g_strdup (version_name_of (version));
 }
 
-/* The words the dialog shows while the description and the versions are
+/* The words the page shows while the description and the versions are
  * on their way. */
 static GtkWidget *
 loading_child (void)
@@ -2804,8 +2805,86 @@ loading_child (void)
   return box;
 }
 
-/* The whole content of the dialog, built in one go from what the answers
- * said. Nothing here is filled in as it arrives: the dialog shows a
+/* Puts the list and the open project side by side, or the list alone.
+ * While a project is open the switcher moves to the left end of the row
+ * and shows its icons only, so both halves keep their share of a bar that
+ * is no longer the whole width of the page. */
+static void
+set_detail_open (AmlContentPage *self, gboolean open)
+{
+  if (self->bar == NULL || self->switcher == NULL)
+    return;
+
+  adw_view_switcher_set_policy (
+    ADW_VIEW_SWITCHER (self->switcher),
+    open ? ADW_VIEW_SWITCHER_POLICY_NARROW : ADW_VIEW_SWITCHER_POLICY_WIDE);
+
+  g_object_ref (self->switcher);
+  gtk_box_remove (GTK_BOX (self->bar), self->switcher);
+
+  if (open)
+    gtk_box_prepend (GTK_BOX (self->bar), self->switcher);
+  else
+    gtk_box_append (GTK_BOX (self->bar), self->switcher);
+
+  g_object_unref (self->switcher);
+}
+
+/* Closes the page of the open project, leaving the list the whole width
+ * of the page again. An answer that is still on its way finds no page to
+ * fill and does nothing. */
+static void
+close_detail (AmlContentPage *self)
+{
+  if (self->split == NULL)
+    return;
+
+  adw_navigation_split_view_set_content (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split), NULL);
+  adw_navigation_split_view_set_collapsed (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split), TRUE);
+  self->details_page = NULL;
+  set_detail_open (self, FALSE);
+}
+
+static void
+on_detail_back (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  close_detail (user_data);
+}
+
+/* The row above the body of an open project: one back arrow that closes
+ * the page and gives the list the whole width back. Nothing else: the
+ * title and the rest are already the first thing the body shows. */
+static GtkWidget *
+detail_body (AmlContentPage *self, GtkWidget *body)
+{
+  GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  GtkWidget *row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  GtkWidget *back = gtk_button_new_from_icon_name ("go-previous-symbolic");
+
+  gtk_widget_add_css_class (back, "flat");
+  gtk_widget_set_valign (back, GTK_ALIGN_CENTER);
+  gtk_widget_set_tooltip_text (back, "Back");
+  gtk_accessible_update_property (GTK_ACCESSIBLE (back),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL, "Back", -1);
+  g_signal_connect (back, "clicked", G_CALLBACK (on_detail_back), self);
+
+  gtk_widget_set_margin_start (row, 6);
+  gtk_widget_set_margin_end (row, 6);
+  gtk_widget_set_margin_top (row, 6);
+  gtk_widget_set_margin_bottom (row, 6);
+  gtk_box_append (GTK_BOX (row), back);
+
+  gtk_widget_set_vexpand (body, TRUE);
+  gtk_box_append (GTK_BOX (box), row);
+  gtk_box_append (GTK_BOX (box), body);
+
+  return box;
+}
+
+/* The whole content of the page, built in one go from what the answers
+ * said. Nothing here is filled in as it arrives: the page shows a
  * spinner until this is called, so the meta, count, description and
  * versions appear together. */
 static GtkWidget *
@@ -2913,19 +2992,19 @@ details_content (AmlContentPage *self)
   return content;
 }
 
-/* Puts the real content in the dialog once both the description and the
+/* Puts the real content in the page once both the description and the
  * versions are in. */
 static void
-dialog_details_fill (AmlContentPage *self)
+detail_fill (AmlContentPage *self)
 {
-  if (self == NULL || self->details_dialog == NULL)
+  if (self == NULL || self->details_page == NULL)
     return;
 
   if (!self->details_ready || !self->versions_ready)
     return;
 
-  adw_dialog_set_child (ADW_DIALOG (self->details_dialog),
-                        details_content (self));
+  adw_navigation_page_set_child (ADW_NAVIGATION_PAGE (self->details_page),
+                                 detail_body (self, details_content (self)));
 
   if (self->versions_problem != NULL)
     show_toast (self, self->versions_problem);
@@ -3000,7 +3079,7 @@ on_detail_versions_ready (GObject *source G_GNUC_UNUSED,
     }
 
   self->versions_ready = TRUE;
-  dialog_details_fill (self);
+  detail_fill (self);
   details_watch_free (watch);
 }
 
@@ -3043,7 +3122,7 @@ on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     }
 
   self->details_ready = TRUE;
-  dialog_details_fill (self);
+  detail_fill (self);
 
   /* Only versions that fit this instance are asked for, and only those
      can reach the list. The watch goes on to the next answer, which is
@@ -3061,13 +3140,13 @@ on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 open_project_page (AmlContentPage *self, AmlModrinthProject *project)
 {
-  AdwDialog *dialog = NULL;
+  GtkWidget *page = NULL;
 
   if (project == NULL)
     return;
 
-  /* What the dialog needs to rebuild its heading once the answers are
-     in. The dialog itself is built with a spinner and filled later. */
+  /* What the page needs to rebuild its heading once the answers are in.
+     The page itself is built with a spinner and filled later. */
   g_free (self->current_project_title);
   self->current_project_title = g_strdup (project->title);
   self->current_project_downloads = project->downloads;
@@ -3083,17 +3162,18 @@ open_project_page (AmlContentPage *self, AmlModrinthProject *project)
   g_free (self->versions_problem);
   self->versions_problem = NULL;
 
-  /* A dialog of its own above the page, showing a spinner until both the
-     description and the versions are in. */
-  dialog = adw_dialog_new ();
-  adw_dialog_set_title (dialog, project->title);
-  adw_dialog_set_content_width (dialog, 640);
-  adw_dialog_set_content_height (dialog, 640);
-  adw_dialog_set_child (dialog, loading_child ());
+  /* The project opens in the right half of the page, beside the list it
+     was picked from, showing a spinner until both the description and
+     the versions are in. */
+  page = GTK_WIDGET (adw_navigation_page_new (
+    detail_body (self, loading_child ()), project->title));
+  watch_widget (&self->details_page, page);
 
-  watch_widget (&self->details_dialog, GTK_WIDGET (dialog));
-
-  adw_dialog_present (dialog, GTK_WIDGET (self));
+  adw_navigation_split_view_set_content (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split), ADW_NAVIGATION_PAGE (page));
+  adw_navigation_split_view_set_collapsed (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split), FALSE);
+  set_detail_open (self, TRUE);
 
   set_busy (self, TRUE);
   aml_modrinth_details_async (project->project_id, self->browse,
@@ -3419,10 +3499,23 @@ build_bar (AmlContentPage *self)
   gtk_box_append (GTK_BOX (inner), self->bar);
   gtk_box_append (GTK_BOX (inner), self->stack);
 
-  /* One overlay over the row and the list, so a message about either one
-     is said in the same place. */
+  /* The list is the left half; the project that is opened is the right
+     half, and is empty until one is opened. Collapsed shows one page at a
+     time, which is the list alone. */
+  self->split = adw_navigation_split_view_new ();
+  gtk_widget_set_vexpand (self->split, TRUE);
+  adw_navigation_split_view_set_sidebar (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split),
+    adw_navigation_page_new (inner, aml_content_type_title (self->type)));
+  adw_navigation_split_view_set_collapsed (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split), TRUE);
+  adw_navigation_split_view_set_sidebar_width_fraction (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split), 0.5);
+
+  /* One overlay over the list and the project, so a message about either
+     one is said in the same place. */
   self->toasts = adw_toast_overlay_new ();
-  adw_toast_overlay_set_child (ADW_TOAST_OVERLAY (self->toasts), inner);
+  adw_toast_overlay_set_child (ADW_TOAST_OVERLAY (self->toasts), self->split);
   gtk_box_append (GTK_BOX (self), self->toasts);
 }
 
@@ -3528,6 +3621,8 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
   self->details_body = NULL;
   self->details_dropdown = NULL;
   self->details_download = NULL;
+  self->details_page = NULL;
+  self->split = NULL;
 
   self->stack = adw_view_stack_new ();
   gtk_widget_set_vexpand (self->stack, TRUE);
@@ -3556,6 +3651,7 @@ aml_content_page_dispose (GObject *object)
   self->toasts = NULL;
   self->banner = NULL;
   self->stack = NULL;
+  self->split = NULL;
   self->bar = NULL;
   self->bar_spacer = NULL;
   self->switcher = NULL;
@@ -3595,13 +3691,13 @@ aml_content_page_dispose (GObject *object)
   g_clear_object (&self->more);
   g_clear_pointer (&self->seen_ids, g_hash_table_unref);
 
-  /* The dialog of a project and the widgets in it are owned by the
-     dialog; the fields only watch them, so they are dropped and not
+  /* The page of a project and the widgets in it are owned by the
+     page; the fields only watch them, so they are dropped and not
      unrefed. */
   watch_widget (&self->details_body, NULL);
   watch_widget (&self->details_dropdown, NULL);
   watch_widget (&self->details_download, NULL);
-  watch_widget (&self->details_dialog, NULL);
+  watch_widget (&self->details_page, NULL);
 
   /* A batch of updates that was still being applied is not applied any
      more: the plans and fetches hold the page weakly and stop. */
