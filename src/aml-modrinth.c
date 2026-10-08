@@ -139,7 +139,7 @@ root_node (const char *json, gssize length, GError **error)
   if (!json_parser_load_from_data (parser, json != NULL ? json : "",
                                    json != NULL ? length : 0, &parse_error))
     {
-      g_propagate_error (error, parse_error);
+      g_propagate_error (error, g_steal_pointer (&parse_error));
       return NULL;
     }
 
@@ -1071,7 +1071,7 @@ aml_modrinth_versions_from_json (const char *json, gssize length,
   if (!json_parser_load_from_data (parser, json != NULL ? json : "",
                                    json != NULL ? length : 0, &parse_error))
     {
-      g_propagate_error (error, parse_error);
+      g_propagate_error (error, g_steal_pointer (&parse_error));
       return NULL;
     }
 
@@ -1284,7 +1284,10 @@ json_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   /* The node is copied out of the parser, so nothing of it outlives
    * this call. */
-  request->answer (task, json_node_copy (root));
+  {
+    g_autoptr (JsonNode) answer = json_node_copy (root);
+    request->answer (task, answer);
+  }
 }
 
 static void
@@ -1372,12 +1375,15 @@ aml_modrinth_details_async (const char *project_id, GCancellable *cancellable,
 
   g_return_if_fail (project_id != NULL);
 
-  url = g_strdup_printf (AML_MODRINTH_URL "/project/%s",
-                         g_uri_escape_string (project_id, NULL, FALSE));
+  {
+    g_autofree char *escaped_id =
+      g_uri_escape_string (project_id, NULL, FALSE);
+
+    url = g_strdup_printf (AML_MODRINTH_URL "/project/%s", escaped_id);
+  }
   get_async (url, cancellable, callback, user_data, details_answer,
              AML_NOT_FOUND_IS_ERROR);
 }
-
 AmlModrinthDetails *
 aml_modrinth_details_finish (GAsyncResult *result, GError **error)
 {
@@ -1585,7 +1591,7 @@ aml_modrinth_categories_from_json (const char *json, gssize length,
   if (!json_parser_load_from_data (parser, json != NULL ? json : "",
                                    json != NULL ? length : 0, &parse_error))
     {
-      g_propagate_error (error, parse_error);
+      g_propagate_error (error, g_steal_pointer (&parse_error));
       return NULL;
     }
 
@@ -1739,8 +1745,13 @@ aml_modrinth_version_by_hash_async (const char *sha1, GCancellable *cancellable,
 
   g_return_if_fail (sha1 != NULL);
 
-  url = g_strdup_printf (AML_MODRINTH_URL "/version_file/%s?algorithm=sha1",
-                         g_uri_escape_string (sha1, NULL, FALSE));
+  {
+    g_autofree char *escaped_sha1 =
+      g_uri_escape_string (sha1, NULL, FALSE);
+
+    url = g_strdup_printf (AML_MODRINTH_URL "/version_file/%s?algorithm=sha1",
+                           escaped_sha1);
+  }
   get_async (url, cancellable, callback, user_data, version_answer,
              AML_NOT_FOUND_IS_ERROR);
 }
@@ -1815,9 +1826,14 @@ aml_modrinth_update_by_hash_async (AmlContentType type, const char *sha1,
   body = g_strdup_printf ("{\"game_versions\":%s,\"loaders\":%s}",
                           game_versions, loaders);
 
-  url = g_strdup_printf (
-      AML_MODRINTH_URL "/version_file/%s/update?algorithm=sha1",
-      g_uri_escape_string (sha1, NULL, FALSE));
+  {
+    g_autofree char *escaped_sha1 =
+      g_uri_escape_string (sha1, NULL, FALSE);
+
+    url = g_strdup_printf (
+        AML_MODRINTH_URL "/version_file/%s/update?algorithm=sha1",
+        escaped_sha1);
+  }
 
   task = request_new (cancellable, callback, user_data, update_answer,
                       AML_NOT_FOUND_IS_ABSENT,

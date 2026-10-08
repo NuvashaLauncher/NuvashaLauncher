@@ -7,7 +7,7 @@ modpacks and mods from Modrinth, resolves and installs loaders, and runs
 the game.
 
 Requires a Wayland session. GTK4 must be built with Wayland support,
-which is the default on all major distributions.
+which is the default on all major distributions. X11 is not supported.
 
 ## Build dependencies
 
@@ -58,9 +58,11 @@ To install it:
 sudo make install PREFIX=/usr/local
 ```
 
-This installs the launcher and its desktop entry. Uninstallation is a
-matter of removing `/usr/local/bin/AML` and
-`/usr/local/share/applications/io.github.Flia7.AML.desktop`.
+This installs the launcher and its desktop entry. To uninstall:
+
+```
+sudo make uninstall PREFIX=/usr/local
+```
 
 ## Tests
 
@@ -83,4 +85,10 @@ make clean         # remove build/ and build-debug/
 
 AML keeps its data under `~/.local/share/AML`, its caches under
 `~/.cache/AML` and its settings under `~/.config/AML`. The accounts file
-holds tokens and is written readable only by its owner.
+holds tokens and is written readable only by its owner, but the tokens
+are not encrypted: anyone who can read your user's files can read them.
+
+## License
+
+AML is free software, released under the GNU General Public License v3.0
+only. See [LICENSE](LICENSE).

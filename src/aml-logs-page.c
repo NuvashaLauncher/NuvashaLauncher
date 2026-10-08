@@ -114,13 +114,50 @@ static void
 append_line (AmlLogsPage *self, const char *line)
 {
   guint limit = aml_launcher_get_line_limit (self->launcher);
+  gboolean removed = FALSE;
 
   g_ptr_array_add (self->lines, g_strdup (line));
 
   /* The launcher drops the oldest line when its log is full, so the page
      drops the same one and stays the same log. */
   while (self->lines->len > limit)
-    g_ptr_array_remove_index (self->lines, 0);
+    {
+      g_ptr_array_remove_index (self->lines, 0);
+      removed = TRUE;
+    }
+
+  /* With no search on, only the tail of the view changed: appending it
+     avoids rebuilding the whole buffer for every line. A filtered view
+     still has to be rebuilt, because a new line may or may not match. */
+  if (!self->filtered && self->view != NULL)
+    {
+      GtkTextBuffer *buffer =
+        gtk_text_view_get_buffer (GTK_TEXT_VIEW (self->view));
+      GtkTextIter start;
+      GtkTextIter end;
+
+      if (removed)
+        {
+          gtk_text_buffer_get_start_iter (buffer, &start);
+          gtk_text_buffer_get_iter_at_line (buffer, &end, 1);
+          gtk_text_buffer_delete (buffer, &start, &end);
+        }
+
+      gtk_text_buffer_get_end_iter (buffer, &end);
+
+      if (gtk_text_buffer_get_char_count (buffer) > 0)
+        gtk_text_buffer_insert (buffer, &end, "\n", 1);
+
+      gtk_text_buffer_get_end_iter (buffer, &end);
+      gtk_text_buffer_insert (buffer, &end, line, -1);
+
+      self->rendered = self->lines->len;
+
+      if (self->following)
+        scroll_to_end (self);
+
+      return;
+    }
 
   show_lines (self);
 

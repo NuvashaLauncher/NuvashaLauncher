@@ -28,6 +28,24 @@
 
 #define AML_MODPACK_FORMAT_VERSION 1
 
+/* The cap on what an archive may hold, AML_MODPACK_MAX_CONTENT_SIZE
+ * unless a caller lowered it. A test has no way to build a four gigabyte
+ * archive to cross the real cap, so the bound is settable; nothing in
+ * the launcher changes it. */
+static guint64 max_content_size = AML_MODPACK_MAX_CONTENT_SIZE;
+
+void
+aml_modpack_set_content_limit (guint64 bytes)
+{
+  max_content_size = bytes;
+}
+
+guint64
+aml_modpack_get_content_limit (void)
+{
+  return max_content_size;
+}
+
 GQuark
 aml_modpack_error_quark (void)
 {
@@ -774,7 +792,7 @@ aml_modpack_new_from_zip (const char *zip_path, GError **error)
       /* A directory ends in a /: what is a safe name under the root is
        * a safe name without the / under it too. */
       if (archive_entry_filetype (header) == AE_IFDIR &&
-          name[strlen (name) - 1] == '/')
+          name[0] != '\0' && name[strlen (name) - 1] == '/')
         path = g_strndup (name, strlen (name) - 1);
       else
         path = g_strdup (name);
@@ -792,7 +810,7 @@ aml_modpack_new_from_zip (const char *zip_path, GError **error)
         {
           size += (guint64) entry_size;
 
-          if (size > AML_MODPACK_MAX_CONTENT_SIZE)
+          if (size > max_content_size)
             {
               g_set_error_literal (
                 error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_BOMB,
@@ -1105,7 +1123,7 @@ extract_entry (struct archive *archive,
         {
           /* The bomb protection runs on the bytes that did inflate, not
            * on what the entry announced. */
-          if (*used + (guint64) size > AML_MODPACK_MAX_CONTENT_SIZE)
+          if (*used + (guint64) size > max_content_size)
             {
               fclose (out);
               g_unlink (dest);

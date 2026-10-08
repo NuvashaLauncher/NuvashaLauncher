@@ -193,6 +193,7 @@ aml_icon_widget_new (const char *placeholder_icon_name)
                                     : "image-x-generic-symbolic");
 
   gtk_image_set_pixel_size (GTK_IMAGE (placeholder), 32);
+  gtk_widget_set_size_request (placeholder, AML_ICON_SIZE, AML_ICON_SIZE);
   gtk_widget_set_halign (placeholder, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (placeholder, GTK_ALIGN_CENTER);
 
@@ -236,6 +237,7 @@ aml_icon_widget_set_file (GtkWidget *widget, const char *path)
      stretched. */
   icon = gtk_image_new_from_paintable (GDK_PAINTABLE (texture));
   gtk_image_set_pixel_size (GTK_IMAGE (icon), AML_ICON_SIZE);
+  gtk_widget_set_size_request (icon, AML_ICON_SIZE, AML_ICON_SIZE);
 
   gtk_stack_add_named (GTK_STACK (widget), icon, "icon");
   gtk_stack_set_visible_child_name (GTK_STACK (widget), "icon");

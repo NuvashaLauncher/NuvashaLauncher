@@ -1085,7 +1085,7 @@ jar_manifest_attribute (const char *path, const char *name)
         continue;
 
       if (g_str_has_prefix (line, prefix))
-        return g_strdup (g_strstrip (g_strdup (line + strlen (prefix))));
+        return g_strstrip (g_strdup (line + strlen (prefix)));
     }
 
   return NULL;
@@ -1281,7 +1281,7 @@ jar_main_class (const char *path, GError **error)
         continue;
 
       if (g_str_has_prefix (line, "Main-Class:"))
-        return g_strdup (g_strstrip (g_strdup (line + strlen ("Main-Class:"))));
+        return g_strstrip (g_strdup (line + strlen ("Main-Class:")));
     }
 
   g_set_error (error, AML_LOADERS_ERROR, AML_LOADERS_ERROR_INSTALLER,
@@ -1950,9 +1950,12 @@ stage_installer (InstallRequest *request)
 
   /* Every loader publishes its installer under the name of its own
      artifact: neoforge-<version>-installer.jar, forge-… . */
-  file = g_strdup_printf ("%s-%s-installer.jar",
-                          g_path_get_basename (coordinate),
-                          request->loader_version);
+  {
+    g_autofree char *artifact_base = g_path_get_basename (coordinate);
+
+    file = g_strdup_printf ("%s-%s-installer.jar", artifact_base,
+                            request->loader_version);
+  }
   url = g_strdup_printf ("%s/%s/%s/%s", maven, coordinate,
                          request->loader_version, file);
 

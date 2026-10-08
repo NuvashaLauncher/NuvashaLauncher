@@ -531,8 +531,12 @@ aml_java_probe_list_async (char            **executables,
                            GAsyncReadyCallback callback,
                            gpointer         user_data)
 {
-  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
+  g_autoptr (GTask) task = NULL;
   ProbeList *list = NULL;
+
+  g_return_if_fail (executables != NULL);
+
+  task = g_task_new (NULL, cancellable, callback, user_data);
 
   g_task_set_check_cancellable (task, FALSE);
 

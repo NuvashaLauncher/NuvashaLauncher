@@ -42,12 +42,15 @@ typedef enum {
 
 GQuark aml_modpack_error_quark (void);
 
-/* What the archive may hold before it is called a bomb: a pack names
+/* What the archive may hold before it is called a bomb. A pack names
  * every file it installs in the manifest and the overrides are the
- * config files on top of them, so a .mrpack made of ten thousand small
- * files or of more than 128 MiB of them is not a modpack. */
-#define AML_MODPACK_MAX_ENTRIES     (10000)
-#define AML_MODPACK_MAX_CONTENT_SIZE ((guint64) (128 * 1024 * 1024))
+ * config files, resource packs and pre-generated worlds on top of them:
+ * the biggest packs on Modrinth unpack well past a gigabyte, so the cap
+ * is generous. It is the *actual* inflated bytes that are counted while
+ * the overrides are extracted, not what an entry announces, so a small
+ * archive that claims to expand without end is still stopped. */
+#define AML_MODPACK_MAX_ENTRIES     (65536)
+#define AML_MODPACK_MAX_CONTENT_SIZE (4ULL * 1024 * 1024 * 1024)
 
 /* The three states of a file for the client: the pack requires it, it
  * only offers it, or the client must not see it. */
@@ -146,6 +149,12 @@ gboolean aml_modpack_verify_file_finish (GAsyncResult *result, GError **error);
 
 /* The check every path the pack writes is run through. */
 gboolean aml_modpack_path_is_safe (const char *path);
+
+/* The cap on how much an archive may hold, in bytes. It defaults to
+ * AML_MODPACK_MAX_CONTENT_SIZE; a test that cannot build a multi
+ * gigabyte archive lowers it. The launcher never changes it. */
+void aml_modpack_set_content_limit (guint64 bytes);
+guint64 aml_modpack_get_content_limit (void);
 
 /* The hosts the format permits the files to come from. */
 gboolean aml_modpack_download_url_allowed (const char *url);

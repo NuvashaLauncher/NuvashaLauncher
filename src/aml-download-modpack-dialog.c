@@ -16,6 +16,7 @@
 #include "aml-download-modpack-dialog.h"
 
 #include "aml-dialogs.h"
+#include "aml-downloads.h"
 #include "aml-download.h"
 #include "aml-icons.h"
 #include "aml-markdown.h"
@@ -94,12 +95,21 @@ struct _AmlDownloadModpackDialog
   char *versions_problem;      /* why the versions are not there */
 
   /* Widgets of the pages that fall on top of the stack. */
-  GtkWidget *install_bar;
-  GtkWidget *install_count;
-  GtkWidget *install_cancel;
+  /* (There is no installing page: the download is the manager's and is
+     shown in the header; the dialog closes the moment it starts.) */
+
+  /* The pack download, shown in the header while it runs. Weak: the
+     manager owns it, and the pointer goes NULL when it is let go. It is
+     the same entry for both phases, the compressed pack and the extract. */
+  AmlDownload *pack_download;
 
   /* What was being retried when an error was shown. */
   gboolean fail_is_install;
+
+  /* Set once the dialog is closed: what is still running must then do
+     nothing that needs its widgets. The install carries on, the pack
+     download is cancelled. */
+  gboolean closed;
 
   /* The switches of the optional-files page and the files they word;
    * for the question "which of the optional files does the user wish?"
@@ -135,18 +145,14 @@ static GtkWidget * build_error_page (AmlDownloadModpackDialog *self,
                                      const char *message,
                                      GCallback retry,
                                      GCallback cancel);
-static GtkWidget * build_installing_page (AmlDownloadModpackDialog *self);
-static void dialog_ensure_installing_page (AmlDownloadModpackDialog *self);
 static void start_install (AmlDownloadModpackDialog *self);
-static void on_pick_directory (GtkButton *, gpointer);
 static void on_error_back (GtkButton *, gpointer);
 static void on_error_retry_fetch (GtkButton *, gpointer);
 static void on_error_retry_install (GtkButton *, gpointer);
-static void on_install_cancel (GtkButton *, gpointer);
 static void on_optional_cancel (GtkButton *, gpointer);
 static void on_optional_install (GtkButton *, gpointer);
 static void dialog_details_open (AmlDownloadModpackDialog *self);
-static void dialog_start_features (AmlDownloadModpackDialog *self);
+static gboolean dialog_start_features (AmlDownloadModpackDialog *self);
 static void on_modpack_download_clicked (GtkButton *, gpointer);
 static void dialog_details_fill (AmlDownloadModpackDialog *self);
 static void close_details (AmlDownloadModpackDialog *self);
@@ -184,9 +190,6 @@ dialog_forget_widgets (AmlDownloadModpackDialog *self)
   details_watch (&self->count, NULL);
   details_watch (&self->details_error, NULL);
   details_watch (&self->name_entry, NULL);
-  details_watch (&self->install_bar, NULL);
-  details_watch (&self->install_count, NULL);
-  details_watch (&self->install_cancel, NULL);
 }
 
 static void
@@ -204,6 +207,12 @@ dialog_dispose (GObject *object)
     g_source_remove (self->debounce);
 
   dialog_forget_widgets (self);
+
+  /* The pack download is the manager's; only the weak pointer home is
+     ours to give back before the field goes away. */
+  if (self->pack_download != NULL)
+    g_object_remove_weak_pointer (G_OBJECT (self->pack_download),
+                                  (gpointer *) &self->pack_download);
 
   g_clear_object (&self->manager);
   g_clear_object (&self->search);
@@ -241,6 +250,19 @@ aml_download_modpack_dialog_class_init (AmlDownloadModpackDialogClass *klass)
 }
 
 static void
+on_dialog_closed (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlDownloadModpackDialog *self = user_data;
+
+  self->closed = TRUE;
+
+  /* Closing does not stop the pack download: it is the manager's, it
+     shows in the header, and the install that follows it runs without
+     the dialog. Only the optional-files choice, which needs the dialog,
+     is skipped for a pack that arrives after it is gone. */
+}
+
+static void
 aml_download_modpack_dialog_init (AmlDownloadModpackDialog *self)
 {
   self->search = g_cancellable_new ();
@@ -251,10 +273,17 @@ aml_download_modpack_dialog_init (AmlDownloadModpackDialog *self)
   self->seen_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                           NULL);
 
+  g_signal_connect (self, "closed", G_CALLBACK (on_dialog_closed), self);
+
   adw_dialog_set_title (ADW_DIALOG (self), "Download Modpack");
   aml_dialog_set_standard_size (ADW_DIALOG (self));
 
   self->nav = adw_navigation_view_new ();
+  /* The installing page appears in place instead of sliding in: the
+     movement is not information, and the pages of this dialog are few
+     and shallow enough that an instant change reads cleanly. */
+  adw_navigation_view_set_animate_transitions (
+    ADW_NAVIGATION_VIEW (self->nav), FALSE);
   adw_dialog_set_child (ADW_DIALOG (self), self->nav);
 
   build_browse_page (self);
@@ -482,13 +511,16 @@ results_arrived (AmlDownloadModpackDialog *self, AmlModrinthResults *results,
         {
           AmlModrinthProject *project =
               g_ptr_array_index (results->projects, i);
-          GtkWidget *row = adw_action_row_new ();
-          GtkWidget *icon = aml_icon_widget_new ("view-list-symbolic");
+          GtkWidget *row = NULL;
+          GtkWidget *icon = NULL;
 
           /* The same project is never listed twice, however the pages
              overlap. */
           if (g_hash_table_contains (self->seen_ids, project->project_id))
             continue;
+
+          row = adw_action_row_new ();
+          icon = aml_icon_widget_new ("view-list-symbolic");
 
           g_hash_table_add (self->seen_ids, g_strdup (project->project_id));
 
@@ -1055,7 +1087,7 @@ close_details (AmlDownloadModpackDialog *self)
     ADW_NAVIGATION_SPLIT_VIEW (self->split), NULL);
   adw_navigation_split_view_set_collapsed (
     ADW_NAVIGATION_SPLIT_VIEW (self->split), TRUE);
-  self->details_page = NULL;
+  details_watch (&self->details_page, NULL);
 
   /* A half a pack wide is what the list needs; the room the other half
      took goes back to the dialog. */
@@ -1107,10 +1139,7 @@ details_content (AmlDownloadModpackDialog *self)
   GtkWidget *box = NULL;
   GtkWidget *page = NULL;
   GtkWidget *heading = NULL;
-  GtkWidget *instance_group = NULL;
-  GtkWidget *name_entry = NULL;
   GtkWidget *bar = NULL;
-  GtkWidget *pick_button = NULL;
   g_autofree char *downloads = NULL;
   const char *who = author_of (self);
 
@@ -1171,46 +1200,6 @@ details_content (AmlDownloadModpackDialog *self)
   gtk_widget_add_css_class (self->details_error, "dim-label");
   gtk_widget_set_visible (self->details_error, FALSE);
   gtk_box_append (GTK_BOX (box), self->details_error);
-
-  /* A pack becomes an instance, so what it is called and where it goes
-     are asked for as well. */
-  instance_group = adw_preferences_group_new ();
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (instance_group),
-                                   "Instance");
-
-  name_entry = adw_entry_row_new ();
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (name_entry), "Name");
-  gtk_editable_set_text (GTK_EDITABLE (name_entry), self->project->title);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (instance_group),
-                             name_entry);
-  details_watch (&self->name_entry, name_entry);
-
-  {
-    g_autofree char *default_directory = g_build_filename (
-        g_get_user_data_dir (), "AML", "instances", NULL);
-
-    details_watch (&self->directory_row, adw_action_row_new ());
-    adw_preferences_row_set_use_markup (
-        ADW_PREFERENCES_ROW (self->directory_row), FALSE);
-    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->directory_row),
-                                   "Directory");
-    adw_action_row_set_subtitle (ADW_ACTION_ROW (self->directory_row),
-                                 default_directory);
-    adw_preferences_group_add (ADW_PREFERENCES_GROUP (instance_group),
-                               self->directory_row);
-  }
-
-  pick_button = gtk_button_new_with_label ("Choose…");
-  gtk_widget_add_css_class (pick_button, "flat");
-  gtk_widget_set_valign (pick_button, GTK_ALIGN_CENTER);
-  adw_action_row_add_suffix (ADW_ACTION_ROW (self->directory_row),
-                             pick_button);
-  adw_action_row_set_activatable_widget (ADW_ACTION_ROW (self->directory_row),
-                                         pick_button);
-  g_signal_connect (pick_button, "clicked", G_CALLBACK (on_pick_directory),
-                    self);
-
-  gtk_box_append (GTK_BOX (box), instance_group);
 
   gtk_widget_set_margin_top (box, 12);
   gtk_widget_set_margin_bottom (box, 12);
@@ -1411,13 +1400,14 @@ project_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 dialog_details_open (AmlDownloadModpackDialog *self)
 {
-  g_autofree char *escaped_id =
-    g_uri_escape_string (self->project->project_id, NULL, FALSE);
-  g_autofree char *url =
-    g_strdup_printf (AML_MODRINTH_URL "/project/%s/version", escaped_id);
+  g_autofree char *escaped_id = NULL;
+  g_autofree char *url = NULL;
 
   if (self->project == NULL)
     return;
+
+  escaped_id = g_uri_escape_string (self->project->project_id, NULL, FALSE);
+  url = g_strdup_printf (AML_MODRINTH_URL "/project/%s/version", escaped_id);
 
   /* Nothing is shown until the description and the versions are both in,
      so the half does not fill itself in piece by piece. */
@@ -1518,78 +1508,6 @@ push_error (AmlDownloadModpackDialog *self,
                             ADW_NAVIGATION_PAGE (page));
 }
 
-static GtkWidget *
-build_installing_page (AmlDownloadModpackDialog *self)
-{
-  GtkWidget *toolbar = adw_toolbar_view_new ();
-  GtkWidget *header = adw_header_bar_new ();
-  GtkWidget *status = adw_status_page_new ();
-  GtkWidget *page = NULL;
-  GtkWidget *bar = gtk_progress_bar_new ();
-  GtkWidget *running = gtk_label_new ("Nothing to do yet, coming up now…");
-  GtkWidget *buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *cancel_btn = gtk_button_new_with_label ("Cancel");
-
-  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
-
-  /* Watched, so a progress callback that arrives after this page is
-   * popped can never write into a widget that is gone. */
-  details_watch (&self->install_bar, bar);
-  details_watch (&self->install_count, running);
-
-  gtk_widget_set_vexpand (GTK_WIDGET (bar), FALSE);
-  gtk_widget_add_css_class (bar, "progress");
-  gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (bar), 0.0);
-  gtk_widget_set_margin_start (bar, 12);
-  gtk_widget_set_margin_end (bar, 12);
-
-  adw_status_page_set_icon_name (ADW_STATUS_PAGE (status),
-                                 "content-loading-symbolic");
-  adw_status_page_set_title (ADW_STATUS_PAGE (status), "Installing…");
-  adw_status_page_set_description (ADW_STATUS_PAGE (status), "");
-
-  g_signal_connect (cancel_btn, "clicked", G_CALLBACK (on_install_cancel),
-                    self);
-  details_watch (&self->install_cancel, cancel_btn);
-
-  gtk_box_append (GTK_BOX (buttons), cancel_btn);
-  gtk_widget_set_halign (buttons, GTK_ALIGN_CENTER);
-
-  GtkWidget *outer = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-
-  gtk_box_append (GTK_BOX (outer), status);
-  gtk_box_append (GTK_BOX (outer), bar);
-  gtk_box_append (GTK_BOX (outer), running);
-  gtk_widget_set_halign (running, GTK_ALIGN_CENTER);
-  gtk_widget_set_vexpand (status, TRUE);
-
-  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), outer);
-  page = GTK_WIDGET (adw_navigation_page_new (toolbar, "Installing"));
-  adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (page), "installing");
-
-  return page;
-}
-
-/* Puts the installing page up unless one is already there. One install
- * attempt has exactly one installing page: rebuilding it on the way to
- * the actual install would push a second page with the same tag while the
- * first is still transitioning in, which the navigation view refuses.
- * The weak pointer is NULL once the page is gone, so a page built for a
- * previous attempt that was popped is never reused. */
-static void
-dialog_ensure_installing_page (AmlDownloadModpackDialog *self)
-{
-  GtkWidget *page = NULL;
-
-  if (self->install_bar != NULL)
-    return;
-
-  page = build_installing_page (self);
-
-  adw_navigation_view_push (ADW_NAVIGATION_VIEW (self->nav),
-                            ADW_NAVIGATION_PAGE (page));
-}
-
 /* Handler buttons patched around the pages. */
 
 /* The pack is shown in the half beside the browser rather than as a page,
@@ -1631,62 +1549,6 @@ on_error_retry_install (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   start_install (self);
 }
 
-static void
-on_install_cancel (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
-{
-  AmlDownloadModpackDialog *self = user_data;
-
-  /* get whatever network is doing and put the user back */
-  if (self->fetch != NULL)
-    g_cancellable_cancel (self->fetch);
-
-  dialog_details_show_again (self);
-}
-
-static void
-on_pick_directory_selected (GObject *source,
-                            GAsyncResult *result,
-                            gpointer user_data)
-{
-  AmlDownloadModpackDialog *self = user_data;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (GFile) file =
-    gtk_file_dialog_select_folder_finish (GTK_FILE_DIALOG (source), result,
-                                          &error);
-
-  if (file == NULL)
-    {
-      /* dismiss is not failure */
-      if (error == NULL ||
-          g_error_matches (error, GTK_DIALOG_ERROR,
-                           GTK_DIALOG_ERROR_CANCELLED) ||
-          g_error_matches (error, GTK_DIALOG_ERROR,
-                           GTK_DIALOG_ERROR_DISMISSED))
-        return;
-
-      dialog_details_show_again (self);
-      return;
-    }
-
-  g_free (self->directory);
-  self->directory = g_file_get_path (file);
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (self->directory_row),
-                               self->directory);
-}
-
-static void
-on_pick_directory (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
-{
-  AmlDownloadModpackDialog *self = user_data;
-  GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
-  g_autoptr (GtkFileDialog) dialog = gtk_file_dialog_new ();
-
-  gtk_file_dialog_select_folder (dialog,
-                                 GTK_IS_WINDOW (root) ? GTK_WINDOW (root)
-                                                      : NULL,
-                                 NULL, on_pick_directory_selected, self);
-}
-
 /* The Download button under the versions: it installs the version the
    drop-down shows, and the dialog it was in has done its work. */
 static void
@@ -1694,7 +1556,6 @@ on_modpack_download_clicked (GtkButton *button G_GNUC_UNUSED,
                              gpointer user_data)
 {
   AmlDownloadModpackDialog *self = user_data;
-  const char *name = NULL;
   guint selected = 0;
 
   if (self->dropdown == NULL || self->versions == NULL)
@@ -1705,14 +1566,8 @@ on_modpack_download_clicked (GtkButton *button G_GNUC_UNUSED,
   if (selected == GTK_INVALID_LIST_POSITION || selected >= self->versions->len)
     return;
 
-  if (self->name_entry != NULL)
-    name = gtk_editable_get_text (GTK_EDITABLE (self->name_entry));
-
-  if (name == NULL || *name == '\0')
-    name = self->project->title;
-
   g_free (self->instance_name);
-  self->instance_name = g_strdup (name);
+  self->instance_name = g_strdup (self->project->title);
 
   if (self->version != NULL)
     aml_modrinth_version_free (self->version);
@@ -1720,14 +1575,38 @@ on_modpack_download_clicked (GtkButton *button G_GNUC_UNUSED,
   self->version = aml_modrinth_version_copy (
       g_ptr_array_index (self->versions, selected));
 
-  /* The install carries on over the browser: the installing page takes
-     the whole dialog, and the pack stays in its half underneath. */
-  dialog_start_features (self);
+  /* The pack download and the install that follows are the manager's:
+     the dialog has nothing left to show, so it closes and lets both run
+     in the background with the header showing what is on its way. The
+     flag is set first, so a fast (cached) pack can never race the close
+     and put the optional page back up. */
+  if (dialog_start_features (self))
+    {
+      self->closed = TRUE;
+      adw_dialog_close (ADW_DIALOG (self));
+    }
 }
 
 /* ---------------------------------------------------------- *
  * The pack fetched and the pack installed
  * ---------------------------------------------------------- */
+
+/* What one background install keeps alive: the dialog it was started
+ * from (whose widgets may already be gone) and the manager's download.
+ * Both are held, so the callbacks can run either while the dialog is up
+ * or after it was closed. */
+typedef struct {
+  AmlDownloadModpackDialog *dialog;
+  AmlDownload *download;
+} InstallJob;
+
+static void
+install_job_free (InstallJob *job)
+{
+  g_clear_object (&job->dialog);
+  g_clear_object (&job->download);
+  g_free (job);
+}
 
 static void
 on_install_progress (guint done,
@@ -1735,18 +1614,24 @@ on_install_progress (guint done,
                      const char *path G_GNUC_UNUSED,
                      gpointer user_data)
 {
-  AmlDownloadModpackDialog *self = user_data;
-  g_autofree char *label = NULL;
+  InstallJob *job = user_data;
 
-  if (self->install_bar == NULL || self->install_count == NULL)
-    return;
+  /* The install's "n of m files" lives in the header's dropdown; the
+     phase line ("Extracting modpack") is set when the install starts and
+     stays. The dialog is long gone by the time this runs. */
+  aml_download_set_progress (job->download, done, total);
+}
 
-  gtk_progress_bar_set_fraction (
-      GTK_PROGRESS_BAR (self->install_bar),
-      total > 0 ? (double) done / (double) total : 0.0);
-
-  label = g_strdup_printf ("%u of %u files", done, total);
-  gtk_label_set_text (GTK_LABEL (self->install_count), label);
+/* The .mrpack is only needed until its overrides are laid down: it is
+ * not kept in the cache, so the next install fetches it fresh. */
+static void
+remove_pack_file (AmlDownloadModpackDialog *self)
+{
+  if (self->pack_path != NULL)
+    {
+      g_unlink (self->pack_path);
+      g_clear_pointer (&self->pack_path, g_free);
+    }
 }
 
 static void
@@ -1754,15 +1639,24 @@ on_install_done (GObject *source G_GNUC_UNUSED,
                  GAsyncResult *result,
                  gpointer user_data)
 {
-  AmlDownloadModpackDialog *self = user_data;
+  InstallJob *job = user_data;
+  AmlDownloadModpackDialog *self = job->dialog;
   g_autoptr (GError) error = NULL;
   g_autoptr (AmlInstance) instance = NULL;
 
   instance = aml_modpack_install_finish (result, &error);
 
+  /* The entry leaves the header's dropdown whether it worked or not, and
+     the compressed pack it came from goes with it. */
+  aml_download_finish (job->download);
+  remove_pack_file (self);
+
   if (instance == NULL)
     {
-      if (!g_error_matches (error, AML_MODPACK_ERROR,
+      /* The error page only makes sense while the dialog is up; a closed
+         dialog that failed in the background just leaves the header. */
+      if (!self->closed &&
+          !g_error_matches (error, AML_MODPACK_ERROR,
                             AML_MODPACK_ERROR_CANCELLED) &&
           !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         {
@@ -1770,14 +1664,18 @@ on_install_done (GObject *source G_GNUC_UNUSED,
           push_error (self, "Could not install the modpack", error->message,
                       G_CALLBACK (on_error_retry_install));
         }
+      else if (!g_error_matches (error, AML_MODPACK_ERROR,
+                                 AML_MODPACK_ERROR_CANCELLED) &&
+               !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+        g_warning ("the modpack could not be installed: %s", error->message);
 
-      operation_done (user_data);
+      install_job_free (job);
       return;
     }
 
-  /* The instance shows the pack's icon. It is set and saved before the
-     dialog closes; a save that fails leaves the instance without one
-     rather than losing the install. */
+  /* The instance shows the pack's icon. It is set before this finishes; a
+     save that fails leaves the instance without one rather than losing
+     the install. */
   if (self->icon_path != NULL &&
       g_file_test (self->icon_path, G_FILE_TEST_IS_REGULAR))
     {
@@ -1788,9 +1686,7 @@ on_install_done (GObject *source G_GNUC_UNUSED,
                    error->message);
     }
 
-  /* The dialog closes itself on success; the reference goes with it. */
-  adw_dialog_close (ADW_DIALOG (self));
-  operation_done (user_data);
+  install_job_free (job);
 }
 
 static void
@@ -1801,10 +1697,6 @@ start_install (AmlDownloadModpackDialog *self)
   const char *directory = NULL;
 
   g_return_if_fail (self->modpack != NULL);
-
-  /* The installing page the pack download put up is the one the install
-   * runs on. */
-  dialog_ensure_installing_page (self);
 
   name = self->instance_name;
 
@@ -1818,10 +1710,12 @@ start_install (AmlDownloadModpackDialog *self)
 
   directory = self->directory; /* NULL means: the manager's default */
 
-  /* the user's selections for the optional files */
+  /* the user's selections for the optional files. A closed dialog has
+     none left to read (its switches are gone), so what the pack requires
+     is what is installed. */
   chosen = g_ptr_array_new ();
 
-  if (self->opt_switch_rows != NULL)
+  if (!self->closed && self->opt_switch_rows != NULL)
     {
       for (guint i = 0; i < self->opt_switch_rows->len; i++)
         {
@@ -1836,9 +1730,24 @@ start_install (AmlDownloadModpackDialog *self)
         }
     }
 
-  aml_modpack_install_async (self->modpack, self->manager, name, directory,
-                             chosen, self->fetch, on_install_progress,
-                             on_install_done, g_object_ref (self));
+  {
+    InstallJob *job = g_new0 (InstallJob, 1);
+    AmlDownload *download = self->pack_download;
+
+    /* The same header entry carries on from the compressed pack into the
+       extract: it is one operation with two phases. */
+    if (download == NULL)
+      download = aml_downloads_add (AML_DOWNLOAD_MODPACK, name);
+
+    aml_download_set_detail (download, "Extracting files");
+
+    job->dialog = g_object_ref (self);
+    job->download = g_object_ref (download);
+
+    aml_modpack_install_async (self->modpack, self->manager, name, directory,
+                               chosen, aml_download_get_cancellable (download),
+                               on_install_progress, on_install_done, job);
+  }
 }
 
 static GtkWidget *
@@ -1969,6 +1878,18 @@ adopt_pack_name (AmlDownloadModpackDialog *self)
 
 /* Fetch the .mrpack, parse it, and decide if the user has options. */
 
+/* What the pack file weighs as it arrives, e.g. "312.4/500.0 MB". The
+ * manager entry formats it; the dialog only hands the numbers over. */
+static void
+on_pack_progress (goffset bytes_done, goffset total, gpointer user_data)
+{
+  AmlDownloadModpackDialog *self = user_data;
+
+  if (self->pack_download != NULL)
+    aml_download_set_bytes (self->pack_download, (guint64) bytes_done,
+                            total > 0 ? (guint64) total : 0);
+}
+
 static void
 on_pack_downloaded (GObject *source G_GNUC_UNUSED,
                     GAsyncResult *result,
@@ -1982,10 +1903,24 @@ on_pack_downloaded (GObject *source G_GNUC_UNUSED,
       if (!g_error_matches (error, AML_DOWNLOAD_ERROR,
                             AML_DOWNLOAD_ERROR_CANCELLED))
         {
-          self->fail_is_install = FALSE;
-          push_error (self, "Pack could not be fetched", error->message,
-                      G_CALLBACK (on_error_retry_fetch));
+          /* A pack that failed after the dialog was closed has nowhere
+             to say so; the reason goes to the journal and the entry
+             leaves the header. */
+          if (!self->closed)
+            {
+              self->fail_is_install = FALSE;
+              push_error (self, "Pack could not be fetched", error->message,
+                          G_CALLBACK (on_error_retry_fetch));
+            }
+          else
+            g_warning ("the modpack \"%s\" could not be fetched: %s",
+                       self->pack_path != NULL ? self->pack_path : "?",
+                       error->message);
         }
+
+      if (self->pack_download != NULL)
+        aml_download_finish (self->pack_download);
+      remove_pack_file (self);
 
       operation_done (user_data);
       return;
@@ -1996,30 +1931,55 @@ on_pack_downloaded (GObject *source G_GNUC_UNUSED,
 
   if (self->modpack == NULL)
     {
-      self->fail_is_install = FALSE;
-      push_error (self, "Invalid pack", error->message,
-                  G_CALLBACK (on_error_retry_fetch));
+      if (!self->closed)
+        {
+          self->fail_is_install = FALSE;
+          push_error (self, "Invalid pack", error->message,
+                      G_CALLBACK (on_error_retry_fetch));
+        }
+      else
+        g_warning ("the fetched modpack is not a pack: %s", error->message);
+
+      if (self->pack_download != NULL)
+        aml_download_finish (self->pack_download);
+      remove_pack_file (self);
+
       operation_done (user_data);
       return;
     }
 
   if (!aml_modpack_resolve (self->modpack, &error))
     {
-      self->fail_is_install = FALSE;
-      push_error (self, "The pack does not define its install",
-                  error->message, G_CALLBACK (on_error_retry_fetch));
+      if (!self->closed)
+        {
+          self->fail_is_install = FALSE;
+          push_error (self, "The pack does not define its install",
+                      error->message, G_CALLBACK (on_error_retry_fetch));
+        }
+      else
+        g_warning ("the fetched modpack does not define its install: %s",
+                   error->message);
+
+      if (self->pack_download != NULL)
+        aml_download_finish (self->pack_download);
+      remove_pack_file (self);
+
       operation_done (user_data);
       return;
     }
 
-  /* The pack is known now, so the instance takes its name. */
+  /* The pack is known now, so the instance takes its name. A closed
+     dialog has no name field left; the name is kept all the same. */
   adopt_pack_name (self);
 
   {
     g_autoptr (GPtrArray) optional =
       aml_modpack_optional_client_files (self->modpack);
 
-    if (optional->len > 0)
+    /* Only a dialog that is still there can ask which optional files to
+       take; a pack that arrived after it was closed installs what the
+       pack requires. */
+    if (!self->closed && optional->len > 0)
       {
         GtkWidget *page = build_optional_page (self, optional);
 
@@ -2030,19 +1990,20 @@ on_pack_downloaded (GObject *source G_GNUC_UNUSED,
       }
   }
 
-  /* start_install starts an operation of its own, which holds its own
-   * reference from here on. */
-  operation_done (user_data);
+  /* start_install holds its own reference from here on. Take it before
+     this callback gives back the one it holds, so a dialog that is
+     already closed is not freed under the install it just started. */
   start_install (self);
+  operation_done (user_data);
 }
 
-static void
+static gboolean
 dialog_start_features (AmlDownloadModpackDialog *self)
 {
   AmlModrinthFile *file = NULL;
 
   if (self->version == NULL || self->version->files == NULL)
-    return;
+    return FALSE;
 
   for (guint i = 0; i < self->version->files->len; i++)
     {
@@ -2062,16 +2023,32 @@ dialog_start_features (AmlDownloadModpackDialog *self)
       push_error (self, "This version has no pack file",
                   "It carries files that AML does not recognize.",
                   G_CALLBACK (on_error_retry_fetch));
-      return;
+      return FALSE;
     }
 
-  /* One installing page per attempt, reused rather than rebuilt. */
-  dialog_ensure_installing_page (self);
+  /* The pack itself is a download like any other: it goes into the
+     header's dropdown and the spinner, and its × cancels it. */
+  if (self->pack_download != NULL)
+    {
+      aml_download_finish (self->pack_download);
+      self->pack_download = NULL;
+    }
 
-  /* Reset automatic labelling on each attempt. */
-  if (self->install_count != NULL)
-    gtk_label_set_text (GTK_LABEL (self->install_count),
-                        "Downloading the pack…");
+  {
+    const char *name = self->instance_name;
+
+    if (name == NULL || *name == '\0')
+      name = self->project != NULL ? self->project->title : NULL;
+
+    if (name == NULL || *name == '\0')
+      name = "modpack";
+
+    self->pack_download = aml_downloads_add (AML_DOWNLOAD_MODPACK, name);
+  }
+
+  aml_download_set_detail (self->pack_download, "Downloading Modpack");
+  g_object_add_weak_pointer (G_OBJECT (self->pack_download),
+                             (gpointer *) &self->pack_download);
 
   {
     g_autofree char *cache_dir = g_build_filename (
@@ -2086,8 +2063,11 @@ dialog_start_features (AmlDownloadModpackDialog *self)
     g_free (self->pack_path);
     self->pack_path = g_build_filename (cache_dir, name, NULL);
 
-    aml_download_file_async (file->url, self->pack_path, file->sha1,
-                             G_CHECKSUM_SHA1, self->fetch, NULL,
-                             on_pack_downloaded, g_object_ref (self));
+    aml_download_file_async (
+      file->url, self->pack_path, file->sha1, G_CHECKSUM_SHA1,
+      aml_download_get_cancellable (self->pack_download), on_pack_progress,
+      on_pack_downloaded, g_object_ref (self));
   }
+
+  return TRUE;
 }

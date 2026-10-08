@@ -835,8 +835,9 @@ read_entry (struct archive *archive, GBytes **data, GError **error)
       return TRUE;
     }
 
+  gsize length = buffer->len;
   *data = g_bytes_new_take (g_byte_array_free (g_steal_pointer (&buffer), FALSE),
-                            buffer->len);
+                            length);
 
   return TRUE;
 }
@@ -1370,6 +1371,9 @@ build_result (ResolveRequest *request, GError **error)
                          ? resolved->assets_index_name
                          : request->asset_index_name);
   g_hash_table_insert (known, "version_name", resolved->version_id);
+  g_hash_table_insert (known, "version_type",
+                       (char *) aml_mc_version_type_to_string (
+                         request->description->type));
 
   jvm = aml_resolve_jvm_arguments (request->description, request->context);
   game = aml_resolve_game_arguments (request->description, request->context);
@@ -1509,7 +1513,10 @@ resolve_dependencies (ResolveRequest *request)
      files keeps the progress of a loader instance the same as it is
      without one. */
   if (request->client_jar_override != NULL)
-    report (request);
+    {
+      request->done++;
+      report (request);
+    }
   else
     download_file (request, resolve_natives, description->client->url,
                    request->client_jar, description->client->sha1);

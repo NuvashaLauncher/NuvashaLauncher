@@ -159,6 +159,10 @@ set_versions (AmlLoaderRow *self, GPtrArray *versions, guint position)
     }
 
   list = gtk_string_list_new (labels);
+
+  for (guint i = 0; i < self->versions->len; i++)
+    g_free ((char *) labels[i]);
+
   adw_combo_row_set_model (ADW_COMBO_ROW (self->version_row),
                            G_LIST_MODEL (list));
   adw_combo_row_set_selected (ADW_COMBO_ROW (self->version_row), position);
@@ -426,8 +430,12 @@ aml_loader_row_new (void)
                                       FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->loader_row),
                                  "Loader");
-  adw_combo_row_set_model (ADW_COMBO_ROW (self->loader_row),
-                           G_LIST_MODEL (gtk_string_list_new (names)));
+  {
+    g_autoptr (GtkStringList) loaders_list = gtk_string_list_new (names);
+
+    adw_combo_row_set_model (ADW_COMBO_ROW (self->loader_row),
+                             G_LIST_MODEL (loaders_list));
+  }
   adw_combo_row_set_selected (ADW_COMBO_ROW (self->loader_row), 0);
 
   self->version_row = g_object_ref_sink (adw_combo_row_new ());

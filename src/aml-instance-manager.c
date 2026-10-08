@@ -9,10 +9,14 @@
  * file manager) runs through GIO async calls so the main loop never
  * blocks. */
 
+/* realpath wants glibc's default feature set; AML is Linux-only. */
+#define _GNU_SOURCE
+
 #include "aml-instance-manager.h"
 
 #include <errno.h>
 #include <glib/gstdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 /* Layout version of instances.json. */
@@ -137,11 +141,35 @@ check_instance_directory (AmlInstanceManager  *self,
 
   g_autofree char *path = g_canonicalize_filename (directory, NULL);
 
+  /* canonicalize is lexical: it keeps a symlink as it is written. When
+     the directory exists, resolve it too, so a link cannot hide the real
+     directory from the overlap checks below. */
+  if (g_file_test (path, G_FILE_TEST_EXISTS))
+    {
+      char *resolved = realpath (path, NULL);
+
+      if (resolved != NULL)
+        {
+          g_free (path);
+          path = resolved;
+        }
+    }
+
   if (g_strcmp0 (path, G_DIR_SEPARATOR_S) == 0)
     {
       g_set_error (error, AML_INSTANCE_MANAGER_ERROR,
                    AML_INSTANCE_MANAGER_ERROR_INVALID_PATH,
                    "the filesystem root cannot be an instance directory");
+      return FALSE;
+    }
+
+  /* The data directory holds instances.json: an instance may not be the
+     data directory itself, or its files would sit beside the metadata. */
+  if (self->data_dir != NULL && g_strcmp0 (path, self->data_dir) == 0)
+    {
+      g_set_error (error, AML_INSTANCE_MANAGER_ERROR,
+                   AML_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+                   "the AML data directory cannot be an instance directory");
       return FALSE;
     }
 
@@ -1683,6 +1711,7 @@ typedef struct
   char *old_directory;
   char *new_directory;
   GFile *destination;
+  GError *undo_error; /* the failure the undo is cleaning up after */
 } MoveData;
 
 static void
@@ -1694,6 +1723,7 @@ move_data_free (MoveData *data)
   g_clear_object (&data->destination);
   g_free (data->old_directory);
   g_free (data->new_directory);
+  g_clear_error (&data->undo_error);
   g_free (data);
 }
 
@@ -1706,15 +1736,34 @@ move_return_error (MoveData *data, GError *error)
 
 /* Puts @instance back to the directory it had and drops whatever landed
  * in the new one. Nothing about the old directory is touched: it was
- * never modified. */
+ * never modified. The destination may hold a partial copy, so it is
+ * removed recursively, and @error is returned once that is done. */
 static void
-move_undo (MoveData *data, gboolean restore_instance)
+move_undo_deleted (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                   gpointer user_data)
+{
+  MoveData *data = user_data;
+  g_autoptr (GError) ignored = NULL;
+
+  /* Best effort: the error that caused the undo is what the caller
+     needs to hear, not a failure to clean up after it. */
+  delete_tree_finish (result, &ignored);
+
+  move_return_error (data, g_steal_pointer (&data->undo_error));
+}
+
+static void
+move_undo (MoveData *data, gboolean restore_instance, GError *error)
 {
   if (restore_instance)
     g_object_set (data->instance, "directory", data->old_directory, NULL);
 
+  data->undo_error = error;
+
   if (data->destination != NULL)
-    g_file_delete (data->destination, NULL, NULL);
+    delete_tree_async (data->destination, NULL, move_undo_deleted, data);
+  else
+    move_return_error (data, g_steal_pointer (&data->undo_error));
 }
 
 /* The move has already happened and been saved. What is left is a
@@ -1745,8 +1794,7 @@ move_copy_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   if (!copy_tree_finish (result, &error))
     {
-      move_undo (data, FALSE);
-      move_return_error (data, g_steal_pointer (&error));
+      move_undo (data, FALSE, g_steal_pointer (&error));
       return;
     }
 
@@ -1756,8 +1804,7 @@ move_copy_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   if (!aml_instance_manager_save (data->self, &error))
     {
-      move_undo (data, TRUE);
-      move_return_error (data, g_steal_pointer (&error));
+      move_undo (data, TRUE, g_steal_pointer (&error));
       return;
     }
 

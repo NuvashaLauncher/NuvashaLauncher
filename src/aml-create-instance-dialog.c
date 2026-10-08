@@ -186,9 +186,13 @@ on_folder_selected (GObject *source, GAsyncResult *result, gpointer user_data)
       if (error == NULL ||
           g_error_matches (error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_CANCELLED) ||
           g_error_matches (error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_DISMISSED))
-        return;
+        {
+          g_object_unref (self);
+          return;
+        }
 
       show_error (self, error->message);
+      g_object_unref (self);
       return;
     }
 
@@ -197,6 +201,7 @@ on_folder_selected (GObject *source, GAsyncResult *result, gpointer user_data)
 
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self->directory_row),
                                self->directory);
+  g_object_unref (self);
 }
 
 static void
@@ -208,7 +213,8 @@ on_pick_directory (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 
   gtk_file_dialog_select_folder (dialog,
                                  GTK_IS_WINDOW (root) ? GTK_WINDOW (root) : NULL,
-                                 NULL, on_folder_selected, self);
+                                 NULL, on_folder_selected,
+                                 g_object_ref (self));
 }
 
 static void

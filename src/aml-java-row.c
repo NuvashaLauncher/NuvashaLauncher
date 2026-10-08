@@ -222,14 +222,14 @@ detect_finished (GObject      *source G_GNUC_UNUSED,
 {
   AmlJavaRow *self = user_data;
   g_autoptr (GError) error = NULL;
-  GPtrArray *javas = aml_java_detect_finish (result, &error);
+  g_autoptr (GPtrArray) javas = aml_java_detect_finish (result, &error);
 
   if (g_task_get_cancellable (G_TASK (result)) == self->cancellable)
     {
       if (javas != NULL)
         {
           g_clear_pointer (&self->javas, g_ptr_array_unref);
-          self->javas = javas;
+          self->javas = g_steal_pointer (&javas);
           fill (self);
         }
       else
@@ -411,7 +411,24 @@ aml_java_row_set_custom (AmlJavaRow *self,
 
       if (g_strcmp0 (java_real, real) == 0)
         {
-          adw_combo_row_set_selected (ADW_COMBO_ROW (self), i + 1);
+          if (self->ready)
+            {
+              aml_java_row_select_path (self, java->executable);
+
+              /* The runtime the default resolves to is not listed again:
+                 its entry is the first, "Default", one. */
+              {
+                gboolean listed = FALSE;
+
+                for (guint j = 0; j < self->ids->len; j++)
+                  if (g_strcmp0 (self->ids->pdata[j], java->executable) == 0)
+                    listed = TRUE;
+
+                if (!listed)
+                  adw_combo_row_set_selected (ADW_COMBO_ROW (self), 0);
+              }
+            }
+
           aml_java_free (probed);
           return;
         }
