@@ -74,6 +74,8 @@ struct _AmlContentPage
   GtkWidget *bar_spacer; /* takes the room between the actions and the
                             switcher, so the switcher sits at the right */
   GtkWidget *switcher;
+  GtkWidget *switcher_installed; /* the Installed button of the pair */
+  GtkWidget *switcher_browse;    /* the Browse button of the pair */
   GtkWidget *installed_actions;
   GtkWidget *browse_actions;
 
@@ -2785,6 +2787,44 @@ version_label (AmlModrinthVersion *version)
   return g_strdup (version_name_of (version));
 }
 
+/* The label of one version in the dropdown. It ellipsizes, so a long
+ * name of a version does not set the width of the half the dropdown
+ * lives in: the version that is loaded and the spinner that stands there
+ * while it is on its way are then the same width. */
+static void
+version_item_setup (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
+                    GtkListItem *item, gpointer user_data G_GNUC_UNUSED)
+{
+  GtkWidget *label = gtk_label_new (NULL);
+
+  gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_END);
+  gtk_label_set_xalign (GTK_LABEL (label), 0);
+  gtk_list_item_set_child (item, label);
+}
+
+static void
+version_item_bind (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
+                   GtkListItem *item, gpointer user_data G_GNUC_UNUSED)
+{
+  GtkWidget *label = gtk_list_item_get_child (item);
+  GtkStringObject *object = gtk_list_item_get_item (item);
+
+  gtk_label_set_text (GTK_LABEL (label),
+                      object != NULL ? gtk_string_object_get_string (object)
+                                     : "");
+}
+
+static GtkListItemFactory *
+version_factory (void)
+{
+  GtkListItemFactory *factory = gtk_signal_list_item_factory_new ();
+
+  g_signal_connect (factory, "setup", G_CALLBACK (version_item_setup), NULL);
+  g_signal_connect (factory, "bind", G_CALLBACK (version_item_bind), NULL);
+
+  return factory;
+}
+
 /* The words the page shows while the description and the versions are
  * on their way. */
 static GtkWidget *
@@ -2805,31 +2845,6 @@ loading_child (void)
   return box;
 }
 
-/* Puts the list and the open project side by side, or the list alone.
- * While a project is open the switcher moves to the left end of the row
- * and shows its icons only, so both halves keep their share of a bar that
- * is no longer the whole width of the page. */
-static void
-set_detail_open (AmlContentPage *self, gboolean open)
-{
-  if (self->bar == NULL || self->switcher == NULL)
-    return;
-
-  adw_view_switcher_set_policy (
-    ADW_VIEW_SWITCHER (self->switcher),
-    open ? ADW_VIEW_SWITCHER_POLICY_NARROW : ADW_VIEW_SWITCHER_POLICY_WIDE);
-
-  g_object_ref (self->switcher);
-  gtk_box_remove (GTK_BOX (self->bar), self->switcher);
-
-  if (open)
-    gtk_box_prepend (GTK_BOX (self->bar), self->switcher);
-  else
-    gtk_box_append (GTK_BOX (self->bar), self->switcher);
-
-  g_object_unref (self->switcher);
-}
-
 /* Closes the page of the open project, leaving the list the whole width
  * of the page again. An answer that is still on its way finds no page to
  * fill and does nothing. */
@@ -2844,7 +2859,6 @@ close_detail (AmlContentPage *self)
   adw_navigation_split_view_set_collapsed (
     ADW_NAVIGATION_SPLIT_VIEW (self->split), TRUE);
   self->details_page = NULL;
-  set_detail_open (self, FALSE);
 }
 
 static void
@@ -2965,6 +2979,14 @@ details_content (AmlContentPage *self)
   /* The foot: every version this instance can take, and the button that
      installs the one shown. The newest is what it shows from the start. */
   watch_widget (&self->details_dropdown, gtk_drop_down_new (NULL, NULL));
+  {
+    GtkListItemFactory *factory = version_factory ();
+
+    gtk_drop_down_set_factory (GTK_DROP_DOWN (self->details_dropdown), factory);
+    gtk_drop_down_set_list_factory (GTK_DROP_DOWN (self->details_dropdown),
+                                    factory);
+    g_object_unref (factory);
+  }
   gtk_widget_set_hexpand (self->details_dropdown, TRUE);
   gtk_widget_set_valign (self->details_dropdown, GTK_ALIGN_CENTER);
 
@@ -3173,7 +3195,6 @@ open_project_page (AmlContentPage *self, AmlModrinthProject *project)
     ADW_NAVIGATION_SPLIT_VIEW (self->split), ADW_NAVIGATION_PAGE (page));
   adw_navigation_split_view_set_collapsed (
     ADW_NAVIGATION_SPLIT_VIEW (self->split), FALSE);
-  set_detail_open (self, TRUE);
 
   set_busy (self, TRUE);
   aml_modrinth_details_async (project->project_id, self->browse,
@@ -3276,6 +3297,13 @@ on_stack_switched (GObject *stack, GParamSpec *pspec G_GNUC_UNUSED,
       ADW_VIEW_STACK (stack));
   gboolean browsing = g_strcmp0 (visible, "browse") == 0;
 
+  /* The switcher follows the list, however the list was changed: a page
+     that is built again keeps the button of the page on top on. */
+  if (self->switcher_installed != NULL && self->switcher_browse != NULL)
+    gtk_toggle_button_set_active (
+      GTK_TOGGLE_BUTTON (browsing ? self->switcher_browse
+                                  : self->switcher_installed), TRUE);
+
   /* The row shows the actions of whichever list is on top. */
   move_actions_into_bar (self, browsing);
 
@@ -3311,9 +3339,9 @@ build_browse (AmlContentPage *self)
   self->search_entry = search_entry;
   self->search_bar = search_bar;
   gtk_widget_add_css_class (search_bar, "content-search-bar");
-  /* A field about a quarter wider than the one the placeholder alone
-     would ask for, so there is more room for the words typed into it. */
-  gtk_widget_set_size_request (search_entry, 390, -1);
+  /* The field takes the room the row has, the way the modpack browser's
+     search does, rather than a fixed width of its own. */
+  gtk_widget_set_hexpand (search_bar, TRUE);
   gtk_widget_set_hexpand (search_entry, TRUE);
   gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_entry),
                                          "Search Modrinth");
@@ -3352,6 +3380,10 @@ build_browse (AmlContentPage *self)
   g_signal_connect (popover, "show",
                     G_CALLBACK (on_filter_clicked), self);
   gtk_box_append (GTK_BOX (top), filter_button);
+
+  /* The row takes the room the bar has, the search inside it takes most
+     of that, and the filter and the switcher sit at its right. */
+  gtk_widget_set_hexpand (top, TRUE);
 
   self->filter_box = filter_box;
   gtk_widget_set_margin_top (filter_box, 6);
@@ -3458,13 +3490,45 @@ build_browse (AmlContentPage *self)
  * end of a toolbar row is for.
  * ---------------------------------------------------------- */
 
+/* The two buttons that show one of the lists. They carry the icons only:
+ * the buttons have no words, so the row they share with the search field
+ * stays one line at any width, and the tooltip is what says which list
+ * each one shows. */
+static void
+on_switcher_toggled (GtkToggleButton *button, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+
+  if (!gtk_toggle_button_get_active (button) || self->stack == NULL)
+    return;
+
+  adw_view_stack_set_visible_child_name (
+    ADW_VIEW_STACK (self->stack),
+    button == GTK_TOGGLE_BUTTON (self->switcher_browse) ? "browse"
+                                                        : "installed");
+}
+
+static GtkWidget *
+switcher_button (const char *icon_name, const char *label)
+{
+  GtkWidget *button = gtk_toggle_button_new ();
+
+  gtk_button_set_icon_name (GTK_BUTTON (button), icon_name);
+  gtk_widget_add_css_class (button, "flat");
+  gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
+  gtk_widget_set_tooltip_text (button, label);
+  gtk_accessible_update_property (GTK_ACCESSIBLE (button),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL, label, -1);
+
+  return button;
+}
+
 static void
 build_bar (AmlContentPage *self)
 {
   GtkWidget *inner = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
   self->bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  self->switcher = adw_view_switcher_new ();
 
   /* The actions go in before this and the switcher after it, so the
      switcher ends up at the right end of the row however many actions
@@ -3473,10 +3537,30 @@ build_bar (AmlContentPage *self)
   self->bar_spacer = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_widget_set_hexpand (self->bar_spacer, TRUE);
 
-  adw_view_switcher_set_policy (ADW_VIEW_SWITCHER (self->switcher),
-                                ADW_VIEW_SWITCHER_POLICY_WIDE);
-  adw_view_switcher_set_stack (ADW_VIEW_SWITCHER (self->switcher),
-                               ADW_VIEW_STACK (self->stack));
+  /* Two buttons that behave as one choice, drawn as the linked pair of
+     GNOME. A view switcher of libadwaita always carries the words of a
+     page under its icon, and this row has no room for two lines. */
+  self->switcher = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+  gtk_widget_add_css_class (self->switcher, "linked");
+
+  self->switcher_installed =
+    switcher_button ("view-list-symbolic", "Installed");
+  self->switcher_browse =
+    switcher_button ("system-search-symbolic", "Browse");
+
+  gtk_toggle_button_set_group (GTK_TOGGLE_BUTTON (self->switcher_browse),
+                               GTK_TOGGLE_BUTTON (self->switcher_installed));
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (self->switcher_installed),
+                                TRUE);
+
+  g_signal_connect (self->switcher_installed, "toggled",
+                    G_CALLBACK (on_switcher_toggled), self);
+  g_signal_connect (self->switcher_browse, "toggled",
+                    G_CALLBACK (on_switcher_toggled), self);
+
+  gtk_box_append (GTK_BOX (self->switcher), self->switcher_installed);
+  gtk_box_append (GTK_BOX (self->switcher), self->switcher_browse);
+
   gtk_widget_set_valign (self->switcher, GTK_ALIGN_CENTER);
 
   gtk_box_append (GTK_BOX (self->bar), self->bar_spacer);
@@ -3504,6 +3588,9 @@ build_bar (AmlContentPage *self)
      time, which is the list alone. */
   self->split = adw_navigation_split_view_new ();
   gtk_widget_set_vexpand (self->split, TRUE);
+  /* Named, so the stylesheet keeps the left half the colour of the page
+     instead of the sidebar colour it would take on its own. */
+  gtk_widget_add_css_class (self->split, "content-split");
   adw_navigation_split_view_set_sidebar (
     ADW_NAVIGATION_SPLIT_VIEW (self->split),
     adw_navigation_page_new (inner, aml_content_type_title (self->type)));
@@ -3511,6 +3598,12 @@ build_bar (AmlContentPage *self)
     ADW_NAVIGATION_SPLIT_VIEW (self->split), TRUE);
   adw_navigation_split_view_set_sidebar_width_fraction (
     ADW_NAVIGATION_SPLIT_VIEW (self->split), 0.5);
+  /* Half the page, rather than the narrow column a split view gives a
+     sidebar by default: this half holds the search row and the list. */
+  adw_navigation_split_view_set_min_sidebar_width (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split), 360);
+  adw_navigation_split_view_set_max_sidebar_width (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split), 640);
 
   /* One overlay over the list and the project, so a message about either
      one is said in the same place. */
@@ -3521,7 +3614,11 @@ build_bar (AmlContentPage *self)
 
 /* The actions of the list being shown go into the row, at its left, and
    the ones of the other list come out. A widget with no parent is the one
-   that belongs here, because only one list holds them at a time. */
+   that belongs here, because only one list holds them at a time.
+
+   Browse brings its own row, whose search field takes the room; nothing
+   has to push the switcher to the right for it. Installed has no such
+   row, so the spacer does that. */
 static void
 move_actions_into_bar (AmlContentPage *self, gboolean browsing)
 {
@@ -3540,6 +3637,9 @@ move_actions_into_bar (AmlContentPage *self, gboolean browsing)
      is the spacer and then the switcher. */
   if (wanted != NULL && gtk_widget_get_parent (wanted) != self->bar)
     gtk_box_insert_child_after (GTK_BOX (self->bar), wanted, NULL);
+
+  if (self->bar_spacer != NULL)
+    gtk_widget_set_visible (self->bar_spacer, !browsing);
 }
 
 AmlContentPage *
@@ -3655,6 +3755,8 @@ aml_content_page_dispose (GObject *object)
   self->bar = NULL;
   self->bar_spacer = NULL;
   self->switcher = NULL;
+  self->switcher_installed = NULL;
+  self->switcher_browse = NULL;
   /* The two action rows are held with a reference of their own, see
      build_installed() and build_browse(); giving it back is what lets
      them go when the page does. */
