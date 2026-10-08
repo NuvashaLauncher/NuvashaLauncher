@@ -1,0 +1,293 @@
+msgid ""
+msgstr ""
+"Language: pt_BR\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Confirm"
+msgstr "Confirmar"
+
+msgid "Delete"
+msgstr "Excluir"
+
+msgid "Retry"
+msgstr "Tentar novamente"
+
+msgid "Loading…"
+msgstr "Carregando..."
+
+msgid "Download"
+msgstr "Baixar"
+
+msgid "Update All"
+msgstr "Atualizar tudo"
+
+msgid "Open Folder"
+msgstr "Abrir Pasta"
+
+msgid "Refresh"
+msgstr "Atualizar"
+
+msgid "Nothing installed yet"
+msgstr "Nada instalado ainda"
+
+msgid "Browse for something to put into the folder of this instance"
+msgstr "Procure algo para colocar na pasta desta instância"
+
+msgid "Installed"
+msgstr "Instalado"
+
+msgid "Loading more…"
+msgstr "Carregar mais"
+
+msgid "Search Modrinth"
+msgstr "Pesquisar Modrinth"
+
+msgid "Filter by category"
+msgstr "Filtrar por categoria"
+
+msgid "Filter"
+msgstr "Filtro"
+
+msgid "Nothing to show yet"
+msgstr "Nada para mostrar"
+
+msgid "Type what to look for, or browse everything Modrinth has for this instance"
+msgstr "Digite o que procurar ou navegue por tudo o que o Modrinth tem para esta instância"
+
+msgid "Browse"
+msgstr "Navegar"
+
+msgid "No mod loader"
+msgstr "Sem mod loader"
+
+msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
+msgstr "Os mods precisam de um mod loader. Escolha primeiro Fabric, Quilt, Forge ou NeoForge nas configurações desta instância"
+
+msgid "Create Instance"
+msgstr "Criar instância"
+
+msgid "Name"
+msgstr "Nome"
+
+msgid "Directory"
+msgstr "Pasta"
+
+msgid "Choose a folder"
+msgstr "Escolher uma pasta"
+
+msgid "Create"
+msgstr "Criar"
+
+msgid "Download Modpack"
+msgstr "Baixar Modpack"
+
+msgid "Loading modpacks…"
+msgstr "Carregando modpacks…"
+
+msgid "Search modpacks"
+msgstr "Pesquisar modpacks"
+
+msgid "Close"
+msgstr "Fechar"
+
+msgid "Back"
+msgstr "Voltar"
+
+msgid "Install"
+msgstr "Instalar"
+
+msgid "Copy of %s"
+msgstr "Cópia de %s"
+
+msgid "Choose Java executable"
+msgstr "Escolha o executável Java"
+
+msgid "Choose an Icon"
+msgstr "Escolha um Ícone"
+
+msgid "Choose a Directory"
+msgstr "Escolher uma pasta"
+
+msgid "Duplicated to \"%s\""
+msgstr "Duplicado em \"%s\""
+
+msgid "Delete \"%s\"?"
+msgstr "Excluir \"%s\""
+
+msgid "General"
+msgstr "Geral"
+
+msgid "Icon"
+msgstr "Ícone"
+
+msgid "Change the Directory"
+msgstr "Alterar a pasta"
+
+msgid "Minecraft"
+msgstr "Minecraft"
+
+msgid "Choose…"
+msgstr "Escolher…"
+
+msgid "Java"
+msgstr "Java"
+
+msgid "Add Java Runtime"
+msgstr "Adicionar Java"
+
+msgid "JVM Arguments"
+msgstr "Argumentos da JVM"
+
+msgid "Actions"
+msgstr "Ações"
+
+msgid "Duplicate"
+msgstr "Duplicar"
+
+msgid "Delete Instance"
+msgstr "Excluir instância"
+
+msgid "Settings"
+msgstr "Configurações"
+
+msgid "Resource Packs"
+msgstr "Pacotes de recursos"
+
+msgid "Shader Packs"
+msgstr "Pacotes de sombreadores"
+
+msgid "Mods"
+msgstr "Mods"
+
+msgid "Logs"
+msgstr "Registros"
+
+msgid "Custom: %s"
+msgstr "Personalizado: %s"
+
+msgid "the game was stopped by signal %d"
+msgstr "o jogo foi interrompido pelo sinal %d"
+
+msgid "the game exited with code %d"
+msgstr "o jogo saiu com o código %d"
+
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Nenhuma versão %s compatível encontrada para o Minecraft %s."
+
+msgid "Loader"
+msgstr "Mod loader"
+
+msgid "Loader Version"
+msgstr "Versão do mod loader"
+
+msgid "Clear"
+msgstr "Limpar"
+
+msgid "Search the log"
+msgstr "Buscar no registro"
+
+msgid "Versions"
+msgstr "Versões"
+
+msgid "Show Snapshots"
+msgstr "Mostrar instantâneos"
+
+msgid "Show unstable Mod Loader versions"
+msgstr "Mostrar versões instáveis de mod loaders"
+
+msgid "Default Java"
+msgstr "Java padrão"
+
+msgid "Automatic (closest compatible)"
+msgstr "Automático (a compatível mais próxima)"
+
+msgid "Custom Java…"
+msgstr "Java personalizado…"
+
+msgid "Language"
+msgstr "Idioma"
+
+msgid "Interface language"
+msgstr "Idioma da interface"
+
+msgid "Line Limit"
+msgstr "Limite de linhas"
+
+msgid "Open Log Folder After Crash"
+msgstr "Abrir pasta de log após falha"
+
+msgid "About AML"
+msgstr "Sobre AML"
+
+msgid "Keyboard Shortcuts"
+msgstr "Atalhos"
+
+msgid "Stop"
+msgstr "Parar"
+
+msgid "Play"
+msgstr "Jogar"
+
+msgid "Keep Playing"
+msgstr "Continuar jogando"
+
+msgid "Downloads"
+msgstr "Downloads"
+
+msgid "Accounts"
+msgstr "Contas"
+
+msgid "No Instances Yet"
+msgstr "Ainda não há instâncias"
+
+msgid "Use the + button in the header to create one"
+msgstr "Use o botão + no cabeçalho para criar uma"
+
+msgid "the loader cannot be resolved: %s"
+msgstr "não é possível resolver o mod loader: %s"
+
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Nenhuma versão compatível encontrada para Minecraft %s e %s."
+
+msgid "No compatible version found for Minecraft %s."
+msgstr "Nenhuma versão compatível encontrada para o Minecraft %s."
+
+msgid "Add Offline Account"
+msgstr "Adicionar conta offline"
+
+msgid "Add"
+msgstr "Adicionar"
+
+msgid "asking Microsoft for a code"
+msgstr "pedindo um código à Microsoft"
+
+msgid "waiting for the sign-in in the browser"
+msgstr "aguardando o início de sessão no navegador"
+
+msgid "Sign In"
+msgstr "Entrar"
+
+msgid "Open the page in your browser, then enter this code:"
+msgstr "Abra a página no seu navegador e insira este código:"
+
+msgid "Open the Page"
+msgstr "Abrir a página"
+
+msgid "Try Again"
+msgstr "Tente novamente"
+
+msgid "Remove"
+msgstr "Remover"
+
+msgid "Remove \"%s\""
+msgstr "Remover \"%s\""
+
+msgid "Add Microsoft Account"
+msgstr "Adicionar conta da Microsoft"
+
+msgid "Minecraft Version"
+msgstr "Versão do Minecraft"

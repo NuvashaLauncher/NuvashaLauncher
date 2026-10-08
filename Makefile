@@ -20,6 +20,9 @@ PKGS := gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive gio-unix-2.0
 PKG_CFLAGS := $(shell $(PKG_CONFIG) --cflags $(PKGS) | \
 	sed -e 's/ -I/ -isystem /g' -e 's/^-I/-isystem /')
 PKG_LIBS := $(shell $(PKG_CONFIG) --libs $(PKGS))
+CPPFLAGS += -DAML_LOCALE_DIR=\"$(PREFIX)/share/locale\"
+LOCALES := es_AR es_ES pt_BR fr de it ja ko zh_CN ru pl uk tr nl
+LOCALE_MOS := $(LOCALES:%=build/locale/%/LC_MESSAGES/aml.mo)
 
 CFLAGS   := -std=c17 -Wall -Wextra -Wpedantic -MMD -MP
 RELFLAGS := -O2
@@ -47,7 +50,7 @@ TESTDBGDEPS := $(addsuffix .d,$(TESTDBGBINS))
 
 .PHONY: all debug test test-debug clean install uninstall
 
-all: $(if $(SRCS),$(BIN))
+all: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 
 debug: $(if $(SRCS),$(DBGBIN))
 
@@ -58,10 +61,10 @@ $(DBGBIN): $(DBGOBJS) | build-debug
 	$(CC) $(DBGFLAGS) -o $@ $(DBGOBJS) $(PKG_LIBS)
 
 build/%.o: src/%.c | build
-	$(CC) $(CFLAGS) $(RELFLAGS) $(PKG_CFLAGS) -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(RELFLAGS) $(PKG_CFLAGS) -c -o $@ $<
 
 build-debug/%.o: src/%.c | build-debug
-	$(CC) $(CFLAGS) $(DBGFLAGS) $(PKG_CFLAGS) -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DBGFLAGS) $(PKG_CFLAGS) -c -o $@ $<
 
 build/tests/%: tests/%.c $(TESTLIBOBJS) | build/tests
 	$(CC) $(CFLAGS) $(RELFLAGS) -Isrc $(PKG_CFLAGS) \
@@ -93,10 +96,14 @@ test-debug: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS)
 	@set -e; for t in $(TESTDBGBINS); do echo "RUN  $$t"; ./$$t; done; \
 	echo "PASS $(words $(TESTDBGBINS)) test(s)"
 
-install: $(if $(SRCS),$(BIN))
+install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 	install -Dm755 $(BIN) $(DESTDIR)$(PREFIX)/bin/AML
 	install -Dm644 data/io.github.Flia7.AML.desktop \
 		$(DESTDIR)$(PREFIX)/share/applications/io.github.Flia7.AML.desktop
+	@for lang in es_AR es_ES pt_BR fr de it ja ko zh_CN ru pl uk tr nl; do \
+		install -Dm644 build/locale/$$lang/LC_MESSAGES/aml.mo \
+			$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/aml.mo; \
+	done
 
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/AML
@@ -107,5 +114,9 @@ clean:
 
 build build-debug build/tests build-debug/tests:
 	mkdir -p $@
+
+build/locale/%/LC_MESSAGES/aml.mo: po/%.po
+	mkdir -p $(dir $@)
+	msgfmt -o $@ $<
 
 -include $(RELDEPS) $(DBGDEPS) $(TESTDEPS) $(TESTDBGDEPS)

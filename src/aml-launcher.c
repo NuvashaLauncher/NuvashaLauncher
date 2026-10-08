@@ -26,6 +26,7 @@
  * environment is touched. */
 
 #include "aml-launcher.h"
+#include "aml-i18n.h"
 
 #include "aml-auth-microsoft.h"
 #include "aml-java.h"
@@ -757,10 +758,10 @@ report_how_it_ended (AmlLauncher *self)
   g_autofree char *reason = NULL;
 
   if (self->terminated_by_signal)
-    reason = g_strdup_printf ("the game was stopped by signal %d",
+    reason = g_strdup_printf (_("the game was stopped by signal %d"),
                              self->term_signal);
   else
-    reason = g_strdup_printf ("the game exited with code %d",
+    reason = g_strdup_printf (_("the game exited with code %d"),
                              self->exit_status);
 
   game_crashed (self, reason);

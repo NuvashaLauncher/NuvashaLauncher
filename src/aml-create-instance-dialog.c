@@ -7,6 +7,7 @@
  * AmlInstanceManager; a failure is reported inline in the dialog. */
 
 #include "aml-create-instance-dialog.h"
+#include "aml-i18n.h"
 
 #include "aml-dialogs.h"
 #include "aml-loader-row.h"
@@ -220,13 +221,13 @@ on_pick_directory (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 static void
 aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
 {
-  adw_dialog_set_title (ADW_DIALOG (self), "Create Instance");
+  adw_dialog_set_title (ADW_DIALOG (self), _("Create Instance"));
 
   /* The same size as the other way of getting an instance. */
   aml_dialog_set_standard_size (ADW_DIALOG (self));
 
   self->name_row = adw_entry_row_new ();
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->name_row), "Name");
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->name_row), _("Name"));
   adw_entry_row_set_activates_default (ADW_ENTRY_ROW (self->name_row), TRUE);
 
   /* The real versions of Mojang's manifest, fetched when the dialog is
@@ -246,14 +247,14 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->directory_row),
                                       FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->directory_row),
-                                 "Directory");
+                                  _("Directory"));
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self->directory_row),
                                default_directory);
 
   GtkWidget *pick_button = gtk_button_new_from_icon_name ("folder-symbolic");
   gtk_widget_add_css_class (pick_button, "flat");
   gtk_widget_set_valign (pick_button, GTK_ALIGN_CENTER);
-  gtk_widget_set_tooltip_text (pick_button, "Choose a folder");
+  gtk_widget_set_tooltip_text (pick_button, _("Choose a folder"));
   g_signal_connect (pick_button, "clicked", G_CALLBACK (on_pick_directory), self);
   adw_action_row_add_suffix (ADW_ACTION_ROW (self->directory_row), pick_button);
   adw_action_row_set_activatable_widget (ADW_ACTION_ROW (self->directory_row),
@@ -280,11 +281,11 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
   gtk_widget_set_margin_end (self->error_label, 24);
   gtk_widget_set_visible (self->error_label, FALSE);
 
-  GtkWidget *cancel_button = gtk_button_new_with_label ("Cancel");
+  GtkWidget *cancel_button = gtk_button_new_with_label (_("Cancel"));
   g_signal_connect (cancel_button, "clicked", G_CALLBACK (on_cancel_clicked),
                     self);
 
-  self->create_button = gtk_button_new_with_label ("Create");
+  self->create_button = gtk_button_new_with_label (_("Create"));
   gtk_widget_add_css_class (self->create_button, "suggested-action");
   g_signal_connect (self->create_button, "clicked", G_CALLBACK (on_create_clicked),
                     self);

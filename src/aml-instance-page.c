@@ -14,6 +14,7 @@
  * asynchronous GIO operations and never block the main loop. */
 
 #include "aml-instance-page.h"
+#include "aml-i18n.h"
 
 #include "aml-content-page.h"
 #include "aml-version-row.h"
@@ -616,7 +617,7 @@ on_add_java_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
   GtkFileDialog *dialog = gtk_file_dialog_new ();
 
-  gtk_file_dialog_set_title (dialog, "Choose Java executable");
+  gtk_file_dialog_set_title (dialog, _("Choose Java executable"));
   gtk_file_dialog_open (dialog,
                         GTK_IS_WINDOW (root) ? GTK_WINDOW (root) : NULL,
                         NULL, on_custom_java_chosen, g_object_ref (self));
@@ -726,7 +727,7 @@ on_change_icon_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   g_autoptr (GtkFileFilter) filter = gtk_file_filter_new ();
   g_autoptr (GListStore) filters = g_list_store_new (GTK_TYPE_FILE_FILTER);
 
-  gtk_file_dialog_set_title (dialog, "Choose an Icon");
+  gtk_file_dialog_set_title (dialog, _("Choose an Icon"));
   gtk_file_filter_set_name (filter, "Images");
   gtk_file_filter_add_mime_type (filter, "image/*");
   g_list_store_append (filters, filter);
@@ -890,7 +891,7 @@ on_change_directory_clicked (GtkButton *button G_GNUC_UNUSED,
       return;
     }
 
-  gtk_file_dialog_set_title (dialog, "Choose a Directory");
+  gtk_file_dialog_set_title (dialog, _("Choose a Directory"));
   gtk_file_dialog_select_folder (dialog,
                                  GTK_IS_WINDOW (root) ? GTK_WINDOW (root)
                                                       : NULL,
@@ -912,7 +913,8 @@ on_duplicate_ready (GObject *source, GAsyncResult *result, gpointer user_data)
   else
     {
       g_autofree char *name = instance_string (copy, "name");
-      g_autofree char *message = g_strdup_printf ("Duplicated to \"%s\"", name);
+      g_autofree char *message =
+        g_strdup_printf (_("Duplicated to \"%s\""), name);
 
       show_toast (self, message);
     }
@@ -972,7 +974,7 @@ on_delete_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   AmlInstancePage *self = user_data;
   g_autofree char *name = instance_string (self->instance, "name");
-  g_autofree char *heading = g_strdup_printf ("Delete \"%s\"?", name);
+  g_autofree char *heading = g_strdup_printf (_("Delete \"%s\"?"), name);
   AdwAlertDialog *alert = ADW_ALERT_DIALOG (
     adw_alert_dialog_new (heading,
                           "Its worlds, mods and settings are deleted "
@@ -981,8 +983,8 @@ on_delete_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   adw_alert_dialog_set_heading_use_markup (alert, FALSE);
   adw_alert_dialog_set_body_use_markup (alert, FALSE);
 
-  adw_alert_dialog_add_response (alert, "cancel", "Cancel");
-  adw_alert_dialog_add_response (alert, "delete", "Delete");
+  adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
+  adw_alert_dialog_add_response (alert, "delete", _("Delete"));
   adw_alert_dialog_set_response_appearance (alert, "delete",
                                             ADW_RESPONSE_DESTRUCTIVE);
   adw_alert_dialog_set_default_response (alert, "cancel");
@@ -1067,9 +1069,9 @@ create_settings_page (AmlInstancePage *self)
   gtk_widget_set_vexpand (page, TRUE);
 
   /* General */
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (general), "General");
+  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (general), _("General"));
 
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (name_row), "Name");
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (name_row), _("Name"));
   adw_entry_row_set_show_apply_button (ADW_ENTRY_ROW (name_row), TRUE);
   gtk_editable_set_text (GTK_EDITABLE (name_row), name);
   g_signal_connect (name_row, "apply", G_CALLBACK (on_name_apply), self);
@@ -1078,14 +1080,14 @@ create_settings_page (AmlInstancePage *self)
   self->icon_row = adw_action_row_new ();
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->icon_row),
                                       FALSE);
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->icon_row), "Icon");
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->icon_row), _("Icon"));
 
   /* The button is the path and the chooser at once: pressing it picks a
      file, and what it picked is written in it. */
   change_icon = path_button (NULL, &self->icon_path_label);
   gtk_widget_add_css_class (change_icon, "flat");
   gtk_widget_set_valign (change_icon, GTK_ALIGN_CENTER);
-  gtk_widget_set_tooltip_text (change_icon, "Choose an Icon");
+   gtk_widget_set_tooltip_text (change_icon, _("Choose an Icon"));
   g_signal_connect (change_icon, "clicked",
                     G_CALLBACK (on_change_icon_clicked), self);
   adw_action_row_add_suffix (ADW_ACTION_ROW (self->icon_row), change_icon);
@@ -1100,13 +1102,13 @@ create_settings_page (AmlInstancePage *self)
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->directory_row),
                                       FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->directory_row),
-                                 "Directory");
+                                 _("Directory"));
 
   self->directory_change = path_button (directory,
                                         &self->directory_path_label);
   gtk_widget_add_css_class (self->directory_change, "flat");
   gtk_widget_set_valign (self->directory_change, GTK_ALIGN_CENTER);
-  gtk_widget_set_tooltip_text (self->directory_change, "Change the Directory");
+   gtk_widget_set_tooltip_text (self->directory_change, _("Change the Directory"));
   g_signal_connect (self->directory_change, "clicked",
                     G_CALLBACK (on_change_directory_clicked), self);
 
@@ -1128,7 +1130,7 @@ create_settings_page (AmlInstancePage *self)
    * fetched as the page is built. The version this instance runs stays
    * in the list even when the filter would hide its type. */
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (minecraft),
-                                   "Minecraft");
+                                    _("Minecraft"));
   g_signal_connect (version_row, "notify::selected",
                     G_CALLBACK (on_version_selected), self);
   aml_version_row_load (AML_VERSION_ROW (version_row), self->settings,
@@ -1163,9 +1165,9 @@ create_settings_page (AmlInstancePage *self)
      did not report. */
   GtkWidget *java_row = GTK_WIDGET (aml_java_row_new ());
   GtkWidget *add_java_row = adw_action_row_new ();
-  GtkWidget *choose_java = gtk_button_new_with_label ("Choose…");
+  GtkWidget *choose_java = gtk_button_new_with_label (_("Choose…"));
 
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (java), "Java");
+  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (java), _("Java"));
 
   g_signal_connect (java_row, "notify::selected",
                     G_CALLBACK (on_java_selected), self);
@@ -1181,7 +1183,7 @@ create_settings_page (AmlInstancePage *self)
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (add_java_row),
                                       FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (add_java_row),
-                                 "Add Java Runtime");
+                                 _("Add Java Runtime"));
   gtk_widget_set_valign (choose_java, GTK_ALIGN_CENTER);
   g_signal_connect (choose_java, "clicked",
                     G_CALLBACK (on_add_java_clicked), self);
@@ -1193,7 +1195,7 @@ create_settings_page (AmlInstancePage *self)
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (java), add_java_row);
 
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (jvm_args_row),
-                                 "JVM Arguments");
+                                 _("JVM Arguments"));
   adw_entry_row_set_show_apply_button (ADW_ENTRY_ROW (jvm_args_row), TRUE);
   gtk_editable_set_text (GTK_EDITABLE (jvm_args_row), jvm_args);
   g_signal_connect (jvm_args_row, "apply", G_CALLBACK (on_jvm_args_apply),
@@ -1209,13 +1211,13 @@ create_settings_page (AmlInstancePage *self)
                                     g_object_ref (self));
 
   /* Actions */
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (actions), "Actions");
-  button_row (ADW_PREFERENCES_GROUP (actions), "Duplicate", NULL,
+  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (actions), _("Actions"));
+  button_row (ADW_PREFERENCES_GROUP (actions), _("Duplicate"), NULL,
               "edit-copy-symbolic", G_CALLBACK (on_duplicate_clicked), self);
-  button_row (ADW_PREFERENCES_GROUP (actions), "Open Folder", NULL,
+  button_row (ADW_PREFERENCES_GROUP (actions), _("Open Folder"), NULL,
               "folder-symbolic", G_CALLBACK (on_open_folder_clicked),
               self);
-  delete_row = button_row (ADW_PREFERENCES_GROUP (actions), "Delete Instance",
+  delete_row = button_row (ADW_PREFERENCES_GROUP (actions), _("Delete Instance"),
                            NULL, "user-trash-symbolic",
                            G_CALLBACK (on_delete_clicked), self);
   gtk_widget_add_css_class (
@@ -1281,27 +1283,27 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
 
   adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (stack),
                                        create_settings_page (self),
-                                       "settings", "Settings",
+                                        "settings", _("Settings"),
                                        "preferences-system-symbolic");
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack),
     GTK_WIDGET (aml_content_page_new (instance, AML_CONTENT_RESOURCE_PACK)),
-    "resource-packs", "Resource Packs", "image-x-generic-symbolic");
+     "resource-packs", _("Resource Packs"), "image-x-generic-symbolic");
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack),
     GTK_WIDGET (aml_content_page_new (instance, AML_CONTENT_SHADER_PACK)),
-    "shader-packs", "Shader Packs", "applications-graphics-symbolic");
+     "shader-packs", _("Shader Packs"), "applications-graphics-symbolic");
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack),
     GTK_WIDGET (aml_content_page_new (instance, AML_CONTENT_MOD)),
-    "mods", "Mods", "view-list-symbolic");
+     "mods", _("Mods"), "view-list-symbolic");
 
   /* The logs of the instance are the logs of the launcher the window
      shares with the row, so the game can be watched from here. */
   self->logs_page = GTK_WIDGET (aml_logs_page_new (launcher));
   g_object_ref (self->logs_page);
   adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (stack),
-                                       self->logs_page, "logs", "Logs",
+                                        self->logs_page, "logs", _("Logs"),
                                        "utilities-terminal-symbolic");
 
   /* Kept so that the content pages can be built again when the loader or

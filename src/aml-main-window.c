@@ -12,6 +12,7 @@
 #include "aml-download-modpack-dialog.h"
 #include "aml-downloads.h"
 #include "aml-instance-page.h"
+#include "aml-i18n.h"
 #include "aml-java-row.h"
 #include "aml-java.h"
 #include "aml-launcher.h"
@@ -245,7 +246,7 @@ on_settings_custom_clicked (GtkButton *button G_GNUC_UNUSED,
   SettingsJava *ctx = user_data;
   GtkFileDialog *dialog = gtk_file_dialog_new ();
 
-  gtk_file_dialog_set_title (dialog, "Choose Java executable");
+  gtk_file_dialog_set_title (dialog, _("Choose Java executable"));
   gtk_file_dialog_open (dialog, GTK_WINDOW (ctx->owner), NULL,
                         on_settings_custom_chosen,
                         settings_java_ref (ctx));
@@ -309,6 +310,23 @@ on_open_logs_after_crash_toggled (GObject *object,
 }
 
 static void
+on_language_selected (GObject *object,
+                      GParamSpec *pspec G_GNUC_UNUSED,
+                      gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  AdwComboRow *row = ADW_COMBO_ROW (object);
+  gsize length = 0;
+  const AmlLanguage *languages = aml_i18n_languages (&length);
+  guint selected = adw_combo_row_get_selected (row);
+
+  if (selected >= length)
+    return;
+
+  aml_settings_set_language (self->settings, languages[selected].code, NULL);
+}
+
+static void
 on_settings (GSimpleAction *action G_GNUC_UNUSED,
              GVariant      *parameter G_GNUC_UNUSED,
              gpointer       user_data)
@@ -319,10 +337,12 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   GtkWidget *versions_group = adw_preferences_group_new ();
   GtkWidget *java_group = adw_preferences_group_new ();
   GtkWidget *logs_group = adw_preferences_group_new ();
+  GtkWidget *language_group = adw_preferences_group_new ();
+  GtkWidget *language_row = adw_combo_row_new ();
   GtkWidget *row = adw_switch_row_new ();
   GtkWidget *java_row = GTK_WIDGET (aml_java_row_new ());
   GtkWidget *custom_row = adw_action_row_new ();
-  GtkWidget *custom_button = gtk_button_new_with_label ("Choose…");
+  GtkWidget *custom_button = gtk_button_new_with_label (_("Choose…"));
   GtkWidget *limit_row = NULL;
   GtkWidget *unstable_row = adw_switch_row_new ();
   GtkWidget *crash_row = adw_switch_row_new ();
@@ -341,16 +361,17 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   ctx->row = AML_JAVA_ROW (java_row);
   g_object_ref (ctx->row);
 
-  adw_dialog_set_title (dialog, "Settings");
+  adw_dialog_set_title (dialog, _("Settings"));
   adw_preferences_dialog_set_search_enabled (ADW_PREFERENCES_DIALOG (dialog),
                                              FALSE);
   g_object_set_data_full (G_OBJECT (dialog), "settings-java", ctx,
                           settings_java_unref);
 
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (versions_group),
-                                   "Versions");
+                                    _("Versions"));
 
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), "Show Snapshots");
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
+                                 _("Show Snapshots"));
   adw_switch_row_set_active (ADW_SWITCH_ROW (row),
                              aml_settings_get_show_snapshots (self->settings));
 
@@ -363,7 +384,7 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   /* The loader versions live under the same choice: both say what the
      version lists hold. */
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (unstable_row),
-                                 "Show unstable Mod Loader versions");
+                                  _("Show unstable Mod Loader versions"));
   adw_switch_row_set_active (
     ADW_SWITCH_ROW (unstable_row),
     aml_settings_get_show_unstable_loaders (self->settings));
@@ -373,21 +394,21 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
                              unstable_row);
 
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (java_group),
-                                   "Java");
+                                   _("Java"));
 
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (java_row),
-                                 "Default Java");
+                                  _("Default Java"));
 
   g_signal_connect (java_row, "notify::selected",
                     G_CALLBACK (on_settings_java_selected), ctx);
 
   aml_java_row_set_default_entry_label (AML_JAVA_ROW (java_row),
-                                        "Automatic (closest compatible)");
+                                         _("Automatic (closest compatible)"));
   aml_java_row_load (AML_JAVA_ROW (java_row),
                      aml_settings_get_default_java_path (self->settings));
 
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (custom_row),
-                                 "Custom Java…");
+                                  _("Custom Java…"));
   gtk_widget_set_valign (custom_button, GTK_ALIGN_CENTER);
   g_signal_connect (custom_button, "clicked",
                     G_CALLBACK (on_settings_custom_clicked),
@@ -400,7 +421,36 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (java_group), custom_row);
 
   /* Logs */
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (logs_group), "Logs");
+  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (logs_group),
+                                   _("Logs"));
+
+  {
+    gsize length = 0;
+    const AmlLanguage *languages = aml_i18n_languages (&length);
+    GtkStringList *model = gtk_string_list_new (NULL);
+    guint selected = 0;
+    const char *current = aml_settings_get_language (self->settings);
+
+    for (gsize i = 0; i < length; i++)
+      {
+        gtk_string_list_append (model, _(languages[i].name));
+        if (g_strcmp0 (current, languages[i].code) == 0)
+          selected = (guint) i;
+      }
+
+    adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (language_group),
+                                     _("Language"));
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (language_row),
+                                   _("Interface language"));
+    adw_combo_row_set_model (ADW_COMBO_ROW (language_row),
+                             G_LIST_MODEL (model));
+    adw_combo_row_set_selected (ADW_COMBO_ROW (language_row), selected);
+    g_signal_connect (language_row, "notify::selected",
+                      G_CALLBACK (on_language_selected), self);
+    adw_preferences_group_add (ADW_PREFERENCES_GROUP (language_group),
+                               language_row);
+    g_object_unref (model);
+  }
 
   limit_row = adw_spin_row_new (
     gtk_adjustment_new (aml_settings_get_log_line_limit (self->settings), 100,
@@ -410,13 +460,13 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   adw_spin_row_set_numeric (ADW_SPIN_ROW (limit_row), TRUE);
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (limit_row), FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (limit_row),
-                                 "Line Limit");
+                                  _("Line Limit"));
   g_signal_connect (limit_row, "notify::value",
                     G_CALLBACK (on_log_limit_changed), self);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (logs_group), limit_row);
 
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (crash_row),
-                                 "Open Log Folder After Crash");
+                                  _("Open Log Folder After Crash"));
   adw_switch_row_set_active (
     ADW_SWITCH_ROW (crash_row),
     aml_settings_get_open_logs_after_crash (self->settings));
@@ -429,7 +479,9 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                             ADW_PREFERENCES_GROUP (java_group));
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
-                            ADW_PREFERENCES_GROUP (logs_group));
+                             ADW_PREFERENCES_GROUP (logs_group));
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+                             ADW_PREFERENCES_GROUP (language_group));
   adw_preferences_dialog_add (ADW_PREFERENCES_DIALOG (dialog),
                               ADW_PREFERENCES_PAGE (page));
 
@@ -456,7 +508,7 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
                                      GTK_LICENSE_GPL_3_0_ONLY);
   adw_about_dialog_add_credit_section (ADW_ABOUT_DIALOG (dialog),
                                        "Application ID", app_ids);
-  adw_dialog_set_title (dialog, "About AML");
+  adw_dialog_set_title (dialog, _("About AML"));
 
   adw_dialog_present (dialog, GTK_WIDGET (self));
 }
@@ -498,8 +550,8 @@ create_add_menu (void)
 {
   GMenu *menu = g_menu_new ();
 
-  g_menu_append (menu, "Create Instance", "win.create-instance");
-  g_menu_append (menu, "Download Modpack", "win.download-modpack");
+  g_menu_append (menu, _("Create Instance"), "win.create-instance");
+  g_menu_append (menu, _("Download Modpack"), "win.download-modpack");
 
   return menu;
 }
@@ -511,11 +563,11 @@ create_app_menu (void)
   g_autoptr (GMenu) general = g_menu_new ();
   g_autoptr (GMenu) rest = g_menu_new ();
 
-  g_menu_append (general, "Settings", "win.settings");
+  g_menu_append (general, _("Settings"), "win.settings");
   g_menu_append_section (menu, NULL, G_MENU_MODEL (general));
 
-  g_menu_append (rest, "Keyboard Shortcuts", "win.shortcuts");
-  g_menu_append (rest, "About AML", "win.about");
+  g_menu_append (rest, _("Keyboard Shortcuts"), "win.shortcuts");
+  g_menu_append (rest, _("About AML"), "win.about");
   g_menu_append_section (menu, NULL, G_MENU_MODEL (rest));
 
   return g_steal_pointer (&menu);
@@ -789,11 +841,11 @@ row_update (GtkWidget *play, AmlLauncher *launcher)
   GtkWidget *icon = g_object_get_data (G_OBJECT (play), "aml-icon");
   GtkWidget *label = g_object_get_data (G_OBJECT (play), "aml-label");
 
-  gtk_label_set_label (GTK_LABEL (label), busy ? "Stop" : "Play");
+  gtk_label_set_label (GTK_LABEL (label), busy ? _("Stop") : _("Play"));
   gtk_image_set_from_icon_name (GTK_IMAGE (icon),
                                 busy ? "media-playback-stop-symbolic"
                                      : "media-playback-start-symbolic");
-  gtk_widget_set_tooltip_text (play, busy ? "Stop" : "Play");
+  gtk_widget_set_tooltip_text (play, busy ? _("Stop") : _("Play"));
 
   /* The green belongs to a game that is about to start, not to a stop:
      an idle row asks, a running one only allows stopping. */
@@ -870,8 +922,8 @@ confirm_stop (AmlMainWindow *self, AmlLauncher *launcher)
                "save is lost."));
   adw_alert_dialog_set_heading_use_markup (alert, FALSE);
   adw_alert_dialog_set_body_use_markup (alert, FALSE);
-  adw_alert_dialog_add_response (alert, "cancel", "Keep Playing");
-  adw_alert_dialog_add_response (alert, "stop", "Stop");
+  adw_alert_dialog_add_response (alert, "cancel", _("Keep Playing"));
+  adw_alert_dialog_add_response (alert, "stop", _("Stop"));
   adw_alert_dialog_set_response_appearance (alert, "stop",
                                             ADW_RESPONSE_DESTRUCTIVE);
   adw_alert_dialog_set_default_response (alert, "cancel");
@@ -953,7 +1005,7 @@ create_instance_row (gpointer item, gpointer user_data)
   GtkWidget *play = gtk_button_new ();
   GtkWidget *play_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   GtkWidget *play_icon = gtk_image_new_from_icon_name ("media-playback-start-symbolic");
-  GtkWidget *play_label = gtk_label_new ("Play");
+  GtkWidget *play_label = gtk_label_new (_("Play"));
 
   g_object_get (instance,
                 "name", &name,
@@ -992,9 +1044,9 @@ create_instance_row (gpointer item, gpointer user_data)
   gtk_button_set_child (GTK_BUTTON (play), play_box);
   gtk_widget_set_valign (play, GTK_ALIGN_CENTER);
   gtk_widget_add_css_class (play, "suggested-action");
-  gtk_widget_set_tooltip_text (play, "Play");
+  gtk_widget_set_tooltip_text (play, _("Play"));
   gtk_accessible_update_property (GTK_ACCESSIBLE (play),
-                                  GTK_ACCESSIBLE_PROPERTY_LABEL, "Play", -1);
+                                   GTK_ACCESSIBLE_PROPERTY_LABEL, _("Play"), -1);
 
   /* The play state swaps the icon and the label, so they are known by
      the button itself rather than walked for. */
@@ -1238,7 +1290,7 @@ refresh_downloads (AmlMainWindow *self)
           gtk_widget_set_valign (row->bar, GTK_ALIGN_CENTER);
           gtk_widget_add_css_class (cancel, "flat");
           gtk_widget_set_valign (cancel, GTK_ALIGN_CENTER);
-          gtk_widget_set_tooltip_text (cancel, "Cancel");
+          gtk_widget_set_tooltip_text (cancel, _("Cancel"));
           gtk_accessible_update_property (GTK_ACCESSIBLE (cancel),
                                           GTK_ACCESSIBLE_PROPERTY_LABEL,
                                           "Cancel", -1);
@@ -1352,9 +1404,9 @@ aml_main_window_init (AmlMainWindow *self)
     gtk_widget_add_css_class (self->downloads_button, "flat");
     gtk_menu_button_set_always_show_arrow (
       GTK_MENU_BUTTON (self->downloads_button), FALSE);
-    gtk_widget_set_tooltip_text (self->downloads_button, "Downloads");
+  gtk_widget_set_tooltip_text (self->downloads_button, _("Downloads"));
     gtk_accessible_update_property (GTK_ACCESSIBLE (self->downloads_button),
-                                    GTK_ACCESSIBLE_PROPERTY_LABEL, "Downloads",
+                                    GTK_ACCESSIBLE_PROPERTY_LABEL, _("Downloads"),
                                     -1);
     gtk_widget_set_visible (self->downloads_button, FALSE);
 
@@ -1397,7 +1449,7 @@ aml_main_window_init (AmlMainWindow *self)
   /* The button is an icon and nothing else, so it needs to be named for
      what it opens rather than read from a label that is not there. */
   gtk_accessible_update_property (GTK_ACCESSIBLE (users_button),
-                                  GTK_ACCESSIBLE_PROPERTY_LABEL, "Accounts",
+                                   GTK_ACCESSIBLE_PROPERTY_LABEL, _("Accounts"),
                                   -1);
 
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (app_menu_button),
@@ -1410,9 +1462,9 @@ aml_main_window_init (AmlMainWindow *self)
 
   /* The empty state has no button in the middle: the "+" menu is the
    * only way to create an instance. */
-  adw_status_page_set_title (ADW_STATUS_PAGE (empty_page), "No Instances Yet");
+  adw_status_page_set_title (ADW_STATUS_PAGE (empty_page), _("No Instances Yet"));
   adw_status_page_set_description (ADW_STATUS_PAGE (empty_page),
-                                   "Use the + button in the header to create one");
+                                   _("Use the + button in the header to create one"));
   gtk_widget_set_hexpand (empty_page, TRUE);
   gtk_widget_set_vexpand (empty_page, TRUE);
 

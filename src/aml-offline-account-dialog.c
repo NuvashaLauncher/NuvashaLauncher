@@ -3,6 +3,7 @@
  */
 
 #include "aml-offline-account-dialog.h"
+#include "aml-i18n.h"
 
 struct _AmlOfflineAccountDialog
 {
@@ -99,7 +100,7 @@ on_cancel_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 static void
 aml_offline_account_dialog_init (AmlOfflineAccountDialog *self)
 {
-  adw_dialog_set_title (ADW_DIALOG (self), "Add Offline Account");
+  adw_dialog_set_title (ADW_DIALOG (self), _("Add Offline Account"));
 
   self->name_row = adw_entry_row_new ();
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->name_row),
@@ -121,11 +122,11 @@ aml_offline_account_dialog_init (AmlOfflineAccountDialog *self)
   gtk_widget_set_margin_end (self->error_label, 24);
   gtk_widget_set_visible (self->error_label, FALSE);
 
-  GtkWidget *cancel_button = gtk_button_new_with_label ("Cancel");
+  GtkWidget *cancel_button = gtk_button_new_with_label (_("Cancel"));
   g_signal_connect (cancel_button, "clicked", G_CALLBACK (on_cancel_clicked),
                     self);
 
-  self->add_button = gtk_button_new_with_label ("Add");
+  self->add_button = gtk_button_new_with_label (_("Add"));
   gtk_widget_add_css_class (self->add_button, "suggested-action");
   g_signal_connect (self->add_button, "clicked", G_CALLBACK (on_add_clicked),
                     self);

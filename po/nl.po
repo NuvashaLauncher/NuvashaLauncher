@@ -1,0 +1,293 @@
+msgid ""
+msgstr ""
+"Language: nl\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Cancel"
+msgstr "Annuleren"
+
+msgid "Confirm"
+msgstr "Bevestigen"
+
+msgid "Delete"
+msgstr "Verwijderen"
+
+msgid "Retry"
+msgstr "Opnieuw proberen"
+
+msgid "Loading…"
+msgstr "Bezig met laden…"
+
+msgid "Download"
+msgstr "Downloaden"
+
+msgid "Update All"
+msgstr "Alles bijwerken"
+
+msgid "Open Folder"
+msgstr "Map openen"
+
+msgid "Refresh"
+msgstr "Vernieuwen"
+
+msgid "Nothing installed yet"
+msgstr "Nog niets geïnstalleerd"
+
+msgid "Browse for something to put into the folder of this instance"
+msgstr "Blader naar iets om in de map van deze instantie te zetten"
+
+msgid "Installed"
+msgstr "Geïnstalleerd"
+
+msgid "Loading more…"
+msgstr "Meer laden…"
+
+msgid "Search Modrinth"
+msgstr "Modrinth doorzoeken"
+
+msgid "Filter by category"
+msgstr "Filteren op categorie"
+
+msgid "Filter"
+msgstr "Filteren"
+
+msgid "Nothing to show yet"
+msgstr "Nog niets te tonen"
+
+msgid "Type what to look for, or browse everything Modrinth has for this instance"
+msgstr "Typ waar je naar zoekt, of blader door alles wat Modrinth voor deze instantie heeft"
+
+msgid "Browse"
+msgstr "Verkennen"
+
+msgid "No mod loader"
+msgstr "Geen mod-loader"
+
+msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
+msgstr "Mods hebben een mod-loader nodig. Kies eerst Fabric, Quilt, Forge of NeoForge in de instellingen van deze instantie"
+
+msgid "Create Instance"
+msgstr "Instantie maken"
+
+msgid "Name"
+msgstr "Naam"
+
+msgid "Directory"
+msgstr "Map"
+
+msgid "Choose a folder"
+msgstr "Kies een map"
+
+msgid "Create"
+msgstr "Maken"
+
+msgid "Download Modpack"
+msgstr "Modpack downloaden"
+
+msgid "Loading modpacks…"
+msgstr "Modpacks laden…"
+
+msgid "Search modpacks"
+msgstr "Modpacks doorzoeken"
+
+msgid "Close"
+msgstr "Sluiten"
+
+msgid "Back"
+msgstr "Terug"
+
+msgid "Install"
+msgstr "Installeren"
+
+msgid "Copy of %s"
+msgstr "Kopie van %s"
+
+msgid "Choose Java executable"
+msgstr "Kies Java-programma"
+
+msgid "Choose an Icon"
+msgstr "Kies een pictogram"
+
+msgid "Choose a Directory"
+msgstr "Kies een map"
+
+msgid "Duplicated to \"%s\""
+msgstr "Gedupliceerd naar \"%s\""
+
+msgid "Delete \"%s\"?"
+msgstr "\"%s\" verwijderen?"
+
+msgid "General"
+msgstr "Algemeen"
+
+msgid "Icon"
+msgstr "Pictogram"
+
+msgid "Change the Directory"
+msgstr "Map wijzigen"
+
+msgid "Minecraft"
+msgstr "Minecraft"
+
+msgid "Choose…"
+msgstr "Kiezen…"
+
+msgid "Java"
+msgstr "Java"
+
+msgid "Add Java Runtime"
+msgstr "Java-runtime toevoegen"
+
+msgid "JVM Arguments"
+msgstr "JVM-argumenten"
+
+msgid "Actions"
+msgstr "Acties"
+
+msgid "Duplicate"
+msgstr "Dupliceren"
+
+msgid "Delete Instance"
+msgstr "Instantie verwijderen"
+
+msgid "Settings"
+msgstr "Instellingen"
+
+msgid "Resource Packs"
+msgstr "Resourcepacks"
+
+msgid "Shader Packs"
+msgstr "Shaders"
+
+msgid "Mods"
+msgstr "Mods"
+
+msgid "Logs"
+msgstr "Logboeken"
+
+msgid "Custom: %s"
+msgstr "Aangepast: %s"
+
+msgid "the game was stopped by signal %d"
+msgstr "het spel is gestopt door signaal %d"
+
+msgid "the game exited with code %d"
+msgstr "het spel eindigde met code %d"
+
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Geen compatibele %s-versie gevonden voor Minecraft %s."
+
+msgid "Loader"
+msgstr "Loader"
+
+msgid "Loader Version"
+msgstr "Loader-versie"
+
+msgid "Clear"
+msgstr "Wissen"
+
+msgid "Search the log"
+msgstr "Zoek in het logboek"
+
+msgid "Versions"
+msgstr "Versies"
+
+msgid "Show Snapshots"
+msgstr "Snapshots tonen"
+
+msgid "Show unstable Mod Loader versions"
+msgstr "Instabiele loader-versies tonen"
+
+msgid "Default Java"
+msgstr "Standaard-Java"
+
+msgid "Automatic (closest compatible)"
+msgstr "Automatisch (dichtstbijzijnde compatibele)"
+
+msgid "Custom Java…"
+msgstr "Aangepaste Java…"
+
+msgid "Language"
+msgstr "Taal"
+
+msgid "Interface language"
+msgstr "Taal van de interface"
+
+msgid "Line Limit"
+msgstr "Regellimiet"
+
+msgid "Open Log Folder After Crash"
+msgstr "Logmap openen na een crash"
+
+msgid "About AML"
+msgstr "Over AML"
+
+msgid "Keyboard Shortcuts"
+msgstr "Sneltoetsen"
+
+msgid "Stop"
+msgstr "Stoppen"
+
+msgid "Play"
+msgstr "Spelen"
+
+msgid "Keep Playing"
+msgstr "Doorgaan met spelen"
+
+msgid "Downloads"
+msgstr "Downloads"
+
+msgid "Accounts"
+msgstr "Accounts"
+
+msgid "No Instances Yet"
+msgstr "Nog geen instanties"
+
+msgid "Use the + button in the header to create one"
+msgstr "Gebruik de knop + in de kopbalk om er een te maken"
+
+msgid "the loader cannot be resolved: %s"
+msgstr "de loader kan niet worden bepaald: %s"
+
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Geen compatibele versie gevonden voor Minecraft %s en %s."
+
+msgid "No compatible version found for Minecraft %s."
+msgstr "Geen compatibele versie gevonden voor Minecraft %s."
+
+msgid "Add Offline Account"
+msgstr "Offline-account toevoegen"
+
+msgid "Add"
+msgstr "Toevoegen"
+
+msgid "asking Microsoft for a code"
+msgstr "een code opvragen bij Microsoft"
+
+msgid "waiting for the sign-in in the browser"
+msgstr "wachten op aanmelden in de browser"
+
+msgid "Sign In"
+msgstr "Aanmelden"
+
+msgid "Open the page in your browser, then enter this code:"
+msgstr "Open de pagina in je browser en voer daarna deze code in:"
+
+msgid "Open the Page"
+msgstr "Pagina openen"
+
+msgid "Try Again"
+msgstr "Opnieuw proberen"
+
+msgid "Remove"
+msgstr "Verwijderen"
+
+msgid "Remove \"%s\""
+msgstr "\"%s\" verwijderen"
+
+msgid "Add Microsoft Account"
+msgstr "Microsoft-account toevoegen"
+
+msgid "Minecraft Version"
+msgstr "Minecraft-versie"

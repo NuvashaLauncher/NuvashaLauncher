@@ -1,0 +1,293 @@
+msgid ""
+msgstr ""
+"Language: ko\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Cancel"
+msgstr "취소"
+
+msgid "Confirm"
+msgstr "확인"
+
+msgid "Delete"
+msgstr "삭제"
+
+msgid "Retry"
+msgstr "다시 시도"
+
+msgid "Loading…"
+msgstr "로드 중…"
+
+msgid "Download"
+msgstr "다운로드"
+
+msgid "Update All"
+msgstr "모두 업데이트"
+
+msgid "Open Folder"
+msgstr "폴더 열기"
+
+msgid "Refresh"
+msgstr "새로 고침"
+
+msgid "Nothing installed yet"
+msgstr "아직 아무것도 설치되지 않음"
+
+msgid "Browse for something to put into the folder of this instance"
+msgstr "이 인스턴스의 폴더에 넣을 항목을 찾습니다"
+
+msgid "Installed"
+msgstr "설치됨"
+
+msgid "Loading more…"
+msgstr "정보 가져오는 중"
+
+msgid "Search Modrinth"
+msgstr "Modrinth 검색"
+
+msgid "Filter by category"
+msgstr "카테고리별 필터링"
+
+msgid "Filter"
+msgstr "필터"
+
+msgid "Nothing to show yet"
+msgstr "보여줄 항목 없음"
+
+msgid "Type what to look for, or browse everything Modrinth has for this instance"
+msgstr "검색할 항목을 입력하거나 Modrinth가 이 회차에 대해 가지고 있는 모든 것을 찾아보세요."
+
+msgid "Browse"
+msgstr "찾아보기"
+
+msgid "No mod loader"
+msgstr "모드 로더 없음"
+
+msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
+msgstr "모드는 모드 로더가 필요합니다. 먼저 이 인스턴스 설정에서 Fabric, Quilt, Forge 또는 NeoForge를 선택하세요"
+
+msgid "Create Instance"
+msgstr "인스턴스 생성"
+
+msgid "Name"
+msgstr "이름"
+
+msgid "Directory"
+msgstr "폴더"
+
+msgid "Choose a folder"
+msgstr "폴더 선택"
+
+msgid "Create"
+msgstr "생성"
+
+msgid "Download Modpack"
+msgstr "모드팩 다운로드"
+
+msgid "Loading modpacks…"
+msgstr "모드팩 로드 중..."
+
+msgid "Search modpacks"
+msgstr "모드팩 검색"
+
+msgid "Close"
+msgstr "닫기"
+
+msgid "Back"
+msgstr "뒤로"
+
+msgid "Install"
+msgstr "설치"
+
+msgid "Copy of %s"
+msgstr "%s 의 복사"
+
+msgid "Choose Java executable"
+msgstr "Java 실행 파일 선택"
+
+msgid "Choose an Icon"
+msgstr "아이콘 선택"
+
+msgid "Choose a Directory"
+msgstr "폴더 선택"
+
+msgid "Duplicated to \"%s\""
+msgstr "\"%s\"(으)로 복제됨"
+
+msgid "Delete \"%s\"?"
+msgstr "%s 삭제하기"
+
+msgid "General"
+msgstr "일반"
+
+msgid "Icon"
+msgstr "아이콘"
+
+msgid "Change the Directory"
+msgstr "폴더 변경"
+
+msgid "Minecraft"
+msgstr "마인크래프트"
+
+msgid "Choose…"
+msgstr "선택…"
+
+msgid "Java"
+msgstr "Java"
+
+msgid "Add Java Runtime"
+msgstr "Java 런타임 추가"
+
+msgid "JVM Arguments"
+msgstr "JVM 인수"
+
+msgid "Actions"
+msgstr "작업"
+
+msgid "Duplicate"
+msgstr "복제"
+
+msgid "Delete Instance"
+msgstr "인스턴스 삭제"
+
+msgid "Settings"
+msgstr "설정"
+
+msgid "Resource Packs"
+msgstr "자원 팩"
+
+msgid "Shader Packs"
+msgstr "셰이더 팩"
+
+msgid "Mods"
+msgstr "모드"
+
+msgid "Logs"
+msgstr "로그"
+
+msgid "Custom: %s"
+msgstr "사용자 지정: %s"
+
+msgid "the game was stopped by signal %d"
+msgstr "%d 신호에 의해 게임이 중지되었습니다"
+
+msgid "the game exited with code %d"
+msgstr "%d 코드로 게임을 종료했습니다"
+
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "마인크래프트 %s 와 (과) 호환되는 %s 버전을 찾을 수 없습니다."
+
+msgid "Loader"
+msgstr "모드 로더"
+
+msgid "Loader Version"
+msgstr "모드 로더 버전"
+
+msgid "Clear"
+msgstr "지우기"
+
+msgid "Search the log"
+msgstr "로그 검색"
+
+msgid "Versions"
+msgstr "버전"
+
+msgid "Show Snapshots"
+msgstr "스냅샷 표시"
+
+msgid "Show unstable Mod Loader versions"
+msgstr "불안정한 모드 로더 버전 표시"
+
+msgid "Default Java"
+msgstr "기본 Java"
+
+msgid "Automatic (closest compatible)"
+msgstr "자동 (가장 가까운 호환 버전)"
+
+msgid "Custom Java…"
+msgstr "사용자 지정 Java…"
+
+msgid "Language"
+msgstr "언어"
+
+msgid "Interface language"
+msgstr "인터페이스 언어"
+
+msgid "Line Limit"
+msgstr "줄 수 제한"
+
+msgid "Open Log Folder After Crash"
+msgstr "충돌 후 로그 폴더 열기"
+
+msgid "About AML"
+msgstr "AML 소개"
+
+msgid "Keyboard Shortcuts"
+msgstr "키보드 단축키"
+
+msgid "Stop"
+msgstr "중지"
+
+msgid "Play"
+msgstr "플레이"
+
+msgid "Keep Playing"
+msgstr "계속 플레이"
+
+msgid "Downloads"
+msgstr "내려받기"
+
+msgid "Accounts"
+msgstr "계정"
+
+msgid "No Instances Yet"
+msgstr "아직 인스턴스가 없습니다"
+
+msgid "Use the + button in the header to create one"
+msgstr "헤더의 + 버튼을 사용하여 생성"
+
+msgid "the loader cannot be resolved: %s"
+msgstr "모드 로더를 확인할 수 없습니다: %s"
+
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "마인크래프트 %s 및 %s 와 (과) 호환되는 버전을 찾을 수 없습니다."
+
+msgid "No compatible version found for Minecraft %s."
+msgstr "마인크래프트 %s 와 (과) 호환되는 버전을 찾을 수 없습니다."
+
+msgid "Add Offline Account"
+msgstr "오프라인 계정 추가"
+
+msgid "Add"
+msgstr "추가"
+
+msgid "asking Microsoft for a code"
+msgstr "microsoft에 코드 요청"
+
+msgid "waiting for the sign-in in the browser"
+msgstr "브라우저에서 로그인을 기다리는 중"
+
+msgid "Sign In"
+msgstr "로그인"
+
+msgid "Open the page in your browser, then enter this code:"
+msgstr "브라우저에서 페이지를 연 다음 다음 코드를 입력하세요."
+
+msgid "Open the Page"
+msgstr "페이지 열기"
+
+msgid "Try Again"
+msgstr "다시 시도"
+
+msgid "Remove"
+msgstr "제거"
+
+msgid "Remove \"%s\""
+msgstr "“%s” 삭제"
+
+msgid "Add Microsoft Account"
+msgstr "Microsoft 계정 추가"
+
+msgid "Minecraft Version"
+msgstr "마인크래프트 버전"

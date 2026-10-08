@@ -1,0 +1,293 @@
+msgid ""
+msgstr ""
+"Language: uk\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Cancel"
+msgstr "Скасувати"
+
+msgid "Confirm"
+msgstr "Підтвердити"
+
+msgid "Delete"
+msgstr "Видалити"
+
+msgid "Retry"
+msgstr "Повторити"
+
+msgid "Loading…"
+msgstr "Завантаження…"
+
+msgid "Download"
+msgstr "Завантажити"
+
+msgid "Update All"
+msgstr "Оновити все"
+
+msgid "Open Folder"
+msgstr "Відкрити теку"
+
+msgid "Refresh"
+msgstr "Оновити"
+
+msgid "Nothing installed yet"
+msgstr "Ще нічого не встановлено"
+
+msgid "Browse for something to put into the folder of this instance"
+msgstr "Знайдіть те, що додати до теки цього екземпляра"
+
+msgid "Installed"
+msgstr "Встановлено"
+
+msgid "Loading more…"
+msgstr "Завантаження ще…"
+
+msgid "Search Modrinth"
+msgstr "Пошук на Modrinth"
+
+msgid "Filter by category"
+msgstr "Фільтр за категорією"
+
+msgid "Filter"
+msgstr "Фільтр"
+
+msgid "Nothing to show yet"
+msgstr "Поки що нічого показати"
+
+msgid "Type what to look for, or browse everything Modrinth has for this instance"
+msgstr "Введіть запит або перегляньте усе, що Modrinth має для цього екземпляра"
+
+msgid "Browse"
+msgstr "Переглянути"
+
+msgid "No mod loader"
+msgstr "Немає мод-завантажувача"
+
+msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
+msgstr "Моди потребують мод-завантажувача. Спершу виберіть Fabric, Quilt, Forge або NeoForge в налаштуваннях цього екземпляра"
+
+msgid "Create Instance"
+msgstr "Створити екземпляр"
+
+msgid "Name"
+msgstr "Назва"
+
+msgid "Directory"
+msgstr "Тека"
+
+msgid "Choose a folder"
+msgstr "Виберіть теку"
+
+msgid "Create"
+msgstr "Створити"
+
+msgid "Download Modpack"
+msgstr "Завантажити модпак"
+
+msgid "Loading modpacks…"
+msgstr "Завантаження модпаків…"
+
+msgid "Search modpacks"
+msgstr "Пошук модпаків"
+
+msgid "Close"
+msgstr "Закрити"
+
+msgid "Back"
+msgstr "Назад"
+
+msgid "Install"
+msgstr "Встановити"
+
+msgid "Copy of %s"
+msgstr "Копія %s"
+
+msgid "Choose Java executable"
+msgstr "Виберіть виконуваний файл Java"
+
+msgid "Choose an Icon"
+msgstr "Виберіть піктограму"
+
+msgid "Choose a Directory"
+msgstr "Виберіть теку"
+
+msgid "Duplicated to \"%s\""
+msgstr "Скопійовано до \"%s\""
+
+msgid "Delete \"%s\"?"
+msgstr "Видалити \"%s\"?"
+
+msgid "General"
+msgstr "Загальні"
+
+msgid "Icon"
+msgstr "Піктограма"
+
+msgid "Change the Directory"
+msgstr "Змінити теку"
+
+msgid "Minecraft"
+msgstr "Minecraft"
+
+msgid "Choose…"
+msgstr "Вибрати…"
+
+msgid "Java"
+msgstr "Java"
+
+msgid "Add Java Runtime"
+msgstr "Додати середовище Java"
+
+msgid "JVM Arguments"
+msgstr "Аргументи JVM"
+
+msgid "Actions"
+msgstr "Дії"
+
+msgid "Duplicate"
+msgstr "Дублювати"
+
+msgid "Delete Instance"
+msgstr "Видалити екземпляр"
+
+msgid "Settings"
+msgstr "Налаштування"
+
+msgid "Resource Packs"
+msgstr "Пакети ресурсів"
+
+msgid "Shader Packs"
+msgstr "Пакети шейдерів"
+
+msgid "Mods"
+msgstr "Моди"
+
+msgid "Logs"
+msgstr "Журнали"
+
+msgid "Custom: %s"
+msgstr "Власне: %s"
+
+msgid "the game was stopped by signal %d"
+msgstr "гру зупинено сигналом %d"
+
+msgid "the game exited with code %d"
+msgstr "гру завершено з кодом %d"
+
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Не знайдено сумісної версії %s для Minecraft %s."
+
+msgid "Loader"
+msgstr "Завантажувач"
+
+msgid "Loader Version"
+msgstr "Версія завантажувача"
+
+msgid "Clear"
+msgstr "Очистити"
+
+msgid "Search the log"
+msgstr "Пошук у журналі"
+
+msgid "Versions"
+msgstr "Версії"
+
+msgid "Show Snapshots"
+msgstr "Показувати снапшоти"
+
+msgid "Show unstable Mod Loader versions"
+msgstr "Показувати нестабільні версії завантажувачів"
+
+msgid "Default Java"
+msgstr "Java за замовчуванням"
+
+msgid "Automatic (closest compatible)"
+msgstr "Автоматично (найближча сумісна)"
+
+msgid "Custom Java…"
+msgstr "Власна Java…"
+
+msgid "Language"
+msgstr "Мова"
+
+msgid "Interface language"
+msgstr "Мова інтерфейсу"
+
+msgid "Line Limit"
+msgstr "Обмеження рядків"
+
+msgid "Open Log Folder After Crash"
+msgstr "Відкрити теку журналів після збою"
+
+msgid "About AML"
+msgstr "Про AML"
+
+msgid "Keyboard Shortcuts"
+msgstr "Комбінації клавіш"
+
+msgid "Stop"
+msgstr "Зупинити"
+
+msgid "Play"
+msgstr "Грати"
+
+msgid "Keep Playing"
+msgstr "Продовжити гру"
+
+msgid "Downloads"
+msgstr "Завантаження"
+
+msgid "Accounts"
+msgstr "Облікові записи"
+
+msgid "No Instances Yet"
+msgstr "Екземплярів ще немає"
+
+msgid "Use the + button in the header to create one"
+msgstr "Скористайтеся кнопкою + у верхній панелі, щоб створити"
+
+msgid "the loader cannot be resolved: %s"
+msgstr "не вдалося визначити завантажувач: %s"
+
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Не знайдено сумісної версії для Minecraft %s та %s."
+
+msgid "No compatible version found for Minecraft %s."
+msgstr "Не знайдено сумісної версії для Minecraft %s."
+
+msgid "Add Offline Account"
+msgstr "Додати офлайн-обліковий запис"
+
+msgid "Add"
+msgstr "Додати"
+
+msgid "asking Microsoft for a code"
+msgstr "запит коду в Microsoft"
+
+msgid "waiting for the sign-in in the browser"
+msgstr "очікування входу в браузері"
+
+msgid "Sign In"
+msgstr "Увійти"
+
+msgid "Open the page in your browser, then enter this code:"
+msgstr "Відкрийте сторінку у браузері, потім введіть цей код:"
+
+msgid "Open the Page"
+msgstr "Відкрити сторінку"
+
+msgid "Try Again"
+msgstr "Спробувати ще раз"
+
+msgid "Remove"
+msgstr "Вилучити"
+
+msgid "Remove \"%s\""
+msgstr "Вилучити \"%s\""
+
+msgid "Add Microsoft Account"
+msgstr "Додати обліковий запис Microsoft"
+
+msgid "Minecraft Version"
+msgstr "Версія Minecraft"

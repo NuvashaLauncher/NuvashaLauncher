@@ -11,6 +11,7 @@
 #define _GNU_SOURCE
 
 #include "aml-java-row.h"
+#include "aml-i18n.h"
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -108,7 +109,7 @@ static char *
 java_label (AmlJava *java)
 {
   if (java->major_version == 0)
-    return g_strdup_printf ("Custom: %s", java->executable);
+    return g_strdup_printf (_("Custom: %s"), java->executable);
 
   /* Just what the runtime calls itself: "OpenJDK 25". The architecture,
      the headless flag and the folder it lives in are left out; the row's
@@ -509,7 +510,7 @@ aml_java_row_init (AmlJavaRow *self)
   self->default_path = NULL;
   self->required_major = 0;
 
-  self->retry = gtk_button_new_with_label ("Retry");
+  self->retry = gtk_button_new_with_label (_("Retry"));
   gtk_widget_add_css_class (self->retry, "flat");
   gtk_widget_set_valign (self->retry, GTK_ALIGN_CENTER);
   gtk_widget_set_visible (self->retry, FALSE);

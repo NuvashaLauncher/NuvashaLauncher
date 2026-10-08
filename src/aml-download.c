@@ -942,7 +942,8 @@ start_attempt (DownloadRequest *request)
   if (request->user_agent != NULL)
     soup_message_headers_replace (
         soup_message_get_request_headers (request->message), "User-Agent",
-        request->user_agent);
+         request->user_agent);
+
 
   if (request->json)
     {

@@ -30,6 +30,8 @@
 #include "aml-modrinth.h"
 
 #include "aml-download.h"
+#include "aml-i18n.h"
+#include "aml-i18n.h"
 
 #include <json-glib/json-glib.h>
 #include <string.h>
@@ -65,12 +67,12 @@ aml_content_type_title (AmlContentType type)
   switch (type)
     {
     case AML_CONTENT_RESOURCE_PACK:
-      return "Resource Packs";
+      return _("Resource Packs");
     case AML_CONTENT_SHADER_PACK:
-      return "Shader Packs";
+      return _("Shader Packs");
     case AML_CONTENT_MOD:
     default:
-      return "Mods";
+      return _("Mods");
     }
 }
 
@@ -1864,10 +1866,10 @@ aml_modrinth_no_compatible_message (AmlContentType type,
   const char *version = minecraft_version != NULL ? minecraft_version : "";
 
   if (aml_content_type_needs_loader (type))
-    return g_strdup_printf ("No compatible version found for Minecraft %s and %s.",
+    return g_strdup_printf (_("No compatible version found for Minecraft %s and %s."),
                             version, loader != NULL ? loader : "");
 
-  return g_strdup_printf ("No compatible version found for Minecraft %s.",
+  return g_strdup_printf (_("No compatible version found for Minecraft %s."),
                           version);
 }
 

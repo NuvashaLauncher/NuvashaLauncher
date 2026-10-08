@@ -15,6 +15,7 @@
  * nobody picked. */
 
 #include "aml-version-row.h"
+#include "aml-i18n.h"
 
 #include "aml-minecraft-versions.h"
 
@@ -319,14 +320,14 @@ aml_version_row_init (AmlVersionRow *self)
   /* A Minecraft version is a name from Mojang, not markup. */
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self), FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self),
-                                 "Minecraft Version");
+                                  _("Minecraft Version"));
 
   /* Nothing to choose until a load fills the list. */
   self->ready = FALSE;
   set_entries (self, g_steal_pointer (&ids), GTK_INVALID_LIST_POSITION);
   gtk_widget_set_sensitive (GTK_WIDGET (self), FALSE);
 
-  self->retry = gtk_button_new_with_label ("Retry");
+  self->retry = gtk_button_new_with_label (_("Retry"));
   gtk_widget_add_css_class (self->retry, "flat");
   gtk_widget_set_valign (self->retry, GTK_ALIGN_CENTER);
   gtk_widget_set_visible (self->retry, FALSE);

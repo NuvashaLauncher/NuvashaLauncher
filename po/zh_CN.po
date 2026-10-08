@@ -1,0 +1,293 @@
+msgid ""
+msgstr ""
+"Language: zh_CN\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Cancel"
+msgstr "取消"
+
+msgid "Confirm"
+msgstr "確認"
+
+msgid "Delete"
+msgstr "删除"
+
+msgid "Retry"
+msgstr "再次挑战"
+
+msgid "Loading…"
+msgstr "加载中…"
+
+msgid "Download"
+msgstr "下载"
+
+msgid "Update All"
+msgstr "全部更新"
+
+msgid "Open Folder"
+msgstr "打开文件夹"
+
+msgid "Refresh"
+msgstr "重新整理"
+
+msgid "Nothing installed yet"
+msgstr "尚未安装任何内容"
+
+msgid "Browse for something to put into the folder of this instance"
+msgstr "浏览要放入此实例文件夹的内容"
+
+msgid "Installed"
+msgstr "已安装"
+
+msgid "Loading more…"
+msgstr "加载更多"
+
+msgid "Search Modrinth"
+msgstr "搜索Modrinth"
+
+msgid "Filter by category"
+msgstr "按类别筛选"
+
+msgid "Filter"
+msgstr "筛选"
+
+msgid "Nothing to show yet"
+msgstr "没有可显示内容"
+
+msgid "Type what to look for, or browse everything Modrinth has for this instance"
+msgstr "输入要查找的内容，或浏览Modrinth为该场次提供的所有内容"
+
+msgid "Browse"
+msgstr "浏览"
+
+msgid "No mod loader"
+msgstr "没有模组加载器"
+
+msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
+msgstr "模组需要模组加载器。请先在此实例的设置中选择 Fabric、Quilt、Forge 或 NeoForge"
+
+msgid "Create Instance"
+msgstr "创建新记录"
+
+msgid "Name"
+msgstr "名称"
+
+msgid "Directory"
+msgstr "文件夹"
+
+msgid "Choose a folder"
+msgstr "选择文件夹"
+
+msgid "Create"
+msgstr "创建"
+
+msgid "Download Modpack"
+msgstr "下载Modpack"
+
+msgid "Loading modpacks…"
+msgstr "正在加载modpack…"
+
+msgid "Search modpacks"
+msgstr "搜索modpacks"
+
+msgid "Close"
+msgstr "关闭"
+
+msgid "Back"
+msgstr "回到"
+
+msgid "Install"
+msgstr "安装"
+
+msgid "Copy of %s"
+msgstr "%s 的副本"
+
+msgid "Choose Java executable"
+msgstr "选择Java可执行文件"
+
+msgid "Choose an Icon"
+msgstr "选择一个图标"
+
+msgid "Choose a Directory"
+msgstr "选择文件夹"
+
+msgid "Duplicated to \"%s\""
+msgstr "已复制到“%s”"
+
+msgid "Delete \"%s\"?"
+msgstr "删除\"%s\""
+
+msgid "General"
+msgstr "常规"
+
+msgid "Icon"
+msgstr "标志"
+
+msgid "Change the Directory"
+msgstr "更改文件夹"
+
+msgid "Minecraft"
+msgstr "我的世界"
+
+msgid "Choose…"
+msgstr "选择…"
+
+msgid "Java"
+msgstr "Java"
+
+msgid "Add Java Runtime"
+msgstr "添加 Java"
+
+msgid "JVM Arguments"
+msgstr "JVM 参数"
+
+msgid "Actions"
+msgstr "操作"
+
+msgid "Duplicate"
+msgstr "复制"
+
+msgid "Delete Instance"
+msgstr "删除实例"
+
+msgid "Settings"
+msgstr "设置"
+
+msgid "Resource Packs"
+msgstr "资源包"
+
+msgid "Shader Packs"
+msgstr "着色器包"
+
+msgid "Mods"
+msgstr "模组"
+
+msgid "Logs"
+msgstr "日志"
+
+msgid "Custom: %s"
+msgstr "自定义：%s"
+
+msgid "the game was stopped by signal %d"
+msgstr "游戏被信号%d停止"
+
+msgid "the game exited with code %d"
+msgstr "游戏以代码%d退出"
+
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "未找到与Minecraft %s兼容的%s版本。"
+
+msgid "Loader"
+msgstr "模组加载器"
+
+msgid "Loader Version"
+msgstr "模组加载器版本"
+
+msgid "Clear"
+msgstr "清除"
+
+msgid "Search the log"
+msgstr "搜索日志"
+
+msgid "Versions"
+msgstr "版本"
+
+msgid "Show Snapshots"
+msgstr "显示快照"
+
+msgid "Show unstable Mod Loader versions"
+msgstr "显示不稳定的Mod加载器版本"
+
+msgid "Default Java"
+msgstr "默认Java"
+
+msgid "Automatic (closest compatible)"
+msgstr "自动（最接近的兼容版本）"
+
+msgid "Custom Java…"
+msgstr "自定义 Java…"
+
+msgid "Language"
+msgstr "语言"
+
+msgid "Interface language"
+msgstr "界面语言"
+
+msgid "Line Limit"
+msgstr "行数上限"
+
+msgid "Open Log Folder After Crash"
+msgstr "崩溃后打开日志文件夹"
+
+msgid "About AML"
+msgstr "关于AML"
+
+msgid "Keyboard Shortcuts"
+msgstr "热键"
+
+msgid "Stop"
+msgstr "停止"
+
+msgid "Play"
+msgstr "开始游戏"
+
+msgid "Keep Playing"
+msgstr "继续游戏"
+
+msgid "Downloads"
+msgstr "下载"
+
+msgid "Accounts"
+msgstr "账户"
+
+msgid "No Instances Yet"
+msgstr "还没有实例"
+
+msgid "Use the + button in the header to create one"
+msgstr "使用标题中的+按钮创建一个"
+
+msgid "the loader cannot be resolved: %s"
+msgstr "无法确定模组加载器：%s"
+
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "未找到与Minecraft %s和%s兼容的版本。"
+
+msgid "No compatible version found for Minecraft %s."
+msgstr "未找到与Minecraft %s兼容的版本。"
+
+msgid "Add Offline Account"
+msgstr "添加离线账户"
+
+msgid "Add"
+msgstr "视需要增加填充棉。"
+
+msgid "asking Microsoft for a code"
+msgstr "要求Microsoft提供代码"
+
+msgid "waiting for the sign-in in the browser"
+msgstr "正在浏览器中等待登录"
+
+msgid "Sign In"
+msgstr "登入"
+
+msgid "Open the page in your browser, then enter this code:"
+msgstr "在浏览器中打开页面，然后输入此代码："
+
+msgid "Open the Page"
+msgstr "打开页面"
+
+msgid "Try Again"
+msgstr "再试一次"
+
+msgid "Remove"
+msgstr "移除"
+
+msgid "Remove \"%s\""
+msgstr "添加或删除 %s"
+
+msgid "Add Microsoft Account"
+msgstr "添加 Microsoft 账户"
+
+msgid "Minecraft Version"
+msgstr "Minecraft版本"

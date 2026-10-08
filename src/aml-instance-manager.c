@@ -13,6 +13,7 @@
 #define _GNU_SOURCE
 
 #include "aml-instance-manager.h"
+#include "aml-i18n.h"
 
 #include <errno.h>
 #include <glib/gstdio.h>
@@ -1166,7 +1167,7 @@ aml_instance_manager_duplicate_async (AmlInstanceManager *self,
                 NULL);
 
   g_autofree char *id = g_uuid_string_random ();
-  g_autofree char *name = g_strdup_printf ("Copy of %s", source_name);
+   g_autofree char *name = g_strdup_printf (_("Copy of %s"), source_name);
   g_autofree char *directory = default_instance_directory (self, name, id);
   g_autofree char *canonical = NULL;
   g_autoptr (GError) local_error = NULL;

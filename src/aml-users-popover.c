@@ -3,6 +3,7 @@
  */
 
 #include "aml-users-popover.h"
+#include "aml-i18n.h"
 
 #include "aml-offline-account-dialog.h"
 #include "aml-sign-in-dialog.h"
@@ -273,8 +274,8 @@ on_remove_clicked (GtkButton *button, gpointer user_data)
                "forgotten. The game itself is not touched."));
   adw_alert_dialog_set_heading_use_markup (alert, FALSE);
   adw_alert_dialog_set_body_use_markup (alert, FALSE);
-  adw_alert_dialog_add_response (alert, "cancel", "Cancel");
-  adw_alert_dialog_add_response (alert, "remove", "Remove");
+  adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
+  adw_alert_dialog_add_response (alert, "remove", _("Remove"));
   adw_alert_dialog_set_response_appearance (alert, "remove",
                                             ADW_RESPONSE_DESTRUCTIVE);
   adw_alert_dialog_set_default_response (alert, "cancel");
@@ -341,7 +342,7 @@ append_account_row (AmlUsersPopover *self, const AmlAccount *account)
       adw_action_row_add_suffix (ADW_ACTION_ROW (row), check);
     }
 
-  tooltip = g_strdup_printf ("Remove \"%s\"", account->name);
+  tooltip = g_strdup_printf (_("Remove \"%s\""), account->name);
   gtk_widget_set_tooltip_text (remove, tooltip);
   gtk_accessible_update_property (GTK_ACCESSIBLE (remove),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL, tooltip, -1);
@@ -477,8 +478,8 @@ aml_users_popover_init (AmlUsersPopover *self)
 {
   GtkWidget *scrolled = gtk_scrolled_window_new ();
   GtkWidget *rows = gtk_list_box_new ();
-  GtkWidget *microsoft = gtk_button_new_with_label ("Add Microsoft Account");
-  GtkWidget *offline = gtk_button_new_with_label ("Add Offline Account");
+  GtkWidget *microsoft = gtk_button_new_with_label (_("Add Microsoft Account"));
+  GtkWidget *offline = gtk_button_new_with_label (_("Add Offline Account"));
 
   /* A row is chosen by clicking it, not by a selection the list keeps:
      the active account is the store's business. The list scrolls instead

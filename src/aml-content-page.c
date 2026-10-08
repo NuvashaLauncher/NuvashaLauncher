@@ -29,6 +29,7 @@
 #include "aml-content-page.h"
 #include "aml-download.h"
 #include "aml-downloads.h"
+#include "aml-i18n.h"
 #include "aml-icons.h"
 #include "aml-markdown.h"
 
@@ -1180,8 +1181,8 @@ show_plan (AmlContentPage *self, PlanRun *plan)
 
     adw_alert_dialog_set_heading_use_markup (alert, FALSE);
     adw_alert_dialog_set_body_use_markup (alert, FALSE);
-    adw_alert_dialog_add_response (alert, "cancel", "Cancel");
-    adw_alert_dialog_add_response (alert, "install", "Confirm");
+     adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
+     adw_alert_dialog_add_response (alert, "install", _("Confirm"));
     adw_alert_dialog_set_response_appearance (alert, "install",
                                               ADW_RESPONSE_SUGGESTED);
     adw_alert_dialog_set_default_response (alert, "cancel");
@@ -1518,8 +1519,8 @@ on_trash_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   alert = ADW_ALERT_DIALOG (adw_alert_dialog_new (heading, body));
   adw_alert_dialog_set_heading_use_markup (alert, FALSE);
   adw_alert_dialog_set_body_use_markup (alert, FALSE);
-  adw_alert_dialog_add_response (alert, "cancel", "Cancel");
-  adw_alert_dialog_add_response (alert, "confirm", "Delete");
+    adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
+    adw_alert_dialog_add_response (alert, "confirm", _("Delete"));
   adw_alert_dialog_set_response_appearance (alert, "confirm",
                                             ADW_RESPONSE_DESTRUCTIVE);
   adw_alert_dialog_set_default_response (alert, "cancel");
@@ -1578,7 +1579,7 @@ file_row (AmlContentPage *self, AmlContentFile *file)
 
     gtk_widget_add_css_class (trash, "flat");
     gtk_widget_set_valign (trash, GTK_ALIGN_CENTER);
-    gtk_widget_set_tooltip_text (trash, "Delete");
+   gtk_widget_set_tooltip_text (trash, _("Delete"));
     gtk_accessible_update_property (GTK_ACCESSIBLE (trash),
                                     GTK_ACCESSIBLE_PROPERTY_LABEL,
                                     "Delete", -1);
@@ -1932,8 +1933,8 @@ update_check_done (AmlContentPage *self, UpdateRun *run)
     alert = ADW_ALERT_DIALOG (adw_alert_dialog_new (heading, body->str));
     adw_alert_dialog_set_heading_use_markup (alert, FALSE);
     adw_alert_dialog_set_body_use_markup (alert, FALSE);
-    adw_alert_dialog_add_response (alert, "cancel", "Cancel");
-    adw_alert_dialog_add_response (alert, "update", "Confirm");
+    adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
+    adw_alert_dialog_add_response (alert, "update", _("Confirm"));
     adw_alert_dialog_set_response_appearance (alert, "update",
                                               ADW_RESPONSE_SUGGESTED);
     adw_alert_dialog_set_default_response (alert, "cancel");
@@ -2711,7 +2712,7 @@ categories_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
         GtkWidget *label = gtk_label_new (
             error != NULL ? error->message : "Could not load categories");
-        GtkWidget *retry = gtk_button_new_with_label ("Retry");
+        GtkWidget *retry = gtk_button_new_with_label (_("Retry"));
 
         gtk_label_set_wrap (GTK_LABEL (label), TRUE);
         gtk_widget_set_size_request (box, 220, -1);
@@ -2899,7 +2900,7 @@ loading_child (void)
 {
   GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
   GtkWidget *spinner = adw_spinner_new ();
-  GtkWidget *label = gtk_label_new ("Loading…");
+  GtkWidget *label = gtk_label_new (_("Loading…"));
 
   gtk_widget_set_valign (box, GTK_ALIGN_CENTER);
   gtk_widget_set_halign (box, GTK_ALIGN_CENTER);
@@ -3024,7 +3025,7 @@ details_content (AmlContentPage *self)
   gtk_widget_set_hexpand (self->details_dropdown, TRUE);
   gtk_widget_set_valign (self->details_dropdown, GTK_ALIGN_CENTER);
 
-  watch_widget (&self->details_download, gtk_button_new_with_label ("Download"));
+  watch_widget (&self->details_download, gtk_button_new_with_label (_("Download")));
   gtk_widget_add_css_class (self->details_download, "suggested-action");
   gtk_widget_set_valign (self->details_download, GTK_ALIGN_CENTER);
   gtk_widget_set_sensitive (self->details_download, FALSE);
@@ -3293,15 +3294,15 @@ build_installed (AmlContentPage *self)
   AdwPreferencesGroup *group =
     ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
 
-  self->update_all = toolbar_button ("software-update-available-symbolic", "Update All",
+   self->update_all = toolbar_button ("software-update-available-symbolic", _("Update All"),
                                      G_CALLBACK (on_update_all_clicked), self);
   gtk_widget_set_sensitive (self->update_all, FALSE);
   gtk_box_append (GTK_BOX (actions), self->update_all);
   gtk_box_append (GTK_BOX (actions),
-                  toolbar_button ("folder-symbolic", "Open Folder",
+                  toolbar_button ("folder-symbolic", _("Open Folder"),
                                   G_CALLBACK (on_open_folder_clicked), self));
   gtk_box_append (GTK_BOX (actions),
-                  toolbar_button ("view-refresh-symbolic", "Refresh",
+                  toolbar_button ("view-refresh-symbolic", _("Refresh"),
                                   G_CALLBACK (on_refresh_clicked), self));
 
   self->spinner = adw_spinner_new ();
@@ -3325,10 +3326,10 @@ build_installed (AmlContentPage *self)
   adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->installed_status),
                                  aml_content_type_icon (self->type));
   adw_status_page_set_title (ADW_STATUS_PAGE (self->installed_status),
-                             "Nothing installed yet");
+                               _("Nothing installed yet"));
   adw_status_page_set_description (
       ADW_STATUS_PAGE (self->installed_status),
-      "Browse for something to put into the folder of this instance");
+       _("Browse for something to put into the folder of this instance"));
 
   /* The list starts where the row above it ends: its first row is not
      rounded at the top, so the two read as one piece. */
@@ -3349,7 +3350,7 @@ build_installed (AmlContentPage *self)
   gtk_box_append (GTK_BOX (box), content);
 
   adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (self->stack), box,
-                                      "installed", "Installed",
+                                        "installed", _("Installed"),
                                       "view-list-symbolic");
 }
 
@@ -3404,10 +3405,10 @@ build_browse (AmlContentPage *self)
   GtkWidget *scroller = gtk_scrolled_window_new ();
   GtkWidget *loading_more = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   GtkWidget *loading_spinner = gtk_spinner_new ();
-  GtkWidget *loading_label = gtk_label_new ("Loading more…");
+  GtkWidget *loading_label = gtk_label_new (_("Loading more…"));
   GtkWidget *retry_row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   GtkWidget *retry_label = gtk_label_new (NULL);
-  GtkWidget *retry_button = gtk_button_new_with_label ("Retry");
+  GtkWidget *retry_button = gtk_button_new_with_label (_("Retry"));
   AdwPreferencesGroup *group =
     ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
 
@@ -3419,7 +3420,7 @@ build_browse (AmlContentPage *self)
   gtk_widget_set_hexpand (search_bar, TRUE);
   gtk_widget_set_hexpand (search_entry, TRUE);
   gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_entry),
-                                         "Search Modrinth");
+                                           _("Search Modrinth"));
   gtk_search_bar_set_child (GTK_SEARCH_BAR (search_bar), search_entry);
   gtk_search_bar_set_key_capture_widget (GTK_SEARCH_BAR (search_bar),
                                          GTK_WIDGET (self));
@@ -3443,9 +3444,9 @@ build_browse (AmlContentPage *self)
 
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (filter_button),
                                  "view-more-symbolic");
-  gtk_widget_set_tooltip_text (filter_button, "Filter by category");
+    gtk_widget_set_tooltip_text (filter_button, _("Filter by category"));
   gtk_accessible_update_property (GTK_ACCESSIBLE (filter_button),
-                                  GTK_ACCESSIBLE_PROPERTY_LABEL, "Filter",
+                                     GTK_ACCESSIBLE_PROPERTY_LABEL, _("Filter"),
                                   -1);
   gtk_widget_set_valign (filter_button, GTK_ALIGN_CENTER);
   gtk_widget_add_css_class (filter_button, "flat");
@@ -3484,11 +3485,11 @@ build_browse (AmlContentPage *self)
   adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->results_status),
                                  "system-search-symbolic");
   adw_status_page_set_title (ADW_STATUS_PAGE (self->results_status),
-                             "Nothing to show yet");
+                               _("Nothing to show yet"));
   adw_status_page_set_description (
       ADW_STATUS_PAGE (self->results_status),
-      "Type what to look for, or browse everything Modrinth has for this "
-      "instance");
+        _("Type what to look for, or browse everything Modrinth has for this "
+        "instance"));
   /* The list starts where the row above it ends: its first row is not
      rounded at the top, so the two read as one piece. */
   gtk_widget_add_css_class (GTK_WIDGET (group), "flush-top");
@@ -3551,7 +3552,7 @@ build_browse (AmlContentPage *self)
   }
 
   adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (self->stack), box,
-                                      "browse", "Browse",
+                                        "browse", _("Browse"),
                                       "system-search-symbolic");
 }
 
@@ -3592,9 +3593,9 @@ switcher_button (const char *icon_name, const char *label)
   gtk_button_set_icon_name (GTK_BUTTON (button), icon_name);
   gtk_widget_add_css_class (button, "flat");
   gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
-  gtk_widget_set_tooltip_text (button, label);
+     gtk_widget_set_tooltip_text (button, _(label));
   gtk_accessible_update_property (GTK_ACCESSIBLE (button),
-                                  GTK_ACCESSIBLE_PROPERTY_LABEL, label, -1);
+                                    GTK_ACCESSIBLE_PROPERTY_LABEL, _(label), -1);
 
   return button;
 }
@@ -3620,7 +3621,7 @@ build_bar (AmlContentPage *self)
   gtk_widget_add_css_class (self->switcher, "linked");
 
   self->switcher_installed =
-    switcher_button ("view-list-symbolic", "Installed");
+     switcher_button ("view-list-symbolic", "Installed");
   self->switcher_browse =
     switcher_button ("system-search-symbolic", "Browse");
 
@@ -3767,11 +3768,11 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
           adw_status_page_set_icon_name (ADW_STATUS_PAGE (status),
                                          aml_content_type_icon (type));
           adw_status_page_set_title (ADW_STATUS_PAGE (status),
-                                     "No mod loader");
+                                      _("No mod loader"));
           adw_status_page_set_description (
               ADW_STATUS_PAGE (status),
-              "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge "
-              "in the settings of this instance first");
+              _("Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge "
+              "in the settings of this instance first"));
           gtk_box_append (GTK_BOX (self), status);
 
           return self;

@@ -3,13 +3,14 @@
  */
 
 #include "aml-sign-in-dialog.h"
+#include "aml-i18n.h"
 
 #include "aml-auth-microsoft.h"
 
 /* What the dialog is waiting for while there is nothing to show: the
  * code from Microsoft, and then the user with it. */
-#define STEP_CODE "asking Microsoft for a code"
-#define STEP_SIGN_IN "waiting for the sign-in in the browser"
+#define STEP_CODE _("asking Microsoft for a code")
+#define STEP_SIGN_IN _("waiting for the sign-in in the browser")
 
 struct _AmlSignInDialog
 {
@@ -248,7 +249,7 @@ aml_sign_in_dialog_init (AmlSignInDialog *self)
   GtkWidget *toolbar = NULL;
   GtkWidget *header = NULL;
 
-  adw_dialog_set_title (ADW_DIALOG (self), "Sign In");
+  adw_dialog_set_title (ADW_DIALOG (self), _("Sign In"));
   adw_dialog_set_content_width (ADW_DIALOG (self), 440);
 
   self->cancellable = g_cancellable_new ();
@@ -256,7 +257,7 @@ aml_sign_in_dialog_init (AmlSignInDialog *self)
   /* What to do with the code. One line, because the code and the button
      under it are the whole of what this dialog is for. */
   self->instruction_label = gtk_label_new (
-      "Open the page in your browser, then enter this code:");
+      _("Open the page in your browser, then enter this code:"));
   gtk_label_set_wrap (GTK_LABEL (self->instruction_label), TRUE);
   gtk_label_set_justify (GTK_LABEL (self->instruction_label),
                          GTK_JUSTIFY_CENTER);
@@ -274,7 +275,7 @@ aml_sign_in_dialog_init (AmlSignInDialog *self)
   gtk_widget_set_visible (self->code_label, FALSE);
 
   self->open_button = icon_label_button ("web-browser-symbolic",
-                                         "Open the Page");
+                                         _("Open the Page"));
   gtk_widget_add_css_class (self->open_button, "pill");
   gtk_widget_add_css_class (self->open_button, "suggested-action");
   gtk_widget_set_halign (self->open_button, GTK_ALIGN_CENTER);
@@ -312,7 +313,7 @@ aml_sign_in_dialog_init (AmlSignInDialog *self)
   gtk_widget_add_css_class (self->error_label, "error");
   gtk_widget_set_visible (self->error_label, FALSE);
 
-  self->retry_button = gtk_button_new_with_label ("Try Again");
+  self->retry_button = gtk_button_new_with_label (_("Try Again"));
   gtk_widget_add_css_class (self->retry_button, "flat");
   gtk_widget_set_halign (self->retry_button, GTK_ALIGN_CENTER);
   gtk_widget_set_visible (self->retry_button, FALSE);

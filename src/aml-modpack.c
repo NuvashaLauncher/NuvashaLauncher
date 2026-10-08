@@ -16,6 +16,7 @@
  * has. */
 
 #include "aml-modpack.h"
+#include "aml-i18n.h"
 
 #include "aml-loaders.h"
 
@@ -1443,7 +1444,7 @@ install_loader_versions (GObject *source G_GNUC_UNUSED,
       else
         {
           g_autofree char *message =
-            g_strdup_printf ("the loader cannot be resolved: %s",
+             g_strdup_printf (_("the loader cannot be resolved: %s"),
                              error->message);
 
           g_clear_error (&error);
