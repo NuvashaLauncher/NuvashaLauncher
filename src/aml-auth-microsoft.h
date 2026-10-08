@@ -49,7 +49,7 @@ G_BEGIN_DECLS
  * with. It has to be registered for the device code flow of a public
  * client, and it is the only place a sign-in is configured: an empty
  * constant is what a build without one says out loud. */
-#define AML_MICROSOFT_CLIENT_ID "00000000-402b-4cd3-a82b-c45ab2f1d3f7"
+#define AML_MICROSOFT_CLIENT_ID "b0e1004b-7f93-40f3-b583-41901516e1ac"
 
 /* Personal Microsoft accounts are the ones a Minecraft account is, so the
  * tenant is the one that holds them. */
