@@ -286,7 +286,8 @@ main (int argc, char **argv)
 
   g_log_set_writer_func (count_criticals, NULL, NULL);
 
-  application = adw_application_new ("io.github.Flia7.AML.windowtest",
+  application =
+    adw_application_new ("io.gitlab.anotherminecraftlauncher.AML.windowtest",
                                      G_APPLICATION_DEFAULT_FLAGS);
   run.application = G_APPLICATION (application);
 
