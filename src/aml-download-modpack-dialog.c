@@ -149,6 +149,7 @@ static void dialog_details_open (AmlDownloadModpackDialog *self);
 static void dialog_start_features (AmlDownloadModpackDialog *self);
 static void on_modpack_download_clicked (GtkButton *, gpointer);
 static void dialog_details_fill (AmlDownloadModpackDialog *self);
+static void close_details (AmlDownloadModpackDialog *self);
 static void show_details_error (AmlDownloadModpackDialog *self,
                                 const char *message);
 
@@ -352,8 +353,12 @@ take_rows_out (GPtrArray **rows, AdwPreferencesGroup *group)
   *rows = g_ptr_array_new ();
 }
 
+/* A click on a row opens its pack in the other half. A click on the row
+ * of the pack that is already open closes it again: the list is the way
+ * in and the way out, so no button has to stand over the pack and push
+ * its name down. */
 static void
-result_row_activated (AdwActionRow *row G_GNUC_UNUSED, gpointer user_data)
+result_row_activated (AdwActionRow *row, gpointer user_data)
 {
   AmlDownloadModpackDialog *self = user_data;
   AmlModrinthProject *project =
@@ -361,6 +366,13 @@ result_row_activated (AdwActionRow *row G_GNUC_UNUSED, gpointer user_data)
 
   if (project == NULL)
     return;
+
+  if (self->details_page != NULL && self->project != NULL &&
+      g_strcmp0 (self->project->project_id, project->project_id) == 0)
+    {
+      close_details (self);
+      return;
+    }
 
   g_clear_pointer (&self->project, aml_modrinth_project_free);
   g_clear_pointer (&self->version, aml_modrinth_version_free);
@@ -725,8 +737,9 @@ build_browse_page (AmlDownloadModpackDialog *self)
 
   self->results_group = adw_preferences_group_new ();
 
-  /* A margin above the card, the way a boxed list is meant to sit. */
-  gtk_widget_set_margin_top (self->results_group, 12);
+  /* The list starts where the search row above it ends: its first row is
+     not rounded at the top, so the two read as one piece. */
+  gtk_widget_add_css_class (self->results_group, "flush-top");
 
   self->search_entry = gtk_search_entry_new ();
   gtk_widget_set_hexpand (self->search_entry, TRUE);
@@ -832,13 +845,22 @@ build_browse_page (AmlDownloadModpackDialog *self)
      is the list alone. */
   self->split = adw_navigation_split_view_new ();
   gtk_widget_set_vexpand (self->split, TRUE);
+  /* Named, so the stylesheet keeps the list half the colour of the dialog
+     instead of the sidebar colour a split view would give it. */
+  gtk_widget_add_css_class (self->split, "flat-split");
   adw_navigation_split_view_set_sidebar (
     ADW_NAVIGATION_SPLIT_VIEW (self->split),
     adw_navigation_page_new (box, "Browse Modpacks"));
   adw_navigation_split_view_set_collapsed (
     ADW_NAVIGATION_SPLIT_VIEW (self->split), TRUE);
+  /* Two halves of one width, rather than the narrow column a split view
+     gives a sidebar by default. */
   adw_navigation_split_view_set_sidebar_width_fraction (
     ADW_NAVIGATION_SPLIT_VIEW (self->split), 0.5);
+  adw_navigation_split_view_set_min_sidebar_width (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split), 360);
+  adw_navigation_split_view_set_max_sidebar_width (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split), 640);
 
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
   adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), self->split);
@@ -1020,7 +1042,9 @@ loading_child (void)
   return box;
 }
 
-/* Closes the open pack, leaving the list the whole dialog again. */
+/* Closes the open pack, leaving the list the whole dialog again. The row
+ * of the pack is the way in and the way out, so nothing has to stand
+ * above the pack and push its name down. */
 static void
 close_details (AmlDownloadModpackDialog *self)
 {
@@ -1038,49 +1062,14 @@ close_details (AmlDownloadModpackDialog *self)
   adw_dialog_set_content_width (ADW_DIALOG (self), AML_DIALOG_CONTENT_WIDTH);
 }
 
-static void
-on_details_back (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
-{
-  close_details (user_data);
-}
-
-/* The row above the body of an open pack: one back arrow that closes the
- * half and gives the list the whole width back. */
-static GtkWidget *
-detail_body (AmlDownloadModpackDialog *self, GtkWidget *body)
-{
-  GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-  GtkWidget *row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *back = gtk_button_new_from_icon_name ("go-previous-symbolic");
-
-  gtk_widget_add_css_class (back, "flat");
-  gtk_widget_set_valign (back, GTK_ALIGN_CENTER);
-  gtk_widget_set_tooltip_text (back, "Back");
-  gtk_accessible_update_property (GTK_ACCESSIBLE (back),
-                                  GTK_ACCESSIBLE_PROPERTY_LABEL, "Back", -1);
-  g_signal_connect (back, "clicked", G_CALLBACK (on_details_back), self);
-
-  gtk_widget_set_margin_start (row, 6);
-  gtk_widget_set_margin_end (row, 6);
-  gtk_widget_set_margin_top (row, 6);
-  gtk_widget_set_margin_bottom (row, 6);
-  gtk_box_append (GTK_BOX (row), back);
-
-  gtk_widget_set_vexpand (body, TRUE);
-  gtk_box_append (GTK_BOX (box), row);
-  gtk_box_append (GTK_BOX (box), body);
-
-  return box;
-}
-
 /* Puts @body in the right half of the browser, beside the list, and takes
  * the whole width of the list back to half. A pack shown before is
  * replaced. */
 static void
 show_details_page (AmlDownloadModpackDialog *self, GtkWidget *body)
 {
-  GtkWidget *page = GTK_WIDGET (adw_navigation_page_new (
-    detail_body (self, body), self->project->title));
+  GtkWidget *page = GTK_WIDGET (adw_navigation_page_new (body,
+                                                         self->project->title));
 
   details_watch (&self->details_page, page);
   adw_navigation_split_view_set_content (
@@ -1273,7 +1262,7 @@ dialog_details_fill (AmlDownloadModpackDialog *self)
     return;
 
   adw_navigation_page_set_child (ADW_NAVIGATION_PAGE (self->details_page),
-                                 detail_body (self, details_content (self)));
+                                 details_content (self));
 
   if (self->versions_problem != NULL)
     show_details_error (self, self->versions_problem);
