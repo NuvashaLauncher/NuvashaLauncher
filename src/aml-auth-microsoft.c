@@ -1296,14 +1296,13 @@ ask_minecraft (AuthRequest *self)
   g_autoptr (JsonGenerator) generator = json_generator_new ();
   g_autoptr (JsonNode) root = NULL;
   g_autofree char *identity = NULL;
-  g_autofree char *authorization = NULL;
   g_autofree char *body = NULL;
-  const char *headers[] = { "Authorization", NULL, "Accept",
-                            "application/json", NULL };
+  const char *headers[] = { "Accept", "application/json", NULL };
 
+  /* The documented request carries the identity token and nothing else:
+     the services read who the player is out of it, and an Authorization
+     header they did not ask for is not part of it. */
   identity = aml_auth_identity_token (self->xbl_user_hash, self->xsts_token);
-  authorization = g_strconcat ("Bearer ", self->xsts_token, NULL);
-  headers[1] = authorization;
 
   json_builder_begin_object (builder);
   json_builder_set_member_name (builder, "identityToken");
