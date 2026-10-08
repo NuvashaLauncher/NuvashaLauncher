@@ -31,10 +31,13 @@ static const GActionEntry app_entries[] = {
  * dim the entry when the window loses focus. The bar is always open, so
  * what it holds should not look like a band over the list.
  *
- * The half of a content page that holds the list is not a sidebar, it is
- * the same page with a project beside it: it keeps the page colour
- * instead of the sidebar colour a split view would give it, so the row
- * of the search does not change colour when a project is opened. */
+ * The half of a browser that holds the list is not a sidebar, it is the
+ * same page with a project beside it: it keeps the page colour instead
+ * of the sidebar colour a split view would give it, so the row of the
+ * search does not change colour when a project is opened.
+ *
+ * The first row of a list of projects is not rounded at the top, so the
+ * list reads as one piece that starts where the row above it ends. */
 static const char app_css[] =
   "searchbar.content-search-bar > revealer > box,"
   "searchbar.content-search-bar > revealer > box:backdrop {"
@@ -44,10 +47,14 @@ static const char app_css[] =
   "searchbar.content-search-bar > revealer > box:backdrop > * {"
   "  filter: none;"
   "}"
-  "navigation-split-view.content-split > .sidebar-pane,"
-  "navigation-split-view.content-split > .sidebar-pane:backdrop {"
+  "navigation-split-view.flat-split > .sidebar-pane,"
+  "navigation-split-view.flat-split > .sidebar-pane:backdrop {"
   "  background-color: transparent;"
   "  color: inherit;"
+  "}"
+  ".flush-top list.boxed-list > row:first-child {"
+  "  border-top-left-radius: 0;"
+  "  border-top-right-radius: 0;"
   "}";
 
 static void

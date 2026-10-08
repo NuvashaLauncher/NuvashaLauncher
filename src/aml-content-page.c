@@ -147,6 +147,7 @@ struct _AmlContentPage
   /* What the page of the currently-open project is titled with and
      what it shows, so the fill function can rebuild the heading. */
   char *current_project_title;
+  char *current_project_id; /* what the open project is, to toggle it shut */
   guint64 current_project_downloads;
   char *details_author;
   GtkWidget *details_body;
@@ -2847,7 +2848,9 @@ loading_child (void)
 
 /* Closes the page of the open project, leaving the list the whole width
  * of the page again. An answer that is still on its way finds no page to
- * fill and does nothing. */
+ * fill and does nothing. The list row of the project is the way in and
+ * the way out, so nothing here has to stand above the project and push
+ * its name down. */
 static void
 close_detail (AmlContentPage *self)
 {
@@ -2859,42 +2862,7 @@ close_detail (AmlContentPage *self)
   adw_navigation_split_view_set_collapsed (
     ADW_NAVIGATION_SPLIT_VIEW (self->split), TRUE);
   self->details_page = NULL;
-}
-
-static void
-on_detail_back (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
-{
-  close_detail (user_data);
-}
-
-/* The row above the body of an open project: one back arrow that closes
- * the page and gives the list the whole width back. Nothing else: the
- * title and the rest are already the first thing the body shows. */
-static GtkWidget *
-detail_body (AmlContentPage *self, GtkWidget *body)
-{
-  GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-  GtkWidget *row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *back = gtk_button_new_from_icon_name ("go-previous-symbolic");
-
-  gtk_widget_add_css_class (back, "flat");
-  gtk_widget_set_valign (back, GTK_ALIGN_CENTER);
-  gtk_widget_set_tooltip_text (back, "Back");
-  gtk_accessible_update_property (GTK_ACCESSIBLE (back),
-                                  GTK_ACCESSIBLE_PROPERTY_LABEL, "Back", -1);
-  g_signal_connect (back, "clicked", G_CALLBACK (on_detail_back), self);
-
-  gtk_widget_set_margin_start (row, 6);
-  gtk_widget_set_margin_end (row, 6);
-  gtk_widget_set_margin_top (row, 6);
-  gtk_widget_set_margin_bottom (row, 6);
-  gtk_box_append (GTK_BOX (row), back);
-
-  gtk_widget_set_vexpand (body, TRUE);
-  gtk_box_append (GTK_BOX (box), row);
-  gtk_box_append (GTK_BOX (box), body);
-
-  return box;
+  g_clear_pointer (&self->current_project_id, g_free);
 }
 
 /* The whole content of the page, built in one go from what the answers
@@ -3026,7 +2994,7 @@ detail_fill (AmlContentPage *self)
     return;
 
   adw_navigation_page_set_child (ADW_NAVIGATION_PAGE (self->details_page),
-                                 detail_body (self, details_content (self)));
+                                 details_content (self));
 
   if (self->versions_problem != NULL)
     show_toast (self, self->versions_problem);
@@ -3168,9 +3136,12 @@ open_project_page (AmlContentPage *self, AmlModrinthProject *project)
     return;
 
   /* What the page needs to rebuild its heading once the answers are in.
-     The page itself is built with a spinner and filled later. */
+     The page itself is built with a spinner and filled later. The id is
+     kept so a second click on the same row closes it again. */
   g_free (self->current_project_title);
   self->current_project_title = g_strdup (project->title);
+  g_free (self->current_project_id);
+  self->current_project_id = g_strdup (project->project_id);
   self->current_project_downloads = project->downloads;
   g_free (self->details_author);
   self->details_author = g_strdup (project->author);
@@ -3186,9 +3157,9 @@ open_project_page (AmlContentPage *self, AmlModrinthProject *project)
 
   /* The project opens in the right half of the page, beside the list it
      was picked from, showing a spinner until both the description and
-     the versions are in. */
-  page = GTK_WIDGET (adw_navigation_page_new (
-    detail_body (self, loading_child ()), project->title));
+     the versions are in. Its name is the first thing the page shows. */
+  page = GTK_WIDGET (adw_navigation_page_new (loading_child (),
+                                              project->title));
   watch_widget (&self->details_page, page);
 
   adw_navigation_split_view_set_content (
@@ -3202,11 +3173,28 @@ open_project_page (AmlContentPage *self, AmlModrinthProject *project)
                               details_watch_new (self, project->project_id));
 }
 
+/* A click on a row opens its project in the other half. A click on the
+ * row of the project that is already open closes it again: the list is
+ * the way in and the way out, so no button has to stand over the project
+ * and push it down. */
 static void
 on_result_activated (AdwActionRow *row, gpointer user_data)
 {
-  open_project_page (user_data,
-                     g_object_get_data (G_OBJECT (row), "aml-project"));
+  AmlContentPage *self = user_data;
+  AmlModrinthProject *project =
+    g_object_get_data (G_OBJECT (row), "aml-project");
+
+  if (project == NULL)
+    return;
+
+  if (self->details_page != NULL &&
+      g_strcmp0 (self->current_project_id, project->project_id) == 0)
+    {
+      close_detail (self);
+      return;
+    }
+
+  open_project_page (self, project);
 }
 
 /* ---------------------------------------------------------- *
@@ -3260,9 +3248,9 @@ build_installed (AmlContentPage *self)
       ADW_STATUS_PAGE (self->installed_status),
       "Browse for something to put into the folder of this instance");
 
-  /* A margin above the card, the way a boxed list is meant to sit: the
-     top row's corners stay round instead of being cut off by the tab. */
-  gtk_widget_set_margin_top (GTK_WIDGET (group), 12);
+  /* The list starts where the row above it ends: its first row is not
+     rounded at the top, so the two read as one piece. */
+  gtk_widget_add_css_class (GTK_WIDGET (group), "flush-top");
 
   self->installed_group = GTK_WIDGET (group);
   self->installed_scroller = scroller;
@@ -3414,8 +3402,9 @@ build_browse (AmlContentPage *self)
       ADW_STATUS_PAGE (self->results_status),
       "Type what to look for, or browse everything Modrinth has for this "
       "instance");
-  /* A margin above the card, the way a boxed list is meant to sit. */
-  gtk_widget_set_margin_top (GTK_WIDGET (group), 12);
+  /* The list starts where the row above it ends: its first row is not
+     rounded at the top, so the two read as one piece. */
+  gtk_widget_add_css_class (GTK_WIDGET (group), "flush-top");
 
   self->results_group = GTK_WIDGET (group);
   self->results_scroller = scroller;
@@ -3590,7 +3579,7 @@ build_bar (AmlContentPage *self)
   gtk_widget_set_vexpand (self->split, TRUE);
   /* Named, so the stylesheet keeps the left half the colour of the page
      instead of the sidebar colour it would take on its own. */
-  gtk_widget_add_css_class (self->split, "content-split");
+  gtk_widget_add_css_class (self->split, "flat-split");
   adw_navigation_split_view_set_sidebar (
     ADW_NAVIGATION_SPLIT_VIEW (self->split),
     adw_navigation_page_new (inner, aml_content_type_title (self->type)));
@@ -3716,6 +3705,7 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
   self->details_problem = NULL;
   self->versions_problem = NULL;
   self->current_project_title = NULL;
+  self->current_project_id = NULL;
   self->current_project_downloads = 0;
   self->details_author = NULL;
   self->details_body = NULL;
@@ -3830,6 +3820,7 @@ aml_content_page_finalize (GObject *object)
   g_free (self->folder);
   g_free (self->query);
   g_free (self->current_project_title);
+  g_free (self->current_project_id);
   g_free (self->details_author);
   g_clear_pointer (&self->details, aml_modrinth_details_free);
   g_clear_pointer (&self->details_versions, g_ptr_array_unref);
