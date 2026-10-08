@@ -29,8 +29,10 @@ G_BEGIN_DECLS
 /* The Modrinth API v2. */
 #define AML_MODRINTH_URL "https://api.modrinth.com/v2"
 
-/* Modrinth asks every client to name itself. */
-#define AML_MODRINTH_USER_AGENT "Flia7/AML (https://github.com/Flia7)"
+/* Modrinth asks every client to name itself, and to carry an address its
+ * operators can reach it at if they need to. */
+#define AML_MODRINTH_USER_AGENT \
+  "AML (https://gitlab.com/anotherminecraftlauncher/aml)"
 
 #define AML_MODRINTH_ERROR (aml_modrinth_error_quark ())
 

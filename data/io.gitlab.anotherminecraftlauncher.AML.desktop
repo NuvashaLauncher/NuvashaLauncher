@@ -6,6 +6,6 @@ Type=Application
 Name=AML
 Comment=Another Minecraft Launcher
 Exec=AML
-Icon=io.github.Flia7.AML
+Icon=io.gitlab.anotherminecraftlauncher.AML
 Terminal=false
 Categories=Game;

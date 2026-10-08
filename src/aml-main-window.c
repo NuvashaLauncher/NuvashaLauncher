@@ -495,13 +495,13 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
 {
   AmlMainWindow *self = user_data;
   AdwDialog *dialog = adw_about_dialog_new ();
-  const char *app_ids[] = { "io.github.Flia7.AML", NULL };
+  const char *app_ids[] = { "io.gitlab.anotherminecraftlauncher.AML", NULL };
 
   adw_about_dialog_set_application_name (ADW_ABOUT_DIALOG (dialog), "AML");
   adw_about_dialog_set_developer_name (ADW_ABOUT_DIALOG (dialog), "Flia");
 
   adw_about_dialog_set_website (ADW_ABOUT_DIALOG (dialog),
-                                "https://github.com/Flia7");
+                                "https://gitlab.com/anotherminecraftlauncher/aml");
   adw_about_dialog_set_copyright (ADW_ABOUT_DIALOG (dialog),
                                   "Copyright (C) 2026 Flia");
   adw_about_dialog_set_license_type (ADW_ABOUT_DIALOG (dialog),

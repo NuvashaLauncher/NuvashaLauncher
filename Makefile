@@ -98,15 +98,23 @@ test-debug: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS)
 
 install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 	install -Dm755 $(BIN) $(DESTDIR)$(PREFIX)/bin/AML
-	install -Dm644 data/io.github.Flia7.AML.desktop \
-		$(DESTDIR)$(PREFIX)/share/applications/io.github.Flia7.AML.desktop
-	@for lang in es_AR es_ES pt_BR fr de it ja ko zh_CN ru pl uk tr nl; do \
+	install -Dm644 data/io.gitlab.anotherminecraftlauncher.AML.desktop \
+		$(DESTDIR)$(PREFIX)/share/applications/io.gitlab.anotherminecraftlauncher.AML.desktop
+	@for lang in $(LOCALES); do \
 		install -Dm644 build/locale/$$lang/LC_MESSAGES/aml.mo \
 			$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/aml.mo; \
 	done
 
+# The same list the install loop uses, so the catalogs go back out with
+# the rest of the launcher.
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/AML
+	rm -f $(DESTDIR)$(PREFIX)/share/applications/io.gitlab.anotherminecraftlauncher.AML.desktop
+	@for lang in $(LOCALES); do \
+		rm -f $(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/aml.mo; \
+	done
+	@# The entry AML installed under its earlier application ID, so an
+	@# upgrade does not leave two launchers in the menu.
 	rm -f $(DESTDIR)$(PREFIX)/share/applications/io.github.Flia7.AML.desktop
 
 clean:

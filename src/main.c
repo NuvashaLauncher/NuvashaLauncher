@@ -130,7 +130,7 @@ main (int argc, char **argv)
 
   g_set_application_name ("Another Minecraft Launcher");
 
-  app = adw_application_new ("io.github.Flia7.AML",
+  app = adw_application_new ("io.gitlab.anotherminecraftlauncher.AML",
                              G_APPLICATION_DEFAULT_FLAGS);
   g_action_map_add_action_entries (G_ACTION_MAP (app), app_entries,
                                    G_N_ELEMENTS (app_entries), app);

@@ -12,7 +12,8 @@ static void
 test_desktop_entry (void)
 {
   g_autofree gchar *path =
-    g_build_filename (AML_DATA_DIR, "io.github.Flia7.AML.desktop", NULL);
+    g_build_filename (AML_DATA_DIR,
+                      "io.gitlab.anotherminecraftlauncher.AML.desktop", NULL);
   g_autoptr (GKeyFile) keys = g_key_file_new ();
   g_autoptr (GError) error = NULL;
   g_autofree gchar *type = NULL;
@@ -38,7 +39,7 @@ test_desktop_entry (void)
   g_assert_cmpstr (exec, ==, "AML");
 
   icon = g_key_file_get_string (keys, "Desktop Entry", "Icon", NULL);
-  g_assert_cmpstr (icon, ==, "io.github.Flia7.AML");
+  g_assert_cmpstr (icon, ==, "io.gitlab.anotherminecraftlauncher.AML");
 
   g_assert_true (g_key_file_has_key (keys, "Desktop Entry", "Terminal", NULL));
   g_assert_false (g_key_file_get_boolean (keys, "Desktop Entry", "Terminal",
