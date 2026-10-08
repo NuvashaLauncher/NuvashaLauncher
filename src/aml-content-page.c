@@ -27,8 +27,8 @@
  * touching it. */
 
 #include "aml-content-page.h"
-
 #include "aml-download.h"
+#include "aml-downloads.h"
 #include "aml-icons.h"
 #include "aml-markdown.h"
 
@@ -132,7 +132,6 @@ struct _AmlContentPage
   guint debounce_source;
   GCancellable *browse;   /* searching and the categories of the filter */
   GCancellable *scan;     /* the folder, its hashes and their lookups */
-  GCancellable *transfer; /* what is being installed or updated */
 
   /* The page of a project waits for the description and the versions
      to arrive before showing anything. These are on the page so both
@@ -776,12 +775,14 @@ install_file_of (AmlModrinthVersion *version, const char *replaces,
 /* A queue of files written one after the other, so that a big file never
  * sits in front of the one that needs it and a failure stops where it
  * happened. The page is only weakly held: it can go away while the last
- * file of it is still on its way. */
+ * file of it is still on its way, and the folder is kept here so the
+ * download finishes without it. */
 typedef struct {
-  AmlContentPage *page;
-  GPtrArray *files; /* InstallFile* */
+  AmlContentPage *page;   /* weak: the page can go during the run */
+  char *folder;           /* where the files go, kept for the whole run */
+  GPtrArray *files;       /* InstallFile* */
   guint index;
-  GCancellable *cancellable;
+  AmlDownload *download;  /* the manager's entry, held while the run lives */
 } FetchRun;
 
 static void fetch_next (FetchRun *run);
@@ -792,8 +793,12 @@ fetch_free (FetchRun *run)
   if (run->page != NULL)
     g_object_remove_weak_pointer (G_OBJECT (run->page), (gpointer *) &run->page);
 
+  if (run->download != NULL)
+    aml_download_finish (run->download);
+
+  g_clear_object (&run->download);
+  g_free (run->folder);
   g_clear_pointer (&run->files, g_ptr_array_unref);
-  g_clear_object (&run->cancellable);
   g_free (run);
 }
 
@@ -813,6 +818,9 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
    * reaches the folder complete and verified. */
   if (!ok)
     {
+      gboolean cancelled = g_error_matches (error, AML_DOWNLOAD_ERROR,
+                                            AML_DOWNLOAD_ERROR_CANCELLED);
+
       if (run->page != NULL)
         {
           AmlContentPage *page = run->page;
@@ -827,13 +835,21 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
             }
 
           set_busy (page, FALSE);
-          show_error (page, "The file could not be installed", error);
+
+          /* A cancel is not a failure worth a message. */
+          if (!cancelled)
+            show_error (page, "The file could not be installed", error);
         }
 
       g_clear_error (&error);
       fetch_free (run);
       return;
     }
+
+  /* What the header row shows: the phase line stays, the count on the
+     right moves with each file landed. */
+  if (run->download != NULL)
+    aml_download_set_progress (run->download, run->index, run->files->len);
 
   /* The new version is in place, so the file it replaces can go. */
   if (file != NULL && file->replaces != NULL)
@@ -876,7 +892,7 @@ fetch_next (FetchRun *run)
     }
 
   file = g_ptr_array_index (run->files, run->index);
-  folder = g_file_new_for_path (self->folder);
+  folder = g_file_new_for_path (run->folder);
 
   {
     g_autoptr (GError) error = NULL;
@@ -884,18 +900,40 @@ fetch_next (FetchRun *run)
     if (!g_file_make_directory_with_parents (folder, NULL, &error) &&
         !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_EXISTS))
       {
-        set_busy (self, FALSE);
-        show_error (self, "The folder cannot be created", error);
+        if (self != NULL)
+          {
+            set_busy (self, FALSE);
+            show_error (self, "The folder cannot be created", error);
+          }
+
         fetch_free (run);
         return;
       }
   }
 
-  path = g_build_filename (self->folder, file->filename, NULL);
+  path = g_build_filename (run->folder, file->filename, NULL);
   run->index++;
 
   aml_download_file_async (file->url, path, file->sha1, G_CHECKSUM_SHA1,
-                           run->cancellable, NULL, fetch_ready, run);
+                           aml_download_get_cancellable (run->download), NULL,
+                           fetch_ready, run);
+}
+
+static AmlDownloadKind
+content_download_kind (AmlContentType type)
+{
+  switch (type)
+    {
+    case AML_CONTENT_RESOURCE_PACK:
+      return AML_DOWNLOAD_RESOURCE_PACK;
+
+    case AML_CONTENT_SHADER_PACK:
+      return AML_DOWNLOAD_SHADER;
+
+    case AML_CONTENT_MOD:
+    default:
+      return AML_DOWNLOAD_MOD;
+    }
 }
 
 /* Takes the files of an install and writes them in order. The run owns
@@ -904,11 +942,30 @@ static void
 start_fetch (AmlContentPage *self, GPtrArray *files)
 {
   FetchRun *run = g_new0 (FetchRun, 1);
+  guint count = files != NULL ? files->len : 0;
 
   run->page = self;
   g_object_add_weak_pointer (G_OBJECT (self), (gpointer *) &run->page);
   run->files = files;
-  run->cancellable = g_object_ref (self->transfer);
+  run->folder = g_strdup (self->folder);
+
+  {
+    const char *title = NULL;
+
+    if (files != NULL && files->len > 0)
+      title = ((InstallFile *) g_ptr_array_index (files, 0))->label;
+
+    if (title == NULL)
+      title = self->current_project_title;
+
+    if (title == NULL)
+      title = "Content";
+
+    run->download = aml_downloads_add (content_download_kind (self->type),
+                                       title);
+    aml_download_set_detail (run->download, "Installing");
+    aml_download_set_progress (run->download, 0, count);
+  }
 
   fetch_next (run);
 }
@@ -1070,11 +1127,15 @@ on_plan_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
 
   if (plan == NULL)
-    return;
+    {
+      g_object_unref (self);
+      return;
+    }
 
   if (g_strcmp0 (response, "install") != 0 || plan->page == NULL)
     {
       plan_free (plan);
+      g_object_unref (self);
       return;
     }
 
@@ -1090,6 +1151,7 @@ on_plan_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
   start_fetch (self, plan->files);
   plan->files = NULL; /* the fetch owns them now */
   plan_free (plan);
+  g_object_unref (self);
 }
 
 static void
@@ -2252,14 +2314,16 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
   for (guint i = 0; i < results->projects->len; i++)
     {
       AmlModrinthProject *project = g_ptr_array_index (results->projects, i);
-      GtkWidget *row = adw_action_row_new ();
-      GtkWidget *icon = aml_icon_widget_new (
-          aml_content_type_icon (self->type));
+      GtkWidget *row = NULL;
+      GtkWidget *icon = NULL;
 
       /* A project already listed is not listed twice: the same answer can
        * come back for two pages that overlap. */
       if (g_hash_table_contains (self->seen_ids, project->project_id))
         continue;
+
+      row = adw_action_row_new ();
+      icon = aml_icon_widget_new (aml_content_type_icon (self->type));
 
       g_hash_table_add (self->seen_ids, g_strdup (project->project_id));
 
@@ -2301,7 +2365,8 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
        * live exactly as long as the rows that show them. */
       g_ptr_array_add (self->results, aml_modrinth_project_copy (project));
       g_object_set_data (G_OBJECT (row), "aml-project",
-                         g_ptr_array_index (self->results, shown));
+                         g_ptr_array_index (self->results,
+                                            self->results->len - 1));
 
       adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
 
@@ -2358,6 +2423,7 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
 
     gtk_widget_set_visible (self->results_status, empty);
     gtk_widget_set_visible (self->results_scroller, !empty);
+    gtk_widget_set_visible (self->results_group, TRUE);
     gtk_widget_set_visible (self->loading_more, FALSE);
     gtk_widget_set_visible (self->retry_row, FALSE);
 
@@ -2861,7 +2927,7 @@ close_detail (AmlContentPage *self)
     ADW_NAVIGATION_SPLIT_VIEW (self->split), NULL);
   adw_navigation_split_view_set_collapsed (
     ADW_NAVIGATION_SPLIT_VIEW (self->split), TRUE);
-  self->details_page = NULL;
+  watch_widget (&self->details_page, NULL);
   g_clear_pointer (&self->current_project_id, g_free);
 }
 
@@ -3051,6 +3117,14 @@ on_detail_versions_ready (GObject *source G_GNUC_UNUSED,
       return;
     }
 
+  /* Another project was opened while this answer was on its way: the
+     project that is open now must not be filled with this one. */
+  if (g_strcmp0 (self->current_project_id, watch->project_id) != 0)
+    {
+      details_watch_free (watch);
+      return;
+    }
+
   set_busy (self, FALSE);
 
   if (versions == NULL)
@@ -3088,6 +3162,14 @@ on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   /* The dialog can be closed while its details are on their way; the
      answer then fills nothing. */
   if (self == NULL)
+    {
+      details_watch_free (watch);
+      return;
+    }
+
+  /* Another project was opened while this answer was on its way: the
+     project that is open now must not be filled with this one. */
+  if (g_strcmp0 (self->current_project_id, watch->project_id) != 0)
     {
       details_watch_free (watch);
       return;
@@ -3294,6 +3376,11 @@ on_stack_switched (GObject *stack, GParamSpec *pspec G_GNUC_UNUSED,
 
   /* The row shows the actions of whichever list is on top. */
   move_actions_into_bar (self, browsing);
+
+  /* Installed is a list of its own: the project page opened from Browse
+     is left with the list it was picked from. */
+  if (!browsing)
+    close_detail (self);
 
   if (!browsing || self->browse_searched)
     return;
@@ -3647,7 +3734,6 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
   self->minecraft_version = instance_string (instance, "minecraft-version");
   self->browse = g_cancellable_new ();
   self->scan = g_cancellable_new ();
-  self->transfer = g_cancellable_new ();
   self->more = g_cancellable_new ();
   self->seen_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                           NULL);
@@ -3775,11 +3861,9 @@ aml_content_page_dispose (GObject *object)
 
   g_cancellable_cancel (self->browse);
   g_cancellable_cancel (self->scan);
-  g_cancellable_cancel (self->transfer);
   g_cancellable_cancel (self->more);
   g_clear_object (&self->browse);
   g_clear_object (&self->scan);
-  g_clear_object (&self->transfer);
   g_clear_object (&self->more);
   g_clear_pointer (&self->seen_ids, g_hash_table_unref);
 

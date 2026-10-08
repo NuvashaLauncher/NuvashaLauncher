@@ -23,18 +23,39 @@ url_is_safe (const char *url)
           g_ascii_strncasecmp (url, "mailto:", 7) == 0);
 }
 
-static void inline_into (GString *out, const char *text, gsize length);
+static void inline_into (GString *out, const char *text, gsize length,
+                         gboolean allow_html);
 
 /* Reads "label](url)" that follows a "[", and writes the markup for a
  * link into @out. @after is set to what comes after the closing ")".
  * FALSE when this is not a link, in which case nothing is written. */
 static gboolean
-inline_link (GString *out, const char *text, gsize length, const char **after)
+inline_link (GString *out, const char *text, gsize length, gboolean allow_html,
+             const char **after)
 {
-  const char *close = memchr (text, ']', length);
+  const char *close = NULL;
   const char *paren = NULL;
   g_autofree char *label = NULL;
   g_autofree char *url = NULL;
+  gsize depth = 0;
+
+  /* The label may hold a nested "![…](…)" of its own, so the "]" that
+     closes it is the one at depth zero, not the first one there is. */
+  for (const char *p = text; p < text + length; p++)
+    {
+      if (*p == '[')
+        depth++;
+      else if (*p == ']')
+        {
+          if (depth == 0)
+            {
+              close = p;
+              break;
+            }
+
+          depth--;
+        }
+    }
 
   if (close == NULL || close + 1 >= text + length || close[1] != '(')
     return FALSE;
@@ -60,13 +81,22 @@ inline_link (GString *out, const char *text, gsize length, const char **after)
       g_autofree char *escaped = g_markup_escape_text (url, -1);
 
       g_string_append_printf (out, "<a href=\"%s\">", escaped);
-      inline_into (out, label, strlen (label));
+
+      /* Images are intentionally hidden in descriptions, including an
+         image wrapped in a link. */
+      if (g_str_has_prefix (label, "!["))
+        {
+          /* Keep consuming the outer link, but emit no text or markup. */
+        }
+      else
+        inline_into (out, label, strlen (label), allow_html);
+
       g_string_append (out, "</a>");
     }
   else
     {
       /* A link that cannot be opened is still words. */
-      inline_into (out, label, strlen (label));
+      inline_into (out, label, strlen (label), allow_html);
     }
 
   *after = paren + 1;
@@ -94,16 +124,213 @@ inline_char (GString *out, char c)
     }
 }
 
-/* The markup of @text, whose length is @length. Recurses for the words
- * inside emphasis and links. */
+/* The characters a body actually names with an entity. */
+static const struct {
+  const char *name;
+  const char *utf8;
+} entities[] = {
+  { "amp", "&" },        { "lt", "<" },          { "gt", ">" },
+  { "quot", "\"" },      { "apos", "'" },        { "nbsp", "\xc2\xa0" },
+  { "mdash", "\xe2\x80\x94" }, { "ndash", "\xe2\x80\x93" },
+  { "hellip", "\xe2\x80\xa6" }, { "copy", "\xc2\xa9" },
+  { "reg", "\xc2\xae" }, { "trade", "\xe2\x84\xa2" },
+  { "laquo", "\xc2\xab" }, { "raquo", "\xc2\xbb" },
+  { "middot", "\xc2\xb7" }, { "bull", "\xe2\x80\xa2" },
+  { "times", "\xc3\x97" }, { "divide", "\xc3\xb7" },
+  { "deg", "\xc2\xb0" }, { "plusmn", "\xc2\xb1" },
+  { "micro", "\xc2\xb5" }, { "para", "\xc2\xb6" }, { "sect", "\xc2\xa7" },
+  { "euro", "\xe2\x82\xac" }, { "pound", "\xc2\xa3" },
+  { "yen", "\xc2\xa5" }, { "cent", "\xc2\xa2" },
+  { "larr", "\xe2\x86\x90" }, { "rarr", "\xe2\x86\x92" },
+  { "uarr", "\xe2\x86\x91" }, { "darr", "\xe2\x86\x93" },
+  { "harr", "\xe2\x86\x94" }, { "lsquo", "\xe2\x80\x98" },
+  { "rsquo", "\xe2\x80\x99" }, { "ldquo", "\xe2\x80\x9c" },
+  { "rdquo", "\xe2\x80\x9d" }, { "star", "\xe2\x98\x85" },
+  { "check", "\xe2\x9c\x94" }, { "cross", "\xe2\x9c\x97" },
+};
+
 static void
-inline_into (GString *out, const char *text, gsize length)
+append_escaped (GString *out, const char *utf8)
+{
+  g_autofree char *escaped = g_markup_escape_text (utf8, -1);
+
+  g_string_append (out, escaped);
+}
+
+/* "&amp;" or "&#x27;" into the character it names, escaped for Pango.
+ * FALSE when this is not an entity, so a bare "&" stays a "&". */
+static gboolean
+entity_into (GString *out, const char *text, gsize length, gsize *consumed)
+{
+  const char *semi = NULL;
+  gsize n = 0;
+  const char *body = NULL;
+  gsize body_len = 0;
+
+  if (length < 3 || text[0] != '&')
+    return FALSE;
+
+  /* No entity is longer than "&hellip;"; a ";" past that is not one. */
+  semi = memchr (text, ';', MIN (length, 12));
+
+  if (semi == NULL)
+    return FALSE;
+
+  n = (semi - text) + 1;
+  body = text + 1;
+  body_len = n - 2;
+
+  if (body_len == 0)
+    return FALSE;
+
+  if (body[0] == '#')
+    {
+      gunichar codepoint = 0;
+
+      if (body_len >= 2 && (body[1] == 'x' || body[1] == 'X'))
+        {
+          g_autofree char *hex = g_strndup (body + 2, body_len - 2);
+
+          codepoint = (gunichar) g_ascii_strtoull (hex, NULL, 16);
+        }
+      else
+        {
+          g_autofree char *dec = g_strndup (body + 1, body_len - 1);
+
+          codepoint = (gunichar) g_ascii_strtoull (dec, NULL, 10);
+        }
+
+      if (codepoint == 0 || codepoint > 0x10FFFF ||
+          !g_unichar_validate (codepoint))
+        return FALSE;
+
+      {
+        char buf[8];
+        int written = g_unichar_to_utf8 (codepoint, buf);
+
+        g_autofree char *decoded = g_strndup (buf, written);
+
+        append_escaped (out, decoded);
+      }
+
+      *consumed = n;
+      return TRUE;
+    }
+
+  for (guint i = 0; i < G_N_ELEMENTS (entities); i++)
+    {
+      if (strlen (entities[i].name) == body_len &&
+          g_ascii_strncasecmp (entities[i].name, body, body_len) == 0)
+        {
+          append_escaped (out, entities[i].utf8);
+          *consumed = n;
+          return TRUE;
+        }
+    }
+
+  return FALSE;
+}
+
+/* The tags a Modrinth body sprinkles into its Markdown, as the Pango
+ * markup that says the same thing. They are all simple pairs, so there
+ * is no attribute to read and nothing to keep track of. */
+static const struct {
+  const char *html;
+  const char *pango;
+} inline_tags[] = {
+  { "b", "b" },       { "strong", "b" }, { "i", "i" },
+  { "em", "i" },      { "u", "u" },      { "s", "s" },
+  { "strike", "s" },  { "del", "s" },    { "sub", "sub" },
+  { "sup", "sup" },   { "code", "span" },
+};
+
+/* "<u>", "</sub>" … turned into Pango markup. @text starts at the "<".
+ * FALSE when this is not a tag the reader renders (which leaves a "<"
+ * that is only a character). */
+static gboolean
+inline_html_into (GString *out, const char *text, gsize length, gsize *consumed)
+{
+  const char *gt = NULL;
+  g_autofree char *inner = NULL;
+  gboolean closing = FALSE;
+  char *name = NULL;
+  gsize namelen = 0;
+
+  if (length < 3 || text[0] != '<')
+    return FALSE;
+
+  if (!(g_ascii_isalpha (text[1]) || text[1] == '/'))
+    return FALSE;
+
+  gt = memchr (text, '>', length);
+
+  if (gt == NULL || gt == text + 1)
+    return FALSE;
+
+  inner = g_strndup (text + 1, gt - text - 1);
+  closing = inner[0] == '/';
+  name = g_strstrip (inner + (closing ? 1 : 0));
+  namelen = strcspn (name, " \t\r\n/");
+  name[namelen] = '\0';
+
+  for (guint i = 0; i < G_N_ELEMENTS (inline_tags); i++)
+    {
+      if (g_ascii_strcasecmp (name, inline_tags[i].html) != 0)
+        continue;
+
+      if (g_strcmp0 (inline_tags[i].pango, "span") == 0)
+        {
+          if (closing)
+            g_string_append (out, "</span>");
+          else
+            g_string_append (out,
+                             "<span font_family=\"monospace\">");
+        }
+      else
+        g_string_append_printf (out, "<%s%s>", closing ? "/" : "",
+                                inline_tags[i].pango);
+
+      *consumed = (gt - text) + 1;
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
+/* The markup of @text, whose length is @length. Recurses for the words
+ * inside emphasis and links. @allow_html lets the tags a body carries
+ * through as Pango markup; leaving it FALSE escapes them, which is what
+ * an inline fragment taken out of its body wants. */
+static void
+inline_into (GString *out, const char *text, gsize length, gboolean allow_html)
 {
   gsize i = 0;
 
   while (i < length)
     {
       char c = text[i];
+
+      if (allow_html && c == '<')
+        {
+          gsize used = 0;
+
+          if (inline_html_into (out, text + i, length - i, &used))
+            {
+              i += used;
+              continue;
+            }
+        }
+
+      if (c == '&')
+        {
+          gsize used = 0;
+
+          if (entity_into (out, text + i, length - i, &used))
+            {
+              i += used;
+              continue;
+            }
+        }
 
       /* A code span: everything up to the next backtick, verbatim. */
       if (c == '`')
@@ -127,8 +354,10 @@ inline_into (GString *out, const char *text, gsize length)
       if (c == '!' && i + 1 < length && text[i + 1] == '[')
         {
           const char *after = NULL;
+          g_autoptr (GString) hidden = g_string_new (NULL);
 
-          if (inline_link (out, text + i + 2, length - i - 2, &after))
+          if (inline_link (hidden, text + i + 2, length - i - 2, allow_html,
+                           &after))
             {
               i = (after - text);
               continue;
@@ -139,7 +368,8 @@ inline_into (GString *out, const char *text, gsize length)
         {
           const char *after = NULL;
 
-          if (inline_link (out, text + i + 1, length - i - 1, &after))
+          if (inline_link (out, text + i + 1, length - i - 1, allow_html,
+                           &after))
             {
               i = (after - text);
               continue;
@@ -163,7 +393,7 @@ inline_into (GString *out, const char *text, gsize length)
           if (end != NULL && end > hay)
             {
               g_string_append (out, "<b>");
-              inline_into (out, hay, end - hay);
+              inline_into (out, hay, end - hay, allow_html);
               g_string_append (out, "</b>");
               i = (end - text) + 2;
               continue;
@@ -181,7 +411,7 @@ inline_into (GString *out, const char *text, gsize length)
               end > hay)
             {
               g_string_append (out, "<s>");
-              inline_into (out, hay, end - hay);
+              inline_into (out, hay, end - hay, allow_html);
               g_string_append (out, "</s>");
               i = (end - text) + 2;
               continue;
@@ -206,7 +436,7 @@ inline_into (GString *out, const char *text, gsize length)
           if (end != NULL && end > hay)
             {
               g_string_append (out, "<i>");
-              inline_into (out, hay, end - hay);
+              inline_into (out, hay, end - hay, allow_html);
               g_string_append (out, "</i>");
               i = (end - text) + 1;
               continue;
@@ -226,7 +456,21 @@ aml_markdown_inline (const char *text)
   if (text == NULL)
     return NULL;
 
-  inline_into (out, text, strlen (text));
+  inline_into (out, text, strlen (text), FALSE);
+
+  return g_string_free (g_steal_pointer (&out), FALSE);
+}
+
+/* The same, with the body's own HTML tags passed through. */
+static char *
+markdown_inline_html (const char *text)
+{
+  g_autoptr (GString) out = g_string_new (NULL);
+
+  if (text == NULL)
+    return NULL;
+
+  inline_into (out, text, strlen (text), TRUE);
 
   return g_string_free (g_steal_pointer (&out), FALSE);
 }
@@ -264,65 +508,97 @@ html_to_markdown (const char *text)
   step = regex_replace (text, "<!--.*?-->", "", G_REGEX_DOTALL);
   out = g_steal_pointer (&step);
 
-  /* An image with its alt text first, so the text beside it is kept. */
-  step = regex_replace (
-      out,
+#define REPLACE(pattern, replacement, flags)                                 \
+  G_STMT_START                                                               \
+  {                                                                          \
+    step = regex_replace (out, pattern, replacement, flags);                 \
+    g_free (out);                                                            \
+    out = g_steal_pointer (&step);                                           \
+  }                                                                          \
+  G_STMT_END
+
+  /* A block of code, kept verbatim. */
+  REPLACE ("<pre[^>]*>(.*?)</pre>", "\n\n```\n\\1\n```\n\n",
+           G_REGEX_CASELESS | G_REGEX_DOTALL);
+
+  /* A video embed becomes a link that opens it. */
+  REPLACE ("<iframe[^>]*src\\s*=\\s*[\"']([^\"']+)[\"'][^>]*>\\s*</iframe>",
+           "", G_REGEX_CASELESS | G_REGEX_DOTALL);
+  REPLACE ("<iframe[^>]*src\\s*=\\s*[\"']([^\"']+)[\"'][^>]*/?>",
+           "", G_REGEX_CASELESS | G_REGEX_DOTALL);
+
+  /* An image with its alt text first, so the text beside it is kept.
+     The attributes come in either order. */
+  REPLACE (
       "<img[^>]*src\\s*=\\s*[\"']([^\"']+)[\"'][^>]*alt\\s*=\\s*[\"']([^\"']*)[\"'][^>]*>",
-      "![$2]($1)", G_REGEX_CASELESS | G_REGEX_DOTALL);
-  g_free (out);
-  out = g_steal_pointer (&step);
+      "", G_REGEX_CASELESS | G_REGEX_DOTALL);
+  REPLACE (
+      "<img[^>]*alt\\s*=\\s*[\"']([^\"']*)[\"'][^>]*src\\s*=\\s*[\"']([^\"']+)[\"'][^>]*>",
+      "", G_REGEX_CASELESS | G_REGEX_DOTALL);
+  REPLACE ("<img[^>]*src\\s*=\\s*[\"']([^\"']+)[\"'][^>]*>",
+           "", G_REGEX_CASELESS | G_REGEX_DOTALL);
 
-  step = regex_replace (out,
-                        "<img[^>]*src\\s*=\\s*[\"']([^\"']+)[\"'][^>]*>",
-                        "![]($1)", G_REGEX_CASELESS | G_REGEX_DOTALL);
-  g_free (out);
-  out = g_steal_pointer (&step);
+  REPLACE ("<a[^>]*href\\s*=\\s*[\"']([^\"']+)[\"'][^>]*>(.*?)</a>",
+           "[\\2](\\1)", G_REGEX_CASELESS | G_REGEX_DOTALL);
 
-  step = regex_replace (out, "<a[^>]*href\\s*=\\s*[\"']([^\"']+)[\"'][^>]*>(.*?)</a>",
-                        "[$2]($1)", G_REGEX_CASELESS | G_REGEX_DOTALL);
-  g_free (out);
-  out = g_steal_pointer (&step);
+  REPLACE ("<(strong|b)[^>]*>(.*?)</\\1>", "**\\2**",
+           G_REGEX_CASELESS | G_REGEX_DOTALL);
+  REPLACE ("<(em|i)[^>]*>(.*?)</\\1>", "*\\2*",
+           G_REGEX_CASELESS | G_REGEX_DOTALL);
 
-  step = regex_replace (out, "<(strong|b)[^>]*>(.*?)</\\1>", "**$2**",
-                        G_REGEX_CASELESS | G_REGEX_DOTALL);
-  g_free (out);
-  out = g_steal_pointer (&step);
+  /* Headings, before the block tags below turn them into gaps. */
+  REPLACE ("<h1[^>]*>(.*?)</h1>", "\n\n# \\1\n\n",
+           G_REGEX_CASELESS | G_REGEX_DOTALL);
+  REPLACE ("<h2[^>]*>(.*?)</h2>", "\n\n## \\1\n\n",
+           G_REGEX_CASELESS | G_REGEX_DOTALL);
+  REPLACE ("<h3[^>]*>(.*?)</h3>", "\n\n### \\1\n\n",
+           G_REGEX_CASELESS | G_REGEX_DOTALL);
+  REPLACE ("<h4[^>]*>(.*?)</h4>", "\n\n#### \\1\n\n",
+           G_REGEX_CASELESS | G_REGEX_DOTALL);
+  REPLACE ("<h5[^>]*>(.*?)</h5>", "\n\n##### \\1\n\n",
+           G_REGEX_CASELESS | G_REGEX_DOTALL);
+  REPLACE ("<h6[^>]*>(.*?)</h6>", "\n\n###### \\1\n\n",
+           G_REGEX_CASELESS | G_REGEX_DOTALL);
 
-  step = regex_replace (out, "<(em|i)[^>]*>(.*?)</\\1>", "*$2*",
-                        G_REGEX_CASELESS | G_REGEX_DOTALL);
-  g_free (out);
-  out = g_steal_pointer (&step);
+  /* A table becomes pipe rows the block reader folds into a grid: a
+     header cell is bold, so a row of <th> reads as a header. */
+  REPLACE ("<caption[^>]*>(.*?)</caption>", "\n\n**\\1**\n\n",
+           G_REGEX_CASELESS | G_REGEX_DOTALL);
+  REPLACE ("<th[^>]*>(.*?)</th>", "| **\\1** ",
+           G_REGEX_CASELESS | G_REGEX_DOTALL);
+  REPLACE ("<td[^>]*>(.*?)</td>", "| \\1 ",
+           G_REGEX_CASELESS | G_REGEX_DOTALL);
+  REPLACE ("<tr[^>]*>", "\n", G_REGEX_CASELESS | G_REGEX_DOTALL);
+  REPLACE ("</tr>", " |\n", G_REGEX_CASELESS | G_REGEX_DOTALL);
+  REPLACE ("</?t(able|head|body|foot)[^>]*>", "\n\n",
+           G_REGEX_CASELESS | G_REGEX_DOTALL);
+
+  /* <summary> is the headline of what a <details> folds away; the fold
+     itself is left open, so the words are what the reader sees. */
+  REPLACE ("<summary[^>]*>(.*?)</summary>", "\n\n**\\1**\n\n",
+           G_REGEX_CASELESS | G_REGEX_DOTALL);
+  REPLACE ("</?details[^>]*>", "\n\n", G_REGEX_CASELESS | G_REGEX_DOTALL);
 
   /* A list item becomes a line of its own with a marker. */
-  step = regex_replace (out, "<li[^>]*>", "\n- ", G_REGEX_CASELESS | G_REGEX_DOTALL);
-  g_free (out);
-  out = g_steal_pointer (&step);
+  REPLACE ("<li[^>]*>", "\n- ", G_REGEX_CASELESS | G_REGEX_DOTALL);
 
-  step = regex_replace (out, "<br\\s*/?>", "\n", G_REGEX_CASELESS | G_REGEX_DOTALL);
-  g_free (out);
-  out = g_steal_pointer (&step);
+  REPLACE ("<br\\s*/?>", "\n", G_REGEX_CASELESS | G_REGEX_DOTALL);
 
-  /* A paragraph is a gap in the words, whatever it is made of. */
-  step = regex_replace (out, "</?p[^>]*>", "\n\n", G_REGEX_CASELESS | G_REGEX_DOTALL);
-  g_free (out);
-  out = g_steal_pointer (&step);
+  /* A paragraph or a block is a gap in the words. */
+  REPLACE (
+      "</?(p|div|center|section|article|header|footer|main|blockquote|ul|ol|dl|dt|dd|figure|figcaption)[^>]*>",
+      "\n\n", G_REGEX_CASELESS | G_REGEX_DOTALL);
 
-  step = regex_replace (out, "</?(ul|ol|dl|center|div|span|table|tr|td|th|thead|tbody|figure|figcaption)[^>]*>",
-                        "\n", G_REGEX_CASELESS | G_REGEX_DOTALL);
-  g_free (out);
-  out = g_steal_pointer (&step);
+  REPLACE ("<hr\\s*/?>", "\n\n---\n\n", G_REGEX_CASELESS | G_REGEX_DOTALL);
 
-  /* Closing tags that have nothing to open. */
-  step = regex_replace (out, "</(li|ul|ol|dl|center|div|span|table|tr|td|th|thead|tbody|figure|figcaption)>",
-                        "", G_REGEX_CASELESS | G_REGEX_DOTALL);
-  g_free (out);
-  out = g_steal_pointer (&step);
+  /* Whatever other tag is left names nothing a reader needs. The tags
+     the reader does render are left for the inline pass. */
+  REPLACE ("<(?!\\/?(?:sub|sup|strong|strike|del|code|em|u|s|b|i)(?=[\\s>/]))[^>]*>",
+           "", G_REGEX_CASELESS | G_REGEX_DOTALL);
 
-  /* Whatever other tag is left names nothing a reader needs. */
-  step = regex_replace (out, "<[^>]+>", "", G_REGEX_DOTALL);
-  g_free (out);
+#undef REPLACE
 
-  return g_steal_pointer (&step);
+  return g_steal_pointer (&out);
 }
 
 static GtkWidget *
@@ -357,8 +633,11 @@ on_activate_link (GtkLabel *label, const char *uri,
 static GtkWidget *
 text_block (const char *markdown, const char *css_class)
 {
-  g_autofree char *markup = aml_markdown_inline (markdown);
+  g_autofree char *markup = markdown_inline_html (markdown);
   GtkWidget *label = wrapped_label (markup);
+
+  if (markup == NULL || *markup == '\0')
+    gtk_widget_set_visible (label, FALSE);
 
   if (css_class != NULL)
     gtk_widget_add_css_class (label, css_class);
@@ -371,6 +650,27 @@ text_block (const char *markdown, const char *css_class)
 
 /* The picture of an image, filled in when the file has been fetched. */
 static void
+image_resize (GtkWidget *picture)
+{
+  const char *ratio_text = g_object_get_data (
+    G_OBJECT (picture), "aml-image-ratio");
+  double ratio = ratio_text != NULL ? g_ascii_strtod (ratio_text, NULL) : 0.0;
+  int width = gtk_widget_get_width (picture);
+
+  if (ratio > 0.0 && width > 0)
+    gtk_widget_set_size_request (picture, -1,
+                                 MAX (1, (int) ((double) width / ratio + 0.5)));
+}
+
+static gboolean
+image_resize_idle (gpointer user_data)
+{
+  image_resize (GTK_WIDGET (user_data));
+  g_object_unref (user_data);
+  return G_SOURCE_REMOVE;
+}
+
+static void
 image_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
              gpointer user_data)
 {
@@ -381,9 +681,32 @@ image_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   if (path != NULL)
     {
       g_autoptr (GFile) file = g_file_new_for_path (path);
+      g_autoptr (GdkTexture) texture = gdk_texture_new_from_file (file, NULL);
 
-      gtk_picture_set_file (GTK_PICTURE (picture), file);
-      gtk_widget_set_visible (picture, TRUE);
+      /* A decoded texture, not the file: gtk_picture_set_file() hands
+         some formats back as a symbolic paintable, and a symbolic
+         picture laid out at a height of zero trips a Gtk critical while
+         it is being drawn. A texture is never symbolic. */
+      if (texture != NULL)
+        {
+          gtk_picture_set_paintable (GTK_PICTURE (picture),
+                                     GDK_PAINTABLE (texture));
+          {
+            int width = gdk_paintable_get_intrinsic_width (
+              GDK_PAINTABLE (texture));
+            int height = gdk_paintable_get_intrinsic_height (
+              GDK_PAINTABLE (texture));
+
+            if (width > 0 && height > 0)
+              g_object_set_data_full (
+                G_OBJECT (picture), "aml-image-ratio",
+                g_strdup_printf ("%.17g", (double) width / (double) height),
+                g_free);
+          }
+          gtk_widget_set_visible (picture, TRUE);
+          gtk_widget_queue_resize (picture);
+          g_idle_add (image_resize_idle, g_object_ref (picture));
+        }
     }
 
   g_object_unref (picture);
@@ -412,6 +735,8 @@ image_block (const char *url)
   GtkWidget *picture = gtk_picture_new ();
   g_autofree char *resolved = resolve_image_url (url);
 
+  /* The aspect frame supplies the correct height; the picture itself must
+     be allowed to scale down to the description column's width. */
   gtk_picture_set_can_shrink (GTK_PICTURE (picture), TRUE);
   gtk_picture_set_content_fit (GTK_PICTURE (picture), GTK_CONTENT_FIT_CONTAIN);
   gtk_widget_set_hexpand (picture, TRUE);
@@ -424,27 +749,62 @@ image_block (const char *url)
   return picture;
 }
 
-/* Reads "![alt](url)" filling the whole of @line. TRUE when the line is
- * one image, in which case @url is set to its url, which the caller
- * frees. */
+/* Reads "![alt](url)" filling the whole of @line, with or without an
+ * outer "[…](link)" around it. TRUE when the line is one image, in which
+ * case @url is set to the image's url, which the caller frees. */
 static gboolean
 line_is_image (const char *line, char **url)
 {
+  /* Descriptions deliberately do not display remote images. */
+  (void) line;
+  (void) url;
+  return FALSE;
+
+#if 0
+  gboolean wrapped = FALSE;
+  const char *p = line;
   const char *close = NULL;
   const char *paren = NULL;
+  const char *end = NULL;
   g_autofree char *found = NULL;
 
-  if (!g_str_has_prefix (line, "!["))
+  if (p[0] == '[')
+    {
+      wrapped = TRUE;
+      p++;
+    }
+
+  if (!(p[0] == '!' && p[1] == '['))
     return FALSE;
 
-  close = strchr (line + 2, ']');
+  close = strstr (p + 2, "](");
 
-  if (close == NULL || close[1] != '(')
+  if (close == NULL)
     return FALSE;
 
   paren = strchr (close + 2, ')');
 
-  if (paren == NULL || paren[1] != '\0')
+  if (paren == NULL)
+    return FALSE;
+
+  end = paren + 1;
+
+  if (wrapped)
+    {
+      const char *outer = NULL;
+
+      if (end[0] != ']' || end[1] != '(')
+        return FALSE;
+
+      outer = strchr (end + 2, ')');
+
+      if (outer == NULL)
+        return FALSE;
+
+      end = outer + 1;
+    }
+
+  if (end[0] != '\0')
     return FALSE;
 
   found = g_strndup (close + 2, paren - (close + 2));
@@ -460,6 +820,7 @@ line_is_image (const char *line, char **url)
     *url = g_steal_pointer (&found);
 
   return TRUE;
+#endif
 }
 
 static guint
@@ -550,6 +911,86 @@ is_rule (const char *line)
   return count >= 3;
 }
 
+/* TRUE when @line is one row of a table written as pipe columns. */
+static gboolean
+is_table_row (const char *line)
+{
+  return line[0] == '|';
+}
+
+/* "|---|:--:|" and the like: the line GFM puts between a header and its
+ * rows. It carries no words, so it is skipped. */
+static gboolean
+is_table_separator (const char *line)
+{
+  gboolean saw_dash = FALSE;
+
+  if (line[0] != '|')
+    return FALSE;
+
+  for (const char *p = line; *p != '\0'; p++)
+    {
+      if (*p == '|' || *p == '-' || *p == ':' || *p == ' ' || *p == '\t')
+        {
+          if (*p == '-')
+            saw_dash = TRUE;
+          continue;
+        }
+
+      return FALSE;
+    }
+
+  return saw_dash;
+}
+
+/* The pipe rows of a table, laid out as a grid. */
+static GtkWidget *
+table_block (GPtrArray *rows)
+{
+  GtkWidget *grid = gtk_grid_new ();
+
+  gtk_grid_set_row_spacing (GTK_GRID (grid), 4);
+  gtk_grid_set_column_spacing (GTK_GRID (grid), 12);
+  gtk_widget_set_hexpand (grid, TRUE);
+  gtk_widget_set_margin_top (grid, 4);
+  gtk_widget_set_margin_bottom (grid, 4);
+
+  for (guint r = 0; r < rows->len; r++)
+    {
+      char **cells = g_ptr_array_index (rows, r);
+      guint n = g_strv_length (cells);
+      guint column = 0;
+
+      for (guint c = 0; c < n; c++)
+        {
+          /* The empty pieces the split leaves at both ends. */
+          if ((c == 0 || c + 1 == n) && cells[c][0] == '\0')
+            continue;
+
+          {
+            g_autofree char *cell = g_strdup (cells[c]);
+            const char *text = g_strstrip (cell);
+            g_autofree char *image_url = NULL;
+            GtkWidget *widget = NULL;
+
+            /* A cell that is one image is the image, as Modrinth draws it;
+               anything else is the words it holds. */
+            if (line_is_image (text, &image_url))
+              widget = image_block (image_url);
+            else
+              widget = text_block (text, NULL);
+
+            gtk_widget_set_hexpand (widget, TRUE);
+            gtk_widget_set_valign (widget, GTK_ALIGN_START);
+            gtk_grid_attach (GTK_GRID (grid), widget, column, r, 1, 1);
+            column++;
+          }
+        }
+    }
+
+  return grid;
+}
+
 /* TRUE when @line begins a block that is not a paragraph line. */
 static gboolean
 starts_block (const char *line)
@@ -559,7 +1000,7 @@ starts_block (const char *line)
   gboolean block =
     heading_level (line) > 0 || g_str_has_prefix (line, "```") ||
     g_str_has_prefix (line, ">") || is_rule (line) ||
-    line_is_image (line, NULL);
+    is_table_row (line) || line_is_image (line, NULL);
 
   if (!block && list_item (line, &content, &bullet))
     block = TRUE;
@@ -646,6 +1087,31 @@ aml_markdown_render (GtkBox *box, const char *markdown)
         {
           gtk_box_append (box, image_block (image_url));
           i++;
+          continue;
+        }
+
+      if (is_table_row (line))
+        {
+          g_autoptr (GPtrArray) rows =
+            g_ptr_array_new_with_free_func ((GDestroyNotify) g_strfreev);
+
+          while (lines[i] != NULL)
+            {
+              g_autofree char *raw = g_strdup (lines[i]);
+              const char *row = g_strstrip (raw);
+
+              if (!is_table_row (row))
+                break;
+
+              if (!is_table_separator (row))
+                g_ptr_array_add (rows, g_strsplit (row, "|", -1));
+
+              i++;
+            }
+
+          if (rows->len > 0)
+            gtk_box_append (box, table_block (rows));
+
           continue;
         }
 

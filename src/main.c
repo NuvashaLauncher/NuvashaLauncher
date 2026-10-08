@@ -52,10 +52,10 @@ static const char app_css[] =
   "  background-color: transparent;"
   "  color: inherit;"
   "}"
-  ".flush-top list.boxed-list > row:first-child {"
-  "  border-top-left-radius: 0;"
-  "  border-top-right-radius: 0;"
-  "}";
+   ".flush-top list.boxed-list > row:first-child {"
+   "  border-top-left-radius: 0;"
+   "  border-top-right-radius: 0;"
+   "}";
 
 static void
 load_app_css (void)

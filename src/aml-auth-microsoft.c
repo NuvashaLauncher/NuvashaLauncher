@@ -359,6 +359,7 @@ aml_auth_xbox_token_from_json (const char *json, gssize length,
   object = json_node_get_object (json_parser_get_root (parser));
   token = g_new0 (AmlXboxToken, 1);
   token->token = string_of (object, "Token");
+  message = string_of (object, "Message");
 
   /* The hash of the user is in the display claims, and it is half of what
      the services are given to identify the player. */
@@ -1333,7 +1334,8 @@ minecraft_answered (AuthRequest *self)
       return;
     }
 
-  token = aml_auth_minecraft_token_from_json (self->body, -1, self->now,
+  token = aml_auth_minecraft_token_from_json (self->body, -1,
+                                              g_get_real_time () / 1000000,
                                               &error);
 
   if (token == NULL)
@@ -1535,6 +1537,9 @@ aml_auth_refresh_async (const AmlAccount   *account,
     }
 
   self->refresh_token = g_strdup (account->refresh_token);
+  /* Microsoft does not always return a new refresh token on a refresh;
+     keep the one the account already holds when it does not. */
+  self->microsoft_refresh_token = g_strdup (account->refresh_token);
 
   ask_for_token (self);
 }

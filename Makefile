@@ -45,7 +45,7 @@ TESTDEPS    := $(addsuffix .d,$(TESTBINS))
 TESTDBGBINS := $(patsubst tests/%.c,build-debug/tests/%,$(TESTSRCS))
 TESTDBGDEPS := $(addsuffix .d,$(TESTDBGBINS))
 
-.PHONY: all debug test test-debug clean install
+.PHONY: all debug test test-debug clean install uninstall
 
 all: $(if $(SRCS),$(BIN))
 
@@ -97,6 +97,10 @@ install: $(if $(SRCS),$(BIN))
 	install -Dm755 $(BIN) $(DESTDIR)$(PREFIX)/bin/AML
 	install -Dm644 data/io.github.Flia7.AML.desktop \
 		$(DESTDIR)$(PREFIX)/share/applications/io.github.Flia7.AML.desktop
+
+uninstall:
+	rm -f $(DESTDIR)$(PREFIX)/bin/AML
+	rm -f $(DESTDIR)$(PREFIX)/share/applications/io.github.Flia7.AML.desktop
 
 clean:
 	rm -rf build build-debug

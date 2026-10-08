@@ -72,7 +72,7 @@ on_add_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   g_autofree char *name =
     g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->name_row)));
   g_autoptr (GError) error = NULL;
-  AmlAccount *account = NULL;
+  g_autoptr (AmlAccount) account = NULL;
 
   g_strstrip (name);
   account = aml_account_new_offline (name, &error);

@@ -375,6 +375,10 @@ save (AmlAccounts *self, GError **error)
       return FALSE;
     }
 
+  /* mkdir only applies the mode when it creates the directory: an
+     existing, looser one must not weaken the token file inside it. */
+  g_chmod (directory, 0700);
+
   /* Mode 0600 and written whole or not at all: the file holds the tokens
      of the accounts, so nobody but the user may read it, and a save that
      is interrupted may never leave half of one behind. */
@@ -547,15 +551,18 @@ aml_accounts_set_active (AmlAccounts *self, const char *id, GError **error)
   if (active_is (self, id))
     return TRUE;
 
-  g_free (self->active_id);
-  self->active_id = g_strdup (id);
+  {
+    g_autofree char *previous = g_steal_pointer (&self->active_id);
 
-  if (!save (self, error))
-    {
-      g_free (self->active_id);
-      self->active_id = NULL;
-      return FALSE;
-    }
+    self->active_id = g_strdup (id);
+
+    if (!save (self, error))
+      {
+        g_free (self->active_id);
+        self->active_id = g_steal_pointer (&previous);
+        return FALSE;
+      }
+  }
 
   emit_changed (self);
 
@@ -579,9 +586,6 @@ aml_accounts_add (AmlAccounts *self, const AmlAccount *account, GError **error)
                    "an account needs a name, an id and a uuid to be stored");
       return FALSE;
     }
-
-  if (!save (self, error))
-    return FALSE;
 
   known = aml_accounts_find (self, account->id);
 
@@ -637,6 +641,13 @@ aml_accounts_remove (AmlAccounts *self, const char *id, GError **error)
 {
   g_return_val_if_fail (AML_IS_ACCOUNTS (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (id == NULL)
+    {
+      g_set_error (error, AML_ACCOUNTS_ERROR, AML_ACCOUNTS_ERROR_UNKNOWN,
+                   "there is no account to remove");
+      return FALSE;
+    }
 
   for (guint i = 0; i < self->accounts->len; i++)
     {

@@ -412,8 +412,6 @@ aml_launch_redact (GPtrArray *argv)
           g_strcmp0 (argument, "--password") == 0)
         {
           g_string_append (out, argument);
-          g_string_append_c (out, ' ');
-          append_argument (out, "***");
           hide_next = TRUE;
           continue;
         }

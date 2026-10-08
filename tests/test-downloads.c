@@ -1,0 +1,150 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
+/* Tests for aml-downloads: the process wide list of downloads that are
+ * running, which the header of the main window shows.
+ *
+ * Nothing here needs a display and nothing touches the network: the
+ * manager is asked about the entries themselves. A test binary is a
+ * process of its own, so the singleton starts empty. */
+
+#include "aml-downloads.h"
+
+#include <glib.h>
+#include <stdlib.h>
+
+/* Every change the manager reports, counted through its signal. */
+static guint changed = 0;
+
+static void
+on_changed (AmlDownloads *downloads G_GNUC_UNUSED, gpointer user_data)
+{
+  guint *count = user_data;
+
+  (*count)++;
+}
+
+static void
+test_add_and_finish (void)
+{
+  AmlDownloads *downloads = aml_downloads_get_default ();
+  AmlDownload *one = NULL;
+  AmlDownload *two = NULL;
+
+  g_signal_connect (downloads, "changed", G_CALLBACK (on_changed), &changed);
+
+  g_assert_cmpuint (aml_downloads_count (), ==, 0);
+  changed = 0;
+
+  one = aml_downloads_add (AML_DOWNLOAD_MODPACK, "A pack");
+  g_assert_nonnull (one);
+  g_assert_cmpuint (aml_downloads_count (), ==, 1);
+  g_assert_cmpuint (changed, ==, 1);
+  g_assert_cmpstr (aml_download_get_title (one), ==, "A pack");
+  g_assert_cmpint (aml_download_get_kind (one), ==, AML_DOWNLOAD_MODPACK);
+  g_assert_nonnull (aml_download_get_cancellable (one));
+
+  two = aml_downloads_add (AML_DOWNLOAD_MOD, "A mod");
+  g_assert_cmpuint (aml_downloads_count (), ==, 2);
+
+  aml_download_finish (one);
+  g_assert_cmpuint (aml_downloads_count (), ==, 1);
+
+  aml_download_finish (two);
+  g_assert_cmpuint (aml_downloads_count (), ==, 0);
+
+  g_print ("ok - an entry is added, counted and finished\n");
+}
+
+static void
+test_progress_and_detail (void)
+{
+  AmlDownload *download = aml_downloads_add (AML_DOWNLOAD_SHADER, "Shaders");
+  guint changes = 0;
+
+  changed = 0;
+
+  g_assert_cmpuint ((guint) aml_download_get_done (download), ==, 0);
+  g_assert_cmpuint ((guint) aml_download_get_total (download), ==, 0);
+  g_assert_cmpint (aml_download_get_unit (download), ==,
+                   AML_DOWNLOAD_UNIT_COUNT);
+  g_assert_null (aml_download_get_detail (download));
+
+  aml_download_set_detail (download, "0 of 4 files");
+  g_assert_cmpstr (aml_download_get_detail (download), ==, "0 of 4 files");
+
+  aml_download_set_progress (download, 2, 4);
+  g_assert_cmpuint ((guint) aml_download_get_done (download), ==, 2);
+  g_assert_cmpuint ((guint) aml_download_get_total (download), ==, 4);
+  g_assert_cmpint (aml_download_get_unit (download), ==,
+                   AML_DOWNLOAD_UNIT_COUNT);
+
+  /* Setting the same values again changes nothing and says nothing. */
+  changes = changed;
+  aml_download_set_progress (download, 2, 4);
+  aml_download_set_detail (download, "0 of 4 files");
+  g_assert_cmpuint (changed, ==, changes);
+
+  /* A single transfer is counted in bytes and says so. */
+  aml_download_set_bytes (download, 300, 500);
+  g_assert_cmpint (aml_download_get_unit (download), ==,
+                   AML_DOWNLOAD_UNIT_BYTES);
+  g_assert_cmpuint ((guint) aml_download_get_done (download), ==, 300);
+  g_assert_cmpuint ((guint) aml_download_get_total (download), ==, 500);
+  g_assert_cmpuint (changed, >, changes);
+
+  aml_download_finish (download);
+  g_print ("ok - the detail and the progress are kept and only change once\n");
+}
+
+static void
+test_cancel (void)
+{
+  AmlDownload *download = aml_downloads_add (AML_DOWNLOAD_RESOURCE_PACK, "Pack");
+  GCancellable *cancellable = aml_download_get_cancellable (download);
+
+  g_assert_false (g_cancellable_is_cancelled (cancellable));
+
+  aml_download_cancel (download);
+  g_assert_true (g_cancellable_is_cancelled (cancellable));
+
+  aml_download_finish (download);
+  g_print ("ok - cancelling the entry cancels its cancellable\n");
+}
+
+static void
+test_all_lists_every_entry (void)
+{
+  GPtrArray *all;
+  AmlDownload *one = aml_downloads_add (AML_DOWNLOAD_UPDATE, "One");
+  AmlDownload *two = aml_downloads_add (AML_DOWNLOAD_UPDATE, "Two");
+
+  all = aml_downloads_get_all ();
+  g_assert_cmpuint (all->len, ==, 2);
+  g_assert_true (g_ptr_array_index (all, 0) == one);
+  g_assert_true (g_ptr_array_index (all, 1) == two);
+
+  aml_download_finish (one);
+  aml_download_finish (two);
+  g_assert_cmpuint (aml_downloads_count (), ==, 0);
+
+  g_print ("ok - the list holds every running download in order\n");
+}
+
+int
+main (void)
+{
+  g_print ("# Download tests\n");
+
+  test_add_and_finish ();
+  test_progress_and_detail ();
+  test_cancel ();
+  test_all_lists_every_entry ();
+
+  /* The singleton holds the one reference it was created with; giving it
+     back keeps the sanitizer run from calling the manager a leak. */
+  g_object_unref (aml_downloads_get_default ());
+
+  return EXIT_SUCCESS;
+}

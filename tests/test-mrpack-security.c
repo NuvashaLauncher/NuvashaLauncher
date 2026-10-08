@@ -585,11 +585,18 @@ test_archive_size_bomb_is_refused (void)
   g_autofree char *index_json = pack_index ("Bomb");
   g_autofree char *zip_path = g_build_filename (dir, "pack.mrpack", NULL);
 
+  /* The real cap is four gigabytes: too much to build here, so the cap
+     is lowered to what the archive below crosses. What is checked is
+     that an archive past whatever the cap is is refused, not the size of
+     the cap itself. */
+  aml_modpack_set_content_limit ((guint64) 128 * 1024 * 1024);
+
   /* One entry that announces more content than one pack carries. */
   zip_write_size_bomb (zip_path, index_json, 129);
   expect_zip_refused ("an archive that announces too much content", zip_path,
                       AML_MODPACK_ERROR_BOMB);
 
+  aml_modpack_set_content_limit (AML_MODPACK_MAX_CONTENT_SIZE);
   remove_recursive (dir);
   g_print ("ok - an archive of too much content is refused\n");
 }

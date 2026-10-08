@@ -10,6 +10,7 @@
 #include "aml-main-window.h"
 #include "aml-create-instance-dialog.h"
 #include "aml-download-modpack-dialog.h"
+#include "aml-downloads.h"
 #include "aml-instance-page.h"
 #include "aml-java-row.h"
 #include "aml-java.h"
@@ -49,6 +50,14 @@ struct _AmlMainWindow
   /* What a launch ended with, which is worth reading after it happened:
      a toast is gone in seconds, a banner stays until it is dismissed. */
   GtkWidget *banner;
+
+  /* What is downloading right now, shown next to the "+" menu: a spinner
+     while anything is on its way, and a dropdown listing each entry. The
+     rows are keyed by the AmlDownload they show. */
+  GtkWidget *downloads_button;  /* a GtkMenuButton around the spinner */
+  GtkWidget *downloads_spinner;
+  GtkWidget *downloads_list;    /* the box inside the dropdown */
+  GHashTable *download_rows;    /* AmlDownload* -> DownloadRow* */
 };
 
 G_DEFINE_FINAL_TYPE (AmlMainWindow, aml_main_window, ADW_TYPE_APPLICATION_WINDOW)
@@ -382,7 +391,7 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   gtk_widget_set_valign (custom_button, GTK_ALIGN_CENTER);
   g_signal_connect (custom_button, "clicked",
                     G_CALLBACK (on_settings_custom_clicked),
-                    settings_java_ref (ctx));
+                    ctx);
   adw_action_row_add_suffix (ADW_ACTION_ROW (custom_row), custom_button);
   adw_action_row_set_activatable_widget (ADW_ACTION_ROW (custom_row),
                                          custom_button);
@@ -972,10 +981,12 @@ create_instance_row (gpointer item, gpointer user_data)
   adw_action_row_set_subtitle (ADW_ACTION_ROW (row), subtitle);
 
   gtk_image_set_pixel_size (GTK_IMAGE (icon), 48);
+  gtk_widget_set_size_request (icon, 48, 48);
   gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
   adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
 
   gtk_image_set_pixel_size (GTK_IMAGE (play_icon), 16);
+  gtk_widget_set_size_request (play_icon, 16, 16);
   gtk_box_append (GTK_BOX (play_box), play_icon);
   gtk_box_append (GTK_BOX (play_box), play_label);
   gtk_button_set_child (GTK_BUTTON (play), play_box);
@@ -1092,6 +1103,197 @@ on_instances_changed (AmlMainWindow *self,
   close_dialogs_of_removed_instances (self);
 }
 
+/* ---------------------------------------------------------- *
+ * What is downloading now
+ * ---------------------------------------------------------- */
+
+/* One dropdown entry: the box GTK owns plus the widgets that change as
+ * the download does. The box is a child of the downloads list, so it is
+ * destroyed with it; only the struct is ours. */
+typedef struct {
+  GtkWidget *box;
+  GtkWidget *phase;  /* what it is doing, on the left */
+  GtkWidget *count;  /* how far it is, on the right */
+  GtkWidget *bar;
+} DownloadRow;
+
+static void
+download_row_free (gpointer data)
+{
+  g_free (data);
+}
+
+static void
+on_download_cancel (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  aml_download_cancel (AML_DOWNLOAD (user_data));
+}
+
+/* What is on the right of the phase line: "312.0/500.0 MB" for a transfer
+ * whose length the server gave, "12 of 48 files" for an install. */
+static char *
+download_count_text (AmlDownload *download)
+{
+  guint64 total = aml_download_get_total (download);
+  guint64 done = aml_download_get_done (download);
+
+  if (total == 0)
+    return g_strdup ("");
+
+  if (aml_download_get_unit (download) == AML_DOWNLOAD_UNIT_BYTES)
+    {
+      gboolean gigabytes = total >= (G_GUINT64_CONSTANT (1) << 30);
+      double divisor = gigabytes ? 1024.0 * 1024.0 * 1024.0
+                                 : 1024.0 * 1024.0;
+
+      return g_strdup_printf ("%.1f/%.1f %s", (double) done / divisor,
+                              (double) total / divisor,
+                              gigabytes ? "GB" : "MB");
+    }
+
+  return g_strdup_printf ("%" G_GUINT64_FORMAT "/%" G_GUINT64_FORMAT, done,
+                          total);
+}
+
+static void
+refresh_downloads (AmlMainWindow *self)
+{
+  GPtrArray *jobs = aml_downloads_get_all ();
+  GHashTableIter iter;
+  gpointer key;
+  gpointer value;
+
+  if (self->downloads_list == NULL)
+    return;
+
+  /* The rows of the downloads that are over. */
+  g_hash_table_iter_init (&iter, self->download_rows);
+
+  while (g_hash_table_iter_next (&iter, &key, &value))
+    {
+      DownloadRow *row = value;
+      gboolean present = FALSE;
+
+      for (guint i = 0; i < jobs->len; i++)
+        if (g_ptr_array_index (jobs, i) == key)
+          present = TRUE;
+
+      if (!present)
+        {
+          gtk_box_remove (GTK_BOX (self->downloads_list), row->box);
+          g_hash_table_iter_remove (&iter);
+        }
+    }
+
+  for (guint i = 0; i < jobs->len; i++)
+    {
+      AmlDownload *download = g_ptr_array_index (jobs, i);
+      DownloadRow *row = g_hash_table_lookup (self->download_rows, download);
+      const char *phase = aml_download_get_detail (download);
+      g_autofree char *count = download_count_text (download);
+      guint64 done = aml_download_get_done (download);
+      guint64 total = aml_download_get_total (download);
+
+      if (row == NULL)
+        {
+          GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
+          GtkWidget *title = gtk_label_new (aml_download_get_title (download));
+          GtkWidget *sub = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+          GtkWidget *line_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+          GtkWidget *cancel = gtk_button_new_from_icon_name (
+            "window-close-symbolic");
+
+          gtk_widget_set_halign (title, GTK_ALIGN_START);
+          gtk_widget_add_css_class (title, "heading");
+          gtk_widget_set_hexpand (title, TRUE);
+          gtk_label_set_ellipsize (GTK_LABEL (title), PANGO_ELLIPSIZE_END);
+          gtk_label_set_xalign (GTK_LABEL (title), 0.0f);
+
+          row = g_new0 (DownloadRow, 1);
+          row->box = box;
+          row->phase = gtk_label_new (NULL);
+          row->count = gtk_label_new (NULL);
+          row->bar = gtk_progress_bar_new ();
+
+          /* The phase ("Downloading compressed modpack") on the left and
+             the amount ("312.0/500.0 MB") on the right, under the title. */
+          gtk_widget_set_halign (row->phase, GTK_ALIGN_START);
+          gtk_widget_set_hexpand (row->phase, TRUE);
+          gtk_label_set_xalign (GTK_LABEL (row->phase), 0.0f);
+          gtk_widget_add_css_class (row->phase, "dim-label");
+
+          gtk_widget_set_halign (row->count, GTK_ALIGN_END);
+          gtk_widget_set_valign (row->count, GTK_ALIGN_CENTER);
+          gtk_widget_add_css_class (row->count, "dim-label");
+          gtk_label_set_xalign (GTK_LABEL (row->count), 1.0f);
+
+          gtk_widget_set_margin_start (box, 12);
+          gtk_widget_set_margin_end (box, 12);
+          gtk_widget_set_margin_top (box, 8);
+          gtk_widget_set_margin_bottom (box, 8);
+          gtk_widget_set_size_request (box, 360, -1);
+
+          /* The bar takes the room and the × sits right of it. */
+          gtk_widget_set_hexpand (row->bar, TRUE);
+          gtk_widget_set_valign (row->bar, GTK_ALIGN_CENTER);
+          gtk_widget_add_css_class (cancel, "flat");
+          gtk_widget_set_valign (cancel, GTK_ALIGN_CENTER);
+          gtk_widget_set_tooltip_text (cancel, "Cancel");
+          gtk_accessible_update_property (GTK_ACCESSIBLE (cancel),
+                                          GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                          "Cancel", -1);
+
+          g_signal_connect (cancel, "clicked", G_CALLBACK (on_download_cancel),
+                            download);
+
+          gtk_box_append (GTK_BOX (sub), row->phase);
+          gtk_box_append (GTK_BOX (sub), row->count);
+          gtk_box_append (GTK_BOX (line_box), row->bar);
+          gtk_box_append (GTK_BOX (line_box), cancel);
+
+          gtk_box_append (GTK_BOX (box), title);
+          gtk_box_append (GTK_BOX (box), sub);
+          gtk_box_append (GTK_BOX (box), line_box);
+          gtk_box_append (GTK_BOX (self->downloads_list), box);
+
+          g_hash_table_insert (self->download_rows, download, row);
+        }
+
+      gtk_label_set_text (GTK_LABEL (row->phase),
+                          phase != NULL ? phase : "");
+      gtk_label_set_text (GTK_LABEL (row->count), count);
+
+      if (total > 0)
+        gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (row->bar),
+                                       (double) done / (double) total);
+      else
+        gtk_progress_bar_pulse (GTK_PROGRESS_BAR (row->bar));
+    }
+
+  if (jobs->len > 0)
+    {
+      gtk_widget_set_visible (self->downloads_button, TRUE);
+    }
+  else
+    {
+      GtkPopover *popover = gtk_menu_button_get_popover (
+        GTK_MENU_BUTTON (self->downloads_button));
+
+      /* The last download is over: a dropdown with nothing left in it
+         should not stay open over the window. */
+      if (popover != NULL)
+        gtk_popover_popdown (popover);
+
+      gtk_widget_set_visible (self->downloads_button, FALSE);
+    }
+}
+
+static void
+on_downloads_changed (AmlDownloads *downloads G_GNUC_UNUSED, gpointer user_data)
+{
+  refresh_downloads (user_data);
+}
+
 static void
 aml_main_window_init (AmlMainWindow *self)
 {
@@ -1105,6 +1307,11 @@ aml_main_window_init (AmlMainWindow *self)
   GtkWidget *empty_page = adw_status_page_new ();
   GtkWidget *toolbar = adw_toolbar_view_new ();
   GtkWidget *add_popover = NULL;
+
+  /* The default raised top-bar layer paints a separate strip above the
+     header bar. Keep the launcher header as one normal Adwaita surface. */
+  adw_toolbar_view_set_top_bar_style (ADW_TOOLBAR_VIEW (toolbar),
+                                      ADW_TOOLBAR_FLAT);
 
   /* The settings and the accounts are the window's own: every launcher of
      an instance is handed the same ones, so the whole window agrees on
@@ -1127,6 +1334,48 @@ aml_main_window_init (AmlMainWindow *self)
   if (add_popover != NULL)
     set_menu_item_tooltip (add_popover, "Download Modpack",
                            "Search Modrinth and install a modpack");
+
+  /* Beside the "+": a spinner that appears while anything is downloading
+     and opens a dropdown of what is. It is hidden when nothing is. */
+  self->downloads_spinner = adw_spinner_new ();
+  self->downloads_button = gtk_menu_button_new ();
+  self->downloads_list = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  self->download_rows = g_hash_table_new_full (g_direct_hash, g_direct_equal,
+                                               NULL, download_row_free);
+
+  {
+    GtkWidget *popover = gtk_popover_new ();
+    GtkWidget *scroller = gtk_scrolled_window_new ();
+
+    gtk_menu_button_set_child (GTK_MENU_BUTTON (self->downloads_button),
+                               self->downloads_spinner);
+    gtk_widget_add_css_class (self->downloads_button, "flat");
+    gtk_menu_button_set_always_show_arrow (
+      GTK_MENU_BUTTON (self->downloads_button), FALSE);
+    gtk_widget_set_tooltip_text (self->downloads_button, "Downloads");
+    gtk_accessible_update_property (GTK_ACCESSIBLE (self->downloads_button),
+                                    GTK_ACCESSIBLE_PROPERTY_LABEL, "Downloads",
+                                    -1);
+    gtk_widget_set_visible (self->downloads_button, FALSE);
+
+    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
+                                    GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+    gtk_scrolled_window_set_propagate_natural_height (
+      GTK_SCROLLED_WINDOW (scroller), TRUE);
+    gtk_scrolled_window_set_max_content_height (
+      GTK_SCROLLED_WINDOW (scroller), 360);
+    gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
+                                   self->downloads_list);
+    gtk_popover_set_child (GTK_POPOVER (popover), scroller);
+    gtk_popover_set_has_arrow (GTK_POPOVER (popover), FALSE);
+    gtk_menu_button_set_popover (GTK_MENU_BUTTON (self->downloads_button),
+                                 popover);
+  }
+
+  adw_header_bar_pack_start (ADW_HEADER_BAR (header), self->downloads_button);
+
+  g_signal_connect_object (aml_downloads_get_default (), "changed",
+                           G_CALLBACK (on_downloads_changed), self, 0);
 
   /* End of the header: the accounts, then the application menu. The
    * button shows the avatar of the active account, and what is behind it
@@ -1192,6 +1441,11 @@ aml_main_window_init (AmlMainWindow *self)
 
   gtk_window_set_title (GTK_WINDOW (self), "AML");
   gtk_window_set_default_size (GTK_WINDOW (self), 960, 640);
+
+  /* A download may already be running (a window opened while one does),
+     so the header starts agreeing with the manager rather than assuming
+     nothing is on its way. */
+  refresh_downloads (self);
 }
 
 AmlMainWindow *
@@ -1286,6 +1540,7 @@ aml_main_window_dispose (GObject *object)
   g_clear_object (&self->settings);
   g_clear_object (&self->accounts);
   g_clear_object (&self->users_popover);
+  g_clear_pointer (&self->download_rows, g_hash_table_unref);
 
   G_OBJECT_CLASS (aml_main_window_parent_class)->dispose (object);
 }
