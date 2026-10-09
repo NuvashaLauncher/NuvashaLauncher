@@ -988,6 +988,8 @@ read_zip_entry (const char *path, const char *entry, GError **error)
   struct archive *archive = NULL;
   struct archive_entry *header = NULL;
   GByteArray *bytes = NULL;
+  g_autofree char *archive_message = NULL;
+  int status = ARCHIVE_EOF;
 
   archive = archive_read_new ();
 
@@ -1001,7 +1003,7 @@ read_zip_entry (const char *path, const char *entry, GError **error)
       return NULL;
     }
 
-  while (archive_read_next_header (archive, &header) == ARCHIVE_OK)
+  while ((status = archive_read_next_header (archive, &header)) == ARCHIVE_OK)
     {
       const char *name = NULL;
 
@@ -1043,12 +1045,22 @@ read_zip_entry (const char *path, const char *entry, GError **error)
       break;
     }
 
+  if (status != ARCHIVE_EOF)
+    archive_message = g_strdup (archive_error_string (archive));
+
   archive_read_close (archive);
   archive_read_free (archive);
 
   if (bytes == NULL && error != NULL && *error == NULL)
-    g_set_error (error, AML_LOADERS_ERROR, AML_LOADERS_ERROR_INSTALLER,
-                 "the installer at \"%s\" has no \"%s\"", path, entry);
+    {
+      if (status != ARCHIVE_EOF)
+        g_set_error (error, AML_LOADERS_ERROR, AML_LOADERS_ERROR_INSTALLER,
+                     "the installer at \"%s\" cannot be read: %s", path,
+                     archive_message != NULL ? archive_message : "unknown error");
+      else
+        g_set_error (error, AML_LOADERS_ERROR, AML_LOADERS_ERROR_INSTALLER,
+                     "the installer at \"%s\" has no \"%s\"", path, entry);
+    }
 
   if (bytes == NULL)
     return NULL;
@@ -1109,6 +1121,7 @@ write_jar_manifest_attribute (const char *path, const char *name,
   g_autofree char *temporary = NULL;
   gboolean written = FALSE;
   gboolean ok = TRUE;
+  int status = ARCHIVE_EOF;
 
   in = archive_read_new ();
 
@@ -1137,10 +1150,11 @@ write_jar_manifest_attribute (const char *path, const char *name,
                    path, archive_error_string (out));
       archive_read_free (in);
       archive_write_free (out);
+      g_unlink (temporary);
       return FALSE;
     }
 
-  while (archive_read_next_header (in, &header) == ARCHIVE_OK)
+  while ((status = archive_read_next_header (in, &header)) == ARCHIVE_OK)
     {
       struct archive_entry *copy = archive_entry_clone (header);
       g_autoptr (GBytes) bytes = NULL;
@@ -1151,6 +1165,13 @@ write_jar_manifest_attribute (const char *path, const char *name,
       int status;
 
       if (archive_write_header (out, copy) != ARCHIVE_OK)
+        {
+          archive_entry_free (copy);
+          ok = FALSE;
+          break;
+        }
+
+      if (archive_entry_pathname (header) == NULL)
         {
           archive_entry_free (copy);
           ok = FALSE;
@@ -1186,7 +1207,10 @@ write_jar_manifest_attribute (const char *path, const char *name,
               }
 
               archive_entry_set_size (copy, strlen (text));
-              written = archive_write_data (out, text, strlen (text)) > 0;
+              written = archive_write_data (out, text, strlen (text)) ==
+                        (la_ssize_t) strlen (text);
+              if (!written)
+                ok = FALSE;
             }
         }
       else
@@ -1198,7 +1222,7 @@ write_jar_manifest_attribute (const char *path, const char *name,
               if (status != ARCHIVE_OK)
                 break;
 
-              if (archive_write_data (out, block, size) < 0)
+              if (archive_write_data (out, block, size) != (la_ssize_t) size)
                 {
                   ok = FALSE;
                   break;
@@ -1211,6 +1235,9 @@ write_jar_manifest_attribute (const char *path, const char *name,
       if (!ok)
         break;
     }
+
+  if (status != ARCHIVE_EOF)
+    ok = FALSE;
 
   archive_read_close (in);
   archive_read_free (in);
