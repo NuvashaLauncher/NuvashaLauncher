@@ -139,6 +139,7 @@ static void run_search (AmlDownloadModpackDialog *self, gboolean append);
 static void set_busy (AmlDownloadModpackDialog *self, gboolean busy);
 static void on_search_done (GObject *, GAsyncResult *, gpointer);
 static void build_browse_page (AmlDownloadModpackDialog *self);
+static void build_import_page (AmlDownloadModpackDialog *self);
 static GtkWidget * build_optional_page (AmlDownloadModpackDialog *self,
                                         GPtrArray *optional_files);
 static GtkWidget * build_error_page (AmlDownloadModpackDialog *self,
@@ -288,7 +289,6 @@ aml_download_modpack_dialog_init (AmlDownloadModpackDialog *self)
     ADW_NAVIGATION_VIEW (self->nav), FALSE);
   adw_dialog_set_child (ADW_DIALOG (self), self->nav);
 
-  build_browse_page (self);
 }
 
 AmlDownloadModpackDialog *
@@ -298,8 +298,27 @@ aml_download_modpack_dialog_new (AmlInstanceManager *manager)
     g_object_new (AML_TYPE_DOWNLOAD_MODPACK_DIALOG, NULL);
 
   self->manager = g_object_ref (manager);
+  build_browse_page (self);
 
   return self;
+}
+
+static void
+build_import_page (AmlDownloadModpackDialog *self)
+{
+  GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+  GtkWidget *spinner = gtk_spinner_new ();
+  GtkWidget *label = gtk_label_new (_("Importing modpack…"));
+  GtkWidget *page = GTK_WIDGET (
+    adw_navigation_page_new (box, _("Import Modpack")));
+
+  gtk_widget_set_halign (box, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (box, GTK_ALIGN_CENTER);
+  gtk_spinner_start (GTK_SPINNER (spinner));
+  gtk_box_append (GTK_BOX (box), spinner);
+  gtk_box_append (GTK_BOX (box), label);
+  adw_navigation_view_add (ADW_NAVIGATION_VIEW (self->nav),
+                           ADW_NAVIGATION_PAGE (page));
 }
 
 static gboolean
@@ -324,6 +343,7 @@ aml_download_modpack_dialog_new_for_file (AmlInstanceManager *manager,
 
   self->pack_path = g_strdup (path);
   self->imported = TRUE;
+  build_import_page (self);
   g_idle_add (start_import_idle, g_object_ref (self));
   return self;
 }

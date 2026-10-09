@@ -375,3 +375,6 @@ msgstr "The export location is not a local file"
 
 msgid "Export Modpack"
 msgstr "导出整合包"
+
+msgid "Importing modpack…"
+msgstr "Importing modpack…"
