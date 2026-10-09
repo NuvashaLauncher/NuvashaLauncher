@@ -891,7 +891,7 @@ aml_modpack_new_from_zip (const char *zip_path, GError **error)
   /* AML stores its local instance icon as an ordinary override file. This
    * does not add fields to modrinth.index.json or change the .mrpack schema;
    * other launchers simply install the harmless extra override. */
-  pack->icon = g_strdup ("overrides/.aml-icon.png");
+  pack->icon = g_strdup ("overrides/icon.png");
 
   return g_steal_pointer (&pack);
 
@@ -2086,7 +2086,7 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
         (la_ssize_t) manifest_length ||
       !export_directory (archive, canonical_root, "", &error) ||
       (run->icon_path != NULL &&
-       !export_file (archive, run->icon_path, "overrides/.aml-icon.png",
+      !export_file (archive, run->icon_path, "overrides/icon.png",
                      &error)) ||
       g_cancellable_is_cancelled (cancellable) ||
       archive_write_close (archive) != ARCHIVE_OK)
