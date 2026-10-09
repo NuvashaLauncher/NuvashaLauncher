@@ -472,7 +472,6 @@ aml_modpack_new_from_json (const char *json, gssize length, GError **error)
   pack->version_id = object_string (root, "versionId");
   pack->name = object_string (root, "name");
   pack->summary = object_string (root, "summary");
-  pack->icon = object_string (root, "icon");
   pack->files = g_ptr_array_new_with_free_func ((GDestroyNotify)
     aml_modpack_file_free);
   pack->dependencies = g_ptr_array_new_with_free_func ((GDestroyNotify)
@@ -485,13 +484,6 @@ aml_modpack_new_from_json (const char *json, gssize length, GError **error)
       g_set_error_literal (error, AML_MODPACK_ERROR,
                            AML_MODPACK_ERROR_FORMAT,
                            "the index has no version id or name");
-      return NULL;
-    }
-
-  if (pack->icon != NULL && !aml_modpack_path_is_safe (pack->icon))
-    {
-      g_set_error_literal (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_PATH,
-                           "the pack icon path is not safe");
       return NULL;
     }
 
@@ -896,6 +888,10 @@ aml_modpack_new_from_zip (const char *zip_path, GError **error)
   }
 
   pack->archive_path = g_strdup (zip_path);
+  /* AML stores its local instance icon as an ordinary override file. This
+   * does not add fields to modrinth.index.json or change the .mrpack schema;
+   * other launchers simply install the harmless extra override. */
+  pack->icon = g_strdup ("overrides/.aml-icon.png");
 
   return g_steal_pointer (&pack);
 
@@ -2148,12 +2144,6 @@ export_manifest (AmlInstance *instance, GError **error)
   json_builder_add_string_value (builder, name != NULL ? name : "AML Instance");
   json_builder_set_member_name (builder, "versionId");
   json_builder_add_string_value (builder, "aml-export");
-  if (icon != NULL && *icon != '\0' &&
-      g_file_test (icon, G_FILE_TEST_IS_REGULAR))
-    {
-      json_builder_set_member_name (builder, "icon");
-      json_builder_add_string_value (builder, "overrides/.aml-icon.png");
-    }
   json_builder_set_member_name (builder, "dependencies");
   json_builder_begin_object (builder);
   json_builder_set_member_name (builder, "minecraft");
