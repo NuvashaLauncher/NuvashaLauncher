@@ -1194,7 +1194,7 @@ create_settings_page (AmlInstancePage *self)
               "folder-symbolic", G_CALLBACK (on_open_folder_clicked),
               self);
   button_row (ADW_PREFERENCES_GROUP (actions), _("Export Modpack"),
-              _("Save this instance as a Modrinth modpack"),
+              NULL,
               "document-save-symbolic", G_CALLBACK (on_export_clicked), self);
   delete_row = button_row (ADW_PREFERENCES_GROUP (actions), _("Delete Instance"),
                            NULL, "user-trash-symbolic",
