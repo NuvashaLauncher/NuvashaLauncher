@@ -898,10 +898,10 @@ aml_modpack_new_from_zip (const char *zip_path, GError **error)
   /* AML stores its local instance icon as an ordinary override file. This
    * does not add fields to modrinth.index.json or change the .mrpack schema;
    * other launchers simply install the harmless extra override. */
-  if (has_root_icon)
+  /* Both root icon.png and overrides/icon.png land at icon.png after the
+   * override prefix is stripped during installation. */
+  if (has_root_icon || has_override_icon)
     pack->icon = g_strdup ("icon.png");
-  else if (has_override_icon)
-    pack->icon = g_strdup ("overrides/icon.png");
 
   return g_steal_pointer (&pack);
 
