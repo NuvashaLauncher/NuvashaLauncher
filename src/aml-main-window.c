@@ -110,40 +110,15 @@ on_show_snapshots_toggled (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
   adw_action_row_set_subtitle (ADW_ACTION_ROW (row), error->message);
 }
 
-/* Default-Java picker state shared by the two async hops below. */
-typedef struct
-{
-  guint refs;
-  AmlMainWindow *owner;
-  AmlJavaRow *row;
-} SettingsJava;
-
-static void
-settings_java_unref (gpointer data)
-{
-  SettingsJava *ctx = data;
-
-  if (--ctx->refs > 0)
-    return;
-
-  g_clear_object (&ctx->owner);
-  g_clear_object (&ctx->row);
-  g_free (ctx);
-}
-
-static SettingsJava *
-settings_java_ref (SettingsJava *ctx)
-{
-  ctx->refs++;
-  return ctx;
-}
-
+/* Picks the Java the settings file names and writes it. The row itself
+ * owns the ask for another runtime, so nothing outside it is needed
+ * here: a change to the selection is the whole of the round trip. */
 static void
 on_settings_java_selected (GObject *object,
                            GParamSpec *pspec G_GNUC_UNUSED,
                            gpointer user_data)
 {
-  SettingsJava *ctx = user_data;
+  AmlMainWindow *self = user_data;
   AmlJavaRow *row = AML_JAVA_ROW (object);
   const char *path = aml_java_row_get_selected_path (row);
   g_autoptr (GError) error = NULL;
@@ -151,15 +126,15 @@ on_settings_java_selected (GObject *object,
   const char *next;
 
   if (path == NULL)
-    return; /* still loading or failed: nothing valid to store */
+    return; /* still loading, failed, or the entry that asks for one */
 
-  current = aml_settings_get_default_java_path (ctx->owner->settings);
+  current = aml_settings_get_default_java_path (self->settings);
   next = (path[0] != '\0') ? path : NULL;
 
   if (g_strcmp0 (current, next) == 0)
     return;
 
-  if (aml_settings_set_default_java_path (ctx->owner->settings, next, &error))
+  if (aml_settings_set_default_java_path (self->settings, next, &error))
     {
       adw_action_row_set_subtitle (ADW_ACTION_ROW (row), NULL);
       return;
@@ -167,89 +142,6 @@ on_settings_java_selected (GObject *object,
 
   aml_java_row_select_path (row, current);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (row), error->message);
-}
-
-static void
-on_settings_custom_probed (GObject *source G_GNUC_UNUSED,
-                           GAsyncResult *result,
-                           gpointer user_data)
-{
-  SettingsJava *ctx = user_data;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (AmlJava) probe = aml_java_probe_finish (result, &error);
-
-  if (probe == NULL)
-    {
-      adw_action_row_set_subtitle (
-        ADW_ACTION_ROW (ctx->row),
-        error != NULL ? error->message
-                      : "the chosen file does not report a version");
-    }
-  else if (aml_settings_set_default_java_path (ctx->owner->settings,
-                                               probe->executable, &error))
-    {
-      adw_action_row_set_subtitle (ADW_ACTION_ROW (ctx->row), NULL);
-      aml_java_row_set_custom (ctx->row, probe->executable,
-                               g_steal_pointer (&probe));
-      /* set_custom() fires notify::selected; the handler persists the
-       * same path and skips as it compares against the new one. */
-    }
-  else
-    {
-      adw_action_row_set_subtitle (ADW_ACTION_ROW (ctx->row),
-                                   error->message);
-    }
-
-  settings_java_unref (ctx);
-}
-
-static void
-on_settings_custom_chosen (GObject *dialog, GAsyncResult *result,
-                           gpointer user_data)
-{
-  SettingsJava *ctx = user_data;
-  g_autoptr (GError) error = NULL;
-  GFile *file =
-    gtk_file_dialog_open_finish (GTK_FILE_DIALOG (dialog), result, &error);
-
-  g_object_unref (dialog);
-
-  if (file == NULL)
-    {
-      if (error != NULL &&
-          !g_error_matches (error, GTK_DIALOG_ERROR,
-                            GTK_DIALOG_ERROR_DISMISSED) &&
-          !g_error_matches (error, GTK_DIALOG_ERROR,
-                            GTK_DIALOG_ERROR_CANCELLED))
-        {
-          adw_action_row_set_subtitle (ADW_ACTION_ROW (ctx->row),
-                                       error->message);
-        }
-
-      settings_java_unref (ctx);
-      return;
-    }
-
-  g_autofree char *path = g_file_get_path (file);
-
-  g_object_unref (file);
-
-  aml_java_probe_async (path, NULL, on_settings_custom_probed,
-                        settings_java_ref (ctx));
-  settings_java_unref (ctx);
-}
-
-static void
-on_settings_custom_clicked (GtkButton *button G_GNUC_UNUSED,
-                            gpointer user_data)
-{
-  SettingsJava *ctx = user_data;
-  GtkFileDialog *dialog = gtk_file_dialog_new ();
-
-  gtk_file_dialog_set_title (dialog, _("Choose Java executable"));
-  gtk_file_dialog_open (dialog, GTK_WINDOW (ctx->owner), NULL,
-                        on_settings_custom_chosen,
-                        settings_java_ref (ctx));
 }
 
 /* Written the moment the value changes. A spin row can produce a value
@@ -341,12 +233,9 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   GtkWidget *language_row = adw_combo_row_new ();
   GtkWidget *row = adw_switch_row_new ();
   GtkWidget *java_row = GTK_WIDGET (aml_java_row_new ());
-  GtkWidget *custom_row = adw_action_row_new ();
-  GtkWidget *custom_button = gtk_button_new_with_label (_("Choose…"));
   GtkWidget *limit_row = NULL;
   GtkWidget *unstable_row = adw_switch_row_new ();
   GtkWidget *crash_row = adw_switch_row_new ();
-  SettingsJava *ctx = g_new0 (SettingsJava, 1);
 
   /* Every one of these rows can show a path or an error message from
      GIO, which is plain text and may hold an "&". */
@@ -354,18 +243,10 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (unstable_row),
                                       FALSE);
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (crash_row), FALSE);
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (custom_row), FALSE);
-
-  ctx->refs = 1;
-  ctx->owner = g_object_ref (self);
-  ctx->row = AML_JAVA_ROW (java_row);
-  g_object_ref (ctx->row);
 
   adw_dialog_set_title (dialog, _("Settings"));
   adw_preferences_dialog_set_search_enabled (ADW_PREFERENCES_DIALOG (dialog),
                                              FALSE);
-  g_object_set_data_full (G_OBJECT (dialog), "settings-java", ctx,
-                          settings_java_unref);
 
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (versions_group),
                                     _("Versions"));
@@ -396,29 +277,20 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (java_group),
                                    _("Java"));
 
+  /* The row carries the whole choice: the runtimes the scan found, the
+     default, and a last entry that adds one it did not report. */
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (java_row),
-                                  _("Default Java"));
+                                  _("Java Runtime"));
 
   g_signal_connect (java_row, "notify::selected",
-                    G_CALLBACK (on_settings_java_selected), ctx);
+                    G_CALLBACK (on_settings_java_selected), self);
 
   aml_java_row_set_default_entry_label (AML_JAVA_ROW (java_row),
                                          _("Automatic (closest compatible)"));
   aml_java_row_load (AML_JAVA_ROW (java_row),
                      aml_settings_get_default_java_path (self->settings));
 
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (custom_row),
-                                  _("Custom Java…"));
-  gtk_widget_set_valign (custom_button, GTK_ALIGN_CENTER);
-  g_signal_connect (custom_button, "clicked",
-                    G_CALLBACK (on_settings_custom_clicked),
-                    ctx);
-  adw_action_row_add_suffix (ADW_ACTION_ROW (custom_row), custom_button);
-  adw_action_row_set_activatable_widget (ADW_ACTION_ROW (custom_row),
-                                         custom_button);
-
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (java_group), java_row);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (java_group), custom_row);
 
   /* Logs */
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (logs_group),

@@ -411,7 +411,7 @@ java_status_refresh (AmlInstancePage *self)
     self->required_java);
 
   if (detected->len == 0 && current == NULL)
-    message = "No Java installation was found on this system";
+    message = _("No Java installation was found on this system");
 
   if (message == NULL && self->required_java > 0)
     {
@@ -426,12 +426,12 @@ java_status_refresh (AmlInstancePage *self)
         }
 
       if (effective == NULL && (current != NULL || global != NULL))
-        message = "The configured Java was not detected; make sure it "
-                  "is still a usable java executable";
+        message = _("The configured Java was not detected; make sure it "
+                    "is still a usable java executable");
       else if (effective == NULL)
         {
           g_autofree char *description = g_strdup_printf (
-            "No detected Java satisfies the requirement of Java %d+",
+            _("No detected Java satisfies the requirement of Java %d+"),
             self->required_java);
 
           adw_action_row_set_subtitle (ADW_ACTION_ROW (row), description);
@@ -440,7 +440,7 @@ java_status_refresh (AmlInstancePage *self)
       else if (effective->major_version < self->required_java)
         {
           g_autofree char *description = g_strdup_printf (
-            "This game needs Java %d or newer, selected Java is %d",
+            _("This game needs Java %d or newer, selected Java is %d"),
             self->required_java, effective->major_version);
 
           adw_action_row_set_subtitle (ADW_ACTION_ROW (row), description);
@@ -461,8 +461,8 @@ java_status_refresh (AmlInstancePage *self)
                                      0);
 
       if (effective != NULL && effective->headless)
-        message = "Minecraft needs a non-headless Java: on Arch use the "
-                  "jre-openjdk package, not jre-openjdk-headless";
+        message = _("Minecraft needs a non-headless Java: on Arch use the "
+                    "jre-openjdk package, not jre-openjdk-headless");
     }
 
   adw_action_row_set_subtitle (ADW_ACTION_ROW (row), message);
@@ -550,77 +550,6 @@ on_java_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
     }
 
   java_status_refresh (self);
-}
-
-static void
-custom_java_probed (GObject *source G_GNUC_UNUSED,
-                    GAsyncResult *result,
-                    gpointer user_data)
-{
-  AmlInstancePage *self = user_data;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (AmlJava) probe = aml_java_probe_finish (result, &error);
-
-  if (probe == NULL)
-    {
-      show_toast (self, error != NULL
-                        ? error->message
-                        : "the chosen file does not report a Java version");
-      g_object_unref (self);
-      return;
-    }
-
-  /* The custom entry goes into the row; selecting it fires our
-   * notify::selected handler so the instance is updated from there. */
-  aml_java_row_set_custom (AML_JAVA_ROW (self->java_row), probe->executable,
-                           g_steal_pointer (&probe));
-  g_object_unref (self);
-}
-
-static void
-on_custom_java_chosen (GObject *dialog, GAsyncResult *result,
-                       gpointer user_data)
-{
-  AmlInstancePage *self = user_data;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (GFile) file =
-    gtk_file_dialog_open_finish (GTK_FILE_DIALOG (dialog), result, &error);
-
-  g_object_unref (dialog);
-
-  if (file == NULL)
-    {
-      if (error != NULL &&
-          !g_error_matches (error, GTK_DIALOG_ERROR,
-                            GTK_DIALOG_ERROR_DISMISSED) &&
-          !g_error_matches (error, GTK_DIALOG_ERROR,
-                            GTK_DIALOG_ERROR_CANCELLED))
-        show_toast (self, error->message);
-
-      g_object_unref (self);
-      return;
-    }
-
-  g_autofree char *path = g_file_get_path (file);
-
-  aml_java_probe_async (path, NULL, custom_java_probed,
-                        g_object_ref (self));
-  g_object_unref (self);
-}
-
-/* The "Add Java Runtime" row was pressed: ask for the executable, and
- * on_custom_java_chosen puts what comes back in the list. */
-static void
-on_add_java_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
-{
-  AmlInstancePage *self = user_data;
-  GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
-  GtkFileDialog *dialog = gtk_file_dialog_new ();
-
-  gtk_file_dialog_set_title (dialog, _("Choose Java executable"));
-  gtk_file_dialog_open (dialog,
-                        GTK_IS_WINDOW (root) ? GTK_WINDOW (root) : NULL,
-                        NULL, on_custom_java_chosen, g_object_ref (self));
 }
 
 /* ---------------------------------------------------------- *
@@ -1161,11 +1090,10 @@ create_settings_page (AmlInstancePage *self)
                              aml_loader_row_get_version_row (
                                self->loader_row));
 
-  /* Java: the installations detection found, then a row that adds one it
-     did not report. */
+  /* Java: the installations detection found. The row ends in an entry
+     that adds one it did not report, so that is where they are added
+     from. */
   GtkWidget *java_row = GTK_WIDGET (aml_java_row_new ());
-  GtkWidget *add_java_row = adw_action_row_new ();
-  GtkWidget *choose_java = gtk_button_new_with_label (_("Choose…"));
 
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (java), _("Java"));
 
@@ -1180,19 +1108,7 @@ create_settings_page (AmlInstancePage *self)
   aml_java_row_load (AML_JAVA_ROW (java_row), java_path);
   self->java_row = java_row;
 
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (add_java_row),
-                                      FALSE);
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (add_java_row),
-                                 _("Add Java Runtime"));
-  gtk_widget_set_valign (choose_java, GTK_ALIGN_CENTER);
-  g_signal_connect (choose_java, "clicked",
-                    G_CALLBACK (on_add_java_clicked), self);
-  adw_action_row_add_suffix (ADW_ACTION_ROW (add_java_row), choose_java);
-  adw_action_row_set_activatable_widget (ADW_ACTION_ROW (add_java_row),
-                                         choose_java);
-
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (java), java_row);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (java), add_java_row);
 
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (jvm_args_row),
                                  _("JVM Arguments"));
