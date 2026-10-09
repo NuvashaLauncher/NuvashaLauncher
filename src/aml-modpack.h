@@ -99,6 +99,7 @@ typedef struct
   char *version_id;
   char *name;
   char *summary;
+  char *icon;               /* relative path inside the installed pack */
   GPtrArray *files;        /* AmlModpackFile* */
   GPtrArray *dependencies; /* AmlModpackDependency* */
 

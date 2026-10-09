@@ -179,6 +179,7 @@ aml_modpack_free (AmlModpack *modpack)
   g_free (modpack->version_id);
   g_free (modpack->name);
   g_free (modpack->summary);
+  g_free (modpack->icon);
   g_free (modpack->archive_path);
   g_free (modpack->minecraft_version);
   g_free (modpack->loader_version);
@@ -471,6 +472,7 @@ aml_modpack_new_from_json (const char *json, gssize length, GError **error)
   pack->version_id = object_string (root, "versionId");
   pack->name = object_string (root, "name");
   pack->summary = object_string (root, "summary");
+  pack->icon = object_string (root, "icon");
   pack->files = g_ptr_array_new_with_free_func ((GDestroyNotify)
     aml_modpack_file_free);
   pack->dependencies = g_ptr_array_new_with_free_func ((GDestroyNotify)
@@ -483,6 +485,13 @@ aml_modpack_new_from_json (const char *json, gssize length, GError **error)
       g_set_error_literal (error, AML_MODPACK_ERROR,
                            AML_MODPACK_ERROR_FORMAT,
                            "the index has no version id or name");
+      return NULL;
+    }
+
+  if (pack->icon != NULL && !aml_modpack_path_is_safe (pack->icon))
+    {
+      g_set_error_literal (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_PATH,
+                           "the pack icon path is not safe");
       return NULL;
     }
 
@@ -1533,6 +1542,22 @@ install_register (InstallRun *run)
       return;
     }
 
+  if (pack->icon != NULL)
+    {
+      g_autofree char *icon = g_build_filename (run->target, pack->icon, NULL);
+
+      if (g_file_test (icon, G_FILE_TEST_IS_REGULAR))
+        {
+          g_object_set (instance, "icon", icon, NULL);
+          if (!aml_instance_manager_save (run->manager, &error))
+            {
+              remove_tree (run->target);
+              install_fail (run, g_steal_pointer (&error));
+              return;
+            }
+        }
+    }
+
   g_task_return_pointer (run->task, g_object_ref (instance),
                          g_object_unref);
   install_run_free (run);
@@ -1879,6 +1904,7 @@ typedef struct {
   char *instance_directory;
   char *archive_path;
   char *manifest;
+  char *icon_path;
 } ExportRun;
 
 static void
@@ -1887,6 +1913,7 @@ export_run_free (ExportRun *run)
   g_free (run->instance_directory);
   g_free (run->archive_path);
   g_free (run->manifest);
+  g_free (run->icon_path);
   g_free (run);
 }
 
@@ -2062,6 +2089,9 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
       archive_write_data (archive, run->manifest, manifest_length) !=
         (la_ssize_t) manifest_length ||
       !export_directory (archive, canonical_root, "", &error) ||
+      (run->icon_path != NULL &&
+       !export_file (archive, run->icon_path, "overrides/.aml-icon.png",
+                     &error)) ||
       g_cancellable_is_cancelled (cancellable) ||
       archive_write_close (archive) != ARCHIVE_OK)
     {
@@ -2090,6 +2120,7 @@ export_manifest (AmlInstance *instance, GError **error)
   g_autofree char *name = NULL;
   g_autofree char *version = NULL;
   g_autofree char *loader_version = NULL;
+  g_autofree char *icon = NULL;
   g_autoptr (JsonBuilder) builder = json_builder_new ();
   g_autoptr (JsonGenerator) generator = json_generator_new ();
   g_autoptr (JsonNode) root = NULL;
@@ -2098,7 +2129,8 @@ export_manifest (AmlInstance *instance, GError **error)
   gsize length = 0;
 
   g_object_get (instance, "name", &name, "minecraft_version", &version,
-                "loader", &loader, "loader_version", &loader_version, NULL);
+                "loader", &loader, "loader_version", &loader_version,
+                "icon", &icon, NULL);
 
   if (version == NULL || *version == '\0')
     {
@@ -2116,13 +2148,26 @@ export_manifest (AmlInstance *instance, GError **error)
   json_builder_add_string_value (builder, name != NULL ? name : "AML Instance");
   json_builder_set_member_name (builder, "versionId");
   json_builder_add_string_value (builder, "aml-export");
+  if (icon != NULL && *icon != '\0' &&
+      g_file_test (icon, G_FILE_TEST_IS_REGULAR))
+    {
+      json_builder_set_member_name (builder, "icon");
+      json_builder_add_string_value (builder, "overrides/.aml-icon.png");
+    }
   json_builder_set_member_name (builder, "dependencies");
   json_builder_begin_object (builder);
   json_builder_set_member_name (builder, "minecraft");
   json_builder_add_string_value (builder, version);
   if (loader != AML_LOADER_VANILLA && loader_version != NULL)
     {
-      json_builder_set_member_name (builder, aml_loader_to_string (loader));
+      const char *loader_name = aml_loader_to_string (loader);
+
+      if (loader == AML_LOADER_FABRIC)
+        loader_name = "fabric-loader";
+      else if (loader == AML_LOADER_QUILT)
+        loader_name = "quilt-loader";
+
+      json_builder_set_member_name (builder, loader_name);
       json_builder_add_string_value (builder, loader_version);
     }
   json_builder_end_object (builder);
@@ -2154,6 +2199,10 @@ aml_modpack_export_async (AmlInstance *instance, const char *path,
   g_object_get (instance, "directory", &directory, NULL);
   run->instance_directory = g_strdup (directory);
   run->archive_path = g_strdup (path);
+  g_object_get (instance, "icon", &run->icon_path, NULL);
+  if (run->icon_path != NULL &&
+      !g_file_test (run->icon_path, G_FILE_TEST_IS_REGULAR))
+    g_clear_pointer (&run->icon_path, g_free);
   run->manifest = export_manifest (instance, &error);
 
   if (run->instance_directory == NULL || run->manifest == NULL)
