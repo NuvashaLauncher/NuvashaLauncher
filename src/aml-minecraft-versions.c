@@ -1813,7 +1813,8 @@ load_request_free (LoadRequest *request)
 }
 
 static void
-manifest_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
+manifest_file_loaded (GObject *source, GAsyncResult *result,
+                      gpointer user_data)
 {
   FetchRequest *request = user_data;
   g_autoptr (GError) error = NULL;
@@ -1821,16 +1822,8 @@ manifest_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
   gsize length = 0;
   AmlVersionManifest *manifest;
 
-  (void) source;
-
-  if (!aml_download_file_finish (result, &error))
-    {
-      g_task_return_error (request->task, g_steal_pointer (&error));
-      fetch_request_free (request);
-      return;
-    }
-
-  if (!g_file_get_contents (request->path, &contents, &length, &error))
+  if (!g_file_load_contents_finish (G_FILE (source), result, &contents,
+                                    &length, NULL, &error))
     {
       g_task_return_new_error (request->task, AML_MC_ERROR, AML_MC_ERROR_IO,
                                "the downloaded manifest cannot be read: %s",
@@ -1851,6 +1844,26 @@ manifest_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
 
   g_task_return_pointer (request->task, manifest, g_object_unref);
   fetch_request_free (request);
+}
+
+static void
+manifest_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  FetchRequest *request = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GFile) file = g_file_new_for_path (request->path);
+
+  (void) source;
+
+  if (!aml_download_file_finish (result, &error))
+    {
+      g_task_return_error (request->task, g_steal_pointer (&error));
+      fetch_request_free (request);
+      return;
+    }
+
+  g_file_load_contents_async (file, g_task_get_cancellable (request->task),
+                              manifest_file_loaded, request);
 }
 
 void
@@ -1900,7 +1913,7 @@ static void
 load_step (LoadRequest *request);
 
 static void
-load_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
+load_file_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
 {
   LoadRequest *request = user_data;
   g_autoptr (GError) error = NULL;
@@ -1908,16 +1921,8 @@ load_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
   gsize length = 0;
   AmlVersionDescription *document;
 
-  (void) source;
-
-  if (!aml_download_file_finish (result, &error))
-    {
-      g_task_return_error (request->task, g_steal_pointer (&error));
-      load_request_free (request);
-      return;
-    }
-
-  if (!g_file_get_contents (request->path, &contents, &length, &error))
+  if (!g_file_load_contents_finish (G_FILE (source), result, &contents,
+                                    &length, NULL, &error))
     {
       g_task_return_new_error (request->task, AML_MC_ERROR, AML_MC_ERROR_IO,
                                "the downloaded version cannot be read: %s",
@@ -1963,6 +1968,26 @@ load_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
   request->next_id = g_strdup (request->merged->inherits_from);
 
   load_step (request);
+}
+
+static void
+load_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  LoadRequest *request = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GFile) file = g_file_new_for_path (request->path);
+
+  (void) source;
+
+  if (!aml_download_file_finish (result, &error))
+    {
+      g_task_return_error (request->task, g_steal_pointer (&error));
+      load_request_free (request);
+      return;
+    }
+
+  g_file_load_contents_async (file, g_task_get_cancellable (request->task),
+                              load_file_loaded, request);
 }
 
 /* Starts the download of the version @request->next_id points at, or
