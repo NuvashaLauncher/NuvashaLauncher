@@ -1049,7 +1049,8 @@ test_version_load (void)
   g_assert_cmpuint (fixture.hits, ==, 3);
   g_assert_cmpstr (call.description->id, ==, "1.21.1");
 
-  /* A copy that no longer matches is thrown away and fetched again. */
+  /* A copy that no longer matches is replaced from the verified global
+   * file cache, without another network request. */
   g_clear_object (&call.description);
   g_clear_error (&call.error);
   g_assert_true (g_file_set_contents (parent_cache, "not a version", -1,
@@ -1060,7 +1061,7 @@ test_version_load (void)
 
   g_assert_no_error (call.error);
   g_assert_nonnull (call.description);
-  g_assert_cmpuint (fixture.hits, ==, 4);
+  g_assert_cmpuint (fixture.hits, ==, 3);
 
   g_clear_pointer (&text, g_free);
   g_assert_true (g_file_get_contents (parent_cache, &text, NULL, NULL));

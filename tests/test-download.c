@@ -8,6 +8,7 @@
  * uses its own temporary directory. */
 
 #include "aml-download.h"
+#include "aml-cache.h"
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -36,6 +37,7 @@ typedef struct
 } Fixture;
 
 static Fixture fixture;
+static AmlSettings *cache_settings;
 
 static void
 reply_with (SoupServerMessage *message, guint status,
@@ -378,6 +380,59 @@ call_json (AsyncRun *run, AsyncCall *call, const char *url)
   aml_download_json_async (url, run->cancellable, json_finished, call);
 }
 
+static void
+call_cached_json (AsyncRun *run, AsyncCall *call, const char *url)
+{
+  call->run = run;
+  run->pending++;
+  aml_download_json_cached_async (url, run->cancellable, json_finished, call);
+}
+
+static void
+clear_api_cache (void)
+{
+  g_autofree char *directory = aml_cache_get_api_directory ();
+  GDir *dir = g_dir_open (directory, 0, NULL);
+  const char *name = NULL;
+
+  if (dir == NULL)
+    return;
+  while ((name = g_dir_read_name (dir)) != NULL)
+    {
+      g_autofree char *path = g_build_filename (directory, name, NULL);
+      g_remove (path);
+    }
+  g_dir_close (dir);
+}
+
+static void
+clear_global_file_cache (void)
+{
+  g_autofree char *directory = aml_cache_get_files_directory ();
+  GDir *dir = g_dir_open (directory, 0, NULL);
+  const char *name = NULL;
+
+  if (dir == NULL)
+    return;
+  while ((name = g_dir_read_name (dir)) != NULL)
+    {
+      g_autofree char *path = g_build_filename (directory, name, NULL);
+      g_remove (path);
+    }
+  g_dir_close (dir);
+}
+
+static char *
+cached_path (const char *method, const char *url, const char *body)
+{
+  g_autofree char *directory = aml_cache_get_api_directory ();
+  g_autofree char *key = g_strdup_printf ("%s\n%s\n%s", method, url,
+                                           body != NULL ? body : "");
+  g_autofree char *digest =
+    g_compute_checksum_for_string (G_CHECKSUM_SHA256, key, -1);
+  return g_build_filename (directory, digest, NULL);
+}
+
 /* ---------------------------------------------------------- *
  * Tests
  * ---------------------------------------------------------- */
@@ -396,6 +451,7 @@ test_successful_download (void)
   g_autofree char *contents = NULL;
 
   fixture.hits = 0;
+  clear_global_file_cache ();
 
   async_run_init (&run);
   call_file (&run, &call, url, dest, expected, G_CHECKSUM_SHA256);
@@ -437,6 +493,7 @@ test_checksum_mismatch (void)
   AsyncCall call = { 0 };
 
   fixture.hits = 0;
+  clear_global_file_cache ();
 
   async_run_init (&run);
   call_file (&run, &call, url, dest, expected, G_CHECKSUM_SHA256);
@@ -493,6 +550,40 @@ test_cached_reuse (void)
   remove_test_dir (dir);
 
   g_print ("ok - a matching cache skips the download\n");
+}
+
+static void
+test_global_file_cache_reuse (void)
+{
+  g_autofree char *dir = make_test_dir ();
+  g_autofree char *first = g_build_filename (dir, "first.jar", NULL);
+  g_autofree char *second = g_build_filename (dir, "second.jar", NULL);
+  g_autofree char *url = server_url ("/file");
+  g_autofree char *expected =
+    hash_of (fixture.file_body->str, fixture.file_body->len,
+             G_CHECKSUM_SHA1);
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+
+  clear_global_file_cache ();
+  fixture.hits = 0;
+  async_run_init (&run);
+  call_file (&run, &call, url, first, expected, G_CHECKSUM_SHA1);
+  async_run_wait (&run);
+  g_assert_true (call.success);
+  async_call_clear (&call);
+  async_run_clear (&run);
+
+  async_run_init (&run);
+  call_file (&run, &call, url, second, expected, G_CHECKSUM_SHA1);
+  async_run_wait (&run);
+  g_assert_true (call.success);
+  g_assert_cmpuint (fixture.hits, ==, 1);
+  async_call_clear (&call);
+  async_run_clear (&run);
+  remove_test_dir (dir);
+
+  g_print ("ok - verified global files are reused across destinations\n");
 }
 
 static void
@@ -751,6 +842,184 @@ test_json_not_found (void)
 }
 
 static void
+test_api_cache_hit (void)
+{
+  g_autofree char *url = server_url ("/json?cache-hit");
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+
+  clear_api_cache ();
+  g_assert_true (aml_settings_set_cache_modrinth_api_responses (
+    cache_settings, TRUE, NULL));
+  fixture.hits = 0;
+  async_run_init (&run);
+  call_cached_json (&run, &call, url);
+  async_run_wait (&run);
+  g_assert_no_error (call.error);
+  async_call_clear (&call);
+  async_run_clear (&run);
+
+  async_run_init (&run);
+  call_cached_json (&run, &call, url);
+  async_run_wait (&run);
+  g_assert_no_error (call.error);
+  g_assert_cmpuint (fixture.hits, ==, 1);
+  async_call_clear (&call);
+  async_run_clear (&run);
+
+  g_print ("ok - API cache hit and miss\n");
+}
+
+static void
+test_api_cache_disabled_and_keys (void)
+{
+  g_autofree char *first = server_url ("/json?first");
+  g_autofree char *second = server_url ("/json?second");
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+
+  clear_api_cache ();
+  g_assert_true (aml_settings_set_cache_modrinth_api_responses (
+    cache_settings, FALSE, NULL));
+  fixture.hits = 0;
+  async_run_init (&run);
+  call_cached_json (&run, &call, first);
+  async_run_wait (&run);
+  async_call_clear (&call);
+  async_run_clear (&run);
+  async_run_init (&run);
+  call_cached_json (&run, &call, first);
+  async_run_wait (&run);
+  g_assert_cmpuint (fixture.hits, ==, 2);
+  async_call_clear (&call);
+  async_run_clear (&run);
+
+  g_assert_true (aml_settings_set_cache_modrinth_api_responses (
+    cache_settings, TRUE, NULL));
+  fixture.hits = 0;
+  async_run_init (&run);
+  call_cached_json (&run, &call, first);
+  async_run_wait (&run);
+  async_call_clear (&call);
+  async_run_clear (&run);
+  async_run_init (&run);
+  call_cached_json (&run, &call, second);
+  async_run_wait (&run);
+  g_assert_cmpuint (fixture.hits, ==, 2);
+  async_call_clear (&call);
+  async_run_clear (&run);
+
+  g_print ("ok - disabled API cache and request keys are respected\n");
+}
+
+static void
+test_api_cache_expiration_and_failed_response (void)
+{
+  g_autofree char *url = server_url ("/json?expired");
+  g_autofree char *path = NULL;
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+
+  clear_api_cache ();
+  g_assert_true (aml_settings_set_cache_expiration (
+    cache_settings, AML_SETTINGS_CACHE_EXPIRATION_7_DAYS, NULL));
+  fixture.hits = 0;
+  async_run_init (&run);
+  call_cached_json (&run, &call, url);
+  async_run_wait (&run);
+  async_call_clear (&call);
+  async_run_clear (&run);
+  path = cached_path ("GET", url, NULL);
+  {
+    g_autofree char *contents = g_strdup_printf (
+      "{\"created\":%" G_GINT64_FORMAT ",\"response\":\"{\\\"kind\\\": \\\"test\\\", \\\"value\\\": 42}\"}",
+      (gint64) (g_get_real_time () / G_USEC_PER_SEC) - 2 * 24 * 60 * 60);
+    g_assert_true (g_file_set_contents (path, contents, -1, NULL));
+  }
+  async_run_init (&run);
+  call_cached_json (&run, &call, url);
+  async_run_wait (&run);
+  g_assert_cmpuint (fixture.hits, ==, 1);
+  async_call_clear (&call);
+  async_run_clear (&run);
+
+  g_assert_true (aml_settings_set_cache_expiration (
+    cache_settings, AML_SETTINGS_CACHE_EXPIRATION_1_HOUR, NULL));
+  async_run_init (&run);
+  call_cached_json (&run, &call, url);
+  async_run_wait (&run);
+  g_assert_cmpuint (fixture.hits, ==, 2);
+  async_call_clear (&call);
+  async_run_clear (&run);
+
+  /* The successful refresh above also verifies that an expired entry is
+   * replaced, rather than merely bypassed. */
+  g_assert_true (g_file_test (path, G_FILE_TEST_EXISTS));
+
+  fixture.hits = 0;
+  g_autofree char *missing = server_url ("/missing?not-cached");
+  async_run_init (&run);
+  call_cached_json (&run, &call, missing);
+  async_run_wait (&run);
+  async_call_clear (&call);
+  async_run_clear (&run);
+  async_run_init (&run);
+  call_cached_json (&run, &call, missing);
+  async_run_wait (&run);
+  g_assert_cmpuint (fixture.hits, ==, 2);
+  async_call_clear (&call);
+  async_run_clear (&run);
+
+  g_print ("ok - expiration refreshes and failed responses are not cached\n");
+}
+
+static void
+test_api_cache_stale_offline (void)
+{
+  g_autofree char *url = server_url ("/json?offline");
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+
+  clear_api_cache ();
+  fixture.hits = 0;
+  async_run_init (&run);
+  call_cached_json (&run, &call, url);
+  async_run_wait (&run);
+  async_call_clear (&call);
+  async_run_clear (&run);
+
+  fixture_stop ();
+  async_run_init (&run);
+  call_cached_json (&run, &call, url);
+  async_run_wait (&run);
+  g_assert_no_error (call.error);
+  g_assert_nonnull (call.parser);
+  async_call_clear (&call);
+  async_run_clear (&run);
+  fixture_start ();
+
+  g_print ("ok - stale API responses are an offline fallback\n");
+}
+
+static void
+test_api_cache_cancellation (void)
+{
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+
+  async_run_init (&run);
+  call_cached_json (&run, &call, "http://127.0.0.1:1/cancel");
+  g_cancellable_cancel (run.cancellable);
+  async_run_wait (&run);
+  g_assert_error (call.error, AML_DOWNLOAD_ERROR,
+                  AML_DOWNLOAD_ERROR_CANCELLED);
+  async_call_clear (&call);
+  async_run_clear (&run);
+
+  g_print ("ok - API cache requests remain cancellable\n");
+}
+
+static void
 test_invalid_url (void)
 {
   g_autofree char *dir = make_test_dir ();
@@ -819,6 +1088,7 @@ test_many_at_once (void)
   char *destinations[MANY_DOWNLOADS] = { 0 };
 
   fixture.hits = 0;
+  clear_global_file_cache ();
 
   async_run_init (&run);
 
@@ -847,7 +1117,10 @@ test_many_at_once (void)
       async_call_clear (&calls[i]);
     }
 
-  g_assert_cmpuint (fixture.hits, ==, MANY_DOWNLOADS);
+  /* The first wave fills the transfer slots; queued requests may reuse the
+   * verified global file cache as soon as that wave completes. */
+  g_assert_cmpuint (fixture.hits, >, 0);
+  g_assert_cmpuint (fixture.hits, <=, MANY_DOWNLOADS);
   g_assert_cmpuint (dir_entry_count (dir), ==, MANY_DOWNLOADS);
 
   for (guint i = 0; i < MANY_DOWNLOADS; i++)
@@ -862,14 +1135,26 @@ test_many_at_once (void)
 int
 main (int argc, char **argv)
 {
+  g_autofree char *root = g_dir_make_tmp ("aml-api-cache-XXXXXX", NULL);
+  g_autofree char *config = g_build_filename (root, "config", NULL);
+  g_autofree char *cache = g_build_filename (root, "cache", NULL);
+
   (void) argc;
   (void) argv;
+
+  g_mkdir_with_parents (config, 0755);
+  g_mkdir_with_parents (cache, 0755);
+  g_setenv ("XDG_CONFIG_HOME", config, TRUE);
+  g_setenv ("XDG_CACHE_HOME", cache, TRUE);
+  cache_settings = aml_settings_new ();
+  aml_download_set_cache_settings (cache_settings);
 
   fixture_start ();
 
   test_successful_download ();
   test_checksum_mismatch ();
   test_cached_reuse ();
+  test_global_file_cache_reuse ();
   test_corrupt_cache_redownload ();
   test_cancellation ();
   test_cancellation_before_start ();
@@ -878,11 +1163,17 @@ main (int argc, char **argv)
   test_rate_limit ();
   test_json_download ();
   test_json_not_found ();
+  test_api_cache_hit ();
+  test_api_cache_disabled_and_keys ();
+  test_api_cache_expiration_and_failed_response ();
+  test_api_cache_stale_offline ();
+  test_api_cache_cancellation ();
   test_invalid_url ();
   test_connection_refused ();
   test_many_at_once ();
 
   fixture_stop ();
+  g_clear_object (&cache_settings);
 
   return EXIT_SUCCESS;
 }

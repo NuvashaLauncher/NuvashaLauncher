@@ -419,7 +419,7 @@ aml_logs_page_new (AmlLauncher *launcher)
   gtk_widget_add_css_class (self->detail, "dim-label");
   gtk_box_append (GTK_BOX (row), self->detail);
 
-  self->clear = toolbar_button ("edit-clear-all-symbolic", _("Clear"),
+  self->clear = toolbar_button ("edit-clear-symbolic", _("Clear"),
                                 G_CALLBACK (on_clear_clicked), self);
   gtk_box_append (GTK_BOX (row), self->clear);
 
