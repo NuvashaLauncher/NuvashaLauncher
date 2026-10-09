@@ -43,6 +43,18 @@ msgstr "Installiert"
 msgid "Loading more…"
 msgstr "Mehr laden..."
 
+msgid "Nothing is selected"
+msgstr "Nichts ausgewählt"
+
+msgid "Install the selected versions"
+msgstr "Ausgewählte Versionen installieren"
+
+msgid "Install the selected versions?"
+msgstr "Ausgewählte Versionen installieren?"
+
+msgid "Install this version with the selected ones"
+msgstr "Diese Version zusammen mit den ausgewählten installieren"
+
 msgid "Search Modrinth"
 msgstr "Suche Modrinth"
 
@@ -303,3 +315,22 @@ msgstr "Microsoft-Konto hinzufügen"
 
 msgid "Minecraft Version"
 msgstr "Minecraft-Version"
+msgid "Install the selected %s?"
+msgstr "Ausgewählte %s installieren?"
+
+msgid "%s \"%s\""
+msgstr "%s \"%s\""
+
+msgid "Search"
+msgstr "Suchen"
+
+msgid "Update"
+msgstr "Aktualisieren"
+
+msgid "Update the following %s"
+msgstr "Folgende %s aktualisieren"
+
+msgid "Dependencies:"
+msgstr "Abhängigkeiten:"
+msgid "The following mods depend on %s:\n%s"
+msgstr "Die folgenden Mods benötigen %s:\n%s"

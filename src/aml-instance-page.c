@@ -393,7 +393,6 @@ java_status_refresh (AmlInstancePage *self)
 {
   AmlJavaRow *row = AML_JAVA_ROW (self->java_row);
   const AmlJava *effective = NULL;
-  const char *global = NULL;
   const char *message = NULL;
   GPtrArray *detected;
   g_autofree char *current = NULL;
@@ -404,28 +403,19 @@ java_status_refresh (AmlInstancePage *self)
   detected = aml_java_row_get_detected (row);
   current = instance_string (self->instance, "java-path");
 
-  /* The first entry names the Java the default stands for, and that same
-     runtime is taken out of the list below so it is not shown twice. */
-  aml_java_row_set_default_choice (
-    row, aml_settings_get_default_java_path (self->settings),
-    self->required_java);
+  /* The first entry names the runtime the automatic choice stands for,
+     and that same runtime is taken out of the list below so it is not
+     shown twice. */
+  aml_java_row_set_required_major (row, self->required_java);
 
   if (detected->len == 0 && current == NULL)
     message = _("No Java installation was found on this system");
 
   if (message == NULL && self->required_java > 0)
     {
-      if (current != NULL)
-        effective = aml_java_select (detected, current, NULL,
-                                     self->required_java);
-      else
-        {
-          global = aml_settings_get_default_java_path (self->settings);
-          effective = aml_java_select (detected, NULL, global,
-                                       self->required_java);
-        }
+      effective = aml_java_select (detected, current, self->required_java);
 
-      if (effective == NULL && (current != NULL || global != NULL))
+      if (effective == NULL && current != NULL)
         message = _("The configured Java was not detected; make sure it "
                     "is still a usable java executable");
       else if (effective == NULL)
@@ -452,13 +442,8 @@ java_status_refresh (AmlInstancePage *self)
    * even when nothing else is wrong with the selection. */
   if (message == NULL)
     {
-      if (effective == NULL && current != NULL)
-        effective = aml_java_select (detected, current, NULL, 0);
-      else if (effective == NULL)
-        effective = aml_java_select (detected, NULL,
-                                     aml_settings_get_default_java_path (
-                                       self->settings),
-                                     0);
+      if (effective == NULL)
+        effective = aml_java_select (detected, current, 0);
 
       if (effective != NULL && effective->headless)
         message = _("Minecraft needs a non-headless Java: on Arch use the "
@@ -515,8 +500,10 @@ on_manifest_loaded (GObject *source G_GNUC_UNUSED,
 }
 
 /* Picks the row of the Java entry the user has chosen and writes it to
- * the instance: NULL for "Default". On writing failure the row and the
- * instance go back to the stored path and the row says why. */
+ * the instance: NULL for the automatic choice, which is what an
+ * instance keeps unless the user names a runtime here. On writing
+ * failure the row and the instance go back to the stored path and the
+ * row says why. */
 static void
 on_java_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
                   gpointer user_data)
@@ -1100,11 +1087,11 @@ create_settings_page (AmlInstancePage *self)
   g_signal_connect (java_row, "notify::selected",
                     G_CALLBACK (on_java_selected), self);
   /* Known before the scan lands, so the first fill already names the
-     default and leaves its runtime out of the list. The required version
-     is not known yet and is set once the manifest loads. */
-  aml_java_row_set_default_choice (
-    AML_JAVA_ROW (java_row),
-    aml_settings_get_default_java_path (self->settings), self->required_java);
+     runtime the automatic choice stands for and leaves it out of the
+     list. The required version is not known yet and is set once the
+     manifest loads. */
+  aml_java_row_set_required_major (AML_JAVA_ROW (java_row),
+                                   self->required_java);
   aml_java_row_load (AML_JAVA_ROW (java_row), java_path);
   self->java_row = java_row;
 

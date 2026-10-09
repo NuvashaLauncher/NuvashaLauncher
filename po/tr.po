@@ -43,6 +43,18 @@ msgstr "Kurulu"
 msgid "Loading more…"
 msgstr "Daha fazlası yükleniyor…"
 
+msgid "Nothing is selected"
+msgstr "Hiçbir şey seçili değil"
+
+msgid "Install the selected versions"
+msgstr "Seçili sürümleri kur"
+
+msgid "Install the selected versions?"
+msgstr "Seçili sürümler kurulsun mu?"
+
+msgid "Install this version with the selected ones"
+msgstr "Bu sürümü seçili sürümlerle birlikte kur"
+
 msgid "Search Modrinth"
 msgstr "Modrinth’te ara"
 
@@ -303,3 +315,22 @@ msgstr "Microsoft Hesabı Ekle"
 
 msgid "Minecraft Version"
 msgstr "Minecraft Sürümü"
+msgid "Install the selected %s?"
+msgstr "Seçili %s yüklensin mi?"
+
+msgid "%s \"%s\""
+msgstr "%s \"%s\""
+
+msgid "Search"
+msgstr "Ara"
+
+msgid "Update"
+msgstr "Güncelle"
+
+msgid "Update the following %s"
+msgstr "Şunları güncelle: %s"
+
+msgid "Dependencies:"
+msgstr "Bağımlılıklar:"
+msgid "The following mods depend on %s:\n%s"
+msgstr "Şu modlar %s moduna bağlı:\n%s"

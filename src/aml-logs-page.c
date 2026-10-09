@@ -363,22 +363,21 @@ on_first_map (GtkWidget *widget G_GNUC_UNUSED, gpointer user_data)
  * Building the page
  * ---------------------------------------------------------- */
 
-/* One flat button with a symbolic icon and a label, the way GNOME writes
-   a toolbar action. */
+/* One flat icon button. The tooltip and accessible name keep the action
+   discoverable without taking room beside the log. */
 static GtkWidget *
 toolbar_button (const char *icon_name, const char *label, GCallback callback,
-                gpointer user_data)
+               gpointer user_data)
 {
   GtkWidget *button = gtk_button_new ();
-  GtkWidget *content = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   GtkWidget *icon = gtk_image_new_from_icon_name (icon_name);
 
   gtk_image_set_pixel_size (GTK_IMAGE (icon), 16);
-  gtk_box_append (GTK_BOX (content), icon);
-  gtk_box_append (GTK_BOX (content), gtk_label_new (label));
-
-  gtk_button_set_child (GTK_BUTTON (button), content);
+  gtk_button_set_child (GTK_BUTTON (button), icon);
   gtk_widget_add_css_class (button, "flat");
+  gtk_widget_set_tooltip_text (button, label);
+  gtk_accessible_update_property (GTK_ACCESSIBLE (button),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL, label, -1);
   g_signal_connect (button, "clicked", callback, user_data);
 
   return button;
@@ -420,7 +419,7 @@ aml_logs_page_new (AmlLauncher *launcher)
   gtk_widget_add_css_class (self->detail, "dim-label");
   gtk_box_append (GTK_BOX (row), self->detail);
 
-  self->clear = toolbar_button ("edit-clear-symbolic", _("Clear"),
+  self->clear = toolbar_button ("edit-clear-all-symbolic", _("Clear"),
                                 G_CALLBACK (on_clear_clicked), self);
   gtk_box_append (GTK_BOX (row), self->clear);
 

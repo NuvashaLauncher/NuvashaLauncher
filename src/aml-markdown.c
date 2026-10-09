@@ -605,8 +605,26 @@ static GtkWidget *
 wrapped_label (const char *markup)
 {
   GtkWidget *label = gtk_label_new (NULL);
+  g_autoptr (PangoAttrList) attrs = NULL;
+  g_autofree char *plain = NULL;
+  g_autoptr (GError) error = NULL;
 
-  gtk_label_set_markup (GTK_LABEL (label), markup != NULL ? markup : "");
+  /* Modrinth descriptions are user content and occasionally contain HTML
+     with mismatched tags. Never pass invalid markup to GtkLabel: it logs a
+     warning and can leave the label with a broken size allocation. */
+  if (markup == NULL ||
+      pango_parse_markup (markup, -1, 0, &attrs, &plain, NULL, &error))
+    gtk_label_set_markup (GTK_LABEL (label), markup != NULL ? markup : "");
+  else
+    {
+      g_autoptr (GRegex) tags =
+        g_regex_new ("<[^>]*>", G_REGEX_DOTALL, 0, NULL);
+      g_autofree char *fallback =
+        g_regex_replace (tags, markup, -1, 0, "", 0, NULL);
+
+      gtk_label_set_text (GTK_LABEL (label), fallback != NULL ? fallback : "");
+    }
+
   gtk_label_set_wrap (GTK_LABEL (label), TRUE);
   gtk_label_set_wrap_mode (GTK_LABEL (label), PANGO_WRAP_WORD_CHAR);
   gtk_label_set_xalign (GTK_LABEL (label), 0);

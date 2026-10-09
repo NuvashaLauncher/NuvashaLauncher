@@ -77,6 +77,16 @@ void aml_download_finish (AmlDownload *self);
 
 guint aml_downloads_count (void);
 
+/* How many files the user has picked across every content page for a
+ * later install: what the header's download icon carries a small number
+ * of. A page says its part with aml_downloads_picked_add(), adding when
+ * its list grows and passing the negative of what it added when its list
+ * shrinks or the page goes away, so that what is shown is what the open
+ * pages have on. */
+guint aml_downloads_picked (void);
+
+void aml_downloads_picked_add (gint delta);
+
 /* (transfer none) every running download, in the order it started. Never
  * NULL; do not modify. */
 GPtrArray *aml_downloads_get_all (void);

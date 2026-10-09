@@ -157,7 +157,6 @@ java_matches (AmlJava   *java,
 const AmlJava *
 aml_java_select (GPtrArray  *javas,
                  const char *instance_java_path,
-                 const char *global_java_path,
                  int         required_major)
 {
   g_return_val_if_fail (javas != NULL, NULL);
@@ -174,19 +173,6 @@ aml_java_select (GPtrArray  *javas,
 
       /* The instance points at a Java detection cannot see; it is the
        * instance's decision either way. */
-      return NULL;
-    }
-
-  if (global_java_path != NULL)
-    {
-      for (guint i = 0; i < javas->len; i++)
-        {
-          AmlJava *java = g_ptr_array_index (javas, i);
-
-          if (java_matches (java, global_java_path))
-            return java;
-        }
-
       return NULL;
     }
 

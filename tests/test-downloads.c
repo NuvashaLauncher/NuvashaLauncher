@@ -132,6 +132,41 @@ test_all_lists_every_entry (void)
   g_print ("ok - the list holds every running download in order\n");
 }
 
+/* What the content pages have picked, which the header counts on the
+ * icon of its downloads button: what one page adds and another takes
+ * away, and a count that never falls below what is really picked. */
+static void
+test_picked_count (void)
+{
+  AmlDownloads *downloads = aml_downloads_get_default ();
+
+  g_assert_cmpuint (aml_downloads_picked (), ==, 0);
+
+  aml_downloads_picked_add (3);
+  g_assert_cmpuint (aml_downloads_picked (), ==, 3);
+
+  /* Two content pages at once: one has four files on its list and the
+     other one, so what the header shows is the sum. */
+  aml_downloads_picked_add (1);
+  g_assert_cmpuint (aml_downloads_picked (), ==, 4);
+
+  aml_downloads_picked_add (-1);
+  g_assert_cmpuint (aml_downloads_picked (), ==, 3);
+
+  aml_downloads_picked_add (-3);
+  g_assert_cmpuint (aml_downloads_picked (), ==, 0);
+
+  /* A page that takes back more than it said has is not a number the
+     header would draw. */
+  aml_downloads_picked_add (-2);
+  g_assert_cmpuint (aml_downloads_picked (), ==, 0);
+
+  /* Nothing is running and nothing is picked: no entry, no button. */
+  g_assert_cmpuint (aml_downloads_count (), ==, 0);
+
+  g_print ("ok - the picked count is what the open pages have on\n");
+}
+
 int
 main (void)
 {
@@ -141,6 +176,7 @@ main (void)
   test_progress_and_detail ();
   test_cancel ();
   test_all_lists_every_entry ();
+  test_picked_count ();
 
   /* The singleton holds the one reference it was created with; giving it
      back keeps the sanitizer run from calling the manager a leak. */

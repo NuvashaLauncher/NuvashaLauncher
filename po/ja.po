@@ -43,6 +43,18 @@ msgstr "インストール済み"
 msgid "Loading more…"
 msgstr "読み込み中…"
 
+msgid "Nothing is selected"
+msgstr "何も選択されていません"
+
+msgid "Install the selected versions"
+msgstr "選択したバージョンをインストール"
+
+msgid "Install the selected versions?"
+msgstr "選択したバージョンをインストールしますか？"
+
+msgid "Install this version with the selected ones"
+msgstr "選択したものと一緒にこのバージョンをインストール"
+
 msgid "Search Modrinth"
 msgstr "Modrinth を検索"
 
@@ -303,3 +315,22 @@ msgstr "Microsoft アカウントを追加"
 
 msgid "Minecraft Version"
 msgstr "Minecraftバージョン"
+msgid "Install the selected %s?"
+msgstr "選択した%sをインストールしますか？"
+
+msgid "%s \"%s\""
+msgstr "%s「%s」"
+
+msgid "Search"
+msgstr "検索"
+
+msgid "Update"
+msgstr "更新"
+
+msgid "Update the following %s"
+msgstr "次の%sを更新"
+
+msgid "Dependencies:"
+msgstr "依存関係："
+msgid "The following mods depend on %s:\n%s"
+msgstr "次のModは%sに依存しています：\n%s"

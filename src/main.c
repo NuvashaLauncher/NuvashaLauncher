@@ -28,27 +28,13 @@ static const GActionEntry app_entries[] = {
   { .name = "quit", .activate = on_quit },
 };
 
-/* The search field of a content page wears the colours of any other
- * entry: the search bar around it paints no band of its own and does not
- * dim the entry when the window loses focus. The bar is always open, so
- * what it holds should not look like a band over the list.
- *
- * The half of a browser that holds the list is not a sidebar, it is the
+/* The half of a browser that holds the list is not a sidebar, it is the
  * same page with a project beside it: it keeps the page colour instead
- * of the sidebar colour a split view would give it, so the row of the
- * search does not change colour when a project is opened.
+ * of the sidebar colour a split view would give it.
  *
  * The first row of a list of projects is not rounded at the top, so the
  * list reads as one piece that starts where the row above it ends. */
 static const char app_css[] =
-  "searchbar.content-search-bar > revealer > box,"
-  "searchbar.content-search-bar > revealer > box:backdrop {"
-  "  background: none;"
-  "  box-shadow: none;"
-  "}"
-  "searchbar.content-search-bar > revealer > box:backdrop > * {"
-  "  filter: none;"
-  "}"
   "navigation-split-view.flat-split > .sidebar-pane,"
   "navigation-split-view.flat-split > .sidebar-pane:backdrop {"
   "  background-color: transparent;"
@@ -57,6 +43,21 @@ static const char app_css[] =
    ".flush-top list.boxed-list > row:first-child {"
    "  border-top-left-radius: 0;"
    "  border-top-right-radius: 0;"
+   "}"
+   /* The small number on the corner of a download icon: how many files
+      are picked for one install. It is round, small and pulled back over
+      the corner of the icon beside it, and its colours are the text
+      colour at a low alpha, so that it reads on any background and
+      needs nothing from the palette. */
+   "label.aml-badge {"
+   "  font-size: 0.7em;"
+   "  font-weight: bold;"
+   "  padding: 0 0.3em;"
+   "  min-width: 1.1em;"
+   "  min-height: 1.1em;"
+   "  border-radius: 0.8em;"
+   "  background-color: alpha(currentColor, 0.25);"
+   "  margin: 0;"
    "}";
 
 static void

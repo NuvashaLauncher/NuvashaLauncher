@@ -43,6 +43,18 @@ msgstr "설치됨"
 msgid "Loading more…"
 msgstr "정보 가져오는 중"
 
+msgid "Nothing is selected"
+msgstr "선택된 항목이 없습니다"
+
+msgid "Install the selected versions"
+msgstr "선택한 버전 설치"
+
+msgid "Install the selected versions?"
+msgstr "선택한 버전을 설치할까요?"
+
+msgid "Install this version with the selected ones"
+msgstr "선택한 항목과 함께 이 버전을 설치"
+
 msgid "Search Modrinth"
 msgstr "Modrinth 검색"
 
@@ -303,3 +315,22 @@ msgstr "Microsoft 계정 추가"
 
 msgid "Minecraft Version"
 msgstr "마인크래프트 버전"
+msgid "Install the selected %s?"
+msgstr "선택한 %s을(를) 설치할까요?"
+
+msgid "%s \"%s\""
+msgstr "%s “%s”"
+
+msgid "Search"
+msgstr "검색"
+
+msgid "Update"
+msgstr "업데이트"
+
+msgid "Update the following %s"
+msgstr "다음 %s 업데이트"
+
+msgid "Dependencies:"
+msgstr "종속 항목:"
+msgid "The following mods depend on %s:\n%s"
+msgstr "다음 모드가 %s에 의존합니다:\n%s"

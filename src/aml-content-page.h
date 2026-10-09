@@ -52,6 +52,7 @@ typedef struct {
   char *project_id;
   char *version_name;
   char *version_number;
+  GPtrArray *required_dependencies; /* project ids this file requires */
 } AmlContentFile;
 
 void aml_content_file_free (AmlContentFile *file);

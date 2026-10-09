@@ -31,7 +31,7 @@ struct _AmlInstance
   AmlLoader loader;
   char *loader_version; /* NULL: vanilla or not set yet */
   char *icon;
-  char *java_path;      /* NULL: use the global default */
+  char *java_path;      /* NULL: the closest compatible Java, automatically */
   char *jvm_args;
 };
 
@@ -786,7 +786,7 @@ aml_instance_class_init (AmlInstanceClass *klass)
 
   properties[PROP_JAVA_PATH] =
     g_param_spec_string ("java-path", "Java path",
-                         "Java executable, or NULL for the global default",
+                         "Java executable, or NULL for the automatic choice",
                          NULL,
                          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 

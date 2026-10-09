@@ -2,14 +2,15 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* AmlJavaRow: the first entry names the runtime the default stands for
- * and that runtime is left out of the list below, so it is shown once.
+/* AmlJavaRow: the first entry names the runtime the automatic choice
+ * stands for and that runtime is left out of the list below, so it is
+ * shown once.
  *
  * Naming the first entry fills the list again, which makes the combo row
  * emit its selection and calls the caller's handler. A handler that sets
- * the default choice (which is what the instance page does) used to call
+ * the requirement (which is what the instance page does) used to call
  * back into itself without end and overflow the stack. This checks the
- * calls stay bounded and that the default's runtime is not repeated.
+ * calls stay bounded and that the automatic runtime is not repeated.
  *
  * Detection scans the machine for Java runtimes; that is local and needs
  * no network. Needs a display to build the row, and skips itself when
@@ -33,7 +34,7 @@ on_selected (GObject    *object G_GNUC_UNUSED,
   /* A regression recurses; fail while the stack can still hold it. */
   g_assert_cmpuint (selected_calls, <, 10);
 
-  aml_java_row_set_default_choice (watched_row, NULL, 21);
+  aml_java_row_set_required_major (watched_row, 21);
 }
 
 static guint
@@ -101,35 +102,40 @@ main (void)
   n = g_list_model_get_n_items (G_LIST_MODEL (model));
   g_assert_cmpuint (n, >=, 1);
 
-  /* The runtime the default resolves to is named in the first entry and
-   * not repeated below. A machine with more than one runtime whose names
-   * collide would show it twice for a reason of its own, so this is
-   * checked where the answer is unambiguous. */
+  /* The runtime the automatic choice resolves to is named in the first
+   * entry and not repeated below. A machine with more than one runtime
+   * whose names collide would show it twice for a reason of its own, so
+   * this is checked where the answer is unambiguous. */
   detected = aml_java_row_get_detected (row);
 
   if (detected->len == 1)
     {
       AmlJava *only = g_ptr_array_index (detected, 0);
 
-      aml_java_row_set_default_choice (row, only->executable, 0);
-      pump (20);
-      g_assert_cmpuint (count_name (model,
-                                    gtk_string_list_get_string (model, 0)),
-                        ==, 1);
+      /* Asking for what that one runtime offers makes it the automatic
+       * choice. */
+      if (only->major_version > 0)
+        {
+          aml_java_row_set_required_major (row, only->major_version);
+          pump (20);
+          g_assert_cmpuint (count_name (model,
+                                        gtk_string_list_get_string (model, 0)),
+                            ==, 1);
+        }
     }
 
-  /* Setting the default choice must not call the handler forever. */
+  /* Setting the requirement must not call the handler forever. */
   watched_row = row;
   selected_calls = 0;
   g_signal_connect (row, "notify::selected", G_CALLBACK (on_selected), NULL);
-  aml_java_row_set_default_choice (row, NULL, 21);
+  aml_java_row_set_required_major (row, 21);
   pump (100);
 
   g_assert_cmpuint (selected_calls, <, 10);
 
   g_object_unref (row);
 
-  g_print ("ok - the default runtime is named once and does not recurse\n");
+  g_print ("ok - the automatic runtime is named once and does not recurse\n");
 
   return EXIT_SUCCESS;
 }

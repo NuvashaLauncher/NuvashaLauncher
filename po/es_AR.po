@@ -81,6 +81,18 @@ msgstr "Descargar"
 msgid "Loading more…"
 msgstr "Cargando más…"
 
+msgid "Nothing is selected"
+msgstr "No hay nada seleccionado"
+
+msgid "Install the selected versions"
+msgstr "Instalar las versiones seleccionadas"
+
+msgid "Install the selected versions?"
+msgstr "¿Instalar las versiones seleccionadas?"
+
+msgid "Install this version with the selected ones"
+msgstr "Instalar esta versión junto con las seleccionadas"
+
 msgid "Name"
 msgstr "Nombre"
 
@@ -317,3 +329,22 @@ msgstr "Los mods necesitan un lanzador de mods. Primero elegí Fabric, Quilt, Fo
 
 msgid "Mods"
 msgstr "Mods"
+msgid "Install the selected %s?"
+msgstr "¿Instalar los %s seleccionados?"
+
+msgid "%s \"%s\""
+msgstr "%s «%s»"
+
+msgid "Search"
+msgstr "Buscar"
+
+msgid "Update"
+msgstr "Actualizar"
+
+msgid "Update the following %s"
+msgstr "Actualizar los siguientes %s"
+
+msgid "Dependencies:"
+msgstr "Dependencias:"
+msgid "The following mods depend on %s:\n%s"
+msgstr "Los siguientes mods dependen de %s:\n%s"

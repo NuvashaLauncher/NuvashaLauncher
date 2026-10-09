@@ -43,6 +43,18 @@ msgstr "Встановлено"
 msgid "Loading more…"
 msgstr "Завантаження ще…"
 
+msgid "Nothing is selected"
+msgstr "Нічого не вибрано"
+
+msgid "Install the selected versions"
+msgstr "Встановити вибрані версії"
+
+msgid "Install the selected versions?"
+msgstr "Встановити вибрані версії?"
+
+msgid "Install this version with the selected ones"
+msgstr "Встановити цю версію разом із вибраними"
+
 msgid "Search Modrinth"
 msgstr "Пошук на Modrinth"
 
@@ -303,3 +315,22 @@ msgstr "Додати обліковий запис Microsoft"
 
 msgid "Minecraft Version"
 msgstr "Версія Minecraft"
+msgid "Install the selected %s?"
+msgstr "Установити вибрані %s?"
+
+msgid "%s \"%s\""
+msgstr "%s «%s»"
+
+msgid "Search"
+msgstr "Пошук"
+
+msgid "Update"
+msgstr "Оновити"
+
+msgid "Update the following %s"
+msgstr "Оновити такі %s"
+
+msgid "Dependencies:"
+msgstr "Залежності:"
+msgid "The following mods depend on %s:\n%s"
+msgstr "Такі моди залежать від %s:\n%s"
