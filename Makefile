@@ -113,9 +113,6 @@ uninstall:
 	@for lang in $(LOCALES); do \
 		rm -f $(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/aml.mo; \
 	done
-	@# The entry AML installed under its earlier application ID, so an
-	@# upgrade does not leave two launchers in the menu.
-	rm -f $(DESTDIR)$(PREFIX)/share/applications/io.github.Flia7.AML.desktop
 
 clean:
 	rm -rf build build-debug
