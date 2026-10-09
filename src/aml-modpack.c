@@ -15,6 +15,8 @@
  * a bomb, and any URL from a host that is not the ones the format
  * has. */
 
+#define _GNU_SOURCE
+
 #include "aml-modpack.h"
 #include "aml-i18n.h"
 
@@ -25,7 +27,9 @@
 #include <errno.h>
 #include <glib/gstdio.h>
 #include <json-glib/json-glib.h>
+#include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #define AML_MODPACK_FORMAT_VERSION 1
 
@@ -1869,4 +1873,302 @@ aml_modpack_install_finish (GAsyncResult *result, GError **error)
   g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
 
   return g_task_propagate_pointer (G_TASK (result), error);
+}
+
+typedef struct {
+  char *instance_directory;
+  char *archive_path;
+  char *manifest;
+} ExportRun;
+
+static void
+export_run_free (ExportRun *run)
+{
+  g_free (run->instance_directory);
+  g_free (run->archive_path);
+  g_free (run->manifest);
+  g_free (run);
+}
+
+static gboolean
+export_file (struct archive *archive, const char *source, const char *target,
+             GError **error)
+{
+  GStatBuf stat_buf;
+  FILE *input = NULL;
+  struct archive_entry *entry = NULL;
+  char buffer[64 * 1024];
+  size_t length;
+
+  if (g_stat (source, &stat_buf) != 0 || !S_ISREG (stat_buf.st_mode))
+    {
+      g_set_error (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
+                   "cannot read instance file \"%s\": %s", source,
+                   g_strerror (errno));
+      return FALSE;
+    }
+
+  input = g_fopen (source, "rb");
+  if (input == NULL)
+    {
+      g_set_error (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
+                   "cannot open instance file \"%s\": %s", source,
+                   g_strerror (errno));
+      return FALSE;
+    }
+
+  entry = archive_entry_new ();
+  archive_entry_set_pathname (entry, target);
+  archive_entry_set_size (entry, stat_buf.st_size);
+  archive_entry_set_filetype (entry, AE_IFREG);
+  archive_entry_set_perm (entry, 0644);
+
+  if (archive_write_header (archive, entry) != ARCHIVE_OK)
+    {
+      g_set_error (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_ARCHIVE,
+                   "cannot write \"%s\": %s", target,
+                   archive_error_string (archive));
+      archive_entry_free (entry);
+      fclose (input);
+      return FALSE;
+    }
+
+  while ((length = fread (buffer, 1, sizeof buffer, input)) > 0)
+    if (archive_write_data (archive, buffer, length) != (la_ssize_t) length)
+      {
+        g_set_error (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_ARCHIVE,
+                     "cannot write \"%s\": %s", target,
+                     archive_error_string (archive));
+        archive_entry_free (entry);
+        fclose (input);
+        return FALSE;
+      }
+
+  if (ferror (input))
+    {
+      g_set_error (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
+                   "cannot read instance file \"%s\": %s", source,
+                   g_strerror (errno));
+      archive_entry_free (entry);
+      fclose (input);
+      return FALSE;
+    }
+
+  fclose (input);
+  archive_entry_free (entry);
+  return TRUE;
+}
+
+static gboolean
+export_directory (struct archive *archive, const char *root,
+                  const char *relative, GError **error)
+{
+  g_autofree char *directory = g_build_filename (root, relative, NULL);
+  g_autoptr (GDir) dir = g_dir_open (directory, 0, error);
+  const char *name = NULL;
+
+  if (dir == NULL)
+    return FALSE;
+
+  while ((name = g_dir_read_name (dir)) != NULL)
+    {
+      g_autofree char *source = g_build_filename (directory, name, NULL);
+      g_autofree char *child_relative =
+        g_build_filename (relative, name, NULL);
+      GStatBuf stat_buf;
+
+      if (g_lstat (source, &stat_buf) != 0)
+        {
+          g_set_error (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
+                       "cannot inspect instance file \"%s\": %s", source,
+                       g_strerror (errno));
+          return FALSE;
+        }
+
+      if (S_ISDIR (stat_buf.st_mode))
+        {
+          if (!export_directory (archive, root, child_relative, error))
+            return FALSE;
+        }
+      else if (S_ISREG (stat_buf.st_mode))
+        {
+          g_autofree char *target =
+            g_build_filename ("overrides", child_relative, NULL);
+
+          if (!export_file (archive, source, target, error))
+            return FALSE;
+        }
+      else if (S_ISLNK (stat_buf.st_mode))
+        {
+          g_set_error (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_PATH,
+                       "cannot export symlink \"%s\"", source);
+          return FALSE;
+        }
+    }
+
+  return TRUE;
+}
+
+static void
+export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
+               gpointer task_data, GCancellable *cancellable)
+{
+  ExportRun *run = task_data;
+  g_autoptr (GError) error = NULL;
+  struct archive *archive = NULL;
+  struct archive_entry *manifest_entry = NULL;
+  gsize manifest_length = strlen (run->manifest);
+  g_autofree char *canonical_root =
+    g_canonicalize_filename (run->instance_directory, NULL);
+  g_autofree char *canonical_archive =
+    g_canonicalize_filename (run->archive_path, NULL);
+  g_autofree char *root_prefix =
+    g_strconcat (canonical_root, G_DIR_SEPARATOR_S, NULL);
+
+  if (g_cancellable_is_cancelled (cancellable))
+    {
+      g_task_return_new_error (task, AML_MODPACK_ERROR,
+                               AML_MODPACK_ERROR_CANCELLED, "cancelled");
+      return;
+    }
+
+  if (g_str_has_prefix (canonical_archive, root_prefix))
+    {
+      g_task_return_new_error (task, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
+                               "the export file cannot be inside the instance");
+      return;
+    }
+
+  archive = archive_write_new ();
+  archive_write_set_format_zip (archive);
+
+  if (archive_write_open_filename (archive, run->archive_path) != ARCHIVE_OK)
+    {
+      g_set_error (&error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_ARCHIVE,
+                   "cannot create \"%s\": %s", run->archive_path,
+                   archive_error_string (archive));
+      archive_write_free (archive);
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  manifest_entry = archive_entry_new ();
+  archive_entry_set_pathname (manifest_entry, "modrinth.index.json");
+  archive_entry_set_size (manifest_entry, manifest_length);
+  archive_entry_set_filetype (manifest_entry, AE_IFREG);
+  archive_entry_set_perm (manifest_entry, 0644);
+
+  if (archive_write_header (archive, manifest_entry) != ARCHIVE_OK ||
+      archive_write_data (archive, run->manifest, manifest_length) !=
+        (la_ssize_t) manifest_length ||
+      !export_directory (archive, canonical_root, "", &error) ||
+      g_cancellable_is_cancelled (cancellable) ||
+      archive_write_close (archive) != ARCHIVE_OK)
+    {
+      if (error == NULL)
+        g_set_error (&error, AML_MODPACK_ERROR,
+                     g_cancellable_is_cancelled (cancellable)
+                       ? AML_MODPACK_ERROR_CANCELLED
+                       : AML_MODPACK_ERROR_ARCHIVE,
+                     g_cancellable_is_cancelled (cancellable)
+                       ? "cancelled" : "cannot finish the modpack archive");
+      archive_entry_free (manifest_entry);
+      archive_write_free (archive);
+      g_unlink (run->archive_path);
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  archive_entry_free (manifest_entry);
+  archive_write_free (archive);
+  g_task_return_boolean (task, TRUE);
+}
+
+static char *
+export_manifest (AmlInstance *instance, GError **error)
+{
+  g_autofree char *name = NULL;
+  g_autofree char *version = NULL;
+  g_autofree char *loader_version = NULL;
+  g_autoptr (JsonBuilder) builder = json_builder_new ();
+  g_autoptr (JsonGenerator) generator = json_generator_new ();
+  g_autoptr (JsonNode) root = NULL;
+  g_autofree char *result = NULL;
+  AmlLoader loader = AML_LOADER_VANILLA;
+  gsize length = 0;
+
+  g_object_get (instance, "name", &name, "minecraft_version", &version,
+                "loader", &loader, "loader_version", &loader_version, NULL);
+
+  if (version == NULL || *version == '\0')
+    {
+      g_set_error_literal (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_FORMAT,
+                           "the instance has no Minecraft version");
+      return NULL;
+    }
+
+  json_builder_begin_object (builder);
+  json_builder_set_member_name (builder, "formatVersion");
+  json_builder_add_int_value (builder, AML_MODPACK_FORMAT_VERSION);
+  json_builder_set_member_name (builder, "game");
+  json_builder_add_string_value (builder, "minecraft");
+  json_builder_set_member_name (builder, "name");
+  json_builder_add_string_value (builder, name != NULL ? name : "AML Instance");
+  json_builder_set_member_name (builder, "versionId");
+  json_builder_add_string_value (builder, "aml-export");
+  json_builder_set_member_name (builder, "dependencies");
+  json_builder_begin_object (builder);
+  json_builder_set_member_name (builder, "minecraft");
+  json_builder_add_string_value (builder, version);
+  if (loader != AML_LOADER_VANILLA && loader_version != NULL)
+    {
+      json_builder_set_member_name (builder, aml_loader_to_string (loader));
+      json_builder_add_string_value (builder, loader_version);
+    }
+  json_builder_end_object (builder);
+  json_builder_set_member_name (builder, "files");
+  json_builder_begin_array (builder);
+  json_builder_end_array (builder);
+  json_builder_end_object (builder);
+  root = json_builder_get_root (builder);
+  json_generator_set_root (generator, root);
+  result = json_generator_to_data (generator, &length);
+  return g_steal_pointer (&result);
+}
+
+void
+aml_modpack_export_async (AmlInstance *instance, const char *path,
+                          GCancellable *cancellable,
+                          GAsyncReadyCallback callback, gpointer user_data)
+{
+  g_autoptr (GTask) task = NULL;
+  g_autoptr (GError) error = NULL;
+  g_autofree char *directory = NULL;
+  ExportRun *run = NULL;
+
+  g_return_if_fail (AML_IS_INSTANCE (instance));
+  g_return_if_fail (path != NULL && g_path_is_absolute (path));
+
+  task = g_task_new (NULL, cancellable, callback, user_data);
+  run = g_new0 (ExportRun, 1);
+  g_object_get (instance, "directory", &directory, NULL);
+  run->instance_directory = g_strdup (directory);
+  run->archive_path = g_strdup (path);
+  run->manifest = export_manifest (instance, &error);
+
+  if (run->instance_directory == NULL || run->manifest == NULL)
+    {
+      export_run_free (run);
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  g_task_set_task_data (task, run, (GDestroyNotify) export_run_free);
+  g_task_run_in_thread (task, export_thread);
+}
+
+gboolean
+aml_modpack_export_finish (GAsyncResult *result, GError **error)
+{
+  return g_task_propagate_boolean (G_TASK (result), error);
 }

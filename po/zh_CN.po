@@ -359,3 +359,22 @@ msgid "Clear AML Cache?"
 msgstr "清除 AML 缓存？"
 msgid "Cached data will be removed. Installed content, instances, accounts, settings and logs will be kept."
 msgstr "缓存数据将被删除。已安装的内容、实例、账户、设置和日志将被保留。"
+
+# New modpack import/export actions use English until translators provide localized text.
+msgid "Import Modpack"
+msgstr "Import Modpack"
+
+msgid "Modpack exported"
+msgstr "Modpack exported"
+
+msgid "Modrinth Modpacks (*.mrpack)"
+msgstr "Modrinth Modpacks (*.mrpack)"
+
+msgid "The export location is not a local file"
+msgstr "The export location is not a local file"
+
+msgid "Save this instance as a Modrinth modpack"
+msgstr "Save this instance as a Modrinth modpack"
+
+msgid "Export Modpack"
+msgstr "Export Modpack"

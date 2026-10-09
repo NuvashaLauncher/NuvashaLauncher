@@ -45,6 +45,7 @@ struct _AmlDownloadModpackDialog
 
   /* The cache of one downloaded pack, reused while the dialog lives. */
   char *pack_path;
+  gboolean imported;
 
   /* What the user did by the end of the details page. */
   AmlModrinthProject *project;
@@ -151,6 +152,7 @@ static void on_error_retry_fetch (GtkButton *, gpointer);
 static void on_error_retry_install (GtkButton *, gpointer);
 static void on_optional_cancel (GtkButton *, gpointer);
 static void on_optional_install (GtkButton *, gpointer);
+static void on_pack_downloaded (GObject *, GAsyncResult *, gpointer);
 static void dialog_details_open (AmlDownloadModpackDialog *self);
 static gboolean dialog_start_features (AmlDownloadModpackDialog *self);
 static void on_modpack_download_clicked (GtkButton *, gpointer);
@@ -297,6 +299,32 @@ aml_download_modpack_dialog_new (AmlInstanceManager *manager)
 
   self->manager = g_object_ref (manager);
 
+  return self;
+}
+
+static gboolean
+start_import_idle (gpointer user_data)
+{
+  AmlDownloadModpackDialog *self = user_data;
+  g_autoptr (GTask) task = g_task_new (NULL, NULL, NULL, NULL);
+
+  /* Reuse the same validation, optional-file selection and install flow as
+   * a downloaded pack. The selected file is never deleted on failure. */
+  g_task_return_boolean (task, TRUE);
+  on_pack_downloaded (NULL, G_ASYNC_RESULT (task), g_object_ref (self));
+  return G_SOURCE_REMOVE;
+}
+
+AmlDownloadModpackDialog *
+aml_download_modpack_dialog_new_for_file (AmlInstanceManager *manager,
+                                          const char *path)
+{
+  AmlDownloadModpackDialog *self =
+    aml_download_modpack_dialog_new (manager);
+
+  self->pack_path = g_strdup (path);
+  self->imported = TRUE;
+  g_idle_add (start_import_idle, g_object_ref (self));
   return self;
 }
 
@@ -1618,12 +1646,12 @@ on_install_progress (guint done,
   aml_download_set_progress (job->download, done, total);
 }
 
-/* The .mrpack is only needed until its overrides are laid down: it is
- * not kept in the cache, so the next install fetches it fresh. */
+/* A downloaded .mrpack is only needed until its overrides are laid down.
+ * An imported file belongs to the user and is never removed here. */
 static void
 remove_pack_file (AmlDownloadModpackDialog *self)
 {
-  if (self->pack_path != NULL)
+  if (!self->imported && self->pack_path != NULL)
     {
       g_unlink (self->pack_path);
       g_clear_pointer (&self->pack_path, g_free);

@@ -88,6 +88,66 @@ on_download_modpack (GSimpleAction *action G_GNUC_UNUSED,
   adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
 }
 
+static void
+on_import_modpack_chosen (GObject *source, GAsyncResult *result,
+                          gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GFile) file =
+    gtk_file_dialog_open_finish (GTK_FILE_DIALOG (source), result, &error);
+
+  if (file == NULL)
+    {
+      if (error != NULL &&
+          !g_error_matches (error, GTK_DIALOG_ERROR,
+                            GTK_DIALOG_ERROR_CANCELLED) &&
+          !g_error_matches (error, GTK_DIALOG_ERROR,
+                            GTK_DIALOG_ERROR_DISMISSED))
+        gtk_widget_set_tooltip_text (GTK_WIDGET (self), error->message);
+      g_object_unref (self);
+      return;
+    }
+
+  {
+    g_autofree char *path = g_file_get_path (file);
+
+    if (path == NULL)
+      {
+        g_warning ("cannot import a non-local modpack file");
+        g_object_unref (self);
+        return;
+      }
+
+    GtkWidget *dialog = GTK_WIDGET (
+      aml_download_modpack_dialog_new_for_file (self->manager, path));
+
+    adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
+  }
+
+  g_object_unref (self);
+}
+
+static void
+on_import_modpack (GSimpleAction *action G_GNUC_UNUSED,
+                   GVariant *parameter G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
+  g_autoptr (GtkFileDialog) dialog = gtk_file_dialog_new ();
+  g_autoptr (GtkFileFilter) filter = gtk_file_filter_new ();
+  g_autoptr (GListStore) filters = g_list_store_new (GTK_TYPE_FILE_FILTER);
+
+  gtk_file_dialog_set_title (dialog, _("Import Modpack"));
+  gtk_file_filter_set_name (filter, _("Modrinth Modpacks (*.mrpack)"));
+  gtk_file_filter_add_suffix (filter, "mrpack");
+  g_list_store_append (filters, filter);
+  gtk_file_dialog_set_filters (dialog, G_LIST_MODEL (filters));
+  gtk_file_dialog_open (dialog,
+                        GTK_IS_WINDOW (root) ? GTK_WINDOW (root) : NULL,
+                        NULL, on_import_modpack_chosen, g_object_ref (self));
+}
+
 /* Written the moment it is switched. When the file cannot be written
  * the setting keeps the value it had, the switch goes back to it and
  * the row says why: the dialog and the file never disagree. */
@@ -542,6 +602,7 @@ on_shortcuts (GSimpleAction *action G_GNUC_UNUSED,
 static const GActionEntry window_entries[] = {
   { .name = "create-instance", .activate = on_create_instance },
   { .name = "download-modpack", .activate = on_download_modpack },
+  { .name = "import-modpack", .activate = on_import_modpack },
   { .name = "settings", .activate = on_settings },
   { .name = "shortcuts", .activate = on_shortcuts },
   { .name = "about", .activate = on_about },
@@ -554,6 +615,7 @@ create_add_menu (void)
 
   g_menu_append (menu, _("Create Instance"), "win.create-instance");
   g_menu_append (menu, _("Download Modpack"), "win.download-modpack");
+  g_menu_append (menu, _("Import Modpack"), "win.import-modpack");
 
   return menu;
 }
