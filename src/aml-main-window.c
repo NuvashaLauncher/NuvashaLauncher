@@ -1232,10 +1232,12 @@ aml_main_window_init (AmlMainWindow *self)
   GtkWidget *toolbar = adw_toolbar_view_new ();
   GtkWidget *add_popover = NULL;
 
-  /* The default raised top-bar layer paints a separate strip above the
-     header bar. Keep the launcher header as one normal Adwaita surface. */
+  /* Flat is the default top-bar style, and it paints no surface of its
+     own, so the header would take the window background and read as the
+     same colour as the content under it. Raised is what gives a header
+     the colour every Adwaita header has. */
   adw_toolbar_view_set_top_bar_style (ADW_TOOLBAR_VIEW (toolbar),
-                                      ADW_TOOLBAR_FLAT);
+                                      ADW_TOOLBAR_RAISED);
 
   /* The settings and the accounts are the window's own: every launcher of
      an instance is handed the same ones, so the whole window agrees on
