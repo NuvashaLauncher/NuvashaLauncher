@@ -1077,6 +1077,19 @@ request_fail (ResolveRequest *request, GError *error)
     g_error_free (error);
 }
 
+/* A stage may discover a bad entry after it has already started other
+ * operations.  Those callbacks still own a borrowed pointer to @request,
+ * so cancellation alone is not enough: final cleanup waits for them. */
+static void
+request_fail_and_wait (ResolveRequest *request, GError *error)
+{
+  request_fail (request, error);
+  g_cancellable_cancel (request->cancellable);
+
+  if (request->pending == 0)
+    resolve_finish (request);
+}
+
 static void
 report (ResolveRequest *request)
 {
@@ -1641,8 +1654,7 @@ resolve_copies (ResolveRequest *request)
 
       if (!ensure_parent_directory (target, &error))
         {
-          request_fail (request, g_steal_pointer (&error));
-          resolve_finish (request);
+          request_fail_and_wait (request, g_steal_pointer (&error));
           return;
         }
 
@@ -1783,12 +1795,11 @@ resolve_objects (ResolveRequest *request)
 
       if (!JSON_NODE_HOLDS_OBJECT (node))
         {
-          request_fail (
+          request_fail_and_wait (
               request,
               g_error_new (AML_RESOLVE_ERROR, AML_RESOLVE_ERROR_ASSETS,
                            "the asset \"%s\" of \"%s\" is not an object",
                            name, path));
-          resolve_finish (request);
           return;
         }
 
@@ -1806,31 +1817,28 @@ resolve_objects (ResolveRequest *request)
 
       if (destination == NULL)
         {
-          request_fail (request,
-                        g_error_new (AML_RESOLVE_ERROR,
-                                     AML_RESOLVE_ERROR_ASSETS,
-                                     "\"%s\" is not a usable asset name",
-                                     hash));
-          resolve_finish (request);
+          request_fail_and_wait (request,
+                                 g_error_new (AML_RESOLVE_ERROR,
+                                              AML_RESOLVE_ERROR_ASSETS,
+                                              "\"%s\" is not a usable asset name",
+                                              hash));
           return;
         }
 
       if (asset_path != NULL && !aml_resolve_entry_name_is_safe (asset_path))
         {
-          request_fail (
+          request_fail_and_wait (
               request,
               g_error_new (AML_RESOLVE_ERROR, AML_RESOLVE_ERROR_UNSAFE_PATH,
                            "the asset \"%s\" of \"%s\" would be copied to "
                            "\"%s\", outside the assets directory",
                            hash, path, asset_path));
-          resolve_finish (request);
           return;
         }
 
       if (!ensure_parent_directory (destination, &local))
         {
-          request_fail (request, g_steal_pointer (&local));
-          resolve_finish (request);
+          request_fail_and_wait (request, g_steal_pointer (&local));
           return;
         }
 
