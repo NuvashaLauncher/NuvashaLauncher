@@ -5,10 +5,13 @@
 /* AmlJavaRow: the Java picker, used by the main window Settings
  * dialog and by an instance's Settings page. Like AmlVersionRow it
  * shows when it is fetching, what it failed to find, how to try again,
- * and which installations exist once the scan is there. The public
- * contract of get_selected_path(): NULL while loading or after a
- * failure; "" while the first entry ("Default" / "Automatic") is
- * picked; the executable path otherwise. */
+ * and which installations exist once the scan is there. The list ends
+ * in an entry that asks for another runtime: picking it opens the file
+ * chooser, adds what comes back and selects it, so a runtime the scan
+ * did not report is added from the row itself. The public contract of
+ * get_selected_path(): NULL while loading, after a failure, and while
+ * the ask is picked; "" while the first entry ("Default" /
+ * "Automatic") is picked; the executable path otherwise. */
 
 #ifndef AML_JAVA_ROW_H
 #define AML_JAVA_ROW_H

@@ -17,6 +17,7 @@
 #include <unistd.h>
 
 static void custom_loaded (GObject*, GAsyncResult*, gpointer);
+static void on_picked (GObject*, GParamSpec*, gpointer);
 
 struct _AmlJavaRow
 {
@@ -29,11 +30,21 @@ struct _AmlJavaRow
   GPtrArray *javas;
 
   /* Model contents: index 0 is the default entry with a NULL path, one
-   * per detected Java, and a trailing one for the custom paths
-   * detection never reported. */
+   * per detected Java, one for a custom path detection never reported,
+   * and a trailing one that asks for another runtime instead of naming
+   * one. That last entry has no path, so the ids array is always one
+   * entry shorter than the names array. */
   GPtrArray *ids;   /* strdupped paths; ids[0] is NULL */
   GPtrArray *names; /* the titles shown in the model */
   char *default_label;
+
+  /* Where the add entry sits in the model, GTK_INVALID_LIST_POSITION
+   * while the list does not hold one. */
+  guint add_index;
+
+  /* The entry to go back to when the add entry is picked: it names no
+   * runtime, so it cannot stay selected. */
+  guint restore;
 
   /* What the first entry stands for: the Java the default resolves to.
    * The global default path and the game's required version decide it;
@@ -84,9 +95,10 @@ show_loading (AmlJavaRow *self)
 {
   g_autoptr (GPtrArray) names = g_ptr_array_new_with_free_func (g_free);
 
-  g_ptr_array_add (names, g_strdup ("Loading…"));
+  g_ptr_array_add (names, g_strdup (_("Loading…")));
 
   self->ready = FALSE;
+  self->add_index = GTK_INVALID_LIST_POSITION;
   put_model (self, g_steal_pointer (&names), 0);
   gtk_widget_set_sensitive (GTK_WIDGET (self), FALSE);
   gtk_widget_set_visible (self->retry, FALSE);
@@ -99,6 +111,7 @@ show_error (AmlJavaRow *self, const char *message)
   g_autoptr (GPtrArray) names = g_ptr_array_new_with_free_func (g_free);
 
   self->ready = FALSE;
+  self->add_index = GTK_INVALID_LIST_POSITION;
   put_model (self, g_steal_pointer (&names), GTK_INVALID_LIST_POSITION);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self), message);
   gtk_widget_set_sensitive (GTK_WIDGET (self), TRUE);
@@ -174,9 +187,18 @@ fill (AmlJavaRow *self)
         position = names->len - 1;
     }
 
+  /* The trailing entry is how a runtime detection did not report gets
+     added. It names no runtime, so it gets no id and the arrays end up
+     one entry apart. */
+  g_ptr_array_add (names, g_strdup (_("Add Java Runtime")));
+  self->add_index = names->len - 1;
+
   g_clear_pointer (&self->ids, g_ptr_array_unref);
   self->ids = ids;
   self->ready = TRUE;
+
+  /* Filled in below, once the model carries the entry this points at. */
+  self->restore = position;
   put_model (self, names, position);
 
   gtk_widget_set_sensitive (GTK_WIDGET (self), TRUE);
@@ -275,6 +297,107 @@ on_retry_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 }
 
 /* ---------------------------------------------------------- *
+ * Adding a runtime the scan did not report
+ *
+ * The last entry of the list asks for one instead of naming one, so it
+ * carries no path and the caller's handler has nothing to store. Picking
+ * it puts the row back to the entry it came from, so the list never
+ * shows the ask as the answer, and opens the chooser. What comes back is
+ * probed and appended like any other runtime, and selected: the selection
+ * is what tells the caller which Java the user wants.
+ * ---------------------------------------------------------- */
+
+static void
+add_probed (GObject      *source G_GNUC_UNUSED,
+            GAsyncResult *result,
+            gpointer      user_data)
+{
+  AmlJavaRow *self = user_data;
+  g_autoptr (GError) error = NULL;
+  AmlJava *probe = aml_java_probe_finish (result, &error);
+
+  if (probe == NULL)
+    adw_action_row_set_subtitle (
+      ADW_ACTION_ROW (self),
+      error != NULL ? error->message
+                    : _("the chosen file does not report a Java version"));
+  else
+    aml_java_row_set_custom (self, probe->executable,
+                             g_steal_pointer (&probe));
+
+  g_object_unref (self);
+}
+
+static void
+add_chosen (GObject *dialog, GAsyncResult *result, gpointer user_data)
+{
+  AmlJavaRow *self = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GFile) file =
+    gtk_file_dialog_open_finish (GTK_FILE_DIALOG (dialog), result, &error);
+
+  g_object_unref (dialog);
+
+  if (file == NULL)
+    {
+      if (error != NULL &&
+          !g_error_matches (error, GTK_DIALOG_ERROR,
+                            GTK_DIALOG_ERROR_DISMISSED) &&
+          !g_error_matches (error, GTK_DIALOG_ERROR,
+                            GTK_DIALOG_ERROR_CANCELLED))
+        adw_action_row_set_subtitle (ADW_ACTION_ROW (self), error->message);
+
+      g_object_unref (self);
+      return;
+    }
+
+  {
+    g_autofree char *path = g_file_get_path (file);
+
+    if (path == NULL)
+      adw_action_row_set_subtitle (
+        ADW_ACTION_ROW (self),
+        _("the chosen file does not report a Java version"));
+    else
+      aml_java_probe_async (path, NULL, add_probed, g_object_ref (self));
+  }
+
+  g_object_unref (self);
+}
+
+static void
+on_picked (GObject    *object G_GNUC_UNUSED,
+           GParamSpec *pspec G_GNUC_UNUSED,
+           gpointer    user_data)
+{
+  AmlJavaRow *self = user_data;
+  GtkRoot *root;
+  GtkFileDialog *dialog;
+  guint selected = adw_combo_row_get_selected (ADW_COMBO_ROW (self));
+
+  if (selected != self->add_index)
+    {
+      /* Anything else in the list names a runtime, and is where the ask
+         goes back to. */
+      if (selected < self->ids->len)
+        self->restore = selected;
+
+      return;
+    }
+
+  /* Connected before whoever uses the row, so the selection is already
+     back on a runtime by the time its handler asks which one was
+     picked. */
+  adw_combo_row_set_selected (ADW_COMBO_ROW (self), self->restore);
+
+  root = gtk_widget_get_root (GTK_WIDGET (self));
+  dialog = gtk_file_dialog_new ();
+  gtk_file_dialog_set_title (dialog, _("Choose Java executable"));
+  gtk_file_dialog_open (dialog, GTK_IS_WINDOW (root) ? GTK_WINDOW (root) : NULL,
+                        NULL, add_chosen, g_object_ref (self));
+}
+
+/* ---------------------------------------------------------- *
  * Public API
  * ---------------------------------------------------------- */
 
@@ -362,6 +485,8 @@ aml_java_row_get_selected_path (AmlJavaRow *self)
 
   position = adw_combo_row_get_selected (ADW_COMBO_ROW (self));
 
+  /* Past the end of the ids is the entry that asks for another runtime:
+     it names none, so there is nothing to hand back. */
   if (position == GTK_INVALID_LIST_POSITION || position >= self->ids->len)
     return NULL;
 
@@ -447,8 +572,8 @@ aml_java_row_set_custom (AmlJavaRow *self,
 
   fill (self);
 
-  /* The probed entry is the last one that has a path: the "Add Java
-     Runtime" entry, when it is on, sits after it and has none. */
+  /* The probed entry is the last one that has a path: the entry that
+     asks for another runtime sits after it and has none. */
   if (self->ready)
     adw_combo_row_set_selected (ADW_COMBO_ROW (self), self->ids->len - 1);
 }
@@ -499,8 +624,7 @@ aml_java_row_init (AmlJavaRow *self)
 {
   /* A Java path is a file name and may hold an "&": it is plain text. */
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self), FALSE);
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self),
-                                 "Java Installation");
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self), _("Java Runtime"));
 
   self->ready = FALSE;
   self->javas = g_ptr_array_new_with_free_func ((GDestroyNotify) aml_java_free);
@@ -509,6 +633,8 @@ aml_java_row_init (AmlJavaRow *self)
   self->default_label = g_strdup ("Default");
   self->default_path = NULL;
   self->required_major = 0;
+  self->add_index = GTK_INVALID_LIST_POSITION;
+  self->restore = 0;
 
   self->retry = gtk_button_new_with_label (_("Retry"));
   gtk_widget_add_css_class (self->retry, "flat");
@@ -517,4 +643,8 @@ aml_java_row_init (AmlJavaRow *self)
   g_signal_connect (self->retry, "clicked", G_CALLBACK (on_retry_clicked),
                     self);
   adw_action_row_add_suffix (ADW_ACTION_ROW (self), self->retry);
+
+  /* First, so the entry that asks for a runtime can put the selection
+     back before whoever uses the row sees it. */
+  g_signal_connect (self, "notify::selected", G_CALLBACK (on_picked), self);
 }
