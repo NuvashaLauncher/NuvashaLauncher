@@ -362,7 +362,7 @@ msgstr "I dati nella cache verranno rimossi. I contenuti installati, le istanze,
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
-msgstr "Import Modpack"
+msgstr "Importa modpack"
 
 msgid "Modpack exported"
 msgstr "Modpack exported"
@@ -373,8 +373,5 @@ msgstr "Modrinth Modpacks (*.mrpack)"
 msgid "The export location is not a local file"
 msgstr "The export location is not a local file"
 
-msgid "Save this instance as a Modrinth modpack"
-msgstr "Save this instance as a Modrinth modpack"
-
 msgid "Export Modpack"
-msgstr "Export Modpack"
+msgstr "Esporta modpack"
