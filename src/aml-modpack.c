@@ -1033,6 +1033,13 @@ extract_entry (struct archive *archive,
   g_autofree char *parent = NULL;
   FILE *out = NULL;
 
+  if (name == NULL)
+    {
+      g_set_error_literal (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_FORMAT,
+                           "an override has no pathname");
+      return FALSE;
+    }
+
   if (!g_str_has_prefix (name, prefix))
     return TRUE;
 
@@ -1124,7 +1131,8 @@ extract_entry (struct archive *archive,
         {
           /* The bomb protection runs on the bytes that did inflate, not
            * on what the entry announced. */
-          if (*used + (guint64) size > max_content_size)
+          if (*used > max_content_size ||
+              (guint64) size > max_content_size - *used)
             {
               fclose (out);
               g_unlink (dest);
@@ -1151,6 +1159,7 @@ extract_entry (struct archive *archive,
 
   if (fclose (out) != 0)
     {
+      g_unlink (dest);
       g_set_error (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
                    "\"%s\" cannot be closed: %s", name, g_strerror (errno));
       return FALSE;
