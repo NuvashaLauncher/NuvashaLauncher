@@ -751,6 +751,8 @@ aml_modpack_new_from_zip (const char *zip_path, GError **error)
   guint64 paths = 0;
   guint64 size = 0;
   int status = ARCHIVE_OK;
+  gboolean has_root_icon = FALSE;
+  gboolean has_override_icon = FALSE;
 
   g_return_val_if_fail (zip_path != NULL, NULL);
 
@@ -811,6 +813,11 @@ aml_modpack_new_from_zip (const char *zip_path, GError **error)
                        name);
           goto error;
         }
+
+      if (g_str_equal (path, "icon.png"))
+        has_root_icon = TRUE;
+      else if (g_str_equal (path, "overrides/icon.png"))
+        has_override_icon = TRUE;
 
       if (entry_size > 0)
         {
@@ -891,7 +898,10 @@ aml_modpack_new_from_zip (const char *zip_path, GError **error)
   /* AML stores its local instance icon as an ordinary override file. This
    * does not add fields to modrinth.index.json or change the .mrpack schema;
    * other launchers simply install the harmless extra override. */
-  pack->icon = g_strdup ("overrides/icon.png");
+  if (has_root_icon)
+    pack->icon = g_strdup ("icon.png");
+  else if (has_override_icon)
+    pack->icon = g_strdup ("overrides/icon.png");
 
   return g_steal_pointer (&pack);
 
@@ -1049,10 +1059,18 @@ extract_entry (struct archive *archive,
       return FALSE;
     }
 
-  if (!g_str_has_prefix (name, prefix))
-    return TRUE;
-
-  relative = g_strdup (name + strlen (prefix));
+  if (g_str_equal (prefix, "icon.png"))
+    {
+      if (!g_str_equal (name, prefix))
+        return TRUE;
+      relative = g_strdup (name);
+    }
+  else
+    {
+      if (!g_str_has_prefix (name, prefix))
+        return TRUE;
+      relative = g_strdup (name + strlen (prefix));
+    }
 
   /* The prefix itself is no file. */
   if (relative[0] == '\0')
@@ -1252,7 +1270,9 @@ extract_overrides (const char *archive_path,
                    const char *directory,
                    GError **error)
 {
-  static const char *prefixes[] = { "overrides/", "client-overrides/" };
+  static const char *prefixes[] = {
+    "overrides/", "client-overrides/", "icon.png"
+  };
   guint64 used = 0;
 
   for (guint i = 0; i < G_N_ELEMENTS (prefixes); i++)
