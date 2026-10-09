@@ -70,7 +70,7 @@ build/tests/%: tests/%.c $(TESTLIBOBJS) | build/tests
 	$(CC) $(CFLAGS) $(RELFLAGS) -Isrc $(PKG_CFLAGS) \
 		-DAML_DATA_DIR=\"$(CURDIR)/data\" -DAML_BIN=\"$(CURDIR)/$(BIN)\" \
 		-DAML_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
-		-DAML_SRC_DIR=\"$(CURDIR)/src\" \
+		-DAML_SRC_DIR=\"$(CURDIR)/src\" -DAML_PO_DIR=\"$(CURDIR)/po\" \
 		-o $@ $< $(TESTLIBOBJS) $(PKG_LIBS)
 
 # Tests never write to the real data directory and never touch the
@@ -87,7 +87,7 @@ build-debug/tests/%: tests/%.c $(TESTLIBDBGOBJS) | build-debug/tests
 	$(CC) $(CFLAGS) $(DBGFLAGS) -Isrc $(PKG_CFLAGS) \
 		-DAML_DATA_DIR=\"$(CURDIR)/data\" -DAML_BIN=\"$(CURDIR)/$(BIN)\" \
 		-DAML_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
-		-DAML_SRC_DIR=\"$(CURDIR)/src\" \
+		-DAML_SRC_DIR=\"$(CURDIR)/src\" -DAML_PO_DIR=\"$(CURDIR)/po\" \
 		-o $@ $< $(TESTLIBDBGOBJS) $(PKG_LIBS)
 
 # The Wayland guard test runs the release launcher, so test-debug builds

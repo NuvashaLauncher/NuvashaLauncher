@@ -24,9 +24,6 @@ msgstr "Español (España)"
 msgid "Português (Brasil)"
 msgstr "Português (Brasil)"
 
-msgid "Restart AML to apply the language"
-msgstr "Reiniciá AML para aplicar el idioma"
-
 msgid "Settings"
 msgstr "Configuración"
 
@@ -37,31 +34,40 @@ msgid "Show Snapshots"
 msgstr "Mostrar snapshots"
 
 msgid "Show unstable Mod Loader versions"
-msgstr "Mostrar versiones inestables de los mod loaders"
+msgstr "Mostrar versiones inestables del lanzador de mods"
 
 msgid "Java"
 msgstr "Java"
 
-msgid "Default Java"
-msgstr "Java predeterminado"
+msgid "Java Runtime"
+msgstr "Entorno de ejecución de Java"
+
+msgid "No Java installation was found on this system"
+msgstr "No se encontró ninguna instalación de Java en este sistema"
+
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "Este juego necesita Java %d o más nuevo, el Java elegido es %d"
 
 msgid "Automatic (closest compatible)"
 msgstr "Automático (compatible más cercano)"
 
-msgid "Custom Java…"
-msgstr "Java personalizado…"
+msgid "No detected Java satisfies the requirement of Java %d+"
+msgstr "Ningún Java detectado cumple el requisito de Java %d+"
+
+msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
+msgstr "Minecraft necesita un Java que no sea headless: en Arch usá el paquete jre-openjdk, no jre-openjdk-headless"
 
 msgid "Logs"
 msgstr "Registros"
+
+msgid "The configured Java was not detected; make sure it is still a usable java executable"
+msgstr "No se detectó el Java configurado; verificá que siga siendo un ejecutable de Java utilizable"
 
 msgid "Line Limit"
 msgstr "Límite de líneas"
 
 msgid "Open Log Folder After Crash"
 msgstr "Abrir la carpeta de registros después de un cierre inesperado"
-
-msgid "Choose…"
-msgstr "Elegir…"
 
 msgid "Retry"
 msgstr "Reintentar"
@@ -87,7 +93,6 @@ msgstr "Cancelar"
 msgid "Create"
 msgstr "Crear"
 
-
 msgid "Back"
 msgstr "Atrás"
 
@@ -108,6 +113,9 @@ msgstr "Acciones"
 
 msgid "Choose Java executable"
 msgstr "Elegí el ejecutable de Java"
+
+msgid "the chosen file does not report a Java version"
+msgstr "el archivo elegido no informa una versión de Java"
 
 msgid "About AML"
 msgstr "Acerca de AML"
@@ -191,7 +199,7 @@ msgid "Accounts"
 msgstr "Cuentas"
 
 msgid "the loader cannot be resolved: %s"
-msgstr "no se puede resolver el mod loader: %s"
+msgstr "no se puede resolver el lanzador de mods: %s"
 
 msgid "No compatible version found for Minecraft %s and %s."
 msgstr "No se encontró una versión compatible para Minecraft %s y %s."
@@ -254,16 +262,16 @@ msgid "waiting for the sign-in in the browser"
 msgstr "Esperando el inicio de sesión en el navegador"
 
 msgid "Loader"
-msgstr "Mod loader"
+msgstr "Lanzador de mods"
 
 msgid "Loader Version"
-msgstr "Versión del mod loader"
+msgstr "Versión del lanzador de mods"
 
 msgid "Minecraft Version"
 msgstr "Versión de Minecraft"
 
 msgid "Add Java Runtime"
-msgstr "Agregar Java"
+msgstr "Agregar entorno de ejecución de Java"
 
 msgid "JVM Arguments"
 msgstr "Argumentos de la JVM"
@@ -302,10 +310,10 @@ msgid "Search the log"
 msgstr "Buscar en el registro"
 
 msgid "No mod loader"
-msgstr "No hay mod loader"
+msgstr "No hay lanzador de mods"
 
 msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
-msgstr "Los mods necesitan un mod loader. Primero elegí Fabric, Quilt, Forge o NeoForge en la configuración de esta instancia"
+msgstr "Los mods necesitan un lanzador de mods. Primero elegí Fabric, Quilt, Forge o NeoForge en la configuración de esta instancia"
 
 msgid "Mods"
 msgstr "Mods"

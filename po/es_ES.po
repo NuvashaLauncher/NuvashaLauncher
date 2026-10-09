@@ -62,10 +62,10 @@ msgid "Browse"
 msgstr "Explorar"
 
 msgid "No mod loader"
-msgstr "Sin mod loader"
+msgstr "Sin lanzador de mods"
 
 msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
-msgstr "Los mods necesitan un mod loader. Elige primero Fabric, Quilt, Forge o NeoForge en la configuración de esta instancia"
+msgstr "Los mods necesitan un lanzador de mods. Elige primero Fabric, Quilt, Forge o NeoForge en la configuración de esta instancia"
 
 msgid "Create Instance"
 msgstr "Crear instancia"
@@ -104,7 +104,10 @@ msgid "Copy of %s"
 msgstr "Copia de %s"
 
 msgid "Choose Java executable"
-msgstr "Elegir ejecutable Java"
+msgstr "Elegir el ejecutable de Java"
+
+msgid "the chosen file does not report a Java version"
+msgstr "el archivo elegido no informa de una versión de Java"
 
 msgid "Choose an Icon"
 msgstr "Elegir un icono"
@@ -130,17 +133,32 @@ msgstr "Cambiar la carpeta"
 msgid "Minecraft"
 msgstr "Minecraft"
 
-msgid "Choose…"
-msgstr "Elegir…"
-
 msgid "Java"
 msgstr "Java"
 
+msgid "Java Runtime"
+msgstr "Entorno de ejecución de Java"
+
+msgid "No Java installation was found on this system"
+msgstr "No se ha encontrado ninguna instalación de Java en este sistema"
+
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "Este juego necesita Java %d o más nuevo, el Java elegido es %d"
+
 msgid "Add Java Runtime"
-msgstr "Añadir Java"
+msgstr "Agregar entorno de ejecución de Java"
+
+msgid "No detected Java satisfies the requirement of Java %d+"
+msgstr "Ningún Java detectado cumple el requisito de Java %d+"
+
+msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
+msgstr "Minecraft necesita un Java que no sea headless: en Arch usa el paquete jre-openjdk, no jre-openjdk-headless"
 
 msgid "JVM Arguments"
 msgstr "Argumentos de la JVM"
+
+msgid "The configured Java was not detected; make sure it is still a usable java executable"
+msgstr "No se ha detectado el Java configurado; comprueba que siga siendo un ejecutable de Java utilizable"
 
 msgid "Actions"
 msgstr "Acciones"
@@ -179,10 +197,10 @@ msgid "No compatible %s version found for Minecraft %s."
 msgstr "No se ha encontrado ninguna versión %s compatible para Minecraft %s."
 
 msgid "Loader"
-msgstr "Mod loader"
+msgstr "Lanzador de mods"
 
 msgid "Loader Version"
-msgstr "Versión del mod loader"
+msgstr "Versión del lanzador de mods"
 
 msgid "Clear"
 msgstr "Limpiar"
@@ -197,16 +215,10 @@ msgid "Show Snapshots"
 msgstr "Mostrar instantáneas"
 
 msgid "Show unstable Mod Loader versions"
-msgstr "Mostrar versiones inestables de los mod loaders"
-
-msgid "Default Java"
-msgstr "Java predeterminado"
+msgstr "Mostrar versiones inestables del lanzador de mods"
 
 msgid "Automatic (closest compatible)"
 msgstr "Automático (la más compatible)"
-
-msgid "Custom Java…"
-msgstr "Java personalizado…"
 
 msgid "Language"
 msgstr "Idioma"
@@ -248,7 +260,7 @@ msgid "Use the + button in the header to create one"
 msgstr "Usa el botón + de la cabecera para crear una"
 
 msgid "the loader cannot be resolved: %s"
-msgstr "no se puede resolver el mod loader: %s"
+msgstr "no se puede resolver el lanzador de mods: %s"
 
 msgid "No compatible version found for Minecraft %s and %s."
 msgstr "No se ha encontrado ninguna versión compatible para Minecraft %s y %s."

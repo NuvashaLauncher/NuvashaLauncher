@@ -104,7 +104,10 @@ msgid "Copy of %s"
 msgstr "%s 的副本"
 
 msgid "Choose Java executable"
-msgstr "选择Java可执行文件"
+msgstr "选择 Java 可执行文件"
+
+msgid "the chosen file does not report a Java version"
+msgstr "所选文件未报告 Java 版本"
 
 msgid "Choose an Icon"
 msgstr "选择一个图标"
@@ -130,17 +133,32 @@ msgstr "更改文件夹"
 msgid "Minecraft"
 msgstr "我的世界"
 
-msgid "Choose…"
-msgstr "选择…"
-
 msgid "Java"
 msgstr "Java"
 
+msgid "Java Runtime"
+msgstr "Java 运行时"
+
+msgid "No Java installation was found on this system"
+msgstr "在此系统中未找到 Java 安装"
+
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "此游戏需要 Java %d 或更高版本，当前选择的是 Java %d"
+
 msgid "Add Java Runtime"
-msgstr "添加 Java"
+msgstr "添加 Java 运行时"
+
+msgid "No detected Java satisfies the requirement of Java %d+"
+msgstr "检测到的 Java 均不满足 Java %d+ 的要求"
+
+msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
+msgstr "Minecraft 需要非无头模式的 Java：在 Arch 上请使用 jre-openjdk 软件包，而不是 jre-openjdk-headless"
 
 msgid "JVM Arguments"
 msgstr "JVM 参数"
+
+msgid "The configured Java was not detected; make sure it is still a usable java executable"
+msgstr "未检测到已配置的 Java；请确认它仍是可用的 Java 可执行文件"
 
 msgid "Actions"
 msgstr "操作"
@@ -197,16 +215,10 @@ msgid "Show Snapshots"
 msgstr "显示快照"
 
 msgid "Show unstable Mod Loader versions"
-msgstr "显示不稳定的Mod加载器版本"
-
-msgid "Default Java"
-msgstr "默认Java"
+msgstr "显示不稳定的模组加载器版本"
 
 msgid "Automatic (closest compatible)"
 msgstr "自动（最接近的兼容版本）"
-
-msgid "Custom Java…"
-msgstr "自定义 Java…"
 
 msgid "Language"
 msgstr "语言"

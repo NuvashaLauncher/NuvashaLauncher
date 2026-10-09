@@ -106,6 +106,9 @@ msgstr "%s kopyası"
 msgid "Choose Java executable"
 msgstr "Java çalıştırılabilir dosyasını seç"
 
+msgid "the chosen file does not report a Java version"
+msgstr "seçilen dosya bir Java sürümü bildirmiyor"
+
 msgid "Choose an Icon"
 msgstr "Bir simge seç"
 
@@ -130,17 +133,32 @@ msgstr "Klasörü değiştir"
 msgid "Minecraft"
 msgstr "Minecraft"
 
-msgid "Choose…"
-msgstr "Seç…"
-
 msgid "Java"
 msgstr "Java"
+
+msgid "Java Runtime"
+msgstr "Java çalışma zamanı"
+
+msgid "No Java installation was found on this system"
+msgstr "Bu sistemde hiçbir Java kurulumu bulunamadı"
+
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "Bu oyun Java %d veya daha yeni bir sürüm gerektiriyor, seçilen Java %d"
 
 msgid "Add Java Runtime"
 msgstr "Java çalışma zamanı ekle"
 
+msgid "No detected Java satisfies the requirement of Java %d+"
+msgstr "Algılanan Java sürümlerinden hiçbiri Java %d+ gereksinimini karşılamıyor"
+
+msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
+msgstr "Minecraft’in headless olmayan bir Java’ya ihtiyacı var: Arch üzerinde jre-openjdk-headless değil, jre-openjdk paketini kullanın"
+
 msgid "JVM Arguments"
 msgstr "JVM Argümanları"
+
+msgid "The configured Java was not detected; make sure it is still a usable java executable"
+msgstr "Yapılandırılmış Java algılanmadı; hâlâ kullanılabilir bir Java çalıştırılabilir dosyası olduğundan emin olun"
 
 msgid "Actions"
 msgstr "Eylemler"
@@ -179,10 +197,10 @@ msgid "No compatible %s version found for Minecraft %s."
 msgstr "Minecraft %s için uyumlu %s sürümü bulunamadı."
 
 msgid "Loader"
-msgstr "Yükleyici"
+msgstr "Mod yükleyici"
 
 msgid "Loader Version"
-msgstr "Yükleyici Sürümü"
+msgstr "Mod yükleyici sürümü"
 
 msgid "Clear"
 msgstr "Temizle"
@@ -199,14 +217,8 @@ msgstr "Anlık Görüntüleri Göster"
 msgid "Show unstable Mod Loader versions"
 msgstr "Kararsız mod yükleyici sürümlerini göster"
 
-msgid "Default Java"
-msgstr "Varsayılan Java"
-
 msgid "Automatic (closest compatible)"
 msgstr "Otomatik (en yakın uyumlu)"
-
-msgid "Custom Java…"
-msgstr "Özel Java…"
 
 msgid "Language"
 msgstr "Dil"
@@ -248,7 +260,7 @@ msgid "Use the + button in the header to create one"
 msgstr "Bir tane oluşturmak için başlıktaki + düğmesini kullanın"
 
 msgid "the loader cannot be resolved: %s"
-msgstr "yükleyici çözümlenemiyor: %s"
+msgstr "mod yükleyici çözümlenemiyor: %s"
 
 msgid "No compatible version found for Minecraft %s and %s."
 msgstr "Minecraft %s ve %s için uyumlu sürüm bulunamadı."

@@ -48,6 +48,12 @@ A new language takes effect on the next launch, because widgets hold the
 strings they were built with. To correct or add a translation, edit the
 catalogs in `po/` and run `make`.
 
+`make test` checks that every string the launcher hands to gettext is
+translated in every catalog, and that every translation takes the same
+arguments as the string it translates. A string left in English reaches
+the interface as English, so the catalogs are checked against the source
+rather than against a file that has to be kept in step with it.
+
 ## Build dependencies
 
 The build needs a C17 compiler, GNU make, and the development packages

@@ -62,10 +62,10 @@ msgid "Browse"
 msgstr "Переглянути"
 
 msgid "No mod loader"
-msgstr "Немає мод-завантажувача"
+msgstr "Немає завантажувача модів"
 
 msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
-msgstr "Моди потребують мод-завантажувача. Спершу виберіть Fabric, Quilt, Forge або NeoForge в налаштуваннях цього екземпляра"
+msgstr "Моди потребують завантажувача модів. Спершу виберіть Fabric, Quilt, Forge або NeoForge в налаштуваннях цього екземпляра"
 
 msgid "Create Instance"
 msgstr "Створити екземпляр"
@@ -106,6 +106,9 @@ msgstr "Копія %s"
 msgid "Choose Java executable"
 msgstr "Виберіть виконуваний файл Java"
 
+msgid "the chosen file does not report a Java version"
+msgstr "вибраний файл не повідомляє версію Java"
+
 msgid "Choose an Icon"
 msgstr "Виберіть піктограму"
 
@@ -130,17 +133,32 @@ msgstr "Змінити теку"
 msgid "Minecraft"
 msgstr "Minecraft"
 
-msgid "Choose…"
-msgstr "Вибрати…"
-
 msgid "Java"
 msgstr "Java"
 
+msgid "Java Runtime"
+msgstr "Середовище виконання Java"
+
+msgid "No Java installation was found on this system"
+msgstr "У цій системі не знайдено встановлень Java"
+
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "Для цієї гри потрібна Java %d або новіша, вибрано Java %d"
+
 msgid "Add Java Runtime"
-msgstr "Додати середовище Java"
+msgstr "Додати середовище виконання Java"
+
+msgid "No detected Java satisfies the requirement of Java %d+"
+msgstr "Жодна виявлена Java не відповідає вимозі Java %d+"
+
+msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
+msgstr "Minecraft потребує Java без headless-режиму: в Arch використовуйте пакунок jre-openjdk, а не jre-openjdk-headless"
 
 msgid "JVM Arguments"
 msgstr "Аргументи JVM"
+
+msgid "The configured Java was not detected; make sure it is still a usable java executable"
+msgstr "Налаштовану Java не виявлено; переконайтеся, що це й досі придатний виконуваний файл Java"
 
 msgid "Actions"
 msgstr "Дії"
@@ -179,10 +197,10 @@ msgid "No compatible %s version found for Minecraft %s."
 msgstr "Не знайдено сумісної версії %s для Minecraft %s."
 
 msgid "Loader"
-msgstr "Завантажувач"
+msgstr "Завантажувач модів"
 
 msgid "Loader Version"
-msgstr "Версія завантажувача"
+msgstr "Версія завантажувача модів"
 
 msgid "Clear"
 msgstr "Очистити"
@@ -197,16 +215,10 @@ msgid "Show Snapshots"
 msgstr "Показувати снапшоти"
 
 msgid "Show unstable Mod Loader versions"
-msgstr "Показувати нестабільні версії завантажувачів"
-
-msgid "Default Java"
-msgstr "Java за замовчуванням"
+msgstr "Показувати нестабільні версії завантажувачів модів"
 
 msgid "Automatic (closest compatible)"
 msgstr "Автоматично (найближча сумісна)"
-
-msgid "Custom Java…"
-msgstr "Власна Java…"
 
 msgid "Language"
 msgstr "Мова"
@@ -248,7 +260,7 @@ msgid "Use the + button in the header to create one"
 msgstr "Скористайтеся кнопкою + у верхній панелі, щоб створити"
 
 msgid "the loader cannot be resolved: %s"
-msgstr "не вдалося визначити завантажувач: %s"
+msgstr "не вдалося визначити завантажувач модів: %s"
 
 msgid "No compatible version found for Minecraft %s and %s."
 msgstr "Не знайдено сумісної версії для Minecraft %s та %s."
