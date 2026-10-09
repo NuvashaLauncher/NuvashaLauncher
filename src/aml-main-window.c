@@ -122,7 +122,9 @@ on_import_modpack_chosen (GObject *source, GAsyncResult *result,
     GtkWidget *dialog = GTK_WIDGET (
       aml_download_modpack_dialog_new_for_file (self->manager, path));
 
-    adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
+    /* Import runs as a background install: its AmlDownload entry appears
+     * beside the + button just like a downloaded modpack. */
+    g_object_unref (dialog);
   }
 
   g_object_unref (self);
