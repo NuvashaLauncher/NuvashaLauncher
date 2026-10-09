@@ -701,6 +701,7 @@ test_install_offline (void)
   g_autofree char *instance_dir = NULL;
   g_autofree char *name = NULL;
   g_autofree char *minecraft = NULL;
+  g_autofree char *icon = NULL;
   AmlLoader loader = AML_LOADER_VANILLA;
   g_autofree char *options = NULL;
   g_autofree char *client = NULL;
@@ -711,6 +712,7 @@ test_install_offline (void)
       NULL },
     ZIP_FILE ("overrides/config/options.txt", "from overrides"),
     ZIP_FILE ("overrides/config/mods.toml", "only overrides"),
+    ZIP_FILE ("overrides/icon.png", "icon bytes"),
     ZIP_FILE ("client-overrides/config/options.txt", "from client"),
     ZIP_FILE ("server-overrides/config/server.txt", "from server"),
   };
@@ -732,12 +734,21 @@ test_install_offline (void)
   g_assert_nonnull (instance);
 
   g_object_get (instance, "directory", &instance_dir, "name", &name,
-                "minecraft-version", &minecraft, "loader", &loader, NULL);
+                "minecraft-version", &minecraft, "loader", &loader,
+                "icon", &icon, NULL);
   g_assert_cmpstr (name, ==, "Offline Pack");
   g_assert_cmpstr (minecraft, ==, "1.20.1");
   g_assert_cmpint (loader, ==, AML_LOADER_VANILLA);
   g_assert_true (g_str_has_prefix (instance_dir, instances_dir));
   g_assert_true (g_file_test (instance_dir, G_FILE_TEST_IS_DIR));
+  g_assert_nonnull (icon);
+  {
+    g_autofree char *icon_name = g_path_get_basename (icon);
+    g_autofree char *icon_data = read_file (icon);
+
+    g_assert_cmpstr (icon_name, ==, "icon.png");
+    g_assert_cmpstr (icon_data, ==, "icon bytes");
+  }
 
   /* overrides lands, client-overrides lands on top of it, and
    * server-overrides has nothing to do on the client. */
