@@ -5,14 +5,15 @@
 /* AmlSettings: the small file of choices the whole application shares,
  * <config dir>/AML/config.json.
  *
- * One object, five options so far: whether the version lists also show
- * snapshots and the versions Mojang no longer serves, which Java an
- * instance runs with when it picks none, whether the loader lists also
- * show the versions a loader does not call stable, how many lines the
- * log of a running game keeps and whether the log folder is opened when
- * a game crashes. The file is read once when the object is created and
- * written on every change; a file that is missing, unreadable or
- * nonsense leaves the defaults in place instead of failing. */
+ * One object, four options so far: whether the version lists also show
+ * snapshots and the versions Mojang no longer serves, whether the loader
+ * lists also show the versions a loader does not call stable, how many
+ * lines the log of a running game keeps and whether the log folder is
+ * opened when a game crashes. Which Java an instance runs with is not
+ * one of them: it is the automatic choice, unless the instance itself
+ * names another runtime. The file is read once when the object is
+ * created and written on every change; a file that is missing, unreadable
+ * or nonsense leaves the defaults in place instead of failing. */
 
 #ifndef AML_SETTINGS_H
 #define AML_SETTINGS_H
@@ -51,16 +52,6 @@ gboolean aml_settings_get_show_snapshots (AmlSettings *self);
 gboolean aml_settings_set_show_snapshots (AmlSettings *self,
                                           gboolean     value,
                                           GError     **error);
-
-/* The global default Java executable, or NULL for "the one that fits
- * each instance best". Borrowed from the object, NULL when unset. */
-const char *aml_settings_get_default_java_path (AmlSettings *self);
-
-/* Same write-through contract as the snapshots setter: the object only
- * ever agrees with the file. */
-gboolean aml_settings_set_default_java_path (AmlSettings *self,
-                                             const char *path,
-                                             GError    **error);
 
 /* How many lines the log of a running game keeps, oldest dropped first.
  * Never below one: AML_SETTINGS_DEFAULT_LOG_LINE_LIMIT when the file

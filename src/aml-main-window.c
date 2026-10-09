@@ -13,8 +13,6 @@
 #include "aml-downloads.h"
 #include "aml-instance-page.h"
 #include "aml-i18n.h"
-#include "aml-java-row.h"
-#include "aml-java.h"
 #include "aml-launcher.h"
 #include "aml-settings.h"
 #include "aml-users-popover.h"
@@ -57,6 +55,7 @@ struct _AmlMainWindow
      rows are keyed by the AmlDownload they show. */
   GtkWidget *downloads_button;  /* a GtkMenuButton around the spinner */
   GtkWidget *downloads_spinner;
+  GtkWidget *downloads_icon;      /* what the button opens, beside the spinner */
   GtkWidget *downloads_list;    /* the box inside the dropdown */
   GHashTable *download_rows;    /* AmlDownload* -> DownloadRow* */
 };
@@ -107,40 +106,6 @@ on_show_snapshots_toggled (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
     return;
 
   adw_switch_row_set_active (row, stored);
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), error->message);
-}
-
-/* Picks the Java the settings file names and writes it. The row itself
- * owns the ask for another runtime, so nothing outside it is needed
- * here: a change to the selection is the whole of the round trip. */
-static void
-on_settings_java_selected (GObject *object,
-                           GParamSpec *pspec G_GNUC_UNUSED,
-                           gpointer user_data)
-{
-  AmlMainWindow *self = user_data;
-  AmlJavaRow *row = AML_JAVA_ROW (object);
-  const char *path = aml_java_row_get_selected_path (row);
-  g_autoptr (GError) error = NULL;
-  const char *current;
-  const char *next;
-
-  if (path == NULL)
-    return; /* still loading, failed, or the entry that asks for one */
-
-  current = aml_settings_get_default_java_path (self->settings);
-  next = (path[0] != '\0') ? path : NULL;
-
-  if (g_strcmp0 (current, next) == 0)
-    return;
-
-  if (aml_settings_set_default_java_path (self->settings, next, &error))
-    {
-      adw_action_row_set_subtitle (ADW_ACTION_ROW (row), NULL);
-      return;
-    }
-
-  aml_java_row_select_path (row, current);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (row), error->message);
 }
 
@@ -227,12 +192,10 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   AdwDialog *dialog = adw_preferences_dialog_new ();
   GtkWidget *page = adw_preferences_page_new ();
   GtkWidget *versions_group = adw_preferences_group_new ();
-  GtkWidget *java_group = adw_preferences_group_new ();
   GtkWidget *logs_group = adw_preferences_group_new ();
   GtkWidget *language_group = adw_preferences_group_new ();
   GtkWidget *language_row = adw_combo_row_new ();
   GtkWidget *row = adw_switch_row_new ();
-  GtkWidget *java_row = GTK_WIDGET (aml_java_row_new ());
   GtkWidget *limit_row = NULL;
   GtkWidget *unstable_row = adw_switch_row_new ();
   GtkWidget *crash_row = adw_switch_row_new ();
@@ -273,24 +236,6 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
                     G_CALLBACK (on_show_unstable_loaders_toggled), self);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (versions_group),
                              unstable_row);
-
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (java_group),
-                                   _("Java"));
-
-  /* The row carries the whole choice: the runtimes the scan found, the
-     default, and a last entry that adds one it did not report. */
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (java_row),
-                                  _("Java Runtime"));
-
-  g_signal_connect (java_row, "notify::selected",
-                    G_CALLBACK (on_settings_java_selected), self);
-
-  aml_java_row_set_default_entry_label (AML_JAVA_ROW (java_row),
-                                         _("Automatic (closest compatible)"));
-  aml_java_row_load (AML_JAVA_ROW (java_row),
-                     aml_settings_get_default_java_path (self->settings));
-
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (java_group), java_row);
 
   /* Logs */
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (logs_group),
@@ -348,8 +293,6 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
 
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                             ADW_PREFERENCES_GROUP (versions_group));
-  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
-                            ADW_PREFERENCES_GROUP (java_group));
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                              ADW_PREFERENCES_GROUP (logs_group));
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
@@ -1027,10 +970,6 @@ on_instances_changed (AmlMainWindow *self,
   close_dialogs_of_removed_instances (self);
 }
 
-/* ---------------------------------------------------------- *
- * What is downloading now
- * ---------------------------------------------------------- */
-
 /* One dropdown entry: the box GTK owns plus the widgets that change as
  * the download does. The box is a child of the downloads list, so it is
  * destroyed with it; only the struct is ours. */
@@ -1083,6 +1022,8 @@ static void
 refresh_downloads (AmlMainWindow *self)
 {
   GPtrArray *jobs = aml_downloads_get_all ();
+  /* What the content pages have picked: what the icon carries a number
+     of, and the reason the button is there when nothing is downloading. */
   GHashTableIter iter;
   gpointer key;
   gpointer value;
@@ -1194,6 +1135,10 @@ refresh_downloads (AmlMainWindow *self)
         gtk_progress_bar_pulse (GTK_PROGRESS_BAR (row->bar));
     }
 
+  /* The button is the page of the header: the spinner that appears while
+     anything is downloading and opens a dropdown of what is, and the
+     number of what the content pages have picked on the icon beside it.
+     Either of the two is a reason for it to be there at all. */
   if (jobs->len > 0)
     {
       gtk_widget_set_visible (self->downloads_button, TRUE);
@@ -1208,8 +1153,15 @@ refresh_downloads (AmlMainWindow *self)
       if (popover != NULL)
         gtk_popover_popdown (popover);
 
-      gtk_widget_set_visible (self->downloads_button, FALSE);
+       gtk_widget_set_visible (self->downloads_button, FALSE);
     }
+
+  /* Browser selections are shown by the browser's own button, not in this
+     menu. This header button is only for transfers that are running. */
+  {
+    gtk_widget_set_visible (self->downloads_spinner, jobs->len > 0);
+    gtk_widget_set_visible (self->downloads_icon, jobs->len == 0);
+  }
 }
 
 static void
@@ -1261,20 +1213,33 @@ aml_main_window_init (AmlMainWindow *self)
     set_menu_item_tooltip (add_popover, "Download Modpack",
                            "Search Modrinth and install a modpack");
 
-  /* Beside the "+": a spinner that appears while anything is downloading
-     and opens a dropdown of what is. It is hidden when nothing is. */
-  self->downloads_spinner = adw_spinner_new ();
+  /* Beside the "+": the downloads. A spinner appears while anything is
+     downloading and opens a dropdown of what is; the icon beside it
+     carries the number of what the content pages have picked and
+     installed at once. The button is hidden when there is neither. */
+  self->downloads_icon = gtk_image_new_from_icon_name (
+    "folder-download-symbolic");
+   self->downloads_spinner = adw_spinner_new ();
   self->downloads_button = gtk_menu_button_new ();
   self->downloads_list = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   self->download_rows = g_hash_table_new_full (g_direct_hash, g_direct_equal,
                                                NULL, download_row_free);
 
   {
+    GtkWidget *packed = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+    GtkWidget *icon_row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
     GtkWidget *popover = gtk_popover_new ();
     GtkWidget *scroller = gtk_scrolled_window_new ();
 
+    /* The icon and the spinner share the middle: the icon says what the
+       button opens, the spinner that something is on its way. */
+    gtk_widget_set_valign (self->downloads_icon, GTK_ALIGN_CENTER);
+    gtk_box_append (GTK_BOX (icon_row), self->downloads_icon);
+    gtk_widget_set_valign (self->downloads_spinner, GTK_ALIGN_CENTER);
+    gtk_box_append (GTK_BOX (icon_row), self->downloads_spinner);
+
     gtk_menu_button_set_child (GTK_MENU_BUTTON (self->downloads_button),
-                               self->downloads_spinner);
+                               icon_row);
     gtk_widget_add_css_class (self->downloads_button, "flat");
     gtk_menu_button_set_always_show_arrow (
       GTK_MENU_BUTTON (self->downloads_button), FALSE);
@@ -1283,6 +1248,8 @@ aml_main_window_init (AmlMainWindow *self)
                                     GTK_ACCESSIBLE_PROPERTY_LABEL, _("Downloads"),
                                     -1);
     gtk_widget_set_visible (self->downloads_button, FALSE);
+
+    gtk_box_append (GTK_BOX (packed), self->downloads_button);
 
     gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
                                     GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
@@ -1296,9 +1263,9 @@ aml_main_window_init (AmlMainWindow *self)
     gtk_popover_set_has_arrow (GTK_POPOVER (popover), FALSE);
     gtk_menu_button_set_popover (GTK_MENU_BUTTON (self->downloads_button),
                                  popover);
-  }
 
-  adw_header_bar_pack_start (ADW_HEADER_BAR (header), self->downloads_button);
+    adw_header_bar_pack_start (ADW_HEADER_BAR (header), packed);
+  }
 
   g_signal_connect_object (aml_downloads_get_default (), "changed",
                            G_CALLBACK (on_downloads_changed), self, 0);

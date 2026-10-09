@@ -268,32 +268,24 @@ test_compatibility_rule (void)
 }
 
 static void
-test_select_instance_overrides_global (void)
+test_select_instance_then_closest (void)
 {
   g_autoptr (GPtrArray) list = fake_java_list ();
   const AmlJava *picked;
 
-  picked = aml_java_select (list, "/fake/jdk/25/bin/java", NULL, 8);
+  picked = aml_java_select (list, "/fake/jdk/25/bin/java", 8);
   g_assert_nonnull (picked);
-  g_assert_cmpint (picked->major_version, ==, 25);
-
-  picked = aml_java_select (list, NULL, "/fake/jdk/17/bin/java", 8);
-  g_assert_nonnull (picked);
-  g_assert_cmpint (picked->major_version, ==, 17);
-
-  picked =
-    aml_java_select (list, "/fake/jdk/25/bin/java", "/fake/jdk/17/bin/java", 8);
   g_assert_cmpint (picked->major_version, ==, 25);
 
   /* Nothing set: the closest compatible one wins. */
-  picked = aml_java_select (list, NULL, NULL, 21);
+  picked = aml_java_select (list, NULL, 21);
   g_assert_nonnull (picked);
   g_assert_cmpint (picked->major_version, ==, 21);
 
   /* An instance path detection never saw is not something this module
    * can fake: selection answers nothing. */
-  g_assert_null (aml_java_select (list, "/elsewhere/bin/java", NULL, 8));
-  g_assert_null (aml_java_select (list, NULL, NULL, 30));
+  g_assert_null (aml_java_select (list, "/elsewhere/bin/java", 8));
+  g_assert_null (aml_java_select (list, NULL, 30));
 }
 
 /* ---------------------------------------------------------- *
@@ -611,8 +603,8 @@ main (void)
 
   test_best_compatible_prefers_windowed ();
 
-  test_select_instance_overrides_global ();
-  g_print ("ok - instance, global then auto, in that order\n");
+  test_select_instance_then_closest ();
+  g_print ("ok - the instance's Java, else the closest compatible one\n");
 
   test_probing_fake_scripts_and_dedup ();
   g_print ("ok - siblings and symlinks probe once, dead paths are skipped\n");

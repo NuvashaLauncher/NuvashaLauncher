@@ -31,6 +31,12 @@ struct _AmlDownloads
   GObject parent_instance;
 
   GPtrArray *jobs; /* AmlDownload*, owned */
+
+  /* How many files the user has picked for a later install, summed over
+     every content page that is open. It is not a download and it does
+     not stop anything: it is what the header counts on the icon of the
+     downloads button. */
+  guint picked;
 };
 
 G_DEFINE_FINAL_TYPE (AmlDownloads, aml_downloads, G_TYPE_OBJECT)
@@ -243,6 +249,36 @@ aml_downloads_count (void)
     return 0;
 
   return default_downloads->jobs->len;
+}
+
+/* What the header shows on the icon of the downloads button: how many
+   files are picked across every content page and installed with one
+   press of the button at the foot of their list. A page says its part
+   when what it has on changes and when it goes away, so the count of a
+   page that took its picks with it drops out on its own. */
+guint
+aml_downloads_picked (void)
+{
+  if (default_downloads == NULL)
+    return 0;
+
+  return default_downloads->picked;
+}
+
+void
+aml_downloads_picked_add (gint delta)
+{
+  AmlDownloads *self = aml_downloads_get_default ();
+  gint picked = (gint) self->picked + delta;
+
+  if (picked < 0)
+    picked = 0;
+
+  if ((guint) picked == self->picked)
+    return;
+
+  self->picked = (guint) picked;
+  emit_changed ();
 }
 
 GPtrArray *

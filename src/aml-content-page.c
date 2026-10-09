@@ -78,6 +78,8 @@ struct _AmlContentPage
   GtkWidget *switcher_installed; /* the Installed button of the pair */
   GtkWidget *switcher_browse;    /* the Browse button of the pair */
   GtkWidget *installed_actions;
+  GtkWidget *installed_search_bar;
+  GtkWidget *installed_search_entry;
   GtkWidget *browse_actions;
 
   GtkWidget *installed_group;
@@ -111,6 +113,7 @@ struct _AmlContentPage
   GHashTable *projects; /* project id -> NULL */
   GHashTable *project_icons; /* project id -> icon url the browser saw */
   GHashTable *project_descriptions; /* project id -> what it is */
+  GHashTable *project_titles; /* project id -> project name */
 
   /* The search: what was asked for, what came back, and where the list
    * stands. */
@@ -133,6 +136,7 @@ struct _AmlContentPage
   guint debounce_source;
   GCancellable *browse;   /* searching and the categories of the filter */
   GCancellable *scan;     /* the folder, its hashes and their lookups */
+  gboolean identifying;   /* installed files are still being resolved */
 
   /* The page of a project waits for the description and the versions
      to arrive before showing anything. These are on the page so both
@@ -155,6 +159,20 @@ struct _AmlContentPage
   GtkWidget *details_download;
   GtkWidget *details_page; /* weak: the page of the open project */
   GtkWidget *split;        /* the list on the left, the project on the right */
+
+  /* The checkmark at the left of the versions of the dropdown: whether
+     the version the dropdown shows is on the list. */
+  GtkWidget *details_check;
+
+  /* What the user picked: the versions whose checkmark is on, one entry
+     per project. The button at the foot of the list installs the whole
+     list at once. */
+  GPtrArray *picks;  /* Pick* */
+  GPtrArray *batch;  /* Pick*, the list being installed */
+  gboolean picking;  /* the batch is being installed now */
+  guint pick_index;
+  GtkWidget *pick_button;
+  GtkWidget *pick_badge;
 };
 
 G_DEFINE_FINAL_TYPE (AmlContentPage, aml_content_page, GTK_TYPE_BOX)
@@ -180,6 +198,14 @@ static void reload_installed (AmlContentPage *self);
 static void open_project_page (AmlContentPage *self, AmlModrinthProject *project);
 static void update_check_next (UpdateRun *run);
 static void update_batch_next (AmlContentPage *self);
+static void start_plan (AmlContentPage *self, AmlModrinthVersion *version,
+                        const char *title, const char *replaces,
+                        gboolean disabled);
+static const char *version_name_of (AmlModrinthVersion *version);
+static AmlModrinthVersion *selected_version (GtkWidget *dropdown,
+                                             GPtrArray *versions);
+static void batch_next (AmlContentPage *self);
+static void batch_stopped (AmlContentPage *self);
 /* A plan that could not be carried out stops where it is; a batch it was
  * part of goes on to the next one. */
 static void plan_stopped (AmlContentPage *self);
@@ -407,6 +433,7 @@ aml_content_file_free (AmlContentFile *file)
   g_free (file->project_id);
   g_free (file->version_name);
   g_free (file->version_number);
+  g_clear_pointer (&file->required_dependencies, g_ptr_array_unref);
   g_free (file);
 }
 
@@ -718,6 +745,7 @@ typedef struct {
   char *url;
   char *filename;
   char *sha1;
+  char *project_id;
   char *label;
   char *replaces;
   gboolean required; /* a dependency of what was asked for, not it */
@@ -732,6 +760,7 @@ install_file_free (InstallFile *file)
   g_free (file->url);
   g_free (file->filename);
   g_free (file->sha1);
+  g_free (file->project_id);
   g_free (file->label);
   g_free (file->replaces);
   g_free (file);
@@ -753,6 +782,7 @@ install_file_of (AmlModrinthVersion *version, const char *replaces,
   install = g_new0 (InstallFile, 1);
   install->url = g_strdup (file->url);
   install->sha1 = g_strdup (file->sha1);
+  install->project_id = g_strdup (version->project_id);
   install->label = g_strdup (version->name);
 
   name = disabled ? aml_content_disabled_name (file->filename, FALSE)
@@ -771,6 +801,48 @@ install_file_of (AmlModrinthVersion *version, const char *replaces,
     }
 
   return install;
+}
+
+static AmlContentFile *
+installed_project_file (AmlContentPage *self, const char *project_id)
+{
+  if (self == NULL || project_id == NULL || self->files == NULL)
+    return NULL;
+
+  for (guint i = 0; i < self->files->len; i++)
+    {
+      AmlContentFile *file = g_ptr_array_index (self->files, i);
+
+      if (g_strcmp0 (file->project_id, project_id) == 0)
+        return file;
+    }
+
+  return NULL;
+}
+
+static void
+remove_duplicate_project_files (AmlContentPage *self, const char *project_id,
+                                const char *keep_path)
+{
+  if (self == NULL || project_id == NULL)
+    return;
+
+  for (guint i = 0; i < self->files->len; i++)
+    {
+      AmlContentFile *installed = g_ptr_array_index (self->files, i);
+      g_autoptr (GFile) old = NULL;
+      g_autoptr (GError) error = NULL;
+
+      if (g_strcmp0 (installed->project_id, project_id) != 0 ||
+          g_strcmp0 (installed->path, keep_path) == 0)
+        continue;
+
+      old = g_file_new_for_path (installed->path);
+      if (!g_file_delete (old, NULL, &error) &&
+          !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+        g_warning ("the duplicate file \"%s\" could not be removed: %s",
+                   installed->path, error != NULL ? error->message : "unknown error");
+    }
 }
 
 /* A queue of files written one after the other, so that a big file never
@@ -835,6 +907,9 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
               page->updating = FALSE;
             }
 
+          if (page->picking)
+            batch_stopped (page);
+
           set_busy (page, FALSE);
 
           /* A cancel is not a failure worth a message. */
@@ -862,6 +937,14 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                    file->replaces);
     }
 
+  if (run->page != NULL && file != NULL)
+    {
+      g_autofree char *keep = g_build_filename (run->folder, file->filename,
+                                                NULL);
+
+      remove_duplicate_project_files (run->page, file->project_id, keep);
+    }
+
   fetch_next (run);
 }
 
@@ -881,6 +964,9 @@ fetch_next (FetchRun *run)
             /* One update of the batch is in: start the next one. The
                list is read once, when the whole batch is done. */
             update_batch_next (self);
+          else if (self->picking)
+            /* One pick of the batch is in: the next one follows. */
+            batch_next (self);
           else
             {
               set_busy (self, FALSE);
@@ -962,8 +1048,11 @@ start_fetch (AmlContentPage *self, GPtrArray *files)
     if (title == NULL)
       title = "Content";
 
-    run->download = aml_downloads_add (content_download_kind (self->type),
-                                       title);
+    /* Keep our own reference: aml_download_finish() removes the manager's
+       reference when the run ends, while fetch_free() still releases the
+       reference held by the run below. */
+    run->download = g_object_ref (
+        aml_downloads_add (content_download_kind (self->type), title));
     aml_download_set_detail (run->download, "Installing");
     aml_download_set_progress (run->download, 0, count);
   }
@@ -1060,7 +1149,7 @@ plan_free (PlanRun *plan)
  * one per line, and any conflict said in as many words. NULL when there
  * is nothing beside the file itself to say, which is the common case. */
 static char *
-plan_text (PlanRun *plan)
+plan_text (AmlContentPage *self, PlanRun *plan)
 {
   g_autoptr (GString) text = g_string_new (NULL);
   gboolean listed = FALSE;
@@ -1074,11 +1163,19 @@ plan_text (PlanRun *plan)
 
       if (!listed)
         {
-          g_string_append (text, "Required Mods\n");
+           g_string_append_printf (text, "%s\n", _("Dependencies:"));
           listed = TRUE;
         }
 
-      g_string_append_printf (text, "%s\n", file->label);
+       {
+         const char *title = file->project_id != NULL
+                               ? g_hash_table_lookup (self->project_titles,
+                                                      file->project_id)
+                               : NULL;
+
+         g_string_append_printf (text, "%s\n",
+                                 title != NULL ? title : file->label);
+       }
     }
 
   if (plan->version->dependencies != NULL)
@@ -1159,8 +1256,9 @@ static void
 show_plan (AmlContentPage *self, PlanRun *plan)
 {
   /* An update of the whole list was confirmed once, as a whole: this plan
-     is not asked for again, it is simply carried out. */
-  if (self->updating)
+     is not asked for again, it is simply carried out. So is one pick of a
+     confirmed batch of them. */
+  if (self->updating || self->picking)
     {
       start_fetch (self, plan->files);
       plan->files = NULL; /* the fetch owns them now */
@@ -1169,13 +1267,14 @@ show_plan (AmlContentPage *self, PlanRun *plan)
     }
 
   {
-    const char *action = plan->replaces != NULL ? "Update" : "Install";
+    const char *action = plan->replaces != NULL ? _("Update") : _("Install");
     /* The name Modrinth writes already holds the version: "Xaero's
        Minimap 26.6.0". */
     const char *title = plan->title != NULL ? plan->title : "the file";
-    g_autofree char *heading =
-      g_strdup_printf ("%s \"%s\"", action, title);
-    g_autofree char *body = plan_text (plan);
+       g_autofree char *heading =
+       g_strdup_printf (_("%s \"%s\""),
+                        action == NULL ? "Install" : action, title);
+     g_autofree char *body = plan_text (self, plan);
     AdwAlertDialog *alert =
       ADW_ALERT_DIALOG (adw_alert_dialog_new (heading, body));
 
@@ -1264,7 +1363,13 @@ plan_versions_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   /* The list is newest first, so the first is what an install takes. */
   version = g_ptr_array_steal_index (versions, 0);
-  file = install_file_of (version, NULL, FALSE);
+  {
+    AmlContentFile *installed = installed_project_file (self,
+                                                         version->project_id);
+
+    file = install_file_of (version, installed != NULL ? installed->path : NULL,
+                            installed != NULL && !installed->enabled);
+  }
 
   if (file != NULL)
     {
@@ -1296,6 +1401,14 @@ start_plan (AmlContentPage *self, AmlModrinthVersion *version,
   g_object_add_weak_pointer (G_OBJECT (self), (gpointer *) &plan->page);
   plan->version = version; /* the plan owns it from here */
   plan->title = g_strdup (title);
+  if (replaces == NULL)
+    {
+      AmlContentFile *installed = installed_project_file (self,
+                                                           version->project_id);
+
+      replaces = installed != NULL ? installed->path : NULL;
+      disabled = installed != NULL && !installed->enabled;
+    }
   plan->replaces = replaces != NULL ? g_strdup (replaces) : NULL;
   plan->stays_disabled = disabled;
   plan->files =
@@ -1314,6 +1427,418 @@ start_plan (AmlContentPage *self, AmlModrinthVersion *version,
   /* Show the plan first: the file itself is listed in it, and only the
    * fetch writes anything to the folder. */
   plan_next (plan);
+}
+
+/* ---------------------------------------------------------- *
+ * What the user picked
+ *
+ * A version whose checkmark is on joins a list, and the button at the
+ * foot of the list installs the whole of it at once. A project is one
+ * entry of that list: picking another version of a project that is
+ * already on it replaces the one that was there, because installing the
+ * same project twice would put two files in the folder.
+ *
+ * The list is not a download and does not stop anything: it waits as
+ * long as the page lives, and the confirmation is asked once for the
+ * whole of it, the way Update All asks once for every update it found.
+ * ---------------------------------------------------------- */
+
+/* One entry of the list: which version of which project, and the words
+   the confirmation and the download call it by. */
+typedef struct {
+  char *project_id;
+  char *title;
+  AmlModrinthVersion *version; /* owned */
+} Pick;
+
+static void
+pick_free (Pick *pick)
+{
+  if (pick == NULL)
+    return;
+
+  aml_modrinth_version_free (pick->version);
+  g_free (pick->project_id);
+  g_free (pick->title);
+  g_free (pick);
+}
+
+/* The entry of @project_id in the list, or NULL when the project has
+   nothing picked. */
+static Pick *
+pick_of_project (AmlContentPage *self, const char *project_id)
+{
+  if (self->picks == NULL || project_id == NULL)
+    return NULL;
+
+  for (guint i = 0; i < self->picks->len; i++)
+    {
+      Pick *pick = g_ptr_array_index (self->picks, i);
+
+      if (g_strcmp0 (pick->project_id, project_id) == 0)
+        return pick;
+    }
+
+  return NULL;
+}
+
+/* Whether @pick holds @version itself rather than another version of the
+   same project: the copy in the list is not the one the page shows, so
+   the ids are what say they are the same. */
+static gboolean
+pick_is_version (Pick *pick, AmlModrinthVersion *version)
+{
+  if (pick == NULL || version == NULL || pick->version == NULL)
+    return FALSE;
+
+  return g_strcmp0 (pick->version->version_id, version->version_id) == 0;
+}
+
+/* The checkmark at the left of the versions follows the list: the version
+   the dropdown shows is on the list, and the button says so. Its state is
+   set with the click handler held back, which is what keeps the two from
+   calling each other. */
+static void
+refresh_pick_check (AmlContentPage *self)
+{
+  AmlModrinthVersion *version = NULL;
+  gboolean on;
+
+  if (self->details_check == NULL || self->details_dropdown == NULL)
+    return;
+
+  version = selected_version (self->details_dropdown,
+                              self->details_versions);
+  on = pick_is_version (pick_of_project (
+                          self, version != NULL ? version->project_id : NULL),
+                        version);
+
+  g_object_set_data (G_OBJECT (self->details_check), "aml-setting",
+                     GINT_TO_POINTER (1));
+  gtk_check_button_set_active (GTK_CHECK_BUTTON (self->details_check), on);
+  g_object_set_data (G_OBJECT (self->details_check), "aml-setting", NULL);
+}
+
+/* What the page has picked is said to the header, which counts it on the
+   icon of its downloads button, and put on the button at the foot of the
+   list. Called after every change of the list, and once when the list is
+   built, so that the button starts where the picks start. */
+static void
+refresh_picks (AmlContentPage *self)
+{
+  guint count = self->picks != NULL ? self->picks->len : 0;
+  if (self->pick_badge != NULL)
+    {
+      g_autofree char *number = g_strdup_printf (
+          "%" G_GUINT64_FORMAT, (guint64) count);
+
+      gtk_label_set_text (GTK_LABEL (self->pick_badge),
+                          count > 0 ? number : "");
+      gtk_widget_set_visible (self->pick_badge, count > 0);
+      gtk_accessible_update_property (GTK_ACCESSIBLE (self->pick_badge),
+                                      GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                      number, -1);
+    }
+
+  if (self->pick_button != NULL)
+    {
+      g_autofree char *tooltip = NULL;
+
+      if (count > 0)
+        tooltip = g_strdup_printf (_("Install the selected %s?"),
+                                   aml_content_type_title (self->type));
+
+      gtk_widget_set_sensitive (self->pick_button, count > 0);
+      gtk_widget_set_tooltip_text (
+           self->pick_button,
+           count == 0 ? _("Nothing is selected")
+                      : tooltip);
+    }
+
+  refresh_pick_check (self);
+}
+
+/* @version of @project_id is now picked: it replaces whatever that
+   project had on the list, or joins it. */
+static void
+pick_add (AmlContentPage *self, AmlModrinthVersion *version)
+{
+  Pick *pick = NULL;
+
+  if (self->picks == NULL || version == NULL || version->project_id == NULL)
+    return;
+
+  pick = pick_of_project (self, version->project_id);
+
+  if (pick != NULL)
+    {
+      /* The very version that was already on the list is left alone, so
+         the checkmarks do not move under the click that put it there. */
+      if (pick_is_version (pick, version))
+        return;
+
+      g_ptr_array_remove (self->picks, pick);
+    }
+
+  pick = g_new0 (Pick, 1);
+  pick->project_id = g_strdup (version->project_id);
+  pick->title = g_strdup (self->current_project_title != NULL
+                            ? self->current_project_title
+                            : version_name_of (version));
+  pick->version = aml_modrinth_version_copy (version);
+  g_ptr_array_add (self->picks, pick);
+}
+
+/* The project of @version has nothing picked any more. Only its own
+   entry goes: another version of the same project is a different pick. */
+static void
+pick_remove (AmlContentPage *self, AmlModrinthVersion *version)
+{
+  Pick *pick = NULL;
+
+  if (self->picks == NULL || version == NULL)
+    return;
+
+  pick = pick_of_project (self, version->project_id);
+
+  if (pick_is_version (pick, version))
+    g_ptr_array_remove (self->picks, pick);
+}
+
+/* The checkmark at the left of the versions was clicked: the version the
+   dropdown shows joins or leaves the list. There is nothing to pick while
+   the dropdown shows none, which is the case on a project that publishes
+   nothing for this instance. */
+static void
+on_version_picked (GtkCheckButton *check, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+  AmlModrinthVersion *version = NULL;
+
+  /* The list is what moved the checkmark itself. */
+  if (g_object_get_data (G_OBJECT (check), "aml-setting") != NULL)
+    return;
+
+  version = selected_version (self->details_dropdown, self->details_versions);
+
+  if (version != NULL)
+    {
+      if (gtk_check_button_get_active (check))
+        pick_add (self, version);
+      else
+        pick_remove (self, version);
+    }
+
+  /* What the list holds is what decides the state of the button, so a
+     click that could not be carried out leaves it where it was. */
+  refresh_picks (self);
+}
+
+/* Another version is what the dropdown shows: the checkmark at its left
+   says whether that one is the one on the list. */
+static void
+on_version_selected (GObject *object G_GNUC_UNUSED,
+                     GParamSpec *pspec G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+
+  refresh_pick_check (self);
+  refresh_picks (self);
+}
+
+/* What the confirmation is answered with. The list was taken out of the
+   page when the question was asked, so what is installed is the list the
+   user saw and nothing that is picked since. */
+static void
+on_batch_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+  const char *response =
+    adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
+
+  if (g_strcmp0 (response, "install") != 0)
+    {
+      /* Nothing was installed, so the list the question was about goes
+         back to the page with its checkmarks as they were. */
+      if (self->batch != NULL)
+        {
+          g_clear_pointer (&self->picks, g_ptr_array_unref);
+          self->picks = g_steal_pointer (&self->batch);
+          refresh_picks (self);
+        }
+
+      g_object_unref (self);
+      return;
+    }
+
+  if (self->batch == NULL)
+    {
+      g_object_unref (self);
+      return;
+    }
+
+  self->picking = TRUE;
+  self->pick_index = 0;
+  batch_next (self);
+
+  g_object_unref (self);
+}
+
+/* Starts the next version of the confirmed list, or says that the whole
+   of it is in. Each one is planned and fetched like any other install;
+   the confirmation is not asked again for the ones that follow. */
+static void
+batch_next (AmlContentPage *self)
+{
+  Pick *pick = NULL;
+
+  if (self->batch == NULL || self->pick_index >= self->batch->len)
+    {
+      guint done = self->batch != NULL ? self->batch->len : 0;
+
+      g_clear_pointer (&self->batch, g_ptr_array_unref);
+      self->picking = FALSE;
+      self->pick_index = 0;
+      set_busy (self, FALSE);
+
+      if (done > 0)
+        {
+          g_autofree char *message = g_strdup_printf (
+              "Installed %u %s", done, done == 1 ? "item" : "items");
+
+          show_toast (self, message);
+          reload_installed (self);
+        }
+
+      return;
+    }
+
+  pick = g_ptr_array_index (self->batch, self->pick_index);
+  self->pick_index++;
+
+  set_busy (self, TRUE);
+  start_plan (self, aml_modrinth_version_copy (pick->version), pick->title,
+              NULL, FALSE);
+}
+
+/* A file of the batch could not be installed: what it would take is not
+   there, so the list goes no further. */
+static void
+batch_stopped (AmlContentPage *self)
+{
+  g_clear_pointer (&self->batch, g_ptr_array_unref);
+  self->picking = FALSE;
+  self->pick_index = 0;
+}
+
+static void
+clear_picks (AmlContentPage *self)
+{
+  g_clear_pointer (&self->picks, g_ptr_array_unref);
+  self->picks = g_ptr_array_new_with_free_func ((GDestroyNotify) pick_free);
+  refresh_picks (self);
+}
+
+/* The button at the foot of the list: every picked version, one per
+   line, and the choice to install the whole of it at once. */
+static void
+on_pick_button_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+  g_autoptr (GString) body = NULL;
+  g_autoptr (GHashTable) listed = NULL;
+  AdwAlertDialog *alert = NULL;
+  const char *kind = NULL;
+
+  if (self->picks == NULL || self->picks->len == 0)
+    return;
+
+  body = g_string_new (NULL);
+  listed = g_hash_table_new (g_str_hash, g_str_equal);
+
+  kind = aml_content_type_title (self->type);
+
+  for (guint i = 0; i < self->picks->len; i++)
+    {
+      Pick *pick = g_ptr_array_index (self->picks, i);
+
+      if (i > 0)
+        g_string_append_c (body, '\n');
+
+      g_string_append (body, pick->title);
+      g_hash_table_add (listed, pick->project_id);
+    }
+
+  /* Show the required dependencies in their own section. These are the
+     dependencies published for the selected versions, not optional or
+     incompatible projects. The resolver still chooses the compatible
+     version when the install starts. */
+  {
+    gboolean has_dependencies = FALSE;
+    GString *dependencies = g_string_new (NULL);
+
+    for (guint i = 0; i < self->picks->len; i++)
+      {
+        Pick *pick = g_ptr_array_index (self->picks, i);
+
+        for (guint j = 0; pick->version->dependencies != NULL &&
+                         j < pick->version->dependencies->len; j++)
+          {
+            AmlModrinthDependency *dependency =
+              g_ptr_array_index (pick->version->dependencies, j);
+            const char *title = NULL;
+
+            if (dependency->type != AML_DEPENDENCY_REQUIRED ||
+                dependency->project_id == NULL ||
+                g_hash_table_contains (listed, dependency->project_id))
+              continue;
+
+            g_hash_table_add (listed, dependency->project_id);
+            title = g_hash_table_lookup (self->project_titles,
+                                         dependency->project_id);
+            if (has_dependencies)
+              g_string_append_c (dependencies, '\n');
+            g_string_append_printf (dependencies, "%s",
+                                    title != NULL ? title
+                                                  : dependency->project_id);
+            has_dependencies = TRUE;
+          }
+      }
+
+    if (has_dependencies)
+      {
+        g_string_append_printf (body, "\n%s\n", _("Dependencies:"));
+        g_string_append (body, dependencies->str);
+      }
+
+    g_string_free (dependencies, TRUE);
+    }
+
+  {
+    g_autofree char *heading =
+      g_strdup_printf (_("Install the selected %s?"), kind);
+
+    alert = ADW_ALERT_DIALOG (adw_alert_dialog_new (heading, body->str));
+  }
+
+  adw_alert_dialog_set_heading_use_markup (alert, FALSE);
+  adw_alert_dialog_set_body_use_markup (alert, FALSE);
+  adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
+  adw_alert_dialog_add_response (alert, "install", _("Install"));
+  adw_alert_dialog_set_response_appearance (alert, "install",
+                                            ADW_RESPONSE_SUGGESTED);
+  adw_alert_dialog_set_default_response (alert, "cancel");
+  adw_alert_dialog_set_close_response (alert, "cancel");
+
+  /* The list goes into the batch here: what is installed is the list
+     this question is about, whatever is picked while it is up. */
+  g_clear_pointer (&self->batch, g_ptr_array_unref);
+  self->batch = g_steal_pointer (&self->picks);
+  self->picks = g_ptr_array_new_with_free_func ((GDestroyNotify) pick_free);
+  refresh_picks (self);
+
+  adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL, on_batch_chosen,
+                           g_object_ref (self));
 }
 
 /* ---------------------------------------------------------- *
@@ -1353,7 +1878,6 @@ toggle_file (AmlContentPage *self, AmlContentFile *file)
     {
       g_hash_table_remove (self->rows, old_path);
       g_hash_table_insert (self->rows, g_strdup (file->path), row);
-      gtk_widget_set_tooltip_text (row, file->path);
     }
 
   show_toast (self, file->enabled ? "Enabled" : "Disabled");
@@ -1362,18 +1886,70 @@ toggle_file (AmlContentPage *self, AmlContentFile *file)
 }
 
 static void
+installed_filter_rows (AmlContentPage *self)
+{
+  const char *query = self->installed_search_entry != NULL
+                        ? gtk_editable_get_text (
+                            GTK_EDITABLE (self->installed_search_entry))
+                        : "";
+  g_autofree char *needle = g_utf8_casefold (query, -1);
+
+  for (GList *item = self->installed_rows; item != NULL; item = item->next)
+    {
+      GtkWidget *row = item->data;
+      AmlContentFile *file = g_object_get_data (G_OBJECT (row), "aml-file");
+      const char *title = NULL;
+      g_autofree char *haystack = NULL;
+      gboolean visible = TRUE;
+
+      if (file != NULL && file->project_id != NULL)
+        title = g_hash_table_lookup (self->project_titles, file->project_id);
+      if (title == NULL && file != NULL)
+        title = file->filename;
+
+      if (needle != NULL && *needle != '\0')
+        {
+          g_autofree char *title_folded =
+            g_utf8_casefold (title != NULL ? title : "", -1);
+          g_autofree char *file_folded =
+            g_utf8_casefold (file != NULL ? file->filename : "", -1);
+
+          haystack = g_strconcat (title_folded != NULL ? title_folded : "",
+                                  " ", file_folded != NULL ? file_folded : "",
+                                  NULL);
+          visible = strstr (haystack, needle) != NULL;
+        }
+
+      gtk_widget_set_visible (row, visible);
+    }
+}
+
+static void
+on_installed_search_changed (GtkEditable *editable G_GNUC_UNUSED,
+                             gpointer user_data)
+{
+  installed_filter_rows (user_data);
+}
+
+static void
 file_row_refresh (GtkWidget *row)
 {
   AmlContentFile *file = g_object_get_data (G_OBJECT (row), "aml-file");
+  AmlContentPage *self = g_object_get_data (G_OBJECT (row), "aml-page");
+  const char *title = NULL;
 
   if (file == NULL || !GTK_IS_WIDGET (row))
     return;
 
-  /* What Modrinth knows the file by, or the name it has on disk when
-   * Modrinth does not know it. */
+  if (self != NULL && file->project_id != NULL)
+    title = g_hash_table_lookup (self->project_titles, file->project_id);
+
+  /* What Modrinth knows the project by, or the name on disk when it is
+   * not known. The version remains useful as a subtitle/fallback only. */
   adw_preferences_row_set_title (
-      ADW_PREFERENCES_ROW (row),
-      file->version_name != NULL ? file->version_name : file->filename);
+       ADW_PREFERENCES_ROW (row),
+       title != NULL ? title : file->filename);
+  installed_filter_rows (self);
 }
 
 /* The first @max_sentences sentences of @text (0 for all of it), with
@@ -1462,14 +2038,52 @@ static void
 on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
 {
   AmlContentPage *self = user_data;
+  const char *path = g_object_get_data (G_OBJECT (source), "aml-path");
   g_autoptr (GError) error = NULL;
 
   if (!g_file_delete_finish (G_FILE (source), result, &error))
     show_error (self, "The file cannot be deleted", error);
-  else
+    else
     {
       show_toast (self, "Deleted");
-      reload_installed (self);
+      /* An identification request may still refer to one of the rows. Stop
+         it before releasing the file it borrowed; the other rows remain in
+         place and are not rebuilt. */
+      g_cancellable_cancel (self->scan);
+      g_clear_object (&self->scan);
+      self->scan = g_cancellable_new ();
+      self->identifying = FALSE;
+
+      for (guint i = 0; path != NULL && i < self->files->len; i++)
+        {
+          AmlContentFile *file = g_ptr_array_index (self->files, i);
+
+          if (g_strcmp0 (file->path, path) == 0)
+            {
+              GtkWidget *row = g_hash_table_lookup (self->rows, path);
+              GList *link = g_list_find (self->installed_rows, row);
+
+              if (row != NULL)
+                {
+                  adw_preferences_group_remove (
+                      ADW_PREFERENCES_GROUP (self->installed_group), row);
+                  g_hash_table_remove (self->rows, path);
+                }
+
+              if (link != NULL)
+                {
+                  self->installed_rows = g_list_delete_link (
+                      self->installed_rows, link);
+                }
+
+              g_ptr_array_remove_index (self->files, i);
+              gtk_widget_set_visible (self->installed_status,
+                                      self->files->len == 0);
+              gtk_widget_set_visible (self->installed_scroller,
+                                      self->files->len != 0);
+              break;
+            }
+        }
     }
 
   g_object_unref (self);
@@ -1494,6 +2108,8 @@ on_delete_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
     }
 
   target = g_file_new_for_path (path);
+  g_object_set_data_full (G_OBJECT (target), "aml-path",
+                          g_strdup (path), g_free);
   /* Deleting is a system call on the file and goes through GIO off the
      main loop; the ref on the page travels to on_deleted(). */
   g_file_delete_async (target, G_PRIORITY_DEFAULT, NULL, on_deleted, self);
@@ -1507,16 +2123,55 @@ on_trash_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   AmlContentFile *file = g_object_get_data (G_OBJECT (button), "aml-file");
   g_autofree char *heading = NULL;
   g_autofree char *body = NULL;
+  g_autoptr (GString) dependents = g_string_new (NULL);
+  const char *title = NULL;
   AdwAlertDialog *alert = NULL;
 
   if (file == NULL)
     return;
 
-  heading = g_strdup_printf ("Delete \"%s\" permanently?", file->filename);
-  body = g_strdup_printf ("\"%s\" is deleted and cannot be brought back.",
-                          file->path);
+  title = file->project_id != NULL
+            ? g_hash_table_lookup (self->project_titles, file->project_id)
+            : NULL;
+  if (title == NULL || *title == '\0')
+    title = file->filename;
+
+  if (file->project_id != NULL)
+    for (guint i = 0; i < self->files->len; i++)
+      {
+        AmlContentFile *other = g_ptr_array_index (self->files, i);
+        const char *other_title = NULL;
+
+        if (other == file || other->required_dependencies == NULL)
+          continue;
+
+        for (guint j = 0; j < other->required_dependencies->len; j++)
+          if (g_strcmp0 (g_ptr_array_index (other->required_dependencies, j),
+                        file->project_id) == 0)
+            {
+              other_title = other->project_id != NULL
+                              ? g_hash_table_lookup (self->project_titles,
+                                                     other->project_id)
+                              : NULL;
+              if (other_title == NULL || *other_title == '\0')
+                other_title = other->filename;
+              if (dependents->len > 0)
+                g_string_append_c (dependents, '\n');
+              g_string_append (dependents, other_title);
+              break;
+            }
+      }
+
+  heading = g_strdup_printf (_("Delete \"%s\"?"), title);
+  if (dependents->len > 0)
+    body = g_strdup_printf (
+        _("The following mods depend on %s:\n%s"), title, dependents->str);
+  else
+    body = NULL;
 
   alert = ADW_ALERT_DIALOG (adw_alert_dialog_new (heading, body));
+  if (body == NULL)
+    adw_alert_dialog_set_body (alert, "");
   adw_alert_dialog_set_heading_use_markup (alert, FALSE);
   adw_alert_dialog_set_body_use_markup (alert, FALSE);
     adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
@@ -1591,6 +2246,7 @@ file_row (AmlContentPage *self, AmlContentFile *file)
   /* The row carries the file it is about, so the switch does not have to
      know where the file came from. */
   g_object_set_data (G_OBJECT (row), "aml-file", file);
+  g_object_set_data (G_OBJECT (row), "aml-page", self);
 
   file_row_refresh (row);
 
@@ -1654,6 +2310,20 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       file->project_id = g_strdup (version->project_id);
       file->version_name = g_strdup (version->name);
       file->version_number = g_strdup (version->version_number);
+      g_clear_pointer (&file->required_dependencies, g_ptr_array_unref);
+      file->required_dependencies = g_ptr_array_new_with_free_func (g_free);
+
+      for (guint i = 0; version->dependencies != NULL &&
+                       i < version->dependencies->len; i++)
+        {
+          AmlModrinthDependency *dependency =
+            g_ptr_array_index (version->dependencies, i);
+
+          if (dependency->type == AML_DEPENDENCY_REQUIRED &&
+              dependency->project_id != NULL)
+            g_ptr_array_add (file->required_dependencies,
+                             g_strdup (dependency->project_id));
+        }
 
       if (file->project_id != NULL && *file->project_id != '\0')
         g_hash_table_add (self->projects, g_strdup (file->project_id));
@@ -1704,6 +2374,16 @@ identify_next (IdentifyRun *run)
       return;
     }
 
+  self->identifying = FALSE;
+  if (self->details_versions != NULL && self->details_download != NULL)
+    {
+      gboolean have_versions = self->details_versions->len > 0;
+
+     gtk_widget_set_sensitive (self->details_download,
+                               have_versions && !self->identifying);
+     gtk_widget_set_sensitive (self->details_check,
+                               have_versions && !self->identifying);
+    }
   identify_run_free (run);
 }
 
@@ -1754,6 +2434,8 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       g_hash_table_insert (self->rows, g_strdup (file->path), row);
     }
 
+  installed_filter_rows (self);
+
   {
     gboolean empty = self->files->len == 0;
 
@@ -1765,6 +2447,7 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   {
     IdentifyRun *run = g_new0 (IdentifyRun, 1);
 
+    self->identifying = TRUE;
     run->page = self;
     g_object_add_weak_pointer (G_OBJECT (self), (gpointer *) &run->page);
     run->cancellable = g_object_ref (self->scan);
@@ -1857,6 +2540,8 @@ plan_stopped (AmlContentPage *self)
 {
   if (self->updating)
     update_batch_next (self);
+  else if (self->picking)
+    batch_next (self);
   else
     set_busy (self, FALSE);
 }
@@ -1916,7 +2601,8 @@ update_check_done (AmlContentPage *self, UpdateRun *run)
                          : self->type == AML_CONTENT_RESOURCE_PACK
                              ? "resource packs"
                              : "shader packs";
-    g_autofree char *heading = g_strdup_printf ("Update the following %s", what);
+    g_autofree char *heading =
+      g_strdup_printf (_("Update the following %s"), what);
     g_autoptr (GString) body = g_string_new (NULL);
     AdwAlertDialog *alert = NULL;
 
@@ -1984,8 +2670,17 @@ on_update_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       UpdateItem *item = g_new0 (UpdateItem, 1);
 
       item->version = update; /* owned from here */
-      item->title = g_strdup (file->version_name != NULL ? file->version_name
-                                                         : file->filename);
+       {
+         const char *title = file->project_id != NULL
+                               ? g_hash_table_lookup (self->project_titles,
+                                                      file->project_id)
+                               : NULL;
+
+         /* Update dialogs use the project name, never the version label.
+          * A filename is the safest fallback while its project metadata is
+          * still being resolved. */
+         item->title = g_strdup (title != NULL ? title : file->filename);
+       }
       item->path = g_strdup (file->path);
       item->disabled = !file->enabled;
       g_ptr_array_add (run->items, item);
@@ -2095,10 +2790,7 @@ on_open_folder_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 }
 
 static void
-on_refresh_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
-{
-  reload_installed (user_data);
-}
+installed_filter_rows (AmlContentPage *self);
 
 /* ---------------------------------------------------------- *
  * Browse
@@ -2218,6 +2910,12 @@ installed_icon_details (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   if (self != NULL && details != NULL)
     {
       GtkWidget *icon = NULL;
+
+      if (details->title != NULL && *details->title != '\0')
+        g_hash_table_insert (self->project_titles,
+                             g_strdup (lookup->project_id),
+                             g_strdup (details->title));
+      file_row_refresh (lookup->row);
 
       /* What the project is, under the file's name, and the icon. Both
          are remembered for the rows of the same project, rebuilt or
@@ -2339,6 +3037,11 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
         g_hash_table_insert (self->project_descriptions,
                              g_strdup (project->project_id),
                              g_strdup (project->description));
+
+      if (project->title != NULL && *project->title != '\0')
+        g_hash_table_insert (self->project_titles,
+                             g_strdup (project->project_id),
+                             g_strdup (project->title));
 
       /* The icon, then the name and the description under it. Nothing
          else: who wrote it, how often it was taken, which game version
@@ -2820,8 +3523,6 @@ on_version_download_clicked (GtkButton *button, gpointer user_data)
   GtkWidget *dropdown = g_object_get_data (G_OBJECT (button), "aml-dropdown");
   GPtrArray *versions = g_object_get_data (G_OBJECT (button), "aml-versions");
   AmlModrinthVersion *version = NULL;
-  GtkWidget *dialog = gtk_widget_get_ancestor (GTK_WIDGET (button),
-                                               ADW_TYPE_DIALOG);
 
   if (self == NULL || dropdown == NULL || versions == NULL)
     return;
@@ -2831,13 +3532,14 @@ on_version_download_clicked (GtkButton *button, gpointer user_data)
   if (version == NULL)
     return;
 
-  /* The plan that follows is shown over the page, not over the list. */
-  if (dialog != NULL)
-    adw_dialog_close (ADW_DIALOG (dialog));
-
+  /* The page stays where it is: the install is planned and confirmed
+     over the list it was asked from, and the files land in the folder
+     while the user keeps reading the page. */
   set_busy (self, TRUE);
   start_plan (self, aml_modrinth_version_copy (version),
-              version_name_of (version), NULL, FALSE);
+              self->current_project_title != NULL
+                ? self->current_project_title : version_name_of (version),
+              NULL, FALSE);
 }
 
 /* What a version reads as in the dropdown: its name and the day it was
@@ -2858,7 +3560,8 @@ version_label (AmlModrinthVersion *version)
 /* The label of one version in the dropdown. It ellipsizes, so a long
  * name of a version does not set the width of the half the dropdown
  * lives in: the version that is loaded and the spinner that stands there
- * while it is on its way are then the same width. */
+ * while it is on its way are then the same width. This is what the
+ * closed dropdown shows: the version alone, with nothing to click. */
 static void
 version_item_setup (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
                     GtkListItem *item, gpointer user_data G_GNUC_UNUSED)
@@ -3011,8 +3714,23 @@ details_content (AmlContentPage *self)
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller), box);
   gtk_widget_set_vexpand (scroller, TRUE);
 
-  /* The foot: every version this instance can take, and the button that
-     installs the one shown. The newest is what it shows from the start. */
+  /* The foot: every version this instance can take, the checkmark that
+     puts the one shown on the list the button at the foot of the other
+     page installs, and the button that installs this one on its own.
+     The newest is what the dropdown shows from the start. */
+  watch_widget (&self->details_check, gtk_check_button_new ());
+  gtk_widget_set_valign (self->details_check, GTK_ALIGN_CENTER);
+  gtk_widget_set_sensitive (self->details_check, FALSE);
+  gtk_widget_set_tooltip_text (self->details_check,
+                               _("Install this version with the selected "
+                                 "ones"));
+  gtk_accessible_update_property (GTK_ACCESSIBLE (self->details_check),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                  _("Install this version with the selected "
+                                    "ones"), -1);
+  g_signal_connect (self->details_check, "toggled",
+                    G_CALLBACK (on_version_picked), self);
+
   watch_widget (&self->details_dropdown, gtk_drop_down_new (NULL, NULL));
   {
     GtkListItemFactory *factory = version_factory ();
@@ -3022,6 +3740,8 @@ details_content (AmlContentPage *self)
                                     factory);
     g_object_unref (factory);
   }
+  g_signal_connect (self->details_dropdown, "notify::selected",
+                    G_CALLBACK (on_version_selected), self);
   gtk_widget_set_hexpand (self->details_dropdown, TRUE);
   gtk_widget_set_valign (self->details_dropdown, GTK_ALIGN_CENTER);
 
@@ -3033,6 +3753,7 @@ details_content (AmlContentPage *self)
                     G_CALLBACK (on_version_download_clicked), self);
 
   bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  gtk_box_append (GTK_BOX (bar), self->details_check);
   gtk_box_append (GTK_BOX (bar), self->details_dropdown);
   gtk_box_append (GTK_BOX (bar), self->details_download);
   gtk_widget_set_margin_top (bar, 12);
@@ -3096,9 +3817,20 @@ detail_fill (AmlContentPage *self)
                          self->details_dropdown);
     }
 
-  gtk_widget_set_sensitive (
-      self->details_download,
-      self->details_versions != NULL && self->details_versions->len > 0);
+  {
+    gboolean have_versions = self->details_versions != NULL &&
+                             self->details_versions->len > 0;
+
+    gtk_widget_set_sensitive (self->details_download,
+                              have_versions && !self->identifying);
+    /* Nothing to put on the list while the dropdown shows none. */
+    gtk_widget_set_sensitive (self->details_check,
+                              have_versions && !self->identifying);
+  }
+
+  /* The version the dropdown shows from the start is not on the list
+     until the checkmark says so. */
+  refresh_picks (self);
 }
 
 static void
@@ -3289,22 +4021,29 @@ build_installed (AmlContentPage *self)
 {
   GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   GtkWidget *actions = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  GtkWidget *search_bar = gtk_search_entry_new ();
   GtkWidget *scroller = gtk_scrolled_window_new ();
   GtkWidget *content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   AdwPreferencesGroup *group =
     ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
 
+   gtk_widget_set_hexpand (actions, TRUE);
+   self->installed_search_bar = search_bar;
+   self->installed_search_entry = search_bar;
+   gtk_widget_set_hexpand (search_bar, TRUE);
+   gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_bar),
+                                           _("Search"));
+   g_signal_connect (search_bar, "changed",
+                     G_CALLBACK (on_installed_search_changed), self);
+   gtk_box_append (GTK_BOX (actions), search_bar);
+
    self->update_all = toolbar_button ("software-update-available-symbolic", _("Update All"),
-                                     G_CALLBACK (on_update_all_clicked), self);
+                                      G_CALLBACK (on_update_all_clicked), self);
   gtk_widget_set_sensitive (self->update_all, FALSE);
   gtk_box_append (GTK_BOX (actions), self->update_all);
   gtk_box_append (GTK_BOX (actions),
                   toolbar_button ("folder-symbolic", _("Open Folder"),
                                   G_CALLBACK (on_open_folder_clicked), self));
-  gtk_box_append (GTK_BOX (actions),
-                  toolbar_button ("view-refresh-symbolic", _("Refresh"),
-                                  G_CALLBACK (on_refresh_clicked), self));
-
   self->spinner = adw_spinner_new ();
   gtk_widget_set_valign (self->spinner, GTK_ALIGN_CENTER);
   gtk_widget_set_visible (self->spinner, FALSE);
@@ -3381,7 +4120,10 @@ on_stack_switched (GObject *stack, GParamSpec *pspec G_GNUC_UNUSED,
   /* Installed is a list of its own: the project page opened from Browse
      is left with the list it was picked from. */
   if (!browsing)
-    close_detail (self);
+    {
+      clear_picks (self);
+      close_detail (self);
+    }
 
   if (!browsing || self->browse_searched)
     return;
@@ -3395,8 +4137,7 @@ build_browse (AmlContentPage *self)
 {
   GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   GtkWidget *top = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *search_bar = gtk_search_bar_new ();
-  GtkWidget *search_entry = gtk_search_entry_new ();
+  GtkWidget *search_bar = gtk_search_entry_new ();
   GtkWidget *filter_button = gtk_menu_button_new ();
   GtkWidget *popover = gtk_popover_new ();
   GtkWidget *filter_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
@@ -3409,34 +4150,31 @@ build_browse (AmlContentPage *self)
   GtkWidget *retry_row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   GtkWidget *retry_label = gtk_label_new (NULL);
   GtkWidget *retry_button = gtk_button_new_with_label (_("Retry"));
+  GtkWidget *foot = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  GtkWidget *pick_button = gtk_button_new ();
+  GtkWidget *pick_icon = gtk_image_new_from_icon_name (
+      "folder-download-symbolic");
+  GtkWidget *pick_overlay = gtk_overlay_new ();
+  GtkWidget *pick_badge = gtk_label_new (NULL);
+  g_autofree char *pick_accessible_label = NULL;
   AdwPreferencesGroup *group =
     ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
 
-  self->search_entry = search_entry;
+  self->search_entry = search_bar;
   self->search_bar = search_bar;
-  gtk_widget_add_css_class (search_bar, "content-search-bar");
   /* The field takes the room the row has, the way the modpack browser's
      search does, rather than a fixed width of its own. */
   gtk_widget_set_hexpand (search_bar, TRUE);
-  gtk_widget_set_hexpand (search_entry, TRUE);
-  gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_entry),
-                                           _("Search Modrinth"));
-  gtk_search_bar_set_child (GTK_SEARCH_BAR (search_bar), search_entry);
-  gtk_search_bar_set_key_capture_widget (GTK_SEARCH_BAR (search_bar),
-                                         GTK_WIDGET (self));
+  gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_bar),
+                                           _("Search"));
 
-  /* Search is what this page is for, so the entry is there from the
-     start: the user should be able to type without first asking for the
-     box to appear. Ctrl+F and Escape still work on it. */
-  gtk_search_bar_set_search_mode (GTK_SEARCH_BAR (search_bar), TRUE);
-
-  g_signal_connect (search_entry, "changed",
+  g_signal_connect (search_bar, "changed",
                     G_CALLBACK (on_search_changed), self);
   {
     GtkEventController *keys = gtk_event_controller_key_new ();
 
     gtk_event_controller_set_propagation_phase (keys, GTK_PHASE_BUBBLE);
-    gtk_widget_add_controller (search_entry, keys);
+    gtk_widget_add_controller (search_bar, keys);
     g_signal_connect (keys, "key-pressed", G_CALLBACK (on_search_key), self);
   }
 
@@ -3507,6 +4245,46 @@ build_browse (AmlContentPage *self)
   gtk_box_append (GTK_BOX (content), scroller);
   gtk_widget_set_visible (scroller, FALSE);
   gtk_box_append (GTK_BOX (box), content);
+
+  /* The foot of the list: the button that installs everything the
+     checkmarks of the versions have on, and nothing else. It is a plain
+     download icon at the left end of the row, where the actions of the
+     other list sit. */
+  gtk_widget_add_css_class (pick_button, "flat");
+  gtk_widget_set_valign (pick_button, GTK_ALIGN_CENTER);
+   pick_accessible_label = g_strdup_printf (
+       _("Install the selected %s?"), aml_content_type_title (self->type));
+   gtk_accessible_update_property (GTK_ACCESSIBLE (pick_button),
+                                   GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                   pick_accessible_label, -1);
+  gtk_button_set_child (GTK_BUTTON (pick_button), pick_icon);
+  g_signal_connect (pick_button, "clicked",
+                    G_CALLBACK (on_pick_button_clicked), self);
+
+   /* Keep the count attached to the button without putting it inside the
+      button's hit target. The overlay keeps it correctly positioned at
+      every scale without changing the button's width. */
+   gtk_widget_add_css_class (pick_badge, "aml-badge");
+   gtk_widget_set_valign (pick_badge, GTK_ALIGN_START);
+   gtk_widget_set_halign (pick_badge, GTK_ALIGN_END);
+   gtk_widget_set_margin_top (pick_badge, 1);
+   gtk_widget_set_margin_end (pick_badge, 1);
+
+   gtk_overlay_set_child (GTK_OVERLAY (pick_overlay), pick_button);
+   gtk_overlay_add_overlay (GTK_OVERLAY (pick_overlay), pick_badge);
+   gtk_box_append (GTK_BOX (foot), pick_overlay);
+  gtk_widget_set_margin_start (foot, 12);
+  gtk_widget_set_margin_end (foot, 12);
+  gtk_widget_set_margin_top (foot, 6);
+  gtk_widget_set_margin_bottom (foot, 6);
+  gtk_box_append (GTK_BOX (box), foot);
+
+  self->pick_button = pick_button;
+  self->pick_badge = pick_badge;
+
+  /* Nothing is picked yet: the button starts where the list starts, with
+     no number on it and nothing to install. */
+  refresh_picks (self);
 
   /* The bottom of the list: a spinner while the next page is on its way
      and a retry row when one failed. Neither is a button the user has to
@@ -3715,8 +4493,11 @@ move_actions_into_bar (AmlContentPage *self, gboolean browsing)
   if (wanted != NULL && gtk_widget_get_parent (wanted) != self->bar)
     gtk_box_insert_child_after (GTK_BOX (self->bar), wanted, NULL);
 
-  if (self->bar_spacer != NULL)
-    gtk_widget_set_visible (self->bar_spacer, !browsing);
+   /* Both action rows contain an expanding search entry. The spacer used by
+      the old Installed-only toolbar would consume that room and leave the
+      entry at its natural width. */
+   if (self->bar_spacer != NULL)
+     gtk_widget_set_visible (self->bar_spacer, FALSE);
 }
 
 AmlContentPage *
@@ -3744,7 +4525,9 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
   self->project_icons = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                                g_free);
   self->project_descriptions = g_hash_table_new_full (g_str_hash, g_str_equal,
-                                                      g_free, g_free);
+                                                       g_free, g_free);
+  self->project_titles = g_hash_table_new_full (g_str_hash, g_str_equal,
+                                                 g_free, g_free);
 
   g_object_get (instance, "directory", &directory, NULL);
 
@@ -3798,8 +4581,15 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
   self->details_body = NULL;
   self->details_dropdown = NULL;
   self->details_download = NULL;
+  self->identifying = FALSE;
+  self->details_check = NULL;
   self->details_page = NULL;
   self->split = NULL;
+  self->batch = NULL;
+  self->picking = FALSE;
+  self->pick_index = 0;
+  self->pick_button = NULL;
+  self->pick_badge = NULL;
 
   self->stack = adw_view_stack_new ();
   gtk_widget_set_vexpand (self->stack, TRUE);
@@ -3842,6 +4632,8 @@ aml_content_page_dispose (GObject *object)
   self->installed_group = NULL;
   self->installed_scroller = NULL;
   self->installed_status = NULL;
+  self->installed_search_bar = NULL;
+  self->installed_search_entry = NULL;
   self->update_all = NULL;
   self->results_group = NULL;
   self->results_scroller = NULL;
@@ -3853,6 +4645,14 @@ aml_content_page_dispose (GObject *object)
   self->retry_row = NULL;
   self->retry_label = NULL;
   self->spinner = NULL;
+  self->pick_button = NULL;
+  self->pick_badge = NULL;
+
+  /* A batch that was still being installed is not applied any more: the
+     plans and fetches hold the page weakly and stop. */
+  g_clear_pointer (&self->batch, g_ptr_array_unref);
+  self->picking = FALSE;
+  self->pick_index = 0;
 
   if (self->debounce_source != 0)
     {
@@ -3872,6 +4672,7 @@ aml_content_page_dispose (GObject *object)
      page; the fields only watch them, so they are dropped and not
      unrefed. */
   watch_widget (&self->details_body, NULL);
+  watch_widget (&self->details_check, NULL);
   watch_widget (&self->details_dropdown, NULL);
   watch_widget (&self->details_download, NULL);
   watch_widget (&self->details_page, NULL);
@@ -3896,10 +4697,13 @@ aml_content_page_finalize (GObject *object)
   g_clear_pointer (&self->projects, g_hash_table_unref);
   g_clear_pointer (&self->project_icons, g_hash_table_unref);
   g_clear_pointer (&self->project_descriptions, g_hash_table_unref);
+  g_clear_pointer (&self->project_titles, g_hash_table_unref);
   g_clear_pointer (&self->categories, g_ptr_array_unref);
   g_clear_pointer (&self->results, g_ptr_array_unref);
   g_list_free (self->installed_rows);
   g_list_free (self->result_rows);
+  g_clear_pointer (&self->picks, g_ptr_array_unref);
+  g_clear_pointer (&self->batch, g_ptr_array_unref);
   g_free (self->minecraft_version);
   g_free (self->loader);
   g_free (self->folder);
@@ -3927,7 +4731,10 @@ aml_content_page_class_init (AmlContentPageClass *klass)
 static void
 aml_content_page_init (AmlContentPage *self)
 {
-  /* Everything is built in aml_content_page_new(), which knows the
-   * instance and the kind of content. */
-  (void) self;
+  /* The list of what is picked is the page's own, and an instance that
+     needs a mod loader to offer mods still has one: what is built here
+     has to be there whatever the page goes on to show. Everything else
+     is built in aml_content_page_new(), which knows the instance and the
+     kind of content. */
+  self->picks = g_ptr_array_new_with_free_func ((GDestroyNotify) pick_free);
 }

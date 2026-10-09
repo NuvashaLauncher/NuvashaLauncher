@@ -43,6 +43,18 @@ msgstr "已安装"
 msgid "Loading more…"
 msgstr "加载更多"
 
+msgid "Nothing is selected"
+msgstr "未选择任何内容"
+
+msgid "Install the selected versions"
+msgstr "安装所选版本"
+
+msgid "Install the selected versions?"
+msgstr "安装所选版本？"
+
+msgid "Install this version with the selected ones"
+msgstr "与所选版本一起安装此版本"
+
 msgid "Search Modrinth"
 msgstr "搜索Modrinth"
 
@@ -303,3 +315,22 @@ msgstr "添加 Microsoft 账户"
 
 msgid "Minecraft Version"
 msgstr "Minecraft版本"
+msgid "Install the selected %s?"
+msgstr "要安装选中的%s吗？"
+
+msgid "%s \"%s\""
+msgstr "%s“%s”"
+
+msgid "Search"
+msgstr "搜索"
+
+msgid "Update"
+msgstr "更新"
+
+msgid "Update the following %s"
+msgstr "更新以下%s"
+
+msgid "Dependencies:"
+msgstr "依赖项："
+msgid "The following mods depend on %s:\n%s"
+msgstr "以下模组依赖于%s：\n%s"

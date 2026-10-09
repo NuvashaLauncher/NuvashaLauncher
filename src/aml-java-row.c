@@ -5,7 +5,9 @@
 /* AmlJavaRow: pick a Java. Mirrors AmlVersionRow's state machine: the
  * row shows it is fetching, it failed (with how to retry), or it holds
  * the installations detection found plus any custom path the instance
- * carries. */
+ * carries. The first entry is the automatic choice: the runtime that
+ * fits the game's Java requirement, named there instead of in the list
+ * when one is found. */
 
 /* realpath wants glibc's default feature set; AML is Linux-only. */
 #define _GNU_SOURCE
@@ -29,13 +31,15 @@ struct _AmlJavaRow
   /* The detected installations, GPtrArray<AmlJava*> owned by the row. */
   GPtrArray *javas;
 
-  /* Model contents: index 0 is the default entry with a NULL path, one
+  /* Model contents: index 0 is the automatic entry with a NULL path, one
    * per detected Java, one for a custom path detection never reported,
    * and a trailing one that asks for another runtime instead of naming
    * one. That last entry has no path, so the ids array is always one
    * entry shorter than the names array. */
   GPtrArray *ids;   /* strdupped paths; ids[0] is NULL */
   GPtrArray *names; /* the titles shown in the model */
+
+  /* What index 0 is called when no runtime resolves it. */
   char *default_label;
 
   /* Where the add entry sits in the model, GTK_INVALID_LIST_POSITION
@@ -46,14 +50,13 @@ struct _AmlJavaRow
    * runtime, so it cannot stay selected. */
   guint restore;
 
-  /* What the first entry stands for: the Java the default resolves to.
-   * The global default path and the game's required version decide it;
-   * that runtime is named in the first entry and left out of the list
-   * below so it is not shown twice. */
-  char *default_path;
+  /* What the first entry stands for: the runtime the automatic choice
+   * resolves to. Only the game's required version decides that, and that
+   * runtime is named in the first entry and left out of the list below
+   * so it is not shown twice. */
   int required_major;
 
-  /* Selection the instance asked for; /"/" is the default entry. */
+  /* Selection the instance asked for; NULL is the automatic entry. */
   char *wanted;
   gboolean probe_started;
 
@@ -143,12 +146,11 @@ fill (AmlJavaRow *self)
     self->wanted != NULL ? realpath (self->wanted, NULL) : NULL;
   guint position = 0;
 
-  /* The Java the default stands for: named in the first entry, and left
-     out of the list below when it is one of the detected runtimes even
-     so. */
-  if (self->default_path != NULL || self->required_major > 0)
-    fallback = aml_java_select (self->javas, NULL, self->default_path,
-                                self->required_major);
+  /* The Java the automatic choice stands for: named in the first entry,
+     and left out of the list below when it is one of the detected
+     runtimes even so. */
+  if (self->required_major > 0)
+    fallback = aml_java_select (self->javas, NULL, self->required_major);
 
   if (fallback != NULL)
     g_ptr_array_add (names, java_label ((AmlJava *) fallback));
@@ -164,9 +166,9 @@ fill (AmlJavaRow *self)
         wanted_real != NULL &&
         g_strcmp0 (real != NULL ? real : java->executable, wanted_real) == 0;
 
-      /* The runtime the default resolves to is the first entry; it does
-         not belong in the list again, unless the instance itself asked
-         for it and so needs its row to be selectable. */
+      /* The runtime the automatic choice resolves to is the first entry;
+         it does not belong in the list again, unless the instance itself
+         asked for it and so needs its row to be selectable. */
       if (java == fallback && !is_wanted)
         continue;
 
@@ -408,30 +410,17 @@ aml_java_row_new (void)
 }
 
 void
-aml_java_row_set_default_entry_label (AmlJavaRow *self,
-                                      const char *label)
-{
-  g_return_if_fail (AML_IS_JAVA_ROW (self));
-
-  g_set_str (&self->default_label, label);
-}
-
-void
-aml_java_row_set_default_choice (AmlJavaRow *self,
-                                 const char *global_path,
-                                 int         required_major)
+aml_java_row_set_required_major (AmlJavaRow *self, int required_major)
 {
   g_return_if_fail (AML_IS_JAVA_ROW (self));
 
   /* Filling the list again makes the combo row emit its selection, which
    * lands back here through the caller's handler. Doing nothing when the
-   * choice is the same is what keeps that from being an endless
+   * requirement is the same is what keeps that from being an endless
    * recursion. */
-  if (g_strcmp0 (self->default_path, global_path) == 0 &&
-      self->required_major == required_major)
+  if (self->required_major == required_major)
     return;
 
-  g_set_str (&self->default_path, global_path);
   self->required_major = required_major;
 
   if (self->ready)
@@ -490,7 +479,7 @@ aml_java_row_get_selected_path (AmlJavaRow *self)
   if (position == GTK_INVALID_LIST_POSITION || position >= self->ids->len)
     return NULL;
 
-  /* Entry 0 carries a NULL path: it is the global default. */
+  /* Entry 0 carries a NULL path: it is the automatic choice. */
   if (self->ids->pdata[position] == NULL)
     return "";
 
@@ -541,8 +530,8 @@ aml_java_row_set_custom (AmlJavaRow *self,
             {
               aml_java_row_select_path (self, java->executable);
 
-              /* The runtime the default resolves to is not listed again:
-                 its entry is the first, "Default", one. */
+              /* The runtime the automatic choice resolves to is not
+                 listed again: its entry is the first one. */
               {
                 gboolean listed = FALSE;
 
@@ -605,7 +594,6 @@ aml_java_row_finalize (GObject *object)
   aml_java_free (self->probed);
   g_free (self->wanted);
   g_free (self->default_label);
-  g_free (self->default_path);
 
   G_OBJECT_CLASS (aml_java_row_parent_class)->finalize (object);
 }
@@ -630,8 +618,7 @@ aml_java_row_init (AmlJavaRow *self)
   self->javas = g_ptr_array_new_with_free_func ((GDestroyNotify) aml_java_free);
   self->ids = g_ptr_array_new_with_free_func (g_free);
   self->names = g_ptr_array_new_with_free_func (g_free);
-  self->default_label = g_strdup ("Default");
-  self->default_path = NULL;
+  self->default_label = g_strdup (_("Automatic (closest compatible)"));
   self->required_major = 0;
   self->add_index = GTK_INVALID_LIST_POSITION;
   self->restore = 0;

@@ -232,6 +232,29 @@ count_by_type (GtkWidget *w, GType type)
   return n;
 }
 
+/* The image of @icon_name under @w. */
+static GtkWidget *
+find_by_icon (GtkWidget *w, const char *icon_name)
+{
+  if (w == NULL)
+    return NULL;
+
+  if (GTK_IS_IMAGE (w) &&
+      g_strcmp0 (gtk_image_get_icon_name (GTK_IMAGE (w)), icon_name) == 0)
+    return w;
+
+  for (GtkWidget *c = gtk_widget_get_first_child (w); c != NULL;
+       c = gtk_widget_get_next_sibling (c))
+    {
+      GtkWidget *found = find_by_icon (c, icon_name);
+
+      if (found != NULL)
+        return found;
+    }
+
+  return NULL;
+}
+
 /* A page of a kind of content opens as the list alone: the project is the
  * other half of a split view, and is only filled when one is opened. This
  * is the state the split has to start in, and moving the split without
@@ -326,6 +349,61 @@ test_page_disposed_while_scanning (void)
   g_print ("ok - a page disposed while scanning is not touched afterwards\n");
 }
 
+/* The foot of the list of a content page: the button that installs every
+ * version the checkmarks have on, at the left of the row, with the number
+ * of them on it. It is there from the start and has nothing to install
+ * until something is picked, so it starts insensitive and bare. */
+static void
+test_pick_button_starts_empty (void)
+{
+  g_autoptr (GError) error = NULL;
+  g_autofree char *tmp = g_dir_make_tmp ("aml-ui-pick-XXXXXX", &error);
+  g_autofree char *data_dir = NULL;
+  g_autoptr (AmlInstanceManager) manager = NULL;
+  AmlInstance *instance = NULL;
+  AmlContentPage *page = NULL;
+  GtkWidget *icon = NULL;
+  GtkWidget *button = NULL;
+  GtkWidget *badge = NULL;
+
+  g_assert_no_error (error);
+  g_assert_nonnull (tmp);
+
+  data_dir = g_build_filename (tmp, "data", NULL);
+  manager = aml_instance_manager_new (data_dir);
+  instance = aml_instance_manager_create (manager, "Pick", NULL, "1.21.1",
+                                          AML_LOADER_FABRIC, "0.15.0",
+                                          &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+
+  page = aml_content_page_new (instance, AML_CONTENT_MOD);
+  g_assert_nonnull (page);
+
+  /* The download icon of the foot is the button itself, and the number
+     that stands over its corner is beside it: what lights up under the
+     pointer is the icon and not the count with it. */
+  icon = find_by_icon (GTK_WIDGET (page), "folder-download-symbolic");
+  g_assert_nonnull (icon);
+
+  button = gtk_widget_get_parent (icon);
+  g_assert_true (GTK_IS_BUTTON (button));
+
+  /* Nothing is picked: there is nothing to install and no number to
+     show, which is what an insensitive button says on its own. */
+  g_assert_false (gtk_widget_get_sensitive (button));
+
+  badge = gtk_widget_get_parent (button);
+  g_assert_true (GTK_IS_OVERLAY (badge));
+  badge = find_by_type (badge, GTK_TYPE_LABEL);
+  g_assert_nonnull (badge);
+  g_assert_cmpstr (gtk_label_get_text (GTK_LABEL (badge)), ==, "");
+  g_assert_false (gtk_widget_get_visible (badge));
+
+  g_object_unref (instance);
+  g_print ("ok - the button that installs what is selected starts empty\n");
+}
+
 int
 main (int argc, char **argv)
 {
@@ -348,6 +426,7 @@ main (int argc, char **argv)
   test_icon_decode ();
   test_content_page_starts_single ();
   test_page_disposed_while_scanning ();
+  test_pick_button_starts_empty ();
 
   return EXIT_SUCCESS;
 }

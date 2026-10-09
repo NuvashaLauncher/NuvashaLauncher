@@ -1045,64 +1045,54 @@ aml_launcher_spawn (AmlLauncher *self, GPtrArray *argv, GError **error)
  * specific: which Java was asked for, which is needed, or that there is
  * none at all. */
 static char *
-no_java_reason (AmlLauncher *self, const char *instance_java,
-                const char *global_java)
+no_java_reason (AmlLauncher *self, const char *instance_java)
 {
   int required = self->resolved != NULL ? self->resolved->java_major_version
                                         : 0;
-  const char *configured =
-    instance_java != NULL && *instance_java != '\0' ? instance_java
-                                                     : global_java;
 
   if (required > 0)
     {
-      if (configured != NULL && *configured != '\0')
+      if (instance_java != NULL && *instance_java != '\0')
         return g_strdup_printf (
           "\"%s\" was not found among the detected Java installations, and "
           "no other one on this system runs Minecraft %s, which needs "
           "Java %d or newer",
-          configured, self->version, required);
+          instance_java, self->version, required);
 
       return g_strdup_printf (
         "no Java on this system runs Minecraft %s, which needs Java %d "
         "or newer", self->version, required);
     }
 
-  if (configured != NULL && *configured != '\0')
+  if (instance_java != NULL && *instance_java != '\0')
     return g_strdup_printf (
       "\"%s\" was not found among the detected Java installations, and "
       "there is no other one to run Minecraft %s with",
-      configured, self->version);
+      instance_java, self->version);
 
   return g_strdup_printf (
     "no Java installation was found on this system to run Minecraft %s "
     "with", self->version);
 }
 
-/* The Java a launch runs with: the one the instance asks for, the one the
- * settings ask for, or the newest one that runs what the game needs.
+/* The Java a launch runs with: the one the instance asks for, or the
+ * closest compatible one when it asks for none.
  *
  * @required is the Java the document of the game asks for, which the
  * merged document of a loader names as its Minecraft version does. */
 static const AmlJava *
 choose_java (AmlLauncher *self, GPtrArray *javas, int required,
-             char       **instance_java, const char **global_java)
+             char       **instance_java)
 {
   const AmlJava *java = NULL;
 
   g_object_get (self->instance, "java-path", instance_java, NULL);
 
-  if (self->settings != NULL)
-    *global_java = aml_settings_get_default_java_path (self->settings);
-  else
-    *global_java = NULL;
-
-  java = aml_java_select (javas, *instance_java, *global_java, required);
+  java = aml_java_select (javas, *instance_java, required);
 
   if (java == NULL)
     {
-      launcher_failed (self,
-                       no_java_reason (self, *instance_java, *global_java));
+      launcher_failed (self, no_java_reason (self, *instance_java));
       return NULL;
     }
 
@@ -1198,7 +1188,6 @@ on_java_detected (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) javas = aml_java_detect_finish (result, &error);
   g_autofree char *instance_java = NULL;
-  const char *global_java = NULL;
   const AmlJava *java = NULL;
 
   if (javas == NULL)
@@ -1220,7 +1209,7 @@ on_java_detected (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                       self->resolved != NULL
                         ? self->resolved->java_major_version
                         : 0,
-                      &instance_java, &global_java);
+                      &instance_java);
 
   if (java == NULL)
     {
@@ -1353,7 +1342,6 @@ on_java_for_the_install (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) javas = aml_java_detect_finish (result, &error);
   g_autofree char *instance_java = NULL;
-  const char *global_java = NULL;
   const AmlJava *java = NULL;
   int required = 0;
 
@@ -1375,7 +1363,7 @@ on_java_for_the_install (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   if (request->profile != NULL && request->profile->java_version != NULL)
     required = request->profile->java_version->major_version;
 
-  java = choose_java (self, javas, required, &instance_java, &global_java);
+  java = choose_java (self, javas, required, &instance_java);
 
   if (java == NULL)
     {

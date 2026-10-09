@@ -64,12 +64,12 @@ gboolean aml_java_parse_version (const char  *output,
 AmlJava *aml_java_best_compatible (GPtrArray *javas, int required_major);
 
 /* Picks the Java an instance will run with: the instance setting wins,
- * then the global default from config.json, and when neither says
- * anything the closest compatible detected one. @javas holds what
- * detection found; nothing here requires every candidate to be in it. */
+ * and when it names none the closest compatible detected one. There is
+ * no global default: a runtime is the instance's own choice.
+ * @javas holds what detection found; nothing here requires every
+ * candidate to be in it. */
 const AmlJava *aml_java_select (GPtrArray *javas,
                                 const char *instance_java_path,
-                                const char *global_java_path,
                                 int         required_major);
 
 /* Runs "<executable> -version" (stderr is merged into stdout, the
