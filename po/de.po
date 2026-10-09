@@ -104,7 +104,10 @@ msgid "Copy of %s"
 msgstr "Kopie von %s"
 
 msgid "Choose Java executable"
-msgstr "Ausführbare Java-Datei auswählen"
+msgstr "Java-Programmdatei auswählen"
+
+msgid "the chosen file does not report a Java version"
+msgstr "die gewählte Datei nennt keine Java-Version"
 
 msgid "Choose an Icon"
 msgstr "Wählen Sie ein Symbol"
@@ -130,17 +133,32 @@ msgstr "Ordner ändern"
 msgid "Minecraft"
 msgstr "Minecraft"
 
-msgid "Choose…"
-msgstr "Auswählen…"
-
 msgid "Java"
 msgstr "Java"
 
+msgid "Java Runtime"
+msgstr "Java-Laufzeitumgebung"
+
+msgid "No Java installation was found on this system"
+msgstr "Auf diesem System wurde keine Java-Installation gefunden"
+
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "Dieses Spiel braucht Java %d oder neuer, gewählt ist Java %d"
+
 msgid "Add Java Runtime"
-msgstr "Java hinzufügen"
+msgstr "Java-Laufzeitumgebung hinzufügen"
+
+msgid "No detected Java satisfies the requirement of Java %d+"
+msgstr "Kein erkanntes Java erfüllt die Anforderung von Java %d+"
+
+msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
+msgstr "Minecraft braucht ein Java ohne Headless: auf Arch das Paket jre-openjdk verwenden, nicht jre-openjdk-headless"
 
 msgid "JVM Arguments"
 msgstr "JVM-Argumente"
+
+msgid "The configured Java was not detected; make sure it is still a usable java executable"
+msgstr "Das konfigurierte Java wurde nicht erkannt; stelle sicher, dass es weiterhin eine nutzbare Java-Programmdatei ist"
 
 msgid "Actions"
 msgstr "Maßnahmen"
@@ -199,14 +217,8 @@ msgstr "Snapshots anzeigen"
 msgid "Show unstable Mod Loader versions"
 msgstr "Instabile Mod-Loader-Versionen anzeigen"
 
-msgid "Default Java"
-msgstr "Standard-Java"
-
 msgid "Automatic (closest compatible)"
 msgstr "Automatisch (passendste)"
-
-msgid "Custom Java…"
-msgstr "Benutzerdefiniertes Java…"
 
 msgid "Language"
 msgstr "Sprache"

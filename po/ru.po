@@ -106,6 +106,9 @@ msgstr "Копия %s"
 msgid "Choose Java executable"
 msgstr "Выберите исполняемый файл Java"
 
+msgid "the chosen file does not report a Java version"
+msgstr "выбранный файл не сообщает версию Java"
+
 msgid "Choose an Icon"
 msgstr "Выберите иконку"
 
@@ -130,17 +133,32 @@ msgstr "Изменить папку"
 msgid "Minecraft"
 msgstr "Minecraft"
 
-msgid "Choose…"
-msgstr "Выбрать…"
-
 msgid "Java"
 msgstr "Java"
 
+msgid "Java Runtime"
+msgstr "Среда выполнения Java"
+
+msgid "No Java installation was found on this system"
+msgstr "В этой системе не найдено установок Java"
+
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "Для этой игры нужна Java %d или новее, выбрана Java %d"
+
 msgid "Add Java Runtime"
-msgstr "Добавить Java"
+msgstr "Добавить среду выполнения Java"
+
+msgid "No detected Java satisfies the requirement of Java %d+"
+msgstr "Ни одна обнаруженная Java не удовлетворяет требованию Java %d+"
+
+msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
+msgstr "Minecraft нужна Java без графического режима (headless): в Arch используйте пакет jre-openjdk, а не jre-openjdk-headless"
 
 msgid "JVM Arguments"
 msgstr "Аргументы JVM"
+
+msgid "The configured Java was not detected; make sure it is still a usable java executable"
+msgstr "Настроенная Java не обнаружена; убедитесь, что это по-прежнему работоспособный исполняемый файл Java"
 
 msgid "Actions"
 msgstr "Действия"
@@ -199,14 +217,8 @@ msgstr "Показать снимки"
 msgid "Show unstable Mod Loader versions"
 msgstr "Показывать нестабильные версии мод-загрузчиков"
 
-msgid "Default Java"
-msgstr "Java по умолчанию"
-
 msgid "Automatic (closest compatible)"
 msgstr "Автоматически (самая подходящая)"
-
-msgid "Custom Java…"
-msgstr "Пользовательская Java..."
 
 msgid "Language"
 msgstr "Язык"

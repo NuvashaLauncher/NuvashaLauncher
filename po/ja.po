@@ -62,10 +62,10 @@ msgid "Browse"
 msgstr "閲覧"
 
 msgid "No mod loader"
-msgstr "Modローダーがありません"
+msgstr "Mod ローダーがありません"
 
 msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
-msgstr "ModにはModローダーが必要です。先にこのインスタンスの設定でFabric、Quilt、Forge、NeoForgeを選んでください"
+msgstr "ModにはMod ローダーが必要です。先にこのインスタンスの設定でFabric、Quilt、Forge、NeoForgeを選んでください"
 
 msgid "Create Instance"
 msgstr "インスタンスを作成"
@@ -106,6 +106,9 @@ msgstr "%sのコピー"
 msgid "Choose Java executable"
 msgstr "Java 実行ファイルを選択"
 
+msgid "the chosen file does not report a Java version"
+msgstr "選んだファイルは Java バージョンを報告しません"
+
 msgid "Choose an Icon"
 msgstr "アイコンを選択"
 
@@ -130,17 +133,32 @@ msgstr "フォルダーを変更"
 msgid "Minecraft"
 msgstr "Minecraft"
 
-msgid "Choose…"
-msgstr "選択…"
-
 msgid "Java"
 msgstr "Java"
+
+msgid "Java Runtime"
+msgstr "Java ランタイム"
+
+msgid "No Java installation was found on this system"
+msgstr "このシステムに Java のインストールが見つかりませんでした"
+
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "このゲームには Java %d 以降が必要です。選択されている Java は %d です"
 
 msgid "Add Java Runtime"
 msgstr "Java ランタイムを追加"
 
+msgid "No detected Java satisfies the requirement of Java %d+"
+msgstr "検出された Java には Java %d+ の要件を満たすものはありません"
+
+msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
+msgstr "Minecraft には headless でない Java が必要です。Arch では jre-openjdk-headless ではなく jre-openjdk パッケージを使ってください"
+
 msgid "JVM Arguments"
 msgstr "JVM 引数"
+
+msgid "The configured Java was not detected; make sure it is still a usable java executable"
+msgstr "設定された Java が検出されません。まだ使える Java 実行ファイルか確認してください"
 
 msgid "Actions"
 msgstr "アクション"
@@ -197,16 +215,10 @@ msgid "Show Snapshots"
 msgstr "スナップショットを表示"
 
 msgid "Show unstable Mod Loader versions"
-msgstr "不安定な Mod ローダーのバージョンを表示"
-
-msgid "Default Java"
-msgstr "デフォルトJava"
+msgstr "不安定なMod ローダーのバージョンを表示"
 
 msgid "Automatic (closest compatible)"
 msgstr "自動（最も近い互換版）"
-
-msgid "Custom Java…"
-msgstr "カスタムJava…"
 
 msgid "Language"
 msgstr "言語"

@@ -62,10 +62,10 @@ msgid "Browse"
 msgstr "Verkennen"
 
 msgid "No mod loader"
-msgstr "Geen mod-loader"
+msgstr "Geen modlader"
 
 msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
-msgstr "Mods hebben een mod-loader nodig. Kies eerst Fabric, Quilt, Forge of NeoForge in de instellingen van deze instantie"
+msgstr "Mods hebben een modlader nodig. Kies eerst Fabric, Quilt, Forge of NeoForge in de instellingen van deze instantie"
 
 msgid "Create Instance"
 msgstr "Instantie maken"
@@ -104,7 +104,10 @@ msgid "Copy of %s"
 msgstr "Kopie van %s"
 
 msgid "Choose Java executable"
-msgstr "Kies Java-programma"
+msgstr "Java-programma kiezen"
+
+msgid "the chosen file does not report a Java version"
+msgstr "het gekozen bestand meldt geen Java-versie"
 
 msgid "Choose an Icon"
 msgstr "Kies een pictogram"
@@ -130,17 +133,32 @@ msgstr "Map wijzigen"
 msgid "Minecraft"
 msgstr "Minecraft"
 
-msgid "Choose…"
-msgstr "Kiezen…"
-
 msgid "Java"
 msgstr "Java"
+
+msgid "Java Runtime"
+msgstr "Java-runtime"
+
+msgid "No Java installation was found on this system"
+msgstr "Er is geen Java-installatie gevonden op dit systeem"
+
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "Deze game heeft Java %d of nieuwer nodig, de gekozen Java is %d"
 
 msgid "Add Java Runtime"
 msgstr "Java-runtime toevoegen"
 
+msgid "No detected Java satisfies the requirement of Java %d+"
+msgstr "Geen gevonden Java voldoet aan de eis van Java %d+"
+
+msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
+msgstr "Minecraft heeft een Java zonder headless nodig: gebruik op Arch het pakket jre-openjdk, niet jre-openjdk-headless"
+
 msgid "JVM Arguments"
 msgstr "JVM-argumenten"
+
+msgid "The configured Java was not detected; make sure it is still a usable java executable"
+msgstr "De ingestelde Java is niet gevonden; controleer of het nog een bruikbaar Java-programma is"
 
 msgid "Actions"
 msgstr "Acties"
@@ -179,10 +197,10 @@ msgid "No compatible %s version found for Minecraft %s."
 msgstr "Geen compatibele %s-versie gevonden voor Minecraft %s."
 
 msgid "Loader"
-msgstr "Loader"
+msgstr "Modlader"
 
 msgid "Loader Version"
-msgstr "Loader-versie"
+msgstr "Modladerversie"
 
 msgid "Clear"
 msgstr "Wissen"
@@ -197,16 +215,10 @@ msgid "Show Snapshots"
 msgstr "Snapshots tonen"
 
 msgid "Show unstable Mod Loader versions"
-msgstr "Instabiele loader-versies tonen"
-
-msgid "Default Java"
-msgstr "Standaard-Java"
+msgstr "Instabiele modladerversies tonen"
 
 msgid "Automatic (closest compatible)"
 msgstr "Automatisch (dichtstbijzijnde compatibele)"
-
-msgid "Custom Java…"
-msgstr "Aangepaste Java…"
 
 msgid "Language"
 msgstr "Taal"
@@ -248,7 +260,7 @@ msgid "Use the + button in the header to create one"
 msgstr "Gebruik de knop + in de kopbalk om er een te maken"
 
 msgid "the loader cannot be resolved: %s"
-msgstr "de loader kan niet worden bepaald: %s"
+msgstr "de modlader kan niet worden bepaald: %s"
 
 msgid "No compatible version found for Minecraft %s and %s."
 msgstr "Geen compatibele versie gevonden voor Minecraft %s en %s."
