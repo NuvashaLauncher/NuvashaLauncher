@@ -193,7 +193,7 @@ rebuild_content_pages (AmlInstancePage *self)
       adw_view_stack_remove (ADW_VIEW_STACK (self->stack), self->logs_page);
       adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (self->stack),
                                            self->logs_page, "logs", "Logs",
-                                           "utilities-terminal-symbolic");
+                                        "edit-clear-all-symbolic");
     }
 
   /* What the user was looking at is not thrown away by the rebuild. */

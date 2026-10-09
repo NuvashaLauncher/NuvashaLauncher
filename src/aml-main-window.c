@@ -8,8 +8,10 @@
  * through the launcher of that instance and follows it while it runs. */
 
 #include "aml-main-window.h"
+#include "aml-cache.h"
 #include "aml-create-instance-dialog.h"
 #include "aml-download-modpack-dialog.h"
+#include "aml-download.h"
 #include "aml-downloads.h"
 #include "aml-instance-page.h"
 #include "aml-i18n.h"
@@ -184,6 +186,125 @@ on_language_selected (GObject *object,
 }
 
 static void
+on_cache_modrinth_api_responses_toggled (GObject *object,
+                                         GParamSpec *pspec G_GNUC_UNUSED,
+                                         gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  AdwSwitchRow *row = ADW_SWITCH_ROW (object);
+  gboolean active = adw_switch_row_get_active (row);
+
+  if (active == aml_settings_get_cache_modrinth_api_responses (self->settings))
+    return;
+
+  if (!aml_settings_set_cache_modrinth_api_responses (self->settings, active,
+                                                      NULL))
+    adw_switch_row_set_active (
+      row, aml_settings_get_cache_modrinth_api_responses (self->settings));
+}
+
+static void
+on_cache_expiration_selected (GObject *object,
+                               GParamSpec *pspec G_GNUC_UNUSED,
+                               gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  AdwComboRow *row = ADW_COMBO_ROW (object);
+  static const AmlSettingsCacheExpiration values[] = {
+    AML_SETTINGS_CACHE_EXPIRATION_1_HOUR,
+    AML_SETTINGS_CACHE_EXPIRATION_6_HOURS,
+    AML_SETTINGS_CACHE_EXPIRATION_1_DAY,
+    AML_SETTINGS_CACHE_EXPIRATION_7_DAYS
+  };
+  guint selected = adw_combo_row_get_selected (row);
+
+  if (selected >= G_N_ELEMENTS (values) ||
+      values[selected] == aml_settings_get_cache_expiration (self->settings))
+    return;
+
+  if (!aml_settings_set_cache_expiration (self->settings, values[selected], NULL))
+    {
+      AmlSettingsCacheExpiration current =
+        aml_settings_get_cache_expiration (self->settings);
+      guint current_index = 0;
+
+      for (guint i = 0; i < G_N_ELEMENTS (values); i++)
+        if (values[i] == current)
+          current_index = i;
+      adw_combo_row_set_selected (row, current_index);
+    }
+}
+
+static void
+on_clear_cache_confirmed (GObject *source, GAsyncResult *result,
+                          gpointer user_data);
+
+static void
+on_clear_cache_clicked (GtkButton *button G_GNUC_UNUSED,
+                        gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  AdwAlertDialog *alert = ADW_ALERT_DIALOG (
+    adw_alert_dialog_new (_("Clear AML Cache?"), NULL));
+
+  adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
+  adw_alert_dialog_add_response (alert, "clear", _("Clear"));
+  adw_alert_dialog_set_response_appearance (alert, "clear",
+                                            ADW_RESPONSE_DESTRUCTIVE);
+  adw_alert_dialog_set_default_response (alert, "cancel");
+  adw_alert_dialog_set_close_response (alert, "cancel");
+  adw_alert_dialog_set_heading_use_markup (alert, FALSE);
+  adw_alert_dialog_set_body_use_markup (alert, FALSE);
+  adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL,
+                           on_clear_cache_confirmed, g_object_ref (self));
+}
+
+static void
+on_cache_cleared (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                  gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  g_autoptr (GError) error = NULL;
+  gboolean success = g_task_propagate_boolean (G_TASK (result), &error);
+  AdwAlertDialog *alert = NULL;
+
+  if (success)
+    alert = ADW_ALERT_DIALOG (
+      adw_alert_dialog_new ("Cache Cleared",
+                            "AML cache data was cleared successfully."));
+  else
+    alert = ADW_ALERT_DIALOG (
+      adw_alert_dialog_new ("Cache Cleanup Failed",
+                            error != NULL ? error->message
+                                          : "The cache could not be cleared."));
+
+  adw_alert_dialog_set_heading_use_markup (alert, FALSE);
+  adw_alert_dialog_set_body_use_markup (alert, FALSE);
+  adw_alert_dialog_add_response (alert, "ok", "OK");
+  adw_alert_dialog_set_default_response (alert, "ok");
+  adw_alert_dialog_set_close_response (alert, "ok");
+  adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (self));
+  g_object_unref (self);
+}
+
+static void
+on_clear_cache_confirmed (GObject *source, GAsyncResult *result,
+                          gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  const char *response =
+    adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
+
+  if (g_strcmp0 (response, "clear") != 0)
+    {
+      g_object_unref (self);
+      return;
+    }
+
+  aml_cache_clear_all_async (NULL, on_cache_cleared, self);
+}
+
+static void
 on_settings (GSimpleAction *action G_GNUC_UNUSED,
              GVariant      *parameter G_GNUC_UNUSED,
              gpointer       user_data)
@@ -194,11 +315,15 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   GtkWidget *versions_group = adw_preferences_group_new ();
   GtkWidget *logs_group = adw_preferences_group_new ();
   GtkWidget *language_group = adw_preferences_group_new ();
+  GtkWidget *cache_group = adw_preferences_group_new ();
   GtkWidget *language_row = adw_combo_row_new ();
   GtkWidget *row = adw_switch_row_new ();
   GtkWidget *limit_row = NULL;
   GtkWidget *unstable_row = adw_switch_row_new ();
   GtkWidget *crash_row = adw_switch_row_new ();
+  GtkWidget *cache_api_row = adw_switch_row_new ();
+  GtkWidget *cache_expiration_row = adw_combo_row_new ();
+  GtkWidget *clear_cache_row = adw_action_row_new ();
 
   /* Every one of these rows can show a path or an error message from
      GIO, which is plain text and may hold an "&". */
@@ -206,6 +331,9 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (unstable_row),
                                       FALSE);
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (crash_row), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (cache_api_row), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (cache_expiration_row), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (clear_cache_row), FALSE);
 
   adw_dialog_set_title (dialog, _("Settings"));
   adw_preferences_dialog_set_search_enabled (ADW_PREFERENCES_DIALOG (dialog),
@@ -291,12 +419,71 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
                     G_CALLBACK (on_open_logs_after_crash_toggled), self);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (logs_group), crash_row);
 
+  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (cache_group),
+                                    _("Cache"));
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (cache_api_row),
+                                  _("Cache Modrinth API responses"));
+  adw_switch_row_set_active (
+    ADW_SWITCH_ROW (cache_api_row),
+    aml_settings_get_cache_modrinth_api_responses (self->settings));
+  g_signal_connect (cache_api_row, "notify::active",
+                    G_CALLBACK (on_cache_modrinth_api_responses_toggled), self);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (cache_group), cache_api_row);
+
+  {
+    GtkStringList *model = gtk_string_list_new (NULL);
+    const char *labels[] = { _("1 hour"), _("6 hours"), _("1 day"), _("7 days") };
+    AmlSettingsCacheExpiration current =
+      aml_settings_get_cache_expiration (self->settings);
+    guint selected = 0;
+    const AmlSettingsCacheExpiration values[] = {
+      AML_SETTINGS_CACHE_EXPIRATION_1_HOUR,
+      AML_SETTINGS_CACHE_EXPIRATION_6_HOURS,
+      AML_SETTINGS_CACHE_EXPIRATION_1_DAY,
+      AML_SETTINGS_CACHE_EXPIRATION_7_DAYS
+    };
+
+    for (guint i = 0; i < G_N_ELEMENTS (labels); i++)
+      {
+        gtk_string_list_append (model, labels[i]);
+        if (values[i] == current)
+          selected = i;
+      }
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (cache_expiration_row),
+                                    _("Cache expiration"));
+    adw_combo_row_set_model (ADW_COMBO_ROW (cache_expiration_row),
+                             G_LIST_MODEL (model));
+    adw_combo_row_set_selected (ADW_COMBO_ROW (cache_expiration_row), selected);
+    g_signal_connect (cache_expiration_row, "notify::selected",
+                      G_CALLBACK (on_cache_expiration_selected), self);
+    adw_preferences_group_add (ADW_PREFERENCES_GROUP (cache_group),
+                               cache_expiration_row);
+    g_object_unref (model);
+  }
+
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (clear_cache_row),
+                                  _("Clear AML Cache"));
+  {
+    GtkWidget *button = gtk_button_new_from_icon_name ("user-trash-symbolic");
+    gtk_widget_add_css_class (button, "flat");
+    gtk_widget_set_tooltip_text (button, _("Clear AML Cache"));
+    gtk_accessible_update_property (GTK_ACCESSIBLE (button),
+                                    GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                    _("Clear AML Cache"), -1);
+    g_signal_connect (button, "clicked", G_CALLBACK (on_clear_cache_clicked),
+                      self);
+    adw_action_row_add_suffix (ADW_ACTION_ROW (clear_cache_row), button);
+  }
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (cache_group), clear_cache_row);
+
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                             ADW_PREFERENCES_GROUP (versions_group));
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                              ADW_PREFERENCES_GROUP (logs_group));
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                              ADW_PREFERENCES_GROUP (language_group));
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+                             ADW_PREFERENCES_GROUP (cache_group));
   adw_preferences_dialog_add (ADW_PREFERENCES_DIALOG (dialog),
                               ADW_PREFERENCES_PAGE (page));
 
@@ -337,16 +524,16 @@ on_shortcuts (GSimpleAction *action G_GNUC_UNUSED,
 {
   AmlMainWindow *self = user_data;
   AdwDialog *dialog = adw_shortcuts_dialog_new ();
-  AdwShortcutsSection *general = adw_shortcuts_section_new ("General");
+  AdwShortcutsSection *general = adw_shortcuts_section_new (_("General"));
 
   adw_shortcuts_section_add (
-    general, adw_shortcuts_item_new ("Show Shortcuts", "F1"));
+    general, adw_shortcuts_item_new (_("Show Shortcuts"), "F1"));
   adw_shortcuts_section_add (
-    general, adw_shortcuts_item_new ("Create Instance", "<primary>n"));
+    general, adw_shortcuts_item_new (_("Create Instance"), "<primary>n"));
   adw_shortcuts_section_add (
-    general, adw_shortcuts_item_new ("Settings", "<primary>comma"));
+    general, adw_shortcuts_item_new (_("Settings"), "<primary>comma"));
   adw_shortcuts_section_add (
-    general, adw_shortcuts_item_new ("Quit", "<primary>q"));
+    general, adw_shortcuts_item_new (_("Quit"), "<primary>q"));
 
   adw_shortcuts_dialog_add (ADW_SHORTCUTS_DIALOG (dialog), general);
   adw_dialog_present (dialog, GTK_WIDGET (self));
@@ -1195,6 +1382,7 @@ aml_main_window_init (AmlMainWindow *self)
      an instance is handed the same ones, so the whole window agrees on
      what a launch does and as whom it plays. */
   self->settings = aml_settings_new ();
+  aml_download_set_cache_settings (self->settings);
   self->accounts = aml_accounts_new ();
 
   g_action_map_add_action_entries (G_ACTION_MAP (self), window_entries,

@@ -5,7 +5,7 @@
 /* AmlSettings: the small file of choices the whole application shares,
  * <config dir>/AML/config.json.
  *
- * One object, four options so far: whether the version lists also show
+ * One object, seven options so far: whether the version lists also show
  * snapshots and the versions Mojang no longer serves, whether the loader
  * lists also show the versions a loader does not call stable, how many
  * lines the log of a running game keeps and whether the log folder is
@@ -33,11 +33,20 @@ typedef enum {
   AML_SETTINGS_ERROR_INVALID  /* the value asked for is not a usable one */
 } AmlSettingsError;
 
+typedef enum {
+  AML_SETTINGS_CACHE_EXPIRATION_1_HOUR = 60 * 60,
+  AML_SETTINGS_CACHE_EXPIRATION_6_HOURS = 6 * 60 * 60,
+  AML_SETTINGS_CACHE_EXPIRATION_1_DAY = 24 * 60 * 60,
+  AML_SETTINGS_CACHE_EXPIRATION_7_DAYS = 7 * 24 * 60 * 60
+} AmlSettingsCacheExpiration;
+
 GQuark aml_settings_error_quark (void);
 
 /* How many lines the log of a running game keeps before the oldest ones
  * are dropped. */
 #define AML_SETTINGS_DEFAULT_LOG_LINE_LIMIT 5000
+#define AML_SETTINGS_DEFAULT_CACHE_EXPIRATION \
+  AML_SETTINGS_CACHE_EXPIRATION_1_HOUR
 
 /* Reads <config dir>/AML/config.json, falling back to the defaults
  * when there is nothing there to read. Never returns NULL. */
@@ -84,6 +93,17 @@ const char *aml_settings_get_language (AmlSettings *self);
 gboolean aml_settings_set_language (AmlSettings *self,
                                     const char *language,
                                     GError    **error);
+
+gboolean aml_settings_get_cache_modrinth_api_responses (AmlSettings *self);
+gboolean aml_settings_set_cache_modrinth_api_responses (AmlSettings *self,
+                                                        gboolean     value,
+                                                        GError     **error);
+
+AmlSettingsCacheExpiration
+aml_settings_get_cache_expiration (AmlSettings *self);
+gboolean aml_settings_set_cache_expiration (AmlSettings *self,
+                                            AmlSettingsCacheExpiration value,
+                                            GError **error);
 
 G_END_DECLS
 

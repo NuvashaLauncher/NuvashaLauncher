@@ -50,9 +50,14 @@ typedef struct {
   /* What a hash lookup answered, all NULL for a file Modrinth does not
    * know or while the network is not there. */
   char *project_id;
+  char *project_name;
+  char *icon_url;
+  char *version_id;
   char *version_name;
   char *version_number;
   GPtrArray *required_dependencies; /* project ids this file requires */
+  GPtrArray *optional_dependencies;
+  GPtrArray *incompatible_dependencies;
 } AmlContentFile;
 
 void aml_content_file_free (AmlContentFile *file);

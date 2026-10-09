@@ -27,6 +27,7 @@
  * touching it. */
 
 #include "aml-content-page.h"
+#include "aml-content-index.h"
 #include "aml-download.h"
 #include "aml-downloads.h"
 #include "aml-i18n.h"
@@ -431,9 +432,14 @@ aml_content_file_free (AmlContentFile *file)
   g_free (file->filename);
   g_free (file->sha1);
   g_free (file->project_id);
+  g_free (file->project_name);
+  g_free (file->icon_url);
+  g_free (file->version_id);
   g_free (file->version_name);
   g_free (file->version_number);
   g_clear_pointer (&file->required_dependencies, g_ptr_array_unref);
+  g_clear_pointer (&file->optional_dependencies, g_ptr_array_unref);
+  g_clear_pointer (&file->incompatible_dependencies, g_ptr_array_unref);
   g_free (file);
 }
 
@@ -518,8 +524,11 @@ typedef struct
   GTask *task;
   GFile *folder;
   GFileEnumerator *enumerator; /* while the batches are read */
+  char *instance_directory;
+  AmlContentType type;
   char *extension;
   GPtrArray *files; /* AmlContentFile* */
+  GPtrArray *index_entries; /* AmlContentIndexEntry* */
   guint index;
 } ScanRun;
 
@@ -534,8 +543,43 @@ scan_free (ScanRun *run)
   g_clear_object (&run->folder);
   g_clear_object (&run->task);
   g_clear_pointer (&run->files, g_ptr_array_unref);
+  g_clear_pointer (&run->index_entries, g_ptr_array_unref);
+  g_free (run->instance_directory);
   g_free (run->extension);
   g_free (run);
+}
+
+static AmlContentIndexEntry *
+scan_index_entry (ScanRun *run, AmlContentFile *file)
+{
+  g_autofree char *name = g_path_get_basename (file->path);
+
+  for (guint i = 0; run->index_entries != NULL &&
+                     i < run->index_entries->len; i++)
+    {
+      AmlContentIndexEntry *entry = g_ptr_array_index (run->index_entries, i);
+      if (g_strcmp0 (entry->filename, name) == 0 &&
+          g_strcmp0 (entry->hash, file->sha1) == 0)
+        return entry;
+    }
+  return NULL;
+}
+
+static void
+apply_index_entry (ScanRun *run, AmlContentFile *file)
+{
+  AmlContentIndexEntry *entry = scan_index_entry (run, file);
+
+  if (entry == NULL)
+    return;
+  file->project_id = g_strdup (entry->project_id);
+  file->project_name = g_strdup (entry->project_name);
+  file->icon_url = g_strdup (entry->icon_url);
+  file->version_id = g_strdup (entry->version_id);
+  file->version_name = g_strdup (entry->version_name);
+  file->required_dependencies = g_ptr_array_ref (entry->required_dependencies);
+  file->optional_dependencies = g_ptr_array_ref (entry->optional_dependencies);
+  file->incompatible_dependencies = g_ptr_array_ref (entry->incompatible_dependencies);
 }
 
 /* One batch of the folder, then the next, so that a folder with a
@@ -628,6 +672,32 @@ scan_children_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 }
 
 static void
+scan_index_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                  gpointer user_data)
+{
+  ScanRun *run = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GPtrArray) entries =
+    aml_content_index_load_finish (result, &error);
+
+  /* A missing or damaged index is deliberately not fatal: the existing
+   * hash lookup repairs what it can, and the folder remains usable offline. */
+  if (entries == NULL)
+    {
+      g_clear_error (&error);
+      entries = g_ptr_array_new_with_free_func (
+        (GDestroyNotify) aml_content_index_entry_free);
+    }
+  run->index_entries = g_steal_pointer (&entries);
+
+  g_file_enumerate_children_async (
+    run->folder,
+    G_FILE_ATTRIBUTE_STANDARD_NAME "," G_FILE_ATTRIBUTE_STANDARD_TYPE,
+    G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, G_PRIORITY_DEFAULT,
+    g_task_get_cancellable (run->task), scan_children_ready, run);
+}
+
+static void
 scan_hash_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                  gpointer user_data)
 {
@@ -647,6 +717,7 @@ scan_hash_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   if (digest != NULL)
     {
       file->sha1 = g_steal_pointer (&digest);
+      apply_index_entry (run, file);
     }
   else
     {
@@ -705,6 +776,8 @@ aml_content_scan_async (const char *instance_directory, AmlContentType type,
   run->task = g_task_new (NULL, cancellable, callback, user_data);
   g_task_set_check_cancellable (run->task, FALSE);
   run->folder = g_file_new_for_path (folder);
+  run->instance_directory = g_strdup (instance_directory);
+  run->type = type;
   run->extension = g_strdup (aml_content_type_extension (type));
   run->files =
     g_ptr_array_new_with_free_func ((GDestroyNotify) aml_content_file_free);
@@ -719,11 +792,8 @@ aml_content_scan_async (const char *instance_directory, AmlContentType type,
       return;
     }
 
-  g_file_enumerate_children_async (
-      run->folder,
-      G_FILE_ATTRIBUTE_STANDARD_NAME "," G_FILE_ATTRIBUTE_STANDARD_TYPE,
-      G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, G_PRIORITY_DEFAULT, cancellable,
-      scan_children_ready, run);
+  aml_content_index_load_async (instance_directory, type, cancellable,
+                                scan_index_ready, run);
 }
 
 GPtrArray *
@@ -746,6 +816,12 @@ typedef struct {
   char *filename;
   char *sha1;
   char *project_id;
+  char *project_name;
+  char *version_id;
+  char *version_name;
+  GPtrArray *required_dependencies;
+  GPtrArray *optional_dependencies;
+  GPtrArray *incompatible_dependencies;
   char *label;
   char *replaces;
   gboolean required; /* a dependency of what was asked for, not it */
@@ -761,6 +837,12 @@ install_file_free (InstallFile *file)
   g_free (file->filename);
   g_free (file->sha1);
   g_free (file->project_id);
+  g_free (file->project_name);
+  g_free (file->version_id);
+  g_free (file->version_name);
+  g_clear_pointer (&file->required_dependencies, g_ptr_array_unref);
+  g_clear_pointer (&file->optional_dependencies, g_ptr_array_unref);
+  g_clear_pointer (&file->incompatible_dependencies, g_ptr_array_unref);
   g_free (file->label);
   g_free (file->replaces);
   g_free (file);
@@ -769,7 +851,7 @@ install_file_free (InstallFile *file)
 /* The file of @version, named as it has to land in the folder. */
 static InstallFile *
 install_file_of (AmlModrinthVersion *version, const char *replaces,
-                 gboolean disabled)
+                 gboolean disabled, const char *project_name)
 {
   AmlModrinthFile *file = aml_modrinth_version_primary_file (version);
   InstallFile *install = NULL;
@@ -783,6 +865,27 @@ install_file_of (AmlModrinthVersion *version, const char *replaces,
   install->url = g_strdup (file->url);
   install->sha1 = g_strdup (file->sha1);
   install->project_id = g_strdup (version->project_id);
+  install->project_name = g_strdup (project_name != NULL
+                                      ? project_name : version->project_id);
+  install->version_id = g_strdup (version->version_id);
+  install->version_name = g_strdup (version->name);
+  install->required_dependencies = g_ptr_array_new_with_free_func (g_free);
+  install->optional_dependencies = g_ptr_array_new_with_free_func (g_free);
+  install->incompatible_dependencies = g_ptr_array_new_with_free_func (g_free);
+  for (guint i = 0; version->dependencies != NULL &&
+                   i < version->dependencies->len; i++)
+    {
+      AmlModrinthDependency *dependency =
+        g_ptr_array_index (version->dependencies, i);
+      GPtrArray *target = dependency->type == AML_DEPENDENCY_REQUIRED
+                            ? install->required_dependencies
+                            : dependency->type == AML_DEPENDENCY_OPTIONAL
+                                ? install->optional_dependencies
+                                : dependency->type == AML_DEPENDENCY_INCOMPATIBLE
+                                    ? install->incompatible_dependencies : NULL;
+      if (target != NULL && dependency->project_id != NULL)
+        g_ptr_array_add (target, g_strdup (dependency->project_id));
+    }
   install->label = g_strdup (version->name);
 
   name = disabled ? aml_content_disabled_name (file->filename, FALSE)
@@ -842,6 +945,14 @@ remove_duplicate_project_files (AmlContentPage *self, const char *project_id,
           !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
         g_warning ("the duplicate file \"%s\" could not be removed: %s",
                    installed->path, error != NULL ? error->message : "unknown error");
+      else
+        {
+          g_autofree char *directory = NULL;
+          g_autofree char *filename = g_path_get_basename (installed->path);
+          g_object_get (self->instance, "directory", &directory, NULL);
+          aml_content_index_remove_async (directory, self->type, filename,
+                                           NULL, NULL, NULL);
+        }
     }
 }
 
@@ -940,9 +1051,29 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   if (run->page != NULL && file != NULL)
     {
       g_autofree char *keep = g_build_filename (run->folder, file->filename,
-                                                NULL);
+                                                 NULL);
 
       remove_duplicate_project_files (run->page, file->project_id, keep);
+
+      {
+        g_autofree char *instance_directory = NULL;
+        AmlContentIndexEntry entry = { 0 };
+        g_object_get (run->page->instance, "directory", &instance_directory,
+                      NULL);
+        entry.filename = file->filename;
+        entry.hash = file->sha1;
+        entry.provider = "Modrinth";
+        entry.project_id = file->project_id;
+        entry.project_name = file->project_name;
+        entry.version_id = file->version_id;
+        entry.version_name = file->version_name;
+        entry.required_dependencies = file->required_dependencies;
+        entry.optional_dependencies = file->optional_dependencies;
+        entry.incompatible_dependencies = file->incompatible_dependencies;
+        aml_content_index_update_async (
+          instance_directory, run->page->type, &entry,
+          aml_download_get_cancellable (run->download), NULL, NULL);
+      }
     }
 
   fetch_next (run);
@@ -1103,8 +1234,8 @@ plan_next (PlanRun *plan)
       /* Everything the version needs is resolved, so the version itself
        * comes last: the dependencies it is fetched with are the ones
        * that have to be in the folder first. */
-      InstallFile *own = install_file_of (plan->version, plan->replaces,
-                                          plan->stays_disabled);
+       InstallFile *own = install_file_of (plan->version, plan->replaces,
+                                           plan->stays_disabled, plan->title);
 
       if (own != NULL)
         g_ptr_array_add (plan->files, own);
@@ -1368,7 +1499,9 @@ plan_versions_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                                                          version->project_id);
 
     file = install_file_of (version, installed != NULL ? installed->path : NULL,
-                            installed != NULL && !installed->enabled);
+                            installed != NULL && !installed->enabled,
+                            g_hash_table_lookup (self->project_titles,
+                                                 version->project_id));
   }
 
   if (file != NULL)
@@ -2046,6 +2179,14 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
     else
     {
       show_toast (self, "Deleted");
+      {
+        g_autofree char *directory = NULL;
+        g_autofree char *filename = g_path_get_basename (path);
+
+        g_object_get (self->instance, "directory", &directory, NULL);
+        aml_content_index_remove_async (directory, self->type, filename,
+                                        NULL, NULL, NULL);
+      }
       /* An identification request may still refer to one of the rows. Stop
          it before releasing the file it borrowed; the other rows remain in
          place and are not rebuilt. */
@@ -2199,7 +2340,6 @@ file_row (AmlContentPage *self, AmlContentFile *file)
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), file->filename);
   adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 2);
   adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (row), FALSE);
-  gtk_widget_set_tooltip_text (row, file->path);
 
   /* The same square as a browse row, with the icon of what this kind of
      file is until the project it belongs to is known; the icon the
@@ -2308,10 +2448,21 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   if (version != NULL)
     {
       file->project_id = g_strdup (version->project_id);
+      {
+        const char *known_name = g_hash_table_lookup (self->project_titles,
+                                                      version->project_id);
+        file->project_name = g_strdup (known_name != NULL
+                                         ? known_name : version->project_id);
+      }
+      file->version_id = g_strdup (version->version_id);
       file->version_name = g_strdup (version->name);
       file->version_number = g_strdup (version->version_number);
       g_clear_pointer (&file->required_dependencies, g_ptr_array_unref);
+      g_clear_pointer (&file->optional_dependencies, g_ptr_array_unref);
+      g_clear_pointer (&file->incompatible_dependencies, g_ptr_array_unref);
       file->required_dependencies = g_ptr_array_new_with_free_func (g_free);
+      file->optional_dependencies = g_ptr_array_new_with_free_func (g_free);
+      file->incompatible_dependencies = g_ptr_array_new_with_free_func (g_free);
 
       for (guint i = 0; version->dependencies != NULL &&
                        i < version->dependencies->len; i++)
@@ -2319,11 +2470,39 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
           AmlModrinthDependency *dependency =
             g_ptr_array_index (version->dependencies, i);
 
-          if (dependency->type == AML_DEPENDENCY_REQUIRED &&
-              dependency->project_id != NULL)
+          if (dependency->project_id == NULL)
+            continue;
+          if (dependency->type == AML_DEPENDENCY_REQUIRED)
             g_ptr_array_add (file->required_dependencies,
                              g_strdup (dependency->project_id));
+          else if (dependency->type == AML_DEPENDENCY_OPTIONAL)
+            g_ptr_array_add (file->optional_dependencies,
+                             g_strdup (dependency->project_id));
+          else if (dependency->type == AML_DEPENDENCY_INCOMPATIBLE)
+            g_ptr_array_add (file->incompatible_dependencies,
+                             g_strdup (dependency->project_id));
         }
+
+      {
+        g_autofree char *directory = NULL;
+        g_autofree char *filename = g_path_get_basename (file->path);
+        AmlContentIndexEntry entry = { 0 };
+
+        g_object_get (self->instance, "directory", &directory, NULL);
+        entry.filename = filename;
+        entry.hash = file->sha1;
+        entry.provider = "Modrinth";
+        entry.project_id = file->project_id;
+        entry.project_name = file->project_name;
+        entry.icon_url = file->icon_url;
+        entry.version_id = file->version_id;
+        entry.version_name = file->version_name;
+        entry.required_dependencies = file->required_dependencies;
+        entry.optional_dependencies = file->optional_dependencies;
+        entry.incompatible_dependencies = file->incompatible_dependencies;
+        aml_content_index_update_async (directory, self->type, &entry,
+                                        run->cancellable, NULL, NULL);
+      }
 
       if (file->project_id != NULL && *file->project_id != '\0')
         g_hash_table_add (self->projects, g_strdup (file->project_id));
@@ -2364,7 +2543,13 @@ identify_next (IdentifyRun *run)
       key = g_strdup (file->path);
       row = g_hash_table_lookup (self->rows, key);
 
-      if (row == NULL || file->sha1 == NULL)
+      /* A hash-matched index entry already identifies this file. The row is
+       * ready from disk and reopening an instance must not ask Modrinth just
+       * to rediscover what the index already records. */
+      if (row == NULL || file->sha1 == NULL ||
+          (file->project_id != NULL && file->project_name != NULL &&
+           *file->project_name != '\0' &&
+           g_strcmp0 (file->project_id, file->project_name) != 0))
         continue;
 
       run->file = file;
@@ -2426,12 +2611,20 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   for (guint i = 0; i < self->files->len; i++)
     {
       AmlContentFile *file = g_ptr_array_index (self->files, i);
+
+      if (file->project_id != NULL && file->project_name != NULL &&
+          *file->project_name != '\0')
+        g_hash_table_replace (self->project_titles,
+                              g_strdup (file->project_id),
+                              g_strdup (file->project_name));
       GtkWidget *row = file_row (self, file);
 
       adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->installed_group),
-                                 row);
+                                  row);
       self->installed_rows = g_list_append (self->installed_rows, row);
       g_hash_table_insert (self->rows, g_strdup (file->path), row);
+      if (file->project_id != NULL)
+        installed_icon_lookup (self, row, file->project_id);
     }
 
   installed_filter_rows (self);
@@ -2897,6 +3090,29 @@ installed_icon_free (InstalledIcon *lookup)
 }
 
 static void
+repair_index_for_file (AmlContentPage *self, AmlContentFile *file)
+{
+  g_autofree char *directory = NULL;
+  g_autofree char *filename = g_path_get_basename (file->path);
+  AmlContentIndexEntry entry = { 0 };
+
+  g_object_get (self->instance, "directory", &directory, NULL);
+  entry.filename = filename;
+  entry.hash = file->sha1;
+  entry.provider = "Modrinth";
+  entry.project_id = file->project_id;
+  entry.project_name = file->project_name;
+  entry.icon_url = file->icon_url;
+  entry.version_id = file->version_id;
+  entry.version_name = file->version_name;
+  entry.required_dependencies = file->required_dependencies;
+  entry.optional_dependencies = file->optional_dependencies;
+  entry.incompatible_dependencies = file->incompatible_dependencies;
+  aml_content_index_update_async (directory, self->type, &entry, self->scan,
+                                  NULL, NULL);
+}
+
+static void
 installed_icon_details (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                         gpointer user_data)
 {
@@ -2910,11 +3126,20 @@ installed_icon_details (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   if (self != NULL && details != NULL)
     {
       GtkWidget *icon = NULL;
+      AmlContentFile *file = g_object_get_data (G_OBJECT (lookup->row),
+                                                "aml-file");
 
       if (details->title != NULL && *details->title != '\0')
-        g_hash_table_insert (self->project_titles,
-                             g_strdup (lookup->project_id),
-                             g_strdup (details->title));
+        {
+          g_hash_table_insert (self->project_titles,
+                               g_strdup (lookup->project_id),
+                               g_strdup (details->title));
+          if (file != NULL)
+            {
+              g_free (file->project_name);
+              file->project_name = g_strdup (details->title);
+            }
+        }
       file_row_refresh (lookup->row);
 
       /* What the project is, under the file's name, and the icon. Both
@@ -2932,13 +3157,21 @@ installed_icon_details (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         {
           g_hash_table_insert (self->project_icons,
                                g_strdup (lookup->project_id),
-                               g_strdup (details->icon_url));
+                              g_strdup (details->icon_url));
+
+          if (file != NULL)
+            {
+              g_free (file->icon_url);
+              file->icon_url = g_strdup (details->icon_url);
+            }
 
           icon = g_object_get_data (G_OBJECT (lookup->row), "aml-icon");
 
           if (icon != NULL)
             start_row_icon (icon, details->icon_url);
         }
+      if (file != NULL)
+        repair_index_for_file (self, file);
     }
 
   installed_icon_free (lookup);
@@ -2948,11 +3181,20 @@ static void
 installed_icon_lookup (AmlContentPage *self, GtkWidget *row,
                        const char *project_id)
 {
+  AmlContentFile *file = g_object_get_data (G_OBJECT (row), "aml-file");
   const char *known = NULL;
   const char *description = NULL;
 
   if (project_id == NULL || *project_id == '\0')
     return;
+
+  if (file != NULL && file->icon_url != NULL && *file->icon_url != '\0')
+    {
+      GtkWidget *icon = g_object_get_data (G_OBJECT (row), "aml-icon");
+      if (icon != NULL)
+        start_row_icon (icon, file->icon_url);
+      return;
+    }
 
   known = g_hash_table_lookup (self->project_icons, project_id);
   description = g_hash_table_lookup (self->project_descriptions, project_id);

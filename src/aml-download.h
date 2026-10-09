@@ -17,6 +17,8 @@
 #include <gio/gio.h>
 #include <json-glib/json-glib.h>
 
+#include "aml-settings.h"
+
 G_BEGIN_DECLS
 
 #define AML_DOWNLOAD_ERROR (aml_download_error_quark ())
@@ -31,6 +33,8 @@ typedef enum {
 } AmlDownloadError;
 
 GQuark aml_download_error_quark (void);
+
+void aml_download_set_cache_settings (AmlSettings *settings);
 
 /* Progress of a running transfer. @bytes_done is what arrived so far,
  * @total is the announced length or -1 when the server did not say.
@@ -123,6 +127,18 @@ void aml_download_json_post_async (const char       *url,
                                    GCancellable     *cancellable,
                                    GAsyncReadyCallback callback,
                                    gpointer                user_data);
+
+void aml_download_json_cached_async (const char       *url,
+                                     GCancellable     *cancellable,
+                                     GAsyncReadyCallback callback,
+                                     gpointer          user_data);
+
+void aml_download_json_post_cached_async (const char       *url,
+                                          const char       *body,
+                                          const char       *user_agent,
+                                          GCancellable     *cancellable,
+                                          GAsyncReadyCallback callback,
+                                          gpointer          user_data);
 
 G_END_DECLS
 

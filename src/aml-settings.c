@@ -20,6 +20,8 @@
 #define OPEN_LOGS_AFTER_CRASH_KEY "open-logs-after-crash"
 #define SHOW_UNSTABLE_LOADERS_KEY "show-unstable-loaders"
 #define LANGUAGE_KEY "language"
+#define CACHE_MODRINTH_API_RESPONSES_KEY "cache-modrinth-api-responses"
+#define CACHE_EXPIRATION_KEY "cache-expiration"
 
 /* A stored limit below this is not a number a log can be trimmed to. */
 #define LOG_LINE_LIMIT_FLOOR 1
@@ -33,6 +35,8 @@ struct _AmlSettings
   gboolean open_logs_after_crash;
   gboolean show_unstable_loaders;
   char *language;
+  gboolean cache_modrinth_api_responses;
+  AmlSettingsCacheExpiration cache_expiration;
   char *filename;
 };
 
@@ -129,6 +133,24 @@ load (AmlSettings *self)
       if (language != NULL && *language != '\0')
         self->language = g_strdup (language);
     }
+
+  node = json_object_get_member (object, CACHE_MODRINTH_API_RESPONSES_KEY);
+  if (node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
+      json_node_get_value_type (node) == G_TYPE_BOOLEAN)
+    self->cache_modrinth_api_responses = json_node_get_boolean (node);
+
+  node = json_object_get_member (object, CACHE_EXPIRATION_KEY);
+  if (node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
+      json_node_get_value_type (node) == G_TYPE_INT64)
+    {
+      gint64 stored = json_node_get_int (node);
+
+      if (stored == AML_SETTINGS_CACHE_EXPIRATION_1_HOUR ||
+          stored == AML_SETTINGS_CACHE_EXPIRATION_6_HOURS ||
+          stored == AML_SETTINGS_CACHE_EXPIRATION_1_DAY ||
+          stored == AML_SETTINGS_CACHE_EXPIRATION_7_DAYS)
+        self->cache_expiration = (AmlSettingsCacheExpiration) stored;
+    }
 }
 
 static gboolean
@@ -166,8 +188,14 @@ save (AmlSettings *self, GError **error)
 
   json_builder_set_member_name (builder, LANGUAGE_KEY);
   json_builder_add_string_value (builder, self->language != NULL
-                                           ? self->language
-                                           : "system");
+                                            ? self->language
+                                            : "system");
+
+  json_builder_set_member_name (builder, CACHE_MODRINTH_API_RESPONSES_KEY);
+  json_builder_add_boolean_value (builder, self->cache_modrinth_api_responses);
+
+  json_builder_set_member_name (builder, CACHE_EXPIRATION_KEY);
+  json_builder_add_int_value (builder, (gint64) self->cache_expiration);
 
   json_builder_end_object (builder);
 
@@ -364,6 +392,71 @@ aml_settings_set_language (AmlSettings *self,
   return FALSE;
 }
 
+gboolean
+aml_settings_get_cache_modrinth_api_responses (AmlSettings *self)
+{
+  g_return_val_if_fail (AML_IS_SETTINGS (self), FALSE);
+
+  return self->cache_modrinth_api_responses;
+}
+
+gboolean
+aml_settings_set_cache_modrinth_api_responses (AmlSettings *self,
+                                               gboolean     value,
+                                               GError     **error)
+{
+  gboolean previous;
+
+  g_return_val_if_fail (AML_IS_SETTINGS (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  previous = self->cache_modrinth_api_responses;
+  self->cache_modrinth_api_responses = value;
+  if (save (self, error))
+    return TRUE;
+
+  self->cache_modrinth_api_responses = previous;
+  return FALSE;
+}
+
+AmlSettingsCacheExpiration
+aml_settings_get_cache_expiration (AmlSettings *self)
+{
+  g_return_val_if_fail (AML_IS_SETTINGS (self),
+                        AML_SETTINGS_DEFAULT_CACHE_EXPIRATION);
+
+  return self->cache_expiration;
+}
+
+gboolean
+aml_settings_set_cache_expiration (AmlSettings *self,
+                                   AmlSettingsCacheExpiration value,
+                                   GError **error)
+{
+  AmlSettingsCacheExpiration previous;
+
+  g_return_val_if_fail (AML_IS_SETTINGS (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (value != AML_SETTINGS_CACHE_EXPIRATION_1_HOUR &&
+      value != AML_SETTINGS_CACHE_EXPIRATION_6_HOURS &&
+      value != AML_SETTINGS_CACHE_EXPIRATION_1_DAY &&
+      value != AML_SETTINGS_CACHE_EXPIRATION_7_DAYS)
+    {
+      g_set_error (error, AML_SETTINGS_ERROR, AML_SETTINGS_ERROR_INVALID,
+                   "the cache expiration interval is not supported");
+      return FALSE;
+    }
+
+  previous = self->cache_expiration;
+  self->cache_expiration = value;
+  if (save (self, error))
+    return TRUE;
+
+  self->cache_expiration = previous;
+  return FALSE;
+}
+
 static void
 aml_settings_finalize (GObject *object)
 {
@@ -388,4 +481,6 @@ aml_settings_init (AmlSettings *self)
 {
   self->filename = settings_filename ();
   self->log_line_limit = AML_SETTINGS_DEFAULT_LOG_LINE_LIMIT;
+  self->cache_modrinth_api_responses = TRUE;
+  self->cache_expiration = AML_SETTINGS_DEFAULT_CACHE_EXPIRATION;
 }

@@ -1301,7 +1301,7 @@ get_async (const char *url, GCancellable *cancellable,
     request_new (cancellable, callback, user_data, answer, not_found, NULL,
                  NULL);
 
-  aml_download_json_async (url, cancellable, json_ready,
+  aml_download_json_cached_async (url, cancellable, json_ready,
                            g_steal_pointer (&task));
 }
 
@@ -1502,7 +1502,7 @@ aml_modrinth_versions_async (const char *project_id, AmlContentType type,
                           instance_ask_new (type, minecraft_version, loader),
                           instance_ask_free);
 
-  aml_download_json_async (url, cancellable, json_ready,
+  aml_download_json_cached_async (url, cancellable, json_ready,
                            g_steal_pointer (&task_ref));
 }
 
@@ -1644,10 +1644,6 @@ aml_modrinth_categories_from_json (const char *json, gssize length,
   return categories;
 }
 
-/* The whole tag list, kept for the session: every page that asks for the
- * categories of any project type is answered out of this one answer. */
-static char *categories_json = NULL;
-
 static void
 categories_answer (GTask *task, JsonNode *root)
 {
@@ -1665,11 +1661,6 @@ categories_answer (GTask *task, JsonNode *root)
       return;
     }
 
-  /* The whole answer is kept for the session; every project type is
-   * answered out of this one. */
-  g_clear_pointer (&categories_json, g_free);
-  categories_json = g_strdup (json);
-
   g_task_return_pointer (task, categories, (GDestroyNotify) g_ptr_array_unref);
 }
 
@@ -1682,28 +1673,9 @@ aml_modrinth_categories_async (const char        *project_type,
   g_autofree char *url = g_strdup_printf (AML_MODRINTH_URL "/tag/category");
   g_autoptr (GTask) task = NULL;
 
-  /* The whole tag list is fetched once for the session and every project
-   * type is answered out of that single answer. */
-  if (categories_json != NULL)
-    {
-      g_autoptr (GTask) cached = g_task_new (NULL, cancellable, callback,
-                                             user_data);
-      g_autoptr (GError) error = NULL;
-      GPtrArray *categories = aml_modrinth_categories_from_json (
-          categories_json, -1, project_type, &error);
-
-      if (categories == NULL)
-        g_task_return_error (cached, g_steal_pointer (&error));
-      else
-        g_task_return_pointer (cached, categories,
-                               (GDestroyNotify) g_ptr_array_unref);
-
-      return;
-    }
-
   task = request_new (cancellable, callback, user_data, categories_answer,
                       AML_NOT_FOUND_IS_ERROR, g_strdup (project_type), g_free);
-  aml_download_json_async (url, cancellable, json_ready,
+  aml_download_json_cached_async (url, cancellable, json_ready,
                            g_steal_pointer (&task));
 }
 
@@ -1842,8 +1814,9 @@ aml_modrinth_update_by_hash_async (AmlContentType type, const char *sha1,
                       instance_ask_new (type, minecraft_version, loader),
                       instance_ask_free);
 
-  aml_download_json_post_async (url, body, AML_MODRINTH_USER_AGENT, cancellable,
-                                json_ready, g_steal_pointer (&task));
+  aml_download_json_post_cached_async (url, body, AML_MODRINTH_USER_AGENT,
+                                       cancellable, json_ready,
+                                       g_steal_pointer (&task));
 }
 
 AmlModrinthVersion *
