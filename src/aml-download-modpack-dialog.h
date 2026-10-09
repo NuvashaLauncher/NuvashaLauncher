@@ -33,6 +33,9 @@ G_DECLARE_FINAL_TYPE (AmlDownloadModpackDialog,
 AmlDownloadModpackDialog *aml_download_modpack_dialog_new (
     AmlInstanceManager *manager);
 
+AmlDownloadModpackDialog *aml_download_modpack_dialog_new_for_file (
+    AmlInstanceManager *manager, const char *path);
+
 G_END_DECLS
 
 #endif /* AML_DOWNLOAD_MODPACK_DIALOG_H */

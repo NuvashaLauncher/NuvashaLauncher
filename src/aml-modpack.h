@@ -192,7 +192,17 @@ void aml_modpack_install_async (AmlModpack *modpack,
 
 /* (transfer full) the new instance, registered. NULL on error. */
 AmlInstance *aml_modpack_install_finish (GAsyncResult *result,
-                                         GError **error);
+                                          GError **error);
+
+/* Writes @instance as a .mrpack at @path. The archive contains the
+ * instance's manifest and its files under overrides/. Archive creation is
+ * performed away from the GTK main loop. */
+void aml_modpack_export_async (AmlInstance *instance, const char *path,
+                               GCancellable *cancellable,
+                               GAsyncReadyCallback callback,
+                               gpointer user_data);
+
+gboolean aml_modpack_export_finish (GAsyncResult *result, GError **error);
 
 G_END_DECLS
 

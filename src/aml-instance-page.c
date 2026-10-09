@@ -24,6 +24,7 @@
 #include "aml-loader-row.h"
 #include "aml-logs-page.h"
 #include "aml-minecraft-versions.h"
+#include "aml-modpack.h"
 
 struct _AmlInstancePage
 {
@@ -681,6 +682,78 @@ on_open_folder_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
                                           g_object_ref (self));
 }
 
+static void
+on_export_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                gpointer user_data)
+{
+  AmlInstancePage *self = user_data;
+  g_autoptr (GError) error = NULL;
+
+  if (!aml_modpack_export_finish (result, &error))
+    show_toast (self, error->message);
+  else
+    show_toast (self, _("Modpack exported"));
+
+  g_object_unref (self);
+}
+
+static void
+on_export_file_chosen (GObject *source, GAsyncResult *result,
+                       gpointer user_data)
+{
+  AmlInstancePage *self = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GFile) file =
+    gtk_file_dialog_save_finish (GTK_FILE_DIALOG (source), result, &error);
+
+  if (file == NULL)
+    {
+      if (error != NULL &&
+          !g_error_matches (error, GTK_DIALOG_ERROR,
+                            GTK_DIALOG_ERROR_CANCELLED) &&
+          !g_error_matches (error, GTK_DIALOG_ERROR,
+                            GTK_DIALOG_ERROR_DISMISSED))
+        show_toast (self, error->message);
+      g_object_unref (self);
+      return;
+    }
+
+  {
+    g_autofree char *path = g_file_get_path (file);
+
+    if (path == NULL)
+      show_toast (self, _("The export location is not a local file"));
+    else
+      aml_modpack_export_async (self->instance, path, NULL, on_export_done,
+                                g_object_ref (self));
+  }
+
+  g_object_unref (self);
+}
+
+static void
+on_export_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlInstancePage *self = user_data;
+  GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
+  g_autoptr (GtkFileDialog) dialog = gtk_file_dialog_new ();
+  g_autoptr (GtkFileFilter) filter = gtk_file_filter_new ();
+  g_autoptr (GListStore) filters = g_list_store_new (GTK_TYPE_FILE_FILTER);
+  g_autofree char *name = instance_string (self->instance, "name");
+  g_autofree char *filename = g_strdup_printf (
+    "%s.mrpack", name != NULL ? name : "instance");
+
+  gtk_file_dialog_set_title (dialog, _("Export Modpack"));
+  gtk_file_dialog_set_initial_name (dialog, filename);
+  gtk_file_filter_set_name (filter, _("Modrinth Modpacks (*.mrpack)"));
+  gtk_file_filter_add_suffix (filter, "mrpack");
+  g_list_store_append (filters, filter);
+  gtk_file_dialog_set_filters (dialog, G_LIST_MODEL (filters));
+  gtk_file_dialog_save (dialog,
+                        GTK_IS_WINDOW (root) ? GTK_WINDOW (root) : NULL,
+                        NULL, on_export_file_chosen, g_object_ref (self));
+}
+
 /* ---------------------------------------------------------- *
  * Changing the directory
  * ---------------------------------------------------------- */
@@ -1120,6 +1193,9 @@ create_settings_page (AmlInstancePage *self)
   button_row (ADW_PREFERENCES_GROUP (actions), _("Open Folder"), NULL,
               "folder-symbolic", G_CALLBACK (on_open_folder_clicked),
               self);
+  button_row (ADW_PREFERENCES_GROUP (actions), _("Export Modpack"),
+              _("Save this instance as a Modrinth modpack"),
+              "document-save-symbolic", G_CALLBACK (on_export_clicked), self);
   delete_row = button_row (ADW_PREFERENCES_GROUP (actions), _("Delete Instance"),
                            NULL, "user-trash-symbolic",
                            G_CALLBACK (on_delete_clicked), self);

@@ -359,3 +359,22 @@ msgid "Clear AML Cache?"
 msgstr "AML 캐시를 지울까요?"
 msgid "Cached data will be removed. Installed content, instances, accounts, settings and logs will be kept."
 msgstr "캐시된 데이터가 삭제됩니다. 설치된 콘텐츠, 인스턴스, 계정, 설정 및 로그는 유지됩니다."
+
+# New modpack import/export actions use English until translators provide localized text.
+msgid "Import Modpack"
+msgstr "Import Modpack"
+
+msgid "Modpack exported"
+msgstr "Modpack exported"
+
+msgid "Modrinth Modpacks (*.mrpack)"
+msgstr "Modrinth Modpacks (*.mrpack)"
+
+msgid "The export location is not a local file"
+msgstr "The export location is not a local file"
+
+msgid "Save this instance as a Modrinth modpack"
+msgstr "Save this instance as a Modrinth modpack"
+
+msgid "Export Modpack"
+msgstr "Export Modpack"
