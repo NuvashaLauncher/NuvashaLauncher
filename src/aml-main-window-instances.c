@@ -429,7 +429,7 @@ update_visible_page (AmlMainWindow *self)
   GListStore *instances = aml_instance_manager_get_instances (self->services.manager);
   guint n_items = g_list_model_get_n_items (G_LIST_MODEL (instances));
 
-  gtk_stack_set_visible_child_name (GTK_STACK (self->stack),
+  gtk_stack_set_visible_child_name (GTK_STACK (self->ui.stack),
                                     n_items > 0 ? "instances" : "empty");
 }
 

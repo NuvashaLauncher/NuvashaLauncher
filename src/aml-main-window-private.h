@@ -31,13 +31,11 @@ struct _AmlMainWindow
     GHashTable *instance_dialogs; /* id -> borrowed AdwDialog */
   } instances;
 
-  /* Switches between the empty state and the instance list. The list is
-     what the window shows; an instance opens a dialog over it. */
-  GtkWidget *stack;
-
-  /* What a launch ended with, which is worth reading after it happened:
-     a toast is gone in seconds, a banner stays until it is dismissed. */
-  GtkWidget *banner;
+  /* Core window UI state. */
+  struct {
+    GtkWidget *stack;  /* empty state or instance list */
+    GtkWidget *banner; /* launch failures and crash details */
+  } ui;
 
   /* What is downloading right now, shown next to the "+" menu. */
   struct {

@@ -160,25 +160,25 @@ aml_main_window_build_ui (AmlMainWindow *self)
   gtk_widget_set_hexpand (empty_page, TRUE);
   gtk_widget_set_vexpand (empty_page, TRUE);
 
-  self->stack = gtk_stack_new ();
-  gtk_stack_add_named (GTK_STACK (self->stack), empty_page, "empty");
-  gtk_widget_set_hexpand (self->stack, TRUE);
-  gtk_widget_set_vexpand (self->stack, TRUE);
+  self->ui.stack = gtk_stack_new ();
+  gtk_stack_add_named (GTK_STACK (self->ui.stack), empty_page, "empty");
+  gtk_widget_set_hexpand (self->ui.stack, TRUE);
+  gtk_widget_set_vexpand (self->ui.stack, TRUE);
 
   /* The list is the content of the window: an instance is a window of
      its own and is never a page here. */
-  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), self->stack);
+  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), self->ui.stack);
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
 
   /* A launch that ends badly is said in a banner under the header, where
      it stays until it is read: a toast is gone in seconds, which is
      exactly when a reason is worth having. */
-  self->banner = adw_banner_new ("");
-  adw_banner_set_button_label (ADW_BANNER (self->banner), "Dismiss");
-  adw_banner_set_revealed (ADW_BANNER (self->banner), FALSE);
-  g_signal_connect (self->banner, "button-clicked",
+  self->ui.banner = adw_banner_new ("");
+  adw_banner_set_button_label (ADW_BANNER (self->ui.banner), "Dismiss");
+  adw_banner_set_revealed (ADW_BANNER (self->ui.banner), FALSE);
+  g_signal_connect (self->ui.banner, "button-clicked",
                     G_CALLBACK (on_main_window_banner_dismiss), NULL);
-  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), self->banner);
+  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), self->ui.banner);
 
   adw_application_window_set_content (ADW_APPLICATION_WINDOW (self),
                                       GTK_WIDGET (toolbar));
