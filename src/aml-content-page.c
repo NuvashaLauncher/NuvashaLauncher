@@ -729,13 +729,13 @@ identify_next (IdentifyRun *run)
     }
 
   self->identifying = FALSE;
-  if (self->details_versions != NULL && self->details_download != NULL)
+  if (self->project.details_versions != NULL && self->project.details_download != NULL)
     {
-      gboolean have_versions = self->details_versions->len > 0;
+      gboolean have_versions = self->project.details_versions->len > 0;
 
-     gtk_widget_set_sensitive (self->details_download,
+     gtk_widget_set_sensitive (self->project.details_download,
                                have_versions && !self->identifying);
-     gtk_widget_set_sensitive (self->details_check,
+     gtk_widget_set_sensitive (self->project.details_check,
                                have_versions && !self->identifying);
     }
   identify_run_free (run);
@@ -1222,23 +1222,23 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
   loader = aml_loader_to_string (value);
   self->loader = loader != NULL ? g_strdup (loader) : NULL;
 
-  self->details_ready = FALSE;
-  self->versions_ready = FALSE;
-  self->details = NULL;
-  self->details_versions = NULL;
-  self->details_problem = NULL;
-  self->versions_problem = NULL;
-  self->current_project_title = NULL;
-  self->current_project_id = NULL;
-  self->current_project_downloads = 0;
-  self->details_author = NULL;
-  self->details_body = NULL;
-  self->details_dropdown = NULL;
-  self->details_download = NULL;
+  self->project.details_ready = FALSE;
+  self->project.versions_ready = FALSE;
+  self->project.details = NULL;
+  self->project.details_versions = NULL;
+  self->project.details_problem = NULL;
+  self->project.versions_problem = NULL;
+  self->project.current_project_title = NULL;
+  self->project.current_project_id = NULL;
+  self->project.current_project_downloads = 0;
+  self->project.details_author = NULL;
+  self->project.details_body = NULL;
+  self->project.details_dropdown = NULL;
+  self->project.details_download = NULL;
   self->identifying = FALSE;
-  self->details_check = NULL;
-  self->details_page = NULL;
-  self->split = NULL;
+  self->project.details_check = NULL;
+  self->project.details_page = NULL;
+  self->project.split = NULL;
   self->install.batch = NULL;
   self->install.picking = FALSE;
   self->install.pick_index = 0;
@@ -1272,7 +1272,7 @@ aml_content_page_dispose (GObject *object)
   self->toasts = NULL;
   self->banner = NULL;
   self->stack = NULL;
-  self->split = NULL;
+  self->project.split = NULL;
   self->bar = NULL;
   self->bar_spacer = NULL;
   self->switcher = NULL;
@@ -1325,11 +1325,11 @@ aml_content_page_dispose (GObject *object)
   /* The page of a project and the widgets in it are owned by the
      page; the fields only watch them, so they are dropped and not
      unrefed. */
-  watch_widget (&self->details_body, NULL);
-  watch_widget (&self->details_check, NULL);
-  watch_widget (&self->details_dropdown, NULL);
-  watch_widget (&self->details_download, NULL);
-  watch_widget (&self->details_page, NULL);
+  watch_widget (&self->project.details_body, NULL);
+  watch_widget (&self->project.details_check, NULL);
+  watch_widget (&self->project.details_dropdown, NULL);
+  watch_widget (&self->project.details_download, NULL);
+  watch_widget (&self->project.details_page, NULL);
 
   /* A batch of updates that was still being applied is not applied any
      more: the plans and fetches hold the page weakly and stop. */
@@ -1362,13 +1362,13 @@ aml_content_page_finalize (GObject *object)
   g_free (self->loader);
   g_free (self->folder);
   g_free (self->query);
-  g_free (self->current_project_title);
-  g_free (self->current_project_id);
-  g_free (self->details_author);
-  g_clear_pointer (&self->details, aml_modrinth_details_free);
-  g_clear_pointer (&self->details_versions, g_ptr_array_unref);
-  g_free (self->details_problem);
-  g_free (self->versions_problem);
+  g_free (self->project.current_project_title);
+  g_free (self->project.current_project_id);
+  g_free (self->project.details_author);
+  g_clear_pointer (&self->project.details, aml_modrinth_details_free);
+  g_clear_pointer (&self->project.details_versions, g_ptr_array_unref);
+  g_free (self->project.details_problem);
+  g_free (self->project.versions_problem);
 
   G_OBJECT_CLASS (aml_content_page_parent_class)->finalize (object);
 }

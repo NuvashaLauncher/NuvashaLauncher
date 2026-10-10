@@ -121,31 +121,25 @@ struct _AmlContentPage
   GCancellable *scan;     /* the folder, its hashes and their lookups */
   gboolean identifying;   /* installed files are still being resolved */
 
-  /* The page of a project waits for the description and the versions
-     to arrive before showing anything. These are on the page so both
-     callbacks can read them, unlike a temporary watch that gets freed. */
-  gboolean details_ready;
-  gboolean versions_ready;
-  AmlModrinthDetails *details;         /* owned */
-  GPtrArray *details_versions;         /* owned */
-  char *details_problem;               /* why the description is not there */
-  char *versions_problem;              /* why the versions are not there */
-
-  /* What the page of the currently-open project is titled with and
-     what it shows, so the fill function can rebuild the heading. */
-  char *current_project_title;
-  char *current_project_id; /* what the open project is, to toggle it shut */
-  guint64 current_project_downloads;
-  char *details_author;
-  GtkWidget *details_body;
-  GtkWidget *details_dropdown;
-  GtkWidget *details_download;
-  GtkWidget *details_page; /* weak: the page of the open project */
-  GtkWidget *split;        /* the list on the left, the project on the right */
-
-  /* The checkmark at the left of the versions of the dropdown: whether
-     the version the dropdown shows is on the list. */
-  GtkWidget *details_check;
+  /* State for the currently open project and its details page. */
+  struct {
+    gboolean details_ready;
+    gboolean versions_ready;
+    AmlModrinthDetails *details;         /* owned */
+    GPtrArray *details_versions;         /* owned */
+    char *details_problem;
+    char *versions_problem;
+    char *current_project_title;
+    char *current_project_id;
+    guint64 current_project_downloads;
+    char *details_author;
+    GtkWidget *details_body;
+    GtkWidget *details_dropdown;
+    GtkWidget *details_download;
+    GtkWidget *details_page;             /* weak */
+    GtkWidget *split;
+    GtkWidget *details_check;
+  } project;
 
   GtkWidget *pick_button;
   GtkWidget *pick_badge;
