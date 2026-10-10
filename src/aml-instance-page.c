@@ -811,6 +811,13 @@ export_metadata_free (ExportMetadata *data)
 }
 
 static void
+on_export_metadata_closed (AdwDialog *dialog G_GNUC_UNUSED,
+                           gpointer user_data)
+{
+  export_metadata_free (user_data);
+}
+
+static void
 on_export_metadata_continue (GtkButton *button G_GNUC_UNUSED,
                              gpointer user_data)
 {
@@ -828,7 +835,6 @@ on_export_metadata_continue (GtkButton *button G_GNUC_UNUSED,
     GTK_EDITABLE (data->version)));
 
   adw_dialog_close (data->dialog);
-  export_metadata_free (data);
 
   /* The transient-file choice remains a separate, deliberately simple
    * safety decision immediately before choosing the destination. */
@@ -842,7 +848,6 @@ on_export_metadata_cancel (GtkButton *button G_GNUC_UNUSED,
   ExportMetadata *data = user_data;
 
   adw_dialog_close (data->dialog);
-  export_metadata_free (data);
 }
 
 static void
@@ -851,6 +856,7 @@ show_export_metadata (AmlInstancePage *self)
   ExportMetadata *data = g_new0 (ExportMetadata, 1);
   GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
   GtkWidget *buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  GtkWidget *fields = adw_preferences_group_new ();
   GtkWidget *cancel = gtk_button_new_with_label (_("Cancel"));
   GtkWidget *continue_button = gtk_button_new_with_label (_("Continue"));
   g_autofree char *name = instance_string (self->instance, "name");
@@ -861,6 +867,8 @@ show_export_metadata (AmlInstancePage *self)
   data->summary = ADW_ENTRY_ROW (adw_entry_row_new ());
   data->version = ADW_ENTRY_ROW (adw_entry_row_new ());
   adw_dialog_set_title (data->dialog, _("Export Modpack"));
+  g_signal_connect (data->dialog, "closed",
+                    G_CALLBACK (on_export_metadata_closed), data);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (data->name),
                                   _("Pack Name"));
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (data->summary),
@@ -869,9 +877,13 @@ show_export_metadata (AmlInstancePage *self)
                                   _("Version ID"));
   gtk_editable_set_text (GTK_EDITABLE (data->name), name != NULL ? name : "");
   gtk_editable_set_text (GTK_EDITABLE (data->version), "aml-export");
-  gtk_box_append (GTK_BOX (box), GTK_WIDGET (data->name));
-  gtk_box_append (GTK_BOX (box), GTK_WIDGET (data->summary));
-  gtk_box_append (GTK_BOX (box), GTK_WIDGET (data->version));
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (fields),
+                             GTK_WIDGET (data->name));
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (fields),
+                             GTK_WIDGET (data->summary));
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (fields),
+                             GTK_WIDGET (data->version));
+  gtk_box_append (GTK_BOX (box), fields);
   gtk_box_append (GTK_BOX (box), buttons);
   gtk_box_append (GTK_BOX (buttons), cancel);
   gtk_box_append (GTK_BOX (buttons), continue_button);
