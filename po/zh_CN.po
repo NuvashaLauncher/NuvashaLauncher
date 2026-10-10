@@ -374,13 +374,13 @@ msgid "Import Modpack"
 msgstr "导入整合包"
 
 msgid "Modpack exported"
-msgstr "Modpack exported"
+msgstr "Modpack 已导出"
 
 msgid "Modrinth Modpacks (*.mrpack)"
-msgstr "Modrinth Modpacks (*.mrpack)"
+msgstr "Modrinth 模组包 (*.mrpack)"
 
 msgid "The export location is not a local file"
-msgstr "The export location is not a local file"
+msgstr "导出位置不是本地文件"
 
 msgid "Export Modpack"
 msgstr "导出整合包"
@@ -392,22 +392,22 @@ msgid "Reading modpack"
 msgstr "正在读取整合包"
 
 msgid "Exporting modpack"
-msgstr "Exporting modpack"
+msgstr "正在导出模组包"
 
 msgid "Modpack export"
-msgstr "Modpack export"
+msgstr "导出模组包"
 
 msgid "Include transient files?"
-msgstr "Include transient files?"
+msgstr "是否包含临时文件？"
 
 msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr "Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr "日志、崩溃报告、截图、缓存和下载通常会被排除。"
 
 msgid "Clean Export"
-msgstr "Clean Export"
+msgstr "仅导出必要文件"
 
 msgid "Include All Files"
-msgstr "Include All Files"
+msgstr "包含所有文件"
 
 msgid "Pack Name"
 msgstr "整合包名称"
@@ -419,7 +419,7 @@ msgid "Version ID"
 msgstr "版本 ID"
 
 msgid "Continue"
-msgstr "Continue"
+msgstr "继续"
 
 msgid "Downloading files"
 msgstr "正在下载文件"
@@ -474,3 +474,71 @@ msgstr "导出"
 
 msgid "Optional metadata. Add a summary or version ID to help identify the exported pack."
 msgstr "可选元数据。添加摘要或版本 ID，以便更容易识别导出的整合包。"
+
+
+msgid "Installed %u item"
+msgid_plural "Installed %u items"
+msgstr[0] "已安装 %u 个项目"
+msgstr[1] "已安装 %u 个项目"
+
+msgid "Updated %u item"
+msgid_plural "Updated %u items"
+msgstr[0] "已更新 %u 个项目"
+msgstr[1] "已更新 %u 个项目"
+
+msgid "The icon must be a file on this computer"
+msgstr "图标必须是此计算机上的文件"
+
+msgid "The game is running; stop it before moving its directory"
+msgstr "游戏正在运行；请先停止游戏再移动其目录"
+
+msgid "%s is being installed"
+msgstr "正在安装 %s"
+
+msgid "no compatible version"
+msgstr "没有兼容的版本"
+
+msgid "Enabled"
+msgstr "已启用"
+
+msgid "Disabled"
+msgstr "已禁用"
+
+msgid "Deleted"
+msgstr "已删除"
+
+msgid "Everything is up to date"
+msgstr "一切都是最新的"
+
+msgid "Cannot create \"%s\": %s"
+msgstr "无法创建“%s”：%s"
+
+msgid "This project publishes nothing that fits this instance."
+msgstr "此项目没有发布适用于此实例的内容。"
+
+msgid "Unknown"
+msgstr "未知"
+
+msgid "%s (unstable)"
+msgstr "%s（不稳定）"
+
+msgid "the next page could not be loaded"
+msgstr "无法加载下一页"
+
+msgid "Other"
+msgstr "其他"
+
+msgid "%.1fM downloads"
+msgstr "%.1fM 次下载"
+
+msgid "%.1fk downloads"
+msgstr "%.1fk 次下载"
+
+msgid "%lu downloads"
+msgstr "%lu 次下载"
+
+msgid "%s  ·  by %s"
+msgstr "%s  ·  作者：%s"
+
+msgid "by %s"
+msgstr "作者：%s"

@@ -1103,11 +1103,11 @@ static char *
 format_downloads (guint64 downloads)
 {
   if (downloads >= 1000000)
-    return g_strdup_printf ("%.1fM downloads", downloads / 1000000.0);
+     return g_strdup_printf (_("%.1fM downloads"), downloads / 1000000.0);
   if (downloads >= 1000)
-    return g_strdup_printf ("%.1fk downloads", downloads / 1000.0);
+     return g_strdup_printf (_("%.1fk downloads"), downloads / 1000.0);
 
-  return g_strdup_printf ("%" G_GUINT64_FORMAT " downloads", downloads);
+   return g_strdup_printf (_("%" G_GUINT64_FORMAT " downloads"), downloads);
 }
 
 /* The words the dialog shows while the description and the versions are
@@ -1219,7 +1219,7 @@ details_content (AmlDownloadModpackDialog *self)
       text = g_strdup_printf ("%s  ·  by %s", self->details->license,
                               who != NULL ? who : "");
     else
-      text = g_strdup_printf ("by %s", who != NULL ? who : "");
+       text = g_strdup_printf (_("by %s"), who != NULL ? who : "");
 
     details_watch (&self->meta, gtk_label_new (text));
     gtk_label_set_xalign (GTK_LABEL (self->meta), 0);

@@ -75,7 +75,7 @@ show_loading (AmlVersionRow *self)
 {
   g_autoptr (GPtrArray) ids = g_ptr_array_new_with_free_func (g_free);
 
-  g_ptr_array_add (ids, g_strdup ("Loading…"));
+   g_ptr_array_add (ids, g_strdup (_("Loading…")));
 
   self->ready = FALSE;
   set_entries (self, g_steal_pointer (&ids), 0);

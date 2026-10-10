@@ -83,7 +83,7 @@ msgid "Create Instance"
 msgstr "Utwórz instancję"
 
 msgid "Name"
-msgstr "Nazwisko"
+msgstr "Nazwa"
 
 msgid "Directory"
 msgstr "Katalog"
@@ -134,7 +134,7 @@ msgid "Delete \"%s\"?"
 msgstr "Usunąć \"%s\"?"
 
 msgid "General"
-msgstr "Informacje ogólne"
+msgstr "Ogólne"
 
 msgid "Icon"
 msgstr "Ikona"
@@ -260,7 +260,7 @@ msgid "Keep Playing"
 msgstr "Graj dalej"
 
 msgid "Downloads"
-msgstr "Pliki do pobrania"
+msgstr "Pobrane"
 
 msgid "Accounts"
 msgstr "Konta"
@@ -374,13 +374,13 @@ msgid "Import Modpack"
 msgstr "Importuj modpack"
 
 msgid "Modpack exported"
-msgstr "Modpack exported"
+msgstr "Wyeksportowano modpack"
 
 msgid "Modrinth Modpacks (*.mrpack)"
-msgstr "Modrinth Modpacks (*.mrpack)"
+msgstr "Modpacki Modrinth (*.mrpack)"
 
 msgid "The export location is not a local file"
-msgstr "The export location is not a local file"
+msgstr "Lokalizacja eksportu nie jest plikiem lokalnym"
 
 msgid "Export Modpack"
 msgstr "Eksportuj modpack"
@@ -392,22 +392,22 @@ msgid "Reading modpack"
 msgstr "Odczytywanie modpacka"
 
 msgid "Exporting modpack"
-msgstr "Exporting modpack"
+msgstr "Eksportowanie modpacka"
 
 msgid "Modpack export"
-msgstr "Modpack export"
+msgstr "Eksport modpacka"
 
 msgid "Include transient files?"
-msgstr "Include transient files?"
+msgstr "Dołączyć pliki tymczasowe?"
 
 msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr "Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr "Dzienniki, raporty awarii, zrzuty ekranu, pamięć podręczna i pobrane pliki są zwykle wykluczane."
 
 msgid "Clean Export"
-msgstr "Clean Export"
+msgstr "Czysty eksport"
 
 msgid "Include All Files"
-msgstr "Include All Files"
+msgstr "Dołącz wszystkie pliki"
 
 msgid "Pack Name"
 msgstr "Nazwa pakietu"
@@ -419,7 +419,7 @@ msgid "Version ID"
 msgstr "Identyfikator wersji"
 
 msgid "Continue"
-msgstr "Continue"
+msgstr "Dalej"
 
 msgid "Downloading files"
 msgstr "Pobieranie plików"
@@ -474,3 +474,71 @@ msgstr "Eksportuj"
 
 msgid "Optional metadata. Add a summary or version ID to help identify the exported pack."
 msgstr "Opcjonalne metadane. Dodaj podsumowanie lub identyfikator wersji, aby łatwiej rozpoznać wyeksportowany pakiet."
+
+
+msgid "Installed %u item"
+msgid_plural "Installed %u items"
+msgstr[0] "Zainstalowano %u element"
+msgstr[1] "Zainstalowano %u elementów"
+
+msgid "Updated %u item"
+msgid_plural "Updated %u items"
+msgstr[0] "Zaktualizowano %u element"
+msgstr[1] "Zaktualizowano %u elementów"
+
+msgid "The icon must be a file on this computer"
+msgstr "Ikona musi być plikiem na tym komputerze"
+
+msgid "The game is running; stop it before moving its directory"
+msgstr "Gra jest uruchomiona; zatrzymaj ją przed przeniesieniem jej katalogu"
+
+msgid "%s is being installed"
+msgstr "Instalowanie %s"
+
+msgid "no compatible version"
+msgstr "brak zgodnej wersji"
+
+msgid "Enabled"
+msgstr "Włączono"
+
+msgid "Disabled"
+msgstr "Wyłączono"
+
+msgid "Deleted"
+msgstr "Usunięto"
+
+msgid "Everything is up to date"
+msgstr "Wszystko jest aktualne"
+
+msgid "Cannot create \"%s\": %s"
+msgstr "Nie można utworzyć „%s”: %s"
+
+msgid "This project publishes nothing that fits this instance."
+msgstr "Ten projekt nie publikuje niczego zgodnego z tą instancją."
+
+msgid "Unknown"
+msgstr "Nieznane"
+
+msgid "%s (unstable)"
+msgstr "%s (niestabilna)"
+
+msgid "the next page could not be loaded"
+msgstr "Nie można wczytać następnej strony"
+
+msgid "Other"
+msgstr "Inne"
+
+msgid "%.1fM downloads"
+msgstr "%.1f mln pobrań"
+
+msgid "%.1fk downloads"
+msgstr "%.1f tys. pobrań"
+
+msgid "%lu downloads"
+msgstr "%lu pobrań"
+
+msgid "%s  ·  by %s"
+msgstr "%s  ·  autor: %s"
+
+msgid "by %s"
+msgstr "autor: %s"

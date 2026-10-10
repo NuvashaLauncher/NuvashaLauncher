@@ -260,7 +260,7 @@ msgid "Keep Playing"
 msgstr "계속 플레이"
 
 msgid "Downloads"
-msgstr "내려받기"
+msgstr "다운로드"
 
 msgid "Accounts"
 msgstr "계정"
@@ -374,13 +374,13 @@ msgid "Import Modpack"
 msgstr "모드팩 가져오기"
 
 msgid "Modpack exported"
-msgstr "Modpack exported"
+msgstr "모드팩을 내보냈습니다"
 
 msgid "Modrinth Modpacks (*.mrpack)"
-msgstr "Modrinth Modpacks (*.mrpack)"
+msgstr "Modrinth 모드팩 (*.mrpack)"
 
 msgid "The export location is not a local file"
-msgstr "The export location is not a local file"
+msgstr "내보내기 위치가 로컬 파일이 아닙니다"
 
 msgid "Export Modpack"
 msgstr "모드팩 내보내기"
@@ -392,22 +392,22 @@ msgid "Reading modpack"
 msgstr "모드팩 읽는 중"
 
 msgid "Exporting modpack"
-msgstr "Exporting modpack"
+msgstr "모드팩 내보내는 중"
 
 msgid "Modpack export"
-msgstr "Modpack export"
+msgstr "모드팩 내보내기"
 
 msgid "Include transient files?"
-msgstr "Include transient files?"
+msgstr "임시 파일을 포함할까요?"
 
 msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr "Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr "로그, 충돌 보고서, 스크린샷, 캐시 및 다운로드는 일반적으로 제외됩니다."
 
 msgid "Clean Export"
-msgstr "Clean Export"
+msgstr "깔끔하게 내보내기"
 
 msgid "Include All Files"
-msgstr "Include All Files"
+msgstr "모든 파일 포함"
 
 msgid "Pack Name"
 msgstr "팩 이름"
@@ -419,7 +419,7 @@ msgid "Version ID"
 msgstr "버전 ID"
 
 msgid "Continue"
-msgstr "Continue"
+msgstr "계속"
 
 msgid "Downloading files"
 msgstr "파일 다운로드 중"
@@ -474,3 +474,71 @@ msgstr "내보내기"
 
 msgid "Optional metadata. Add a summary or version ID to help identify the exported pack."
 msgstr "선택적 메타데이터입니다. 내보낸 팩을 식별하기 쉽도록 요약이나 버전 ID를 추가하세요."
+
+
+msgid "Installed %u item"
+msgid_plural "Installed %u items"
+msgstr[0] "아이템 %u개 설치됨"
+msgstr[1] "아이템 %u개 설치됨"
+
+msgid "Updated %u item"
+msgid_plural "Updated %u items"
+msgstr[0] "아이템 %u개 업데이트됨"
+msgstr[1] "아이템 %u개 업데이트됨"
+
+msgid "The icon must be a file on this computer"
+msgstr "아이콘은 이 컴퓨터에 있는 파일이어야 합니다"
+
+msgid "The game is running; stop it before moving its directory"
+msgstr "게임이 실행 중입니다. 디렉터리를 이동하기 전에 게임을 중지하세요"
+
+msgid "%s is being installed"
+msgstr "%s 설치 중"
+
+msgid "no compatible version"
+msgstr "호환되는 버전이 없습니다"
+
+msgid "Enabled"
+msgstr "활성화됨"
+
+msgid "Disabled"
+msgstr "비활성화됨"
+
+msgid "Deleted"
+msgstr "삭제됨"
+
+msgid "Everything is up to date"
+msgstr "모두 최신 상태입니다"
+
+msgid "Cannot create \"%s\": %s"
+msgstr "“%s”을(를) 만들 수 없습니다: %s"
+
+msgid "This project publishes nothing that fits this instance."
+msgstr "이 프로젝트에는 이 인스턴스에 맞는 항목이 없습니다."
+
+msgid "Unknown"
+msgstr "알 수 없음"
+
+msgid "%s (unstable)"
+msgstr "%s (불안정)"
+
+msgid "the next page could not be loaded"
+msgstr "다음 페이지를 불러오지 못했습니다"
+
+msgid "Other"
+msgstr "기타"
+
+msgid "%.1fM downloads"
+msgstr "%.1fM 다운로드"
+
+msgid "%.1fk downloads"
+msgstr "%.1fk 다운로드"
+
+msgid "%lu downloads"
+msgstr "%lu 다운로드"
+
+msgid "%s  ·  by %s"
+msgstr "%s  ·  제작자: %s"
+
+msgid "by %s"
+msgstr "제작자: %s"

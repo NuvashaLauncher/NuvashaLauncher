@@ -155,8 +155,8 @@ set_versions (AmlLoaderRow *self, GPtrArray *versions, guint position)
       /* What a user reads says which of these the loader does not call
          stable. */
       labels[i] = version->stable ? g_strdup (version->version)
-                                  : g_strdup_printf ("%s (unstable)",
-                                                     version->version);
+                                   : g_strdup_printf (_("%s (unstable)"),
+                                                      version->version);
     }
 
   list = gtk_string_list_new (labels);

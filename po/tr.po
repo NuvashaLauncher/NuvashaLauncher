@@ -328,7 +328,7 @@ msgid "Install the selected %s?"
 msgstr "Seçili %s yüklensin mi?"
 
 msgid "%s \"%s\""
-msgstr "%s \"%s\""
+msgstr "%s “%s”"
 
 msgid "Search"
 msgstr "Ara"
@@ -374,13 +374,13 @@ msgid "Import Modpack"
 msgstr "Mod paketi içe aktar"
 
 msgid "Modpack exported"
-msgstr "Modpack exported"
+msgstr "Mod paketi dışa aktarıldı"
 
 msgid "Modrinth Modpacks (*.mrpack)"
-msgstr "Modrinth Modpacks (*.mrpack)"
+msgstr "Modrinth mod paketleri (*.mrpack)"
 
 msgid "The export location is not a local file"
-msgstr "The export location is not a local file"
+msgstr "Dışa aktarma konumu yerel bir dosya değil"
 
 msgid "Export Modpack"
 msgstr "Mod paketi dışa aktar"
@@ -392,22 +392,22 @@ msgid "Reading modpack"
 msgstr "Mod paketi okunuyor"
 
 msgid "Exporting modpack"
-msgstr "Exporting modpack"
+msgstr "Mod paketi dışa aktarılıyor"
 
 msgid "Modpack export"
-msgstr "Modpack export"
+msgstr "Mod paketi dışa aktarma"
 
 msgid "Include transient files?"
-msgstr "Include transient files?"
+msgstr "Geçici dosyalar dahil edilsin mi?"
 
 msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr "Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr "Günlükler, çökme raporları, ekran görüntüleri, önbellekler ve indirmeler normalde hariç tutulur."
 
 msgid "Clean Export"
-msgstr "Clean Export"
+msgstr "Temiz dışa aktarma"
 
 msgid "Include All Files"
-msgstr "Include All Files"
+msgstr "Tüm dosyaları dahil et"
 
 msgid "Pack Name"
 msgstr "Paket adı"
@@ -419,7 +419,7 @@ msgid "Version ID"
 msgstr "Sürüm kimliği"
 
 msgid "Continue"
-msgstr "Continue"
+msgstr "Devam et"
 
 msgid "Downloading files"
 msgstr "Dosyalar indiriliyor"
@@ -474,3 +474,71 @@ msgstr "Dışa aktar"
 
 msgid "Optional metadata. Add a summary or version ID to help identify the exported pack."
 msgstr "İsteğe bağlı meta veriler. Dışa aktarılan paketi kolayca tanımak için bir özet veya sürüm kimliği ekleyin."
+
+
+msgid "Installed %u item"
+msgid_plural "Installed %u items"
+msgstr[0] "%u öğe yüklendi"
+msgstr[1] "%u öğe yüklendi"
+
+msgid "Updated %u item"
+msgid_plural "Updated %u items"
+msgstr[0] "%u öğe güncellendi"
+msgstr[1] "%u öğe güncellendi"
+
+msgid "The icon must be a file on this computer"
+msgstr "Simge bu bilgisayardaki bir dosya olmalıdır"
+
+msgid "The game is running; stop it before moving its directory"
+msgstr "Oyun çalışıyor; dizinini taşımadan önce durdurun"
+
+msgid "%s is being installed"
+msgstr "%s yükleniyor"
+
+msgid "no compatible version"
+msgstr "uyumlu sürüm yok"
+
+msgid "Enabled"
+msgstr "Etkin"
+
+msgid "Disabled"
+msgstr "Devre dışı"
+
+msgid "Deleted"
+msgstr "Silindi"
+
+msgid "Everything is up to date"
+msgstr "Her şey güncel"
+
+msgid "Cannot create \"%s\": %s"
+msgstr "“%s” oluşturulamıyor: %s"
+
+msgid "This project publishes nothing that fits this instance."
+msgstr "Bu proje bu örneğe uyan hiçbir şey yayımlamıyor."
+
+msgid "Unknown"
+msgstr "Bilinmiyor"
+
+msgid "%s (unstable)"
+msgstr "%s (kararsız)"
+
+msgid "the next page could not be loaded"
+msgstr "Sonraki sayfa yüklenemedi"
+
+msgid "Other"
+msgstr "Diğer"
+
+msgid "%.1fM downloads"
+msgstr "%.1f milyon indirme"
+
+msgid "%.1fk downloads"
+msgstr "%.1f bin indirme"
+
+msgid "%lu downloads"
+msgstr "%lu indirme"
+
+msgid "%s  ·  by %s"
+msgstr "%s  ·  %s tarafından"
+
+msgid "by %s"
+msgstr "%s tarafından"
