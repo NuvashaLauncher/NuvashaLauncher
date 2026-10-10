@@ -43,7 +43,7 @@ struct _AmlInstancePage
    * this page alive. */
   AdwToastOverlay *toast_overlay;
   AdwActionRow *icon_row;
-  GtkWidget *icon_path_label; /* the icon path inside the chooser button */
+  GtkLabel *icon_path_label; /* the icon path inside the chooser button */
   AdwViewStack *stack; /* the view stack holding the pages of the instance */
   GtkWidget *logs_page; /* the last page, kept so a rebuild can move it back */
 
@@ -53,7 +53,7 @@ struct _AmlInstancePage
      it. */
   AdwActionRow *directory_row;
   GtkButton *directory_change;
-  GtkWidget *directory_path_label; /* the path inside the chooser button */
+  GtkLabel *directory_path_label; /* the path inside the chooser button */
   GtkSpinner *directory_spinner;
 
   /* The Java row plus what we know about it. Row load = detection
@@ -539,7 +539,7 @@ on_java_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
  * says pressing it chooses another one. The label is handed back so the
  * row can put the new path in it after the choice. */
 static GtkWidget *
-path_button (const char *path, GtkWidget **label)
+path_button (const char *path, GtkLabel **label)
 {
   GtkWidget *button = gtk_button_new ();
   GtkWidget *box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
@@ -562,7 +562,7 @@ path_button (const char *path, GtkWidget **label)
   gtk_button_set_child (GTK_BUTTON (button), box);
 
   if (label != NULL)
-    *label = text;
+    *label = GTK_LABEL (text);
 
   return button;
 }
