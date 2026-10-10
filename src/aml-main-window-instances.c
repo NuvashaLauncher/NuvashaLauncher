@@ -26,7 +26,7 @@ dialog_of_instance (AmlMainWindow *self, const char *id)
   if (id == NULL)
     return NULL;
 
-  return g_hash_table_lookup (self->instance_dialogs, id);
+  return g_hash_table_lookup (self->instances.instance_dialogs, id);
 }
 
 /* A dialog that was closed is not open any more. AdwDialog emits this
@@ -39,7 +39,7 @@ on_instance_dialog_closed (AdwDialog *dialog, gpointer user_data)
   const char *id = g_object_get_data (G_OBJECT (dialog), "aml-instance-id");
 
   if (id != NULL)
-    g_hash_table_remove (self->instance_dialogs, id);
+    g_hash_table_remove (self->instances.instance_dialogs, id);
 }
 
 /* The dialog of an instance says the name of the instance, and says it
@@ -109,7 +109,7 @@ open_instance_dialog (AmlMainWindow *self, AmlInstance *instance)
      again and closable when its instance is deleted. */
   g_object_set_data_full (G_OBJECT (dialog), "aml-instance-id",
                           g_strdup (id), g_free);
-  g_hash_table_insert (self->instance_dialogs, g_strdup (id), dialog);
+  g_hash_table_insert (self->instances.instance_dialogs, g_strdup (id), dialog);
   /* Weak, so that a dialog that outlives the window cannot call back
      into a window that is gone. */
   g_signal_connect_object (dialog, "closed",
@@ -137,7 +137,7 @@ close_dialogs_of_removed_instances (AmlMainWindow *self)
 
   /* Collect first: closing a dialog takes it out of the table being
      walked. */
-  g_hash_table_iter_init (&iter, self->instance_dialogs);
+  g_hash_table_iter_init (&iter, self->instances.instance_dialogs);
 
   while (g_hash_table_iter_next (&iter, &key, &value))
     {
@@ -443,7 +443,7 @@ drop_launchers_of_removed_instances (AmlMainWindow *self)
   gpointer key = NULL;
   gpointer value = NULL;
 
-  g_hash_table_iter_init (&iter, self->launchers);
+  g_hash_table_iter_init (&iter, self->instances.launchers);
 
   while (g_hash_table_iter_next (&iter, &key, &value))
     {

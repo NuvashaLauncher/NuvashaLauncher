@@ -26,16 +26,12 @@ struct _AmlMainWindow
   AmlAccounts *accounts;
   AmlUsersPopover *users_popover;
 
-  /* One launcher per instance, keyed by its id, so the row of an
-     instance and its dialog always talk about the same launch. */
-  GHashTable *launchers;
-
-  /* The dialog of each instance that is open, keyed by its id. An
-     AdwDialog is not a window, so the window list of the application
-     cannot be asked about it; this is the bookkeeping that is. The
-     dialogs are held by the window they were presented on, so the table
-     holds borrowed pointers and only says which ones are open. */
-  GHashTable *instance_dialogs;
+  /* Per-instance launchers and dialogs. Both maps are keyed by instance
+   * id so a row, launcher, and dialog always refer to the same instance. */
+  struct {
+    GHashTable *launchers;        /* id -> owned AmlLauncher */
+    GHashTable *instance_dialogs; /* id -> borrowed AdwDialog */
+  } instances;
 
   /* Switches between the empty state and the instance list. The list is
      what the window shows; an instance opens a dialog over it. */

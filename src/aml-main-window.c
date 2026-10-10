@@ -78,7 +78,7 @@ window_launcher (AmlMainWindow *self, const char *instance_id)
   if (instance_id == NULL)
     return NULL;
 
-  launcher = g_hash_table_lookup (self->launchers, instance_id);
+  launcher = g_hash_table_lookup (self->instances.launchers, instance_id);
 
   if (launcher != NULL)
     return launcher;
@@ -96,7 +96,7 @@ window_launcher (AmlMainWindow *self, const char *instance_id)
   g_signal_connect_object (launcher, "state",
                            G_CALLBACK (on_window_launcher_state), self, 0);
 
-  g_hash_table_insert (self->launchers, g_strdup (instance_id), launcher);
+  g_hash_table_insert (self->instances.launchers, g_strdup (instance_id), launcher);
 
   return launcher;
 }
@@ -142,12 +142,12 @@ aml_main_window_new (GtkApplication *application, AmlInstanceManager *manager)
 
   /* The table owns the launchers: the key is the id of the instance and
      the value is its launcher. */
-  self->launchers = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
+  self->instances.launchers = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                            g_object_unref);
 
   /* The open instance dialogs are only bookkept here: the window they
      are presented on owns them. */
-  self->instance_dialogs = g_hash_table_new_full (g_str_hash, g_str_equal,
+  self->instances.instance_dialogs = g_hash_table_new_full (g_str_hash, g_str_equal,
                                                   g_free, NULL);
 
   /* The instances are a boxed list, the same list the content pages and
@@ -194,8 +194,8 @@ aml_main_window_dispose (GObject *object)
   /* A running game keeps its own launcher alive through the process
      readers, so dropping the table here never kills a game in front of
      the user; it only lets go of the ones that are not running. */
-  g_clear_pointer (&self->launchers, g_hash_table_unref);
-  g_clear_pointer (&self->instance_dialogs, g_hash_table_unref);
+  g_clear_pointer (&self->instances.launchers, g_hash_table_unref);
+  g_clear_pointer (&self->instances.instance_dialogs, g_hash_table_unref);
   g_clear_object (&self->manager);
   g_clear_object (&self->settings);
   g_clear_object (&self->accounts);
