@@ -29,7 +29,6 @@ G_DECLARE_FINAL_TYPE (AmlLogsPage, aml_logs_page, AML, LOGS_PAGE, GtkBox)
 /* The page of @launcher. It follows that launcher, so two views of the
  * same instance show the same lines. */
 AmlLogsPage *aml_logs_page_new (AmlLauncher *launcher);
-void aml_logs_page_focus_search (AmlLogsPage *self);
 
 G_END_DECLS
 
