@@ -897,10 +897,6 @@ show_export_metadata (AmlInstancePage *self)
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (fields),
                              GTK_WIDGET (data->version));
   gtk_box_append (GTK_BOX (box), fields);
-  gtk_widget_set_margin_start (box, 18);
-  gtk_widget_set_margin_end (box, 18);
-  gtk_widget_set_margin_top (box, 18);
-  gtk_widget_set_margin_bottom (box, 18);
   gtk_box_append (GTK_BOX (box), buttons);
   gtk_box_append (GTK_BOX (buttons), cancel);
   gtk_box_append (GTK_BOX (buttons), export_button);
