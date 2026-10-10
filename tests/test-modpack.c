@@ -294,7 +294,7 @@ export_now (AmlInstance *instance, const char *path, GError **error)
   AsyncWait wait = { 0 };
 
   aml_modpack_export_async (instance, path, NULL, NULL, NULL, FALSE, NULL,
-                            export_done, &wait);
+                            NULL, NULL, export_done, &wait);
   async_wait_run (&wait);
 
   *error = wait.error;
