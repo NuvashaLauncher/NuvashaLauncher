@@ -14,16 +14,16 @@ static GtkWidget *
 toolbar_button (const char *icon_name, const char *label, GCallback callback,
                 gpointer user_data)
 {
-  GtkWidget *button = gtk_button_new_from_icon_name (icon_name);
+  GtkButton *button = GTK_BUTTON (gtk_button_new_from_icon_name (icon_name));
 
-  gtk_widget_add_css_class (button, "flat");
-  gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
-  gtk_widget_set_tooltip_text (button, label);
-  gtk_accessible_update_property (GTK_ACCESSIBLE (button),
+  gtk_widget_add_css_class (GTK_WIDGET (button), "flat");
+  gtk_widget_set_valign (GTK_WIDGET (button), GTK_ALIGN_CENTER);
+  gtk_widget_set_tooltip_text (GTK_WIDGET (button), label);
+  gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (button)),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL, label, -1);
   g_signal_connect (button, "clicked", callback, user_data);
 
-  return button;
+  return GTK_WIDGET (button);
 }
 
 
@@ -34,37 +34,37 @@ toolbar_button (const char *icon_name, const char *label, GCallback callback,
 void
 aml_content_page_build_installed (AmlContentPage *self)
 {
-  GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-  GtkWidget *actions = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
+  GtkBox *actions = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
    GtkSearchEntry *search_bar = GTK_SEARCH_ENTRY (gtk_search_entry_new ());
-  GtkWidget *scroller = gtk_scrolled_window_new ();
-  GtkWidget *content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
+  GtkBox *content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   AdwPreferencesGroup *group =
     ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
 
-   gtk_widget_set_hexpand (actions, TRUE);
+   gtk_widget_set_hexpand (GTK_WIDGET (actions), TRUE);
    self->installed.search_bar = GTK_SEARCH_ENTRY (search_bar);
    self->installed.search_entry = GTK_SEARCH_ENTRY (search_bar);
    gtk_widget_set_hexpand (GTK_WIDGET (search_bar), TRUE);
-    gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_bar),
+    gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (GTK_WIDGET (search_bar)),
                                             _("Search"));
      gtk_widget_set_visible (GTK_WIDGET (search_bar), TRUE);
    g_signal_connect (search_bar, "changed",
                      G_CALLBACK (aml_content_page_on_installed_search_changed), self);
-     gtk_box_append (GTK_BOX (actions), GTK_WIDGET (search_bar));
+     gtk_box_append (GTK_BOX (GTK_WIDGET (actions)), GTK_WIDGET (search_bar));
 
    self->installed.update_all = GTK_BUTTON (toolbar_button (
      "software-update-available-symbolic", _("Update All"),
      G_CALLBACK (aml_content_page_on_update_all_clicked), self));
    gtk_widget_set_sensitive (GTK_WIDGET (self->installed.update_all), FALSE);
-  gtk_box_append (GTK_BOX (actions), GTK_WIDGET (self->installed.update_all));
-  gtk_box_append (GTK_BOX (actions),
+  gtk_box_append (GTK_BOX (GTK_WIDGET (actions)), GTK_WIDGET (self->installed.update_all));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (actions)),
                   toolbar_button ("folder-symbolic", _("Open Folder"),
                                   G_CALLBACK (aml_content_page_on_open_folder_clicked), self));
     self->browse.spinner = ADW_SPINNER (adw_spinner_new ());
    gtk_widget_set_valign (GTK_WIDGET (self->browse.spinner), GTK_ALIGN_CENTER);
   gtk_widget_set_visible (GTK_WIDGET (self->browse.spinner), FALSE);
-  gtk_box_append (GTK_BOX (actions), GTK_WIDGET (self->browse.spinner));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (actions)), GTK_WIDGET (self->browse.spinner));
 
   /* The actions belong to the toolbar row above both lists, not to this
      one of them: they are the same row whichever list is shown, and
@@ -89,23 +89,23 @@ aml_content_page_build_installed (AmlContentPage *self)
 
   /* The list starts where the row above it ends: its first row is not
      rounded at the top, so the two read as one piece. */
-  gtk_widget_add_css_class (GTK_WIDGET (group), "flush-top");
+  gtk_widget_add_css_class (GTK_WIDGET (group), "flush");
 
    self->installed.group = group;
    self->installed.scroller = GTK_SCROLLED_WINDOW (scroller);
-  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
+  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)),
                                  GTK_WIDGET (group));
-  gtk_widget_set_vexpand (scroller, TRUE);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
+  gtk_widget_set_vexpand (GTK_WIDGET (scroller), TRUE);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)),
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 
-  gtk_widget_set_vexpand (content, TRUE);
-  gtk_box_append (GTK_BOX (content), GTK_WIDGET (self->installed.status));
-  gtk_box_append (GTK_BOX (content), scroller);
-  gtk_widget_set_visible (scroller, FALSE);
-  gtk_box_append (GTK_BOX (box), content);
+  gtk_widget_set_vexpand (GTK_WIDGET (content), TRUE);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (self->installed.status));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (scroller));
+  gtk_widget_set_visible (GTK_WIDGET (scroller), FALSE);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (content));
 
-  adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (self->stack), box,
+  adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (self->stack), GTK_WIDGET (box),
                                         "installed", _("Installed"),
                                       "view-list-symbolic");
 }
@@ -152,27 +152,27 @@ aml_content_page_on_stack_switched (GObject *stack, GParamSpec *pspec G_GNUC_UNU
 void
 aml_content_page_build_browse (AmlContentPage *self)
 {
-  GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-  GtkWidget *top = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
+  GtkBox *top = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
    GtkSearchEntry *search_bar = GTK_SEARCH_ENTRY (gtk_search_entry_new ());
-  GtkWidget *filter_button = gtk_menu_button_new ();
-  GtkWidget *popover = gtk_popover_new ();
-  GtkWidget *filter_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-  GtkWidget *filter_scroller = gtk_scrolled_window_new ();
-  GtkWidget *content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-  GtkWidget *scroller = gtk_scrolled_window_new ();
-  GtkWidget *loading_more = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *loading_spinner = gtk_spinner_new ();
-  GtkWidget *loading_label = gtk_label_new (_("Loading more…"));
-  GtkWidget *retry_row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *retry_label = gtk_label_new (NULL);
-  GtkWidget *retry_button = gtk_button_new_with_label (_("Retry"));
-  GtkWidget *foot = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *pick_button = gtk_button_new ();
-  GtkWidget *pick_icon = gtk_image_new_from_icon_name (
-      "folder-download-symbolic");
-  GtkWidget *pick_overlay = gtk_overlay_new ();
-  GtkWidget *pick_badge = gtk_label_new (NULL);
+  GtkMenuButton *filter_button = GTK_MENU_BUTTON (gtk_menu_button_new ());
+  GtkPopover *popover = GTK_POPOVER (gtk_popover_new ());
+  GtkBox *filter_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
+  GtkScrolledWindow *filter_scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
+  GtkBox *content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
+  GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
+  GtkBox *loading_more = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+  GtkSpinner *loading_spinner = GTK_SPINNER (gtk_spinner_new ());
+  GtkLabel *loading_label = GTK_LABEL (gtk_label_new (_("Loading more…")));
+  GtkBox *retry_row = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+  GtkLabel *retry_label = GTK_LABEL (gtk_label_new (NULL));
+  GtkButton *retry_button = GTK_BUTTON (gtk_button_new_with_label (_("Retry")));
+  GtkBox *foot = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+  GtkButton *pick_button = GTK_BUTTON (gtk_button_new ());
+  GtkImage *pick_icon = GTK_IMAGE (gtk_image_new_from_icon_name (
+      "folder-download-symbolic"));
+  GtkOverlay *pick_overlay = GTK_OVERLAY (gtk_overlay_new ());
+  GtkLabel *pick_badge = GTK_LABEL (gtk_label_new (NULL));
   g_autofree char *pick_accessible_label = NULL;
   AdwPreferencesGroup *group =
     ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
@@ -182,7 +182,7 @@ aml_content_page_build_browse (AmlContentPage *self)
   /* The field takes the room the row has, the way the modpack browser's
      search does, rather than a fixed width of its own. */
   gtk_widget_set_hexpand (GTK_WIDGET (search_bar), TRUE);
-  gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_bar),
+  gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (GTK_WIDGET (search_bar)),
                                             _("Search"));
   gtk_widget_set_visible (GTK_WIDGET (search_bar), TRUE);
 
@@ -196,43 +196,43 @@ aml_content_page_build_browse (AmlContentPage *self)
     g_signal_connect (keys, "key-pressed", G_CALLBACK (aml_content_page_on_search_key), self);
   }
 
-  gtk_box_append (GTK_BOX (top), GTK_WIDGET (search_bar));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (top)), GTK_WIDGET (search_bar));
 
-  gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (filter_button),
+  gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (GTK_WIDGET (filter_button)),
                                  "view-more-symbolic");
-    gtk_widget_set_tooltip_text (filter_button, _("Filter by category"));
-  gtk_accessible_update_property (GTK_ACCESSIBLE (filter_button),
+    gtk_widget_set_tooltip_text (GTK_WIDGET (filter_button), _("Filter by category"));
+  gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (filter_button)),
                                      GTK_ACCESSIBLE_PROPERTY_LABEL, _("Filter"),
                                   -1);
-  gtk_widget_set_valign (filter_button, GTK_ALIGN_CENTER);
-  gtk_widget_add_css_class (filter_button, "flat");
-  gtk_menu_button_set_popover (GTK_MENU_BUTTON (filter_button), popover);
+  gtk_widget_set_valign (GTK_WIDGET (filter_button), GTK_ALIGN_CENTER);
+  gtk_widget_add_css_class (GTK_WIDGET (filter_button), "flat");
+  gtk_menu_button_set_popover (GTK_MENU_BUTTON (GTK_WIDGET (filter_button)), GTK_WIDGET (popover));
   /* A click opens the popover but does not emit "activate" on the
      menu button, so the load hangs off the popover's "show" instead. */
   g_signal_connect (popover, "show",
                     G_CALLBACK (aml_content_page_on_filter_clicked), self);
-  gtk_box_append (GTK_BOX (top), filter_button);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (top)), GTK_WIDGET (filter_button));
 
   /* The row takes the room the bar has, the search inside it takes most
      of that, and the filter and the switcher sit at its right. */
-  gtk_widget_set_hexpand (top, TRUE);
+  gtk_widget_set_hexpand (GTK_WIDGET (top), TRUE);
 
    self->browse.filter_box = GTK_BOX (filter_box);
-  gtk_widget_set_margin_top (filter_box, 6);
-  gtk_widget_set_margin_bottom (filter_box, 6);
-  gtk_widget_set_margin_start (filter_box, 6);
-  gtk_widget_set_margin_end (filter_box, 6);
-  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (filter_scroller),
-                                 filter_box);
+  gtk_widget_set_margin_top (GTK_WIDGET (filter_box), 6);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (filter_box), 6);
+  gtk_widget_set_margin_start (GTK_WIDGET (filter_box), 6);
+  gtk_widget_set_margin_end (GTK_WIDGET (filter_box), 6);
+  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (GTK_WIDGET (filter_scroller)),
+                                  GTK_WIDGET (filter_box));
   /* Wide enough to read a category and its heading, and no taller than
      the popover can be: a long list scrolls instead of running off the
      screen. */
-  gtk_widget_set_size_request (filter_scroller, 280, -1);
+  gtk_widget_set_size_request (GTK_WIDGET (filter_scroller), 280, -1);
   gtk_scrolled_window_set_max_content_height (
       GTK_SCROLLED_WINDOW (filter_scroller), 420);
   gtk_scrolled_window_set_propagate_natural_height (
       GTK_SCROLLED_WINDOW (filter_scroller), TRUE);
-  gtk_popover_set_child (GTK_POPOVER (popover), filter_scroller);
+  gtk_popover_set_child (GTK_POPOVER (GTK_WIDGET (popover)), GTK_WIDGET (filter_scroller));
 
    self->browse_actions = GTK_BOX (top);
   g_object_ref_sink (top);
@@ -248,54 +248,54 @@ aml_content_page_build_browse (AmlContentPage *self)
         "instance"));
   /* The list starts where the row above it ends: its first row is not
      rounded at the top, so the two read as one piece. */
-  gtk_widget_add_css_class (GTK_WIDGET (group), "flush-top");
+  gtk_widget_add_css_class (GTK_WIDGET (group), "flush");
 
    self->browse.results_group = group;
    self->browse.results_scroller = GTK_SCROLLED_WINDOW (scroller);
-  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
+  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)),
                                  GTK_WIDGET (group));
-  gtk_widget_set_vexpand (scroller, TRUE);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
+  gtk_widget_set_vexpand (GTK_WIDGET (scroller), TRUE);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)),
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 
-  gtk_widget_set_vexpand (content, TRUE);
-  gtk_box_append (GTK_BOX (content), GTK_WIDGET (self->browse.results_status));
-  gtk_box_append (GTK_BOX (content), scroller);
-  gtk_widget_set_visible (scroller, FALSE);
-  gtk_box_append (GTK_BOX (box), content);
+  gtk_widget_set_vexpand (GTK_WIDGET (content), TRUE);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (self->browse.results_status));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (scroller));
+  gtk_widget_set_visible (GTK_WIDGET (scroller), FALSE);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (content));
 
   /* The foot of the list: the button that installs everything the
      checkmarks of the versions have on, and nothing else. It is a plain
      download icon at the left end of the row, where the actions of the
      other list sit. */
-  gtk_widget_add_css_class (pick_button, "flat");
-  gtk_widget_set_valign (pick_button, GTK_ALIGN_CENTER);
+  gtk_widget_add_css_class (GTK_WIDGET (pick_button), "flat");
+  gtk_widget_set_valign (GTK_WIDGET (pick_button), GTK_ALIGN_CENTER);
    pick_accessible_label = g_strdup_printf (
        _("Install the selected %s?"), aml_content_type_title (self->type));
-   gtk_accessible_update_property (GTK_ACCESSIBLE (pick_button),
+   gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (pick_button)),
                                    GTK_ACCESSIBLE_PROPERTY_LABEL,
                                    pick_accessible_label, -1);
-  gtk_button_set_child (GTK_BUTTON (pick_button), pick_icon);
+  gtk_button_set_child (GTK_BUTTON (GTK_WIDGET (pick_button)), GTK_WIDGET (pick_icon));
   g_signal_connect (pick_button, "clicked",
                     G_CALLBACK (aml_content_page_on_pick_button_clicked), self);
 
    /* Keep the count attached to the button without putting it inside the
       button's hit target. The overlay keeps it correctly positioned at
       every scale without changing the button's width. */
-   gtk_widget_add_css_class (pick_badge, "aml-badge");
-   gtk_widget_set_valign (pick_badge, GTK_ALIGN_START);
-   gtk_widget_set_halign (pick_badge, GTK_ALIGN_END);
-   gtk_widget_set_margin_top (pick_badge, 1);
-   gtk_widget_set_margin_end (pick_badge, 1);
+   gtk_widget_add_css_class (GTK_WIDGET (pick_badge), "aml-badge");
+   gtk_widget_set_valign (GTK_WIDGET (pick_badge), GTK_ALIGN_START);
+   gtk_widget_set_halign (GTK_WIDGET (pick_badge), GTK_ALIGN_END);
+   gtk_widget_set_margin_top (GTK_WIDGET (pick_badge), 1);
+   gtk_widget_set_margin_end (GTK_WIDGET (pick_badge), 1);
 
-   gtk_overlay_set_child (GTK_OVERLAY (pick_overlay), pick_button);
-   gtk_overlay_add_overlay (GTK_OVERLAY (pick_overlay), pick_badge);
-   gtk_box_append (GTK_BOX (foot), pick_overlay);
-  gtk_widget_set_margin_start (foot, 12);
-  gtk_widget_set_margin_end (foot, 12);
-  gtk_widget_set_margin_top (foot, 6);
-  gtk_widget_set_margin_bottom (foot, 6);
-  gtk_box_append (GTK_BOX (box), foot);
+   gtk_overlay_set_child (GTK_OVERLAY (GTK_WIDGET (pick_overlay)), GTK_WIDGET (pick_button));
+   gtk_overlay_add_overlay (GTK_OVERLAY (GTK_WIDGET (pick_overlay)), GTK_WIDGET (pick_badge));
+   gtk_box_append (GTK_BOX (GTK_WIDGET (foot)), GTK_WIDGET (pick_overlay));
+  gtk_widget_set_margin_start (GTK_WIDGET (foot), 12);
+  gtk_widget_set_margin_end (GTK_WIDGET (foot), 12);
+  gtk_widget_set_margin_top (GTK_WIDGET (foot), 6);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (foot), 6);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (foot));
 
    self->pick_button = GTK_BUTTON (pick_button);
    self->pick_badge = GTK_LABEL (pick_badge);
@@ -308,25 +308,25 @@ aml_content_page_build_browse (AmlContentPage *self)
      and a retry row when one failed. Neither is a button the user has to
      press to see more: the list asks for the next page itself when it is
      scrolled to the end. */
-  gtk_widget_set_halign (loading_more, GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (loading_more, GTK_ALIGN_CENTER);
-  gtk_widget_set_margin_top (loading_more, 12);
-  gtk_widget_set_margin_bottom (loading_more, 12);
-  gtk_widget_set_visible (loading_more, FALSE);
-  gtk_box_append (GTK_BOX (loading_more), loading_spinner);
-  gtk_box_append (GTK_BOX (loading_more), loading_label);
-  adw_preferences_group_add (group, loading_more);
+  gtk_widget_set_halign (GTK_WIDGET (loading_more), GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (GTK_WIDGET (loading_more), GTK_ALIGN_CENTER);
+  gtk_widget_set_margin_top (GTK_WIDGET (loading_more), 12);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (loading_more), 12);
+  gtk_widget_set_visible (GTK_WIDGET (loading_more), FALSE);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (loading_more)), GTK_WIDGET (loading_spinner));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (loading_more)), GTK_WIDGET (loading_label));
+  adw_preferences_group_add (group, GTK_WIDGET (loading_more));
 
-  gtk_widget_set_halign (retry_row, GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (retry_row, GTK_ALIGN_CENTER);
-  gtk_widget_set_margin_top (retry_row, 12);
-  gtk_widget_set_margin_bottom (retry_row, 12);
-  gtk_widget_set_visible (retry_row, FALSE);
-  gtk_label_set_wrap (GTK_LABEL (retry_label), TRUE);
-  gtk_widget_add_css_class (retry_label, "dim-label");
-  gtk_box_append (GTK_BOX (retry_row), retry_label);
-  gtk_box_append (GTK_BOX (retry_row), retry_button);
-  adw_preferences_group_add (group, retry_row);
+  gtk_widget_set_halign (GTK_WIDGET (retry_row), GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (GTK_WIDGET (retry_row), GTK_ALIGN_CENTER);
+  gtk_widget_set_margin_top (GTK_WIDGET (retry_row), 12);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (retry_row), 12);
+  gtk_widget_set_visible (GTK_WIDGET (retry_row), FALSE);
+  gtk_label_set_wrap (GTK_LABEL (GTK_WIDGET (retry_label)), TRUE);
+  gtk_widget_add_css_class (GTK_WIDGET (retry_label), "dim-label");
+  gtk_box_append (GTK_BOX (GTK_WIDGET (retry_row)), GTK_WIDGET (retry_label));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (retry_row)), GTK_WIDGET (retry_button));
+  adw_preferences_group_add (group, GTK_WIDGET (retry_row));
 
    self->browse.loading_more = GTK_BOX (loading_more);
    self->browse.retry_row = GTK_BOX (retry_row);
@@ -341,13 +341,13 @@ aml_content_page_build_browse (AmlContentPage *self)
      the value is at the upper bound. */
   {
     GtkAdjustment *adjustment =
-      gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (scroller));
+      gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)));
 
     g_signal_connect (adjustment, "value-changed",
                       G_CALLBACK (aml_content_page_on_scroll_changed), self);
   }
 
-  adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (self->stack), box,
+  adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (self->stack), GTK_WIDGET (box),
                                         "browse", _("Browse"),
                                       "system-search-symbolic");
 }
@@ -384,22 +384,22 @@ on_switcher_toggled (GtkToggleButton *button, gpointer user_data)
 static GtkWidget *
 switcher_button (const char *icon_name, const char *label)
 {
-  GtkWidget *button = gtk_toggle_button_new ();
+  GtkToggleButton *button = GTK_TOGGLE_BUTTON (gtk_toggle_button_new ());
 
-  gtk_button_set_icon_name (GTK_BUTTON (button), icon_name);
-  gtk_widget_add_css_class (button, "flat");
-  gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
-     gtk_widget_set_tooltip_text (button, _(label));
-  gtk_accessible_update_property (GTK_ACCESSIBLE (button),
+  gtk_button_set_icon_name (GTK_BUTTON (GTK_WIDGET (button)), icon_name);
+  gtk_widget_add_css_class (GTK_WIDGET (button), "flat");
+  gtk_widget_set_valign (GTK_WIDGET (button), GTK_ALIGN_CENTER);
+     gtk_widget_set_tooltip_text (GTK_WIDGET (button), _(label));
+  gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (button)),
                                     GTK_ACCESSIBLE_PROPERTY_LABEL, _(label), -1);
 
-  return button;
+  return GTK_WIDGET (button);
 }
 
 void
 aml_content_page_build_bar (AmlContentPage *self)
 {
-  GtkWidget *inner = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  GtkBox *inner = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
 
   self->bar = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
 
@@ -461,9 +461,9 @@ aml_content_page_build_bar (AmlContentPage *self)
   g_signal_connect (self->banner, "button-clicked",
                     G_CALLBACK (on_banner_dismiss), self);
 
-  gtk_box_append (GTK_BOX (inner), GTK_WIDGET (self->banner));
-  gtk_box_append (GTK_BOX (inner), GTK_WIDGET (self->bar));
-  gtk_box_append (GTK_BOX (inner), GTK_WIDGET (self->stack));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (inner)), GTK_WIDGET (self->banner));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (inner)), GTK_WIDGET (self->bar));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (inner)), GTK_WIDGET (self->stack));
 
   /* The list is the left half; the project that is opened is the right
      half, and is empty until one is opened. Collapsed shows one page at a
@@ -476,7 +476,7 @@ aml_content_page_build_bar (AmlContentPage *self)
   gtk_widget_add_css_class (GTK_WIDGET (self->project.split), "flat-split");
   adw_navigation_split_view_set_sidebar (
     ADW_NAVIGATION_SPLIT_VIEW (self->project.split),
-    adw_navigation_page_new (inner, aml_content_type_title (self->type)));
+    adw_navigation_page_new (GTK_WIDGET (inner), aml_content_type_title (self->type)));
   adw_navigation_split_view_set_collapsed (
     ADW_NAVIGATION_SPLIT_VIEW (self->project.split), TRUE);
   adw_navigation_split_view_set_sidebar_width_fraction (

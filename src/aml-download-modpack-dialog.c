@@ -310,17 +310,17 @@ aml_download_modpack_dialog_new (AmlInstanceManager *manager)
 static void
 build_import_page (AmlDownloadModpackDialog *self)
 {
-  GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
-  GtkWidget *spinner = gtk_spinner_new ();
-  GtkWidget *label = gtk_label_new (_("Importing modpack…"));
-  GtkWidget *page = GTK_WIDGET (
-    adw_navigation_page_new (box, _("Import Modpack")));
+  GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
+  GtkSpinner *spinner = GTK_SPINNER (gtk_spinner_new ());
+  GtkLabel *label = GTK_LABEL (gtk_label_new (_("Importing modpack…")));
+  AdwNavigationPage *page = ADW_NAVIGATION_PAGE (
+    adw_navigation_page_new (GTK_WIDGET (box), _("Import Modpack")));
 
-  gtk_widget_set_halign (box, GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (box, GTK_ALIGN_CENTER);
-  gtk_spinner_start (GTK_SPINNER (spinner));
-  gtk_box_append (GTK_BOX (box), spinner);
-  gtk_box_append (GTK_BOX (box), label);
+  gtk_widget_set_halign (GTK_WIDGET (box), GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (GTK_WIDGET (box), GTK_ALIGN_CENTER);
+  gtk_spinner_start (GTK_SPINNER (GTK_WIDGET (spinner)));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (spinner));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (label));
   adw_navigation_view_add (ADW_NAVIGATION_VIEW (self->nav),
                            ADW_NAVIGATION_PAGE (page));
 }
@@ -592,30 +592,30 @@ results_arrived (AmlDownloadModpackDialog *self, AmlModrinthResults *results,
              are what the details page is for. Markup off first: the
              title and the description are plain Modrinth text and may
              hold an "&". */
-          adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row),
+          adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (row)),
                                               FALSE);
-          adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
+          adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (row)),
                                          project->title);
           {
             g_autofree char *line = one_line (project->description);
 
-            adw_action_row_set_subtitle (ADW_ACTION_ROW (row), line);
+            adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (row)), line);
           }
           /* Two lines at most, ending in an ellipsis when the
              description is longer: every row is the same height, and the
              whole description is on the details page. */
-          adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 2);
-          adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (row), FALSE);
+          adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (GTK_WIDGET (row)), 2);
+          adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (GTK_WIDGET (row)), FALSE);
 
           gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
           start_modpack_icon (icon, project->icon_url);
 
-          adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
+          adw_action_row_add_prefix (ADW_ACTION_ROW (GTK_WIDGET (row)), icon);
 
           /* An AdwActionRow is not activatable by default, so the row
              itself is made one: a click anywhere on it opens the
              details page. */
-          gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
+          gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (GTK_WIDGET (row)), TRUE);
 
           g_ptr_array_add (self->hits,
                            aml_modrinth_project_copy (project));
@@ -808,19 +808,19 @@ static void
 build_browse_page (AmlDownloadModpackDialog *self)
 {
   GtkWidget *page = NULL;
-  GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-  GtkWidget *top = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *scroller = gtk_scrolled_window_new ();
-  GtkWidget *loading = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
-  GtkWidget *loading_spinner = gtk_spinner_new ();
-  GtkWidget *loading_label = gtk_label_new (_("Loading modpacks…"));
-  GtkWidget *loading_more = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *more_spinner = gtk_spinner_new ();
-  GtkWidget *more_label = gtk_label_new (_("Loading more…"));
-  GtkWidget *retry_row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *retry_label = gtk_label_new (NULL);
-  GtkWidget *retry_button = gtk_button_new_with_label (_("Retry"));
-  GtkWidget *close_button = gtk_button_new_from_icon_name ("window-close-symbolic");
+  GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
+  GtkBox *top = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+  GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
+  GtkBox *loading = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 6));
+  GtkSpinner *loading_spinner = GTK_SPINNER (gtk_spinner_new ());
+  GtkLabel *loading_label = GTK_LABEL (gtk_label_new (_("Loading modpacks…")));
+  GtkBox *loading_more = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+  GtkSpinner *more_spinner = GTK_SPINNER (gtk_spinner_new ());
+  GtkLabel *more_label = GTK_LABEL (gtk_label_new (_("Loading more…")));
+  GtkBox *retry_row = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+  GtkLabel *retry_label = GTK_LABEL (gtk_label_new (NULL));
+  GtkButton *retry_button = GTK_BUTTON (gtk_button_new_with_label (_("Retry")));
+  GtkButton *close_button = GTK_BUTTON (gtk_button_new_from_icon_name ("window-close-symbolic"));
 
   /* Exactly one of these is shown at any moment: the list, the words for
      an empty answer, the error, or the spinner while the first page is
@@ -833,7 +833,7 @@ build_browse_page (AmlDownloadModpackDialog *self)
 
   /* The list starts where the search row above it ends: its first row is
      not rounded at the top, so the two read as one piece. */
-  gtk_widget_add_css_class (GTK_WIDGET (self->results_group), "flush-top");
+  gtk_widget_add_css_class (GTK_WIDGET (self->results_group), "flush");
 
   self->search_entry = GTK_SEARCH_ENTRY (gtk_search_entry_new ());
   gtk_widget_set_hexpand (GTK_WIDGET (self->search_entry), TRUE);
@@ -842,39 +842,39 @@ build_browse_page (AmlDownloadModpackDialog *self)
   g_signal_connect (self->search_entry, "changed",
                     G_CALLBACK (on_search_changed), self);
 
-  gtk_box_append (GTK_BOX (top), GTK_WIDGET (self->search_entry));
-  gtk_widget_add_css_class (close_button, "flat");
-  gtk_widget_set_tooltip_text (close_button, _("Close"));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (top)), GTK_WIDGET (self->search_entry));
+  gtk_widget_add_css_class (GTK_WIDGET (close_button), "flat");
+  gtk_widget_set_tooltip_text (GTK_WIDGET (close_button), _("Close"));
   g_signal_connect_swapped (close_button, "clicked",
                             G_CALLBACK (adw_dialog_close), self);
-  gtk_box_append (GTK_BOX (top), close_button);
-  gtk_widget_set_margin_start (top, 12);
-  gtk_widget_set_margin_end (top, 12);
-  gtk_widget_set_margin_top (top, 6);
-  gtk_widget_set_margin_bottom (top, 6);
-  gtk_box_append (GTK_BOX (box), top);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (top)), GTK_WIDGET (close_button));
+  gtk_widget_set_margin_start (GTK_WIDGET (top), 12);
+  gtk_widget_set_margin_end (GTK_WIDGET (top), 12);
+  gtk_widget_set_margin_top (GTK_WIDGET (top), 6);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (top), 6);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (top));
 
   /* The list. The bottom of it holds a spinner while the next page is on
      its way and a retry row when a page failed. */
-  gtk_widget_set_halign (loading_more, GTK_ALIGN_CENTER);
-  gtk_widget_set_margin_top (loading_more, 12);
-  gtk_widget_set_margin_bottom (loading_more, 12);
-  gtk_widget_set_visible (loading_more, FALSE);
-  gtk_box_append (GTK_BOX (loading_more), more_spinner);
-  gtk_box_append (GTK_BOX (loading_more), more_label);
+  gtk_widget_set_halign (GTK_WIDGET (loading_more), GTK_ALIGN_CENTER);
+  gtk_widget_set_margin_top (GTK_WIDGET (loading_more), 12);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (loading_more), 12);
+  gtk_widget_set_visible (GTK_WIDGET (loading_more), FALSE);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (loading_more)), GTK_WIDGET (more_spinner));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (loading_more)), GTK_WIDGET (more_label));
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->results_group),
-                             loading_more);
+                              GTK_WIDGET (loading_more));
 
-  gtk_widget_set_halign (retry_row, GTK_ALIGN_CENTER);
-  gtk_widget_set_margin_top (retry_row, 12);
-  gtk_widget_set_margin_bottom (retry_row, 12);
-  gtk_widget_set_visible (retry_row, FALSE);
-  gtk_label_set_wrap (GTK_LABEL (retry_label), TRUE);
-  gtk_widget_add_css_class (retry_label, "dim-label");
-  gtk_box_append (GTK_BOX (retry_row), retry_label);
-  gtk_box_append (GTK_BOX (retry_row), retry_button);
+  gtk_widget_set_halign (GTK_WIDGET (retry_row), GTK_ALIGN_CENTER);
+  gtk_widget_set_margin_top (GTK_WIDGET (retry_row), 12);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (retry_row), 12);
+  gtk_widget_set_visible (GTK_WIDGET (retry_row), FALSE);
+  gtk_label_set_wrap (GTK_LABEL (GTK_WIDGET (retry_label)), TRUE);
+  gtk_widget_add_css_class (GTK_WIDGET (retry_label), "dim-label");
+  gtk_box_append (GTK_BOX (GTK_WIDGET (retry_row)), GTK_WIDGET (retry_label));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (retry_row)), GTK_WIDGET (retry_button));
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->results_group),
-                             retry_row);
+                              GTK_WIDGET (retry_row));
 
   self->loading_more = GTK_BOX (loading_more);
   self->retry_row = GTK_BOX (retry_row);
@@ -883,14 +883,14 @@ build_browse_page (AmlDownloadModpackDialog *self)
   g_signal_connect_swapped (retry_button, "clicked",
                             G_CALLBACK (on_retry_page), self);
 
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)),
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
   /* The group is the whole width of the list: a row of the browser has to
      cover it rather than sit centered in a clamp of its own. */
-  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
+  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)),
                                  GTK_WIDGET (self->results_group));
-  gtk_widget_set_vexpand (scroller, TRUE);
-  gtk_stack_add_named (GTK_STACK (self->results_stack), scroller, "results");
+  gtk_widget_set_vexpand (GTK_WIDGET (scroller), TRUE);
+  gtk_stack_add_named (GTK_STACK (self->results_stack), GTK_WIDGET (scroller), "results");
 
   /* An empty answer. */
   self->results_status = ADW_STATUS_PAGE (adw_status_page_new ());
@@ -912,22 +912,22 @@ build_browse_page (AmlDownloadModpackDialog *self)
                        GTK_WIDGET (self->error_status), "error");
 
   /* The first page is on its way. */
-  gtk_widget_set_valign (loading, GTK_ALIGN_CENTER);
-  gtk_widget_set_halign (loading, GTK_ALIGN_CENTER);
-  gtk_box_append (GTK_BOX (loading), loading_spinner);
-  gtk_box_append (GTK_BOX (loading), loading_label);
-  gtk_spinner_start (GTK_SPINNER (loading_spinner));
-  gtk_stack_add_named (GTK_STACK (self->results_stack), loading, "loading");
+  gtk_widget_set_valign (GTK_WIDGET (loading), GTK_ALIGN_CENTER);
+  gtk_widget_set_halign (GTK_WIDGET (loading), GTK_ALIGN_CENTER);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (loading)), GTK_WIDGET (loading_spinner));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (loading)), GTK_WIDGET (loading_label));
+  gtk_spinner_start (GTK_SPINNER (GTK_WIDGET (loading_spinner)));
+  gtk_stack_add_named (GTK_STACK (self->results_stack), GTK_WIDGET (loading), "loading");
 
   gtk_stack_set_visible_child_name (GTK_STACK (self->results_stack),
                                     "loading");
-  gtk_box_append (GTK_BOX (box), GTK_WIDGET (self->results_stack));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (self->results_stack));
 
   /* The list asks for the next page when it is scrolled to its end.
      GTK4 has no edge-reached signal, so the adjustment is watched. */
   {
     GtkAdjustment *adjustment =
-      gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (scroller));
+      gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)));
 
     g_signal_connect (adjustment, "value-changed",
                       G_CALLBACK (on_scroll_changed), self);
@@ -943,7 +943,7 @@ build_browse_page (AmlDownloadModpackDialog *self)
   gtk_widget_add_css_class (GTK_WIDGET (self->split), "flat-split");
   adw_navigation_split_view_set_sidebar (
     ADW_NAVIGATION_SPLIT_VIEW (self->split),
-    adw_navigation_page_new (box, "Browse Modpacks"));
+    adw_navigation_page_new (GTK_WIDGET (box), "Browse Modpacks"));
   adw_navigation_split_view_set_collapsed (
     ADW_NAVIGATION_SPLIT_VIEW (self->split), TRUE);
   /* Two halves of one width, rather than the narrow column a split view
@@ -956,7 +956,7 @@ build_browse_page (AmlDownloadModpackDialog *self)
     ADW_NAVIGATION_SPLIT_VIEW (self->split), 640);
 
   page = GTK_WIDGET (adw_navigation_page_new (GTK_WIDGET (self->split), ""));
-  adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (page), "browse");
+  adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (GTK_WIDGET (page)), "browse");
 
   adw_navigation_view_add (ADW_NAVIGATION_VIEW (self->nav),
                            ADW_NAVIGATION_PAGE (page));
@@ -1090,14 +1090,14 @@ versions_of_answer (JsonNode *root, GError **error)
 static GtkWidget *
 plain_label (const char *text)
 {
-  GtkWidget *label = gtk_label_new (text != NULL ? text : "");
+  GtkLabel *label = GTK_LABEL (gtk_label_new (text != NULL ? text : ""));
 
-  gtk_label_set_wrap (GTK_LABEL (label), TRUE);
-  gtk_label_set_wrap_mode (GTK_LABEL (label), PANGO_WRAP_WORD_CHAR);
-  gtk_label_set_xalign (GTK_LABEL (label), 0);
-  gtk_label_set_selectable (GTK_LABEL (label), TRUE);
+  gtk_label_set_wrap (GTK_LABEL (GTK_WIDGET (label)), TRUE);
+  gtk_label_set_wrap_mode (GTK_LABEL (GTK_WIDGET (label)), PANGO_WRAP_WORD_CHAR);
+  gtk_label_set_xalign (GTK_LABEL (GTK_WIDGET (label)), 0);
+  gtk_label_set_selectable (GTK_LABEL (GTK_WIDGET (label)), TRUE);
 
-  return label;
+  return GTK_WIDGET (label);
 }
 
 /* The words the dialog shows while the description and the versions are
@@ -1105,19 +1105,19 @@ plain_label (const char *text)
 static GtkWidget *
 loading_child (void)
 {
-  GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
-  GtkWidget *spinner = adw_spinner_new ();
-  GtkWidget *label = gtk_label_new (_("Loading…"));
+  GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
+  AdwSpinner *spinner = ADW_SPINNER (adw_spinner_new ());
+  GtkLabel *label = GTK_LABEL (gtk_label_new (_("Loading…")));
 
-  gtk_widget_set_valign (box, GTK_ALIGN_CENTER);
-  gtk_widget_set_halign (box, GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (spinner, GTK_ALIGN_CENTER);
-  gtk_widget_set_halign (spinner, GTK_ALIGN_CENTER);
-  gtk_widget_add_css_class (label, "dim-label");
-  gtk_box_append (GTK_BOX (box), spinner);
-  gtk_box_append (GTK_BOX (box), label);
+  gtk_widget_set_valign (GTK_WIDGET (box), GTK_ALIGN_CENTER);
+  gtk_widget_set_halign (GTK_WIDGET (box), GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (GTK_WIDGET (spinner), GTK_ALIGN_CENTER);
+  gtk_widget_set_halign (GTK_WIDGET (spinner), GTK_ALIGN_CENTER);
+  gtk_widget_add_css_class (GTK_WIDGET (label), "dim-label");
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (spinner));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (label));
 
-  return box;
+  return GTK_WIDGET (box);
 }
 
 /* Closes the open pack, leaving the list the whole dialog again. The row
@@ -1146,10 +1146,10 @@ close_details (AmlDownloadModpackDialog *self)
 static void
 show_details_page (AmlDownloadModpackDialog *self, GtkWidget *body)
 {
-  GtkWidget *page = GTK_WIDGET (adw_navigation_page_new (body,
+  AdwNavigationPage *page = ADW_NAVIGATION_PAGE (adw_navigation_page_new (body,
                                                          self->project->title));
 
-  details_watch (&self->details_page, page);
+  details_watch (&self->details_page, GTK_WIDGET (page));
   adw_navigation_split_view_set_content (
     ADW_NAVIGATION_SPLIT_VIEW (self->split), ADW_NAVIGATION_PAGE (page));
   adw_navigation_split_view_set_collapsed (
@@ -1196,10 +1196,10 @@ details_content (AmlDownloadModpackDialog *self)
   /* The title, then who wrote it and how often it was taken, the same
      three lines the other contents open with. */
   page = gtk_label_new (self->project->title);
-  gtk_label_set_wrap (GTK_LABEL (page), TRUE);
-  gtk_label_set_xalign (GTK_LABEL (page), 0);
-  gtk_widget_add_css_class (page, "title-2");
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), page);
+  gtk_label_set_wrap (GTK_LABEL (GTK_WIDGET (page)), TRUE);
+  gtk_label_set_xalign (GTK_LABEL (GTK_WIDGET (page)), 0);
+  gtk_widget_add_css_class (GTK_WIDGET (page), "title-2");
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (heading)), GTK_WIDGET (page));
 
   {
     g_autofree char *text = NULL;
@@ -1210,14 +1210,14 @@ details_content (AmlDownloadModpackDialog *self)
     details_watch (&self->meta, gtk_label_new (text));
     gtk_label_set_xalign (GTK_LABEL (self->meta), 0);
     gtk_widget_add_css_class (GTK_WIDGET (self->meta), "dim-label");
-    adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), GTK_WIDGET (self->meta));
+    adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (heading)), GTK_WIDGET (self->meta));
   }
 
    downloads = aml_content_format_downloads (self->project->downloads);
   details_watch (&self->count, gtk_label_new (downloads));
   gtk_label_set_xalign (GTK_LABEL (self->count), 0);
   gtk_widget_add_css_class (GTK_WIDGET (self->count), "dim-label");
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), GTK_WIDGET (self->count));
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (heading)), GTK_WIDGET (self->count));
 
   /* The long description, in Markdown. */
   details_watch (&self->body, gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
@@ -1231,8 +1231,8 @@ details_content (AmlDownloadModpackDialog *self)
     gtk_box_append (GTK_BOX (self->body),
                     plain_label (self->project->description));
 
-  gtk_box_append (GTK_BOX (box), heading);
-  gtk_box_append (GTK_BOX (box), GTK_WIDGET (self->body));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (heading));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (self->body));
 
   /* Where a version list that failed to load, or that holds nothing to
      install, says so: it must not be a disabled button with no reason. */
@@ -1241,15 +1241,15 @@ details_content (AmlDownloadModpackDialog *self)
   gtk_label_set_xalign (GTK_LABEL (self->details_error), 0);
   gtk_widget_add_css_class (GTK_WIDGET (self->details_error), "dim-label");
   gtk_widget_set_visible (GTK_WIDGET (self->details_error), FALSE);
-  gtk_box_append (GTK_BOX (box), GTK_WIDGET (self->details_error));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (self->details_error));
 
-  gtk_widget_set_margin_top (box, 12);
-  gtk_widget_set_margin_bottom (box, 12);
-  gtk_widget_set_margin_start (box, 18);
-  gtk_widget_set_margin_end (box, 18);
+  gtk_widget_set_margin_top (GTK_WIDGET (box), 12);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (box), 12);
+  gtk_widget_set_margin_start (GTK_WIDGET (box), 18);
+  gtk_widget_set_margin_end (GTK_WIDGET (box), 18);
 
-  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller), box);
-  gtk_widget_set_vexpand (scroller, TRUE);
+  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)), GTK_WIDGET (box));
+  gtk_widget_set_vexpand (GTK_WIDGET (scroller), TRUE);
 
   /* The foot: every version the pack publishes, and the button that
      installs the one shown. The newest is what it shows from the start. */
@@ -1274,7 +1274,7 @@ details_content (AmlDownloadModpackDialog *self)
   gtk_widget_set_margin_end (bar, 12);
 
   content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-  gtk_box_append (GTK_BOX (content), scroller);
+  gtk_box_append (GTK_BOX (content), GTK_WIDGET (scroller));
   gtk_box_append (GTK_BOX (content),
                   gtk_separator_new (GTK_ORIENTATION_HORIZONTAL));
   gtk_box_append (GTK_BOX (content), bar);
@@ -1495,44 +1495,44 @@ build_error_page (AmlDownloadModpackDialog *self,
                   GCallback retry,
                   GCallback cancel)
 {
-  GtkWidget *toolbar = adw_toolbar_view_new ();
-  GtkWidget *header = adw_header_bar_new ();
+  AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
+  AdwHeaderBar *header = ADW_HEADER_BAR (adw_header_bar_new ());
   GtkWidget *box = NULL;
-  GtkWidget *status = adw_status_page_new ();
-  GtkWidget *buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *retry_btn = gtk_button_new_with_label (_("Retry"));
-  GtkWidget *back_btn = gtk_button_new_with_label (_("Back"));
+  AdwStatusPage *status = ADW_STATUS_PAGE (adw_status_page_new ());
+  GtkBox *buttons = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+  GtkButton *retry_btn = GTK_BUTTON (gtk_button_new_with_label (_("Retry")));
+  GtkButton *back_btn = GTK_BUTTON (gtk_button_new_with_label (_("Back")));
   GtkWidget *page = NULL;
 
-  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
+  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)), GTK_WIDGET (header));
 
-  status = adw_status_page_new ();
-  adw_status_page_set_icon_name (ADW_STATUS_PAGE (status),
+  status = ADW_STATUS_PAGE (adw_status_page_new ());
+  adw_status_page_set_icon_name (ADW_STATUS_PAGE (GTK_WIDGET (status)),
                                  "dialog-error-symbolic");
-  adw_status_page_set_title (ADW_STATUS_PAGE (status), what);
+  adw_status_page_set_title (ADW_STATUS_PAGE (GTK_WIDGET (status)), what);
   {
     g_autofree char *escaped =
       g_markup_escape_text (message != NULL ? message : "", -1);
 
-    adw_status_page_set_description (ADW_STATUS_PAGE (status), escaped);
+    adw_status_page_set_description (ADW_STATUS_PAGE (GTK_WIDGET (status)), escaped);
   }
 
-  gtk_widget_add_css_class (retry_btn, "suggested-action");
+  gtk_widget_add_css_class (GTK_WIDGET (retry_btn), "suggested-action");
   g_signal_connect (retry_btn, "clicked", retry, self);
   g_signal_connect (back_btn, "clicked", cancel, self);
-  gtk_box_append (GTK_BOX (buttons), retry_btn);
-  gtk_box_append (GTK_BOX (buttons), back_btn);
-  gtk_widget_set_halign (buttons, GTK_ALIGN_CENTER);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (buttons)), GTK_WIDGET (retry_btn));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (buttons)), GTK_WIDGET (back_btn));
+  gtk_widget_set_halign (GTK_WIDGET (buttons), GTK_ALIGN_CENTER);
 
   box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
-  gtk_box_append (GTK_BOX (box), status);
-  gtk_box_append (GTK_BOX (box), buttons);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (status));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (buttons));
   gtk_widget_set_vexpand (GTK_WIDGET (status), TRUE);
   gtk_widget_set_valign (GTK_WIDGET (status), GTK_ALIGN_CENTER);
 
-  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), box);
-  page = GTK_WIDGET (adw_navigation_page_new (toolbar, "Could not install"));
-  adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (page), "error");
+  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)), GTK_WIDGET (box));
+  page = GTK_WIDGET (adw_navigation_page_new (GTK_WIDGET (toolbar), "Could not install"));
+  adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (GTK_WIDGET (page)), "error");
 
   return page;
 }
@@ -1799,17 +1799,17 @@ static GtkWidget *
 build_optional_page (AmlDownloadModpackDialog *self,
                      GPtrArray *optional_files)
 {
-  GtkWidget *toolbar = adw_toolbar_view_new ();
-  GtkWidget *header = adw_header_bar_new ();
-  GtkWidget *heading = adw_preferences_group_new ();
-  GtkWidget *buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *cancel = gtk_button_new_with_label (_("Cancel"));
-  GtkWidget *install = gtk_button_new_with_label (_("Install"));
+  AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
+  AdwHeaderBar *header = ADW_HEADER_BAR (adw_header_bar_new ());
+  AdwPreferencesGroup *heading = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+  GtkBox *buttons = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+  GtkButton *cancel = GTK_BUTTON (gtk_button_new_with_label (_("Cancel")));
+  GtkButton *install = GTK_BUTTON (gtk_button_new_with_label (_("Install")));
   GtkWidget *page = NULL;
 
-  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
+  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)), GTK_WIDGET (header));
 
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (heading),
+  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (GTK_WIDGET (heading)),
                                    _("Optional files"));
   adw_preferences_group_set_description (
     ADW_PREFERENCES_GROUP (heading),
@@ -1824,25 +1824,25 @@ build_optional_page (AmlDownloadModpackDialog *self,
   for (guint i = 0; i < optional_files->len; i++)
     {
       AmlModpackFile *file = g_ptr_array_index (optional_files, i);
-      GtkWidget *row = adw_switch_row_new ();
+      AdwSwitchRow *row = ADW_SWITCH_ROW (adw_switch_row_new ());
 
-      adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
-      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), file->path);
-      adw_switch_row_set_active (ADW_SWITCH_ROW (row), FALSE);
-      gtk_widget_add_css_class (row, "dim-label");
+      adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), FALSE);
+      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), file->path);
+      adw_switch_row_set_active (ADW_SWITCH_ROW (GTK_WIDGET (row)), FALSE);
+      gtk_widget_add_css_class (GTK_WIDGET (row), "dim-label");
 
-      adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), row);
+      adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (heading)), GTK_WIDGET (row));
       g_ptr_array_add (self->opt_switch_rows, row);
       g_ptr_array_add (self->opt_files, file);
     }
 
-  gtk_widget_add_css_class (install, "suggested-action");
-  gtk_box_append (GTK_BOX (buttons), cancel);
-  gtk_box_append (GTK_BOX (buttons), install);
-  gtk_widget_set_margin_start (buttons, 12);
-  gtk_widget_set_margin_end (buttons, 12);
-  gtk_widget_set_margin_bottom (buttons, 12);
-  gtk_widget_set_halign (buttons, GTK_ALIGN_END);
+  gtk_widget_add_css_class (GTK_WIDGET (install), "suggested-action");
+  gtk_box_append (GTK_BOX (GTK_WIDGET (buttons)), GTK_WIDGET (cancel));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (buttons)), GTK_WIDGET (install));
+  gtk_widget_set_margin_start (GTK_WIDGET (buttons), 12);
+  gtk_widget_set_margin_end (GTK_WIDGET (buttons), 12);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (buttons), 12);
+  gtk_widget_set_halign (GTK_WIDGET (buttons), GTK_ALIGN_END);
 
   g_signal_connect (cancel, "clicked", G_CALLBACK (on_optional_cancel),
                     self);
@@ -1852,16 +1852,16 @@ build_optional_page (AmlDownloadModpackDialog *self,
   AdwPreferencesPage *page_holder =
     ADW_PREFERENCES_PAGE (adw_preferences_page_new ());
 
-  adw_preferences_page_add (page_holder, ADW_PREFERENCES_GROUP (heading));
+  adw_preferences_page_add (page_holder, ADW_PREFERENCES_GROUP (GTK_WIDGET (heading)));
 
-  GtkWidget *boxy = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  GtkBox *boxy = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
 
-  gtk_box_append (GTK_BOX (boxy), GTK_WIDGET (page_holder));
-  gtk_box_append (GTK_BOX (boxy), buttons);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (boxy)), GTK_WIDGET (page_holder));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (boxy)), GTK_WIDGET (buttons));
 
-  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), boxy);
-  page = GTK_WIDGET (adw_navigation_page_new (toolbar, "Choose Files"));
-  adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (page), "optional");
+  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)), GTK_WIDGET (boxy));
+  page = GTK_WIDGET (adw_navigation_page_new (GTK_WIDGET (toolbar), "Choose Files"));
+  adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (GTK_WIDGET (page)), "optional");
 
   return page;
 }

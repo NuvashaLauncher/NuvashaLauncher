@@ -203,7 +203,7 @@ static void
 on_name_apply (AdwEntryRow *row, gpointer user_data)
 {
   AmlInstancePage *self = user_data;
-  const char *text = gtk_editable_get_text (GTK_EDITABLE (row));
+  const char *text = gtk_editable_get_text (GTK_EDITABLE (GTK_WIDGET (row)));
   g_autofree char *current = instance_string (self->instance, "name");
   g_autoptr (GError) error = NULL;
 
@@ -216,13 +216,13 @@ on_name_apply (AdwEntryRow *row, gpointer user_data)
       /* The edit never reached the file: the row shows the stored name
        * again instead of a name that does not exist. */
       show_toast (self, error->message);
-      gtk_editable_set_text (GTK_EDITABLE (row), current);
+      gtk_editable_set_text (GTK_EDITABLE (GTK_WIDGET (row)), current);
       return;
     }
 
   g_autofree char *renamed = instance_string (self->instance, "name");
 
-  gtk_editable_set_text (GTK_EDITABLE (row), renamed);
+  gtk_editable_set_text (GTK_EDITABLE (GTK_WIDGET (row)), renamed);
 
   /* The tab follows the name: the window watches the instance for this,
      because the tab is the window's and not the page's. */
@@ -233,7 +233,7 @@ static void
 on_jvm_args_apply (AdwEntryRow *row, gpointer user_data)
 {
   AmlInstancePage *self = user_data;
-  const char *text = gtk_editable_get_text (GTK_EDITABLE (row));
+  const char *text = gtk_editable_get_text (GTK_EDITABLE (GTK_WIDGET (row)));
   g_autofree char *current = instance_string (self->instance, "jvm-args");
   g_autoptr (GError) error = NULL;
 
@@ -248,7 +248,7 @@ on_jvm_args_apply (AdwEntryRow *row, gpointer user_data)
     {
       g_object_set (self->instance, "jvm-args", current, NULL);
       show_toast (self, error->message);
-      gtk_editable_set_text (GTK_EDITABLE (row), current);
+      gtk_editable_set_text (GTK_EDITABLE (GTK_WIDGET (row)), current);
       return;
     }
 }
@@ -417,7 +417,7 @@ java_status_refresh (AmlInstancePage *self)
             _("No detected Java satisfies the requirement of Java %d+"),
             self->required_java);
 
-          adw_action_row_set_subtitle (ADW_ACTION_ROW (row), description);
+          adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (row)), description);
           return;
         }
       else if (effective->major_version < self->required_java)
@@ -426,7 +426,7 @@ java_status_refresh (AmlInstancePage *self)
             _("This game needs Java %d or newer, selected Java is %d"),
             self->required_java, effective->major_version);
 
-          adw_action_row_set_subtitle (ADW_ACTION_ROW (row), description);
+          adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (row)), description);
           return;
         }
     }
@@ -443,7 +443,7 @@ java_status_refresh (AmlInstancePage *self)
                     "jre-openjdk package, not jre-openjdk-headless");
     }
 
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), message);
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (row)), message);
 }
 
 static void
@@ -542,30 +542,30 @@ on_java_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
 static GtkWidget *
 path_button (const char *path, GtkLabel **label)
 {
-  GtkWidget *button = gtk_button_new ();
-  GtkWidget *box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *image = gtk_image_new_from_icon_name ("folder-symbolic");
-  GtkWidget *text = gtk_label_new (path);
-  GtkWidget *arrow = gtk_image_new_from_icon_name ("pan-end-symbolic");
+  GtkButton *button = GTK_BUTTON (gtk_button_new ());
+  GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+  GtkImage *image = GTK_IMAGE (gtk_image_new_from_icon_name ("folder-symbolic"));
+  GtkLabel *text = GTK_LABEL (gtk_label_new (path));
+  GtkImage *arrow = GTK_IMAGE (gtk_image_new_from_icon_name ("pan-end-symbolic"));
 
   /* A path is long, and the middle of it is what tells two paths apart.
      The cap keeps a deep path from making the row as wide as itself. */
-  gtk_label_set_ellipsize (GTK_LABEL (text), PANGO_ELLIPSIZE_MIDDLE);
-  gtk_label_set_max_width_chars (GTK_LABEL (text), 30);
+  gtk_label_set_ellipsize (GTK_LABEL (GTK_WIDGET (text)), PANGO_ELLIPSIZE_MIDDLE);
+  gtk_label_set_max_width_chars (GTK_LABEL (GTK_WIDGET (text)), 30);
 
-  gtk_widget_set_valign (image, GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (text, GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (arrow, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (GTK_WIDGET (image), GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (GTK_WIDGET (text), GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (GTK_WIDGET (arrow), GTK_ALIGN_CENTER);
 
-  gtk_box_append (GTK_BOX (box), image);
-  gtk_box_append (GTK_BOX (box), text);
-  gtk_box_append (GTK_BOX (box), arrow);
-  gtk_button_set_child (GTK_BUTTON (button), box);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (image));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (text));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (arrow));
+  gtk_button_set_child (GTK_BUTTON (GTK_WIDGET (button)), GTK_WIDGET (box));
 
   if (label != NULL)
     *label = GTK_LABEL (text);
 
-  return button;
+  return GTK_WIDGET (button);
 }
 
 static void
@@ -851,15 +851,15 @@ static void
 show_export_metadata (AmlInstancePage *self)
 {
   ExportMetadata *data = g_new0 (ExportMetadata, 1);
-  GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
-  GtkWidget *buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *heading = gtk_label_new (_("Pack information"));
-  GtkWidget *description = gtk_label_new (
+  GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
+  GtkBox *buttons = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+  GtkLabel *heading = GTK_LABEL (gtk_label_new (_("Pack information")));
+  GtkLabel *description = GTK_LABEL (gtk_label_new (
     _("Optional metadata. Add a summary or version ID to help identify the "
-      "exported pack."));
-  GtkWidget *fields = adw_preferences_group_new ();
-  GtkWidget *cancel = gtk_button_new_with_label (_("Cancel"));
-  GtkWidget *export_button = gtk_button_new_with_label (_("Export"));
+      "exported pack.")));
+  AdwPreferencesGroup *fields = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+  GtkButton *cancel = GTK_BUTTON (gtk_button_new_with_label (_("Cancel")));
+  GtkButton *export_button = GTK_BUTTON (gtk_button_new_with_label (_("Export")));
   g_autofree char *name = instance_string (self->instance, "name");
 
   data->page = g_object_ref (self);
@@ -876,38 +876,38 @@ show_export_metadata (AmlInstancePage *self)
                                   _("Summary"));
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (data->version),
                                   _("Version ID"));
-  gtk_widget_add_css_class (heading, "title-2");
-  gtk_widget_add_css_class (description, "dim-label");
-  gtk_label_set_justify (GTK_LABEL (heading), GTK_JUSTIFY_CENTER);
-  gtk_label_set_justify (GTK_LABEL (description), GTK_JUSTIFY_CENTER);
-  gtk_label_set_wrap (GTK_LABEL (description), TRUE);
-  gtk_label_set_xalign (GTK_LABEL (heading), 0.5f);
-  gtk_label_set_xalign (GTK_LABEL (description), 0.5f);
+  gtk_widget_add_css_class (GTK_WIDGET (heading), "title-2");
+  gtk_widget_add_css_class (GTK_WIDGET (description), "dim-label");
+  gtk_label_set_justify (GTK_LABEL (GTK_WIDGET (heading)), GTK_JUSTIFY_CENTER);
+  gtk_label_set_justify (GTK_LABEL (GTK_WIDGET (description)), GTK_JUSTIFY_CENTER);
+  gtk_label_set_wrap (GTK_LABEL (GTK_WIDGET (description)), TRUE);
+  gtk_label_set_xalign (GTK_LABEL (GTK_WIDGET (heading)), 0.5f);
+  gtk_label_set_xalign (GTK_LABEL (GTK_WIDGET (description)), 0.5f);
   gtk_editable_set_text (GTK_EDITABLE (data->name), name != NULL ? name : "");
   gtk_editable_set_text (GTK_EDITABLE (data->version), "");
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (fields),
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (fields)),
                              GTK_WIDGET (data->name));
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (fields),
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (fields)),
                              GTK_WIDGET (data->summary));
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (fields),
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (fields)),
                              GTK_WIDGET (data->version));
-  gtk_box_append (GTK_BOX (box), heading);
-  gtk_box_append (GTK_BOX (box), description);
-  gtk_box_append (GTK_BOX (box), fields);
-  gtk_widget_set_margin_start (box, 12);
-  gtk_widget_set_margin_end (box, 12);
-  gtk_widget_set_margin_top (box, 12);
-  gtk_widget_set_margin_bottom (box, 12);
-  gtk_box_append (GTK_BOX (box), buttons);
-  gtk_box_append (GTK_BOX (buttons), cancel);
-  gtk_box_append (GTK_BOX (buttons), export_button);
-  gtk_widget_set_halign (buttons, GTK_ALIGN_CENTER);
-  gtk_widget_add_css_class (export_button, "suggested-action");
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (heading));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (description));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (fields));
+  gtk_widget_set_margin_start (GTK_WIDGET (box), 12);
+  gtk_widget_set_margin_end (GTK_WIDGET (box), 12);
+  gtk_widget_set_margin_top (GTK_WIDGET (box), 12);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (box), 12);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (buttons));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (buttons)), GTK_WIDGET (cancel));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (buttons)), GTK_WIDGET (export_button));
+  gtk_widget_set_halign (GTK_WIDGET (buttons), GTK_ALIGN_CENTER);
+  gtk_widget_add_css_class (GTK_WIDGET (export_button), "suggested-action");
   g_signal_connect (cancel, "clicked",
                     G_CALLBACK (on_export_metadata_cancel), data);
   g_signal_connect (export_button, "clicked",
                     G_CALLBACK (on_export_metadata_continue), data);
-  adw_dialog_set_child (data->dialog, box);
+  adw_dialog_set_child (data->dialog, GTK_WIDGET (box));
   adw_dialog_present (data->dialog, GTK_WIDGET (self));
 }
 
@@ -1206,28 +1206,28 @@ button_row (AdwPreferencesGroup *group,
             GCallback            callback,
             gpointer             user_data)
 {
-  GtkWidget *row = adw_action_row_new ();
-  GtkWidget *button = gtk_button_new_from_icon_name (icon_name);
+  AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
+  GtkButton *button = GTK_BUTTON (gtk_button_new_from_icon_name (icon_name));
 
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), title);
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), subtitle);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), title);
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (row)), subtitle);
 
-  gtk_widget_add_css_class (button, "flat");
-  gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
-  gtk_widget_set_tooltip_text (button, title);
+  gtk_widget_add_css_class (GTK_WIDGET (button), "flat");
+  gtk_widget_set_valign (GTK_WIDGET (button), GTK_ALIGN_CENTER);
+  gtk_widget_set_tooltip_text (GTK_WIDGET (button), title);
 
   /* The row carries the title for a reader; the button is only its icon,
      so it needs a name of its own for a screen reader to say. */
-  gtk_accessible_update_property (GTK_ACCESSIBLE (button),
+  gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (button)),
                                 GTK_ACCESSIBLE_PROPERTY_LABEL, title, -1);
 
   g_signal_connect (button, "clicked", callback, user_data);
 
-  adw_action_row_add_suffix (ADW_ACTION_ROW (row), button);
-  adw_action_row_set_activatable_widget (ADW_ACTION_ROW (row), button);
-  adw_preferences_group_add (group, row);
+  adw_action_row_add_suffix (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (button));
+  adw_action_row_set_activatable_widget (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (button));
+  adw_preferences_group_add (group, GTK_WIDGET (row));
 
-  return row;
+  return GTK_WIDGET (row);
 }
 
 /* ---------------------------------------------------------- *
@@ -1237,7 +1237,7 @@ button_row (AdwPreferencesGroup *group,
 static GtkWidget *
 create_settings_page (AmlInstancePage *self)
 {
-  GtkWidget *page = adw_preferences_page_new ();
+  AdwPreferencesPage *page = ADW_PREFERENCES_PAGE (adw_preferences_page_new ());
   g_autofree char *name = instance_string (self->instance, "name");
   g_autofree char *directory = instance_string (self->instance, "directory");
   g_autofree char *minecraft_version =
@@ -1248,32 +1248,32 @@ create_settings_page (AmlInstancePage *self)
   g_autofree char *jvm_args = instance_string (self->instance, "jvm-args");
   g_autofree char *java_path =
     instance_string (self->instance, "java-path");
-  GtkWidget *name_row = adw_entry_row_new ();
+  AdwEntryRow *name_row = ADW_ENTRY_ROW (adw_entry_row_new ());
   GtkWidget *version_row = GTK_WIDGET (aml_version_row_new ());
-  GtkWidget *jvm_args_row = adw_entry_row_new ();
-  GtkWidget *general = adw_preferences_group_new ();
-  GtkWidget *minecraft = adw_preferences_group_new ();
-  GtkWidget *java = adw_preferences_group_new ();
-  GtkWidget *actions = adw_preferences_group_new ();
+  AdwEntryRow *jvm_args_row = ADW_ENTRY_ROW (adw_entry_row_new ());
+  AdwPreferencesGroup *general = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+  AdwPreferencesGroup *minecraft = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+  AdwPreferencesGroup *java = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+  AdwPreferencesGroup *actions = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   GtkWidget *change_icon = NULL;
   GtkWidget *delete_row = NULL;
 
   /* Names, paths and arguments are text from the user or the disk: none
      of them is markup. */
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (name_row), FALSE);
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (jvm_args_row),
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (name_row)), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (jvm_args_row)),
                                       FALSE);
 
-  gtk_widget_set_vexpand (page, TRUE);
+  gtk_widget_set_vexpand (GTK_WIDGET (page), TRUE);
 
   /* General */
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (general), _("General"));
+  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (GTK_WIDGET (general)), _("General"));
 
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (name_row), _("Name"));
-  adw_entry_row_set_show_apply_button (ADW_ENTRY_ROW (name_row), TRUE);
-  gtk_editable_set_text (GTK_EDITABLE (name_row), name);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (name_row)), _("Name"));
+  adw_entry_row_set_show_apply_button (ADW_ENTRY_ROW (GTK_WIDGET (name_row)), TRUE);
+  gtk_editable_set_text (GTK_EDITABLE (GTK_WIDGET (name_row)), name);
   g_signal_connect (name_row, "apply", G_CALLBACK (on_name_apply), self);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (general), name_row);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (general)), GTK_WIDGET (name_row));
 
   self->icon_row = ADW_ACTION_ROW (adw_action_row_new ());
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->icon_row),
@@ -1291,7 +1291,7 @@ create_settings_page (AmlInstancePage *self)
   adw_action_row_add_suffix (ADW_ACTION_ROW (self->icon_row), change_icon);
   adw_action_row_set_activatable_widget (ADW_ACTION_ROW (self->icon_row),
                                          change_icon);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (general), GTK_WIDGET (self->icon_row));
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (general)), GTK_WIDGET (self->icon_row));
   update_icon_row (self);
 
   /* Directory: where the files are. Pressing the button moves every file
@@ -1320,20 +1320,20 @@ create_settings_page (AmlInstancePage *self)
                              GTK_WIDGET (self->directory_change));
   adw_action_row_set_activatable_widget (ADW_ACTION_ROW (self->directory_row),
                                          GTK_WIDGET (self->directory_change));
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (general),
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (general)),
                              GTK_WIDGET (self->directory_row));
   update_directory_row (self);
 
   /* Minecraft: the list of versions comes from Mojang's manifest,
    * fetched as the page is built. The version this instance runs stays
    * in the list even when the filter would hide its type. */
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (minecraft),
+  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (GTK_WIDGET (minecraft)),
                                     _("Minecraft"));
   g_signal_connect (version_row, "notify::selected",
                     G_CALLBACK (on_version_selected), self);
   aml_version_row_load (AML_VERSION_ROW (version_row), self->settings,
                         minecraft_version);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (minecraft), version_row);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (minecraft)), version_row);
   /* The loader and one of its versions: changing either of them changes
      what this instance runs, so both are stored like the version above. */
   {
@@ -1352,10 +1352,10 @@ create_settings_page (AmlInstancePage *self)
 
   /* Rows of the same Minecraft group, drawn and behaving like the version
      row above. */
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (minecraft),
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (minecraft)),
                              aml_loader_row_get_loader_row (
                                self->loader_row));
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (minecraft),
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (minecraft)),
                              aml_loader_row_get_version_row (
                                self->loader_row));
 
@@ -1364,7 +1364,7 @@ create_settings_page (AmlInstancePage *self)
      from. */
   GtkWidget *java_row = GTK_WIDGET (aml_java_row_new ());
 
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (java), _("Java"));
+  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (GTK_WIDGET (java)), _("Java"));
 
   g_signal_connect (java_row, "notify::selected",
                     G_CALLBACK (on_java_selected), self);
@@ -1377,15 +1377,15 @@ create_settings_page (AmlInstancePage *self)
   aml_java_row_load (AML_JAVA_ROW (java_row), java_path);
   self->java_row = AML_JAVA_ROW (java_row);
 
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (java), java_row);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (java)), java_row);
 
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (jvm_args_row),
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (jvm_args_row)),
                                  _("JVM Arguments"));
-  adw_entry_row_set_show_apply_button (ADW_ENTRY_ROW (jvm_args_row), TRUE);
-  gtk_editable_set_text (GTK_EDITABLE (jvm_args_row), jvm_args);
+  adw_entry_row_set_show_apply_button (ADW_ENTRY_ROW (GTK_WIDGET (jvm_args_row)), TRUE);
+  gtk_editable_set_text (GTK_EDITABLE (GTK_WIDGET (jvm_args_row)), jvm_args);
   g_signal_connect (jvm_args_row, "apply", G_CALLBACK (on_jvm_args_apply),
                     self);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (java), jvm_args_row);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (java)), GTK_WIDGET (jvm_args_row));
 
   /* The Java row's compatibility warning needs the javaVersion field of
    * the instance's version document; fetching is offline-friendly via
@@ -1396,7 +1396,7 @@ create_settings_page (AmlInstancePage *self)
                                     g_object_ref (self));
 
   /* Actions */
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (actions), _("Actions"));
+  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (GTK_WIDGET (actions)), _("Actions"));
   button_row (ADW_PREFERENCES_GROUP (actions), _("Duplicate"), NULL,
               "edit-copy-symbolic", G_CALLBACK (on_duplicate_clicked), self);
   button_row (ADW_PREFERENCES_GROUP (actions), _("Open Folder"), NULL,
@@ -1412,16 +1412,16 @@ create_settings_page (AmlInstancePage *self)
     adw_action_row_get_activatable_widget (ADW_ACTION_ROW (delete_row)),
     "destructive-action");
 
-  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (GTK_WIDGET (page)),
                             ADW_PREFERENCES_GROUP (general));
-  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (GTK_WIDGET (page)),
                             ADW_PREFERENCES_GROUP (minecraft));
-  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (GTK_WIDGET (page)),
                             ADW_PREFERENCES_GROUP (java));
-  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (GTK_WIDGET (page)),
                             ADW_PREFERENCES_GROUP (actions));
 
-  return page;
+  return GTK_WIDGET (page);
 }
 
 /* The Directory row follows the launch: a running game makes both of its
@@ -1453,10 +1453,10 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
   g_return_val_if_fail (AML_IS_LAUNCHER (launcher), NULL);
 
   AmlInstancePage *self = g_object_new (AML_TYPE_INSTANCE_PAGE, NULL);
-  GtkWidget *stack = adw_view_stack_new ();
-  GtkWidget *switcher = adw_view_switcher_new ();
-  GtkWidget *header = adw_header_bar_new ();
-  GtkWidget *toolbar = adw_toolbar_view_new ();
+  AdwViewStack *stack = ADW_VIEW_STACK (adw_view_stack_new ());
+  AdwViewSwitcher *switcher = ADW_VIEW_SWITCHER (adw_view_switcher_new ());
+  AdwHeaderBar *header = ADW_HEADER_BAR (adw_header_bar_new ());
+  AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
   g_autofree char *name = instance_string (instance, "name");
 
   self->manager = g_object_ref (manager);
@@ -1469,7 +1469,7 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
   g_signal_connect_object (launcher, "state",
                            G_CALLBACK (on_page_launcher_state), self, 0);
 
-  adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (stack),
+  adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (GTK_WIDGET (stack)),
                                        create_settings_page (self),
                                         "settings", _("Settings"),
                                        "preferences-system-symbolic");
@@ -1490,7 +1490,7 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
      shares with the row, so the game can be watched from here. */
   self->logs_page = aml_logs_page_new (launcher);
   g_object_ref (self->logs_page);
-  adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (stack),
+  adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (GTK_WIDGET (stack)),
                                         GTK_WIDGET (self->logs_page), "logs", _("Logs"),
                                        "utilities-terminal-symbolic");
 
@@ -1501,25 +1501,25 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
   /* The header holds only this switcher. There is no back button here:
    the dialog is named after the instance and its close button is what
    leaves it. */
-  adw_view_switcher_set_policy (ADW_VIEW_SWITCHER (switcher),
+  adw_view_switcher_set_policy (ADW_VIEW_SWITCHER (GTK_WIDGET (switcher)),
                                 ADW_VIEW_SWITCHER_POLICY_WIDE);
-  adw_view_switcher_set_stack (ADW_VIEW_SWITCHER (switcher),
+  adw_view_switcher_set_stack (ADW_VIEW_SWITCHER (GTK_WIDGET (switcher)),
                                ADW_VIEW_STACK (stack));
-  adw_header_bar_set_title_widget (ADW_HEADER_BAR (header), switcher);
+  adw_header_bar_set_title_widget (ADW_HEADER_BAR (GTK_WIDGET (header)), GTK_WIDGET (switcher));
 
   self->toast_overlay = ADW_TOAST_OVERLAY (adw_toast_overlay_new ());
-  adw_toast_overlay_set_child (ADW_TOAST_OVERLAY (self->toast_overlay), stack);
+  adw_toast_overlay_set_child (ADW_TOAST_OVERLAY (self->toast_overlay), GTK_WIDGET (stack));
 
-  gtk_widget_set_vexpand (toolbar, TRUE);
-  gtk_widget_set_hexpand (toolbar, TRUE);
-  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
-  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar),
+  gtk_widget_set_vexpand (GTK_WIDGET (toolbar), TRUE);
+  gtk_widget_set_hexpand (GTK_WIDGET (toolbar), TRUE);
+  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)), GTK_WIDGET (header));
+  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)),
                                 GTK_WIDGET (self->toast_overlay));
 
   /* The dialog holds this box, and the box holds the toolbar view of the
      instance: there is no navigation page and no back button between the
      switcher and the five pages of the instance. */
-  gtk_box_append (GTK_BOX (self), toolbar);
+  gtk_box_append (GTK_BOX (self), GTK_WIDGET (toolbar));
   gtk_accessible_update_property (GTK_ACCESSIBLE (self),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL, name, -1);
 

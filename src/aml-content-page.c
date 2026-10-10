@@ -205,7 +205,7 @@ installed_filter_rows (AmlContentPage *self)
           visible = strstr (haystack, needle) != NULL;
         }
 
-      gtk_widget_set_visible (row, visible);
+      gtk_widget_set_visible (GTK_WIDGET (row), visible);
     }
 }
 
@@ -296,7 +296,7 @@ row_show_description (GtkWidget *row, const char *description)
     return;
 
   short_text = description_line (description, 2);
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), short_text);
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (row)), short_text);
 }
 
 /* The switch of a mod row: on means the mod loads, off means its file
@@ -482,22 +482,22 @@ on_trash_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 static GtkWidget *
 file_row (AmlContentPage *self, AmlContentFile *file)
 {
-  GtkWidget *row = adw_action_row_new ();
+  AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
   GtkWidget *icon = aml_icon_widget_new (aml_content_type_icon (self->type));
 
   /* A file name and a path are plain text: markup off first, because
      either may hold an "&". Where the file lives is the row's tooltip;
      under the name goes what the project is, once Modrinth says so. */
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), file->filename);
-  adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 2);
-  adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (row), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), FALSE);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), file->filename);
+  adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (GTK_WIDGET (row)), 2);
+  adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (GTK_WIDGET (row)), FALSE);
 
   /* The same square as a browse row, with the icon of what this kind of
      file is until the project it belongs to is known; the icon the
      browser saw for that project replaces it then. */
   gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
-  adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
+  adw_action_row_add_prefix (ADW_ACTION_ROW (GTK_WIDGET (row)), icon);
   g_object_set_data (G_OBJECT (row), "aml-icon", icon);
 
   /* Only a mod is something that can be turned off: a resource pack or a
@@ -505,34 +505,34 @@ file_row (AmlContentPage *self, AmlContentFile *file)
      switch. */
   if (self->type == AML_CONTENT_MOD)
     {
-      GtkWidget *sw = gtk_switch_new ();
+      GtkSwitch *sw = GTK_SWITCH (gtk_switch_new ());
 
-      gtk_switch_set_active (GTK_SWITCH (sw), file->enabled);
-      gtk_widget_set_valign (sw, GTK_ALIGN_CENTER);
-      gtk_widget_set_tooltip_text (sw,
+      gtk_switch_set_active (GTK_SWITCH (GTK_WIDGET (sw)), file->enabled);
+      gtk_widget_set_valign (GTK_WIDGET (sw), GTK_ALIGN_CENTER);
+      gtk_widget_set_tooltip_text (GTK_WIDGET (sw),
                                    file->enabled ? "Disable" : "Enable");
-      gtk_accessible_update_property (GTK_ACCESSIBLE (sw),
+      gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (sw)),
                                       GTK_ACCESSIBLE_PROPERTY_LABEL,
                                       "Enabled", -1);
       g_object_set_data (G_OBJECT (sw), "aml-file", file);
       g_signal_connect (sw, "state-set", G_CALLBACK (on_mod_toggled), self);
-      adw_action_row_add_suffix (ADW_ACTION_ROW (row), sw);
+      adw_action_row_add_suffix (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (sw));
     }
 
   /* Every kind of file can be deleted. On a mod the button sits after
      the switch, at the right end of the row. */
   {
-    GtkWidget *trash = gtk_button_new_from_icon_name ("user-trash-symbolic");
+    GtkButton *trash = GTK_BUTTON (gtk_button_new_from_icon_name ("user-trash-symbolic"));
 
-    gtk_widget_add_css_class (trash, "flat");
-    gtk_widget_set_valign (trash, GTK_ALIGN_CENTER);
-   gtk_widget_set_tooltip_text (trash, _("Delete"));
-    gtk_accessible_update_property (GTK_ACCESSIBLE (trash),
+    gtk_widget_add_css_class (GTK_WIDGET (trash), "flat");
+    gtk_widget_set_valign (GTK_WIDGET (trash), GTK_ALIGN_CENTER);
+   gtk_widget_set_tooltip_text (GTK_WIDGET (trash), _("Delete"));
+    gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (trash)),
                                     GTK_ACCESSIBLE_PROPERTY_LABEL,
                                     "Delete", -1);
     g_object_set_data (G_OBJECT (trash), "aml-file", file);
     g_signal_connect (trash, "clicked", G_CALLBACK (on_trash_clicked), self);
-    adw_action_row_add_suffix (ADW_ACTION_ROW (row), trash);
+    adw_action_row_add_suffix (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (trash));
   }
 
   /* The row carries the file it is about, so the switch does not have to
@@ -540,9 +540,9 @@ file_row (AmlContentPage *self, AmlContentFile *file)
   g_object_set_data (G_OBJECT (row), "aml-file", file);
   g_object_set_data (G_OBJECT (row), "aml-page", self);
 
-  file_row_refresh (row);
+  file_row_refresh (GTK_WIDGET (row));
 
-  return row;
+  return GTK_WIDGET (row);
 }
 
 /* Asks Modrinth what each file is, one after the other, so that a list
@@ -1188,17 +1188,17 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
     {
       if (value == AML_LOADER_VANILLA)
         {
-          GtkWidget *status = adw_status_page_new ();
+          AdwStatusPage *status = ADW_STATUS_PAGE (adw_status_page_new ());
 
-          adw_status_page_set_icon_name (ADW_STATUS_PAGE (status),
+          adw_status_page_set_icon_name (ADW_STATUS_PAGE (GTK_WIDGET (status)),
                                          aml_content_type_icon (type));
-          adw_status_page_set_title (ADW_STATUS_PAGE (status),
+          adw_status_page_set_title (ADW_STATUS_PAGE (GTK_WIDGET (status)),
                                       _("No mod loader"));
           adw_status_page_set_description (
               ADW_STATUS_PAGE (status),
               _("Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge "
               "in the settings of this instance first"));
-          gtk_box_append (GTK_BOX (self), status);
+          gtk_box_append (GTK_BOX (self), GTK_WIDGET (status));
 
           return self;
         }

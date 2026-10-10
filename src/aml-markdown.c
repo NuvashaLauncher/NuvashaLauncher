@@ -604,7 +604,7 @@ html_to_markdown (const char *text)
 static GtkWidget *
 wrapped_label (const char *markup)
 {
-  GtkWidget *label = gtk_label_new (NULL);
+  GtkLabel *label = GTK_LABEL (gtk_label_new (NULL));
   g_autoptr (PangoAttrList) attrs = NULL;
   g_autofree char *plain = NULL;
   g_autoptr (GError) error = NULL;
@@ -614,7 +614,7 @@ wrapped_label (const char *markup)
      warning and can leave the label with a broken size allocation. */
   if (markup == NULL ||
       pango_parse_markup (markup, -1, 0, &attrs, &plain, NULL, &error))
-    gtk_label_set_markup (GTK_LABEL (label), markup != NULL ? markup : "");
+    gtk_label_set_markup (GTK_LABEL (GTK_WIDGET (label)), markup != NULL ? markup : "");
   else
     {
       g_autoptr (GRegex) tags =
@@ -622,15 +622,15 @@ wrapped_label (const char *markup)
       g_autofree char *fallback =
         g_regex_replace (tags, markup, -1, 0, "", 0, NULL);
 
-      gtk_label_set_text (GTK_LABEL (label), fallback != NULL ? fallback : "");
+      gtk_label_set_text (GTK_LABEL (GTK_WIDGET (label)), fallback != NULL ? fallback : "");
     }
 
-  gtk_label_set_wrap (GTK_LABEL (label), TRUE);
-  gtk_label_set_wrap_mode (GTK_LABEL (label), PANGO_WRAP_WORD_CHAR);
-  gtk_label_set_xalign (GTK_LABEL (label), 0);
-  gtk_label_set_selectable (GTK_LABEL (label), TRUE);
+  gtk_label_set_wrap (GTK_LABEL (GTK_WIDGET (label)), TRUE);
+  gtk_label_set_wrap_mode (GTK_LABEL (GTK_WIDGET (label)), PANGO_WRAP_WORD_CHAR);
+  gtk_label_set_xalign (GTK_LABEL (GTK_WIDGET (label)), 0);
+  gtk_label_set_selectable (GTK_LABEL (GTK_WIDGET (label)), TRUE);
 
-  return label;
+  return GTK_WIDGET (label);
 }
 
 static gboolean
@@ -655,10 +655,10 @@ text_block (const char *markdown, const char *css_class)
   GtkWidget *label = wrapped_label (markup);
 
   if (markup == NULL || *markup == '\0')
-    gtk_widget_set_visible (label, FALSE);
+    gtk_widget_set_visible (GTK_WIDGET (label), FALSE);
 
   if (css_class != NULL)
-    gtk_widget_add_css_class (label, css_class);
+    gtk_widget_add_css_class (GTK_WIDGET (label), css_class);
 
   g_signal_connect (label, "activate-link", G_CALLBACK (on_activate_link),
                     NULL);
@@ -673,10 +673,10 @@ image_resize (GtkWidget *picture)
   const char *ratio_text = g_object_get_data (
     G_OBJECT (picture), "aml-image-ratio");
   double ratio = ratio_text != NULL ? g_ascii_strtod (ratio_text, NULL) : 0.0;
-  int width = gtk_widget_get_width (picture);
+  int width = gtk_widget_get_width (GTK_WIDGET (picture));
 
   if (ratio > 0.0 && width > 0)
-    gtk_widget_set_size_request (picture, -1,
+    gtk_widget_set_size_request (GTK_WIDGET (picture), -1,
                                  MAX (1, (int) ((double) width / ratio + 0.5)));
 }
 
@@ -707,7 +707,7 @@ image_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
          it is being drawn. A texture is never symbolic. */
       if (texture != NULL)
         {
-          gtk_picture_set_paintable (GTK_PICTURE (picture),
+          gtk_picture_set_paintable (GTK_PICTURE (GTK_WIDGET (picture)),
                                      GDK_PAINTABLE (texture));
           {
             int width = gdk_paintable_get_intrinsic_width (
@@ -721,8 +721,8 @@ image_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                 g_strdup_printf ("%.17g", (double) width / (double) height),
                 g_free);
           }
-          gtk_widget_set_visible (picture, TRUE);
-          gtk_widget_queue_resize (picture);
+          gtk_widget_set_visible (GTK_WIDGET (picture), TRUE);
+          gtk_widget_queue_resize (GTK_WIDGET (picture));
           g_idle_add (image_resize_idle, g_object_ref (picture));
         }
     }
@@ -750,21 +750,21 @@ resolve_image_url (const char *url)
 static GtkWidget *
 image_block (const char *url)
 {
-  GtkWidget *picture = gtk_picture_new ();
+  GtkPicture *picture = GTK_PICTURE (gtk_picture_new ());
   g_autofree char *resolved = resolve_image_url (url);
 
   /* The aspect frame supplies the correct height; the picture itself must
      be allowed to scale down to the description column's width. */
-  gtk_picture_set_can_shrink (GTK_PICTURE (picture), TRUE);
-  gtk_picture_set_content_fit (GTK_PICTURE (picture), GTK_CONTENT_FIT_CONTAIN);
-  gtk_widget_set_hexpand (picture, TRUE);
-  gtk_widget_set_halign (picture, GTK_ALIGN_FILL);
-  gtk_widget_set_visible (picture, FALSE);
+  gtk_picture_set_can_shrink (GTK_PICTURE (GTK_WIDGET (picture)), TRUE);
+  gtk_picture_set_content_fit (GTK_PICTURE (GTK_WIDGET (picture)), GTK_CONTENT_FIT_CONTAIN);
+  gtk_widget_set_hexpand (GTK_WIDGET (picture), TRUE);
+  gtk_widget_set_halign (GTK_WIDGET (picture), GTK_ALIGN_FILL);
+  gtk_widget_set_visible (GTK_WIDGET (picture), FALSE);
 
   if (resolved != NULL && url_is_safe (resolved))
     aml_icon_load_async (resolved, NULL, image_ready, g_object_ref (picture));
 
-  return picture;
+  return GTK_WIDGET (picture);
 }
 
 /* Reads "![alt](url)" filling the whole of @line, with or without an
@@ -965,13 +965,13 @@ is_table_separator (const char *line)
 static GtkWidget *
 table_block (GPtrArray *rows)
 {
-  GtkWidget *grid = gtk_grid_new ();
+  GtkGrid *grid = GTK_GRID (gtk_grid_new ());
 
-  gtk_grid_set_row_spacing (GTK_GRID (grid), 4);
-  gtk_grid_set_column_spacing (GTK_GRID (grid), 12);
-  gtk_widget_set_hexpand (grid, TRUE);
-  gtk_widget_set_margin_top (grid, 4);
-  gtk_widget_set_margin_bottom (grid, 4);
+  gtk_grid_set_row_spacing (GTK_GRID (GTK_WIDGET (grid)), 4);
+  gtk_grid_set_column_spacing (GTK_GRID (GTK_WIDGET (grid)), 12);
+  gtk_widget_set_hexpand (GTK_WIDGET (grid), TRUE);
+  gtk_widget_set_margin_top (GTK_WIDGET (grid), 4);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (grid), 4);
 
   for (guint r = 0; r < rows->len; r++)
     {
@@ -1000,13 +1000,13 @@ table_block (GPtrArray *rows)
 
             gtk_widget_set_hexpand (widget, TRUE);
             gtk_widget_set_valign (widget, GTK_ALIGN_START);
-            gtk_grid_attach (GTK_GRID (grid), widget, column, r, 1, 1);
+            gtk_grid_attach (GTK_GRID (GTK_WIDGET (grid)), widget, column, r, 1, 1);
             column++;
           }
         }
     }
 
-  return grid;
+  return GTK_WIDGET (grid);
 }
 
 /* TRUE when @line begins a block that is not a paragraph line. */
@@ -1084,7 +1084,7 @@ aml_markdown_render (GtkBox *box, const char *markdown)
           markup = g_strdup_printf (
               "<span font_family=\"monospace\">%s</span>", escaped);
           label = wrapped_label (markup);
-          gtk_box_append (box, label);
+          gtk_box_append (GTK_BOX (box), GTK_WIDGET (label));
           continue;
         }
 
@@ -1096,14 +1096,14 @@ aml_markdown_render (GtkBox *box, const char *markdown)
             g_strdup_printf ("title-%u", MIN (level, 4));
 
           gtk_box_append (
-              box, text_block (g_strstrip ((char *) line + level), css));
+              GTK_BOX (box), text_block (g_strstrip ((char *) line + level), css));
           i++;
           continue;
         }
 
       if (line_is_image (line, &image_url))
         {
-          gtk_box_append (box, image_block (image_url));
+          gtk_box_append (GTK_BOX (box), image_block (image_url));
           i++;
           continue;
         }
@@ -1128,46 +1128,46 @@ aml_markdown_render (GtkBox *box, const char *markdown)
             }
 
           if (rows->len > 0)
-            gtk_box_append (box, table_block (rows));
+            gtk_box_append (GTK_BOX (box), table_block (rows));
 
           continue;
         }
 
       if (list_item (line, &content, &bullet))
         {
-          GtkWidget *row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-          GtkWidget *dot = gtk_label_new (bullet);
+          GtkBox *row = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+          GtkLabel *dot = GTK_LABEL (gtk_label_new (bullet));
           GtkWidget *item = text_block (content, NULL);
 
-          gtk_widget_set_valign (dot, GTK_ALIGN_START);
-          gtk_widget_add_css_class (dot, "dim-label");
+          gtk_widget_set_valign (GTK_WIDGET (dot), GTK_ALIGN_START);
+          gtk_widget_add_css_class (GTK_WIDGET (dot), "dim-label");
           gtk_widget_set_valign (item, GTK_ALIGN_START);
           gtk_widget_set_hexpand (item, TRUE);
-          gtk_box_append (GTK_BOX (row), dot);
-          gtk_box_append (GTK_BOX (row), item);
-          gtk_box_append (box, row);
+          gtk_box_append (GTK_BOX (GTK_WIDGET (row)), GTK_WIDGET (dot));
+          gtk_box_append (GTK_BOX (GTK_WIDGET (row)), item);
+          gtk_box_append (GTK_BOX (box), GTK_WIDGET (row));
           i++;
           continue;
         }
 
       if (g_str_has_prefix (line, ">"))
         {
-          GtkWidget *row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-          GtkWidget *bar = gtk_separator_new (GTK_ORIENTATION_VERTICAL);
+          GtkBox *row = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+          GtkSeparator *bar = GTK_SEPARATOR (gtk_separator_new (GTK_ORIENTATION_VERTICAL));
           GtkWidget *label =
             text_block (g_strstrip ((char *) line + 1), "dim-label");
 
-          gtk_widget_set_hexpand (label, TRUE);
-          gtk_box_append (GTK_BOX (row), bar);
-          gtk_box_append (GTK_BOX (row), label);
-          gtk_box_append (box, row);
+          gtk_widget_set_hexpand (GTK_WIDGET (label), TRUE);
+          gtk_box_append (GTK_BOX (GTK_WIDGET (row)), GTK_WIDGET (bar));
+          gtk_box_append (GTK_BOX (GTK_WIDGET (row)), GTK_WIDGET (label));
+          gtk_box_append (GTK_BOX (box), GTK_WIDGET (row));
           i++;
           continue;
         }
 
       if (is_rule (line))
         {
-          gtk_box_append (box, gtk_separator_new (GTK_ORIENTATION_HORIZONTAL));
+          gtk_box_append (GTK_BOX (box), gtk_separator_new (GTK_ORIENTATION_HORIZONTAL));
           i++;
           continue;
         }
@@ -1189,7 +1189,7 @@ aml_markdown_render (GtkBox *box, const char *markdown)
         }
 
       if (paragraph->len > 0)
-        gtk_box_append (box, text_block (paragraph->str, NULL));
+        gtk_box_append (GTK_BOX (box), text_block (paragraph->str, NULL));
       else
         i++;
     }

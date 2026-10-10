@@ -25,34 +25,34 @@ aml_main_window_build_ui (AmlMainWindow *self)
 
   g_autoptr (GMenu) add_menu = create_add_menu ();
   g_autoptr (GMenu) app_menu = create_app_menu ();
-  GtkWidget *header = adw_header_bar_new ();
-  GtkWidget *add_button = gtk_menu_button_new ();
-  GtkWidget *users_button = gtk_menu_button_new ();
-  GtkWidget *app_menu_button = gtk_menu_button_new ();
+  AdwHeaderBar *header = ADW_HEADER_BAR (adw_header_bar_new ());
+  GtkMenuButton *add_button = GTK_MENU_BUTTON (gtk_menu_button_new ());
+  GtkMenuButton *users_button = GTK_MENU_BUTTON (gtk_menu_button_new ());
+  GtkMenuButton *app_menu_button = GTK_MENU_BUTTON (gtk_menu_button_new ());
   GtkWidget *users_child = NULL;
-  GtkWidget *empty_page = adw_status_page_new ();
-  GtkWidget *toolbar = adw_toolbar_view_new ();
+  AdwStatusPage *empty_page = ADW_STATUS_PAGE (adw_status_page_new ());
+  AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
   GtkWidget *add_popover = NULL;
 
   /* Flat is the default top-bar style, and it paints no surface of its
      own, so the header would take the window background and read as the
      same colour as the content under it. Raised is what gives a header
      the colour every Adwaita header has. */
-  adw_toolbar_view_set_top_bar_style (ADW_TOOLBAR_VIEW (toolbar),
+  adw_toolbar_view_set_top_bar_style (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)),
                                       ADW_TOOLBAR_RAISED);
 
   g_action_map_add_action_entries (G_ACTION_MAP (self), window_entries,
                                    window_entries_count, self);
 
   /* Start of the header: the "+" menu. */
-  gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (add_button),
+  gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (GTK_WIDGET (add_button)),
                                  "list-add-symbolic");
-  gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (add_button),
+  gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (GTK_WIDGET (add_button)),
                                   G_MENU_MODEL (add_menu));
-  adw_header_bar_pack_start (ADW_HEADER_BAR (header), add_button);
+  adw_header_bar_pack_start (ADW_HEADER_BAR (GTK_WIDGET (header)), GTK_WIDGET (add_button));
 
   add_popover = GTK_WIDGET (
-    gtk_menu_button_get_popover (GTK_MENU_BUTTON (add_button)));
+    gtk_menu_button_get_popover (GTK_MENU_BUTTON (GTK_WIDGET (add_button))));
   if (add_popover != NULL)
     set_menu_item_tooltip (add_popover, "Download Modpack",
                            "Search Modrinth and install a modpack");
@@ -70,20 +70,20 @@ aml_main_window_build_ui (AmlMainWindow *self)
                                                NULL, download_row_free);
 
   {
-    GtkWidget *packed = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-    GtkWidget *icon_row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
-    GtkWidget *popover = gtk_popover_new ();
-    GtkWidget *scroller = gtk_scrolled_window_new ();
+    GtkBox *packed = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+    GtkBox *icon_row = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4));
+    GtkPopover *popover = GTK_POPOVER (gtk_popover_new ());
+    GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
 
     /* The icon and the spinner share the middle: the icon says what the
        button opens, the spinner that something is on its way. */
     gtk_widget_set_valign (GTK_WIDGET (self->downloads.icon), GTK_ALIGN_CENTER);
-    gtk_box_append (GTK_BOX (icon_row), GTK_WIDGET (self->downloads.icon));
+    gtk_box_append (GTK_BOX (GTK_WIDGET (icon_row)), GTK_WIDGET (self->downloads.icon));
     gtk_widget_set_valign (GTK_WIDGET (self->downloads.spinner), GTK_ALIGN_CENTER);
-    gtk_box_append (GTK_BOX (icon_row), GTK_WIDGET (self->downloads.spinner));
+    gtk_box_append (GTK_BOX (GTK_WIDGET (icon_row)), GTK_WIDGET (self->downloads.spinner));
 
     gtk_menu_button_set_child (GTK_MENU_BUTTON (self->downloads.button),
-                               icon_row);
+                               GTK_WIDGET (icon_row));
     gtk_widget_add_css_class (GTK_WIDGET (self->downloads.button), "flat");
     gtk_menu_button_set_always_show_arrow (
       GTK_MENU_BUTTON (self->downloads.button), FALSE);
@@ -93,22 +93,22 @@ aml_main_window_build_ui (AmlMainWindow *self)
                                     -1);
     gtk_widget_set_visible (GTK_WIDGET (self->downloads.button), FALSE);
 
-    gtk_box_append (GTK_BOX (packed), GTK_WIDGET (self->downloads.button));
+    gtk_box_append (GTK_BOX (GTK_WIDGET (packed)), GTK_WIDGET (self->downloads.button));
 
-    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
+    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)),
                                     GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
     gtk_scrolled_window_set_propagate_natural_height (
       GTK_SCROLLED_WINDOW (scroller), TRUE);
     gtk_scrolled_window_set_max_content_height (
       GTK_SCROLLED_WINDOW (scroller), 360);
-    gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
+    gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)),
                                    GTK_WIDGET (self->downloads.list));
-    gtk_popover_set_child (GTK_POPOVER (popover), scroller);
-    gtk_popover_set_has_arrow (GTK_POPOVER (popover), FALSE);
+    gtk_popover_set_child (GTK_POPOVER (GTK_WIDGET (popover)), GTK_WIDGET (scroller));
+    gtk_popover_set_has_arrow (GTK_POPOVER (GTK_WIDGET (popover)), FALSE);
     gtk_menu_button_set_popover (GTK_MENU_BUTTON (self->downloads.button),
-                                 popover);
+                                 GTK_WIDGET (popover));
 
-    adw_header_bar_pack_start (ADW_HEADER_BAR (header), packed);
+    adw_header_bar_pack_start (ADW_HEADER_BAR (GTK_WIDGET (header)), GTK_WIDGET (packed));
   }
 
   g_signal_connect_object (aml_downloads_get_default (), "changed",
@@ -120,44 +120,44 @@ aml_main_window_build_ui (AmlMainWindow *self)
    * a new one is added. */
   /* The model owns the popover and its account store. */
   users_child = aml_users_popover_get_button_content (self->model->users_popover);
-  gtk_menu_button_set_child (GTK_MENU_BUTTON (users_button), users_child);
-  gtk_menu_button_set_popover (GTK_MENU_BUTTON (users_button),
+  gtk_menu_button_set_child (GTK_MENU_BUTTON (GTK_WIDGET (users_button)), users_child);
+  gtk_menu_button_set_popover (GTK_MENU_BUTTON (GTK_WIDGET (users_button)),
                               GTK_WIDGET (self->model->users_popover));
   /* The child is a box around the avatar, so the menu button does not
      recognize it as an icon button and would draw a frame behind it. */
-  gtk_widget_add_css_class (users_button, "flat");
+  gtk_widget_add_css_class (GTK_WIDGET (users_button), "flat");
   /* The button is an icon and nothing else, so it needs to be named for
      what it opens rather than read from a label that is not there. */
-  gtk_accessible_update_property (GTK_ACCESSIBLE (users_button),
+  gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (users_button)),
                                    GTK_ACCESSIBLE_PROPERTY_LABEL, _("Accounts"),
                                   -1);
 
-  gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (app_menu_button),
+  gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (GTK_WIDGET (app_menu_button)),
                                  "open-menu-symbolic");
-  gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (app_menu_button),
+  gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (GTK_WIDGET (app_menu_button)),
                                   G_MENU_MODEL (app_menu));
 
-  adw_header_bar_pack_end (ADW_HEADER_BAR (header), app_menu_button);
-  adw_header_bar_pack_end (ADW_HEADER_BAR (header), users_button);
+  adw_header_bar_pack_end (ADW_HEADER_BAR (GTK_WIDGET (header)), GTK_WIDGET (app_menu_button));
+  adw_header_bar_pack_end (ADW_HEADER_BAR (GTK_WIDGET (header)), GTK_WIDGET (users_button));
 
   /* The empty state has no button in the middle: the "+" menu is the
    * only way to create an instance. */
-  adw_status_page_set_title (ADW_STATUS_PAGE (empty_page), _("No Instances Yet"));
-  adw_status_page_set_description (ADW_STATUS_PAGE (empty_page),
+  adw_status_page_set_title (ADW_STATUS_PAGE (GTK_WIDGET (empty_page)), _("No Instances Yet"));
+  adw_status_page_set_description (ADW_STATUS_PAGE (GTK_WIDGET (empty_page)),
                                    _("Use the + button in the header to create one"));
-  gtk_widget_set_hexpand (empty_page, TRUE);
-  gtk_widget_set_vexpand (empty_page, TRUE);
+  gtk_widget_set_hexpand (GTK_WIDGET (empty_page), TRUE);
+  gtk_widget_set_vexpand (GTK_WIDGET (empty_page), TRUE);
 
   self->ui.stack = GTK_STACK (gtk_stack_new ());
-  gtk_stack_add_named (GTK_STACK (self->ui.stack), empty_page, "empty");
+  gtk_stack_add_named (GTK_STACK (self->ui.stack), GTK_WIDGET (empty_page), "empty");
   gtk_widget_set_hexpand (GTK_WIDGET (self->ui.stack), TRUE);
   gtk_widget_set_vexpand (GTK_WIDGET (self->ui.stack), TRUE);
 
   /* The list is the content of the window: an instance is a window of
      its own and is never a page here. */
-  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar),
+  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)),
                                 GTK_WIDGET (self->ui.stack));
-  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
+  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)), GTK_WIDGET (header));
 
   /* A launch that ends badly is said in a banner under the header, where
      it stays until it is read: a toast is gone in seconds, which is
@@ -167,7 +167,7 @@ aml_main_window_build_ui (AmlMainWindow *self)
   adw_banner_set_revealed (ADW_BANNER (self->ui.banner), FALSE);
   g_signal_connect (self->ui.banner, "button-clicked",
                     G_CALLBACK (on_main_window_banner_dismiss), NULL);
-  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar),
+  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)),
                                 GTK_WIDGET (self->ui.banner));
 
   adw_application_window_set_content (ADW_APPLICATION_WINDOW (self),

@@ -187,23 +187,23 @@ aml_icon_load_finish (GAsyncResult *result, GError **error)
 GtkWidget *
 aml_icon_widget_new (const char *placeholder_icon_name)
 {
-  GtkWidget *stack = gtk_stack_new ();
-  GtkWidget *placeholder = gtk_image_new_from_icon_name (
+  GtkStack *stack = GTK_STACK (gtk_stack_new ());
+  GtkImage *placeholder = GTK_IMAGE (gtk_image_new_from_icon_name (
       placeholder_icon_name != NULL ? placeholder_icon_name
-                                    : "image-x-generic-symbolic");
+                                    : "image-x-generic-symbolic"));
 
-  gtk_image_set_pixel_size (GTK_IMAGE (placeholder), 32);
-  gtk_widget_set_size_request (placeholder, AML_ICON_SIZE, AML_ICON_SIZE);
-  gtk_widget_set_halign (placeholder, GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (placeholder, GTK_ALIGN_CENTER);
+  gtk_image_set_pixel_size (GTK_IMAGE (GTK_WIDGET (placeholder)), 32);
+  gtk_widget_set_size_request (GTK_WIDGET (placeholder), AML_ICON_SIZE, AML_ICON_SIZE);
+  gtk_widget_set_halign (GTK_WIDGET (placeholder), GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (GTK_WIDGET (placeholder), GTK_ALIGN_CENTER);
 
   /* The same square for every row, whatever is in it. */
-  gtk_widget_set_size_request (stack, AML_ICON_SIZE, AML_ICON_SIZE);
+  gtk_widget_set_size_request (GTK_WIDGET (stack), AML_ICON_SIZE, AML_ICON_SIZE);
 
-  gtk_stack_add_named (GTK_STACK (stack), placeholder, "placeholder");
-  gtk_stack_set_visible_child_name (GTK_STACK (stack), "placeholder");
+  gtk_stack_add_named (GTK_STACK (GTK_WIDGET (stack)), GTK_WIDGET (placeholder), "placeholder");
+  gtk_stack_set_visible_child_name (GTK_STACK (GTK_WIDGET (stack)), "placeholder");
 
-  return stack;
+  return GTK_WIDGET (stack);
 }
 
 gboolean

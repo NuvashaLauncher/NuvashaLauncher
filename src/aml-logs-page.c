@@ -439,18 +439,18 @@ static GtkWidget *
 toolbar_button (const char *icon_name, const char *label, GCallback callback,
                gpointer user_data)
 {
-  GtkWidget *button = gtk_button_new ();
-  GtkWidget *icon = gtk_image_new_from_icon_name (icon_name);
+  GtkButton *button = GTK_BUTTON (gtk_button_new ());
+  GtkImage *icon = GTK_IMAGE (gtk_image_new_from_icon_name (icon_name));
 
-  gtk_image_set_pixel_size (GTK_IMAGE (icon), 16);
-  gtk_button_set_child (GTK_BUTTON (button), icon);
-  gtk_widget_add_css_class (button, "flat");
-  gtk_widget_set_tooltip_text (button, label);
-  gtk_accessible_update_property (GTK_ACCESSIBLE (button),
+  gtk_image_set_pixel_size (GTK_IMAGE (GTK_WIDGET (icon)), 16);
+  gtk_button_set_child (GTK_BUTTON (GTK_WIDGET (button)), GTK_WIDGET (icon));
+  gtk_widget_add_css_class (GTK_WIDGET (button), "flat");
+  gtk_widget_set_tooltip_text (GTK_WIDGET (button), label);
+  gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (button)),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL, label, -1);
   g_signal_connect (button, "clicked", callback, user_data);
 
-  return button;
+  return GTK_WIDGET (button);
 }
 
 AmlLogsPage *

@@ -302,68 +302,67 @@ append_account_row (AmlUsersPopover *self, const AmlAccount *account)
     account->type == AML_ACCOUNT_MICROSOFT &&
     !aml_account_token_is_valid (account, g_get_real_time () / 1000000);
 
-  GtkWidget *row = adw_action_row_new ();
-  GtkWidget *image = gtk_image_new ();
-  GtkWidget *remove = gtk_button_new_from_icon_name ("user-trash-symbolic");
+  AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
+  GtkImage *image = GTK_IMAGE (gtk_image_new ());
+  GtkButton *remove = GTK_BUTTON (gtk_button_new_from_icon_name ("user-trash-symbolic"));
   g_autofree char *tooltip = NULL;
 
   /* The name and the kind are plain text: an account name may hold an
      "&". Owned by the row, which is itself the clickable target. */
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), account->name);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), FALSE);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), account->name);
 
   /* The kind of account is on every row: an offline session and a
      Microsoft one are not the same thing to play with, and the user is
      the one who has to know which one a launch will run as. An account
      whose token has run out says so here, which is earlier than finding
      it out from a launch that stops. */
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (row),
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (row)),
                                needs_sign_in ? "Microsoft · Needs sign-in"
                                              : aml_account_type_name (
                                                    account->type));
 
   if (needs_sign_in)
-    gtk_widget_add_css_class (row, "warning");
+    gtk_widget_add_css_class (GTK_WIDGET (row), "warning");
 
   set_avatar_icon (GTK_IMAGE (image));
   set_avatar (self, GTK_IMAGE (image), account->avatar_url);
-  gtk_image_set_pixel_size (GTK_IMAGE (image), AVATAR_SIZE);
-  gtk_widget_set_valign (image, GTK_ALIGN_CENTER);
-  adw_action_row_add_prefix (ADW_ACTION_ROW (row), image);
+  gtk_image_set_pixel_size (GTK_IMAGE (GTK_WIDGET (image)), AVATAR_SIZE);
+  gtk_widget_set_valign (GTK_WIDGET (image), GTK_ALIGN_CENTER);
+  adw_action_row_add_prefix (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (image));
 
   /* The mark of the one a launch plays as, at the far end of the row. */
   if (is_active)
     {
-      GtkWidget *check =
-        gtk_image_new_from_icon_name ("object-select-symbolic");
+      GtkImage *check = GTK_IMAGE (gtk_image_new_from_icon_name ("object-select-symbolic"));
 
-      gtk_widget_add_css_class (check, "accent");
-      gtk_widget_set_valign (check, GTK_ALIGN_CENTER);
-      adw_action_row_add_suffix (ADW_ACTION_ROW (row), check);
+      gtk_widget_add_css_class (GTK_WIDGET (check), "accent");
+      gtk_widget_set_valign (GTK_WIDGET (check), GTK_ALIGN_CENTER);
+      adw_action_row_add_suffix (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (check));
     }
 
   tooltip = g_strdup_printf (_("Remove \"%s\""), account->name);
-  gtk_widget_set_tooltip_text (remove, tooltip);
-  gtk_accessible_update_property (GTK_ACCESSIBLE (remove),
+  gtk_widget_set_tooltip_text (GTK_WIDGET (remove), tooltip);
+  gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (remove)),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL, tooltip, -1);
-  gtk_widget_add_css_class (remove, "flat");
-  gtk_widget_set_valign (remove, GTK_ALIGN_CENTER);
+  gtk_widget_add_css_class (GTK_WIDGET (remove), "flat");
+  gtk_widget_set_valign (GTK_WIDGET (remove), GTK_ALIGN_CENTER);
   g_object_set_data_full (G_OBJECT (remove), "aml-account-id",
                           g_strdup (account->id), g_free);
   g_object_set_data_full (G_OBJECT (remove), "aml-account-name",
                           g_strdup (account->name), g_free);
   g_signal_connect (remove, "clicked", G_CALLBACK (on_remove_clicked), self);
-  adw_action_row_add_suffix (ADW_ACTION_ROW (row), remove);
+  adw_action_row_add_suffix (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (remove));
 
   /* Which account a row is about travels with the row: the list is built
      again whenever the store changes, and a row is never asked about
      anything else. */
-  gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
+  gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (GTK_WIDGET (row)), TRUE);
   g_object_set_data_full (G_OBJECT (row), "aml-account-id",
                           g_strdup (account->id), g_free);
   g_signal_connect (row, "activated", G_CALLBACK (on_row_activated), self);
 
-  gtk_list_box_append (GTK_LIST_BOX (self->list_box), row);
+  gtk_list_box_append (GTK_LIST_BOX (self->list_box), GTK_WIDGET (row));
 }
 
 /* ------------------------------------------------------ *
@@ -476,28 +475,28 @@ on_accounts_changed (AmlAccounts *accounts G_GNUC_UNUSED,
 static void
 aml_users_popover_init (AmlUsersPopover *self)
 {
-  GtkWidget *scrolled = gtk_scrolled_window_new ();
-  GtkWidget *rows = gtk_list_box_new ();
-  GtkWidget *microsoft = gtk_button_new_with_label (_("Add Microsoft Account"));
-  GtkWidget *offline = gtk_button_new_with_label (_("Add Offline Account"));
+  GtkScrolledWindow *scrolled = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
+  GtkListBox *rows = GTK_LIST_BOX (gtk_list_box_new ());
+  GtkButton *microsoft = GTK_BUTTON (gtk_button_new_with_label (_("Add Microsoft Account")));
+  GtkButton *offline = GTK_BUTTON (gtk_button_new_with_label (_("Add Offline Account")));
 
   /* A row is chosen by clicking it, not by a selection the list keeps:
      the active account is the store's business. The list scrolls instead
      of the popover growing without end when there are many accounts. */
-  gtk_list_box_set_selection_mode (GTK_LIST_BOX (rows), GTK_SELECTION_NONE);
-  gtk_widget_add_css_class (rows, "boxed-list");
-  gtk_widget_set_size_request (scrolled, USERS_WIDTH, -1);
+  gtk_list_box_set_selection_mode (GTK_LIST_BOX (GTK_WIDGET (rows)), GTK_SELECTION_NONE);
+  gtk_widget_add_css_class (GTK_WIDGET (rows), "boxed-list");
+  gtk_widget_set_size_request (GTK_WIDGET (scrolled), USERS_WIDTH, -1);
   gtk_scrolled_window_set_propagate_natural_width (
       GTK_SCROLLED_WINDOW (scrolled), TRUE);
-  gtk_widget_set_halign (scrolled, GTK_ALIGN_CENTER);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled),
+  gtk_widget_set_halign (GTK_WIDGET (scrolled), GTK_ALIGN_CENTER);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (GTK_WIDGET (scrolled)),
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scrolled), rows);
-  gtk_scrolled_window_set_max_content_height (GTK_SCROLLED_WINDOW (scrolled),
+  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (GTK_WIDGET (scrolled)), GTK_WIDGET (rows));
+  gtk_scrolled_window_set_max_content_height (GTK_SCROLLED_WINDOW (GTK_WIDGET (scrolled)),
                                               420);
   gtk_scrolled_window_set_propagate_natural_height (
       GTK_SCROLLED_WINDOW (scrolled), TRUE);
-  gtk_widget_set_size_request (rows, USERS_ROWS_WIDTH, -1);
+  gtk_widget_set_size_request (GTK_WIDGET (rows), USERS_ROWS_WIDTH, -1);
 
   self->list_box = GTK_LIST_BOX (rows);
   self->list_scroller = GTK_SCROLLED_WINDOW (scrolled);
@@ -513,24 +512,24 @@ aml_users_popover_init (AmlUsersPopover *self)
 
   /* The two ways of having an account. The first one signs in without a
      password: the user types a code into a page of Microsoft's own. */
-  gtk_widget_add_css_class (microsoft, "flat");
-  gtk_widget_add_css_class (offline, "flat");
-  gtk_widget_set_halign (microsoft, GTK_ALIGN_CENTER);
-  gtk_widget_set_halign (offline, GTK_ALIGN_CENTER);
-  gtk_widget_set_margin_top (microsoft, 6);
-  gtk_widget_set_margin_bottom (offline, 12);
+  gtk_widget_add_css_class (GTK_WIDGET (microsoft), "flat");
+  gtk_widget_add_css_class (GTK_WIDGET (offline), "flat");
+  gtk_widget_set_halign (GTK_WIDGET (microsoft), GTK_ALIGN_CENTER);
+  gtk_widget_set_halign (GTK_WIDGET (offline), GTK_ALIGN_CENTER);
+  gtk_widget_set_margin_top (GTK_WIDGET (microsoft), 6);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (offline), 12);
   g_signal_connect (microsoft, "clicked",
                     G_CALLBACK (on_add_microsoft_clicked), self);
   g_signal_connect (offline, "clicked", G_CALLBACK (on_add_offline_clicked),
                     self);
 
-  GtkWidget *content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-  gtk_box_append (GTK_BOX (content), scrolled);
-  gtk_box_append (GTK_BOX (content), microsoft);
-  gtk_box_append (GTK_BOX (content), offline);
-  gtk_box_append (GTK_BOX (content), GTK_WIDGET (self->error_label));
+  GtkBox *content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (scrolled));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (microsoft));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (offline));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (self->error_label));
 
-  gtk_popover_set_child (GTK_POPOVER (self), content);
+  gtk_popover_set_child (GTK_POPOVER (self), GTK_WIDGET (content));
 
   /* What the header says about who is playing: the avatar of the active
      account, or the default one when there is none. It is filled from the

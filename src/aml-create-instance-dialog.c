@@ -251,27 +251,27 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self->directory_row),
                                default_directory);
 
-  GtkWidget *pick_button = gtk_button_new_from_icon_name ("folder-symbolic");
-  gtk_widget_add_css_class (pick_button, "flat");
-  gtk_widget_set_valign (pick_button, GTK_ALIGN_CENTER);
-  gtk_widget_set_tooltip_text (pick_button, _("Choose a folder"));
+  GtkButton *pick_button = GTK_BUTTON (gtk_button_new_from_icon_name ("folder-symbolic"));
+  gtk_widget_add_css_class (GTK_WIDGET (pick_button), "flat");
+  gtk_widget_set_valign (GTK_WIDGET (pick_button), GTK_ALIGN_CENTER);
+  gtk_widget_set_tooltip_text (GTK_WIDGET (pick_button), _("Choose a folder"));
   g_signal_connect (pick_button, "clicked", G_CALLBACK (on_pick_directory), self);
-  adw_action_row_add_suffix (ADW_ACTION_ROW (self->directory_row), pick_button);
+  adw_action_row_add_suffix (ADW_ACTION_ROW (self->directory_row), GTK_WIDGET (pick_button));
   adw_action_row_set_activatable_widget (ADW_ACTION_ROW (self->directory_row),
-                                         pick_button);
+                                         GTK_WIDGET (pick_button));
 
-  GtkWidget *group = adw_preferences_group_new ();
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), GTK_WIDGET (self->name_row));
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), GTK_WIDGET (self->version_row));
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (group),
+  AdwPreferencesGroup *group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (group)), GTK_WIDGET (self->name_row));
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (group)), GTK_WIDGET (self->version_row));
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (group)),
                              aml_loader_row_get_loader_row (self->loader_row));
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (group),
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (group)),
                              aml_loader_row_get_version_row (self->loader_row));
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), GTK_WIDGET (self->directory_row));
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (group)), GTK_WIDGET (self->directory_row));
 
-  GtkWidget *page = adw_preferences_page_new ();
-  gtk_widget_set_vexpand (page, TRUE);
-  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+  AdwPreferencesPage *page = ADW_PREFERENCES_PAGE (adw_preferences_page_new ());
+  gtk_widget_set_vexpand (GTK_WIDGET (page), TRUE);
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (GTK_WIDGET (page)),
                             ADW_PREFERENCES_GROUP (group));
 
   self->error_label = GTK_LABEL (gtk_label_new (NULL));
@@ -281,7 +281,7 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
   gtk_widget_set_margin_end (GTK_WIDGET (self->error_label), 24);
   gtk_widget_set_visible (GTK_WIDGET (self->error_label), FALSE);
 
-  GtkWidget *cancel_button = gtk_button_new_with_label (_("Cancel"));
+  GtkButton *cancel_button = GTK_BUTTON (gtk_button_new_with_label (_("Cancel")));
   g_signal_connect (cancel_button, "clicked", G_CALLBACK (on_cancel_clicked),
                     self);
 
@@ -290,19 +290,19 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
   g_signal_connect (self->create_button, "clicked", G_CALLBACK (on_create_clicked),
                     self);
 
-  GtkWidget *buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  gtk_widget_set_halign (buttons, GTK_ALIGN_END);
-  gtk_widget_set_margin_start (buttons, 24);
-  gtk_widget_set_margin_end (buttons, 24);
-  gtk_widget_set_margin_bottom (buttons, 24);
-  gtk_box_append (GTK_BOX (buttons), cancel_button);
-  gtk_box_append (GTK_BOX (buttons), GTK_WIDGET (self->create_button));
+  GtkBox *buttons = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+  gtk_widget_set_halign (GTK_WIDGET (buttons), GTK_ALIGN_END);
+  gtk_widget_set_margin_start (GTK_WIDGET (buttons), 24);
+  gtk_widget_set_margin_end (GTK_WIDGET (buttons), 24);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (buttons), 24);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (buttons)), GTK_WIDGET (cancel_button));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (buttons)), GTK_WIDGET (self->create_button));
 
-  GtkWidget *content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-  gtk_box_append (GTK_BOX (content), page);
-  gtk_box_append (GTK_BOX (content), GTK_WIDGET (self->error_label));
-  gtk_box_append (GTK_BOX (content), buttons);
-  adw_dialog_set_child (ADW_DIALOG (self), content);
+  GtkBox *content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (page));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (self->error_label));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (buttons));
+  adw_dialog_set_child (ADW_DIALOG (self), GTK_WIDGET (content));
 
   adw_dialog_set_default_widget (ADW_DIALOG (self),
                                  GTK_WIDGET (self->create_button));
