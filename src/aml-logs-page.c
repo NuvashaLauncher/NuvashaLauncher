@@ -319,6 +319,15 @@ on_search_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
     gtk_widget_grab_focus (self->search_entry);
 }
 
+void
+aml_logs_page_focus_search (AmlLogsPage *self)
+{
+  g_return_if_fail (AML_IS_LOGS_PAGE (self));
+
+  gtk_widget_set_visible (self->search_bar, TRUE);
+  gtk_widget_grab_focus (self->search_entry);
+}
+
 /* ---------------------------------------------------------- *
  * The state line and the buttons
  * ---------------------------------------------------------- */
@@ -486,6 +495,7 @@ aml_logs_page_new (AmlLauncher *launcher)
 {
   AmlLogsPage *self;
   GtkWidget *row;
+  GtkWidget *actions;
   GtkWidget *card;
   GtkWidget *text;
   GtkAdjustment *adjustment;
@@ -518,11 +528,13 @@ aml_logs_page_new (AmlLauncher *launcher)
 
   self->clear = toolbar_button ("edit-clear-symbolic", _("Clear"),
                                 G_CALLBACK (on_clear_clicked), self);
-  gtk_box_append (GTK_BOX (row), self->clear);
 
   self->open = toolbar_button ("folder-symbolic", _("Open Folder"),
                                G_CALLBACK (on_open_clicked), self);
-  gtk_box_append (GTK_BOX (row), self->open);
+
+  actions = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  gtk_box_append (GTK_BOX (actions), self->clear);
+  gtk_box_append (GTK_BOX (actions), self->open);
 
   self->search_button = toolbar_button ("system-search-symbolic", _("Search"),
                                         G_CALLBACK (on_search_clicked), self);
@@ -559,6 +571,7 @@ aml_logs_page_new (AmlLauncher *launcher)
    gtk_widget_set_hexpand (self->search_bar, TRUE);
    gtk_box_insert_child_after (GTK_BOX (row), self->search_bar,
                                self->search_button);
+   gtk_box_append (GTK_BOX (row), actions);
 
   /* The lines themselves. Read only: this is what the game printed,
      nothing to write into. */
