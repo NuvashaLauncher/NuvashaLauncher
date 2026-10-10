@@ -22,7 +22,6 @@ struct _AmlLogsPage
   GtkWidget *scroller;
   GtkWidget *search_bar;
   GtkWidget *search_entry;
-  GtkEventController *global_keys;
 
   /* How many lines the text view holds, and whether the user is looking
      at the end of the log: a view that has been scrolled up to read
@@ -278,13 +277,6 @@ on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED, guint keyval,
 {
   AmlLogsPage *self = user_data;
 
-  if (keyval == GDK_KEY_f && (state & GDK_CONTROL_MASK))
-    {
-      gtk_widget_set_visible (self->search_bar, TRUE);
-      gtk_widget_grab_focus (self->search_entry);
-      return GDK_EVENT_STOP;
-    }
-
   if (keyval != GDK_KEY_Escape)
     return GDK_EVENT_PROPAGATE;
 
@@ -297,7 +289,7 @@ on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED, guint keyval,
       scroll_to_end (self);
     }
 
-  gtk_widget_set_visible (self->search_bar, FALSE);
+  gtk_search_bar_set_search_mode (GTK_SEARCH_BAR (self->search_bar), FALSE);
   gtk_widget_grab_focus (GTK_WIDGET (self));
 
   return GDK_EVENT_STOP;
@@ -307,24 +299,8 @@ static void
 on_search_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   AmlLogsPage *self = user_data;
-  gboolean open = gtk_widget_get_visible (self->search_bar);
 
-  gtk_widget_set_visible (self->search_bar, !open);
-  if (open)
-    {
-      gtk_editable_set_text (GTK_EDITABLE (self->search_entry), "");
-      gtk_widget_grab_focus (GTK_WIDGET (self));
-    }
-  else
-    gtk_widget_grab_focus (self->search_entry);
-}
-
-void
-aml_logs_page_focus_search (AmlLogsPage *self)
-{
-  g_return_if_fail (AML_IS_LOGS_PAGE (self));
-
-  gtk_widget_set_visible (self->search_bar, TRUE);
+  gtk_search_bar_set_search_mode (GTK_SEARCH_BAR (self->search_bar), TRUE);
   gtk_widget_grab_focus (self->search_entry);
 }
 
@@ -449,20 +425,8 @@ static void
 on_first_map (GtkWidget *widget G_GNUC_UNUSED, gpointer user_data)
 {
   AmlLogsPage *self = user_data;
-  GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
 
   scroll_to_end (self);
-
-  if (root != NULL && self->global_keys == NULL)
-    {
-      self->global_keys = gtk_event_controller_key_new ();
-      gtk_event_controller_set_propagation_phase (
-        self->global_keys, GTK_PHASE_CAPTURE);
-      gtk_widget_add_controller (GTK_WIDGET (root), self->global_keys);
-      g_signal_connect (self->global_keys, "key-pressed",
-                        G_CALLBACK (on_search_key), self);
-    }
-
   g_signal_handlers_disconnect_by_data (self, self);
 }
 
@@ -495,7 +459,6 @@ aml_logs_page_new (AmlLauncher *launcher)
 {
   AmlLogsPage *self;
   GtkWidget *row;
-  GtkWidget *actions;
   GtkWidget *card;
   GtkWidget *text;
   GtkAdjustment *adjustment;
@@ -511,11 +474,11 @@ aml_logs_page_new (AmlLauncher *launcher)
   gtk_widget_set_vexpand (GTK_WIDGET (self), TRUE);
 
   /* What the launch is doing, and the buttons that act on the log. */
-  row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
   gtk_widget_set_margin_top (row, 6);
   gtk_widget_set_margin_bottom (row, 6);
-  gtk_widget_set_margin_start (row, 0);
-  gtk_widget_set_margin_end (row, 0);
+  gtk_widget_set_margin_start (row, 12);
+  gtk_widget_set_margin_end (row, 12);
 
   self->state = gtk_label_new (NULL);
   gtk_widget_add_css_class (self->state, "heading");
@@ -523,54 +486,55 @@ aml_logs_page_new (AmlLauncher *launcher)
 
   self->detail = gtk_label_new (NULL);
   gtk_label_set_ellipsize (GTK_LABEL (self->detail), PANGO_ELLIPSIZE_END);
+  gtk_widget_set_hexpand (self->detail, TRUE);
   gtk_widget_add_css_class (self->detail, "dim-label");
   gtk_box_append (GTK_BOX (row), self->detail);
 
   self->clear = toolbar_button ("edit-clear-symbolic", _("Clear"),
                                 G_CALLBACK (on_clear_clicked), self);
+  gtk_box_append (GTK_BOX (row), self->clear);
 
   self->open = toolbar_button ("folder-symbolic", _("Open Folder"),
                                G_CALLBACK (on_open_clicked), self);
-
-  actions = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  gtk_box_append (GTK_BOX (actions), self->clear);
-  gtk_box_append (GTK_BOX (actions), self->open);
+  gtk_box_append (GTK_BOX (row), self->open);
 
   self->search_button = toolbar_button ("system-search-symbolic", _("Search"),
                                         G_CALLBACK (on_search_clicked), self);
-  gtk_box_append (GTK_BOX (row), self->search_button);
+  gtk_box_insert_child_after (GTK_BOX (row), self->search_button, NULL);
+
+  gtk_box_append (GTK_BOX (self), row);
 
   /* Searching the log: a bar over the lines, closed until Ctrl+F opens
    * it. The lines are kept either way, so nothing here can lose one. */
-   self->search_bar = gtk_search_entry_new ();
-   self->search_entry = self->search_bar;
-   gtk_widget_set_hexpand (self->search_entry, TRUE);
-   gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (self->search_entry),
-                                          _("Search the log"));
-   gtk_widget_set_visible (self->search_bar, FALSE);
+   self->search_bar = gtk_search_bar_new ();
+  self->search_entry = gtk_search_entry_new ();
+  gtk_widget_set_hexpand (self->search_entry, TRUE);
+  gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (self->search_entry),
+                                         _("Search the log"));
+  gtk_search_bar_set_child (GTK_SEARCH_BAR (self->search_bar),
+                            self->search_entry);
+   gtk_search_bar_set_key_capture_widget (GTK_SEARCH_BAR (self->search_bar),
+                                          GTK_WIDGET (self));
+   gtk_search_bar_set_search_mode (GTK_SEARCH_BAR (self->search_bar), FALSE);
   g_signal_connect (self->search_entry, "changed",
                     G_CALLBACK (on_search_changed), self);
   {
     GtkEventController *keys = gtk_event_controller_key_new ();
 
     gtk_event_controller_set_propagation_phase (keys, GTK_PHASE_BUBBLE);
-     gtk_widget_add_controller (self->search_entry, keys);
-     g_signal_connect (keys, "key-pressed", G_CALLBACK (on_search_key), self);
-   }
+    gtk_widget_add_controller (self->search_entry, keys);
+    g_signal_connect (keys, "key-pressed", G_CALLBACK (on_search_key), self);
+  }
 
-   {
-     GtkEventController *keys = gtk_event_controller_key_new ();
+  {
+    GtkWidget *search_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
-     gtk_event_controller_set_propagation_phase (keys, GTK_PHASE_CAPTURE);
-     gtk_widget_add_controller (GTK_WIDGET (self), keys);
-     g_signal_connect (keys, "key-pressed", G_CALLBACK (on_search_key), self);
-   }
-
-   gtk_widget_set_hexpand (self->search_bar, TRUE);
-   gtk_box_append (GTK_BOX (row), self->search_bar);
-    gtk_box_append (GTK_BOX (row), actions);
-   gtk_widget_set_hexpand (row, TRUE);
-   gtk_box_append (GTK_BOX (self), row);
+    gtk_widget_set_margin_bottom (search_box, 6);
+    gtk_widget_set_margin_start (search_box, 12);
+    gtk_widget_set_margin_end (search_box, 12);
+    gtk_box_append (GTK_BOX (search_box), self->search_bar);
+    gtk_box_append (GTK_BOX (self), search_box);
+  }
 
   /* The lines themselves. Read only: this is what the game printed,
      nothing to write into. */
@@ -619,13 +583,6 @@ static void
 aml_logs_page_dispose (GObject *object)
 {
   AmlLogsPage *self = AML_LOGS_PAGE (object);
-  GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
-
-  if (root != NULL && self->global_keys != NULL)
-    {
-      gtk_widget_remove_controller (GTK_WIDGET (root), self->global_keys);
-      self->global_keys = NULL;
-    }
 
   /* The launcher outlives this page while a game is still running, so
      the connections go before anything else can arrive. */

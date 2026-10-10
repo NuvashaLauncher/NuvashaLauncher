@@ -9,7 +9,6 @@
 
 #include "aml-main-window.h"
 #include "aml-cache.h"
-#include "aml-content-page.h"
 #include "aml-create-instance-dialog.h"
 #include "aml-download-modpack-dialog.h"
 #include "aml-download.h"
@@ -17,7 +16,6 @@
 #include "aml-instance-page.h"
 #include "aml-i18n.h"
 #include "aml-launcher.h"
-#include "aml-logs-page.h"
 #include "aml-settings.h"
 #include "aml-users-popover.h"
 
@@ -174,87 +172,6 @@ on_show_snapshots_toggled (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
 
   adw_switch_row_set_active (row, stored);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (row), error->message);
-}
-
-static gboolean
-find_search_page (GtkWidget *widget, gpointer user_data)
-{
-  GtkWidget **found = user_data;
-
-  if (!gtk_widget_get_visible (widget) || !gtk_widget_get_mapped (widget))
-    return GDK_EVENT_PROPAGATE;
-
-  if (AML_IS_LOGS_PAGE (widget) || AML_IS_CONTENT_PAGE (widget))
-    {
-      *found = widget;
-      return GDK_EVENT_STOP;
-    }
-
-  for (GtkWidget *child = gtk_widget_get_first_child (widget); child != NULL;
-       child = gtk_widget_get_next_sibling (child))
-    if (find_search_page (child, found) == GDK_EVENT_STOP)
-      return GDK_EVENT_STOP;
-
-  return GDK_EVENT_PROPAGATE;
-}
-
-static gboolean
-on_global_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
-                      guint keyval, guint keycode G_GNUC_UNUSED,
-                      GdkModifierType state, gpointer user_data)
-{
-  AmlMainWindow *self = user_data;
-  GtkWidget *focus = gtk_root_get_focus (GTK_ROOT (self));
-
-  if (keyval != GDK_KEY_f || !(state & GDK_CONTROL_MASK))
-    return GDK_EVENT_PROPAGATE;
-
-  for (GtkWidget *widget = focus; widget != NULL;
-       widget = gtk_widget_get_parent (widget))
-    {
-      if (AML_IS_LOGS_PAGE (widget))
-        {
-          aml_logs_page_focus_search (AML_LOGS_PAGE (widget));
-          return GDK_EVENT_STOP;
-        }
-
-      if (AML_IS_CONTENT_PAGE (widget))
-        {
-          aml_content_page_focus_search (AML_CONTENT_PAGE (widget));
-          return GDK_EVENT_STOP;
-        }
-    }
-
-  {
-    GtkWidget *page = NULL;
-
-    find_search_page (GTK_WIDGET (self), &page);
-    if (page != NULL)
-      {
-        if (AML_IS_LOGS_PAGE (page))
-          aml_logs_page_focus_search (AML_LOGS_PAGE (page));
-        else
-          aml_content_page_focus_search (AML_CONTENT_PAGE (page));
-        return GDK_EVENT_STOP;
-      }
-  }
-
-  return GDK_EVENT_PROPAGATE;
-}
-
-static gboolean
-on_global_search_shortcut (GtkWidget *widget G_GNUC_UNUSED,
-                           GVariant *args G_GNUC_UNUSED, gpointer user_data)
-{
-  return on_global_search_key (NULL, GDK_KEY_f, 0, GDK_CONTROL_MASK,
-                               user_data) == GDK_EVENT_STOP;
-}
-
-static void
-on_search_action (GSimpleAction *action G_GNUC_UNUSED,
-                  GVariant *parameter G_GNUC_UNUSED, gpointer user_data)
-{
-  on_global_search_key (NULL, GDK_KEY_f, 0, GDK_CONTROL_MASK, user_data);
 }
 
 /* Written the moment the value changes. A spin row can produce a value
@@ -725,7 +642,6 @@ static const GActionEntry window_entries[] = {
   { .name = "import-modpack", .activate = on_import_modpack },
   { .name = "settings", .activate = on_settings },
   { .name = "shortcuts", .activate = on_shortcuts },
-  { .name = "search", .activate = on_search_action },
   { .name = "about", .activate = on_about },
 };
 
@@ -1543,13 +1459,6 @@ on_downloads_changed (AmlDownloads *downloads G_GNUC_UNUSED, gpointer user_data)
 static void
 aml_main_window_init (AmlMainWindow *self)
 {
-  GtkEventController *keys = gtk_event_controller_key_new ();
-  GtkEventController *shortcuts = gtk_shortcut_controller_new ();
-  GtkShortcutTrigger *trigger =
-    gtk_keyval_trigger_new (GDK_KEY_f, GDK_CONTROL_MASK);
-  GtkShortcutAction *action =
-    gtk_callback_action_new (on_global_search_shortcut, self, NULL);
-  GtkShortcut *shortcut = gtk_shortcut_new (trigger, action);
   g_autoptr (GMenu) add_menu = create_add_menu ();
   g_autoptr (GMenu) app_menu = create_app_menu ();
   GtkWidget *header = adw_header_bar_new ();
@@ -1560,16 +1469,6 @@ aml_main_window_init (AmlMainWindow *self)
   GtkWidget *empty_page = adw_status_page_new ();
   GtkWidget *toolbar = adw_toolbar_view_new ();
   GtkWidget *add_popover = NULL;
-
-  gtk_event_controller_set_propagation_phase (keys, GTK_PHASE_CAPTURE);
-  gtk_widget_add_controller (GTK_WIDGET (self), keys);
-  g_signal_connect (keys, "key-pressed",
-                    G_CALLBACK (on_global_search_key), self);
-  gtk_shortcut_controller_set_scope (GTK_SHORTCUT_CONTROLLER (shortcuts),
-                                     GTK_SHORTCUT_SCOPE_GLOBAL);
-  gtk_shortcut_controller_add_shortcut (GTK_SHORTCUT_CONTROLLER (shortcuts),
-                                        shortcut);
-  gtk_widget_add_controller (GTK_WIDGET (self), shortcuts);
 
   /* Flat is the default top-bar style, and it paints no surface of its
      own, so the header would take the window background and read as the
@@ -1587,16 +1486,6 @@ aml_main_window_init (AmlMainWindow *self)
 
   g_action_map_add_action_entries (G_ACTION_MAP (self), window_entries,
                                    G_N_ELEMENTS (window_entries), self);
-
-  {
-    GtkApplication *application =
-      GTK_APPLICATION (gtk_window_get_application (GTK_WINDOW (self)));
-    const char *accelerators[] = { "<Primary>f", NULL };
-
-    if (application != NULL)
-      gtk_application_set_accels_for_action (application, "win.search",
-                                             accelerators);
-  }
 
   /* Start of the header: the "+" menu. */
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (add_button),
