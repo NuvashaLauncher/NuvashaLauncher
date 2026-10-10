@@ -1664,14 +1664,15 @@ install_job_free (InstallJob *job)
 static void
 on_install_progress (guint done,
                      guint total,
-                     const char *path G_GNUC_UNUSED,
+  const char *path,
                      gpointer user_data)
 {
   InstallJob *job = user_data;
 
-  /* The install's "n of m files" lives in the header's dropdown; the
-     phase line ("Extracting modpack") is set when the install starts and
-     stays. The dialog is long gone by the time this runs. */
+  /* The install's "n of m files" lives in the header's dropdown; a NULL
+   * path marks the transition from downloading to extraction. */
+  if (path == NULL)
+    aml_download_set_detail (job->download, _("Extracting files"));
   aml_download_set_progress (job->download, done, total);
 }
 
@@ -1792,7 +1793,9 @@ start_install (AmlDownloadModpackDialog *self)
     if (download == NULL)
       download = aml_downloads_add (AML_DOWNLOAD_MODPACK, name);
 
-    aml_download_set_detail (download, "Extracting files");
+    aml_download_set_detail (
+      download, self->modpack->files->len > 0 ? _("Downloading files")
+                                              : _("Extracting files"));
 
     job->dialog = g_object_ref (self);
     job->download = g_object_ref (download);
