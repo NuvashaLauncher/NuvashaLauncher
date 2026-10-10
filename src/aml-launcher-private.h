@@ -64,6 +64,7 @@ void set_state (AmlLauncher *self, AmlLaunchState state,
                 const char *detail);
 void launcher_failed (AmlLauncher *self, const char *reason);
 gboolean on_stop_timeout (gpointer user_data);
+void finish_launch (AmlLauncher *self);
 AmlAccount *active_account (AmlLauncher *self);
 void on_manifest_ready (GObject *source, GAsyncResult *result,
                         gpointer user_data);
