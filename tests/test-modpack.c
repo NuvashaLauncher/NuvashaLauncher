@@ -263,6 +263,16 @@ install_done (GObject *source G_GNUC_UNUSED,
   g_main_loop_quit (wait->loop);
 }
 
+static void
+export_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+             gpointer user_data)
+{
+  AsyncWait *wait = user_data;
+
+  wait->value = aml_modpack_export_finish (result, &wait->error);
+  g_main_loop_quit (wait->loop);
+}
+
 /* The whole install, in place. */
 static AmlInstance *
 install_now (AmlModpack *pack, AmlInstanceManager *manager, const char *name,
@@ -276,6 +286,18 @@ install_now (AmlModpack *pack, AmlInstanceManager *manager, const char *name,
 
   *error = wait.error;
   return wait.instance;
+}
+
+static gboolean
+export_now (AmlInstance *instance, const char *path, GError **error)
+{
+  AsyncWait wait = { 0 };
+
+  aml_modpack_export_async (instance, path, NULL, export_done, &wait);
+  async_wait_run (&wait);
+
+  *error = wait.error;
+  return wait.value;
 }
 
 static guint
@@ -917,6 +939,78 @@ test_install_needs_resolve (void)
   g_print ("ok - an install whose dependencies were never read is refused\n");
 }
 
+static void
+test_export_import_round_trip (void)
+{
+  g_autofree char *root = make_tmp_dir ();
+  g_autofree char *source_data = g_build_filename (root, "source-data", NULL);
+  g_autofree char *target_data = g_build_filename (root, "target-data", NULL);
+  g_autofree char *source_dir = g_build_filename (root, "source-instance", NULL);
+  g_autofree char *icon_source = g_build_filename (root, "source-icon.png", NULL);
+  g_autofree char *archive = g_build_filename (root, "round-trip.mrpack", NULL);
+  g_autofree char *override = g_build_filename (source_dir, "config", "test.txt", NULL);
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlInstanceManager) source_manager = manager_new (source_data);
+  g_autoptr (AmlInstanceManager) target_manager = manager_new (target_data);
+  g_autoptr (AmlInstance) source = NULL;
+  g_autoptr (AmlModpack) pack = NULL;
+  g_autoptr (AmlInstance) imported = NULL;
+  g_autofree char *imported_dir = NULL;
+  g_autofree char *imported_icon = NULL;
+  g_autofree char *icon_bytes = NULL;
+  g_autofree char *override_bytes = NULL;
+  AmlLoader loader = AML_LOADER_VANILLA;
+
+  source = aml_instance_manager_create (source_manager, "Round Trip",
+                                        source_dir, "1.20.1", AML_LOADER_FABRIC,
+                                        "0.15.11", &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (source);
+  g_assert_true (g_file_set_contents (icon_source, "icon bytes", -1, &error));
+  g_assert_no_error (error);
+  {
+    g_autofree char *override_dir = g_path_get_dirname (override);
+
+    g_assert_cmpint (g_mkdir_with_parents (override_dir, 0755), ==, 0);
+  }
+  g_assert_true (g_file_set_contents (override, "override bytes", -1, &error));
+  g_assert_no_error (error);
+  g_object_set (source, "icon", icon_source, NULL);
+  g_assert_true (aml_instance_manager_save (source_manager, &error));
+  g_assert_no_error (error);
+
+  g_assert_true (export_now (source, archive, &error));
+  g_assert_no_error (error);
+  g_assert_true (g_file_test (archive, G_FILE_TEST_IS_REGULAR));
+
+  pack = aml_modpack_new_from_zip (archive, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (pack);
+  g_assert_true (aml_modpack_resolve (pack, &error));
+  g_assert_no_error (error);
+  g_assert_cmpint (pack->loader, ==, AML_LOADER_FABRIC);
+
+  imported = install_now (pack, target_manager, "Round Trip", NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (imported);
+  g_object_get (imported, "loader", &loader, "directory", &imported_dir,
+                "icon", &imported_icon, NULL);
+  g_assert_cmpint (loader, ==, AML_LOADER_FABRIC);
+  g_assert_nonnull (imported_icon);
+  icon_bytes = read_file (imported_icon);
+  g_assert_cmpstr (icon_bytes, ==, "icon bytes");
+
+  {
+    g_autofree char *imported_override =
+      g_build_filename (imported_dir, "config", "test.txt", NULL);
+    override_bytes = read_file (imported_override);
+  }
+  g_assert_cmpstr (override_bytes, ==, "override bytes");
+
+  remove_recursive (root);
+  g_print ("ok - export and import preserve loader, icon and overrides\n");
+}
+
 /* ---------------------------------------------------------- */
 
 int
@@ -942,6 +1036,8 @@ main (int argc, char **argv)
   g_test_add_func ("/modpack/install-rollback", test_install_rolls_back);
   g_test_add_func ("/modpack/install-existing", test_install_leaves_user_data);
   g_test_add_func ("/modpack/install-unresolved", test_install_needs_resolve);
+  g_test_add_func ("/modpack/export-import-round-trip",
+                   test_export_import_round_trip);
 
   return g_test_run ();
 }
