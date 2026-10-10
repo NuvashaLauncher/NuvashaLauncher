@@ -65,11 +65,11 @@ refresh_downloads (AmlMainWindow *self)
   gpointer key;
   gpointer value;
 
-  if (self->downloads_list == NULL)
+  if (self->downloads.list == NULL)
     return;
 
   /* The rows of the downloads that are over. */
-  g_hash_table_iter_init (&iter, self->download_rows);
+  g_hash_table_iter_init (&iter, self->downloads.rows);
 
   while (g_hash_table_iter_next (&iter, &key, &value))
     {
@@ -82,7 +82,7 @@ refresh_downloads (AmlMainWindow *self)
 
       if (!present)
         {
-          gtk_box_remove (GTK_BOX (self->downloads_list), row->box);
+          gtk_box_remove (GTK_BOX (self->downloads.list), row->box);
           g_hash_table_iter_remove (&iter);
         }
     }
@@ -90,7 +90,7 @@ refresh_downloads (AmlMainWindow *self)
   for (guint i = 0; i < jobs->len; i++)
     {
       AmlDownload *download = g_ptr_array_index (jobs, i);
-      DownloadRow *row = g_hash_table_lookup (self->download_rows, download);
+      DownloadRow *row = g_hash_table_lookup (self->downloads.rows, download);
       const char *phase = aml_download_get_detail (download);
       g_autofree char *count = download_count_text (download);
       guint64 done = aml_download_get_done (download);
@@ -156,9 +156,9 @@ refresh_downloads (AmlMainWindow *self)
           gtk_box_append (GTK_BOX (box), title);
           gtk_box_append (GTK_BOX (box), sub);
           gtk_box_append (GTK_BOX (box), line_box);
-          gtk_box_append (GTK_BOX (self->downloads_list), box);
+          gtk_box_append (GTK_BOX (self->downloads.list), box);
 
-          g_hash_table_insert (self->download_rows, download, row);
+          g_hash_table_insert (self->downloads.rows, download, row);
         }
 
       gtk_label_set_text (GTK_LABEL (row->phase),
@@ -178,26 +178,26 @@ refresh_downloads (AmlMainWindow *self)
      Either of the two is a reason for it to be there at all. */
   if (jobs->len > 0)
     {
-      gtk_widget_set_visible (self->downloads_button, TRUE);
+      gtk_widget_set_visible (self->downloads.button, TRUE);
     }
   else
     {
       GtkPopover *popover = gtk_menu_button_get_popover (
-        GTK_MENU_BUTTON (self->downloads_button));
+        GTK_MENU_BUTTON (self->downloads.button));
 
       /* The last download is over: a dropdown with nothing left in it
          should not stay open over the window. */
       if (popover != NULL)
         gtk_popover_popdown (popover);
 
-       gtk_widget_set_visible (self->downloads_button, FALSE);
+       gtk_widget_set_visible (self->downloads.button, FALSE);
     }
 
   /* Browser selections are shown by the browser's own button, not in this
      menu. This header button is only for transfers that are running. */
   {
-    gtk_widget_set_visible (self->downloads_spinner, jobs->len > 0);
-    gtk_widget_set_visible (self->downloads_icon, jobs->len == 0);
+    gtk_widget_set_visible (self->downloads.spinner, jobs->len > 0);
+    gtk_widget_set_visible (self->downloads.icon, jobs->len == 0);
   }
 }
 
