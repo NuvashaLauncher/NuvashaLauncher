@@ -234,7 +234,7 @@ aml_content_page_build_browse (AmlContentPage *self)
       GTK_SCROLLED_WINDOW (filter_scroller), TRUE);
   gtk_popover_set_child (GTK_POPOVER (popover), filter_scroller);
 
-   self->browse_actions = top;
+   self->browse_actions = GTK_BOX (top);
   g_object_ref_sink (top);
 
    self->browse.results_status = ADW_STATUS_PAGE (adw_status_page_new ());
@@ -401,7 +401,7 @@ aml_content_page_build_bar (AmlContentPage *self)
 {
   GtkWidget *inner = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
-  self->bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  self->bar = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
 
   {
     GtkEventController *keys = gtk_event_controller_key_new ();
@@ -416,19 +416,19 @@ aml_content_page_build_bar (AmlContentPage *self)
      switcher ends up at the right end of the row however many actions
      there are. Aligning inside a box would not move it: a box gives every
      child its own width. */
-  self->bar_spacer = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-  gtk_widget_set_hexpand (self->bar_spacer, TRUE);
+  self->bar_spacer = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+  gtk_widget_set_hexpand (GTK_WIDGET (self->bar_spacer), TRUE);
 
   /* Two buttons that behave as one choice, drawn as the linked pair of
      GNOME. A view switcher of libadwaita always carries the words of a
      page under its icon, and this row has no room for two lines. */
-  self->switcher = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-  gtk_widget_add_css_class (self->switcher, "linked");
+  self->switcher = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+  gtk_widget_add_css_class (GTK_WIDGET (self->switcher), "linked");
 
-  self->switcher_installed =
-     switcher_button ("view-list-symbolic", "Installed");
-   self->switcher_browse =
-     switcher_button ("web-browser-symbolic", "Browse");
+  self->switcher_installed = GTK_TOGGLE_BUTTON (
+    switcher_button ("view-list-symbolic", "Installed"));
+  self->switcher_browse = GTK_TOGGLE_BUTTON (
+    switcher_button ("web-browser-symbolic", "Browse"));
 
   gtk_toggle_button_set_group (GTK_TOGGLE_BUTTON (self->switcher_browse),
                                GTK_TOGGLE_BUTTON (self->switcher_installed));
@@ -440,30 +440,30 @@ aml_content_page_build_bar (AmlContentPage *self)
   g_signal_connect (self->switcher_browse, "toggled",
                     G_CALLBACK (on_switcher_toggled), self);
 
-  gtk_box_append (GTK_BOX (self->switcher), self->switcher_installed);
-  gtk_box_append (GTK_BOX (self->switcher), self->switcher_browse);
+  gtk_box_append (GTK_BOX (self->switcher), GTK_WIDGET (self->switcher_installed));
+  gtk_box_append (GTK_BOX (self->switcher), GTK_WIDGET (self->switcher_browse));
 
-  gtk_widget_set_valign (self->switcher, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (GTK_WIDGET (self->switcher), GTK_ALIGN_CENTER);
 
-  gtk_box_append (GTK_BOX (self->bar), self->bar_spacer);
-  gtk_box_append (GTK_BOX (self->bar), self->switcher);
+  gtk_box_append (GTK_BOX (self->bar), GTK_WIDGET (self->bar_spacer));
+  gtk_box_append (GTK_BOX (self->bar), GTK_WIDGET (self->switcher));
 
-  gtk_widget_set_margin_top (self->bar, 6);
-  gtk_widget_set_margin_bottom (self->bar, 6);
-  gtk_widget_set_margin_start (self->bar, 12);
-  gtk_widget_set_margin_end (self->bar, 12);
+  gtk_widget_set_margin_top (GTK_WIDGET (self->bar), 6);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (self->bar), 6);
+  gtk_widget_set_margin_start (GTK_WIDGET (self->bar), 12);
+  gtk_widget_set_margin_end (GTK_WIDGET (self->bar), 12);
 
   /* A failure is said in a banner above the row, where it stays until it
      is read; what a toast says is an operation that just worked. */
-  self->banner = adw_banner_new ("");
+  self->banner = ADW_BANNER (adw_banner_new (""));
   adw_banner_set_button_label (ADW_BANNER (self->banner), "Dismiss");
   adw_banner_set_revealed (ADW_BANNER (self->banner), FALSE);
   g_signal_connect (self->banner, "button-clicked",
                     G_CALLBACK (on_banner_dismiss), self);
 
-  gtk_box_append (GTK_BOX (inner), self->banner);
-  gtk_box_append (GTK_BOX (inner), self->bar);
-  gtk_box_append (GTK_BOX (inner), self->stack);
+  gtk_box_append (GTK_BOX (inner), GTK_WIDGET (self->banner));
+  gtk_box_append (GTK_BOX (inner), GTK_WIDGET (self->bar));
+  gtk_box_append (GTK_BOX (inner), GTK_WIDGET (self->stack));
 
   /* The list is the left half; the project that is opened is the right
      half, and is empty until one is opened. Collapsed shows one page at a
@@ -490,10 +490,10 @@ aml_content_page_build_bar (AmlContentPage *self)
 
   /* One overlay over the list and the project, so a message about either
      one is said in the same place. */
-  self->toasts = adw_toast_overlay_new ();
+  self->toasts = ADW_TOAST_OVERLAY (adw_toast_overlay_new ());
   adw_toast_overlay_set_child (ADW_TOAST_OVERLAY (self->toasts),
                                GTK_WIDGET (self->project.split));
-  gtk_box_append (GTK_BOX (self), self->toasts);
+  gtk_box_append (GTK_BOX (self), GTK_WIDGET (self->toasts));
 }
 
 /* The actions of the list being shown go into the row, at its left, and
@@ -506,25 +506,25 @@ aml_content_page_build_bar (AmlContentPage *self)
 void
 aml_content_page_move_actions_into_bar (AmlContentPage *self, gboolean browsing)
 {
-  GtkWidget *wanted = browsing ? self->browse_actions
+  GtkWidget *wanted = browsing ? GTK_WIDGET (self->browse_actions)
                                : GTK_WIDGET (self->installed.actions);
   GtkWidget *other = browsing ? GTK_WIDGET (self->installed.actions)
-                              : self->browse_actions;
+                              : GTK_WIDGET (self->browse_actions);
 
   if (self->bar == NULL)
     return;
 
-  if (other != NULL && gtk_widget_get_parent (other) == self->bar)
+  if (other != NULL && gtk_widget_get_parent (other) == GTK_WIDGET (self->bar))
     gtk_box_remove (GTK_BOX (self->bar), other);
 
   /* At the front, which is the left end of the row: everything after it
      is the spacer and then the switcher. */
-  if (wanted != NULL && gtk_widget_get_parent (wanted) != self->bar)
+  if (wanted != NULL && gtk_widget_get_parent (wanted) != GTK_WIDGET (self->bar))
     gtk_box_insert_child_after (GTK_BOX (self->bar), wanted, NULL);
 
    /* Both action rows contain an expanding search entry. The spacer used by
       the old Installed-only toolbar would consume that room and leave the
       entry at its natural width. */
    if (self->bar_spacer != NULL)
-     gtk_widget_set_visible (self->bar_spacer, FALSE);
+     gtk_widget_set_visible (GTK_WIDGET (self->bar_spacer), FALSE);
 }

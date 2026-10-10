@@ -48,7 +48,7 @@ watch_widget (gpointer field, GtkWidget *widget)
 void
 show_toast (AmlContentPage *self, const char *message)
 {
-  aml_ui_show_toast (GTK_WIDGET (self), self->toasts, message);
+  aml_ui_show_toast (GTK_WIDGET (self), GTK_WIDGET (self->toasts), message);
 }
 
 GtkWidget *

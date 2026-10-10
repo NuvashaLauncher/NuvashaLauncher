@@ -44,19 +44,19 @@ struct _AmlContentPage
 
   /* Borrowed from the widget tree of the page, and cleared in dispose()
    * because a request can answer after the tree is gone. */
-  GtkWidget *toasts;
-  GtkWidget *banner; /* what a failure is said in, until it is read */
-  GtkWidget *stack;
+  AdwToastOverlay *toasts;
+  AdwBanner *banner; /* what a failure is said in, until it is read */
+  AdwViewStack *stack;
 
   /* The row that decides between Installed and Browse: the actions of
    * the list being shown on the left, the switcher on the right. Only
    * one of the two action boxes is a child of it at a time. */
-  GtkWidget *bar;
-  GtkWidget *bar_spacer; /* takes the room between the actions and the
-                            switcher, so the switcher sits at the right */
-  GtkWidget *switcher;
-  GtkWidget *switcher_installed; /* the Installed button of the pair */
-  GtkWidget *switcher_browse;    /* the Browse button of the pair */
+  GtkBox *bar;
+  GtkBox *bar_spacer; /* takes the room between the actions and the
+                         switcher, so the switcher sits at the right */
+  GtkBox *switcher;
+  GtkToggleButton *switcher_installed; /* the Installed button of the pair */
+  GtkToggleButton *switcher_browse;    /* the Browse button of the pair */
   struct {
     GtkBox *actions;
     GtkSearchEntry *search_bar;
@@ -71,7 +71,7 @@ struct _AmlContentPage
     GCancellable *scan;
     gboolean identifying;
   } installed;
-  GtkWidget *browse_actions;
+  GtkBox *browse_actions;
 
   AmlContentInstallModel *install_model;
 
