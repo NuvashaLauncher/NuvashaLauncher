@@ -2068,7 +2068,7 @@ export_run_free (ExportRun *run)
 
 static gboolean
 export_file (struct archive *archive, const char *source, const char *target,
-             GError **error)
+             GCancellable *cancellable, GError **error)
 {
   GStatBuf stat_buf;
   FILE *input = NULL;
@@ -2110,7 +2110,17 @@ export_file (struct archive *archive, const char *source, const char *target,
     }
 
   while ((length = fread (buffer, 1, sizeof buffer, input)) > 0)
-    if (archive_write_data (archive, buffer, length) != (la_ssize_t) length)
+    {
+      if (g_cancellable_is_cancelled (cancellable))
+        {
+          g_set_error_literal (error, AML_MODPACK_ERROR,
+                               AML_MODPACK_ERROR_CANCELLED, "cancelled");
+          archive_entry_free (entry);
+          fclose (input);
+          return FALSE;
+        }
+
+      if (archive_write_data (archive, buffer, length) != (la_ssize_t) length)
       {
         g_set_error (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_ARCHIVE,
                      "cannot write \"%s\": %s", target,
@@ -2119,6 +2129,7 @@ export_file (struct archive *archive, const char *source, const char *target,
         fclose (input);
         return FALSE;
       }
+    }
 
   if (ferror (input))
     {
@@ -2138,7 +2149,7 @@ export_file (struct archive *archive, const char *source, const char *target,
 static gboolean
 export_directory (struct archive *archive, const char *root,
                   const char *relative, GHashTable *indexed_paths,
-                  GError **error)
+                  GCancellable *cancellable, GError **error)
 {
   g_autofree char *directory = g_build_filename (root, relative, NULL);
   g_autoptr (GDir) dir = g_dir_open (directory, 0, error);
@@ -2149,6 +2160,13 @@ export_directory (struct archive *archive, const char *root,
 
   while ((name = g_dir_read_name (dir)) != NULL)
     {
+      if (g_cancellable_is_cancelled (cancellable))
+        {
+          g_set_error_literal (error, AML_MODPACK_ERROR,
+                               AML_MODPACK_ERROR_CANCELLED, "cancelled");
+          return FALSE;
+        }
+
       g_autofree char *source = g_build_filename (directory, name, NULL);
       g_autofree char *child_relative =
         g_build_filename (relative, name, NULL);
@@ -2165,7 +2183,7 @@ export_directory (struct archive *archive, const char *root,
       if (S_ISDIR (stat_buf.st_mode))
         {
           if (!export_directory (archive, root, child_relative,
-                                 indexed_paths, error))
+                                 indexed_paths, cancellable, error))
             return FALSE;
         }
       else if (S_ISREG (stat_buf.st_mode))
@@ -2176,7 +2194,7 @@ export_directory (struct archive *archive, const char *root,
           if (g_hash_table_contains (indexed_paths, child_relative))
             continue;
 
-          if (!export_file (archive, source, target, error))
+          if (!export_file (archive, source, target, cancellable, error))
             return FALSE;
         }
       else if (S_ISLNK (stat_buf.st_mode))
@@ -2194,7 +2212,7 @@ export_directory (struct archive *archive, const char *root,
  * Modrinth URL. Files without complete metadata remain overrides, which is
  * still a valid and lossless export. */
 static gboolean
-export_indexed_files (ExportRun *run, GError **error)
+export_indexed_files (ExportRun *run, GCancellable *cancellable, GError **error)
 {
   static const char *folders[] = { "mods", "resourcepacks", "shaderpacks" };
   g_autoptr (JsonParser) manifest_parser = json_parser_new ();
@@ -2212,6 +2230,13 @@ export_indexed_files (ExportRun *run, GError **error)
   for (guint folder_index = 0; folder_index < G_N_ELEMENTS (folders);
        folder_index++)
     {
+      if (g_cancellable_is_cancelled (cancellable))
+        {
+          g_set_error_literal (error, AML_MODPACK_ERROR,
+                               AML_MODPACK_ERROR_CANCELLED, "cancelled");
+          return FALSE;
+        }
+
       g_autofree char *index_path = g_build_filename (
         run->instance_directory, folders[folder_index], ".index", "index.json",
         NULL);
@@ -2235,6 +2260,13 @@ export_indexed_files (ExportRun *run, GError **error)
 
       for (guint i = 0; i < json_array_get_length (entries); i++)
         {
+          if (g_cancellable_is_cancelled (cancellable))
+            {
+              g_set_error_literal (error, AML_MODPACK_ERROR,
+                                   AML_MODPACK_ERROR_CANCELLED, "cancelled");
+              return FALSE;
+            }
+
           JsonObject *entry = json_node_get_object (
             json_array_get_element (entries, i));
           const char *filename = NULL;
@@ -2333,7 +2365,7 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
       return;
     }
 
-  if (!export_indexed_files (run, &error))
+  if (!export_indexed_files (run, cancellable, &error))
     {
       g_task_return_error (task, g_steal_pointer (&error));
       return;
@@ -2371,9 +2403,9 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
       archive_write_data (archive, run->manifest, manifest_length) !=
         (la_ssize_t) manifest_length ||
       !export_directory (archive, canonical_root, "", run->indexed_paths,
-                         &error) ||
+                         cancellable, &error) ||
       (run->icon_path != NULL &&
-      !export_file (archive, run->icon_path, "overrides/icon.png",
+       !export_file (archive, run->icon_path, "overrides/icon.png", cancellable,
                      &error)) ||
       g_cancellable_is_cancelled (cancellable) ||
       archive_write_close (archive) != ARCHIVE_OK)
