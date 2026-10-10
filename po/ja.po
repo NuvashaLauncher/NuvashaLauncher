@@ -283,6 +283,15 @@ msgstr "Minecraft %sの互換性のあるバージョンが見つかりません
 msgid "Add Offline Account"
 msgstr "オフラインアカウントを追加"
 
+msgid "a name can only hold letters, digits and underscores"
+msgstr "名前には英字、数字、アンダースコアのみ使用できます"
+
+msgid "a name cannot be empty"
+msgstr "名前を空にすることはできません"
+
+msgid "a name has to be 3 to 16 characters long"
+msgstr "名前は3文字以上16文字以下にしてください"
+
 msgid "Add"
 msgstr "追加"
 

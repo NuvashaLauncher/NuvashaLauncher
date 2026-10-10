@@ -283,6 +283,15 @@ msgstr "Minecraft %s için uyumlu sürüm bulunamadı."
 msgid "Add Offline Account"
 msgstr "Çevrimdışı hesap ekle"
 
+msgid "a name can only hold letters, digits and underscores"
+msgstr "bir ad yalnızca harf, rakam ve alt çizgi içerebilir"
+
+msgid "a name cannot be empty"
+msgstr "ad boş olamaz"
+
+msgid "a name has to be 3 to 16 characters long"
+msgstr "ad 3 ila 16 karakter uzunluğunda olmalıdır"
+
 msgid "Add"
 msgstr "Ekle"
 

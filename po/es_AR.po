@@ -165,6 +165,15 @@ msgstr "Agregar cuenta de Microsoft"
 msgid "Add Offline Account"
 msgstr "Agregar cuenta sin conexión"
 
+msgid "a name can only hold letters, digits and underscores"
+msgstr "un nombre solo puede contener letras, números y guiones bajos"
+
+msgid "a name cannot be empty"
+msgstr "el nombre no puede estar vacío"
+
+msgid "a name has to be 3 to 16 characters long"
+msgstr "el nombre debe tener entre 3 y 16 caracteres"
+
 msgid "Choose a folder"
 msgstr "Elegí una carpeta"
 

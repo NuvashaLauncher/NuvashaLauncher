@@ -348,6 +348,16 @@ test_entitlements (void)
   g_assert_true (aml_auth_owns_minecraft_from_json (owned, -1, &error));
   g_assert_no_error (error);
 
+  /* Current Minecraft services responses use entitlements/name rather
+   * than the older items/entitlementName shape. */
+  {
+    const char *current =
+      "{\"entitlements\":[{\"name\":\"product_minecraft\"}]}";
+
+    g_assert_true (aml_auth_owns_minecraft_from_json (current, -1, &error));
+    g_assert_no_error (error);
+  }
+
   /* Owning something else is not owning the game: an account of a family
      that only bought the game says what is missing. */
   g_assert_false (aml_auth_owns_minecraft_from_json (not_owned, -1, &error));

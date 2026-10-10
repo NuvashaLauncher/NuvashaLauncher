@@ -283,6 +283,15 @@ msgstr "未找到与Minecraft %s兼容的版本。"
 msgid "Add Offline Account"
 msgstr "添加离线账户"
 
+msgid "a name can only hold letters, digits and underscores"
+msgstr "名称只能包含字母、数字和下划线"
+
+msgid "a name cannot be empty"
+msgstr "名称不能为空"
+
+msgid "a name has to be 3 to 16 characters long"
+msgstr "名称长度必须为 3 到 16 个字符"
+
 msgid "Add"
 msgstr "视需要增加填充棉。"
 
