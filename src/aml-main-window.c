@@ -124,6 +124,7 @@ on_import_modpack_chosen (GObject *source, GAsyncResult *result,
 
     /* Import runs as a background install: its AmlDownload entry appears
      * beside the + button just like a downloaded modpack. */
+    g_object_ref_sink (dialog);
     g_object_unref (dialog);
   }
 
