@@ -53,7 +53,7 @@ on_window_launcher_state (AmlLauncher *launcher G_GNUC_UNUSED,
       return;
     }
 
-  if (self->banner == NULL)
+  if (self->ui.banner == NULL)
     return;
 
   if (detail != NULL && *detail != '\0')
@@ -61,9 +61,9 @@ on_window_launcher_state (AmlLauncher *launcher G_GNUC_UNUSED,
   else
     message = g_strdup (what);
 
-  adw_banner_set_use_markup (ADW_BANNER (self->banner), FALSE);
-  adw_banner_set_title (ADW_BANNER (self->banner), message);
-  adw_banner_set_revealed (ADW_BANNER (self->banner), TRUE);
+  adw_banner_set_use_markup (ADW_BANNER (self->ui.banner), FALSE);
+  adw_banner_set_title (ADW_BANNER (self->ui.banner), message);
+  adw_banner_set_revealed (ADW_BANNER (self->ui.banner), TRUE);
 }
 
 /* The launcher of one instance, made when it is first asked for. It is
@@ -174,7 +174,7 @@ aml_main_window_new (GtkApplication *application, AmlInstanceManager *manager)
   gtk_widget_set_margin_end (scroll, 12);
   gtk_widget_set_hexpand (scroll, TRUE);
   gtk_widget_set_vexpand (scroll, TRUE);
-  gtk_stack_add_named (GTK_STACK (self->stack), scroll, "instances");
+  gtk_stack_add_named (GTK_STACK (self->ui.stack), scroll, "instances");
 
   /* The connection goes away with the window, which outlives every
    * callback it could receive. */
