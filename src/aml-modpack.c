@@ -1137,6 +1137,11 @@ extract_entry (struct archive *archive,
   if (relative[0] == '\0')
     return TRUE;
 
+  /* AML's content indexes are launcher metadata, never game files. */
+  if (g_str_has_prefix (relative, ".index/") ||
+      strstr (relative, "/.index/") != NULL)
+    return TRUE;
+
   /* A directory ends in a /: no name of its own to check against the
    * safety rules, only its contents. */
   {
