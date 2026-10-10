@@ -114,8 +114,8 @@ struct _AmlContentPage
     GtkCheckButton *details_check;
   } project;
 
-  GtkWidget *pick_button;
-  GtkWidget *pick_badge;
+  GtkButton *pick_button;
+  GtkLabel *pick_badge;
 };
 
 

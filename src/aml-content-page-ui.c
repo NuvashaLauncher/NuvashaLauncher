@@ -297,8 +297,8 @@ aml_content_page_build_browse (AmlContentPage *self)
   gtk_widget_set_margin_bottom (foot, 6);
   gtk_box_append (GTK_BOX (box), foot);
 
-  self->pick_button = pick_button;
-  self->pick_badge = pick_badge;
+   self->pick_button = GTK_BUTTON (pick_button);
+   self->pick_badge = GTK_LABEL (pick_badge);
 
   /* Nothing is picked yet: the button starts where the list starts, with
      no number on it and nothing to install. */
