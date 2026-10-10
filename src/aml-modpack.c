@@ -1707,6 +1707,8 @@ install_next (InstallRun *run)
 {
   if (run->current >= run->total)
     {
+      if (run->progress != NULL)
+        run->progress (run->current, run->total, NULL, run->progress_data);
       extract_overrides_async (run->pack->archive_path, run->temp,
                                run->cancellable, overrides_extracted, run);
       return;

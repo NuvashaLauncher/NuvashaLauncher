@@ -425,3 +425,9 @@ msgstr "Version ID"
 
 msgid "Continue"
 msgstr "Continue"
+
+msgid "Downloading files"
+msgstr "Downloading files"
+
+msgid "Extracting files"
+msgstr "Extracting files"
