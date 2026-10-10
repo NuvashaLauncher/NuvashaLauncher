@@ -35,6 +35,7 @@ struct _AmlInstancePage
   AmlInstance *instance;
   AmlSettings *settings;
   AmlLauncher *launcher;
+  gboolean export_include_transient;
 
   /* Borrowed from the widget tree of the page. Cleared in dispose(),
    * because the tree can go away while a running operation still keeps
@@ -742,8 +743,9 @@ on_export_file_chosen (GObject *source, GAsyncResult *result,
                                  _("Exporting modpack"));
         g_object_add_weak_pointer (G_OBJECT (self->export_download),
                                    (gpointer *) &self->export_download);
-        aml_modpack_export_async (self->instance, path, NULL, on_export_done,
-                                  g_object_ref (self));
+        aml_modpack_export_async (self->instance, path,
+                                  self->export_include_transient, NULL,
+                                  on_export_done, g_object_ref (self));
       }
   }
 
@@ -751,9 +753,8 @@ on_export_file_chosen (GObject *source, GAsyncResult *result,
 }
 
 static void
-on_export_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+open_export_file_dialog (AmlInstancePage *self)
 {
-  AmlInstancePage *self = user_data;
   GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
   g_autoptr (GtkFileDialog) dialog = gtk_file_dialog_new ();
   g_autoptr (GtkFileFilter) filter = gtk_file_filter_new ();
@@ -771,6 +772,43 @@ on_export_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   gtk_file_dialog_save (dialog,
                         GTK_IS_WINDOW (root) ? GTK_WINDOW (root) : NULL,
                         NULL, on_export_file_chosen, g_object_ref (self));
+}
+
+static void
+on_export_policy_chosen (GObject *source, GAsyncResult *result,
+                         gpointer user_data)
+{
+  AmlInstancePage *self = user_data;
+  const char *response =
+    adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
+
+  if (g_strcmp0 (response, "cancel") != 0)
+    {
+      self->export_include_transient = g_strcmp0 (response, "include") == 0;
+      open_export_file_dialog (self);
+    }
+
+  g_object_unref (self);
+}
+
+static void
+on_export_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlInstancePage *self = user_data;
+  AdwAlertDialog *alert = ADW_ALERT_DIALOG (
+    adw_alert_dialog_new (_("Include transient files?"),
+                          _("Logs, crash reports, screenshots, caches and "
+                            "downloads are normally excluded.")));
+
+  adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
+  adw_alert_dialog_add_response (alert, "clean", _("Clean Export"));
+  adw_alert_dialog_add_response (alert, "include", _("Include All Files"));
+  adw_alert_dialog_set_response_appearance (alert, "include",
+                                            ADW_RESPONSE_DESTRUCTIVE);
+  adw_alert_dialog_set_default_response (alert, "clean");
+  adw_alert_dialog_set_close_response (alert, "cancel");
+  adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL,
+                           on_export_policy_chosen, g_object_ref (self));
 }
 
 /* ---------------------------------------------------------- *
