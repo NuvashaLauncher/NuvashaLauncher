@@ -17,7 +17,6 @@
 #include "aml-i18n.h"
 
 #include "aml-content-page.h"
-#include "aml-dialogs.h"
 #include "aml-downloads.h"
 #include "aml-version-row.h"
 #include "aml-java.h"
@@ -875,7 +874,6 @@ show_export_metadata (AmlInstancePage *self)
 
   data->page = g_object_ref (self);
   data->dialog = ADW_DIALOG (g_object_ref_sink (adw_dialog_new ()));
-  aml_dialog_set_standard_size (data->dialog);
   data->name = ADW_ENTRY_ROW (adw_entry_row_new ());
   data->summary = ADW_ENTRY_ROW (adw_entry_row_new ());
   data->version = ADW_ENTRY_ROW (adw_entry_row_new ());
