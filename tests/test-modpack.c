@@ -1008,6 +1008,22 @@ test_export_import_round_trip (void)
   g_assert_no_error (error);
   g_assert_true (g_file_test (archive, G_FILE_TEST_IS_REGULAR));
 
+  {
+    struct archive *reader = archive_read_new ();
+    struct archive_entry *entry = NULL;
+    guint icon_entries = 0;
+
+    g_assert_cmpint (archive_read_support_format_zip (reader), ==, ARCHIVE_OK);
+    g_assert_cmpint (archive_read_open_filename (reader, archive, 10240), ==,
+                     ARCHIVE_OK);
+    while (archive_read_next_header (reader, &entry) == ARCHIVE_OK)
+      if (g_strcmp0 (archive_entry_pathname (entry), "overrides/icon.png") ==
+          0)
+        icon_entries++;
+    g_assert_cmpint (archive_read_free (reader), ==, ARCHIVE_OK);
+    g_assert_cmpuint (icon_entries, ==, 1);
+  }
+
   pack = aml_modpack_new_from_zip (archive, &error);
   g_assert_no_error (error);
   g_assert_nonnull (pack);

@@ -2273,6 +2273,14 @@ export_directory (ExportRun *run, struct archive *archive, const char *root,
           g_autofree char *target =
             g_build_filename ("overrides", child_relative, NULL);
 
+          /* The instance icon is written explicitly below so it is also
+           * available to PrismLauncher-compatible importers. Do not emit
+           * the same source while walking the instance, or the ZIP gets
+           * duplicate overrides/icon.png entries. */
+          if (run->icon_path != NULL &&
+              g_strcmp0 (source, run->icon_path) == 0)
+            continue;
+
           if (g_hash_table_contains (indexed_paths, child_relative))
             continue;
 
