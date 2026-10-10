@@ -426,6 +426,36 @@ modify_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   for (gint i = (gint) entries->len - 1; i >= 0; i--)
     {
       AmlContentIndexEntry *old = g_ptr_array_index (entries, i);
+
+      if (run->entry != NULL &&
+          g_strcmp0 (old->filename, run->entry->filename) == 0)
+        {
+          /* Repair updates commonly know the project name and icon but not
+           * the hashes or URL recorded when the file was installed. Keep
+           * those export-critical fields instead of erasing them. */
+          if (run->entry->hash512 == NULL || *run->entry->hash512 == '\0')
+            {
+              g_clear_pointer (&run->entry->hash512, g_free);
+              run->entry->hash512 = g_strdup (old->hash512);
+            }
+          if (run->entry->download_url == NULL ||
+              *run->entry->download_url == '\0')
+            {
+              g_clear_pointer (&run->entry->download_url, g_free);
+              run->entry->download_url = g_strdup (old->download_url);
+            }
+          if (run->entry->env_client == NULL || *run->entry->env_client == '\0')
+            {
+              g_clear_pointer (&run->entry->env_client, g_free);
+              run->entry->env_client = g_strdup (old->env_client);
+            }
+          if (run->entry->env_server == NULL || *run->entry->env_server == '\0')
+            {
+              g_clear_pointer (&run->entry->env_server, g_free);
+              run->entry->env_server = g_strdup (old->env_server);
+            }
+        }
+
       if ((run->entry != NULL && g_strcmp0 (old->filename,
                                              run->entry->filename) == 0) ||
           (run->remove_filename != NULL &&
