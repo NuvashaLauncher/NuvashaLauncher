@@ -27,11 +27,11 @@ struct _AmlUsersPopover
 
   AmlAccounts *accounts;
 
-  GtkWidget *list_box;      /* the accounts, one row each */
-  GtkWidget *list_scroller; /* what holds the list, hidden when it is empty */
-  GtkWidget *error_label;   /* what went wrong, when something did */
-  GtkWidget *avatar_image;
-  GtkWidget *button_content; /* what the header button shows */
+  GtkListBox *list_box;      /* the accounts, one row each */
+  GtkScrolledWindow *list_scroller; /* what holds the list */
+  GtkLabel *error_label;     /* what went wrong, when something did */
+  GtkImage *avatar_image;
+  GtkBox *button_content;    /* what the header button shows */
 
   /* Avatars are pictures of the internet: they are fetched after the row
      that wants one is on screen, and a fetch that is still running when
@@ -198,14 +198,14 @@ static void
 show_error (AmlUsersPopover *self, const char *message)
 {
   gtk_label_set_text (GTK_LABEL (self->error_label), message);
-  gtk_widget_set_visible (self->error_label, TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (self->error_label), TRUE);
 }
 
 static void
 clear_error (AmlUsersPopover *self)
 {
   gtk_label_set_text (GTK_LABEL (self->error_label), NULL);
-  gtk_widget_set_visible (self->error_label, FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->error_label), FALSE);
 }
 
 /* The account a widget in a row is about, which is the id of the account
@@ -452,13 +452,13 @@ rebuild (AmlUsersPopover *self)
   g_clear_object (&self->avatars);
   self->avatars = g_cancellable_new ();
 
-  while ((child = gtk_widget_get_first_child (self->list_box)) != NULL)
+  while ((child = gtk_widget_get_first_child (GTK_WIDGET (self->list_box))) != NULL)
     gtk_list_box_remove (GTK_LIST_BOX (self->list_box), child);
 
   /* With no accounts the list is not there at all: an empty boxed list
      still draws a blank card, and the scroller around it leaves a gap
      above the two buttons that add one. */
-  gtk_widget_set_visible (self->list_scroller, accounts->len > 0);
+  gtk_widget_set_visible (GTK_WIDGET (self->list_scroller), accounts->len > 0);
 
   for (guint i = 0; i < accounts->len; i++)
     append_account_row (self, g_ptr_array_index (accounts, i));
@@ -499,17 +499,17 @@ aml_users_popover_init (AmlUsersPopover *self)
       GTK_SCROLLED_WINDOW (scrolled), TRUE);
   gtk_widget_set_size_request (rows, USERS_ROWS_WIDTH, -1);
 
-  self->list_box = rows;
-  self->list_scroller = scrolled;
+  self->list_box = GTK_LIST_BOX (rows);
+  self->list_scroller = GTK_SCROLLED_WINDOW (scrolled);
 
-  self->error_label = gtk_label_new (NULL);
+  self->error_label = GTK_LABEL (gtk_label_new (NULL));
   gtk_label_set_wrap (GTK_LABEL (self->error_label), TRUE);
   gtk_label_set_justify (GTK_LABEL (self->error_label), GTK_JUSTIFY_CENTER);
-  gtk_widget_add_css_class (self->error_label, "error");
-  gtk_widget_set_margin_start (self->error_label, 12);
-  gtk_widget_set_margin_end (self->error_label, 12);
-  gtk_widget_set_margin_bottom (self->error_label, 6);
-  gtk_widget_set_visible (self->error_label, FALSE);
+  gtk_widget_add_css_class (GTK_WIDGET (self->error_label), "error");
+  gtk_widget_set_margin_start (GTK_WIDGET (self->error_label), 12);
+  gtk_widget_set_margin_end (GTK_WIDGET (self->error_label), 12);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (self->error_label), 6);
+  gtk_widget_set_visible (GTK_WIDGET (self->error_label), FALSE);
 
   /* The two ways of having an account. The first one signs in without a
      password: the user types a code into a page of Microsoft's own. */
@@ -528,20 +528,20 @@ aml_users_popover_init (AmlUsersPopover *self)
   gtk_box_append (GTK_BOX (content), scrolled);
   gtk_box_append (GTK_BOX (content), microsoft);
   gtk_box_append (GTK_BOX (content), offline);
-  gtk_box_append (GTK_BOX (content), self->error_label);
+  gtk_box_append (GTK_BOX (content), GTK_WIDGET (self->error_label));
 
   gtk_popover_set_child (GTK_POPOVER (self), content);
 
   /* What the header says about who is playing: the avatar of the active
      account, or the default one when there is none. It is filled from the
      same store as the list, so the two cannot disagree. */
-  self->avatar_image = gtk_image_new_from_icon_name ("avatar-default-symbolic");
+  self->avatar_image = GTK_IMAGE (gtk_image_new_from_icon_name ("avatar-default-symbolic"));
   gtk_image_set_pixel_size (GTK_IMAGE (self->avatar_image),
                             HEADER_AVATAR_SIZE);
-  gtk_widget_set_valign (self->avatar_image, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (GTK_WIDGET (self->avatar_image), GTK_ALIGN_CENTER);
 
-  self->button_content = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-  gtk_box_append (GTK_BOX (self->button_content), self->avatar_image);
+  self->button_content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+  gtk_box_append (GTK_BOX (self->button_content), GTK_WIDGET (self->avatar_image));
 }
 
 static void
@@ -694,5 +694,5 @@ aml_users_popover_get_button_content (AmlUsersPopover *self)
   /* The same widget every time: a caller that asked twice is holding two
      references to one button, which is what it would want, and never two
      buttons over one avatar. */
-  return g_object_ref (self->button_content);
+  return GTK_WIDGET (g_object_ref (self->button_content));
 }
