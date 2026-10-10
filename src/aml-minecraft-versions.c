@@ -13,6 +13,7 @@
  * g_get_user_cache_dir()/AML/. */
 
 #include "aml-minecraft-versions.h"
+#include "aml-task.h"
 
 #include "aml-download.h"
 
@@ -1784,7 +1785,7 @@ typedef struct
 
 typedef struct
 {
-  GTask *task;
+  AmlTaskSequence *sequence;
   char *path;       /* cache file of the document being read */
   char *next_id;    /* the version to fetch next, NULL when there is none */
   AmlVersionManifest *manifest;
@@ -1808,8 +1809,15 @@ load_request_free (LoadRequest *request)
   g_clear_object (&request->manifest);
   g_clear_object (&request->merged);
   g_clear_pointer (&request->seen, g_hash_table_unref);
-  g_object_unref (request->task);
   g_free (request);
+}
+
+static void load_step (LoadRequest *request);
+
+static void
+load_sequence_step (GTask *task G_GNUC_UNUSED, gpointer user_data)
+{
+  load_step (user_data);
 }
 
 static void
@@ -1910,9 +1918,6 @@ aml_version_manifest_fetch_finish (GAsyncResult *result, GError **error)
 }
 
 static void
-load_step (LoadRequest *request);
-
-static void
 load_file_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
 {
   LoadRequest *request = user_data;
@@ -1924,10 +1929,11 @@ load_file_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
   if (!g_file_load_contents_finish (G_FILE (source), result, &contents,
                                     &length, NULL, &error))
     {
-      g_task_return_new_error (request->task, AML_MC_ERROR, AML_MC_ERROR_IO,
-                               "the downloaded version cannot be read: %s",
-                               error->message);
-      load_request_free (request);
+      aml_task_sequence_return_error (
+        request->sequence,
+        g_error_new (AML_MC_ERROR, AML_MC_ERROR_IO,
+                     "the downloaded version cannot be read: %s",
+                     error->message));
       return;
     }
 
@@ -1936,8 +1942,8 @@ load_file_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
 
   if (document == NULL)
     {
-      g_task_return_error (request->task, g_steal_pointer (&error));
-      load_request_free (request);
+      aml_task_sequence_return_error (request->sequence,
+                                      g_steal_pointer (&error));
       return;
     }
 
@@ -1957,9 +1963,10 @@ load_file_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
 
   if (request->merged->inherits_from == NULL)
     {
-      g_task_return_pointer (request->task, request->merged, g_object_unref);
-      request->merged = NULL;
-      load_request_free (request);
+      AmlVersionDescription *result = g_steal_pointer (&request->merged);
+
+      aml_task_sequence_return_pointer (request->sequence, result,
+                                        g_object_unref);
       return;
     }
 
@@ -1967,7 +1974,7 @@ load_file_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
   g_clear_pointer (&request->path, g_free);
   request->next_id = g_strdup (request->merged->inherits_from);
 
-  load_step (request);
+  aml_task_sequence_next (request->sequence);
 }
 
 static void
@@ -1981,12 +1988,14 @@ load_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
 
   if (!aml_download_file_finish (result, &error))
     {
-      g_task_return_error (request->task, g_steal_pointer (&error));
-      load_request_free (request);
+      aml_task_sequence_return_error (request->sequence,
+                                      g_steal_pointer (&error));
       return;
     }
 
-  g_file_load_contents_async (file, g_task_get_cancellable (request->task),
+  g_file_load_contents_async (
+    file,
+    g_task_get_cancellable (aml_task_sequence_get_task (request->sequence)),
                               load_file_loaded, request);
 }
 
@@ -2003,21 +2012,21 @@ load_step (LoadRequest *request)
 
   if (entry == NULL)
     {
-      g_task_return_new_error (request->task, AML_MC_ERROR,
-                               AML_MC_ERROR_NOT_FOUND,
-                               "the manifest knows no version \"%s\"",
-                               request->next_id);
-      load_request_free (request);
+      aml_task_sequence_return_error (
+        request->sequence,
+        g_error_new (AML_MC_ERROR, AML_MC_ERROR_NOT_FOUND,
+                     "the manifest knows no version \"%s\"",
+                     request->next_id));
       return;
     }
 
   if (g_hash_table_contains (request->seen, request->next_id))
     {
-      g_task_return_new_error (request->task, AML_MC_ERROR,
-                               AML_MC_ERROR_CYCLE,
-                               "\"%s\" inherits from a version that inherits "
-                               "from it", request->next_id);
-      load_request_free (request);
+      aml_task_sequence_return_error (
+        request->sequence,
+        g_error_new (AML_MC_ERROR, AML_MC_ERROR_CYCLE,
+                     "\"%s\" inherits from a version that inherits from it",
+                     request->next_id));
       return;
     }
 
@@ -2026,8 +2035,8 @@ load_step (LoadRequest *request)
 
   if (!version_cache_path (request->next_id, &path, &error))
     {
-      g_task_return_error (request->task, g_steal_pointer (&error));
-      load_request_free (request);
+      aml_task_sequence_return_error (request->sequence,
+                                      g_steal_pointer (&error));
       return;
     }
 
@@ -2037,7 +2046,9 @@ load_step (LoadRequest *request)
    * enough, so a damaged one is downloaded again. */
   aml_download_file_async (entry->url, request->path, entry->sha1,
                            G_CHECKSUM_SHA1,
-                           g_task_get_cancellable (request->task), NULL,
+                           g_task_get_cancellable (
+                             aml_task_sequence_get_task (request->sequence)),
+                           NULL,
                            load_downloaded, request);
 }
 
@@ -2049,22 +2060,20 @@ aml_version_load_async (AmlVersionManifest *manifest,
                         gpointer            user_data)
 {
   LoadRequest *request;
-  GTask *task;
-
   g_return_if_fail (AML_IS_VERSION_MANIFEST (manifest));
   g_return_if_fail (version_id != NULL);
 
-  task = g_task_new (NULL, cancellable, callback, user_data);
-  g_task_set_check_cancellable (task, FALSE);
-
   request = g_new0 (LoadRequest, 1);
-  request->task = task;
   request->manifest = g_object_ref (manifest);
   request->seen = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
   request->next_id = g_strdup (version_id);
 
-  /* The first step can already fail, which frees the request. */
-  load_step (request);
+  request->sequence =
+    aml_task_sequence_new (cancellable, callback, user_data,
+                           load_sequence_step, request,
+                           (GDestroyNotify) load_request_free);
+
+  aml_task_sequence_start (request->sequence);
 }
 
 AmlVersionDescription *
