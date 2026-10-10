@@ -370,6 +370,16 @@ typedef struct {
   gpointer user_data;
 } ModifyRun;
 
+/* Index updates are read/modify/write operations. Keeping them in one queue
+ * prevents two metadata repairs from loading the same old index and letting
+ * the later write discard the entry added by the first one. */
+static GQueue pending_modifications = G_QUEUE_INIT;
+static gboolean modification_active;
+
+static void modify_start_next (void);
+static void modify_written (GObject *source, GAsyncResult *result,
+                            gpointer user_data);
+
 static void
 modify_free (ModifyRun *run)
 {
@@ -468,9 +478,35 @@ modify_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   /* write_entries_async owns the completion callback; keep the task's
    * callback and user data, then release this modifier after it starts. */
   write_entries_async (run->instance_directory, run->type, entries,
-                       run->cancellable, run->callback, run->user_data);
+                       run->cancellable, modify_written, run);
   g_clear_pointer (&entries, g_ptr_array_unref);
+}
+
+static void
+modify_written (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  ModifyRun *run = user_data;
+
+  if (run->callback != NULL)
+    run->callback (source, result, run->user_data);
+
   modify_free (run);
+  modification_active = FALSE;
+  modify_start_next ();
+}
+
+static void
+modify_start_next (void)
+{
+  ModifyRun *run = NULL;
+
+  if (modification_active || g_queue_is_empty (&pending_modifications))
+    return;
+
+  run = g_queue_pop_head (&pending_modifications);
+  modification_active = TRUE;
+  aml_content_index_load_async (run->instance_directory, run->type,
+                                run->cancellable, modify_loaded, run);
 }
 
 static void
@@ -487,8 +523,8 @@ modify_async (const char *instance_directory, AmlContentType type,
   run->cancellable = cancellable != NULL ? g_object_ref (cancellable) : NULL;
   run->callback = callback;
   run->user_data = user_data;
-  aml_content_index_load_async (instance_directory, type, cancellable,
-                                modify_loaded, run);
+  g_queue_push_tail (&pending_modifications, run);
+  modify_start_next ();
 }
 
 void

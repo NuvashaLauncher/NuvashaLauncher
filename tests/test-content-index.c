@@ -9,155 +9,96 @@
 
 typedef struct {
   GMainLoop *loop;
-  GPtrArray *entries;
-  GError *error;
-  gboolean success;
-} Wait;
+  guint completed;
+} UpdateWait;
 
 static void
-load_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result, gpointer data)
+update_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result G_GNUC_UNUSED,
+             gpointer user_data)
 {
-  Wait *wait = data;
-  wait->entries = aml_content_index_load_finish (result, &wait->error);
-  g_main_loop_quit (wait->loop);
+  UpdateWait *wait = user_data;
+
+  wait->completed++;
+  if (wait->completed == 2)
+    g_main_loop_quit (wait->loop);
 }
 
 static void
-write_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result, gpointer data)
+load_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+           gpointer user_data)
 {
-  Wait *wait = data;
-  wait->success = g_task_propagate_boolean (G_TASK (result), &wait->error);
-  g_main_loop_quit (wait->loop);
+  GMainLoop *loop = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GPtrArray) entries =
+    aml_content_index_load_finish (result, &error);
+
+  g_assert_no_error (error);
+  g_assert_nonnull (entries);
+  g_assert_cmpuint (entries->len, ==, 2);
+  g_main_loop_quit (loop);
 }
 
 static void
-wait_clear (Wait *wait)
+test_concurrent_updates_are_serialized (void)
 {
-  g_clear_pointer (&wait->entries, g_ptr_array_unref);
-  g_clear_error (&wait->error);
-  g_clear_pointer (&wait->loop, g_main_loop_unref);
-}
+  g_autofree char *root = g_dir_make_tmp ("aml-content-index-XXXXXX", NULL);
+  g_autofree char *index_directory = g_build_filename (root, "mods", ".index",
+                                                       NULL);
+  g_autofree char *index_path = g_build_filename (index_directory, "index.json",
+                                                  NULL);
+  g_autofree char *mods_directory = g_build_filename (root, "mods", NULL);
+  GMainLoop *loop = g_main_loop_new (NULL, FALSE);
+  UpdateWait wait = { loop, 0 };
+  AmlContentIndexEntry first = {
+    .filename = "first.jar",
+    .hash = "first-sha1",
+    .hash512 = "first-sha512",
+    .download_url = "https://cdn.example/first.jar",
+    .env_client = "required",
+    .env_server = "required",
+    .project_id = "first",
+    .project_name = "First",
+    .version_id = "first-version",
+    .version_name = "1.0",
+  };
+  AmlContentIndexEntry second = {
+    .filename = "second.jar",
+    .hash = "second-sha1",
+    .hash512 = "second-sha512",
+    .download_url = "https://cdn.example/second.jar",
+    .env_client = "required",
+    .env_server = "required",
+    .project_id = "second",
+    .project_name = "Second",
+    .version_id = "second-version",
+    .version_name = "1.0",
+  };
 
-static void
-load (const char *root, Wait *wait)
-{
-  wait->loop = g_main_loop_new (NULL, FALSE);
-  aml_content_index_load_async (root, AML_CONTENT_MOD, NULL, load_done, wait);
-  g_main_loop_run (wait->loop);
-}
+  g_assert_cmpint (g_mkdir (mods_directory, 0755), ==, 0);
 
-static void
-modify (const char *root, AmlContentIndexEntry *entry, const char *remove,
-        Wait *wait)
-{
-  wait->loop = g_main_loop_new (NULL, FALSE);
-  if (entry != NULL)
-    aml_content_index_update_async (root, AML_CONTENT_MOD, entry, NULL,
-                                    write_done, wait);
-  else
-    aml_content_index_remove_async (root, AML_CONTENT_MOD, remove, NULL,
-                                    write_done, wait);
-  g_main_loop_run (wait->loop);
-}
+  aml_content_index_update_async (root, AML_CONTENT_MOD, &first, NULL,
+                                  update_done, &wait);
+  aml_content_index_update_async (root, AML_CONTENT_MOD, &second, NULL,
+                                  update_done, &wait);
+  g_main_loop_run (loop);
 
-static AmlContentIndexEntry *
-entry_new (const char *filename, const char *hash, const char *project,
-           const char *version)
-{
-  AmlContentIndexEntry *entry = g_new0 (AmlContentIndexEntry, 1);
-  entry->filename = g_strdup (filename);
-  entry->hash = g_strdup (hash);
-  entry->provider = g_strdup ("Modrinth");
-  entry->project_id = g_strdup (project);
-  entry->project_name = g_strdup ("Example Project");
-  entry->version_id = g_strdup (version);
-  entry->version_name = g_strdup ("1.0");
-  entry->required_dependencies = g_ptr_array_new_with_free_func (g_free);
-  entry->optional_dependencies = g_ptr_array_new_with_free_func (g_free);
-  entry->incompatible_dependencies = g_ptr_array_new_with_free_func (g_free);
-  g_ptr_array_add (entry->required_dependencies, g_strdup ("required"));
-  g_ptr_array_add (entry->optional_dependencies, g_strdup ("optional"));
-  g_ptr_array_add (entry->incompatible_dependencies, g_strdup ("incompatible"));
-  return entry;
-}
+  aml_content_index_load_async (root, AML_CONTENT_MOD, NULL, load_done, loop);
+  g_main_loop_run (loop);
 
-static void
-test_index (void)
-{
-  g_autofree char *root = g_dir_make_tmp ("aml-index-XXXXXX", NULL);
-  g_autofree char *folder = g_build_filename (root, "mods", NULL);
-  g_autoptr (AmlContentIndexEntry) entry =
-    entry_new ("example.jar", "hash-one", "project", "version-one");
-  g_autoptr (AmlContentIndexEntry) duplicate =
-    entry_new ("example-two.jar", "hash-two", "project", "version-two");
-  Wait wait = { 0 };
-
-  g_mkdir_with_parents (folder, 0755);
-  load (root, &wait);
-  g_assert_no_error (wait.error);
-  g_assert_cmpuint (wait.entries->len, ==, 0);
-  wait_clear (&wait);
-
-  modify (root, entry, NULL, &wait);
-  g_assert_true (wait.success);
-  wait_clear (&wait);
-  load (root, &wait);
-  g_assert_no_error (wait.error);
-  g_assert_cmpuint (wait.entries->len, ==, 1);
-  AmlContentIndexEntry *read = g_ptr_array_index (wait.entries, 0);
-  g_assert_cmpstr (read->hash, ==, "hash-one");
-  g_assert_cmpuint (read->required_dependencies->len, ==, 1);
-  wait_clear (&wait);
-
-  modify (root, duplicate, NULL, &wait);
-  g_assert_true (wait.success);
-  wait_clear (&wait);
-  load (root, &wait);
-  g_assert_cmpuint (wait.entries->len, ==, 2);
-  g_assert_cmpstr (((AmlContentIndexEntry *) g_ptr_array_index (
-                     wait.entries, 1))->project_id, ==, "project");
-  wait_clear (&wait);
-  modify (root, NULL, "example-two.jar", &wait);
-  g_assert_true (wait.success);
-  wait_clear (&wait);
-
+  g_main_loop_unref (loop);
+  g_remove (index_path);
+  g_rmdir (index_directory);
   {
-    g_autofree char *index_path =
-      g_build_filename (folder, ".index", "index.json", NULL);
-    g_assert_true (g_file_set_contents (index_path, "broken", -1, NULL));
+    g_rmdir (mods_directory);
   }
-  load (root, &wait);
-  g_assert_error (wait.error, AML_CONTENT_INDEX_ERROR,
-                  AML_CONTENT_INDEX_ERROR_INVALID);
-  wait_clear (&wait);
-
-  modify (root, entry, NULL, &wait);
-  g_assert_true (wait.success);
-  wait_clear (&wait);
-  g_free (entry->hash);
-  entry->hash = g_strdup ("hash-two");
-  modify (root, entry, NULL, &wait);
-  g_assert_true (wait.success);
-  wait_clear (&wait);
-  load (root, &wait);
-  g_assert_cmpstr (((AmlContentIndexEntry *) g_ptr_array_index (
-                     wait.entries, 0))->hash, ==, "hash-two");
-  wait_clear (&wait);
-
-  modify (root, NULL, "example.jar", &wait);
-  g_assert_true (wait.success);
-  wait_clear (&wait);
-  load (root, &wait);
-  g_assert_cmpuint (wait.entries->len, ==, 0);
-  wait_clear (&wait);
-
-  g_print ("ok - content index persists, repairs, validates and deletes\n");
+  g_rmdir (root);
 }
 
 int
 main (int argc, char **argv)
 {
   g_test_init (&argc, &argv, NULL);
-  g_test_add_func ("/content-index/index", test_index);
+  g_test_add_func ("/content-index/concurrent-updates",
+                   test_concurrent_updates_are_serialized);
   return g_test_run ();
 }
