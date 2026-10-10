@@ -3549,20 +3549,13 @@ on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
                GdkModifierType state G_GNUC_UNUSED, gpointer user_data)
 {
   AmlContentPage *self = user_data;
-  GtkWidget *entry = self->search_entry;
-
-  if (entry == NULL || !gtk_widget_has_focus (entry))
-    entry = self->installed_search_entry;
 
   if (keyval != GDK_KEY_Escape)
     return GDK_EVENT_PROPAGATE;
 
-  if (entry != NULL)
-    {
-      gtk_editable_set_text (GTK_EDITABLE (entry), "");
-      gtk_widget_set_visible (entry, FALSE);
-      gtk_widget_grab_focus (GTK_WIDGET (self));
-    }
+  if (*gtk_editable_get_text (
+        GTK_EDITABLE (self->search_entry)) != '\0')
+    gtk_editable_set_text (GTK_EDITABLE (self->search_entry), "");
 
   return GDK_EVENT_STOP;
 }
@@ -3584,29 +3577,6 @@ on_content_search_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   AmlContentPage *self = user_data;
   GtkWidget *entry = active_search_entry (self);
 
-  if (entry != NULL)
-    {
-      gboolean open = gtk_widget_get_visible (entry);
-
-      gtk_widget_set_visible (entry, !open);
-      if (!open)
-        gtk_widget_grab_focus (entry);
-      else
-        {
-          gtk_editable_set_text (GTK_EDITABLE (entry), "");
-          gtk_widget_grab_focus (GTK_WIDGET (self));
-        }
-    }
-}
-
-void
-aml_content_page_focus_search (AmlContentPage *self)
-{
-  GtkWidget *entry;
-
-  g_return_if_fail (AML_IS_CONTENT_PAGE (self));
-
-  entry = active_search_entry (self);
   if (entry != NULL)
     {
       gtk_widget_set_visible (entry, TRUE);
@@ -4386,15 +4356,8 @@ build_installed (AmlContentPage *self)
     gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_bar),
                                             _("Search"));
     gtk_widget_set_visible (search_bar, FALSE);
-    g_signal_connect (search_bar, "changed",
-                      G_CALLBACK (on_installed_search_changed), self);
-    {
-      GtkEventController *keys = gtk_event_controller_key_new ();
-
-      gtk_event_controller_set_propagation_phase (keys, GTK_PHASE_BUBBLE);
-      gtk_widget_add_controller (search_bar, keys);
-      g_signal_connect (keys, "key-pressed", G_CALLBACK (on_search_key), self);
-    }
+   g_signal_connect (search_bar, "changed",
+                     G_CALLBACK (on_installed_search_changed), self);
     gtk_box_append (GTK_BOX (actions), search_button);
     gtk_box_append (GTK_BOX (actions), search_bar);
 
@@ -4776,7 +4739,7 @@ build_bar (AmlContentPage *self)
   self->switcher_installed =
      switcher_button ("view-list-symbolic", "Installed");
    self->switcher_browse =
-     switcher_button ("web-browser-symbolic", "Browse");
+     switcher_button ("applications-games-symbolic", "Browse");
 
   gtk_toggle_button_set_group (GTK_TOGGLE_BUTTON (self->switcher_browse),
                                GTK_TOGGLE_BUTTON (self->switcher_installed));
