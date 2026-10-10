@@ -15,7 +15,7 @@ on_create_instance (GSimpleAction *action G_GNUC_UNUSED,
 {
   AmlMainWindow *self = user_data;
   GtkWidget *dialog = GTK_WIDGET (
-    aml_create_instance_dialog_new (self->manager, self->settings));
+    aml_create_instance_dialog_new (self->services.manager, self->services.settings));
 
   adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
 }
@@ -27,7 +27,7 @@ on_download_modpack (GSimpleAction *action G_GNUC_UNUSED,
 {
   AmlMainWindow *self = user_data;
   GtkWidget *dialog = GTK_WIDGET (aml_download_modpack_dialog_new (
-    self->manager));
+    self->services.manager));
 
   adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
 }
@@ -64,7 +64,7 @@ on_import_modpack_chosen (GObject *source, GAsyncResult *result,
       }
 
     GtkWidget *dialog = GTK_WIDGET (
-      aml_download_modpack_dialog_new_for_file (self->manager, path));
+      aml_download_modpack_dialog_new_for_file (self->services.manager, path));
 
     /* Import runs as a background install: its AmlDownload entry appears
      * beside the + button just like a downloaded modpack. */
@@ -105,13 +105,13 @@ on_show_snapshots_toggled (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
   AmlMainWindow *self = user_data;
   AdwSwitchRow *row = ADW_SWITCH_ROW (object);
   gboolean active = adw_switch_row_get_active (row);
-  gboolean stored = aml_settings_get_show_snapshots (self->settings);
+  gboolean stored = aml_settings_get_show_snapshots (self->services.settings);
   g_autoptr (GError) error = NULL;
 
   if (active == stored)
     return;
 
-  if (aml_settings_set_show_snapshots (self->settings, active, &error))
+  if (aml_settings_set_show_snapshots (self->services.settings, active, &error))
     return;
 
   adw_switch_row_set_active (row, stored);
@@ -129,14 +129,14 @@ on_log_limit_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
   AdwSpinRow *row = ADW_SPIN_ROW (object);
   guint limit = (guint) adw_spin_row_get_value (row);
 
-  if (limit == aml_settings_get_log_line_limit (self->settings))
+  if (limit == aml_settings_get_log_line_limit (self->services.settings))
     return;
 
   /* A limit that cannot be written leaves the row showing the number the
      settings file holds. */
-  if (!aml_settings_set_log_line_limit (self->settings, limit, NULL))
+  if (!aml_settings_set_log_line_limit (self->services.settings, limit, NULL))
     adw_spin_row_set_value (
-      row, aml_settings_get_log_line_limit (self->settings));
+      row, aml_settings_get_log_line_limit (self->services.settings));
 }
 
 /* Same contract as the snapshots switch: written at once, and put back
@@ -150,12 +150,12 @@ on_show_unstable_loaders_toggled (GObject *object,
   AdwSwitchRow *row = ADW_SWITCH_ROW (object);
   gboolean active = adw_switch_row_get_active (row);
 
-  if (active == aml_settings_get_show_unstable_loaders (self->settings))
+  if (active == aml_settings_get_show_unstable_loaders (self->services.settings))
     return;
 
-  if (!aml_settings_set_show_unstable_loaders (self->settings, active, NULL))
+  if (!aml_settings_set_show_unstable_loaders (self->services.settings, active, NULL))
     adw_switch_row_set_active (
-      row, aml_settings_get_show_unstable_loaders (self->settings));
+      row, aml_settings_get_show_unstable_loaders (self->services.settings));
 }
 
 static void
@@ -167,12 +167,12 @@ on_open_logs_after_crash_toggled (GObject *object,
   AdwSwitchRow *row = ADW_SWITCH_ROW (object);
   gboolean active = adw_switch_row_get_active (row);
 
-  if (active == aml_settings_get_open_logs_after_crash (self->settings))
+  if (active == aml_settings_get_open_logs_after_crash (self->services.settings))
     return;
 
-  if (!aml_settings_set_open_logs_after_crash (self->settings, active, NULL))
+  if (!aml_settings_set_open_logs_after_crash (self->services.settings, active, NULL))
     adw_switch_row_set_active (
-      row, aml_settings_get_open_logs_after_crash (self->settings));
+      row, aml_settings_get_open_logs_after_crash (self->services.settings));
 }
 
 static void
@@ -184,12 +184,12 @@ on_export_metadata_toggled (GObject *object,
   AdwSwitchRow *row = ADW_SWITCH_ROW (object);
   gboolean active = adw_switch_row_get_active (row);
 
-  if (active == aml_settings_get_export_metadata (self->settings))
+  if (active == aml_settings_get_export_metadata (self->services.settings))
     return;
 
-  if (!aml_settings_set_export_metadata (self->settings, active, NULL))
+  if (!aml_settings_set_export_metadata (self->services.settings, active, NULL))
     adw_switch_row_set_active (
-      row, aml_settings_get_export_metadata (self->settings));
+      row, aml_settings_get_export_metadata (self->services.settings));
 }
 
 static void
@@ -206,7 +206,7 @@ on_language_selected (GObject *object,
   if (selected >= length)
     return;
 
-  aml_settings_set_language (self->settings, languages[selected].code, NULL);
+  aml_settings_set_language (self->services.settings, languages[selected].code, NULL);
 }
 
 static void
@@ -218,13 +218,13 @@ on_cache_modrinth_api_responses_toggled (GObject *object,
   AdwSwitchRow *row = ADW_SWITCH_ROW (object);
   gboolean active = adw_switch_row_get_active (row);
 
-  if (active == aml_settings_get_cache_modrinth_api_responses (self->settings))
+  if (active == aml_settings_get_cache_modrinth_api_responses (self->services.settings))
     return;
 
-  if (!aml_settings_set_cache_modrinth_api_responses (self->settings, active,
+  if (!aml_settings_set_cache_modrinth_api_responses (self->services.settings, active,
                                                       NULL))
     adw_switch_row_set_active (
-      row, aml_settings_get_cache_modrinth_api_responses (self->settings));
+      row, aml_settings_get_cache_modrinth_api_responses (self->services.settings));
 }
 
 static void
@@ -243,13 +243,13 @@ on_cache_expiration_selected (GObject *object,
   guint selected = adw_combo_row_get_selected (row);
 
   if (selected >= G_N_ELEMENTS (values) ||
-      values[selected] == aml_settings_get_cache_expiration (self->settings))
+      values[selected] == aml_settings_get_cache_expiration (self->services.settings))
     return;
 
-  if (!aml_settings_set_cache_expiration (self->settings, values[selected], NULL))
+  if (!aml_settings_set_cache_expiration (self->services.settings, values[selected], NULL))
     {
       AmlSettingsCacheExpiration current =
-        aml_settings_get_cache_expiration (self->settings);
+        aml_settings_get_cache_expiration (self->services.settings);
       guint current_index = 0;
 
       for (guint i = 0; i < G_N_ELEMENTS (values); i++)
@@ -375,7 +375,7 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   adw_action_row_set_subtitle (ADW_ACTION_ROW (export_metadata_row),
                                _("Show name, summary and version fields before exporting."));
   adw_switch_row_set_active (ADW_SWITCH_ROW (export_metadata_row),
-                             aml_settings_get_export_metadata (self->settings));
+                             aml_settings_get_export_metadata (self->services.settings));
   g_signal_connect (export_metadata_row, "notify::active",
                     G_CALLBACK (on_export_metadata_toggled), self);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (general_group),
@@ -384,7 +384,7 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
                                  _("Show Snapshots"));
   adw_switch_row_set_active (ADW_SWITCH_ROW (row),
-                             aml_settings_get_show_snapshots (self->settings));
+                             aml_settings_get_show_snapshots (self->services.settings));
 
   /* Connected after the value was set, so opening the dialog never
    * writes anything by itself. */
@@ -398,7 +398,7 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
                                   _("Show unstable Mod Loader versions"));
   adw_switch_row_set_active (
     ADW_SWITCH_ROW (unstable_row),
-    aml_settings_get_show_unstable_loaders (self->settings));
+    aml_settings_get_show_unstable_loaders (self->services.settings));
   g_signal_connect (unstable_row, "notify::active",
                     G_CALLBACK (on_show_unstable_loaders_toggled), self);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (versions_group),
@@ -413,7 +413,7 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
     const AmlLanguage *languages = aml_i18n_languages (&length);
     GtkStringList *model = gtk_string_list_new (NULL);
     guint selected = 0;
-    const char *current = aml_settings_get_language (self->settings);
+    const char *current = aml_settings_get_language (self->services.settings);
 
     for (gsize i = 0; i < length; i++)
       {
@@ -437,7 +437,7 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   }
 
   limit_row = adw_spin_row_new (
-    gtk_adjustment_new (aml_settings_get_log_line_limit (self->settings), 100,
+    gtk_adjustment_new (aml_settings_get_log_line_limit (self->services.settings), 100,
                         100000, 500, 5000, 0),
     0, 0);
   adw_spin_row_set_digits (ADW_SPIN_ROW (limit_row), 0);
@@ -453,7 +453,7 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
                                   _("Open Log Folder After Crash"));
   adw_switch_row_set_active (
     ADW_SWITCH_ROW (crash_row),
-    aml_settings_get_open_logs_after_crash (self->settings));
+    aml_settings_get_open_logs_after_crash (self->services.settings));
   g_signal_connect (crash_row, "notify::active",
                     G_CALLBACK (on_open_logs_after_crash_toggled), self);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (logs_group), crash_row);
@@ -464,7 +464,7 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
                                   _("Cache Modrinth API responses"));
   adw_switch_row_set_active (
     ADW_SWITCH_ROW (cache_api_row),
-    aml_settings_get_cache_modrinth_api_responses (self->settings));
+    aml_settings_get_cache_modrinth_api_responses (self->services.settings));
   g_signal_connect (cache_api_row, "notify::active",
                     G_CALLBACK (on_cache_modrinth_api_responses_toggled), self);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (cache_group), cache_api_row);
@@ -473,7 +473,7 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
     GtkStringList *model = gtk_string_list_new (NULL);
     const char *labels[] = { _("1 hour"), _("6 hours"), _("1 day"), _("7 days") };
     AmlSettingsCacheExpiration current =
-      aml_settings_get_cache_expiration (self->settings);
+      aml_settings_get_cache_expiration (self->services.settings);
     guint selected = 0;
     const AmlSettingsCacheExpiration values[] = {
       AML_SETTINGS_CACHE_EXPIRATION_1_HOUR,

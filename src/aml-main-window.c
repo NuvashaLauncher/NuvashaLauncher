@@ -83,12 +83,12 @@ window_launcher (AmlMainWindow *self, const char *instance_id)
   if (launcher != NULL)
     return launcher;
 
-  instance = aml_instance_manager_get_by_id (self->manager, instance_id);
+  instance = aml_instance_manager_get_by_id (self->services.manager, instance_id);
 
   if (instance == NULL)
     return NULL;
 
-  launcher = aml_launcher_new (instance, self->settings, self->accounts);
+  launcher = aml_launcher_new (instance, self->services.settings, self->services.accounts);
 
   /* g_signal_connect_object drops the connection when either side goes
      away, so the window outliving a launcher is not a dangling
@@ -121,7 +121,7 @@ aml_main_window_new (GtkApplication *application, AmlInstanceManager *manager)
   GtkWidget *list = NULL;
   GtkWidget *scroll = NULL;
 
-  self->manager = g_object_ref (manager);
+  self->services.manager = g_object_ref (manager);
 
   /* The standard shortcuts, registered on the application because the
      window is not the one that owns them. */
@@ -196,10 +196,10 @@ aml_main_window_dispose (GObject *object)
      the user; it only lets go of the ones that are not running. */
   g_clear_pointer (&self->instances.launchers, g_hash_table_unref);
   g_clear_pointer (&self->instances.instance_dialogs, g_hash_table_unref);
-  g_clear_object (&self->manager);
-  g_clear_object (&self->settings);
-  g_clear_object (&self->accounts);
-  g_clear_object (&self->users_popover);
+  g_clear_object (&self->services.manager);
+  g_clear_object (&self->services.settings);
+  g_clear_object (&self->services.accounts);
+  g_clear_object (&self->services.users_popover);
   g_clear_pointer (&self->downloads.rows, g_hash_table_unref);
 
   G_OBJECT_CLASS (aml_main_window_parent_class)->dispose (object);

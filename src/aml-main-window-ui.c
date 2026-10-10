@@ -44,9 +44,9 @@ aml_main_window_build_ui (AmlMainWindow *self)
   /* The settings and the accounts are the window's own: every launcher of
      an instance is handed the same ones, so the whole window agrees on
      what a launch does and as whom it plays. */
-  self->settings = aml_settings_new ();
-  aml_download_set_cache_settings (self->settings);
-  self->accounts = aml_accounts_new ();
+  self->services.settings = aml_settings_new ();
+  aml_download_set_cache_settings (self->services.settings);
+  self->services.accounts = aml_accounts_new ();
 
   g_action_map_add_action_entries (G_ACTION_MAP (self), window_entries,
                                    window_entries_count, self);
@@ -125,16 +125,16 @@ aml_main_window_build_ui (AmlMainWindow *self)
    * button shows the avatar of the active account, and what is behind it
    * is the list of the accounts this copy of AML has, which is also where
    * a new one is added. */
-  self->users_popover = aml_users_popover_new (self->accounts);
+  self->services.users_popover = aml_users_popover_new (self->services.accounts);
   /* A widget is created with a floating reference, and set_popover()
      below sinks that one for the button. The window keeps a reference of
      its own as well, so that dropping it in dispose() never frees a
      popover the button still holds. */
-  g_object_ref_sink (self->users_popover);
-  users_child = aml_users_popover_get_button_content (self->users_popover);
+  g_object_ref_sink (self->services.users_popover);
+  users_child = aml_users_popover_get_button_content (self->services.users_popover);
   gtk_menu_button_set_child (GTK_MENU_BUTTON (users_button), users_child);
   gtk_menu_button_set_popover (GTK_MENU_BUTTON (users_button),
-                              GTK_WIDGET (self->users_popover));
+                              GTK_WIDGET (self->services.users_popover));
   /* The child is a box around the avatar, so the menu button does not
      recognize it as an icon button and would draw a frame behind it. */
   gtk_widget_add_css_class (users_button, "flat");
