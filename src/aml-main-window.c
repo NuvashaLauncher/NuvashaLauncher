@@ -182,7 +182,7 @@ on_global_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
                       GdkModifierType state, gpointer user_data)
 {
   AmlMainWindow *self = user_data;
-  GtkWidget *focus = gtk_window_get_focus (GTK_WINDOW (self));
+  GtkWidget *focus = gtk_root_get_focus (GTK_ROOT (self));
 
   if (keyval != GDK_KEY_f || !(state & GDK_CONTROL_MASK))
     return GDK_EVENT_PROPAGATE;
@@ -204,6 +204,14 @@ on_global_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
     }
 
   return GDK_EVENT_PROPAGATE;
+}
+
+static gboolean
+on_global_search_shortcut (GtkWidget *widget G_GNUC_UNUSED,
+                           GVariant *args G_GNUC_UNUSED, gpointer user_data)
+{
+  return on_global_search_key (NULL, GDK_KEY_f, 0, GDK_CONTROL_MASK,
+                               user_data) == GDK_EVENT_STOP;
 }
 
 /* Written the moment the value changes. A spin row can produce a value
@@ -1492,6 +1500,12 @@ static void
 aml_main_window_init (AmlMainWindow *self)
 {
   GtkEventController *keys = gtk_event_controller_key_new ();
+  GtkEventController *shortcuts = gtk_shortcut_controller_new ();
+  GtkShortcutTrigger *trigger =
+    gtk_keyval_trigger_new (GDK_KEY_f, GDK_CONTROL_MASK);
+  GtkShortcutAction *action =
+    gtk_callback_action_new (on_global_search_shortcut, self, NULL);
+  GtkShortcut *shortcut = gtk_shortcut_new (trigger, action);
   g_autoptr (GMenu) add_menu = create_add_menu ();
   g_autoptr (GMenu) app_menu = create_app_menu ();
   GtkWidget *header = adw_header_bar_new ();
@@ -1507,6 +1521,11 @@ aml_main_window_init (AmlMainWindow *self)
   gtk_widget_add_controller (GTK_WIDGET (self), keys);
   g_signal_connect (keys, "key-pressed",
                     G_CALLBACK (on_global_search_key), self);
+  gtk_shortcut_controller_set_scope (GTK_SHORTCUT_CONTROLLER (shortcuts),
+                                     GTK_SHORTCUT_SCOPE_GLOBAL);
+  gtk_shortcut_controller_add_shortcut (GTK_SHORTCUT_CONTROLLER (shortcuts),
+                                        shortcut);
+  gtk_widget_add_controller (GTK_WIDGET (self), shortcuts);
 
   /* Flat is the default top-bar style, and it paints no surface of its
      own, so the header would take the window background and read as the
