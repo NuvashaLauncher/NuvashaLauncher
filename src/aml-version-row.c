@@ -40,7 +40,7 @@ struct _AmlVersionRow
   gboolean ready;
 
   /* Borrowed from the row's own suffixes, cleared in dispose(). */
-  GtkWidget *retry;
+  GtkButton *retry;
 };
 
 G_DEFINE_FINAL_TYPE (AmlVersionRow, aml_version_row, ADW_TYPE_COMBO_ROW)
@@ -82,7 +82,7 @@ show_loading (AmlVersionRow *self)
 
   /* The row does not answer while it does not know the versions. */
   gtk_widget_set_sensitive (GTK_WIDGET (self), FALSE);
-  gtk_widget_set_visible (self->retry, FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self), NULL);
 }
 
@@ -98,7 +98,7 @@ show_error (AmlVersionRow *self, const char *message)
   /* The Retry button is a suffix of the row, so the row itself has to
    * answer clicks for it to be reachable. */
   gtk_widget_set_sensitive (GTK_WIDGET (self), TRUE);
-  gtk_widget_set_visible (self->retry, TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (self->retry), TRUE);
 }
 
 /* Fills the row from a manifest that arrived. */
@@ -153,7 +153,7 @@ fill (AmlVersionRow *self, AmlVersionManifest *manifest)
 
   self->ready = TRUE;
   gtk_widget_set_sensitive (GTK_WIDGET (self), TRUE);
-  gtk_widget_set_visible (self->retry, FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self), NULL);
 
   g_object_notify (G_OBJECT (self), "selected");
@@ -327,11 +327,11 @@ aml_version_row_init (AmlVersionRow *self)
   set_entries (self, g_steal_pointer (&ids), GTK_INVALID_LIST_POSITION);
   gtk_widget_set_sensitive (GTK_WIDGET (self), FALSE);
 
-  self->retry = gtk_button_new_with_label (_("Retry"));
-  gtk_widget_add_css_class (self->retry, "flat");
-  gtk_widget_set_valign (self->retry, GTK_ALIGN_CENTER);
-  gtk_widget_set_visible (self->retry, FALSE);
+  self->retry = GTK_BUTTON (gtk_button_new_with_label (_("Retry")));
+  gtk_widget_add_css_class (GTK_WIDGET (self->retry), "flat");
+  gtk_widget_set_valign (GTK_WIDGET (self->retry), GTK_ALIGN_CENTER);
+  gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
   g_signal_connect (self->retry, "clicked", G_CALLBACK (on_retry_clicked),
                     self);
-  adw_action_row_add_suffix (ADW_ACTION_ROW (self), self->retry);
+  adw_action_row_add_suffix (ADW_ACTION_ROW (self), GTK_WIDGET (self->retry));
 }
