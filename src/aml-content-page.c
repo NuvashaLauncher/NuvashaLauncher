@@ -431,6 +431,8 @@ aml_content_file_free (AmlContentFile *file)
   g_free (file->path);
   g_free (file->filename);
   g_free (file->sha1);
+  g_free (file->sha512);
+  g_free (file->download_url);
   g_free (file->project_id);
   g_free (file->project_name);
   g_free (file->icon_url);
@@ -573,6 +575,8 @@ apply_index_entry (ScanRun *run, AmlContentFile *file)
   if (entry == NULL)
     return;
   file->project_id = g_strdup (entry->project_id);
+  file->sha512 = g_strdup (entry->hash512);
+  file->download_url = g_strdup (entry->download_url);
   file->project_name = g_strdup (entry->project_name);
   file->icon_url = g_strdup (entry->icon_url);
   file->version_id = g_strdup (entry->version_id);
@@ -2468,6 +2472,15 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       file->version_id = g_strdup (version->version_id);
       file->version_name = g_strdup (version->name);
       file->version_number = g_strdup (version->version_number);
+      {
+        AmlModrinthFile *primary =
+          aml_modrinth_version_primary_file (version);
+
+        g_free (file->sha512);
+        g_free (file->download_url);
+        file->sha512 = primary != NULL ? g_strdup (primary->sha512) : NULL;
+        file->download_url = primary != NULL ? g_strdup (primary->url) : NULL;
+      }
       g_clear_pointer (&file->required_dependencies, g_ptr_array_unref);
       g_clear_pointer (&file->optional_dependencies, g_ptr_array_unref);
       g_clear_pointer (&file->incompatible_dependencies, g_ptr_array_unref);
@@ -2565,7 +2578,8 @@ identify_next (IdentifyRun *run)
        * ready from disk and reopening an instance must not ask Modrinth just
        * to rediscover what the index already records. */
       if (row == NULL || file->sha1 == NULL ||
-          (file->project_id != NULL && file->project_name != NULL &&
+          ((file->sha512 != NULL && file->download_url != NULL) &&
+           file->project_id != NULL && file->project_name != NULL &&
            *file->project_name != '\0' &&
            g_strcmp0 (file->project_id, file->project_name) != 0))
         continue;
