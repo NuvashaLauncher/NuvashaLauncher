@@ -1034,13 +1034,15 @@ copy_tree_query_ready (GObject *source, GAsyncResult *result,
       break;
 
     default:
-      g_autofree char *path = g_file_get_path (tree->source);
-      copy_tree_record_error (tree,
-                              g_error_new (AML_INSTANCE_MANAGER_ERROR,
-                                           AML_INSTANCE_MANAGER_ERROR_INVALID_PATH,
-                                           "\"%s\" is neither a directory "
-                                           "nor a regular file",
-                                           path));
+      {
+        g_autofree char *path = g_file_get_path (tree->source);
+        copy_tree_record_error (
+          tree,
+          g_error_new (AML_INSTANCE_MANAGER_ERROR,
+                       AML_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+                       "\"%s\" is neither a directory nor a regular file",
+                       path));
+      }
       break;
     }
 
