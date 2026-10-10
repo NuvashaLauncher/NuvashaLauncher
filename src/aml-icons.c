@@ -212,6 +212,7 @@ aml_icon_widget_set_file (GtkWidget *widget, const char *path)
   g_autoptr (GFile) file = NULL;
   g_autoptr (GdkTexture) texture = NULL;
   GtkWidget *icon = NULL;
+  GtkWidget *old_icon = NULL;
 
   if (widget == NULL || !GTK_IS_STACK (widget) || path == NULL)
     return FALSE;
@@ -239,6 +240,9 @@ aml_icon_widget_set_file (GtkWidget *widget, const char *path)
   gtk_image_set_pixel_size (GTK_IMAGE (icon), AML_ICON_SIZE);
   gtk_widget_set_size_request (icon, AML_ICON_SIZE, AML_ICON_SIZE);
 
+  old_icon = gtk_stack_get_child_by_name (GTK_STACK (widget), "icon");
+  if (old_icon != NULL)
+    gtk_stack_remove (GTK_STACK (widget), old_icon);
   gtk_stack_add_named (GTK_STACK (widget), icon, "icon");
   gtk_stack_set_visible_child_name (GTK_STACK (widget), "icon");
 
