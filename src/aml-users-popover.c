@@ -540,6 +540,7 @@ aml_users_popover_init (AmlUsersPopover *self)
   gtk_widget_set_valign (GTK_WIDGET (self->avatar_image), GTK_ALIGN_CENTER);
 
   self->button_content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+  g_object_ref_sink (self->button_content);
   gtk_box_append (GTK_BOX (self->button_content), GTK_WIDGET (self->avatar_image));
 }
 
