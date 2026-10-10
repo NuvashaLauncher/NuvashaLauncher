@@ -41,10 +41,10 @@ struct _AmlInstancePage
   /* Borrowed from the widget tree of the page. Cleared in dispose(),
    * because the tree can go away while a running operation still keeps
    * this page alive. */
-  GtkWidget *toast_overlay;
+  AdwToastOverlay *toast_overlay;
   GtkWidget *icon_row;
   GtkWidget *icon_path_label; /* the icon path inside the chooser button */
-  GtkWidget *stack; /* the AdwViewStack holding the pages of the instance */
+  AdwViewStack *stack; /* the view stack holding the pages of the instance */
   GtkWidget *logs_page; /* the last page, kept so a rebuild can move it back */
 
   /* The Directory row: the chooser button that says where the instance is
@@ -111,7 +111,7 @@ loader_display_name (AmlInstance *instance)
 static void
 show_toast (AmlInstancePage *self, const char *message)
 {
-  aml_ui_show_toast (GTK_WIDGET (self), self->toast_overlay, message);
+  aml_ui_show_toast (GTK_WIDGET (self), GTK_WIDGET (self->toast_overlay), message);
 }
 
 /* The list binds an item when it enters the store, so a row that was
@@ -1495,7 +1495,7 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
 
   /* Kept so that the content pages can be built again when the loader or
      the Minecraft version changes. */
-  self->stack = stack;
+  self->stack = ADW_VIEW_STACK (stack);
 
   /* The header holds only this switcher. There is no back button here:
    the dialog is named after the instance and its close button is what
@@ -1506,14 +1506,14 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
                                ADW_VIEW_STACK (stack));
   adw_header_bar_set_title_widget (ADW_HEADER_BAR (header), switcher);
 
-  self->toast_overlay = adw_toast_overlay_new ();
+  self->toast_overlay = ADW_TOAST_OVERLAY (adw_toast_overlay_new ());
   adw_toast_overlay_set_child (ADW_TOAST_OVERLAY (self->toast_overlay), stack);
 
   gtk_widget_set_vexpand (toolbar, TRUE);
   gtk_widget_set_hexpand (toolbar, TRUE);
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
   adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar),
-                                self->toast_overlay);
+                                GTK_WIDGET (self->toast_overlay));
 
   /* The dialog holds this box, and the box holds the toolbar view of the
      instance: there is no navigation page and no back button between the
