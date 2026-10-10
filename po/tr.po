@@ -399,3 +399,27 @@ msgstr "Clean Export"
 
 msgid "Include All Files"
 msgstr "Include All Files"
+
+msgid "Pack Name"
+msgstr "Pack Name"
+
+msgid "Summary"
+msgstr "Summary"
+
+msgid "Version ID"
+msgstr "Version ID"
+
+msgid "Continue"
+msgstr "Continue"
+
+msgid "Include transient files?"
+msgstr "Include transient files?"
+
+msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr "Logs, crash reports, screenshots, caches and downloads are normally excluded."
+
+msgid "Clean Export"
+msgstr "Clean Export"
+
+msgid "Include All Files"
+msgstr "Include All Files"

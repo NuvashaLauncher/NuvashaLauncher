@@ -61,6 +61,9 @@ struct _AmlInstancePage
   int required_java;        /* 0 means "never found one / unknown" */
   GCancellable *cancellable;
   AmlDownload *export_download;
+  char *export_name;
+  char *export_summary;
+  char *export_version;
 
   /* The two loader rows, plain AdwComboRows added to the Minecraft group,
      and what the instance runs now, so that a change that cannot be
@@ -743,7 +746,8 @@ on_export_file_chosen (GObject *source, GAsyncResult *result,
                                  _("Exporting modpack"));
         g_object_add_weak_pointer (G_OBJECT (self->export_download),
                                    (gpointer *) &self->export_download);
-        aml_modpack_export_async (self->instance, path,
+        aml_modpack_export_async (self->instance, path, self->export_name,
+                                  self->export_summary, self->export_version,
                                   self->export_include_transient, NULL,
                                   on_export_done, g_object_ref (self));
       }
@@ -774,6 +778,98 @@ open_export_file_dialog (AmlInstancePage *self)
                         NULL, on_export_file_chosen, g_object_ref (self));
 }
 
+static void show_export_policy (AmlInstancePage *self);
+
+typedef struct {
+  AmlInstancePage *page;
+  AdwDialog *dialog;
+  AdwEntryRow *name;
+  AdwEntryRow *summary;
+  AdwEntryRow *version;
+} ExportMetadata;
+
+static void
+export_metadata_free (ExportMetadata *data)
+{
+  g_object_unref (data->page);
+  g_object_unref (data->dialog);
+  g_free (data);
+}
+
+static void
+on_export_metadata_continue (GtkButton *button G_GNUC_UNUSED,
+                             gpointer user_data)
+{
+  ExportMetadata *data = user_data;
+  AmlInstancePage *self = data->page;
+
+  g_free (self->export_name);
+  g_free (self->export_summary);
+  g_free (self->export_version);
+  self->export_name = g_strdup (gtk_editable_get_text (
+    GTK_EDITABLE (data->name)));
+  self->export_summary = g_strdup (gtk_editable_get_text (
+    GTK_EDITABLE (data->summary)));
+  self->export_version = g_strdup (gtk_editable_get_text (
+    GTK_EDITABLE (data->version)));
+
+  adw_dialog_close (data->dialog);
+  export_metadata_free (data);
+
+  /* The transient-file choice remains a separate, deliberately simple
+   * safety decision immediately before choosing the destination. */
+  show_export_policy (self);
+}
+
+static void
+on_export_metadata_cancel (GtkButton *button G_GNUC_UNUSED,
+                           gpointer user_data)
+{
+  ExportMetadata *data = user_data;
+
+  adw_dialog_close (data->dialog);
+  export_metadata_free (data);
+}
+
+static void
+show_export_metadata (AmlInstancePage *self)
+{
+  ExportMetadata *data = g_new0 (ExportMetadata, 1);
+  GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+  GtkWidget *buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  GtkWidget *cancel = gtk_button_new_with_label (_("Cancel"));
+  GtkWidget *continue_button = gtk_button_new_with_label (_("Continue"));
+  g_autofree char *name = instance_string (self->instance, "name");
+
+  data->page = g_object_ref (self);
+  data->dialog = ADW_DIALOG (adw_dialog_new ());
+  data->name = ADW_ENTRY_ROW (adw_entry_row_new ());
+  data->summary = ADW_ENTRY_ROW (adw_entry_row_new ());
+  data->version = ADW_ENTRY_ROW (adw_entry_row_new ());
+  adw_dialog_set_title (data->dialog, _("Export Modpack"));
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (data->name),
+                                  _("Pack Name"));
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (data->summary),
+                                  _("Summary"));
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (data->version),
+                                  _("Version ID"));
+  gtk_editable_set_text (GTK_EDITABLE (data->name), name != NULL ? name : "");
+  gtk_editable_set_text (GTK_EDITABLE (data->version), "aml-export");
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (data->name));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (data->summary));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (data->version));
+  gtk_box_append (GTK_BOX (box), buttons);
+  gtk_box_append (GTK_BOX (buttons), cancel);
+  gtk_box_append (GTK_BOX (buttons), continue_button);
+  gtk_widget_add_css_class (continue_button, "suggested-action");
+  g_signal_connect (cancel, "clicked",
+                    G_CALLBACK (on_export_metadata_cancel), data);
+  g_signal_connect (continue_button, "clicked",
+                    G_CALLBACK (on_export_metadata_continue), data);
+  adw_dialog_set_child (data->dialog, box);
+  adw_dialog_present (data->dialog, GTK_WIDGET (self));
+}
+
 static void
 on_export_policy_chosen (GObject *source, GAsyncResult *result,
                          gpointer user_data)
@@ -795,6 +891,13 @@ static void
 on_export_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   AmlInstancePage *self = user_data;
+
+  show_export_metadata (self);
+}
+
+static void
+show_export_policy (AmlInstancePage *self)
+{
   AdwAlertDialog *alert = ADW_ALERT_DIALOG (
     adw_alert_dialog_new (_("Include transient files?"),
                           _("Logs, crash reports, screenshots, caches and "
@@ -1414,6 +1517,9 @@ aml_instance_page_finalize (GObject *object)
   g_clear_object (&self->settings);
   g_clear_object (&self->launcher);
   g_free (self->loader_version);
+  g_free (self->export_name);
+  g_free (self->export_summary);
+  g_free (self->export_version);
 
   G_OBJECT_CLASS (aml_instance_page_parent_class)->finalize (object);
 }

@@ -2473,7 +2473,8 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
 }
 
 static char *
-export_manifest (AmlInstance *instance, GError **error)
+export_manifest (AmlInstance *instance, const char *pack_name,
+                 const char *summary, const char *version_id, GError **error)
 {
   g_autofree char *name = NULL;
   g_autofree char *version = NULL;
@@ -2503,9 +2504,19 @@ export_manifest (AmlInstance *instance, GError **error)
   json_builder_set_member_name (builder, "game");
   json_builder_add_string_value (builder, "minecraft");
   json_builder_set_member_name (builder, "name");
-  json_builder_add_string_value (builder, name != NULL ? name : "AML Instance");
+  json_builder_add_string_value (builder,
+                                 pack_name != NULL && *pack_name != '\0'
+                                   ? pack_name
+                                   : name != NULL ? name : "AML Instance");
+  if (summary != NULL && *summary != '\0')
+    {
+      json_builder_set_member_name (builder, "summary");
+      json_builder_add_string_value (builder, summary);
+    }
   json_builder_set_member_name (builder, "versionId");
-  json_builder_add_string_value (builder, "aml-export");
+  json_builder_add_string_value (builder,
+                                 version_id != NULL && *version_id != '\0'
+                                   ? version_id : "aml-export");
   json_builder_set_member_name (builder, "dependencies");
   json_builder_begin_object (builder);
   json_builder_set_member_name (builder, "minecraft");
@@ -2535,7 +2546,8 @@ export_manifest (AmlInstance *instance, GError **error)
 
 void
 aml_modpack_export_async (AmlInstance *instance, const char *path,
-                          gboolean include_transient,
+                          const char *pack_name, const char *summary,
+                          const char *version_id, gboolean include_transient,
                           GCancellable *cancellable,
                           GAsyncReadyCallback callback, gpointer user_data)
 {
@@ -2559,7 +2571,8 @@ aml_modpack_export_async (AmlInstance *instance, const char *path,
   if (run->icon_path != NULL &&
       !g_file_test (run->icon_path, G_FILE_TEST_IS_REGULAR))
     g_clear_pointer (&run->icon_path, g_free);
-  run->manifest = export_manifest (instance, &error);
+  run->manifest = export_manifest (instance, pack_name, summary, version_id,
+                                   &error);
 
   if (run->instance_directory == NULL || run->manifest == NULL)
     {
