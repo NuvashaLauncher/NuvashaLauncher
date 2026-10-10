@@ -65,7 +65,7 @@ aml_content_page_on_retry_page_clicked (GtkButton *button G_GNUC_UNUSED, gpointe
   if (self->browse.model->loading_page)
     return;
 
-  gtk_widget_set_visible (self->browse.retry_row, FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->browse.retry_row), FALSE);
   aml_content_page_run_search (self, TRUE);
 }
 
@@ -397,15 +397,15 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
   {
     gboolean empty = self->browse.model->results->len == 0;
 
-    gtk_widget_set_visible (self->browse.results_status, empty);
-    gtk_widget_set_visible (self->browse.results_scroller, !empty);
-    gtk_widget_set_visible (self->browse.results_group, TRUE);
-    gtk_widget_set_visible (self->browse.loading_more, FALSE);
-    gtk_widget_set_visible (self->browse.retry_row, FALSE);
+    gtk_widget_set_visible (GTK_WIDGET (self->browse.results_status), empty);
+    gtk_widget_set_visible (GTK_WIDGET (self->browse.results_scroller), !empty);
+    gtk_widget_set_visible (GTK_WIDGET (self->browse.results_group), TRUE);
+    gtk_widget_set_visible (GTK_WIDGET (self->browse.loading_more), FALSE);
+    gtk_widget_set_visible (GTK_WIDGET (self->browse.retry_row), FALSE);
 
     /* Nothing more to ask for once the total is reached. */
     if (self->browse.model->offset >= self->browse.model->total_hits)
-      gtk_widget_set_visible (self->browse.loading_more, FALSE);
+      gtk_widget_set_visible (GTK_WIDGET (self->browse.loading_more), FALSE);
   }
 }
 
@@ -435,9 +435,9 @@ search_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       take_rows_out (&self->browse.result_rows,
                  ADW_PREFERENCES_GROUP (self->browse.results_group));
       g_clear_pointer (&self->browse.model->results, g_ptr_array_unref);
-      gtk_widget_set_visible (self->browse.results_status, TRUE);
-      gtk_widget_set_visible (self->browse.results_group, FALSE);
-      gtk_widget_set_visible (self->browse.loading_more, FALSE);
+      gtk_widget_set_visible (GTK_WIDGET (self->browse.results_status), TRUE);
+      gtk_widget_set_visible (GTK_WIDGET (self->browse.results_group), FALSE);
+      gtk_widget_set_visible (GTK_WIDGET (self->browse.loading_more), FALSE);
 
       /* A page that failed is offered again from the list itself. */
       if (append)
@@ -447,7 +447,7 @@ search_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                    : g_strdup (_("the next page could not be loaded"));
 
           gtk_label_set_text (GTK_LABEL (self->browse.retry_label), message);
-          gtk_widget_set_visible (self->browse.retry_row, TRUE);
+          gtk_widget_set_visible (GTK_WIDGET (self->browse.retry_row), TRUE);
         }
       else if (error != NULL &&
                !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
@@ -496,8 +496,8 @@ aml_content_page_run_search (AmlContentPage *self, gboolean append)
   set_busy (self, TRUE);
 
   /* The spinner at the bottom says a page is on its way. */
-  gtk_widget_set_visible (self->browse.loading_more, TRUE);
-  gtk_widget_set_visible (self->browse.retry_row, FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->browse.loading_more), TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (self->browse.retry_row), FALSE);
 
   aml_modrinth_search_async (search, self->browse.model->more, search_ready,
                              page_watch_new (self));
@@ -566,7 +566,7 @@ active_search_entry (AmlContentPage *self)
     : NULL;
 
   return g_strcmp0 (visible, "browse") == 0
-           ? self->browse.search_entry
+           ? GTK_WIDGET (self->browse.search_entry)
            : GTK_WIDGET (self->installed.search_entry);
 }
 
@@ -621,7 +621,7 @@ load_categories_again (GtkWidget *button G_GNUC_UNUSED, gpointer user_data)
 static void
 fill_categories (AmlContentPage *self, GPtrArray *categories)
 {
-  GtkWidget *child = gtk_widget_get_first_child (self->browse.filter_box);
+  GtkWidget *child = gtk_widget_get_first_child (GTK_WIDGET (self->browse.filter_box));
 
   while (child != NULL)
     {
@@ -707,7 +707,7 @@ categories_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
    * of check buttons reads as "no categories", not as a failure. */
   if (categories == NULL)
     {
-      GtkWidget *child = gtk_widget_get_first_child (self->browse.filter_box);
+      GtkWidget *child = gtk_widget_get_first_child (GTK_WIDGET (self->browse.filter_box));
 
       while (child != NULL)
         {

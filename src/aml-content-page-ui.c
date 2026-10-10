@@ -177,8 +177,8 @@ aml_content_page_build_browse (AmlContentPage *self)
   AdwPreferencesGroup *group =
     ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
 
-   self->browse.search_entry = GTK_WIDGET (search_bar);
-   self->browse.search_bar = GTK_WIDGET (search_bar);
+   self->browse.search_entry = GTK_SEARCH_ENTRY (search_bar);
+   self->browse.search_bar = GTK_SEARCH_ENTRY (search_bar);
   /* The field takes the room the row has, the way the modpack browser's
      search does, rather than a fixed width of its own. */
   gtk_widget_set_hexpand (GTK_WIDGET (search_bar), TRUE);
@@ -217,7 +217,7 @@ aml_content_page_build_browse (AmlContentPage *self)
      of that, and the filter and the switcher sit at its right. */
   gtk_widget_set_hexpand (top, TRUE);
 
-   self->browse.filter_box = filter_box;
+   self->browse.filter_box = GTK_BOX (filter_box);
   gtk_widget_set_margin_top (filter_box, 6);
   gtk_widget_set_margin_bottom (filter_box, 6);
   gtk_widget_set_margin_start (filter_box, 6);
@@ -237,7 +237,7 @@ aml_content_page_build_browse (AmlContentPage *self)
    self->browse_actions = top;
   g_object_ref_sink (top);
 
-   self->browse.results_status = adw_status_page_new ();
+   self->browse.results_status = ADW_STATUS_PAGE (adw_status_page_new ());
   adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->browse.results_status),
                                  "system-search-symbolic");
   adw_status_page_set_title (ADW_STATUS_PAGE (self->browse.results_status),
@@ -250,8 +250,8 @@ aml_content_page_build_browse (AmlContentPage *self)
      rounded at the top, so the two read as one piece. */
   gtk_widget_add_css_class (GTK_WIDGET (group), "flush-top");
 
-   self->browse.results_group = GTK_WIDGET (group);
-   self->browse.results_scroller = scroller;
+   self->browse.results_group = group;
+   self->browse.results_scroller = GTK_SCROLLED_WINDOW (scroller);
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
                                  GTK_WIDGET (group));
   gtk_widget_set_vexpand (scroller, TRUE);
@@ -259,7 +259,7 @@ aml_content_page_build_browse (AmlContentPage *self)
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 
   gtk_widget_set_vexpand (content, TRUE);
-  gtk_box_append (GTK_BOX (content), self->browse.results_status);
+  gtk_box_append (GTK_BOX (content), GTK_WIDGET (self->browse.results_status));
   gtk_box_append (GTK_BOX (content), scroller);
   gtk_widget_set_visible (scroller, FALSE);
   gtk_box_append (GTK_BOX (box), content);
@@ -328,9 +328,9 @@ aml_content_page_build_browse (AmlContentPage *self)
   gtk_box_append (GTK_BOX (retry_row), retry_button);
   adw_preferences_group_add (group, retry_row);
 
-   self->browse.loading_more = loading_more;
-   self->browse.retry_row = retry_row;
-  self->browse.retry_label = retry_label;
+   self->browse.loading_more = GTK_BOX (loading_more);
+   self->browse.retry_row = GTK_BOX (retry_row);
+   self->browse.retry_label = GTK_LABEL (retry_label);
 
   g_signal_connect (retry_button, "clicked",
                     G_CALLBACK (aml_content_page_on_retry_page_clicked), self);
