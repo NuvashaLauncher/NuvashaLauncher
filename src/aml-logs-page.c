@@ -34,39 +34,11 @@ struct _AmlLogsPage
    * every line back. */
   GPtrArray *lines; /* char*, one per line, in order */
   gboolean filtered;
-  gboolean search_open;
 };
 
 G_DEFINE_FINAL_TYPE (AmlLogsPage, aml_logs_page, GTK_TYPE_BOX)
 
 static void scroll_to_end (AmlLogsPage *self);
-static void show_lines (AmlLogsPage *self);
-
-static void
-set_search_open (AmlLogsPage *self, gboolean open)
-{
-  if (self->search_open == open)
-    return;
-
-  self->search_open = open;
-  gtk_widget_set_visible (self->search_bar, open);
-
-  if (self->search_button != NULL &&
-      gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (self->search_button)) !=
-        open)
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (self->search_button),
-                                 open);
-
-  if (open)
-    gtk_widget_grab_focus (self->search_entry);
-  else
-    {
-      gtk_editable_set_text (GTK_EDITABLE (self->search_entry), "");
-      self->filtered = FALSE;
-      show_lines (self);
-      gtk_widget_grab_focus (GTK_WIDGET (self));
-    }
-}
 
 /* Launcher lines carry internal stream tags and some Minecraft versions
  * emit Log4j XML records. Keep those details for diagnostics internally,
@@ -324,17 +296,19 @@ on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED, guint keyval,
       scroll_to_end (self);
     }
 
-  set_search_open (self, FALSE);
+  gtk_widget_set_visible (self->search_bar, FALSE);
+  gtk_widget_grab_focus (GTK_WIDGET (self));
 
   return GDK_EVENT_STOP;
 }
 
 static void
-on_search_toggled (GtkToggleButton *button, gpointer user_data)
+on_search_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   AmlLogsPage *self = user_data;
 
-  set_search_open (self, gtk_toggle_button_get_active (button));
+  gtk_widget_set_visible (self->search_bar, TRUE);
+  gtk_widget_grab_focus (self->search_entry);
 }
 
 /* ---------------------------------------------------------- *
@@ -530,16 +504,8 @@ aml_logs_page_new (AmlLauncher *launcher)
   gtk_box_append (GTK_BOX (actions), self->clear);
   gtk_box_append (GTK_BOX (actions), self->open);
 
-  self->search_button = gtk_toggle_button_new ();
-  gtk_button_set_icon_name (GTK_BUTTON (self->search_button),
-                            "system-search-symbolic");
-  gtk_widget_add_css_class (self->search_button, "flat");
-  gtk_widget_set_tooltip_text (self->search_button, _("Search"));
-  gtk_accessible_update_property (
-    GTK_ACCESSIBLE (self->search_button), GTK_ACCESSIBLE_PROPERTY_LABEL,
-    _("Search"), -1);
-  g_signal_connect (self->search_button, "toggled",
-                    G_CALLBACK (on_search_toggled), self);
+  self->search_button = toolbar_button ("system-search-symbolic", _("Search"),
+                                        G_CALLBACK (on_search_clicked), self);
   /* Searching the log: a bar over the lines, closed until Ctrl+F opens
    * it. The lines are kept either way, so nothing here can lose one. */
    self->search_bar = gtk_search_entry_new ();
