@@ -39,6 +39,60 @@ G_DEFINE_FINAL_TYPE (AmlLogsPage, aml_logs_page, GTK_TYPE_BOX)
 
 static void scroll_to_end (AmlLogsPage *self);
 
+/* Launcher lines carry internal stream tags and some Minecraft versions
+ * emit Log4j XML records. Keep those details for diagnostics internally,
+ * but show the readable message in the log view. */
+static char *
+display_line (const char *line)
+{
+  const char *body = NULL;
+  const char *tag_start = NULL;
+  const char *tag_end = NULL;
+  g_autofree char *formatted = g_strdup (line);
+
+  if (line == NULL)
+    return NULL;
+
+  if (strlen (line) >= 10 && line[2] == ':' && line[5] == ':' &&
+      line[8] == ' ' && line[9] == '[')
+    {
+      tag_start = line + 9;
+      tag_end = strchr (tag_start, ']');
+
+      if (tag_end != NULL && tag_end[1] == ' ')
+        {
+          body = tag_end + 2;
+
+          if (g_str_has_prefix (tag_start, "[stdout]"))
+            formatted = g_strdup_printf ("%.8s %s", line, body);
+          else if (g_str_has_prefix (tag_start, "[stderr]"))
+            formatted = g_strdup_printf ("%.8s [error] %s", line, body);
+        }
+    }
+
+  body = formatted;
+  if (strlen (formatted) >= 10 && formatted[8] == ' ')
+    body = formatted + 9;
+
+  if (g_str_has_prefix (body, "<log4j:Event ") ||
+      g_str_equal (body, "</log4j:Event>") ||
+      g_str_equal (body, "</log4j:Message>"))
+    return NULL;
+
+  if (g_str_has_prefix (body, "<log4j:Message><![CDATA["))
+    body += strlen ("<log4j:Message><![CDATA[");
+
+  {
+    const char *suffix = strstr (body, "]]></log4j:Message>");
+
+    if (suffix != NULL)
+      return g_strdup_printf ("%.8s %.*s", formatted, (int) (suffix - body),
+                              body);
+  }
+
+  return g_strdup (formatted);
+}
+
 /* ---------------------------------------------------------- *
  * The lines
  *
@@ -69,7 +123,7 @@ show_lines (AmlLogsPage *self)
 
   for (guint i = 0; i < self->lines->len; i++)
     {
-      const char *line = g_ptr_array_index (self->lines, i);
+       const char *line = g_ptr_array_index (self->lines, i);
 
       if (needle != NULL && *needle != '\0' &&
           strstr (line, needle) == NULL)
@@ -102,7 +156,12 @@ reload_log (AmlLogsPage *self)
       g_auto (GStrv) split = g_strsplit (text, "\n", -1);
 
       for (guint i = 0; split != NULL && split[i] != NULL; i++)
-        g_ptr_array_add (self->lines, g_strdup (split[i]));
+        {
+          g_autofree char *line = display_line (split[i]);
+
+          if (line != NULL && *line != '\0')
+            g_ptr_array_add (self->lines, g_steal_pointer (&line));
+        }
     }
 
   self->filtered = FALSE;
@@ -114,6 +173,12 @@ reload_log (AmlLogsPage *self)
 static void
 append_line (AmlLogsPage *self, const char *line)
 {
+  g_autofree char *display = display_line (line);
+
+  if (display == NULL || *display == '\0')
+    return;
+
+  line = display;
   guint limit = aml_launcher_get_line_limit (self->launcher);
   gboolean removed = FALSE;
 
