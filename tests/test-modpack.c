@@ -951,6 +951,8 @@ test_export_import_round_trip (void)
   g_autofree char *archive = g_build_filename (root, "round-trip.mrpack", NULL);
   g_autofree char *override = g_build_filename (source_dir, "config", "test.txt", NULL);
   g_autofree char *log = g_build_filename (source_dir, "logs", "latest.log", NULL);
+  g_autofree char *index =
+    g_build_filename (source_dir, "mods", ".index", "index.json", NULL);
   g_autoptr (GError) error = NULL;
   g_autoptr (AmlInstanceManager) source_manager = manager_new (source_data);
   g_autoptr (AmlInstanceManager) target_manager = manager_new (target_data);
@@ -983,6 +985,13 @@ test_export_import_round_trip (void)
     g_assert_cmpint (g_mkdir_with_parents (log_dir, 0755), ==, 0);
   }
   g_assert_true (g_file_set_contents (log, "transient bytes", -1, &error));
+  g_assert_no_error (error);
+  {
+    g_autofree char *index_dir = g_path_get_dirname (index);
+
+    g_assert_cmpint (g_mkdir_with_parents (index_dir, 0755), ==, 0);
+  }
+  g_assert_true (g_file_set_contents (index, "internal index", -1, &error));
   g_assert_no_error (error);
   g_object_set (source, "icon", icon_source, NULL);
   g_assert_true (aml_instance_manager_save (source_manager, &error));
@@ -1024,8 +1033,11 @@ test_export_import_round_trip (void)
   {
     g_autofree char *imported_log =
       g_build_filename (imported_dir, "logs", "latest.log", NULL);
+    g_autofree char *imported_index =
+      g_build_filename (imported_dir, "mods", ".index", "index.json", NULL);
 
     g_assert_false (g_file_test (imported_log, G_FILE_TEST_EXISTS));
+    g_assert_false (g_file_test (imported_index, G_FILE_TEST_EXISTS));
   }
 
   remove_recursive (root);

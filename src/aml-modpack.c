@@ -2199,6 +2199,10 @@ export_path_is_transient (const char *relative)
   const char *end = strchr (relative, G_DIR_SEPARATOR);
   gsize length = end != NULL ? (gsize) (end - relative) : strlen (relative);
 
+  if (g_str_has_prefix (relative, ".index") ||
+      strstr (relative, G_DIR_SEPARATOR_S ".index") != NULL)
+    return TRUE;
+
   for (guint i = 0; i < G_N_ELEMENTS (names); i++)
     if (strlen (names[i]) == length &&
         strncmp (relative, names[i], length) == 0)
