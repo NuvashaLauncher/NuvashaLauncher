@@ -401,13 +401,13 @@ msgid "Include All Files"
 msgstr "Include All Files"
 
 msgid "Pack Name"
-msgstr "Pack Name"
+msgstr "팩 이름"
 
 msgid "Summary"
-msgstr "Summary"
+msgstr "요약"
 
 msgid "Version ID"
-msgstr "Version ID"
+msgstr "버전 ID"
 
 msgid "Continue"
 msgstr "Continue"
@@ -459,3 +459,6 @@ msgstr "내보내기 전에 이름, 요약, 버전 입력란을 표시합니다.
 
 msgid "Export complete"
 msgstr "내보내기 완료"
+
+msgid "Export"
+msgstr "내보내기"

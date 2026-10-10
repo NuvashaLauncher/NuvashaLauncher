@@ -401,13 +401,13 @@ msgid "Include All Files"
 msgstr "Include All Files"
 
 msgid "Pack Name"
-msgstr "Pack Name"
+msgstr "Paket adı"
 
 msgid "Summary"
-msgstr "Summary"
+msgstr "Özet"
 
 msgid "Version ID"
-msgstr "Version ID"
+msgstr "Sürüm kimliği"
 
 msgid "Continue"
 msgstr "Continue"
@@ -459,3 +459,6 @@ msgstr "Dışa aktarmadan önce ad, özet ve sürüm alanlarını göster."
 
 msgid "Export complete"
 msgstr "Dışa aktarma tamamlandı"
+
+msgid "Export"
+msgstr "Dışa aktar"

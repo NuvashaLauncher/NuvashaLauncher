@@ -401,13 +401,13 @@ msgid "Include All Files"
 msgstr "Include All Files"
 
 msgid "Pack Name"
-msgstr "Pack Name"
+msgstr "Назва пакета"
 
 msgid "Summary"
-msgstr "Summary"
+msgstr "Підсумок"
 
 msgid "Version ID"
-msgstr "Version ID"
+msgstr "Ідентифікатор версії"
 
 msgid "Continue"
 msgstr "Continue"
@@ -459,3 +459,6 @@ msgstr "Показувати поля назви, підсумку та верс
 
 msgid "Export complete"
 msgstr "Експорт завершено"
+
+msgid "Export"
+msgstr "Експортувати"

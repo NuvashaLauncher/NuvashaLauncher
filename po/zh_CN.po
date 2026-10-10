@@ -401,13 +401,13 @@ msgid "Include All Files"
 msgstr "Include All Files"
 
 msgid "Pack Name"
-msgstr "Pack Name"
+msgstr "整合包名称"
 
 msgid "Summary"
-msgstr "Summary"
+msgstr "摘要"
 
 msgid "Version ID"
-msgstr "Version ID"
+msgstr "版本 ID"
 
 msgid "Continue"
 msgstr "Continue"
@@ -459,3 +459,6 @@ msgstr "导出前显示名称、摘要和版本字段。"
 
 msgid "Export complete"
 msgstr "导出完成"
+
+msgid "Export"
+msgstr "导出"
