@@ -14,6 +14,9 @@ typedef struct _AmlMainWindowModel AmlMainWindowModel;
 AmlMainWindowModel *aml_main_window_model_new (void);
 void aml_main_window_model_free (AmlMainWindowModel *model);
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (AmlMainWindowModel,
+                               aml_main_window_model_free)
+
 struct _AmlMainWindowModel
 {
   AmlInstanceManager *manager;
