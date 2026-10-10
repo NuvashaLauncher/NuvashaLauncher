@@ -462,3 +462,6 @@ msgstr "Експорт завершено"
 
 msgid "Export"
 msgstr "Експортувати"
+
+msgid "Optional metadata. Add a summary or version ID to help identify the exported pack."
+msgstr "Необов’язкові метадані. Додайте підсумок або ідентифікатор версії, щоб легше розпізнати експортований пакет."

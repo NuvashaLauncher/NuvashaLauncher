@@ -888,6 +888,10 @@ show_export_metadata (AmlInstancePage *self)
                                   _("Version ID"));
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (fields),
                                    _("Pack information"));
+  adw_preferences_group_set_description (
+    ADW_PREFERENCES_GROUP (fields),
+    _("Optional metadata. Add a summary or version ID to help identify the "
+      "exported pack."));
   gtk_editable_set_text (GTK_EDITABLE (data->name), name != NULL ? name : "");
   gtk_editable_set_text (GTK_EDITABLE (data->version), "");
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (fields),
