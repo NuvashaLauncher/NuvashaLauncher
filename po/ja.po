@@ -401,13 +401,13 @@ msgid "Include All Files"
 msgstr "Include All Files"
 
 msgid "Pack Name"
-msgstr "Pack Name"
+msgstr "パック名"
 
 msgid "Summary"
-msgstr "Summary"
+msgstr "概要"
 
 msgid "Version ID"
-msgstr "Version ID"
+msgstr "バージョン ID"
 
 msgid "Continue"
 msgstr "Continue"
@@ -459,3 +459,6 @@ msgstr "エクスポート前に名前、概要、バージョンの入力欄を
 
 msgid "Export complete"
 msgstr "エクスポート完了"
+
+msgid "Export"
+msgstr "エクスポート"

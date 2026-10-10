@@ -401,13 +401,13 @@ msgid "Include All Files"
 msgstr "Include All Files"
 
 msgid "Pack Name"
-msgstr "Pack Name"
+msgstr "Pakketnaam"
 
 msgid "Summary"
-msgstr "Summary"
+msgstr "Samenvatting"
 
 msgid "Version ID"
-msgstr "Version ID"
+msgstr "Versie-ID"
 
 msgid "Continue"
 msgstr "Continue"
@@ -459,3 +459,6 @@ msgstr "Naam-, samenvattings- en versievelden tonen vóór het exporteren."
 
 msgid "Export complete"
 msgstr "Export voltooid"
+
+msgid "Export"
+msgstr "Exporteren"

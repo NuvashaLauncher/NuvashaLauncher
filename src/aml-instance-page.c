@@ -869,7 +869,7 @@ show_export_metadata (AmlInstancePage *self)
   GtkWidget *buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   GtkWidget *fields = adw_preferences_group_new ();
   GtkWidget *cancel = gtk_button_new_with_label (_("Cancel"));
-  GtkWidget *continue_button = gtk_button_new_with_label (_("Continue"));
+  GtkWidget *export_button = gtk_button_new_with_label (_("Export"));
   g_autofree char *name = instance_string (self->instance, "name");
 
   data->page = g_object_ref (self);
@@ -888,9 +888,6 @@ show_export_metadata (AmlInstancePage *self)
                                   _("Version ID"));
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (fields),
                                    _("Pack information"));
-  adw_preferences_group_set_description (
-    ADW_PREFERENCES_GROUP (fields),
-    _("These details are optional. The pack name defaults to the instance name."));
   gtk_editable_set_text (GTK_EDITABLE (data->name), name != NULL ? name : "");
   gtk_editable_set_text (GTK_EDITABLE (data->version), "");
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (fields),
@@ -906,11 +903,11 @@ show_export_metadata (AmlInstancePage *self)
   gtk_widget_set_margin_bottom (box, 18);
   gtk_box_append (GTK_BOX (box), buttons);
   gtk_box_append (GTK_BOX (buttons), cancel);
-  gtk_box_append (GTK_BOX (buttons), continue_button);
-  gtk_widget_add_css_class (continue_button, "suggested-action");
+  gtk_box_append (GTK_BOX (buttons), export_button);
+  gtk_widget_add_css_class (export_button, "suggested-action");
   g_signal_connect (cancel, "clicked",
                     G_CALLBACK (on_export_metadata_cancel), data);
-  g_signal_connect (continue_button, "clicked",
+  g_signal_connect (export_button, "clicked",
                     G_CALLBACK (on_export_metadata_continue), data);
   adw_dialog_set_child (data->dialog, box);
   adw_dialog_present (data->dialog, GTK_WIDGET (self));

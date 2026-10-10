@@ -401,13 +401,13 @@ msgid "Include All Files"
 msgstr "Include All Files"
 
 msgid "Pack Name"
-msgstr "Pack Name"
+msgstr "Nome del pacchetto"
 
 msgid "Summary"
-msgstr "Summary"
+msgstr "Riepilogo"
 
 msgid "Version ID"
-msgstr "Version ID"
+msgstr "ID versione"
 
 msgid "Continue"
 msgstr "Continue"
@@ -459,3 +459,6 @@ msgstr "Mostra i campi del nome, del riepilogo e della versione prima dell’esp
 
 msgid "Export complete"
 msgstr "Esportazione completata"
+
+msgid "Export"
+msgstr "Esporta"
