@@ -250,6 +250,13 @@ on_global_search_shortcut (GtkWidget *widget G_GNUC_UNUSED,
                                user_data) == GDK_EVENT_STOP;
 }
 
+static void
+on_search_action (GSimpleAction *action G_GNUC_UNUSED,
+                  GVariant *parameter G_GNUC_UNUSED, gpointer user_data)
+{
+  on_global_search_key (NULL, GDK_KEY_f, 0, GDK_CONTROL_MASK, user_data);
+}
+
 /* Written the moment the value changes. A spin row can produce a value
  * for every click of its arrows, so the number that is already stored is
  * skipped rather than written over and over. */
@@ -718,6 +725,7 @@ static const GActionEntry window_entries[] = {
   { .name = "import-modpack", .activate = on_import_modpack },
   { .name = "settings", .activate = on_settings },
   { .name = "shortcuts", .activate = on_shortcuts },
+  { .name = "search", .activate = on_search_action },
   { .name = "about", .activate = on_about },
 };
 
@@ -1579,6 +1587,16 @@ aml_main_window_init (AmlMainWindow *self)
 
   g_action_map_add_action_entries (G_ACTION_MAP (self), window_entries,
                                    G_N_ELEMENTS (window_entries), self);
+
+  {
+    GtkApplication *application =
+      GTK_APPLICATION (gtk_window_get_application (GTK_WINDOW (self)));
+    const char *accelerators[] = { "<Primary>f", NULL };
+
+    if (application != NULL)
+      gtk_application_set_accels_for_action (application, "win.search",
+                                             accelerators);
+  }
 
   /* Start of the header: the "+" menu. */
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (add_button),
