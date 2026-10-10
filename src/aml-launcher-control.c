@@ -75,7 +75,7 @@ on_account_refreshed (GObject      *source G_GNUC_UNUSED,
 
   account = aml_auth_refresh_finish (result, &error);
 
-  if (self->stop_requested)
+  if (self->process.stop_requested)
     return;
 
   if (account == NULL)
@@ -160,8 +160,8 @@ aml_launcher_start (AmlLauncher *self)
 
   g_clear_object (&self->cancellable);
   self->cancellable = g_cancellable_new ();
-  self->stop_requested = FALSE;
-  self->last_percent = 0;
+  self->process.stop_requested = FALSE;
+  self->process.last_percent = 0;
 
   /* The Java of the launch before this one says nothing about this one:
      a loader that has to be installed first chooses its own. */
@@ -187,11 +187,11 @@ aml_launcher_stop (AmlLauncher *self)
   if (!aml_launch_state_is_busy (self->state))
     return;
 
-  self->stop_requested = TRUE;
+  self->process.stop_requested = TRUE;
 
   /* Nothing is running yet: what has to stop is the resolve and the
      Java search behind it. */
-  if (self->process == NULL)
+  if (self->process.process == NULL)
     {
       log_line (self, TAG_STATE, "stopping before the game starts");
       g_cancellable_cancel (self->cancellable);
@@ -205,9 +205,9 @@ aml_launcher_stop (AmlLauncher *self)
   /* Minecraft has its own way of ending; SIGTERM is what every launcher
      sends first, and a game that hangs is stopped for good after the
      timeout. */
-  g_subprocess_send_signal (self->process, SIGTERM);
+  g_subprocess_send_signal (self->process.process, SIGTERM);
 
-  if (self->stop_timeout == 0)
-    self->stop_timeout = g_timeout_add_seconds (AML_LAUNCH_STOP_TIMEOUT,
+  if (self->process.stop_timeout == 0)
+    self->process.stop_timeout = g_timeout_add_seconds (AML_LAUNCH_STOP_TIMEOUT,
                                                 on_stop_timeout, self);
 }

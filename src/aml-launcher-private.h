@@ -31,7 +31,19 @@ struct _AmlLauncher
   /* What a launch needs while it is on its way. */
   GCancellable *cancellable;
   AmlResolvedVersion *resolved;
-  GSubprocess *process;
+  struct {
+    GSubprocess *process;
+    gboolean exited;
+    gboolean exited_normally;
+    gboolean terminated_by_signal;
+    int exit_status;
+    int term_signal;
+    gint64 started_at; /* unix seconds, for crash reports */
+    guint readers;
+    guint stop_timeout;
+    guint last_percent;
+    gboolean stop_requested;
+  } process;
 
   /* The accounts a launch plays as. The active one of them is read when
      the command line is built, so a token that was refreshed a moment
@@ -44,18 +56,6 @@ struct _AmlLauncher
   char *java_executable;
   int java_major_version;
 
-  /* How the process ended, filled in when it is gone. */
-  gboolean exited;
-  gboolean exited_normally;
-  gboolean terminated_by_signal;
-  int exit_status;
-  int term_signal;
-  gint64 started_at; /* unix seconds, for the crash reports */
-  guint readers;     /* output readers that have not reached the end */
-  guint stop_timeout;
-  guint last_percent; /* how far the resolve got the last time it said */
-
-  gboolean stop_requested;
 };
 
 extern guint aml_launcher_signals[AML_LAUNCHER_N_SIGNALS];

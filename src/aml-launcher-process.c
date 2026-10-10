@@ -86,7 +86,7 @@ crash_reports_listed (GObject *source, GAsyncResult *result,
           if (g_file_info_get_file_type (info) == G_FILE_TYPE_REGULAR)
             written_now =
               g_file_info_get_attribute_uint64 (
-                info, G_FILE_ATTRIBUTE_TIME_MODIFIED) >= (guint64) self->started_at;
+                info, G_FILE_ATTRIBUTE_TIME_MODIFIED) >= (guint64) self->process.started_at;
 
           /* Every report is looked at, and what is left of the
              directory goes with the loop instead of piling up. */
@@ -113,12 +113,12 @@ report_how_it_ended (AmlLauncher *self)
 {
   g_autofree char *reason = NULL;
 
-  if (self->terminated_by_signal)
+  if (self->process.terminated_by_signal)
     reason = g_strdup_printf (_("the game was stopped by signal %d"),
-                             self->term_signal);
+                             self->process.term_signal);
   else
     reason = g_strdup_printf (_("the game exited with code %d"),
-                             self->exit_status);
+                             self->process.exit_status);
 
   game_crashed (self, reason);
 }
@@ -128,22 +128,22 @@ report_how_it_ended (AmlLauncher *self)
 static void
 finish_launch (AmlLauncher *self)
 {
-  if (self->stop_timeout != 0)
+  if (self->process.stop_timeout != 0)
     {
-      g_source_remove (self->stop_timeout);
-      self->stop_timeout = 0;
+      g_source_remove (self->process.stop_timeout);
+      self->process.stop_timeout = 0;
     }
 
   /* A game that was asked to stop and did, however it did, has not
      crashed: the force stop reports itself in the log instead. */
-  if (self->stop_requested)
+  if (self->process.stop_requested)
     {
       log_line (self, TAG_STATE, "the game stopped");
       set_state (self, AML_LAUNCH_STOPPED, NULL);
       return;
     }
 
-  if (!self->exited_normally || self->exit_status != 0)
+  if (!self->process.exited_normally || self->process.exit_status != 0)
     {
       report_how_it_ended (self);
       return;
@@ -189,7 +189,7 @@ on_output_done (GError *error, gpointer user_data)
     log_line (self, TAG_STDOUT, "the output of the game cannot be read: %s",
               error->message);
 
-  if (--self->readers == 0 && self->exited)
+  if (--self->process.readers == 0 && self->process.exited)
     finish_launch (self);
 }
 
@@ -201,7 +201,7 @@ watch_output (AmlLauncher *self, GInputStream *stream, gboolean stderr_line)
     stream, stderr_line, on_output_line, on_output_done, g_object_ref (self),
     g_object_unref);
 
-  self->readers++;
+  self->process.readers++;
   aml_line_reader_start (reader);
 }
 
@@ -217,14 +217,14 @@ on_stop_timeout (gpointer user_data)
 {
   AmlLauncher *self = user_data;
 
-  self->stop_timeout = 0;
+  self->process.stop_timeout = 0;
 
   log_line (self, TAG_STATE,
             "the game did not stop within %d seconds, ending it now",
             AML_LAUNCH_STOP_TIMEOUT);
 
-  if (self->process != NULL)
-    g_subprocess_force_exit (self->process);
+  if (self->process.process != NULL)
+    g_subprocess_force_exit (self->process.process);
 
   return G_SOURCE_REMOVE;
 }
@@ -238,21 +238,21 @@ on_process_exited (GObject *source, GAsyncResult *result, gpointer user_data)
      says whether the exit was a clean one. */
   g_subprocess_wait_finish (G_SUBPROCESS (source), result, NULL);
 
-  self->exited = TRUE;
-  self->exited_normally = g_subprocess_get_if_exited (self->process);
-  self->terminated_by_signal = g_subprocess_get_if_signaled (self->process);
+  self->process.exited = TRUE;
+  self->process.exited_normally = g_subprocess_get_if_exited (self->process.process);
+  self->process.terminated_by_signal = g_subprocess_get_if_signaled (self->process.process);
 
-  if (self->exited_normally)
-    self->exit_status = g_subprocess_get_exit_status (self->process);
+  if (self->process.exited_normally)
+    self->process.exit_status = g_subprocess_get_exit_status (self->process.process);
 
-  if (self->terminated_by_signal)
-    self->term_signal = g_subprocess_get_term_sig (self->process);
+  if (self->process.terminated_by_signal)
+    self->process.term_signal = g_subprocess_get_term_sig (self->process.process);
 
-  g_clear_object (&self->process);
+  g_clear_object (&self->process.process);
 
   /* The pipes can still hold the last lines of the game, so the launch
      is over once they have been read. */
-  if (self->readers == 0)
+  if (self->process.readers == 0)
     finish_launch (self);
 
   g_object_unref (self);
@@ -277,7 +277,7 @@ aml_launcher_spawn (AmlLauncher *self, GPtrArray *argv, GError **error)
      it is gone, and this is the only place a process is started. A
      launch that is still preparing has nothing to refuse yet, because
      this is how a launch ends. */
-  if (self->process != NULL)
+  if (self->process.process != NULL)
     {
       g_set_error (error, AML_LAUNCH_ERROR, AML_LAUNCH_ERROR_ALREADY_RUNNING,
                    "this instance is already %s",
@@ -316,12 +316,12 @@ aml_launcher_spawn (AmlLauncher *self, GPtrArray *argv, GError **error)
   shown = aml_launch_redact (argv);
   log_line (self, TAG_STATE, "%s", shown);
 
-  self->process =
+  self->process.process =
     g_subprocess_launcher_spawnv (launcher, arguments, &spawn_error);
 
   g_free (vector);
 
-  if (self->process == NULL)
+  if (self->process.process == NULL)
     {
       launcher_failed (self, spawn_error->message);
       g_propagate_error (error, g_steal_pointer (&spawn_error));
@@ -329,21 +329,21 @@ aml_launcher_spawn (AmlLauncher *self, GPtrArray *argv, GError **error)
     }
 
   now = g_date_time_new_now_utc ();
-  self->started_at = now != NULL ? g_date_time_to_unix (now) : 0;
-  self->exited = FALSE;
-  self->exited_normally = FALSE;
-  self->terminated_by_signal = FALSE;
-  self->exit_status = 0;
-  self->term_signal = 0;
-  self->readers = 0;
+  self->process.started_at = now != NULL ? g_date_time_to_unix (now) : 0;
+  self->process.exited = FALSE;
+  self->process.exited_normally = FALSE;
+  self->process.terminated_by_signal = FALSE;
+  self->process.exit_status = 0;
+  self->process.term_signal = 0;
+  self->process.readers = 0;
 
   log_line (self, TAG_STATE, "the game runs as process %s",
-            g_subprocess_get_identifier (self->process));
+            g_subprocess_get_identifier (self->process.process));
 
-  watch_output (self, g_subprocess_get_stdout_pipe (self->process), FALSE);
-  watch_output (self, g_subprocess_get_stderr_pipe (self->process), TRUE);
+  watch_output (self, g_subprocess_get_stdout_pipe (self->process.process), FALSE);
+  watch_output (self, g_subprocess_get_stderr_pipe (self->process.process), TRUE);
 
-  g_subprocess_wait_async (self->process, NULL, on_process_exited,
+  g_subprocess_wait_async (self->process.process, NULL, on_process_exited,
                            g_object_ref (self));
 
   /* The process is up: that is the event the Running state comes from. */
