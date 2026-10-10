@@ -1982,7 +1982,10 @@ on_pack_downloaded (GObject *source G_GNUC_UNUSED,
       return;
     }
 
-  aml_modpack_new_from_zip_async (self->pack_path, self->fetch,
+  aml_modpack_new_from_zip_async (
+    self->pack_path,
+    self->pack_download != NULL
+      ? aml_download_get_cancellable (self->pack_download) : self->fetch,
                                   on_pack_parsed, user_data);
 }
 
