@@ -2497,11 +2497,15 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       {
         g_autofree char *directory = NULL;
         g_autofree char *filename = g_path_get_basename (file->path);
+        AmlModrinthFile *primary =
+          aml_modrinth_version_primary_file (version);
         AmlContentIndexEntry entry = { 0 };
 
         g_object_get (self->instance, "directory", &directory, NULL);
         entry.filename = filename;
         entry.hash = file->sha1;
+        entry.hash512 = primary != NULL ? primary->sha512 : NULL;
+        entry.download_url = primary != NULL ? primary->url : NULL;
         entry.env_client = "required";
         entry.env_server = self->type == AML_CONTENT_MOD ? "required"
                                                           : "unsupported";
