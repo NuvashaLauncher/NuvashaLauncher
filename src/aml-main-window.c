@@ -1757,4 +1757,6 @@ aml_main_window_class_init (AmlMainWindowClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   object_class->dispose = aml_main_window_dispose;
+  gtk_widget_class_add_binding_action (GTK_WIDGET_CLASS (klass), GDK_KEY_f,
+                                       GDK_CONTROL_MASK, "win.search", NULL);
 }
