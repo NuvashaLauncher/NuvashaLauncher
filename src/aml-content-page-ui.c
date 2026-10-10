@@ -142,10 +142,10 @@ aml_content_page_on_stack_switched (GObject *stack, GParamSpec *pspec G_GNUC_UNU
       aml_content_page_close_detail (self);
     }
 
-  if (!browsing || self->browse.searched)
+  if (!browsing || self->browse.model->searched)
     return;
 
-  self->browse.searched = TRUE;
+  self->browse.model->searched = TRUE;
   aml_content_page_run_search (self, FALSE);
 }
 

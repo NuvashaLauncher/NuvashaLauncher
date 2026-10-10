@@ -6,6 +6,7 @@
 #define AML_CONTENT_PAGE_PRIVATE_H
 
 #include "aml-content-page.h"
+#include "aml-content-browser-model.h"
 
 G_BEGIN_DECLS
 
@@ -94,23 +95,7 @@ struct _AmlContentPage
     GtkWidget *spinner;
 
     GList *result_rows;
-    GHashTable *projects;
-    GHashTable *project_icons;
-    GHashTable *project_descriptions;
-    GHashTable *project_titles;
-    char *query;
-    GPtrArray *categories;
-    GPtrArray *results;
-    guint offset;
-    guint64 total_hits;
-    gboolean categories_loaded;
-    gboolean searched;
-    gboolean loading_page;
-    gboolean pending_append;
-    GHashTable *seen_ids;
-    GCancellable *more;
-    guint debounce_source;
-    GCancellable *cancellable;
+    AmlContentBrowserModel *model;
   } browse;
 
   /* Browse state is grouped below. */
