@@ -169,11 +169,11 @@ static void
 version_item_setup (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
                     GtkListItem *item, gpointer user_data G_GNUC_UNUSED)
 {
-  GtkWidget *label = gtk_label_new (NULL);
+  GtkLabel *label = GTK_LABEL (gtk_label_new (NULL));
 
-  gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_END);
-  gtk_label_set_xalign (GTK_LABEL (label), 0);
-  gtk_list_item_set_child (item, label);
+  gtk_label_set_ellipsize (GTK_LABEL (GTK_WIDGET (label)), PANGO_ELLIPSIZE_END);
+  gtk_label_set_xalign (GTK_LABEL (GTK_WIDGET (label)), 0);
+  gtk_list_item_set_child (item, GTK_WIDGET (label));
 }
 
 static void
@@ -183,7 +183,7 @@ version_item_bind (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
   GtkWidget *label = gtk_list_item_get_child (item);
   GtkStringObject *object = gtk_list_item_get_item (item);
 
-  gtk_label_set_text (GTK_LABEL (label),
+  gtk_label_set_text (GTK_LABEL (GTK_WIDGET (label)),
                       object != NULL ? gtk_string_object_get_string (object)
                                      : "");
 }
@@ -204,19 +204,19 @@ version_factory (void)
 static GtkWidget *
 loading_child (void)
 {
-  GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
-  GtkWidget *spinner = adw_spinner_new ();
-  GtkWidget *label = gtk_label_new (_("Loading…"));
+  GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
+  AdwSpinner *spinner = ADW_SPINNER (adw_spinner_new ());
+  GtkLabel *label = GTK_LABEL (gtk_label_new (_("Loading…")));
 
-  gtk_widget_set_valign (box, GTK_ALIGN_CENTER);
-  gtk_widget_set_halign (box, GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (spinner, GTK_ALIGN_CENTER);
-  gtk_widget_set_halign (spinner, GTK_ALIGN_CENTER);
-  gtk_widget_add_css_class (label, "dim-label");
-  gtk_box_append (GTK_BOX (box), spinner);
-  gtk_box_append (GTK_BOX (box), label);
+  gtk_widget_set_valign (GTK_WIDGET (box), GTK_ALIGN_CENTER);
+  gtk_widget_set_halign (GTK_WIDGET (box), GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (GTK_WIDGET (spinner), GTK_ALIGN_CENTER);
+  gtk_widget_set_halign (GTK_WIDGET (spinner), GTK_ALIGN_CENTER);
+  gtk_widget_add_css_class (GTK_WIDGET (label), "dim-label");
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (spinner));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (label));
 
-  return box;
+  return GTK_WIDGET (box);
 }
 
 /* Closes the page of the open project, leaving the list the whole width
@@ -306,15 +306,15 @@ details_content (AmlContentPage *self)
     gtk_box_append (GTK_BOX (self->project.details_body),
                     plain_label (self->project.details->description));
 
-  gtk_box_append (GTK_BOX (box), heading);
-  gtk_box_append (GTK_BOX (box), GTK_WIDGET (self->project.details_body));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), heading);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (self->project.details_body));
 
-  gtk_widget_set_margin_top (box, 12);
-  gtk_widget_set_margin_bottom (box, 12);
-  gtk_widget_set_margin_start (box, 18);
-  gtk_widget_set_margin_end (box, 18);
+  gtk_widget_set_margin_top (GTK_WIDGET (box), 12);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (box), 12);
+  gtk_widget_set_margin_start (GTK_WIDGET (box), 18);
+  gtk_widget_set_margin_end (GTK_WIDGET (box), 18);
 
-  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller), box);
+  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller), GTK_WIDGET (box));
   gtk_widget_set_vexpand (scroller, TRUE);
 
   /* The foot: every version this instance can take, the checkmark that

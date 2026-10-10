@@ -54,14 +54,14 @@ show_toast (AmlContentPage *self, const char *message)
 GtkWidget *
 plain_label (const char *text)
 {
-  GtkWidget *label = gtk_label_new (text != NULL ? text : "");
+  GtkLabel *label = GTK_LABEL (gtk_label_new (text != NULL ? text : ""));
 
-  gtk_label_set_wrap (GTK_LABEL (label), TRUE);
-  gtk_label_set_wrap_mode (GTK_LABEL (label), PANGO_WRAP_WORD_CHAR);
-  gtk_label_set_xalign (GTK_LABEL (label), 0);
-  gtk_label_set_selectable (GTK_LABEL (label), TRUE);
+  gtk_label_set_wrap (GTK_LABEL (GTK_WIDGET (label)), TRUE);
+  gtk_label_set_wrap_mode (GTK_LABEL (GTK_WIDGET (label)), PANGO_WRAP_WORD_CHAR);
+  gtk_label_set_xalign (GTK_LABEL (GTK_WIDGET (label)), 0);
+  gtk_label_set_selectable (GTK_LABEL (GTK_WIDGET (label)), TRUE);
 
-  return label;
+  return GTK_WIDGET (label);
 }
 
 void

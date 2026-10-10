@@ -161,17 +161,17 @@ row_update (GtkWidget *play, AmlLauncher *launcher)
   GtkWidget *label = g_object_get_data (G_OBJECT (play), "aml-label");
 
   gtk_label_set_label (GTK_LABEL (label), busy ? _("Stop") : _("Play"));
-  gtk_image_set_from_icon_name (GTK_IMAGE (icon),
+  gtk_image_set_from_icon_name (GTK_IMAGE (GTK_WIDGET (icon)),
                                 busy ? "media-playback-stop-symbolic"
                                      : "media-playback-start-symbolic");
-  gtk_widget_set_tooltip_text (play, busy ? _("Stop") : _("Play"));
+  gtk_widget_set_tooltip_text (GTK_WIDGET (play), busy ? _("Stop") : _("Play"));
 
   /* The green belongs to a game that is about to start, not to a stop:
      an idle row asks, a running one only allows stopping. */
   if (busy)
-    gtk_widget_remove_css_class (play, "suggested-action");
+    gtk_widget_remove_css_class (GTK_WIDGET (play), "suggested-action");
   else
-    gtk_widget_add_css_class (play, "suggested-action");
+    gtk_widget_add_css_class (GTK_WIDGET (play), "suggested-action");
 }
 
 static void
@@ -319,12 +319,12 @@ create_instance_row (gpointer item, gpointer user_data)
   const char *id = NULL;
   const char *loader_name = NULL;
   AmlLauncher *launcher = NULL;
-  GtkWidget *row = adw_action_row_new ();
-  GtkWidget *icon = gtk_image_new_from_icon_name ("applications-games-symbolic");
-  GtkWidget *play = gtk_button_new ();
-  GtkWidget *play_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *play_icon = gtk_image_new_from_icon_name ("media-playback-start-symbolic");
-  GtkWidget *play_label = gtk_label_new (_("Play"));
+  AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
+  GtkImage *icon = GTK_IMAGE (gtk_image_new_from_icon_name ("applications-games-symbolic"));
+  GtkButton *play = GTK_BUTTON (gtk_button_new ());
+  GtkBox *play_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+  GtkImage *play_icon = GTK_IMAGE (gtk_image_new_from_icon_name ("media-playback-start-symbolic"));
+  GtkLabel *play_label = GTK_LABEL (gtk_label_new (_("Play")));
 
   g_object_get (instance,
                 "name", &name,
@@ -345,26 +345,26 @@ create_instance_row (gpointer item, gpointer user_data)
     subtitle = g_strdup (minecraft_version);
 
   /* Names and versions are plain text and may hold an "&". */
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
-  adw_action_row_set_title_lines (ADW_ACTION_ROW (row), 1);
-  adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 1);
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), name);
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), subtitle);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), FALSE);
+  adw_action_row_set_title_lines (ADW_ACTION_ROW (GTK_WIDGET (row)), 1);
+  adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (GTK_WIDGET (row)), 1);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), name);
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (row)), subtitle);
 
-  gtk_image_set_pixel_size (GTK_IMAGE (icon), 48);
-  gtk_widget_set_size_request (icon, 48, 48);
-  gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
-  adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
+  gtk_image_set_pixel_size (GTK_IMAGE (GTK_WIDGET (icon)), 48);
+  gtk_widget_set_size_request (GTK_WIDGET (icon), 48, 48);
+  gtk_widget_set_valign (GTK_WIDGET (icon), GTK_ALIGN_CENTER);
+  adw_action_row_add_prefix (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (icon));
 
-  gtk_image_set_pixel_size (GTK_IMAGE (play_icon), 16);
-  gtk_widget_set_size_request (play_icon, 16, 16);
-  gtk_box_append (GTK_BOX (play_box), play_icon);
-  gtk_box_append (GTK_BOX (play_box), play_label);
-  gtk_button_set_child (GTK_BUTTON (play), play_box);
-  gtk_widget_set_valign (play, GTK_ALIGN_CENTER);
-  gtk_widget_add_css_class (play, "suggested-action");
-  gtk_widget_set_tooltip_text (play, _("Play"));
-  gtk_accessible_update_property (GTK_ACCESSIBLE (play),
+  gtk_image_set_pixel_size (GTK_IMAGE (GTK_WIDGET (play_icon)), 16);
+  gtk_widget_set_size_request (GTK_WIDGET (play_icon), 16, 16);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (play_box)), GTK_WIDGET (play_icon));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (play_box)), GTK_WIDGET (play_label));
+  gtk_button_set_child (GTK_BUTTON (GTK_WIDGET (play)), GTK_WIDGET (play_box));
+  gtk_widget_set_valign (GTK_WIDGET (play), GTK_ALIGN_CENTER);
+  gtk_widget_add_css_class (GTK_WIDGET (play), "suggested-action");
+  gtk_widget_set_tooltip_text (GTK_WIDGET (play), _("Play"));
+  gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (play)),
                                    GTK_ACCESSIBLE_PROPERTY_LABEL, _("Play"), -1);
 
   /* The play state swaps the icon and the label, so they are known by
@@ -372,7 +372,7 @@ create_instance_row (gpointer item, gpointer user_data)
   g_object_set_data (G_OBJECT (play), "aml-icon", play_icon);
   g_object_set_data (G_OBJECT (play), "aml-label", play_label);
 
-  adw_action_row_add_suffix (ADW_ACTION_ROW (row), play);
+  adw_action_row_add_suffix (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (play));
 
   g_signal_connect (play, "clicked", G_CALLBACK (on_play_clicked), self);
 
@@ -391,16 +391,16 @@ create_instance_row (gpointer item, gpointer user_data)
 
   /* The launcher of this instance: the button follows it from here on. */
   launcher = window_launcher (self, id);
-  row_set_launcher (play, launcher);
+  row_set_launcher (GTK_WIDGET (play), launcher);
 
   if (launcher != NULL)
-    row_update (play, launcher);
+    row_update (GTK_WIDGET (play), launcher);
 
   /* A click anywhere on the row, outside its buttons, opens the
      instance. An AdwActionRow is not activatable by default. */
-  gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
+  gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (GTK_WIDGET (row)), TRUE);
 
-  return row;
+  return GTK_WIDGET (row);
 }
 
 /* A row clicked anywhere but on its buttons opens the instance. The

@@ -228,18 +228,18 @@ on_closed (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_data)
 static GtkWidget *
 icon_label_button (const char *icon_name, const char *label)
 {
-  GtkWidget *button = gtk_button_new ();
-  GtkWidget *box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8);
-  GtkWidget *icon = gtk_image_new_from_icon_name (icon_name);
-  GtkWidget *text = gtk_label_new (label);
+  GtkButton *button = GTK_BUTTON (gtk_button_new ());
+  GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8));
+  GtkImage *icon = GTK_IMAGE (gtk_image_new_from_icon_name (icon_name));
+  GtkLabel *text = GTK_LABEL (gtk_label_new (label));
 
-  gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (text, GTK_ALIGN_CENTER);
-  gtk_box_append (GTK_BOX (box), icon);
-  gtk_box_append (GTK_BOX (box), text);
-  gtk_button_set_child (GTK_BUTTON (button), box);
+  gtk_widget_set_valign (GTK_WIDGET (icon), GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (GTK_WIDGET (text), GTK_ALIGN_CENTER);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (icon));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (text));
+  gtk_button_set_child (GTK_BUTTON (GTK_WIDGET (button)), GTK_WIDGET (box));
 
-  return button;
+  return GTK_WIDGET (button);
 }
 
 static void

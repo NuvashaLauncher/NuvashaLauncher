@@ -320,19 +320,19 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
          and which loader are what the details page is for. Markup is
          turned off before the title and the description go in, because
          both are plain text from Modrinth and may hold an "&". */
-      adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
-      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
+      adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), FALSE);
+      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (row)),
                                      project->title);
       {
         g_autofree char *line = description_line (project->description, 0);
 
-        adw_action_row_set_subtitle (ADW_ACTION_ROW (row), line);
+        adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (row)), line);
       }
       /* Two lines at most, ending in an ellipsis when the description is
          longer: every row is then the same height, whatever it holds.
          The whole description is on the details page. */
-      adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 2);
-      adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (row), FALSE);
+      adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (GTK_WIDGET (row)), 2);
+      adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (GTK_WIDGET (row)), FALSE);
 
       gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
       start_row_icon (icon, project->icon_url);
@@ -344,12 +344,12 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
                          g_ptr_array_index (self->browse.model->results,
                                             self->browse.model->results->len - 1));
 
-      adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
+      adw_action_row_add_prefix (ADW_ACTION_ROW (GTK_WIDGET (row)), icon);
 
       /* The whole row opens the project, where the version is chosen.
        * An AdwActionRow is not activatable by default, so the row
        * itself is made one: a click on it activates the row. */
-      gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
+      gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (GTK_WIDGET (row)), TRUE);
       g_signal_connect (row, "activated", G_CALLBACK (aml_content_page_on_result_activated),
                         self);
 
@@ -379,7 +379,7 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
         {
           GList *oldest = self->browse.result_rows;
           GtkWidget *row = oldest->data;
-          gint height = gtk_widget_get_height (row);
+          gint height = gtk_widget_get_height (GTK_WIDGET (row));
 
           removed += height > 0 ? height : 48;
 
@@ -645,18 +645,18 @@ fill_categories (AmlContentPage *self, GPtrArray *categories)
               category->header != NULL
                   ? aml_modrinth_category_label (category->header)
                    : g_strdup (_("Other"));
-            GtkWidget *heading = gtk_label_new (heading_label);
+            GtkLabel *heading = GTK_LABEL (gtk_label_new (heading_label));
 
             g_free (current);
             current = g_strdup (category->header != NULL ? category->header
                                                         : "other");
 
-            gtk_label_set_xalign (GTK_LABEL (heading), 0.0);
-            gtk_widget_add_css_class (heading, "caption");
-            gtk_widget_add_css_class (heading, "dim-label");
-            gtk_widget_set_margin_top (heading, 6);
-            gtk_widget_set_margin_start (heading, 6);
-            gtk_box_append (GTK_BOX (self->browse.filter_box), heading);
+            gtk_label_set_xalign (GTK_LABEL (GTK_WIDGET (heading)), 0.0);
+            gtk_widget_add_css_class (GTK_WIDGET (heading), "caption");
+            gtk_widget_add_css_class (GTK_WIDGET (heading), "dim-label");
+            gtk_widget_set_margin_top (GTK_WIDGET (heading), 6);
+            gtk_widget_set_margin_start (GTK_WIDGET (heading), 6);
+            gtk_box_append (GTK_BOX (self->browse.filter_box), GTK_WIDGET (heading));
           }
 
         {
@@ -666,16 +666,16 @@ fill_categories (AmlContentPage *self, GPtrArray *categories)
           button = gtk_check_button_new_with_label (label_text);
         }
 
-        gtk_widget_add_css_class (button, "flat");
+        gtk_widget_add_css_class (GTK_WIDGET (button), "flat");
         /* The whole width of the popover is the target, so a category is
            not a small checkbox at the left that has to be aimed at. */
-        gtk_widget_set_hexpand (button, TRUE);
-        gtk_widget_set_halign (button, GTK_ALIGN_FILL);
+        gtk_widget_set_hexpand (GTK_WIDGET (button), TRUE);
+        gtk_widget_set_halign (GTK_WIDGET (button), GTK_ALIGN_FILL);
         g_object_set_data_full (G_OBJECT (button), "aml-category",
                                 g_strdup (category->name), g_free);
         g_signal_connect (button, "toggled", G_CALLBACK (on_category_toggled),
                           self);
-        gtk_box_append (GTK_BOX (self->browse.filter_box), button);
+        gtk_box_append (GTK_BOX (self->browse.filter_box), GTK_WIDGET (button));
       }
   }
 }
@@ -718,17 +718,17 @@ categories_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         }
 
       {
-        GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
-        GtkWidget *label = gtk_label_new (
-            error != NULL ? error->message : "Could not load categories");
-        GtkWidget *retry = gtk_button_new_with_label (_("Retry"));
+        GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 6));
+        GtkLabel *label = GTK_LABEL (gtk_label_new (
+            error != NULL ? error->message : "Could not load categories"));
+        GtkButton *retry = GTK_BUTTON (gtk_button_new_with_label (_("Retry")));
 
-        gtk_label_set_wrap (GTK_LABEL (label), TRUE);
-        gtk_widget_set_size_request (box, 220, -1);
-        gtk_box_append (GTK_BOX (box), label);
-        gtk_box_append (GTK_BOX (box), retry);
+        gtk_label_set_wrap (GTK_LABEL (GTK_WIDGET (label)), TRUE);
+        gtk_widget_set_size_request (GTK_WIDGET (box), 220, -1);
+        gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (label));
+        gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (retry));
 
-        gtk_box_append (GTK_BOX (self->browse.filter_box), box);
+        gtk_box_append (GTK_BOX (self->browse.filter_box), GTK_WIDGET (box));
         g_signal_connect (retry, "clicked",
                           G_CALLBACK (load_categories_again), self);
       }
