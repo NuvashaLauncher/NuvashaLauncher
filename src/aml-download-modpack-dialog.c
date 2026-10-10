@@ -2052,7 +2052,11 @@ on_pack_parsed (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     /* Only a dialog that is still there can ask which optional files to
        take; a pack that arrived after it was closed installs what the
        pack requires. */
-    if (!self->closed && optional->len > 0)
+    /* A local import is intentionally headless: the dialog is never
+     * presented, so there is no optional-file page for the user to answer.
+     * Install the required files and overrides directly, leaving optional
+     * entries out just as the closed-dialog path does. */
+    if (!self->imported && !self->closed && optional->len > 0)
       {
         GtkWidget *page = build_optional_page (self, optional);
 
