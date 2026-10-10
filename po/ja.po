@@ -441,3 +441,21 @@ msgstr "Modpack をダウンロード中"
 
 msgid "Writing archive"
 msgstr "アーカイブを書き込み中"
+
+msgid "These details are optional. The pack name defaults to the instance name."
+msgstr "これらの詳細は任意です。パック名はデフォルトでインスタンス名になります。"
+
+msgid "Export modpack metadata"
+msgstr "エクスポートメタデータ"
+
+msgid "Ask for export metadata"
+msgstr "エクスポート時にメタデータを確認"
+
+msgid "Pack information"
+msgstr "パック情報"
+
+msgid "Show name, summary and version fields before exporting."
+msgstr "エクスポート前に名前、概要、バージョンの入力欄を表示します。"
+
+msgid "Export complete"
+msgstr "エクスポート完了"

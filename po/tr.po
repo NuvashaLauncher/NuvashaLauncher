@@ -441,3 +441,21 @@ msgstr "Mod paketi indiriliyor"
 
 msgid "Writing archive"
 msgstr "Arşiv yazılıyor"
+
+msgid "These details are optional. The pack name defaults to the instance name."
+msgstr "Bu bilgiler isteğe bağlıdır. Paket adı varsayılan olarak örnek adı olur."
+
+msgid "Export modpack metadata"
+msgstr "Dışa aktarma meta verileri"
+
+msgid "Ask for export metadata"
+msgstr "Dışa aktarırken meta verileri sor"
+
+msgid "Pack information"
+msgstr "Paket bilgileri"
+
+msgid "Show name, summary and version fields before exporting."
+msgstr "Dışa aktarmadan önce ad, özet ve sürüm alanlarını göster."
+
+msgid "Export complete"
+msgstr "Dışa aktarma tamamlandı"
