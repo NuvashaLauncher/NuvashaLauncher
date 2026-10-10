@@ -45,6 +45,8 @@ typedef struct {
   char *path;      /* the file as it is now, suffix included */
   char *filename;  /* without the suffix, which is what a row shows */
   char *sha1;      /* the hash of the bytes, or NULL while unknown */
+  char *sha512;    /* Modrinth hash when the index knows it */
+  char *download_url; /* Modrinth source URL when the index knows it */
   gboolean enabled;
 
   /* What a hash lookup answered, all NULL for a file Modrinth does not
