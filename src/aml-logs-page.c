@@ -13,14 +13,14 @@ struct _AmlLogsPage
 
   AmlLauncher *launcher;
 
-  GtkWidget *state;
-  GtkWidget *detail;
-  GtkWidget *clear;
-  GtkWidget *open;
-  GtkWidget *view;
-  GtkWidget *scroller;
-  GtkWidget *search_bar;
-  GtkWidget *search_entry;
+  GtkLabel *state;
+  GtkLabel *detail;
+  GtkButton *clear;
+  GtkButton *open;
+  GtkTextView *view;
+  GtkScrolledWindow *scroller;
+  GtkSearchEntry *search_bar;
+  GtkSearchEntry *search_entry;
 
   /* How many lines the text view holds, and whether the user is looking
      at the end of the log: a view that has been scrolled up to read
@@ -279,8 +279,8 @@ on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED, guint keyval,
 
   if (keyval == GDK_KEY_f && (state & GDK_CONTROL_MASK))
     {
-      gtk_widget_set_visible (self->search_bar, TRUE);
-      gtk_widget_grab_focus (self->search_entry);
+      gtk_widget_set_visible (GTK_WIDGET (self->search_bar), TRUE);
+      gtk_widget_grab_focus (GTK_WIDGET (self->search_entry));
       return GDK_EVENT_STOP;
     }
 
@@ -296,8 +296,8 @@ on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED, guint keyval,
       scroll_to_end (self);
     }
 
-  gtk_widget_set_visible (self->search_bar, TRUE);
-  gtk_widget_grab_focus (self->search_entry);
+  gtk_widget_set_visible (GTK_WIDGET (self->search_bar), TRUE);
+  gtk_widget_grab_focus (GTK_WIDGET (self->search_entry));
   gtk_widget_grab_focus (GTK_WIDGET (self));
 
   return GDK_EVENT_STOP;
@@ -321,7 +321,7 @@ update_controls (AmlLogsPage *self)
 
   /* Offering to open a folder that is not there is offering something
      that cannot work. */
-  gtk_widget_set_sensitive (self->open,
+  gtk_widget_set_sensitive (GTK_WIDGET (self->open),
                             g_file_test (directory, G_FILE_TEST_IS_DIR));
 }
 
@@ -481,36 +481,36 @@ aml_logs_page_new (AmlLauncher *launcher)
   gtk_widget_set_margin_start (row, 12);
   gtk_widget_set_margin_end (row, 12);
 
-  self->state = gtk_label_new (NULL);
-  gtk_widget_add_css_class (self->state, "heading");
-  self->detail = gtk_label_new (NULL);
+  self->state = GTK_LABEL (gtk_label_new (NULL));
+  gtk_widget_add_css_class (GTK_WIDGET (self->state), "heading");
+  self->detail = GTK_LABEL (gtk_label_new (NULL));
   gtk_label_set_ellipsize (GTK_LABEL (self->detail), PANGO_ELLIPSIZE_END);
-  gtk_widget_add_css_class (self->detail, "dim-label");
+  gtk_widget_add_css_class (GTK_WIDGET (self->detail), "dim-label");
 
-  self->clear = toolbar_button ("edit-clear-symbolic", _("Clear"),
-                                G_CALLBACK (on_clear_clicked), self);
+  self->clear = GTK_BUTTON (toolbar_button ("edit-clear-symbolic", _("Clear"),
+                                G_CALLBACK (on_clear_clicked), self));
 
-  self->open = toolbar_button ("folder-symbolic", _("Open Folder"),
-                               G_CALLBACK (on_open_clicked), self);
+  self->open = GTK_BUTTON (toolbar_button ("folder-symbolic", _("Open Folder"),
+                               G_CALLBACK (on_open_clicked), self));
   actions = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  gtk_box_append (GTK_BOX (actions), self->clear);
-  gtk_box_append (GTK_BOX (actions), self->open);
+  gtk_box_append (GTK_BOX (actions), GTK_WIDGET (self->clear));
+  gtk_box_append (GTK_BOX (actions), GTK_WIDGET (self->open));
 
   /* Searching the log: a bar over the lines, closed until Ctrl+F opens
    * it. The lines are kept either way, so nothing here can lose one. */
-   self->search_bar = gtk_search_entry_new ();
+   self->search_bar = GTK_SEARCH_ENTRY (gtk_search_entry_new ());
    self->search_entry = self->search_bar;
-   gtk_widget_set_hexpand (self->search_entry, TRUE);
+   gtk_widget_set_hexpand (GTK_WIDGET (self->search_entry), TRUE);
   gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (self->search_entry),
                                          _("Search the log"));
-    gtk_widget_set_visible (self->search_bar, TRUE);
+    gtk_widget_set_visible (GTK_WIDGET (self->search_bar), TRUE);
   g_signal_connect (self->search_entry, "changed",
                     G_CALLBACK (on_search_changed), self);
   {
     GtkEventController *keys = gtk_event_controller_key_new ();
 
     gtk_event_controller_set_propagation_phase (keys, GTK_PHASE_BUBBLE);
-     gtk_widget_add_controller (self->search_entry, keys);
+     gtk_widget_add_controller (GTK_WIDGET (self->search_entry), keys);
      g_signal_connect (keys, "key-pressed", G_CALLBACK (on_search_key), self);
    }
    {
@@ -521,10 +521,10 @@ aml_logs_page_new (AmlLauncher *launcher)
      g_signal_connect (keys, "key-pressed", G_CALLBACK (on_search_key), self);
    }
 
-   gtk_widget_set_hexpand (self->search_bar, TRUE);
+   gtk_widget_set_hexpand (GTK_WIDGET (self->search_bar), TRUE);
    search_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
    gtk_widget_set_hexpand (search_box, TRUE);
-   gtk_box_append (GTK_BOX (search_box), self->search_bar);
+   gtk_box_append (GTK_BOX (search_box), GTK_WIDGET (self->search_bar));
    gtk_box_append (GTK_BOX (row), search_box);
    gtk_box_append (GTK_BOX (row), actions);
    gtk_widget_set_hexpand (row, TRUE);
@@ -540,17 +540,17 @@ aml_logs_page_new (AmlLauncher *launcher)
   gtk_text_view_set_left_margin (GTK_TEXT_VIEW (text), 12);
   gtk_text_view_set_top_margin (GTK_TEXT_VIEW (text), 6);
   gtk_text_view_set_bottom_margin (GTK_TEXT_VIEW (text), 6);
-  self->view = text;
+  self->view = GTK_TEXT_VIEW (text);
 
-  self->scroller = gtk_scrolled_window_new ();
+  self->scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (self->scroller), text);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (self->scroller),
                                   GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-  gtk_widget_set_vexpand (self->scroller, TRUE);
+  gtk_widget_set_vexpand (GTK_WIDGET (self->scroller), TRUE);
 
   card = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_widget_add_css_class (card, "card");
-  gtk_box_append (GTK_BOX (card), self->scroller);
+  gtk_box_append (GTK_BOX (card), GTK_WIDGET (self->scroller));
   gtk_widget_set_margin_start (card, 12);
   gtk_widget_set_margin_end (card, 12);
   gtk_widget_set_margin_bottom (card, 12);
