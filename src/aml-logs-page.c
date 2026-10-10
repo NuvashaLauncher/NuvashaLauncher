@@ -322,6 +322,14 @@ on_search_toggled (GtkToggleButton *button, gpointer user_data)
     }
 }
 
+void
+aml_logs_page_focus_search (AmlLogsPage *self)
+{
+  g_return_if_fail (AML_IS_LOGS_PAGE (self));
+
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (self->search_button), TRUE);
+}
+
 /* ---------------------------------------------------------- *
  * The state line and the buttons
  * ---------------------------------------------------------- */

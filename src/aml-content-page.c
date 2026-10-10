@@ -3571,6 +3571,21 @@ active_search_entry (AmlContentPage *self)
            ? self->search_entry : self->installed_search_entry;
 }
 
+void
+aml_content_page_focus_search (AmlContentPage *self)
+{
+  GtkWidget *entry;
+
+  g_return_if_fail (AML_IS_CONTENT_PAGE (self));
+
+  entry = active_search_entry (self);
+  if (entry != NULL)
+    {
+      gtk_widget_set_visible (entry, TRUE);
+      gtk_widget_grab_focus (entry);
+    }
+}
+
 static void
 on_content_search_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
