@@ -462,3 +462,6 @@ msgstr "Dışa aktarma tamamlandı"
 
 msgid "Export"
 msgstr "Dışa aktar"
+
+msgid "Optional metadata. Add a summary or version ID to help identify the exported pack."
+msgstr "İsteğe bağlı meta veriler. Dışa aktarılan paketi kolayca tanımak için bir özet veya sürüm kimliği ekleyin."

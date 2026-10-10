@@ -462,3 +462,6 @@ msgstr "내보내기 완료"
 
 msgid "Export"
 msgstr "내보내기"
+
+msgid "Optional metadata. Add a summary or version ID to help identify the exported pack."
+msgstr "선택적 메타데이터입니다. 내보낸 팩을 식별하기 쉽도록 요약이나 버전 ID를 추가하세요."

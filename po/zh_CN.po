@@ -462,3 +462,6 @@ msgstr "导出完成"
 
 msgid "Export"
 msgstr "导出"
+
+msgid "Optional metadata. Add a summary or version ID to help identify the exported pack."
+msgstr "可选元数据。添加摘要或版本 ID，以便更容易识别导出的整合包。"
