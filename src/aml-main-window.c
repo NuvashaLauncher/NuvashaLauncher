@@ -636,12 +636,29 @@ on_shortcuts (GSimpleAction *action G_GNUC_UNUSED,
   adw_dialog_present (dialog, GTK_WIDGET (self));
 }
 
+static void
+on_search_action (GSimpleAction *action G_GNUC_UNUSED,
+                  GVariant *parameter G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  GtkWidget *focus = gtk_root_get_focus (GTK_ROOT (self));
+
+  for (GtkWidget *widget = focus; widget != NULL;
+       widget = gtk_widget_get_parent (widget))
+    if (AML_IS_INSTANCE_PAGE (widget))
+      {
+        aml_instance_page_focus_search (AML_INSTANCE_PAGE (widget));
+        return;
+      }
+}
+
 static const GActionEntry window_entries[] = {
   { .name = "create-instance", .activate = on_create_instance },
   { .name = "download-modpack", .activate = on_download_modpack },
   { .name = "import-modpack", .activate = on_import_modpack },
   { .name = "settings", .activate = on_settings },
   { .name = "shortcuts", .activate = on_shortcuts },
+  { .name = "search", .activate = on_search_action },
   { .name = "about", .activate = on_about },
 };
 
@@ -1486,6 +1503,15 @@ aml_main_window_init (AmlMainWindow *self)
 
   g_action_map_add_action_entries (G_ACTION_MAP (self), window_entries,
                                    G_N_ELEMENTS (window_entries), self);
+  {
+    GtkApplication *application =
+      GTK_APPLICATION (gtk_window_get_application (GTK_WINDOW (self)));
+    const char *accelerators[] = { "<Primary>f", NULL };
+
+    if (application != NULL)
+      gtk_application_set_accels_for_action (application, "win.search",
+                                             accelerators);
+  }
 
   /* Start of the header: the "+" menu. */
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (add_button),

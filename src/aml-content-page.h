@@ -35,6 +35,8 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (AmlContentPage, aml_content_page, AML, CONTENT_PAGE,
                       GtkBox)
 
+void aml_content_page_focus_search (AmlContentPage *self);
+
 /* What the loaders and the game ignore: a file whose name ends with
  * this is not loaded, and taking it off the name loads it again. */
 #define AML_CONTENT_DISABLED_SUFFIX ".disabled"

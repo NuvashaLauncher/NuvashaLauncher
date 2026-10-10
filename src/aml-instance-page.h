@@ -40,7 +40,10 @@ G_DECLARE_FINAL_TYPE (AmlInstancePage, aml_instance_page, AML, INSTANCE_PAGE,
 AmlInstancePage *aml_instance_page_new (AmlInstanceManager *manager,
                                         AmlInstance       *instance,
                                         AmlSettings        *settings,
-                                        AmlLauncher       *launcher);
+                                         AmlLauncher       *launcher);
+
+/* Opens search for the currently selected content/logs tab. */
+void aml_instance_page_focus_search (AmlInstancePage *self);
 
 G_END_DECLS
 
