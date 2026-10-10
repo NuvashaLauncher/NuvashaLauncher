@@ -867,6 +867,10 @@ show_export_metadata (AmlInstancePage *self)
   ExportMetadata *data = g_new0 (ExportMetadata, 1);
   GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
   GtkWidget *buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  GtkWidget *heading = gtk_label_new (_("Pack information"));
+  GtkWidget *description = gtk_label_new (
+    _("Optional metadata. Add a summary or version ID to help identify the "
+      "exported pack."));
   GtkWidget *fields = adw_preferences_group_new ();
   GtkWidget *cancel = gtk_button_new_with_label (_("Cancel"));
   GtkWidget *export_button = gtk_button_new_with_label (_("Export"));
@@ -886,12 +890,13 @@ show_export_metadata (AmlInstancePage *self)
                                   _("Summary"));
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (data->version),
                                   _("Version ID"));
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (fields),
-                                   _("Pack information"));
-  adw_preferences_group_set_description (
-    ADW_PREFERENCES_GROUP (fields),
-    _("Optional metadata. Add a summary or version ID to help identify the "
-      "exported pack."));
+  gtk_widget_add_css_class (heading, "title-2");
+  gtk_widget_add_css_class (description, "dim-label");
+  gtk_label_set_justify (GTK_LABEL (heading), GTK_JUSTIFY_CENTER);
+  gtk_label_set_justify (GTK_LABEL (description), GTK_JUSTIFY_CENTER);
+  gtk_label_set_wrap (GTK_LABEL (description), TRUE);
+  gtk_label_set_xalign (GTK_LABEL (heading), 0.5f);
+  gtk_label_set_xalign (GTK_LABEL (description), 0.5f);
   gtk_editable_set_text (GTK_EDITABLE (data->name), name != NULL ? name : "");
   gtk_editable_set_text (GTK_EDITABLE (data->version), "");
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (fields),
@@ -900,10 +905,17 @@ show_export_metadata (AmlInstancePage *self)
                              GTK_WIDGET (data->summary));
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (fields),
                              GTK_WIDGET (data->version));
+  gtk_box_append (GTK_BOX (box), heading);
+  gtk_box_append (GTK_BOX (box), description);
   gtk_box_append (GTK_BOX (box), fields);
+  gtk_widget_set_margin_start (box, 12);
+  gtk_widget_set_margin_end (box, 12);
+  gtk_widget_set_margin_top (box, 12);
+  gtk_widget_set_margin_bottom (box, 12);
   gtk_box_append (GTK_BOX (box), buttons);
   gtk_box_append (GTK_BOX (buttons), cancel);
   gtk_box_append (GTK_BOX (buttons), export_button);
+  gtk_widget_set_halign (buttons, GTK_ALIGN_CENTER);
   gtk_widget_add_css_class (export_button, "suggested-action");
   g_signal_connect (cancel, "clicked",
                     G_CALLBACK (on_export_metadata_cancel), data);
