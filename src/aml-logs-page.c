@@ -299,9 +299,17 @@ static void
 on_search_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   AmlLogsPage *self = user_data;
+  gboolean open = gtk_search_bar_get_search_mode (
+    GTK_SEARCH_BAR (self->search_bar));
 
-  gtk_search_bar_set_search_mode (GTK_SEARCH_BAR (self->search_bar), TRUE);
-  gtk_widget_grab_focus (self->search_entry);
+  gtk_search_bar_set_search_mode (GTK_SEARCH_BAR (self->search_bar), !open);
+  if (open)
+    {
+      gtk_editable_set_text (GTK_EDITABLE (self->search_entry), "");
+      gtk_widget_grab_focus (GTK_WIDGET (self));
+    }
+  else
+    gtk_widget_grab_focus (self->search_entry);
 }
 
 /* ---------------------------------------------------------- *
@@ -526,15 +534,9 @@ aml_logs_page_new (AmlLauncher *launcher)
     g_signal_connect (keys, "key-pressed", G_CALLBACK (on_search_key), self);
   }
 
-  {
-    GtkWidget *search_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-
-    gtk_widget_set_margin_bottom (search_box, 6);
-    gtk_widget_set_margin_start (search_box, 12);
-    gtk_widget_set_margin_end (search_box, 12);
-    gtk_box_append (GTK_BOX (search_box), self->search_bar);
-    gtk_box_append (GTK_BOX (self), search_box);
-  }
+   gtk_widget_set_hexpand (self->search_bar, TRUE);
+   gtk_box_insert_child_after (GTK_BOX (row), self->search_bar,
+                               self->search_button);
 
   /* The lines themselves. Read only: this is what the game printed,
      nothing to write into. */
