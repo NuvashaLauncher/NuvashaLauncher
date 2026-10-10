@@ -76,23 +76,6 @@ struct _AmlInstancePage
 G_DEFINE_FINAL_TYPE (AmlInstancePage, aml_instance_page,
                      GTK_TYPE_BOX)
 
-void
-aml_instance_page_focus_search (AmlInstancePage *self)
-{
-  GtkWidget *page;
-
-  g_return_if_fail (AML_IS_INSTANCE_PAGE (self));
-
-  if (self->stack == NULL)
-    return;
-
-  page = adw_view_stack_get_visible_child (ADW_VIEW_STACK (self->stack));
-  if (AML_IS_CONTENT_PAGE (page))
-    aml_content_page_focus_search (AML_CONTENT_PAGE (page));
-  else if (AML_IS_LOGS_PAGE (page))
-    aml_logs_page_focus_search (AML_LOGS_PAGE (page));
-}
-
 /* ---------------------------------------------------------- *
  * Helpers
  * ---------------------------------------------------------- */
