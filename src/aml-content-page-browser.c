@@ -1,0 +1,786 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
+#include "aml-content-page-private.h"
+#include "aml-content-index.h"
+#include "aml-icons.h"
+#include "aml-i18n.h"
+#include "aml-modrinth.h"
+
+#define RESULTS_PER_PAGE 20
+#define MAX_RESULT_ROWS 400
+#define RESULT_ROWS_TRIM 200
+#define SEARCH_DELAY_MS 300
+
+/* Internal Browse/search workflow for AmlContentPage. */
+
+/* ---------------------------------------------------------- *
+ * Browse
+ * ---------------------------------------------------------- */
+
+void aml_content_page_on_result_activated (AdwActionRow *row, gpointer user_data);
+static void on_category_toggled (GtkCheckButton *button, gpointer user_data);
+void aml_content_page_on_scroll_changed (GtkAdjustment *adjustment, gpointer user_data);
+
+/* The list is scrolled to its end: ask for the next page. Only one page
+ * is ever on its way, and there is nothing to ask for once the total is
+ * reached, so the signal is answered with a flag rather than by
+ * counting.
+ *
+ * GTK4 has no edge-reached signal on GtkScrolledWindow, so the adjustment
+ * is watched instead: a scroll to the bottom puts the value at the upper
+ * bound. */
+void
+aml_content_page_on_scroll_changed (GtkAdjustment *adjustment, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+  gdouble at_end;
+
+  if (self->loading_page)
+    return;
+
+  if (self->offset >= self->total_hits)
+    return;
+
+  at_end = gtk_adjustment_get_upper (adjustment) -
+           gtk_adjustment_get_page_size (adjustment) -
+           gtk_adjustment_get_step_increment (adjustment);
+
+  if (gtk_adjustment_get_value (adjustment) < at_end)
+    return;
+
+  self->offset += RESULTS_PER_PAGE;
+  aml_content_page_run_search (self, TRUE);
+}
+
+/* A page that failed can be asked for again from the row that says it
+ * failed. The offset is already where the page starts, so the same
+ * question is asked again. */
+void
+aml_content_page_on_retry_page_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+
+  if (self->loading_page)
+    return;
+
+  gtk_widget_set_visible (self->retry_row, FALSE);
+  aml_content_page_run_search (self, TRUE);
+}
+
+/* The rows of a page of results. @append is FALSE for a new search or a
+ * new filter, which starts the list over, and TRUE for the next page,
+ * which is added to what is already there. */
+/* Puts the project icon in @icon when it has been fetched, and leaves
+   the placeholder in it when there is none. The widget is held for the
+   length of the fetch, so a row that goes away first is still a widget
+   when the answer arrives. */
+static void
+icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+            gpointer user_data)
+{
+  GtkWidget *icon = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autofree char *path = aml_icon_load_finish (result, &error);
+
+  if (path != NULL && !aml_icon_widget_set_file (icon, path))
+    g_debug ("the icon for \"%s\" could not be decoded",
+             (const char *) g_object_get_data (G_OBJECT (icon),
+                                               "aml-icon-url"));
+
+  g_object_unref (icon);
+}
+
+static void
+start_row_icon (GtkWidget *icon, const char *url)
+{
+  g_object_set_data_full (G_OBJECT (icon), "aml-icon-url", g_strdup (url),
+                          g_free);
+  aml_icon_load_async (url, NULL, icon_ready, g_object_ref (icon));
+}
+
+/* An installed file that Modrinth knows: the icon the browser showed for
+ * its project is what the row should carry too. The url is remembered
+ * from the browser when it was seen there, and a project that was not is
+ * asked Modrinth for once. */
+typedef struct {
+  PageWatch *watch;   /* the page, weakly held */
+  GtkWidget *row;     /* the row whose icon is wanted, held for the wait */
+  char *project_id;
+} InstalledIcon;
+
+static void
+installed_icon_free (InstalledIcon *lookup)
+{
+  page_watch_free (lookup->watch);
+  g_object_unref (lookup->row);
+  g_free (lookup->project_id);
+  g_free (lookup);
+}
+
+static void
+repair_index_for_file (AmlContentPage *self, AmlContentFile *file)
+{
+  g_autofree char *directory = NULL;
+  g_autofree char *filename = g_path_get_basename (file->path);
+  AmlContentIndexEntry entry = { 0 };
+
+  g_object_get (self->instance, "directory", &directory, NULL);
+  entry.filename = filename;
+  entry.hash = file->sha1;
+  entry.provider = "Modrinth";
+  entry.project_id = file->project_id;
+  entry.project_name = file->project_name;
+  entry.icon_url = file->icon_url;
+  entry.version_id = file->version_id;
+  entry.version_name = file->version_name;
+  entry.required_dependencies = file->required_dependencies;
+  entry.optional_dependencies = file->optional_dependencies;
+  entry.incompatible_dependencies = file->incompatible_dependencies;
+  aml_content_index_update_async (directory, self->type, &entry, self->scan,
+                                  NULL, NULL);
+}
+
+static void
+installed_icon_details (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                        gpointer user_data)
+{
+  InstalledIcon *lookup = user_data;
+  AmlContentPage *self = lookup->watch->page;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlModrinthDetails) details = NULL;
+
+  details = aml_modrinth_details_finish (result, &error);
+
+  if (self != NULL && details != NULL)
+    {
+      GtkWidget *icon = NULL;
+      AmlContentFile *file = g_object_get_data (G_OBJECT (lookup->row),
+                                                "aml-file");
+
+      if (details->title != NULL && *details->title != '\0')
+        {
+          g_hash_table_insert (self->project_titles,
+                               g_strdup (lookup->project_id),
+                               g_strdup (details->title));
+          if (file != NULL)
+            {
+              g_free (file->project_name);
+              file->project_name = g_strdup (details->title);
+            }
+        }
+      file_row_refresh (lookup->row);
+
+      /* What the project is, under the file's name, and the icon. Both
+         are remembered for the rows of the same project, rebuilt or
+         reached through the browser. */
+      if (details->description != NULL && *details->description != '\0')
+        {
+          g_hash_table_insert (self->project_descriptions,
+                               g_strdup (lookup->project_id),
+                               g_strdup (details->description));
+          row_show_description (lookup->row, details->description);
+        }
+
+      if (details->icon_url != NULL && *details->icon_url != '\0')
+        {
+          g_hash_table_insert (self->project_icons,
+                               g_strdup (lookup->project_id),
+                              g_strdup (details->icon_url));
+
+          if (file != NULL)
+            {
+              g_free (file->icon_url);
+              file->icon_url = g_strdup (details->icon_url);
+            }
+
+          icon = g_object_get_data (G_OBJECT (lookup->row), "aml-icon");
+
+          if (icon != NULL)
+            start_row_icon (icon, details->icon_url);
+        }
+      if (file != NULL)
+        repair_index_for_file (self, file);
+    }
+
+  installed_icon_free (lookup);
+}
+
+void
+installed_icon_lookup (AmlContentPage *self, GtkWidget *row,
+                       const char *project_id)
+{
+  AmlContentFile *file = g_object_get_data (G_OBJECT (row), "aml-file");
+  const char *known = NULL;
+  const char *description = NULL;
+
+  if (project_id == NULL || *project_id == '\0')
+    return;
+
+  if (file != NULL && file->icon_url != NULL && *file->icon_url != '\0')
+    {
+      GtkWidget *icon = g_object_get_data (G_OBJECT (row), "aml-icon");
+      if (icon != NULL)
+        start_row_icon (icon, file->icon_url);
+      return;
+    }
+
+  known = g_hash_table_lookup (self->project_icons, project_id);
+  description = g_hash_table_lookup (self->project_descriptions, project_id);
+
+  /* A description the browser already read goes in without asking again,
+     even when the icon still has to be fetched. */
+  if (description != NULL)
+    row_show_description (row, description);
+
+  if (known != NULL)
+    {
+      GtkWidget *icon = g_object_get_data (G_OBJECT (row), "aml-icon");
+
+      if (icon != NULL)
+        start_row_icon (icon, known);
+
+      return;
+    }
+
+  {
+    InstalledIcon *lookup = g_new0 (InstalledIcon, 1);
+
+    lookup->watch = page_watch_new (self);
+    lookup->row = g_object_ref (row);
+    lookup->project_id = g_strdup (project_id);
+
+    aml_modrinth_details_async (project_id, self->scan, installed_icon_details,
+                                lookup);
+  }
+}
+
+static void
+results_arrived (AmlContentPage *self, AmlModrinthResults *results,
+                 gboolean append)
+{
+  guint shown = 0;
+
+  if (!append)
+    {
+      take_rows_out (&self->result_rows,
+                     ADW_PREFERENCES_GROUP (self->results_group));
+      g_clear_pointer (&self->results, g_ptr_array_unref);
+      self->results = g_ptr_array_new_with_free_func (
+          (GDestroyNotify) aml_modrinth_project_free);
+      self->total_hits = results->total_hits;
+      g_hash_table_remove_all (self->seen_ids);
+
+      /* A new search starts at the top of the list. */
+      {
+        GtkAdjustment *adjustment =
+          gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (
+            self->results_scroller));
+
+        gtk_adjustment_set_value (adjustment, gtk_adjustment_get_lower (adjustment));
+      }
+    }
+
+  for (guint i = 0; i < results->projects->len; i++)
+    {
+      AmlModrinthProject *project = g_ptr_array_index (results->projects, i);
+      GtkWidget *row = NULL;
+      GtkWidget *icon = NULL;
+
+      /* A project already listed is not listed twice: the same answer can
+       * come back for two pages that overlap. */
+      if (g_hash_table_contains (self->seen_ids, project->project_id))
+        continue;
+
+      row = adw_action_row_new ();
+      icon = aml_icon_widget_new (aml_content_type_icon (self->type));
+
+      g_hash_table_add (self->seen_ids, g_strdup (project->project_id));
+
+      /* What the browser saw, remembered for the installed rows of the
+         same project. */
+      if (project->icon_url != NULL && *project->icon_url != '\0')
+        g_hash_table_insert (self->project_icons,
+                             g_strdup (project->project_id),
+                             g_strdup (project->icon_url));
+
+      if (project->description != NULL && *project->description != '\0')
+        g_hash_table_insert (self->project_descriptions,
+                             g_strdup (project->project_id),
+                             g_strdup (project->description));
+
+      if (project->title != NULL && *project->title != '\0')
+        g_hash_table_insert (self->project_titles,
+                             g_strdup (project->project_id),
+                             g_strdup (project->title));
+
+      /* The icon, then the name and the description under it. Nothing
+         else: who wrote it, how often it was taken, which game version
+         and which loader are what the details page is for. Markup is
+         turned off before the title and the description go in, because
+         both are plain text from Modrinth and may hold an "&". */
+      adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
+      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
+                                     project->title);
+      {
+        g_autofree char *line = description_line (project->description, 0);
+
+        adw_action_row_set_subtitle (ADW_ACTION_ROW (row), line);
+      }
+      /* Two lines at most, ending in an ellipsis when the description is
+         longer: every row is then the same height, whatever it holds.
+         The whole description is on the details page. */
+      adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 2);
+      adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (row), FALSE);
+
+      gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
+      start_row_icon (icon, project->icon_url);
+
+      /* The rows point into the list the page owns, so the projects
+       * live exactly as long as the rows that show them. */
+      g_ptr_array_add (self->results, aml_modrinth_project_copy (project));
+      g_object_set_data (G_OBJECT (row), "aml-project",
+                         g_ptr_array_index (self->results,
+                                            self->results->len - 1));
+
+      adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
+
+      /* The whole row opens the project, where the version is chosen.
+       * An AdwActionRow is not activatable by default, so the row
+       * itself is made one: a click on it activates the row. */
+      gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
+      g_signal_connect (row, "activated", G_CALLBACK (aml_content_page_on_result_activated),
+                        self);
+
+      adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->results_group),
+                                 row);
+      self->result_rows = g_list_append (self->result_rows, row);
+      shown++;
+    }
+
+  /* The offset is where the next page starts, which is the end of what
+     is listed now. */
+  self->offset += shown;
+
+  /* The list does not grow without end: past the cap the oldest rows go,
+     and the scroll is put back where it was, so the user stays on the
+     same project rather than being thrown to the top. */
+  if (self->result_rows != NULL &&
+      g_list_length (self->result_rows) > MAX_RESULT_ROWS)
+    {
+      GtkAdjustment *adjustment =
+        gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (
+          self->results_scroller));
+      gdouble at = gtk_adjustment_get_value (adjustment);
+      gdouble removed = 0;
+
+      for (guint i = 0; i < RESULT_ROWS_TRIM; i++)
+        {
+          GList *oldest = self->result_rows;
+          GtkWidget *row = oldest->data;
+          gint height = gtk_widget_get_height (row);
+
+          removed += height > 0 ? height : 48;
+
+          self->result_rows = g_list_delete_link (self->result_rows, oldest);
+          adw_preferences_group_remove (ADW_PREFERENCES_GROUP (
+                                          self->results_group),
+                                        row);
+        }
+
+      gtk_adjustment_set_value (adjustment,
+                                MAX (at - removed,
+                                     gtk_adjustment_get_lower (adjustment)));
+    }
+
+  {
+    gboolean empty = self->results->len == 0;
+
+    gtk_widget_set_visible (self->results_status, empty);
+    gtk_widget_set_visible (self->results_scroller, !empty);
+    gtk_widget_set_visible (self->results_group, TRUE);
+    gtk_widget_set_visible (self->loading_more, FALSE);
+    gtk_widget_set_visible (self->retry_row, FALSE);
+
+    /* Nothing more to ask for once the total is reached. */
+    if (self->offset >= self->total_hits)
+      gtk_widget_set_visible (self->loading_more, FALSE);
+  }
+}
+
+static void
+search_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+              gpointer user_data)
+{
+  PageWatch *watch = user_data;
+  AmlContentPage *self = watch->page;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlModrinthResults) results = NULL;
+  gboolean append = FALSE;
+
+  if (self == NULL)
+    {
+      page_watch_free (watch);
+      return;
+    }
+
+  append = self->pending_append;
+  results = aml_modrinth_search_finish (result, &error);
+  set_busy (self, FALSE);
+  self->loading_page = FALSE;
+
+  if (results == NULL)
+    {
+      take_rows_out (&self->result_rows,
+                 ADW_PREFERENCES_GROUP (self->results_group));
+      g_clear_pointer (&self->results, g_ptr_array_unref);
+      gtk_widget_set_visible (self->results_status, TRUE);
+      gtk_widget_set_visible (self->results_group, FALSE);
+      gtk_widget_set_visible (self->loading_more, FALSE);
+
+      /* A page that failed is offered again from the list itself. */
+      if (append)
+        {
+          g_autofree char *message =
+            error != NULL ? g_strdup (error->message)
+                   : g_strdup (_("the next page could not be loaded"));
+
+          gtk_label_set_text (GTK_LABEL (self->retry_label), message);
+          gtk_widget_set_visible (self->retry_row, TRUE);
+        }
+      else if (error != NULL &&
+               !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+        {
+          g_autofree char *escaped = g_markup_escape_text (error->message, -1);
+
+          adw_status_page_set_description (ADW_STATUS_PAGE (self->results_status),
+                                           escaped);
+        }
+
+      page_watch_free (watch);
+      return;
+    }
+
+  results_arrived (self, results, append);
+  page_watch_free (watch);
+}
+
+void
+aml_content_page_run_search (AmlContentPage *self, gboolean append)
+{
+  g_autoptr (AmlModrinthSearch) search = g_new0 (AmlModrinthSearch, 1);
+
+  search->type = self->type;
+  search->query = g_strdup (self->query != NULL ? self->query : "");
+  search->minecraft_version = g_strdup (self->minecraft_version);
+  search->loader = self->loader != NULL ? g_strdup (self->loader) : NULL;
+  search->categories = self->categories != NULL
+                           ? g_ptr_array_ref (self->categories)
+                           : NULL;
+  search->offset = self->offset;
+  search->limit = RESULTS_PER_PAGE;
+
+  /* A new search or a new filter cancels the page that was on its way
+   * and starts the list over. */
+  if (!append)
+    {
+      g_cancellable_cancel (self->more);
+      g_clear_object (&self->more);
+      self->more = g_cancellable_new ();
+      self->offset = 0;
+    }
+
+  self->loading_page = TRUE;
+  self->pending_append = append;
+  set_busy (self, TRUE);
+
+  /* The spinner at the bottom says a page is on its way. */
+  gtk_widget_set_visible (self->loading_more, TRUE);
+  gtk_widget_set_visible (self->retry_row, FALSE);
+
+  aml_modrinth_search_async (search, self->more, search_ready,
+                             page_watch_new (self));
+}
+
+static gboolean
+on_search_timeout (gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+
+  self->debounce_source = 0;
+  g_free (self->query);
+  self->query =
+    g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->search_entry)));
+  self->offset = 0;
+  aml_content_page_run_search (self, FALSE);
+
+  return G_SOURCE_REMOVE;
+}
+
+void
+aml_content_page_on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+
+  if (self->debounce_source != 0)
+    g_source_remove (self->debounce_source);
+
+  self->debounce_source =
+    g_timeout_add (SEARCH_DELAY_MS, on_search_timeout, self);
+}
+
+/* Escape means "forget what I typed". The bar of this page is always
+ * open, so there is nothing for Escape to close and it would be swallowed
+ * without clearing anything.
+ *
+ * GTK4 has no key-press-event signal and no stop-searching signal on
+ * GtkSearchEntry, so the key is taken with a controller of its own. It is
+ * added after the one inside the search entry and both run on the bubble
+ * phase, so this one is asked first.
+ *
+ * Clearing the text makes the entry emit "changed", which is what starts
+ * the search again, this time for everything. */
+gboolean
+aml_content_page_on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
+               guint keyval, guint keycode G_GNUC_UNUSED,
+               GdkModifierType state G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+
+  if (keyval != GDK_KEY_Escape)
+    return GDK_EVENT_PROPAGATE;
+
+  if (*gtk_editable_get_text (
+        GTK_EDITABLE (self->search_entry)) != '\0')
+    gtk_editable_set_text (GTK_EDITABLE (self->search_entry), "");
+
+  return GDK_EVENT_STOP;
+}
+
+static GtkWidget *
+active_search_entry (AmlContentPage *self)
+{
+  const char *visible = self->stack != NULL
+    ? adw_view_stack_get_visible_child_name (ADW_VIEW_STACK (self->stack))
+    : NULL;
+
+  return g_strcmp0 (visible, "browse") == 0
+           ? self->search_entry : self->installed_search_entry;
+}
+
+
+gboolean
+aml_content_page_on_content_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
+                       guint keyval, guint keycode G_GNUC_UNUSED,
+                       GdkModifierType state, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+  GtkWidget *entry;
+
+  if (keyval != GDK_KEY_f || !(state & GDK_CONTROL_MASK))
+    return GDK_EVENT_PROPAGATE;
+
+  entry = active_search_entry (self);
+  if (entry != NULL)
+    {
+      gtk_widget_set_visible (entry, TRUE);
+      gtk_widget_grab_focus (entry);
+    }
+
+  return GDK_EVENT_STOP;
+}
+
+static void categories_ready (GObject *source, GAsyncResult *result,
+                              gpointer user_data);
+static void fill_categories (AmlContentPage *self, GPtrArray *categories);
+
+static void
+load_categories (AmlContentPage *self)
+{
+  g_autofree char *project_type =
+    aml_modrinth_project_type_for_content (self->type);
+
+  self->categories_loaded = TRUE;
+  aml_modrinth_categories_async (project_type, self->browse,
+                                 categories_ready, page_watch_new (self));
+}
+
+static void
+load_categories_again (GtkWidget *button G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+
+  self->categories_loaded = FALSE;
+  load_categories (self);
+}
+
+/* Fills the popover with the categories, grouped under the heading
+ * Modrinth puts them under, with readable labels. */
+static void
+fill_categories (AmlContentPage *self, GPtrArray *categories)
+{
+  GtkWidget *child = gtk_widget_get_first_child (self->filter_box);
+
+  while (child != NULL)
+    {
+      GtkWidget *next = gtk_widget_get_next_sibling (child);
+
+      gtk_box_remove (GTK_BOX (self->filter_box), child);
+      child = next;
+    }
+
+  {
+    g_autofree char *current = NULL;
+
+    for (guint i = 0; i < categories->len; i++)
+      {
+        AmlModrinthCategory *category = g_ptr_array_index (categories, i);
+        GtkWidget *button = NULL;
+
+        if (g_strcmp0 (current, category->header) != 0)
+          {
+            g_autofree char *heading_label =
+              category->header != NULL
+                  ? aml_modrinth_category_label (category->header)
+                   : g_strdup (_("Other"));
+            GtkWidget *heading = gtk_label_new (heading_label);
+
+            g_free (current);
+            current = g_strdup (category->header != NULL ? category->header
+                                                        : "other");
+
+            gtk_label_set_xalign (GTK_LABEL (heading), 0.0);
+            gtk_widget_add_css_class (heading, "caption");
+            gtk_widget_add_css_class (heading, "dim-label");
+            gtk_widget_set_margin_top (heading, 6);
+            gtk_widget_set_margin_start (heading, 6);
+            gtk_box_append (GTK_BOX (self->filter_box), heading);
+          }
+
+        {
+          g_autofree char *label_text =
+            aml_modrinth_category_label (category->name);
+
+          button = gtk_check_button_new_with_label (label_text);
+        }
+
+        gtk_widget_add_css_class (button, "flat");
+        /* The whole width of the popover is the target, so a category is
+           not a small checkbox at the left that has to be aimed at. */
+        gtk_widget_set_hexpand (button, TRUE);
+        gtk_widget_set_halign (button, GTK_ALIGN_FILL);
+        g_object_set_data_full (G_OBJECT (button), "aml-category",
+                                g_strdup (category->name), g_free);
+        g_signal_connect (button, "toggled", G_CALLBACK (on_category_toggled),
+                          self);
+        gtk_box_append (GTK_BOX (self->filter_box), button);
+      }
+  }
+}
+
+static void
+categories_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                  gpointer user_data)
+{
+  PageWatch *watch = user_data;
+  AmlContentPage *self = watch->page;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GPtrArray) categories = NULL;
+
+  if (self == NULL)
+    {
+      page_watch_free (watch);
+      return;
+    }
+
+  categories = aml_modrinth_categories_finish (result, &error);
+
+  if (self->filter_box == NULL)
+    {
+      page_watch_free (watch);
+      return;
+    }
+
+  /* A failed request is said so, with a way to try again: an empty list
+   * of check buttons reads as "no categories", not as a failure. */
+  if (categories == NULL)
+    {
+      GtkWidget *child = gtk_widget_get_first_child (self->filter_box);
+
+      while (child != NULL)
+        {
+          GtkWidget *next = gtk_widget_get_next_sibling (child);
+
+          gtk_box_remove (GTK_BOX (self->filter_box), child);
+          child = next;
+        }
+
+      {
+        GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
+        GtkWidget *label = gtk_label_new (
+            error != NULL ? error->message : "Could not load categories");
+        GtkWidget *retry = gtk_button_new_with_label (_("Retry"));
+
+        gtk_label_set_wrap (GTK_LABEL (label), TRUE);
+        gtk_widget_set_size_request (box, 220, -1);
+        gtk_box_append (GTK_BOX (box), label);
+        gtk_box_append (GTK_BOX (box), retry);
+
+        gtk_box_append (GTK_BOX (self->filter_box), box);
+        g_signal_connect (retry, "clicked",
+                          G_CALLBACK (load_categories_again), self);
+      }
+
+      page_watch_free (watch);
+      return;
+    }
+
+  fill_categories (self, categories);
+  page_watch_free (watch);
+}
+
+void
+aml_content_page_on_filter_clicked (GtkWidget *widget G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+
+  if (self->categories_loaded)
+    return;
+
+  load_categories (self);
+}
+
+static void
+on_category_toggled (GtkCheckButton *button, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+  const char *category =
+    g_object_get_data (G_OBJECT (button), "aml-category");
+
+  if (category == NULL)
+    return;
+
+  if (gtk_check_button_get_active (button))
+    g_ptr_array_add (self->categories, g_strdup (category));
+  else
+    {
+      /* What is left of the filter, without the one that was turned
+       * off. */
+      GPtrArray *kept = g_ptr_array_new_with_free_func (g_free);
+
+      for (guint i = 0; i < self->categories->len; i++)
+        {
+          const char *one = g_ptr_array_index (self->categories, i);
+
+          if (g_strcmp0 (one, category) != 0)
+            g_ptr_array_add (kept, g_strdup (one));
+        }
+
+      g_clear_pointer (&self->categories, g_ptr_array_unref);
+      self->categories = kept;
+    }
+
+  self->offset = 0;
+  aml_content_page_run_search (self, FALSE);
+}
