@@ -16,15 +16,13 @@ struct _AmlMainWindow
 {
   AdwApplicationWindow parent_instance;
 
-  AmlInstanceManager *manager;
-  AmlSettings *settings;
-
-  /* The accounts a launch plays as, and the popover in the header that
-     shows them and the two ways of adding one. The window owns the store
-     for as long as it is open, and every launcher of an instance is
-     handed the same one. */
-  AmlAccounts *accounts;
-  AmlUsersPopover *users_popover;
+  /* Shared services used by the window, its dialogs, and its launchers. */
+  struct {
+    AmlInstanceManager *manager;
+    AmlSettings *settings;
+    AmlAccounts *accounts;
+    AmlUsersPopover *users_popover;
+  } services;
 
   /* Per-instance launchers and dialogs. Both maps are keyed by instance
    * id so a row, launcher, and dialog always refer to the same instance. */

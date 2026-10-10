@@ -91,7 +91,7 @@ open_instance_dialog (AmlMainWindow *self, AmlInstance *instance)
     }
 
   page = GTK_WIDGET (
-    aml_instance_page_new (self->manager, instance, self->settings,
+    aml_instance_page_new (self->services.manager, instance, self->services.settings,
                            window_launcher (self, id)));
 
   g_object_get (instance, "name", &name, NULL);
@@ -144,7 +144,7 @@ close_dialogs_of_removed_instances (AmlMainWindow *self)
       const char *id = key;
       AdwDialog *dialog = value;
 
-      if (aml_instance_manager_get_by_id (self->manager, id) == NULL)
+      if (aml_instance_manager_get_by_id (self->services.manager, id) == NULL)
         g_ptr_array_add (doomed, g_object_ref (dialog));
     }
 
@@ -411,7 +411,7 @@ on_row_activate (GtkListBox *list G_GNUC_UNUSED, GtkListBoxRow *row,
                  gpointer user_data)
 {
   AmlMainWindow *self = user_data;
-  GListStore *instances = aml_instance_manager_get_instances (self->manager);
+  GListStore *instances = aml_instance_manager_get_instances (self->services.manager);
   AmlInstance *instance =
     g_list_model_get_item (G_LIST_MODEL (instances),
                            gtk_list_box_row_get_index (row));
@@ -426,7 +426,7 @@ on_row_activate (GtkListBox *list G_GNUC_UNUSED, GtkListBoxRow *row,
 void
 update_visible_page (AmlMainWindow *self)
 {
-  GListStore *instances = aml_instance_manager_get_instances (self->manager);
+  GListStore *instances = aml_instance_manager_get_instances (self->services.manager);
   guint n_items = g_list_model_get_n_items (G_LIST_MODEL (instances));
 
   gtk_stack_set_visible_child_name (GTK_STACK (self->stack),
@@ -449,7 +449,7 @@ drop_launchers_of_removed_instances (AmlMainWindow *self)
     {
       AmlLauncher *launcher = value;
 
-      if (aml_instance_manager_get_by_id (self->manager, (const char *) key)
+      if (aml_instance_manager_get_by_id (self->services.manager, (const char *) key)
             != NULL)
         continue;
 
