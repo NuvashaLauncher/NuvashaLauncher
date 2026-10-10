@@ -188,7 +188,7 @@ installed_filter_rows (AmlContentPage *self)
       gboolean visible = TRUE;
 
       if (file != NULL && file->project_id != NULL)
-        title = g_hash_table_lookup (self->browse.project_titles, file->project_id);
+        title = g_hash_table_lookup (self->browse.model->project_titles, file->project_id);
       if (title == NULL && file != NULL)
         title = file->filename;
 
@@ -227,7 +227,7 @@ file_row_refresh (GtkWidget *row)
     return;
 
   if (self != NULL && file->project_id != NULL)
-    title = g_hash_table_lookup (self->browse.project_titles, file->project_id);
+    title = g_hash_table_lookup (self->browse.model->project_titles, file->project_id);
 
   /* What Modrinth knows the project by, or the name on disk when it is
    * not known. The version remains useful as a subtitle/fallback only. */
@@ -424,7 +424,7 @@ on_trash_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
     return;
 
   title = file->project_id != NULL
-            ? g_hash_table_lookup (self->browse.project_titles, file->project_id)
+            ? g_hash_table_lookup (self->browse.model->project_titles, file->project_id)
             : NULL;
   if (title == NULL || *title == '\0')
     title = file->filename;
@@ -443,7 +443,7 @@ on_trash_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
                         file->project_id) == 0)
             {
               other_title = other->project_id != NULL
-                              ? g_hash_table_lookup (self->browse.project_titles,
+                              ? g_hash_table_lookup (self->browse.model->project_titles,
                                                      other->project_id)
                               : NULL;
               if (other_title == NULL || *other_title == '\0')
@@ -601,7 +601,7 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     {
       file->project_id = g_strdup (version->project_id);
       {
-        const char *known_name = g_hash_table_lookup (self->browse.project_titles,
+        const char *known_name = g_hash_table_lookup (self->browse.model->project_titles,
                                                       version->project_id);
         file->project_name = g_strdup (known_name != NULL
                                          ? known_name : version->project_id);
@@ -673,7 +673,7 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       }
 
       if (file->project_id != NULL && *file->project_id != '\0')
-        g_hash_table_add (self->browse.projects, g_strdup (file->project_id));
+        g_hash_table_add (self->browse.model->projects, g_strdup (file->project_id));
 
       file_row_refresh (row);
 
@@ -783,7 +783,7 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
       if (file->project_id != NULL && file->project_name != NULL &&
           *file->project_name != '\0')
-        g_hash_table_replace (self->browse.project_titles,
+        g_hash_table_replace (self->browse.model->project_titles,
                               g_strdup (file->project_id),
                               g_strdup (file->project_name));
       GtkWidget *row = file_row (self, file);
@@ -1034,7 +1034,7 @@ on_update_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       item->version = update; /* owned from here */
        {
          const char *title = file->project_id != NULL
-                               ? g_hash_table_lookup (self->browse.project_titles,
+                               ? g_hash_table_lookup (self->browse.model->project_titles,
                                                       file->project_id)
                                : NULL;
 
@@ -1085,7 +1085,7 @@ update_check_next (UpdateRun *run)
       g_object_set_data (G_OBJECT (self), "aml-update-file", file);
       aml_modrinth_update_by_hash_async (self->type, file->sha1,
                                          self->minecraft_version,
-                                         self->loader, self->browse.cancellable,
+                                         self->loader, self->browse.model->cancellable,
                                          on_update_ready,
                                          page_watch_new (self));
       return;
@@ -1168,20 +1168,8 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
   self->instance = g_object_ref (instance);
   self->type = type;
   self->minecraft_version = instance_string (instance, "minecraft-version");
-  self->browse.cancellable = g_cancellable_new ();
+  self->browse.model = aml_content_browser_model_new ();
   self->installed.scan = g_cancellable_new ();
-  self->browse.more = g_cancellable_new ();
-  self->browse.seen_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
-                                          NULL);
-  self->browse.categories = g_ptr_array_new_with_free_func (g_free);
-  self->browse.projects = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
-                                          NULL);
-  self->browse.project_icons = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
-                                               g_free);
-  self->browse.project_descriptions = g_hash_table_new_full (g_str_hash, g_str_equal,
-                                                       g_free, g_free);
-  self->browse.project_titles = g_hash_table_new_full (g_str_hash, g_str_equal,
-                                                 g_free, g_free);
 
   g_object_get (instance, "directory", &directory, NULL);
 
@@ -1308,19 +1296,14 @@ aml_content_page_dispose (GObject *object)
   self->install.picking = FALSE;
   self->install.pick_index = 0;
 
-  if (self->browse.debounce_source != 0)
+  if (self->browse.model->debounce_source != 0)
     {
-      g_source_remove (self->browse.debounce_source);
-      self->browse.debounce_source = 0;
+      g_source_remove (self->browse.model->debounce_source);
+      self->browse.model->debounce_source = 0;
     }
 
-  g_cancellable_cancel (self->browse.cancellable);
   g_cancellable_cancel (self->installed.scan);
-  g_cancellable_cancel (self->browse.more);
-  g_clear_object (&self->browse.cancellable);
   g_clear_object (&self->installed.scan);
-  g_clear_object (&self->browse.more);
-  g_clear_pointer (&self->browse.seen_ids, g_hash_table_unref);
 
   /* The page of a project and the widgets in it are owned by the
      page; the fields only watch them, so they are dropped and not
@@ -1348,12 +1331,8 @@ aml_content_page_finalize (GObject *object)
   g_clear_object (&self->instance);
   g_clear_pointer (&self->installed.files, g_ptr_array_unref);
   g_clear_pointer (&self->installed.rows, g_hash_table_unref);
-  g_clear_pointer (&self->browse.projects, g_hash_table_unref);
-  g_clear_pointer (&self->browse.project_icons, g_hash_table_unref);
-  g_clear_pointer (&self->browse.project_descriptions, g_hash_table_unref);
-  g_clear_pointer (&self->browse.project_titles, g_hash_table_unref);
-  g_clear_pointer (&self->browse.categories, g_ptr_array_unref);
-  g_clear_pointer (&self->browse.results, g_ptr_array_unref);
+  aml_content_browser_model_free (self->browse.model);
+  self->browse.model = NULL;
   g_list_free (self->installed.rows_list);
   g_list_free (self->browse.result_rows);
   g_clear_pointer (&self->install.picks, g_ptr_array_unref);
@@ -1361,7 +1340,6 @@ aml_content_page_finalize (GObject *object)
   g_free (self->minecraft_version);
   g_free (self->loader);
   g_free (self->folder);
-  g_free (self->browse.query);
   g_free (self->project.current_project_title);
   g_free (self->project.current_project_id);
   g_free (self->project.details_author);
