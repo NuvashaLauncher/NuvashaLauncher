@@ -32,15 +32,17 @@ page_watch_free (PageWatch *watch)
  * the field becomes NULL before anything can touch it. Used for the
  * widgets of the page of a project, which the page owns. */
 void
-watch_widget (GtkWidget **field, GtkWidget *widget)
+watch_widget (gpointer field, GtkWidget *widget)
 {
-  if (*field != NULL)
-    g_object_remove_weak_pointer (G_OBJECT (*field), (gpointer *) field);
+  GtkWidget **target = field;
 
-  *field = widget;
+  if (*target != NULL)
+    g_object_remove_weak_pointer (G_OBJECT (*target), field);
+
+  *target = widget;
 
   if (widget != NULL)
-    g_object_add_weak_pointer (G_OBJECT (widget), (gpointer *) field);
+    g_object_add_weak_pointer (G_OBJECT (widget), field);
 }
 
 void

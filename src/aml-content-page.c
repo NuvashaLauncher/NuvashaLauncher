@@ -733,9 +733,9 @@ identify_next (IdentifyRun *run)
     {
       gboolean have_versions = self->project.details_versions->len > 0;
 
-     gtk_widget_set_sensitive (self->project.details_download,
+     gtk_widget_set_sensitive (GTK_WIDGET (self->project.details_download),
                                have_versions && !self->installed.identifying);
-     gtk_widget_set_sensitive (self->project.details_check,
+     gtk_widget_set_sensitive (GTK_WIDGET (self->project.details_check),
                                have_versions && !self->installed.identifying);
     }
   identify_run_free (run);
