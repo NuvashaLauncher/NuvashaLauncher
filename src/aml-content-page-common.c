@@ -77,5 +77,5 @@ void
 set_busy (AmlContentPage *self, gboolean busy)
 {
   if (self->browse.spinner != NULL)
-    gtk_widget_set_visible (self->browse.spinner, busy);
+    gtk_widget_set_visible (GTK_WIDGET (self->browse.spinner), busy);
 }

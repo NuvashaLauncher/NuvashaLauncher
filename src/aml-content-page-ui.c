@@ -43,8 +43,8 @@ aml_content_page_build_installed (AmlContentPage *self)
     ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
 
    gtk_widget_set_hexpand (actions, TRUE);
-   self->installed.search_bar = GTK_WIDGET (search_bar);
-   self->installed.search_entry = GTK_WIDGET (search_bar);
+   self->installed.search_bar = GTK_SEARCH_ENTRY (search_bar);
+   self->installed.search_entry = GTK_SEARCH_ENTRY (search_bar);
    gtk_widget_set_hexpand (GTK_WIDGET (search_bar), TRUE);
     gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_bar),
                                             _("Search"));
@@ -53,18 +53,18 @@ aml_content_page_build_installed (AmlContentPage *self)
                      G_CALLBACK (aml_content_page_on_installed_search_changed), self);
      gtk_box_append (GTK_BOX (actions), GTK_WIDGET (search_bar));
 
-   self->installed.update_all = toolbar_button (
+   self->installed.update_all = GTK_BUTTON (toolbar_button (
      "software-update-available-symbolic", _("Update All"),
-     G_CALLBACK (aml_content_page_on_update_all_clicked), self);
-  gtk_widget_set_sensitive (self->installed.update_all, FALSE);
-  gtk_box_append (GTK_BOX (actions), self->installed.update_all);
+     G_CALLBACK (aml_content_page_on_update_all_clicked), self));
+   gtk_widget_set_sensitive (GTK_WIDGET (self->installed.update_all), FALSE);
+  gtk_box_append (GTK_BOX (actions), GTK_WIDGET (self->installed.update_all));
   gtk_box_append (GTK_BOX (actions),
                   toolbar_button ("folder-symbolic", _("Open Folder"),
                                   G_CALLBACK (aml_content_page_on_open_folder_clicked), self));
-   self->browse.spinner = adw_spinner_new ();
-  gtk_widget_set_valign (self->browse.spinner, GTK_ALIGN_CENTER);
-  gtk_widget_set_visible (self->browse.spinner, FALSE);
-  gtk_box_append (GTK_BOX (actions), self->browse.spinner);
+    self->browse.spinner = ADW_SPINNER (adw_spinner_new ());
+   gtk_widget_set_valign (GTK_WIDGET (self->browse.spinner), GTK_ALIGN_CENTER);
+  gtk_widget_set_visible (GTK_WIDGET (self->browse.spinner), FALSE);
+  gtk_box_append (GTK_BOX (actions), GTK_WIDGET (self->browse.spinner));
 
   /* The actions belong to the toolbar row above both lists, not to this
      one of them: they are the same row whichever list is shown, and
@@ -75,10 +75,10 @@ aml_content_page_build_installed (AmlContentPage *self)
      switched, so this one is held here: without it, taking it out would
      be the last reference to it and would destroy the box and the
      spinner inside it while self->browse.spinner still points at them. */
-   self->installed.actions = actions;
+   self->installed.actions = GTK_BOX (actions);
   g_object_ref_sink (actions);
 
-   self->installed.status = adw_status_page_new ();
+   self->installed.status = ADW_STATUS_PAGE (adw_status_page_new ());
   adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->installed.status),
                                  aml_content_type_icon (self->type));
   adw_status_page_set_title (ADW_STATUS_PAGE (self->installed.status),
@@ -91,8 +91,8 @@ aml_content_page_build_installed (AmlContentPage *self)
      rounded at the top, so the two read as one piece. */
   gtk_widget_add_css_class (GTK_WIDGET (group), "flush-top");
 
-   self->installed.group = GTK_WIDGET (group);
-   self->installed.scroller = scroller;
+   self->installed.group = group;
+   self->installed.scroller = GTK_SCROLLED_WINDOW (scroller);
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
                                  GTK_WIDGET (group));
   gtk_widget_set_vexpand (scroller, TRUE);
@@ -100,7 +100,7 @@ aml_content_page_build_installed (AmlContentPage *self)
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 
   gtk_widget_set_vexpand (content, TRUE);
-  gtk_box_append (GTK_BOX (content), self->installed.status);
+  gtk_box_append (GTK_BOX (content), GTK_WIDGET (self->installed.status));
   gtk_box_append (GTK_BOX (content), scroller);
   gtk_widget_set_visible (scroller, FALSE);
   gtk_box_append (GTK_BOX (box), content);
@@ -507,8 +507,8 @@ void
 aml_content_page_move_actions_into_bar (AmlContentPage *self, gboolean browsing)
 {
   GtkWidget *wanted = browsing ? self->browse_actions
-                               : self->installed.actions;
-  GtkWidget *other = browsing ? self->installed.actions
+                               : GTK_WIDGET (self->installed.actions);
+  GtkWidget *other = browsing ? GTK_WIDGET (self->installed.actions)
                               : self->browse_actions;
 
   if (self->bar == NULL)

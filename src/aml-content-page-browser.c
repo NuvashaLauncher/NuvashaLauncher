@@ -566,7 +566,8 @@ active_search_entry (AmlContentPage *self)
     : NULL;
 
   return g_strcmp0 (visible, "browse") == 0
-           ? self->browse.search_entry : self->installed.search_entry;
+           ? self->browse.search_entry
+           : GTK_WIDGET (self->installed.search_entry);
 }
 
 
