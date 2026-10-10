@@ -42,7 +42,7 @@ struct _AmlDownloadModpackDialog
 
   AmlInstanceManager *manager; /* owned */
 
-  GtkWidget *nav; /* AdwNavigationView */
+  AdwNavigationView *nav;
 
   /* The cache of one downloaded pack, reused while the dialog lives. */
   char *pack_path;
@@ -55,16 +55,16 @@ struct _AmlDownloadModpackDialog
   AmlModpack *modpack; /* owned, parsed from pack_path */
 
   /* Browse page widgets. */
-  GtkWidget *search_entry;
-  GtkWidget *results_status;
-  GtkWidget *results_stack;   /* one state at a time: loading, results,
+  GtkSearchEntry *search_entry;
+  AdwStatusPage *results_status;
+  GtkStack *results_stack;   /* one state at a time: loading, results,
                                  empty or error */
-  GtkWidget *results_group;
-  GtkWidget *loading_more;    /* spinner row at the bottom of the list */
-  GtkWidget *retry_row;       /* inline retry row when a page fails */
-  GtkWidget *retry_label;
-  GtkWidget *more_button;     /* asks for the failed page again */
-  GtkWidget *error_status;    /* the status page of the error state */
+  AdwPreferencesGroup *results_group;
+  GtkBox *loading_more;       /* spinner row at the bottom of the list */
+  GtkBox *retry_row;          /* inline retry row when a page fails */
+  GtkLabel *retry_label;
+  GtkButton *more_button;     /* asks for the failed page again */
+  AdwStatusPage *error_status; /* the status page of the error state */
   guint offset;
   guint64 total;
   gboolean loading_page;      /* a page is on its way */
@@ -74,19 +74,19 @@ struct _AmlDownloadModpackDialog
 
   /* The browser is the left half; the pack that is opened is the right
      half, empty until one is opened. */
-  GtkWidget *split;
-  GtkWidget *details_page;   /* weak: the page of the open pack */
-  GtkWidget *dropdown;       /* GtkDropDown, the versions to install */
-  GtkWidget *download_button;
-  GtkWidget *body;           /* the box the Markdown description goes in */
-  GtkWidget *meta;           /* license and author under the title */
-  GtkWidget *count;          /* the download count, at the left */
+  AdwNavigationSplitView *split;
+  AdwNavigationPage *details_page; /* weak: the page of the open pack */
+  GtkDropDown *dropdown;       /* the versions to install */
+  GtkButton *download_button;
+  GtkBox *body;                /* the box the Markdown description goes in */
+  GtkLabel *meta;              /* license and author under the title */
+  GtkLabel *count;             /* the download count, at the left */
 
   /* What the dialog of a pack holds while it is up. */
   GPtrArray *versions; /* AmlModrinthVersion* of the details dialog */
-  GtkWidget *name_entry;  /* AdwEntryRow */
-  GtkWidget *directory_row;
-  GtkWidget *details_error; /* inline words when versions fail or are empty */
+  AdwEntryRow *name_entry;
+  AdwActionRow *directory_row;
+  GtkLabel *details_error; /* inline words when versions fail or are empty */
 
   /* What the dialog of a pack is waiting for before it shows anything:
      the long description and the versions. */
@@ -168,15 +168,17 @@ static void show_details_error (AmlDownloadModpackDialog *self,
  * holds @widget is destroyed, @field becomes NULL before a request that
  * is still running can touch it. */
 static void
-details_watch (GtkWidget **field, GtkWidget *widget)
+details_watch (gpointer field, GtkWidget *widget)
 {
-  if (*field != NULL)
-    g_object_remove_weak_pointer (G_OBJECT (*field), (gpointer *) field);
+  GtkWidget **target = field;
 
-  *field = widget;
+  if (*target != NULL)
+    g_object_remove_weak_pointer (G_OBJECT (*target), field);
+
+  *target = widget;
 
   if (widget != NULL)
-    g_object_add_weak_pointer (G_OBJECT (widget), (gpointer *) field);
+    g_object_add_weak_pointer (G_OBJECT (widget), field);
 }
 
 /* Drops every weak pointer this dialog holds, so a widget that outlives,
@@ -283,13 +285,13 @@ aml_download_modpack_dialog_init (AmlDownloadModpackDialog *self)
   adw_dialog_set_title (ADW_DIALOG (self), _("Download Modpack"));
   aml_dialog_set_standard_size (ADW_DIALOG (self));
 
-  self->nav = adw_navigation_view_new ();
+  self->nav = ADW_NAVIGATION_VIEW (adw_navigation_view_new ());
   /* The installing page appears in place instead of sliding in: the
      movement is not information, and the pages of this dialog are few
      and shallow enough that an instant change reads cleanly. */
   adw_navigation_view_set_animate_transitions (
     ADW_NAVIGATION_VIEW (self->nav), FALSE);
-  adw_dialog_set_child (ADW_DIALOG (self), self->nav);
+  adw_dialog_set_child (ADW_DIALOG (self), GTK_WIDGET (self->nav));
 
 }
 
@@ -423,7 +425,7 @@ on_retry_page (AmlDownloadModpackDialog *self)
   if (self->loading_page)
     return;
 
-  gtk_widget_set_visible (self->retry_row, FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->retry_row), FALSE);
   run_search (self, TRUE);
 }
 
@@ -551,7 +553,7 @@ results_arrived (AmlDownloadModpackDialog *self, AmlModrinthResults *results,
       /* A new search starts at the top of the list. */
       {
         GtkWidget *scroller =
-          gtk_widget_get_ancestor (self->results_group,
+          gtk_widget_get_ancestor (GTK_WIDGET (self->results_group),
                                    GTK_TYPE_SCROLLED_WINDOW);
 
         if (scroller != NULL)
@@ -641,8 +643,8 @@ results_arrived (AmlDownloadModpackDialog *self, AmlModrinthResults *results,
           GTK_STACK (self->results_stack), empty ? "empty" : "results");
     }
 
-  gtk_widget_set_visible (self->loading_more, FALSE);
-  gtk_widget_set_visible (self->retry_row, FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->loading_more), FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->retry_row), FALSE);
 
   set_busy (self, FALSE);
   self->loading_page = FALSE;
@@ -684,8 +686,8 @@ run_search (AmlDownloadModpackDialog *self, gboolean append)
                                       "loading");
   else
     {
-      gtk_widget_set_visible (self->loading_more, TRUE);
-      gtk_widget_set_visible (self->retry_row, FALSE);
+      gtk_widget_set_visible (GTK_WIDGET (self->loading_more), TRUE);
+      gtk_widget_set_visible (GTK_WIDGET (self->retry_row), FALSE);
     }
 
   escaped_query =
@@ -747,8 +749,8 @@ on_search_done (GObject *source G_GNUC_UNUSED,
               /* A page that failed is offered again from the list. */
               gtk_label_set_text (GTK_LABEL (self->retry_label),
                                   error->message);
-              gtk_widget_set_visible (self->loading_more, FALSE);
-              gtk_widget_set_visible (self->retry_row, TRUE);
+              gtk_widget_set_visible (GTK_WIDGET (self->loading_more), FALSE);
+              gtk_widget_set_visible (GTK_WIDGET (self->retry_row), TRUE);
             }
           else
             {
@@ -779,8 +781,8 @@ on_search_done (GObject *source G_GNUC_UNUSED,
       if (self->append)
         {
           gtk_label_set_text (GTK_LABEL (self->retry_label), error->message);
-          gtk_widget_set_visible (self->loading_more, FALSE);
-          gtk_widget_set_visible (self->retry_row, TRUE);
+          gtk_widget_set_visible (GTK_WIDGET (self->loading_more), FALSE);
+          gtk_widget_set_visible (GTK_WIDGET (self->retry_row), TRUE);
         }
       else
         {
@@ -824,23 +826,23 @@ build_browse_page (AmlDownloadModpackDialog *self)
      an empty answer, the error, or the spinner while the first page is
      on its way. A status page that stayed under the results was the bug
      this replaces. */
-  self->results_stack = gtk_stack_new ();
-  gtk_widget_set_vexpand (self->results_stack, TRUE);
+  self->results_stack = GTK_STACK (gtk_stack_new ());
+  gtk_widget_set_vexpand (GTK_WIDGET (self->results_stack), TRUE);
 
-  self->results_group = adw_preferences_group_new ();
+  self->results_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
 
   /* The list starts where the search row above it ends: its first row is
      not rounded at the top, so the two read as one piece. */
-  gtk_widget_add_css_class (self->results_group, "flush-top");
+  gtk_widget_add_css_class (GTK_WIDGET (self->results_group), "flush-top");
 
-  self->search_entry = gtk_search_entry_new ();
-  gtk_widget_set_hexpand (self->search_entry, TRUE);
+  self->search_entry = GTK_SEARCH_ENTRY (gtk_search_entry_new ());
+  gtk_widget_set_hexpand (GTK_WIDGET (self->search_entry), TRUE);
   gtk_search_entry_set_placeholder_text (
     GTK_SEARCH_ENTRY (self->search_entry), _("Search modpacks"));
   g_signal_connect (self->search_entry, "changed",
                     G_CALLBACK (on_search_changed), self);
 
-  gtk_box_append (GTK_BOX (top), self->search_entry);
+  gtk_box_append (GTK_BOX (top), GTK_WIDGET (self->search_entry));
   gtk_widget_add_css_class (close_button, "flat");
   gtk_widget_set_tooltip_text (close_button, _("Close"));
   g_signal_connect_swapped (close_button, "clicked",
@@ -874,9 +876,9 @@ build_browse_page (AmlDownloadModpackDialog *self)
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->results_group),
                              retry_row);
 
-  self->loading_more = loading_more;
-  self->retry_row = retry_row;
-  self->retry_label = retry_label;
+  self->loading_more = GTK_BOX (loading_more);
+  self->retry_row = GTK_BOX (retry_row);
+  self->retry_label = GTK_LABEL (retry_label);
 
   g_signal_connect_swapped (retry_button, "clicked",
                             G_CALLBACK (on_retry_page), self);
@@ -886,12 +888,12 @@ build_browse_page (AmlDownloadModpackDialog *self)
   /* The group is the whole width of the list: a row of the browser has to
      cover it rather than sit centered in a clamp of its own. */
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
-                                 self->results_group);
+                                 GTK_WIDGET (self->results_group));
   gtk_widget_set_vexpand (scroller, TRUE);
   gtk_stack_add_named (GTK_STACK (self->results_stack), scroller, "results");
 
   /* An empty answer. */
-  self->results_status = adw_status_page_new ();
+  self->results_status = ADW_STATUS_PAGE (adw_status_page_new ());
   adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->results_status),
                                  "system-search-symbolic");
   adw_status_page_set_title (ADW_STATUS_PAGE (self->results_status),
@@ -900,14 +902,14 @@ build_browse_page (AmlDownloadModpackDialog *self)
     ADW_STATUS_PAGE (self->results_status),
     "No modpack matches what was asked for. Try another word");
   gtk_stack_add_named (GTK_STACK (self->results_stack),
-                       self->results_status, "empty");
+                       GTK_WIDGET (self->results_status), "empty");
 
   /* A search that could not be made. */
-  self->error_status = adw_status_page_new ();
+  self->error_status = ADW_STATUS_PAGE (adw_status_page_new ());
   adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->error_status),
                                  "dialog-error-symbolic");
   gtk_stack_add_named (GTK_STACK (self->results_stack),
-                       self->error_status, "error");
+                       GTK_WIDGET (self->error_status), "error");
 
   /* The first page is on its way. */
   gtk_widget_set_valign (loading, GTK_ALIGN_CENTER);
@@ -919,7 +921,7 @@ build_browse_page (AmlDownloadModpackDialog *self)
 
   gtk_stack_set_visible_child_name (GTK_STACK (self->results_stack),
                                     "loading");
-  gtk_box_append (GTK_BOX (box), self->results_stack);
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (self->results_stack));
 
   /* The list asks for the next page when it is scrolled to its end.
      GTK4 has no edge-reached signal, so the adjustment is watched. */
@@ -934,11 +936,11 @@ build_browse_page (AmlDownloadModpackDialog *self)
   /* The list is the left half; the pack that is opened is the right half,
      empty until one is opened. Collapsed shows one page at a time, which
      is the list alone. */
-  self->split = adw_navigation_split_view_new ();
-  gtk_widget_set_vexpand (self->split, TRUE);
+  self->split = ADW_NAVIGATION_SPLIT_VIEW (adw_navigation_split_view_new ());
+  gtk_widget_set_vexpand (GTK_WIDGET (self->split), TRUE);
   /* Named, so the stylesheet keeps the list half the colour of the dialog
      instead of the sidebar colour a split view would give it. */
-  gtk_widget_add_css_class (self->split, "flat-split");
+  gtk_widget_add_css_class (GTK_WIDGET (self->split), "flat-split");
   adw_navigation_split_view_set_sidebar (
     ADW_NAVIGATION_SPLIT_VIEW (self->split),
     adw_navigation_page_new (box, "Browse Modpacks"));
@@ -953,7 +955,7 @@ build_browse_page (AmlDownloadModpackDialog *self)
   adw_navigation_split_view_set_max_sidebar_width (
     ADW_NAVIGATION_SPLIT_VIEW (self->split), 640);
 
-  page = GTK_WIDGET (adw_navigation_page_new (self->split, ""));
+  page = GTK_WIDGET (adw_navigation_page_new (GTK_WIDGET (self->split), ""));
   adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (page), "browse");
 
   adw_navigation_view_add (ADW_NAVIGATION_VIEW (self->nav),
@@ -1207,15 +1209,15 @@ details_content (AmlDownloadModpackDialog *self)
 
     details_watch (&self->meta, gtk_label_new (text));
     gtk_label_set_xalign (GTK_LABEL (self->meta), 0);
-    gtk_widget_add_css_class (self->meta, "dim-label");
-    adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), self->meta);
+    gtk_widget_add_css_class (GTK_WIDGET (self->meta), "dim-label");
+    adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), GTK_WIDGET (self->meta));
   }
 
    downloads = aml_content_format_downloads (self->project->downloads);
   details_watch (&self->count, gtk_label_new (downloads));
   gtk_label_set_xalign (GTK_LABEL (self->count), 0);
-  gtk_widget_add_css_class (self->count, "dim-label");
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), self->count);
+  gtk_widget_add_css_class (GTK_WIDGET (self->count), "dim-label");
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), GTK_WIDGET (self->count));
 
   /* The long description, in Markdown. */
   details_watch (&self->body, gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
@@ -1237,9 +1239,9 @@ details_content (AmlDownloadModpackDialog *self)
   details_watch (&self->details_error, gtk_label_new (NULL));
   gtk_label_set_wrap (GTK_LABEL (self->details_error), TRUE);
   gtk_label_set_xalign (GTK_LABEL (self->details_error), 0);
-  gtk_widget_add_css_class (self->details_error, "dim-label");
-  gtk_widget_set_visible (self->details_error, FALSE);
-  gtk_box_append (GTK_BOX (box), self->details_error);
+  gtk_widget_add_css_class (GTK_WIDGET (self->details_error), "dim-label");
+  gtk_widget_set_visible (GTK_WIDGET (self->details_error), FALSE);
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (self->details_error));
 
   gtk_widget_set_margin_top (box, 12);
   gtk_widget_set_margin_bottom (box, 12);
@@ -1252,20 +1254,20 @@ details_content (AmlDownloadModpackDialog *self)
   /* The foot: every version the pack publishes, and the button that
      installs the one shown. The newest is what it shows from the start. */
   details_watch (&self->dropdown, gtk_drop_down_new (NULL, NULL));
-  gtk_widget_set_hexpand (self->dropdown, TRUE);
-  gtk_widget_set_valign (self->dropdown, GTK_ALIGN_CENTER);
+  gtk_widget_set_hexpand (GTK_WIDGET (self->dropdown), TRUE);
+  gtk_widget_set_valign (GTK_WIDGET (self->dropdown), GTK_ALIGN_CENTER);
 
   details_watch (&self->download_button, gtk_button_new_with_label (_("Download")));
-  gtk_widget_add_css_class (self->download_button, "suggested-action");
-  gtk_widget_set_valign (self->download_button, GTK_ALIGN_CENTER);
+  gtk_widget_add_css_class (GTK_WIDGET (self->download_button), "suggested-action");
+  gtk_widget_set_valign (GTK_WIDGET (self->download_button), GTK_ALIGN_CENTER);
   /* Nothing can be installed before the versions have arrived. */
-  gtk_widget_set_sensitive (self->download_button, FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (self->download_button), FALSE);
   g_signal_connect (self->download_button, "clicked",
                     G_CALLBACK (on_modpack_download_clicked), self);
 
   bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  gtk_box_append (GTK_BOX (bar), self->dropdown);
-  gtk_box_append (GTK_BOX (bar), self->download_button);
+  gtk_box_append (GTK_BOX (bar), GTK_WIDGET (self->dropdown));
+  gtk_box_append (GTK_BOX (bar), GTK_WIDGET (self->download_button));
   gtk_widget_set_margin_top (bar, 12);
   gtk_widget_set_margin_bottom (bar, 12);
   gtk_widget_set_margin_start (bar, 12);
@@ -1313,7 +1315,7 @@ dialog_details_fill (AmlDownloadModpackDialog *self)
     }
 
   if (self->download_button != NULL)
-    gtk_widget_set_sensitive (self->download_button,
+    gtk_widget_set_sensitive (GTK_WIDGET (self->download_button),
                               self->versions != NULL && self->versions->len > 0);
 }
 
@@ -1327,7 +1329,7 @@ show_details_error (AmlDownloadModpackDialog *self, const char *message)
 
   gtk_label_set_text (GTK_LABEL (self->details_error),
                       message != NULL ? message : "");
-  gtk_widget_set_visible (self->details_error, message != NULL);
+  gtk_widget_set_visible (GTK_WIDGET (self->details_error), message != NULL);
 }
 
 static void
