@@ -177,6 +177,28 @@ on_show_snapshots_toggled (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
 }
 
 static gboolean
+find_search_page (GtkWidget *widget, gpointer user_data)
+{
+  GtkWidget **found = user_data;
+
+  if (!gtk_widget_get_visible (widget) || !gtk_widget_get_mapped (widget))
+    return GDK_EVENT_PROPAGATE;
+
+  if (AML_IS_LOGS_PAGE (widget) || AML_IS_CONTENT_PAGE (widget))
+    {
+      *found = widget;
+      return GDK_EVENT_STOP;
+    }
+
+  for (GtkWidget *child = gtk_widget_get_first_child (widget); child != NULL;
+       child = gtk_widget_get_next_sibling (child))
+    if (find_search_page (child, found) == GDK_EVENT_STOP)
+      return GDK_EVENT_STOP;
+
+  return GDK_EVENT_PROPAGATE;
+}
+
+static gboolean
 on_global_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
                       guint keyval, guint keycode G_GNUC_UNUSED,
                       GdkModifierType state, gpointer user_data)
@@ -202,6 +224,20 @@ on_global_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
           return GDK_EVENT_STOP;
         }
     }
+
+  {
+    GtkWidget *page = NULL;
+
+    find_search_page (GTK_WIDGET (self), &page);
+    if (page != NULL)
+      {
+        if (AML_IS_LOGS_PAGE (page))
+          aml_logs_page_focus_search (AML_LOGS_PAGE (page));
+        else
+          aml_content_page_focus_search (AML_CONTENT_PAGE (page));
+        return GDK_EVENT_STOP;
+      }
+  }
 
   return GDK_EVENT_PROPAGATE;
 }
