@@ -154,6 +154,7 @@ static void on_error_retry_install (GtkButton *, gpointer);
 static void on_optional_cancel (GtkButton *, gpointer);
 static void on_optional_install (GtkButton *, gpointer);
 static void on_pack_downloaded (GObject *, GAsyncResult *, gpointer);
+static void on_pack_parsed (GObject *, GAsyncResult *, gpointer);
 static void dialog_details_open (AmlDownloadModpackDialog *self);
 static gboolean dialog_start_features (AmlDownloadModpackDialog *self);
 static void on_modpack_download_clicked (GtkButton *, gpointer);
@@ -1970,8 +1971,19 @@ on_pack_downloaded (GObject *source G_GNUC_UNUSED,
       return;
     }
 
+  aml_modpack_new_from_zip_async (self->pack_path, self->fetch,
+                                  on_pack_parsed, user_data);
+}
+
+static void
+on_pack_parsed (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                gpointer user_data)
+{
+  AmlDownloadModpackDialog *self = user_data;
+  g_autoptr (GError) error = NULL;
+
   g_clear_pointer (&self->modpack, aml_modpack_free);
-  self->modpack = aml_modpack_new_from_zip (self->pack_path, &error);
+  self->modpack = aml_modpack_new_from_zip_finish (result, &error);
 
   if (self->modpack == NULL)
     {
