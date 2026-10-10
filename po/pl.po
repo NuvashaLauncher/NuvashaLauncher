@@ -28,9 +28,6 @@ msgstr "Zaktualizuj wszystko"
 msgid "Open Folder"
 msgstr "Otwórz folder"
 
-msgid "Refresh"
-msgstr "Odśwież"
-
 msgid "Nothing installed yet"
 msgstr "Nic nie zostało zainstalowane…"
 
@@ -46,17 +43,8 @@ msgstr "Dalsze ładowanie"
 msgid "Nothing is selected"
 msgstr "Nic nie zaznaczono"
 
-msgid "Install the selected versions"
-msgstr "Zainstaluj wybrane wersje"
-
-msgid "Install the selected versions?"
-msgstr "Zainstalować wybrane wersje?"
-
 msgid "Install this version with the selected ones"
 msgstr "Zainstaluj tę wersję razem z wybranymi"
-
-msgid "Search Modrinth"
-msgstr "Wyszukaj modrinth"
 
 msgid "Filter by category"
 msgstr "Filtruj wg kategorii"
@@ -67,8 +55,10 @@ msgstr "Filtruj"
 msgid "Nothing to show yet"
 msgstr "Nie ma nic do wyświetlenia"
 
-msgid "Type what to look for, or browse everything Modrinth has for this instance"
-msgstr "Wpisz, czego szukać, lub przejrzyj wszystko, co Modrinth ma dla tej instancji"
+msgid ""
+"Type what to look for, or browse everything Modrinth has for this instance"
+msgstr ""
+"Wpisz, czego szukać, lub przejrzyj wszystko, co Modrinth ma dla tej instancji"
 
 msgid "Browse"
 msgstr "Przeglądaj"
@@ -76,8 +66,12 @@ msgstr "Przeglądaj"
 msgid "No mod loader"
 msgstr "Brak ładowacza modów"
 
-msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
-msgstr "Mody wymagają ładowacza modów. Najpierw wybierz Fabric, Quilt, Forge lub NeoForge w ustawieniach tej instancji"
+msgid ""
+"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
+"settings of this instance first"
+msgstr ""
+"Mody wymagają ładowacza modów. Najpierw wybierz Fabric, Quilt, Forge lub "
+"NeoForge w ustawieniach tej instancji"
 
 msgid "Create Instance"
 msgstr "Utwórz instancję"
@@ -163,14 +157,22 @@ msgstr "Dodaj środowisko uruchomieniowe Java"
 msgid "No detected Java satisfies the requirement of Java %d+"
 msgstr "Żadna wykryta Java nie spełnia wymagania Java %d+"
 
-msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
-msgstr "Minecraft potrzebuje Javy in wersji bezobsługowej (headless): w Arch użyj pakietu jre-openjdk, a nie jre-openjdk-headless"
+msgid ""
+"Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
+"not jre-openjdk-headless"
+msgstr ""
+"Minecraft potrzebuje Javy in wersji bezobsługowej (headless): w Arch użyj "
+"pakietu jre-openjdk, a nie jre-openjdk-headless"
 
 msgid "JVM Arguments"
 msgstr "Argumenty JVM"
 
-msgid "The configured Java was not detected; make sure it is still a usable java executable"
-msgstr "Skonfigurowanej Javy nie wykryto; upewnij się, że to nadal jest używalny plik wykonywalny Java"
+msgid ""
+"The configured Java was not detected; make sure it is still a usable java "
+"executable"
+msgstr ""
+"Skonfigurowanej Javy nie wykryto; upewnij się, że to nadal jest używalny "
+"plik wykonywalny Java"
 
 msgid "Actions"
 msgstr "Czynności"
@@ -324,6 +326,7 @@ msgstr "Dodaj konto Microsoft"
 
 msgid "Minecraft Version"
 msgstr "Wersja Minecrafta"
+
 msgid "Install the selected %s?"
 msgstr "Zainstalować wybrane %s?"
 
@@ -341,33 +344,46 @@ msgstr "Zaktualizować następujące %s"
 
 msgid "Dependencies:"
 msgstr "Zależności:"
-msgid "The following mods depend on %s:\n%s"
-msgstr "Następujące mody zależą od %s:\n%s"
+
+msgid ""
+"The following mods depend on %s:\n"
+"%s"
+msgstr ""
+"Następujące mody zależą od %s:\n"
+"%s"
 
 msgid "Cache"
 msgstr "Pamięć podręczna"
+
 msgid "Cache Modrinth API responses"
 msgstr "Buforuj odpowiedzi API Modrinth"
+
 msgid "Cache expiration"
 msgstr "Wygasanie pamięci podręcznej"
+
 msgid "1 hour"
 msgstr "1 godzina"
+
 msgid "6 hours"
 msgstr "6 godzin"
+
 msgid "1 day"
 msgstr "1 dzień"
+
 msgid "7 days"
 msgstr "7 dni"
+
 msgid "Clear AML Cache"
 msgstr "Wyczyść pamięć podręczną AML"
+
 msgid "Show Shortcuts"
 msgstr "Pokaż skróty"
+
 msgid "Quit"
 msgstr "Wyjdź"
+
 msgid "Clear AML Cache?"
 msgstr "Wyczyścić pamięć podręczną AML?"
-msgid "Cached data will be removed. Installed content, instances, accounts, settings and logs will be kept."
-msgstr "Dane z pamięci podręcznej zostaną usunięte. Zainstalowana zawartość, instancje, konta, ustawienia i dzienniki zostaną zachowane."
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -400,8 +416,11 @@ msgstr "Eksport modpacka"
 msgid "Include transient files?"
 msgstr "Dołączyć pliki tymczasowe?"
 
-msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr "Dzienniki, raporty awarii, zrzuty ekranu, pamięć podręczna i pobrane pliki są zwykle wykluczane."
+msgid ""
+"Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr ""
+"Dzienniki, raporty awarii, zrzuty ekranu, pamięć podręczna i pobrane pliki "
+"są zwykle wykluczane."
 
 msgid "Clean Export"
 msgstr "Czysty eksport"
@@ -418,15 +437,11 @@ msgstr "Podsumowanie"
 msgid "Version ID"
 msgstr "Identyfikator wersji"
 
-msgid "Continue"
-msgstr "Dalej"
-
 msgid "Downloading files"
 msgstr "Pobieranie plików"
 
 msgid "Extracting files"
 msgstr "Rozpakowywanie plików"
-
 
 msgid "Optional files"
 msgstr "Pliki opcjonalne"
@@ -434,7 +449,9 @@ msgstr "Pliki opcjonalne"
 msgid ""
 "The pack lists these files but says they are not needed. Nothing of them is "
 "installed unless you ask. Default is off"
-msgstr "Pakiet zawiera te pliki, ale nie są one wymagane. Żaden nie zostanie zainstalowany bez Twojej prośby. Domyślnie wyłączone"
+msgstr ""
+"Pakiet zawiera te pliki, ale nie są one wymagane. Żaden nie zostanie "
+"zainstalowany bez Twojej prośby. Domyślnie wyłączone"
 
 msgid "Pack could not be fetched"
 msgstr "Nie można pobrać pakietu"
@@ -450,9 +467,6 @@ msgstr "Pobieranie modpacka"
 
 msgid "Writing archive"
 msgstr "Zapisywanie archiwum"
-
-msgid "These details are optional. The pack name defaults to the instance name."
-msgstr "Te informacje są opcjonalne. Domyślnie nazwa pakietu będzie nazwą instancji."
 
 msgid "Export modpack metadata"
 msgstr "Metadane eksportu"
@@ -472,9 +486,12 @@ msgstr "Eksport zakończony"
 msgid "Export"
 msgstr "Eksportuj"
 
-msgid "Optional metadata. Add a summary or version ID to help identify the exported pack."
-msgstr "Opcjonalne metadane. Dodaj podsumowanie lub identyfikator wersji, aby łatwiej rozpoznać wyeksportowany pakiet."
-
+msgid ""
+"Optional metadata. Add a summary or version ID to help identify the exported "
+"pack."
+msgstr ""
+"Opcjonalne metadane. Dodaj podsumowanie lub identyfikator wersji, aby "
+"łatwiej rozpoznać wyeksportowany pakiet."
 
 msgid "Installed %u item"
 msgid_plural "Installed %u items"
@@ -533,9 +550,6 @@ msgstr "%.1f mln pobrań"
 
 msgid "%.1fk downloads"
 msgstr "%.1f tys. pobrań"
-
-msgid "%lu downloads"
-msgstr "%lu pobrań"
 
 msgid "%s  ·  by %s"
 msgstr "%s  ·  autor: %s"

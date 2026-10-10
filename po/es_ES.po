@@ -28,9 +28,6 @@ msgstr "Actualizar todo"
 msgid "Open Folder"
 msgstr "Abrir carpeta"
 
-msgid "Refresh"
-msgstr "Actualizar"
-
 msgid "Nothing installed yet"
 msgstr "Nada instalado todavía"
 
@@ -46,17 +43,8 @@ msgstr "Cargando más…"
 msgid "Nothing is selected"
 msgstr "No hay nada seleccionado"
 
-msgid "Install the selected versions"
-msgstr "Instalar las versiones seleccionadas"
-
-msgid "Install the selected versions?"
-msgstr "¿Instalar las versiones seleccionadas?"
-
 msgid "Install this version with the selected ones"
 msgstr "Instalar esta versión junto con las seleccionadas"
-
-msgid "Search Modrinth"
-msgstr "Buscar en Modrinth"
 
 msgid "Filter by category"
 msgstr "Filtrar por categoría"
@@ -67,8 +55,10 @@ msgstr "Filtrar"
 msgid "Nothing to show yet"
 msgstr "Nada que mostrar todavía"
 
-msgid "Type what to look for, or browse everything Modrinth has for this instance"
-msgstr "Escribe qué buscar o explora todo lo que Modrinth tiene para esta instancia"
+msgid ""
+"Type what to look for, or browse everything Modrinth has for this instance"
+msgstr ""
+"Escribe qué buscar o explora todo lo que Modrinth tiene para esta instancia"
 
 msgid "Browse"
 msgstr "Explorar"
@@ -76,8 +66,12 @@ msgstr "Explorar"
 msgid "No mod loader"
 msgstr "Sin lanzador de mods"
 
-msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
-msgstr "Los mods necesitan un lanzador de mods. Elige primero Fabric, Quilt, Forge o NeoForge en la configuración de esta instancia"
+msgid ""
+"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
+"settings of this instance first"
+msgstr ""
+"Los mods necesitan un lanzador de mods. Elige primero Fabric, Quilt, Forge o "
+"NeoForge en la configuración de esta instancia"
 
 msgid "Create Instance"
 msgstr "Crear instancia"
@@ -163,14 +157,22 @@ msgstr "Agregar entorno de ejecución de Java"
 msgid "No detected Java satisfies the requirement of Java %d+"
 msgstr "Ningún Java detectado cumple el requisito de Java %d+"
 
-msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
-msgstr "Minecraft necesita un Java que no sea headless: en Arch usa el paquete jre-openjdk, no jre-openjdk-headless"
+msgid ""
+"Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
+"not jre-openjdk-headless"
+msgstr ""
+"Minecraft necesita un Java que no sea headless: en Arch usa el paquete jre-"
+"openjdk, no jre-openjdk-headless"
 
 msgid "JVM Arguments"
 msgstr "Argumentos de la JVM"
 
-msgid "The configured Java was not detected; make sure it is still a usable java executable"
-msgstr "No se ha detectado el Java configurado; comprueba que siga siendo un ejecutable de Java utilizable"
+msgid ""
+"The configured Java was not detected; make sure it is still a usable java "
+"executable"
+msgstr ""
+"No se ha detectado el Java configurado; comprueba que siga siendo un "
+"ejecutable de Java utilizable"
 
 msgid "Actions"
 msgstr "Acciones"
@@ -324,6 +326,7 @@ msgstr "Añadir cuenta de Microsoft"
 
 msgid "Minecraft Version"
 msgstr "Versión de Minecraft"
+
 msgid "Install the selected %s?"
 msgstr "¿Instalar los %s seleccionados?"
 
@@ -341,33 +344,46 @@ msgstr "Actualizar los siguientes %s"
 
 msgid "Dependencies:"
 msgstr "Dependencias:"
-msgid "The following mods depend on %s:\n%s"
-msgstr "Los siguientes mods dependen de %s:\n%s"
+
+msgid ""
+"The following mods depend on %s:\n"
+"%s"
+msgstr ""
+"Los siguientes mods dependen de %s:\n"
+"%s"
 
 msgid "Cache"
 msgstr "Caché"
+
 msgid "Cache Modrinth API responses"
 msgstr "Guardar respuestas de la API de Modrinth"
+
 msgid "Cache expiration"
 msgstr "Caducidad de la caché"
+
 msgid "1 hour"
 msgstr "1 hora"
+
 msgid "6 hours"
 msgstr "6 horas"
+
 msgid "1 day"
 msgstr "1 día"
+
 msgid "7 days"
 msgstr "7 días"
+
 msgid "Clear AML Cache"
 msgstr "Borrar caché de AML"
+
 msgid "Show Shortcuts"
 msgstr "Mostrar atajos de teclado"
+
 msgid "Quit"
 msgstr "Salir"
+
 msgid "Clear AML Cache?"
 msgstr "¿Borrar la caché de AML?"
-msgid "Cached data will be removed. Installed content, instances, accounts, settings and logs will be kept."
-msgstr "Se eliminarán los datos de la caché. Se conservarán el contenido instalado, las instancias, las cuentas, la configuración y los registros."
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -400,8 +416,11 @@ msgstr "Exportar modpack"
 msgid "Include transient files?"
 msgstr "¿Incluir archivos temporales?"
 
-msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr "Los registros, informes de fallos, capturas de pantalla, cachés y descargas normalmente se excluyen."
+msgid ""
+"Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr ""
+"Los registros, informes de fallos, capturas de pantalla, cachés y descargas "
+"normalmente se excluyen."
 
 msgid "Clean Export"
 msgstr "Exportación limpia"
@@ -418,15 +437,11 @@ msgstr "Resumen"
 msgid "Version ID"
 msgstr "ID de versión"
 
-msgid "Continue"
-msgstr "Continuar"
-
 msgid "Downloading files"
 msgstr "Descargando archivos"
 
 msgid "Extracting files"
 msgstr "Extrayendo archivos"
-
 
 msgid "Optional files"
 msgstr "Archivos opcionales"
@@ -434,7 +449,10 @@ msgstr "Archivos opcionales"
 msgid ""
 "The pack lists these files but says they are not needed. Nothing of them is "
 "installed unless you ask. Default is off"
-msgstr "El paquete incluye estos archivos, pero indica que no son necesarios. No se instalará ninguno a menos que lo pidas. La opción predeterminada está desactivada"
+msgstr ""
+"El paquete incluye estos archivos, pero indica que no son necesarios. No se "
+"instalará ninguno a menos que lo pidas. La opción predeterminada está "
+"desactivada"
 
 msgid "Pack could not be fetched"
 msgstr "No se pudo descargar el paquete"
@@ -450,9 +468,6 @@ msgstr "Descargando modpack"
 
 msgid "Writing archive"
 msgstr "Escribiendo archivo"
-
-msgid "These details are optional. The pack name defaults to the instance name."
-msgstr "Estos datos son opcionales. El nombre del paquete será el de la instancia de forma predeterminada."
 
 msgid "Export modpack metadata"
 msgstr "Metadatos de exportación"
@@ -472,9 +487,12 @@ msgstr "Exportación completada"
 msgid "Export"
 msgstr "Exportar"
 
-msgid "Optional metadata. Add a summary or version ID to help identify the exported pack."
-msgstr "Metadatos opcionales. Añade un resumen o un ID de versión para identificar fácilmente el paquete exportado."
-
+msgid ""
+"Optional metadata. Add a summary or version ID to help identify the exported "
+"pack."
+msgstr ""
+"Metadatos opcionales. Añade un resumen o un ID de versión para identificar "
+"fácilmente el paquete exportado."
 
 msgid "Installed %u item"
 msgid_plural "Installed %u items"
@@ -533,9 +551,6 @@ msgstr "%.1f M de descargas"
 
 msgid "%.1fk downloads"
 msgstr "%.1f mil descargas"
-
-msgid "%lu downloads"
-msgstr "%lu descargas"
 
 msgid "%s  ·  by %s"
 msgstr "%s  ·  por %s"

@@ -28,9 +28,6 @@ msgstr "Tümünü Güncelle"
 msgid "Open Folder"
 msgstr "Klasörü Aç"
 
-msgid "Refresh"
-msgstr "Yenile"
-
 msgid "Nothing installed yet"
 msgstr "Henüz hiçbir şey kurulu değil"
 
@@ -46,17 +43,8 @@ msgstr "Daha fazlası yükleniyor…"
 msgid "Nothing is selected"
 msgstr "Hiçbir şey seçili değil"
 
-msgid "Install the selected versions"
-msgstr "Seçili sürümleri kur"
-
-msgid "Install the selected versions?"
-msgstr "Seçili sürümler kurulsun mu?"
-
 msgid "Install this version with the selected ones"
 msgstr "Bu sürümü seçili sürümlerle birlikte kur"
-
-msgid "Search Modrinth"
-msgstr "Modrinth’te ara"
 
 msgid "Filter by category"
 msgstr "Kategoriye göre filtrele"
@@ -67,8 +55,11 @@ msgstr "Filtrele"
 msgid "Nothing to show yet"
 msgstr "Henüz gösterilecek bir şey yok"
 
-msgid "Type what to look for, or browse everything Modrinth has for this instance"
-msgstr "Aramak istediğinizi yazın veya Modrinth’in bu örnek için sunduğu her şeye göz atın"
+msgid ""
+"Type what to look for, or browse everything Modrinth has for this instance"
+msgstr ""
+"Aramak istediğinizi yazın veya Modrinth’in bu örnek için sunduğu her şeye "
+"göz atın"
 
 msgid "Browse"
 msgstr "Göz At"
@@ -76,8 +67,12 @@ msgstr "Göz At"
 msgid "No mod loader"
 msgstr "Mod yükleyici yok"
 
-msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
-msgstr "Modlar için bir mod yükleyici gerekiyor. Önce bu örneğin ayarlarından Fabric, Quilt, Forge veya NeoForge seçin"
+msgid ""
+"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
+"settings of this instance first"
+msgstr ""
+"Modlar için bir mod yükleyici gerekiyor. Önce bu örneğin ayarlarından "
+"Fabric, Quilt, Forge veya NeoForge seçin"
 
 msgid "Create Instance"
 msgstr "Örnek Oluştur"
@@ -161,16 +156,25 @@ msgid "Add Java Runtime"
 msgstr "Java çalışma zamanı ekle"
 
 msgid "No detected Java satisfies the requirement of Java %d+"
-msgstr "Algılanan Java sürümlerinden hiçbiri Java %d+ gereksinimini karşılamıyor"
+msgstr ""
+"Algılanan Java sürümlerinden hiçbiri Java %d+ gereksinimini karşılamıyor"
 
-msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
-msgstr "Minecraft’in headless olmayan bir Java’ya ihtiyacı var: Arch üzerinde jre-openjdk-headless değil, jre-openjdk paketini kullanın"
+msgid ""
+"Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
+"not jre-openjdk-headless"
+msgstr ""
+"Minecraft’in headless olmayan bir Java’ya ihtiyacı var: Arch üzerinde jre-"
+"openjdk-headless değil, jre-openjdk paketini kullanın"
 
 msgid "JVM Arguments"
 msgstr "JVM Argümanları"
 
-msgid "The configured Java was not detected; make sure it is still a usable java executable"
-msgstr "Yapılandırılmış Java algılanmadı; hâlâ kullanılabilir bir Java çalıştırılabilir dosyası olduğundan emin olun"
+msgid ""
+"The configured Java was not detected; make sure it is still a usable java "
+"executable"
+msgstr ""
+"Yapılandırılmış Java algılanmadı; hâlâ kullanılabilir bir Java "
+"çalıştırılabilir dosyası olduğundan emin olun"
 
 msgid "Actions"
 msgstr "Eylemler"
@@ -324,6 +328,7 @@ msgstr "Microsoft Hesabı Ekle"
 
 msgid "Minecraft Version"
 msgstr "Minecraft Sürümü"
+
 msgid "Install the selected %s?"
 msgstr "Seçili %s yüklensin mi?"
 
@@ -341,33 +346,46 @@ msgstr "Şunları güncelle: %s"
 
 msgid "Dependencies:"
 msgstr "Bağımlılıklar:"
-msgid "The following mods depend on %s:\n%s"
-msgstr "Şu modlar %s moduna bağlı:\n%s"
+
+msgid ""
+"The following mods depend on %s:\n"
+"%s"
+msgstr ""
+"Şu modlar %s moduna bağlı:\n"
+"%s"
 
 msgid "Cache"
 msgstr "Önbellek"
+
 msgid "Cache Modrinth API responses"
 msgstr "Modrinth API yanıtlarını önbelleğe al"
+
 msgid "Cache expiration"
 msgstr "Önbellek sona erme süresi"
+
 msgid "1 hour"
 msgstr "1 saat"
+
 msgid "6 hours"
 msgstr "6 saat"
+
 msgid "1 day"
 msgstr "1 gün"
+
 msgid "7 days"
 msgstr "7 gün"
+
 msgid "Clear AML Cache"
 msgstr "AML önbelleğini temizle"
+
 msgid "Show Shortcuts"
 msgstr "Kısayolları Göster"
+
 msgid "Quit"
 msgstr "Çıkış"
+
 msgid "Clear AML Cache?"
 msgstr "AML önbelleği temizlensin mi?"
-msgid "Cached data will be removed. Installed content, instances, accounts, settings and logs will be kept."
-msgstr "Önbelleğe alınan veriler kaldırılacak. Yüklü içerik, örnekler, hesaplar, ayarlar ve günlükler korunacak."
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -400,8 +418,11 @@ msgstr "Mod paketi dışa aktarma"
 msgid "Include transient files?"
 msgstr "Geçici dosyalar dahil edilsin mi?"
 
-msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr "Günlükler, çökme raporları, ekran görüntüleri, önbellekler ve indirmeler normalde hariç tutulur."
+msgid ""
+"Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr ""
+"Günlükler, çökme raporları, ekran görüntüleri, önbellekler ve indirmeler "
+"normalde hariç tutulur."
 
 msgid "Clean Export"
 msgstr "Temiz dışa aktarma"
@@ -418,15 +439,11 @@ msgstr "Özet"
 msgid "Version ID"
 msgstr "Sürüm kimliği"
 
-msgid "Continue"
-msgstr "Devam et"
-
 msgid "Downloading files"
 msgstr "Dosyalar indiriliyor"
 
 msgid "Extracting files"
 msgstr "Dosyalar çıkarılıyor"
-
 
 msgid "Optional files"
 msgstr "İsteğe bağlı dosyalar"
@@ -434,7 +451,9 @@ msgstr "İsteğe bağlı dosyalar"
 msgid ""
 "The pack lists these files but says they are not needed. Nothing of them is "
 "installed unless you ask. Default is off"
-msgstr "Paket bu dosyaları listeliyor ancak gerekli olmadıklarını belirtiyor. Siz istemedikçe hiçbiri yüklenmez. Varsayılan olarak kapalı"
+msgstr ""
+"Paket bu dosyaları listeliyor ancak gerekli olmadıklarını belirtiyor. Siz "
+"istemedikçe hiçbiri yüklenmez. Varsayılan olarak kapalı"
 
 msgid "Pack could not be fetched"
 msgstr "Paket alınamadı"
@@ -450,9 +469,6 @@ msgstr "Mod paketi indiriliyor"
 
 msgid "Writing archive"
 msgstr "Arşiv yazılıyor"
-
-msgid "These details are optional. The pack name defaults to the instance name."
-msgstr "Bu bilgiler isteğe bağlıdır. Paket adı varsayılan olarak örnek adı olur."
 
 msgid "Export modpack metadata"
 msgstr "Dışa aktarma meta verileri"
@@ -472,9 +488,12 @@ msgstr "Dışa aktarma tamamlandı"
 msgid "Export"
 msgstr "Dışa aktar"
 
-msgid "Optional metadata. Add a summary or version ID to help identify the exported pack."
-msgstr "İsteğe bağlı meta veriler. Dışa aktarılan paketi kolayca tanımak için bir özet veya sürüm kimliği ekleyin."
-
+msgid ""
+"Optional metadata. Add a summary or version ID to help identify the exported "
+"pack."
+msgstr ""
+"İsteğe bağlı meta veriler. Dışa aktarılan paketi kolayca tanımak için bir "
+"özet veya sürüm kimliği ekleyin."
 
 msgid "Installed %u item"
 msgid_plural "Installed %u items"
@@ -533,9 +552,6 @@ msgstr "%.1f milyon indirme"
 
 msgid "%.1fk downloads"
 msgstr "%.1f bin indirme"
-
-msgid "%lu downloads"
-msgstr "%lu indirme"
 
 msgid "%s  ·  by %s"
 msgstr "%s  ·  %s tarafından"
