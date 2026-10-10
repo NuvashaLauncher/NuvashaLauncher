@@ -44,6 +44,8 @@ aml_content_index_entry_free (AmlContentIndexEntry *entry)
   g_free (entry->hash);
   g_free (entry->hash512);
   g_free (entry->download_url);
+  g_free (entry->env_client);
+  g_free (entry->env_server);
   g_free (entry->provider);
   g_free (entry->project_id);
   g_free (entry->project_name);
@@ -113,6 +115,12 @@ entries_from_json (const char *contents, gsize length, GError **error)
         json_object_get_string_member_with_default (object, "hash512", ""));
       entry->download_url = g_strdup (
         json_object_get_string_member_with_default (object, "download_url", ""));
+      entry->env_client = g_strdup (
+        json_object_get_string_member_with_default (object, "env_client",
+                                                   "required"));
+      entry->env_server = g_strdup (
+        json_object_get_string_member_with_default (object, "env_server",
+                                                   "required"));
       entry->provider = g_strdup (json_object_get_string_member_with_default (
         object, "provider", INDEX_PROVIDER));
       entry->project_id = g_strdup (json_object_get_string_member_with_default (
@@ -252,6 +260,10 @@ entries_to_json (GPtrArray *entries, gsize *length)
       json_builder_add_string_value (builder, entry->hash512);
       json_builder_set_member_name (builder, "download_url");
       json_builder_add_string_value (builder, entry->download_url);
+      json_builder_set_member_name (builder, "env_client");
+      json_builder_add_string_value (builder, entry->env_client);
+      json_builder_set_member_name (builder, "env_server");
+      json_builder_add_string_value (builder, entry->env_server);
       json_builder_set_member_name (builder, "provider");
       json_builder_add_string_value (builder, entry->provider != NULL
                                                ? entry->provider : INDEX_PROVIDER);
@@ -376,6 +388,8 @@ entry_copy (AmlContentIndexEntry *source)
   entry->hash = g_strdup (source->hash);
   entry->hash512 = g_strdup (source->hash512);
   entry->download_url = g_strdup (source->download_url);
+  entry->env_client = g_strdup (source->env_client);
+  entry->env_server = g_strdup (source->env_server);
   entry->provider = g_strdup (source->provider);
   entry->project_id = g_strdup (source->project_id);
   entry->project_name = g_strdup (source->project_name);

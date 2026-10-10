@@ -22,6 +22,8 @@ typedef struct {
   char *hash;
   char *hash512;
   char *download_url;
+  char *env_client;
+  char *env_server;
   char *provider;
   char *project_id;
   char *project_name;

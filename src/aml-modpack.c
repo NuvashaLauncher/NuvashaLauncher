@@ -2241,6 +2241,8 @@ export_indexed_files (ExportRun *run, GError **error)
           const char *sha1 = NULL;
           const char *sha512 = NULL;
           const char *url = NULL;
+          const char *env_client = NULL;
+          const char *env_server = NULL;
           g_autofree char *source = NULL;
           GStatBuf stat_buf;
           JsonObject *file = NULL;
@@ -2257,6 +2259,10 @@ export_indexed_files (ExportRun *run, GError **error)
                                                                "");
           url = json_object_get_string_member_with_default (entry,
                                                             "download_url", "");
+          env_client = json_object_get_string_member_with_default (
+            entry, "env_client", "required");
+          env_server = json_object_get_string_member_with_default (
+            entry, "env_server", "required");
           source = g_build_filename (run->instance_directory, folders[folder_index],
                                      filename, NULL);
 
@@ -2277,6 +2283,12 @@ export_indexed_files (ExportRun *run, GError **error)
           json_object_set_object_member (file, "hashes", hashes);
           json_array_add_string_element (downloads, url);
           json_object_set_array_member (file, "downloads", downloads);
+          {
+            JsonObject *env = json_object_new ();
+            json_object_set_string_member (env, "client", env_client);
+            json_object_set_string_member (env, "server", env_server);
+            json_object_set_object_member (file, "env", env);
+          }
           json_object_set_int_member (file, "fileSize", stat_buf.st_size);
           json_array_add_object_element (files, file);
           g_hash_table_add (run->indexed_paths,
