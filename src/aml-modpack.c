@@ -2063,6 +2063,7 @@ typedef struct {
   gboolean include_transient;
   AmlModpackExportProgressFunc progress;
   gpointer progress_data;
+  guint64 done;
   guint64 total;
 } ExportRun;
 
@@ -2116,7 +2117,8 @@ export_progress (ExportRun *run, guint64 done, guint64 total,
 }
 
 static gboolean
-export_file (struct archive *archive, const char *source, const char *target,
+export_file (ExportRun *run, struct archive *archive, const char *source,
+             const char *target,
              GCancellable *cancellable, GError **error)
 {
   GStatBuf stat_buf;
@@ -2192,6 +2194,8 @@ export_file (struct archive *archive, const char *source, const char *target,
 
   fclose (input);
   archive_entry_free (entry);
+  run->done++;
+  export_progress (run, run->done, run->total, "Writing archive");
   return TRUE;
 }
 
@@ -2217,7 +2221,7 @@ export_path_is_transient (const char *relative)
 }
 
 static gboolean
-export_directory (struct archive *archive, const char *root,
+export_directory (ExportRun *run, struct archive *archive, const char *root,
                   const char *relative, GHashTable *indexed_paths,
                   gboolean include_transient, GCancellable *cancellable,
                   GError **error)
@@ -2259,7 +2263,7 @@ export_directory (struct archive *archive, const char *root,
 
       if (S_ISDIR (stat_buf.st_mode))
         {
-          if (!export_directory (archive, root, child_relative,
+          if (!export_directory (run, archive, root, child_relative,
                                  indexed_paths, include_transient, cancellable,
                                  error))
             return FALSE;
@@ -2272,7 +2276,7 @@ export_directory (struct archive *archive, const char *root,
           if (g_hash_table_contains (indexed_paths, child_relative))
             continue;
 
-          if (!export_file (archive, source, target, cancellable, error))
+          if (!export_file (run, archive, source, target, cancellable, error))
             return FALSE;
         }
       else if (S_ISLNK (stat_buf.st_mode))
@@ -2542,11 +2546,26 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
 
   if (archive_write_header (archive, manifest_entry) != ARCHIVE_OK ||
       archive_write_data (archive, run->manifest, manifest_length) !=
-        (la_ssize_t) manifest_length ||
-      !export_directory (archive, canonical_root, "", run->indexed_paths,
+        (la_ssize_t) manifest_length)
+    {
+      g_set_error (&error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_ARCHIVE,
+                   "cannot write the modpack manifest: %s",
+                   archive_error_string (archive));
+      archive_entry_free (manifest_entry);
+      archive_write_free (archive);
+      g_unlink (run->archive_path);
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  run->done = 1;
+  export_progress (run, run->done, run->total, "Writing archive");
+
+  if (!export_directory (run, archive, canonical_root, "", run->indexed_paths,
                          run->include_transient, cancellable, &error) ||
       (run->icon_path != NULL &&
-       !export_file (archive, run->icon_path, "overrides/icon.png", cancellable,
+       !export_file (run, archive, run->icon_path, "overrides/icon.png",
+                     cancellable,
                      &error)) ||
       g_cancellable_is_cancelled (cancellable) ||
       archive_write_close (archive) != ARCHIVE_OK)
