@@ -1779,7 +1779,8 @@ version_cache_path (const char *id, char **path, GError **error)
 
 typedef struct
 {
-  GTask *task;
+  AmlTaskSequence *sequence;
+  char *url;
   char *path;
 } FetchRequest;
 
@@ -1797,7 +1798,7 @@ static void
 fetch_request_free (FetchRequest *request)
 {
   g_free (request->path);
-  g_object_unref (request->task);
+  g_free (request->url);
   g_free (request);
 }
 
@@ -1833,10 +1834,11 @@ manifest_file_loaded (GObject *source, GAsyncResult *result,
   if (!g_file_load_contents_finish (G_FILE (source), result, &contents,
                                     &length, NULL, &error))
     {
-      g_task_return_new_error (request->task, AML_MC_ERROR, AML_MC_ERROR_IO,
-                               "the downloaded manifest cannot be read: %s",
-                               error->message);
-      fetch_request_free (request);
+      aml_task_sequence_return_error (
+        request->sequence,
+        g_error_new (AML_MC_ERROR, AML_MC_ERROR_IO,
+                     "the downloaded manifest cannot be read: %s",
+                     error->message));
       return;
     }
 
@@ -1845,13 +1847,13 @@ manifest_file_loaded (GObject *source, GAsyncResult *result,
 
   if (manifest == NULL)
     {
-      g_task_return_error (request->task, g_steal_pointer (&error));
-      fetch_request_free (request);
+      aml_task_sequence_return_error (request->sequence,
+                                      g_steal_pointer (&error));
       return;
     }
 
-  g_task_return_pointer (request->task, manifest, g_object_unref);
-  fetch_request_free (request);
+  aml_task_sequence_return_pointer (request->sequence, manifest,
+                                    g_object_unref);
 }
 
 static void
@@ -1865,13 +1867,26 @@ manifest_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
 
   if (!aml_download_file_finish (result, &error))
     {
-      g_task_return_error (request->task, g_steal_pointer (&error));
-      fetch_request_free (request);
+      aml_task_sequence_return_error (request->sequence,
+                                      g_steal_pointer (&error));
       return;
     }
 
-  g_file_load_contents_async (file, g_task_get_cancellable (request->task),
+  g_file_load_contents_async (
+    file,
+    g_task_get_cancellable (aml_task_sequence_get_task (request->sequence)),
                               manifest_file_loaded, request);
+}
+
+static void
+manifest_fetch_step (GTask *task G_GNUC_UNUSED, gpointer user_data)
+{
+  FetchRequest *request = user_data;
+
+  aml_download_file_async (
+    request->url, request->path, NULL, G_CHECKSUM_SHA1,
+    g_task_get_cancellable (aml_task_sequence_get_task (request->sequence)),
+    NULL, manifest_downloaded, request);
 }
 
 void
@@ -1883,12 +1898,7 @@ aml_version_manifest_fetch_async (const char         *url,
   FetchRequest *request;
   g_autoptr (GError) error = NULL;
   g_autofree char *directory = NULL;
-  GTask *task;
-
   g_return_if_fail (url != NULL);
-
-  task = g_task_new (NULL, cancellable, callback, user_data);
-  g_task_set_check_cancellable (task, FALSE);
 
   directory = ensure_cache_directory (&error);
 
@@ -1896,17 +1906,22 @@ aml_version_manifest_fetch_async (const char         *url,
     {
       /* The task reports back through an idle, so the caller never
        * hears from us before this function has returned. */
+      g_autoptr (GTask) task =
+        g_task_new (NULL, cancellable, callback, user_data);
+
+      g_task_set_check_cancellable (task, FALSE);
       g_task_return_error (task, g_steal_pointer (&error));
-      g_object_unref (task);
       return;
     }
 
   request = g_new0 (FetchRequest, 1);
-  request->task = task;
+  request->url = g_strdup (url);
   request->path = g_build_filename (directory, MANIFEST_FILE, NULL);
-
-  aml_download_file_async (url, request->path, NULL, G_CHECKSUM_SHA1,
-                           cancellable, NULL, manifest_downloaded, request);
+  request->sequence =
+    aml_task_sequence_new (cancellable, callback, user_data,
+                           manifest_fetch_step, request,
+                           (GDestroyNotify) fetch_request_free);
+  aml_task_sequence_start (request->sequence);
 }
 
 AmlVersionManifest *
