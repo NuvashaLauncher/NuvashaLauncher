@@ -178,7 +178,7 @@ refresh_downloads (AmlMainWindow *self)
      Either of the two is a reason for it to be there at all. */
   if (jobs->len > 0)
     {
-      gtk_widget_set_visible (self->downloads.button, TRUE);
+      gtk_widget_set_visible (GTK_WIDGET (self->downloads.button), TRUE);
     }
   else
     {
@@ -190,14 +190,14 @@ refresh_downloads (AmlMainWindow *self)
       if (popover != NULL)
         gtk_popover_popdown (popover);
 
-       gtk_widget_set_visible (self->downloads.button, FALSE);
+       gtk_widget_set_visible (GTK_WIDGET (self->downloads.button), FALSE);
     }
 
   /* Browser selections are shown by the browser's own button, not in this
      menu. This header button is only for transfers that are running. */
   {
-    gtk_widget_set_visible (self->downloads.spinner, jobs->len > 0);
-    gtk_widget_set_visible (self->downloads.icon, jobs->len == 0);
+    gtk_widget_set_visible (GTK_WIDGET (self->downloads.spinner), jobs->len > 0);
+    gtk_widget_set_visible (GTK_WIDGET (self->downloads.icon), jobs->len == 0);
   }
 }
 
