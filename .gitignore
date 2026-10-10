@@ -10,3 +10,7 @@
 *~
 *.swp
 *.swo
+
+# Local modpack import/export data
+/overrides/
+/modrinth.index.json
