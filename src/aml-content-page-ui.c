@@ -468,29 +468,29 @@ aml_content_page_build_bar (AmlContentPage *self)
   /* The list is the left half; the project that is opened is the right
      half, and is empty until one is opened. Collapsed shows one page at a
      time, which is the list alone. */
-  self->split = adw_navigation_split_view_new ();
-  gtk_widget_set_vexpand (self->split, TRUE);
+  self->project.split = adw_navigation_split_view_new ();
+  gtk_widget_set_vexpand (self->project.split, TRUE);
   /* Named, so the stylesheet keeps the left half the colour of the page
      instead of the sidebar colour it would take on its own. */
-  gtk_widget_add_css_class (self->split, "flat-split");
+  gtk_widget_add_css_class (self->project.split, "flat-split");
   adw_navigation_split_view_set_sidebar (
-    ADW_NAVIGATION_SPLIT_VIEW (self->split),
+    ADW_NAVIGATION_SPLIT_VIEW (self->project.split),
     adw_navigation_page_new (inner, aml_content_type_title (self->type)));
   adw_navigation_split_view_set_collapsed (
-    ADW_NAVIGATION_SPLIT_VIEW (self->split), TRUE);
+    ADW_NAVIGATION_SPLIT_VIEW (self->project.split), TRUE);
   adw_navigation_split_view_set_sidebar_width_fraction (
-    ADW_NAVIGATION_SPLIT_VIEW (self->split), 0.5);
+    ADW_NAVIGATION_SPLIT_VIEW (self->project.split), 0.5);
   /* Half the page, rather than the narrow column a split view gives a
      sidebar by default: this half holds the search row and the list. */
   adw_navigation_split_view_set_min_sidebar_width (
-    ADW_NAVIGATION_SPLIT_VIEW (self->split), 360);
+    ADW_NAVIGATION_SPLIT_VIEW (self->project.split), 360);
   adw_navigation_split_view_set_max_sidebar_width (
-    ADW_NAVIGATION_SPLIT_VIEW (self->split), 640);
+    ADW_NAVIGATION_SPLIT_VIEW (self->project.split), 640);
 
   /* One overlay over the list and the project, so a message about either
      one is said in the same place. */
   self->toasts = adw_toast_overlay_new ();
-  adw_toast_overlay_set_child (ADW_TOAST_OVERLAY (self->toasts), self->split);
+  adw_toast_overlay_set_child (ADW_TOAST_OVERLAY (self->toasts), self->project.split);
   gtk_box_append (GTK_BOX (self), self->toasts);
 }
 
