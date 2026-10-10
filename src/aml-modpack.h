@@ -207,6 +207,8 @@ AmlInstance *aml_modpack_install_finish (GAsyncResult *result,
  * instance's manifest and its files under overrides/. Archive creation is
  * performed away from the GTK main loop. */
 void aml_modpack_export_async (AmlInstance *instance, const char *path,
+                               const char *pack_name, const char *summary,
+                               const char *version_id,
                                gboolean include_transient,
                                GCancellable *cancellable,
                                GAsyncReadyCallback callback,
