@@ -30,6 +30,9 @@ G_DECLARE_FINAL_TYPE (AmlLogsPage, aml_logs_page, AML, LOGS_PAGE, GtkBox)
  * same instance show the same lines. */
 AmlLogsPage *aml_logs_page_new (AmlLauncher *launcher);
 
+/* Opens the log search field and focuses it. */
+void aml_logs_page_focus_search (AmlLogsPage *self);
+
 G_END_DECLS
 
 #endif /* AML_LOGS_PAGE_H */

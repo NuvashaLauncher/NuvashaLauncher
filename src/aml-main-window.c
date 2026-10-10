@@ -9,6 +9,7 @@
 
 #include "aml-main-window.h"
 #include "aml-cache.h"
+#include "aml-content-page.h"
 #include "aml-create-instance-dialog.h"
 #include "aml-download-modpack-dialog.h"
 #include "aml-download.h"
@@ -16,6 +17,7 @@
 #include "aml-instance-page.h"
 #include "aml-i18n.h"
 #include "aml-launcher.h"
+#include "aml-logs-page.h"
 #include "aml-settings.h"
 #include "aml-users-popover.h"
 
@@ -172,6 +174,36 @@ on_show_snapshots_toggled (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
 
   adw_switch_row_set_active (row, stored);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (row), error->message);
+}
+
+static gboolean
+on_global_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
+                      guint keyval, guint keycode G_GNUC_UNUSED,
+                      GdkModifierType state, gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  GtkWidget *focus = gtk_window_get_focus (GTK_WINDOW (self));
+
+  if (keyval != GDK_KEY_f || !(state & GDK_CONTROL_MASK))
+    return GDK_EVENT_PROPAGATE;
+
+  for (GtkWidget *widget = focus; widget != NULL;
+       widget = gtk_widget_get_parent (widget))
+    {
+      if (AML_IS_LOGS_PAGE (widget))
+        {
+          aml_logs_page_focus_search (AML_LOGS_PAGE (widget));
+          return GDK_EVENT_STOP;
+        }
+
+      if (AML_IS_CONTENT_PAGE (widget))
+        {
+          aml_content_page_focus_search (AML_CONTENT_PAGE (widget));
+          return GDK_EVENT_STOP;
+        }
+    }
+
+  return GDK_EVENT_PROPAGATE;
 }
 
 /* Written the moment the value changes. A spin row can produce a value
@@ -1459,6 +1491,7 @@ on_downloads_changed (AmlDownloads *downloads G_GNUC_UNUSED, gpointer user_data)
 static void
 aml_main_window_init (AmlMainWindow *self)
 {
+  GtkEventController *keys = gtk_event_controller_key_new ();
   g_autoptr (GMenu) add_menu = create_add_menu ();
   g_autoptr (GMenu) app_menu = create_app_menu ();
   GtkWidget *header = adw_header_bar_new ();
@@ -1469,6 +1502,11 @@ aml_main_window_init (AmlMainWindow *self)
   GtkWidget *empty_page = adw_status_page_new ();
   GtkWidget *toolbar = adw_toolbar_view_new ();
   GtkWidget *add_popover = NULL;
+
+  gtk_event_controller_set_propagation_phase (keys, GTK_PHASE_CAPTURE);
+  gtk_widget_add_controller (GTK_WIDGET (self), keys);
+  g_signal_connect (keys, "key-pressed",
+                    G_CALLBACK (on_global_search_key), self);
 
   /* Flat is the default top-bar style, and it paints no surface of its
      own, so the header would take the window background and read as the

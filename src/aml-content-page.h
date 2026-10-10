@@ -62,6 +62,9 @@ typedef struct {
   GPtrArray *incompatible_dependencies;
 } AmlContentFile;
 
+/* Opens the search field of the currently visible Installed/Browse list. */
+void aml_content_page_focus_search (AmlContentPage *self);
+
 void aml_content_file_free (AmlContentFile *file);
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (AmlContentFile, aml_content_file_free)
