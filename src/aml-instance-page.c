@@ -26,6 +26,7 @@
 #include "aml-logs-page.h"
 #include "aml-minecraft-versions.h"
 #include "aml-modpack.h"
+#include "aml-ui-feedback.h"
 
 struct _AmlInstancePage
 {
@@ -107,26 +108,10 @@ loader_display_name (AmlInstance *instance)
   return name;
 }
 
-/* FALSE once the page was popped or the window went away: the page can
- * outlive both while an asynchronous operation is still running. */
-static gboolean
-page_is_shown (AmlInstancePage *self)
-{
-  return gtk_widget_get_root (GTK_WIDGET (self)) != NULL;
-}
-
 static void
 show_toast (AmlInstancePage *self, const char *message)
 {
-  AdwToast *toast = NULL;
-
-  if (self->toast_overlay == NULL || !page_is_shown (self))
-    return;
-
-  toast = adw_toast_new (message);
-  /* Messages come from GError: they are plain text, never markup. */
-  adw_toast_set_use_markup (toast, FALSE);
-  adw_toast_overlay_add_toast (ADW_TOAST_OVERLAY (self->toast_overlay), toast);
+  aml_ui_show_toast (GTK_WIDGET (self), self->toast_overlay, message);
 }
 
 /* The list binds an item when it enters the store, so a row that was

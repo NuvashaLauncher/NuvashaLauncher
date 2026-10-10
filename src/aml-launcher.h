@@ -17,10 +17,10 @@
  *    disk, the Java detection and finally GSubprocess. Nothing here
  *    waits for a socket, a disk or a process in the GTK main loop.
  *
- *  - the object, which owns the subprocess, reads its two pipes line by
- *    line with a timestamp and holds the state. The state only ever
- *    changes on something that really happened: progress from the
- *    resolve, a process that spawned, a process that exited.
+ *  - the object, which owns the subprocess and its state. Process output is
+ *    read by the small line-reader helper and handed back here for logging.
+ *    The state only changes on something that really happened: progress
+ *    from the resolve, a process that spawned, or a process that exited.
  *
  * The object belongs to the instance it was made for and refuses a
  * second launch while one is in flight, so the same game never runs

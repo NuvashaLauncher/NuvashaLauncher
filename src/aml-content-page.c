@@ -2,32 +2,17 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* AmlContentPage: the mods, the resource packs or the shader packs of
- * one instance.
+/* AmlContentPage shows installed content and the compatible Modrinth
+ * catalog for one instance. The content type supplies the folder, loader
+ * filter, file extensions, title, and icon.
  *
- * The content type is the only thing that makes the three pages
- * different: which folder of the instance they read, whether a loader
- * decides what fits, which extensions a file has, and the words and the
- * icon that name them. Everything else here is written once.
- *
- * Installed is read from the folder rather than from Modrinth, so it
- * works with no network at all; the only thing it asks for is the name
- * Modrinth knows a file by, and a file Modrinth does not know is listed
- * under its own name. Browse is Modrinth, narrowed to the Minecraft
- * version and the loader of the instance, so a version that does not fit
- * is never offered and never has to be refused afterwards.
- *
- * Files are written by the download module, which hashes what arrives
- * and only then renames it into place, and the dependencies a version
- * requires are resolved and shown before anything is downloaded.
- *
- * Every request here answers on the main loop with the page only weakly
- * held: a page can be destroyed while a request of its own is still
- * running, so each of them checks that the page is still there before
- * touching it. */
+ * Async callbacks hold the page weakly: a closed page must be safe to
+ * destroy while a scan, search, or version lookup is still running. */
 
 #include "aml-content-page.h"
 #include "aml-content-index.h"
+#include "aml-content-format.h"
+#include "aml-ui-feedback.h"
 #include "aml-download.h"
 #include "aml-downloads.h"
 #include "aml-i18n.h"
@@ -88,11 +73,17 @@ struct _AmlContentPage
   GtkWidget *installed_status;
   GtkWidget *update_all;
 
-  /* Update All first checks every file, then asks once. This is the list
-     of updates it found and where applying them has got to. */
-  gboolean updating;
-  GPtrArray *updates; /* UpdateItem* */
-  guint update_index;
+  /* Update All and selected-version installs share this workflow state. */
+  struct {
+    gboolean updating;
+    GPtrArray *updates; /* UpdateItem* */
+    guint update_index;
+    GPtrArray *picks;   /* Pick* */
+    GPtrArray *batch;   /* Pick*, the list being installed */
+    gboolean picking;   /* the batch is being installed now */
+    guint pick_index;
+  } install;
+
   GtkWidget *results_group;
   GtkWidget *results_scroller;
   GtkWidget *results_status;
@@ -165,13 +156,6 @@ struct _AmlContentPage
      the version the dropdown shows is on the list. */
   GtkWidget *details_check;
 
-  /* What the user picked: the versions whose checkmark is on, one entry
-     per project. The button at the foot of the list installs the whole
-     list at once. */
-  GPtrArray *picks;  /* Pick* */
-  GPtrArray *batch;  /* Pick*, the list being installed */
-  gboolean picking;  /* the batch is being installed now */
-  guint pick_index;
   GtkWidget *pick_button;
   GtkWidget *pick_badge;
 };
@@ -303,33 +287,10 @@ instance_string (AmlInstance *instance, const char *property)
   return value;
 }
 
-/* A count of downloads in the fewest words that still say what it is. */
-static char *
-format_downloads (guint64 downloads)
-{
-  g_autofree char *count = NULL;
-
-  if (downloads >= 1000000)
-    return g_strdup_printf (_("%.1fM downloads"), downloads / 1000000.0);
-  if (downloads >= 1000)
-    return g_strdup_printf (_("%.1fk downloads"), downloads / 1000.0);
-
-  count = g_strdup_printf ("%" G_GUINT64_FORMAT, downloads);
-  return g_strdup_printf (_("%s downloads"), count);
-}
-
 static void
 show_toast (AmlContentPage *self, const char *message)
 {
-  AdwToast *toast = NULL;
-
-  if (self->toasts == NULL)
-    return;
-
-  toast = adw_toast_new (message);
-  /* Messages come from GError: plain text, never markup. */
-  adw_toast_set_use_markup (toast, FALSE);
-  adw_toast_overlay_add_toast (ADW_TOAST_OVERLAY (self->toasts), toast);
+  aml_ui_show_toast (GTK_WIDGET (self), self->toasts, message);
 }
 
 /* Words that are not Markdown and must read exactly as they are: an
@@ -1021,14 +982,14 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
           /* A batch stops at the first file that fails rather than going
              on to the next with half of it missing. */
-          if (page->updating)
+          if (page->install.updating)
             {
-              g_clear_pointer (&page->updates, g_ptr_array_unref);
-              page->update_index = 0;
-              page->updating = FALSE;
+              g_clear_pointer (&page->install.updates, g_ptr_array_unref);
+              page->install.update_index = 0;
+              page->install.updating = FALSE;
             }
 
-          if (page->picking)
+          if (page->install.picking)
             batch_stopped (page);
 
           set_busy (page, FALSE);
@@ -1109,11 +1070,11 @@ fetch_next (FetchRun *run)
     {
       if (self != NULL)
         {
-          if (self->updating)
+          if (self->install.updating)
             /* One update of the batch is in: start the next one. The
                list is read once, when the whole batch is done. */
             update_batch_next (self);
-          else if (self->picking)
+          else if (self->install.picking)
             /* One pick of the batch is in: the next one follows. */
             batch_next (self);
           else
@@ -1407,7 +1368,7 @@ show_plan (AmlContentPage *self, PlanRun *plan)
   /* An update of the whole list was confirmed once, as a whole: this plan
      is not asked for again, it is simply carried out. So is one pick of a
      confirmed batch of them. */
-  if (self->updating || self->picking)
+  if (self->install.updating || self->install.picking)
     {
       start_fetch (self, plan->files);
       plan->files = NULL; /* the fetch owns them now */
@@ -1619,12 +1580,12 @@ pick_free (Pick *pick)
 static Pick *
 pick_of_project (AmlContentPage *self, const char *project_id)
 {
-  if (self->picks == NULL || project_id == NULL)
+  if (self->install.picks == NULL || project_id == NULL)
     return NULL;
 
-  for (guint i = 0; i < self->picks->len; i++)
+  for (guint i = 0; i < self->install.picks->len; i++)
     {
-      Pick *pick = g_ptr_array_index (self->picks, i);
+      Pick *pick = g_ptr_array_index (self->install.picks, i);
 
       if (g_strcmp0 (pick->project_id, project_id) == 0)
         return pick;
@@ -1677,7 +1638,7 @@ refresh_pick_check (AmlContentPage *self)
 static void
 refresh_picks (AmlContentPage *self)
 {
-  guint count = self->picks != NULL ? self->picks->len : 0;
+  guint count = self->install.picks != NULL ? self->install.picks->len : 0;
   if (self->pick_badge != NULL)
     {
       g_autofree char *number = g_strdup_printf (
@@ -1716,7 +1677,7 @@ pick_add (AmlContentPage *self, AmlModrinthVersion *version)
 {
   Pick *pick = NULL;
 
-  if (self->picks == NULL || version == NULL || version->project_id == NULL)
+  if (self->install.picks == NULL || version == NULL || version->project_id == NULL)
     return;
 
   pick = pick_of_project (self, version->project_id);
@@ -1728,7 +1689,7 @@ pick_add (AmlContentPage *self, AmlModrinthVersion *version)
       if (pick_is_version (pick, version))
         return;
 
-      g_ptr_array_remove (self->picks, pick);
+      g_ptr_array_remove (self->install.picks, pick);
     }
 
   pick = g_new0 (Pick, 1);
@@ -1737,7 +1698,7 @@ pick_add (AmlContentPage *self, AmlModrinthVersion *version)
                             ? self->current_project_title
                             : version_name_of (version));
   pick->version = aml_modrinth_version_copy (version);
-  g_ptr_array_add (self->picks, pick);
+  g_ptr_array_add (self->install.picks, pick);
 }
 
 /* The project of @version has nothing picked any more. Only its own
@@ -1747,13 +1708,13 @@ pick_remove (AmlContentPage *self, AmlModrinthVersion *version)
 {
   Pick *pick = NULL;
 
-  if (self->picks == NULL || version == NULL)
+  if (self->install.picks == NULL || version == NULL)
     return;
 
   pick = pick_of_project (self, version->project_id);
 
   if (pick_is_version (pick, version))
-    g_ptr_array_remove (self->picks, pick);
+    g_ptr_array_remove (self->install.picks, pick);
 }
 
 /* The checkmark at the left of the versions was clicked: the version the
@@ -1811,10 +1772,10 @@ on_batch_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
     {
       /* Nothing was installed, so the list the question was about goes
          back to the page with its checkmarks as they were. */
-      if (self->batch != NULL)
+      if (self->install.batch != NULL)
         {
-          g_clear_pointer (&self->picks, g_ptr_array_unref);
-          self->picks = g_steal_pointer (&self->batch);
+          g_clear_pointer (&self->install.picks, g_ptr_array_unref);
+          self->install.picks = g_steal_pointer (&self->install.batch);
           refresh_picks (self);
         }
 
@@ -1822,14 +1783,14 @@ on_batch_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
       return;
     }
 
-  if (self->batch == NULL)
+  if (self->install.batch == NULL)
     {
       g_object_unref (self);
       return;
     }
 
-  self->picking = TRUE;
-  self->pick_index = 0;
+  self->install.picking = TRUE;
+  self->install.pick_index = 0;
   batch_next (self);
 
   g_object_unref (self);
@@ -1843,13 +1804,13 @@ batch_next (AmlContentPage *self)
 {
   Pick *pick = NULL;
 
-  if (self->batch == NULL || self->pick_index >= self->batch->len)
+  if (self->install.batch == NULL || self->install.pick_index >= self->install.batch->len)
     {
-      guint done = self->batch != NULL ? self->batch->len : 0;
+      guint done = self->install.batch != NULL ? self->install.batch->len : 0;
 
-      g_clear_pointer (&self->batch, g_ptr_array_unref);
-      self->picking = FALSE;
-      self->pick_index = 0;
+      g_clear_pointer (&self->install.batch, g_ptr_array_unref);
+      self->install.picking = FALSE;
+      self->install.pick_index = 0;
       set_busy (self, FALSE);
 
       if (done > 0)
@@ -1864,8 +1825,8 @@ batch_next (AmlContentPage *self)
       return;
     }
 
-  pick = g_ptr_array_index (self->batch, self->pick_index);
-  self->pick_index++;
+  pick = g_ptr_array_index (self->install.batch, self->install.pick_index);
+  self->install.pick_index++;
 
   set_busy (self, TRUE);
   start_plan (self, aml_modrinth_version_copy (pick->version), pick->title,
@@ -1877,16 +1838,16 @@ batch_next (AmlContentPage *self)
 static void
 batch_stopped (AmlContentPage *self)
 {
-  g_clear_pointer (&self->batch, g_ptr_array_unref);
-  self->picking = FALSE;
-  self->pick_index = 0;
+  g_clear_pointer (&self->install.batch, g_ptr_array_unref);
+  self->install.picking = FALSE;
+  self->install.pick_index = 0;
 }
 
 static void
 clear_picks (AmlContentPage *self)
 {
-  g_clear_pointer (&self->picks, g_ptr_array_unref);
-  self->picks = g_ptr_array_new_with_free_func ((GDestroyNotify) pick_free);
+  g_clear_pointer (&self->install.picks, g_ptr_array_unref);
+  self->install.picks = g_ptr_array_new_with_free_func ((GDestroyNotify) pick_free);
   refresh_picks (self);
 }
 
@@ -1901,7 +1862,7 @@ on_pick_button_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   AdwAlertDialog *alert = NULL;
   const char *kind = NULL;
 
-  if (self->picks == NULL || self->picks->len == 0)
+  if (self->install.picks == NULL || self->install.picks->len == 0)
     return;
 
   body = g_string_new (NULL);
@@ -1909,9 +1870,9 @@ on_pick_button_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 
   kind = aml_content_type_title (self->type);
 
-  for (guint i = 0; i < self->picks->len; i++)
+  for (guint i = 0; i < self->install.picks->len; i++)
     {
-      Pick *pick = g_ptr_array_index (self->picks, i);
+      Pick *pick = g_ptr_array_index (self->install.picks, i);
 
       if (i > 0)
         g_string_append_c (body, '\n');
@@ -1928,9 +1889,9 @@ on_pick_button_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
     gboolean has_dependencies = FALSE;
     GString *dependencies = g_string_new (NULL);
 
-    for (guint i = 0; i < self->picks->len; i++)
+    for (guint i = 0; i < self->install.picks->len; i++)
       {
-        Pick *pick = g_ptr_array_index (self->picks, i);
+        Pick *pick = g_ptr_array_index (self->install.picks, i);
 
         for (guint j = 0; pick->version->dependencies != NULL &&
                          j < pick->version->dependencies->len; j++)
@@ -1983,9 +1944,9 @@ on_pick_button_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 
   /* The list goes into the batch here: what is installed is the list
      this question is about, whatever is picked while it is up. */
-  g_clear_pointer (&self->batch, g_ptr_array_unref);
-  self->batch = g_steal_pointer (&self->picks);
-  self->picks = g_ptr_array_new_with_free_func ((GDestroyNotify) pick_free);
+  g_clear_pointer (&self->install.batch, g_ptr_array_unref);
+  self->install.batch = g_steal_pointer (&self->install.picks);
+  self->install.picks = g_ptr_array_new_with_free_func ((GDestroyNotify) pick_free);
   refresh_picks (self);
 
   adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL, on_batch_chosen,
@@ -2732,13 +2693,13 @@ update_batch_next (AmlContentPage *self)
 {
   UpdateItem *item = NULL;
 
-  if (self->updates == NULL || self->update_index >= self->updates->len)
+  if (self->install.updates == NULL || self->install.update_index >= self->install.updates->len)
     {
-      guint done = self->updates != NULL ? self->updates->len : 0;
+      guint done = self->install.updates != NULL ? self->install.updates->len : 0;
 
-      g_clear_pointer (&self->updates, g_ptr_array_unref);
-      self->update_index = 0;
-      self->updating = FALSE;
+      g_clear_pointer (&self->install.updates, g_ptr_array_unref);
+      self->install.update_index = 0;
+      self->install.updating = FALSE;
       set_busy (self, FALSE);
 
       if (done > 0)
@@ -2753,8 +2714,8 @@ update_batch_next (AmlContentPage *self)
       return;
     }
 
-  item = g_ptr_array_index (self->updates, self->update_index);
-  self->update_index++;
+  item = g_ptr_array_index (self->install.updates, self->install.update_index);
+  self->install.update_index++;
 
   /* The batch was confirmed once, as a whole: this plan is not asked for
      again, it is simply carried out. */
@@ -2766,9 +2727,9 @@ update_batch_next (AmlContentPage *self)
 static void
 plan_stopped (AmlContentPage *self)
 {
-  if (self->updating)
+  if (self->install.updating)
     update_batch_next (self);
-  else if (self->picking)
+  else if (self->install.picking)
     batch_next (self);
   else
     set_busy (self, FALSE);
@@ -2798,9 +2759,9 @@ on_update_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
     }
 
   /* The whole list was confirmed: install each one. */
-  self->updates = g_steal_pointer (&run->items);
-  self->update_index = 0;
-  self->updating = TRUE;
+  self->install.updates = g_steal_pointer (&run->items);
+  self->install.update_index = 0;
+  self->install.updating = TRUE;
   g_free (run);
   update_batch_next (self);
 
@@ -3983,9 +3944,9 @@ details_content (AmlContentPage *self)
 
     if (self->details != NULL && self->details->license != NULL &&
         *self->details->license != '\0')
-       text = g_strdup_printf (_("%s  ·  by %s"), self->details->license, who);
+      text = aml_content_format_author (self->details->license, who);
     else
-       text = g_strdup_printf (_("by %s"), who);
+      text = aml_content_format_author (NULL, who);
 
     meta = gtk_label_new (text);
     gtk_label_set_xalign (GTK_LABEL (meta), 0);
@@ -3993,7 +3954,7 @@ details_content (AmlContentPage *self)
     adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), meta);
   }
 
-  downloads = format_downloads (self->current_project_downloads);
+  downloads = aml_content_format_downloads (self->current_project_downloads);
   count = gtk_label_new (downloads);
   gtk_label_set_xalign (GTK_LABEL (count), 0);
   gtk_widget_add_css_class (count, "dim-label");
@@ -4331,31 +4292,32 @@ build_installed (AmlContentPage *self)
 {
   GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   GtkWidget *actions = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *search_bar = gtk_search_entry_new ();
+   GtkSearchEntry *search_bar = GTK_SEARCH_ENTRY (gtk_search_entry_new ());
   GtkWidget *scroller = gtk_scrolled_window_new ();
   GtkWidget *content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   AdwPreferencesGroup *group =
     ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
 
    gtk_widget_set_hexpand (actions, TRUE);
-   self->installed_search_bar = search_bar;
-   self->installed_search_entry = search_bar;
-   gtk_widget_set_hexpand (search_bar, TRUE);
+   self->installed_search_bar = GTK_WIDGET (search_bar);
+   self->installed_search_entry = GTK_WIDGET (search_bar);
+   gtk_widget_set_hexpand (GTK_WIDGET (search_bar), TRUE);
     gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_bar),
                                             _("Search"));
-    gtk_widget_set_visible (search_bar, TRUE);
+     gtk_widget_set_visible (GTK_WIDGET (search_bar), TRUE);
    g_signal_connect (search_bar, "changed",
                      G_CALLBACK (on_installed_search_changed), self);
-     gtk_box_append (GTK_BOX (actions), search_bar);
+     gtk_box_append (GTK_BOX (actions), GTK_WIDGET (search_bar));
 
-   self->update_all = toolbar_button ("software-update-available-symbolic", _("Update All"),
-                                      G_CALLBACK (on_update_all_clicked), self);
+   self->update_all = toolbar_button (
+     "software-update-available-symbolic", _("Update All"),
+     G_CALLBACK (on_update_all_clicked), self);
   gtk_widget_set_sensitive (self->update_all, FALSE);
   gtk_box_append (GTK_BOX (actions), self->update_all);
   gtk_box_append (GTK_BOX (actions),
                   toolbar_button ("folder-symbolic", _("Open Folder"),
                                   G_CALLBACK (on_open_folder_clicked), self));
-  self->spinner = adw_spinner_new ();
+   self->spinner = adw_spinner_new ();
   gtk_widget_set_valign (self->spinner, GTK_ALIGN_CENTER);
   gtk_widget_set_visible (self->spinner, FALSE);
   gtk_box_append (GTK_BOX (actions), self->spinner);
@@ -4369,10 +4331,10 @@ build_installed (AmlContentPage *self)
      switched, so this one is held here: without it, taking it out would
      be the last reference to it and would destroy the box and the
      spinner inside it while self->spinner still points at them. */
-  self->installed_actions = actions;
+   self->installed_actions = actions;
   g_object_ref_sink (actions);
 
-  self->installed_status = adw_status_page_new ();
+   self->installed_status = adw_status_page_new ();
   adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->installed_status),
                                  aml_content_type_icon (self->type));
   adw_status_page_set_title (ADW_STATUS_PAGE (self->installed_status),
@@ -4385,8 +4347,8 @@ build_installed (AmlContentPage *self)
      rounded at the top, so the two read as one piece. */
   gtk_widget_add_css_class (GTK_WIDGET (group), "flush-top");
 
-  self->installed_group = GTK_WIDGET (group);
-  self->installed_scroller = scroller;
+   self->installed_group = GTK_WIDGET (group);
+   self->installed_scroller = scroller;
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
                                  GTK_WIDGET (group));
   gtk_widget_set_vexpand (scroller, TRUE);
@@ -4448,7 +4410,7 @@ build_browse (AmlContentPage *self)
 {
   GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   GtkWidget *top = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  GtkWidget *search_bar = gtk_search_entry_new ();
+   GtkSearchEntry *search_bar = GTK_SEARCH_ENTRY (gtk_search_entry_new ());
   GtkWidget *filter_button = gtk_menu_button_new ();
   GtkWidget *popover = gtk_popover_new ();
   GtkWidget *filter_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
@@ -4471,14 +4433,14 @@ build_browse (AmlContentPage *self)
   AdwPreferencesGroup *group =
     ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
 
-  self->search_entry = search_bar;
-  self->search_bar = search_bar;
+   self->search_entry = GTK_WIDGET (search_bar);
+   self->search_bar = GTK_WIDGET (search_bar);
   /* The field takes the room the row has, the way the modpack browser's
      search does, rather than a fixed width of its own. */
-  gtk_widget_set_hexpand (search_bar, TRUE);
+  gtk_widget_set_hexpand (GTK_WIDGET (search_bar), TRUE);
   gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_bar),
                                             _("Search"));
-  gtk_widget_set_visible (search_bar, TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (search_bar), TRUE);
 
   g_signal_connect (search_bar, "changed",
                     G_CALLBACK (on_search_changed), self);
@@ -4486,11 +4448,11 @@ build_browse (AmlContentPage *self)
     GtkEventController *keys = gtk_event_controller_key_new ();
 
     gtk_event_controller_set_propagation_phase (keys, GTK_PHASE_BUBBLE);
-    gtk_widget_add_controller (search_bar, keys);
+    gtk_widget_add_controller (GTK_WIDGET (search_bar), keys);
     g_signal_connect (keys, "key-pressed", G_CALLBACK (on_search_key), self);
   }
 
-  gtk_box_append (GTK_BOX (top), search_bar);
+  gtk_box_append (GTK_BOX (top), GTK_WIDGET (search_bar));
 
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (filter_button),
                                  "view-more-symbolic");
@@ -4511,7 +4473,7 @@ build_browse (AmlContentPage *self)
      of that, and the filter and the switcher sit at its right. */
   gtk_widget_set_hexpand (top, TRUE);
 
-  self->filter_box = filter_box;
+   self->filter_box = filter_box;
   gtk_widget_set_margin_top (filter_box, 6);
   gtk_widget_set_margin_bottom (filter_box, 6);
   gtk_widget_set_margin_start (filter_box, 6);
@@ -4528,10 +4490,10 @@ build_browse (AmlContentPage *self)
       GTK_SCROLLED_WINDOW (filter_scroller), TRUE);
   gtk_popover_set_child (GTK_POPOVER (popover), filter_scroller);
 
-  self->browse_actions = top;
+   self->browse_actions = top;
   g_object_ref_sink (top);
 
-  self->results_status = adw_status_page_new ();
+   self->results_status = adw_status_page_new ();
   adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->results_status),
                                  "system-search-symbolic");
   adw_status_page_set_title (ADW_STATUS_PAGE (self->results_status),
@@ -4544,8 +4506,8 @@ build_browse (AmlContentPage *self)
      rounded at the top, so the two read as one piece. */
   gtk_widget_add_css_class (GTK_WIDGET (group), "flush-top");
 
-  self->results_group = GTK_WIDGET (group);
-  self->results_scroller = scroller;
+   self->results_group = GTK_WIDGET (group);
+   self->results_scroller = scroller;
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
                                  GTK_WIDGET (group));
   gtk_widget_set_vexpand (scroller, TRUE);
@@ -4622,8 +4584,8 @@ build_browse (AmlContentPage *self)
   gtk_box_append (GTK_BOX (retry_row), retry_button);
   adw_preferences_group_add (group, retry_row);
 
-  self->loading_more = loading_more;
-  self->retry_row = retry_row;
+   self->loading_more = loading_more;
+   self->retry_row = retry_row;
   self->retry_label = retry_label;
 
   g_signal_connect (retry_button, "clicked",
@@ -4906,9 +4868,9 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
   self->details_check = NULL;
   self->details_page = NULL;
   self->split = NULL;
-  self->batch = NULL;
-  self->picking = FALSE;
-  self->pick_index = 0;
+  self->install.batch = NULL;
+  self->install.picking = FALSE;
+  self->install.pick_index = 0;
   self->pick_button = NULL;
   self->pick_badge = NULL;
 
@@ -4971,9 +4933,9 @@ aml_content_page_dispose (GObject *object)
 
   /* A batch that was still being installed is not applied any more: the
      plans and fetches hold the page weakly and stop. */
-  g_clear_pointer (&self->batch, g_ptr_array_unref);
-  self->picking = FALSE;
-  self->pick_index = 0;
+  g_clear_pointer (&self->install.batch, g_ptr_array_unref);
+  self->install.picking = FALSE;
+  self->install.pick_index = 0;
 
   if (self->debounce_source != 0)
     {
@@ -5000,9 +4962,9 @@ aml_content_page_dispose (GObject *object)
 
   /* A batch of updates that was still being applied is not applied any
      more: the plans and fetches hold the page weakly and stop. */
-  g_clear_pointer (&self->updates, g_ptr_array_unref);
-  self->update_index = 0;
-  self->updating = FALSE;
+  g_clear_pointer (&self->install.updates, g_ptr_array_unref);
+  self->install.update_index = 0;
+  self->install.updating = FALSE;
 
   G_OBJECT_CLASS (aml_content_page_parent_class)->dispose (object);
 }
@@ -5023,8 +4985,8 @@ aml_content_page_finalize (GObject *object)
   g_clear_pointer (&self->results, g_ptr_array_unref);
   g_list_free (self->installed_rows);
   g_list_free (self->result_rows);
-  g_clear_pointer (&self->picks, g_ptr_array_unref);
-  g_clear_pointer (&self->batch, g_ptr_array_unref);
+  g_clear_pointer (&self->install.picks, g_ptr_array_unref);
+  g_clear_pointer (&self->install.batch, g_ptr_array_unref);
   g_free (self->minecraft_version);
   g_free (self->loader);
   g_free (self->folder);
@@ -5057,5 +5019,5 @@ aml_content_page_init (AmlContentPage *self)
      has to be there whatever the page goes on to show. Everything else
      is built in aml_content_page_new(), which knows the instance and the
      kind of content. */
-  self->picks = g_ptr_array_new_with_free_func ((GDestroyNotify) pick_free);
+  self->install.picks = g_ptr_array_new_with_free_func ((GDestroyNotify) pick_free);
 }

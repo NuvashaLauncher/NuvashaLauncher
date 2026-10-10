@@ -2,28 +2,13 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* AmlLauncher: putting one instance on the air and following it.
+/* AmlLauncher prepares and runs one instance, then owns its process state.
+ * The preparation pipeline is asynchronous; the pure command-line helpers
+ * remain usable without a JVM or network and are covered independently by
+ * tests.
  *
- * The pure part comes first: the UUID of an offline player, the
- * substitution of the placeholders a version document writes, the whole
- * command line of a launch and the printable form of that command line
- * with the token taken out of it. Those are plain functions over data
- * that is already in memory, which is what the tests use.
- *
- * The pipeline on top of that is asynchronous from end to end: the
- * manifest, the resolve module putting every jar, asset and native on
- * disk, the Java detection, and GSubprocess. Nothing here waits for a
- * socket, a disk or a process in the caller's main context.
- *
- * The object owns the subprocess, reads its two pipes line by line with
- * a timestamp on every line and holds the state. A state only ever comes
- * from something that really happened: progress from the resolve, a
- * process that spawned, a process that ended.
- *
- * The game is not AML: it does not inherit the GDK_BACKEND=wayland AML
- * sets for itself, so LWJGL opens its window through XWayland as it does
- * for every other launcher on this desktop. Nothing else about the
- * environment is touched. */
+ * The game must not inherit AML's GDK_BACKEND setting. Other environment
+ * variables are left unchanged. */
 
 #include "aml-launcher.h"
 #include "aml-i18n.h"
@@ -31,6 +16,7 @@
 #include "aml-auth-microsoft.h"
 #include "aml-instance-components.h"
 #include "aml-java.h"
+#include "aml-line-reader.h"
 #include "aml-loaders.h"
 #include "aml-minecraft-resolve.h"
 #include "aml-minecraft-versions.h"
@@ -814,81 +800,40 @@ finish_launch (AmlLauncher *self)
 }
 
 /* ---------------------------------------------------------- *
- * Reading what the game prints
+ * Connect process output to the launcher log
  * ---------------------------------------------------------- */
 
-/* One pipe of the process. It holds the launcher so a line that arrives
- * after the window went away still has somewhere to go. */
-typedef struct {
-  AmlLauncher *launcher;
-  GDataInputStream *stream;
-  gboolean stderr;
-} AmlLauncherOutput;
-
 static void
-output_free (AmlLauncherOutput *output)
+on_output_line (const char *line, gboolean stderr_line, gpointer user_data)
 {
-  g_clear_object (&output->stream);
-  g_clear_object (&output->launcher);
-  g_free (output);
+  AmlLauncher *self = user_data;
+
+  log_line (self, stderr_line ? TAG_STDERR : TAG_STDOUT, "%s", line);
 }
 
-static void read_output_line (AmlLauncherOutput *output);
-
 static void
-read_output_line_ready (GObject *source, GAsyncResult *result,
-                        gpointer user_data)
+on_output_done (GError *error, gpointer user_data)
 {
-  AmlLauncherOutput *output = user_data;
-  AmlLauncher *self = output->launcher;
-  g_autoptr (GError) error = NULL;
-  g_autofree char *line = g_data_input_stream_read_line_finish (
-    G_DATA_INPUT_STREAM (source), result, NULL, &error);
+  AmlLauncher *self = user_data;
 
-  if (line != NULL)
-    {
-      log_line (self, output->stderr ? TAG_STDERR : TAG_STDOUT, "%s", line);
-      read_output_line (output);
-      return;
-    }
-
-  /* A NULL line without an error is the end of the pipe, which is the
-     ordinary way this ends. Anything else is worth one line of its
-     own. */
   if (error != NULL)
     log_line (self, TAG_STDOUT, "the output of the game cannot be read: %s",
               error->message);
 
-  /* One reader is done. When the process is gone as well, the launch is
-     over and the last lines are already in the log. */
   if (--self->readers == 0 && self->exited)
     finish_launch (self);
-
-  output_free (output);
-}
-
-static void
-read_output_line (AmlLauncherOutput *output)
-{
-  g_data_input_stream_read_line_async (output->stream, G_PRIORITY_DEFAULT,
-                                       NULL, read_output_line_ready, output);
 }
 
 /* Takes the stream it is given over. */
 static void
-watch_output (AmlLauncher *self, GInputStream *stream, gboolean stderr)
+watch_output (AmlLauncher *self, GInputStream *stream, gboolean stderr_line)
 {
-  AmlLauncherOutput *output = g_new0 (AmlLauncherOutput, 1);
-
-  output->launcher = g_object_ref (self);
-  output->stream = g_data_input_stream_new (stream);
-  output->stderr = stderr;
-
-  g_data_input_stream_set_newline_type (output->stream,
-                                        G_DATA_STREAM_NEWLINE_TYPE_ANY);
+  AmlLineReader *reader = aml_line_reader_new (
+    stream, stderr_line, on_output_line, on_output_done, g_object_ref (self),
+    g_object_unref);
 
   self->readers++;
-  read_output_line (output);
+  aml_line_reader_start (reader);
 }
 
 /* ---------------------------------------------------------- *
