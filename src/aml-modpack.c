@@ -478,12 +478,11 @@ aml_modpack_new_from_json (const char *json, gssize length, GError **error)
     aml_modpack_dependency_free);
   pack->loader = AML_LOADER_VANILLA;
 
-  if (pack->version_id == NULL || pack->name == NULL ||
-      *pack->version_id == '\0' || *pack->name == '\0')
+  if (pack->name == NULL || *pack->name == '\0')
     {
       g_set_error_literal (error, AML_MODPACK_ERROR,
                            AML_MODPACK_ERROR_FORMAT,
-                           "the index has no version id or name");
+                            "the index has no name");
       return NULL;
     }
 
@@ -2594,7 +2593,7 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
 
   archive_entry_free (manifest_entry);
   archive_write_free (archive);
-  export_progress (run, run->total, run->total, "Export complete");
+  export_progress (run, run->total, run->total, _("Export complete"));
   g_task_return_boolean (task, TRUE);
 }
 
@@ -2639,10 +2638,11 @@ export_manifest (AmlInstance *instance, const char *pack_name,
       json_builder_set_member_name (builder, "summary");
       json_builder_add_string_value (builder, summary);
     }
-  json_builder_set_member_name (builder, "versionId");
-  json_builder_add_string_value (builder,
-                                 version_id != NULL && *version_id != '\0'
-                                   ? version_id : "aml-export");
+  if (version_id != NULL && *version_id != '\0')
+    {
+      json_builder_set_member_name (builder, "versionId");
+      json_builder_add_string_value (builder, version_id);
+    }
   json_builder_set_member_name (builder, "dependencies");
   json_builder_begin_object (builder);
   json_builder_set_member_name (builder, "minecraft");

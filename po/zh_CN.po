@@ -441,3 +441,21 @@ msgstr "正在下载整合包"
 
 msgid "Writing archive"
 msgstr "正在写入归档"
+
+msgid "These details are optional. The pack name defaults to the instance name."
+msgstr "这些信息是可选的。默认使用实例名称作为整合包名称。"
+
+msgid "Export modpack metadata"
+msgstr "导出元数据"
+
+msgid "Ask for export metadata"
+msgstr "导出时询问元数据"
+
+msgid "Pack information"
+msgstr "整合包信息"
+
+msgid "Show name, summary and version fields before exporting."
+msgstr "导出前显示名称、摘要和版本字段。"
+
+msgid "Export complete"
+msgstr "导出完成"

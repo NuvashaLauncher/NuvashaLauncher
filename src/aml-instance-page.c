@@ -877,7 +877,7 @@ show_export_metadata (AmlInstancePage *self)
   data->name = ADW_ENTRY_ROW (adw_entry_row_new ());
   data->summary = ADW_ENTRY_ROW (adw_entry_row_new ());
   data->version = ADW_ENTRY_ROW (adw_entry_row_new ());
-  adw_dialog_set_title (data->dialog, _("Export Modpack"));
+  adw_dialog_set_title (data->dialog, _("Export modpack metadata"));
   g_signal_connect (data->dialog, "closed",
                     G_CALLBACK (on_export_metadata_closed), data);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (data->name),
@@ -886,8 +886,13 @@ show_export_metadata (AmlInstancePage *self)
                                   _("Summary"));
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (data->version),
                                   _("Version ID"));
+  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (fields),
+                                   _("Pack information"));
+  adw_preferences_group_set_description (
+    ADW_PREFERENCES_GROUP (fields),
+    _("These details are optional. The pack name defaults to the instance name."));
   gtk_editable_set_text (GTK_EDITABLE (data->name), name != NULL ? name : "");
-  gtk_editable_set_text (GTK_EDITABLE (data->version), "aml-export");
+  gtk_editable_set_text (GTK_EDITABLE (data->version), "");
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (fields),
                              GTK_WIDGET (data->name));
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (fields),
@@ -895,6 +900,10 @@ show_export_metadata (AmlInstancePage *self)
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (fields),
                              GTK_WIDGET (data->version));
   gtk_box_append (GTK_BOX (box), fields);
+  gtk_widget_set_margin_start (box, 18);
+  gtk_widget_set_margin_end (box, 18);
+  gtk_widget_set_margin_top (box, 18);
+  gtk_widget_set_margin_bottom (box, 18);
   gtk_box_append (GTK_BOX (box), buttons);
   gtk_box_append (GTK_BOX (buttons), cancel);
   gtk_box_append (GTK_BOX (buttons), continue_button);
@@ -929,7 +938,15 @@ on_export_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   AmlInstancePage *self = user_data;
 
-  show_export_metadata (self);
+  if (aml_settings_get_export_metadata (self->settings))
+    show_export_metadata (self);
+  else
+    {
+      g_clear_pointer (&self->export_name, g_free);
+      g_clear_pointer (&self->export_summary, g_free);
+      g_clear_pointer (&self->export_version, g_free);
+      show_export_policy (self);
+    }
 }
 
 static void

@@ -105,6 +105,13 @@ gboolean aml_settings_set_cache_expiration (AmlSettings *self,
                                             AmlSettingsCacheExpiration value,
                                             GError **error);
 
+/* TRUE asks for pack metadata before an export; FALSE performs a direct
+ * export using the instance name and no optional metadata. */
+gboolean aml_settings_get_export_metadata (AmlSettings *self);
+gboolean aml_settings_set_export_metadata (AmlSettings *self,
+                                           gboolean value,
+                                           GError **error);
+
 G_END_DECLS
 
 #endif /* AML_SETTINGS_H */

@@ -232,6 +232,23 @@ on_open_logs_after_crash_toggled (GObject *object,
 }
 
 static void
+on_export_metadata_toggled (GObject *object,
+                            GParamSpec *pspec G_GNUC_UNUSED,
+                            gpointer user_data)
+{
+  AmlMainWindow *self = user_data;
+  AdwSwitchRow *row = ADW_SWITCH_ROW (object);
+  gboolean active = adw_switch_row_get_active (row);
+
+  if (active == aml_settings_get_export_metadata (self->settings))
+    return;
+
+  if (!aml_settings_set_export_metadata (self->settings, active, NULL))
+    adw_switch_row_set_active (
+      row, aml_settings_get_export_metadata (self->settings));
+}
+
+static void
 on_language_selected (GObject *object,
                       GParamSpec *pspec G_GNUC_UNUSED,
                       gpointer user_data)
@@ -379,6 +396,7 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   GtkWidget *logs_group = adw_preferences_group_new ();
   GtkWidget *language_group = adw_preferences_group_new ();
   GtkWidget *cache_group = adw_preferences_group_new ();
+  GtkWidget *general_group = adw_preferences_group_new ();
   GtkWidget *language_row = adw_combo_row_new ();
   GtkWidget *row = adw_switch_row_new ();
   GtkWidget *limit_row = NULL;
@@ -387,6 +405,7 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   GtkWidget *cache_api_row = adw_switch_row_new ();
   GtkWidget *cache_expiration_row = adw_combo_row_new ();
   GtkWidget *clear_cache_row = adw_action_row_new ();
+  GtkWidget *export_metadata_row = adw_switch_row_new ();
 
   /* Every one of these rows can show a path or an error message from
      GIO, which is plain text and may hold an "&". */
@@ -397,13 +416,26 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (cache_api_row), FALSE);
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (cache_expiration_row), FALSE);
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (clear_cache_row), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (export_metadata_row), FALSE);
 
   adw_dialog_set_title (dialog, _("Settings"));
   adw_preferences_dialog_set_search_enabled (ADW_PREFERENCES_DIALOG (dialog),
                                              FALSE);
 
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (versions_group),
-                                    _("Versions"));
+                                     _("Versions"));
+  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (general_group),
+                                   _("General"));
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (export_metadata_row),
+                                  _("Ask for export metadata"));
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (export_metadata_row),
+                               _("Show name, summary and version fields before exporting."));
+  adw_switch_row_set_active (ADW_SWITCH_ROW (export_metadata_row),
+                             aml_settings_get_export_metadata (self->settings));
+  g_signal_connect (export_metadata_row, "notify::active",
+                    G_CALLBACK (on_export_metadata_toggled), self);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (general_group),
+                              export_metadata_row);
 
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
                                  _("Show Snapshots"));
@@ -540,7 +572,9 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (cache_group), clear_cache_row);
 
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
-                            ADW_PREFERENCES_GROUP (versions_group));
+                             ADW_PREFERENCES_GROUP (general_group));
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+                             ADW_PREFERENCES_GROUP (versions_group));
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                              ADW_PREFERENCES_GROUP (logs_group));
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),

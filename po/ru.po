@@ -441,3 +441,21 @@ msgstr "Загрузка модпака"
 
 msgid "Writing archive"
 msgstr "Запись архива"
+
+msgid "These details are optional. The pack name defaults to the instance name."
+msgstr "Эти данные необязательны. По умолчанию именем пакета будет имя инстанса."
+
+msgid "Export modpack metadata"
+msgstr "Метаданные экспорта"
+
+msgid "Ask for export metadata"
+msgstr "Запрашивать метаданные при экспорте"
+
+msgid "Pack information"
+msgstr "Информация о пакете"
+
+msgid "Show name, summary and version fields before exporting."
+msgstr "Показывать поля имени, описания и версии перед экспортом."
+
+msgid "Export complete"
+msgstr "Экспорт завершён"

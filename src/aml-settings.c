@@ -22,6 +22,7 @@
 #define LANGUAGE_KEY "language"
 #define CACHE_MODRINTH_API_RESPONSES_KEY "cache-modrinth-api-responses"
 #define CACHE_EXPIRATION_KEY "cache-expiration"
+#define EXPORT_METADATA_KEY "export-metadata"
 
 /* A stored limit below this is not a number a log can be trimmed to. */
 #define LOG_LINE_LIMIT_FLOOR 1
@@ -37,6 +38,7 @@ struct _AmlSettings
   char *language;
   gboolean cache_modrinth_api_responses;
   AmlSettingsCacheExpiration cache_expiration;
+  gboolean export_metadata;
   char *filename;
 };
 
@@ -151,6 +153,11 @@ load (AmlSettings *self)
           stored == AML_SETTINGS_CACHE_EXPIRATION_7_DAYS)
         self->cache_expiration = (AmlSettingsCacheExpiration) stored;
     }
+
+  node = json_object_get_member (object, EXPORT_METADATA_KEY);
+  if (node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
+      json_node_get_value_type (node) == G_TYPE_BOOLEAN)
+    self->export_metadata = json_node_get_boolean (node);
 }
 
 static gboolean
@@ -197,6 +204,9 @@ save (AmlSettings *self, GError **error)
   json_builder_set_member_name (builder, CACHE_EXPIRATION_KEY);
   json_builder_add_int_value (builder, (gint64) self->cache_expiration);
 
+  json_builder_set_member_name (builder, EXPORT_METADATA_KEY);
+  json_builder_add_boolean_value (builder, self->export_metadata);
+
   json_builder_end_object (builder);
 
   /* The builder hands out a copy of what it built and the generator makes
@@ -233,6 +243,32 @@ aml_settings_new (void)
   load (self);
 
   return self;
+}
+
+gboolean
+aml_settings_get_export_metadata (AmlSettings *self)
+{
+  g_return_val_if_fail (AML_IS_SETTINGS (self), TRUE);
+
+  return self->export_metadata;
+}
+
+gboolean
+aml_settings_set_export_metadata (AmlSettings *self, gboolean value,
+                                  GError **error)
+{
+  gboolean previous;
+
+  g_return_val_if_fail (AML_IS_SETTINGS (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  previous = self->export_metadata;
+  self->export_metadata = value;
+  if (save (self, error))
+    return TRUE;
+
+  self->export_metadata = previous;
+  return FALSE;
 }
 
 gboolean
@@ -483,4 +519,5 @@ aml_settings_init (AmlSettings *self)
   self->log_line_limit = AML_SETTINGS_DEFAULT_LOG_LINE_LIMIT;
   self->cache_modrinth_api_responses = TRUE;
   self->cache_expiration = AML_SETTINGS_DEFAULT_CACHE_EXPIRATION;
+  self->export_metadata = TRUE;
 }

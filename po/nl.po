@@ -441,3 +441,21 @@ msgstr "Modpack downloaden"
 
 msgid "Writing archive"
 msgstr "Archief schrijven"
+
+msgid "These details are optional. The pack name defaults to the instance name."
+msgstr "Deze gegevens zijn optioneel. De pakketnaam is standaard de naam van de instantie."
+
+msgid "Export modpack metadata"
+msgstr "Exportmetagegevens"
+
+msgid "Ask for export metadata"
+msgstr "Vragen om exportmetagegevens"
+
+msgid "Pack information"
+msgstr "Pakketinformatie"
+
+msgid "Show name, summary and version fields before exporting."
+msgstr "Naam-, samenvattings- en versievelden tonen vóór het exporteren."
+
+msgid "Export complete"
+msgstr "Export voltooid"
