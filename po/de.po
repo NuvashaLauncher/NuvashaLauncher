@@ -562,3 +562,15 @@ msgstr "von %s"
 
 msgid "%s downloads"
 msgstr "%s Downloads"
+
+msgid "Cache Cleared"
+msgstr "Cache geleert"
+
+msgid "AML cache data was cleared successfully."
+msgstr "AML-Cache-Daten wurden erfolgreich gelöscht."
+
+msgid "Cache Cleanup Failed"
+msgstr "Bereinigung des Caches fehlgeschlagen"
+
+msgid "The cache could not be cleared."
+msgstr "Der Cache konnte nicht geleert werden."

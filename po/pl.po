@@ -559,3 +559,15 @@ msgstr "autor: %s"
 
 msgid "%s downloads"
 msgstr "%s pobrań"
+
+msgid "Cache Cleared"
+msgstr "Wyczyszczono pamięć podręczną"
+
+msgid "AML cache data was cleared successfully."
+msgstr "Dane pamięci podręcznej AML zostały pomyślnie usunięte."
+
+msgid "Cache Cleanup Failed"
+msgstr "Nie udało się wyczyścić pamięci podręcznej"
+
+msgid "The cache could not be cleared."
+msgstr "Nie można było wyczyścić pamięci podręcznej."

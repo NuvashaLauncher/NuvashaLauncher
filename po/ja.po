@@ -559,3 +559,15 @@ msgstr "作成者: %s"
 
 msgid "%s downloads"
 msgstr "%s ダウンロード"
+
+msgid "Cache Cleared"
+msgstr "キャッシュを消去しました"
+
+msgid "AML cache data was cleared successfully."
+msgstr "AML のキャッシュデータを正常に消去しました。"
+
+msgid "Cache Cleanup Failed"
+msgstr "キャッシュの消去に失敗しました"
+
+msgid "The cache could not be cleared."
+msgstr "キャッシュを消去できませんでした。"

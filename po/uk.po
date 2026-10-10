@@ -559,3 +559,15 @@ msgstr "автор: %s"
 
 msgid "%s downloads"
 msgstr "%s завантажень"
+
+msgid "Cache Cleared"
+msgstr "Кеш очищено"
+
+msgid "AML cache data was cleared successfully."
+msgstr "Дані кешу AML успішно очищено."
+
+msgid "Cache Cleanup Failed"
+msgstr "Не вдалося очистити кеш"
+
+msgid "The cache could not be cleared."
+msgstr "Не вдалося очистити кеш."
