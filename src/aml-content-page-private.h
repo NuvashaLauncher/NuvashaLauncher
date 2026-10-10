@@ -58,13 +58,13 @@ struct _AmlContentPage
   GtkWidget *switcher_installed; /* the Installed button of the pair */
   GtkWidget *switcher_browse;    /* the Browse button of the pair */
   struct {
-    GtkWidget *actions;
-    GtkWidget *search_bar;
-    GtkWidget *search_entry;
-    GtkWidget *group;
-    GtkWidget *scroller;
-    GtkWidget *status;
-    GtkWidget *update_all;
+    GtkBox *actions;
+    GtkSearchEntry *search_bar;
+    GtkSearchEntry *search_entry;
+    AdwPreferencesGroup *group;
+    GtkScrolledWindow *scroller;
+    AdwStatusPage *status;
+    GtkButton *update_all;
     GPtrArray *files;     /* AmlContentFile* */
     GHashTable *rows;     /* path -> row */
     GList *rows_list;     /* rows of the Installed group */
@@ -85,7 +85,7 @@ struct _AmlContentPage
     GtkWidget *loading_more; /* spinner row at the bottom of the list */
     GtkWidget *retry_row;    /* inline retry row when a page fails */
     GtkWidget *retry_label;
-    GtkWidget *spinner;
+    AdwSpinner *spinner;
 
     GList *result_rows;
     AmlContentBrowserModel *model;

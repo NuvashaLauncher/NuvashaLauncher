@@ -370,9 +370,9 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
                 }
 
               g_ptr_array_remove_index (self->installed.files, i);
-              gtk_widget_set_visible (self->installed.status,
+              gtk_widget_set_visible (GTK_WIDGET (self->installed.status),
                                       self->installed.files->len == 0);
-              gtk_widget_set_visible (self->installed.scroller,
+              gtk_widget_set_visible (GTK_WIDGET (self->installed.scroller),
                                       self->installed.files->len != 0);
               break;
             }
@@ -801,9 +801,9 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   {
     gboolean empty = self->installed.files->len == 0;
 
-    gtk_widget_set_visible (self->installed.status, empty);
-    gtk_widget_set_visible (self->installed.scroller, !empty);
-    gtk_widget_set_sensitive (self->installed.update_all, !empty);
+    gtk_widget_set_visible (GTK_WIDGET (self->installed.status), empty);
+    gtk_widget_set_visible (GTK_WIDGET (self->installed.scroller), !empty);
+    gtk_widget_set_sensitive (GTK_WIDGET (self->installed.update_all), !empty);
   }
 
   {
