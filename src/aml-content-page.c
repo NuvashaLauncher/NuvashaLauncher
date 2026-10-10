@@ -1233,8 +1233,8 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
   self->pick_button = NULL;
   self->pick_badge = NULL;
 
-  self->stack = adw_view_stack_new ();
-  gtk_widget_set_vexpand (self->stack, TRUE);
+  self->stack = ADW_VIEW_STACK (adw_view_stack_new ());
+  gtk_widget_set_vexpand (GTK_WIDGET (self->stack), TRUE);
 
   aml_content_page_build_installed (self);
   aml_content_page_build_browse (self);
