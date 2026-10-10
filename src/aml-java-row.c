@@ -66,7 +66,7 @@ struct _AmlJavaRow
 
   gboolean ready;
   gboolean disposed;
-  GtkWidget *retry;
+  GtkButton *retry;
 };
 
 G_DEFINE_FINAL_TYPE (AmlJavaRow, aml_java_row, ADW_TYPE_COMBO_ROW)
@@ -105,7 +105,7 @@ show_loading (AmlJavaRow *self)
   self->add_index = GTK_INVALID_LIST_POSITION;
   put_model (self, g_steal_pointer (&names), 0);
   gtk_widget_set_sensitive (GTK_WIDGET (self), FALSE);
-  gtk_widget_set_visible (self->retry, FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self), NULL);
 }
 
@@ -119,7 +119,7 @@ show_error (AmlJavaRow *self, const char *message)
   put_model (self, g_steal_pointer (&names), GTK_INVALID_LIST_POSITION);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self), message);
   gtk_widget_set_sensitive (GTK_WIDGET (self), TRUE);
-  gtk_widget_set_visible (self->retry, TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (self->retry), TRUE);
 }
 
 static char *
@@ -205,7 +205,7 @@ fill (AmlJavaRow *self)
   put_model (self, names, position);
 
   gtk_widget_set_sensitive (GTK_WIDGET (self), TRUE);
-  gtk_widget_set_visible (self->retry, FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self), NULL);
 
   /* A wanted path detection never saw needs a probe. */
@@ -647,13 +647,13 @@ aml_java_row_init (AmlJavaRow *self)
   self->add_index = GTK_INVALID_LIST_POSITION;
   self->restore = 0;
 
-  self->retry = gtk_button_new_with_label (_("Retry"));
-  gtk_widget_add_css_class (self->retry, "flat");
-  gtk_widget_set_valign (self->retry, GTK_ALIGN_CENTER);
-  gtk_widget_set_visible (self->retry, FALSE);
+   self->retry = GTK_BUTTON (gtk_button_new_with_label (_("Retry")));
+  gtk_widget_add_css_class (GTK_WIDGET (self->retry), "flat");
+  gtk_widget_set_valign (GTK_WIDGET (self->retry), GTK_ALIGN_CENTER);
+  gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
   g_signal_connect (self->retry, "clicked", G_CALLBACK (on_retry_clicked),
                     self);
-  adw_action_row_add_suffix (ADW_ACTION_ROW (self), self->retry);
+  adw_action_row_add_suffix (ADW_ACTION_ROW (self), GTK_WIDGET (self->retry));
 
   /* First, so the entry that asks for a runtime can put the selection
      back before whoever uses the row sees it. */
