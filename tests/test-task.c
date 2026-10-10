@@ -78,6 +78,83 @@ test_sequence_progresses_and_cleans_up (void)
   g_print ("ok - task sequence advances, returns results and frees state\n");
 }
 
+static void
+error_step (GTask *task G_GNUC_UNUSED, gpointer user_data)
+{
+  SequenceData *data = user_data;
+
+  data->calls++;
+  aml_task_sequence_return_error (
+    data->sequence,
+    g_error_new_literal (G_IO_ERROR, G_IO_ERROR_FAILED, "step failed"));
+}
+
+static void
+error_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+            gpointer user_data)
+{
+  SequenceResult *result_data = user_data;
+  g_autoptr (GError) error = NULL;
+  gpointer value = g_task_propagate_pointer (G_TASK (result), &error);
+
+  g_assert_null (value);
+  g_assert_error (error, G_IO_ERROR, G_IO_ERROR_FAILED);
+  g_main_loop_quit (result_data->loop);
+}
+
+static void
+test_sequence_returns_errors (void)
+{
+  SequenceData data = { 0 };
+  SequenceResult result = { 0 };
+
+  result.loop = g_main_loop_new (NULL, FALSE);
+  data.sequence = aml_task_sequence_new (NULL, error_done, &result,
+                                          error_step, &data,
+                                          sequence_data_free);
+  aml_task_sequence_start (data.sequence);
+  g_main_loop_run (result.loop);
+
+  g_assert_cmpuint (data.calls, ==, 1);
+  g_assert_true (data.data_freed);
+  g_main_loop_unref (result.loop);
+  g_print ("ok - task sequence returns errors and frees state\n");
+}
+
+static void
+cancel_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+             gpointer user_data)
+{
+  SequenceResult *result_data = user_data;
+  g_autoptr (GError) error = NULL;
+  gpointer value = g_task_propagate_pointer (G_TASK (result), &error);
+
+  g_assert_null (value);
+  g_assert_error (error, G_IO_ERROR, G_IO_ERROR_CANCELLED);
+  g_main_loop_quit (result_data->loop);
+}
+
+static void
+test_sequence_honors_cancellation (void)
+{
+  SequenceData data = { 0 };
+  SequenceResult result = { 0 };
+  g_autoptr (GCancellable) cancellable = g_cancellable_new ();
+
+  result.loop = g_main_loop_new (NULL, FALSE);
+  g_cancellable_cancel (cancellable);
+  data.sequence = aml_task_sequence_new (cancellable, cancel_done, &result,
+                                          sequence_step, &data,
+                                          sequence_data_free);
+  aml_task_sequence_start (data.sequence);
+  g_main_loop_run (result.loop);
+
+  g_assert_cmpuint (data.calls, ==, 0);
+  g_assert_true (data.data_freed);
+  g_main_loop_unref (result.loop);
+  g_print ("ok - task sequence stops before a cancelled step\n");
+}
+
 int
 main (int argc, char **argv)
 {
@@ -86,5 +163,7 @@ main (int argc, char **argv)
 
   g_print ("# Task sequence\n");
   test_sequence_progresses_and_cleans_up ();
+  test_sequence_returns_errors ();
+  test_sequence_honors_cancellation ();
   return 0;
 }
