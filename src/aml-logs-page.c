@@ -496,7 +496,6 @@ aml_logs_page_new (AmlLauncher *launcher)
   AmlLogsPage *self;
   GtkWidget *row;
   GtkWidget *actions;
-  GtkWidget *spacer;
   GtkWidget *card;
   GtkWidget *text;
   GtkAdjustment *adjustment;
@@ -512,11 +511,11 @@ aml_logs_page_new (AmlLauncher *launcher)
   gtk_widget_set_vexpand (GTK_WIDGET (self), TRUE);
 
   /* What the launch is doing, and the buttons that act on the log. */
-  row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
+  row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   gtk_widget_set_margin_top (row, 6);
   gtk_widget_set_margin_bottom (row, 6);
-  gtk_widget_set_margin_start (row, 12);
-  gtk_widget_set_margin_end (row, 12);
+  gtk_widget_set_margin_start (row, 0);
+  gtk_widget_set_margin_end (row, 0);
 
   self->state = gtk_label_new (NULL);
   gtk_widget_add_css_class (self->state, "heading");
@@ -569,10 +568,7 @@ aml_logs_page_new (AmlLauncher *launcher)
 
    gtk_widget_set_hexpand (self->search_bar, TRUE);
    gtk_box_append (GTK_BOX (row), self->search_bar);
-   spacer = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-   gtk_widget_set_hexpand (spacer, TRUE);
-   gtk_box_append (GTK_BOX (row), spacer);
-   gtk_box_append (GTK_BOX (row), actions);
+    gtk_box_append (GTK_BOX (row), actions);
    gtk_widget_set_hexpand (row, TRUE);
    gtk_box_append (GTK_BOX (self), row);
 
