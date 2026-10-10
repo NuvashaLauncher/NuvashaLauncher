@@ -3571,33 +3571,6 @@ active_search_entry (AmlContentPage *self)
            ? self->search_entry : self->installed_search_entry;
 }
 
-void
-aml_content_page_focus_search (AmlContentPage *self)
-{
-  GtkWidget *entry;
-
-  g_return_if_fail (AML_IS_CONTENT_PAGE (self));
-
-  entry = active_search_entry (self);
-  if (entry != NULL)
-    {
-      gtk_widget_set_visible (entry, TRUE);
-      gtk_widget_grab_focus (entry);
-    }
-}
-
-static void
-on_content_search_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
-{
-  AmlContentPage *self = user_data;
-  GtkWidget *entry = active_search_entry (self);
-
-  if (entry != NULL)
-    {
-      gtk_widget_set_visible (entry, TRUE);
-      gtk_widget_grab_focus (entry);
-    }
-}
 
 static gboolean
 on_content_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
@@ -4356,9 +4329,6 @@ build_installed (AmlContentPage *self)
   GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   GtkWidget *actions = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   GtkWidget *search_bar = gtk_search_entry_new ();
-  GtkWidget *search_button = toolbar_button (
-    "system-search-symbolic", _("Search"),
-    G_CALLBACK (on_content_search_clicked), self);
   GtkWidget *scroller = gtk_scrolled_window_new ();
   GtkWidget *content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   AdwPreferencesGroup *group =
@@ -4370,11 +4340,10 @@ build_installed (AmlContentPage *self)
    gtk_widget_set_hexpand (search_bar, TRUE);
     gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_bar),
                                             _("Search"));
-    gtk_widget_set_visible (search_bar, FALSE);
+    gtk_widget_set_visible (search_bar, TRUE);
    g_signal_connect (search_bar, "changed",
                      G_CALLBACK (on_installed_search_changed), self);
-    gtk_box_append (GTK_BOX (actions), search_button);
-    gtk_box_append (GTK_BOX (actions), search_bar);
+     gtk_box_append (GTK_BOX (actions), search_bar);
 
    self->update_all = toolbar_button ("software-update-available-symbolic", _("Update All"),
                                       G_CALLBACK (on_update_all_clicked), self);
@@ -4477,9 +4446,6 @@ build_browse (AmlContentPage *self)
   GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   GtkWidget *top = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   GtkWidget *search_bar = gtk_search_entry_new ();
-  GtkWidget *search_button = toolbar_button (
-    "system-search-symbolic", _("Search"),
-    G_CALLBACK (on_content_search_clicked), self);
   GtkWidget *filter_button = gtk_menu_button_new ();
   GtkWidget *popover = gtk_popover_new ();
   GtkWidget *filter_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
@@ -4509,7 +4475,7 @@ build_browse (AmlContentPage *self)
   gtk_widget_set_hexpand (search_bar, TRUE);
   gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_bar),
                                             _("Search"));
-  gtk_widget_set_visible (search_bar, FALSE);
+  gtk_widget_set_visible (search_bar, TRUE);
 
   g_signal_connect (search_bar, "changed",
                     G_CALLBACK (on_search_changed), self);
@@ -4521,7 +4487,6 @@ build_browse (AmlContentPage *self)
     g_signal_connect (keys, "key-pressed", G_CALLBACK (on_search_key), self);
   }
 
-  gtk_box_append (GTK_BOX (top), search_button);
   gtk_box_append (GTK_BOX (top), search_bar);
 
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (filter_button),

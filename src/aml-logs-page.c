@@ -17,7 +17,6 @@ struct _AmlLogsPage
   GtkWidget *detail;
   GtkWidget *clear;
   GtkWidget *open;
-  GtkWidget *search_button;
   GtkWidget *view;
   GtkWidget *scroller;
   GtkWidget *search_bar;
@@ -280,8 +279,8 @@ on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED, guint keyval,
 
   if (keyval == GDK_KEY_f && (state & GDK_CONTROL_MASK))
     {
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (self->search_button),
-                                    TRUE);
+      gtk_widget_set_visible (self->search_bar, TRUE);
+      gtk_widget_grab_focus (self->search_entry);
       return GDK_EVENT_STOP;
     }
 
@@ -297,37 +296,11 @@ on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED, guint keyval,
       scroll_to_end (self);
     }
 
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (self->search_button),
-                                FALSE);
+  gtk_widget_set_visible (self->search_bar, TRUE);
+  gtk_widget_grab_focus (self->search_entry);
   gtk_widget_grab_focus (GTK_WIDGET (self));
 
   return GDK_EVENT_STOP;
-}
-
-static void
-on_search_toggled (GtkToggleButton *button, gpointer user_data)
-{
-  AmlLogsPage *self = user_data;
-  gboolean open = gtk_toggle_button_get_active (button);
-
-  gtk_widget_set_visible (self->search_bar, open);
-  if (open)
-    gtk_widget_grab_focus (self->search_entry);
-  else
-    {
-      gtk_editable_set_text (GTK_EDITABLE (self->search_entry), "");
-      self->filtered = FALSE;
-      show_lines (self);
-      gtk_widget_grab_focus (GTK_WIDGET (self));
-    }
-}
-
-void
-aml_logs_page_focus_search (AmlLogsPage *self)
-{
-  g_return_if_fail (AML_IS_LOGS_PAGE (self));
-
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (self->search_button), TRUE);
 }
 
 /* ---------------------------------------------------------- *
@@ -523,16 +496,6 @@ aml_logs_page_new (AmlLauncher *launcher)
   gtk_box_append (GTK_BOX (actions), self->clear);
   gtk_box_append (GTK_BOX (actions), self->open);
 
-  self->search_button = gtk_toggle_button_new ();
-  gtk_button_set_icon_name (GTK_BUTTON (self->search_button),
-                            "system-search-symbolic");
-  gtk_widget_add_css_class (self->search_button, "flat");
-  gtk_widget_set_tooltip_text (self->search_button, _("Search"));
-  gtk_accessible_update_property (
-    GTK_ACCESSIBLE (self->search_button), GTK_ACCESSIBLE_PROPERTY_LABEL,
-    _("Search"), -1);
-  g_signal_connect (self->search_button, "toggled",
-                    G_CALLBACK (on_search_toggled), self);
   /* Searching the log: a bar over the lines, closed until Ctrl+F opens
    * it. The lines are kept either way, so nothing here can lose one. */
    self->search_bar = gtk_search_entry_new ();
@@ -540,7 +503,7 @@ aml_logs_page_new (AmlLauncher *launcher)
    gtk_widget_set_hexpand (self->search_entry, TRUE);
   gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (self->search_entry),
                                          _("Search the log"));
-   gtk_widget_set_visible (self->search_bar, FALSE);
+    gtk_widget_set_visible (self->search_bar, TRUE);
   g_signal_connect (self->search_entry, "changed",
                     G_CALLBACK (on_search_changed), self);
   {
@@ -561,7 +524,6 @@ aml_logs_page_new (AmlLauncher *launcher)
    gtk_widget_set_hexpand (self->search_bar, TRUE);
    search_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
    gtk_widget_set_hexpand (search_box, TRUE);
-   gtk_box_append (GTK_BOX (search_box), self->search_button);
    gtk_box_append (GTK_BOX (search_box), self->search_bar);
    gtk_box_append (GTK_BOX (row), search_box);
    gtk_box_append (GTK_BOX (row), actions);

@@ -636,54 +636,12 @@ on_shortcuts (GSimpleAction *action G_GNUC_UNUSED,
   adw_dialog_present (dialog, GTK_WIDGET (self));
 }
 
-static void find_mapped_instance_page (GtkWidget *, AmlInstancePage **);
-
-static void
-on_search_action (GSimpleAction *action G_GNUC_UNUSED,
-                  GVariant *parameter G_GNUC_UNUSED, gpointer user_data)
-{
-  AmlMainWindow *self = user_data;
-  GtkWidget *focus = gtk_root_get_focus (GTK_ROOT (self));
-  AmlInstancePage *fallback = NULL;
-
-  for (GtkWidget *widget = focus; widget != NULL;
-       widget = gtk_widget_get_parent (widget))
-    if (AML_IS_INSTANCE_PAGE (widget))
-      {
-        aml_instance_page_focus_search (AML_INSTANCE_PAGE (widget));
-        return;
-      }
-
-  find_mapped_instance_page (GTK_WIDGET (self), &fallback);
-  if (fallback != NULL)
-    aml_instance_page_focus_search (fallback);
-}
-
-static void
-find_mapped_instance_page (GtkWidget *widget, AmlInstancePage **found)
-{
-  if (*found != NULL || !gtk_widget_get_visible (widget) ||
-      !gtk_widget_get_mapped (widget))
-    return;
-
-  if (AML_IS_INSTANCE_PAGE (widget))
-    {
-      *found = AML_INSTANCE_PAGE (widget);
-      return;
-    }
-
-  for (GtkWidget *child = gtk_widget_get_first_child (widget); child != NULL;
-       child = gtk_widget_get_next_sibling (child))
-    find_mapped_instance_page (child, found);
-}
-
 static const GActionEntry window_entries[] = {
   { .name = "create-instance", .activate = on_create_instance },
   { .name = "download-modpack", .activate = on_download_modpack },
   { .name = "import-modpack", .activate = on_import_modpack },
   { .name = "settings", .activate = on_settings },
   { .name = "shortcuts", .activate = on_shortcuts },
-  { .name = "search", .activate = on_search_action },
   { .name = "about", .activate = on_about },
 };
 
@@ -1528,15 +1486,6 @@ aml_main_window_init (AmlMainWindow *self)
 
   g_action_map_add_action_entries (G_ACTION_MAP (self), window_entries,
                                    G_N_ELEMENTS (window_entries), self);
-  {
-    GtkApplication *application =
-      GTK_APPLICATION (gtk_window_get_application (GTK_WINDOW (self)));
-    const char *accelerators[] = { "<Primary>f", NULL };
-
-    if (application != NULL)
-      gtk_application_set_accels_for_action (application, "win.search",
-                                             accelerators);
-  }
 
   /* Start of the header: the "+" menu. */
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (add_button),
@@ -1782,6 +1731,4 @@ aml_main_window_class_init (AmlMainWindowClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   object_class->dispose = aml_main_window_dispose;
-  gtk_widget_class_add_binding_action (GTK_WIDGET_CLASS (klass), GDK_KEY_f,
-                                       GDK_CONTROL_MASK, "win.search", NULL);
 }
