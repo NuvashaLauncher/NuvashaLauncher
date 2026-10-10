@@ -138,7 +138,7 @@ repair_index_for_file (AmlContentPage *self, AmlContentFile *file)
   entry.required_dependencies = file->required_dependencies;
   entry.optional_dependencies = file->optional_dependencies;
   entry.incompatible_dependencies = file->incompatible_dependencies;
-  aml_content_index_update_async (directory, self->type, &entry, self->scan,
+  aml_content_index_update_async (directory, self->type, &entry, self->installed.scan,
                                   NULL, NULL);
 }
 
@@ -251,7 +251,7 @@ installed_icon_lookup (AmlContentPage *self, GtkWidget *row,
     lookup->row = g_object_ref (row);
     lookup->project_id = g_strdup (project_id);
 
-    aml_modrinth_details_async (project_id, self->scan, installed_icon_details,
+    aml_modrinth_details_async (project_id, self->installed.scan, installed_icon_details,
                                 lookup);
   }
 }
@@ -566,7 +566,7 @@ active_search_entry (AmlContentPage *self)
     : NULL;
 
   return g_strcmp0 (visible, "browse") == 0
-           ? self->browse.search_entry : self->installed_search_entry;
+           ? self->browse.search_entry : self->installed.search_entry;
 }
 
 

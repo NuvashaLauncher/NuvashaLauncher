@@ -157,12 +157,12 @@ toggle_file (AmlContentPage *self, AmlContentFile *file)
 
   /* The row the file is about follows the new path, and the table that
      finds a row by its path is told, so nothing else has to move. */
-  row = g_hash_table_lookup (self->rows, old_path);
+  row = g_hash_table_lookup (self->installed.rows, old_path);
 
   if (row != NULL)
     {
-      g_hash_table_remove (self->rows, old_path);
-      g_hash_table_insert (self->rows, g_strdup (file->path), row);
+      g_hash_table_remove (self->installed.rows, old_path);
+      g_hash_table_insert (self->installed.rows, g_strdup (file->path), row);
     }
 
   show_toast (self, file->enabled ? _("Enabled") : _("Disabled"));
@@ -173,13 +173,13 @@ toggle_file (AmlContentPage *self, AmlContentFile *file)
 static void
 installed_filter_rows (AmlContentPage *self)
 {
-  const char *query = self->installed_search_entry != NULL
+  const char *query = self->installed.search_entry != NULL
                         ? gtk_editable_get_text (
-                            GTK_EDITABLE (self->installed_search_entry))
+                            GTK_EDITABLE (self->installed.search_entry))
                         : "";
   g_autofree char *needle = g_utf8_casefold (query, -1);
 
-  for (GList *item = self->installed_rows; item != NULL; item = item->next)
+  for (GList *item = self->installed.rows_list; item != NULL; item = item->next)
     {
       GtkWidget *row = item->data;
       AmlContentFile *file = g_object_get_data (G_OBJECT (row), "aml-file");
@@ -342,38 +342,38 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
       /* An identification request may still refer to one of the rows. Stop
          it before releasing the file it borrowed; the other rows remain in
          place and are not rebuilt. */
-      g_cancellable_cancel (self->scan);
-      g_clear_object (&self->scan);
-      self->scan = g_cancellable_new ();
-      self->identifying = FALSE;
+      g_cancellable_cancel (self->installed.scan);
+      g_clear_object (&self->installed.scan);
+      self->installed.scan = g_cancellable_new ();
+      self->installed.identifying = FALSE;
 
-      for (guint i = 0; path != NULL && i < self->files->len; i++)
+      for (guint i = 0; path != NULL && i < self->installed.files->len; i++)
         {
-          AmlContentFile *file = g_ptr_array_index (self->files, i);
+          AmlContentFile *file = g_ptr_array_index (self->installed.files, i);
 
           if (g_strcmp0 (file->path, path) == 0)
             {
-              GtkWidget *row = g_hash_table_lookup (self->rows, path);
-              GList *link = g_list_find (self->installed_rows, row);
+              GtkWidget *row = g_hash_table_lookup (self->installed.rows, path);
+              GList *link = g_list_find (self->installed.rows_list, row);
 
               if (row != NULL)
                 {
                   adw_preferences_group_remove (
-                      ADW_PREFERENCES_GROUP (self->installed_group), row);
-                  g_hash_table_remove (self->rows, path);
+                      ADW_PREFERENCES_GROUP (self->installed.group), row);
+                  g_hash_table_remove (self->installed.rows, path);
                 }
 
               if (link != NULL)
                 {
-                  self->installed_rows = g_list_delete_link (
-                      self->installed_rows, link);
+                  self->installed.rows_list = g_list_delete_link (
+                      self->installed.rows_list, link);
                 }
 
-              g_ptr_array_remove_index (self->files, i);
-              gtk_widget_set_visible (self->installed_status,
-                                      self->files->len == 0);
-              gtk_widget_set_visible (self->installed_scroller,
-                                      self->files->len != 0);
+              g_ptr_array_remove_index (self->installed.files, i);
+              gtk_widget_set_visible (self->installed.status,
+                                      self->installed.files->len == 0);
+              gtk_widget_set_visible (self->installed.scroller,
+                                      self->installed.files->len != 0);
               break;
             }
         }
@@ -430,9 +430,9 @@ on_trash_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
     title = file->filename;
 
   if (file->project_id != NULL)
-    for (guint i = 0; i < self->files->len; i++)
+    for (guint i = 0; i < self->installed.files->len; i++)
       {
-        AmlContentFile *other = g_ptr_array_index (self->files, i);
+        AmlContentFile *other = g_ptr_array_index (self->installed.files, i);
         const char *other_title = NULL;
 
         if (other == file || other->required_dependencies == NULL)
@@ -701,15 +701,15 @@ identify_next (IdentifyRun *run)
       return;
     }
 
-  while (run->index < self->files->len)
+  while (run->index < self->installed.files->len)
     {
-      AmlContentFile *file = g_ptr_array_index (self->files, run->index);
+      AmlContentFile *file = g_ptr_array_index (self->installed.files, run->index);
       g_autofree char *key = NULL;
       GtkWidget *row = NULL;
 
       run->index++;
       key = g_strdup (file->path);
-      row = g_hash_table_lookup (self->rows, key);
+      row = g_hash_table_lookup (self->installed.rows, key);
 
       /* A hash-matched index entry already identifies this file. The row is
        * ready from disk and reopening an instance must not ask Modrinth just
@@ -728,15 +728,15 @@ identify_next (IdentifyRun *run)
       return;
     }
 
-  self->identifying = FALSE;
+  self->installed.identifying = FALSE;
   if (self->project.details_versions != NULL && self->project.details_download != NULL)
     {
       gboolean have_versions = self->project.details_versions->len > 0;
 
      gtk_widget_set_sensitive (self->project.details_download,
-                               have_versions && !self->identifying);
+                               have_versions && !self->installed.identifying);
      gtk_widget_set_sensitive (self->project.details_check,
-                               have_versions && !self->identifying);
+                               have_versions && !self->installed.identifying);
     }
   identify_run_free (run);
 }
@@ -770,16 +770,16 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   /* The rows that pointed into the old list are gone, so the list they
    * pointed into can go too. */
-  take_rows_out (&self->installed_rows,
-                 ADW_PREFERENCES_GROUP (self->installed_group));
-  g_clear_pointer (&self->files, g_ptr_array_unref);
-  g_clear_pointer (&self->rows, g_hash_table_unref);
-  self->files = g_steal_pointer (&files);
-  self->rows = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+  take_rows_out (&self->installed.rows_list,
+                 ADW_PREFERENCES_GROUP (self->installed.group));
+  g_clear_pointer (&self->installed.files, g_ptr_array_unref);
+  g_clear_pointer (&self->installed.rows, g_hash_table_unref);
+  self->installed.files = g_steal_pointer (&files);
+  self->installed.rows = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
-  for (guint i = 0; i < self->files->len; i++)
+  for (guint i = 0; i < self->installed.files->len; i++)
     {
-      AmlContentFile *file = g_ptr_array_index (self->files, i);
+      AmlContentFile *file = g_ptr_array_index (self->installed.files, i);
 
       if (file->project_id != NULL && file->project_name != NULL &&
           *file->project_name != '\0')
@@ -788,10 +788,10 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                               g_strdup (file->project_name));
       GtkWidget *row = file_row (self, file);
 
-      adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->installed_group),
+      adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->installed.group),
                                   row);
-      self->installed_rows = g_list_append (self->installed_rows, row);
-      g_hash_table_insert (self->rows, g_strdup (file->path), row);
+      self->installed.rows_list = g_list_append (self->installed.rows_list, row);
+      g_hash_table_insert (self->installed.rows, g_strdup (file->path), row);
       if (file->project_id != NULL)
         installed_icon_lookup (self, row, file->project_id);
     }
@@ -799,20 +799,20 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   installed_filter_rows (self);
 
   {
-    gboolean empty = self->files->len == 0;
+    gboolean empty = self->installed.files->len == 0;
 
-    gtk_widget_set_visible (self->installed_status, empty);
-    gtk_widget_set_visible (self->installed_scroller, !empty);
-    gtk_widget_set_sensitive (self->update_all, !empty);
+    gtk_widget_set_visible (self->installed.status, empty);
+    gtk_widget_set_visible (self->installed.scroller, !empty);
+    gtk_widget_set_sensitive (self->installed.update_all, !empty);
   }
 
   {
     IdentifyRun *run = g_new0 (IdentifyRun, 1);
 
-    self->identifying = TRUE;
+    self->installed.identifying = TRUE;
     run->page = self;
     g_object_add_weak_pointer (G_OBJECT (self), (gpointer *) &run->page);
-    run->cancellable = g_object_ref (self->scan);
+    run->cancellable = g_object_ref (self->installed.scan);
     identify_next (run);
   }
 
@@ -823,9 +823,9 @@ void
 reload_installed (AmlContentPage *self)
 {
   g_autofree char *directory = NULL;
-  GCancellable *previous = self->scan;
+  GCancellable *previous = self->installed.scan;
 
-  if (self->scan == NULL || self->installed_group == NULL)
+  if (self->installed.scan == NULL || self->installed.group == NULL)
     return;
 
   g_object_get (self->instance, "directory", &directory, NULL);
@@ -835,11 +835,11 @@ reload_installed (AmlContentPage *self)
 
   /* A scan that is still running is replaced: what it would answer is
    * about a folder that has since changed. */
-  self->scan = g_cancellable_new ();
+  self->installed.scan = g_cancellable_new ();
   g_cancellable_cancel (previous);
   g_clear_object (&previous);
 
-  aml_content_scan_async (directory, self->type, self->scan, scan_ready,
+  aml_content_scan_async (directory, self->type, self->installed.scan, scan_ready,
                           page_watch_new (self));
 }
 
@@ -1073,9 +1073,9 @@ update_check_next (UpdateRun *run)
       return;
     }
 
-  while (run->index < self->files->len)
+  while (run->index < self->installed.files->len)
     {
-      AmlContentFile *file = g_ptr_array_index (self->files, run->index);
+      AmlContentFile *file = g_ptr_array_index (self->installed.files, run->index);
 
       run->index++;
 
@@ -1169,7 +1169,7 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
   self->type = type;
   self->minecraft_version = instance_string (instance, "minecraft-version");
   self->browse.cancellable = g_cancellable_new ();
-  self->scan = g_cancellable_new ();
+  self->installed.scan = g_cancellable_new ();
   self->browse.more = g_cancellable_new ();
   self->browse.seen_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                           NULL);
@@ -1235,7 +1235,7 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
   self->project.details_body = NULL;
   self->project.details_dropdown = NULL;
   self->project.details_download = NULL;
-  self->identifying = FALSE;
+  self->installed.identifying = FALSE;
   self->project.details_check = NULL;
   self->project.details_page = NULL;
   self->project.split = NULL;
@@ -1281,14 +1281,14 @@ aml_content_page_dispose (GObject *object)
   /* The two action rows are held with a reference of their own, see
      build_installed() and build_browse(); giving it back is what lets
      them go when the page does. */
-  g_clear_object (&self->installed_actions);
+  g_clear_object (&self->installed.actions);
   g_clear_object (&self->browse_actions);
-  self->installed_group = NULL;
-  self->installed_scroller = NULL;
-  self->installed_status = NULL;
-  self->installed_search_bar = NULL;
-  self->installed_search_entry = NULL;
-  self->update_all = NULL;
+  self->installed.group = NULL;
+  self->installed.scroller = NULL;
+  self->installed.status = NULL;
+  self->installed.search_bar = NULL;
+  self->installed.search_entry = NULL;
+  self->installed.update_all = NULL;
   self->browse.results_group = NULL;
   self->browse.results_scroller = NULL;
   self->browse.results_status = NULL;
@@ -1315,10 +1315,10 @@ aml_content_page_dispose (GObject *object)
     }
 
   g_cancellable_cancel (self->browse.cancellable);
-  g_cancellable_cancel (self->scan);
+  g_cancellable_cancel (self->installed.scan);
   g_cancellable_cancel (self->browse.more);
   g_clear_object (&self->browse.cancellable);
-  g_clear_object (&self->scan);
+  g_clear_object (&self->installed.scan);
   g_clear_object (&self->browse.more);
   g_clear_pointer (&self->browse.seen_ids, g_hash_table_unref);
 
@@ -1346,15 +1346,15 @@ aml_content_page_finalize (GObject *object)
   AmlContentPage *self = AML_CONTENT_PAGE (object);
 
   g_clear_object (&self->instance);
-  g_clear_pointer (&self->files, g_ptr_array_unref);
-  g_clear_pointer (&self->rows, g_hash_table_unref);
+  g_clear_pointer (&self->installed.files, g_ptr_array_unref);
+  g_clear_pointer (&self->installed.rows, g_hash_table_unref);
   g_clear_pointer (&self->browse.projects, g_hash_table_unref);
   g_clear_pointer (&self->browse.project_icons, g_hash_table_unref);
   g_clear_pointer (&self->browse.project_descriptions, g_hash_table_unref);
   g_clear_pointer (&self->browse.project_titles, g_hash_table_unref);
   g_clear_pointer (&self->browse.categories, g_ptr_array_unref);
   g_clear_pointer (&self->browse.results, g_ptr_array_unref);
-  g_list_free (self->installed_rows);
+  g_list_free (self->installed.rows_list);
   g_list_free (self->browse.result_rows);
   g_clear_pointer (&self->install.picks, g_ptr_array_unref);
   g_clear_pointer (&self->install.batch, g_ptr_array_unref);

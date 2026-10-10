@@ -425,10 +425,10 @@ detail_fill (AmlContentPage *self)
                              self->project.details_versions->len > 0;
 
     gtk_widget_set_sensitive (self->project.details_download,
-                              have_versions && !self->identifying);
+                              have_versions && !self->installed.identifying);
     /* Nothing to put on the list while the dropdown shows none. */
     gtk_widget_set_sensitive (self->project.details_check,
-                              have_versions && !self->identifying);
+                              have_versions && !self->installed.identifying);
   }
 
   /* The version the dropdown shows from the start is not on the list
