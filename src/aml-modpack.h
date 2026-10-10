@@ -206,10 +206,16 @@ AmlInstance *aml_modpack_install_finish (GAsyncResult *result,
 /* Writes @instance as a .mrpack at @path. The archive contains the
  * instance's manifest and its files under overrides/. Archive creation is
  * performed away from the GTK main loop. */
+typedef void (*AmlModpackExportProgressFunc) (guint64 done, guint64 total,
+                                               const char *detail,
+                                               gpointer user_data);
+
 void aml_modpack_export_async (AmlInstance *instance, const char *path,
                                const char *pack_name, const char *summary,
                                const char *version_id,
                                gboolean include_transient,
+                               AmlModpackExportProgressFunc progress,
+                               gpointer progress_data,
                                GCancellable *cancellable,
                                GAsyncReadyCallback callback,
                                gpointer user_data);

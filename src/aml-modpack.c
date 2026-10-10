@@ -2054,6 +2054,9 @@ typedef struct {
   char *icon_path;
   GHashTable *indexed_paths;
   gboolean include_transient;
+  AmlModpackExportProgressFunc progress;
+  gpointer progress_data;
+  guint64 total;
 } ExportRun;
 
 static void
@@ -2065,6 +2068,44 @@ export_run_free (ExportRun *run)
   g_free (run->icon_path);
   g_clear_pointer (&run->indexed_paths, g_hash_table_unref);
   g_free (run);
+}
+
+typedef struct {
+  AmlModpackExportProgressFunc callback;
+  gpointer data;
+  guint64 done;
+  guint64 total;
+  char *detail;
+} ExportProgress;
+
+static gboolean
+export_progress_dispatch (gpointer user_data)
+{
+  ExportProgress *progress = user_data;
+
+  progress->callback (progress->done, progress->total, progress->detail,
+                      progress->data);
+  g_free (progress->detail);
+  g_free (progress);
+  return G_SOURCE_REMOVE;
+}
+
+static void
+export_progress (ExportRun *run, guint64 done, guint64 total,
+                 const char *detail)
+{
+  ExportProgress *progress;
+
+  if (run->progress == NULL)
+    return;
+
+  progress = g_new0 (ExportProgress, 1);
+  progress->callback = run->progress;
+  progress->data = run->progress_data;
+  progress->done = done;
+  progress->total = total;
+  progress->detail = g_strdup (detail);
+  g_main_context_invoke (NULL, export_progress_dispatch, progress);
 }
 
 static gboolean
@@ -2385,6 +2426,39 @@ export_indexed_files (ExportRun *run, GCancellable *cancellable, GError **error)
   return TRUE;
 }
 
+static guint64
+export_count_directory (const char *root, const char *relative,
+                        GHashTable *indexed_paths, gboolean include_transient)
+{
+  g_autofree char *directory = g_build_filename (root, relative, NULL);
+  g_autoptr (GDir) dir = g_dir_open (directory, 0, NULL);
+  const char *name = NULL;
+  guint64 total = 0;
+
+  if (dir == NULL)
+    return 0;
+
+  while ((name = g_dir_read_name (dir)) != NULL)
+    {
+      g_autofree char *source = g_build_filename (directory, name, NULL);
+      g_autofree char *child = g_build_filename (relative, name, NULL);
+      GStatBuf stat_buf;
+
+      if (!include_transient && export_path_is_transient (child))
+        continue;
+      if (g_lstat (source, &stat_buf) != 0)
+        continue;
+      if (S_ISDIR (stat_buf.st_mode))
+        total += export_count_directory (root, child, indexed_paths,
+                                         include_transient);
+      else if (S_ISREG (stat_buf.st_mode) &&
+               !g_hash_table_contains (indexed_paths, child))
+        total++;
+    }
+
+  return total;
+}
+
 static void
 export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
                gpointer task_data, GCancellable *cancellable)
@@ -2413,6 +2487,13 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
       g_task_return_error (task, g_steal_pointer (&error));
       return;
     }
+
+  run->total = g_hash_table_size (run->indexed_paths) +
+               export_count_directory (canonical_root, "", run->indexed_paths,
+                                       run->include_transient) + 1;
+  if (run->icon_path != NULL)
+    run->total++;
+  export_progress (run, 0, run->total, "Writing archive");
 
   manifest_length = strlen (run->manifest);
 
@@ -2469,6 +2550,7 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
 
   archive_entry_free (manifest_entry);
   archive_write_free (archive);
+  export_progress (run, run->total, run->total, "Export complete");
   g_task_return_boolean (task, TRUE);
 }
 
@@ -2548,6 +2630,8 @@ void
 aml_modpack_export_async (AmlInstance *instance, const char *path,
                           const char *pack_name, const char *summary,
                           const char *version_id, gboolean include_transient,
+                          AmlModpackExportProgressFunc progress,
+                          gpointer progress_data,
                           GCancellable *cancellable,
                           GAsyncReadyCallback callback, gpointer user_data)
 {
@@ -2565,6 +2649,8 @@ aml_modpack_export_async (AmlInstance *instance, const char *path,
   run->instance_directory = g_strdup (directory);
   run->archive_path = g_strdup (path);
   run->include_transient = include_transient;
+  run->progress = progress;
+  run->progress_data = progress_data;
   run->indexed_paths = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                               NULL);
   g_object_get (instance, "icon", &run->icon_path, NULL);

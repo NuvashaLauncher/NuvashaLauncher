@@ -689,6 +689,19 @@ on_open_folder_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 }
 
 static void
+on_export_progress (guint64 done, guint64 total, const char *detail,
+                    gpointer user_data)
+{
+  AmlInstancePage *self = user_data;
+
+  if (self->export_download != NULL)
+    {
+      aml_download_set_detail (self->export_download, detail);
+      aml_download_set_progress (self->export_download, done, total);
+    }
+}
+
+static void
 on_export_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                 gpointer user_data)
 {
@@ -748,7 +761,8 @@ on_export_file_chosen (GObject *source, GAsyncResult *result,
                                    (gpointer *) &self->export_download);
         aml_modpack_export_async (self->instance, path, self->export_name,
                                   self->export_summary, self->export_version,
-                                  self->export_include_transient, NULL,
+                                  self->export_include_transient,
+                                  on_export_progress, self, NULL,
                                   on_export_done, g_object_ref (self));
       }
   }
