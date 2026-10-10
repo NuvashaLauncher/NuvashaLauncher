@@ -24,12 +24,12 @@ struct _AmlCreateInstanceDialog
   /* Directory picked with the file chooser, or NULL to keep the default. */
   char *directory;
 
-  GtkWidget *name_row;
-  GtkWidget *version_row; /* AmlVersionRow, filled when the dialog opens */
+  AdwEntryRow *name_row;
+  AmlVersionRow *version_row;
   AmlLoaderRow *loader_row; /* its two rows are filled when it opens */
-  GtkWidget *directory_row;
-  GtkWidget *error_label;
-  GtkWidget *create_button;
+  AdwActionRow *directory_row;
+  GtkLabel *error_label;
+  GtkButton *create_button;
 };
 
 G_DEFINE_FINAL_TYPE (AmlCreateInstanceDialog, aml_create_instance_dialog,
@@ -40,13 +40,13 @@ show_error (AmlCreateInstanceDialog *self,
             const char              *message)
 {
   gtk_label_set_text (GTK_LABEL (self->error_label), message);
-  gtk_widget_set_visible (self->error_label, TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (self->error_label), TRUE);
 }
 
 static void
 clear_error (AmlCreateInstanceDialog *self)
 {
-  gtk_widget_set_visible (self->error_label, FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->error_label), FALSE);
 }
 
 static void
@@ -70,7 +70,7 @@ update_create_button (AmlCreateInstanceDialog *self)
 
   /* The version row answers nothing while it is loading or failed, so
    * the dialog waits until a version from the list is picked. */
-  gtk_widget_set_sensitive (self->create_button,
+  gtk_widget_set_sensitive (GTK_WIDGET (self->create_button),
                             name[0] != '\0' && version != NULL &&
                             loader_ready);
 }
@@ -226,13 +226,13 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
   /* The same size as the other way of getting an instance. */
   aml_dialog_set_standard_size (ADW_DIALOG (self));
 
-  self->name_row = adw_entry_row_new ();
+  self->name_row = ADW_ENTRY_ROW (adw_entry_row_new ());
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->name_row), _("Name"));
   adw_entry_row_set_activates_default (ADW_ENTRY_ROW (self->name_row), TRUE);
 
   /* The real versions of Mojang's manifest, fetched when the dialog is
    * created; the row fills itself and says so while it works. */
-  self->version_row = GTK_WIDGET (aml_version_row_new ());
+  self->version_row = aml_version_row_new ();
 
   /* The loader and the version of it. Filled when the dialog opens and
      again whenever the Minecraft version above changes. */
@@ -243,7 +243,7 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
   g_autofree char *default_directory =
     g_build_filename (g_get_user_data_dir (), "AML", "instances", NULL);
 
-  self->directory_row = adw_action_row_new ();
+  self->directory_row = ADW_ACTION_ROW (adw_action_row_new ());
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->directory_row),
                                       FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->directory_row),
@@ -261,32 +261,32 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
                                          pick_button);
 
   GtkWidget *group = adw_preferences_group_new ();
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), self->name_row);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), self->version_row);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), GTK_WIDGET (self->name_row));
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), GTK_WIDGET (self->version_row));
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (group),
                              aml_loader_row_get_loader_row (self->loader_row));
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (group),
                              aml_loader_row_get_version_row (self->loader_row));
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), self->directory_row);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), GTK_WIDGET (self->directory_row));
 
   GtkWidget *page = adw_preferences_page_new ();
   gtk_widget_set_vexpand (page, TRUE);
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                             ADW_PREFERENCES_GROUP (group));
 
-  self->error_label = gtk_label_new (NULL);
+  self->error_label = GTK_LABEL (gtk_label_new (NULL));
   gtk_label_set_wrap (GTK_LABEL (self->error_label), TRUE);
   gtk_label_set_xalign (GTK_LABEL (self->error_label), 0.0);
-  gtk_widget_set_margin_start (self->error_label, 24);
-  gtk_widget_set_margin_end (self->error_label, 24);
-  gtk_widget_set_visible (self->error_label, FALSE);
+  gtk_widget_set_margin_start (GTK_WIDGET (self->error_label), 24);
+  gtk_widget_set_margin_end (GTK_WIDGET (self->error_label), 24);
+  gtk_widget_set_visible (GTK_WIDGET (self->error_label), FALSE);
 
   GtkWidget *cancel_button = gtk_button_new_with_label (_("Cancel"));
   g_signal_connect (cancel_button, "clicked", G_CALLBACK (on_cancel_clicked),
                     self);
 
-  self->create_button = gtk_button_new_with_label (_("Create"));
-  gtk_widget_add_css_class (self->create_button, "suggested-action");
+  self->create_button = GTK_BUTTON (gtk_button_new_with_label (_("Create")));
+  gtk_widget_add_css_class (GTK_WIDGET (self->create_button), "suggested-action");
   g_signal_connect (self->create_button, "clicked", G_CALLBACK (on_create_clicked),
                     self);
 
@@ -296,15 +296,16 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
   gtk_widget_set_margin_end (buttons, 24);
   gtk_widget_set_margin_bottom (buttons, 24);
   gtk_box_append (GTK_BOX (buttons), cancel_button);
-  gtk_box_append (GTK_BOX (buttons), self->create_button);
+  gtk_box_append (GTK_BOX (buttons), GTK_WIDGET (self->create_button));
 
   GtkWidget *content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_box_append (GTK_BOX (content), page);
-  gtk_box_append (GTK_BOX (content), self->error_label);
+  gtk_box_append (GTK_BOX (content), GTK_WIDGET (self->error_label));
   gtk_box_append (GTK_BOX (content), buttons);
   adw_dialog_set_child (ADW_DIALOG (self), content);
 
-  adw_dialog_set_default_widget (ADW_DIALOG (self), self->create_button);
+  adw_dialog_set_default_widget (ADW_DIALOG (self),
+                                 GTK_WIDGET (self->create_button));
 
   g_signal_connect (self->name_row, "notify::text", G_CALLBACK (on_input_changed),
                     self);
