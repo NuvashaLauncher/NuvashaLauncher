@@ -885,7 +885,7 @@ aml_content_page_refresh_picks (AmlContentPage *self)
 
       gtk_label_set_text (GTK_LABEL (self->pick_badge),
                           count > 0 ? number : "");
-      gtk_widget_set_visible (self->pick_badge, count > 0);
+      gtk_widget_set_visible (GTK_WIDGET (self->pick_badge), count > 0);
       gtk_accessible_update_property (GTK_ACCESSIBLE (self->pick_badge),
                                       GTK_ACCESSIBLE_PROPERTY_LABEL,
                                       number, -1);
@@ -899,9 +899,9 @@ aml_content_page_refresh_picks (AmlContentPage *self)
         tooltip = g_strdup_printf (_("Install the selected %s?"),
                                    aml_content_type_title (self->type));
 
-      gtk_widget_set_sensitive (self->pick_button, count > 0);
+      gtk_widget_set_sensitive (GTK_WIDGET (self->pick_button), count > 0);
       gtk_widget_set_tooltip_text (
-           self->pick_button,
+           GTK_WIDGET (self->pick_button),
            count == 0 ? _("Nothing is selected")
                       : tooltip);
     }
