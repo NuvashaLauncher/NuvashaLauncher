@@ -11,10 +11,10 @@
  * the download does. The box is a child of the downloads list, so it is
  * destroyed with it; only the struct is ours. */
 typedef struct {
-  GtkWidget *box;
-  GtkWidget *phase;  /* what it is doing, on the left */
-  GtkWidget *count;  /* how far it is, on the right */
-  GtkWidget *bar;
+  GtkBox *box;
+  GtkLabel *phase;          /* what it is doing, on the left */
+  GtkLabel *count;          /* how far it is, on the right */
+  GtkProgressBar *bar;
 } DownloadRow;
 
 void
@@ -82,7 +82,7 @@ refresh_downloads (AmlMainWindow *self)
 
       if (!present)
         {
-          gtk_box_remove (GTK_BOX (self->downloads.list), row->box);
+          gtk_box_remove (GTK_BOX (self->downloads.list), GTK_WIDGET (row->box));
           g_hash_table_iter_remove (&iter);
         }
     }
@@ -112,21 +112,21 @@ refresh_downloads (AmlMainWindow *self)
           gtk_label_set_xalign (GTK_LABEL (title), 0.0f);
 
           row = g_new0 (DownloadRow, 1);
-          row->box = box;
-          row->phase = gtk_label_new (NULL);
-          row->count = gtk_label_new (NULL);
-          row->bar = gtk_progress_bar_new ();
+           row->box = GTK_BOX (box);
+           row->phase = GTK_LABEL (gtk_label_new (NULL));
+           row->count = GTK_LABEL (gtk_label_new (NULL));
+           row->bar = GTK_PROGRESS_BAR (gtk_progress_bar_new ());
 
           /* The phase ("Downloading compressed modpack") on the left and
              the amount ("312.0/500.0 MB") on the right, under the title. */
-          gtk_widget_set_halign (row->phase, GTK_ALIGN_START);
-          gtk_widget_set_hexpand (row->phase, TRUE);
+          gtk_widget_set_halign (GTK_WIDGET (row->phase), GTK_ALIGN_START);
+          gtk_widget_set_hexpand (GTK_WIDGET (row->phase), TRUE);
           gtk_label_set_xalign (GTK_LABEL (row->phase), 0.0f);
-          gtk_widget_add_css_class (row->phase, "dim-label");
+          gtk_widget_add_css_class (GTK_WIDGET (row->phase), "dim-label");
 
-          gtk_widget_set_halign (row->count, GTK_ALIGN_END);
-          gtk_widget_set_valign (row->count, GTK_ALIGN_CENTER);
-          gtk_widget_add_css_class (row->count, "dim-label");
+          gtk_widget_set_halign (GTK_WIDGET (row->count), GTK_ALIGN_END);
+          gtk_widget_set_valign (GTK_WIDGET (row->count), GTK_ALIGN_CENTER);
+          gtk_widget_add_css_class (GTK_WIDGET (row->count), "dim-label");
           gtk_label_set_xalign (GTK_LABEL (row->count), 1.0f);
 
           gtk_widget_set_margin_start (box, 12);
@@ -136,8 +136,8 @@ refresh_downloads (AmlMainWindow *self)
           gtk_widget_set_size_request (box, 360, -1);
 
           /* The bar takes the room and the × sits right of it. */
-          gtk_widget_set_hexpand (row->bar, TRUE);
-          gtk_widget_set_valign (row->bar, GTK_ALIGN_CENTER);
+          gtk_widget_set_hexpand (GTK_WIDGET (row->bar), TRUE);
+          gtk_widget_set_valign (GTK_WIDGET (row->bar), GTK_ALIGN_CENTER);
           gtk_widget_add_css_class (cancel, "flat");
           gtk_widget_set_valign (cancel, GTK_ALIGN_CENTER);
           gtk_widget_set_tooltip_text (cancel, _("Cancel"));
@@ -148,9 +148,9 @@ refresh_downloads (AmlMainWindow *self)
           g_signal_connect (cancel, "clicked", G_CALLBACK (on_download_cancel),
                             download);
 
-          gtk_box_append (GTK_BOX (sub), row->phase);
-          gtk_box_append (GTK_BOX (sub), row->count);
-          gtk_box_append (GTK_BOX (line_box), row->bar);
+          gtk_box_append (GTK_BOX (sub), GTK_WIDGET (row->phase));
+          gtk_box_append (GTK_BOX (sub), GTK_WIDGET (row->count));
+          gtk_box_append (GTK_BOX (line_box), GTK_WIDGET (row->bar));
           gtk_box_append (GTK_BOX (line_box), cancel);
 
           gtk_box_append (GTK_BOX (box), title);
