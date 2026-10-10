@@ -42,7 +42,7 @@ struct _AmlInstancePage
    * because the tree can go away while a running operation still keeps
    * this page alive. */
   AdwToastOverlay *toast_overlay;
-  GtkWidget *icon_row;
+  AdwActionRow *icon_row;
   GtkWidget *icon_path_label; /* the icon path inside the chooser button */
   AdwViewStack *stack; /* the view stack holding the pages of the instance */
   GtkWidget *logs_page; /* the last page, kept so a rebuild can move it back */
@@ -51,14 +51,14 @@ struct _AmlInstancePage
      and the spinner that shows a move in progress. A move in progress
      makes the button insensitive, so a second one cannot start on top of
      it. */
-  GtkWidget *directory_row;
-  GtkWidget *directory_change;
+  AdwActionRow *directory_row;
+  GtkButton *directory_change;
   GtkWidget *directory_path_label; /* the path inside the chooser button */
-  GtkWidget *directory_spinner;
+  GtkSpinner *directory_spinner;
 
   /* The Java row plus what we know about it. Row load = detection
    * finishes; description load = the Minecraft version's javaVersion.  */
-  GtkWidget *java_row;
+  AmlJavaRow *java_row;
   int required_java;        /* 0 means "never found one / unknown" */
   GCancellable *cancellable;
   AmlDownload *export_download;
@@ -986,14 +986,14 @@ update_directory_row (AmlInstancePage *self)
       gtk_label_set_text (GTK_LABEL (self->directory_path_label), directory);
     }
 
-  gtk_widget_set_sensitive (self->directory_change, !running);
+  gtk_widget_set_sensitive (GTK_WIDGET (self->directory_change), !running);
 }
 
 static void
 set_moving (AmlInstancePage *self, gboolean moving)
 {
-  gtk_widget_set_visible (self->directory_spinner, moving);
-  gtk_widget_set_sensitive (self->directory_change, !moving);
+  gtk_widget_set_visible (GTK_WIDGET (self->directory_spinner), moving);
+  gtk_widget_set_sensitive (GTK_WIDGET (self->directory_change), !moving);
 }
 
 static void
@@ -1274,7 +1274,7 @@ create_settings_page (AmlInstancePage *self)
   g_signal_connect (name_row, "apply", G_CALLBACK (on_name_apply), self);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (general), name_row);
 
-  self->icon_row = adw_action_row_new ();
+  self->icon_row = ADW_ACTION_ROW (adw_action_row_new ());
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->icon_row),
                                       FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->icon_row), _("Icon"));
@@ -1290,37 +1290,37 @@ create_settings_page (AmlInstancePage *self)
   adw_action_row_add_suffix (ADW_ACTION_ROW (self->icon_row), change_icon);
   adw_action_row_set_activatable_widget (ADW_ACTION_ROW (self->icon_row),
                                          change_icon);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (general), self->icon_row);
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (general), GTK_WIDGET (self->icon_row));
   update_icon_row (self);
 
   /* Directory: where the files are. Pressing the button moves every file
      to another folder, which is the only thing the row does. */
-  self->directory_row = adw_action_row_new ();
+  self->directory_row = ADW_ACTION_ROW (adw_action_row_new ());
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->directory_row),
                                       FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->directory_row),
                                  _("Directory"));
 
-  self->directory_change = path_button (directory,
-                                        &self->directory_path_label);
-  gtk_widget_add_css_class (self->directory_change, "flat");
-  gtk_widget_set_valign (self->directory_change, GTK_ALIGN_CENTER);
-   gtk_widget_set_tooltip_text (self->directory_change, _("Change the Directory"));
+   self->directory_change = GTK_BUTTON (path_button (
+     directory, &self->directory_path_label));
+  gtk_widget_add_css_class (GTK_WIDGET (self->directory_change), "flat");
+  gtk_widget_set_valign (GTK_WIDGET (self->directory_change), GTK_ALIGN_CENTER);
+   gtk_widget_set_tooltip_text (GTK_WIDGET (self->directory_change), _("Change the Directory"));
   g_signal_connect (self->directory_change, "clicked",
                     G_CALLBACK (on_change_directory_clicked), self);
 
-  self->directory_spinner = gtk_spinner_new ();
-  gtk_widget_set_valign (self->directory_spinner, GTK_ALIGN_CENTER);
-  gtk_widget_set_visible (self->directory_spinner, FALSE);
+  self->directory_spinner = GTK_SPINNER (gtk_spinner_new ());
+  gtk_widget_set_valign (GTK_WIDGET (self->directory_spinner), GTK_ALIGN_CENTER);
+  gtk_widget_set_visible (GTK_WIDGET (self->directory_spinner), FALSE);
 
   adw_action_row_add_suffix (ADW_ACTION_ROW (self->directory_row),
-                             self->directory_spinner);
+                             GTK_WIDGET (self->directory_spinner));
   adw_action_row_add_suffix (ADW_ACTION_ROW (self->directory_row),
-                             self->directory_change);
+                             GTK_WIDGET (self->directory_change));
   adw_action_row_set_activatable_widget (ADW_ACTION_ROW (self->directory_row),
-                                         self->directory_change);
+                                         GTK_WIDGET (self->directory_change));
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (general),
-                             self->directory_row);
+                             GTK_WIDGET (self->directory_row));
   update_directory_row (self);
 
   /* Minecraft: the list of versions comes from Mojang's manifest,
@@ -1374,7 +1374,7 @@ create_settings_page (AmlInstancePage *self)
   aml_java_row_set_required_major (AML_JAVA_ROW (java_row),
                                    self->required_java);
   aml_java_row_load (AML_JAVA_ROW (java_row), java_path);
-  self->java_row = java_row;
+  self->java_row = AML_JAVA_ROW (java_row);
 
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (java), java_row);
 
