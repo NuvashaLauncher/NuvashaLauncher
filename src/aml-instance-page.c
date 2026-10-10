@@ -45,7 +45,7 @@ struct _AmlInstancePage
   AdwActionRow *icon_row;
   GtkLabel *icon_path_label; /* the icon path inside the chooser button */
   AdwViewStack *stack; /* the view stack holding the pages of the instance */
-  GtkWidget *logs_page; /* the last page, kept so a rebuild can move it back */
+  AmlLogsPage *logs_page; /* the last page, kept so a rebuild can move it back */
 
   /* The Directory row: the chooser button that says where the instance is
      and the spinner that shows a move in progress. A move in progress
@@ -182,9 +182,10 @@ rebuild_content_pages (AmlInstancePage *self)
      changes: Settings, Resource Packs, Shader Packs, Mods, Logs. */
   if (self->logs_page != NULL)
     {
-      adw_view_stack_remove (ADW_VIEW_STACK (self->stack), self->logs_page);
+      adw_view_stack_remove (ADW_VIEW_STACK (self->stack),
+                             GTK_WIDGET (self->logs_page));
       adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (self->stack),
-                                           self->logs_page, "logs", "Logs",
+                                           GTK_WIDGET (self->logs_page), "logs", "Logs",
                                         "edit-clear-all-symbolic");
     }
 
@@ -1487,10 +1488,10 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
 
   /* The logs of the instance are the logs of the launcher the window
      shares with the row, so the game can be watched from here. */
-  self->logs_page = GTK_WIDGET (aml_logs_page_new (launcher));
+  self->logs_page = aml_logs_page_new (launcher);
   g_object_ref (self->logs_page);
   adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (stack),
-                                        self->logs_page, "logs", _("Logs"),
+                                        GTK_WIDGET (self->logs_page), "logs", _("Logs"),
                                        "utilities-terminal-symbolic");
 
   /* Kept so that the content pages can be built again when the loader or
