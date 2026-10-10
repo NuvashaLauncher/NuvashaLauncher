@@ -949,6 +949,7 @@ test_export_import_round_trip (void)
   g_autofree char *icon_source = g_build_filename (root, "source-icon.png", NULL);
   g_autofree char *archive = g_build_filename (root, "round-trip.mrpack", NULL);
   g_autofree char *override = g_build_filename (source_dir, "config", "test.txt", NULL);
+  g_autofree char *log = g_build_filename (source_dir, "logs", "latest.log", NULL);
   g_autoptr (GError) error = NULL;
   g_autoptr (AmlInstanceManager) source_manager = manager_new (source_data);
   g_autoptr (AmlInstanceManager) target_manager = manager_new (target_data);
@@ -974,6 +975,13 @@ test_export_import_round_trip (void)
     g_assert_cmpint (g_mkdir_with_parents (override_dir, 0755), ==, 0);
   }
   g_assert_true (g_file_set_contents (override, "override bytes", -1, &error));
+  g_assert_no_error (error);
+  {
+    g_autofree char *log_dir = g_path_get_dirname (log);
+
+    g_assert_cmpint (g_mkdir_with_parents (log_dir, 0755), ==, 0);
+  }
+  g_assert_true (g_file_set_contents (log, "transient bytes", -1, &error));
   g_assert_no_error (error);
   g_object_set (source, "icon", icon_source, NULL);
   g_assert_true (aml_instance_manager_save (source_manager, &error));
@@ -1006,6 +1014,12 @@ test_export_import_round_trip (void)
     override_bytes = read_file (imported_override);
   }
   g_assert_cmpstr (override_bytes, ==, "override bytes");
+  {
+    g_autofree char *imported_log =
+      g_build_filename (imported_dir, "logs", "latest.log", NULL);
+
+    g_assert_false (g_file_test (imported_log, G_FILE_TEST_EXISTS));
+  }
 
   remove_recursive (root);
   g_print ("ok - export and import preserve loader, icon and overrides\n");

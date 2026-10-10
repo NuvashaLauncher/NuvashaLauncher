@@ -2147,6 +2147,23 @@ export_file (struct archive *archive, const char *source, const char *target,
 }
 
 static gboolean
+export_path_is_transient (const char *relative)
+{
+  static const char *names[] = {
+    "logs", "crash-reports", "screenshots", "cache", "downloads", "debug"
+  };
+  const char *end = strchr (relative, G_DIR_SEPARATOR);
+  gsize length = end != NULL ? (gsize) (end - relative) : strlen (relative);
+
+  for (guint i = 0; i < G_N_ELEMENTS (names); i++)
+    if (strlen (names[i]) == length &&
+        strncmp (relative, names[i], length) == 0)
+      return TRUE;
+
+  return FALSE;
+}
+
+static gboolean
 export_directory (struct archive *archive, const char *root,
                   const char *relative, GHashTable *indexed_paths,
                   GCancellable *cancellable, GError **error)
@@ -2171,6 +2188,9 @@ export_directory (struct archive *archive, const char *root,
       g_autofree char *child_relative =
         g_build_filename (relative, name, NULL);
       GStatBuf stat_buf;
+
+      if (export_path_is_transient (child_relative))
+        continue;
 
       if (g_lstat (source, &stat_buf) != 0)
         {
