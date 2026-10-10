@@ -326,12 +326,13 @@ static gboolean
 start_import_idle (gpointer user_data)
 {
   AmlDownloadModpackDialog *self = user_data;
-  g_autoptr (GTask) task = g_task_new (NULL, NULL, NULL, NULL);
 
   /* Reuse the same validation, optional-file selection and install flow as
    * a downloaded pack. The selected file is never deleted on failure. */
-  g_task_return_boolean (task, TRUE);
-  on_pack_downloaded (NULL, G_ASYNC_RESULT (task), g_object_ref (self));
+  aml_modpack_new_from_zip_async (
+    self->pack_path, aml_download_get_cancellable (self->pack_download),
+    on_pack_parsed, g_object_ref (self));
+  g_object_unref (self);
   return G_SOURCE_REMOVE;
 }
 
