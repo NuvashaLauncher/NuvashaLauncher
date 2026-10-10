@@ -377,10 +377,10 @@ msgid "Export Modpack"
 msgstr "Exporter un modpack"
 
 msgid "Importing modpack…"
-msgstr "Importing modpack…"
+msgstr "Importation du modpack…"
 
 msgid "Reading modpack"
-msgstr "Reading modpack"
+msgstr "Lecture du modpack"
 
 msgid "Exporting modpack"
 msgstr "Exporting modpack"
@@ -413,7 +413,31 @@ msgid "Continue"
 msgstr "Continue"
 
 msgid "Downloading files"
-msgstr "Downloading files"
+msgstr "Téléchargement des fichiers"
 
 msgid "Extracting files"
-msgstr "Extracting files"
+msgstr "Extraction des fichiers"
+
+
+msgid "Optional files"
+msgstr "Fichiers facultatifs"
+
+msgid ""
+"The pack lists these files but says they are not needed. Nothing of them is "
+"installed unless you ask. Default is off"
+msgstr "Le pack liste ces fichiers, mais indique qu’ils ne sont pas nécessaires. Aucun ne sera installé sans votre demande. Désactivé par défaut"
+
+msgid "Pack could not be fetched"
+msgstr "Impossible de récupérer le pack"
+
+msgid "Invalid pack"
+msgstr "Pack invalide"
+
+msgid "The pack does not define its install"
+msgstr "Le pack ne définit pas son installation"
+
+msgid "Downloading Modpack"
+msgstr "Téléchargement du modpack"
+
+msgid "Writing archive"
+msgstr "Écriture de l’archive"

@@ -1824,11 +1824,11 @@ build_optional_page (AmlDownloadModpackDialog *self,
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
 
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (heading),
-                                   "Optional files");
+                                   _("Optional files"));
   adw_preferences_group_set_description (
     ADW_PREFERENCES_GROUP (heading),
-    "The pack lists these files but says they are not needed. Nothing of "
-    "them is installed unless you ask. Default is off");
+    _("The pack lists these files but says they are not needed. Nothing of "
+      "them is installed unless you ask. Default is off"));
 
   g_clear_pointer (&self->opt_switch_rows, g_ptr_array_unref);
   self->opt_switch_rows = g_ptr_array_new ();
@@ -1968,7 +1968,7 @@ on_pack_downloaded (GObject *source G_GNUC_UNUSED,
           if (!self->closed)
             {
               self->fail_is_install = FALSE;
-              push_error (self, "Pack could not be fetched", error->message,
+               push_error (self, _("Pack could not be fetched"), error->message,
                           G_CALLBACK (on_error_retry_fetch));
             }
           else
@@ -2007,7 +2007,7 @@ on_pack_parsed (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       if (!self->closed)
         {
           self->fail_is_install = FALSE;
-          push_error (self, "Invalid pack", error->message,
+           push_error (self, _("Invalid pack"), error->message,
                       G_CALLBACK (on_error_retry_fetch));
         }
       else
@@ -2026,7 +2026,7 @@ on_pack_parsed (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       if (!self->closed)
         {
           self->fail_is_install = FALSE;
-          push_error (self, "The pack does not define its install",
+           push_error (self, _("The pack does not define its install"),
                       error->message, G_CALLBACK (on_error_retry_fetch));
         }
       else
@@ -2123,7 +2123,7 @@ dialog_start_features (AmlDownloadModpackDialog *self)
     self->pack_download = aml_downloads_add (AML_DOWNLOAD_MODPACK, name);
   }
 
-  aml_download_set_detail (self->pack_download, "Downloading Modpack");
+  aml_download_set_detail (self->pack_download, _("Downloading Modpack"));
   g_object_add_weak_pointer (G_OBJECT (self->pack_download),
                              (gpointer *) &self->pack_download);
 

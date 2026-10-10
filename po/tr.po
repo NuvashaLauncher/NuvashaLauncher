@@ -377,10 +377,10 @@ msgid "Export Modpack"
 msgstr "Mod paketi dışa aktar"
 
 msgid "Importing modpack…"
-msgstr "Importing modpack…"
+msgstr "Mod paketi içe aktarılıyor…"
 
 msgid "Reading modpack"
-msgstr "Reading modpack"
+msgstr "Mod paketi okunuyor"
 
 msgid "Exporting modpack"
 msgstr "Exporting modpack"
@@ -413,7 +413,31 @@ msgid "Continue"
 msgstr "Continue"
 
 msgid "Downloading files"
-msgstr "Downloading files"
+msgstr "Dosyalar indiriliyor"
 
 msgid "Extracting files"
-msgstr "Extracting files"
+msgstr "Dosyalar çıkarılıyor"
+
+
+msgid "Optional files"
+msgstr "İsteğe bağlı dosyalar"
+
+msgid ""
+"The pack lists these files but says they are not needed. Nothing of them is "
+"installed unless you ask. Default is off"
+msgstr "Paket bu dosyaları listeliyor ancak gerekli olmadıklarını belirtiyor. Siz istemedikçe hiçbiri yüklenmez. Varsayılan olarak kapalı"
+
+msgid "Pack could not be fetched"
+msgstr "Paket alınamadı"
+
+msgid "Invalid pack"
+msgstr "Geçersiz paket"
+
+msgid "The pack does not define its install"
+msgstr "Paket kurulumunu tanımlamıyor"
+
+msgid "Downloading Modpack"
+msgstr "Mod paketi indiriliyor"
+
+msgid "Writing archive"
+msgstr "Arşiv yazılıyor"

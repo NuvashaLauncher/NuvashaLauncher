@@ -377,10 +377,10 @@ msgid "Export Modpack"
 msgstr "Modpack をエクスポート"
 
 msgid "Importing modpack…"
-msgstr "Importing modpack…"
+msgstr "Modpack をインポート中…"
 
 msgid "Reading modpack"
-msgstr "Reading modpack"
+msgstr "Modpack を読み込み中"
 
 msgid "Exporting modpack"
 msgstr "Exporting modpack"
@@ -413,7 +413,31 @@ msgid "Continue"
 msgstr "Continue"
 
 msgid "Downloading files"
-msgstr "Downloading files"
+msgstr "ファイルをダウンロード中"
 
 msgid "Extracting files"
-msgstr "Extracting files"
+msgstr "ファイルを展開中"
+
+
+msgid "Optional files"
+msgstr "オプションファイル"
+
+msgid ""
+"The pack lists these files but says they are not needed. Nothing of them is "
+"installed unless you ask. Default is off"
+msgstr "パックにはこれらのファイルが記載されていますが、必須ではありません。要求しない限りインストールされません。デフォルトでは無効です"
+
+msgid "Pack could not be fetched"
+msgstr "パックを取得できませんでした"
+
+msgid "Invalid pack"
+msgstr "無効なパック"
+
+msgid "The pack does not define its install"
+msgstr "パックにインストール情報がありません"
+
+msgid "Downloading Modpack"
+msgstr "Modpack をダウンロード中"
+
+msgid "Writing archive"
+msgstr "アーカイブを書き込み中"

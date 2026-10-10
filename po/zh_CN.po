@@ -377,10 +377,10 @@ msgid "Export Modpack"
 msgstr "导出整合包"
 
 msgid "Importing modpack…"
-msgstr "Importing modpack…"
+msgstr "正在导入整合包…"
 
 msgid "Reading modpack"
-msgstr "Reading modpack"
+msgstr "正在读取整合包"
 
 msgid "Exporting modpack"
 msgstr "Exporting modpack"
@@ -413,7 +413,31 @@ msgid "Continue"
 msgstr "Continue"
 
 msgid "Downloading files"
-msgstr "Downloading files"
+msgstr "正在下载文件"
 
 msgid "Extracting files"
-msgstr "Extracting files"
+msgstr "正在解压文件"
+
+
+msgid "Optional files"
+msgstr "可选文件"
+
+msgid ""
+"The pack lists these files but says they are not needed. Nothing of them is "
+"installed unless you ask. Default is off"
+msgstr "整合包列出了这些文件，但表示它们不是必需的。除非你主动选择，否则不会安装。默认关闭"
+
+msgid "Pack could not be fetched"
+msgstr "无法获取整合包"
+
+msgid "Invalid pack"
+msgstr "整合包无效"
+
+msgid "The pack does not define its install"
+msgstr "整合包未定义安装信息"
+
+msgid "Downloading Modpack"
+msgstr "正在下载整合包"
+
+msgid "Writing archive"
+msgstr "正在写入归档"
