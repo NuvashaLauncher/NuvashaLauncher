@@ -496,6 +496,7 @@ aml_logs_page_new (AmlLauncher *launcher)
   AmlLogsPage *self;
   GtkWidget *row;
   GtkWidget *actions;
+  GtkWidget *spacer;
   GtkWidget *card;
   GtkWidget *text;
   GtkAdjustment *adjustment;
@@ -538,9 +539,7 @@ aml_logs_page_new (AmlLauncher *launcher)
 
   self->search_button = toolbar_button ("system-search-symbolic", _("Search"),
                                         G_CALLBACK (on_search_clicked), self);
-  gtk_box_insert_child_after (GTK_BOX (row), self->search_button, NULL);
-
-  gtk_box_append (GTK_BOX (self), row);
+  gtk_box_append (GTK_BOX (row), self->search_button);
 
   /* Searching the log: a bar over the lines, closed until Ctrl+F opens
    * it. The lines are kept either way, so nothing here can lose one. */
@@ -569,9 +568,13 @@ aml_logs_page_new (AmlLauncher *launcher)
    }
 
    gtk_widget_set_hexpand (self->search_bar, TRUE);
-   gtk_box_insert_child_after (GTK_BOX (row), self->search_bar,
-                               self->search_button);
+   gtk_box_append (GTK_BOX (row), self->search_bar);
+   spacer = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+   gtk_widget_set_hexpand (spacer, TRUE);
+   gtk_box_append (GTK_BOX (row), spacer);
    gtk_box_append (GTK_BOX (row), actions);
+   gtk_widget_set_hexpand (row, TRUE);
+   gtk_box_append (GTK_BOX (self), row);
 
   /* The lines themselves. Read only: this is what the game printed,
      nothing to write into. */
