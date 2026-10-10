@@ -28,9 +28,13 @@ struct _AmlLauncher
      for. */
   GPtrArray *lines;
 
-  /* What a launch needs while it is on its way. */
-  GCancellable *cancellable;
-  AmlResolvedVersion *resolved;
+  /* What preparation has selected while a launch is on its way. */
+  struct {
+    GCancellable *cancellable;
+    AmlResolvedVersion *resolved;
+    char *java_executable;
+    int java_major_version;
+  } preparation;
   struct {
     GSubprocess *process;
     gboolean exited;
@@ -49,12 +53,6 @@ struct _AmlLauncher
      the command line is built, so a token that was refreshed a moment
      earlier is the one the game is run with. */
   AmlAccounts *accounts;
-
-  /* The Java this launch chose. A loader that has to be installed first
-   * needs one before the game is resolved, so the choice is made once and
-   * kept. */
-  char *java_executable;
-  int java_major_version;
 
 };
 
