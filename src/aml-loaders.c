@@ -14,6 +14,9 @@
 #include <json-glib/json-glib.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+
+#define MAX_INSTALLER_ENTRY_SIZE (128ULL * 1024ULL * 1024ULL)
 
 GQuark
 aml_loaders_error_quark (void)
@@ -979,6 +982,47 @@ ensure_directory (const char *path, GError **error)
   return FALSE;
 }
 
+/* Writes an extracted installer file beside its destination and publishes
+ * it only after the complete byte stream is durable. A failed processor or
+ * interrupted process therefore cannot leave a half-written library. */
+static gboolean
+write_install_file (const char *path, const void *data, gsize size,
+                    GError **error)
+{
+  g_autofree char *directory = g_path_get_dirname (path);
+  g_autofree char *temporary = g_build_filename (directory,
+                                                 ".aml-loader-XXXXXX", NULL);
+  g_autoptr (GError) local_error = NULL;
+  int fd = g_mkstemp (temporary);
+
+  if (fd < 0)
+    {
+      g_set_error (error, AML_LOADERS_ERROR, AML_LOADERS_ERROR_INSTALLER,
+                   "cannot create a temporary file for \"%s\": %s", path,
+                   g_strerror (errno));
+      return FALSE;
+    }
+  close (fd);
+
+  if (!g_file_set_contents_full (temporary, data, (gssize) size,
+                                 G_FILE_SET_CONTENTS_CONSISTENT |
+                                 G_FILE_SET_CONTENTS_DURABLE,
+                                 0600, &local_error) ||
+      g_rename (temporary, path) != 0)
+    {
+      if (local_error == NULL)
+        g_set_error (&local_error, AML_LOADERS_ERROR,
+                     AML_LOADERS_ERROR_INSTALLER,
+                     "cannot publish \"%s\": %s", path, g_strerror (errno));
+      g_unlink (temporary);
+      g_propagate_error (error, g_steal_pointer (&local_error));
+      return FALSE;
+    }
+
+  g_chmod (path, 0644);
+  return TRUE;
+}
+
 /* The bytes of @entry inside the zip archive at @path, which is what an
  * installer is: a jar holding its profile, the document of the loader and
  * the patches it applies. */
@@ -1015,6 +1059,15 @@ read_zip_entry (const char *path, const char *entry, GError **error)
       if (name == NULL || !g_str_equal (name, entry))
         continue;
 
+      if (archive_entry_size_is_set (header) &&
+          archive_entry_size (header) > (la_int64_t) MAX_INSTALLER_ENTRY_SIZE)
+        {
+          g_set_error (error, AML_LOADERS_ERROR,
+                       AML_LOADERS_ERROR_INSTALLER,
+                       "the \"%s\" of the installer is too large", entry);
+          break;
+        }
+
       bytes = g_byte_array_new ();
 
       for (;;)
@@ -1034,6 +1087,16 @@ read_zip_entry (const char *path, const char *entry, GError **error)
                            AML_LOADERS_ERROR_INSTALLER,
                            "the \"%s\" of the installer cannot be read: %s",
                            entry, archive_error_string (archive));
+              g_byte_array_unref (bytes);
+              bytes = NULL;
+              break;
+            }
+
+          if ((guint64) bytes->len + size > MAX_INSTALLER_ENTRY_SIZE)
+            {
+              g_set_error (error, AML_LOADERS_ERROR,
+                           AML_LOADERS_ERROR_INSTALLER,
+                           "the \"%s\" of the installer is too large", entry);
               g_byte_array_unref (bytes);
               bytes = NULL;
               break;
@@ -1715,7 +1778,7 @@ drain_pending (InstallRequest *request)
 
       data = g_bytes_get_data (bytes, &size);
 
-      if (!g_file_set_contents (file->path, data, (gssize) size, &error))
+      if (!write_install_file (file->path, data, size, &error))
         {
           install_failed (request, g_steal_pointer (&error));
           return;

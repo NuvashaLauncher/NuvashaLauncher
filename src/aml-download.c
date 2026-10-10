@@ -135,6 +135,7 @@ typedef struct _DownloadRequest
   gboolean hash_retried; /* a wrong hash is retried only once */
   gboolean holds_slot;
   guint retry_source;    /* pending retry timeout, 0 while there is none */
+  guint retry_cancel_source; /* cancellation watch for a pending retry */
 } DownloadRequest;
 
 static void start_attempt (DownloadRequest *request);
@@ -148,6 +149,7 @@ static void source_closed_ready (GObject *source, GAsyncResult *result,
 static void attempt_next (DownloadRequest *request);
 static void attempt_failed (DownloadRequest *request, GError *error);
 static gboolean retry_when_due (gpointer user_data);
+static gboolean retry_cancelled (gpointer user_data);
 static void cache_open_ready (GObject *source, GAsyncResult *result,
                               gpointer user_data);
 static void hash_read_ready (GObject *source, GAsyncResult *result,
@@ -268,6 +270,12 @@ cache_write_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_autoptr (GError) error = NULL;
 
   g_file_replace_contents_finish (G_FILE (source), result, NULL, &error);
+  if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
+    {
+      request_fail (request, cancelled_error ());
+      return;
+    }
+
   if (error != NULL)
     g_debug ("the Modrinth API cache was not written: %s", error->message);
   request_succeed_json (request, g_steal_pointer (&request->pending_parser));
@@ -285,6 +293,12 @@ cache_write_directory_done (GObject *source, GAsyncResult *result,
   if (!g_file_make_directory_finish (G_FILE (source), result, &error) &&
       !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_EXISTS))
     {
+      if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
+        {
+          request_fail (request, cancelled_error ());
+          g_object_unref (file);
+          return;
+        }
       g_debug ("the Modrinth API cache directory was not created: %s",
                error->message);
       request_succeed_json (request, g_steal_pointer (&request->pending_parser));
@@ -292,11 +306,19 @@ cache_write_directory_done (GObject *source, GAsyncResult *result,
       return;
     }
 
+  if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
+    {
+      request_fail (request, cancelled_error ());
+      g_object_unref (file);
+      return;
+    }
+
   g_file_replace_contents_async (file, request->pending_cache_data,
-                                 strlen (request->pending_cache_data),
-                                 NULL, FALSE,
-                                 G_FILE_CREATE_REPLACE_DESTINATION, NULL,
-                                 cache_write_done, request);
+                                  strlen (request->pending_cache_data),
+                                  NULL, FALSE,
+                                  G_FILE_CREATE_REPLACE_DESTINATION,
+                                  g_task_get_cancellable (request->task),
+                                  cache_write_done, request);
   g_object_unref (file);
 }
 
@@ -313,6 +335,12 @@ cache_write_parent_done (GObject *source, GAsyncResult *result,
   if (!g_file_make_directory_finish (G_FILE (source), result, &error) &&
       !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_EXISTS))
     {
+      if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
+        {
+          request_fail (request, cancelled_error ());
+          g_object_unref (file);
+          return;
+        }
       g_debug ("the Modrinth API cache parent was not created: %s",
                error->message);
       request_succeed_json (request, g_steal_pointer (&request->pending_parser));
@@ -320,7 +348,15 @@ cache_write_parent_done (GObject *source, GAsyncResult *result,
       return;
     }
 
-  g_file_make_directory_async (directory, G_PRIORITY_DEFAULT, NULL,
+  if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
+    {
+      request_fail (request, cancelled_error ());
+      g_object_unref (file);
+      return;
+    }
+
+  g_file_make_directory_async (directory, G_PRIORITY_DEFAULT,
+                               g_task_get_cancellable (request->task),
                                cache_write_directory_done, file);
 }
 
@@ -338,6 +374,12 @@ cache_write_cache_done (GObject *source, GAsyncResult *result,
   if (!g_file_make_directory_finish (G_FILE (source), result, &error) &&
       !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_EXISTS))
     {
+      if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
+        {
+          request_fail (request, cancelled_error ());
+          g_object_unref (file);
+          return;
+        }
       g_debug ("the Modrinth API cache root was not created: %s",
                error->message);
       request_succeed_json (request, g_steal_pointer (&request->pending_parser));
@@ -345,7 +387,15 @@ cache_write_cache_done (GObject *source, GAsyncResult *result,
       return;
     }
 
-  g_file_make_directory_async (parent, G_PRIORITY_DEFAULT, NULL,
+  if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
+    {
+      request_fail (request, cancelled_error ());
+      g_object_unref (file);
+      return;
+    }
+
+  g_file_make_directory_async (parent, G_PRIORITY_DEFAULT,
+                               g_task_get_cancellable (request->task),
                                cache_write_parent_done, file);
 }
 
@@ -378,7 +428,8 @@ cache_write (DownloadRequest *request, const char *response)
   g_debug ("writing Modrinth API cache entry (%zu bytes)",
            strlen (request->pending_cache_data));
   g_object_set_data (G_OBJECT (file), "aml-cache-request", request);
-  g_file_make_directory_async (cache_root, G_PRIORITY_DEFAULT, NULL,
+  g_file_make_directory_async (cache_root, G_PRIORITY_DEFAULT,
+                               g_task_get_cancellable (request->task),
                                cache_write_cache_done,
                                g_object_ref (file));
 }
@@ -515,6 +566,8 @@ request_free (DownloadRequest *request)
 {
   if (request->retry_source != 0)
     g_source_remove (request->retry_source);
+  if (request->retry_cancel_source != 0)
+    g_source_remove (request->retry_cancel_source);
 
   close_sink (request);
   g_clear_pointer (&request->chunk, g_bytes_unref);
@@ -724,13 +777,19 @@ global_cache_directory_ready (GObject *source, GAsyncResult *result,
   if (!g_file_make_directory_finish (G_FILE (source), result, &error) &&
       !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_EXISTS))
     {
+      if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
+        {
+          request_fail (request, cancelled_error ());
+          return;
+        }
       g_debug ("the global file cache directory was not created: %s",
                error->message);
       request_succeed (request);
       return;
     }
 
-  g_file_make_directory_async (files, G_PRIORITY_DEFAULT, NULL,
+  g_file_make_directory_async (files, G_PRIORITY_DEFAULT,
+                               g_task_get_cancellable (request->task),
                                global_cache_files_ready, request);
 }
 
@@ -744,6 +803,11 @@ global_cache_files_ready (GObject *source, GAsyncResult *result,
   if (!g_file_make_directory_finish (G_FILE (source), result, &error) &&
       !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_EXISTS))
     {
+      if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
+        {
+          request_fail (request, cancelled_error ());
+          return;
+        }
       g_debug ("the global file cache directory was not created: %s",
                error->message);
       request_succeed (request);
@@ -763,6 +827,14 @@ global_cache_copy_ready (GObject *source, GAsyncResult *result,
   if (!g_file_copy_finish (G_FILE (source), result, &error) &&
       !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
     g_debug ("the global file cache was not written: %s", error->message);
+
+  if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)) ||
+      g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+    {
+      request_fail (request, cancelled_error ());
+      return;
+    }
+
   request_succeed (request);
 }
 
@@ -1168,7 +1240,8 @@ verify_and_install (DownloadRequest *request)
 
       if (request->global_cache_path == NULL)
         request->global_cache_path = global_cache_path (request->expected_hash);
-      g_file_make_directory_async (parent, G_PRIORITY_DEFAULT, NULL,
+      g_file_make_directory_async (parent, G_PRIORITY_DEFAULT,
+                                   g_task_get_cancellable (request->task),
                                    global_cache_directory_ready, request);
       return;
     }
@@ -1298,6 +1371,14 @@ attempt_failed (DownloadRequest *request, GError *error)
       discard_temporary (request);
       g_clear_error (&error);
       request->retry_source = g_timeout_add (delay_ms, retry_when_due, request);
+      {
+        GSource *source = g_cancellable_source_new (
+          g_task_get_cancellable (request->task));
+
+        g_source_set_callback (source, retry_cancelled, request, NULL);
+        request->retry_cancel_source = g_source_attach (source, NULL);
+        g_source_unref (source);
+      }
       return;
     }
 
@@ -1310,6 +1391,11 @@ retry_when_due (gpointer user_data)
   DownloadRequest *request = user_data;
 
   request->retry_source = 0;
+  if (request->retry_cancel_source != 0)
+    {
+      g_source_remove (request->retry_cancel_source);
+      request->retry_cancel_source = 0;
+    }
 
   if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
     {
@@ -1319,6 +1405,16 @@ retry_when_due (gpointer user_data)
 
   start_attempt (request);
 
+  return G_SOURCE_REMOVE;
+}
+
+static gboolean
+retry_cancelled (gpointer user_data)
+{
+  DownloadRequest *request = user_data;
+
+  request->retry_cancel_source = 0;
+  request_fail (request, cancelled_error ());
   return G_SOURCE_REMOVE;
 }
 

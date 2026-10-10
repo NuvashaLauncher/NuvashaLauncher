@@ -7,8 +7,12 @@
 #include "aml-settings.h"
 
 #include <errno.h>
+#include <glib/gstdio.h>
 #include <json-glib/json-glib.h>
 #include <string.h>
+
+#define SETTINGS_FORMAT_VERSION 1
+#define CORRUPT_SUFFIX ".corrupt"
 
 /* Everything below g_get_user_config_dir(). */
 #define SETTINGS_SUBDIR "AML"
@@ -59,8 +63,31 @@ settings_filename (void)
   return g_build_filename (directory, SETTINGS_FILE, NULL);
 }
 
-/* Nothing in here is an error the user has to hear about: a settings
- * file that is missing or broken simply means the defaults. */
+static void
+quarantine_corrupt_file (const char *path)
+{
+  g_autofree char *base = g_strconcat (path, CORRUPT_SUFFIX, NULL);
+  g_autofree char *candidate = NULL;
+
+  for (guint i = 0; i < 1000; i++)
+    {
+      candidate = i == 0 ? g_strdup (base)
+                         : g_strdup_printf ("%s.%u", base, i);
+      if (!g_file_test (candidate, G_FILE_TEST_EXISTS))
+        break;
+      g_clear_pointer (&candidate, g_free);
+    }
+
+  if (candidate == NULL || g_rename (path, candidate) != 0)
+    g_warning ("could not quarantine the settings file \"%s\": %s",
+               path, g_strerror (errno));
+  else
+    g_warning ("the settings file \"%s\" is corrupt; it was moved to \"%s\"",
+               path, candidate);
+}
+
+/* A missing file means defaults; malformed files are quarantined so they can
+ * be recovered instead of silently disappearing. */
 static void
 load (AmlSettings *self)
 {
@@ -82,7 +109,7 @@ load (AmlSettings *self)
 
   if (!json_parser_load_from_data (parser, contents, length, NULL))
     {
-      g_debug ("\"%s\" does not hold JSON", self->filename);
+      quarantine_corrupt_file (self->filename);
       return;
     }
 
@@ -90,11 +117,23 @@ load (AmlSettings *self)
 
   if (root == NULL || !JSON_NODE_HOLDS_OBJECT (root))
     {
-      g_debug ("\"%s\" does not hold an object", self->filename);
+      quarantine_corrupt_file (self->filename);
       return;
     }
 
   object = json_node_get_object (root);
+  node = json_object_get_member (object, "version");
+
+  /* Version 0 is the original format, which had no version member. */
+  if (node != NULL &&
+      (!JSON_NODE_HOLDS_VALUE (node) ||
+       json_node_get_value_type (node) != G_TYPE_INT64 ||
+       json_node_get_int (node) != SETTINGS_FORMAT_VERSION))
+    {
+      quarantine_corrupt_file (self->filename);
+      return;
+    }
+
   node = json_object_get_member (object, SHOW_SNAPSHOTS_KEY);
 
   if (node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
@@ -172,7 +211,7 @@ save (AmlSettings *self, GError **error)
 
   directory = g_path_get_dirname (self->filename);
 
-  if (g_mkdir_with_parents (directory, 0755) != 0)
+  if (g_mkdir_with_parents (directory, 0700) != 0)
     {
       g_set_error (error, AML_SETTINGS_ERROR, AML_SETTINGS_ERROR_IO,
                    "cannot create \"%s\": %s", directory,
@@ -181,6 +220,8 @@ save (AmlSettings *self, GError **error)
     }
 
   json_builder_begin_object (builder);
+  json_builder_set_member_name (builder, "version");
+  json_builder_add_int_value (builder, SETTINGS_FORMAT_VERSION);
   json_builder_set_member_name (builder, SHOW_SNAPSHOTS_KEY);
   json_builder_add_boolean_value (builder, self->show_snapshots);
 

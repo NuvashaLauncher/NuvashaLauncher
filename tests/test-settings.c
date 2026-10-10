@@ -6,6 +6,7 @@
 #include "aml-settings.h"
 
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <string.h>
 
 static char *root;
@@ -59,6 +60,29 @@ test_persistence (void)
   g_assert_no_error (error);
   g_assert_nonnull (strstr (contents, "cache-modrinth-api-responses"));
   g_assert_nonnull (strstr (contents, "cache-expiration"));
+  g_assert_nonnull (strstr (contents, "\"version\""));
+}
+
+static void
+test_corrupt_settings_quarantined (void)
+{
+  g_autofree char *config =
+    g_build_filename (g_get_user_config_dir (), "AML", "config.json", NULL);
+  g_autofree char *backup = g_strconcat (config, ".corrupt", NULL);
+  g_autoptr (AmlSettings) settings = NULL;
+
+  g_remove (config);
+  g_remove (backup);
+  g_assert_true (g_file_set_contents (config, "{not-json", -1, NULL));
+
+  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_WARNING,
+                         "*settings file*is corrupt*");
+  settings = aml_settings_new ();
+  g_test_assert_expected_messages ();
+  g_assert_true (g_file_test (backup, G_FILE_TEST_IS_REGULAR));
+  g_assert_false (g_file_test (config, G_FILE_TEST_EXISTS));
+  g_assert_cmpint (aml_settings_get_cache_expiration (settings), ==,
+                   AML_SETTINGS_CACHE_EXPIRATION_1_HOUR);
 }
 
 static void
@@ -146,6 +170,8 @@ main (int argc, char **argv)
 
   g_test_add_func ("/settings/defaults", test_defaults);
   g_test_add_func ("/settings/persistence", test_persistence);
+  g_test_add_func ("/settings/corrupt-quarantine",
+                   test_corrupt_settings_quarantined);
   g_test_add_func ("/settings/invalid-expiration", test_invalid_expiration);
   g_test_add_func ("/cache/paths", test_cache_paths);
   g_test_add_func ("/cache/cleanup", test_cache_cleanup);

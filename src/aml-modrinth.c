@@ -240,12 +240,18 @@ aml_modrinth_project_free (AmlModrinthProject *project)
 /* One entry of a /search answer. Everything a result row shows is here,
  * so that listing a page of results costs no request per row. */
 static AmlModrinthProject *
-project_from_hit (JsonNode *hit)
+project_from_hit (JsonNode *hit, GError **error)
 {
   AmlModrinthProject *project = g_new0 (AmlModrinthProject, 1);
 
-  project->project_id = aml_json_string (hit, "project_id");
-  project->slug = aml_json_string (hit, "slug");
+  if (!aml_json_require_string (hit, "project_id", &project->project_id,
+                                error) ||
+      !aml_json_require_string (hit, "slug", &project->slug, error))
+    {
+      aml_modrinth_project_free (project);
+      return NULL;
+    }
+
   project->title = aml_json_string (hit, "title");
   project->description = aml_json_string (hit, "description");
   project->author = aml_json_string (hit, "author");
@@ -532,7 +538,22 @@ aml_modrinth_results_from_json (const char *json, gssize length,
         if (aml_json_object_of (hit) == NULL)
           continue;
 
-        g_ptr_array_add (results->projects, project_from_hit (hit));
+        {
+          g_autoptr (GError) result_error = NULL;
+          AmlModrinthProject *project = project_from_hit (hit, &result_error);
+
+          if (project == NULL)
+            {
+              g_set_error (error, AML_MODRINTH_ERROR, AML_MODRINTH_ERROR_PARSE,
+                           "invalid search result: %s",
+                           result_error != NULL ? result_error->message
+                                                 : "invalid project");
+              aml_modrinth_results_free (results);
+              return NULL;
+            }
+
+          g_ptr_array_add (results->projects, project);
+         }
       }
   }
 

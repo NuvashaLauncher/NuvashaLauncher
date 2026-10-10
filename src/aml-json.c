@@ -4,6 +4,12 @@
 
 #include "aml-json.h"
 
+GQuark
+aml_json_error_quark (void)
+{
+  return g_quark_from_static_string ("aml-json-error");
+}
+
 JsonObject *
 aml_json_object_of (JsonNode *node)
 {
@@ -81,4 +87,36 @@ aml_json_string_array (JsonNode *node, const char *name)
     }
 
   return strings;
+}
+
+gboolean
+aml_json_require_string (JsonNode *node, const char *name,
+                         char **value, GError **error)
+{
+  JsonObject *object = aml_json_object_of (node);
+  JsonNode *member = object != NULL ? json_object_get_member (object, name)
+                                    : NULL;
+
+  g_return_val_if_fail (value != NULL, FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (member == NULL)
+    {
+      g_set_error (error, AML_JSON_ERROR, AML_JSON_ERROR_MISSING,
+                   "required JSON field \"%s\" is missing", name);
+      return FALSE;
+    }
+
+  if (!JSON_NODE_HOLDS_VALUE (member) ||
+      json_node_get_value_type (member) != G_TYPE_STRING ||
+      json_node_get_string (member) == NULL ||
+      *json_node_get_string (member) == '\0')
+    {
+      g_set_error (error, AML_JSON_ERROR, AML_JSON_ERROR_TYPE,
+                   "JSON field \"%s\" is not a non-empty string", name);
+      return FALSE;
+    }
+
+  *value = json_node_dup_string (member);
+  return TRUE;
 }
