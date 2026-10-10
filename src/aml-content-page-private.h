@@ -7,6 +7,7 @@
 
 #include "aml-content-page.h"
 #include "aml-content-browser-model.h"
+#include "aml-content-install-model.h"
 
 G_BEGIN_DECLS
 
@@ -71,16 +72,7 @@ struct _AmlContentPage
   } installed;
   GtkWidget *browse_actions;
 
-  /* Update All and selected-version installs share this workflow state. */
-  struct {
-    gboolean updating;
-    GPtrArray *updates; /* UpdateItem* */
-    guint update_index;
-    GPtrArray *picks;   /* Pick* */
-    GPtrArray *batch;   /* Pick*, the list being installed */
-    gboolean picking;   /* the batch is being installed now */
-    guint pick_index;
-  } install;
+  AmlContentInstallModel *install_model;
 
   struct {
     GtkWidget *results_group;

@@ -866,13 +866,13 @@ update_batch_next (AmlContentPage *self)
 {
   UpdateItem *item = NULL;
 
-  if (self->install.updates == NULL || self->install.update_index >= self->install.updates->len)
+  if (self->install_model->updates == NULL || self->install_model->update_index >= self->install_model->updates->len)
     {
-      guint done = self->install.updates != NULL ? self->install.updates->len : 0;
+      guint done = self->install_model->updates != NULL ? self->install_model->updates->len : 0;
 
-      g_clear_pointer (&self->install.updates, g_ptr_array_unref);
-      self->install.update_index = 0;
-      self->install.updating = FALSE;
+      g_clear_pointer (&self->install_model->updates, g_ptr_array_unref);
+      self->install_model->update_index = 0;
+      self->install_model->updating = FALSE;
       set_busy (self, FALSE);
 
       if (done > 0)
@@ -887,8 +887,8 @@ update_batch_next (AmlContentPage *self)
       return;
     }
 
-  item = g_ptr_array_index (self->install.updates, self->install.update_index);
-  self->install.update_index++;
+  item = g_ptr_array_index (self->install_model->updates, self->install_model->update_index);
+  self->install_model->update_index++;
 
   /* The batch was confirmed once, as a whole: this plan is not asked for
      again, it is simply carried out. */
@@ -900,9 +900,9 @@ update_batch_next (AmlContentPage *self)
 void
 plan_stopped (AmlContentPage *self)
 {
-  if (self->install.updating)
+  if (self->install_model->updating)
     update_batch_next (self);
-  else if (self->install.picking)
+  else if (self->install_model->picking)
     batch_next (self);
   else
     set_busy (self, FALSE);
@@ -932,9 +932,9 @@ on_update_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
     }
 
   /* The whole list was confirmed: install each one. */
-  self->install.updates = g_steal_pointer (&run->items);
-  self->install.update_index = 0;
-  self->install.updating = TRUE;
+  self->install_model->updates = g_steal_pointer (&run->items);
+  self->install_model->update_index = 0;
+  self->install_model->updating = TRUE;
   g_free (run);
   update_batch_next (self);
 
@@ -1227,9 +1227,9 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
   self->project.details_check = NULL;
   self->project.details_page = NULL;
   self->project.split = NULL;
-  self->install.batch = NULL;
-  self->install.picking = FALSE;
-  self->install.pick_index = 0;
+  self->install_model->batch = NULL;
+  self->install_model->picking = FALSE;
+  self->install_model->pick_index = 0;
   self->pick_button = NULL;
   self->pick_badge = NULL;
 
@@ -1292,9 +1292,9 @@ aml_content_page_dispose (GObject *object)
 
   /* A batch that was still being installed is not applied any more: the
      plans and fetches hold the page weakly and stop. */
-  g_clear_pointer (&self->install.batch, g_ptr_array_unref);
-  self->install.picking = FALSE;
-  self->install.pick_index = 0;
+  g_clear_pointer (&self->install_model->batch, g_ptr_array_unref);
+  self->install_model->picking = FALSE;
+  self->install_model->pick_index = 0;
 
   if (self->browse.model->debounce_source != 0)
     {
@@ -1316,9 +1316,7 @@ aml_content_page_dispose (GObject *object)
 
   /* A batch of updates that was still being applied is not applied any
      more: the plans and fetches hold the page weakly and stop. */
-  g_clear_pointer (&self->install.updates, g_ptr_array_unref);
-  self->install.update_index = 0;
-  self->install.updating = FALSE;
+  self->install_model->updating = FALSE;
 
   G_OBJECT_CLASS (aml_content_page_parent_class)->dispose (object);
 }
@@ -1335,8 +1333,8 @@ aml_content_page_finalize (GObject *object)
   self->browse.model = NULL;
   g_list_free (self->installed.rows_list);
   g_list_free (self->browse.result_rows);
-  g_clear_pointer (&self->install.picks, g_ptr_array_unref);
-  g_clear_pointer (&self->install.batch, g_ptr_array_unref);
+  aml_content_install_model_free (self->install_model);
+  self->install_model = NULL;
   g_free (self->minecraft_version);
   g_free (self->loader);
   g_free (self->folder);
@@ -1368,5 +1366,6 @@ aml_content_page_init (AmlContentPage *self)
      has to be there whatever the page goes on to show. Everything else
      is built in aml_content_page_new(), which knows the instance and the
      kind of content. */
-  self->install.picks = g_ptr_array_new_with_free_func ((GDestroyNotify) pick_free);
+  self->install_model =
+    aml_content_install_model_new ((GDestroyNotify) pick_free);
 }
