@@ -344,6 +344,14 @@ aml_download_modpack_dialog_new_for_file (AmlInstanceManager *manager,
 
   self->pack_path = g_strdup (path);
   self->imported = TRUE;
+  {
+    g_autofree char *name = g_path_get_basename (path);
+
+    self->pack_download = aml_downloads_add (AML_DOWNLOAD_MODPACK, name);
+  }
+  aml_download_set_detail (self->pack_download, _("Reading modpack"));
+  g_object_add_weak_pointer (G_OBJECT (self->pack_download),
+                             (gpointer *) &self->pack_download);
   build_import_page (self);
   g_idle_add (start_import_idle, g_object_ref (self));
   return self;

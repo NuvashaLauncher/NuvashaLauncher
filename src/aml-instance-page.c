@@ -17,6 +17,7 @@
 #include "aml-i18n.h"
 
 #include "aml-content-page.h"
+#include "aml-downloads.h"
 #include "aml-version-row.h"
 #include "aml-java.h"
 #include "aml-java-row.h"
@@ -58,6 +59,7 @@ struct _AmlInstancePage
   GtkWidget *java_row;
   int required_java;        /* 0 means "never found one / unknown" */
   GCancellable *cancellable;
+  AmlDownload *export_download;
 
   /* The two loader rows, plain AdwComboRows added to the Minecraft group,
      and what the instance runs now, so that a change that cannot be
@@ -694,6 +696,12 @@ on_export_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   else
     show_toast (self, _("Modpack exported"));
 
+  if (self->export_download != NULL)
+    {
+      aml_download_finish (self->export_download);
+      self->export_download = NULL;
+    }
+
   g_object_unref (self);
 }
 
@@ -724,8 +732,19 @@ on_export_file_chosen (GObject *source, GAsyncResult *result,
     if (path == NULL)
       show_toast (self, _("The export location is not a local file"));
     else
-      aml_modpack_export_async (self->instance, path, NULL, on_export_done,
-                                g_object_ref (self));
+      {
+        g_autofree char *name = instance_string (self->instance, "name");
+
+        self->export_download =
+          aml_downloads_add (AML_DOWNLOAD_UPDATE,
+                             name != NULL ? name : _("Modpack export"));
+        aml_download_set_detail (self->export_download,
+                                 _("Exporting modpack"));
+        g_object_add_weak_pointer (G_OBJECT (self->export_download),
+                                   (gpointer *) &self->export_download);
+        aml_modpack_export_async (self->instance, path, NULL, on_export_done,
+                                  g_object_ref (self));
+      }
   }
 
   g_object_unref (self);

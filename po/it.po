@@ -378,3 +378,12 @@ msgstr "Esporta modpack"
 
 msgid "Importing modpack…"
 msgstr "Importing modpack…"
+
+msgid "Reading modpack"
+msgstr "Reading modpack"
+
+msgid "Exporting modpack"
+msgstr "Exporting modpack"
+
+msgid "Modpack export"
+msgstr "Modpack export"
