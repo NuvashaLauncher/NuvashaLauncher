@@ -307,12 +307,15 @@ instance_string (AmlInstance *instance, const char *property)
 static char *
 format_downloads (guint64 downloads)
 {
-  if (downloads >= 1000000)
-     return g_strdup_printf (_("%.1fM downloads"), downloads / 1000000.0);
-  if (downloads >= 1000)
-     return g_strdup_printf (_("%.1fk downloads"), downloads / 1000.0);
+  g_autofree char *count = NULL;
 
-   return g_strdup_printf (_("%" G_GUINT64_FORMAT " downloads"), downloads);
+  if (downloads >= 1000000)
+    return g_strdup_printf (_("%.1fM downloads"), downloads / 1000000.0);
+  if (downloads >= 1000)
+    return g_strdup_printf (_("%.1fk downloads"), downloads / 1000.0);
+
+  count = g_strdup_printf ("%" G_GUINT64_FORMAT, downloads);
+  return g_strdup_printf (_("%s downloads"), count);
 }
 
 static void

@@ -542,3 +542,6 @@ msgstr "%s  ·  제작자: %s"
 
 msgid "by %s"
 msgstr "제작자: %s"
+
+msgid "%s downloads"
+msgstr "%s 다운로드"
