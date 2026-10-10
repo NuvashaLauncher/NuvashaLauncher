@@ -76,15 +76,15 @@ struct _AmlContentPage
   AmlContentInstallModel *install_model;
 
   struct {
-    GtkWidget *results_group;
-    GtkWidget *results_scroller;
-    GtkWidget *results_status;
-    GtkWidget *search_entry;
-    GtkWidget *search_bar;
-    GtkWidget *filter_box;
-    GtkWidget *loading_more; /* spinner row at the bottom of the list */
-    GtkWidget *retry_row;    /* inline retry row when a page fails */
-    GtkWidget *retry_label;
+    AdwPreferencesGroup *results_group;
+    GtkScrolledWindow *results_scroller;
+    AdwStatusPage *results_status;
+    GtkSearchEntry *search_entry;
+    GtkSearchEntry *search_bar;
+    GtkBox *filter_box;
+    GtkBox *loading_more; /* spinner row at the bottom of the list */
+    GtkBox *retry_row;    /* inline retry row when a page fails */
+    GtkLabel *retry_label;
     AdwSpinner *spinner;
 
     GList *result_rows;
