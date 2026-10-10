@@ -374,13 +374,13 @@ msgid "Import Modpack"
 msgstr "Importar modpack"
 
 msgid "Modpack exported"
-msgstr "Modpack exported"
+msgstr "Modpack exportado"
 
 msgid "Modrinth Modpacks (*.mrpack)"
-msgstr "Modrinth Modpacks (*.mrpack)"
+msgstr "Modpacks de Modrinth (*.mrpack)"
 
 msgid "The export location is not a local file"
-msgstr "The export location is not a local file"
+msgstr "La ubicación de exportación no es un archivo local"
 
 msgid "Export Modpack"
 msgstr "Exportar modpack"
@@ -392,22 +392,22 @@ msgid "Reading modpack"
 msgstr "Leyendo modpack"
 
 msgid "Exporting modpack"
-msgstr "Exporting modpack"
+msgstr "Exportando modpack"
 
 msgid "Modpack export"
-msgstr "Modpack export"
+msgstr "Exportar modpack"
 
 msgid "Include transient files?"
-msgstr "Include transient files?"
+msgstr "¿Incluir archivos temporales?"
 
 msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr "Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr "Los registros, informes de fallos, capturas de pantalla, cachés y descargas normalmente se excluyen."
 
 msgid "Clean Export"
-msgstr "Clean Export"
+msgstr "Exportación limpia"
 
 msgid "Include All Files"
-msgstr "Include All Files"
+msgstr "Incluir todos los archivos"
 
 msgid "Pack Name"
 msgstr "Nombre del paquete"
@@ -419,7 +419,7 @@ msgid "Version ID"
 msgstr "ID de versión"
 
 msgid "Continue"
-msgstr "Continue"
+msgstr "Continuar"
 
 msgid "Downloading files"
 msgstr "Descargando archivos"
@@ -474,3 +474,71 @@ msgstr "Exportar"
 
 msgid "Optional metadata. Add a summary or version ID to help identify the exported pack."
 msgstr "Metadatos opcionales. Añade un resumen o un ID de versión para identificar fácilmente el paquete exportado."
+
+
+msgid "Installed %u item"
+msgid_plural "Installed %u items"
+msgstr[0] "%u elemento instalado"
+msgstr[1] "%u elementos instalados"
+
+msgid "Updated %u item"
+msgid_plural "Updated %u items"
+msgstr[0] "%u elemento actualizado"
+msgstr[1] "%u elementos actualizados"
+
+msgid "The icon must be a file on this computer"
+msgstr "El icono debe ser un archivo de este equipo"
+
+msgid "The game is running; stop it before moving its directory"
+msgstr "El juego está en ejecución; deténlo antes de mover su carpeta"
+
+msgid "%s is being installed"
+msgstr "Se está instalando %s"
+
+msgid "no compatible version"
+msgstr "ninguna versión compatible"
+
+msgid "Enabled"
+msgstr "Activado"
+
+msgid "Disabled"
+msgstr "Desactivado"
+
+msgid "Deleted"
+msgstr "Eliminado"
+
+msgid "Everything is up to date"
+msgstr "Todo está actualizado"
+
+msgid "Cannot create \"%s\": %s"
+msgstr "No se puede crear «%s»: %s"
+
+msgid "This project publishes nothing that fits this instance."
+msgstr "Este proyecto no publica nada compatible con esta instancia."
+
+msgid "Unknown"
+msgstr "Desconocido"
+
+msgid "%s (unstable)"
+msgstr "%s (inestable)"
+
+msgid "the next page could not be loaded"
+msgstr "No se pudo cargar la siguiente página"
+
+msgid "Other"
+msgstr "Otros"
+
+msgid "%.1fM downloads"
+msgstr "%.1f M de descargas"
+
+msgid "%.1fk downloads"
+msgstr "%.1f mil descargas"
+
+msgid "%lu downloads"
+msgstr "%lu descargas"
+
+msgid "%s  ·  by %s"
+msgstr "%s  ·  por %s"
+
+msgid "by %s"
+msgstr "por %s"

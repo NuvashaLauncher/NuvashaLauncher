@@ -100,7 +100,7 @@ loader_display_name (AmlInstance *instance)
   nick = aml_loader_to_string (loader);
 
   if (nick == NULL || nick[0] == '\0')
-    return g_strdup ("Unknown");
+     return g_strdup (_("Unknown"));
 
   char *name = g_strdup (nick);
   name[0] = g_ascii_toupper (name[0]);
@@ -620,7 +620,7 @@ on_icon_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 
   if (path == NULL)
     {
-      show_toast (self, "The icon must be a file on this computer");
+      show_toast (self, _("The icon must be a file on this computer"));
       g_object_unref (self);
       return;
     }
@@ -1098,8 +1098,8 @@ on_change_directory_clicked (GtkButton *button G_GNUC_UNUSED,
      at the same time. */
   if (aml_launch_state_is_busy (aml_launcher_get_state (self->launcher)))
     {
-      show_toast (self, "The game is running; stop it before moving its "
-                   "directory");
+      show_toast (self, _("The game is running; stop it before moving its "
+                          "directory"));
       return;
     }
 

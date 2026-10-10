@@ -308,11 +308,11 @@ static char *
 format_downloads (guint64 downloads)
 {
   if (downloads >= 1000000)
-    return g_strdup_printf ("%.1fM downloads", downloads / 1000000.0);
+     return g_strdup_printf (_("%.1fM downloads"), downloads / 1000000.0);
   if (downloads >= 1000)
-    return g_strdup_printf ("%.1fk downloads", downloads / 1000.0);
+     return g_strdup_printf (_("%.1fk downloads"), downloads / 1000.0);
 
-  return g_strdup_printf ("%" G_GUINT64_FORMAT " downloads", downloads);
+   return g_strdup_printf (_("%" G_GUINT64_FORMAT " downloads"), downloads);
 }
 
 static void
@@ -1387,7 +1387,7 @@ on_plan_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 
   {
     g_autofree char *message =
-      g_strdup_printf ("%s is being installed", plan->title);
+      g_strdup_printf (_("%s is being installed"), plan->title);
 
     show_toast (self, message);
   }
@@ -1499,7 +1499,7 @@ plan_versions_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       if (self != NULL)
         {
           show_toast (self, error != NULL ? error->message
-                                          : "no compatible version");
+                                          : _("no compatible version"));
           plan_stopped (self);
         }
 
@@ -1852,7 +1852,7 @@ batch_next (AmlContentPage *self)
       if (done > 0)
         {
           g_autofree char *message = g_strdup_printf (
-              "Installed %u %s", done, done == 1 ? "item" : "items");
+            ngettext ("Installed %u item", "Installed %u items", done), done);
 
           show_toast (self, message);
           reload_installed (self);
@@ -2028,7 +2028,7 @@ toggle_file (AmlContentPage *self, AmlContentFile *file)
       g_hash_table_insert (self->rows, g_strdup (file->path), row);
     }
 
-  show_toast (self, file->enabled ? "Enabled" : "Disabled");
+  show_toast (self, file->enabled ? _("Enabled") : _("Disabled"));
 
   return TRUE;
 }
@@ -2193,7 +2193,7 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
     show_error (self, "The file cannot be deleted", error);
     else
     {
-      show_toast (self, "Deleted");
+      show_toast (self, _("Deleted"));
       {
         g_autofree char *directory = NULL;
         g_autofree char *filename = g_path_get_basename (path);
@@ -2741,7 +2741,7 @@ update_batch_next (AmlContentPage *self)
       if (done > 0)
         {
           g_autofree char *message = g_strdup_printf (
-            "Updated %u %s", done, done == 1 ? "item" : "items");
+            ngettext ("Updated %u item", "Updated %u items", done), done);
 
           show_toast (self, message);
           reload_installed (self);
@@ -2814,7 +2814,7 @@ update_check_done (AmlContentPage *self, UpdateRun *run)
 
   if (run->items->len == 0)
     {
-      show_toast (self, "Everything is up to date");
+      show_toast (self, _("Everything is up to date"));
       g_clear_pointer (&run->items, g_ptr_array_unref);
       g_free (run);
       return;
@@ -2996,7 +2996,7 @@ on_open_folder_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   if (g_mkdir_with_parents (self->folder, 0755) != 0)
     {
       g_autofree char *message =
-        g_strdup_printf ("Cannot create \"%s\": %s", self->folder,
+        g_strdup_printf (_("Cannot create \"%s\": %s"), self->folder,
                          g_strerror (errno));
 
       show_toast (self, message);
@@ -3446,7 +3446,7 @@ search_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         {
           g_autofree char *message =
             error != NULL ? g_strdup (error->message)
-                          : g_strdup ("the next page could not be loaded");
+                   : g_strdup (_("the next page could not be loaded"));
 
           gtk_label_set_text (GTK_LABEL (self->retry_label), message);
           gtk_widget_set_visible (self->retry_row, TRUE);
@@ -3645,7 +3645,7 @@ fill_categories (AmlContentPage *self, GPtrArray *categories)
             g_autofree char *heading_label =
               category->header != NULL
                   ? aml_modrinth_category_label (category->header)
-                  : g_strdup ("Other");
+                   : g_strdup (_("Other"));
             GtkWidget *heading = gtk_label_new (heading_label);
 
             g_free (current);
@@ -3980,9 +3980,9 @@ details_content (AmlContentPage *self)
 
     if (self->details != NULL && self->details->license != NULL &&
         *self->details->license != '\0')
-      text = g_strdup_printf ("%s  ·  by %s", self->details->license, who);
+       text = g_strdup_printf (_("%s  ·  by %s"), self->details->license, who);
     else
-      text = g_strdup_printf ("by %s", who);
+       text = g_strdup_printf (_("by %s"), who);
 
     meta = gtk_label_new (text);
     gtk_label_set_xalign (GTK_LABEL (meta), 0);
@@ -4094,7 +4094,7 @@ detail_fill (AmlContentPage *self)
   if (self->versions_problem != NULL)
     show_toast (self, self->versions_problem);
   else if (self->details_versions != NULL && self->details_versions->len == 0)
-    show_toast (self, "This project publishes nothing that fits this instance.");
+    show_toast (self, _("This project publishes nothing that fits this instance."));
 
   if (self->details_versions != NULL && self->details_versions->len > 0)
     {
@@ -4175,7 +4175,7 @@ on_detail_versions_ready (GObject *source G_GNUC_UNUSED,
                                             AML_MODRINTH_ERROR_NOT_FOUND))
         self->versions_problem = g_strdup (error->message);
       else
-        self->versions_problem = g_strdup ("no compatible version");
+        self->versions_problem = g_strdup (_("no compatible version"));
     }
   else
     {
