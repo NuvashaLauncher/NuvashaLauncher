@@ -306,16 +306,9 @@ static void
 on_search_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   AmlLogsPage *self = user_data;
-  gboolean open = gtk_widget_get_visible (self->search_bar);
 
-  gtk_widget_set_visible (self->search_bar, !open);
-  if (open)
-    {
-      gtk_editable_set_text (GTK_EDITABLE (self->search_entry), "");
-      gtk_widget_grab_focus (GTK_WIDGET (self));
-    }
-  else
-    gtk_widget_grab_focus (self->search_entry);
+  gtk_widget_set_visible (self->search_bar, TRUE);
+  gtk_widget_grab_focus (self->search_entry);
 }
 
 /* ---------------------------------------------------------- *
