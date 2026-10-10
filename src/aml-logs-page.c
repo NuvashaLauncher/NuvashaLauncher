@@ -17,6 +17,7 @@ struct _AmlLogsPage
   GtkWidget *detail;
   GtkWidget *clear;
   GtkWidget *open;
+  GtkWidget *search_button;
   GtkWidget *view;
   GtkWidget *scroller;
   GtkWidget *search_bar;
@@ -294,6 +295,15 @@ on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED, guint keyval,
   return GDK_EVENT_STOP;
 }
 
+static void
+on_search_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlLogsPage *self = user_data;
+
+  gtk_search_bar_set_search_mode (GTK_SEARCH_BAR (self->search_bar), TRUE);
+  gtk_widget_grab_focus (self->search_entry);
+}
+
 /* ---------------------------------------------------------- *
  * The state line and the buttons
  * ---------------------------------------------------------- */
@@ -303,15 +313,11 @@ update_controls (AmlLogsPage *self)
 {
   g_autofree char *directory =
     aml_launcher_get_log_directory (self->launcher);
-  AmlLaunchState state = aml_launcher_get_state (self->launcher);
   const char *detail = aml_launcher_get_state_detail (self->launcher);
 
   /* A game that ended by itself says nothing here: "Stopped" is the
      resting state of the page, not a piece of news. */
-  gtk_label_set_text (GTK_LABEL (self->state),
-                      state == AML_LAUNCH_STOPPED
-                        ? ""
-                        : aml_launch_state_to_string (state));
+  gtk_label_set_text (GTK_LABEL (self->state), "");
   gtk_label_set_text (GTK_LABEL (self->detail), detail != NULL ? detail : "");
 
   /* Offering to open a folder that is not there is offering something
@@ -492,19 +498,24 @@ aml_logs_page_new (AmlLauncher *launcher)
                                G_CALLBACK (on_open_clicked), self);
   gtk_box_append (GTK_BOX (row), self->open);
 
+  self->search_button = toolbar_button ("system-search-symbolic", _("Search"),
+                                        G_CALLBACK (on_search_clicked), self);
+  gtk_box_insert_child_after (GTK_BOX (row), self->search_button, NULL);
+
   gtk_box_append (GTK_BOX (self), row);
 
   /* Searching the log: a bar over the lines, closed until Ctrl+F opens
    * it. The lines are kept either way, so nothing here can lose one. */
-  self->search_bar = gtk_search_bar_new ();
+   self->search_bar = gtk_search_bar_new ();
   self->search_entry = gtk_search_entry_new ();
   gtk_widget_set_hexpand (self->search_entry, TRUE);
   gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (self->search_entry),
                                          _("Search the log"));
   gtk_search_bar_set_child (GTK_SEARCH_BAR (self->search_bar),
                             self->search_entry);
-  gtk_search_bar_set_key_capture_widget (GTK_SEARCH_BAR (self->search_bar),
-                                         GTK_WIDGET (self));
+   gtk_search_bar_set_key_capture_widget (GTK_SEARCH_BAR (self->search_bar),
+                                          GTK_WIDGET (self));
+   gtk_search_bar_set_search_mode (GTK_SEARCH_BAR (self->search_bar), FALSE);
   g_signal_connect (self->search_entry, "changed",
                     G_CALLBACK (on_search_changed), self);
   {
