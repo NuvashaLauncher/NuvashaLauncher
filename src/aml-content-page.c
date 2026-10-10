@@ -1067,6 +1067,9 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
          entry.hash = file->sha1;
          entry.hash512 = file->sha512;
          entry.download_url = file->url;
+         entry.env_client = "required";
+         entry.env_server = run->page->type == AML_CONTENT_MOD
+                              ? "required" : "unsupported";
         entry.provider = "Modrinth";
         entry.project_id = file->project_id;
         entry.project_name = file->project_name;
@@ -1074,7 +1077,10 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         entry.version_name = file->version_name;
         entry.required_dependencies = file->required_dependencies;
         entry.optional_dependencies = file->optional_dependencies;
-        entry.incompatible_dependencies = file->incompatible_dependencies;
+         entry.incompatible_dependencies = file->incompatible_dependencies;
+         entry.env_client = "required";
+         entry.env_server = run->page->type == AML_CONTENT_MOD
+                              ? "required" : "unsupported";
         aml_content_index_update_async (
           instance_directory, run->page->type, &entry,
           aml_download_get_cancellable (run->download), NULL, NULL);
@@ -2495,7 +2501,10 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
         g_object_get (self->instance, "directory", &directory, NULL);
         entry.filename = filename;
-        entry.hash = file->sha1;
+    entry.hash = file->sha1;
+    entry.env_client = "required";
+    entry.env_server = self->type == AML_CONTENT_MOD ? "required"
+                                                     : "unsupported";
         entry.provider = "Modrinth";
         entry.project_id = file->project_id;
         entry.project_name = file->project_name;
