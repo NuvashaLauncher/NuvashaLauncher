@@ -22,6 +22,7 @@ struct _AmlLogsPage
   GtkWidget *scroller;
   GtkWidget *search_bar;
   GtkWidget *search_entry;
+  GtkEventController *global_keys;
 
   /* How many lines the text view holds, and whether the user is looking
      at the end of the log: a view that has been scrolled up to read
@@ -439,8 +440,20 @@ static void
 on_first_map (GtkWidget *widget G_GNUC_UNUSED, gpointer user_data)
 {
   AmlLogsPage *self = user_data;
+  GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
 
   scroll_to_end (self);
+
+  if (root != NULL && self->global_keys == NULL)
+    {
+      self->global_keys = gtk_event_controller_key_new ();
+      gtk_event_controller_set_propagation_phase (
+        self->global_keys, GTK_PHASE_CAPTURE);
+      gtk_widget_add_controller (GTK_WIDGET (root), self->global_keys);
+      g_signal_connect (self->global_keys, "key-pressed",
+                        G_CALLBACK (on_search_key), self);
+    }
+
   g_signal_handlers_disconnect_by_data (self, self);
 }
 
@@ -500,7 +513,6 @@ aml_logs_page_new (AmlLauncher *launcher)
 
   self->detail = gtk_label_new (NULL);
   gtk_label_set_ellipsize (GTK_LABEL (self->detail), PANGO_ELLIPSIZE_END);
-  gtk_widget_set_hexpand (self->detail, TRUE);
   gtk_widget_add_css_class (self->detail, "dim-label");
   gtk_box_append (GTK_BOX (row), self->detail);
 
@@ -595,6 +607,13 @@ static void
 aml_logs_page_dispose (GObject *object)
 {
   AmlLogsPage *self = AML_LOGS_PAGE (object);
+  GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
+
+  if (root != NULL && self->global_keys != NULL)
+    {
+      gtk_widget_remove_controller (GTK_WIDGET (root), self->global_keys);
+      self->global_keys = NULL;
+    }
 
   /* The launcher outlives this page while a game is still running, so
      the connections go before anything else can arrive. */
