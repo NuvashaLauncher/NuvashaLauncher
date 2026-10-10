@@ -2053,6 +2053,7 @@ typedef struct {
   char *manifest;
   char *icon_path;
   GHashTable *indexed_paths;
+  gboolean include_transient;
 } ExportRun;
 
 static void
@@ -2166,7 +2167,8 @@ export_path_is_transient (const char *relative)
 static gboolean
 export_directory (struct archive *archive, const char *root,
                   const char *relative, GHashTable *indexed_paths,
-                  GCancellable *cancellable, GError **error)
+                  gboolean include_transient, GCancellable *cancellable,
+                  GError **error)
 {
   g_autofree char *directory = g_build_filename (root, relative, NULL);
   g_autoptr (GDir) dir = g_dir_open (directory, 0, error);
@@ -2189,7 +2191,7 @@ export_directory (struct archive *archive, const char *root,
         g_build_filename (relative, name, NULL);
       GStatBuf stat_buf;
 
-      if (export_path_is_transient (child_relative))
+      if (!include_transient && export_path_is_transient (child_relative))
         continue;
 
       if (g_lstat (source, &stat_buf) != 0)
@@ -2203,7 +2205,8 @@ export_directory (struct archive *archive, const char *root,
       if (S_ISDIR (stat_buf.st_mode))
         {
           if (!export_directory (archive, root, child_relative,
-                                 indexed_paths, cancellable, error))
+                                 indexed_paths, include_transient, cancellable,
+                                 error))
             return FALSE;
         }
       else if (S_ISREG (stat_buf.st_mode))
@@ -2443,7 +2446,7 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
       archive_write_data (archive, run->manifest, manifest_length) !=
         (la_ssize_t) manifest_length ||
       !export_directory (archive, canonical_root, "", run->indexed_paths,
-                         cancellable, &error) ||
+                         run->include_transient, cancellable, &error) ||
       (run->icon_path != NULL &&
        !export_file (archive, run->icon_path, "overrides/icon.png", cancellable,
                      &error)) ||
@@ -2532,6 +2535,7 @@ export_manifest (AmlInstance *instance, GError **error)
 
 void
 aml_modpack_export_async (AmlInstance *instance, const char *path,
+                          gboolean include_transient,
                           GCancellable *cancellable,
                           GAsyncReadyCallback callback, gpointer user_data)
 {
@@ -2548,6 +2552,7 @@ aml_modpack_export_async (AmlInstance *instance, const char *path,
   g_object_get (instance, "directory", &directory, NULL);
   run->instance_directory = g_strdup (directory);
   run->archive_path = g_strdup (path);
+  run->include_transient = include_transient;
   run->indexed_paths = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                               NULL);
   g_object_get (instance, "icon", &run->icon_path, NULL);
