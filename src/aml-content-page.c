@@ -4739,7 +4739,7 @@ build_bar (AmlContentPage *self)
   self->switcher_installed =
      switcher_button ("view-list-symbolic", "Installed");
    self->switcher_browse =
-     switcher_button ("applications-games-symbolic", "Browse");
+     switcher_button ("web-browser-symbolic", "Browse");
 
   gtk_toggle_button_set_group (GTK_TOGGLE_BUTTON (self->switcher_browse),
                                GTK_TOGGLE_BUTTON (self->switcher_installed));
