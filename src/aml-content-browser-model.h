@@ -14,6 +14,9 @@ typedef struct _AmlContentBrowserModel AmlContentBrowserModel;
 AmlContentBrowserModel *aml_content_browser_model_new (void);
 void aml_content_browser_model_free (AmlContentBrowserModel *model);
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (AmlContentBrowserModel,
+                               aml_content_browser_model_free)
+
 struct _AmlContentBrowserModel
 {
   GHashTable *projects;             /* project id -> NULL */
