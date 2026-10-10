@@ -2501,10 +2501,10 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
         g_object_get (self->instance, "directory", &directory, NULL);
         entry.filename = filename;
-    entry.hash = file->sha1;
-    entry.env_client = "required";
-    entry.env_server = self->type == AML_CONTENT_MOD ? "required"
-                                                     : "unsupported";
+        entry.hash = file->sha1;
+        entry.env_client = "required";
+        entry.env_server = self->type == AML_CONTENT_MOD ? "required"
+                                                          : "unsupported";
         entry.provider = "Modrinth";
         entry.project_id = file->project_id;
         entry.project_name = file->project_name;
