@@ -77,6 +77,10 @@ gboolean aml_instance_validate (AmlInstance *self, GError **error);
 /* The unique id, never NULL. */
 const char *aml_instance_get_id (AmlInstance *self);
 
+/* Borrowed component map keyed by stable component id. Property access and
+ * legacy JSON remain compatibility views over this map. */
+GHashTable *aml_instance_get_components (AmlInstance *self);
+
 G_END_DECLS
 
 #endif /* AML_INSTANCE_H */

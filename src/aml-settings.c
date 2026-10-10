@@ -5,6 +5,7 @@
 /* AmlSettings: reading and writing <config dir>/AML/config.json. */
 
 #include "aml-settings.h"
+#include "aml-fs.h"
 
 #include <errno.h>
 #include <glib/gstdio.h>
@@ -211,11 +212,10 @@ save (AmlSettings *self, GError **error)
 
   directory = g_path_get_dirname (self->filename);
 
-  if (g_mkdir_with_parents (directory, 0700) != 0)
+  if (!aml_fs_make_private_directory (directory, &io_error))
     {
       g_set_error (error, AML_SETTINGS_ERROR, AML_SETTINGS_ERROR_IO,
-                   "cannot create \"%s\": %s", directory,
-                   g_strerror (errno));
+                   "%s", io_error->message);
       return FALSE;
     }
 
@@ -262,10 +262,8 @@ save (AmlSettings *self, GError **error)
   json_generator_set_pretty (generator, TRUE);
   data = json_generator_to_data (generator, &length);
 
-  if (!g_file_set_contents_full (self->filename, data, length,
-                                 G_FILE_SET_CONTENTS_CONSISTENT |
-                                 G_FILE_SET_CONTENTS_DURABLE,
-                                 0600, &io_error))
+  if (!aml_fs_replace_contents (self->filename, data, length, 0600,
+                                &io_error))
     {
       g_set_error (error, AML_SETTINGS_ERROR, AML_SETTINGS_ERROR_IO,
                    "cannot write \"%s\": %s", self->filename,

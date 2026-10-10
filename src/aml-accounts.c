@@ -3,6 +3,7 @@
  */
 
 #include "aml-accounts.h"
+#include "aml-fs.h"
 
 #include <errno.h>
 #include <glib/gstdio.h>
@@ -396,24 +397,18 @@ save (AmlAccounts *self, GError **error)
 
   directory = g_path_get_dirname (self->filename);
 
-  if (g_mkdir_with_parents (directory, 0700) != 0)
+  if (!aml_fs_make_private_directory (directory, &local_error))
     {
       g_set_error (error, AML_ACCOUNTS_ERROR, AML_ACCOUNTS_ERROR_IO,
-                   "cannot create \"%s\": %s", directory, g_strerror (errno));
+                   "%s", local_error->message);
       return FALSE;
     }
-
-  /* mkdir only applies the mode when it creates the directory: an
-     existing, looser one must not weaken the token file inside it. */
-  g_chmod (directory, 0700);
 
   /* Mode 0600 and written whole or not at all: the file holds the tokens
      of the accounts, so nobody but the user may read it, and a save that
      is interrupted may never leave half of one behind. */
-  if (!g_file_set_contents_full (self->filename, data, -1,
-                                 G_FILE_SET_CONTENTS_CONSISTENT |
-                                 G_FILE_SET_CONTENTS_DURABLE,
-                                 0600, &local_error))
+  if (!aml_fs_replace_contents (self->filename, data, -1, 0600,
+                                &local_error))
     {
       g_prefix_error (&local_error, "cannot save \"%s\": ", self->filename);
       g_propagate_error (error, g_steal_pointer (&local_error));

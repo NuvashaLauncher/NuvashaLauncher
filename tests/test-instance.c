@@ -7,6 +7,7 @@
  * directories. */
 
 #include "aml-instance.h"
+#include "aml-instance-components.h"
 
 #include <glib.h>
 #include <stdlib.h>
@@ -525,6 +526,36 @@ test_optional_fields (void)
   g_print ("ok - optional fields\n");
 }
 
+static void
+test_components (void)
+{
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlInstance) instance =
+    aml_instance_new (TEST_UUID, "Components", "/tmp/components-instance",
+                      "1.20.1", AML_LOADER_FABRIC, &error);
+  g_autofree char *minecraft = NULL;
+  g_autofree char *loader = NULL;
+
+  g_assert_no_error (error);
+  g_assert_true (g_str_equal (aml_instance_component_id_for_loader (
+                                AML_LOADER_FABRIC), AML_COMPONENT_FABRIC));
+
+  minecraft = aml_instance_component_get_version (instance,
+                                                   AML_COMPONENT_MINECRAFT);
+  loader = aml_instance_component_get_version (instance, AML_COMPONENT_FABRIC);
+  g_assert_cmpstr (minecraft, ==, "1.20.1");
+  g_assert_null (loader);
+
+  g_assert_true (aml_instance_component_set_version (
+    instance, AML_COMPONENT_FABRIC, "0.15.11", &error));
+  g_assert_no_error (error);
+  g_clear_pointer (&loader, g_free);
+  loader = aml_instance_component_get_version (instance, AML_COMPONENT_FABRIC);
+  g_assert_cmpstr (loader, ==, "0.15.11");
+
+  g_print ("ok - component versions use stable component ids\n");
+}
+
 int
 main (int argc, char **argv)
 {
@@ -540,6 +571,7 @@ main (int argc, char **argv)
   test_missing_fields ();
   test_malformed_json ();
   test_optional_fields ();
+  test_components ();
 
   return EXIT_SUCCESS;
 }

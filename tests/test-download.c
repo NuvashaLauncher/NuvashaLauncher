@@ -91,6 +91,19 @@ server_handler (SoupServer *server, SoupServerMessage *message,
   else if (g_str_equal (path, "/json"))
     reply_with (message, 200, "application/json", JSON_BODY,
                 strlen (JSON_BODY));
+  else if (g_str_equal (path, "/etag"))
+    {
+      const char *etag = soup_message_headers_get_one (
+        soup_server_message_get_request_headers (message), "If-None-Match");
+
+      soup_message_headers_replace (
+        soup_server_message_get_response_headers (message), "ETag", "\"v1\"");
+      if (g_strcmp0 (etag, "\"v1\"") == 0)
+        reply_with (message, 304, NULL, NULL, 0);
+      else
+        reply_with (message, 200, "application/json", JSON_BODY,
+                    strlen (JSON_BODY));
+    }
   else
     reply_with (message, 404, NULL, NULL, 0);
 }
@@ -974,6 +987,62 @@ test_api_cache_expiration_and_failed_response (void)
 }
 
 static void
+test_api_cache_etag (void)
+{
+  AsyncRun run = { 0 };
+  AsyncCall first = { 0 };
+  AsyncCall second = { 0 };
+  g_autofree char *url = server_url ("/etag");
+  g_autofree char *path = NULL;
+  g_autofree char *contents = NULL;
+  g_autoptr (GString) stale = NULL;
+  char *created = NULL;
+  gsize length = 0;
+
+  clear_api_cache ();
+  g_assert_true (aml_settings_set_cache_modrinth_api_responses (
+    cache_settings, TRUE, NULL));
+  g_assert_true (aml_settings_set_cache_expiration (
+    cache_settings, AML_SETTINGS_CACHE_EXPIRATION_1_HOUR, NULL));
+  fixture.hits = 0;
+
+  async_run_init (&run);
+  call_cached_json (&run, &first, url);
+  async_run_wait (&run);
+  g_assert_no_error (first.error);
+  async_call_clear (&first);
+  async_run_clear (&run);
+
+  path = cached_path ("GET", url, NULL);
+  g_assert_true (g_file_get_contents (path, &contents, &length, NULL));
+  stale = g_string_new_len (contents, length);
+  created = strstr (stale->str, "\"created\"");
+  g_assert_nonnull (created);
+  created = strchr (created, ':');
+  g_assert_nonnull (created);
+  created++;
+  while (*created == ' ')
+    created++;
+  while (g_ascii_isdigit (*created))
+    {
+      memmove (created, created + 1, strlen (created));
+    }
+  g_string_insert (stale, created - stale->str, "0");
+  g_assert_true (g_file_set_contents (path, stale->str, -1, NULL));
+
+  async_run_init (&run);
+  call_cached_json (&run, &second, url);
+  async_run_wait (&run);
+  g_assert_no_error (second.error);
+  g_assert_nonnull (second.parser);
+  g_assert_cmpuint (fixture.hits, ==, 2);
+  async_call_clear (&second);
+  async_run_clear (&run);
+
+  g_print ("ok - expired API cache entries revalidate with ETag\n");
+}
+
+static void
 test_api_cache_stale_offline (void)
 {
   g_autofree char *url = server_url ("/json?offline");
@@ -1166,6 +1235,7 @@ main (int argc, char **argv)
   test_api_cache_hit ();
   test_api_cache_disabled_and_keys ();
   test_api_cache_expiration_and_failed_response ();
+  test_api_cache_etag ();
   test_api_cache_stale_offline ();
   test_api_cache_cancellation ();
   test_invalid_url ();

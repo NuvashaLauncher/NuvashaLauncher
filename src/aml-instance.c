@@ -33,6 +33,7 @@ struct _AmlInstance
   char *icon;
   char *java_path;      /* NULL: the closest compatible Java, automatically */
   char *jvm_args;
+  GHashTable *components; /* stable component id -> owned version */
 };
 
 G_DEFINE_TYPE (AmlInstance, aml_instance, G_TYPE_OBJECT)
@@ -592,6 +593,14 @@ aml_instance_get_id (AmlInstance *self)
   return self->id;
 }
 
+GHashTable *
+aml_instance_get_components (AmlInstance *self)
+{
+  g_return_val_if_fail (AML_IS_INSTANCE (self), NULL);
+
+  return self->components;
+}
+
 /* Returns an allocated copy of an empty string as NULL: the nullable
  * fields use NULL, not "", for "not set". */
 static char *
@@ -631,15 +640,71 @@ aml_instance_set_property (GObject      *object,
     case PROP_MINECRAFT_VERSION:
       g_free (self->minecraft_version);
       self->minecraft_version = g_value_dup_string (value);
+      if (self->components != NULL)
+        {
+          if (self->minecraft_version != NULL)
+            g_hash_table_replace (self->components, g_strdup ("net.minecraft"),
+                                  g_strdup (self->minecraft_version));
+          else
+            g_hash_table_remove (self->components, "net.minecraft");
+        }
       break;
 
     case PROP_LOADER:
+      if (self->components != NULL)
+        {
+          g_hash_table_remove (self->components,
+                               "net.fabricmc.fabric-loader");
+          g_hash_table_remove (self->components, "net.minecraftforge");
+          g_hash_table_remove (self->components,
+                               "net.neoforged.neoforge");
+          g_hash_table_remove (self->components, "org.quiltmc.quilt-loader");
+        }
       self->loader = g_value_get_enum (value);
+      if (self->components != NULL && self->loader_version != NULL)
+        {
+          const char *component = NULL;
+
+          if (self->loader == AML_LOADER_FABRIC)
+            component = "net.fabricmc.fabric-loader";
+          else if (self->loader == AML_LOADER_FORGE)
+            component = "net.minecraftforge";
+          else if (self->loader == AML_LOADER_NEOFORGE)
+            component = "net.neoforged.neoforge";
+          else if (self->loader == AML_LOADER_QUILT)
+            component = "org.quiltmc.quilt-loader";
+
+          if (component != NULL)
+            g_hash_table_replace (self->components, g_strdup (component),
+                                  g_strdup (self->loader_version));
+        }
       break;
 
     case PROP_LOADER_VERSION:
       g_free (self->loader_version);
       self->loader_version = optional_string (g_value_get_string (value));
+      if (self->components != NULL)
+        {
+          const char *component = NULL;
+
+          if (self->loader == AML_LOADER_FABRIC)
+            component = "net.fabricmc.fabric-loader";
+          else if (self->loader == AML_LOADER_FORGE)
+            component = "net.minecraftforge";
+          else if (self->loader == AML_LOADER_NEOFORGE)
+            component = "net.neoforged.neoforge";
+          else if (self->loader == AML_LOADER_QUILT)
+            component = "org.quiltmc.quilt-loader";
+
+          if (component != NULL)
+            {
+              if (self->loader_version != NULL)
+                g_hash_table_replace (self->components, g_strdup (component),
+                                      g_strdup (self->loader_version));
+              else
+                g_hash_table_remove (self->components, component);
+            }
+        }
       break;
 
     case PROP_ICON:
@@ -728,6 +793,7 @@ aml_instance_finalize (GObject *object)
   g_free (self->icon);
   g_free (self->java_path);
   g_free (self->jvm_args);
+  g_clear_pointer (&self->components, g_hash_table_unref);
 
   G_OBJECT_CLASS (aml_instance_parent_class)->finalize (object);
 }
@@ -806,4 +872,6 @@ aml_instance_init (AmlInstance *self)
    * arguments are set here. */
   self->jvm_args = g_strdup (DEFAULT_JVM_ARGS);
   self->loader = AML_LOADER_VANILLA;
+  self->components = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
+                                             g_free);
 }
