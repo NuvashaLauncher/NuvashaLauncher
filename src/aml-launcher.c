@@ -197,7 +197,7 @@ run_the_game (AmlLauncher *self)
   AmlAccount *account = NULL;
   AmlLaunchSession session;
 
-  if (self->stop_requested || self->resolved == NULL)
+  if (self->process.stop_requested || self->resolved == NULL)
     return;
 
   /* The active account, read here rather than when the launch was asked
@@ -266,7 +266,7 @@ on_java_detected (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   /* A stop during the Java search ends the launch here: nothing runs
      after it. */
-  if (self->stop_requested)
+  if (self->process.stop_requested)
     {
       g_object_unref (self);
       return;
@@ -305,7 +305,7 @@ on_resolved (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
-  if (self->stop_requested)
+  if (self->process.stop_requested)
     {
       aml_resolved_version_free (resolved);
       g_object_unref (self);
@@ -345,17 +345,17 @@ on_resolve_progress (const AmlResolveProgress *progress, gpointer user_data)
   guint percent;
   g_autofree char *detail = NULL;
 
-  if (self->stop_requested)
+  if (self->process.stop_requested)
     return;
 
   if (progress->total > progress->done)
     {
       percent = (progress->done * 100) / progress->total;
 
-      if (percent == self->last_percent)
+      if (percent == self->process.last_percent)
         return;
 
-      self->last_percent = percent;
+      self->process.last_percent = percent;
       detail = g_strdup_printf ("%s %u%%", progress->stage, percent);
       set_state (self, AML_LAUNCH_DOWNLOADING, detail);
       return;
@@ -469,7 +469,7 @@ aml_launcher_finalize (GObject *object)
   AmlLauncher *self = AML_LAUNCHER (object);
 
   g_clear_object (&self->cancellable);
-  g_clear_object (&self->process);
+  g_clear_object (&self->process.process);
   g_clear_pointer (&self->resolved, aml_resolved_version_free);
   g_clear_object (&self->instance);
   g_clear_object (&self->settings);

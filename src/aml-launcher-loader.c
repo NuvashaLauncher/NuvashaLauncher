@@ -66,7 +66,7 @@ on_java_for_the_install (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
-  if (self->stop_requested)
+  if (self->process.stop_requested)
     {
       loader_request_free (request);
       return;
@@ -115,7 +115,7 @@ on_install_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
-  if (self->stop_requested)
+  if (self->process.stop_requested)
     {
       loader_request_free (request);
       return;
@@ -143,15 +143,15 @@ on_install_progress (const char *stage, guint done, guint total,
   guint percent;
   g_autofree char *detail = NULL;
 
-  if (self->stop_requested || total == 0)
+  if (self->process.stop_requested || total == 0)
     return;
 
   percent = (done * 100) / total;
 
-  if (percent == self->last_percent)
+  if (percent == self->process.last_percent)
     return;
 
-  self->last_percent = percent;
+  self->process.last_percent = percent;
   detail = g_strdup_printf ("%s %u%%", stage, percent);
   set_state (self, AML_LAUNCH_DOWNLOADING, detail);
 }
@@ -177,7 +177,7 @@ on_game_document (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   request->profile = document;
 
-  if (self->stop_requested)
+  if (self->process.stop_requested)
     {
       loader_request_free (request);
       return;
@@ -233,7 +233,7 @@ on_profile_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   request->profile = profile;
 
-  if (self->stop_requested)
+  if (self->process.stop_requested)
     {
       loader_request_free (request);
       return;
@@ -295,7 +295,7 @@ on_manifest_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
-  if (self->stop_requested)
+  if (self->process.stop_requested)
     {
       g_object_unref (self);
       return;
