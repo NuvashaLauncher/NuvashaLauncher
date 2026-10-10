@@ -78,17 +78,17 @@ window_launcher (AmlMainWindow *self, const char *instance_id)
   if (instance_id == NULL)
     return NULL;
 
-  launcher = g_hash_table_lookup (self->instances.launchers, instance_id);
+  launcher = g_hash_table_lookup (self->model->launchers, instance_id);
 
   if (launcher != NULL)
     return launcher;
 
-  instance = aml_instance_manager_get_by_id (self->services.manager, instance_id);
+  instance = aml_instance_manager_get_by_id (self->model->manager, instance_id);
 
   if (instance == NULL)
     return NULL;
 
-  launcher = aml_launcher_new (instance, self->services.settings, self->services.accounts);
+  launcher = aml_launcher_new (instance, self->model->settings, self->model->accounts);
 
   /* g_signal_connect_object drops the connection when either side goes
      away, so the window outliving a launcher is not a dangling
@@ -96,7 +96,7 @@ window_launcher (AmlMainWindow *self, const char *instance_id)
   g_signal_connect_object (launcher, "state",
                            G_CALLBACK (on_window_launcher_state), self, 0);
 
-  g_hash_table_insert (self->instances.launchers, g_strdup (instance_id), launcher);
+  g_hash_table_insert (self->model->launchers, g_strdup (instance_id), launcher);
 
   return launcher;
 }
@@ -104,6 +104,7 @@ window_launcher (AmlMainWindow *self, const char *instance_id)
 static void
 aml_main_window_init (AmlMainWindow *self)
 {
+  self->model = aml_main_window_model_new ();
   aml_main_window_build_ui (self);
 }
 
@@ -121,7 +122,7 @@ aml_main_window_new (GtkApplication *application, AmlInstanceManager *manager)
   GtkWidget *list = NULL;
   GtkWidget *scroll = NULL;
 
-  self->services.manager = g_object_ref (manager);
+  self->model->manager = g_object_ref (manager);
 
   /* The standard shortcuts, registered on the application because the
      window is not the one that owns them. */
@@ -139,16 +140,6 @@ aml_main_window_new (GtkApplication *application, AmlInstanceManager *manager)
                                            shortcuts);
     gtk_application_set_accels_for_action (application, "app.quit", quit);
   }
-
-  /* The table owns the launchers: the key is the id of the instance and
-     the value is its launcher. */
-  self->instances.launchers = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
-                                           g_object_unref);
-
-  /* The open instance dialogs are only bookkept here: the window they
-     are presented on owns them. */
-  self->instances.instance_dialogs = g_hash_table_new_full (g_str_hash, g_str_equal,
-                                                  g_free, NULL);
 
   /* The instances are a boxed list, the same list the content pages and
      the modpack browser use, on a margin the way a boxed list is meant
@@ -194,12 +185,8 @@ aml_main_window_dispose (GObject *object)
   /* A running game keeps its own launcher alive through the process
      readers, so dropping the table here never kills a game in front of
      the user; it only lets go of the ones that are not running. */
-  g_clear_pointer (&self->instances.launchers, g_hash_table_unref);
-  g_clear_pointer (&self->instances.instance_dialogs, g_hash_table_unref);
-  g_clear_object (&self->services.manager);
-  g_clear_object (&self->services.settings);
-  g_clear_object (&self->services.accounts);
-  g_clear_object (&self->services.users_popover);
+  aml_main_window_model_free (self->model);
+  self->model = NULL;
   g_clear_pointer (&self->downloads.rows, g_hash_table_unref);
 
   G_OBJECT_CLASS (aml_main_window_parent_class)->dispose (object);

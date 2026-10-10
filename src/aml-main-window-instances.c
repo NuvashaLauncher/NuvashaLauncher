@@ -26,7 +26,7 @@ dialog_of_instance (AmlMainWindow *self, const char *id)
   if (id == NULL)
     return NULL;
 
-  return g_hash_table_lookup (self->instances.instance_dialogs, id);
+  return g_hash_table_lookup (self->model->instance_dialogs, id);
 }
 
 /* A dialog that was closed is not open any more. AdwDialog emits this
@@ -39,7 +39,7 @@ on_instance_dialog_closed (AdwDialog *dialog, gpointer user_data)
   const char *id = g_object_get_data (G_OBJECT (dialog), "aml-instance-id");
 
   if (id != NULL)
-    g_hash_table_remove (self->instances.instance_dialogs, id);
+    g_hash_table_remove (self->model->instance_dialogs, id);
 }
 
 /* The dialog of an instance says the name of the instance, and says it
@@ -91,7 +91,7 @@ open_instance_dialog (AmlMainWindow *self, AmlInstance *instance)
     }
 
   page = GTK_WIDGET (
-    aml_instance_page_new (self->services.manager, instance, self->services.settings,
+    aml_instance_page_new (self->model->manager, instance, self->model->settings,
                            window_launcher (self, id)));
 
   g_object_get (instance, "name", &name, NULL);
@@ -109,7 +109,7 @@ open_instance_dialog (AmlMainWindow *self, AmlInstance *instance)
      again and closable when its instance is deleted. */
   g_object_set_data_full (G_OBJECT (dialog), "aml-instance-id",
                           g_strdup (id), g_free);
-  g_hash_table_insert (self->instances.instance_dialogs, g_strdup (id), dialog);
+  g_hash_table_insert (self->model->instance_dialogs, g_strdup (id), dialog);
   /* Weak, so that a dialog that outlives the window cannot call back
      into a window that is gone. */
   g_signal_connect_object (dialog, "closed",
@@ -137,14 +137,14 @@ close_dialogs_of_removed_instances (AmlMainWindow *self)
 
   /* Collect first: closing a dialog takes it out of the table being
      walked. */
-  g_hash_table_iter_init (&iter, self->instances.instance_dialogs);
+  g_hash_table_iter_init (&iter, self->model->instance_dialogs);
 
   while (g_hash_table_iter_next (&iter, &key, &value))
     {
       const char *id = key;
       AdwDialog *dialog = value;
 
-      if (aml_instance_manager_get_by_id (self->services.manager, id) == NULL)
+      if (aml_instance_manager_get_by_id (self->model->manager, id) == NULL)
         g_ptr_array_add (doomed, g_object_ref (dialog));
     }
 
@@ -411,7 +411,7 @@ on_row_activate (GtkListBox *list G_GNUC_UNUSED, GtkListBoxRow *row,
                  gpointer user_data)
 {
   AmlMainWindow *self = user_data;
-  GListStore *instances = aml_instance_manager_get_instances (self->services.manager);
+  GListStore *instances = aml_instance_manager_get_instances (self->model->manager);
   AmlInstance *instance =
     g_list_model_get_item (G_LIST_MODEL (instances),
                            gtk_list_box_row_get_index (row));
@@ -426,7 +426,7 @@ on_row_activate (GtkListBox *list G_GNUC_UNUSED, GtkListBoxRow *row,
 void
 update_visible_page (AmlMainWindow *self)
 {
-  GListStore *instances = aml_instance_manager_get_instances (self->services.manager);
+  GListStore *instances = aml_instance_manager_get_instances (self->model->manager);
   guint n_items = g_list_model_get_n_items (G_LIST_MODEL (instances));
 
   gtk_stack_set_visible_child_name (GTK_STACK (self->ui.stack),
@@ -443,13 +443,13 @@ drop_launchers_of_removed_instances (AmlMainWindow *self)
   gpointer key = NULL;
   gpointer value = NULL;
 
-  g_hash_table_iter_init (&iter, self->instances.launchers);
+  g_hash_table_iter_init (&iter, self->model->launchers);
 
   while (g_hash_table_iter_next (&iter, &key, &value))
     {
       AmlLauncher *launcher = value;
 
-      if (aml_instance_manager_get_by_id (self->services.manager, (const char *) key)
+      if (aml_instance_manager_get_by_id (self->model->manager, (const char *) key)
             != NULL)
         continue;
 
