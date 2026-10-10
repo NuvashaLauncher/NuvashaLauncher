@@ -20,6 +20,8 @@ typedef enum {
 typedef struct {
   char *filename;
   char *hash;
+  char *hash512;
+  char *download_url;
   char *provider;
   char *project_id;
   char *project_name;

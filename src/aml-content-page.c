@@ -815,6 +815,7 @@ typedef struct {
   char *url;
   char *filename;
   char *sha1;
+  char *sha512;
   char *project_id;
   char *project_name;
   char *version_id;
@@ -836,6 +837,7 @@ install_file_free (InstallFile *file)
   g_free (file->url);
   g_free (file->filename);
   g_free (file->sha1);
+  g_free (file->sha512);
   g_free (file->project_id);
   g_free (file->project_name);
   g_free (file->version_id);
@@ -864,6 +866,7 @@ install_file_of (AmlModrinthVersion *version, const char *replaces,
   install = g_new0 (InstallFile, 1);
   install->url = g_strdup (file->url);
   install->sha1 = g_strdup (file->sha1);
+  install->sha512 = g_strdup (file->sha512);
   install->project_id = g_strdup (version->project_id);
   install->project_name = g_strdup (project_name != NULL
                                       ? project_name : version->project_id);
@@ -1061,7 +1064,9 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         g_object_get (run->page->instance, "directory", &instance_directory,
                       NULL);
         entry.filename = file->filename;
-        entry.hash = file->sha1;
+         entry.hash = file->sha1;
+         entry.hash512 = file->sha512;
+         entry.download_url = file->url;
         entry.provider = "Modrinth";
         entry.project_id = file->project_id;
         entry.project_name = file->project_name;
