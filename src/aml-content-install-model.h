@@ -12,6 +12,9 @@ typedef struct _AmlContentInstallModel AmlContentInstallModel;
 AmlContentInstallModel *aml_content_install_model_new (GDestroyNotify pick_free);
 void aml_content_install_model_free (AmlContentInstallModel *model);
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (AmlContentInstallModel,
+                               aml_content_install_model_free)
+
 struct _AmlContentInstallModel
 {
   gboolean updating;

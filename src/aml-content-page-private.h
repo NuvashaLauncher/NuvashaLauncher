@@ -24,6 +24,7 @@ void plan_stopped (AmlContentPage *self);
 
 PageWatch *page_watch_new (AmlContentPage *self);
 void page_watch_free (PageWatch *watch);
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (PageWatch, page_watch_free)
 void take_rows_out (GList **rows, AdwPreferencesGroup *group);
 void file_row_refresh (GtkWidget *row);
 char *description_line (const char *text, guint max_sentences);
