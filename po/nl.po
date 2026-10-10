@@ -560,3 +560,15 @@ msgstr "door %s"
 
 msgid "%s downloads"
 msgstr "%s downloads"
+
+msgid "Cache Cleared"
+msgstr "Cache gewist"
+
+msgid "AML cache data was cleared successfully."
+msgstr "De AML-cachegegevens zijn gewist."
+
+msgid "Cache Cleanup Failed"
+msgstr "Cache wissen mislukt"
+
+msgid "The cache could not be cleared."
+msgstr "De cache kon niet worden gewist."

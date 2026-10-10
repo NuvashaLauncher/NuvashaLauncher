@@ -561,3 +561,15 @@ msgstr "%s tarafından"
 
 msgid "%s downloads"
 msgstr "%s indirme"
+
+msgid "Cache Cleared"
+msgstr "Önbellek temizlendi"
+
+msgid "AML cache data was cleared successfully."
+msgstr "AML önbellek verileri başarıyla temizlendi."
+
+msgid "Cache Cleanup Failed"
+msgstr "Önbellek temizlenemedi"
+
+msgid "The cache could not be cleared."
+msgstr "Önbellek temizlenemedi."

@@ -294,13 +294,13 @@ on_cache_cleared (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   if (success)
     alert = ADW_ALERT_DIALOG (
-      adw_alert_dialog_new ("Cache Cleared",
-                            "AML cache data was cleared successfully."));
+      adw_alert_dialog_new (_("Cache Cleared"),
+                            _("AML cache data was cleared successfully.")));
   else
     alert = ADW_ALERT_DIALOG (
-      adw_alert_dialog_new ("Cache Cleanup Failed",
+      adw_alert_dialog_new (_("Cache Cleanup Failed"),
                             error != NULL ? error->message
-                                          : "The cache could not be cleared."));
+                                          : _("The cache could not be cleared.")));
 
   adw_alert_dialog_set_heading_use_markup (alert, FALSE);
   adw_alert_dialog_set_body_use_markup (alert, FALSE);

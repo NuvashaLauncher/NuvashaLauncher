@@ -558,3 +558,15 @@ msgstr "제작자: %s"
 
 msgid "%s downloads"
 msgstr "%s 다운로드"
+
+msgid "Cache Cleared"
+msgstr "캐시 삭제됨"
+
+msgid "AML cache data was cleared successfully."
+msgstr "AML 캐시 데이터를 성공적으로 삭제했습니다."
+
+msgid "Cache Cleanup Failed"
+msgstr "캐시 정리 실패"
+
+msgid "The cache could not be cleared."
+msgstr "캐시를 삭제할 수 없습니다."

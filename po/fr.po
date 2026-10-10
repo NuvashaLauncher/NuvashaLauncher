@@ -564,3 +564,15 @@ msgstr "par %s"
 
 msgid "%s downloads"
 msgstr "%s téléchargements"
+
+msgid "Cache Cleared"
+msgstr "Cache vidée"
+
+msgid "AML cache data was cleared successfully."
+msgstr "Les données du cache AML ont été supprimées avec succès."
+
+msgid "Cache Cleanup Failed"
+msgstr "Échec du nettoyage du cache"
+
+msgid "The cache could not be cleared."
+msgstr "Le cache n’a pas pu être vidé."
