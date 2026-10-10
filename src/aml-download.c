@@ -46,6 +46,10 @@
 /* Bytes taken from the network in one step. */
 #define CHUNK_SIZE (64 * 1024)
 
+/* API documents are parsed in the main context. Refuse unexpectedly huge
+ * responses before they can monopolize memory or freeze the UI. */
+#define MAX_JSON_RESPONSE_SIZE (64ULL * 1024ULL * 1024ULL)
+
 /* Name template of the temporary file. It is created in the directory
  * of the destination, so the final rename never crosses a file
  * system. */
@@ -109,6 +113,8 @@ typedef struct _DownloadRequest
   char *cache_path;
   char *global_cache_path;
   char *stale_json;
+  char *cache_etag;
+  char *response_etag;
   AmlSettingsCacheExpiration cache_expiration;
   JsonParser *pending_parser;
   char *pending_cache_data;
@@ -225,7 +231,7 @@ global_cache_path (const char *hash)
 
 static JsonParser *
 cache_parser (const char *contents, gsize length, char **response,
-              gint64 *created)
+              char **etag, gint64 *created)
 {
   g_autoptr (JsonParser) envelope = json_parser_new ();
   JsonNode *root = NULL;
@@ -259,6 +265,12 @@ cache_parser (const char *contents, gsize length, char **response,
 
   if (response != NULL)
     *response = g_strdup (body);
+
+  node = json_object_get_member (json_node_get_object (root), "etag");
+  if (etag != NULL && node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
+      json_node_get_value_type (node) == G_TYPE_STRING)
+    *etag = g_strdup (json_node_get_string (node));
+
   return g_steal_pointer (&parser);
 }
 
@@ -417,6 +429,11 @@ cache_write (DownloadRequest *request, const char *response)
   json_builder_add_int_value (builder, g_get_real_time () / G_USEC_PER_SEC);
   json_builder_set_member_name (builder, "response");
   json_builder_add_string_value (builder, response);
+  if (request->response_etag != NULL)
+    {
+      json_builder_set_member_name (builder, "etag");
+      json_builder_add_string_value (builder, request->response_etag);
+    }
   json_builder_end_object (builder);
   root = json_builder_get_root (builder);
   json_generator_set_root (generator, root);
@@ -585,6 +602,8 @@ request_free (DownloadRequest *request)
   g_free (request->cache_path);
   g_free (request->global_cache_path);
   g_free (request->stale_json);
+  g_free (request->cache_etag);
+  g_free (request->response_etag);
   g_clear_object (&request->pending_parser);
   g_free (request->pending_cache_data);
   g_free (request);
@@ -916,7 +935,13 @@ cache_load_ready (GObject *source, GAsyncResult *result, gpointer user_data)
       return;
     }
 
-  parser = cache_parser (contents, length, &response, &created);
+    {
+      g_autofree char *etag = NULL;
+
+      parser = cache_parser (contents, length, &response, &etag, &created);
+      g_clear_pointer (&request->cache_etag, g_free);
+      request->cache_etag = g_steal_pointer (&etag);
+    }
   if (parser == NULL)
     {
       start_attempt (request);
@@ -1468,6 +1493,11 @@ start_attempt (DownloadRequest *request)
         soup_message_get_request_headers (request->message), "User-Agent",
          request->user_agent);
 
+  if (request->json && request->cache_etag != NULL)
+    soup_message_headers_replace (
+      soup_message_get_request_headers (request->message), "If-None-Match",
+      request->cache_etag);
+
 
   if (request->json)
     {
@@ -1517,6 +1547,20 @@ json_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 
   status_error = check_status (request);
 
+  if (request->stale_json != NULL &&
+      soup_message_get_status (request->message) == SOUP_STATUS_NOT_MODIFIED)
+    {
+      g_autoptr (JsonParser) stale = json_parser_new ();
+
+      if (json_parser_load_from_data (stale, request->stale_json, -1, NULL) &&
+          json_parser_get_root (stale) != NULL)
+        {
+          g_clear_error (&status_error);
+          request_succeed_json (request, g_steal_pointer (&stale));
+          return;
+        }
+    }
+
   if (status_error != NULL)
     {
       end_attempt (request, status_error);
@@ -1525,6 +1569,23 @@ json_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 
   parser = json_parser_new ();
   data = g_bytes_get_data (body, &size);
+
+  {
+    const char *etag = soup_message_headers_get_one (
+      soup_message_get_response_headers (request->message), "ETag");
+
+    g_clear_pointer (&request->response_etag, g_free);
+    request->response_etag = g_strdup (etag);
+  }
+
+  if (size > MAX_JSON_RESPONSE_SIZE)
+    {
+      request_fail (request,
+                    g_error_new (AML_DOWNLOAD_ERROR, AML_DOWNLOAD_ERROR_IO,
+                                 "the JSON response is too large (%zu bytes)",
+                                 size));
+      return;
+    }
 
   if (!json_parser_load_from_data (parser, data != NULL ? data : "",
                                    (gssize) size, &parse_error))

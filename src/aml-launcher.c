@@ -29,6 +29,7 @@
 #include "aml-i18n.h"
 
 #include "aml-auth-microsoft.h"
+#include "aml-instance-components.h"
 #include "aml-java.h"
 #include "aml-loaders.h"
 #include "aml-minecraft-resolve.h"
@@ -1761,7 +1762,8 @@ aml_launcher_start (AmlLauncher *self)
       return;
     }
 
-  g_object_get (self->instance, "minecraft-version", &version, NULL);
+  version = aml_instance_component_get_version (
+    self->instance, AML_COMPONENT_MINECRAFT);
 
   g_free (self->version);
   self->version = version;

@@ -1094,6 +1094,21 @@ typedef struct {
   GDestroyNotify free_data;
 } Request;
 
+typedef struct {
+  char *key;
+  GPtrArray *tasks; /* GTask*, one for each caller */
+} JsonFlight;
+
+static GHashTable *json_flights;
+
+static void
+json_flight_free (JsonFlight *flight)
+{
+  g_free (flight->key);
+  g_clear_pointer (&flight->tasks, g_ptr_array_unref);
+  g_free (flight);
+}
+
 static void
 request_free (gpointer data)
 {
@@ -1181,6 +1196,65 @@ error_is_not_found (const GError *error)
 }
 
 static void
+json_flight_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                  gpointer user_data)
+{
+  JsonFlight *flight = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (JsonParser) parser = aml_download_json_finish (result, &error);
+  JsonNode *root = parser != NULL ? json_parser_get_root (parser) : NULL;
+
+  /* Remove before delivering callbacks: a callback may immediately request
+   * the same URL again, and that request must start a fresh flight. */
+  g_hash_table_steal (json_flights, flight->key);
+
+  for (guint i = 0; i < flight->tasks->len; i++)
+    {
+      GTask *task = g_ptr_array_index (flight->tasks, i);
+      Request *request = g_task_get_task_data (task);
+
+      if (g_task_return_error_if_cancelled (task))
+        continue;
+
+      if (parser == NULL)
+        {
+          if (error_is_not_found (error) &&
+              request->not_found == AML_NOT_FOUND_IS_ABSENT)
+            {
+              g_task_return_pointer (task, NULL, NULL);
+              continue;
+            }
+
+          if (error_is_not_found (error))
+            {
+              g_task_return_new_error (task, AML_MODRINTH_ERROR,
+                                       AML_MODRINTH_ERROR_NOT_FOUND,
+                                       "Modrinth does not know this file");
+              continue;
+            }
+
+          fail (task, g_error_copy (error));
+          continue;
+        }
+
+      if (root == NULL)
+        {
+          g_task_return_new_error (task, AML_MODRINTH_ERROR,
+                                   AML_MODRINTH_ERROR_PARSE,
+                                   "the answer holds no JSON");
+          continue;
+        }
+
+      {
+        g_autoptr (JsonNode) answer = json_node_copy (root);
+        request->answer (task, answer);
+      }
+    }
+
+  json_flight_free (flight);
+}
+
+static void
 json_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
             gpointer user_data)
 {
@@ -1243,9 +1317,26 @@ get_async (const char *url, GCancellable *cancellable,
   g_autoptr (GTask) task =
     request_new (cancellable, callback, user_data, answer, not_found, NULL,
                  NULL);
+  JsonFlight *flight = NULL;
 
-  aml_download_json_cached_async (url, cancellable, json_ready,
-                           g_steal_pointer (&task));
+  if (json_flights == NULL)
+    json_flights = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
+                                          (GDestroyNotify) json_flight_free);
+
+  flight = g_hash_table_lookup (json_flights, url);
+  if (flight != NULL)
+    {
+      g_ptr_array_add (flight->tasks, g_object_ref (task));
+      return;
+    }
+
+  flight = g_new0 (JsonFlight, 1);
+  flight->key = g_strdup (url);
+  flight->tasks = g_ptr_array_new_with_free_func (g_object_unref);
+  g_ptr_array_add (flight->tasks, g_object_ref (task));
+  g_hash_table_insert (json_flights, g_strdup (url), flight);
+
+  aml_download_json_cached_async (url, cancellable, json_flight_done, flight);
 }
 
 /* ---------------------------------------------------------- *
