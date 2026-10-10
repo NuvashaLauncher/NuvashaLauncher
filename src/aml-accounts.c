@@ -339,9 +339,19 @@ active_is (AmlAccounts *self, const char *id)
 static void
 quarantine_corrupt_file (const char *path)
 {
-  g_autofree char *corrupt_path = g_strconcat (path, ".corrupt", NULL);
+  g_autofree char *base = g_strconcat (path, ".corrupt", NULL);
+  g_autofree char *corrupt_path = NULL;
 
-  if (g_rename (path, corrupt_path) != 0)
+  for (guint i = 0; i < 1000; i++)
+    {
+      corrupt_path = i == 0 ? g_strdup (base)
+                            : g_strdup_printf ("%s.%u", base, i);
+      if (!g_file_test (corrupt_path, G_FILE_TEST_EXISTS))
+        break;
+      g_clear_pointer (&corrupt_path, g_free);
+    }
+
+  if (corrupt_path == NULL || g_rename (path, corrupt_path) != 0)
     g_warning ("could not quarantine the accounts file \"%s\": %s",
                path, g_strerror (errno));
   else

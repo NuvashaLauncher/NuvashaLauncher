@@ -65,6 +65,7 @@ struct _AmlJavaRow
   AmlJava *probed;
 
   gboolean ready;
+  gboolean disposed;
   GtkWidget *retry;
 };
 
@@ -230,8 +231,8 @@ fill (AmlJavaRow *self)
       if (!found)
         {
           self->probe_started = TRUE;
-          aml_java_probe_async (self->wanted, NULL, custom_loaded,
-                                g_object_ref (self));
+          aml_java_probe_async (self->wanted, self->cancellable,
+                                custom_loaded, g_object_ref (self));
         }
     }
 }
@@ -272,6 +273,19 @@ custom_loaded (GObject      *source G_GNUC_UNUSED,
   AmlJavaRow *self = user_data;
   g_autoptr (GError) error = NULL;
   AmlJava *custom = aml_java_probe_finish (result, &error);
+  GCancellable *probe_cancellable =
+    g_task_get_cancellable (G_TASK (result));
+
+  /* Disposing or reloading the row cancels a custom probe. Do not rebuild
+   * a row whose state has already been torn down for that cancellation. */
+  if (self->disposed || probe_cancellable != self->cancellable ||
+      (error != NULL &&
+       g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED)))
+    {
+      aml_java_free (custom);
+      g_object_unref (self);
+      return;
+    }
 
   if (custom != NULL)
     {
@@ -318,6 +332,14 @@ add_probed (GObject      *source G_GNUC_UNUSED,
   g_autoptr (GError) error = NULL;
   AmlJava *probe = aml_java_probe_finish (result, &error);
 
+  if (self->disposed ||
+      g_task_get_cancellable (G_TASK (result)) != self->cancellable)
+    {
+      aml_java_free (probe);
+      g_object_unref (self);
+      return;
+    }
+
   if (probe == NULL)
     adw_action_row_set_subtitle (
       ADW_ACTION_ROW (self),
@@ -360,8 +382,9 @@ add_chosen (GObject *dialog, GAsyncResult *result, gpointer user_data)
       adw_action_row_set_subtitle (
         ADW_ACTION_ROW (self),
         _("the chosen file does not report a Java version"));
-    else
-      aml_java_probe_async (path, NULL, add_probed, g_object_ref (self));
+      else
+        aml_java_probe_async (path, self->cancellable, add_probed,
+                              g_object_ref (self));
   }
 
   g_object_unref (self);
@@ -576,6 +599,7 @@ aml_java_row_dispose (GObject *object)
 {
   AmlJavaRow *self = AML_JAVA_ROW (object);
 
+  self->disposed = TRUE;
   g_cancellable_cancel (self->cancellable);
   g_clear_object (&self->cancellable);
   self->retry = NULL;

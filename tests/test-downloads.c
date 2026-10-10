@@ -138,8 +138,6 @@ test_all_lists_every_entry (void)
 static void
 test_picked_count (void)
 {
-  AmlDownloads *downloads = aml_downloads_get_default ();
-
   g_assert_cmpuint (aml_downloads_picked (), ==, 0);
 
   aml_downloads_picked_add (3);

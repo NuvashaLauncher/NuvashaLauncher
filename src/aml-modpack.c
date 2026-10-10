@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #define AML_MODPACK_FORMAT_VERSION 1
 
@@ -2007,6 +2008,7 @@ aml_modpack_install_finish (GAsyncResult *result, GError **error)
 typedef struct {
   char *instance_directory;
   char *archive_path;
+  char *temporary_archive;
   char *manifest;
   char *icon_path;
   GHashTable *indexed_paths;
@@ -2022,6 +2024,7 @@ export_run_free (ExportRun *run)
 {
   g_free (run->instance_directory);
   g_free (run->archive_path);
+  g_free (run->temporary_archive);
   g_free (run->manifest);
   g_free (run->icon_path);
   g_clear_pointer (&run->indexed_paths, g_hash_table_unref);
@@ -2483,15 +2486,34 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
       return;
     }
 
+  {
+    g_autofree char *parent = g_path_get_dirname (run->archive_path);
+    int fd = -1;
+
+    run->temporary_archive = g_build_filename (parent, ".aml-modpack-XXXXXX",
+                                               NULL);
+    fd = g_mkstemp (run->temporary_archive);
+    if (fd < 0)
+      {
+        g_task_return_new_error (task, AML_MODPACK_ERROR,
+                                 AML_MODPACK_ERROR_IO,
+                                 "cannot create a temporary archive: %s",
+                                 g_strerror (errno));
+        return;
+      }
+    close (fd);
+  }
+
   archive = archive_write_new ();
   archive_write_set_format_zip (archive);
 
-  if (archive_write_open_filename (archive, run->archive_path) != ARCHIVE_OK)
+  if (archive_write_open_filename (archive, run->temporary_archive) != ARCHIVE_OK)
     {
       g_set_error (&error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_ARCHIVE,
                    "cannot create \"%s\": %s", run->archive_path,
                    archive_error_string (archive));
       archive_write_free (archive);
+      g_unlink (run->temporary_archive);
       g_task_return_error (task, g_steal_pointer (&error));
       return;
     }
@@ -2511,7 +2533,7 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
                    archive_error_string (archive));
       archive_entry_free (manifest_entry);
       archive_write_free (archive);
-      g_unlink (run->archive_path);
+      g_unlink (run->temporary_archive);
       g_task_return_error (task, g_steal_pointer (&error));
       return;
     }
@@ -2537,13 +2559,26 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
                        ? "cancelled" : "cannot finish the modpack archive");
       archive_entry_free (manifest_entry);
       archive_write_free (archive);
-      g_unlink (run->archive_path);
+      g_unlink (run->temporary_archive);
       g_task_return_error (task, g_steal_pointer (&error));
       return;
     }
 
   archive_entry_free (manifest_entry);
   archive_write_free (archive);
+
+  if (g_rename (run->temporary_archive, run->archive_path) != 0)
+    {
+      g_autoptr (GError) rename_error = NULL;
+
+      g_set_error (&rename_error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
+                   "cannot publish \"%s\": %s", run->archive_path,
+                   g_strerror (errno));
+      g_unlink (run->temporary_archive);
+      g_task_return_error (task, g_steal_pointer (&rename_error));
+      return;
+    }
+
   export_progress (run, run->total, run->total, _("Export complete"));
   g_task_return_boolean (task, TRUE);
 }

@@ -191,6 +191,19 @@ test_search_without_hits (void)
   g_print ("ok - a search that found nothing is an empty list\n");
 }
 
+static void
+test_search_rejects_malformed_hit (void)
+{
+  const char *json =
+    "{\"total_hits\":1,\"hits\":[{\"slug\":\"missing-id\"}]}";
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlModrinthResults) results =
+    aml_modrinth_results_from_json (json, -1, &error);
+
+  g_assert_null (results);
+  g_assert_error (error, AML_MODRINTH_ERROR, AML_MODRINTH_ERROR_PARSE);
+}
+
 /* ---------------------------------------------------------- *
  * A project in full
  * ---------------------------------------------------------- */
@@ -965,6 +978,8 @@ main (int argc, char **argv)
   g_test_add_func ("/modrinth/search-url", test_search_url_paginates);
   g_test_add_func ("/modrinth/search-results", test_search_results);
   g_test_add_func ("/modrinth/search-empty", test_search_without_hits);
+  g_test_add_func ("/modrinth/search-malformed-hit",
+                   test_search_rejects_malformed_hit);
   g_test_add_func ("/modrinth/project", test_project_details);
   g_test_add_func ("/modrinth/versions-mod", test_versions_of_a_mod);
   g_test_add_func ("/modrinth/versions-pack", test_versions_of_a_pack);
