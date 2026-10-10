@@ -518,7 +518,7 @@ plan_text (AmlContentPage *self, PlanRun *plan)
 
        {
          const char *title = file->project_id != NULL
-                               ? g_hash_table_lookup (self->project_titles,
+                               ? g_hash_table_lookup (self->browse.project_titles,
                                                       file->project_id)
                                : NULL;
 
@@ -718,7 +718,7 @@ plan_versions_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
     file = install_file_of (version, installed != NULL ? installed->path : NULL,
                             installed != NULL && !installed->enabled,
-                            g_hash_table_lookup (self->project_titles,
+                            g_hash_table_lookup (self->browse.project_titles,
                                                  version->project_id));
   }
 
@@ -767,7 +767,7 @@ start_plan (AmlContentPage *self, AmlModrinthVersion *version,
   plan->queue = g_ptr_array_new_with_free_func (
       (GDestroyNotify) aml_modrinth_dependency_free);
   plan->seen = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-  plan->cancellable = g_object_ref (self->browse);
+  plan->cancellable = g_object_ref (self->browse.cancellable);
 
   if (!plan_take (plan, version))
     {
@@ -1104,7 +1104,7 @@ aml_content_page_on_pick_button_clicked (GtkButton *button G_GNUC_UNUSED, gpoint
               continue;
 
             g_hash_table_add (listed, dependency->project_id);
-            title = g_hash_table_lookup (self->project_titles,
+            title = g_hash_table_lookup (self->browse.project_titles,
                                          dependency->project_id);
             if (has_dependencies)
               g_string_append_c (dependencies, '\n');

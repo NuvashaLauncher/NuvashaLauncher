@@ -37,10 +37,10 @@ aml_content_page_on_scroll_changed (GtkAdjustment *adjustment, gpointer user_dat
   AmlContentPage *self = user_data;
   gdouble at_end;
 
-  if (self->loading_page)
+  if (self->browse.loading_page)
     return;
 
-  if (self->offset >= self->total_hits)
+  if (self->browse.offset >= self->browse.total_hits)
     return;
 
   at_end = gtk_adjustment_get_upper (adjustment) -
@@ -50,7 +50,7 @@ aml_content_page_on_scroll_changed (GtkAdjustment *adjustment, gpointer user_dat
   if (gtk_adjustment_get_value (adjustment) < at_end)
     return;
 
-  self->offset += RESULTS_PER_PAGE;
+  self->browse.offset += RESULTS_PER_PAGE;
   aml_content_page_run_search (self, TRUE);
 }
 
@@ -62,10 +62,10 @@ aml_content_page_on_retry_page_clicked (GtkButton *button G_GNUC_UNUSED, gpointe
 {
   AmlContentPage *self = user_data;
 
-  if (self->loading_page)
+  if (self->browse.loading_page)
     return;
 
-  gtk_widget_set_visible (self->retry_row, FALSE);
+  gtk_widget_set_visible (self->browse.retry_row, FALSE);
   aml_content_page_run_search (self, TRUE);
 }
 
@@ -161,7 +161,7 @@ installed_icon_details (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
       if (details->title != NULL && *details->title != '\0')
         {
-          g_hash_table_insert (self->project_titles,
+          g_hash_table_insert (self->browse.project_titles,
                                g_strdup (lookup->project_id),
                                g_strdup (details->title));
           if (file != NULL)
@@ -177,7 +177,7 @@ installed_icon_details (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
          reached through the browser. */
       if (details->description != NULL && *details->description != '\0')
         {
-          g_hash_table_insert (self->project_descriptions,
+          g_hash_table_insert (self->browse.project_descriptions,
                                g_strdup (lookup->project_id),
                                g_strdup (details->description));
           row_show_description (lookup->row, details->description);
@@ -185,7 +185,7 @@ installed_icon_details (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
       if (details->icon_url != NULL && *details->icon_url != '\0')
         {
-          g_hash_table_insert (self->project_icons,
+          g_hash_table_insert (self->browse.project_icons,
                                g_strdup (lookup->project_id),
                               g_strdup (details->icon_url));
 
@@ -226,8 +226,8 @@ installed_icon_lookup (AmlContentPage *self, GtkWidget *row,
       return;
     }
 
-  known = g_hash_table_lookup (self->project_icons, project_id);
-  description = g_hash_table_lookup (self->project_descriptions, project_id);
+  known = g_hash_table_lookup (self->browse.project_icons, project_id);
+  description = g_hash_table_lookup (self->browse.project_descriptions, project_id);
 
   /* A description the browser already read goes in without asking again,
      even when the icon still has to be fetched. */
@@ -264,19 +264,19 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
 
   if (!append)
     {
-      take_rows_out (&self->result_rows,
-                     ADW_PREFERENCES_GROUP (self->results_group));
-      g_clear_pointer (&self->results, g_ptr_array_unref);
-      self->results = g_ptr_array_new_with_free_func (
+      take_rows_out (&self->browse.result_rows,
+                     ADW_PREFERENCES_GROUP (self->browse.results_group));
+      g_clear_pointer (&self->browse.results, g_ptr_array_unref);
+      self->browse.results = g_ptr_array_new_with_free_func (
           (GDestroyNotify) aml_modrinth_project_free);
-      self->total_hits = results->total_hits;
-      g_hash_table_remove_all (self->seen_ids);
+      self->browse.total_hits = results->total_hits;
+      g_hash_table_remove_all (self->browse.seen_ids);
 
       /* A new search starts at the top of the list. */
       {
         GtkAdjustment *adjustment =
           gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (
-            self->results_scroller));
+            self->browse.results_scroller));
 
         gtk_adjustment_set_value (adjustment, gtk_adjustment_get_lower (adjustment));
       }
@@ -290,28 +290,28 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
 
       /* A project already listed is not listed twice: the same answer can
        * come back for two pages that overlap. */
-      if (g_hash_table_contains (self->seen_ids, project->project_id))
+      if (g_hash_table_contains (self->browse.seen_ids, project->project_id))
         continue;
 
       row = adw_action_row_new ();
       icon = aml_icon_widget_new (aml_content_type_icon (self->type));
 
-      g_hash_table_add (self->seen_ids, g_strdup (project->project_id));
+      g_hash_table_add (self->browse.seen_ids, g_strdup (project->project_id));
 
       /* What the browser saw, remembered for the installed rows of the
          same project. */
       if (project->icon_url != NULL && *project->icon_url != '\0')
-        g_hash_table_insert (self->project_icons,
+        g_hash_table_insert (self->browse.project_icons,
                              g_strdup (project->project_id),
                              g_strdup (project->icon_url));
 
       if (project->description != NULL && *project->description != '\0')
-        g_hash_table_insert (self->project_descriptions,
+        g_hash_table_insert (self->browse.project_descriptions,
                              g_strdup (project->project_id),
                              g_strdup (project->description));
 
       if (project->title != NULL && *project->title != '\0')
-        g_hash_table_insert (self->project_titles,
+        g_hash_table_insert (self->browse.project_titles,
                              g_strdup (project->project_id),
                              g_strdup (project->title));
 
@@ -339,10 +339,10 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
 
       /* The rows point into the list the page owns, so the projects
        * live exactly as long as the rows that show them. */
-      g_ptr_array_add (self->results, aml_modrinth_project_copy (project));
+      g_ptr_array_add (self->browse.results, aml_modrinth_project_copy (project));
       g_object_set_data (G_OBJECT (row), "aml-project",
-                         g_ptr_array_index (self->results,
-                                            self->results->len - 1));
+                         g_ptr_array_index (self->browse.results,
+                                            self->browse.results->len - 1));
 
       adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
 
@@ -353,39 +353,39 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
       g_signal_connect (row, "activated", G_CALLBACK (aml_content_page_on_result_activated),
                         self);
 
-      adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->results_group),
+      adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->browse.results_group),
                                  row);
-      self->result_rows = g_list_append (self->result_rows, row);
+      self->browse.result_rows = g_list_append (self->browse.result_rows, row);
       shown++;
     }
 
   /* The offset is where the next page starts, which is the end of what
      is listed now. */
-  self->offset += shown;
+  self->browse.offset += shown;
 
   /* The list does not grow without end: past the cap the oldest rows go,
      and the scroll is put back where it was, so the user stays on the
      same project rather than being thrown to the top. */
-  if (self->result_rows != NULL &&
-      g_list_length (self->result_rows) > MAX_RESULT_ROWS)
+  if (self->browse.result_rows != NULL &&
+      g_list_length (self->browse.result_rows) > MAX_RESULT_ROWS)
     {
       GtkAdjustment *adjustment =
         gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (
-          self->results_scroller));
+          self->browse.results_scroller));
       gdouble at = gtk_adjustment_get_value (adjustment);
       gdouble removed = 0;
 
       for (guint i = 0; i < RESULT_ROWS_TRIM; i++)
         {
-          GList *oldest = self->result_rows;
+          GList *oldest = self->browse.result_rows;
           GtkWidget *row = oldest->data;
           gint height = gtk_widget_get_height (row);
 
           removed += height > 0 ? height : 48;
 
-          self->result_rows = g_list_delete_link (self->result_rows, oldest);
+          self->browse.result_rows = g_list_delete_link (self->browse.result_rows, oldest);
           adw_preferences_group_remove (ADW_PREFERENCES_GROUP (
-                                          self->results_group),
+                                          self->browse.results_group),
                                         row);
         }
 
@@ -395,17 +395,17 @@ results_arrived (AmlContentPage *self, AmlModrinthResults *results,
     }
 
   {
-    gboolean empty = self->results->len == 0;
+    gboolean empty = self->browse.results->len == 0;
 
-    gtk_widget_set_visible (self->results_status, empty);
-    gtk_widget_set_visible (self->results_scroller, !empty);
-    gtk_widget_set_visible (self->results_group, TRUE);
-    gtk_widget_set_visible (self->loading_more, FALSE);
-    gtk_widget_set_visible (self->retry_row, FALSE);
+    gtk_widget_set_visible (self->browse.results_status, empty);
+    gtk_widget_set_visible (self->browse.results_scroller, !empty);
+    gtk_widget_set_visible (self->browse.results_group, TRUE);
+    gtk_widget_set_visible (self->browse.loading_more, FALSE);
+    gtk_widget_set_visible (self->browse.retry_row, FALSE);
 
     /* Nothing more to ask for once the total is reached. */
-    if (self->offset >= self->total_hits)
-      gtk_widget_set_visible (self->loading_more, FALSE);
+    if (self->browse.offset >= self->browse.total_hits)
+      gtk_widget_set_visible (self->browse.loading_more, FALSE);
   }
 }
 
@@ -425,19 +425,19 @@ search_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
-  append = self->pending_append;
+  append = self->browse.pending_append;
   results = aml_modrinth_search_finish (result, &error);
   set_busy (self, FALSE);
-  self->loading_page = FALSE;
+  self->browse.loading_page = FALSE;
 
   if (results == NULL)
     {
-      take_rows_out (&self->result_rows,
-                 ADW_PREFERENCES_GROUP (self->results_group));
-      g_clear_pointer (&self->results, g_ptr_array_unref);
-      gtk_widget_set_visible (self->results_status, TRUE);
-      gtk_widget_set_visible (self->results_group, FALSE);
-      gtk_widget_set_visible (self->loading_more, FALSE);
+      take_rows_out (&self->browse.result_rows,
+                 ADW_PREFERENCES_GROUP (self->browse.results_group));
+      g_clear_pointer (&self->browse.results, g_ptr_array_unref);
+      gtk_widget_set_visible (self->browse.results_status, TRUE);
+      gtk_widget_set_visible (self->browse.results_group, FALSE);
+      gtk_widget_set_visible (self->browse.loading_more, FALSE);
 
       /* A page that failed is offered again from the list itself. */
       if (append)
@@ -446,15 +446,15 @@ search_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
             error != NULL ? g_strdup (error->message)
                    : g_strdup (_("the next page could not be loaded"));
 
-          gtk_label_set_text (GTK_LABEL (self->retry_label), message);
-          gtk_widget_set_visible (self->retry_row, TRUE);
+          gtk_label_set_text (GTK_LABEL (self->browse.retry_label), message);
+          gtk_widget_set_visible (self->browse.retry_row, TRUE);
         }
       else if (error != NULL &&
                !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         {
           g_autofree char *escaped = g_markup_escape_text (error->message, -1);
 
-          adw_status_page_set_description (ADW_STATUS_PAGE (self->results_status),
+          adw_status_page_set_description (ADW_STATUS_PAGE (self->browse.results_status),
                                            escaped);
         }
 
@@ -472,34 +472,34 @@ aml_content_page_run_search (AmlContentPage *self, gboolean append)
   g_autoptr (AmlModrinthSearch) search = g_new0 (AmlModrinthSearch, 1);
 
   search->type = self->type;
-  search->query = g_strdup (self->query != NULL ? self->query : "");
+  search->query = g_strdup (self->browse.query != NULL ? self->browse.query : "");
   search->minecraft_version = g_strdup (self->minecraft_version);
   search->loader = self->loader != NULL ? g_strdup (self->loader) : NULL;
-  search->categories = self->categories != NULL
-                           ? g_ptr_array_ref (self->categories)
+  search->categories = self->browse.categories != NULL
+                           ? g_ptr_array_ref (self->browse.categories)
                            : NULL;
-  search->offset = self->offset;
+  search->offset = self->browse.offset;
   search->limit = RESULTS_PER_PAGE;
 
   /* A new search or a new filter cancels the page that was on its way
    * and starts the list over. */
   if (!append)
     {
-      g_cancellable_cancel (self->more);
-      g_clear_object (&self->more);
-      self->more = g_cancellable_new ();
-      self->offset = 0;
+      g_cancellable_cancel (self->browse.more);
+      g_clear_object (&self->browse.more);
+      self->browse.more = g_cancellable_new ();
+      self->browse.offset = 0;
     }
 
-  self->loading_page = TRUE;
-  self->pending_append = append;
+  self->browse.loading_page = TRUE;
+  self->browse.pending_append = append;
   set_busy (self, TRUE);
 
   /* The spinner at the bottom says a page is on its way. */
-  gtk_widget_set_visible (self->loading_more, TRUE);
-  gtk_widget_set_visible (self->retry_row, FALSE);
+  gtk_widget_set_visible (self->browse.loading_more, TRUE);
+  gtk_widget_set_visible (self->browse.retry_row, FALSE);
 
-  aml_modrinth_search_async (search, self->more, search_ready,
+  aml_modrinth_search_async (search, self->browse.more, search_ready,
                              page_watch_new (self));
 }
 
@@ -508,11 +508,11 @@ on_search_timeout (gpointer user_data)
 {
   AmlContentPage *self = user_data;
 
-  self->debounce_source = 0;
-  g_free (self->query);
-  self->query =
-    g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->search_entry)));
-  self->offset = 0;
+  self->browse.debounce_source = 0;
+  g_free (self->browse.query);
+  self->browse.query =
+    g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->browse.search_entry)));
+  self->browse.offset = 0;
   aml_content_page_run_search (self, FALSE);
 
   return G_SOURCE_REMOVE;
@@ -523,10 +523,10 @@ aml_content_page_on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointe
 {
   AmlContentPage *self = user_data;
 
-  if (self->debounce_source != 0)
-    g_source_remove (self->debounce_source);
+  if (self->browse.debounce_source != 0)
+    g_source_remove (self->browse.debounce_source);
 
-  self->debounce_source =
+  self->browse.debounce_source =
     g_timeout_add (SEARCH_DELAY_MS, on_search_timeout, self);
 }
 
@@ -552,8 +552,8 @@ aml_content_page_on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
     return GDK_EVENT_PROPAGATE;
 
   if (*gtk_editable_get_text (
-        GTK_EDITABLE (self->search_entry)) != '\0')
-    gtk_editable_set_text (GTK_EDITABLE (self->search_entry), "");
+        GTK_EDITABLE (self->browse.search_entry)) != '\0')
+    gtk_editable_set_text (GTK_EDITABLE (self->browse.search_entry), "");
 
   return GDK_EVENT_STOP;
 }
@@ -566,7 +566,7 @@ active_search_entry (AmlContentPage *self)
     : NULL;
 
   return g_strcmp0 (visible, "browse") == 0
-           ? self->search_entry : self->installed_search_entry;
+           ? self->browse.search_entry : self->installed_search_entry;
 }
 
 
@@ -601,8 +601,8 @@ load_categories (AmlContentPage *self)
   g_autofree char *project_type =
     aml_modrinth_project_type_for_content (self->type);
 
-  self->categories_loaded = TRUE;
-  aml_modrinth_categories_async (project_type, self->browse,
+  self->browse.categories_loaded = TRUE;
+  aml_modrinth_categories_async (project_type, self->browse.cancellable,
                                  categories_ready, page_watch_new (self));
 }
 
@@ -611,7 +611,7 @@ load_categories_again (GtkWidget *button G_GNUC_UNUSED, gpointer user_data)
 {
   AmlContentPage *self = user_data;
 
-  self->categories_loaded = FALSE;
+  self->browse.categories_loaded = FALSE;
   load_categories (self);
 }
 
@@ -620,13 +620,13 @@ load_categories_again (GtkWidget *button G_GNUC_UNUSED, gpointer user_data)
 static void
 fill_categories (AmlContentPage *self, GPtrArray *categories)
 {
-  GtkWidget *child = gtk_widget_get_first_child (self->filter_box);
+  GtkWidget *child = gtk_widget_get_first_child (self->browse.filter_box);
 
   while (child != NULL)
     {
       GtkWidget *next = gtk_widget_get_next_sibling (child);
 
-      gtk_box_remove (GTK_BOX (self->filter_box), child);
+      gtk_box_remove (GTK_BOX (self->browse.filter_box), child);
       child = next;
     }
 
@@ -655,7 +655,7 @@ fill_categories (AmlContentPage *self, GPtrArray *categories)
             gtk_widget_add_css_class (heading, "dim-label");
             gtk_widget_set_margin_top (heading, 6);
             gtk_widget_set_margin_start (heading, 6);
-            gtk_box_append (GTK_BOX (self->filter_box), heading);
+            gtk_box_append (GTK_BOX (self->browse.filter_box), heading);
           }
 
         {
@@ -674,7 +674,7 @@ fill_categories (AmlContentPage *self, GPtrArray *categories)
                                 g_strdup (category->name), g_free);
         g_signal_connect (button, "toggled", G_CALLBACK (on_category_toggled),
                           self);
-        gtk_box_append (GTK_BOX (self->filter_box), button);
+        gtk_box_append (GTK_BOX (self->browse.filter_box), button);
       }
   }
 }
@@ -696,7 +696,7 @@ categories_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   categories = aml_modrinth_categories_finish (result, &error);
 
-  if (self->filter_box == NULL)
+  if (self->browse.filter_box == NULL)
     {
       page_watch_free (watch);
       return;
@@ -706,13 +706,13 @@ categories_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
    * of check buttons reads as "no categories", not as a failure. */
   if (categories == NULL)
     {
-      GtkWidget *child = gtk_widget_get_first_child (self->filter_box);
+      GtkWidget *child = gtk_widget_get_first_child (self->browse.filter_box);
 
       while (child != NULL)
         {
           GtkWidget *next = gtk_widget_get_next_sibling (child);
 
-          gtk_box_remove (GTK_BOX (self->filter_box), child);
+          gtk_box_remove (GTK_BOX (self->browse.filter_box), child);
           child = next;
         }
 
@@ -727,7 +727,7 @@ categories_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         gtk_box_append (GTK_BOX (box), label);
         gtk_box_append (GTK_BOX (box), retry);
 
-        gtk_box_append (GTK_BOX (self->filter_box), box);
+        gtk_box_append (GTK_BOX (self->browse.filter_box), box);
         g_signal_connect (retry, "clicked",
                           G_CALLBACK (load_categories_again), self);
       }
@@ -745,7 +745,7 @@ aml_content_page_on_filter_clicked (GtkWidget *widget G_GNUC_UNUSED, gpointer us
 {
   AmlContentPage *self = user_data;
 
-  if (self->categories_loaded)
+  if (self->browse.categories_loaded)
     return;
 
   load_categories (self);
@@ -762,25 +762,25 @@ on_category_toggled (GtkCheckButton *button, gpointer user_data)
     return;
 
   if (gtk_check_button_get_active (button))
-    g_ptr_array_add (self->categories, g_strdup (category));
+    g_ptr_array_add (self->browse.categories, g_strdup (category));
   else
     {
       /* What is left of the filter, without the one that was turned
        * off. */
       GPtrArray *kept = g_ptr_array_new_with_free_func (g_free);
 
-      for (guint i = 0; i < self->categories->len; i++)
+      for (guint i = 0; i < self->browse.categories->len; i++)
         {
-          const char *one = g_ptr_array_index (self->categories, i);
+          const char *one = g_ptr_array_index (self->browse.categories, i);
 
           if (g_strcmp0 (one, category) != 0)
             g_ptr_array_add (kept, g_strdup (one));
         }
 
-      g_clear_pointer (&self->categories, g_ptr_array_unref);
-      self->categories = kept;
+      g_clear_pointer (&self->browse.categories, g_ptr_array_unref);
+      self->browse.categories = kept;
     }
 
-  self->offset = 0;
+  self->browse.offset = 0;
   aml_content_page_run_search (self, FALSE);
 }

@@ -537,7 +537,7 @@ on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
      the one that frees it. */
   aml_modrinth_versions_async (watch->project_id, self->type,
                                self->minecraft_version, self->loader,
-                               self->browse, on_detail_versions_ready, watch);
+                               self->browse.cancellable, on_detail_versions_ready, watch);
 }
 
 /* The dialog of @project: what it is, every version of it that fits this
@@ -586,7 +586,7 @@ open_project_page (AmlContentPage *self, AmlModrinthProject *project)
     ADW_NAVIGATION_SPLIT_VIEW (self->project.split), FALSE);
 
   set_busy (self, TRUE);
-  aml_modrinth_details_async (project->project_id, self->browse,
+  aml_modrinth_details_async (project->project_id, self->browse.cancellable,
                               on_details_ready,
                               details_watch_new (self, project->project_id));
 }
