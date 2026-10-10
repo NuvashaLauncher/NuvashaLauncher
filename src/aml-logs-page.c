@@ -45,8 +45,17 @@ static void show_lines (AmlLogsPage *self);
 static void
 set_search_open (AmlLogsPage *self, gboolean open)
 {
+  if (self->search_open == open)
+    return;
+
   self->search_open = open;
   gtk_widget_set_visible (self->search_bar, open);
+
+  if (self->search_button != NULL &&
+      gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (self->search_button)) !=
+        open)
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (self->search_button),
+                                 open);
 
   if (open)
     gtk_widget_grab_focus (self->search_entry);
@@ -321,11 +330,11 @@ on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED, guint keyval,
 }
 
 static void
-on_search_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+on_search_toggled (GtkToggleButton *button, gpointer user_data)
 {
   AmlLogsPage *self = user_data;
 
-  set_search_open (self, !self->search_open);
+  set_search_open (self, gtk_toggle_button_get_active (button));
 }
 
 /* ---------------------------------------------------------- *
@@ -521,8 +530,16 @@ aml_logs_page_new (AmlLauncher *launcher)
   gtk_box_append (GTK_BOX (actions), self->clear);
   gtk_box_append (GTK_BOX (actions), self->open);
 
-  self->search_button = toolbar_button ("system-search-symbolic", _("Search"),
-                                        G_CALLBACK (on_search_clicked), self);
+  self->search_button = gtk_toggle_button_new ();
+  gtk_button_set_icon_name (GTK_BUTTON (self->search_button),
+                            "system-search-symbolic");
+  gtk_widget_add_css_class (self->search_button, "flat");
+  gtk_widget_set_tooltip_text (self->search_button, _("Search"));
+  gtk_accessible_update_property (
+    GTK_ACCESSIBLE (self->search_button), GTK_ACCESSIBLE_PROPERTY_LABEL,
+    _("Search"), -1);
+  g_signal_connect (self->search_button, "toggled",
+                    G_CALLBACK (on_search_toggled), self);
   /* Searching the log: a bar over the lines, closed until Ctrl+F opens
    * it. The lines are kept either way, so nothing here can lose one. */
    self->search_bar = gtk_search_entry_new ();
