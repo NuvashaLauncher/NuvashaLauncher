@@ -1982,6 +1982,7 @@ typedef struct {
   char *archive_path;
   char *manifest;
   char *icon_path;
+  GHashTable *indexed_paths;
 } ExportRun;
 
 static void
@@ -1991,6 +1992,7 @@ export_run_free (ExportRun *run)
   g_free (run->archive_path);
   g_free (run->manifest);
   g_free (run->icon_path);
+  g_clear_pointer (&run->indexed_paths, g_hash_table_unref);
   g_free (run);
 }
 
@@ -2065,7 +2067,8 @@ export_file (struct archive *archive, const char *source, const char *target,
 
 static gboolean
 export_directory (struct archive *archive, const char *root,
-                  const char *relative, GError **error)
+                  const char *relative, GHashTable *indexed_paths,
+                  GError **error)
 {
   g_autofree char *directory = g_build_filename (root, relative, NULL);
   g_autoptr (GDir) dir = g_dir_open (directory, 0, error);
@@ -2091,13 +2094,17 @@ export_directory (struct archive *archive, const char *root,
 
       if (S_ISDIR (stat_buf.st_mode))
         {
-          if (!export_directory (archive, root, child_relative, error))
+          if (!export_directory (archive, root, child_relative,
+                                 indexed_paths, error))
             return FALSE;
         }
       else if (S_ISREG (stat_buf.st_mode))
         {
           g_autofree char *target =
             g_build_filename ("overrides", child_relative, NULL);
+
+          if (g_hash_table_contains (indexed_paths, child_relative))
+            continue;
 
           if (!export_file (archive, source, target, error))
             return FALSE;
@@ -2188,12 +2195,13 @@ export_indexed_files (ExportRun *run, GError **error)
               g_stat (source, &stat_buf) != 0 || !S_ISREG (stat_buf.st_mode))
             continue;
 
+          g_autofree char *relative =
+            g_build_filename (folders[folder_index], filename, NULL);
+
           file = json_object_new ();
           hashes = json_object_new ();
           downloads = json_array_new ();
-          json_object_set_string_member (file, "path",
-                                         g_build_filename (folders[folder_index],
-                                                           filename, NULL));
+          json_object_set_string_member (file, "path", relative);
           json_object_set_string_member (hashes, "sha1", sha1);
           json_object_set_string_member (hashes, "sha512", sha512);
           json_object_set_object_member (file, "hashes", hashes);
@@ -2201,6 +2209,9 @@ export_indexed_files (ExportRun *run, GError **error)
           json_object_set_array_member (file, "downloads", downloads);
           json_object_set_int_member (file, "fileSize", stat_buf.st_size);
           json_array_add_object_element (files, file);
+          g_hash_table_add (run->indexed_paths,
+                            g_build_filename (folders[folder_index], filename,
+                                              NULL));
         }
     }
 
@@ -2225,7 +2236,7 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
   g_autoptr (GError) error = NULL;
   struct archive *archive = NULL;
   struct archive_entry *manifest_entry = NULL;
-  gsize manifest_length = strlen (run->manifest);
+  gsize manifest_length = 0;
   g_autofree char *canonical_root =
     g_canonicalize_filename (run->instance_directory, NULL);
   g_autofree char *canonical_archive =
@@ -2245,6 +2256,8 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
       g_task_return_error (task, g_steal_pointer (&error));
       return;
     }
+
+  manifest_length = strlen (run->manifest);
 
   if (g_str_has_prefix (canonical_archive, root_prefix))
     {
@@ -2275,7 +2288,8 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
   if (archive_write_header (archive, manifest_entry) != ARCHIVE_OK ||
       archive_write_data (archive, run->manifest, manifest_length) !=
         (la_ssize_t) manifest_length ||
-      !export_directory (archive, canonical_root, "", &error) ||
+      !export_directory (archive, canonical_root, "", run->indexed_paths,
+                         &error) ||
       (run->icon_path != NULL &&
       !export_file (archive, run->icon_path, "overrides/icon.png",
                      &error)) ||
@@ -2380,6 +2394,8 @@ aml_modpack_export_async (AmlInstance *instance, const char *path,
   g_object_get (instance, "directory", &directory, NULL);
   run->instance_directory = g_strdup (directory);
   run->archive_path = g_strdup (path);
+  run->indexed_paths = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
+                                              NULL);
   g_object_get (instance, "icon", &run->icon_path, NULL);
   if (run->icon_path != NULL &&
       !g_file_test (run->icon_path, G_FILE_TEST_IS_REGULAR))
