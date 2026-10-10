@@ -261,6 +261,9 @@ account_from_json (JsonObject *object)
       *name == '\0' || uuid == NULL || *uuid == '\0')
     return NULL;
 
+  if (!g_str_equal (type, "microsoft") && !g_str_equal (type, "offline"))
+    return NULL;
+
   account = g_new0 (AmlAccount, 1);
   account->type = g_str_equal (type, "microsoft") ? AML_ACCOUNT_MICROSOFT
                                                   : AML_ACCOUNT_OFFLINE;
@@ -329,6 +332,21 @@ static gboolean
 active_is (AmlAccounts *self, const char *id)
 {
   return self->active_id != NULL && g_str_equal (self->active_id, id);
+}
+
+/* Keep a file that cannot be understood so a user can recover it or report
+ * it. The store starts empty, but never destroys the original evidence. */
+static void
+quarantine_corrupt_file (const char *path)
+{
+  g_autofree char *corrupt_path = g_strconcat (path, ".corrupt", NULL);
+
+  if (g_rename (path, corrupt_path) != 0)
+    g_warning ("could not quarantine the accounts file \"%s\": %s",
+               path, g_strerror (errno));
+  else
+    g_warning ("the accounts file \"%s\" is corrupt; it was moved to \"%s\"",
+               path, corrupt_path);
 }
 
 static gboolean
@@ -410,8 +428,7 @@ load (AmlAccounts *self)
 
   if (!json_parser_load_from_data (parser, text, -1, NULL))
     {
-      g_warning ("the accounts file \"%s\" is not a document; there are no "
-                 "accounts", self->filename);
+      quarantine_corrupt_file (self->filename);
       return;
     }
 
@@ -419,8 +436,7 @@ load (AmlAccounts *self)
 
   if (root == NULL || !JSON_NODE_HOLDS_OBJECT (root))
     {
-      g_warning ("the accounts file \"%s\" is not a document; there are no "
-                 "accounts", self->filename);
+      quarantine_corrupt_file (self->filename);
       return;
     }
 

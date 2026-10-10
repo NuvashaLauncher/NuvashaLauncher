@@ -277,6 +277,18 @@ test_select_instance_then_closest (void)
   g_assert_nonnull (picked);
   g_assert_cmpint (picked->major_version, ==, 25);
 
+  /* An explicitly selected runtime still has to meet the game's
+   * requirement: the instance setting cannot force Java 8 onto Java 17. */
+  g_assert_null (aml_java_select (list, "/fake/jdk/8/bin/java", 17));
+  g_assert_null (aml_java_select (list, "/fake/jdk/25/bin/java", 26));
+
+  /* Selection itself does not hide the configured runtime's headless state;
+   * the launcher can then explain why it cannot run the game with it. */
+  ((AmlJava *) g_ptr_array_index (list, 1))->headless = TRUE;
+  picked = aml_java_select (list, "/fake/jdk/17/bin/java", 17);
+  g_assert_nonnull (picked);
+  g_assert_true (picked->headless);
+
   /* Nothing set: the closest compatible one wins. */
   picked = aml_java_select (list, NULL, 21);
   g_assert_nonnull (picked);

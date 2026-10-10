@@ -342,6 +342,41 @@ test_persistence (void)
     store_broken = aml_accounts_new_for_path (broken);
     g_assert_cmpuint (aml_accounts_count (store_broken), ==, 0);
     g_assert_null (aml_accounts_get_active (store_broken));
+    {
+      g_autofree char *quarantined = g_strconcat (broken, ".corrupt", NULL);
+
+      g_assert_false (g_file_test (broken, G_FILE_TEST_EXISTS));
+      g_assert_true (g_file_test (quarantined, G_FILE_TEST_IS_REGULAR));
+    }
+  }
+
+  /* A type added by a newer or corrupted writer must not silently become
+   * an offline account. */
+  {
+    g_autofree char *unknown = temporary_path ("unknown-type.json");
+    g_autoptr (AmlAccounts) store_unknown = NULL;
+    const char *json =
+      "{\"accounts\":[{\"type\":\"something-new\","
+      "\"id\":\"id\",\"name\":\"Name\","
+      "\"uuid\":\"uuid\"}],\"active\":\"id\"}";
+
+    g_assert_true (g_file_set_contents (unknown, json, -1, NULL));
+    store_unknown = aml_accounts_new_for_path (unknown);
+    g_assert_cmpuint (aml_accounts_count (store_unknown), ==, 0);
+    g_assert_null (aml_accounts_get_active (store_unknown));
+  }
+
+  /* A field with the wrong JSON type is not a usable account either. */
+  {
+    g_autofree char *wrong_type = temporary_path ("wrong-field-type.json");
+    g_autoptr (AmlAccounts) store_wrong_type = NULL;
+    const char *json =
+      "{\"accounts\":[{\"type\":\"offline\",\"id\":42,"
+      "\"name\":\"Name\",\"uuid\":\"uuid\"}]}";
+
+    g_assert_true (g_file_set_contents (wrong_type, json, -1, NULL));
+    store_wrong_type = aml_accounts_new_for_path (wrong_type);
+    g_assert_cmpuint (aml_accounts_count (store_wrong_type), ==, 0);
   }
 
   /* What the file holds is the token in plain sight, which is why it is

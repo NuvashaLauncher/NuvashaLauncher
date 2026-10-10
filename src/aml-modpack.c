@@ -18,6 +18,8 @@
 #define _GNU_SOURCE
 
 #include "aml-modpack.h"
+
+#include "aml-json.h"
 #include "aml-i18n.h"
 
 #include "aml-loaders.h"
@@ -60,57 +62,6 @@ aml_modpack_error_quark (void)
 /* ---------------------------------------------------------- *
  * Reading JSON
  * ---------------------------------------------------------- */
-
-static JsonObject *
-object_of (JsonNode *node)
-{
-  if (node == NULL || !JSON_NODE_HOLDS_OBJECT (node))
-    return NULL;
-
-  return json_node_get_object (node);
-}
-
-/* The string @name of the object @node, or NULL. A field that is
- * there but is not a string counts as absent. */
-static char *
-object_string (JsonNode *node, const char *name)
-{
-  JsonObject *object = object_of (node);
-  JsonNode *member = NULL;
-
-  if (object == NULL)
-    return NULL;
-
-  member = json_object_get_member (object, name);
-
-  if (member == NULL || !JSON_NODE_HOLDS_VALUE (member) ||
-      json_node_get_value_type (member) != G_TYPE_STRING)
-    return NULL;
-
-  return json_node_dup_string (member);
-}
-
-/* Integer member, or @fallback for everything else. */
-static gint64
-object_int (JsonNode *node, const char *name, gint64 fallback)
-{
-  JsonObject *object = object_of (node);
-  JsonNode *member = NULL;
-
-  if (object == NULL)
-    return fallback;
-
-  member = json_object_get_member (object, name);
-
-  if (member == NULL || !JSON_NODE_HOLDS_VALUE (member))
-    return fallback;
-
-  if (json_node_get_value_type (member) != G_TYPE_INT64 &&
-      json_node_get_value_type (member) != G_TYPE_DOUBLE)
-    return fallback;
-
-  return (gint64) json_node_get_int (member);
-}
 
 /* The JSON of @json as a node tree, or NULL with @error set. The
  * node outlives the parser, so the caller frees it. */
@@ -289,7 +240,7 @@ aml_modpack_download_url_allowed (const char *url)
 static AmlModpackEnv
 env_from_node (JsonNode *env_node, const char *name)
 {
-  char *value = object_string (env_node, name);
+  char *value = aml_json_string (env_node, name);
   AmlModpackEnv env = AML_MODPACK_ENV_UNSPECIFIED;
 
   if (value == NULL)
@@ -315,14 +266,14 @@ static AmlModpackFile *
 file_from_node (JsonNode *node, GError **error)
 {
   g_autoptr (AmlModpackFile) file = g_new0 (AmlModpackFile, 1);
-  g_autofree char *path = object_string (node, "path");
+  g_autofree char *path = aml_json_string (node, "path");
   g_autofree char *sha1 = NULL;
   g_autofree char *sha512 = NULL;
   JsonNode *hashes = NULL;
   JsonNode *downloads_node = NULL;
   JsonObject *object = NULL;
 
-  object = object_of (node);
+  object = aml_json_object_of (node);
 
   if (object == NULL)
     {
@@ -358,8 +309,8 @@ file_from_node (JsonNode *node, GError **error)
       return NULL;
     }
 
-  sha1 = object_string (hashes, "sha1");
-  sha512 = object_string (hashes, "sha512");
+  sha1 = aml_json_string (hashes, "sha1");
+  sha512 = aml_json_string (hashes, "sha512");
 
   if (sha1 == NULL || sha512 == NULL)
     {
@@ -408,7 +359,7 @@ file_from_node (JsonNode *node, GError **error)
   file->path = g_steal_pointer (&path);
   file->sha1 = g_steal_pointer (&sha1);
   file->sha512 = g_steal_pointer (&sha512);
-  file->file_size = (goffset) object_int (node, "fileSize", 0);
+  file->file_size = (goffset) aml_json_int (node, "fileSize", 0);
 
   {
     JsonNode *env = json_object_get_member (object, "env");
@@ -434,7 +385,7 @@ aml_modpack_new_from_json (const char *json, gssize length, GError **error)
   if (root == NULL)
     return NULL;
 
-  object = object_of (root);
+  object = aml_json_object_of (root);
 
   if (object == NULL)
     {
@@ -444,7 +395,7 @@ aml_modpack_new_from_json (const char *json, gssize length, GError **error)
       return NULL;
     }
 
-  format_version = object_int (root, "formatVersion", -1);
+  format_version = aml_json_int (root, "formatVersion", -1);
 
   if (format_version != AML_MODPACK_FORMAT_VERSION)
     {
@@ -455,7 +406,7 @@ aml_modpack_new_from_json (const char *json, gssize length, GError **error)
       return NULL;
     }
 
-  game = object_string (root, "game");
+  game = aml_json_string (root, "game");
 
   if (g_strcmp0 (game, "minecraft") != 0)
     {
@@ -469,9 +420,9 @@ aml_modpack_new_from_json (const char *json, gssize length, GError **error)
   pack = g_new0 (AmlModpack, 1);
   pack->format_version = (guint) format_version;
   pack->game = g_strdup (game);
-  pack->version_id = object_string (root, "versionId");
-  pack->name = object_string (root, "name");
-  pack->summary = object_string (root, "summary");
+  pack->version_id = aml_json_string (root, "versionId");
+  pack->name = aml_json_string (root, "name");
+  pack->summary = aml_json_string (root, "summary");
   pack->files = g_ptr_array_new_with_free_func ((GDestroyNotify)
     aml_modpack_file_free);
   pack->dependencies = g_ptr_array_new_with_free_func ((GDestroyNotify)

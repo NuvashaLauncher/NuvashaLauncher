@@ -10,6 +10,7 @@
 #define _GNU_SOURCE
 
 #include "aml-java.h"
+#include "aml-task.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -168,7 +169,14 @@ aml_java_select (GPtrArray  *javas,
           AmlJava *java = g_ptr_array_index (javas, i);
 
           if (java_matches (java, instance_java_path))
-            return java;
+            {
+              /* An explicit path is preferred, but it must still satisfy
+               * the Java version named by Minecraft.  Otherwise an old
+               * per-instance setting could make a newer game fail after
+               * launch with an opaque JVM error. */
+              return aml_java_is_compatible (java, required_major) ? java
+                                                                     : NULL;
+            }
         }
 
       /* The instance points at a Java detection cannot see; it is the
@@ -421,11 +429,11 @@ aml_java_probe_finish (GAsyncResult  *result,
 
 typedef struct
 {
-  GTask *task;
   char **executables;
   guint next;
   GPtrArray *javas;   /* AmlJava*, element free aml_java_free */
   GHashTable *seen;   /* resolved real paths, for dedup */
+  AmlTaskSequence *sequence;
 } ProbeList;
 
 static void
@@ -433,7 +441,6 @@ probe_list_destroyed (gpointer data)
 {
   ProbeList *list = data;
 
-  g_clear_object (&list->task);
   g_strfreev (list->executables);
   g_clear_pointer (&list->javas, g_ptr_array_unref);
   g_clear_pointer (&list->seen, g_hash_table_unref);
@@ -459,8 +466,27 @@ aml_java_add_unique (GPtrArray  *javas,
   return java;
 }
 
+static void probe_list_probed (GObject *source, GAsyncResult *result,
+                               gpointer user_data);
+
 static void
-probe_list_step (ProbeList *list);
+probe_list_sequence_step (GTask *task G_GNUC_UNUSED, gpointer user_data)
+{
+  ProbeList *list = user_data;
+
+  if (list->executables[list->next] == NULL)
+    {
+      aml_task_sequence_return_pointer (
+        list->sequence, g_steal_pointer (&list->javas),
+        (GDestroyNotify) g_ptr_array_unref);
+      return;
+    }
+
+  aml_java_probe_async (list->executables[list->next],
+                        g_task_get_cancellable (task), probe_list_probed,
+                        list);
+  list->next++;
+}
 
 static void
 probe_list_probed (GObject      *source G_GNUC_UNUSED,
@@ -478,37 +504,7 @@ probe_list_probed (GObject      *source G_GNUC_UNUSED,
       /* The finished probe stays alive while its result points into it. */
     }
 
-  GCancellable *cancellable = g_task_get_cancellable (list->task);
-
-  if (cancellable != NULL && g_cancellable_is_cancelled (cancellable))
-    {
-      /* A cancelled probe list says nothing: there is no partial list. */
-      g_task_return_new_error (list->task, G_IO_ERROR, G_IO_ERROR_CANCELLED,
-                               "the scan was cancelled");
-      probe_list_destroyed (list);
-      return;
-    }
-
-  probe_list_step (list);
-}
-
-static void
-probe_list_step (ProbeList *list)
-{
-  /* The executables array is taken over as-is; a NULL entry ends the
-   * walk. */
-  if (list->executables[list->next] == NULL)
-    {
-      g_task_return_pointer (list->task, g_steal_pointer (&list->javas),
-                             (GDestroyNotify) g_ptr_array_unref);
-      probe_list_destroyed (list);
-      return;
-    }
-
-  aml_java_probe_async (list->executables[list->next],
-                        g_task_get_cancellable (list->task),
-                        probe_list_probed, list);
-  list->next++;
+  aml_task_sequence_next (list->sequence);
 }
 
 void
@@ -517,23 +513,20 @@ aml_java_probe_list_async (char            **executables,
                            GAsyncReadyCallback callback,
                            gpointer         user_data)
 {
-  g_autoptr (GTask) task = NULL;
   ProbeList *list = NULL;
 
   g_return_if_fail (executables != NULL);
 
-  task = g_task_new (NULL, cancellable, callback, user_data);
-
-  g_task_set_check_cancellable (task, FALSE);
-
   list = g_new0 (ProbeList, 1);
-  list->task = g_steal_pointer (&task);
   list->executables = executables; /* the caller gives up the array */
   list->javas = g_ptr_array_new_with_free_func (
     (GDestroyNotify) aml_java_free);
   list->seen = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
-  probe_list_step (list);
+  list->sequence = aml_task_sequence_new (
+    cancellable, callback, user_data, probe_list_sequence_step, list,
+    probe_list_destroyed);
+  aml_task_sequence_start (list->sequence);
 }
 
 GPtrArray *
