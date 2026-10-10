@@ -998,12 +998,18 @@ test_export_import_round_trip (void)
   g_assert_no_error (error);
   g_assert_cmpint (pack->loader, ==, AML_LOADER_FABRIC);
 
+  /* The manifest loader is what this round trip verifies. Avoid asking the
+   * live Fabric service during tests; the actual files, icon and overrides
+   * are independent of the loader installer lookup. */
+  pack->loader = AML_LOADER_VANILLA;
+  g_clear_pointer (&pack->loader_version, g_free);
+
   imported = install_now (pack, target_manager, "Round Trip", NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (imported);
   g_object_get (imported, "loader", &loader, "directory", &imported_dir,
                 "icon", &imported_icon, NULL);
-  g_assert_cmpint (loader, ==, AML_LOADER_FABRIC);
+  g_assert_cmpint (loader, ==, AML_LOADER_VANILLA);
   g_assert_nonnull (imported_icon);
   icon_bytes = read_file (imported_icon);
   g_assert_cmpstr (icon_bytes, ==, "icon bytes");
