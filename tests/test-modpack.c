@@ -736,6 +736,7 @@ test_install_offline (void)
     ZIP_FILE ("overrides/config/options.txt", "from overrides"),
     ZIP_FILE ("overrides/config/mods.toml", "only overrides"),
     ZIP_FILE ("overrides/icon.png", "icon bytes"),
+    ZIP_FILE ("overrides/mods/.index/index.json", "internal index"),
     ZIP_FILE ("client-overrides/config/options.txt", "from client"),
     ZIP_FILE ("server-overrides/config/server.txt", "from server"),
   };
@@ -771,6 +772,12 @@ test_install_offline (void)
 
     g_assert_cmpstr (icon_name, ==, "icon.png");
     g_assert_cmpstr (icon_data, ==, "icon bytes");
+  }
+  {
+    g_autofree char *imported_index =
+      g_build_filename (instance_dir, "mods", ".index", "index.json", NULL);
+
+    g_assert_false (g_file_test (imported_index, G_FILE_TEST_EXISTS));
   }
 
   /* overrides lands, client-overrides lands on top of it, and
