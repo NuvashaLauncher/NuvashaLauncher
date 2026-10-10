@@ -31,7 +31,7 @@
 
 #include "aml-download.h"
 #include "aml-i18n.h"
-#include "aml-i18n.h"
+#include "aml-json.h"
 
 #include <json-glib/json-glib.h>
 #include <string.h>
@@ -122,15 +122,6 @@ aml_content_type_icon (AmlContentType type)
  * Reading a JSON answer
  * ---------------------------------------------------------- */
 
-static JsonObject *
-object_of (JsonNode *node)
-{
-  if (node == NULL || !JSON_NODE_HOLDS_OBJECT (node))
-    return NULL;
-
-  return json_node_get_object (node);
-}
-
 static JsonNode *
 root_node (const char *json, gssize length, GError **error)
 {
@@ -162,75 +153,6 @@ root_node (const char *json, gssize length, GError **error)
 /* The string @name of the object @node, or NULL. A field that is there
  * but is not a string counts as absent, so a malformed answer cannot
  * reach a list as an empty string where words were meant. */
-static char *
-object_string (JsonNode *node, const char *name)
-{
-  JsonNode *member = json_object_get_member (object_of (node), name);
-
-  if (member == NULL || !JSON_NODE_HOLDS_VALUE (member) ||
-      json_node_get_value_type (member) != G_TYPE_STRING)
-    return NULL;
-
-  return json_node_dup_string (member);
-}
-
-static gboolean
-object_boolean (JsonNode *node, const char *name, gboolean fallback)
-{
-  JsonNode *member = json_object_get_member (object_of (node), name);
-
-  if (member == NULL || !JSON_NODE_HOLDS_VALUE (member) ||
-      json_node_get_value_type (member) != G_TYPE_BOOLEAN)
-    return fallback;
-
-  return json_node_get_boolean (member);
-}
-
-static gint64
-object_int (JsonNode *node, const char *name, gint64 fallback)
-{
-  JsonNode *member = json_object_get_member (object_of (node), name);
-  GType type = G_TYPE_INVALID;
-
-  if (member == NULL || !JSON_NODE_HOLDS_VALUE (member))
-    return fallback;
-
-  type = json_node_get_value_type (member);
-
-  if (type != G_TYPE_INT64 && type != G_TYPE_DOUBLE)
-    return fallback;
-
-  return (gint64) json_node_get_int (member);
-}
-
-/* Every string of the array @name, as a GPtrArray of char* the caller
- * owns. Never NULL: a field that is absent is an empty list. */
-static GPtrArray *
-object_string_array (JsonNode *node, const char *name)
-{
-  GPtrArray *strings = g_ptr_array_new_with_free_func (g_free);
-  JsonNode *member = json_object_get_member (object_of (node), name);
-
-  if (member == NULL || !JSON_NODE_HOLDS_ARRAY (member))
-    return strings;
-
-  {
-    JsonArray *array = json_node_get_array (member);
-    guint length = json_array_get_length (array);
-
-    for (guint i = 0; i < length; i++)
-      {
-        JsonNode *item = json_array_get_element (array, i);
-
-        if (JSON_NODE_HOLDS_VALUE (item) &&
-            json_node_get_value_type (item) == G_TYPE_STRING)
-          g_ptr_array_add (strings, json_node_dup_string (item));
-      }
-  }
-
-  return strings;
-}
-
 static gboolean
 string_array_has (GPtrArray *strings, const char *value)
 {
@@ -322,16 +244,16 @@ project_from_hit (JsonNode *hit)
 {
   AmlModrinthProject *project = g_new0 (AmlModrinthProject, 1);
 
-  project->project_id = object_string (hit, "project_id");
-  project->slug = object_string (hit, "slug");
-  project->title = object_string (hit, "title");
-  project->description = object_string (hit, "description");
-  project->author = object_string (hit, "author");
-  project->icon_url = object_string (hit, "icon_url");
-  project->downloads = (guint64) object_int (hit, "downloads", 0);
-  project->followers = (guint64) object_int (hit, "follows", 0);
-  project->versions = object_string_array (hit, "versions");
-  project->categories = object_string_array (hit, "categories");
+  project->project_id = aml_json_string (hit, "project_id");
+  project->slug = aml_json_string (hit, "slug");
+  project->title = aml_json_string (hit, "title");
+  project->description = aml_json_string (hit, "description");
+  project->author = aml_json_string (hit, "author");
+  project->icon_url = aml_json_string (hit, "icon_url");
+  project->downloads = (guint64) aml_json_int (hit, "downloads", 0);
+  project->followers = (guint64) aml_json_int (hit, "follows", 0);
+  project->versions = aml_json_string_array (hit, "versions");
+  project->categories = aml_json_string_array (hit, "categories");
 
   if (project->title == NULL)
     project->title = g_strdup (project->slug != NULL ? project->slug : "");
@@ -383,38 +305,38 @@ aml_modrinth_details_from_json (const char *json, gssize length,
     return NULL;
 
   details = g_new0 (AmlModrinthDetails, 1);
-  details->project_id = object_string (root, "id");
-  details->slug = object_string (root, "slug");
-  details->title = object_string (root, "title");
-  details->description = object_string (root, "description");
-  details->body = object_string (root, "body");
-  details->icon_url = object_string (root, "icon_url");
-  details->source_url = object_string (root, "source_url");
-  details->issues_url = object_string (root, "issues_url");
-  details->wiki_url = object_string (root, "wiki_url");
-  details->downloads = (guint64) object_int (root, "downloads", 0);
-  details->followers = (guint64) object_int (root, "followers", 0);
-  details->game_versions = object_string_array (root, "game_versions");
-  details->categories = object_string_array (root, "categories");
-  details->loaders = object_string_array (root, "loaders");
+  details->project_id = aml_json_string (root, "id");
+  details->slug = aml_json_string (root, "slug");
+  details->title = aml_json_string (root, "title");
+  details->description = aml_json_string (root, "description");
+  details->body = aml_json_string (root, "body");
+  details->icon_url = aml_json_string (root, "icon_url");
+  details->source_url = aml_json_string (root, "source_url");
+  details->issues_url = aml_json_string (root, "issues_url");
+  details->wiki_url = aml_json_string (root, "wiki_url");
+  details->downloads = (guint64) aml_json_int (root, "downloads", 0);
+  details->followers = (guint64) aml_json_int (root, "followers", 0);
+  details->game_versions = aml_json_string_array (root, "game_versions");
+  details->categories = aml_json_string_array (root, "categories");
+  details->loaders = aml_json_string_array (root, "loaders");
 
   /* The license is an object with an id, not a string. */
   details->license =
-    object_string (json_object_get_member (object_of (root), "license"), "id");
+    aml_json_string (json_object_get_member (aml_json_object_of (root), "license"), "id");
 
   /* A search answer names an author; a project answer carries the team
    * instead, and Modrinth writes that as the team's project id rather
    * than as its members, so there is no name to take from it. Members
    * are read anyway in case that ever stops being true. */
-  details->author = object_string (root, "author");
+  details->author = aml_json_string (root, "author");
 
   if (details->author == NULL)
     {
-      team = json_object_get_member (object_of (root), "team");
+      team = json_object_get_member (aml_json_object_of (root), "team");
 
       if (team != NULL && JSON_NODE_HOLDS_ARRAY (team) &&
           json_array_get_length (json_node_get_array (team)) > 0)
-        details->author = object_string (
+        details->author = aml_json_string (
             json_array_get_element (json_node_get_array (team), 0), "name");
     }
 
@@ -582,7 +504,7 @@ aml_modrinth_results_from_json (const char *json, gssize length,
   if (root == NULL)
     return NULL;
 
-  hits = json_object_get_member (object_of (root), "hits");
+  hits = json_object_get_member (aml_json_object_of (root), "hits");
 
   if (hits == NULL || !JSON_NODE_HOLDS_ARRAY (hits))
     {
@@ -595,7 +517,7 @@ aml_modrinth_results_from_json (const char *json, gssize length,
   results = g_new0 (AmlModrinthResults, 1);
   results->projects =
     g_ptr_array_new_with_free_func ((GDestroyNotify) aml_modrinth_project_free);
-  results->total_hits = (guint64) object_int (root, "total_hits", 0);
+  results->total_hits = (guint64) aml_json_int (root, "total_hits", 0);
 
   {
     JsonArray *array = json_node_get_array (hits);
@@ -607,7 +529,7 @@ aml_modrinth_results_from_json (const char *json, gssize length,
 
         /* A hit that is not an object has no title and no id, so there
          * is nothing a row could show for it. */
-        if (object_of (hit) == NULL)
+        if (aml_json_object_of (hit) == NULL)
           continue;
 
         g_ptr_array_add (results->projects, project_from_hit (hit));
@@ -858,8 +780,8 @@ aml_modrinth_version_has_hash (const AmlModrinthVersion *version,
 static AmlModrinthFile *
 file_from_node (JsonNode *node)
 {
-  g_autofree char *filename = object_string (node, "filename");
-  g_autofree char *url = object_string (node, "url");
+  g_autofree char *filename = aml_json_string (node, "filename");
+  g_autofree char *url = aml_json_string (node, "url");
   g_autofree char *sha1 = NULL;
   g_autofree char *sha512 = NULL;
   AmlModrinthFile *file = NULL;
@@ -868,12 +790,12 @@ file_from_node (JsonNode *node)
     return NULL;
 
   {
-    JsonNode *hashes = json_object_get_member (object_of (node), "hashes");
+    JsonNode *hashes = json_object_get_member (aml_json_object_of (node), "hashes");
 
     if (hashes != NULL)
       {
-        sha1 = object_string (hashes, "sha1");
-        sha512 = object_string (hashes, "sha512");
+        sha1 = aml_json_string (hashes, "sha1");
+        sha512 = aml_json_string (hashes, "sha512");
       }
   }
 
@@ -882,8 +804,8 @@ file_from_node (JsonNode *node)
   file->url = g_steal_pointer (&url);
   file->sha1 = g_steal_pointer (&sha1);
   file->sha512 = g_steal_pointer (&sha512);
-  file->primary = object_boolean (node, "primary", FALSE);
-  file->size = (goffset) object_int (node, "size", 0);
+  file->primary = aml_json_boolean (node, "primary", FALSE);
+  file->size = (goffset) aml_json_int (node, "size", 0);
 
   return file;
 }
@@ -891,13 +813,13 @@ file_from_node (JsonNode *node)
 static AmlModrinthDependency *
 dependency_from_node (JsonNode *node)
 {
-  g_autofree char *type = object_string (node, "dependency_type");
+  g_autofree char *type = aml_json_string (node, "dependency_type");
   AmlModrinthDependency *dependency = g_new0 (AmlModrinthDependency, 1);
 
   dependency->type = dependency_type_from_string (type);
-  dependency->project_id = object_string (node, "project_id");
-  dependency->version_id = object_string (node, "version_id");
-  dependency->file_name = object_string (node, "file_name");
+  dependency->project_id = aml_json_string (node, "project_id");
+  dependency->version_id = aml_json_string (node, "version_id");
+  dependency->file_name = aml_json_string (node, "file_name");
 
   return dependency;
 }
@@ -911,23 +833,23 @@ version_from_node (JsonNode *node)
   AmlModrinthVersion *version = NULL;
   JsonNode *array_node = NULL;
 
-  if (object_of (node) == NULL)
+  if (aml_json_object_of (node) == NULL)
     return NULL;
 
   version = g_new0 (AmlModrinthVersion, 1);
-  version->version_id = object_string (node, "id");
-  version->project_id = object_string (node, "project_id");
-  version->name = object_string (node, "name");
-  version->version_number = object_string (node, "version_number");
-  version->changelog = object_string (node, "changelog");
-  version->date_published = object_string (node, "date_published");
-  version->downloads = (guint64) object_int (node, "downloads", 0);
-  version->game_versions = object_string_array (node, "game_versions");
-  version->loaders = object_string_array (node, "loaders");
+  version->version_id = aml_json_string (node, "id");
+  version->project_id = aml_json_string (node, "project_id");
+  version->name = aml_json_string (node, "name");
+  version->version_number = aml_json_string (node, "version_number");
+  version->changelog = aml_json_string (node, "changelog");
+  version->date_published = aml_json_string (node, "date_published");
+  version->downloads = (guint64) aml_json_int (node, "downloads", 0);
+  version->game_versions = aml_json_string_array (node, "game_versions");
+  version->loaders = aml_json_string_array (node, "loaders");
 
   version->files =
     g_ptr_array_new_with_free_func ((GDestroyNotify) aml_modrinth_file_free);
-  array_node = json_object_get_member (object_of (node), "files");
+  array_node = json_object_get_member (aml_json_object_of (node), "files");
 
   if (array_node != NULL && JSON_NODE_HOLDS_ARRAY (array_node))
     {
@@ -946,7 +868,7 @@ version_from_node (JsonNode *node)
 
   version->dependencies = g_ptr_array_new_with_free_func (
       (GDestroyNotify) aml_modrinth_dependency_free);
-  array_node = json_object_get_member (object_of (node), "dependencies");
+  array_node = json_object_get_member (aml_json_object_of (node), "dependencies");
 
   if (array_node != NULL && JSON_NODE_HOLDS_ARRAY (array_node))
     {
@@ -957,7 +879,7 @@ version_from_node (JsonNode *node)
         {
           JsonNode *item = json_array_get_element (array, i);
 
-          if (object_of (item) != NULL)
+          if (aml_json_object_of (item) != NULL)
             g_ptr_array_add (version->dependencies, dependency_from_node (item));
         }
     }
@@ -1619,19 +1541,19 @@ aml_modrinth_categories_from_json (const char *json, gssize length,
       AmlModrinthCategory *category = NULL;
       JsonNode *item = json_array_get_element (array, i);
 
-      if (object_of (item) == NULL)
+      if (aml_json_object_of (item) == NULL)
         continue;
 
       /* One project type publishes one list of categories, so the other
        * kinds' categories are not offered here. This is also what keeps a
        * pack page from offering "fabric". */
-      item_type = object_string (item, "project_type");
-      name = object_string (item, "name");
+      item_type = aml_json_string (item, "project_type");
+      name = aml_json_string (item, "name");
 
       if (name == NULL || g_strcmp0 (item_type, project_type) != 0)
         continue;
 
-      header = object_string (item, "header");
+      header = aml_json_string (item, "header");
 
       category = g_new0 (AmlModrinthCategory, 1);
       category->name = g_steal_pointer (&name);
