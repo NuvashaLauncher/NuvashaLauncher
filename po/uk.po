@@ -28,9 +28,6 @@ msgstr "Оновити все"
 msgid "Open Folder"
 msgstr "Відкрити теку"
 
-msgid "Refresh"
-msgstr "Оновити"
-
 msgid "Nothing installed yet"
 msgstr "Ще нічого не встановлено"
 
@@ -46,17 +43,8 @@ msgstr "Завантаження ще…"
 msgid "Nothing is selected"
 msgstr "Нічого не вибрано"
 
-msgid "Install the selected versions"
-msgstr "Встановити вибрані версії"
-
-msgid "Install the selected versions?"
-msgstr "Встановити вибрані версії?"
-
 msgid "Install this version with the selected ones"
 msgstr "Встановити цю версію разом із вибраними"
-
-msgid "Search Modrinth"
-msgstr "Пошук на Modrinth"
 
 msgid "Filter by category"
 msgstr "Фільтр за категорією"
@@ -67,8 +55,10 @@ msgstr "Фільтр"
 msgid "Nothing to show yet"
 msgstr "Поки що нічого показати"
 
-msgid "Type what to look for, or browse everything Modrinth has for this instance"
-msgstr "Введіть запит або перегляньте усе, що Modrinth має для цього екземпляра"
+msgid ""
+"Type what to look for, or browse everything Modrinth has for this instance"
+msgstr ""
+"Введіть запит або перегляньте усе, що Modrinth має для цього екземпляра"
 
 msgid "Browse"
 msgstr "Переглянути"
@@ -76,8 +66,12 @@ msgstr "Переглянути"
 msgid "No mod loader"
 msgstr "Немає завантажувача модів"
 
-msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
-msgstr "Моди потребують завантажувача модів. Спершу виберіть Fabric, Quilt, Forge або NeoForge в налаштуваннях цього екземпляра"
+msgid ""
+"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
+"settings of this instance first"
+msgstr ""
+"Моди потребують завантажувача модів. Спершу виберіть Fabric, Quilt, Forge "
+"або NeoForge в налаштуваннях цього екземпляра"
 
 msgid "Create Instance"
 msgstr "Створити екземпляр"
@@ -163,14 +157,22 @@ msgstr "Додати середовище виконання Java"
 msgid "No detected Java satisfies the requirement of Java %d+"
 msgstr "Жодна виявлена Java не відповідає вимозі Java %d+"
 
-msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
-msgstr "Minecraft потребує Java без headless-режиму: в Arch використовуйте пакунок jre-openjdk, а не jre-openjdk-headless"
+msgid ""
+"Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
+"not jre-openjdk-headless"
+msgstr ""
+"Minecraft потребує Java без headless-режиму: в Arch використовуйте пакунок "
+"jre-openjdk, а не jre-openjdk-headless"
 
 msgid "JVM Arguments"
 msgstr "Аргументи JVM"
 
-msgid "The configured Java was not detected; make sure it is still a usable java executable"
-msgstr "Налаштовану Java не виявлено; переконайтеся, що це й досі придатний виконуваний файл Java"
+msgid ""
+"The configured Java was not detected; make sure it is still a usable java "
+"executable"
+msgstr ""
+"Налаштовану Java не виявлено; переконайтеся, що це й досі придатний "
+"виконуваний файл Java"
 
 msgid "Actions"
 msgstr "Дії"
@@ -324,6 +326,7 @@ msgstr "Додати обліковий запис Microsoft"
 
 msgid "Minecraft Version"
 msgstr "Версія Minecraft"
+
 msgid "Install the selected %s?"
 msgstr "Установити вибрані %s?"
 
@@ -341,33 +344,46 @@ msgstr "Оновити такі %s"
 
 msgid "Dependencies:"
 msgstr "Залежності:"
-msgid "The following mods depend on %s:\n%s"
-msgstr "Такі моди залежать від %s:\n%s"
+
+msgid ""
+"The following mods depend on %s:\n"
+"%s"
+msgstr ""
+"Такі моди залежать від %s:\n"
+"%s"
 
 msgid "Cache"
 msgstr "Кеш"
+
 msgid "Cache Modrinth API responses"
 msgstr "Кешувати відповіді API Modrinth"
+
 msgid "Cache expiration"
 msgstr "Термін дії кешу"
+
 msgid "1 hour"
 msgstr "1 година"
+
 msgid "6 hours"
 msgstr "6 годин"
+
 msgid "1 day"
 msgstr "1 день"
+
 msgid "7 days"
 msgstr "7 днів"
+
 msgid "Clear AML Cache"
 msgstr "Очистити кеш AML"
+
 msgid "Show Shortcuts"
 msgstr "Показати комбінації клавіш"
+
 msgid "Quit"
 msgstr "Вийти"
+
 msgid "Clear AML Cache?"
 msgstr "Очистити кеш AML?"
-msgid "Cached data will be removed. Installed content, instances, accounts, settings and logs will be kept."
-msgstr "Кешовані дані буде видалено. Встановлений вміст, екземпляри, облікові записи, налаштування та журнали буде збережено."
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -400,8 +416,11 @@ msgstr "Експорт модпака"
 msgid "Include transient files?"
 msgstr "Включити тимчасові файли?"
 
-msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr "Журнали, звіти про помилки, знімки екрана, кеш і завантаження зазвичай виключаються."
+msgid ""
+"Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr ""
+"Журнали, звіти про помилки, знімки екрана, кеш і завантаження зазвичай "
+"виключаються."
 
 msgid "Clean Export"
 msgstr "Чистий експорт"
@@ -418,15 +437,11 @@ msgstr "Підсумок"
 msgid "Version ID"
 msgstr "Ідентифікатор версії"
 
-msgid "Continue"
-msgstr "Продовжити"
-
 msgid "Downloading files"
 msgstr "Завантаження файлів"
 
 msgid "Extracting files"
 msgstr "Розпакування файлів"
-
 
 msgid "Optional files"
 msgstr "Необов’язкові файли"
@@ -434,7 +449,9 @@ msgstr "Необов’язкові файли"
 msgid ""
 "The pack lists these files but says they are not needed. Nothing of them is "
 "installed unless you ask. Default is off"
-msgstr "Пакет містить ці файли, але вони не є необхідними. Вони не встановлюються без вашого запиту. Типово вимкнено"
+msgstr ""
+"Пакет містить ці файли, але вони не є необхідними. Вони не встановлюються "
+"без вашого запиту. Типово вимкнено"
 
 msgid "Pack could not be fetched"
 msgstr "Не вдалося отримати пакет"
@@ -450,9 +467,6 @@ msgstr "Завантаження модпака"
 
 msgid "Writing archive"
 msgstr "Запис архіву"
-
-msgid "These details are optional. The pack name defaults to the instance name."
-msgstr "Ці дані необов’язкові. Типово назвою пакета буде назва інстансу."
 
 msgid "Export modpack metadata"
 msgstr "Метадані експорту"
@@ -472,9 +486,12 @@ msgstr "Експорт завершено"
 msgid "Export"
 msgstr "Експортувати"
 
-msgid "Optional metadata. Add a summary or version ID to help identify the exported pack."
-msgstr "Необов’язкові метадані. Додайте підсумок або ідентифікатор версії, щоб легше розпізнати експортований пакет."
-
+msgid ""
+"Optional metadata. Add a summary or version ID to help identify the exported "
+"pack."
+msgstr ""
+"Необов’язкові метадані. Додайте підсумок або ідентифікатор версії, щоб легше "
+"розпізнати експортований пакет."
 
 msgid "Installed %u item"
 msgid_plural "Installed %u items"
@@ -533,9 +550,6 @@ msgstr "%.1f млн завантажень"
 
 msgid "%.1fk downloads"
 msgstr "%.1f тис. завантажень"
-
-msgid "%lu downloads"
-msgstr "%lu завантажень"
 
 msgid "%s  ·  by %s"
 msgstr "%s  ·  автор: %s"

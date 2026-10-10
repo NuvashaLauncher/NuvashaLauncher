@@ -28,9 +28,6 @@ msgstr "Tout mettre à jour"
 msgid "Open Folder"
 msgstr "Ouvrir le dossier"
 
-msgid "Refresh"
-msgstr "Actualiser"
-
 msgid "Nothing installed yet"
 msgstr "Rien d’installé…"
 
@@ -46,17 +43,8 @@ msgstr "Chargement"
 msgid "Nothing is selected"
 msgstr "Rien n'est sélectionné"
 
-msgid "Install the selected versions"
-msgstr "Installer les versions sélectionnées"
-
-msgid "Install the selected versions?"
-msgstr "Installer les versions sélectionnées ?"
-
 msgid "Install this version with the selected ones"
 msgstr "Installer cette version avec les autres sélectionnées"
-
-msgid "Search Modrinth"
-msgstr "Rechercher dans Modrinth"
 
 msgid "Filter by category"
 msgstr "Filtrer par forme pharmaceutique"
@@ -67,8 +55,11 @@ msgstr "Filtrer"
 msgid "Nothing to show yet"
 msgstr "Rien à afficher"
 
-msgid "Type what to look for, or browse everything Modrinth has for this instance"
-msgstr "Tapez ce qu'il faut rechercher ou parcourez tout ce que Modrinth a pour ce cas"
+msgid ""
+"Type what to look for, or browse everything Modrinth has for this instance"
+msgstr ""
+"Tapez ce qu'il faut rechercher ou parcourez tout ce que Modrinth a pour ce "
+"cas"
 
 msgid "Browse"
 msgstr "Parcourir"
@@ -76,8 +67,12 @@ msgstr "Parcourir"
 msgid "No mod loader"
 msgstr "Aucun chargeur de mods"
 
-msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
-msgstr "Les mods ont besoin d’un chargeur de mods. Choisissez d’abord Fabric, Quilt, Forge ou NeoForge dans les paramètres de cette instance"
+msgid ""
+"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
+"settings of this instance first"
+msgstr ""
+"Les mods ont besoin d’un chargeur de mods. Choisissez d’abord Fabric, Quilt, "
+"Forge ou NeoForge dans les paramètres de cette instance"
 
 msgid "Create Instance"
 msgstr "Créer une instance"
@@ -163,14 +158,22 @@ msgstr "Ajouter un environnement d’exécution Java"
 msgid "No detected Java satisfies the requirement of Java %d+"
 msgstr "Aucun Java détecté ne satisfait l’exigence de Java %d+"
 
-msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
-msgstr "Minecraft a besoin d’un Java non headless : sur Arch, utilisez le paquet jre-openjdk, pas jre-openjdk-headless"
+msgid ""
+"Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
+"not jre-openjdk-headless"
+msgstr ""
+"Minecraft a besoin d’un Java non headless : sur Arch, utilisez le paquet jre-"
+"openjdk, pas jre-openjdk-headless"
 
 msgid "JVM Arguments"
 msgstr "Arguments de la JVM"
 
-msgid "The configured Java was not detected; make sure it is still a usable java executable"
-msgstr "Le Java configuré n’a pas été détecté ; vérifiez qu’il s’agit toujours d’un exécutable Java utilisable"
+msgid ""
+"The configured Java was not detected; make sure it is still a usable java "
+"executable"
+msgstr ""
+"Le Java configuré n’a pas été détecté ; vérifiez qu’il s’agit toujours d’un "
+"exécutable Java utilisable"
 
 msgid "Actions"
 msgstr "Interventions"
@@ -284,7 +287,9 @@ msgid "Add Offline Account"
 msgstr "Ajouter un compte hors ligne"
 
 msgid "a name can only hold letters, digits and underscores"
-msgstr "un nom ne peut contenir que des lettres, des chiffres et des traits de soulignement"
+msgstr ""
+"un nom ne peut contenir que des lettres, des chiffres et des traits de "
+"soulignement"
 
 msgid "a name cannot be empty"
 msgstr "un nom ne peut pas être vide"
@@ -324,6 +329,7 @@ msgstr "Ajouter un compte Microsoft"
 
 msgid "Minecraft Version"
 msgstr "Version Minecraft"
+
 msgid "Install the selected %s?"
 msgstr "Installer les %s sélectionnés ?"
 
@@ -341,33 +347,46 @@ msgstr "Mettre à jour les %s suivants"
 
 msgid "Dependencies:"
 msgstr "Dépendances :"
-msgid "The following mods depend on %s:\n%s"
-msgstr "Les mods suivants dépendent de %s :\n%s"
+
+msgid ""
+"The following mods depend on %s:\n"
+"%s"
+msgstr ""
+"Les mods suivants dépendent de %s :\n"
+"%s"
 
 msgid "Cache"
 msgstr "Cache"
+
 msgid "Cache Modrinth API responses"
 msgstr "Mettre en cache les réponses de l’API Modrinth"
+
 msgid "Cache expiration"
 msgstr "Expiration du cache"
+
 msgid "1 hour"
 msgstr "1 heure"
+
 msgid "6 hours"
 msgstr "6 heures"
+
 msgid "1 day"
 msgstr "1 jour"
+
 msgid "7 days"
 msgstr "7 jours"
+
 msgid "Clear AML Cache"
 msgstr "Vider le cache AML"
+
 msgid "Show Shortcuts"
 msgstr "Afficher les raccourcis"
+
 msgid "Quit"
 msgstr "Quitter"
+
 msgid "Clear AML Cache?"
 msgstr "Vider le cache AML ?"
-msgid "Cached data will be removed. Installed content, instances, accounts, settings and logs will be kept."
-msgstr "Les données en cache seront supprimées. Le contenu installé, les instances, les comptes, les paramètres et les journaux seront conservés."
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -400,8 +419,11 @@ msgstr "Exportation du pack de mods"
 msgid "Include transient files?"
 msgstr "Inclure les fichiers temporaires ?"
 
-msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr "Les journaux, rapports de plantage, captures d’écran, caches et téléchargements sont normalement exclus."
+msgid ""
+"Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr ""
+"Les journaux, rapports de plantage, captures d’écran, caches et "
+"téléchargements sont normalement exclus."
 
 msgid "Clean Export"
 msgstr "Exportation propre"
@@ -418,15 +440,11 @@ msgstr "Résumé"
 msgid "Version ID"
 msgstr "ID de version"
 
-msgid "Continue"
-msgstr "Continuer"
-
 msgid "Downloading files"
 msgstr "Téléchargement des fichiers"
 
 msgid "Extracting files"
 msgstr "Extraction des fichiers"
-
 
 msgid "Optional files"
 msgstr "Fichiers facultatifs"
@@ -434,7 +452,9 @@ msgstr "Fichiers facultatifs"
 msgid ""
 "The pack lists these files but says they are not needed. Nothing of them is "
 "installed unless you ask. Default is off"
-msgstr "Le pack liste ces fichiers, mais indique qu’ils ne sont pas nécessaires. Aucun ne sera installé sans votre demande. Désactivé par défaut"
+msgstr ""
+"Le pack liste ces fichiers, mais indique qu’ils ne sont pas nécessaires. "
+"Aucun ne sera installé sans votre demande. Désactivé par défaut"
 
 msgid "Pack could not be fetched"
 msgstr "Impossible de récupérer le pack"
@@ -451,9 +471,6 @@ msgstr "Téléchargement du modpack"
 msgid "Writing archive"
 msgstr "Écriture de l’archive"
 
-msgid "These details are optional. The pack name defaults to the instance name."
-msgstr "Ces informations sont facultatives. Le nom du pack est celui de l’instance par défaut."
-
 msgid "Export modpack metadata"
 msgstr "Métadonnées d’exportation"
 
@@ -464,7 +481,8 @@ msgid "Pack information"
 msgstr "Informations du pack"
 
 msgid "Show name, summary and version fields before exporting."
-msgstr "Afficher les champs du nom, du résumé et de la version avant l’exportation."
+msgstr ""
+"Afficher les champs du nom, du résumé et de la version avant l’exportation."
 
 msgid "Export complete"
 msgstr "Exportation terminée"
@@ -472,9 +490,12 @@ msgstr "Exportation terminée"
 msgid "Export"
 msgstr "Exporter"
 
-msgid "Optional metadata. Add a summary or version ID to help identify the exported pack."
-msgstr "Métadonnées facultatives. Ajoutez un résumé ou un ID de version pour identifier plus facilement le pack exporté."
-
+msgid ""
+"Optional metadata. Add a summary or version ID to help identify the exported "
+"pack."
+msgstr ""
+"Métadonnées facultatives. Ajoutez un résumé ou un ID de version pour "
+"identifier plus facilement le pack exporté."
 
 msgid "Installed %u item"
 msgid_plural "Installed %u items"
@@ -490,7 +511,8 @@ msgid "The icon must be a file on this computer"
 msgstr "L’icône doit être un fichier sur cet ordinateur"
 
 msgid "The game is running; stop it before moving its directory"
-msgstr "Le jeu est en cours d’exécution ; arrêtez-le avant de déplacer son dossier"
+msgstr ""
+"Le jeu est en cours d’exécution ; arrêtez-le avant de déplacer son dossier"
 
 msgid "%s is being installed"
 msgstr "Installation de %s"
@@ -533,9 +555,6 @@ msgstr "%.1f M téléchargements"
 
 msgid "%.1fk downloads"
 msgstr "%.1f k téléchargements"
-
-msgid "%lu downloads"
-msgstr "%lu téléchargements"
 
 msgid "%s  ·  by %s"
 msgstr "%s  ·  par %s"

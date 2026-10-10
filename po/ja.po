@@ -28,9 +28,6 @@ msgstr "すべて更新"
 msgid "Open Folder"
 msgstr "フォルダを開く"
 
-msgid "Refresh"
-msgstr "再読み込み"
-
 msgid "Nothing installed yet"
 msgstr "なにもインストールされていません…"
 
@@ -46,17 +43,8 @@ msgstr "読み込み中…"
 msgid "Nothing is selected"
 msgstr "何も選択されていません"
 
-msgid "Install the selected versions"
-msgstr "選択したバージョンをインストール"
-
-msgid "Install the selected versions?"
-msgstr "選択したバージョンをインストールしますか？"
-
 msgid "Install this version with the selected ones"
 msgstr "選択したものと一緒にこのバージョンをインストール"
-
-msgid "Search Modrinth"
-msgstr "Modrinth を検索"
 
 msgid "Filter by category"
 msgstr "カテゴリーで絞り込む"
@@ -67,8 +55,10 @@ msgstr "絞り込み"
 msgid "Nothing to show yet"
 msgstr "表示するものはありません"
 
-msgid "Type what to look for, or browse everything Modrinth has for this instance"
-msgstr "何を探すかを入力するか、このインスタンスのModrinthのすべてを参照してください"
+msgid ""
+"Type what to look for, or browse everything Modrinth has for this instance"
+msgstr ""
+"何を探すかを入力するか、このインスタンスのModrinthのすべてを参照してください"
 
 msgid "Browse"
 msgstr "閲覧"
@@ -76,8 +66,12 @@ msgstr "閲覧"
 msgid "No mod loader"
 msgstr "Mod ローダーがありません"
 
-msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
-msgstr "ModにはMod ローダーが必要です。先にこのインスタンスの設定でFabric、Quilt、Forge、NeoForgeを選んでください"
+msgid ""
+"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
+"settings of this instance first"
+msgstr ""
+"ModにはMod ローダーが必要です。先にこのインスタンスの設定でFabric、Quilt、"
+"Forge、NeoForgeを選んでください"
 
 msgid "Create Instance"
 msgstr "インスタンスを作成"
@@ -163,14 +157,22 @@ msgstr "Java ランタイムを追加"
 msgid "No detected Java satisfies the requirement of Java %d+"
 msgstr "検出された Java には Java %d+ の要件を満たすものはありません"
 
-msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
-msgstr "Minecraft には headless でない Java が必要です。Arch では jre-openjdk-headless ではなく jre-openjdk パッケージを使ってください"
+msgid ""
+"Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
+"not jre-openjdk-headless"
+msgstr ""
+"Minecraft には headless でない Java が必要です。Arch では jre-openjdk-"
+"headless ではなく jre-openjdk パッケージを使ってください"
 
 msgid "JVM Arguments"
 msgstr "JVM 引数"
 
-msgid "The configured Java was not detected; make sure it is still a usable java executable"
-msgstr "設定された Java が検出されません。まだ使える Java 実行ファイルか確認してください"
+msgid ""
+"The configured Java was not detected; make sure it is still a usable java "
+"executable"
+msgstr ""
+"設定された Java が検出されません。まだ使える Java 実行ファイルか確認してくだ"
+"さい"
 
 msgid "Actions"
 msgstr "アクション"
@@ -324,6 +326,7 @@ msgstr "Microsoft アカウントを追加"
 
 msgid "Minecraft Version"
 msgstr "Minecraftバージョン"
+
 msgid "Install the selected %s?"
 msgstr "選択した%sをインストールしますか？"
 
@@ -341,33 +344,46 @@ msgstr "次の%sを更新"
 
 msgid "Dependencies:"
 msgstr "依存関係："
-msgid "The following mods depend on %s:\n%s"
-msgstr "次のModは%sに依存しています：\n%s"
+
+msgid ""
+"The following mods depend on %s:\n"
+"%s"
+msgstr ""
+"次のModは%sに依存しています：\n"
+"%s"
 
 msgid "Cache"
 msgstr "キャッシュ"
+
 msgid "Cache Modrinth API responses"
 msgstr "Modrinth API 応答をキャッシュ"
+
 msgid "Cache expiration"
 msgstr "キャッシュの有効期限"
+
 msgid "1 hour"
 msgstr "1時間"
+
 msgid "6 hours"
 msgstr "6時間"
+
 msgid "1 day"
 msgstr "1日"
+
 msgid "7 days"
 msgstr "7日"
+
 msgid "Clear AML Cache"
 msgstr "AML キャッシュを消去"
+
 msgid "Show Shortcuts"
 msgstr "ショートカットを表示"
+
 msgid "Quit"
 msgstr "終了"
+
 msgid "Clear AML Cache?"
 msgstr "AML キャッシュを消去しますか？"
-msgid "Cached data will be removed. Installed content, instances, accounts, settings and logs will be kept."
-msgstr "キャッシュデータを削除します。インストール済みのコンテンツ、インスタンス、アカウント、設定、ログは保持されます。"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -400,8 +416,11 @@ msgstr "Modpack のエクスポート"
 msgid "Include transient files?"
 msgstr "一時ファイルを含めますか？"
 
-msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr "ログ、クラッシュレポート、スクリーンショット、キャッシュ、ダウンロードは通常除外されます。"
+msgid ""
+"Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr ""
+"ログ、クラッシュレポート、スクリーンショット、キャッシュ、ダウンロードは通常"
+"除外されます。"
 
 msgid "Clean Export"
 msgstr "クリーンエクスポート"
@@ -418,15 +437,11 @@ msgstr "概要"
 msgid "Version ID"
 msgstr "バージョン ID"
 
-msgid "Continue"
-msgstr "続行"
-
 msgid "Downloading files"
 msgstr "ファイルをダウンロード中"
 
 msgid "Extracting files"
 msgstr "ファイルを展開中"
-
 
 msgid "Optional files"
 msgstr "オプションファイル"
@@ -434,7 +449,9 @@ msgstr "オプションファイル"
 msgid ""
 "The pack lists these files but says they are not needed. Nothing of them is "
 "installed unless you ask. Default is off"
-msgstr "パックにはこれらのファイルが記載されていますが、必須ではありません。要求しない限りインストールされません。デフォルトでは無効です"
+msgstr ""
+"パックにはこれらのファイルが記載されていますが、必須ではありません。要求しな"
+"い限りインストールされません。デフォルトでは無効です"
 
 msgid "Pack could not be fetched"
 msgstr "パックを取得できませんでした"
@@ -450,9 +467,6 @@ msgstr "Modpack をダウンロード中"
 
 msgid "Writing archive"
 msgstr "アーカイブを書き込み中"
-
-msgid "These details are optional. The pack name defaults to the instance name."
-msgstr "これらの詳細は任意です。パック名はデフォルトでインスタンス名になります。"
 
 msgid "Export modpack metadata"
 msgstr "エクスポートメタデータ"
@@ -472,9 +486,12 @@ msgstr "エクスポート完了"
 msgid "Export"
 msgstr "エクスポート"
 
-msgid "Optional metadata. Add a summary or version ID to help identify the exported pack."
-msgstr "オプションのメタデータ。エクスポートしたパックを識別しやすくするため、概要またはバージョン ID を追加できます。"
-
+msgid ""
+"Optional metadata. Add a summary or version ID to help identify the exported "
+"pack."
+msgstr ""
+"オプションのメタデータ。エクスポートしたパックを識別しやすくするため、概要ま"
+"たはバージョン ID を追加できます。"
 
 msgid "Installed %u item"
 msgid_plural "Installed %u items"
@@ -533,9 +550,6 @@ msgstr "%.1fM ダウンロード"
 
 msgid "%.1fk downloads"
 msgstr "%.1fk ダウンロード"
-
-msgid "%lu downloads"
-msgstr "%lu ダウンロード"
 
 msgid "%s  ·  by %s"
 msgstr "%s  ·  作成者: %s"

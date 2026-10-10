@@ -28,9 +28,6 @@ msgstr "모두 업데이트"
 msgid "Open Folder"
 msgstr "폴더 열기"
 
-msgid "Refresh"
-msgstr "새로 고침"
-
 msgid "Nothing installed yet"
 msgstr "아직 아무것도 설치되지 않음"
 
@@ -46,17 +43,8 @@ msgstr "정보 가져오는 중"
 msgid "Nothing is selected"
 msgstr "선택된 항목이 없습니다"
 
-msgid "Install the selected versions"
-msgstr "선택한 버전 설치"
-
-msgid "Install the selected versions?"
-msgstr "선택한 버전을 설치할까요?"
-
 msgid "Install this version with the selected ones"
 msgstr "선택한 항목과 함께 이 버전을 설치"
-
-msgid "Search Modrinth"
-msgstr "Modrinth 검색"
 
 msgid "Filter by category"
 msgstr "카테고리별 필터링"
@@ -67,8 +55,11 @@ msgstr "필터"
 msgid "Nothing to show yet"
 msgstr "보여줄 항목 없음"
 
-msgid "Type what to look for, or browse everything Modrinth has for this instance"
-msgstr "검색할 항목을 입력하거나 Modrinth가 이 회차에 대해 가지고 있는 모든 것을 찾아보세요."
+msgid ""
+"Type what to look for, or browse everything Modrinth has for this instance"
+msgstr ""
+"검색할 항목을 입력하거나 Modrinth가 이 회차에 대해 가지고 있는 모든 것을 찾아"
+"보세요."
 
 msgid "Browse"
 msgstr "찾아보기"
@@ -76,8 +67,12 @@ msgstr "찾아보기"
 msgid "No mod loader"
 msgstr "모드 로더 없음"
 
-msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
-msgstr "모드는 모드 로더가 필요합니다. 먼저 이 인스턴스 설정에서 Fabric, Quilt, Forge 또는 NeoForge를 선택하세요"
+msgid ""
+"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
+"settings of this instance first"
+msgstr ""
+"모드는 모드 로더가 필요합니다. 먼저 이 인스턴스 설정에서 Fabric, Quilt, "
+"Forge 또는 NeoForge를 선택하세요"
 
 msgid "Create Instance"
 msgstr "인스턴스 생성"
@@ -163,14 +158,22 @@ msgstr "Java 런타임 추가"
 msgid "No detected Java satisfies the requirement of Java %d+"
 msgstr "감지된 Java 중 Java %d+ 요구 사항을 충족하는 것이 없습니다"
 
-msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
-msgstr "Minecraft에는 headless가 아닌 Java가 필요합니다. Arch에서는 jre-openjdk-headless가 아니라 jre-openjdk 패키지를 사용하세요"
+msgid ""
+"Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
+"not jre-openjdk-headless"
+msgstr ""
+"Minecraft에는 headless가 아닌 Java가 필요합니다. Arch에서는 jre-openjdk-"
+"headless가 아니라 jre-openjdk 패키지를 사용하세요"
 
 msgid "JVM Arguments"
 msgstr "JVM 인수"
 
-msgid "The configured Java was not detected; make sure it is still a usable java executable"
-msgstr "설정된 Java를 찾을 수 없습니다. 아직 사용할 수 있는 Java 실행 파일인지 확인하세요"
+msgid ""
+"The configured Java was not detected; make sure it is still a usable java "
+"executable"
+msgstr ""
+"설정된 Java를 찾을 수 없습니다. 아직 사용할 수 있는 Java 실행 파일인지 확인하"
+"세요"
 
 msgid "Actions"
 msgstr "작업"
@@ -324,6 +327,7 @@ msgstr "Microsoft 계정 추가"
 
 msgid "Minecraft Version"
 msgstr "마인크래프트 버전"
+
 msgid "Install the selected %s?"
 msgstr "선택한 %s을(를) 설치할까요?"
 
@@ -341,33 +345,46 @@ msgstr "다음 %s 업데이트"
 
 msgid "Dependencies:"
 msgstr "종속 항목:"
-msgid "The following mods depend on %s:\n%s"
-msgstr "다음 모드가 %s에 의존합니다:\n%s"
+
+msgid ""
+"The following mods depend on %s:\n"
+"%s"
+msgstr ""
+"다음 모드가 %s에 의존합니다:\n"
+"%s"
 
 msgid "Cache"
 msgstr "캐시"
+
 msgid "Cache Modrinth API responses"
 msgstr "Modrinth API 응답 캐시"
+
 msgid "Cache expiration"
 msgstr "캐시 만료"
+
 msgid "1 hour"
 msgstr "1시간"
+
 msgid "6 hours"
 msgstr "6시간"
+
 msgid "1 day"
 msgstr "1일"
+
 msgid "7 days"
 msgstr "7일"
+
 msgid "Clear AML Cache"
 msgstr "AML 캐시 지우기"
+
 msgid "Show Shortcuts"
 msgstr "바로 가기 표시"
+
 msgid "Quit"
 msgstr "종료"
+
 msgid "Clear AML Cache?"
 msgstr "AML 캐시를 지울까요?"
-msgid "Cached data will be removed. Installed content, instances, accounts, settings and logs will be kept."
-msgstr "캐시된 데이터가 삭제됩니다. 설치된 콘텐츠, 인스턴스, 계정, 설정 및 로그는 유지됩니다."
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -400,7 +417,8 @@ msgstr "모드팩 내보내기"
 msgid "Include transient files?"
 msgstr "임시 파일을 포함할까요?"
 
-msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgid ""
+"Logs, crash reports, screenshots, caches and downloads are normally excluded."
 msgstr "로그, 충돌 보고서, 스크린샷, 캐시 및 다운로드는 일반적으로 제외됩니다."
 
 msgid "Clean Export"
@@ -418,15 +436,11 @@ msgstr "요약"
 msgid "Version ID"
 msgstr "버전 ID"
 
-msgid "Continue"
-msgstr "계속"
-
 msgid "Downloading files"
 msgstr "파일 다운로드 중"
 
 msgid "Extracting files"
 msgstr "파일 압축 해제 중"
-
 
 msgid "Optional files"
 msgstr "선택 파일"
@@ -434,7 +448,9 @@ msgstr "선택 파일"
 msgid ""
 "The pack lists these files but says they are not needed. Nothing of them is "
 "installed unless you ask. Default is off"
-msgstr "팩에 나열되어 있지만 필수 항목은 아닙니다. 요청하지 않으면 설치되지 않습니다. 기본값은 끔입니다"
+msgstr ""
+"팩에 나열되어 있지만 필수 항목은 아닙니다. 요청하지 않으면 설치되지 않습니"
+"다. 기본값은 끔입니다"
 
 msgid "Pack could not be fetched"
 msgstr "팩을 가져오지 못했습니다"
@@ -450,9 +466,6 @@ msgstr "모드팩 다운로드 중"
 
 msgid "Writing archive"
 msgstr "압축 파일 작성 중"
-
-msgid "These details are optional. The pack name defaults to the instance name."
-msgstr "이 세부 정보는 선택 사항입니다. 팩 이름은 기본적으로 인스턴스 이름을 사용합니다."
 
 msgid "Export modpack metadata"
 msgstr "내보내기 메타데이터"
@@ -472,9 +485,12 @@ msgstr "내보내기 완료"
 msgid "Export"
 msgstr "내보내기"
 
-msgid "Optional metadata. Add a summary or version ID to help identify the exported pack."
-msgstr "선택적 메타데이터입니다. 내보낸 팩을 식별하기 쉽도록 요약이나 버전 ID를 추가하세요."
-
+msgid ""
+"Optional metadata. Add a summary or version ID to help identify the exported "
+"pack."
+msgstr ""
+"선택적 메타데이터입니다. 내보낸 팩을 식별하기 쉽도록 요약이나 버전 ID를 추가"
+"하세요."
 
 msgid "Installed %u item"
 msgid_plural "Installed %u items"
@@ -533,9 +549,6 @@ msgstr "%.1fM 다운로드"
 
 msgid "%.1fk downloads"
 msgstr "%.1fk 다운로드"
-
-msgid "%lu downloads"
-msgstr "%lu 다운로드"
 
 msgid "%s  ·  by %s"
 msgstr "%s  ·  제작자: %s"

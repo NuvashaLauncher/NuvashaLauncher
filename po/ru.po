@@ -28,9 +28,6 @@ msgstr "Обновить всё"
 msgid "Open Folder"
 msgstr "Открыть каталог"
 
-msgid "Refresh"
-msgstr "Обновление"
-
 msgid "Nothing installed yet"
 msgstr "Ничего не установлено…"
 
@@ -46,17 +43,8 @@ msgstr "Загрузка больше результатов..."
 msgid "Nothing is selected"
 msgstr "Ничего не выбрано"
 
-msgid "Install the selected versions"
-msgstr "Установить выбранные версии"
-
-msgid "Install the selected versions?"
-msgstr "Установить выбранные версии?"
-
 msgid "Install this version with the selected ones"
 msgstr "Установить эту версию вместе с выбранными"
-
-msgid "Search Modrinth"
-msgstr "Поиск по Modrinth"
 
 msgid "Filter by category"
 msgstr "Фильтр по категории"
@@ -67,8 +55,11 @@ msgstr "Фильтр"
 msgid "Nothing to show yet"
 msgstr "Здесь пока пусто"
 
-msgid "Type what to look for, or browse everything Modrinth has for this instance"
-msgstr "Введите, что искать, или просмотрите все, что есть у Modrinth для этого экземпляра"
+msgid ""
+"Type what to look for, or browse everything Modrinth has for this instance"
+msgstr ""
+"Введите, что искать, или просмотрите все, что есть у Modrinth для этого "
+"экземпляра"
 
 msgid "Browse"
 msgstr "Обзор"
@@ -76,8 +67,12 @@ msgstr "Обзор"
 msgid "No mod loader"
 msgstr "Нет мод-загрузчика"
 
-msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
-msgstr "Модам нужен мод-загрузчик. Сначала выберите Fabric, Quilt, Forge или NeoForge в настройках этого экземпляра"
+msgid ""
+"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
+"settings of this instance first"
+msgstr ""
+"Модам нужен мод-загрузчик. Сначала выберите Fabric, Quilt, Forge или "
+"NeoForge в настройках этого экземпляра"
 
 msgid "Create Instance"
 msgstr "Создать экземпляр"
@@ -163,14 +158,22 @@ msgstr "Добавить среду выполнения Java"
 msgid "No detected Java satisfies the requirement of Java %d+"
 msgstr "Ни одна обнаруженная Java не удовлетворяет требованию Java %d+"
 
-msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
-msgstr "Minecraft нужна Java без графического режима (headless): в Arch используйте пакет jre-openjdk, а не jre-openjdk-headless"
+msgid ""
+"Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
+"not jre-openjdk-headless"
+msgstr ""
+"Minecraft нужна Java без графического режима (headless): в Arch используйте "
+"пакет jre-openjdk, а не jre-openjdk-headless"
 
 msgid "JVM Arguments"
 msgstr "Аргументы JVM"
 
-msgid "The configured Java was not detected; make sure it is still a usable java executable"
-msgstr "Настроенная Java не обнаружена; убедитесь, что это по-прежнему работоспособный исполняемый файл Java"
+msgid ""
+"The configured Java was not detected; make sure it is still a usable java "
+"executable"
+msgstr ""
+"Настроенная Java не обнаружена; убедитесь, что это по-прежнему "
+"работоспособный исполняемый файл Java"
 
 msgid "Actions"
 msgstr "Действия"
@@ -324,6 +327,7 @@ msgstr "Добавить учётную запись Microsoft"
 
 msgid "Minecraft Version"
 msgstr "Версия Minecraft"
+
 msgid "Install the selected %s?"
 msgstr "Установить выбранные %s?"
 
@@ -341,33 +345,46 @@ msgstr "Обновить следующие %s"
 
 msgid "Dependencies:"
 msgstr "Зависимости:"
-msgid "The following mods depend on %s:\n%s"
-msgstr "Следующие моды зависят от %s:\n%s"
+
+msgid ""
+"The following mods depend on %s:\n"
+"%s"
+msgstr ""
+"Следующие моды зависят от %s:\n"
+"%s"
 
 msgid "Cache"
 msgstr "Кэш"
+
 msgid "Cache Modrinth API responses"
 msgstr "Кэшировать ответы API Modrinth"
+
 msgid "Cache expiration"
 msgstr "Срок действия кэша"
+
 msgid "1 hour"
 msgstr "1 час"
+
 msgid "6 hours"
 msgstr "6 часов"
+
 msgid "1 day"
 msgstr "1 день"
+
 msgid "7 days"
 msgstr "7 дней"
+
 msgid "Clear AML Cache"
 msgstr "Очистить кэш AML"
+
 msgid "Show Shortcuts"
 msgstr "Показать сочетания клавиш"
+
 msgid "Quit"
 msgstr "Выйти"
+
 msgid "Clear AML Cache?"
 msgstr "Очистить кэш AML?"
-msgid "Cached data will be removed. Installed content, instances, accounts, settings and logs will be kept."
-msgstr "Кэшированные данные будут удалены. Установленный контент, экземпляры, аккаунты, настройки и журналы будут сохранены."
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -400,8 +417,10 @@ msgstr "Экспорт модпака"
 msgid "Include transient files?"
 msgstr "Включить временные файлы?"
 
-msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr "Журналы, отчёты о сбоях, снимки экрана, кэш и загрузки обычно исключаются."
+msgid ""
+"Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr ""
+"Журналы, отчёты о сбоях, снимки экрана, кэш и загрузки обычно исключаются."
 
 msgid "Clean Export"
 msgstr "Чистый экспорт"
@@ -418,15 +437,11 @@ msgstr "Описание"
 msgid "Version ID"
 msgstr "ID версии"
 
-msgid "Continue"
-msgstr "Продолжить"
-
 msgid "Downloading files"
 msgstr "Загрузка файлов"
 
 msgid "Extracting files"
 msgstr "Распаковка файлов"
-
 
 msgid "Optional files"
 msgstr "Необязательные файлы"
@@ -434,7 +449,9 @@ msgstr "Необязательные файлы"
 msgid ""
 "The pack lists these files but says they are not needed. Nothing of them is "
 "installed unless you ask. Default is off"
-msgstr "В пакете перечислены эти файлы, но они не являются обязательными. Они не устанавливаются без вашего запроса. По умолчанию отключены"
+msgstr ""
+"В пакете перечислены эти файлы, но они не являются обязательными. Они не "
+"устанавливаются без вашего запроса. По умолчанию отключены"
 
 msgid "Pack could not be fetched"
 msgstr "Не удалось получить пакет"
@@ -450,9 +467,6 @@ msgstr "Загрузка модпака"
 
 msgid "Writing archive"
 msgstr "Запись архива"
-
-msgid "These details are optional. The pack name defaults to the instance name."
-msgstr "Эти данные необязательны. По умолчанию именем пакета будет имя инстанса."
 
 msgid "Export modpack metadata"
 msgstr "Метаданные экспорта"
@@ -472,9 +486,12 @@ msgstr "Экспорт завершён"
 msgid "Export"
 msgstr "Экспортировать"
 
-msgid "Optional metadata. Add a summary or version ID to help identify the exported pack."
-msgstr "Необязательные метаданные. Добавьте описание или ID версии, чтобы упростить идентификацию экспортированного пакета."
-
+msgid ""
+"Optional metadata. Add a summary or version ID to help identify the exported "
+"pack."
+msgstr ""
+"Необязательные метаданные. Добавьте описание или ID версии, чтобы упростить "
+"идентификацию экспортированного пакета."
 
 msgid "Installed %u item"
 msgid_plural "Installed %u items"
@@ -533,9 +550,6 @@ msgstr "%.1f млн загрузок"
 
 msgid "%.1fk downloads"
 msgstr "%.1f тыс. загрузок"
-
-msgid "%lu downloads"
-msgstr "%lu загрузок"
 
 msgid "%s  ·  by %s"
 msgstr "%s  ·  автор: %s"
