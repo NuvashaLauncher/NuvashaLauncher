@@ -459,6 +459,7 @@ aml_logs_page_new (AmlLauncher *launcher)
 {
   AmlLogsPage *self;
   GtkWidget *row;
+  GtkWidget *actions;
   GtkWidget *card;
   GtkWidget *text;
   GtkAdjustment *adjustment;
@@ -486,29 +487,27 @@ aml_logs_page_new (AmlLauncher *launcher)
 
   self->detail = gtk_label_new (NULL);
   gtk_label_set_ellipsize (GTK_LABEL (self->detail), PANGO_ELLIPSIZE_END);
-  gtk_widget_set_hexpand (self->detail, TRUE);
   gtk_widget_add_css_class (self->detail, "dim-label");
   gtk_box_append (GTK_BOX (row), self->detail);
 
   self->clear = toolbar_button ("edit-clear-symbolic", _("Clear"),
                                 G_CALLBACK (on_clear_clicked), self);
-  gtk_box_append (GTK_BOX (row), self->clear);
 
   self->open = toolbar_button ("folder-symbolic", _("Open Folder"),
                                G_CALLBACK (on_open_clicked), self);
-  gtk_box_append (GTK_BOX (row), self->open);
+  actions = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  gtk_box_append (GTK_BOX (actions), self->clear);
+  gtk_box_append (GTK_BOX (actions), self->open);
 
   self->search_button = toolbar_button ("system-search-symbolic", _("Search"),
                                         G_CALLBACK (on_search_clicked), self);
   gtk_box_insert_child_after (GTK_BOX (row), self->search_button, NULL);
 
-  gtk_box_append (GTK_BOX (self), row);
-
   /* Searching the log: a bar over the lines, closed until Ctrl+F opens
    * it. The lines are kept either way, so nothing here can lose one. */
    self->search_bar = gtk_search_bar_new ();
   self->search_entry = gtk_search_entry_new ();
-  gtk_widget_set_hexpand (self->search_entry, TRUE);
+   gtk_widget_set_hexpand (self->search_entry, TRUE);
   gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (self->search_entry),
                                          _("Search the log"));
   gtk_search_bar_set_child (GTK_SEARCH_BAR (self->search_bar),
@@ -526,15 +525,12 @@ aml_logs_page_new (AmlLauncher *launcher)
     g_signal_connect (keys, "key-pressed", G_CALLBACK (on_search_key), self);
   }
 
-  {
-    GtkWidget *search_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-
-    gtk_widget_set_margin_bottom (search_box, 6);
-    gtk_widget_set_margin_start (search_box, 12);
-    gtk_widget_set_margin_end (search_box, 12);
-    gtk_box_append (GTK_BOX (search_box), self->search_bar);
-    gtk_box_append (GTK_BOX (self), search_box);
-  }
+   gtk_widget_set_hexpand (self->search_bar, TRUE);
+   gtk_box_insert_child_after (GTK_BOX (row), self->search_bar,
+                               self->search_button);
+   gtk_box_append (GTK_BOX (row), actions);
+   gtk_widget_set_hexpand (row, TRUE);
+   gtk_box_append (GTK_BOX (self), row);
 
   /* The lines themselves. Read only: this is what the game printed,
      nothing to write into. */
