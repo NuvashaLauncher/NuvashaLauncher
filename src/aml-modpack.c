@@ -2195,7 +2195,7 @@ export_file (ExportRun *run, struct archive *archive, const char *source,
   fclose (input);
   archive_entry_free (entry);
   run->done++;
-  export_progress (run, run->done, run->total, "Writing archive");
+  export_progress (run, run->done, run->total, _("Writing archive"));
   return TRUE;
 }
 
@@ -2522,7 +2522,7 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
                                        run->include_transient) + 1;
   if (run->icon_path != NULL)
     run->total++;
-  export_progress (run, 0, run->total, "Writing archive");
+  export_progress (run, 0, run->total, _("Writing archive"));
 
   manifest_length = strlen (run->manifest);
 
@@ -2567,7 +2567,7 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
     }
 
   run->done = 1;
-  export_progress (run, run->done, run->total, "Writing archive");
+      export_progress (run, run->done, run->total, _("Writing archive"));
 
   if (!export_directory (run, archive, canonical_root, "", run->indexed_paths,
                          run->include_transient, cancellable, &error) ||

@@ -377,10 +377,10 @@ msgid "Export Modpack"
 msgstr "모드팩 내보내기"
 
 msgid "Importing modpack…"
-msgstr "Importing modpack…"
+msgstr "모드팩 가져오는 중…"
 
 msgid "Reading modpack"
-msgstr "Reading modpack"
+msgstr "모드팩 읽는 중"
 
 msgid "Exporting modpack"
 msgstr "Exporting modpack"
@@ -413,7 +413,31 @@ msgid "Continue"
 msgstr "Continue"
 
 msgid "Downloading files"
-msgstr "Downloading files"
+msgstr "파일 다운로드 중"
 
 msgid "Extracting files"
-msgstr "Extracting files"
+msgstr "파일 압축 해제 중"
+
+
+msgid "Optional files"
+msgstr "선택 파일"
+
+msgid ""
+"The pack lists these files but says they are not needed. Nothing of them is "
+"installed unless you ask. Default is off"
+msgstr "팩에 나열되어 있지만 필수 항목은 아닙니다. 요청하지 않으면 설치되지 않습니다. 기본값은 끔입니다"
+
+msgid "Pack could not be fetched"
+msgstr "팩을 가져오지 못했습니다"
+
+msgid "Invalid pack"
+msgstr "잘못된 팩"
+
+msgid "The pack does not define its install"
+msgstr "팩에 설치 정보가 없습니다"
+
+msgid "Downloading Modpack"
+msgstr "모드팩 다운로드 중"
+
+msgid "Writing archive"
+msgstr "압축 파일 작성 중"
