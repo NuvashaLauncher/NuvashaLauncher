@@ -913,6 +913,67 @@ error:
   return NULL;
 }
 
+typedef struct {
+  char *path;
+} ModpackRead;
+
+static void
+modpack_read_free (ModpackRead *read)
+{
+  g_free (read->path);
+  g_free (read);
+}
+
+static void
+modpack_read_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
+                     gpointer task_data, GCancellable *cancellable)
+{
+  ModpackRead *read = task_data;
+  g_autoptr (GError) error = NULL;
+  AmlModpack *pack = aml_modpack_new_from_zip (read->path, &error);
+
+  if (g_cancellable_is_cancelled (cancellable))
+    {
+      aml_modpack_free (pack);
+      g_task_return_new_error (task, AML_MODPACK_ERROR,
+                               AML_MODPACK_ERROR_CANCELLED, "cancelled");
+      return;
+    }
+
+  if (pack == NULL)
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  g_task_return_pointer (task, pack,
+                         (GDestroyNotify) aml_modpack_free);
+}
+
+void
+aml_modpack_new_from_zip_async (const char *zip_path,
+                                GCancellable *cancellable,
+                                GAsyncReadyCallback callback,
+                                gpointer user_data)
+{
+  g_autoptr (GTask) task = NULL;
+  ModpackRead *read = NULL;
+
+  g_return_if_fail (zip_path != NULL);
+
+  task = g_task_new (NULL, cancellable, callback, user_data);
+  read = g_new0 (ModpackRead, 1);
+  read->path = g_strdup (zip_path);
+  g_task_set_task_data (task, read, (GDestroyNotify) modpack_read_free);
+  g_task_run_in_thread (task, modpack_read_thread);
+}
+
+AmlModpack *
+aml_modpack_new_from_zip_finish (GAsyncResult *result, GError **error)
+{
+  return g_task_propagate_pointer (G_TASK (result), error);
+}
+
 /* ---------------------------------------------------------- *
  * Checking what arrived
  * ---------------------------------------------------------- */

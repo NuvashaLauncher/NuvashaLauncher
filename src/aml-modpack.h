@@ -128,6 +128,14 @@ AmlModpack *aml_modpack_new_from_json (const char *json,
  * hardlink, no path outside the instance, no bomb. */
 AmlModpack *aml_modpack_new_from_zip (const char *zip_path, GError **error);
 
+void aml_modpack_new_from_zip_async (const char *zip_path,
+                                     GCancellable *cancellable,
+                                     GAsyncReadyCallback callback,
+                                     gpointer user_data);
+
+AmlModpack *aml_modpack_new_from_zip_finish (GAsyncResult *result,
+                                             GError **error);
+
 /* The Minecraft version and the loader the pack runs on, out of its
  * dependencies. A loader the pack does not name leaves the instance on
  * vanilla. */
