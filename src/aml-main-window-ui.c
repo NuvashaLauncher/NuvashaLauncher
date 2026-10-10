@@ -68,11 +68,11 @@ aml_main_window_build_ui (AmlMainWindow *self)
      downloading and opens a dropdown of what is; the icon beside it
      carries the number of what the content pages have picked and
      installed at once. The button is hidden when there is neither. */
-  self->downloads.icon = gtk_image_new_from_icon_name (
-    "folder-download-symbolic");
-   self->downloads.spinner = adw_spinner_new ();
-  self->downloads.button = gtk_menu_button_new ();
-  self->downloads.list = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  self->downloads.icon = GTK_IMAGE (gtk_image_new_from_icon_name (
+    "folder-download-symbolic"));
+   self->downloads.spinner = ADW_SPINNER (adw_spinner_new ());
+  self->downloads.button = GTK_MENU_BUTTON (gtk_menu_button_new ());
+  self->downloads.list = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   self->downloads.rows = g_hash_table_new_full (g_direct_hash, g_direct_equal,
                                                NULL, download_row_free);
 
@@ -84,23 +84,23 @@ aml_main_window_build_ui (AmlMainWindow *self)
 
     /* The icon and the spinner share the middle: the icon says what the
        button opens, the spinner that something is on its way. */
-    gtk_widget_set_valign (self->downloads.icon, GTK_ALIGN_CENTER);
-    gtk_box_append (GTK_BOX (icon_row), self->downloads.icon);
-    gtk_widget_set_valign (self->downloads.spinner, GTK_ALIGN_CENTER);
-    gtk_box_append (GTK_BOX (icon_row), self->downloads.spinner);
+    gtk_widget_set_valign (GTK_WIDGET (self->downloads.icon), GTK_ALIGN_CENTER);
+    gtk_box_append (GTK_BOX (icon_row), GTK_WIDGET (self->downloads.icon));
+    gtk_widget_set_valign (GTK_WIDGET (self->downloads.spinner), GTK_ALIGN_CENTER);
+    gtk_box_append (GTK_BOX (icon_row), GTK_WIDGET (self->downloads.spinner));
 
     gtk_menu_button_set_child (GTK_MENU_BUTTON (self->downloads.button),
                                icon_row);
-    gtk_widget_add_css_class (self->downloads.button, "flat");
+    gtk_widget_add_css_class (GTK_WIDGET (self->downloads.button), "flat");
     gtk_menu_button_set_always_show_arrow (
       GTK_MENU_BUTTON (self->downloads.button), FALSE);
-  gtk_widget_set_tooltip_text (self->downloads.button, _("Downloads"));
+  gtk_widget_set_tooltip_text (GTK_WIDGET (self->downloads.button), _("Downloads"));
     gtk_accessible_update_property (GTK_ACCESSIBLE (self->downloads.button),
                                     GTK_ACCESSIBLE_PROPERTY_LABEL, _("Downloads"),
                                     -1);
-    gtk_widget_set_visible (self->downloads.button, FALSE);
+    gtk_widget_set_visible (GTK_WIDGET (self->downloads.button), FALSE);
 
-    gtk_box_append (GTK_BOX (packed), self->downloads.button);
+    gtk_box_append (GTK_BOX (packed), GTK_WIDGET (self->downloads.button));
 
     gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
                                     GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
@@ -109,7 +109,7 @@ aml_main_window_build_ui (AmlMainWindow *self)
     gtk_scrolled_window_set_max_content_height (
       GTK_SCROLLED_WINDOW (scroller), 360);
     gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
-                                   self->downloads.list);
+                                   GTK_WIDGET (self->downloads.list));
     gtk_popover_set_child (GTK_POPOVER (popover), scroller);
     gtk_popover_set_has_arrow (GTK_POPOVER (popover), FALSE);
     gtk_menu_button_set_popover (GTK_MENU_BUTTON (self->downloads.button),
