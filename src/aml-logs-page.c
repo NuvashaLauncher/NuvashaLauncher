@@ -34,11 +34,30 @@ struct _AmlLogsPage
    * every line back. */
   GPtrArray *lines; /* char*, one per line, in order */
   gboolean filtered;
+  gboolean search_open;
 };
 
 G_DEFINE_FINAL_TYPE (AmlLogsPage, aml_logs_page, GTK_TYPE_BOX)
 
 static void scroll_to_end (AmlLogsPage *self);
+static void show_lines (AmlLogsPage *self);
+
+static void
+set_search_open (AmlLogsPage *self, gboolean open)
+{
+  self->search_open = open;
+  gtk_widget_set_visible (self->search_bar, open);
+
+  if (open)
+    gtk_widget_grab_focus (self->search_entry);
+  else
+    {
+      gtk_editable_set_text (GTK_EDITABLE (self->search_entry), "");
+      self->filtered = FALSE;
+      show_lines (self);
+      gtk_widget_grab_focus (GTK_WIDGET (self));
+    }
+}
 
 /* Launcher lines carry internal stream tags and some Minecraft versions
  * emit Log4j XML records. Keep those details for diagnostics internally,
@@ -296,8 +315,7 @@ on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED, guint keyval,
       scroll_to_end (self);
     }
 
-  gtk_widget_set_visible (self->search_bar, FALSE);
-  gtk_widget_grab_focus (GTK_WIDGET (self));
+  set_search_open (self, FALSE);
 
   return GDK_EVENT_STOP;
 }
@@ -307,8 +325,7 @@ on_search_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   AmlLogsPage *self = user_data;
 
-  gtk_widget_set_visible (self->search_bar, TRUE);
-  gtk_widget_grab_focus (self->search_entry);
+  set_search_open (self, !self->search_open);
 }
 
 /* ---------------------------------------------------------- *
