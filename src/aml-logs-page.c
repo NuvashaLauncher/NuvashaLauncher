@@ -466,6 +466,7 @@ aml_logs_page_new (AmlLauncher *launcher)
 {
   AmlLogsPage *self;
   GtkWidget *row;
+  GtkWidget *search_box;
   GtkWidget *actions;
   GtkWidget *card;
   GtkWidget *text;
@@ -490,12 +491,9 @@ aml_logs_page_new (AmlLauncher *launcher)
 
   self->state = gtk_label_new (NULL);
   gtk_widget_add_css_class (self->state, "heading");
-  gtk_box_append (GTK_BOX (row), self->state);
-
   self->detail = gtk_label_new (NULL);
   gtk_label_set_ellipsize (GTK_LABEL (self->detail), PANGO_ELLIPSIZE_END);
   gtk_widget_add_css_class (self->detail, "dim-label");
-  gtk_box_append (GTK_BOX (row), self->detail);
 
   self->clear = toolbar_button ("edit-clear-symbolic", _("Clear"),
                                 G_CALLBACK (on_clear_clicked), self);
@@ -508,8 +506,6 @@ aml_logs_page_new (AmlLauncher *launcher)
 
   self->search_button = toolbar_button ("system-search-symbolic", _("Search"),
                                         G_CALLBACK (on_search_clicked), self);
-  gtk_box_insert_child_after (GTK_BOX (row), self->search_button, NULL);
-
   /* Searching the log: a bar over the lines, closed until Ctrl+F opens
    * it. The lines are kept either way, so nothing here can lose one. */
    self->search_bar = gtk_search_entry_new ();
@@ -536,8 +532,11 @@ aml_logs_page_new (AmlLauncher *launcher)
    }
 
    gtk_widget_set_hexpand (self->search_bar, TRUE);
-   gtk_box_insert_child_after (GTK_BOX (row), self->search_bar,
-                               self->search_button);
+   search_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+   gtk_widget_set_hexpand (search_box, TRUE);
+   gtk_box_append (GTK_BOX (search_box), self->search_button);
+   gtk_box_append (GTK_BOX (search_box), self->search_bar);
+   gtk_box_append (GTK_BOX (row), search_box);
    gtk_box_append (GTK_BOX (row), actions);
    gtk_widget_set_hexpand (row, TRUE);
    gtk_box_append (GTK_BOX (self), row);
