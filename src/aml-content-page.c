@@ -3560,6 +3560,51 @@ on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
   return GDK_EVENT_STOP;
 }
 
+static GtkWidget *
+active_search_entry (AmlContentPage *self)
+{
+  const char *visible = self->stack != NULL
+    ? adw_view_stack_get_visible_child_name (ADW_VIEW_STACK (self->stack))
+    : NULL;
+
+  return g_strcmp0 (visible, "browse") == 0
+           ? self->search_entry : self->installed_search_entry;
+}
+
+static void
+on_content_search_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+  GtkWidget *entry = active_search_entry (self);
+
+  if (entry != NULL)
+    {
+      gtk_widget_set_visible (entry, TRUE);
+      gtk_widget_grab_focus (entry);
+    }
+}
+
+static gboolean
+on_content_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
+                       guint keyval, guint keycode G_GNUC_UNUSED,
+                       GdkModifierType state, gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+  GtkWidget *entry;
+
+  if (keyval != GDK_KEY_f || !(state & GDK_CONTROL_MASK))
+    return GDK_EVENT_PROPAGATE;
+
+  entry = active_search_entry (self);
+  if (entry != NULL)
+    {
+      gtk_widget_set_visible (entry, TRUE);
+      gtk_widget_grab_focus (entry);
+    }
+
+  return GDK_EVENT_STOP;
+}
+
 static void categories_ready (GObject *source, GAsyncResult *result,
                               gpointer user_data);
 static void fill_categories (AmlContentPage *self, GPtrArray *categories);
@@ -4296,6 +4341,9 @@ build_installed (AmlContentPage *self)
   GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   GtkWidget *actions = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   GtkWidget *search_bar = gtk_search_entry_new ();
+  GtkWidget *search_button = toolbar_button (
+    "system-search-symbolic", _("Search"),
+    G_CALLBACK (on_content_search_clicked), self);
   GtkWidget *scroller = gtk_scrolled_window_new ();
   GtkWidget *content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   AdwPreferencesGroup *group =
@@ -4305,11 +4353,13 @@ build_installed (AmlContentPage *self)
    self->installed_search_bar = search_bar;
    self->installed_search_entry = search_bar;
    gtk_widget_set_hexpand (search_bar, TRUE);
-   gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_bar),
-                                           _("Search"));
+    gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_bar),
+                                            _("Search"));
+    gtk_widget_set_visible (search_bar, FALSE);
    g_signal_connect (search_bar, "changed",
                      G_CALLBACK (on_installed_search_changed), self);
-   gtk_box_append (GTK_BOX (actions), search_bar);
+    gtk_box_append (GTK_BOX (actions), search_button);
+    gtk_box_append (GTK_BOX (actions), search_bar);
 
    self->update_all = toolbar_button ("software-update-available-symbolic", _("Update All"),
                                       G_CALLBACK (on_update_all_clicked), self);
@@ -4412,6 +4462,9 @@ build_browse (AmlContentPage *self)
   GtkWidget *box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   GtkWidget *top = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   GtkWidget *search_bar = gtk_search_entry_new ();
+  GtkWidget *search_button = toolbar_button (
+    "system-search-symbolic", _("Search"),
+    G_CALLBACK (on_content_search_clicked), self);
   GtkWidget *filter_button = gtk_menu_button_new ();
   GtkWidget *popover = gtk_popover_new ();
   GtkWidget *filter_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
@@ -4440,7 +4493,8 @@ build_browse (AmlContentPage *self)
      search does, rather than a fixed width of its own. */
   gtk_widget_set_hexpand (search_bar, TRUE);
   gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_bar),
-                                           _("Search"));
+                                            _("Search"));
+  gtk_widget_set_visible (search_bar, FALSE);
 
   g_signal_connect (search_bar, "changed",
                     G_CALLBACK (on_search_changed), self);
@@ -4452,6 +4506,7 @@ build_browse (AmlContentPage *self)
     g_signal_connect (keys, "key-pressed", G_CALLBACK (on_search_key), self);
   }
 
+  gtk_box_append (GTK_BOX (top), search_button);
   gtk_box_append (GTK_BOX (top), search_bar);
 
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (filter_button),
@@ -4659,6 +4714,15 @@ build_bar (AmlContentPage *self)
 
   self->bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
+  {
+    GtkEventController *keys = gtk_event_controller_key_new ();
+
+    gtk_event_controller_set_propagation_phase (keys, GTK_PHASE_CAPTURE);
+    gtk_widget_add_controller (GTK_WIDGET (self), keys);
+    g_signal_connect (keys, "key-pressed",
+                      G_CALLBACK (on_content_search_key), self);
+  }
+
   /* The actions go in before this and the switcher after it, so the
      switcher ends up at the right end of the row however many actions
      there are. Aligning inside a box would not move it: a box gives every
@@ -4674,8 +4738,8 @@ build_bar (AmlContentPage *self)
 
   self->switcher_installed =
      switcher_button ("view-list-symbolic", "Installed");
-  self->switcher_browse =
-    switcher_button ("system-search-symbolic", "Browse");
+   self->switcher_browse =
+     switcher_button ("applications-games-symbolic", "Browse");
 
   gtk_toggle_button_set_group (GTK_TOGGLE_BUTTON (self->switcher_browse),
                                GTK_TOGGLE_BUTTON (self->switcher_installed));
