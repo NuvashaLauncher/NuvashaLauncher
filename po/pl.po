@@ -542,3 +542,6 @@ msgstr "%s  ·  autor: %s"
 
 msgid "by %s"
 msgstr "autor: %s"
+
+msgid "%s downloads"
+msgstr "%s pobrań"

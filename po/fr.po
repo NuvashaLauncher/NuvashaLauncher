@@ -542,3 +542,6 @@ msgstr "%s  ·  par %s"
 
 msgid "by %s"
 msgstr "par %s"
+
+msgid "%s downloads"
+msgstr "%s téléchargements"
