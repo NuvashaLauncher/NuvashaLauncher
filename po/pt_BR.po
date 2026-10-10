@@ -283,6 +283,15 @@ msgstr "Nenhuma versão compatível encontrada para o Minecraft %s."
 msgid "Add Offline Account"
 msgstr "Adicionar conta offline"
 
+msgid "a name can only hold letters, digits and underscores"
+msgstr "um nome pode conter apenas letras, números e sublinhados"
+
+msgid "a name cannot be empty"
+msgstr "o nome não pode estar vazio"
+
+msgid "a name has to be 3 to 16 characters long"
+msgstr "o nome deve ter de 3 a 16 caracteres"
+
 msgid "Add"
 msgstr "Adicionar"
 

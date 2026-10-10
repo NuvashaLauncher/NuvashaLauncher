@@ -491,7 +491,12 @@ aml_auth_owns_minecraft_from_json (const char *json, gssize length,
   {
     JsonObject *object = json_node_get_object (json_parser_get_root (parser));
 
-    items = json_object_get_member (object, "items");
+    /* The service has used both names over time. Current responses call the
+     * collection "entitlements" and its entry field "name"; older
+     * responses used "items" and "entitlementName". */
+    items = json_object_get_member (object, "entitlements");
+    if (items == NULL)
+      items = json_object_get_member (object, "items");
 
     /* A document with no list in it is a refusal rather than a list of
        nothing, and the two say different things. */
@@ -517,7 +522,9 @@ aml_auth_owns_minecraft_from_json (const char *json, gssize length,
       if (!JSON_NODE_HOLDS_OBJECT (item))
         continue;
 
-      name = string_of (json_node_get_object (item), "entitlementName");
+       name = string_of (json_node_get_object (item), "name");
+       if (name == NULL)
+         name = string_of (json_node_get_object (item), "entitlementName");
 
       /* The store names it minecraft_java; the older names are still
          published by some accounts, so they count as owning it too. */
@@ -1296,25 +1303,29 @@ ask_minecraft (AuthRequest *self)
   g_autoptr (JsonBuilder) builder = json_builder_new ();
   g_autoptr (JsonGenerator) generator = json_generator_new ();
   g_autoptr (JsonNode) root = NULL;
-  g_autofree char *identity = NULL;
+  g_autofree char *xtoken = NULL;
   g_autofree char *body = NULL;
   const char *headers[] = { "Accept", "application/json", NULL };
 
-  /* The documented request carries the identity token and nothing else:
-     the services read who the player is out of it, and an Authorization
-     header they did not ask for is not part of it. */
-  identity = aml_auth_identity_token (self->xbl_user_hash, self->xsts_token);
+  /* Current Minecraft services use the launcher login contract. Prism
+   * Launcher sends the XBL3 token and explicitly identifies the PC launcher;
+   * the older login_with_xbox identityToken endpoint can return a token that
+   * is not accepted by the entitlement/profile services. */
+  xtoken = g_strdup_printf ("XBL3.0 x=%s;%s", self->xbl_user_hash,
+                            self->xsts_token);
 
   json_builder_begin_object (builder);
-  json_builder_set_member_name (builder, "identityToken");
-  json_builder_add_string_value (builder, identity);
+  json_builder_set_member_name (builder, "xtoken");
+  json_builder_add_string_value (builder, xtoken);
+  json_builder_set_member_name (builder, "platform");
+  json_builder_add_string_value (builder, "PC_LAUNCHER");
   json_builder_end_object (builder);
 
   root = json_builder_get_root (builder);
   json_generator_set_root (generator, root);
   body = json_generator_to_data (generator, NULL);
 
-  send (self, AML_MINECRAFT_SERVICES_URL "/authentication/login_with_xbox",
+  send (self, AML_MINECRAFT_SERVICES_URL "/launcher/login",
         SOUP_METHOD_POST, body, "application/json", headers, STEP_MINECRAFT);
 }
 
@@ -1359,16 +1370,20 @@ static void
 ask_entitlements (AuthRequest *self)
 {
   g_autofree char *authorization = NULL;
+  g_autofree char *url = NULL;
+  g_autofree char *request_id = g_uuid_string_random ();
   const char *headers[] = { "Authorization", NULL, "Accept",
                             "application/json", NULL };
 
   authorization = g_strconcat ("Bearer ", self->mc_access_token, NULL);
   headers[1] = authorization;
 
-  /* What the account owns is asked before the profile is: an account that
-     does not own the game has nothing to be launched with, and a user is
-     better off being told that than shown a sign-in that worked. */
-  send (self, AML_MINECRAFT_SERVICES_URL "/entitlements/mcstore",
+  /* Prism and the current Minecraft services use the license endpoint with
+     a request id. The older mcstore endpoint can return a legacy-shaped
+     response or reject otherwise valid accounts. */
+  url = g_strdup_printf (AML_MINECRAFT_SERVICES_URL
+                         "/entitlements/license?requestId=%s", request_id);
+  send (self, url,
         SOUP_METHOD_GET, NULL, NULL, headers, STEP_ENTITLEMENTS);
 }
 

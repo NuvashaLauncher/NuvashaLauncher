@@ -283,6 +283,15 @@ msgstr "Не знайдено сумісної версії для Minecraft %s.
 msgid "Add Offline Account"
 msgstr "Додати офлайн-обліковий запис"
 
+msgid "a name can only hold letters, digits and underscores"
+msgstr "ім’я може містити лише літери, цифри та символи підкреслення"
+
+msgid "a name cannot be empty"
+msgstr "ім’я не може бути порожнім"
+
+msgid "a name has to be 3 to 16 characters long"
+msgstr "ім’я має містити від 3 до 16 символів"
+
 msgid "Add"
 msgstr "Додати"
 

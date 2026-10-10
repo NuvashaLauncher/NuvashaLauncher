@@ -105,21 +105,17 @@ aml_offline_account_dialog_init (AmlOfflineAccountDialog *self)
   self->name_row = adw_entry_row_new ();
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->name_row),
                                  "Name");
+  adw_entry_row_set_max_length (ADW_ENTRY_ROW (self->name_row), 16);
   adw_entry_row_set_activates_default (ADW_ENTRY_ROW (self->name_row), TRUE);
 
   GtkWidget *group = adw_preferences_group_new ();
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), self->name_row);
 
-  GtkWidget *page = adw_preferences_page_new ();
-  gtk_widget_set_vexpand (page, TRUE);
-  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
-                            ADW_PREFERENCES_GROUP (group));
-
   self->error_label = gtk_label_new (NULL);
   gtk_label_set_wrap (GTK_LABEL (self->error_label), TRUE);
   gtk_label_set_xalign (GTK_LABEL (self->error_label), 0.0);
-  gtk_widget_set_margin_start (self->error_label, 24);
-  gtk_widget_set_margin_end (self->error_label, 24);
+  gtk_widget_add_css_class (self->error_label, "error");
+  gtk_widget_set_valign (self->error_label, GTK_ALIGN_START);
   gtk_widget_set_visible (self->error_label, FALSE);
 
   GtkWidget *cancel_button = gtk_button_new_with_label (_("Cancel"));
@@ -132,15 +128,20 @@ aml_offline_account_dialog_init (AmlOfflineAccountDialog *self)
                     self);
 
   GtkWidget *buttons = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  gtk_widget_set_halign (buttons, GTK_ALIGN_END);
-  gtk_widget_set_margin_start (buttons, 24);
-  gtk_widget_set_margin_end (buttons, 24);
-  gtk_widget_set_margin_bottom (buttons, 24);
+  gtk_widget_set_halign (buttons, GTK_ALIGN_CENTER);
   gtk_box_append (GTK_BOX (buttons), cancel_button);
   gtk_box_append (GTK_BOX (buttons), self->add_button);
 
-  GtkWidget *content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-  gtk_box_append (GTK_BOX (content), page);
+  /* Keep this form like the export-metadata form: a natural vertical box
+     containing the field group, the validation message, and the buttons.
+     A preferences page here adds a scrolling allocation around the entry
+     and can let the message paint over the row. */
+  GtkWidget *content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+  gtk_widget_set_margin_start (content, 12);
+  gtk_widget_set_margin_end (content, 12);
+  gtk_widget_set_margin_top (content, 12);
+  gtk_widget_set_margin_bottom (content, 12);
+  gtk_box_append (GTK_BOX (content), group);
   gtk_box_append (GTK_BOX (content), self->error_label);
   gtk_box_append (GTK_BOX (content), buttons);
   adw_dialog_set_child (ADW_DIALOG (self), content);
