@@ -6,6 +6,7 @@
 #define AML_MAIN_WINDOW_PRIVATE_H
 
 #include "aml-main-window.h"
+#include "aml-main-window-model.h"
 #include "aml-launcher.h"
 #include "aml-accounts.h"
 #include "aml-downloads.h"
@@ -16,20 +17,7 @@ struct _AmlMainWindow
 {
   AdwApplicationWindow parent_instance;
 
-  /* Shared services used by the window, its dialogs, and its launchers. */
-  struct {
-    AmlInstanceManager *manager;
-    AmlSettings *settings;
-    AmlAccounts *accounts;
-    AmlUsersPopover *users_popover;
-  } services;
-
-  /* Per-instance launchers and dialogs. Both maps are keyed by instance
-   * id so a row, launcher, and dialog always refer to the same instance. */
-  struct {
-    GHashTable *launchers;        /* id -> owned AmlLauncher */
-    GHashTable *instance_dialogs; /* id -> borrowed AdwDialog */
-  } instances;
+  AmlMainWindowModel *model;
 
   /* Core window UI state. */
   struct {
