@@ -1418,10 +1418,10 @@ on_details_answer (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   operation_done (user_data);
 }
 
-/* The icon of the project, kept in the shared icon cache. It is put on
- * the instance that the pack becomes, so an instance made from a pack
- * shows the pack's icon like any other instance icon. The reference the
- * load holds keeps the dialog alive until the answer is in. */
+/* The icon of the project is previewed from the shared icon cache. It is
+ * copied into the new instance before that instance points at it: clearing
+ * AML's cache must never remove an instance's icon. The reference the load
+ * holds keeps the dialog alive until the answer is in. */
 static void
 project_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                     gpointer user_data)
@@ -1716,17 +1716,38 @@ on_install_done (GObject *source G_GNUC_UNUSED,
       return;
     }
 
-  /* The instance shows the pack's icon. It is set before this finishes; a
-     save that fails leaves the instance without one rather than losing
-     the install. */
+  /* The instance owns its icon. Never leave its property pointing into the
+     shared cache, because cache cleanup is allowed to remove that tree. */
   if (self->icon_path != NULL &&
       g_file_test (self->icon_path, G_FILE_TEST_IS_REGULAR))
     {
-      g_object_set (instance, "icon", self->icon_path, NULL);
+      g_autofree char *directory = NULL;
+      g_autofree char *instance_icon = NULL;
+      g_autoptr (GFile) source = NULL;
+      g_autoptr (GFile) target = NULL;
+      gboolean icon_copied = FALSE;
 
-      if (!aml_instance_manager_save (self->manager, &error))
-        g_warning ("the icon of the new instance could not be saved: %s",
-                   error->message);
+      g_object_get (instance, "directory", &directory, NULL);
+      instance_icon = g_build_filename (directory, "icon.png", NULL);
+      source = g_file_new_for_path (self->icon_path);
+      target = g_file_new_for_path (instance_icon);
+
+      if (!g_file_copy (source, target, G_FILE_COPY_OVERWRITE, NULL, NULL,
+                        NULL, &error))
+        g_warning ("the icon of the new instance could not be copied: %s",
+                   error != NULL ? error->message : "unknown error");
+      else
+        {
+          g_object_set (instance, "icon", instance_icon, NULL);
+          icon_copied = TRUE;
+        }
+
+      if (icon_copied)
+        {
+          if (!aml_instance_manager_save (self->manager, &error))
+            g_warning ("the icon of the new instance could not be saved: %s",
+                       error->message);
+        }
     }
 
   install_job_free (job);
