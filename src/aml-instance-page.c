@@ -762,7 +762,9 @@ on_export_file_chosen (GObject *source, GAsyncResult *result,
         aml_modpack_export_async (self->instance, path, self->export_name,
                                   self->export_summary, self->export_version,
                                   self->export_include_transient,
-                                  on_export_progress, self, NULL,
+                                  on_export_progress, self,
+                                  aml_download_get_cancellable (
+                                    self->export_download),
                                   on_export_done, g_object_ref (self));
       }
   }
