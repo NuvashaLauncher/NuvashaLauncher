@@ -119,12 +119,12 @@ install_file_of (AmlModrinthVersion *version, const char *replaces,
  AmlContentFile *
 installed_project_file (AmlContentPage *self, const char *project_id)
 {
-  if (self == NULL || project_id == NULL || self->files == NULL)
+  if (self == NULL || project_id == NULL || self->installed.files == NULL)
     return NULL;
 
-  for (guint i = 0; i < self->files->len; i++)
+  for (guint i = 0; i < self->installed.files->len; i++)
     {
-      AmlContentFile *file = g_ptr_array_index (self->files, i);
+      AmlContentFile *file = g_ptr_array_index (self->installed.files, i);
 
       if (g_strcmp0 (file->project_id, project_id) == 0)
         return file;
@@ -140,9 +140,9 @@ remove_duplicate_project_files (AmlContentPage *self, const char *project_id,
   if (self == NULL || project_id == NULL)
     return;
 
-  for (guint i = 0; i < self->files->len; i++)
+  for (guint i = 0; i < self->installed.files->len; i++)
     {
-      AmlContentFile *installed = g_ptr_array_index (self->files, i);
+      AmlContentFile *installed = g_ptr_array_index (self->installed.files, i);
       g_autoptr (GFile) old = NULL;
       g_autoptr (GError) error = NULL;
 

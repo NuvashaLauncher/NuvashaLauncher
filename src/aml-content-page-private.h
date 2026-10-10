@@ -54,15 +54,21 @@ struct _AmlContentPage
   GtkWidget *switcher;
   GtkWidget *switcher_installed; /* the Installed button of the pair */
   GtkWidget *switcher_browse;    /* the Browse button of the pair */
-  GtkWidget *installed_actions;
-  GtkWidget *installed_search_bar;
-  GtkWidget *installed_search_entry;
+  struct {
+    GtkWidget *actions;
+    GtkWidget *search_bar;
+    GtkWidget *search_entry;
+    GtkWidget *group;
+    GtkWidget *scroller;
+    GtkWidget *status;
+    GtkWidget *update_all;
+    GPtrArray *files;     /* AmlContentFile* */
+    GHashTable *rows;     /* path -> row */
+    GList *rows_list;     /* rows of the Installed group */
+    GCancellable *scan;
+    gboolean identifying;
+  } installed;
   GtkWidget *browse_actions;
-
-  GtkWidget *installed_group;
-  GtkWidget *installed_scroller;
-  GtkWidget *installed_status;
-  GtkWidget *update_all;
 
   /* Update All and selected-version installs share this workflow state. */
   struct {
@@ -107,17 +113,8 @@ struct _AmlContentPage
     GCancellable *cancellable;
   } browse;
 
-  /* What the folder holds, and the row of each file. The rows point
-   * into these, so both are only replaced once the rows that point at
-   * them are gone. */
-  GPtrArray *files;     /* AmlContentFile* */
-  GHashTable *rows;     /* path -> row */
-  GList *installed_rows; /* the rows of the Installed group */
-   /* Browse state is grouped below. */
+  /* Browse state is grouped below. */
 
-  guint debounce_source;
-  GCancellable *scan;     /* the folder, its hashes and their lookups */
-  gboolean identifying;   /* installed files are still being resolved */
 
   /* State for the currently open project and its details page. */
   struct {
