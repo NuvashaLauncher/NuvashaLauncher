@@ -1346,6 +1346,66 @@ extract_overrides (const char *archive_path,
   return TRUE;
 }
 
+typedef struct {
+  char *archive_path;
+  char *directory;
+} ExtractRun;
+
+static void
+extract_run_free (ExtractRun *run)
+{
+  g_free (run->archive_path);
+  g_free (run->directory);
+  g_free (run);
+}
+
+static void
+extract_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
+                gpointer task_data, GCancellable *cancellable)
+{
+  ExtractRun *run = task_data;
+  g_autoptr (GError) error = NULL;
+
+  if (g_cancellable_is_cancelled (cancellable))
+    {
+      g_task_return_new_error (task, AML_MODPACK_ERROR,
+                               AML_MODPACK_ERROR_CANCELLED, "cancelled");
+      return;
+    }
+
+  if (!extract_overrides (run->archive_path, run->directory, &error))
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  if (g_cancellable_is_cancelled (cancellable))
+    g_task_return_new_error (task, AML_MODPACK_ERROR,
+                             AML_MODPACK_ERROR_CANCELLED, "cancelled");
+  else
+    g_task_return_boolean (task, TRUE);
+}
+
+static void
+extract_overrides_async (const char *archive_path, const char *directory,
+                         GCancellable *cancellable,
+                         GAsyncReadyCallback callback, gpointer user_data)
+{
+  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
+  ExtractRun *run = g_new0 (ExtractRun, 1);
+
+  run->archive_path = g_strdup (archive_path);
+  run->directory = g_strdup (directory);
+  g_task_set_task_data (task, run, (GDestroyNotify) extract_run_free);
+  g_task_run_in_thread (task, extract_thread);
+}
+
+static gboolean
+extract_overrides_finish (GAsyncResult *result, GError **error)
+{
+  return g_task_propagate_boolean (G_TASK (result), error);
+}
+
 /* ---------------------------------------------------------- *
  * The tree one install makes, to leave nothing of on failure
  * ---------------------------------------------------------- */
@@ -1453,6 +1513,7 @@ static void install_file_done (GObject *, GAsyncResult *, gpointer);
 static void install_file_verified (GObject *, GAsyncResult *, gpointer);
 static void install_loader_versions (GObject *, GAsyncResult *, gpointer);
 static void install_register (InstallRun *run);
+static void overrides_extracted (GObject *, GAsyncResult *, gpointer);
 
 static void
 install_run_free (InstallRun *run)
@@ -1646,15 +1707,8 @@ install_next (InstallRun *run)
 {
   if (run->current >= run->total)
     {
-      g_autoptr (GError) error = NULL;
-
-      if (!extract_overrides (run->pack->archive_path, run->temp, &error))
-        {
-          install_fail (run, g_steal_pointer (&error));
-          return;
-        }
-
-      install_after_overrides (run);
+      extract_overrides_async (run->pack->archive_path, run->temp,
+                               run->cancellable, overrides_extracted, run);
       return;
     }
 
@@ -1664,6 +1718,22 @@ install_next (InstallRun *run)
   run->saw_hash_error = FALSE;
 
   dispatch_download (run);
+}
+
+static void
+overrides_extracted (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                     gpointer user_data)
+{
+  InstallRun *run = user_data;
+  g_autoptr (GError) error = NULL;
+
+  if (!extract_overrides_finish (result, &error))
+    {
+      install_fail (run, g_steal_pointer (&error));
+      return;
+    }
+
+  install_after_overrides (run);
 }
 
 static void
