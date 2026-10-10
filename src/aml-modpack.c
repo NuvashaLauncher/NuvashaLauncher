@@ -2296,6 +2296,8 @@ export_indexed_files (ExportRun *run, GCancellable *cancellable, GError **error)
           const char *env_client = NULL;
           const char *env_server = NULL;
           g_autofree char *source = NULL;
+          g_autofree char *disabled_source = NULL;
+          gboolean disabled = FALSE;
           GStatBuf stat_buf;
           JsonObject *file = NULL;
           JsonObject *hashes = NULL;
@@ -2318,6 +2320,18 @@ export_indexed_files (ExportRun *run, GCancellable *cancellable, GError **error)
           source = g_build_filename (run->instance_directory, folders[folder_index],
                                      filename, NULL);
 
+          if (g_stat (source, &stat_buf) != 0 || !S_ISREG (stat_buf.st_mode))
+            {
+              disabled_source = g_strconcat (source, ".disabled", NULL);
+              if (g_stat (disabled_source, &stat_buf) == 0 &&
+                  S_ISREG (stat_buf.st_mode))
+                {
+                  g_free (source);
+                  source = g_steal_pointer (&disabled_source);
+                  disabled = TRUE;
+                }
+            }
+
           if (*filename == '\0' || *sha1 == '\0' || *sha512 == '\0' ||
               *url == '\0' || !aml_modpack_download_url_allowed (url) ||
               g_stat (source, &stat_buf) != 0 || !S_ISREG (stat_buf.st_mode))
@@ -2337,8 +2351,10 @@ export_indexed_files (ExportRun *run, GCancellable *cancellable, GError **error)
           json_object_set_array_member (file, "downloads", downloads);
           {
             JsonObject *env = json_object_new ();
-            json_object_set_string_member (env, "client", env_client);
-            json_object_set_string_member (env, "server", env_server);
+            json_object_set_string_member (env, "client",
+                                           disabled ? "optional" : env_client);
+            json_object_set_string_member (env, "server",
+                                           disabled ? "optional" : env_server);
             json_object_set_object_member (file, "env", env);
           }
           json_object_set_int_member (file, "fileSize", stat_buf.st_size);
@@ -2346,6 +2362,10 @@ export_indexed_files (ExportRun *run, GCancellable *cancellable, GError **error)
           g_hash_table_add (run->indexed_paths,
                             g_build_filename (folders[folder_index], filename,
                                               NULL));
+          if (disabled)
+            g_hash_table_add (run->indexed_paths,
+                              g_strconcat (folders[folder_index], G_DIR_SEPARATOR_S,
+                                           filename, ".disabled", NULL));
         }
     }
 
