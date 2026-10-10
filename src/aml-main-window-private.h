@@ -33,8 +33,8 @@ struct _AmlMainWindow
 
   /* Core window UI state. */
   struct {
-    GtkWidget *stack;  /* empty state or instance list */
-    GtkWidget *banner; /* launch failures and crash details */
+    GtkStack *stack;    /* empty state or instance list */
+    AdwBanner *banner;  /* launch failures and crash details */
   } ui;
 
   /* What is downloading right now, shown next to the "+" menu. */
