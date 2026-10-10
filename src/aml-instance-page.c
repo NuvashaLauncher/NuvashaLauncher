@@ -810,11 +810,20 @@ export_metadata_free (ExportMetadata *data)
   g_free (data);
 }
 
+static gboolean
+export_metadata_free_idle (gpointer user_data)
+{
+  export_metadata_free (user_data);
+  return G_SOURCE_REMOVE;
+}
+
 static void
 on_export_metadata_closed (AdwDialog *dialog G_GNUC_UNUSED,
                            gpointer user_data)
 {
-  export_metadata_free (user_data);
+  /* Adwaita is still completing its close signal while this callback runs.
+   * Release the dialog after the close sequence has finished. */
+  g_idle_add (export_metadata_free_idle, user_data);
 }
 
 static void
@@ -862,7 +871,7 @@ show_export_metadata (AmlInstancePage *self)
   g_autofree char *name = instance_string (self->instance, "name");
 
   data->page = g_object_ref (self);
-  data->dialog = ADW_DIALOG (adw_dialog_new ());
+  data->dialog = ADW_DIALOG (g_object_ref_sink (adw_dialog_new ()));
   data->name = ADW_ENTRY_ROW (adw_entry_row_new ());
   data->summary = ADW_ENTRY_ROW (adw_entry_row_new ());
   data->version = ADW_ENTRY_ROW (adw_entry_row_new ());
