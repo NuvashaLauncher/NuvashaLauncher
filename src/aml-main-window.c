@@ -636,12 +636,15 @@ on_shortcuts (GSimpleAction *action G_GNUC_UNUSED,
   adw_dialog_present (dialog, GTK_WIDGET (self));
 }
 
+static void find_mapped_instance_page (GtkWidget *, AmlInstancePage **);
+
 static void
 on_search_action (GSimpleAction *action G_GNUC_UNUSED,
                   GVariant *parameter G_GNUC_UNUSED, gpointer user_data)
 {
   AmlMainWindow *self = user_data;
   GtkWidget *focus = gtk_root_get_focus (GTK_ROOT (self));
+  AmlInstancePage *fallback = NULL;
 
   for (GtkWidget *widget = focus; widget != NULL;
        widget = gtk_widget_get_parent (widget))
@@ -650,6 +653,28 @@ on_search_action (GSimpleAction *action G_GNUC_UNUSED,
         aml_instance_page_focus_search (AML_INSTANCE_PAGE (widget));
         return;
       }
+
+  find_mapped_instance_page (GTK_WIDGET (self), &fallback);
+  if (fallback != NULL)
+    aml_instance_page_focus_search (fallback);
+}
+
+static void
+find_mapped_instance_page (GtkWidget *widget, AmlInstancePage **found)
+{
+  if (*found != NULL || !gtk_widget_get_visible (widget) ||
+      !gtk_widget_get_mapped (widget))
+    return;
+
+  if (AML_IS_INSTANCE_PAGE (widget))
+    {
+      *found = AML_INSTANCE_PAGE (widget);
+      return;
+    }
+
+  for (GtkWidget *child = gtk_widget_get_first_child (widget); child != NULL;
+       child = gtk_widget_get_next_sibling (child))
+    find_mapped_instance_page (child, found);
 }
 
 static const GActionEntry window_entries[] = {
