@@ -221,14 +221,14 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
           /* A batch stops at the first file that fails rather than going
              on to the next with half of it missing. */
-          if (page->install.updating)
+          if (page->install_model->updating)
             {
-              g_clear_pointer (&page->install.updates, g_ptr_array_unref);
-              page->install.update_index = 0;
-              page->install.updating = FALSE;
+              g_clear_pointer (&page->install_model->updates, g_ptr_array_unref);
+              page->install_model->update_index = 0;
+              page->install_model->updating = FALSE;
             }
 
-          if (page->install.picking)
+          if (page->install_model->picking)
             batch_stopped (page);
 
           set_busy (page, FALSE);
@@ -309,11 +309,11 @@ fetch_next (FetchRun *run)
     {
       if (self != NULL)
         {
-          if (self->install.updating)
+          if (self->install_model->updating)
             /* One update of the batch is in: start the next one. The
                list is read once, when the whole batch is done. */
             update_batch_next (self);
-          else if (self->install.picking)
+          else if (self->install_model->picking)
             /* One pick of the batch is in: the next one follows. */
             batch_next (self);
           else
@@ -607,7 +607,7 @@ show_plan (AmlContentPage *self, PlanRun *plan)
   /* An update of the whole list was confirmed once, as a whole: this plan
      is not asked for again, it is simply carried out. So is one pick of a
      confirmed batch of them. */
-  if (self->install.updating || self->install.picking)
+  if (self->install_model->updating || self->install_model->picking)
     {
       start_fetch (self, plan->files);
       plan->files = NULL; /* the fetch owns them now */
@@ -819,12 +819,12 @@ pick_free (Pick *pick)
 static Pick *
 pick_of_project (AmlContentPage *self, const char *project_id)
 {
-  if (self->install.picks == NULL || project_id == NULL)
+  if (self->install_model->picks == NULL || project_id == NULL)
     return NULL;
 
-  for (guint i = 0; i < self->install.picks->len; i++)
+  for (guint i = 0; i < self->install_model->picks->len; i++)
     {
-      Pick *pick = g_ptr_array_index (self->install.picks, i);
+      Pick *pick = g_ptr_array_index (self->install_model->picks, i);
 
       if (g_strcmp0 (pick->project_id, project_id) == 0)
         return pick;
@@ -877,7 +877,7 @@ refresh_pick_check (AmlContentPage *self)
 void
 aml_content_page_refresh_picks (AmlContentPage *self)
 {
-  guint count = self->install.picks != NULL ? self->install.picks->len : 0;
+  guint count = self->install_model->picks != NULL ? self->install_model->picks->len : 0;
   if (self->pick_badge != NULL)
     {
       g_autofree char *number = g_strdup_printf (
@@ -916,7 +916,7 @@ pick_add (AmlContentPage *self, AmlModrinthVersion *version)
 {
   Pick *pick = NULL;
 
-  if (self->install.picks == NULL || version == NULL || version->project_id == NULL)
+  if (self->install_model->picks == NULL || version == NULL || version->project_id == NULL)
     return;
 
   pick = pick_of_project (self, version->project_id);
@@ -928,7 +928,7 @@ pick_add (AmlContentPage *self, AmlModrinthVersion *version)
       if (pick_is_version (pick, version))
         return;
 
-      g_ptr_array_remove (self->install.picks, pick);
+      g_ptr_array_remove (self->install_model->picks, pick);
     }
 
   pick = g_new0 (Pick, 1);
@@ -937,7 +937,7 @@ pick_add (AmlContentPage *self, AmlModrinthVersion *version)
                             ? self->project.current_project_title
                             : version_name_of (version));
   pick->version = aml_modrinth_version_copy (version);
-  g_ptr_array_add (self->install.picks, pick);
+  g_ptr_array_add (self->install_model->picks, pick);
 }
 
 /* The project of @version has nothing picked any more. Only its own
@@ -947,13 +947,13 @@ pick_remove (AmlContentPage *self, AmlModrinthVersion *version)
 {
   Pick *pick = NULL;
 
-  if (self->install.picks == NULL || version == NULL)
+  if (self->install_model->picks == NULL || version == NULL)
     return;
 
   pick = pick_of_project (self, version->project_id);
 
   if (pick_is_version (pick, version))
-    g_ptr_array_remove (self->install.picks, pick);
+    g_ptr_array_remove (self->install_model->picks, pick);
 }
 
 /* What the confirmation is answered with. The list was taken out of the
@@ -970,10 +970,10 @@ on_batch_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
     {
       /* Nothing was installed, so the list the question was about goes
          back to the page with its checkmarks as they were. */
-      if (self->install.batch != NULL)
+      if (self->install_model->batch != NULL)
         {
-          g_clear_pointer (&self->install.picks, g_ptr_array_unref);
-          self->install.picks = g_steal_pointer (&self->install.batch);
+          g_clear_pointer (&self->install_model->picks, g_ptr_array_unref);
+          self->install_model->picks = g_steal_pointer (&self->install_model->batch);
           aml_content_page_refresh_picks (self);
         }
 
@@ -981,14 +981,14 @@ on_batch_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
       return;
     }
 
-  if (self->install.batch == NULL)
+  if (self->install_model->batch == NULL)
     {
       g_object_unref (self);
       return;
     }
 
-  self->install.picking = TRUE;
-  self->install.pick_index = 0;
+  self->install_model->picking = TRUE;
+  self->install_model->pick_index = 0;
   batch_next (self);
 
   g_object_unref (self);
@@ -1002,13 +1002,13 @@ batch_next (AmlContentPage *self)
 {
   Pick *pick = NULL;
 
-  if (self->install.batch == NULL || self->install.pick_index >= self->install.batch->len)
+  if (self->install_model->batch == NULL || self->install_model->pick_index >= self->install_model->batch->len)
     {
-      guint done = self->install.batch != NULL ? self->install.batch->len : 0;
+      guint done = self->install_model->batch != NULL ? self->install_model->batch->len : 0;
 
-      g_clear_pointer (&self->install.batch, g_ptr_array_unref);
-      self->install.picking = FALSE;
-      self->install.pick_index = 0;
+      g_clear_pointer (&self->install_model->batch, g_ptr_array_unref);
+      self->install_model->picking = FALSE;
+      self->install_model->pick_index = 0;
       set_busy (self, FALSE);
 
       if (done > 0)
@@ -1023,8 +1023,8 @@ batch_next (AmlContentPage *self)
       return;
     }
 
-  pick = g_ptr_array_index (self->install.batch, self->install.pick_index);
-  self->install.pick_index++;
+  pick = g_ptr_array_index (self->install_model->batch, self->install_model->pick_index);
+  self->install_model->pick_index++;
 
   set_busy (self, TRUE);
   start_plan (self, aml_modrinth_version_copy (pick->version), pick->title,
@@ -1036,16 +1036,16 @@ batch_next (AmlContentPage *self)
 void
 batch_stopped (AmlContentPage *self)
 {
-  g_clear_pointer (&self->install.batch, g_ptr_array_unref);
-  self->install.picking = FALSE;
-  self->install.pick_index = 0;
+  g_clear_pointer (&self->install_model->batch, g_ptr_array_unref);
+  self->install_model->picking = FALSE;
+  self->install_model->pick_index = 0;
 }
 
 void
 aml_content_page_clear_picks (AmlContentPage *self)
 {
-  g_clear_pointer (&self->install.picks, g_ptr_array_unref);
-  self->install.picks = g_ptr_array_new_with_free_func ((GDestroyNotify) pick_free);
+  g_clear_pointer (&self->install_model->picks, g_ptr_array_unref);
+  self->install_model->picks = g_ptr_array_new_with_free_func ((GDestroyNotify) pick_free);
   aml_content_page_refresh_picks (self);
 }
 
@@ -1060,7 +1060,7 @@ aml_content_page_on_pick_button_clicked (GtkButton *button G_GNUC_UNUSED, gpoint
   AdwAlertDialog *alert = NULL;
   const char *kind = NULL;
 
-  if (self->install.picks == NULL || self->install.picks->len == 0)
+  if (self->install_model->picks == NULL || self->install_model->picks->len == 0)
     return;
 
   body = g_string_new (NULL);
@@ -1068,9 +1068,9 @@ aml_content_page_on_pick_button_clicked (GtkButton *button G_GNUC_UNUSED, gpoint
 
   kind = aml_content_type_title (self->type);
 
-  for (guint i = 0; i < self->install.picks->len; i++)
+  for (guint i = 0; i < self->install_model->picks->len; i++)
     {
-      Pick *pick = g_ptr_array_index (self->install.picks, i);
+      Pick *pick = g_ptr_array_index (self->install_model->picks, i);
 
       if (i > 0)
         g_string_append_c (body, '\n');
@@ -1087,9 +1087,9 @@ aml_content_page_on_pick_button_clicked (GtkButton *button G_GNUC_UNUSED, gpoint
     gboolean has_dependencies = FALSE;
     GString *dependencies = g_string_new (NULL);
 
-    for (guint i = 0; i < self->install.picks->len; i++)
+    for (guint i = 0; i < self->install_model->picks->len; i++)
       {
-        Pick *pick = g_ptr_array_index (self->install.picks, i);
+        Pick *pick = g_ptr_array_index (self->install_model->picks, i);
 
         for (guint j = 0; pick->version->dependencies != NULL &&
                          j < pick->version->dependencies->len; j++)
@@ -1142,9 +1142,9 @@ aml_content_page_on_pick_button_clicked (GtkButton *button G_GNUC_UNUSED, gpoint
 
   /* The list goes into the batch here: what is installed is the list
      this question is about, whatever is picked while it is up. */
-  g_clear_pointer (&self->install.batch, g_ptr_array_unref);
-  self->install.batch = g_steal_pointer (&self->install.picks);
-  self->install.picks = g_ptr_array_new_with_free_func ((GDestroyNotify) pick_free);
+  g_clear_pointer (&self->install_model->batch, g_ptr_array_unref);
+  self->install_model->batch = g_steal_pointer (&self->install_model->picks);
+  self->install_model->picks = g_ptr_array_new_with_free_func ((GDestroyNotify) pick_free);
   aml_content_page_refresh_picks (self);
 
   adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL, on_batch_chosen,
