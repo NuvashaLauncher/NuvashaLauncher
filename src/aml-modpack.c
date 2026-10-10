@@ -2243,6 +2243,9 @@ export_directory (struct archive *archive, const char *root,
         g_build_filename (relative, name, NULL);
       GStatBuf stat_buf;
 
+      if (g_str_has_prefix (child_relative, ".index") ||
+          strstr (child_relative, G_DIR_SEPARATOR_S ".index") != NULL)
+        continue;
       if (!include_transient && export_path_is_transient (child_relative))
         continue;
 
@@ -2455,6 +2458,9 @@ export_count_directory (const char *root, const char *relative,
       g_autofree char *child = g_build_filename (relative, name, NULL);
       GStatBuf stat_buf;
 
+      if (g_str_has_prefix (child, ".index") ||
+          strstr (child, G_DIR_SEPARATOR_S ".index") != NULL)
+        continue;
       if (!include_transient && export_path_is_transient (child))
         continue;
       if (g_lstat (source, &stat_buf) != 0)
