@@ -2113,6 +2113,110 @@ export_directory (struct archive *archive, const char *root,
   return TRUE;
 }
 
+/* Add installed content whose AML index has both hashes and its original
+ * Modrinth URL. Files without complete metadata remain overrides, which is
+ * still a valid and lossless export. */
+static gboolean
+export_indexed_files (ExportRun *run, GError **error)
+{
+  static const char *folders[] = { "mods", "resourcepacks", "shaderpacks" };
+  g_autoptr (JsonParser) manifest_parser = json_parser_new ();
+  JsonNode *manifest_root = NULL;
+  JsonObject *manifest = NULL;
+  JsonArray *files = NULL;
+
+  if (!json_parser_load_from_data (manifest_parser, run->manifest, -1, error))
+    return FALSE;
+
+  manifest_root = json_parser_get_root (manifest_parser);
+  manifest = json_node_get_object (manifest_root);
+  files = json_object_get_array_member (manifest, "files");
+
+  for (guint folder_index = 0; folder_index < G_N_ELEMENTS (folders);
+       folder_index++)
+    {
+      g_autofree char *index_path = g_build_filename (
+        run->instance_directory, folders[folder_index], ".index", "index.json",
+        NULL);
+      g_autofree char *data = NULL;
+      gsize length = 0;
+      g_autoptr (JsonParser) index_parser = json_parser_new ();
+      JsonNode *index_root = NULL;
+      JsonArray *entries = NULL;
+
+      if (!g_file_get_contents (index_path, &data, &length, NULL) ||
+          !json_parser_load_from_data (index_parser, data, length, NULL))
+        continue;
+
+      index_root = json_parser_get_root (index_parser);
+      if (!JSON_NODE_HOLDS_OBJECT (index_root))
+        continue;
+      entries = json_object_get_array_member (json_node_get_object (index_root),
+                                              "entries");
+      if (entries == NULL)
+        continue;
+
+      for (guint i = 0; i < json_array_get_length (entries); i++)
+        {
+          JsonObject *entry = json_node_get_object (
+            json_array_get_element (entries, i));
+          const char *filename = NULL;
+          const char *sha1 = NULL;
+          const char *sha512 = NULL;
+          const char *url = NULL;
+          g_autofree char *source = NULL;
+          GStatBuf stat_buf;
+          JsonObject *file = NULL;
+          JsonObject *hashes = NULL;
+          JsonArray *downloads = NULL;
+
+          if (entry == NULL)
+            continue;
+          filename = json_object_get_string_member_with_default (entry,
+                                                                  "filename",
+                                                                  "");
+          sha1 = json_object_get_string_member_with_default (entry, "hash", "");
+          sha512 = json_object_get_string_member_with_default (entry, "hash512",
+                                                               "");
+          url = json_object_get_string_member_with_default (entry,
+                                                            "download_url", "");
+          source = g_build_filename (run->instance_directory, folders[folder_index],
+                                     filename, NULL);
+
+          if (*filename == '\0' || *sha1 == '\0' || *sha512 == '\0' ||
+              *url == '\0' || !aml_modpack_download_url_allowed (url) ||
+              g_stat (source, &stat_buf) != 0 || !S_ISREG (stat_buf.st_mode))
+            continue;
+
+          file = json_object_new ();
+          hashes = json_object_new ();
+          downloads = json_array_new ();
+          json_object_set_string_member (file, "path",
+                                         g_build_filename (folders[folder_index],
+                                                           filename, NULL));
+          json_object_set_string_member (hashes, "sha1", sha1);
+          json_object_set_string_member (hashes, "sha512", sha512);
+          json_object_set_object_member (file, "hashes", hashes);
+          json_array_add_string_element (downloads, url);
+          json_object_set_array_member (file, "downloads", downloads);
+          json_object_set_int_member (file, "fileSize", stat_buf.st_size);
+          json_array_add_object_element (files, file);
+        }
+    }
+
+  {
+    g_autoptr (JsonGenerator) generator = json_generator_new ();
+    g_autofree char *data = NULL;
+
+    json_generator_set_root (generator, manifest_root);
+    data = json_generator_to_data (generator, NULL);
+    g_free (run->manifest);
+    run->manifest = g_steal_pointer (&data);
+  }
+
+  return TRUE;
+}
+
 static void
 export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
                gpointer task_data, GCancellable *cancellable)
@@ -2133,6 +2237,12 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
     {
       g_task_return_new_error (task, AML_MODPACK_ERROR,
                                AML_MODPACK_ERROR_CANCELLED, "cancelled");
+      return;
+    }
+
+  if (!export_indexed_files (run, &error))
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
       return;
     }
 
