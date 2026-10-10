@@ -14,6 +14,7 @@
  * about itself. */
 
 #include "aml-download-modpack-dialog.h"
+#include "aml-content-format.h"
 
 #include "aml-dialogs.h"
 #include "aml-downloads.h"
@@ -1097,22 +1098,6 @@ plain_label (const char *text)
   return label;
 }
 
-/* What a count of downloads reads in the fewest words that still say
-   what it is. */
-static char *
-format_downloads (guint64 downloads)
-{
-  g_autofree char *count = NULL;
-
-  if (downloads >= 1000000)
-    return g_strdup_printf (_("%.1fM downloads"), downloads / 1000000.0);
-  if (downloads >= 1000)
-    return g_strdup_printf (_("%.1fk downloads"), downloads / 1000.0);
-
-   count = g_strdup_printf ("%" G_GUINT64_FORMAT, downloads);
-   return g_strdup_printf (_("%s downloads"), count);
-}
-
 /* The words the dialog shows while the description and the versions are
    on their way. */
 static GtkWidget *
@@ -1217,12 +1202,8 @@ details_content (AmlDownloadModpackDialog *self)
   {
     g_autofree char *text = NULL;
 
-    if (self->details != NULL && self->details->license != NULL &&
-        *self->details->license != '\0')
-      text = g_strdup_printf ("%s  ·  by %s", self->details->license,
-                              who != NULL ? who : "");
-    else
-       text = g_strdup_printf (_("by %s"), who != NULL ? who : "");
+    text = aml_content_format_author (
+      self->details != NULL ? self->details->license : NULL, who);
 
     details_watch (&self->meta, gtk_label_new (text));
     gtk_label_set_xalign (GTK_LABEL (self->meta), 0);
@@ -1230,7 +1211,7 @@ details_content (AmlDownloadModpackDialog *self)
     adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), self->meta);
   }
 
-  downloads = format_downloads (self->project->downloads);
+   downloads = aml_content_format_downloads (self->project->downloads);
   details_watch (&self->count, gtk_label_new (downloads));
   gtk_label_set_xalign (GTK_LABEL (self->count), 0);
   gtk_widget_add_css_class (self->count, "dim-label");
