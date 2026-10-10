@@ -24,7 +24,7 @@ start_preparing (AmlLauncher *self)
             self->version != NULL ? self->version : "this instance");
 
   aml_version_manifest_fetch_async (AML_VERSION_MANIFEST_URL,
-                                    self->cancellable, on_manifest_ready,
+                                    self->preparation.cancellable, on_manifest_ready,
                                     g_object_ref (self));
 }
 
@@ -126,7 +126,7 @@ account_for_launch (AmlLauncher *self)
   log_line (self, TAG_STATE, "signing \"%s\" in again before launching",
             account->name != NULL ? account->name : "the account");
 
-  aml_auth_refresh_async (account, self->cancellable, on_account_refreshed,
+  aml_auth_refresh_async (account, self->preparation.cancellable, on_account_refreshed,
                           g_object_ref (self));
 
   return FALSE;
@@ -158,15 +158,15 @@ aml_launcher_start (AmlLauncher *self)
   g_free (self->version);
   self->version = version;
 
-  g_clear_object (&self->cancellable);
-  self->cancellable = g_cancellable_new ();
+  g_clear_object (&self->preparation.cancellable);
+  self->preparation.cancellable = g_cancellable_new ();
   self->process.stop_requested = FALSE;
   self->process.last_percent = 0;
 
   /* The Java of the launch before this one says nothing about this one:
      a loader that has to be installed first chooses its own. */
-  g_clear_pointer (&self->java_executable, g_free);
-  self->java_major_version = 0;
+  g_clear_pointer (&self->preparation.java_executable, g_free);
+  self->preparation.java_major_version = 0;
 
   set_state (self, AML_LAUNCH_PREPARING, self->version);
 
@@ -194,7 +194,7 @@ aml_launcher_stop (AmlLauncher *self)
   if (self->process.process == NULL)
     {
       log_line (self, TAG_STATE, "stopping before the game starts");
-      g_cancellable_cancel (self->cancellable);
+      g_cancellable_cancel (self->preparation.cancellable);
       set_state (self, AML_LAUNCH_STOPPED, NULL);
       return;
     }

@@ -92,7 +92,7 @@ on_java_for_the_install (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   aml_loaders_install_async (
     request->loader, request->game_version, request->loader_version,
-    request->profile, java->executable, NULL, self->cancellable,
+    request->profile, java->executable, NULL, self->preparation.cancellable,
     on_install_progress, self, on_install_done, request);
 }
 
@@ -126,7 +126,7 @@ on_install_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   merged = aml_version_description_merge (request->profile, install->description);
 
   aml_resolve_description_async (merged, merged->id, install->client_jar, NULL,
-                                 NULL, NULL, self->cancellable,
+                                 NULL, NULL, self->preparation.cancellable,
                                  on_resolve_progress, self, on_resolved,
                                  g_object_ref (self));
   loader_request_free (request);
@@ -185,7 +185,7 @@ on_game_document (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   set_state (self, AML_LAUNCH_LAUNCHING, "choosing Java");
 
-  aml_java_detect_async (self->cancellable, on_java_for_the_install, request);
+  aml_java_detect_async (self->preparation.cancellable, on_java_for_the_install, request);
 }
 
 static void
@@ -209,7 +209,7 @@ on_vanilla_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   merged = aml_version_description_merge (vanilla, request->profile);
 
   aml_resolve_description_async (merged, merged->id, NULL, NULL, NULL, NULL,
-                                 self->cancellable, on_resolve_progress, self,
+                                 self->preparation.cancellable, on_resolve_progress, self,
                                  on_resolved, g_object_ref (self));
   loader_request_free (request);
 }
@@ -240,7 +240,7 @@ on_profile_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     }
 
   aml_version_load_async (request->manifest, request->game_version,
-                          self->cancellable, on_vanilla_loaded, request);
+                          self->preparation.cancellable, on_vanilla_loaded, request);
 }
 
 static void
@@ -267,7 +267,7 @@ resolve_with_a_loader (AmlLauncher        *self,
                 self->version != NULL ? self->version : "");
 
       aml_version_load_async (manifest, request->game_version,
-                              self->cancellable, on_game_document, request);
+                              self->preparation.cancellable, on_game_document, request);
       return;
     }
 
@@ -276,7 +276,7 @@ resolve_with_a_loader (AmlLauncher        *self,
             self->version != NULL ? self->version : "");
 
   aml_loaders_profile_async (loader, request->game_version, loader_version,
-                             self->cancellable, on_profile_loaded, request);
+                             self->preparation.cancellable, on_profile_loaded, request);
 }
 
 void
@@ -327,7 +327,7 @@ on_manifest_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   }
 
   aml_resolve_version_async (manifest, self->version, NULL, NULL, NULL,
-                             self->cancellable, on_resolve_progress, self,
+                             self->preparation.cancellable, on_resolve_progress, self,
                              on_resolved, g_object_ref (self));
   g_object_unref (self);
 }

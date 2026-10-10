@@ -114,7 +114,7 @@ launch_finished_with_error (AmlLauncher *self, GError *error)
 static char *
 no_java_reason (AmlLauncher *self, const char *instance_java)
 {
-  int required = self->resolved != NULL ? self->resolved->java_major_version
+  int required = self->preparation.resolved != NULL ? self->preparation.resolved->java_major_version
                                         : 0;
 
   if (required > 0)
@@ -179,9 +179,9 @@ choose_java (AmlLauncher *self, GPtrArray *javas, int required,
 void
 remember_java (AmlLauncher *self, const AmlJava *java)
 {
-  g_free (self->java_executable);
-  self->java_executable = g_strdup (java->executable);
-  self->java_major_version = java->major_version;
+  g_free (self->preparation.java_executable);
+  self->preparation.java_executable = g_strdup (java->executable);
+  self->preparation.java_major_version = java->major_version;
 }
 
 /* The last step of every launch: the arguments the game is started with,
@@ -197,7 +197,7 @@ run_the_game (AmlLauncher *self)
   AmlAccount *account = NULL;
   AmlLaunchSession session;
 
-  if (self->process.stop_requested || self->resolved == NULL)
+  if (self->process.stop_requested || self->preparation.resolved == NULL)
     return;
 
   /* The active account, read here rather than when the launch was asked
@@ -221,8 +221,8 @@ run_the_game (AmlLauncher *self)
 
   g_object_get (self->instance, "jvm-args", &jvm_args, NULL);
 
-  argv = aml_launch_build_arguments (self->resolved, &session,
-                                     self->java_executable,
+  argv = aml_launch_build_arguments (self->preparation.resolved, &session,
+                                     self->preparation.java_executable,
                                      self->game_directory, jvm_args, &error);
 
   if (argv == NULL)
@@ -239,8 +239,8 @@ run_the_game (AmlLauncher *self)
             account != NULL ? aml_account_type_name (account->type)
                             : "Offline");
 
-  log_line (self, TAG_STATE, "Java %d at %s", self->java_major_version,
-            self->java_executable);
+  log_line (self, TAG_STATE, "Java %d at %s", self->preparation.java_major_version,
+            self->preparation.java_executable);
 
   /* The spawn reports its own failure as the Failed state; the error is
      only here for a caller that asked for one. */
@@ -273,8 +273,8 @@ on_java_detected (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     }
 
   java = choose_java (self, javas,
-                      self->resolved != NULL
-                        ? self->resolved->java_major_version
+                      self->preparation.resolved != NULL
+                        ? self->preparation.resolved->java_major_version
                         : 0,
                       &instance_java);
 
@@ -314,12 +314,12 @@ on_resolved (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   /* The resolve is where every download of a launch happens, so this is
      the moment the command line starts being built. */
-  g_clear_pointer (&self->resolved, aml_resolved_version_free);
-  self->resolved = resolved;
+  g_clear_pointer (&self->preparation.resolved, aml_resolved_version_free);
+  self->preparation.resolved = resolved;
 
   /* A loader that was installed on the way here already chose the Java it
      is installed and run with. */
-  if (self->java_executable != NULL)
+  if (self->preparation.java_executable != NULL)
     {
       run_the_game (self);
       g_object_unref (self);
@@ -328,7 +328,7 @@ on_resolved (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   set_state (self, AML_LAUNCH_LAUNCHING, "choosing Java");
 
-  aml_java_detect_async (self->cancellable, on_java_detected,
+  aml_java_detect_async (self->preparation.cancellable, on_java_detected,
                          g_object_ref (self));
   g_object_unref (self);
 }
@@ -458,7 +458,7 @@ aml_launcher_dispose (GObject *object)
   /* Downloads in flight stop when the owner lets go of the launcher.
      The game itself is not killed: the readers and the wait hold a
      reference for as long as it runs. */
-  g_cancellable_cancel (self->cancellable);
+  g_cancellable_cancel (self->preparation.cancellable);
 
   G_OBJECT_CLASS (aml_launcher_parent_class)->dispose (object);
 }
@@ -468,9 +468,9 @@ aml_launcher_finalize (GObject *object)
 {
   AmlLauncher *self = AML_LAUNCHER (object);
 
-  g_clear_object (&self->cancellable);
+  g_clear_object (&self->preparation.cancellable);
   g_clear_object (&self->process.process);
-  g_clear_pointer (&self->resolved, aml_resolved_version_free);
+  g_clear_pointer (&self->preparation.resolved, aml_resolved_version_free);
   g_clear_object (&self->instance);
   g_clear_object (&self->settings);
   g_clear_object (&self->accounts);
@@ -478,7 +478,7 @@ aml_launcher_finalize (GObject *object)
   g_free (self->detail);
   g_free (self->version);
   g_free (self->game_directory);
-  g_free (self->java_executable);
+  g_free (self->preparation.java_executable);
 
   G_OBJECT_CLASS (aml_launcher_parent_class)->finalize (object);
 }
