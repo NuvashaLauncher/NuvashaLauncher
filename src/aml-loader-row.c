@@ -13,9 +13,9 @@ struct _AmlLoaderRow
 
   /* Plain AdwComboRows, owned here and added to a group by whoever made
      this. Both hold a reference back, so either may go first. */
-  GtkWidget *loader_row;
-  GtkWidget *version_row;
-  GtkWidget *retry;
+  AdwComboRow *loader_row;
+  AdwComboRow *version_row;
+  GtkButton *retry;
 
   /* Cancelled when a load replaces it or when the row goes away. */
   GCancellable *cancellable;
@@ -121,7 +121,7 @@ update_visibility (AmlLoaderRow *self)
 {
   gboolean vanilla = selected_loader (self) == AML_LOADER_VANILLA;
 
-  gtk_widget_set_visible (self->version_row, !vanilla);
+  gtk_widget_set_visible (GTK_WIDGET (self->version_row), !vanilla);
 }
 
 /* Both combos answer only when nothing else has locked them: a running
@@ -130,8 +130,8 @@ update_visibility (AmlLoaderRow *self)
 static void
 update_sensitivity (AmlLoaderRow *self)
 {
-  gtk_widget_set_sensitive (self->loader_row, !self->blocked);
-  gtk_widget_set_sensitive (self->version_row,
+  gtk_widget_set_sensitive (GTK_WIDGET (self->loader_row), !self->blocked);
+  gtk_widget_set_sensitive (GTK_WIDGET (self->version_row),
                             !self->blocked && self->interactive);
 }
 
@@ -198,7 +198,7 @@ show_loading (AmlLoaderRow *self)
   adw_combo_row_set_selected (ADW_COMBO_ROW (self->version_row), 0);
 
   /* The row does not answer while it does not know the versions. */
-  gtk_widget_set_visible (self->retry, FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self->version_row), NULL);
   update_sensitivity (self);
   emit_changed (self);
@@ -227,7 +227,7 @@ show_error (AmlLoaderRow *self, const char *message, gboolean retry)
                               GTK_INVALID_LIST_POSITION);
 
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self->version_row), message);
-  gtk_widget_set_visible (self->retry, retry);
+  gtk_widget_set_visible (GTK_WIDGET (self->retry), retry);
   update_sensitivity (self);
   emit_changed (self);
 }
@@ -258,7 +258,7 @@ show_empty (AmlLoaderRow *self)
                              self->game_version != NULL ? self->game_version
                                                         : "?");
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self->version_row), message);
-  gtk_widget_set_visible (self->retry, FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
   update_sensitivity (self);
   emit_changed (self);
 }
@@ -281,7 +281,7 @@ fill (AmlLoaderRow *self, GPtrArray *published)
 
   self->ready = TRUE;
   self->interactive = TRUE;
-  gtk_widget_set_visible (self->retry, FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
 
   /* Nothing to pick is not the same as something to pick: the row says
      so instead of answering with a version. */
@@ -426,7 +426,7 @@ aml_loader_row_new (void)
   for (guint i = 0; i < count; i++)
     names[i] = aml_loader_display_name (loaders[i]);
 
-  self->loader_row = g_object_ref_sink (adw_combo_row_new ());
+  self->loader_row = ADW_COMBO_ROW (g_object_ref_sink (adw_combo_row_new ()));
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->loader_row),
                                       FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->loader_row),
@@ -439,16 +439,17 @@ aml_loader_row_new (void)
   }
   adw_combo_row_set_selected (ADW_COMBO_ROW (self->loader_row), 0);
 
-  self->version_row = g_object_ref_sink (adw_combo_row_new ());
+  self->version_row = ADW_COMBO_ROW (g_object_ref_sink (adw_combo_row_new ()));
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->version_row),
                                       FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->version_row),
                                   _("Loader Version"));
-  self->retry = g_object_ref_sink (gtk_button_new_with_label (_("Retry")));
-  gtk_widget_add_css_class (self->retry, "flat");
-  gtk_widget_set_valign (self->retry, GTK_ALIGN_CENTER);
-  gtk_widget_set_visible (self->retry, FALSE);
-  adw_action_row_add_suffix (ADW_ACTION_ROW (self->version_row), self->retry);
+  self->retry = GTK_BUTTON (
+    g_object_ref_sink (gtk_button_new_with_label (_("Retry"))));
+  gtk_widget_add_css_class (GTK_WIDGET (self->retry), "flat");
+  gtk_widget_set_valign (GTK_WIDGET (self->retry), GTK_ALIGN_CENTER);
+  gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
+  adw_action_row_add_suffix (ADW_ACTION_ROW (self->version_row), GTK_WIDGET (self->retry));
 
   self->current = AML_LOADER_VANILLA;
 
@@ -472,7 +473,7 @@ aml_loader_row_get_loader_row (AmlLoaderRow *self)
 {
   g_return_val_if_fail (AML_IS_LOADER_ROW (self), NULL);
 
-  return self->loader_row;
+  return GTK_WIDGET (self->loader_row);
 }
 
 GtkWidget *
@@ -480,7 +481,7 @@ aml_loader_row_get_version_row (AmlLoaderRow *self)
 {
   g_return_val_if_fail (AML_IS_LOADER_ROW (self), NULL);
 
-  return self->version_row;
+  return GTK_WIDGET (self->version_row);
 }
 
 void
