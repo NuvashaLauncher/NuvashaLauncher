@@ -45,14 +45,14 @@ struct _AmlMainWindow
      a toast is gone in seconds, a banner stays until it is dismissed. */
   GtkWidget *banner;
 
-  /* What is downloading right now, shown next to the "+" menu: a spinner
-     while anything is on its way, and a dropdown listing each entry. The
-     rows are keyed by the AmlDownload they show. */
-  GtkWidget *downloads_button;  /* a GtkMenuButton around the spinner */
-  GtkWidget *downloads_spinner;
-  GtkWidget *downloads_icon;      /* what the button opens, beside the spinner */
-  GtkWidget *downloads_list;    /* the box inside the dropdown */
-  GHashTable *download_rows;    /* AmlDownload* -> DownloadRow* */
+  /* What is downloading right now, shown next to the "+" menu. */
+  struct {
+    GtkWidget *button;  /* a GtkMenuButton around the spinner */
+    GtkWidget *spinner;
+    GtkWidget *icon;    /* what the button opens beside the spinner */
+    GtkWidget *list;    /* the box inside the dropdown */
+    GHashTable *rows;    /* AmlDownload* -> DownloadRow* */
+  } downloads;
 };
 
 

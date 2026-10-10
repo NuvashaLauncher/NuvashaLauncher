@@ -200,7 +200,7 @@ aml_main_window_dispose (GObject *object)
   g_clear_object (&self->settings);
   g_clear_object (&self->accounts);
   g_clear_object (&self->users_popover);
-  g_clear_pointer (&self->download_rows, g_hash_table_unref);
+  g_clear_pointer (&self->downloads.rows, g_hash_table_unref);
 
   G_OBJECT_CLASS (aml_main_window_parent_class)->dispose (object);
 }
