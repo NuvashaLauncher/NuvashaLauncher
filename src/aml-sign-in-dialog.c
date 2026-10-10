@@ -18,15 +18,15 @@ struct _AmlSignInDialog
 
   GCancellable *cancellable;
 
-  GtkWidget *spinner;
-  GtkWidget *waiting;           /* the circle and what it is waiting for */
-  GtkWidget *waiting_label;
-  GtkWidget *instruction_label; /* what to do with the code */
-  GtkWidget *code_label;
-  GtkWidget *uri_label;
-  GtkWidget *open_button;
-  GtkWidget *error_label;
-  GtkWidget *retry_button;
+  GtkSpinner *spinner;
+  GtkBox *waiting;              /* the circle and what it is waiting for */
+  GtkLabel *waiting_label;
+  GtkLabel *instruction_label;  /* what to do with the code */
+  GtkLabel *code_label;
+  GtkLabel *uri_label;
+  GtkButton *open_button;
+  GtkLabel *error_label;
+  GtkButton *retry_button;
 
   /* What the chain polls with while the user is in the browser. It is
      freed with the dialog and never shown: the user types the code that
@@ -50,17 +50,17 @@ static void
 show_error (AmlSignInDialog *self, const char *message)
 {
   gtk_label_set_text (GTK_LABEL (self->error_label), message);
-  gtk_widget_set_visible (self->error_label, message != NULL);
-  gtk_widget_set_visible (self->retry_button, TRUE);
-  gtk_widget_set_visible (self->waiting, FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->error_label), message != NULL);
+  gtk_widget_set_visible (GTK_WIDGET (self->retry_button), TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (self->waiting), FALSE);
 }
 
 static void
 clear_error (AmlSignInDialog *self)
 {
   gtk_label_set_text (GTK_LABEL (self->error_label), NULL);
-  gtk_widget_set_visible (self->error_label, FALSE);
-  gtk_widget_set_visible (self->retry_button, FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->error_label), FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->retry_button), FALSE);
 }
 
 /* What is being waited for. There is nothing of a token or of an account
@@ -69,7 +69,7 @@ static void
 set_step (AmlSignInDialog *self, const char *step)
 {
   gtk_label_set_text (GTK_LABEL (self->waiting_label), step);
-  gtk_widget_set_visible (self->waiting, TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (self->waiting), TRUE);
 }
 
 /* Opens the page Microsoft serves through GIO, the way the desktop opens
@@ -126,10 +126,10 @@ on_code_ready (GObject      *source G_GNUC_UNUSED,
   gtk_label_set_text (GTK_LABEL (self->uri_label),
                       self->code->verification_uri);
 
-  gtk_widget_set_visible (self->instruction_label, TRUE);
-  gtk_widget_set_visible (self->code_label, TRUE);
-  gtk_widget_set_visible (self->uri_label, TRUE);
-  gtk_widget_set_visible (self->open_button, TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (self->instruction_label), TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (self->code_label), TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (self->uri_label), TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (self->open_button), TRUE);
 
   /* The page opens by itself, and the button is there for a user who
      closed the tab it opened. */
@@ -183,10 +183,10 @@ begin_sign_in (AmlSignInDialog *self)
   g_clear_pointer (&self->code, aml_device_code_free);
 
   clear_error (self);
-  gtk_widget_set_visible (self->instruction_label, FALSE);
-  gtk_widget_set_visible (self->code_label, FALSE);
-  gtk_widget_set_visible (self->uri_label, FALSE);
-  gtk_widget_set_visible (self->open_button, FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->instruction_label), FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->code_label), FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->uri_label), FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->open_button), FALSE);
   set_step (self, STEP_CODE);
 
   aml_auth_device_code_async (self->cancellable, on_code_ready,
@@ -256,67 +256,67 @@ aml_sign_in_dialog_init (AmlSignInDialog *self)
 
   /* What to do with the code. One line, because the code and the button
      under it are the whole of what this dialog is for. */
-  self->instruction_label = gtk_label_new (
-      _("Open the page in your browser, then enter this code:"));
+  self->instruction_label = GTK_LABEL (gtk_label_new (
+      _("Open the page in your browser, then enter this code:")));
   gtk_label_set_wrap (GTK_LABEL (self->instruction_label), TRUE);
   gtk_label_set_justify (GTK_LABEL (self->instruction_label),
                          GTK_JUSTIFY_CENTER);
   gtk_label_set_xalign (GTK_LABEL (self->instruction_label), 0.5);
-  gtk_widget_set_visible (self->instruction_label, FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->instruction_label), FALSE);
 
   /* The code is the one thing to act on, so it is the biggest thing here,
      in monospace so its characters cannot be told apart from lookalikes,
      and selectable so it can be copied by hand. */
-  self->code_label = gtk_label_new (NULL);
-  gtk_widget_add_css_class (self->code_label, "title-1");
-  gtk_widget_add_css_class (self->code_label, "monospace");
+  self->code_label = GTK_LABEL (gtk_label_new (NULL));
+  gtk_widget_add_css_class (GTK_WIDGET (self->code_label), "title-1");
+  gtk_widget_add_css_class (GTK_WIDGET (self->code_label), "monospace");
   gtk_label_set_selectable (GTK_LABEL (self->code_label), TRUE);
   gtk_label_set_xalign (GTK_LABEL (self->code_label), 0.5);
-  gtk_widget_set_visible (self->code_label, FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->code_label), FALSE);
 
-  self->open_button = icon_label_button ("web-browser-symbolic",
-                                         _("Open the Page"));
-  gtk_widget_add_css_class (self->open_button, "pill");
-  gtk_widget_add_css_class (self->open_button, "suggested-action");
-  gtk_widget_set_halign (self->open_button, GTK_ALIGN_CENTER);
-  gtk_widget_set_visible (self->open_button, FALSE);
+  self->open_button = GTK_BUTTON (icon_label_button ("web-browser-symbolic",
+                                          _("Open the Page")));
+  gtk_widget_add_css_class (GTK_WIDGET (self->open_button), "pill");
+  gtk_widget_add_css_class (GTK_WIDGET (self->open_button), "suggested-action");
+  gtk_widget_set_halign (GTK_WIDGET (self->open_button), GTK_ALIGN_CENTER);
+  gtk_widget_set_visible (GTK_WIDGET (self->open_button), FALSE);
   g_signal_connect (self->open_button, "clicked", G_CALLBACK (on_open_clicked),
                     self);
 
   /* The address the code is entered at, for a user who would rather open
      the page themselves than follow the button. */
-  self->uri_label = gtk_label_new (NULL);
-  gtk_widget_add_css_class (self->uri_label, "dim-label");
-  gtk_widget_add_css_class (self->uri_label, "caption");
+  self->uri_label = GTK_LABEL (gtk_label_new (NULL));
+  gtk_widget_add_css_class (GTK_WIDGET (self->uri_label), "dim-label");
+  gtk_widget_add_css_class (GTK_WIDGET (self->uri_label), "caption");
   gtk_label_set_wrap (GTK_LABEL (self->uri_label), TRUE);
   gtk_label_set_selectable (GTK_LABEL (self->uri_label), TRUE);
   gtk_label_set_justify (GTK_LABEL (self->uri_label), GTK_JUSTIFY_CENTER);
   gtk_label_set_xalign (GTK_LABEL (self->uri_label), 0.5);
-  gtk_widget_set_visible (self->uri_label, FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->uri_label), FALSE);
 
   /* What is being waited for, and a circle while it is. */
-  self->spinner = gtk_spinner_new ();
+  self->spinner = GTK_SPINNER (gtk_spinner_new ());
   gtk_spinner_start (GTK_SPINNER (self->spinner));
-  self->waiting_label = gtk_label_new (STEP_CODE);
-  gtk_widget_add_css_class (self->waiting_label, "dim-label");
-  self->waiting = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8);
-  gtk_widget_set_halign (self->waiting, GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (self->waiting, GTK_ALIGN_CENTER);
-  gtk_box_append (GTK_BOX (self->waiting), self->spinner);
-  gtk_box_append (GTK_BOX (self->waiting), self->waiting_label);
+  self->waiting_label = GTK_LABEL (gtk_label_new (STEP_CODE));
+  gtk_widget_add_css_class (GTK_WIDGET (self->waiting_label), "dim-label");
+  self->waiting = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8));
+  gtk_widget_set_halign (GTK_WIDGET (self->waiting), GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (GTK_WIDGET (self->waiting), GTK_ALIGN_CENTER);
+  gtk_box_append (GTK_BOX (self->waiting), GTK_WIDGET (self->spinner));
+  gtk_box_append (GTK_BOX (self->waiting), GTK_WIDGET (self->waiting_label));
 
   /* What went wrong, and a way to ask for a new code. */
-  self->error_label = gtk_label_new (NULL);
+  self->error_label = GTK_LABEL (gtk_label_new (NULL));
   gtk_label_set_wrap (GTK_LABEL (self->error_label), TRUE);
   gtk_label_set_xalign (GTK_LABEL (self->error_label), 0.5);
   gtk_label_set_justify (GTK_LABEL (self->error_label), GTK_JUSTIFY_CENTER);
-  gtk_widget_add_css_class (self->error_label, "error");
-  gtk_widget_set_visible (self->error_label, FALSE);
+  gtk_widget_add_css_class (GTK_WIDGET (self->error_label), "error");
+  gtk_widget_set_visible (GTK_WIDGET (self->error_label), FALSE);
 
-  self->retry_button = gtk_button_new_with_label (_("Try Again"));
-  gtk_widget_add_css_class (self->retry_button, "flat");
-  gtk_widget_set_halign (self->retry_button, GTK_ALIGN_CENTER);
-  gtk_widget_set_visible (self->retry_button, FALSE);
+  self->retry_button = GTK_BUTTON (gtk_button_new_with_label (_("Try Again")));
+  gtk_widget_add_css_class (GTK_WIDGET (self->retry_button), "flat");
+  gtk_widget_set_halign (GTK_WIDGET (self->retry_button), GTK_ALIGN_CENTER);
+  gtk_widget_set_visible (GTK_WIDGET (self->retry_button), FALSE);
   g_signal_connect (self->retry_button, "clicked",
                     G_CALLBACK (on_retry_clicked), self);
 
@@ -325,13 +325,13 @@ aml_sign_in_dialog_init (AmlSignInDialog *self)
   gtk_widget_set_margin_end (body, 24);
   gtk_widget_set_margin_top (body, 24);
   gtk_widget_set_margin_bottom (body, 24);
-  gtk_box_append (GTK_BOX (body), self->instruction_label);
-  gtk_box_append (GTK_BOX (body), self->code_label);
-  gtk_box_append (GTK_BOX (body), self->open_button);
-  gtk_box_append (GTK_BOX (body), self->uri_label);
-  gtk_box_append (GTK_BOX (body), self->waiting);
-  gtk_box_append (GTK_BOX (body), self->error_label);
-  gtk_box_append (GTK_BOX (body), self->retry_button);
+  gtk_box_append (GTK_BOX (body), GTK_WIDGET (self->instruction_label));
+  gtk_box_append (GTK_BOX (body), GTK_WIDGET (self->code_label));
+  gtk_box_append (GTK_BOX (body), GTK_WIDGET (self->open_button));
+  gtk_box_append (GTK_BOX (body), GTK_WIDGET (self->uri_label));
+  gtk_box_append (GTK_BOX (body), GTK_WIDGET (self->waiting));
+  gtk_box_append (GTK_BOX (body), GTK_WIDGET (self->error_label));
+  gtk_box_append (GTK_BOX (body), GTK_WIDGET (self->retry_button));
 
   /* A header bar of its own: a dialog closed by the button in its corner
      is what every other dialog does, and it needs no Cancel at the
