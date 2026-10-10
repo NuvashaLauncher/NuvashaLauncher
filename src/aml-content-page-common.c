@@ -74,6 +74,6 @@ on_banner_dismiss (AdwBanner *banner G_GNUC_UNUSED, gpointer user_data)
 void
 set_busy (AmlContentPage *self, gboolean busy)
 {
-  if (self->spinner != NULL)
-    gtk_widget_set_visible (self->spinner, busy);
+  if (self->browse.spinner != NULL)
+    gtk_widget_set_visible (self->browse.spinner, busy);
 }

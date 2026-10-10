@@ -75,16 +75,37 @@ struct _AmlContentPage
     guint pick_index;
   } install;
 
-  GtkWidget *results_group;
-  GtkWidget *results_scroller;
-  GtkWidget *results_status;
-  GtkWidget *search_entry;
-  GtkWidget *search_bar;
-  GtkWidget *filter_box;
-  GtkWidget *loading_more; /* spinner row at the bottom of the list */
-  GtkWidget *retry_row;    /* inline retry row when a page fails */
-  GtkWidget *retry_label;
-  GtkWidget *spinner;
+  struct {
+    GtkWidget *results_group;
+    GtkWidget *results_scroller;
+    GtkWidget *results_status;
+    GtkWidget *search_entry;
+    GtkWidget *search_bar;
+    GtkWidget *filter_box;
+    GtkWidget *loading_more; /* spinner row at the bottom of the list */
+    GtkWidget *retry_row;    /* inline retry row when a page fails */
+    GtkWidget *retry_label;
+    GtkWidget *spinner;
+
+    GList *result_rows;
+    GHashTable *projects;
+    GHashTable *project_icons;
+    GHashTable *project_descriptions;
+    GHashTable *project_titles;
+    char *query;
+    GPtrArray *categories;
+    GPtrArray *results;
+    guint offset;
+    guint64 total_hits;
+    gboolean categories_loaded;
+    gboolean searched;
+    gboolean loading_page;
+    gboolean pending_append;
+    GHashTable *seen_ids;
+    GCancellable *more;
+    guint debounce_source;
+    GCancellable *cancellable;
+  } browse;
 
   /* What the folder holds, and the row of each file. The rows point
    * into these, so both are only replaced once the rows that point at
@@ -92,32 +113,9 @@ struct _AmlContentPage
   GPtrArray *files;     /* AmlContentFile* */
   GHashTable *rows;     /* path -> row */
   GList *installed_rows; /* the rows of the Installed group */
-  GList *result_rows;    /* the rows of the Browse group */
-  GHashTable *projects; /* project id -> NULL */
-  GHashTable *project_icons; /* project id -> icon url the browser saw */
-  GHashTable *project_descriptions; /* project id -> what it is */
-  GHashTable *project_titles; /* project id -> project name */
-
-  /* The search: what was asked for, what came back, and where the list
-   * stands. */
-  char *query;
-  GPtrArray *categories; /* char*, what the filter has on */
-  GPtrArray *results;    /* AmlModrinthProject* the rows point at */
-  guint offset;
-  guint64 total_hits;
-  gboolean categories_loaded;
-  gboolean browse_searched;
-
-  /* The infinite scroll: whether a page is on its way, the projects
-   * already listed (so a page is never added twice) and the cancellable
-   * of the page being fetched. */
-  gboolean loading_page;
-  gboolean pending_append;
-  GHashTable *seen_ids; /* project id -> NULL */
-  GCancellable *more;   /* the next page, cancelled by a new search */
+   /* Browse state is grouped below. */
 
   guint debounce_source;
-  GCancellable *browse;   /* searching and the categories of the filter */
   GCancellable *scan;     /* the folder, its hashes and their lookups */
   gboolean identifying;   /* installed files are still being resolved */
 

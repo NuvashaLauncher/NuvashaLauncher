@@ -61,10 +61,10 @@ aml_content_page_build_installed (AmlContentPage *self)
   gtk_box_append (GTK_BOX (actions),
                   toolbar_button ("folder-symbolic", _("Open Folder"),
                                   G_CALLBACK (aml_content_page_on_open_folder_clicked), self));
-   self->spinner = adw_spinner_new ();
-  gtk_widget_set_valign (self->spinner, GTK_ALIGN_CENTER);
-  gtk_widget_set_visible (self->spinner, FALSE);
-  gtk_box_append (GTK_BOX (actions), self->spinner);
+   self->browse.spinner = adw_spinner_new ();
+  gtk_widget_set_valign (self->browse.spinner, GTK_ALIGN_CENTER);
+  gtk_widget_set_visible (self->browse.spinner, FALSE);
+  gtk_box_append (GTK_BOX (actions), self->browse.spinner);
 
   /* The actions belong to the toolbar row above both lists, not to this
      one of them: they are the same row whichever list is shown, and
@@ -74,7 +74,7 @@ aml_content_page_build_installed (AmlContentPage *self)
      The row of the other list is taken out of the bar when the lists are
      switched, so this one is held here: without it, taking it out would
      be the last reference to it and would destroy the box and the
-     spinner inside it while self->spinner still points at them. */
+     spinner inside it while self->browse.spinner still points at them. */
    self->installed_actions = actions;
   g_object_ref_sink (actions);
 
@@ -142,10 +142,10 @@ aml_content_page_on_stack_switched (GObject *stack, GParamSpec *pspec G_GNUC_UNU
       aml_content_page_close_detail (self);
     }
 
-  if (!browsing || self->browse_searched)
+  if (!browsing || self->browse.searched)
     return;
 
-  self->browse_searched = TRUE;
+  self->browse.searched = TRUE;
   aml_content_page_run_search (self, FALSE);
 }
 
@@ -177,8 +177,8 @@ aml_content_page_build_browse (AmlContentPage *self)
   AdwPreferencesGroup *group =
     ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
 
-   self->search_entry = GTK_WIDGET (search_bar);
-   self->search_bar = GTK_WIDGET (search_bar);
+   self->browse.search_entry = GTK_WIDGET (search_bar);
+   self->browse.search_bar = GTK_WIDGET (search_bar);
   /* The field takes the room the row has, the way the modpack browser's
      search does, rather than a fixed width of its own. */
   gtk_widget_set_hexpand (GTK_WIDGET (search_bar), TRUE);
@@ -217,7 +217,7 @@ aml_content_page_build_browse (AmlContentPage *self)
      of that, and the filter and the switcher sit at its right. */
   gtk_widget_set_hexpand (top, TRUE);
 
-   self->filter_box = filter_box;
+   self->browse.filter_box = filter_box;
   gtk_widget_set_margin_top (filter_box, 6);
   gtk_widget_set_margin_bottom (filter_box, 6);
   gtk_widget_set_margin_start (filter_box, 6);
@@ -237,21 +237,21 @@ aml_content_page_build_browse (AmlContentPage *self)
    self->browse_actions = top;
   g_object_ref_sink (top);
 
-   self->results_status = adw_status_page_new ();
-  adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->results_status),
+   self->browse.results_status = adw_status_page_new ();
+  adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->browse.results_status),
                                  "system-search-symbolic");
-  adw_status_page_set_title (ADW_STATUS_PAGE (self->results_status),
+  adw_status_page_set_title (ADW_STATUS_PAGE (self->browse.results_status),
                                _("Nothing to show yet"));
   adw_status_page_set_description (
-      ADW_STATUS_PAGE (self->results_status),
+      ADW_STATUS_PAGE (self->browse.results_status),
         _("Type what to look for, or browse everything Modrinth has for this "
         "instance"));
   /* The list starts where the row above it ends: its first row is not
      rounded at the top, so the two read as one piece. */
   gtk_widget_add_css_class (GTK_WIDGET (group), "flush-top");
 
-   self->results_group = GTK_WIDGET (group);
-   self->results_scroller = scroller;
+   self->browse.results_group = GTK_WIDGET (group);
+   self->browse.results_scroller = scroller;
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
                                  GTK_WIDGET (group));
   gtk_widget_set_vexpand (scroller, TRUE);
@@ -259,7 +259,7 @@ aml_content_page_build_browse (AmlContentPage *self)
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 
   gtk_widget_set_vexpand (content, TRUE);
-  gtk_box_append (GTK_BOX (content), self->results_status);
+  gtk_box_append (GTK_BOX (content), self->browse.results_status);
   gtk_box_append (GTK_BOX (content), scroller);
   gtk_widget_set_visible (scroller, FALSE);
   gtk_box_append (GTK_BOX (box), content);
@@ -328,9 +328,9 @@ aml_content_page_build_browse (AmlContentPage *self)
   gtk_box_append (GTK_BOX (retry_row), retry_button);
   adw_preferences_group_add (group, retry_row);
 
-   self->loading_more = loading_more;
-   self->retry_row = retry_row;
-  self->retry_label = retry_label;
+   self->browse.loading_more = loading_more;
+   self->browse.retry_row = retry_row;
+  self->browse.retry_label = retry_label;
 
   g_signal_connect (retry_button, "clicked",
                     G_CALLBACK (aml_content_page_on_retry_page_clicked), self);
