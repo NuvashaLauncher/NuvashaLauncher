@@ -92,7 +92,7 @@ on_version_selected (GObject *object G_GNUC_UNUSED,
 /* What the download button would take: the version the dropdown shows,
  * or NULL when none is chosen yet. */
 AmlModrinthVersion *
-selected_version (GtkWidget *dropdown, GPtrArray *versions)
+selected_version (GtkDropDown *dropdown, GPtrArray *versions)
 {
   guint index = gtk_drop_down_get_selected (GTK_DROP_DOWN (dropdown));
 
@@ -130,7 +130,7 @@ on_version_download_clicked (GtkButton *button, gpointer user_data)
   if (self == NULL || dropdown == NULL || versions == NULL)
     return;
 
-  version = selected_version (dropdown, versions);
+  version = selected_version (GTK_DROP_DOWN (dropdown), versions);
 
   if (version == NULL)
     return;
@@ -307,7 +307,7 @@ details_content (AmlContentPage *self)
                     plain_label (self->project.details->description));
 
   gtk_box_append (GTK_BOX (box), heading);
-  gtk_box_append (GTK_BOX (box), self->project.details_body);
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (self->project.details_body));
 
   gtk_widget_set_margin_top (box, 12);
   gtk_widget_set_margin_bottom (box, 12);
@@ -322,9 +322,9 @@ details_content (AmlContentPage *self)
      page installs, and the button that installs this one on its own.
      The newest is what the dropdown shows from the start. */
   watch_widget (&self->project.details_check, gtk_check_button_new ());
-  gtk_widget_set_valign (self->project.details_check, GTK_ALIGN_CENTER);
-  gtk_widget_set_sensitive (self->project.details_check, FALSE);
-  gtk_widget_set_tooltip_text (self->project.details_check,
+  gtk_widget_set_valign (GTK_WIDGET (self->project.details_check), GTK_ALIGN_CENTER);
+  gtk_widget_set_sensitive (GTK_WIDGET (self->project.details_check), FALSE);
+  gtk_widget_set_tooltip_text (GTK_WIDGET (self->project.details_check),
                                _("Install this version with the selected "
                                  "ones"));
   gtk_accessible_update_property (GTK_ACCESSIBLE (self->project.details_check),
@@ -345,20 +345,20 @@ details_content (AmlContentPage *self)
   }
   g_signal_connect (self->project.details_dropdown, "notify::selected",
                     G_CALLBACK (on_version_selected), self);
-  gtk_widget_set_hexpand (self->project.details_dropdown, TRUE);
-  gtk_widget_set_valign (self->project.details_dropdown, GTK_ALIGN_CENTER);
+  gtk_widget_set_hexpand (GTK_WIDGET (self->project.details_dropdown), TRUE);
+  gtk_widget_set_valign (GTK_WIDGET (self->project.details_dropdown), GTK_ALIGN_CENTER);
 
   watch_widget (&self->project.details_download, gtk_button_new_with_label (_("Download")));
-  gtk_widget_add_css_class (self->project.details_download, "suggested-action");
-  gtk_widget_set_valign (self->project.details_download, GTK_ALIGN_CENTER);
-  gtk_widget_set_sensitive (self->project.details_download, FALSE);
+  gtk_widget_add_css_class (GTK_WIDGET (self->project.details_download), "suggested-action");
+  gtk_widget_set_valign (GTK_WIDGET (self->project.details_download), GTK_ALIGN_CENTER);
+  gtk_widget_set_sensitive (GTK_WIDGET (self->project.details_download), FALSE);
   g_signal_connect (self->project.details_download, "clicked",
                     G_CALLBACK (on_version_download_clicked), self);
 
   bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  gtk_box_append (GTK_BOX (bar), self->project.details_check);
-  gtk_box_append (GTK_BOX (bar), self->project.details_dropdown);
-  gtk_box_append (GTK_BOX (bar), self->project.details_download);
+  gtk_box_append (GTK_BOX (bar), GTK_WIDGET (self->project.details_check));
+  gtk_box_append (GTK_BOX (bar), GTK_WIDGET (self->project.details_dropdown));
+  gtk_box_append (GTK_BOX (bar), GTK_WIDGET (self->project.details_download));
   gtk_widget_set_margin_top (bar, 12);
   gtk_widget_set_margin_bottom (bar, 12);
   gtk_widget_set_margin_start (bar, 12);
@@ -424,10 +424,10 @@ detail_fill (AmlContentPage *self)
     gboolean have_versions = self->project.details_versions != NULL &&
                              self->project.details_versions->len > 0;
 
-    gtk_widget_set_sensitive (self->project.details_download,
+    gtk_widget_set_sensitive (GTK_WIDGET (self->project.details_download),
                               have_versions && !self->installed.identifying);
     /* Nothing to put on the list while the dropdown shows none. */
-    gtk_widget_set_sensitive (self->project.details_check,
+    gtk_widget_set_sensitive (GTK_WIDGET (self->project.details_check),
                               have_versions && !self->installed.identifying);
   }
 
@@ -614,4 +614,3 @@ aml_content_page_on_result_activated (AdwActionRow *row, gpointer user_data)
 
   open_project_page (self, project);
 }
-

@@ -468,11 +468,12 @@ aml_content_page_build_bar (AmlContentPage *self)
   /* The list is the left half; the project that is opened is the right
      half, and is empty until one is opened. Collapsed shows one page at a
      time, which is the list alone. */
-  self->project.split = adw_navigation_split_view_new ();
-  gtk_widget_set_vexpand (self->project.split, TRUE);
+  self->project.split = ADW_NAVIGATION_SPLIT_VIEW (
+    adw_navigation_split_view_new ());
+  gtk_widget_set_vexpand (GTK_WIDGET (self->project.split), TRUE);
   /* Named, so the stylesheet keeps the left half the colour of the page
      instead of the sidebar colour it would take on its own. */
-  gtk_widget_add_css_class (self->project.split, "flat-split");
+  gtk_widget_add_css_class (GTK_WIDGET (self->project.split), "flat-split");
   adw_navigation_split_view_set_sidebar (
     ADW_NAVIGATION_SPLIT_VIEW (self->project.split),
     adw_navigation_page_new (inner, aml_content_type_title (self->type)));
@@ -490,7 +491,8 @@ aml_content_page_build_bar (AmlContentPage *self)
   /* One overlay over the list and the project, so a message about either
      one is said in the same place. */
   self->toasts = adw_toast_overlay_new ();
-  adw_toast_overlay_set_child (ADW_TOAST_OVERLAY (self->toasts), self->project.split);
+  adw_toast_overlay_set_child (ADW_TOAST_OVERLAY (self->toasts),
+                               GTK_WIDGET (self->project.split));
   gtk_box_append (GTK_BOX (self), self->toasts);
 }
 
@@ -526,4 +528,3 @@ aml_content_page_move_actions_into_bar (AmlContentPage *self, gboolean browsing)
    if (self->bar_spacer != NULL)
      gtk_widget_set_visible (self->bar_spacer, FALSE);
 }
-

@@ -106,12 +106,12 @@ struct _AmlContentPage
     char *current_project_id;
     guint64 current_project_downloads;
     char *details_author;
-    GtkWidget *details_body;
-    GtkWidget *details_dropdown;
-    GtkWidget *details_download;
-    GtkWidget *details_page;             /* weak */
-    GtkWidget *split;
-    GtkWidget *details_check;
+    GtkBox *details_body;
+    GtkDropDown *details_dropdown;
+    GtkButton *details_download;
+    AdwNavigationPage *details_page;     /* weak */
+    AdwNavigationSplitView *split;
+    GtkCheckButton *details_check;
   } project;
 
   GtkWidget *pick_button;
@@ -160,7 +160,7 @@ void on_banner_dismiss (AdwBanner *banner, gpointer user_data);
 void set_busy (AmlContentPage *self, gboolean busy);
 void show_toast (AmlContentPage *self, const char *message);
 GtkWidget *plain_label (const char *text);
-void watch_widget (GtkWidget **field, GtkWidget *widget);
+void watch_widget (gpointer field, GtkWidget *widget);
 void start_plan (AmlContentPage *self, AmlModrinthVersion *version,
                  const char *title, const char *replaces, gboolean disabled);
 void reload_installed (AmlContentPage *self);
@@ -171,7 +171,7 @@ void remove_duplicate_project_files (AmlContentPage *self,
                                      const char *keep_path);
 void show_error (AmlContentPage *self, const char *what, GError *error);
 void aml_content_page_on_result_activated (AdwActionRow *row, gpointer user_data);
-AmlModrinthVersion *selected_version (GtkWidget *dropdown,
+AmlModrinthVersion *selected_version (GtkDropDown *dropdown,
                                       GPtrArray *versions);
 const char *version_name_of (AmlModrinthVersion *version);
 void pick_add (AmlContentPage *self, AmlModrinthVersion *version);
