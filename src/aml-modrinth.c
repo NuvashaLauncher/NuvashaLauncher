@@ -1772,6 +1772,20 @@ aml_modrinth_version_by_hash_finish (GAsyncResult *result, GError **error)
   return g_task_propagate_pointer (G_TASK (result), error);
 }
 
+void
+aml_modrinth_version_by_id_async (const char *version_id,
+                                  GCancellable *cancellable,
+                                  GAsyncReadyCallback callback,
+                                  gpointer user_data)
+{
+  g_autofree char *escaped = g_uri_escape_string (version_id, NULL, FALSE);
+  g_autofree char *url = g_strdup_printf (AML_MODRINTH_URL "/version/%s",
+                                          escaped);
+
+  get_async (url, cancellable, callback, user_data, version_answer,
+             AML_NOT_FOUND_IS_ERROR);
+}
+
 /* ---------------------------------------------------------- *
  * An update out of the hash of a file
  * ---------------------------------------------------------- */

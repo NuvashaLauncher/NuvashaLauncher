@@ -187,8 +187,9 @@ installed_filter_rows (AmlContentPage *self)
       g_autofree char *haystack = NULL;
       gboolean visible = TRUE;
 
-      if (file != NULL && file->project_id != NULL)
-        title = g_hash_table_lookup (self->browse.model->project_titles, file->project_id);
+      if (file != NULL && file->local_metadata &&
+          file->project_name != NULL && *file->project_name != '\0')
+        title = file->project_name;
       if (title == NULL && file != NULL)
         title = file->filename;
 
@@ -226,11 +227,12 @@ file_row_refresh (GtkWidget *row)
   if (file == NULL || !GTK_IS_WIDGET (row))
     return;
 
-  if (self != NULL && file->project_id != NULL)
-    title = g_hash_table_lookup (self->browse.model->project_titles, file->project_id);
-
-  /* What Modrinth knows the project by, or the name on disk when it is
-   * not known. The version remains useful as a subtitle/fallback only. */
+  if (file->local_metadata && file->project_name != NULL &&
+      *file->project_name != '\0')
+    title = file->project_name;
+  /* Installed names come from the local file metadata, never from a remote
+   * project lookup. The filename is the fallback for files without local
+   * metadata. */
   adw_preferences_row_set_title (
        ADW_PREFERENCES_ROW (row),
        title != NULL ? title : file->filename);
@@ -423,9 +425,8 @@ on_trash_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   if (file == NULL)
     return;
 
-  title = file->project_id != NULL
-            ? g_hash_table_lookup (self->browse.model->project_titles, file->project_id)
-            : NULL;
+  title = file->local_metadata && file->project_name != NULL
+            ? file->project_name : file->filename;
   if (title == NULL || *title == '\0')
     title = file->filename;
 
@@ -440,14 +441,13 @@ on_trash_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 
         for (guint j = 0; j < other->required_dependencies->len; j++)
           if (g_strcmp0 (g_ptr_array_index (other->required_dependencies, j),
-                        file->project_id) == 0)
+                         file->project_id) == 0 ||
+              g_strcmp0 (g_ptr_array_index (other->required_dependencies, j),
+                         file->local_id) == 0)
             {
-              other_title = other->project_id != NULL
-                              ? g_hash_table_lookup (self->browse.model->project_titles,
-                                                     other->project_id)
-                              : NULL;
-              if (other_title == NULL || *other_title == '\0')
-                other_title = other->filename;
+              other_title = other->local_metadata &&
+                            other->project_name != NULL
+                              ? other->project_name : other->filename;
               if (dependents->len > 0)
                 g_string_append_c (dependents, '\n');
               g_string_append (dependents, other_title);
@@ -489,9 +489,15 @@ file_row (AmlContentPage *self, AmlContentFile *file)
      either may hold an "&". Where the file lives is the row's tooltip;
      under the name goes what the project is, once Modrinth says so. */
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), FALSE);
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), file->filename);
+  adw_preferences_row_set_title (
+    ADW_PREFERENCES_ROW (GTK_WIDGET (row)),
+    file->local_metadata && file->project_name != NULL &&
+    *file->project_name != '\0'
+      ? file->project_name : file->filename);
   adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (GTK_WIDGET (row)), 2);
   adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (GTK_WIDGET (row)), FALSE);
+  if (file->description != NULL && *file->description != '\0')
+    row_show_description (GTK_WIDGET (row), file->description);
 
   /* The same square as a browse row, with the icon of what this kind of
      file is until the project it belongs to is known; the icon the
@@ -499,6 +505,8 @@ file_row (AmlContentPage *self, AmlContentFile *file)
   gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
   adw_action_row_add_prefix (ADW_ACTION_ROW (GTK_WIDGET (row)), icon);
   g_object_set_data (G_OBJECT (row), "aml-icon", icon);
+  if (file->local_icon_path != NULL)
+    aml_icon_widget_set_file (icon, file->local_icon_path);
 
   /* Only a mod is something that can be turned off: a resource pack or a
      shader pack is loaded whenever it is present, so neither has a
@@ -545,22 +553,32 @@ file_row (AmlContentPage *self, AmlContentFile *file)
   return GTK_WIDGET (row);
 }
 
-/* Asks Modrinth what each file is, one after the other, so that a list
- * of twenty mods does not open twenty requests at once. */
+/* Ask Modrinth several hashes at once, while keeping the request burst
+ * bounded for large content folders. */
+#define IDENTIFY_CONCURRENCY 8
+
+typedef struct _IdentifyRun IdentifyRun;
 typedef struct {
-  AmlContentPage *page; /* weakly held */
-  GCancellable *cancellable; /* the one the chain's requests are on */
-  guint index;
-  /* The file and the row the in-flight request is about. */
+  IdentifyRun *run;
   AmlContentFile *file;
   GtkWidget *row;
-} IdentifyRun;
+} IdentifyRequest;
 
-static void identify_next (IdentifyRun *run);
+struct _IdentifyRun {
+  AmlContentPage *page; /* weakly held */
+  GCancellable *cancellable;
+  guint next_index;
+  guint in_flight;
+  gboolean finished;
+};
+
+static void identify_start (IdentifyRun *run);
 
 static void
-identify_run_free (IdentifyRun *run)
+identify_run_maybe_free (IdentifyRun *run)
 {
+  if (!run->finished || run->in_flight != 0)
+    return;
   if (run->page != NULL)
     g_object_remove_weak_pointer (G_OBJECT (run->page),
                                   (gpointer *) &run->page);
@@ -570,15 +588,90 @@ identify_run_free (IdentifyRun *run)
 }
 
 static void
+identify_complete (IdentifyRun *run)
+{
+  if (!run->finished)
+    {
+      run->finished = TRUE;
+      if (run->page != NULL)
+        {
+          run->page->installed.identifying = FALSE;
+          if (run->page->project.details_versions != NULL &&
+              run->page->project.details_download != NULL)
+            {
+              gboolean have_versions =
+                run->page->project.details_versions->len > 0;
+              gtk_widget_set_sensitive (
+                GTK_WIDGET (run->page->project.details_download), have_versions);
+              gtk_widget_set_sensitive (
+                GTK_WIDGET (run->page->project.details_check), have_versions);
+            }
+        }
+    }
+  identify_run_maybe_free (run);
+}
+
+static void
+identify_request_free (IdentifyRequest *request)
+{
+  IdentifyRun *run = request->run;
+  g_free (request);
+  run->in_flight--;
+  identify_run_maybe_free (run);
+}
+
+static void
+persist_identified_file (AmlContentPage *self, AmlContentFile *file)
+{
+  g_autofree char *directory = NULL;
+  g_autofree char *filename = g_path_get_basename (file->path);
+  AmlContentIndexEntry entry = { 0 };
+
+  g_object_get (self->instance, "directory", &directory, NULL);
+  entry.filename = filename;
+  entry.hash = file->sha1;
+  entry.hash512 = file->sha512;
+  entry.download_url = file->download_url;
+  entry.env_client = "required";
+  entry.env_server = self->type == AML_CONTENT_MOD ? "required"
+                                                    : "unsupported";
+  entry.provider = "Modrinth";
+  entry.project_id = file->project_id;
+  entry.project_name = file->project_name;
+  entry.icon_url = file->icon_url;
+  entry.version_id = file->version_id;
+  entry.version_name = file->version_name;
+  entry.required_dependencies = file->required_dependencies;
+  entry.optional_dependencies = file->optional_dependencies;
+  entry.incompatible_dependencies = file->incompatible_dependencies;
+  aml_content_index_update_async (directory, self->type, &entry,
+                                  self->installed.scan, NULL, NULL);
+}
+
+static void
+add_remote_dependency (GPtrArray **destination, const char *value)
+{
+  if (value == NULL)
+    return;
+  if (*destination == NULL)
+    *destination = g_ptr_array_new_with_free_func (g_free);
+  for (guint j = 0; j < (*destination)->len; j++)
+    if (g_strcmp0 (value, g_ptr_array_index (*destination, j)) == 0)
+      return;
+  g_ptr_array_add (*destination, g_strdup (value));
+}
+
+static void
 identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                 gpointer user_data)
 {
-  IdentifyRun *run = user_data;
+  IdentifyRequest *request = user_data;
+  IdentifyRun *run = request->run;
   AmlContentPage *self = run->page;
   g_autoptr (GError) error = NULL;
   g_autoptr (AmlModrinthVersion) version = NULL;
-  AmlContentFile *file = run->file;
-  GtkWidget *row = run->row;
+  AmlContentFile *file = request->file;
+  GtkWidget *row = request->row;
 
   version = aml_modrinth_version_by_hash_finish (result, &error);
 
@@ -587,13 +680,15 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   if (run->cancellable != NULL &&
       g_cancellable_is_cancelled (run->cancellable))
     {
-      identify_run_free (run);
+      run->finished = TRUE;
+      identify_request_free (request);
       return;
     }
 
   if (self == NULL || file == NULL || row == NULL)
     {
-      identify_run_free (run);
+      identify_complete (run);
+      identify_request_free (request);
       return;
     }
 
@@ -603,8 +698,9 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       {
         const char *known_name = g_hash_table_lookup (self->browse.model->project_titles,
                                                       version->project_id);
-        file->project_name = g_strdup (known_name != NULL
-                                         ? known_name : version->project_id);
+       if (!file->local_metadata)
+         file->project_name = g_strdup (known_name != NULL
+                                          ? known_name : version->project_id);
       }
       file->version_id = g_strdup (version->version_id);
       file->version_name = g_strdup (version->name);
@@ -618,13 +714,6 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         file->sha512 = primary != NULL ? g_strdup (primary->sha512) : NULL;
         file->download_url = primary != NULL ? g_strdup (primary->url) : NULL;
       }
-      g_clear_pointer (&file->required_dependencies, g_ptr_array_unref);
-      g_clear_pointer (&file->optional_dependencies, g_ptr_array_unref);
-      g_clear_pointer (&file->incompatible_dependencies, g_ptr_array_unref);
-      file->required_dependencies = g_ptr_array_new_with_free_func (g_free);
-      file->optional_dependencies = g_ptr_array_new_with_free_func (g_free);
-      file->incompatible_dependencies = g_ptr_array_new_with_free_func (g_free);
-
       for (guint i = 0; version->dependencies != NULL &&
                        i < version->dependencies->len; i++)
         {
@@ -634,43 +723,20 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
           if (dependency->project_id == NULL)
             continue;
           if (dependency->type == AML_DEPENDENCY_REQUIRED)
-            g_ptr_array_add (file->required_dependencies,
-                             g_strdup (dependency->project_id));
+            add_remote_dependency (&file->required_dependencies,
+                                   dependency->project_id);
           else if (dependency->type == AML_DEPENDENCY_OPTIONAL)
-            g_ptr_array_add (file->optional_dependencies,
-                             g_strdup (dependency->project_id));
+            add_remote_dependency (&file->optional_dependencies,
+                                   dependency->project_id);
           else if (dependency->type == AML_DEPENDENCY_INCOMPATIBLE)
-            g_ptr_array_add (file->incompatible_dependencies,
-                             g_strdup (dependency->project_id));
+            add_remote_dependency (&file->incompatible_dependencies,
+                                   dependency->project_id);
         }
 
-      {
-        g_autofree char *directory = NULL;
-        g_autofree char *filename = g_path_get_basename (file->path);
-        AmlModrinthFile *primary =
-          aml_modrinth_version_primary_file (version);
-        AmlContentIndexEntry entry = { 0 };
-
-        g_object_get (self->instance, "directory", &directory, NULL);
-        entry.filename = filename;
-        entry.hash = file->sha1;
-        entry.hash512 = primary != NULL ? primary->sha512 : NULL;
-        entry.download_url = primary != NULL ? primary->url : NULL;
-        entry.env_client = "required";
-        entry.env_server = self->type == AML_CONTENT_MOD ? "required"
-                                                          : "unsupported";
-        entry.provider = "Modrinth";
-        entry.project_id = file->project_id;
-        entry.project_name = file->project_name;
-        entry.icon_url = file->icon_url;
-        entry.version_id = file->version_id;
-        entry.version_name = file->version_name;
-        entry.required_dependencies = file->required_dependencies;
-        entry.optional_dependencies = file->optional_dependencies;
-        entry.incompatible_dependencies = file->incompatible_dependencies;
-        aml_content_index_update_async (directory, self->type, &entry,
-                                        run->cancellable, NULL, NULL);
-      }
+      /* Persist the hash lookup immediately. Project details and the icon
+       * are a second request; a failure there must not lose the metadata we
+       * already obtained from the version-by-hash response. */
+      persist_identified_file (self, file);
 
       if (file->project_id != NULL && *file->project_id != '\0')
         g_hash_table_add (self->browse.model->projects, g_strdup (file->project_id));
@@ -679,66 +745,59 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
       /* The browser's icon of the project the file belongs to, which the
          row carries from here on. */
-      installed_icon_lookup (self, row, file->project_id);
     }
 
   /* Modrinth does not know this file, or the network is not there: it
    * keeps its own name and the page works all the same. */
   g_clear_error (&error);
 
-  /* The answer for the file that was asked is in; the chain goes on. */
-  identify_next (run);
+  identify_request_free (request);
+  identify_start (run);
 }
 
 static void
-identify_next (IdentifyRun *run)
+identify_start (IdentifyRun *run)
 {
   AmlContentPage *self = run->page;
 
   if (self == NULL)
     {
-      identify_run_free (run);
+      identify_complete (run);
       return;
     }
 
-  while (run->index < self->installed.files->len)
+  while (run->next_index < self->installed.files->len &&
+         run->in_flight < IDENTIFY_CONCURRENCY)
     {
-      AmlContentFile *file = g_ptr_array_index (self->installed.files, run->index);
+      AmlContentFile *file =
+        g_ptr_array_index (self->installed.files, run->next_index++);
       g_autofree char *key = NULL;
       GtkWidget *row = NULL;
 
-      run->index++;
       key = g_strdup (file->path);
       row = g_hash_table_lookup (self->installed.rows, key);
 
       /* A hash-matched index entry already identifies this file. The row is
        * ready from disk and reopening an instance must not ask Modrinth just
        * to rediscover what the index already records. */
-      if (row == NULL || file->sha1 == NULL ||
-          ((file->sha512 != NULL && file->download_url != NULL) &&
-           file->project_id != NULL && file->project_name != NULL &&
-           *file->project_name != '\0' &&
-           g_strcmp0 (file->project_id, file->project_name) != 0))
+      if (row == NULL || file->sha1 == NULL)
         continue;
 
-      run->file = file;
-      run->row = row;
-      aml_modrinth_version_by_hash_async (file->sha1, run->cancellable,
-                                          identify_ready, run);
-      return;
+      IdentifyRequest *request = g_new0 (IdentifyRequest, 1);
+      request->run = run;
+      request->file = file;
+      request->row = row;
+      run->in_flight++;
+      if (file->version_id != NULL && *file->version_id != '\0')
+        aml_modrinth_version_by_id_async (file->version_id, run->cancellable,
+                                          identify_ready, request);
+      else
+        aml_modrinth_version_by_hash_async (file->sha1, run->cancellable,
+                                            identify_ready, request);
     }
 
-  self->installed.identifying = FALSE;
-  if (self->project.details_versions != NULL && self->project.details_download != NULL)
-    {
-      gboolean have_versions = self->project.details_versions->len > 0;
-
-     gtk_widget_set_sensitive (GTK_WIDGET (self->project.details_download),
-                               have_versions && !self->installed.identifying);
-     gtk_widget_set_sensitive (GTK_WIDGET (self->project.details_check),
-                               have_versions && !self->installed.identifying);
-    }
-  identify_run_free (run);
+  if (run->next_index >= self->installed.files->len && run->in_flight == 0)
+    identify_complete (run);
 }
 
 static void
@@ -760,6 +819,8 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   if (files == NULL)
     {
+      gtk_widget_set_visible (GTK_WIDGET (self->installed.loading), FALSE);
+      gtk_widget_set_visible (GTK_WIDGET (self->installed.status), TRUE);
       if (error != NULL && !g_error_matches (error, G_IO_ERROR,
                                              G_IO_ERROR_CANCELLED))
         show_error (self, "The folder cannot be read", error);
@@ -767,6 +828,8 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       page_watch_free (watch);
       return;
     }
+
+  gtk_widget_set_visible (GTK_WIDGET (self->installed.loading), FALSE);
 
   /* The rows that pointed into the old list are gone, so the list they
    * pointed into can go too. */
@@ -792,8 +855,6 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                                   row);
       self->installed.rows_list = g_list_append (self->installed.rows_list, row);
       g_hash_table_insert (self->installed.rows, g_strdup (file->path), row);
-      if (file->project_id != NULL)
-        installed_icon_lookup (self, row, file->project_id);
     }
 
   installed_filter_rows (self);
@@ -813,7 +874,7 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     run->page = self;
     g_object_add_weak_pointer (G_OBJECT (self), (gpointer *) &run->page);
     run->cancellable = g_object_ref (self->installed.scan);
-    identify_next (run);
+    identify_start (run);
   }
 
   page_watch_free (watch);
@@ -832,6 +893,10 @@ reload_installed (AmlContentPage *self)
 
   if (directory == NULL)
     return;
+
+  gtk_widget_set_visible (GTK_WIDGET (self->installed.status), FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->installed.scroller), FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->installed.loading), TRUE);
 
   /* A scan that is still running is replaced: what it would answer is
    * about a folder that has since changed. */
@@ -1274,6 +1339,7 @@ aml_content_page_dispose (GObject *object)
   self->installed.group = NULL;
   self->installed.scroller = NULL;
   self->installed.status = NULL;
+  self->installed.loading = NULL;
   self->installed.search_bar = NULL;
   self->installed.search_entry = NULL;
   self->installed.update_all = NULL;

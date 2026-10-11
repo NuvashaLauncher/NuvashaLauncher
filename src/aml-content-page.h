@@ -53,8 +53,12 @@ typedef struct {
   /* What a hash lookup answered, all NULL for a file Modrinth does not
    * know or while the network is not there. */
   char *project_id;
+  char *local_id;
   char *project_name;
+  char *description;
+  gboolean local_metadata;
   char *icon_url;
+  char *local_icon_path;
   char *version_id;
   char *version_name;
   char *version_number;

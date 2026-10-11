@@ -159,7 +159,12 @@ void aml_modrinth_search_async (const AmlModrinthSearch *search,
 
 /* (transfer full). NULL on error. */
 AmlModrinthResults *aml_modrinth_search_finish (GAsyncResult  *result,
-                                                GError       **error);
+                                                          GError       **error);
+
+void aml_modrinth_version_by_id_async (const char         *version_id,
+                                       GCancellable       *cancellable,
+                                       GAsyncReadyCallback callback,
+                                       gpointer            user_data);
 
 /* The projects out of what /search answered, and the total it counted.
  * This is what the fetch above parses, and what a test hands a fixture

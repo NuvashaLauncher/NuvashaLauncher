@@ -41,6 +41,13 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC (AmlContentIndexEntry,
 
 GQuark aml_content_index_error_quark (void);
 
+char *aml_content_index_entry_path (const char *instance_directory,
+                                    AmlContentType type,
+                                    const char *filename);
+GPtrArray *aml_content_index_load_sync (const char *instance_directory,
+                                        AmlContentType type,
+                                        GError **error);
+
 void aml_content_index_load_async (const char *instance_directory,
                                    AmlContentType type,
                                    GCancellable *cancellable,
