@@ -64,6 +64,7 @@ struct _AmlContentPage
     AdwPreferencesGroup *group;
     GtkScrolledWindow *scroller;
     AdwStatusPage *status;
+    AdwSpinner *loading;
     GtkButton *update_all;
     GPtrArray *files;     /* AmlContentFile* */
     GHashTable *rows;     /* path -> row */

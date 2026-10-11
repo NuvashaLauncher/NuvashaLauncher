@@ -13,10 +13,14 @@ typedef struct {
 } UpdateWait;
 
 static void
-update_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result G_GNUC_UNUSED,
+update_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
              gpointer user_data)
 {
   UpdateWait *wait = user_data;
+  g_autoptr (GError) error = NULL;
+
+  if (!aml_content_index_modify_finish (result, &error))
+    g_error ("content index update failed: %s", error->message);
 
   wait->completed++;
   if (wait->completed == 2)
@@ -39,25 +43,13 @@ load_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 }
 
 static void
-damaged_update_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
-                     gpointer user_data)
-{
-  GMainLoop *loop = user_data;
-  g_autoptr (GError) error = NULL;
-
-  g_assert_false (aml_content_index_modify_finish (result, &error));
-  g_assert_nonnull (error);
-  g_main_loop_quit (loop);
-}
-
-static void
 test_concurrent_updates_are_serialized (void)
 {
   g_autofree char *root = g_dir_make_tmp ("aml-content-index-XXXXXX", NULL);
   g_autofree char *index_directory = g_build_filename (root, "mods", ".index",
                                                        NULL);
-  g_autofree char *index_path = g_build_filename (index_directory, "index.json",
-                                                  NULL);
+  g_autofree char *first_path = NULL;
+  g_autofree char *second_path = NULL;
   g_autofree char *mods_directory = g_build_filename (root, "mods", NULL);
   GMainLoop *loop = g_main_loop_new (NULL, FALSE);
   UpdateWait wait = { loop, 0 };
@@ -94,30 +86,19 @@ test_concurrent_updates_are_serialized (void)
                                   update_done, &wait);
   g_main_loop_run (loop);
 
+  first_path = aml_content_index_entry_path (root, AML_CONTENT_MOD,
+                                             first.filename);
+  second_path = aml_content_index_entry_path (root, AML_CONTENT_MOD,
+                                              second.filename);
+  g_assert_true (g_file_test (first_path, G_FILE_TEST_IS_REGULAR));
+  g_assert_true (g_file_test (second_path, G_FILE_TEST_IS_REGULAR));
+
   aml_content_index_load_async (root, AML_CONTENT_MOD, NULL, load_done, loop);
   g_main_loop_run (loop);
 
-  g_assert_true (g_file_set_contents (index_path, "{broken", -1, NULL));
-  {
-    AmlContentIndexEntry repair = {
-      .filename = "repair.jar",
-      .project_name = "Repair",
-      .env_client = "required",
-      .env_server = "unsupported",
-    };
-    aml_content_index_update_async (root, AML_CONTENT_MOD, &repair, NULL,
-                                    damaged_update_done, loop);
-    g_main_loop_run (loop);
-  }
-  {
-    g_autofree char *contents = NULL;
-
-    g_assert_true (g_file_get_contents (index_path, &contents, NULL, NULL));
-    g_assert_cmpstr (contents, ==, "{broken");
-  }
-
   g_main_loop_unref (loop);
-  g_remove (index_path);
+  g_remove (first_path);
+  g_remove (second_path);
   g_rmdir (index_directory);
   {
     g_rmdir (mods_directory);

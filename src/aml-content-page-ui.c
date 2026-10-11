@@ -39,6 +39,7 @@ aml_content_page_build_installed (AmlContentPage *self)
    GtkSearchEntry *search_bar = GTK_SEARCH_ENTRY (gtk_search_entry_new ());
   GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
   GtkBox *content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
+  AdwSpinner *loading = ADW_SPINNER (adw_spinner_new ());
   AdwPreferencesGroup *group =
     ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
 
@@ -79,6 +80,11 @@ aml_content_page_build_installed (AmlContentPage *self)
   g_object_ref_sink (actions);
 
    self->installed.status = ADW_STATUS_PAGE (adw_status_page_new ());
+   self->installed.loading = loading;
+   gtk_widget_set_valign (GTK_WIDGET (loading), GTK_ALIGN_CENTER);
+   gtk_widget_set_halign (GTK_WIDGET (loading), GTK_ALIGN_CENTER);
+   gtk_widget_set_vexpand (GTK_WIDGET (loading), TRUE);
+   gtk_widget_set_visible (GTK_WIDGET (loading), FALSE);
   adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->installed.status),
                                  aml_content_type_icon (self->type));
   adw_status_page_set_title (ADW_STATUS_PAGE (self->installed.status),
@@ -100,7 +106,8 @@ aml_content_page_build_installed (AmlContentPage *self)
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 
   gtk_widget_set_vexpand (GTK_WIDGET (content), TRUE);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (self->installed.status));
+   gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (loading));
+   gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (self->installed.status));
   gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (scroller));
   gtk_widget_set_visible (GTK_WIDGET (scroller), FALSE);
   gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (content));

@@ -8,6 +8,7 @@
 #include "aml-modpack-private.h"
 
 #include "aml-i18n.h"
+#include "aml-content-index.h"
 #include "aml-loaders.h"
 
 #include <archive.h>
@@ -128,6 +129,67 @@ static void install_file_verified (GObject *, GAsyncResult *, gpointer);
 static void install_loader_versions (GObject *, GAsyncResult *, gpointer);
 static void install_register (InstallRun *run);
 static void overrides_extracted (GObject *, GAsyncResult *, gpointer);
+
+static void
+seed_manifest_indexes (InstallRun *run)
+{
+  for (guint i = 0; i < run->files->len; i++)
+    {
+      AmlModpackFile *file = g_ptr_array_index (run->files, i);
+      AmlContentType type;
+      const char *url = file->downloads != NULL && file->downloads->len > 0
+                          ? g_ptr_array_index (file->downloads, 0) : NULL;
+      g_autofree char *filename = NULL;
+      g_autofree char *project_id = NULL;
+      g_autofree char *version_id = NULL;
+      AmlContentIndexEntry entry = { 0 };
+
+      if (g_str_has_prefix (file->path, "mods/"))
+        {
+          type = AML_CONTENT_MOD;
+        }
+      else if (g_str_has_prefix (file->path, "resourcepacks/"))
+        {
+          type = AML_CONTENT_RESOURCE_PACK;
+        }
+      else if (g_str_has_prefix (file->path, "shaderpacks/"))
+        {
+          type = AML_CONTENT_SHADER_PACK;
+        }
+      else
+        continue;
+
+      filename = g_path_get_basename (file->path);
+      if (url != NULL)
+        {
+          g_autoptr (GUri) uri = g_uri_parse (url, G_URI_FLAGS_NONE, NULL);
+          const char *uri_path = uri != NULL ? g_uri_get_path (uri) : NULL;
+          g_auto (GStrv) parts = uri_path != NULL
+                                   ? g_strsplit (uri_path, "/", -1) : NULL;
+
+          for (guint part = 0; parts != NULL && parts[part] != NULL; part++)
+            {
+              if (g_strcmp0 (parts[part], "data") == 0 &&
+                  parts[part + 1] != NULL)
+                project_id = g_strdup (parts[part + 1]);
+              if (g_strcmp0 (parts[part], "versions") == 0 &&
+                  parts[part + 1] != NULL)
+                version_id = g_strdup (parts[part + 1]);
+            }
+        }
+      entry.filename = filename;
+      entry.hash = file->sha1;
+      entry.hash512 = file->sha512;
+      entry.download_url = (char *) url;
+      entry.env_client = "required";
+      entry.env_server = type == AML_CONTENT_MOD ? "required" : "unsupported";
+      entry.provider = "Modrinth";
+      entry.project_id = project_id;
+      entry.version_id = version_id;
+      aml_content_index_update_async (run->target, type, &entry,
+                                      run->cancellable, NULL, NULL);
+    }
+}
 
 static void
 install_run_free (InstallRun *run)
@@ -309,6 +371,11 @@ install_register (InstallRun *run)
             }
         }
     }
+
+  /* The manifest gives us the hashes and download URLs immediately. Project
+   * names, dependencies and icons are filled in later by the content page's
+   * Modrinth hash lookup. */
+  seed_manifest_indexes (run);
 
   g_task_return_pointer (run->task, g_object_ref (instance),
                          g_object_unref);
@@ -938,28 +1005,15 @@ export_indexed_files (ExportRun *run, GCancellable *cancellable, GError **error)
           return FALSE;
         }
 
-      g_autofree char *index_path = g_build_filename (
-        run->instance_directory, folders[folder_index], ".index", "index.json",
-        NULL);
-      g_autofree char *data = NULL;
-      gsize length = 0;
-      g_autoptr (JsonParser) index_parser = json_parser_new ();
-      JsonNode *index_root = NULL;
-      JsonArray *entries = NULL;
+      g_autoptr (GError) index_error = NULL;
+      g_autoptr (GPtrArray) entries =
+        aml_content_index_load_sync (run->instance_directory,
+                                     folder_index, &index_error);
 
-      if (!g_file_get_contents (index_path, &data, &length, NULL) ||
-          !json_parser_load_from_data (index_parser, data, length, NULL))
-        continue;
-
-      index_root = json_parser_get_root (index_parser);
-      if (!JSON_NODE_HOLDS_OBJECT (index_root))
-        continue;
-      entries = json_object_get_array_member (json_node_get_object (index_root),
-                                              "entries");
       if (entries == NULL)
         continue;
 
-      for (guint i = 0; i < json_array_get_length (entries); i++)
+      for (guint i = 0; i < entries->len; i++)
         {
           if (g_cancellable_is_cancelled (cancellable))
             {
@@ -968,8 +1022,7 @@ export_indexed_files (ExportRun *run, GCancellable *cancellable, GError **error)
               return FALSE;
             }
 
-          JsonObject *entry = json_node_get_object (
-            json_array_get_element (entries, i));
+          AmlContentIndexEntry *entry = g_ptr_array_index (entries, i);
           const char *filename = NULL;
           const char *sha1 = NULL;
           const char *sha512 = NULL;
@@ -984,20 +1037,12 @@ export_indexed_files (ExportRun *run, GCancellable *cancellable, GError **error)
           JsonObject *hashes = NULL;
           JsonArray *downloads = NULL;
 
-          if (entry == NULL)
-            continue;
-          filename = json_object_get_string_member_with_default (entry,
-                                                                  "filename",
-                                                                  "");
-          sha1 = json_object_get_string_member_with_default (entry, "hash", "");
-          sha512 = json_object_get_string_member_with_default (entry, "hash512",
-                                                               "");
-          url = json_object_get_string_member_with_default (entry,
-                                                            "download_url", "");
-          env_client = json_object_get_string_member_with_default (
-            entry, "env_client", "required");
-          env_server = json_object_get_string_member_with_default (
-            entry, "env_server", "required");
+          filename = entry->filename;
+          sha1 = entry->hash;
+          sha512 = entry->hash512;
+          url = entry->download_url;
+          env_client = entry->env_client;
+          env_server = entry->env_server;
           source = g_build_filename (run->instance_directory, folders[folder_index],
                                      filename, NULL);
 
