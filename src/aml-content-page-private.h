@@ -85,7 +85,7 @@ struct _AmlContentPage
     GtkBox *loading_more; /* spinner row at the bottom of the list */
     GtkBox *retry_row;    /* inline retry row when a page fails */
     GtkLabel *retry_label;
-    GtkWidget *spinner;
+    AdwSpinner *spinner;
 
     GList *result_rows;
     AmlContentBrowserModel *model;
