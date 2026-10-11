@@ -115,12 +115,40 @@ struct _AmlTaskSequence
 };
 
 static void
-sequence_free (AmlTaskSequence *sequence)
+sequence_finalize (gpointer user_data)
+{
+  g_free (user_data);
+}
+
+/* Lets go of the step state and finishes the sequence. The struct itself
+ * is not freed here: it is handed to the task it was built on, which
+ * frees it when the task is finalized.
+ *
+ * The reason is the finished flag. A caller keeps the sequence pointer
+ * after the sequence completes, and a late second completion reads that
+ * flag to see that there is nothing left to do. Freeing the struct at
+ * the moment of completion makes that read a read of freed memory, so
+ * the flag can never be true and the protection it is written to give is
+ * not there at all. Tying the struct to the task keeps it readable for
+ * as long as anyone can still hold the pointer, because a caller that
+ * holds the pointer also holds the task. */
+static void
+sequence_finish (AmlTaskSequence *sequence)
 {
   if (sequence->user_data_free != NULL)
-    sequence->user_data_free (sequence->user_data);
+    {
+      sequence->user_data_free (sequence->user_data);
+      sequence->user_data_free = NULL;
+      sequence->user_data = NULL;
+    }
+
+  g_task_set_task_data (sequence->task, sequence, sequence_finalize);
+
+  /* The task goes out to whoever completes it, and the sequence rides
+     along with it, so the reference taken in aml_task_sequence_new is
+     given back here. A completed sequence has no task left to hand
+     out, which is why the finished flag is checked before that. */
   g_clear_object (&sequence->task);
-  g_free (sequence);
 }
 
 AmlTaskSequence *
@@ -156,7 +184,7 @@ aml_task_sequence_start (AmlTaskSequence *sequence)
   if (g_task_return_error_if_cancelled (sequence->task))
     {
       sequence->finished = TRUE;
-      sequence_free (sequence);
+      sequence_finish (sequence);
       return;
     }
 
@@ -174,7 +202,7 @@ aml_task_sequence_next (AmlTaskSequence *sequence)
   if (g_task_return_error_if_cancelled (sequence->task))
     {
       sequence->finished = TRUE;
-      sequence_free (sequence);
+      sequence_finish (sequence);
       return;
     }
 
@@ -197,7 +225,7 @@ aml_task_sequence_return_pointer (AmlTaskSequence *sequence,
 
   sequence->finished = TRUE;
   g_task_return_pointer (sequence->task, result, result_free);
-  sequence_free (sequence);
+  sequence_finish (sequence);
 }
 
 void
@@ -213,5 +241,5 @@ aml_task_sequence_return_error (AmlTaskSequence *sequence, GError *error)
 
   sequence->finished = TRUE;
   g_task_return_error (sequence->task, error);
-  sequence_free (sequence);
+  sequence_finish (sequence);
 }
