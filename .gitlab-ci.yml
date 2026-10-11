@@ -1,4 +1,4 @@
-image: ubuntu:24.04
+image: archlinux:base-devel
 
 stages:
   - test
@@ -9,16 +9,15 @@ variables:
 
 .setup:
   before_script:
-    - apt-get update
-    - apt-get install -y --no-install-recommends
-        build-essential
+    - pacman -Syu --noconfirm
+    - pacman -S --noconfirm
         gettext
-        pkg-config
-        libarchive-dev
-        libadwaita-1-dev
-        libgtk-4-dev
-        libjson-glib-dev
-        libsoup-3.0-dev
+        pkgconf
+        libarchive
+        libadwaita
+        gtk4
+        json-glib
+        libsoup3
 
 test:
   extends: .setup
