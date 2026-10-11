@@ -670,8 +670,12 @@ aml_instance_set_property (GObject      *object,
       break;
 
     case PROP_NAME:
-      g_free (self->name);
-      self->name = g_value_dup_string (value);
+      {
+        g_autofree char *normalized =
+          aml_instance_normalize_name (g_value_get_string (value));
+        g_free (self->name);
+        self->name = g_steal_pointer (&normalized);
+      }
       break;
 
     case PROP_DIRECTORY:

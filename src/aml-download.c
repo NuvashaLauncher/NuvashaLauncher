@@ -24,9 +24,9 @@
 #include "aml-download.h"
 
 #include "aml-cache.h"
+#include "aml-fs.h"
 
 #include <errno.h>
-#include <fcntl.h>
 #include <gio/gunixoutputstream.h>
 #include <glib/gstdio.h>
 #include <libsoup/soup.h>
@@ -78,6 +78,19 @@ static SoupSession *session = NULL;
 static guint running = 0;
 static GQueue waiting = G_QUEUE_INIT;
 static AmlSettings *cache_settings = NULL;
+
+void
+aml_download_shutdown (void)
+{
+  /* Requests own all callback state. Do not tear down the session while one
+   * of them is still running or queued. The normal application shutdown
+   * path calls this after its windows and tasks have gone away. */
+  if (running != 0 || !g_queue_is_empty (&waiting))
+    return;
+
+  g_clear_object (&session);
+  g_clear_object (&cache_settings);
+}
 
 static SoupSession *
 get_session (void)
@@ -555,38 +568,6 @@ discard_temporary (DownloadRequest *request)
 }
 
 static gboolean
-directory_is_real_path (const char *directory)
-{
-  g_auto (GStrv) parts = NULL;
-  int current = -1;
-
-  if (!g_path_is_absolute (directory))
-    return FALSE;
-
-  parts = g_strsplit (directory + 1, G_DIR_SEPARATOR_S, -1);
-  current = open (G_DIR_SEPARATOR_S,
-                  O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
-  if (current < 0)
-    return FALSE;
-
-  for (guint i = 0; parts[i] != NULL && parts[i][0] != '\0'; i++)
-    {
-      int next = openat (current, parts[i],
-                         O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
-      if (next < 0)
-        {
-          close (current);
-          return FALSE;
-        }
-      close (current);
-      current = next;
-    }
-
-  close (current);
-  return TRUE;
-}
-
-static gboolean
 open_temporary (DownloadRequest *request, GError **error)
 {
   g_autofree char *directory = g_path_get_dirname (request->dest_path);
@@ -599,7 +580,7 @@ open_temporary (DownloadRequest *request, GError **error)
    * caller selected. The instance installer creates real private temporary
    * directories, and rejecting symlink parents is the safe default for all
    * other callers too. */
-  if (!directory_is_real_path (directory) ||
+  if (!aml_fs_directory_is_real (directory) ||
       g_lstat (directory, &directory_stat) != 0 ||
       !S_ISDIR (directory_stat.st_mode))
     {

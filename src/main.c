@@ -14,6 +14,7 @@
 #include "aml-instance-manager.h"
 #include "aml-i18n.h"
 #include "aml-main-window.h"
+#include "aml-download.h"
 #include "aml-settings.h"
 
 static void
@@ -137,5 +138,7 @@ main (int argc, char **argv)
                                    G_N_ELEMENTS (app_entries), app);
   g_signal_connect (app, "activate", G_CALLBACK (on_activate), NULL);
 
-  return g_application_run (G_APPLICATION (app), argc, argv);
+  int status = g_application_run (G_APPLICATION (app), argc, argv);
+  aml_download_shutdown ();
+  return status;
 }

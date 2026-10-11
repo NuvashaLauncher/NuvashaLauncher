@@ -126,6 +126,27 @@ test_sanitize_name (void)
 }
 
 static void
+test_normalize_name (void)
+{
+  g_autofree char *trimmed =
+    aml_instance_normalize_name (" \tCafe\xCC\x81  ");
+  g_autofree char *composed = aml_instance_normalize_name ("Caf\xC3\xA9");
+  g_autofree char *stored = NULL;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlInstance) instance =
+    aml_instance_new (NULL, " \tCafe\xCC\x81  ", "/tmp/normalized-instance",
+                      "1.21.1", AML_LOADER_VANILLA, &error);
+
+  g_assert_cmpstr (trimmed, ==, "Caf\xC3\xA9");
+  g_assert_cmpstr (composed, ==, "Caf\xC3\xA9");
+  g_assert_no_error (error);
+  g_object_get (instance, "name", &stored, NULL);
+  g_assert_cmpstr (stored, ==, "Caf\xC3\xA9");
+
+  g_print ("ok - instance names are normalized at the model boundary\n");
+}
+
+static void
 test_new_defaults (void)
 {
   g_autoptr (GError) error = NULL;
@@ -564,6 +585,7 @@ main (int argc, char **argv)
 
   test_loader_strings ();
   test_sanitize_name ();
+  test_normalize_name ();
   test_new_defaults ();
   test_new_rejects_bad_values ();
   test_validate ();

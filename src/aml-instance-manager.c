@@ -14,6 +14,7 @@
 
 #include "aml-instance-manager.h"
 #include "aml-i18n.h"
+#include "aml-fs.h"
 
 #include <errno.h>
 #include <glib/gstdio.h>
@@ -182,6 +183,16 @@ check_instance_directory (AmlInstanceManager  *self,
           g_free (path);
           path = resolved;
         }
+    }
+
+  g_autofree char *parent = g_path_get_dirname (path);
+  if (!aml_fs_directory_is_real (parent))
+    {
+      g_set_error (error, AML_INSTANCE_MANAGER_ERROR,
+                   AML_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+                   "the parent of the instance directory must not contain "
+                   "symlinks and must already exist");
+      return FALSE;
     }
 
   if (g_strcmp0 (path, G_DIR_SEPARATOR_S) == 0)
@@ -487,16 +498,34 @@ parse_instances_json (const char *contents, gssize length, GError **error)
         }
 
       const char *id = aml_instance_get_id (instance);
+      g_autofree char *instance_name_value = instance_name (instance);
+      g_autofree char *instance_key =
+        instance_name_key (instance_name_value);
 
       for (GList *l = list; l != NULL; l = l->next)
         {
           AmlInstance *seen = l->data;
+          g_autofree char *seen_name = instance_name (seen);
+          g_autofree char *seen_key =
+            instance_name_key (seen_name);
 
           if (g_str_equal (aml_instance_get_id (seen), id))
             {
               g_set_error (error, AML_INSTANCE_MANAGER_ERROR,
                            AML_INSTANCE_MANAGER_ERROR_CORRUPT,
                            "instances.json lists the id \"%s\" twice", id);
+              g_object_unref (instance);
+              g_list_free_full (list, g_object_unref);
+              return NULL;
+            }
+
+          if (g_str_equal (seen_key, instance_key))
+            {
+              g_set_error (error, AML_INSTANCE_MANAGER_ERROR,
+                           AML_INSTANCE_MANAGER_ERROR_CORRUPT,
+                           "instances.json lists the normalized name \"%s\" "
+                           "more than once",
+                           instance_name_value);
               g_object_unref (instance);
               g_list_free_full (list, g_object_unref);
               return NULL;
@@ -1045,74 +1074,12 @@ link_copy_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 }
 
 static void
-copy_tree_query_ready (GObject *source, GAsyncResult *result,
-                       gpointer user_data)
-{
-  CopyTree *tree = user_data;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (GFileInfo) info =
-    g_file_query_info_finish (G_FILE (source), result, &error);
-
-  if (info == NULL)
-    {
-      copy_tree_record_error (tree, g_steal_pointer (&error));
-      copy_tree_done (tree);
-      return;
-    }
-
-  switch (g_file_info_get_file_type (info))
-    {
-    case G_FILE_TYPE_DIRECTORY:
-      copy_tree_start_dir (tree, g_object_ref (tree->source),
-                           g_object_ref (tree->destination));
-      break;
-
-    case G_FILE_TYPE_REGULAR:
-      copy_tree_start_file (tree, g_object_ref (tree->source),
-                            g_object_ref (tree->destination));
-      break;
-
-    case G_FILE_TYPE_SYMBOLIC_LINK:
-      copy_tree_start_link (tree, g_object_ref (tree->destination),
-                            g_file_info_get_symlink_target (info));
-      break;
-
-    default:
-      {
-        g_autofree char *path = g_file_get_path (tree->source);
-        copy_tree_record_error (
-          tree,
-          g_error_new (AML_INSTANCE_MANAGER_ERROR,
-                       AML_INSTANCE_MANAGER_ERROR_INVALID_PATH,
-                       "\"%s\" is neither a directory nor a regular file",
-                       path));
-      }
-      break;
-    }
-
-  copy_tree_done (tree);
-}
-
-static void
 copy_tree_async (GFile *source, GFile *destination,
                  GCancellable *cancellable,
                  GAsyncReadyCallback callback, gpointer user_data)
 {
-  CopyTree *tree = g_new0 (CopyTree, 1);
-
-  tree->task = g_task_new (NULL, cancellable, callback, user_data);
-  tree->cancellable = cancellable; /* the task keeps a reference */
-  tree->pending = 1;
-  tree->source = g_object_ref (source);
-  tree->destination = g_object_ref (destination);
-
-  g_file_query_info_async (source,
-                           G_FILE_ATTRIBUTE_STANDARD_NAME ","
-                           G_FILE_ATTRIBUTE_STANDARD_TYPE ","
-                           G_FILE_ATTRIBUTE_STANDARD_SYMLINK_TARGET,
-                           G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-                           G_PRIORITY_DEFAULT, cancellable,
-                           copy_tree_query_ready, tree);
+  aml_fs_copy_tree_async (source, destination, cancellable, callback,
+                          user_data);
 }
 
 static gboolean
@@ -1325,8 +1292,6 @@ static void delete_next_files_ready (GObject *source, GAsyncResult *result,
 static void delete_enumerator_close_ready (GObject *source,
                                            GAsyncResult *result,
                                            gpointer user_data);
-static void delete_tree_query_ready (GObject *source, GAsyncResult *result,
-                                     gpointer user_data);
 
 static void
 delete_tree_record_error (DeleteTree *tree, GError *error)
@@ -1522,48 +1487,12 @@ delete_next_files_ready (GObject *source G_GNUC_UNUSED,
 }
 
 static void
-delete_tree_query_ready (GObject *source, GAsyncResult *result,
-                         gpointer user_data)
-{
-  DeleteTree *tree = user_data;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (GFileInfo) info =
-    g_file_query_info_finish (G_FILE (source), result, &error);
-
-  if (info == NULL)
-    {
-      /* Nothing to remove: a directory that is already gone counts as
-       * removed. */
-      if (error != NULL &&
-          g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
-        g_clear_error (&error);
-      else if (error != NULL)
-        delete_tree_record_error (tree, g_steal_pointer (&error));
-
-      delete_tree_done (tree);
-      return;
-    }
-
-  delete_tree_start_node (tree, NULL, g_object_ref (tree->file),
-                          g_file_info_get_file_type (info));
-  delete_tree_done (tree);
-}
-
-static void
 delete_tree_async (GFile *file, GCancellable *cancellable,
                    GAsyncReadyCallback callback, gpointer user_data)
 {
-  DeleteTree *tree = g_new0 (DeleteTree, 1);
+  g_autofree char *path = g_file_get_path (file);
 
-  tree->task = g_task_new (NULL, cancellable, callback, user_data);
-  tree->cancellable = cancellable; /* the task keeps a reference */
-  tree->pending = 1;
-  tree->file = g_object_ref (file);
-
-  g_file_query_info_async (file, G_FILE_ATTRIBUTE_STANDARD_TYPE,
-                           G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-                           G_PRIORITY_DEFAULT, cancellable,
-                           delete_tree_query_ready, tree);
+  aml_fs_remove_tree_async (path, cancellable, callback, user_data);
 }
 
 static gboolean

@@ -36,6 +36,11 @@ GQuark aml_download_error_quark (void);
 
 void aml_download_set_cache_settings (AmlSettings *settings);
 
+/* Releases the process-wide network service when no transfer is active.
+ * Applications call this during orderly shutdown; a busy service is left
+ * alive so in-flight callbacks cannot be invalidated. */
+void aml_download_shutdown (void);
+
 /* Progress of a running transfer. @bytes_done is what arrived so far,
  * @total is the announced length or -1 when the server did not say.
  * Called on the caller's main context; a download served from the
