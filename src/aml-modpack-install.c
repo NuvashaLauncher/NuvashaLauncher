@@ -299,12 +299,10 @@ install_register (InstallRun *run)
    * run->temp is emptied as the move starts. */
   temp = g_steal_pointer (&run->temp);
 
-  if (g_rename (temp, run->target) != 0)
+  if (!aml_fs_rename (temp, run->target, &error))
     {
       run->temp = g_steal_pointer (&temp);
-      g_set_error (&error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
-                   "the unpacked pack cannot be moved: %s",
-                   g_strerror (errno));
+      g_prefix_error (&error, "the unpacked pack cannot be moved: ");
       install_fail (run, g_steal_pointer (&error));
       return;
     }
@@ -453,13 +451,14 @@ dispatch_download (InstallRun *run)
     g_autofree char *dest = g_build_filename (run->temp, file->path, NULL);
     g_autofree char *parent = g_path_get_dirname (dest);
 
-    if (g_mkdir_with_parents (parent, 0755) != 0)
+    g_autoptr (GError) directory_error = NULL;
+    if (!aml_fs_make_directory (parent, 0755, &directory_error))
       {
         g_autoptr (GError) error = NULL;
 
         g_set_error (&error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
                      "a directory under the instance cannot be made: %s",
-                     g_strerror (errno));
+                     directory_error->message);
         install_fail (run, g_steal_pointer (&error));
         return;
       }
@@ -535,7 +534,7 @@ install_file_verified (GObject *source G_GNUC_UNUSED,
       file = g_ptr_array_index (run->files, run->current);
       dest = g_build_filename (run->temp, file->path, NULL);
 
-      g_unlink (dest);
+      aml_fs_unlink (dest, NULL);
 
       run->saw_hash_error = TRUE;
       run->attempt++;
@@ -570,7 +569,6 @@ aml_modpack_install_async (AmlModpack *modpack,
   g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
   InstallRun *run = NULL;
   g_autofree char *parent = NULL;
-  g_autofree char *template = NULL;
 
   if (modpack == NULL || manager == NULL || name == NULL || name[0] == '\0')
     {
@@ -654,19 +652,21 @@ aml_modpack_install_async (AmlModpack *modpack,
    * made if it has to be; what is made stays. */
   parent = g_path_get_dirname (run->target);
 
-  if (g_mkdir_with_parents (parent, 0755) != 0)
+  g_autoptr (GError) parent_error = NULL;
+  if (!aml_fs_make_directory (parent, 0755, &parent_error))
     {
       g_autoptr (GError) error = NULL;
 
       g_set_error (&error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
                    "a directory under the instance cannot be made: %s",
-                   g_strerror (errno));
+                   parent_error->message);
       install_refuse (task, run, g_steal_pointer (&error));
       return;
     }
 
-  template = g_strdup_printf ("%s/.aml-modpack-XXXXXX", parent);
-  run->temp = g_mkdtemp (template);
+  g_autoptr (GError) temp_error = NULL;
+  run->temp = aml_fs_make_temporary_directory (parent, ".aml-modpack-XXXXXX",
+                                               &temp_error);
 
   if (run->temp == NULL)
     {
@@ -674,7 +674,7 @@ aml_modpack_install_async (AmlModpack *modpack,
 
       g_set_error (&error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
                    "the temporary directory cannot be made: %s",
-                   g_strerror (errno));
+                   temp_error->message);
       install_refuse (task, run, g_steal_pointer (&error));
       return;
     }
@@ -692,11 +692,6 @@ aml_modpack_install_async (AmlModpack *modpack,
       install_refuse (task, run, g_steal_pointer (&error));
       return;
     }
-
-  /* g_mkdtemp fills the template in place and hands back that very
-   * pointer: run->temp is its owner now and the local name has
-   * nothing left to free. */
-  template = NULL;
 
   /* install_next and not dispatch_download: a pack may name no files
    * at all to download, and then the first thing it wants is its
@@ -1177,15 +1172,16 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
     g_autofree char *parent = g_path_get_dirname (run->archive_path);
     int fd = -1;
 
-    run->temporary_archive = g_build_filename (parent, ".aml-modpack-XXXXXX",
-                                               NULL);
-    fd = g_mkstemp (run->temporary_archive);
+    g_autoptr (GError) temporary_error = NULL;
+    fd = aml_fs_open_temporary_file (parent, ".aml-modpack-XXXXXX",
+                                     &run->temporary_archive,
+                                     &temporary_error);
     if (fd < 0)
       {
         g_task_return_new_error (task, AML_MODPACK_ERROR,
                                  AML_MODPACK_ERROR_IO,
-                                 "cannot create a temporary archive: %s",
-                                 g_strerror (errno));
+                                  "cannot create a temporary archive: %s",
+                                  temporary_error->message);
         return;
       }
     close (fd);
@@ -1200,7 +1196,7 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
                    "cannot create \"%s\": %s", run->archive_path,
                    archive_error_string (archive));
       archive_write_free (archive);
-      g_unlink (run->temporary_archive);
+      aml_fs_unlink (run->temporary_archive, NULL);
       g_task_return_error (task, g_steal_pointer (&error));
       return;
     }
@@ -1220,7 +1216,7 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
                    archive_error_string (archive));
       archive_entry_free (manifest_entry);
       archive_write_free (archive);
-      g_unlink (run->temporary_archive);
+      aml_fs_unlink (run->temporary_archive, NULL);
       g_task_return_error (task, g_steal_pointer (&error));
       return;
     }
@@ -1246,7 +1242,7 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
                        ? "cancelled" : "cannot finish the modpack archive");
       archive_entry_free (manifest_entry);
       archive_write_free (archive);
-      g_unlink (run->temporary_archive);
+      aml_fs_unlink (run->temporary_archive, NULL);
       g_task_return_error (task, g_steal_pointer (&error));
       return;
     }
@@ -1254,15 +1250,12 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
   archive_entry_free (manifest_entry);
   archive_write_free (archive);
 
-  if (g_rename (run->temporary_archive, run->archive_path) != 0)
+  if (!aml_fs_rename (run->temporary_archive, run->archive_path, &error))
     {
-      g_autoptr (GError) rename_error = NULL;
-
-      g_set_error (&rename_error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
-                   "cannot publish \"%s\": %s", run->archive_path,
-                   g_strerror (errno));
-      g_unlink (run->temporary_archive);
-      g_task_return_error (task, g_steal_pointer (&rename_error));
+      g_prefix_error (&error, "cannot publish \"%s\": ",
+                      run->archive_path);
+      aml_fs_unlink (run->temporary_archive, NULL);
+      g_task_return_error (task, g_steal_pointer (&error));
       return;
     }
 

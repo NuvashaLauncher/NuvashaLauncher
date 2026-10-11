@@ -16,6 +16,7 @@
 #include "aml-task.h"
 
 #include "aml-download.h"
+#include "aml-fs.h"
 
 #include <errno.h>
 #include <string.h>
@@ -1731,11 +1732,12 @@ ensure_cache_directory (GError **error)
   g_autofree char *directory =
     g_build_filename (g_get_user_cache_dir (), AML_VERSIONS_CACHE_SUBDIR, NULL);
 
-  if (g_mkdir_with_parents (directory, 0755) != 0)
+  g_autoptr (GError) local_error = NULL;
+  if (!aml_fs_make_directory (directory, 0755, &local_error))
     {
       g_set_error (error, AML_MC_ERROR, AML_MC_ERROR_IO,
                    "cannot create \"%s\": %s", directory,
-                   g_strerror (errno));
+                   local_error->message);
       return NULL;
     }
 

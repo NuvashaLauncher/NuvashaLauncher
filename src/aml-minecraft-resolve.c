@@ -26,6 +26,7 @@
 #include "aml-task.h"
 
 #include "aml-download.h"
+#include "aml-fs.h"
 
 #include <archive.h>
 #include <archive_entry.h>
@@ -83,10 +84,12 @@ safe_name (const char *id)
 static gboolean
 ensure_directory (const char *path, GError **error)
 {
-  if (g_mkdir_with_parents (path, 0755) != 0)
+  g_autoptr (GError) local_error = NULL;
+  if (!aml_fs_make_directory (path, 0755, &local_error))
     {
       g_set_error (error, AML_RESOLVE_ERROR, AML_RESOLVE_ERROR_IO,
-                   "cannot create \"%s\": %s", path, g_strerror (errno));
+                   "cannot create \"%s\": %s", path,
+                   local_error->message);
       return FALSE;
     }
 
@@ -785,7 +788,7 @@ extract_write_ready (GObject *source, GAsyncResult *result, gpointer user_data)
   g_autoptr (GError) error = NULL;
   ExtractStep *step = user_data;
 
-  g_file_replace_contents_finish (G_FILE (source), result, NULL, &error);
+  aml_fs_replace_contents_finish (G_FILE (source), result, NULL, &error);
 
   if (error != NULL)
     {
@@ -1608,7 +1611,7 @@ asset_copied (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   ResolveRequest *request = user_data;
   g_autoptr (GError) error = NULL;
 
-  if (!g_file_copy_finish (G_FILE (source), result, &error))
+  if (!aml_fs_copy_finish (G_FILE (source), result, &error))
     {
       operation_finished (request, resolve_finish, g_steal_pointer (&error));
       return;
@@ -1670,7 +1673,7 @@ resolve_copies (ResolveRequest *request)
       request->total++;
       started++;
 
-      g_file_copy_async (source_file, target_file, G_FILE_COPY_OVERWRITE,
+      aml_fs_copy_async (source_file, target_file, G_FILE_COPY_OVERWRITE,
                          G_PRIORITY_DEFAULT, request->cancellable, NULL, NULL,
                          asset_copied, request);
     }

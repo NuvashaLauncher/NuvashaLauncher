@@ -34,14 +34,164 @@ aml_fs_replace_contents (const char *path, const void *contents,
 gboolean
 aml_fs_make_private_directory (const char *path, GError **error)
 {
-  if (g_mkdir_with_parents (path, 0700) != 0 || g_chmod (path, 0700) != 0)
+  if (!aml_fs_make_directory (path, 0700, error))
+    return FALSE;
+  if (g_chmod (path, 0700) != 0)
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    "cannot secure \"%s\": %s", path, g_strerror (errno));
       return FALSE;
     }
+  return TRUE;
+}
+
+gboolean
+aml_fs_make_directory (const char *path, int mode, GError **error)
+{
+  if (g_mkdir_with_parents (path, mode) != 0)
+    {
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                   "cannot create \"%s\": %s", path, g_strerror (errno));
+      return FALSE;
+    }
 
   return TRUE;
+}
+
+gboolean
+aml_fs_unlink (const char *path, GError **error)
+{
+  if (g_unlink (path) != 0 && errno != ENOENT)
+    {
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                   "cannot remove \"%s\": %s", path, g_strerror (errno));
+      return FALSE;
+    }
+  return TRUE;
+}
+
+gboolean
+aml_fs_rename (const char *source, const char *destination, GError **error)
+{
+  if (g_rename (source, destination) != 0)
+    {
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                   "cannot rename \"%s\" to \"%s\": %s", source,
+                   destination, g_strerror (errno));
+      return FALSE;
+    }
+  return TRUE;
+}
+
+int
+aml_fs_open_temporary_file (const char *directory, const char *prefix,
+                            char **path, GError **error)
+{
+  g_autofree char *template =
+    g_build_filename (directory, prefix != NULL ? prefix : ".aml-XXXXXX",
+                      NULL);
+  int fd = g_mkstemp (template);
+
+  if (fd < 0)
+    {
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                   "cannot create temporary file in \"%s\": %s", directory,
+                   g_strerror (errno));
+      return -1;
+    }
+
+  if (path != NULL)
+    *path = g_steal_pointer (&template);
+  return fd;
+}
+
+char *
+aml_fs_make_temporary_directory (const char *parent, const char *prefix,
+                                 GError **error)
+{
+  g_autofree char *template =
+    g_build_filename (parent, prefix != NULL ? prefix : ".aml-XXXXXX", NULL);
+  char *result = g_mkdtemp (template);
+
+  if (result == NULL)
+    {
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                   "cannot create temporary directory in \"%s\": %s",
+                   parent, g_strerror (errno));
+      return NULL;
+    }
+  if (g_chmod (result, 0700) != 0)
+    {
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                   "cannot secure temporary directory \"%s\": %s", result,
+                   g_strerror (errno));
+      g_rmdir (result);
+      return NULL;
+    }
+  return g_steal_pointer (&template);
+}
+
+gboolean
+aml_fs_move_file (GFile *source, GFile *destination, GFileCopyFlags flags,
+                  GCancellable *cancellable, GError **error)
+{
+  return g_file_move (source, destination, flags, cancellable, NULL, NULL,
+                      error);
+}
+
+gboolean
+aml_fs_copy_file (GFile *source, GFile *destination, GFileCopyFlags flags,
+                  GCancellable *cancellable, GError **error)
+{
+  return g_file_copy (source, destination, flags, cancellable, NULL, NULL,
+                      error);
+}
+
+void
+aml_fs_replace_contents_async (GFile *file, const char *contents, gsize length,
+                               const char *etag, gboolean make_backup,
+                               GFileCreateFlags flags, GCancellable *cancellable,
+                               GAsyncReadyCallback callback, gpointer user_data)
+{
+  g_file_replace_contents_async (file, contents, length, etag, make_backup,
+                                 flags, cancellable, callback, user_data);
+}
+
+gboolean
+aml_fs_replace_contents_finish (GFile *file, GAsyncResult *result,
+                                char **new_etag, GError **error)
+{
+  return g_file_replace_contents_finish (file, result, new_etag, error);
+}
+
+void
+aml_fs_copy_async (GFile *source, GFile *destination, GFileCopyFlags flags,
+                   int io_priority, GCancellable *cancellable,
+                   GFileProgressCallback progress_callback,
+                   gpointer progress_data, GAsyncReadyCallback callback,
+                   gpointer user_data)
+{
+  g_file_copy_async (source, destination, flags, io_priority, cancellable,
+                     progress_callback, progress_data, callback, user_data);
+}
+
+gboolean
+aml_fs_copy_finish (GFile *file, GAsyncResult *result, GError **error)
+{
+  return g_file_copy_finish (file, result, error);
+}
+
+void
+aml_fs_delete_async (GFile *file, int io_priority, GCancellable *cancellable,
+                     GAsyncReadyCallback callback, gpointer user_data)
+{
+  g_file_delete_async (file, io_priority, cancellable, callback, user_data);
+}
+
+gboolean
+aml_fs_delete_finish (GFile *file, GAsyncResult *result, GError **error)
+{
+  return g_file_delete_finish (file, result, error);
 }
 
 gboolean

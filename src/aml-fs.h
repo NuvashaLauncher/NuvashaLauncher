@@ -12,6 +12,40 @@ G_BEGIN_DECLS
 gboolean aml_fs_replace_contents (const char *path, const void *contents,
                                   gssize length, int mode, GError **error);
 gboolean aml_fs_make_private_directory (const char *path, GError **error);
+gboolean aml_fs_make_directory (const char *path, int mode, GError **error);
+gboolean aml_fs_unlink (const char *path, GError **error);
+gboolean aml_fs_rename (const char *source, const char *destination,
+                        GError **error);
+int aml_fs_open_temporary_file (const char *directory, const char *prefix,
+                                char **path, GError **error);
+char *aml_fs_make_temporary_directory (const char *parent, const char *prefix,
+                                       GError **error);
+gboolean aml_fs_move_file (GFile *source, GFile *destination,
+                           GFileCopyFlags flags, GCancellable *cancellable,
+                           GError **error);
+gboolean aml_fs_copy_file (GFile *source, GFile *destination,
+                           GFileCopyFlags flags, GCancellable *cancellable,
+                           GError **error);
+void aml_fs_replace_contents_async (GFile *file, const char *contents,
+                                    gsize length, const char *etag,
+                                    gboolean make_backup, GFileCreateFlags flags,
+                                    GCancellable *cancellable,
+                                    GAsyncReadyCallback callback,
+                                    gpointer user_data);
+gboolean aml_fs_replace_contents_finish (GFile *file, GAsyncResult *result,
+                                         char **new_etag, GError **error);
+void aml_fs_copy_async (GFile *source, GFile *destination, GFileCopyFlags flags,
+                        int io_priority, GCancellable *cancellable,
+                        GFileProgressCallback progress_callback,
+                        gpointer progress_data, GAsyncReadyCallback callback,
+                        gpointer user_data);
+gboolean aml_fs_copy_finish (GFile *file, GAsyncResult *result,
+                             GError **error);
+void aml_fs_delete_async (GFile *file, int io_priority,
+                          GCancellable *cancellable,
+                          GAsyncReadyCallback callback, gpointer user_data);
+gboolean aml_fs_delete_finish (GFile *file, GAsyncResult *result,
+                               GError **error);
 
 /* TRUE when every existing component of an absolute directory path can be
  * opened without following a symlink. Missing trailing components are

@@ -5,6 +5,7 @@
 #include "aml-loaders.h"
 #include "aml-loaders-private.h"
 #include "aml-task.h"
+#include "aml-fs.h"
 
 #include "aml-download.h"
 #include "aml-minecraft-resolve.h"
@@ -55,12 +56,13 @@ aml_loader_install_free (AmlLoaderInstall *install)
 static gboolean
 ensure_directory (const char *path, GError **error)
 {
-  if (g_mkdir_with_parents (path, 0755) == 0)
+  g_autoptr (GError) local_error = NULL;
+  if (aml_fs_make_directory (path, 0755, &local_error))
     return TRUE;
 
   g_set_error (error, AML_LOADERS_ERROR, AML_LOADERS_ERROR_INSTALLER,
                "the directory \"%s\" cannot be made: %s", path,
-               g_strerror (errno));
+               local_error->message);
 
   return FALSE;
 }
@@ -73,31 +75,26 @@ write_install_file (const char *path, const void *data, gsize size,
                     GError **error)
 {
   g_autofree char *directory = g_path_get_dirname (path);
-  g_autofree char *temporary = g_build_filename (directory,
-                                                 ".aml-loader-XXXXXX", NULL);
+  g_autofree char *temporary = NULL;
   g_autoptr (GError) local_error = NULL;
-  int fd = g_mkstemp (temporary);
+  int fd = aml_fs_open_temporary_file (directory, ".aml-loader-XXXXXX",
+                                       &temporary, error);
 
   if (fd < 0)
     {
-      g_set_error (error, AML_LOADERS_ERROR, AML_LOADERS_ERROR_INSTALLER,
-                   "cannot create a temporary file for \"%s\": %s", path,
-                   g_strerror (errno));
       return FALSE;
     }
   close (fd);
 
-  if (!g_file_set_contents_full (temporary, data, (gssize) size,
-                                 G_FILE_SET_CONTENTS_CONSISTENT |
-                                 G_FILE_SET_CONTENTS_DURABLE,
-                                 0600, &local_error) ||
-      g_rename (temporary, path) != 0)
+  if (!aml_fs_replace_contents (temporary, data, (gssize) size, 0600,
+                                &local_error) ||
+      !aml_fs_rename (temporary, path, &local_error))
     {
       if (local_error == NULL)
         g_set_error (&local_error, AML_LOADERS_ERROR,
                      AML_LOADERS_ERROR_INSTALLER,
                      "cannot publish \"%s\": %s", path, g_strerror (errno));
-      g_unlink (temporary);
+      aml_fs_unlink (temporary, NULL);
       g_propagate_error (error, g_steal_pointer (&local_error));
       return FALSE;
     }
@@ -267,6 +264,7 @@ write_jar_manifest_attribute (const char *path, const char *name,
   g_autofree char *temporary = NULL;
   gboolean written = FALSE;
   gboolean ok = TRUE;
+  g_autoptr (GError) local_error = NULL;
   int status = ARCHIVE_EOF;
 
   in = archive_read_new ();
@@ -296,7 +294,7 @@ write_jar_manifest_attribute (const char *path, const char *name,
                    path, archive_error_string (out));
       archive_read_free (in);
       archive_write_free (out);
-      g_unlink (temporary);
+      aml_fs_unlink (temporary, NULL);
       return FALSE;
     }
 
@@ -395,7 +393,7 @@ write_jar_manifest_attribute (const char *path, const char *name,
                    path, out != NULL ? archive_error_string (out) : "");
       archive_write_free (out);
 
-      g_unlink (temporary);
+      aml_fs_unlink (temporary, NULL);
       return FALSE;
     }
 
@@ -406,16 +404,16 @@ write_jar_manifest_attribute (const char *path, const char *name,
       g_set_error (error, AML_LOADERS_ERROR, AML_LOADERS_ERROR_INSTALLER,
                    "the patched client jar at \"%s\" has no manifest to "
                    "write %s into", path, name);
-      g_unlink (temporary);
+      aml_fs_unlink (temporary, NULL);
       return FALSE;
     }
 
-  if (g_rename (temporary, path) != 0)
+  if (!aml_fs_rename (temporary, path, &local_error))
     {
       g_set_error (error, AML_LOADERS_ERROR, AML_LOADERS_ERROR_INSTALLER,
                    "the patched client jar at \"%s\" cannot be replaced: %s",
-                   path, g_strerror (errno));
-      g_unlink (temporary);
+                    path, local_error->message);
+      aml_fs_unlink (temporary, NULL);
       return FALSE;
     }
 

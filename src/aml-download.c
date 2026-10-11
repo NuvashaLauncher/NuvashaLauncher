@@ -315,7 +315,7 @@ cache_write_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   DownloadRequest *request = user_data;
   g_autoptr (GError) error = NULL;
 
-  g_file_replace_contents_finish (G_FILE (source), result, NULL, &error);
+  aml_fs_replace_contents_finish (G_FILE (source), result, NULL, &error);
   if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
     {
       request_fail (request, cancelled_error ());
@@ -359,7 +359,7 @@ cache_write_directory_done (GObject *source, GAsyncResult *result,
       return;
     }
 
-  g_file_replace_contents_async (file, request->pending_cache_data,
+  aml_fs_replace_contents_async (file, request->pending_cache_data,
                                   strlen (request->pending_cache_data),
                                   NULL, FALSE,
                                   G_FILE_CREATE_REPLACE_DESTINATION,
@@ -592,7 +592,7 @@ discard_temporary (DownloadRequest *request)
       if (request->parent_fd >= 0 && request->tmp_name != NULL)
         unlinkat (request->parent_fd, request->tmp_name, 0);
       else
-        g_unlink (request->tmp_path);
+        aml_fs_unlink (request->tmp_path, NULL);
       g_clear_pointer (&request->tmp_path, g_free);
     }
   g_clear_pointer (&request->tmp_name, g_free);
@@ -869,7 +869,7 @@ global_cache_copy (DownloadRequest *request)
   g_autoptr (GFile) source = g_file_new_for_path (request->dest_path);
   g_autoptr (GFile) destination =
     g_file_new_for_path (request->global_cache_path);
-  g_file_copy_async (source, destination, G_FILE_COPY_OVERWRITE,
+  aml_fs_copy_async (source, destination, G_FILE_COPY_OVERWRITE,
                      G_PRIORITY_DEFAULT, g_task_get_cancellable (request->task),
                      NULL, NULL, global_cache_copy_ready, request);
 }
@@ -933,7 +933,7 @@ global_cache_copy_ready (GObject *source, GAsyncResult *result,
   DownloadRequest *request = user_data;
   g_autoptr (GError) error = NULL;
 
-  if (!g_file_copy_finish (G_FILE (source), result, &error) &&
+  if (!aml_fs_copy_finish (G_FILE (source), result, &error) &&
       !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
     g_debug ("the global file cache was not written: %s", error->message);
 
@@ -968,7 +968,7 @@ global_cache_hash_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         g_file_new_for_path (request->global_cache_path);
       g_autoptr (GFile) destination = g_file_new_for_path (request->dest_path);
 
-      g_file_copy_async (source, destination, G_FILE_COPY_OVERWRITE,
+      aml_fs_copy_async (source, destination, G_FILE_COPY_OVERWRITE,
                          G_PRIORITY_DEFAULT,
                          g_task_get_cancellable (request->task), NULL, NULL,
                          global_cache_copy_ready, request);

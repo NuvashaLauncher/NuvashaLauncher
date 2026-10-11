@@ -4,6 +4,7 @@
 
 #include "aml-content-index.h"
 #include "aml-task.h"
+#include "aml-fs.h"
 
 #include "aml-content-page.h"
 
@@ -338,7 +339,7 @@ write_done (GObject *source, GAsyncResult *result, gpointer user_data)
   WriteRun *run = user_data;
   g_autoptr (GError) error = NULL;
 
-  if (g_file_replace_contents_finish (G_FILE (source), result, NULL, &error))
+  if (aml_fs_replace_contents_finish (G_FILE (source), result, NULL, &error))
     g_task_return_boolean (run->task, TRUE);
   else
     g_task_return_error (run->task, g_steal_pointer (&error));
@@ -358,18 +359,19 @@ write_entry_async (const char *instance_directory, AmlContentType type,
   run->path = aml_content_index_entry_path (instance_directory, type,
                                             entry->filename);
   run->data = entry_to_json (entry, &run->length);
-  if (g_mkdir_with_parents (run->directory, 0755) != 0 && errno != EEXIST)
+  g_autoptr (GError) directory_error = NULL;
+  if (!aml_fs_make_directory (run->directory, 0755, &directory_error))
     {
       g_task_return_new_error (run->task, AML_CONTENT_INDEX_ERROR,
                                AML_CONTENT_INDEX_ERROR_INVALID,
-                               "cannot create index directory \"%s\": %s",
-                               run->directory, g_strerror (errno));
+                                "cannot create index directory \"%s\": %s",
+                                run->directory, directory_error->message);
       write_run_free (run);
       return;
     }
   {
     g_autoptr (GFile) file = g_file_new_for_path (run->path);
-    g_file_replace_contents_async (file, run->data, run->length, NULL, FALSE,
+    aml_fs_replace_contents_async (file, run->data, run->length, NULL, FALSE,
                                    G_FILE_CREATE_REPLACE_DESTINATION,
                                    cancellable, write_done, run);
   }
@@ -396,7 +398,7 @@ remove_done (GObject *source, GAsyncResult *result, gpointer user_data)
   RemoveRun *run = user_data;
   g_autoptr (GError) error = NULL;
 
-  if (!g_file_delete_finish (G_FILE (source), result, &error) &&
+  if (!aml_fs_delete_finish (G_FILE (source), result, &error) &&
       !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
     g_task_return_error (run->task, g_steal_pointer (&error));
   else
@@ -429,7 +431,7 @@ aml_content_index_remove_async (const char *instance_directory,
   run->scope = aml_task_scope_borrow_task (run->task);
   run->path = aml_content_index_entry_path (instance_directory, type, filename);
   file = g_file_new_for_path (run->path);
-  g_file_delete_async (file, G_PRIORITY_DEFAULT, cancellable, remove_done, run);
+  aml_fs_delete_async (file, G_PRIORITY_DEFAULT, cancellable, remove_done, run);
 }
 
 gboolean

@@ -395,12 +395,13 @@ aml_instance_manager_save (AmlInstanceManager *self, GError **error)
   if (json == NULL)
     return FALSE;
 
-  if (g_mkdir_with_parents (self->data_dir, 0700) != 0)
+  g_autoptr (GError) directory_error = NULL;
+  if (!aml_fs_make_directory (self->data_dir, 0700, &directory_error))
     {
       g_set_error (error, AML_INSTANCE_MANAGER_ERROR,
                    AML_INSTANCE_MANAGER_ERROR_IO,
                    "cannot create \"%s\": %s",
-                   self->data_dir, g_strerror (errno));
+                    self->data_dir, directory_error->message);
       return FALSE;
     }
 
@@ -409,10 +410,8 @@ aml_instance_manager_save (AmlInstanceManager *self, GError **error)
   /* The data goes to a temporary file in the same directory, is flushed
    * and fsynced and then renamed over instances.json, so a save that
    * fails or is interrupted can never leave a half written file. */
-  if (!g_file_set_contents_full (self->metadata_path, json, -1,
-                                 G_FILE_SET_CONTENTS_CONSISTENT |
-                                 G_FILE_SET_CONTENTS_DURABLE,
-                                 0600, &local_error))
+  if (!aml_fs_replace_contents (self->metadata_path, json, -1, 0600,
+                                &local_error))
     {
       g_prefix_error (&local_error, "cannot save \"%s\": ",
                       self->metadata_path);
@@ -555,7 +554,7 @@ quarantine_corrupt_file (const char *path)
       g_clear_pointer (&corrupt_path, g_free);
     }
 
-  if (corrupt_path == NULL || g_rename (path, corrupt_path) != 0)
+  if (corrupt_path == NULL || !aml_fs_rename (path, corrupt_path, NULL))
     g_warning ("could not rename the corrupt file to \"%s\": %s",
                corrupt_path, g_strerror (errno));
 }
@@ -657,12 +656,14 @@ aml_instance_manager_create (AmlInstanceManager *self,
   if (loader_version != NULL)
     g_object_set (instance, "loader_version", loader_version, NULL);
 
+  g_autoptr (GError) path_error = NULL;
   if (!g_file_test (path, G_FILE_TEST_IS_DIR) &&
-      g_mkdir_with_parents (path, 0755) != 0)
+      !aml_fs_make_directory (path, 0755, &path_error))
     {
       g_set_error (error, AML_INSTANCE_MANAGER_ERROR,
                    AML_INSTANCE_MANAGER_ERROR_IO,
-                   "cannot create \"%s\": %s", path, g_strerror (errno));
+                    "cannot create \"%s\": %s", path,
+                    path_error->message);
       return NULL;
     }
 
@@ -904,12 +905,14 @@ aml_instance_manager_duplicate_async (AmlInstanceManager *self,
                 "jvm_args", jvm_args,
                 NULL);
 
-  if (g_mkdir_with_parents (self->instances_dir, 0755) != 0)
+  g_autoptr (GError) instances_error = NULL;
+  if (!aml_fs_make_directory (self->instances_dir, 0755,
+                              &instances_error))
     {
       g_task_return_new_error (task, AML_INSTANCE_MANAGER_ERROR,
                                AML_INSTANCE_MANAGER_ERROR_IO,
                                "cannot create \"%s\": %s",
-                               self->instances_dir, g_strerror (errno));
+                               self->instances_dir, instances_error->message);
       return;
     }
 

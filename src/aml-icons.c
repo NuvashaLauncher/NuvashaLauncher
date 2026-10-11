@@ -6,6 +6,7 @@
 
 #include "aml-download.h"
 #include "aml-task.h"
+#include "aml-fs.h"
 
 #include <errno.h>
 #include <glib/gstdio.h>
@@ -163,7 +164,7 @@ aml_icon_load_async (const char *url, GCancellable *cancellable,
       return;
     }
 
-  if (g_mkdir_with_parents (directory, 0755) != 0)
+  if (!aml_fs_make_directory (directory, 0755, NULL))
     {
       g_task_return_new_error (load->task, G_IO_ERROR, G_IO_ERROR_FAILED,
                               "cannot create \"%s\": %s", directory,
