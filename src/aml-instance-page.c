@@ -27,6 +27,7 @@
 #include "aml-minecraft-versions.h"
 #include "aml-modpack.h"
 #include "aml-ui-feedback.h"
+#include "aml-task.h"
 
 struct _AmlInstancePage
 {
@@ -37,6 +38,8 @@ struct _AmlInstancePage
   AmlSettings *settings;
   AmlLauncher *launcher;
   gboolean export_include_transient;
+  AmlTaskScope *scope;
+  guint export_idle;
 
   /* Borrowed from the widget tree of the page. Cleared in dispose(),
    * because the tree can go away while a running operation still keeps
@@ -801,7 +804,9 @@ export_metadata_free (ExportMetadata *data)
 static gboolean
 export_metadata_free_idle (gpointer user_data)
 {
-  export_metadata_free (user_data);
+  ExportMetadata *data = user_data;
+  aml_task_scope_forget_source (data->page->scope, data->page->export_idle);
+  data->page->export_idle = 0;
   return G_SOURCE_REMOVE;
 }
 
@@ -811,7 +816,11 @@ on_export_metadata_closed (AdwDialog *dialog G_GNUC_UNUSED,
 {
   /* Adwaita is still completing its close signal while this callback runs.
    * Release the dialog after the close sequence has finished. */
-  g_idle_add (export_metadata_free_idle, user_data);
+  ExportMetadata *data = user_data;
+  data->page->export_idle = g_idle_add_full (
+    G_PRIORITY_DEFAULT, export_metadata_free_idle, data,
+    (GDestroyNotify) export_metadata_free);
+  aml_task_scope_track_source (data->page->scope, data->page->export_idle);
 }
 
 static void
@@ -1546,7 +1555,10 @@ aml_instance_page_dispose (GObject *object)
   self->directory_spinner = NULL;
 
   g_cancellable_cancel (self->cancellable);
+  aml_task_scope_cancel (self->scope);
   g_clear_object (&self->cancellable);
+  aml_task_scope_free (self->scope);
+  self->scope = NULL;
 
   /* The loader rows are the page's. Their handlers go with them, so the
    * rows the widget tree may still hold cannot call back into a page
@@ -1587,5 +1599,5 @@ aml_instance_page_init (AmlInstancePage *self)
 {
   /* Everything is built in aml_instance_page_new(), which knows the
    * instance the page is for. */
-  (void) self;
+  self->scope = aml_task_scope_new (NULL, NULL, NULL, NULL);
 }

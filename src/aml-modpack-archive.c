@@ -10,6 +10,7 @@
 #include "aml-json.h"
 #include "aml-i18n.h"
 #include "aml-loaders.h"
+#include "aml-task.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -854,11 +855,13 @@ error:
 
 typedef struct {
   char *path;
+  AmlTaskScope *scope;
 } ModpackRead;
 
 static void
 modpack_read_free (ModpackRead *read)
 {
+  aml_task_scope_free (read->scope);
   g_free (read->path);
   g_free (read);
 }
@@ -902,6 +905,7 @@ aml_modpack_new_from_zip_async (const char *zip_path,
 
   task = g_task_new (NULL, cancellable, callback, user_data);
   read = g_new0 (ModpackRead, 1);
+  read->scope = aml_task_scope_borrow_task (task);
   read->path = g_strdup (zip_path);
   g_task_set_task_data (task, read, (GDestroyNotify) modpack_read_free);
   g_task_run_in_thread (task, modpack_read_thread);
@@ -925,6 +929,7 @@ typedef struct
   GCancellable *cancellable;
   guint stage; /* 0: checking sha1, 1: checking sha512 */
   GTask *task; /* owned */
+  AmlTaskScope *scope;
 } VerifyRun;
 
 static void
@@ -938,6 +943,7 @@ verify_run_free (VerifyRun *run)
   g_free (run->sha512);
   g_clear_object (&run->cancellable);
   g_clear_object (&run->task);
+  aml_task_scope_free (run->scope);
   g_free (run);
 }
 
@@ -1021,6 +1027,7 @@ aml_modpack_verify_file_async (const AmlModpackFile *file,
     cancellable != NULL ? g_object_ref (cancellable) : NULL;
   run->stage = 0;
   run->task = g_object_ref (task);
+  run->scope = aml_task_scope_borrow_task (task);
 
   aml_download_file_hash_async (job_file, G_CHECKSUM_SHA1, run->cancellable,
                                 verify_hash_ready, run);
@@ -1365,11 +1372,13 @@ extract_overrides (const char *archive_path,
 typedef struct {
   char *archive_path;
   char *directory;
+  AmlTaskScope *scope;
 } ExtractRun;
 
 static void
 extract_run_free (ExtractRun *run)
 {
+  aml_task_scope_free (run->scope);
   g_free (run->archive_path);
   g_free (run->directory);
   g_free (run);
@@ -1409,6 +1418,7 @@ extract_overrides_async (const char *archive_path, const char *directory,
 {
   g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
   ExtractRun *run = g_new0 (ExtractRun, 1);
+  run->scope = aml_task_scope_borrow_task (task);
 
   run->archive_path = g_strdup (archive_path);
   run->directory = g_strdup (directory);

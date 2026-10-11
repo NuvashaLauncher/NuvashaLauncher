@@ -3,6 +3,7 @@
  */
 
 #include "aml-loaders.h"
+#include "aml-task.h"
 #include "aml-loaders-private.h"
 
 #include "aml-download.h"
@@ -315,6 +316,7 @@ loader_version_own_part (AmlLoader   loader,
 
 typedef struct {
   GTask *task;
+  AmlTaskScope *scope;
   AmlLoader loader;
   char *game_version;
   GPtrArray *versions; /* AmlLoaderVersion*, element free aml_loader_version_free */
@@ -325,6 +327,7 @@ versions_request_free (gpointer data)
 {
   VersionsRequest *request = data;
 
+  aml_task_scope_free (request->scope);
   g_clear_object (&request->task);
   g_clear_pointer (&request->versions, g_ptr_array_unref);
   g_free (request->game_version);
@@ -655,6 +658,7 @@ aml_loaders_versions_async (AmlLoader           loader,
 
   request = g_new0 (VersionsRequest, 1);
   request->task = g_task_new (NULL, cancellable, callback, user_data);
+  request->scope = aml_task_scope_borrow_task (request->task);
   request->loader = loader;
   request->game_version = g_strdup (game_version);
   request->versions = g_ptr_array_new_with_free_func (

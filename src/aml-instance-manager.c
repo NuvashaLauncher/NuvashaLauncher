@@ -15,6 +15,7 @@
 #include "aml-instance-manager.h"
 #include "aml-i18n.h"
 #include "aml-fs.h"
+#include "aml-task.h"
 
 #include <errno.h>
 #include <glib/gstdio.h>
@@ -755,6 +756,7 @@ remove_instance_and_save (AmlInstanceManager *self,
   return TRUE;
 }
 
+#if 0 /* legacy callback tree walker; aml-fs owns this operation now */
 /* ---------------------------------------------------------- *
  * Asynchronous recursive copy
  *
@@ -1073,6 +1075,7 @@ link_copy_ready (GObject *source, GAsyncResult *result, gpointer user_data)
   copy_tree_done (tree);
 }
 
+#endif
 static void
 copy_tree_async (GFile *source, GFile *destination,
                  GCancellable *cancellable,
@@ -1098,6 +1101,7 @@ typedef struct
 {
   AmlInstanceManager *self;
   GTask *task;
+  AmlTaskScope *scope;
   AmlInstance *copy; /* built, not registered yet */
 } DuplicateData;
 
@@ -1105,6 +1109,7 @@ static void
 duplicate_data_free (DuplicateData *data)
 {
   g_clear_object (&data->task);
+  aml_task_scope_free (data->scope);
   g_clear_object (&data->self);
   g_clear_object (&data->copy);
   g_free (data);
@@ -1161,7 +1166,6 @@ aml_instance_manager_duplicate_async (AmlInstanceManager *self,
   g_return_if_fail (AML_IS_INSTANCE (source_instance));
 
   g_autoptr (GTask) task = g_task_new (self, cancellable, callback, user_data);
-
   if (!g_list_store_find (self->instances, source_instance, NULL))
     {
       g_task_return_new_error (task, AML_INSTANCE_MANAGER_ERROR,
@@ -1232,6 +1236,7 @@ aml_instance_manager_duplicate_async (AmlInstanceManager *self,
   DuplicateData *data = g_new0 (DuplicateData, 1);
   data->self = g_object_ref (self);
   data->task = g_object_ref (task);
+  data->scope = aml_task_scope_borrow_task (task);
   data->copy = g_steal_pointer (&copy);
 
   g_autoptr (GFile) source_file = g_file_new_for_path (source_directory);
@@ -1251,6 +1256,7 @@ aml_instance_manager_duplicate_finish (AmlInstanceManager *self,
   return g_task_propagate_pointer (G_TASK (result), error);
 }
 
+#if 0 /* legacy callback tree walker; aml-fs owns this operation now */
 /* ---------------------------------------------------------- *
  * Asynchronous recursive delete
  *
@@ -1486,6 +1492,7 @@ delete_next_files_ready (GObject *source G_GNUC_UNUSED,
                                       delete_next_files_ready, node);
 }
 
+#endif
 static void
 delete_tree_async (GFile *file, GCancellable *cancellable,
                    GAsyncReadyCallback callback, gpointer user_data)
@@ -1511,6 +1518,7 @@ typedef struct
 {
   AmlInstanceManager *self;
   GTask *task;
+  AmlTaskScope *scope;
   AmlInstance *instance;
 } DeleteData;
 
@@ -1518,6 +1526,7 @@ static void
 delete_data_free (DeleteData *data)
 {
   g_clear_object (&data->task);
+  aml_task_scope_free (data->scope);
   g_clear_object (&data->self);
   g_clear_object (&data->instance);
   g_free (data);
@@ -1566,7 +1575,6 @@ aml_instance_manager_delete_async (AmlInstanceManager *self,
   g_return_if_fail (AML_IS_INSTANCE (instance));
 
   g_autoptr (GTask) task = g_task_new (self, cancellable, callback, user_data);
-
   if (!g_list_store_find (self->instances, instance, NULL))
     {
       g_task_return_new_error (task, AML_INSTANCE_MANAGER_ERROR,
@@ -1593,6 +1601,7 @@ aml_instance_manager_delete_async (AmlInstanceManager *self,
   DeleteData *data = g_new0 (DeleteData, 1);
   data->self = g_object_ref (self);
   data->task = g_object_ref (task);
+   data->scope = aml_task_scope_borrow_task (task);
   data->instance = g_object_ref (instance);
 
   delete_tree_async (file, cancellable, delete_directory_ready, data);
@@ -1691,6 +1700,7 @@ typedef struct
 {
   AmlInstanceManager *self;
   GTask *task;
+  AmlTaskScope *scope;
   AmlInstance *instance;
 
   char *old_directory;
@@ -1703,6 +1713,7 @@ static void
 move_data_free (MoveData *data)
 {
   g_clear_object (&data->task);
+  aml_task_scope_free (data->scope);
   g_clear_object (&data->self);
   g_clear_object (&data->instance);
   g_clear_object (&data->destination);
@@ -1830,6 +1841,7 @@ aml_instance_manager_change_directory_async (AmlInstanceManager *self,
   MoveData *data = g_new0 (MoveData, 1);
   data->self = g_object_ref (self);
   data->task = g_steal_pointer (&task);
+  data->scope = aml_task_scope_borrow_task (data->task);
   data->instance = g_object_ref (instance);
   data->old_directory = g_steal_pointer (&old_directory);
   data->new_directory = g_strdup (path);
@@ -1901,6 +1913,9 @@ aml_instance_manager_open_folder_async (AmlInstanceManager *self,
   g_return_if_fail (AML_IS_INSTANCE (instance));
 
   g_autoptr (GTask) task = g_task_new (self, cancellable, callback, user_data);
+  g_object_set_data_full (G_OBJECT (task), "aml-task-scope",
+                          aml_task_scope_borrow_task (task),
+                          (GDestroyNotify) aml_task_scope_free);
 
   if (!g_list_store_find (self->instances, instance, NULL))
     {

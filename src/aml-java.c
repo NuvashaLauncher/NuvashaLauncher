@@ -11,6 +11,7 @@
 
 #include "aml-java.h"
 #include "aml-task.h"
+#include "aml-task.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -318,6 +319,7 @@ aml_java_parse_version (const char  *output,
 typedef struct
 {
   GTask *task;
+  AmlTaskScope *scope;
   char *executable;
   GSubprocess *process;
 } Probe;
@@ -327,6 +329,7 @@ probe_destroyed (gpointer data)
 {
   Probe *probe = data;
 
+  aml_task_scope_free (probe->scope);
   g_clear_object (&probe->task);
   g_clear_pointer (&probe->executable, g_free);
   g_clear_object (&probe->process);
@@ -386,7 +389,9 @@ aml_java_probe_async (const char         *executable,
                       GAsyncReadyCallback callback,
                       gpointer            user_data)
 {
-  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
+  AmlTaskScope *scope =
+    aml_task_scope_new (NULL, cancellable, callback, user_data);
+  GTask *task = aml_task_scope_get_task (scope);
   g_autoptr (GError) error = NULL;
   const char * const argv[] = { executable, "-XshowSettings:properties", "-version",
                    NULL };
@@ -395,7 +400,8 @@ aml_java_probe_async (const char         *executable,
   g_task_set_check_cancellable (task, FALSE);
 
   probe = g_new0 (Probe, 1);
-  probe->task = g_steal_pointer (&task);
+  probe->scope = scope;
+  probe->task = g_object_ref (task);
   probe->executable = g_strdup (executable);
 
   probe->process = g_subprocess_newv (argv,
@@ -705,6 +711,7 @@ dedupe_candidates (char **candidates)
 typedef struct
 {
   GTask *detect_task;
+  AmlTaskScope *scope;
 } Detect;
 
 static void
@@ -722,6 +729,7 @@ detected (GObject      *source G_GNUC_UNUSED,
     g_task_return_pointer (detect->detect_task, javas,
                            (GDestroyNotify) g_ptr_array_unref);
 
+  aml_task_scope_free (detect->scope);
   g_clear_object (&detect->detect_task);
   g_free (detect);
 }
@@ -731,7 +739,9 @@ aml_java_detect_async (GCancellable       *cancellable,
                        GAsyncReadyCallback callback,
                        gpointer            user_data)
 {
-  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
+  AmlTaskScope *scope = aml_task_scope_new (NULL, cancellable, callback,
+                                            user_data);
+  GTask *task = aml_task_scope_get_task (scope);
   g_auto (GStrv) collected = collect_candidates ();
   g_auto (GStrv) candidates = dedupe_candidates (collected);
   Detect *detect = NULL;
@@ -739,7 +749,8 @@ aml_java_detect_async (GCancellable       *cancellable,
   g_task_set_check_cancellable (task, FALSE);
 
   detect = g_new0 (Detect, 1);
-  detect->detect_task = g_steal_pointer (&task);
+  detect->scope = scope;
+  detect->detect_task = g_object_ref (task);
 
   aml_java_probe_list_async (g_steal_pointer (&candidates), cancellable,
                              detected, detect);
@@ -751,7 +762,9 @@ aml_java_detect_list_async (char            **roots,
                             GAsyncReadyCallback callback,
                             gpointer         user_data)
 {
-  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
+  AmlTaskScope *scope = aml_task_scope_new (NULL, cancellable, callback,
+                                            user_data);
+  GTask *task = aml_task_scope_get_task (scope);
   g_auto (GStrv) collected = collect_candidates_list (roots);
   g_auto (GStrv) candidates = dedupe_candidates (collected);
   Detect *detect = NULL;
@@ -759,7 +772,8 @@ aml_java_detect_list_async (char            **roots,
   g_task_set_check_cancellable (task, FALSE);
 
   detect = g_new0 (Detect, 1);
-  detect->detect_task = g_steal_pointer (&task);
+  detect->scope = scope;
+  detect->detect_task = g_object_ref (task);
 
   aml_java_probe_list_async (g_steal_pointer (&candidates), cancellable,
                              detected, detect);

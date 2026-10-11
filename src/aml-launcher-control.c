@@ -208,6 +208,9 @@ aml_launcher_stop (AmlLauncher *self)
   g_subprocess_send_signal (self->process.process, SIGTERM);
 
   if (self->process.stop_timeout == 0)
-    self->process.stop_timeout = g_timeout_add_seconds (AML_LAUNCH_STOP_TIMEOUT,
-                                                on_stop_timeout, self);
+    {
+      self->process.stop_timeout =
+        g_timeout_add_seconds (AML_LAUNCH_STOP_TIMEOUT, on_stop_timeout, self);
+      aml_task_scope_track_source (self->scope, self->process.stop_timeout);
+    }
 }

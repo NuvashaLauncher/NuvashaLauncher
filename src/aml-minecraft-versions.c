@@ -1908,6 +1908,9 @@ aml_version_manifest_fetch_async (const char         *url,
        * hears from us before this function has returned. */
       g_autoptr (GTask) task =
         g_task_new (NULL, cancellable, callback, user_data);
+      g_object_set_data_full (G_OBJECT (task), "aml-task-scope",
+                              aml_task_scope_borrow_task (task),
+                              (GDestroyNotify) aml_task_scope_free);
 
       g_task_set_check_cancellable (task, FALSE);
       g_task_return_error (task, g_steal_pointer (&error));

@@ -7,6 +7,7 @@
 
 #include "aml-launcher.h"
 #include "aml-java.h"
+#include "aml-task.h"
 
 #define TAG_STATE "state"
 #define TAG_STDOUT "stdout"
@@ -53,6 +54,7 @@ struct _AmlLauncher
      the command line is built, so a token that was refreshed a moment
      earlier is the one the game is run with. */
   AmlAccounts *accounts;
+  AmlTaskScope *scope;
 
 };
 

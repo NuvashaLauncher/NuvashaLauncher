@@ -155,6 +155,32 @@ test_sequence_honors_cancellation (void)
   g_print ("ok - task sequence stops before a cancelled step\n");
 }
 
+static gboolean
+scope_probe (gpointer user_data)
+{
+  gboolean *ran = user_data;
+  *ran = TRUE;
+  return G_SOURCE_REMOVE;
+}
+
+static void
+test_scope_cancels_owned_sources (void)
+{
+  gboolean ran = FALSE;
+  g_autoptr (GCancellable) cancellable = g_cancellable_new ();
+  AmlTaskScope *scope = aml_task_scope_new (NULL, cancellable, NULL, NULL);
+  guint source = g_idle_add (scope_probe, &ran);
+
+  aml_task_scope_track_source (scope, source);
+  aml_task_scope_cancel (scope);
+  while (g_main_context_pending (NULL))
+    g_main_context_iteration (NULL, FALSE);
+
+  g_assert_false (ran);
+  aml_task_scope_free (scope);
+  g_print ("ok - task scopes cancel and release owned sources\n");
+}
+
 int
 main (int argc, char **argv)
 {
@@ -165,5 +191,6 @@ main (int argc, char **argv)
   test_sequence_progresses_and_cleans_up ();
   test_sequence_returns_errors ();
   test_sequence_honors_cancellation ();
+  test_scope_cancels_owned_sources ();
   return 0;
 }

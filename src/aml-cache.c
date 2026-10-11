@@ -169,6 +169,7 @@ aml_cache_clear_api_async (GCancellable *cancellable,
   aml_fs_remove_tree_async (path, cancellable, callback, user_data);
 }
 
+#if 0 /* legacy callback tree walker; aml-fs owns this operation now */
 /* ---------------------------------------------------------- *
  * Clearing the complete global cache tree
  * ---------------------------------------------------------- */
@@ -352,6 +353,7 @@ clear_tree_next (ClearTree *tree)
     g_task_get_cancellable (tree->task), clear_tree_file_ready, tree);
 }
 
+#endif
 void
 aml_cache_clear_all_async (GCancellable *cancellable,
                            GAsyncReadyCallback callback, gpointer user_data)

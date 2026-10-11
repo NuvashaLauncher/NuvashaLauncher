@@ -10,6 +10,7 @@
 #include "aml-i18n.h"
 #include "aml-content-index.h"
 #include "aml-fs.h"
+#include "aml-task.h"
 #include "aml-loaders.h"
 
 #include <archive.h>
@@ -84,6 +85,7 @@ typedef struct
   AmlModpackProgressFunc progress;
   gpointer progress_data; /* user_data both for the result and progress */
   GTask *task;
+  AmlTaskScope *scope;
 } InstallRun;
 
 static void install_next (InstallRun *run);
@@ -165,6 +167,7 @@ install_run_free (InstallRun *run)
   g_clear_object (&run->manager);
   g_clear_object (&run->cancellable);
   g_clear_object (&run->task);
+  aml_task_scope_free (run->scope);
   g_free (run->name);
   g_free (run->target);
   g_free (run->temp);
@@ -597,6 +600,7 @@ aml_modpack_install_async (AmlModpack *modpack,
   run->progress_data = user_data;
   run->files = g_ptr_array_new ();
   run->task = g_object_ref (task);
+  run->scope = aml_task_scope_borrow_task (task);
 
   /* The target is what the manager would choose for the name, unless
    * the caller says where the instance is to go. */
@@ -720,11 +724,13 @@ typedef struct {
   gpointer progress_data;
   guint64 done;
   guint64 total;
+  AmlTaskScope *scope;
 } ExportRun;
 
 static void
 export_run_free (ExportRun *run)
 {
+  aml_task_scope_free (run->scope);
   g_free (run->instance_directory);
   g_free (run->archive_path);
   g_free (run->temporary_archive);
@@ -1356,6 +1362,7 @@ aml_modpack_export_async (AmlInstance *instance, const char *path,
 
   task = g_task_new (NULL, cancellable, callback, user_data);
   run = g_new0 (ExportRun, 1);
+  run->scope = aml_task_scope_borrow_task (task);
   g_object_get (instance, "directory", &directory, NULL);
   run->instance_directory = g_strdup (directory);
   run->archive_path = g_strdup (path);

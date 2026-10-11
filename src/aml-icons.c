@@ -5,6 +5,7 @@
 #include "aml-icons.h"
 
 #include "aml-download.h"
+#include "aml-task.h"
 
 #include <errno.h>
 #include <glib/gstdio.h>
@@ -54,6 +55,7 @@ cache_path_for (const char *url)
 typedef struct
 {
   GTask *task;
+  AmlTaskScope *scope;
   char *url;
   char *path;
 } IconLoad;
@@ -68,6 +70,7 @@ static void
 icon_load_free (IconLoad *load)
 {
   g_clear_object (&load->task);
+  aml_task_scope_free (load->scope);
   g_free (load->url);
   g_free (load->path);
   g_free (load);
@@ -147,6 +150,7 @@ aml_icon_load_async (const char *url, GCancellable *cancellable,
 
   load = g_new0 (IconLoad, 1);
   load->task = g_steal_pointer (&task);
+  load->scope = aml_task_scope_borrow_task (load->task);
   load->url = g_strdup (url);
   load->path = cache_path_for (url);
 

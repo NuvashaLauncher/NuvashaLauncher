@@ -11,6 +11,7 @@ aml_content_browser_model_new (void)
 
   model->more = g_cancellable_new ();
   model->cancellable = g_cancellable_new ();
+  model->scope = aml_task_scope_new (NULL, model->cancellable, NULL, NULL);
   model->seen_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                            NULL);
   model->categories = g_ptr_array_new_with_free_func (g_free);
@@ -33,7 +34,8 @@ aml_content_browser_model_free (AmlContentBrowserModel *model)
     return;
 
   if (model->debounce_source != 0)
-    g_source_remove (model->debounce_source);
+    aml_task_scope_remove_source (model->scope, model->debounce_source);
+  aml_task_scope_free (model->scope);
   g_cancellable_cancel (model->more);
   g_cancellable_cancel (model->cancellable);
   g_clear_object (&model->more);

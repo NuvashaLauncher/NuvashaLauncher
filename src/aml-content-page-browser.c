@@ -352,6 +352,8 @@ on_search_timeout (gpointer user_data)
 {
   AmlContentPage *self = user_data;
 
+  aml_task_scope_forget_source (self->browse.model->scope,
+                                self->browse.model->debounce_source);
   self->browse.model->debounce_source = 0;
   g_free (self->browse.model->query);
   self->browse.model->query =
@@ -368,10 +370,13 @@ aml_content_page_on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointe
   AmlContentPage *self = user_data;
 
   if (self->browse.model->debounce_source != 0)
-    g_source_remove (self->browse.model->debounce_source);
+    aml_task_scope_remove_source (self->browse.model->scope,
+                                  self->browse.model->debounce_source);
 
   self->browse.model->debounce_source =
     g_timeout_add (SEARCH_DELAY_MS, on_search_timeout, self);
+  aml_task_scope_track_source (self->browse.model->scope,
+                               self->browse.model->debounce_source);
 }
 
 /* Escape means "forget what I typed". The bar of this page is always
