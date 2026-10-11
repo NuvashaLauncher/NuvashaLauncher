@@ -25,6 +25,7 @@
 #include "aml-modpack.h"
 #include "aml-modrinth.h"
 #include "aml-task.h"
+#include "aml-fs.h"
 
 #include <glib/gstdio.h>
 #include <stdlib.h>
@@ -1683,7 +1684,7 @@ remove_pack_file (AmlDownloadModpackDialog *self)
 {
   if (!self->imported && self->pack_path != NULL)
     {
-      g_unlink (self->pack_path);
+      aml_fs_unlink (self->pack_path, NULL);
       g_clear_pointer (&self->pack_path, g_free);
     }
 }
@@ -1743,8 +1744,8 @@ on_install_done (GObject *source G_GNUC_UNUSED,
       source = g_file_new_for_path (self->icon_path);
       target = g_file_new_for_path (instance_icon);
 
-      if (!g_file_copy (source, target, G_FILE_COPY_OVERWRITE, NULL, NULL,
-                        NULL, &error))
+      if (!aml_fs_copy_file (source, target, G_FILE_COPY_OVERWRITE, NULL,
+                             &error))
         g_warning ("the icon of the new instance could not be copied: %s",
                    error != NULL ? error->message : "unknown error");
       else
@@ -2150,7 +2151,7 @@ dialog_start_features (AmlDownloadModpackDialog *self)
       g_get_user_cache_dir (), "AML", "packs", NULL);
     const char *name = "pack.mrpack";
 
-    g_mkdir_with_parents (cache_dir, 0755);
+    aml_fs_make_directory (cache_dir, 0755, NULL);
 
     if (file->filename != NULL && *file->filename != '\0')
       name = file->filename;

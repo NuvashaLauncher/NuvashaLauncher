@@ -79,7 +79,7 @@ quarantine_corrupt_file (const char *path)
       g_clear_pointer (&candidate, g_free);
     }
 
-  if (candidate == NULL || g_rename (path, candidate) != 0)
+  if (candidate == NULL || !aml_fs_rename (path, candidate, NULL))
     g_warning ("could not quarantine the settings file \"%s\": %s",
                path, g_strerror (errno));
   else

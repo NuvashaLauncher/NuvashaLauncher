@@ -8,6 +8,7 @@
 #include "aml-downloads.h"
 #include "aml-i18n.h"
 #include "aml-modrinth.h"
+#include "aml-fs.h"
 
 /* Internal install/download workflow for AmlContentPage. */
 
@@ -143,15 +144,13 @@ remove_duplicate_project_files (AmlContentPage *self, const char *project_id,
   for (guint i = 0; i < self->installed.files->len; i++)
     {
       AmlContentFile *installed = g_ptr_array_index (self->installed.files, i);
-      g_autoptr (GFile) old = NULL;
       g_autoptr (GError) error = NULL;
 
       if (g_strcmp0 (installed->project_id, project_id) != 0 ||
           g_strcmp0 (installed->path, keep_path) == 0)
         continue;
 
-      old = g_file_new_for_path (installed->path);
-      if (!g_file_delete (old, NULL, &error) &&
+      if (!aml_fs_unlink (installed->path, &error) &&
           !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
         g_warning ("the duplicate file \"%s\" could not be removed: %s",
                    installed->path, error != NULL ? error->message : "unknown error");
@@ -251,9 +250,7 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   /* The new version is in place, so the file it replaces can go. */
   if (file != NULL && file->replaces != NULL)
     {
-      g_autoptr (GFile) old = g_file_new_for_path (file->replaces);
-
-      if (!g_file_delete (old, NULL, NULL))
+      if (!aml_fs_unlink (file->replaces, NULL))
         g_warning ("the file \"%s\" it replaces could not be removed",
                    file->replaces);
     }

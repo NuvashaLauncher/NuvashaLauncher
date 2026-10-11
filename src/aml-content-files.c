@@ -9,6 +9,7 @@
 #include "aml-content-index.h"
 #include "aml-download.h"
 #include "aml-task.h"
+#include "aml-fs.h"
 
 #include <archive.h>
 #include <archive_entry.h>
@@ -120,7 +121,7 @@ aml_content_set_disabled (const char *path, gboolean disabled, GError **error)
 
   /* A rename of a local file is one system call: it waits for nothing
    * and moves no byte of the file itself. */
-  if (!g_file_move (from, to, G_FILE_COPY_NONE, NULL, NULL, NULL, error))
+  if (!aml_fs_move_file (from, to, G_FILE_COPY_NONE, NULL, error))
     return NULL;
 
   return g_steal_pointer (&target);
@@ -645,8 +646,8 @@ apply_resource_metadata (AmlContentFile *file)
                                                      "AML", "local-icons", NULL);
       g_autofree char *name = g_strconcat (file->sha1, ".png", NULL);
       g_autofree char *path = g_build_filename (directory, name, NULL);
-      if (g_mkdir_with_parents (directory, 0755) == 0 &&
-          g_file_set_contents (path, (const char *) icon->data, icon->len, NULL))
+      if (aml_fs_make_directory (directory, 0755, NULL) &&
+          aml_fs_replace_contents (path, icon->data, icon->len, 0644, NULL))
         file->local_icon_path = g_steal_pointer (&path);
     }
   file->local_metadata = TRUE;
@@ -717,9 +718,9 @@ apply_local_metadata (AmlContentFile *file, AmlContentType type)
                                                      "AML", "local-icons", NULL);
       g_autofree char *name = g_strconcat (file->sha1, ".png", NULL);
       g_autofree char *path = g_build_filename (directory, name, NULL);
-      if (g_mkdir_with_parents (directory, 0755) == 0 &&
-          g_file_set_contents (path, (const char *) icon_data->data,
-                               icon_data->len, NULL))
+      if (aml_fs_make_directory (directory, 0755, NULL) &&
+          aml_fs_replace_contents (path, icon_data->data, icon_data->len,
+                                   0644, NULL))
         file->local_icon_path = g_steal_pointer (&path);
     }
   g_free (icon_member);

@@ -352,7 +352,8 @@ quarantine_corrupt_file (const char *path)
       g_clear_pointer (&corrupt_path, g_free);
     }
 
-  if (corrupt_path == NULL || g_rename (path, corrupt_path) != 0)
+  if (corrupt_path == NULL ||
+      !aml_fs_rename (path, corrupt_path, NULL))
     g_warning ("could not quarantine the accounts file \"%s\": %s",
                path, g_strerror (errno));
   else
