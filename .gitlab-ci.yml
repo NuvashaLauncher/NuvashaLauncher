@@ -34,18 +34,14 @@ sanitizers:
   script:
     - make test-debug
 
+# make static-analysis already runs the GCC analyzer over every source,
+# then clang-tidy and cppcheck. The loop that used to sit in front of it
+# ran that same analyzer pass a second time, doubling the slowest step of
+# the job for no extra coverage.
 static-analysis:
   extends: .setup
   stage: analysis
   script:
-    - |
-      set -eu
-      for source in src/*.c; do
-        gcc -std=c17 -Wall -Wextra -Wpedantic -fanalyzer -fsyntax-only \
-          $(pkg-config --cflags gtk4 libadwaita-1 json-glib-1.0 \
-            libsoup-3.0 libarchive gio-unix-2.0) \
-          -Isrc "$source"
-      done
     - make static-analysis
 
 leaks:
