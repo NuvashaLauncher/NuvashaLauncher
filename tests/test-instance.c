@@ -147,6 +147,45 @@ test_normalize_name (void)
 }
 
 static void
+test_jvm_args_survive_null (void)
+{
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlInstance) instance =
+    aml_instance_new (NULL, "Test", "/tmp/aml-jvm-args-test", "1.21.1",
+                      AML_LOADER_VANILLA, &error);
+  g_autofree char *stored = NULL;
+  g_autofree char *round_tripped = NULL;
+  g_autoptr (JsonNode) node = NULL;
+  g_autoptr (AmlInstance) reloaded = NULL;
+
+  g_assert_no_error (error);
+
+  /* Clearing the field is the one write the model does not refuse:
+     aml_instance_validate treats a null and an empty string alike, and
+     the UI passes an empty string for a cleared row. */
+  g_assert_true (aml_instance_set_string (instance, "jvm-args", NULL, NULL));
+  g_assert_true (aml_instance_validate (instance, NULL));
+
+  /* What must not happen is the field holding a null, because the file
+     would then carry "jvm_args": null and the parser refuses it. */
+  g_object_get (instance, "jvm-args", &stored, NULL);
+  g_assert_cmpstr (stored, ==, "");
+
+  /* The whole point: an instance written after this still reads back. */
+  node = aml_instance_to_json (instance);
+  g_assert_nonnull (node);
+
+  reloaded = aml_instance_new_from_json (node, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (reloaded);
+
+  g_object_get (reloaded, "jvm-args", &round_tripped, NULL);
+  g_assert_cmpstr (round_tripped, ==, "");
+
+  g_print ("ok - clearing jvm-args leaves an instance that reads back\n");
+}
+
+static void
 test_new_defaults (void)
 {
   g_autoptr (GError) error = NULL;
@@ -586,6 +625,7 @@ main (int argc, char **argv)
   test_loader_strings ();
   test_sanitize_name ();
   test_normalize_name ();
+  test_jvm_args_survive_null ();
   test_new_defaults ();
   test_new_rejects_bad_values ();
   test_validate ();
