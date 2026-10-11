@@ -17,6 +17,7 @@ gboolean aml_fs_make_private_directory (const char *path, GError **error);
  * opened without following a symlink. Missing trailing components are
  * accepted so callers can create them securely afterwards. */
 gboolean aml_fs_directory_is_real (const char *path);
+int aml_fs_open_directory_nofollow (const char *path, GError **error);
 
 /* Best-effort recursive removal that never follows symlinks. Used for
  * cleanup of private temporary trees; callers report the operation that

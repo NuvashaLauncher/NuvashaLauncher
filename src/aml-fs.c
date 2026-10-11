@@ -5,6 +5,7 @@
 #define _GNU_SOURCE
 
 #include "aml-fs.h"
+#include "aml-task.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -76,6 +77,40 @@ aml_fs_directory_is_real (const char *path)
   return TRUE;
 }
 
+int
+aml_fs_open_directory_nofollow (const char *path, GError **error)
+{
+  g_auto (GStrv) parts = NULL;
+  int current = -1;
+
+  if (path == NULL || !g_path_is_absolute (path))
+    goto failed;
+  parts = g_strsplit (path + 1, G_DIR_SEPARATOR_S, -1);
+  current = open (G_DIR_SEPARATOR_S,
+                  O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
+  if (current < 0)
+    goto failed;
+  for (guint i = 0; parts[i] != NULL && parts[i][0] != '\0'; i++)
+    {
+      int next = openat (current, parts[i],
+                         O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
+      if (next < 0)
+        goto failed;
+      close (current);
+      current = next;
+    }
+  return current;
+
+failed:
+  if (current >= 0)
+    close (current);
+  if (error != NULL)
+    g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                 "cannot securely open directory \"%s\": %s", path,
+                 g_strerror (errno));
+  return -1;
+}
+
 void
 aml_fs_remove_tree (const char *path)
 {
@@ -135,6 +170,9 @@ aml_fs_remove_tree_async (const char *path, GCancellable *cancellable,
                           GAsyncReadyCallback callback, gpointer user_data)
 {
   g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
+  g_object_set_data_full (G_OBJECT (task), "aml-task-scope",
+                          aml_task_scope_borrow_task (task),
+                          (GDestroyNotify) aml_task_scope_free);
   RemoveTreeData *data = g_new0 (RemoveTreeData, 1);
 
   data->path = g_strdup (path);
@@ -259,6 +297,9 @@ aml_fs_copy_tree_async (GFile *source, GFile *destination,
                         GAsyncReadyCallback callback, gpointer user_data)
 {
   g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
+  g_object_set_data_full (G_OBJECT (task), "aml-task-scope",
+                          aml_task_scope_borrow_task (task),
+                          (GDestroyNotify) aml_task_scope_free);
   CopyTreeData *data = g_new0 (CopyTreeData, 1);
 
   data->source = g_object_ref (source);

@@ -59,8 +59,10 @@ gboolean
 on_stop_timeout (gpointer user_data)
 {
   AmlLauncher *self = user_data;
+  guint source_id = self->process.stop_timeout;
 
   self->process.stop_timeout = 0;
+  aml_task_scope_forget_source (self->scope, source_id);
 
   log_line (self, TAG_STATE,
             "the game did not stop within %d seconds, ending it now",

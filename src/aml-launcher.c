@@ -198,6 +198,7 @@ aml_launcher_dispose (GObject *object)
      The game itself is not killed: the readers and the wait hold a
      reference for as long as it runs. */
   g_cancellable_cancel (self->preparation.cancellable);
+  aml_task_scope_cancel (self->scope);
 
   G_OBJECT_CLASS (aml_launcher_parent_class)->dispose (object);
 }
@@ -208,6 +209,8 @@ aml_launcher_finalize (GObject *object)
   AmlLauncher *self = AML_LAUNCHER (object);
 
   g_clear_object (&self->preparation.cancellable);
+  aml_task_scope_free (self->scope);
+  self->scope = NULL;
   g_clear_object (&self->process.process);
   g_clear_pointer (&self->preparation.resolved, aml_resolved_version_free);
   g_clear_object (&self->instance);
@@ -247,5 +250,6 @@ static void
 aml_launcher_init (AmlLauncher *self)
 {
   self->lines = g_ptr_array_new_with_free_func (g_free);
+  self->scope = aml_task_scope_new (NULL, NULL, NULL, NULL);
   self->state = AML_LAUNCH_STOPPED;
 }

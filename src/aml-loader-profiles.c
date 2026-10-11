@@ -7,6 +7,7 @@
 
 #include "aml-download.h"
 #include "aml-minecraft-resolve.h"
+#include "aml-task.h"
 
 #include <json-glib/json-glib.h>
 #include <string.h>
@@ -113,6 +114,7 @@ give_libraries_their_downloads (JsonNode *root, GError **error)
 
 typedef struct {
   GTask *task;
+  AmlTaskScope *scope;
 } ProfileRequest;
 
 static void
@@ -120,6 +122,7 @@ profile_request_free (gpointer data)
 {
   ProfileRequest *request = data;
 
+  aml_task_scope_free (request->scope);
   g_clear_object (&request->task);
   g_free (request);
 }
@@ -212,6 +215,7 @@ aml_loaders_profile_async (AmlLoader           loader,
 
   request = g_new0 (ProfileRequest, 1);
   request->task = g_task_new (NULL, cancellable, callback, user_data);
+  request->scope = aml_task_scope_borrow_task (request->task);
 
   g_task_set_check_cancellable (request->task, FALSE);
 

@@ -3,6 +3,7 @@
  */
 
 #include "aml-markdown.h"
+#include "aml-task.h"
 
 #include "aml-icons.h"
 
@@ -683,8 +684,16 @@ image_resize (GtkWidget *picture)
 static gboolean
 image_resize_idle (gpointer user_data)
 {
-  image_resize (GTK_WIDGET (user_data));
-  g_object_unref (user_data);
+  GtkWidget *picture = user_data;
+  AmlTaskScope *scope = g_object_get_data (G_OBJECT (picture),
+                                           "aml-image-scope");
+  guint source_id = GPOINTER_TO_UINT (
+    g_object_get_data (G_OBJECT (picture), "aml-image-source"));
+
+  if (scope != NULL)
+    aml_task_scope_forget_source (scope, source_id);
+  image_resize (picture);
+  g_object_unref (picture);
   return G_SOURCE_REMOVE;
 }
 
@@ -723,7 +732,19 @@ image_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
           }
           gtk_widget_set_visible (GTK_WIDGET (picture), TRUE);
           gtk_widget_queue_resize (GTK_WIDGET (picture));
-          g_idle_add (image_resize_idle, g_object_ref (picture));
+          AmlTaskScope *scope = g_object_get_data (
+            G_OBJECT (picture), "aml-image-scope");
+          if (scope == NULL)
+            {
+              scope = aml_task_scope_new (NULL, NULL, NULL, NULL);
+              g_object_set_data_full (G_OBJECT (picture), "aml-image-scope",
+                                      scope, (GDestroyNotify) aml_task_scope_free);
+            }
+          guint source_id = g_idle_add (image_resize_idle,
+                                        g_object_ref (picture));
+          g_object_set_data (G_OBJECT (picture), "aml-image-source",
+                             GUINT_TO_POINTER (source_id));
+          aml_task_scope_track_source (scope, source_id);
         }
     }
 

@@ -25,8 +25,10 @@
 
 #include "aml-cache.h"
 #include "aml-fs.h"
+#include "aml-task.h"
 
 #include <errno.h>
+#include <fcntl.h>
 #include <gio/gunixoutputstream.h>
 #include <glib/gstdio.h>
 #include <libsoup/soup.h>
@@ -73,13 +75,22 @@ aml_download_error_quark (void)
 
 /* One session for the whole launcher: a session per download would
  * throw away the connection pool. It lives until the process exits. */
-static SoupSession *session = NULL;
+typedef struct {
+  SoupSession *session;
+  guint running;
+  GQueue waiting;
+  AmlSettings *cache_settings;
+} DownloadService;
 
-/* How many transfers run right now, and the requests waiting for a
- * free slot. Touched only from the main context. */
-static guint running = 0;
-static GQueue waiting = G_QUEUE_INIT;
-static AmlSettings *cache_settings = NULL;
+static DownloadService service = { .waiting = G_QUEUE_INIT };
+
+static void
+attach_task_scope (GTask *task)
+{
+  g_object_set_data_full (G_OBJECT (task), "aml-task-scope",
+                          aml_task_scope_borrow_task (task),
+                          (GDestroyNotify) aml_task_scope_free);
+}
 
 void
 aml_download_shutdown (void)
@@ -87,27 +98,27 @@ aml_download_shutdown (void)
   /* Requests own all callback state. Do not tear down the session while one
    * of them is still running or queued. The normal application shutdown
    * path calls this after its windows and tasks have gone away. */
-  if (running != 0 || !g_queue_is_empty (&waiting))
+  if (service.running != 0 || !g_queue_is_empty (&service.waiting))
     return;
 
-  g_clear_object (&session);
-  g_clear_object (&cache_settings);
+  g_clear_object (&service.session);
+  g_clear_object (&service.cache_settings);
 }
 
 static SoupSession *
 get_session (void)
 {
-  if (session == NULL)
+  if (service.session == NULL)
     /* max-conns is a construct property: it can only be given while
        the session is created, and it matches the cap on transfers so
        that our counter, not the socket pool, is what limits the
        downloads. */
-    session = g_object_new (SOUP_TYPE_SESSION, "user-agent",
+    service.session = g_object_new (SOUP_TYPE_SESSION, "user-agent",
                             "AML (Another Minecraft Launcher)", "timeout",
                             (guint) 60, "max-conns", (gint) MAX_CONCURRENT,
                             "max-conns-per-host", (gint) MAX_CONCURRENT, NULL);
 
-  return session;
+  return service.session;
 }
 
 /* ---------------------------------------------------------- *
@@ -151,6 +162,8 @@ typedef struct _DownloadRequest
   GBytes *chunk;         /* block being written */
   GChecksum *checksum;   /* hash of the received bytes */
   char *tmp_path;
+  char *tmp_name;
+  int parent_fd;
   int fd;
   goffset total;         /* announced length, -1 when unknown */
   goffset done;
@@ -162,6 +175,7 @@ typedef struct _DownloadRequest
   guint priority;
   guint retry_source;    /* pending retry timeout, 0 while there is none */
   guint retry_cancel_source; /* cancellation watch for a pending retry */
+  AmlTaskScope *scope;
 } DownloadRequest;
 
 static void start_attempt (DownloadRequest *request);
@@ -221,10 +235,10 @@ url_for_message (const char *url)
 static AmlSettings *
 get_cache_settings (void)
 {
-  if (cache_settings == NULL)
-    cache_settings = aml_settings_new ();
+  if (service.cache_settings == NULL)
+    service.cache_settings = aml_settings_new ();
 
-  return cache_settings;
+  return service.cache_settings;
 }
 
 static char *
@@ -518,15 +532,15 @@ compare_waiting_requests (gconstpointer left, gconstpointer right,
 static void
 start_transfer (DownloadRequest *request)
 {
-  if (running < MAX_CONCURRENT)
+  if (service.running < MAX_CONCURRENT)
     {
-      running++;
+      service.running++;
       request->holds_slot = TRUE;
       request->begin (request);
       return;
     }
 
-  g_queue_insert_sorted (&waiting, request, compare_waiting_requests, NULL);
+  g_queue_insert_sorted (&service.waiting, request, compare_waiting_requests, NULL);
 }
 
 static void
@@ -536,16 +550,16 @@ release_slot (DownloadRequest *request)
     return;
 
   request->holds_slot = FALSE;
-  running--;
+  service.running--;
 
-  while (running < MAX_CONCURRENT)
+  while (service.running < MAX_CONCURRENT)
     {
-      DownloadRequest *next = g_queue_pop_head (&waiting);
+      DownloadRequest *next = g_queue_pop_head (&service.waiting);
 
       if (next == NULL)
         break;
 
-      running++;
+      service.running++;
       next->holds_slot = TRUE;
       next->begin (next);
     }
@@ -575,8 +589,17 @@ discard_temporary (DownloadRequest *request)
 {
   if (request->tmp_path != NULL)
     {
-      g_unlink (request->tmp_path);
+      if (request->parent_fd >= 0 && request->tmp_name != NULL)
+        unlinkat (request->parent_fd, request->tmp_name, 0);
+      else
+        g_unlink (request->tmp_path);
       g_clear_pointer (&request->tmp_path, g_free);
+    }
+  g_clear_pointer (&request->tmp_name, g_free);
+  if (request->parent_fd >= 0)
+    {
+      close (request->parent_fd);
+      request->parent_fd = -1;
     }
 
   close_sink (request);
@@ -586,8 +609,7 @@ static gboolean
 open_temporary (DownloadRequest *request, GError **error)
 {
   g_autofree char *directory = g_path_get_dirname (request->dest_path);
-  GStatBuf directory_stat;
-  g_autofree char *path = g_build_filename (directory, TEMP_TEMPLATE, NULL);
+  int fd = -1;
 
   /* Do not create a temporary beside a destination reached through a
    * symlink. The download is later published with rename(), so accepting a
@@ -595,17 +617,25 @@ open_temporary (DownloadRequest *request, GError **error)
    * caller selected. The instance installer creates real private temporary
    * directories, and rejecting symlink parents is the safe default for all
    * other callers too. */
-  if (!aml_fs_directory_is_real (directory) ||
-      g_lstat (directory, &directory_stat) != 0 ||
-      !S_ISDIR (directory_stat.st_mode))
-    {
-      g_set_error (error, AML_DOWNLOAD_ERROR, AML_DOWNLOAD_ERROR_IO,
-                   "download destination parent \"%s\" is not a real directory",
-                   directory);
-      return FALSE;
-    }
+  request->parent_fd = aml_fs_open_directory_nofollow (directory, error);
+  if (request->parent_fd < 0)
+    return FALSE;
 
-  int fd = g_mkstemp (path);
+  for (guint attempt = 0; attempt < 100; attempt++)
+    {
+      g_autofree char *name = g_strdup_printf (".aml-%08x%08x",
+                                               g_random_int (),
+                                               g_random_int ());
+      fd = openat (request->parent_fd, name,
+                   O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0600);
+      if (fd >= 0)
+        {
+          request->tmp_name = g_steal_pointer (&name);
+          break;
+        }
+      if (errno != EEXIST)
+        break;
+    }
 
   if (fd < 0)
     {
@@ -614,10 +644,12 @@ open_temporary (DownloadRequest *request, GError **error)
       g_set_error (error, AML_DOWNLOAD_ERROR, AML_DOWNLOAD_ERROR_IO,
                    "cannot create a temporary file in \"%s\": %s",
                    directory, g_strerror (errsv));
+      close (request->parent_fd);
+      request->parent_fd = -1;
       return FALSE;
     }
 
-  request->tmp_path = g_steal_pointer (&path);
+  request->tmp_path = g_build_filename (directory, request->tmp_name, NULL);
   request->fd = fd;
   request->sink = g_unix_output_stream_new (fd, TRUE);
 
@@ -632,7 +664,7 @@ static void
 request_free (DownloadRequest *request)
 {
   if (request->retry_source != 0)
-    g_source_remove (request->retry_source);
+    aml_task_scope_remove_source (request->scope, request->retry_source);
   if (request->retry_cancel_source != 0)
     g_source_remove (request->retry_cancel_source);
 
@@ -640,6 +672,11 @@ request_free (DownloadRequest *request)
   g_clear_pointer (&request->chunk, g_bytes_unref);
   g_clear_pointer (&request->checksum, g_checksum_free);
   g_clear_pointer (&request->tmp_path, g_free);
+  g_clear_pointer (&request->tmp_name, g_free);
+  aml_task_scope_free (request->scope);
+  request->scope = NULL;
+  if (request->parent_fd >= 0)
+    close (request->parent_fd);
   g_clear_object (&request->source);
   g_clear_object (&request->message);
   g_clear_object (&request->task);
@@ -696,6 +733,7 @@ request_succeed_json (DownloadRequest *request, JsonParser *parser)
 typedef struct
 {
   GTask *task;
+  AmlTaskScope *scope;
   GInputStream *stream;
   GChecksum *checksum;
 } HashFile;
@@ -717,6 +755,7 @@ hash_file_free (HashFile *hash)
 {
   hash_file_close (hash);
   g_clear_pointer (&hash->checksum, g_checksum_free);
+  aml_task_scope_free (hash->scope);
   g_clear_object (&hash->task);
   g_free (hash);
 }
@@ -728,6 +767,7 @@ hash_file_async (GFile *file, GChecksumType type, GCancellable *cancellable,
   HashFile *hash = g_new0 (HashFile, 1);
 
   hash->task = g_task_new (file, cancellable, callback, user_data);
+  hash->scope = aml_task_scope_borrow_task (hash->task);
   hash->checksum = g_checksum_new (type);
 
   g_file_read_async (file, G_PRIORITY_DEFAULT, cancellable, cache_open_ready,
@@ -1294,7 +1334,9 @@ verify_and_install (DownloadRequest *request)
 
   close_sink (request);
 
-  if (g_rename (request->tmp_path, request->dest_path) != 0)
+  g_autofree char *destination_name = g_path_get_basename (request->dest_path);
+  if (renameat (request->parent_fd, request->tmp_name,
+                request->parent_fd, destination_name) != 0)
     {
       int errsv = errno;
 
@@ -1446,12 +1488,15 @@ attempt_failed (DownloadRequest *request, GError *error)
       discard_temporary (request);
       g_clear_error (&error);
       request->retry_source = g_timeout_add (delay_ms, retry_when_due, request);
+      aml_task_scope_track_source (request->scope, request->retry_source);
       {
         GSource *source = g_cancellable_source_new (
           g_task_get_cancellable (request->task));
 
         g_source_set_callback (source, retry_cancelled, request, NULL);
         request->retry_cancel_source = g_source_attach (source, NULL);
+        aml_task_scope_track_source (request->scope,
+                                     request->retry_cancel_source);
         g_source_unref (source);
       }
       return;
@@ -1465,10 +1510,12 @@ retry_when_due (gpointer user_data)
 {
   DownloadRequest *request = user_data;
 
+  aml_task_scope_forget_source (request->scope, request->retry_source);
   request->retry_source = 0;
   if (request->retry_cancel_source != 0)
     {
-      g_source_remove (request->retry_cancel_source);
+      aml_task_scope_remove_source (request->scope,
+                                    request->retry_cancel_source);
       request->retry_cancel_source = 0;
     }
 
@@ -1688,6 +1735,7 @@ aml_download_file_async (const char *url,
   g_return_if_fail (g_path_is_absolute (dest_path));
 
   g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
+  attach_task_scope (task);
 
   /* Cancellation is reported by this module, in its own error domain,
      so GTask must not replace the error with G_IO_ERROR_CANCELLED. */
@@ -1703,9 +1751,13 @@ aml_download_file_async (const char *url,
       return;
     }
 
-  DownloadRequest *request = g_new0 (DownloadRequest, 1);
+   DownloadRequest *request = g_new0 (DownloadRequest, 1);
+   request->parent_fd = -1;
 
   request->task = g_steal_pointer (&task);
+  request->scope = aml_task_scope_new (NULL,
+                                       g_task_get_cancellable (request->task),
+                                       NULL, NULL);
   request->url = g_strdup (url);
   request->dest_path = g_strdup (dest_path);
   request->expected_hash = g_strdup (expected_hash);
@@ -1737,6 +1789,7 @@ aml_download_json_async (const char *url,
   g_return_if_fail (url != NULL);
 
   g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
+  attach_task_scope (task);
 
   /* See aml_download_file_async(). */
   g_task_set_check_cancellable (task, FALSE);
@@ -1751,9 +1804,13 @@ aml_download_json_async (const char *url,
       return;
     }
 
-  DownloadRequest *request = g_new0 (DownloadRequest, 1);
+   DownloadRequest *request = g_new0 (DownloadRequest, 1);
+   request->parent_fd = -1;
 
   request->task = g_steal_pointer (&task);
+  request->scope = aml_task_scope_new (NULL,
+                                       g_task_get_cancellable (request->task),
+                                       NULL, NULL);
   request->url = g_strdup (url);
   request->json = TRUE;
   request->user_data = user_data;
@@ -1770,7 +1827,7 @@ aml_download_set_cache_settings (AmlSettings *settings)
 {
   g_return_if_fail (settings == NULL || AML_IS_SETTINGS (settings));
 
-  g_set_object (&cache_settings, settings);
+  g_set_object (&service.cache_settings, settings);
 }
 
 void
@@ -1812,6 +1869,7 @@ aml_download_json_post_async (const char           *url,
   g_return_if_fail (body != NULL);
 
   g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
+  attach_task_scope (task);
 
   /* See aml_download_file_async(). */
   g_task_set_check_cancellable (task, FALSE);
@@ -1826,9 +1884,13 @@ aml_download_json_post_async (const char           *url,
       return;
     }
 
-  DownloadRequest *request = g_new0 (DownloadRequest, 1);
+   DownloadRequest *request = g_new0 (DownloadRequest, 1);
+   request->parent_fd = -1;
 
   request->task = g_steal_pointer (&task);
+  request->scope = aml_task_scope_new (NULL,
+                                       g_task_get_cancellable (request->task),
+                                       NULL, NULL);
   request->url = g_strdup (url);
   request->body = g_strdup (body);
   request->user_agent = g_strdup (user_agent);
@@ -1848,6 +1910,7 @@ aml_download_json_cached_async (const char *url, GCancellable *cancellable,
 {
   g_return_if_fail (url != NULL);
   g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
+  attach_task_scope (task);
 
   g_task_set_check_cancellable (task, FALSE);
   if (!usable_url (url))
@@ -1859,8 +1922,12 @@ aml_download_json_cached_async (const char *url, GCancellable *cancellable,
       return;
     }
 
-  DownloadRequest *request = g_new0 (DownloadRequest, 1);
+   DownloadRequest *request = g_new0 (DownloadRequest, 1);
+   request->parent_fd = -1;
   request->task = g_steal_pointer (&task);
+  request->scope = aml_task_scope_new (NULL,
+                                       g_task_get_cancellable (request->task),
+                                       NULL, NULL);
   request->url = g_strdup (url);
   request->json = TRUE;
   request->api_cache = TRUE;
@@ -1881,6 +1948,7 @@ aml_download_json_post_cached_async (const char *url, const char *body,
   g_return_if_fail (url != NULL);
   g_return_if_fail (body != NULL);
   g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
+  attach_task_scope (task);
 
   g_task_set_check_cancellable (task, FALSE);
   if (!usable_url (url))
@@ -1892,8 +1960,12 @@ aml_download_json_post_cached_async (const char *url, const char *body,
       return;
     }
 
-  DownloadRequest *request = g_new0 (DownloadRequest, 1);
+   DownloadRequest *request = g_new0 (DownloadRequest, 1);
+   request->parent_fd = -1;
   request->task = g_steal_pointer (&task);
+  request->scope = aml_task_scope_new (NULL,
+                                       g_task_get_cancellable (request->task),
+                                       NULL, NULL);
   request->url = g_strdup (url);
   request->body = g_strdup (body);
   request->user_agent = g_strdup (user_agent);

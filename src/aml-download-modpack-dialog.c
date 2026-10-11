@@ -24,6 +24,7 @@
 #include "aml-markdown.h"
 #include "aml-modpack.h"
 #include "aml-modrinth.h"
+#include "aml-task.h"
 
 #include <glib/gstdio.h>
 #include <stdlib.h>
@@ -124,6 +125,8 @@ struct _AmlDownloadModpackDialog
   GCancellable *search; /* kills an in-flight search */
   GCancellable *fetch;  /* kills a version fetch, the pack get and install */
   guint debounce;
+  guint import_idle;
+  AmlTaskScope *scope;
   GPtrArray *rows;
   GPtrArray *hits;
 
@@ -210,8 +213,8 @@ dialog_dispose (GObject *object)
   if (self->fetch != NULL)
     g_cancellable_cancel (self->fetch);
 
-  if (self->debounce != 0)
-    g_source_remove (self->debounce);
+  if (self->scope != NULL)
+    aml_task_scope_cancel (self->scope);
 
   dialog_forget_widgets (self);
 
@@ -224,6 +227,8 @@ dialog_dispose (GObject *object)
   g_clear_object (&self->manager);
   g_clear_object (&self->search);
   g_clear_object (&self->fetch);
+  aml_task_scope_free (self->scope);
+  self->scope = NULL;
   g_clear_pointer (&self->project, aml_modrinth_project_free);
   g_clear_pointer (&self->version, aml_modrinth_version_free);
   g_clear_pointer (&self->modpack, aml_modpack_free);
@@ -260,7 +265,9 @@ static void
 on_dialog_closed (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_data)
 {
   AmlDownloadModpackDialog *self = user_data;
-
+  if (self->import_idle != 0)
+    aml_task_scope_remove_source (self->scope, self->import_idle);
+  self->import_idle = 0;
   self->closed = TRUE;
 
   /* Closing does not stop the pack download: it is the manager's, it
@@ -274,6 +281,7 @@ aml_download_modpack_dialog_init (AmlDownloadModpackDialog *self)
 {
   self->search = g_cancellable_new ();
   self->fetch = g_cancellable_new ();
+  self->scope = aml_task_scope_new (NULL, self->search, NULL, NULL);
   self->rows = NULL;
   self->hits = NULL;
   self->versions = NULL;
@@ -328,6 +336,8 @@ static gboolean
 start_import_idle (gpointer user_data)
 {
   AmlDownloadModpackDialog *self = user_data;
+  aml_task_scope_forget_source (self->scope, self->import_idle);
+  self->import_idle = 0;
 
   /* Reuse the same validation, optional-file selection and install flow as
    * a downloaded pack. The selected file is never deleted on failure. */
@@ -358,7 +368,8 @@ aml_download_modpack_dialog_new_for_file (AmlInstanceManager *manager,
   g_object_add_weak_pointer (G_OBJECT (self->pack_download),
                              (gpointer *) &self->pack_download);
   build_import_page (self);
-  g_idle_add (start_import_idle, g_object_ref (self));
+  self->import_idle = g_idle_add (start_import_idle, g_object_ref (self));
+  aml_task_scope_track_source (self->scope, self->import_idle);
   return self;
 }
 
@@ -371,6 +382,7 @@ on_search_timeout (gpointer user_data)
 {
   AmlDownloadModpackDialog *self = user_data;
 
+  aml_task_scope_forget_source (self->scope, self->debounce);
   self->debounce = 0;
   run_search (self, FALSE);
 
@@ -383,9 +395,10 @@ on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
   AmlDownloadModpackDialog *self = user_data;
 
   if (self->debounce != 0)
-    g_source_remove (self->debounce);
+    aml_task_scope_remove_source (self->scope, self->debounce);
 
   self->debounce = g_timeout_add (SEARCH_DELAY_MS, on_search_timeout, self);
+  aml_task_scope_track_source (self->scope, self->debounce);
 }
 
 /* The list is scrolled to its end: ask for the next page. Only one page

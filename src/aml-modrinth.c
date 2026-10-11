@@ -28,6 +28,7 @@
  * main loop is parsing a body that has already arrived. */
 
 #include "aml-modrinth.h"
+#include "aml-task.h"
 
 #include "aml-download.h"
 #include "aml-i18n.h"
@@ -1090,6 +1091,7 @@ typedef enum {
 typedef struct {
   AnswerFunc answer;
   AmlNotFoundRule not_found;
+  AmlTaskScope *scope;
   void *data;
   GDestroyNotify free_data;
 } Request;
@@ -1117,6 +1119,7 @@ request_free (gpointer data)
   if (request->data != NULL && request->free_data != NULL)
     request->free_data (request->data);
 
+  aml_task_scope_free (request->scope);
   g_free (request);
 }
 
@@ -1127,6 +1130,7 @@ request_new (GCancellable *cancellable, GAsyncReadyCallback callback,
 {
   GTask *task = g_task_new (NULL, cancellable, callback, user_data);
   Request *request = g_new0 (Request, 1);
+  request->scope = aml_task_scope_borrow_task (task);
 
   request->answer = answer;
   request->not_found = not_found;

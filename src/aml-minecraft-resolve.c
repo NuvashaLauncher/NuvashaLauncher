@@ -23,6 +23,7 @@
  * a disk or for a jar in the main loop. */
 
 #include "aml-minecraft-resolve.h"
+#include "aml-task.h"
 
 #include "aml-download.h"
 
@@ -686,6 +687,7 @@ make_parents (const char *root, const char *relative, GError **error)
 typedef struct
 {
   GTask *task;
+  AmlTaskScope *scope;
   GPtrArray *jars; /* AmlResolveFile*, a reference */
   char *directory;
   guint index;
@@ -703,6 +705,7 @@ typedef struct
 static void
 extract_request_free (ExtractRequest *request)
 {
+  aml_task_scope_free (request->scope);
   g_clear_object (&request->task);
   g_clear_pointer (&request->jars, g_ptr_array_unref);
   g_free (request->directory);
@@ -982,6 +985,7 @@ aml_resolve_extract_natives_async (GPtrArray         *jars,
 
   request = g_new0 (ExtractRequest, 1);
   request->task = g_task_new (NULL, cancellable, callback, user_data);
+  request->scope = aml_task_scope_borrow_task (request->task);
   g_task_set_check_cancellable (request->task, FALSE);
   request->jars = g_ptr_array_ref (jars);
   request->directory = g_strdup (natives_directory);
@@ -1015,6 +1019,7 @@ typedef struct
 struct ResolveRequest
 {
   GTask *task;
+  AmlTaskScope *scope;
   AmlVersionManifest *manifest;
   AmlVersionDescription *description;
 
@@ -1147,6 +1152,7 @@ request_free (ResolveRequest *request)
   if (request->cancel_handler != 0 && request->caller != NULL)
     g_cancellable_disconnect (request->caller, request->cancel_handler);
 
+  aml_task_scope_free (request->scope);
   g_clear_object (&request->task);
   g_clear_object (&request->manifest);
   g_clear_object (&request->description);
@@ -2004,6 +2010,7 @@ request_new (const char         *version_id,
   g_autofree char *jar = g_strconcat (name, ".jar", NULL);
 
   request->task = g_task_new (NULL, cancellable, callback, user_data);
+  request->scope = aml_task_scope_borrow_task (request->task);
   g_task_set_check_cancellable (request->task, FALSE);
   request->version_id = g_strdup (version_id);
   request->data_dir = data_dir != NULL

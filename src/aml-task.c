@@ -4,6 +4,98 @@
 
 #include "aml-task.h"
 
+struct _AmlTaskScope
+{
+  GTask *task;
+  GArray *sources;
+  gboolean owns_task;
+};
+
+AmlTaskScope *
+aml_task_scope_new (GObject *source_object, GCancellable *cancellable,
+                    GAsyncReadyCallback callback, gpointer user_data)
+{
+  AmlTaskScope *scope = g_new0 (AmlTaskScope, 1);
+  scope->task = g_task_new (source_object, cancellable, callback, user_data);
+  scope->sources = g_array_new (FALSE, FALSE, sizeof (guint));
+  scope->owns_task = TRUE;
+  return scope;
+}
+
+AmlTaskScope *
+aml_task_scope_borrow_task (GTask *task)
+{
+  AmlTaskScope *scope = g_new0 (AmlTaskScope, 1);
+  scope->task = task;
+  scope->sources = g_array_new (FALSE, FALSE, sizeof (guint));
+  return scope;
+}
+
+GTask *
+aml_task_scope_get_task (AmlTaskScope *scope)
+{
+  g_return_val_if_fail (scope != NULL, NULL);
+  return scope->task;
+}
+
+void
+aml_task_scope_track_source (AmlTaskScope *scope, guint source_id)
+{
+  g_return_if_fail (scope != NULL);
+  if (source_id != 0)
+    g_array_append_val (scope->sources, source_id);
+}
+
+void
+aml_task_scope_remove_source (AmlTaskScope *scope, guint source_id)
+{
+  g_return_if_fail (scope != NULL);
+  for (guint i = 0; i < scope->sources->len; i++)
+    if (g_array_index (scope->sources, guint, i) == source_id)
+      {
+        g_source_remove (source_id);
+        g_array_remove_index_fast (scope->sources, i);
+        return;
+      }
+}
+
+void
+aml_task_scope_forget_source (AmlTaskScope *scope, guint source_id)
+{
+  g_return_if_fail (scope != NULL);
+  for (guint i = 0; i < scope->sources->len; i++)
+    if (g_array_index (scope->sources, guint, i) == source_id)
+      {
+        g_array_remove_index_fast (scope->sources, i);
+        return;
+      }
+}
+
+void
+aml_task_scope_cancel (AmlTaskScope *scope)
+{
+  g_return_if_fail (scope != NULL);
+  GCancellable *cancellable = g_task_get_cancellable (scope->task);
+  if (cancellable != NULL)
+    g_cancellable_cancel (cancellable);
+  for (guint i = 0; i < scope->sources->len; i++)
+    g_source_remove (g_array_index (scope->sources, guint, i));
+  g_array_set_size (scope->sources, 0);
+}
+
+void
+aml_task_scope_free (AmlTaskScope *scope)
+{
+  if (scope == NULL)
+    return;
+  for (guint i = 0; i < scope->sources->len; i++)
+    g_source_remove (g_array_index (scope->sources, guint, i));
+  g_array_unref (scope->sources);
+  if (scope->owns_task)
+    g_clear_object (&scope->task);
+  g_free (scope);
+}
+
 struct _AmlTaskSequence
 {
   GTask *task;

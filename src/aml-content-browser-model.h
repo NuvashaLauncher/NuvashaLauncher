@@ -8,6 +8,7 @@
 #include <gio/gio.h>
 
 #include "aml-modrinth.h"
+#include "aml-task.h"
 
 typedef struct _AmlContentBrowserModel AmlContentBrowserModel;
 
@@ -35,6 +36,7 @@ struct _AmlContentBrowserModel
   GHashTable *seen_ids;
   GCancellable *more;
   guint debounce_source;
+  AmlTaskScope *scope;
   GCancellable *cancellable;
 };
 

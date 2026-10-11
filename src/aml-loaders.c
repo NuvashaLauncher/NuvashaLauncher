@@ -4,6 +4,7 @@
 
 #include "aml-loaders.h"
 #include "aml-loaders-private.h"
+#include "aml-task.h"
 
 #include "aml-download.h"
 #include "aml-minecraft-resolve.h"
@@ -508,6 +509,7 @@ typedef enum {
 
 typedef struct {
   GTask *task;
+  AmlTaskScope *scope;
 
   AmlLoader loader;
   InstallStage stage;
@@ -547,6 +549,7 @@ install_request_free (gpointer data)
 {
   InstallRequest *request = data;
 
+  aml_task_scope_free (request->scope);
   g_clear_object (&request->task);
   g_clear_object (&request->profile);
   g_clear_object (&request->description);
@@ -1780,6 +1783,7 @@ aml_loaders_install_async (AmlLoader              loader,
 
   request = g_new0 (InstallRequest, 1);
   request->task = g_task_new (NULL, cancellable, callback, user_data);
+  request->scope = aml_task_scope_borrow_task (request->task);
   request->loader = loader;
   request->game_version = g_strdup (game_version);
   request->loader_version = g_strdup (loader_version);

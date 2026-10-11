@@ -8,6 +8,7 @@
 #include "aml-content-page.h"
 #include "aml-content-index.h"
 #include "aml-download.h"
+#include "aml-task.h"
 
 #include <archive.h>
 #include <archive_entry.h>
@@ -140,6 +141,7 @@ name_is_content (const char *name, const char *extension)
 typedef struct
 {
   GTask *task;
+  AmlTaskScope *scope;
   GFile *folder;
   GFileEnumerator *enumerator; /* while the batches are read */
   char *instance_directory;
@@ -778,6 +780,9 @@ scan_local_metadata (ScanRun *run)
     }
   GTask *task = g_task_new (NULL, g_task_get_cancellable (run->task),
                             local_metadata_done, run);
+  g_object_set_data_full (G_OBJECT (task), "aml-task-scope",
+                          aml_task_scope_borrow_task (task),
+                          (GDestroyNotify) aml_task_scope_free);
   g_task_set_task_data (task, run, NULL);
   g_task_run_in_thread (task, local_metadata_thread);
   g_object_unref (task);
@@ -789,6 +794,7 @@ scan_free (ScanRun *run)
   g_clear_object (&run->enumerator);
   g_clear_object (&run->folder);
   g_clear_object (&run->task);
+  aml_task_scope_free (run->scope);
   g_clear_pointer (&run->files, g_ptr_array_unref);
   g_clear_pointer (&run->index_entries, g_ptr_array_unref);
   g_free (run->instance_directory);
@@ -1046,6 +1052,7 @@ aml_content_scan_async (const char *instance_directory, AmlContentType type,
   folder = aml_content_folder_path (instance_directory, type);
   run = g_new0 (ScanRun, 1);
   run->task = g_task_new (NULL, cancellable, callback, user_data);
+  run->scope = aml_task_scope_borrow_task (run->task);
   g_task_set_check_cancellable (run->task, FALSE);
   run->folder = g_file_new_for_path (folder);
   run->instance_directory = g_strdup (instance_directory);

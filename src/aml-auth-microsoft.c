@@ -3,6 +3,7 @@
  */
 
 #include "aml-auth-microsoft.h"
+#include "aml-task.h"
 
 #include <libsoup/soup.h>
 #include <string.h>
@@ -682,6 +683,7 @@ struct _AuthRequest
   GTask *task;
   SoupMessage *message;
   guint poll_source;
+  AmlTaskScope *scope;
   Step step;
 
   gint status;
@@ -734,6 +736,7 @@ request_new (GTask *task)
   AuthRequest *self = g_new0 (AuthRequest, 1);
 
   self->task = g_object_ref (task);
+  self->scope = aml_task_scope_borrow_task (task);
   self->now = g_get_real_time () / 1000000;
 
   /* The cancellation of the task is this module's own: a sign-in that is
@@ -742,6 +745,14 @@ request_new (GTask *task)
   g_task_set_task_data (task, self, request_free);
 
   return self;
+}
+
+static void
+attach_task_scope (GTask *task)
+{
+  g_object_set_data_full (G_OBJECT (task), "aml-task-scope",
+                          aml_task_scope_borrow_task (task),
+                          (GDestroyNotify) aml_task_scope_free);
 }
 
 /* The one way out of a sign-in: an error and no account. */
@@ -1007,6 +1018,7 @@ aml_auth_device_code_async (GCancellable       *cancellable,
   AuthRequest *self = NULL;
 
   task = g_task_new (NULL, cancellable, callback, user_data);
+  attach_task_scope (task);
   self = request_new (task);
 
   if (!client_id_is_set ())
@@ -1067,8 +1079,10 @@ static gboolean
 poll_again (gpointer user_data)
 {
   AuthRequest *self = user_data;
+  guint source_id = self->poll_source;
 
   self->poll_source = 0;
+  aml_task_scope_forget_source (self->scope, source_id);
 
   if (self->task == NULL || answer_if_cancelled (self))
     return G_SOURCE_REMOVE;
@@ -1138,6 +1152,7 @@ token_answered (AuthRequest *self)
     }
 
   self->poll_source = g_timeout_add_seconds (self->interval, poll_again, self);
+  aml_task_scope_track_source (self->scope, self->poll_source);
 }
 
 /* ---------------------------------------------------------- *
@@ -1494,6 +1509,7 @@ aml_auth_sign_in_async (const AmlDeviceCode   *code,
   g_return_if_fail (code->device_code != NULL);
 
   task = g_task_new (NULL, cancellable, callback, user_data);
+  attach_task_scope (task);
   self = request_new (task);
 
   if (!client_id_is_set ())
@@ -1530,6 +1546,7 @@ aml_auth_refresh_async (const AmlAccount   *account,
   g_return_if_fail (account != NULL);
 
   task = g_task_new (NULL, cancellable, callback, user_data);
+  attach_task_scope (task);
   self = request_new (task);
 
   if (!client_id_is_set ())
@@ -1581,8 +1598,9 @@ request_free (gpointer data)
 {
   AuthRequest *self = data;
 
-  if (self->poll_source != 0)
-    g_source_remove (self->poll_source);
+  if (self->scope != NULL)
+    aml_task_scope_cancel (self->scope);
+  aml_task_scope_free (self->scope);
 
   g_clear_object (&self->message);
   g_free (self->body);
