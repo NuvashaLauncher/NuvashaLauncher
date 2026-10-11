@@ -9,6 +9,7 @@
 
 #include "aml-i18n.h"
 #include "aml-content-index.h"
+#include "aml-fs.h"
 #include "aml-loaders.h"
 
 #include <archive.h>
@@ -24,43 +25,6 @@
 /* ---------------------------------------------------------- *
  * The tree one install makes, to leave nothing of on failure
  * ---------------------------------------------------------- */
-
-static void
-remove_tree (const char *path)
-{
-  GDir *dir = NULL;
-  const char *entry = NULL;
-
-  /* A symlink has nothing of a tree under it for this walk: it goes as
-   * it is, never followed. */
-  if (g_file_test (path, G_FILE_TEST_IS_SYMLINK))
-    {
-      g_remove (path);
-      return;
-    }
-
-  dir = g_dir_open (path, 0, NULL);
-
-  if (dir == NULL)
-    {
-      g_remove (path);
-      return;
-    }
-
-  while ((entry = g_dir_read_name (dir)) != NULL)
-    {
-      g_autofree char *child = g_build_filename (path, entry, NULL);
-
-      if (g_file_test (child, G_FILE_TEST_IS_DIR) &&
-          !g_file_test (child, G_FILE_TEST_IS_SYMLINK))
-        remove_tree (child);
-      else
-        g_remove (child);
-    }
-
-  g_dir_close (dir);
-  g_rmdir (path);
-}
 
 /* ---------------------------------------------------------- *
  * One loader version against what the pack asks for
@@ -213,10 +177,10 @@ static void
 install_fail (InstallRun *run, GError *error)
 {
   if (run->temp != NULL)
-    remove_tree (run->temp);
+    aml_fs_remove_tree (run->temp);
 
   if (run->moved)
-    remove_tree (run->target);
+    aml_fs_remove_tree (run->target);
 
   g_task_return_error (run->task, error);
   install_run_free (run);
@@ -351,7 +315,7 @@ install_register (InstallRun *run)
 
   if (instance == NULL)
     {
-      remove_tree (run->target);
+      aml_fs_remove_tree (run->target);
       install_fail (run, g_steal_pointer (&error));
       return;
     }
@@ -365,7 +329,7 @@ install_register (InstallRun *run)
           g_object_set (instance, "icon", icon, NULL);
           if (!aml_instance_manager_save (run->manager, &error))
             {
-              remove_tree (run->target);
+              aml_fs_remove_tree (run->target);
               install_fail (run, g_steal_pointer (&error));
               return;
             }

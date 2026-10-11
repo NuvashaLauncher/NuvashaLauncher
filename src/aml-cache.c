@@ -3,6 +3,7 @@
  */
 
 #include "aml-cache.h"
+#include "aml-fs.h"
 
 #define CACHE_SUBDIR "AML"
 
@@ -10,6 +11,8 @@ typedef struct {
   GTask *task;
   GFileEnumerator *enumerator;
 } ClearCache;
+
+#if 0 /* retained only as historical reference; tree removal is centralized */
 
 static char *
 cache_directory (const char *child)
@@ -135,16 +138,35 @@ void
 aml_cache_clear_api_async (GCancellable *cancellable,
                            GAsyncReadyCallback callback, gpointer user_data)
 {
-  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
-  ClearCache *clear = g_new0 (ClearCache, 1);
   g_autofree char *path = aml_cache_get_api_directory ();
-  g_autoptr (GFile) directory =
-    g_file_new_for_path (path);
+  aml_fs_remove_tree_async (path, cancellable, callback, user_data);
+}
+#endif
 
-  clear->task = g_steal_pointer (&task);
-  g_file_enumerate_children_async (
-    directory, G_FILE_ATTRIBUTE_STANDARD_NAME, G_FILE_QUERY_INFO_NONE,
-    G_PRIORITY_DEFAULT, cancellable, clear_opened, clear);
+static char *
+cache_directory (const char *child)
+{
+  return g_build_filename (g_get_user_cache_dir (), CACHE_SUBDIR, child, NULL);
+}
+
+char *
+aml_cache_get_api_directory (void)
+{
+  return cache_directory ("api");
+}
+
+char *
+aml_cache_get_files_directory (void)
+{
+  return cache_directory ("files");
+}
+
+void
+aml_cache_clear_api_async (GCancellable *cancellable,
+                           GAsyncReadyCallback callback, gpointer user_data)
+{
+  g_autofree char *path = aml_cache_get_api_directory ();
+  aml_fs_remove_tree_async (path, cancellable, callback, user_data);
 }
 
 /* ---------------------------------------------------------- *
@@ -336,16 +358,5 @@ aml_cache_clear_all_async (GCancellable *cancellable,
 {
   g_autofree char *path =
     g_build_filename (g_get_user_cache_dir (), CACHE_SUBDIR, NULL);
-  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
-  ClearTree *tree = g_new0 (ClearTree, 1);
-  ClearFrame *root = g_new0 (ClearFrame, 1);
-
-  tree->task = g_steal_pointer (&task);
-  tree->frames = g_ptr_array_new ();
-  root->directory = g_file_new_for_path (path);
-  g_ptr_array_add (tree->frames, root);
-  g_file_enumerate_children_async (
-    root->directory, G_FILE_ATTRIBUTE_STANDARD_NAME ","
-    G_FILE_ATTRIBUTE_STANDARD_TYPE, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-    G_PRIORITY_DEFAULT, cancellable, clear_tree_opened, tree);
+  aml_fs_remove_tree_async (path, cancellable, callback, user_data);
 }

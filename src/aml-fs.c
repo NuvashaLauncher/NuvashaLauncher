@@ -2,10 +2,15 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+#define _GNU_SOURCE
+
 #include "aml-fs.h"
 
 #include <errno.h>
+#include <fcntl.h>
 #include <glib/gstdio.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 gboolean
 aml_fs_replace_contents (const char *path, const void *contents,
@@ -36,4 +41,235 @@ aml_fs_make_private_directory (const char *path, GError **error)
     }
 
   return TRUE;
+}
+
+gboolean
+aml_fs_directory_is_real (const char *path)
+{
+  g_auto (GStrv) parts = NULL;
+  int current = -1;
+
+  if (path == NULL || !g_path_is_absolute (path))
+    return FALSE;
+
+  parts = g_strsplit (path + 1, G_DIR_SEPARATOR_S, -1);
+  current = open (G_DIR_SEPARATOR_S,
+                  O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
+  if (current < 0)
+    return FALSE;
+
+  for (guint i = 0; parts[i] != NULL && parts[i][0] != '\0'; i++)
+    {
+      int next = openat (current, parts[i],
+                         O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
+      if (next < 0)
+        {
+          gboolean missing = errno == ENOENT;
+          close (current);
+          return missing;
+        }
+      close (current);
+      current = next;
+    }
+
+  close (current);
+  return TRUE;
+}
+
+void
+aml_fs_remove_tree (const char *path)
+{
+  GStatBuf stat_buf;
+
+  if (path == NULL || g_lstat (path, &stat_buf) != 0)
+    return;
+
+  if (S_ISDIR (stat_buf.st_mode) && !S_ISLNK (stat_buf.st_mode))
+    {
+      g_autoptr (GDir) directory = g_dir_open (path, 0, NULL);
+      const char *name = NULL;
+
+      if (directory != NULL)
+        while ((name = g_dir_read_name (directory)) != NULL)
+          {
+            g_autofree char *child = g_build_filename (path, name, NULL);
+            aml_fs_remove_tree (child);
+          }
+
+      g_rmdir (path);
+    }
+  else
+    {
+      g_unlink (path);
+    }
+}
+
+typedef struct {
+  char *path;
+} RemoveTreeData;
+
+static void
+remove_tree_data_free (RemoveTreeData *data)
+{
+  g_free (data->path);
+  g_free (data);
+}
+
+static void
+remove_tree_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
+                    gpointer task_data, GCancellable *cancellable G_GNUC_UNUSED)
+{
+  RemoveTreeData *data = task_data;
+
+  if (g_task_return_error_if_cancelled (task))
+    return;
+
+  aml_fs_remove_tree (data->path);
+
+  if (!g_task_return_error_if_cancelled (task))
+    g_task_return_boolean (task, TRUE);
+}
+
+void
+aml_fs_remove_tree_async (const char *path, GCancellable *cancellable,
+                          GAsyncReadyCallback callback, gpointer user_data)
+{
+  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
+  RemoveTreeData *data = g_new0 (RemoveTreeData, 1);
+
+  data->path = g_strdup (path);
+  g_task_set_task_data (task, data,
+                        (GDestroyNotify) remove_tree_data_free);
+  g_task_run_in_thread (task, remove_tree_thread);
+}
+
+gboolean
+aml_fs_remove_tree_finish (GAsyncResult *result, GError **error)
+{
+  g_return_val_if_fail (g_task_is_valid (result, NULL), FALSE);
+  return g_task_propagate_boolean (G_TASK (result), error);
+}
+
+typedef struct {
+  GFile *source;
+  GFile *destination;
+} CopyTreeData;
+
+static void
+copy_tree_data_free (CopyTreeData *data)
+{
+  g_clear_object (&data->source);
+  g_clear_object (&data->destination);
+  g_free (data);
+}
+
+static gboolean
+copy_tree_sync (GFile *source, GFile *destination, GCancellable *cancellable,
+                GError **error)
+{
+  g_autoptr (GFileInfo) info = NULL;
+  GFileType type;
+
+  if (g_cancellable_set_error_if_cancelled (cancellable, error))
+    return FALSE;
+
+  info = g_file_query_info (source,
+                            G_FILE_ATTRIBUTE_STANDARD_TYPE ","
+                            G_FILE_ATTRIBUTE_STANDARD_SYMLINK_TARGET,
+                            G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+                            cancellable, error);
+  if (info == NULL)
+    return FALSE;
+
+  type = g_file_info_get_file_type (info);
+  if (type == G_FILE_TYPE_DIRECTORY)
+    {
+      g_autoptr (GFileEnumerator) enumerator = NULL;
+      GFileInfo *child_info = NULL;
+
+      if (!g_file_make_directory (destination, cancellable, error) &&
+          !g_error_matches (*error, G_IO_ERROR, G_IO_ERROR_EXISTS))
+        return FALSE;
+      g_clear_error (error);
+
+      enumerator = g_file_enumerate_children (
+        source, G_FILE_ATTRIBUTE_STANDARD_NAME ","
+        G_FILE_ATTRIBUTE_STANDARD_TYPE ","
+        G_FILE_ATTRIBUTE_STANDARD_SYMLINK_TARGET,
+        G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, cancellable, error);
+      if (enumerator == NULL)
+        return FALSE;
+
+      while ((child_info = g_file_enumerator_next_file (enumerator,
+                                                         cancellable, error)) != NULL)
+        {
+          g_autoptr (GFile) child_source = g_file_get_child (
+            source, g_file_info_get_name (child_info));
+          g_autoptr (GFile) child_destination = g_file_get_child (
+            destination, g_file_info_get_name (child_info));
+
+          if (!copy_tree_sync (child_source, child_destination, cancellable,
+                               error))
+            {
+              g_object_unref (child_info);
+              return FALSE;
+            }
+          g_object_unref (child_info);
+        }
+
+      return *error == NULL;
+    }
+
+  if (type == G_FILE_TYPE_SYMBOLIC_LINK)
+    {
+      const char *target = g_file_info_get_symlink_target (info);
+      g_autofree char *destination_path = g_file_get_path (destination);
+
+      if (target == NULL || destination_path == NULL ||
+          symlink (target, destination_path) != 0)
+        {
+          g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                       "cannot copy symlink: %s", g_strerror (errno));
+          return FALSE;
+        }
+      return TRUE;
+    }
+
+  return g_file_copy (source, destination, G_FILE_COPY_NONE, cancellable,
+                      NULL, NULL, error);
+}
+
+static void
+copy_tree_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
+                  gpointer task_data, GCancellable *cancellable)
+{
+  CopyTreeData *data = task_data;
+  g_autoptr (GError) error = NULL;
+
+  if (copy_tree_sync (data->source, data->destination, cancellable,
+                      &error))
+    g_task_return_boolean (task, TRUE);
+  else
+    g_task_return_error (task, g_steal_pointer (&error));
+}
+
+void
+aml_fs_copy_tree_async (GFile *source, GFile *destination,
+                        GCancellable *cancellable,
+                        GAsyncReadyCallback callback, gpointer user_data)
+{
+  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
+  CopyTreeData *data = g_new0 (CopyTreeData, 1);
+
+  data->source = g_object_ref (source);
+  data->destination = g_object_ref (destination);
+  g_task_set_task_data (task, data, (GDestroyNotify) copy_tree_data_free);
+  g_task_run_in_thread (task, copy_tree_thread);
+}
+
+gboolean
+aml_fs_copy_tree_finish (GAsyncResult *result, GError **error)
+{
+  g_return_val_if_fail (g_task_is_valid (result, NULL), FALSE);
+  return g_task_propagate_boolean (G_TASK (result), error);
 }
