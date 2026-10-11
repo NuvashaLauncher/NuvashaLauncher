@@ -924,6 +924,18 @@ update_item_free (UpdateItem *item)
   g_free (item);
 }
 
+static void
+update_button_busy (AmlContentPage *self, gboolean busy)
+{
+  if (self->installed.update_content == NULL)
+    return;
+  gtk_stack_set_visible_child_name (self->installed.update_content,
+                                    busy ? "spinner" : "icon");
+  gtk_widget_set_sensitive (
+    GTK_WIDGET (self->installed.update_all),
+    busy || (self->installed.files != NULL && self->installed.files->len > 0));
+}
+
 /* Starts the next one of a confirmed batch. When the last one is in, the
  * list is read again and the batch is over. */
 void
@@ -938,7 +950,7 @@ update_batch_next (AmlContentPage *self)
       g_clear_pointer (&self->install_model->updates, g_ptr_array_unref);
       self->install_model->update_index = 0;
       self->install_model->updating = FALSE;
-      set_busy (self, FALSE);
+      update_button_busy (self, FALSE);
 
       if (done > 0)
         {
@@ -957,7 +969,7 @@ update_batch_next (AmlContentPage *self)
 
   /* The batch was confirmed once, as a whole: this plan is not asked for
      again, it is simply carried out. */
-  set_busy (self, TRUE);
+  update_button_busy (self, TRUE);
   start_plan (self, aml_modrinth_version_copy (item->version), item->title,
               item->path, item->disabled);
 }
@@ -1011,8 +1023,8 @@ on_update_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 static void
 update_check_done (AmlContentPage *self, UpdateRun *run)
 {
+  update_button_busy (self, FALSE);
   g_object_set_data (G_OBJECT (self), "aml-update-run", NULL);
-  set_busy (self, FALSE);
 
   if (run->items->len == 0)
     {
@@ -1165,12 +1177,18 @@ aml_content_page_on_update_all_clicked (GtkButton *button G_GNUC_UNUSED, gpointe
   AmlContentPage *self = user_data;
   UpdateRun *run = g_new0 (UpdateRun, 1);
 
+  if (g_object_get_data (G_OBJECT (self), "aml-update-run") != NULL ||
+      self->install_model->updating)
+    {
+      g_free (run);
+      return;
+    }
+  update_button_busy (self, TRUE);
   run->page = self;
   g_object_add_weak_pointer (G_OBJECT (self), (gpointer *) &run->page);
   run->items =
     g_ptr_array_new_with_free_func ((GDestroyNotify) update_item_free);
   g_object_set_data (G_OBJECT (self), "aml-update-run", run);
-  set_busy (self, TRUE);
   update_check_next (run);
 }
 
@@ -1340,6 +1358,8 @@ aml_content_page_dispose (GObject *object)
   self->installed.scroller = NULL;
   self->installed.status = NULL;
   self->installed.loading = NULL;
+  self->installed.update_content = NULL;
+  self->installed.update_spinner = NULL;
   self->installed.search_bar = NULL;
   self->installed.search_entry = NULL;
   self->installed.update_all = NULL;

@@ -66,6 +66,8 @@ struct _AmlContentPage
     AdwStatusPage *status;
     AdwSpinner *loading;
     GtkButton *update_all;
+    GtkStack *update_content;
+    AdwSpinner *update_spinner;
     GPtrArray *files;     /* AmlContentFile* */
     GHashTable *rows;     /* path -> row */
     GList *rows_list;     /* rows of the Installed group */

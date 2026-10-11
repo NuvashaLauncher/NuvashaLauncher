@@ -54,7 +54,7 @@ struct _AmlInstancePage
   AdwActionRow *directory_row;
   GtkButton *directory_change;
   GtkLabel *directory_path_label; /* the path inside the chooser button */
-  GtkSpinner *directory_spinner;
+  AdwSpinner *directory_spinner;
 
   /* The Java row plus what we know about it. Row load = detection
    * finishes; description load = the Minecraft version's javaVersion.  */
@@ -1310,7 +1310,7 @@ create_settings_page (AmlInstancePage *self)
   g_signal_connect (self->directory_change, "clicked",
                     G_CALLBACK (on_change_directory_clicked), self);
 
-  self->directory_spinner = GTK_SPINNER (gtk_spinner_new ());
+  self->directory_spinner = ADW_SPINNER (adw_spinner_new ());
   gtk_widget_set_valign (GTK_WIDGET (self->directory_spinner), GTK_ALIGN_CENTER);
   gtk_widget_set_visible (GTK_WIDGET (self->directory_spinner), FALSE);
 

@@ -311,14 +311,13 @@ static void
 build_import_page (AmlDownloadModpackDialog *self)
 {
   GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
-  GtkSpinner *spinner = GTK_SPINNER (gtk_spinner_new ());
+  AdwSpinner *spinner = ADW_SPINNER (adw_spinner_new ());
   GtkLabel *label = GTK_LABEL (gtk_label_new (_("Importing modpack…")));
   AdwNavigationPage *page = ADW_NAVIGATION_PAGE (
     adw_navigation_page_new (GTK_WIDGET (box), _("Import Modpack")));
 
   gtk_widget_set_halign (GTK_WIDGET (box), GTK_ALIGN_CENTER);
   gtk_widget_set_valign (GTK_WIDGET (box), GTK_ALIGN_CENTER);
-  gtk_spinner_start (GTK_SPINNER (GTK_WIDGET (spinner)));
   gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (spinner));
   gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (label));
   adw_navigation_view_add (ADW_NAVIGATION_VIEW (self->nav),
@@ -812,10 +811,10 @@ build_browse_page (AmlDownloadModpackDialog *self)
   GtkBox *top = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
   GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
   GtkBox *loading = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 6));
-  GtkSpinner *loading_spinner = GTK_SPINNER (gtk_spinner_new ());
+  AdwSpinner *loading_spinner = ADW_SPINNER (adw_spinner_new ());
   GtkLabel *loading_label = GTK_LABEL (gtk_label_new (_("Loading modpacks…")));
   GtkBox *loading_more = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
-  GtkSpinner *more_spinner = GTK_SPINNER (gtk_spinner_new ());
+  AdwSpinner *more_spinner = ADW_SPINNER (adw_spinner_new ());
   GtkLabel *more_label = GTK_LABEL (gtk_label_new (_("Loading more…")));
   GtkBox *retry_row = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
   GtkLabel *retry_label = GTK_LABEL (gtk_label_new (NULL));
@@ -916,7 +915,6 @@ build_browse_page (AmlDownloadModpackDialog *self)
   gtk_widget_set_halign (GTK_WIDGET (loading), GTK_ALIGN_CENTER);
   gtk_box_append (GTK_BOX (GTK_WIDGET (loading)), GTK_WIDGET (loading_spinner));
   gtk_box_append (GTK_BOX (GTK_WIDGET (loading)), GTK_WIDGET (loading_label));
-  gtk_spinner_start (GTK_SPINNER (GTK_WIDGET (loading_spinner)));
   gtk_stack_add_named (GTK_STACK (self->results_stack), GTK_WIDGET (loading), "loading");
 
   gtk_stack_set_visible_child_name (GTK_STACK (self->results_stack),
