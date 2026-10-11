@@ -1276,11 +1276,8 @@ extract_entry (struct archive *archive,
 
 /* One archive read for one of the two folder layers of a pack. */
 static gboolean
-extract_layer (const char *archive_path,
-               const char *directory,
-               const char *prefix,
-               guint64 *used,
-               GError **error)
+extract_layers (const char *archive_path, const char *directory,
+                guint64 *used, GError **error)
 {
   struct archive *archive = NULL;
   struct archive_entry *header = NULL;
@@ -1309,7 +1306,18 @@ extract_layer (const char *archive_path,
           return FALSE;
         }
 
-      if (!extract_entry (archive, header, directory, prefix, used, error))
+      const char *name = archive_entry_pathname (header);
+      const char *prefix = NULL;
+
+      if (name != NULL && g_str_equal (name, "icon.png"))
+        prefix = "icon.png";
+      else if (name != NULL && g_str_has_prefix (name, "client-overrides/"))
+        prefix = "client-overrides/";
+      else if (name != NULL && g_str_has_prefix (name, "overrides/"))
+        prefix = "overrides/";
+
+      if (prefix != NULL &&
+          !extract_entry (archive, header, directory, prefix, used, error))
         {
           archive_read_close (archive);
           archive_read_free (archive);
@@ -1349,19 +1357,9 @@ extract_overrides (const char *archive_path,
                    const char *directory,
                    GError **error)
 {
-  static const char *prefixes[] = {
-    "overrides/", "client-overrides/", "icon.png"
-  };
   guint64 used = 0;
 
-  for (guint i = 0; i < G_N_ELEMENTS (prefixes); i++)
-    {
-      if (!extract_layer (archive_path, directory, prefixes[i], &used,
-                          error))
-        return FALSE;
-    }
-
-  return TRUE;
+  return extract_layers (archive_path, directory, &used, error);
 }
 
 typedef struct {

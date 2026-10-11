@@ -32,6 +32,7 @@ aml_content_file_free (AmlContentFile *file)
   g_free (file->project_id);
   g_free (file->local_id);
   g_free (file->project_name);
+  g_free (file->search_key);
   g_free (file->description);
   g_free (file->icon_url);
   g_free (file->local_icon_path);
@@ -42,6 +43,22 @@ aml_content_file_free (AmlContentFile *file)
   g_clear_pointer (&file->optional_dependencies, g_ptr_array_unref);
   g_clear_pointer (&file->incompatible_dependencies, g_ptr_array_unref);
   g_free (file);
+}
+
+void
+aml_content_file_refresh_search_key (AmlContentFile *file)
+{
+  const char *title = file->project_name != NULL && *file->project_name != '\0'
+                        ? file->project_name : file->filename;
+  g_autofree char *title_folded = g_utf8_casefold (title != NULL ? title : "",
+                                                   -1);
+  g_autofree char *file_folded =
+    g_utf8_casefold (file->filename != NULL ? file->filename : "", -1);
+
+  g_free (file->search_key);
+  file->search_key = g_strconcat (title_folded != NULL ? title_folded : "",
+                                  " ", file_folded != NULL ? file_folded : "",
+                                  NULL);
 }
 
 char *
@@ -715,18 +732,22 @@ scan_finish (ScanRun *run)
   scan_free (run);
 }
 
-typedef struct {
-  AmlContentFile *file;
-  AmlContentType type;
-} LocalMetadataInput;
-
 static void
 local_metadata_thread (GTask *task, gpointer source G_GNUC_UNUSED,
                        gpointer task_data,
                        GCancellable *cancellable G_GNUC_UNUSED)
 {
-  LocalMetadataInput *input = task_data;
-  apply_local_metadata (input->file, input->type);
+  ScanRun *run = task_data;
+
+  for (guint i = 0; i < run->files->len; i++)
+    {
+      if (g_task_return_error_if_cancelled (task))
+        return;
+      AmlContentFile *file = g_ptr_array_index (run->files, i);
+      apply_local_metadata (file, run->type);
+      aml_content_file_refresh_search_key (file);
+    }
+
   g_task_return_boolean (task, TRUE);
 }
 
@@ -737,45 +758,29 @@ local_metadata_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   ScanRun *run = user_data;
   g_autoptr (GError) error = NULL;
 
-  g_task_propagate_boolean (G_TASK (result), &error);
-  if (error != NULL)
-    g_clear_error (&error);
-  if (g_task_get_cancellable (run->task) != NULL &&
-      g_cancellable_is_cancelled (g_task_get_cancellable (run->task)))
-    run->local_cancelled = TRUE;
-  run->local_pending--;
-  if (run->local_pending != 0)
-    return;
-  if (run->local_cancelled)
+  if (!g_task_propagate_boolean (G_TASK (result), &error))
     {
-      g_task_return_new_error (run->task, G_IO_ERROR, G_IO_ERROR_CANCELLED,
-                               "cancelled");
+      g_task_return_error (run->task, g_steal_pointer (&error));
       scan_free (run);
       return;
     }
+
   scan_finish (run);
 }
 
 static void
 scan_local_metadata (ScanRun *run)
 {
-  run->local_pending = run->files->len;
-  if (run->local_pending == 0)
+  if (run->files->len == 0)
     {
       scan_finish (run);
       return;
     }
-  for (guint i = 0; i < run->files->len; i++)
-    {
-      GTask *task = g_task_new (NULL, g_task_get_cancellable (run->task),
-                                local_metadata_done, run);
-      LocalMetadataInput *input = g_new (LocalMetadataInput, 1);
-      input->file = g_ptr_array_index (run->files, i);
-      input->type = run->type;
-      g_task_set_task_data (task, input, g_free);
-      g_task_run_in_thread (task, local_metadata_thread);
-      g_object_unref (task);
-    }
+  GTask *task = g_task_new (NULL, g_task_get_cancellable (run->task),
+                            local_metadata_done, run);
+  g_task_set_task_data (task, run, NULL);
+  g_task_run_in_thread (task, local_metadata_thread);
+  g_object_unref (task);
 }
 
 static void
