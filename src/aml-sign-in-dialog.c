@@ -18,7 +18,7 @@ struct _AmlSignInDialog
 
   GCancellable *cancellable;
 
-  GtkSpinner *spinner;
+  AdwSpinner *spinner;
   GtkBox *waiting;              /* the circle and what it is waiting for */
   GtkLabel *waiting_label;
   GtkLabel *instruction_label;  /* what to do with the code */
@@ -295,8 +295,7 @@ aml_sign_in_dialog_init (AmlSignInDialog *self)
   gtk_widget_set_visible (GTK_WIDGET (self->uri_label), FALSE);
 
   /* What is being waited for, and a circle while it is. */
-  self->spinner = GTK_SPINNER (gtk_spinner_new ());
-  gtk_spinner_start (GTK_SPINNER (self->spinner));
+  self->spinner = ADW_SPINNER (adw_spinner_new ());
   self->waiting_label = GTK_LABEL (gtk_label_new (STEP_CODE));
   gtk_widget_add_css_class (GTK_WIDGET (self->waiting_label), "dim-label");
   self->waiting = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8));

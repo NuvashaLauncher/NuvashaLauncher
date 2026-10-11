@@ -40,6 +40,10 @@ aml_content_page_build_installed (AmlContentPage *self)
   GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
   GtkBox *content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   AdwSpinner *loading = ADW_SPINNER (adw_spinner_new ());
+  GtkStack *update_content = GTK_STACK (gtk_stack_new ());
+  GtkImage *update_icon = GTK_IMAGE (gtk_image_new_from_icon_name (
+    "software-update-available-symbolic"));
+  AdwSpinner *update_spinner = ADW_SPINNER (adw_spinner_new ());
   AdwPreferencesGroup *group =
     ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
 
@@ -54,9 +58,15 @@ aml_content_page_build_installed (AmlContentPage *self)
                      G_CALLBACK (aml_content_page_on_installed_search_changed), self);
      gtk_box_append (GTK_BOX (GTK_WIDGET (actions)), GTK_WIDGET (search_bar));
 
-   self->installed.update_all = GTK_BUTTON (toolbar_button (
-     "software-update-available-symbolic", _("Update All"),
-     G_CALLBACK (aml_content_page_on_update_all_clicked), self));
+    self->installed.update_all = GTK_BUTTON (toolbar_button (
+      "software-update-available-symbolic", _("Update All"),
+      G_CALLBACK (aml_content_page_on_update_all_clicked), self));
+   gtk_stack_add_named (update_content, GTK_WIDGET (update_icon), "icon");
+   gtk_stack_add_named (update_content, GTK_WIDGET (update_spinner), "spinner");
+   gtk_stack_set_visible_child_name (update_content, "icon");
+   gtk_button_set_child (self->installed.update_all, GTK_WIDGET (update_content));
+   self->installed.update_content = update_content;
+   self->installed.update_spinner = update_spinner;
    gtk_widget_set_sensitive (GTK_WIDGET (self->installed.update_all), FALSE);
   gtk_box_append (GTK_BOX (GTK_WIDGET (actions)), GTK_WIDGET (self->installed.update_all));
   gtk_box_append (GTK_BOX (GTK_WIDGET (actions)),
@@ -169,7 +179,7 @@ aml_content_page_build_browse (AmlContentPage *self)
   GtkBox *content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
   GtkBox *loading_more = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
-  GtkSpinner *loading_spinner = GTK_SPINNER (gtk_spinner_new ());
+  AdwSpinner *loading_spinner = ADW_SPINNER (adw_spinner_new ());
   GtkLabel *loading_label = GTK_LABEL (gtk_label_new (_("Loading more…")));
   GtkBox *retry_row = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
   GtkLabel *retry_label = GTK_LABEL (gtk_label_new (NULL));
