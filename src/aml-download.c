@@ -49,6 +49,8 @@
 
 /* Bytes taken from the network in one step. */
 #define CHUNK_SIZE (64 * 1024)
+#define DOWNLOAD_PRIORITY_BULK 0
+#define DOWNLOAD_PRIORITY_INTERACTIVE 100
 
 /* API documents are parsed in the main context. Refuse unexpectedly huge
  * responses before they can monopolize memory or freeze the UI. */
@@ -157,6 +159,7 @@ typedef struct _DownloadRequest
   guint attempts;        /* attempts used, MAX_ATTEMPTS at most */
   gboolean hash_retried; /* a wrong hash is retried only once */
   gboolean holds_slot;
+  guint priority;
   guint retry_source;    /* pending retry timeout, 0 while there is none */
   guint retry_cancel_source; /* cancellation watch for a pending retry */
 } DownloadRequest;
@@ -496,6 +499,18 @@ usable_url (const char *url)
   return message != NULL;
 }
 
+static gint
+compare_waiting_requests (gconstpointer left, gconstpointer right,
+                          gpointer user_data G_GNUC_UNUSED)
+{
+  const DownloadRequest *a = left;
+  const DownloadRequest *b = right;
+
+  if (a->priority == b->priority)
+    return 0;
+  return a->priority > b->priority ? -1 : 1;
+}
+
 /* ---------------------------------------------------------- *
  * Slots: at most MAX_CONCURRENT transfers at a time
  * ---------------------------------------------------------- */
@@ -511,7 +526,7 @@ start_transfer (DownloadRequest *request)
       return;
     }
 
-  g_queue_push_tail (&waiting, request);
+  g_queue_insert_sorted (&waiting, request, compare_waiting_requests, NULL);
 }
 
 static void
@@ -1699,6 +1714,7 @@ aml_download_file_async (const char *url,
   request->user_data = user_data;
   request->fd = -1;
   request->total = -1;
+  request->priority = DOWNLOAD_PRIORITY_BULK;
   request->begin = file_request_start;
 
   start_transfer (request);
@@ -1743,6 +1759,7 @@ aml_download_json_async (const char *url,
   request->user_data = user_data;
   request->fd = -1;
   request->total = -1;
+  request->priority = DOWNLOAD_PRIORITY_INTERACTIVE;
   request->begin = start_attempt;
 
   start_transfer (request);
@@ -1819,6 +1836,7 @@ aml_download_json_post_async (const char           *url,
   request->user_data = user_data;
   request->fd = -1;
   request->total = -1;
+  request->priority = DOWNLOAD_PRIORITY_INTERACTIVE;
   request->begin = start_attempt;
 
   start_transfer (request);
@@ -1848,6 +1866,7 @@ aml_download_json_cached_async (const char *url, GCancellable *cancellable,
   request->api_cache = TRUE;
   request->fd = -1;
   request->total = -1;
+  request->priority = DOWNLOAD_PRIORITY_INTERACTIVE;
   request->begin = json_cache_start;
   start_transfer (request);
 }
@@ -1882,6 +1901,7 @@ aml_download_json_post_cached_async (const char *url, const char *body,
   request->api_cache = TRUE;
   request->fd = -1;
   request->total = -1;
+  request->priority = DOWNLOAD_PRIORITY_INTERACTIVE;
   request->begin = json_cache_start;
   start_transfer (request);
 }

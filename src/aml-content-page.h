@@ -55,6 +55,7 @@ typedef struct {
   char *project_id;
   char *local_id;
   char *project_name;
+  char *search_key;  /* casefolded title and filename for installed search */
   char *description;
   gboolean local_metadata;
   char *icon_url;
@@ -68,6 +69,7 @@ typedef struct {
 } AmlContentFile;
 
 void aml_content_file_free (AmlContentFile *file);
+void aml_content_file_refresh_search_key (AmlContentFile *file);
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (AmlContentFile, aml_content_file_free)
 

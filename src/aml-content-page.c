@@ -183,28 +183,11 @@ installed_filter_rows (AmlContentPage *self)
     {
       GtkWidget *row = item->data;
       AmlContentFile *file = g_object_get_data (G_OBJECT (row), "aml-file");
-      const char *title = NULL;
-      g_autofree char *haystack = NULL;
       gboolean visible = TRUE;
 
-      if (file != NULL && file->local_metadata &&
-          file->project_name != NULL && *file->project_name != '\0')
-        title = file->project_name;
-      if (title == NULL && file != NULL)
-        title = file->filename;
-
       if (needle != NULL && *needle != '\0')
-        {
-          g_autofree char *title_folded =
-            g_utf8_casefold (title != NULL ? title : "", -1);
-          g_autofree char *file_folded =
-            g_utf8_casefold (file != NULL ? file->filename : "", -1);
-
-          haystack = g_strconcat (title_folded != NULL ? title_folded : "",
-                                  " ", file_folded != NULL ? file_folded : "",
-                                  NULL);
-          visible = strstr (haystack, needle) != NULL;
-        }
+        visible = file != NULL && file->search_key != NULL &&
+                  strstr (file->search_key, needle) != NULL;
 
       gtk_widget_set_visible (GTK_WIDGET (row), visible);
     }
