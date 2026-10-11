@@ -57,11 +57,15 @@ void aml_content_index_update_async (const char *instance_directory,
                                      gpointer user_data);
 
 void aml_content_index_remove_async (const char *instance_directory,
-                                     AmlContentType type,
-                                     const char *filename,
-                                     GCancellable *cancellable,
-                                     GAsyncReadyCallback callback,
-                                     gpointer user_data);
+                                      AmlContentType type,
+                                      const char *filename,
+                                      GCancellable *cancellable,
+                                      GAsyncReadyCallback callback,
+                                      gpointer user_data);
+
+/* Completes update_async() and remove_async(). */
+gboolean aml_content_index_modify_finish (GAsyncResult *result,
+                                          GError **error);
 
 G_END_DECLS
 

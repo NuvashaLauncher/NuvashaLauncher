@@ -324,40 +324,32 @@ index_write_done (GObject *source, GAsyncResult *result, gpointer user_data)
 }
 
 static void
-index_directory_done (GObject *source, GAsyncResult *result, gpointer user_data)
-{
-  WriteRun *run = user_data;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (GFile) file = g_file_new_for_path (run->path);
-
-  if (!g_file_make_directory_finish (G_FILE (source), result, &error) &&
-      !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_EXISTS))
-    {
-      g_task_return_error (run->task, g_steal_pointer (&error));
-      write_run_free (run);
-      return;
-    }
-
-  g_file_replace_contents_async (file, run->data, run->length, NULL, FALSE,
-                                 G_FILE_CREATE_REPLACE_DESTINATION, NULL,
-                                 index_write_done, run);
-}
-
-static void
 write_entries_async (const char *instance_directory, AmlContentType type,
                      GPtrArray *entries, GCancellable *cancellable,
                      GAsyncReadyCallback callback, gpointer user_data)
 {
   WriteRun *run = g_new0 (WriteRun, 1);
-  g_autoptr (GFile) directory = NULL;
+  g_autoptr (GFile) file = NULL;
 
   run->task = g_task_new (NULL, cancellable, callback, user_data);
   run->directory = index_directory (instance_directory, type);
   run->path = index_path (instance_directory, type);
   run->data = entries_to_json (entries, &run->length);
-  directory = g_file_new_for_path (run->directory);
-  g_file_make_directory_async (directory, G_PRIORITY_DEFAULT, cancellable,
-                               index_directory_done, run);
+  file = g_file_new_for_path (run->path);
+
+  if (g_mkdir_with_parents (run->directory, 0755) != 0 && errno != EEXIST)
+    {
+      g_task_return_new_error (run->task, AML_CONTENT_INDEX_ERROR,
+                               AML_CONTENT_INDEX_ERROR_INVALID,
+                               "cannot create index directory \"%s\": %s",
+                               run->directory, g_strerror (errno));
+      write_run_free (run);
+      return;
+    }
+
+  g_file_replace_contents_async (file, run->data, run->length, NULL, FALSE,
+                                 G_FILE_CREATE_REPLACE_DESTINATION, cancellable,
+                                 index_write_done, run);
 }
 
 typedef struct {
@@ -432,7 +424,27 @@ modify_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     aml_content_index_load_finish (result, &error);
 
   if (entries == NULL)
-    entries = empty_entries ();
+    {
+      /* A missing index is already returned as an empty array by
+       * index_loaded(). Any other failure must leave the existing file
+       * untouched instead of erasing all of its metadata. */
+      if (run->callback != NULL)
+        {
+          g_autoptr (GTask) task =
+            g_task_new (NULL, run->cancellable, run->callback, run->user_data);
+          g_task_return_error (task, g_steal_pointer (&error));
+        }
+      else
+        {
+          g_warning ("could not read content index for \"%s\": %s",
+                     run->instance_directory,
+                     error != NULL ? error->message : "unknown error");
+        }
+      modify_free (run);
+      modification_active = FALSE;
+      modify_start_next ();
+      return;
+    }
   for (gint i = (gint) entries->len - 1; i >= 0; i--)
     {
       AmlContentIndexEntry *old = g_ptr_array_index (entries, i);
@@ -486,13 +498,25 @@ static void
 modify_written (GObject *source, GAsyncResult *result, gpointer user_data)
 {
   ModifyRun *run = user_data;
+  g_autoptr (GError) error = NULL;
 
   if (run->callback != NULL)
     run->callback (source, result, run->user_data);
+  else if (!g_task_propagate_boolean (G_TASK (result), &error))
+    g_warning ("could not write content index for \"%s\": %s",
+               run->instance_directory, error->message);
 
   modify_free (run);
   modification_active = FALSE;
   modify_start_next ();
+}
+
+gboolean
+aml_content_index_modify_finish (GAsyncResult *result, GError **error)
+{
+  g_return_val_if_fail (G_IS_TASK (result), FALSE);
+
+  return g_task_propagate_boolean (G_TASK (result), error);
 }
 
 static void
