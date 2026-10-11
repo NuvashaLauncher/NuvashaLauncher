@@ -857,7 +857,13 @@ aml_instance_set_property (GObject      *object,
 
     case PROP_JVM_ARGS:
       g_free (self->jvm_args);
-      self->jvm_args = g_value_dup_string (value);
+      /* An instance with no arguments holds an empty string, never a
+       * null. What is here is what gets serialized, and the parser
+       * refuses a null, so storing one writes a file that cannot be read
+       * back and the manager answers by quarantining every instance in
+       * it. */
+      self->jvm_args = g_strdup (g_value_get_string (value) != NULL
+                                   ? g_value_get_string (value) : "");
       break;
 
     default:
