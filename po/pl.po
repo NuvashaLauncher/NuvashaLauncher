@@ -571,3 +571,6 @@ msgstr "Nie udało się wyczyścić pamięci podręcznej"
 
 msgid "The cache could not be cleared."
 msgstr "Nie można było wyczyścić pamięci podręcznej."
+
+msgid "the versions of this loader could not be read"
+msgstr "nie można odczytać wersji tego ładowacza modów"

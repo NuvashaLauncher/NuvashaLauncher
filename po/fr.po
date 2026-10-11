@@ -576,3 +576,6 @@ msgstr "Échec du nettoyage du cache"
 
 msgid "The cache could not be cleared."
 msgstr "Le cache n’a pas pu être vidé."
+
+msgid "the versions of this loader could not be read"
+msgstr "impossible de lire les versions de ce chargeur de mods"

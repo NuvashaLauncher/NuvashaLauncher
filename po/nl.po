@@ -572,3 +572,6 @@ msgstr "Cache wissen mislukt"
 
 msgid "The cache could not be cleared."
 msgstr "De cache kon niet worden gewist."
+
+msgid "the versions of this loader could not be read"
+msgstr "de versies van deze modlader konden niet worden gelezen"

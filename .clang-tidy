@@ -9,16 +9,16 @@
 # future decision to re-enable one starts from the reason it was off.
 #
 # Ownership is not judged here. GLib's `g_autoptr` and `g_autofree` hide
-# their cleanup from the analyzer, which reports those sites as leaks.
-# `make test-lsan` is the authority on that instead, and it runs the same
-# suites under LeakSanitizer.
+# their cleanup from the analyzer, which reports every one of those sites
+# as a leak, so `clang-analyzer-unix.Malloc` is off rather than annotated
+# with a suppression at each one. `make test-lsan` is the authority on
+# ownership instead, and it runs the same suites under LeakSanitizer.
 
 Checks: >
   -*,
   clang-analyzer-core.*,
   clang-analyzer-deadcode.*,
   clang-analyzer-nullability.*,
-  clang-analyzer-unix.Malloc,
   clang-analyzer-unix.MismatchedDeallocator,
   clang-analyzer-unix.cstring.BadNullArg,
   clang-analyzer-unix.cstring.NotNullTerminated,

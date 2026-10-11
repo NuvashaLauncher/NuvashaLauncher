@@ -255,9 +255,6 @@ env_from_node (JsonNode *env_node, const char *name)
 static AmlModpackFile *
 file_from_node (JsonNode *node, GError **error)
 {
-  /* NOLINTBEGIN(clang-analyzer-unix.Malloc) -- every path out of this
-     function that returns NULL drops the autoptr cleanup first, which is
-     what frees the half-built entry. */
   g_autoptr (AmlModpackFile) file = g_new0 (AmlModpackFile, 1);
   g_autofree char *path = aml_json_string (node, "path");
   g_autofree char *sha1 = NULL;
@@ -362,7 +359,6 @@ file_from_node (JsonNode *node, GError **error)
   }
 
   return g_steal_pointer (&file);
-  /* NOLINTEND(clang-analyzer-unix.Malloc) */
 }
 
 AmlModpack *

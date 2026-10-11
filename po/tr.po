@@ -573,3 +573,6 @@ msgstr "Önbellek temizlenemedi"
 
 msgid "The cache could not be cleared."
 msgstr "Önbellek temizlenemedi."
+
+msgid "the versions of this loader could not be read"
+msgstr "bu mod yükleyicinin sürümleri okunamadı"

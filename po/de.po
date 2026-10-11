@@ -574,3 +574,6 @@ msgstr "Bereinigung des Caches fehlgeschlagen"
 
 msgid "The cache could not be cleared."
 msgstr "Der Cache konnte nicht geleert werden."
+
+msgid "the versions of this loader could not be read"
+msgstr "die Versionen dieses Mod-Loaders konnten nicht gelesen werden"
