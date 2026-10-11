@@ -6,6 +6,7 @@
 #include "aml-task.h"
 #include "aml-fs.h"
 
+
 #include "aml-content-page.h"
 
 #include <errno.h>
@@ -189,7 +190,9 @@ load_entries_sync (const char *instance_directory, AmlContentType type,
       if (!g_str_has_suffix (name, ".json"))
         continue;
       path = g_build_filename (directory, name, NULL);
-      if (!g_file_get_contents (path, &contents, &length, &local_error))
+      if (!aml_fs_file_size_within (path, AML_FS_MAX_CONTENT_INDEX_SIZE,
+                                    &local_error) ||
+          !g_file_get_contents (path, &contents, &length, &local_error))
         {
           g_propagate_error (error, g_steal_pointer (&local_error));
           g_dir_close (dir);

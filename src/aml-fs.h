@@ -9,10 +9,21 @@
 
 G_BEGIN_DECLS
 
+/* Bounded local-document policies. These prevent malformed/corrupt local
+ * metadata from forcing unbounded parser allocations. */
+#define AML_FS_MAX_SMALL_METADATA_SIZE (1024 * 1024)
+#define AML_FS_MAX_CONTENT_INDEX_SIZE (4 * 1024 * 1024)
+#define AML_FS_MAX_INSTANCE_METADATA_SIZE (16 * 1024 * 1024)
+#define AML_FS_MAX_REMOTE_JSON_SIZE (64 * 1024 * 1024)
+#define AML_FS_MAX_ASSET_INDEX_SIZE AML_FS_MAX_REMOTE_JSON_SIZE
+#define AML_FS_MAX_JSON_DOCUMENT_SIZE AML_FS_MAX_REMOTE_JSON_SIZE
+
 gboolean aml_fs_replace_contents (const char *path, const void *contents,
                                   gssize length, int mode, GError **error);
 gboolean aml_fs_make_private_directory (const char *path, GError **error);
 gboolean aml_fs_make_directory (const char *path, int mode, GError **error);
+gboolean aml_fs_file_size_within (const char *path, goffset maximum,
+                                  GError **error);
 gboolean aml_fs_unlink (const char *path, GError **error);
 gboolean aml_fs_rename (const char *source, const char *destination,
                         GError **error);

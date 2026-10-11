@@ -1749,7 +1749,8 @@ resolve_objects (ResolveRequest *request)
 
   path = g_build_filename (request->indexes_dir, request->asset_index_id, NULL);
 
-  if (!g_file_get_contents (path, &text, &length, &error) ||
+  if (!aml_fs_file_size_within (path, AML_FS_MAX_ASSET_INDEX_SIZE, &error) ||
+      !g_file_get_contents (path, &text, &length, &error) ||
       !json_parser_load_from_data (parser, text, (gssize) length, &error) ||
       !JSON_NODE_HOLDS_OBJECT (json_parser_get_root (parser)))
     {

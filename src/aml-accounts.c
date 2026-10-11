@@ -10,6 +10,7 @@
 #include <glib/gstdio.h>
 #include <string.h>
 
+
 GQuark
 aml_accounts_error_quark (void)
 {
@@ -427,7 +428,9 @@ load (AmlAccounts *self)
   JsonNode *root = NULL;
   JsonNode *node = NULL;
 
-  if (!g_file_get_contents (self->filename, &text, NULL, NULL))
+  if (!aml_fs_file_size_within (self->filename,
+                                AML_FS_MAX_SMALL_METADATA_SIZE, NULL) ||
+      !g_file_get_contents (self->filename, &text, NULL, NULL))
     return;
 
   parser = json_parser_new ();

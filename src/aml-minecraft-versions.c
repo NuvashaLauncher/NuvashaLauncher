@@ -1844,6 +1844,15 @@ manifest_file_loaded (GObject *source, GAsyncResult *result,
       return;
     }
 
+  if (length > AML_FS_MAX_JSON_DOCUMENT_SIZE)
+    {
+      aml_task_sequence_return_error (
+        request->sequence,
+        g_error_new_literal (AML_MC_ERROR, AML_MC_ERROR_IO,
+                             "the downloaded manifest is too large"));
+      return;
+    }
+
   manifest = aml_version_manifest_new_from_json (contents, (gssize) length,
                                                  &error);
 
@@ -1954,6 +1963,15 @@ load_file_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
         g_error_new (AML_MC_ERROR, AML_MC_ERROR_IO,
                      "the downloaded version cannot be read: %s",
                      error->message));
+      return;
+    }
+
+  if (length > AML_FS_MAX_JSON_DOCUMENT_SIZE)
+    {
+      aml_task_sequence_return_error (
+        request->sequence,
+        g_error_new_literal (AML_MC_ERROR, AML_MC_ERROR_IO,
+                             "the downloaded version document is too large"));
       return;
     }
 
