@@ -39,6 +39,18 @@ load_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 }
 
 static void
+damaged_update_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                     gpointer user_data)
+{
+  GMainLoop *loop = user_data;
+  g_autoptr (GError) error = NULL;
+
+  g_assert_false (aml_content_index_modify_finish (result, &error));
+  g_assert_nonnull (error);
+  g_main_loop_quit (loop);
+}
+
+static void
 test_concurrent_updates_are_serialized (void)
 {
   g_autofree char *root = g_dir_make_tmp ("aml-content-index-XXXXXX", NULL);
@@ -84,6 +96,25 @@ test_concurrent_updates_are_serialized (void)
 
   aml_content_index_load_async (root, AML_CONTENT_MOD, NULL, load_done, loop);
   g_main_loop_run (loop);
+
+  g_assert_true (g_file_set_contents (index_path, "{broken", -1, NULL));
+  {
+    AmlContentIndexEntry repair = {
+      .filename = "repair.jar",
+      .project_name = "Repair",
+      .env_client = "required",
+      .env_server = "unsupported",
+    };
+    aml_content_index_update_async (root, AML_CONTENT_MOD, &repair, NULL,
+                                    damaged_update_done, loop);
+    g_main_loop_run (loop);
+  }
+  {
+    g_autofree char *contents = NULL;
+
+    g_assert_true (g_file_get_contents (index_path, &contents, NULL, NULL));
+    g_assert_cmpstr (contents, ==, "{broken");
+  }
 
   g_main_loop_unref (loop);
   g_remove (index_path);
