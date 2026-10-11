@@ -175,6 +175,39 @@ aml_instance_sanitize_name (const char *name)
   return g_strndup (start, end - start);
 }
 
+char *
+aml_instance_normalize_name (const char *name)
+{
+  g_autofree char *normalized =
+    g_utf8_normalize (name != NULL ? name : "", -1, G_NORMALIZE_NFC);
+
+  /* Preserve invalid input so validation can reject it instead of turning it
+   * into a different, apparently valid name. */
+  if (normalized == NULL)
+    return g_strdup (name != NULL ? name : "");
+
+  const char *start = normalized;
+  const char *end = normalized + strlen (normalized);
+
+  while (*start != '\0')
+    {
+      gunichar character = g_utf8_get_char (start);
+      if (!g_unichar_isspace (character))
+        break;
+      start = g_utf8_next_char (start);
+    }
+
+  while (end > start)
+    {
+      const char *previous = g_utf8_prev_char (end);
+      if (!g_unichar_isspace (g_utf8_get_char (previous)))
+        break;
+      end = previous;
+    }
+
+  return g_strndup (start, end - start);
+}
+
 /* Checks one string field: non-NULL (unless @nullable), non-empty and
  * valid UTF-8 so that it can always be written back to JSON. */
 static gboolean
@@ -211,6 +244,14 @@ validate_text (const char  *value,
                    "instance %s must be valid UTF-8", field);
       return FALSE;
     }
+
+  for (const char *p = value; *p != '\0'; p = g_utf8_next_char (p))
+    if (g_unichar_iscntrl (g_utf8_get_char (p)))
+      {
+        g_set_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID,
+                     "instance %s must not contain control characters", field);
+        return FALSE;
+      }
 
   return TRUE;
 }
@@ -328,10 +369,11 @@ aml_instance_new (const char  *id,
       id = generated_id;
     }
 
+  g_autofree char *normalized_name = aml_instance_normalize_name (name);
   AmlInstance *self =
     g_object_new (AML_TYPE_INSTANCE,
                   "id", id,
-                  "name", name,
+                  "name", normalized_name,
                   "directory", canonical,
                   "minecraft_version", minecraft_version,
                   "loader", loader,
