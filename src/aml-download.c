@@ -48,6 +48,7 @@
 
 /* Transfers running at the same time. */
 #define MAX_CONCURRENT 8
+#define MAX_BULK_CONCURRENT 6
 
 /* Bytes taken from the network in one step. */
 #define CHUNK_SIZE (64 * 1024)
@@ -75,14 +76,47 @@ aml_download_error_quark (void)
 
 /* One session for the whole launcher: a session per download would
  * throw away the connection pool. It lives until the process exits. */
-typedef struct {
+struct _AmlDownloadService {
   SoupSession *session;
-  guint running;
-  GQueue waiting;
+  guint interactive_running;
+  guint bulk_running;
+  GQueue interactive_waiting;
+  GQueue bulk_waiting;
   AmlSettings *cache_settings;
-} DownloadService;
+};
 
-static DownloadService service = { .waiting = G_QUEUE_INIT };
+static AmlDownloadService *service;
+
+AmlDownloadService *
+aml_download_service_new (void)
+{
+  if (service == NULL)
+    {
+      service = g_new0 (AmlDownloadService, 1);
+      g_queue_init (&service->interactive_waiting);
+      g_queue_init (&service->bulk_waiting);
+    }
+  return service;
+}
+
+void
+aml_download_service_free (AmlDownloadService *owned_service)
+{
+  if (owned_service != service)
+    return;
+  aml_download_shutdown ();
+  if (service != NULL && service->interactive_running == 0 &&
+      service->bulk_running == 0 &&
+      g_queue_is_empty (&service->interactive_waiting) &&
+      g_queue_is_empty (&service->bulk_waiting))
+    g_clear_pointer (&service, g_free);
+}
+
+static AmlDownloadService *
+get_service (void)
+{
+  return aml_download_service_new ();
+}
 
 static void
 attach_task_scope (GTask *task)
@@ -95,30 +129,35 @@ attach_task_scope (GTask *task)
 void
 aml_download_shutdown (void)
 {
+  if (service == NULL)
+    return;
   /* Requests own all callback state. Do not tear down the session while one
    * of them is still running or queued. The normal application shutdown
    * path calls this after its windows and tasks have gone away. */
-  if (service.running != 0 || !g_queue_is_empty (&service.waiting))
+  if (service->interactive_running != 0 || service->bulk_running != 0 ||
+      !g_queue_is_empty (&service->interactive_waiting) ||
+      !g_queue_is_empty (&service->bulk_waiting))
     return;
 
-  g_clear_object (&service.session);
-  g_clear_object (&service.cache_settings);
+  g_clear_object (&service->session);
+  g_clear_object (&service->cache_settings);
 }
 
 static SoupSession *
 get_session (void)
 {
-  if (service.session == NULL)
+  get_service ();
+  if (service->session == NULL)
     /* max-conns is a construct property: it can only be given while
        the session is created, and it matches the cap on transfers so
        that our counter, not the socket pool, is what limits the
        downloads. */
-    service.session = g_object_new (SOUP_TYPE_SESSION, "user-agent",
+    service->session = g_object_new (SOUP_TYPE_SESSION, "user-agent",
                             "AML (Another Minecraft Launcher)", "timeout",
                             (guint) 60, "max-conns", (gint) MAX_CONCURRENT,
                             "max-conns-per-host", (gint) MAX_CONCURRENT, NULL);
 
-  return service.session;
+  return service->session;
 }
 
 /* ---------------------------------------------------------- *
@@ -175,6 +214,7 @@ typedef struct _DownloadRequest
   guint priority;
   guint retry_source;    /* pending retry timeout, 0 while there is none */
   guint retry_cancel_source; /* cancellation watch for a pending retry */
+  guint queue_cancel_source;
   AmlTaskScope *scope;
 } DownloadRequest;
 
@@ -190,6 +230,7 @@ static void attempt_next (DownloadRequest *request);
 static void attempt_failed (DownloadRequest *request, GError *error);
 static gboolean retry_when_due (gpointer user_data);
 static gboolean retry_cancelled (gpointer user_data);
+static gboolean queued_cancelled (gpointer user_data);
 static void cache_open_ready (GObject *source, GAsyncResult *result,
                               gpointer user_data);
 static void hash_read_ready (GObject *source, GAsyncResult *result,
@@ -235,10 +276,10 @@ url_for_message (const char *url)
 static AmlSettings *
 get_cache_settings (void)
 {
-  if (service.cache_settings == NULL)
-    service.cache_settings = aml_settings_new ();
+  if (service->cache_settings == NULL)
+    service->cache_settings = aml_settings_new ();
 
-  return service.cache_settings;
+  return service->cache_settings;
 }
 
 static char *
@@ -532,15 +573,32 @@ compare_waiting_requests (gconstpointer left, gconstpointer right,
 static void
 start_transfer (DownloadRequest *request)
 {
-  if (service.running < MAX_CONCURRENT)
+  get_service ();
+  gboolean interactive = request->priority >= DOWNLOAD_PRIORITY_INTERACTIVE;
+  guint total = service->interactive_running + service->bulk_running;
+  gboolean has_slot = total < MAX_CONCURRENT &&
+                      (interactive || service->bulk_running < MAX_BULK_CONCURRENT);
+
+  if (has_slot)
     {
-      service.running++;
+      if (interactive)
+        service->interactive_running++;
+      else
+        service->bulk_running++;
       request->holds_slot = TRUE;
       request->begin (request);
       return;
     }
 
-  g_queue_insert_sorted (&service.waiting, request, compare_waiting_requests, NULL);
+  GQueue *queue = interactive ? &service->interactive_waiting
+                              : &service->bulk_waiting;
+  g_queue_insert_sorted (queue, request, compare_waiting_requests, NULL);
+
+  GSource *source = g_cancellable_source_new (
+    g_task_get_cancellable (request->task));
+  g_source_set_callback (source, queued_cancelled, request, NULL);
+  request->queue_cancel_source = g_source_attach (source, NULL);
+  g_source_unref (source);
 }
 
 static void
@@ -550,16 +608,34 @@ release_slot (DownloadRequest *request)
     return;
 
   request->holds_slot = FALSE;
-  service.running--;
+  if (request->priority >= DOWNLOAD_PRIORITY_INTERACTIVE)
+    service->interactive_running--;
+  else
+    service->bulk_running--;
 
-  while (service.running < MAX_CONCURRENT)
+  while (service->interactive_running + service->bulk_running < MAX_CONCURRENT)
     {
-      DownloadRequest *next = g_queue_pop_head (&service.waiting);
+      DownloadRequest *next = NULL;
+
+      if (!g_queue_is_empty (&service->interactive_waiting))
+        next = g_queue_pop_head (&service->interactive_waiting);
+      else if (service->bulk_running < MAX_BULK_CONCURRENT &&
+               !g_queue_is_empty (&service->bulk_waiting))
+        next = g_queue_pop_head (&service->bulk_waiting);
 
       if (next == NULL)
         break;
 
-      service.running++;
+      if (next->queue_cancel_source != 0)
+        {
+          g_source_remove (next->queue_cancel_source);
+          next->queue_cancel_source = 0;
+        }
+
+      if (next->priority >= DOWNLOAD_PRIORITY_INTERACTIVE)
+        service->interactive_running++;
+      else
+        service->bulk_running++;
       next->holds_slot = TRUE;
       next->begin (next);
     }
@@ -667,6 +743,8 @@ request_free (DownloadRequest *request)
     aml_task_scope_remove_source (request->scope, request->retry_source);
   if (request->retry_cancel_source != 0)
     g_source_remove (request->retry_cancel_source);
+  if (request->queue_cancel_source != 0)
+    g_source_remove (request->queue_cancel_source);
 
   close_sink (request);
   g_clear_pointer (&request->chunk, g_bytes_unref);
@@ -1540,6 +1618,19 @@ retry_cancelled (gpointer user_data)
   return G_SOURCE_REMOVE;
 }
 
+static gboolean
+queued_cancelled (gpointer user_data)
+{
+  DownloadRequest *request = user_data;
+  GQueue *queue = request->priority >= DOWNLOAD_PRIORITY_INTERACTIVE
+                    ? &service->interactive_waiting : &service->bulk_waiting;
+
+  request->queue_cancel_source = 0;
+  if (g_queue_remove (queue, request))
+    request_fail (request, cancelled_error ());
+  return G_SOURCE_REMOVE;
+}
+
 /* ---------------------------------------------------------- *
  * Starting one attempt
  * ---------------------------------------------------------- */
@@ -1827,7 +1918,8 @@ aml_download_set_cache_settings (AmlSettings *settings)
 {
   g_return_if_fail (settings == NULL || AML_IS_SETTINGS (settings));
 
-  g_set_object (&service.cache_settings, settings);
+  get_service ();
+  g_set_object (&service->cache_settings, settings);
 }
 
 void

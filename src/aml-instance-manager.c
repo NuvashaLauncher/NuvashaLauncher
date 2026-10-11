@@ -569,7 +569,11 @@ aml_instance_manager_load (AmlInstanceManager *self, GError **error)
   gsize length = 0;
   g_autoptr (GError) local_error = NULL;
 
-  if (!g_file_get_contents (self->metadata_path, &contents, &length,
+  if ((g_file_test (self->metadata_path, G_FILE_TEST_EXISTS) &&
+       !aml_fs_file_size_within (self->metadata_path,
+                                 AML_FS_MAX_INSTANCE_METADATA_SIZE,
+                                 &local_error)) ||
+      !g_file_get_contents (self->metadata_path, &contents, &length,
                             &local_error))
     {
       /* First run: there simply is nothing to load yet. */

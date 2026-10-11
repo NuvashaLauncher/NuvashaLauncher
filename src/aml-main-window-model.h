@@ -6,6 +6,7 @@
 #define AML_MAIN_WINDOW_MODEL_H
 
 #include "aml-instance-manager.h"
+#include "aml-download.h"
 #include "aml-settings.h"
 #include "aml-users-popover.h"
 
@@ -20,6 +21,7 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC (AmlMainWindowModel,
 struct _AmlMainWindowModel
 {
   AmlInstanceManager *manager;
+  AmlDownloadService *download_service;
   AmlSettings *settings;
   AmlAccounts *accounts;
   AmlUsersPopover *users_popover;

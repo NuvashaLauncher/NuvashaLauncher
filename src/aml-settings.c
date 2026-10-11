@@ -100,7 +100,9 @@ load (AmlSettings *self)
   JsonNode *node;
   gsize length = 0;
 
-  if (!g_file_get_contents (self->filename, &contents, &length, &error))
+  if (!aml_fs_file_size_within (self->filename, AML_FS_MAX_SMALL_METADATA_SIZE,
+                                &error) ||
+      !g_file_get_contents (self->filename, &contents, &length, &error))
     {
       g_debug ("the settings were not read: %s", error->message);
       return;
