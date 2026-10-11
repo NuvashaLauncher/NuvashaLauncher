@@ -28,7 +28,7 @@ struct _AmlMainWindow
   /* What is downloading right now, shown next to the "+" menu. */
   struct {
     GtkMenuButton *button; /* around the spinner */
-    AdwSpinner *spinner;
+    GtkWidget *spinner;
     GtkImage *icon;        /* what the button opens beside the spinner */
     GtkBox *list;          /* the box inside the dropdown */
     GHashTable *rows;    /* AmlDownload* -> DownloadRow* */

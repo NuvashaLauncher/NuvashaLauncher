@@ -63,7 +63,7 @@ aml_main_window_build_ui (AmlMainWindow *self)
      installed at once. The button is hidden when there is neither. */
   self->downloads.icon = GTK_IMAGE (gtk_image_new_from_icon_name (
     "folder-download-symbolic"));
-   self->downloads.spinner = ADW_SPINNER (adw_spinner_new ());
+    self->downloads.spinner = adw_spinner_new ();
   self->downloads.button = GTK_MENU_BUTTON (gtk_menu_button_new ());
   self->downloads.list = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   self->downloads.rows = g_hash_table_new_full (g_direct_hash, g_direct_equal,
