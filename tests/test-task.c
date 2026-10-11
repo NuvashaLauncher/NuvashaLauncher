@@ -163,6 +163,14 @@ scope_probe (gpointer user_data)
   return G_SOURCE_REMOVE;
 }
 
+static gboolean
+scope_stress_probe (gpointer user_data)
+{
+  guint *callbacks = user_data;
+  (*callbacks)++;
+  return G_SOURCE_REMOVE;
+}
+
 static void
 test_scope_cancels_owned_sources (void)
 {
@@ -181,6 +189,31 @@ test_scope_cancels_owned_sources (void)
   g_print ("ok - task scopes cancel and release owned sources\n");
 }
 
+static void
+test_scope_cancellation_stress (void)
+{
+  guint callbacks = 0;
+
+  for (guint i = 0; i < 1000; i++)
+    {
+      g_autoptr (GCancellable) cancellable = g_cancellable_new ();
+      AmlTaskScope *scope = aml_task_scope_new (NULL, cancellable, NULL,
+                                                NULL);
+      guint source = g_idle_add_full (
+        G_PRIORITY_DEFAULT, scope_stress_probe, &callbacks, NULL);
+
+      aml_task_scope_track_source (scope, source);
+      aml_task_scope_cancel (scope);
+      aml_task_scope_free (scope);
+    }
+
+  while (g_main_context_pending (NULL))
+    g_main_context_iteration (NULL, FALSE);
+
+  g_assert_cmpuint (callbacks, ==, 0);
+  g_print ("ok - task scope cancellation remains leak-free under stress\n");
+}
+
 int
 main (int argc, char **argv)
 {
@@ -192,5 +225,6 @@ main (int argc, char **argv)
   test_sequence_returns_errors ();
   test_sequence_honors_cancellation ();
   test_scope_cancels_owned_sources ();
+  test_scope_cancellation_stress ();
   return 0;
 }

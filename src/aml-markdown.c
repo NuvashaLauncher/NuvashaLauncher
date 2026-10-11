@@ -799,67 +799,6 @@ line_is_image (const char *line, char **url)
   (void) url;
   return FALSE;
 
-#if 0
-  gboolean wrapped = FALSE;
-  const char *p = line;
-  const char *close = NULL;
-  const char *paren = NULL;
-  const char *end = NULL;
-  g_autofree char *found = NULL;
-
-  if (p[0] == '[')
-    {
-      wrapped = TRUE;
-      p++;
-    }
-
-  if (!(p[0] == '!' && p[1] == '['))
-    return FALSE;
-
-  close = strstr (p + 2, "](");
-
-  if (close == NULL)
-    return FALSE;
-
-  paren = strchr (close + 2, ')');
-
-  if (paren == NULL)
-    return FALSE;
-
-  end = paren + 1;
-
-  if (wrapped)
-    {
-      const char *outer = NULL;
-
-      if (end[0] != ']' || end[1] != '(')
-        return FALSE;
-
-      outer = strchr (end + 2, ')');
-
-      if (outer == NULL)
-        return FALSE;
-
-      end = outer + 1;
-    }
-
-  if (end[0] != '\0')
-    return FALSE;
-
-  found = g_strndup (close + 2, paren - (close + 2));
-
-  {
-    char *space = strpbrk (found, " \t");
-
-    if (space != NULL)
-      *space = '\0';
-  }
-
-  if (url != NULL)
-    *url = g_steal_pointer (&found);
-
-  return TRUE;
-#endif
 }
 
 static guint
