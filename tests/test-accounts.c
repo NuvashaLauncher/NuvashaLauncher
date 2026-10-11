@@ -339,7 +339,10 @@ test_persistence (void)
 
     g_assert_true (g_file_set_contents (broken, "{not a document", -1, NULL));
 
+    g_test_expect_message (NULL, G_LOG_LEVEL_WARNING,
+                           "*accounts file*is corrupt; it was moved to*");
     store_broken = aml_accounts_new_for_path (broken);
+    g_test_assert_expected_messages ();
     g_assert_cmpuint (aml_accounts_count (store_broken), ==, 0);
     g_assert_null (aml_accounts_get_active (store_broken));
     {
