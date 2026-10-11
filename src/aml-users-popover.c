@@ -163,31 +163,17 @@ update_the_button (AmlUsersPopover *self)
 
   g_clear_pointer (&self->active_name, g_free);
   set_avatar_icon (GTK_IMAGE (self->avatar_image));
+  gtk_widget_set_tooltip_text (GTK_WIDGET (self), NULL);
 
   if (account == NULL)
     {
       self->active_name = g_strdup ("");
-
-      gtk_widget_set_tooltip_text (GTK_WIDGET (self),
-                                   "No account yet: launches play offline as "
-                                   "\"Player\"");
       return;
     }
 
   self->active_name = g_strdup (account->name);
   set_avatar (self, GTK_IMAGE (self->avatar_image), account->avatar_url);
 
-  {
-    gboolean ready = account->type == AML_ACCOUNT_OFFLINE ||
-                     aml_account_token_is_valid (account,
-                                                 g_get_real_time () / 1000000);
-    g_autofree char *tooltip = NULL;
-
-    tooltip = g_strdup_printf ("%s (%s%s)", account->name,
-                               aml_account_type_name (account->type),
-                               ready ? "" : ", needs sign-in");
-    gtk_widget_set_tooltip_text (GTK_WIDGET (self), tooltip);
-  }
 }
 
 /* ------------------------------------------------------ *
