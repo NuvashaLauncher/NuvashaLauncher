@@ -32,7 +32,7 @@ aml_task_scope_borrow_task (GTask *task)
 }
 
 GTask *
-aml_task_scope_get_task (AmlTaskScope *scope)
+aml_task_scope_get_task (const AmlTaskScope *scope)
 {
   g_return_val_if_fail (scope != NULL, NULL);
   return scope->task;
@@ -53,7 +53,8 @@ aml_task_scope_remove_source (AmlTaskScope *scope, guint source_id)
   for (guint i = 0; i < scope->sources->len; i++)
     if (g_array_index (scope->sources, guint, i) == source_id)
       {
-        g_source_remove (source_id);
+        if (g_main_context_find_source_by_id (NULL, source_id) != NULL)
+          g_source_remove (source_id);
         g_array_remove_index_fast (scope->sources, i);
         return;
       }
@@ -79,7 +80,11 @@ aml_task_scope_cancel (AmlTaskScope *scope)
   if (cancellable != NULL)
     g_cancellable_cancel (cancellable);
   for (guint i = 0; i < scope->sources->len; i++)
-    g_source_remove (g_array_index (scope->sources, guint, i));
+    {
+      guint source_id = g_array_index (scope->sources, guint, i);
+      if (g_main_context_find_source_by_id (NULL, source_id) != NULL)
+        g_source_remove (source_id);
+    }
   g_array_set_size (scope->sources, 0);
 }
 
@@ -89,7 +94,11 @@ aml_task_scope_free (AmlTaskScope *scope)
   if (scope == NULL)
     return;
   for (guint i = 0; i < scope->sources->len; i++)
-    g_source_remove (g_array_index (scope->sources, guint, i));
+    {
+      guint source_id = g_array_index (scope->sources, guint, i);
+      if (g_main_context_find_source_by_id (NULL, source_id) != NULL)
+        g_source_remove (source_id);
+    }
   g_array_unref (scope->sources);
   if (scope->owns_task)
     g_clear_object (&scope->task);
@@ -132,7 +141,7 @@ aml_task_sequence_new (GCancellable *cancellable,
 }
 
 GTask *
-aml_task_sequence_get_task (AmlTaskSequence *sequence)
+aml_task_sequence_get_task (const AmlTaskSequence *sequence)
 {
   g_return_val_if_fail (sequence != NULL, NULL);
   return sequence->task;

@@ -18,6 +18,9 @@ variables:
         gtk4
         json-glib
         libsoup3
+        clang
+        cppcheck
+        valgrind
 
 test:
   extends: .setup
@@ -43,3 +46,16 @@ static-analysis:
             libsoup-3.0 libarchive gio-unix-2.0) \
           -Isrc "$source"
       done
+    - make static-analysis
+
+leaks:
+  extends: .setup
+  stage: test
+  script:
+    - make test-lsan
+
+valgrind:
+  extends: .setup
+  stage: analysis
+  script:
+    - make test-valgrind

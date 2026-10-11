@@ -81,12 +81,16 @@ put_model (AmlJavaRow *self, GPtrArray *names, guint position)
   g_autofree const char **strings = NULL;
   g_autoptr (GtkStringList) list = NULL;
 
+  /* NOLINTBEGIN(clang-analyzer-unix.Malloc) -- gtk_string_list_new copies
+     the strings it is given and does not take the array, which g_autofree
+     releases at the end of this function. */
   strings = g_new0 (const char *, names->len + 1);
 
   for (guint i = 0; i < names->len; i++)
     strings[i] = (char *) g_ptr_array_index (names, i);
 
   list = gtk_string_list_new (strings);
+  /* NOLINTEND(clang-analyzer-unix.Malloc) */
   g_clear_pointer (&self->names, g_ptr_array_unref);
   self->names = names;
 
@@ -149,8 +153,9 @@ fill (AmlJavaRow *self)
 
   /* The Java the automatic choice stands for: named in the first entry,
      and left out of the list below when it is one of the detected
-     runtimes even so. */
-  if (self->required_major > 0)
+     runtimes even so. Detection clears the list and fills it again, so
+     the row is walked while it may still hold nothing. */
+  if (self->javas != NULL && self->required_major > 0)
     fallback = aml_java_select (self->javas, NULL, self->required_major);
 
   if (fallback != NULL)
@@ -159,7 +164,7 @@ fill (AmlJavaRow *self)
     g_ptr_array_add (names, g_strdup (self->default_label));
   g_ptr_array_add (ids, NULL);
 
-  for (guint i = 0; i < self->javas->len; i++)
+  for (guint i = 0; self->javas != NULL && i < self->javas->len; i++)
     {
       AmlJava *java = g_ptr_array_index (self->javas, i);
       g_autofree char *real = realpath (java->executable, NULL);
@@ -215,7 +220,7 @@ fill (AmlJavaRow *self)
       g_autofree char *wanted_real = realpath (self->wanted, NULL);
       gboolean found = FALSE;
 
-      for (guint i = 0; i < self->javas->len; i++)
+      for (guint i = 0; self->javas != NULL && i < self->javas->len; i++)
         {
           AmlJava *java = g_ptr_array_index (self->javas, i);
           g_autofree char *real = realpath (java->executable, NULL);

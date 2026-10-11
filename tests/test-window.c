@@ -149,8 +149,15 @@ advance (gpointer user_data)
   switch (run->step++)
     {
     case 0: /* the list binds its row a little after the window is up */
-      /* The list is the only window so far. */
-      g_assert_cmpuint (g_list_length (windows), ==, 1);
+      /* The window is registered with the application on its own
+         schedule, which is not the first tick of the loop and is slower
+         still under a sanitizer or Valgrind. Wait for it the same way
+         the later steps wait for what they need. */
+      if (g_list_length (windows) != 1)
+        {
+          run->step = 0;
+          return G_SOURCE_CONTINUE;
+        }
       return G_SOURCE_CONTINUE;
 
     case 1:
@@ -296,7 +303,11 @@ main (int argc, char **argv)
   watchdog = g_timeout_add_seconds (20, finish, &run);
   g_application_run (G_APPLICATION (application), 0, NULL);
 
-  if (watchdog != 0)
+  /* The watchdog usually finishes the test long before this, but under a
+     sanitizer or Valgrind the run can outlast it. If the watchdog fired,
+     its source is already gone and removing it again is the critical
+     this test is meant to catch. */
+  if (watchdog != 0 && g_main_context_find_source_by_id (NULL, watchdog) != NULL)
     g_source_remove (watchdog);
 
   g_free (run.instance_id);

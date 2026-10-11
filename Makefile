@@ -48,7 +48,7 @@ TESTDEPS    := $(addsuffix .d,$(TESTBINS))
 TESTDBGBINS := $(patsubst tests/%.c,build-debug/tests/%,$(TESTSRCS))
 TESTDBGDEPS := $(addsuffix .d,$(TESTDBGBINS))
 
-.PHONY: all debug test test-debug clean install uninstall
+.PHONY: all debug test test-debug test-lsan test-valgrind static-analysis clean install uninstall
 
 all: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 
@@ -95,6 +95,41 @@ build-debug/tests/%: tests/%.c $(TESTLIBDBGOBJS) | build-debug/tests
 test-debug: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS)
 	@set -e; for t in $(TESTDBGBINS); do echo "RUN  $$t"; ./$$t; done; \
 	echo "PASS $(words $(TESTDBGBINS)) test(s)"
+
+# LeakSanitizer is included with the Linux AddressSanitizer runtime. Keep it
+# explicit so CI does not silently lose leak checking when sanitizer defaults
+# change. The options are set per test rather than around a recursive make,
+# so the suite runs once and every test is the one being leak checked.
+test-lsan: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS)
+	@set -e; for t in $(TESTDBGBINS); do echo "RUN  $$t"; \
+	  ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 \
+	  LSAN_OPTIONS=detect_leaks=1:exitcode=1 \
+	  ./$$t; done; \
+	echo "PASS $(words $(TESTDBGBINS)) test(s)"
+
+# Optional local target for environments that provide Valgrind. The caches
+# the toolkit and the graphics driver keep for the life of the process are
+# listed in tools/aml.valgrind.supp.
+test-valgrind: $(if $(SRCS),$(BIN)) $(TESTBINS)
+	@set -e; for t in $(TESTBINS); do echo "VALGRIND $$t"; \
+	  G_SLICE=always-malloc G_DEBUG=gc-friendly \
+	  valgrind --quiet --leak-check=full --suppressions=tools/aml.valgrind.supp \
+	    --errors-for-leak-kinds=definite,indirect \
+	    --error-exitcode=1 ./$$t; done
+
+static-analysis:
+	@set -e; for source in src/*.c; do \
+	  $(CC) $(CPPFLAGS) -std=c17 -Wall -Wextra -Wpedantic -fanalyzer -fsyntax-only \
+	    $(PKG_CFLAGS) -Isrc "$$source"; done
+	@if command -v clang-tidy >/dev/null; then \
+	  clang-tidy src/*.c --warnings-as-errors='*' \
+	    -- $(CPPFLAGS) -std=c17 $(PKG_CFLAGS) -Isrc; \
+	else echo "clang-tidy not installed; skipping"; fi
+	@if command -v cppcheck >/dev/null; then \
+	  cppcheck --enable=warning,style,performance,portability --error-exitcode=1 \
+	    --inline-suppr --suppress=missingIncludeSystem --suppress=unknownMacro \
+	    --suppress=syntaxError -Isrc src; \
+	else echo "cppcheck not installed; skipping"; fi
 
 install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 	install -Dm755 $(BIN) $(DESTDIR)$(PREFIX)/bin/AML

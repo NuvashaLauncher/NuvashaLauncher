@@ -1,0 +1,95 @@
+# Static-analysis policy for AML.
+#
+# `make static-analysis` runs clang-tidy with this file and treats every
+# diagnostic as an error, so the list below is deliberately narrow.
+#
+# It keeps the checks that have found real defects in this codebase and
+# drops the ones that only ever describe GLib, GObject or ordinary C
+# idiom. Each exclusion below says what it would otherwise report, so a
+# future decision to re-enable one starts from the reason it was off.
+#
+# Ownership is not judged here. GLib's `g_autoptr` and `g_autofree` hide
+# their cleanup from the analyzer, which reports those sites as leaks.
+# `make test-lsan` is the authority on that instead, and it runs the same
+# suites under LeakSanitizer.
+
+Checks: >
+  -*,
+  clang-analyzer-core.*,
+  clang-analyzer-deadcode.*,
+  clang-analyzer-nullability.*,
+  clang-analyzer-unix.Malloc,
+  clang-analyzer-unix.MismatchedDeallocator,
+  clang-analyzer-unix.cstring.BadNullArg,
+  clang-analyzer-unix.cstring.NotNullTerminated,
+  clang-analyzer-unix.Stream,
+  bugprone-argument-comment,
+  bugprone-bool-pointer-implicit-conversion,
+  bugprone-branch-clone,
+  bugprone-dangling-handle,
+  bugprone-infinite-loop,
+  bugprone-integer-division,
+  bugprone-macro-parentheses,
+  bugprone-macro-repeated-side-effect,
+  bugprone-misdirected-widening-cast,
+  bugprone-multiple-statement-macro,
+  bugprone-not-null-terminated-result,
+  bugprone-redundant-branch-condition,
+  bugprone-sizeof-container,
+  bugprone-sizeof-expression,
+  bugprone-string-constructor,
+  bugprone-suspicious-enum-usage,
+  bugprone-suspicious-memset-usage,
+  bugprone-suspicious-memcmp-usage,
+  bugprone-suspicious-missing-comma,
+  bugprone-suspicious-semicolon,
+  bugprone-swapped-arguments,
+  bugprone-undefined-memory-manipulation,
+  bugprone-unhandled-self-assignment,
+  bugprone-unused-raii,
+  bugprone-unused-return-value,
+  bugprone-use-after-move,
+  performance-*,
+  -clang-analyzer-unix.Stream,
+  -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-easily-swappable-types,
+  -bugprone-implicit-widening-of-multiplication-result,
+  -bugprone-macro-repeated-side-effect,
+  -bugprone-multi-level-implicit-pointer-conversion,
+  -bugprone-narrowing-conversions,
+  -bugprone-reserved-identifier,
+  -bugprone-signed-bitwise,
+  -cert-dcl37-c,
+  -cert-err33-c,
+  -cert-err34-c
+
+# Excluded, with the reason:
+#
+#   cert-dcl37-c                `_GNU_SOURCE` and the `struct _AmlFoo`
+#                               forward declarations are the documented
+#                               C and GObject conventions; the rule is a
+#                               C++ namespace rule.
+#   cert-err33-c                `fclose` on a path that is already failing
+#                               and `setlocale (LC_ALL, "")` have nothing
+#                               useful to add to the error being reported.
+#   cert-err34-c                the `sscanf ("%d")` calls all test the
+#                               number of conversions converted, and
+#                               parsing a leading integer is the intent.
+#   bugprone-*-pointer-conversion, reserved-identifier, signed-bitwise,
+#   easily-swappable-*           `g_steal_pointer`, `G_PARAM_WRITABLE |
+#                               G_PARAM_CONSTRUCT_ONLY` and same-typed
+#                               parse parameters are the GLib idiom.
+#   bugprone-narrowing-*         the GTK APIs take `float` and `gsize`
+#                               where C callers naturally hold `double`
+#                               and `gssize`.
+#   clang-analyzer-unix.Stream  reports the standard `while (fread (...))
+#                               > 0` loop as reading past EOF. Every site
+#                               already tests `ferror` afterwards.
+#   security.insecureAPI.*      `memcpy` of a compile-time constant count
+#                               into a buffer whose size nearby constants
+#                               prove.
+
+# Warnings that come from a macro expansion are not actionable here, and
+# the GLib headers pull in thousands of them.
+HeaderFilterRegex: 'src/[^/]*\.h$'

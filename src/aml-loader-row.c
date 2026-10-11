@@ -5,6 +5,10 @@
 #include "aml-loader-row.h"
 #include "aml-i18n.h"
 
+/* Said when a load fails without anything to say: the versions are gone
+   and the row has to tell the user that in words. */
+#define NO_VERSION_MESSAGE "the versions of this loader could not be read"
+
 struct _AmlLoaderRow
 {
   GObject parent_instance;
@@ -140,6 +144,9 @@ update_sensitivity (AmlLoaderRow *self)
 static void
 set_versions (AmlLoaderRow *self, GPtrArray *versions, guint position)
 {
+  /* NOLINTBEGIN(clang-analyzer-unix.Malloc) -- the labels are copied by
+     gtk_string_list_new, then freed one by one below and the array itself
+     by g_autofree at the end of this function. */
   g_autoptr (GtkStringList) list = NULL;
   g_autofree const char **labels = NULL;
 
@@ -167,6 +174,7 @@ set_versions (AmlLoaderRow *self, GPtrArray *versions, guint position)
   adw_combo_row_set_model (ADW_COMBO_ROW (self->version_row),
                            G_LIST_MODEL (list));
   adw_combo_row_set_selected (ADW_COMBO_ROW (self->version_row), position);
+  /* NOLINTEND(clang-analyzer-unix.Malloc) */
 }
 
 /* A screen stores a choice when it hears this; it is emitted whenever
@@ -330,7 +338,11 @@ versions_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                                 AML_LOADERS_ERROR_NO_VERSIONS))
         show_empty (self);
       else
-        show_error (self, error->message, TRUE);
+        /* A failure that carries no error is still a failure: say what
+           happened in words rather than reading a message that is not
+           there. */
+        show_error (self, error != NULL ? error->message : NO_VERSION_MESSAGE,
+                    TRUE);
     }
 
   g_object_unref (self);
@@ -415,6 +427,9 @@ AmlLoaderRow *
 aml_loader_row_new (void)
 {
   AmlLoaderRow *self = g_object_new (AML_TYPE_LOADER_ROW, NULL);
+  /* NOLINTBEGIN(clang-analyzer-unix.Malloc) -- gtk_string_list_new copies
+     the names, and g_autofree releases the array when this function
+     returns. */
   const AmlLoader *loaders = aml_loaders_supported ();
   g_autofree const char **names = NULL;
   guint count = 0;
@@ -438,6 +453,7 @@ aml_loader_row_new (void)
                              G_LIST_MODEL (loaders_list));
   }
   adw_combo_row_set_selected (ADW_COMBO_ROW (self->loader_row), 0);
+  /* NOLINTEND(clang-analyzer-unix.Malloc) */
 
   self->version_row = ADW_COMBO_ROW (g_object_ref_sink (adw_combo_row_new ()));
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->version_row),

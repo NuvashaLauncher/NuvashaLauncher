@@ -1320,6 +1320,11 @@ build_result (ResolveRequest *request, GError **error)
   g_autoptr (GPtrArray) game = NULL;
   g_autoptr (GHashTable) known = g_hash_table_new (g_str_hash, g_str_equal);
 
+  /* NOLINTBEGIN(clang-analyzer-core.NullDereference) -- the request only
+     reaches this point once it holds a document: the loader path drops a
+     NULL description at aml_version_load_finish, and the caller-supplied
+     one is checked with g_return_if_fail before it is taken. The
+     analyzer cannot see that across the steps of the request. */
   if (request->description->main_class == NULL)
     {
       g_set_error (error, AML_RESOLVE_ERROR, AML_RESOLVE_ERROR_INVALID,
@@ -1327,6 +1332,7 @@ build_result (ResolveRequest *request, GError **error)
       g_free (resolved);
       return NULL;
     }
+  /* NOLINTEND(clang-analyzer-core.NullDereference) */
 
   /* A loader that patches the client jar produced one already: it is the
      jar the game runs from, and the one at the end of the class path,

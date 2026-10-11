@@ -1510,7 +1510,7 @@ build_error_page (AmlDownloadModpackDialog *self,
   AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
   AdwHeaderBar *header = ADW_HEADER_BAR (adw_header_bar_new ());
   GtkWidget *box = NULL;
-  AdwStatusPage *status = ADW_STATUS_PAGE (adw_status_page_new ());
+  AdwStatusPage *status = NULL;
   GtkBox *buttons = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
   GtkButton *retry_btn = GTK_BUTTON (gtk_button_new_with_label (_("Retry")));
   GtkButton *back_btn = GTK_BUTTON (gtk_button_new_with_label (_("Back")));
