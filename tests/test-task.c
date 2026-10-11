@@ -341,6 +341,59 @@ test_scope_cancellation_stress (void)
   g_print ("ok - task scope cancellation remains leak-free under stress\n");
 }
 
+/* A step that starts nothing and finishes nothing, so the test decides
+ * when and how the sequence completes. */
+static void
+manual_step (GTask *task G_GNUC_UNUSED, gpointer user_data)
+{
+  guint *steps = user_data;
+  (*steps)++;
+}
+
+/* Completing a sequence twice used to read the finished flag out of freed
+ * memory: the flag was written and the struct freed together, so it could
+ * never be seen as set. The sequence now lives as long as the task, which
+ * is what makes the flag mean anything at all. */
+static void
+test_sequence_survives_completing_twice (void)
+{
+  guint steps = 0;
+  SequenceResult result = { 0 };
+  AmlTaskSequence *sequence;
+  g_autofree char *first = g_strdup ("the one that counts");
+
+  result.loop = g_main_loop_new (NULL, FALSE);
+
+  sequence = aml_task_sequence_new (NULL, sequence_done, &result, manual_step,
+                                    &steps, NULL);
+  aml_task_sequence_start (sequence);
+  g_assert_cmpuint (steps, ==, 1);
+
+  aml_task_sequence_return_pointer (sequence, g_steal_pointer (&first),
+                                    g_free);
+
+  /* Every way a late completion can arrive, each of which has to stop
+     rather than act on state that is gone. The results handed to the
+     ones that stop have to be released, which is what the result_free
+     and the error are for. */
+  aml_task_sequence_return_pointer (sequence, g_strdup ("again"), g_free);
+  aml_task_sequence_return_error (sequence,
+                                  g_error_new_literal (G_IO_ERROR,
+                                                       G_IO_ERROR_FAILED,
+                                                       "again"));
+  aml_task_sequence_next (sequence);
+
+  g_main_loop_run (result.loop);
+
+  /* One step, one completion, and the value the first one carried. */
+  g_assert_cmpuint (steps, ==, 1);
+  g_assert_cmpstr (result.answer, ==, "the one that counts");
+  g_free (result.answer);
+
+  g_main_loop_unref (result.loop);
+  g_print ("ok - a sequence completed twice stays finished\n");
+}
+
 int
 main (int argc, char **argv)
 {
@@ -353,6 +406,7 @@ main (int argc, char **argv)
   test_sequence_progresses_and_cleans_up ();
   test_sequence_returns_errors ();
   test_sequence_honors_cancellation ();
+  test_sequence_survives_completing_twice ();
   test_scope_cancels_owned_sources ();
   test_scope_cancellation_stress ();
 

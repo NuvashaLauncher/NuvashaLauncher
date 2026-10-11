@@ -15,7 +15,12 @@ typedef void (*AmlTaskSequenceStep) (GTask *task, gpointer user_data);
 
 /* A small sequential async-task runner. A step starts one asynchronous
  * operation and calls aml_task_sequence_next() from its completion callback.
- * The sequence owns @user_data until it completes or fails. */
+ * The sequence owns @user_data until it completes or fails.
+ *
+ * Completing a sequence frees its step state but not the sequence itself:
+ * it stays alive with the task until that is done with, so a completion
+ * that arrives twice reads a real finished flag and stops, rather than
+ * reading freed memory. Completing twice is therefore safe. */
 AmlTaskSequence *aml_task_sequence_new (GCancellable *cancellable,
                                         GAsyncReadyCallback callback,
                                         gpointer callback_data,
