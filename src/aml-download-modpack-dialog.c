@@ -1750,8 +1750,8 @@ on_install_done (GObject *source G_GNUC_UNUSED,
                    error != NULL ? error->message : "unknown error");
       else
         {
-          g_object_set (instance, "icon", instance_icon, NULL);
-          icon_copied = TRUE;
+          icon_copied = aml_instance_set_string (instance, "icon",
+                                                 instance_icon, &error);
         }
 
       if (icon_copied)

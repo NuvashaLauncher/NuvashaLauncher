@@ -85,6 +85,18 @@ gboolean aml_instance_manager_rename (AmlInstanceManager *self,
                                       const char *new_name,
                                       GError **error);
 
+/* Atomically updates one validated string property and persists it. */
+gboolean aml_instance_manager_set_string (AmlInstanceManager *self,
+                                          AmlInstance *instance,
+                                          const char *property,
+                                          const char *value,
+                                          GError **error);
+gboolean aml_instance_manager_set_loader (AmlInstanceManager *self,
+                                          AmlInstance *instance,
+                                          AmlLoader loader,
+                                          const char *version,
+                                          GError **error);
+
 /* Says whether @directory may become the directory of @instance, and
  * puts the canonical form of it in @canonical when that is not NULL.
  *

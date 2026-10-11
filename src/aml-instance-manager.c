@@ -715,23 +715,101 @@ aml_instance_manager_rename (AmlInstanceManager *self,
       return FALSE;
     }
 
-  g_object_set (instance, "name", stripped, NULL);
-
   g_autoptr (GError) local_error = NULL;
 
-  if (!aml_instance_validate (instance, &local_error))
+  if (!aml_instance_set_name (instance, stripped, &local_error))
     {
-      g_object_set (instance, "name", old_name, NULL);
+      aml_instance_set_name (instance, old_name, NULL);
       g_propagate_error (error, g_steal_pointer (&local_error));
       return FALSE;
     }
 
   if (!aml_instance_manager_save (self, error))
     {
-      g_object_set (instance, "name", old_name, NULL);
+      aml_instance_set_name (instance, old_name, NULL);
       return FALSE;
     }
 
+  return TRUE;
+}
+
+gboolean
+aml_instance_manager_set_string (AmlInstanceManager *self,
+                                 AmlInstance *instance,
+                                 const char *property,
+                                 const char *value,
+                                 GError **error)
+{
+  static const char *allowed[] = {
+    "minecraft-version", "loader-version", "icon", "java-path", "jvm-args",
+    NULL
+  };
+  g_autofree char *old = NULL;
+
+  g_return_val_if_fail (AML_IS_INSTANCE_MANAGER (self), FALSE);
+  g_return_val_if_fail (AML_IS_INSTANCE (instance), FALSE);
+  g_return_val_if_fail (property != NULL, FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (!g_list_store_find (self->instances, instance, NULL))
+    {
+      g_set_error_literal (error, AML_INSTANCE_MANAGER_ERROR,
+                           AML_INSTANCE_MANAGER_ERROR_NOT_FOUND,
+                           "the instance is not registered");
+      return FALSE;
+    }
+
+  gboolean known = FALSE;
+  for (guint i = 0; allowed[i] != NULL; i++)
+    known |= g_str_equal (property, allowed[i]);
+  if (!known)
+    {
+      g_set_error (error, AML_INSTANCE_MANAGER_ERROR,
+                   AML_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+                   "instance property \"%s\" cannot be edited here", property);
+      return FALSE;
+    }
+
+  g_object_get (instance, property, &old, NULL);
+  if (!aml_instance_set_string (instance, property, value, error) ||
+      !aml_instance_manager_save (self, error))
+    {
+      g_object_set (instance, property, old, NULL);
+      return FALSE;
+    }
+  return TRUE;
+}
+
+gboolean
+aml_instance_manager_set_loader (AmlInstanceManager *self,
+                                 AmlInstance *instance,
+                                 AmlLoader loader,
+                                 const char *version,
+                                 GError **error)
+{
+  AmlLoader old_loader = AML_LOADER_VANILLA;
+  g_autofree char *old_version = NULL;
+
+  g_return_val_if_fail (AML_IS_INSTANCE_MANAGER (self), FALSE);
+  g_return_val_if_fail (AML_IS_INSTANCE (instance), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (!g_list_store_find (self->instances, instance, NULL))
+    {
+      g_set_error_literal (error, AML_INSTANCE_MANAGER_ERROR,
+                           AML_INSTANCE_MANAGER_ERROR_NOT_FOUND,
+                           "the instance is not registered");
+      return FALSE;
+    }
+
+  g_object_get (instance, "loader", &old_loader, "loader-version", &old_version,
+                NULL);
+  if (!aml_instance_set_loader (instance, loader, version, error) ||
+      !aml_instance_manager_save (self, error))
+    {
+      aml_instance_set_loader (instance, old_loader, old_version, NULL);
+      return FALSE;
+    }
   return TRUE;
 }
 
@@ -1202,7 +1280,7 @@ static void
 move_undo (MoveData *data, gboolean restore_instance, GError *error)
 {
   if (restore_instance)
-    g_object_set (data->instance, "directory", data->old_directory, NULL);
+    aml_instance_set_directory (data->instance, data->old_directory, NULL);
 
   data->undo_error = error;
 
@@ -1246,7 +1324,7 @@ move_copy_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   /* The files are all in the new place; only now does the stored path
      change, and the file that records it is written whole. */
-  g_object_set (data->instance, "directory", data->new_directory, NULL);
+    aml_instance_set_directory (data->instance, data->new_directory, NULL);
 
   if (!aml_instance_manager_save (data->self, &error))
     {
@@ -1301,11 +1379,11 @@ aml_instance_manager_change_directory_async (AmlInstanceManager *self,
      changed and saved, which is all that is left to do. */
   if (!g_file_test (data->old_directory, G_FILE_TEST_IS_DIR))
     {
-      g_object_set (instance, "directory", data->new_directory, NULL);
+      aml_instance_set_directory (instance, data->new_directory, NULL);
 
       if (!aml_instance_manager_save (self, &local_error))
         {
-          g_object_set (instance, "directory", data->old_directory, NULL);
+          aml_instance_set_directory (instance, data->old_directory, NULL);
           move_return_error (data, g_steal_pointer (&local_error));
           return;
         }

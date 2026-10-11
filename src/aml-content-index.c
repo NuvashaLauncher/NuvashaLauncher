@@ -149,7 +149,10 @@ entry_from_json (const char *contents, gsize length, GError **error)
   g_autoptr (GError) parse_error = NULL;
   JsonNode *root = NULL;
 
-  if (!json_parser_load_from_data (parser, contents, length, &parse_error))
+  /* Callers bound the file before they get here, so the length always
+     fits the signed one the parser takes. */
+  if (!json_parser_load_from_data (parser, contents, (gssize) length,
+                                  &parse_error))
     {
       g_set_error (error, AML_CONTENT_INDEX_ERROR,
                    AML_CONTENT_INDEX_ERROR_INVALID, "%s",

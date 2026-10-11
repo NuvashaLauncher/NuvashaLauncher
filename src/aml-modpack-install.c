@@ -327,7 +327,7 @@ install_register (InstallRun *run)
 
       if (g_file_test (icon, G_FILE_TEST_IS_REGULAR))
         {
-          g_object_set (instance, "icon", icon, NULL);
+          aml_instance_set_string (instance, "icon", icon, &error);
           if (!aml_instance_manager_save (run->manager, &error))
             {
               aml_fs_remove_tree (run->target);
