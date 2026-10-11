@@ -24,7 +24,7 @@ AmlTaskSequence *aml_task_sequence_new (GCancellable *cancellable,
                                         GDestroyNotify user_data_free);
 void aml_task_sequence_start (AmlTaskSequence *sequence);
 void aml_task_sequence_next (AmlTaskSequence *sequence);
-GTask *aml_task_sequence_get_task (AmlTaskSequence *sequence);
+GTask *aml_task_sequence_get_task (const AmlTaskSequence *sequence);
 void aml_task_sequence_return_pointer (AmlTaskSequence *sequence,
                                        gpointer result,
                                        GDestroyNotify result_free);
@@ -39,7 +39,7 @@ AmlTaskScope *aml_task_scope_new (GObject *source_object,
                                   GAsyncReadyCallback callback,
                                   gpointer user_data);
 AmlTaskScope *aml_task_scope_borrow_task (GTask *task);
-GTask *aml_task_scope_get_task (AmlTaskScope *scope);
+GTask *aml_task_scope_get_task (const AmlTaskScope *scope);
 void aml_task_scope_track_source (AmlTaskScope *scope, guint source_id);
 void aml_task_scope_remove_source (AmlTaskScope *scope, guint source_id);
 void aml_task_scope_forget_source (AmlTaskScope *scope, guint source_id);

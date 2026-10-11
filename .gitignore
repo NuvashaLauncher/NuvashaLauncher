@@ -5,6 +5,7 @@
 # Core dumps
 /core
 /core.*
+/vgcore.*
 
 # Editor files
 *~

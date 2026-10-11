@@ -803,7 +803,7 @@ export_file (ExportRun *run, struct archive *archive, const char *source,
 
   entry = archive_entry_new ();
   archive_entry_set_pathname (entry, target);
-  archive_entry_set_size (entry, stat_buf.st_size);
+  archive_entry_set_size (entry, (la_int64_t) stat_buf.st_size);
   archive_entry_set_filetype (entry, AE_IFREG);
   archive_entry_set_perm (entry, 0644);
 
@@ -1203,7 +1203,7 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
 
   manifest_entry = archive_entry_new ();
   archive_entry_set_pathname (manifest_entry, "modrinth.index.json");
-  archive_entry_set_size (manifest_entry, manifest_length);
+  archive_entry_set_size (manifest_entry, (la_int64_t) manifest_length);
   archive_entry_set_filetype (manifest_entry, AE_IFREG);
   archive_entry_set_perm (manifest_entry, 0644);
 

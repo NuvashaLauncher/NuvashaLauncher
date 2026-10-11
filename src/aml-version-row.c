@@ -55,6 +55,9 @@ G_DEFINE_FINAL_TYPE (AmlVersionRow, aml_version_row, ADW_TYPE_COMBO_ROW)
 static void
 set_entries (AmlVersionRow *self, GPtrArray *ids, guint position)
 {
+  /* NOLINTBEGIN(clang-analyzer-unix.Malloc) -- gtk_string_list_new copies
+     the strings it is given, and g_autofree frees the array at the end of
+     this function. The analyzer reads the constructor as taking it. */
   g_autofree const char **strings = g_new0 (const char *, ids->len + 1);
   g_autoptr (GtkStringList) list = NULL;
 
@@ -62,6 +65,7 @@ set_entries (AmlVersionRow *self, GPtrArray *ids, guint position)
     strings[i] = g_ptr_array_index (ids, i);
 
   list = gtk_string_list_new (strings);
+  /* NOLINTEND(clang-analyzer-unix.Malloc) */
 
   g_clear_pointer (&self->ids, g_ptr_array_unref);
   self->ids = g_steal_pointer (&ids);
