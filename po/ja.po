@@ -571,3 +571,6 @@ msgstr "キャッシュの消去に失敗しました"
 
 msgid "The cache could not be cleared."
 msgstr "キャッシュを消去できませんでした。"
+
+msgid "the versions of this loader could not be read"
+msgstr "この Mod ローダーのバージョンを読み取れませんでした"

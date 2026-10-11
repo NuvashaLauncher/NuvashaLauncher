@@ -81,16 +81,12 @@ put_model (AmlJavaRow *self, GPtrArray *names, guint position)
   g_autofree const char **strings = NULL;
   g_autoptr (GtkStringList) list = NULL;
 
-  /* NOLINTBEGIN(clang-analyzer-unix.Malloc) -- gtk_string_list_new copies
-     the strings it is given and does not take the array, which g_autofree
-     releases at the end of this function. */
   strings = g_new0 (const char *, names->len + 1);
 
   for (guint i = 0; i < names->len; i++)
     strings[i] = (char *) g_ptr_array_index (names, i);
 
   list = gtk_string_list_new (strings);
-  /* NOLINTEND(clang-analyzer-unix.Malloc) */
   g_clear_pointer (&self->names, g_ptr_array_unref);
   self->names = names;
 

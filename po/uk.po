@@ -571,3 +571,6 @@ msgstr "Не вдалося очистити кеш"
 
 msgid "The cache could not be cleared."
 msgstr "Не вдалося очистити кеш."
+
+msgid "the versions of this loader could not be read"
+msgstr "не вдалося прочитати версії цього завантажувача модів"

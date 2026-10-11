@@ -563,3 +563,6 @@ msgstr "缓存清理失败"
 
 msgid "The cache could not be cleared."
 msgstr "无法清除缓存。"
+
+msgid "the versions of this loader could not be read"
+msgstr "无法读取此模组加载器的版本"

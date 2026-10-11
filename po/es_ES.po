@@ -572,3 +572,6 @@ msgstr "Error al limpiar la caché"
 
 msgid "The cache could not be cleared."
 msgstr "No se pudo limpiar la caché."
+
+msgid "the versions of this loader could not be read"
+msgstr "no se pudieron leer las versiones de este lanzador de mods"
