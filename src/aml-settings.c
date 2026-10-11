@@ -110,7 +110,9 @@ load (AmlSettings *self)
 
   parser = json_parser_new ();
 
-  if (!json_parser_load_from_data (parser, contents, length, NULL))
+  /* The size check above already refused anything larger, so the length
+     always fits the signed one the parser takes. */
+  if (!json_parser_load_from_data (parser, contents, (gssize) length, NULL))
     {
       quarantine_corrupt_file (self->filename);
       return;
@@ -264,7 +266,8 @@ save (AmlSettings *self, GError **error)
   json_generator_set_pretty (generator, TRUE);
   data = json_generator_to_data (generator, &length);
 
-  if (!aml_fs_replace_contents (self->filename, data, length, 0600,
+  /* What we just generated always fits the signed one the writer takes. */
+  if (!aml_fs_replace_contents (self->filename, data, (gssize) length, 0600,
                                 &io_error))
     {
       g_set_error (error, AML_SETTINGS_ERROR, AML_SETTINGS_ERROR_IO,

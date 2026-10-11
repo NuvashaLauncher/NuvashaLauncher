@@ -245,11 +245,10 @@ on_jvm_args_apply (AdwEntryRow *row, gpointer user_data)
 
   /* AmlInstanceManager validates before it writes, so an empty line
    * fails here and never reaches instances.json. */
-  g_object_set (self->instance, "jvm-args", text, NULL);
-
-  if (!aml_instance_manager_save (self->manager, &error))
+  if (!aml_instance_manager_set_string (self->manager, self->instance,
+                                        "jvm-args", text, &error))
     {
-      g_object_set (self->instance, "jvm-args", current, NULL);
+      aml_instance_set_string (self->instance, "jvm-args", current, NULL);
       show_toast (self, error->message);
       gtk_editable_set_text (GTK_EDITABLE (GTK_WIDGET (row)), current);
       return;
@@ -281,13 +280,14 @@ on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
   if (g_strcmp0 (version, current) == 0)
     return;
 
-  g_object_set (self->instance, "minecraft-version", version, NULL);
-
-  if (!aml_instance_manager_save (self->manager, &error))
+  if (!aml_instance_manager_set_string (self->manager, self->instance,
+                                        "minecraft-version", version,
+                                        &error))
     {
       /* The edit never reached the file: the instance and the row go
        * back to the version that is still stored. */
-      g_object_set (self->instance, "minecraft-version", current, NULL);
+      aml_instance_set_string (self->instance, "minecraft-version", current,
+                               NULL);
       show_toast (self, error->message);
       aml_version_row_select (row, current);
       return;
@@ -350,15 +350,14 @@ on_loader_changed (AmlLoaderRow *row, gpointer user_data)
                  self->loader_version) == 0)
     return;
 
-  g_object_set (self->instance, "loader", loader, "loader-version",
-                loader == AML_LOADER_VANILLA ? NULL : version, NULL);
-
-  if (!aml_instance_manager_save (self->manager, &error))
+  if (!aml_instance_manager_set_loader (
+        self->manager, self->instance, loader,
+        loader == AML_LOADER_VANILLA ? NULL : version, &error))
     {
       /* The edit never reached the file: the instance and the row go back
          to the loader the instance runs. */
-      g_object_set (self->instance, "loader", self->loader, "loader-version",
-                    self->loader_version, NULL);
+      aml_instance_set_loader (self->instance, self->loader,
+                               self->loader_version, NULL);
       show_toast (self, error->message);
       aml_loader_row_load (row, self->settings, self->loader,
                            self->loader_version, minecraft);
@@ -522,11 +521,10 @@ on_java_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
       return;
     }
 
-  g_object_set (self->instance, "java-path", next, NULL);
-
-  if (!aml_instance_manager_save (self->manager, &error))
+  if (!aml_instance_manager_set_string (self->manager, self->instance,
+                                        "java-path", next, &error))
     {
-      g_object_set (self->instance, "java-path", current, NULL);
+      aml_instance_set_string (self->instance, "java-path", current, NULL);
       show_toast (self, error->message);
       aml_java_row_select_path (row, current);
       return;
@@ -616,11 +614,10 @@ on_icon_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 
   g_autofree char *previous = instance_string (self->instance, "icon");
 
-  g_object_set (self->instance, "icon", path, NULL);
-
-  if (!aml_instance_manager_save (self->manager, &error))
+  if (!aml_instance_manager_set_string (self->manager, self->instance,
+                                        "icon", path, &error))
     {
-      g_object_set (self->instance, "icon", previous, NULL);
+      aml_instance_set_string (self->instance, "icon", previous, NULL);
       show_toast (self, error->message);
       g_object_unref (self);
       return;

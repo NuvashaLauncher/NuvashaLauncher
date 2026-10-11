@@ -79,6 +79,18 @@ JsonNode *aml_instance_to_json (AmlInstance *self);
 /* TRUE when every field of @self holds a usable value. */
 gboolean aml_instance_validate (AmlInstance *self, GError **error);
 
+/* Model-level mutation helpers. Callers should use these instead of writing
+ * instance properties directly; validation is performed before the value is
+ * accepted. */
+gboolean aml_instance_set_string (AmlInstance *self, const char *property,
+                                  const char *value, GError **error);
+gboolean aml_instance_set_loader (AmlInstance *self, AmlLoader loader,
+                                  const char *version, GError **error);
+gboolean aml_instance_set_name (AmlInstance *self, const char *name,
+                                GError **error);
+gboolean aml_instance_set_directory (AmlInstance *self, const char *directory,
+                                     GError **error);
+
 /* The unique id, never NULL. */
 const char *aml_instance_get_id (AmlInstance *self);
 

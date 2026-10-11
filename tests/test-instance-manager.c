@@ -681,6 +681,42 @@ test_rename (void)
 }
 
 static void
+test_model_updates_are_atomic (void)
+{
+  g_autofree char *data_dir = make_tmp_dir ();
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlInstanceManager) manager =
+    aml_instance_manager_new (data_dir);
+  g_autoptr (AmlInstance) instance =
+    aml_instance_manager_create (manager, "Model", NULL, "1.21.1",
+                                 AML_LOADER_VANILLA, NULL, &error);
+
+  g_assert_no_error (error);
+  g_assert_true (aml_instance_manager_set_string (
+    manager, instance, "jvm-args", "-Xmx2G", &error));
+  g_assert_no_error (error);
+  g_assert_true (aml_instance_manager_set_loader (
+    manager, instance, AML_LOADER_FABRIC, "0.15.0", &error));
+  g_assert_no_error (error);
+  g_assert_false (aml_instance_manager_set_string (
+    manager, instance, "not-a-property", "value", &error));
+  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
+                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_clear_error (&error);
+
+  g_autoptr (AmlInstanceManager) fresh = aml_instance_manager_new (data_dir);
+  g_assert_true (aml_instance_manager_load (fresh, &error));
+  g_assert_no_error (error);
+  g_autoptr (AmlInstance) loaded = g_list_model_get_item (
+    G_LIST_MODEL (aml_instance_manager_get_instances (fresh)), 0);
+  g_autofree char *args = prop_string (loaded, "jvm-args");
+  g_assert_cmpstr (args, ==, "-Xmx2G");
+
+  remove_recursive (data_dir);
+  g_print ("ok - model updates validate and persist atomically\n");
+}
+
+static void
 test_duplicate (void)
 {
   g_autofree char *data_dir = make_tmp_dir ();
@@ -1313,6 +1349,7 @@ main (int argc, char **argv)
   test_version_mismatch ();
   test_atomic_save_failure ();
   test_rename ();
+  test_model_updates_are_atomic ();
   test_duplicate ();
   test_duplicate_without_directory ();
   test_delete_metadata_only ();

@@ -334,6 +334,98 @@ aml_instance_validate (AmlInstance *self, GError **error)
   return TRUE;
 }
 
+gboolean
+aml_instance_set_string (AmlInstance *self, const char *property,
+                         const char *value, GError **error)
+{
+  static const char *allowed[] = {
+    "minecraft-version", "loader-version", "icon", "java-path", "jvm-args",
+    NULL
+  };
+  g_autofree char *old = NULL;
+
+  g_return_val_if_fail (AML_IS_INSTANCE (self), FALSE);
+  g_return_val_if_fail (property != NULL, FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  gboolean known = FALSE;
+  for (guint i = 0; allowed[i] != NULL; i++)
+    known |= g_str_equal (property, allowed[i]);
+  if (!known)
+    {
+      g_set_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID,
+                   "instance property \"%s\" cannot be changed", property);
+      return FALSE;
+    }
+
+  g_object_get (self, property, &old, NULL);
+  g_object_set (self, property, value, NULL);
+  if (!aml_instance_validate (self, error))
+    {
+      g_object_set (self, property, old, NULL);
+      return FALSE;
+    }
+  return TRUE;
+}
+
+gboolean
+aml_instance_set_loader (AmlInstance *self, AmlLoader loader,
+                         const char *version, GError **error)
+{
+  AmlLoader old_loader = AML_LOADER_VANILLA;
+  g_autofree char *old_version = NULL;
+
+  g_return_val_if_fail (AML_IS_INSTANCE (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  g_object_get (self, "loader", &old_loader, "loader-version", &old_version,
+                NULL);
+  g_object_set (self, "loader", loader, "loader-version", version, NULL);
+  if (!aml_instance_validate (self, error))
+    {
+      g_object_set (self, "loader", old_loader, "loader-version",
+                    old_version, NULL);
+      return FALSE;
+    }
+  return TRUE;
+}
+
+gboolean
+aml_instance_set_name (AmlInstance *self, const char *name, GError **error)
+{
+  g_autofree char *old = NULL;
+  g_autofree char *normalized = aml_instance_normalize_name (name);
+
+  g_return_val_if_fail (AML_IS_INSTANCE (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+  old = g_strdup (self->name);
+  g_object_set (self, "name", normalized, NULL);
+  if (!aml_instance_validate (self, error))
+    {
+      g_object_set (self, "name", old, NULL);
+      return FALSE;
+    }
+  return TRUE;
+}
+
+gboolean
+aml_instance_set_directory (AmlInstance *self, const char *directory,
+                            GError **error)
+{
+  g_autofree char *old = NULL;
+
+  g_return_val_if_fail (AML_IS_INSTANCE (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+  old = g_strdup (self->directory);
+  g_object_set (self, "directory", directory, NULL);
+  if (!aml_instance_validate (self, error))
+    {
+      g_object_set (self, "directory", old, NULL);
+      return FALSE;
+    }
+  return TRUE;
+}
+
 AmlInstance *
 aml_instance_new (const char  *id,
                   const char  *name,

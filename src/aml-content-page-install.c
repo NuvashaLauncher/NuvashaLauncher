@@ -300,7 +300,6 @@ fetch_next (FetchRun *run)
   AmlContentPage *self = run->page;
   InstallFile *file = NULL;
   g_autofree char *path = NULL;
-  g_autoptr (GFile) folder = NULL;
 
   if (run->index >= run->files->len)
     {
@@ -325,13 +324,10 @@ fetch_next (FetchRun *run)
     }
 
   file = g_ptr_array_index (run->files, run->index);
-  folder = g_file_new_for_path (run->folder);
-
   {
     g_autoptr (GError) error = NULL;
 
-    if (!g_file_make_directory_with_parents (folder, NULL, &error) &&
-        !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_EXISTS))
+    if (!aml_fs_make_directory (run->folder, 0755, &error))
       {
         if (self != NULL)
           {

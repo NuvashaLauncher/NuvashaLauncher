@@ -72,16 +72,16 @@ aml_instance_component_set_version (AmlInstance *instance,
 
   if (g_str_equal (component_id, AML_COMPONENT_MINECRAFT))
     {
-      g_object_set (instance, "minecraft-version", version, NULL);
-      return TRUE;
+      return aml_instance_set_string (instance, "minecraft-version", version,
+                                      error);
     }
 
   g_object_get (instance, "loader", &loader, NULL);
   loader_id = aml_instance_component_id_for_loader (loader);
   if (loader_id != NULL && g_str_equal (loader_id, component_id))
     {
-      g_object_set (instance, "loader-version", version, NULL);
-      return TRUE;
+      return aml_instance_set_string (instance, "loader-version", version,
+                                      error);
     }
 
   g_set_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID,
