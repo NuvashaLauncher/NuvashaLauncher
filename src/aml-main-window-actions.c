@@ -564,20 +564,46 @@ on_shortcuts (GSimpleAction *action G_GNUC_UNUSED,
               gpointer       user_data)
 {
   AmlMainWindow *self = user_data;
-  AdwDialog *dialog = adw_shortcuts_dialog_new ();
-  AdwShortcutsSection *general = adw_shortcuts_section_new (_("General"));
+  GtkShortcutsWindow *dialog =
+    GTK_SHORTCUTS_WINDOW (g_object_new (GTK_TYPE_SHORTCUTS_WINDOW, NULL));
+  GtkShortcutsSection *section =
+    GTK_SHORTCUTS_SECTION (g_object_new (GTK_TYPE_SHORTCUTS_SECTION,
+                                         "title", _("General"), NULL));
+  GtkShortcutsGroup *group =
+    GTK_SHORTCUTS_GROUP (g_object_new (GTK_TYPE_SHORTCUTS_GROUP,
+                                       "title", _("General"), NULL));
+  const struct {
+    const char *title;
+    const char *accelerator;
+  } shortcuts[] = {
+    { "Show Shortcuts", "F1" },
+    { "Create Instance", "<primary>n" },
+    { "Settings", "<primary>comma" },
+    { "Quit", "<primary>q" },
+  };
 
-  adw_shortcuts_section_add (
-    general, adw_shortcuts_item_new (_("Show Shortcuts"), "F1"));
-  adw_shortcuts_section_add (
-    general, adw_shortcuts_item_new (_("Create Instance"), "<primary>n"));
-  adw_shortcuts_section_add (
-    general, adw_shortcuts_item_new (_("Settings"), "<primary>comma"));
-  adw_shortcuts_section_add (
-    general, adw_shortcuts_item_new (_("Quit"), "<primary>q"));
+  for (guint i = 0; i < G_N_ELEMENTS (shortcuts); i++)
+    {
+      GtkShortcutsShortcut *shortcut =
+        GTK_SHORTCUTS_SHORTCUT (g_object_new (GTK_TYPE_SHORTCUTS_SHORTCUT,
+                                              "title", _(shortcuts[i].title),
+                                              "accelerator", shortcuts[i].accelerator,
+                                              NULL));
+      G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+      gtk_shortcuts_group_add_shortcut (group, shortcut);
+      G_GNUC_END_IGNORE_DEPRECATIONS
+    }
 
-  adw_shortcuts_dialog_add (ADW_SHORTCUTS_DIALOG (dialog), general);
-  adw_dialog_present (dialog, GTK_WIDGET (self));
+  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+  gtk_shortcuts_section_add_group (section, group);
+  gtk_shortcuts_window_add_section (dialog, section);
+  G_GNUC_END_IGNORE_DEPRECATIONS
+  gtk_window_set_transient_for (GTK_WINDOW (dialog), GTK_WINDOW (self));
+  gtk_window_set_destroy_with_parent (GTK_WINDOW (dialog), TRUE);
+  g_object_ref_sink (dialog);
+  g_signal_connect_swapped (dialog, "destroy", G_CALLBACK (g_object_unref),
+                            dialog);
+  gtk_window_present (GTK_WINDOW (dialog));
 }
 
 const GActionEntry window_entries[] = {
