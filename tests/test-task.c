@@ -171,6 +171,133 @@ scope_stress_probe (gpointer user_data)
   return G_SOURCE_REMOVE;
 }
 
+/* Everything below is about a source that has already fired.
+ * ---------------------------------------------------------- */
+
+/* GLib does not complain when a live source is removed: that is what
+ * removal is for. It complains when the id no longer names a source,
+ * because then the main loop's bookkeeping is being told to undo
+ * something that was never recorded. A tracked id outlives its source,
+ * so a scope that removes sources on the way out has to check that the
+ * source is still there first, and these tests are what proves it does.
+ *
+ * The counter catches the complaint the same way test-window does. */
+static guint criticals;
+
+static GLogWriterOutput
+count_criticals (GLogLevelFlags   log_level,
+                 const GLogField *fields,
+                 gsize            n_fields,
+                 gpointer         user_data)
+{
+  (void) user_data;
+
+  if ((log_level & G_LOG_LEVEL_CRITICAL) != 0)
+    criticals++;
+
+  return g_log_writer_default (log_level, fields, n_fields, NULL);
+}
+
+static gboolean
+already_fired_probe (gpointer user_data)
+{
+  guint *fired = user_data;
+  (*fired)++;
+  return G_SOURCE_REMOVE;
+}
+
+/* Hands back the id of a source that has run and been destroyed, so the
+ * id names nothing by the time it is returned. */
+static guint
+fire_and_dissolve (guint *fired)
+{
+  guint source = g_timeout_add (1, already_fired_probe, fired);
+
+  while (*fired == 0)
+    g_main_context_iteration (NULL, FALSE);
+
+  g_assert_cmpuint (*fired, ==, 1);
+  g_assert_null (g_main_context_find_source_by_id (NULL, source));
+
+  return source;
+}
+
+static void
+test_scope_free_releases_a_source_that_fired (void)
+{
+  guint fired = 0;
+  guint before = criticals;
+  g_autoptr (GCancellable) cancellable = g_cancellable_new ();
+  AmlTaskScope *scope = aml_task_scope_new (NULL, cancellable, NULL, NULL);
+  guint source = fire_and_dissolve (&fired);
+
+  aml_task_scope_track_source (scope, source);
+  aml_task_scope_free (scope);
+
+  g_assert_cmpuint (criticals, ==, before);
+  g_print ("ok - freeing a scope releases a source that already fired\n");
+}
+
+static void
+test_scope_cancel_releases_a_source_that_fired (void)
+{
+  guint fired = 0;
+  guint before = criticals;
+  g_autoptr (GCancellable) cancellable = g_cancellable_new ();
+  AmlTaskScope *scope = aml_task_scope_new (NULL, cancellable, NULL, NULL);
+  guint source = fire_and_dissolve (&fired);
+
+  aml_task_scope_track_source (scope, source);
+  aml_task_scope_cancel (scope);
+  aml_task_scope_free (scope);
+
+  g_assert_cmpuint (criticals, ==, before);
+  g_print ("ok - cancelling a scope releases a source that already fired\n");
+}
+
+static void
+test_scope_removes_a_source_that_fired (void)
+{
+  guint fired = 0;
+  guint before = criticals;
+  g_autoptr (GCancellable) cancellable = g_cancellable_new ();
+  AmlTaskScope *scope = aml_task_scope_new (NULL, cancellable, NULL, NULL);
+  guint source = fire_and_dissolve (&fired);
+
+  aml_task_scope_track_source (scope, source);
+  aml_task_scope_remove_source (scope, source);
+  aml_task_scope_free (scope);
+
+  g_assert_cmpuint (criticals, ==, before);
+  g_print ("ok - removing one spent source leaves the rest of the scope\n");
+}
+
+/* Both shapes at once: some sources have fired and some have not, which
+   is what a scope really looks like when it is torn down part way
+   through. Removing the live ones must not disturb the spent ones. */
+static void
+test_scope_releases_mixed_sources (void)
+{
+  guint fired = 0;
+  gboolean live_ran = FALSE;
+  guint before = criticals;
+  g_autoptr (GCancellable) cancellable = g_cancellable_new ();
+  AmlTaskScope *scope = aml_task_scope_new (NULL, cancellable, NULL, NULL);
+  guint spent = fire_and_dissolve (&fired);
+  guint live = g_idle_add (scope_probe, &live_ran);
+
+  aml_task_scope_track_source (scope, spent);
+  aml_task_scope_track_source (scope, live);
+  aml_task_scope_free (scope);
+
+  while (g_main_context_pending (NULL))
+    g_main_context_iteration (NULL, FALSE);
+
+  g_assert_false (live_ran);
+  g_assert_cmpuint (criticals, ==, before);
+  g_print ("ok - a scope with both spent and live sources cleans up once\n");
+}
+
 static void
 test_scope_cancels_owned_sources (void)
 {
@@ -220,11 +347,19 @@ main (int argc, char **argv)
   (void) argc;
   (void) argv;
 
+  g_log_set_writer_func (count_criticals, NULL, NULL);
+
   g_print ("# Task sequence\n");
   test_sequence_progresses_and_cleans_up ();
   test_sequence_returns_errors ();
   test_sequence_honors_cancellation ();
   test_scope_cancels_owned_sources ();
   test_scope_cancellation_stress ();
+
+  g_print ("# Task scope and sources it has already lost\n");
+  test_scope_free_releases_a_source_that_fired ();
+  test_scope_cancel_releases_a_source_that_fired ();
+  test_scope_removes_a_source_that_fired ();
+  test_scope_releases_mixed_sources ();
   return 0;
 }
