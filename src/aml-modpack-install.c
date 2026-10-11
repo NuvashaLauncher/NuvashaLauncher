@@ -711,6 +711,20 @@ aml_modpack_install_async (AmlModpack *modpack,
       return;
     }
 
+  /* mkdtemp creates a private directory on supported POSIX systems, but
+   * enforce that contract explicitly: extraction and download paths below
+   * must never be writable by another local user. */
+  if (g_chmod (run->temp, 0700) != 0)
+    {
+      g_autoptr (GError) error = NULL;
+
+      g_set_error (&error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
+                   "the temporary directory cannot be secured: %s",
+                   g_strerror (errno));
+      install_refuse (task, run, g_steal_pointer (&error));
+      return;
+    }
+
   /* g_mkdtemp fills the template in place and hands back that very
    * pointer: run->temp is its owner now and the local name has
    * nothing left to free. */

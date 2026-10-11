@@ -62,6 +62,34 @@ instance_name (AmlInstance *instance)
   return name;
 }
 
+static char *
+instance_name_key (const char *name)
+{
+  g_autofree char *normalized = aml_instance_normalize_name (name);
+  return g_utf8_casefold (normalized, -1);
+}
+
+static gboolean
+name_is_taken (AmlInstanceManager *self, AmlInstance *except,
+               const char *name)
+{
+  g_autofree char *wanted = instance_name_key (name);
+  guint count = g_list_model_get_n_items (G_LIST_MODEL (self->instances));
+
+  for (guint i = 0; i < count; i++)
+    {
+      g_autoptr (AmlInstance) other =
+        g_list_model_get_item (G_LIST_MODEL (self->instances), i);
+      g_autofree char *other_name = instance_name (other);
+      g_autofree char *other_key = instance_name_key (other_name);
+
+      if (other != except && g_strcmp0 (wanted, other_key) == 0)
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
 /* TRUE when @path contains a ".." component, which would let a path
  * point outside of what was actually picked. */
 static gboolean
@@ -565,6 +593,15 @@ aml_instance_manager_create (AmlInstanceManager *self,
 
   g_autofree char *id = g_uuid_string_random ();
   g_autofree char *path = NULL;
+  g_autofree char *normalized_name = aml_instance_normalize_name (name);
+
+  if (normalized_name[0] == '\0' || name_is_taken (self, NULL, normalized_name))
+    {
+      g_set_error (error, AML_INSTANCE_MANAGER_ERROR,
+                   AML_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+                   "an instance with that name already exists or the name is empty");
+      return NULL;
+    }
 
   if (directory != NULL)
     {
@@ -581,7 +618,8 @@ aml_instance_manager_create (AmlInstanceManager *self,
     }
 
   g_autoptr (AmlInstance) instance =
-    aml_instance_new (id, name, path, minecraft_version, loader, error);
+     aml_instance_new (id, normalized_name, path, minecraft_version, loader,
+                       error);
 
   if (instance == NULL)
     return NULL;
@@ -632,9 +670,15 @@ aml_instance_manager_rename (AmlInstanceManager *self,
   g_autofree char *old_name = NULL;
   g_object_get (instance, "name", &old_name, NULL);
 
-  g_autofree char *stripped =
-    g_strdup (new_name != NULL ? new_name : "");
-  g_strstrip (stripped);
+  g_autofree char *stripped = aml_instance_normalize_name (new_name);
+
+  if (stripped[0] == '\0' || name_is_taken (self, instance, stripped))
+    {
+      g_set_error (error, AML_INSTANCE_MANAGER_ERROR,
+                   AML_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+                   "an instance with that name already exists or the name is empty");
+      return FALSE;
+    }
 
   g_object_set (instance, "name", stripped, NULL);
 

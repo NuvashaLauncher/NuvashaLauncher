@@ -2,6 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+#define _GNU_SOURCE
+
 /* Asynchronous HTTP downloads on top of libsoup 3 and GIO.
  *
  * A file is written into a temporary file next to its destination, the
@@ -24,10 +26,12 @@
 #include "aml-cache.h"
 
 #include <errno.h>
+#include <fcntl.h>
 #include <gio/gunixoutputstream.h>
 #include <glib/gstdio.h>
 #include <libsoup/soup.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 /* Attempts for a transport error, an HTTP 5xx or an HTTP 429. */
@@ -551,10 +555,60 @@ discard_temporary (DownloadRequest *request)
 }
 
 static gboolean
+directory_is_real_path (const char *directory)
+{
+  g_auto (GStrv) parts = NULL;
+  int current = -1;
+
+  if (!g_path_is_absolute (directory))
+    return FALSE;
+
+  parts = g_strsplit (directory + 1, G_DIR_SEPARATOR_S, -1);
+  current = open (G_DIR_SEPARATOR_S,
+                  O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
+  if (current < 0)
+    return FALSE;
+
+  for (guint i = 0; parts[i] != NULL && parts[i][0] != '\0'; i++)
+    {
+      int next = openat (current, parts[i],
+                         O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
+      if (next < 0)
+        {
+          close (current);
+          return FALSE;
+        }
+      close (current);
+      current = next;
+    }
+
+  close (current);
+  return TRUE;
+}
+
+static gboolean
 open_temporary (DownloadRequest *request, GError **error)
 {
   g_autofree char *directory = g_path_get_dirname (request->dest_path);
+  GStatBuf directory_stat;
   g_autofree char *path = g_build_filename (directory, TEMP_TEMPLATE, NULL);
+
+  /* Do not create a temporary beside a destination reached through a
+   * symlink. The download is later published with rename(), so accepting a
+   * substituted parent would write into a directory other than the one the
+   * caller selected. The instance installer creates real private temporary
+   * directories, and rejecting symlink parents is the safe default for all
+   * other callers too. */
+  if (!directory_is_real_path (directory) ||
+      g_lstat (directory, &directory_stat) != 0 ||
+      !S_ISDIR (directory_stat.st_mode))
+    {
+      g_set_error (error, AML_DOWNLOAD_ERROR, AML_DOWNLOAD_ERROR_IO,
+                   "download destination parent \"%s\" is not a real directory",
+                   directory);
+      return FALSE;
+    }
+
   int fd = g_mkstemp (path);
 
   if (fd < 0)

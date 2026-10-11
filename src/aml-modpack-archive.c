@@ -11,9 +11,10 @@
 #include "aml-i18n.h"
 #include "aml-loaders.h"
 
+#include <errno.h>
+#include <fcntl.h>
 #include <archive.h>
 #include <archive_entry.h>
-#include <errno.h>
 #include <glib/gstdio.h>
 #include <json-glib/json-glib.h>
 #include <stdio.h>
@@ -1038,6 +1039,99 @@ aml_modpack_verify_file_finish (GAsyncResult *result, GError **error)
  * ---------------------------------------------------------- */
 
 static gboolean
+extract_mkdir (const char *directory, const char *relative, GError **error)
+{
+  g_auto (GStrv) parts = g_strsplit (relative, "/", -1);
+  int current = -1;
+
+  current = open (directory, O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
+  if (current < 0)
+    goto failed;
+
+  for (guint i = 0; parts[i] != NULL; i++)
+    {
+      int next = -1;
+
+      if (mkdirat (current, parts[i], 0755) != 0 && errno != EEXIST)
+        goto failed;
+
+      next = openat (current, parts[i],
+                     O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
+      if (next < 0)
+        goto failed;
+
+      close (current);
+      current = next;
+    }
+
+  close (current);
+  return TRUE;
+
+failed:
+  if (current >= 0)
+    close (current);
+  g_set_error (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
+               "cannot securely make \"%s\": %s", relative,
+               g_strerror (errno));
+  return FALSE;
+}
+
+/* Open a new regular file below @directory without following any symlink in
+ * the path. The archive has already validated the spelling of @relative;
+ * this second layer protects the filesystem operation itself from a path
+ * component being replaced while extraction is in progress. */
+static int
+extract_open_file (const char *directory, const char *relative, GError **error)
+{
+  g_auto (GStrv) parts = g_strsplit (relative, "/", -1);
+  int current = -1;
+  guint last = 0;
+
+  while (parts[last + 1] != NULL)
+    last++;
+
+  current = open (directory, O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
+  if (current < 0)
+    goto failed;
+
+  for (guint i = 0; i < last; i++)
+    {
+      int next = -1;
+
+      if (mkdirat (current, parts[i], 0755) != 0 && errno != EEXIST)
+        goto failed;
+
+      next = openat (current, parts[i],
+                     O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
+      if (next < 0)
+        goto failed;
+
+      close (current);
+      current = next;
+    }
+
+  {
+    int fd = openat (current, parts[last],
+                     O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC | O_NOFOLLOW,
+                     0644);
+    int saved_errno = errno;
+    close (current);
+    current = -1;
+    if (fd >= 0)
+      return fd;
+    errno = saved_errno;
+  }
+
+failed:
+  if (current >= 0)
+    close (current);
+  g_set_error (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
+               "cannot securely open \"%s\": %s", relative,
+               g_strerror (errno));
+  return -1;
+}
+
+static gboolean
 extract_entry (struct archive *archive,
                struct archive_entry *header,
                const char *directory,
@@ -1047,8 +1141,6 @@ extract_entry (struct archive *archive,
 {
   const char *name = archive_entry_pathname (header);
   g_autofree char *relative = NULL;
-  g_autofree char *dest = NULL;
-  g_autofree char *parent = NULL;
   FILE *out = NULL;
 
   if (name == NULL)
@@ -1098,19 +1190,9 @@ extract_entry (struct archive *archive,
       return FALSE;
     }
 
-  dest = g_build_filename (directory, relative, NULL);
-
   if (archive_entry_filetype (header) == AE_IFDIR)
     {
-      if (g_mkdir_with_parents (dest, 0755) != 0)
-        {
-          g_set_error (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
-                       "\"%s\" cannot be made: %s", name,
-                       g_strerror (errno));
-          return FALSE;
-        }
-
-      return TRUE;
+      return extract_mkdir (directory, relative, error);
     }
 
   if (archive_entry_filetype (header) != AE_IFREG)
@@ -1120,16 +1202,13 @@ extract_entry (struct archive *archive,
       return FALSE;
     }
 
-  parent = g_path_get_dirname (dest);
-
-  if (g_mkdir_with_parents (parent, 0755) != 0)
-    {
-      g_set_error (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
-                   "\"%s\" cannot be made: %s", name, g_strerror (errno));
-      return FALSE;
-    }
-
-  out = g_fopen (dest, "wb");
+  {
+    int fd = extract_open_file (directory, relative, error);
+    if (fd >= 0)
+      out = fdopen (fd, "wb");
+    if (out == NULL && fd >= 0)
+      close (fd);
+  }
 
   if (out == NULL)
     {
@@ -1151,8 +1230,7 @@ extract_entry (struct archive *archive,
       if (status != ARCHIVE_OK)
         {
           fclose (out);
-          g_unlink (dest);
-          g_set_error (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_ARCHIVE,
+      g_set_error (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_ARCHIVE,
                        "\"%s\" cannot be read out of the archive: %s", name,
                        archive_error_string (archive));
           return FALSE;
@@ -1166,7 +1244,6 @@ extract_entry (struct archive *archive,
               (guint64) size > max_content_size - *used)
             {
               fclose (out);
-              g_unlink (dest);
               g_set_error_literal (error, AML_MODPACK_ERROR,
                                    AML_MODPACK_ERROR_BOMB,
                                    "the overrides decode past the size one "
@@ -1177,7 +1254,6 @@ extract_entry (struct archive *archive,
           if (fwrite (block, 1, size, out) != size)
             {
               fclose (out);
-              g_unlink (dest);
               g_set_error (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
                            "\"%s\" cannot be written: %s", name,
                            g_strerror (errno));
@@ -1190,7 +1266,6 @@ extract_entry (struct archive *archive,
 
   if (fclose (out) != 0)
     {
-      g_unlink (dest);
       g_set_error (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
                    "\"%s\" cannot be closed: %s", name, g_strerror (errno));
       return FALSE;

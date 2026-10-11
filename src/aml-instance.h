@@ -53,6 +53,11 @@ gboolean aml_loader_from_string (const char *string, AmlLoader *loader);
  * returns NULL or an empty string. */
 char *aml_instance_sanitize_name (const char *name);
 
+/* (transfer full) NFC-normalized display name with Unicode surrounding
+ * whitespace removed. Control characters remain in the result so validation
+ * can reject them rather than silently changing what the user entered. */
+char *aml_instance_normalize_name (const char *name);
+
 /* Creates an instance and validates every field. @id may be NULL to
  * generate a random UUID. @directory must be an absolute path and is
  * canonicalized; it must exist or be creatable by the caller. */
