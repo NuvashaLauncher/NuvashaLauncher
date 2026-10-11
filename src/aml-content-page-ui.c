@@ -61,7 +61,7 @@ aml_content_page_build_installed (AmlContentPage *self)
   gtk_box_append (GTK_BOX (GTK_WIDGET (actions)),
                   toolbar_button ("folder-symbolic", _("Open Folder"),
                                   G_CALLBACK (aml_content_page_on_open_folder_clicked), self));
-    self->browse.spinner = ADW_SPINNER (adw_spinner_new ());
+    self->browse.spinner = adw_spinner_new ();
    gtk_widget_set_valign (GTK_WIDGET (self->browse.spinner), GTK_ALIGN_CENTER);
   gtk_widget_set_visible (GTK_WIDGET (self->browse.spinner), FALSE);
   gtk_box_append (GTK_BOX (GTK_WIDGET (actions)), GTK_WIDGET (self->browse.spinner));
