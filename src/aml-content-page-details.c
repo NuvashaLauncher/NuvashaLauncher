@@ -205,7 +205,7 @@ static GtkWidget *
 loading_child (void)
 {
   GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
-  GtkWidget *spinner = adw_spinner_new ();
+  AdwSpinner *spinner = ADW_SPINNER (adw_spinner_new ());
   GtkLabel *label = GTK_LABEL (gtk_label_new (_("Loading…")));
 
   gtk_widget_set_valign (GTK_WIDGET (box), GTK_ALIGN_CENTER);
