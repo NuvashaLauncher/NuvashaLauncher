@@ -30,27 +30,15 @@ aml_icon_cache_directory (void)
   return g_build_filename (g_get_user_cache_dir (), "AML", "icons", NULL);
 }
 
-/* The name a url is cached under: its SHA1, with the extension the url
- * ends in so a file can be recognised for what it is. A url with no
- * extension is cached as a .png, which is what Modrinth serves. */
+/* The name a URL is cached under. All cached icons are normalized to PNG at
+ * display size, regardless of the source format or URL extension. */
 static char *
 cache_path_for (const char *url)
 {
   g_autofree char *hash = g_compute_checksum_for_string (G_CHECKSUM_SHA1,
                                                          url, -1);
   g_autofree char *directory = aml_icon_cache_directory ();
-  g_autofree char *leaf = NULL;
-  const char *dot = strrchr (url, '.');
-  const char *extension = ".png";
-
-  if (dot != NULL && strlen (dot) <= 5)
-    extension = dot;
-
-  /* The query, if any, is not part of the file name. */
-  if (strchr (extension, '?') != NULL || strchr (extension, '/') != NULL)
-    extension = ".png";
-
-  leaf = g_strdup_printf ("%s%s", hash, extension);
+  g_autofree char *leaf = g_strdup_printf ("%s.png", hash);
 
   return g_build_filename (directory, leaf, NULL);
 }
@@ -96,6 +84,11 @@ icon_downloaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                error != NULL ? error->message : "unknown error");
       aml_task_scope_return_error (load->scope, g_steal_pointer (&error));
     }
+  else if (!aml_icon_scale_file (load->path))
+    aml_task_scope_return_error (
+      load->scope,
+      g_error_new_literal (G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
+                           "the downloaded icon could not be decoded"));
   else
     aml_task_scope_return_pointer (load->scope, g_strdup (load->path), g_free);
 
@@ -171,10 +164,14 @@ aml_icon_load_async (const char *url, GAsyncReadyCallback callback,
      something that is already on disk. */
   if (g_file_test (load->path, G_FILE_TEST_IS_REGULAR))
     {
-      aml_task_scope_return_pointer_deferred (scope, g_strdup (load->path),
-                                              g_free);
-      icon_load_free (load);
-      return g_steal_pointer (&scope);
+      if (aml_icon_scale_file (load->path))
+        {
+          aml_task_scope_return_pointer_deferred (scope, g_strdup (load->path),
+                                                  g_free);
+          icon_load_free (load);
+          return g_steal_pointer (&scope);
+        }
+      g_unlink (load->path);
     }
 
   if (!aml_fs_make_directory (directory, 0755, NULL))
@@ -226,6 +223,22 @@ aml_icon_widget_new (const char *placeholder_icon_name)
   gtk_stack_set_visible_child_name (GTK_STACK (GTK_WIDGET (stack)), "placeholder");
 
   return GTK_WIDGET (stack);
+}
+
+gboolean
+aml_icon_scale_file (const char *path)
+{
+  g_autoptr (GdkPixbuf) pixbuf = NULL;
+
+  if (path == NULL)
+    return FALSE;
+
+  pixbuf = gdk_pixbuf_new_from_file_at_scale (path, AML_ICON_SIZE,
+                                              AML_ICON_SIZE, TRUE, NULL);
+  if (pixbuf == NULL)
+    return FALSE;
+
+  return gdk_pixbuf_save (pixbuf, path, "png", NULL, NULL);
 }
 
 gboolean

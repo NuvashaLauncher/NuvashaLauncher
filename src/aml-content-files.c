@@ -8,6 +8,7 @@
 #include "aml-content-page.h"
 #include "aml-content-index.h"
 #include "aml-download.h"
+#include "aml-icons.h"
 #include "aml-task-private.h"
 #include "aml-fs.h"
 
@@ -678,7 +679,8 @@ apply_resource_metadata (AmlContentFile *file)
       g_autofree char *name = g_strconcat (file->sha1, ".png", NULL);
       g_autofree char *path = g_build_filename (directory, name, NULL);
       if (aml_fs_make_directory (directory, 0755, NULL) &&
-          aml_fs_replace_contents (path, icon->data, icon->len, 0644, NULL))
+          aml_fs_replace_contents (path, icon->data, icon->len, 0644, NULL) &&
+          aml_icon_scale_file (path))
         file->local_icon_path = g_steal_pointer (&path);
     }
   file->local_metadata = TRUE;
@@ -751,7 +753,8 @@ apply_local_metadata (AmlContentFile *file, AmlContentType type)
       g_autofree char *path = g_build_filename (directory, name, NULL);
       if (aml_fs_make_directory (directory, 0755, NULL) &&
           aml_fs_replace_contents (path, icon_data->data, icon_data->len,
-                                   0644, NULL))
+                                   0644, NULL) &&
+          aml_icon_scale_file (path))
         file->local_icon_path = g_steal_pointer (&path);
     }
   g_free (icon_member);
