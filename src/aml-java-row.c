@@ -63,7 +63,6 @@ struct _AmlJavaRow
   gboolean ready;
   gboolean disposed;
   gboolean rebuilding;
-  guint clear_selection_source;
   GtkButton *retry;
 
   /* The request the row is waiting for. Borrowed from the JavaAsk that
@@ -126,23 +125,6 @@ put_model (AmlJavaRow *self, GPtrArray *names, guint position)
   adw_combo_row_set_model (ADW_COMBO_ROW (self), G_LIST_MODEL (list));
   adw_combo_row_set_selected (ADW_COMBO_ROW (self), position);
   self->rebuilding = FALSE;
-}
-
-static gboolean
-clear_empty_selection (gpointer user_data)
-{
-  AmlJavaRow *self = user_data;
-
-  self->clear_selection_source = 0;
-  if (self->ready)
-    {
-      self->rebuilding = TRUE;
-      adw_combo_row_set_selected (ADW_COMBO_ROW (self),
-                                  GTK_INVALID_LIST_POSITION);
-      self->rebuilding = FALSE;
-    }
-
-  return G_SOURCE_REMOVE;
 }
 
 static void
@@ -255,10 +237,6 @@ fill (AmlJavaRow *self)
   /* Filled in below, once the model carries the entry this points at. */
   self->restore = position;
   put_model (self, names, position);
-
-  if (position == GTK_INVALID_LIST_POSITION && self->ids->len > 0 &&
-      self->ids->pdata[0] != NULL && self->clear_selection_source == 0)
-    self->clear_selection_source = g_idle_add (clear_empty_selection, self);
 
   gtk_widget_set_sensitive (GTK_WIDGET (self), TRUE);
   gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
@@ -475,19 +453,6 @@ on_picked (GObject    *object G_GNUC_UNUSED,
   if (self->rebuilding)
     return;
 
-  /* GTK may choose the first item once more after the model is installed.
-   * Clear that implementation detail before it can become an instance
-   * setting; a later callback, after the idle clear, is a user choice. */
-  if (self->clear_selection_source != 0 &&
-      self->ids->len > 0 && self->ids->pdata[0] != NULL)
-    {
-      self->rebuilding = TRUE;
-      adw_combo_row_set_selected (ADW_COMBO_ROW (self),
-                                  GTK_INVALID_LIST_POSITION);
-      self->rebuilding = FALSE;
-      return;
-    }
-
   if (selected != self->add_index)
     {
       /* Anything else in the list names a runtime, and is where the ask
@@ -696,9 +661,6 @@ aml_java_row_dispose (GObject *object)
   AmlJavaRow *self = AML_JAVA_ROW (object);
 
   self->disposed = TRUE;
-  if (self->clear_selection_source != 0)
-    g_source_remove (self->clear_selection_source);
-  self->clear_selection_source = 0;
   g_cancellable_cancel (self->cancellable);
   g_clear_object (&self->cancellable);
   self->retry = NULL;
