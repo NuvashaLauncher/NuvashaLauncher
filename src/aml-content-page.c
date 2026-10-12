@@ -940,7 +940,9 @@ update_button_busy (AmlContentPage *self, gboolean busy)
                                     busy ? "spinner" : "icon");
   gtk_widget_set_sensitive (
     GTK_WIDGET (self->installed.update_all),
-    !busy && (self->installed.files != NULL && self->installed.files->len > 0));
+    self->installed.files != NULL && self->installed.files->len > 0);
+  gtk_widget_set_can_target (GTK_WIDGET (self->installed.update_all), !busy);
+  gtk_widget_set_focusable (GTK_WIDGET (self->installed.update_all), !busy);
 }
 
 /* Starts the next one of a confirmed batch. When the last one is in, the
