@@ -1149,6 +1149,16 @@ test_connection_refused (void)
   g_print ("ok - a refused connection is a network error\n");
 }
 
+static void
+released_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+               gpointer user_data)
+{
+  guint *finished = user_data;
+
+  (void) aml_download_file_finish (result, NULL);
+  (*finished)--;
+}
+
 #define MANY_DOWNLOADS 10
 
 static void
@@ -1208,6 +1218,59 @@ test_many_at_once (void)
   g_print ("ok - many downloads share the transfer slots\n");
 }
 
+/* The shape a modpack fetch uses: nobody waits for the answer, the work is
+ * tied to a cancel button it does not own, and the header row it reports
+ * into is dropped while it still runs. The operation releases itself, so
+ * the request state that borrows it must outlive the completion. */
+static void
+test_released_download_outlives_its_row (void)
+{
+  g_autofree char *dir = make_test_dir ();
+  g_autofree char *url = server_url ("/file");
+  g_autofree char *expected =
+    hash_of (fixture.file_body->str, fixture.file_body->len,
+             G_CHECKSUM_SHA256);
+  g_autoptr (GCancellable) row = g_cancellable_new ();
+  guint finished = 0;
+  gint64 deadline = 0;
+
+  clear_global_file_cache ();
+
+  for (guint round = 0; round < 20; round++)
+    {
+      g_autofree char *name = g_strdup_printf ("f%u.mrpack", round);
+      g_autofree char *path = g_build_filename (dir, name, NULL);
+
+      finished++;
+      aml_task_scope_release_when_done (
+        aml_download_file_async (url, path, expected, G_CHECKSUM_SHA256, NULL,
+                                 released_done, &finished),
+        row);
+
+      /* The row is dropped between starting and finishing, which is what
+         closing the header while a download runs looks like. */
+      if (round == 5)
+        g_cancellable_cancel (row);
+    }
+
+  /* Everything the wave started is answered, and the release each one
+     owes the request state is delivered. */
+  deadline = g_get_monotonic_time () + 30 * G_TIME_SPAN_SECOND;
+
+  while (finished > 0 && g_get_monotonic_time () < deadline)
+    {
+      while (g_main_context_pending (NULL))
+        g_main_context_iteration (NULL, FALSE);
+
+      g_usleep (1000);
+    }
+
+  g_assert_cmpuint (finished, ==, 0);
+  remove_test_dir (dir);
+
+  g_print ("ok - a released download outlives the row that cancelled it\n");
+}
+
 int
 main (int argc, char **argv)
 {
@@ -1248,6 +1311,7 @@ main (int argc, char **argv)
   test_invalid_url ();
   test_connection_refused ();
   test_many_at_once ();
+  test_released_download_outlives_its_row ();
 
   fixture_stop ();
   g_clear_object (&cache_settings);

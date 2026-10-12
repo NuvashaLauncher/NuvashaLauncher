@@ -124,7 +124,8 @@ finish_launch (AmlLauncher *self)
 {
   if (self->process.stop_timeout != 0)
     {
-      g_source_remove (self->process.stop_timeout);
+      /* Through the scope, which is where this source is registered. */
+      aml_task_scope_remove_source (self->scope, self->process.stop_timeout);
       self->process.stop_timeout = 0;
     }
 

@@ -13,4 +13,10 @@ AmlTaskScope *aml_task_scope_from_task (GTask *task);
 void aml_task_scope_attach_task (GTask *task);
 GTask *aml_task_scope_task (const AmlTaskScope *scope);
 
+/* Internal cancellable watch with caller-owned callback data. */
+guint aml_cancellable_watch (GCancellable  *cancellable,
+                             GSourceFunc    callback,
+                             gpointer       user_data,
+                             GDestroyNotify notify);
+
 #endif /* AML_TASK_PRIVATE_H */

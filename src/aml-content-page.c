@@ -1395,7 +1395,11 @@ aml_content_page_dispose (GObject *object)
 
   if (self->browse.model->debounce_source != 0)
     {
-      g_source_remove (self->browse.model->debounce_source);
+      /* Through the model, which is where this source is registered: a
+         scope left holding the id would take down whatever source is
+         given the same id next. */
+      aml_task_scope_remove_source (self->browse.model->scope,
+                                    self->browse.model->debounce_source);
       self->browse.model->debounce_source = 0;
     }
 
