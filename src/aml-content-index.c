@@ -346,9 +346,9 @@ write_done (GObject *source, GAsyncResult *result, gpointer user_data)
   g_autoptr (GError) error = NULL;
 
   if (aml_fs_replace_contents_finish (G_FILE (source), result, NULL, &error))
-    g_task_return_boolean (run->task, TRUE);
+    aml_task_scope_return_boolean (run->scope, TRUE);
   else
-    g_task_return_error (run->task, g_steal_pointer (&error));
+    aml_task_scope_return_error (run->scope, g_steal_pointer (&error));
   write_run_free (run);
 }
 
@@ -368,10 +368,12 @@ write_entry_async (const char *instance_directory, AmlContentType type,
   g_autoptr (GError) directory_error = NULL;
   if (!aml_fs_make_directory (run->directory, 0755, &directory_error))
     {
-      g_task_return_new_error (run->task, AML_CONTENT_INDEX_ERROR,
-                               AML_CONTENT_INDEX_ERROR_INVALID,
-                                "cannot create index directory \"%s\": %s",
-                                run->directory, directory_error->message);
+      aml_task_scope_return_error (
+        run->scope,
+        g_error_new (AML_CONTENT_INDEX_ERROR,
+                     AML_CONTENT_INDEX_ERROR_INVALID,
+                     "cannot create index directory \"%s\": %s",
+                     run->directory, directory_error->message));
       write_run_free (run);
       return;
     }
@@ -406,9 +408,9 @@ remove_done (GObject *source, GAsyncResult *result, gpointer user_data)
 
   if (!aml_fs_delete_finish (G_FILE (source), result, &error) &&
       !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
-    g_task_return_error (run->task, g_steal_pointer (&error));
+    aml_task_scope_return_error (run->scope, g_steal_pointer (&error));
   else
-    g_task_return_boolean (run->task, TRUE);
+    aml_task_scope_return_boolean (run->scope, TRUE);
   remove_run_free (run);
 }
 
