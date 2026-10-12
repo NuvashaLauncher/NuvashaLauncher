@@ -4,7 +4,7 @@ image: archlinux:base-devel
 # quota. The Makefile targets remain available for local validation.
 workflow:
   rules:
-    - when: never
+    - when: always
 
 stages:
   - test
