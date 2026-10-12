@@ -881,7 +881,7 @@ duplicate_data_free (DuplicateData *data)
 static void
 duplicate_data_return_error (DuplicateData *data, GError *error)
 {
-  g_task_return_error (data->task, error);
+  aml_task_scope_return_error (data->scope, error);
   duplicate_data_free (data);
 }
 
@@ -913,7 +913,7 @@ duplicate_copy_ready (GObject *source G_GNUC_UNUSED,
       return;
     }
 
-  g_task_return_pointer (data->task, data->copy, g_object_unref);
+  aml_task_scope_return_pointer (data->scope, data->copy, g_object_unref);
   data->copy = NULL; /* the task hands it to the finish call */
   duplicate_data_free (data);
 }
@@ -1063,7 +1063,7 @@ delete_data_free (DeleteData *data)
 static void
 delete_data_return_error (DeleteData *data, GError *error)
 {
-  g_task_return_error (data->task, error);
+  aml_task_scope_return_error (data->scope, error);
   delete_data_free (data);
 }
 
@@ -1087,7 +1087,7 @@ delete_directory_ready (GObject *source G_GNUC_UNUSED,
       return;
     }
 
-  g_task_return_boolean (data->task, TRUE);
+  aml_task_scope_return_boolean (data->scope, TRUE);
   delete_data_free (data);
 }
 
@@ -1254,7 +1254,7 @@ move_data_free (MoveData *data)
 static void
 move_return_error (MoveData *data, GError *error)
 {
-  g_task_return_error (data->task, error);
+  aml_task_scope_return_error (data->scope, error);
   move_data_free (data);
 }
 
@@ -1305,7 +1305,7 @@ move_old_removed (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     g_warning ("the old directory \"%s\" could not be removed: %s",
                data->old_directory, error->message);
 
-  g_task_return_boolean (data->task, TRUE);
+  aml_task_scope_return_boolean (data->scope, TRUE);
   move_data_free (data);
 }
 
@@ -1388,7 +1388,7 @@ aml_instance_manager_change_directory_async (AmlInstanceManager *self,
           return;
         }
 
-      g_task_return_boolean (data->task, TRUE);
+      aml_task_scope_return_boolean (data->scope, TRUE);
       move_data_free (data);
       return;
     }
