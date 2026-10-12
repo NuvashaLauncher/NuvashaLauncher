@@ -677,7 +677,7 @@ make_parents (const char *root, const char *relative, GError **error)
           continue;
         }
 
-      if (!g_file_make_directory_with_parents (child, NULL, &local))
+      if (!aml_fs_make_directory (path, 0755, &local))
         {
           g_propagate_error (error, g_steal_pointer (&local));
           return FALSE;
@@ -936,11 +936,11 @@ extract_entries (ExtractStep *step)
           return;
         }
 
-      g_file_replace_contents_bytes_async (file, data, NULL, FALSE,
-                                           G_FILE_CREATE_NONE,
-                                           g_task_get_cancellable (
-                                               request->task),
-                                           extract_write_ready, step);
+       aml_fs_replace_contents_bytes_async (file, data, NULL, FALSE,
+                                            G_FILE_CREATE_NONE,
+                                            g_task_get_cancellable (
+                                                request->task),
+                                            extract_write_ready, step);
       return;
     }
 
@@ -989,10 +989,11 @@ aml_resolve_extract_natives_async (GPtrArray         *jars,
 
   request = g_new0 (ExtractRequest, 1);
 
-  /* Borrowed: the caller's handle keeps the operation alive, and the
-     request is answered before it goes away. */
+  /* Keep a reference separate from the handle returned to the caller. The
+     completion callback may release that handle before this request has
+     finished cleaning up its task state. */
   request->task = g_object_ref (aml_task_scope_task (scope));
-  request->scope = scope;
+  request->scope = aml_task_scope_ref (scope);
   g_task_set_check_cancellable (request->task, FALSE);
   request->jars = g_ptr_array_ref (jars);
   request->directory = g_strdup (natives_directory);

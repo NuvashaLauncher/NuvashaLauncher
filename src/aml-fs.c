@@ -169,6 +169,21 @@ aml_fs_copy_file (GFile *source, GFile *destination, GFileCopyFlags flags,
 }
 
 void
+aml_fs_make_directory_async (GFile *file, int io_priority,
+                              GCancellable *cancellable,
+                              GAsyncReadyCallback callback, gpointer user_data)
+{
+  g_file_make_directory_async (file, io_priority, cancellable, callback,
+                               user_data);
+}
+
+gboolean
+aml_fs_make_directory_finish (GFile *file, GAsyncResult *result, GError **error)
+{
+  return g_file_make_directory_finish (file, result, error);
+}
+
+void
 aml_fs_replace_contents_async (GFile *file, const char *contents, gsize length,
                                const char *etag, gboolean make_backup,
                                GFileCreateFlags flags, GCancellable *cancellable,
@@ -181,6 +196,25 @@ aml_fs_replace_contents_async (GFile *file, const char *contents, gsize length,
 gboolean
 aml_fs_replace_contents_finish (GFile *file, GAsyncResult *result,
                                 char **new_etag, GError **error)
+{
+  return g_file_replace_contents_finish (file, result, new_etag, error);
+}
+
+void
+aml_fs_replace_contents_bytes_async (GFile *file, GBytes *contents,
+                                     const char *etag, gboolean make_backup,
+                                     GFileCreateFlags flags,
+                                     GCancellable *cancellable,
+                                     GAsyncReadyCallback callback,
+                                     gpointer user_data)
+{
+  g_file_replace_contents_bytes_async (file, contents, etag, make_backup,
+                                       flags, cancellable, callback, user_data);
+}
+
+gboolean
+aml_fs_replace_contents_bytes_finish (GFile *file, GAsyncResult *result,
+                                      char **new_etag, GError **error)
 {
   return g_file_replace_contents_finish (file, result, new_etag, error);
 }
@@ -279,6 +313,149 @@ failed:
     g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                  "cannot securely open directory \"%s\": %s", path,
                  g_strerror (errno));
+  return -1;
+}
+
+int
+aml_fs_open_temporary_file_nofollow (const char *directory, char **name,
+                                     char **path, int *parent_fd,
+                                     GError **error)
+{
+  int directory_fd = aml_fs_open_directory_nofollow (directory, error);
+
+  if (directory_fd < 0)
+    return -1;
+
+  for (guint attempt = 0; attempt < 100; attempt++)
+    {
+      g_autofree char *candidate = g_strdup_printf (".aml-%08x%08x",
+                                                    g_random_int (),
+                                                    g_random_int ());
+      int fd = openat (directory_fd, candidate,
+                       O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0600);
+      if (fd >= 0)
+        {
+          if (name != NULL)
+            *name = g_strdup (candidate);
+          if (path != NULL)
+            *path = g_build_filename (directory, candidate, NULL);
+          if (parent_fd != NULL)
+            *parent_fd = directory_fd;
+          else
+            close (directory_fd);
+          return fd;
+        }
+      if (errno != EEXIST)
+        break;
+    }
+
+  g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+               "cannot create a temporary file in \"%s\": %s", directory,
+               g_strerror (errno));
+  close (directory_fd);
+  return -1;
+}
+
+gboolean
+aml_fs_unlink_at (int directory_fd, const char *name, GError **error)
+{
+  if (unlinkat (directory_fd, name, 0) != 0 && errno != ENOENT)
+    {
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                   "cannot remove \"%s\": %s", name, g_strerror (errno));
+      return FALSE;
+    }
+  return TRUE;
+}
+
+gboolean
+aml_fs_rename_at (int directory_fd, const char *source, const char *destination,
+                  GError **error)
+{
+  if (renameat (directory_fd, source, directory_fd, destination) != 0)
+    {
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                   "cannot rename \"%s\" to \"%s\": %s", source,
+                   destination, g_strerror (errno));
+      return FALSE;
+    }
+  return TRUE;
+}
+
+gboolean
+aml_fs_make_directory_tree_nofollow (const char *directory, const char *relative,
+                                     int mode, GError **error)
+{
+  g_auto (GStrv) parts = g_strsplit (relative, "/", -1);
+  int current = open (directory, O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
+
+  if (current < 0)
+    goto failed;
+  for (guint i = 0; parts[i] != NULL; i++)
+    {
+      int next;
+      if (mkdirat (current, parts[i], mode) != 0 && errno != EEXIST)
+        goto failed;
+      next = openat (current, parts[i],
+                     O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
+      if (next < 0)
+        goto failed;
+      close (current);
+      current = next;
+    }
+  close (current);
+  return TRUE;
+
+failed:
+  if (current >= 0)
+    close (current);
+  g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+               "cannot securely make \"%s\": %s", relative,
+               g_strerror (errno));
+  return FALSE;
+}
+
+int
+aml_fs_open_file_nofollow (const char *directory, const char *relative,
+                           int flags, int directory_mode, int mode,
+                           GError **error)
+{
+  g_auto (GStrv) parts = g_strsplit (relative, "/", -1);
+  int current = open (directory, O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
+  guint last = 0;
+
+  if (current < 0)
+    goto failed;
+  while (parts[last + 1] != NULL)
+    last++;
+  for (guint i = 0; i < last; i++)
+    {
+      int next;
+      if (mkdirat (current, parts[i], directory_mode) != 0 && errno != EEXIST)
+        goto failed;
+      next = openat (current, parts[i],
+                     O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
+      if (next < 0)
+        goto failed;
+      close (current);
+      current = next;
+    }
+
+  {
+    int fd = openat (current, parts[last], flags | O_CLOEXEC | O_NOFOLLOW,
+                     mode);
+    int saved_errno = errno;
+    close (current);
+    if (fd >= 0)
+      return fd;
+    errno = saved_errno;
+  }
+failed:
+  if (current >= 0)
+    close (current);
+  g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+               "cannot securely open \"%s\": %s", relative,
+               g_strerror (errno));
   return -1;
 }
 
