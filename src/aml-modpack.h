@@ -205,17 +205,6 @@ gboolean aml_modpack_install_icon (AmlInstanceManager *manager,
                                    AmlInstance *instance,
                                    const char *source_path, GError **error);
 gboolean aml_modpack_icon_is_regular (const char *path);
-void aml_modpack_operation_release (AmlTaskScope *operation,
-                                    GCancellable *cancellable);
-AmlTaskScope *aml_modpack_operation_new (GCancellable *cancellable);
-void aml_modpack_operation_cancel (AmlTaskScope *operation);
-void aml_modpack_operation_forget (AmlTaskScope *operation);
-void aml_modpack_operation_follow (AmlTaskScope *operation,
-                                   GCancellable *cancellable);
-void aml_modpack_operation_track (AmlTaskScope *operation, guint source_id);
-void aml_modpack_operation_remove (AmlTaskScope *operation, guint source_id);
-void aml_modpack_operation_forget_source (AmlTaskScope *operation,
-                                          guint source_id);
 
 /* Writes @instance as a .mrpack at @path. The archive contains the
  * instance's manifest and its files under overrides/. Archive creation is
