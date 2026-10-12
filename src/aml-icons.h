@@ -18,6 +18,8 @@
 
 #include <adwaita.h>
 
+#include "aml-task.h"
+
 G_BEGIN_DECLS
 
 /* The square every icon of a list is shown in. */
@@ -40,11 +42,15 @@ gboolean aml_icon_widget_set_file (GtkWidget *widget, const char *path);
  * the caller must therefore pass a widget it keeps alive for the length
  * of the call, or check it in the callback.
  *
+ * The callback never runs before this returns, so the caller can store
+ * the operation handle here and release it from the callback.
+ *
+ * (transfer full) the operation, released with aml_task_scope_unref().
+ *
  * (transfer full) the path, which the caller frees. */
-void aml_icon_load_async (const char        *url,
-                          GCancellable      *cancellable,
-                          GAsyncReadyCallback callback,
-                          gpointer           user_data);
+AmlTaskScope *aml_icon_load_async (const char        *url,
+                                   GAsyncReadyCallback callback,
+                                   gpointer           user_data);
 
 /* (transfer full). NULL when there is nothing to show. */
 char *aml_icon_load_finish (GAsyncResult *result, GError **error);

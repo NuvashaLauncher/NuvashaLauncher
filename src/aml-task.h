@@ -61,9 +61,15 @@ void aml_task_scope_return_pointer (AmlTaskScope *scope,
 void aml_task_scope_return_boolean (AmlTaskScope *scope, gboolean result);
 void aml_task_scope_return_error (AmlTaskScope *scope, GError *error);
 
-/* Completes an operation that failed before it started. The callback runs
+/* Completes an operation that has nothing to wait for. The callback runs
  * from an idle, never from inside the *_async() call, so a caller can
- * always store the handle it has to release in the callback. */
+ * always store the handle it has to release in the callback. A constructor
+ * that can answer on the spot uses these instead of the plain returns. */
+void aml_task_scope_return_pointer_deferred (AmlTaskScope *scope,
+                                             gpointer       result,
+                                             GDestroyNotify result_free);
+void aml_task_scope_return_boolean_deferred (AmlTaskScope *scope,
+                                             gboolean       result);
 void aml_task_scope_return_error_deferred (AmlTaskScope *scope, GError *error);
 void aml_task_scope_track_source (AmlTaskScope *scope, guint source_id);
 void aml_task_scope_remove_source (AmlTaskScope *scope, guint source_id);

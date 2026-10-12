@@ -168,46 +168,103 @@ aml_task_scope_return_boolean (AmlTaskScope *scope, gboolean result)
   g_task_return_boolean (scope->task, result);
 }
 
-/* What an operation that has nothing to do has to hand over. The scope is
- * borrowed: the idle below is tracked by the scope, so the scope removes
- * it before it can go away and the pointer stays valid. */
+/* What an operation that has nothing to wait for has to hand over. The
+ * scope is borrowed: the idle below is tracked by the scope, so the scope
+ * removes it before the scope can go away and the pointer stays valid. */
+typedef enum
+{
+  DEFERRED_POINTER,
+  DEFERRED_BOOLEAN,
+  DEFERRED_ERROR
+} DeferredKind;
+
 typedef struct
 {
   AmlTaskScope *scope;
+  DeferredKind kind;
+  gpointer value;
+  GDestroyNotify value_free;
+  gboolean boolean;
   GError *error;
-} DeferredError;
+} DeferredCompletion;
 
 static void
-deferred_error_free (gpointer user_data)
+deferred_completion_free (gpointer user_data)
 {
-  DeferredError *deferred = user_data;
+  DeferredCompletion *deferred = user_data;
 
   g_clear_error (&deferred->error);
   g_free (deferred);
 }
 
 static gboolean
-deferred_error_return (gpointer user_data)
+deferred_completion_return (gpointer user_data)
 {
-  DeferredError *deferred = user_data;
+  DeferredCompletion *deferred = user_data;
 
-  aml_task_scope_return_error (deferred->scope,
-                               g_steal_pointer (&deferred->error));
+  switch (deferred->kind)
+    {
+    case DEFERRED_POINTER:
+      g_task_return_pointer (deferred->scope->task, deferred->value,
+                             deferred->value_free);
+      break;
+    case DEFERRED_BOOLEAN:
+      g_task_return_boolean (deferred->scope->task, deferred->boolean);
+      break;
+    case DEFERRED_ERROR:
+      g_task_return_error (deferred->scope->task,
+                           g_steal_pointer (&deferred->error));
+      break;
+    }
+
   return G_SOURCE_REMOVE;
+}
+
+static void
+defer_completion (AmlTaskScope *scope, DeferredCompletion *deferred)
+{
+  deferred->scope = scope;
+  aml_task_scope_track_source (
+    scope, g_idle_add_full (G_PRIORITY_DEFAULT, deferred_completion_return,
+                           deferred, deferred_completion_free));
+}
+
+void
+aml_task_scope_return_pointer_deferred (AmlTaskScope *scope, gpointer result,
+                                        GDestroyNotify result_free)
+{
+  DeferredCompletion *deferred = g_new0 (DeferredCompletion, 1);
+
+  g_return_if_fail (scope != NULL);
+
+  deferred->kind = DEFERRED_POINTER;
+  deferred->value = result;
+  deferred->value_free = result_free;
+  defer_completion (scope, deferred);
+}
+
+void
+aml_task_scope_return_boolean_deferred (AmlTaskScope *scope, gboolean result)
+{
+  DeferredCompletion *deferred = g_new0 (DeferredCompletion, 1);
+
+  g_return_if_fail (scope != NULL);
+
+  deferred->kind = DEFERRED_BOOLEAN;
+  deferred->boolean = result;
+  defer_completion (scope, deferred);
 }
 
 void
 aml_task_scope_return_error_deferred (AmlTaskScope *scope, GError *error)
 {
-  DeferredError *deferred = g_new0 (DeferredError, 1);
+  DeferredCompletion *deferred = g_new0 (DeferredCompletion, 1);
 
   g_return_if_fail (scope != NULL);
 
-  deferred->scope = scope;
+  deferred->kind = DEFERRED_ERROR;
   deferred->error = error;
-  aml_task_scope_track_source (
-    scope, g_idle_add_full (G_PRIORITY_DEFAULT, deferred_error_return, deferred,
-                           deferred_error_free));
+  defer_completion (scope, deferred);
 }
 
 void

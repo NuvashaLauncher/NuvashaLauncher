@@ -76,28 +76,48 @@ aml_content_page_on_retry_page_clicked (GtkButton *button G_GNUC_UNUSED, gpointe
    the placeholder in it when there is none. The widget is held for the
    length of the fetch, so a row that goes away first is still a widget
    when the answer arrives. */
+/* What one row's icon load keeps alive: the widget the image goes in, and
+ * the operation that has to be released when the answer arrives. */
+typedef struct
+{
+  GtkWidget *icon;
+  AmlTaskScope *operation;
+} IconLoad;
+
+static void
+icon_load_free (IconLoad *load)
+{
+  g_clear_object (&load->icon);
+  if (load->operation != NULL)
+    aml_task_scope_unref (load->operation);
+  g_free (load);
+}
+
 static void
 icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
             gpointer user_data)
 {
-  GtkWidget *icon = user_data;
+  IconLoad *load = user_data;
   g_autoptr (GError) error = NULL;
   g_autofree char *path = aml_icon_load_finish (result, &error);
 
-  if (path != NULL && !aml_icon_widget_set_file (icon, path))
+  if (path != NULL && !aml_icon_widget_set_file (load->icon, path))
     g_debug ("the icon for \"%s\" could not be decoded",
-             (const char *) g_object_get_data (G_OBJECT (icon),
+             (const char *) g_object_get_data (G_OBJECT (load->icon),
                                                "aml-icon-url"));
 
-  g_object_unref (icon);
+  icon_load_free (load);
 }
 
 static void
 start_row_icon (GtkWidget *icon, const char *url)
 {
+  IconLoad *load = g_new0 (IconLoad, 1);
+
   g_object_set_data_full (G_OBJECT (icon), "aml-icon-url", g_strdup (url),
                           g_free);
-  aml_icon_load_async (url, NULL, icon_ready, g_object_ref (icon));
+  load->icon = g_object_ref (icon);
+  load->operation = aml_icon_load_async (url, icon_ready, load);
 }
 
 static void

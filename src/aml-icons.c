@@ -56,6 +56,9 @@ cache_path_for (const char *url)
 typedef struct
 {
   GTask *task;
+
+  /* Borrowed from the operation the caller owns, except while the load
+     waits in the queue: the caller's reference is what keeps it alive. */
   AmlTaskScope *scope;
   char *url;
   char *path;
@@ -71,7 +74,6 @@ static void
 icon_load_free (IconLoad *load)
 {
   g_clear_object (&load->task);
-  aml_task_scope_unref (load->scope);
   g_free (load->url);
   g_free (load->path);
   g_free (load);
@@ -130,15 +132,13 @@ icon_pump (void)
     }
 }
 
-void
-aml_icon_load_async (const char *url, GCancellable *cancellable,
-                     GAsyncReadyCallback callback, gpointer user_data)
+AmlTaskScope *
+aml_icon_load_async (const char *url, GAsyncReadyCallback callback,
+                     gpointer user_data)
 {
-  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback,
-                                       user_data);
-  aml_task_scope_attach_task (task);
-  AmlTaskScope *scope = g_object_get_data (G_OBJECT (task),
-                                           "aml-task-scope");
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
+  GTask *task = aml_task_scope_task (scope);
   g_autofree char *directory = NULL;
   IconLoad *load = NULL;
 
@@ -148,15 +148,18 @@ aml_icon_load_async (const char *url, GCancellable *cancellable,
     {
       /* A project with no icon is not an error: there is simply nothing
          to put in the row. */
-      aml_task_scope_return_pointer (scope, NULL, NULL);
-      return;
+      aml_task_scope_return_pointer_deferred (scope, NULL, NULL);
+      return g_steal_pointer (&scope);
     }
 
   directory = aml_icon_cache_directory ();
 
   load = g_new0 (IconLoad, 1);
-  load->task = g_steal_pointer (&task);
-  load->scope = aml_task_scope_from_task (load->task);
+  load->task = g_object_ref (task);
+
+  /* Borrowed: the caller holds the operation until the callback, and the
+     load is answered before it goes away. */
+  load->scope = scope;
   load->url = g_strdup (url);
   load->path = cache_path_for (url);
 
@@ -164,24 +167,27 @@ aml_icon_load_async (const char *url, GCancellable *cancellable,
      something that is already on disk. */
   if (g_file_test (load->path, G_FILE_TEST_IS_REGULAR))
     {
-      aml_task_scope_return_pointer (load->scope, g_strdup (load->path), g_free);
+      aml_task_scope_return_pointer_deferred (scope, g_strdup (load->path),
+                                              g_free);
       icon_load_free (load);
-      return;
+      return g_steal_pointer (&scope);
     }
 
   if (!aml_fs_make_directory (directory, 0755, NULL))
     {
-      aml_task_scope_return_error (
-        load->scope,
+      aml_task_scope_return_error_deferred (
+        scope,
         g_error_new (G_IO_ERROR, G_IO_ERROR_FAILED,
                      "cannot create \"%s\": %s", directory,
                      g_strerror (errno)));
       icon_load_free (load);
-      return;
+      return g_steal_pointer (&scope);
     }
 
   g_queue_push_tail (&pending, load);
   icon_pump ();
+
+  return g_steal_pointer (&scope);
 }
 
 char *

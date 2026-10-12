@@ -368,6 +368,8 @@ typedef struct
 {
   AmlTaskScope *operation;
   gboolean finished;
+  gpointer value;
+  char *path;
   GError *error;
 } DeferredWait;
 
@@ -378,7 +380,8 @@ deferred_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   DeferredWait *wait = user_data;
 
   wait->finished = TRUE;
-  g_task_propagate_boolean (G_TASK (result), &wait->error);
+  wait->value = g_task_propagate_pointer (G_TASK (result), &wait->error);
+  wait->path = wait->value;
   aml_task_scope_unref (wait->operation);
   wait->operation = NULL;
 }
@@ -400,9 +403,28 @@ test_immediate_failure_completes_after_the_constructor (void)
     g_main_context_iteration (NULL, FALSE);
 
   g_assert_true (wait.finished);
-  g_assert_nonnull (wait.error);
+  g_assert_null (wait.value);
+  g_assert_error (wait.error, G_IO_ERROR, G_IO_ERROR_FAILED);
   g_clear_error (&wait.error);
-  g_print ("ok - an operation that fails at once still returns its handle\n");
+
+  /* The pointer and boolean shapes carry the same guarantee: the answer
+   * arrives with its value, and it arrives after the constructor. */
+  wait.finished = FALSE;
+  wait.value = NULL;
+  wait.operation = aml_task_scope_new (NULL, NULL, deferred_done, &wait);
+  aml_task_scope_return_pointer_deferred (wait.operation,
+                                          g_strdup ("/a/path"), g_free);
+  g_assert_false (wait.finished);
+
+  while (g_main_context_pending (NULL))
+    g_main_context_iteration (NULL, FALSE);
+
+  g_assert_true (wait.finished);
+  g_assert_no_error (wait.error);
+  g_assert_cmpstr (wait.path, ==, "/a/path");
+  g_clear_pointer (&wait.path, g_free);
+  wait.value = NULL;
+  g_print ("ok - an operation that finishes at once still returns its handle\n");
 }
 
 /* A cancel button that belongs to a row the caller does not own still has
