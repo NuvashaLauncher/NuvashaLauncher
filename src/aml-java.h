@@ -66,8 +66,9 @@ gboolean aml_java_parse_version (const char  *output,
 AmlJava *aml_java_best_compatible (GPtrArray *javas, int required_major);
 
 /* Picks the Java an instance will run with: the instance setting wins,
- * and when it names none the closest compatible detected one. There is
- * no global default: a runtime is the instance's own choice.
+ * and when it names none the exact required major is selected when it is
+ * detected. There is no automatic fallback to another major, and no global
+ * default: a runtime is the instance's own choice.
  * @javas holds what detection found; nothing here requires every
  * candidate to be in it. */
 const AmlJava *aml_java_select (GPtrArray *javas,

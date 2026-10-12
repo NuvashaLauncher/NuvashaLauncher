@@ -185,7 +185,19 @@ aml_java_select (GPtrArray  *javas,
       return NULL;
     }
 
-  return aml_java_best_compatible (javas, required_major);
+  /* Automatic selection must not silently choose a different major. A
+   * newer JVM may be technically compatible, but it is not the runtime the
+   * user asked for and can behave differently with loaders and launchers.
+   * Leave the automatic choice unset until the required major is present. */
+  for (guint i = 0; i < javas->len; i++)
+    {
+      AmlJava *java = g_ptr_array_index (javas, i);
+
+      if (java->major_version == required_major && !java->headless)
+        return java;
+    }
+
+  return NULL;
 }
 
 /* ---------------------------------------------------------- *
