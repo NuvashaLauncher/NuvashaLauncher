@@ -851,8 +851,7 @@ scan_index_entry (ScanRun *run, AmlContentFile *file)
                      i < run->index_entries->len; i++)
     {
       AmlContentIndexEntry *entry = g_ptr_array_index (run->index_entries, i);
-      if (g_strcmp0 (entry->filename, name) == 0 &&
-          g_strcmp0 (entry->hash, file->sha1) == 0)
+      if (g_strcmp0 (entry->filename, name) == 0)
         return entry;
     }
   return NULL;
@@ -865,6 +864,8 @@ apply_index_entry (ScanRun *run, AmlContentFile *file)
 
   if (entry == NULL)
     return;
+  if (entry->hash != NULL && *entry->hash != '\0')
+    file->sha1 = g_strdup (entry->hash);
   if (entry->project_id != NULL && *entry->project_id != '\0')
     file->project_id = g_strdup (entry->project_id);
   if (entry->hash512 != NULL && *entry->hash512 != '\0')
@@ -939,6 +940,7 @@ batch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       file->path = g_file_get_path (child);
       file->filename = aml_content_disabled_name (name, TRUE);
       file->enabled = g_strcmp0 (name, file->filename) == 0;
+      apply_index_entry (run, file);
       g_ptr_array_add (run->files, file);
     }
 
@@ -1059,7 +1061,11 @@ scan_hash_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 scan_hash_next (ScanRun *run)
 {
-  run->hash_pending = run->files->len;
+  run->hash_pending = 0;
+  for (guint i = 0; i < run->files->len; i++)
+    if (((AmlContentFile *) g_ptr_array_index (run->files, i))->sha1 == NULL)
+      run->hash_pending++;
+
   if (run->hash_pending == 0)
     {
       scan_local_metadata (run);
@@ -1068,6 +1074,10 @@ scan_hash_next (ScanRun *run)
   for (guint i = 0; i < run->files->len; i++)
     {
       AmlContentFile *file = g_ptr_array_index (run->files, i);
+
+      if (file->sha1 != NULL)
+        continue;
+
       g_autoptr (GFile) handle = g_file_new_for_path (file->path);
       HashInput *input = g_new (HashInput, 1);
       input->run = run;
