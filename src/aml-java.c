@@ -175,8 +175,7 @@ aml_java_select (GPtrArray  *javas,
                * the Java version named by Minecraft.  Otherwise an old
                * per-instance setting could make a newer game fail after
                * launch with an opaque JVM error. */
-              return aml_java_is_compatible (java, required_major) ? java
-                                                                     : NULL;
+               return java->major_version == required_major ? java : NULL;
             }
         }
 

@@ -273,12 +273,10 @@ test_select_instance_then_closest (void)
   g_autoptr (GPtrArray) list = fake_java_list ();
   const AmlJava *picked;
 
-  picked = aml_java_select (list, "/fake/jdk/25/bin/java", 8);
-  g_assert_nonnull (picked);
-  g_assert_cmpint (picked->major_version, ==, 25);
+  /* An explicitly selected runtime must match the required major too. */
+  g_assert_null (aml_java_select (list, "/fake/jdk/25/bin/java", 8));
 
-  /* An explicitly selected runtime still has to meet the game's
-   * requirement: the instance setting cannot force Java 8 onto Java 17. */
+  /* An instance setting cannot force Java 8 onto Java 17. */
   g_assert_null (aml_java_select (list, "/fake/jdk/8/bin/java", 17));
   g_assert_null (aml_java_select (list, "/fake/jdk/25/bin/java", 26));
 
