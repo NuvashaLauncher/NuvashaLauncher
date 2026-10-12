@@ -1017,9 +1017,20 @@ set_moving (AmlInstancePage *self, gboolean moving)
 
 static void
 on_change_directory_ready (GObject *source, GAsyncResult *result,
+                            gpointer user_data);
+
+typedef struct
+{
+  AmlInstancePage *page;
+  AmlTaskScope *operation;
+} ChangeDirectoryWait;
+
+static void
+on_change_directory_ready (GObject *source, GAsyncResult *result,
                            gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  ChangeDirectoryWait *wait = user_data;
+  AmlInstancePage *self = wait->page;
   g_autoptr (GError) error = NULL;
 
   if (aml_instance_manager_change_directory_finish (
@@ -1038,6 +1049,8 @@ on_change_directory_ready (GObject *source, GAsyncResult *result,
   update_directory_row (self);
 
   g_object_unref (self);
+  aml_task_scope_unref (wait->operation);
+  g_free (wait);
 }
 
 static void
@@ -1081,9 +1094,11 @@ on_directory_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 
     set_moving (self, TRUE);
 
-    aml_instance_manager_change_directory_async (
-      self->manager, self->instance, canonical, NULL,
-      on_change_directory_ready, g_object_ref (self));
+    ChangeDirectoryWait *wait = g_new0 (ChangeDirectoryWait, 1);
+    wait->page = g_object_ref (self);
+    wait->operation = aml_instance_manager_change_directory_async (
+      self->manager, self->instance, canonical, on_change_directory_ready,
+      wait);
   }
 
   g_object_unref (self);
