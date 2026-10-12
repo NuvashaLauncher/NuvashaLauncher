@@ -334,22 +334,11 @@ versions_request_free (gpointer data)
   g_free (request);
 }
 
-/* What is unstable is what the loader says about it, and when it says
-   nothing a pre-release version is what is not final. */
+/* A release version stays stable even when an API marks it as old. Only an
+ * explicit pre-release marker in the version itself makes it unstable. */
 static gboolean
-version_is_stable (JsonObject *loader, const char *version)
+version_is_stable (const char *version)
 {
-  JsonNode *stable;
-
-  if (loader == NULL)
-    return version_is_final (version);
-
-  stable = json_object_get_member (loader, "stable");
-
-  if (stable != NULL && JSON_NODE_HOLDS_VALUE (stable) &&
-      json_node_get_value_type (stable) == G_TYPE_BOOLEAN)
-    return json_node_get_boolean (stable);
-
   return version_is_final (version);
 }
 
@@ -387,7 +376,7 @@ version_from_entry (JsonNode *entry)
 
   result = g_new0 (AmlLoaderVersion, 1);
   result->version = g_strdup (version);
-  result->stable = version_is_stable (json_node_get_object (loader), version);
+   result->stable = version_is_stable (version);
 
   return result;
 }
