@@ -700,7 +700,10 @@ run_search (AmlDownloadModpackDialog *self, gboolean append)
 
   if (self->debounce != 0)
     {
-      g_source_remove (self->debounce);
+      /* The debounce source belongs to the dialog scope. Removing it
+         through the scope also forgets its ID, so a later recycled GLib
+         source ID cannot be removed during scope teardown. */
+      aml_task_scope_remove_source (self->scope, self->debounce);
       self->debounce = 0;
     }
 
