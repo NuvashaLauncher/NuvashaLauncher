@@ -11,16 +11,23 @@
 
 static char *root;
 
+typedef struct
+{
+  GMainLoop *loop;
+  AmlTaskScope *operation;
+} CacheClearWait;
+
 static void
 cache_clear_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                   gpointer user_data)
 {
-  GMainLoop *loop = user_data;
+  CacheClearWait *wait = user_data;
   g_autoptr (GError) error = NULL;
 
   g_assert_true (g_task_propagate_boolean (G_TASK (result), &error));
   g_assert_no_error (error);
-  g_main_loop_quit (loop);
+  aml_task_scope_unref (wait->operation);
+  g_main_loop_quit (wait->loop);
 }
 
 static void
@@ -142,7 +149,8 @@ test_cache_cleanup (void)
   g_assert_true (g_file_set_contents (packs_file, "pack", -1, NULL));
   g_assert_true (g_file_set_contents (installed, "installed", -1, NULL));
 
-  aml_cache_clear_all_async (NULL, cache_clear_done, loop);
+   CacheClearWait wait = { loop, NULL };
+   wait.operation = aml_cache_clear_all_async (cache_clear_done, &wait);
   g_main_loop_run (loop);
 
   g_assert_false (g_file_test (api, G_FILE_TEST_EXISTS));

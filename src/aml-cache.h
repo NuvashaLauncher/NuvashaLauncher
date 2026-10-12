@@ -6,22 +6,21 @@
 #define AML_CACHE_H
 
 #include <gio/gio.h>
+#include "aml-task.h"
 
 G_BEGIN_DECLS
 
 char *aml_cache_get_api_directory (void);
 char *aml_cache_get_files_directory (void);
 
-void aml_cache_clear_api_async (GCancellable       *cancellable,
-                                GAsyncReadyCallback callback,
-                                gpointer            user_data);
+AmlTaskScope *aml_cache_clear_api_async (GAsyncReadyCallback callback,
+                                          gpointer            user_data);
 
 /* Removes the contents of the global AML cache tree. It never traverses
  * instance directories, so installed content and its metadata indexes stay
  * untouched. The callback receives a GTask boolean result. */
-void aml_cache_clear_all_async (GCancellable       *cancellable,
-                                GAsyncReadyCallback callback,
-                                gpointer            user_data);
+AmlTaskScope *aml_cache_clear_all_async (GAsyncReadyCallback callback,
+                                         gpointer            user_data);
 
 G_END_DECLS
 
