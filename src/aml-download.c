@@ -22,6 +22,7 @@
  * from the same main context. */
 
 #include "aml-download.h"
+#include "aml-downloads.h"
 
 #include "aml-cache.h"
 #include "aml-fs.h"
@@ -87,62 +88,33 @@ struct _AmlDownloadService {
   AmlSettings *cache_settings;
 };
 
-static AmlDownloadService *service;
-
 AmlDownloadService *
 aml_download_service_new (void)
 {
-  if (service == NULL)
-    {
-      service = g_new0 (AmlDownloadService, 1);
-      g_queue_init (&service->interactive_waiting);
-      g_queue_init (&service->bulk_waiting);
-      service->prefer_interactive = TRUE;
-    }
+  AmlDownloadService *service = g_new0 (AmlDownloadService, 1);
+  g_queue_init (&service->interactive_waiting);
+  g_queue_init (&service->bulk_waiting);
+  service->prefer_interactive = TRUE;
   return service;
 }
 
 void
 aml_download_service_free (AmlDownloadService *owned_service)
 {
-  if (owned_service != service)
+  if (owned_service == NULL)
     return;
   aml_download_service_cancel_queued (owned_service);
-  aml_download_shutdown ();
-  if (service != NULL && service->interactive_running == 0 &&
-      service->bulk_running == 0 &&
-      g_queue_is_empty (&service->interactive_waiting) &&
-      g_queue_is_empty (&service->bulk_waiting))
-    g_clear_pointer (&service, g_free);
-}
-
-static AmlDownloadService *
-get_service (void)
-{
-  return aml_download_service_new ();
-}
-
-void
-aml_download_shutdown (void)
-{
-  if (service == NULL)
+  if (owned_service->interactive_running != 0 ||
+      owned_service->bulk_running != 0)
     return;
-  /* Requests own all callback state. Do not tear down the session while one
-   * of them is still running or queued. The normal application shutdown
-   * path calls this after its windows and tasks have gone away. */
-  if (service->interactive_running != 0 || service->bulk_running != 0 ||
-      !g_queue_is_empty (&service->interactive_waiting) ||
-      !g_queue_is_empty (&service->bulk_waiting))
-    return;
-
-  g_clear_object (&service->session);
-  g_clear_object (&service->cache_settings);
+  g_clear_object (&owned_service->session);
+  g_clear_object (&owned_service->cache_settings);
+  g_free (owned_service);
 }
 
 static SoupSession *
-get_session (void)
+get_session (AmlDownloadService *service)
 {
-  get_service ();
   if (service->session == NULL)
     /* max-conns is a construct property: it can only be given while
        the session is created, and it matches the cap on transfers so
@@ -271,8 +243,9 @@ url_for_message (const char *url)
 }
 
 static AmlSettings *
-get_cache_settings (void)
+get_cache_settings (DownloadRequest *request)
 {
+  AmlDownloadService *service = request->service;
   if (service->cache_settings == NULL)
     service->cache_settings = aml_settings_new ();
 
@@ -665,8 +638,9 @@ release_slot (DownloadRequest *request)
 void
 aml_download_service_cancel_queued (AmlDownloadService *owned_service)
 {
-  if (owned_service == NULL || owned_service != service)
+  if (owned_service == NULL)
     return;
+  AmlDownloadService *service = owned_service;
 
   while (!g_queue_is_empty (&service->interactive_waiting))
     {
@@ -1103,7 +1077,7 @@ global_cache_hash_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 json_cache_start (DownloadRequest *request)
 {
-  AmlSettings *settings = get_cache_settings ();
+  AmlSettings *settings = get_cache_settings (request);
 
   request->api_cache = aml_settings_get_cache_modrinth_api_responses (settings);
   request->cache_expiration = aml_settings_get_cache_expiration (settings);
@@ -1672,6 +1646,8 @@ queued_cancelled (gpointer user_data)
 {
   DownloadRequest *request = user_data;
 
+  AmlDownloadService *service = request->service;
+
   if (g_queue_remove (request->priority >= DOWNLOAD_PRIORITY_INTERACTIVE
                         ? &service->interactive_waiting
                         : &service->bulk_waiting,
@@ -1739,7 +1715,8 @@ start_attempt (DownloadRequest *request)
 
   if (request->json)
     {
-      soup_session_send_and_read_async (get_session (), request->message,
+      soup_session_send_and_read_async (get_session (request->service),
+                                        request->message,
                                         G_PRIORITY_DEFAULT, cancellable,
                                         json_ready, request);
       return;
@@ -1754,7 +1731,7 @@ start_attempt (DownloadRequest *request)
   if (request->expected_hash != NULL)
     request->checksum = g_checksum_new (request->hash_type);
 
-  soup_session_send_async (get_session (), request->message,
+  soup_session_send_async (get_session (request->service), request->message,
                            G_PRIORITY_DEFAULT, cancellable, send_ready,
                            request);
 }
@@ -1862,7 +1839,7 @@ json_ready (GObject *source, GAsyncResult *result, gpointer user_data)
  * ---------------------------------------------------------- */
 
 AmlTaskScope *
-aml_download_file_async (const char *url,
+aml_download_file_async (AmlDownloadService *service, const char *url,
                          const char *dest_path,
                          const char *expected_hash,
                          GChecksumType hash_type,
@@ -1899,7 +1876,7 @@ aml_download_file_async (const char *url,
   /* Borrowed: the caller's handle keeps the operation alive, and the
      request is answered before it goes away. */
   request->scope = scope;
-   request->service = get_service ();
+   request->service = service;
    request->task = g_object_ref (aml_task_scope_task (scope));
   request->url = g_strdup (url);
   request->dest_path = g_strdup (dest_path);
@@ -1926,7 +1903,7 @@ aml_download_file_finish (GAsyncResult *result, GError **error)
 }
 
 AmlTaskScope *
-aml_download_json_async (const char *url,
+aml_download_json_async (AmlDownloadService *service, const char *url,
                          GAsyncReadyCallback callback,
                          gpointer user_data)
 {
@@ -1956,7 +1933,7 @@ aml_download_json_async (const char *url,
   /* Borrowed: the caller's handle keeps the operation alive, and the
      request is answered before it goes away. */
   request->scope = scope;
-   request->service = get_service ();
+   request->service = service;
    request->task = g_object_ref (aml_task_scope_task (scope));
   request->url = g_strdup (url);
   request->json = TRUE;
@@ -1972,11 +1949,11 @@ aml_download_json_async (const char *url,
 }
 
 void
-aml_download_set_cache_settings (AmlSettings *settings)
+aml_download_set_cache_settings (AmlDownloadService *service,
+                                  AmlSettings *settings)
 {
   g_return_if_fail (settings == NULL || AML_IS_SETTINGS (settings));
 
-  get_service ();
   g_set_object (&service->cache_settings, settings);
 }
 
@@ -2007,7 +1984,8 @@ aml_download_json_finish (GAsyncResult *result, GError **error)
 }
 
 AmlTaskScope *
-aml_download_json_post_async (const char           *url,
+aml_download_json_post_async (AmlDownloadService *service,
+                              const char           *url,
                               const char           *body,
                               const char           *user_agent,
                               GAsyncReadyCallback   callback,
@@ -2039,7 +2017,7 @@ aml_download_json_post_async (const char           *url,
   /* Borrowed: the caller's handle keeps the operation alive, and the
      request is answered before it goes away. */
   request->scope = scope;
-   request->service = get_service ();
+   request->service = service;
    request->task = g_object_ref (aml_task_scope_task (scope));
   request->url = g_strdup (url);
   request->body = g_strdup (body);
@@ -2057,7 +2035,8 @@ aml_download_json_post_async (const char           *url,
 }
 
 AmlTaskScope *
-aml_download_json_cached_async (const char *url, GAsyncReadyCallback callback,
+aml_download_json_cached_async (AmlDownloadService *service, const char *url,
+                                GAsyncReadyCallback callback,
                                 gpointer user_data)
 {
   g_return_val_if_fail (url != NULL, NULL);
@@ -2081,7 +2060,7 @@ aml_download_json_cached_async (const char *url, GAsyncReadyCallback callback,
   /* Borrowed: the caller's handle keeps the operation alive, and the
      request is answered before it goes away. */
   request->scope = scope;
-   request->service = get_service ();
+   request->service = service;
    request->task = g_object_ref (aml_task_scope_task (scope));
   request->url = g_strdup (url);
   request->json = TRUE;
@@ -2096,7 +2075,8 @@ aml_download_json_cached_async (const char *url, GAsyncReadyCallback callback,
 }
 
 AmlTaskScope *
-aml_download_json_post_cached_async (const char *url, const char *body,
+aml_download_json_post_cached_async (AmlDownloadService *service,
+                                     const char *url, const char *body,
                                      const char *user_agent,
                                      GAsyncReadyCallback callback,
                                      gpointer user_data)
@@ -2122,7 +2102,7 @@ aml_download_json_post_cached_async (const char *url, const char *body,
   /* Borrowed: the caller's handle keeps the operation alive, and the
      request is answered before it goes away. */
   request->scope = scope;
-   request->service = get_service ();
+   request->service = service;
    request->task = g_object_ref (aml_task_scope_task (scope));
   request->url = g_strdup (url);
   request->body = g_strdup (body);

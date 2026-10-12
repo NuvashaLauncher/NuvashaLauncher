@@ -8,6 +8,7 @@
 #include "aml-fs.h"
 
 #include "aml-download.h"
+#include "aml-downloads.h"
 #include "aml-minecraft-resolve.h"
 
 #include <archive.h>
@@ -879,7 +880,7 @@ drain_pending (InstallRequest *request)
     }
 
   aml_task_scope_release_when_done (
-    aml_download_file_async (file->url, file->path, file->sha1,
+    aml_download_file_async (aml_downloads_get_service (), file->url, file->path, file->sha1,
                              file->sha1 != NULL ? G_CHECKSUM_SHA1
                                                 : G_CHECKSUM_MD5,
                              NULL, file_ready, request),

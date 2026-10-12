@@ -12,6 +12,7 @@
 #include "aml-fs.h"
 #include "aml-task-private.h"
 #include "aml-loaders.h"
+#include "aml-downloads.h"
 
 #include <archive.h>
 #include <archive_entry.h>
@@ -474,7 +475,7 @@ dispatch_download (InstallRun *run)
       }
 
     aml_task_scope_release_when_done (
-      aml_download_file_async (url, dest, NULL, 0, NULL, install_file_done,
+      aml_download_file_async (aml_downloads_get_service (), url, dest, NULL, 0, NULL, install_file_done,
                                run),
       run->cancellable);
   }
