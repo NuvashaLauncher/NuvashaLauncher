@@ -283,11 +283,18 @@ on_clear_cache_clicked (GtkButton *button G_GNUC_UNUSED,
                            on_clear_cache_confirmed, g_object_ref (self));
 }
 
+typedef struct
+{
+  AmlMainWindow *window;
+  AmlTaskScope *operation;
+} CacheClearWait;
+
 static void
 on_cache_cleared (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                   gpointer user_data)
 {
-  AmlMainWindow *self = user_data;
+  CacheClearWait *wait = user_data;
+  AmlMainWindow *self = wait->window;
   g_autoptr (GError) error = NULL;
   gboolean success = g_task_propagate_boolean (G_TASK (result), &error);
   AdwAlertDialog *alert = NULL;
@@ -309,6 +316,8 @@ on_cache_cleared (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   adw_alert_dialog_set_close_response (alert, "ok");
   adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (self));
   g_object_unref (self);
+  aml_task_scope_unref (wait->operation);
+  g_free (wait);
 }
 
 static void
@@ -325,7 +334,9 @@ on_clear_cache_confirmed (GObject *source, GAsyncResult *result,
       return;
     }
 
-  aml_cache_clear_all_async (NULL, on_cache_cleared, self);
+  CacheClearWait *wait = g_new0 (CacheClearWait, 1);
+  wait->window = self;
+  wait->operation = aml_cache_clear_all_async (on_cache_cleared, wait);
 }
 
 static void
