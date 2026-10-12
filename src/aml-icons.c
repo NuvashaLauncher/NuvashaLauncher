@@ -151,7 +151,7 @@ aml_icon_load_async (const char *url, GCancellable *cancellable,
 
   load = g_new0 (IconLoad, 1);
   load->task = g_steal_pointer (&task);
-  load->scope = aml_task_scope_borrow_task (load->task);
+  load->scope = aml_task_scope_from_task (load->task);
   load->url = g_strdup (url);
   load->path = cache_path_for (url);
 

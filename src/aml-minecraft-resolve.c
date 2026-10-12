@@ -988,7 +988,7 @@ aml_resolve_extract_natives_async (GPtrArray         *jars,
 
   request = g_new0 (ExtractRequest, 1);
   request->task = g_task_new (NULL, cancellable, callback, user_data);
-  request->scope = aml_task_scope_borrow_task (request->task);
+  request->scope = aml_task_scope_from_task (request->task);
   g_task_set_check_cancellable (request->task, FALSE);
   request->jars = g_ptr_array_ref (jars);
   request->directory = g_strdup (natives_directory);
@@ -2020,7 +2020,7 @@ request_new (const char         *version_id,
   g_autofree char *jar = g_strconcat (name, ".jar", NULL);
 
   request->task = g_task_new (NULL, cancellable, callback, user_data);
-  request->scope = aml_task_scope_borrow_task (request->task);
+  request->scope = aml_task_scope_from_task (request->task);
   g_task_set_check_cancellable (request->task, FALSE);
   request->version_id = g_strdup (version_id);
   request->data_dir = data_dir != NULL

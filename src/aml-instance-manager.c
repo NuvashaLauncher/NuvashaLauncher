@@ -1001,7 +1001,7 @@ aml_instance_manager_duplicate_async (AmlInstanceManager *self,
   DuplicateData *data = g_new0 (DuplicateData, 1);
   data->self = g_object_ref (self);
   data->task = g_object_ref (task);
-  data->scope = aml_task_scope_borrow_task (task);
+  data->scope = aml_task_scope_from_task (task);
   data->copy = g_steal_pointer (&copy);
 
   g_autoptr (GFile) source_file = g_file_new_for_path (source_directory);
@@ -1129,7 +1129,7 @@ aml_instance_manager_delete_async (AmlInstanceManager *self,
   DeleteData *data = g_new0 (DeleteData, 1);
   data->self = g_object_ref (self);
   data->task = g_object_ref (task);
-   data->scope = aml_task_scope_borrow_task (task);
+   data->scope = aml_task_scope_from_task (task);
   data->instance = g_object_ref (instance);
 
   delete_tree_async (file, cancellable, delete_directory_ready, data);
@@ -1369,7 +1369,7 @@ aml_instance_manager_change_directory_async (AmlInstanceManager *self,
   MoveData *data = g_new0 (MoveData, 1);
   data->self = g_object_ref (self);
   data->task = g_steal_pointer (&task);
-  data->scope = aml_task_scope_borrow_task (data->task);
+  data->scope = aml_task_scope_from_task (data->task);
   data->instance = g_object_ref (instance);
   data->old_directory = g_steal_pointer (&old_directory);
   data->new_directory = g_strdup (path);

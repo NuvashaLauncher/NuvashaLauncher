@@ -1130,7 +1130,7 @@ request_new (GCancellable *cancellable, GAsyncReadyCallback callback,
 {
   GTask *task = g_task_new (NULL, cancellable, callback, user_data);
   Request *request = g_new0 (Request, 1);
-  request->scope = aml_task_scope_borrow_task (task);
+  request->scope = aml_task_scope_from_task (task);
 
   request->answer = answer;
   request->not_found = not_found;

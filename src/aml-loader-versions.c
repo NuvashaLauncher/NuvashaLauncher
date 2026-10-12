@@ -658,7 +658,7 @@ aml_loaders_versions_async (AmlLoader           loader,
 
   request = g_new0 (VersionsRequest, 1);
   request->task = g_task_new (NULL, cancellable, callback, user_data);
-  request->scope = aml_task_scope_borrow_task (request->task);
+  request->scope = aml_task_scope_from_task (request->task);
   request->loader = loader;
   request->game_version = g_strdup (game_version);
   request->versions = g_ptr_array_new_with_free_func (
