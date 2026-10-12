@@ -777,7 +777,7 @@ request_fail (DownloadRequest *request, GError *error)
 {
   discard_temporary (request);
   release_slot (request);
-  g_task_return_error (request->task, error);
+  aml_task_scope_return_error (request->scope, error);
   request_free (request);
 }
 
@@ -785,7 +785,7 @@ static void
 request_succeed (DownloadRequest *request)
 {
   release_slot (request);
-  g_task_return_boolean (request->task, TRUE);
+  aml_task_scope_return_boolean (request->scope, TRUE);
   request_free (request);
 }
 
@@ -793,7 +793,7 @@ static void
 request_succeed_json (DownloadRequest *request, JsonParser *parser)
 {
   release_slot (request);
-  g_task_return_pointer (request->task, parser, g_object_unref);
+  aml_task_scope_return_pointer (request->scope, parser, g_object_unref);
   request_free (request);
 }
 
@@ -843,6 +843,7 @@ hash_file_async (GFile *file, GChecksumType type, GCancellable *cancellable,
   HashFile *hash = g_new0 (HashFile, 1);
 
   hash->task = g_task_new (file, cancellable, callback, user_data);
+  aml_task_scope_attach_task (hash->task);
   hash->scope = aml_task_scope_from_task (hash->task);
   hash->checksum = g_checksum_new (type);
 
@@ -861,7 +862,7 @@ cache_open_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 
   if (hash->stream == NULL)
     {
-      g_task_return_error (hash->task, g_steal_pointer (&error));
+      aml_task_scope_return_error (hash->scope, g_steal_pointer (&error));
       hash_file_free (hash);
       return;
     }
@@ -874,7 +875,7 @@ hash_read_next (HashFile *hash)
 {
   g_input_stream_read_bytes_async (hash->stream, CHUNK_SIZE,
                                    G_PRIORITY_DEFAULT,
-                                   g_task_get_cancellable (hash->task),
+                                    aml_task_scope_get_cancellable (hash->scope),
                                    hash_read_ready, hash);
 }
 
@@ -888,7 +889,7 @@ hash_read_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 
   if (bytes == NULL)
     {
-      g_task_return_error (hash->task, g_steal_pointer (&error));
+      aml_task_scope_return_error (hash->scope, g_steal_pointer (&error));
       hash_file_free (hash);
       return;
     }
@@ -898,9 +899,8 @@ hash_read_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 
   if (size == 0)
     {
-      g_task_return_pointer (hash->task,
-                             g_strdup (g_checksum_get_string (hash->checksum)),
-                             g_free);
+      aml_task_scope_return_pointer (
+        hash->scope, g_strdup (g_checksum_get_string (hash->checksum)), g_free);
       hash_file_free (hash);
       return;
     }
@@ -1844,9 +1844,8 @@ aml_download_file_async (const char *url,
    request->parent_fd = -1;
 
   request->task = g_steal_pointer (&task);
-  request->scope = aml_task_scope_new (NULL,
-                                       g_task_get_cancellable (request->task),
-                                       NULL, NULL);
+  request->scope = aml_task_scope_ref (
+    g_object_get_data (G_OBJECT (request->task), "aml-task-scope"));
   request->url = g_strdup (url);
   request->dest_path = g_strdup (dest_path);
   request->expected_hash = g_strdup (expected_hash);
@@ -1897,9 +1896,8 @@ aml_download_json_async (const char *url,
    request->parent_fd = -1;
 
   request->task = g_steal_pointer (&task);
-  request->scope = aml_task_scope_new (NULL,
-                                       g_task_get_cancellable (request->task),
-                                       NULL, NULL);
+  request->scope = aml_task_scope_ref (
+    g_object_get_data (G_OBJECT (request->task), "aml-task-scope"));
   request->url = g_strdup (url);
   request->json = TRUE;
   request->user_data = user_data;
@@ -1978,9 +1976,8 @@ aml_download_json_post_async (const char           *url,
    request->parent_fd = -1;
 
   request->task = g_steal_pointer (&task);
-  request->scope = aml_task_scope_new (NULL,
-                                       g_task_get_cancellable (request->task),
-                                       NULL, NULL);
+  request->scope = aml_task_scope_ref (
+    g_object_get_data (G_OBJECT (request->task), "aml-task-scope"));
   request->url = g_strdup (url);
   request->body = g_strdup (body);
   request->user_agent = g_strdup (user_agent);
@@ -2015,9 +2012,8 @@ aml_download_json_cached_async (const char *url, GCancellable *cancellable,
    DownloadRequest *request = g_new0 (DownloadRequest, 1);
    request->parent_fd = -1;
   request->task = g_steal_pointer (&task);
-  request->scope = aml_task_scope_new (NULL,
-                                       g_task_get_cancellable (request->task),
-                                       NULL, NULL);
+  request->scope = aml_task_scope_ref (
+    g_object_get_data (G_OBJECT (request->task), "aml-task-scope"));
   request->url = g_strdup (url);
   request->json = TRUE;
   request->api_cache = TRUE;
@@ -2053,9 +2049,8 @@ aml_download_json_post_cached_async (const char *url, const char *body,
    DownloadRequest *request = g_new0 (DownloadRequest, 1);
    request->parent_fd = -1;
   request->task = g_steal_pointer (&task);
-  request->scope = aml_task_scope_new (NULL,
-                                       g_task_get_cancellable (request->task),
-                                       NULL, NULL);
+  request->scope = aml_task_scope_ref (
+    g_object_get_data (G_OBJECT (request->task), "aml-task-scope"));
   request->url = g_strdup (url);
   request->body = g_strdup (body);
   request->user_agent = g_strdup (user_agent);
