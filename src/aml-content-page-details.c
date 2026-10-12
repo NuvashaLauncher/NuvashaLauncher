@@ -6,6 +6,7 @@
 #include "aml-content-format.h"
 #include "aml-i18n.h"
 #include "aml-markdown.h"
+#include "aml-operation.h"
 
 /* One answer of the page of a project while what it shows is being
  * read: the page that opened it, weakly held, and the project the
@@ -41,7 +42,7 @@ details_watch_free (DetailsWatch *watch)
                                   (gpointer *) &watch->page);
 
   if (watch->operation != NULL)
-    aml_task_scope_unref (watch->operation);
+    aml_operation_unref (watch->operation);
 
   g_free (watch->project_id);
   g_free (watch);
@@ -543,11 +544,11 @@ on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
      can reach the list. The watch goes on to the next answer, which is
      the one that frees it, so it hands over the handle it was holding:
      this answer is in. */
-  aml_task_scope_unref (watch->operation);
+  aml_operation_unref (watch->operation);
   watch->operation = aml_modrinth_versions_async (
     watch->project_id, self->type, self->minecraft_version, self->loader,
     on_detail_versions_ready, watch);
-  aml_task_scope_follow_cancellable (watch->operation,
+  aml_operation_follow (watch->operation,
                                      self->browse.model->cancellable);
 }
 
@@ -603,7 +604,7 @@ open_project_page (AmlContentPage *self, AmlModrinthProject *project)
     watch->operation =
       aml_modrinth_details_async (project->project_id, on_details_ready,
                                   watch);
-    aml_task_scope_follow_cancellable (watch->operation,
+    aml_operation_follow (watch->operation,
                                        self->browse.model->cancellable);
   }
 }

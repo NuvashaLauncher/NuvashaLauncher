@@ -7,6 +7,7 @@
 #include "aml-create-instance-dialog.h"
 #include "aml-download-modpack-dialog.h"
 #include "aml-i18n.h"
+#include "aml-operation.h"
 
 static void
 on_create_instance (GSimpleAction *action G_GNUC_UNUSED,
@@ -316,7 +317,7 @@ on_cache_cleared (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   adw_alert_dialog_set_close_response (alert, "ok");
   adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (self));
   g_object_unref (self);
-  aml_task_scope_unref (wait->operation);
+  aml_operation_unref (wait->operation);
   g_free (wait);
 }
 

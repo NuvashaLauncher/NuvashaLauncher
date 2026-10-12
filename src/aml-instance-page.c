@@ -28,6 +28,7 @@
 #include "aml-modpack.h"
 #include "aml-ui-feedback.h"
 #include "aml-task.h"
+#include "aml-operation.h"
 
 struct _AmlInstancePage
 {
@@ -314,8 +315,8 @@ on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
    * warning again, using the manifest cache. */
   if (self->versions_operation != NULL)
     {
-      aml_task_scope_cancel (self->versions_operation);
-      aml_task_scope_unref (self->versions_operation);
+      aml_operation_cancel (self->versions_operation);
+      aml_operation_unref (self->versions_operation);
     }
   self->versions_operation = aml_version_manifest_fetch_async (
     AML_VERSION_MANIFEST_URL, on_manifest_loaded, g_object_ref (self));
@@ -464,7 +465,7 @@ on_description_loaded (GObject *source G_GNUC_UNUSED,
     aml_version_load_finish (result, &error);
 
   /* The answer is in: the read that brought it is finished with. */
-  aml_task_scope_unref (self->versions_operation);
+  aml_operation_unref (self->versions_operation);
   self->versions_operation = NULL;
 
   if (description != NULL && description->java_version != NULL)
@@ -489,7 +490,7 @@ on_manifest_loaded (GObject *source G_GNUC_UNUSED,
                                               "minecraft-version");
 
   /* The manifest is in: the read that brought it is finished with. */
-  aml_task_scope_unref (self->versions_operation);
+  aml_operation_unref (self->versions_operation);
   self->versions_operation = NULL;
 
   if (manifest == NULL)
@@ -681,7 +682,7 @@ on_open_folder_ready (GObject *source, GAsyncResult *result, gpointer user_data)
     show_toast (self, error->message);
 
   g_object_unref (self);
-  aml_task_scope_unref (operation);
+  aml_operation_unref (operation);
   g_free (wait);
 }
 
@@ -729,7 +730,7 @@ on_export_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     }
   if (self->export_operation != NULL)
     {
-      aml_task_scope_unref (self->export_operation);
+      aml_operation_unref (self->export_operation);
       self->export_operation = NULL;
     }
 
@@ -780,7 +781,7 @@ on_export_file_chosen (GObject *source, GAsyncResult *result,
 
         /* The entry's × is the cancel button the user can see, so the
            export follows that entry's cancellable. */
-        aml_task_scope_follow_cancellable (
+        aml_operation_follow (
           self->export_operation,
           aml_download_get_cancellable (self->export_download));
       }
@@ -833,7 +834,7 @@ static gboolean
 export_metadata_free_idle (gpointer user_data)
 {
   ExportMetadata *data = user_data;
-  aml_task_scope_forget_source (data->page->scope, data->page->export_idle);
+  aml_operation_forget_source (data->page->scope, data->page->export_idle);
   data->page->export_idle = 0;
   return G_SOURCE_REMOVE;
 }
@@ -848,7 +849,7 @@ on_export_metadata_closed (AdwDialog *dialog G_GNUC_UNUSED,
   data->page->export_idle = g_idle_add_full (
     G_PRIORITY_DEFAULT, export_metadata_free_idle, data,
     (GDestroyNotify) export_metadata_free);
-  aml_task_scope_track_source (data->page->scope, data->page->export_idle);
+  aml_operation_track (data->page->scope, data->page->export_idle);
 }
 
 static void
@@ -1068,7 +1069,7 @@ on_change_directory_ready (GObject *source, GAsyncResult *result,
   update_directory_row (self);
 
   g_object_unref (self);
-  aml_task_scope_unref (wait->operation);
+  aml_operation_unref (wait->operation);
   g_free (wait);
 }
 
@@ -1171,7 +1172,7 @@ on_duplicate_ready (GObject *source, GAsyncResult *result, gpointer user_data)
     }
 
   g_object_unref (self);
-  aml_task_scope_unref (wait->operation);
+  aml_operation_unref (wait->operation);
   g_free (wait);
 }
 
@@ -1199,7 +1200,7 @@ on_delete_ready (GObject *source, GAsyncResult *result, gpointer user_data)
       /* The instance is still registered: stay on its page. */
       show_toast (self, error->message);
       g_object_unref (self);
-      aml_task_scope_unref (wait->operation);
+      aml_operation_unref (wait->operation);
       g_free (wait);
       return;
     }
@@ -1209,7 +1210,7 @@ on_delete_ready (GObject *source, GAsyncResult *result, gpointer user_data)
      page to close itself would mean two places deciding the same thing. */
 
   g_object_unref (self);
-  aml_task_scope_unref (wait->operation);
+  aml_operation_unref (wait->operation);
   g_free (wait);
 }
 
@@ -1607,15 +1608,15 @@ aml_instance_page_dispose (GObject *object)
   self->directory_path_label = NULL;
   self->directory_spinner = NULL;
 
-  aml_task_scope_cancel (self->scope);
-  aml_task_scope_unref (self->scope);
+  aml_operation_cancel (self->scope);
+  aml_operation_unref (self->scope);
   self->scope = NULL;
 
   /* The Java warning's manifest read is this page's: it stops with it. */
   if (self->versions_operation != NULL)
     {
-      aml_task_scope_cancel (self->versions_operation);
-      aml_task_scope_unref (self->versions_operation);
+      aml_operation_cancel (self->versions_operation);
+      aml_operation_unref (self->versions_operation);
       self->versions_operation = NULL;
     }
 
@@ -1658,5 +1659,5 @@ aml_instance_page_init (AmlInstancePage *self)
 {
   /* Everything is built in aml_instance_page_new(), which knows the
    * instance the page is for. */
-  self->scope = aml_task_scope_new (NULL, NULL, NULL, NULL);
+  self->scope = aml_operation_new (NULL, NULL, NULL, NULL);
 }

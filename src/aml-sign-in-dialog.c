@@ -6,6 +6,7 @@
 #include "aml-i18n.h"
 
 #include "aml-auth-microsoft.h"
+#include "aml-operation.h"
 
 /* What the dialog is waiting for while there is nothing to show: the
  * code from Microsoft, and then the user with it. */
@@ -137,7 +138,7 @@ on_code_ready (GObject      *source G_GNUC_UNUSED,
 
   set_step (self, STEP_SIGN_IN);
 
-  aml_task_scope_release_when_done (
+  aml_operation_release (
     aml_auth_sign_in_async (self->code, finish_sign_in, g_object_ref (self)),
     self->cancellable);
 }
@@ -190,7 +191,7 @@ begin_sign_in (AmlSignInDialog *self)
   gtk_widget_set_visible (GTK_WIDGET (self->open_button), FALSE);
   set_step (self, STEP_CODE);
 
-  aml_task_scope_release_when_done (
+  aml_operation_release (
     aml_auth_device_code_async (on_code_ready, g_object_ref (self)),
     self->cancellable);
 }
