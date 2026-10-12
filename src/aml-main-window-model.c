@@ -35,6 +35,7 @@ aml_main_window_model_free (AmlMainWindowModel *model)
   g_clear_pointer (&model->launchers, g_hash_table_unref);
   g_clear_pointer (&model->instance_dialogs, g_hash_table_unref);
   g_clear_object (&model->manager);
+  aml_download_service_cancel_queued (model->download_service);
   aml_download_service_free (model->download_service);
   model->download_service = NULL;
   g_clear_object (&model->settings);
