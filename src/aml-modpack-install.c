@@ -219,8 +219,15 @@ install_after_overrides (InstallRun *run)
       return;
     }
 
-  aml_loaders_versions_async (pack->loader, pack->minecraft_version,
-                              run->cancellable, install_loader_versions, run);
+  {
+    AmlTaskScope *listing = aml_loaders_versions_async (pack->loader,
+                                                        pack->minecraft_version,
+                                                        install_loader_versions,
+                                                        run);
+
+    aml_task_scope_follow_cancellable (listing, run->cancellable);
+    aml_task_scope_unref_when_done (listing);
+  }
 }
 
 static void

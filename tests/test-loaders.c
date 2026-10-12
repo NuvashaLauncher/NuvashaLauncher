@@ -675,6 +675,7 @@ typedef struct
   AmlVersionDescription *profile;
   GPtrArray *versions;
   guint watchdog;
+  AmlTaskScope *operation;
 } Wait;
 
 static gboolean
@@ -694,6 +695,8 @@ on_install_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   Wait *wait = user_data;
 
   wait->install = aml_loaders_install_finish (result, &wait->error);
+  aml_task_scope_unref (wait->operation);
+  wait->operation = NULL;
   g_main_loop_quit (wait->loop);
 }
 
@@ -704,6 +707,8 @@ on_profile_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   Wait *wait = user_data;
 
   wait->profile = aml_loaders_profile_finish (result, &wait->error);
+  aml_task_scope_unref (wait->operation);
+  wait->operation = NULL;
   g_main_loop_quit (wait->loop);
 }
 
@@ -714,6 +719,8 @@ on_versions_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   Wait *wait = user_data;
 
   wait->versions = aml_loaders_versions_finish (result, &wait->error);
+  aml_task_scope_unref (wait->operation);
+  wait->operation = NULL;
   g_main_loop_quit (wait->loop);
 }
 
@@ -733,8 +740,9 @@ test_cancelled_versions_deliver_nothing (void)
      request is what the last screen left behind. */
   g_cancellable_cancel (cancellable);
 
-  aml_loaders_versions_async (AML_LOADER_FABRIC, "1.20.1", cancellable,
-                              on_versions_finished, &wait);
+  wait.operation = aml_loaders_versions_async (AML_LOADER_FABRIC, "1.20.1",
+                                               on_versions_finished, &wait);
+  aml_task_scope_follow_cancellable (wait.operation, cancellable);
 
   g_main_loop_run (wait.loop);
   g_source_remove (wait.watchdog);
@@ -773,9 +781,10 @@ test_install_of_a_loader_that_publishes_none (void)
   wait.loop = g_main_loop_new (NULL, FALSE);
   wait.watchdog = g_timeout_add_seconds (20, watchdog_fired, &wait);
 
-  aml_loaders_install_async (AML_LOADER_FABRIC, "1.20.1", "0.19.5", document,
-                             "/bin/true", NULL, NULL, NULL, NULL,
-                             on_install_finished, &wait);
+  wait.operation = aml_loaders_install_async (AML_LOADER_FABRIC, "1.20.1",
+                                              "0.19.5", document, "/bin/true",
+                                              NULL, NULL, NULL,
+                                              on_install_finished, &wait);
 
   g_main_loop_run (wait.loop);
   g_source_remove (wait.watchdog);
@@ -799,8 +808,9 @@ test_profile_of_a_loader_that_publishes_an_installer (void)
   wait.loop = g_main_loop_new (NULL, FALSE);
   wait.watchdog = g_timeout_add_seconds (20, watchdog_fired, &wait);
 
-  aml_loaders_profile_async (AML_LOADER_FORGE, "1.20.1", "1.20.1-47.2.0",
-                             NULL, on_profile_finished, &wait);
+  wait.operation = aml_loaders_profile_async (AML_LOADER_FORGE, "1.20.1",
+                                              "1.20.1-47.2.0",
+                                              on_profile_finished, &wait);
 
   g_main_loop_run (wait.loop);
   g_source_remove (wait.watchdog);

@@ -547,7 +547,6 @@ install_request_free (gpointer data)
 {
   InstallRequest *request = data;
 
-  aml_task_scope_unref (request->scope);
   g_clear_object (&request->task);
   g_clear_object (&request->profile);
   g_clear_object (&request->description);
@@ -567,13 +566,17 @@ install_request_free (gpointer data)
   g_free (request);
 }
 
-/* Ends the install. Consumes @error, which may be NULL. */
+/* Ends the install. Consumes @error, which may be NULL.
+ *
+ * The answer is deferred: the constructor itself can find out that a
+ * loader publishes no installer, and the callback must not run before the
+ * caller has been handed the handle it is meant to release. */
 static void
 install_finished (InstallRequest *request, GError *error)
 {
   if (error != NULL)
     {
-      aml_task_scope_return_error (request->scope, error);
+      aml_task_scope_return_error_deferred (request->scope, error);
     }
   else
     {
@@ -582,8 +585,8 @@ install_finished (InstallRequest *request, GError *error)
       install->description = g_object_ref (request->description);
       install->client_jar = g_strdup (request->patched_jar);
 
-       aml_task_scope_return_pointer (
-         request->scope, install, (GDestroyNotify) aml_loader_install_free);
+      aml_task_scope_return_pointer_deferred (
+        request->scope, install, (GDestroyNotify) aml_loader_install_free);
     }
 
   install_request_free (request);
@@ -1757,31 +1760,35 @@ install_step_done (InstallRequest *request)
     }
 }
 
-void
+AmlTaskScope *
 aml_loaders_install_async (AmlLoader              loader,
                            const char            *game_version,
                            const char            *loader_version,
                            AmlVersionDescription *game_document,
                            const char            *java_executable,
                            const char            *data_dir,
-                           GCancellable          *cancellable,
                            AmlLoadersProgressFunc  progress,
                            gpointer                progress_data,
                            GAsyncReadyCallback     callback,
                            gpointer                user_data)
 {
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
   InstallRequest *request = NULL;
   g_autofree char *versions_dir = NULL;
   g_autofree char *jar_name = NULL;
 
-  g_return_if_fail (game_version != NULL);
-  g_return_if_fail (loader_version != NULL);
-  g_return_if_fail (AML_IS_VERSION_DESCRIPTION (game_document));
-  g_return_if_fail (java_executable != NULL);
+  g_return_val_if_fail (game_version != NULL, NULL);
+  g_return_val_if_fail (loader_version != NULL, NULL);
+  g_return_val_if_fail (AML_IS_VERSION_DESCRIPTION (game_document), NULL);
+  g_return_val_if_fail (java_executable != NULL, NULL);
 
   request = g_new0 (InstallRequest, 1);
-  request->task = g_task_new (NULL, cancellable, callback, user_data);
-  request->scope = aml_task_scope_from_task (request->task);
+
+  /* Borrowed: the caller's handle keeps the operation alive, and the
+     request is answered before it goes away. */
+  request->task = g_object_ref (aml_task_scope_task (scope));
+  request->scope = scope;
   request->loader = loader;
   request->game_version = g_strdup (game_version);
   request->loader_version = g_strdup (loader_version);
@@ -1799,7 +1806,7 @@ aml_loaders_install_async (AmlLoader              loader,
                                    AML_LOADERS_ERROR_UNSUPPORTED,
                                    "%s publishes no installer to run",
                                    aml_loader_display_name (loader)));
-      return;
+      return g_steal_pointer (&scope);
     }
 
   if (data_dir != NULL)
@@ -1836,7 +1843,7 @@ aml_loaders_install_async (AmlLoader              loader,
                                    AML_LOADERS_ERROR_INSTALLER,
                                    "Minecraft %s has no client jar to patch",
                                    game_version));
-      return;
+      return g_steal_pointer (&scope);
     }
 
   versions_dir = g_build_filename (request->data_dir, "versions",
@@ -1849,12 +1856,14 @@ aml_loaders_install_async (AmlLoader              loader,
   if (g_file_test (request->client_jar, G_FILE_TEST_IS_REGULAR))
     {
       stage_installer (request);
-      return;
+      return g_steal_pointer (&scope);
     }
 
   queue_file (request, FILE_FETCH, game_document->client->url, NULL,
               request->client_jar, game_document->client->sha1, FALSE);
   drain_pending (request);
+
+  return g_steal_pointer (&scope);
 }
 
 AmlLoaderInstall *
