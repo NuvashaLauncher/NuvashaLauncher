@@ -840,6 +840,8 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
+  gtk_widget_set_visible (GTK_WIDGET (self->installed.loading), FALSE);
+
   /* The rows that pointed into the old list are gone, so the list they
    * pointed into can go too. */
   take_rows_out (&self->installed.rows_list,
@@ -916,9 +918,6 @@ metadata_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         }
       installed_filter_rows (self);
     }
-
-  if (self->installed.loading != NULL)
-    gtk_widget_set_visible (GTK_WIDGET (self->installed.loading), FALSE);
 
   g_object_unref (self);
 }

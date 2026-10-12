@@ -780,11 +780,10 @@ local_metadata_thread (GTask *task G_GNUC_UNUSED,
                        GCancellable *cancellable G_GNUC_UNUSED)
 {
   MetadataRun *run = task_data;
-  AmlTaskScope *scope = run->scope;
 
   for (guint i = 0; i < run->files->len; i++)
     {
-      if (aml_task_scope_return_error_if_cancelled (scope))
+      if (g_task_return_error_if_cancelled (task))
         return;
       AmlContentFile *file = g_ptr_array_index (run->files, i);
 
@@ -798,7 +797,7 @@ local_metadata_thread (GTask *task G_GNUC_UNUSED,
       aml_content_file_refresh_search_key (file);
     }
 
-  aml_task_scope_return_boolean (scope, TRUE);
+  g_task_return_boolean (task, TRUE);
 }
 
 static void
