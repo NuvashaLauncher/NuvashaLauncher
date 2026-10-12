@@ -1245,9 +1245,7 @@ on_delete_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   g_autofree char *name = instance_string (self->instance, "name");
   g_autofree char *heading = g_strdup_printf (_("Delete \"%s\"?"), name);
   AdwAlertDialog *alert = ADW_ALERT_DIALOG (
-    adw_alert_dialog_new (heading,
-                          "Its worlds, mods and settings are deleted "
-                          "permanently. This cannot be undone."));
+    adw_alert_dialog_new (heading, NULL));
 
   adw_alert_dialog_set_heading_use_markup (alert, FALSE);
   adw_alert_dialog_set_body_use_markup (alert, FALSE);
