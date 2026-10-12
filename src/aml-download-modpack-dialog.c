@@ -808,7 +808,7 @@ on_search_done (GObject *source G_GNUC_UNUSED,
       return;
     }
 
-  answer = json_to_string (json_parser_get_root (parser), FALSE);
+  answer = aml_modrinth_json_node_to_string (json_parser_get_root (parser));
   results = aml_modrinth_results_from_json (answer, -1, &error);
 
   if (results == NULL)
@@ -1076,7 +1076,7 @@ versions_of_answer (JsonNode *root, GError **error)
   for (guint i = 0; i < json_array_get_length (array); i++)
     {
       JsonNode *element = json_array_get_element (array, i);
-      g_autofree char *json = json_to_string (element, FALSE);
+      g_autofree char *json = aml_modrinth_json_node_to_string (element);
       AmlModrinthVersion *version =
         aml_modrinth_version_from_json (json, -1, NULL);
 
