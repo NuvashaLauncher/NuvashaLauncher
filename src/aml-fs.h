@@ -74,9 +74,9 @@ int aml_fs_open_directory_nofollow (const char *path, GError **error);
  * originally failed rather than replacing it with cleanup failure. */
 void aml_fs_remove_tree (const char *path);
 
-void aml_fs_remove_tree_async (const char *path, GCancellable *cancellable,
-                               GAsyncReadyCallback callback,
-                               gpointer user_data);
+AmlTaskScope *aml_fs_remove_tree_async (const char *path,
+                                        GAsyncReadyCallback callback,
+                                        gpointer user_data);
 gboolean aml_fs_remove_tree_finish (GAsyncResult *result, GError **error);
 
 AmlTaskScope *aml_fs_copy_tree_async (GFile *source, GFile *destination,

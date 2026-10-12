@@ -1031,13 +1031,14 @@ aml_instance_manager_duplicate_finish (AmlInstanceManager *self,
   return g_task_propagate_pointer (G_TASK (result), error);
 }
 
-static void
+static AmlTaskScope *
 delete_tree_async (GFile *file, GCancellable *cancellable,
                    GAsyncReadyCallback callback, gpointer user_data)
 {
   g_autofree char *path = g_file_get_path (file);
 
-  aml_fs_remove_tree_async (path, cancellable, callback, user_data);
+  (void) cancellable;
+  return aml_fs_remove_tree_async (path, callback, user_data);
 }
 
 static gboolean
@@ -1057,6 +1058,7 @@ typedef struct
   AmlInstanceManager *self;
   GTask *task;
   AmlTaskScope *scope;
+  AmlTaskScope *tree_scope;
   AmlInstance *instance;
 } DeleteData;
 
@@ -1065,6 +1067,8 @@ delete_data_free (DeleteData *data)
 {
   g_clear_object (&data->task);
   aml_task_scope_unref (data->scope);
+  if (data->tree_scope != NULL)
+    aml_task_scope_unref (data->tree_scope);
   g_clear_object (&data->self);
   g_clear_object (&data->instance);
   g_free (data);
@@ -1146,7 +1150,8 @@ aml_instance_manager_delete_async (AmlInstanceManager *self,
     data->scope = aml_task_scope_ref (task_scope);
   data->instance = g_object_ref (instance);
 
-  delete_tree_async (file, NULL, delete_directory_ready, data);
+  data->tree_scope = delete_tree_async (file, NULL, delete_directory_ready,
+                                        data);
   return aml_task_scope_ref (task_scope);
 }
 
@@ -1245,6 +1250,7 @@ typedef struct
   GTask *task;
   AmlTaskScope *scope;
   AmlTaskScope *copy_scope;
+  AmlTaskScope *tree_scope;
   AmlInstance *instance;
 
   char *old_directory;
@@ -1260,6 +1266,8 @@ move_data_free (MoveData *data)
   aml_task_scope_unref (data->scope);
   if (data->copy_scope != NULL)
     aml_task_scope_unref (data->copy_scope);
+  if (data->tree_scope != NULL)
+    aml_task_scope_unref (data->tree_scope);
   g_clear_object (&data->self);
   g_clear_object (&data->instance);
   g_clear_object (&data->destination);
@@ -1303,7 +1311,8 @@ move_undo (MoveData *data, gboolean restore_instance, GError *error)
   data->undo_error = error;
 
   if (data->destination != NULL)
-    delete_tree_async (data->destination, NULL, move_undo_deleted, data);
+    data->tree_scope = delete_tree_async (data->destination, NULL,
+                                          move_undo_deleted, data);
   else
     move_return_error (data, g_steal_pointer (&data->undo_error));
 }
@@ -1355,7 +1364,7 @@ move_copy_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   {
     g_autoptr (GFile) old = g_file_new_for_path (data->old_directory);
 
-    delete_tree_async (old, NULL, move_old_removed, data);
+    data->tree_scope = delete_tree_async (old, NULL, move_old_removed, data);
   }
 }
 
