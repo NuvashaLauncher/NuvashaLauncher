@@ -918,17 +918,16 @@ duplicate_copy_ready (GObject *source G_GNUC_UNUSED,
   duplicate_data_free (data);
 }
 
-void
+AmlTaskScope *
 aml_instance_manager_duplicate_async (AmlInstanceManager *self,
                                       AmlInstance *source_instance,
-                                      GCancellable *cancellable,
                                       GAsyncReadyCallback callback,
                                       gpointer user_data)
 {
-  g_return_if_fail (AML_IS_INSTANCE_MANAGER (self));
-  g_return_if_fail (AML_IS_INSTANCE (source_instance));
+  g_return_val_if_fail (AML_IS_INSTANCE_MANAGER (self), NULL);
+  g_return_val_if_fail (AML_IS_INSTANCE (source_instance), NULL);
 
-  g_autoptr (GTask) task = g_task_new (self, cancellable, callback, user_data);
+  g_autoptr (GTask) task = g_task_new (self, NULL, callback, user_data);
   aml_task_scope_attach_task (task);
   AmlTaskScope *task_scope = g_object_get_data (G_OBJECT (task),
                                                  "aml-task-scope");
@@ -939,7 +938,7 @@ aml_instance_manager_duplicate_async (AmlInstanceManager *self,
         g_error_new_literal (AML_INSTANCE_MANAGER_ERROR,
                              AML_INSTANCE_MANAGER_ERROR_NOT_FOUND,
                              "the instance is not registered"));
-      return;
+       return aml_task_scope_ref (task_scope);
     }
 
   g_autofree char *source_name = instance_name (source_instance);
@@ -969,7 +968,7 @@ aml_instance_manager_duplicate_async (AmlInstanceManager *self,
    if (!check_instance_directory (self, directory, NULL, &canonical, &local_error))
      {
        aml_task_scope_return_error (task_scope, g_steal_pointer (&local_error));
-       return;
+       return aml_task_scope_ref (task_scope);
      }
 
   g_free (directory);
@@ -982,7 +981,7 @@ aml_instance_manager_duplicate_async (AmlInstanceManager *self,
    if (copy == NULL)
      {
        aml_task_scope_return_error (task_scope, g_steal_pointer (&local_error));
-       return;
+        return aml_task_scope_ref (task_scope);
      }
 
   g_object_set (copy,
@@ -1002,20 +1001,21 @@ aml_instance_manager_duplicate_async (AmlInstanceManager *self,
                      AML_INSTANCE_MANAGER_ERROR_IO,
                      "cannot create \"%s\": %s",
                      self->instances_dir, instances_error->message));
-      return;
+        return aml_task_scope_ref (task_scope);
     }
 
   DuplicateData *data = g_new0 (DuplicateData, 1);
   data->self = g_object_ref (self);
   data->task = g_object_ref (task);
-  data->scope = aml_task_scope_from_task (task);
+  data->scope = aml_task_scope_ref (task_scope);
   data->copy = g_steal_pointer (&copy);
 
   g_autoptr (GFile) source_file = g_file_new_for_path (source_directory);
   g_autoptr (GFile) copy_file = g_file_new_for_path (directory);
 
-  copy_tree_async (source_file, copy_file, cancellable,
+  copy_tree_async (source_file, copy_file, NULL,
                    duplicate_copy_ready, data);
+  return aml_task_scope_ref (task_scope);
 }
 
 AmlInstance *
