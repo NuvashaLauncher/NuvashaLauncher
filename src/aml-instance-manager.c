@@ -1459,12 +1459,16 @@ aml_instance_manager_open_folder_async (AmlInstanceManager *self,
 
   g_autoptr (GTask) task = g_task_new (self, cancellable, callback, user_data);
    aml_task_scope_attach_task (task);
+   AmlTaskScope *scope = g_object_get_data (G_OBJECT (task),
+                                            "aml-task-scope");
 
   if (!g_list_store_find (self->instances, instance, NULL))
     {
-      g_task_return_new_error (task, AML_INSTANCE_MANAGER_ERROR,
-                               AML_INSTANCE_MANAGER_ERROR_NOT_FOUND,
-                               "the instance is not registered");
+      aml_task_scope_return_error (
+        scope,
+        g_error_new_literal (AML_INSTANCE_MANAGER_ERROR,
+                             AML_INSTANCE_MANAGER_ERROR_NOT_FOUND,
+                             "the instance is not registered"));
       return;
     }
 
@@ -1472,10 +1476,11 @@ aml_instance_manager_open_folder_async (AmlInstanceManager *self,
 
   if (!g_file_test (directory, G_FILE_TEST_IS_DIR))
     {
-      g_task_return_new_error (task, AML_INSTANCE_MANAGER_ERROR,
-                               AML_INSTANCE_MANAGER_ERROR_INVALID_PATH,
-                               "the directory \"%s\" does not exist",
-                               directory);
+      aml_task_scope_return_error (
+        scope,
+        g_error_new (AML_INSTANCE_MANAGER_ERROR,
+                     AML_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+                     "the directory \"%s\" does not exist", directory));
       return;
     }
 
@@ -1484,7 +1489,7 @@ aml_instance_manager_open_folder_async (AmlInstanceManager *self,
 
   if (uri == NULL)
     {
-      g_task_return_error (task, g_steal_pointer (&error));
+      aml_task_scope_return_error (scope, g_steal_pointer (&error));
       return;
     }
 
