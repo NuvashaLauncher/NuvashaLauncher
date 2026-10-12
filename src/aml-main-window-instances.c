@@ -29,6 +29,10 @@ dialog_of_instance (AmlMainWindow *self, const char *id)
   return g_hash_table_lookup (self->model->instance_dialogs, id);
 }
 
+static void on_instance_renamed (AmlInstance *instance,
+                                 GParamSpec *pspec,
+                                 gpointer user_data);
+
 /* A dialog that was closed is not open any more. AdwDialog emits this
    while it is still alive, so the borrowed pointer leaves the table
    before the dialog is freed. */
@@ -38,8 +42,22 @@ on_instance_dialog_closed (AdwDialog *dialog, gpointer user_data)
   AmlMainWindow *self = user_data;
   const char *id = g_object_get_data (G_OBJECT (dialog), "aml-instance-id");
 
+  /* A closed dialog is removed from the reopen table. Detach its page now
+   * as well, so large content lists and their decoded textures are released
+   * immediately instead of waiting for the dialog object to be finalized. */
+  adw_dialog_set_child (dialog, NULL);
+
   if (id != NULL)
-    g_hash_table_remove (self->model->instance_dialogs, id);
+    {
+      AmlInstance *instance =
+        aml_instance_manager_get_by_id (self->model->manager, id);
+
+      if (instance != NULL)
+        g_signal_handlers_disconnect_by_func (instance,
+                                              G_CALLBACK (on_instance_renamed),
+                                              self);
+      g_hash_table_remove (self->model->instance_dialogs, id);
+    }
 }
 
 /* The dialog of an instance says the name of the instance, and says it
