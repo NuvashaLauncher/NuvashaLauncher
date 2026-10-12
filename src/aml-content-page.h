@@ -27,6 +27,7 @@
 
 #include "aml-instance.h"
 #include "aml-modrinth.h"
+#include "aml-task.h"
 
 G_BEGIN_DECLS
 
@@ -95,11 +96,10 @@ char *aml_content_set_disabled (const char  *path,
  * instance that never installed anything of this kind looks like.
  *
  * (transfer full) the AmlContentFile*. */
-void aml_content_scan_async (const char         *instance_directory,
-                             AmlContentType      type,
-                             GCancellable       *cancellable,
-                             GAsyncReadyCallback callback,
-                             gpointer            user_data);
+AmlTaskScope *aml_content_scan_async (const char         *instance_directory,
+                                      AmlContentType      type,
+                                      GAsyncReadyCallback callback,
+                                      gpointer            user_data);
 
 /* (transfer full) the AmlContentFile*. NULL on error. */
 GPtrArray *aml_content_scan_finish (GAsyncResult  *result,

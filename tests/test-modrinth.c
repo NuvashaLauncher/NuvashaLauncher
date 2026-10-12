@@ -787,12 +787,27 @@ test_folder_and_disabled_names (void)
 static GPtrArray *scanned = NULL;
 static GMainLoop *scanning = NULL;
 
+typedef struct
+{
+  AmlTaskScope *operation;
+} ScanWait;
+
 static void
 on_scan_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
-                  gpointer user_data G_GNUC_UNUSED)
+                  gpointer user_data)
 {
+  ScanWait *wait = user_data;
+
   g_clear_pointer (&scanned, g_ptr_array_unref);
   scanned = aml_content_scan_finish (result, NULL);
+
+  if (wait->operation != NULL)
+    {
+      aml_task_scope_unref (wait->operation);
+      wait->operation = NULL;
+    }
+  g_free (wait);
+
   g_main_loop_quit (scanning);
 }
 
@@ -805,7 +820,14 @@ scan (const char *instance, AmlContentType type)
 
   scanned = NULL;
   scanning = g_main_loop_new (NULL, FALSE);
-  aml_content_scan_async (instance, type, NULL, on_scan_finished, NULL);
+  {
+    /* On the heap: the answer arrives after this call returns, and the
+       callback releases the handle it was given. */
+    ScanWait *wait = g_new0 (ScanWait, 1);
+
+    wait->operation =
+      aml_content_scan_async (instance, type, on_scan_finished, wait);
+  }
   g_main_loop_run (scanning);
 
   /* GMainLoop is refcounted but is not a GObject, so it cannot be given
