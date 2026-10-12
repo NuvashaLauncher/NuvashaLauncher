@@ -130,7 +130,10 @@ selected_loader (AmlLoaderRow *self)
 static void
 update_visibility (AmlLoaderRow *self)
 {
-  gboolean vanilla = selected_loader (self) == AML_LOADER_VANILLA;
+  /* The loader combo can still be emitting its selection notification while
+   * a new request is being started. @current is the request's authoritative
+   * loader, so use it instead of rereading the combo during that transition. */
+  gboolean vanilla = self->current == AML_LOADER_VANILLA;
 
   gtk_widget_set_visible (GTK_WIDGET (self->version_row), !vanilla);
 }
