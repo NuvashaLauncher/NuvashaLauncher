@@ -10,7 +10,7 @@
 #include "aml-i18n.h"
 #include "aml-content-index.h"
 #include "aml-fs.h"
-#include "aml-task.h"
+#include "aml-task-private.h"
 #include "aml-loaders.h"
 
 #include <archive.h>

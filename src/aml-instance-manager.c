@@ -15,7 +15,7 @@
 #include "aml-instance-manager.h"
 #include "aml-i18n.h"
 #include "aml-fs.h"
-#include "aml-task.h"
+#include "aml-task-private.h"
 
 #include <errno.h>
 #include <glib/gstdio.h>

@@ -3,7 +3,7 @@
  */
 
 #include "aml-auth-microsoft.h"
-#include "aml-task.h"
+#include "aml-task-private.h"
 
 #include <libsoup/soup.h>
 #include <string.h>

@@ -10,7 +10,7 @@
 #include "aml-json.h"
 #include "aml-i18n.h"
 #include "aml-loaders.h"
-#include "aml-task.h"
+#include "aml-task-private.h"
 
 #include <errno.h>
 #include <fcntl.h>
