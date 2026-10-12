@@ -185,9 +185,9 @@ profile_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     description = profile_from_root (json_parser_get_root (parser), &error);
 
   if (error != NULL)
-    g_task_return_error (request->task, g_steal_pointer (&error));
+    aml_task_scope_return_error (request->scope, g_steal_pointer (&error));
   else
-    g_task_return_pointer (request->task, description, g_object_unref);
+    aml_task_scope_return_pointer (request->scope, description, g_object_unref);
 
   profile_request_free (request);
 }
@@ -217,15 +217,16 @@ aml_loaders_profile_async (AmlLoader           loader,
   request->task = g_task_new (NULL, cancellable, callback, user_data);
   request->scope = aml_task_scope_from_task (request->task);
 
-  g_task_set_check_cancellable (request->task, FALSE);
+  aml_task_scope_set_check_cancellable (request->scope, FALSE);
 
   if (base == NULL)
     {
-      g_task_return_new_error (
-        request->task, AML_LOADERS_ERROR, AML_LOADERS_ERROR_UNSUPPORTED,
-        "%s publishes an installer instead of a version document: "
-        "aml_loaders_install_async() is what installs it",
-        aml_loader_display_name (loader));
+      aml_task_scope_return_error (
+        request->scope,
+        g_error_new (AML_LOADERS_ERROR, AML_LOADERS_ERROR_UNSUPPORTED,
+                     "%s publishes an installer instead of a version "
+                     "document: aml_loaders_install_async() is what "
+                     "installs it", aml_loader_display_name (loader)));
       profile_request_free (request);
       return;
     }
