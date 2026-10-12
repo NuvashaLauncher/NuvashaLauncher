@@ -879,7 +879,13 @@ scan_index_entry (ScanRun *run, AmlContentFile *file)
     {
       AmlContentIndexEntry *entry = g_ptr_array_index (run->index_entries, i);
       if (g_strcmp0 (entry->filename, name) == 0)
-        return entry;
+        {
+          if (entry->size == file->size &&
+              entry->mtime_usec == file->mtime_usec &&
+              entry->hash != NULL && *entry->hash != '\0')
+            return entry;
+          return NULL;
+        }
     }
   return NULL;
 }
@@ -966,6 +972,9 @@ batch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       file = g_new0 (AmlContentFile, 1);
       file->path = g_file_get_path (child);
       file->filename = aml_content_disabled_name (name, TRUE);
+      file->size = g_file_info_get_size (info);
+      file->mtime_usec = g_file_info_get_attribute_uint32 (
+        info, G_FILE_ATTRIBUTE_TIME_MODIFIED_USEC);
       file->enabled = g_strcmp0 (name, file->filename) == 0;
       apply_index_entry (run, file);
       g_ptr_array_add (run->files, file);
@@ -1036,7 +1045,8 @@ scan_index_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   g_file_enumerate_children_async (
     run->folder,
-    G_FILE_ATTRIBUTE_STANDARD_NAME "," G_FILE_ATTRIBUTE_STANDARD_TYPE,
+    G_FILE_ATTRIBUTE_STANDARD_NAME "," G_FILE_ATTRIBUTE_STANDARD_TYPE ","
+    G_FILE_ATTRIBUTE_STANDARD_SIZE "," G_FILE_ATTRIBUTE_TIME_MODIFIED_USEC,
     G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, G_PRIORITY_DEFAULT,
      aml_task_scope_get_cancellable (run->scope), scan_children_ready, run);
 }

@@ -48,6 +48,8 @@ void aml_content_page_reset_for_tab_switch (AmlContentPage *self);
 typedef struct {
   char *path;      /* the file as it is now, suffix included */
   char *filename;  /* without the suffix, which is what a row shows */
+  guint64 size;    /* size used by the content-index fingerprint */
+  gint64 mtime_usec; /* modification time used by the fingerprint */
   char *sha1;      /* the hash of the bytes, or NULL while unknown */
   char *sha512;    /* Modrinth hash when the index knows it */
   char *download_url; /* Modrinth source URL when the index knows it */

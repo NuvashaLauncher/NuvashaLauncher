@@ -660,6 +660,8 @@ persist_identified_file (AmlContentPage *self, AmlContentFile *file)
 
   g_object_get (self->instance, "directory", &directory, NULL);
   entry.filename = filename;
+  entry.size = file->size;
+  entry.mtime_usec = file->mtime_usec;
   entry.hash = file->sha1;
   entry.hash512 = file->sha512;
   entry.download_url = file->download_url;
