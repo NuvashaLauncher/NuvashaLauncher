@@ -89,6 +89,7 @@ struct _AmlContentPage
     GtkSearchEntry *search_entry;
     GtkSearchEntry *search_bar;
     GtkBox *filter_box;
+    GtkMenuButton *filter_button;
     GtkBox *loading_more; /* spinner row at the bottom of the list */
     GtkBox *retry_row;    /* inline retry row when a page fails */
     GtkLabel *retry_label;
@@ -160,6 +161,7 @@ gboolean aml_content_page_on_content_search_key (GtkEventControllerKey *controll
 void aml_content_page_refresh_picks (AmlContentPage *self);
 void aml_content_page_clear_picks (AmlContentPage *self);
 void aml_content_page_close_detail (AmlContentPage *self);
+void aml_content_page_reset_for_tab_switch (AmlContentPage *self);
 void aml_content_page_run_search (AmlContentPage *self, gboolean append);
 void aml_content_page_on_stack_switched (GObject *stack, GParamSpec *pspec,
                                          gpointer user_data);

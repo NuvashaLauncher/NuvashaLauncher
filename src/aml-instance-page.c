@@ -203,6 +203,20 @@ rebuild_content_pages (AmlInstancePage *self)
                                            visible);
 }
 
+static void
+on_content_tab_switched (GObject *stack, GParamSpec *pspec G_GNUC_UNUSED,
+                         gpointer user_data)
+{
+  (void) user_data;
+  const char *name = adw_view_stack_get_visible_child_name (
+    ADW_VIEW_STACK (stack));
+  GtkWidget *child = adw_view_stack_get_child_by_name (
+    ADW_VIEW_STACK (stack), name);
+
+  if (child != NULL && AML_IS_CONTENT_PAGE (child))
+    aml_content_page_reset_for_tab_switch (AML_CONTENT_PAGE (child));
+}
+
 /* ---------------------------------------------------------- *
  * Saving the editable rows
  * ---------------------------------------------------------- */
@@ -1560,6 +1574,8 @@ aml_instance_page_new (AmlInstanceManager *manager, AmlInstance *instance,
   /* Kept so that the content pages can be built again when the loader or
      the Minecraft version changes. */
   self->stack = ADW_VIEW_STACK (stack);
+  g_signal_connect (stack, "notify::visible-child",
+                    G_CALLBACK (on_content_tab_switched), self);
 
   /* The header holds only this switcher. There is no back button here:
    the dialog is named after the instance and its close button is what
