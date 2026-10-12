@@ -23,9 +23,16 @@ start_preparing (AmlLauncher *self)
   log_line (self, TAG_STATE, "preparing Minecraft %s",
             self->version != NULL ? self->version : "this instance");
 
-  aml_version_manifest_fetch_async (AML_VERSION_MANIFEST_URL,
-                                    self->preparation.cancellable, on_manifest_ready,
-                                    g_object_ref (self));
+  {
+    AmlTaskScope *fetching =
+      aml_version_manifest_fetch_async (AML_VERSION_MANIFEST_URL,
+                                        on_manifest_ready, g_object_ref (self));
+
+    /* One read of a launch: it stops with the launch, and releases itself
+       when the launch has what it needs. */
+    aml_task_scope_follow_cancellable (fetching, self->preparation.cancellable);
+    aml_task_scope_unref_when_done (fetching);
+  }
 }
 
 /* A sign-in that has to happen again, said as a state of its own: nothing

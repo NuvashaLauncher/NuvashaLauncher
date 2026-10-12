@@ -1902,16 +1902,17 @@ manifest_fetch_step (AmlTaskSequence *sequence G_GNUC_UNUSED,
     NULL, manifest_downloaded, request);
 }
 
-void
+AmlTaskScope *
 aml_version_manifest_fetch_async (const char         *url,
-                                  GCancellable       *cancellable,
                                   GAsyncReadyCallback callback,
                                   gpointer            user_data)
 {
+  g_autoptr (GCancellable) cancellable = g_cancellable_new ();
   FetchRequest *request;
+  AmlTaskScope *scope = NULL;
   g_autoptr (GError) error = NULL;
   g_autofree char *directory = NULL;
-  g_return_if_fail (url != NULL);
+  g_return_val_if_fail (url != NULL, NULL);
 
   directory = ensure_cache_directory (&error);
 
@@ -1919,15 +1920,13 @@ aml_version_manifest_fetch_async (const char         *url,
     {
       /* The task reports back through an idle, so the caller never
        * hears from us before this function has returned. */
-      g_autoptr (GTask) task =
-        g_task_new (NULL, cancellable, callback, user_data);
-       aml_task_scope_attach_task (task);
-       AmlTaskScope *scope = g_object_get_data (G_OBJECT (task),
-                                                "aml-task-scope");
+      g_autoptr (AmlTaskScope) failure =
+        aml_task_scope_new (NULL, cancellable, callback, user_data);
 
-      aml_task_scope_set_check_cancellable (scope, FALSE);
-      aml_task_scope_return_error (scope, g_steal_pointer (&error));
-      return;
+      aml_task_scope_set_check_cancellable (failure, FALSE);
+      aml_task_scope_return_error_deferred (failure,
+                                            g_steal_pointer (&error));
+      return g_steal_pointer (&failure);
     }
 
   request = g_new0 (FetchRequest, 1);
@@ -1937,9 +1936,21 @@ aml_version_manifest_fetch_async (const char         *url,
     aml_task_sequence_new (cancellable, callback, user_data,
                            manifest_fetch_step, request,
                            (GDestroyNotify) fetch_request_free);
-  AmlTaskSequence *sequence = request->sequence;
-  aml_task_sequence_start (sequence);
-  aml_task_sequence_unref (sequence);
+
+  /* Kept on the stack, not read back out of the request: a sequence that
+     answers at once frees the request, and this is past that. */
+  {
+    AmlTaskSequence *sequence = request->sequence;
+
+    /* The handle the caller gets back stands for the whole run. The
+       sequence keeps the task itself. */
+    scope = aml_task_sequence_scope (sequence);
+
+    aml_task_sequence_start (sequence);
+    aml_task_sequence_unref (sequence);
+  }
+
+  return scope;
 }
 
 AmlVersionManifest *
@@ -2093,16 +2104,18 @@ load_step (LoadRequest *request)
                            load_downloaded, request);
 }
 
-void
+AmlTaskScope *
 aml_version_load_async (AmlVersionManifest *manifest,
                         const char         *version_id,
-                        GCancellable       *cancellable,
                         GAsyncReadyCallback callback,
                         gpointer            user_data)
 {
+  g_autoptr (GCancellable) cancellable = g_cancellable_new ();
+  AmlTaskScope *scope = NULL;
   LoadRequest *request;
-  g_return_if_fail (AML_IS_VERSION_MANIFEST (manifest));
-  g_return_if_fail (version_id != NULL);
+
+  g_return_val_if_fail (AML_IS_VERSION_MANIFEST (manifest), NULL);
+  g_return_val_if_fail (version_id != NULL, NULL);
 
   request = g_new0 (LoadRequest, 1);
   request->manifest = g_object_ref (manifest);
@@ -2114,9 +2127,20 @@ aml_version_load_async (AmlVersionManifest *manifest,
                            load_sequence_step, request,
                            (GDestroyNotify) load_request_free);
 
-  AmlTaskSequence *sequence = request->sequence;
-  aml_task_sequence_start (sequence);
-  aml_task_sequence_unref (sequence);
+  /* Kept on the stack, not read back out of the request: a sequence that
+     answers at once frees the request, and this is past that. */
+  {
+    AmlTaskSequence *sequence = request->sequence;
+
+    /* The handle the caller gets back stands for the whole run. The
+       sequence keeps the task itself. */
+    scope = aml_task_sequence_scope (sequence);
+
+    aml_task_sequence_start (sequence);
+    aml_task_sequence_unref (sequence);
+  }
+
+  return scope;
 }
 
 AmlVersionDescription *

@@ -63,7 +63,10 @@ struct _AmlInstancePage
    * finishes; description load = the Minecraft version's javaVersion.  */
   AmlJavaRow *java_row;
   int required_java;        /* 0 means "never found one / unknown" */
-  GCancellable *cancellable;
+
+  /* The manifest and version-document reads the Java warning is built
+     from. One at a time: a new version picked stops the last read. */
+  AmlTaskScope *versions_operation;
   AmlDownload *export_download;
   AmlTaskScope *export_operation;
   char *export_name;
@@ -309,12 +312,13 @@ on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
 
   /* Its javaVersion requirement may differ: check the compatibility
    * warning again, using the manifest cache. */
-  g_cancellable_cancel (self->cancellable);
-  g_clear_object (&self->cancellable);
-  self->cancellable = g_cancellable_new ();
-  aml_version_manifest_fetch_async (AML_VERSION_MANIFEST_URL,
-                                    self->cancellable, on_manifest_loaded,
-                                    g_object_ref (self));
+  if (self->versions_operation != NULL)
+    {
+      aml_task_scope_cancel (self->versions_operation);
+      aml_task_scope_unref (self->versions_operation);
+    }
+  self->versions_operation = aml_version_manifest_fetch_async (
+    AML_VERSION_MANIFEST_URL, on_manifest_loaded, g_object_ref (self));
 }
 
 /* ---------------------------------------------------------- *
@@ -459,6 +463,10 @@ on_description_loaded (GObject *source G_GNUC_UNUSED,
   g_autoptr (AmlVersionDescription) description =
     aml_version_load_finish (result, &error);
 
+  /* The answer is in: the read that brought it is finished with. */
+  aml_task_scope_unref (self->versions_operation);
+  self->versions_operation = NULL;
+
   if (description != NULL && description->java_version != NULL)
     self->required_java = description->java_version->major_version;
   else
@@ -480,7 +488,9 @@ on_manifest_loaded (GObject *source G_GNUC_UNUSED,
   g_autofree char *version = instance_string (self->instance,
                                               "minecraft-version");
 
-  g_clear_object (&self->cancellable);
+  /* The manifest is in: the read that brought it is finished with. */
+  aml_task_scope_unref (self->versions_operation);
+  self->versions_operation = NULL;
 
   if (manifest == NULL)
     {
@@ -489,9 +499,9 @@ on_manifest_loaded (GObject *source G_GNUC_UNUSED,
       return;
     }
 
-  self->cancellable = g_cancellable_new ();
-  aml_version_load_async (manifest, version, self->cancellable,
-                          on_description_loaded, g_object_ref (self));
+  self->versions_operation = aml_version_load_async (manifest, version,
+                                                      on_description_loaded,
+                                                      g_object_ref (self));
   g_object_unref (self);
 }
 
@@ -1444,10 +1454,8 @@ create_settings_page (AmlInstancePage *self)
   /* The Java row's compatibility warning needs the javaVersion field of
    * the instance's version document; fetching is offline-friendly via
    * the cache. */
-  self->cancellable = g_cancellable_new ();
-  aml_version_manifest_fetch_async (AML_VERSION_MANIFEST_URL,
-                                    self->cancellable, on_manifest_loaded,
-                                    g_object_ref (self));
+  self->versions_operation = aml_version_manifest_fetch_async (
+    AML_VERSION_MANIFEST_URL, on_manifest_loaded, g_object_ref (self));
 
   /* Actions */
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (GTK_WIDGET (actions)), _("Actions"));
@@ -1599,11 +1607,17 @@ aml_instance_page_dispose (GObject *object)
   self->directory_path_label = NULL;
   self->directory_spinner = NULL;
 
-  g_cancellable_cancel (self->cancellable);
   aml_task_scope_cancel (self->scope);
-  g_clear_object (&self->cancellable);
   aml_task_scope_unref (self->scope);
   self->scope = NULL;
+
+  /* The Java warning's manifest read is this page's: it stops with it. */
+  if (self->versions_operation != NULL)
+    {
+      aml_task_scope_cancel (self->versions_operation);
+      aml_task_scope_unref (self->versions_operation);
+      self->versions_operation = NULL;
+    }
 
   /* The loader rows are the page's. Their handlers go with them, so the
    * rows the widget tree may still hold cannot call back into a page

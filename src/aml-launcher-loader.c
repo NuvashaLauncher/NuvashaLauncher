@@ -74,9 +74,18 @@ on_vanilla_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   merged = aml_version_description_merge (vanilla, request->profile);
 
-  aml_resolve_description_async (merged, merged->id, NULL, NULL, NULL, NULL,
-                                 self->preparation.cancellable, on_resolve_progress, self,
-                                 on_resolved, g_object_ref (self));
+  /* The resolve is the launch now, and it keeps itself: the request is
+     about the loader profile, which is over. */
+  {
+    AmlTaskScope *resolving = aml_resolve_description_async (
+      merged, merged->id, NULL, NULL, NULL, NULL, on_resolve_progress, self,
+      on_resolved, g_object_ref (self));
+
+    aml_task_scope_follow_cancellable (resolving,
+                                       self->preparation.cancellable);
+    aml_task_scope_unref_when_done (resolving);
+  }
+
   loader_request_free (request);
 }
 
@@ -105,8 +114,13 @@ on_profile_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
-  aml_version_load_async (request->manifest, request->game_version,
-                          self->preparation.cancellable, on_vanilla_loaded, request);
+  /* The vanilla document is the next step; it takes the request's handle. */
+  aml_task_scope_unref (request->operation);
+  request->operation = aml_version_load_async (request->manifest,
+                                              request->game_version,
+                                              on_vanilla_loaded, request);
+  aml_task_scope_follow_cancellable (request->operation,
+                                     self->preparation.cancellable);
 }
 
 static void
@@ -132,8 +146,10 @@ resolve_with_a_loader (AmlLauncher        *self,
                 aml_loader_display_name (loader), loader_version,
                 self->version != NULL ? self->version : "");
 
-      aml_version_load_async (manifest, request->game_version,
-                              self->preparation.cancellable, on_game_document, request);
+      request->operation = aml_version_load_async (manifest, request->game_version,
+                                             on_game_document, request);
+      aml_task_scope_follow_cancellable (request->operation,
+                                         self->preparation.cancellable);
       return;
     }
 
@@ -195,8 +211,15 @@ on_manifest_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       }
   }
 
-  aml_resolve_version_async (manifest, self->version, NULL, NULL, NULL,
-                             self->preparation.cancellable, on_resolve_progress, self,
-                             on_resolved, g_object_ref (self));
+  {
+    AmlTaskScope *resolving = aml_resolve_version_async (
+      manifest, self->version, NULL, NULL, NULL, on_resolve_progress, self,
+      on_resolved, g_object_ref (self));
+
+    aml_task_scope_follow_cancellable (resolving,
+                                       self->preparation.cancellable);
+    aml_task_scope_unref_when_done (resolving);
+  }
+
   g_object_unref (self);
 }

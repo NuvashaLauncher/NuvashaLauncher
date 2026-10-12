@@ -973,27 +973,33 @@ extract_next_jar (ExtractRequest *request)
                            extract_read_ready, step);
 }
 
-void
+AmlTaskScope *
 aml_resolve_extract_natives_async (GPtrArray         *jars,
                                    const char        *natives_directory,
-                                   GCancellable      *cancellable,
                                    GAsyncReadyCallback callback,
                                    gpointer            user_data)
 {
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
   ExtractRequest *request;
 
-  g_return_if_fail (jars != NULL);
-  g_return_if_fail (natives_directory != NULL);
-  g_return_if_fail (g_path_is_absolute (natives_directory));
+  g_return_val_if_fail (jars != NULL, NULL);
+  g_return_val_if_fail (natives_directory != NULL, NULL);
+  g_return_val_if_fail (g_path_is_absolute (natives_directory), NULL);
 
   request = g_new0 (ExtractRequest, 1);
-  request->task = g_task_new (NULL, cancellable, callback, user_data);
-  request->scope = aml_task_scope_from_task (request->task);
+
+  /* Borrowed: the caller's handle keeps the operation alive, and the
+     request is answered before it goes away. */
+  request->task = g_object_ref (aml_task_scope_task (scope));
+  request->scope = scope;
   g_task_set_check_cancellable (request->task, FALSE);
   request->jars = g_ptr_array_ref (jars);
   request->directory = g_strdup (natives_directory);
 
   extract_next_jar (request);
+
+  return g_steal_pointer (&scope);
 }
 
 gboolean
@@ -1049,10 +1055,9 @@ struct ResolveRequest
   gpointer progress_data;
 
   /* The first failure is kept; the rest of the queue is told to stop
-     through this cancellable, which follows whatever the caller gave. */
+     through this cancellable, which the operation's own cancellation
+     follows. */
   GCancellable *cancellable;
-  GCancellable *caller;
-  gulong cancel_handler;
   GError *error;
 
   const char *stage; /* what the progress refers to */
@@ -1154,16 +1159,11 @@ request_end (ResolveRequest *request, AmlResolvedVersion *resolved)
 static void
 request_free (ResolveRequest *request)
 {
-  if (request->cancel_handler != 0 && request->caller != NULL)
-    g_cancellable_disconnect (request->caller, request->cancel_handler);
-
-  aml_task_scope_unref (request->scope);
   g_clear_object (&request->task);
   g_clear_object (&request->manifest);
   g_clear_object (&request->description);
   g_clear_pointer (&request->context, aml_rule_context_free);
   g_clear_object (&request->cancellable);
-  g_clear_object (&request->caller);
   g_clear_error (&request->error);
   g_clear_pointer (&request->natives, g_ptr_array_unref);
   g_clear_pointer (&request->asset_hashes, g_ptr_array_unref);
@@ -1582,9 +1582,13 @@ resolve_natives (ResolveRequest *request)
       return;
     }
 
-  aml_resolve_extract_natives_async (request->natives, request->natives_dir,
-                                     request->cancellable, natives_extracted,
-                                     request);
+  {
+    AmlTaskScope *extracting = aml_resolve_extract_natives_async (
+      request->natives, request->natives_dir, natives_extracted, request);
+
+    aml_task_scope_follow_cancellable (extracting, request->cancellable);
+    aml_task_scope_unref_when_done (extracting);
+  }
 }
 
 /* ---------------------------------------------------------- *
@@ -2011,18 +2015,18 @@ request_new (const char         *version_id,
              const char         *data_dir,
              const char         *natives_dir,
              const char         *asset_base_url,
-             GCancellable       *cancellable,
+             AmlTaskScope       *scope,
              AmlResolveProgressFunc progress,
-             gpointer              progress_data,
-             GAsyncReadyCallback   callback,
-             gpointer              user_data)
+             gpointer              progress_data)
 {
   ResolveRequest *request = g_new0 (ResolveRequest, 1);
   g_autofree char *name = safe_name (version_id);
   g_autofree char *jar = g_strconcat (name, ".jar", NULL);
 
-  request->task = g_task_new (NULL, cancellable, callback, user_data);
-  request->scope = aml_task_scope_from_task (request->task);
+  /* Borrowed: the caller's handle keeps the operation alive, and the
+     request is answered before it goes away. */
+  request->task = g_object_ref (aml_task_scope_task (scope));
+  request->scope = scope;
   g_task_set_check_cancellable (request->task, FALSE);
   request->version_id = g_strdup (version_id);
   request->data_dir = data_dir != NULL
@@ -2058,15 +2062,10 @@ request_new (const char         *version_id,
     g_build_filename (request->data_dir, "versions", name, NULL);
   request->client_jar = g_build_filename (request->versions_dir, jar, NULL);
 
-  /* Whatever the caller cancels must stop this too, and only this: the
-     cancellable above is cancelled on a failure as well, which the
-     caller knows nothing about. */
-  request->caller = cancellable != NULL ? g_object_ref (cancellable) : NULL;
-
-  if (cancellable != NULL)
-    request->cancel_handler =
-      g_cancellable_connect (cancellable, G_CALLBACK (g_cancellable_cancel),
-                             request->cancellable, NULL);
+  /* The operation owns the cancellation: whoever started it stops it
+     through the handle it was given. The cancellable above is cancelled on
+     a failure as well, which the caller knows nothing about. */
+  aml_task_scope_follow_cancellable (scope, request->cancellable);
 
   return request;
 }
@@ -2089,61 +2088,69 @@ request_make_directories (ResolveRequest *request)
   return TRUE;
 }
 
-void
+AmlTaskScope *
 aml_resolve_version_async (AmlVersionManifest *manifest,
                            const char         *version_id,
                            const char         *data_dir,
                            const char         *natives_dir,
                            const char         *asset_base_url,
-                           GCancellable       *cancellable,
                            AmlResolveProgressFunc progress,
                            gpointer              progress_data,
                            GAsyncReadyCallback   callback,
                            gpointer              user_data)
 {
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
   ResolveRequest *request;
 
-  g_return_if_fail (AML_IS_VERSION_MANIFEST (manifest));
-  g_return_if_fail (version_id != NULL);
+  g_return_val_if_fail (AML_IS_VERSION_MANIFEST (manifest), NULL);
+  g_return_val_if_fail (version_id != NULL, NULL);
 
   request = request_new (version_id, data_dir, natives_dir, asset_base_url,
-                         cancellable, progress, progress_data, callback,
-                         user_data);
+                         scope, progress, progress_data);
   request->manifest = g_object_ref (manifest);
 
   if (!request_make_directories (request))
     {
       resolve_finish (request);
-      return;
+      return g_steal_pointer (&scope);
     }
 
-  aml_version_load_async (manifest, version_id, request->cancellable,
-                          version_loaded, request);
+  {
+    AmlTaskScope *loading = aml_version_load_async (manifest, version_id,
+                                                    version_loaded, request);
+
+    aml_task_scope_follow_cancellable (loading, request->cancellable);
+    aml_task_scope_unref_when_done (loading);
+  }
+
+  return g_steal_pointer (&scope);
 }
 
-void
+AmlTaskScope *
 aml_resolve_description_async (AmlVersionDescription *description,
                                const char             *version_id,
                                const char             *client_jar,
                                const char             *data_dir,
                                const char             *natives_dir,
                                const char             *asset_base_url,
-                               GCancellable           *cancellable,
                                AmlResolveProgressFunc   progress,
                                gpointer                progress_data,
                                GAsyncReadyCallback     callback,
                                gpointer                user_data)
 {
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
   ResolveRequest *request;
 
-  g_return_if_fail (AML_IS_VERSION_DESCRIPTION (description));
-  g_return_if_fail (version_id != NULL);
-  g_return_if_fail (client_jar == NULL || g_file_test (client_jar,
-                                                      G_FILE_TEST_IS_REGULAR));
+  g_return_val_if_fail (AML_IS_VERSION_DESCRIPTION (description), NULL);
+  g_return_val_if_fail (version_id != NULL, NULL);
+  g_return_val_if_fail (client_jar == NULL || g_file_test (client_jar,
+                                                           G_FILE_TEST_IS_REGULAR),
+                        NULL);
 
   request = request_new (version_id, data_dir, natives_dir, asset_base_url,
-                         cancellable, progress, progress_data, callback,
-                         user_data);
+                         scope, progress, progress_data);
 
   /* The document is the one the caller merged: there is no manifest to
      follow an inheritsFrom from, because it has been followed already. */
@@ -2155,10 +2162,12 @@ aml_resolve_description_async (AmlVersionDescription *description,
   if (!request_make_directories (request))
     {
       resolve_finish (request);
-      return;
+      return g_steal_pointer (&scope);
     }
 
   description_ready (request);
+
+  return g_steal_pointer (&scope);
 }
 
 AmlResolvedVersion *

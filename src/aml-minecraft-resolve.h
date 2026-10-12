@@ -26,6 +26,7 @@
 #include <gio/gio.h>
 
 #include "aml-minecraft-versions.h"
+#include "aml-task.h"
 
 G_BEGIN_DECLS
 
@@ -175,11 +176,10 @@ GPtrArray *aml_resolve_game_arguments (AmlVersionDescription *description,
  *
  * A jar that lists no prefixes of its own is taken to exclude META-INF,
  * which is what every launcher does with the metadata a jar carries. */
-void aml_resolve_extract_natives_async (GPtrArray         *jars,
-                                        const char        *natives_directory,
-                                        GCancellable      *cancellable,
-                                        GAsyncReadyCallback callback,
-                                        gpointer            user_data);
+AmlTaskScope *aml_resolve_extract_natives_async (GPtrArray *jars,
+                                                 const char *natives_directory,
+                                                 GAsyncReadyCallback callback,
+                                                 gpointer user_data);
 
 gboolean aml_resolve_extract_natives_finish (GAsyncResult  *result,
                                              GError       **error);
@@ -240,16 +240,15 @@ typedef void (*AmlResolveProgressFunc) (const AmlResolveProgress *progress,
  * Errors come from the download module while fetching, from AML_MC_ERROR
  * while parsing a document and from AML_RESOLVE_ERROR for everything
  * this module adds itself. */
-void aml_resolve_version_async (AmlVersionManifest *manifest,
-                                const char         *version_id,
-                                const char         *data_dir,
-                                const char         *natives_dir,
-                                const char         *asset_base_url,
-                                GCancellable       *cancellable,
-                                AmlResolveProgressFunc progress,
-                                gpointer              progress_data,
-                                GAsyncReadyCallback   callback,
-                                gpointer              user_data);
+AmlTaskScope *aml_resolve_version_async (AmlVersionManifest *manifest,
+                                         const char *version_id,
+                                         const char *data_dir,
+                                         const char *natives_dir,
+                                         const char *asset_base_url,
+                                         AmlResolveProgressFunc progress,
+                                         gpointer progress_data,
+                                         GAsyncReadyCallback callback,
+                                         gpointer user_data);
 
 /* (transfer full) */
 AmlResolvedVersion *aml_resolve_version_finish (GAsyncResult  *result,
@@ -267,17 +266,16 @@ AmlResolvedVersion *aml_resolve_version_finish (GAsyncResult  *result,
  * @client_jar, when it is not NULL, is a jar on disk that runs instead
  * of the one the document names, which is what a loader that patches the
  * client installs; nothing is fetched for it and it has to exist. */
-void aml_resolve_description_async (AmlVersionDescription *description,
-                                    const char             *version_id,
-                                    const char             *client_jar,
-                                    const char             *data_dir,
-                                    const char             *natives_dir,
-                                    const char             *asset_base_url,
-                                    GCancellable           *cancellable,
-                                    AmlResolveProgressFunc   progress,
-                                    gpointer                progress_data,
-                                    GAsyncReadyCallback     callback,
-                                    gpointer                user_data);
+AmlTaskScope *aml_resolve_description_async (AmlVersionDescription *description,
+                                             const char *version_id,
+                                             const char *client_jar,
+                                             const char *data_dir,
+                                             const char *natives_dir,
+                                             const char *asset_base_url,
+                                             AmlResolveProgressFunc progress,
+                                             gpointer progress_data,
+                                             GAsyncReadyCallback callback,
+                                             gpointer user_data);
 
 G_END_DECLS
 
