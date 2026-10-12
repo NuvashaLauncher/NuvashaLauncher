@@ -2209,12 +2209,24 @@ dialog_start_features (AmlDownloadModpackDialog *self)
   {
     g_autofree char *cache_dir = g_build_filename (
       g_get_user_cache_dir (), "AML", "packs", NULL);
-    const char *name = "pack.mrpack";
+    g_autoptr (GError) error = NULL;
+    g_autofree char *name = NULL;
 
-    aml_cache_ensure_directory (cache_dir, NULL);
+    if (!aml_cache_ensure_directory (cache_dir, &error))
+      {
+        push_error (self, _("Pack could not be fetched"),
+                    error->message, G_CALLBACK (on_error_retry_fetch));
+        return FALSE;
+      }
 
-    if (file->filename != NULL && *file->filename != '\0')
-      name = file->filename;
+    /* The filename is supplied by the remote service. Do not use it as a
+     * path component: besides allowing traversal, equal filenames from two
+     * downloads would race with one another. The original name is only
+     * useful as display metadata, so use a unique local cache name instead. */
+    {
+      g_autofree char *uuid = g_uuid_string_random ();
+      name = g_strdup_printf ("pack-%s.mrpack", uuid);
+    }
 
     g_free (self->pack_path);
     self->pack_path = g_build_filename (cache_dir, name, NULL);

@@ -65,11 +65,13 @@ for these libraries, named as `pkg-config` knows them:
 - `libsoup-3.0`
 - `libarchive`
 - `gio-unix-2.0`
+- `gettext` (for `msgfmt`, which builds the translation catalogs)
 
 On Debian and Ubuntu:
 
 ```
 sudo apt install build-essential pkg-config \
+    gettext \
     libgtk-4-dev libadwaita-1-dev libjson-glib-dev libsoup-3.0-dev \
     libarchive-dev
 ```
@@ -77,7 +79,7 @@ sudo apt install build-essential pkg-config \
 On Fedora:
 
 ```
-sudo dnf install gcc make pkgconf-pkg-config \
+sudo dnf install gcc make gettext pkgconf-pkg-config \
     gtk4-devel libadwaita-devel json-glib-devel libsoup3-devel \
     libarchive-devel
 ```
@@ -85,7 +87,7 @@ sudo dnf install gcc make pkgconf-pkg-config \
 On Arch:
 
 ```
-sudo pacman -S base-devel pkgconf gtk4 libadwaita json-glib libsoup \
+sudo pacman -S base-devel gettext pkgconf gtk4 libadwaita json-glib libsoup \
     libarchive
 ```
 
