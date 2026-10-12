@@ -40,6 +40,7 @@
 
 #include "aml-content-page-private.h"
 #include "aml-fs.h"
+#include "aml-operation.h"
 
 G_DEFINE_FINAL_TYPE (AmlContentPage, aml_content_page, GTK_TYPE_BOX)
 
@@ -322,7 +323,7 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
         g_autofree char *filename = g_path_get_basename (path);
 
         g_object_get (self->instance, "directory", &directory, NULL);
-        aml_task_scope_unref_when_done (aml_content_index_remove_async (
+        aml_operation_unref_when_done (aml_content_index_remove_async (
           directory, self->type, filename, NULL, NULL));
       }
       /* An identification request may still refer to one of the rows. Stop
@@ -604,7 +605,7 @@ identify_request_free (IdentifyRequest *request)
   IdentifyRun *run = request->run;
 
   if (request->operation != NULL)
-    aml_task_scope_unref (request->operation);
+    aml_operation_unref (request->operation);
 
   g_free (request);
   run->in_flight--;
@@ -635,7 +636,7 @@ persist_identified_file (AmlContentPage *self, AmlContentFile *file)
   entry.required_dependencies = file->required_dependencies;
   entry.optional_dependencies = file->optional_dependencies;
   entry.incompatible_dependencies = file->incompatible_dependencies;
-  aml_task_scope_release_when_done (
+  aml_operation_release (
     aml_content_index_update_async (directory, self->type, &entry, NULL, NULL),
     self->installed.scan);
 }
@@ -790,7 +791,7 @@ identify_start (IdentifyRun *run)
                                               request);
 
       if (run->cancellable != NULL)
-        aml_task_scope_follow_cancellable (request->operation,
+        aml_operation_follow (request->operation,
                                            run->cancellable);
     }
 
@@ -909,7 +910,7 @@ reload_installed (AmlContentPage *self)
 
     watch->operation = aml_content_scan_async (directory, self->type,
                                                scan_ready, watch);
-    aml_task_scope_follow_cancellable (watch->operation,
+    aml_operation_follow (watch->operation,
                                        self->installed.scan);
   }
 }
@@ -1172,7 +1173,7 @@ update_check_next (UpdateRun *run)
         watch->operation = aml_modrinth_update_by_hash_async (
           self->type, file->sha1, self->minecraft_version, self->loader,
           on_update_ready, watch);
-        aml_task_scope_follow_cancellable (watch->operation,
+        aml_operation_follow (watch->operation,
                                            self->browse.model->cancellable);
       }
       return;
@@ -1398,7 +1399,7 @@ aml_content_page_dispose (GObject *object)
       /* Through the model, which is where this source is registered: a
          scope left holding the id would take down whatever source is
          given the same id next. */
-      aml_task_scope_remove_source (self->browse.model->scope,
+      aml_operation_remove (self->browse.model->scope,
                                     self->browse.model->debounce_source);
       self->browse.model->debounce_source = 0;
     }

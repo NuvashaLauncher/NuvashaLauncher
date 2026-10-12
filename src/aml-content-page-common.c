@@ -4,6 +4,7 @@
 
 #include "aml-content-page-private.h"
 #include "aml-ui-feedback.h"
+#include "aml-operation.h"
 
 PageWatch *
 page_watch_new (AmlContentPage *self)
@@ -22,7 +23,7 @@ page_watch_free (PageWatch *watch)
     return;
 
   if (watch->operation != NULL)
-    aml_task_scope_unref (watch->operation);
+    aml_operation_unref (watch->operation);
 
   if (watch->page != NULL)
     g_object_remove_weak_pointer (G_OBJECT (watch->page),
