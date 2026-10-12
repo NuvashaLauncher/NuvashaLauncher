@@ -527,6 +527,7 @@ static void
 borrowed_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                gpointer user_data)
 {
+  (void) user_data;
   g_task_propagate_boolean (G_TASK (result), NULL);
 }
 
