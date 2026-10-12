@@ -948,7 +948,6 @@ verify_run_free (VerifyRun *run)
   g_free (run->sha1);
   g_free (run->sha512);
   g_clear_object (&run->task);
-  aml_task_scope_unref (run->scope);
   g_free (run);
 }
 
@@ -1391,7 +1390,6 @@ typedef struct {
 static void
 extract_run_free (ExtractRun *run)
 {
-  aml_task_scope_unref (run->scope);
   g_free (run->archive_path);
   g_free (run->directory);
   g_free (run);
