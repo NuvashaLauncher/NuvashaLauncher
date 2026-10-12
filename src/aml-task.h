@@ -50,6 +50,7 @@ AmlTaskScope *aml_task_scope_new (GObject *source_object,
                                   gpointer user_data);
 AmlTaskScope *aml_task_scope_ref (AmlTaskScope *scope);
 void aml_task_scope_unref (AmlTaskScope *scope);
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (AmlTaskScope, aml_task_scope_unref)
 GCancellable *aml_task_scope_get_cancellable (const AmlTaskScope *scope);
 void aml_task_scope_set_check_cancellable (AmlTaskScope *scope,
                                            gboolean       check);
