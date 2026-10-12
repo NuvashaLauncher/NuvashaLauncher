@@ -6,6 +6,7 @@
 #define AML_FS_H
 
 #include <gio/gio.h>
+#include "aml-task.h"
 
 G_BEGIN_DECLS
 
@@ -78,10 +79,10 @@ void aml_fs_remove_tree_async (const char *path, GCancellable *cancellable,
                                gpointer user_data);
 gboolean aml_fs_remove_tree_finish (GAsyncResult *result, GError **error);
 
-void aml_fs_copy_tree_async (GFile *source, GFile *destination,
-                             GCancellable *cancellable,
-                             GAsyncReadyCallback callback,
-                             gpointer user_data);
+AmlTaskScope *aml_fs_copy_tree_async (GFile *source, GFile *destination,
+                                      GCancellable *cancellable,
+                                      GAsyncReadyCallback callback,
+                                      gpointer user_data);
 gboolean aml_fs_copy_tree_finish (GAsyncResult *result, GError **error);
 
 G_END_DECLS

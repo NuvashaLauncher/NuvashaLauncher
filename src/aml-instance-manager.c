@@ -839,13 +839,13 @@ remove_instance_and_save (AmlInstanceManager *self,
   return TRUE;
 }
 
-static void
+static AmlTaskScope *
 copy_tree_async (GFile *source, GFile *destination,
                  GCancellable *cancellable,
                  GAsyncReadyCallback callback, gpointer user_data)
 {
-  aml_fs_copy_tree_async (source, destination, cancellable, callback,
-                          user_data);
+  return aml_fs_copy_tree_async (source, destination, cancellable, callback,
+                                 user_data);
 }
 
 static gboolean
@@ -865,6 +865,7 @@ typedef struct
   AmlInstanceManager *self;
   GTask *task;
   AmlTaskScope *scope;
+  AmlTaskScope *copy_scope;
   AmlInstance *copy; /* built, not registered yet */
 } DuplicateData;
 
@@ -873,6 +874,8 @@ duplicate_data_free (DuplicateData *data)
 {
   g_clear_object (&data->task);
   aml_task_scope_unref (data->scope);
+  if (data->copy_scope != NULL)
+    aml_task_scope_unref (data->copy_scope);
   g_clear_object (&data->self);
   g_clear_object (&data->copy);
   g_free (data);
@@ -1013,8 +1016,8 @@ aml_instance_manager_duplicate_async (AmlInstanceManager *self,
   g_autoptr (GFile) source_file = g_file_new_for_path (source_directory);
   g_autoptr (GFile) copy_file = g_file_new_for_path (directory);
 
-  copy_tree_async (source_file, copy_file, NULL,
-                   duplicate_copy_ready, data);
+  data->copy_scope = copy_tree_async (source_file, copy_file, NULL,
+                                      duplicate_copy_ready, data);
   return aml_task_scope_ref (task_scope);
 }
 
@@ -1241,6 +1244,7 @@ typedef struct
   AmlInstanceManager *self;
   GTask *task;
   AmlTaskScope *scope;
+  AmlTaskScope *copy_scope;
   AmlInstance *instance;
 
   char *old_directory;
@@ -1254,6 +1258,8 @@ move_data_free (MoveData *data)
 {
   g_clear_object (&data->task);
   aml_task_scope_unref (data->scope);
+  if (data->copy_scope != NULL)
+    aml_task_scope_unref (data->copy_scope);
   g_clear_object (&data->self);
   g_clear_object (&data->instance);
   g_clear_object (&data->destination);
@@ -1410,8 +1416,8 @@ aml_instance_manager_change_directory_async (AmlInstanceManager *self,
   {
     g_autoptr (GFile) source = g_file_new_for_path (data->old_directory);
 
-     copy_tree_async (source, data->destination, NULL, move_copy_ready,
-                     data);
+     data->copy_scope = copy_tree_async (source, data->destination, NULL,
+                                         move_copy_ready, data);
   }
   return aml_task_scope_ref (task_scope);
 }

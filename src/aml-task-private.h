@@ -11,5 +11,6 @@
  * Public callers own AmlTaskScope instead of borrowing task ownership. */
 AmlTaskScope *aml_task_scope_from_task (GTask *task);
 void aml_task_scope_attach_task (GTask *task);
+GTask *aml_task_scope_task (const AmlTaskScope *scope);
 
 #endif /* AML_TASK_PRIVATE_H */

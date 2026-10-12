@@ -70,6 +70,13 @@ aml_task_scope_attach_task (GTask *task)
                           (GDestroyNotify) aml_task_scope_unref);
 }
 
+GTask *
+aml_task_scope_task (const AmlTaskScope *scope)
+{
+  g_return_val_if_fail (scope != NULL, NULL);
+  return scope->task;
+}
+
 GCancellable *
 aml_task_scope_get_cancellable (const AmlTaskScope *scope)
 {
