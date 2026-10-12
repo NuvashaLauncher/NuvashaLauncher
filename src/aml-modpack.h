@@ -210,15 +210,14 @@ typedef void (*AmlModpackExportProgressFunc) (guint64 done, guint64 total,
                                                const char *detail,
                                                gpointer user_data);
 
-void aml_modpack_export_async (AmlInstance *instance, const char *path,
-                               const char *pack_name, const char *summary,
-                               const char *version_id,
-                               gboolean include_transient,
-                               AmlModpackExportProgressFunc progress,
-                               gpointer progress_data,
-                               GCancellable *cancellable,
-                               GAsyncReadyCallback callback,
-                               gpointer user_data);
+AmlTaskScope *aml_modpack_export_async (AmlInstance *instance, const char *path,
+                                        const char *pack_name, const char *summary,
+                                        const char *version_id,
+                                        gboolean include_transient,
+                                        AmlModpackExportProgressFunc progress,
+                                        gpointer progress_data,
+                                        GAsyncReadyCallback callback,
+                                        gpointer user_data);
 
 gboolean aml_modpack_export_finish (GAsyncResult *result, GError **error);
 

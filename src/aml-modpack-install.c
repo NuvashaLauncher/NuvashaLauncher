@@ -1348,13 +1348,12 @@ export_manifest (AmlInstance *instance, const char *pack_name,
   return g_steal_pointer (&result);
 }
 
-void
+AmlTaskScope *
 aml_modpack_export_async (AmlInstance *instance, const char *path,
                           const char *pack_name, const char *summary,
                           const char *version_id, gboolean include_transient,
                           AmlModpackExportProgressFunc progress,
                           gpointer progress_data,
-                          GCancellable *cancellable,
                           GAsyncReadyCallback callback, gpointer user_data)
 {
   g_autoptr (GTask) task = NULL;
@@ -1362,15 +1361,15 @@ aml_modpack_export_async (AmlInstance *instance, const char *path,
   g_autofree char *directory = NULL;
   ExportRun *run = NULL;
 
-  g_return_if_fail (AML_IS_INSTANCE (instance));
-  g_return_if_fail (path != NULL && g_path_is_absolute (path));
+  g_return_val_if_fail (AML_IS_INSTANCE (instance), NULL);
+  g_return_val_if_fail (path != NULL && g_path_is_absolute (path), NULL);
 
-  task = g_task_new (NULL, cancellable, callback, user_data);
+  task = g_task_new (NULL, NULL, callback, user_data);
   aml_task_scope_attach_task (task);
   AmlTaskScope *task_scope = g_object_get_data (G_OBJECT (task),
                                                  "aml-task-scope");
   run = g_new0 (ExportRun, 1);
-  run->scope = aml_task_scope_from_task (task);
+  run->scope = aml_task_scope_ref (task_scope);
   g_object_get (instance, "directory", &directory, NULL);
   run->instance_directory = g_strdup (directory);
   run->archive_path = g_strdup (path);
@@ -1390,11 +1389,12 @@ aml_modpack_export_async (AmlInstance *instance, const char *path,
     {
       export_run_free (run);
       aml_task_scope_return_error (task_scope, g_steal_pointer (&error));
-      return;
+      return aml_task_scope_ref (task_scope);
     }
 
   g_task_set_task_data (task, run, (GDestroyNotify) export_run_free);
   g_task_run_in_thread (task, export_thread);
+  return aml_task_scope_ref (task_scope);
 }
 
 gboolean
