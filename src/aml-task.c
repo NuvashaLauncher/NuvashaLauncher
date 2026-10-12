@@ -213,11 +213,11 @@ aml_task_sequence_new (GCancellable *cancellable,
   return sequence;
 }
 
-GTask *
-aml_task_sequence_get_task (const AmlTaskSequence *sequence)
+GCancellable *
+aml_task_sequence_get_cancellable (const AmlTaskSequence *sequence)
 {
   g_return_val_if_fail (sequence != NULL, NULL);
-  return sequence->task;
+  return g_task_get_cancellable (sequence->task);
 }
 
 void

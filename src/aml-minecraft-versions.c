@@ -1885,7 +1885,7 @@ manifest_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
 
   g_file_load_contents_async (
     file,
-    g_task_get_cancellable (aml_task_sequence_get_task (request->sequence)),
+    aml_task_sequence_get_cancellable (request->sequence),
                               manifest_file_loaded, request);
 }
 
@@ -1896,7 +1896,7 @@ manifest_fetch_step (GTask *task G_GNUC_UNUSED, gpointer user_data)
 
   aml_download_file_async (
     request->url, request->path, NULL, G_CHECKSUM_SHA1,
-    g_task_get_cancellable (aml_task_sequence_get_task (request->sequence)),
+    aml_task_sequence_get_cancellable (request->sequence),
     NULL, manifest_downloaded, request);
 }
 
@@ -2033,7 +2033,7 @@ load_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
 
   g_file_load_contents_async (
     file,
-    g_task_get_cancellable (aml_task_sequence_get_task (request->sequence)),
+    aml_task_sequence_get_cancellable (request->sequence),
                               load_file_loaded, request);
 }
 
@@ -2084,8 +2084,7 @@ load_step (LoadRequest *request)
    * enough, so a damaged one is downloaded again. */
   aml_download_file_async (entry->url, request->path, entry->sha1,
                            G_CHECKSUM_SHA1,
-                           g_task_get_cancellable (
-                             aml_task_sequence_get_task (request->sequence)),
+                            aml_task_sequence_get_cancellable (request->sequence),
                            NULL,
                            load_downloaded, request);
 }

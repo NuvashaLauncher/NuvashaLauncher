@@ -32,7 +32,7 @@ AmlTaskSequence *aml_task_sequence_ref (AmlTaskSequence *sequence);
 void aml_task_sequence_unref (AmlTaskSequence *sequence);
 void aml_task_sequence_start (AmlTaskSequence *sequence);
 void aml_task_sequence_next (AmlTaskSequence *sequence);
-GTask *aml_task_sequence_get_task (const AmlTaskSequence *sequence);
+GCancellable *aml_task_sequence_get_cancellable (const AmlTaskSequence *sequence);
 void aml_task_sequence_return_pointer (AmlTaskSequence *sequence,
                                        gpointer result,
                                        GDestroyNotify result_free);
