@@ -349,29 +349,18 @@ test_create_sanitized_name (void)
   g_autoptr (AmlInstanceManager) manager =
     aml_instance_manager_new (data_dir);
 
-  /* The display name may contain anything, but the directory derived
-   * from it must stay inside <data>/instances and look like a plain
-   * single path component. */
+  /* A name that cannot be used as a directory component is rejected rather
+   * than silently changed. */
   AmlInstance *instance =
     aml_instance_manager_create (manager, "../../evil", NULL, "1.21.1",
                                  AML_LOADER_VANILLA, NULL, &error);
-  g_assert_no_error (error);
-  g_assert_nonnull (instance);
-
-  g_autofree char *directory = prop_string (instance, "directory");
-  g_autofree char *instances_root =
-    g_build_filename (data_dir, "instances", NULL);
-  g_autofree char *leaf = g_path_get_basename (directory);
-
-  g_assert_true (g_str_has_prefix (directory, instances_root));
-  g_assert_null (strstr (directory, ".."));
-  g_assert_null (strstr (leaf, "/"));
-  g_assert_true (g_file_test (directory, G_FILE_TEST_IS_DIR));
-
-  g_object_unref (instance);
+  g_assert_null (instance);
+  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
+                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_clear_error (&error);
   remove_recursive (data_dir);
 
-  g_print ("ok - awkward name still gets a safe directory\n");
+  g_print ("ok - unusable instance names are refused\n");
 }
 
 static void

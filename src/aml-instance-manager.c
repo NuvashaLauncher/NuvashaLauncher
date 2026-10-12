@@ -74,6 +74,17 @@ instance_name_key (const char *name)
   return g_utf8_casefold (normalized, -1);
 }
 
+/* The display name is also the automatically chosen directory name. Do not
+ * silently turn a name that cannot be a directory component into another
+ * name; the user should fix it instead. */
+static gboolean
+instance_name_is_usable (const char *name)
+{
+  g_autofree char *safe = aml_instance_sanitize_name (name);
+
+  return g_strcmp0 (name, safe) == 0;
+}
+
 static gboolean
 name_is_taken (AmlInstanceManager *self, AmlInstance *except,
                const char *name)
@@ -661,11 +672,14 @@ aml_instance_manager_create (AmlInstanceManager *self,
   g_autofree char *path = NULL;
   g_autofree char *normalized_name = aml_instance_normalize_name (name);
 
-  if (normalized_name[0] == '\0')
+  if (normalized_name[0] == '\0' ||
+      !instance_name_is_usable (normalized_name))
     {
       g_set_error (error, AML_INSTANCE_MANAGER_ERROR,
                    AML_INSTANCE_MANAGER_ERROR_INVALID_PATH,
-                   "the instance name is empty");
+                   normalized_name[0] == '\0'
+                     ? "the instance name is empty"
+                     : "the instance name cannot be used as a directory name");
       return NULL;
     }
 
@@ -747,7 +761,8 @@ aml_instance_manager_rename (AmlInstanceManager *self,
 
   g_autofree char *stripped = aml_instance_normalize_name (new_name);
 
-  if (stripped[0] == '\0' || name_is_taken (self, instance, stripped))
+  if (stripped[0] == '\0' || !instance_name_is_usable (stripped) ||
+      name_is_taken (self, instance, stripped))
     {
       g_set_error (error, AML_INSTANCE_MANAGER_ERROR,
                    AML_INSTANCE_MANAGER_ERROR_INVALID_PATH,

@@ -695,7 +695,9 @@ aml_java_row_init (AmlJavaRow *self)
   self->javas = g_ptr_array_new_with_free_func ((GDestroyNotify) aml_java_free);
   self->ids = g_ptr_array_new_with_free_func (g_free);
   self->names = g_ptr_array_new_with_free_func (g_free);
-  self->default_label = g_strdup (_("Automatic (closest compatible)"));
+  /* No exact runtime means no default selection. Keep the first combo entry
+   * blank rather than implying that an automatic choice exists. */
+  self->default_label = g_strdup ("");
   self->required_major = 0;
   self->add_index = GTK_INVALID_LIST_POSITION;
   self->restore = 0;
