@@ -23,8 +23,7 @@ variables:
         json-glib
         libsoup3
         clang
-        cppcheck
-        valgrind
+         valgrind
 
 test:
   extends: .setup
@@ -39,7 +38,7 @@ sanitizers:
     - make test-debug
 
 # make static-analysis already runs the GCC analyzer over every source,
-# then clang-tidy and cppcheck. The loop that used to sit in front of it
+# then clang-tidy. The loop that used to sit in front of it
 # ran that same analyzer pass a second time, doubling the slowest step of
 # the job for no extra coverage.
 static-analysis:

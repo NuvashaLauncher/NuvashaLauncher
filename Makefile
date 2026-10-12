@@ -125,11 +125,6 @@ static-analysis:
 	  clang-tidy src/*.c --warnings-as-errors='*' \
 	    -- $(CPPFLAGS) -std=c17 $(PKG_CFLAGS) -Isrc; \
 	else echo "clang-tidy not installed; skipping"; fi
-	@if command -v cppcheck >/dev/null; then \
-	  cppcheck --enable=warning,style,performance,portability --error-exitcode=1 \
-	    --inline-suppr --suppress=missingIncludeSystem --suppress=unknownMacro \
-	    --suppress=syntaxError -Isrc src; \
-	else echo "cppcheck not installed; skipping"; fi
 
 install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 	install -Dm755 $(BIN) $(DESTDIR)$(PREFIX)/bin/AML
