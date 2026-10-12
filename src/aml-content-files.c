@@ -192,7 +192,6 @@ typedef struct
 static void scan_hash_next (ScanRun *run);
 static void batch_read_next (ScanRun *run);
 static int compare_files (gconstpointer a, gconstpointer b);
-static void scan_local_metadata (ScanRun *run);
 static void scan_free (ScanRun *run);
 
 typedef struct {
@@ -767,14 +766,21 @@ scan_finish (ScanRun *run)
   scan_free (run);
 }
 
+typedef struct
+{
+  AmlTaskScope *scope;
+  GPtrArray *files;
+  AmlContentType type;
+} MetadataRun;
+
 static void
-local_metadata_thread (GTask *task, gpointer source G_GNUC_UNUSED,
+local_metadata_thread (GTask *task G_GNUC_UNUSED,
+                       gpointer source G_GNUC_UNUSED,
                        gpointer task_data,
                        GCancellable *cancellable G_GNUC_UNUSED)
 {
-  ScanRun *run = task_data;
-  AmlTaskScope *scope = g_object_get_data (G_OBJECT (task),
-                                           "aml-task-scope");
+  MetadataRun *run = task_data;
+  AmlTaskScope *scope = run->scope;
 
   for (guint i = 0; i < run->files->len; i++)
     {
@@ -796,36 +802,55 @@ local_metadata_thread (GTask *task, gpointer source G_GNUC_UNUSED,
 }
 
 static void
-local_metadata_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
-                     gpointer user_data)
+metadata_run_free (MetadataRun *run)
 {
-  ScanRun *run = user_data;
-  g_autoptr (GError) error = NULL;
-
-  if (!g_task_propagate_boolean (G_TASK (result), &error))
-    {
-      aml_task_scope_return_error (run->scope, g_steal_pointer (&error));
-      scan_free (run);
-      return;
-    }
-
-  scan_finish (run);
+  g_ptr_array_unref (run->files);
+  aml_task_scope_unref (run->scope);
+  g_free (run);
 }
 
 static void
-scan_local_metadata (ScanRun *run)
+local_metadata_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                     gpointer user_data)
 {
-  if (run->files->len == 0)
-    {
-      scan_finish (run);
-      return;
-    }
-  GTask *task = g_task_new (NULL, aml_task_scope_get_cancellable (run->scope),
-                            local_metadata_done, run);
+  MetadataRun *run = user_data;
+  g_autoptr (GError) error = NULL;
+
+  if (!g_task_propagate_boolean (G_TASK (result), &error))
+    aml_task_scope_return_error (run->scope, g_steal_pointer (&error));
+  else
+    aml_task_scope_return_boolean (run->scope, TRUE);
+
+  metadata_run_free (run);
+}
+
+AmlTaskScope *
+aml_content_metadata_async (GPtrArray *files, AmlContentType type,
+                            GAsyncReadyCallback callback, gpointer user_data)
+{
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
+  MetadataRun *run = g_new0 (MetadataRun, 1);
+  GTask *task = NULL;
+
+  run->scope = aml_task_scope_ref (scope);
+  run->files = g_ptr_array_ref (files);
+  run->type = type;
+  task = g_task_new (NULL, aml_task_scope_get_cancellable (scope),
+                     local_metadata_done, run);
   aml_task_scope_attach_task (task);
   g_task_set_task_data (task, run, NULL);
   g_task_run_in_thread (task, local_metadata_thread);
   g_object_unref (task);
+
+  return g_steal_pointer (&scope);
+}
+
+gboolean
+aml_content_metadata_finish (GAsyncResult *result, GError **error)
+{
+  g_return_val_if_fail (g_task_is_valid (result, NULL), FALSE);
+  return g_task_propagate_boolean (G_TASK (result), error);
 }
 
 static void
@@ -1054,7 +1079,7 @@ scan_hash_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
           scan_free (run);
         }
       else
-        scan_local_metadata (run);
+        scan_finish (run);
     }
 }
 
@@ -1068,7 +1093,7 @@ scan_hash_next (ScanRun *run)
 
   if (run->hash_pending == 0)
     {
-      scan_local_metadata (run);
+      scan_finish (run);
       return;
     }
   for (guint i = 0; i < run->files->len; i++)

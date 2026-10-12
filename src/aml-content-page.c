@@ -70,6 +70,8 @@ void batch_next (AmlContentPage *self);
 /* A plan that could not be carried out stops where it is; a batch it was
  * part of goes on to the next one. */
 void plan_stopped (AmlContentPage *self);
+static void metadata_ready (GObject *source, GAsyncResult *result,
+                            gpointer user_data);
 
 /* ---------------------------------------------------------- *
  * Small helpers
@@ -877,7 +879,38 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     identify_start (run);
   }
 
+  aml_operation_release (
+    aml_content_metadata_async (self->installed.files, self->type,
+                                metadata_ready, g_object_ref (self)),
+    self->installed.scan);
+
   page_watch_free (watch);
+}
+
+static void
+metadata_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                gpointer user_data)
+{
+  AmlContentPage *self = user_data;
+  g_autoptr (GError) error = NULL;
+
+  if (aml_content_metadata_finish (result, &error))
+    {
+      for (guint i = 0; self->installed.files != NULL &&
+                        i < self->installed.files->len; i++)
+        {
+          AmlContentFile *file =
+            g_ptr_array_index (self->installed.files, i);
+          GtkWidget *row = g_hash_table_lookup (self->installed.rows,
+                                                file->path);
+
+          if (row != NULL)
+            file_row_refresh (row);
+        }
+      installed_filter_rows (self);
+    }
+
+  g_object_unref (self);
 }
 
 void
