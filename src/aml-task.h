@@ -52,7 +52,13 @@ AmlTaskScope *aml_task_scope_ref (AmlTaskScope *scope);
 void aml_task_scope_unref (AmlTaskScope *scope);
 /* Attach an operation scope to @task. The task owns the attached scope. */
 void aml_task_scope_attach_task (GTask *task);
-GTask *aml_task_scope_get_task (const AmlTaskScope *scope);
+GCancellable *aml_task_scope_get_cancellable (const AmlTaskScope *scope);
+void aml_task_scope_set_check_cancellable (AmlTaskScope *scope,
+                                           gboolean       check);
+void aml_task_scope_return_pointer (AmlTaskScope *scope,
+                                    gpointer       result,
+                                    GDestroyNotify result_free);
+void aml_task_scope_return_error (AmlTaskScope *scope, GError *error);
 void aml_task_scope_track_source (AmlTaskScope *scope, guint source_id);
 void aml_task_scope_remove_source (AmlTaskScope *scope, guint source_id);
 void aml_task_scope_forget_source (AmlTaskScope *scope, guint source_id);
