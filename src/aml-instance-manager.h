@@ -12,6 +12,7 @@
 #define AML_INSTANCE_MANAGER_H
 
 #include "aml-instance.h"
+#include "aml-task.h"
 
 G_BEGIN_DECLS
 
@@ -163,11 +164,10 @@ gboolean aml_instance_manager_delete_finish (AmlInstanceManager *self,
                                              GError **error);
 
 /* Opens the instance directory with the default file manager. */
-void aml_instance_manager_open_folder_async (AmlInstanceManager *self,
-                                             AmlInstance *instance,
-                                             GCancellable *cancellable,
-                                             GAsyncReadyCallback callback,
-                                             gpointer user_data);
+AmlTaskScope *aml_instance_manager_open_folder_async (AmlInstanceManager *self,
+                                                       AmlInstance *instance,
+                                                       GAsyncReadyCallback callback,
+                                                       gpointer user_data);
 
 gboolean aml_instance_manager_open_folder_finish (AmlInstanceManager *self,
                                                   GAsyncResult *result,

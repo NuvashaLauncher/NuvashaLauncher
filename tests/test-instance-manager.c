@@ -27,6 +27,7 @@ typedef struct
   gboolean success;
   gboolean timed_out;
   guint watchdog;
+  AmlTaskScope *operation;
 } AsyncCall;
 
 static char *
@@ -204,6 +205,8 @@ open_folder_finished (GObject *source, GAsyncResult *result, gpointer user_data)
   call->success =
     aml_instance_manager_open_folder_finish (AML_INSTANCE_MANAGER (source),
                                              result, &call->error);
+  aml_task_scope_unref (call->operation);
+  call->operation = NULL;
   g_main_loop_quit (call->loop);
 }
 
@@ -990,8 +993,9 @@ test_open_folder_without_directory (void)
   AsyncCall call = { 0 };
   call.loop = g_main_loop_new (NULL, FALSE);
 
-  aml_instance_manager_open_folder_async (manager, instance, NULL,
-                                          open_folder_finished, &call);
+  call.operation =
+    aml_instance_manager_open_folder_async (manager, instance,
+                                            open_folder_finished, &call);
   async_call_run (&call);
   g_assert_error (call.error, AML_INSTANCE_MANAGER_ERROR,
                   AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);

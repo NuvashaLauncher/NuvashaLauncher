@@ -1447,17 +1447,16 @@ open_folder_launch_ready (GObject *source G_GNUC_UNUSED,
   g_object_unref (task);
 }
 
-void
+AmlTaskScope *
 aml_instance_manager_open_folder_async (AmlInstanceManager *self,
-                                        AmlInstance *instance,
-                                        GCancellable *cancellable,
-                                        GAsyncReadyCallback callback,
-                                        gpointer user_data)
+                                         AmlInstance *instance,
+                                         GAsyncReadyCallback callback,
+                                         gpointer user_data)
 {
-  g_return_if_fail (AML_IS_INSTANCE_MANAGER (self));
-  g_return_if_fail (AML_IS_INSTANCE (instance));
+  g_return_val_if_fail (AML_IS_INSTANCE_MANAGER (self), NULL);
+  g_return_val_if_fail (AML_IS_INSTANCE (instance), NULL);
 
-  g_autoptr (GTask) task = g_task_new (self, cancellable, callback, user_data);
+  g_autoptr (GTask) task = g_task_new (self, NULL, callback, user_data);
    aml_task_scope_attach_task (task);
    AmlTaskScope *scope = g_object_get_data (G_OBJECT (task),
                                             "aml-task-scope");
@@ -1469,7 +1468,7 @@ aml_instance_manager_open_folder_async (AmlInstanceManager *self,
         g_error_new_literal (AML_INSTANCE_MANAGER_ERROR,
                              AML_INSTANCE_MANAGER_ERROR_NOT_FOUND,
                              "the instance is not registered"));
-      return;
+      return aml_task_scope_ref (scope);
     }
 
   g_autofree char *directory = instance_directory (instance);
@@ -1481,7 +1480,7 @@ aml_instance_manager_open_folder_async (AmlInstanceManager *self,
         g_error_new (AML_INSTANCE_MANAGER_ERROR,
                      AML_INSTANCE_MANAGER_ERROR_INVALID_PATH,
                      "the directory \"%s\" does not exist", directory));
-      return;
+      return aml_task_scope_ref (scope);
     }
 
   g_autoptr (GError) error = NULL;
@@ -1490,12 +1489,14 @@ aml_instance_manager_open_folder_async (AmlInstanceManager *self,
   if (uri == NULL)
     {
       aml_task_scope_return_error (scope, g_steal_pointer (&error));
-      return;
+      return aml_task_scope_ref (scope);
     }
 
-  g_app_info_launch_default_for_uri_async (uri, NULL, cancellable,
-                                           open_folder_launch_ready,
-                                           g_object_ref (task));
+  g_app_info_launch_default_for_uri_async (
+    uri, NULL, aml_task_scope_get_cancellable (scope),
+                                            open_folder_launch_ready,
+                                            g_object_ref (task));
+  return aml_task_scope_ref (scope);
 }
 
 gboolean
