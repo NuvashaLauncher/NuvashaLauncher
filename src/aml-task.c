@@ -100,6 +100,13 @@ aml_task_scope_return_error (AmlTaskScope *scope, GError *error)
 }
 
 void
+aml_task_scope_return_boolean (AmlTaskScope *scope, gboolean result)
+{
+  g_return_if_fail (scope != NULL);
+  g_task_return_boolean (scope->task, result);
+}
+
+void
 aml_task_scope_track_source (AmlTaskScope *scope, guint source_id)
 {
   g_return_if_fail (scope != NULL);
