@@ -240,10 +240,10 @@ load_thread (GTask *task, gpointer source G_GNUC_UNUSED, gpointer task_data,
                                           &error);
 
   if (entries == NULL)
-    g_task_return_error (task, g_steal_pointer (&error));
+    aml_task_scope_return_error (args->scope, g_steal_pointer (&error));
   else
-    g_task_return_pointer (task, entries,
-                           (GDestroyNotify) g_ptr_array_unref);
+    aml_task_scope_return_pointer (args->scope, entries,
+                                   (GDestroyNotify) g_ptr_array_unref);
 }
 
 void
