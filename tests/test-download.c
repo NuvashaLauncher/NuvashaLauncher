@@ -1219,6 +1219,18 @@ test_many_at_once (void)
   g_print ("ok - many downloads share the transfer slots\n");
 }
 
+static void
+test_download_queue_soak (void)
+{
+  /* Repeat the full mixed queue lifecycle so slot accounting, cache reuse,
+   * cancellation cleanup, and request teardown are exercised over a longer
+   * run than the functional concurrency test. */
+  for (guint round = 0; round < 12; round++)
+    test_many_at_once ();
+
+  g_print ("ok - download queue survives a sustained soak\n");
+}
+
 /* The shape a modpack fetch uses: nobody waits for the answer, the work is
  * tied to a cancel button it does not own, and the header row it reports
  * into is dropped while it still runs. The operation releases itself, so
@@ -1313,6 +1325,7 @@ main (int argc, char **argv)
   test_invalid_url ();
   test_connection_refused ();
   test_many_at_once ();
+  test_download_queue_soak ();
   test_released_download_outlives_its_row ();
 
   fixture_stop ();
