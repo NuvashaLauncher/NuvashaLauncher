@@ -567,24 +567,31 @@ aml_modpack_install_async (AmlModpack *modpack,
                            gpointer user_data)
 {
   g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
+  aml_task_scope_attach_task (task);
+  AmlTaskScope *task_scope = g_object_get_data (G_OBJECT (task),
+                                                 "aml-task-scope");
   InstallRun *run = NULL;
   g_autofree char *parent = NULL;
 
   if (modpack == NULL || manager == NULL || name == NULL || name[0] == '\0')
     {
-      g_task_return_new_error (task, AML_MODPACK_ERROR,
-                               AML_MODPACK_ERROR_FORMAT,
-                               "the install is missing its modpack, its "
-                               "manager or its name");
+      aml_task_scope_return_error (
+        task_scope,
+        g_error_new_literal (AML_MODPACK_ERROR,
+                             AML_MODPACK_ERROR_FORMAT,
+                             "the install is missing its modpack, its "
+                             "manager or its name"));
       return;
     }
 
   if (modpack->minecraft_version == NULL)
     {
-      g_task_return_new_error (task, AML_MODPACK_ERROR,
-                               AML_MODPACK_ERROR_LOADER,
-                               "the dependencies were never read: call "
-                               "aml_modpack_resolve() first");
+      aml_task_scope_return_error (
+        task_scope,
+        g_error_new_literal (AML_MODPACK_ERROR,
+                             AML_MODPACK_ERROR_LOADER,
+                             "the dependencies were never read: call "
+                             "aml_modpack_resolve() first"));
       return;
     }
 
@@ -1359,6 +1366,9 @@ aml_modpack_export_async (AmlInstance *instance, const char *path,
   g_return_if_fail (path != NULL && g_path_is_absolute (path));
 
   task = g_task_new (NULL, cancellable, callback, user_data);
+  aml_task_scope_attach_task (task);
+  AmlTaskScope *task_scope = g_object_get_data (G_OBJECT (task),
+                                                 "aml-task-scope");
   run = g_new0 (ExportRun, 1);
   run->scope = aml_task_scope_from_task (task);
   g_object_get (instance, "directory", &directory, NULL);
@@ -1379,7 +1389,7 @@ aml_modpack_export_async (AmlInstance *instance, const char *path,
   if (run->instance_directory == NULL || run->manifest == NULL)
     {
       export_run_free (run);
-      g_task_return_error (task, g_steal_pointer (&error));
+      aml_task_scope_return_error (task_scope, g_steal_pointer (&error));
       return;
     }
 
