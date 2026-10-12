@@ -929,6 +929,9 @@ aml_instance_manager_duplicate_async (AmlInstanceManager *self,
   g_return_if_fail (AML_IS_INSTANCE (source_instance));
 
   g_autoptr (GTask) task = g_task_new (self, cancellable, callback, user_data);
+  aml_task_scope_attach_task (task);
+  AmlTaskScope *task_scope = g_object_get_data (G_OBJECT (task),
+                                                 "aml-task-scope");
   if (!g_list_store_find (self->instances, source_instance, NULL))
     {
       g_task_return_new_error (task, AML_INSTANCE_MANAGER_ERROR,
@@ -963,7 +966,7 @@ aml_instance_manager_duplicate_async (AmlInstanceManager *self,
 
   if (!check_instance_directory (self, directory, NULL, &canonical, &local_error))
     {
-      g_task_return_error (task, g_steal_pointer (&local_error));
+      aml_task_scope_return_error (task_scope, g_steal_pointer (&local_error));
       return;
     }
 
@@ -1353,6 +1356,9 @@ aml_instance_manager_change_directory_async (AmlInstanceManager *self,
   g_return_if_fail (AML_IS_INSTANCE (instance));
 
   g_autoptr (GTask) task = g_task_new (self, cancellable, callback, user_data);
+  aml_task_scope_attach_task (task);
+  AmlTaskScope *task_scope = g_object_get_data (G_OBJECT (task),
+                                                 "aml-task-scope");
   g_autofree char *path = NULL;
   g_autofree char *old_directory = NULL;
   g_autoptr (GError) local_error = NULL;
@@ -1360,7 +1366,7 @@ aml_instance_manager_change_directory_async (AmlInstanceManager *self,
   if (!aml_instance_manager_check_new_directory (self, instance, directory,
                                                  &path, &local_error))
     {
-      g_task_return_error (task, g_steal_pointer (&local_error));
+      aml_task_scope_return_error (task_scope, g_steal_pointer (&local_error));
       return;
     }
 
