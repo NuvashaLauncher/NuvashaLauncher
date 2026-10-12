@@ -119,7 +119,10 @@ typedef struct {
   AdwDialog *dialog;   /* the dialog of the instance */
   char *instance_id;
   guint step;
+  guint cycles;
 } Run;
+
+static void on_activate (GApplication *application, gpointer user_data);
 
 static gboolean
 finish (gpointer user_data)
@@ -133,6 +136,17 @@ finish (gpointer user_data)
     adw_dialog_force_close (run->dialog);
 
   gtk_window_destroy (run->window);
+
+  if (run->cycles++ < 9)
+    {
+      run->window = NULL;
+      run->dialog = NULL;
+      g_clear_pointer (&run->instance_id, g_free);
+      run->step = 0;
+      on_activate (run->application, run);
+      return G_SOURCE_REMOVE;
+    }
+
   g_application_quit (run->application);
 
   return G_SOURCE_REMOVE;
