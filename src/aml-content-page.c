@@ -212,15 +212,24 @@ file_row_refresh (GtkWidget *row)
   if (file == NULL || !GTK_IS_WIDGET (row))
     return;
 
-  if (file->local_metadata && file->project_name != NULL &&
-      *file->project_name != '\0')
+  if (file->project_name != NULL && *file->project_name != '\0')
     title = file->project_name;
-  /* Installed names come from the local file metadata, never from a remote
-   * project lookup. The filename is the fallback for files without local
-   * metadata. */
+
+  /* The index may provide the project name before local archive metadata
+   * finishes. The filename remains the fallback for unknown files. */
   adw_preferences_row_set_title (
        ADW_PREFERENCES_ROW (row),
        title != NULL ? title : file->filename);
+  if (file->description != NULL && *file->description != '\0')
+    row_show_description (row, file->description);
+
+  {
+    GtkWidget *icon = g_object_get_data (G_OBJECT (row), "aml-icon");
+
+    if (icon != NULL && file->local_icon_path != NULL)
+      aml_icon_widget_set_file (icon, file->local_icon_path);
+  }
+
   installed_filter_rows (self);
 }
 
@@ -831,8 +840,6 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
-  gtk_widget_set_visible (GTK_WIDGET (self->installed.loading), FALSE);
-
   /* The rows that pointed into the old list are gone, so the list they
    * pointed into can go too. */
   take_rows_out (&self->installed.rows_list,
@@ -909,6 +916,9 @@ metadata_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         }
       installed_filter_rows (self);
     }
+
+  if (self->installed.loading != NULL)
+    gtk_widget_set_visible (GTK_WIDGET (self->installed.loading), FALSE);
 
   g_object_unref (self);
 }
