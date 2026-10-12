@@ -196,6 +196,8 @@ delete_finished (GObject *source, GAsyncResult *result, gpointer user_data)
   call->success =
     aml_instance_manager_delete_finish (AML_INSTANCE_MANAGER (source),
                                         result, &call->error);
+  aml_task_scope_unref (call->operation);
+  call->operation = NULL;
   g_main_loop_quit (call->loop);
 }
 
@@ -877,8 +879,8 @@ test_delete_metadata_only (void)
   AsyncCall call = { 0 };
   call.loop = g_main_loop_new (NULL, FALSE);
 
-  aml_instance_manager_delete_async (manager, instance, FALSE, NULL,
-                                     delete_finished, &call);
+   call.operation = aml_instance_manager_delete_async (
+     manager, instance, FALSE, delete_finished, &call);
   async_call_run (&call);
   g_assert_no_error (call.error);
   g_assert_true (call.success);
@@ -922,8 +924,8 @@ test_delete_with_directory (void)
   AsyncCall call = { 0 };
   call.loop = g_main_loop_new (NULL, FALSE);
 
-  aml_instance_manager_delete_async (manager, instance, TRUE, NULL,
-                                     delete_finished, &call);
+   call.operation = aml_instance_manager_delete_async (
+     manager, instance, TRUE, delete_finished, &call);
   async_call_run (&call);
   g_assert_no_error (call.error);
   g_assert_true (call.success);
@@ -961,8 +963,8 @@ test_delete_unregistered (void)
   AsyncCall call = { 0 };
   call.loop = g_main_loop_new (NULL, FALSE);
 
-  aml_instance_manager_delete_async (manager, stranger, FALSE, NULL,
-                                     delete_finished, &call);
+   call.operation = aml_instance_manager_delete_async (
+     manager, stranger, FALSE, delete_finished, &call);
   async_call_run (&call);
   g_assert_error (call.error, AML_INSTANCE_MANAGER_ERROR,
                   AML_INSTANCE_MANAGER_ERROR_NOT_FOUND);

@@ -1170,7 +1170,8 @@ on_duplicate_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 static void
 on_delete_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  ChangeDirectoryWait *wait = user_data;
+  AmlInstancePage *self = wait->page;
   g_autoptr (GError) error = NULL;
 
   if (!aml_instance_manager_delete_finish (AML_INSTANCE_MANAGER (source),
@@ -1179,6 +1180,8 @@ on_delete_ready (GObject *source, GAsyncResult *result, gpointer user_data)
       /* The instance is still registered: stay on its page. */
       show_toast (self, error->message);
       g_object_unref (self);
+      aml_task_scope_unref (wait->operation);
+      g_free (wait);
       return;
     }
 
@@ -1187,6 +1190,8 @@ on_delete_ready (GObject *source, GAsyncResult *result, gpointer user_data)
      page to close itself would mean two places deciding the same thing. */
 
   g_object_unref (self);
+  aml_task_scope_unref (wait->operation);
+  g_free (wait);
 }
 
 static void
@@ -1197,9 +1202,12 @@ on_delete_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
 
   if (g_strcmp0 (response, "delete") == 0 && self->manager != NULL)
-    aml_instance_manager_delete_async (self->manager, self->instance, TRUE,
-                                       NULL, on_delete_ready,
-                                       g_object_ref (self));
+     {
+       ChangeDirectoryWait *wait = g_new0 (ChangeDirectoryWait, 1);
+       wait->page = g_object_ref (self);
+       wait->operation = aml_instance_manager_delete_async (
+         self->manager, self->instance, TRUE, on_delete_ready, wait);
+     }
 
   g_object_unref (self);
 }
