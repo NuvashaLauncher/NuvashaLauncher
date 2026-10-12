@@ -36,6 +36,8 @@ void row_show_description (GtkWidget *row, const char *description);
 void installed_icon_lookup (AmlContentPage *self, GtkWidget *row,
                             const char *project_id);
 void reload_installed (AmlContentPage *self);
+void aml_content_page_on_installed_scroll_changed (GtkAdjustment *adjustment,
+                                                   gpointer user_data);
 
 struct _AmlContentPage
 {
