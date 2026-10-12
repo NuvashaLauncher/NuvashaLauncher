@@ -934,9 +934,11 @@ aml_instance_manager_duplicate_async (AmlInstanceManager *self,
                                                  "aml-task-scope");
   if (!g_list_store_find (self->instances, source_instance, NULL))
     {
-      g_task_return_new_error (task, AML_INSTANCE_MANAGER_ERROR,
-                               AML_INSTANCE_MANAGER_ERROR_NOT_FOUND,
-                               "the instance is not registered");
+      aml_task_scope_return_error (
+        task_scope,
+        g_error_new_literal (AML_INSTANCE_MANAGER_ERROR,
+                             AML_INSTANCE_MANAGER_ERROR_NOT_FOUND,
+                             "the instance is not registered"));
       return;
     }
 
@@ -979,7 +981,7 @@ aml_instance_manager_duplicate_async (AmlInstanceManager *self,
 
   if (copy == NULL)
     {
-      g_task_return_error (task, g_steal_pointer (&local_error));
+      aml_task_scope_return_error (task_scope, g_steal_pointer (&local_error));
       return;
     }
 
@@ -994,10 +996,12 @@ aml_instance_manager_duplicate_async (AmlInstanceManager *self,
   if (!aml_fs_make_directory (self->instances_dir, 0755,
                               &instances_error))
     {
-      g_task_return_new_error (task, AML_INSTANCE_MANAGER_ERROR,
-                               AML_INSTANCE_MANAGER_ERROR_IO,
-                               "cannot create \"%s\": %s",
-                               self->instances_dir, instances_error->message);
+      aml_task_scope_return_error (
+        task_scope,
+        g_error_new (AML_INSTANCE_MANAGER_ERROR,
+                     AML_INSTANCE_MANAGER_ERROR_IO,
+                     "cannot create \"%s\": %s",
+                     self->instances_dir, instances_error->message));
       return;
     }
 
@@ -1106,11 +1110,16 @@ aml_instance_manager_delete_async (AmlInstanceManager *self,
   g_return_if_fail (AML_IS_INSTANCE (instance));
 
   g_autoptr (GTask) task = g_task_new (self, cancellable, callback, user_data);
+  aml_task_scope_attach_task (task);
+  AmlTaskScope *task_scope = g_object_get_data (G_OBJECT (task),
+                                                 "aml-task-scope");
   if (!g_list_store_find (self->instances, instance, NULL))
     {
-      g_task_return_new_error (task, AML_INSTANCE_MANAGER_ERROR,
-                               AML_INSTANCE_MANAGER_ERROR_NOT_FOUND,
-                               "the instance is not registered");
+      aml_task_scope_return_error (
+        task_scope,
+        g_error_new_literal (AML_INSTANCE_MANAGER_ERROR,
+                             AML_INSTANCE_MANAGER_ERROR_NOT_FOUND,
+                             "the instance is not registered"));
       return;
     }
 
@@ -1119,9 +1128,9 @@ aml_instance_manager_delete_async (AmlInstanceManager *self,
       g_autoptr (GError) error = NULL;
 
       if (!remove_instance_and_save (self, instance, &error))
-        g_task_return_error (task, g_steal_pointer (&error));
-      else
-        g_task_return_boolean (task, TRUE);
+         aml_task_scope_return_error (task_scope, g_steal_pointer (&error));
+       else
+         aml_task_scope_return_boolean (task_scope, TRUE);
 
       return;
     }
