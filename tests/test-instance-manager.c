@@ -534,6 +534,36 @@ test_load_missing_file (void)
 }
 
 static void
+test_load_removes_missing_directory (void)
+{
+  g_autofree char *data_dir = make_tmp_dir ();
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlInstanceManager) manager =
+    aml_instance_manager_new (data_dir);
+
+  AmlInstance *instance =
+    aml_instance_manager_create (manager, "Removed", NULL, "1.21.1",
+                                 AML_LOADER_VANILLA, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+  g_autofree char *directory = prop_string (instance, "directory");
+  g_assert_true (g_file_test (directory, G_FILE_TEST_IS_DIR));
+
+  remove_recursive (directory);
+
+  g_autoptr (AmlInstanceManager) fresh =
+    aml_instance_manager_new (data_dir);
+  g_assert_true (aml_instance_manager_load (fresh, &error));
+  g_assert_no_error (error);
+  g_assert_cmpuint (manager_count (fresh), ==, 0);
+
+  g_object_unref (instance);
+  remove_recursive (data_dir);
+
+  g_print ("ok - missing instance directories are removed\n");
+}
+
+static void
 assert_quarantined (const char *data_dir, const char *original_text)
 {
   g_autofree char *metadata_path =
@@ -1403,6 +1433,7 @@ main (int argc, char **argv)
   test_create_duplicate_names ();
   test_path_validation ();
   test_load_missing_file ();
+  test_load_removes_missing_directory ();
   test_corrupt_file ();
   test_missing_field_file ();
   test_version_mismatch ();
