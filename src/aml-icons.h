@@ -35,6 +35,9 @@ GtkWidget *aml_icon_widget_new (const char *placeholder_icon_name);
  * has: an image the toolkit cannot read must not become a blank hole. */
 gboolean aml_icon_widget_set_file (GtkWidget *widget, const char *path);
 
+/* Replaces @path with a 64x64-or-smaller PNG suitable for the icon cache. */
+gboolean aml_icon_scale_file (const char *path);
+
 /* Fetches @url into the icon cache and calls @callback when it is there.
  * The answer is the path of the cached file, or NULL when there is no
  * url, the download failed or it was cancelled. The callback is handed
