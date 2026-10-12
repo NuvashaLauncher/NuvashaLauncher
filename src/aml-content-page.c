@@ -635,11 +635,9 @@ persist_identified_file (AmlContentPage *self, AmlContentFile *file)
   entry.required_dependencies = file->required_dependencies;
   entry.optional_dependencies = file->optional_dependencies;
   entry.incompatible_dependencies = file->incompatible_dependencies;
-  aml_task_scope_follow_cancellable (
-          aml_task_scope_unref_when_done (
-            aml_content_index_update_async (directory, self->type, &entry,
-                                            NULL, NULL)),
-          self->installed.scan);
+  aml_task_scope_release_when_done (
+    aml_content_index_update_async (directory, self->type, &entry, NULL, NULL),
+    self->installed.scan);
 }
 
 static void

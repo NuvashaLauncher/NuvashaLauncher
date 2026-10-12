@@ -137,8 +137,9 @@ on_code_ready (GObject      *source G_GNUC_UNUSED,
 
   set_step (self, STEP_SIGN_IN);
 
-  aml_auth_sign_in_async (self->code, self->cancellable, finish_sign_in,
-                          g_object_ref (self));
+  aml_task_scope_release_when_done (
+    aml_auth_sign_in_async (self->code, finish_sign_in, g_object_ref (self)),
+    self->cancellable);
 }
 
 static void
@@ -189,8 +190,9 @@ begin_sign_in (AmlSignInDialog *self)
   gtk_widget_set_visible (GTK_WIDGET (self->open_button), FALSE);
   set_step (self, STEP_CODE);
 
-  aml_auth_device_code_async (self->cancellable, on_code_ready,
-                              g_object_ref (self));
+  aml_task_scope_release_when_done (
+    aml_auth_device_code_async (on_code_ready, g_object_ref (self)),
+    self->cancellable);
 }
 
 void

@@ -42,6 +42,7 @@
 #include <json-glib/json-glib.h>
 
 #include "aml-accounts.h"
+#include "aml-task.h"
 
 G_BEGIN_DECLS
 
@@ -120,9 +121,8 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC (AmlDeviceCode, aml_device_code_free)
 /* Asks Microsoft for a code to sign in with.
  *
  * AML_AUTH_ERROR_NO_CLIENT_ID when AML_MICROSOFT_CLIENT_ID is empty. */
-void aml_auth_device_code_async (GCancellable       *cancellable,
-                                 GAsyncReadyCallback callback,
-                                 gpointer            user_data);
+AmlTaskScope *aml_auth_device_code_async (GAsyncReadyCallback callback,
+                                          gpointer user_data);
 
 /* (transfer full) */
 AmlDeviceCode *aml_auth_device_code_finish (GAsyncResult *result,
@@ -140,10 +140,9 @@ AmlDeviceCode *aml_auth_device_code_finish (GAsyncResult *result,
  * Minecraft: Java, and AML_AUTH_ERROR_NO_PROFILE when it owns it but
  * has never played, which is what an account of a family that only
  * bought the game says. */
-void aml_auth_sign_in_async (const AmlDeviceCode *code,
-                             GCancellable          *cancellable,
-                             GAsyncReadyCallback    callback,
-                             gpointer               user_data);
+AmlTaskScope *aml_auth_sign_in_async (const AmlDeviceCode *code,
+                                      GAsyncReadyCallback callback,
+                                      gpointer user_data);
 
 /* (transfer full). The account is not stored anywhere: the caller adds
    it to the store, which is what writes it. */
@@ -155,10 +154,9 @@ AmlAccount *aml_auth_sign_in_finish (GAsyncResult *result, GError **error);
  *
  * AML_AUTH_ERROR_DECLINED when Microsoft will not hand out a new one,
  * which is what the caller answers by asking the user to sign in again. */
-void aml_auth_refresh_async (const AmlAccount   *account,
-                             GCancellable       *cancellable,
-                             GAsyncReadyCallback callback,
-                             gpointer            user_data);
+AmlTaskScope *aml_auth_refresh_async (const AmlAccount *account,
+                                      GAsyncReadyCallback callback,
+                                      gpointer user_data);
 
 /* (transfer full) */
 AmlAccount *aml_auth_refresh_finish (GAsyncResult *result, GError **error);

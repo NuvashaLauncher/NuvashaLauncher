@@ -731,26 +731,22 @@ auth_session (void)
 /* A sign-in is the task: the request lives as long as the task does, and
    the task is what is answered when it is over. */
 static AuthRequest *
-request_new (GTask *task)
+request_new (AmlTaskScope *scope)
 {
   AuthRequest *self = g_new0 (AuthRequest, 1);
 
-  self->task = g_object_ref (task);
-  self->scope = aml_task_scope_from_task (task);
+  /* Borrowed: this request is the task's own data and the scope owns that
+     task. The caller keeps the operation alive until its callback. */
+  self->task = g_object_ref (aml_task_scope_task (scope));
+  self->scope = scope;
   self->now = g_get_real_time () / 1000000;
 
   /* The cancellation of the task is this module's own: a sign-in that is
      cancelled stops waiting, and nothing is answered twice. */
-  g_task_set_check_cancellable (task, FALSE);
-  g_task_set_task_data (task, self, request_free);
+  g_task_set_check_cancellable (self->task, FALSE);
+  g_task_set_task_data (self->task, self, request_free);
 
   return self;
-}
-
-static void
-attach_task_scope (GTask *task)
-{
-  aml_task_scope_attach_task (task);
 }
 
 /* The one way out of a sign-in: an error and no account. */
@@ -765,7 +761,9 @@ fail (AuthRequest *self, GError *error)
       return;
     }
 
-  aml_task_scope_return_error (self->scope, error);
+  /* Deferred: a chain can find out that it has nothing to do before the
+     call that started it has returned the handle it must release. */
+  aml_task_scope_return_error_deferred (self->scope, error);
   g_clear_object (&self->task);
 }
 
@@ -783,7 +781,7 @@ succeed (AuthRequest   *self,
       return;
     }
 
-  aml_task_scope_return_pointer (self->scope, result, free_result);
+  aml_task_scope_return_pointer_deferred (self->scope, result, free_result);
   g_clear_object (&self->task);
 }
 
@@ -1003,23 +1001,20 @@ device_code_answered (AuthRequest *self)
              (GDestroyNotify) aml_device_code_free);
 }
 
-void
-aml_auth_device_code_async (GCancellable       *cancellable,
-                            GAsyncReadyCallback callback,
-                            gpointer            user_data)
+AmlTaskScope *
+aml_auth_device_code_async (GAsyncReadyCallback callback, gpointer user_data)
 {
-  g_autoptr (GTask) task = NULL;
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
   g_autofree char *form = NULL;
   AuthRequest *self = NULL;
 
-  task = g_task_new (NULL, cancellable, callback, user_data);
-  attach_task_scope (task);
-  self = request_new (task);
+  self = request_new (scope);
 
   if (!client_id_is_set ())
     {
       fail (self, no_client_id_error ());
-      return;
+      return g_steal_pointer (&scope);
     }
 
   form = soup_form_encode ("client_id", AML_MICROSOFT_CLIENT_ID, "scope",
@@ -1027,6 +1022,8 @@ aml_auth_device_code_async (GCancellable       *cancellable,
 
   send (self, AML_MICROSOFT_DEVICE_CODE_URL, SOUP_METHOD_POST, form,
         "application/x-www-form-urlencoded", NULL, STEP_DEVICE_CODE);
+
+  return g_steal_pointer (&scope);
 }
 
 AmlDeviceCode *
@@ -1491,26 +1488,24 @@ profile_answered (AuthRequest *self)
  * Signing in, and refreshing
  * ---------------------------------------------------------- */
 
-void
+AmlTaskScope *
 aml_auth_sign_in_async (const AmlDeviceCode   *code,
-                        GCancellable          *cancellable,
                         GAsyncReadyCallback    callback,
                         gpointer               user_data)
 {
-  g_autoptr (GTask) task = NULL;
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
   AuthRequest *self = NULL;
 
-  g_return_if_fail (code != NULL);
-  g_return_if_fail (code->device_code != NULL);
+  g_return_val_if_fail (code != NULL, NULL);
+  g_return_val_if_fail (code->device_code != NULL, NULL);
 
-  task = g_task_new (NULL, cancellable, callback, user_data);
-  attach_task_scope (task);
-  self = request_new (task);
+  self = request_new (scope);
 
   if (!client_id_is_set ())
     {
       fail (self, no_client_id_error ());
-      return;
+      return g_steal_pointer (&scope);
     }
 
   self->device_code = g_strdup (code->device_code);
@@ -1518,6 +1513,8 @@ aml_auth_sign_in_async (const AmlDeviceCode   *code,
   self->deadline = self->now + code->expires_in;
 
   ask_for_token (self);
+
+  return g_steal_pointer (&scope);
 }
 
 AmlAccount *
@@ -1529,25 +1526,23 @@ aml_auth_sign_in_finish (GAsyncResult *result, GError **error)
   return (AmlAccount *) g_task_propagate_pointer (G_TASK (result), error);
 }
 
-void
+AmlTaskScope *
 aml_auth_refresh_async (const AmlAccount   *account,
-                        GCancellable       *cancellable,
                         GAsyncReadyCallback callback,
                         gpointer            user_data)
 {
-  g_autoptr (GTask) task = NULL;
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
   AuthRequest *self = NULL;
 
-  g_return_if_fail (account != NULL);
+  g_return_val_if_fail (account != NULL, NULL);
 
-  task = g_task_new (NULL, cancellable, callback, user_data);
-  attach_task_scope (task);
-  self = request_new (task);
+  self = request_new (scope);
 
   if (!client_id_is_set ())
     {
       fail (self, no_client_id_error ());
-      return;
+      return g_steal_pointer (&scope);
     }
 
   /* An account with no refresh token has nothing to be refreshed with,
@@ -1560,7 +1555,7 @@ aml_auth_refresh_async (const AmlAccount   *account,
                          "\"%s\" has to sign in again before it can play",
                          account->name != NULL ? account->name
                                                : "this account"));
-      return;
+      return g_steal_pointer (&scope);
     }
 
   self->refresh_token = g_strdup (account->refresh_token);
@@ -1569,6 +1564,8 @@ aml_auth_refresh_async (const AmlAccount   *account,
   self->microsoft_refresh_token = g_strdup (account->refresh_token);
 
   ask_for_token (self);
+
+  return g_steal_pointer (&scope);
 }
 
 AmlAccount *
@@ -1593,9 +1590,9 @@ request_free (gpointer data)
 {
   AuthRequest *self = data;
 
-  if (self->scope != NULL)
-    aml_task_scope_cancel (self->scope);
-  aml_task_scope_unref (self->scope);
+  /* The scope owns the task this request is the data of, so reaching here
+     is the scope going away: it has already released the sources the poll
+     was waiting on. */
 
   g_clear_object (&self->message);
   g_free (self->body);
