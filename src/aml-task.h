@@ -11,7 +11,8 @@ G_BEGIN_DECLS
 
 typedef struct _AmlTaskSequence AmlTaskSequence;
 typedef struct _AmlTaskScope AmlTaskScope;
-typedef void (*AmlTaskSequenceStep) (GTask *task, gpointer user_data);
+typedef void (*AmlTaskSequenceStep) (AmlTaskSequence *sequence,
+                                     gpointer         user_data);
 
 /* A small sequential async-task runner. A step starts one asynchronous
  * operation and calls aml_task_sequence_next() from its completion callback.

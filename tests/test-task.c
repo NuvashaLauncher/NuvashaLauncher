@@ -27,7 +27,7 @@ sequence_data_free (gpointer user_data)
 }
 
 static void
-sequence_step (GTask *task G_GNUC_UNUSED, gpointer user_data)
+sequence_step (AmlTaskSequence *sequence G_GNUC_UNUSED, gpointer user_data)
 {
   SequenceData *data = user_data;
 
@@ -80,7 +80,7 @@ test_sequence_progresses_and_cleans_up (void)
 }
 
 static void
-error_step (GTask *task G_GNUC_UNUSED, gpointer user_data)
+error_step (AmlTaskSequence *sequence G_GNUC_UNUSED, gpointer user_data)
 {
   SequenceData *data = user_data;
 
@@ -360,7 +360,7 @@ test_scope_reference_keeps_operation_alive (void)
 /* A step that starts nothing and finishes nothing, so the test decides
  * when and how the sequence completes. */
 static void
-manual_step (GTask *task G_GNUC_UNUSED, gpointer user_data)
+manual_step (AmlTaskSequence *sequence G_GNUC_UNUSED, gpointer user_data)
 {
   guint *steps = user_data;
   (*steps)++;
