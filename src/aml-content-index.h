@@ -20,6 +20,8 @@ typedef enum {
 
 typedef struct {
   char *filename;
+  guint64 size;
+  gint64 mtime_usec;
   char *hash;
   char *hash512;
   char *download_url;

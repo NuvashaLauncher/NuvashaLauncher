@@ -113,6 +113,14 @@ entry_from_object (JsonObject *object, GError **error)
       aml_content_index_entry_free (entry);
       return NULL;
     }
+  {
+    JsonNode *node = json_object_get_member (object, "size");
+    if (node != NULL && JSON_NODE_HOLDS_VALUE (node))
+      entry->size = (guint64) json_node_get_int (node);
+    node = json_object_get_member (object, "mtime_usec");
+    if (node != NULL && JSON_NODE_HOLDS_VALUE (node))
+      entry->mtime_usec = json_node_get_int (node);
+  }
   entry->hash = g_strdup (json_object_get_string_member_with_default (
     object, "hash", ""));
   entry->hash512 = g_strdup (json_object_get_string_member_with_default (
@@ -302,6 +310,10 @@ entry_to_json (AmlContentIndexEntry *entry, gsize *length)
   G_STMT_START { json_builder_set_member_name (builder, name); \
     json_builder_add_string_value (builder, (value) != NULL ? (value) : ""); } G_STMT_END
   ADD_STRING ("filename", entry->filename);
+  json_builder_set_member_name (builder, "size");
+  json_builder_add_int_value (builder, (gint64) entry->size);
+  json_builder_set_member_name (builder, "mtime_usec");
+  json_builder_add_int_value (builder, entry->mtime_usec);
   ADD_STRING ("hash", entry->hash);
   ADD_STRING ("hash512", entry->hash512);
   ADD_STRING ("download_url", entry->download_url);
