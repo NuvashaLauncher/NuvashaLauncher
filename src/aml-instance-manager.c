@@ -130,13 +130,30 @@ path_contains (const char *parent, const char *child)
 
 static char *
 default_instance_directory (AmlInstanceManager *self,
-                            const char *name,
-                            const char *id)
+                            const char *name)
 {
   g_autofree char *safe_name = aml_instance_sanitize_name (name);
-  g_autofree char *leaf = g_strdup_printf ("%s-%.8s", safe_name, id);
 
-  return g_build_filename (self->instances_dir, leaf, NULL);
+  return g_build_filename (self->instances_dir, safe_name, NULL);
+}
+
+/* Instance names are case-insensitively unique. Keep the first requested
+ * name unchanged and give later instances the smallest numeric suffix that
+ * is still available: test, test 2, test 3, ... . */
+static char *
+unique_instance_name (AmlInstanceManager *self, const char *name)
+{
+  if (!name_is_taken (self, NULL, name))
+    return g_strdup (name);
+
+  for (guint suffix = 2; ; suffix++)
+    {
+      g_autofree char *candidate =
+        g_strdup_printf ("%s %u", name, suffix);
+
+      if (!name_is_taken (self, NULL, candidate))
+        return g_steal_pointer (&candidate);
+    }
 }
 
 /* Checks that @directory may become an instance directory: absolute,
@@ -313,13 +330,17 @@ char *
 aml_instance_manager_default_directory (AmlInstanceManager *self,
                                         const char *name)
 {
-  g_autofree char *id = NULL;
+  g_autofree char *normalized = NULL;
+  g_autofree char *unique = NULL;
 
   g_return_val_if_fail (AML_IS_INSTANCE_MANAGER (self), NULL);
 
-  id = g_uuid_string_random ();
+  normalized = aml_instance_normalize_name (name);
+  if (normalized[0] == '\0')
+    return NULL;
 
-  return default_instance_directory (self, name, id);
+  unique = unique_instance_name (self, normalized);
+  return default_instance_directory (self, unique);
 }
 
 AmlInstance *
@@ -628,13 +649,20 @@ aml_instance_manager_create (AmlInstanceManager *self,
   g_autofree char *path = NULL;
   g_autofree char *normalized_name = aml_instance_normalize_name (name);
 
-  if (normalized_name[0] == '\0' || name_is_taken (self, NULL, normalized_name))
+  if (normalized_name[0] == '\0')
     {
       g_set_error (error, AML_INSTANCE_MANAGER_ERROR,
                    AML_INSTANCE_MANAGER_ERROR_INVALID_PATH,
-                   "an instance with that name already exists or the name is empty");
+                   "the instance name is empty");
       return NULL;
     }
+
+  {
+    g_autofree char *unique =
+      unique_instance_name (self, normalized_name);
+    g_free (normalized_name);
+    normalized_name = g_steal_pointer (&unique);
+  }
 
   if (directory != NULL)
     {
@@ -644,7 +672,7 @@ aml_instance_manager_create (AmlInstanceManager *self,
   else
     {
       g_autofree char *derived =
-        default_instance_directory (self, name, id);
+        default_instance_directory (self, normalized_name);
 
       if (!check_instance_directory (self, derived, NULL, &path, error))
         return NULL;
@@ -962,7 +990,8 @@ aml_instance_manager_duplicate_async (AmlInstanceManager *self,
 
   g_autofree char *id = g_uuid_string_random ();
    g_autofree char *name = g_strdup_printf (_("Copy of %s"), source_name);
-  g_autofree char *directory = default_instance_directory (self, name, id);
+   g_autofree char *unique_name = unique_instance_name (self, name);
+   g_autofree char *directory = default_instance_directory (self, unique_name);
   g_autofree char *canonical = NULL;
   g_autoptr (GError) local_error = NULL;
 
@@ -976,7 +1005,7 @@ aml_instance_manager_duplicate_async (AmlInstanceManager *self,
   directory = g_steal_pointer (&canonical);
 
   g_autoptr (AmlInstance) copy =
-    aml_instance_new (id, name, directory, minecraft_version, loader,
+     aml_instance_new (id, unique_name, directory, minecraft_version, loader,
                       &local_error);
 
    if (copy == NULL)
