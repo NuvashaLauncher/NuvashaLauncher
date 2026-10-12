@@ -24,6 +24,8 @@
 
 #include <gio/gio.h>
 
+#include "aml-task.h"
+
 G_BEGIN_DECLS
 
 /* The Modrinth API v2. */
@@ -152,19 +154,17 @@ char *aml_modrinth_facets (const AmlModrinthSearch *search);
 
 /* Searches. The answers are only the projects that fit the Minecraft
  * version and the loader the search asked for. */
-void aml_modrinth_search_async (const AmlModrinthSearch *search,
-                                GCancellable           *cancellable,
-                                GAsyncReadyCallback     callback,
-                                gpointer                user_data);
+AmlTaskScope *aml_modrinth_search_async (const AmlModrinthSearch *search,
+                                          GAsyncReadyCallback callback,
+                                          gpointer user_data);
 
 /* (transfer full). NULL on error. */
 AmlModrinthResults *aml_modrinth_search_finish (GAsyncResult  *result,
                                                           GError       **error);
 
-void aml_modrinth_version_by_id_async (const char         *version_id,
-                                       GCancellable       *cancellable,
-                                       GAsyncReadyCallback callback,
-                                       gpointer            user_data);
+AmlTaskScope *aml_modrinth_version_by_id_async (const char *version_id,
+                                                GAsyncReadyCallback callback,
+                                                gpointer user_data);
 
 /* The projects out of what /search answered, and the total it counted.
  * This is what the fetch above parses, and what a test hands a fixture
@@ -201,10 +201,9 @@ void aml_modrinth_details_free (AmlModrinthDetails *details);
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (AmlModrinthDetails, aml_modrinth_details_free)
 
-void aml_modrinth_details_async (const char        *project_id,
-                                 GCancellable      *cancellable,
-                                 GAsyncReadyCallback callback,
-                                 gpointer           user_data);
+AmlTaskScope *aml_modrinth_details_async (const char *project_id,
+                                           GAsyncReadyCallback callback,
+                                           gpointer user_data);
 
 /* (transfer full). NULL on error. */
 AmlModrinthDetails *aml_modrinth_details_finish (GAsyncResult  *result,
@@ -304,13 +303,12 @@ gboolean aml_modrinth_version_has_hash (const AmlModrinthVersion *version,
  * AML_MODRINTH_ERROR_NOT_FOUND when the project publishes nothing for
  * that Minecraft version and loader, which is what the page shows as
  * "No compatible version found for Minecraft <version> and <Loader>." */
-void aml_modrinth_versions_async (const char        *project_id,
-                                  AmlContentType      type,
-                                  const char         *minecraft_version,
-                                  const char         *loader,
-                                  GCancellable       *cancellable,
-                                  GAsyncReadyCallback callback,
-                                  gpointer            user_data);
+AmlTaskScope *aml_modrinth_versions_async (const char *project_id,
+                                           AmlContentType type,
+                                           const char *minecraft_version,
+                                           const char *loader,
+                                           GAsyncReadyCallback callback,
+                                           gpointer user_data);
 
 /* (transfer full) the AmlModrinthVersion* of what fits, newest first.
  * NULL on error. */
@@ -353,10 +351,9 @@ char *aml_modrinth_project_type_for_content (AmlContentType type);
  * again. A caller that waits while the fetch is in flight and cancels
  * stops waiting and is answered as cancelled; the fetch itself carries
  * on for the others. */
-void aml_modrinth_categories_async (const char        *project_type,
-                                    GCancellable      *cancellable,
-                                    GAsyncReadyCallback callback,
-                                    gpointer           user_data);
+AmlTaskScope *aml_modrinth_categories_async (const char *project_type,
+                                              GAsyncReadyCallback callback,
+                                              gpointer user_data);
 
 /* (transfer full) the AmlModrinthCategory*, sorted by name. NULL on
  * error. */
@@ -412,10 +409,9 @@ char *aml_modrinth_no_compatible_message (AmlContentType type,
  * AML_MODRINTH_ERROR_NOT_FOUND when Modrinth does not know the hash:
  * the file is not from Modrinth, or is not the exact file it
  * published, and AML says so rather than guessing. */
-void aml_modrinth_version_by_hash_async (const char         *sha1,
-                                         GCancellable       *cancellable,
-                                         GAsyncReadyCallback callback,
-                                         gpointer            user_data);
+AmlTaskScope *aml_modrinth_version_by_hash_async (const char *sha1,
+                                                   GAsyncReadyCallback callback,
+                                                   gpointer user_data);
 
 /* (transfer full). NULL on error. */
 AmlModrinthVersion *aml_modrinth_version_by_hash_finish (GAsyncResult  *result,
@@ -430,13 +426,12 @@ AmlModrinthVersion *aml_modrinth_version_by_hash_finish (GAsyncResult  *result,
  *
  * NULL is the answer when Modrinth has nothing newer that fits, which
  * is what a page shows as up to date; it is not an error. */
-void aml_modrinth_update_by_hash_async (AmlContentType      type,
-                                        const char         *sha1,
-                                        const char         *minecraft_version,
-                                        const char         *loader,
-                                        GCancellable       *cancellable,
-                                        GAsyncReadyCallback callback,
-                                        gpointer            user_data);
+AmlTaskScope *aml_modrinth_update_by_hash_async (AmlContentType type,
+                                                   const char *sha1,
+                                                   const char *minecraft_version,
+                                                   const char *loader,
+                                                   GAsyncReadyCallback callback,
+                                                   gpointer user_data);
 
 /* (transfer full). NULL when there is no update, and on error. */
 AmlModrinthVersion *aml_modrinth_update_by_hash_finish (GAsyncResult  *result,

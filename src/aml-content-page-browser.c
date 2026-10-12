@@ -363,8 +363,13 @@ aml_content_page_run_search (AmlContentPage *self, gboolean append)
   gtk_widget_set_visible (GTK_WIDGET (self->browse.loading_more), TRUE);
   gtk_widget_set_visible (GTK_WIDGET (self->browse.retry_row), FALSE);
 
-  aml_modrinth_search_async (search, self->browse.model->more, search_ready,
-                             page_watch_new (self));
+  {
+    PageWatch *watch = page_watch_new (self);
+
+    watch->operation = aml_modrinth_search_async (search, search_ready, watch);
+    aml_task_scope_follow_cancellable (watch->operation,
+                                       self->browse.model->more);
+  }
 }
 
 static gboolean
@@ -472,8 +477,14 @@ load_categories (AmlContentPage *self)
     aml_modrinth_project_type_for_content (self->type);
 
   self->browse.model->categories_loaded = TRUE;
-  aml_modrinth_categories_async (project_type, self->browse.model->cancellable,
-                                 categories_ready, page_watch_new (self));
+  {
+    PageWatch *watch = page_watch_new (self);
+
+    watch->operation = aml_modrinth_categories_async (project_type,
+                                                      categories_ready, watch);
+    aml_task_scope_follow_cancellable (watch->operation,
+                                       self->browse.model->cancellable);
+  }
 }
 
 static void

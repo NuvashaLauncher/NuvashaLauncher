@@ -546,6 +546,9 @@ typedef struct {
   IdentifyRun *run;
   AmlContentFile *file;
   GtkWidget *row;
+
+  /* The operation that answers for this file, released with the request. */
+  AmlTaskScope *operation;
 } IdentifyRequest;
 
 struct _IdentifyRun {
@@ -599,6 +602,10 @@ static void
 identify_request_free (IdentifyRequest *request)
 {
   IdentifyRun *run = request->run;
+
+  if (request->operation != NULL)
+    aml_task_scope_unref (request->operation);
+
   g_free (request);
   run->in_flight--;
   identify_run_maybe_free (run);
@@ -776,11 +783,17 @@ identify_start (IdentifyRun *run)
       request->row = row;
       run->in_flight++;
       if (file->version_id != NULL && *file->version_id != '\0')
-        aml_modrinth_version_by_id_async (file->version_id, run->cancellable,
-                                          identify_ready, request);
+        request->operation =
+          aml_modrinth_version_by_id_async (file->version_id, identify_ready,
+                                            request);
       else
-        aml_modrinth_version_by_hash_async (file->sha1, run->cancellable,
-                                            identify_ready, request);
+        request->operation =
+          aml_modrinth_version_by_hash_async (file->sha1, identify_ready,
+                                              request);
+
+      if (run->cancellable != NULL)
+        aml_task_scope_follow_cancellable (request->operation,
+                                           run->cancellable);
     }
 
   if (run->next_index >= self->installed.files->len && run->in_flight == 0)
@@ -1155,11 +1168,15 @@ update_check_next (UpdateRun *run)
         continue;
 
       g_object_set_data (G_OBJECT (self), "aml-update-file", file);
-      aml_modrinth_update_by_hash_async (self->type, file->sha1,
-                                         self->minecraft_version,
-                                         self->loader, self->browse.model->cancellable,
-                                         on_update_ready,
-                                         page_watch_new (self));
+      {
+        PageWatch *watch = page_watch_new (self);
+
+        watch->operation = aml_modrinth_update_by_hash_async (
+          self->type, file->sha1, self->minecraft_version, self->loader,
+          on_update_ready, watch);
+        aml_task_scope_follow_cancellable (watch->operation,
+                                           self->browse.model->cancellable);
+      }
       return;
     }
 

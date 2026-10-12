@@ -15,6 +15,10 @@
 typedef struct {
   AmlContentPage *page; /* weak */
   char *project_id;     /* owned */
+
+  /* The operation this watch was made for. The watch lives through two
+     answers in a row, so it holds the handle of the one still running. */
+  AmlTaskScope *operation;
 } DetailsWatch;
 
 static DetailsWatch *
@@ -35,6 +39,9 @@ details_watch_free (DetailsWatch *watch)
   if (watch->page != NULL)
     g_object_remove_weak_pointer (G_OBJECT (watch->page),
                                   (gpointer *) &watch->page);
+
+  if (watch->operation != NULL)
+    aml_task_scope_unref (watch->operation);
 
   g_free (watch->project_id);
   g_free (watch);
@@ -534,10 +541,14 @@ on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   /* Only versions that fit this instance are asked for, and only those
      can reach the list. The watch goes on to the next answer, which is
-     the one that frees it. */
-  aml_modrinth_versions_async (watch->project_id, self->type,
-                               self->minecraft_version, self->loader,
-                               self->browse.model->cancellable, on_detail_versions_ready, watch);
+     the one that frees it, so it hands over the handle it was holding:
+     this answer is in. */
+  aml_task_scope_unref (watch->operation);
+  watch->operation = aml_modrinth_versions_async (
+    watch->project_id, self->type, self->minecraft_version, self->loader,
+    on_detail_versions_ready, watch);
+  aml_task_scope_follow_cancellable (watch->operation,
+                                     self->browse.model->cancellable);
 }
 
 /* The dialog of @project: what it is, every version of it that fits this
@@ -586,9 +597,15 @@ open_project_page (AmlContentPage *self, AmlModrinthProject *project)
     ADW_NAVIGATION_SPLIT_VIEW (self->project.split), FALSE);
 
   set_busy (self, TRUE);
-  aml_modrinth_details_async (project->project_id, self->browse.model->cancellable,
-                              on_details_ready,
-                              details_watch_new (self, project->project_id));
+  {
+    DetailsWatch *watch = details_watch_new (self, project->project_id);
+
+    watch->operation =
+      aml_modrinth_details_async (project->project_id, on_details_ready,
+                                  watch);
+    aml_task_scope_follow_cancellable (watch->operation,
+                                       self->browse.model->cancellable);
+  }
 }
 
 /* A click on a row opens its project in the other half. A click on the
