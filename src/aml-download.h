@@ -26,6 +26,9 @@ typedef struct _AmlDownloadService AmlDownloadService;
 
 AmlDownloadService *aml_download_service_new (void);
 void aml_download_service_free (AmlDownloadService *service);
+/* Cancel every request waiting for a transfer slot. Active transfers are
+ * unaffected; their callers still own their individual cancellables. */
+void aml_download_service_cancel_queued (AmlDownloadService *service);
 
 #define AML_DOWNLOAD_ERROR (aml_download_error_quark ())
 

@@ -83,6 +83,7 @@ struct _AmlDownloadService {
   guint bulk_running;
   GQueue interactive_waiting;
   GQueue bulk_waiting;
+  gboolean prefer_interactive;
   AmlSettings *cache_settings;
 };
 
@@ -96,6 +97,7 @@ aml_download_service_new (void)
       service = g_new0 (AmlDownloadService, 1);
       g_queue_init (&service->interactive_waiting);
       g_queue_init (&service->bulk_waiting);
+      service->prefer_interactive = TRUE;
     }
   return service;
 }
@@ -105,6 +107,7 @@ aml_download_service_free (AmlDownloadService *owned_service)
 {
   if (owned_service != service)
     return;
+  aml_download_service_cancel_queued (owned_service);
   aml_download_shutdown ();
   if (service != NULL && service->interactive_running == 0 &&
       service->bulk_running == 0 &&
@@ -613,12 +616,24 @@ release_slot (DownloadRequest *request)
   while (service->interactive_running + service->bulk_running < MAX_CONCURRENT)
     {
       DownloadRequest *next = NULL;
+      gboolean interactive_available =
+        !g_queue_is_empty (&service->interactive_waiting);
+      gboolean bulk_available =
+        service->bulk_running < MAX_BULK_CONCURRENT &&
+        !g_queue_is_empty (&service->bulk_waiting);
 
-      if (!g_queue_is_empty (&service->interactive_waiting))
+      /* Alternate between classes whenever both have work. This preserves
+       * responsiveness without allowing a long stream of interactive/API
+       * requests to starve the bulk queue. Priority still applies within
+       * each class through g_queue_insert_sorted(). */
+      if (interactive_available && bulk_available && service->prefer_interactive)
         next = g_queue_pop_head (&service->interactive_waiting);
-      else if (service->bulk_running < MAX_BULK_CONCURRENT &&
-               !g_queue_is_empty (&service->bulk_waiting))
+      else if (interactive_available && !bulk_available)
+        next = g_queue_pop_head (&service->interactive_waiting);
+      else if (bulk_available)
         next = g_queue_pop_head (&service->bulk_waiting);
+      else if (interactive_available)
+        next = g_queue_pop_head (&service->interactive_waiting);
 
       if (next == NULL)
         break;
@@ -631,11 +646,49 @@ release_slot (DownloadRequest *request)
         }
 
       if (next->priority >= DOWNLOAD_PRIORITY_INTERACTIVE)
-        service->interactive_running++;
+        {
+          service->interactive_running++;
+          service->prefer_interactive = FALSE;
+        }
       else
-        service->bulk_running++;
+        {
+          service->bulk_running++;
+          service->prefer_interactive = TRUE;
+        }
       next->holds_slot = TRUE;
       next->begin (next);
+    }
+}
+
+void
+aml_download_service_cancel_queued (AmlDownloadService *owned_service)
+{
+  if (owned_service == NULL || owned_service != service)
+    return;
+
+  while (!g_queue_is_empty (&service->interactive_waiting))
+    {
+      DownloadRequest *request =
+        g_queue_pop_head (&service->interactive_waiting);
+      if (request->queue_cancel_source != 0)
+        {
+          aml_task_scope_remove_source (request->scope,
+                                        request->queue_cancel_source);
+          request->queue_cancel_source = 0;
+        }
+      request_fail (request, cancelled_error ());
+    }
+
+  while (!g_queue_is_empty (&service->bulk_waiting))
+    {
+      DownloadRequest *request = g_queue_pop_head (&service->bulk_waiting);
+      if (request->queue_cancel_source != 0)
+        {
+          aml_task_scope_remove_source (request->scope,
+                                        request->queue_cancel_source);
+          request->queue_cancel_source = 0;
+        }
+      request_fail (request, cancelled_error ());
     }
 }
 
