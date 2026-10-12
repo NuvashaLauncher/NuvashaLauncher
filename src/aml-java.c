@@ -474,7 +474,8 @@ static void probe_list_probed (GObject *source, GAsyncResult *result,
                                gpointer user_data);
 
 static void
-probe_list_sequence_step (GTask *task G_GNUC_UNUSED, gpointer user_data)
+probe_list_sequence_step (AmlTaskSequence *sequence G_GNUC_UNUSED,
+                          gpointer user_data)
 {
   ProbeList *list = user_data;
 
@@ -487,7 +488,8 @@ probe_list_sequence_step (GTask *task G_GNUC_UNUSED, gpointer user_data)
     }
 
   aml_java_probe_async (list->executables[list->next],
-                        g_task_get_cancellable (task), probe_list_probed,
+                        aml_task_sequence_get_cancellable (list->sequence),
+                        probe_list_probed,
                         list);
   list->next++;
 }

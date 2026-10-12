@@ -255,7 +255,7 @@ aml_task_sequence_start (AmlTaskSequence *sequence)
       return;
     }
 
-  sequence->step (sequence->task, sequence->user_data);
+  sequence->step (sequence, sequence->user_data);
 }
 
 void
@@ -273,7 +273,7 @@ aml_task_sequence_next (AmlTaskSequence *sequence)
       return;
     }
 
-  sequence->step (sequence->task, sequence->user_data);
+  sequence->step (sequence, sequence->user_data);
 }
 
 void

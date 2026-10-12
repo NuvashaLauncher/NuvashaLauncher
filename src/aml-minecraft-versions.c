@@ -1818,7 +1818,8 @@ load_request_free (LoadRequest *request)
 static void load_step (LoadRequest *request);
 
 static void
-load_sequence_step (GTask *task G_GNUC_UNUSED, gpointer user_data)
+load_sequence_step (AmlTaskSequence *sequence G_GNUC_UNUSED,
+                    gpointer user_data)
 {
   load_step (user_data);
 }
@@ -1890,7 +1891,8 @@ manifest_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
 }
 
 static void
-manifest_fetch_step (GTask *task G_GNUC_UNUSED, gpointer user_data)
+manifest_fetch_step (AmlTaskSequence *sequence G_GNUC_UNUSED,
+                     gpointer user_data)
 {
   FetchRequest *request = user_data;
 
