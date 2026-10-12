@@ -795,7 +795,8 @@ answer_if_cancelled (AuthRequest *self)
 {
   GTask *task = NULL;
 
-  if (self->task == NULL || !g_task_return_error_if_cancelled (self->task))
+  if (self->task == NULL ||
+      !aml_task_scope_return_error_if_cancelled (self->scope))
     return FALSE;
 
   task = g_steal_pointer (&self->task);
