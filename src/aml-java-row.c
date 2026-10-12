@@ -117,8 +117,13 @@ put_model (AmlJavaRow *self, GPtrArray *names, guint position)
   g_clear_pointer (&self->names, g_ptr_array_unref);
   self->names = names;
 
+  /* Replacing the model can transiently select its first item. That is an
+   * implementation detail, not a user choice: do not let the selection
+   * handler persist it as the instance's Java path. */
+  g_signal_handlers_block_by_func (self, G_CALLBACK (on_picked), self);
   adw_combo_row_set_model (ADW_COMBO_ROW (self), G_LIST_MODEL (list));
   adw_combo_row_set_selected (ADW_COMBO_ROW (self), position);
+  g_signal_handlers_unblock_by_func (self, G_CALLBACK (on_picked), self);
 }
 
 static void
