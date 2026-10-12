@@ -1922,9 +1922,11 @@ aml_version_manifest_fetch_async (const char         *url,
       g_autoptr (GTask) task =
         g_task_new (NULL, cancellable, callback, user_data);
        aml_task_scope_attach_task (task);
+       AmlTaskScope *scope = g_object_get_data (G_OBJECT (task),
+                                                "aml-task-scope");
 
-      g_task_set_check_cancellable (task, FALSE);
-      g_task_return_error (task, g_steal_pointer (&error));
+      aml_task_scope_set_check_cancellable (scope, FALSE);
+      aml_task_scope_return_error (scope, g_steal_pointer (&error));
       return;
     }
 
