@@ -87,6 +87,12 @@ void aml_task_scope_cancel (AmlTaskScope *scope);
  * such an operation must not touch the scope afterwards. */
 AmlTaskScope *aml_task_scope_unref_when_done (AmlTaskScope *scope);
 
+/* Hands the caller's reference back and ties the operation to
+ * @cancellable. For work whose answer nobody is waiting for but which
+ * still has to stop when whatever asked for it is stopped. */
+void aml_task_scope_release_when_done (AmlTaskScope *scope,
+                                       GCancellable *cancellable);
+
 /* Cancels @scope whenever @cancellable is cancelled, for an operation
  * whose cancel button belongs to an object the caller does not own. The
  * scope stops watching when its last reference goes away. */

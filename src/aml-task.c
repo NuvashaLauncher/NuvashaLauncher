@@ -97,6 +97,12 @@ aml_task_scope_unref (AmlTaskScope *scope)
   if (scope == NULL || !g_atomic_ref_count_dec (&scope->refs))
     return;
 
+  /* The task goes first: it is what the scope's borrowers are attached
+     to, and dropping it runs their cleanups while this scope is still
+     whole enough to answer them. */
+  if (scope->owns_task)
+    g_clear_object (&scope->task);
+
   for (guint i = 0; i < scope->sources->len; i++)
     {
       guint source_id = g_array_index (scope->sources, guint, i);
@@ -113,8 +119,6 @@ aml_task_scope_unref (AmlTaskScope *scope)
   g_array_unref (scope->completions);
   aml_task_scope_unfollow (scope);
   g_array_unref (scope->followed);
-  if (scope->owns_task)
-    g_clear_object (&scope->task);
   g_free (scope);
 }
 
@@ -221,6 +225,13 @@ aml_task_scope_unref_when_done (AmlTaskScope *scope)
   g_return_val_if_fail (scope != NULL, NULL);
   scope->unref_when_done = TRUE;
   return scope;
+}
+
+void
+aml_task_scope_release_when_done (AmlTaskScope *scope, GCancellable *cancellable)
+{
+  aml_task_scope_follow_cancellable (scope, cancellable);
+  aml_task_scope_unref_when_done (scope);
 }
 
 /* What an operation that has nothing to wait for has to hand over. The

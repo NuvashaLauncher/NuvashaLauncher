@@ -286,11 +286,9 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
          entry.env_client = "required";
          entry.env_server = run->page->type == AML_CONTENT_MOD
                               ? "required" : "unsupported";
-        aml_task_scope_follow_cancellable (
-          aml_task_scope_unref_when_done (
-            aml_content_index_update_async (instance_directory,
-                                            run->page->type, &entry, NULL,
-                                            NULL)),
+        aml_task_scope_release_when_done (
+          aml_content_index_update_async (instance_directory,
+                                          run->page->type, &entry, NULL, NULL),
           aml_download_get_cancellable (run->download));
       }
     }

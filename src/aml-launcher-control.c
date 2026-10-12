@@ -133,8 +133,9 @@ account_for_launch (AmlLauncher *self)
   log_line (self, TAG_STATE, "signing \"%s\" in again before launching",
             account->name != NULL ? account->name : "the account");
 
-  aml_auth_refresh_async (account, self->preparation.cancellable, on_account_refreshed,
-                          g_object_ref (self));
+  aml_task_scope_release_when_done (
+    aml_auth_refresh_async (account, on_account_refreshed, g_object_ref (self)),
+    self->preparation.cancellable);
 
   return FALSE;
 }
