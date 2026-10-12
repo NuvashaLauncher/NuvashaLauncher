@@ -153,16 +153,27 @@ aml_task_scope_set_check_cancellable (AmlTaskScope *scope, gboolean check)
   g_task_set_check_cancellable (scope->task, check);
 }
 
-/* A completion hands the operation to the caller's callback, and that
- * callback runs before g_task_return_*() has finished with the task, so it
- * may already have dropped the last reference. A scope whose caller gave
- * the reference away is released here, and nothing may touch it after
- * this: handing a reference back means letting go of it. */
+/* A completion hands the operation to the caller's callback, and GTask
+ * gives up its own reference before returning from that call. Nothing may
+ * be freed underneath code that is still running there: the code that
+ * completed the operation usually frees state that borrows its scope
+ * straight afterwards. Releasing from the next main-loop turn is what
+ * keeps that state looking at a scope that is still there.
+ *
+ * The reference the caller handed back is the one the idle owns: handing a
+ * reference back means giving it away, not taking another one. */
+static gboolean
+release_when_done_idle (gpointer user_data)
+{
+  aml_task_scope_unref (user_data);
+  return G_SOURCE_REMOVE;
+}
+
 static void
 scope_release_when_done (AmlTaskScope *scope)
 {
   scope->unref_when_done = FALSE;
-  aml_task_scope_unref (scope);
+  g_idle_add_full (G_PRIORITY_DEFAULT, release_when_done_idle, scope, NULL);
 }
 
 gboolean
