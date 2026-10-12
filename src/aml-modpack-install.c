@@ -1141,14 +1141,16 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
 
   if (g_cancellable_is_cancelled (cancellable))
     {
-      g_task_return_new_error (task, AML_MODPACK_ERROR,
-                               AML_MODPACK_ERROR_CANCELLED, "cancelled");
+      aml_task_scope_return_error (
+        run->scope,
+        g_error_new_literal (AML_MODPACK_ERROR,
+                             AML_MODPACK_ERROR_CANCELLED, "cancelled"));
       return;
     }
 
   if (!export_indexed_files (run, cancellable, &error))
     {
-      g_task_return_error (task, g_steal_pointer (&error));
+      aml_task_scope_return_error (run->scope, g_steal_pointer (&error));
       return;
     }
 
@@ -1163,8 +1165,10 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
 
   if (g_str_has_prefix (canonical_archive, root_prefix))
     {
-      g_task_return_new_error (task, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
-                               "the export file cannot be inside the instance");
+      aml_task_scope_return_error (
+        run->scope,
+        g_error_new_literal (AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
+                             "the export file cannot be inside the instance"));
       return;
     }
 
@@ -1178,10 +1182,11 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
                                      &temporary_error);
     if (fd < 0)
       {
-        g_task_return_new_error (task, AML_MODPACK_ERROR,
-                                 AML_MODPACK_ERROR_IO,
-                                  "cannot create a temporary archive: %s",
-                                  temporary_error->message);
+        aml_task_scope_return_error (
+          run->scope,
+          g_error_new (AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
+                       "cannot create a temporary archive: %s",
+                       temporary_error->message));
         return;
       }
     close (fd);
@@ -1197,7 +1202,7 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
                    archive_error_string (archive));
       archive_write_free (archive);
       aml_fs_unlink (run->temporary_archive, NULL);
-      g_task_return_error (task, g_steal_pointer (&error));
+      aml_task_scope_return_error (run->scope, g_steal_pointer (&error));
       return;
     }
 
@@ -1217,7 +1222,7 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
       archive_entry_free (manifest_entry);
       archive_write_free (archive);
       aml_fs_unlink (run->temporary_archive, NULL);
-      g_task_return_error (task, g_steal_pointer (&error));
+       aml_task_scope_return_error (run->scope, g_steal_pointer (&error));
       return;
     }
 
@@ -1243,7 +1248,7 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
       archive_entry_free (manifest_entry);
       archive_write_free (archive);
       aml_fs_unlink (run->temporary_archive, NULL);
-      g_task_return_error (task, g_steal_pointer (&error));
+       aml_task_scope_return_error (run->scope, g_steal_pointer (&error));
       return;
     }
 
@@ -1255,12 +1260,12 @@ export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
       g_prefix_error (&error, "cannot publish \"%s\": ",
                       run->archive_path);
       aml_fs_unlink (run->temporary_archive, NULL);
-      g_task_return_error (task, g_steal_pointer (&error));
+      aml_task_scope_return_error (run->scope, g_steal_pointer (&error));
       return;
     }
 
   export_progress (run, run->total, run->total, _("Export complete"));
-  g_task_return_boolean (task, TRUE);
+  aml_task_scope_return_boolean (run->scope, TRUE);
 }
 
 static char *
