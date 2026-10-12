@@ -98,11 +98,6 @@ void aml_content_delete_async (GFile *file, int io_priority,
                                gpointer user_data);
 gboolean aml_content_delete_finish (GFile *file, GAsyncResult *result,
                                     GError **error);
-void aml_content_operation_release (AmlTaskScope *operation,
-                                    GCancellable *cancellable);
-void aml_content_operation_forget (AmlTaskScope *operation);
-void aml_content_operation_follow (AmlTaskScope *operation,
-                                   GCancellable *cancellable);
 
 /* The files of @instance_directory for @type, sorted by name, each one
  * hashed. A folder that does not exist holds no files, which is what an
