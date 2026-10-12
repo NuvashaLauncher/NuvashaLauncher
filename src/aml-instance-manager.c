@@ -1420,12 +1420,14 @@ open_folder_launch_ready (GObject *source G_GNUC_UNUSED,
                           GAsyncResult *result, gpointer user_data)
 {
   GTask *task = user_data; /* holds its own reference */
+  AmlTaskScope *scope = g_object_get_data (G_OBJECT (task),
+                                           "aml-task-scope");
   g_autoptr (GError) error = NULL;
 
   if (g_app_info_launch_default_for_uri_finish (result, &error))
-    g_task_return_boolean (task, TRUE);
+    aml_task_scope_return_boolean (scope, TRUE);
   else
-    g_task_return_error (task, g_steal_pointer (&error));
+    aml_task_scope_return_error (scope, g_steal_pointer (&error));
 
   g_object_unref (task);
 }
