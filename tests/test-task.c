@@ -344,6 +344,19 @@ test_scope_cancellation_stress (void)
   g_print ("ok - task scope cancellation remains leak-free under stress\n");
 }
 
+static void
+test_scope_reference_keeps_operation_alive (void)
+{
+  AmlTaskScope *scope = aml_task_scope_new (NULL, NULL, NULL, NULL);
+  AmlTaskScope *held = aml_task_scope_ref (scope);
+
+  aml_task_scope_free (scope);
+  g_assert_nonnull (aml_task_scope_get_task (held));
+  aml_task_scope_unref (held);
+
+  g_print ("ok - task scope references keep operation state alive\n");
+}
+
 /* A step that starts nothing and finishes nothing, so the test decides
  * when and how the sequence completes. */
 static void
@@ -419,6 +432,7 @@ main (int argc, char **argv)
   test_sequence_survives_completing_twice ();
   test_scope_cancels_owned_sources ();
   test_scope_cancellation_stress ();
+  test_scope_reference_keeps_operation_alive ();
 
   g_print ("# Task scope and sources it has already lost\n");
   test_scope_free_releases_a_source_that_fired ();

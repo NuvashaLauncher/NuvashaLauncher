@@ -1441,9 +1441,7 @@ aml_instance_manager_open_folder_async (AmlInstanceManager *self,
   g_return_if_fail (AML_IS_INSTANCE (instance));
 
   g_autoptr (GTask) task = g_task_new (self, cancellable, callback, user_data);
-  g_object_set_data_full (G_OBJECT (task), "aml-task-scope",
-                          aml_task_scope_borrow_task (task),
-                          (GDestroyNotify) aml_task_scope_free);
+   aml_task_scope_attach_task (task);
 
   if (!g_list_store_find (self->instances, instance, NULL))
     {

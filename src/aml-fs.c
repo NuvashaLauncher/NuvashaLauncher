@@ -341,9 +341,7 @@ aml_fs_remove_tree_async (const char *path, GCancellable *cancellable,
                           GAsyncReadyCallback callback, gpointer user_data)
 {
   g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
-  g_object_set_data_full (G_OBJECT (task), "aml-task-scope",
-                          aml_task_scope_borrow_task (task),
-                          (GDestroyNotify) aml_task_scope_free);
+  aml_task_scope_attach_task (task);
   RemoveTreeData *data = g_new0 (RemoveTreeData, 1);
 
   data->path = g_strdup (path);
@@ -468,9 +466,7 @@ aml_fs_copy_tree_async (GFile *source, GFile *destination,
                         GAsyncReadyCallback callback, gpointer user_data)
 {
   g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
-  g_object_set_data_full (G_OBJECT (task), "aml-task-scope",
-                          aml_task_scope_borrow_task (task),
-                          (GDestroyNotify) aml_task_scope_free);
+  aml_task_scope_attach_task (task);
   CopyTreeData *data = g_new0 (CopyTreeData, 1);
 
   data->source = g_object_ref (source);

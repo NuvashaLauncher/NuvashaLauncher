@@ -781,9 +781,7 @@ scan_local_metadata (ScanRun *run)
     }
   GTask *task = g_task_new (NULL, g_task_get_cancellable (run->task),
                             local_metadata_done, run);
-  g_object_set_data_full (G_OBJECT (task), "aml-task-scope",
-                          aml_task_scope_borrow_task (task),
-                          (GDestroyNotify) aml_task_scope_free);
+  aml_task_scope_attach_task (task);
   g_task_set_task_data (task, run, NULL);
   g_task_run_in_thread (task, local_metadata_thread);
   g_object_unref (task);
