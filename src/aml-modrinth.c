@@ -1303,10 +1303,11 @@ json_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       if (error_is_not_found (error))
         {
           g_clear_error (&error);
-          g_task_return_error (
-              task, g_error_new_literal (AML_MODRINTH_ERROR,
-                                         AML_MODRINTH_ERROR_NOT_FOUND,
-                                         "Modrinth does not know this file"));
+          request_return_error (
+            task,
+            g_error_new_literal (AML_MODRINTH_ERROR,
+                                 AML_MODRINTH_ERROR_NOT_FOUND,
+                                 "Modrinth does not know this file"));
           return;
         }
 
@@ -1318,10 +1319,10 @@ json_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   if (root == NULL)
     {
-      g_task_return_error (
-          task, g_error_new_literal (AML_MODRINTH_ERROR,
-                                     AML_MODRINTH_ERROR_PARSE,
-                                     "the answer holds no JSON"));
+      request_return_error (
+        task,
+        g_error_new_literal (AML_MODRINTH_ERROR, AML_MODRINTH_ERROR_PARSE,
+                             "the answer holds no JSON"));
       return;
     }
 
