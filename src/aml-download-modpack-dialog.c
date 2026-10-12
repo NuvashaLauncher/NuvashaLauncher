@@ -846,6 +846,7 @@ static void
 build_browse_page (AmlDownloadModpackDialog *self)
 {
   GtkWidget *page = NULL;
+  GtkBox *root = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   GtkBox *top = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
   GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
@@ -890,7 +891,7 @@ build_browse_page (AmlDownloadModpackDialog *self)
   gtk_widget_set_margin_end (GTK_WIDGET (top), 12);
   gtk_widget_set_margin_top (GTK_WIDGET (top), 6);
   gtk_widget_set_margin_bottom (GTK_WIDGET (top), 6);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (top));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (root)), GTK_WIDGET (top));
 
   /* The list. The bottom of it holds a spinner while the next page is on
      its way and a retry row when a page failed. */
@@ -991,8 +992,9 @@ build_browse_page (AmlDownloadModpackDialog *self)
     ADW_NAVIGATION_SPLIT_VIEW (self->split), 360);
   adw_navigation_split_view_set_max_sidebar_width (
     ADW_NAVIGATION_SPLIT_VIEW (self->split), 640);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (root)), GTK_WIDGET (self->split));
 
-  page = GTK_WIDGET (adw_navigation_page_new (GTK_WIDGET (self->split), ""));
+  page = GTK_WIDGET (adw_navigation_page_new (GTK_WIDGET (root), ""));
   adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (GTK_WIDGET (page)), "browse");
 
   adw_navigation_view_add (ADW_NAVIGATION_VIEW (self->nav),
