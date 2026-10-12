@@ -1152,6 +1152,7 @@ request_new (GCancellable *cancellable, GAsyncReadyCallback callback,
 static void
 fail (GTask *task, GError *error)
 {
+  Request *request = g_task_get_task_data (task);
   GError *wrapped = NULL;
 
   /* The cancellation is reported once, from here. The task must not be
@@ -1161,10 +1162,11 @@ fail (GTask *task, GError *error)
     {
       g_clear_error (&error);
 
-      g_task_return_error (
-          task, g_error_new_literal (AML_MODRINTH_ERROR,
-                                     AML_MODRINTH_ERROR_NETWORK,
-                                     "the request was cancelled"));
+      aml_task_scope_return_error (
+        request->scope,
+        g_error_new_literal (AML_MODRINTH_ERROR,
+                             AML_MODRINTH_ERROR_NETWORK,
+                             "the request was cancelled"));
       return;
     }
 
@@ -1186,7 +1188,7 @@ fail (GTask *task, GError *error)
                            "%s", error->message);
 
   g_error_free (error);
-  g_task_return_error (task, wrapped);
+  aml_task_scope_return_error (request->scope, wrapped);
 }
 
 /* The download module writes the status into its own message, which is
@@ -1225,15 +1227,17 @@ json_flight_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
           if (error_is_not_found (error) &&
               request->not_found == AML_NOT_FOUND_IS_ABSENT)
             {
-              g_task_return_pointer (task, NULL, NULL);
+               aml_task_scope_return_pointer (request->scope, NULL, NULL);
               continue;
             }
 
           if (error_is_not_found (error))
             {
-              g_task_return_new_error (task, AML_MODRINTH_ERROR,
-                                       AML_MODRINTH_ERROR_NOT_FOUND,
-                                       "Modrinth does not know this file");
+               aml_task_scope_return_error (
+                 request->scope,
+                 g_error_new_literal (AML_MODRINTH_ERROR,
+                                      AML_MODRINTH_ERROR_NOT_FOUND,
+                                      "Modrinth does not know this file"));
               continue;
             }
 
@@ -1243,9 +1247,11 @@ json_flight_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
       if (root == NULL)
         {
-          g_task_return_new_error (task, AML_MODRINTH_ERROR,
-                                   AML_MODRINTH_ERROR_PARSE,
-                                   "the answer holds no JSON");
+           aml_task_scope_return_error (
+             request->scope,
+             g_error_new_literal (AML_MODRINTH_ERROR,
+                                  AML_MODRINTH_ERROR_PARSE,
+                                  "the answer holds no JSON"));
           continue;
         }
 
