@@ -29,10 +29,6 @@ dialog_of_instance (AmlMainWindow *self, const char *id)
   return g_hash_table_lookup (self->model->instance_dialogs, id);
 }
 
-static void on_instance_renamed (AmlInstance *instance,
-                                 GParamSpec *pspec,
-                                 gpointer user_data);
-
 /* A dialog that was closed is not open any more. AdwDialog emits this
    while it is still alive, so the borrowed pointer leaves the table
    before the dialog is freed. */
@@ -51,11 +47,11 @@ on_instance_dialog_closed (AdwDialog *dialog, gpointer user_data)
     {
       AmlInstance *instance =
         aml_instance_manager_get_by_id (self->model->manager, id);
+      gulong handler = (gulong) GPOINTER_TO_SIZE (
+        g_object_get_data (G_OBJECT (dialog), "aml-rename-handler"));
 
-      if (instance != NULL)
-        g_signal_handlers_disconnect_by_func (instance,
-                                              G_CALLBACK (on_instance_renamed),
-                                              self);
+      if (instance != NULL && handler != 0)
+        g_signal_handler_disconnect (instance, handler);
       g_hash_table_remove (self->model->instance_dialogs, id);
     }
 }
@@ -135,8 +131,12 @@ open_instance_dialog (AmlMainWindow *self, AmlInstance *instance)
 
   /* The connection goes with the dialog: a page that goes away first
      leaves nothing to call back into. */
-  g_signal_connect_object (instance, "notify::name",
-                           G_CALLBACK (on_instance_renamed), self, 0);
+  {
+    gulong handler = g_signal_connect (instance, "notify::name",
+                                       G_CALLBACK (on_instance_renamed), self);
+    g_object_set_data (G_OBJECT (dialog), "aml-rename-handler",
+                       GSIZE_TO_POINTER ((gsize) handler));
+  }
 
   adw_dialog_present (dialog, GTK_WIDGET (self));
 }
