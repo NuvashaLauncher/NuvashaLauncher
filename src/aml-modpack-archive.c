@@ -877,19 +877,21 @@ modpack_read_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
   if (g_cancellable_is_cancelled (cancellable))
     {
       aml_modpack_free (pack);
-      g_task_return_new_error (task, AML_MODPACK_ERROR,
-                               AML_MODPACK_ERROR_CANCELLED, "cancelled");
+      aml_task_scope_return_error (
+        read->scope,
+        g_error_new_literal (AML_MODPACK_ERROR,
+                             AML_MODPACK_ERROR_CANCELLED, "cancelled"));
       return;
     }
 
   if (pack == NULL)
     {
-      g_task_return_error (task, g_steal_pointer (&error));
+      aml_task_scope_return_error (read->scope, g_steal_pointer (&error));
       return;
     }
 
-  g_task_return_pointer (task, pack,
-                         (GDestroyNotify) aml_modpack_free);
+  aml_task_scope_return_pointer (read->scope, pack,
+                                 (GDestroyNotify) aml_modpack_free);
 }
 
 void
@@ -961,7 +963,7 @@ verify_hash_ready (GObject *source G_GNUC_UNUSED,
 
   if (digest == NULL)
     {
-      g_task_return_error (run->task, g_steal_pointer (&error));
+      aml_task_scope_return_error (run->scope, g_steal_pointer (&error));
       verify_run_free (run);
       return;
     }
@@ -973,7 +975,7 @@ verify_hash_ready (GObject *source G_GNUC_UNUSED,
       g_set_error (&error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_HASH,
                    "\"%s\" arrived with a different %s than the index says",
                    run->path, run->stage == 0 ? "sha1" : "sha512");
-      g_task_return_error (run->task, g_steal_pointer (&error));
+      aml_task_scope_return_error (run->scope, g_steal_pointer (&error));
       verify_run_free (run);
       return;
     }
@@ -982,7 +984,7 @@ verify_hash_ready (GObject *source G_GNUC_UNUSED,
 
   if (run->stage > 1)
     {
-      g_task_return_boolean (run->task, TRUE);
+      aml_task_scope_return_boolean (run->scope, TRUE);
       verify_run_free (run);
       return;
     }
@@ -1393,22 +1395,26 @@ extract_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
 
   if (g_cancellable_is_cancelled (cancellable))
     {
-      g_task_return_new_error (task, AML_MODPACK_ERROR,
-                               AML_MODPACK_ERROR_CANCELLED, "cancelled");
+      aml_task_scope_return_error (
+        run->scope,
+        g_error_new_literal (AML_MODPACK_ERROR,
+                             AML_MODPACK_ERROR_CANCELLED, "cancelled"));
       return;
     }
 
   if (!extract_overrides (run->archive_path, run->directory, &error))
     {
-      g_task_return_error (task, g_steal_pointer (&error));
+      aml_task_scope_return_error (run->scope, g_steal_pointer (&error));
       return;
     }
 
   if (g_cancellable_is_cancelled (cancellable))
-    g_task_return_new_error (task, AML_MODPACK_ERROR,
-                             AML_MODPACK_ERROR_CANCELLED, "cancelled");
+    aml_task_scope_return_error (
+      run->scope,
+      g_error_new_literal (AML_MODPACK_ERROR,
+                           AML_MODPACK_ERROR_CANCELLED, "cancelled"));
   else
-    g_task_return_boolean (task, TRUE);
+    aml_task_scope_return_boolean (run->scope, TRUE);
 }
 
 void
