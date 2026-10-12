@@ -141,7 +141,8 @@ name_is_content (const char *name, const char *extension)
  * what Modrinth is then asked about. */
 typedef struct
 {
-  GTask *task;
+  /* Borrowed: the caller's handle keeps the operation alive, and every
+     path that frees this run has already answered it. */
   AmlTaskScope *scope;
   GFile *folder;
   GFileEnumerator *enumerator; /* while the batches are read */
@@ -797,8 +798,6 @@ scan_free (ScanRun *run)
 {
   g_clear_object (&run->enumerator);
   g_clear_object (&run->folder);
-  g_clear_object (&run->task);
-  aml_task_scope_unref (run->scope);
   if (run->index_operation != NULL)
     aml_task_scope_unref (run->index_operation);
   g_clear_pointer (&run->files, g_ptr_array_unref);
@@ -1053,21 +1052,21 @@ compare_files (gconstpointer a, gconstpointer b)
   return g_utf8_collate (left->filename, right->filename);
 }
 
-void
+AmlTaskScope *
 aml_content_scan_async (const char *instance_directory, AmlContentType type,
-                        GCancellable *cancellable,
                         GAsyncReadyCallback callback, gpointer user_data)
 {
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
   ScanRun *run = NULL;
   g_autofree char *folder = NULL;
 
-  g_return_if_fail (instance_directory != NULL);
+  g_return_val_if_fail (instance_directory != NULL, NULL);
 
   folder = aml_content_folder_path (instance_directory, type);
   run = g_new0 (ScanRun, 1);
-  run->task = g_task_new (NULL, cancellable, callback, user_data);
-  run->scope = aml_task_scope_from_task (run->task);
-   aml_task_scope_set_check_cancellable (run->scope, FALSE);
+  run->scope = scope;
+  aml_task_scope_set_check_cancellable (run->scope, FALSE);
   run->folder = g_file_new_for_path (folder);
   run->instance_directory = g_strdup (instance_directory);
   run->type = type;
@@ -1079,14 +1078,17 @@ aml_content_scan_async (const char *instance_directory, AmlContentType type,
    * folder, which reads the same as an empty one. */
   if (!g_file_query_exists (run->folder, NULL))
     {
-       aml_task_scope_return_pointer (run->scope, g_steal_pointer (&run->files),
-                                      (GDestroyNotify) g_ptr_array_unref);
+      aml_task_scope_return_pointer_deferred (scope,
+                                              g_steal_pointer (&run->files),
+                                              (GDestroyNotify) g_ptr_array_unref);
       scan_free (run);
-      return;
+      return g_steal_pointer (&scope);
     }
 
   run->index_operation = aml_content_index_load_async (instance_directory, type,
                                                        scan_index_ready, run);
+
+  return g_steal_pointer (&scope);
 }
 
 GPtrArray *

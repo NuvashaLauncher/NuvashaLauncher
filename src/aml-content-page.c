@@ -796,13 +796,15 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) files = NULL;
 
+  /* The answer is taken even when nobody is left to show it: the result
+     belongs to whoever asked, and it is freed by being handed over. */
+  files = aml_content_scan_finish (result, &error);
+
   if (self == NULL)
     {
       page_watch_free (watch);
       return;
     }
-
-  files = aml_content_scan_finish (result, &error);
 
   if (files == NULL)
     {
@@ -891,8 +893,14 @@ reload_installed (AmlContentPage *self)
   g_cancellable_cancel (previous);
   g_clear_object (&previous);
 
-  aml_content_scan_async (directory, self->type, self->installed.scan, scan_ready,
-                          page_watch_new (self));
+  {
+    PageWatch *watch = page_watch_new (self);
+
+    watch->operation = aml_content_scan_async (directory, self->type,
+                                               scan_ready, watch);
+    aml_task_scope_follow_cancellable (watch->operation,
+                                       self->installed.scan);
+  }
 }
 
 /* Update All: check every file Modrinth knows, ask once with the whole

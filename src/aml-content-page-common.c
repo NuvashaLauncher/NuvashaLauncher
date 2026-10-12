@@ -21,6 +21,9 @@ page_watch_free (PageWatch *watch)
   if (watch == NULL)
     return;
 
+  if (watch->operation != NULL)
+    aml_task_scope_unref (watch->operation);
+
   if (watch->page != NULL)
     g_object_remove_weak_pointer (G_OBJECT (watch->page),
                                   (gpointer *) &watch->page);

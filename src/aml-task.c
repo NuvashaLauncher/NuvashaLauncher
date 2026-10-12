@@ -20,6 +20,7 @@ struct _AmlTaskScope
   gatomicrefcount refs;
   GTask *task;
   GArray *sources;
+  GArray *completions;
   GArray *followed;
   gboolean owns_task;
   gboolean unref_when_done;
@@ -32,6 +33,7 @@ aml_task_scope_alloc (void)
 
   g_atomic_ref_count_init (&scope->refs);
   scope->sources = g_array_new (FALSE, FALSE, sizeof (guint));
+  scope->completions = g_array_new (FALSE, FALSE, sizeof (guint));
   scope->followed = g_array_new (FALSE, FALSE, sizeof (FollowedCancellable));
 
   return scope;
@@ -101,7 +103,14 @@ aml_task_scope_unref (AmlTaskScope *scope)
       if (g_main_context_find_source_by_id (NULL, source_id) != NULL)
         g_source_remove (source_id);
     }
+  for (guint i = 0; i < scope->completions->len; i++)
+    {
+      guint source_id = g_array_index (scope->completions, guint, i);
+      if (g_main_context_find_source_by_id (NULL, source_id) != NULL)
+        g_source_remove (source_id);
+    }
   g_array_unref (scope->sources);
+  g_array_unref (scope->completions);
   aml_task_scope_unfollow (scope);
   g_array_unref (scope->followed);
   if (scope->owns_task)
@@ -246,6 +255,16 @@ deferred_completion_free (gpointer user_data)
 {
   DeferredCompletion *deferred = user_data;
 
+  /* A completion that was removed before it ran never handed its value to
+     the task, so the value is released here. */
+  if (deferred->kind == DEFERRED_POINTER)
+    {
+      if (deferred->value_free != NULL)
+        deferred->value_free (deferred->value);
+      else
+        g_free (deferred->value);
+    }
+
   g_clear_error (&deferred->error);
   g_free (deferred);
 }
@@ -255,13 +274,25 @@ deferred_completion_return (gpointer user_data)
 {
   DeferredCompletion *deferred = user_data;
 
-  /* Through the scope's own helpers, so a deferred completion releases an
-     operation the same way an immediate one does. */
+  /* Cancelling does not drop an answer that is already on its way: the
+     operation reports the cancellation instead, so whoever started it is
+     still answered and can release the handle it was given. */
+  if (g_cancellable_is_cancelled (aml_task_scope_get_cancellable (deferred->scope)))
+    {
+      aml_task_scope_return_error (
+        deferred->scope,
+        g_error_new_literal (G_IO_ERROR, G_IO_ERROR_CANCELLED,
+                             "the operation was cancelled"));
+      return G_SOURCE_REMOVE;
+    }
+
   switch (deferred->kind)
     {
     case DEFERRED_POINTER:
       aml_task_scope_return_pointer (deferred->scope, deferred->value,
                                      deferred->value_free);
+      deferred->value = NULL;
+      deferred->value_free = NULL;
       break;
     case DEFERRED_BOOLEAN:
       aml_task_scope_return_boolean (deferred->scope, deferred->boolean);
@@ -278,10 +309,16 @@ deferred_completion_return (gpointer user_data)
 static void
 defer_completion (AmlTaskScope *scope, DeferredCompletion *deferred)
 {
+  guint source_id;
+
   deferred->scope = scope;
-  aml_task_scope_track_source (
-    scope, g_idle_add_full (G_PRIORITY_DEFAULT, deferred_completion_return,
-                           deferred, deferred_completion_free));
+
+  /* Tracked apart from the scope's own sources: cancelling must not take
+     these away, only the end of the scope does. */
+  source_id = g_idle_add_full (G_PRIORITY_DEFAULT, deferred_completion_return,
+                              deferred, deferred_completion_free);
+  if (source_id != 0)
+    g_array_append_val (scope->completions, source_id);
 }
 
 void

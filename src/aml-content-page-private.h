@@ -13,6 +13,10 @@ G_BEGIN_DECLS
 
 typedef struct {
   AmlContentPage *page; /* weak */
+
+  /* The operation this watch was made for, when the caller started one.
+     Released with the watch, so the answer never outlives its handle. */
+  AmlTaskScope *operation;
 } PageWatch;
 
 typedef struct _Pick Pick;
