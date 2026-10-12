@@ -90,10 +90,10 @@ icon_downloaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     {
       g_debug ("the icon \"%s\" could not be fetched: %s", load->url,
                error != NULL ? error->message : "unknown error");
-      g_task_return_error (load->task, g_steal_pointer (&error));
+      aml_task_scope_return_error (load->scope, g_steal_pointer (&error));
     }
   else
-    g_task_return_pointer (load->task, g_strdup (load->path), g_free);
+    aml_task_scope_return_pointer (load->scope, g_strdup (load->path), g_free);
 
   icon_load_free (load);
 
@@ -115,15 +115,17 @@ icon_pump (void)
          back once, by icon_load_free(), and not by hand first. */
       if (g_cancellable_is_cancelled (g_task_get_cancellable (task)))
         {
-          g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_CANCELLED,
-                                   "the icon is no longer wanted");
+          aml_task_scope_return_error (
+            load->scope,
+            g_error_new_literal (G_IO_ERROR, G_IO_ERROR_CANCELLED,
+                                 "the icon is no longer wanted"));
           icon_load_free (load);
           continue;
         }
 
       active++;
-      aml_download_file_async (load->url, load->path, NULL, G_CHECKSUM_SHA1,
-                               g_task_get_cancellable (task), NULL,
+       aml_download_file_async (load->url, load->path, NULL, G_CHECKSUM_SHA1,
+                                aml_task_scope_get_cancellable (load->scope), NULL,
                                icon_downloaded, load);
     }
 }
@@ -159,16 +161,18 @@ aml_icon_load_async (const char *url, GCancellable *cancellable,
      something that is already on disk. */
   if (g_file_test (load->path, G_FILE_TEST_IS_REGULAR))
     {
-      g_task_return_pointer (load->task, g_strdup (load->path), g_free);
+      aml_task_scope_return_pointer (load->scope, g_strdup (load->path), g_free);
       icon_load_free (load);
       return;
     }
 
   if (!aml_fs_make_directory (directory, 0755, NULL))
     {
-      g_task_return_new_error (load->task, G_IO_ERROR, G_IO_ERROR_FAILED,
-                              "cannot create \"%s\": %s", directory,
-                              g_strerror (errno));
+      aml_task_scope_return_error (
+        load->scope,
+        g_error_new (G_IO_ERROR, G_IO_ERROR_FAILED,
+                     "cannot create \"%s\": %s", directory,
+                     g_strerror (errno)));
       icon_load_free (load);
       return;
     }
