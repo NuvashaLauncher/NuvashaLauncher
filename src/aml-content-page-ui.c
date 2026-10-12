@@ -109,6 +109,10 @@ aml_content_page_build_installed (AmlContentPage *self)
 
    self->installed.group = group;
    self->installed.scroller = GTK_SCROLLED_WINDOW (scroller);
+   g_signal_connect (
+     gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (scroller)),
+     "value-changed", G_CALLBACK (aml_content_page_on_installed_scroll_changed),
+     self);
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)),
                                  GTK_WIDGET (group));
   gtk_widget_set_vexpand (GTK_WIDGET (scroller), TRUE);

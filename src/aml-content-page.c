@@ -72,6 +72,7 @@ void batch_next (AmlContentPage *self);
 void plan_stopped (AmlContentPage *self);
 static void metadata_ready (GObject *source, GAsyncResult *result,
                             gpointer user_data);
+static void load_visible_icons (AmlContentPage *self);
 
 /* ---------------------------------------------------------- *
  * Small helpers
@@ -223,12 +224,7 @@ file_row_refresh (GtkWidget *row)
   if (file->description != NULL && *file->description != '\0')
     row_show_description (row, file->description);
 
-  {
-    GtkWidget *icon = g_object_get_data (G_OBJECT (row), "aml-icon");
-
-    if (icon != NULL && file->local_icon_path != NULL)
-      aml_icon_widget_set_file (icon, file->local_icon_path);
-  }
+  load_visible_icons (self);
 
   installed_filter_rows (self);
 }
@@ -500,8 +496,6 @@ file_row (AmlContentPage *self, AmlContentFile *file)
   gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
   adw_action_row_add_prefix (ADW_ACTION_ROW (GTK_WIDGET (row)), icon);
   g_object_set_data (G_OBJECT (row), "aml-icon", icon);
-  if (file->local_icon_path != NULL)
-    aml_icon_widget_set_file (icon, file->local_icon_path);
 
   /* Only a mod is something that can be turned off: a resource pack or a
      shader pack is loaded whenever it is present, so neither has a
@@ -546,6 +540,41 @@ file_row (AmlContentPage *self, AmlContentFile *file)
   file_row_refresh (GTK_WIDGET (row));
 
   return GTK_WIDGET (row);
+}
+
+static void
+load_row_icon (AmlContentPage *self, GtkWidget *row)
+{
+  AmlContentFile *file = g_object_get_data (G_OBJECT (row), "aml-file");
+  GtkWidget *icon = g_object_get_data (G_OBJECT (row), "aml-icon");
+  GtkWidget *scroller = GTK_WIDGET (self->installed.scroller);
+  graphene_rect_t bounds;
+
+  if (file == NULL || icon == NULL || file->local_icon_path == NULL ||
+      g_object_get_data (G_OBJECT (row), "aml-icon-loaded") != NULL ||
+      !gtk_widget_compute_bounds (row, scroller, &bounds))
+    return;
+
+  if (bounds.origin.y + bounds.size.height < 0 ||
+      bounds.origin.y > gtk_widget_get_height (scroller))
+    return;
+
+  if (aml_icon_widget_set_file (icon, file->local_icon_path))
+    g_object_set_data (G_OBJECT (row), "aml-icon-loaded", GINT_TO_POINTER (1));
+}
+
+static void
+load_visible_icons (AmlContentPage *self)
+{
+  for (GList *item = self->installed.rows_list; item != NULL; item = item->next)
+    load_row_icon (self, item->data);
+}
+
+void
+aml_content_page_on_installed_scroll_changed (
+  GtkAdjustment *adjustment G_GNUC_UNUSED, gpointer user_data)
+{
+  load_visible_icons (user_data);
 }
 
 /* Ask Modrinth several hashes at once, while keeping the request burst
@@ -876,6 +905,8 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     gtk_widget_set_visible (GTK_WIDGET (self->installed.status), empty);
     gtk_widget_set_visible (GTK_WIDGET (self->installed.scroller), !empty);
     gtk_widget_set_sensitive (GTK_WIDGET (self->installed.update_all), !empty);
+    if (!empty)
+      load_visible_icons (self);
   }
 
   {
