@@ -931,7 +931,7 @@ static char *
 cache_file (const char *name)
 {
   g_autofree char *directory =
-    g_build_filename (g_get_user_cache_dir (), "AML", NULL);
+    g_build_filename (g_get_user_cache_dir (), "AML", "versions", NULL);
 
   return g_build_filename (directory, name, NULL);
 }
@@ -1150,7 +1150,10 @@ cache_start (void)
 static void
 cache_stop (void)
 {
-  g_autofree char *directory = g_build_filename (cache_home, "AML", NULL);
+  g_autofree char *directory =
+     g_build_filename (cache_home, "AML", "versions", NULL);
+  g_autofree char *aml_directory =
+    g_build_filename (cache_home, "AML", NULL);
   g_autoptr (GDir) dir = g_dir_open (directory, 0, NULL);
 
   if (dir != NULL)
@@ -1166,6 +1169,7 @@ cache_stop (void)
     }
 
   g_rmdir (directory);
+  g_rmdir (aml_directory);
   g_rmdir (cache_home);
 }
 

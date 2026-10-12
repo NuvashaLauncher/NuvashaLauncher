@@ -31,7 +31,7 @@ G_BEGIN_DECLS
 
 /* Directory below g_get_user_cache_dir() holding the manifest and the
  * version documents AML has downloaded. */
-#define AML_VERSIONS_CACHE_SUBDIR "AML"
+#define AML_VERSIONS_CACHE_SUBDIR "AML/versions"
 
 #define AML_MC_ERROR (aml_mc_error_quark ())
 
