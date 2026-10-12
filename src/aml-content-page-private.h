@@ -35,6 +35,7 @@ char *description_line (const char *text, guint max_sentences);
 void row_show_description (GtkWidget *row, const char *description);
 void installed_icon_lookup (AmlContentPage *self, GtkWidget *row,
                             const char *project_id);
+void reload_installed (AmlContentPage *self);
 
 struct _AmlContentPage
 {
@@ -76,6 +77,7 @@ struct _AmlContentPage
     GHashTable *rows;     /* path -> row */
     GList *rows_list;     /* rows of the Installed group */
     GCancellable *scan;
+    gboolean loaded;
     gboolean identifying;
   } installed;
   GtkBox *browse_actions;

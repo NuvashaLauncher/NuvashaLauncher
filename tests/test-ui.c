@@ -334,8 +334,9 @@ test_page_disposed_while_scanning (void)
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
-  /* The scan of this page is on its way when the page is dropped. */
+  /* Start the lazy scan before the page is dropped. */
   page = aml_content_page_new (instance, AML_CONTENT_MOD);
+  aml_content_page_reset_for_tab_switch (page);
   g_object_ref_sink (page);
   g_object_unref (page);
 
