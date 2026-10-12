@@ -68,6 +68,7 @@ test_sequence_progresses_and_cleans_up (void)
                                           sequence_step, &data,
                                           sequence_data_free);
   aml_task_sequence_start (data.sequence);
+  aml_task_sequence_unref (data.sequence);
   g_main_loop_run (result.loop);
 
   g_assert_cmpuint (data.calls, ==, 2);
@@ -113,6 +114,7 @@ test_sequence_returns_errors (void)
                                           error_step, &data,
                                           sequence_data_free);
   aml_task_sequence_start (data.sequence);
+  aml_task_sequence_unref (data.sequence);
   g_main_loop_run (result.loop);
 
   g_assert_cmpuint (data.calls, ==, 1);
@@ -147,6 +149,7 @@ test_sequence_honors_cancellation (void)
                                           sequence_step, &data,
                                           sequence_data_free);
   aml_task_sequence_start (data.sequence);
+  aml_task_sequence_unref (data.sequence);
   g_main_loop_run (result.loop);
 
   g_assert_cmpuint (data.calls, ==, 0);
@@ -366,7 +369,9 @@ test_sequence_survives_completing_twice (void)
 
   sequence = aml_task_sequence_new (NULL, sequence_done, &result, manual_step,
                                     &steps, NULL);
+  aml_task_sequence_ref (sequence);
   aml_task_sequence_start (sequence);
+  aml_task_sequence_unref (sequence);
   g_assert_cmpuint (steps, ==, 1);
 
   aml_task_sequence_return_pointer (sequence, g_steal_pointer (&first),
@@ -384,6 +389,11 @@ test_sequence_survives_completing_twice (void)
   aml_task_sequence_next (sequence);
 
   g_main_loop_run (result.loop);
+
+  /* The caller-owned reference keeps a late completion safe after the
+   * result callback has released the task's reference. */
+  aml_task_sequence_return_pointer (sequence, g_strdup ("late"), g_free);
+  aml_task_sequence_unref (sequence);
 
   /* One step, one completion, and the value the first one carried. */
   g_assert_cmpuint (steps, ==, 1);
