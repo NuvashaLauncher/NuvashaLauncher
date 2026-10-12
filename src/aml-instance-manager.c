@@ -36,9 +36,12 @@ struct _AmlInstanceManager
   char *data_dir;
   char *metadata_path;
   char *instances_dir;
+  guint directory_check_source;
 };
 
 G_DEFINE_TYPE (AmlInstanceManager, aml_instance_manager, G_TYPE_OBJECT)
+
+static gboolean check_instance_directories (gpointer user_data);
 
 GQuark
 aml_instance_manager_error_quark (void)
@@ -270,6 +273,8 @@ aml_instance_manager_finalize (GObject *object)
 {
   AmlInstanceManager *self = AML_INSTANCE_MANAGER (object);
 
+  if (self->directory_check_source != 0)
+    g_source_remove (self->directory_check_source);
   g_clear_object (&self->instances);
   g_free (self->data_dir);
   g_free (self->metadata_path);
@@ -290,6 +295,8 @@ static void
 aml_instance_manager_init (AmlInstanceManager *self)
 {
   self->instances = g_list_store_new (AML_TYPE_INSTANCE);
+  self->directory_check_source =
+    g_timeout_add_seconds (1, check_instance_directories, self);
 }
 
 AmlInstanceManager *
@@ -630,6 +637,11 @@ aml_instance_manager_load (AmlInstanceManager *self, GError **error)
     g_list_store_append (self->instances, l->data);
 
   g_list_free_full (list, g_object_unref);
+
+  /* A directory removed while AML was not running means the instance was
+   * removed outside AML. Reflect that in the model and metadata as well. */
+  check_instance_directories (self);
+
   return TRUE;
 }
 
@@ -865,6 +877,40 @@ remove_instance_and_save (AmlInstanceManager *self,
     }
 
   return TRUE;
+}
+
+/* Keep the model consistent with the filesystem. This deliberately checks
+ * directories outside the normal AML instances root too, because users can
+ * choose an arbitrary instance directory. */
+static gboolean
+check_instance_directories (gpointer user_data)
+{
+  AmlInstanceManager *self = AML_INSTANCE_MANAGER (user_data);
+
+  for (guint i = g_list_model_get_n_items (G_LIST_MODEL (self->instances));
+       i > 0;
+       i--)
+    {
+      guint position = i - 1;
+      g_autoptr (AmlInstance) instance =
+        g_list_model_get_item (G_LIST_MODEL (self->instances), position);
+      g_autofree char *directory = instance_directory (instance);
+
+      if (g_file_test (directory, G_FILE_TEST_IS_DIR))
+        continue;
+
+      g_autoptr (GError) error = NULL;
+      if (!remove_instance_and_save (self, instance, &error))
+        {
+          g_warning ("could not remove missing instance directory from the "
+                     "instance list: %s", error->message);
+          continue;
+        }
+
+      g_debug ("removed instance whose directory disappeared: %s", directory);
+    }
+
+  return G_SOURCE_CONTINUE;
 }
 
 static AmlTaskScope *
