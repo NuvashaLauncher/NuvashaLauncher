@@ -757,18 +757,16 @@ attach_task_scope (GTask *task)
 static void
 fail (AuthRequest *self, GError *error)
 {
-  GTask *task = g_steal_pointer (&self->task);
-
   g_assert (error != NULL);
 
-  if (task == NULL)
+  if (self->task == NULL)
     {
       g_error_free (error);
       return;
     }
 
-  g_task_return_error (task, error);
-  g_object_unref (task);
+  aml_task_scope_return_error (self->scope, error);
+  g_clear_object (&self->task);
 }
 
 /* The other way out: what the chain was for, which is the caller's now.
@@ -779,16 +777,14 @@ succeed (AuthRequest   *self,
          gpointer       result,
          GDestroyNotify free_result)
 {
-  GTask *task = g_steal_pointer (&self->task);
-
-  if (task == NULL)
+  if (self->task == NULL)
     {
       free_result (result);
       return;
     }
 
-  g_task_return_pointer (task, result, free_result);
-  g_object_unref (task);
+  aml_task_scope_return_pointer (self->scope, result, free_result);
+  g_clear_object (&self->task);
 }
 
 /* Answers the task with the cancellation and says whether it did, which
