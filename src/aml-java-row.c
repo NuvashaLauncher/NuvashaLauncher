@@ -62,6 +62,7 @@ struct _AmlJavaRow
 
   gboolean ready;
   gboolean disposed;
+  gboolean no_default;
   GtkButton *retry;
 
   /* The request the row is waiting for. Borrowed from the JavaAsk that
@@ -122,6 +123,40 @@ put_model (AmlJavaRow *self, GPtrArray *names, guint position)
 }
 
 static void
+java_popup_setup (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
+                  GtkListItem *item,
+                  gpointer user_data G_GNUC_UNUSED)
+{
+  GtkLabel *label = GTK_LABEL (gtk_label_new (NULL));
+
+  gtk_label_set_xalign (label, 0.0);
+  gtk_list_item_set_child (item, GTK_WIDGET (label));
+}
+
+static void
+java_popup_bind (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
+                 GtkListItem *item,
+                 gpointer user_data)
+{
+  AmlJavaRow *self = user_data;
+  GtkWidget *child = gtk_list_item_get_child (item);
+  gpointer value = gtk_list_item_get_item (item);
+  gboolean placeholder = self->no_default &&
+                        gtk_list_item_get_position (item) == 0;
+
+  if (GTK_IS_STRING_OBJECT (value))
+    gtk_label_set_text (GTK_LABEL (child),
+                        gtk_string_object_get_string (value));
+
+  /* AdwComboRow must have an item while its model is non-empty, but the
+   * placeholder is not a Java choice. Keep it out of the popup and make it
+   * impossible to activate; the button still renders it as empty. */
+  gtk_widget_set_visible (child, !placeholder);
+  gtk_list_item_set_selectable (item, !placeholder);
+  gtk_list_item_set_activatable (item, !placeholder);
+}
+
+static void
 show_loading (AmlJavaRow *self)
 {
   g_autoptr (GPtrArray) names = g_ptr_array_new_with_free_func (g_free);
@@ -129,6 +164,7 @@ show_loading (AmlJavaRow *self)
   g_ptr_array_add (names, g_strdup (_("Loading…")));
 
   self->ready = FALSE;
+  self->no_default = FALSE;
   self->add_index = GTK_INVALID_LIST_POSITION;
   put_model (self, g_steal_pointer (&names), 0);
   gtk_widget_set_sensitive (GTK_WIDGET (self), FALSE);
@@ -187,6 +223,15 @@ fill (AmlJavaRow *self)
       g_ptr_array_add (ids, NULL);
       position = 0;
     }
+  else
+    {
+      /* Gtk's internal selection model always picks an item from a non-empty
+       * model. This private, non-selectable placeholder keeps that required
+       * selection from becoming a Java choice or appearing in the popup. */
+      g_ptr_array_add (names, g_strdup (""));
+      g_ptr_array_add (ids, NULL);
+      position = 0;
+    }
 
   for (guint i = 0; self->javas != NULL && i < self->javas->len; i++)
     {
@@ -226,6 +271,7 @@ fill (AmlJavaRow *self)
 
   g_clear_pointer (&self->ids, g_ptr_array_unref);
   self->ids = ids;
+  self->no_default = fallback == NULL;
   self->ready = TRUE;
 
   /* Filled in below, once the model carries the entry this points at. */
@@ -694,8 +740,20 @@ aml_java_row_init (AmlJavaRow *self)
   self->ids = g_ptr_array_new_with_free_func (g_free);
   self->names = g_ptr_array_new_with_free_func (g_free);
   self->required_major = 0;
+  self->no_default = TRUE;
   self->add_index = GTK_INVALID_LIST_POSITION;
   self->restore = 0;
+
+  {
+    GtkSignalListItemFactory *factory =
+      GTK_SIGNAL_LIST_ITEM_FACTORY (gtk_signal_list_item_factory_new ());
+
+    g_signal_connect (factory, "setup", G_CALLBACK (java_popup_setup), self);
+    g_signal_connect (factory, "bind", G_CALLBACK (java_popup_bind), self);
+    adw_combo_row_set_list_factory (ADW_COMBO_ROW (self),
+                                    GTK_LIST_ITEM_FACTORY (factory));
+    g_object_unref (factory);
+  }
 
    self->retry = GTK_BUTTON (gtk_button_new_with_label (_("Retry")));
   gtk_widget_add_css_class (GTK_WIDGET (self->retry), "flat");
