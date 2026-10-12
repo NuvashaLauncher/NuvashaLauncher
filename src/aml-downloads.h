@@ -19,6 +19,8 @@
 #include <gio/gio.h>
 #include <glib-object.h>
 
+typedef struct _AmlDownloadService AmlDownloadService;
+
 G_BEGIN_DECLS
 
 typedef enum {
@@ -46,6 +48,7 @@ G_DECLARE_FINAL_TYPE (AmlDownloads, aml_downloads, AML, DOWNLOADS, GObject)
 
 /* The one manager of the process. */
 AmlDownloads *aml_downloads_get_default (void);
+AmlDownloadService *aml_downloads_get_service (void);
 
 /* Starts an entry and returns it. The manager owns it while it is
  * running: @title is copied. (transfer none) */

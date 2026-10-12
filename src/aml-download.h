@@ -43,12 +43,8 @@ typedef enum {
 
 GQuark aml_download_error_quark (void);
 
-void aml_download_set_cache_settings (AmlSettings *settings);
-
-/* Releases the process-wide network service when no transfer is active.
- * Applications call this during orderly shutdown; a busy service is left
- * alive so in-flight callbacks cannot be invalidated. */
-void aml_download_shutdown (void);
+void aml_download_set_cache_settings (AmlDownloadService *service,
+                                      AmlSettings *settings);
 
 /* Progress of a running transfer. @bytes_done is what arrived so far,
  * @total is the announced length or -1 when the server did not say.
@@ -80,7 +76,8 @@ typedef void (*AmlDownloadProgressFunc) (goffset bytes_done,
  * whose directory already exists.
  *
  * @progress and @callback both receive @user_data. */
-AmlTaskScope *aml_download_file_async (const char *url,
+AmlTaskScope *aml_download_file_async (AmlDownloadService *service,
+                                       const char *url,
                                        const char *dest_path,
                                        const char *expected_hash,
                                        GChecksumType hash_type,
@@ -99,7 +96,8 @@ gboolean aml_download_file_finish (GAsyncResult *result,
  * The returned parser is owned by the caller; a body that does not
  * parse comes back as a JSON_PARSER_ERROR from json-glib and is not
  * retried. */
-AmlTaskScope *aml_download_json_async (const char *url,
+AmlTaskScope *aml_download_json_async (AmlDownloadService *service,
+                                       const char *url,
                                        GAsyncReadyCallback callback,
                                        gpointer user_data);
 
@@ -132,17 +130,20 @@ char *aml_download_file_hash_finish (GAsyncResult *result,
  * it is talking to asks for. NULL keeps the session's own.
  *
  * The returned parser is owned by the caller. */
-AmlTaskScope *aml_download_json_post_async (const char *url,
+AmlTaskScope *aml_download_json_post_async (AmlDownloadService *service,
+                                             const char *url,
                                             const char *body,
                                             const char *user_agent,
                                             GAsyncReadyCallback callback,
                                             gpointer user_data);
 
-AmlTaskScope *aml_download_json_cached_async (const char *url,
+AmlTaskScope *aml_download_json_cached_async (AmlDownloadService *service,
+                                               const char *url,
                                               GAsyncReadyCallback callback,
                                               gpointer user_data);
 
-AmlTaskScope *aml_download_json_post_cached_async (const char *url,
+AmlTaskScope *aml_download_json_post_cached_async (AmlDownloadService *service,
+                                                    const char *url,
                                                    const char *body,
                                                    const char *user_agent,
                                                    GAsyncReadyCallback callback,

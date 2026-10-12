@@ -3,6 +3,7 @@
  */
 
 #include "aml-downloads.h"
+#include "aml-download.h"
 
 struct _AmlDownload
 {
@@ -31,6 +32,7 @@ struct _AmlDownloads
   GObject parent_instance;
 
   GPtrArray *jobs; /* AmlDownload*, owned */
+  AmlDownloadService *service;
 
   /* How many files the user has picked for a later install, summed over
      every content page that is open. It is not a download and it does
@@ -50,6 +52,16 @@ aml_downloads_get_default (void)
     default_downloads = g_object_new (AML_TYPE_DOWNLOADS, NULL);
 
   return default_downloads;
+}
+
+AmlDownloadService *
+aml_downloads_get_service (void)
+{
+  AmlDownloads *self = aml_downloads_get_default ();
+
+  if (self->service == NULL)
+    self->service = aml_download_service_new ();
+  return self->service;
 }
 
 static void
@@ -292,6 +304,8 @@ aml_downloads_dispose (GObject *object)
 {
   AmlDownloads *self = AML_DOWNLOADS (object);
 
+  aml_download_service_free (self->service);
+  self->service = NULL;
   g_clear_pointer (&self->jobs, g_ptr_array_unref);
 
   G_OBJECT_CLASS (aml_downloads_parent_class)->dispose (object);

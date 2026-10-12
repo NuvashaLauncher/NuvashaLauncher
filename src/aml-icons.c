@@ -5,6 +5,7 @@
 #include "aml-icons.h"
 
 #include "aml-download.h"
+#include "aml-downloads.h"
 #include "aml-task-private.h"
 #include "aml-fs.h"
 
@@ -127,7 +128,7 @@ icon_pump (void)
 
       active++;
       aml_task_scope_release_when_done (
-        aml_download_file_async (load->url, load->path, NULL,
+        aml_download_file_async (aml_downloads_get_service (), load->url, load->path, NULL,
                                  G_CHECKSUM_SHA1, NULL, icon_downloaded,
                                  load),
         aml_task_scope_get_cancellable (load->scope));

@@ -5,6 +5,7 @@
 #include "aml-main-window-model.h"
 
 #include "aml-download.h"
+#include "aml-downloads.h"
 #include "aml-launcher.h"
 
 AmlMainWindowModel *
@@ -13,8 +14,8 @@ aml_main_window_model_new (void)
   AmlMainWindowModel *model = g_new0 (AmlMainWindowModel, 1);
 
   model->settings = aml_settings_new ();
-  model->download_service = aml_download_service_new ();
-  aml_download_set_cache_settings (model->settings);
+  model->download_service = aml_downloads_get_service ();
+  aml_download_set_cache_settings (model->download_service, model->settings);
   model->accounts = aml_accounts_new ();
   model->users_popover = aml_users_popover_new (model->accounts);
   g_object_ref_sink (model->users_popover);
@@ -36,7 +37,6 @@ aml_main_window_model_free (AmlMainWindowModel *model)
   g_clear_pointer (&model->instance_dialogs, g_hash_table_unref);
   g_clear_object (&model->manager);
   aml_download_service_cancel_queued (model->download_service);
-  aml_download_service_free (model->download_service);
   model->download_service = NULL;
   g_clear_object (&model->settings);
   g_clear_object (&model->accounts);

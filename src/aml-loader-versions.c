@@ -7,6 +7,7 @@
 #include "aml-loaders-private.h"
 
 #include "aml-download.h"
+#include "aml-downloads.h"
 #include "aml-minecraft-resolve.h"
 
 #include <json-glib/json-glib.h>
@@ -696,7 +697,7 @@ aml_loaders_versions_async (AmlLoader           loader,
     }
 
   aml_task_scope_release_when_done (
-    aml_download_json_async (url, versions_loaded, request),
+    aml_download_json_async (aml_downloads_get_service (), url, versions_loaded, request),
     aml_task_scope_get_cancellable (scope));
 
   return g_steal_pointer (&scope);

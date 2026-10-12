@@ -8,6 +8,7 @@
  * uses its own temporary directory. */
 
 #include "aml-download.h"
+#include "aml-downloads.h"
 #include "aml-cache.h"
 
 #include <glib.h>
@@ -383,7 +384,7 @@ call_file (AsyncRun *run, AsyncCall *call, const char *url,
   call->run = run;
   run->pending++;
 
-  call->operation = aml_download_file_async (url, dest_path, expected_hash,
+  call->operation = aml_download_file_async (aml_downloads_get_service (), url, dest_path, expected_hash,
                                              hash_type, progress_cb,
                                              download_finished, call);
   aml_task_scope_follow_cancellable (call->operation, run->cancellable);
@@ -395,7 +396,7 @@ call_json (AsyncRun *run, AsyncCall *call, const char *url)
   call->run = run;
   run->pending++;
 
-  call->operation = aml_download_json_async (url, json_finished, call);
+  call->operation = aml_download_json_async (aml_downloads_get_service (), url, json_finished, call);
   aml_task_scope_follow_cancellable (call->operation, run->cancellable);
 }
 
@@ -404,7 +405,7 @@ call_cached_json (AsyncRun *run, AsyncCall *call, const char *url)
 {
   call->run = run;
   run->pending++;
-  call->operation = aml_download_json_cached_async (url, json_finished, call);
+  call->operation = aml_download_json_cached_async (aml_downloads_get_service (), url, json_finished, call);
   aml_task_scope_follow_cancellable (call->operation, run->cancellable);
 }
 
@@ -1243,7 +1244,7 @@ test_released_download_outlives_its_row (void)
 
       finished++;
       aml_task_scope_release_when_done (
-        aml_download_file_async (url, path, expected, G_CHECKSUM_SHA256, NULL,
+        aml_download_file_async (aml_downloads_get_service (), url, path, expected, G_CHECKSUM_SHA256, NULL,
                                  released_done, &finished),
         row);
 
@@ -1286,7 +1287,8 @@ main (int argc, char **argv)
   g_setenv ("XDG_CONFIG_HOME", config, TRUE);
   g_setenv ("XDG_CACHE_HOME", cache, TRUE);
   cache_settings = aml_settings_new ();
-  aml_download_set_cache_settings (cache_settings);
+  aml_download_set_cache_settings (aml_downloads_get_service (),
+                                   cache_settings);
 
   fixture_start ();
 
