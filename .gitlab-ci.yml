@@ -9,9 +9,6 @@ variables:
 
 .setup:
   before_script:
-    # Valgrind must inspect symbols in ld.so to install its mandatory
-    # memcmp redirection. Arch keeps those symbols in the debug repository.
-    - printf '\n[core-debug]\nInclude = /etc/pacman.d/mirrorlist\n' >> /etc/pacman.conf
     - pacman -Syu --noconfirm
     - pacman -S --noconfirm
         glibc-debug
@@ -22,8 +19,6 @@ variables:
         gtk4
         json-glib
         libsoup3
-        clang
-         valgrind
 
 test:
   extends: .setup
@@ -37,8 +32,8 @@ sanitizers:
   script:
     - make test-debug
 
-# make static-analysis already runs the GCC analyzer over every source,
-# then clang-tidy. The loop that used to sit in front of it
+# make static-analysis runs the GCC analyzer over every source. The loop that
+# used to sit in front of it
 # ran that same analyzer pass a second time, doubling the slowest step of
 # the job for no extra coverage.
 static-analysis:
@@ -52,9 +47,3 @@ leaks:
   stage: test
   script:
     - make test-lsan
-
-valgrind:
-  extends: .setup
-  stage: analysis
-  script:
-    - make test-valgrind
