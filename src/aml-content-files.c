@@ -774,33 +774,52 @@ typedef struct
   AmlTaskScope *scope;
   GPtrArray *files;
   AmlContentType type;
+  gint pending;
 } MetadataRun;
 
-static void
-local_metadata_thread (GTask *task G_GNUC_UNUSED,
-                       gpointer source G_GNUC_UNUSED,
-                       gpointer task_data,
-                       GCancellable *cancellable G_GNUC_UNUSED)
+typedef struct
 {
-  MetadataRun *run = task_data;
+  MetadataRun *run;
+  AmlContentFile *file;
+} MetadataWork;
 
-  for (guint i = 0; i < run->files->len; i++)
+static GThreadPool *metadata_pool;
+static void metadata_run_free (MetadataRun *run);
+
+static void
+metadata_run_complete (MetadataRun *run)
+{
+  if (!g_atomic_int_dec_and_test (&run->pending))
+    return;
+
+  if (g_cancellable_is_cancelled (aml_task_scope_get_cancellable (run->scope)))
+    aml_task_scope_return_error (
+      run->scope,
+      g_error_new_literal (G_IO_ERROR, G_IO_ERROR_CANCELLED, "cancelled"));
+  else
+    aml_task_scope_return_boolean (run->scope, TRUE);
+
+  metadata_run_free (run);
+}
+
+static void
+metadata_work (gpointer data, gpointer user_data G_GNUC_UNUSED)
+{
+  MetadataWork *work = data;
+  MetadataRun *run = work->run;
+
+  if (!g_cancellable_is_cancelled (aml_task_scope_get_cancellable (run->scope)))
     {
-      if (g_task_return_error_if_cancelled (task))
-        return;
-      AmlContentFile *file = g_ptr_array_index (run->files, i);
+      AmlContentFile *file = work->file;
 
-      /* The content index already carries the remote identity for files seen
-       * before. Keep reading archives when their index has no usable icon:
-       * local mod/resource-pack icons are not persisted in the index and
-       * would otherwise disappear on the next scan. */
       if ((file->project_id == NULL || file->icon_url == NULL ||
            *file->icon_url == '\0') && !file->local_metadata)
         apply_local_metadata (file, run->type);
       aml_content_file_refresh_search_key (file);
     }
 
-  g_task_return_boolean (task, TRUE);
+  metadata_run_complete (run);
+  g_free (work);
 }
 
 static void
@@ -838,12 +857,28 @@ aml_content_metadata_async (GPtrArray *files, AmlContentType type,
   run->scope = aml_task_scope_ref (scope);
   run->files = g_ptr_array_ref (files);
   run->type = type;
-  task = g_task_new (NULL, aml_task_scope_get_cancellable (scope),
-                     local_metadata_done, run);
-  aml_task_scope_attach_task (task);
-  g_task_set_task_data (task, run, NULL);
-  g_task_run_in_thread (task, local_metadata_thread);
-  g_object_unref (task);
+
+  if (metadata_pool == NULL)
+    metadata_pool = g_thread_pool_new (metadata_work, NULL, 4, FALSE, NULL);
+
+  if (files->len == 0)
+    {
+      task = g_task_new (NULL, aml_task_scope_get_cancellable (scope),
+                         local_metadata_done, run);
+      aml_task_scope_attach_task (task);
+      g_task_return_boolean (task, TRUE);
+      g_object_unref (task);
+      return g_steal_pointer (&scope);
+    }
+
+  g_atomic_int_set (&run->pending, files->len);
+  for (guint i = 0; i < files->len; i++)
+    {
+      MetadataWork *work = g_new (MetadataWork, 1);
+      work->run = run;
+      work->file = g_ptr_array_index (files, i);
+      g_thread_pool_push (metadata_pool, work, NULL);
+    }
 
   return g_steal_pointer (&scope);
 }
