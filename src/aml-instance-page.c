@@ -767,6 +767,12 @@ on_export_file_chosen (GObject *source, GAsyncResult *result,
           self->instance, path, self->export_name, self->export_summary,
           self->export_version, self->export_include_transient,
           on_export_progress, self, on_export_done, g_object_ref (self));
+
+        /* The entry's × is the cancel button the user can see, so the
+           export follows that entry's cancellable. */
+        aml_task_scope_follow_cancellable (
+          self->export_operation,
+          aml_download_get_cancellable (self->export_download));
       }
   }
 

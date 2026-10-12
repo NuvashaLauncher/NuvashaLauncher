@@ -4,22 +4,69 @@
 
 #include "aml-task-private.h"
 
+/* A cancellable the scope watches without owning it, so that a UI whose
+ * cancel button lives on someone else's object still stops the work. The
+ * handler borrows the scope and never outlives it: unref() disconnects
+ * every entry before the scope goes away, and the handler holds no
+ * reference, so the pair cannot form a cycle. */
+typedef struct
+{
+  GCancellable *cancellable;
+  gulong handler;
+} FollowedCancellable;
+
 struct _AmlTaskScope
 {
   gatomicrefcount refs;
   GTask *task;
   GArray *sources;
+  GArray *followed;
   gboolean owns_task;
 };
+
+static AmlTaskScope *
+aml_task_scope_alloc (void)
+{
+  AmlTaskScope *scope = g_new0 (AmlTaskScope, 1);
+
+  g_atomic_ref_count_init (&scope->refs);
+  scope->sources = g_array_new (FALSE, FALSE, sizeof (guint));
+  scope->followed = g_array_new (FALSE, FALSE, sizeof (FollowedCancellable));
+
+  return scope;
+}
+
+static void
+aml_task_scope_unfollow (AmlTaskScope *scope)
+{
+  for (guint i = 0; i < scope->followed->len; i++)
+    {
+      FollowedCancellable *followed =
+        &g_array_index (scope->followed, FollowedCancellable, i);
+
+      if (followed->handler != 0)
+        g_cancellable_disconnect (followed->cancellable, followed->handler);
+      g_clear_object (&followed->cancellable);
+    }
+  g_array_set_size (scope->followed, 0);
+}
 
 AmlTaskScope *
 aml_task_scope_new (GObject *source_object, GCancellable *cancellable,
                     GAsyncReadyCallback callback, gpointer user_data)
 {
-  AmlTaskScope *scope = g_new0 (AmlTaskScope, 1);
-  g_atomic_ref_count_init (&scope->refs);
-  scope->task = g_task_new (source_object, cancellable, callback, user_data);
-  scope->sources = g_array_new (FALSE, FALSE, sizeof (guint));
+  g_autoptr (GCancellable) owned = NULL;
+  AmlTaskScope *scope = aml_task_scope_alloc ();
+
+  /* A caller that owns the operation handle has to be able to stop it, so
+   * an operation with no cancellable of its own is given one here rather
+   * than leaving aml_task_scope_cancel() with nothing to cancel. */
+  if (cancellable == NULL)
+    owned = g_cancellable_new ();
+
+  scope->task = g_task_new (source_object, cancellable != NULL ? cancellable
+                                                              : owned,
+                            callback, user_data);
   scope->owns_task = TRUE;
   return scope;
 }
@@ -27,10 +74,9 @@ aml_task_scope_new (GObject *source_object, GCancellable *cancellable,
 AmlTaskScope *
 aml_task_scope_from_task (GTask *task)
 {
-  AmlTaskScope *scope = g_new0 (AmlTaskScope, 1);
-  g_atomic_ref_count_init (&scope->refs);
+  AmlTaskScope *scope = aml_task_scope_alloc ();
+
   scope->task = task;
-  scope->sources = g_array_new (FALSE, FALSE, sizeof (guint));
   return scope;
 }
 
@@ -55,6 +101,8 @@ aml_task_scope_unref (AmlTaskScope *scope)
         g_source_remove (source_id);
     }
   g_array_unref (scope->sources);
+  aml_task_scope_unfollow (scope);
+  g_array_unref (scope->followed);
   if (scope->owns_task)
     g_clear_object (&scope->task);
   g_free (scope);
@@ -120,6 +168,48 @@ aml_task_scope_return_boolean (AmlTaskScope *scope, gboolean result)
   g_task_return_boolean (scope->task, result);
 }
 
+/* What an operation that has nothing to do has to hand over. The scope is
+ * borrowed: the idle below is tracked by the scope, so the scope removes
+ * it before it can go away and the pointer stays valid. */
+typedef struct
+{
+  AmlTaskScope *scope;
+  GError *error;
+} DeferredError;
+
+static void
+deferred_error_free (gpointer user_data)
+{
+  DeferredError *deferred = user_data;
+
+  g_clear_error (&deferred->error);
+  g_free (deferred);
+}
+
+static gboolean
+deferred_error_return (gpointer user_data)
+{
+  DeferredError *deferred = user_data;
+
+  aml_task_scope_return_error (deferred->scope,
+                               g_steal_pointer (&deferred->error));
+  return G_SOURCE_REMOVE;
+}
+
+void
+aml_task_scope_return_error_deferred (AmlTaskScope *scope, GError *error)
+{
+  DeferredError *deferred = g_new0 (DeferredError, 1);
+
+  g_return_if_fail (scope != NULL);
+
+  deferred->scope = scope;
+  deferred->error = error;
+  aml_task_scope_track_source (
+    scope, g_idle_add_full (G_PRIORITY_DEFAULT, deferred_error_return, deferred,
+                           deferred_error_free));
+}
+
 void
 aml_task_scope_track_source (AmlTaskScope *scope, guint source_id)
 {
@@ -168,6 +258,30 @@ aml_task_scope_cancel (AmlTaskScope *scope)
         g_source_remove (source_id);
     }
   g_array_set_size (scope->sources, 0);
+}
+
+static void
+on_followed_cancellable_cancelled (GCancellable *cancellable G_GNUC_UNUSED,
+                                   gpointer      user_data)
+{
+  aml_task_scope_cancel (user_data);
+}
+
+void
+aml_task_scope_follow_cancellable (AmlTaskScope *scope, GCancellable *cancellable)
+{
+  FollowedCancellable followed;
+
+  g_return_if_fail (scope != NULL);
+  g_return_if_fail (cancellable != NULL);
+
+  followed.cancellable = g_object_ref (cancellable);
+  followed.handler =
+    g_cancellable_connect (cancellable,
+                           G_CALLBACK ((void (*) (void))
+                                        on_followed_cancellable_cancelled),
+                           scope, NULL);
+  g_array_append_val (scope->followed, followed);
 }
 
 struct _AmlTaskSequence

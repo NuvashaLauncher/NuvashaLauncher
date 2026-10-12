@@ -349,12 +349,122 @@ test_scope_reference_keeps_operation_alive (void)
 {
   AmlTaskScope *scope = aml_task_scope_new (NULL, NULL, NULL, NULL);
   AmlTaskScope *held = aml_task_scope_ref (scope);
+  g_autoptr (GCancellable) cancellable =
+    g_object_ref (aml_task_scope_get_cancellable (held));
 
   aml_task_scope_unref (scope);
-  g_assert_null (aml_task_scope_get_cancellable (held));
+  g_assert_true (g_cancellable_is_cancelled (cancellable) == FALSE);
+  aml_task_scope_cancel (held);
+  g_assert_true (g_cancellable_is_cancelled (cancellable));
   aml_task_scope_unref (held);
 
   g_print ("ok - task scope references keep operation state alive\n");
+}
+
+/* The handle an operation hands back has to be releasable from its own
+ * completion callback, which means the callback must not run before the
+ * constructor has returned it. */
+typedef struct
+{
+  AmlTaskScope *operation;
+  gboolean finished;
+  GError *error;
+} DeferredWait;
+
+static void
+deferred_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+               gpointer user_data)
+{
+  DeferredWait *wait = user_data;
+
+  wait->finished = TRUE;
+  g_task_propagate_boolean (G_TASK (result), &wait->error);
+  aml_task_scope_unref (wait->operation);
+  wait->operation = NULL;
+}
+
+static void
+test_immediate_failure_completes_after_the_constructor (void)
+{
+  DeferredWait wait = { 0 };
+
+  wait.operation = aml_task_scope_new (NULL, NULL, deferred_done, &wait);
+  aml_task_scope_return_error_deferred (
+    wait.operation,
+    g_error_new_literal (G_IO_ERROR, G_IO_ERROR_FAILED, "nothing to do"));
+
+  g_assert_false (wait.finished);
+  g_assert_nonnull (wait.operation);
+
+  while (g_main_context_pending (NULL))
+    g_main_context_iteration (NULL, FALSE);
+
+  g_assert_true (wait.finished);
+  g_assert_nonnull (wait.error);
+  g_clear_error (&wait.error);
+  g_print ("ok - an operation that fails at once still returns its handle\n");
+}
+
+/* A cancel button that belongs to a row the caller does not own still has
+ * to stop the operation. */
+typedef struct
+{
+  AmlTaskScope *operation;
+  gboolean finished;
+  gboolean cancelled;
+  GError *error;
+} FollowedWait;
+
+static void
+followed_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+               gpointer user_data)
+{
+  FollowedWait *wait = user_data;
+
+  wait->finished = TRUE;
+  g_task_propagate_boolean (G_TASK (result), &wait->error);
+  aml_task_scope_unref (wait->operation);
+  wait->operation = NULL;
+}
+
+/* What the work in flight does when it notices the cancellation. */
+static gboolean
+followed_report_cancelled (gpointer user_data)
+{
+  FollowedWait *wait = user_data;
+
+  wait->cancelled = aml_task_scope_return_error_if_cancelled (wait->operation);
+  return G_SOURCE_REMOVE;
+}
+
+static void
+test_scope_follows_a_cancellable_it_does_not_own (void)
+{
+  FollowedWait wait = { 0 };
+  g_autoptr (GCancellable) row = g_cancellable_new ();
+  g_autoptr (GCancellable) own = NULL;
+  guint before = criticals;
+
+  wait.operation = aml_task_scope_new (NULL, NULL, followed_done, &wait);
+  own = g_object_ref (aml_task_scope_get_cancellable (wait.operation));
+  aml_task_scope_follow_cancellable (wait.operation, row);
+
+  g_assert_false (g_cancellable_is_cancelled (own));
+  g_cancellable_cancel (row);
+  g_assert_true (g_cancellable_is_cancelled (own));
+
+  aml_task_scope_track_source (
+    wait.operation, g_idle_add (followed_report_cancelled, &wait));
+
+  while (g_main_context_pending (NULL))
+    g_main_context_iteration (NULL, FALSE);
+
+  g_assert_true (wait.finished);
+  g_assert_true (wait.cancelled);
+  g_assert_error (wait.error, G_IO_ERROR, G_IO_ERROR_CANCELLED);
+  g_clear_error (&wait.error);
+  g_assert_cmpuint (criticals, ==, before);
+  g_print ("ok - an operation follows a cancellable owned by its caller\n");
 }
 
 /* A step that starts nothing and finishes nothing, so the test decides
@@ -433,6 +543,8 @@ main (int argc, char **argv)
   test_scope_cancels_owned_sources ();
   test_scope_cancellation_stress ();
   test_scope_reference_keeps_operation_alive ();
+  test_immediate_failure_completes_after_the_constructor ();
+  test_scope_follows_a_cancellable_it_does_not_own ();
 
   g_print ("# Task scope and sources it has already lost\n");
   test_scope_free_releases_a_source_that_fired ();

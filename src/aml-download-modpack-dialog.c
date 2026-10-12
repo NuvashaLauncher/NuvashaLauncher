@@ -1652,6 +1652,7 @@ on_modpack_download_clicked (GtkButton *button G_GNUC_UNUSED,
 typedef struct {
   AmlDownloadModpackDialog *dialog;
   AmlDownload *download;
+  AmlTaskScope *operation;
 } InstallJob;
 
 static void
@@ -1659,6 +1660,8 @@ install_job_free (InstallJob *job)
 {
   g_clear_object (&job->dialog);
   g_clear_object (&job->download);
+  if (job->operation != NULL)
+    aml_task_scope_unref (job->operation);
   g_free (job);
 }
 
@@ -1704,6 +1707,8 @@ on_install_done (GObject *source G_GNUC_UNUSED,
   /* The entry leaves the header's dropdown whether it worked or not, and
      the compressed pack it came from goes with it. */
   aml_download_finish (job->download);
+  aml_task_scope_unref (job->operation);
+  job->operation = NULL;
   remove_pack_file (self);
 
   if (instance == NULL)
@@ -1822,9 +1827,14 @@ start_install (AmlDownloadModpackDialog *self)
     job->dialog = g_object_ref (self);
     job->download = g_object_ref (download);
 
-    aml_modpack_install_async (self->modpack, self->manager, name, directory,
-                               chosen, aml_download_get_cancellable (download),
-                               on_install_progress, on_install_done, job);
+    job->operation = aml_modpack_install_async (
+      self->modpack, self->manager, name, directory, chosen,
+      on_install_progress, on_install_done, job);
+
+    /* The × on the header entry is what the user reaches for to stop this,
+       so the install follows that entry's cancellable. */
+    aml_task_scope_follow_cancellable (job->operation,
+                                       aml_download_get_cancellable (download));
   }
 }
 

@@ -195,7 +195,7 @@ install_fail (InstallRun *run, GError *error)
 static void
 install_refuse (InstallRun *run, GError *error)
 {
-  aml_task_scope_return_error (run->scope, error);
+  aml_task_scope_return_error_deferred (run->scope, error);
   install_run_free (run);
 }
 
@@ -555,44 +555,43 @@ install_file_verified (GObject *source G_GNUC_UNUSED,
   install_next (run);
 }
 
-void
+AmlTaskScope *
 aml_modpack_install_async (AmlModpack *modpack,
                            AmlInstanceManager *manager,
                            const char *name,
                            const char *directory,
                            const GPtrArray *optional_files,
-                           GCancellable *cancellable,
                            AmlModpackProgressFunc progress,
                            GAsyncReadyCallback callback,
                            gpointer user_data)
 {
-  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
-  aml_task_scope_attach_task (task);
-  AmlTaskScope *task_scope = g_object_get_data (G_OBJECT (task),
-                                                 "aml-task-scope");
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
+  GTask *task = aml_task_scope_task (scope);
+  AmlTaskScope *task_scope = scope;
   InstallRun *run = NULL;
   g_autofree char *parent = NULL;
 
   if (modpack == NULL || manager == NULL || name == NULL || name[0] == '\0')
     {
-      aml_task_scope_return_error (
+      aml_task_scope_return_error_deferred (
         task_scope,
         g_error_new_literal (AML_MODPACK_ERROR,
                              AML_MODPACK_ERROR_FORMAT,
                              "the install is missing its modpack, its "
                              "manager or its name"));
-      return;
+      return aml_task_scope_ref (task_scope);
     }
 
   if (modpack->minecraft_version == NULL)
     {
-      aml_task_scope_return_error (
+      aml_task_scope_return_error_deferred (
         task_scope,
         g_error_new_literal (AML_MODPACK_ERROR,
                              AML_MODPACK_ERROR_LOADER,
                              "the dependencies were never read: call "
                              "aml_modpack_resolve() first"));
-      return;
+      return aml_task_scope_ref (task_scope);
     }
 
   run = g_new0 (InstallRun, 1);
@@ -600,12 +599,12 @@ aml_modpack_install_async (AmlModpack *modpack,
   run->pack = modpack;
   run->manager = g_object_ref (manager);
   run->name = g_strdup (name);
-  run->cancellable = cancellable != NULL ? g_object_ref (cancellable) : NULL;
+  run->cancellable = g_object_ref (aml_task_scope_get_cancellable (task_scope));
   run->progress = progress;
   run->progress_data = user_data;
   run->files = g_ptr_array_new ();
   run->task = g_object_ref (task);
-  run->scope = aml_task_scope_from_task (task);
+  run->scope = aml_task_scope_ref (task_scope);
 
   /* The target is what the manager would choose for the name, unless
    * the caller says where the instance is to go. */
@@ -622,7 +621,7 @@ aml_modpack_install_async (AmlModpack *modpack,
                            AML_MODPACK_ERROR_IO,
                            "the directory of the instance is not usable");
       install_refuse (run, g_steal_pointer (&error));
-      return;
+      return aml_task_scope_ref (task_scope);
     }
 
   /* What already runs in the chosen place is user data: never touch it. */
@@ -633,7 +632,7 @@ aml_modpack_install_async (AmlModpack *modpack,
       g_set_error (&error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
                    "a directory already exists at \"%s\"", run->target);
       install_refuse (run, g_steal_pointer (&error));
-      return;
+      return aml_task_scope_ref (task_scope);
     }
 
   {
@@ -668,7 +667,7 @@ aml_modpack_install_async (AmlModpack *modpack,
                    "a directory under the instance cannot be made: %s",
                    parent_error->message);
       install_refuse (run, g_steal_pointer (&error));
-      return;
+      return aml_task_scope_ref (task_scope);
     }
 
   g_autoptr (GError) temp_error = NULL;
@@ -683,7 +682,7 @@ aml_modpack_install_async (AmlModpack *modpack,
                    "the temporary directory cannot be made: %s",
                    temp_error->message);
       install_refuse (run, g_steal_pointer (&error));
-      return;
+      return aml_task_scope_ref (task_scope);
     }
 
   /* mkdtemp creates a private directory on supported POSIX systems, but
@@ -697,13 +696,14 @@ aml_modpack_install_async (AmlModpack *modpack,
                    "the temporary directory cannot be secured: %s",
                    g_strerror (errno));
       install_refuse (run, g_steal_pointer (&error));
-      return;
+      return aml_task_scope_ref (task_scope);
     }
 
   /* install_next and not dispatch_download: a pack may name no files
    * at all to download, and then the first thing it wants is its
    * overrides, not a file that is not there. */
   install_next (run);
+  return aml_task_scope_ref (task_scope);
 }
 
 AmlInstance *
@@ -726,13 +726,15 @@ typedef struct {
   gpointer progress_data;
   guint64 done;
   guint64 total;
+
+  /* Borrowed. This run is the task's own data and the scope owns that
+   * task, so a reference here would make the two hold each other up. */
   AmlTaskScope *scope;
 } ExportRun;
 
 static void
 export_run_free (ExportRun *run)
 {
-  aml_task_scope_unref (run->scope);
   g_free (run->instance_directory);
   g_free (run->archive_path);
   g_free (run->temporary_archive);
@@ -1356,7 +1358,10 @@ aml_modpack_export_async (AmlInstance *instance, const char *path,
                           gpointer progress_data,
                           GAsyncReadyCallback callback, gpointer user_data)
 {
-  g_autoptr (GTask) task = NULL;
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
+  GTask *task = aml_task_scope_task (scope);
+  AmlTaskScope *task_scope = scope;
   g_autoptr (GError) error = NULL;
   g_autofree char *directory = NULL;
   ExportRun *run = NULL;
@@ -1364,12 +1369,8 @@ aml_modpack_export_async (AmlInstance *instance, const char *path,
   g_return_val_if_fail (AML_IS_INSTANCE (instance), NULL);
   g_return_val_if_fail (path != NULL && g_path_is_absolute (path), NULL);
 
-  task = g_task_new (NULL, NULL, callback, user_data);
-  aml_task_scope_attach_task (task);
-  AmlTaskScope *task_scope = g_object_get_data (G_OBJECT (task),
-                                                 "aml-task-scope");
   run = g_new0 (ExportRun, 1);
-  run->scope = aml_task_scope_ref (task_scope);
+  run->scope = task_scope;
   g_object_get (instance, "directory", &directory, NULL);
   run->instance_directory = g_strdup (directory);
   run->archive_path = g_strdup (path);
@@ -1388,7 +1389,8 @@ aml_modpack_export_async (AmlInstance *instance, const char *path,
   if (run->instance_directory == NULL || run->manifest == NULL)
     {
       export_run_free (run);
-      aml_task_scope_return_error (task_scope, g_steal_pointer (&error));
+      aml_task_scope_return_error_deferred (task_scope,
+                                            g_steal_pointer (&error));
       return aml_task_scope_ref (task_scope);
     }
 

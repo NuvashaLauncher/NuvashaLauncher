@@ -60,10 +60,21 @@ void aml_task_scope_return_pointer (AmlTaskScope *scope,
                                     GDestroyNotify result_free);
 void aml_task_scope_return_boolean (AmlTaskScope *scope, gboolean result);
 void aml_task_scope_return_error (AmlTaskScope *scope, GError *error);
+
+/* Completes an operation that failed before it started. The callback runs
+ * from an idle, never from inside the *_async() call, so a caller can
+ * always store the handle it has to release in the callback. */
+void aml_task_scope_return_error_deferred (AmlTaskScope *scope, GError *error);
 void aml_task_scope_track_source (AmlTaskScope *scope, guint source_id);
 void aml_task_scope_remove_source (AmlTaskScope *scope, guint source_id);
 void aml_task_scope_forget_source (AmlTaskScope *scope, guint source_id);
 void aml_task_scope_cancel (AmlTaskScope *scope);
+
+/* Cancels @scope whenever @cancellable is cancelled, for an operation
+ * whose cancel button belongs to an object the caller does not own. The
+ * scope stops watching when its last reference goes away. */
+void aml_task_scope_follow_cancellable (AmlTaskScope *scope,
+                                        GCancellable *cancellable);
 
 G_END_DECLS
 

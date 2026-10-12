@@ -261,6 +261,11 @@ install_done (GObject *source G_GNUC_UNUSED,
   AsyncWait *wait = user_data;
 
   wait->instance = aml_modpack_install_finish (result, &wait->error);
+  if (wait->operation != NULL)
+    {
+      aml_task_scope_unref (wait->operation);
+      wait->operation = NULL;
+    }
   g_main_loop_quit (wait->loop);
 }
 
@@ -283,8 +288,8 @@ install_now (AmlModpack *pack, AmlInstanceManager *manager, const char *name,
 {
   AsyncWait wait = { 0 };
 
-  aml_modpack_install_async (pack, manager, name, directory, NULL, NULL, NULL,
-                             install_done, &wait);
+   wait.operation = aml_modpack_install_async (
+     pack, manager, name, directory, NULL, NULL, install_done, &wait);
   async_wait_run (&wait);
 
   *error = wait.error;
