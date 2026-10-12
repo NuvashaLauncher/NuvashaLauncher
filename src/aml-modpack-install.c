@@ -62,6 +62,56 @@ aml_modpack_icon_is_regular (const char *path)
   return path != NULL && g_file_test (path, G_FILE_TEST_IS_REGULAR);
 }
 
+void
+aml_modpack_operation_release (AmlTaskScope *operation,
+                               GCancellable *cancellable)
+{
+  aml_task_scope_release_when_done (operation, cancellable);
+}
+
+AmlTaskScope *
+aml_modpack_operation_new (GCancellable *cancellable)
+{
+  return aml_task_scope_new (NULL, cancellable, NULL, NULL);
+}
+
+void
+aml_modpack_operation_cancel (AmlTaskScope *operation)
+{
+  aml_task_scope_cancel (operation);
+}
+
+void
+aml_modpack_operation_forget (AmlTaskScope *operation)
+{
+  aml_task_scope_unref (operation);
+}
+
+void
+aml_modpack_operation_follow (AmlTaskScope *operation,
+                              GCancellable *cancellable)
+{
+  aml_task_scope_follow_cancellable (operation, cancellable);
+}
+
+void
+aml_modpack_operation_track (AmlTaskScope *operation, guint source_id)
+{
+  aml_task_scope_track_source (operation, source_id);
+}
+
+void
+aml_modpack_operation_remove (AmlTaskScope *operation, guint source_id)
+{
+  aml_task_scope_remove_source (operation, source_id);
+}
+
+void
+aml_modpack_operation_forget_source (AmlTaskScope *operation, guint source_id)
+{
+  aml_task_scope_forget_source (operation, source_id);
+}
+
 /* ---------------------------------------------------------- *
  * The tree one install makes, to leave nothing of on failure
  * ---------------------------------------------------------- */
