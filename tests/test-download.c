@@ -276,11 +276,15 @@ typedef struct
   goffset progress_done;
   goffset progress_total;
   gboolean cancel_on_progress;
+  AmlTaskScope *operation;
 } AsyncCall;
 
 static void
 call_finished (AsyncCall *call)
 {
+  aml_task_scope_unref (call->operation);
+  call->operation = NULL;
+
   if (--call->run->pending == 0)
     g_main_loop_quit (call->run->loop);
 }
@@ -379,9 +383,10 @@ call_file (AsyncRun *run, AsyncCall *call, const char *url,
   call->run = run;
   run->pending++;
 
-  aml_download_file_async (url, dest_path, expected_hash, hash_type,
-                           run->cancellable, progress_cb, download_finished,
-                           call);
+  call->operation = aml_download_file_async (url, dest_path, expected_hash,
+                                             hash_type, progress_cb,
+                                             download_finished, call);
+  aml_task_scope_follow_cancellable (call->operation, run->cancellable);
 }
 
 static void
@@ -390,7 +395,8 @@ call_json (AsyncRun *run, AsyncCall *call, const char *url)
   call->run = run;
   run->pending++;
 
-  aml_download_json_async (url, run->cancellable, json_finished, call);
+  call->operation = aml_download_json_async (url, json_finished, call);
+  aml_task_scope_follow_cancellable (call->operation, run->cancellable);
 }
 
 static void
@@ -398,7 +404,8 @@ call_cached_json (AsyncRun *run, AsyncCall *call, const char *url)
 {
   call->run = run;
   run->pending++;
-  aml_download_json_cached_async (url, run->cancellable, json_finished, call);
+  call->operation = aml_download_json_cached_async (url, json_finished, call);
+  aml_task_scope_follow_cancellable (call->operation, run->cancellable);
 }
 
 static void

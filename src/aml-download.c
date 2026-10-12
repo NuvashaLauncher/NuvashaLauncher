@@ -135,12 +135,6 @@ get_service (void)
   return aml_download_service_new ();
 }
 
-static void
-attach_task_scope (GTask *task)
-{
-  aml_task_scope_attach_task (task);
-}
-
 void
 aml_download_shutdown (void)
 {
@@ -766,7 +760,6 @@ request_free (DownloadRequest *request)
   g_clear_pointer (&request->checksum, g_checksum_free);
   g_clear_pointer (&request->tmp_path, g_free);
   g_clear_pointer (&request->tmp_name, g_free);
-  aml_task_scope_unref (request->scope);
   request->scope = NULL;
   if (request->parent_fd >= 0)
     close (request->parent_fd);
@@ -848,24 +841,29 @@ hash_file_free (HashFile *hash)
 {
   hash_file_close (hash);
   g_clear_pointer (&hash->checksum, g_checksum_free);
-  aml_task_scope_unref (hash->scope);
   g_clear_object (&hash->task);
   g_free (hash);
 }
 
-static void
-hash_file_async (GFile *file, GChecksumType type, GCancellable *cancellable,
-                 GAsyncReadyCallback callback, gpointer user_data)
+static AmlTaskScope *
+hash_file_async (GFile *file, GChecksumType type, GAsyncReadyCallback callback,
+                 gpointer user_data)
 {
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
   HashFile *hash = g_new0 (HashFile, 1);
 
-  hash->task = g_task_new (file, cancellable, callback, user_data);
-  aml_task_scope_attach_task (hash->task);
-  hash->scope = aml_task_scope_from_task (hash->task);
+  /* Borrowed: the caller's handle keeps the operation alive, and the read
+     is answered before it goes away. */
+  hash->scope = scope;
+  hash->task = g_object_ref (aml_task_scope_task (scope));
   hash->checksum = g_checksum_new (type);
 
-  g_file_read_async (file, G_PRIORITY_DEFAULT, cancellable, cache_open_ready,
+  g_file_read_async (file, G_PRIORITY_DEFAULT,
+                     aml_task_scope_get_cancellable (scope), cache_open_ready,
                      hash);
+
+  return g_steal_pointer (&scope);
 }
 
 static void
@@ -951,9 +949,9 @@ file_request_start (DownloadRequest *request)
 
   g_autoptr (GFile) destination = g_file_new_for_path (request->dest_path);
 
-  hash_file_async (destination, request->hash_type,
-                   g_task_get_cancellable (request->task), cache_ready,
-                   request);
+  aml_task_scope_release_when_done (
+    hash_file_async (destination, request->hash_type, cache_ready, request),
+    g_task_get_cancellable (request->task));
 }
 
 static void
@@ -1179,9 +1177,10 @@ cache_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   {
     g_autoptr (GFile) global =
       g_file_new_for_path (request->global_cache_path);
-    hash_file_async (global, request->hash_type,
-                     g_task_get_cancellable (request->task),
-                     global_cache_hash_ready, request);
+    aml_task_scope_release_when_done (
+      hash_file_async (global, request->hash_type, global_cache_hash_ready,
+                      request),
+      g_task_get_cancellable (request->task));
   }
 }
 
@@ -1826,43 +1825,45 @@ json_ready (GObject *source, GAsyncResult *result, gpointer user_data)
  * The public interface
  * ---------------------------------------------------------- */
 
-void
+AmlTaskScope *
 aml_download_file_async (const char *url,
                          const char *dest_path,
                          const char *expected_hash,
                          GChecksumType hash_type,
-                         GCancellable *cancellable,
                          AmlDownloadProgressFunc progress,
                          GAsyncReadyCallback callback,
                          gpointer user_data)
 {
-  g_return_if_fail (url != NULL);
-  g_return_if_fail (dest_path != NULL);
-  g_return_if_fail (g_path_is_absolute (dest_path));
+  g_return_val_if_fail (url != NULL, NULL);
+  g_return_val_if_fail (dest_path != NULL, NULL);
+  g_return_val_if_fail (g_path_is_absolute (dest_path), NULL);
 
-  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
-  attach_task_scope (task);
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
 
   /* Cancellation is reported by this module, in its own error domain,
      so GTask must not replace the error with G_IO_ERROR_CANCELLED. */
-  g_task_set_check_cancellable (task, FALSE);
+  g_task_set_check_cancellable (aml_task_scope_task (scope), FALSE);
 
   if (!usable_url (url))
     {
       g_autofree char *shown = url_for_message (url);
 
-      download_return_new_error (task, AML_DOWNLOAD_ERROR,
-                               AML_DOWNLOAD_ERROR_NETWORK,
-                               "\"%s\" is not a usable download url", shown);
-      return;
+      aml_task_scope_return_error_deferred (
+        scope,
+        g_error_new (AML_DOWNLOAD_ERROR,
+                     AML_DOWNLOAD_ERROR_NETWORK,
+                     "\"%s\" is not a usable download url", shown));
+      return g_steal_pointer (&scope);
     }
 
    DownloadRequest *request = g_new0 (DownloadRequest, 1);
    request->parent_fd = -1;
 
-  request->task = g_steal_pointer (&task);
-  request->scope = aml_task_scope_ref (
-    g_object_get_data (G_OBJECT (request->task), "aml-task-scope"));
+  /* Borrowed: the caller's handle keeps the operation alive, and the
+     request is answered before it goes away. */
+  request->scope = scope;
+  request->task = g_object_ref (aml_task_scope_task (scope));
   request->url = g_strdup (url);
   request->dest_path = g_strdup (dest_path);
   request->expected_hash = g_strdup (expected_hash);
@@ -1875,6 +1876,8 @@ aml_download_file_async (const char *url,
   request->begin = file_request_start;
 
   start_transfer (request);
+
+  return g_steal_pointer (&scope);
 }
 
 gboolean
@@ -1885,36 +1888,38 @@ aml_download_file_finish (GAsyncResult *result, GError **error)
   return g_task_propagate_boolean (G_TASK (result), error);
 }
 
-void
+AmlTaskScope *
 aml_download_json_async (const char *url,
-                         GCancellable *cancellable,
                          GAsyncReadyCallback callback,
                          gpointer user_data)
 {
-  g_return_if_fail (url != NULL);
+  g_return_val_if_fail (url != NULL, NULL);
 
-  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
-  attach_task_scope (task);
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
 
   /* See aml_download_file_async(). */
-  g_task_set_check_cancellable (task, FALSE);
+  g_task_set_check_cancellable (aml_task_scope_task (scope), FALSE);
 
   if (!usable_url (url))
     {
       g_autofree char *shown = url_for_message (url);
 
-      download_return_new_error (task, AML_DOWNLOAD_ERROR,
-                               AML_DOWNLOAD_ERROR_NETWORK,
-                               "\"%s\" is not a usable download url", shown);
-      return;
+      aml_task_scope_return_error_deferred (
+        scope,
+        g_error_new (AML_DOWNLOAD_ERROR,
+                     AML_DOWNLOAD_ERROR_NETWORK,
+                     "\"%s\" is not a usable download url", shown));
+      return g_steal_pointer (&scope);
     }
 
    DownloadRequest *request = g_new0 (DownloadRequest, 1);
    request->parent_fd = -1;
 
-  request->task = g_steal_pointer (&task);
-  request->scope = aml_task_scope_ref (
-    g_object_get_data (G_OBJECT (request->task), "aml-task-scope"));
+  /* Borrowed: the caller's handle keeps the operation alive, and the
+     request is answered before it goes away. */
+  request->scope = scope;
+  request->task = g_object_ref (aml_task_scope_task (scope));
   request->url = g_strdup (url);
   request->json = TRUE;
   request->user_data = user_data;
@@ -1924,6 +1929,8 @@ aml_download_json_async (const char *url,
   request->begin = start_attempt;
 
   start_transfer (request);
+
+  return g_steal_pointer (&scope);
 }
 
 void
@@ -1935,15 +1942,14 @@ aml_download_set_cache_settings (AmlSettings *settings)
   g_set_object (&service->cache_settings, settings);
 }
 
-void
+AmlTaskScope *
 aml_download_file_hash_async (GFile *file, GChecksumType type,
-                              GCancellable *cancellable,
                               GAsyncReadyCallback callback,
                               gpointer user_data)
 {
-  g_return_if_fail (G_IS_FILE (file));
+  g_return_val_if_fail (G_IS_FILE (file), NULL);
 
-  hash_file_async (file, type, cancellable, callback, user_data);
+  return hash_file_async (file, type, callback, user_data);
 }
 
 char *
@@ -1962,39 +1968,40 @@ aml_download_json_finish (GAsyncResult *result, GError **error)
   return g_task_propagate_pointer (G_TASK (result), error);
 }
 
-void
+AmlTaskScope *
 aml_download_json_post_async (const char           *url,
                               const char           *body,
                               const char           *user_agent,
-                              GCancellable         *cancellable,
                               GAsyncReadyCallback   callback,
                               gpointer              user_data)
 {
-  g_return_if_fail (url != NULL);
-  g_return_if_fail (body != NULL);
+  g_return_val_if_fail (url != NULL, NULL);
+  g_return_val_if_fail (body != NULL, NULL);
 
-  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
-  attach_task_scope (task);
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
 
   /* See aml_download_file_async(). */
-  g_task_set_check_cancellable (task, FALSE);
+  g_task_set_check_cancellable (aml_task_scope_task (scope), FALSE);
 
   if (!usable_url (url))
     {
       g_autofree char *shown = url_for_message (url);
 
-      download_return_new_error (task, AML_DOWNLOAD_ERROR,
-                               AML_DOWNLOAD_ERROR_NETWORK,
-                               "\"%s\" is not a usable request url", shown);
-      return;
+      aml_task_scope_return_error_deferred (
+        scope,
+        g_error_new (AML_DOWNLOAD_ERROR, AML_DOWNLOAD_ERROR_NETWORK,
+                     "\"%s\" is not a usable request url", shown));
+      return g_steal_pointer (&scope);
     }
 
    DownloadRequest *request = g_new0 (DownloadRequest, 1);
    request->parent_fd = -1;
 
-  request->task = g_steal_pointer (&task);
-  request->scope = aml_task_scope_ref (
-    g_object_get_data (G_OBJECT (request->task), "aml-task-scope"));
+  /* Borrowed: the caller's handle keeps the operation alive, and the
+     request is answered before it goes away. */
+  request->scope = scope;
+  request->task = g_object_ref (aml_task_scope_task (scope));
   request->url = g_strdup (url);
   request->body = g_strdup (body);
   request->user_agent = g_strdup (user_agent);
@@ -2006,31 +2013,36 @@ aml_download_json_post_async (const char           *url,
   request->begin = start_attempt;
 
   start_transfer (request);
+
+  return g_steal_pointer (&scope);
 }
 
-void
-aml_download_json_cached_async (const char *url, GCancellable *cancellable,
-                                GAsyncReadyCallback callback, gpointer user_data)
+AmlTaskScope *
+aml_download_json_cached_async (const char *url, GAsyncReadyCallback callback,
+                                gpointer user_data)
 {
-  g_return_if_fail (url != NULL);
-  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
-  attach_task_scope (task);
+  g_return_val_if_fail (url != NULL, NULL);
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
 
-  g_task_set_check_cancellable (task, FALSE);
+  g_task_set_check_cancellable (aml_task_scope_task (scope), FALSE);
   if (!usable_url (url))
     {
       g_autofree char *shown = url_for_message (url);
-      download_return_new_error (task, AML_DOWNLOAD_ERROR,
-                               AML_DOWNLOAD_ERROR_NETWORK,
-                               "\"%s\" is not a usable download url", shown);
-      return;
+      aml_task_scope_return_error_deferred (
+        scope,
+        g_error_new (AML_DOWNLOAD_ERROR,
+                     AML_DOWNLOAD_ERROR_NETWORK,
+                     "\"%s\" is not a usable download url", shown));
+      return g_steal_pointer (&scope);
     }
 
    DownloadRequest *request = g_new0 (DownloadRequest, 1);
    request->parent_fd = -1;
-  request->task = g_steal_pointer (&task);
-  request->scope = aml_task_scope_ref (
-    g_object_get_data (G_OBJECT (request->task), "aml-task-scope"));
+  /* Borrowed: the caller's handle keeps the operation alive, and the
+     request is answered before it goes away. */
+  request->scope = scope;
+  request->task = g_object_ref (aml_task_scope_task (scope));
   request->url = g_strdup (url);
   request->json = TRUE;
   request->api_cache = TRUE;
@@ -2039,35 +2051,38 @@ aml_download_json_cached_async (const char *url, GCancellable *cancellable,
   request->priority = DOWNLOAD_PRIORITY_INTERACTIVE;
   request->begin = json_cache_start;
   start_transfer (request);
+
+  return g_steal_pointer (&scope);
 }
 
-void
+AmlTaskScope *
 aml_download_json_post_cached_async (const char *url, const char *body,
                                      const char *user_agent,
-                                     GCancellable *cancellable,
                                      GAsyncReadyCallback callback,
                                      gpointer user_data)
 {
-  g_return_if_fail (url != NULL);
-  g_return_if_fail (body != NULL);
-  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
-  attach_task_scope (task);
+  g_return_val_if_fail (url != NULL, NULL);
+  g_return_val_if_fail (body != NULL, NULL);
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
 
-  g_task_set_check_cancellable (task, FALSE);
+  g_task_set_check_cancellable (aml_task_scope_task (scope), FALSE);
   if (!usable_url (url))
     {
       g_autofree char *shown = url_for_message (url);
-      download_return_new_error (task, AML_DOWNLOAD_ERROR,
-                               AML_DOWNLOAD_ERROR_NETWORK,
-                               "\"%s\" is not a usable request url", shown);
-      return;
+      aml_task_scope_return_error_deferred (
+        scope,
+        g_error_new (AML_DOWNLOAD_ERROR, AML_DOWNLOAD_ERROR_NETWORK,
+                     "\"%s\" is not a usable request url", shown));
+      return g_steal_pointer (&scope);
     }
 
    DownloadRequest *request = g_new0 (DownloadRequest, 1);
    request->parent_fd = -1;
-  request->task = g_steal_pointer (&task);
-  request->scope = aml_task_scope_ref (
-    g_object_get_data (G_OBJECT (request->task), "aml-task-scope"));
+  /* Borrowed: the caller's handle keeps the operation alive, and the
+     request is answered before it goes away. */
+  request->scope = scope;
+  request->task = g_object_ref (aml_task_scope_task (scope));
   request->url = g_strdup (url);
   request->body = g_strdup (body);
   request->user_agent = g_strdup (user_agent);
@@ -2078,4 +2093,6 @@ aml_download_json_post_cached_async (const char *url, const char *body,
   request->priority = DOWNLOAD_PRIORITY_INTERACTIVE;
   request->begin = json_cache_start;
   start_transfer (request);
+
+  return g_steal_pointer (&scope);
 }

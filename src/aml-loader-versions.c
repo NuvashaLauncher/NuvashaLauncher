@@ -695,8 +695,9 @@ aml_loaders_versions_async (AmlLoader           loader,
       return g_steal_pointer (&scope);
     }
 
-  aml_download_json_async (url, aml_task_scope_get_cancellable (scope),
-                           versions_loaded, request);
+  aml_task_scope_release_when_done (
+    aml_download_json_async (url, versions_loaded, request),
+    aml_task_scope_get_cancellable (scope));
 
   return g_steal_pointer (&scope);
 }

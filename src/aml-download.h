@@ -18,6 +18,7 @@
 #include <json-glib/json-glib.h>
 
 #include "aml-settings.h"
+#include "aml-task.h"
 
 G_BEGIN_DECLS
 
@@ -76,14 +77,13 @@ typedef void (*AmlDownloadProgressFunc) (goffset bytes_done,
  * whose directory already exists.
  *
  * @progress and @callback both receive @user_data. */
-void aml_download_file_async (const char       *url,
-                              const char       *dest_path,
-                              const char       *expected_hash,
-                              GChecksumType     hash_type,
-                              GCancellable     *cancellable,
-                              AmlDownloadProgressFunc progress,
-                              GAsyncReadyCallback     callback,
-                              gpointer                user_data);
+AmlTaskScope *aml_download_file_async (const char *url,
+                                       const char *dest_path,
+                                       const char *expected_hash,
+                                       GChecksumType hash_type,
+                                       AmlDownloadProgressFunc progress,
+                                       GAsyncReadyCallback callback,
+                                       gpointer user_data);
 
 /* TRUE on success. The error is always one of AmlDownloadError; for
  * AML_DOWNLOAD_ERROR_IO its message is what the file system said. */
@@ -96,10 +96,9 @@ gboolean aml_download_file_finish (GAsyncResult *result,
  * The returned parser is owned by the caller; a body that does not
  * parse comes back as a JSON_PARSER_ERROR from json-glib and is not
  * retried. */
-void aml_download_json_async (const char       *url,
-                              GCancellable     *cancellable,
-                              GAsyncReadyCallback callback,
-                              gpointer                user_data);
+AmlTaskScope *aml_download_json_async (const char *url,
+                                       GAsyncReadyCallback callback,
+                                       gpointer user_data);
 
 /* (transfer full). NULL on error. */
 JsonParser *aml_download_json_finish (GAsyncResult *result,
@@ -112,11 +111,10 @@ JsonParser *aml_download_json_finish (GAsyncResult *result,
  * G_IO_ERROR_NOT_FOUND when there is no such file.
  *
  * (transfer full) the digest, lowercase and hexadecimal. */
-void aml_download_file_hash_async (GFile            *file,
-                                  GChecksumType      type,
-                                  GCancellable     *cancellable,
-                                  GAsyncReadyCallback callback,
-                                  gpointer                user_data);
+AmlTaskScope *aml_download_file_hash_async (GFile *file,
+                                             GChecksumType type,
+                                             GAsyncReadyCallback callback,
+                                             gpointer user_data);
 
 /* (transfer full). NULL on error. */
 char *aml_download_file_hash_finish (GAsyncResult *result,
@@ -131,24 +129,21 @@ char *aml_download_file_hash_finish (GAsyncResult *result,
  * it is talking to asks for. NULL keeps the session's own.
  *
  * The returned parser is owned by the caller. */
-void aml_download_json_post_async (const char       *url,
-                                   const char       *body,
-                                   const char       *user_agent,
-                                   GCancellable     *cancellable,
-                                   GAsyncReadyCallback callback,
-                                   gpointer                user_data);
+AmlTaskScope *aml_download_json_post_async (const char *url,
+                                            const char *body,
+                                            const char *user_agent,
+                                            GAsyncReadyCallback callback,
+                                            gpointer user_data);
 
-void aml_download_json_cached_async (const char       *url,
-                                     GCancellable     *cancellable,
-                                     GAsyncReadyCallback callback,
-                                     gpointer          user_data);
+AmlTaskScope *aml_download_json_cached_async (const char *url,
+                                              GAsyncReadyCallback callback,
+                                              gpointer user_data);
 
-void aml_download_json_post_cached_async (const char       *url,
-                                          const char       *body,
-                                          const char       *user_agent,
-                                          GCancellable     *cancellable,
-                                          GAsyncReadyCallback callback,
-                                          gpointer          user_data);
+AmlTaskScope *aml_download_json_post_cached_async (const char *url,
+                                                   const char *body,
+                                                   const char *user_agent,
+                                                   GAsyncReadyCallback callback,
+                                                   gpointer user_data);
 
 G_END_DECLS
 

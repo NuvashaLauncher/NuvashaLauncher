@@ -345,9 +345,10 @@ fetch_next (FetchRun *run)
   path = g_build_filename (run->folder, file->filename, NULL);
   run->index++;
 
-  aml_download_file_async (file->url, path, file->sha1, G_CHECKSUM_SHA1,
-                           aml_download_get_cancellable (run->download), NULL,
-                           fetch_ready, run);
+  aml_task_scope_release_when_done (
+    aml_download_file_async (file->url, path, file->sha1, G_CHECKSUM_SHA1,
+                             NULL, fetch_ready, run),
+    aml_download_get_cancellable (run->download));
 }
 
 static AmlDownloadKind

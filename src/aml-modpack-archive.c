@@ -992,8 +992,10 @@ verify_hash_ready (GObject *source G_GNUC_UNUSED,
   {
     g_autoptr (GFile) file = g_file_new_for_path (run->path);
 
-    aml_download_file_hash_async (file, G_CHECKSUM_SHA512, run->cancellable,
-                                  verify_hash_ready, run);
+    aml_task_scope_release_when_done (
+      aml_download_file_hash_async (file, G_CHECKSUM_SHA512,
+                                    verify_hash_ready, run),
+      run->cancellable);
   }
 }
 
@@ -1035,8 +1037,10 @@ aml_modpack_verify_file_async (const AmlModpackFile *file,
   run->task = g_object_ref (task);
   run->scope = aml_task_scope_from_task (task);
 
-  aml_download_file_hash_async (job_file, G_CHECKSUM_SHA1, run->cancellable,
-                                verify_hash_ready, run);
+  aml_task_scope_release_when_done (
+    aml_download_file_hash_async (job_file, G_CHECKSUM_SHA1, verify_hash_ready,
+                                  run),
+    run->cancellable);
 }
 
 gboolean

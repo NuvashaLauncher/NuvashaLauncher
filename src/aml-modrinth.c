@@ -1363,8 +1363,9 @@ get_async (const char *url, GAsyncReadyCallback callback, gpointer user_data,
   g_ptr_array_add (flight->tasks, g_object_ref (task));
   g_hash_table_insert (json_flights, g_strdup (url), flight);
 
-  aml_download_json_cached_async (url, aml_task_scope_get_cancellable (scope),
-                                  json_flight_done, flight);
+  aml_task_scope_release_when_done (
+    aml_download_json_cached_async (url, json_flight_done, flight),
+    aml_task_scope_get_cancellable (scope));
 
   return g_steal_pointer (&scope);
 }
@@ -1564,9 +1565,10 @@ aml_modrinth_versions_async (const char *project_id, AmlContentType type,
                        instance_ask_new (type, minecraft_version, loader),
                        instance_ask_free);
 
-  aml_download_json_cached_async (url, aml_task_scope_get_cancellable (scope),
-                                  json_ready,
-                                  aml_task_scope_task (scope));
+  aml_task_scope_release_when_done (
+    aml_download_json_cached_async (url, json_ready,
+                                    aml_task_scope_task (scope)),
+    aml_task_scope_get_cancellable (scope));
 
   return g_steal_pointer (&scope);
 }
@@ -1739,8 +1741,10 @@ aml_modrinth_categories_async (const char        *project_type,
 
   scope = request_new (callback, user_data, categories_answer,
                        AML_NOT_FOUND_IS_ERROR, g_strdup (project_type), g_free);
-  aml_download_json_cached_async (url, aml_task_scope_get_cancellable (scope),
-                                  json_ready, aml_task_scope_task (scope));
+  aml_task_scope_release_when_done (
+    aml_download_json_cached_async (url, json_ready,
+                                    aml_task_scope_task (scope)),
+    aml_task_scope_get_cancellable (scope));
 
   return g_steal_pointer (&scope);
 }
@@ -1893,10 +1897,11 @@ aml_modrinth_update_by_hash_async (AmlContentType type, const char *sha1,
                        instance_ask_new (type, minecraft_version, loader),
                        instance_ask_free);
 
-  aml_download_json_post_cached_async (url, body, AML_MODRINTH_USER_AGENT,
-                                       aml_task_scope_get_cancellable (scope),
-                                       json_ready,
-                                       aml_task_scope_task (scope));
+  aml_task_scope_release_when_done (
+    aml_download_json_post_cached_async (url, body, AML_MODRINTH_USER_AGENT,
+                                         json_ready,
+                                         aml_task_scope_task (scope)),
+    aml_task_scope_get_cancellable (scope));
 
   return g_steal_pointer (&scope);
 }

@@ -1896,10 +1896,11 @@ manifest_fetch_step (AmlTaskSequence *sequence G_GNUC_UNUSED,
 {
   FetchRequest *request = user_data;
 
-  aml_download_file_async (
-    request->url, request->path, NULL, G_CHECKSUM_SHA1,
-    aml_task_sequence_get_cancellable (request->sequence),
-    NULL, manifest_downloaded, request);
+  aml_task_scope_release_when_done (
+    aml_download_file_async (request->url, request->path, NULL,
+                             G_CHECKSUM_SHA1, NULL, manifest_downloaded,
+                             request),
+    aml_task_sequence_get_cancellable (request->sequence));
 }
 
 AmlTaskScope *
@@ -2097,11 +2098,10 @@ load_step (LoadRequest *request)
 
   /* The manifest's sha1 decides whether the copy on disk is good
    * enough, so a damaged one is downloaded again. */
-  aml_download_file_async (entry->url, request->path, entry->sha1,
-                           G_CHECKSUM_SHA1,
-                            aml_task_sequence_get_cancellable (request->sequence),
-                           NULL,
-                           load_downloaded, request);
+  aml_task_scope_release_when_done (
+    aml_download_file_async (entry->url, request->path, entry->sha1,
+                             G_CHECKSUM_SHA1, NULL, load_downloaded, request),
+    aml_task_sequence_get_cancellable (request->sequence));
 }
 
 AmlTaskScope *

@@ -1037,9 +1037,10 @@ scan_hash_next (ScanRun *run)
       HashInput *input = g_new (HashInput, 1);
       input->run = run;
       input->file = file;
-      aml_download_file_hash_async (handle, G_CHECKSUM_SHA1,
-                                     aml_task_scope_get_cancellable (run->scope),
-                                    scan_hash_ready, input);
+      aml_task_scope_release_when_done (
+          aml_download_file_hash_async (handle, G_CHECKSUM_SHA1,
+                                        scan_hash_ready, input),
+          aml_task_scope_get_cancellable (run->scope));
     }
 }
 

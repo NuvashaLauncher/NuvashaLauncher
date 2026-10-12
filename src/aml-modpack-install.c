@@ -471,8 +471,10 @@ dispatch_download (InstallRun *run)
         return;
       }
 
-    aml_download_file_async (url, dest, NULL, 0, run->cancellable, NULL,
-                             install_file_done, run);
+    aml_task_scope_release_when_done (
+      aml_download_file_async (url, dest, NULL, 0, NULL, install_file_done,
+                               run),
+      run->cancellable);
   }
 }
 

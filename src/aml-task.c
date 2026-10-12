@@ -426,7 +426,11 @@ aml_task_scope_follow_cancellable (AmlTaskScope *scope, GCancellable *cancellabl
   FollowedCancellable followed;
 
   g_return_if_fail (scope != NULL);
-  g_return_if_fail (cancellable != NULL);
+
+  /* No cancellable is nothing to follow: the operation is simply not
+     tied to anything else. */
+  if (cancellable == NULL)
+    return;
 
   followed.cancellable = g_object_ref (cancellable);
   followed.handler =

@@ -744,8 +744,9 @@ run_search (AmlDownloadModpackDialog *self, gboolean append)
   /* The callback holds a reference: closing the dialog while a search
    * is in flight finalizes it, and a callback that then reads self would
    * be reading freed memory. */
-  aml_download_json_async (url, self->search, on_search_done,
-                           g_object_ref (self));
+  aml_task_scope_release_when_done (
+    aml_download_json_async (url, on_search_done, g_object_ref (self)),
+    self->search);
 }
 
 /* Every operation of this dialog hands its callback a reference it gives
@@ -1559,8 +1560,9 @@ dialog_details_open (AmlDownloadModpackDialog *self)
     aml_task_scope_follow_cancellable (ask->operation, self->fetch);
   }
 
-  aml_download_json_async (url, self->fetch, on_versions_answer,
-                           g_object_ref (self));
+  aml_task_scope_release_when_done (
+    aml_download_json_async (url, on_versions_answer, g_object_ref (self)),
+    self->fetch);
 }
 
 
@@ -2237,10 +2239,11 @@ dialog_start_features (AmlDownloadModpackDialog *self)
     g_free (self->pack_path);
     self->pack_path = g_build_filename (cache_dir, name, NULL);
 
-    aml_download_file_async (
-      file->url, self->pack_path, file->sha1, G_CHECKSUM_SHA1,
-      aml_download_get_cancellable (self->pack_download), on_pack_progress,
-      on_pack_downloaded, g_object_ref (self));
+    aml_task_scope_release_when_done (
+      aml_download_file_async (file->url, self->pack_path, file->sha1,
+                               G_CHECKSUM_SHA1, on_pack_progress,
+                               on_pack_downloaded, g_object_ref (self)),
+      aml_download_get_cancellable (self->pack_download));
   }
 
   return TRUE;
