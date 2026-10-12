@@ -102,11 +102,12 @@ test_fabric_version_list (void)
   g_assert_cmpstr (version_at (versions, 3)->version, ==, "0.10.7+build.214");
   g_assert_cmpstr (version_at (versions, 4)->version, ==, "0.9.3+build.207");
 
-  /* What the loader says about stability is what a list is filtered and
-     labelled with. */
-  g_assert_true (version_at (versions, 0)->stable);
-  g_assert_false (version_at (versions, 1)->stable);
-  g_assert_false (version_at (versions, 3)->stable);
+   /* Old numeric releases remain stable even when the service marks them
+      as old; build/pre-release suffixes are unstable. */
+   g_assert_true (version_at (versions, 0)->stable);
+   g_assert_true (version_at (versions, 1)->stable);
+   g_assert_true (version_at (versions, 2)->stable);
+   g_assert_false (version_at (versions, 3)->stable);
 
   g_print ("ok - a Fabric list is read, newest first, with what is stable\n");
 }
