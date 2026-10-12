@@ -378,8 +378,17 @@ void
 aml_task_scope_track_source (AmlTaskScope *scope, guint source_id)
 {
   g_return_if_fail (scope != NULL);
-  if (source_id != 0)
-    g_array_append_val (scope->sources, source_id);
+
+  if (source_id == 0)
+    return;
+
+  /* Registered once. The same source twice would be removed twice, and the
+     second removal would find whatever has been given that id since. */
+  for (guint i = 0; i < scope->sources->len; i++)
+    if (g_array_index (scope->sources, guint, i) == source_id)
+      return;
+
+  g_array_append_val (scope->sources, source_id);
 }
 
 void
@@ -450,6 +459,92 @@ aml_task_scope_follow_cancellable (AmlTaskScope *scope, GCancellable *cancellabl
                                         on_followed_cancellable_cancelled),
                            scope, NULL);
   g_array_append_val (scope->followed, followed);
+}
+
+/* ---------------------------------------------------------- *
+ * Watching a cancellable
+ * ---------------------------------------------------------- */
+
+/* The state behind aml_cancellable_watch(). It lives as long as the source
+   does, and the source's destroy notify is what tears it down. */
+typedef struct
+{
+  GCancellable *cancellable;
+  GSourceFunc callback;
+  gpointer user_data;
+  GDestroyNotify notify;
+  gulong handler;
+} CancellableWatch;
+
+/* Answers from a source dispatch, which is a main-loop turn of its own. By
+   then the cancellable's emission has returned, so the disconnect below is
+   not one made from inside that emission, which GLib deadlocks on. */
+static gboolean
+watch_dispatch (gpointer user_data)
+{
+  CancellableWatch *watch = user_data;
+
+  return watch->callback (watch->user_data);
+}
+
+static void
+watch_free (gpointer user_data)
+{
+  CancellableWatch *watch = user_data;
+
+  if (watch->handler != 0)
+    g_cancellable_disconnect (watch->cancellable, watch->handler);
+  g_clear_object (&watch->cancellable);
+
+  if (watch->notify != NULL)
+    watch->notify (watch->user_data);
+  g_free (watch);
+}
+
+/* Marks the watch ready. Connecting to a cancellable that is already
+   cancelled runs this before aml_cancellable_watch() has attached the
+   source, which is harmless: the source is not due until it is told. */
+static void
+watch_cancelled (GCancellable *cancellable G_GNUC_UNUSED,
+                 gpointer      user_data)
+{
+  g_source_set_ready_time (user_data, 0);
+}
+
+guint
+aml_cancellable_watch (GCancellable  *cancellable,
+                       GSourceFunc    callback,
+                       gpointer       user_data,
+                       GDestroyNotify notify)
+{
+  CancellableWatch *watch = g_new0 (CancellableWatch, 1);
+  GSource *source;
+  guint source_id;
+
+  g_return_val_if_fail (G_IS_CANCELLABLE (cancellable), 0);
+  g_return_val_if_fail (callback != NULL, 0);
+
+  watch->callback = callback;
+  watch->user_data = user_data;
+  watch->notify = notify;
+  watch->cancellable = g_object_ref (cancellable);
+
+  /* A timeout that is due at a time that has not come: GLib compares a
+     plain source's ready time against the clock, so this is how a source is
+     written that stays quiet until it is told to speak. An idle source
+     would not do - it ignores the ready time and dispatches on the first
+     turn of the loop, cancelled or not. */
+  source = g_timeout_source_new (0);
+  g_source_set_ready_time (source, G_MAXINT64);
+  g_source_set_callback (source, watch_dispatch, watch, watch_free);
+  watch->handler =
+    g_cancellable_connect (cancellable, G_CALLBACK (watch_cancelled), source,
+                           NULL);
+
+  source_id = g_source_attach (source, NULL);
+  g_source_unref (source);
+
+  return source_id;
 }
 
 struct _AmlTaskSequence

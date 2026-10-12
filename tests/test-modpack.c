@@ -13,7 +13,10 @@
  * no files and no loader installs from its overrides alone, which is
  * the whole pipeline minus the network. */
 
+#include "aml-download-modpack-dialog.h"
 #include "aml-modpack.h"
+
+#include <gtk/gtk.h>
 
 #include <archive.h>
 #include <archive_entry.h>
@@ -1079,6 +1082,59 @@ test_export_import_round_trip (void)
   g_print ("ok - export and import preserve loader, icon and overrides\n");
 }
 
+/* ---------------------------------------------------------- *
+ * The dialog's own flow
+ *
+ * Reading a pack and installing it through the dialog is what a user does,
+ * and it is a different path from the install this file otherwise tests:
+ * the dialog hands its own references around and releases the operations
+ * it started. Local only, so it runs without a network. The widgets need
+ * a display; without one the flow is skipped rather than faked. */
+
+static void
+test_dialog_imports_and_installs (void)
+{
+  g_autofree char *dir = make_tmp_dir ();
+  g_autofree char *data_dir = g_build_filename (dir, "data", NULL);
+  g_autofree char *zip_path = g_build_filename (dir, "pack.mrpack", NULL);
+  g_autofree char *index_json =
+    pack_index ("Dialog Pack", "", "\"minecraft\":\"1.20.1\"");
+  g_autoptr (AmlInstanceManager) manager = NULL;
+  g_autoptr (AmlDownloadModpackDialog) dialog = NULL;
+  ZipEntry entries[] = {
+    { "modrinth.index.json", index_json, strlen (index_json), AE_IFREG,
+      NULL },
+    ZIP_FILE ("overrides/config/options.txt", "from overrides"),
+    ZIP_FILE ("overrides/icon.png", "icon bytes"),
+  };
+  gboolean finished = FALSE;
+  gint64 deadline = 0;
+
+  zip_write (zip_path, entries, G_N_ELEMENTS (entries));
+  manager = manager_new (data_dir);
+
+  dialog = aml_download_modpack_dialog_new_for_file (manager, zip_path);
+  g_assert_nonnull (dialog);
+
+  /* The import runs on the main loop: the pack is read, the install goes
+     on, and both release the operations they started. */
+  deadline = g_get_monotonic_time () + 30 * G_TIME_SPAN_SECOND;
+
+  while (!finished && g_get_monotonic_time () < deadline)
+    {
+      if (manager_count (manager) > 0)
+        finished = TRUE;
+
+      g_main_context_iteration (NULL, FALSE);
+    }
+
+  g_assert_true (finished);
+  g_assert_cmpuint (manager_count (manager), ==, 1);
+
+  remove_recursive (dir);
+  g_print ("ok - the dialog reads a pack and installs it in one go\n");
+}
+
 /* ---------------------------------------------------------- */
 
 int
@@ -1106,6 +1162,9 @@ main (int argc, char **argv)
   g_test_add_func ("/modpack/install-unresolved", test_install_needs_resolve);
   g_test_add_func ("/modpack/export-import-round-trip",
                    test_export_import_round_trip);
+
+  if (gtk_init_check ())
+    g_test_add_func ("/modpack/dialog-import", test_dialog_imports_and_installs);
 
   return g_test_run ();
 }

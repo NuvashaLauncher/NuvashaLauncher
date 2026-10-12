@@ -88,22 +88,6 @@ struct _AmlDownloadService {
 
 static AmlDownloadService *service;
 
-static void
-download_return_new_error (GTask       *task,
-                           GQuark       domain,
-                           gint         code,
-                           const char  *format,
-                           ...)
-{
-  AmlTaskScope *scope = g_object_get_data (G_OBJECT (task),
-                                           "aml-task-scope");
-  va_list args;
-  va_start (args, format);
-  GError *error = g_error_new_valist (domain, code, format, args);
-  va_end (args);
-  aml_task_scope_return_error (scope, error);
-}
-
 AmlDownloadService *
 aml_download_service_new (void)
 {
@@ -223,7 +207,7 @@ typedef struct _DownloadRequest
   guint priority;
   guint retry_source;    /* pending retry timeout, 0 while there is none */
   guint retry_cancel_source; /* cancellation watch for a pending retry */
-  guint queue_cancel_source;
+  guint queue_cancel_source; /* cancellation watch while queued */
   AmlTaskScope *scope;
 } DownloadRequest;
 
@@ -601,13 +585,17 @@ start_transfer (DownloadRequest *request)
 
   GQueue *queue = interactive ? &service->interactive_waiting
                               : &service->bulk_waiting;
+  GCancellable *cancellable = g_task_get_cancellable (request->task);
+
   g_queue_insert_sorted (queue, request, compare_waiting_requests, NULL);
 
-  GSource *source = g_cancellable_source_new (
-    g_task_get_cancellable (request->task));
-  g_source_set_callback (source, queued_cancelled, request, NULL);
-  request->queue_cancel_source = g_source_attach (source, NULL);
-  g_source_unref (source);
+  /* Watched through the scope, so the watch is removed along with every
+     other source this request owns. aml_cancellable_watch() hands the
+     callback this request and not the cancellable, which a cancellable
+     source would have done instead. */
+  request->queue_cancel_source =
+    aml_cancellable_watch (cancellable, queued_cancelled, request, NULL);
+  aml_task_scope_track_source (request->scope, request->queue_cancel_source);
 }
 
 static void
@@ -637,7 +625,8 @@ release_slot (DownloadRequest *request)
 
       if (next->queue_cancel_source != 0)
         {
-          g_source_remove (next->queue_cancel_source);
+          aml_task_scope_remove_source (next->scope,
+                                        next->queue_cancel_source);
           next->queue_cancel_source = 0;
         }
 
@@ -750,10 +739,17 @@ request_free (DownloadRequest *request)
 {
   if (request->retry_source != 0)
     aml_task_scope_remove_source (request->scope, request->retry_source);
+
+  /* Through the scope, which is where this source was registered: removing
+     it by hand would leave its id behind, and a scope that later tears that
+     id down removes whatever source has been given the same id since. */
   if (request->retry_cancel_source != 0)
-    g_source_remove (request->retry_cancel_source);
+    aml_task_scope_remove_source (request->scope,
+                                  request->retry_cancel_source);
+
   if (request->queue_cancel_source != 0)
-    g_source_remove (request->queue_cancel_source);
+    aml_task_scope_remove_source (request->scope,
+                                  request->queue_cancel_source);
 
   close_sink (request);
   g_clear_pointer (&request->chunk, g_bytes_unref);
@@ -782,29 +778,39 @@ request_free (DownloadRequest *request)
   g_free (request);
 }
 
+/* Every answer is given in the same order: the request is torn down first,
+   the task is completed second. The caller's callback is free to drop the
+   last reference on the scope, and request_free() still has to reach the
+   scope to take this request's sources off it. */
 static void
 request_fail (DownloadRequest *request, GError *error)
 {
+  AmlTaskScope *scope = request->scope;
+
   discard_temporary (request);
   release_slot (request);
-  aml_task_scope_return_error (request->scope, error);
   request_free (request);
+  aml_task_scope_return_error (scope, error);
 }
 
 static void
 request_succeed (DownloadRequest *request)
 {
+  AmlTaskScope *scope = request->scope;
+
   release_slot (request);
-  aml_task_scope_return_boolean (request->scope, TRUE);
   request_free (request);
+  aml_task_scope_return_boolean (scope, TRUE);
 }
 
 static void
 request_succeed_json (DownloadRequest *request, JsonParser *parser)
 {
+  AmlTaskScope *scope = request->scope;
+
   release_slot (request);
-  aml_task_scope_return_pointer (request->scope, parser, g_object_unref);
   request_free (request);
+  aml_task_scope_return_pointer (scope, parser, g_object_unref);
 }
 
 /* ---------------------------------------------------------- *
@@ -1581,16 +1587,11 @@ attempt_failed (DownloadRequest *request, GError *error)
       g_clear_error (&error);
       request->retry_source = g_timeout_add (delay_ms, retry_when_due, request);
       aml_task_scope_track_source (request->scope, request->retry_source);
-      {
-        GSource *source = g_cancellable_source_new (
-          g_task_get_cancellable (request->task));
-
-        g_source_set_callback (source, retry_cancelled, request, NULL);
-        request->retry_cancel_source = g_source_attach (source, NULL);
-        aml_task_scope_track_source (request->scope,
-                                     request->retry_cancel_source);
-        g_source_unref (source);
-      }
+      request->retry_cancel_source =
+        aml_cancellable_watch (g_task_get_cancellable (request->task),
+                               retry_cancelled, request, NULL);
+      aml_task_scope_track_source (request->scope,
+                                   request->retry_cancel_source);
       return;
     }
 
@@ -1627,21 +1628,32 @@ retry_cancelled (gpointer user_data)
 {
   DownloadRequest *request = user_data;
 
-  request->retry_cancel_source = 0;
+  /* Off the scope before the answer, so nothing is left holding an id for
+     a source this one is about to destroy. */
+  if (request->retry_cancel_source != 0)
+    {
+      aml_task_scope_remove_source (request->scope,
+                                    request->retry_cancel_source);
+      request->retry_cancel_source = 0;
+    }
+
   request_fail (request, cancelled_error ());
   return G_SOURCE_REMOVE;
 }
 
+/* Cancelled while waiting for a transfer slot. The watch is torn down by
+   returning G_SOURCE_REMOVE, which also means this cannot be asked twice. */
 static gboolean
 queued_cancelled (gpointer user_data)
 {
   DownloadRequest *request = user_data;
-  GQueue *queue = request->priority >= DOWNLOAD_PRIORITY_INTERACTIVE
-                    ? &service->interactive_waiting : &service->bulk_waiting;
 
-  request->queue_cancel_source = 0;
-  if (g_queue_remove (queue, request))
+  if (g_queue_remove (request->priority >= DOWNLOAD_PRIORITY_INTERACTIVE
+                        ? &service->interactive_waiting
+                        : &service->bulk_waiting,
+                      request))
     request_fail (request, cancelled_error ());
+
   return G_SOURCE_REMOVE;
 }
 
