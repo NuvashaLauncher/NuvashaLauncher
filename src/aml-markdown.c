@@ -697,11 +697,20 @@ image_resize_idle (gpointer user_data)
   return G_SOURCE_REMOVE;
 }
 
+/* What one image load keeps alive: the picture the texture goes in, and
+ * the operation that has to be released when the answer arrives. */
+typedef struct
+{
+  GtkWidget *picture;
+  AmlTaskScope *operation;
+} ImageLoad;
+
 static void
 image_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
              gpointer user_data)
 {
-  GtkWidget *picture = user_data;
+  ImageLoad *load = user_data;
+  GtkWidget *picture = load->picture;
   g_autoptr (GError) error = NULL;
   g_autofree char *path = aml_icon_load_finish (result, &error);
 
@@ -748,7 +757,10 @@ image_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         }
     }
 
-  g_object_unref (picture);
+  g_clear_object (&load->picture);
+  if (load->operation != NULL)
+    aml_task_scope_unref (load->operation);
+  g_free (load);
 }
 
 /* Modrinth writes an image with an absolute url, or one that starts at
@@ -783,7 +795,12 @@ image_block (const char *url)
   gtk_widget_set_visible (GTK_WIDGET (picture), FALSE);
 
   if (resolved != NULL && url_is_safe (resolved))
-    aml_icon_load_async (resolved, NULL, image_ready, g_object_ref (picture));
+    {
+      ImageLoad *load = g_new0 (ImageLoad, 1);
+
+      load->picture = GTK_WIDGET (g_object_ref (picture));
+      load->operation = aml_icon_load_async (resolved, image_ready, load);
+    }
 
   return GTK_WIDGET (picture);
 }

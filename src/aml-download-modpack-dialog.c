@@ -486,6 +486,23 @@ result_row_activated (AdwActionRow *row, gpointer user_data)
   dialog_details_open (self);
 }
 
+/* What one row's icon load keeps alive: the widget the image goes in, and
+ * the operation that has to be released when the answer arrives. */
+typedef struct
+{
+  GtkWidget *icon;
+  AmlTaskScope *operation;
+} IconLoad;
+
+static void
+icon_load_free (IconLoad *load)
+{
+  g_clear_object (&load->icon);
+  if (load->operation != NULL)
+    aml_task_scope_unref (load->operation);
+  g_free (load);
+}
+
 /* Puts the project icon in @icon when it has been fetched; the
  * placeholder stays when there is none. The widget is held for the length
  * of the fetch, so a row that goes away first is still there to be told. */
@@ -493,16 +510,16 @@ static void
 modpack_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                     gpointer user_data)
 {
-  GtkWidget *icon = user_data;
+  IconLoad *load = user_data;
   g_autoptr (GError) error = NULL;
   g_autofree char *path = aml_icon_load_finish (result, &error);
 
-  if (path != NULL && !aml_icon_widget_set_file (icon, path))
+  if (path != NULL && !aml_icon_widget_set_file (load->icon, path))
     g_debug ("the icon for \"%s\" could not be decoded",
-             (const char *) g_object_get_data (G_OBJECT (icon),
+             (const char *) g_object_get_data (G_OBJECT (load->icon),
                                                "aml-icon-url"));
 
-  g_object_unref (icon);
+  icon_load_free (load);
 }
 
 /* Kicks off one row's icon and remembers the url on the widget, so a
@@ -510,9 +527,12 @@ modpack_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 start_modpack_icon (GtkWidget *icon, const char *url)
 {
+  IconLoad *load = g_new0 (IconLoad, 1);
+
   g_object_set_data_full (G_OBJECT (icon), "aml-icon-url", g_strdup (url),
                           g_free);
-  aml_icon_load_async (url, NULL, modpack_icon_ready, g_object_ref (icon));
+  load->icon = g_object_ref (icon);
+  load->operation = aml_icon_load_async (url, modpack_icon_ready, load);
 }
 
 /* The rows of a page of results. @append is FALSE for a new search, which
@@ -1434,11 +1454,18 @@ on_details_answer (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
  * copied into the new instance before that instance points at it: clearing
  * AML's cache must never remove an instance's icon. The reference the load
  * holds keeps the dialog alive until the answer is in. */
+typedef struct
+{
+  AmlDownloadModpackDialog *dialog;
+  AmlTaskScope *operation;
+} ProjectIconLoad;
+
 static void
 project_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                     gpointer user_data)
 {
-  AmlDownloadModpackDialog *self = user_data;
+  ProjectIconLoad *load = user_data;
+  AmlDownloadModpackDialog *self = load->dialog;
   g_autoptr (GError) error = NULL;
   g_autofree char *path = aml_icon_load_finish (result, &error);
 
@@ -1448,7 +1475,10 @@ project_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       self->icon_path = g_steal_pointer (&path);
     }
 
-  g_object_unref (self);
+  g_clear_object (&load->dialog);
+  if (load->operation != NULL)
+    aml_task_scope_unref (load->operation);
+  g_free (load);
 }
 
 static void
@@ -1485,8 +1515,16 @@ dialog_details_open (AmlDownloadModpackDialog *self)
   g_clear_pointer (&self->icon_path, g_free);
 
   if (self->project->icon_url != NULL && *self->project->icon_url != '\0')
-    aml_icon_load_async (self->project->icon_url, self->fetch,
-                         project_icon_ready, g_object_ref (self));
+    {
+      ProjectIconLoad *load = g_new0 (ProjectIconLoad, 1);
+
+      load->dialog = g_object_ref (self);
+      load->operation = aml_icon_load_async (self->project->icon_url,
+                                             project_icon_ready, load);
+      /* The same fetch cancellable the details and versions use, so one
+         new project cancels all three. */
+      aml_task_scope_follow_cancellable (load->operation, self->fetch);
+    }
 
   /* The long description, and the versions of the pack beside it. */
   aml_modrinth_details_async (self->project->project_id, self->fetch,
