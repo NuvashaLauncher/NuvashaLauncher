@@ -124,12 +124,11 @@ gboolean aml_instance_manager_check_new_directory (AmlInstanceManager *self,
  *
  * An instance whose old directory does not exist has nothing to move: the
  * stored path is changed and saved, and that is all. */
-void aml_instance_manager_change_directory_async (AmlInstanceManager *self,
-                                                  AmlInstance *instance,
-                                                  const char *directory,
-                                                  GCancellable *cancellable,
-                                                  GAsyncReadyCallback callback,
-                                                  gpointer user_data);
+AmlTaskScope *aml_instance_manager_change_directory_async (AmlInstanceManager *self,
+                                                            AmlInstance *instance,
+                                                            const char *directory,
+                                                            GAsyncReadyCallback callback,
+                                                            gpointer user_data);
 
 gboolean aml_instance_manager_change_directory_finish (AmlInstanceManager *self,
                                                         GAsyncResult *result,

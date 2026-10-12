@@ -218,6 +218,8 @@ change_directory_finished (GObject *source, GAsyncResult *result,
 
   call->success = aml_instance_manager_change_directory_finish (
     AML_INSTANCE_MANAGER (source), result, &call->error);
+  aml_task_scope_unref (call->operation);
+  call->operation = NULL;
   g_main_loop_quit (call->loop);
 }
 
@@ -1192,10 +1194,8 @@ test_change_directory_moves_files (void)
   AsyncCall call = { 0 };
   call.loop = g_main_loop_new (NULL, FALSE);
 
-  aml_instance_manager_change_directory_async (manager, instance,
-                                               new_directory, NULL,
-                                               change_directory_finished,
-                                               &call);
+   call.operation = aml_instance_manager_change_directory_async (
+     manager, instance, new_directory, change_directory_finished, &call);
   async_call_run (&call);
 
   g_assert_no_error (call.error);
@@ -1298,10 +1298,8 @@ test_change_directory_failure_keeps_everything (void)
   AsyncCall call = { 0 };
   call.loop = g_main_loop_new (NULL, FALSE);
 
-  aml_instance_manager_change_directory_async (manager, instance,
-                                               new_directory, NULL,
-                                               change_directory_finished,
-                                               &call);
+   call.operation = aml_instance_manager_change_directory_async (
+     manager, instance, new_directory, change_directory_finished, &call);
   async_call_run (&call);
 
   g_assert_nonnull (call.error);

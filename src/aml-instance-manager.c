@@ -966,11 +966,11 @@ aml_instance_manager_duplicate_async (AmlInstanceManager *self,
   g_autofree char *canonical = NULL;
   g_autoptr (GError) local_error = NULL;
 
-  if (!check_instance_directory (self, directory, NULL, &canonical, &local_error))
-    {
-      aml_task_scope_return_error (task_scope, g_steal_pointer (&local_error));
-      return;
-    }
+   if (!check_instance_directory (self, directory, NULL, &canonical, &local_error))
+     {
+       aml_task_scope_return_error (task_scope, g_steal_pointer (&local_error));
+       return;
+     }
 
   g_free (directory);
   directory = g_steal_pointer (&canonical);
@@ -979,11 +979,11 @@ aml_instance_manager_duplicate_async (AmlInstanceManager *self,
     aml_instance_new (id, name, directory, minecraft_version, loader,
                       &local_error);
 
-  if (copy == NULL)
-    {
-      aml_task_scope_return_error (task_scope, g_steal_pointer (&local_error));
-      return;
-    }
+   if (copy == NULL)
+     {
+       aml_task_scope_return_error (task_scope, g_steal_pointer (&local_error));
+       return;
+     }
 
   g_object_set (copy,
                 "loader_version", loader_version,
@@ -1353,18 +1353,17 @@ move_copy_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   }
 }
 
-void
+AmlTaskScope *
 aml_instance_manager_change_directory_async (AmlInstanceManager *self,
                                              AmlInstance *instance,
                                              const char *directory,
-                                             GCancellable *cancellable,
                                              GAsyncReadyCallback callback,
                                              gpointer user_data)
 {
-  g_return_if_fail (AML_IS_INSTANCE_MANAGER (self));
-  g_return_if_fail (AML_IS_INSTANCE (instance));
+  g_return_val_if_fail (AML_IS_INSTANCE_MANAGER (self), NULL);
+  g_return_val_if_fail (AML_IS_INSTANCE (instance), NULL);
 
-  g_autoptr (GTask) task = g_task_new (self, cancellable, callback, user_data);
+  g_autoptr (GTask) task = g_task_new (self, NULL, callback, user_data);
   aml_task_scope_attach_task (task);
   AmlTaskScope *task_scope = g_object_get_data (G_OBJECT (task),
                                                  "aml-task-scope");
@@ -1375,8 +1374,8 @@ aml_instance_manager_change_directory_async (AmlInstanceManager *self,
   if (!aml_instance_manager_check_new_directory (self, instance, directory,
                                                  &path, &local_error))
     {
-      aml_task_scope_return_error (task_scope, g_steal_pointer (&local_error));
-      return;
+       aml_task_scope_return_error (task_scope, g_steal_pointer (&local_error));
+       return aml_task_scope_ref (task_scope);
     }
 
   g_object_get (instance, "directory", &old_directory, NULL);
@@ -1384,7 +1383,7 @@ aml_instance_manager_change_directory_async (AmlInstanceManager *self,
   MoveData *data = g_new0 (MoveData, 1);
   data->self = g_object_ref (self);
   data->task = g_steal_pointer (&task);
-  data->scope = aml_task_scope_from_task (data->task);
+  data->scope = aml_task_scope_ref (task_scope);
   data->instance = g_object_ref (instance);
   data->old_directory = g_steal_pointer (&old_directory);
   data->new_directory = g_strdup (path);
@@ -1400,20 +1399,21 @@ aml_instance_manager_change_directory_async (AmlInstanceManager *self,
         {
           aml_instance_set_directory (instance, data->old_directory, NULL);
           move_return_error (data, g_steal_pointer (&local_error));
-          return;
+          return aml_task_scope_ref (task_scope);
         }
 
       aml_task_scope_return_boolean (data->scope, TRUE);
       move_data_free (data);
-      return;
+      return aml_task_scope_ref (task_scope);
     }
 
   {
     g_autoptr (GFile) source = g_file_new_for_path (data->old_directory);
 
-    copy_tree_async (source, data->destination, cancellable, move_copy_ready,
+     copy_tree_async (source, data->destination, NULL, move_copy_ready,
                      data);
   }
+  return aml_task_scope_ref (task_scope);
 }
 
 gboolean
