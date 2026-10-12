@@ -6,6 +6,7 @@
 
 struct _AmlTaskScope
 {
+  gatomicrefcount refs;
   GTask *task;
   GArray *sources;
   gboolean owns_task;
@@ -16,6 +17,7 @@ aml_task_scope_new (GObject *source_object, GCancellable *cancellable,
                     GAsyncReadyCallback callback, gpointer user_data)
 {
   AmlTaskScope *scope = g_new0 (AmlTaskScope, 1);
+  g_atomic_ref_count_init (&scope->refs);
   scope->task = g_task_new (source_object, cancellable, callback, user_data);
   scope->sources = g_array_new (FALSE, FALSE, sizeof (guint));
   scope->owns_task = TRUE;
@@ -26,9 +28,46 @@ AmlTaskScope *
 aml_task_scope_borrow_task (GTask *task)
 {
   AmlTaskScope *scope = g_new0 (AmlTaskScope, 1);
+  g_atomic_ref_count_init (&scope->refs);
   scope->task = task;
   scope->sources = g_array_new (FALSE, FALSE, sizeof (guint));
   return scope;
+}
+
+AmlTaskScope *
+aml_task_scope_ref (AmlTaskScope *scope)
+{
+  g_return_val_if_fail (scope != NULL, NULL);
+  g_atomic_ref_count_inc (&scope->refs);
+  return scope;
+}
+
+void
+aml_task_scope_unref (AmlTaskScope *scope)
+{
+  if (scope == NULL || !g_atomic_ref_count_dec (&scope->refs))
+    return;
+
+  for (guint i = 0; i < scope->sources->len; i++)
+    {
+      guint source_id = g_array_index (scope->sources, guint, i);
+      if (g_main_context_find_source_by_id (NULL, source_id) != NULL)
+        g_source_remove (source_id);
+    }
+  g_array_unref (scope->sources);
+  if (scope->owns_task)
+    g_clear_object (&scope->task);
+  g_free (scope);
+}
+
+void
+aml_task_scope_attach_task (GTask *task)
+{
+  g_return_if_fail (G_IS_TASK (task));
+
+  g_object_set_data_full (G_OBJECT (task), "aml-task-scope",
+                          aml_task_scope_borrow_task (task),
+                          (GDestroyNotify) aml_task_scope_unref);
 }
 
 GTask *
@@ -91,18 +130,7 @@ aml_task_scope_cancel (AmlTaskScope *scope)
 void
 aml_task_scope_free (AmlTaskScope *scope)
 {
-  if (scope == NULL)
-    return;
-  for (guint i = 0; i < scope->sources->len; i++)
-    {
-      guint source_id = g_array_index (scope->sources, guint, i);
-      if (g_main_context_find_source_by_id (NULL, source_id) != NULL)
-        g_source_remove (source_id);
-    }
-  g_array_unref (scope->sources);
-  if (scope->owns_task)
-    g_clear_object (&scope->task);
-  g_free (scope);
+  aml_task_scope_unref (scope);
 }
 
 struct _AmlTaskSequence

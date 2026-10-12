@@ -121,9 +121,7 @@ get_service (void)
 static void
 attach_task_scope (GTask *task)
 {
-  g_object_set_data_full (G_OBJECT (task), "aml-task-scope",
-                          aml_task_scope_borrow_task (task),
-                          (GDestroyNotify) aml_task_scope_free);
+  aml_task_scope_attach_task (task);
 }
 
 void
