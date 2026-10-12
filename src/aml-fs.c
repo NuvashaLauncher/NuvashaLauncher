@@ -362,6 +362,7 @@ aml_fs_remove_tree_finish (GAsyncResult *result, GError **error)
 typedef struct {
   GFile *source;
   GFile *destination;
+  AmlTaskScope *scope;
 } CopyTreeData;
 
 static void
@@ -453,8 +454,7 @@ copy_tree_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
                   gpointer task_data, GCancellable *cancellable)
 {
   CopyTreeData *data = task_data;
-  AmlTaskScope *scope = g_object_get_data (G_OBJECT (task),
-                                           "aml-task-scope");
+  AmlTaskScope *scope = data->scope;
   g_autoptr (GError) error = NULL;
 
   if (copy_tree_sync (data->source, data->destination, cancellable,
@@ -464,19 +464,22 @@ copy_tree_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
     aml_task_scope_return_error (scope, g_steal_pointer (&error));
 }
 
-void
+AmlTaskScope *
 aml_fs_copy_tree_async (GFile *source, GFile *destination,
                         GCancellable *cancellable,
                         GAsyncReadyCallback callback, gpointer user_data)
 {
-  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
-  aml_task_scope_attach_task (task);
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, cancellable, callback, user_data);
+  GTask *task = aml_task_scope_task (scope);
   CopyTreeData *data = g_new0 (CopyTreeData, 1);
 
   data->source = g_object_ref (source);
   data->destination = g_object_ref (destination);
+  data->scope = scope;
   g_task_set_task_data (task, data, (GDestroyNotify) copy_tree_data_free);
   g_task_run_in_thread (task, copy_tree_thread);
+  return g_steal_pointer (&scope);
 }
 
 gboolean
