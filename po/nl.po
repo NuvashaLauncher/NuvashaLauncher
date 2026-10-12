@@ -579,3 +579,33 @@ msgid "Unavailable"
 msgstr "Niet beschikbaar"
 msgid "No compatible Java runtime was found."
 msgstr "Geen compatibele Java-runtime gevonden."
+
+msgid "Minecraft crashed"
+msgstr "Minecraft is gecrasht"
+
+msgid "Minecraft could not start"
+msgstr "Minecraft kon niet worden gestart"
+
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft vereist aanmelden"
+
+msgid "The file cannot be renamed"
+msgstr "Het bestand kan niet worden hernoemd"
+
+msgid "The file cannot be deleted"
+msgstr "Het bestand kan niet worden verwijderd"
+
+msgid "The folder cannot be read"
+msgstr "De map kan niet worden gelezen"
+
+msgid "The file could not be installed"
+msgstr "Het bestand kon niet worden geïnstalleerd"
+
+msgid "The folder cannot be created"
+msgstr "De map kon niet worden aangemaakt"
+
+msgid "This cannot be installed"
+msgstr "Dit kan niet worden geïnstalleerd"
+
+msgid "Pick a Minecraft version first"
+msgstr "Kies eerst een Minecraft-versie"

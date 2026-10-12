@@ -150,7 +150,7 @@ toggle_file (AmlContentPage *self, AmlContentFile *file)
 
   if (renamed == NULL)
     {
-      show_error (self, "The file cannot be renamed", error);
+       show_error (self, _("The file cannot be renamed"), error);
       return FALSE;
     }
 
@@ -319,7 +319,7 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
   g_autoptr (GError) error = NULL;
 
   if (!aml_content_delete_finish (G_FILE (source), result, &error))
-    show_error (self, "The file cannot be deleted", error);
+      show_error (self, _("The file cannot be deleted"), error);
     else
     {
       show_toast (self, _("Deleted"));
@@ -865,7 +865,7 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       gtk_widget_set_visible (GTK_WIDGET (self->installed.status), TRUE);
       if (error != NULL && !g_error_matches (error, G_IO_ERROR,
                                              G_IO_ERROR_CANCELLED))
-        show_error (self, "The folder cannot be read", error);
+         show_error (self, _("The folder cannot be read"), error);
 
       page_watch_free (watch);
       return;

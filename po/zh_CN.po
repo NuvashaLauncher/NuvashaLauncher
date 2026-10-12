@@ -570,3 +570,33 @@ msgid "Unavailable"
 msgstr "不可用"
 msgid "No compatible Java runtime was found."
 msgstr "未找到兼容的 Java 运行时。"
+
+msgid "Minecraft crashed"
+msgstr "Minecraft 已崩溃"
+
+msgid "Minecraft could not start"
+msgstr "Minecraft 无法启动"
+
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft 需要登录"
+
+msgid "The file cannot be renamed"
+msgstr "无法重命名文件"
+
+msgid "The file cannot be deleted"
+msgstr "无法删除文件"
+
+msgid "The folder cannot be read"
+msgstr "无法读取文件夹"
+
+msgid "The file could not be installed"
+msgstr "无法安装文件"
+
+msgid "The folder cannot be created"
+msgstr "无法创建文件夹"
+
+msgid "This cannot be installed"
+msgstr "无法安装此内容"
+
+msgid "Pick a Minecraft version first"
+msgstr "请先选择 Minecraft 版本"

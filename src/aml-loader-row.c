@@ -335,7 +335,7 @@ fill (AmlLoaderRow *self, GPtrArray *published)
   if (self->versions->len == 0)
     {
       g_autofree char *message = g_strdup_printf (
-        "No compatible %s version found for Minecraft %s.",
+        _("No compatible %s version found for Minecraft %s."),
         aml_loader_display_name (self->current),
         self->game_version != NULL ? self->game_version : "?");
 
@@ -479,7 +479,7 @@ start_versions (AmlLoaderRow *self, AmlLoader loader, const char *wanted)
      it; without one there is nothing to ask for. */
   if (self->game_version == NULL || *self->game_version == '\0')
     {
-      show_error (self, "Pick a Minecraft version first", FALSE);
+      show_error (self, _("Pick a Minecraft version first"), FALSE);
       return;
     }
 

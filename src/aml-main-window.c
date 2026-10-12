@@ -38,15 +38,15 @@ on_window_launcher_state (AmlLauncher *launcher G_GNUC_UNUSED,
   switch (state)
     {
     case AML_LAUNCH_CRASHED:
-      what = "Minecraft crashed";
+      what = _("Minecraft crashed");
       break;
 
     case AML_LAUNCH_FAILED:
-      what = "Minecraft could not start";
+      what = _("Minecraft could not start");
       break;
 
     case AML_LAUNCH_NEEDS_SIGN_IN:
-      what = "Minecraft needs a sign-in";
+      what = _("Minecraft needs a sign-in");
       break;
 
     default:
