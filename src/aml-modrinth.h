@@ -23,6 +23,7 @@
 #define AML_MODRINTH_H
 
 #include <gio/gio.h>
+#include <json-glib/json-glib.h>
 
 #include "aml-task.h"
 
@@ -47,6 +48,7 @@ typedef enum {
 } AmlModrinthError;
 
 GQuark aml_modrinth_error_quark (void);
+char *aml_modrinth_json_node_to_string (JsonNode *node);
 
 /* ---------------------------------------------------------- *
  * The kinds of content

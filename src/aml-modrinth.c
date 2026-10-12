@@ -44,6 +44,13 @@ aml_modrinth_error_quark (void)
   return g_quark_from_static_string ("aml-modrinth-error");
 }
 
+char *
+aml_modrinth_json_node_to_string (JsonNode *node)
+{
+  g_return_val_if_fail (node != NULL, NULL);
+  return json_to_string (node, FALSE);
+}
+
 /* ---------------------------------------------------------- *
  * The kinds of content
  * ---------------------------------------------------------- */
