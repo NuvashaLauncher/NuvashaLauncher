@@ -861,7 +861,7 @@ typedef struct {
 static void
 modpack_read_free (ModpackRead *read)
 {
-  aml_task_scope_free (read->scope);
+  aml_task_scope_unref (read->scope);
   g_free (read->path);
   g_free (read);
 }
@@ -943,7 +943,7 @@ verify_run_free (VerifyRun *run)
   g_free (run->sha512);
   g_clear_object (&run->cancellable);
   g_clear_object (&run->task);
-  aml_task_scope_free (run->scope);
+  aml_task_scope_unref (run->scope);
   g_free (run);
 }
 
@@ -1378,7 +1378,7 @@ typedef struct {
 static void
 extract_run_free (ExtractRun *run)
 {
-  aml_task_scope_free (run->scope);
+  aml_task_scope_unref (run->scope);
   g_free (run->archive_path);
   g_free (run->directory);
   g_free (run);

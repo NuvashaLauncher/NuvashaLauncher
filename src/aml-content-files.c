@@ -793,7 +793,7 @@ scan_free (ScanRun *run)
   g_clear_object (&run->enumerator);
   g_clear_object (&run->folder);
   g_clear_object (&run->task);
-  aml_task_scope_free (run->scope);
+  aml_task_scope_unref (run->scope);
   g_clear_pointer (&run->files, g_ptr_array_unref);
   g_clear_pointer (&run->index_entries, g_ptr_array_unref);
   g_free (run->instance_directory);

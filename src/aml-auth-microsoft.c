@@ -1598,7 +1598,7 @@ request_free (gpointer data)
 
   if (self->scope != NULL)
     aml_task_scope_cancel (self->scope);
-  aml_task_scope_free (self->scope);
+  aml_task_scope_unref (self->scope);
 
   g_clear_object (&self->message);
   g_free (self->body);

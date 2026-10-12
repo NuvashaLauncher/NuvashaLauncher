@@ -872,7 +872,7 @@ static void
 duplicate_data_free (DuplicateData *data)
 {
   g_clear_object (&data->task);
-  aml_task_scope_free (data->scope);
+  aml_task_scope_unref (data->scope);
   g_clear_object (&data->self);
   g_clear_object (&data->copy);
   g_free (data);
@@ -1054,7 +1054,7 @@ static void
 delete_data_free (DeleteData *data)
 {
   g_clear_object (&data->task);
-  aml_task_scope_free (data->scope);
+  aml_task_scope_unref (data->scope);
   g_clear_object (&data->self);
   g_clear_object (&data->instance);
   g_free (data);
@@ -1241,7 +1241,7 @@ static void
 move_data_free (MoveData *data)
 {
   g_clear_object (&data->task);
-  aml_task_scope_free (data->scope);
+  aml_task_scope_unref (data->scope);
   g_clear_object (&data->self);
   g_clear_object (&data->instance);
   g_clear_object (&data->destination);

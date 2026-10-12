@@ -71,7 +71,7 @@ static void
 icon_load_free (IconLoad *load)
 {
   g_clear_object (&load->task);
-  aml_task_scope_free (load->scope);
+  aml_task_scope_unref (load->scope);
   g_free (load->url);
   g_free (load->path);
   g_free (load);

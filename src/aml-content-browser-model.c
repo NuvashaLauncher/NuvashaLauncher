@@ -35,7 +35,7 @@ aml_content_browser_model_free (AmlContentBrowserModel *model)
 
   if (model->debounce_source != 0)
     aml_task_scope_remove_source (model->scope, model->debounce_source);
-  aml_task_scope_free (model->scope);
+  aml_task_scope_unref (model->scope);
   g_cancellable_cancel (model->more);
   g_cancellable_cancel (model->cancellable);
   g_clear_object (&model->more);

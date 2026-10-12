@@ -327,7 +327,7 @@ versions_request_free (gpointer data)
 {
   VersionsRequest *request = data;
 
-  aml_task_scope_free (request->scope);
+  aml_task_scope_unref (request->scope);
   g_clear_object (&request->task);
   g_clear_pointer (&request->versions, g_ptr_array_unref);
   g_free (request->game_version);
