@@ -25,7 +25,7 @@ aml_task_scope_new (GObject *source_object, GCancellable *cancellable,
 }
 
 AmlTaskScope *
-aml_task_scope_borrow_task (GTask *task)
+aml_task_scope_from_task (GTask *task)
 {
   AmlTaskScope *scope = g_new0 (AmlTaskScope, 1);
   g_atomic_ref_count_init (&scope->refs);
@@ -66,7 +66,7 @@ aml_task_scope_attach_task (GTask *task)
   g_return_if_fail (G_IS_TASK (task));
 
   g_object_set_data_full (G_OBJECT (task), "aml-task-scope",
-                          aml_task_scope_borrow_task (task),
+                          aml_task_scope_from_task (task),
                           (GDestroyNotify) aml_task_scope_unref);
 }
 
@@ -125,12 +125,6 @@ aml_task_scope_cancel (AmlTaskScope *scope)
         g_source_remove (source_id);
     }
   g_array_set_size (scope->sources, 0);
-}
-
-void
-aml_task_scope_free (AmlTaskScope *scope)
-{
-  aml_task_scope_unref (scope);
 }
 
 struct _AmlTaskSequence

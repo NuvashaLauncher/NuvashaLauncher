@@ -256,7 +256,7 @@ aml_content_index_load_async (const char *instance_directory,
 
   args->instance_directory = g_strdup (instance_directory);
   args->type = type;
-  args->scope = aml_task_scope_borrow_task (task);
+  args->scope = aml_task_scope_from_task (task);
   g_task_set_task_data (task, args, (GDestroyNotify) load_args_free);
   g_task_run_in_thread (task, load_thread);
   g_object_unref (task);
@@ -360,7 +360,7 @@ write_entry_async (const char *instance_directory, AmlContentType type,
   WriteRun *run = g_new0 (WriteRun, 1);
 
   run->task = g_task_new (NULL, cancellable, callback, user_data);
-  run->scope = aml_task_scope_borrow_task (run->task);
+  run->scope = aml_task_scope_from_task (run->task);
   run->directory = index_directory (instance_directory, type);
   run->path = aml_content_index_entry_path (instance_directory, type,
                                             entry->filename);
@@ -434,7 +434,7 @@ aml_content_index_remove_async (const char *instance_directory,
   g_autoptr (GFile) file = NULL;
 
   run->task = g_task_new (NULL, cancellable, callback, user_data);
-  run->scope = aml_task_scope_borrow_task (run->task);
+  run->scope = aml_task_scope_from_task (run->task);
   run->path = aml_content_index_entry_path (instance_directory, type, filename);
   file = g_file_new_for_path (run->path);
   aml_fs_delete_async (file, G_PRIORITY_DEFAULT, cancellable, remove_done, run);

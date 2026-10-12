@@ -843,7 +843,7 @@ hash_file_async (GFile *file, GChecksumType type, GCancellable *cancellable,
   HashFile *hash = g_new0 (HashFile, 1);
 
   hash->task = g_task_new (file, cancellable, callback, user_data);
-  hash->scope = aml_task_scope_borrow_task (hash->task);
+  hash->scope = aml_task_scope_from_task (hash->task);
   hash->checksum = g_checksum_new (type);
 
   g_file_read_async (file, G_PRIORITY_DEFAULT, cancellable, cache_open_ready,

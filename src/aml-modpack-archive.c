@@ -905,7 +905,7 @@ aml_modpack_new_from_zip_async (const char *zip_path,
 
   task = g_task_new (NULL, cancellable, callback, user_data);
   read = g_new0 (ModpackRead, 1);
-  read->scope = aml_task_scope_borrow_task (task);
+  read->scope = aml_task_scope_from_task (task);
   read->path = g_strdup (zip_path);
   g_task_set_task_data (task, read, (GDestroyNotify) modpack_read_free);
   g_task_run_in_thread (task, modpack_read_thread);
@@ -1027,7 +1027,7 @@ aml_modpack_verify_file_async (const AmlModpackFile *file,
     cancellable != NULL ? g_object_ref (cancellable) : NULL;
   run->stage = 0;
   run->task = g_object_ref (task);
-  run->scope = aml_task_scope_borrow_task (task);
+  run->scope = aml_task_scope_from_task (task);
 
   aml_download_file_hash_async (job_file, G_CHECKSUM_SHA1, run->cancellable,
                                 verify_hash_ready, run);
@@ -1418,7 +1418,7 @@ extract_overrides_async (const char *archive_path, const char *directory,
 {
   g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
   ExtractRun *run = g_new0 (ExtractRun, 1);
-  run->scope = aml_task_scope_borrow_task (task);
+  run->scope = aml_task_scope_from_task (task);
 
   run->archive_path = g_strdup (archive_path);
   run->directory = g_strdup (directory);

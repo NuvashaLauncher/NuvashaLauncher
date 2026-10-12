@@ -1051,7 +1051,7 @@ aml_content_scan_async (const char *instance_directory, AmlContentType type,
   folder = aml_content_folder_path (instance_directory, type);
   run = g_new0 (ScanRun, 1);
   run->task = g_task_new (NULL, cancellable, callback, user_data);
-  run->scope = aml_task_scope_borrow_task (run->task);
+  run->scope = aml_task_scope_from_task (run->task);
   g_task_set_check_cancellable (run->task, FALSE);
   run->folder = g_file_new_for_path (folder);
   run->instance_directory = g_strdup (instance_directory);

@@ -47,7 +47,7 @@ AmlTaskScope *aml_task_scope_new (GObject *source_object,
                                   GCancellable *cancellable,
                                   GAsyncReadyCallback callback,
                                   gpointer user_data);
-AmlTaskScope *aml_task_scope_borrow_task (GTask *task);
+AmlTaskScope *aml_task_scope_from_task (GTask *task);
 AmlTaskScope *aml_task_scope_ref (AmlTaskScope *scope);
 void aml_task_scope_unref (AmlTaskScope *scope);
 /* Attach an operation scope to @task. The task owns the attached scope. */
@@ -57,7 +57,6 @@ void aml_task_scope_track_source (AmlTaskScope *scope, guint source_id);
 void aml_task_scope_remove_source (AmlTaskScope *scope, guint source_id);
 void aml_task_scope_forget_source (AmlTaskScope *scope, guint source_id);
 void aml_task_scope_cancel (AmlTaskScope *scope);
-void aml_task_scope_free (AmlTaskScope *scope);
 
 G_END_DECLS
 

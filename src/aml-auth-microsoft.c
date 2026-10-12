@@ -736,7 +736,7 @@ request_new (GTask *task)
   AuthRequest *self = g_new0 (AuthRequest, 1);
 
   self->task = g_object_ref (task);
-  self->scope = aml_task_scope_borrow_task (task);
+  self->scope = aml_task_scope_from_task (task);
   self->now = g_get_real_time () / 1000000;
 
   /* The cancellation of the task is this module's own: a sign-in that is

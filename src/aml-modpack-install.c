@@ -598,7 +598,7 @@ aml_modpack_install_async (AmlModpack *modpack,
   run->progress_data = user_data;
   run->files = g_ptr_array_new ();
   run->task = g_object_ref (task);
-  run->scope = aml_task_scope_borrow_task (task);
+  run->scope = aml_task_scope_from_task (task);
 
   /* The target is what the manager would choose for the name, unless
    * the caller says where the instance is to go. */
@@ -1355,7 +1355,7 @@ aml_modpack_export_async (AmlInstance *instance, const char *path,
 
   task = g_task_new (NULL, cancellable, callback, user_data);
   run = g_new0 (ExportRun, 1);
-  run->scope = aml_task_scope_borrow_task (task);
+  run->scope = aml_task_scope_from_task (task);
   g_object_get (instance, "directory", &directory, NULL);
   run->instance_directory = g_strdup (directory);
   run->archive_path = g_strdup (path);
