@@ -32,7 +32,7 @@ AmlJavaRow *aml_java_row_new (void);
 /* The Java version the instance's game needs, which is what the
  * automatic choice resolves to: the closest detected runtime for
  * @required_major (0 means "not known yet", so nothing is resolved and
- * the first entry is named "Automatic (closest compatible)"). The first
+ * the first entry is blank). The first
  * entry is named after that runtime and the same runtime is taken out of
  * the detected list, so it is shown once, as the automatic choice. Set
  * before or after load(); a change after load() fills the list again. */
