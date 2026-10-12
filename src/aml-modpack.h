@@ -128,10 +128,9 @@ AmlModpack *aml_modpack_new_from_json (const char *json,
  * hardlink, no path outside the instance, no bomb. */
 AmlModpack *aml_modpack_new_from_zip (const char *zip_path, GError **error);
 
-void aml_modpack_new_from_zip_async (const char *zip_path,
-                                     GCancellable *cancellable,
-                                     GAsyncReadyCallback callback,
-                                     gpointer user_data);
+AmlTaskScope *aml_modpack_new_from_zip_async (const char *zip_path,
+                                              GAsyncReadyCallback callback,
+                                              gpointer user_data);
 
 AmlModpack *aml_modpack_new_from_zip_finish (GAsyncResult *result,
                                              GError **error);
@@ -148,11 +147,10 @@ GPtrArray *aml_modpack_required_client_files (AmlModpack *modpack);
 GPtrArray *aml_modpack_optional_client_files (AmlModpack *modpack);
 
 /* Both hashes of the manifest, out of the bytes on the disk. */
-void aml_modpack_verify_file_async (const AmlModpackFile *file,
-                                   const char *path,
-                                   GCancellable *cancellable,
-                                   GAsyncReadyCallback callback,
-                                   gpointer user_data);
+AmlTaskScope *aml_modpack_verify_file_async (const AmlModpackFile *file,
+                                            const char *path,
+                                            GAsyncReadyCallback callback,
+                                            gpointer user_data);
 
 gboolean aml_modpack_verify_file_finish (GAsyncResult *result, GError **error);
 

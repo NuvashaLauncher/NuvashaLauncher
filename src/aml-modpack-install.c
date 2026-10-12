@@ -363,8 +363,10 @@ install_next (InstallRun *run)
     {
       if (run->progress != NULL)
         run->progress (run->current, run->total, NULL, run->progress_data);
-      extract_overrides_async (run->pack->archive_path, run->temp,
-                               run->cancellable, overrides_extracted, run);
+      aml_task_scope_release_when_done (
+        extract_overrides_async (run->pack->archive_path, run->temp,
+                                 overrides_extracted, run),
+        run->cancellable);
       return;
     }
 
@@ -511,8 +513,9 @@ install_file_done (GObject *source G_GNUC_UNUSED,
     AmlModpackFile *file = g_ptr_array_index (run->files, run->current);
     g_autofree char *dest = g_build_filename (run->temp, file->path, NULL);
 
-    aml_modpack_verify_file_async (file, dest, run->cancellable,
-                                   install_file_verified, run);
+    aml_task_scope_release_when_done (
+      aml_modpack_verify_file_async (file, dest, install_file_verified, run),
+      run->cancellable);
   }
 }
 

@@ -861,7 +861,6 @@ typedef struct {
 static void
 modpack_read_free (ModpackRead *read)
 {
-  aml_task_scope_unref (read->scope);
   g_free (read->path);
   g_free (read);
 }
@@ -894,23 +893,28 @@ modpack_read_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
                                  (GDestroyNotify) aml_modpack_free);
 }
 
-void
+AmlTaskScope *
 aml_modpack_new_from_zip_async (const char *zip_path,
-                                GCancellable *cancellable,
                                 GAsyncReadyCallback callback,
                                 gpointer user_data)
 {
-  g_autoptr (GTask) task = NULL;
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
+  GTask *task = aml_task_scope_task (scope);
   ModpackRead *read = NULL;
 
-  g_return_if_fail (zip_path != NULL);
+  g_return_val_if_fail (zip_path != NULL, NULL);
 
-  task = g_task_new (NULL, cancellable, callback, user_data);
   read = g_new0 (ModpackRead, 1);
-  read->scope = aml_task_scope_from_task (task);
+
+  /* Borrowed: the read is the task's own data and the scope owns that
+     task. The caller keeps the operation alive until its callback. */
+  read->scope = scope;
   read->path = g_strdup (zip_path);
   g_task_set_task_data (task, read, (GDestroyNotify) modpack_read_free);
   g_task_run_in_thread (task, modpack_read_thread);
+
+  return g_steal_pointer (&scope);
 }
 
 AmlModpack *
@@ -928,7 +932,6 @@ typedef struct
   char *path;
   char *sha1;
   char *sha512;
-  GCancellable *cancellable;
   guint stage; /* 0: checking sha1, 1: checking sha512 */
   GTask *task; /* owned */
   AmlTaskScope *scope;
@@ -943,7 +946,6 @@ verify_run_free (VerifyRun *run)
   g_free (run->path);
   g_free (run->sha1);
   g_free (run->sha512);
-  g_clear_object (&run->cancellable);
   g_clear_object (&run->task);
   aml_task_scope_unref (run->scope);
   g_free (run);
@@ -995,52 +997,54 @@ verify_hash_ready (GObject *source G_GNUC_UNUSED,
     aml_task_scope_release_when_done (
       aml_download_file_hash_async (file, G_CHECKSUM_SHA512,
                                     verify_hash_ready, run),
-      run->cancellable);
+      aml_task_scope_get_cancellable (run->scope));
   }
 }
 
 /* Both hashes of the manifest, out of the bytes on the disk. */
-void
+AmlTaskScope *
 aml_modpack_verify_file_async (const AmlModpackFile *file,
                                const char *path,
-                               GCancellable *cancellable,
                                GAsyncReadyCallback callback,
                                gpointer user_data)
 {
-  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
-  aml_task_scope_attach_task (task);
-  AmlTaskScope *task_scope = g_object_get_data (G_OBJECT (task),
-                                                 "aml-task-scope");
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
+  GTask *task = aml_task_scope_task (scope);
   g_autoptr (GFile) job_file = g_file_new_for_path (path);
   VerifyRun *run = NULL;
 
-  g_return_if_fail (file != NULL);
-  g_return_if_fail (path != NULL);
+  g_return_val_if_fail (file != NULL, NULL);
+  g_return_val_if_fail (path != NULL, NULL);
 
   if (file->sha1 == NULL || file->sha512 == NULL)
     {
-      aml_task_scope_return_error (
-        task_scope,
+      aml_task_scope_return_error_deferred (
+        scope,
         g_error_new (AML_MODPACK_ERROR, AML_MODPACK_ERROR_HASH,
                      "\"%s\" does not carry the two hashes the format "
                      "requires", file->path != NULL ? file->path : "file"));
-      return;
+      return g_steal_pointer (&scope);
     }
 
   run = g_new0 (VerifyRun, 1);
   run->path = g_strdup (path);
   run->sha1 = g_strdup (file->sha1);
   run->sha512 = g_strdup (file->sha512);
-  run->cancellable =
-    cancellable != NULL ? g_object_ref (cancellable) : NULL;
   run->stage = 0;
   run->task = g_object_ref (task);
-  run->scope = aml_task_scope_from_task (task);
+
+  /* Borrowed: the operation the caller owns until the answer. */
+  run->scope = scope;
+  aml_task_scope_follow_cancellable (scope,
+                                     aml_task_scope_get_cancellable (scope));
 
   aml_task_scope_release_when_done (
     aml_download_file_hash_async (job_file, G_CHECKSUM_SHA1, verify_hash_ready,
                                   run),
-    run->cancellable);
+    aml_task_scope_get_cancellable (scope));
+
+  return g_steal_pointer (&scope);
 }
 
 gboolean
@@ -1425,19 +1429,24 @@ extract_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
     aml_task_scope_return_boolean (run->scope, TRUE);
 }
 
-void
+AmlTaskScope *
 extract_overrides_async (const char *archive_path, const char *directory,
-                         GCancellable *cancellable,
                          GAsyncReadyCallback callback, gpointer user_data)
 {
-  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
+  GTask *task = aml_task_scope_task (scope);
   ExtractRun *run = g_new0 (ExtractRun, 1);
-  run->scope = aml_task_scope_from_task (task);
 
+  /* Borrowed: the extract is the task's own data and the scope owns that
+     task. The caller keeps the operation alive until its callback. */
+  run->scope = scope;
   run->archive_path = g_strdup (archive_path);
   run->directory = g_strdup (directory);
   g_task_set_task_data (task, run, (GDestroyNotify) extract_run_free);
   g_task_run_in_thread (task, extract_thread);
+
+  return g_steal_pointer (&scope);
 }
 
 gboolean
