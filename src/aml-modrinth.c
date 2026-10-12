@@ -1123,6 +1123,20 @@ request_free (gpointer data)
   g_free (request);
 }
 
+static void
+request_return_error (GTask *task, GError *error)
+{
+  Request *request = g_task_get_task_data (task);
+  aml_task_scope_return_error (request->scope, error);
+}
+
+static void
+request_return_pointer (GTask *task, gpointer value, GDestroyNotify free_value)
+{
+  Request *request = g_task_get_task_data (task);
+  aml_task_scope_return_pointer (request->scope, value, free_value);
+}
+
 static GTask *
 request_new (GCancellable *cancellable, GAsyncReadyCallback callback,
              gpointer user_data, AnswerFunc answer, AmlNotFoundRule not_found,
@@ -1282,7 +1296,7 @@ json_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
           request->not_found == AML_NOT_FOUND_IS_ABSENT)
         {
           g_clear_error (&error);
-          g_task_return_pointer (task, NULL, NULL);
+          request_return_pointer (task, NULL, NULL);
           return;
         }
 
@@ -1364,11 +1378,11 @@ search_answer (GTask *task, JsonNode *root)
 
   if (results == NULL)
     {
-      g_task_return_error (task, g_steal_pointer (&error));
+      request_return_error (task, g_steal_pointer (&error));
       return;
     }
 
-  g_task_return_pointer (task, results,
+  request_return_pointer (task, results,
                          (GDestroyNotify) aml_modrinth_results_free);
 }
 
@@ -1405,11 +1419,11 @@ details_answer (GTask *task, JsonNode *root)
 
   if (details == NULL)
     {
-      g_task_return_error (task, g_steal_pointer (&error));
+      request_return_error (task, g_steal_pointer (&error));
       return;
     }
 
-  g_task_return_pointer (task, details,
+  request_return_pointer (task, details,
                          (GDestroyNotify) aml_modrinth_details_free);
 }
 
@@ -1488,11 +1502,11 @@ versions_answer (GTask *task, JsonNode *root)
 
   if (versions == NULL)
     {
-      g_task_return_error (task, g_steal_pointer (&error));
+      request_return_error (task, g_steal_pointer (&error));
       return;
     }
 
-  g_task_return_pointer (task, versions, (GDestroyNotify) g_ptr_array_unref);
+  request_return_pointer (task, versions, (GDestroyNotify) g_ptr_array_unref);
 }
 
 void
@@ -1701,11 +1715,11 @@ categories_answer (GTask *task, JsonNode *root)
 
   if (categories == NULL)
     {
-      g_task_return_error (task, g_steal_pointer (&error));
+      request_return_error (task, g_steal_pointer (&error));
       return;
     }
 
-  g_task_return_pointer (task, categories, (GDestroyNotify) g_ptr_array_unref);
+  request_return_pointer (task, categories, (GDestroyNotify) g_ptr_array_unref);
 }
 
 void
@@ -1746,11 +1760,11 @@ version_answer (GTask *task, JsonNode *root)
 
   if (version == NULL)
     {
-      g_task_return_error (task, g_steal_pointer (&error));
+      request_return_error (task, g_steal_pointer (&error));
       return;
     }
 
-  g_task_return_pointer (task, version,
+  request_return_pointer (task, version,
                          (GDestroyNotify) aml_modrinth_version_free);
 }
 
@@ -1813,7 +1827,7 @@ update_answer (GTask *task, JsonNode *root)
 
   if (version == NULL)
     {
-      g_task_return_error (task, g_steal_pointer (&error));
+      request_return_error (task, g_steal_pointer (&error));
       return;
     }
 
@@ -1823,11 +1837,11 @@ update_answer (GTask *task, JsonNode *root)
                                   asked->minecraft_version, asked->loader))
     {
       aml_modrinth_version_free (version);
-      g_task_return_pointer (task, NULL, NULL);
+      request_return_pointer (task, NULL, NULL);
       return;
     }
 
-  g_task_return_pointer (task, version,
+  request_return_pointer (task, version,
                          (GDestroyNotify) aml_modrinth_version_free);
 }
 
