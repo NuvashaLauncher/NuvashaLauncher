@@ -155,6 +155,9 @@ typedef struct
   gboolean hash_cancelled;
   guint local_pending;
   gboolean local_cancelled;
+
+  /* The index load that has to finish before the scan can move on. */
+  AmlTaskScope *index_operation;
 } ScanRun;
 
 static void scan_hash_next (ScanRun *run);
@@ -796,6 +799,8 @@ scan_free (ScanRun *run)
   g_clear_object (&run->folder);
   g_clear_object (&run->task);
   aml_task_scope_unref (run->scope);
+  if (run->index_operation != NULL)
+    aml_task_scope_unref (run->index_operation);
   g_clear_pointer (&run->files, g_ptr_array_unref);
   g_clear_pointer (&run->index_entries, g_ptr_array_unref);
   g_free (run->instance_directory);
@@ -950,6 +955,12 @@ scan_index_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_autoptr (GPtrArray) entries =
     aml_content_index_load_finish (result, &error);
 
+  if (run->index_operation != NULL)
+    {
+      aml_task_scope_unref (run->index_operation);
+      run->index_operation = NULL;
+    }
+
   /* A missing or damaged index is deliberately not fatal: the existing
    * hash lookup repairs what it can, and the folder remains usable offline. */
   if (entries == NULL)
@@ -1074,8 +1085,8 @@ aml_content_scan_async (const char *instance_directory, AmlContentType type,
       return;
     }
 
-  aml_content_index_load_async (instance_directory, type, cancellable,
-                                scan_index_ready, run);
+  run->index_operation = aml_content_index_load_async (instance_directory, type,
+                                                       scan_index_ready, run);
 }
 
 GPtrArray *

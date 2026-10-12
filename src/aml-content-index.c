@@ -219,6 +219,8 @@ load_entries_sync (const char *instance_directory, AmlContentType type,
 typedef struct {
   char *instance_directory;
   AmlContentType type;
+
+  /* Borrowed: this is the task's own data and the scope owns the task. */
   AmlTaskScope *scope;
 } LoadArgs;
 
@@ -226,7 +228,6 @@ static void
 load_args_free (LoadArgs *args)
 {
   g_free (args->instance_directory);
-  aml_task_scope_unref (args->scope);
   g_free (args);
 }
 
@@ -246,20 +247,23 @@ load_thread (GTask *task, gpointer source G_GNUC_UNUSED, gpointer task_data,
                                    (GDestroyNotify) g_ptr_array_unref);
 }
 
-void
+AmlTaskScope *
 aml_content_index_load_async (const char *instance_directory,
-                              AmlContentType type, GCancellable *cancellable,
+                              AmlContentType type,
                               GAsyncReadyCallback callback, gpointer user_data)
 {
-  GTask *task = g_task_new (NULL, cancellable, callback, user_data);
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
+  GTask *task = aml_task_scope_task (scope);
   LoadArgs *args = g_new0 (LoadArgs, 1);
 
   args->instance_directory = g_strdup (instance_directory);
   args->type = type;
-  args->scope = aml_task_scope_from_task (task);
+  args->scope = scope;
   g_task_set_task_data (task, args, (GDestroyNotify) load_args_free);
   g_task_run_in_thread (task, load_thread);
-  g_object_unref (task);
+
+  return g_steal_pointer (&scope);
 }
 
 GPtrArray *
@@ -320,19 +324,18 @@ entry_to_json (AmlContentIndexEntry *entry, gsize *length)
 }
 
 typedef struct {
-  GTask *task;
-  AmlTaskScope *scope;
   char *path;
   char *directory;
   char *data;
   gsize length;
+
+  /* Borrowed: the operation the caller owns until the callback runs. */
+  AmlTaskScope *scope;
 } WriteRun;
 
 static void
 write_run_free (WriteRun *run)
 {
-  g_clear_object (&run->task);
-  aml_task_scope_unref (run->scope);
   g_free (run->path);
   g_free (run->directory);
   g_free (run->data);
@@ -352,50 +355,56 @@ write_done (GObject *source, GAsyncResult *result, gpointer user_data)
   write_run_free (run);
 }
 
-static void
+static AmlTaskScope *
 write_entry_async (const char *instance_directory, AmlContentType type,
-                   AmlContentIndexEntry *entry, GCancellable *cancellable,
-                   GAsyncReadyCallback callback, gpointer user_data)
+                   AmlContentIndexEntry *entry, GAsyncReadyCallback callback,
+                   gpointer user_data)
 {
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
   WriteRun *run = g_new0 (WriteRun, 1);
 
-  run->task = g_task_new (NULL, cancellable, callback, user_data);
-  run->scope = aml_task_scope_from_task (run->task);
   run->directory = index_directory (instance_directory, type);
   run->path = aml_content_index_entry_path (instance_directory, type,
                                             entry->filename);
   run->data = entry_to_json (entry, &run->length);
+  run->scope = scope;
+
   g_autoptr (GError) directory_error = NULL;
   if (!aml_fs_make_directory (run->directory, 0755, &directory_error))
     {
-      aml_task_scope_return_error (
-        run->scope,
+      aml_task_scope_return_error_deferred (
+        scope,
         g_error_new (AML_CONTENT_INDEX_ERROR,
                      AML_CONTENT_INDEX_ERROR_INVALID,
                      "cannot create index directory \"%s\": %s",
                      run->directory, directory_error->message));
       write_run_free (run);
-      return;
+      return g_steal_pointer (&scope);
     }
+
   {
     g_autoptr (GFile) file = g_file_new_for_path (run->path);
+
     aml_fs_replace_contents_async (file, run->data, run->length, NULL, FALSE,
                                    G_FILE_CREATE_REPLACE_DESTINATION,
-                                   cancellable, write_done, run);
+                                   aml_task_scope_get_cancellable (scope),
+                                   write_done, run);
   }
+
+  return g_steal_pointer (&scope);
 }
 
 typedef struct {
-  GTask *task;
-  AmlTaskScope *scope;
   char *path;
+
+  /* Borrowed: the operation the caller owns until the callback runs. */
+  AmlTaskScope *scope;
 } RemoveRun;
 
 static void
 remove_run_free (RemoveRun *run)
 {
-  g_clear_object (&run->task);
-  aml_task_scope_unref (run->scope);
   g_free (run->path);
   g_free (run);
 }
@@ -414,32 +423,36 @@ remove_done (GObject *source, GAsyncResult *result, gpointer user_data)
   remove_run_free (run);
 }
 
-void
+AmlTaskScope *
 aml_content_index_update_async (const char *instance_directory,
                                 AmlContentType type,
                                 AmlContentIndexEntry *entry,
-                                GCancellable *cancellable,
-                                GAsyncReadyCallback callback, gpointer user_data)
+                                GAsyncReadyCallback callback,
+                                gpointer user_data)
 {
-  g_return_if_fail (entry != NULL);
-  write_entry_async (instance_directory, type, entry, cancellable, callback,
-                     user_data);
+  g_return_val_if_fail (entry != NULL, NULL);
+
+  return write_entry_async (instance_directory, type, entry, callback,
+                            user_data);
 }
 
-void
+AmlTaskScope *
 aml_content_index_remove_async (const char *instance_directory,
                                 AmlContentType type, const char *filename,
-                                GCancellable *cancellable,
                                 GAsyncReadyCallback callback, gpointer user_data)
 {
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
   RemoveRun *run = g_new0 (RemoveRun, 1);
   g_autoptr (GFile) file = NULL;
 
-  run->task = g_task_new (NULL, cancellable, callback, user_data);
-  run->scope = aml_task_scope_from_task (run->task);
   run->path = aml_content_index_entry_path (instance_directory, type, filename);
+  run->scope = scope;
   file = g_file_new_for_path (run->path);
-  aml_fs_delete_async (file, G_PRIORITY_DEFAULT, cancellable, remove_done, run);
+  aml_fs_delete_async (file, G_PRIORITY_DEFAULT,
+                       aml_task_scope_get_cancellable (scope), remove_done, run);
+
+  return g_steal_pointer (&scope);
 }
 
 gboolean
