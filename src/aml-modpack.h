@@ -189,15 +189,14 @@ typedef void (*AmlModpackProgressFunc) (guint files_done,
  * Every download has to clear both hashes of the manifest. What the
  * user sees as "N of M files" goes to @progress. Both @callback and
  * @progress receive @user_data. */
-void aml_modpack_install_async (AmlModpack *modpack,
-                                AmlInstanceManager *manager,
-                                const char *name,
-                                const char *directory,
-                                const GPtrArray *optional_files,
-                                GCancellable *cancellable,
-                                AmlModpackProgressFunc progress,
-                                GAsyncReadyCallback callback,
-                                gpointer user_data);
+AmlTaskScope *aml_modpack_install_async (AmlModpack *modpack,
+                                         AmlInstanceManager *manager,
+                                         const char *name,
+                                         const char *directory,
+                                         const GPtrArray *optional_files,
+                                         AmlModpackProgressFunc progress,
+                                         GAsyncReadyCallback callback,
+                                         gpointer user_data);
 
 /* (transfer full) the new instance, registered. NULL on error. */
 AmlInstance *aml_modpack_install_finish (GAsyncResult *result,
