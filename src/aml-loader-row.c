@@ -4,6 +4,7 @@
 
 #include "aml-loader-row.h"
 #include "aml-i18n.h"
+#include "aml-download.h"
 
 /* Said when a load fails without anything to say: the versions are gone
    and the row has to tell the user that in words. */
@@ -273,6 +274,39 @@ show_empty (AmlLoaderRow *self)
   emit_changed (self);
 }
 
+static void
+show_unavailable (AmlLoaderRow *self)
+{
+  g_autoptr (GtkStringList) list = NULL;
+  const char *unavailable[] = { "Unavailable", NULL };
+
+  self->ready = FALSE;
+  self->interactive = FALSE;
+  g_clear_pointer (&self->versions, g_ptr_array_unref);
+  self->versions = g_ptr_array_new_with_free_func (
+    (GDestroyNotify) aml_loader_version_free);
+
+  list = gtk_string_list_new (unavailable);
+  adw_combo_row_set_model (ADW_COMBO_ROW (self->version_row),
+                           G_LIST_MODEL (list));
+  adw_combo_row_set_selected (ADW_COMBO_ROW (self->version_row), 0);
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (self->version_row), NULL);
+  gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
+  update_sensitivity (self);
+  emit_changed (self);
+}
+
+static gboolean
+versions_are_unavailable (const GError *error)
+{
+  if (error == NULL ||
+      !g_error_matches (error, AML_DOWNLOAD_ERROR, AML_DOWNLOAD_ERROR_HTTP))
+    return FALSE;
+
+  return g_str_has_prefix (error->message, "HTTP 400 ") ||
+         g_str_has_prefix (error->message, "HTTP 404 ");
+}
+
 /* Fills the version row from the versions a loader published. */
 static void
 fill (AmlLoaderRow *self, GPtrArray *published)
@@ -364,8 +398,10 @@ versions_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         fill (self, versions);
       else if (error != NULL &&
                g_error_matches (error, AML_LOADERS_ERROR,
-                                AML_LOADERS_ERROR_NO_VERSIONS))
+                                 AML_LOADERS_ERROR_NO_VERSIONS))
         show_empty (self);
+      else if (versions_are_unavailable (error))
+        show_unavailable (self);
       else
         /* A failure that carries no error is still a failure: say what
            happened in words rather than reading a message that is not
