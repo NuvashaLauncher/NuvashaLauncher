@@ -150,3 +150,26 @@
    ...
    fun:gsk_*
 }
+
+# GIO unloads the dconf settings module after its worker has exited. The
+# module's loader bookkeeping is then reported as a small definite leak;
+# it is outside AML and only appears when the dconf module is available.
+{
+   gio-dconf-module-unload
+   Memcheck:Leak
+   match-leak-kinds: definite,indirect
+   ...
+   fun:g_io_extension_point_get_extensions
+}
+
+# The Arch Duktape build uses realloc(ptr, 0) while compiling its embedded
+# scripts. Memcheck diagnoses that library-internal call even though the
+# resulting allocation is handled by Duktape; do not hide calls from AML.
+{
+   duktape-realloc-zero
+   Memcheck:Param
+   realloc(size)
+   fun:realloc
+   ...
+   obj:/usr/lib/libduktape.so.*
+}
