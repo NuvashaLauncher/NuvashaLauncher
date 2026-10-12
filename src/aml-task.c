@@ -464,6 +464,12 @@ aml_task_scope_follow_cancellable (AmlTaskScope *scope, GCancellable *cancellabl
   if (cancellable == NULL)
     return;
 
+  /* Following the operation's own cancellable would call
+     aml_task_scope_cancel() recursively when that cancellable is cancelled.
+     Only a cancellable owned by some other object belongs here. */
+  if (cancellable == g_task_get_cancellable (scope->task))
+    return;
+
   followed.cancellable = g_object_ref (cancellable);
   followed.handler =
     g_cancellable_connect (cancellable,

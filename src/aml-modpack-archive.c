@@ -1037,8 +1037,6 @@ aml_modpack_verify_file_async (const AmlModpackFile *file,
 
   /* Borrowed: the operation the caller owns until the answer. */
   run->scope = scope;
-  aml_task_scope_follow_cancellable (scope,
-                                     aml_task_scope_get_cancellable (scope));
 
   aml_task_scope_release_when_done (
     aml_download_file_hash_async (job_file, G_CHECKSUM_SHA1, verify_hash_ready,

@@ -576,6 +576,20 @@ test_callback_can_release_owned_operation (void)
   g_print ("ok - the completion callback can release its operation\n");
 }
 
+static void
+test_scope_does_not_follow_its_own_cancellable (void)
+{
+  g_autoptr (AmlTaskScope) scope = aml_task_scope_new (NULL, NULL, NULL, NULL);
+  guint before = criticals;
+
+  aml_task_scope_follow_cancellable (scope,
+                                    aml_task_scope_get_cancellable (scope));
+  aml_task_scope_cancel (scope);
+
+  g_assert_cmpuint (criticals, ==, before);
+  g_print ("ok - a scope does not recursively follow itself\n");
+}
+
 /* A step that starts nothing and finishes nothing, so the test decides
  * when and how the sequence completes. */
 static void
@@ -656,6 +670,7 @@ main (int argc, char **argv)
   test_scope_follows_a_cancellable_it_does_not_own ();
   test_a_released_operation_outlives_the_code_that_completed_it ();
   test_callback_can_release_owned_operation ();
+  test_scope_does_not_follow_its_own_cancellable ();
 
   g_print ("# Task scope and sources it has already lost\n");
   test_scope_free_releases_a_source_that_fired ();
