@@ -469,11 +469,10 @@ copy_tree_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
 
 AmlTaskScope *
 aml_fs_copy_tree_async (GFile *source, GFile *destination,
-                        GCancellable *cancellable,
                         GAsyncReadyCallback callback, gpointer user_data)
 {
   g_autoptr (AmlTaskScope) scope =
-    aml_task_scope_new (NULL, cancellable, callback, user_data);
+    aml_task_scope_new (NULL, NULL, callback, user_data);
   GTask *task = aml_task_scope_task (scope);
   CopyTreeData *data = g_new0 (CopyTreeData, 1);
 

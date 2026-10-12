@@ -841,11 +841,9 @@ remove_instance_and_save (AmlInstanceManager *self,
 
 static AmlTaskScope *
 copy_tree_async (GFile *source, GFile *destination,
-                 GCancellable *cancellable,
                  GAsyncReadyCallback callback, gpointer user_data)
 {
-  return aml_fs_copy_tree_async (source, destination, cancellable, callback,
-                                 user_data);
+  return aml_fs_copy_tree_async (source, destination, callback, user_data);
 }
 
 static gboolean
@@ -1016,7 +1014,7 @@ aml_instance_manager_duplicate_async (AmlInstanceManager *self,
   g_autoptr (GFile) source_file = g_file_new_for_path (source_directory);
   g_autoptr (GFile) copy_file = g_file_new_for_path (directory);
 
-  data->copy_scope = copy_tree_async (source_file, copy_file, NULL,
+  data->copy_scope = copy_tree_async (source_file, copy_file,
                                       duplicate_copy_ready, data);
   return aml_task_scope_ref (task_scope);
 }
@@ -1425,7 +1423,7 @@ aml_instance_manager_change_directory_async (AmlInstanceManager *self,
   {
     g_autoptr (GFile) source = g_file_new_for_path (data->old_directory);
 
-     data->copy_scope = copy_tree_async (source, data->destination, NULL,
+     data->copy_scope = copy_tree_async (source, data->destination,
                                          move_copy_ready, data);
   }
   return aml_task_scope_ref (task_scope);

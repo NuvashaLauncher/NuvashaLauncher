@@ -80,7 +80,6 @@ AmlTaskScope *aml_fs_remove_tree_async (const char *path,
 gboolean aml_fs_remove_tree_finish (GAsyncResult *result, GError **error);
 
 AmlTaskScope *aml_fs_copy_tree_async (GFile *source, GFile *destination,
-                                      GCancellable *cancellable,
                                       GAsyncReadyCallback callback,
                                       gpointer user_data);
 gboolean aml_fs_copy_tree_finish (GAsyncResult *result, GError **error);
