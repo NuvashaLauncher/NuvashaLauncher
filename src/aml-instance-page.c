@@ -65,6 +65,7 @@ struct _AmlInstancePage
   int required_java;        /* 0 means "never found one / unknown" */
   GCancellable *cancellable;
   AmlDownload *export_download;
+  AmlTaskScope *export_operation;
   char *export_name;
   char *export_summary;
   char *export_version;
@@ -716,6 +717,11 @@ on_export_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       aml_download_finish (self->export_download);
       self->export_download = NULL;
     }
+  if (self->export_operation != NULL)
+    {
+      aml_task_scope_unref (self->export_operation);
+      self->export_operation = NULL;
+    }
 
   g_object_unref (self);
 }
@@ -757,13 +763,10 @@ on_export_file_chosen (GObject *source, GAsyncResult *result,
                                  _("Exporting modpack"));
         g_object_add_weak_pointer (G_OBJECT (self->export_download),
                                    (gpointer *) &self->export_download);
-        aml_modpack_export_async (self->instance, path, self->export_name,
-                                  self->export_summary, self->export_version,
-                                  self->export_include_transient,
-                                  on_export_progress, self,
-                                  aml_download_get_cancellable (
-                                    self->export_download),
-                                  on_export_done, g_object_ref (self));
+        self->export_operation = aml_modpack_export_async (
+          self->instance, path, self->export_name, self->export_summary,
+          self->export_version, self->export_include_transient,
+          on_export_progress, self, on_export_done, g_object_ref (self));
       }
   }
 

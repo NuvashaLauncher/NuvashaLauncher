@@ -199,6 +199,7 @@ typedef struct
   AmlInstance *instance;
   gboolean timed_out;
   guint watchdog;
+  AmlTaskScope *operation;
 } AsyncWait;
 
 static gboolean
@@ -270,6 +271,8 @@ export_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   AsyncWait *wait = user_data;
 
   wait->value = aml_modpack_export_finish (result, &wait->error);
+  aml_task_scope_unref (wait->operation);
+  wait->operation = NULL;
   g_main_loop_quit (wait->loop);
 }
 
@@ -293,8 +296,9 @@ export_now (AmlInstance *instance, const char *path, GError **error)
 {
   AsyncWait wait = { 0 };
 
-  aml_modpack_export_async (instance, path, NULL, NULL, NULL, FALSE, NULL,
-                            NULL, NULL, export_done, &wait);
+  wait.operation = aml_modpack_export_async (instance, path, NULL, NULL, NULL,
+                                             FALSE, NULL, NULL, export_done,
+                                             &wait);
   async_wait_run (&wait);
 
   *error = wait.error;
