@@ -48,11 +48,8 @@ AmlTaskScope *aml_task_scope_new (GObject *source_object,
                                   GCancellable *cancellable,
                                   GAsyncReadyCallback callback,
                                   gpointer user_data);
-AmlTaskScope *aml_task_scope_from_task (GTask *task);
 AmlTaskScope *aml_task_scope_ref (AmlTaskScope *scope);
 void aml_task_scope_unref (AmlTaskScope *scope);
-/* Attach an operation scope to @task. The task owns the attached scope. */
-void aml_task_scope_attach_task (GTask *task);
 GCancellable *aml_task_scope_get_cancellable (const AmlTaskScope *scope);
 void aml_task_scope_set_check_cancellable (AmlTaskScope *scope,
                                            gboolean       check);

@@ -13,7 +13,7 @@
  * g_get_user_cache_dir()/AML/. */
 
 #include "aml-minecraft-versions.h"
-#include "aml-task.h"
+#include "aml-task-private.h"
 
 #include "aml-download.h"
 #include "aml-fs.h"

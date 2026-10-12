@@ -4,7 +4,7 @@
 
 #include "aml-loaders.h"
 #include "aml-loaders-private.h"
-#include "aml-task.h"
+#include "aml-task-private.h"
 #include "aml-fs.h"
 
 #include "aml-download.h"

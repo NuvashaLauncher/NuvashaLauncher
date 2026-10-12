@@ -7,7 +7,7 @@
 
 #include "aml-download.h"
 #include "aml-minecraft-resolve.h"
-#include "aml-task.h"
+#include "aml-task-private.h"
 
 #include <json-glib/json-glib.h>
 #include <string.h>

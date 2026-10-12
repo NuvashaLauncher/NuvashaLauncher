@@ -28,7 +28,7 @@
  * main loop is parsing a body that has already arrived. */
 
 #include "aml-modrinth.h"
-#include "aml-task.h"
+#include "aml-task-private.h"
 
 #include "aml-download.h"
 #include "aml-i18n.h"

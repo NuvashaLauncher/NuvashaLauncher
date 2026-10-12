@@ -23,7 +23,7 @@
  * a disk or for a jar in the main loop. */
 
 #include "aml-minecraft-resolve.h"
-#include "aml-task.h"
+#include "aml-task-private.h"
 
 #include "aml-download.h"
 #include "aml-fs.h"

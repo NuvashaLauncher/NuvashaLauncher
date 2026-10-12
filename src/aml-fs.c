@@ -5,7 +5,7 @@
 #define _GNU_SOURCE
 
 #include "aml-fs.h"
-#include "aml-task.h"
+#include "aml-task-private.h"
 
 #include <errno.h>
 #include <fcntl.h>
