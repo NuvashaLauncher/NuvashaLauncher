@@ -40,8 +40,14 @@ gboolean aml_fs_move_file (GFile *source, GFile *destination,
                            GFileCopyFlags flags, GCancellable *cancellable,
                            GError **error);
 gboolean aml_fs_copy_file (GFile *source, GFile *destination,
-                           GFileCopyFlags flags, GCancellable *cancellable,
-                           GError **error);
+                            GFileCopyFlags flags, GCancellable *cancellable,
+                            GError **error);
+void aml_fs_make_directory_async (GFile *file, int io_priority,
+                                  GCancellable *cancellable,
+                                  GAsyncReadyCallback callback,
+                                  gpointer user_data);
+gboolean aml_fs_make_directory_finish (GFile *file, GAsyncResult *result,
+                                       GError **error);
 void aml_fs_replace_contents_async (GFile *file, const char *contents,
                                     gsize length, const char *etag,
                                     gboolean make_backup, GFileCreateFlags flags,
@@ -49,7 +55,15 @@ void aml_fs_replace_contents_async (GFile *file, const char *contents,
                                     GAsyncReadyCallback callback,
                                     gpointer user_data);
 gboolean aml_fs_replace_contents_finish (GFile *file, GAsyncResult *result,
-                                         char **new_etag, GError **error);
+                                          char **new_etag, GError **error);
+void aml_fs_replace_contents_bytes_async (GFile *file, GBytes *contents,
+                                          const char *etag, gboolean make_backup,
+                                          GFileCreateFlags flags,
+                                          GCancellable *cancellable,
+                                          GAsyncReadyCallback callback,
+                                          gpointer user_data);
+gboolean aml_fs_replace_contents_bytes_finish (GFile *file, GAsyncResult *result,
+                                               char **new_etag, GError **error);
 void aml_fs_copy_async (GFile *source, GFile *destination, GFileCopyFlags flags,
                         int io_priority, GCancellable *cancellable,
                         GFileProgressCallback progress_callback,
@@ -68,6 +82,18 @@ gboolean aml_fs_delete_finish (GFile *file, GAsyncResult *result,
  * accepted so callers can create them securely afterwards. */
 gboolean aml_fs_directory_is_real (const char *path);
 int aml_fs_open_directory_nofollow (const char *path, GError **error);
+int aml_fs_open_temporary_file_nofollow (const char *directory, char **name,
+                                         char **path, int *parent_fd,
+                                         GError **error);
+gboolean aml_fs_unlink_at (int directory_fd, const char *name, GError **error);
+gboolean aml_fs_rename_at (int directory_fd, const char *source,
+                           const char *destination, GError **error);
+gboolean aml_fs_make_directory_tree_nofollow (const char *directory,
+                                              const char *relative, int mode,
+                                              GError **error);
+int aml_fs_open_file_nofollow (const char *directory, const char *relative,
+                               int flags, int directory_mode, int mode,
+                               GError **error);
 
 /* Best-effort recursive removal that never follows symlinks. Used for
  * cleanup of private temporary trees; callers report the operation that

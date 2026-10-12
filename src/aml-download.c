@@ -370,7 +370,7 @@ cache_write_directory_done (GObject *source, GAsyncResult *result,
                                                 "aml-cache-request");
   g_autoptr (GError) error = NULL;
 
-  if (!g_file_make_directory_finish (G_FILE (source), result, &error) &&
+  if (!aml_fs_make_directory_finish (G_FILE (source), result, &error) &&
       !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_EXISTS))
     {
       if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
@@ -412,7 +412,7 @@ cache_write_parent_done (GObject *source, GAsyncResult *result,
   g_autoptr (GError) error = NULL;
   g_autoptr (GFile) directory = g_file_get_parent (file);
 
-  if (!g_file_make_directory_finish (G_FILE (source), result, &error) &&
+  if (!aml_fs_make_directory_finish (G_FILE (source), result, &error) &&
       !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_EXISTS))
     {
       if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
@@ -435,7 +435,7 @@ cache_write_parent_done (GObject *source, GAsyncResult *result,
       return;
     }
 
-  g_file_make_directory_async (directory, G_PRIORITY_DEFAULT,
+  aml_fs_make_directory_async (directory, G_PRIORITY_DEFAULT,
                                g_task_get_cancellable (request->task),
                                cache_write_directory_done, file);
 }
@@ -451,7 +451,7 @@ cache_write_cache_done (GObject *source, GAsyncResult *result,
   g_autoptr (GFile) directory = g_file_get_parent (file);
   g_autoptr (GFile) parent = g_file_get_parent (directory);
 
-  if (!g_file_make_directory_finish (G_FILE (source), result, &error) &&
+  if (!aml_fs_make_directory_finish (G_FILE (source), result, &error) &&
       !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_EXISTS))
     {
       if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
@@ -474,7 +474,7 @@ cache_write_cache_done (GObject *source, GAsyncResult *result,
       return;
     }
 
-  g_file_make_directory_async (parent, G_PRIORITY_DEFAULT,
+  aml_fs_make_directory_async (parent, G_PRIORITY_DEFAULT,
                                g_task_get_cancellable (request->task),
                                cache_write_parent_done, file);
 }
@@ -513,7 +513,7 @@ cache_write (DownloadRequest *request, const char *response)
   g_debug ("writing Modrinth API cache entry (%zu bytes)",
            strlen (request->pending_cache_data));
   g_object_set_data (G_OBJECT (file), "aml-cache-request", request);
-  g_file_make_directory_async (cache_root, G_PRIORITY_DEFAULT,
+  aml_fs_make_directory_async (cache_root, G_PRIORITY_DEFAULT,
                                g_task_get_cancellable (request->task),
                                cache_write_cache_done,
                                g_object_ref (file));
@@ -664,7 +664,7 @@ discard_temporary (DownloadRequest *request)
   if (request->tmp_path != NULL)
     {
       if (request->parent_fd >= 0 && request->tmp_name != NULL)
-        unlinkat (request->parent_fd, request->tmp_name, 0);
+        aml_fs_unlink_at (request->parent_fd, request->tmp_name, NULL);
       else
         aml_fs_unlink (request->tmp_path, NULL);
       g_clear_pointer (&request->tmp_path, g_free);
@@ -683,7 +683,6 @@ static gboolean
 open_temporary (DownloadRequest *request, GError **error)
 {
   g_autofree char *directory = g_path_get_dirname (request->dest_path);
-  int fd = -1;
 
   /* Do not create a temporary beside a destination reached through a
    * symlink. The download is later published with rename(), so accepting a
@@ -691,41 +690,12 @@ open_temporary (DownloadRequest *request, GError **error)
    * caller selected. The instance installer creates real private temporary
    * directories, and rejecting symlink parents is the safe default for all
    * other callers too. */
-  request->parent_fd = aml_fs_open_directory_nofollow (directory, error);
-  if (request->parent_fd < 0)
+  request->fd = aml_fs_open_temporary_file_nofollow (
+    directory, &request->tmp_name, &request->tmp_path, &request->parent_fd,
+    error);
+  if (request->fd < 0)
     return FALSE;
-
-  for (guint attempt = 0; attempt < 100; attempt++)
-    {
-      g_autofree char *name = g_strdup_printf (".aml-%08x%08x",
-                                               g_random_int (),
-                                               g_random_int ());
-      fd = openat (request->parent_fd, name,
-                   O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0600);
-      if (fd >= 0)
-        {
-          request->tmp_name = g_steal_pointer (&name);
-          break;
-        }
-      if (errno != EEXIST)
-        break;
-    }
-
-  if (fd < 0)
-    {
-      int errsv = errno;
-
-      g_set_error (error, AML_DOWNLOAD_ERROR, AML_DOWNLOAD_ERROR_IO,
-                   "cannot create a temporary file in \"%s\": %s",
-                   directory, g_strerror (errsv));
-      close (request->parent_fd);
-      request->parent_fd = -1;
-      return FALSE;
-    }
-
-  request->tmp_path = g_build_filename (directory, request->tmp_name, NULL);
-  request->fd = fd;
-  request->sink = g_unix_output_stream_new (fd, TRUE);
+  request->sink = g_unix_output_stream_new (request->fd, TRUE);
 
   return TRUE;
 }
@@ -980,7 +950,7 @@ global_cache_directory_ready (GObject *source, GAsyncResult *result,
   g_autofree char *directory = aml_cache_get_files_directory ();
   g_autoptr (GFile) files = g_file_new_for_path (directory);
 
-  if (!g_file_make_directory_finish (G_FILE (source), result, &error) &&
+  if (!aml_fs_make_directory_finish (G_FILE (source), result, &error) &&
       !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_EXISTS))
     {
       if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
@@ -994,7 +964,7 @@ global_cache_directory_ready (GObject *source, GAsyncResult *result,
       return;
     }
 
-  g_file_make_directory_async (files, G_PRIORITY_DEFAULT,
+  aml_fs_make_directory_async (files, G_PRIORITY_DEFAULT,
                                g_task_get_cancellable (request->task),
                                global_cache_files_ready, request);
 }
@@ -1006,7 +976,7 @@ global_cache_files_ready (GObject *source, GAsyncResult *result,
   DownloadRequest *request = user_data;
   g_autoptr (GError) error = NULL;
 
-  if (!g_file_make_directory_finish (G_FILE (source), result, &error) &&
+  if (!aml_fs_make_directory_finish (G_FILE (source), result, &error) &&
       !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_EXISTS))
     {
       if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
@@ -1433,16 +1403,15 @@ verify_and_install (DownloadRequest *request)
   close_sink (request);
 
   g_autofree char *destination_name = g_path_get_basename (request->dest_path);
-  if (renameat (request->parent_fd, request->tmp_name,
-                request->parent_fd, destination_name) != 0)
+  g_autoptr (GError) rename_error = NULL;
+  if (!aml_fs_rename_at (request->parent_fd, request->tmp_name,
+                         destination_name, &rename_error))
     {
-      int errsv = errno;
-
       attempt_failed (request,
                       g_error_new (AML_DOWNLOAD_ERROR, AML_DOWNLOAD_ERROR_IO,
                                    "cannot rename \"%s\" to \"%s\": %s",
                                    request->tmp_path, request->dest_path,
-                                   g_strerror (errsv)));
+                                   rename_error->message));
       return;
     }
 
@@ -1455,7 +1424,7 @@ verify_and_install (DownloadRequest *request)
 
       if (request->global_cache_path == NULL)
         request->global_cache_path = global_cache_path (request->expected_hash);
-      g_file_make_directory_async (parent, G_PRIORITY_DEFAULT,
+      aml_fs_make_directory_async (parent, G_PRIORITY_DEFAULT,
                                    g_task_get_cancellable (request->task),
                                    global_cache_directory_ready, request);
       return;
