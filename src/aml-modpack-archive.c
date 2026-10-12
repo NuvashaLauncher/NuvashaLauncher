@@ -1006,6 +1006,9 @@ aml_modpack_verify_file_async (const AmlModpackFile *file,
                                gpointer user_data)
 {
   g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
+  aml_task_scope_attach_task (task);
+  AmlTaskScope *task_scope = g_object_get_data (G_OBJECT (task),
+                                                 "aml-task-scope");
   g_autoptr (GFile) job_file = g_file_new_for_path (path);
   VerifyRun *run = NULL;
 
@@ -1014,10 +1017,11 @@ aml_modpack_verify_file_async (const AmlModpackFile *file,
 
   if (file->sha1 == NULL || file->sha512 == NULL)
     {
-      g_task_return_new_error (
-        task, AML_MODPACK_ERROR, AML_MODPACK_ERROR_HASH,
-        "\"%s\" does not carry the two hashes the format requires",
-        file->path != NULL ? file->path : "file");
+      aml_task_scope_return_error (
+        task_scope,
+        g_error_new (AML_MODPACK_ERROR, AML_MODPACK_ERROR_HASH,
+                     "\"%s\" does not carry the two hashes the format "
+                     "requires", file->path != NULL ? file->path : "file"));
       return;
     }
 
