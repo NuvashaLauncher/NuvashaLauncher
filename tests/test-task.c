@@ -538,6 +538,44 @@ test_a_released_operation_outlives_the_code_that_completed_it (void)
   g_print ("ok - a released operation outlives the code that completed it\n");
 }
 
+/* Public callers commonly release their owned handle from the completion
+ * callback. The scope must therefore remain alive until the whole
+ * g_task_return_* call has returned, not merely until the callback starts. */
+typedef struct
+{
+  AmlTaskScope *scope;
+} CallbackRelease;
+
+static void
+callback_releases_operation (GObject *source G_GNUC_UNUSED,
+                             GAsyncResult *result,
+                             gpointer user_data)
+{
+  CallbackRelease *release = user_data;
+
+  g_task_propagate_boolean (G_TASK (result), NULL);
+  aml_task_scope_unref (release->scope);
+  release->scope = NULL;
+}
+
+static void
+test_callback_can_release_owned_operation (void)
+{
+  CallbackRelease release = { NULL };
+  guint before = criticals;
+
+  release.scope = aml_task_scope_new (NULL, NULL,
+                                      callback_releases_operation, &release);
+  aml_task_scope_return_boolean (release.scope, TRUE);
+
+  while (g_main_context_pending (NULL))
+    g_main_context_iteration (NULL, FALSE);
+
+  g_assert_null (release.scope);
+  g_assert_cmpuint (criticals, ==, before);
+  g_print ("ok - the completion callback can release its operation\n");
+}
+
 /* A step that starts nothing and finishes nothing, so the test decides
  * when and how the sequence completes. */
 static void
@@ -617,6 +655,7 @@ main (int argc, char **argv)
   test_immediate_failure_completes_after_the_constructor ();
   test_scope_follows_a_cancellable_it_does_not_own ();
   test_a_released_operation_outlives_the_code_that_completed_it ();
+  test_callback_can_release_owned_operation ();
 
   g_print ("# Task scope and sources it has already lost\n");
   test_scope_free_releases_a_source_that_fired ();

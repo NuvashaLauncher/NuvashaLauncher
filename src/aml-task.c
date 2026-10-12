@@ -180,13 +180,16 @@ gboolean
 aml_task_scope_return_error_if_cancelled (AmlTaskScope *scope)
 {
   gboolean cancelled;
+  AmlTaskScope *hold;
 
   g_return_val_if_fail (scope != NULL, FALSE);
 
+  hold = aml_task_scope_ref (scope);
   cancelled = g_task_return_error_if_cancelled (scope->task);
   if (cancelled && scope->unref_when_done)
     scope_release_when_done (scope);
 
+  aml_task_scope_unref (hold);
   return cancelled;
 }
 
@@ -195,39 +198,48 @@ aml_task_scope_return_pointer (AmlTaskScope *scope, gpointer result,
                                GDestroyNotify result_free)
 {
   gboolean release;
+  AmlTaskScope *hold;
 
   g_return_if_fail (scope != NULL);
 
+  hold = aml_task_scope_ref (scope);
   release = scope->unref_when_done;
   g_task_return_pointer (scope->task, result, result_free);
   if (release && scope->unref_when_done)
     scope_release_when_done (scope);
+  aml_task_scope_unref (hold);
 }
 
 void
 aml_task_scope_return_error (AmlTaskScope *scope, GError *error)
 {
   gboolean release;
+  AmlTaskScope *hold;
 
   g_return_if_fail (scope != NULL);
 
+  hold = aml_task_scope_ref (scope);
   release = scope->unref_when_done;
   g_task_return_error (scope->task, error);
   if (release && scope->unref_when_done)
     scope_release_when_done (scope);
+  aml_task_scope_unref (hold);
 }
 
 void
 aml_task_scope_return_boolean (AmlTaskScope *scope, gboolean result)
 {
   gboolean release;
+  AmlTaskScope *hold;
 
   g_return_if_fail (scope != NULL);
 
+  hold = aml_task_scope_ref (scope);
   release = scope->unref_when_done;
   g_task_return_boolean (scope->task, result);
   if (release && scope->unref_when_done)
     scope_release_when_done (scope);
+  aml_task_scope_unref (hold);
 }
 
 AmlTaskScope *
