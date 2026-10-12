@@ -249,13 +249,14 @@ test_create_and_persist (void)
   g_assert_nonnull (instance);
   g_assert_cmpuint (manager_count (manager), ==, 1);
 
-  /* The default directory lives below <data>/instances/ and is named
-   * after the sanitized name plus a part of the id. */
-  g_autofree char *directory = prop_string (instance, "directory");
-  g_autofree char *instances_root =
-    g_build_filename (data_dir, "instances", NULL);
-  g_assert_true (g_str_has_prefix (directory, instances_root));
-  g_assert_nonnull (strstr (directory, "Pack One-"));
+   /* The default directory lives below <data>/instances/ and matches the
+   * sanitized instance name. */
+   g_autofree char *directory = prop_string (instance, "directory");
+   g_autofree char *directory_name = g_path_get_basename (directory);
+   g_autofree char *instances_root =
+     g_build_filename (data_dir, "instances", NULL);
+   g_assert_true (g_str_has_prefix (directory, instances_root));
+   g_assert_cmpstr (directory_name, ==, "Pack One");
   g_assert_true (g_file_test (directory, G_FILE_TEST_IS_DIR));
 
   /* The metadata file carries format version 1 and one entry. */
@@ -371,6 +372,57 @@ test_create_sanitized_name (void)
   remove_recursive (data_dir);
 
   g_print ("ok - awkward name still gets a safe directory\n");
+}
+
+static void
+test_create_duplicate_names (void)
+{
+  g_autofree char *data_dir = make_tmp_dir ();
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlInstanceManager) manager =
+    aml_instance_manager_new (data_dir);
+
+  AmlInstance *first =
+    aml_instance_manager_create (manager, "test", NULL, "1.21.1",
+                                 AML_LOADER_VANILLA, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (first);
+
+  AmlInstance *second =
+    aml_instance_manager_create (manager, "test", NULL, "1.21.1",
+                                 AML_LOADER_VANILLA, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (second);
+
+  AmlInstance *third =
+    aml_instance_manager_create (manager, "test", NULL, "1.21.1",
+                                 AML_LOADER_VANILLA, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (third);
+
+  g_autofree char *first_name = prop_string (first, "name");
+  g_autofree char *second_name = prop_string (second, "name");
+  g_autofree char *third_name = prop_string (third, "name");
+  g_autofree char *first_directory = prop_string (first, "directory");
+  g_autofree char *second_directory = prop_string (second, "directory");
+  g_autofree char *third_directory = prop_string (third, "directory");
+  g_autofree char *first_leaf = g_path_get_basename (first_directory);
+  g_autofree char *second_leaf = g_path_get_basename (second_directory);
+  g_autofree char *third_leaf = g_path_get_basename (third_directory);
+
+  g_assert_cmpstr (first_name, ==, "test");
+  g_assert_cmpstr (second_name, ==, "test 2");
+  g_assert_cmpstr (third_name, ==, "test 3");
+  g_assert_cmpstr (first_leaf, ==, first_name);
+  g_assert_cmpstr (second_leaf, ==, second_name);
+  g_assert_cmpstr (third_leaf, ==, third_name);
+
+  g_object_unref (first);
+  g_object_unref (second);
+  g_object_unref (third);
+  remove_recursive (data_dir);
+
+  g_print ("ok - duplicate names get numeric suffixes\n");
 }
 
 static void
@@ -1348,6 +1400,7 @@ main (int argc, char **argv)
   test_create_and_persist ();
   test_create_explicit_directory ();
   test_create_sanitized_name ();
+  test_create_duplicate_names ();
   test_path_validation ();
   test_load_missing_file ();
   test_corrupt_file ();

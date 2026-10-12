@@ -53,9 +53,9 @@ gboolean aml_instance_manager_save (AmlInstanceManager *self,
  * AmlInstance. */
 GListStore *aml_instance_manager_get_instances (AmlInstanceManager *self);
 
-/* The directory a new instance of @name would land in when the caller
- * names none: <data dir>/instances/<name>-<short id>, with a fresh id.
- * (transfer full) */
+ /* The directory a new instance of @name would land in when the caller
+  * names none: <data dir>/instances/<unique name>. If @name is already in
+  * use, the next available numeric suffix is used. (transfer full) */
 char *aml_instance_manager_default_directory (AmlInstanceManager *self,
                                               const char *name);
 
@@ -64,9 +64,10 @@ char *aml_instance_manager_default_directory (AmlInstanceManager *self,
 AmlInstance *aml_instance_manager_get_by_id (AmlInstanceManager *self,
                                              const char *id);
 
-/* Creates an instance and registers it. @directory is the directory the
- * user picked; NULL derives it from the name under
- * <data dir>/instances/<name>-<short id>. The directory must be
+ /* Creates an instance and registers it. @directory is the directory the
+  * user picked; NULL derives it from the unique name under
+  * <data dir>/instances/<name>. If the requested name is already in use,
+  * a numeric suffix is added. The directory must be
  * absolute, must not contain ".." and must neither be, contain nor lie
  * inside the directory of another instance. Returns the new instance
  * (transfer full). */
