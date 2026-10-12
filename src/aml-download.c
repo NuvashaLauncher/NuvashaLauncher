@@ -749,7 +749,7 @@ request_free (DownloadRequest *request)
   g_clear_pointer (&request->checksum, g_checksum_free);
   g_clear_pointer (&request->tmp_path, g_free);
   g_clear_pointer (&request->tmp_name, g_free);
-  aml_task_scope_free (request->scope);
+  aml_task_scope_unref (request->scope);
   request->scope = NULL;
   if (request->parent_fd >= 0)
     close (request->parent_fd);
@@ -831,7 +831,7 @@ hash_file_free (HashFile *hash)
 {
   hash_file_close (hash);
   g_clear_pointer (&hash->checksum, g_checksum_free);
-  aml_task_scope_free (hash->scope);
+  aml_task_scope_unref (hash->scope);
   g_clear_object (&hash->task);
   g_free (hash);
 }

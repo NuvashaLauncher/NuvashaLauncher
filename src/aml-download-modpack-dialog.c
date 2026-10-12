@@ -228,7 +228,7 @@ dialog_dispose (GObject *object)
   g_clear_object (&self->manager);
   g_clear_object (&self->search);
   g_clear_object (&self->fetch);
-  aml_task_scope_free (self->scope);
+  aml_task_scope_unref (self->scope);
   self->scope = NULL;
   g_clear_pointer (&self->project, aml_modrinth_project_free);
   g_clear_pointer (&self->version, aml_modrinth_version_free);

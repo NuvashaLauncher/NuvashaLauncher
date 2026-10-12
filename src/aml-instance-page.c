@@ -1554,7 +1554,7 @@ aml_instance_page_dispose (GObject *object)
   g_cancellable_cancel (self->cancellable);
   aml_task_scope_cancel (self->scope);
   g_clear_object (&self->cancellable);
-  aml_task_scope_free (self->scope);
+  aml_task_scope_unref (self->scope);
   self->scope = NULL;
 
   /* The loader rows are the page's. Their handlers go with them, so the

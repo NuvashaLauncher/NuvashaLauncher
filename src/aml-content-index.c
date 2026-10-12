@@ -226,7 +226,7 @@ static void
 load_args_free (LoadArgs *args)
 {
   g_free (args->instance_directory);
-  aml_task_scope_free (args->scope);
+  aml_task_scope_unref (args->scope);
   g_free (args);
 }
 
@@ -332,7 +332,7 @@ static void
 write_run_free (WriteRun *run)
 {
   g_clear_object (&run->task);
-  aml_task_scope_free (run->scope);
+  aml_task_scope_unref (run->scope);
   g_free (run->path);
   g_free (run->directory);
   g_free (run->data);
@@ -393,7 +393,7 @@ static void
 remove_run_free (RemoveRun *run)
 {
   g_clear_object (&run->task);
-  aml_task_scope_free (run->scope);
+  aml_task_scope_unref (run->scope);
   g_free (run->path);
   g_free (run);
 }

@@ -1119,7 +1119,7 @@ request_free (gpointer data)
   if (request->data != NULL && request->free_data != NULL)
     request->free_data (request->data);
 
-  aml_task_scope_free (request->scope);
+  aml_task_scope_unref (request->scope);
   g_free (request);
 }
 

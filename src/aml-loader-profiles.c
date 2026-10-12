@@ -122,7 +122,7 @@ profile_request_free (gpointer data)
 {
   ProfileRequest *request = data;
 
-  aml_task_scope_free (request->scope);
+  aml_task_scope_unref (request->scope);
   g_clear_object (&request->task);
   g_free (request);
 }

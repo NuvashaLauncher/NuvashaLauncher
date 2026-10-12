@@ -708,7 +708,7 @@ typedef struct
 static void
 extract_request_free (ExtractRequest *request)
 {
-  aml_task_scope_free (request->scope);
+  aml_task_scope_unref (request->scope);
   g_clear_object (&request->task);
   g_clear_pointer (&request->jars, g_ptr_array_unref);
   g_free (request->directory);
@@ -1155,7 +1155,7 @@ request_free (ResolveRequest *request)
   if (request->cancel_handler != 0 && request->caller != NULL)
     g_cancellable_disconnect (request->caller, request->cancel_handler);
 
-  aml_task_scope_free (request->scope);
+  aml_task_scope_unref (request->scope);
   g_clear_object (&request->task);
   g_clear_object (&request->manifest);
   g_clear_object (&request->description);

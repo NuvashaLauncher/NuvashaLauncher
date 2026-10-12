@@ -738,7 +738,7 @@ image_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
             {
               scope = aml_task_scope_new (NULL, NULL, NULL, NULL);
               g_object_set_data_full (G_OBJECT (picture), "aml-image-scope",
-                                      scope, (GDestroyNotify) aml_task_scope_free);
+                                      scope, (GDestroyNotify) aml_task_scope_unref);
             }
           guint source_id = g_idle_add (image_resize_idle,
                                         g_object_ref (picture));

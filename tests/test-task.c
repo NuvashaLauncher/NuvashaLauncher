@@ -235,7 +235,7 @@ test_scope_free_releases_a_source_that_fired (void)
   guint source = fire_and_dissolve (&fired);
 
   aml_task_scope_track_source (scope, source);
-  aml_task_scope_free (scope);
+  aml_task_scope_unref (scope);
 
   g_assert_cmpuint (criticals, ==, before);
   g_print ("ok - freeing a scope releases a source that already fired\n");
@@ -252,7 +252,7 @@ test_scope_cancel_releases_a_source_that_fired (void)
 
   aml_task_scope_track_source (scope, source);
   aml_task_scope_cancel (scope);
-  aml_task_scope_free (scope);
+  aml_task_scope_unref (scope);
 
   g_assert_cmpuint (criticals, ==, before);
   g_print ("ok - cancelling a scope releases a source that already fired\n");
@@ -269,7 +269,7 @@ test_scope_removes_a_source_that_fired (void)
 
   aml_task_scope_track_source (scope, source);
   aml_task_scope_remove_source (scope, source);
-  aml_task_scope_free (scope);
+  aml_task_scope_unref (scope);
 
   g_assert_cmpuint (criticals, ==, before);
   g_print ("ok - removing one spent source leaves the rest of the scope\n");
@@ -291,7 +291,7 @@ test_scope_releases_mixed_sources (void)
 
   aml_task_scope_track_source (scope, spent);
   aml_task_scope_track_source (scope, live);
-  aml_task_scope_free (scope);
+  aml_task_scope_unref (scope);
 
   while (g_main_context_pending (NULL))
     g_main_context_iteration (NULL, FALSE);
@@ -315,7 +315,7 @@ test_scope_cancels_owned_sources (void)
     g_main_context_iteration (NULL, FALSE);
 
   g_assert_false (ran);
-  aml_task_scope_free (scope);
+  aml_task_scope_unref (scope);
   g_print ("ok - task scopes cancel and release owned sources\n");
 }
 
@@ -334,7 +334,7 @@ test_scope_cancellation_stress (void)
 
       aml_task_scope_track_source (scope, source);
       aml_task_scope_cancel (scope);
-      aml_task_scope_free (scope);
+      aml_task_scope_unref (scope);
     }
 
   while (g_main_context_pending (NULL))
@@ -350,7 +350,7 @@ test_scope_reference_keeps_operation_alive (void)
   AmlTaskScope *scope = aml_task_scope_new (NULL, NULL, NULL, NULL);
   AmlTaskScope *held = aml_task_scope_ref (scope);
 
-  aml_task_scope_free (scope);
+  aml_task_scope_unref (scope);
   g_assert_nonnull (aml_task_scope_get_task (held));
   aml_task_scope_unref (held);
 

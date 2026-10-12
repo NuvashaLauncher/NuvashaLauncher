@@ -329,7 +329,7 @@ probe_destroyed (gpointer data)
 {
   Probe *probe = data;
 
-  aml_task_scope_free (probe->scope);
+  aml_task_scope_unref (probe->scope);
   g_clear_object (&probe->task);
   g_clear_pointer (&probe->executable, g_free);
   g_clear_object (&probe->process);
@@ -731,7 +731,7 @@ detected (GObject      *source G_GNUC_UNUSED,
     g_task_return_pointer (detect->detect_task, javas,
                            (GDestroyNotify) g_ptr_array_unref);
 
-  aml_task_scope_free (detect->scope);
+  aml_task_scope_unref (detect->scope);
   g_clear_object (&detect->detect_task);
   g_free (detect);
 }

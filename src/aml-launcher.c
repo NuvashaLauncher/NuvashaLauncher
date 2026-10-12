@@ -209,7 +209,7 @@ aml_launcher_finalize (GObject *object)
   AmlLauncher *self = AML_LAUNCHER (object);
 
   g_clear_object (&self->preparation.cancellable);
-  aml_task_scope_free (self->scope);
+  aml_task_scope_unref (self->scope);
   self->scope = NULL;
   g_clear_object (&self->process.process);
   g_clear_pointer (&self->preparation.resolved, aml_resolved_version_free);

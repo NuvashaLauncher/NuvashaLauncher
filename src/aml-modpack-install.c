@@ -167,7 +167,7 @@ install_run_free (InstallRun *run)
   g_clear_object (&run->manager);
   g_clear_object (&run->cancellable);
   g_clear_object (&run->task);
-  aml_task_scope_free (run->scope);
+  aml_task_scope_unref (run->scope);
   g_free (run->name);
   g_free (run->target);
   g_free (run->temp);
@@ -725,7 +725,7 @@ typedef struct {
 static void
 export_run_free (ExportRun *run)
 {
-  aml_task_scope_free (run->scope);
+  aml_task_scope_unref (run->scope);
   g_free (run->instance_directory);
   g_free (run->archive_path);
   g_free (run->temporary_archive);
