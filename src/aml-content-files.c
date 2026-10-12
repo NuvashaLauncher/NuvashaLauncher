@@ -730,8 +730,8 @@ static void
 scan_finish (ScanRun *run)
 {
   g_ptr_array_sort (run->files, compare_files);
-  g_task_return_pointer (run->task, g_steal_pointer (&run->files),
-                         (GDestroyNotify) g_ptr_array_unref);
+  aml_task_scope_return_pointer (run->scope, g_steal_pointer (&run->files),
+                                 (GDestroyNotify) g_ptr_array_unref);
   scan_free (run);
 }
 
@@ -763,7 +763,7 @@ local_metadata_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   if (!g_task_propagate_boolean (G_TASK (result), &error))
     {
-      g_task_return_error (run->task, g_steal_pointer (&error));
+      aml_task_scope_return_error (run->scope, g_steal_pointer (&error));
       scan_free (run);
       return;
     }
@@ -779,7 +779,7 @@ scan_local_metadata (ScanRun *run)
       scan_finish (run);
       return;
     }
-  GTask *task = g_task_new (NULL, g_task_get_cancellable (run->task),
+  GTask *task = g_task_new (NULL, aml_task_scope_get_cancellable (run->scope),
                             local_metadata_done, run);
   aml_task_scope_attach_task (task);
   g_task_set_task_data (task, run, NULL);
@@ -863,7 +863,7 @@ batch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   children = g_file_enumerator_next_files_finish (run->enumerator, result,
                                                   &error);
 
-  if (g_task_return_error_if_cancelled (run->task))
+  if (g_cancellable_is_cancelled (aml_task_scope_get_cancellable (run->scope)))
     {
       scan_free (run);
       return;
@@ -873,7 +873,7 @@ batch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
    * whole folder. */
   if (children == NULL && error != NULL)
     {
-      g_task_return_error (run->task, g_steal_pointer (&error));
+      aml_task_scope_return_error (run->scope, g_steal_pointer (&error));
       scan_free (run);
       return;
     }
@@ -914,7 +914,7 @@ static void
 batch_read_next (ScanRun *run)
 {
   g_file_enumerator_next_files_async (run->enumerator, 64, G_PRIORITY_DEFAULT,
-                                      g_task_get_cancellable (run->task),
+                                       aml_task_scope_get_cancellable (run->scope),
                                       batch_ready, run);
 }
 
@@ -930,7 +930,7 @@ scan_children_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 
   if (enumerator == NULL)
     {
-      g_task_return_error (run->task, g_steal_pointer (&error));
+       aml_task_scope_return_error (run->scope, g_steal_pointer (&error));
       scan_free (run);
       return;
     }
@@ -962,7 +962,7 @@ scan_index_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     run->folder,
     G_FILE_ATTRIBUTE_STANDARD_NAME "," G_FILE_ATTRIBUTE_STANDARD_TYPE,
     G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, G_PRIORITY_DEFAULT,
-    g_task_get_cancellable (run->task), scan_children_ready, run);
+     aml_task_scope_get_cancellable (run->scope), scan_children_ready, run);
 }
 
 static void
@@ -977,7 +977,7 @@ scan_hash_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   digest = aml_download_file_hash_finish (result, &error);
 
-  if (g_cancellable_is_cancelled (g_task_get_cancellable (run->task)))
+   if (g_cancellable_is_cancelled (aml_task_scope_get_cancellable (run->scope)))
     run->hash_cancelled = TRUE;
 
   if (digest != NULL)
@@ -998,8 +998,10 @@ scan_hash_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     {
       if (run->hash_cancelled)
         {
-          g_task_return_new_error (run->task, G_IO_ERROR,
-                                   G_IO_ERROR_CANCELLED, "cancelled");
+           aml_task_scope_return_error (
+             run->scope,
+             g_error_new_literal (G_IO_ERROR, G_IO_ERROR_CANCELLED,
+                                  "cancelled"));
           scan_free (run);
         }
       else
@@ -1024,7 +1026,7 @@ scan_hash_next (ScanRun *run)
       input->run = run;
       input->file = file;
       aml_download_file_hash_async (handle, G_CHECKSUM_SHA1,
-                                    g_task_get_cancellable (run->task),
+                                     aml_task_scope_get_cancellable (run->scope),
                                     scan_hash_ready, input);
     }
 }
@@ -1052,7 +1054,7 @@ aml_content_scan_async (const char *instance_directory, AmlContentType type,
   run = g_new0 (ScanRun, 1);
   run->task = g_task_new (NULL, cancellable, callback, user_data);
   run->scope = aml_task_scope_from_task (run->task);
-  g_task_set_check_cancellable (run->task, FALSE);
+   aml_task_scope_set_check_cancellable (run->scope, FALSE);
   run->folder = g_file_new_for_path (folder);
   run->instance_directory = g_strdup (instance_directory);
   run->type = type;
@@ -1064,8 +1066,8 @@ aml_content_scan_async (const char *instance_directory, AmlContentType type,
    * folder, which reads the same as an empty one. */
   if (!g_file_query_exists (run->folder, NULL))
     {
-      g_task_return_pointer (run->task, g_steal_pointer (&run->files),
-                             (GDestroyNotify) g_ptr_array_unref);
+       aml_task_scope_return_pointer (run->scope, g_steal_pointer (&run->files),
+                                      (GDestroyNotify) g_ptr_array_unref);
       scan_free (run);
       return;
     }
