@@ -31,16 +31,12 @@ struct _AmlJavaRow
   /* The detected installations, GPtrArray<AmlJava*> owned by the row. */
   GPtrArray *javas;
 
-  /* Model contents: index 0 is the automatic entry with a NULL path, one
-   * per detected Java, one for a custom path detection never reported,
-   * and a trailing one that asks for another runtime instead of naming
-   * one. That last entry has no path, so the ids array is always one
-   * entry shorter than the names array. */
-  GPtrArray *ids;   /* strdupped paths; ids[0] is NULL */
+  /* Model contents: when an exact automatic runtime exists, index 0 is its
+   * entry with a NULL path. Otherwise there is no selected placeholder. The
+   * remaining entries are detected/custom runtimes and a trailing entry
+   * that asks for another runtime instead of naming one. */
+  GPtrArray *ids;   /* strdupped paths; the automatic entry has a NULL id */
   GPtrArray *names; /* the titles shown in the model */
-
-  /* What index 0 is called when no runtime resolves it. */
-  char *default_label;
 
   /* Where the add entry sits in the model, GTK_INVALID_LIST_POSITION
    * while the list does not hold one. */
@@ -176,7 +172,7 @@ fill (AmlJavaRow *self)
   const AmlJava *fallback = NULL;
   g_autofree char *wanted_real =
     self->wanted != NULL ? realpath (self->wanted, NULL) : NULL;
-  guint position = 0;
+  guint position = GTK_INVALID_LIST_POSITION;
 
   /* The Java the automatic choice stands for: named in the first entry,
      and left out of the list below when it is one of the detected
@@ -186,10 +182,11 @@ fill (AmlJavaRow *self)
     fallback = aml_java_select (self->javas, NULL, self->required_major);
 
   if (fallback != NULL)
-    g_ptr_array_add (names, java_label ((AmlJava *) fallback));
-  else
-    g_ptr_array_add (names, g_strdup (self->default_label));
-  g_ptr_array_add (ids, NULL);
+    {
+      g_ptr_array_add (names, java_label ((AmlJava *) fallback));
+      g_ptr_array_add (ids, NULL);
+      position = 0;
+    }
 
   for (guint i = 0; self->javas != NULL && i < self->javas->len; i++)
     {
@@ -223,8 +220,7 @@ fill (AmlJavaRow *self)
     }
 
   /* The trailing entry is how a runtime detection did not report gets
-     added. It names no runtime, so it gets no id and the arrays end up
-     one entry apart. */
+     added. It names no runtime, so it gets no id. */
   g_ptr_array_add (names, g_strdup (_("Add Java Runtime")));
   self->add_index = names->len - 1;
 
@@ -242,7 +238,8 @@ fill (AmlJavaRow *self)
 
   /* A wanted path detection never saw needs a probe. */
   if (self->wanted != NULL && *self->wanted != '\0' && !self->probe_started &&
-      self->probed == NULL && position == 0)
+       self->probed == NULL &&
+       (position == GTK_INVALID_LIST_POSITION || position == 0))
     {
       g_autofree char *wanted_real = realpath (self->wanted, NULL);
       gboolean found = FALSE;
@@ -555,8 +552,8 @@ aml_java_row_get_selected_path (AmlJavaRow *self)
   if (position == GTK_INVALID_LIST_POSITION || position >= self->ids->len)
     return NULL;
 
-  /* Entry 0 carries a NULL path: it is the automatic choice. */
-  if (self->ids->pdata[position] == NULL)
+  /* A NULL id marks the automatic choice. */
+  if (position < self->ids->len && self->ids->pdata[position] == NULL)
     return "";
 
   return self->ids->pdata[position];
@@ -572,7 +569,9 @@ aml_java_row_select_path (AmlJavaRow *self, const char *path)
 
   if (path == NULL || *path == '\0')
     {
-      adw_combo_row_set_selected (ADW_COMBO_ROW (self), 0);
+      guint automatic = self->ids->len > 0 && self->ids->pdata[0] == NULL
+                          ? 0 : GTK_INVALID_LIST_POSITION;
+      adw_combo_row_set_selected (ADW_COMBO_ROW (self), automatic);
       return;
     }
 
@@ -670,7 +669,6 @@ aml_java_row_finalize (GObject *object)
   g_clear_pointer (&self->javas, g_ptr_array_unref);
   aml_java_free (self->probed);
   g_free (self->wanted);
-  g_free (self->default_label);
 
   G_OBJECT_CLASS (aml_java_row_parent_class)->finalize (object);
 }
@@ -695,9 +693,6 @@ aml_java_row_init (AmlJavaRow *self)
   self->javas = g_ptr_array_new_with_free_func ((GDestroyNotify) aml_java_free);
   self->ids = g_ptr_array_new_with_free_func (g_free);
   self->names = g_ptr_array_new_with_free_func (g_free);
-  /* No exact runtime means no default selection. Keep the first combo entry
-   * blank rather than implying that an automatic choice exists. */
-  self->default_label = g_strdup ("");
   self->required_major = 0;
   self->add_index = GTK_INVALID_LIST_POSITION;
   self->restore = 0;
