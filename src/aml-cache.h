@@ -12,6 +12,7 @@ G_BEGIN_DECLS
 
 char *aml_cache_get_api_directory (void);
 char *aml_cache_get_files_directory (void);
+gboolean aml_cache_ensure_directory (const char *path, GError **error);
 
 AmlTaskScope *aml_cache_clear_api_async (GAsyncReadyCallback callback,
                                           gpointer            user_data);

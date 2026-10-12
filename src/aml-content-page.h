@@ -90,6 +90,8 @@ char *aml_content_disabled_name (const char *filename, gboolean enabled);
 char *aml_content_set_disabled (const char  *path,
                                 gboolean     disabled,
                                 GError     **error);
+gboolean aml_content_remove_file (const char *path, GError **error);
+gboolean aml_content_ensure_folder (const char *path, GError **error);
 
 /* The files of @instance_directory for @type, sorted by name, each one
  * hashed. A folder that does not exist holds no files, which is what an

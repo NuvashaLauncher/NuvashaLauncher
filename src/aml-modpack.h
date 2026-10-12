@@ -198,7 +198,13 @@ AmlTaskScope *aml_modpack_install_async (AmlModpack *modpack,
 
 /* (transfer full) the new instance, registered. NULL on error. */
 AmlInstance *aml_modpack_install_finish (GAsyncResult *result,
-                                          GError **error);
+                                           GError **error);
+
+gboolean aml_modpack_remove_archive (const char *path, GError **error);
+gboolean aml_modpack_install_icon (AmlInstanceManager *manager,
+                                   AmlInstance *instance,
+                                   const char *source_path, GError **error);
+gboolean aml_modpack_icon_is_regular (const char *path);
 
 /* Writes @instance as a .mrpack at @path. The archive contains the
  * instance's manifest and its files under overrides/. Archive creation is

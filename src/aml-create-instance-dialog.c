@@ -52,15 +52,13 @@ clear_error (AmlCreateInstanceDialog *self)
 static void
 update_create_button (AmlCreateInstanceDialog *self)
 {
-  g_autofree char *name =
-    g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->name_row)));
+  g_autofree char *name = aml_instance_normalize_name (
+    gtk_editable_get_text (GTK_EDITABLE (self->name_row)));
   const char *version =
     aml_version_row_get_selected (AML_VERSION_ROW (self->version_row));
   AmlLoader loader =
     aml_loader_row_get_loader (self->loader_row);
   gboolean loader_ready = TRUE;
-
-  g_strstrip (name);
 
   /* A loader that is not vanilla needs a version of it, and its row only
    * answers when it knows one. */
@@ -132,8 +130,8 @@ static void
 on_create_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   AmlCreateInstanceDialog *self = user_data;
-  g_autofree char *name =
-    g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->name_row)));
+  g_autofree char *name = aml_instance_normalize_name (
+    gtk_editable_get_text (GTK_EDITABLE (self->name_row)));
   const char *version =
     aml_version_row_get_selected (AML_VERSION_ROW (self->version_row));
   AmlLoader loader =
@@ -142,8 +140,6 @@ on_create_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
     aml_loader_row_get_version (self->loader_row);
   g_autoptr (GError) error = NULL;
   g_autoptr (AmlInstance) instance = NULL;
-
-  g_strstrip (name);
 
   /* The Create button is insensitive without a version, so this only
    * guards against the row being emptied underneath it. */

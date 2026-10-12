@@ -24,6 +24,44 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+gboolean
+aml_modpack_remove_archive (const char *path, GError **error)
+{
+  g_return_val_if_fail (path != NULL, FALSE);
+  return aml_fs_unlink (path, error);
+}
+
+gboolean
+aml_modpack_install_icon (AmlInstanceManager *manager, AmlInstance *instance,
+                          const char *source_path, GError **error)
+{
+  g_autofree char *directory = NULL;
+  g_autofree char *target = NULL;
+  g_autoptr (GFile) source = NULL;
+  g_autoptr (GFile) destination = NULL;
+
+  g_return_val_if_fail (AML_IS_INSTANCE_MANAGER (manager), FALSE);
+  g_return_val_if_fail (AML_IS_INSTANCE (instance), FALSE);
+  g_return_val_if_fail (source_path != NULL, FALSE);
+
+  g_object_get (instance, "directory", &directory, NULL);
+  target = g_build_filename (directory, "icon.png", NULL);
+  source = g_file_new_for_path (source_path);
+  destination = g_file_new_for_path (target);
+
+  if (!aml_fs_copy_file (source, destination, G_FILE_COPY_OVERWRITE, NULL,
+                         error) ||
+      !aml_instance_set_string (instance, "icon", target, error))
+    return FALSE;
+  return aml_instance_manager_save (manager, error);
+}
+
+gboolean
+aml_modpack_icon_is_regular (const char *path)
+{
+  return path != NULL && g_file_test (path, G_FILE_TEST_IS_REGULAR);
+}
+
 /* ---------------------------------------------------------- *
  * The tree one install makes, to leave nothing of on failure
  * ---------------------------------------------------------- */

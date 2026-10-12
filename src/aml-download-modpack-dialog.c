@@ -19,13 +19,13 @@
 #include "aml-dialogs.h"
 #include "aml-downloads.h"
 #include "aml-download.h"
+#include "aml-cache.h"
 #include "aml-i18n.h"
 #include "aml-icons.h"
 #include "aml-markdown.h"
 #include "aml-modpack.h"
 #include "aml-modrinth.h"
 #include "aml-task.h"
-#include "aml-fs.h"
 
 #include <glib/gstdio.h>
 #include <stdlib.h>
@@ -1760,7 +1760,7 @@ remove_pack_file (AmlDownloadModpackDialog *self)
 {
   if (!self->imported && self->pack_path != NULL)
     {
-      aml_fs_unlink (self->pack_path, NULL);
+      aml_modpack_remove_archive (self->pack_path, NULL);
       g_clear_pointer (&self->pack_path, g_free);
     }
 }
@@ -1808,36 +1808,12 @@ on_install_done (GObject *source G_GNUC_UNUSED,
 
   /* The instance owns its icon. Never leave its property pointing into the
      shared cache, because cache cleanup is allowed to remove that tree. */
-  if (self->icon_path != NULL &&
-      g_file_test (self->icon_path, G_FILE_TEST_IS_REGULAR))
+  if (aml_modpack_icon_is_regular (self->icon_path))
     {
-      g_autofree char *directory = NULL;
-      g_autofree char *instance_icon = NULL;
-      g_autoptr (GFile) source = NULL;
-      g_autoptr (GFile) target = NULL;
-      gboolean icon_copied = FALSE;
-
-      g_object_get (instance, "directory", &directory, NULL);
-      instance_icon = g_build_filename (directory, "icon.png", NULL);
-      source = g_file_new_for_path (self->icon_path);
-      target = g_file_new_for_path (instance_icon);
-
-      if (!aml_fs_copy_file (source, target, G_FILE_COPY_OVERWRITE, NULL,
-                             &error))
+      if (!aml_modpack_install_icon (self->manager, instance, self->icon_path,
+                                     &error))
         g_warning ("the icon of the new instance could not be copied: %s",
                    error != NULL ? error->message : "unknown error");
-      else
-        {
-          icon_copied = aml_instance_set_string (instance, "icon",
-                                                 instance_icon, &error);
-        }
-
-      if (icon_copied)
-        {
-          if (!aml_instance_manager_save (self->manager, &error))
-            g_warning ("the icon of the new instance could not be saved: %s",
-                       error->message);
-        }
     }
 
   install_job_free (job);
@@ -2234,7 +2210,7 @@ dialog_start_features (AmlDownloadModpackDialog *self)
       g_get_user_cache_dir (), "AML", "packs", NULL);
     const char *name = "pack.mrpack";
 
-    aml_fs_make_directory (cache_dir, 0755, NULL);
+    aml_cache_ensure_directory (cache_dir, NULL);
 
     if (file->filename != NULL && *file->filename != '\0')
       name = file->filename;

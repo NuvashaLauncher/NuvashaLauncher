@@ -25,6 +25,13 @@ aml_cache_get_files_directory (void)
   return cache_directory ("files");
 }
 
+gboolean
+aml_cache_ensure_directory (const char *path, GError **error)
+{
+  g_return_val_if_fail (path != NULL, FALSE);
+  return aml_fs_make_directory (path, 0755, error);
+}
+
 static AmlTaskScope *
 cache_clear_async (const char *path, GAsyncReadyCallback callback,
                    gpointer user_data)
