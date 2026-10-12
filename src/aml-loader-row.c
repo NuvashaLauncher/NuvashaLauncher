@@ -281,7 +281,7 @@ static void
 show_unavailable (AmlLoaderRow *self)
 {
   g_autoptr (GtkStringList) list = NULL;
-  const char *unavailable[] = { "Unavailable", NULL };
+  const char *unavailable[] = { _("Unavailable"), NULL };
 
   self->ready = FALSE;
   self->interactive = FALSE;

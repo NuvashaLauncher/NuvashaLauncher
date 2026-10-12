@@ -577,3 +577,5 @@ msgstr "Der Cache konnte nicht geleert werden."
 
 msgid "the versions of this loader could not be read"
 msgstr "die Versionen dieses Mod-Loaders konnten nicht gelesen werden"
+msgid "Unavailable"
+msgstr "Nicht verfügbar"

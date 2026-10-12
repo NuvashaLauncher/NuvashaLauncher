@@ -577,3 +577,5 @@ msgstr "Non è stato possibile svuotare la cache."
 
 msgid "the versions of this loader could not be read"
 msgstr "impossibile leggere le versioni di questo caricatore di mod"
+msgid "Unavailable"
+msgstr "Non disponibile"

@@ -573,3 +573,5 @@ msgstr "캐시를 삭제할 수 없습니다."
 
 msgid "the versions of this loader could not be read"
 msgstr "이 모드 로더의 버전을 읽을 수 없습니다"
+msgid "Unavailable"
+msgstr "사용할 수 없음"

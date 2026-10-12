@@ -576,3 +576,5 @@ msgstr "Önbellek temizlenemedi."
 
 msgid "the versions of this loader could not be read"
 msgstr "bu mod yükleyicinin sürümleri okunamadı"
+msgid "Unavailable"
+msgstr "Kullanılamıyor"
