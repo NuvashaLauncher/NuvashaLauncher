@@ -84,6 +84,13 @@ aml_task_scope_set_check_cancellable (AmlTaskScope *scope, gboolean check)
   g_task_set_check_cancellable (scope->task, check);
 }
 
+gboolean
+aml_task_scope_return_error_if_cancelled (AmlTaskScope *scope)
+{
+  g_return_val_if_fail (scope != NULL, FALSE);
+  return g_task_return_error_if_cancelled (scope->task);
+}
+
 void
 aml_task_scope_return_pointer (AmlTaskScope *scope, gpointer result,
                                GDestroyNotify result_free)
