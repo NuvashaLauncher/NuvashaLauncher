@@ -141,6 +141,26 @@ aml_content_ensure_folder (const char *path, GError **error)
   return aml_fs_make_directory (path, 0755, error);
 }
 
+void
+aml_content_operation_release (AmlTaskScope *operation,
+                               GCancellable *cancellable)
+{
+  aml_task_scope_release_when_done (operation, cancellable);
+}
+
+void
+aml_content_operation_forget (AmlTaskScope *operation)
+{
+  aml_task_scope_unref (operation);
+}
+
+void
+aml_content_operation_follow (AmlTaskScope *operation,
+                              GCancellable *cancellable)
+{
+  aml_task_scope_follow_cancellable (operation, cancellable);
+}
+
 /* TRUE when @name is a file of this content, suffix or not: the loaders
  * and the game only pick up the ones that do not carry the suffix. */
 static gboolean

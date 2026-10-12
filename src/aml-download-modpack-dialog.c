@@ -215,7 +215,7 @@ dialog_dispose (GObject *object)
     g_cancellable_cancel (self->fetch);
 
   if (self->scope != NULL)
-    aml_task_scope_cancel (self->scope);
+    aml_modpack_operation_cancel (self->scope);
 
   dialog_forget_widgets (self);
 
@@ -228,7 +228,7 @@ dialog_dispose (GObject *object)
   g_clear_object (&self->manager);
   g_clear_object (&self->search);
   g_clear_object (&self->fetch);
-  aml_task_scope_unref (self->scope);
+  aml_modpack_operation_forget (self->scope);
   self->scope = NULL;
   g_clear_pointer (&self->project, aml_modrinth_project_free);
   g_clear_pointer (&self->version, aml_modrinth_version_free);
@@ -267,7 +267,7 @@ on_dialog_closed (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_data)
 {
   AmlDownloadModpackDialog *self = user_data;
   if (self->import_idle != 0)
-    aml_task_scope_remove_source (self->scope, self->import_idle);
+    aml_modpack_operation_remove (self->scope, self->import_idle);
   self->import_idle = 0;
   self->closed = TRUE;
 
@@ -282,7 +282,7 @@ aml_download_modpack_dialog_init (AmlDownloadModpackDialog *self)
 {
   self->search = g_cancellable_new ();
   self->fetch = g_cancellable_new ();
-  self->scope = aml_task_scope_new (NULL, self->search, NULL, NULL);
+  self->scope = aml_modpack_operation_new (self->search);
   self->rows = NULL;
   self->hits = NULL;
   self->versions = NULL;
@@ -337,12 +337,12 @@ static gboolean
 start_import_idle (gpointer user_data)
 {
   AmlDownloadModpackDialog *self = user_data;
-  aml_task_scope_forget_source (self->scope, self->import_idle);
+  aml_modpack_operation_forget_source (self->scope, self->import_idle);
   self->import_idle = 0;
 
   /* Reuse the same validation, optional-file selection and install flow as
    * a downloaded pack. The selected file is never deleted on failure. */
-  aml_task_scope_release_when_done (
+  aml_modpack_operation_release (
     aml_modpack_new_from_zip_async (self->pack_path, on_pack_parsed,
                                     g_object_ref (self)),
     self->imported ? self->fetch
@@ -370,7 +370,7 @@ aml_download_modpack_dialog_new_for_file (AmlInstanceManager *manager,
                              (gpointer *) &self->pack_download);
   build_import_page (self);
   self->import_idle = g_idle_add (start_import_idle, g_object_ref (self));
-  aml_task_scope_track_source (self->scope, self->import_idle);
+  aml_modpack_operation_track (self->scope, self->import_idle);
   return self;
 }
 
@@ -383,7 +383,7 @@ on_search_timeout (gpointer user_data)
 {
   AmlDownloadModpackDialog *self = user_data;
 
-  aml_task_scope_forget_source (self->scope, self->debounce);
+  aml_modpack_operation_forget_source (self->scope, self->debounce);
   self->debounce = 0;
   run_search (self, FALSE);
 
@@ -396,10 +396,10 @@ on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
   AmlDownloadModpackDialog *self = user_data;
 
   if (self->debounce != 0)
-    aml_task_scope_remove_source (self->scope, self->debounce);
+    aml_modpack_operation_remove (self->scope, self->debounce);
 
   self->debounce = g_timeout_add (SEARCH_DELAY_MS, on_search_timeout, self);
-  aml_task_scope_track_source (self->scope, self->debounce);
+  aml_modpack_operation_track (self->scope, self->debounce);
 }
 
 /* The list is scrolled to its end: ask for the next page. Only one page
@@ -499,7 +499,7 @@ icon_load_free (IconLoad *load)
 {
   g_clear_object (&load->icon);
   if (load->operation != NULL)
-    aml_task_scope_unref (load->operation);
+    aml_modpack_operation_forget (load->operation);
   g_free (load);
 }
 
@@ -703,7 +703,7 @@ run_search (AmlDownloadModpackDialog *self, gboolean append)
       /* The debounce source belongs to the dialog scope. Removing it
          through the scope also forgets its ID, so a later recycled GLib
          source ID cannot be removed during scope teardown. */
-      aml_task_scope_remove_source (self->scope, self->debounce);
+      aml_modpack_operation_remove (self->scope, self->debounce);
       self->debounce = 0;
     }
 
@@ -747,7 +747,7 @@ run_search (AmlDownloadModpackDialog *self, gboolean append)
   /* The callback holds a reference: closing the dialog while a search
    * is in flight finalizes it, and a callback that then reads self would
    * be reading freed memory. */
-  aml_task_scope_release_when_done (
+  aml_modpack_operation_release (
     aml_download_json_async (aml_downloads_get_service (), url, on_search_done, g_object_ref (self)),
     self->search);
 }
@@ -1436,7 +1436,7 @@ ask_free (DetailsAsk *ask)
   g_clear_object (&ask->dialog);
 
   if (ask->operation != NULL)
-    aml_task_scope_unref (ask->operation);
+    aml_modpack_operation_forget (ask->operation);
 
   g_free (ask);
 }
@@ -1502,7 +1502,7 @@ project_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   g_clear_object (&load->dialog);
   if (load->operation != NULL)
-    aml_task_scope_unref (load->operation);
+    aml_modpack_operation_forget (load->operation);
   g_free (load);
 }
 
@@ -1548,7 +1548,7 @@ dialog_details_open (AmlDownloadModpackDialog *self)
                                              project_icon_ready, load);
       /* The same fetch cancellable the details and versions use, so one
          new project cancels all three. */
-      aml_task_scope_follow_cancellable (load->operation, self->fetch);
+      aml_modpack_operation_follow (load->operation, self->fetch);
     }
 
   /* The long description, and the versions of the pack beside it. */
@@ -1560,10 +1560,10 @@ dialog_details_open (AmlDownloadModpackDialog *self)
                                                  on_details_answer, ask);
     /* The same fetch cancellable the versions answer uses, so opening
        another project stops this one. */
-    aml_task_scope_follow_cancellable (ask->operation, self->fetch);
+    aml_modpack_operation_follow (ask->operation, self->fetch);
   }
 
-  aml_task_scope_release_when_done (
+  aml_modpack_operation_release (
     aml_download_json_async (aml_downloads_get_service (), url, on_versions_answer, g_object_ref (self)),
     self->fetch);
 }
@@ -1734,7 +1734,7 @@ install_job_free (InstallJob *job)
   g_clear_object (&job->dialog);
   g_clear_object (&job->download);
   if (job->operation != NULL)
-    aml_task_scope_unref (job->operation);
+    aml_modpack_operation_forget (job->operation);
   g_free (job);
 }
 
@@ -1780,7 +1780,7 @@ on_install_done (GObject *source G_GNUC_UNUSED,
   /* The entry leaves the header's dropdown whether it worked or not, and
      the compressed pack it came from goes with it. */
   aml_download_finish (job->download);
-  aml_task_scope_unref (job->operation);
+  aml_modpack_operation_forget (job->operation);
   job->operation = NULL;
   remove_pack_file (self);
 
@@ -1882,7 +1882,7 @@ start_install (AmlDownloadModpackDialog *self)
 
     /* The × on the header entry is what the user reaches for to stop this,
        so the install follows that entry's cancellable. */
-    aml_task_scope_follow_cancellable (job->operation,
+    aml_modpack_operation_follow (job->operation,
                                        aml_download_get_cancellable (download));
   }
 }
@@ -2063,7 +2063,7 @@ on_pack_downloaded (GObject *source G_GNUC_UNUSED,
       return;
     }
 
-  aml_task_scope_release_when_done (
+  aml_modpack_operation_release (
     aml_modpack_new_from_zip_async (self->pack_path, on_pack_parsed,
                                     user_data),
     self->pack_download != NULL
@@ -2218,7 +2218,7 @@ dialog_start_features (AmlDownloadModpackDialog *self)
     g_free (self->pack_path);
     self->pack_path = g_build_filename (cache_dir, name, NULL);
 
-    aml_task_scope_release_when_done (
+    aml_modpack_operation_release (
       aml_download_file_async (aml_downloads_get_service (), file->url, self->pack_path, file->sha1,
                                G_CHECKSUM_SHA1, on_pack_progress,
                                on_pack_downloaded, g_object_ref (self)),

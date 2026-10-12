@@ -158,9 +158,9 @@ remove_duplicate_project_files (AmlContentPage *self, const char *project_id,
           g_autofree char *directory = NULL;
           g_autofree char *filename = g_path_get_basename (installed->path);
           g_object_get (self->instance, "directory", &directory, NULL);
-          aml_task_scope_unref_when_done (
+          aml_content_operation_release (
             aml_content_index_remove_async (directory, self->type, filename,
-                                            NULL, NULL));
+                                            NULL, NULL), NULL);
         }
     }
 }
@@ -285,7 +285,7 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
          entry.env_client = "required";
          entry.env_server = run->page->type == AML_CONTENT_MOD
                               ? "required" : "unsupported";
-        aml_task_scope_release_when_done (
+        aml_content_operation_release (
           aml_content_index_update_async (instance_directory,
                                           run->page->type, &entry, NULL, NULL),
           aml_download_get_cancellable (run->download));
@@ -344,7 +344,7 @@ fetch_next (FetchRun *run)
   path = g_build_filename (run->folder, file->filename, NULL);
   run->index++;
 
-  aml_task_scope_release_when_done (
+  aml_content_operation_release (
     aml_download_file_async (aml_downloads_get_service (), file->url, path, file->sha1, G_CHECKSUM_SHA1,
                              NULL, fetch_ready, run),
     aml_download_get_cancellable (run->download));
@@ -472,7 +472,7 @@ plan_next (PlanRun *plan)
                                                  self->minecraft_version,
                                                  self->loader,
                                                  plan_versions_ready, plan);
-  aml_task_scope_follow_cancellable (plan->operation, plan->cancellable);
+  aml_content_operation_follow (plan->operation, plan->cancellable);
 }
 
 static void
@@ -492,7 +492,7 @@ plan_free (PlanRun *plan)
   g_clear_object (&plan->cancellable);
 
   if (plan->operation != NULL)
-    aml_task_scope_unref (plan->operation);
+    aml_content_operation_forget (plan->operation);
 
   g_free (plan->title);
   g_free (plan->replaces);
@@ -704,7 +704,7 @@ plan_versions_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
      it; what is left of the plan owns its own work from here. */
   if (plan->operation != NULL)
     {
-      aml_task_scope_unref (plan->operation);
+      aml_content_operation_forget (plan->operation);
       plan->operation = NULL;
     }
 
