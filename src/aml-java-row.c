@@ -174,6 +174,8 @@ fill (AmlJavaRow *self)
     self->wanted != NULL ? realpath (self->wanted, NULL) : NULL;
   guint position = GTK_INVALID_LIST_POSITION;
 
+  self->add_index = GTK_INVALID_LIST_POSITION;
+
   /* The Java the automatic choice stands for: named in the first entry,
      and left out of the list below when it is one of the detected
      runtimes even so. Detection clears the list and fills it again, so
@@ -187,6 +189,13 @@ fill (AmlJavaRow *self)
       g_ptr_array_add (ids, NULL);
       position = 0;
     }
+
+  /* AdwComboRow selects the first item in a non-empty model. When there is
+   * no exact automatic runtime and no explicit Java path, keep the model
+   * genuinely empty rather than allowing an incompatible runtime to appear
+   * selected. */
+  if (fallback == NULL && (self->wanted == NULL || *self->wanted == '\0'))
+    goto finish_model;
 
   for (guint i = 0; self->javas != NULL && i < self->javas->len; i++)
     {
@@ -223,6 +232,8 @@ fill (AmlJavaRow *self)
      added. It names no runtime, so it gets no id. */
   g_ptr_array_add (names, g_strdup (_("Add Java Runtime")));
   self->add_index = names->len - 1;
+
+finish_model:
 
   g_clear_pointer (&self->ids, g_ptr_array_unref);
   self->ids = ids;
