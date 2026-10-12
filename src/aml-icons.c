@@ -27,7 +27,8 @@
 char *
 aml_icon_cache_directory (void)
 {
-  return g_build_filename (g_get_user_cache_dir (), "AML", "icons", NULL);
+  return g_build_filename (g_get_user_cache_dir (), "AML", "icons",
+                           "external", NULL);
 }
 
 /* The name a URL is cached under. All cached icons are normalized to PNG at

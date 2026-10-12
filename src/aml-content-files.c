@@ -675,7 +675,7 @@ apply_resource_metadata (AmlContentFile *file)
   if (icon != NULL && file->sha1 != NULL)
     {
       g_autofree char *directory = g_build_filename (g_get_user_cache_dir (),
-                                                      "AML", "icons", NULL);
+                                                      "AML", "icons", "local", NULL);
       g_autofree char *name = g_strconcat (file->sha1, ".png", NULL);
       g_autofree char *path = g_build_filename (directory, name, NULL);
       if (aml_fs_make_directory (directory, 0755, NULL) &&
@@ -748,7 +748,7 @@ apply_local_metadata (AmlContentFile *file, AmlContentType type)
   if (icon_data != NULL && file->sha1 != NULL)
     {
       g_autofree char *directory = g_build_filename (g_get_user_cache_dir (),
-                                                      "AML", "icons", NULL);
+                                                      "AML", "icons", "local", NULL);
       g_autofree char *name = g_strconcat (file->sha1, ".png", NULL);
       g_autofree char *path = g_build_filename (directory, name, NULL);
       if (aml_fs_make_directory (directory, 0755, NULL) &&
