@@ -9,11 +9,10 @@
 
 #define AML_MODPACK_FORMAT_VERSION 1
 
-void extract_overrides_async (const char *archive_path,
-                              const char *directory,
-                              GCancellable *cancellable,
-                              GAsyncReadyCallback callback,
-                              gpointer user_data);
+AmlTaskScope *extract_overrides_async (const char *archive_path,
+                                       const char *directory,
+                                       GAsyncReadyCallback callback,
+                                       gpointer user_data);
 gboolean extract_overrides_finish (GAsyncResult *result, GError **error);
 
 #endif /* AML_MODPACK_PRIVATE_H */

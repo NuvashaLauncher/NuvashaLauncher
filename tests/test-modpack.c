@@ -237,6 +237,8 @@ verify_file_done (GObject *source G_GNUC_UNUSED,
   AsyncWait *wait = user_data;
 
   wait->value = aml_modpack_verify_file_finish (result, &wait->error);
+  aml_task_scope_unref (wait->operation);
+  wait->operation = NULL;
   g_main_loop_quit (wait->loop);
 }
 
@@ -246,7 +248,8 @@ verify_now (const AmlModpackFile *file, const char *path, GError **error)
 {
   AsyncWait wait = { 0 };
 
-  aml_modpack_verify_file_async (file, path, NULL, verify_file_done, &wait);
+  wait.operation = aml_modpack_verify_file_async (file, path, verify_file_done,
+                                                 &wait);
   async_wait_run (&wait);
 
   *error = wait.error;

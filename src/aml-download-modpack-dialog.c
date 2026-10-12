@@ -342,11 +342,11 @@ start_import_idle (gpointer user_data)
 
   /* Reuse the same validation, optional-file selection and install flow as
    * a downloaded pack. The selected file is never deleted on failure. */
-  aml_modpack_new_from_zip_async (
-    self->pack_path,
+  aml_task_scope_release_when_done (
+    aml_modpack_new_from_zip_async (self->pack_path, on_pack_parsed,
+                                    g_object_ref (self)),
     self->imported ? self->fetch
-                   : aml_download_get_cancellable (self->pack_download),
-    on_pack_parsed, g_object_ref (self));
+                   : aml_download_get_cancellable (self->pack_download));
   g_object_unref (self);
   return G_SOURCE_REMOVE;
 }
@@ -2084,11 +2084,11 @@ on_pack_downloaded (GObject *source G_GNUC_UNUSED,
       return;
     }
 
-  aml_modpack_new_from_zip_async (
-    self->pack_path,
+  aml_task_scope_release_when_done (
+    aml_modpack_new_from_zip_async (self->pack_path, on_pack_parsed,
+                                    user_data),
     self->pack_download != NULL
-      ? aml_download_get_cancellable (self->pack_download) : self->fetch,
-                                  on_pack_parsed, user_data);
+      ? aml_download_get_cancellable (self->pack_download) : self->fetch);
 }
 
 static void
