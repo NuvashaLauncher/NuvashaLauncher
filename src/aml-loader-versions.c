@@ -628,10 +628,10 @@ versions_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     }
 
   if (error != NULL)
-    g_task_return_error (request->task, g_steal_pointer (&error));
+    aml_task_scope_return_error (request->scope, g_steal_pointer (&error));
   else
-    g_task_return_pointer (request->task, versions,
-                           (GDestroyNotify) g_ptr_array_unref);
+    aml_task_scope_return_pointer (request->scope, versions,
+                                   (GDestroyNotify) g_ptr_array_unref);
 
   versions_request_free (request);
 }
@@ -664,7 +664,7 @@ aml_loaders_versions_async (AmlLoader           loader,
   request->versions = g_ptr_array_new_with_free_func (
     (GDestroyNotify) aml_loader_version_free);
 
-  g_task_set_check_cancellable (request->task, FALSE);
+  aml_task_scope_set_check_cancellable (request->scope, FALSE);
 
   if (api != NULL)
     {
@@ -683,10 +683,11 @@ aml_loaders_versions_async (AmlLoader           loader,
     }
   else
     {
-      g_task_return_new_error (request->task, AML_LOADERS_ERROR,
-                               AML_LOADERS_ERROR_UNSUPPORTED,
-                               "AML does not install %s",
-                               aml_loader_display_name (loader));
+      aml_task_scope_return_error (
+        request->scope,
+        g_error_new (AML_LOADERS_ERROR, AML_LOADERS_ERROR_UNSUPPORTED,
+                     "AML does not install %s",
+                     aml_loader_display_name (loader)));
       versions_request_free (request);
       return;
     }
