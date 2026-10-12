@@ -163,6 +163,7 @@ get_session (void)
 typedef struct _DownloadRequest
 {
   GTask *task; /* the only reference: dropped when the request ends */
+  AmlDownloadService *service; /* application-owned transfer scheduler */
 
   /* Set once when the request is created. */
   char *url;
@@ -569,7 +570,7 @@ compare_waiting_requests (gconstpointer left, gconstpointer right,
 static void
 start_transfer (DownloadRequest *request)
 {
-  get_service ();
+  AmlDownloadService *service = request->service;
   gboolean interactive = request->priority >= DOWNLOAD_PRIORITY_INTERACTIVE;
   guint total = service->interactive_running + service->bulk_running;
   gboolean has_slot = total < MAX_CONCURRENT &&
@@ -604,6 +605,7 @@ start_transfer (DownloadRequest *request)
 static void
 release_slot (DownloadRequest *request)
 {
+  AmlDownloadService *service = request->service;
   if (!request->holds_slot)
     return;
 
@@ -1897,7 +1899,8 @@ aml_download_file_async (const char *url,
   /* Borrowed: the caller's handle keeps the operation alive, and the
      request is answered before it goes away. */
   request->scope = scope;
-  request->task = g_object_ref (aml_task_scope_task (scope));
+   request->service = get_service ();
+   request->task = g_object_ref (aml_task_scope_task (scope));
   request->url = g_strdup (url);
   request->dest_path = g_strdup (dest_path);
   request->expected_hash = g_strdup (expected_hash);
@@ -1953,7 +1956,8 @@ aml_download_json_async (const char *url,
   /* Borrowed: the caller's handle keeps the operation alive, and the
      request is answered before it goes away. */
   request->scope = scope;
-  request->task = g_object_ref (aml_task_scope_task (scope));
+   request->service = get_service ();
+   request->task = g_object_ref (aml_task_scope_task (scope));
   request->url = g_strdup (url);
   request->json = TRUE;
   request->user_data = user_data;
@@ -2035,7 +2039,8 @@ aml_download_json_post_async (const char           *url,
   /* Borrowed: the caller's handle keeps the operation alive, and the
      request is answered before it goes away. */
   request->scope = scope;
-  request->task = g_object_ref (aml_task_scope_task (scope));
+   request->service = get_service ();
+   request->task = g_object_ref (aml_task_scope_task (scope));
   request->url = g_strdup (url);
   request->body = g_strdup (body);
   request->user_agent = g_strdup (user_agent);
@@ -2076,7 +2081,8 @@ aml_download_json_cached_async (const char *url, GAsyncReadyCallback callback,
   /* Borrowed: the caller's handle keeps the operation alive, and the
      request is answered before it goes away. */
   request->scope = scope;
-  request->task = g_object_ref (aml_task_scope_task (scope));
+   request->service = get_service ();
+   request->task = g_object_ref (aml_task_scope_task (scope));
   request->url = g_strdup (url);
   request->json = TRUE;
   request->api_cache = TRUE;
@@ -2116,7 +2122,8 @@ aml_download_json_post_cached_async (const char *url, const char *body,
   /* Borrowed: the caller's handle keeps the operation alive, and the
      request is answered before it goes away. */
   request->scope = scope;
-  request->task = g_object_ref (aml_task_scope_task (scope));
+   request->service = get_service ();
+   request->task = g_object_ref (aml_task_scope_task (scope));
   request->url = g_strdup (url);
   request->body = g_strdup (body);
   request->user_agent = g_strdup (user_agent);
