@@ -56,6 +56,7 @@ void aml_task_scope_set_check_cancellable (AmlTaskScope *scope,
 void aml_task_scope_return_pointer (AmlTaskScope *scope,
                                     gpointer       result,
                                     GDestroyNotify result_free);
+void aml_task_scope_return_boolean (AmlTaskScope *scope, gboolean result);
 void aml_task_scope_return_error (AmlTaskScope *scope, GError *error);
 void aml_task_scope_track_source (AmlTaskScope *scope, guint source_id);
 void aml_task_scope_remove_source (AmlTaskScope *scope, guint source_id);

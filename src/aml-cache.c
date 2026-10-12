@@ -7,12 +7,6 @@
 
 #define CACHE_SUBDIR "AML"
 
-typedef struct {
-  GTask *task;
-  GFileEnumerator *enumerator;
-} ClearCache;
-
-
 static char *
 cache_directory (const char *child)
 {
