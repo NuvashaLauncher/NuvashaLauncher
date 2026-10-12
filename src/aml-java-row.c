@@ -62,6 +62,7 @@ struct _AmlJavaRow
 
   gboolean ready;
   gboolean disposed;
+  gboolean rebuilding;
   GtkButton *retry;
 
   /* The request the row is waiting for. Borrowed from the JavaAsk that
@@ -120,10 +121,10 @@ put_model (AmlJavaRow *self, GPtrArray *names, guint position)
   /* Replacing the model can transiently select its first item. That is an
    * implementation detail, not a user choice: do not let the selection
    * handler persist it as the instance's Java path. */
-  g_signal_handlers_block_by_func (self, G_CALLBACK (on_picked), self);
+  self->rebuilding = TRUE;
   adw_combo_row_set_model (ADW_COMBO_ROW (self), G_LIST_MODEL (list));
   adw_combo_row_set_selected (ADW_COMBO_ROW (self), position);
-  g_signal_handlers_unblock_by_func (self, G_CALLBACK (on_picked), self);
+  self->rebuilding = FALSE;
 }
 
 static void
@@ -448,6 +449,9 @@ on_picked (GObject    *object G_GNUC_UNUSED,
   GtkRoot *root;
   GtkFileDialog *dialog;
   guint selected = adw_combo_row_get_selected (ADW_COMBO_ROW (self));
+
+  if (self->rebuilding)
+    return;
 
   if (selected != self->add_index)
     {
