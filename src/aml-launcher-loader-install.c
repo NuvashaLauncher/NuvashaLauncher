@@ -112,10 +112,18 @@ on_install_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
      the Minecraft version, and the client jar its processors patched. */
   merged = aml_version_description_merge (request->profile, install->description);
 
-  aml_resolve_description_async (merged, merged->id, install->client_jar, NULL,
-                                 NULL, NULL, self->preparation.cancellable,
-                                 on_resolve_progress, self, on_resolved,
-                                 g_object_ref (self));
+  /* The resolve is the launch now, and it keeps itself: the request is
+     about the install, which is over. */
+  {
+    AmlTaskScope *resolving = aml_resolve_description_async (
+      merged, merged->id, install->client_jar, NULL, NULL, NULL,
+      on_resolve_progress, self, on_resolved, g_object_ref (self));
+
+    aml_task_scope_follow_cancellable (resolving,
+                                       self->preparation.cancellable);
+    aml_task_scope_unref_when_done (resolving);
+  }
+
   loader_request_free (request);
 }
 

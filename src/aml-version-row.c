@@ -28,6 +28,11 @@ struct _AmlVersionRow
   /* Cancelled when a load replaces it or when the row goes away. */
   GCancellable *cancellable;
 
+  /* The load the row is waiting for. Borrowed from the ManifestAsk that
+     started it: that one releases it when the answer arrives, and a newer
+     load replaces it before an older answer can arrive. */
+  AmlTaskScope *operation;
+
   /* The version ids behind the model, in the order the row shows
    * them. Never NULL, empty while there is no list. */
   GPtrArray *ids;
@@ -163,18 +168,45 @@ fill (AmlVersionRow *self, AmlVersionManifest *manifest)
  * Fetching the manifest
  * ---------------------------------------------------------- */
 
+/* One load of the manifest: the row, which can be disposed while the
+   answer is on its way, and the handle that answer is meant to release. */
+typedef struct
+{
+  AmlVersionRow *row;
+  AmlTaskScope *operation;
+} ManifestAsk;
+
+static void
+manifest_ask_free (ManifestAsk *ask)
+{
+  AmlVersionRow *row = ask->row;
+
+  /* The row's own pointer is a loan of this reference, so it is given
+     back before the reference goes. */
+  if (row != NULL && row->operation == ask->operation)
+    row->operation = NULL;
+
+  g_clear_object (&ask->row);
+
+  if (ask->operation != NULL)
+    aml_task_scope_unref (ask->operation);
+
+  g_free (ask);
+}
+
 static void
 manifest_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                  gpointer user_data)
 {
-  AmlVersionRow *self = user_data;
+  ManifestAsk *ask = user_data;
+  AmlVersionRow *self = ask->row;
   g_autoptr (GError) error = NULL;
   g_autoptr (AmlVersionManifest) manifest = NULL;
 
   /* The answer belongs to the load this row already replaced, which
    * was cancelled on the way out: it says nothing about the list the
    * row shows now. */
-  if (g_task_get_cancellable (G_TASK (result)) == self->cancellable)
+  if (self != NULL && self->operation == ask->operation)
     {
       manifest = aml_version_manifest_fetch_finish (result, &error);
 
@@ -184,8 +216,8 @@ manifest_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         show_error (self, error->message);
     }
 
-  /* The reference the load took on the row. */
-  g_object_unref (self);
+  /* The reference the load took on the row, and its handle. */
+  manifest_ask_free (ask);
 }
 
 static void
@@ -230,8 +262,15 @@ aml_version_row_load (AmlVersionRow *self,
 
   show_loading (self);
 
-  aml_version_manifest_fetch_async (AML_VERSION_MANIFEST_URL, self->cancellable,
-                                    manifest_loaded, g_object_ref (self));
+{
+    ManifestAsk *ask = g_new0 (ManifestAsk, 1);
+
+    ask->row = g_object_ref (self);
+    ask->operation = aml_version_manifest_fetch_async (AML_VERSION_MANIFEST_URL,
+                                                       manifest_loaded, ask);
+    aml_task_scope_follow_cancellable (ask->operation, self->cancellable);
+    self->operation = ask->operation;
+  }
 }
 
 const char *

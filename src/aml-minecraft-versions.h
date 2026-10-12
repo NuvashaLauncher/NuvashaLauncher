@@ -20,6 +20,8 @@
 #include <gio/gio.h>
 #include <json-glib/json-glib.h>
 
+#include "aml-task.h"
+
 G_BEGIN_DECLS
 
 /* The address Mojang's own launcher uses. launchermeta.mojang.com
@@ -270,10 +272,9 @@ GPtrArray *aml_version_description_legacy_argv (AmlVersionDescription *self);
  * it. The copy on disk is replaced on every successful fetch and is
  * never used as a fallback: a list Mojang no longer serves is worse
  * than a visible failure the user can retry. */
-void aml_version_manifest_fetch_async (const char         *url,
-                                       GCancellable       *cancellable,
-                                       GAsyncReadyCallback callback,
-                                       gpointer            user_data);
+AmlTaskScope *aml_version_manifest_fetch_async (const char *url,
+                                                GAsyncReadyCallback callback,
+                                                gpointer user_data);
 
 /* (transfer full). Errors come from the download module while
  * fetching and from AML_MC_ERROR while parsing. */
@@ -284,11 +285,10 @@ AmlVersionManifest *aml_version_manifest_fetch_finish (GAsyncResult *result,
  * published, follows inheritsFrom up to the root and merges every step
  * into one description. Cached documents are verified against that sha1
  * before they are used, so a stale or damaged copy is downloaded again. */
-void aml_version_load_async (AmlVersionManifest *manifest,
-                             const char         *version_id,
-                             GCancellable       *cancellable,
-                             GAsyncReadyCallback callback,
-                             gpointer            user_data);
+AmlTaskScope *aml_version_load_async (AmlVersionManifest *manifest,
+                                      const char *version_id,
+                                      GAsyncReadyCallback callback,
+                                      gpointer user_data);
 
 /* (transfer full). AML_MC_ERROR_NOT_FOUND when the manifest has no
  * such version, AML_MC_ERROR_CYCLE when inheritsFrom walks in a

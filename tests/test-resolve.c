@@ -758,6 +758,7 @@ typedef struct
   AsyncRun *run;
   gboolean success;
   GError *error;
+  AmlTaskScope *operation;
 } ExtractCall;
 
 static void
@@ -767,6 +768,8 @@ extract_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   ExtractCall *call = user_data;
 
   call->success = aml_resolve_extract_natives_finish (result, &call->error);
+  aml_task_scope_unref (call->operation);
+  call->operation = NULL;
 
   if (--call->run->pending == 0)
     g_main_loop_quit (call->run->loop);
@@ -788,8 +791,8 @@ extract_one (const char *jar, const char *natives_dir, GPtrArray *exclude,
   g_ptr_array_add (jars, file);
 
   call->run->pending++;
-  aml_resolve_extract_natives_async (jars, natives_dir, NULL,
-                                     extract_finished, call);
+  call->operation = aml_resolve_extract_natives_async (jars, natives_dir,
+                                                       extract_finished, call);
 }
 
 static void
@@ -1057,6 +1060,7 @@ typedef struct
   guint last_done;
   guint last_total;
   char *last_stage;
+  AmlTaskScope *operation;
 } ResolveCall;
 
 static void
@@ -1066,6 +1070,8 @@ manifest_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   ResolveCall *call = user_data;
 
   call->manifest = aml_version_manifest_fetch_finish (result, &call->error);
+  aml_task_scope_unref (call->operation);
+  call->operation = NULL;
 
   if (--call->run->pending == 0)
     g_main_loop_quit (call->run->loop);
@@ -1078,6 +1084,8 @@ resolve_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   ResolveCall *call = user_data;
 
   call->resolved = aml_resolve_version_finish (result, &call->error);
+  aml_task_scope_unref (call->operation);
+  call->operation = NULL;
 
   if (--call->run->pending == 0)
     g_main_loop_quit (call->run->loop);
@@ -1275,7 +1283,8 @@ fetch_manifest (AsyncRun *run, ResolveCall *call, const char *url)
   call->run = run;
   run->pending++;
 
-  aml_version_manifest_fetch_async (url, NULL, manifest_finished, call);
+  call->operation = aml_version_manifest_fetch_async (url, manifest_finished,
+                                                      call);
 }
 
 static void
@@ -1286,9 +1295,10 @@ start_resolve (AsyncRun *run, ResolveCall *call, AmlVersionManifest *manifest,
   call->run = run;
   run->pending++;
 
-  aml_resolve_version_async (manifest, version_id, data_dir, natives_dir,
-                             asset_base_url, NULL, resolve_progress, call,
-                             resolve_finished, call);
+  call->operation = aml_resolve_version_async (manifest, version_id, data_dir,
+                                               natives_dir, asset_base_url,
+                                               resolve_progress, call,
+                                               resolve_finished, call);
 }
 
 static char *

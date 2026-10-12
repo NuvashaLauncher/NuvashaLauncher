@@ -814,11 +814,15 @@ typedef struct
   GError *error;
   AmlVersionManifest *manifest;
   AmlVersionDescription *description;
+  AmlTaskScope *operation;
 } AsyncCall;
 
 static void
 call_finished (AsyncCall *call)
 {
+  aml_task_scope_unref (call->operation);
+  call->operation = NULL;
+
   if (--call->run->pending == 0)
     g_main_loop_quit (call->run->loop);
 }
@@ -902,8 +906,9 @@ call_manifest (AsyncRun *run, AsyncCall *call, const char *url)
   call->run = run;
   run->pending++;
 
-  aml_version_manifest_fetch_async (url, run->cancellable, manifest_finished,
-                                    call);
+  call->operation = aml_version_manifest_fetch_async (url, manifest_finished,
+                                                      call);
+  aml_task_scope_follow_cancellable (call->operation, run->cancellable);
 }
 
 static void
@@ -913,8 +918,9 @@ call_load (AsyncRun *run, AsyncCall *call, AmlVersionManifest *manifest,
   call->run = run;
   run->pending++;
 
-  aml_version_load_async (manifest, version_id, run->cancellable,
-                          load_finished, call);
+  call->operation = aml_version_load_async (manifest, version_id,
+                                             load_finished, call);
+  aml_task_scope_follow_cancellable (call->operation, run->cancellable);
 }
 
 /* ---------------------------------------------------------- *
