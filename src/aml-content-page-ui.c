@@ -167,6 +167,24 @@ aml_content_page_on_stack_switched (GObject *stack, GParamSpec *pspec G_GNUC_UNU
 }
 
 void
+aml_content_page_reset_for_tab_switch (AmlContentPage *self)
+{
+  g_return_if_fail (AML_IS_CONTENT_PAGE (self));
+
+  if (self->browse.filter_button != NULL)
+    {
+      GtkPopover *popover = gtk_menu_button_get_popover (
+        self->browse.filter_button);
+      if (popover != NULL)
+        gtk_popover_popdown (popover);
+    }
+
+  aml_content_page_close_detail (self);
+  if (self->stack != NULL)
+    adw_view_stack_set_visible_child_name (self->stack, "installed");
+}
+
+void
 aml_content_page_build_browse (AmlContentPage *self)
 {
   GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
@@ -235,6 +253,7 @@ aml_content_page_build_browse (AmlContentPage *self)
   gtk_widget_set_hexpand (GTK_WIDGET (top), TRUE);
 
    self->browse.filter_box = GTK_BOX (filter_box);
+   self->browse.filter_button = filter_button;
   gtk_widget_set_margin_top (GTK_WIDGET (filter_box), 6);
   gtk_widget_set_margin_bottom (GTK_WIDGET (filter_box), 6);
   gtk_widget_set_margin_start (GTK_WIDGET (filter_box), 6);
