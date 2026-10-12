@@ -651,10 +651,18 @@ on_change_icon_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
  * Open folder, duplicate, delete
  * ---------------------------------------------------------- */
 
+typedef struct
+{
+  AmlInstancePage *page;
+  AmlTaskScope *operation;
+} OpenFolderWait;
+
 static void
 on_open_folder_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  OpenFolderWait *wait = user_data;
+  AmlInstancePage *self = wait->page;
+  AmlTaskScope *operation = wait->operation;
   g_autoptr (GError) error = NULL;
 
   if (!aml_instance_manager_open_folder_finish (AML_INSTANCE_MANAGER (source),
@@ -662,6 +670,8 @@ on_open_folder_ready (GObject *source, GAsyncResult *result, gpointer user_data)
     show_toast (self, error->message);
 
   g_object_unref (self);
+  aml_task_scope_unref (operation);
+  g_free (wait);
 }
 
 static void
@@ -669,9 +679,11 @@ on_open_folder_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   AmlInstancePage *self = user_data;
 
-  aml_instance_manager_open_folder_async (self->manager, self->instance, NULL,
-                                          on_open_folder_ready,
-                                          g_object_ref (self));
+  OpenFolderWait *wait = g_new0 (OpenFolderWait, 1);
+  wait->page = g_object_ref (self);
+  wait->operation =
+    aml_instance_manager_open_folder_async (self->manager, self->instance,
+                                            on_open_folder_ready, wait);
 }
 
 static void
