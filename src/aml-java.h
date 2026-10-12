@@ -15,6 +15,8 @@
 
 #include <gio/gio.h>
 
+#include "aml-task.h"
+
 G_BEGIN_DECLS
 
 #define AML_JAVA_ERROR (aml_java_error_quark ())
@@ -74,10 +76,9 @@ const AmlJava *aml_java_select (GPtrArray *javas,
 
 /* Runs "<executable> -version" (stderr is merged into stdout, the
  * flags Go answers) and parses what comes back. */
-void aml_java_probe_async (const char         *executable,
-                           GCancellable       *cancellable,
-                           GAsyncReadyCallback callback,
-                           gpointer            user_data);
+AmlTaskScope *aml_java_probe_async (const char *executable,
+                                    GAsyncReadyCallback callback,
+                                    gpointer user_data);
 
 /* (transfer full). Errors from the spawn, from AML_JAVA_ERROR and
  * G_IO_ERROR_CANCELLED for a cancelled caller. */
@@ -88,10 +89,9 @@ AmlJava *aml_java_probe_finish (GAsyncResult  *result,
  * version, deduplicated by the resolved real path of @executables
  * (elements are stolen into the result in the order they were probed).
  * @executables is NULL-terminated. */
-void aml_java_probe_list_async (char            **executables,
-                                GCancellable    *cancellable,
-                                GAsyncReadyCallback callback,
-                                gpointer         user_data);
+AmlTaskScope *aml_java_probe_list_async (char **executables,
+                                         GAsyncReadyCallback callback,
+                                         gpointer user_data);
 
 /* (transfer full). The array holds AmlJava* with aml_java_free() as
  * the element and the array free function, so
@@ -105,9 +105,8 @@ GPtrArray *aml_java_probe_list_finish (GAsyncResult  *result,
  * ~/.jdks, ~/.sdkman/candidates/java, ~/.asdf/installs/java,
  * ~/.local/share/mise/installs/java), $JAVA_HOME/bin/java and the
  * "java" on $PATH. Same result shape as aml_java_probe_list_finish(). */
-void aml_java_detect_async (GCancellable        *cancellable,
-                            GAsyncReadyCallback callback,
-                            gpointer              user_data);
+AmlTaskScope *aml_java_detect_async (GAsyncReadyCallback callback,
+                                     gpointer user_data);
 
 GPtrArray *aml_java_detect_finish (GAsyncResult  *result,
                                    GError       **error);
@@ -118,10 +117,9 @@ GPtrArray *aml_java_detect_finish (GAsyncResult  *result,
  * what a headless test uses to scan fake VMs in a temp directory.
  * Unlike aml_java_detect_async() it never reaches $JAVA_HOME, $PATH
  * or anything outside the given roots. */
-void aml_java_detect_list_async (char            **roots,
-                                 GCancellable    *cancellable,
-                                 GAsyncReadyCallback callback,
-                                 gpointer         user_data);
+AmlTaskScope *aml_java_detect_list_async (char **roots,
+                                          GAsyncReadyCallback callback,
+                                          gpointer user_data);
 
 GPtrArray *aml_java_detect_list_finish (GAsyncResult  *result,
                                         GError       **error);

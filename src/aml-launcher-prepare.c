@@ -155,11 +155,30 @@ run_the_game (AmlLauncher *self)
   aml_launcher_spawn (self, argv, NULL);
 }
 
+/* The Java search of a launch: the launcher, which a stop can take away
+   while the search runs, and the handle the answer is meant to release. */
+typedef struct {
+  AmlLauncher *launcher;
+  AmlTaskScope *operation;
+} JavaSearch;
+
+static void
+java_search_free (JavaSearch *search)
+{
+  g_clear_object (&search->launcher);
+
+  if (search->operation != NULL)
+    aml_task_scope_unref (search->operation);
+
+  g_free (search);
+}
+
 static void
 on_java_detected (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                   gpointer user_data)
 {
-  AmlLauncher *self = user_data;
+  JavaSearch *search = user_data;
+  AmlLauncher *self = search->launcher;
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) javas = aml_java_detect_finish (result, &error);
   g_autofree char *instance_java = NULL;
@@ -168,7 +187,7 @@ on_java_detected (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   if (javas == NULL)
     {
       launch_finished_with_error (self, g_steal_pointer (&error));
-      g_object_unref (self);
+      java_search_free (search);
       return;
     }
 
@@ -176,7 +195,7 @@ on_java_detected (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
      after it. */
   if (self->process.stop_requested)
     {
-      g_object_unref (self);
+      java_search_free (search);
       return;
     }
 
@@ -188,14 +207,14 @@ on_java_detected (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   if (java == NULL)
     {
-      g_object_unref (self);
+      java_search_free (search);
       return;
     }
 
   remember_java (self, java);
   run_the_game (self);
 
-  g_object_unref (self);
+  java_search_free (search);
 }
 
 void
@@ -236,8 +255,15 @@ on_resolved (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   set_state (self, AML_LAUNCH_LAUNCHING, "choosing Java");
 
-  aml_java_detect_async (self->preparation.cancellable, on_java_detected,
-                         g_object_ref (self));
+  {
+    JavaSearch *search = g_new0 (JavaSearch, 1);
+
+    search->launcher = g_object_ref (self);
+    search->operation = aml_java_detect_async (on_java_detected, search);
+    aml_task_scope_follow_cancellable (search->operation,
+                                       self->preparation.cancellable);
+  }
+
   g_object_unref (self);
 }
 

@@ -339,6 +339,7 @@ typedef struct
   GPtrArray *javas;
   GError *error;
   AmlJava *single;
+  AmlTaskScope *operation;
 } JavaCall;
 
 static void
@@ -349,6 +350,8 @@ list_finished (GObject *source G_GNUC_UNUSED,
   JavaCall *call = user_data;
 
   call->javas = aml_java_probe_list_finish (result, &call->error);
+  aml_task_scope_unref (call->operation);
+  call->operation = NULL;
   g_main_loop_quit (call->run.loop);
 }
 
@@ -360,6 +363,8 @@ single_finished (GObject *source G_GNUC_UNUSED,
   JavaCall *call = user_data;
 
   call->single = aml_java_probe_finish (result, &call->error);
+  aml_task_scope_unref (call->operation);
+  call->operation = NULL;
   g_main_loop_quit (call->run.loop);
 }
 
@@ -388,8 +393,8 @@ test_probing_fake_scripts_and_dedup (void)
   executables[4] = NULL;
 
   call.javas = NULL;
-  aml_java_probe_list_async (g_strdupv (executables), NULL, list_finished,
-                             &call);
+  call.operation = aml_java_probe_list_async (g_strdupv (executables),
+                                             list_finished, &call);
   run_one (&call.run);
 
   g_assert_no_error (call.error);
@@ -481,7 +486,7 @@ test_detect_list_jre_layout_and_dedup (void)
   roots[0] = root;
   roots[1] = NULL;
 
-  aml_java_detect_list_async (roots, NULL, list_finished, &call);
+  call.operation = aml_java_detect_list_async (roots, list_finished, &call);
   run_one (&call.run);
 
   g_assert_no_error (call.error);
@@ -547,7 +552,7 @@ test_detect_headless_roots (void)
 
   roots[0] = root;
   roots[1] = NULL;
-  aml_java_detect_list_async (roots, NULL, list_finished, &call);
+  call.operation = aml_java_detect_list_async (roots, list_finished, &call);
   run_one (&call.run);
 
   g_assert_no_error (call.error);
@@ -577,7 +582,7 @@ test_probing_parses_the_report (void)
                                              report_with_settings);
   JavaCall call = { 0 };
 
-  aml_java_probe_async (script, NULL, single_finished, &call);
+  call.operation = aml_java_probe_async (script, single_finished, &call);
   run_one (&call.run);
 
   g_assert_no_error (call.error);

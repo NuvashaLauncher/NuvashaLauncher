@@ -318,6 +318,7 @@ aml_java_parse_version (const char  *output,
 
 typedef struct
 {
+  /* Borrowed from the operation the caller owns until the answer. */
   AmlTaskScope *scope;
   char *executable;
   GSubprocess *process;
@@ -328,7 +329,6 @@ probe_destroyed (gpointer data)
 {
   Probe *probe = data;
 
-  aml_task_scope_unref (probe->scope);
   g_clear_pointer (&probe->executable, g_free);
   g_clear_object (&probe->process);
   g_free (probe);
@@ -382,14 +382,13 @@ probe_communicate (GObject      *source G_GNUC_UNUSED,
   probe_destroyed (probe);
 }
 
-void
+AmlTaskScope *
 aml_java_probe_async (const char         *executable,
-                      GCancellable       *cancellable,
                       GAsyncReadyCallback callback,
                       gpointer            user_data)
 {
-  AmlTaskScope *scope =
-    aml_task_scope_new (NULL, cancellable, callback, user_data);
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
   g_autoptr (GError) error = NULL;
   const char * const argv[] = { executable, "-XshowSettings:properties", "-version",
                    NULL };
@@ -398,6 +397,9 @@ aml_java_probe_async (const char         *executable,
   aml_task_scope_set_check_cancellable (scope, FALSE);
 
   probe = g_new0 (Probe, 1);
+
+  /* Borrowed: the caller's handle keeps the operation alive, and the
+     probe is answered before it goes away. */
   probe->scope = scope;
   probe->executable = g_strdup (executable);
 
@@ -408,14 +410,17 @@ aml_java_probe_async (const char         *executable,
 
   if (probe->process == NULL)
     {
-      aml_task_scope_return_error (probe->scope, g_steal_pointer (&error));
+      aml_task_scope_return_error_deferred (probe->scope,
+                                            g_steal_pointer (&error));
       probe_destroyed (probe);
-      return;
+      return g_steal_pointer (&scope);
     }
 
   g_subprocess_communicate_utf8_async (probe->process, NULL,
                                        aml_task_scope_get_cancellable (scope),
                                        probe_communicate, probe);
+
+  return g_steal_pointer (&scope);
 }
 
 AmlJava *
@@ -487,10 +492,18 @@ probe_list_sequence_step (AmlTaskSequence *sequence G_GNUC_UNUSED,
       return;
     }
 
-  aml_java_probe_async (list->executables[list->next],
-                        aml_task_sequence_get_cancellable (list->sequence),
-                        probe_list_probed,
-                        list);
+  {
+    AmlTaskScope *probe =
+      aml_java_probe_async (list->executables[list->next], probe_list_probed,
+                            list);
+
+    /* One probe of many: it follows the sequence's cancellation and
+       releases itself once it has answered. */
+    aml_task_scope_follow_cancellable (
+      probe, aml_task_sequence_get_cancellable (list->sequence));
+    aml_task_scope_unref_when_done (probe);
+  }
+
   list->next++;
 }
 
@@ -513,15 +526,16 @@ probe_list_probed (GObject      *source G_GNUC_UNUSED,
   aml_task_sequence_next (list->sequence);
 }
 
-void
+AmlTaskScope *
 aml_java_probe_list_async (char            **executables,
-                           GCancellable    *cancellable,
                            GAsyncReadyCallback callback,
                            gpointer         user_data)
 {
   ProbeList *list = NULL;
+  AmlTaskScope *scope = NULL;
+  g_autoptr (GCancellable) cancellable = g_cancellable_new ();
 
-  g_return_if_fail (executables != NULL);
+  g_return_val_if_fail (executables != NULL, NULL);
 
   list = g_new0 (ProbeList, 1);
   list->executables = executables; /* the caller gives up the array */
@@ -532,9 +546,14 @@ aml_java_probe_list_async (char            **executables,
   list->sequence = aml_task_sequence_new (
     cancellable, callback, user_data, probe_list_sequence_step, list,
     probe_list_destroyed);
-  AmlTaskSequence *sequence = list->sequence;
-  aml_task_sequence_start (sequence);
-  aml_task_sequence_unref (sequence);
+
+  /* The handle the caller gets back stands for the whole run. The
+     sequence keeps the task itself. */
+  scope = aml_task_sequence_scope (list->sequence);
+
+  aml_task_sequence_start (list->sequence);
+  aml_task_sequence_unref (list->sequence);
+  return scope;
 }
 
 GPtrArray *
@@ -724,23 +743,26 @@ detected (GObject      *source G_GNUC_UNUSED,
   g_autoptr (GError) error = NULL;
   GPtrArray *javas = aml_java_probe_list_finish (result, &error);
 
-  if (javas == NULL)
-    aml_task_scope_return_error (detect->scope, g_steal_pointer (&error));
-  else
-    aml_task_scope_return_pointer (detect->scope, javas,
-                                   (GDestroyNotify) g_ptr_array_unref);
+  /* The reference this detection held is handed back to the operation,
+     which releases it once the answer is in. The answer is also deferred:
+     an empty machine answers before the call that asked is over. */
+  aml_task_scope_unref_when_done (detect->scope);
 
-  aml_task_scope_unref (detect->scope);
+  if (javas == NULL)
+    aml_task_scope_return_error_deferred (detect->scope,
+                                          g_steal_pointer (&error));
+  else
+    aml_task_scope_return_pointer_deferred (detect->scope, javas,
+                                            (GDestroyNotify) g_ptr_array_unref);
+
   g_free (detect);
 }
 
-void
-aml_java_detect_async (GCancellable       *cancellable,
-                       GAsyncReadyCallback callback,
-                       gpointer            user_data)
+AmlTaskScope *
+aml_java_detect_async (GAsyncReadyCallback callback, gpointer user_data)
 {
-  AmlTaskScope *scope = aml_task_scope_new (NULL, cancellable, callback,
-                                            user_data);
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
   g_auto (GStrv) collected = collect_candidates ();
   g_auto (GStrv) candidates = dedupe_candidates (collected);
   Detect *detect = NULL;
@@ -748,20 +770,28 @@ aml_java_detect_async (GCancellable       *cancellable,
   aml_task_scope_set_check_cancellable (scope, FALSE);
 
   detect = g_new0 (Detect, 1);
-  detect->scope = scope;
+  detect->scope = aml_task_scope_ref (scope);
 
-  aml_java_probe_list_async (g_steal_pointer (&candidates), cancellable,
-                             detected, detect);
+  {
+    AmlTaskScope *listing =
+      aml_java_probe_list_async (g_steal_pointer (&candidates), detected,
+                                 detect);
+
+    aml_task_scope_follow_cancellable (listing,
+                                       aml_task_scope_get_cancellable (scope));
+    aml_task_scope_unref_when_done (listing);
+  }
+
+  return g_steal_pointer (&scope);
 }
 
-void
+AmlTaskScope *
 aml_java_detect_list_async (char            **roots,
-                            GCancellable    *cancellable,
                             GAsyncReadyCallback callback,
                             gpointer         user_data)
 {
-  AmlTaskScope *scope = aml_task_scope_new (NULL, cancellable, callback,
-                                            user_data);
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
   g_auto (GStrv) collected = collect_candidates_list (roots);
   g_auto (GStrv) candidates = dedupe_candidates (collected);
   Detect *detect = NULL;
@@ -769,10 +799,19 @@ aml_java_detect_list_async (char            **roots,
   aml_task_scope_set_check_cancellable (scope, FALSE);
 
   detect = g_new0 (Detect, 1);
-  detect->scope = scope;
+  detect->scope = aml_task_scope_ref (scope);
 
-  aml_java_probe_list_async (g_steal_pointer (&candidates), cancellable,
-                             detected, detect);
+  {
+    AmlTaskScope *listing =
+      aml_java_probe_list_async (g_steal_pointer (&candidates), detected,
+                                 detect);
+
+    aml_task_scope_follow_cancellable (listing,
+                                       aml_task_scope_get_cancellable (scope));
+    aml_task_scope_unref_when_done (listing);
+  }
+
+  return g_steal_pointer (&scope);
 }
 
 GPtrArray *

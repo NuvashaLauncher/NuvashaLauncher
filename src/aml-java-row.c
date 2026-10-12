@@ -67,7 +67,38 @@ struct _AmlJavaRow
   gboolean ready;
   gboolean disposed;
   GtkButton *retry;
+
+  /* The request the row is waiting for. Borrowed from the JavaAsk that
+     started it: that one releases it when the answer arrives, and a
+     newer request replaces it before an older answer can arrive. */
+  AmlTaskScope *operation;
 };
+
+/* One Java request the row started: the row, which can be disposed while
+   the answer is on its way, and the handle that answer is to release. */
+typedef struct
+{
+  AmlJavaRow *row;
+  AmlTaskScope *operation;
+} JavaAsk;
+
+static void
+java_ask_free (JavaAsk *ask)
+{
+  AmlJavaRow *row = ask->row;
+
+  /* The row's own pointer is a loan of this reference, so it is given
+     back before the reference goes. */
+  if (row != NULL && row->operation == ask->operation)
+    row->operation = NULL;
+
+  g_clear_object (&ask->row);
+
+  if (ask->operation != NULL)
+    aml_task_scope_unref (ask->operation);
+
+  g_free (ask);
+}
 
 G_DEFINE_FINAL_TYPE (AmlJavaRow, aml_java_row, ADW_TYPE_COMBO_ROW)
 
@@ -231,9 +262,15 @@ fill (AmlJavaRow *self)
 
       if (!found)
         {
+          JavaAsk *ask = g_new0 (JavaAsk, 1);
+
           self->probe_started = TRUE;
-          aml_java_probe_async (self->wanted, self->cancellable,
-                                custom_loaded, g_object_ref (self));
+          ask->row = g_object_ref (self);
+          ask->operation = aml_java_probe_async (self->wanted, custom_loaded,
+                                                 ask);
+          aml_task_scope_follow_cancellable (ask->operation,
+                                             self->cancellable);
+          self->operation = ask->operation;
         }
     }
 }
@@ -247,11 +284,14 @@ detect_finished (GObject      *source G_GNUC_UNUSED,
                  GAsyncResult *result,
                  gpointer      user_data)
 {
-  AmlJavaRow *self = user_data;
+  JavaAsk *ask = user_data;
+  AmlJavaRow *self = ask->row;
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) javas = aml_java_detect_finish (result, &error);
 
-  if (g_task_get_cancellable (G_TASK (result)) == self->cancellable)
+  /* A detection of a row that has been reloaded since is about a machine
+     state that is gone: it fills nothing. */
+  if (self != NULL && self->operation == ask->operation && !self->disposed)
     {
       if (javas != NULL)
         {
@@ -259,11 +299,12 @@ detect_finished (GObject      *source G_GNUC_UNUSED,
           self->javas = g_steal_pointer (&javas);
           fill (self);
         }
-      else
+      else if (error != NULL &&
+               !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         show_error (self, error->message);
     }
 
-  g_object_unref (self);
+  java_ask_free (ask);
 }
 
 static void
@@ -271,20 +312,19 @@ custom_loaded (GObject      *source G_GNUC_UNUSED,
                GAsyncResult *result,
                gpointer      user_data)
 {
-  AmlJavaRow *self = user_data;
+  JavaAsk *ask = user_data;
+  AmlJavaRow *self = ask->row;
   g_autoptr (GError) error = NULL;
   AmlJava *custom = aml_java_probe_finish (result, &error);
-  GCancellable *probe_cancellable =
-    g_task_get_cancellable (G_TASK (result));
 
   /* Disposing or reloading the row cancels a custom probe. Do not rebuild
    * a row whose state has already been torn down for that cancellation. */
-  if (self->disposed || probe_cancellable != self->cancellable ||
+  if (self == NULL || self->disposed || self->operation != ask->operation ||
       (error != NULL &&
        g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED)))
     {
       aml_java_free (custom);
-      g_object_unref (self);
+      java_ask_free (ask);
       return;
     }
 
@@ -302,7 +342,7 @@ custom_loaded (GObject      *source G_GNUC_UNUSED,
     }
 
   fill (self);
-  g_object_unref (self);
+  java_ask_free (ask);
 }
 
 static void
@@ -329,15 +369,15 @@ add_probed (GObject      *source G_GNUC_UNUSED,
             GAsyncResult *result,
             gpointer      user_data)
 {
-  AmlJavaRow *self = user_data;
+  JavaAsk *ask = user_data;
+  AmlJavaRow *self = ask->row;
   g_autoptr (GError) error = NULL;
   AmlJava *probe = aml_java_probe_finish (result, &error);
 
-  if (self->disposed ||
-      g_task_get_cancellable (G_TASK (result)) != self->cancellable)
+  if (self == NULL || self->disposed || self->operation != ask->operation)
     {
       aml_java_free (probe);
-      g_object_unref (self);
+      java_ask_free (ask);
       return;
     }
 
@@ -350,7 +390,7 @@ add_probed (GObject      *source G_GNUC_UNUSED,
     aml_java_row_set_custom (self, probe->executable,
                              g_steal_pointer (&probe));
 
-  g_object_unref (self);
+  java_ask_free (ask);
 }
 
 static void
@@ -383,9 +423,15 @@ add_chosen (GObject *dialog, GAsyncResult *result, gpointer user_data)
       adw_action_row_set_subtitle (
         ADW_ACTION_ROW (self),
         _("the chosen file does not report a Java version"));
-      else
-        aml_java_probe_async (path, self->cancellable, add_probed,
-                              g_object_ref (self));
+    else
+      {
+        JavaAsk *ask = g_new0 (JavaAsk, 1);
+
+        ask->row = g_object_ref (self);
+        ask->operation = aml_java_probe_async (path, add_probed, ask);
+        aml_task_scope_follow_cancellable (ask->operation, self->cancellable);
+        self->operation = ask->operation;
+      }
   }
 
   g_object_unref (self);
@@ -466,8 +512,14 @@ aml_java_row_load (AmlJavaRow *self, const char *wanted)
   self->probed = NULL;
 
   show_loading (self);
-  aml_java_detect_async (self->cancellable, detect_finished,
-                         g_object_ref (self));
+  {
+    JavaAsk *ask = g_new0 (JavaAsk, 1);
+
+    ask->row = g_object_ref (self);
+    ask->operation = aml_java_detect_async (detect_finished, ask);
+    aml_task_scope_follow_cancellable (ask->operation, self->cancellable);
+    self->operation = ask->operation;
+  }
 }
 
 GPtrArray *

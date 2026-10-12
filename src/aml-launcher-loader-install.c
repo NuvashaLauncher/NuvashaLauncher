@@ -13,6 +13,10 @@ loader_request_free (LoaderRequest *request)
   g_clear_object (&request->manifest);
   g_clear_object (&request->profile);
   g_clear_object (&request->launcher);
+
+  if (request->operation != NULL)
+    aml_task_scope_unref (request->operation);
+
   g_free (request->game_version);
   g_free (request->loader_version);
   g_free (request);
