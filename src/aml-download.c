@@ -32,6 +32,7 @@
 #include <gio/gunixoutputstream.h>
 #include <glib/gstdio.h>
 #include <libsoup/soup.h>
+#include <stdarg.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -86,6 +87,22 @@ struct _AmlDownloadService {
 };
 
 static AmlDownloadService *service;
+
+static void
+download_return_new_error (GTask       *task,
+                           GQuark       domain,
+                           gint         code,
+                           const char  *format,
+                           ...)
+{
+  AmlTaskScope *scope = g_object_get_data (G_OBJECT (task),
+                                           "aml-task-scope");
+  va_list args;
+  va_start (args, format);
+  GError *error = g_error_new_valist (domain, code, format, args);
+  va_end (args);
+  aml_task_scope_return_error (scope, error);
+}
 
 AmlDownloadService *
 aml_download_service_new (void)
@@ -1834,7 +1851,7 @@ aml_download_file_async (const char *url,
     {
       g_autofree char *shown = url_for_message (url);
 
-      g_task_return_new_error (task, AML_DOWNLOAD_ERROR,
+      download_return_new_error (task, AML_DOWNLOAD_ERROR,
                                AML_DOWNLOAD_ERROR_NETWORK,
                                "\"%s\" is not a usable download url", shown);
       return;
@@ -1886,7 +1903,7 @@ aml_download_json_async (const char *url,
     {
       g_autofree char *shown = url_for_message (url);
 
-      g_task_return_new_error (task, AML_DOWNLOAD_ERROR,
+      download_return_new_error (task, AML_DOWNLOAD_ERROR,
                                AML_DOWNLOAD_ERROR_NETWORK,
                                "\"%s\" is not a usable download url", shown);
       return;
@@ -1966,7 +1983,7 @@ aml_download_json_post_async (const char           *url,
     {
       g_autofree char *shown = url_for_message (url);
 
-      g_task_return_new_error (task, AML_DOWNLOAD_ERROR,
+      download_return_new_error (task, AML_DOWNLOAD_ERROR,
                                AML_DOWNLOAD_ERROR_NETWORK,
                                "\"%s\" is not a usable request url", shown);
       return;
@@ -2003,7 +2020,7 @@ aml_download_json_cached_async (const char *url, GCancellable *cancellable,
   if (!usable_url (url))
     {
       g_autofree char *shown = url_for_message (url);
-      g_task_return_new_error (task, AML_DOWNLOAD_ERROR,
+      download_return_new_error (task, AML_DOWNLOAD_ERROR,
                                AML_DOWNLOAD_ERROR_NETWORK,
                                "\"%s\" is not a usable download url", shown);
       return;
@@ -2040,7 +2057,7 @@ aml_download_json_post_cached_async (const char *url, const char *body,
   if (!usable_url (url))
     {
       g_autofree char *shown = url_for_message (url);
-      g_task_return_new_error (task, AML_DOWNLOAD_ERROR,
+      download_return_new_error (task, AML_DOWNLOAD_ERROR,
                                AML_DOWNLOAD_ERROR_NETWORK,
                                "\"%s\" is not a usable request url", shown);
       return;
