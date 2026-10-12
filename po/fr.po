@@ -583,3 +583,33 @@ msgid "Unavailable"
 msgstr "Indisponible"
 msgid "No compatible Java runtime was found."
 msgstr "Aucun environnement d’exécution Java compatible n’a été trouvé."
+
+msgid "Minecraft crashed"
+msgstr "Minecraft a planté"
+
+msgid "Minecraft could not start"
+msgstr "Minecraft n’a pas pu démarrer"
+
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft nécessite une connexion"
+
+msgid "The file cannot be renamed"
+msgstr "Le fichier ne peut pas être renommé"
+
+msgid "The file cannot be deleted"
+msgstr "Le fichier ne peut pas être supprimé"
+
+msgid "The folder cannot be read"
+msgstr "Le dossier ne peut pas être lu"
+
+msgid "The file could not be installed"
+msgstr "Le fichier n’a pas pu être installé"
+
+msgid "The folder cannot be created"
+msgstr "Le dossier n’a pas pu être créé"
+
+msgid "This cannot be installed"
+msgstr "Impossible d’installer ceci"
+
+msgid "Pick a Minecraft version first"
+msgstr "Choisissez d’abord une version de Minecraft"

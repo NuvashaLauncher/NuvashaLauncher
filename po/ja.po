@@ -578,3 +578,33 @@ msgid "Unavailable"
 msgstr "利用できません"
 msgid "No compatible Java runtime was found."
 msgstr "互換性のあるJavaランタイムが見つかりません。"
+
+msgid "Minecraft crashed"
+msgstr "Minecraftがクラッシュしました"
+
+msgid "Minecraft could not start"
+msgstr "Minecraftを起動できませんでした"
+
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraftにはサインインが必要です"
+
+msgid "The file cannot be renamed"
+msgstr "ファイルの名前を変更できません"
+
+msgid "The file cannot be deleted"
+msgstr "ファイルを削除できません"
+
+msgid "The folder cannot be read"
+msgstr "フォルダーを読み取れません"
+
+msgid "The file could not be installed"
+msgstr "ファイルをインストールできませんでした"
+
+msgid "The folder cannot be created"
+msgstr "フォルダーを作成できませんでした"
+
+msgid "This cannot be installed"
+msgstr "これはインストールできません"
+
+msgid "Pick a Minecraft version first"
+msgstr "先にMinecraftのバージョンを選択してください"

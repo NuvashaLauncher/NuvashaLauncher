@@ -577,3 +577,33 @@ msgid "Unavailable"
 msgstr "사용할 수 없음"
 msgid "No compatible Java runtime was found."
 msgstr "호환되는 Java 런타임을 찾을 수 없습니다."
+
+msgid "Minecraft crashed"
+msgstr "Minecraft가 충돌했습니다"
+
+msgid "Minecraft could not start"
+msgstr "Minecraft를 시작할 수 없습니다"
+
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft에 로그인이 필요합니다"
+
+msgid "The file cannot be renamed"
+msgstr "파일 이름을 변경할 수 없습니다"
+
+msgid "The file cannot be deleted"
+msgstr "파일을 삭제할 수 없습니다"
+
+msgid "The folder cannot be read"
+msgstr "폴더를 읽을 수 없습니다"
+
+msgid "The file could not be installed"
+msgstr "파일을 설치할 수 없습니다"
+
+msgid "The folder cannot be created"
+msgstr "폴더를 만들 수 없습니다"
+
+msgid "This cannot be installed"
+msgstr "이 항목은 설치할 수 없습니다"
+
+msgid "Pick a Minecraft version first"
+msgstr "먼저 Minecraft 버전을 선택하세요"

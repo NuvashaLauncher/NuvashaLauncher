@@ -235,7 +235,7 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
           /* A cancel is not a failure worth a message. */
           if (!cancelled)
-            show_error (page, "The file could not be installed", error);
+             show_error (page, _("The file could not be installed"), error);
         }
 
       g_clear_error (&error);
@@ -334,7 +334,7 @@ fetch_next (FetchRun *run)
         if (self != NULL)
           {
             set_busy (self, FALSE);
-            show_error (self, "The folder cannot be created", error);
+       show_error (self, _("The folder cannot be created"), error);
           }
 
         fetch_free (run);
@@ -664,7 +664,7 @@ plan_take (PlanRun *plan, AmlModrinthVersion *version)
     {
       if (self != NULL)
         {
-          show_error (self, "This cannot be installed", error);
+           show_error (self, _("This cannot be installed"), error);
           plan_stopped (self);
         }
 

@@ -578,3 +578,33 @@ msgid "Unavailable"
 msgstr "Niedostępne"
 msgid "No compatible Java runtime was found."
 msgstr "Nie znaleziono zgodnego środowiska Java."
+
+msgid "Minecraft crashed"
+msgstr "Minecraft uległ awarii"
+
+msgid "Minecraft could not start"
+msgstr "Nie udało się uruchomić Minecrafta"
+
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft wymaga zalogowania"
+
+msgid "The file cannot be renamed"
+msgstr "Nie można zmienić nazwy pliku"
+
+msgid "The file cannot be deleted"
+msgstr "Nie można usunąć pliku"
+
+msgid "The folder cannot be read"
+msgstr "Nie można odczytać folderu"
+
+msgid "The file could not be installed"
+msgstr "Nie udało się zainstalować pliku"
+
+msgid "The folder cannot be created"
+msgstr "Nie udało się utworzyć folderu"
+
+msgid "This cannot be installed"
+msgstr "Tego nie można zainstalować"
+
+msgid "Pick a Minecraft version first"
+msgstr "Najpierw wybierz wersję Minecrafta"

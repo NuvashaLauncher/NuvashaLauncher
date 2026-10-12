@@ -578,3 +578,33 @@ msgid "Unavailable"
 msgstr "Недоступно"
 msgid "No compatible Java runtime was found."
 msgstr "Совместимая среда выполнения Java не найдена."
+
+msgid "Minecraft crashed"
+msgstr "Minecraft аварийно завершил работу"
+
+msgid "Minecraft could not start"
+msgstr "Не удалось запустить Minecraft"
+
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft требует входа в аккаунт"
+
+msgid "The file cannot be renamed"
+msgstr "Не удалось переименовать файл"
+
+msgid "The file cannot be deleted"
+msgstr "Не удалось удалить файл"
+
+msgid "The folder cannot be read"
+msgstr "Не удалось прочитать папку"
+
+msgid "The file could not be installed"
+msgstr "Не удалось установить файл"
+
+msgid "The folder cannot be created"
+msgstr "Не удалось создать папку"
+
+msgid "This cannot be installed"
+msgstr "Это невозможно установить"
+
+msgid "Pick a Minecraft version first"
+msgstr "Сначала выберите версию Minecraft"

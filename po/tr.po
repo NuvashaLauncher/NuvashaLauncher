@@ -580,3 +580,33 @@ msgid "Unavailable"
 msgstr "Kullanılamıyor"
 msgid "No compatible Java runtime was found."
 msgstr "Uyumlu Java çalışma zamanı bulunamadı."
+
+msgid "Minecraft crashed"
+msgstr "Minecraft çöktü"
+
+msgid "Minecraft could not start"
+msgstr "Minecraft başlatılamadı"
+
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft oturum açmanızı gerektiriyor"
+
+msgid "The file cannot be renamed"
+msgstr "Dosyanın adı değiştirilemiyor"
+
+msgid "The file cannot be deleted"
+msgstr "Dosya silinemiyor"
+
+msgid "The folder cannot be read"
+msgstr "Klasör okunamıyor"
+
+msgid "The file could not be installed"
+msgstr "Dosya yüklenemedi"
+
+msgid "The folder cannot be created"
+msgstr "Klasör oluşturulamadı"
+
+msgid "This cannot be installed"
+msgstr "Bu yüklenemiyor"
+
+msgid "Pick a Minecraft version first"
+msgstr "Önce bir Minecraft sürümü seçin"
