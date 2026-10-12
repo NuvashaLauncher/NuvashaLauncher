@@ -9,8 +9,12 @@ variables:
 
 .setup:
   before_script:
+    # Valgrind must inspect symbols in ld.so to install its mandatory
+    # memcmp redirection. Arch keeps those symbols in the debug repository.
+    - printf '\n[core-debug]\nInclude = /etc/pacman.d/mirrorlist\n' >> /etc/pacman.conf
     - pacman -Syu --noconfirm
     - pacman -S --noconfirm
+        glibc-debug
         gettext
         pkgconf
         libarchive
