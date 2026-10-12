@@ -76,6 +76,12 @@ void aml_task_scope_remove_source (AmlTaskScope *scope, guint source_id);
 void aml_task_scope_forget_source (AmlTaskScope *scope, guint source_id);
 void aml_task_scope_cancel (AmlTaskScope *scope);
 
+/* Hands the caller's reference back: the operation releases itself once
+ * it completes. For work whose answer nobody is waiting for, where the
+ * handle exists only to be able to cancel the work. Returns @scope so it
+ * can be chained onto a call that hands one back. */
+AmlTaskScope *aml_task_scope_unref_when_done (AmlTaskScope *scope);
+
 /* Cancels @scope whenever @cancellable is cancelled, for an operation
  * whose cancel button belongs to an object the caller does not own. The
  * scope stops watching when its last reference goes away. */

@@ -159,8 +159,9 @@ remove_duplicate_project_files (AmlContentPage *self, const char *project_id,
           g_autofree char *directory = NULL;
           g_autofree char *filename = g_path_get_basename (installed->path);
           g_object_get (self->instance, "directory", &directory, NULL);
-          aml_content_index_remove_async (directory, self->type, filename,
-                                           NULL, NULL, NULL);
+          aml_task_scope_unref_when_done (
+            aml_content_index_remove_async (directory, self->type, filename,
+                                            NULL, NULL));
         }
     }
 }
@@ -285,9 +286,12 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
          entry.env_client = "required";
          entry.env_server = run->page->type == AML_CONTENT_MOD
                               ? "required" : "unsupported";
-        aml_content_index_update_async (
-          instance_directory, run->page->type, &entry,
-          aml_download_get_cancellable (run->download), NULL, NULL);
+        aml_task_scope_follow_cancellable (
+          aml_task_scope_unref_when_done (
+            aml_content_index_update_async (instance_directory,
+                                            run->page->type, &entry, NULL,
+                                            NULL)),
+          aml_download_get_cancellable (run->download));
       }
     }
 

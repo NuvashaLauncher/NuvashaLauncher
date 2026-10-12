@@ -322,8 +322,8 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
         g_autofree char *filename = g_path_get_basename (path);
 
         g_object_get (self->instance, "directory", &directory, NULL);
-        aml_content_index_remove_async (directory, self->type, filename,
-                                        NULL, NULL, NULL);
+        aml_task_scope_unref_when_done (aml_content_index_remove_async (
+          directory, self->type, filename, NULL, NULL));
       }
       /* An identification request may still refer to one of the rows. Stop
          it before releasing the file it borrowed; the other rows remain in
@@ -628,8 +628,11 @@ persist_identified_file (AmlContentPage *self, AmlContentFile *file)
   entry.required_dependencies = file->required_dependencies;
   entry.optional_dependencies = file->optional_dependencies;
   entry.incompatible_dependencies = file->incompatible_dependencies;
-  aml_content_index_update_async (directory, self->type, &entry,
-                                  self->installed.scan, NULL, NULL);
+  aml_task_scope_follow_cancellable (
+          aml_task_scope_unref_when_done (
+            aml_content_index_update_async (directory, self->type, &entry,
+                                            NULL, NULL)),
+          self->installed.scan);
 }
 
 static void

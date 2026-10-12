@@ -8,6 +8,7 @@
 #include <gio/gio.h>
 
 #include "aml-modrinth.h"
+#include "aml-task.h"
 
 G_BEGIN_DECLS
 
@@ -48,27 +49,27 @@ GPtrArray *aml_content_index_load_sync (const char *instance_directory,
                                         AmlContentType type,
                                         GError **error);
 
-void aml_content_index_load_async (const char *instance_directory,
-                                   AmlContentType type,
-                                   GCancellable *cancellable,
-                                   GAsyncReadyCallback callback,
-                                   gpointer user_data);
+/* (transfer full) the operation. The callback never runs before the call
+ * that starts it returns, so the handle can be stored here and released
+ * from the callback. */
+AmlTaskScope *aml_content_index_load_async (const char *instance_directory,
+                                           AmlContentType type,
+                                           GAsyncReadyCallback callback,
+                                           gpointer user_data);
 GPtrArray *aml_content_index_load_finish (GAsyncResult *result,
                                           GError **error);
 
-void aml_content_index_update_async (const char *instance_directory,
-                                     AmlContentType type,
-                                     AmlContentIndexEntry *entry,
-                                     GCancellable *cancellable,
-                                     GAsyncReadyCallback callback,
-                                     gpointer user_data);
+AmlTaskScope *aml_content_index_update_async (const char *instance_directory,
+                                              AmlContentType type,
+                                              AmlContentIndexEntry *entry,
+                                              GAsyncReadyCallback callback,
+                                              gpointer user_data);
 
-void aml_content_index_remove_async (const char *instance_directory,
-                                      AmlContentType type,
-                                      const char *filename,
-                                      GCancellable *cancellable,
-                                      GAsyncReadyCallback callback,
-                                      gpointer user_data);
+AmlTaskScope *aml_content_index_remove_async (const char *instance_directory,
+                                              AmlContentType type,
+                                              const char *filename,
+                                              GAsyncReadyCallback callback,
+                                              gpointer user_data);
 
 /* Completes update_async() and remove_async(). */
 gboolean aml_content_index_modify_finish (GAsyncResult *result,

@@ -22,6 +22,7 @@ struct _AmlTaskScope
   GArray *sources;
   GArray *followed;
   gboolean owns_task;
+  gboolean unref_when_done;
 };
 
 static AmlTaskScope *
@@ -139,33 +140,85 @@ aml_task_scope_set_check_cancellable (AmlTaskScope *scope, gboolean check)
   g_task_set_check_cancellable (scope->task, check);
 }
 
+/* A completion hands the operation to the caller's callback, and that
+ * callback runs before g_task_return_*() has finished with the task, so it
+ * may already have dropped the last reference. What is left to do here is
+ * decided before the return and holds its own reference. */
+static gboolean
+unref_when_done_idle (gpointer user_data)
+{
+  aml_task_scope_unref (user_data);
+  return G_SOURCE_REMOVE;
+}
+
+static void
+scope_release_when_done (AmlTaskScope *scope)
+{
+  scope->unref_when_done = FALSE;
+  g_idle_add_full (G_PRIORITY_DEFAULT, unref_when_done_idle,
+                   aml_task_scope_ref (scope), NULL);
+}
+
 gboolean
 aml_task_scope_return_error_if_cancelled (AmlTaskScope *scope)
 {
+  gboolean cancelled;
+
   g_return_val_if_fail (scope != NULL, FALSE);
-  return g_task_return_error_if_cancelled (scope->task);
+
+  cancelled = g_task_return_error_if_cancelled (scope->task);
+  if (cancelled && scope->unref_when_done)
+    scope_release_when_done (scope);
+
+  return cancelled;
 }
 
 void
 aml_task_scope_return_pointer (AmlTaskScope *scope, gpointer result,
                                GDestroyNotify result_free)
 {
+  gboolean release;
+
   g_return_if_fail (scope != NULL);
+
+  release = scope->unref_when_done;
   g_task_return_pointer (scope->task, result, result_free);
+  if (release && scope->unref_when_done)
+    scope_release_when_done (scope);
 }
 
 void
 aml_task_scope_return_error (AmlTaskScope *scope, GError *error)
 {
+  gboolean release;
+
   g_return_if_fail (scope != NULL);
+
+  release = scope->unref_when_done;
   g_task_return_error (scope->task, error);
+  if (release && scope->unref_when_done)
+    scope_release_when_done (scope);
 }
 
 void
 aml_task_scope_return_boolean (AmlTaskScope *scope, gboolean result)
 {
+  gboolean release;
+
   g_return_if_fail (scope != NULL);
+
+  release = scope->unref_when_done;
   g_task_return_boolean (scope->task, result);
+  if (release && scope->unref_when_done)
+    scope_release_when_done (scope);
+}
+
+AmlTaskScope *
+aml_task_scope_unref_when_done (AmlTaskScope *scope)
+{
+  g_return_val_if_fail (scope != NULL, NULL);
+  scope->unref_when_done = TRUE;
+  return scope;
 }
 
 /* What an operation that has nothing to wait for has to hand over. The
@@ -202,18 +255,20 @@ deferred_completion_return (gpointer user_data)
 {
   DeferredCompletion *deferred = user_data;
 
+  /* Through the scope's own helpers, so a deferred completion releases an
+     operation the same way an immediate one does. */
   switch (deferred->kind)
     {
     case DEFERRED_POINTER:
-      g_task_return_pointer (deferred->scope->task, deferred->value,
-                             deferred->value_free);
+      aml_task_scope_return_pointer (deferred->scope, deferred->value,
+                                     deferred->value_free);
       break;
     case DEFERRED_BOOLEAN:
-      g_task_return_boolean (deferred->scope->task, deferred->boolean);
+      aml_task_scope_return_boolean (deferred->scope, deferred->boolean);
       break;
     case DEFERRED_ERROR:
-      g_task_return_error (deferred->scope->task,
-                           g_steal_pointer (&deferred->error));
+      aml_task_scope_return_error (deferred->scope,
+                                   g_steal_pointer (&deferred->error));
       break;
     }
 

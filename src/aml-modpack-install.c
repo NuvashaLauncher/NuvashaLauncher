@@ -152,8 +152,11 @@ seed_manifest_indexes (InstallRun *run)
       entry.provider = "Modrinth";
       entry.project_id = project_id;
       entry.version_id = version_id;
-      aml_content_index_update_async (run->target, type, &entry,
-                                      run->cancellable, NULL, NULL);
+      aml_task_scope_follow_cancellable (
+        aml_task_scope_unref_when_done (
+          aml_content_index_update_async (run->target, type, &entry, NULL,
+                                          NULL)),
+        run->cancellable);
     }
 }
 
