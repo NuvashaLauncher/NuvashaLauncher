@@ -144,13 +144,6 @@ java_popup_bind (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
   gboolean placeholder = self->no_default &&
                         gtk_list_item_get_position (item) == 0;
 
-  if (child == NULL)
-    {
-      child = gtk_label_new (NULL);
-      gtk_label_set_xalign (GTK_LABEL (child), 0.0);
-      gtk_list_item_set_child (item, child);
-    }
-
   if (GTK_IS_STRING_OBJECT (value))
     gtk_label_set_text (GTK_LABEL (child),
                         gtk_string_object_get_string (value));
@@ -158,8 +151,7 @@ java_popup_bind (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
   /* AdwComboRow must have an item while its model is non-empty, but the
    * placeholder is not a Java choice. Keep it out of the popup and make it
    * impossible to activate; the button still renders it as empty. */
-  if (placeholder)
-    gtk_list_item_set_child (item, NULL);
+  gtk_widget_set_visible (child, !placeholder);
   gtk_list_item_set_selectable (item, !placeholder);
   gtk_list_item_set_activatable (item, !placeholder);
 }
