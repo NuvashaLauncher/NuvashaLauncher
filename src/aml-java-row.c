@@ -62,6 +62,8 @@ struct _AmlJavaRow
 
   gboolean ready;
   gboolean disposed;
+  gboolean no_default;
+  gboolean rebuilding;
   GtkButton *retry;
 
   /* The request the row is waiting for. Borrowed from the JavaAsk that
@@ -98,6 +100,46 @@ java_ask_free (JavaAsk *ask)
 
 G_DEFINE_FINAL_TYPE (AmlJavaRow, aml_java_row, ADW_TYPE_COMBO_ROW)
 
+static void
+java_factory_setup (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
+                    GtkListItem *item,
+                    gpointer user_data G_GNUC_UNUSED)
+{
+  GtkLabel *label = GTK_LABEL (gtk_label_new (NULL));
+
+  gtk_label_set_xalign (label, 0.0);
+  gtk_list_item_set_child (item, GTK_WIDGET (label));
+}
+
+static void
+java_button_bind (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
+                  GtkListItem *item,
+                  gpointer user_data)
+{
+  AmlJavaRow *self = user_data;
+  GtkWidget *child = gtk_list_item_get_child (item);
+  gpointer value = gtk_list_item_get_item (item);
+
+  if (self->no_default)
+    gtk_label_set_text (GTK_LABEL (child), "");
+  else if (GTK_IS_STRING_OBJECT (value))
+    gtk_label_set_text (GTK_LABEL (child),
+                        gtk_string_object_get_string (value));
+}
+
+static void
+java_popup_bind (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
+                 GtkListItem *item,
+                 gpointer user_data G_GNUC_UNUSED)
+{
+  GtkWidget *child = gtk_list_item_get_child (item);
+  gpointer value = gtk_list_item_get_item (item);
+
+  if (GTK_IS_STRING_OBJECT (value))
+    gtk_label_set_text (GTK_LABEL (child),
+                        gtk_string_object_get_string (value));
+}
+
 /* ---------------------------------------------------------- *
  * Rebuilding the visible list
  * ---------------------------------------------------------- */
@@ -117,8 +159,10 @@ put_model (AmlJavaRow *self, GPtrArray *names, guint position)
   g_clear_pointer (&self->names, g_ptr_array_unref);
   self->names = names;
 
+  self->rebuilding = TRUE;
   adw_combo_row_set_model (ADW_COMBO_ROW (self), G_LIST_MODEL (list));
   adw_combo_row_set_selected (ADW_COMBO_ROW (self), position);
+  self->rebuilding = FALSE;
 }
 
 static void
@@ -174,8 +218,6 @@ fill (AmlJavaRow *self)
     self->wanted != NULL ? realpath (self->wanted, NULL) : NULL;
   guint position = GTK_INVALID_LIST_POSITION;
 
-  self->add_index = GTK_INVALID_LIST_POSITION;
-
   /* The Java the automatic choice stands for: named in the first entry,
      and left out of the list below when it is one of the detected
      runtimes even so. Detection clears the list and fills it again, so
@@ -189,13 +231,6 @@ fill (AmlJavaRow *self)
       g_ptr_array_add (ids, NULL);
       position = 0;
     }
-
-  /* AdwComboRow selects the first item in a non-empty model. When there is
-   * no exact automatic runtime and no explicit Java path, keep the model
-   * genuinely empty rather than allowing an incompatible runtime to appear
-   * selected. */
-  if (fallback == NULL && (self->wanted == NULL || *self->wanted == '\0'))
-    goto finish_model;
 
   for (guint i = 0; self->javas != NULL && i < self->javas->len; i++)
     {
@@ -233,10 +268,10 @@ fill (AmlJavaRow *self)
   g_ptr_array_add (names, g_strdup (_("Add Java Runtime")));
   self->add_index = names->len - 1;
 
-finish_model:
-
   g_clear_pointer (&self->ids, g_ptr_array_unref);
   self->ids = ids;
+  self->no_default = fallback == NULL &&
+                     (self->wanted == NULL || *self->wanted == '\0');
   self->ready = TRUE;
 
   /* Filled in below, once the model carries the entry this points at. */
@@ -455,12 +490,18 @@ on_picked (GObject    *object G_GNUC_UNUSED,
   GtkFileDialog *dialog;
   guint selected = adw_combo_row_get_selected (ADW_COMBO_ROW (self));
 
+  if (self->rebuilding)
+    return;
+
   if (selected != self->add_index)
     {
       /* Anything else in the list names a runtime, and is where the ask
          goes back to. */
       if (selected < self->ids->len)
-        self->restore = selected;
+        {
+          self->restore = selected;
+          self->no_default = FALSE;
+        }
 
       return;
     }
@@ -705,8 +746,31 @@ aml_java_row_init (AmlJavaRow *self)
   self->ids = g_ptr_array_new_with_free_func (g_free);
   self->names = g_ptr_array_new_with_free_func (g_free);
   self->required_major = 0;
+  self->no_default = TRUE;
   self->add_index = GTK_INVALID_LIST_POSITION;
   self->restore = 0;
+
+  {
+    GtkSignalListItemFactory *button_factory =
+      GTK_SIGNAL_LIST_ITEM_FACTORY (gtk_signal_list_item_factory_new ());
+    GtkSignalListItemFactory *popup_factory =
+      GTK_SIGNAL_LIST_ITEM_FACTORY (gtk_signal_list_item_factory_new ());
+
+    g_signal_connect (button_factory, "setup",
+                      G_CALLBACK (java_factory_setup), self);
+    g_signal_connect (button_factory, "bind",
+                      G_CALLBACK (java_button_bind), self);
+    g_signal_connect (popup_factory, "setup",
+                      G_CALLBACK (java_factory_setup), self);
+    g_signal_connect (popup_factory, "bind",
+                      G_CALLBACK (java_popup_bind), self);
+    adw_combo_row_set_factory (ADW_COMBO_ROW (self),
+                               GTK_LIST_ITEM_FACTORY (button_factory));
+    adw_combo_row_set_list_factory (ADW_COMBO_ROW (self),
+                                    GTK_LIST_ITEM_FACTORY (popup_factory));
+    g_object_unref (button_factory);
+    g_object_unref (popup_factory);
+  }
 
    self->retry = GTK_BUTTON (gtk_button_new_with_label (_("Retry")));
   gtk_widget_add_css_class (GTK_WIDGET (self->retry), "flat");
