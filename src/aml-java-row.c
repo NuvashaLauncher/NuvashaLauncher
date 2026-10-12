@@ -608,6 +608,13 @@ aml_java_row_get_selected_path (AmlJavaRow *self)
   if (!self->ready)
     return NULL;
 
+  /* GTK keeps an internal first item selected so the dropdown remains
+   * usable, but that is not an instance choice until the user opens it and
+   * picks something. Report the automatic/blank state to the page instead
+   * of leaking that implementation detail into java-path. */
+  if (self->no_default)
+    return "";
+
   position = adw_combo_row_get_selected (ADW_COMBO_ROW (self));
 
   /* Past the end of the ids is the entry that asks for another runtime:
