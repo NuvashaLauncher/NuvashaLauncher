@@ -85,10 +85,6 @@ struct _AmlDownloadService {
   GQueue interactive_waiting;
   GQueue bulk_waiting;
   gboolean prefer_interactive;
-  guint64 completed;
-  guint64 failed;
-  guint64 cancelled;
-  guint64 retries;
   AmlSettings *cache_settings;
 };
 
@@ -111,30 +107,6 @@ aml_download_service_queued_bulk (const AmlDownloadService *service)
 {
   return service == NULL ? 0 :
     g_queue_get_length ((GQueue *) &service->bulk_waiting);
-}
-
-guint64
-aml_download_service_completed (const AmlDownloadService *service)
-{
-  return service == NULL ? 0 : service->completed;
-}
-
-guint64
-aml_download_service_failed (const AmlDownloadService *service)
-{
-  return service == NULL ? 0 : service->failed;
-}
-
-guint64
-aml_download_service_cancelled (const AmlDownloadService *service)
-{
-  return service == NULL ? 0 : service->cancelled;
-}
-
-guint64
-aml_download_service_retries (const AmlDownloadService *service)
-{
-  return service == NULL ? 0 : service->retries;
 }
 
 AmlDownloadService *
@@ -855,16 +827,11 @@ static void
 request_fail (DownloadRequest *request, GError *error)
 {
   AmlTaskScope *scope = request->scope;
-  AmlDownloadService *service = request->service;
   gboolean cancelled = g_error_matches (error, AML_DOWNLOAD_ERROR,
                                         AML_DOWNLOAD_ERROR_CANCELLED);
 
   aml_task_scope_set_state (scope, cancelled ? AML_TASK_STATE_CANCELLED
-                                              : AML_TASK_STATE_FAILED);
-  if (cancelled)
-    service->cancelled++;
-  else
-    service->failed++;
+                                               : AML_TASK_STATE_FAILED);
   g_debug ("download operation=%" G_GUINT64_FORMAT " %s", 
            aml_task_scope_get_id (scope), cancelled ? "cancelled" : "failed");
   discard_temporary (request);
@@ -877,7 +844,6 @@ static void
 request_succeed (DownloadRequest *request)
 {
   AmlTaskScope *scope = request->scope;
-  request->service->completed++;
   g_debug ("download operation=%" G_GUINT64_FORMAT " completed",
            aml_task_scope_get_id (scope));
 
@@ -890,7 +856,6 @@ static void
 request_succeed_json (DownloadRequest *request, JsonParser *parser)
 {
   AmlTaskScope *scope = request->scope;
-  request->service->completed++;
   g_debug ("download operation=%" G_GUINT64_FORMAT " completed",
            aml_task_scope_get_id (scope));
 
@@ -1670,7 +1635,6 @@ attempt_failed (DownloadRequest *request, GError *error)
     {
       discard_temporary (request);
       g_clear_error (&error);
-      request->service->retries++;
       aml_task_scope_set_state (request->scope, AML_TASK_STATE_RETRYING);
       g_debug ("download operation=%" G_GUINT64_FORMAT " retry attempt=%u",
                aml_task_scope_get_id (request->scope), request->attempts + 1);
@@ -2072,57 +2036,6 @@ aml_download_json_finish (GAsyncResult *result, GError **error)
   g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
 
   return g_task_propagate_pointer (G_TASK (result), error);
-}
-
-AmlTaskScope *
-aml_download_json_post_async (AmlDownloadService *service,
-                              const char           *url,
-                              const char           *body,
-                              const char           *user_agent,
-                              GAsyncReadyCallback   callback,
-                              gpointer              user_data)
-{
-  g_return_val_if_fail (url != NULL, NULL);
-  g_return_val_if_fail (body != NULL, NULL);
-
-  g_autoptr (AmlTaskScope) scope =
-    aml_task_scope_new (NULL, NULL, callback, user_data);
-
-  /* See aml_download_file_async(). */
-  g_task_set_check_cancellable (aml_task_scope_task (scope), FALSE);
-
-  if (!usable_url (url))
-    {
-      g_autofree char *shown = url_for_message (url);
-
-      aml_task_scope_return_error_deferred (
-        scope,
-        g_error_new (AML_DOWNLOAD_ERROR, AML_DOWNLOAD_ERROR_NETWORK,
-                     "\"%s\" is not a usable request url", shown));
-      return g_steal_pointer (&scope);
-    }
-
-   DownloadRequest *request = g_new0 (DownloadRequest, 1);
-   request->parent_fd = -1;
-
-  /* Borrowed: the caller's handle keeps the operation alive, and the
-     request is answered before it goes away. */
-  request->scope = scope;
-   request->service = service;
-   request->task = g_object_ref (aml_task_scope_task (scope));
-  request->url = g_strdup (url);
-  request->body = g_strdup (body);
-  request->user_agent = g_strdup (user_agent);
-  request->json = TRUE;
-  request->user_data = user_data;
-  request->fd = -1;
-  request->total = -1;
-  request->priority = DOWNLOAD_PRIORITY_INTERACTIVE;
-  request->begin = start_attempt;
-
-  start_transfer (request);
-
-  return g_steal_pointer (&scope);
 }
 
 AmlTaskScope *

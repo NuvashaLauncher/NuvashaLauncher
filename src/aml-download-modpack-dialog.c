@@ -142,7 +142,6 @@ G_DEFINE_FINAL_TYPE (AmlDownloadModpackDialog, aml_download_modpack_dialog,
                      ADW_TYPE_DIALOG)
 
 static void run_search (AmlDownloadModpackDialog *self, gboolean append);
-static void set_busy (AmlDownloadModpackDialog *self, gboolean busy);
 static void on_search_done (GObject *, GAsyncResult *, gpointer);
 static void build_browse_page (AmlDownloadModpackDialog *self);
 static void build_import_page (AmlDownloadModpackDialog *self);
@@ -682,7 +681,6 @@ results_arrived (AmlDownloadModpackDialog *self, AmlModrinthResults *results,
   gtk_widget_set_visible (GTK_WIDGET (self->loading_more), FALSE);
   gtk_widget_set_visible (GTK_WIDGET (self->retry_row), FALSE);
 
-  set_busy (self, FALSE);
   self->loading_page = FALSE;
 }
 
@@ -716,7 +714,6 @@ run_search (AmlDownloadModpackDialog *self, gboolean append)
   self->loading_page = TRUE;
   self->append = append;
 
-  set_busy (self, TRUE);
 
   /* The first page of a search shows the loading state; a page that is
      added below what is already there shows a spinner at its end. */
@@ -1004,13 +1001,6 @@ build_browse_page (AmlDownloadModpackDialog *self)
 
   /* The page lands on the popular packs rather than on nothing. */
   run_search (self, FALSE);
-}
-
-static void
-set_busy (AmlDownloadModpackDialog *self, gboolean busy)
-{
-  (void) self;
-  (void) busy;
 }
 
 /* ---------------------------------------------------------- *

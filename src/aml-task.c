@@ -299,7 +299,6 @@ aml_task_scope_release_when_done (AmlTaskScope *scope, GCancellable *cancellable
 typedef enum
 {
   DEFERRED_POINTER,
-  DEFERRED_BOOLEAN,
   DEFERRED_ERROR
 } DeferredKind;
 
@@ -309,7 +308,6 @@ typedef struct
   DeferredKind kind;
   gpointer value;
   GDestroyNotify value_free;
-  gboolean boolean;
   GError *error;
 } DeferredCompletion;
 
@@ -357,9 +355,6 @@ deferred_completion_return (gpointer user_data)
       deferred->value = NULL;
       deferred->value_free = NULL;
       break;
-    case DEFERRED_BOOLEAN:
-      aml_task_scope_return_boolean (deferred->scope, deferred->boolean);
-      break;
     case DEFERRED_ERROR:
       aml_task_scope_return_error (deferred->scope,
                                    g_steal_pointer (&deferred->error));
@@ -395,18 +390,6 @@ aml_task_scope_return_pointer_deferred (AmlTaskScope *scope, gpointer result,
   deferred->kind = DEFERRED_POINTER;
   deferred->value = result;
   deferred->value_free = result_free;
-  defer_completion (scope, deferred);
-}
-
-void
-aml_task_scope_return_boolean_deferred (AmlTaskScope *scope, gboolean result)
-{
-  DeferredCompletion *deferred = g_new0 (DeferredCompletion, 1);
-
-  g_return_if_fail (scope != NULL);
-
-  deferred->kind = DEFERRED_BOOLEAN;
-  deferred->boolean = result;
   defer_completion (scope, deferred);
 }
 
