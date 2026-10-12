@@ -32,10 +32,6 @@ void aml_download_service_cancel_queued (AmlDownloadService *service);
 guint aml_download_service_active (const AmlDownloadService *service);
 guint aml_download_service_queued_interactive (const AmlDownloadService *service);
 guint aml_download_service_queued_bulk (const AmlDownloadService *service);
-guint64 aml_download_service_completed (const AmlDownloadService *service);
-guint64 aml_download_service_failed (const AmlDownloadService *service);
-guint64 aml_download_service_cancelled (const AmlDownloadService *service);
-guint64 aml_download_service_retries (const AmlDownloadService *service);
 
 #define AML_DOWNLOAD_ERROR (aml_download_error_quark ())
 
@@ -127,22 +123,6 @@ AmlTaskScope *aml_download_file_hash_async (GFile *file,
 /* (transfer full). NULL on error. */
 char *aml_download_file_hash_finish (GAsyncResult *result,
                                      GError     **error);
-
-/* Posts @body as "application/json" to @url and parses the answer the
- * way aml_download_json_async() does, with the same retry and rate
- * limit rules.
- *
- * @user_agent replaces the User-Agent of the session for this one
- * request, which is what a service that wants to be told which client
- * it is talking to asks for. NULL keeps the session's own.
- *
- * The returned parser is owned by the caller. */
-AmlTaskScope *aml_download_json_post_async (AmlDownloadService *service,
-                                             const char *url,
-                                            const char *body,
-                                            const char *user_agent,
-                                            GAsyncReadyCallback callback,
-                                            gpointer user_data);
 
 AmlTaskScope *aml_download_json_cached_async (AmlDownloadService *service,
                                                const char *url,

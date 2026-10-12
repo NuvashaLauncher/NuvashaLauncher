@@ -11,7 +11,8 @@
  * itself. The public contract of get_selected_path(): NULL while
  * loading, after a failure, while the ask is picked, or when no runtime is
  * selected; "" while the automatic entry is picked; the executable path
- * otherwise. */
+ * otherwise. The row can remain visually blank while GTK internally holds
+ * its first model item to keep the dropdown available. */
 
 #ifndef AML_JAVA_ROW_H
 #define AML_JAVA_ROW_H
@@ -29,13 +30,10 @@ G_DECLARE_FINAL_TYPE (AmlJavaRow, aml_java_row, AML, JAVA_ROW,
 
 AmlJavaRow *aml_java_row_new (void);
 
-/* The Java version the instance's game needs, which is what the
- * automatic choice resolves to: the closest detected runtime for
- * @required_major (0 means "not known yet", so nothing is resolved and
- * no entry is selected). When an exact runtime exists, the first entry is
- * named after it and that runtime is taken out of the detected list, so it
- * is shown once as the automatic choice. Set before or after load(); a
- * change after load() fills the list again. */
+ /* The Java version the instance's game needs. When the exact
+  * @required_major is detected, it becomes the automatic choice; otherwise
+  * no runtime is selected. Set before or after load(); a change after load()
+  * fills the list again. */
 void aml_java_row_set_required_major (AmlJavaRow *self, int required_major);
 
 /* Fetches the detected installations and puts them in the list,

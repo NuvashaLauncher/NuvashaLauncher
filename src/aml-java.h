@@ -122,9 +122,6 @@ AmlTaskScope *aml_java_detect_list_async (char **roots,
                                           GAsyncReadyCallback callback,
                                           gpointer user_data);
 
-GPtrArray *aml_java_detect_list_finish (GAsyncResult  *result,
-                                        GError       **error);
-
 G_END_DECLS
 
 #endif /* AML_JAVA_H */

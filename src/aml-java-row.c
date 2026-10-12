@@ -5,9 +5,8 @@
 /* AmlJavaRow: pick a Java. Mirrors AmlVersionRow's state machine: the
  * row shows it is fetching, it failed (with how to retry), or it holds
  * the installations detection found plus any custom path the instance
- * carries. The first entry is the automatic choice: the runtime that
- * fits the game's Java requirement, named there instead of in the list
- * when one is found. */
+ * carries. An exact required runtime is displayed as the automatic choice;
+ * otherwise the row stays visually blank until the user chooses one. */
 
 /* realpath wants glibc's default feature set; AML is Linux-only. */
 #define _GNU_SOURCE
@@ -32,9 +31,8 @@ struct _AmlJavaRow
   /* The detected installations, GPtrArray<AmlJava*> owned by the row. */
   GPtrArray *javas;
 
-  /* Model contents: when an exact automatic runtime exists, index 0 is its
-   * entry with a NULL path. Otherwise there is no selected placeholder. The
-   * remaining entries are detected/custom runtimes and a trailing entry
+  /* Model contents: an exact automatic runtime is index 0 with a NULL path;
+   * the remaining entries are detected/custom runtimes and a trailing entry
    * that asks for another runtime instead of naming one. */
   GPtrArray *ids;   /* strdupped paths; the automatic entry has a NULL id */
   GPtrArray *names; /* the titles shown in the model */
@@ -47,9 +45,8 @@ struct _AmlJavaRow
    * runtime, so it cannot stay selected. */
   guint restore;
 
-  /* What the first entry stands for: the runtime the automatic choice
-   * resolves to. Only the game's required version decides that, and that
-   * runtime is named in the first entry and left out of the list below
+  /* What the first entry stands for when an exact automatic runtime exists.
+   * That runtime is named in the first entry and left out of the list below
    * so it is not shown twice. */
   int required_major;
 

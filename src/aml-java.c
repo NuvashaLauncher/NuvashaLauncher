@@ -834,12 +834,3 @@ aml_java_detect_finish (GAsyncResult  *result,
 
   return g_task_propagate_pointer (G_TASK (result), error);
 }
-
-GPtrArray *
-aml_java_detect_list_finish (GAsyncResult  *result,
-                             GError       **error)
-{
-  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
-
-  return g_task_propagate_pointer (G_TASK (result), error);
-}
