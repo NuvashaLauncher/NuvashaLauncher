@@ -326,14 +326,16 @@ remove_tree_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
                     gpointer task_data, GCancellable *cancellable G_GNUC_UNUSED)
 {
   RemoveTreeData *data = task_data;
+  AmlTaskScope *scope = g_object_get_data (G_OBJECT (task),
+                                           "aml-task-scope");
 
-  if (g_task_return_error_if_cancelled (task))
+  if (aml_task_scope_return_error_if_cancelled (scope))
     return;
 
   aml_fs_remove_tree (data->path);
 
-  if (!g_task_return_error_if_cancelled (task))
-    g_task_return_boolean (task, TRUE);
+  if (!aml_task_scope_return_error_if_cancelled (scope))
+    aml_task_scope_return_boolean (scope, TRUE);
 }
 
 void
@@ -451,13 +453,15 @@ copy_tree_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
                   gpointer task_data, GCancellable *cancellable)
 {
   CopyTreeData *data = task_data;
+  AmlTaskScope *scope = g_object_get_data (G_OBJECT (task),
+                                           "aml-task-scope");
   g_autoptr (GError) error = NULL;
 
   if (copy_tree_sync (data->source, data->destination, cancellable,
                       &error))
-    g_task_return_boolean (task, TRUE);
+    aml_task_scope_return_boolean (scope, TRUE);
   else
-    g_task_return_error (task, g_steal_pointer (&error));
+    aml_task_scope_return_error (scope, g_steal_pointer (&error));
 }
 
 void
