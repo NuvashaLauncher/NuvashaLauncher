@@ -312,6 +312,7 @@ aml_fs_remove_tree (const char *path)
 
 typedef struct {
   char *path;
+  AmlTaskScope *scope;
 } RemoveTreeData;
 
 static void
@@ -326,8 +327,7 @@ remove_tree_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
                     gpointer task_data, GCancellable *cancellable G_GNUC_UNUSED)
 {
   RemoveTreeData *data = task_data;
-  AmlTaskScope *scope = g_object_get_data (G_OBJECT (task),
-                                           "aml-task-scope");
+  AmlTaskScope *scope = data->scope;
 
   if (aml_task_scope_return_error_if_cancelled (scope))
     return;
@@ -338,18 +338,21 @@ remove_tree_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
     aml_task_scope_return_boolean (scope, TRUE);
 }
 
-void
-aml_fs_remove_tree_async (const char *path, GCancellable *cancellable,
-                          GAsyncReadyCallback callback, gpointer user_data)
+AmlTaskScope *
+aml_fs_remove_tree_async (const char *path, GAsyncReadyCallback callback,
+                          gpointer user_data)
 {
-  g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
-  aml_task_scope_attach_task (task);
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
+  GTask *task = aml_task_scope_task (scope);
   RemoveTreeData *data = g_new0 (RemoveTreeData, 1);
 
   data->path = g_strdup (path);
+  data->scope = scope;
   g_task_set_task_data (task, data,
                         (GDestroyNotify) remove_tree_data_free);
   g_task_run_in_thread (task, remove_tree_thread);
+  return g_steal_pointer (&scope);
 }
 
 gboolean

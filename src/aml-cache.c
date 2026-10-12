@@ -25,27 +25,11 @@ aml_cache_get_files_directory (void)
   return cache_directory ("files");
 }
 
-static void
-cache_clear_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
-                  gpointer user_data)
-{
-  AmlTaskScope *scope = user_data;
-  g_autoptr (GError) error = NULL;
-
-  if (aml_fs_remove_tree_finish (result, &error))
-    aml_task_scope_return_boolean (scope, TRUE);
-  else
-    aml_task_scope_return_error (scope, g_steal_pointer (&error));
-}
-
 static AmlTaskScope *
 cache_clear_async (const char *path, GAsyncReadyCallback callback,
                    gpointer user_data)
 {
-  AmlTaskScope *scope = aml_task_scope_new (NULL, NULL, callback, user_data);
-  aml_fs_remove_tree_async (path, aml_task_scope_get_cancellable (scope),
-                            cache_clear_done, scope);
-  return scope;
+  return aml_fs_remove_tree_async (path, callback, user_data);
 }
 
 AmlTaskScope *
