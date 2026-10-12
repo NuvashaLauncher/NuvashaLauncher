@@ -10,6 +10,7 @@
 #include "aml-fs.h"
 
 #include <errno.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib/gstdio.h>
 #include <string.h>
 
@@ -230,7 +231,7 @@ aml_icon_widget_new (const char *placeholder_icon_name)
 gboolean
 aml_icon_widget_set_file (GtkWidget *widget, const char *path)
 {
-  g_autoptr (GFile) file = NULL;
+  g_autoptr (GdkPixbuf) pixbuf = NULL;
   g_autoptr (GdkTexture) texture = NULL;
   GtkWidget *icon = NULL;
   GtkWidget *old_icon = NULL;
@@ -238,13 +239,17 @@ aml_icon_widget_set_file (GtkWidget *widget, const char *path)
   if (widget == NULL || !GTK_IS_STACK (widget) || path == NULL)
     return FALSE;
 
-  /* Decoding the bytes here, once, does two things: it proves that this
-     machine can read the format Modrinth served (usually WebP), and it
-     hands the icon a texture that is ready to draw instead of asking it
-     to read the file a second time. A file that does not decode leaves
-     the placeholder in place rather than an empty square. */
-  file = g_file_new_for_path (path);
-  texture = gdk_texture_new_from_file (file, NULL);
+  /* Decode at display size rather than retaining a full-size source texture
+     for a 64-pixel row. Large modpack icons can otherwise consume megabytes
+     each even though the UI never displays those extra pixels. */
+  pixbuf = gdk_pixbuf_new_from_file_at_scale (path, AML_ICON_SIZE,
+                                              AML_ICON_SIZE, TRUE, NULL);
+  if (pixbuf != NULL)
+    {
+      G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+      texture = gdk_texture_new_for_pixbuf (pixbuf);
+      G_GNUC_END_IGNORE_DEPRECATIONS
+    }
 
   if (texture == NULL)
     {
