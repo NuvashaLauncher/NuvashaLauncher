@@ -39,7 +39,6 @@
 #define SEARCH_DELAY_MS 300
 
 #include "aml-content-page-private.h"
-#include "aml-fs.h"
 #include "aml-operation.h"
 
 G_DEFINE_FINAL_TYPE (AmlContentPage, aml_content_page, GTK_TYPE_BOX)
@@ -313,7 +312,7 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
   const char *path = g_object_get_data (G_OBJECT (source), "aml-path");
   g_autoptr (GError) error = NULL;
 
-  if (!aml_fs_delete_finish (G_FILE (source), result, &error))
+  if (!aml_content_delete_finish (G_FILE (source), result, &error))
     show_error (self, "The file cannot be deleted", error);
     else
     {
@@ -392,7 +391,8 @@ on_delete_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
                           g_strdup (path), g_free);
   /* Deleting is a system call on the file and goes through GIO off the
      main loop; the ref on the page travels to on_deleted(). */
-  aml_fs_delete_async (target, G_PRIORITY_DEFAULT, NULL, on_deleted, self);
+  aml_content_delete_async (target, G_PRIORITY_DEFAULT, NULL, on_deleted,
+                            self);
 }
 
 /* The trash button asks first, then deletes the file for good. */
@@ -1225,7 +1225,7 @@ aml_content_page_on_open_folder_clicked (GtkButton *button G_GNUC_UNUSED, gpoint
      to open a path that is not there only confuses it. Create it first,
      empty, ready for files. */
   g_autoptr (GError) create_error = NULL;
-  if (!aml_fs_make_directory (self->folder, 0755, &create_error))
+  if (!aml_content_ensure_folder (self->folder, &create_error))
     {
       g_autofree char *message =
         g_strdup_printf (_("Cannot create \"%s\": %s"), self->folder,

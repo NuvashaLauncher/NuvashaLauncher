@@ -92,6 +92,12 @@ char *aml_content_set_disabled (const char  *path,
                                 GError     **error);
 gboolean aml_content_remove_file (const char *path, GError **error);
 gboolean aml_content_ensure_folder (const char *path, GError **error);
+void aml_content_delete_async (GFile *file, int io_priority,
+                               GCancellable *cancellable,
+                               GAsyncReadyCallback callback,
+                               gpointer user_data);
+gboolean aml_content_delete_finish (GFile *file, GAsyncResult *result,
+                                    GError **error);
 void aml_content_operation_release (AmlTaskScope *operation,
                                     GCancellable *cancellable);
 void aml_content_operation_forget (AmlTaskScope *operation);

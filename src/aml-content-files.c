@@ -142,6 +142,20 @@ aml_content_ensure_folder (const char *path, GError **error)
 }
 
 void
+aml_content_delete_async (GFile *file, int io_priority,
+                          GCancellable *cancellable,
+                          GAsyncReadyCallback callback, gpointer user_data)
+{
+  aml_fs_delete_async (file, io_priority, cancellable, callback, user_data);
+}
+
+gboolean
+aml_content_delete_finish (GFile *file, GAsyncResult *result, GError **error)
+{
+  return aml_fs_delete_finish (file, result, error);
+}
+
+void
 aml_content_operation_release (AmlTaskScope *operation,
                                GCancellable *cancellable)
 {
