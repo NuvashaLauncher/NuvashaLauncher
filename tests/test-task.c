@@ -351,7 +351,7 @@ test_scope_reference_keeps_operation_alive (void)
   AmlTaskScope *held = aml_task_scope_ref (scope);
 
   aml_task_scope_unref (scope);
-  g_assert_nonnull (aml_task_scope_get_task (held));
+  g_assert_null (aml_task_scope_get_cancellable (held));
   aml_task_scope_unref (held);
 
   g_print ("ok - task scope references keep operation state alive\n");

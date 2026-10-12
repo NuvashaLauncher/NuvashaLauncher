@@ -70,11 +70,33 @@ aml_task_scope_attach_task (GTask *task)
                           (GDestroyNotify) aml_task_scope_unref);
 }
 
-GTask *
-aml_task_scope_get_task (const AmlTaskScope *scope)
+GCancellable *
+aml_task_scope_get_cancellable (const AmlTaskScope *scope)
 {
   g_return_val_if_fail (scope != NULL, NULL);
-  return scope->task;
+  return g_task_get_cancellable (scope->task);
+}
+
+void
+aml_task_scope_set_check_cancellable (AmlTaskScope *scope, gboolean check)
+{
+  g_return_if_fail (scope != NULL);
+  g_task_set_check_cancellable (scope->task, check);
+}
+
+void
+aml_task_scope_return_pointer (AmlTaskScope *scope, gpointer result,
+                               GDestroyNotify result_free)
+{
+  g_return_if_fail (scope != NULL);
+  g_task_return_pointer (scope->task, result, result_free);
+}
+
+void
+aml_task_scope_return_error (AmlTaskScope *scope, GError *error)
+{
+  g_return_if_fail (scope != NULL);
+  g_task_return_error (scope->task, error);
 }
 
 void

@@ -318,7 +318,6 @@ aml_java_parse_version (const char  *output,
 
 typedef struct
 {
-  GTask *task;
   AmlTaskScope *scope;
   char *executable;
   GSubprocess *process;
@@ -330,7 +329,6 @@ probe_destroyed (gpointer data)
   Probe *probe = data;
 
   aml_task_scope_unref (probe->scope);
-  g_clear_object (&probe->task);
   g_clear_pointer (&probe->executable, g_free);
   g_clear_object (&probe->process);
   g_free (probe);
@@ -348,7 +346,7 @@ probe_communicate (GObject      *source G_GNUC_UNUSED,
   if (!g_subprocess_communicate_utf8_finish (G_SUBPROCESS (source), result,
                                              &output, NULL, &error))
     {
-      g_task_return_error (probe->task, g_steal_pointer (&error));
+      aml_task_scope_return_error (probe->scope, g_steal_pointer (&error));
       probe_destroyed (probe);
       return;
     }
@@ -361,10 +359,10 @@ probe_communicate (GObject      *source G_GNUC_UNUSED,
       g_subprocess_get_exit_status (G_SUBPROCESS (source)) != 0 ||
       !aml_java_parse_version (output, -1, &major, &arch, &vendor_out))
     {
-      g_task_return_new_error (probe->task, AML_JAVA_ERROR,
-                               AML_JAVA_ERROR_PARSE,
-                               "\"%s\" did not report a version",
-                               probe->executable);
+      aml_task_scope_return_error (
+        probe->scope,
+        g_error_new (AML_JAVA_ERROR, AML_JAVA_ERROR_PARSE,
+                     "\"%s\" did not report a version", probe->executable));
       g_free (arch);
       g_free (vendor_out);
       probe_destroyed (probe);
@@ -379,7 +377,8 @@ probe_communicate (GObject      *source G_GNUC_UNUSED,
   java->vendor = g_steal_pointer (&vendor_out);
   java->headless = !java_has_xawt (java->executable);
 
-  g_task_return_pointer (probe->task, java, (GDestroyNotify) aml_java_free);
+  aml_task_scope_return_pointer (probe->scope, java,
+                                 (GDestroyNotify) aml_java_free);
   probe_destroyed (probe);
 }
 
@@ -391,17 +390,15 @@ aml_java_probe_async (const char         *executable,
 {
   AmlTaskScope *scope =
     aml_task_scope_new (NULL, cancellable, callback, user_data);
-  GTask *task = aml_task_scope_get_task (scope);
   g_autoptr (GError) error = NULL;
   const char * const argv[] = { executable, "-XshowSettings:properties", "-version",
                    NULL };
   Probe *probe = NULL;
 
-  g_task_set_check_cancellable (task, FALSE);
+  aml_task_scope_set_check_cancellable (scope, FALSE);
 
   probe = g_new0 (Probe, 1);
   probe->scope = scope;
-  probe->task = g_object_ref (task);
   probe->executable = g_strdup (executable);
 
   probe->process = g_subprocess_newv (argv,
@@ -411,13 +408,14 @@ aml_java_probe_async (const char         *executable,
 
   if (probe->process == NULL)
     {
-      g_task_return_error (probe->task, g_steal_pointer (&error));
+      aml_task_scope_return_error (probe->scope, g_steal_pointer (&error));
       probe_destroyed (probe);
       return;
     }
 
   g_subprocess_communicate_utf8_async (probe->process, NULL,
-                                      cancellable, probe_communicate, probe);
+                                       aml_task_scope_get_cancellable (scope),
+                                       probe_communicate, probe);
 }
 
 AmlJava *
@@ -712,7 +710,6 @@ dedupe_candidates (char **candidates)
 
 typedef struct
 {
-  GTask *detect_task;
   AmlTaskScope *scope;
 } Detect;
 
@@ -726,13 +723,12 @@ detected (GObject      *source G_GNUC_UNUSED,
   GPtrArray *javas = aml_java_probe_list_finish (result, &error);
 
   if (javas == NULL)
-    g_task_return_error (detect->detect_task, g_steal_pointer (&error));
+    aml_task_scope_return_error (detect->scope, g_steal_pointer (&error));
   else
-    g_task_return_pointer (detect->detect_task, javas,
-                           (GDestroyNotify) g_ptr_array_unref);
+    aml_task_scope_return_pointer (detect->scope, javas,
+                                   (GDestroyNotify) g_ptr_array_unref);
 
   aml_task_scope_unref (detect->scope);
-  g_clear_object (&detect->detect_task);
   g_free (detect);
 }
 
@@ -743,16 +739,14 @@ aml_java_detect_async (GCancellable       *cancellable,
 {
   AmlTaskScope *scope = aml_task_scope_new (NULL, cancellable, callback,
                                             user_data);
-  GTask *task = aml_task_scope_get_task (scope);
   g_auto (GStrv) collected = collect_candidates ();
   g_auto (GStrv) candidates = dedupe_candidates (collected);
   Detect *detect = NULL;
 
-  g_task_set_check_cancellable (task, FALSE);
+  aml_task_scope_set_check_cancellable (scope, FALSE);
 
   detect = g_new0 (Detect, 1);
   detect->scope = scope;
-  detect->detect_task = g_object_ref (task);
 
   aml_java_probe_list_async (g_steal_pointer (&candidates), cancellable,
                              detected, detect);
@@ -766,16 +760,14 @@ aml_java_detect_list_async (char            **roots,
 {
   AmlTaskScope *scope = aml_task_scope_new (NULL, cancellable, callback,
                                             user_data);
-  GTask *task = aml_task_scope_get_task (scope);
   g_auto (GStrv) collected = collect_candidates_list (roots);
   g_auto (GStrv) candidates = dedupe_candidates (collected);
   Detect *detect = NULL;
 
-  g_task_set_check_cancellable (task, FALSE);
+  aml_task_scope_set_check_cancellable (scope, FALSE);
 
   detect = g_new0 (Detect, 1);
   detect->scope = scope;
-  detect->detect_task = g_object_ref (task);
 
   aml_java_probe_list_async (g_steal_pointer (&candidates), cancellable,
                              detected, detect);
