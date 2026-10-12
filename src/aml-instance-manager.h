@@ -150,12 +150,11 @@ AmlInstance *aml_instance_manager_duplicate_finish (AmlInstanceManager *self,
  * @delete_directory is TRUE; the metadata is removed after the
  * directory went away, so a failed deletion keeps the instance
  * registered. */
-void aml_instance_manager_delete_async (AmlInstanceManager *self,
-                                        AmlInstance *instance,
-                                        gboolean delete_directory,
-                                        GCancellable *cancellable,
-                                        GAsyncReadyCallback callback,
-                                        gpointer user_data);
+AmlTaskScope *aml_instance_manager_delete_async (AmlInstanceManager *self,
+                                                  AmlInstance *instance,
+                                                  gboolean delete_directory,
+                                                  GAsyncReadyCallback callback,
+                                                  gpointer user_data);
 
 gboolean aml_instance_manager_delete_finish (AmlInstanceManager *self,
                                              GAsyncResult *result,
