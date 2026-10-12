@@ -733,9 +733,9 @@ static void
 extract_finished (ExtractRequest *request, GError *error)
 {
   if (error != NULL)
-    g_task_return_error (request->task, error);
+    aml_task_scope_return_error (request->scope, error);
   else
-    g_task_return_boolean (request->task, TRUE);
+    aml_task_scope_return_boolean (request->scope, TRUE);
 
   extract_request_free (request);
 }
@@ -1137,14 +1137,16 @@ static void
 request_end (ResolveRequest *request, AmlResolvedVersion *resolved)
 {
   if (resolved != NULL)
-    g_task_return_pointer (request->task, resolved,
-                           (GDestroyNotify) aml_resolved_version_free);
+    aml_task_scope_return_pointer (request->scope, resolved,
+                                   (GDestroyNotify) aml_resolved_version_free);
   else if (request->error != NULL)
-    g_task_return_error (request->task, g_steal_pointer (&request->error));
+    aml_task_scope_return_error (request->scope,
+                                 g_steal_pointer (&request->error));
   else
-    g_task_return_new_error (request->task, AML_RESOLVE_ERROR,
-                             AML_RESOLVE_ERROR_INVALID,
-                             "the version cannot be resolved");
+    aml_task_scope_return_error (
+      request->scope,
+      g_error_new_literal (AML_RESOLVE_ERROR, AML_RESOLVE_ERROR_INVALID,
+                           "the version cannot be resolved"));
 
   request_free (request);
 }
