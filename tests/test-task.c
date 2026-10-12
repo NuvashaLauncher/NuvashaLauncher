@@ -489,6 +489,55 @@ test_scope_follows_a_cancellable_it_does_not_own (void)
   g_print ("ok - an operation follows a cancellable owned by its caller\n");
 }
 
+/* The shape that broke a modpack download: the operation is completed, and
+ * the code that completed it then frees state that borrows the scope.
+ * That state has to find the scope still there. */
+typedef struct
+{
+  AmlTaskScope *scope;
+  gboolean answered;
+} BorrowedState;
+
+static void
+borrowed_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+               gpointer user_data)
+{
+  g_task_propagate_boolean (G_TASK (result), NULL);
+}
+
+static void
+borrowed_state_free (BorrowedState *state)
+{
+  /* This is what every request cleanup does: it takes the scope's sources
+     away. It must run against a scope that is still alive. */
+  if (state->scope != NULL)
+    aml_task_scope_remove_source (state->scope, 0);
+
+  g_free (state);
+}
+
+static void
+test_a_released_operation_outlives_the_code_that_completed_it (void)
+{
+  BorrowedState *state = g_new0 (BorrowedState, 1);
+  guint before = criticals;
+
+  state->scope = aml_task_scope_unref_when_done (
+    aml_task_scope_new (NULL, NULL, borrowed_done, NULL));
+
+  /* The completion runs from inside this call, as it does for an
+     operation that finds out it has nothing to do. */
+  aml_task_scope_return_boolean (state->scope, TRUE);
+
+  borrowed_state_free (state);
+
+  while (g_main_context_pending (NULL))
+    g_main_context_iteration (NULL, FALSE);
+
+  g_assert_cmpuint (criticals, ==, before);
+  g_print ("ok - a released operation outlives the code that completed it\n");
+}
+
 /* A step that starts nothing and finishes nothing, so the test decides
  * when and how the sequence completes. */
 static void
@@ -567,6 +616,7 @@ main (int argc, char **argv)
   test_scope_reference_keeps_operation_alive ();
   test_immediate_failure_completes_after_the_constructor ();
   test_scope_follows_a_cancellable_it_does_not_own ();
+  test_a_released_operation_outlives_the_code_that_completed_it ();
 
   g_print ("# Task scope and sources it has already lost\n");
   test_scope_free_releases_a_source_that_fired ();

@@ -83,8 +83,11 @@ void aml_task_scope_cancel (AmlTaskScope *scope);
 /* Hands the caller's reference back: the operation releases itself once
  * it completes. For work whose answer nobody is waiting for, where the
  * handle exists only to be able to cancel the work. Returns @scope so it
- * can be chained onto a call that hands one back. The code that completes
- * such an operation must not touch the scope afterwards. */
+ * can be chained onto a call that hands one back.
+ *
+ * The release happens on the next main-loop turn, never inside the
+ * completion itself: state that borrows the scope is usually freed right
+ * after the operation completes, and it must still find the scope there. */
 AmlTaskScope *aml_task_scope_unref_when_done (AmlTaskScope *scope);
 
 /* Hands the caller's reference back and ties the operation to
