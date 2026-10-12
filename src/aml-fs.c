@@ -323,7 +323,8 @@ remove_tree_data_free (RemoveTreeData *data)
 }
 
 static void
-remove_tree_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
+remove_tree_thread (GTask *task G_GNUC_UNUSED,
+                    gpointer source_object G_GNUC_UNUSED,
                     gpointer task_data, GCancellable *cancellable G_GNUC_UNUSED)
 {
   RemoveTreeData *data = task_data;
@@ -453,7 +454,8 @@ copy_tree_sync (GFile *source, GFile *destination, GCancellable *cancellable,
 }
 
 static void
-copy_tree_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
+copy_tree_thread (GTask *task G_GNUC_UNUSED,
+                   gpointer source_object G_GNUC_UNUSED,
                   gpointer task_data, GCancellable *cancellable)
 {
   CopyTreeData *data = task_data;

@@ -866,7 +866,8 @@ modpack_read_free (ModpackRead *read)
 }
 
 static void
-modpack_read_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
+modpack_read_thread (GTask *task G_GNUC_UNUSED,
+                     gpointer source_object G_GNUC_UNUSED,
                      gpointer task_data, GCancellable *cancellable)
 {
   ModpackRead *read = task_data;
@@ -1399,7 +1400,8 @@ extract_run_free (ExtractRun *run)
 }
 
 static void
-extract_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
+extract_thread (GTask *task G_GNUC_UNUSED,
+                gpointer source_object G_GNUC_UNUSED,
                 gpointer task_data, GCancellable *cancellable)
 {
   ExtractRun *run = task_data;

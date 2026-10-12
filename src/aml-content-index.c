@@ -232,7 +232,8 @@ load_args_free (LoadArgs *args)
 }
 
 static void
-load_thread (GTask *task, gpointer source G_GNUC_UNUSED, gpointer task_data,
+load_thread (GTask *task G_GNUC_UNUSED, gpointer source G_GNUC_UNUSED,
+             gpointer task_data,
              GCancellable *cancellable G_GNUC_UNUSED)
 {
   LoadArgs *args = task_data;

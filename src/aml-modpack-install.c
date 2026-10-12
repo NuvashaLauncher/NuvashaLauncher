@@ -1146,7 +1146,8 @@ export_count_directory (const char *root, const char *relative,
 }
 
 static void
-export_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
+export_thread (GTask *task G_GNUC_UNUSED,
+                gpointer source_object G_GNUC_UNUSED,
                gpointer task_data, GCancellable *cancellable)
 {
   ExportRun *run = task_data;
