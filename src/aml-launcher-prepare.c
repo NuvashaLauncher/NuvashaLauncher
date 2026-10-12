@@ -5,6 +5,7 @@
 #include "aml-launcher-private.h"
 #include "aml-auth-microsoft.h"
 #include "aml-instance-components.h"
+#include "aml-i18n.h"
 #include "aml-java.h"
 #include "aml-loaders.h"
 #include "aml-minecraft-resolve.h"
@@ -22,32 +23,9 @@
 static char *
 no_java_reason (AmlLauncher *self, const char *instance_java)
 {
-  int required = self->preparation.resolved != NULL ? self->preparation.resolved->java_major_version
-                                        : 0;
-
-  if (required > 0)
-    {
-      if (instance_java != NULL && *instance_java != '\0')
-        return g_strdup_printf (
-          "\"%s\" was not found among the detected Java installations, and "
-          "no other one on this system runs Minecraft %s, which needs "
-          "Java %d or newer",
-          instance_java, self->version, required);
-
-      return g_strdup_printf (
-        "no Java on this system runs Minecraft %s, which needs Java %d "
-        "or newer", self->version, required);
-    }
-
-  if (instance_java != NULL && *instance_java != '\0')
-    return g_strdup_printf (
-      "\"%s\" was not found among the detected Java installations, and "
-      "there is no other one to run Minecraft %s with",
-      instance_java, self->version);
-
-  return g_strdup_printf (
-    "no Java installation was found on this system to run Minecraft %s "
-    "with", self->version);
+  (void) self;
+  (void) instance_java;
+  return g_strdup (_("No compatible Java runtime was found."));
 }
 
 /* The Java a launch runs with: the one the instance asks for, or the
@@ -298,4 +276,3 @@ on_resolve_progress (const AmlResolveProgress *progress, gpointer user_data)
   if (self->state == AML_LAUNCH_DOWNLOADING)
     set_state (self, AML_LAUNCH_PREPARING, self->version);
 }
-
