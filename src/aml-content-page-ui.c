@@ -182,6 +182,9 @@ aml_content_page_reset_for_tab_switch (AmlContentPage *self)
   aml_content_page_close_detail (self);
   if (self->stack != NULL)
     adw_view_stack_set_visible_child_name (self->stack, "installed");
+
+  if (!self->installed.loaded)
+    reload_installed (self);
 }
 
 void

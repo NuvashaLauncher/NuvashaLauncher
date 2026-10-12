@@ -60,7 +60,6 @@ typedef struct {
 } UpdateRun;
 
 void aml_content_page_run_search (AmlContentPage *self, gboolean append);
-void reload_installed (AmlContentPage *self);
 void open_project_page (AmlContentPage *self, AmlModrinthProject *project);
 static void update_check_next (UpdateRun *run);
 void update_batch_next (AmlContentPage *self);
@@ -890,6 +889,8 @@ reload_installed (AmlContentPage *self)
   if (self->installed.scan == NULL || self->installed.group == NULL)
     return;
 
+  self->installed.loaded = TRUE;
+
   g_object_get (self->instance, "directory", &directory, NULL);
 
   if (directory == NULL)
@@ -1341,8 +1342,6 @@ aml_content_page_new (AmlInstance *instance, AmlContentType type)
 
   aml_content_page_build_bar (self);
   aml_content_page_move_actions_into_bar (self, FALSE);
-
-  reload_installed (self);
 
   return self;
 }
