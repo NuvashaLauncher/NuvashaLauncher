@@ -782,11 +782,12 @@ local_metadata_thread (GTask *task, gpointer source G_GNUC_UNUSED,
         return;
       AmlContentFile *file = g_ptr_array_index (run->files, i);
 
-      /* The content index already carries the remote identity and metadata
-       * for files seen before. Reopening every archive just to rediscover
-       * that information makes large modpacks needlessly expensive; only
-       * inspect files that still need local identification. */
-      if (file->project_id == NULL && !file->local_metadata)
+      /* The content index already carries the remote identity for files seen
+       * before. Keep reading archives when their index has no usable icon:
+       * local mod/resource-pack icons are not persisted in the index and
+       * would otherwise disappear on the next scan. */
+      if ((file->project_id == NULL || file->icon_url == NULL ||
+           *file->icon_url == '\0') && !file->local_metadata)
         apply_local_metadata (file, run->type);
       aml_content_file_refresh_search_key (file);
     }
