@@ -29,6 +29,13 @@ void aml_download_service_free (AmlDownloadService *service);
 /* Cancel every request waiting for a transfer slot. Active transfers are
  * unaffected; their callers still own their individual cancellables. */
 void aml_download_service_cancel_queued (AmlDownloadService *service);
+guint aml_download_service_active (const AmlDownloadService *service);
+guint aml_download_service_queued_interactive (const AmlDownloadService *service);
+guint aml_download_service_queued_bulk (const AmlDownloadService *service);
+guint64 aml_download_service_completed (const AmlDownloadService *service);
+guint64 aml_download_service_failed (const AmlDownloadService *service);
+guint64 aml_download_service_cancelled (const AmlDownloadService *service);
+guint64 aml_download_service_retries (const AmlDownloadService *service);
 
 #define AML_DOWNLOAD_ERROR (aml_download_error_quark ())
 

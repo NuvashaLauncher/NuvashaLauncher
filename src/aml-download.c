@@ -85,8 +85,57 @@ struct _AmlDownloadService {
   GQueue interactive_waiting;
   GQueue bulk_waiting;
   gboolean prefer_interactive;
+  guint64 completed;
+  guint64 failed;
+  guint64 cancelled;
+  guint64 retries;
   AmlSettings *cache_settings;
 };
+
+guint
+aml_download_service_active (const AmlDownloadService *service)
+{
+  return service == NULL ? 0 : service->interactive_running +
+                                service->bulk_running;
+}
+
+guint
+aml_download_service_queued_interactive (const AmlDownloadService *service)
+{
+  return service == NULL ? 0 :
+    g_queue_get_length ((GQueue *) &service->interactive_waiting);
+}
+
+guint
+aml_download_service_queued_bulk (const AmlDownloadService *service)
+{
+  return service == NULL ? 0 :
+    g_queue_get_length ((GQueue *) &service->bulk_waiting);
+}
+
+guint64
+aml_download_service_completed (const AmlDownloadService *service)
+{
+  return service == NULL ? 0 : service->completed;
+}
+
+guint64
+aml_download_service_failed (const AmlDownloadService *service)
+{
+  return service == NULL ? 0 : service->failed;
+}
+
+guint64
+aml_download_service_cancelled (const AmlDownloadService *service)
+{
+  return service == NULL ? 0 : service->cancelled;
+}
+
+guint64
+aml_download_service_retries (const AmlDownloadService *service)
+{
+  return service == NULL ? 0 : service->retries;
+}
 
 AmlDownloadService *
 aml_download_service_new (void)
@@ -556,6 +605,12 @@ start_transfer (DownloadRequest *request)
       else
         service->bulk_running++;
       request->holds_slot = TRUE;
+      aml_task_scope_set_state (request->scope, AML_TASK_STATE_RUNNING);
+      g_debug ("download operation=%" G_GUINT64_FORMAT " start pool=%s active=%u queued=%u/%u",
+               aml_task_scope_get_id (request->scope), interactive ? "interactive" : "bulk",
+               aml_download_service_active (service),
+               aml_download_service_queued_interactive (service),
+               aml_download_service_queued_bulk (service));
       request->begin (request);
       return;
     }
@@ -565,6 +620,10 @@ start_transfer (DownloadRequest *request)
   GCancellable *cancellable = g_task_get_cancellable (request->task);
 
   g_queue_insert_sorted (queue, request, compare_waiting_requests, NULL);
+  g_debug ("download operation=%" G_GUINT64_FORMAT " queued pool=%s queued=%u/%u",
+           aml_task_scope_get_id (request->scope), interactive ? "interactive" : "bulk",
+           aml_download_service_queued_interactive (service),
+           aml_download_service_queued_bulk (service));
 
   /* Watched through the scope, so the watch is removed along with every
      other source this request owns. aml_cancellable_watch() hands the
@@ -631,6 +690,11 @@ release_slot (DownloadRequest *request)
           service->prefer_interactive = TRUE;
         }
       next->holds_slot = TRUE;
+      aml_task_scope_set_state (next->scope, AML_TASK_STATE_RUNNING);
+      g_debug ("download operation=%" G_GUINT64_FORMAT " dequeued active=%u queued=%u/%u",
+               aml_task_scope_get_id (next->scope), aml_download_service_active (service),
+               aml_download_service_queued_interactive (service),
+               aml_download_service_queued_bulk (service));
       next->begin (next);
     }
 }
@@ -736,6 +800,12 @@ open_temporary (DownloadRequest *request, GError **error)
 static void
 request_free (DownloadRequest *request)
 {
+  if (request->scope != NULL)
+    {
+      aml_task_scope_set_state (request->scope, AML_TASK_STATE_CLEANING);
+      g_debug ("download operation=%" G_GUINT64_FORMAT " cleaning",
+               aml_task_scope_get_id (request->scope));
+    }
   if (request->retry_source != 0)
     aml_task_scope_remove_source (request->scope, request->retry_source);
 
@@ -785,7 +855,18 @@ static void
 request_fail (DownloadRequest *request, GError *error)
 {
   AmlTaskScope *scope = request->scope;
+  AmlDownloadService *service = request->service;
+  gboolean cancelled = g_error_matches (error, AML_DOWNLOAD_ERROR,
+                                        AML_DOWNLOAD_ERROR_CANCELLED);
 
+  aml_task_scope_set_state (scope, cancelled ? AML_TASK_STATE_CANCELLED
+                                              : AML_TASK_STATE_FAILED);
+  if (cancelled)
+    service->cancelled++;
+  else
+    service->failed++;
+  g_debug ("download operation=%" G_GUINT64_FORMAT " %s", 
+           aml_task_scope_get_id (scope), cancelled ? "cancelled" : "failed");
   discard_temporary (request);
   release_slot (request);
   request_free (request);
@@ -796,6 +877,9 @@ static void
 request_succeed (DownloadRequest *request)
 {
   AmlTaskScope *scope = request->scope;
+  request->service->completed++;
+  g_debug ("download operation=%" G_GUINT64_FORMAT " completed",
+           aml_task_scope_get_id (scope));
 
   release_slot (request);
   request_free (request);
@@ -806,6 +890,9 @@ static void
 request_succeed_json (DownloadRequest *request, JsonParser *parser)
 {
   AmlTaskScope *scope = request->scope;
+  request->service->completed++;
+  g_debug ("download operation=%" G_GUINT64_FORMAT " completed",
+           aml_task_scope_get_id (scope));
 
   release_slot (request);
   request_free (request);
@@ -1583,6 +1670,10 @@ attempt_failed (DownloadRequest *request, GError *error)
     {
       discard_temporary (request);
       g_clear_error (&error);
+      request->service->retries++;
+      aml_task_scope_set_state (request->scope, AML_TASK_STATE_RETRYING);
+      g_debug ("download operation=%" G_GUINT64_FORMAT " retry attempt=%u",
+               aml_task_scope_get_id (request->scope), request->attempts + 1);
       request->retry_source = g_timeout_add (delay_ms, retry_when_due, request);
       aml_task_scope_track_source (request->scope, request->retry_source);
       request->retry_cancel_source =
