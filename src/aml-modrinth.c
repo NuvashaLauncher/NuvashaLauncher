@@ -1285,7 +1285,10 @@ static void
 json_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
             gpointer user_data)
 {
-  g_autoptr (GTask) task = user_data;
+  /* The flight stores this task as callback data without owning another
+     reference. Keep one while this callback uses the task, but do not treat
+     the borrowed callback pointer itself as an owned reference. */
+  g_autoptr (GTask) task = g_object_ref (user_data);
   Request *request = g_task_get_task_data (task);
   g_autoptr (JsonParser) parser = NULL;
   g_autoptr (GError) error = NULL;
