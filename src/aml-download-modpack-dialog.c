@@ -20,7 +20,6 @@
 #include "aml-downloads.h"
 #include "aml-download.h"
 #include "aml-operation.h"
-#include "aml-cache.h"
 #include "aml-i18n.h"
 #include "aml-icons.h"
 #include "aml-markdown.h"
@@ -29,6 +28,8 @@
 #include "aml-task.h"
 
 #include <glib/gstdio.h>
+#include <errno.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -165,6 +166,7 @@ static gboolean dialog_start_features (AmlDownloadModpackDialog *self);
 static void on_modpack_download_clicked (GtkButton *, gpointer);
 static void dialog_details_fill (AmlDownloadModpackDialog *self);
 static void close_details (AmlDownloadModpackDialog *self);
+static void remove_pack_file (AmlDownloadModpackDialog *self);
 static void show_details_error (AmlDownloadModpackDialog *self,
                                 const char *message);
 
@@ -242,7 +244,7 @@ dialog_dispose (GObject *object)
   g_clear_pointer (&self->opt_switch_rows, g_ptr_array_unref);
   g_clear_pointer (&self->opt_files, g_ptr_array_unref);
   g_clear_pointer (&self->seen_ids, g_hash_table_unref);
-  g_free (self->pack_path);
+   remove_pack_file (self);
   g_free (self->directory);
   g_free (self->instance_name);
   self->instance_name = NULL;
@@ -2198,29 +2200,26 @@ dialog_start_features (AmlDownloadModpackDialog *self)
                              (gpointer *) &self->pack_download);
 
   {
-    g_autofree char *cache_dir = g_build_filename (
-      g_get_user_cache_dir (), "AML", "packs", NULL);
-    g_autoptr (GError) error = NULL;
-    g_autofree char *name = NULL;
+    g_autofree char *template = g_build_filename (
+      g_get_tmp_dir (), ".aml-pack-XXXXXX", NULL);
+    int fd = g_mkstemp (template);
 
-    if (!aml_cache_ensure_directory (cache_dir, &error))
+    if (fd < 0)
       {
+        g_autoptr (GError) error = NULL;
+
+        g_set_error (&error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                     "cannot create a temporary modpack file: %s",
+                     g_strerror (errno));
         push_error (self, _("Pack could not be fetched"),
                     error->message, G_CALLBACK (on_error_retry_fetch));
         return FALSE;
       }
 
-    /* The filename is supplied by the remote service. Do not use it as a
-     * path component: besides allowing traversal, equal filenames from two
-     * downloads would race with one another. The original name is only
-     * useful as display metadata, so use a unique local cache name instead. */
-    {
-      g_autofree char *uuid = g_uuid_string_random ();
-      name = g_strdup_printf ("pack-%s.mrpack", uuid);
-    }
-
+    close (fd);
+    g_unlink (template);
     g_free (self->pack_path);
-    self->pack_path = g_build_filename (cache_dir, name, NULL);
+    self->pack_path = g_steal_pointer (&template);
 
     aml_operation_release (
       aml_download_file_async (aml_downloads_get_service (), file->url, self->pack_path, file->sha1,
