@@ -80,6 +80,31 @@ test_sequence_progresses_and_cleans_up (void)
 }
 
 static void
+test_scope_ids_and_states (void)
+{
+  g_autoptr (AmlTaskScope) first = aml_task_scope_new (NULL, NULL, NULL, NULL);
+  g_autoptr (AmlTaskScope) second = aml_task_scope_new (NULL, NULL, NULL, NULL);
+
+  g_assert_cmpuint (aml_task_scope_get_id (first), >, 0);
+  g_assert_cmpuint (aml_task_scope_get_id (first), !=,
+                    aml_task_scope_get_id (second));
+  g_assert_cmpint (aml_task_scope_get_state (first), ==,
+                   AML_TASK_STATE_QUEUED);
+
+  aml_task_scope_set_state (first, AML_TASK_STATE_RUNNING);
+  g_assert_cmpint (aml_task_scope_get_state (first), ==,
+                   AML_TASK_STATE_RUNNING);
+  aml_task_scope_cancel (first);
+  g_assert_cmpint (aml_task_scope_get_state (first), ==,
+                   AML_TASK_STATE_CANCELLED);
+
+  aml_task_scope_return_boolean (second, TRUE);
+  g_assert_cmpint (aml_task_scope_get_state (second), ==,
+                   AML_TASK_STATE_COMPLETED);
+  g_print ("ok - operation ids and lifecycle states are observable\n");
+}
+
+static void
 error_step (AmlTaskSequence *sequence G_GNUC_UNUSED, gpointer user_data)
 {
   SequenceData *data = user_data;
@@ -671,6 +696,7 @@ main (int argc, char **argv)
   test_a_released_operation_outlives_the_code_that_completed_it ();
   test_callback_can_release_owned_operation ();
   test_scope_does_not_follow_its_own_cancellable ();
+  test_scope_ids_and_states ();
 
   g_print ("# Task scope and sources it has already lost\n");
   test_scope_free_releases_a_source_that_fired ();
