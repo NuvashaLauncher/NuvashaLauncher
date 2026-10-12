@@ -1119,7 +1119,6 @@ request_free (gpointer data)
   if (request->data != NULL && request->free_data != NULL)
     request->free_data (request->data);
 
-  aml_task_scope_unref (request->scope);
   g_free (request);
 }
 
@@ -1137,14 +1136,18 @@ request_return_pointer (GTask *task, gpointer value, GDestroyNotify free_value)
   aml_task_scope_return_pointer (request->scope, value, free_value);
 }
 
-static GTask *
-request_new (GCancellable *cancellable, GAsyncReadyCallback callback,
-             gpointer user_data, AnswerFunc answer, AmlNotFoundRule not_found,
-             void *data, GDestroyNotify free_data)
+static AmlTaskScope *
+request_new (GAsyncReadyCallback callback, gpointer user_data,
+             AnswerFunc answer, AmlNotFoundRule not_found, void *data,
+             GDestroyNotify free_data)
 {
-  GTask *task = g_task_new (NULL, cancellable, callback, user_data);
+  AmlTaskScope *scope = aml_task_scope_new (NULL, NULL, callback, user_data);
+  GTask *task = aml_task_scope_task (scope);
   Request *request = g_new0 (Request, 1);
-  request->scope = aml_task_scope_from_task (task);
+
+  /* Borrowed: this request is the task's own data and the scope owns that
+     task. The caller keeps the operation alive until its callback. */
+  request->scope = scope;
 
   request->answer = answer;
   request->not_found = not_found;
@@ -1156,7 +1159,7 @@ request_new (GCancellable *cancellable, GAsyncReadyCallback callback,
   g_task_set_check_cancellable (task, FALSE);
   g_task_set_task_data (task, request, request_free);
 
-  return task;
+  return scope;
 }
 
 /* One way out of a request: an error of this module's domain, so that a
@@ -1334,14 +1337,13 @@ json_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   }
 }
 
-static void
-get_async (const char *url, GCancellable *cancellable,
-           GAsyncReadyCallback callback, gpointer user_data,
+static AmlTaskScope *
+get_async (const char *url, GAsyncReadyCallback callback, gpointer user_data,
            AnswerFunc answer, AmlNotFoundRule not_found)
 {
-  g_autoptr (GTask) task =
-    request_new (cancellable, callback, user_data, answer, not_found, NULL,
-                 NULL);
+  g_autoptr (AmlTaskScope) scope =
+    request_new (callback, user_data, answer, not_found, NULL, NULL);
+  GTask *task = aml_task_scope_task (scope);
   JsonFlight *flight = NULL;
 
   if (json_flights == NULL)
@@ -1352,7 +1354,7 @@ get_async (const char *url, GCancellable *cancellable,
   if (flight != NULL)
     {
       g_ptr_array_add (flight->tasks, g_object_ref (task));
-      return;
+      return g_steal_pointer (&scope);
     }
 
   flight = g_new0 (JsonFlight, 1);
@@ -1361,7 +1363,10 @@ get_async (const char *url, GCancellable *cancellable,
   g_ptr_array_add (flight->tasks, g_object_ref (task));
   g_hash_table_insert (json_flights, g_strdup (url), flight);
 
-  aml_download_json_cached_async (url, cancellable, json_flight_done, flight);
+  aml_download_json_cached_async (url, aml_task_scope_get_cancellable (scope),
+                                  json_flight_done, flight);
+
+  return g_steal_pointer (&scope);
 }
 
 /* ---------------------------------------------------------- *
@@ -1387,18 +1392,17 @@ search_answer (GTask *task, JsonNode *root)
                          (GDestroyNotify) aml_modrinth_results_free);
 }
 
-void
+AmlTaskScope *
 aml_modrinth_search_async (const AmlModrinthSearch *search,
-                           GCancellable *cancellable,
                            GAsyncReadyCallback callback, gpointer user_data)
 {
   g_autofree char *url = NULL;
 
-  g_return_if_fail (search != NULL);
+  g_return_val_if_fail (search != NULL, NULL);
 
   url = aml_modrinth_search_url (search);
-  get_async (url, cancellable, callback, user_data, search_answer,
-             AML_NOT_FOUND_IS_ERROR);
+  return get_async (url, callback, user_data, search_answer,
+                    AML_NOT_FOUND_IS_ERROR);
 }
 
 AmlModrinthResults *
@@ -1428,13 +1432,13 @@ details_answer (GTask *task, JsonNode *root)
                          (GDestroyNotify) aml_modrinth_details_free);
 }
 
-void
-aml_modrinth_details_async (const char *project_id, GCancellable *cancellable,
-                            GAsyncReadyCallback callback, gpointer user_data)
+AmlTaskScope *
+aml_modrinth_details_async (const char *project_id, GAsyncReadyCallback callback,
+                            gpointer user_data)
 {
   g_autofree char *url = NULL;
 
-  g_return_if_fail (project_id != NULL);
+  g_return_val_if_fail (project_id != NULL, NULL);
 
   {
     g_autofree char *escaped_id =
@@ -1442,8 +1446,8 @@ aml_modrinth_details_async (const char *project_id, GCancellable *cancellable,
 
     url = g_strdup_printf (AML_MODRINTH_URL "/project/%s", escaped_id);
   }
-  get_async (url, cancellable, callback, user_data, details_answer,
-             AML_NOT_FOUND_IS_ERROR);
+  return get_async (url, callback, user_data, details_answer,
+                    AML_NOT_FOUND_IS_ERROR);
 }
 AmlModrinthDetails *
 aml_modrinth_details_finish (GAsyncResult *result, GError **error)
@@ -1510,13 +1514,12 @@ versions_answer (GTask *task, JsonNode *root)
   request_return_pointer (task, versions, (GDestroyNotify) g_ptr_array_unref);
 }
 
-void
+AmlTaskScope *
 aml_modrinth_versions_async (const char *project_id, AmlContentType type,
                              const char *minecraft_version, const char *loader,
-                             GCancellable *cancellable,
                              GAsyncReadyCallback callback, gpointer user_data)
 {
-  g_autoptr (GTask) task_ref = NULL;
+  g_autoptr (AmlTaskScope) scope = NULL;
   g_autofree char *game_versions = NULL;
   g_autofree char *loaders = NULL;
   g_autofree char *escaped_id = NULL;
@@ -1524,8 +1527,8 @@ aml_modrinth_versions_async (const char *project_id, AmlContentType type,
   g_autofree char *escaped_loaders = NULL;
   g_autofree char *url = NULL;
 
-  g_return_if_fail (project_id != NULL);
-  g_return_if_fail (minecraft_version != NULL);
+  g_return_val_if_fail (project_id != NULL, NULL);
+  g_return_val_if_fail (minecraft_version != NULL, NULL);
 
   game_versions = string_array_json (minecraft_version);
   escaped_id = g_uri_escape_string (project_id, NULL, FALSE);
@@ -1556,13 +1559,16 @@ aml_modrinth_versions_async (const char *project_id, AmlContentType type,
         AML_MODRINTH_URL "/project/%s/version?game_versions=%s",
         escaped_id, escaped_game);
 
-  task_ref = request_new (cancellable, callback, user_data, versions_answer,
-                          AML_NOT_FOUND_IS_ERROR,
-                          instance_ask_new (type, minecraft_version, loader),
-                          instance_ask_free);
+  scope = request_new (callback, user_data, versions_answer,
+                       AML_NOT_FOUND_IS_ERROR,
+                       instance_ask_new (type, minecraft_version, loader),
+                       instance_ask_free);
 
-  aml_download_json_cached_async (url, cancellable, json_ready,
-                           g_steal_pointer (&task_ref));
+  aml_download_json_cached_async (url, aml_task_scope_get_cancellable (scope),
+                                  json_ready,
+                                  aml_task_scope_task (scope));
+
+  return g_steal_pointer (&scope);
 }
 
 GPtrArray *
@@ -1723,19 +1729,20 @@ categories_answer (GTask *task, JsonNode *root)
   request_return_pointer (task, categories, (GDestroyNotify) g_ptr_array_unref);
 }
 
-void
+AmlTaskScope *
 aml_modrinth_categories_async (const char        *project_type,
-                               GCancellable      *cancellable,
                                GAsyncReadyCallback callback,
                                gpointer           user_data)
 {
   g_autofree char *url = g_strdup_printf (AML_MODRINTH_URL "/tag/category");
-  g_autoptr (GTask) task = NULL;
+  g_autoptr (AmlTaskScope) scope = NULL;
 
-  task = request_new (cancellable, callback, user_data, categories_answer,
-                      AML_NOT_FOUND_IS_ERROR, g_strdup (project_type), g_free);
-  aml_download_json_cached_async (url, cancellable, json_ready,
-                           g_steal_pointer (&task));
+  scope = request_new (callback, user_data, categories_answer,
+                       AML_NOT_FOUND_IS_ERROR, g_strdup (project_type), g_free);
+  aml_download_json_cached_async (url, aml_task_scope_get_cancellable (scope),
+                                  json_ready, aml_task_scope_task (scope));
+
+  return g_steal_pointer (&scope);
 }
 
 GPtrArray *
@@ -1769,14 +1776,14 @@ version_answer (GTask *task, JsonNode *root)
                          (GDestroyNotify) aml_modrinth_version_free);
 }
 
-void
-aml_modrinth_version_by_hash_async (const char *sha1, GCancellable *cancellable,
+AmlTaskScope *
+aml_modrinth_version_by_hash_async (const char *sha1,
                                     GAsyncReadyCallback callback,
                                     gpointer user_data)
 {
   g_autofree char *url = NULL;
 
-  g_return_if_fail (sha1 != NULL);
+  g_return_val_if_fail (sha1 != NULL, NULL);
 
   {
     g_autofree char *escaped_sha1 =
@@ -1785,8 +1792,8 @@ aml_modrinth_version_by_hash_async (const char *sha1, GCancellable *cancellable,
     url = g_strdup_printf (AML_MODRINTH_URL "/version_file/%s?algorithm=sha1",
                            escaped_sha1);
   }
-  get_async (url, cancellable, callback, user_data, version_answer,
-             AML_NOT_FOUND_IS_ERROR);
+  return get_async (url, callback, user_data, version_answer,
+                    AML_NOT_FOUND_IS_ERROR);
 }
 
 AmlModrinthVersion *
@@ -1797,9 +1804,8 @@ aml_modrinth_version_by_hash_finish (GAsyncResult *result, GError **error)
   return g_task_propagate_pointer (G_TASK (result), error);
 }
 
-void
+AmlTaskScope *
 aml_modrinth_version_by_id_async (const char *version_id,
-                                  GCancellable *cancellable,
                                   GAsyncReadyCallback callback,
                                   gpointer user_data)
 {
@@ -1807,8 +1813,8 @@ aml_modrinth_version_by_id_async (const char *version_id,
   g_autofree char *url = g_strdup_printf (AML_MODRINTH_URL "/version/%s",
                                           escaped);
 
-  get_async (url, cancellable, callback, user_data, version_answer,
-             AML_NOT_FOUND_IS_ERROR);
+  return get_async (url, callback, user_data, version_answer,
+                    AML_NOT_FOUND_IS_ERROR);
 }
 
 /* ---------------------------------------------------------- *
@@ -1846,21 +1852,21 @@ update_answer (GTask *task, JsonNode *root)
                          (GDestroyNotify) aml_modrinth_version_free);
 }
 
-void
+AmlTaskScope *
 aml_modrinth_update_by_hash_async (AmlContentType type, const char *sha1,
                                    const char *minecraft_version,
-                                   const char *loader, GCancellable *cancellable,
+                                   const char *loader,
                                    GAsyncReadyCallback callback,
                                    gpointer user_data)
 {
-  g_autoptr (GTask) task = NULL;
+  g_autoptr (AmlTaskScope) scope = NULL;
   g_autofree char *url = NULL;
   g_autofree char *game_versions = NULL;
   g_autofree char *loaders = NULL;
   g_autofree char *body = NULL;
 
-  g_return_if_fail (sha1 != NULL);
-  g_return_if_fail (minecraft_version != NULL);
+  g_return_val_if_fail (sha1 != NULL, NULL);
+  g_return_val_if_fail (minecraft_version != NULL, NULL);
 
   /* Both narrowings are already JSON arrays, so the body is written
    * around them rather than through a builder. */
@@ -1882,14 +1888,17 @@ aml_modrinth_update_by_hash_async (AmlContentType type, const char *sha1,
         escaped_sha1);
   }
 
-  task = request_new (cancellable, callback, user_data, update_answer,
-                      AML_NOT_FOUND_IS_ABSENT,
-                      instance_ask_new (type, minecraft_version, loader),
-                      instance_ask_free);
+  scope = request_new (callback, user_data, update_answer,
+                       AML_NOT_FOUND_IS_ABSENT,
+                       instance_ask_new (type, minecraft_version, loader),
+                       instance_ask_free);
 
   aml_download_json_post_cached_async (url, body, AML_MODRINTH_USER_AGENT,
-                                       cancellable, json_ready,
-                                       g_steal_pointer (&task));
+                                       aml_task_scope_get_cancellable (scope),
+                                       json_ready,
+                                       aml_task_scope_task (scope));
+
+  return g_steal_pointer (&scope);
 }
 
 AmlModrinthVersion *

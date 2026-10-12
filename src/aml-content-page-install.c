@@ -425,6 +425,9 @@ typedef struct {
   GPtrArray *files;           /* InstallFile* collected, dependencies */
   GHashTable *seen;           /* project ids already in the plan */
   GCancellable *cancellable;
+
+  /* The versions request that has to answer before the plan moves on. */
+  AmlTaskScope *operation;
 } PlanRun;
 
 static void plan_free (PlanRun *plan);
@@ -436,6 +439,7 @@ static void
 plan_next (PlanRun *plan)
 {
   AmlModrinthDependency *dependency = NULL;
+  g_autofree char *project_id = NULL;
   AmlContentPage *self = plan->page;
 
   if (self == NULL)
@@ -459,16 +463,18 @@ plan_next (PlanRun *plan)
       return;
     }
 
-  /* The dependency is taken out of the queue without being freed: the
-     call below reads its project id, and freeing it first would be a
-     read of memory that is gone. It is freed once the call has copied
-     what it needs. */
+  /* The dependency is taken out of the queue and its project id copied out:
+     the call below needs the id, and the dependency itself is not wanted
+     once the question has been asked. */
   dependency = g_ptr_array_steal_index (plan->queue, 0);
-
-  aml_modrinth_versions_async (dependency->project_id, self->type,
-                               self->minecraft_version, self->loader,
-                               plan->cancellable, plan_versions_ready, plan);
+  project_id = g_strdup (dependency->project_id);
   aml_modrinth_dependency_free (dependency);
+
+  plan->operation = aml_modrinth_versions_async (project_id, self->type,
+                                                 self->minecraft_version,
+                                                 self->loader,
+                                                 plan_versions_ready, plan);
+  aml_task_scope_follow_cancellable (plan->operation, plan->cancellable);
 }
 
 static void
@@ -486,6 +492,10 @@ plan_free (PlanRun *plan)
   g_clear_pointer (&plan->files, g_ptr_array_unref);
   g_clear_pointer (&plan->seen, g_hash_table_unref);
   g_clear_object (&plan->cancellable);
+
+  if (plan->operation != NULL)
+    aml_task_scope_unref (plan->operation);
+
   g_free (plan->title);
   g_free (plan->replaces);
   g_free (plan);
@@ -691,6 +701,14 @@ plan_versions_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   InstallFile *file = NULL;
 
   versions = aml_modrinth_versions_finish (result, &error);
+
+  /* This answer is in, so the plan does not need the handle that brought
+     it; what is left of the plan owns its own work from here. */
+  if (plan->operation != NULL)
+    {
+      aml_task_scope_unref (plan->operation);
+      plan->operation = NULL;
+    }
 
   if (versions == NULL)
     {

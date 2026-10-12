@@ -1417,12 +1417,33 @@ on_versions_answer (GObject *source G_GNUC_UNUSED,
 static void dialog_details_show_again (AmlDownloadModpackDialog *self);
 static void dialog_details_fill (AmlDownloadModpackDialog *self);
 
+/* One answer the dialog asked for and has not released yet: the dialog it
+ * belongs to, which can be closed while the request is on its way, and
+ * the operation handle the answer is meant to release. */
+typedef struct
+{
+  AmlDownloadModpackDialog *dialog;
+  AmlTaskScope *operation;
+} DetailsAsk;
+
+static void
+ask_free (DetailsAsk *ask)
+{
+  g_clear_object (&ask->dialog);
+
+  if (ask->operation != NULL)
+    aml_task_scope_unref (ask->operation);
+
+  g_free (ask);
+}
+
 /* The long description of the pack, read once the dialog is up. */
 static void
 on_details_answer (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                    gpointer user_data)
 {
-  AmlDownloadModpackDialog *self = user_data;
+  DetailsAsk *ask = user_data;
+  AmlDownloadModpackDialog *self = ask->dialog;
   g_autoptr (GError) error = NULL;
   g_autoptr (AmlModrinthDetails) details = NULL;
 
@@ -1447,7 +1468,7 @@ on_details_answer (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   self->details_ready = TRUE;
   dialog_details_fill (self);
 
-  operation_done (user_data);
+  ask_free (ask);
 }
 
 /* The icon of the project is previewed from the shared icon cache. It is
@@ -1527,8 +1548,17 @@ dialog_details_open (AmlDownloadModpackDialog *self)
     }
 
   /* The long description, and the versions of the pack beside it. */
-  aml_modrinth_details_async (self->project->project_id, self->fetch,
-                              on_details_answer, g_object_ref (self));
+  {
+    DetailsAsk *ask = g_new0 (DetailsAsk, 1);
+
+    ask->dialog = g_object_ref (self);
+    ask->operation = aml_modrinth_details_async (self->project->project_id,
+                                                 on_details_answer, ask);
+    /* The same fetch cancellable the versions answer uses, so opening
+       another project stops this one. */
+    aml_task_scope_follow_cancellable (ask->operation, self->fetch);
+  }
+
   aml_download_json_async (url, self->fetch, on_versions_answer,
                            g_object_ref (self));
 }
