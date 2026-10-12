@@ -136,6 +136,9 @@ aml_icon_load_async (const char *url, GCancellable *cancellable,
 {
   g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback,
                                        user_data);
+  aml_task_scope_attach_task (task);
+  AmlTaskScope *scope = g_object_get_data (G_OBJECT (task),
+                                           "aml-task-scope");
   g_autofree char *directory = NULL;
   IconLoad *load = NULL;
 
@@ -145,7 +148,7 @@ aml_icon_load_async (const char *url, GCancellable *cancellable,
     {
       /* A project with no icon is not an error: there is simply nothing
          to put in the row. */
-      g_task_return_pointer (task, NULL, NULL);
+      aml_task_scope_return_pointer (scope, NULL, NULL);
       return;
     }
 
