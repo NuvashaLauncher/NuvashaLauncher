@@ -49,7 +49,9 @@ on_game_document (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   set_state (self, AML_LAUNCH_LAUNCHING, "choosing Java");
 
-  aml_java_detect_async (self->preparation.cancellable, on_java_for_the_install, request);
+  request->operation = aml_java_detect_async (on_java_for_the_install, request);
+  aml_task_scope_follow_cancellable (request->operation,
+                                     self->preparation.cancellable);
 }
 
 static void

@@ -14,6 +14,9 @@ typedef struct {
   AmlVersionDescription *profile; /* the document the loader adds */
   char *game_version;
   char *loader_version;
+
+  /* The operation this request is waiting on, released with it. */
+  AmlTaskScope *operation;
 } LoaderRequest;
 
 void loader_request_free (LoaderRequest *request);

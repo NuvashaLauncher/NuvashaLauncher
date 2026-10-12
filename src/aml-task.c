@@ -151,21 +151,14 @@ aml_task_scope_set_check_cancellable (AmlTaskScope *scope, gboolean check)
 
 /* A completion hands the operation to the caller's callback, and that
  * callback runs before g_task_return_*() has finished with the task, so it
- * may already have dropped the last reference. What is left to do here is
- * decided before the return and holds its own reference. */
-static gboolean
-unref_when_done_idle (gpointer user_data)
-{
-  aml_task_scope_unref (user_data);
-  return G_SOURCE_REMOVE;
-}
-
+ * may already have dropped the last reference. A scope whose caller gave
+ * the reference away is released here, and nothing may touch it after
+ * this: handing a reference back means letting go of it. */
 static void
 scope_release_when_done (AmlTaskScope *scope)
 {
   scope->unref_when_done = FALSE;
-  g_idle_add_full (G_PRIORITY_DEFAULT, unref_when_done_idle,
-                   aml_task_scope_ref (scope), NULL);
+  aml_task_scope_unref (scope);
 }
 
 gboolean
@@ -524,6 +517,21 @@ aml_task_sequence_get_cancellable (const AmlTaskSequence *sequence)
 {
   g_return_val_if_fail (sequence != NULL, NULL);
   return g_task_get_cancellable (sequence->task);
+}
+
+AmlTaskScope *
+aml_task_sequence_scope (AmlTaskSequence *sequence)
+{
+  AmlTaskScope *scope;
+
+  g_return_val_if_fail (sequence != NULL, NULL);
+
+  /* A scope that takes over a reference of its own: the sequence keeps
+     the task running regardless, and this is the reference that lets the
+     handle outlive the caller that stored it. */
+  scope = aml_task_scope_from_task (g_object_ref (sequence->task));
+  scope->owns_task = TRUE;
+  return scope;
 }
 
 void

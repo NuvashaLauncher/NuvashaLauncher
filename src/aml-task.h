@@ -34,6 +34,10 @@ void aml_task_sequence_unref (AmlTaskSequence *sequence);
 void aml_task_sequence_start (AmlTaskSequence *sequence);
 void aml_task_sequence_next (AmlTaskSequence *sequence);
 GCancellable *aml_task_sequence_get_cancellable (const AmlTaskSequence *sequence);
+/* An operation handle for the sequence, for a caller that wants to stop it
+ * or to hold one thing for the whole run. It holds its own reference on the
+ * task, so releasing it does not stop the sequence. */
+AmlTaskScope *aml_task_sequence_scope (AmlTaskSequence *sequence);
 void aml_task_sequence_return_pointer (AmlTaskSequence *sequence,
                                        gpointer result,
                                        GDestroyNotify result_free);
@@ -79,7 +83,8 @@ void aml_task_scope_cancel (AmlTaskScope *scope);
 /* Hands the caller's reference back: the operation releases itself once
  * it completes. For work whose answer nobody is waiting for, where the
  * handle exists only to be able to cancel the work. Returns @scope so it
- * can be chained onto a call that hands one back. */
+ * can be chained onto a call that hands one back. The code that completes
+ * such an operation must not touch the scope afterwards. */
 AmlTaskScope *aml_task_scope_unref_when_done (AmlTaskScope *scope);
 
 /* Cancels @scope whenever @cancellable is cancelled, for an operation
