@@ -116,25 +116,13 @@ sudo make uninstall PREFIX=/usr/local
 make test            # run every test against the release build
 make test-debug      # the same tests under AddressSanitizer and UBSan
 make test-lsan       # sanitizer tests with LeakSanitizer enabled
-make test-valgrind   # release tests under Valgrind
-make static-analysis # GCC analyzer and clang-tidy when installed
+make static-analysis # GCC analyzer
 ```
 
 Both are headless: no display is opened and no test touches the network
 or the real data directory.
 
-The three analysis targets are optional and skip whichever tool is not
-installed. Two files decide what they report, and both say why:
-
-- `.clang-tidy` keeps the checks that have found real defects here and
-  excludes the ones that only describe GLib and GObject idiom. Every
-  exclusion carries its reason, and every diagnostic is an error.
-- `tools/aml.valgrind.supp` suppresses the caches GLib, GTK, Pango,
-  Fontconfig and the graphics driver keep for the life of the process.
-  Each entry is anchored on a toolkit symbol, so a leak in AML cannot
-  match one.
-
-LeakSanitizer, not Valgrind, is the authority on ownership here: GLib's
+LeakSanitizer is the authority on ownership here: GLib's
 `g_autoptr` and `g_autofree` hide their cleanup from the analyzer, which
 reports those sites as leaks.
 

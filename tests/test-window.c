@@ -151,7 +151,7 @@ advance (gpointer user_data)
     case 0: /* the list binds its row a little after the window is up */
       /* The window is registered with the application on its own
          schedule, which is not the first tick of the loop and is slower
-         still under a sanitizer or Valgrind. Wait for it the same way
+         still under a sanitizer. Wait for it the same way
          the later steps wait for what they need. */
       if (g_list_length (windows) != 1)
         {
@@ -304,7 +304,7 @@ main (int argc, char **argv)
   g_application_run (G_APPLICATION (application), 0, NULL);
 
   /* The watchdog usually finishes the test long before this, but under a
-     sanitizer or Valgrind the run can outlast it. If the watchdog fired,
+     sanitizer the run can outlast it. If the watchdog fired,
      its source is already gone and removing it again is the critical
      this test is meant to catch. */
   if (watchdog != 0 && g_main_context_find_source_by_id (NULL, watchdog) != NULL)

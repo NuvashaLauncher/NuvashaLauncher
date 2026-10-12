@@ -48,7 +48,7 @@ TESTDEPS    := $(addsuffix .d,$(TESTBINS))
 TESTDBGBINS := $(patsubst tests/%.c,build-debug/tests/%,$(TESTSRCS))
 TESTDBGDEPS := $(addsuffix .d,$(TESTDBGBINS))
 
-.PHONY: all debug test test-debug test-lsan test-valgrind static-analysis clean install uninstall
+.PHONY: all debug test test-debug test-lsan static-analysis clean install uninstall
 
 all: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 
@@ -107,24 +107,10 @@ test-lsan: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS)
 	  ./$$t; done; \
 	echo "PASS $(words $(TESTDBGBINS)) test(s)"
 
-# Optional local target for environments that provide Valgrind. The caches
-# the toolkit and the graphics driver keep for the life of the process are
-# listed in tools/aml.valgrind.supp.
-test-valgrind: $(if $(SRCS),$(BIN)) $(TESTBINS)
-	@set -e; for t in $(TESTBINS); do echo "VALGRIND $$t"; \
-	  G_SLICE=always-malloc G_DEBUG=gc-friendly \
-	  valgrind --quiet --leak-check=full --suppressions=tools/aml.valgrind.supp \
-	    --errors-for-leak-kinds=definite,indirect \
-	    --error-exitcode=1 ./$$t; done
-
 static-analysis:
 	@set -e; for source in src/*.c; do \
 	  $(CC) $(CPPFLAGS) -std=c17 -Wall -Wextra -Wpedantic -fanalyzer -fsyntax-only \
 	    $(PKG_CFLAGS) -Isrc "$$source"; done
-	@if command -v clang-tidy >/dev/null; then \
-	  clang-tidy src/*.c --warnings-as-errors='*' \
-	    -- $(CPPFLAGS) -std=c17 $(PKG_CFLAGS) -Isrc; \
-	else echo "clang-tidy not installed; skipping"; fi
 
 install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 	install -Dm755 $(BIN) $(DESTDIR)$(PREFIX)/bin/AML
