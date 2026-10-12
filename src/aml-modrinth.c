@@ -1233,7 +1233,7 @@ json_flight_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       GTask *task = g_ptr_array_index (flight->tasks, i);
       Request *request = g_task_get_task_data (task);
 
-      if (g_task_return_error_if_cancelled (task))
+      if (aml_task_scope_return_error_if_cancelled (request->scope))
         continue;
 
       if (parser == NULL)
