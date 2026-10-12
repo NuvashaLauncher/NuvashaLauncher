@@ -185,7 +185,7 @@ install_fail (InstallRun *run, GError *error)
   if (run->moved)
     aml_fs_remove_tree (run->target);
 
-  g_task_return_error (run->task, error);
+  aml_task_scope_return_error (run->scope, error);
   install_run_free (run);
 }
 
@@ -193,9 +193,9 @@ install_fail (InstallRun *run, GError *error)
  * only message is a mistake of the caller, and nothing of a tree is
  * touched because none of it is made. */
 static void
-install_refuse (GTask *task, InstallRun *run, GError *error)
+install_refuse (InstallRun *run, GError *error)
 {
-  g_task_return_error (task, error);
+  aml_task_scope_return_error (run->scope, error);
   install_run_free (run);
 }
 
@@ -342,8 +342,8 @@ install_register (InstallRun *run)
    * Modrinth hash lookup. */
   seed_manifest_indexes (run);
 
-  g_task_return_pointer (run->task, g_object_ref (instance),
-                         g_object_unref);
+  aml_task_scope_return_pointer (run->scope, g_object_ref (instance),
+                                 g_object_unref);
   install_run_free (run);
 }
 
@@ -614,7 +614,7 @@ aml_modpack_install_async (AmlModpack *modpack,
       g_set_error_literal (&error, AML_MODPACK_ERROR,
                            AML_MODPACK_ERROR_IO,
                            "the directory of the instance is not usable");
-      install_refuse (task, run, g_steal_pointer (&error));
+      install_refuse (run, g_steal_pointer (&error));
       return;
     }
 
@@ -625,7 +625,7 @@ aml_modpack_install_async (AmlModpack *modpack,
 
       g_set_error (&error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
                    "a directory already exists at \"%s\"", run->target);
-      install_refuse (task, run, g_steal_pointer (&error));
+      install_refuse (run, g_steal_pointer (&error));
       return;
     }
 
@@ -660,7 +660,7 @@ aml_modpack_install_async (AmlModpack *modpack,
       g_set_error (&error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
                    "a directory under the instance cannot be made: %s",
                    parent_error->message);
-      install_refuse (task, run, g_steal_pointer (&error));
+      install_refuse (run, g_steal_pointer (&error));
       return;
     }
 
@@ -675,7 +675,7 @@ aml_modpack_install_async (AmlModpack *modpack,
       g_set_error (&error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
                    "the temporary directory cannot be made: %s",
                    temp_error->message);
-      install_refuse (task, run, g_steal_pointer (&error));
+      install_refuse (run, g_steal_pointer (&error));
       return;
     }
 
@@ -689,7 +689,7 @@ aml_modpack_install_async (AmlModpack *modpack,
       g_set_error (&error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
                    "the temporary directory cannot be secured: %s",
                    g_strerror (errno));
-      install_refuse (task, run, g_steal_pointer (&error));
+      install_refuse (run, g_steal_pointer (&error));
       return;
     }
 
