@@ -17,16 +17,19 @@ typedef void (*AmlTaskSequenceStep) (GTask *task, gpointer user_data);
  * operation and calls aml_task_sequence_next() from its completion callback.
  * The sequence owns @user_data until it completes or fails.
  *
- * Completing a sequence frees its step state but not the sequence itself:
- * it stays alive with the task until that is done with, so a completion
- * that arrives twice reads a real finished flag and stops, rather than
- * reading freed memory. Completing twice is therefore safe. */
+ * Completing a sequence frees its step state. Keep a reference with
+ * aml_task_sequence_ref() when an asynchronous callback may use the
+ * sequence after the completion callback has run. The caller owns the
+ * reference returned by this constructor and must release it with
+ * aml_task_sequence_unref(), normally after starting the sequence. */
 AmlTaskSequence *aml_task_sequence_new (GCancellable *cancellable,
                                         GAsyncReadyCallback callback,
                                         gpointer callback_data,
                                         AmlTaskSequenceStep step,
                                         gpointer user_data,
                                         GDestroyNotify user_data_free);
+AmlTaskSequence *aml_task_sequence_ref (AmlTaskSequence *sequence);
+void aml_task_sequence_unref (AmlTaskSequence *sequence);
 void aml_task_sequence_start (AmlTaskSequence *sequence);
 void aml_task_sequence_next (AmlTaskSequence *sequence);
 GTask *aml_task_sequence_get_task (const AmlTaskSequence *sequence);

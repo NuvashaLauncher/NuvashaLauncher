@@ -1935,7 +1935,9 @@ aml_version_manifest_fetch_async (const char         *url,
     aml_task_sequence_new (cancellable, callback, user_data,
                            manifest_fetch_step, request,
                            (GDestroyNotify) fetch_request_free);
-  aml_task_sequence_start (request->sequence);
+  AmlTaskSequence *sequence = request->sequence;
+  aml_task_sequence_start (sequence);
+  aml_task_sequence_unref (sequence);
 }
 
 AmlVersionManifest *
@@ -2111,7 +2113,9 @@ aml_version_load_async (AmlVersionManifest *manifest,
                            load_sequence_step, request,
                            (GDestroyNotify) load_request_free);
 
-  aml_task_sequence_start (request->sequence);
+  AmlTaskSequence *sequence = request->sequence;
+  aml_task_sequence_start (sequence);
+  aml_task_sequence_unref (sequence);
 }
 
 AmlVersionDescription *

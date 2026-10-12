@@ -532,7 +532,9 @@ aml_java_probe_list_async (char            **executables,
   list->sequence = aml_task_sequence_new (
     cancellable, callback, user_data, probe_list_sequence_step, list,
     probe_list_destroyed);
-  aml_task_sequence_start (list->sequence);
+  AmlTaskSequence *sequence = list->sequence;
+  aml_task_sequence_start (sequence);
+  aml_task_sequence_unref (sequence);
 }
 
 GPtrArray *

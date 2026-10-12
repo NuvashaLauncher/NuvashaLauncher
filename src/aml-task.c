@@ -107,6 +107,7 @@ aml_task_scope_free (AmlTaskScope *scope)
 
 struct _AmlTaskSequence
 {
+  gatomicrefcount refs;
   GTask *task;
   AmlTaskSequenceStep step;
   gpointer user_data;
@@ -117,7 +118,7 @@ struct _AmlTaskSequence
 static void
 sequence_finalize (gpointer user_data)
 {
-  g_free (user_data);
+  aml_task_sequence_unref (user_data);
 }
 
 /* Lets go of the step state and finishes the sequence. The struct itself
@@ -142,6 +143,7 @@ sequence_finish (AmlTaskSequence *sequence)
       sequence->user_data = NULL;
     }
 
+  /* Transfer the sequence's internal lifetime reference to the task. */
   g_task_set_task_data (sequence->task, sequence, sequence_finalize);
 
   /* The task goes out to whoever completes it, and the sequence rides
@@ -149,6 +151,23 @@ sequence_finish (AmlTaskSequence *sequence)
      given back here. A completed sequence has no task left to hand
      out, which is why the finished flag is checked before that. */
   g_clear_object (&sequence->task);
+}
+
+AmlTaskSequence *
+aml_task_sequence_ref (AmlTaskSequence *sequence)
+{
+  g_return_val_if_fail (sequence != NULL, NULL);
+  g_atomic_ref_count_inc (&sequence->refs);
+  return sequence;
+}
+
+void
+aml_task_sequence_unref (AmlTaskSequence *sequence)
+{
+  if (sequence == NULL || !g_atomic_ref_count_dec (&sequence->refs))
+    return;
+
+  g_free (sequence);
 }
 
 AmlTaskSequence *
@@ -161,6 +180,10 @@ aml_task_sequence_new (GCancellable *cancellable,
 {
   AmlTaskSequence *sequence = g_new0 (AmlTaskSequence, 1);
 
+  g_atomic_ref_count_init (&sequence->refs);
+  /* One reference belongs to the caller; the other lasts until completion
+   * transfers it to the GTask's task data. */
+  g_atomic_ref_count_inc (&sequence->refs);
   sequence->task = g_task_new (NULL, cancellable, callback, callback_data);
   sequence->step = step;
   sequence->user_data = user_data;
