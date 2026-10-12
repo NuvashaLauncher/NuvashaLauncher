@@ -85,6 +85,26 @@ instance_name_is_usable (const char *name)
   return g_strcmp0 (name, safe) == 0;
 }
 
+static const char *
+instance_name_forbidden_character (const char *name)
+{
+  if (name == NULL || *name == '\0')
+    return NULL;
+
+  if (strchr (name, '/') != NULL)
+    return "/";
+
+  if (strstr (name, "..") != NULL || name[0] == '.' ||
+      name[strlen (name) - 1] == '.')
+    return ".";
+
+  for (const char *p = name; *p != '\0'; p = g_utf8_next_char (p))
+    if (g_unichar_iscntrl (g_utf8_get_char (p)))
+      return "control characters";
+
+  return NULL;
+}
+
 static gboolean
 name_is_taken (AmlInstanceManager *self, AmlInstance *except,
                const char *name)
@@ -675,11 +695,17 @@ aml_instance_manager_create (AmlInstanceManager *self,
   if (normalized_name[0] == '\0' ||
       !instance_name_is_usable (normalized_name))
     {
+      const char *forbidden = instance_name_forbidden_character (normalized_name);
+
       g_set_error (error, AML_INSTANCE_MANAGER_ERROR,
                    AML_INSTANCE_MANAGER_ERROR_INVALID_PATH,
                    normalized_name[0] == '\0'
                      ? "the instance name is empty"
-                     : "the instance name cannot be used as a directory name");
+                     : forbidden != NULL
+                       ? "Instances cannot contain %s in their name"
+                       : "the instance name cannot be used as a directory name",
+                   normalized_name[0] == '\0' || forbidden == NULL
+                     ? "" : forbidden);
       return NULL;
     }
 
@@ -761,12 +787,27 @@ aml_instance_manager_rename (AmlInstanceManager *self,
 
   g_autofree char *stripped = aml_instance_normalize_name (new_name);
 
-  if (stripped[0] == '\0' || !instance_name_is_usable (stripped) ||
-      name_is_taken (self, instance, stripped))
+  if (stripped[0] == '\0' || !instance_name_is_usable (stripped))
+    {
+      const char *forbidden = instance_name_forbidden_character (stripped);
+
+      g_set_error (error, AML_INSTANCE_MANAGER_ERROR,
+                   AML_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+                   stripped[0] == '\0'
+                     ? "the instance name is empty"
+                     : forbidden != NULL
+                       ? "Instances cannot contain %s in their name"
+                       : "the instance name cannot be used as a directory name",
+                   stripped[0] == '\0' || forbidden == NULL
+                     ? "" : forbidden);
+      return FALSE;
+    }
+
+  if (name_is_taken (self, instance, stripped))
     {
       g_set_error (error, AML_INSTANCE_MANAGER_ERROR,
                    AML_INSTANCE_MANAGER_ERROR_INVALID_PATH,
-                   "an instance with that name already exists or the name is empty");
+                   "an instance with that name already exists");
       return FALSE;
     }
 

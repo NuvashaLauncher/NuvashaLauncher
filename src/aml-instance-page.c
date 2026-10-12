@@ -432,17 +432,9 @@ java_status_refresh (AmlInstancePage *self)
 
       if (effective == NULL && current != NULL)
         message = _("The configured Java was not detected; make sure it "
-                    "is still a usable java executable");
-      else if (effective == NULL)
-        {
-          g_autofree char *description = g_strdup_printf (
-            _("No detected Java satisfies the requirement of Java %d+"),
-            self->required_java);
-
-          adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (row)), description);
-          return;
-        }
-      else if (effective->major_version < self->required_java)
+                     "is still a usable java executable");
+      else if (effective != NULL &&
+               effective->major_version < self->required_java)
         {
           g_autofree char *description = g_strdup_printf (
             _("This game needs Java %d or newer, selected Java is %d"),
