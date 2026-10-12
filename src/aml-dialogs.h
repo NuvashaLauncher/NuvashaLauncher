@@ -2,13 +2,12 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* The size the dialogs that hold a list and a form are given.
+/* The sizes the dialogs that hold a list and a form are given.
  *
- * Create Instance and Download Modpack are two ways of arriving at the
- * same kind of thing, so they are sized once here: two literals in two
- * files is a pair that drifts the first time one of them is changed. A
- * dialog that has to be a different size, such as the sign-in form that
- * is one column of a code, sets its own and does not use this. */
+ * Create Instance uses the standard size. Download Modpack also uses the
+ * shared height but has a wide variant for its two-pane browser. A dialog
+ * that has to be a different size, such as the sign-in form that is one
+ * column of a code, sets its own and does not use these. */
 
 #ifndef AML_DIALOGS_H
 #define AML_DIALOGS_H
@@ -21,6 +20,7 @@ G_BEGIN_DECLS
  * enough for a list plus the buttons below it, so a dialog of this kind
  * opens without a scrollbar on a laptop and does not fill a desktop. */
 #define AML_DIALOG_CONTENT_WIDTH 720
+#define AML_DIALOG_WIDE_CONTENT_WIDTH 1040
 #define AML_DIALOG_CONTENT_HEIGHT 560
 
 /* Gives @dialog the size the dialogs of this kind share. Both width and
