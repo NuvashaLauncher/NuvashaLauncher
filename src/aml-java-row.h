@@ -9,8 +9,8 @@
  * picking it opens the file chooser, adds what comes back and selects
  * it, so a runtime the scan did not report is added from the row
  * itself. The public contract of get_selected_path(): NULL while
- * loading, after a failure, and while the ask is picked; "" while the
- * first entry (the automatic choice) is picked; the executable path
+ * loading, after a failure, while the ask is picked, or when no runtime is
+ * selected; "" while the automatic entry is picked; the executable path
  * otherwise. */
 
 #ifndef AML_JAVA_ROW_H
@@ -32,16 +32,16 @@ AmlJavaRow *aml_java_row_new (void);
 /* The Java version the instance's game needs, which is what the
  * automatic choice resolves to: the closest detected runtime for
  * @required_major (0 means "not known yet", so nothing is resolved and
- * the first entry is blank). The first
- * entry is named after that runtime and the same runtime is taken out of
- * the detected list, so it is shown once, as the automatic choice. Set
- * before or after load(); a change after load() fills the list again. */
+ * no entry is selected). When an exact runtime exists, the first entry is
+ * named after it and that runtime is taken out of the detected list, so it
+ * is shown once as the automatic choice. Set before or after load(); a
+ * change after load() fills the list again. */
 void aml_java_row_set_required_major (AmlJavaRow *self, int required_major);
 
 /* Fetches the detected installations and puts them in the list,
  * followed by whatever custom path @wanted names when detection did not
- * report it. @wanted == NULL selects the first entry. Loading again
- * cancels the running load. */
+ * report it. @wanted == NULL leaves no explicit runtime selected unless an
+ * exact automatic runtime exists. Loading again cancels the running load. */
 void aml_java_row_load (AmlJavaRow *self, const char *wanted);
 
 /* The detected installations list, borrowed; NULL until the row loads.
@@ -55,8 +55,8 @@ gboolean aml_java_row_get_ready (AmlJavaRow *self);
  * automatic choice), the executable path for everything else. */
 const char *aml_java_row_get_selected_path (AmlJavaRow *self);
 
-/* Selects the entry holding @path; an empty or NULL @path falls back to
- * the first entry. */
+/* Selects the entry holding @path; an empty or NULL @path selects the
+ * automatic entry when one exists, otherwise it clears the selection. */
 void aml_java_row_select_path (AmlJavaRow *self, const char *path);
 
 /* Adds an entry for @path that detection did not report and selects it.
