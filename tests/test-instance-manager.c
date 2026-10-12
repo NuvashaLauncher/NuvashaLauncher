@@ -357,6 +357,8 @@ test_create_sanitized_name (void)
   g_assert_null (instance);
   g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
                   AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_cmpstr (error->message, ==,
+                   "Instances cannot contain / in their name");
   g_clear_error (&error);
   remove_recursive (data_dir);
 
@@ -740,6 +742,15 @@ test_rename (void)
   g_free (name);
   name = prop_string (instance, "name");
   g_assert_cmpstr (name, ==, "Renamed Pack");
+
+  /* A path separator is reported specifically and leaves the old name. */
+  g_assert_false (aml_instance_manager_rename (manager, instance, "/",
+                                               &error));
+  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
+                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_cmpstr (error->message, ==,
+                   "Instances cannot contain / in their name");
+  g_clear_error (&error);
 
   /* Renaming an instance the manager does not know fails. */
   g_autoptr (AmlInstance) stranger =

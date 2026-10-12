@@ -8,6 +8,7 @@
 
 #include "aml-create-instance-dialog.h"
 #include "aml-i18n.h"
+#include "aml-ui-feedback.h"
 
 #include "aml-dialogs.h"
 #include "aml-loader-row.h"
@@ -28,7 +29,7 @@ struct _AmlCreateInstanceDialog
   AmlVersionRow *version_row;
   AmlLoaderRow *loader_row; /* its two rows are filled when it opens */
   AdwActionRow *directory_row;
-  GtkLabel *error_label;
+  AdwToastOverlay *toast_overlay;
   GtkButton *create_button;
 };
 
@@ -39,14 +40,8 @@ static void
 show_error (AmlCreateInstanceDialog *self,
             const char              *message)
 {
-  gtk_label_set_text (GTK_LABEL (self->error_label), message);
-  gtk_widget_set_visible (GTK_WIDGET (self->error_label), TRUE);
-}
-
-static void
-clear_error (AmlCreateInstanceDialog *self)
-{
-  gtk_widget_set_visible (GTK_WIDGET (self->error_label), FALSE);
+  aml_ui_show_toast (GTK_WIDGET (self), GTK_WIDGET (self->toast_overlay),
+                     message);
 }
 
 static void
@@ -116,7 +111,6 @@ on_input_changed (GObject *object G_GNUC_UNUSED,
 {
   AmlCreateInstanceDialog *self = user_data;
 
-  clear_error (self);
   update_create_button (self);
 }
 
@@ -270,13 +264,6 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (GTK_WIDGET (page)),
                             ADW_PREFERENCES_GROUP (group));
 
-  self->error_label = GTK_LABEL (gtk_label_new (NULL));
-  gtk_label_set_wrap (GTK_LABEL (self->error_label), TRUE);
-  gtk_label_set_xalign (GTK_LABEL (self->error_label), 0.0);
-  gtk_widget_set_margin_start (GTK_WIDGET (self->error_label), 24);
-  gtk_widget_set_margin_end (GTK_WIDGET (self->error_label), 24);
-  gtk_widget_set_visible (GTK_WIDGET (self->error_label), FALSE);
-
   GtkButton *cancel_button = GTK_BUTTON (gtk_button_new_with_label (_("Cancel")));
   g_signal_connect (cancel_button, "clicked", G_CALLBACK (on_cancel_clicked),
                     self);
@@ -296,9 +283,10 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
 
   GtkBox *content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (page));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (self->error_label));
   gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (buttons));
-  adw_dialog_set_child (ADW_DIALOG (self), GTK_WIDGET (content));
+  self->toast_overlay = ADW_TOAST_OVERLAY (adw_toast_overlay_new ());
+  adw_toast_overlay_set_child (self->toast_overlay, GTK_WIDGET (content));
+  adw_dialog_set_child (ADW_DIALOG (self), GTK_WIDGET (self->toast_overlay));
 
   adw_dialog_set_default_widget (ADW_DIALOG (self),
                                  GTK_WIDGET (self->create_button));
