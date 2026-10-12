@@ -51,6 +51,7 @@
 
 #include "aml-instance.h"
 #include "aml-minecraft-versions.h"
+#include "aml-task.h"
 
 G_BEGIN_DECLS
 
@@ -145,11 +146,10 @@ gboolean aml_loaders_version_runs_game (AmlLoader      loader,
  * AML_LOADERS_ERROR_UNSUPPORTED for a loader this module does not know,
  * AML_LOADERS_ERROR_NO_VERSIONS when the loader has no version for that
  * game version. */
-void aml_loaders_versions_async (AmlLoader       loader,
-                                 const char     *game_version,
-                                 GCancellable   *cancellable,
-                                 GAsyncReadyCallback callback,
-                                 gpointer            user_data);
+AmlTaskScope *aml_loaders_versions_async (AmlLoader loader,
+                                          const char *game_version,
+                                          GAsyncReadyCallback callback,
+                                          gpointer user_data);
 
 /* (transfer full). The array holds AmlLoaderVersion* with
    aml_loader_version_free() as the element free function. */
@@ -204,12 +204,11 @@ GPtrArray *aml_loaders_versions_for_display (GPtrArray  *published,
  * it over the document of that version is all a loader instance needs.
  *
  * AML_LOADERS_ERROR_UNSUPPORTED for a loader this module does not know. */
-void aml_loaders_profile_async (AmlLoader           loader,
-                                const char         *game_version,
-                                const char         *loader_version,
-                                GCancellable       *cancellable,
-                                GAsyncReadyCallback callback,
-                                gpointer            user_data);
+AmlTaskScope *aml_loaders_profile_async (AmlLoader loader,
+                                         const char *game_version,
+                                         const char *loader_version,
+                                         GAsyncReadyCallback callback,
+                                         gpointer user_data);
 
 /* (transfer full) */
 AmlVersionDescription *aml_loaders_profile_finish (GAsyncResult  *result,
@@ -268,17 +267,16 @@ typedef void (*AmlLoadersProgressFunc) (const char *stage,
  * would not start.
  *
  * AML_LOADERS_ERROR_UNSUPPORTED for a loader that publishes no installer. */
-void aml_loaders_install_async (AmlLoader              loader,
-                                const char            *game_version,
-                                const char            *loader_version,
-                                AmlVersionDescription *game_document,
-                                const char            *java_executable,
-                                const char            *data_dir,
-                                GCancellable          *cancellable,
-                                AmlLoadersProgressFunc  progress,
-                                gpointer                progress_data,
-                                GAsyncReadyCallback     callback,
-                                gpointer                user_data);
+AmlTaskScope *aml_loaders_install_async (AmlLoader loader,
+                                         const char *game_version,
+                                         const char *loader_version,
+                                         AmlVersionDescription *game_document,
+                                         const char *java_executable,
+                                         const char *data_dir,
+                                         AmlLoadersProgressFunc progress,
+                                         gpointer progress_data,
+                                         GAsyncReadyCallback callback,
+                                         gpointer user_data);
 
 /* (transfer full). NULL on error. */
 AmlLoaderInstall *aml_loaders_install_finish (GAsyncResult  *result,

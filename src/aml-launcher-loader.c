@@ -141,8 +141,11 @@ resolve_with_a_loader (AmlLauncher        *self,
             aml_loader_display_name (loader), loader_version,
             self->version != NULL ? self->version : "");
 
-  aml_loaders_profile_async (loader, request->game_version, loader_version,
-                             self->preparation.cancellable, on_profile_loaded, request);
+  request->operation = aml_loaders_profile_async (loader, request->game_version,
+                                                 loader_version,
+                                                 on_profile_loaded, request);
+  aml_task_scope_follow_cancellable (request->operation,
+                                     self->preparation.cancellable);
 }
 
 void

@@ -72,10 +72,15 @@ on_java_for_the_install (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
             aml_loader_display_name (request->loader), request->loader_version,
             java->major_version, java->executable);
 
-  aml_loaders_install_async (
+  /* The Java answer is in: its handle is released and the install takes
+   the request's one. */
+  aml_task_scope_unref (request->operation);
+  request->operation = aml_loaders_install_async (
     request->loader, request->game_version, request->loader_version,
-    request->profile, java->executable, NULL, self->preparation.cancellable,
-    on_install_progress, self, on_install_done, request);
+    request->profile, java->executable, NULL, on_install_progress, self,
+    on_install_done, request);
+  aml_task_scope_follow_cancellable (request->operation,
+                                     self->preparation.cancellable);
 }
 
 static void

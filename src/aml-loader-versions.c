@@ -327,7 +327,6 @@ versions_request_free (gpointer data)
 {
   VersionsRequest *request = data;
 
-  aml_task_scope_unref (request->scope);
   g_clear_object (&request->task);
   g_clear_pointer (&request->versions, g_ptr_array_unref);
   g_free (request->game_version);
@@ -636,13 +635,14 @@ versions_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   versions_request_free (request);
 }
 
-void
+AmlTaskScope *
 aml_loaders_versions_async (AmlLoader           loader,
                             const char         *game_version,
-                            GCancellable       *cancellable,
                             GAsyncReadyCallback callback,
                             gpointer            user_data)
 {
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
   VersionsRequest *request = NULL;
   const char *meta = NULL;
   const char *api = NULL;
@@ -650,15 +650,18 @@ aml_loaders_versions_async (AmlLoader           loader,
   g_autofree char *url = NULL;
   g_autofree char *quoted_game = NULL;
 
-  g_return_if_fail (game_version != NULL);
+  g_return_val_if_fail (game_version != NULL, NULL);
 
   meta = loader_meta (loader);
   api = loader_maven_api (loader);
   quoted_game = g_uri_escape_string (game_version, NULL, FALSE);
 
   request = g_new0 (VersionsRequest, 1);
-  request->task = g_task_new (NULL, cancellable, callback, user_data);
-  request->scope = aml_task_scope_from_task (request->task);
+
+  /* Borrowed: the caller's handle keeps the operation alive, and the
+     request is answered before it goes away. */
+  request->task = g_object_ref (aml_task_scope_task (scope));
+  request->scope = scope;
   request->loader = loader;
   request->game_version = g_strdup (game_version);
   request->versions = g_ptr_array_new_with_free_func (
@@ -683,16 +686,19 @@ aml_loaders_versions_async (AmlLoader           loader,
     }
   else
     {
-      aml_task_scope_return_error (
+      aml_task_scope_return_error_deferred (
         request->scope,
         g_error_new (AML_LOADERS_ERROR, AML_LOADERS_ERROR_UNSUPPORTED,
                      "AML does not install %s",
                      aml_loader_display_name (loader)));
       versions_request_free (request);
-      return;
+      return g_steal_pointer (&scope);
     }
 
-  aml_download_json_async (url, cancellable, versions_loaded, request);
+  aml_download_json_async (url, aml_task_scope_get_cancellable (scope),
+                           versions_loaded, request);
+
+  return g_steal_pointer (&scope);
 }
 
 GPtrArray *

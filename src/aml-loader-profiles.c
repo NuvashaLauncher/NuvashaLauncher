@@ -122,7 +122,6 @@ profile_request_free (gpointer data)
 {
   ProfileRequest *request = data;
 
-  aml_task_scope_unref (request->scope);
   g_clear_object (&request->task);
   g_free (request);
 }
@@ -192,43 +191,47 @@ profile_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   profile_request_free (request);
 }
 
-void
+AmlTaskScope *
 aml_loaders_profile_async (AmlLoader           loader,
                            const char         *game_version,
                            const char         *loader_version,
-                           GCancellable       *cancellable,
                            GAsyncReadyCallback callback,
                            gpointer            user_data)
 {
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
   ProfileRequest *request = NULL;
   const char *base = NULL;
   g_autofree char *url = NULL;
   g_autofree char *quoted_game = NULL;
   g_autofree char *quoted_loader = NULL;
 
-  g_return_if_fail (game_version != NULL);
-  g_return_if_fail (loader_version != NULL);
+  g_return_val_if_fail (game_version != NULL, NULL);
+  g_return_val_if_fail (loader_version != NULL, NULL);
 
   base = loader_meta (loader);
   quoted_game = g_uri_escape_string (game_version, NULL, FALSE);
   quoted_loader = g_uri_escape_string (loader_version, NULL, FALSE);
 
   request = g_new0 (ProfileRequest, 1);
-  request->task = g_task_new (NULL, cancellable, callback, user_data);
-  request->scope = aml_task_scope_from_task (request->task);
+
+  /* Borrowed: the caller's handle keeps the operation alive, and the
+     request is answered before it goes away. */
+  request->task = g_object_ref (aml_task_scope_task (scope));
+  request->scope = scope;
 
   aml_task_scope_set_check_cancellable (request->scope, FALSE);
 
   if (base == NULL)
     {
-      aml_task_scope_return_error (
+      aml_task_scope_return_error_deferred (
         request->scope,
         g_error_new (AML_LOADERS_ERROR, AML_LOADERS_ERROR_UNSUPPORTED,
                      "%s publishes an installer instead of a version "
                      "document: aml_loaders_install_async() is what "
                      "installs it", aml_loader_display_name (loader)));
       profile_request_free (request);
-      return;
+      return g_steal_pointer (&scope);
     }
 
   /* The profile is a version document of its own that inherits from the
@@ -237,7 +240,10 @@ aml_loaders_profile_async (AmlLoader           loader,
   url = g_strdup_printf ("%s/versions/loader/%s/%s/profile/json", base,
                          quoted_game, quoted_loader);
 
-  aml_download_json_async (url, cancellable, profile_loaded, request);
+  aml_download_json_async (url, aml_task_scope_get_cancellable (scope),
+                           profile_loaded, request);
+
+  return g_steal_pointer (&scope);
 }
 
 AmlVersionDescription *

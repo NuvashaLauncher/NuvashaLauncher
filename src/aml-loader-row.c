@@ -25,6 +25,11 @@ struct _AmlLoaderRow
   /* Cancelled when a load replaces it or when the row goes away. */
   GCancellable *cancellable;
 
+  /* The load the row is waiting for. Borrowed from the VersionsAsk that
+     started it: that one releases it when the answer arrives, and a newer
+     load replaces it before an older answer can arrive. */
+  AmlTaskScope *operation;
+
   /* The versions of the loader, in the order the row shows them, and the
      game version they were fetched for. */
   GPtrArray *versions; /* AmlLoaderVersion* */
@@ -314,17 +319,44 @@ fill (AmlLoaderRow *self, GPtrArray *published)
  * Fetching
  * ---------------------------------------------------------- */
 
+/* One load of the version list: the row, which can be disposed while the
+   answer is on its way, and the handle that answer is meant to release. */
+typedef struct
+{
+  AmlLoaderRow *row;
+  AmlTaskScope *operation;
+} VersionsAsk;
+
+static void
+versions_ask_free (VersionsAsk *ask)
+{
+  AmlLoaderRow *row = ask->row;
+
+  /* The row's own pointer is a loan of this reference, so it is given
+     back before the reference goes. */
+  if (row != NULL && row->operation == ask->operation)
+    row->operation = NULL;
+
+  g_clear_object (&ask->row);
+
+  if (ask->operation != NULL)
+    aml_task_scope_unref (ask->operation);
+
+  g_free (ask);
+}
+
 static void
 versions_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                  gpointer user_data)
 {
-  AmlLoaderRow *self = user_data;
+  VersionsAsk *ask = user_data;
+  AmlLoaderRow *self = ask->row;
   g_autoptr (GError) error = NULL;
   GPtrArray *versions = NULL;
 
   /* The answer belongs to the load this row already replaced, which was
      cancelled on the way out. */
-  if (g_task_get_cancellable (G_TASK (result)) == self->cancellable)
+  if (self != NULL && self->operation == ask->operation)
     {
       versions = aml_loaders_versions_finish (result, &error);
 
@@ -342,7 +374,7 @@ versions_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                     TRUE);
     }
 
-  g_object_unref (self);
+  versions_ask_free (ask);
 }
 
 static void
@@ -412,8 +444,15 @@ start_versions (AmlLoaderRow *self, AmlLoader loader, const char *wanted)
       return;
     }
 
-  aml_loaders_versions_async (loader, self->game_version, self->cancellable,
-                              versions_loaded, g_object_ref (self));
+  {
+    VersionsAsk *ask = g_new0 (VersionsAsk, 1);
+
+    ask->row = g_object_ref (self);
+    ask->operation = aml_loaders_versions_async (loader, self->game_version,
+                                                 versions_loaded, ask);
+    aml_task_scope_follow_cancellable (ask->operation, self->cancellable);
+    self->operation = ask->operation;
+  }
 }
 
 /* ---------------------------------------------------------- *
