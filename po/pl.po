@@ -574,3 +574,5 @@ msgstr "Nie można było wyczyścić pamięci podręcznej."
 
 msgid "the versions of this loader could not be read"
 msgstr "nie można odczytać wersji tego ładowacza modów"
+msgid "Unavailable"
+msgstr "Niedostępne"

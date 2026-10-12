@@ -566,3 +566,5 @@ msgstr "无法清除缓存。"
 
 msgid "the versions of this loader could not be read"
 msgstr "无法读取此模组加载器的版本"
+msgid "Unavailable"
+msgstr "不可用"

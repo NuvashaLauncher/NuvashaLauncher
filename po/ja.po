@@ -574,3 +574,5 @@ msgstr "キャッシュを消去できませんでした。"
 
 msgid "the versions of this loader could not be read"
 msgstr "この Mod ローダーのバージョンを読み取れませんでした"
+msgid "Unavailable"
+msgstr "利用できません"
