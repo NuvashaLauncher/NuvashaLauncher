@@ -781,7 +781,13 @@ local_metadata_thread (GTask *task, gpointer source G_GNUC_UNUSED,
       if (aml_task_scope_return_error_if_cancelled (scope))
         return;
       AmlContentFile *file = g_ptr_array_index (run->files, i);
-      apply_local_metadata (file, run->type);
+
+      /* The content index already carries the remote identity and metadata
+       * for files seen before. Reopening every archive just to rediscover
+       * that information makes large modpacks needlessly expensive; only
+       * inspect files that still need local identification. */
+      if (file->project_id == NULL && !file->local_metadata)
+        apply_local_metadata (file, run->type);
       aml_content_file_refresh_search_key (file);
     }
 
