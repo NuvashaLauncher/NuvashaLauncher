@@ -94,8 +94,9 @@ void aml_task_scope_release_when_done (AmlTaskScope *scope,
                                        GCancellable *cancellable);
 
 /* Cancels @scope whenever @cancellable is cancelled, for an operation
- * whose cancel button belongs to an object the caller does not own. The
- * scope stops watching when its last reference goes away. */
+ * whose cancel button belongs to an object the caller does not own. A
+ * NULL @cancellable ties the operation to nothing. The scope stops
+ * watching when its last reference goes away. */
 void aml_task_scope_follow_cancellable (AmlTaskScope *scope,
                                         GCancellable *cancellable);
 

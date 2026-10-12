@@ -240,8 +240,9 @@ aml_loaders_profile_async (AmlLoader           loader,
   url = g_strdup_printf ("%s/versions/loader/%s/%s/profile/json", base,
                          quoted_game, quoted_loader);
 
-  aml_download_json_async (url, aml_task_scope_get_cancellable (scope),
-                           profile_loaded, request);
+  aml_task_scope_release_when_done (
+    aml_download_json_async (url, profile_loaded, request),
+    aml_task_scope_get_cancellable (scope));
 
   return g_steal_pointer (&scope);
 }

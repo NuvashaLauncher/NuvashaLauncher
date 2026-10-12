@@ -1226,9 +1226,10 @@ download_file (ResolveRequest *request, ResolveStep next, const char *url,
 
   operation_started (request);
 
-  aml_download_file_async (url, path, sha1, G_CHECKSUM_SHA1,
-                           request->cancellable, NULL, file_downloaded,
-                           pending);
+  aml_task_scope_release_when_done (
+    aml_download_file_async (url, path, sha1, G_CHECKSUM_SHA1, NULL,
+                             file_downloaded, pending),
+    request->cancellable);
 }
 
 /* ---------------------------------------------------------- *
@@ -1892,9 +1893,10 @@ resolve_objects (ResolveRequest *request)
 
       /* An object is named after its own hash, so the bytes can be
          checked against it. */
-      aml_download_file_async (url, destination, hash, G_CHECKSUM_SHA1,
-                               request->cancellable, NULL,
-                               objects_downloaded, pending);
+      aml_task_scope_release_when_done (
+        aml_download_file_async (url, destination, hash, G_CHECKSUM_SHA1,
+                                 NULL, objects_downloaded, pending),
+        request->cancellable);
     }
 
   if (started == 0)

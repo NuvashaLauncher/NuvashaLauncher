@@ -878,11 +878,12 @@ drain_pending (InstallRequest *request)
       return;
     }
 
-  aml_download_file_async (file->url, file->path, file->sha1,
-                           file->sha1 != NULL ? G_CHECKSUM_SHA1
-                                              : G_CHECKSUM_MD5,
-                           g_task_get_cancellable (request->task), NULL,
-                           file_ready, request);
+  aml_task_scope_release_when_done (
+    aml_download_file_async (file->url, file->path, file->sha1,
+                             file->sha1 != NULL ? G_CHECKSUM_SHA1
+                                                : G_CHECKSUM_MD5,
+                             NULL, file_ready, request),
+    g_task_get_cancellable (request->task));
 }
 
 /* ---------------------------------------------------------- *
