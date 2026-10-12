@@ -115,6 +115,13 @@ AmlTaskScope *aml_content_scan_async (const char         *instance_directory,
 GPtrArray *aml_content_scan_finish (GAsyncResult  *result,
                                     GError       **error);
 
+/* Completes local archive metadata extraction after the file list is shown. */
+AmlTaskScope *aml_content_metadata_async (GPtrArray          *files,
+                                          AmlContentType       type,
+                                          GAsyncReadyCallback  callback,
+                                          gpointer             user_data);
+gboolean aml_content_metadata_finish (GAsyncResult *result, GError **error);
+
 /* The page for @type of @instance. It keeps its own reference on the
  * instance until it is destroyed. Like every widget it starts with a
  * floating reference. */
