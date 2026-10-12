@@ -11,6 +11,15 @@ G_BEGIN_DECLS
 
 typedef struct _AmlTaskSequence AmlTaskSequence;
 typedef struct _AmlTaskScope AmlTaskScope;
+typedef enum {
+  AML_TASK_STATE_QUEUED,
+  AML_TASK_STATE_RUNNING,
+  AML_TASK_STATE_RETRYING,
+  AML_TASK_STATE_COMPLETED,
+  AML_TASK_STATE_FAILED,
+  AML_TASK_STATE_CANCELLED,
+  AML_TASK_STATE_CLEANING
+} AmlTaskState;
 typedef void (*AmlTaskSequenceStep) (AmlTaskSequence *sequence,
                                      gpointer         user_data);
 
@@ -54,6 +63,9 @@ AmlTaskScope *aml_task_scope_new (GObject *source_object,
                                   gpointer user_data);
 AmlTaskScope *aml_task_scope_ref (AmlTaskScope *scope);
 void aml_task_scope_unref (AmlTaskScope *scope);
+guint64 aml_task_scope_get_id (const AmlTaskScope *scope);
+AmlTaskState aml_task_scope_get_state (const AmlTaskScope *scope);
+void aml_task_scope_set_state (AmlTaskScope *scope, AmlTaskState state);
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (AmlTaskScope, aml_task_scope_unref)
 GCancellable *aml_task_scope_get_cancellable (const AmlTaskScope *scope);
 void aml_task_scope_set_check_cancellable (AmlTaskScope *scope,

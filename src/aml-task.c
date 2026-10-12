@@ -18,6 +18,8 @@ typedef struct
 struct _AmlTaskScope
 {
   gatomicrefcount refs;
+  guint64 id;
+  AmlTaskState state;
   GTask *task;
   GArray *sources;
   GArray *completions;
@@ -26,17 +28,45 @@ struct _AmlTaskScope
   gboolean unref_when_done;
 };
 
+static gint next_task_id;
+
 static AmlTaskScope *
 aml_task_scope_alloc (void)
 {
   AmlTaskScope *scope = g_new0 (AmlTaskScope, 1);
 
   g_atomic_ref_count_init (&scope->refs);
+  scope->id = (guint64) g_atomic_int_add (&next_task_id, 1) + 1;
+  scope->state = AML_TASK_STATE_QUEUED;
   scope->sources = g_array_new (FALSE, FALSE, sizeof (guint));
   scope->completions = g_array_new (FALSE, FALSE, sizeof (guint));
   scope->followed = g_array_new (FALSE, FALSE, sizeof (FollowedCancellable));
 
   return scope;
+}
+
+guint64
+aml_task_scope_get_id (const AmlTaskScope *scope)
+{
+  g_return_val_if_fail (scope != NULL, 0);
+  return scope->id;
+}
+
+AmlTaskState
+aml_task_scope_get_state (const AmlTaskScope *scope)
+{
+  g_return_val_if_fail (scope != NULL, AML_TASK_STATE_FAILED);
+  return scope->state;
+}
+
+void
+aml_task_scope_set_state (AmlTaskScope *scope, AmlTaskState state)
+{
+  g_return_if_fail (scope != NULL);
+  if (scope->state != state)
+    g_debug ("operation=%" G_GUINT64_FORMAT " state=%d->%d", scope->id,
+             scope->state, state);
+  scope->state = state;
 }
 
 static void
@@ -186,6 +216,8 @@ aml_task_scope_return_error_if_cancelled (AmlTaskScope *scope)
 
   hold = aml_task_scope_ref (scope);
   cancelled = g_task_return_error_if_cancelled (scope->task);
+  if (cancelled)
+    aml_task_scope_set_state (scope, AML_TASK_STATE_CANCELLED);
   if (cancelled && scope->unref_when_done)
     scope_release_when_done (scope);
 
@@ -201,6 +233,7 @@ aml_task_scope_return_pointer (AmlTaskScope *scope, gpointer result,
   AmlTaskScope *hold;
 
   g_return_if_fail (scope != NULL);
+  aml_task_scope_set_state (scope, AML_TASK_STATE_COMPLETED);
 
   hold = aml_task_scope_ref (scope);
   release = scope->unref_when_done;
@@ -217,6 +250,7 @@ aml_task_scope_return_error (AmlTaskScope *scope, GError *error)
   AmlTaskScope *hold;
 
   g_return_if_fail (scope != NULL);
+  aml_task_scope_set_state (scope, AML_TASK_STATE_FAILED);
 
   hold = aml_task_scope_ref (scope);
   release = scope->unref_when_done;
@@ -233,6 +267,8 @@ aml_task_scope_return_boolean (AmlTaskScope *scope, gboolean result)
   AmlTaskScope *hold;
 
   g_return_if_fail (scope != NULL);
+  aml_task_scope_set_state (scope, result ? AML_TASK_STATE_COMPLETED
+                                          : AML_TASK_STATE_FAILED);
 
   hold = aml_task_scope_ref (scope);
   release = scope->unref_when_done;
@@ -433,6 +469,7 @@ void
 aml_task_scope_cancel (AmlTaskScope *scope)
 {
   g_return_if_fail (scope != NULL);
+  aml_task_scope_set_state (scope, AML_TASK_STATE_CANCELLED);
   GCancellable *cancellable = g_task_get_cancellable (scope->task);
   if (cancellable != NULL)
     g_cancellable_cancel (cancellable);
