@@ -127,6 +127,20 @@ aml_content_set_disabled (const char *path, gboolean disabled, GError **error)
   return g_steal_pointer (&target);
 }
 
+gboolean
+aml_content_remove_file (const char *path, GError **error)
+{
+  g_return_val_if_fail (path != NULL, FALSE);
+  return aml_fs_unlink (path, error);
+}
+
+gboolean
+aml_content_ensure_folder (const char *path, GError **error)
+{
+  g_return_val_if_fail (path != NULL, FALSE);
+  return aml_fs_make_directory (path, 0755, error);
+}
+
 /* TRUE when @name is a file of this content, suffix or not: the loaders
  * and the game only pick up the ones that do not carry the suffix. */
 static gboolean
