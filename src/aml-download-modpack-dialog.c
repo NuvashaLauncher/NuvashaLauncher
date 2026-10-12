@@ -294,6 +294,8 @@ aml_download_modpack_dialog_init (AmlDownloadModpackDialog *self)
 
   adw_dialog_set_title (ADW_DIALOG (self), _("Download Modpack"));
   aml_dialog_set_standard_size (ADW_DIALOG (self));
+  adw_dialog_set_content_width (ADW_DIALOG (self),
+                                AML_DIALOG_WIDE_CONTENT_WIDTH);
 
   self->nav = ADW_NAVIGATION_VIEW (adw_navigation_view_new ());
   /* The installing page appears in place instead of sliding in: the
@@ -1174,9 +1176,8 @@ close_details (AmlDownloadModpackDialog *self)
     ADW_NAVIGATION_SPLIT_VIEW (self->split), TRUE);
   details_watch (&self->details_page, NULL);
 
-  /* A half a pack wide is what the list needs; the room the other half
-     took goes back to the dialog. */
-  adw_dialog_set_content_width (ADW_DIALOG (self), AML_DIALOG_CONTENT_WIDTH);
+  /* Keep the browser at its wide size even when the details half is closed,
+     matching the other content browsers. */
 }
 
 /* Puts @body in the right half of the browser, beside the list, and takes
@@ -1194,9 +1195,7 @@ show_details_page (AmlDownloadModpackDialog *self, GtkWidget *body)
   adw_navigation_split_view_set_collapsed (
     ADW_NAVIGATION_SPLIT_VIEW (self->split), FALSE);
 
-  /* The pack opens to the side of the list, so the dialog widens by the
-     other half to keep both readable. */
-  adw_dialog_set_content_width (ADW_DIALOG (self), 1040);
+  /* The dialog is already wide enough for both halves. */
 }
 
 /* The author the search answer named. A project answer does not name one:
