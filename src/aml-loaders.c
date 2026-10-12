@@ -573,7 +573,7 @@ install_finished (InstallRequest *request, GError *error)
 {
   if (error != NULL)
     {
-      g_task_return_error (request->task, error);
+      aml_task_scope_return_error (request->scope, error);
     }
   else
     {
@@ -582,8 +582,8 @@ install_finished (InstallRequest *request, GError *error)
       install->description = g_object_ref (request->description);
       install->client_jar = g_strdup (request->patched_jar);
 
-      g_task_return_pointer (request->task, install,
-                             (GDestroyNotify) aml_loader_install_free);
+       aml_task_scope_return_pointer (
+         request->scope, install, (GDestroyNotify) aml_loader_install_free);
     }
 
   install_request_free (request);
