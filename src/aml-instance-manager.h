@@ -137,11 +137,10 @@ gboolean aml_instance_manager_change_directory_finish (AmlInstanceManager *self,
 /* Copies the files of @source into a fresh directory, registers the
  * copy as "Copy of <name>" with a new id and saves. The copy appears in
  * the list only after its files were copied. */
-void aml_instance_manager_duplicate_async (AmlInstanceManager *self,
-                                           AmlInstance *source,
-                                           GCancellable *cancellable,
-                                           GAsyncReadyCallback callback,
-                                           gpointer user_data);
+AmlTaskScope *aml_instance_manager_duplicate_async (AmlInstanceManager *self,
+                                                     AmlInstance *source,
+                                                     GAsyncReadyCallback callback,
+                                                     gpointer user_data);
 
 AmlInstance *aml_instance_manager_duplicate_finish (AmlInstanceManager *self,
                                                     GAsyncResult *result,

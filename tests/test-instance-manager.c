@@ -183,6 +183,8 @@ duplicate_finished (GObject *source, GAsyncResult *result, gpointer user_data)
   call->result =
     aml_instance_manager_duplicate_finish (AML_INSTANCE_MANAGER (source),
                                            result, &call->error);
+  aml_task_scope_unref (call->operation);
+  call->operation = NULL;
   g_main_loop_quit (call->loop);
 }
 
@@ -754,8 +756,8 @@ test_duplicate (void)
   AsyncCall call = { 0 };
   call.loop = g_main_loop_new (NULL, FALSE);
 
-  aml_instance_manager_duplicate_async (manager, instance, NULL,
-                                        duplicate_finished, &call);
+   call.operation = aml_instance_manager_duplicate_async (
+     manager, instance, duplicate_finished, &call);
   async_call_run (&call);
   g_assert_no_error (call.error);
   g_assert_nonnull (call.result);
@@ -840,8 +842,8 @@ test_duplicate_without_directory (void)
   AsyncCall call = { 0 };
   call.loop = g_main_loop_new (NULL, FALSE);
 
-  aml_instance_manager_duplicate_async (manager, instance, NULL,
-                                        duplicate_finished, &call);
+   call.operation = aml_instance_manager_duplicate_async (
+     manager, instance, duplicate_finished, &call);
   async_call_run (&call);
   g_assert_error (call.error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND);
   g_assert_null (call.result);

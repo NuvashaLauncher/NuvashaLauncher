@@ -1133,7 +1133,8 @@ on_change_directory_clicked (GtkButton *button G_GNUC_UNUSED,
 static void
 on_duplicate_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  ChangeDirectoryWait *wait = user_data;
+  AmlInstancePage *self = wait->page;
   g_autoptr (GError) error = NULL;
   g_autoptr (AmlInstance) copy =
     aml_instance_manager_duplicate_finish (AML_INSTANCE_MANAGER (source),
@@ -1151,6 +1152,8 @@ on_duplicate_ready (GObject *source, GAsyncResult *result, gpointer user_data)
     }
 
   g_object_unref (self);
+  aml_task_scope_unref (wait->operation);
+  g_free (wait);
 }
 
 static void
@@ -1158,9 +1161,10 @@ on_duplicate_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   AmlInstancePage *self = user_data;
 
-  aml_instance_manager_duplicate_async (self->manager, self->instance, NULL,
-                                        on_duplicate_ready,
-                                        g_object_ref (self));
+  ChangeDirectoryWait *wait = g_new0 (ChangeDirectoryWait, 1);
+  wait->page = g_object_ref (self);
+  wait->operation = aml_instance_manager_duplicate_async (
+    self->manager, self->instance, on_duplicate_ready, wait);
 }
 
 static void
