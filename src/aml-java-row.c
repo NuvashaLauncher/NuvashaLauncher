@@ -20,6 +20,7 @@
 
 static void custom_loaded (GObject*, GAsyncResult*, gpointer);
 static void on_picked (GObject*, GParamSpec*, gpointer);
+static void on_java_activated (AdwComboRow*, gpointer);
 
 struct _AmlJavaRow
 {
@@ -64,6 +65,7 @@ struct _AmlJavaRow
   gboolean disposed;
   gboolean no_default;
   gboolean rebuilding;
+  gboolean user_opened;
   GtkButton *retry;
 
   /* The request the row is waiting for. Borrowed from the JavaAsk that
@@ -272,6 +274,7 @@ fill (AmlJavaRow *self)
   self->ids = ids;
   self->no_default = fallback == NULL &&
                      (self->wanted == NULL || *self->wanted == '\0');
+  self->user_opened = FALSE;
   self->ready = TRUE;
 
   /* Filled in below, once the model carries the entry this points at. */
@@ -493,6 +496,9 @@ on_picked (GObject    *object G_GNUC_UNUSED,
   if (self->rebuilding)
     return;
 
+  if (!self->user_opened)
+    return;
+
   if (selected != self->add_index)
     {
       /* Anything else in the list names a runtime, and is where the ask
@@ -516,6 +522,14 @@ on_picked (GObject    *object G_GNUC_UNUSED,
   gtk_file_dialog_set_title (dialog, _("Choose Java executable"));
   gtk_file_dialog_open (dialog, GTK_IS_WINDOW (root) ? GTK_WINDOW (root) : NULL,
                         NULL, add_chosen, g_object_ref (self));
+}
+
+static void
+on_java_activated (AdwComboRow *row G_GNUC_UNUSED, gpointer user_data)
+{
+  AmlJavaRow *self = user_data;
+
+  self->user_opened = TRUE;
 }
 
 /* ---------------------------------------------------------- *
@@ -747,6 +761,7 @@ aml_java_row_init (AmlJavaRow *self)
   self->names = g_ptr_array_new_with_free_func (g_free);
   self->required_major = 0;
   self->no_default = TRUE;
+  self->user_opened = FALSE;
   self->add_index = GTK_INVALID_LIST_POSITION;
   self->restore = 0;
 
@@ -783,4 +798,5 @@ aml_java_row_init (AmlJavaRow *self)
   /* First, so the entry that asks for a runtime can put the selection
      back before whoever uses the row sees it. */
   g_signal_connect (self, "notify::selected", G_CALLBACK (on_picked), self);
+  g_signal_connect (self, "activate", G_CALLBACK (on_java_activated), self);
 }
