@@ -117,7 +117,7 @@ make test            # run every test against the release build
 make test-debug      # the same tests under AddressSanitizer and UBSan
 make test-lsan       # sanitizer tests with LeakSanitizer enabled
 make test-valgrind   # release tests under Valgrind
-make static-analysis # GCC analyzer, clang-tidy and cppcheck when installed
+make static-analysis # GCC analyzer and clang-tidy when installed
 ```
 
 Both are headless: no display is opened and no test touches the network
