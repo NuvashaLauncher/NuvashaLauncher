@@ -370,9 +370,49 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
             changed = aml_content_remove_file (dependent, &dependent_error);
           else
             {
+              AmlContentFile *dependent_file = NULL;
+              GtkWidget *dependent_row = NULL;
               g_autofree char *disabled =
-                aml_content_set_disabled (dependent, FALSE, &dependent_error);
+                aml_content_set_disabled (dependent, TRUE, &dependent_error);
               changed = disabled != NULL;
+
+              if (changed)
+                for (guint j = 0; j < self->installed.files->len; j++)
+                  {
+                    AmlContentFile *candidate =
+                      g_ptr_array_index (self->installed.files, j);
+
+                    if (g_strcmp0 (candidate->path, dependent) == 0)
+                      {
+                        dependent_file = candidate;
+                        break;
+                      }
+                  }
+
+              if (dependent_file != NULL)
+                {
+                  dependent_row = g_hash_table_lookup (self->installed.rows,
+                                                       dependent);
+                  g_hash_table_remove (self->installed.rows, dependent);
+                  g_free (dependent_file->path);
+                  dependent_file->path = g_steal_pointer (&disabled);
+                  dependent_file->enabled = FALSE;
+                  g_hash_table_insert (self->installed.rows,
+                                       g_strdup (dependent_file->path),
+                                       dependent_row);
+
+                  if (dependent_row != NULL)
+                    {
+                      GtkSwitch *switch_widget = g_object_get_data (
+                        G_OBJECT (dependent_row), "aml-mod-switch");
+                      if (switch_widget != NULL)
+                        {
+                          gtk_switch_set_active (switch_widget, FALSE);
+                          gtk_widget_set_tooltip_text (
+                            GTK_WIDGET (switch_widget), "Enable");
+                        }
+                    }
+                }
             }
 
           if (!changed)
@@ -433,7 +473,6 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
               break;
             }
         }
-      reload_installed (self);
     }
 
   g_object_unref (self);
@@ -588,6 +627,7 @@ file_row (AmlContentPage *self, AmlContentFile *file)
                                       GTK_ACCESSIBLE_PROPERTY_LABEL,
                                       "Enabled", -1);
       g_object_set_data (G_OBJECT (sw), "aml-file", file);
+      g_object_set_data (G_OBJECT (row), "aml-mod-switch", sw);
       g_signal_connect (sw, "state-set", G_CALLBACK (on_mod_toggled), self);
       adw_action_row_add_suffix (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (sw));
     }
@@ -598,6 +638,10 @@ file_row (AmlContentPage *self, AmlContentFile *file)
     GtkButton *trash = GTK_BUTTON (gtk_button_new_from_icon_name ("user-trash-symbolic"));
 
     gtk_widget_add_css_class (GTK_WIDGET (trash), "flat");
+    /* Do not let clicking delete move keyboard focus into a row that is
+     * about to disappear. GTK would otherwise focus the first remaining row
+     * when this button is removed, which scrolls the list to the top. */
+    gtk_widget_set_focus_on_click (GTK_WIDGET (trash), FALSE);
     gtk_widget_set_valign (GTK_WIDGET (trash), GTK_ALIGN_CENTER);
    gtk_widget_set_tooltip_text (GTK_WIDGET (trash), _("Delete"));
     gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (trash)),
