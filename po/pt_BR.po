@@ -223,8 +223,8 @@ msgstr "Buscar no registro"
 msgid "Versions"
 msgstr "Versões"
 
-msgid "Show Snapshots"
-msgstr "Mostrar instantâneos"
+msgid "Show unstable Minecraft versions"
+msgstr "Mostrar versões instáveis do Minecraft"
 
 msgid "Show unstable Mod Loader versions"
 msgstr "Mostrar versões instáveis de carregadores de mods"

@@ -218,8 +218,8 @@ msgstr "搜索日志"
 msgid "Versions"
 msgstr "版本"
 
-msgid "Show Snapshots"
-msgstr "显示快照"
+msgid "Show unstable Minecraft versions"
+msgstr "显示不稳定的 Minecraft 版本"
 
 msgid "Show unstable Mod Loader versions"
 msgstr "显示不稳定的模组加载器版本"

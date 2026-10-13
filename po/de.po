@@ -224,8 +224,8 @@ msgstr "Im Protokoll suchen"
 msgid "Versions"
 msgstr "Versionen"
 
-msgid "Show Snapshots"
-msgstr "Snapshots anzeigen"
+msgid "Show unstable Minecraft versions"
+msgstr "Instabile Minecraft-Versionen anzeigen"
 
 msgid "Show unstable Mod Loader versions"
 msgstr "Instabile Mod-Loader-Versionen anzeigen"
