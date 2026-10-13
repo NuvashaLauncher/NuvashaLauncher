@@ -374,7 +374,7 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
           else
             {
               g_autofree char *disabled =
-                aml_content_set_disabled (dependent, TRUE, &dependent_error);
+                aml_content_set_disabled (dependent, FALSE, &dependent_error);
               changed = disabled != NULL;
               g_debug ("disabling dependent content file: %s -> %s",
                        dependent, disabled != NULL ? disabled : "(failed)");
