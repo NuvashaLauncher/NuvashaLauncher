@@ -325,8 +325,6 @@ auth_read_ready (GObject *source, GAsyncResult *result, gpointer user_data)
   g_clear_pointer (&self->response_bytes, g_byte_array_unref);
   g_clear_object (&self->response_stream);
   g_clear_object (&self->message);
-  g_clear_object (&self->response_stream);
-  g_clear_pointer (&self->response_bytes, g_byte_array_unref);
 
   /* The step that asked for this request is the only thing a sign-in
      keeps between two of them. */
@@ -1029,7 +1027,10 @@ request_free (gpointer data)
      is the scope going away: it has already released the sources the poll
      was waiting on. */
 
+  g_clear_object (&self->task);
   g_clear_object (&self->message);
+  g_clear_object (&self->response_stream);
+  g_clear_pointer (&self->response_bytes, g_byte_array_unref);
   g_free (self->body);
   g_free (self->device_code);
   g_free (self->refresh_token);
