@@ -155,10 +155,6 @@ msgstr "Bu oyun Java %d veya daha yeni bir sürüm gerektiriyor, seçilen Java %
 msgid "Add Java Runtime"
 msgstr "Java çalışma zamanı ekle"
 
-msgid "No detected Java satisfies the requirement of Java %d+"
-msgstr ""
-"Algılanan Java sürümlerinden hiçbiri Java %d+ gereksinimini karşılamıyor"
-
 msgid ""
 "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
 "not jre-openjdk-headless"
@@ -232,9 +228,6 @@ msgstr "Anlık Görüntüleri Göster"
 
 msgid "Show unstable Mod Loader versions"
 msgstr "Kararsız mod yükleyici sürümlerini göster"
-
-msgid "Automatic (closest compatible)"
-msgstr "Otomatik (en yakın uyumlu)"
 
 msgid "Language"
 msgstr "Dil"

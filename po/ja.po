@@ -154,9 +154,6 @@ msgstr "このゲームには Java %d 以降が必要です。選択されてい
 msgid "Add Java Runtime"
 msgstr "Java ランタイムを追加"
 
-msgid "No detected Java satisfies the requirement of Java %d+"
-msgstr "検出された Java には Java %d+ の要件を満たすものはありません"
-
 msgid ""
 "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
 "not jre-openjdk-headless"
@@ -230,9 +227,6 @@ msgstr "スナップショットを表示"
 
 msgid "Show unstable Mod Loader versions"
 msgstr "不安定なMod ローダーのバージョンを表示"
-
-msgid "Automatic (closest compatible)"
-msgstr "自動（最も近い互換版）"
 
 msgid "Language"
 msgstr "言語"

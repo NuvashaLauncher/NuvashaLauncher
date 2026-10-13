@@ -37,12 +37,6 @@ msgstr "No se encontró ninguna instalación de Java en este sistema"
 msgid "This game needs Java %d or newer, selected Java is %d"
 msgstr "Este juego necesita Java %d o más nuevo, el Java elegido es %d"
 
-msgid "Automatic (closest compatible)"
-msgstr "Automático (compatible más cercano)"
-
-msgid "No detected Java satisfies the requirement of Java %d+"
-msgstr "Ningún Java detectado cumple el requisito de Java %d+"
-
 msgid ""
 "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
 "not jre-openjdk-headless"

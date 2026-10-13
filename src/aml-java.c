@@ -171,11 +171,11 @@ aml_java_select (GPtrArray  *javas,
 
           if (java_matches (java, instance_java_path))
             {
-              /* An explicit path is preferred, but it must still satisfy
-               * the Java version named by Minecraft.  Otherwise an old
-               * per-instance setting could make a newer game fail after
-               * launch with an opaque JVM error. */
-               return java->major_version == required_major ? java : NULL;
+               /* An explicit path is preferred, but it must still satisfy
+                * the Java version named by Minecraft. A zero requirement
+                * means the version document did not declare one. */
+                return required_major == 0 ||
+                       java->major_version == required_major ? java : NULL;
             }
         }
 
@@ -183,6 +183,11 @@ aml_java_select (GPtrArray  *javas,
        * instance's decision either way. */
       return NULL;
     }
+
+  /* Older version documents do not declare a Java version. Pick the
+     closest usable runtime rather than looking for the impossible major 0. */
+  if (required_major == 0)
+    return aml_java_best_compatible (javas, 0);
 
   /* Automatic selection must not silently choose a different major. A
    * newer JVM may be technically compatible, but it is not the runtime the

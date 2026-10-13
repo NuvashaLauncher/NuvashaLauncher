@@ -1245,6 +1245,7 @@ aml_resolved_version_free (AmlResolvedVersion *resolved)
     return;
 
   g_free (resolved->version_id);
+  g_free (resolved->version_type);
   g_free (resolved->client_jar);
   g_free (resolved->classpath);
   g_free (resolved->natives_directory);
@@ -1349,6 +1350,8 @@ build_result (ResolveRequest *request, GError **error)
   }
 
   resolved->version_id = g_strdup (request->description->id);
+  resolved->version_type = g_strdup (
+    aml_mc_version_type_to_string (request->description->type));
   resolved->natives_directory = g_strdup (request->natives_dir);
   resolved->library_directory = g_strdup (request->libraries_dir);
   resolved->main_class = g_strdup (request->description->main_class);
@@ -1394,14 +1397,14 @@ build_result (ResolveRequest *request, GError **error)
   g_hash_table_insert (known, "natives_directory", request->natives_dir);
   g_hash_table_insert (known, "library_directory", request->libraries_dir);
   g_hash_table_insert (known, "assets_root", resolved->assets_directory);
+  /* Pre-1.7 version documents call the same directory game_assets. */
+  g_hash_table_insert (known, "game_assets", resolved->assets_directory);
   g_hash_table_insert (known, "assets_index_name",
                        resolved->assets_index_name != NULL
                          ? resolved->assets_index_name
                          : request->asset_index_name);
   g_hash_table_insert (known, "version_name", resolved->version_id);
-  g_hash_table_insert (known, "version_type",
-                       (char *) aml_mc_version_type_to_string (
-                         request->description->type));
+  g_hash_table_insert (known, "version_type", resolved->version_type);
 
   jvm = aml_resolve_jvm_arguments (request->description, request->context);
   game = aml_resolve_game_arguments (request->description, request->context);

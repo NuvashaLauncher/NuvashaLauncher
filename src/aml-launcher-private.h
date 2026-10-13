@@ -25,6 +25,11 @@ struct _AmlLauncher
   AmlLaunchState state;
   char *detail; /* what goes with the state, NULL when there is nothing */
 
+  /* Per-launch values that must not appear in game output or launcher logs. */
+  char *log_access_token;
+  char *log_session;
+  char *log_uuid;
+
   /* The log: the newest line last, trimmed to what the settings ask
      for. */
   GPtrArray *lines;

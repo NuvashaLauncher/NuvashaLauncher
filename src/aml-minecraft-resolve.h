@@ -190,6 +190,7 @@ gboolean aml_resolve_extract_natives_finish (GAsyncResult  *result,
 
 typedef struct {
   char *version_id;
+  char *version_type;       /* release, snapshot, old_beta or old_alpha */
   char *client_jar;         /* absolute path */
   char *classpath;          /* ':' separated, client jar last */
   char *natives_directory;

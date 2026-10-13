@@ -8,6 +8,33 @@
 #include <string.h>
 #include <stdarg.h>
 
+/* Replace per-launch credentials before a line is retained, emitted or
+ * shown. This also catches old Minecraft versions that print their complete
+ * legacy session as "Session ID is token:...". */
+static char *
+censor_private_text (AmlLauncher *self, const char *text)
+{
+  g_autofree char *result = g_strdup (text != NULL ? text : "");
+  const char *secrets[] = { self->log_access_token, self->log_session,
+                            self->log_uuid, NULL };
+
+  for (guint i = 0; secrets[i] != NULL; i++)
+    {
+      g_auto (GStrv) parts = NULL;
+      g_autofree char *joined = NULL;
+
+      if (secrets[i][0] == '\0')
+        continue;
+
+      parts = g_strsplit (result, secrets[i], -1);
+      joined = g_strjoinv ("***", parts);
+      g_free (g_steal_pointer (&result));
+      result = g_steal_pointer (&joined);
+    }
+
+  return g_steal_pointer (&result);
+}
+
 /* Internal launcher log buffer and formatting workflow. */
 
 /* ---------------------------------------------------------- *
@@ -55,6 +82,12 @@ log_line (AmlLauncher *self,
   va_start (args, format);
   body = g_strdup_vprintf (format, args);
   va_end (args);
+
+  {
+    g_autofree char *censored = censor_private_text (self, body);
+    g_free (g_steal_pointer (&body));
+    body = g_steal_pointer (&censored);
+  }
 
   stamp = now != NULL ? g_date_time_format (now, "%H:%M:%S")
                       : g_strdup ("--:--:--");

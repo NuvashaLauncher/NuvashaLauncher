@@ -153,6 +153,8 @@ aml_launch_build_arguments (const AmlResolvedVersion *resolved,
 {
   g_autoptr (GHashTable) placeholders = NULL;
   g_autoptr (GPtrArray) argv = NULL;
+  g_autofree char *legacy_session = NULL;
+  const char *auth_session = AML_LAUNCH_OFFLINE_TOKEN;
 
   g_return_val_if_fail (resolved != NULL, NULL);
   g_return_val_if_fail (session != NULL, NULL);
@@ -169,11 +171,24 @@ aml_launch_build_arguments (const AmlResolvedVersion *resolved,
 
   placeholders = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
+  /* Minecraft versions through 1.6 use one legacy session argument rather
+     than the separate UUID and access-token arguments used by newer
+     versions. The old launcher format is token:<access-token>:<uuid>. */
+  if (g_strcmp0 (session->user_type, AML_LAUNCH_MICROSOFT_USER_TYPE) == 0 &&
+      session->access_token != NULL && *session->access_token != '\0' &&
+      g_strcmp0 (session->access_token, AML_LAUNCH_OFFLINE_TOKEN) != 0)
+    {
+      legacy_session = g_strdup_printf ("token:%s:%s", session->access_token,
+                                        session->uuid != NULL ? session->uuid
+                                                               : "");
+      auth_session = legacy_session;
+    }
+
   /* Who the player is: the account, not a name AML made up. */
   put_placeholder (placeholders, "auth_player_name", session->name);
   put_placeholder (placeholders, "auth_uuid", session->uuid);
   put_placeholder (placeholders, "auth_access_token", session->access_token);
-  put_placeholder (placeholders, "auth_session", "");
+  put_placeholder (placeholders, "auth_session", auth_session);
   put_placeholder (placeholders, "auth_xuid", "");
   put_placeholder (placeholders, "clientid", "");
   put_placeholder (placeholders, "user_type", session->user_type);
@@ -186,10 +201,15 @@ aml_launch_build_arguments (const AmlResolvedVersion *resolved,
      on its own. */
   put_placeholder (placeholders, "game_directory", game_directory);
   put_placeholder (placeholders, "version_name", resolved->version_id);
-  put_placeholder (placeholders, "version_type", resolved->version_id);
+  put_placeholder (placeholders, "version_type",
+                   resolved->version_type != NULL &&
+                   resolved->version_type[0] != '\0'
+                     ? resolved->version_type : resolved->version_id);
   put_placeholder (placeholders, "natives_directory",
                    resolved->natives_directory);
   put_placeholder (placeholders, "assets_root", resolved->assets_directory);
+  /* Pre-1.7 version documents call the same directory game_assets. */
+  put_placeholder (placeholders, "game_assets", resolved->assets_directory);
   put_placeholder (placeholders, "assets_index_name",
                    resolved->assets_index_name);
   put_placeholder (placeholders, "library_directory",
@@ -311,11 +331,11 @@ aml_launch_redact (GPtrArray *argv)
       if (i > 0)
         g_string_append_c (out, ' ');
 
-      /* The token of the session goes into the command line as the
-         argument of --accessToken; nothing else a launcher passes holds
-         a secret, but the two forms below are covered as well. */
+      /* Hide values supplied to flags that carry credentials. */
       if (g_strcmp0 (argument, "--accessToken") == 0 ||
-          g_strcmp0 (argument, "--password") == 0)
+          g_strcmp0 (argument, "--session") == 0 ||
+          g_strcmp0 (argument, "--password") == 0 ||
+          g_strcmp0 (argument, "--token") == 0)
         {
           g_string_append (out, argument);
           hide_next = TRUE;
@@ -323,7 +343,9 @@ aml_launch_redact (GPtrArray *argv)
         }
 
       if ((g_str_has_prefix (argument, "--accessToken=") ||
-           g_str_has_prefix (argument, "--password=")) &&
+           g_str_has_prefix (argument, "--session=") ||
+           g_str_has_prefix (argument, "--password=") ||
+           g_str_has_prefix (argument, "--token=")) &&
           equals != NULL)
         {
           g_string_append_len (out, argument, (gssize) (equals - argument));
@@ -337,4 +359,3 @@ aml_launch_redact (GPtrArray *argv)
 
   return g_string_free (out, FALSE);
 }
-

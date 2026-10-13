@@ -287,6 +287,15 @@ test_select_instance_then_closest (void)
   g_assert_nonnull (picked);
   g_assert_true (picked->headless);
 
+  /* Older version documents omit javaVersion: zero means any usable Java,
+   * both for an explicit instance choice and for automatic selection. */
+  picked = aml_java_select (list, "/fake/jdk/17/bin/java", 0);
+  g_assert_nonnull (picked);
+  g_assert_cmpint (picked->major_version, ==, 17);
+  picked = aml_java_select (list, NULL, 0);
+  g_assert_nonnull (picked);
+  g_assert_cmpint (picked->major_version, ==, 8);
+
   /* Nothing set: the exact required major is selected automatically. */
   picked = aml_java_select (list, NULL, 21);
   g_assert_nonnull (picked);
