@@ -255,10 +255,6 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
                              aml_loader_row_get_version_row (self->loader_row));
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (group)), GTK_WIDGET (self->directory_row));
 
-  AdwPreferencesPage *page = ADW_PREFERENCES_PAGE (adw_preferences_page_new ());
-  adw_preferences_page_add (ADW_PREFERENCES_PAGE (GTK_WIDGET (page)),
-                            ADW_PREFERENCES_GROUP (group));
-
   GtkButton *cancel_button = GTK_BUTTON (gtk_button_new_with_label (_("Cancel")));
   g_signal_connect (cancel_button, "clicked", G_CALLBACK (on_cancel_clicked),
                     self);
@@ -269,15 +265,21 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
                     self);
 
   GtkBox *buttons = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
-  gtk_widget_set_halign (GTK_WIDGET (buttons), GTK_ALIGN_END);
-  gtk_widget_set_margin_start (GTK_WIDGET (buttons), 24);
-  gtk_widget_set_margin_end (GTK_WIDGET (buttons), 24);
-  gtk_widget_set_margin_bottom (GTK_WIDGET (buttons), 24);
+  gtk_widget_set_halign (GTK_WIDGET (buttons), GTK_ALIGN_CENTER);
   gtk_box_append (GTK_BOX (GTK_WIDGET (buttons)), GTK_WIDGET (cancel_button));
   gtk_box_append (GTK_BOX (GTK_WIDGET (buttons)), GTK_WIDGET (self->create_button));
 
   GtkBox *content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (page));
+  gtk_box_set_spacing (content, 12);
+  gtk_widget_set_margin_start (GTK_WIDGET (content), 12);
+  gtk_widget_set_margin_end (GTK_WIDGET (content), 12);
+  gtk_widget_set_margin_top (GTK_WIDGET (content), 12);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (content), 12);
+  GtkLabel *heading = GTK_LABEL (gtk_label_new (_("Create Instance")));
+  gtk_widget_add_css_class (GTK_WIDGET (heading), "title-2");
+  gtk_label_set_xalign (GTK_LABEL (heading), 0.5f);
+  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (heading));
+  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (group));
   gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (buttons));
   self->toast_overlay = ADW_TOAST_OVERLAY (adw_toast_overlay_new ());
   adw_toast_overlay_set_child (self->toast_overlay, GTK_WIDGET (content));

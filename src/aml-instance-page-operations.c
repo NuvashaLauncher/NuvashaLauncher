@@ -248,9 +248,6 @@ show_export_metadata (AmlInstancePage *self)
   GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
   GtkBox *buttons = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
   GtkLabel *heading = GTK_LABEL (gtk_label_new (_("Pack information")));
-  GtkLabel *description = GTK_LABEL (gtk_label_new (
-    _("Optional metadata. Add a summary or version ID to help identify the "
-      "exported pack.")));
   AdwPreferencesGroup *fields = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   GtkButton *cancel = GTK_BUTTON (gtk_button_new_with_label (_("Cancel")));
   GtkButton *export_button = GTK_BUTTON (gtk_button_new_with_label (_("Export")));
@@ -271,12 +268,9 @@ show_export_metadata (AmlInstancePage *self)
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (data->version),
                                   _("Version ID"));
   gtk_widget_add_css_class (GTK_WIDGET (heading), "title-2");
-  gtk_widget_add_css_class (GTK_WIDGET (description), "dim-label");
   gtk_label_set_justify (GTK_LABEL (GTK_WIDGET (heading)), GTK_JUSTIFY_CENTER);
-  gtk_label_set_justify (GTK_LABEL (GTK_WIDGET (description)), GTK_JUSTIFY_CENTER);
-  gtk_label_set_wrap (GTK_LABEL (GTK_WIDGET (description)), TRUE);
   gtk_label_set_xalign (GTK_LABEL (GTK_WIDGET (heading)), 0.5f);
-  gtk_label_set_xalign (GTK_LABEL (GTK_WIDGET (description)), 0.5f);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (heading), 12);
   gtk_editable_set_text (GTK_EDITABLE (data->name), name != NULL ? name : "");
   gtk_editable_set_text (GTK_EDITABLE (data->version), "");
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (fields)),
@@ -286,7 +280,6 @@ show_export_metadata (AmlInstancePage *self)
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (fields)),
                              GTK_WIDGET (data->version));
   gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (heading));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (description));
   gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (fields));
   gtk_widget_set_margin_start (GTK_WIDGET (box), 12);
   gtk_widget_set_margin_end (GTK_WIDGET (box), 12);
@@ -610,4 +603,3 @@ on_delete_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL, on_delete_chosen,
                            g_object_ref (self));
 }
-
