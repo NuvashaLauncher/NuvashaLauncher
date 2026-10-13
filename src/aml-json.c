@@ -4,6 +4,8 @@
 
 #include "aml-json.h"
 
+#include <math.h>
+
 GQuark
 aml_json_error_quark (void)
 {
@@ -59,10 +61,21 @@ aml_json_int (JsonNode *node, const char *name, gint64 fallback)
     return fallback;
 
   type = json_node_get_value_type (member);
-  if (type != G_TYPE_INT64 && type != G_TYPE_DOUBLE)
-    return fallback;
+  if (type == G_TYPE_INT64)
+    return json_node_get_int (member);
 
-  return (gint64) json_node_get_int (member);
+  if (type == G_TYPE_DOUBLE)
+    {
+      gdouble number = json_node_get_double (member);
+
+      if (!isfinite (number) || number < -9223372036854775808.0 ||
+          number >= 9223372036854775808.0)
+        return fallback;
+
+      return (gint64) number;
+    }
+
+  return fallback;
 }
 
 GPtrArray *
