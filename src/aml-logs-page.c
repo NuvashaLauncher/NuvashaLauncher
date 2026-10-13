@@ -49,10 +49,12 @@ display_line (const char *line)
   const char *body = NULL;
   const char *tag_start = NULL;
   const char *tag_end = NULL;
-  g_autofree char *formatted = g_strdup (line);
+  g_autofree char *formatted = NULL;
 
   if (line == NULL)
     return NULL;
+
+  formatted = g_strdup (line);
 
   if (strlen (line) >= 10 && line[2] == ':' && line[5] == ':' &&
       line[8] == ' ' && line[9] == '[')
@@ -65,9 +67,15 @@ display_line (const char *line)
           body = tag_end + 2;
 
           if (g_str_has_prefix (tag_start, "[stdout]"))
-            formatted = g_strdup_printf ("%.8s %s", line, body);
+            {
+              g_free (g_steal_pointer (&formatted));
+              formatted = g_strdup_printf ("%.8s %s", line, body);
+            }
           else if (g_str_has_prefix (tag_start, "[stderr]"))
-            formatted = g_strdup_printf ("%.8s [error] %s", line, body);
+            {
+              g_free (g_steal_pointer (&formatted));
+              formatted = g_strdup_printf ("%.8s [error] %s", line, body);
+            }
         }
     }
 

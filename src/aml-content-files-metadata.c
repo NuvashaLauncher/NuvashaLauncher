@@ -60,16 +60,19 @@ loose_json_dependencies (const guint8 *data, gsize length,
 
   if (start == NULL || dependencies == NULL)
     return;
-  start = strchr (start, '{');
+  start = (const char *) memchr (
+    start, '{', length - (gsize) (start - (const char *) data));
   if (start == NULL)
     return;
-  end = strchr (start, '}');
+  end = (const char *) memchr (
+    start, '}', length - (gsize) (start - (const char *) data));
   if (end == NULL)
     end = (const char *) data + length;
   for (const char *cursor = start; cursor < end; cursor++)
     if (*cursor == '"')
       {
-        const char *close = strchr (cursor + 1, '"');
+        const char *close = (const char *) memchr (
+          cursor + 1, '"', end - (cursor + 1));
         const char *colon = close != NULL ? close + 1 : NULL;
         if (close == NULL || close >= end)
           break;

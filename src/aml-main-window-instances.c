@@ -132,8 +132,8 @@ open_instance_dialog (AmlMainWindow *self, AmlInstance *instance)
   /* The connection goes with the dialog: a page that goes away first
      leaves nothing to call back into. */
   {
-    gulong handler = g_signal_connect (instance, "notify::name",
-                                       G_CALLBACK (on_instance_renamed), self);
+     gulong handler = g_signal_connect_object (
+       instance, "notify::name", G_CALLBACK (on_instance_renamed), self, 0);
     g_object_set_data (G_OBJECT (dialog), "aml-rename-handler",
                        GSIZE_TO_POINTER ((gsize) handler));
   }

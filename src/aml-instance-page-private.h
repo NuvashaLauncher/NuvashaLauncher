@@ -50,6 +50,7 @@ struct _AmlInstancePage
   /* The manifest and version-document reads the Java warning is built
      from. One at a time: a new version picked stops the last read. */
   AmlTaskScope *versions_operation;
+  guint versions_generation;
   AmlDownload *export_download;
   AmlTaskScope *export_operation;
   char *export_name;

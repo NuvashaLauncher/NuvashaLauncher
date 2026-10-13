@@ -17,6 +17,7 @@
 #include <archive.h>
 #include <archive_entry.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <glib/gstdio.h>
 #include <json-glib/json-glib.h>
 #include <stdio.h>
@@ -103,17 +104,22 @@ export_file (ExportRun *run, struct archive *archive, const char *source,
   char buffer[64 * 1024];
   size_t length;
 
-  if (g_stat (source, &stat_buf) != 0 || !S_ISREG (stat_buf.st_mode))
+  int fd = open (source, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+
+  if (fd < 0 || fstat (fd, &stat_buf) != 0 || !S_ISREG (stat_buf.st_mode))
     {
+      if (fd >= 0)
+        close (fd);
       g_set_error (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
                    "cannot read instance file \"%s\": %s", source,
                    g_strerror (errno));
       return FALSE;
     }
 
-  input = g_fopen (source, "rb");
+  input = fdopen (fd, "rb");
   if (input == NULL)
     {
+      close (fd);
       g_set_error (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_IO,
                    "cannot open instance file \"%s\": %s", source,
                    g_strerror (errno));

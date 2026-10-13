@@ -299,16 +299,19 @@ aml_task_scope_release_when_done (AmlTaskScope *scope, GCancellable *cancellable
 typedef enum
 {
   DEFERRED_POINTER,
-  DEFERRED_ERROR
+  DEFERRED_ERROR,
+  DEFERRED_BOOLEAN
 } DeferredKind;
 
 typedef struct
 {
   AmlTaskScope *scope;
+  GTask *task;
   DeferredKind kind;
   gpointer value;
   GDestroyNotify value_free;
   GError *error;
+  gboolean result;
 } DeferredCompletion;
 
 static void
@@ -327,6 +330,8 @@ deferred_completion_free (gpointer user_data)
     }
 
   g_clear_error (&deferred->error);
+  g_clear_object (&deferred->task);
+  aml_task_scope_unref (deferred->scope);
   g_free (deferred);
 }
 
@@ -359,6 +364,9 @@ deferred_completion_return (gpointer user_data)
       aml_task_scope_return_error (deferred->scope,
                                    g_steal_pointer (&deferred->error));
       break;
+    case DEFERRED_BOOLEAN:
+      aml_task_scope_return_boolean (deferred->scope, deferred->result);
+      break;
     }
 
   return G_SOURCE_REMOVE;
@@ -369,7 +377,8 @@ defer_completion (AmlTaskScope *scope, DeferredCompletion *deferred)
 {
   guint source_id;
 
-  deferred->scope = scope;
+  deferred->scope = aml_task_scope_ref (scope);
+  deferred->task = g_object_ref (scope->task);
 
   /* Tracked apart from the scope's own sources: cancelling must not take
      these away, only the end of the scope does. */
@@ -402,6 +411,19 @@ aml_task_scope_return_error_deferred (AmlTaskScope *scope, GError *error)
 
   deferred->kind = DEFERRED_ERROR;
   deferred->error = error;
+  defer_completion (scope, deferred);
+}
+
+void
+aml_task_scope_return_boolean_deferred (AmlTaskScope *scope, gboolean result)
+{
+  DeferredCompletion *deferred;
+
+  g_return_if_fail (scope != NULL);
+
+  deferred = g_new0 (DeferredCompletion, 1);
+  deferred->kind = DEFERRED_BOOLEAN;
+  deferred->result = result;
   defer_completion (scope, deferred);
 }
 
