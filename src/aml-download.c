@@ -63,11 +63,6 @@
  * responses before they can monopolize memory or freeze the UI. */
 #define MAX_JSON_RESPONSE_SIZE (64ULL * 1024ULL * 1024ULL)
 
-/* Name template of the temporary file. It is created in the directory
- * of the destination, so the final rename never crosses a file
- * system. */
-#define TEMP_TEMPLATE ".aml-XXXXXX"
-
 GQuark
 aml_download_error_quark (void)
 {
