@@ -1446,6 +1446,7 @@ test_resolve_modern (void)
 
   /* And the answer says so. */
   g_assert_cmpstr (call.resolved->version_id, ==, "test-version");
+  g_assert_cmpstr (call.resolved->version_type, ==, "release");
   g_assert_cmpstr (call.resolved->main_class, ==,
                    "net.minecraft.client.main.Main");
   g_assert_cmpstr (call.resolved->client_jar, ==, client_jar);

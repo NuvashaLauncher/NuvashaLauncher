@@ -155,9 +155,6 @@ msgstr "이 게임에는 Java %d 이상이 필요하지만 선택된 Java는 %d�
 msgid "Add Java Runtime"
 msgstr "Java 런타임 추가"
 
-msgid "No detected Java satisfies the requirement of Java %d+"
-msgstr "감지된 Java 중 Java %d+ 요구 사항을 충족하는 것이 없습니다"
-
 msgid ""
 "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
 "not jre-openjdk-headless"
@@ -231,9 +228,6 @@ msgstr "스냅샷 표시"
 
 msgid "Show unstable Mod Loader versions"
 msgstr "불안정한 모드 로더 버전 표시"
-
-msgid "Automatic (closest compatible)"
-msgstr "자동 (가장 가까운 호환 버전)"
 
 msgid "Language"
 msgstr "언어"

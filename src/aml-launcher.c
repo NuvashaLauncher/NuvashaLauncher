@@ -218,6 +218,9 @@ aml_launcher_finalize (GObject *object)
   g_clear_object (&self->accounts);
   g_clear_pointer (&self->lines, g_ptr_array_unref);
   g_free (self->detail);
+  g_free (self->log_access_token);
+  g_free (self->log_session);
+  g_free (self->log_uuid);
   g_free (self->version);
   g_free (self->game_directory);
   g_free (self->preparation.java_executable);

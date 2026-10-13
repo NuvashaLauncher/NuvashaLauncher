@@ -76,6 +76,7 @@ resolved_new (const char *version_id)
   AmlResolvedVersion *resolved = g_new0 (AmlResolvedVersion, 1);
 
   resolved->version_id = g_strdup (version_id);
+  resolved->version_type = g_strdup ("release");
   resolved->client_jar = g_strdup ("/home/u/.local/share/AML/versions/1.20.1/"
                                    "1.20.1.jar");
   resolved->classpath = g_strdup ("/home/u/.local/share/AML/libraries/lwjgl.jar:"
@@ -320,7 +321,7 @@ test_build_arguments_modern (void)
   g_assert_cmpstr (at (argv, 17), ==, "12");
   g_assert_cmpstr (at (argv, 19), ==, account->uuid);
   g_assert_cmpstr (at (argv, 21), ==, AML_LAUNCH_OFFLINE_USER_TYPE);
-  g_assert_cmpstr (at (argv, 23), ==, "1.20.1");
+  g_assert_cmpstr (at (argv, 23), ==, "release");
 }
 
 /* ---------------------------------------------------------- *
@@ -377,6 +378,27 @@ test_build_arguments_without_jvm_args (void)
   /* Nothing that looks like a heap size was invented for it. */
   for (guint i = 0; i < with_empty->len; i++)
     g_assert_null (strstr (at (with_empty, i), "-Xmx"));
+}
+
+static void
+test_version_type_fallback (void)
+{
+  g_autoptr (AmlResolvedVersion) resolved = resolved_new ("1.20.1");
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GPtrArray) argv = NULL;
+  g_autoptr (AmlAccount) account = aml_account_new_offline ("Flia", NULL);
+  AmlLaunchSession session = aml_launch_session_for (account);
+
+  g_clear_pointer (&resolved->version_type, g_free);
+  resolved->jvm_arguments = strings (NULL);
+  resolved->game_arguments = strings ("${version_type}", NULL);
+
+  argv = aml_launch_build_arguments (resolved, &session, "/usr/bin/java",
+                                     "/home/u/games/one", NULL, &error);
+
+  g_assert_no_error (error);
+  g_assert_nonnull (argv);
+  g_assert_cmpstr (at (argv, argv->len - 1), ==, "1.20.1");
 }
 
 /* ---------------------------------------------------------- *
@@ -443,6 +465,46 @@ test_build_arguments_legacy (void)
 }
 
 static void
+test_build_arguments_legacy_session (void)
+{
+  g_autoptr (AmlResolvedVersion) resolved = resolved_new ("1.6.4");
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GPtrArray) argv = NULL;
+  g_autoptr (AmlAccount) account = g_new0 (AmlAccount, 1);
+  AmlLaunchSession session;
+  guint main_class = 0;
+
+  account->type = AML_ACCOUNT_MICROSOFT;
+  account->name = g_strdup ("Notch");
+  account->uuid = g_strdup ("069a79f4-44e9-4726-a5be-fca90e38aaf5");
+  account->access_token = g_strdup ("the-access-token");
+  session = aml_launch_session_for (account);
+
+  resolved->jvm_arguments = strings (NULL);
+  resolved->game_arguments = strings ("--username", "${auth_player_name}",
+                                      "--session", "${auth_session}", NULL);
+
+  argv = aml_launch_build_arguments (resolved, &session, "/usr/bin/java",
+                                     "/home/u/games/one", NULL, &error);
+
+  g_assert_no_error (error);
+  g_assert_nonnull (argv);
+
+  for (guint i = 0; i < argv->len; i++)
+    if (g_strcmp0 (at (argv, i), "net.minecraft.client.main.Main") == 0)
+      main_class = i;
+
+  g_assert_cmpstr (at (argv, main_class + 4), ==,
+                   "token:the-access-token:069a79f4-44e9-4726-a5be-fca90e38aaf5");
+
+  {
+    g_autofree char *shown = aml_launch_redact (argv);
+    g_assert_null (strstr (shown, "the-access-token"));
+    g_assert_nonnull (strstr (shown, "--session '***'"));
+  }
+}
+
+static void
 test_build_arguments_failures (void)
 {
   g_autoptr (AmlResolvedVersion) resolved = resolved_new ("1.20.1");
@@ -484,7 +546,8 @@ test_redact (void)
 {
   g_autoptr (GPtrArray) argv = strings (
     "/usr/bin/java", "-Xmx2G", "--accessToken", "s3cr3t-token", "--username",
-    "Player", "--password=hunter2", NULL);
+    "Player", "--password=hunter2", "--session=legacy-secret",
+    "--token", "token-secret", NULL);
   g_autofree char *shown = aml_launch_redact (argv);
   g_autoptr (GPtrArray) plain = strings ("/usr/bin/java", "-cp",
                                          "/games/one", "--demo", NULL);
@@ -499,8 +562,12 @@ test_redact (void)
      a glob. */
   g_assert_null (strstr (shown, "s3cr3t-token"));
   g_assert_null (strstr (shown, "hunter2"));
+  g_assert_null (strstr (shown, "legacy-secret"));
+  g_assert_null (strstr (shown, "token-secret"));
   g_assert_nonnull (strstr (shown, "--accessToken '***'"));
   g_assert_nonnull (strstr (shown, "--password='***'"));
+  g_assert_nonnull (strstr (shown, "--session='***'"));
+  g_assert_nonnull (strstr (shown, "--token '***'"));
 
   /* Nothing else is touched, so the log still says what ran, and an
      argument with a space in it is quoted the way a shell needs. */
@@ -529,8 +596,14 @@ main (void)
   test_build_arguments_without_jvm_args ();
   g_print ("ok - no jvm arguments adds nothing to the command line\n");
 
+  test_version_type_fallback ();
+  g_print ("ok - a missing version type falls back to the version id\n");
+
   test_build_arguments_legacy ();
   g_print ("ok - a legacy document gets the library path and classpath\n");
+
+  test_build_arguments_legacy_session ();
+  g_print ("ok - legacy sessions carry the token and stay redacted\n");
 
   test_build_arguments_failures ();
   g_print ("ok - a document without a main class or bad jvm args fails\n");

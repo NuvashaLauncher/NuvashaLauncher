@@ -17,15 +17,35 @@
  * The pipeline
  * ---------------------------------------------------------- */
 
-/* What to say when nothing usable for Java was found. The reason is
- * specific: which Java was asked for, which is needed, or that there is
- * none at all. */
+/* What to say when nothing usable for Java was found. */
 static char *
-no_java_reason (AmlLauncher *self, const char *instance_java)
+no_java_reason (void)
 {
-  (void) self;
-  (void) instance_java;
   return g_strdup (_("No compatible Java runtime was found."));
+}
+
+static void
+set_log_private_values (AmlLauncher *self, const AmlLaunchSession *session)
+{
+  g_clear_pointer (&self->log_access_token, g_free);
+  g_clear_pointer (&self->log_session, g_free);
+  g_clear_pointer (&self->log_uuid, g_free);
+
+  if (session == NULL)
+    return;
+
+  if (session->access_token != NULL &&
+      g_strcmp0 (session->access_token, AML_LAUNCH_OFFLINE_TOKEN) != 0)
+    {
+      self->log_access_token = g_strdup (session->access_token);
+      self->log_session = g_strdup_printf ("token:%s:%s",
+                                           session->access_token,
+                                           session->uuid != NULL
+                                             ? session->uuid : "");
+    }
+
+  if (session->uuid != NULL)
+    self->log_uuid = g_strdup (session->uuid);
 }
 
 /* The Java a launch runs with: the one the instance asks for, or the
@@ -45,7 +65,7 @@ choose_java (AmlLauncher *self, GPtrArray *javas, int required,
 
   if (java == NULL)
     {
-      launcher_failed (self, no_java_reason (self, *instance_java));
+      launcher_failed (self, no_java_reason ());
       return NULL;
     }
 
@@ -104,6 +124,8 @@ run_the_game (AmlLauncher *self)
       session.user_type = AML_LAUNCH_OFFLINE_USER_TYPE;
       session.access_token = AML_LAUNCH_OFFLINE_TOKEN;
     }
+
+  set_log_private_values (self, &session);
 
   g_object_get (self->instance, "jvm-args", &jvm_args, NULL);
 

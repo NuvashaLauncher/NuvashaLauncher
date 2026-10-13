@@ -154,9 +154,6 @@ msgstr "Ta gra wymaga Java %d lub nowszej, wybrano Java %d"
 msgid "Add Java Runtime"
 msgstr "Dodaj środowisko uruchomieniowe Java"
 
-msgid "No detected Java satisfies the requirement of Java %d+"
-msgstr "Żadna wykryta Java nie spełnia wymagania Java %d+"
-
 msgid ""
 "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
 "not jre-openjdk-headless"
@@ -230,9 +227,6 @@ msgstr "Pokaż migawki"
 
 msgid "Show unstable Mod Loader versions"
 msgstr "Pokazuj niestabilne wersje ładowacza modów"
-
-msgid "Automatic (closest compatible)"
-msgstr "Automatycznie (najbliższa zgodna)"
 
 msgid "Language"
 msgstr "Język"
