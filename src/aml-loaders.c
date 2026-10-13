@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 /* Copyright (C) 2026 Flia
  * SPDX-License-Identifier: GPL-3.0-only
  */
@@ -14,10 +16,12 @@
 #include <archive.h>
 #include <archive_entry.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <glib/gstdio.h>
 #include <json-glib/json-glib.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #define MAX_INSTALLER_ENTRY_SIZE (128ULL * 1024ULL * 1024ULL)
@@ -241,8 +245,21 @@ queue_artifact (InstallRequest *request, const char *coordinate,
 
   path = g_build_filename (request->libraries_dir, relative, NULL);
 
-  if (g_file_test (path, G_FILE_TEST_IS_REGULAR))
-    return;
+  {
+    GStatBuf info;
+
+    /* This pathname becomes a Java classpath entry. Do not treat a planted
+     * symlink as an already fetched artifact. */
+    if (g_lstat (path, &info) == 0 && S_ISREG (info.st_mode))
+      {
+        int fd = open (path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+        if (fd >= 0)
+          {
+            close (fd);
+            return;
+          }
+      }
+  }
 
   url = g_strconcat (maven, "/", relative, NULL);
   queue_file (request, FILE_FETCH, url, NULL, path, NULL, optional);
