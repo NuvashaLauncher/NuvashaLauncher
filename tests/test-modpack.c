@@ -1115,6 +1115,10 @@ test_dialog_imports_and_installs (void)
 
   dialog = aml_download_modpack_dialog_new_for_file (manager, zip_path);
   g_assert_nonnull (dialog);
+  /* The constructor returns a floating dialog, as GTK widget constructors
+   * do. Keep the reference owned by this test rather than relying on an
+   * unrelated in-flight browser request to keep the dialog alive. */
+  g_object_ref_sink (dialog);
 
   /* The import runs on the main loop: the pack is read, the install goes
      on, and both release the operations they started. */
