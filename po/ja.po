@@ -222,8 +222,8 @@ msgstr "ログを検索"
 msgid "Versions"
 msgstr "バージョン"
 
-msgid "Show Snapshots"
-msgstr "スナップショットを表示"
+msgid "Show unstable Minecraft versions"
+msgstr "不安定な Minecraft バージョンを表示"
 
 msgid "Show unstable Mod Loader versions"
 msgstr "不安定なMod ローダーのバージョンを表示"

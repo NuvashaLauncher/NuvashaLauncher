@@ -223,8 +223,8 @@ msgstr "Günlükte ara"
 msgid "Versions"
 msgstr "Sürümler"
 
-msgid "Show Snapshots"
-msgstr "Anlık Görüntüleri Göster"
+msgid "Show unstable Minecraft versions"
+msgstr "Kararsız Minecraft sürümlerini göster"
 
 msgid "Show unstable Mod Loader versions"
 msgstr "Kararsız mod yükleyici sürümlerini göster"

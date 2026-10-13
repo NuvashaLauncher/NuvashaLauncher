@@ -223,8 +223,8 @@ msgstr "Поиск в журнале"
 msgid "Versions"
 msgstr "Версии"
 
-msgid "Show Snapshots"
-msgstr "Показать снимки"
+msgid "Show unstable Minecraft versions"
+msgstr "Показывать нестабильные версии Minecraft"
 
 msgid "Show unstable Mod Loader versions"
 msgstr "Показывать нестабильные версии мод-загрузчиков"

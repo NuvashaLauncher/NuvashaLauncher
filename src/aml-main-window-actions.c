@@ -394,7 +394,7 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
                                GTK_WIDGET (export_metadata_row));
 
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (row)),
-                                 _("Show Snapshots"));
+                                  _("Show unstable Minecraft versions"));
   adw_switch_row_set_active (ADW_SWITCH_ROW (GTK_WIDGET (row)),
                              aml_settings_get_show_snapshots (self->model->settings));
 

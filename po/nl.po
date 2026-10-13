@@ -223,8 +223,8 @@ msgstr "Zoek in het logboek"
 msgid "Versions"
 msgstr "Versies"
 
-msgid "Show Snapshots"
-msgstr "Snapshots tonen"
+msgid "Show unstable Minecraft versions"
+msgstr "Onstabiele Minecraft-versies tonen"
 
 msgid "Show unstable Mod Loader versions"
 msgstr "Instabiele modladerversies tonen"

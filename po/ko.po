@@ -223,8 +223,8 @@ msgstr "로그 검색"
 msgid "Versions"
 msgstr "버전"
 
-msgid "Show Snapshots"
-msgstr "스냅샷 표시"
+msgid "Show unstable Minecraft versions"
+msgstr "불안정한 Minecraft 버전 표시"
 
 msgid "Show unstable Mod Loader versions"
 msgstr "불안정한 모드 로더 버전 표시"
