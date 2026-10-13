@@ -41,10 +41,6 @@ static const char app_css[] =
   "  background-color: transparent;"
   "  color: inherit;"
   "}"
-   ".flush-top list.boxed-list > row:first-child {"
-   "  border-top-left-radius: 0;"
-   "  border-top-right-radius: 0;"
-   "}"
    /* The small number on the corner of a download icon: how many files
       are picked for one install. It is round, small and pulled back over
       the corner of the icon beside it, and its colours are the text
