@@ -60,7 +60,7 @@ main (int argc, char **argv)
   if (!gtk_init_check ())
     {
       g_print ("skipped - no display, cannot build the widgets\n");
-      return EXIT_SUCCESS;
+      return 77;
     }
 
   g_autofree char *tmp = g_dir_make_tmp ("aml-openfolder-XXXXXX", &error);

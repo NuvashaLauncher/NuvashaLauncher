@@ -416,7 +416,7 @@ main (int argc, char **argv)
   if (!gtk_init_check ())
     {
       g_print ("skipped - no display, cannot build the widgets\n");
-      return EXIT_SUCCESS;
+      return 77;
     }
 
   /* The markup audit counts through the structured log writer. */

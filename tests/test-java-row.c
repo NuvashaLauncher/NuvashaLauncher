@@ -84,7 +84,7 @@ main (void)
   if (!gtk_init_check ())
     {
       g_print ("skipped - no display, cannot build the row\n");
-      return EXIT_SUCCESS;
+      return 77;
     }
 
   row = aml_java_row_new ();
