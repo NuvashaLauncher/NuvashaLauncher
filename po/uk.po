@@ -602,3 +602,9 @@ msgstr "Це неможливо встановити"
 
 msgid "Pick a Minecraft version first"
 msgstr "Спочатку виберіть версію Minecraft"
+
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "Видалення залежності видаляє мод, який від неї залежав"
+
+msgid "A dependent mod cannot be deleted"
+msgstr "Не вдалося видалити залежний мод"

@@ -603,3 +603,9 @@ msgstr "Bu yüklenemiyor"
 
 msgid "Pick a Minecraft version first"
 msgstr "Önce bir Minecraft sürümü seçin"
+
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "Bir bağımlılığı silmek, ona bağlı olan modu da siler"
+
+msgid "A dependent mod cannot be deleted"
+msgstr "Bağımlı mod silinemiyor"

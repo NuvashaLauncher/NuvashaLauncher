@@ -112,6 +112,12 @@ gboolean aml_settings_set_export_metadata (AmlSettings *self,
                                            gboolean value,
                                            GError **error);
 
+/* FALSE by default: deleting a dependency does not delete its dependents. */
+gboolean aml_settings_get_delete_dependents (AmlSettings *self);
+gboolean aml_settings_set_delete_dependents (AmlSettings *self,
+                                             gboolean value,
+                                             GError **error);
+
 G_END_DECLS
 
 #endif /* AML_SETTINGS_H */

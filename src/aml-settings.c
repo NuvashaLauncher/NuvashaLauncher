@@ -28,6 +28,7 @@
 #define CACHE_MODRINTH_API_RESPONSES_KEY "cache-modrinth-api-responses"
 #define CACHE_EXPIRATION_KEY "cache-expiration"
 #define EXPORT_METADATA_KEY "export-metadata"
+#define DELETE_DEPENDENTS_KEY "delete-dependents"
 
 /* A stored limit below this is not a number a log can be trimmed to. */
 #define LOG_LINE_LIMIT_FLOOR 1
@@ -44,6 +45,7 @@ struct _AmlSettings
   gboolean cache_modrinth_api_responses;
   AmlSettingsCacheExpiration cache_expiration;
   gboolean export_metadata;
+  gboolean delete_dependents;
   char *filename;
 };
 
@@ -202,6 +204,11 @@ load (AmlSettings *self)
   if (node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
       json_node_get_value_type (node) == G_TYPE_BOOLEAN)
     self->export_metadata = json_node_get_boolean (node);
+
+  node = json_object_get_member (object, DELETE_DEPENDENTS_KEY);
+  if (node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
+      json_node_get_value_type (node) == G_TYPE_BOOLEAN)
+    self->delete_dependents = json_node_get_boolean (node);
 }
 
 static gboolean
@@ -251,6 +258,8 @@ save (AmlSettings *self, GError **error)
 
   json_builder_set_member_name (builder, EXPORT_METADATA_KEY);
   json_builder_add_boolean_value (builder, self->export_metadata);
+  json_builder_set_member_name (builder, DELETE_DEPENDENTS_KEY);
+  json_builder_add_boolean_value (builder, self->delete_dependents);
 
   json_builder_end_object (builder);
 
@@ -312,6 +321,31 @@ aml_settings_set_export_metadata (AmlSettings *self, gboolean value,
     return TRUE;
 
   self->export_metadata = previous;
+  return FALSE;
+}
+
+gboolean
+aml_settings_get_delete_dependents (AmlSettings *self)
+{
+  g_return_val_if_fail (AML_IS_SETTINGS (self), FALSE);
+  return self->delete_dependents;
+}
+
+gboolean
+aml_settings_set_delete_dependents (AmlSettings *self, gboolean value,
+                                    GError **error)
+{
+  gboolean previous;
+
+  g_return_val_if_fail (AML_IS_SETTINGS (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  previous = self->delete_dependents;
+  self->delete_dependents = value;
+  if (save (self, error))
+    return TRUE;
+
+  self->delete_dependents = previous;
   return FALSE;
 }
 
