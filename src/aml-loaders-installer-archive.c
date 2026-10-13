@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 /* Copyright (C) 2026 Flia
  * SPDX-License-Identifier: GPL-3.0-only
  */
@@ -9,6 +11,8 @@
 #include "aml-fs.h"
 
 #include <archive.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <archive_entry.h>
 #include <errno.h>
 #include <glib/gstdio.h>
@@ -108,8 +112,10 @@ aml_loader_read_zip_entry (const char *path, const char *entry, GError **error)
 
   archive = archive_read_new ();
 
-  if (archive_read_support_format_zip (archive) != ARCHIVE_OK ||
-      archive_read_open_filename (archive, path, 65536) != ARCHIVE_OK)
+  int fd = open (path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+
+  if (fd < 0 || archive_read_support_format_zip (archive) != ARCHIVE_OK ||
+      archive_read_open_fd (archive, fd, 65536) != ARCHIVE_OK)
     {
       g_set_error (error, AML_LOADERS_ERROR, AML_LOADERS_ERROR_INSTALLER,
                    "the installer at \"%s\" cannot be read: %s", path,
@@ -260,8 +266,10 @@ aml_loader_write_jar_manifest_attribute (const char *path, const char *name,
 
   in = archive_read_new ();
 
-  if (archive_read_support_format_zip (in) != ARCHIVE_OK ||
-      archive_read_open_filename (in, path, 65536) != ARCHIVE_OK)
+  int fd = open (path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+
+  if (fd < 0 || archive_read_support_format_zip (in) != ARCHIVE_OK ||
+      archive_read_open_fd (in, fd, 65536) != ARCHIVE_OK)
     {
       g_set_error (error, AML_LOADERS_ERROR, AML_LOADERS_ERROR_INSTALLER,
                    "the patched client jar at \"%s\" cannot be read: %s", path,
@@ -316,8 +324,29 @@ aml_loader_write_jar_manifest_attribute (const char *path, const char *name,
       if (g_str_equal (archive_entry_pathname (header), "META-INF/MANIFEST.MF"))
         {
           g_autofree char *attribute = NULL;
+          GByteArray *manifest_bytes = g_byte_array_new ();
 
-          bytes = aml_loader_read_zip_entry (path, "META-INF/MANIFEST.MF", NULL);
+          /* Read the entry from the archive handle already being iterated.
+           * Reopening @path here made the manifest come from a different
+           * file if the pathname changed during the rewrite. */
+          for (;;)
+            {
+              int read_status = archive_read_data_block (in, &block, &size,
+                                                          &offset);
+              if (read_status == ARCHIVE_EOF)
+                break;
+              if (read_status != ARCHIVE_OK)
+                {
+                  g_byte_array_unref (manifest_bytes);
+                  manifest_bytes = NULL;
+                  ok = FALSE;
+                  break;
+                }
+              g_byte_array_append (manifest_bytes, block, size);
+            }
+
+          if (manifest_bytes != NULL)
+            bytes = g_byte_array_free_to_bytes (manifest_bytes);
 
           if (bytes != NULL)
             {
@@ -451,4 +480,3 @@ aml_loader_jar_main_class (const char *path, GError **error)
 
   return NULL;
 }
-

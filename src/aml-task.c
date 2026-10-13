@@ -383,9 +383,9 @@ void
 aml_task_scope_return_pointer_deferred (AmlTaskScope *scope, gpointer result,
                                         GDestroyNotify result_free)
 {
-  DeferredCompletion *deferred = g_new0 (DeferredCompletion, 1);
-
   g_return_if_fail (scope != NULL);
+
+  DeferredCompletion *deferred = g_new0 (DeferredCompletion, 1);
 
   deferred->kind = DEFERRED_POINTER;
   deferred->value = result;
@@ -396,9 +396,9 @@ aml_task_scope_return_pointer_deferred (AmlTaskScope *scope, gpointer result,
 void
 aml_task_scope_return_error_deferred (AmlTaskScope *scope, GError *error)
 {
-  DeferredCompletion *deferred = g_new0 (DeferredCompletion, 1);
-
   g_return_if_fail (scope != NULL);
+
+  DeferredCompletion *deferred = g_new0 (DeferredCompletion, 1);
 
   deferred->kind = DEFERRED_ERROR;
   deferred->error = error;

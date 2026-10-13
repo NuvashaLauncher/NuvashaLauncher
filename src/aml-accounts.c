@@ -428,9 +428,9 @@ load (AmlAccounts *self)
   JsonNode *root = NULL;
   JsonNode *node = NULL;
 
-  if (!aml_fs_file_size_within (self->filename,
-                                AML_FS_MAX_SMALL_METADATA_SIZE, NULL) ||
-      !g_file_get_contents (self->filename, &text, NULL, NULL))
+  if (!aml_fs_get_contents_within (self->filename,
+                                   AML_FS_MAX_SMALL_METADATA_SIZE,
+                                   &text, NULL, NULL))
     return;
 
   parser = json_parser_new ();

@@ -56,6 +56,8 @@ typedef enum {
 
 typedef struct _AuthRequest AuthRequest;
 
+#define MAX_AUTH_RESPONSE_SIZE (4ULL * 1024ULL * 1024ULL)
+
 struct _AuthRequest
 {
   GTask *task;
@@ -66,6 +68,8 @@ struct _AuthRequest
 
   gint status;
   char *body;
+  GInputStream *response_stream;
+  GByteArray *response_bytes;
 
   /* What the user is signing in with: either a code to wait on, or a
    * refresh token that trades for the first step again. */
@@ -89,6 +93,8 @@ static void request_free (gpointer data);
 
 static void sent (SoupSession *session, GAsyncResult *result,
                   gpointer user_data);
+static void auth_read_ready (GObject *source, GAsyncResult *result,
+                             gpointer user_data);
 
 static SoupSession *
 auth_session (void)
@@ -230,9 +236,9 @@ send (AuthRequest         *self,
   for (guint i = 0; headers != NULL && headers[i] != NULL; i += 2)
     soup_message_headers_replace (request_headers, headers[i], headers[i + 1]);
 
-  soup_session_send_and_read_async (
-      auth_session (), self->message, G_PRIORITY_DEFAULT,
-      g_task_get_cancellable (self->task), (GAsyncReadyCallback) sent, self);
+  soup_session_send_async (
+       auth_session (), self->message, G_PRIORITY_DEFAULT,
+       g_task_get_cancellable (self->task), (GAsyncReadyCallback) sent, self);
 }
 
 static void
@@ -244,18 +250,10 @@ sent (SoupSession         *session G_GNUC_UNUSED,
      answer the task, and nothing here touches the request after that. */
   AuthRequest *self = user_data;
   g_autoptr (GError) transport_error = NULL;
-  g_autoptr (GBytes) bytes = NULL;
-  gsize length = 0;
-  const char *data = NULL;
 
   self->status = soup_message_get_status (self->message);
-  bytes = soup_session_send_and_read_finish (auth_session (), result,
-                                             &transport_error);
-  g_clear_object (&self->message);
-
-  data = bytes != NULL ? g_bytes_get_data (bytes, &length) : NULL;
-  g_free (self->body);
-  self->body = data != NULL ? g_strndup (data, length) : g_strdup ("");
+  self->response_stream = soup_session_send_finish (auth_session (), result,
+                                                    &transport_error);
 
   /* A request that never came back is not a service that said no. */
   if (transport_error != NULL)
@@ -270,6 +268,65 @@ sent (SoupSession         *session G_GNUC_UNUSED,
                          transport_error->message));
       return;
     }
+
+  self->response_bytes = g_byte_array_new ();
+  if (soup_message_headers_get_content_length (
+        soup_message_get_response_headers (self->message)) >
+      (goffset) MAX_AUTH_RESPONSE_SIZE)
+    {
+      fail (self, g_error_new_literal (AML_AUTH_ERROR, AML_AUTH_ERROR_NETWORK,
+                                       "the sign-in response is too large"));
+      return;
+    }
+  g_input_stream_read_bytes_async (self->response_stream, 64 * 1024,
+                                   G_PRIORITY_DEFAULT,
+                                   g_task_get_cancellable (self->task),
+                                   auth_read_ready, self);
+}
+
+static void
+auth_read_ready (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  AuthRequest *self = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GBytes) chunk =
+    g_input_stream_read_bytes_finish (G_INPUT_STREAM (source), result, &error);
+  gsize size = 0;
+
+  if (chunk == NULL)
+    {
+      fail (self, g_steal_pointer (&error));
+      return;
+    }
+
+  size = g_bytes_get_size (chunk);
+  if (self->response_bytes->len + size > MAX_AUTH_RESPONSE_SIZE)
+    {
+      fail (self, g_error_new_literal (AML_AUTH_ERROR, AML_AUTH_ERROR_NETWORK,
+                                       "the sign-in response is too large"));
+      return;
+    }
+
+  if (size != 0)
+    g_byte_array_append (self->response_bytes, g_bytes_get_data (chunk, NULL),
+                         size);
+  if (size != 0)
+    {
+      g_input_stream_read_bytes_async (self->response_stream, 64 * 1024,
+                                       G_PRIORITY_DEFAULT,
+                                       g_task_get_cancellable (self->task),
+                                       auth_read_ready, self);
+      return;
+    }
+
+  g_free (self->body);
+  self->body = g_strndup ((const char *) self->response_bytes->data,
+                          self->response_bytes->len);
+  g_clear_pointer (&self->response_bytes, g_byte_array_unref);
+  g_clear_object (&self->response_stream);
+  g_clear_object (&self->message);
+  g_clear_object (&self->response_stream);
+  g_clear_pointer (&self->response_bytes, g_byte_array_unref);
 
   /* The step that asked for this request is the only thing a sign-in
      keeps between two of them. */

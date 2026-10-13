@@ -80,6 +80,68 @@ aml_fs_file_size_within (const char *path, goffset maximum, GError **error)
 }
 
 gboolean
+aml_fs_get_contents_within (const char *path, goffset maximum,
+                            char **contents, gsize *length, GError **error)
+{
+  struct stat info;
+  int fd = -1;
+  gsize used = 0;
+  char *data = NULL;
+
+  g_return_val_if_fail (contents != NULL, FALSE);
+  *contents = NULL;
+  if (length != NULL)
+    *length = 0;
+
+  fd = open (path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+  if (fd < 0 || fstat (fd, &info) != 0 || !S_ISREG (info.st_mode) ||
+      info.st_size > maximum)
+    {
+      int saved_errno = errno;
+      if (fd >= 0)
+        close (fd);
+      g_set_error (error, G_FILE_ERROR,
+                   saved_errno != 0 ? g_file_error_from_errno (saved_errno)
+                                    : G_FILE_ERROR_INVAL,
+                   "cannot securely read \"%s\"", path);
+      return FALSE;
+    }
+
+  data = g_malloc ((gsize) maximum + 1);
+  while (used < (gsize) maximum)
+    {
+      ssize_t got = read (fd, data + used, (gsize) maximum - used + 1);
+      if (got == 0)
+        break;
+      if (got < 0 && errno == EINTR)
+        continue;
+      if (got < 0)
+        {
+          g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                       "cannot read \"%s\"", path);
+          close (fd);
+          g_free (data);
+          return FALSE;
+        }
+      used += (gsize) got;
+      if (used > (gsize) maximum)
+        {
+          g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_INVAL,
+                       "file \"%s\" exceeds the permitted size", path);
+          close (fd);
+          g_free (data);
+          return FALSE;
+        }
+    }
+  close (fd);
+  data[used] = '\0';
+  *contents = data;
+  if (length != NULL)
+    *length = used;
+  return TRUE;
+}
+
+gboolean
 aml_fs_unlink (const char *path, GError **error)
 {
   if (g_unlink (path) != 0 && errno != ENOENT)

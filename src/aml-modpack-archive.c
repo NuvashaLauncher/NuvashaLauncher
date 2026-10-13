@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 /* Copyright (C) 2026 Flia
  * SPDX-License-Identifier: GPL-3.0-only
  */
@@ -16,6 +18,8 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <archive.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <archive_entry.h>
 #include <glib/gstdio.h>
 #include <json-glib/json-glib.h>
@@ -700,8 +704,10 @@ aml_modpack_new_from_zip (const char *zip_path, GError **error)
 
   archive = archive_read_new ();
 
-  if (archive_read_support_format_zip (archive) != ARCHIVE_OK ||
-      archive_read_open_filename (archive, zip_path, 65536) != ARCHIVE_OK)
+  int fd = open (zip_path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+
+  if (fd < 0 || archive_read_support_format_zip (archive) != ARCHIVE_OK ||
+      archive_read_open_fd (archive, fd, 65536) != ARCHIVE_OK)
     {
       g_set_error (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_ARCHIVE,
                    "the modpack cannot be read: %s",

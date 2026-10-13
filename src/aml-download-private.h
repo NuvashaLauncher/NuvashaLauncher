@@ -16,6 +16,7 @@ struct _AmlDownloadService {
   GQueue interactive_waiting;
   GQueue bulk_waiting;
   gboolean prefer_interactive;
+  gboolean destroy_requested;
   AmlSettings *cache_settings;
 };
 
@@ -55,6 +56,7 @@ typedef struct _DownloadRequest
   GInputStream *source;  /* response body, closed when it ends */
   GOutputStream *sink;   /* the temporary file */
   GBytes *chunk;         /* block being written */
+  GByteArray *json_body; /* bounded JSON response being streamed */
   GChecksum *checksum;   /* hash of the received bytes */
   char *tmp_path;
   char *tmp_name;

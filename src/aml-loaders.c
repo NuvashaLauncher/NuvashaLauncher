@@ -606,10 +606,24 @@ resolve_variable (InstallRequest *request, const char *name, GError **error)
   /* A file inside the installer jar, written as a path in it. */
   if (value[0] == '/')
     {
+      const char *entry = value;
       g_autofree char *path = NULL;
 
-      queue_unpacked (request, value);
-      path = g_build_filename (request->root, value + 1, NULL);
+      while (*entry == '/')
+        entry++;
+
+      if (*entry == '\0' || strstr (entry, "..") != NULL ||
+          !aml_resolve_entry_name_is_safe (entry))
+        {
+          g_set_error (error, AML_LOADERS_ERROR,
+                       AML_LOADERS_ERROR_INSTALLER,
+                       "the installer names an unsafe unpacked path \"%s\"",
+                       value);
+          return FALSE;
+        }
+
+      queue_unpacked (request, entry);
+      path = g_build_filename (request->root, entry, NULL);
 
       g_hash_table_insert (request->variables, g_strdup (name),
                            g_steal_pointer (&path));

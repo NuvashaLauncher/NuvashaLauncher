@@ -116,10 +116,27 @@ aml_download_service_free (AmlDownloadService *owned_service)
   aml_download_service_cancel_queued (owned_service);
   if (owned_service->interactive_running != 0 ||
       owned_service->bulk_running != 0)
-    return;
+    {
+      /* Requests borrow the scheduler.  Defer destruction until the last
+       * request releases its slot instead of leaking the service forever. */
+      owned_service->destroy_requested = TRUE;
+      return;
+    }
   g_clear_object (&owned_service->session);
   g_clear_object (&owned_service->cache_settings);
   g_free (owned_service);
+}
+
+static void
+service_destroy_if_requested (AmlDownloadService *service)
+{
+  if (!service->destroy_requested ||
+      service->interactive_running != 0 || service->bulk_running != 0)
+    return;
+
+  g_clear_object (&service->session);
+  g_clear_object (&service->cache_settings);
+  g_free (service);
 }
 
 static SoupSession *
@@ -157,8 +174,9 @@ static gboolean retry_cancelled (gpointer user_data);
 static gboolean queued_cancelled (gpointer user_data);
 static void send_ready (GObject *source, GAsyncResult *result,
                         gpointer user_data);
-static void json_ready (GObject *source, GAsyncResult *result,
-                        gpointer user_data);
+static void json_stream_ready (GObject *source, GAsyncResult *result,
+                               gpointer user_data);
+static void json_process_body (DownloadRequest *request, GBytes *body);
 static void cache_ready (GObject *source, GAsyncResult *result,
                               gpointer user_data);
 static void json_cache_start (DownloadRequest *request);
@@ -169,7 +187,10 @@ void aml_download_request_succeed_json (DownloadRequest *request,
 static void global_cache_hash_ready (GObject *source, GAsyncResult *result,
                                      gpointer user_data);
 static void global_cache_copy_ready (GObject *source, GAsyncResult *result,
-                                     gpointer user_data);
+                                      gpointer user_data);
+static void global_cache_copy_hash_ready (GObject *source,
+                                           GAsyncResult *result,
+                                           gpointer user_data);
 static void global_cache_directory_ready (GObject *source,
                                           GAsyncResult *result,
                                           gpointer user_data);
@@ -346,6 +367,8 @@ release_slot (DownloadRequest *request)
                aml_download_service_queued_bulk (service));
       next->begin (next);
     }
+
+  service_destroy_if_requested (service);
 }
 
 void
@@ -471,6 +494,7 @@ request_free (DownloadRequest *request)
 
   close_sink (request);
   g_clear_pointer (&request->chunk, g_bytes_unref);
+  g_clear_pointer (&request->json_body, g_byte_array_unref);
   g_clear_pointer (&request->checksum, g_checksum_free);
   g_clear_pointer (&request->tmp_path, g_free);
   g_clear_pointer (&request->tmp_name, g_free);
@@ -629,7 +653,7 @@ global_cache_files_ready (GObject *source, GAsyncResult *result,
 
 static void
 global_cache_copy_ready (GObject *source, GAsyncResult *result,
-                         gpointer user_data)
+                          gpointer user_data)
 {
   DownloadRequest *request = user_data;
   g_autoptr (GError) error = NULL;
@@ -645,7 +669,37 @@ global_cache_copy_ready (GObject *source, GAsyncResult *result,
       return;
     }
 
-  request_succeed (request);
+  /* The source was hashed before the asynchronous copy.  Hash the bytes
+   * actually adopted at the destination as well, so a replacement during
+   * the copy cannot satisfy the request. */
+  {
+    g_autoptr (GFile) destination = g_file_new_for_path (request->dest_path);
+    aml_task_scope_release_when_done (
+      aml_download_hash_file_async (destination, request->hash_type,
+                                    global_cache_copy_hash_ready, request),
+      g_task_get_cancellable (request->task));
+  }
+}
+
+static void
+global_cache_copy_hash_ready (GObject *source G_GNUC_UNUSED,
+                              GAsyncResult *result, gpointer user_data)
+{
+  DownloadRequest *request = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autofree char *digest = aml_download_file_hash_finish (result, &error);
+
+  if (request_was_cancelled (request, error))
+    {
+      aml_download_request_fail (request, aml_download_cancelled_error ());
+      return;
+    }
+
+  if (digest != NULL &&
+      g_ascii_strcasecmp (digest, request->expected_hash) == 0)
+    request_succeed (request);
+  else
+    start_attempt (request);
 }
 
 static void
@@ -938,7 +992,14 @@ read_chunk_ready (GObject *source, GAsyncResult *result, gpointer user_data)
   if (g_bytes_get_size (bytes) == 0)
     {
       /* End of the response body. */
-      end_attempt (request, NULL);
+      if (request->json)
+        {
+          g_autoptr (GBytes) body =
+            g_byte_array_free_to_bytes (g_steal_pointer (&request->json_body));
+          json_process_body (request, body);
+        }
+      else
+        end_attempt (request, NULL);
       return;
     }
 
@@ -947,6 +1008,22 @@ read_chunk_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 
   request->chunk = g_steal_pointer (&bytes);
   data = g_bytes_get_data (request->chunk, &size);
+
+  if (request->json)
+    {
+      if (request->json_body->len + size > MAX_JSON_RESPONSE_SIZE)
+        {
+          end_attempt (request,
+                       g_error_new_literal (AML_DOWNLOAD_ERROR,
+                                            AML_DOWNLOAD_ERROR_IO,
+                                            "the JSON response is too large"));
+          return;
+        }
+      g_byte_array_append (request->json_body, (const guint8 *) data, size);
+      g_clear_pointer (&request->chunk, g_bytes_unref);
+      read_next_chunk (request);
+      return;
+    }
 
   g_output_stream_write_all_async (request->sink, data, size,
                                    G_PRIORITY_DEFAULT,
@@ -1323,10 +1400,10 @@ start_attempt (DownloadRequest *request)
 
   if (request->json)
     {
-      soup_session_send_and_read_async (get_session (request->service),
-                                        request->message,
-                                        G_PRIORITY_DEFAULT, cancellable,
-                                        json_ready, request);
+      request->json_body = g_byte_array_new ();
+      soup_session_send_async (get_session (request->service), request->message,
+                               G_PRIORITY_DEFAULT, cancellable,
+                               json_stream_ready, request);
       return;
     }
 
@@ -1349,24 +1426,15 @@ start_attempt (DownloadRequest *request)
  * ---------------------------------------------------------- */
 
 static void
-json_ready (GObject *source, GAsyncResult *result, gpointer user_data)
+json_process_body (DownloadRequest *request, GBytes *body)
 {
-  DownloadRequest *request = user_data;
   g_autoptr (GError) error = NULL;
-  g_autoptr (GBytes) body =
-    soup_session_send_and_read_finish (SOUP_SESSION (source), result, &error);
   GError *status_error = NULL;
   g_autoptr (JsonParser) parser = NULL;
   g_autoptr (GError) parse_error = NULL;
   g_autofree char *response = NULL;
   gsize size = 0;
   const char *data = NULL;
-
-  if (body == NULL)
-    {
-      end_attempt (request, g_steal_pointer (&error));
-      return;
-    }
 
   status_error = check_status (request);
 
@@ -1440,6 +1508,36 @@ json_ready (GObject *source, GAsyncResult *result, gpointer user_data)
     }
 
   aml_download_request_succeed_json (request, g_steal_pointer (&parser));
+}
+
+static void
+json_stream_ready (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  DownloadRequest *request = user_data;
+  g_autoptr (GError) error = NULL;
+  GInputStream *stream = soup_session_send_finish (SOUP_SESSION (source),
+                                                   result, &error);
+  SoupMessageHeaders *headers = NULL;
+  goffset length = -1;
+
+  if (stream == NULL)
+    {
+      end_attempt (request, g_steal_pointer (&error));
+      return;
+    }
+
+  request->source = stream;
+  headers = soup_message_get_response_headers (request->message);
+  length = soup_message_headers_get_content_length (headers);
+  if (length > (goffset) MAX_JSON_RESPONSE_SIZE)
+    {
+      end_attempt (request,
+                   g_error_new_literal (AML_DOWNLOAD_ERROR,
+                                        AML_DOWNLOAD_ERROR_IO,
+                                        "the JSON response is too large"));
+      return;
+    }
+  read_next_chunk (request);
 }
 
 /* ---------------------------------------------------------- *

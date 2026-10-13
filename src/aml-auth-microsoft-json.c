@@ -122,7 +122,10 @@ aml_auth_device_code_from_json (const char *json, gssize length,
 
   /* The interval is how often the token endpoint may be asked, and a
      service that says nothing about it means once every five seconds. */
-  if (!int_of (object, "interval", &interval) || interval < 1)
+  /* Do not allow a service response to suspend the main-loop poll for an
+   * effectively unbounded time. */
+  if (!int_of (object, "interval", &interval) || interval < 1 ||
+      interval > 3600)
     interval = 5;
 
   /* A code without a place to type it, or without a code to type, is
@@ -184,7 +187,10 @@ aml_auth_oauth_token_from_json (const char *json, gssize length, gint64 now,
   token = g_new0 (AmlOAuthToken, 1);
   token->access_token = string_of (object, "access_token");
   token->refresh_token = string_of (object, "refresh_token");
-  token->expires_at = expires_in > 0 ? now + expires_in : 0;
+  token->expires_at = (expires_in > 0 &&
+                       now <= G_MAXINT64 - expires_in)
+                        ? now + expires_in
+                        : (expires_in > 0 ? G_MAXINT64 : 0);
 
   /* The services answer a token the game is run with; Microsoft answers
    * the same shape with a refresh token as well. */
@@ -428,7 +434,10 @@ aml_auth_minecraft_token_from_json (const char *json, gssize length,
   token = g_new0 (AmlOAuthToken, 1);
   token->access_token = string_of (object, "access_token");
   int_of (object, "expires_in", &expires_in);
-  token->expires_at = expires_in > 0 ? now + expires_in : 0;
+  token->expires_at = (expires_in > 0 &&
+                       now <= G_MAXINT64 - expires_in)
+                        ? now + expires_in
+                        : (expires_in > 0 ? G_MAXINT64 : 0);
 
   if (token->access_token != NULL && *token->access_token != '\0')
     return token;

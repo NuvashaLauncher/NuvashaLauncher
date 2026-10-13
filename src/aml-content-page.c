@@ -60,6 +60,19 @@ typedef struct {
   GPtrArray *items; /* UpdateItem* */
 } UpdateRun;
 
+static void
+update_run_free (UpdateRun *run)
+{
+  if (run == NULL)
+    return;
+
+  if (run->page != NULL)
+    g_object_remove_weak_pointer (G_OBJECT (run->page),
+                                  (gpointer *) &run->page);
+  g_clear_pointer (&run->items, g_ptr_array_unref);
+  g_free (run);
+}
+
 void aml_content_page_run_search (AmlContentPage *self, gboolean append);
 void open_project_page (AmlContentPage *self, AmlModrinthProject *project);
 static void update_check_next (UpdateRun *run);
@@ -1207,8 +1220,8 @@ on_update_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 
   if (g_strcmp0 (response, "update") != 0)
     {
-      g_clear_pointer (&run->items, g_ptr_array_unref);
-      g_free (run);
+      g_object_set_data (G_OBJECT (self), "aml-update-run", NULL);
+      update_run_free (run);
       g_object_unref (self);
       return;
     }
@@ -1217,7 +1230,8 @@ on_update_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
   self->install_model->updates = g_steal_pointer (&run->items);
   self->install_model->update_index = 0;
   self->install_model->updating = TRUE;
-  g_free (run);
+  g_object_set_data (G_OBJECT (self), "aml-update-run", NULL);
+  update_run_free (run);
   update_batch_next (self);
 
   g_object_unref (self);
@@ -1234,8 +1248,7 @@ update_check_done (AmlContentPage *self, UpdateRun *run)
   if (run->items->len == 0)
     {
       show_toast (self, _("Everything is up to date"));
-      g_clear_pointer (&run->items, g_ptr_array_unref);
-      g_free (run);
+      update_run_free (run);
       return;
     }
 
@@ -1350,8 +1363,7 @@ update_check_next (UpdateRun *run)
 
   if (self == NULL)
     {
-      g_clear_pointer (&run->items, g_ptr_array_unref);
-      g_free (run);
+      update_run_free (run);
       return;
     }
 
