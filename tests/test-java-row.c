@@ -124,12 +124,14 @@ main (void)
         }
     }
 
-  /* A missing automatic runtime is visually blank, but the popup still has
-   * a real selected item and can move to a detected or added runtime. */
+  /* A missing exact runtime still selects a detected runtime visibly, while
+   * the row reports that the instance remains on automatic selection. */
   aml_java_row_set_required_major (row, G_MAXINT);
   pump (20);
+  model = GTK_STRING_LIST (adw_combo_row_get_model (ADW_COMBO_ROW (row)));
   g_assert_cmpuint (adw_combo_row_get_selected (ADW_COMBO_ROW (row)),
                     !=, GTK_INVALID_LIST_POSITION);
+  g_assert_cmpstr (gtk_string_list_get_string (model, 0), !=, "");
   g_assert_cmpstr (aml_java_row_get_selected_path (row), ==, "");
 
   /* Setting the requirement must not call the handler forever. */
