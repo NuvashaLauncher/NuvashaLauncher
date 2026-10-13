@@ -23,6 +23,11 @@ test_model_owns_browser_state (void)
   g_assert_false (model->searched);
   g_assert_false (model->loading_page);
   g_assert_cmpuint (model->offset, ==, 0);
+  g_autoptr (GCancellable) more = g_object_ref (model->more);
+  g_autoptr (GCancellable) cancellable = g_object_ref (model->cancellable);
+  g_clear_pointer (&model, aml_content_browser_model_free);
+  g_assert_true (g_cancellable_is_cancelled (more));
+  g_assert_true (g_cancellable_is_cancelled (cancellable));
   g_print ("ok - browser model owns initialized search state\n");
 }
 
