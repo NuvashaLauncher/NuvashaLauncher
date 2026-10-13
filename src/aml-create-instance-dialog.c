@@ -211,6 +211,7 @@ static void
 aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
 {
   adw_dialog_set_title (ADW_DIALOG (self), _("Create Instance"));
+  adw_dialog_set_follows_content_size (ADW_DIALOG (self), FALSE);
 
   self->name_row = ADW_ENTRY_ROW (adw_entry_row_new ());
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->name_row), _("Name"));
