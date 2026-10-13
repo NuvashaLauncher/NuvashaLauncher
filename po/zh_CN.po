@@ -594,3 +594,9 @@ msgstr "无法安装此内容"
 
 msgid "Pick a Minecraft version first"
 msgstr "请先选择 Minecraft 版本"
+
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "删除依赖项会删除依赖它的模组"
+
+msgid "A dependent mod cannot be deleted"
+msgstr "无法删除依赖的模组"

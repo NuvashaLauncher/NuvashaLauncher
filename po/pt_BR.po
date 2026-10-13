@@ -603,3 +603,9 @@ msgstr "Não é possível instalar isto"
 
 msgid "Pick a Minecraft version first"
 msgstr "Escolha primeiro uma versão do Minecraft"
+
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "Excluir uma dependência exclui o mod que dependia dela"
+
+msgid "A dependent mod cannot be deleted"
+msgstr "Não foi possível excluir um mod dependente"

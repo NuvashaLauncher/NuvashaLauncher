@@ -602,3 +602,9 @@ msgstr "これはインストールできません"
 
 msgid "Pick a Minecraft version first"
 msgstr "先にMinecraftのバージョンを選択してください"
+
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "依存関係を削除すると、その依存関係に依存していた Mod も削除します"
+
+msgid "A dependent mod cannot be deleted"
+msgstr "依存する Mod を削除できません"

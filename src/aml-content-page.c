@@ -18,6 +18,7 @@
 #include "aml-i18n.h"
 #include "aml-icons.h"
 #include "aml-markdown.h"
+#include "aml-settings.h"
 
 #include <glib/gstdio.h>
 #include <string.h>
@@ -369,6 +370,7 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
               break;
             }
         }
+      reload_installed (self);
     }
 
   g_object_unref (self);
@@ -382,6 +384,8 @@ on_delete_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
   AmlContentPage *self = user_data;
   const char *path = g_object_get_data (G_OBJECT (source), "aml-path");
+  GPtrArray *dependent_paths =
+    g_object_get_data (G_OBJECT (source), "aml-dependent-paths");
   const char *response =
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
   g_autoptr (GFile) target = NULL;
@@ -390,6 +394,19 @@ on_delete_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
     {
       g_object_unref (self);
       return;
+    }
+
+  for (guint i = 0; dependent_paths != NULL && i < dependent_paths->len; i++)
+    {
+      const char *dependent = g_ptr_array_index (dependent_paths, i);
+      g_autoptr (GError) error = NULL;
+
+      if (!aml_content_remove_file (dependent, &error))
+        {
+          show_error (self, _("A dependent mod cannot be deleted"), error);
+          g_object_unref (self);
+          return;
+        }
     }
 
   target = g_file_new_for_path (path);
@@ -410,6 +427,9 @@ on_trash_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   g_autofree char *heading = NULL;
   g_autofree char *body = NULL;
   g_autoptr (GString) dependents = g_string_new (NULL);
+  g_autoptr (GPtrArray) dependent_paths =
+    g_ptr_array_new_with_free_func (g_free);
+  g_autoptr (AmlSettings) settings = aml_settings_new ();
   const char *title = NULL;
   AdwAlertDialog *alert = NULL;
 
@@ -442,6 +462,8 @@ on_trash_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
               if (dependents->len > 0)
                 g_string_append_c (dependents, '\n');
               g_string_append (dependents, other_title);
+              if (aml_settings_get_delete_dependents (settings))
+                g_ptr_array_add (dependent_paths, g_strdup (other->path));
               break;
             }
       }
@@ -466,6 +488,9 @@ on_trash_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   adw_alert_dialog_set_close_response (alert, "cancel");
   g_object_set_data_full (G_OBJECT (alert), "aml-path",
                           g_strdup (file->path), g_free);
+  g_object_set_data_full (G_OBJECT (alert), "aml-dependent-paths",
+                          g_steal_pointer (&dependent_paths),
+                          (GDestroyNotify) g_ptr_array_unref);
   adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL, on_delete_chosen,
                            g_object_ref (self));
 }
