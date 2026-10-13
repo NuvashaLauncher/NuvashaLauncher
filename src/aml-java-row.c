@@ -5,8 +5,8 @@
 /* AmlJavaRow: pick a Java. Mirrors AmlVersionRow's state machine: the
  * row shows it is fetching, it failed (with how to retry), or it holds
  * the installations detection found plus any custom path the instance
- * carries. An exact required runtime is displayed as the automatic choice;
- * otherwise the row stays visually blank until the user chooses one. */
+ * carries. The automatic choice is displayed even when the detected runtime
+ * does not satisfy the game's exact Java requirement. */
 
 /* realpath wants glibc's default feature set; AML is Linux-only. */
 #define _GNU_SOURCE
@@ -30,7 +30,7 @@ struct _AmlJavaRow
   /* The detected installations, GPtrArray<AmlJava*> owned by the row. */
   GPtrArray *javas;
 
-  /* Model contents: an exact automatic runtime is index 0 with a NULL path;
+  /* Model contents: the automatic runtime is index 0 with a NULL path;
    * the remaining entries are detected/custom runtimes and a trailing entry
    * that asks for another runtime instead of naming one. */
   GPtrArray *ids;   /* strdupped paths; the automatic entry has a NULL id */
@@ -44,7 +44,7 @@ struct _AmlJavaRow
    * runtime, so it cannot stay selected. */
   guint restore;
 
-  /* What the first entry stands for when an exact automatic runtime exists.
+  /* What the first entry stands for when an automatic runtime exists.
    * That runtime is named in the first entry and left out of the list below
    * so it is not shown twice. */
   int required_major;
@@ -59,7 +59,7 @@ struct _AmlJavaRow
 
   gboolean ready;
   gboolean disposed;
-  gboolean no_default;
+  gboolean automatic_selection;
   gboolean rebuilding;
   GtkButton *retry;
 
@@ -111,15 +111,12 @@ java_factory_setup (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
 static void
 java_button_bind (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
                   GtkListItem *item,
-                  gpointer user_data)
+                  gpointer user_data G_GNUC_UNUSED)
 {
-  AmlJavaRow *self = user_data;
   GtkWidget *child = gtk_list_item_get_child (item);
   gpointer value = gtk_list_item_get_item (item);
 
-  if (self->no_default)
-    gtk_label_set_text (GTK_LABEL (child), "");
-  else if (GTK_IS_STRING_OBJECT (value))
+  if (GTK_IS_STRING_OBJECT (value))
     gtk_label_set_text (GTK_LABEL (child),
                         gtk_string_object_get_string (value));
 }
@@ -216,13 +213,15 @@ fill (AmlJavaRow *self)
   guint position = GTK_INVALID_LIST_POSITION;
 
   /* The Java the automatic choice stands for: named in the first entry,
-     and left out of the list below when it is one of the detected
-     runtimes even so. A zero requirement means the version document did
-     not declare one, so use the same best-runtime selection as launch.
-     Detection clears the list and fills it again, so the row is walked while
-     it may still hold nothing. */
+     and left out of the list below when it is one of the detected runtimes.
+     If no exact runtime exists, still show the best detected runtime so the
+     row always starts with a useful selection. */
   if (self->javas != NULL)
     fallback = aml_java_select (self->javas, NULL, self->required_major);
+
+  if (fallback == NULL && self->javas != NULL &&
+      (self->wanted == NULL || *self->wanted == '\0'))
+    fallback = aml_java_best_compatible (self->javas, 0);
 
   if (fallback != NULL)
     {
@@ -269,14 +268,12 @@ fill (AmlJavaRow *self)
 
   g_clear_pointer (&self->ids, g_ptr_array_unref);
   self->ids = ids;
-  self->no_default = fallback == NULL &&
-                     (self->wanted == NULL || *self->wanted == '\0');
+  self->automatic_selection = fallback != NULL &&
+                              (self->wanted == NULL || *self->wanted == '\0');
   self->ready = TRUE;
 
-  /* Keep a real item selected even when there is no compatible automatic
-     runtime. The button is blank through @no_default, but an invalid GTK
-     selection leaves AdwComboRow without a usable starting item and makes
-     the popup unable to change the choice reliably. */
+  /* Keep a real item selected so the popup is usable even when no exact
+     automatic runtime exists. */
   if (position == GTK_INVALID_LIST_POSITION && names->len > 0)
     position = 0;
 
@@ -506,7 +503,7 @@ on_picked (GObject    *object G_GNUC_UNUSED,
       if (selected < self->ids->len)
         {
           self->restore = selected;
-          self->no_default = FALSE;
+          self->automatic_selection = FALSE;
         }
 
       return;
@@ -603,11 +600,8 @@ aml_java_row_get_selected_path (AmlJavaRow *self)
   if (!self->ready)
     return NULL;
 
-  /* GTK keeps an internal first item selected so the dropdown remains
-   * usable, but that is not an instance choice until the user opens it and
-   * picks something. Report the automatic/blank state to the page instead
-   * of leaking that implementation detail into java-path. */
-  if (self->no_default)
+  /* The visible first item is automatic, not an explicit instance choice. */
+  if (self->automatic_selection)
     return "";
 
   position = adw_combo_row_get_selected (ADW_COMBO_ROW (self));
@@ -636,6 +630,7 @@ aml_java_row_select_path (AmlJavaRow *self, const char *path)
     {
       guint automatic = self->ids->len > 0 && self->ids->pdata[0] == NULL
                           ? 0 : GTK_INVALID_LIST_POSITION;
+      self->automatic_selection = automatic != GTK_INVALID_LIST_POSITION;
       adw_combo_row_set_selected (ADW_COMBO_ROW (self), automatic);
       return;
     }
@@ -759,7 +754,7 @@ aml_java_row_init (AmlJavaRow *self)
   self->ids = g_ptr_array_new_with_free_func (g_free);
   self->names = g_ptr_array_new_with_free_func (g_free);
   self->required_major = 0;
-  self->no_default = TRUE;
+  self->automatic_selection = FALSE;
   self->add_index = GTK_INVALID_LIST_POSITION;
   self->restore = 0;
 
