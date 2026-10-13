@@ -81,6 +81,8 @@ on_export_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   if (self->export_download != NULL)
     {
+      g_object_remove_weak_pointer (G_OBJECT (self->export_download),
+                                    (gpointer *) &self->export_download);
       aml_download_finish (self->export_download);
       self->export_download = NULL;
     }
@@ -320,6 +322,12 @@ void
 on_export_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   AmlInstancePage *self = user_data;
+
+  if (self->export_operation != NULL)
+    {
+      instance_page_show_toast (self, _("Exporting modpack"));
+      return;
+    }
 
   if (aml_settings_get_export_metadata (self->settings))
     show_export_metadata (self);

@@ -813,8 +813,8 @@ resolve_objects (ResolveRequest *request)
 
   path = g_build_filename (request->indexes_dir, request->asset_index_id, NULL);
 
-  if (!aml_fs_file_size_within (path, AML_FS_MAX_ASSET_INDEX_SIZE, &error) ||
-      !g_file_get_contents (path, &text, &length, &error) ||
+  if (!aml_fs_get_contents_within (path, AML_FS_MAX_ASSET_INDEX_SIZE,
+                                   &text, &length, &error) ||
       !json_parser_load_from_data (parser, text, (gssize) length, &error) ||
       !JSON_NODE_HOLDS_OBJECT (json_parser_get_root (parser)))
     {
@@ -1016,7 +1016,9 @@ description_ready (ResolveRequest *request)
      answers in "assets", and the copy of it on disk is named after the
      id the index itself carries. */
   g_free (request->asset_index_name);
-  request->asset_index_name = g_strdup (request->description->assets);
+  request->asset_index_name = aml_resolve_safe_name (
+    request->description->assets != NULL ? request->description->assets
+                                         : request->version_id);
 
   g_free (request->asset_index_id);
 

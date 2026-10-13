@@ -42,7 +42,7 @@ duplicate_data_free (DuplicateData *data)
 static void
 duplicate_data_return_error (DuplicateData *data, GError *error)
 {
-  aml_task_scope_return_error (data->scope, error);
+  aml_task_scope_return_error_deferred (data->scope, error);
   duplicate_data_free (data);
 }
 
@@ -74,7 +74,8 @@ duplicate_copy_ready (GObject *source G_GNUC_UNUSED,
       return;
     }
 
-  aml_task_scope_return_pointer (data->scope, data->copy, g_object_unref);
+  aml_task_scope_return_pointer_deferred (data->scope, data->copy,
+                                          g_object_unref);
   data->copy = NULL; /* the task hands it to the finish call */
   duplicate_data_free (data);
 }
@@ -236,7 +237,7 @@ delete_data_free (DeleteData *data)
 static void
 delete_data_return_error (DeleteData *data, GError *error)
 {
-  aml_task_scope_return_error (data->scope, error);
+  aml_task_scope_return_error_deferred (data->scope, error);
   delete_data_free (data);
 }
 
@@ -260,7 +261,7 @@ delete_directory_ready (GObject *source G_GNUC_UNUSED,
       return;
     }
 
-  aml_task_scope_return_boolean (data->scope, TRUE);
+  aml_task_scope_return_boolean_deferred (data->scope, TRUE);
   delete_data_free (data);
 }
 
@@ -439,7 +440,7 @@ move_data_free (MoveData *data)
 static void
 move_return_error (MoveData *data, GError *error)
 {
-  aml_task_scope_return_error (data->scope, error);
+  aml_task_scope_return_error_deferred (data->scope, error);
   move_data_free (data);
 }
 
@@ -491,7 +492,7 @@ move_old_removed (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     g_warning ("the old directory \"%s\" could not be removed: %s",
                data->old_directory, error->message);
 
-  aml_task_scope_return_boolean (data->scope, TRUE);
+  aml_task_scope_return_boolean_deferred (data->scope, TRUE);
   move_data_free (data);
 }
 
@@ -576,7 +577,7 @@ aml_instance_manager_change_directory_async (AmlInstanceManager *self,
           return aml_task_scope_ref (task_scope);
         }
 
-      aml_task_scope_return_boolean (data->scope, TRUE);
+       aml_task_scope_return_boolean_deferred (data->scope, TRUE);
       move_data_free (data);
       return aml_task_scope_ref (task_scope);
     }

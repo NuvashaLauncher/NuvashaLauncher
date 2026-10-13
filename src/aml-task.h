@@ -85,6 +85,8 @@ void aml_task_scope_return_pointer_deferred (AmlTaskScope *scope,
                                               gpointer       result,
                                               GDestroyNotify result_free);
 void aml_task_scope_return_error_deferred (AmlTaskScope *scope, GError *error);
+void aml_task_scope_return_boolean_deferred (AmlTaskScope *scope,
+                                            gboolean result);
 void aml_task_scope_track_source (AmlTaskScope *scope, guint source_id);
 void aml_task_scope_remove_source (AmlTaskScope *scope, guint source_id);
 void aml_task_scope_forget_source (AmlTaskScope *scope, guint source_id);

@@ -73,6 +73,15 @@ give_libraries_their_downloads (JsonNode *root, GError **error)
 
         coordinate = json_node_get_string (name);
         repository = json_node_get_string (address);
+
+        if (!g_str_has_prefix (repository, "https://"))
+          {
+            g_set_error (error, AML_LOADERS_ERROR,
+                         AML_LOADERS_ERROR_NO_MAVEN,
+                         "the loader repository is not an HTTPS address");
+            return FALSE;
+          }
+
         path = aml_resolve_maven_path (coordinate);
 
         /* The path is written into the library directory later on, so it

@@ -223,6 +223,40 @@ on_jvm_args_apply (AdwEntryRow *row, gpointer user_data)
     }
 }
 
+typedef struct
+{
+  AmlInstancePage *page;
+  guint generation;
+} VersionWait;
+
+static void
+version_wait_free (VersionWait *wait)
+{
+  g_object_unref (wait->page);
+  g_free (wait);
+}
+
+static VersionWait *
+version_wait_new (AmlInstancePage *self, guint generation)
+{
+  VersionWait *wait = g_new (VersionWait, 1);
+  wait->generation = generation;
+  wait->page = g_object_ref (self);
+  return wait;
+}
+
+static AmlInstancePage *
+version_wait_page (VersionWait *wait)
+{
+  return wait->page;
+}
+
+static guint
+version_wait_generation (VersionWait *wait)
+{
+  return wait->generation;
+}
+
 static void
 on_manifest_loaded (GObject *source G_GNUC_UNUSED,
                     GAsyncResult *result,
@@ -282,7 +316,8 @@ on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
       aml_operation_unref (self->versions_operation);
     }
   self->versions_operation = aml_version_manifest_fetch_async (
-    AML_VERSION_MANIFEST_URL, on_manifest_loaded, g_object_ref (self));
+    AML_VERSION_MANIFEST_URL, on_manifest_loaded,
+    version_wait_new (self, ++self->versions_generation));
 }
 
 /* ---------------------------------------------------------- *
@@ -414,10 +449,17 @@ on_description_loaded (GObject *source G_GNUC_UNUSED,
                        GAsyncResult *result,
                        gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  VersionWait *wait = user_data;
+  AmlInstancePage *self = version_wait_page (wait);
   g_autoptr (GError) error = NULL;
   g_autoptr (AmlVersionDescription) description =
     aml_version_load_finish (result, &error);
+
+  if (version_wait_generation (wait) != self->versions_generation)
+    {
+      version_wait_free (wait);
+      return;
+    }
 
   /* The answer is in: the read that brought it is finished with. */
   aml_operation_unref (self->versions_operation);
@@ -429,7 +471,7 @@ on_description_loaded (GObject *source G_GNUC_UNUSED,
     self->required_java = 0;
 
   java_status_refresh (self);
-  g_object_unref (self);
+  version_wait_free (wait);
 }
 
 static void
@@ -437,12 +479,19 @@ on_manifest_loaded (GObject *source G_GNUC_UNUSED,
                     GAsyncResult *result,
                     gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  VersionWait *wait = user_data;
+  AmlInstancePage *self = version_wait_page (wait);
   g_autoptr (GError) error = NULL;
   g_autoptr (AmlVersionManifest) manifest =
     aml_version_manifest_fetch_finish (result, &error);
   g_autofree char *version = instance_string (self->instance,
                                               "minecraft-version");
+
+  if (version_wait_generation (wait) != self->versions_generation)
+    {
+      version_wait_free (wait);
+      return;
+    }
 
   /* The manifest is in: the read that brought it is finished with. */
   aml_operation_unref (self->versions_operation);
@@ -451,14 +500,14 @@ on_manifest_loaded (GObject *source G_GNUC_UNUSED,
   if (manifest == NULL)
     {
       java_status_refresh (self);
-      g_object_unref (self);
+      version_wait_free (wait);
       return;
     }
 
-  self->versions_operation = aml_version_load_async (manifest, version,
-                                                      on_description_loaded,
-                                                      g_object_ref (self));
-  g_object_unref (self);
+  self->versions_operation = aml_version_load_async (
+    manifest, version, on_description_loaded,
+    version_wait_new (self, version_wait_generation (wait)));
+  version_wait_free (wait);
 }
 
 /* Picks the row of the Java entry the user has chosen and writes it to
@@ -813,7 +862,8 @@ create_settings_page (AmlInstancePage *self)
    * the instance's version document; fetching is offline-friendly via
    * the cache. */
   self->versions_operation = aml_version_manifest_fetch_async (
-    AML_VERSION_MANIFEST_URL, on_manifest_loaded, g_object_ref (self));
+    AML_VERSION_MANIFEST_URL, on_manifest_loaded,
+    version_wait_new (self, ++self->versions_generation));
 
   /* Actions */
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (GTK_WIDGET (actions)), _("Actions"));
