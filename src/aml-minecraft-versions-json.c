@@ -7,7 +7,11 @@
 
 #include "aml-minecraft-versions.h"
 
+#include <math.h>
 #include <string.h>
+
+#define MAX_VERSION_REGEX_LENGTH 1024
+#define MAX_VERSION_VALUE_LENGTH 1024
 #include <sys/utsname.h>
 
 static void free_download_info (gpointer data);
@@ -192,7 +196,13 @@ get_int64 (JsonObject *object,
 
       if (type == G_TYPE_DOUBLE)
         {
-          *value = (gint64) json_node_get_double (node);
+          gdouble number = json_node_get_double (node);
+
+          if (!isfinite (number) || number < -9223372036854775808.0 ||
+              number >= 9223372036854775808.0)
+            return wrong_field (member, "an integer in range", error);
+
+          *value = (gint64) number;
           return TRUE;
         }
     }
@@ -512,7 +522,9 @@ version_matches (const char *pattern, const char *version)
   gint start = 0;
   gint end = 0;
 
-  if (version == NULL)
+  if (pattern == NULL || version == NULL ||
+      strlen (pattern) > MAX_VERSION_REGEX_LENGTH ||
+      strlen (version) > MAX_VERSION_VALUE_LENGTH)
     return FALSE;
 
   regex = g_regex_new (pattern, G_REGEX_OPTIMIZE, 0, &error);
@@ -1123,6 +1135,14 @@ parse_java_version (JsonObject *root, AmlJavaVersion **version, GError **error)
       return FALSE;
     }
 
+  if (major < 0 || major > G_MAXINT)
+    {
+      g_set_error (error, AML_MC_ERROR, AML_MC_ERROR_INVALID,
+                   "the Java major version is out of range");
+      free_java_version (java_version);
+      return FALSE;
+    }
+
   java_version->major_version = (int) major;
   *version = java_version;
 
@@ -1705,4 +1725,3 @@ aml_version_description_legacy_argv (AmlVersionDescription *self)
 
   return words;
 }
-

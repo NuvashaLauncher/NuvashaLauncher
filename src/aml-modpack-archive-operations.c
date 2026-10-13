@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 /* Copyright (C) 2026 Flia
  * SPDX-License-Identifier: GPL-3.0-only
  */
@@ -12,6 +14,8 @@
 #include "aml-task-private.h"
 
 #include <archive.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <archive_entry.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -306,11 +310,14 @@ extract_layers (const char *archive_path, const char *directory,
   struct archive *archive = NULL;
   struct archive_entry *header = NULL;
   int status = ARCHIVE_OK;
+  guint paths = 0;
 
   archive = archive_read_new ();
 
-  if (archive_read_support_format_zip (archive) != ARCHIVE_OK ||
-      archive_read_open_filename (archive, archive_path, 65536) != ARCHIVE_OK)
+  int fd = open (archive_path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+
+  if (fd < 0 || archive_read_support_format_zip (archive) != ARCHIVE_OK ||
+      archive_read_open_fd (archive, fd, 65536) != ARCHIVE_OK)
     {
       g_set_error (error, AML_MODPACK_ERROR, AML_MODPACK_ERROR_ARCHIVE,
                    "the pack cannot be opened: %s",
@@ -321,6 +328,16 @@ extract_layers (const char *archive_path, const char *directory,
 
   while ((status = archive_read_next_header (archive, &header)) == ARCHIVE_OK)
     {
+      if (++paths > AML_MODPACK_MAX_ENTRIES)
+        {
+          g_set_error_literal (error, AML_MODPACK_ERROR,
+                               AML_MODPACK_ERROR_BOMB,
+                               "the archive has more entries than one pack");
+          archive_read_close (archive);
+          archive_read_free (archive);
+          return FALSE;
+        }
+
       if (!aml_modpack_archive_entry_is_safe (
             archive_entry_pathname (header), archive_entry_filetype (header),
             archive_entry_hardlink (header), error))
