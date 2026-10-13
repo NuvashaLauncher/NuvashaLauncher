@@ -3,6 +3,7 @@
  */
 
 #include <gtk/gtk.h>
+#include <stdlib.h>
 
 #include "aml-main-window-model.h"
 
@@ -14,7 +15,7 @@ test_model_owns_window_services (void)
   if (!gtk_init_check ())
     {
       g_print ("skipped - no display for main window model test\n");
-      return;
+      exit (77);
     }
 
   model = aml_main_window_model_new ();

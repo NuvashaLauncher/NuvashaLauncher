@@ -26,7 +26,7 @@ LOCALE_MOS := $(LOCALES:%=build/locale/%/LC_MESSAGES/aml.mo)
 
 CFLAGS   := -std=c17 -Wall -Wextra -Wpedantic -MMD -MP
 RELFLAGS := -O2
-DBGFLAGS := -g -O0 -fsanitize=address,undefined
+DBGFLAGS := -g -O0 -fsanitize=address,undefined -fno-sanitize-recover=all
 
 BIN    := build/AML
 DBGBIN := build-debug/AML
@@ -48,7 +48,7 @@ TESTDEPS    := $(addsuffix .d,$(TESTBINS))
 TESTDBGBINS := $(patsubst tests/%.c,build-debug/tests/%,$(TESTSRCS))
 TESTDBGDEPS := $(addsuffix .d,$(TESTDBGBINS))
 
-.PHONY: all debug test test-debug test-lsan static-analysis clean install uninstall
+.PHONY: all debug test test-debug test-lsan static-analysis pot clean install uninstall
 
 all: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 
@@ -78,8 +78,10 @@ build/tests/%: tests/%.c $(TESTLIBOBJS) | build/tests
 # when there is none; the test that runs the launcher runs it with DISPLAY
 # and WAYLAND_DISPLAY removed.
 test: $(if $(SRCS),$(BIN)) $(TESTBINS)
-	@set -e; for t in $(TESTBINS); do echo "RUN  $$t"; ./$$t; done; \
-	echo "PASS $(words $(TESTBINS)) test(s)"
+	@pass=0; skip=0; for t in $(TESTBINS); do echo "RUN  $$t"; ./$$t; status=$$?; \
+		if test $$status -eq 77; then skip=$$((skip + 1)); \
+		elif test $$status -ne 0; then exit $$status; else pass=$$((pass + 1)); fi; done; \
+		echo "PASS $$pass test(s), SKIP $$skip test(s)"
 
 # Same tests, but every test and every src object is built with
 # AddressSanitizer and UndefinedBehaviorSanitizer into build-debug/.
@@ -93,29 +95,39 @@ build-debug/tests/%: tests/%.c $(TESTLIBDBGOBJS) | build-debug/tests
 # The Wayland guard test runs the release launcher, so test-debug builds
 # both binaries.
 test-debug: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS)
-	@set -e; for t in $(TESTDBGBINS); do echo "RUN  $$t"; ./$$t; done; \
-	echo "PASS $(words $(TESTDBGBINS)) test(s)"
+	@pass=0; skip=0; for t in $(TESTDBGBINS); do echo "RUN  $$t"; ./$$t; status=$$?; \
+		if test $$status -eq 77; then skip=$$((skip + 1)); \
+		elif test $$status -ne 0; then exit $$status; else pass=$$((pass + 1)); fi; done; \
+		echo "PASS $$pass test(s), SKIP $$skip test(s)"
 
 # LeakSanitizer is included with the Linux AddressSanitizer runtime. Keep it
 # explicit so CI does not silently lose leak checking when sanitizer defaults
 # change. The options are set per test rather than around a recursive make,
 # so the suite runs once and every test is the one being leak checked.
 test-lsan: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS)
-	@set -e; for t in $(TESTDBGBINS); do echo "RUN  $$t"; \
+	@pass=0; skip=0; for t in $(TESTDBGBINS); do echo "RUN  $$t"; \
 	  ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 \
 	  LSAN_OPTIONS=detect_leaks=1:exitcode=1 \
-	  ./$$t; done; \
-	echo "PASS $(words $(TESTDBGBINS)) test(s)"
+	  ./$$t; status=$$?; \
+		if test $$status -eq 77; then skip=$$((skip + 1)); \
+		elif test $$status -ne 0; then exit $$status; else pass=$$((pass + 1)); fi; done; \
+		echo "PASS $$pass test(s), SKIP $$skip test(s)"
 
 static-analysis:
 	@set -e; for source in src/*.c; do \
-	  $(CC) $(CPPFLAGS) -std=c17 -Wall -Wextra -Wpedantic -fanalyzer -fsyntax-only \
+	    $(CC) $(CPPFLAGS) -std=c17 -Wall -Wextra -Wpedantic -fanalyzer -c -o /dev/null \
 	    $(PKG_CFLAGS) -Isrc "$$source"; done
+
+pot:
+	xgettext --from-code=UTF-8 --language=C --keyword=_ --keyword=N_ \
+		--files-from=po/POTFILES.in --output=po/aml.pot
 
 install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 	install -Dm755 $(BIN) $(DESTDIR)$(PREFIX)/bin/AML
 	install -Dm644 data/io.gitlab.anotherminecraftlauncher.AML.desktop \
 		$(DESTDIR)$(PREFIX)/share/applications/io.gitlab.anotherminecraftlauncher.AML.desktop
+	install -Dm644 data/io.gitlab.anotherminecraftlauncher.AML.metainfo.xml \
+		$(DESTDIR)$(PREFIX)/share/metainfo/io.gitlab.anotherminecraftlauncher.AML.metainfo.xml
 	@for lang in $(LOCALES); do \
 		install -Dm644 build/locale/$$lang/LC_MESSAGES/aml.mo \
 			$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/aml.mo; \
@@ -126,6 +138,7 @@ install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/AML
 	rm -f $(DESTDIR)$(PREFIX)/share/applications/io.gitlab.anotherminecraftlauncher.AML.desktop
+	rm -f $(DESTDIR)$(PREFIX)/share/metainfo/io.gitlab.anotherminecraftlauncher.AML.metainfo.xml
 	@for lang in $(LOCALES); do \
 		rm -f $(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/aml.mo; \
 	done

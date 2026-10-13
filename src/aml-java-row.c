@@ -428,13 +428,19 @@ add_probed (GObject      *source G_GNUC_UNUSED,
     }
 
   if (probe == NULL)
-    adw_action_row_set_subtitle (
-      ADW_ACTION_ROW (self),
-      error != NULL ? error->message
-                    : _("the chosen file does not report a Java version"));
-  else
-    aml_java_row_set_custom (self, probe->executable,
-                             g_steal_pointer (&probe));
+    {
+      adw_action_row_set_subtitle (
+        ADW_ACTION_ROW (self),
+        error != NULL ? error->message
+                      : _("the chosen file does not report a Java version"));
+      java_ask_free (ask);
+      return;
+    }
+
+  {
+    const char *executable = probe->executable;
+    aml_java_row_set_custom (self, executable, g_steal_pointer (&probe));
+  }
 
   java_ask_free (ask);
 }

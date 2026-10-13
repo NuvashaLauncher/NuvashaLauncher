@@ -123,7 +123,7 @@ main (int argc, char **argv)
   if (!gtk_init_check ())
     {
       g_print ("skipped - no display, the icon theme cannot be opened\n");
-      return EXIT_SUCCESS;
+      return 77;
     }
 
   theme = gtk_icon_theme_get_for_display (gdk_display_get_default ());
@@ -131,7 +131,7 @@ main (int argc, char **argv)
   if (theme == NULL)
     {
       g_print ("skipped - no icon theme on this display\n");
-      return EXIT_SUCCESS;
+      return 77;
     }
 
   {

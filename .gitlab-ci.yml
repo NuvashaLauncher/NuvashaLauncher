@@ -1,11 +1,5 @@
 image: archlinux:base-devel
 
-# CI is intentionally disabled to preserve the project's GitLab compute
-# quota. The Makefile targets remain available for local validation.
-workflow:
-  rules:
-    - when: never
-
 stages:
   - test
   - analysis

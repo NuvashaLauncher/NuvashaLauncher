@@ -377,6 +377,8 @@ defer_completion (AmlTaskScope *scope, DeferredCompletion *deferred)
 {
   guint source_id;
 
+  g_return_if_fail (scope != NULL);
+
   deferred->scope = aml_task_scope_ref (scope);
   deferred->task = g_object_ref (scope->task);
 

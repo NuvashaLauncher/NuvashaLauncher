@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 msgid "Cancel"
 msgstr "취소"

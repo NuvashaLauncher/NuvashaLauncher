@@ -120,6 +120,7 @@ typedef struct {
   char *instance_id;
   guint step;
   guint cycles;
+  gboolean reached_dialog;
 } Run;
 
 static void on_activate (GApplication *application, gpointer user_data);
@@ -203,6 +204,7 @@ advance (gpointer user_data)
          is named after the instance. */
       g_assert_cmpuint (g_list_length (windows), ==, 1);
       g_assert_cmpstr (adw_dialog_get_title (run->dialog), ==, "Test");
+      run->reached_dialog = TRUE;
       return G_SOURCE_CONTINUE;
 
     default:
@@ -275,7 +277,7 @@ main (int argc, char **argv)
      memory. */
   g_print ("skipped - the sanitizer run does not attribute Gtk's own "
            "allocations\n");
-  return EXIT_SUCCESS;
+   return 77;
 #endif
 
   /* The settings and the accounts of the window go under this root. */
@@ -284,7 +286,7 @@ main (int argc, char **argv)
   if (root == NULL)
     {
       g_print ("skipped - no temporary directory\n");
-      return EXIT_SUCCESS;
+       return 77;
     }
 
   data = g_build_filename (root, "data", NULL);
@@ -302,7 +304,7 @@ main (int argc, char **argv)
   if (!gtk_init_check ())
     {
       g_print ("skipped - no display, cannot build the window\n");
-      return EXIT_SUCCESS;
+       return 77;
     }
 
   g_log_set_writer_func (count_criticals, NULL, NULL);
@@ -326,6 +328,7 @@ main (int argc, char **argv)
 
   g_free (run.instance_id);
 
+  g_assert_true (run.reached_dialog);
   g_assert_cmpuint (criticals, ==, 0);
   g_print ("ok - an instance opens a dialog and both close cleanly\n");
 

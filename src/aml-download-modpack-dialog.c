@@ -1120,13 +1120,18 @@ details_content (AmlDownloadModpackDialog *self)
   g_autofree char *downloads = NULL;
   const char *who = author_of (self);
 
+  if (self->project == NULL)
+    return gtk_label_new ("");
+
   scroller = gtk_scrolled_window_new ();
   box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 18);
   heading = adw_preferences_group_new ();
 
   /* The title, then who wrote it and how often it was taken, the same
      three lines the other contents open with. */
-  page = gtk_label_new (self->project->title);
+  page = gtk_label_new (self->project != NULL && self->project->title != NULL
+                          ? self->project->title
+                          : "");
   gtk_label_set_wrap (GTK_LABEL (GTK_WIDGET (page)), TRUE);
   gtk_label_set_xalign (GTK_LABEL (GTK_WIDGET (page)), 0);
   gtk_widget_add_css_class (GTK_WIDGET (page), "title-2");
