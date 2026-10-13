@@ -259,6 +259,7 @@ show_export_metadata (AmlInstancePage *self)
   data->summary = ADW_ENTRY_ROW (adw_entry_row_new ());
   data->version = ADW_ENTRY_ROW (adw_entry_row_new ());
   adw_dialog_set_title (data->dialog, _("Export modpack metadata"));
+  adw_dialog_set_follows_content_size (data->dialog, FALSE);
   g_signal_connect (data->dialog, "closed",
                     G_CALLBACK (on_export_metadata_closed), data);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (data->name),
