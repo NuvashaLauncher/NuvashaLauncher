@@ -16,14 +16,14 @@ censor_private_text (AmlLauncher *self, const char *text)
 {
   g_autofree char *result = g_strdup (text != NULL ? text : "");
   const char *secrets[] = { self->log_access_token, self->log_session,
-                            self->log_uuid, NULL };
+                            self->log_uuid };
 
-  for (guint i = 0; secrets[i] != NULL; i++)
+  for (guint i = 0; i < G_N_ELEMENTS (secrets); i++)
     {
       g_auto (GStrv) parts = NULL;
       g_autofree char *joined = NULL;
 
-      if (secrets[i][0] == '\0')
+      if (secrets[i] == NULL || secrets[i][0] == '\0')
         continue;
 
       parts = g_strsplit (result, secrets[i], -1);
