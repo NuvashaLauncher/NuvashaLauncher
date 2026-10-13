@@ -508,7 +508,6 @@ void
 aml_content_apply_local_metadata (AmlContentFile *file, AmlContentType type)
 {
   if (file->required_dependencies == NULL)
-  if (file->required_dependencies == NULL)
     file->required_dependencies = g_ptr_array_new_with_free_func (g_free);
   if (file->optional_dependencies == NULL)
     file->optional_dependencies = g_ptr_array_new_with_free_func (g_free);
