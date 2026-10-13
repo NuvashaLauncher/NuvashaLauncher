@@ -45,6 +45,7 @@ main (void)
   g_autofree char *truncated = make_jar (
     "fabric.mod.json", "{\"id\":\"example\",\"depends\":{\"other");
   g_autoptr (AmlContentFile) file = g_new0 (AmlContentFile, 1);
+  g_autoptr (AmlContentFile) broken = g_new0 (AmlContentFile, 1);
 
   file->path = g_strdup (valid);
   aml_content_apply_local_metadata (file, AML_CONTENT_MOD);
@@ -56,12 +57,9 @@ main (void)
   g_assert_cmpstr (g_ptr_array_index (file->required_dependencies, 0), ==,
                    "other");
 
-  g_clear_pointer (&file->path, g_free);
-  file->path = g_strdup (truncated);
-  g_clear_pointer (&file->project_name, g_free);
-  file->local_metadata = FALSE;
-  aml_content_apply_local_metadata (file, AML_CONTENT_MOD);
-  g_assert_false (file->local_metadata);
+  broken->path = g_strdup (truncated);
+  aml_content_apply_local_metadata (broken, AML_CONTENT_MOD);
+  g_assert_false (broken->local_metadata);
   g_print ("ok - local metadata parsers handle valid and truncated JSON\n");
   return 0;
 }
