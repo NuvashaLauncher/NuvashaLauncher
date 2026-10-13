@@ -10,7 +10,6 @@
 #include "aml-i18n.h"
 #include "aml-ui-feedback.h"
 
-#include "aml-dialogs.h"
 #include "aml-loader-row.h"
 #include "aml-loaders.h"
 #include "aml-version-row.h"
@@ -213,9 +212,6 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
 {
   adw_dialog_set_title (ADW_DIALOG (self), _("Create Instance"));
 
-  /* The same size as the other way of getting an instance. */
-  aml_dialog_set_standard_size (ADW_DIALOG (self));
-
   self->name_row = ADW_ENTRY_ROW (adw_entry_row_new ());
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->name_row), _("Name"));
   adw_entry_row_set_activates_default (ADW_ENTRY_ROW (self->name_row), TRUE);
@@ -260,7 +256,6 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (group)), GTK_WIDGET (self->directory_row));
 
   AdwPreferencesPage *page = ADW_PREFERENCES_PAGE (adw_preferences_page_new ());
-  gtk_widget_set_vexpand (GTK_WIDGET (page), TRUE);
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (GTK_WIDGET (page)),
                             ADW_PREFERENCES_GROUP (group));
 
