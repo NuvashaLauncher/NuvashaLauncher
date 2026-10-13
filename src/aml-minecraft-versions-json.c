@@ -516,8 +516,9 @@ arch_equals (const char *one, const char *two)
 static gboolean
 version_matches (const char *pattern, const char *version)
 {
+  static char *cached_pattern = NULL;
+  static GRegex *cached_regex = NULL;
   g_autoptr (GError) error = NULL;
-  g_autoptr (GRegex) regex = NULL;
   g_autoptr (GMatchInfo) match = NULL;
   gint start = 0;
   gint end = 0;
@@ -527,16 +528,22 @@ version_matches (const char *pattern, const char *version)
       strlen (version) > MAX_VERSION_VALUE_LENGTH)
     return FALSE;
 
-  regex = g_regex_new (pattern, G_REGEX_OPTIMIZE, 0, &error);
+  if (g_strcmp0 (cached_pattern, pattern) != 0)
+    {
+      g_clear_pointer (&cached_pattern, g_free);
+      g_clear_pointer (&cached_regex, g_regex_unref);
+      cached_pattern = g_strdup (pattern);
+      cached_regex = g_regex_new (pattern, G_REGEX_OPTIMIZE, 0, &error);
+    }
 
-  if (regex == NULL)
+  if (cached_regex == NULL)
     {
       g_warning ("the version pattern \"%s\" is not a regular expression: %s",
                  pattern, error->message);
       return FALSE;
     }
 
-  if (!g_regex_match (regex, version, 0, &match))
+  if (!g_regex_match (cached_regex, version, 0, &match))
     return FALSE;
 
   g_match_info_fetch_pos (match, 0, &start, &end);

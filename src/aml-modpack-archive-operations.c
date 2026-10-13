@@ -472,5 +472,6 @@ extract_overrides_async (const char *archive_path, const char *directory,
 gboolean
 extract_overrides_finish (GAsyncResult *result, GError **error)
 {
+  g_return_val_if_fail (G_IS_TASK (result), FALSE);
   return g_task_propagate_boolean (G_TASK (result), error);
 }

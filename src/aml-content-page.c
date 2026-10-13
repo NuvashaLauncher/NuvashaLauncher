@@ -479,10 +479,12 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
                 }
 
               g_ptr_array_remove_index (self->installed.files, i);
-              gtk_widget_set_visible (GTK_WIDGET (self->installed.status),
-                                      self->installed.files->len == 0);
-              gtk_widget_set_visible (GTK_WIDGET (self->installed.scroller),
-                                      self->installed.files->len != 0);
+              if (self->installed.status != NULL)
+                gtk_widget_set_visible (GTK_WIDGET (self->installed.status),
+                                        self->installed.files->len == 0);
+              if (self->installed.scroller != NULL)
+                gtk_widget_set_visible (GTK_WIDGET (self->installed.scroller),
+                                        self->installed.files->len != 0);
               break;
             }
         }
