@@ -367,12 +367,17 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
           gboolean changed = FALSE;
 
           if (aml_settings_get_delete_dependents (settings))
-            changed = aml_content_remove_file (dependent, &dependent_error);
+            {
+              g_debug ("deleting dependent content file: %s", dependent);
+              changed = aml_content_remove_file (dependent, &dependent_error);
+            }
           else
             {
               g_autofree char *disabled =
                 aml_content_set_disabled (dependent, TRUE, &dependent_error);
               changed = disabled != NULL;
+              g_debug ("disabling dependent content file: %s -> %s",
+                       dependent, disabled != NULL ? disabled : "(failed)");
             }
 
           if (!changed)
@@ -385,6 +390,11 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
               break;
             }
         }
+
+      g_debug ("deleted content file: %s; dependent actions=%u; cascade=%s",
+               path, dependent_paths->len,
+               aml_settings_get_delete_dependents (settings) ? "delete"
+                                                               : "disable");
 
       show_toast (self, _("Deleted"));
       {
