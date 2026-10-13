@@ -23,6 +23,7 @@
 
 #include "aml-download.h"
 #include "aml-download-private.h"
+#include "aml-download-private.h"
 #include "aml-downloads.h"
 
 #include "aml-cache.h"
@@ -79,15 +80,7 @@ aml_download_error_quark (void)
 
 /* One session for the whole launcher: a session per download would
  * throw away the connection pool. It lives until the process exits. */
-struct _AmlDownloadService {
-  SoupSession *session;
-  guint interactive_running;
-  guint bulk_running;
-  GQueue interactive_waiting;
-  GQueue bulk_waiting;
-  gboolean prefer_interactive;
-  AmlSettings *cache_settings;
-};
+
 
 guint
 aml_download_service_active (const AmlDownloadService *service)
@@ -154,61 +147,6 @@ get_session (AmlDownloadService *service)
  * One request
  * ---------------------------------------------------------- */
 
-typedef struct _DownloadRequest
-{
-  GTask *task; /* the only reference: dropped when the request ends */
-  AmlDownloadService *service; /* application-owned transfer scheduler */
-
-  /* Set once when the request is created. */
-  char *url;
-  char *dest_path;       /* NULL for a JSON request */
-  char *expected_hash;   /* NULL: nothing to verify */
-  GChecksumType hash_type;
-  char *body;            /* NULL: a GET request */
-  char *user_agent;      /* NULL: the session's own */
-  AmlDownloadProgressFunc progress;
-  gpointer user_data;
-  gboolean json;
-  gboolean api_cache;
-  char *cache_path;
-  char *global_cache_path;
-  char *stale_json;
-  char *cache_etag;
-  char *response_etag;
-  AmlSettingsCacheExpiration cache_expiration;
-  JsonParser *pending_parser;
-  char *pending_cache_data;
-
-  /* What runs once this request holds a slot: the cache check and then
-     the transfer for a file, the transfer alone for JSON. Holding the
-     slot from the very start is what keeps a whole version's assets from
-     opening thousands of files at once to hash them. */
-  void (*begin) (struct _DownloadRequest *request);
-
-  /* One attempt at a time. */
-  SoupMessage *message;
-  GInputStream *source;  /* response body, closed when it ends */
-  GOutputStream *sink;   /* the temporary file */
-  GBytes *chunk;         /* block being written */
-  GChecksum *checksum;   /* hash of the received bytes */
-  char *tmp_path;
-  char *tmp_name;
-  int parent_fd;
-  int fd;
-  goffset total;         /* announced length, -1 when unknown */
-  goffset done;
-  GError *pending_error; /* waits for the response stream to close */
-  guint http_status;     /* status of a failed attempt */
-  guint attempts;        /* attempts used, MAX_ATTEMPTS at most */
-  gboolean hash_retried; /* a wrong hash is retried only once */
-  gboolean holds_slot;
-  guint priority;
-  guint retry_source;    /* pending retry timeout, 0 while there is none */
-  guint retry_cancel_source; /* cancellation watch for a pending retry */
-  guint queue_cancel_source; /* cancellation watch while queued */
-  AmlTaskScope *scope;
-} DownloadRequest;
-
 static void start_attempt (DownloadRequest *request);
 static void file_request_start (DownloadRequest *request);
 static void read_chunk_ready (GObject *source, GAsyncResult *result,
@@ -231,7 +169,8 @@ static void cache_ready (GObject *source, GAsyncResult *result,
 static void json_cache_start (DownloadRequest *request);
 static void cache_load_ready (GObject *source, GAsyncResult *result,
                               gpointer user_data);
-static void request_succeed_json (DownloadRequest *request, JsonParser *parser);
+void aml_download_request_succeed_json (DownloadRequest *request,
+                                        JsonParser *parser);
 static void global_cache_hash_ready (GObject *source, GAsyncResult *result,
                                      gpointer user_data);
 static void global_cache_copy_ready (GObject *source, GAsyncResult *result,
@@ -241,9 +180,9 @@ static void global_cache_directory_ready (GObject *source,
                                           gpointer user_data);
 static void global_cache_files_ready (GObject *source, GAsyncResult *result,
                                       gpointer user_data);
-static GError *cancelled_error (void);
+GError *aml_download_cancelled_error (void);
 static gboolean request_was_cancelled (DownloadRequest *request, GError *error);
-static void request_fail (DownloadRequest *request, GError *error);
+void aml_download_request_fail (DownloadRequest *request, GError *error);
 static void request_succeed (DownloadRequest *request);
 
 /* ---------------------------------------------------------- *
@@ -260,262 +199,8 @@ url_for_message (const char *url)
   return end == NULL ? g_strdup (url) : g_strndup (url, end - url);
 }
 
-static AmlSettings *
-get_cache_settings (DownloadRequest *request)
-{
-  AmlDownloadService *service = request->service;
-  if (service->cache_settings == NULL)
-    service->cache_settings = aml_settings_new ();
-
-  return service->cache_settings;
-}
-
-static char *
-api_cache_path (DownloadRequest *request)
-{
-  g_autofree char *directory = aml_cache_get_api_directory ();
-  g_autofree char *key = g_strdup_printf ("%s\n%s\n%s",
-                                           request->body != NULL ? "POST" : "GET",
-                                           request->url,
-                                           request->body != NULL ? request->body : "");
-  g_autofree char *digest =
-    g_compute_checksum_for_string (G_CHECKSUM_SHA256, key, -1);
-
-  return g_build_filename (directory, digest, NULL);
-}
-
-static char *
-global_cache_path (const char *hash)
-{
-  g_autofree char *directory = aml_cache_get_files_directory ();
-
-  return g_build_filename (directory, hash, NULL);
-}
-
-static JsonParser *
-cache_parser (const char *contents, gsize length, char **response,
-              char **etag, gint64 *created)
-{
-  g_autoptr (JsonParser) envelope = json_parser_new ();
-  JsonNode *root = NULL;
-  JsonNode *node = NULL;
-  const char *body = NULL;
-  g_autoptr (JsonParser) parser = NULL;
-
-  if (!json_parser_load_from_data (envelope, contents, length, NULL))
-    return NULL;
-
-  root = json_parser_get_root (envelope);
-  if (root == NULL || !JSON_NODE_HOLDS_OBJECT (root))
-    return NULL;
-
-  node = json_object_get_member (json_node_get_object (root), "created");
-  if (node == NULL || !JSON_NODE_HOLDS_VALUE (node) ||
-      json_node_get_value_type (node) != G_TYPE_INT64)
-    return NULL;
-  *created = json_node_get_int (node);
-
-  node = json_object_get_member (json_node_get_object (root), "response");
-  if (node == NULL || !JSON_NODE_HOLDS_VALUE (node) ||
-      json_node_get_value_type (node) != G_TYPE_STRING)
-    return NULL;
-  body = json_node_get_string (node);
-
-  parser = json_parser_new ();
-  if (!json_parser_load_from_data (parser, body, -1, NULL) ||
-      json_parser_get_root (parser) == NULL)
-    return NULL;
-
-  if (response != NULL)
-    *response = g_strdup (body);
-
-  node = json_object_get_member (json_node_get_object (root), "etag");
-  if (etag != NULL && node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
-      json_node_get_value_type (node) == G_TYPE_STRING)
-    *etag = g_strdup (json_node_get_string (node));
-
-  return g_steal_pointer (&parser);
-}
-
-static void
-cache_write_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
-                  gpointer user_data)
-{
-  DownloadRequest *request = user_data;
-  g_autoptr (GError) error = NULL;
-
-  aml_fs_replace_contents_finish (G_FILE (source), result, NULL, &error);
-  if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
-    {
-      request_fail (request, cancelled_error ());
-      return;
-    }
-
-  if (error != NULL)
-    g_debug ("the Modrinth API cache was not written: %s", error->message);
-  request_succeed_json (request, g_steal_pointer (&request->pending_parser));
-}
-
-static void
-cache_write_directory_done (GObject *source, GAsyncResult *result,
-                            gpointer user_data)
-{
-  GFile *file = user_data;
-  DownloadRequest *request = g_object_get_data (G_OBJECT (file),
-                                                "aml-cache-request");
-  g_autoptr (GError) error = NULL;
-
-  if (!aml_fs_make_directory_finish (G_FILE (source), result, &error) &&
-      !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_EXISTS))
-    {
-      if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
-        {
-          request_fail (request, cancelled_error ());
-          g_object_unref (file);
-          return;
-        }
-      g_debug ("the Modrinth API cache directory was not created: %s",
-               error->message);
-      request_succeed_json (request, g_steal_pointer (&request->pending_parser));
-      g_object_unref (file);
-      return;
-    }
-
-  if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
-    {
-      request_fail (request, cancelled_error ());
-      g_object_unref (file);
-      return;
-    }
-
-  aml_fs_replace_contents_async (file, request->pending_cache_data,
-                                  strlen (request->pending_cache_data),
-                                  NULL, FALSE,
-                                  G_FILE_CREATE_REPLACE_DESTINATION,
-                                  g_task_get_cancellable (request->task),
-                                  cache_write_done, request);
-  g_object_unref (file);
-}
-
-static void
-cache_write_parent_done (GObject *source, GAsyncResult *result,
-                         gpointer user_data)
-{
-  GFile *file = user_data;
-  DownloadRequest *request = g_object_get_data (G_OBJECT (file),
-                                                "aml-cache-request");
-  g_autoptr (GError) error = NULL;
-  g_autoptr (GFile) directory = g_file_get_parent (file);
-
-  if (!aml_fs_make_directory_finish (G_FILE (source), result, &error) &&
-      !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_EXISTS))
-    {
-      if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
-        {
-          request_fail (request, cancelled_error ());
-          g_object_unref (file);
-          return;
-        }
-      g_debug ("the Modrinth API cache parent was not created: %s",
-               error->message);
-      request_succeed_json (request, g_steal_pointer (&request->pending_parser));
-      g_object_unref (file);
-      return;
-    }
-
-  if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
-    {
-      request_fail (request, cancelled_error ());
-      g_object_unref (file);
-      return;
-    }
-
-  aml_fs_make_directory_async (directory, G_PRIORITY_DEFAULT,
-                               g_task_get_cancellable (request->task),
-                               cache_write_directory_done, file);
-}
-
-static void
-cache_write_cache_done (GObject *source, GAsyncResult *result,
-                        gpointer user_data)
-{
-  GFile *file = user_data;
-  DownloadRequest *request = g_object_get_data (G_OBJECT (file),
-                                                "aml-cache-request");
-  g_autoptr (GError) error = NULL;
-  g_autoptr (GFile) directory = g_file_get_parent (file);
-  g_autoptr (GFile) parent = g_file_get_parent (directory);
-
-  if (!aml_fs_make_directory_finish (G_FILE (source), result, &error) &&
-      !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_EXISTS))
-    {
-      if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
-        {
-          request_fail (request, cancelled_error ());
-          g_object_unref (file);
-          return;
-        }
-      g_debug ("the Modrinth API cache root was not created: %s",
-               error->message);
-      request_succeed_json (request, g_steal_pointer (&request->pending_parser));
-      g_object_unref (file);
-      return;
-    }
-
-  if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
-    {
-      request_fail (request, cancelled_error ());
-      g_object_unref (file);
-      return;
-    }
-
-  aml_fs_make_directory_async (parent, G_PRIORITY_DEFAULT,
-                               g_task_get_cancellable (request->task),
-                               cache_write_parent_done, file);
-}
-
-static void
-cache_write (DownloadRequest *request, const char *response)
-{
-  g_autoptr (JsonBuilder) builder = json_builder_new ();
-  g_autoptr (JsonGenerator) generator = json_generator_new ();
-  g_autoptr (JsonNode) root = NULL;
-  g_autofree char *data = NULL;
-  g_autoptr (GFile) file = g_file_new_for_path (request->cache_path);
-  g_autoptr (GFile) directory = g_file_get_parent (file);
-  g_autoptr (GFile) parent = g_file_get_parent (directory);
-  g_autoptr (GFile) cache_root = g_file_get_parent (parent);
-  gsize length = 0;
-
-  json_builder_begin_object (builder);
-  json_builder_set_member_name (builder, "created");
-  json_builder_add_int_value (builder, g_get_real_time () / G_USEC_PER_SEC);
-  json_builder_set_member_name (builder, "response");
-  json_builder_add_string_value (builder, response);
-  if (request->response_etag != NULL)
-    {
-      json_builder_set_member_name (builder, "etag");
-      json_builder_add_string_value (builder, request->response_etag);
-    }
-  json_builder_end_object (builder);
-  root = json_builder_get_root (builder);
-  json_generator_set_root (generator, root);
-  data = json_generator_to_data (generator, &length);
-
-  /* The cache directory is normally already present. GIO's async mkdir
-   * also handles its first creation; the cache write itself is async. */
-  request->pending_cache_data = g_steal_pointer (&data);
-  g_debug ("writing Modrinth API cache entry (%zu bytes)",
-           strlen (request->pending_cache_data));
-  g_object_set_data (G_OBJECT (file), "aml-cache-request", request);
-  aml_fs_make_directory_async (cache_root, G_PRIORITY_DEFAULT,
-                               g_task_get_cancellable (request->task),
-                               cache_write_cache_done,
-                               g_object_ref (file));
-}
-
-static GError *
-cancelled_error (void)
+GError *
+aml_download_cancelled_error (void)
 {
   return g_error_new (AML_DOWNLOAD_ERROR, AML_DOWNLOAD_ERROR_CANCELLED,
                       "the download was cancelled");
@@ -685,7 +370,7 @@ aml_download_service_cancel_queued (AmlDownloadService *owned_service)
                                         request->queue_cancel_source);
           request->queue_cancel_source = 0;
         }
-      request_fail (request, cancelled_error ());
+      aml_download_request_fail (request, aml_download_cancelled_error ());
     }
 
   while (!g_queue_is_empty (&service->bulk_waiting))
@@ -697,7 +382,7 @@ aml_download_service_cancel_queued (AmlDownloadService *owned_service)
                                         request->queue_cancel_source);
           request->queue_cancel_source = 0;
         }
-      request_fail (request, cancelled_error ());
+      aml_download_request_fail (request, aml_download_cancelled_error ());
     }
 }
 
@@ -820,8 +505,8 @@ request_free (DownloadRequest *request)
    the task is completed second. The caller's callback is free to drop the
    last reference on the scope, and request_free() still has to reach the
    scope to take this request's sources off it. */
-static void
-request_fail (DownloadRequest *request, GError *error)
+void
+aml_download_request_fail (DownloadRequest *request, GError *error)
 {
   AmlTaskScope *scope = request->scope;
   gboolean cancelled = g_error_matches (error, AML_DOWNLOAD_ERROR,
@@ -849,8 +534,8 @@ request_succeed (DownloadRequest *request)
   aml_task_scope_return_boolean (scope, TRUE);
 }
 
-static void
-request_succeed_json (DownloadRequest *request, JsonParser *parser)
+void
+aml_download_request_succeed_json (DownloadRequest *request, JsonParser *parser)
 {
   AmlTaskScope *scope = request->scope;
   g_debug ("download operation=%" G_GUINT64_FORMAT " completed",
@@ -909,7 +594,7 @@ global_cache_directory_ready (GObject *source, GAsyncResult *result,
     {
       if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
         {
-          request_fail (request, cancelled_error ());
+          aml_download_request_fail (request, aml_download_cancelled_error ());
           return;
         }
       g_debug ("the global file cache directory was not created: %s",
@@ -935,7 +620,7 @@ global_cache_files_ready (GObject *source, GAsyncResult *result,
     {
       if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
         {
-          request_fail (request, cancelled_error ());
+          aml_download_request_fail (request, aml_download_cancelled_error ());
           return;
         }
       g_debug ("the global file cache directory was not created: %s",
@@ -961,7 +646,7 @@ global_cache_copy_ready (GObject *source, GAsyncResult *result,
   if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)) ||
       g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
     {
-      request_fail (request, cancelled_error ());
+      aml_download_request_fail (request, aml_download_cancelled_error ());
       return;
     }
 
@@ -978,7 +663,7 @@ global_cache_hash_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   if (request_was_cancelled (request, error))
     {
-      request_fail (request, cancelled_error ());
+      aml_download_request_fail (request, aml_download_cancelled_error ());
       return;
     }
 
@@ -1002,7 +687,7 @@ global_cache_hash_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 json_cache_start (DownloadRequest *request)
 {
-  AmlSettings *settings = get_cache_settings (request);
+  AmlSettings *settings = aml_download_get_cache_settings (request);
 
   request->api_cache = aml_settings_get_cache_modrinth_api_responses (settings);
   request->cache_expiration = aml_settings_get_cache_expiration (settings);
@@ -1013,7 +698,7 @@ json_cache_start (DownloadRequest *request)
       return;
     }
 
-  request->cache_path = api_cache_path (request);
+  request->cache_path = aml_download_api_cache_path (request);
   {
     g_autoptr (GFile) file = g_file_new_for_path (request->cache_path);
 
@@ -1038,7 +723,7 @@ cache_load_ready (GObject *source, GAsyncResult *result, gpointer user_data)
     {
       if (request_was_cancelled (request, error))
         {
-          request_fail (request, cancelled_error ());
+          aml_download_request_fail (request, aml_download_cancelled_error ());
           return;
         }
 
@@ -1049,7 +734,7 @@ cache_load_ready (GObject *source, GAsyncResult *result, gpointer user_data)
     {
       g_autofree char *etag = NULL;
 
-      parser = cache_parser (contents, length, &response, &etag, &created);
+      parser = aml_download_cache_parser (contents, length, &response, &etag, &created);
       g_clear_pointer (&request->cache_etag, g_free);
       request->cache_etag = g_steal_pointer (&etag);
     }
@@ -1064,11 +749,11 @@ cache_load_ready (GObject *source, GAsyncResult *result, gpointer user_data)
     {
       if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
         {
-          request_fail (request, cancelled_error ());
+          aml_download_request_fail (request, aml_download_cancelled_error ());
           return;
         }
 
-      request_succeed_json (request, g_steal_pointer (&parser));
+      aml_download_request_succeed_json (request, g_steal_pointer (&parser));
       return;
     }
 
@@ -1088,7 +773,7 @@ cache_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   if (request_was_cancelled (request, error))
     {
-      request_fail (request, cancelled_error ());
+      aml_download_request_fail (request, aml_download_cancelled_error ());
       return;
     }
 
@@ -1103,7 +788,7 @@ cache_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   /* Missing, unreadable or stale: fetch it again. The slot is already
      held, so this goes straight to the transfer. */
   g_clear_error (&error);
-  request->global_cache_path = global_cache_path (request->expected_hash);
+  request->global_cache_path = aml_download_global_cache_path (request->expected_hash);
   {
     g_autoptr (GFile) global =
       g_file_new_for_path (request->global_cache_path);
@@ -1320,7 +1005,7 @@ verify_and_install (DownloadRequest *request)
 {
   if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
     {
-      request_fail (request, cancelled_error ());
+      aml_download_request_fail (request, aml_download_cancelled_error ());
       return;
     }
 
@@ -1377,7 +1062,7 @@ verify_and_install (DownloadRequest *request)
       g_autoptr (GFile) parent = g_file_get_parent (directory_file);
 
       if (request->global_cache_path == NULL)
-        request->global_cache_path = global_cache_path (request->expected_hash);
+        request->global_cache_path = aml_download_global_cache_path (request->expected_hash);
       aml_fs_make_directory_async (parent, G_PRIORITY_DEFAULT,
                                    g_task_get_cancellable (request->task),
                                    global_cache_directory_ready, request);
@@ -1446,7 +1131,7 @@ attempt_failed (DownloadRequest *request, GError *error)
   if (request_was_cancelled (request, error))
     {
       g_clear_error (&error);
-      request_fail (request, cancelled_error ());
+      aml_download_request_fail (request, aml_download_cancelled_error ());
       return;
     }
 
@@ -1472,7 +1157,7 @@ attempt_failed (DownloadRequest *request, GError *error)
           json_parser_get_root (parser) != NULL)
         {
           g_clear_error (&error);
-          request_succeed_json (request, g_steal_pointer (&parser));
+          aml_download_request_succeed_json (request, g_steal_pointer (&parser));
           return;
         }
     }
@@ -1521,7 +1206,7 @@ attempt_failed (DownloadRequest *request, GError *error)
       return;
     }
 
-  request_fail (request, error);
+  aml_download_request_fail (request, error);
 }
 
 static gboolean
@@ -1540,7 +1225,7 @@ retry_when_due (gpointer user_data)
 
   if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
     {
-      request_fail (request, cancelled_error ());
+      aml_download_request_fail (request, aml_download_cancelled_error ());
       return G_SOURCE_REMOVE;
     }
 
@@ -1563,7 +1248,7 @@ retry_cancelled (gpointer user_data)
       request->retry_cancel_source = 0;
     }
 
-  request_fail (request, cancelled_error ());
+  aml_download_request_fail (request, aml_download_cancelled_error ());
   return G_SOURCE_REMOVE;
 }
 
@@ -1580,7 +1265,7 @@ queued_cancelled (gpointer user_data)
                         ? &service->interactive_waiting
                         : &service->bulk_waiting,
                       request))
-    request_fail (request, cancelled_error ());
+    aml_download_request_fail (request, aml_download_cancelled_error ());
 
   return G_SOURCE_REMOVE;
 }
@@ -1597,7 +1282,7 @@ start_attempt (DownloadRequest *request)
 
   if (g_cancellable_is_cancelled (cancellable))
     {
-      request_fail (request, cancelled_error ());
+      aml_download_request_fail (request, aml_download_cancelled_error ());
       return;
     }
 
@@ -1619,7 +1304,7 @@ start_attempt (DownloadRequest *request)
     {
       g_autofree char *url = url_for_message (request->url);
 
-      request_fail (request,
+      aml_download_request_fail (request,
                     g_error_new (AML_DOWNLOAD_ERROR, AML_DOWNLOAD_ERROR_NETWORK,
                                  "\"%s\" is not a usable download url", url));
       return;
@@ -1652,7 +1337,7 @@ start_attempt (DownloadRequest *request)
 
   if (!open_temporary (request, &error))
     {
-      request_fail (request, g_steal_pointer (&error));
+      aml_download_request_fail (request, g_steal_pointer (&error));
       return;
     }
 
@@ -1699,7 +1384,7 @@ json_ready (GObject *source, GAsyncResult *result, gpointer user_data)
           json_parser_get_root (stale) != NULL)
         {
           g_clear_error (&status_error);
-          request_succeed_json (request, g_steal_pointer (&stale));
+          aml_download_request_succeed_json (request, g_steal_pointer (&stale));
           return;
         }
     }
@@ -1723,7 +1408,7 @@ json_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 
   if (size > MAX_JSON_RESPONSE_SIZE)
     {
-      request_fail (request,
+      aml_download_request_fail (request,
                     g_error_new (AML_DOWNLOAD_ERROR, AML_DOWNLOAD_ERROR_IO,
                                  "the JSON response is too large (%zu bytes)",
                                  size));
@@ -1735,7 +1420,7 @@ json_ready (GObject *source, GAsyncResult *result, gpointer user_data)
     {
       /* A body that is not JSON would come back unchanged on a retry,
          so the parse error is reported as it is. */
-      request_fail (request, g_steal_pointer (&parse_error));
+      aml_download_request_fail (request, g_steal_pointer (&parse_error));
       return;
     }
 
@@ -1743,7 +1428,7 @@ json_ready (GObject *source, GAsyncResult *result, gpointer user_data)
     {
       /* json-glib accepts an empty document without complaint; there
          is nothing to hand to a caller though. */
-      request_fail (request,
+      aml_download_request_fail (request,
                     g_error_new_literal (JSON_PARSER_ERROR,
                                          JSON_PARSER_ERROR_PARSE,
                                          "the response body holds no JSON"));
@@ -1755,11 +1440,11 @@ json_ready (GObject *source, GAsyncResult *result, gpointer user_data)
       data = g_bytes_get_data (body, &size);
       response = g_strndup (data, size);
       request->pending_parser = g_steal_pointer (&parser);
-      cache_write (request, response);
+      aml_download_cache_write (request, response);
       return;
     }
 
-  request_succeed_json (request, g_steal_pointer (&parser));
+  aml_download_request_succeed_json (request, g_steal_pointer (&parser));
 }
 
 /* ---------------------------------------------------------- *
