@@ -389,7 +389,7 @@ versions_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   VersionsAsk *ask = user_data;
   AmlLoaderRow *self = ask->row;
   g_autoptr (GError) error = NULL;
-  GPtrArray *versions = NULL;
+  g_autoptr (GPtrArray) versions = NULL;
 
   /* The answer belongs to the load this row already replaced, which was
      cancelled on the way out. */

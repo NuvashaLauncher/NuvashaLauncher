@@ -85,6 +85,21 @@ open_the_page (AmlSignInDialog *self)
   if (self->code == NULL)
     return;
 
+  {
+    g_autoptr (GUri) uri = g_uri_parse (self->code->verification_uri,
+                                        G_URI_FLAGS_NONE, &error);
+    const char *scheme = uri != NULL ? g_uri_get_scheme (uri) : NULL;
+    const char *host = uri != NULL ? g_uri_get_host (uri) : NULL;
+
+    if (uri == NULL || g_ascii_strcasecmp (scheme, "https") != 0 ||
+        g_ascii_strcasecmp (host, "microsoft.com") != 0)
+      {
+        g_clear_error (&error);
+        show_error (self, "Microsoft returned an unsafe verification address");
+        return;
+      }
+  }
+
   if (!g_app_info_launch_default_for_uri (self->code->verification_uri, NULL,
                                           &error))
     {

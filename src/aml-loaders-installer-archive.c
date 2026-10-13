@@ -259,6 +259,7 @@ aml_loader_write_jar_manifest_attribute (const char *path, const char *name,
   struct archive *out = NULL;
   struct archive_entry *header = NULL;
   g_autofree char *temporary = NULL;
+  g_autofree char *temporary_directory = g_path_get_dirname (path);
   gboolean written = FALSE;
   gboolean ok = TRUE;
   g_autoptr (GError) local_error = NULL;
@@ -281,21 +282,33 @@ aml_loader_write_jar_manifest_attribute (const char *path, const char *name,
   /* The jar is written out beside itself and moved over it only once it
      is whole, the same way a download is: a jar that is half written is a
      broken game. */
-  temporary = g_strconcat (path, ".aml-new", NULL);
+  {
+    g_autoptr (GError) temporary_error = NULL;
+    int temporary_fd = aml_fs_open_temporary_file (
+      temporary_directory, ".aml-new-XXXXXX", &temporary, &temporary_error);
 
-  out = archive_write_new ();
-  archive_write_set_format_zip (out);
+    if (temporary_fd < 0)
+      {
+        g_propagate_error (error, g_steal_pointer (&temporary_error));
+        archive_read_free (in);
+        return FALSE;
+      }
 
-  if (archive_write_open_filename (out, temporary) != ARCHIVE_OK)
-    {
-      g_set_error (error, AML_LOADERS_ERROR, AML_LOADERS_ERROR_INSTALLER,
-                   "the patched client jar at \"%s\" cannot be written: %s",
-                   path, archive_error_string (out));
-      archive_read_free (in);
-      archive_write_free (out);
-      aml_fs_unlink (temporary, NULL);
-      return FALSE;
-    }
+    out = archive_write_new ();
+    archive_write_set_format_zip (out);
+
+    if (archive_write_open_fd (out, temporary_fd) != ARCHIVE_OK)
+      {
+        g_set_error (error, AML_LOADERS_ERROR,
+                     AML_LOADERS_ERROR_INSTALLER,
+                     "the patched client jar at \"%s\" cannot be written: %s",
+                     path, archive_error_string (out));
+        archive_read_free (in);
+        archive_write_free (out);
+        aml_fs_unlink (temporary, NULL);
+        return FALSE;
+      }
+  }
 
   while ((status = archive_read_next_header (in, &header)) == ARCHIVE_OK)
     {
@@ -306,13 +319,6 @@ aml_loader_write_jar_manifest_attribute (const char *path, const char *name,
       size_t size = 0;
       la_int64_t offset = 0;
       int status;
-
-      if (archive_write_header (out, copy) != ARCHIVE_OK)
-        {
-          archive_entry_free (copy);
-          ok = FALSE;
-          break;
-        }
 
       if (archive_entry_pathname (header) == NULL)
         {
@@ -371,14 +377,26 @@ aml_loader_write_jar_manifest_attribute (const char *path, const char *name,
               }
 
               archive_entry_set_size (copy, strlen (text));
-              written = archive_write_data (out, text, strlen (text)) ==
-                        (la_ssize_t) strlen (text);
+              if (archive_write_header (out, copy) != ARCHIVE_OK)
+                ok = FALSE;
+              else
+                written = archive_write_data (out, text, strlen (text)) ==
+                          (la_ssize_t) strlen (text);
               if (!written)
                 ok = FALSE;
             }
+          else
+            ok = FALSE;
         }
       else
         {
+          if (archive_write_header (out, copy) != ARCHIVE_OK)
+            {
+              archive_entry_free (copy);
+              ok = FALSE;
+              break;
+            }
+
           for (;;)
             {
               status = archive_read_data_block (in, &block, &size, &offset);

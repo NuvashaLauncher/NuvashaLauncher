@@ -251,7 +251,8 @@ aml_version_row_load (AmlVersionRow *self,
   g_return_if_fail (AML_IS_VERSION_ROW (self));
   g_return_if_fail (AML_IS_SETTINGS (settings));
 
-  g_cancellable_cancel (self->cancellable);
+  if (self->cancellable != NULL)
+    g_cancellable_cancel (self->cancellable);
   g_clear_object (&self->cancellable);
   self->cancellable = g_cancellable_new ();
 

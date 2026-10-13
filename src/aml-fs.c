@@ -508,6 +508,7 @@ aml_fs_open_file_nofollow (const char *directory, const char *relative,
                      mode);
     int saved_errno = errno;
     close (current);
+    current = -1;
     if (fd >= 0)
       return fd;
     errno = saved_errno;
