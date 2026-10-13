@@ -323,12 +323,44 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
       show_error (self, _("The file cannot be deleted"), error);
     else
     {
-      GPtrArray *dependent_paths =
-        g_object_get_data (G_OBJECT (source), "aml-dependent-paths");
+      g_autoptr (GPtrArray) dependent_paths =
+        g_ptr_array_new_with_free_func (g_free);
       g_autoptr (AmlSettings) settings = aml_settings_new ();
+      AmlContentFile *deleted = NULL;
 
-      for (guint i = 0; dependent_paths != NULL &&
-                         i < dependent_paths->len; i++)
+      for (guint i = 0; i < self->installed.files->len; i++)
+        {
+          AmlContentFile *candidate =
+            g_ptr_array_index (self->installed.files, i);
+
+          if (g_strcmp0 (candidate->path, path) == 0)
+            {
+              deleted = candidate;
+              break;
+            }
+        }
+
+      if (deleted != NULL && deleted->project_id != NULL)
+        for (guint i = 0; i < self->installed.files->len; i++)
+          {
+            AmlContentFile *other =
+              g_ptr_array_index (self->installed.files, i);
+
+            if (other == deleted || other->required_dependencies == NULL)
+              continue;
+
+            for (guint j = 0; j < other->required_dependencies->len; j++)
+              if (g_strcmp0 (g_ptr_array_index (other->required_dependencies, j),
+                             deleted->project_id) == 0 ||
+                  g_strcmp0 (g_ptr_array_index (other->required_dependencies, j),
+                             deleted->local_id) == 0)
+                {
+                  g_ptr_array_add (dependent_paths, g_strdup (other->path));
+                  break;
+                }
+          }
+
+      for (guint i = 0; i < dependent_paths->len; i++)
         {
           const char *dependent = g_ptr_array_index (dependent_paths, i);
           g_autoptr (GError) dependent_error = NULL;
