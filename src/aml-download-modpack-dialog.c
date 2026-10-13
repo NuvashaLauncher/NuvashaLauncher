@@ -137,7 +137,10 @@ dialog_dispose (GObject *object)
   g_clear_pointer (&self->opt_files, g_ptr_array_unref);
   g_clear_pointer (&self->seen_ids, g_hash_table_unref);
    remove_pack_file (self);
-  g_free (self->directory);
+   /* Imported archives belong to the caller and are not deleted, but the
+    * dialog still owns the path string it stored. */
+   g_clear_pointer (&self->pack_path, g_free);
+   g_free (self->directory);
   g_free (self->instance_name);
   self->instance_name = NULL;
   g_free (self->icon_path);
