@@ -112,15 +112,26 @@ catalogs. To uninstall:
 sudo make uninstall PREFIX=/usr/local
 ```
 
-On Arch Linux, build and install a pacman package from the repository:
+On Arch Linux, the repository includes a `PKGBUILD` for building a pacman
+package from the current checkout. From the repository root, run:
 
 ```
 makepkg -si
 ```
 
-The `PKGBUILD` packages the current checkout's release AML binary under `/usr`.
-Run it from the repository root; it deliberately uses the checkout directly so
-makepkg does not treat the tracked `src/` directory as a temporary source tree.
+The `-s` option installs missing build dependencies and `-i` installs the
+resulting package. The `PKGBUILD` packages the release binary, desktop entry,
+metadata and translations under `/usr`; it does not run the test suite or
+create a debug package. The generated package is named like
+`aml-0.1-1-x86_64.pkg.tar.zst` and can also be installed directly with:
+
+```
+sudo pacman -U ./aml-0.1-1-x86_64.pkg.tar.zst
+```
+
+Run `makepkg -si` from the repository root. The PKGBUILD uses the checkout
+directly so makepkg does not treat the tracked `src/` directory as a temporary
+source tree.
 
 ## Tests
 
