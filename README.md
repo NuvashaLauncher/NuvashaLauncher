@@ -113,25 +113,26 @@ sudo make uninstall PREFIX=/usr/local
 ```
 
 On Arch Linux, the repository includes a `PKGBUILD` for building a pacman
-package from the current checkout. From the repository root, run:
+package from a pinned GitLab release snapshot. From the AUR/package directory
+containing the PKGBUILD, run:
 
 ```
-makepkg -si
+makepkg -csi
 ```
 
-The `-s` option installs missing build dependencies and `-i` installs the
-resulting package. The `PKGBUILD` packages the release binary, desktop entry,
-metadata and translations under `/usr`; it does not run the test suite or
-create a debug package. The generated package is named like
+The `-s` option installs missing build dependencies, `-c` removes temporary
+source/build files after a successful build, and `-i` installs the resulting
+package. The PKGBUILD verifies the pinned source archive with SHA-256 and
+packages the release binary, desktop entry, metadata and translations under
+`/usr`; it does not run the test suite or create a debug package. The generated package is named like
 `aml-0.1-1-x86_64.pkg.tar.zst` and can also be installed directly with:
 
 ```
 sudo pacman -U ./aml-0.1-1-x86_64.pkg.tar.zst
 ```
 
-Run `makepkg -si` from the repository root. The PKGBUILD uses the checkout
-directly so makepkg does not treat the tracked `src/` directory as a temporary
-source tree.
+Use the AUR/package directory rather than the AML source checkout when running
+makepkg; makepkg uses a temporary `src/` directory for the pinned archive.
 
 ## Tests
 
