@@ -583,6 +583,7 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
   const char *app_ids[] = { "io.gitlab.anotherminecraftlauncher.AML", NULL };
 
   adw_about_dialog_set_application_name (ADW_ABOUT_DIALOG (dialog), "AML");
+  adw_about_dialog_set_version (ADW_ABOUT_DIALOG (dialog), AML_VERSION);
   adw_about_dialog_set_developer_name (ADW_ABOUT_DIALOG (dialog), "Flia");
 
   adw_about_dialog_set_website (ADW_ABOUT_DIALOG (dialog),
