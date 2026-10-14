@@ -8,7 +8,7 @@ arch=('x86_64')
 options=('!debug')
 url='https://gitlab.com/anotherminecraftlauncher/aml'
 license=('GPL-3.0-only')
-depends=('gtk4' 'libadwaita' 'json-glib' 'libsoup3' 'libarchive' 'wayland')
+depends=('gtk4>=4.10' 'libadwaita>=1.5' 'json-glib' 'libsoup3' 'libarchive' 'wayland')
 makedepends=('gcc' 'make' 'gettext' 'pkgconf')
 optdepends=('java-runtime: launch Minecraft instances')
 source=('aml-9b7fc49.tar.gz::https://gitlab.com/anotherminecraftlauncher/aml/-/archive/9b7fc49/aml-9b7fc49.tar.gz')

@@ -59,13 +59,24 @@ rather than against a file that has to be kept in step with it.
 The build needs a C17 compiler, GNU make, and the development packages
 for these libraries, named as `pkg-config` knows them:
 
-- `gtk4`
-- `libadwaita-1`
+- `gtk4` 4.10 or newer
+- `libadwaita-1` 1.5 or newer
 - `json-glib-1.0`
 - `libsoup-3.0`
 - `libarchive`
 - `gio-unix-2.0`
 - `gettext` (for `msgfmt`, which builds the translation catalogs)
+
+GTK 4.10 is required for `GtkFileDialog`, and libadwaita 1.5 is required for
+the adaptive dialog APIs used by AML. The other listed libraries use their
+normal major API versions and have no newer minimum identified by AML.
+
+Get the source with:
+
+```
+git clone https://gitlab.com/anotherminecraftlauncher/aml.git
+cd aml
+```
 
 On Debian and Ubuntu:
 
@@ -76,6 +87,9 @@ sudo apt install build-essential pkg-config \
     libarchive-dev
 ```
 
+Use Ubuntu 24.04 or newer (or an equivalent Debian release) so the GTK and
+libadwaita versions meet the minimums above.
+
 On Fedora:
 
 ```
@@ -84,12 +98,18 @@ sudo dnf install gcc make gettext pkgconf-pkg-config \
     libarchive-devel
 ```
 
+Use Fedora 40 or newer so the GTK and libadwaita versions meet the minimums
+above.
+
 On Arch:
 
 ```
 sudo pacman -S base-devel gettext pkgconf gtk4 libadwaita json-glib libsoup \
     libarchive
 ```
+
+Arch's current packages satisfy the required GTK 4.10 and libadwaita 1.5
+minimums.
 
 ## Building
 
@@ -129,6 +149,16 @@ or create a debug package. The generated package is named like
 
 ```
 sudo pacman -U ./aml-0.1-1-x86_64.pkg.tar.zst
+```
+
+If you cloned the full AML source repository, copy the PKGBUILD to a separate
+directory before running makepkg:
+
+```
+mkdir ../aml-package
+cp PKGBUILD ../aml-package/
+cd ../aml-package
+makepkg -si
 ```
 
 Use the AUR/package directory rather than the AML source checkout when running
