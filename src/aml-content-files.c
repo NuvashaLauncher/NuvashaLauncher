@@ -385,7 +385,8 @@ apply_index_entry (ScanRun *run, AmlContentFile *file)
   if (entry->download_url != NULL && *entry->download_url != '\0')
     file->download_url = g_strdup (entry->download_url);
   if (!file->local_metadata && entry->project_name != NULL &&
-      *entry->project_name != '\0')
+      *entry->project_name != '\0' &&
+      g_strcmp0 (entry->project_name, entry->project_id) != 0)
     {
       g_free (file->project_name);
       file->project_name = g_strdup (entry->project_name);
