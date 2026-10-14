@@ -222,7 +222,7 @@ void
 on_resolved (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
              gpointer user_data)
 {
-  AmlLauncher *self = user_data;
+  AmlLauncher *self = AML_LAUNCHER (user_data);
   g_autoptr (GError) error = NULL;
   AmlResolvedVersion *resolved = aml_resolve_version_finish (result, &error);
 
@@ -276,7 +276,7 @@ on_resolved (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 void
 on_resolve_progress (const AmlResolveProgress *progress, gpointer user_data)
 {
-  AmlLauncher *self = user_data;
+  AmlLauncher *self = AML_LAUNCHER (user_data);
   guint percent;
   g_autofree char *detail = NULL;
 

@@ -250,7 +250,7 @@ append_line (AmlLogsPage *self, const char *line)
 static void
 on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlLogsPage *self = user_data;
+  AmlLogsPage *self = AML_LOGS_PAGE (user_data);
   gboolean had_search = self->filtered;
 
   self->filtered =
@@ -283,7 +283,7 @@ on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED, guint keyval,
                  G_GNUC_UNUSED,
                gpointer user_data)
 {
-  AmlLogsPage *self = user_data;
+  AmlLogsPage *self = AML_LOGS_PAGE (user_data);
 
   if (keyval == GDK_KEY_f && (state & GDK_CONTROL_MASK))
     {
@@ -336,7 +336,7 @@ update_controls (AmlLogsPage *self)
 static void
 on_clear_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlLogsPage *self = user_data;
+  AmlLogsPage *self = AML_LOGS_PAGE (user_data);
 
   aml_launcher_clear_log (self->launcher);
   reload_log (self);
@@ -358,7 +358,7 @@ open_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 on_open_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlLogsPage *self = user_data;
+  AmlLogsPage *self = AML_LOGS_PAGE (user_data);
   g_autofree char *directory =
     aml_launcher_get_log_directory (self->launcher);
   g_autofree char *uri = NULL;
@@ -383,7 +383,7 @@ on_state_changed (AmlLauncher *launcher G_GNUC_UNUSED,
                   AmlLaunchState state G_GNUC_UNUSED,
                   const char *detail G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlLogsPage *self = user_data;
+  AmlLogsPage *self = AML_LOGS_PAGE (user_data);
 
   update_controls (self);
 }
@@ -392,7 +392,7 @@ static void
 on_output (AmlLauncher *launcher G_GNUC_UNUSED, const char *line,
            gboolean stderr G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlLogsPage *self = user_data;
+  AmlLogsPage *self = AML_LOGS_PAGE (user_data);
 
   append_line (self, line);
 }
@@ -415,7 +415,7 @@ scroll_to_end (AmlLogsPage *self)
 static void
 on_adjustment_changed (GtkAdjustment *adjustment, gpointer user_data)
 {
-  AmlLogsPage *self = user_data;
+  AmlLogsPage *self = AML_LOGS_PAGE (user_data);
   gdouble at_end;
 
   at_end = gtk_adjustment_get_upper (adjustment) -
@@ -431,7 +431,7 @@ on_adjustment_changed (GtkAdjustment *adjustment, gpointer user_data)
 static void
 on_first_map (GtkWidget *widget G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlLogsPage *self = user_data;
+  AmlLogsPage *self = AML_LOGS_PAGE (user_data);
 
   scroll_to_end (self);
   g_signal_handlers_disconnect_by_data (self, self);

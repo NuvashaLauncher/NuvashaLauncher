@@ -89,7 +89,7 @@ refresh_downloads (AmlMainWindow *self)
 
   for (guint i = 0; i < jobs->len; i++)
     {
-      AmlDownload *download = g_ptr_array_index (jobs, i);
+      AmlDownload *download = AML_DOWNLOAD (g_ptr_array_index (jobs, i));
       DownloadRow *row = g_hash_table_lookup (self->downloads.rows, download);
       const char *phase = aml_download_get_detail (download);
       g_autofree char *count = download_count_text (download);

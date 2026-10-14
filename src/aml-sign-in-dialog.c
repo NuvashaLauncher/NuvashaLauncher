@@ -236,7 +236,7 @@ on_open_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 static void
 on_closed (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlSignInDialog *self = user_data;
+  AmlSignInDialog *self = AML_SIGN_IN_DIALOG (user_data);
 
   g_cancellable_cancel (self->cancellable);
 }

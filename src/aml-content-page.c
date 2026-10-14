@@ -207,7 +207,7 @@ installed_filter_rows (AmlContentPage *self)
 
   for (GList *item = self->installed.rows_list; item != NULL; item = item->next)
     {
-      GtkWidget *row = item->data;
+      GtkWidget *row = GTK_WIDGET (item->data);
       AmlContentFile *file = g_object_get_data (G_OBJECT (row), "aml-file");
       gboolean visible = TRUE;
 
@@ -230,7 +230,8 @@ void
 file_row_refresh (GtkWidget *row)
 {
   AmlContentFile *file = g_object_get_data (G_OBJECT (row), "aml-file");
-  AmlContentPage *self = g_object_get_data (G_OBJECT (row), "aml-page");
+  AmlContentPage *self =
+    AML_CONTENT_PAGE (g_object_get_data (G_OBJECT (row), "aml-page"));
   const char *title = NULL;
 
   if (file == NULL || !GTK_IS_WIDGET (row))
@@ -320,7 +321,7 @@ row_show_description (GtkWidget *row, const char *description)
 static gboolean
 on_mod_toggled (GtkSwitch *sw, gboolean state G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  AmlContentPage *self = AML_CONTENT_PAGE (user_data);
   AmlContentFile *file = g_object_get_data (G_OBJECT (sw), "aml-file");
 
   if (file == NULL || !toggle_file (self, file))
@@ -335,7 +336,7 @@ on_mod_toggled (GtkSwitch *sw, gboolean state G_GNUC_UNUSED, gpointer user_data)
 static void
 on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  AmlContentPage *self = AML_CONTENT_PAGE (user_data);
   const char *path = g_object_get_data (G_OBJECT (source), "aml-path");
   g_autoptr (GError) error = NULL;
 
@@ -423,8 +424,9 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
 
                   if (dependent_row != NULL)
                     {
-                      GtkSwitch *switch_widget = g_object_get_data (
-                        G_OBJECT (dependent_row), "aml-mod-switch");
+                      GtkSwitch *switch_widget = GTK_SWITCH (
+                        g_object_get_data (G_OBJECT (dependent_row),
+                                           "aml-mod-switch"));
                       if (switch_widget != NULL)
                         {
                           gtk_switch_set_active (switch_widget, FALSE);
@@ -469,7 +471,8 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
 
           if (g_strcmp0 (file->path, path) == 0)
             {
-              GtkWidget *row = g_hash_table_lookup (self->installed.rows, path);
+              GtkWidget *row = GTK_WIDGET (
+                g_hash_table_lookup (self->installed.rows, path));
               GList *link = g_list_find (self->installed.rows_list, row);
 
               if (row != NULL)
@@ -506,7 +509,7 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
 static void
 on_delete_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  AmlContentPage *self = AML_CONTENT_PAGE (user_data);
   const char *path = g_object_get_data (G_OBJECT (source), "aml-path");
   GPtrArray *dependent_paths =
     g_object_get_data (G_OBJECT (source), "aml-dependent-paths");
@@ -536,7 +539,7 @@ on_delete_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 static void
 on_trash_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  AmlContentPage *self = AML_CONTENT_PAGE (user_data);
   AmlContentFile *file = g_object_get_data (G_OBJECT (button), "aml-file");
   g_autofree char *heading = NULL;
   g_autofree char *body = NULL;
@@ -703,8 +706,8 @@ local_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
       if (load->page->installed.scroller != NULL)
         {
-          GtkWidget *icon = g_object_get_data (G_OBJECT (load->row),
-                                               "aml-icon");
+          GtkWidget *icon = GTK_WIDGET (
+            g_object_get_data (G_OBJECT (load->row), "aml-icon"));
           if (icon != NULL)
             aml_icon_widget_set_file (icon, file->local_icon_path);
         }
@@ -720,7 +723,8 @@ static void
 load_row_icon (AmlContentPage *self, GtkWidget *row)
 {
   AmlContentFile *file = g_object_get_data (G_OBJECT (row), "aml-file");
-  GtkWidget *icon = g_object_get_data (G_OBJECT (row), "aml-icon");
+  GtkWidget *icon =
+    GTK_WIDGET (g_object_get_data (G_OBJECT (row), "aml-icon"));
   GtkWidget *scroller = GTK_WIDGET (self->installed.scroller);
   graphene_rect_t bounds;
 
@@ -1131,7 +1135,7 @@ static void
 metadata_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                 gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  AmlContentPage *self = AML_CONTENT_PAGE (user_data);
   g_autoptr (GError) error = NULL;
 
   if (aml_content_metadata_finish (result, &error))
@@ -1141,8 +1145,8 @@ metadata_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         {
            AmlContentFile *file =
              g_ptr_array_index (self->installed.files, i);
-          GtkWidget *row = g_hash_table_lookup (self->installed.rows,
-                                                file->path);
+          GtkWidget *row = GTK_WIDGET (
+            g_hash_table_lookup (self->installed.rows, file->path));
 
            if (row != NULL)
              file_row_refresh (row);
@@ -1278,7 +1282,7 @@ plan_stopped (AmlContentPage *self)
 static void
 on_update_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  AmlContentPage *self = AML_CONTENT_PAGE (user_data);
   UpdateRun *run = g_object_get_data (G_OBJECT (source), "aml-update-run");
   const char *response =
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
@@ -1466,7 +1470,7 @@ update_check_next (UpdateRun *run)
 void
 aml_content_page_on_update_all_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  AmlContentPage *self = AML_CONTENT_PAGE (user_data);
   UpdateRun *run = g_new0 (UpdateRun, 1);
 
   if (g_object_get_data (G_OBJECT (self), "aml-update-run") != NULL ||
@@ -1499,7 +1503,7 @@ open_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 void
 aml_content_page_on_open_folder_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  AmlContentPage *self = AML_CONTENT_PAGE (user_data);
   g_autofree char *uri = NULL;
 
   /* The folder may not exist yet on a fresh instance: asking the desktop

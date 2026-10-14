@@ -168,7 +168,7 @@ void
 on_manifest_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                    gpointer user_data)
 {
-  AmlLauncher *self = user_data;
+  AmlLauncher *self = AML_LAUNCHER (user_data);
   g_autoptr (GError) error = NULL;
   g_autoptr (AmlVersionManifest) manifest =
     aml_version_manifest_fetch_finish (result, &error);

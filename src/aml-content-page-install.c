@@ -574,7 +574,7 @@ plan_text (AmlContentPage *self, PlanRun *plan)
 static void
 on_plan_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  AmlContentPage *self = AML_CONTENT_PAGE (user_data);
   PlanRun *plan = g_object_get_data (G_OBJECT (source), "aml-plan");
   const char *response =
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);

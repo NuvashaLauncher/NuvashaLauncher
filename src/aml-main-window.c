@@ -31,7 +31,7 @@ on_window_launcher_state (AmlLauncher *launcher G_GNUC_UNUSED,
                           AmlLaunchState state,
                           const char *detail, gpointer user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   g_autofree char *message = NULL;
   const char *what = NULL;
 

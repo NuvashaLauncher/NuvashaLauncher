@@ -394,7 +394,7 @@ custom_loaded (GObject      *source G_GNUC_UNUSED,
 static void
 on_retry_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlJavaRow *self = user_data;
+  AmlJavaRow *self = AML_JAVA_ROW (user_data);
 
   aml_java_row_load (self, self->wanted);
 }
@@ -448,7 +448,7 @@ add_probed (GObject      *source G_GNUC_UNUSED,
 static void
 add_chosen (GObject *dialog, GAsyncResult *result, gpointer user_data)
 {
-  AmlJavaRow *self = user_data;
+  AmlJavaRow *self = AML_JAVA_ROW (user_data);
   g_autoptr (GError) error = NULL;
   g_autoptr (GFile) file =
     gtk_file_dialog_open_finish (GTK_FILE_DIALOG (dialog), result, &error);
@@ -494,7 +494,7 @@ on_picked (GObject    *object G_GNUC_UNUSED,
            GParamSpec *pspec G_GNUC_UNUSED,
            gpointer    user_data)
 {
-  AmlJavaRow *self = user_data;
+  AmlJavaRow *self = AML_JAVA_ROW (user_data);
   GtkRoot *root;
   GtkFileDialog *dialog;
   guint selected = adw_combo_row_get_selected (ADW_COMBO_ROW (self));

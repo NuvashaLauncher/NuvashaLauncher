@@ -45,7 +45,7 @@ on_open_folder_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 void
 on_open_folder_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  AmlInstancePage *self = AML_INSTANCE_PAGE (user_data);
 
   OpenFolderWait *wait = g_new0 (OpenFolderWait, 1);
   wait->page = g_object_ref (self);
@@ -58,7 +58,7 @@ static void
 on_export_progress (guint64 done, guint64 total, const char *detail,
                     gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  AmlInstancePage *self = AML_INSTANCE_PAGE (user_data);
 
   if (self->export_download != NULL)
     {
@@ -71,7 +71,7 @@ static void
 on_export_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                 gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  AmlInstancePage *self = AML_INSTANCE_PAGE (user_data);
   g_autoptr (GError) error = NULL;
 
   if (!aml_modpack_export_finish (result, &error))
@@ -99,7 +99,7 @@ static void
 on_export_file_chosen (GObject *source, GAsyncResult *result,
                        gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  AmlInstancePage *self = AML_INSTANCE_PAGE (user_data);
   g_autoptr (GError) error = NULL;
   g_autoptr (GFile) file =
     gtk_file_dialog_save_finish (GTK_FILE_DIALOG (source), result, &error);
@@ -305,7 +305,7 @@ static void
 on_export_policy_chosen (GObject *source, GAsyncResult *result,
                          gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  AmlInstancePage *self = AML_INSTANCE_PAGE (user_data);
   const char *response =
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
 
@@ -321,7 +321,7 @@ on_export_policy_chosen (GObject *source, GAsyncResult *result,
 void
 on_export_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  AmlInstancePage *self = AML_INSTANCE_PAGE (user_data);
 
   if (self->export_operation != NULL)
     {
@@ -434,7 +434,7 @@ on_change_directory_ready (GObject *source, GAsyncResult *result,
 static void
 on_directory_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  AmlInstancePage *self = AML_INSTANCE_PAGE (user_data);
   g_autoptr (GError) error = NULL;
   g_autoptr (GFile) file =
     gtk_file_dialog_select_folder_finish (GTK_FILE_DIALOG (source), result,
@@ -486,7 +486,7 @@ void
 on_change_directory_clicked (GtkButton *button G_GNUC_UNUSED,
                              gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  AmlInstancePage *self = AML_INSTANCE_PAGE (user_data);
   GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
   g_autoptr (GtkFileDialog) dialog = gtk_file_dialog_new ();
 
@@ -537,7 +537,7 @@ on_duplicate_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 void
 on_duplicate_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  AmlInstancePage *self = AML_INSTANCE_PAGE (user_data);
 
   ChangeDirectoryWait *wait = g_new0 (ChangeDirectoryWait, 1);
   wait->page = g_object_ref (self);
@@ -575,7 +575,7 @@ on_delete_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 static void
 on_delete_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  AmlInstancePage *self = AML_INSTANCE_PAGE (user_data);
   const char *response =
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
 
@@ -593,7 +593,7 @@ on_delete_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 void
 on_delete_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  AmlInstancePage *self = AML_INSTANCE_PAGE (user_data);
   g_autofree char *name = instance_string (self->instance, "name");
   g_autofree char *heading = g_strdup_printf (_("Delete \"%s\"?"), name);
   AdwAlertDialog *alert = ADW_ALERT_DIALOG (
