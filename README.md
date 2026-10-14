@@ -133,18 +133,18 @@ sudo make uninstall PREFIX=/usr/local
 ```
 
 On Arch Linux, the repository includes a `PKGBUILD` for building a pacman
-package from a pinned GitLab release snapshot. From the AUR/package directory
-containing the PKGBUILD, run:
+package from the current GitLab `main` snapshot. From a directory containing
+the PKGBUILD, run:
 
 ```
 makepkg -si
 ```
 
 The `-s` option installs missing build dependencies and `-i` installs the
-resulting package. The PKGBUILD uses a pinned source tarball with SHA-256
-verification, so Git is not required. It packages the release binary, desktop
-entry, metadata and translations under `/usr`; it does not run the test suite
-or create a debug package. The generated package is named like
+resulting package. The PKGBUILD downloads the current source tarball from
+GitLab, so Git is not required. It packages the release binary, desktop entry,
+metadata and translations under `/usr`; it does not run the test suite or
+create a debug package. The generated package is named like
 `aml-0.1-1-x86_64.pkg.tar.zst` and can also be installed directly with:
 
 ```
@@ -152,7 +152,8 @@ sudo pacman -U ./aml-0.1-1-x86_64.pkg.tar.zst
 ```
 
 If you cloned the full AML source repository, copy the PKGBUILD to a separate
-directory before running makepkg:
+directory before running makepkg, so makepkg's temporary `src/` directory does
+not conflict with AML's source directory:
 
 ```
 mkdir ../aml-package
@@ -161,8 +162,6 @@ cd ../aml-package
 makepkg -si
 ```
 
-Use the AUR/package directory rather than the AML source checkout when running
-makepkg; makepkg uses a temporary `src/` directory for the pinned archive.
 
 ## Tests
 
