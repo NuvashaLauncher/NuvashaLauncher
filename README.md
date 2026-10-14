@@ -112,6 +112,16 @@ catalogs. To uninstall:
 sudo make uninstall PREFIX=/usr/local
 ```
 
+On Arch Linux, build and install a pacman package from the repository:
+
+```
+makepkg -si
+```
+
+The `PKGBUILD` packages the current checkout's release AML binary under `/usr`.
+Run it from the repository root; it deliberately uses the checkout directly so
+makepkg does not treat the tracked `src/` directory as a temporary source tree.
+
 ## Tests
 
 ```
