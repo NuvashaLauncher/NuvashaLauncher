@@ -76,8 +76,7 @@ install_file_of (AmlModrinthVersion *version, const char *replaces,
   install->sha1 = g_strdup (file->sha1);
   install->sha512 = g_strdup (file->sha512);
   install->project_id = g_strdup (version->project_id);
-  install->project_name = g_strdup (project_name != NULL
-                                      ? project_name : version->project_id);
+  install->project_name = g_strdup (project_name);
   install->version_id = g_strdup (version->version_id);
   install->version_name = g_strdup (version->name);
   install->required_dependencies = g_ptr_array_new_with_free_func (g_free);

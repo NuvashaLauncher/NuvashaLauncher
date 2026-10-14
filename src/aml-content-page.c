@@ -427,12 +427,12 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
                       GtkSwitch *switch_widget = GTK_SWITCH (
                         g_object_get_data (G_OBJECT (dependent_row),
                                            "aml-mod-switch"));
-                      if (switch_widget != NULL)
-                        {
-                          gtk_switch_set_active (switch_widget, FALSE);
-                          gtk_widget_set_tooltip_text (
-                            GTK_WIDGET (switch_widget), "Enable");
-                        }
+                        if (switch_widget != NULL)
+                          {
+                           gtk_switch_set_active (switch_widget, FALSE);
+                           gtk_widget_set_tooltip_text (
+                             GTK_WIDGET (switch_widget), "Enable");
+                          }
                     }
                 }
             }
@@ -653,7 +653,7 @@ file_row (AmlContentPage *self, AmlContentFile *file)
                                       "Enabled", -1);
       g_object_set_data (G_OBJECT (sw), "aml-file", file);
       g_object_set_data (G_OBJECT (row), "aml-mod-switch", sw);
-      g_signal_connect (sw, "state-set", G_CALLBACK (on_mod_toggled), self);
+       g_signal_connect (sw, "state-set", G_CALLBACK (on_mod_toggled), self);
       adw_action_row_add_suffix (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (sw));
     }
 
@@ -790,6 +790,12 @@ typedef struct {
   AmlTaskScope *operation;
 } IdentifyRequest;
 
+typedef struct {
+  AmlContentPage *page; /* weakly held */
+  char *project_id;
+  AmlTaskScope *operation;
+} ProjectTitleRequest;
+
 struct _IdentifyRun {
   AmlContentPage *page; /* weakly held */
   GCancellable *cancellable;
@@ -885,6 +891,91 @@ persist_identified_file (AmlContentPage *self, AmlContentFile *file)
 }
 
 static void
+project_title_request_free (ProjectTitleRequest *request)
+{
+  if (request->page != NULL)
+    g_object_remove_weak_pointer (G_OBJECT (request->page),
+                                  (gpointer *) &request->page);
+  if (request->operation != NULL)
+    aml_operation_unref (request->operation);
+  g_free (request->project_id);
+  g_free (request);
+}
+
+static void
+on_project_title_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                         gpointer user_data)
+{
+  ProjectTitleRequest *request = user_data;
+  AmlContentPage *self = request->page;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (AmlModrinthDetails) details =
+    aml_modrinth_details_finish (result, &error);
+
+  if (self != NULL && details != NULL && details->title != NULL &&
+      *details->title != '\0')
+    {
+      if (self->browse.model == NULL || self->installed.files == NULL)
+        {
+          project_title_request_free (request);
+          return;
+        }
+
+      g_hash_table_replace (self->browse.model->project_titles,
+                            g_strdup (request->project_id),
+                            g_strdup (details->title));
+
+      for (guint i = 0; i < self->installed.files->len; i++)
+        {
+          AmlContentFile *file =
+            g_ptr_array_index (self->installed.files, i);
+
+          if (g_strcmp0 (file->project_id, request->project_id) != 0)
+            continue;
+          if (file->project_name != NULL &&
+              *file->project_name != '\0' &&
+              g_strcmp0 (file->project_name, file->project_id) != 0)
+            continue;
+
+          g_free (file->project_name);
+          file->project_name = g_strdup (details->title);
+          persist_identified_file (self, file);
+
+          GtkWidget *row = self->installed.rows != NULL
+                             ? GTK_WIDGET (g_hash_table_lookup (
+                                 self->installed.rows, file->path))
+                             : NULL;
+          if (row != NULL)
+            file_row_refresh (row);
+        }
+    }
+
+  project_title_request_free (request);
+}
+
+static void
+request_project_title (AmlContentPage *self, const char *project_id)
+{
+  ProjectTitleRequest *request = NULL;
+
+  if (self == NULL || project_id == NULL || *project_id == '\0')
+    return;
+
+  request = g_new0 (ProjectTitleRequest, 1);
+  request->page = self;
+  request->project_id = g_strdup (project_id);
+  g_object_add_weak_pointer (G_OBJECT (self),
+                             (gpointer *) &request->page);
+  request->operation = aml_modrinth_details_async (
+    project_id, on_project_title_ready, request);
+  if (request->operation == NULL)
+    {
+      project_title_request_free (request);
+      return;
+    }
+}
+
+static void
 add_remote_dependency (GPtrArray **destination, const char *value)
 {
   if (value == NULL)
@@ -934,9 +1025,15 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       {
         const char *known_name = g_hash_table_lookup (self->browse.model->project_titles,
                                                       version->project_id);
-       if (!file->local_metadata)
-         file->project_name = g_strdup (known_name != NULL
-                                          ? known_name : version->project_id);
+        if (!file->local_metadata || file->project_name == NULL ||
+            *file->project_name == '\0' ||
+            g_strcmp0 (file->project_name, version->project_id) == 0)
+          {
+            g_free (file->project_name);
+            file->project_name = g_strdup (known_name);
+          }
+        if (known_name == NULL)
+          request_project_title (self, version->project_id);
       }
       file->version_id = g_strdup (version->version_id);
       file->version_name = g_strdup (version->name);
