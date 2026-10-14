@@ -7,6 +7,7 @@
 CC         := gcc
 PKG_CONFIG ?= pkg-config
 PREFIX     ?= /usr/local
+VERSION    := $(strip $(shell cat VERSION))
 
 # Libraries AML links against. Never add an X11 package here: AML is
 # Wayland only and must not link anything X11 related.
@@ -21,6 +22,7 @@ PKG_CFLAGS := $(shell $(PKG_CONFIG) --cflags $(PKGS) | \
 	sed -e 's/ -I/ -isystem /g' -e 's/^-I/-isystem /')
 PKG_LIBS := $(shell $(PKG_CONFIG) --libs $(PKGS))
 CPPFLAGS += -DAML_LOCALE_DIR=\"$(PREFIX)/share/locale\"
+CPPFLAGS += -DAML_VERSION=\"$(VERSION)\"
 LOCALES := es_AR es_ES pt_BR fr de it ja ko zh_CN ru pl uk tr nl
 LOCALE_MOS := $(LOCALES:%=build/locale/%/LC_MESSAGES/aml.mo)
 

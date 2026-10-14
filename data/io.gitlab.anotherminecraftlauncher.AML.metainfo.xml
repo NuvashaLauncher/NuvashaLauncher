@@ -7,6 +7,9 @@
   <provides>
     <binary>AML</binary>
   </provides>
+  <releases>
+    <release version="0.1" date="2026-10-14"/>
+  </releases>
   <categories>
     <category>Game</category>
   </categories>

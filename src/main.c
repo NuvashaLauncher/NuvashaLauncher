@@ -111,6 +111,12 @@ main (int argc, char **argv)
 {
   g_autoptr (AdwApplication) app = NULL;
 
+  if (argc == 2 && g_strcmp0 (argv[1], "--version") == 0)
+    {
+      g_print ("AML %s\n", AML_VERSION);
+      return 0;
+    }
+
   /* AML runs on Wayland only. Force the Wayland backend even when the user
    * exported GDK_BACKEND=x11, and never let GDK pick another backend. */
   g_setenv ("GDK_BACKEND", "wayland", TRUE);

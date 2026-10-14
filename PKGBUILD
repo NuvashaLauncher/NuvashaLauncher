@@ -1,6 +1,6 @@
 # Maintainer: Flia <43163973-anotherminecraftlauncher@users.noreply.gitlab.com>
 pkgname=aml
-pkgver=0.1
+pkgver=$(<"$startdir/VERSION")
 pkgrel=1
 pkgdesc='Another Minecraft Launcher for Linux'
 arch=('x86_64')
