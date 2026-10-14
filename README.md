@@ -117,14 +117,14 @@ package from a pinned GitLab release snapshot. From the AUR/package directory
 containing the PKGBUILD, run:
 
 ```
-makepkg -csi
+makepkg -si
 ```
 
-The `-s` option installs missing build dependencies, `-c` removes temporary
-source/build files after a successful build, and `-i` installs the resulting
-package. The PKGBUILD verifies the pinned source archive with SHA-256 and
-packages the release binary, desktop entry, metadata and translations under
-`/usr`; it does not run the test suite or create a debug package. The generated package is named like
+The `-s` option installs missing build dependencies and `-i` installs the
+resulting package. The PKGBUILD uses a pinned source tarball with SHA-256
+verification, so Git is not required. It packages the release binary, desktop
+entry, metadata and translations under `/usr`; it does not run the test suite
+or create a debug package. The generated package is named like
 `aml-0.1-1-x86_64.pkg.tar.zst` and can also be installed directly with:
 
 ```
