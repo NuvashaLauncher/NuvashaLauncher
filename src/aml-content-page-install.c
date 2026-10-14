@@ -138,7 +138,7 @@ void
 remove_duplicate_project_files (AmlContentPage *self, const char *project_id,
                                 const char *keep_path)
 {
-  if (self == NULL || project_id == NULL)
+  if (self == NULL || project_id == NULL || self->installed.files == NULL)
     return;
 
   for (guint i = 0; i < self->installed.files->len; i++)
@@ -727,13 +727,17 @@ plan_versions_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   /* The list is newest first, so the first is what an install takes. */
   version = g_ptr_array_steal_index (versions, 0);
   {
+    const char *project_name = NULL;
     AmlContentFile *installed = installed_project_file (self,
                                                          version->project_id);
 
+    if (self != NULL && self->browse.model != NULL)
+      project_name = g_hash_table_lookup (self->browse.model->project_titles,
+                                          version->project_id);
+
     file = install_file_of (version, installed != NULL ? installed->path : NULL,
                             installed != NULL && !installed->enabled,
-                            g_hash_table_lookup (self->browse.model->project_titles,
-                                                 version->project_id));
+                            project_name);
   }
 
   if (file != NULL)

@@ -45,6 +45,7 @@ struct _AmlDownloadModpackDialog
   gboolean loading_page;      /* a page is on its way */
   gboolean append;            /* the page being fetched follows the list */
   gboolean searched;          /* the first search has been asked for */
+  guint search_generation;   /* rejects answers from older searches */
   GHashTable *seen_ids;       /* project id -> NULL, no duplicate rows */
 
   /* The browser is the left half; the pack that is opened is the right
@@ -67,6 +68,7 @@ struct _AmlDownloadModpackDialog
      the long description and the versions. */
   gboolean details_ready;
   gboolean versions_ready;
+  guint details_generation;  /* rejects answers from older projects */
   AmlModrinthDetails *details; /* owned, the answer read while the dialog is up */
   char *details_problem;       /* why the description is not there */
   char *versions_problem;      /* why the versions are not there */

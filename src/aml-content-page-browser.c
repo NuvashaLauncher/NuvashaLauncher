@@ -51,7 +51,6 @@ aml_content_page_on_scroll_changed (GtkAdjustment *adjustment, gpointer user_dat
   if (gtk_adjustment_get_value (adjustment) < at_end)
     return;
 
-  self->browse.model->offset += RESULTS_PER_PAGE;
   aml_content_page_run_search (self, TRUE);
 }
 

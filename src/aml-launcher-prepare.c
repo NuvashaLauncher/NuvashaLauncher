@@ -65,7 +65,8 @@ choose_java (AmlLauncher *self, GPtrArray *javas, int required,
 
   if (java == NULL)
     {
-      launcher_failed (self, no_java_reason ());
+      g_autofree char *reason = no_java_reason ();
+      launcher_failed (self, reason);
       return NULL;
     }
 

@@ -592,6 +592,11 @@ run_search (AmlDownloadModpackDialog *self, gboolean append)
   g_autofree char *escaped_query = NULL;
   g_autofree char *escaped_facets = NULL;
   g_autofree char *url = NULL;
+  typedef struct {
+    AmlDownloadModpackDialog *dialog;
+    guint generation;
+  } SearchAsk;
+  SearchAsk *ask = NULL;
 
   if (self->search != NULL)
     g_cancellable_cancel (self->search);
@@ -613,6 +618,9 @@ run_search (AmlDownloadModpackDialog *self, gboolean append)
 
   self->loading_page = TRUE;
   self->append = append;
+  ask = g_new0 (SearchAsk, 1);
+  ask->dialog = g_object_ref (self);
+  ask->generation = ++self->search_generation;
 
 
   /* The first page of a search shows the loading state; a page that is
@@ -648,7 +656,7 @@ run_search (AmlDownloadModpackDialog *self, gboolean append)
    * is in flight finalizes it, and a callback that then reads self would
    * be reading freed memory. */
   aml_operation_release (
-    aml_download_json_async (aml_downloads_get_service (), url, on_search_done, g_object_ref (self)),
+    aml_download_json_async (aml_downloads_get_service (), url, on_search_done, ask),
     self->search);
 }
 
@@ -666,13 +674,25 @@ on_search_done (GObject *source G_GNUC_UNUSED,
                 GAsyncResult *result,
                 gpointer user_data)
 {
-  AmlDownloadModpackDialog *self = user_data;
+  typedef struct {
+    AmlDownloadModpackDialog *dialog;
+    guint generation;
+  } SearchAsk;
+  SearchAsk *ask = user_data;
+  AmlDownloadModpackDialog *self = ask->dialog;
   g_autoptr (GError) error = NULL;
   g_autoptr (JsonParser) parser = NULL;
   g_autoptr (AmlModrinthResults) results = NULL;
   const char *answer = NULL;
 
   parser = aml_download_json_finish (result, &error);
+
+  if (ask->generation != self->search_generation)
+    {
+      g_object_unref (self);
+      g_free (ask);
+      return;
+    }
 
   if (parser == NULL)
     {
@@ -704,7 +724,8 @@ on_search_done (GObject *source G_GNUC_UNUSED,
             }
         }
 
-      operation_done (user_data);
+      g_object_unref (self);
+      g_free (ask);
       return;
     }
 
@@ -733,12 +754,14 @@ on_search_done (GObject *source G_GNUC_UNUSED,
             GTK_STACK (self->results_stack), "error");
         }
 
-      operation_done (user_data);
+      g_object_unref (self);
+      g_free (ask);
       return;
     }
 
   results_arrived (self, results, self->append);
-  operation_done (user_data);
+  g_object_unref (self);
+  g_free (ask);
 }
 
 static void
@@ -1268,17 +1291,37 @@ show_details_error (AmlDownloadModpackDialog *self, const char *message)
   gtk_widget_set_visible (GTK_WIDGET (self->details_error), message != NULL);
 }
 
+typedef struct
+{
+  AmlDownloadModpackDialog *dialog;
+  guint generation;
+} VersionsAsk;
+
+static void
+versions_ask_free (VersionsAsk *ask)
+{
+  g_object_unref (ask->dialog);
+  g_free (ask);
+}
+
 static void
 on_versions_answer (GObject *source G_GNUC_UNUSED,
                     GAsyncResult *result,
                     gpointer user_data)
 {
-  AmlDownloadModpackDialog *self = user_data;
+  VersionsAsk *ask = user_data;
+  AmlDownloadModpackDialog *self = ask->dialog;
   g_autoptr (GError) error = NULL;
   g_autoptr (JsonParser) parser = NULL;
   g_autoptr (GPtrArray) versions = NULL;
 
   parser = aml_download_json_finish (result, &error);
+
+  if (ask->generation != self->details_generation)
+    {
+      versions_ask_free (ask);
+      return;
+    }
 
   if (parser == NULL)
     {
@@ -1291,7 +1334,7 @@ on_versions_answer (GObject *source G_GNUC_UNUSED,
                                     : "the versions could not be read");
         }
 
-      operation_done (user_data);
+      versions_ask_free (ask);
       return;
     }
 
@@ -1302,7 +1345,7 @@ on_versions_answer (GObject *source G_GNUC_UNUSED,
       g_free (self->versions_problem);
       self->versions_problem =
         g_strdup (error != NULL ? error->message : "the versions could not be read");
-      operation_done (user_data);
+      versions_ask_free (ask);
       return;
     }
 
@@ -1315,7 +1358,7 @@ on_versions_answer (GObject *source G_GNUC_UNUSED,
   self->versions_ready = TRUE;
   dialog_details_fill (self);
 
-  operation_done (user_data);
+  versions_ask_free (ask);
 }
 
 static void dialog_details_fill (AmlDownloadModpackDialog *self);
@@ -1327,6 +1370,7 @@ typedef struct
 {
   AmlDownloadModpackDialog *dialog;
   AmlTaskScope *operation;
+  guint generation;
 } DetailsAsk;
 
 static void
@@ -1351,6 +1395,12 @@ on_details_answer (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_autoptr (AmlModrinthDetails) details = NULL;
 
   details = aml_modrinth_details_finish (result, &error);
+
+  if (ask->generation != self->details_generation)
+    {
+      ask_free (ask);
+      return;
+    }
 
   if (details == NULL)
     {
@@ -1421,6 +1471,7 @@ dialog_details_open (AmlDownloadModpackDialog *self)
      so the half does not fill itself in piece by piece. */
   self->details_ready = FALSE;
   self->versions_ready = FALSE;
+  self->details_generation++;
   g_clear_pointer (&self->details, aml_modrinth_details_free);
   g_free (self->details_problem);
   self->details_problem = NULL;
@@ -1455,16 +1506,24 @@ dialog_details_open (AmlDownloadModpackDialog *self)
     DetailsAsk *ask = g_new0 (DetailsAsk, 1);
 
     ask->dialog = g_object_ref (self);
+    ask->generation = self->details_generation;
     ask->operation = aml_modrinth_details_async (self->project->project_id,
-                                                 on_details_answer, ask);
+                                                  on_details_answer, ask);
     /* The same fetch cancellable the versions answer uses, so opening
        another project stops this one. */
     aml_operation_follow (ask->operation, self->fetch);
   }
 
-  aml_operation_release (
-    aml_download_json_async (aml_downloads_get_service (), url, on_versions_answer, g_object_ref (self)),
-    self->fetch);
+  {
+    VersionsAsk *ask = g_new0 (VersionsAsk, 1);
+
+    ask->dialog = g_object_ref (self);
+    ask->generation = self->details_generation;
+    aml_operation_release (
+      aml_download_json_async (aml_downloads_get_service (), url,
+                               on_versions_answer, ask),
+      self->fetch);
+  }
 }
 
 

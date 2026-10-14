@@ -39,6 +39,7 @@ aml_content_file_free (AmlContentFile *file)
   g_free (file->search_key);
   g_free (file->description);
   g_free (file->icon_url);
+  g_free (file->local_icon_member);
   g_free (file->local_icon_path);
   g_free (file->version_id);
   g_free (file->version_name);
@@ -252,10 +253,12 @@ metadata_work (gpointer data, gpointer user_data G_GNUC_UNUSED)
   if (!g_cancellable_is_cancelled (aml_task_scope_get_cancellable (run->scope)))
     {
       AmlContentFile *file = work->file;
+      gboolean needs_metadata = !file->metadata_checked;
 
-      if ((file->project_id == NULL || file->icon_url == NULL ||
-           *file->icon_url == '\0') && !file->local_metadata)
+      if (needs_metadata)
         aml_content_apply_local_metadata (file, run->type);
+      file->metadata_checked = TRUE;
+      file->metadata_dirty = needs_metadata;
       aml_content_file_refresh_search_key (file);
     }
 
@@ -389,6 +392,11 @@ apply_index_entry (ScanRun *run, AmlContentFile *file)
     }
   if (entry->icon_url != NULL && *entry->icon_url != '\0')
     file->icon_url = g_strdup (entry->icon_url);
+  file->metadata_checked = entry->metadata_checked;
+  if (entry->local_icon_member != NULL && *entry->local_icon_member != '\0')
+    file->local_icon_member = g_strdup (entry->local_icon_member);
+  if (entry->local_icon_path != NULL && *entry->local_icon_path != '\0')
+    file->local_icon_path = g_strdup (entry->local_icon_path);
   if (entry->version_id != NULL && *entry->version_id != '\0')
     file->version_id = g_strdup (entry->version_id);
   if (entry->version_name != NULL && *entry->version_name != '\0')

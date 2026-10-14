@@ -61,6 +61,33 @@ static void icon_pump (void);
 static GQueue pending = G_QUEUE_INIT;
 static guint active = 0;
 
+static gboolean
+save_icon_bytes (const gchar *buffer, gsize count, GError **error,
+                 gpointer user_data)
+{
+  int fd = GPOINTER_TO_INT (user_data);
+  gsize written = 0;
+
+  while (written < count)
+    {
+      ssize_t result = write (fd, buffer + written, count - written);
+
+      if (result < 0 && errno == EINTR)
+        continue;
+
+      if (result <= 0)
+        {
+          g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                       "cannot write scaled icon: %s", g_strerror (errno));
+          return FALSE;
+        }
+
+      written += (gsize) result;
+    }
+
+  return TRUE;
+}
+
 static void
 icon_load_free (IconLoad *load)
 {
@@ -230,6 +257,13 @@ gboolean
 aml_icon_scale_file (const char *path)
 {
   g_autoptr (GdkPixbuf) pixbuf = NULL;
+  g_autofree char *directory = NULL;
+  g_autofree char *name = NULL;
+  g_autofree char *temporary_name = NULL;
+  g_autoptr (GError) error = NULL;
+  int parent_fd = -1;
+  int fd = -1;
+  gboolean saved = FALSE;
 
   if (path == NULL)
     return FALSE;
@@ -239,7 +273,35 @@ aml_icon_scale_file (const char *path)
   if (pixbuf == NULL)
     return FALSE;
 
-  return gdk_pixbuf_save (pixbuf, path, "png", NULL, NULL);
+  directory = g_path_get_dirname (path);
+  name = g_path_get_basename (path);
+  fd = aml_fs_open_temporary_file_nofollow (directory, &temporary_name, NULL,
+                                            &parent_fd, &error);
+  if (fd < 0)
+    return FALSE;
+
+  saved = gdk_pixbuf_save_to_callback (pixbuf, save_icon_bytes,
+                                       GINT_TO_POINTER (fd), "png", &error,
+                                       NULL);
+  if (saved && fsync (fd) != 0)
+    {
+      g_set_error (&error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                   "cannot flush scaled icon: %s", g_strerror (errno));
+      saved = FALSE;
+    }
+
+  if (close (fd) != 0)
+    saved = FALSE;
+  fd = -1;
+
+  if (saved)
+    saved = aml_fs_rename_at (parent_fd, temporary_name, name, &error);
+
+  if (!saved)
+    aml_fs_unlink_at (parent_fd, temporary_name, NULL);
+
+  close (parent_fd);
+  return saved;
 }
 
 gboolean
