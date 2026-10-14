@@ -54,31 +54,11 @@ arguments as the string it translates. A string left in English reaches
 the interface as English, so the catalogs are checked against the source
 rather than against a file that has to be kept in step with it.
 
-## Build dependencies
+## Dependencies
 
-The build needs a C17 compiler, GNU make, and the development packages
-for these libraries, named as `pkg-config` knows them:
+GTK 4.10+ and libadwaita 1.5+ are required.
 
-- `gtk4` 4.10 or newer
-- `libadwaita-1` 1.5 or newer
-- `json-glib-1.0`
-- `libsoup-3.0`
-- `libarchive`
-- `gio-unix-2.0`
-- `gettext` (for `msgfmt`, which builds the translation catalogs)
-
-GTK 4.10 is required for `GtkFileDialog`, and libadwaita 1.5 is required for
-the adaptive dialog APIs used by AML. The other listed libraries use their
-normal major API versions and have no newer minimum identified by AML.
-
-Get the source with:
-
-```
-git clone https://gitlab.com/anotherminecraftlauncher/aml.git
-cd aml
-```
-
-On Debian and Ubuntu:
+Debian/Ubuntu:
 
 ```
 sudo apt install build-essential pkg-config \
@@ -87,10 +67,9 @@ sudo apt install build-essential pkg-config \
     libarchive-dev
 ```
 
-Use Ubuntu 24.04 or newer (or an equivalent Debian release) so the GTK and
-libadwaita versions meet the minimums above.
+Use Ubuntu 24.04+ or Debian 13+.
 
-On Fedora:
+Fedora:
 
 ```
 sudo dnf install gcc make gettext pkgconf-pkg-config \
@@ -98,68 +77,46 @@ sudo dnf install gcc make gettext pkgconf-pkg-config \
     libarchive-devel
 ```
 
-Use Fedora 40 or newer so the GTK and libadwaita versions meet the minimums
-above.
+Use Fedora 40+.
 
-On Arch:
+Arch:
 
 ```
 sudo pacman -S base-devel gettext pkgconf gtk4 libadwaita json-glib libsoup \
     libarchive
 ```
 
-Arch's current packages satisfy the required GTK 4.10 and libadwaita 1.5
-minimums.
+## Installation
 
-## Building
+Clone the repository:
 
 ```
+git clone https://gitlab.com/anotherminecraftlauncher/aml.git
+cd aml
+```
+
+For Debian, Ubuntu, Fedora, and other non-Arch distributions:
+
+```bash
 make
-```
-
-The launcher is `build/AML`.
-
-To install it:
-
-```
 sudo make install PREFIX=/usr/local
 ```
 
-This installs the launcher, its desktop entry and its translation
-catalogs. To uninstall:
+The launcher is installed as `/usr/local/bin/AML`.
 
-```
-sudo make uninstall PREFIX=/usr/local
-```
-
-On Arch Linux, the repository includes a `PKGBUILD` for building a pacman
-package from the current GitLab `main` snapshot. From a directory containing
-the PKGBUILD, run:
-
-```
-makepkg -si
-```
-
-The `-s` option installs missing build dependencies and `-i` installs the
-resulting package. The PKGBUILD downloads the current source tarball from
-GitLab, so Git is not required. It packages the release binary, desktop entry,
-metadata and translations under `/usr`; it does not run the test suite or
-create a debug package. The generated package is named like
-`aml-0.1-1-x86_64.pkg.tar.zst` and can also be installed directly with:
-
-```
-sudo pacman -U ./aml-0.1-1-x86_64.pkg.tar.zst
-```
-
-If you cloned the full AML source repository, copy the PKGBUILD to a separate
-directory before running makepkg, so makepkg's temporary `src/` directory does
-not conflict with AML's source directory:
+For Arch Linux, build and install the package:
 
 ```
 mkdir ../aml-package
 cp PKGBUILD ../aml-package/
 cd ../aml-package
 makepkg -si
+```
+
+To uninstall a source installation:
+
+```
+sudo make uninstall PREFIX=/usr/local
 ```
 
 
