@@ -63,7 +63,10 @@ typedef struct {
   char *search_key;  /* casefolded title and filename for installed search */
   char *description;
   gboolean local_metadata;
+  gboolean metadata_checked;
+  gboolean metadata_dirty;
   char *icon_url;
+  char *local_icon_member;
   char *local_icon_path;
   char *version_id;
   char *version_name;

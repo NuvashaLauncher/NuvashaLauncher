@@ -40,9 +40,18 @@
 #define SEARCH_DELAY_MS 300
 
 #include "aml-content-page-private.h"
+#include "aml-content-files-private.h"
 #include "aml-operation.h"
 
 G_DEFINE_FINAL_TYPE (AmlContentPage, aml_content_page, GTK_TYPE_BOX)
+
+typedef struct {
+  AmlContentPage *page;
+  GtkWidget *row;
+} LocalIconLoad;
+
+static void persist_identified_file (AmlContentPage *self,
+                                     AmlContentFile *file);
 
 /* One file that has a newer version, and what to install for it. */
 typedef struct {
@@ -237,8 +246,6 @@ file_row_refresh (GtkWidget *row)
        title != NULL ? title : file->filename);
   if (file->description != NULL && *file->description != '\0')
     row_show_description (row, file->description);
-
-  load_visible_icons (self);
 
   installed_filter_rows (self);
 }
@@ -678,6 +685,38 @@ file_row (AmlContentPage *self, AmlContentFile *file)
 }
 
 static void
+local_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                  gpointer user_data)
+{
+  LocalIconLoad *load = user_data;
+  AmlContentFile *file = g_object_get_data (G_OBJECT (load->row), "aml-file");
+  g_autoptr (GError) error = NULL;
+  g_autofree char *path =
+    aml_content_load_local_icon_finish (result, &error);
+
+  g_object_set_data (G_OBJECT (load->row), "aml-local-icon-loading", NULL);
+
+  if (path != NULL && file != NULL)
+    {
+      g_free (file->local_icon_path);
+      file->local_icon_path = g_steal_pointer (&path);
+
+      if (load->page->installed.scroller != NULL)
+        {
+          GtkWidget *icon = g_object_get_data (G_OBJECT (load->row),
+                                               "aml-icon");
+          if (icon != NULL)
+            aml_icon_widget_set_file (icon, file->local_icon_path);
+        }
+      persist_identified_file (load->page, file);
+    }
+
+  g_object_unref (load->row);
+  g_object_unref (load->page);
+  g_free (load);
+}
+
+static void
 load_row_icon (AmlContentPage *self, GtkWidget *row)
 {
   AmlContentFile *file = g_object_get_data (G_OBJECT (row), "aml-file");
@@ -685,7 +724,8 @@ load_row_icon (AmlContentPage *self, GtkWidget *row)
   GtkWidget *scroller = GTK_WIDGET (self->installed.scroller);
   graphene_rect_t bounds;
 
-  if (file == NULL || icon == NULL || file->local_icon_path == NULL ||
+  if (file == NULL || icon == NULL ||
+      (file->local_icon_path == NULL && file->local_icon_member == NULL) ||
       g_object_get_data (G_OBJECT (row), "aml-icon-loaded") != NULL ||
       !gtk_widget_compute_bounds (row, scroller, &bounds))
     return;
@@ -694,7 +734,27 @@ load_row_icon (AmlContentPage *self, GtkWidget *row)
       bounds.origin.y > gtk_widget_get_height (scroller))
     return;
 
-  if (aml_icon_widget_set_file (icon, file->local_icon_path))
+  if (file->local_icon_path != NULL &&
+      !g_file_test (file->local_icon_path, G_FILE_TEST_IS_REGULAR))
+    g_clear_pointer (&file->local_icon_path, g_free);
+
+  if (file->local_icon_path == NULL &&
+      g_object_get_data (G_OBJECT (row), "aml-local-icon-loading") == NULL)
+    {
+      LocalIconLoad *load = g_new0 (LocalIconLoad, 1);
+
+      load->page = g_object_ref (self);
+      load->row = g_object_ref (row);
+      g_object_set_data (G_OBJECT (row), "aml-local-icon-loading",
+                         GINT_TO_POINTER (1));
+
+      aml_operation_release (
+        aml_content_load_local_icon_async (file, local_icon_ready, load),
+        self->installed.scan);
+    }
+
+  if (file->local_icon_path != NULL &&
+      aml_icon_widget_set_file (icon, file->local_icon_path))
     g_object_set_data (G_OBJECT (row), "aml-icon-loaded", GINT_TO_POINTER (1));
 }
 
@@ -807,6 +867,9 @@ persist_identified_file (AmlContentPage *self, AmlContentFile *file)
   entry.project_id = file->project_id;
   entry.project_name = file->project_name;
   entry.icon_url = file->icon_url;
+  entry.metadata_checked = file->metadata_checked;
+  entry.local_icon_member = file->local_icon_member;
+  entry.local_icon_path = file->local_icon_path;
   entry.version_id = file->version_id;
   entry.version_name = file->version_name;
   entry.required_dependencies = file->required_dependencies;
@@ -1076,13 +1139,19 @@ metadata_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       for (guint i = 0; self->installed.files != NULL &&
                         i < self->installed.files->len; i++)
         {
-          AmlContentFile *file =
-            g_ptr_array_index (self->installed.files, i);
+           AmlContentFile *file =
+             g_ptr_array_index (self->installed.files, i);
           GtkWidget *row = g_hash_table_lookup (self->installed.rows,
                                                 file->path);
 
-          if (row != NULL)
-            file_row_refresh (row);
+           if (row != NULL)
+             file_row_refresh (row);
+
+           if (file->metadata_dirty)
+             {
+               persist_identified_file (self, file);
+               file->metadata_dirty = FALSE;
+             }
         }
       installed_filter_rows (self);
     }

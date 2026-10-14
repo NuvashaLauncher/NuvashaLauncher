@@ -31,6 +31,9 @@ typedef struct {
   char *project_id;
   char *project_name;
   char *icon_url;
+  gboolean metadata_checked;
+  char *local_icon_member;
+  char *local_icon_path;
   char *version_id;
   char *version_name;
   GPtrArray *required_dependencies;

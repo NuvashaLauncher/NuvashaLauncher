@@ -187,22 +187,28 @@ entity_into (GString *out, const char *text, gsize length, gsize *consumed)
   if (body[0] == '#')
     {
       gunichar codepoint = 0;
+      guint64 parsed = 0;
+      char *end = NULL;
 
       if (body_len >= 2 && (body[1] == 'x' || body[1] == 'X'))
         {
           g_autofree char *hex = g_strndup (body + 2, body_len - 2);
 
-          codepoint = (gunichar) g_ascii_strtoull (hex, NULL, 16);
+          parsed = g_ascii_strtoull (hex, &end, 16);
         }
       else
         {
           g_autofree char *dec = g_strndup (body + 1, body_len - 1);
 
-          codepoint = (gunichar) g_ascii_strtoull (dec, NULL, 10);
+          parsed = g_ascii_strtoull (dec, &end, 10);
         }
 
-      if (codepoint == 0 || codepoint > 0x10FFFF ||
-          !g_unichar_validate (codepoint))
+      if (end == NULL || *end != '\0' || parsed == 0 || parsed > 0x10FFFF)
+        return FALSE;
+
+      codepoint = (gunichar) parsed;
+
+      if (!g_unichar_validate (codepoint))
         return FALSE;
 
       {

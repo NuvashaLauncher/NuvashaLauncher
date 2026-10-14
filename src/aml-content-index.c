@@ -58,6 +58,8 @@ aml_content_index_entry_free (AmlContentIndexEntry *entry)
   g_free (entry->project_id);
   g_free (entry->project_name);
   g_free (entry->icon_url);
+  g_free (entry->local_icon_member);
+  g_free (entry->local_icon_path);
   g_free (entry->version_id);
   g_free (entry->version_name);
   g_clear_pointer (&entry->required_dependencies, g_ptr_array_unref);
@@ -139,6 +141,12 @@ entry_from_object (JsonObject *object, GError **error)
     object, "project_name", ""));
   entry->icon_url = g_strdup (json_object_get_string_member_with_default (
     object, "icon_url", ""));
+  entry->metadata_checked = json_object_get_boolean_member_with_default (
+    object, "metadata_checked", FALSE);
+  entry->local_icon_member = g_strdup (
+    json_object_get_string_member_with_default (object, "local_icon_member", ""));
+  entry->local_icon_path = g_strdup (
+    json_object_get_string_member_with_default (object, "local_icon_path", ""));
   entry->version_id = g_strdup (json_object_get_string_member_with_default (
     object, "version_id", ""));
   entry->version_name = g_strdup (json_object_get_string_member_with_default (
@@ -322,6 +330,10 @@ entry_to_json (AmlContentIndexEntry *entry, gsize *length)
   ADD_STRING ("project_id", entry->project_id);
   ADD_STRING ("project_name", entry->project_name);
   ADD_STRING ("icon_url", entry->icon_url);
+  json_builder_set_member_name (builder, "metadata_checked");
+  json_builder_add_boolean_value (builder, entry->metadata_checked);
+  ADD_STRING ("local_icon_member", entry->local_icon_member);
+  ADD_STRING ("local_icon_path", entry->local_icon_path);
   ADD_STRING ("version_id", entry->version_id);
   ADD_STRING ("version_name", entry->version_name);
 #undef ADD_STRING

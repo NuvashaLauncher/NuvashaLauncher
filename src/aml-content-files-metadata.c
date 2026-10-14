@@ -7,6 +7,7 @@
 
 #include "aml-content-page.h"
 #include "aml-content-files-private.h"
+#include "aml-task-private.h"
 #include "aml-fs.h"
 #include "aml-icons.h"
 
@@ -119,7 +120,14 @@ json_icon_member (JsonObject *object)
       for (GList *item = members; item != NULL; item = item->next)
         {
           const char *name = item->data;
-          gint size = (gint) g_ascii_strtoll (name, NULL, 10);
+          char *end = NULL;
+          gint64 parsed = g_ascii_strtoll (name, &end, 10);
+
+          if (end == name || *end != '\0' || parsed < 0 ||
+              parsed > G_MAXINT)
+            continue;
+
+          gint size = (gint) parsed;
           if (size > best_size)
             {
               best = name;
@@ -504,6 +512,137 @@ apply_resource_metadata (AmlContentFile *file)
   file->local_metadata = TRUE;
 }
 
+gboolean
+aml_content_load_local_icon (AmlContentFile *file)
+{
+  g_autoptr (GByteArray) icon = NULL;
+  g_autofree char *directory = NULL;
+  g_autofree char *name = NULL;
+  g_autofree char *path = NULL;
+
+  if (file == NULL || file->local_icon_member == NULL ||
+      file->local_icon_path != NULL || file->sha1 == NULL)
+    return file != NULL && file->local_icon_path != NULL;
+
+  icon = read_archive_member (file->path, file->local_icon_member);
+  if (icon == NULL)
+    return FALSE;
+
+  directory = g_build_filename (g_get_user_cache_dir (), "AML", "icons",
+                                "local", NULL);
+  name = g_strconcat (file->sha1, ".png", NULL);
+  path = g_build_filename (directory, name, NULL);
+
+  if (!aml_fs_make_directory (directory, 0755, NULL) ||
+      !aml_fs_replace_contents (path, icon->data, icon->len, 0644, NULL) ||
+      !aml_icon_scale_file (path))
+    return FALSE;
+
+  file->local_icon_path = g_steal_pointer (&path);
+  return TRUE;
+}
+
+typedef struct
+{
+  AmlTaskScope *scope;
+  char *archive_path;
+  char *member;
+  char *sha1;
+} LocalIconExtract;
+
+static void
+local_icon_extract_free (LocalIconExtract *extract)
+{
+  g_free (extract->archive_path);
+  g_free (extract->member);
+  g_free (extract->sha1);
+  g_free (extract);
+}
+
+static void
+local_icon_extract_thread (GTask *task G_GNUC_UNUSED,
+                           gpointer source_object G_GNUC_UNUSED,
+                           gpointer task_data,
+                           GCancellable *cancellable)
+{
+  LocalIconExtract *extract = task_data;
+  g_autoptr (GByteArray) icon = NULL;
+  g_autofree char *directory = NULL;
+  g_autofree char *name = NULL;
+  g_autofree char *path = NULL;
+  g_autoptr (GError) error = NULL;
+
+  if (g_cancellable_is_cancelled (cancellable))
+    {
+      aml_task_scope_return_error (extract->scope,
+        g_error_new_literal (G_IO_ERROR, G_IO_ERROR_CANCELLED, "cancelled"));
+      return;
+    }
+
+  icon = read_archive_member (extract->archive_path, extract->member);
+  if (icon == NULL)
+    {
+      aml_task_scope_return_error (extract->scope,
+        g_error_new_literal (G_IO_ERROR, G_IO_ERROR_NOT_FOUND,
+                             "the local icon was not found"));
+      return;
+    }
+
+  directory = g_build_filename (g_get_user_cache_dir (), "AML", "icons",
+                                "local", NULL);
+  name = g_strconcat (extract->sha1, ".png", NULL);
+  path = g_build_filename (directory, name, NULL);
+
+  if (!aml_fs_make_directory (directory, 0755, &error) ||
+      !aml_fs_replace_contents (path, icon->data, icon->len, 0644, &error) ||
+      !aml_icon_scale_file (path))
+    {
+      if (error == NULL)
+        error = g_error_new_literal (G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
+                                     "the local icon could not be scaled");
+      aml_task_scope_return_error (extract->scope, g_steal_pointer (&error));
+      return;
+    }
+
+  aml_task_scope_return_pointer (extract->scope, g_steal_pointer (&path), g_free);
+}
+
+AmlTaskScope *
+aml_content_load_local_icon_async (AmlContentFile *file,
+                                   GAsyncReadyCallback callback,
+                                   gpointer user_data)
+{
+  g_autoptr (AmlTaskScope) scope =
+    aml_task_scope_new (NULL, NULL, callback, user_data);
+  LocalIconExtract *extract = NULL;
+
+  g_return_val_if_fail (file != NULL, NULL);
+
+  if (file->local_icon_member == NULL || file->sha1 == NULL)
+    {
+      aml_task_scope_return_pointer_deferred (scope, NULL, NULL);
+      return g_steal_pointer (&scope);
+    }
+
+  extract = g_new0 (LocalIconExtract, 1);
+  extract->scope = scope;
+  extract->archive_path = g_strdup (file->path);
+  extract->member = g_strdup (file->local_icon_member);
+  extract->sha1 = g_strdup (file->sha1);
+  g_task_set_task_data (aml_task_scope_task (scope), extract,
+                        (GDestroyNotify) local_icon_extract_free);
+  g_task_run_in_thread (aml_task_scope_task (scope), local_icon_extract_thread);
+
+  return g_steal_pointer (&scope);
+}
+
+char *
+aml_content_load_local_icon_finish (GAsyncResult *result, GError **error)
+{
+  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
+  return g_task_propagate_pointer (G_TASK (result), error);
+}
+
 void
 aml_content_apply_local_metadata (AmlContentFile *file, AmlContentType type)
 {
@@ -526,7 +665,6 @@ aml_content_apply_local_metadata (AmlContentFile *file, AmlContentType type)
       return;
     }
   char *icon_member = NULL;
-  g_autoptr (GByteArray) icon_data = NULL;
   g_autoptr (GByteArray) metadata = NULL;
 
   /* Read the declared metadata files directly. This avoids depending on ZIP
@@ -559,20 +697,5 @@ aml_content_apply_local_metadata (AmlContentFile *file, AmlContentType type)
         apply_local_mcmod (file, metadata->data, metadata->len, &icon_member);
     }
 
-  if (icon_member != NULL)
-    icon_data = read_archive_member (file->path, icon_member);
-
-  if (icon_data != NULL && file->sha1 != NULL)
-    {
-      g_autofree char *directory = g_build_filename (g_get_user_cache_dir (),
-                                                      "AML", "icons", "local", NULL);
-      g_autofree char *name = g_strconcat (file->sha1, ".png", NULL);
-      g_autofree char *path = g_build_filename (directory, name, NULL);
-      if (aml_fs_make_directory (directory, 0755, NULL) &&
-          aml_fs_replace_contents (path, icon_data->data, icon_data->len,
-                                   0644, NULL) &&
-          aml_icon_scale_file (path))
-        file->local_icon_path = g_steal_pointer (&path);
-    }
-  g_free (icon_member);
+  file->local_icon_member = icon_member;
 }

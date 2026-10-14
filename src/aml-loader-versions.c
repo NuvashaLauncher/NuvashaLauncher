@@ -103,18 +103,34 @@ compare_versions (const char *left, const char *right)
 
       if (g_ascii_isdigit (*left) && g_ascii_isdigit (*right))
         {
-          char *left_end = NULL;
-          char *right_end = NULL;
-          glong left_number = g_ascii_strtoll (left, &left_end, 10);
-          glong right_number = g_ascii_strtoll (right, &right_end, 10);
+          const char *left_end = left;
+          const char *right_end = right;
+          const char *left_significant = left;
+          const char *right_significant = right;
+          gsize left_length;
+          gsize right_length;
+
+          while (g_ascii_isdigit (*left_end))
+            left_end++;
+          while (g_ascii_isdigit (*right_end))
+            right_end++;
 
           /* The leading zeros say nothing about which is newer. */
-          while (left < left_end && *left == '0')
-            left++;
-          while (right < right_end && *right == '0')
-            right++;
+          while (left_significant < left_end && *left_significant == '0')
+            left_significant++;
+          while (right_significant < right_end && *right_significant == '0')
+            right_significant++;
 
-          result = (left_number > right_number) - (left_number < right_number);
+          left_length = left_end - left_significant;
+          right_length = right_end - right_significant;
+
+          if (left_length != right_length)
+            result = left_length > right_length ? 1 : -1;
+          else
+            result = left_length == 0
+                       ? 0
+                       : memcmp (left_significant, right_significant,
+                                 left_length);
 
           if (result != 0)
             return result;
