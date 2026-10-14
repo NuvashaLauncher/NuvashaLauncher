@@ -169,7 +169,7 @@ toggle_file (AmlContentPage *self, AmlContentFile *file)
   g_autofree char *old_path = g_strdup (file->path);
   GtkWidget *row = NULL;
 
-  renamed = aml_content_set_disabled (file->path, !file->enabled, &error);
+  renamed = aml_content_set_disabled (file->path, file->enabled, &error);
 
   if (renamed == NULL)
     {
@@ -194,6 +194,19 @@ toggle_file (AmlContentPage *self, AmlContentFile *file)
   show_toast (self, file->enabled ? _("Enabled") : _("Disabled"));
 
   return TRUE;
+}
+
+/* The label shown for an installed file everywhere in the page.  Metadata
+ * can be present without a usable project name, so the filename remains the
+ * fallback in that case. */
+static const char *
+file_display_name (AmlContentFile *file)
+{
+  if (file != NULL && file->project_name != NULL &&
+      *file->project_name != '\0')
+    return file->project_name;
+
+  return file != NULL ? file->filename : NULL;
 }
 
 static void
@@ -393,45 +406,46 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
             {
               AmlContentFile *dependent_file = NULL;
               GtkWidget *dependent_row = NULL;
-              g_autofree char *disabled =
-                aml_content_set_disabled (dependent, TRUE, &dependent_error);
-              changed = disabled != NULL;
+              for (guint j = 0; j < self->installed.files->len; j++)
+                {
+                  AmlContentFile *candidate =
+                    g_ptr_array_index (self->installed.files, j);
 
-              if (changed)
-                for (guint j = 0; j < self->installed.files->len; j++)
-                  {
-                    AmlContentFile *candidate =
-                      g_ptr_array_index (self->installed.files, j);
-
-                    if (g_strcmp0 (candidate->path, dependent) == 0)
-                      {
-                        dependent_file = candidate;
-                        break;
-                      }
-                  }
+                  if (g_strcmp0 (candidate->path, dependent) == 0)
+                    {
+                      dependent_file = candidate;
+                      break;
+                    }
+                }
 
               if (dependent_file != NULL)
                 {
+                  /* Use the same operation as a user pressing the switch.
+                   * In particular, this performs the filesystem rename and
+                   * updates the file and row maps together. */
+                  changed = !dependent_file->enabled ||
+                            toggle_file (self, dependent_file);
                   dependent_row = g_hash_table_lookup (self->installed.rows,
-                                                       dependent);
-                  g_hash_table_remove (self->installed.rows, dependent);
-                  g_free (dependent_file->path);
-                  dependent_file->path = g_steal_pointer (&disabled);
-                  dependent_file->enabled = FALSE;
-                  g_hash_table_insert (self->installed.rows,
-                                       g_strdup (dependent_file->path),
-                                       dependent_row);
+                                                       dependent_file->path);
 
                   if (dependent_row != NULL)
                     {
                       GtkSwitch *switch_widget = GTK_SWITCH (
                         g_object_get_data (G_OBJECT (dependent_row),
                                            "aml-mod-switch"));
-                        if (switch_widget != NULL)
-                          {
-                           gtk_switch_set_active (switch_widget, FALSE);
-                           gtk_widget_set_tooltip_text (
-                             GTK_WIDGET (switch_widget), "Enable");
+                      if (switch_widget != NULL)
+                        {
+                          gulong handler = GPOINTER_TO_SIZE (
+                            g_object_get_data (G_OBJECT (switch_widget),
+                                               "aml-toggle-handler"));
+
+                          if (handler != 0)
+                            g_signal_handler_block (switch_widget, handler);
+                          gtk_switch_set_active (switch_widget, FALSE);
+                          if (handler != 0)
+                            g_signal_handler_unblock (switch_widget, handler);
+                          gtk_widget_set_tooltip_text (
+                            GTK_WIDGET (switch_widget), "Enable");
                           }
                     }
                 }
@@ -552,8 +566,7 @@ on_trash_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   if (file == NULL)
     return;
 
-  title = file->local_metadata && file->project_name != NULL
-            ? file->project_name : file->filename;
+  title = file_display_name (file);
   if (title == NULL || *title == '\0')
     title = file->filename;
 
@@ -572,9 +585,7 @@ on_trash_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
               g_strcmp0 (g_ptr_array_index (other->required_dependencies, j),
                          file->local_id) == 0)
             {
-              other_title = other->local_metadata &&
-                            other->project_name != NULL
-                              ? other->project_name : other->filename;
+              other_title = file_display_name (other);
               if (dependents->len > 0)
                 g_string_append_c (dependents, '\n');
               g_string_append (dependents, other_title);
@@ -621,10 +632,7 @@ file_row (AmlContentPage *self, AmlContentFile *file)
      under the name goes what the project is, once Modrinth says so. */
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), FALSE);
   adw_preferences_row_set_title (
-    ADW_PREFERENCES_ROW (GTK_WIDGET (row)),
-    file->local_metadata && file->project_name != NULL &&
-    *file->project_name != '\0'
-      ? file->project_name : file->filename);
+    ADW_PREFERENCES_ROW (GTK_WIDGET (row)), file_display_name (file));
   adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (GTK_WIDGET (row)), 2);
   adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (GTK_WIDGET (row)), FALSE);
   if (file->description != NULL && *file->description != '\0')
@@ -653,7 +661,10 @@ file_row (AmlContentPage *self, AmlContentFile *file)
                                       "Enabled", -1);
       g_object_set_data (G_OBJECT (sw), "aml-file", file);
       g_object_set_data (G_OBJECT (row), "aml-mod-switch", sw);
-       g_signal_connect (sw, "state-set", G_CALLBACK (on_mod_toggled), self);
+      g_object_set_data (
+        G_OBJECT (sw), "aml-toggle-handler",
+        GSIZE_TO_POINTER (g_signal_connect (
+          sw, "state-set", G_CALLBACK (on_mod_toggled), self)));
       adw_action_row_add_suffix (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (sw));
     }
 
