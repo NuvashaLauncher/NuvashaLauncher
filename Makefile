@@ -125,24 +125,24 @@ pot:
 		--files-from=po/POTFILES.in --output=po/aml.pot
 
 install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
-	install -Dm755 $(BIN) $(DESTDIR)$(PREFIX)/bin/AML
+	install -Dm755 $(BIN) "$(DESTDIR)$(PREFIX)/bin/AML"
 	install -Dm644 data/io.gitlab.anotherminecraftlauncher.AML.desktop \
-		$(DESTDIR)$(PREFIX)/share/applications/io.gitlab.anotherminecraftlauncher.AML.desktop
+		"$(DESTDIR)$(PREFIX)/share/applications/io.gitlab.anotherminecraftlauncher.AML.desktop"
 	install -Dm644 data/io.gitlab.anotherminecraftlauncher.AML.metainfo.xml \
-		$(DESTDIR)$(PREFIX)/share/metainfo/io.gitlab.anotherminecraftlauncher.AML.metainfo.xml
+		"$(DESTDIR)$(PREFIX)/share/metainfo/io.gitlab.anotherminecraftlauncher.AML.metainfo.xml"
 	@for lang in $(LOCALES); do \
 		install -Dm644 build/locale/$$lang/LC_MESSAGES/aml.mo \
-			$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/aml.mo; \
+			"$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/aml.mo"; \
 	done
 
 # The same list the install loop uses, so the catalogs go back out with
 # the rest of the launcher.
 uninstall:
-	rm -f $(DESTDIR)$(PREFIX)/bin/AML
-	rm -f $(DESTDIR)$(PREFIX)/share/applications/io.gitlab.anotherminecraftlauncher.AML.desktop
-	rm -f $(DESTDIR)$(PREFIX)/share/metainfo/io.gitlab.anotherminecraftlauncher.AML.metainfo.xml
+	rm -f "$(DESTDIR)$(PREFIX)/bin/AML"
+	rm -f "$(DESTDIR)$(PREFIX)/share/applications/io.gitlab.anotherminecraftlauncher.AML.desktop"
+	rm -f "$(DESTDIR)$(PREFIX)/share/metainfo/io.gitlab.anotherminecraftlauncher.AML.metainfo.xml"
 	@for lang in $(LOCALES); do \
-		rm -f $(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/aml.mo; \
+		rm -f "$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/aml.mo"; \
 	done
 
 clean:
