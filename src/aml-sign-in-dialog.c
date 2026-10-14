@@ -73,6 +73,36 @@ set_step (AmlSignInDialog *self, const char *step)
   gtk_widget_set_visible (GTK_WIDGET (self->waiting), TRUE);
 }
 
+static gboolean
+is_safe_verification_uri (const char *address)
+{
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GUri) uri = NULL;
+  const char *scheme = NULL;
+  const char *host = NULL;
+  gint port;
+
+  if (address == NULL)
+    return FALSE;
+
+  uri = g_uri_parse (address, G_URI_FLAGS_NONE, &error);
+  if (uri == NULL)
+    return FALSE;
+
+  scheme = g_uri_get_scheme (uri);
+  host = g_uri_get_host (uri);
+  port = g_uri_get_port (uri);
+
+  /* Microsoft currently returns www.microsoft.com/link, while older
+   * responses used microsoft.com/devicelogin. Keep the allowlist exact: a
+   * lookalike subdomain must not be enough to launch an arbitrary URL. */
+  return scheme != NULL && g_ascii_strcasecmp (scheme, "https") == 0 &&
+         host != NULL &&
+         (g_ascii_strcasecmp (host, "microsoft.com") == 0 ||
+          g_ascii_strcasecmp (host, "www.microsoft.com") == 0) &&
+         (port == -1 || port == 443);
+}
+
 /* Opens the page Microsoft serves through GIO, the way the desktop opens
    any other link: never through a command that would run whatever is
    under that name on the PATH. The address is on the dialog as well, for
@@ -85,20 +115,11 @@ open_the_page (AmlSignInDialog *self)
   if (self->code == NULL)
     return;
 
-  {
-    g_autoptr (GUri) uri = g_uri_parse (self->code->verification_uri,
-                                        G_URI_FLAGS_NONE, &error);
-    const char *scheme = uri != NULL ? g_uri_get_scheme (uri) : NULL;
-    const char *host = uri != NULL ? g_uri_get_host (uri) : NULL;
-
-    if (uri == NULL || g_ascii_strcasecmp (scheme, "https") != 0 ||
-        g_ascii_strcasecmp (host, "microsoft.com") != 0)
-      {
-        g_clear_error (&error);
-        show_error (self, "Microsoft returned an unsafe verification address");
-        return;
-      }
-  }
+  if (!is_safe_verification_uri (self->code->verification_uri))
+    {
+      show_error (self, "Microsoft returned an unsafe verification address");
+      return;
+    }
 
   if (!g_app_info_launch_default_for_uri (self->code->verification_uri, NULL,
                                           &error))
