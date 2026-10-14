@@ -1,4 +1,5 @@
 # Maintainer: Flia <43163973-anotherminecraftlauncher@users.noreply.gitlab.com>
+export PACKAGER='Flia <43163973-anotherminecraftlauncher@users.noreply.gitlab.com>'
 pkgname=aml
 pkgver=0.1
 pkgrel=1
