@@ -70,7 +70,7 @@ static void
 on_version_selected (GObject *object G_GNUC_UNUSED,
                      GParamSpec *pspec G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlLoaderRow *self = user_data;
+  AmlLoaderRow *self = AML_LOADER_ROW (user_data);
 
   if (!self->ready || self->blocked)
     return;
@@ -88,7 +88,7 @@ static void
 on_loader_selected (GObject *object G_GNUC_UNUSED,
                     GParamSpec *pspec G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlLoaderRow *self = user_data;
+  AmlLoaderRow *self = AML_LOADER_ROW (user_data);
   AmlLoader loader = AML_LOADER_VANILLA;
 
   if (self->blocked)
@@ -419,7 +419,7 @@ versions_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 on_retry_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlLoaderRow *self = user_data;
+  AmlLoaderRow *self = AML_LOADER_ROW (user_data);
   g_autofree char *wanted = NULL;
   g_autofree char *game_version = NULL;
 

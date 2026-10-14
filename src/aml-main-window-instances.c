@@ -35,7 +35,7 @@ dialog_of_instance (AmlMainWindow *self, const char *id)
 static void
 on_instance_dialog_closed (AdwDialog *dialog, gpointer user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   const char *id = g_object_get_data (G_OBJECT (dialog), "aml-instance-id");
 
   /* A closed dialog is removed from the reopen table. Detach its page now
@@ -63,7 +63,7 @@ static void
 on_instance_renamed (AmlInstance *instance, GParamSpec *pspec G_GNUC_UNUSED,
                      gpointer user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   const char *id = aml_instance_get_id (instance);
   AdwDialog *dialog = NULL;
   char *name = NULL;
@@ -160,7 +160,7 @@ close_dialogs_of_removed_instances (AmlMainWindow *self)
   while (g_hash_table_iter_next (&iter, &key, &value))
     {
       const char *id = key;
-      AdwDialog *dialog = value;
+      AdwDialog *dialog = ADW_DIALOG (value);
 
       if (aml_instance_manager_get_by_id (self->model->manager, id) == NULL)
         g_ptr_array_add (doomed, g_object_ref (dialog));
@@ -175,8 +175,10 @@ static void
 row_update (GtkWidget *play, AmlLauncher *launcher)
 {
   gboolean busy = aml_launch_state_is_busy (aml_launcher_get_state (launcher));
-  GtkWidget *icon = g_object_get_data (G_OBJECT (play), "aml-icon");
-  GtkWidget *label = g_object_get_data (G_OBJECT (play), "aml-label");
+  GtkWidget *icon =
+    GTK_WIDGET (g_object_get_data (G_OBJECT (play), "aml-icon"));
+  GtkWidget *label =
+    GTK_WIDGET (g_object_get_data (G_OBJECT (play), "aml-label"));
 
   gtk_label_set_label (GTK_LABEL (label), busy ? _("Stop") : _("Play"));
   gtk_image_set_from_icon_name (GTK_IMAGE (GTK_WIDGET (icon)),
@@ -232,7 +234,7 @@ row_set_launcher (GtkWidget *play, AmlLauncher *launcher)
 static void
 on_stop_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  AmlLauncher *launcher = user_data;
+  AmlLauncher *launcher = AML_LAUNCHER (user_data);
   const char *response =
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
 
@@ -272,7 +274,7 @@ confirm_stop (AmlMainWindow *self, AmlLauncher *launcher)
 static void
 on_play_clicked (GtkButton *button, gpointer user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   const char *id = g_object_get_data (G_OBJECT (button), "aml-instance-id");
   AmlLauncher *launcher = window_launcher (self, id);
 
@@ -328,7 +330,7 @@ on_row_icon_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
 GtkWidget *
 create_instance_row (gpointer item, gpointer user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   AmlInstance *instance = AML_INSTANCE (item);
   g_autofree char *name = NULL;
   g_autofree char *minecraft_version = NULL;
@@ -428,7 +430,7 @@ void
 on_row_activate (GtkListBox *list G_GNUC_UNUSED, GtkListBoxRow *row,
                  gpointer user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   GListStore *instances = aml_instance_manager_get_instances (self->model->manager);
   AmlInstance *instance =
     g_list_model_get_item (G_LIST_MODEL (instances),
@@ -465,7 +467,7 @@ drop_launchers_of_removed_instances (AmlMainWindow *self)
 
   while (g_hash_table_iter_next (&iter, &key, &value))
     {
-      AmlLauncher *launcher = value;
+      AmlLauncher *launcher = AML_LAUNCHER (value);
 
       if (aml_instance_manager_get_by_id (self->model->manager, (const char *) key)
             != NULL)

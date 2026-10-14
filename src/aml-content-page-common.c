@@ -71,7 +71,7 @@ plain_label (const char *text)
 void
 on_banner_dismiss (AdwBanner *banner G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  AmlContentPage *self = AML_CONTENT_PAGE (user_data);
 
   if (self->banner != NULL)
     adw_banner_set_revealed (ADW_BANNER (self->banner), FALSE);

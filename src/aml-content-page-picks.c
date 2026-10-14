@@ -191,7 +191,7 @@ pick_remove (AmlContentPage *self, AmlModrinthVersion *version)
 static void
 on_batch_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  AmlContentPage *self = AML_CONTENT_PAGE (user_data);
   const char *response =
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
 
@@ -283,7 +283,7 @@ aml_content_page_clear_picks (AmlContentPage *self)
 void
 aml_content_page_on_pick_button_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  AmlContentPage *self = AML_CONTENT_PAGE (user_data);
   g_autoptr (GString) body = NULL;
   g_autoptr (GHashTable) listed = NULL;
   AdwAlertDialog *alert = NULL;

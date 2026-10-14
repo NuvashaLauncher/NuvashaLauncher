@@ -223,7 +223,7 @@ manifest_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 on_retry_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlVersionRow *self = user_data;
+  AmlVersionRow *self = AML_VERSION_ROW (user_data);
   g_autofree char *wanted = NULL;
 
   if (self->settings == NULL)

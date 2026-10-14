@@ -14,7 +14,7 @@ on_create_instance (GSimpleAction *action G_GNUC_UNUSED,
                     GVariant      *parameter G_GNUC_UNUSED,
                     gpointer       user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   GtkWidget *dialog = GTK_WIDGET (
     aml_create_instance_dialog_new (self->model->manager, self->model->settings));
 
@@ -26,7 +26,7 @@ on_download_modpack (GSimpleAction *action G_GNUC_UNUSED,
                      GVariant      *parameter G_GNUC_UNUSED,
                      gpointer       user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   GtkWidget *dialog = GTK_WIDGET (aml_download_modpack_dialog_new (
     self->model->manager));
 
@@ -37,7 +37,7 @@ static void
 on_import_modpack_chosen (GObject *source, GAsyncResult *result,
                           gpointer user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   g_autoptr (GError) error = NULL;
   g_autoptr (GFile) file =
     gtk_file_dialog_open_finish (GTK_FILE_DIALOG (source), result, &error);
@@ -80,7 +80,7 @@ static void
 on_import_modpack (GSimpleAction *action G_GNUC_UNUSED,
                    GVariant *parameter G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
   g_autoptr (GtkFileDialog) dialog = gtk_file_dialog_new ();
   g_autoptr (GtkFileFilter) filter = gtk_file_filter_new ();
@@ -103,7 +103,7 @@ static void
 on_show_snapshots_toggled (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
                            gpointer user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   AdwSwitchRow *row = ADW_SWITCH_ROW (object);
   gboolean active = adw_switch_row_get_active (row);
   gboolean stored = aml_settings_get_show_snapshots (self->model->settings);
@@ -126,7 +126,7 @@ static void
 on_log_limit_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
                       gpointer user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   AdwSpinRow *row = ADW_SPIN_ROW (object);
   guint limit = (guint) adw_spin_row_get_value (row);
 
@@ -147,7 +147,7 @@ on_show_unstable_loaders_toggled (GObject *object,
                                   GParamSpec *pspec G_GNUC_UNUSED,
                                   gpointer user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   AdwSwitchRow *row = ADW_SWITCH_ROW (object);
   gboolean active = adw_switch_row_get_active (row);
 
@@ -164,7 +164,7 @@ on_open_logs_after_crash_toggled (GObject *object,
                                   GParamSpec *pspec G_GNUC_UNUSED,
                                   gpointer user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   AdwSwitchRow *row = ADW_SWITCH_ROW (object);
   gboolean active = adw_switch_row_get_active (row);
 
@@ -181,7 +181,7 @@ on_export_metadata_toggled (GObject *object,
                             GParamSpec *pspec G_GNUC_UNUSED,
                             gpointer user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   AdwSwitchRow *row = ADW_SWITCH_ROW (object);
   gboolean active = adw_switch_row_get_active (row);
 
@@ -198,7 +198,7 @@ on_delete_dependents_toggled (GObject *object,
                                GParamSpec *pspec G_GNUC_UNUSED,
                                gpointer user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   AdwSwitchRow *row = ADW_SWITCH_ROW (object);
   gboolean active = adw_switch_row_get_active (row);
 
@@ -215,7 +215,7 @@ on_language_selected (GObject *object,
                       GParamSpec *pspec G_GNUC_UNUSED,
                       gpointer user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   AdwComboRow *row = ADW_COMBO_ROW (object);
   gsize length = 0;
   const AmlLanguage *languages = aml_i18n_languages (&length);
@@ -232,7 +232,7 @@ on_cache_modrinth_api_responses_toggled (GObject *object,
                                          GParamSpec *pspec G_GNUC_UNUSED,
                                          gpointer user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   AdwSwitchRow *row = ADW_SWITCH_ROW (object);
   gboolean active = adw_switch_row_get_active (row);
 
@@ -250,7 +250,7 @@ on_cache_expiration_selected (GObject *object,
                                GParamSpec *pspec G_GNUC_UNUSED,
                                gpointer user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   AdwComboRow *row = ADW_COMBO_ROW (object);
   static const AmlSettingsCacheExpiration values[] = {
     AML_SETTINGS_CACHE_EXPIRATION_1_HOUR,
@@ -285,7 +285,7 @@ static void
 on_clear_cache_clicked (GtkButton *button G_GNUC_UNUSED,
                         gpointer user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   AdwAlertDialog *alert = ADW_ALERT_DIALOG (
     adw_alert_dialog_new (_("Clear AML Cache?"), NULL));
 
@@ -342,7 +342,7 @@ static void
 on_clear_cache_confirmed (GObject *source, GAsyncResult *result,
                           gpointer user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   const char *response =
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
 
@@ -362,7 +362,7 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
              GVariant      *parameter G_GNUC_UNUSED,
              gpointer       user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   AdwDialog *dialog = adw_preferences_dialog_new ();
   AdwPreferencesPage *page = ADW_PREFERENCES_PAGE (adw_preferences_page_new ());
   AdwPreferencesGroup *versions_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
@@ -578,7 +578,7 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
           GVariant      *parameter G_GNUC_UNUSED,
           gpointer       user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   AdwDialog *dialog = adw_about_dialog_new ();
   const char *app_ids[] = { "io.gitlab.anotherminecraftlauncher.AML", NULL };
 
@@ -605,7 +605,7 @@ on_shortcuts (GSimpleAction *action G_GNUC_UNUSED,
               GVariant      *parameter G_GNUC_UNUSED,
               gpointer       user_data)
 {
-  AmlMainWindow *self = user_data;
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   AdwDialog *dialog = adw_shortcuts_dialog_new ();
   AdwShortcutsSection *general = adw_shortcuts_section_new (_("General"));
 

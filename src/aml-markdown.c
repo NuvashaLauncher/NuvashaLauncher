@@ -232,7 +232,7 @@ image_resize (GtkWidget *picture)
 static gboolean
 image_resize_idle (gpointer user_data)
 {
-  GtkWidget *picture = user_data;
+  GtkWidget *picture = GTK_WIDGET (user_data);
   AmlTaskScope *scope = g_object_get_data (G_OBJECT (picture),
                                            "aml-image-scope");
   guint source_id = GPOINTER_TO_UINT (

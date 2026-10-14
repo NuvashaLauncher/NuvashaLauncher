@@ -69,7 +69,7 @@ on_input_changed (GObject *object G_GNUC_UNUSED, GParamSpec *pspec G_GNUC_UNUSED
 static void
 on_add_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlOfflineAccountDialog *self = user_data;
+  AmlOfflineAccountDialog *self = AML_OFFLINE_ACCOUNT_DIALOG (user_data);
   g_autofree char *name =
     g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->name_row)));
   g_autoptr (GError) error = NULL;

@@ -157,7 +157,8 @@ start_install (AmlDownloadModpackDialog *self)
     {
       for (guint i = 0; i < self->opt_switch_rows->len; i++)
         {
-          AdwSwitchRow *row = g_ptr_array_index (self->opt_switch_rows, i);
+          AdwSwitchRow *row = ADW_SWITCH_ROW (
+            g_ptr_array_index (self->opt_switch_rows, i));
 
           if (adw_switch_row_get_active (row))
             {
@@ -269,7 +270,7 @@ build_optional_page (AmlDownloadModpackDialog *self,
 static void
 on_optional_cancel (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlDownloadModpackDialog *self = user_data;
+  AmlDownloadModpackDialog *self = AML_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   dialog_details_show_again (self);
 }
@@ -277,7 +278,7 @@ on_optional_cancel (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 static void
 on_optional_install (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlDownloadModpackDialog *self = user_data;
+  AmlDownloadModpackDialog *self = AML_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   /* Pop ourselves off so the installing page is showing when
    * the install clocks in with the downloading files. */
@@ -328,7 +329,7 @@ adopt_pack_name (AmlDownloadModpackDialog *self)
 static void
 on_pack_progress (goffset bytes_done, goffset total, gpointer user_data)
 {
-  AmlDownloadModpackDialog *self = user_data;
+  AmlDownloadModpackDialog *self = AML_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   if (self->pack_download != NULL)
     aml_download_set_bytes (self->pack_download, (guint64) bytes_done,
@@ -340,7 +341,7 @@ on_pack_downloaded (GObject *source G_GNUC_UNUSED,
                     GAsyncResult *result,
                     gpointer user_data)
 {
-  AmlDownloadModpackDialog *self = user_data;
+  AmlDownloadModpackDialog *self = AML_DOWNLOAD_MODPACK_DIALOG (user_data);
   g_autoptr (GError) error = NULL;
 
   if (!aml_download_file_finish (result, &error))
@@ -382,7 +383,7 @@ void
 on_pack_parsed (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                 gpointer user_data)
 {
-  AmlDownloadModpackDialog *self = user_data;
+  AmlDownloadModpackDialog *self = AML_DOWNLOAD_MODPACK_DIALOG (user_data);
   g_autoptr (GError) error = NULL;
 
   g_clear_pointer (&self->modpack, aml_modpack_free);

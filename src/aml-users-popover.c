@@ -205,7 +205,7 @@ account_id_of (gpointer widget)
 static void
 on_row_activated (AdwActionRow *row, gpointer user_data)
 {
-  AmlUsersPopover *self = user_data;
+  AmlUsersPopover *self = AML_USERS_POPOVER (user_data);
   const char *id = account_id_of (row);
   g_autoptr (GError) error = NULL;
 
@@ -222,7 +222,7 @@ on_row_activated (AdwActionRow *row, gpointer user_data)
 static void
 on_remove_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  AmlUsersPopover *self = user_data;
+  AmlUsersPopover *self = AML_USERS_POPOVER (user_data);
   const char *id = g_object_get_data (G_OBJECT (source), "aml-account-id");
   const char *response =
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
@@ -243,7 +243,7 @@ on_remove_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 static void
 on_remove_clicked (GtkButton *button, gpointer user_data)
 {
-  AmlUsersPopover *self = user_data;
+  AmlUsersPopover *self = AML_USERS_POPOVER (user_data);
   const char *id = account_id_of (button);
   const char *name = g_object_get_data (G_OBJECT (button), "aml-account-name");
   g_autofree char *heading = NULL;
@@ -372,7 +372,7 @@ static void
 on_signed_in (AmlSignInDialog *dialog, AmlAccount *account,
               gpointer user_data)
 {
-  AmlUsersPopover *self = user_data;
+  AmlUsersPopover *self = AML_USERS_POPOVER (user_data);
 
   add_account (self, account);
   adw_dialog_close (ADW_DIALOG (dialog));
@@ -383,7 +383,7 @@ static void
 on_offline_added (AmlOfflineAccountDialog *dialog, AmlAccount *account,
                   gpointer user_data)
 {
-  AmlUsersPopover *self = user_data;
+  AmlUsersPopover *self = AML_USERS_POPOVER (user_data);
 
   add_account (self, account);
   adw_dialog_close (ADW_DIALOG (dialog));
@@ -393,7 +393,7 @@ on_offline_added (AmlOfflineAccountDialog *dialog, AmlAccount *account,
 static void
 on_add_microsoft_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlUsersPopover *self = user_data;
+  AmlUsersPopover *self = AML_USERS_POPOVER (user_data);
   AmlSignInDialog *dialog = aml_sign_in_dialog_new ();
 
   /* Weak, so that the handler does not keep the dialog alive for as long
@@ -408,7 +408,7 @@ on_add_microsoft_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 static void
 on_add_offline_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlUsersPopover *self = user_data;
+  AmlUsersPopover *self = AML_USERS_POPOVER (user_data);
   AmlOfflineAccountDialog *dialog = aml_offline_account_dialog_new ();
 
   g_signal_connect_object (dialog, "account-added",

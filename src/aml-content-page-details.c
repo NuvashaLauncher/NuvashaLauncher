@@ -55,7 +55,7 @@ details_watch_free (DetailsWatch *watch)
 static void
 on_version_picked (GtkCheckButton *check, gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  AmlContentPage *self = AML_CONTENT_PAGE (user_data);
   AmlModrinthVersion *version = NULL;
 
   /* The list is what moved the checkmark itself. */
@@ -83,7 +83,7 @@ static void
 on_version_selected (GObject *object G_GNUC_UNUSED,
                      GParamSpec *pspec G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  AmlContentPage *self = AML_CONTENT_PAGE (user_data);
 
   refresh_pick_check (self);
   aml_content_page_refresh_picks (self);
@@ -130,8 +130,9 @@ version_name_of (AmlModrinthVersion *version)
 static void
 on_version_download_clicked (GtkButton *button, gpointer user_data)
 {
-  AmlContentPage *self = user_data;
-  GtkWidget *dropdown = g_object_get_data (G_OBJECT (button), "aml-dropdown");
+  AmlContentPage *self = AML_CONTENT_PAGE (user_data);
+  GtkWidget *dropdown =
+    GTK_WIDGET (g_object_get_data (G_OBJECT (button), "aml-dropdown"));
   GPtrArray *versions = g_object_get_data (G_OBJECT (button), "aml-versions");
   AmlModrinthVersion *version = NULL;
 
@@ -616,7 +617,7 @@ open_project_page (AmlContentPage *self, AmlModrinthProject *project)
 void
 aml_content_page_on_result_activated (AdwActionRow *row, gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  AmlContentPage *self = AML_CONTENT_PAGE (user_data);
   AmlModrinthProject *project =
     g_object_get_data (G_OBJECT (row), "aml-project");
 

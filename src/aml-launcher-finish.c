@@ -63,7 +63,7 @@ static void
 crash_reports_listed (GObject *source, GAsyncResult *result,
                       gpointer user_data)
 {
-  AmlLauncher *self = user_data;
+  AmlLauncher *self = AML_LAUNCHER (user_data);
   g_autoptr (GError) error = NULL;
   g_autoptr (GFileEnumerator) files = NULL;
   g_autoptr (GFileInfo) info = NULL;

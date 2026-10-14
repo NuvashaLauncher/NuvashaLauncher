@@ -162,7 +162,7 @@ aml_download_modpack_dialog_class_init (AmlDownloadModpackDialogClass *klass)
 static void
 on_dialog_closed (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlDownloadModpackDialog *self = user_data;
+  AmlDownloadModpackDialog *self = AML_DOWNLOAD_MODPACK_DIALOG (user_data);
   if (self->import_idle != 0)
     aml_operation_remove (self->scope, self->import_idle);
   self->import_idle = 0;
@@ -235,7 +235,7 @@ build_import_page (AmlDownloadModpackDialog *self)
 static gboolean
 start_import_idle (gpointer user_data)
 {
-  AmlDownloadModpackDialog *self = user_data;
+  AmlDownloadModpackDialog *self = AML_DOWNLOAD_MODPACK_DIALOG (user_data);
   aml_operation_forget_source (self->scope, self->import_idle);
   self->import_idle = 0;
 
@@ -283,7 +283,7 @@ aml_download_modpack_dialog_new_for_file (AmlInstanceManager *manager,
 static gboolean
 on_search_timeout (gpointer user_data)
 {
-  AmlDownloadModpackDialog *self = user_data;
+  AmlDownloadModpackDialog *self = AML_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   aml_operation_forget_source (self->scope, self->debounce);
   self->debounce = 0;
@@ -295,7 +295,7 @@ on_search_timeout (gpointer user_data)
 static void
 on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlDownloadModpackDialog *self = user_data;
+  AmlDownloadModpackDialog *self = AML_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   if (self->debounce != 0)
     aml_operation_remove (self->scope, self->debounce);
@@ -313,7 +313,7 @@ on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
 static void
 on_scroll_changed (GtkAdjustment *adjustment, gpointer user_data)
 {
-  AmlDownloadModpackDialog *self = user_data;
+  AmlDownloadModpackDialog *self = AML_DOWNLOAD_MODPACK_DIALOG (user_data);
   gdouble at_end;
 
   if (self->loading_page)
@@ -367,7 +367,7 @@ take_rows_out (GPtrArray **rows, AdwPreferencesGroup *group)
 static void
 result_row_activated (AdwActionRow *row, gpointer user_data)
 {
-  AmlDownloadModpackDialog *self = user_data;
+  AmlDownloadModpackDialog *self = AML_DOWNLOAD_MODPACK_DIALOG (user_data);
   AmlModrinthProject *project =
     g_object_get_data (G_OBJECT (row), "aml-project");
 
@@ -1606,7 +1606,7 @@ dialog_details_show_again (AmlDownloadModpackDialog *self)
 void
 on_error_back (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlDownloadModpackDialog *self = user_data;
+  AmlDownloadModpackDialog *self = AML_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   dialog_details_show_again (self);
 }
@@ -1614,7 +1614,7 @@ on_error_back (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 void
 on_error_retry_fetch (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlDownloadModpackDialog *self = user_data;
+  AmlDownloadModpackDialog *self = AML_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   self->fail_is_install = FALSE;
 
@@ -1627,7 +1627,7 @@ on_error_retry_fetch (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 void
 on_error_retry_install (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlDownloadModpackDialog *self = user_data;
+  AmlDownloadModpackDialog *self = AML_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   /* Back onto the installing page of the attempt that failed. */
   adw_navigation_view_pop (ADW_NAVIGATION_VIEW (self->nav));
@@ -1640,7 +1640,7 @@ static void
 on_modpack_download_clicked (GtkButton *button G_GNUC_UNUSED,
                              gpointer user_data)
 {
-  AmlDownloadModpackDialog *self = user_data;
+  AmlDownloadModpackDialog *self = AML_DOWNLOAD_MODPACK_DIALOG (user_data);
   guint selected = 0;
 
   if (self->dropdown == NULL || self->versions == NULL)

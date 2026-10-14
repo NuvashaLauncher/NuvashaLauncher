@@ -173,7 +173,7 @@ on_content_tab_switched (GObject *stack, GParamSpec *pspec G_GNUC_UNUSED,
 static void
 on_name_apply (AdwEntryRow *row, gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  AmlInstancePage *self = AML_INSTANCE_PAGE (user_data);
   const char *text = gtk_editable_get_text (GTK_EDITABLE (GTK_WIDGET (row)));
   g_autofree char *current = instance_string (self->instance, "name");
   g_autoptr (GError) error = NULL;
@@ -203,7 +203,7 @@ on_name_apply (AdwEntryRow *row, gpointer user_data)
 static void
 on_jvm_args_apply (AdwEntryRow *row, gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  AmlInstancePage *self = AML_INSTANCE_PAGE (user_data);
   const char *text = gtk_editable_get_text (GTK_EDITABLE (GTK_WIDGET (row)));
   g_autofree char *current = instance_string (self->instance, "jvm-args");
   g_autoptr (GError) error = NULL;
@@ -269,7 +269,7 @@ static void
 on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
                      gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  AmlInstancePage *self = AML_INSTANCE_PAGE (user_data);
   AmlVersionRow *row = AML_VERSION_ROW (object);
   const char *version = aml_version_row_get_selected (row);
   g_autofree char *current =
@@ -330,7 +330,7 @@ on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
 static void
 on_loader_changed (AmlLoaderRow *row, gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  AmlInstancePage *self = AML_INSTANCE_PAGE (user_data);
   AmlLoader loader = aml_loader_row_get_loader (row);
   const char *version = aml_loader_row_get_version (row);
   g_autofree char *minecraft =
@@ -519,7 +519,7 @@ static void
 on_java_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
                   gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  AmlInstancePage *self = AML_INSTANCE_PAGE (user_data);
   AmlJavaRow *row = AML_JAVA_ROW (object);
   const char *path = aml_java_row_get_selected_path (row);
   g_autofree char *current = instance_string (self->instance, "java-path");
@@ -600,7 +600,7 @@ update_icon_row (AmlInstancePage *self)
 static void
 on_icon_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  AmlInstancePage *self = AML_INSTANCE_PAGE (user_data);
   g_autoptr (GError) error = NULL;
   g_autoptr (GFile) file =
     gtk_file_dialog_open_finish (GTK_FILE_DIALOG (source), result, &error);
@@ -646,7 +646,7 @@ on_icon_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 static void
 on_change_icon_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  AmlInstancePage *self = AML_INSTANCE_PAGE (user_data);
   GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
   g_autoptr (GtkFileDialog) dialog = gtk_file_dialog_new ();
   g_autoptr (GtkFileFilter) filter = gtk_file_filter_new ();
@@ -903,7 +903,7 @@ on_page_launcher_state (AmlLauncher *launcher G_GNUC_UNUSED,
                         AmlLaunchState state, const char *detail G_GNUC_UNUSED,
                         gpointer user_data)
 {
-  AmlInstancePage *self = user_data;
+  AmlInstancePage *self = AML_INSTANCE_PAGE (user_data);
 
   update_directory_row (self);
 

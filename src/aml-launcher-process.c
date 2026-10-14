@@ -18,7 +18,7 @@
 static void
 on_output_line (const char *line, gboolean stderr_line, gpointer user_data)
 {
-  AmlLauncher *self = user_data;
+  AmlLauncher *self = AML_LAUNCHER (user_data);
 
   log_line (self, stderr_line ? TAG_STDERR : TAG_STDOUT, "%s", line);
 }
@@ -26,7 +26,7 @@ on_output_line (const char *line, gboolean stderr_line, gpointer user_data)
 static void
 on_output_done (GError *error, gpointer user_data)
 {
-  AmlLauncher *self = user_data;
+  AmlLauncher *self = AML_LAUNCHER (user_data);
 
   if (error != NULL)
     log_line (self, TAG_STDOUT, "the output of the game cannot be read: %s",
@@ -58,7 +58,7 @@ watch_output (AmlLauncher *self, GInputStream *stream, gboolean stderr_line)
 gboolean
 on_stop_timeout (gpointer user_data)
 {
-  AmlLauncher *self = user_data;
+  AmlLauncher *self = AML_LAUNCHER (user_data);
   guint source_id = self->process.stop_timeout;
 
   self->process.stop_timeout = 0;
@@ -77,7 +77,7 @@ on_stop_timeout (gpointer user_data)
 static void
 on_process_exited (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  AmlLauncher *self = user_data;
+  AmlLauncher *self = AML_LAUNCHER (user_data);
 
   /* How it ended is read from the process itself: wait_finish() only
      says whether the exit was a clean one. */

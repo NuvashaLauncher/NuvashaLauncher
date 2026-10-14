@@ -134,7 +134,7 @@ static void
 on_install_progress (const char *stage, guint done, guint total,
                      gpointer user_data)
 {
-  AmlLauncher *self = user_data;
+  AmlLauncher *self = AML_LAUNCHER (user_data);
   guint percent;
   g_autofree char *detail = NULL;
 

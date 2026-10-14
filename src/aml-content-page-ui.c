@@ -140,7 +140,7 @@ void
 aml_content_page_on_stack_switched (GObject *stack, GParamSpec *pspec G_GNUC_UNUSED,
                    gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  AmlContentPage *self = AML_CONTENT_PAGE (user_data);
   const char *visible = adw_view_stack_get_visible_child_name (
       ADW_VIEW_STACK (stack));
   gboolean browsing = g_strcmp0 (visible, "browse") == 0;
@@ -413,7 +413,7 @@ aml_content_page_build_browse (AmlContentPage *self)
 static void
 on_switcher_toggled (GtkToggleButton *button, gpointer user_data)
 {
-  AmlContentPage *self = user_data;
+  AmlContentPage *self = AML_CONTENT_PAGE (user_data);
 
   if (!gtk_toggle_button_get_active (button) || self->stack == NULL)
     return;

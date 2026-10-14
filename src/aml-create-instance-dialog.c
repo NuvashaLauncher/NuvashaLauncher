@@ -74,7 +74,7 @@ static void
 on_version_selected (GObject *object G_GNUC_UNUSED,
                      GParamSpec *pspec G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlCreateInstanceDialog *self = user_data;
+  AmlCreateInstanceDialog *self = AML_CREATE_INSTANCE_DIALOG (user_data);
   const char *version =
     aml_version_row_get_selected (AML_VERSION_ROW (self->version_row));
 
@@ -95,7 +95,7 @@ on_version_selected (GObject *object G_GNUC_UNUSED,
 static void
 on_loader_changed (AmlLoaderRow *row G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlCreateInstanceDialog *self = user_data;
+  AmlCreateInstanceDialog *self = AML_CREATE_INSTANCE_DIALOG (user_data);
 
   /* The row reloads its own versions when the loader changes and tells
      this handler again once one is picked; the dialog only has to say
@@ -108,7 +108,7 @@ on_input_changed (GObject *object G_GNUC_UNUSED,
                   GParamSpec *pspec G_GNUC_UNUSED,
                   gpointer user_data)
 {
-  AmlCreateInstanceDialog *self = user_data;
+  AmlCreateInstanceDialog *self = AML_CREATE_INSTANCE_DIALOG (user_data);
 
   update_create_button (self);
 }
@@ -122,7 +122,7 @@ on_cancel_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 static void
 on_create_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlCreateInstanceDialog *self = user_data;
+  AmlCreateInstanceDialog *self = AML_CREATE_INSTANCE_DIALOG (user_data);
   g_autofree char *name = aml_instance_normalize_name (
     gtk_editable_get_text (GTK_EDITABLE (self->name_row)));
   const char *version =
@@ -164,7 +164,7 @@ on_create_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 static void
 on_folder_selected (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  AmlCreateInstanceDialog *self = user_data;
+  AmlCreateInstanceDialog *self = AML_CREATE_INSTANCE_DIALOG (user_data);
   g_autoptr (GError) error = NULL;
   g_autoptr (GFile) file =
     gtk_file_dialog_select_folder_finish (GTK_FILE_DIALOG (source), result,
@@ -197,7 +197,7 @@ on_folder_selected (GObject *source, GAsyncResult *result, gpointer user_data)
 static void
 on_pick_directory (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  AmlCreateInstanceDialog *self = user_data;
+  AmlCreateInstanceDialog *self = AML_CREATE_INSTANCE_DIALOG (user_data);
   GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
   g_autoptr (GtkFileDialog) dialog = gtk_file_dialog_new ();
 
