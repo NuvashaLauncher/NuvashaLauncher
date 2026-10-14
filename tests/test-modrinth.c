@@ -912,19 +912,19 @@ test_scan_and_toggle (void)
 
     /* A disabled file is loaded again by taking the suffix off. */
     g_free (back);
-    back = aml_content_set_disabled (disabled_path, TRUE, &error);
+    back = aml_content_set_disabled (disabled_path, FALSE, &error);
     g_assert_no_error (error);
     g_assert_cmpstr (back, ==, enabled_path);
     g_assert_true (g_file_test (back, G_FILE_TEST_EXISTS));
 
     /* Asking for the state a file is already in is not a rename. */
-    same = aml_content_set_disabled (back, TRUE, &error);
+    same = aml_content_set_disabled (back, FALSE, &error);
     g_assert_no_error (error);
     g_assert_cmpstr (same, ==, back);
     g_assert_true (g_file_test (same, G_FILE_TEST_EXISTS));
 
     /* And it goes back to being a file the loader skips. */
-    renamed = aml_content_set_disabled (back, FALSE, &error);
+    renamed = aml_content_set_disabled (back, TRUE, &error);
     g_assert_no_error (error);
     g_assert_cmpstr (renamed, ==, disabled_path);
     g_assert_true (g_file_test (renamed, G_FILE_TEST_EXISTS));

@@ -86,14 +86,14 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC (AmlContentFile, aml_content_file_free)
 char *aml_content_folder_path (const char    *instance_directory,
                                AmlContentType type);
 
-/* The name @filename has when the content is enabled or disabled, which
- * is @filename with the ".disabled" suffix put on or taken off.
+/* The name @filename has when the content is enabled or disabled.
+ * @enabled is TRUE to remove the ".disabled" suffix, or FALSE to add it.
  * (transfer full) */
 char *aml_content_disabled_name (const char *filename, gboolean enabled);
 
-/* Renames the file at @path so that it is disabled or enabled again,
- * and hands the name it has afterwards back in @new_path when it is not
- * NULL. (transfer full) */
+/* Renames the file at @path so that it is disabled or enabled again.
+ * @disabled is TRUE to add the ".disabled" suffix, or FALSE to remove it.
+ * Returns the file's new path. (transfer full) */
 char *aml_content_set_disabled (const char  *path,
                                 gboolean     disabled,
                                 GError     **error);

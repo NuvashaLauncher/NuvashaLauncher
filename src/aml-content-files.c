@@ -113,7 +113,7 @@ aml_content_set_disabled (const char *path, gboolean disabled, GError **error)
 
   directory = g_path_get_dirname (path);
   base = g_path_get_basename (path);
-  name = aml_content_disabled_name (base, disabled);
+  name = aml_content_disabled_name (base, !disabled);
   target = g_build_filename (directory, name, NULL);
 
   if (g_strcmp0 (path, target) == 0)
