@@ -128,6 +128,8 @@ install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 	install -Dm755 $(BIN) "$(DESTDIR)$(PREFIX)/bin/AML"
 	install -Dm644 data/io.gitlab.anotherminecraftlauncher.AML.desktop \
 		"$(DESTDIR)$(PREFIX)/share/applications/io.gitlab.anotherminecraftlauncher.AML.desktop"
+	install -Dm644 data/icons/scalable/apps/io.gitlab.anotherminecraftlauncher.AML.svg \
+		"$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/io.gitlab.anotherminecraftlauncher.AML.svg"
 	install -Dm644 data/io.gitlab.anotherminecraftlauncher.AML.metainfo.xml \
 		"$(DESTDIR)$(PREFIX)/share/metainfo/io.gitlab.anotherminecraftlauncher.AML.metainfo.xml"
 	@for lang in $(LOCALES); do \
@@ -140,6 +142,7 @@ install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 uninstall:
 	rm -f "$(DESTDIR)$(PREFIX)/bin/AML"
 	rm -f "$(DESTDIR)$(PREFIX)/share/applications/io.gitlab.anotherminecraftlauncher.AML.desktop"
+	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/io.gitlab.anotherminecraftlauncher.AML.svg"
 	rm -f "$(DESTDIR)$(PREFIX)/share/metainfo/io.gitlab.anotherminecraftlauncher.AML.metainfo.xml"
 	@for lang in $(LOCALES); do \
 		rm -f "$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/aml.mo"; \
