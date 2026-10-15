@@ -2,9 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* Starts the launcher with DISPLAY and WAYLAND_DISPLAY removed and checks
- * that it refuses to run: exit code 1 and a clear message on stderr,
- * instead of falling back to X11. Runs headless. */
+/* Starts the launcher without a display and checks that it refuses to run
+ * with a clear message on stderr. Runs headless. */
 
 #include <glib.h>
 #include <stdlib.h>
@@ -12,7 +11,7 @@
 #include <sys/wait.h>
 
 static void
-test_refuses_to_start_without_wayland (void)
+test_refuses_to_start_without_display (void)
 {
   gchar *argv[] = { (gchar *) AML_BIN, NULL };
   g_auto (GStrv) env = g_get_environ ();
@@ -24,6 +23,7 @@ test_refuses_to_start_without_wayland (void)
 
   env = g_environ_unsetenv (env, "DISPLAY");
   env = g_environ_unsetenv (env, "WAYLAND_DISPLAY");
+  env = g_environ_setenv (env, "GDK_BACKEND", "invalid", TRUE);
 
   spawned = g_spawn_sync (NULL, argv, env, G_SPAWN_DEFAULT, NULL, NULL,
                           &child_stdout, &child_stderr, &status, &error);
@@ -34,7 +34,7 @@ test_refuses_to_start_without_wayland (void)
   g_assert_cmpint (WEXITSTATUS (status), ==, 1);
 
   g_assert_nonnull (child_stderr);
-  g_assert_nonnull (strstr (child_stderr, "AML requires a Wayland session"));
+  g_assert_nonnull (strstr (child_stderr, "AML could not open a display"));
 
   g_free (child_stdout);
   g_free (child_stderr);
@@ -46,8 +46,8 @@ main (int argc, char **argv)
   (void) argc;
   (void) argv;
 
-  test_refuses_to_start_without_wayland ();
+  test_refuses_to_start_without_display ();
 
-  g_print ("ok - launcher refuses to start without a Wayland display\n");
+  g_print ("ok - launcher refuses to start without a display\n");
   return EXIT_SUCCESS;
 }

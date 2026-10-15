@@ -9,8 +9,8 @@ PKG_CONFIG ?= pkg-config
 PREFIX     ?= /usr/local
 VERSION    := $(strip $(shell cat VERSION))
 
-# Libraries AML links against. Never add an X11 package here: AML is
-# Wayland only and must not link anything X11 related.
+# Libraries AML links against. GTK loads the available display backend at
+# runtime, so AML does not link to a window-system backend directly.
 # gio-unix-2.0 is the Linux part of GIO itself (no display involved) and
 # provides the output stream that writes a download into its temporary
 # file descriptor.
@@ -78,7 +78,7 @@ build/tests/%: tests/%.c $(TESTLIBOBJS) | build/tests
 # Tests never write to the real data directory and never touch the
 # network. Only the icon name audit opens a display, and it skips itself
 # when there is none; the test that runs the launcher runs it with DISPLAY
-# and WAYLAND_DISPLAY removed.
+# and display variables removed.
 test: $(if $(SRCS),$(BIN)) $(TESTBINS)
 	@pass=0; skip=0; for t in $(TESTBINS); do echo "RUN  $$t"; ./$$t; status=$$?; \
 		if test $$status -eq 77; then skip=$$((skip + 1)); \
@@ -94,8 +94,8 @@ build-debug/tests/%: tests/%.c $(TESTLIBDBGOBJS) | build-debug/tests
 		-DAML_SRC_DIR=\"$(CURDIR)/src\" -DAML_PO_DIR=\"$(CURDIR)/po\" \
 		-o $@ $< $(TESTLIBDBGOBJS) $(PKG_LIBS)
 
-# The Wayland guard test runs the release launcher, so test-debug builds
-# both binaries.
+# The display guard test runs the release launcher, so test-debug builds both
+# binaries.
 test-debug: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS)
 	@pass=0; skip=0; for t in $(TESTDBGBINS); do echo "RUN  $$t"; ./$$t; status=$$?; \
 		if test $$status -eq 77; then skip=$$((skip + 1)); \

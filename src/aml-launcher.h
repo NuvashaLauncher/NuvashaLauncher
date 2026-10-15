@@ -251,7 +251,7 @@ void aml_launcher_stop (AmlLauncher *self);
 
 /* The last step of a launch: runs @argv, java included as its first
  * element, with the instance directory as the working directory and
- * without the GDK_BACKEND AML sets for itself.
+ * without a GDK_BACKEND selection from AML.
  *
  * This is public because it is the one step a headless test can drive on
  * its own with a fake java: the state machine, the two output readers

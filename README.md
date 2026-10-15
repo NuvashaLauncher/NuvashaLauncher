@@ -6,8 +6,7 @@ AML creates instances, installs modpacks and mods from Modrinth, resolves
 mod loaders, and runs the game. It is written in C against GTK4 and
 libadwaita, and it uses the public APIs of the services it talks to.
 
-Requires a Wayland session. GTK4 must be built with Wayland support,
-which is the default on all major distributions. X11 is not supported.
+Works with both Wayland and X11 through GTK4.
 
 ## Features
 
@@ -23,9 +22,8 @@ which is the default on all major distributions. X11 is not supported.
 
 ## Design notes
 
-AML is Wayland only. It does not link, load or talk to X11 or XWayland,
-and it exits when no Wayland display is available instead of falling back
-to another backend.
+GTK selects the available display backend at startup. AML does not select or
+require a specific window-system backend.
 
 There is no companion service, no updater and no telemetry. AML only makes
 requests when a task needs them, and only to the service that task needs.

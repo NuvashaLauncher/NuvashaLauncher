@@ -401,10 +401,9 @@ test_child_environment (void)
     g_strdup_printf ("DISPLAY=%s", display != NULL ? display : "unset");
   Watch watch = { 0 };
 
-  /* AML runs on Wayland and sets this for itself. The game is not AML:
-     it must not inherit it, or it would try to open a Wayland window
-     with a toolkit that knows nothing about it. */
-  g_setenv ("GDK_BACKEND", "wayland", TRUE);
+  /* The launcher process has a backend selection in its environment. The
+     game is not AML and must not inherit it. */
+  g_setenv ("GDK_BACKEND", "test-backend", TRUE);
 
   argv = argv_of (write_script (
     "environment.sh",
