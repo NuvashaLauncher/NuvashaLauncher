@@ -68,8 +68,6 @@ sudo apt install build-essential pkg-config \
     libarchive-dev
 ```
 
-Use Debian 13+.
-
 Fedora:
 
 ```
@@ -79,8 +77,6 @@ sudo dnf install gcc make gettext pkgconf-pkg-config \
     libarchive-devel
 ```
 
-Use Fedora 40+.
-
 openSUSE Tumbleweed:
 
 ```bash
@@ -88,9 +84,6 @@ sudo zypper install gcc make gettext-tools pkg-config glib2-devel \
     gtk4-devel libadwaita-devel json-glib-devel libsoup3-devel \
     libarchive-devel
 ```
-
-Use Tumbleweed or another openSUSE release with GTK 4.10 and libadwaita 1.5
-or newer.
 
 Arch:
 
