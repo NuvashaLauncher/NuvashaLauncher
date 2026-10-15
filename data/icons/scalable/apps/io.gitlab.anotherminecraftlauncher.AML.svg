@@ -3,34 +3,7 @@
    height="1024"
    viewBox="0 0 1024 1024"
    xmlns="http://www.w3.org/2000/svg">
-  <defs
-     id="defs1">
-    <filter
-       style="color-interpolation-filters:sRGB"
-       id="filter2180"
-       x="-0.010215482"
-       y="-0.007057422"
-       width="1.020431"
-       height="1.0141148">
-      <feGaussianBlur
-         result="result6"
-         stdDeviation="3"
-         in="SourceGraphic"
-         id="feGaussianBlur2180" />
-      <feColorMatrix
-         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 "
-         result="result7"
-         in="SourceGraphic"
-         id="feColorMatrix2180" />
-      <feComposite
-         operator="in"
-         in="result6"
-         in2="result7"
-         id="feComposite2180" />
-    </filter>
-  </defs>
-<g
-     id="g2236">
+  <g>
     <rect
        style="fill:#ffffff;fill-opacity:1;stroke-width:0.249053"
        id="rect2177-6"
@@ -49,38 +22,8 @@
         y="96"
         ry="96"
         rx="96" />
-    <g
-       id="g2180"
-       transform="matrix(0.75684673,0,0,0.72989188,135.06988,138.988)"
-       style="filter:url(#filter2180)">
-      <rect
-         style="fill:#502d16;fill-opacity:1;stroke-width:0.264583"
-         id="rect2174"
-         width="165.48282"
-         height="572.53253"
-         x="410.85391"
-         y="450.79807" />
-      <rect
-         style="fill:#225500;fill-opacity:1;stroke-width:0.255938"
-         id="rect2175"
-         width="704.81256"
-         height="154.07021"
-         x="135.18437"
-         y="310.04254" />
-      <rect
-         style="fill:#225500;fill-opacity:1;stroke-width:0.264583"
-         id="rect2176"
-         width="502.15479"
-         height="157.87442"
-         x="243.23822"
-         y="155.97232" />
-      <rect
-         style="fill:#225500;fill-opacity:1;stroke-width:0.200478"
-         id="rect2176-5"
-         width="288.30154"
-         height="157.87442"
-         x="347.55356"
-         y="3.1280339" />
-    </g>
+    <path fill="#225500"
+       d="M400 143h224v112h80v112h80v112H240V367h80V255h80Z" />
+    <rect fill="#502d16" x="448" y="479" width="128" height="407" />
   </g>
 </svg>
