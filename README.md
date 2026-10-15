@@ -58,26 +58,39 @@ rather than against a file that has to be kept in step with it.
 
 GTK 4.10+ and libadwaita 1.5+ are required.
 
-Debian/Ubuntu:
+Debian:
 
 ```
 sudo apt install build-essential pkg-config \
     gettext \
+    libglib2.0-dev \
     libgtk-4-dev libadwaita-1-dev libjson-glib-dev libsoup-3.0-dev \
     libarchive-dev
 ```
 
-Use Ubuntu 24.04+ or Debian 13+.
+Use Debian 13+.
 
 Fedora:
 
 ```
 sudo dnf install gcc make gettext pkgconf-pkg-config \
+    glib2-devel \
     gtk4-devel libadwaita-devel json-glib-devel libsoup3-devel \
     libarchive-devel
 ```
 
 Use Fedora 40+.
+
+openSUSE Tumbleweed:
+
+```bash
+sudo zypper install gcc make gettext-tools pkg-config glib2-devel \
+    gtk4-devel libadwaita-devel json-glib-devel libsoup3-devel \
+    libarchive-devel
+```
+
+Use Tumbleweed or another openSUSE release with GTK 4.10 and libadwaita 1.5
+or newer.
 
 Arch:
 
@@ -85,6 +98,41 @@ Arch:
 sudo pacman -S base-devel gettext pkgconf gtk4 libadwaita json-glib libsoup \
     libarchive
 ```
+
+Gentoo:
+
+```bash
+sudo emerge --ask sys-devel/gcc sys-devel/gettext dev-build/make \
+    dev-util/pkgconf dev-libs/glib gui-libs/gtk:4 gui-libs/libadwaita \
+    dev-libs/json-glib net-libs/libsoup:3 app-arch/libarchive
+```
+
+NixOS:
+
+```bash
+nix-shell -p gcc gnumake gettext pkg-config glib gtk4 libadwaita \
+    json-glib libsoup libarchive
+```
+
+Alpine Linux:
+
+```bash
+sudo apk add build-base gettext-dev pkgconf glib-dev gtk4.0-dev \
+    libadwaita-dev json-glib-dev libsoup3-dev libarchive-dev wayland-dev
+```
+
+Void Linux:
+
+```bash
+sudo xbps-install -S base-devel gettext pkg-config glib-devel gtk4-devel \
+    libadwaita-devel json-glib-devel libsoup3-devel libarchive-devel
+```
+
+Slackware:
+
+Install `gcc`, `make`, `gettext`, and `pkg-config` from Slackware, then build
+the `gtk4`, `libadwaita`, `json-glib`, `libsoup`, and `libarchive` packages
+from SlackBuilds.org.
 
 ## Installation
 
@@ -95,7 +143,7 @@ git clone https://gitlab.com/anotherminecraftlauncher/aml.git
 cd aml
 ```
 
-For Debian, Ubuntu, Fedora, and other non-Arch distributions:
+For Debian, Fedora, openSUSE, and other non-Arch distributions:
 
 ```bash
 make
@@ -107,9 +155,6 @@ The launcher is installed as `/usr/local/bin/AML`.
 For Arch Linux, build and install the package:
 
 ```
-mkdir ../aml-package
-cp PKGBUILD ../aml-package/
-cd ../aml-package
 makepkg -si
 ```
 
