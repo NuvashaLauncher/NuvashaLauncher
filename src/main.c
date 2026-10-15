@@ -2,11 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* AML, Another Minecraft Launcher.
- *
- * Wayland only: this program never links, loads or talks to X11 or
- * XWayland.
- */
+/* AML, Another Minecraft Launcher. GTK chooses the available display
+ * backend at startup. */
 
 #include <adwaita.h>
 #include <gtk/gtk.h>
@@ -117,18 +114,9 @@ main (int argc, char **argv)
       return 0;
     }
 
-  /* AML runs on Wayland only. Force the Wayland backend even when the user
-   * exported GDK_BACKEND=x11, and never let GDK pick another backend. */
-  g_setenv ("GDK_BACKEND", "wayland", TRUE);
-  gdk_set_allowed_backends ("wayland");
-
-  /* libwayland silently falls back to a "wayland-0" socket when
-   * WAYLAND_DISPLAY is unset, so require an explicit Wayland session
-   * instead of relying on gtk_init_check() alone. */
-  if (g_getenv ("WAYLAND_DISPLAY") == NULL || !gtk_init_check ())
+  if (!gtk_init_check ())
     {
-      g_printerr ("AML requires a Wayland session "
-                  "(could not open a Wayland display).\n");
+      g_printerr ("AML could not open a display.\n");
       return 1;
     }
 

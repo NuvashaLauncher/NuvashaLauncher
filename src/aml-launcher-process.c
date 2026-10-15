@@ -144,10 +144,8 @@ aml_launcher_spawn (AmlLauncher *self, GPtrArray *argv, GError **error)
   launcher = g_subprocess_launcher_new (G_SUBPROCESS_FLAGS_STDOUT_PIPE |
                                         G_SUBPROCESS_FLAGS_STDERR_PIPE);
 
-  /* AML runs on Wayland and sets GDK_BACKEND for itself. The game is not
-     AML and must not inherit that: it opens its window the way it does
-     anywhere else on this desktop, through XWayland. Nothing else about
-     the environment is changed, DISPLAY included. */
+  /* The game is not AML and must not inherit a GDK backend selection. Nothing
+     else about the environment is changed, DISPLAY included. */
   g_subprocess_launcher_unsetenv (launcher, "GDK_BACKEND");
 
   /* The game writes its own files next to the instance: its worlds, its

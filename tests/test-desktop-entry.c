@@ -50,7 +50,7 @@ test_desktop_entry (void)
   g_assert_nonnull (categories);
   g_assert_cmpstr (categories[0], ==, "Game");
 
-  /* X11 only keys are not allowed in a Wayland only launcher. */
+  /* Keep the desktop entry independent of the display backend. */
   g_assert_false (g_key_file_has_key (keys, "Desktop Entry", "StartupWMClass",
                                       NULL));
 }
