@@ -77,7 +77,7 @@ sudo dnf install gcc make gettext pkgconf-pkg-config \
     libarchive-devel
 ```
 
-openSUSE Tumbleweed:
+openSUSE:
 
 ```bash
 sudo zypper install gcc make gettext-tools pkg-config glib2-devel \
