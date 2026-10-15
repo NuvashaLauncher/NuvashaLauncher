@@ -107,20 +107,6 @@ nix-shell -p gcc gnumake gettext pkg-config glib gtk4 libadwaita \
     json-glib libsoup libarchive
 ```
 
-Alpine Linux:
-
-```bash
-sudo apk add build-base gettext-dev pkgconf glib-dev gtk4.0-dev \
-    libadwaita-dev json-glib-dev libsoup3-dev libarchive-dev wayland-dev
-```
-
-Void Linux:
-
-```bash
-sudo xbps-install -S base-devel gettext pkg-config glib-devel gtk4-devel \
-    libadwaita-devel json-glib-devel libsoup3-devel libarchive-devel
-```
-
 ## Installation
 
 Clone the repository:
