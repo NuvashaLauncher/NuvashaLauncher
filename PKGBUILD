@@ -11,15 +11,14 @@ license=('GPL-3.0-only')
 depends=('gtk4>=4.10' 'libadwaita>=1.5' 'json-glib' 'libsoup3' 'libarchive' 'wayland')
 makedepends=('gcc' 'make' 'gettext' 'pkgconf')
 optdepends=('java-runtime: launch Minecraft instances')
-source=('aml-main.tar.gz::https://gitlab.com/anotherminecraftlauncher/aml/-/archive/main/aml-main.tar.gz')
-sha256sums=('SKIP')
+source=()
 
 build() {
-  cd "$srcdir/aml-main"
+  cd "$startdir"
   make all
 }
 
 package() {
-  cd "$srcdir/aml-main"
+  cd "$startdir"
   make DESTDIR="$pkgdir" PREFIX=/usr install
 }
