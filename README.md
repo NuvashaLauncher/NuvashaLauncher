@@ -128,12 +128,6 @@ sudo xbps-install -S base-devel gettext pkg-config glib-devel gtk4-devel \
     libadwaita-devel json-glib-devel libsoup3-devel libarchive-devel
 ```
 
-Slackware:
-
-Install `gcc`, `make`, `gettext`, and `pkg-config` from Slackware, then build
-the `gtk4`, `libadwaita`, `json-glib`, `libsoup`, and `libarchive` packages
-from SlackBuilds.org.
-
 ## Installation
 
 Clone the repository:
@@ -143,7 +137,7 @@ git clone https://gitlab.com/anotherminecraftlauncher/aml.git
 cd aml
 ```
 
-For Debian, Fedora, openSUSE, and other non-Arch distributions:
+For Debian, Fedora, openSUSE, Gentoo, NixOS, Alpine, Void, etc.:
 
 ```bash
 make
