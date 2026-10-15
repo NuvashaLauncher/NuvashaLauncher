@@ -130,7 +130,7 @@ git clone https://gitlab.com/anotherminecraftlauncher/aml.git
 cd aml
 ```
 
-For Debian, Fedora, openSUSE, Gentoo, NixOS, Alpine, Void, etc:
+For Debian, Fedora, openSUSE, Gentoo, NixOS, Alpine, Void, Arch, etc.:
 
 ```bash
 make
@@ -138,12 +138,6 @@ sudo make install PREFIX=/usr/local
 ```
 
 The launcher is installed as `/usr/local/bin/AML`.
-
-For Arch Linux, build and install the package:
-
-```
-makepkg -si
-```
 
 To uninstall a source installation:
 
