@@ -137,7 +137,7 @@ git clone https://gitlab.com/anotherminecraftlauncher/aml.git
 cd aml
 ```
 
-For Debian, Fedora, openSUSE, Gentoo, NixOS, Alpine, Void, etc.:
+For Debian, Fedora, openSUSE, Gentoo, NixOS, Alpine, Void, etc:
 
 ```bash
 make
