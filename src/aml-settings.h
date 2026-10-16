@@ -5,11 +5,12 @@
 /* AmlSettings: the small file of choices the whole application shares,
  * <config dir>/AML/config.json.
  *
- * One object, seven options so far: whether the version lists also show
+ * One object, ten options so far: whether the version lists also show
  * snapshots and the versions Mojang no longer serves, whether the loader
  * lists also show the versions a loader does not call stable, how many
- * lines the log of a running game keeps and whether the log folder is
- * opened when a game crashes. Which Java an instance runs with is not
+ * lines the log of a running game keeps, whether the log folder is opened
+ * when a game crashes, and whether the game sandbox is enabled. Which Java
+ * an instance runs with is not
  * one of them: it is the automatic choice, unless the instance itself
  * names another runtime. The file is read once when the object is
  * created and written on every change; a file that is missing, unreadable
@@ -115,8 +116,15 @@ gboolean aml_settings_set_export_metadata (AmlSettings *self,
 /* FALSE by default: deleting a dependency does not delete its dependents. */
 gboolean aml_settings_get_delete_dependents (AmlSettings *self);
 gboolean aml_settings_set_delete_dependents (AmlSettings *self,
-                                             gboolean value,
-                                             GError **error);
+                                              gboolean value,
+                                              GError **error);
+
+/* FALSE by default: the game is started directly unless the user opts into
+ * the bubblewrap sandbox. */
+gboolean aml_settings_get_sandbox_enabled (AmlSettings *self);
+gboolean aml_settings_set_sandbox_enabled (AmlSettings *self,
+                                           gboolean value,
+                                           GError **error);
 
 G_END_DECLS
 

@@ -608,3 +608,9 @@ msgstr "Видалення залежності видаляє мод, який 
 
 msgid "A dependent mod cannot be deleted"
 msgstr "Не вдалося видалити залежний мод"
+
+msgid "Enable game sandbox"
+msgstr "Enable game sandbox"
+
+msgid "Run Minecraft inside bubblewrap."
+msgstr "Run Minecraft inside bubblewrap."

@@ -609,3 +609,9 @@ msgstr "Bir bağımlılığı silmek, ona bağlı olan modu da siler"
 
 msgid "A dependent mod cannot be deleted"
 msgstr "Bağımlı mod silinemiyor"
+
+msgid "Enable game sandbox"
+msgstr "Enable game sandbox"
+
+msgid "Run Minecraft inside bubblewrap."
+msgstr "Run Minecraft inside bubblewrap."

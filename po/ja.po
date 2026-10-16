@@ -608,3 +608,9 @@ msgstr "依存関係を削除すると、その依存関係に依存していた
 
 msgid "A dependent mod cannot be deleted"
 msgstr "依存する Mod を削除できません"
+
+msgid "Enable game sandbox"
+msgstr "Enable game sandbox"
+
+msgid "Run Minecraft inside bubblewrap."
+msgstr "Run Minecraft inside bubblewrap."

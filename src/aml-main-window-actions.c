@@ -211,6 +211,23 @@ on_delete_dependents_toggled (GObject *object,
 }
 
 static void
+on_sandbox_toggled (GObject *object,
+                    GParamSpec *pspec G_GNUC_UNUSED,
+                    gpointer user_data)
+{
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
+  AdwSwitchRow *row = ADW_SWITCH_ROW (object);
+  gboolean active = adw_switch_row_get_active (row);
+
+  if (active == aml_settings_get_sandbox_enabled (self->model->settings))
+    return;
+
+  if (!aml_settings_set_sandbox_enabled (self->model->settings, active, NULL))
+    adw_switch_row_set_active (
+      row, aml_settings_get_sandbox_enabled (self->model->settings));
+}
+
+static void
 on_language_selected (GObject *object,
                       GParamSpec *pspec G_GNUC_UNUSED,
                       gpointer user_data)
@@ -380,6 +397,7 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   AdwActionRow *clear_cache_row = ADW_ACTION_ROW (adw_action_row_new ());
   AdwSwitchRow *export_metadata_row = ADW_SWITCH_ROW (adw_switch_row_new ());
   AdwSwitchRow *delete_dependents_row = ADW_SWITCH_ROW (adw_switch_row_new ());
+  AdwSwitchRow *sandbox_row = ADW_SWITCH_ROW (adw_switch_row_new ());
 
   /* Every one of these rows can show a path or an error message from
      GIO, which is plain text and may hold an "&". */
@@ -392,6 +410,7 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (clear_cache_row)), FALSE);
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (export_metadata_row)), FALSE);
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (delete_dependents_row)), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (sandbox_row)), FALSE);
 
   adw_dialog_set_title (dialog, _("Settings"));
   adw_preferences_dialog_set_search_enabled (ADW_PREFERENCES_DIALOG (dialog),
@@ -421,9 +440,20 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
    g_signal_connect (delete_dependents_row, "notify::active",
                     G_CALLBACK (on_delete_dependents_toggled), self);
    adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (general_group)),
-                               GTK_WIDGET (delete_dependents_row));
+                                GTK_WIDGET (delete_dependents_row));
 
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (row)),
+   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (sandbox_row)),
+                                   _("Enable game sandbox"));
+   adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (sandbox_row)),
+                                _("Run Minecraft inside bubblewrap."));
+   adw_switch_row_set_active (
+     sandbox_row, aml_settings_get_sandbox_enabled (self->model->settings));
+   g_signal_connect (sandbox_row, "notify::active",
+                     G_CALLBACK (on_sandbox_toggled), self);
+   adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (general_group)),
+                               GTK_WIDGET (sandbox_row));
+
+   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (row)),
                                   _("Show unstable Minecraft versions"));
   adw_switch_row_set_active (ADW_SWITCH_ROW (GTK_WIDGET (row)),
                              aml_settings_get_show_snapshots (self->model->settings));

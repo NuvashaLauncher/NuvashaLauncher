@@ -611,3 +611,9 @@ msgstr "Das Löschen einer Abhängigkeit löscht das davon abhängige Mod"
 
 msgid "A dependent mod cannot be deleted"
 msgstr "Ein abhängiges Mod kann nicht gelöscht werden"
+
+msgid "Enable game sandbox"
+msgstr "Enable game sandbox"
+
+msgid "Run Minecraft inside bubblewrap."
+msgstr "Run Minecraft inside bubblewrap."

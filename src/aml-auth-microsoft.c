@@ -747,8 +747,8 @@ ask_minecraft (AuthRequest *self)
   g_autofree char *body = NULL;
   const char *headers[] = { "Accept", "application/json", NULL };
 
-  /* Current Minecraft services use the launcher login contract. Prism
-   * Launcher sends the XBL3 token and explicitly identifies the PC launcher;
+  /* Current Minecraft services use the launcher login contract. The request
+   * sends the XBL3 token and explicitly identifies the PC launcher;
    * the older login_with_xbox identityToken endpoint can return a token that
    * is not accepted by the entitlement/profile services. */
   xtoken = g_strdup_printf ("XBL3.0 x=%s;%s", self->xbl_user_hash,
@@ -818,8 +818,8 @@ ask_entitlements (AuthRequest *self)
   authorization = g_strconcat ("Bearer ", self->mc_access_token, NULL);
   headers[1] = authorization;
 
-  /* Prism and the current Minecraft services use the license endpoint with
-     a request id. The older mcstore endpoint can return a legacy-shaped
+  /* Current Minecraft services use the license endpoint with a request id.
+     The older mcstore endpoint can return a legacy-shaped
      response or reject otherwise valid accounts. */
   url = g_strdup_printf (AML_MINECRAFT_SERVICES_URL
                          "/entitlements/license?requestId=%s", request_id);

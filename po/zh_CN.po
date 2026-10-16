@@ -600,3 +600,9 @@ msgstr "删除依赖项会删除依赖它的模组"
 
 msgid "A dependent mod cannot be deleted"
 msgstr "无法删除依赖的模组"
+
+msgid "Enable game sandbox"
+msgstr "Enable game sandbox"
+
+msgid "Run Minecraft inside bubblewrap."
+msgstr "Run Minecraft inside bubblewrap."
