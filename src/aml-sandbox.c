@@ -29,6 +29,13 @@ add_environment (GPtrArray *arguments, const char *name, const char *value)
 }
 
 static void
+unset_environment (GPtrArray *arguments, const char *name)
+{
+  add (arguments, "--unsetenv");
+  add (arguments, name);
+}
+
+static void
 add_directory (GPtrArray *arguments, const char *path)
 {
   add (arguments, "--dir");
@@ -67,6 +74,7 @@ aml_sandbox_wrap_arguments (GPtrArray               *command,
                             const AmlResolvedVersion *resolved,
                             const char               *java_executable,
                             const char               *game_directory,
+                            gboolean                  network_enabled,
                             GError                  **error)
 {
   g_autoptr (GPtrArray) arguments = NULL;
@@ -93,6 +101,8 @@ aml_sandbox_wrap_arguments (GPtrArray               *command,
   add (arguments, "--unshare-uts");
   add (arguments, "--unshare-ipc");
   add (arguments, "--unshare-cgroup");
+  if (!network_enabled)
+    add (arguments, "--unshare-net");
   add_pair (arguments, "--proc", "/proc");
   add_pair (arguments, "--dev", "/dev");
   add_pair (arguments, "--tmpfs", "/tmp");
@@ -102,6 +112,8 @@ aml_sandbox_wrap_arguments (GPtrArray               *command,
   aml_sandbox_add_game_mounts (arguments, resolved, java_executable,
                                game_directory);
   aml_sandbox_add_display_mounts (arguments);
+  unset_environment (arguments, "DBUS_SESSION_BUS_ADDRESS");
+  unset_environment (arguments, "DBUS_SYSTEM_BUS_ADDRESS");
   add_environment (arguments, "HOME", game_directory);
   add_pair (arguments, "--chdir", game_directory);
   add (arguments, "--");

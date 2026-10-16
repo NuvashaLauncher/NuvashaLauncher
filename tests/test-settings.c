@@ -39,6 +39,7 @@ test_defaults (void)
   g_assert_cmpint (aml_settings_get_cache_expiration (settings), ==,
                    AML_SETTINGS_CACHE_EXPIRATION_1_HOUR);
   g_assert_false (aml_settings_get_sandbox_enabled (settings));
+  g_assert_true (aml_settings_get_sandbox_network_enabled (settings));
 }
 
 static void
@@ -58,12 +59,16 @@ test_persistence (void)
   g_assert_no_error (error);
   g_assert_true (aml_settings_set_sandbox_enabled (settings, TRUE, &error));
   g_assert_no_error (error);
+  g_assert_true (aml_settings_set_sandbox_network_enabled (settings, FALSE,
+                                                            &error));
+  g_assert_no_error (error);
 
   loaded = aml_settings_new ();
   g_assert_false (aml_settings_get_cache_modrinth_api_responses (loaded));
   g_assert_cmpint (aml_settings_get_cache_expiration (loaded), ==,
                    AML_SETTINGS_CACHE_EXPIRATION_7_DAYS);
   g_assert_true (aml_settings_get_sandbox_enabled (loaded));
+  g_assert_false (aml_settings_get_sandbox_network_enabled (loaded));
 
   config = g_build_filename (g_get_user_config_dir (), "AML", "config.json",
                              NULL);
@@ -72,6 +77,7 @@ test_persistence (void)
   g_assert_nonnull (strstr (contents, "cache-modrinth-api-responses"));
   g_assert_nonnull (strstr (contents, "cache-expiration"));
   g_assert_nonnull (strstr (contents, "sandbox-enabled"));
+  g_assert_nonnull (strstr (contents, "sandbox-network-enabled"));
   g_assert_nonnull (strstr (contents, "\"version\""));
 }
 

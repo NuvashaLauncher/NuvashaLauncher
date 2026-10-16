@@ -147,7 +147,8 @@ run_the_game (AmlLauncher *self)
     {
       sandbox_argv = aml_sandbox_wrap_arguments (
         argv, self->preparation.resolved, self->preparation.java_executable,
-        self->game_directory, &error);
+        self->game_directory,
+        aml_settings_get_sandbox_network_enabled (self->settings), &error);
 
       if (sandbox_argv == NULL)
         {

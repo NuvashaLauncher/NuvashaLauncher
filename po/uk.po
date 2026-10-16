@@ -614,3 +614,9 @@ msgstr "Enable game sandbox"
 
 msgid "Run Minecraft inside bubblewrap."
 msgstr "Run Minecraft inside bubblewrap."
+
+msgid "Allow sandbox network access"
+msgstr "Allow sandbox network access"
+
+msgid "Allow Minecraft to connect to the network inside the sandbox."
+msgstr "Allow Minecraft to connect to the network inside the sandbox."

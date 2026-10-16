@@ -63,6 +63,10 @@ the instance and required caches writable, exposes Java, LWJGL natives,
 OpenGL/Vulkan drivers, Wayland/X11 and PipeWire, and leaves the game network
 available. AML itself always remains outside the sandbox.
 
+Network access inside the sandbox is controlled separately by the global
+`sandbox-network-enabled` setting, which defaults to enabled. When disabled,
+the game runs without a network namespace connection.
+
 For legacy Minecraft versions using LWJGL 2, AML automatically adds
 `-DLWJGL_DISABLE_XRANDR=true` when the optional `xrandr` command is absent.
 
