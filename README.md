@@ -173,6 +173,8 @@ AML keeps its data under `~/.local/share/AML`, its caches under
 `~/.cache/AML` and its settings under `~/.config/AML`. The accounts file
 holds tokens and is written readable only by its owner, but the tokens
 are not encrypted: anyone who can read your user's files can read them.
+Native libraries extracted for a game are kept under that instance's
+`natives/` directory rather than in a shared global directory.
 
 ## Signing in
 

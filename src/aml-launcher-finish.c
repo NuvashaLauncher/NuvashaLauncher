@@ -3,6 +3,7 @@
  */
 
 #include "aml-launcher-private.h"
+#include "aml-fs.h"
 #include "aml-i18n.h"
 
 /* ---------------------------------------------------------- *
@@ -122,6 +123,15 @@ report_how_it_ended (AmlLauncher *self)
 void
 finish_launch (AmlLauncher *self)
 {
+  /* Natives are launch artifacts, not instance data. They are extracted from
+   * the cached jars again on the next launch, so removing this per-instance
+   * directory prevents a game or mod from leaving native code behind. */
+  {
+    g_autofree char *natives =
+      g_build_filename (self->game_directory, "natives", NULL);
+    aml_fs_remove_tree (natives);
+  }
+
   if (self->process.stop_timeout != 0)
     {
       /* Through the scope, which is where this source is registered. */
@@ -162,4 +172,3 @@ finish_launch (AmlLauncher *self)
       crash_reports_listed, g_object_ref (self));
   }
 }
-

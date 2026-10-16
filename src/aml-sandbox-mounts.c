@@ -87,8 +87,8 @@ aml_sandbox_add_game_mounts (GPtrArray *arguments,
   bind_readonly_if_present (arguments, resolved->assets_directory);
   bind_readonly_if_present (arguments, resolved->library_directory);
   bind_parent_readonly (arguments, resolved->client_jar);
-  bind_writable_if_present (arguments, resolved->natives_directory);
   bind_writable_if_present (arguments, game_directory);
+  bind_writable_if_present (arguments, resolved->natives_directory);
 
   /* The logging JVM argument contains the absolute path of a file resolved
    * alongside the other version resources. Only its containing directory is
