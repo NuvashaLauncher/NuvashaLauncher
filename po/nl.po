@@ -609,3 +609,20 @@ msgstr "Een afhankelijkheid verwijderen verwijdert de mod die ervan afhankelijk 
 
 msgid "A dependent mod cannot be deleted"
 msgstr "Een afhankelijke mod kan niet worden verwijderd"
+msgid "Sandbox"
+msgstr "Sandbox"
+
+msgid "Minecraft sandbox"
+msgstr "Minecraft-sandbox"
+
+msgid "Sandbox Minecraft instances"
+msgstr "Minecraft-instanties sandboxen"
+
+msgid "Restrict Minecraft to its instance and read-only game dependencies."
+msgstr "Beperk Minecraft tot de instantie en alleen-lezen spelafhankelijkheden."
+
+msgid "Allow network access"
+msgstr "Netwerktoegang toestaan"
+
+msgid "Disable this for offline play and stronger protection against data exfiltration."
+msgstr "Schakel dit uit voor offline spelen en betere bescherming tegen gegevensdiefstal."
