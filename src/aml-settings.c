@@ -30,6 +30,7 @@
 #define EXPORT_METADATA_KEY "export-metadata"
 #define DELETE_DEPENDENTS_KEY "delete-dependents"
 #define SANDBOX_ENABLED_KEY "sandbox-enabled"
+#define SANDBOX_NETWORK_ENABLED_KEY "sandbox-network-enabled"
 
 /* A stored limit below this is not a number a log can be trimmed to. */
 #define LOG_LINE_LIMIT_FLOOR 1
@@ -48,6 +49,7 @@ struct _AmlSettings
   gboolean export_metadata;
   gboolean delete_dependents;
   gboolean sandbox_enabled;
+  gboolean sandbox_network_enabled;
   char *filename;
 };
 
@@ -216,6 +218,11 @@ load (AmlSettings *self)
   if (node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
       json_node_get_value_type (node) == G_TYPE_BOOLEAN)
     self->sandbox_enabled = json_node_get_boolean (node);
+
+  node = json_object_get_member (object, SANDBOX_NETWORK_ENABLED_KEY);
+  if (node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
+      json_node_get_value_type (node) == G_TYPE_BOOLEAN)
+    self->sandbox_network_enabled = json_node_get_boolean (node);
 }
 
 static gboolean
@@ -269,6 +276,8 @@ save (AmlSettings *self, GError **error)
   json_builder_add_boolean_value (builder, self->delete_dependents);
   json_builder_set_member_name (builder, SANDBOX_ENABLED_KEY);
   json_builder_add_boolean_value (builder, self->sandbox_enabled);
+  json_builder_set_member_name (builder, SANDBOX_NETWORK_ENABLED_KEY);
+  json_builder_add_boolean_value (builder, self->sandbox_network_enabled);
 
   json_builder_end_object (builder);
 
@@ -381,6 +390,32 @@ aml_settings_set_sandbox_enabled (AmlSettings *self, gboolean value,
     return TRUE;
 
   self->sandbox_enabled = previous;
+  return FALSE;
+}
+
+gboolean
+aml_settings_get_sandbox_network_enabled (AmlSettings *self)
+{
+  g_return_val_if_fail (AML_IS_SETTINGS (self), TRUE);
+
+  return self->sandbox_network_enabled;
+}
+
+gboolean
+aml_settings_set_sandbox_network_enabled (AmlSettings *self, gboolean value,
+                                           GError **error)
+{
+  gboolean previous;
+
+  g_return_val_if_fail (AML_IS_SETTINGS (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  previous = self->sandbox_network_enabled;
+  self->sandbox_network_enabled = value;
+  if (save (self, error))
+    return TRUE;
+
+  self->sandbox_network_enabled = previous;
   return FALSE;
 }
 
@@ -633,4 +668,5 @@ aml_settings_init (AmlSettings *self)
   self->cache_modrinth_api_responses = TRUE;
   self->cache_expiration = AML_SETTINGS_DEFAULT_CACHE_EXPIRATION;
   self->export_metadata = TRUE;
+  self->sandbox_network_enabled = TRUE;
 }

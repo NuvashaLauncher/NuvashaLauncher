@@ -22,6 +22,7 @@ test_wraps_command (void)
   g_autofree char *root = g_dir_make_tmp ("aml-sandbox-XXXXXX", NULL);
   g_autoptr (GPtrArray) command = g_ptr_array_new_with_free_func (g_free);
   g_autoptr (GPtrArray) wrapped = NULL;
+  g_autoptr (GPtrArray) offline_wrapped = NULL;
   AmlResolvedVersion resolved = { 0 };
   g_autoptr (GError) error = NULL;
 
@@ -34,7 +35,7 @@ test_wraps_command (void)
   g_assert_nonnull (root);
   g_ptr_array_add (command, g_strdup ("/bin/true"));
   wrapped = aml_sandbox_wrap_arguments (command, &resolved, "/bin/true",
-                                        root, &error);
+                                        root, TRUE, &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (wrapped);
@@ -44,6 +45,13 @@ test_wraps_command (void)
   g_assert_true (contains (wrapped, "--unshare-uts"));
   g_assert_true (contains (wrapped, "--setenv"));
   g_assert_true (contains (wrapped, root));
+  g_assert_false (contains (wrapped, "--unshare-net"));
+
+  offline_wrapped = aml_sandbox_wrap_arguments (command, &resolved, "/bin/true",
+                                               root, FALSE, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (offline_wrapped);
+  g_assert_true (contains (offline_wrapped, "--unshare-net"));
 }
 
 int

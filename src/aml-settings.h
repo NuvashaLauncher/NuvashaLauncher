@@ -5,7 +5,7 @@
 /* AmlSettings: the small file of choices the whole application shares,
  * <config dir>/AML/config.json.
  *
- * One object, ten options so far: whether the version lists also show
+ * One object, eleven options so far: whether the version lists also show
  * snapshots and the versions Mojang no longer serves, whether the loader
  * lists also show the versions a loader does not call stable, how many
  * lines the log of a running game keeps, whether the log folder is opened
@@ -125,6 +125,13 @@ gboolean aml_settings_get_sandbox_enabled (AmlSettings *self);
 gboolean aml_settings_set_sandbox_enabled (AmlSettings *self,
                                            gboolean value,
                                            GError **error);
+
+/* TRUE by default: the sandbox keeps the game's network access unless the
+ * user explicitly disables it. */
+gboolean aml_settings_get_sandbox_network_enabled (AmlSettings *self);
+gboolean aml_settings_set_sandbox_network_enabled (AmlSettings *self,
+                                                   gboolean value,
+                                                   GError **error);
 
 G_END_DECLS
 

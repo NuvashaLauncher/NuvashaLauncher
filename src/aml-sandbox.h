@@ -15,6 +15,7 @@ GPtrArray *aml_sandbox_wrap_arguments (GPtrArray              *command,
                                        const AmlResolvedVersion *resolved,
                                        const char              *java_executable,
                                        const char              *game_directory,
+                                       gboolean                 network_enabled,
                                        GError                 **error);
 
 G_END_DECLS
