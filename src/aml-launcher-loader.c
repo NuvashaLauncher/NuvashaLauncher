@@ -77,11 +77,9 @@ on_vanilla_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   /* The resolve is the launch now, and it keeps itself: the request is
      about the loader profile, which is over. */
   {
-    g_autofree char *natives_directory =
-      aml_launcher_get_natives_directory (self);
     AmlTaskScope *resolving = aml_resolve_description_async (
-      merged, merged->id, NULL, NULL, natives_directory, NULL,
-      on_resolve_progress, self, on_resolved, g_object_ref (self));
+      merged, merged->id, NULL, NULL, NULL, NULL, on_resolve_progress, self,
+      on_resolved, g_object_ref (self));
 
     aml_task_scope_follow_cancellable (resolving,
                                        self->preparation.cancellable);
@@ -214,11 +212,9 @@ on_manifest_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   }
 
   {
-    g_autofree char *natives_directory =
-      aml_launcher_get_natives_directory (self);
     AmlTaskScope *resolving = aml_resolve_version_async (
-      manifest, self->version, NULL, natives_directory, NULL,
-      on_resolve_progress, self, on_resolved, g_object_ref (self));
+      manifest, self->version, NULL, NULL, NULL, on_resolve_progress, self,
+      on_resolved, g_object_ref (self));
 
     aml_task_scope_follow_cancellable (resolving,
                                        self->preparation.cancellable);

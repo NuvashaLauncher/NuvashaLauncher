@@ -5,7 +5,7 @@
 /* AmlSettings: the small file of choices the whole application shares,
  * <config dir>/AML/config.json.
  *
- * One object holds the application-wide options: whether the version lists also show
+ * One object, seven options so far: whether the version lists also show
  * snapshots and the versions Mojang no longer serves, whether the loader
  * lists also show the versions a loader does not call stable, how many
  * lines the log of a running game keeps and whether the log folder is
@@ -115,18 +115,8 @@ gboolean aml_settings_set_export_metadata (AmlSettings *self,
 /* FALSE by default: deleting a dependency does not delete its dependents. */
 gboolean aml_settings_get_delete_dependents (AmlSettings *self);
 gboolean aml_settings_set_delete_dependents (AmlSettings *self,
-                                              gboolean value,
-                                              GError **error);
-
-gboolean aml_settings_get_sandbox_enabled (AmlSettings *self);
-gboolean aml_settings_set_sandbox_enabled (AmlSettings *self,
-                                           gboolean value,
-                                           GError **error);
-
-gboolean aml_settings_get_sandbox_network (AmlSettings *self);
-gboolean aml_settings_set_sandbox_network (AmlSettings *self,
-                                           gboolean value,
-                                           GError **error);
+                                             gboolean value,
+                                             GError **error);
 
 G_END_DECLS
 

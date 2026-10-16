@@ -7,8 +7,6 @@
 
 #include <adwaita.h>
 #include <gtk/gtk.h>
-#include <unistd.h>
-#include <string.h>
 
 #include "aml-instance-manager.h"
 #include "aml-i18n.h"
@@ -109,49 +107,6 @@ int
 main (int argc, char **argv)
 {
   g_autoptr (AdwApplication) app = NULL;
-
-  /* The broker can be reached through PATH (argv[0] is then usually just
-   * "xdg-open") or through an absolute path mounted by Bubblewrap. */
-  {
-    const char *program = strrchr (argv[0], '/');
-    gboolean xdg_broker =
-      (program != NULL ? program + 1 : argv[0]) != NULL &&
-      g_str_equal (program != NULL ? program + 1 : argv[0], "xdg-open");
-    gboolean gio_broker =
-      (program != NULL ? program + 1 : argv[0]) != NULL &&
-      g_str_equal (program != NULL ? program + 1 : argv[0], "gio") &&
-      argc == 3 && g_str_equal (argv[1], "open");
-
-  if ((xdg_broker && argc == 2) || gio_broker)
-    {
-      const char *path = gio_broker ? argv[2] : argv[1];
-      const char *file_path = path;
-      size_t length;
-
-      g_printerr ("AML sandbox open broker invoked: %s\n",
-                  path != NULL ? path : "(null)");
-
-      if (g_str_has_prefix (file_path, "file:"))
-        {
-          file_path += strlen ("file:");
-          while (g_str_has_prefix (file_path, "//"))
-            file_path++;
-        }
-
-      if (path == NULL || !g_str_has_prefix (file_path, "/instance/") ||
-          strstr (file_path, "..") != NULL)
-        {
-          g_printerr ("AML sandbox open broker rejected request\n");
-          return 1;
-        }
-
-      length = strlen (file_path);
-      if (write (4, file_path, length) != (ssize_t) length ||
-          write (4, "\n", 1) != 1)
-        return 1;
-      return 0;
-    }
-  }
 
   if (argc == 2 && g_strcmp0 (argv[1], "--version") == 0)
     {

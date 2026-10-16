@@ -600,20 +600,3 @@ msgstr "删除依赖项会删除依赖它的模组"
 
 msgid "A dependent mod cannot be deleted"
 msgstr "无法删除依赖的模组"
-msgid "Sandbox"
-msgstr "沙盒"
-
-msgid "Minecraft sandbox"
-msgstr "Minecraft 沙盒"
-
-msgid "Sandbox Minecraft instances"
-msgstr "将 Minecraft 实例置于沙盒中"
-
-msgid "Restrict Minecraft to its instance and read-only game dependencies."
-msgstr "将 Minecraft 限制在其实例和只读游戏依赖项中。"
-
-msgid "Allow network access"
-msgstr "允许网络访问"
-
-msgid "Disable this for offline play and stronger protection against data exfiltration."
-msgstr "禁用此项以进行离线游戏并更好地防止数据外泄。"

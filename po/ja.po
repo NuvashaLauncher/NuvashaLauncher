@@ -608,20 +608,3 @@ msgstr "依存関係を削除すると、その依存関係に依存していた
 
 msgid "A dependent mod cannot be deleted"
 msgstr "依存する Mod を削除できません"
-msgid "Sandbox"
-msgstr "サンドボックス"
-
-msgid "Minecraft sandbox"
-msgstr "Minecraft のサンドボックス"
-
-msgid "Sandbox Minecraft instances"
-msgstr "Minecraft インスタンスをサンドボックス化"
-
-msgid "Restrict Minecraft to its instance and read-only game dependencies."
-msgstr "Minecraft をインスタンスと読み取り専用のゲーム依存ファイルに制限します。"
-
-msgid "Allow network access"
-msgstr "ネットワークアクセスを許可"
-
-msgid "Disable this for offline play and stronger protection against data exfiltration."
-msgstr "オフラインプレイとデータ流出へのより強い保護のために無効にします。"

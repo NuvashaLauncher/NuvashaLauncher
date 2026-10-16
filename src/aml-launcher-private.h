@@ -43,8 +43,6 @@ struct _AmlLauncher
   } preparation;
   struct {
     GSubprocess *process;
-    GDataInputStream *open_stream;
-    GDataInputStream *open_fifo_stream;
     gboolean exited;
     gboolean exited_normally;
     gboolean terminated_by_signal;
@@ -85,6 +83,5 @@ void remember_java (AmlLauncher *self, const AmlJava *java);
 void on_resolved (GObject *source, GAsyncResult *result, gpointer user_data);
 void on_resolve_progress (const AmlResolveProgress *progress,
                           gpointer user_data);
-char *aml_launcher_get_natives_directory (AmlLauncher *self);
 
 #endif /* AML_LAUNCHER_PRIVATE_H */

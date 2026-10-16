@@ -609,20 +609,3 @@ msgstr "Bir bağımlılığı silmek, ona bağlı olan modu da siler"
 
 msgid "A dependent mod cannot be deleted"
 msgstr "Bağımlı mod silinemiyor"
-msgid "Sandbox"
-msgstr "Korumalı alan"
-
-msgid "Minecraft sandbox"
-msgstr "Minecraft korumalı alanı"
-
-msgid "Sandbox Minecraft instances"
-msgstr "Minecraft örneklerini korumalı alana al"
-
-msgid "Restrict Minecraft to its instance and read-only game dependencies."
-msgstr "Minecraft'ı kendi örneği ve salt okunur oyun bağımlılıklarıyla sınırla."
-
-msgid "Allow network access"
-msgstr "Ağ erişimine izin ver"
-
-msgid "Disable this for offline play and stronger protection against data exfiltration."
-msgstr "Çevrimdışı oyun ve veri sızmasına karşı daha güçlü koruma için devre dışı bırakın."

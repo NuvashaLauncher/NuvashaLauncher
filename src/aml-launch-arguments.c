@@ -239,17 +239,6 @@ aml_launch_build_arguments (const AmlResolvedVersion *resolved,
   if (!add_shell_words (argv, jvm_args, error))
     return NULL;
 
-  /* Minecraft 26.1.2 deliberately forces GLFW to X11 unless its own
-   * development flag enables Wayland preference.  In a Wayland sandbox there
-   * is no DISPLAY, so enable that upstream-supported flag for this release. */
-  if (g_strcmp0 (resolved->version_id, "26.1.2") == 0 &&
-      resolved->classpath != NULL &&
-      strstr (resolved->classpath, "/org/lwjgl/lwjgl-glfw/") != NULL)
-    {
-      g_ptr_array_add (argv, g_strdup ("-DMC_DEBUG_ENABLED=true"));
-      g_ptr_array_add (argv, g_strdup ("-DMC_DEBUG_PREFER_WAYLAND=true"));
-    }
-
   /* A document of 1.13 and newer already carries the library path and
      the classpath; an older one carries neither, so both go here when
      they are missing instead of twice when they are not. */

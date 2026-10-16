@@ -608,20 +608,3 @@ msgstr "Usunięcie zależności usuwa mod, który od niej zależał"
 
 msgid "A dependent mod cannot be deleted"
 msgstr "Nie można usunąć zależnego moda"
-msgid "Sandbox"
-msgstr "Piaskownica"
-
-msgid "Minecraft sandbox"
-msgstr "Piaskownica Minecraft"
-
-msgid "Sandbox Minecraft instances"
-msgstr "Uruchamiaj instancje Minecrafta w piaskownicy"
-
-msgid "Restrict Minecraft to its instance and read-only game dependencies."
-msgstr "Ogranicz Minecrafta do jego instancji i zależności gry tylko do odczytu."
-
-msgid "Allow network access"
-msgstr "Zezwalaj na dostęp do sieci"
-
-msgid "Disable this for offline play and stronger protection against data exfiltration."
-msgstr "Wyłącz, aby grać offline i lepiej chronić się przed wyprowadzaniem danych."
