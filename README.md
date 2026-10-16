@@ -19,6 +19,7 @@ Works with both Wayland and X11 through GTK4.
 - Fabric, Quilt, Forge and NeoForge.
 - The game log of a running session, in a tab of its own.
 - Microsoft account sign-in, or offline play under any name.
+- Optional bubblewrap sandboxing for the game process.
 
 ## Design notes
 
@@ -55,6 +56,15 @@ rather than against a file that has to be kept in step with it.
 ## Dependencies
 
 GTK 4.10+ and libadwaita 1.5+ are required.
+
+The optional game sandbox uses `bwrap` (bubblewrap). It is disabled by
+default and can be enabled through the global `sandbox-enabled` setting. When enabled, AML keeps
+the instance and required caches writable, exposes Java, LWJGL natives,
+OpenGL/Vulkan drivers, Wayland/X11 and PipeWire, and leaves the game network
+available. AML itself always remains outside the sandbox.
+
+For legacy Minecraft versions using LWJGL 2, AML automatically adds
+`-DLWJGL_DISABLE_XRANDR=true` when the optional `xrandr` command is absent.
 
 Debian:
 

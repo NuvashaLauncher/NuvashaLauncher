@@ -239,6 +239,20 @@ aml_launch_build_arguments (const AmlResolvedVersion *resolved,
   if (!add_shell_words (argv, jvm_args, error))
     return NULL;
 
+  /* LWJGL 2 tries to execute xrandr without checking whether it exists. This
+   * disables that path and lets LWJGL use its XF86VidMode fallback when
+   * xrandr is unavailable. LWJGL 3 does not
+   * read this property, so it is safe to add it only to old classpaths. */
+  if (resolved->classpath != NULL &&
+      (strstr (resolved->classpath, "/org/lwjgl/lwjgl/lwjgl/") != NULL ||
+       strstr (resolved->classpath, "/org/lwjgl/lwjgl/lwjgl-platform/") != NULL))
+    {
+      g_autofree char *xrandr = g_find_program_in_path ("xrandr");
+
+      if (xrandr == NULL)
+        g_ptr_array_add (argv, g_strdup ("-DLWJGL_DISABLE_XRANDR=true"));
+    }
+
   /* A document of 1.13 and newer already carries the library path and
      the classpath; an older one carries neither, so both go here when
      they are missing instead of twice when they are not. */

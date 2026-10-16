@@ -607,3 +607,9 @@ msgstr "종속성을 삭제하면 해당 종속 모드도 삭제됩니다"
 
 msgid "A dependent mod cannot be deleted"
 msgstr "종속 모드를 삭제할 수 없습니다"
+
+msgid "Enable game sandbox"
+msgstr "Enable game sandbox"
+
+msgid "Run Minecraft inside bubblewrap."
+msgstr "Run Minecraft inside bubblewrap."

@@ -10,6 +10,7 @@
 #include "aml-loaders.h"
 #include "aml-minecraft-resolve.h"
 #include "aml-minecraft-versions.h"
+#include "aml-sandbox.h"
 
 #include <string.h>
 
@@ -99,6 +100,7 @@ run_the_game (AmlLauncher *self)
 {
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
+  g_autoptr (GPtrArray) sandbox_argv = NULL;
   g_autofree char *jvm_args = NULL;
   g_autofree char *offline_uuid = NULL;
   AmlAccount *account = NULL;
@@ -138,6 +140,24 @@ run_the_game (AmlLauncher *self)
     {
       launcher_failed (self, error->message);
       return;
+    }
+
+  if (self->settings != NULL &&
+      aml_settings_get_sandbox_enabled (self->settings))
+    {
+      sandbox_argv = aml_sandbox_wrap_arguments (
+        argv, self->preparation.resolved, self->preparation.java_executable,
+        self->game_directory, &error);
+
+      if (sandbox_argv == NULL)
+        {
+          launcher_failed (self, error->message);
+          return;
+        }
+
+      g_clear_pointer (&argv, g_ptr_array_unref);
+      argv = g_steal_pointer (&sandbox_argv);
+      log_line (self, TAG_STATE, "bubblewrap sandbox enabled");
     }
 
   /* Who the game is about to run as. The token is not in this line: the
