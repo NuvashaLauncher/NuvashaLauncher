@@ -6,6 +6,17 @@ AML creates instances, installs modpacks and mods from Modrinth, resolves
 mod loaders, and runs the game. It is written in C against GTK4 and
 libadwaita, and it uses the public APIs of the services it talks to.
 
+On Linux, Minecraft launches use Bubblewrap when it is installed and sandboxing
+is enabled in Settings. The instance is writable; Java, libraries, assets,
+natives and version files are read-only mounts. Bubblewrap is an optional system
+dependency, so AML falls back to a normal launch with a warning when it is not
+available.
+
+The sandbox does not expose the host `xdg-open` or session bus. When a game
+opens a path below its instance, AML brokers that request back to the host
+after validating the path, so actions such as opening the resource-pack folder
+remain available without giving mods general desktop access.
+
 Works with both Wayland and X11 through GTK4.
 
 ## Features
@@ -63,7 +74,7 @@ sudo apt install build-essential pkg-config \
     gettext \
     libglib2.0-dev \
     libgtk-4-dev libadwaita-1-dev libjson-glib-dev libsoup-3.0-dev \
-    libarchive-dev
+    libarchive-dev bubblewrap
 ```
 
 Fedora:
@@ -72,7 +83,7 @@ Fedora:
 sudo dnf install gcc make gettext pkgconf-pkg-config \
     glib2-devel \
     gtk4-devel libadwaita-devel json-glib-devel libsoup3-devel \
-    libarchive-devel
+    libarchive-devel bubblewrap
 ```
 
 openSUSE:
@@ -80,14 +91,14 @@ openSUSE:
 ```bash
 sudo zypper install gcc make gettext-tools pkg-config glib2-devel \
     gtk4-devel libadwaita-devel json-glib-devel libsoup3-devel \
-    libarchive-devel
+    libarchive-devel bubblewrap
 ```
 
 Arch:
 
 ```
 sudo pacman -S base-devel gettext pkgconf gtk4 libadwaita json-glib libsoup \
-    libarchive
+    libarchive bubblewrap
 ```
 
 Gentoo:
@@ -95,14 +106,14 @@ Gentoo:
 ```bash
 sudo emerge --ask sys-devel/gcc sys-devel/gettext dev-build/make \
     dev-util/pkgconf dev-libs/glib gui-libs/gtk:4 gui-libs/libadwaita \
-    dev-libs/json-glib net-libs/libsoup:3 app-arch/libarchive
+    dev-libs/json-glib net-libs/libsoup:3 app-arch/libarchive sys-apps/bubblewrap
 ```
 
 NixOS:
 
 ```bash
 nix-shell -p gcc gnumake gettext pkg-config glib gtk4 libadwaita \
-    json-glib libsoup libarchive
+    json-glib libsoup libarchive bubblewrap
 ```
 
 ## Installation

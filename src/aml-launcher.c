@@ -156,6 +156,22 @@ aml_launcher_get_crash_report_directory (AmlLauncher *self)
   return g_build_filename (self->game_directory, "crash-reports", NULL);
 }
 
+char *
+aml_launcher_get_natives_directory (AmlLauncher *self)
+{
+  g_return_val_if_fail (AML_IS_LAUNCHER (self), NULL);
+
+  /* Native extraction is version-specific. Keeping it per instance prevents
+   * one Minecraft/LWJGL version from reusing another version's natives. The
+   * directory remains outside the instance so the sandbox can expose it
+   * read-only. The resolver writes the extracted files below the supplied
+   * directory, in its "natives" child; return that actual library directory
+   * rather than the extraction workspace itself. */
+   return g_build_filename (g_get_user_data_dir (), AML_RESOLVE_DATA_SUBDIR,
+                            "natives", aml_instance_get_id (self->instance),
+                            "natives", NULL);
+}
+
 AmlLauncher *
 aml_launcher_new (AmlInstance *instance,
                   AmlSettings *settings,
@@ -212,6 +228,8 @@ aml_launcher_finalize (GObject *object)
   aml_task_scope_unref (self->scope);
   self->scope = NULL;
   g_clear_object (&self->process.process);
+  g_clear_object (&self->process.open_stream);
+  g_clear_object (&self->process.open_fifo_stream);
   g_clear_pointer (&self->preparation.resolved, aml_resolved_version_free);
   g_clear_object (&self->instance);
   g_clear_object (&self->settings);

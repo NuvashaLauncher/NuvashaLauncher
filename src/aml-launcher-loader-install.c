@@ -115,8 +115,10 @@ on_install_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   /* The resolve is the launch now, and it keeps itself: the request is
      about the install, which is over. */
   {
+    g_autofree char *natives_directory =
+      aml_launcher_get_natives_directory (self);
     AmlTaskScope *resolving = aml_resolve_description_async (
-      merged, merged->id, install->client_jar, NULL, NULL, NULL,
+      merged, merged->id, install->client_jar, NULL, natives_directory, NULL,
       on_resolve_progress, self, on_resolved, g_object_ref (self));
 
     aml_task_scope_follow_cancellable (resolving,

@@ -206,8 +206,42 @@ on_delete_dependents_toggled (GObject *object,
     return;
 
   if (!aml_settings_set_delete_dependents (self->model->settings, active, NULL))
-    adw_switch_row_set_active (
-      row, aml_settings_get_delete_dependents (self->model->settings));
+       adw_switch_row_set_active (
+         row, aml_settings_get_delete_dependents (self->model->settings));
+}
+
+static void
+on_sandbox_enabled_toggled (GObject *object,
+                            GParamSpec *pspec G_GNUC_UNUSED,
+                            gpointer user_data)
+{
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
+  AdwSwitchRow *row = ADW_SWITCH_ROW (object);
+  gboolean active = adw_switch_row_get_active (row);
+  gboolean stored = aml_settings_get_sandbox_enabled (self->model->settings);
+
+  if (active == stored)
+    return;
+
+  if (!aml_settings_set_sandbox_enabled (self->model->settings, active, NULL))
+    adw_switch_row_set_active (row, stored);
+}
+
+static void
+on_sandbox_network_toggled (GObject *object,
+                            GParamSpec *pspec G_GNUC_UNUSED,
+                            gpointer user_data)
+{
+  AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
+  AdwSwitchRow *row = ADW_SWITCH_ROW (object);
+  gboolean active = adw_switch_row_get_active (row);
+  gboolean stored = aml_settings_get_sandbox_network (self->model->settings);
+
+  if (active == stored)
+    return;
+
+  if (!aml_settings_set_sandbox_network (self->model->settings, active, NULL))
+    adw_switch_row_set_active (row, stored);
 }
 
 static void
@@ -365,11 +399,13 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   AmlMainWindow *self = AML_MAIN_WINDOW (user_data);
   AdwDialog *dialog = adw_preferences_dialog_new ();
   AdwPreferencesPage *page = ADW_PREFERENCES_PAGE (adw_preferences_page_new ());
+  AdwPreferencesPage *sandbox_page = ADW_PREFERENCES_PAGE (adw_preferences_page_new ());
   AdwPreferencesGroup *versions_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwPreferencesGroup *logs_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwPreferencesGroup *language_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwPreferencesGroup *cache_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwPreferencesGroup *general_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+  AdwPreferencesGroup *sandbox_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwComboRow *language_row = ADW_COMBO_ROW (adw_combo_row_new ());
   AdwSwitchRow *row = ADW_SWITCH_ROW (adw_switch_row_new ());
   GtkWidget *limit_row = NULL;
@@ -380,6 +416,8 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   AdwActionRow *clear_cache_row = ADW_ACTION_ROW (adw_action_row_new ());
   AdwSwitchRow *export_metadata_row = ADW_SWITCH_ROW (adw_switch_row_new ());
   AdwSwitchRow *delete_dependents_row = ADW_SWITCH_ROW (adw_switch_row_new ());
+  AdwSwitchRow *sandbox_enabled_row = ADW_SWITCH_ROW (adw_switch_row_new ());
+  AdwSwitchRow *sandbox_network_row = ADW_SWITCH_ROW (adw_switch_row_new ());
 
   /* Every one of these rows can show a path or an error message from
      GIO, which is plain text and may hold an "&". */
@@ -392,10 +430,35 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (clear_cache_row)), FALSE);
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (export_metadata_row)), FALSE);
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (delete_dependents_row)), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (sandbox_enabled_row)), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (sandbox_network_row)), FALSE);
 
   adw_dialog_set_title (dialog, _("Settings"));
   adw_preferences_dialog_set_search_enabled (ADW_PREFERENCES_DIALOG (dialog),
                                              FALSE);
+
+  adw_preferences_page_set_title (sandbox_page, _("Sandbox"));
+  adw_preferences_group_set_title (sandbox_group, _("Minecraft sandbox"));
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (sandbox_enabled_row)),
+                                 _("Sandbox Minecraft instances"));
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (sandbox_enabled_row)),
+                               _("Restrict Minecraft to its instance and read-only game dependencies."));
+  adw_switch_row_set_active (sandbox_enabled_row,
+                             aml_settings_get_sandbox_enabled (self->model->settings));
+  g_signal_connect (sandbox_enabled_row, "notify::active",
+                    G_CALLBACK (on_sandbox_enabled_toggled), self);
+  adw_preferences_group_add (sandbox_group, GTK_WIDGET (sandbox_enabled_row));
+
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (sandbox_network_row)),
+                                 _("Allow network access"));
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (sandbox_network_row)),
+                               _("Disable this for offline play and stronger protection against data exfiltration."));
+  adw_switch_row_set_active (sandbox_network_row,
+                             aml_settings_get_sandbox_network (self->model->settings));
+  g_signal_connect (sandbox_network_row, "notify::active",
+                    G_CALLBACK (on_sandbox_network_toggled), self);
+  adw_preferences_group_add (sandbox_group, GTK_WIDGET (sandbox_network_row));
+  adw_preferences_page_add (sandbox_page, sandbox_group);
 
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (GTK_WIDGET (versions_group)),
                                      _("Versions"));
@@ -568,7 +631,8 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (GTK_WIDGET (page)),
                              ADW_PREFERENCES_GROUP (cache_group));
   adw_preferences_dialog_add (ADW_PREFERENCES_DIALOG (dialog),
-                              ADW_PREFERENCES_PAGE (page));
+                               ADW_PREFERENCES_PAGE (page));
+  adw_preferences_dialog_add (ADW_PREFERENCES_DIALOG (dialog), sandbox_page);
 
   adw_dialog_present (dialog, GTK_WIDGET (self));
 }
