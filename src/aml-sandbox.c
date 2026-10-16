@@ -272,7 +272,7 @@ add_environment (GPtrArray *arguments)
   add (arguments, "/instance");
   add (arguments, "--setenv");
   add (arguments, "PATH");
-  add (arguments, "/aml/bin:/usr/bin:/bin");
+  add (arguments, "/instance/.aml-runtime:/aml/bin:/usr/bin:/bin");
 
   for (guint i = 0; names[i] != NULL; i++)
     {
@@ -504,6 +504,7 @@ aml_sandbox_build_arguments (GPtrArray              *java_argv,
   g_autofree char *natives_source = NULL;
   g_autofree char *client_parent = NULL;
   g_autofree char *runtime_skins = NULL;
+  g_autofree char *xrandr_link = NULL;
   g_autofree char *assets_objects = NULL;
   g_autofree char *assets_indexes = NULL;
   g_autofree char *assets_virtual = NULL;
@@ -644,6 +645,29 @@ aml_sandbox_build_arguments (GPtrArray              *java_argv,
     return NULL;
   runtime_skins = g_build_filename (game_source, ".aml-runtime", "assets",
                                     "skins", NULL);
+  xrandr_link = g_build_filename (game_source, ".aml-runtime", "xrandr",
+                                  NULL);
+  {
+    g_autofree char *runtime = g_path_get_dirname (xrandr_link);
+
+    if (g_mkdir_with_parents (runtime, 0700) != 0)
+      {
+        g_set_error (error, AML_SANDBOX_ERROR,
+                     AML_SANDBOX_ERROR_INVALID_PATH,
+                     "cannot create the sandbox runtime directory");
+        return NULL;
+      }
+  }
+  if (!g_file_test (xrandr_link, G_FILE_TEST_EXISTS))
+    {
+      if (symlink ("/aml/bin/xrandr", xrandr_link) != 0)
+        {
+          g_set_error (error, AML_SANDBOX_ERROR,
+                       AML_SANDBOX_ERROR_INVALID_PATH,
+                       "cannot create the sandbox xrandr link");
+          return NULL;
+        }
+    }
   assets_objects = canonical_directory (
     g_build_filename (assets_source, "objects", NULL), error);
   assets_indexes = canonical_directory (
