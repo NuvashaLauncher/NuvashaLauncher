@@ -13,6 +13,8 @@ main (int argc, char **argv)
   if (argc < 2 || strcmp (argv[1], "-q") != 0)
     return 1;
 
+  fprintf (stderr, "AML xrandr helper invoked\n");
+
   display = XOpenDisplay (NULL);
   if (display == NULL)
     return 1;
