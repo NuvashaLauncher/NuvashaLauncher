@@ -607,3 +607,20 @@ msgstr "종속성을 삭제하면 해당 종속 모드도 삭제됩니다"
 
 msgid "A dependent mod cannot be deleted"
 msgstr "종속 모드를 삭제할 수 없습니다"
+msgid "Sandbox"
+msgstr "샌드박스"
+
+msgid "Minecraft sandbox"
+msgstr "Minecraft 샌드박스"
+
+msgid "Sandbox Minecraft instances"
+msgstr "Minecraft 인스턴스를 샌드박스 처리"
+
+msgid "Restrict Minecraft to its instance and read-only game dependencies."
+msgstr "Minecraft를 해당 인스턴스와 읽기 전용 게임 종속 항목으로 제한합니다."
+
+msgid "Allow network access"
+msgstr "네트워크 액세스 허용"
+
+msgid "Disable this for offline play and stronger protection against data exfiltration."
+msgstr "오프라인 플레이와 데이터 유출 방지 강화를 위해 비활성화합니다."

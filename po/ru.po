@@ -608,3 +608,20 @@ msgstr "Удаление зависимости удаляет мод, кото�
 
 msgid "A dependent mod cannot be deleted"
 msgstr "Невозможно удалить зависимый мод"
+msgid "Sandbox"
+msgstr "Песочница"
+
+msgid "Minecraft sandbox"
+msgstr "Песочница Minecraft"
+
+msgid "Sandbox Minecraft instances"
+msgstr "Изолировать экземпляры Minecraft в песочнице"
+
+msgid "Restrict Minecraft to its instance and read-only game dependencies."
+msgstr "Ограничить Minecraft его экземпляром и зависимостями игры только для чтения."
+
+msgid "Allow network access"
+msgstr "Разрешить доступ к сети"
+
+msgid "Disable this for offline play and stronger protection against data exfiltration."
+msgstr "Отключите для игры без сети и усиленной защиты от утечки данных."

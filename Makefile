@@ -32,8 +32,10 @@ DBGFLAGS := -g -O0 -fsanitize=address,undefined -fno-sanitize-recover=all
 
 BIN    := build/AML
 DBGBIN := build-debug/AML
+OPEN_BROKER := build/aml-open-broker.so
+XRANDR_HELPER := build/aml-xrandr
 
-SRCS    := $(wildcard src/*.c)
+SRCS    := $(filter-out src/aml-open-broker.c src/aml-xrandr.c,$(wildcard src/*.c))
 RELOBJS := $(patsubst src/%.c,build/%.o,$(SRCS))
 DBGOBJS := $(patsubst src/%.c,build-debug/%.o,$(SRCS))
 RELDEPS := $(RELOBJS:.o=.d)
@@ -52,12 +54,18 @@ TESTDBGDEPS := $(addsuffix .d,$(TESTDBGBINS))
 
 .PHONY: all debug test test-debug test-lsan static-analysis pot clean install uninstall
 
-all: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
+all: $(if $(SRCS),$(BIN)) $(OPEN_BROKER) $(XRANDR_HELPER) $(LOCALE_MOS)
 
 debug: $(if $(SRCS),$(DBGBIN))
 
-$(BIN): $(RELOBJS) | build
+$(BIN): $(RELOBJS) $(OPEN_BROKER) $(XRANDR_HELPER) | build
 	$(CC) $(RELFLAGS) -o $@ $(RELOBJS) $(PKG_LIBS)
+
+$(OPEN_BROKER): src/aml-open-broker.c | build
+	$(CC) -std=c17 -Wall -Wextra -Wpedantic -fPIC -shared -o $@ $< -ldl
+
+$(XRANDR_HELPER): src/aml-xrandr.c | build
+	$(CC) -std=c17 -Wall -Wextra -Wpedantic -o $@ $< -lX11 -lXrandr
 
 $(DBGBIN): $(DBGOBJS) | build-debug
 	$(CC) $(DBGFLAGS) -o $@ $(DBGOBJS) $(PKG_LIBS)
