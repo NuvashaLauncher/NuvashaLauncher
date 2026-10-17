@@ -627,7 +627,7 @@ msgstr "Skin"
 
 # UI string
 msgid "Slim model"
-msgstr "Slim model"
+msgstr "Тонка модель"
 
 # UI string
 msgid "OK"
@@ -635,7 +635,7 @@ msgstr "OK"
 
 # UI string
 msgid "Export skin…"
-msgstr "Export skin…"
+msgstr "Експортувати скін…"
 
 # UI string
 msgid "Imported skin"
@@ -643,7 +643,7 @@ msgstr "Imported skin"
 
 # UI string
 msgid "Default model"
-msgstr "Default model"
+msgstr "Стандартна модель"
 
 # UI string
 msgid "PNG skin texture"
@@ -655,9 +655,22 @@ msgstr "Invalid skin"
 
 # UI string
 msgid "No cape"
-msgstr "No cape"
+msgstr "Без плаща"
 
 # UI string
 msgid "Import skin…"
-msgstr "Import skin…"
+msgstr "Імпортувати скін…"
+
+
+# UI string
+msgid "Open Skins Folder"
+msgstr ""
+
+# UI string
+msgid "Delete skin?"
+msgstr "Видалити скін?"
+
+# UI string
+msgid "This skin will be removed from the skin library."
+msgstr "Цей скін буде видалено з бібліотеки."
 

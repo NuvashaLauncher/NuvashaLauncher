@@ -129,6 +129,7 @@ pot:
 install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 	install -Dm755 $(BIN) "$(DESTDIR)$(PREFIX)/bin/AML"
 	install -Dm644 data/skins/steve.png "$(DESTDIR)$(PREFIX)/share/AML/skins/steve.png"
+	install -Dm644 data/pack.png "$(DESTDIR)$(PREFIX)/share/AML/pack.png"
 	@for skin in data/skins/defaults/*.png; do \
 		install -Dm644 "$$skin" "$(DESTDIR)$(PREFIX)/share/AML/skins/defaults/$$(basename "$$skin")"; \
 	done
@@ -148,6 +149,7 @@ install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 uninstall:
 	rm -f "$(DESTDIR)$(PREFIX)/bin/AML"
 	rm -f "$(DESTDIR)$(PREFIX)/share/AML/skins/steve.png"
+	rm -f "$(DESTDIR)$(PREFIX)/share/AML/pack.png"
 	rm -rf "$(DESTDIR)$(PREFIX)/share/AML/skins/defaults"
 	rm -f "$(DESTDIR)$(PREFIX)/share/applications/io.gitlab.anotherminecraftlauncher.AML.desktop"
 	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/io.gitlab.anotherminecraftlauncher.AML.svg"

@@ -628,7 +628,7 @@ msgstr "Skin"
 
 # UI string
 msgid "Slim model"
-msgstr "Slim model"
+msgstr "İnce model"
 
 # UI string
 msgid "OK"
@@ -636,7 +636,7 @@ msgstr "OK"
 
 # UI string
 msgid "Export skin…"
-msgstr "Export skin…"
+msgstr "Kaplamayı dışa aktar…"
 
 # UI string
 msgid "Imported skin"
@@ -644,7 +644,7 @@ msgstr "Imported skin"
 
 # UI string
 msgid "Default model"
-msgstr "Default model"
+msgstr "Varsayılan model"
 
 # UI string
 msgid "PNG skin texture"
@@ -656,9 +656,22 @@ msgstr "Invalid skin"
 
 # UI string
 msgid "No cape"
-msgstr "No cape"
+msgstr "Pelerin yok"
 
 # UI string
 msgid "Import skin…"
-msgstr "Import skin…"
+msgstr "Kaplama içe aktar…"
+
+
+# UI string
+msgid "Open Skins Folder"
+msgstr ""
+
+# UI string
+msgid "Delete skin?"
+msgstr "Deri silinsin mi?"
+
+# UI string
+msgid "This skin will be removed from the skin library."
+msgstr "Bu deri, deri kitaplığından kaldırılacak."
 

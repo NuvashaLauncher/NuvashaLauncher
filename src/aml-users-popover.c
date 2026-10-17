@@ -8,6 +8,7 @@
 #include "aml-offline-account-dialog.h"
 #include "aml-sign-in-dialog.h"
 #include "aml-skin-view.h"
+#include "aml-fs.h"
 
 #include <libsoup/soup.h>
 
@@ -230,15 +231,17 @@ typedef struct
   GPtrArray *cape_ids;
   GPtrArray *cape_urls;
   GHashTable *skin_urls;
-  GtkWidget *current_skin_row;
+  AdwActionRow *current_skin_row;
+  GtkButton *remove_button;
   gboolean defaults_added;
   SoupMessage *profile_message;
   SoupMessage *cape_message;
+  GHashTable *deleted_skin_ids;
   AmlAccount *account;
 } SkinMenu;
 
-static GtkWidget *skin_row_new (SkinMenu *menu, const char *name,
-                                const char *url);
+static AdwActionRow *skin_row_new (SkinMenu *menu, const char *name,
+                                   const char *url);
 
 static char *
 skin_directory_path (void)
@@ -267,6 +270,55 @@ skin_name_for_url (const char *url)
   return g_strdup (_("Skin"));
 }
 
+static char *
+skin_identity (const char *url)
+{
+  return skin_name_for_url (url);
+}
+
+static char *
+cached_skin_path (const char *url)
+{
+  if (url == NULL || (!g_str_has_prefix (url, "http://") &&
+                      !g_str_has_prefix (url, "https://")))
+    return NULL;
+  {
+    g_autofree char *name = g_strconcat (skin_identity (url), ".png", NULL);
+    return g_build_filename (skin_directory_path (), name, NULL);
+  }
+}
+
+static gboolean
+is_default_skin_alias (const char *alias)
+{
+  static const char *defaults[] = {
+    "STEVE", "ALEX", "SUNNY", "KAI", "MAKENA", "ZURI", "EFE", "ARI", "NOOR"
+  };
+  if (alias == NULL)
+    return FALSE;
+  for (guint i = 0; i < G_N_ELEMENTS (defaults); i++)
+    if (g_ascii_strcasecmp (alias, defaults[i]) == 0)
+      return TRUE;
+  return FALSE;
+}
+
+static gboolean
+skin_url_is_default (const char *url)
+{
+  g_autofree char *defaults =
+    g_build_filename (g_get_user_data_dir (), "AML", "skins", "defaults", NULL);
+  g_autofree char *path = NULL;
+  g_autofree char *prefix = NULL;
+  g_autoptr (GFile) file = NULL;
+
+  if (url == NULL || !g_str_has_prefix (url, "file://"))
+    return FALSE;
+  file = g_file_new_for_uri (url);
+  path = g_file_get_path (file);
+  prefix = g_strconcat (defaults, G_DIR_SEPARATOR_S, NULL);
+  return path != NULL && g_str_has_prefix (path, prefix);
+}
+
 static void
 append_local_skins (SkinMenu *menu)
 {
@@ -274,7 +326,7 @@ append_local_skins (SkinMenu *menu)
   g_autoptr (GDir) dir = NULL;
   const char *name;
 
-  if (g_mkdir_with_parents (directory, 0755) != 0 ||
+  if (!aml_fs_make_directory (directory, 0755, NULL) ||
       (dir = g_dir_open (directory, 0, NULL)) == NULL)
     return;
   while ((name = g_dir_read_name (dir)) != NULL)
@@ -285,14 +337,16 @@ append_local_skins (SkinMenu *menu)
         continue;
       path = g_build_filename (directory, name, NULL);
       uri = g_filename_to_uri (path, NULL, NULL);
-      if (uri == NULL || g_hash_table_contains (menu->skin_urls, uri))
+      g_autofree char *identity = uri != NULL ? skin_identity (uri) : NULL;
+      if (uri == NULL || g_hash_table_contains (menu->skin_urls, identity) ||
+          g_hash_table_contains (menu->deleted_skin_ids, identity))
         continue;
       gtk_list_box_append (menu->skins,
-                           skin_row_new (menu, name, uri));
+                           GTK_WIDGET (skin_row_new (menu, name, uri)));
     }
 }
 
-static GtkWidget *
+static AdwActionRow *
 append_default_skins (SkinMenu *menu)
 {
   static const char *defaults[] = {
@@ -301,9 +355,9 @@ append_default_skins (SkinMenu *menu)
   g_autofree char *source_dir = g_build_filename (AML_DATA_DIR, "skins", "defaults", NULL);
   g_autofree char *source_fallback = g_build_filename (AML_SOURCE_DATA_DIR, "skins", "defaults", NULL);
   g_autofree char *target_dir = g_build_filename (g_get_user_data_dir (), "AML", "skins", "defaults", NULL);
-  GtkWidget *steve_row = NULL;
+  AdwActionRow *steve_row = NULL;
 
-  if (menu->defaults_added || g_mkdir_with_parents (target_dir, 0755) != 0)
+  if (menu->defaults_added || !aml_fs_make_directory (target_dir, 0755, NULL))
     return NULL;
   for (guint i = 0; i < G_N_ELEMENTS (defaults); i++)
     {
@@ -326,12 +380,14 @@ append_default_skins (SkinMenu *menu)
       source = g_file_new_for_path (source_path);
       target = g_file_new_for_path (target_path);
       if (!g_file_test (target_path, G_FILE_TEST_IS_REGULAR))
-        g_file_copy (source, target, G_FILE_COPY_NONE, NULL, NULL, NULL, NULL);
+        aml_fs_copy_file (source, target, G_FILE_COPY_NONE, NULL, NULL);
       uri = g_filename_to_uri (target_path, NULL, NULL);
-      if (uri != NULL && !g_hash_table_contains (menu->skin_urls, uri))
+      g_autofree char *identity = uri != NULL ? skin_identity (uri) : NULL;
+      if (uri != NULL && !g_hash_table_contains (menu->skin_urls, identity) &&
+          !g_hash_table_contains (menu->deleted_skin_ids, identity))
         {
-          GtkWidget *row = skin_row_new (menu, name, uri);
-          gtk_list_box_append (menu->skins, row);
+          AdwActionRow *row = skin_row_new (menu, name, uri);
+          gtk_list_box_append (menu->skins, GTK_WIDGET (row));
           if (g_str_equal (name, "Steve"))
             steve_row = row;
         }
@@ -358,7 +414,7 @@ skin_texture_load_free (SkinTextureLoad *load)
 }
 
 static void
-cache_skin_bytes (const char *url, GBytes *bytes)
+cache_skin_bytes (AmlSkinView *view, const char *url, GBytes *bytes)
 {
   g_autofree char *cache_directory = skin_directory_path ();
   g_autofree char *hash = g_compute_checksum_for_string (G_CHECKSUM_SHA256,
@@ -368,8 +424,14 @@ cache_skin_bytes (const char *url, GBytes *bytes)
   gsize length = 0;
   gconstpointer data = g_bytes_get_data (bytes, &length);
 
-  if (g_mkdir_with_parents (cache_directory, 0755) == 0)
-    g_file_set_contents (path, data, (gssize) length, NULL);
+  {
+    GHashTable *deleted = g_object_get_data (G_OBJECT (view),
+                                             "aml-deleted-skin-ids");
+    if (deleted != NULL && g_hash_table_contains (deleted, hash))
+      return;
+  }
+  if (aml_fs_make_directory (cache_directory, 0755, NULL))
+    aml_fs_replace_contents (path, data, (gssize) length, 0600, NULL);
 }
 
 static void
@@ -386,7 +448,7 @@ on_view_texture_loaded (GObject *source, GAsyncResult *result, gpointer user_dat
   if (bytes != NULL && !load->cape && load->url != NULL &&
       (g_str_has_prefix (load->url, "http://") ||
        g_str_has_prefix (load->url, "https://")))
-    cache_skin_bytes (load->url, bytes);
+    cache_skin_bytes (load->view, load->url, bytes);
   if (texture == NULL && error != NULL)
     g_warning ("Could not load skin preview texture: %s", error->message);
   if (texture != NULL)
@@ -557,12 +619,12 @@ on_skin_file_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
     g_autofree char *destination_path = NULL;
     g_autoptr (GFile) destination = NULL;
 
-    if (basename == NULL || g_mkdir_with_parents (directory, 0755) != 0)
+    if (basename == NULL || !aml_fs_make_directory (directory, 0755, NULL))
       goto done;
     destination_path = g_build_filename (directory, basename, NULL);
     destination = g_file_new_for_path (destination_path);
-    if (!g_file_copy (file, destination, G_FILE_COPY_OVERWRITE,
-                      NULL, NULL, NULL, &error))
+    if (!aml_fs_copy_file (file, destination, G_FILE_COPY_OVERWRITE,
+                           NULL, &error))
       goto done;
     g_clear_object (&file);
     file = g_steal_pointer (&destination);
@@ -574,8 +636,8 @@ on_skin_file_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
       (gdk_texture_get_height (skin) != 32 && gdk_texture_get_height (skin) != 64))
     {
       g_clear_error (&error);
-      error = g_error_new_literal (G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
-                                   "Skin images must be 64x64 or 64x32 PNG files");
+       error = g_error_new_literal (G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
+                                    _("Skin images must be 64x64 or 64x32 PNG files"));
       goto done;
     }
 
@@ -588,8 +650,8 @@ on_skin_file_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
       gtk_image_set_from_paintable (menu->image, GDK_PAINTABLE (face));
       {
         char *uri = g_file_get_uri (file);
-        GtkWidget *row = skin_row_new (menu, _("Imported skin"), uri);
-        gtk_list_box_append (menu->skins, row);
+        AdwActionRow *row = skin_row_new (menu, _("Imported skin"), uri);
+        gtk_list_box_append (menu->skins, GTK_WIDGET (row));
         gtk_list_box_select_row (menu->skins, GTK_LIST_BOX_ROW (row));
         load_view_texture (menu->view, uri, FALSE);
         g_free (uri);
@@ -628,16 +690,121 @@ on_import_skin_clicked (GtkButton *button, gpointer user_data)
 }
 
 static void
+remove_skin_row (SkinMenu *menu, GtkListBoxRow *row)
+{
+  const char *url = g_object_get_data (G_OBJECT (row), "aml-skin-url");
+  g_autofree char *path = NULL;
+
+  if (url != NULL && g_str_has_prefix (url, "file://"))
+    {
+      g_autoptr (GFile) file = g_file_new_for_uri (url);
+      path = g_file_get_path (file);
+    }
+  else if (url != NULL && (g_str_has_prefix (url, "http://") ||
+                           g_str_has_prefix (url, "https://")))
+    {
+      g_autofree char *name = g_strconcat (skin_identity (url), ".png", NULL);
+      path = g_build_filename (skin_directory_path (), name, NULL);
+    }
+  if (path != NULL)
+    aml_fs_unlink (path, NULL);
+  if (url != NULL)
+    g_hash_table_add (menu->deleted_skin_ids, g_strdup (skin_identity (url)));
+
+  int index = gtk_list_box_row_get_index (row);
+  gtk_list_box_remove (menu->skins, GTK_WIDGET (row));
+  row = gtk_list_box_get_row_at_index (menu->skins, index);
+  if (row == NULL && index > 0)
+    row = gtk_list_box_get_row_at_index (menu->skins, index - 1);
+  if (row != NULL)
+    gtk_list_box_select_row (menu->skins, row);
+  else
+    set_avatar_icon (menu->image);
+}
+
+static void
+on_active_skin_delete_done (GObject *source, GAsyncResult *result,
+                            gpointer user_data G_GNUC_UNUSED)
+{
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GBytes) bytes =
+    soup_session_send_and_read_finish (SOUP_SESSION (source), result, &error);
+  SoupMessage *message = g_object_get_data (G_OBJECT (source),
+                                            "aml-delete-skin-message");
+
+  if (bytes == NULL || message == NULL || soup_message_get_status (message) >= 300)
+    g_warning ("Could not delete active Minecraft skin: %s",
+               error != NULL ? error->message : "server rejected the request");
+}
+
+static void
+delete_active_skin (SkinMenu *menu)
+{
+  SoupSession *session;
+  SoupMessage *message;
+  char *authorization;
+
+  if (menu->account == NULL || menu->account->type != AML_ACCOUNT_MICROSOFT ||
+      menu->account->access_token == NULL)
+    return;
+  session = soup_session_new_with_options ("user-agent", "AML", NULL);
+  message = soup_message_new (SOUP_METHOD_DELETE,
+                              "https://api.minecraftservices.com/minecraft/profile/skins/active");
+  authorization = g_strconcat ("Bearer ", menu->account->access_token, NULL);
+  soup_message_headers_replace (soup_message_get_request_headers (message),
+                                "Authorization", authorization);
+  g_free (authorization);
+  g_object_set_data_full (G_OBJECT (session), "aml-delete-skin-message",
+                          message, g_object_unref);
+  soup_session_send_and_read_async (session, message, G_PRIORITY_DEFAULT, NULL,
+                                    on_active_skin_delete_done, NULL);
+  g_object_unref (session);
+}
+
+static void
+on_remove_skin_confirmed (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  SkinMenu *menu = user_data;
+  const char *response =
+    adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
+  GtkListBoxRow *row = g_object_get_data (G_OBJECT (source), "aml-skin-row");
+
+  if (g_str_equal (response, "remove") && row != NULL)
+    {
+      const char *url = g_object_get_data (G_OBJECT (row), "aml-skin-url");
+      if (url != NULL && menu->account != NULL &&
+          g_strcmp0 (url, menu->account->avatar_url) == 0)
+        delete_active_skin (menu);
+      remove_skin_row (menu, row);
+    }
+}
+
+static void
 on_remove_skin_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   SkinMenu *menu = user_data;
   GtkListBoxRow *row = gtk_list_box_get_selected_row (menu->skins);
+  const char *url;
 
-  if (row != NULL)
-    {
-      gtk_list_box_remove (menu->skins, GTK_WIDGET (row));
-      set_avatar_icon (menu->image);
-    }
+  if (row == NULL ||
+      (url = g_object_get_data (G_OBJECT (row), "aml-skin-url")) == NULL ||
+      skin_url_is_default (url))
+    return;
+
+  {
+    AdwAlertDialog *alert = ADW_ALERT_DIALOG (
+      adw_alert_dialog_new (_("Delete skin?"),
+                            _("This skin will be removed from the skin library.")));
+    adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
+    adw_alert_dialog_add_response (alert, "remove", _("Delete"));
+    adw_alert_dialog_set_response_appearance (alert, "remove",
+                                              ADW_RESPONSE_DESTRUCTIVE);
+    adw_alert_dialog_set_default_response (alert, "cancel");
+    adw_alert_dialog_set_close_response (alert, "cancel");
+    g_object_set_data (G_OBJECT (alert), "aml-skin-row", row);
+    adw_alert_dialog_choose (alert, GTK_WIDGET (menu->dialog), NULL,
+                             on_remove_skin_confirmed, menu);
+  }
 }
 
 static void
@@ -649,7 +816,7 @@ on_open_skins_clicked (GtkButton *button G_GNUC_UNUSED,
   g_autofree char *uri = NULL;
   g_autoptr (GError) error = NULL;
 
-  if (g_mkdir_with_parents (directory, 0755) != 0)
+  if (!aml_fs_make_directory (directory, 0755, NULL))
     return;
   uri = g_filename_to_uri (directory, NULL, NULL);
   if (uri == NULL ||
@@ -695,7 +862,14 @@ static void
 on_skin_selected (GtkListBox *list, GtkListBoxRow *row, gpointer user_data)
 {
   SkinMenu *menu = user_data;
-  const char *url = g_object_get_data (G_OBJECT (row), "aml-skin-url");
+  const char *url;
+
+  if (row == NULL)
+    return;
+  url = g_object_get_data (G_OBJECT (row), "aml-skin-url");
+  if (menu->remove_button != NULL)
+    gtk_widget_set_sensitive (GTK_WIDGET (menu->remove_button),
+                              url != NULL && !skin_url_is_default (url));
 
   if (url == NULL)
     return;
@@ -721,7 +895,7 @@ on_skin_selected (GtkListBox *list, GtkListBoxRow *row, gpointer user_data)
     }
 }
 
-static GtkWidget *
+static AdwActionRow *
 skin_row_new (SkinMenu *menu, const char *name, const char *url)
 {
   AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
@@ -733,7 +907,8 @@ skin_row_new (SkinMenu *menu, const char *name, const char *url)
   set_avatar_icon (image);
   if (url != NULL)
     {
-      g_hash_table_add (menu->skin_urls, g_strdup (url));
+      g_autofree char *identity = skin_identity (url);
+      g_hash_table_add (menu->skin_urls, g_strdup (identity));
       g_object_set_data_full (G_OBJECT (row), "aml-skin-url", g_strdup (url), g_free);
       if (g_str_has_prefix (url, "file://"))
         {
@@ -743,10 +918,14 @@ skin_row_new (SkinMenu *menu, const char *name, const char *url)
             set_avatar_icon (image);
         }
       else
-        set_avatar (menu->owner, image, url);
+        {
+          g_autofree char *cached = cached_skin_path (url);
+          if (cached == NULL || !set_local_avatar (image, cached))
+            set_avatar (menu->owner, image, url);
+        }
     }
   adw_action_row_add_prefix (row, GTK_WIDGET (image));
-  return GTK_WIDGET (row);
+  return row;
 }
 
 static void
@@ -773,7 +952,18 @@ append_profile_skins (SkinMenu *menu, const char *json)
       if (url != NULL)
         {
           g_autofree char *fallback_name = NULL;
-          if (g_hash_table_contains (menu->skin_urls, url))
+          g_autofree char *identity = skin_identity (url);
+          if (is_default_skin_alias (alias))
+            {
+              if (menu->current_skin_row != NULL)
+                {
+                  gtk_list_box_remove (menu->skins,
+                                       GTK_WIDGET (menu->current_skin_row));
+                  menu->current_skin_row = NULL;
+                }
+              continue;
+            }
+          if (g_hash_table_contains (menu->skin_urls, identity))
             {
               if (menu->current_skin_row != NULL && alias != NULL && *alias != '\0')
                 adw_preferences_row_set_title (
@@ -783,10 +973,10 @@ append_profile_skins (SkinMenu *menu, const char *json)
           if (alias == NULL || *alias == '\0')
             fallback_name = skin_name_for_url (url);
           gtk_list_box_append (menu->skins,
-                               skin_row_new (menu,
+                               GTK_WIDGET (skin_row_new (menu,
                                              alias != NULL && *alias != '\0'
                                                ? alias : fallback_name,
-                                             url));
+                                             url)));
         }
     }
 }
@@ -836,7 +1026,7 @@ load_profile_skins (SkinMenu *menu)
   g_object_unref (session);
 }
 
-static GtkWidget *
+static AdwDialog *
 skin_menu_new (AmlUsersPopover *owner, GtkImage *image, AmlAccount *account)
 {
   AdwDialog *dialog = adw_dialog_new ();
@@ -871,8 +1061,12 @@ skin_menu_new (AmlUsersPopover *owner, GtkImage *image, AmlAccount *account)
   data->cape_ids = g_ptr_array_new_with_free_func (g_free);
   data->cape_urls = g_ptr_array_new_with_free_func (g_free);
   data->skin_urls = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+  data->deleted_skin_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
   data->capes = capes;
   data->account = account;
+  data->remove_button = remove;
+  g_object_set_data (G_OBJECT (preview), "aml-deleted-skin-ids",
+                     data->deleted_skin_ids);
   g_object_set_data (G_OBJECT (slim_model), "aml-slim", GINT_TO_POINTER (1));
   g_signal_connect (import, "clicked", G_CALLBACK (on_import_skin_clicked), data);
   g_signal_connect (export, "clicked", G_CALLBACK (on_export_skin_clicked), data);
@@ -899,7 +1093,8 @@ skin_menu_new (AmlUsersPopover *owner, GtkImage *image, AmlAccount *account)
   gtk_widget_set_hexpand (GTK_WIDGET (remove), FALSE);
   gtk_widget_set_hexpand (GTK_WIDGET (open_skins), FALSE);
   gtk_widget_set_halign (GTK_WIDGET (remove), GTK_ALIGN_END);
-  gtk_widget_set_tooltip_text (GTK_WIDGET (open_skins), _("Open Skins Folder"));
+  gtk_widget_set_tooltip_text (GTK_WIDGET (open_skins), _("Open Folder"));
+  gtk_widget_set_tooltip_text (GTK_WIDGET (remove), _("Delete"));
   gtk_widget_set_hexpand (GTK_WIDGET (action_spacer), TRUE);
   gtk_box_append (left, GTK_WIDGET (preview));
   gtk_box_append (left, GTK_WIDGET (capes));
@@ -929,7 +1124,10 @@ skin_menu_new (AmlUsersPopover *owner, GtkImage *image, AmlAccount *account)
   append_local_skins (data);
   if (account->type != AML_ACCOUNT_OFFLINE && account->avatar_url != NULL)
     {
-      if (!g_hash_table_contains (data->skin_urls, account->avatar_url))
+      if (!g_hash_table_contains (data->skin_urls,
+                                  skin_identity (account->avatar_url)) &&
+          !g_hash_table_contains (data->deleted_skin_ids,
+                                  skin_identity (account->avatar_url)))
         {
           g_autofree char *skin_name = skin_name_for_url (account->avatar_url);
           gboolean cached = FALSE;
@@ -944,21 +1142,21 @@ skin_menu_new (AmlUsersPopover *owner, GtkImage *image, AmlAccount *account)
           if (!cached)
             {
               data->current_skin_row = skin_row_new (data, skin_name, account->avatar_url);
-              gtk_list_box_append (skins, data->current_skin_row);
+              gtk_list_box_append (skins, GTK_WIDGET (data->current_skin_row));
             }
           load_view_texture (preview, account->avatar_url, FALSE);
         }
     }
   else
     {
-      GtkWidget *steve_row = append_default_skins (data);
+      AdwActionRow *steve_row = append_default_skins (data);
       if (steve_row != NULL)
         gtk_list_box_select_row (skins, GTK_LIST_BOX_ROW (steve_row));
     }
   g_signal_connect (capes, "notify::selected", G_CALLBACK (on_cape_selected), data);
   load_capes (data);
   load_profile_skins (data);
-  return GTK_WIDGET (dialog);
+  return dialog;
 }
 
 /* What the button in the header says about who this copy of AML plays
@@ -1011,7 +1209,7 @@ account_id_of (gpointer widget)
   return g_object_get_data (G_OBJECT (widget), "aml-account-id");
 }
 
-static GtkWidget *skin_menu_new (AmlUsersPopover *owner, GtkImage *image,
+static AdwDialog *skin_menu_new (AmlUsersPopover *owner, GtkImage *image,
                                  AmlAccount *account);
 
 static void
@@ -1019,15 +1217,15 @@ open_skin_menu_for_account (AmlUsersPopover *self, const char *id,
                             GtkImage *image)
 {
   AmlAccount *account = aml_accounts_find (self->accounts, id);
-  GtkWidget *dialog;
+  AdwDialog *dialog;
 
   if (account == NULL || image == NULL)
     return;
   gtk_popover_popdown (GTK_POPOVER (self));
   dialog = skin_menu_new (self, image, account);
-  gtk_widget_set_focusable (dialog, TRUE);
+  gtk_widget_set_focusable (GTK_WIDGET (dialog), TRUE);
   adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
-  gtk_widget_grab_focus (dialog);
+  gtk_widget_grab_focus (GTK_WIDGET (dialog));
   g_object_unref (dialog);
 }
 

@@ -628,7 +628,7 @@ msgstr "Skin"
 
 # UI string
 msgid "Slim model"
-msgstr "Slim model"
+msgstr "Slank model"
 
 # UI string
 msgid "OK"
@@ -636,7 +636,7 @@ msgstr "OK"
 
 # UI string
 msgid "Export skin…"
-msgstr "Export skin…"
+msgstr "Skin exporteren…"
 
 # UI string
 msgid "Imported skin"
@@ -644,7 +644,7 @@ msgstr "Imported skin"
 
 # UI string
 msgid "Default model"
-msgstr "Default model"
+msgstr "Standaardmodel"
 
 # UI string
 msgid "PNG skin texture"
@@ -656,9 +656,22 @@ msgstr "Invalid skin"
 
 # UI string
 msgid "No cape"
-msgstr "No cape"
+msgstr "Geen cape"
 
 # UI string
 msgid "Import skin…"
-msgstr "Import skin…"
+msgstr "Skin importeren…"
+
+
+# UI string
+msgid "Open Skins Folder"
+msgstr ""
+
+# UI string
+msgid "Delete skin?"
+msgstr "Skin verwijderen?"
+
+# UI string
+msgid "This skin will be removed from the skin library."
+msgstr "Deze skin wordt uit de skinbibliotheek verwijderd."
 

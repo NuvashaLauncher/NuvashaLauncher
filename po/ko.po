@@ -626,7 +626,7 @@ msgstr "Skin"
 
 # UI string
 msgid "Slim model"
-msgstr "Slim model"
+msgstr "슬림 모델"
 
 # UI string
 msgid "OK"
@@ -634,7 +634,7 @@ msgstr "OK"
 
 # UI string
 msgid "Export skin…"
-msgstr "Export skin…"
+msgstr "스킨 내보내기…"
 
 # UI string
 msgid "Imported skin"
@@ -642,7 +642,7 @@ msgstr "Imported skin"
 
 # UI string
 msgid "Default model"
-msgstr "Default model"
+msgstr "기본 모델"
 
 # UI string
 msgid "PNG skin texture"
@@ -654,9 +654,22 @@ msgstr "Invalid skin"
 
 # UI string
 msgid "No cape"
-msgstr "No cape"
+msgstr "망토 없음"
 
 # UI string
 msgid "Import skin…"
-msgstr "Import skin…"
+msgstr "스킨 가져오기…"
+
+
+# UI string
+msgid "Open Skins Folder"
+msgstr ""
+
+# UI string
+msgid "Delete skin?"
+msgstr "스킨을 삭제하시겠습니까?"
+
+# UI string
+msgid "This skin will be removed from the skin library."
+msgstr "이 스킨은 스킨 라이브러리에서 삭제됩니다."
 

@@ -300,6 +300,19 @@ row_set_icon (GtkImage *image, AmlInstance *instance)
 
   g_object_get (instance, "icon", &path, NULL);
 
+  if (path == NULL || !g_file_test (path, G_FILE_TEST_IS_REGULAR))
+    {
+      g_autofree char *default_icon =
+        g_build_filename (AML_DATA_DIR, "pack.png", NULL);
+      if (!g_file_test (default_icon, G_FILE_TEST_IS_REGULAR))
+        {
+          g_clear_pointer (&default_icon, g_free);
+          default_icon = g_build_filename (AML_SOURCE_DATA_DIR, "pack.png", NULL);
+        }
+      if (g_file_test (default_icon, G_FILE_TEST_IS_REGULAR))
+        path = g_strdup (default_icon);
+    }
+
   if (path != NULL && g_file_test (path, G_FILE_TEST_IS_REGULAR))
     {
       g_autoptr (GFile) file = g_file_new_for_path (path);
