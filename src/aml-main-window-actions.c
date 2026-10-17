@@ -405,6 +405,7 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   AdwPreferencesGroup *language_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwPreferencesGroup *cache_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwPreferencesGroup *general_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+  AdwPreferencesGroup *sandbox_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwComboRow *language_row = ADW_COMBO_ROW (adw_combo_row_new ());
   AdwSwitchRow *row = ADW_SWITCH_ROW (adw_switch_row_new ());
   GtkWidget *limit_row = NULL;
@@ -440,6 +441,8 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
                                      _("Versions"));
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (GTK_WIDGET (general_group)),
                                    _("General"));
+  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (GTK_WIDGET (sandbox_group)),
+                                   _("Sandbox"));
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (export_metadata_row)),
                                   _("Ask for export metadata"));
   adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (export_metadata_row)),
@@ -463,28 +466,23 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
                                 GTK_WIDGET (delete_dependents_row));
 
    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (sandbox_row)),
-                                   _("Enable game sandbox"));
-   adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (sandbox_row)),
-                                _("Run Minecraft inside bubblewrap."));
+                                   _("Enable sandbox"));
    adw_switch_row_set_active (
      sandbox_row, aml_settings_get_sandbox_enabled (self->model->settings));
    g_signal_connect (sandbox_row, "notify::active",
                      G_CALLBACK (on_sandbox_toggled), self);
-   adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (general_group)),
+   adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (sandbox_group)),
                                GTK_WIDGET (sandbox_row));
 
    adw_preferences_row_set_title (
      ADW_PREFERENCES_ROW (GTK_WIDGET (sandbox_network_row)),
      _("Allow sandbox network access"));
-   adw_action_row_set_subtitle (
-     ADW_ACTION_ROW (GTK_WIDGET (sandbox_network_row)),
-     _("Allow Minecraft to connect to the network inside the sandbox."));
    adw_switch_row_set_active (
      sandbox_network_row,
      aml_settings_get_sandbox_network_enabled (self->model->settings));
    g_signal_connect (sandbox_network_row, "notify::active",
                      G_CALLBACK (on_sandbox_network_toggled), self);
-   adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (general_group)),
+   adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (sandbox_group)),
                                GTK_WIDGET (sandbox_network_row));
 
    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (row)),
@@ -631,6 +629,8 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
                              ADW_PREFERENCES_GROUP (language_group));
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (GTK_WIDGET (page)),
                              ADW_PREFERENCES_GROUP (cache_group));
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (GTK_WIDGET (page)),
+                             ADW_PREFERENCES_GROUP (sandbox_group));
   adw_preferences_dialog_add (ADW_PREFERENCES_DIALOG (dialog),
                               ADW_PREFERENCES_PAGE (page));
 

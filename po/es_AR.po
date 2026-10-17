@@ -613,14 +613,11 @@ msgstr "Eliminar una dependencia elimina el mod que dependía de ella"
 msgid "A dependent mod cannot be deleted"
 msgstr "No se puede eliminar un mod dependiente"
 
-msgid "Enable game sandbox"
-msgstr "Activar el sandbox del juego"
+msgid "Sandbox"
+msgstr "Sandbox"
 
-msgid "Run Minecraft inside bubblewrap."
-msgstr "Ejecutar Minecraft dentro de bubblewrap."
+msgid "Enable sandbox"
+msgstr "Activar sandbox"
 
 msgid "Allow sandbox network access"
 msgstr "Permitir acceso a la red del sandbox"
-
-msgid "Allow Minecraft to connect to the network inside the sandbox."
-msgstr "Permitir que Minecraft se conecte a la red dentro del sandbox."

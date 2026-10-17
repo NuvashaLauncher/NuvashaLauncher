@@ -601,14 +601,11 @@ msgstr "删除依赖项会删除依赖它的模组"
 msgid "A dependent mod cannot be deleted"
 msgstr "无法删除依赖的模组"
 
-msgid "Enable game sandbox"
-msgstr "Enable game sandbox"
+msgid "Sandbox"
+msgstr "沙盒"
 
-msgid "Run Minecraft inside bubblewrap."
-msgstr "Run Minecraft inside bubblewrap."
+msgid "Enable sandbox"
+msgstr "启用沙盒"
 
 msgid "Allow sandbox network access"
 msgstr "Allow sandbox network access"
-
-msgid "Allow Minecraft to connect to the network inside the sandbox."
-msgstr "Allow Minecraft to connect to the network inside the sandbox."

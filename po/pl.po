@@ -609,14 +609,11 @@ msgstr "Usunięcie zależności usuwa mod, który od niej zależał"
 msgid "A dependent mod cannot be deleted"
 msgstr "Nie można usunąć zależnego moda"
 
-msgid "Enable game sandbox"
-msgstr "Enable game sandbox"
+msgid "Sandbox"
+msgstr "Piaskownica"
 
-msgid "Run Minecraft inside bubblewrap."
-msgstr "Run Minecraft inside bubblewrap."
+msgid "Enable sandbox"
+msgstr "Włącz piaskownicę"
 
 msgid "Allow sandbox network access"
 msgstr "Allow sandbox network access"
-
-msgid "Allow Minecraft to connect to the network inside the sandbox."
-msgstr "Allow Minecraft to connect to the network inside the sandbox."
