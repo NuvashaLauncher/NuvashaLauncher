@@ -5,6 +5,9 @@
 #include "aml-sandbox.h"
 #include "aml-sandbox-display.h"
 #include "aml-sandbox-mounts.h"
+#include "aml-open-broker.h"
+
+#include <unistd.h>
 
 
 static void
@@ -79,6 +82,9 @@ aml_sandbox_wrap_arguments (GPtrArray               *command,
 {
   g_autoptr (GPtrArray) arguments = NULL;
   g_autofree char *bwrap = NULL;
+  g_autofree char *self_executable = NULL;
+  const char *broker = NULL;
+  g_autoptr (GError) broker_error = NULL;
 
   g_return_val_if_fail (command != NULL && command->len > 0, NULL);
   g_return_val_if_fail (resolved != NULL, NULL);
@@ -112,6 +118,25 @@ aml_sandbox_wrap_arguments (GPtrArray               *command,
   aml_sandbox_add_game_mounts (arguments, resolved, java_executable,
                                game_directory);
   aml_sandbox_add_display_mounts (arguments);
+  broker = aml_open_broker_start (game_directory, &broker_error);
+  if (broker == NULL)
+    {
+      g_propagate_error (error, g_steal_pointer (&broker_error));
+      return NULL;
+    }
+
+  self_executable = g_file_read_link ("/proc/self/exe", NULL);
+  if (self_executable != NULL)
+    {
+      /* Most mods use xdg-open. Replace only that entry point with AML's
+       * one-purpose client; no shell or arbitrary executable is exposed. */
+      add_pair (arguments, "--ro-bind", self_executable);
+      add (arguments, "/usr/bin/xdg-open");
+    }
+  add (arguments, "--bind");
+  add (arguments, broker);
+  add (arguments, broker);
+  add_environment (arguments, "AML_OPEN_BROKER_SOCKET", broker);
   unset_environment (arguments, "DBUS_SESSION_BUS_ADDRESS");
   unset_environment (arguments, "DBUS_SYSTEM_BUS_ADDRESS");
   add_environment (arguments, "HOME", game_directory);
