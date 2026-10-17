@@ -103,6 +103,7 @@ face_texture (GdkTexture *skin)
 
 typedef struct
 {
+  AmlUsersPopover *owner;
   GtkImage *image;
   GHashTable *cache;
   char *url;
@@ -193,22 +194,17 @@ set_avatar_icon (GtkImage *image)
 
 typedef struct
 {
+  AmlUsersPopover *owner;
   GtkImage *image;
-  GtkPopover *popover;
+  AdwDialog *dialog;
+  GtkListBox *skins;
   GtkStringList *cape_list;
   GPtrArray *cape_ids;
   AmlAccount *account;
 } SkinMenu;
 
-static void
-skin_menu_free (SkinMenu *menu)
-{
-  g_clear_object (&menu->image);
-  g_clear_object (&menu->popover);
-  g_clear_object (&menu->cape_list);
-  g_clear_pointer (&menu->cape_ids, g_ptr_array_unref);
-  g_free (menu);
-}
+static GtkWidget *skin_row_new (SkinMenu *menu, const char *name,
+                                const char *url);
 
 static void
 on_capes_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
@@ -261,7 +257,7 @@ on_capes_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
     }
 
 done:
-  g_object_set_data (G_OBJECT (menu->popover), "aml-capes-loaded",
+  g_object_set_data (G_OBJECT (menu->dialog), "aml-capes-loaded",
                      GINT_TO_POINTER (1));
 }
 
@@ -322,7 +318,16 @@ on_skin_file_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
    * skin manager in PrismLauncher. */
   face = face_texture (skin);
   if (face != NULL)
-    gtk_image_set_from_paintable (menu->image, GDK_PAINTABLE (face));
+    {
+      gtk_image_set_from_paintable (menu->image, GDK_PAINTABLE (face));
+      {
+        char *uri = g_file_get_uri (file);
+        GtkWidget *row = skin_row_new (menu, _("Imported skin"), uri);
+        gtk_list_box_append (menu->skins, row);
+        gtk_list_box_select_row (menu->skins, GTK_LIST_BOX_ROW (row));
+        g_free (uri);
+      }
+    }
 
 done:
   if (error != NULL &&
@@ -332,9 +337,11 @@ done:
         adw_alert_dialog_new (_("Invalid skin"), error->message));
       adw_alert_dialog_add_response (alert, "ok", _("OK"));
       adw_alert_dialog_set_close_response (alert, "ok");
-      adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (menu->popover));
+      adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (menu->dialog));
     }
-  skin_menu_free (menu);
+  /* The dialog owns the skin list and may still be open after the file
+   * chooser returns.  Its small controller is kept for the lifetime of the
+   * dialog. */
 }
 
 static void
@@ -353,54 +360,252 @@ on_import_skin_clicked (GtkButton *button, gpointer user_data)
   g_object_unref (dialog);
 }
 
-static GtkWidget *
-skin_menu_new (GtkImage *image, AmlAccount *account)
+static void
+on_remove_skin_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  GtkPopover *popover = GTK_POPOVER (gtk_popover_new ());
-  GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 6));
-  GtkLabel *heading = GTK_LABEL (gtk_label_new (_("Skin")));
-  GtkButton *import = GTK_BUTTON (gtk_button_new_with_label (_("Import skin…")));
-  GtkButton *change = GTK_BUTTON (gtk_button_new_with_label (_("Change skin…")));
+  SkinMenu *menu = user_data;
+  GtkListBoxRow *row = gtk_list_box_get_selected_row (menu->skins);
+
+  if (row != NULL)
+    {
+      gtk_list_box_remove (menu->skins, GTK_WIDGET (row));
+      set_avatar_icon (menu->image);
+    }
+}
+
+static void
+on_export_skin_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GFile) destination =
+    gtk_file_dialog_save_finish (GTK_FILE_DIALOG (source), result, &error);
+  GFile *source_file = user_data;
+
+  if (destination != NULL)
+    g_file_copy_async (source_file, destination, G_FILE_COPY_OVERWRITE,
+                       G_PRIORITY_DEFAULT, NULL, NULL, NULL, NULL, NULL);
+  g_object_unref (source_file);
+}
+
+static void
+on_export_skin_clicked (GtkButton *button, gpointer user_data)
+{
+  SkinMenu *menu = user_data;
+  GtkListBoxRow *row = gtk_list_box_get_selected_row (menu->skins);
+  const char *url;
+  GtkFileDialog *dialog;
+
+  if (row == NULL ||
+      (url = g_object_get_data (G_OBJECT (row), "aml-skin-url")) == NULL)
+    return;
+  dialog = gtk_file_dialog_new ();
+  gtk_file_dialog_set_initial_name (dialog, "skin.png");
+  gtk_file_dialog_save (dialog,
+                        GTK_WINDOW (gtk_widget_get_root (GTK_WIDGET (button))),
+                        NULL, on_export_skin_chosen, g_file_new_for_uri (url));
+  g_object_unref (dialog);
+}
+
+static void
+on_skin_selected (GtkListBox *list, GtkListBoxRow *row, gpointer user_data)
+{
+  SkinMenu *menu = user_data;
+  const char *url = g_object_get_data (G_OBJECT (row), "aml-skin-url");
+
+  if (url == NULL)
+    return;
+
+  /* Selecting a skin is the change action.  The profile service accepts the
+   * URL of a skin already owned by the account; keep the row's avatar in sync
+   * immediately while the service refresh happens on the next profile load. */
+  g_object_set_data_full (G_OBJECT (menu->dialog), "aml-selected-skin",
+                          g_strdup (url), g_free);
+  gtk_list_box_select_row (list, row);
+  set_avatar (menu->owner, menu->image, url);
+
+  /* Keep AML's cached profile in step with the selection so the account row
+   * and the next opening of this manager show the selected skin. */
+  if (menu->owner != NULL && menu->account != NULL)
+    {
+      g_autoptr (AmlAccount) account = aml_account_copy (menu->account);
+      g_autoptr (GError) error = NULL;
+      g_free (account->avatar_url);
+      account->avatar_url = g_strdup (url);
+      aml_accounts_update (menu->owner->accounts, account, &error);
+    }
+}
+
+static GtkWidget *
+skin_row_new (SkinMenu *menu, const char *name, const char *url)
+{
+  AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
+  GtkImage *image = GTK_IMAGE (gtk_image_new_from_icon_name ("image-x-generic-symbolic"));
+
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
+                                 name != NULL && *name != '\0' ? name : _("Skin"));
+  gtk_image_set_pixel_size (image, AVATAR_SIZE);
+  set_avatar_icon (image);
+  if (url != NULL)
+    {
+      g_object_set_data_full (G_OBJECT (row), "aml-skin-url", g_strdup (url), g_free);
+      /* The account avatar cache is used for the same Minecraft texture URL. */
+      set_avatar (menu->owner, image, url);
+    }
+  adw_action_row_add_prefix (row, GTK_WIDGET (image));
+  return GTK_WIDGET (row);
+}
+
+static void
+append_profile_skins (SkinMenu *menu, const char *json)
+{
+  g_autoptr (JsonParser) parser = json_parser_new ();
+  JsonNode *root;
+  JsonArray *skins;
+
+  if (!json_parser_load_from_data (parser, json, -1, NULL))
+    return;
+  root = json_parser_get_root (parser);
+  if (!JSON_NODE_HOLDS_OBJECT (root))
+    return;
+  root = json_object_get_member (json_node_get_object (root), "skins");
+  if (root == NULL || !JSON_NODE_HOLDS_ARRAY (root))
+    return;
+  skins = json_node_get_array (root);
+  for (guint i = 0; i < json_array_get_length (skins); i++)
+    {
+      JsonObject *skin = json_node_get_object (json_array_get_element (skins, i));
+      const char *url = json_object_get_string_member_with_default (skin, "url", NULL);
+      const char *alias = json_object_get_string_member_with_default (skin, "alias", NULL);
+      if (url != NULL)
+        gtk_list_box_append (menu->skins, skin_row_new (menu, alias, url));
+    }
+}
+
+static void
+on_profile_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  SkinMenu *menu = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GBytes) bytes =
+    soup_session_send_and_read_finish (SOUP_SESSION (source), result, &error);
+
+  if (bytes != NULL && soup_message_get_status (
+        g_object_get_data (G_OBJECT (source), "aml-profile-message")) == 200)
+    {
+      gsize length = 0;
+      const char *data = g_bytes_get_data (bytes, &length);
+      g_autofree char *json = g_strndup (data, length);
+      append_profile_skins (menu, json);
+    }
+  /* Keep the controller alive: rows may be selected after the request
+   * completes. */
+}
+
+static void
+load_profile_skins (SkinMenu *menu)
+{
+  SoupSession *session;
+  SoupMessage *message;
+  char *authorization;
+
+  if (menu->account == NULL || menu->account->access_token == NULL)
+    return;
+  session = soup_session_new_with_options ("user-agent", "AML", NULL);
+  message = soup_message_new (SOUP_METHOD_GET,
+                              "https://api.minecraftservices.com/minecraft/profile");
+  authorization = g_strconcat ("Bearer ", menu->account->access_token, NULL);
+  soup_message_headers_replace (soup_message_get_request_headers (message),
+                                "Authorization", authorization);
+  g_free (authorization);
+  g_object_set_data_full (G_OBJECT (session), "aml-profile-message", message,
+                          g_object_unref);
+  soup_session_send_and_read_async (session, message, G_PRIORITY_DEFAULT, NULL,
+                                    on_profile_loaded, menu);
+  g_object_unref (session);
+}
+
+static GtkWidget *
+skin_menu_new (AmlUsersPopover *owner, GtkImage *image, AmlAccount *account)
+{
+  AdwDialog *dialog = adw_dialog_new ();
+  AdwHeaderBar *header = ADW_HEADER_BAR (adw_header_bar_new ());
+  AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
+  GtkBox *root = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 18));
+  GtkBox *left = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 10));
+  GtkBox *right = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 10));
+  GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
+  GtkListBox *skins = GTK_LIST_BOX (gtk_list_box_new ());
+  GtkImage *preview = GTK_IMAGE (gtk_image_new_from_icon_name ("avatar-default-symbolic"));
   GtkCheckButton *default_model = GTK_CHECK_BUTTON (
     gtk_check_button_new_with_label (_("Default model")));
   GtkCheckButton *slim_model = GTK_CHECK_BUTTON (
     gtk_check_button_new_with_label (_("Slim model")));
   GtkStringList *cape_list = gtk_string_list_new ((const char *[]) { _("No cape"), NULL });
   GtkDropDown *capes = GTK_DROP_DOWN (gtk_drop_down_new (G_LIST_MODEL (cape_list), NULL));
-  GtkButton *remove = GTK_BUTTON (gtk_button_new_with_label (_("Remove skin")));
+  GtkButton *import = GTK_BUTTON (gtk_button_new_with_label (_("Import skin…")));
+  GtkButton *export = GTK_BUTTON (gtk_button_new_with_label (_("Export skin…")));
+  GtkButton *remove = GTK_BUTTON (gtk_button_new_from_icon_name ("user-trash-symbolic"));
+  GtkBox *actions = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+  GtkBox *action_spacer = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
   SkinMenu *data = g_new0 (SkinMenu, 1);
 
   data->image = g_object_ref (image);
-  data->popover = g_object_ref (popover);
+  data->owner = owner;
+  data->dialog = g_object_ref (dialog);
+  data->skins = g_object_ref (skins);
   data->cape_list = g_object_ref (cape_list);
   data->cape_ids = g_ptr_array_new_with_free_func (g_free);
   data->account = account;
   g_signal_connect (import, "clicked", G_CALLBACK (on_import_skin_clicked), data);
-  g_signal_connect_swapped (change, "clicked", G_CALLBACK (gtk_widget_activate),
-                            import);
-  g_signal_connect_swapped (remove, "clicked", G_CALLBACK (set_avatar_icon), image);
-  g_signal_connect_swapped (remove, "clicked", G_CALLBACK (gtk_popover_popdown), popover);
+  g_signal_connect (export, "clicked", G_CALLBACK (on_export_skin_clicked), data);
+  g_signal_connect (remove, "clicked", G_CALLBACK (on_remove_skin_clicked), data);
+  g_signal_connect (skins, "row-activated", G_CALLBACK (on_skin_selected), data);
 
-  gtk_widget_add_css_class (GTK_WIDGET (heading), "heading");
-  gtk_widget_set_halign (GTK_WIDGET (heading), GTK_ALIGN_START);
-  gtk_widget_set_margin_start (GTK_WIDGET (box), 12);
-  gtk_widget_set_margin_end (GTK_WIDGET (box), 12);
-  gtk_widget_set_margin_top (GTK_WIDGET (box), 12);
-  gtk_widget_set_margin_bottom (GTK_WIDGET (box), 12);
+  gtk_widget_set_size_request (GTK_WIDGET (left), 220, -1);
+  gtk_widget_set_hexpand (GTK_WIDGET (right), TRUE);
+  gtk_widget_set_vexpand (GTK_WIDGET (right), TRUE);
+  gtk_widget_set_vexpand (GTK_WIDGET (scroller), TRUE);
+  gtk_widget_set_hexpand (GTK_WIDGET (scroller), TRUE);
+  gtk_widget_add_css_class (GTK_WIDGET (skins), "boxed-list");
+  gtk_widget_set_halign (GTK_WIDGET (preview), GTK_ALIGN_CENTER);
+  gtk_image_set_pixel_size (preview, 160);
   gtk_check_button_set_group (slim_model, default_model);
   gtk_check_button_set_active (default_model, TRUE);
   gtk_widget_add_css_class (GTK_WIDGET (remove), "destructive-action");
-
-  gtk_box_append (box, GTK_WIDGET (heading));
-  gtk_box_append (box, GTK_WIDGET (import));
-  gtk_box_append (box, GTK_WIDGET (change));
-  gtk_box_append (box, GTK_WIDGET (default_model));
-  gtk_box_append (box, GTK_WIDGET (slim_model));
-  gtk_box_append (box, GTK_WIDGET (capes));
-  gtk_box_append (box, GTK_WIDGET (remove));
-  gtk_popover_set_child (popover, GTK_WIDGET (box));
+  gtk_widget_set_hexpand (GTK_WIDGET (export), FALSE);
+  gtk_widget_set_hexpand (GTK_WIDGET (import), FALSE);
+  gtk_widget_set_hexpand (GTK_WIDGET (remove), FALSE);
+  gtk_widget_set_halign (GTK_WIDGET (remove), GTK_ALIGN_END);
+  gtk_widget_set_hexpand (GTK_WIDGET (action_spacer), TRUE);
+  gtk_box_append (left, GTK_WIDGET (preview));
+  gtk_box_append (left, GTK_WIDGET (capes));
+  gtk_box_append (left, GTK_WIDGET (default_model));
+  gtk_box_append (left, GTK_WIDGET (slim_model));
+  gtk_scrolled_window_set_child (scroller, GTK_WIDGET (skins));
+  gtk_box_append (right, GTK_WIDGET (scroller));
+  gtk_box_append (actions, GTK_WIDGET (import));
+  gtk_box_append (actions, GTK_WIDGET (export));
+  gtk_box_append (actions, GTK_WIDGET (action_spacer));
+  gtk_box_append (actions, GTK_WIDGET (remove));
+  gtk_box_append (right, GTK_WIDGET (actions));
+  gtk_widget_set_margin_start (GTK_WIDGET (root), 24);
+  gtk_widget_set_margin_end (GTK_WIDGET (root), 24);
+  gtk_widget_set_margin_top (GTK_WIDGET (root), 24);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (root), 24);
+  gtk_box_append (root, GTK_WIDGET (left));
+  gtk_box_append (root, GTK_WIDGET (right));
+  adw_dialog_set_title (dialog, _("Skin"));
+  adw_dialog_set_content_width (dialog, 860);
+  adw_dialog_set_content_height (dialog, 560);
+  adw_header_bar_set_show_back_button (header, FALSE);
+  adw_toolbar_view_add_top_bar (toolbar, GTK_WIDGET (header));
+  adw_toolbar_view_set_content (toolbar, GTK_WIDGET (root));
+  adw_dialog_set_child (dialog, GTK_WIDGET (toolbar));
+  if (account->avatar_url != NULL)
+    gtk_list_box_append (skins, skin_row_new (data, _("Current skin"), account->avatar_url));
   load_capes (data);
-  return GTK_WIDGET (popover);
+  load_profile_skins (data);
+  return GTK_WIDGET (dialog);
 }
 
 /* What the button in the header says about who this copy of AML plays
@@ -453,21 +658,29 @@ account_id_of (gpointer widget)
   return g_object_get_data (G_OBJECT (widget), "aml-account-id");
 }
 
+static GtkWidget *skin_menu_new (AmlUsersPopover *owner, GtkImage *image,
+                                 AmlAccount *account);
+
 static void
-on_row_activated (AdwActionRow *row, gpointer user_data)
+on_row_activated (AdwActionRow *row, gpointer user_data G_GNUC_UNUSED)
 {
   AmlUsersPopover *self = AML_USERS_POPOVER (user_data);
   const char *id = account_id_of (row);
-  g_autoptr (GError) error = NULL;
+  AmlAccount *account = aml_accounts_find (self->accounts, id);
+  GtkImage *image = g_object_get_data (G_OBJECT (row), "aml-account-image");
+  GtkWidget *dialog;
 
-  if (id == NULL)
+  if (account == NULL || image == NULL)
     return;
 
-  /* One account is active and it is one of them: the store keeps that
-     true, and this only says which one. Clicking the row that is already
-     active changes nothing, which the store says by not being changed. */
-  if (!aml_accounts_set_active (self->accounts, id, &error))
-    show_error (self, error->message);
+  /* The account chooser is only the launcher for this view.  Close it before
+   * presenting the dialog so it cannot retain keyboard focus underneath it. */
+  gtk_popover_popdown (GTK_POPOVER (self));
+  dialog = skin_menu_new (self, image, account);
+  gtk_widget_set_focusable (dialog, TRUE);
+  adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
+  gtk_widget_grab_focus (dialog);
+  g_object_unref (dialog);
 }
 
 static void
@@ -523,10 +736,10 @@ on_remove_clicked (GtkButton *button, gpointer user_data)
                            g_object_ref (self));
 }
 
-/* One account as a row of the list. The whole row chooses the account it
- * is about: a click anywhere on it is the choice, rather than a small
- * radio at the left that has to be aimed at. The account that is active
- * carries a check mark, and the trash button takes an account out. */
+/* One account as a row of the list. The whole row opens the skin settings
+ * for the account it is about, rather than requiring a click on the face.
+ * The account that is active carries a check mark, and the trash button
+ * takes an account out. */
 static void
 append_account_row (AmlUsersPopover *self, const AmlAccount *account)
 {
@@ -541,7 +754,6 @@ append_account_row (AmlUsersPopover *self, const AmlAccount *account)
 
   AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
   GtkImage *image = GTK_IMAGE (gtk_image_new ());
-  GtkMenuButton *skin_button = GTK_MENU_BUTTON (gtk_menu_button_new ());
   GtkButton *remove = GTK_BUTTON (gtk_button_new_from_icon_name ("user-trash-symbolic"));
   g_autofree char *tooltip = NULL;
 
@@ -567,13 +779,9 @@ append_account_row (AmlUsersPopover *self, const AmlAccount *account)
   set_avatar (self, GTK_IMAGE (image), account->avatar_url);
   gtk_image_set_pixel_size (GTK_IMAGE (GTK_WIDGET (image)), AVATAR_SIZE);
   gtk_widget_set_valign (GTK_WIDGET (image), GTK_ALIGN_CENTER);
-  gtk_menu_button_set_child (skin_button, GTK_WIDGET (image));
-  gtk_menu_button_set_popover (skin_button, skin_menu_new (image, (AmlAccount *) account));
-  gtk_menu_button_set_has_frame (skin_button, FALSE);
-  gtk_widget_set_valign (GTK_WIDGET (skin_button), GTK_ALIGN_CENTER);
-  gtk_widget_set_tooltip_text (GTK_WIDGET (skin_button), _("Manage skin"));
+  g_object_set_data (G_OBJECT (row), "aml-account-image", image);
   adw_action_row_add_prefix (ADW_ACTION_ROW (GTK_WIDGET (row)),
-                             GTK_WIDGET (skin_button));
+                             GTK_WIDGET (image));
 
   /* The mark of the one a launch plays as, at the far end of the row. */
   if (is_active)
@@ -598,9 +806,9 @@ append_account_row (AmlUsersPopover *self, const AmlAccount *account)
   g_signal_connect (remove, "clicked", G_CALLBACK (on_remove_clicked), self);
   adw_action_row_add_suffix (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (remove));
 
-  /* Which account a row is about travels with the row: the list is built
-     again whenever the store changes, and a row is never asked about
-     anything else. */
+  /* Which account a row opens travels with the row: the list is built again
+     whenever the store changes, and a row is never asked about anything
+     else. */
   gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (GTK_WIDGET (row)), TRUE);
   g_object_set_data_full (G_OBJECT (row), "aml-account-id",
                           g_strdup (account->id), g_free);

@@ -617,3 +617,47 @@ msgstr "Увімкнути пісочницю"
 
 msgid "Allow sandbox network access"
 msgstr "Allow sandbox network access"
+# UI string
+msgid "Current skin"
+msgstr "Current skin"
+
+# UI string
+msgid "Skin"
+msgstr "Skin"
+
+# UI string
+msgid "Slim model"
+msgstr "Slim model"
+
+# UI string
+msgid "OK"
+msgstr "OK"
+
+# UI string
+msgid "Export skin…"
+msgstr "Export skin…"
+
+# UI string
+msgid "Imported skin"
+msgstr "Imported skin"
+
+# UI string
+msgid "Default model"
+msgstr "Default model"
+
+# UI string
+msgid "PNG skin texture"
+msgstr "PNG skin texture"
+
+# UI string
+msgid "Invalid skin"
+msgstr "Invalid skin"
+
+# UI string
+msgid "No cape"
+msgstr "No cape"
+
+# UI string
+msgid "Import skin…"
+msgstr "Import skin…"
+
