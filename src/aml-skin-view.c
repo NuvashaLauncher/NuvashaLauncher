@@ -80,12 +80,13 @@ compile_shader (GLenum type, const char *source)
 }
 
 static void
-upload_texture (GdkTexture *texture, GLuint *handle)
+upload_texture (GdkTexture *texture, GLuint *handle, gboolean skin)
 {
   int width, height;
   gsize stride;
   g_autofree guchar *source = NULL;
   g_autofree guchar *pixels = NULL;
+  g_autofree guchar *normalized = NULL;
 
   if (texture == NULL)
     {
@@ -99,8 +100,48 @@ upload_texture (GdkTexture *texture, GLuint *handle)
   height = gdk_texture_get_height (texture);
   stride = (gsize) width * 4;
   source = g_malloc (stride * height);
-  pixels = g_malloc (stride * height);
   gdk_texture_download (texture, source, stride);
+
+  /* Expand legacy 64x32 skins to the modern 64x64 atlas, matching
+   * PrismLauncher’s improveSkin() conversion. */
+  if (skin && width == 64 && height == 32)
+    {
+      static const int legacy_faces[][6] = {
+        { 4, 16, 16, 32, 4, 4 }, { 8, 16, 16, 32, 4, 4 },
+        { 0, 20, 24, 32, 4, 12 }, { 4, 20, 16, 32, 4, 12 },
+        { 8, 20, 8, 32, 4, 12 }, { 12, 20, 16, 32, 4, 12 },
+        { 44, 16, -8, 32, 4, 4 }, { 48, 16, -8, 32, 4, 4 },
+        { 40, 20, 0, 32, 4, 12 }, { 44, 20, -8, 32, 4, 12 },
+        { 48, 20, -16, 32, 4, 12 }, { 52, 20, -8, 32, 4, 12 }
+      };
+      gsize old_stride = stride;
+
+      normalized = g_malloc0 (64 * 64 * 4);
+      for (int y = 0; y < 32; y++)
+        memcpy (normalized + (gsize) y * 64 * 4,
+                source + (gsize) y * old_stride, 64 * 4);
+
+      for (guint i = 0; i < G_N_ELEMENTS (legacy_faces); i++)
+        {
+          int sx = legacy_faces[i][0], sy = legacy_faces[i][1];
+          int dx = sx + legacy_faces[i][2], dy = sy + legacy_faces[i][3];
+          int rw = legacy_faces[i][4], rh = legacy_faces[i][5];
+
+          for (int y = 0; y < rh; y++)
+            for (int x = 0; x < rw; x++)
+              memcpy (normalized + (gsize) (dy + y) * 64 * 4 + (gsize) (dx + x) * 4,
+                      source + (gsize) (sy + y) * old_stride +
+                      (gsize) (sx + rw - 1 - x) * 4, 4);
+        }
+
+      g_free (source);
+      source = g_steal_pointer (&normalized);
+      width = height = 64;
+      stride = 64 * 4;
+    }
+
+  /* Allocate this only after legacy skins have been expanded. */
+  pixels = g_malloc (stride * height);
 
   /* PrismLauncher normalizes the alpha channel of skin files before giving
    * them to OpenGL.  A number of otherwise valid Minecraft skins have
@@ -261,7 +302,6 @@ draw_model (AmlSkinView *self)
 
   if (self->skin == NULL || self->skin_texture == 0 || self->program == 0)
     { g_array_unref (v); g_array_unref (cape_v); return; }
-  if (gdk_texture_get_height (self->skin) == 32) texture_height = 32;
   add_box (v, -4, 0, -4, 8, 8, 8, 0, 0, texture_height);
   add_box (v, -4, -12, -2, 8, 12, 4, 16, 16, texture_height);
   add_box (v, -3.9f, -24, -2, 4, 12, 4, 0, 16, texture_height);
@@ -381,8 +421,8 @@ on_realize (GtkGLArea *area, gpointer user_data G_GNUC_UNUSED)
   glGenBuffers (1, &self->vertex_buffer);
   if (major >= 3)
     glGenVertexArrays (1, &self->vertex_array);
-  upload_texture (self->skin, &self->skin_texture);
-  upload_texture (self->cape, &self->cape_texture);
+  upload_texture (self->skin, &self->skin_texture, TRUE);
+  upload_texture (self->cape, &self->cape_texture, FALSE);
 }
 
 static void
@@ -475,7 +515,7 @@ void
 aml_skin_view_set_skin (AmlSkinView *self, GdkTexture *texture)
 {
   g_set_object (&self->skin, texture);
-  if (self->ready) { gtk_gl_area_make_current (GTK_GL_AREA (self)); upload_texture (texture, &self->skin_texture); }
+  if (self->ready) { gtk_gl_area_make_current (GTK_GL_AREA (self)); upload_texture (texture, &self->skin_texture, TRUE); }
   gtk_widget_queue_draw (GTK_WIDGET (self));
 }
 
@@ -483,7 +523,7 @@ void
 aml_skin_view_set_cape (AmlSkinView *self, GdkTexture *texture)
 {
   g_set_object (&self->cape, texture);
-  if (self->ready) { gtk_gl_area_make_current (GTK_GL_AREA (self)); upload_texture (texture, &self->cape_texture); }
+  if (self->ready) { gtk_gl_area_make_current (GTK_GL_AREA (self)); upload_texture (texture, &self->cape_texture, FALSE); }
   gtk_widget_queue_draw (GTK_WIDGET (self));
 }
 
