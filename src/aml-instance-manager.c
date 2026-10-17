@@ -22,6 +22,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+static void assign_default_instance_icon (AmlInstance *instance,
+                                          const char *directory);
+
+
 /* Layout version of instances.json. */
 #define INSTANCES_FORMAT_VERSION 1
 
@@ -369,6 +373,24 @@ aml_instance_manager_default_directory (AmlInstanceManager *self,
 
   unique = unique_instance_name (self, normalized);
   return default_instance_directory (self, unique);
+}
+
+static void
+assign_default_instance_icon (AmlInstance *instance, const char *directory)
+{
+  g_autofree char *source_path =
+    g_build_filename (AML_DATA_DIR, "pack.png", NULL);
+  if (!g_file_test (source_path, G_FILE_TEST_IS_REGULAR))
+    {
+      g_clear_pointer (&source_path, g_free);
+      source_path = g_build_filename (AML_SOURCE_DATA_DIR, "pack.png", NULL);
+    }
+  g_autofree char *target_path = g_build_filename (directory, "icon.png", NULL);
+  g_autoptr (GFile) source = g_file_new_for_path (source_path);
+  g_autoptr (GFile) target = g_file_new_for_path (target_path);
+  if (g_file_test (source_path, G_FILE_TEST_IS_REGULAR) &&
+      aml_fs_copy_file (source, target, G_FILE_COPY_OVERWRITE, NULL, NULL))
+    aml_instance_set_string (instance, "icon", target_path, NULL);
 }
 
 AmlInstance *
@@ -738,6 +760,7 @@ aml_instance_manager_create (AmlInstanceManager *self,
       return NULL;
     }
 
+  assign_default_instance_icon (instance, path);
   g_list_store_append (self->instances, instance);
 
   if (!aml_instance_manager_save (self, error))

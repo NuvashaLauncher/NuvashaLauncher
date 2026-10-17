@@ -619,7 +619,7 @@ msgstr "Skin"
 
 # UI string
 msgid "Slim model"
-msgstr "Slim model"
+msgstr "纤细模型"
 
 # UI string
 msgid "OK"
@@ -627,7 +627,7 @@ msgstr "OK"
 
 # UI string
 msgid "Export skin…"
-msgstr "Export skin…"
+msgstr "导出皮肤…"
 
 # UI string
 msgid "Imported skin"
@@ -635,7 +635,7 @@ msgstr "Imported skin"
 
 # UI string
 msgid "Default model"
-msgstr "Default model"
+msgstr "默认模型"
 
 # UI string
 msgid "PNG skin texture"
@@ -647,9 +647,22 @@ msgstr "Invalid skin"
 
 # UI string
 msgid "No cape"
-msgstr "No cape"
+msgstr "无披风"
 
 # UI string
 msgid "Import skin…"
-msgstr "Import skin…"
+msgstr "导入皮肤…"
+
+
+# UI string
+msgid "Open Skins Folder"
+msgstr ""
+
+# UI string
+msgid "Delete skin?"
+msgstr "删除皮肤？"
+
+# UI string
+msgid "This skin will be removed from the skin library."
+msgstr "此皮肤将从皮肤库中移除。"
 

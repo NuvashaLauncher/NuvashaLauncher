@@ -26,7 +26,7 @@ msgid "Update All"
 msgstr "Обновить всё"
 
 msgid "Open Folder"
-msgstr "Открыть каталог"
+msgstr "Открыть папку"
 
 msgid "Nothing installed yet"
 msgstr "Ничего не установлено…"
@@ -627,7 +627,7 @@ msgstr "Skin"
 
 # UI string
 msgid "Slim model"
-msgstr "Slim model"
+msgstr "Тонкая модель"
 
 # UI string
 msgid "OK"
@@ -635,7 +635,7 @@ msgstr "OK"
 
 # UI string
 msgid "Export skin…"
-msgstr "Export skin…"
+msgstr "Экспортировать скин…"
 
 # UI string
 msgid "Imported skin"
@@ -643,7 +643,7 @@ msgstr "Imported skin"
 
 # UI string
 msgid "Default model"
-msgstr "Default model"
+msgstr "Стандартная модель"
 
 # UI string
 msgid "PNG skin texture"
@@ -655,9 +655,22 @@ msgstr "Invalid skin"
 
 # UI string
 msgid "No cape"
-msgstr "No cape"
+msgstr "Без плаща"
 
 # UI string
 msgid "Import skin…"
-msgstr "Import skin…"
+msgstr "Импортировать скин…"
+
+
+# UI string
+msgid "Open Skins Folder"
+msgstr ""
+
+# UI string
+msgid "Delete skin?"
+msgstr "Удалить скин?"
+
+# UI string
+msgid "This skin will be removed from the skin library."
+msgstr "Этот скин будет удалён из библиотеки."
 

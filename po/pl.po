@@ -627,7 +627,7 @@ msgstr "Skin"
 
 # UI string
 msgid "Slim model"
-msgstr "Slim model"
+msgstr "Model smukły"
 
 # UI string
 msgid "OK"
@@ -635,7 +635,7 @@ msgstr "OK"
 
 # UI string
 msgid "Export skin…"
-msgstr "Export skin…"
+msgstr "Eksportuj skórkę…"
 
 # UI string
 msgid "Imported skin"
@@ -643,7 +643,7 @@ msgstr "Imported skin"
 
 # UI string
 msgid "Default model"
-msgstr "Default model"
+msgstr "Model domyślny"
 
 # UI string
 msgid "PNG skin texture"
@@ -655,9 +655,22 @@ msgstr "Invalid skin"
 
 # UI string
 msgid "No cape"
-msgstr "No cape"
+msgstr "Bez peleryny"
 
 # UI string
 msgid "Import skin…"
-msgstr "Import skin…"
+msgstr "Importuj skórkę…"
+
+
+# UI string
+msgid "Open Skins Folder"
+msgstr ""
+
+# UI string
+msgid "Delete skin?"
+msgstr "Usunąć skórkę?"
+
+# UI string
+msgid "This skin will be removed from the skin library."
+msgstr "Ta skórka zostanie usunięta z biblioteki."
 
