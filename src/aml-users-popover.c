@@ -7,6 +7,7 @@
 
 #include "aml-offline-account-dialog.h"
 #include "aml-sign-in-dialog.h"
+#include "aml-skin-view.h"
 
 #include <libsoup/soup.h>
 
@@ -196,15 +197,73 @@ typedef struct
 {
   AmlUsersPopover *owner;
   GtkImage *image;
+  AmlSkinView *view;
   AdwDialog *dialog;
   GtkListBox *skins;
+  GtkDropDown *capes;
   GtkStringList *cape_list;
   GPtrArray *cape_ids;
+  GPtrArray *cape_urls;
   AmlAccount *account;
 } SkinMenu;
 
 static GtkWidget *skin_row_new (SkinMenu *menu, const char *name,
                                 const char *url);
+
+typedef struct
+{
+  AmlSkinView *view;
+  gboolean cape;
+} SkinTextureLoad;
+
+static void
+skin_texture_load_free (SkinTextureLoad *load)
+{
+  g_clear_object (&load->view);
+  g_free (load);
+}
+
+static void
+on_view_texture_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  SkinTextureLoad *load = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GBytes) bytes =
+    g_file_load_bytes_finish (G_FILE (source), result, NULL, &error);
+  g_autoptr (GdkTexture) texture = NULL;
+
+  if (bytes != NULL)
+    texture = gdk_texture_new_from_bytes (bytes, &error);
+  if (texture == NULL && error != NULL)
+    g_warning ("Could not load skin preview texture: %s", error->message);
+  if (texture != NULL)
+    {
+      if (load->cape)
+        aml_skin_view_set_cape (load->view, texture);
+      else
+        aml_skin_view_set_skin (load->view, texture);
+    }
+  skin_texture_load_free (load);
+}
+
+static void
+load_view_texture (AmlSkinView *view, const char *url, gboolean cape)
+{
+  g_autoptr (GFile) file = NULL;
+  SkinTextureLoad *load;
+
+  if (url == NULL || *url == '\0')
+    {
+      if (cape)
+        aml_skin_view_set_cape (view, NULL);
+      return;
+    }
+  file = g_file_new_for_uri (url);
+  load = g_new0 (SkinTextureLoad, 1);
+  load->view = g_object_ref (view);
+  load->cape = cape;
+  g_file_load_bytes_async (file, NULL, on_view_texture_loaded, load);
+}
 
 static void
 on_capes_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
@@ -243,22 +302,54 @@ on_capes_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
       JsonObject *object;
       const char *id;
       const char *alias;
+      const char *url;
+      const char *state;
 
       if (!JSON_NODE_HOLDS_OBJECT (item))
         continue;
       object = json_node_get_object (item);
       id = json_object_get_string_member_with_default (object, "id", NULL);
       alias = json_object_get_string_member_with_default (object, "alias", id);
+      url = json_object_get_string_member_with_default (object, "url", NULL);
+      state = json_object_get_string_member_with_default (object, "state", NULL);
       if (id == NULL || *id == '\0')
         continue;
       g_ptr_array_add (menu->cape_ids, g_strdup (id));
+      g_ptr_array_add (menu->cape_urls, g_strdup (url != NULL ? url : ""));
       gtk_string_list_append (menu->cape_list,
                               alias != NULL && *alias != '\0' ? alias : id);
+      if (state != NULL && g_str_equal (state, "ACTIVE"))
+        gtk_drop_down_set_selected (menu->capes, menu->cape_ids->len);
     }
 
 done:
   g_object_set_data (G_OBJECT (menu->dialog), "aml-capes-loaded",
                      GINT_TO_POINTER (1));
+}
+
+static void
+on_cape_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
+                  gpointer user_data)
+{
+  SkinMenu *menu = user_data;
+  guint selected = gtk_drop_down_get_selected (GTK_DROP_DOWN (object));
+
+  if (selected == 0 || selected - 1 >= menu->cape_urls->len)
+    {
+      aml_skin_view_set_cape (menu->view, NULL);
+      return;
+    }
+  load_view_texture (menu->view,
+                     g_ptr_array_index (menu->cape_urls, selected - 1), TRUE);
+}
+
+static void
+on_model_toggled (GtkCheckButton *button, gpointer user_data)
+{
+  SkinMenu *menu = user_data;
+  if (gtk_check_button_get_active (button))
+    aml_skin_view_set_slim (menu->view,
+                            g_object_get_data (G_OBJECT (button), "aml-slim") != NULL);
 }
 
 static void
@@ -325,6 +416,7 @@ on_skin_file_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
         GtkWidget *row = skin_row_new (menu, _("Imported skin"), uri);
         gtk_list_box_append (menu->skins, row);
         gtk_list_box_select_row (menu->skins, GTK_LIST_BOX_ROW (row));
+        load_view_texture (menu->view, uri, FALSE);
         g_free (uri);
       }
     }
@@ -422,6 +514,7 @@ on_skin_selected (GtkListBox *list, GtkListBoxRow *row, gpointer user_data)
                           g_strdup (url), g_free);
   gtk_list_box_select_row (list, row);
   set_avatar (menu->owner, menu->image, url);
+  load_view_texture (menu->view, url, FALSE);
 
   /* Keep AML's cached profile in step with the selection so the account row
    * and the next opening of this manager show the selected skin. */
@@ -535,7 +628,7 @@ skin_menu_new (AmlUsersPopover *owner, GtkImage *image, AmlAccount *account)
   GtkBox *right = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 10));
   GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
   GtkListBox *skins = GTK_LIST_BOX (gtk_list_box_new ());
-  GtkImage *preview = GTK_IMAGE (gtk_image_new_from_icon_name ("avatar-default-symbolic"));
+  AmlSkinView *preview = aml_skin_view_new ();
   GtkCheckButton *default_model = GTK_CHECK_BUTTON (
     gtk_check_button_new_with_label (_("Default model")));
   GtkCheckButton *slim_model = GTK_CHECK_BUTTON (
@@ -550,16 +643,22 @@ skin_menu_new (AmlUsersPopover *owner, GtkImage *image, AmlAccount *account)
   SkinMenu *data = g_new0 (SkinMenu, 1);
 
   data->image = g_object_ref (image);
+  data->view = g_object_ref (preview);
   data->owner = owner;
   data->dialog = g_object_ref (dialog);
   data->skins = g_object_ref (skins);
   data->cape_list = g_object_ref (cape_list);
   data->cape_ids = g_ptr_array_new_with_free_func (g_free);
+  data->cape_urls = g_ptr_array_new_with_free_func (g_free);
+  data->capes = capes;
   data->account = account;
+  g_object_set_data (G_OBJECT (slim_model), "aml-slim", GINT_TO_POINTER (1));
   g_signal_connect (import, "clicked", G_CALLBACK (on_import_skin_clicked), data);
   g_signal_connect (export, "clicked", G_CALLBACK (on_export_skin_clicked), data);
   g_signal_connect (remove, "clicked", G_CALLBACK (on_remove_skin_clicked), data);
   g_signal_connect (skins, "row-activated", G_CALLBACK (on_skin_selected), data);
+  g_signal_connect (default_model, "toggled", G_CALLBACK (on_model_toggled), data);
+  g_signal_connect (slim_model, "toggled", G_CALLBACK (on_model_toggled), data);
 
   gtk_widget_set_size_request (GTK_WIDGET (left), 220, -1);
   gtk_widget_set_hexpand (GTK_WIDGET (right), TRUE);
@@ -567,8 +666,9 @@ skin_menu_new (AmlUsersPopover *owner, GtkImage *image, AmlAccount *account)
   gtk_widget_set_vexpand (GTK_WIDGET (scroller), TRUE);
   gtk_widget_set_hexpand (GTK_WIDGET (scroller), TRUE);
   gtk_widget_add_css_class (GTK_WIDGET (skins), "boxed-list");
-  gtk_widget_set_halign (GTK_WIDGET (preview), GTK_ALIGN_CENTER);
-  gtk_image_set_pixel_size (preview, 160);
+  gtk_widget_set_halign (GTK_WIDGET (preview), GTK_ALIGN_FILL);
+  gtk_widget_set_vexpand (GTK_WIDGET (preview), TRUE);
+  gtk_widget_set_size_request (GTK_WIDGET (preview), 220, 300);
   gtk_check_button_set_group (slim_model, default_model);
   gtk_check_button_set_active (default_model, TRUE);
   gtk_widget_add_css_class (GTK_WIDGET (remove), "destructive-action");
@@ -602,7 +702,11 @@ skin_menu_new (AmlUsersPopover *owner, GtkImage *image, AmlAccount *account)
   adw_toolbar_view_set_content (toolbar, GTK_WIDGET (root));
   adw_dialog_set_child (dialog, GTK_WIDGET (toolbar));
   if (account->avatar_url != NULL)
-    gtk_list_box_append (skins, skin_row_new (data, _("Current skin"), account->avatar_url));
+    {
+      gtk_list_box_append (skins, skin_row_new (data, _("Current skin"), account->avatar_url));
+      load_view_texture (preview, account->avatar_url, FALSE);
+    }
+  g_signal_connect (capes, "notify::selected", G_CALLBACK (on_cape_selected), data);
   load_capes (data);
   load_profile_skins (data);
   return GTK_WIDGET (dialog);

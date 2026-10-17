@@ -14,13 +14,13 @@ VERSION    := $(strip $(shell cat VERSION))
 # gio-unix-2.0 is the Linux part of GIO itself (no display involved) and
 # provides the output stream that writes a download into its temporary
 # file descriptor.
-PKGS := gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive gio-unix-2.0
+PKGS := gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive gio-unix-2.0 epoxy
 
 # pkg-config prints -I paths; use -isystem so warnings are only about our
 # own code and not about the GTK/GLib headers themselves.
 PKG_CFLAGS := $(shell $(PKG_CONFIG) --cflags $(PKGS) | \
 	sed -e 's/ -I/ -isystem /g' -e 's/^-I/-isystem /')
-PKG_LIBS := $(shell $(PKG_CONFIG) --libs $(PKGS))
+PKG_LIBS := $(shell $(PKG_CONFIG) --libs $(PKGS)) -lm
 CPPFLAGS += -DAML_LOCALE_DIR=\"$(PREFIX)/share/locale\"
 CPPFLAGS += -DAML_VERSION=\"$(VERSION)\"
 LOCALES := es_AR es_ES pt_BR fr de it ja ko zh_CN ru pl uk tr nl
