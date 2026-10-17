@@ -248,22 +248,23 @@ add_face (GArray *vertices, float x, float y, float z, float w, float h, float d
 
 static void
 add_box (GArray *v, float x, float y, float z, float w, float h, float d,
-         int tx, int ty, int texture_height)
+         int tx, int ty, int texture_w, int texture_h, int texture_d,
+         int texture_height)
 {
   /* Minecraft's atlas lays a cuboid out as right/front/left/back on the
    * side strip, with top and bottom immediately above it. */
-  add_face (v, x, y, z, w, h, d, 0, tx + (int)d, ty + (int)d,
-            (int)w, (int)h, texture_height);
-  add_face (v, x, y, z, w, h, d, 1, tx + (int)d + (int)w, ty + (int)d,
-            (int)d, (int)h, texture_height);
-  add_face (v, x, y, z, w, h, d, 2, tx + 2 * (int)d + (int)w, ty + (int)d,
-            (int)w, (int)h, texture_height);
-  add_face (v, x, y, z, w, h, d, 3, tx, ty + (int)d,
-            (int)d, (int)h, texture_height);
-  add_face (v, x, y, z, w, h, d, 4, tx + (int)d + (int)w, ty,
-            (int)w, (int)d, texture_height);
-  add_face (v, x, y, z, w, h, d, 5, tx + (int)d, ty,
-            (int)w, (int)d, texture_height);
+  add_face (v, x, y, z, w, h, d, 0, tx + texture_d, ty + texture_d,
+            texture_w, texture_h, texture_height);
+  add_face (v, x, y, z, w, h, d, 1, tx + texture_d + texture_w, ty + texture_d,
+            texture_d, texture_h, texture_height);
+  add_face (v, x, y, z, w, h, d, 2, tx + 2 * texture_d + texture_w, ty + texture_d,
+            texture_w, texture_h, texture_height);
+  add_face (v, x, y, z, w, h, d, 3, tx, ty + texture_d,
+            texture_d, texture_h, texture_height);
+  add_face (v, x, y, z, w, h, d, 4, tx + texture_d + texture_w, ty,
+            texture_w, texture_d, texture_height);
+  add_face (v, x, y, z, w, h, d, 5, tx + texture_d, ty,
+            texture_w, texture_d, texture_height);
 }
 
 static void
@@ -302,29 +303,29 @@ draw_model (AmlSkinView *self)
 
   if (self->skin == NULL || self->skin_texture == 0 || self->program == 0)
     { g_array_unref (v); g_array_unref (cape_v); return; }
-  add_box (v, -4, 0, -4, 8, 8, 8, 0, 0, texture_height);
-  add_box (v, -4, -12, -2, 8, 12, 4, 16, 16, texture_height);
-  add_box (v, -3.9f, -24, -2, 4, 12, 4, 0, 16, texture_height);
-  add_box (v, -.1f, -24, -2, 4, 12, 4, 16, 48, texture_height);
-  add_box (v, -4 - arm_width, -12, -2, arm_width, 12, 4, arm_x, 16, texture_height);
-  add_box (v, 4, -12, -2, arm_width, 12, 4, 32, 48, texture_height);
+  add_box (v, -4, 0, -4, 8, 8, 8, 0, 0, 8, 8, 8, texture_height);
+  add_box (v, -4, -12, -2, 8, 12, 4, 16, 16, 8, 12, 4, texture_height);
+  add_box (v, -3.9f, -24, -2, 4, 12, 4, 0, 16, 4, 12, 4, texture_height);
+  add_box (v, -.1f, -24, -2, 4, 12, 4, 16, 48, 4, 12, 4, texture_height);
+  add_box (v, -4 - arm_width, -12, -2, arm_width, 12, 4, arm_x, 16, arm_width, 12, 4, texture_height);
+  add_box (v, 4, -12, -2, arm_width, 12, 4, 32, 48, arm_width, 12, 4, texture_height);
   if (texture_height == 64)
     {
       /* The second layer is deliberately slightly larger: this is the hat,
        * jacket, sleeves and trousers layer of the Minecraft skin format. */
-      add_box (v, -4.5f, -.5f, -4.5f, 9, 9, 9, 32, 0, texture_height);
-      add_box (v, -4.25f, -12.25f, -2.25f, 8.5f, 12.5f, 4.5f, 16, 32, texture_height);
-      add_box (v, -4.15f, -24.25f, -2.25f, 4.5f, 12.5f, 4.5f, 0, 32, texture_height);
-      add_box (v, -.35f, -24.25f, -2.25f, 4.5f, 12.5f, 4.5f, 0, 48, texture_height);
+      add_box (v, -4.5f, -.5f, -4.5f, 9, 9, 9, 32, 0, 8, 8, 8, texture_height);
+      add_box (v, -4.25f, -12.25f, -2.25f, 8.5f, 12.5f, 4.5f, 16, 32, 8, 12, 4, texture_height);
+      add_box (v, -4.15f, -24.25f, -2.25f, 4.5f, 12.5f, 4.5f, 0, 32, 4, 12, 4, texture_height);
+      add_box (v, -.35f, -24.25f, -2.25f, 4.5f, 12.5f, 4.5f, 0, 48, 4, 12, 4, texture_height);
       add_box (v, -6 - (arm_width + .5f) / 2.f, -12.25f, -2.25f,
-               arm_width + .5f, 12.5f, 4.5f, 40, 32, texture_height);
+               arm_width + .5f, 12.5f, 4.5f, 40, 32, arm_width, 12, 4, texture_height);
       add_box (v, 6 - (arm_width + .5f) / 2.f, -12.25f, -2.25f,
-               arm_width + .5f, 12.5f, 4.5f, 48, 48, texture_height);
+               arm_width + .5f, 12.5f, 4.5f, 48, 48, arm_width, 12, 4, texture_height);
     }
   skin_count = v->len;
   if (self->cape_texture != 0)
     {
-      add_box (cape_v, -5, -16, 2, 10, 16, 1, 0, 0, 32);
+      add_box (cape_v, -5, -16, 2, 10, 16, 1, 0, 0, 10, 16, 1, 32);
       rotate_cape (cape_v);
     }
 
