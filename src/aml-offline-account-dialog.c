@@ -86,12 +86,6 @@ on_add_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 }
 
 static void
-on_cancel_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
-{
-  adw_dialog_close (ADW_DIALOG (user_data));
-}
-
-static void
 aml_offline_account_dialog_init (AmlOfflineAccountDialog *self)
 {
   adw_dialog_set_title (ADW_DIALOG (self), _("Add Offline Account"));
@@ -114,7 +108,7 @@ aml_offline_account_dialog_init (AmlOfflineAccountDialog *self)
   gtk_widget_set_visible (GTK_WIDGET (self->error_label), FALSE);
 
   GtkButton *cancel_button = GTK_BUTTON (gtk_button_new_with_label (_("Cancel")));
-  g_signal_connect (cancel_button, "clicked", G_CALLBACK (on_cancel_clicked),
+  g_signal_connect (cancel_button, "clicked", G_CALLBACK (aml_ui_cancel_dialog),
                     self);
 
   self->add_button = GTK_BUTTON (gtk_button_new_with_label (_("Add")));

@@ -718,11 +718,11 @@ global_cache_hash_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   if (digest != NULL &&
       g_ascii_strcasecmp (digest, request->expected_hash) == 0)
     {
-      g_autoptr (GFile) source =
+      g_autoptr (GFile) cache_file =
         g_file_new_for_path (request->global_cache_path);
       g_autoptr (GFile) destination = g_file_new_for_path (request->dest_path);
 
-      aml_fs_copy_async (source, destination, G_FILE_COPY_OVERWRITE,
+       aml_fs_copy_async (cache_file, destination, G_FILE_COPY_OVERWRITE,
                          G_PRIORITY_DEFAULT,
                          g_task_get_cancellable (request->task), NULL, NULL,
                          global_cache_copy_ready, request);

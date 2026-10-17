@@ -18,13 +18,6 @@
  * The pipeline
  * ---------------------------------------------------------- */
 
-/* What to say when nothing usable for Java was found. */
-static char *
-no_java_reason (void)
-{
-  return g_strdup (_("No compatible Java runtime was found."));
-}
-
 static void
 set_log_private_values (AmlLauncher *self, const AmlLaunchSession *session)
 {
@@ -66,7 +59,7 @@ choose_java (AmlLauncher *self, GPtrArray *javas, int required,
 
   if (java == NULL)
     {
-      g_autofree char *reason = no_java_reason ();
+      g_autofree char *reason = g_strdup (_("No compatible Java runtime was found."));
       launcher_failed (self, reason);
       return NULL;
     }

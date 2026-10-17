@@ -16,6 +16,7 @@ void aml_ui_show_toast (GtkWidget  *page,
 
 GtkWidget *aml_ui_loading_child (void);
 void aml_ui_clear_error_label (GtkLabel *label);
+void aml_ui_cancel_dialog (GtkButton *button, gpointer user_data);
 
 G_END_DECLS
 

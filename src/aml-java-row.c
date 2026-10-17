@@ -109,22 +109,9 @@ java_factory_setup (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
 }
 
 static void
-java_button_bind (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
-                  GtkListItem *item,
-                  gpointer user_data G_GNUC_UNUSED)
-{
-  GtkWidget *child = gtk_list_item_get_child (item);
-  gpointer value = gtk_list_item_get_item (item);
-
-  if (GTK_IS_STRING_OBJECT (value))
-    gtk_label_set_text (GTK_LABEL (child),
-                        gtk_string_object_get_string (value));
-}
-
-static void
-java_popup_bind (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
-                 GtkListItem *item,
-                 gpointer user_data G_GNUC_UNUSED)
+java_list_item_bind (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
+                     GtkListItem *item,
+                     gpointer user_data G_GNUC_UNUSED)
 {
   GtkWidget *child = gtk_list_item_get_child (item);
   gpointer value = gtk_list_item_get_item (item);
@@ -290,7 +277,7 @@ fill (AmlJavaRow *self)
        self->probed == NULL &&
        (position == GTK_INVALID_LIST_POSITION || position == 0))
     {
-      g_autofree char *wanted_real = realpath (self->wanted, NULL);
+      g_autofree char *wanted_path_real = realpath (self->wanted, NULL);
       gboolean found = FALSE;
 
       for (guint i = 0; self->javas != NULL && i < self->javas->len; i++)
@@ -299,7 +286,7 @@ fill (AmlJavaRow *self)
           g_autofree char *real = realpath (java->executable, NULL);
 
           if (g_strcmp0 (real != NULL ? real : java->executable,
-                         wanted_real != NULL ? wanted_real : self->wanted) == 0)
+                          wanted_path_real != NULL ? wanted_path_real : self->wanted) == 0)
             {
               found = TRUE;
               break;
@@ -773,11 +760,11 @@ aml_java_row_init (AmlJavaRow *self)
     g_signal_connect (button_factory, "setup",
                       G_CALLBACK (java_factory_setup), self);
     g_signal_connect (button_factory, "bind",
-                      G_CALLBACK (java_button_bind), self);
+                       G_CALLBACK (java_list_item_bind), self);
     g_signal_connect (popup_factory, "setup",
                       G_CALLBACK (java_factory_setup), self);
     g_signal_connect (popup_factory, "bind",
-                      G_CALLBACK (java_popup_bind), self);
+                       G_CALLBACK (java_list_item_bind), self);
     adw_combo_row_set_factory (ADW_COMBO_ROW (self),
                                GTK_LIST_ITEM_FACTORY (button_factory));
     adw_combo_row_set_list_factory (ADW_COMBO_ROW (self),

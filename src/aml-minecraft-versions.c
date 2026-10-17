@@ -322,9 +322,10 @@ load_file_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
 
   if (request->merged->inherits_from == NULL)
     {
-      AmlVersionDescription *result = g_steal_pointer (&request->merged);
+      AmlVersionDescription *merged_result =
+        g_steal_pointer (&request->merged);
 
-      aml_task_sequence_return_pointer (request->sequence, result,
+      aml_task_sequence_return_pointer (request->sequence, merged_result,
                                         g_object_unref);
       return;
     }

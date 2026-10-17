@@ -31,6 +31,12 @@ aml_ui_clear_error_label (GtkLabel *label)
 }
 
 void
+aml_ui_cancel_dialog (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  adw_dialog_close (ADW_DIALOG (user_data));
+}
+
+void
 aml_ui_show_toast (GtkWidget  *page,
                    GtkWidget  *overlay,
                    const char *message)
