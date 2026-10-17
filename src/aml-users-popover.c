@@ -8,6 +8,8 @@
 #include "aml-offline-account-dialog.h"
 #include "aml-sign-in-dialog.h"
 
+#include <libsoup/soup.h>
+
 /* How wide the list is: enough for a name and its kind to be read, and no
  * wider than the header the button of it sits in. */
 #define USERS_WIDTH 360
@@ -65,7 +67,8 @@ face_texture (GdkTexture *skin)
   g_autofree guchar *face = NULL;
 
   if (skin == NULL || gdk_texture_get_width (skin) != SKIN_SIZE ||
-      gdk_texture_get_height (skin) != SKIN_SIZE)
+      (gdk_texture_get_height (skin) != SKIN_SIZE &&
+       gdk_texture_get_height (skin) != SKIN_SIZE / 2))
     return NULL;
 
   skin_stride = (gsize) SKIN_SIZE * 4;
@@ -150,6 +153,218 @@ static void
 set_avatar_icon (GtkImage *image)
 {
   gtk_image_set_from_icon_name (image, "avatar-default-symbolic");
+}
+
+typedef struct
+{
+  GtkImage *image;
+  GtkPopover *popover;
+  GtkStringList *cape_list;
+  GPtrArray *cape_ids;
+  AmlAccount *account;
+} SkinMenu;
+
+static void
+skin_menu_free (SkinMenu *menu)
+{
+  g_clear_object (&menu->image);
+  g_clear_object (&menu->popover);
+  g_clear_object (&menu->cape_list);
+  g_clear_pointer (&menu->cape_ids, g_ptr_array_unref);
+  g_free (menu);
+}
+
+static void
+on_capes_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  SkinMenu *menu = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GBytes) bytes =
+    soup_session_send_and_read_finish (SOUP_SESSION (source), result, &error);
+  g_autoptr (JsonParser) parser = NULL;
+  JsonNode *root = NULL;
+  JsonArray *capes = NULL;
+
+  if (bytes == NULL ||
+      soup_message_get_status (g_object_get_data (G_OBJECT (source),
+                                                  "aml-cape-message")) != 200)
+    goto done;
+
+  parser = json_parser_new ();
+  if (!json_parser_load_from_data (parser, g_bytes_get_data (bytes, NULL),
+                                   (gssize) g_bytes_get_size (bytes), &error))
+    goto done;
+
+  root = json_parser_get_root (parser);
+  if (!JSON_NODE_HOLDS_OBJECT (root))
+    goto done;
+  {
+    JsonNode *node = json_object_get_member (json_node_get_object (root), "capes");
+    if (node == NULL || !JSON_NODE_HOLDS_ARRAY (node))
+      goto done;
+    capes = json_node_get_array (node);
+  }
+
+  for (guint i = 0; i < json_array_get_length (capes); i++)
+    {
+      JsonNode *item = json_array_get_element (capes, i);
+      JsonObject *object;
+      const char *id;
+      const char *alias;
+
+      if (!JSON_NODE_HOLDS_OBJECT (item))
+        continue;
+      object = json_node_get_object (item);
+      id = json_object_get_string_member_with_default (object, "id", NULL);
+      alias = json_object_get_string_member_with_default (object, "alias", id);
+      if (id == NULL || *id == '\0')
+        continue;
+      g_ptr_array_add (menu->cape_ids, g_strdup (id));
+      gtk_string_list_append (menu->cape_list,
+                              alias != NULL && *alias != '\0' ? alias : id);
+    }
+
+done:
+  g_object_set_data (G_OBJECT (menu->popover), "aml-capes-loaded",
+                     GINT_TO_POINTER (1));
+}
+
+static void
+load_capes (SkinMenu *menu)
+{
+  SoupSession *session;
+  SoupMessage *message;
+  const char *token;
+  char *authorization;
+
+  if (menu->account == NULL || menu->account->type != AML_ACCOUNT_MICROSOFT ||
+      menu->account->access_token == NULL ||
+      !aml_account_token_is_valid (menu->account, g_get_real_time () / 1000000))
+    return;
+
+  session = soup_session_new_with_options ("user-agent", "AML", NULL);
+  message = soup_message_new (SOUP_METHOD_GET,
+                              "https://api.minecraftservices.com/minecraft/profile");
+  token = menu->account->access_token;
+  authorization = g_strconcat ("Bearer ", token, NULL);
+  soup_message_headers_replace (soup_message_get_request_headers (message),
+                                "Authorization", authorization);
+  g_free (authorization);
+  g_object_set_data_full (G_OBJECT (session), "aml-cape-message", message,
+                          g_object_unref);
+  soup_session_send_and_read_async (session, message, G_PRIORITY_DEFAULT, NULL,
+                                    on_capes_loaded, menu);
+  g_object_unref (session);
+}
+
+static void
+on_skin_file_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  SkinMenu *menu = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GFile) file = NULL;
+  g_autoptr (GdkTexture) skin = NULL;
+  g_autoptr (GdkTexture) face = NULL;
+
+  file = gtk_file_dialog_open_finish (GTK_FILE_DIALOG (source), result, &error);
+  if (file == NULL)
+    goto done;
+
+  skin = gdk_texture_new_from_file (file, &error);
+  if (skin == NULL ||
+      (gdk_texture_get_width (skin) != 64 && gdk_texture_get_width (skin) != 64) ||
+      (gdk_texture_get_height (skin) != 32 && gdk_texture_get_height (skin) != 64))
+    {
+      g_clear_error (&error);
+      error = g_error_new_literal (G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
+                                   "Skin images must be 64x64 or 64x32 PNG files");
+      goto done;
+    }
+
+  /* Imported files are immediately usable as the row's preview. Uploading
+   * is intentionally separate from choosing a local skin, just like the
+   * skin manager in PrismLauncher. */
+  face = face_texture (skin);
+  if (face != NULL)
+    gtk_image_set_from_paintable (menu->image, GDK_PAINTABLE (face));
+
+done:
+  if (error != NULL &&
+      !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+    {
+      AdwAlertDialog *alert = ADW_ALERT_DIALOG (
+        adw_alert_dialog_new (_("Invalid skin"), error->message));
+      adw_alert_dialog_add_response (alert, "ok", _("OK"));
+      adw_alert_dialog_set_close_response (alert, "ok");
+      adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (menu->popover));
+    }
+  skin_menu_free (menu);
+}
+
+static void
+on_import_skin_clicked (GtkButton *button, gpointer user_data)
+{
+  SkinMenu *source = user_data;
+  GtkFileDialog *dialog = gtk_file_dialog_new ();
+  GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (button));
+  GtkFileFilter *filter = gtk_file_filter_new ();
+
+  gtk_file_filter_set_name (filter, _("PNG skin texture"));
+  gtk_file_filter_add_mime_type (filter, "image/png");
+  gtk_file_dialog_set_default_filter (dialog, filter);
+  gtk_file_dialog_open (dialog, GTK_WINDOW (root), NULL,
+                        on_skin_file_chosen, source);
+  g_object_unref (dialog);
+}
+
+static GtkWidget *
+skin_menu_new (GtkImage *image, AmlAccount *account)
+{
+  GtkPopover *popover = GTK_POPOVER (gtk_popover_new ());
+  GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 6));
+  GtkLabel *heading = GTK_LABEL (gtk_label_new (_("Skin")));
+  GtkButton *import = GTK_BUTTON (gtk_button_new_with_label (_("Import skin…")));
+  GtkButton *change = GTK_BUTTON (gtk_button_new_with_label (_("Change skin…")));
+  GtkCheckButton *default_model = GTK_CHECK_BUTTON (
+    gtk_check_button_new_with_label (_("Default model")));
+  GtkCheckButton *slim_model = GTK_CHECK_BUTTON (
+    gtk_check_button_new_with_label (_("Slim model")));
+  GtkStringList *cape_list = gtk_string_list_new ((const char *[]) { _("No cape"), NULL });
+  GtkDropDown *capes = GTK_DROP_DOWN (gtk_drop_down_new (G_LIST_MODEL (cape_list), NULL));
+  GtkButton *remove = GTK_BUTTON (gtk_button_new_with_label (_("Remove skin")));
+  SkinMenu *data = g_new0 (SkinMenu, 1);
+
+  data->image = g_object_ref (image);
+  data->popover = g_object_ref (popover);
+  data->cape_list = g_object_ref (cape_list);
+  data->cape_ids = g_ptr_array_new_with_free_func (g_free);
+  data->account = account;
+  g_signal_connect (import, "clicked", G_CALLBACK (on_import_skin_clicked), data);
+  g_signal_connect_swapped (change, "clicked", G_CALLBACK (gtk_widget_activate),
+                            import);
+  g_signal_connect_swapped (remove, "clicked", G_CALLBACK (set_avatar_icon), image);
+  g_signal_connect_swapped (remove, "clicked", G_CALLBACK (gtk_popover_popdown), popover);
+
+  gtk_widget_add_css_class (GTK_WIDGET (heading), "heading");
+  gtk_widget_set_halign (GTK_WIDGET (heading), GTK_ALIGN_START);
+  gtk_widget_set_margin_start (GTK_WIDGET (box), 12);
+  gtk_widget_set_margin_end (GTK_WIDGET (box), 12);
+  gtk_widget_set_margin_top (GTK_WIDGET (box), 12);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (box), 12);
+  gtk_check_button_set_group (slim_model, default_model);
+  gtk_check_button_set_active (default_model, TRUE);
+  gtk_widget_add_css_class (GTK_WIDGET (remove), "destructive-action");
+
+  gtk_box_append (box, GTK_WIDGET (heading));
+  gtk_box_append (box, GTK_WIDGET (import));
+  gtk_box_append (box, GTK_WIDGET (change));
+  gtk_box_append (box, GTK_WIDGET (default_model));
+  gtk_box_append (box, GTK_WIDGET (slim_model));
+  gtk_box_append (box, GTK_WIDGET (capes));
+  gtk_box_append (box, GTK_WIDGET (remove));
+  gtk_popover_set_child (popover, GTK_WIDGET (box));
+  load_capes (data);
+  return GTK_WIDGET (popover);
 }
 
 /* What the button in the header says about who this copy of AML plays
@@ -290,6 +505,7 @@ append_account_row (AmlUsersPopover *self, const AmlAccount *account)
 
   AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
   GtkImage *image = GTK_IMAGE (gtk_image_new ());
+  GtkMenuButton *skin_button = GTK_MENU_BUTTON (gtk_menu_button_new ());
   GtkButton *remove = GTK_BUTTON (gtk_button_new_from_icon_name ("user-trash-symbolic"));
   g_autofree char *tooltip = NULL;
 
@@ -315,7 +531,13 @@ append_account_row (AmlUsersPopover *self, const AmlAccount *account)
   set_avatar (self, GTK_IMAGE (image), account->avatar_url);
   gtk_image_set_pixel_size (GTK_IMAGE (GTK_WIDGET (image)), AVATAR_SIZE);
   gtk_widget_set_valign (GTK_WIDGET (image), GTK_ALIGN_CENTER);
-  adw_action_row_add_prefix (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (image));
+  gtk_menu_button_set_child (skin_button, GTK_WIDGET (image));
+  gtk_menu_button_set_popover (skin_button, skin_menu_new (image, (AmlAccount *) account));
+  gtk_menu_button_set_has_frame (skin_button, FALSE);
+  gtk_widget_set_valign (GTK_WIDGET (skin_button), GTK_ALIGN_CENTER);
+  gtk_widget_set_tooltip_text (GTK_WIDGET (skin_button), _("Manage skin"));
+  adw_action_row_add_prefix (ADW_ACTION_ROW (GTK_WIDGET (row)),
+                             GTK_WIDGET (skin_button));
 
   /* The mark of the one a launch plays as, at the far end of the row. */
   if (is_active)
