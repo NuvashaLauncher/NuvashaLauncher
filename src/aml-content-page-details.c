@@ -7,6 +7,7 @@
 #include "aml-i18n.h"
 #include "aml-markdown.h"
 #include "aml-operation.h"
+#include "aml-ui-feedback.h"
 
 /* One answer of the page of a project while what it shows is being
  * read: the page that opened it, weakly held, and the project the
@@ -210,24 +211,6 @@ version_factory (void)
 
 /* The words the page shows while the description and the versions are
  * on their way. */
-static GtkWidget *
-loading_child (void)
-{
-  GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
-  AdwSpinner *spinner = ADW_SPINNER (adw_spinner_new ());
-  GtkLabel *label = GTK_LABEL (gtk_label_new (_("Loading…")));
-
-  gtk_widget_set_valign (GTK_WIDGET (box), GTK_ALIGN_CENTER);
-  gtk_widget_set_halign (GTK_WIDGET (box), GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (GTK_WIDGET (spinner), GTK_ALIGN_CENTER);
-  gtk_widget_set_halign (GTK_WIDGET (spinner), GTK_ALIGN_CENTER);
-  gtk_widget_add_css_class (GTK_WIDGET (label), "dim-label");
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (spinner));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (label));
-
-  return GTK_WIDGET (box);
-}
-
 /* Closes the page of the open project, leaving the list the whole width
  * of the page again. An answer that is still on its way finds no page to
  * fill and does nothing. The list row of the project is the way in and
@@ -589,7 +572,7 @@ open_project_page (AmlContentPage *self, AmlModrinthProject *project)
   /* The project opens in the right half of the page, beside the list it
      was picked from, showing a spinner until both the description and
      the versions are in. Its name is the first thing the page shows. */
-  page = GTK_WIDGET (adw_navigation_page_new (loading_child (),
+  page = GTK_WIDGET (adw_navigation_page_new (aml_ui_loading_child (),
                                               project->title));
   watch_widget (&self->project.details_page, page);
 

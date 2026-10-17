@@ -3,32 +3,9 @@
  */
 
 #include "aml-sandbox-display.h"
+#include "aml-sandbox-private.h"
 
 #include <glib/gstdio.h>
-
-static void
-add (GPtrArray *arguments, const char *value)
-{
-  g_ptr_array_add (arguments, g_strdup (value));
-}
-
-static void
-bind_readonly_if_present (GPtrArray *arguments, const char *path)
-{
-  if (path != NULL && *path != '\0' && g_file_test (path, G_FILE_TEST_EXISTS))
-    {
-      add (arguments, "--ro-bind-try");
-      add (arguments, path);
-      add (arguments, path);
-    }
-}
-
-static void
-add_directory (GPtrArray *arguments, const char *path)
-{
-  add (arguments, "--dir");
-  add (arguments, path);
-}
 
 static void
 bind_runtime_socket (GPtrArray *arguments, const char *runtime,
@@ -40,7 +17,7 @@ bind_runtime_socket (GPtrArray *arguments, const char *runtime,
     return;
 
   path = g_build_filename (runtime, name, NULL);
-  bind_readonly_if_present (arguments, path);
+  aml_sandbox_bind_readonly_if_present (arguments, path);
 }
 
 void
@@ -66,10 +43,10 @@ aml_sandbox_add_display_mounts (GPtrArray *arguments)
       g_autofree char *native = g_build_filename (pulse, "native", NULL);
 
       if (g_file_test (pulse, G_FILE_TEST_IS_DIR))
-        add_directory (arguments, pulse);
-      bind_readonly_if_present (arguments, native);
+        aml_sandbox_add_directory (arguments, pulse);
+      aml_sandbox_bind_readonly_if_present (arguments, native);
     }
 
-  bind_readonly_if_present (arguments, "/tmp/.X11-unix");
-  bind_readonly_if_present (arguments, authority);
+  aml_sandbox_bind_readonly_if_present (arguments, "/tmp/.X11-unix");
+  aml_sandbox_bind_readonly_if_present (arguments, authority);
 }

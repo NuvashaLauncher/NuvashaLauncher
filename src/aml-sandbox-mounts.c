@@ -3,35 +3,19 @@
  */
 
 #include "aml-sandbox-mounts.h"
+#include "aml-sandbox-private.h"
 
 #include <glib/gstdio.h>
 #include <string.h>
-
-static void
-add (GPtrArray *arguments, const char *value)
-{
-  g_ptr_array_add (arguments, g_strdup (value));
-}
-
-static void
-bind_readonly_if_present (GPtrArray *arguments, const char *path)
-{
-  if (path != NULL && *path != '\0' && g_file_test (path, G_FILE_TEST_EXISTS))
-    {
-      add (arguments, "--ro-bind-try");
-      add (arguments, path);
-      add (arguments, path);
-    }
-}
 
 static void
 bind_device_if_present (GPtrArray *arguments, const char *path)
 {
   if (path != NULL && *path != '\0' && g_file_test (path, G_FILE_TEST_EXISTS))
     {
-      add (arguments, "--dev-bind-try");
-      add (arguments, path);
-      add (arguments, path);
+      aml_sandbox_add_argument (arguments, "--dev-bind-try");
+      aml_sandbox_add_argument (arguments, path);
+      aml_sandbox_add_argument (arguments, path);
     }
 }
 
@@ -40,9 +24,9 @@ bind_writable_if_present (GPtrArray *arguments, const char *path)
 {
   if (path != NULL && *path != '\0' && g_file_test (path, G_FILE_TEST_EXISTS))
     {
-      add (arguments, "--bind-try");
-      add (arguments, path);
-      add (arguments, path);
+      aml_sandbox_add_argument (arguments, "--bind-try");
+      aml_sandbox_add_argument (arguments, path);
+      aml_sandbox_add_argument (arguments, path);
     }
 }
 
@@ -55,7 +39,7 @@ bind_parent_readonly (GPtrArray *arguments, const char *path)
     return;
 
   parent = g_path_get_dirname (path);
-  bind_readonly_if_present (arguments, parent);
+  aml_sandbox_bind_readonly_if_present (arguments, parent);
 }
 
 void
@@ -66,14 +50,14 @@ aml_sandbox_add_system_mounts (GPtrArray *arguments)
   };
 
   for (guint i = 0; i < G_N_ELEMENTS (directories); i++)
-    bind_readonly_if_present (arguments, directories[i]);
+    aml_sandbox_bind_readonly_if_present (arguments, directories[i]);
 
   bind_device_if_present (arguments, "/dev/dri");
   bind_device_if_present (arguments, "/dev/nvidiactl");
   bind_device_if_present (arguments, "/dev/nvidia-uvm");
   bind_device_if_present (arguments, "/dev/nvidia-modeset");
   bind_device_if_present (arguments, "/dev/nvidia0");
-  bind_readonly_if_present (arguments, "/run/udev");
+  aml_sandbox_bind_readonly_if_present (arguments, "/run/udev");
 }
 
 void
@@ -84,9 +68,9 @@ aml_sandbox_add_game_mounts (GPtrArray *arguments,
 {
   g_autofree char *java_dir = g_path_get_dirname (java_executable);
 
-  bind_readonly_if_present (arguments, java_dir);
-  bind_readonly_if_present (arguments, resolved->assets_directory);
-  bind_readonly_if_present (arguments, resolved->library_directory);
+  aml_sandbox_bind_readonly_if_present (arguments, java_dir);
+  aml_sandbox_bind_readonly_if_present (arguments, resolved->assets_directory);
+  aml_sandbox_bind_readonly_if_present (arguments, resolved->library_directory);
   bind_parent_readonly (arguments, resolved->client_jar);
   bind_writable_if_present (arguments, game_directory);
   bind_writable_if_present (arguments, resolved->natives_directory);

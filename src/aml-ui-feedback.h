@@ -14,6 +14,9 @@ void aml_ui_show_toast (GtkWidget  *page,
                         GtkWidget  *overlay,
                         const char *message);
 
+GtkWidget *aml_ui_loading_child (void);
+void aml_ui_clear_error_label (GtkLabel *label);
+
 G_END_DECLS
 
 #endif /* AML_UI_FEEDBACK_H */

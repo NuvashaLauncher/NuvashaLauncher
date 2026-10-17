@@ -53,6 +53,10 @@ gboolean aml_loader_from_string (const char *string, AmlLoader *loader);
  * returns NULL or an empty string. */
 char *aml_instance_sanitize_name (const char *name);
 
+/* Return the packaged default instance icon path, or NULL when it is not
+ * available. The returned path is owned by the caller. */
+char *aml_instance_default_icon_path (void);
+
 /* (transfer full) NFC-normalized display name with Unicode surrounding
  * whitespace removed. Control characters remain in the result so validation
  * can reject them rather than silently changing what the user entered. */

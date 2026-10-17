@@ -293,8 +293,7 @@ draw_model (AmlSkinView *self)
   GArray *v = g_array_new (FALSE, FALSE, sizeof (Vertex));
   GArray *cape_v = g_array_new (FALSE, FALSE, sizeof (Vertex));
   int arm_width = self->slim ? 3 : 4;
-  int arm_x = self->slim ? 40 : 40;
-  int texture_height = 64;
+  int arm_x = 40;
   float model[16], rotation[16], projection[16], mvp[16];
   int width = gtk_widget_get_width (GTK_WIDGET (self));
   int height = gtk_widget_get_height (GTK_WIDGET (self));
@@ -303,25 +302,22 @@ draw_model (AmlSkinView *self)
 
   if (self->skin == NULL || self->skin_texture == 0 || self->program == 0)
     { g_array_unref (v); g_array_unref (cape_v); return; }
-  add_box (v, -4, 0, -4, 8, 8, 8, 0, 0, 8, 8, 8, texture_height);
-  add_box (v, -4, -12, -2, 8, 12, 4, 16, 16, 8, 12, 4, texture_height);
-  add_box (v, -3.9f, -24, -2, 4, 12, 4, 0, 16, 4, 12, 4, texture_height);
-  add_box (v, -.1f, -24, -2, 4, 12, 4, 16, 48, 4, 12, 4, texture_height);
-  add_box (v, -4 - arm_width, -12, -2, arm_width, 12, 4, arm_x, 16, arm_width, 12, 4, texture_height);
-  add_box (v, 4, -12, -2, arm_width, 12, 4, 32, 48, arm_width, 12, 4, texture_height);
-  if (texture_height == 64)
-    {
-      /* The second layer is deliberately slightly larger: this is the hat,
-       * jacket, sleeves and trousers layer of the Minecraft skin format. */
-      add_box (v, -4.5f, -.5f, -4.5f, 9, 9, 9, 32, 0, 8, 8, 8, texture_height);
-      add_box (v, -4.25f, -12.25f, -2.25f, 8.5f, 12.5f, 4.5f, 16, 32, 8, 12, 4, texture_height);
-      add_box (v, -4.15f, -24.25f, -2.25f, 4.5f, 12.5f, 4.5f, 0, 32, 4, 12, 4, texture_height);
-      add_box (v, -.35f, -24.25f, -2.25f, 4.5f, 12.5f, 4.5f, 0, 48, 4, 12, 4, texture_height);
-      add_box (v, -6 - (arm_width + .5f) / 2.f, -12.25f, -2.25f,
-               arm_width + .5f, 12.5f, 4.5f, 40, 32, arm_width, 12, 4, texture_height);
-      add_box (v, 6 - (arm_width + .5f) / 2.f, -12.25f, -2.25f,
-               arm_width + .5f, 12.5f, 4.5f, 48, 48, arm_width, 12, 4, texture_height);
-    }
+  add_box (v, -4, 0, -4, 8, 8, 8, 0, 0, 8, 8, 8, 64);
+  add_box (v, -4, -12, -2, 8, 12, 4, 16, 16, 8, 12, 4, 64);
+  add_box (v, -3.9f, -24, -2, 4, 12, 4, 0, 16, 4, 12, 4, 64);
+  add_box (v, -.1f, -24, -2, 4, 12, 4, 16, 48, 4, 12, 4, 64);
+  add_box (v, -4 - arm_width, -12, -2, arm_width, 12, 4, arm_x, 16, arm_width, 12, 4, 64);
+  add_box (v, 4, -12, -2, arm_width, 12, 4, 32, 48, arm_width, 12, 4, 64);
+  /* The second layer is deliberately slightly larger: this is the hat,
+   * jacket, sleeves and trousers layer of the Minecraft skin format. */
+  add_box (v, -4.5f, -.5f, -4.5f, 9, 9, 9, 32, 0, 8, 8, 8, 64);
+  add_box (v, -4.25f, -12.25f, -2.25f, 8.5f, 12.5f, 4.5f, 16, 32, 8, 12, 4, 64);
+  add_box (v, -4.15f, -24.25f, -2.25f, 4.5f, 12.5f, 4.5f, 0, 32, 4, 12, 4, 64);
+  add_box (v, -.35f, -24.25f, -2.25f, 4.5f, 12.5f, 4.5f, 0, 48, 4, 12, 4, 64);
+  add_box (v, -6 - (arm_width + .5f) / 2.f, -12.25f, -2.25f,
+           arm_width + .5f, 12.5f, 4.5f, 40, 32, arm_width, 12, 4, 64);
+  add_box (v, 6 - (arm_width + .5f) / 2.f, -12.25f, -2.25f,
+           arm_width + .5f, 12.5f, 4.5f, 48, 48, arm_width, 12, 4, 64);
   skin_count = v->len;
   if (self->cape_texture != 0)
     {

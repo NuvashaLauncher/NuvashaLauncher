@@ -1,5 +1,3 @@
-#define _GNU_SOURCE
-
 /* Copyright (C) 2026 Flia
  * SPDX-License-Identifier: GPL-3.0-only
  */
@@ -18,7 +16,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <archive.h>
-#include <fcntl.h>
 #include <unistd.h>
 #include <archive_entry.h>
 #include <glib/gstdio.h>
@@ -26,7 +23,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #define AML_MODPACK_FORMAT_VERSION 1
 

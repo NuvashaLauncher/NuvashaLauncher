@@ -3,6 +3,7 @@
  */
 
 #include "aml-icons.h"
+#include "aml-icon-load-private.h"
 
 #include "aml-download.h"
 #include "aml-downloads.h"
@@ -13,6 +14,15 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib/gstdio.h>
 #include <string.h>
+
+void
+aml_icon_load_free (AmlIconLoad *load)
+{
+  g_clear_object (&load->icon);
+  if (load->operation != NULL)
+    aml_operation_unref (load->operation);
+  g_free (load);
+}
 
 /* How many icons are fetched at the same time.
  *
