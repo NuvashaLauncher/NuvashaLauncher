@@ -62,7 +62,7 @@ void
 aml_sandbox_add_system_mounts (GPtrArray *arguments)
 {
   static const char *const directories[] = {
-    "/usr", "/bin", "/sbin", "/lib", "/lib64", "/etc"
+    "/usr", "/bin", "/sbin", "/lib", "/lib64", "/etc", "/sys"
   };
 
   for (guint i = 0; i < G_N_ELEMENTS (directories); i++)
@@ -73,6 +73,7 @@ aml_sandbox_add_system_mounts (GPtrArray *arguments)
   bind_device_if_present (arguments, "/dev/nvidia-uvm");
   bind_device_if_present (arguments, "/dev/nvidia-modeset");
   bind_device_if_present (arguments, "/dev/nvidia0");
+  bind_readonly_if_present (arguments, "/run/udev");
 }
 
 void
