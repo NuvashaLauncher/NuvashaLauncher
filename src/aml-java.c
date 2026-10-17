@@ -11,7 +11,6 @@
 
 #include "aml-java.h"
 #include "aml-task.h"
-#include "aml-task.h"
 
 #include <stdio.h>
 #include <stdlib.h>

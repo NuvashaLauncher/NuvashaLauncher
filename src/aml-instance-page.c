@@ -245,18 +245,6 @@ version_wait_new (AmlInstancePage *self, guint generation)
   return wait;
 }
 
-static AmlInstancePage *
-version_wait_page (VersionWait *wait)
-{
-  return wait->page;
-}
-
-static guint
-version_wait_generation (VersionWait *wait)
-{
-  return wait->generation;
-}
-
 static void
 on_manifest_loaded (GObject *source G_GNUC_UNUSED,
                     GAsyncResult *result,
@@ -450,12 +438,12 @@ on_description_loaded (GObject *source G_GNUC_UNUSED,
                        gpointer user_data)
 {
   VersionWait *wait = user_data;
-  AmlInstancePage *self = version_wait_page (wait);
+  AmlInstancePage *self = wait->page;
   g_autoptr (GError) error = NULL;
   g_autoptr (AmlVersionDescription) description =
     aml_version_load_finish (result, &error);
 
-  if (version_wait_generation (wait) != self->versions_generation)
+  if (wait->generation != self->versions_generation)
     {
       version_wait_free (wait);
       return;
@@ -480,14 +468,14 @@ on_manifest_loaded (GObject *source G_GNUC_UNUSED,
                     gpointer user_data)
 {
   VersionWait *wait = user_data;
-  AmlInstancePage *self = version_wait_page (wait);
+  AmlInstancePage *self = wait->page;
   g_autoptr (GError) error = NULL;
   g_autoptr (AmlVersionManifest) manifest =
     aml_version_manifest_fetch_finish (result, &error);
   g_autofree char *version = instance_string (self->instance,
                                               "minecraft-version");
 
-  if (version_wait_generation (wait) != self->versions_generation)
+  if (wait->generation != self->versions_generation)
     {
       version_wait_free (wait);
       return;
@@ -506,7 +494,7 @@ on_manifest_loaded (GObject *source G_GNUC_UNUSED,
 
   self->versions_operation = aml_version_load_async (
     manifest, version, on_description_loaded,
-    version_wait_new (self, version_wait_generation (wait)));
+    version_wait_new (self, wait->generation));
   version_wait_free (wait);
 }
 

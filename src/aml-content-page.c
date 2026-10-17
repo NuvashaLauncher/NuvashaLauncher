@@ -23,22 +23,6 @@
 #include <glib/gstdio.h>
 #include <string.h>
 
-/* Results on a page of Browse. */
-#define RESULTS_PER_PAGE 20
-
-/* The most rows the list keeps. A search that matches thousands of
- * projects would otherwise grow the widget tree without end, and each
- * row is a handful of widgets. The oldest rows go first: the user who
- * scrolled to the bottom of a long list is reading the newest, and the
- * ones above are the ones a new search would have replaced anyway. */
-#define MAX_RESULT_ROWS 400
-#define RESULT_ROWS_TRIM 200
-
-/* How long the words of a search entry rest before they are asked for,
- * so that typing is not one request per letter. Long enough to be past a
- * fast typist, short enough that the list is not forgotten. */
-#define SEARCH_DELAY_MS 300
-
 #include "aml-content-page-private.h"
 #include "aml-content-files-private.h"
 #include "aml-operation.h"
@@ -83,7 +67,6 @@ update_run_free (UpdateRun *run)
 }
 
 void aml_content_page_run_search (AmlContentPage *self, gboolean append);
-void open_project_page (AmlContentPage *self, AmlModrinthProject *project);
 static void update_check_next (UpdateRun *run);
 void update_batch_next (AmlContentPage *self);
 void start_plan (AmlContentPage *self, AmlModrinthVersion *version,

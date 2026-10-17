@@ -350,14 +350,6 @@ versions_request_free (gpointer data)
   g_free (request);
 }
 
-/* A release version stays stable even when an API marks it as old. Only an
- * explicit pre-release marker in the version itself makes it unstable. */
-static gboolean
-version_is_stable (const char *version)
-{
-  return version_is_final (version);
-}
-
 /* Reads one entry of a version list: {"loader": {"version": …}}. */
 static AmlLoaderVersion *
 version_from_entry (JsonNode *entry)
@@ -392,7 +384,7 @@ version_from_entry (JsonNode *entry)
 
   result = g_new0 (AmlLoaderVersion, 1);
   result->version = g_strdup (version);
-   result->stable = version_is_stable (version);
+    result->stable = version_is_final (version);
 
   return result;
 }

@@ -18,7 +18,6 @@
 #include <glib/gstdio.h>
 #include <json-glib/json-glib.h>
 #include <string.h>
-#include <unistd.h>
 
 #define MAX_INSTALLER_ENTRY_SIZE (128ULL * 1024ULL * 1024ULL)
 

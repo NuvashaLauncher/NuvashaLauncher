@@ -24,8 +24,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define MAX_INSTALLER_ENTRY_SIZE (128ULL * 1024ULL * 1024ULL)
-
 GQuark
 aml_loaders_error_quark (void)
 {

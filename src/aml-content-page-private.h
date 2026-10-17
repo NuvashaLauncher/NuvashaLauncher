@@ -174,7 +174,6 @@ GtkWidget *plain_label (const char *text);
 void watch_widget (gpointer field, GtkWidget *widget);
 void start_plan (AmlContentPage *self, AmlModrinthVersion *version,
                  const char *title, const char *replaces, gboolean disabled);
-void reload_installed (AmlContentPage *self);
 AmlContentFile *installed_project_file (AmlContentPage *self,
                                        const char *project_id);
 void remove_duplicate_project_files (AmlContentPage *self,
@@ -182,6 +181,7 @@ void remove_duplicate_project_files (AmlContentPage *self,
                                      const char *keep_path);
 void show_error (AmlContentPage *self, const char *what, GError *error);
 void aml_content_page_on_result_activated (AdwActionRow *row, gpointer user_data);
+void open_project_page (AmlContentPage *self, AmlModrinthProject *project);
 AmlModrinthVersion *selected_version (GtkDropDown *dropdown,
                                       GPtrArray *versions);
 const char *version_name_of (AmlModrinthVersion *version);

@@ -20,6 +20,22 @@
 /* Used when a name sanitizes down to nothing. */
 #define FALLBACK_NAME "instance"
 
+char *
+aml_instance_default_icon_path (void)
+{
+  g_autofree char *installed =
+    g_build_filename (AML_DATA_DIR, "pack.png", NULL);
+  if (g_file_test (installed, G_FILE_TEST_IS_REGULAR))
+    return g_steal_pointer (&installed);
+
+  g_autofree char *source =
+    g_build_filename (AML_SOURCE_DATA_DIR, "pack.png", NULL);
+  if (g_file_test (source, G_FILE_TEST_IS_REGULAR))
+    return g_steal_pointer (&source);
+
+  return NULL;
+}
+
 struct _AmlInstance
 {
   GObject parent_instance;

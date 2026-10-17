@@ -378,19 +378,15 @@ aml_instance_manager_default_directory (AmlInstanceManager *self,
 static void
 assign_default_instance_icon (AmlInstance *instance, const char *directory)
 {
-  g_autofree char *source_path =
-    g_build_filename (AML_DATA_DIR, "pack.png", NULL);
-  if (!g_file_test (source_path, G_FILE_TEST_IS_REGULAR))
-    {
-      g_clear_pointer (&source_path, g_free);
-      source_path = g_build_filename (AML_SOURCE_DATA_DIR, "pack.png", NULL);
-    }
+  g_autofree char *source_path = aml_instance_default_icon_path ();
   g_autofree char *target_path = g_build_filename (directory, "icon.png", NULL);
-  g_autoptr (GFile) source = g_file_new_for_path (source_path);
-  g_autoptr (GFile) target = g_file_new_for_path (target_path);
-  if (g_file_test (source_path, G_FILE_TEST_IS_REGULAR) &&
-      aml_fs_copy_file (source, target, G_FILE_COPY_OVERWRITE, NULL, NULL))
-    aml_instance_set_string (instance, "icon", target_path, NULL);
+  if (source_path != NULL)
+    {
+      g_autoptr (GFile) source = g_file_new_for_path (source_path);
+      g_autoptr (GFile) target = g_file_new_for_path (target_path);
+      if (aml_fs_copy_file (source, target, G_FILE_COPY_OVERWRITE, NULL, NULL))
+        aml_instance_set_string (instance, "icon", target_path, NULL);
+    }
 }
 
 AmlInstance *

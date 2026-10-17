@@ -53,9 +53,6 @@
 /* The prefix the resources of the game have in a map_to_resources index. */
 #define ASSET_RESOURCE_PREFIX "minecraft/"
 
-/* What -cp wants between the jars. */
-#define CLASSPATH_SEPARATOR ":"
-
 GQuark
 aml_resolve_error_quark (void)
 {

@@ -23,7 +23,6 @@
 
 #include "aml-download.h"
 #include "aml-download-private.h"
-#include "aml-download-private.h"
 #include "aml-downloads.h"
 
 #include "aml-cache.h"

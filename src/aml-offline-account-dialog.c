@@ -4,6 +4,7 @@
 
 #include "aml-offline-account-dialog.h"
 #include "aml-i18n.h"
+#include "aml-ui-feedback.h"
 
 struct _AmlOfflineAccountDialog
 {
@@ -27,13 +28,6 @@ show_error (AmlOfflineAccountDialog *self, const char *message)
   gtk_widget_set_visible (GTK_WIDGET (self->error_label), TRUE);
 }
 
-static void
-clear_error (AmlOfflineAccountDialog *self)
-{
-  gtk_label_set_text (GTK_LABEL (self->error_label), NULL);
-  gtk_widget_set_visible (GTK_WIDGET (self->error_label), FALSE);
-}
-
 /* The Add button is sensitive when the name is one the game accepts, and
  * the reason it is not is written under the entry: which of the two it is
  * comes from the same check the store makes, so the dialog cannot accept
@@ -54,7 +48,7 @@ update_add_button (AmlOfflineAccountDialog *self)
   /* An empty entry is not a mistake, it is one no one has typed in yet:
      only a name that was really typed and refused gets a sentence. */
   if (account != NULL || name[0] == '\0')
-    clear_error (self);
+    aml_ui_clear_error_label (self->error_label);
   else
     show_error (self, error->message);
 }

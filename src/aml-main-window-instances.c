@@ -302,15 +302,7 @@ row_set_icon (GtkImage *image, AmlInstance *instance)
 
   if (path == NULL || !g_file_test (path, G_FILE_TEST_IS_REGULAR))
     {
-      g_autofree char *default_icon =
-        g_build_filename (AML_DATA_DIR, "pack.png", NULL);
-      if (!g_file_test (default_icon, G_FILE_TEST_IS_REGULAR))
-        {
-          g_clear_pointer (&default_icon, g_free);
-          default_icon = g_build_filename (AML_SOURCE_DATA_DIR, "pack.png", NULL);
-        }
-      if (g_file_test (default_icon, G_FILE_TEST_IS_REGULAR))
-        path = g_strdup (default_icon);
+      path = aml_instance_default_icon_path ();
     }
 
   if (path != NULL && g_file_test (path, G_FILE_TEST_IS_REGULAR))

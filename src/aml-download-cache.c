@@ -87,9 +87,9 @@ aml_download_cache_parser (const char *contents, gsize length, char **response,
   return g_steal_pointer (&parser);
 }
 
-void
-aml_download_cache_write_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
-                  gpointer user_data)
+static void
+aml_download_cache_write_done (GObject *source G_GNUC_UNUSED,
+                               GAsyncResult *result, gpointer user_data)
 {
   DownloadRequest *request = user_data;
   g_autoptr (GError) error = NULL;
@@ -106,9 +106,10 @@ aml_download_cache_write_done (GObject *source G_GNUC_UNUSED, GAsyncResult *resu
   aml_download_request_succeed_json (request, g_steal_pointer (&request->pending_parser));
 }
 
-void
-aml_download_cache_write_directory_done (GObject *source, GAsyncResult *result,
-                            gpointer user_data)
+static void
+aml_download_cache_write_directory_done (GObject *source,
+                                         GAsyncResult *result,
+                                         gpointer user_data)
 {
   GFile *file = user_data;
   DownloadRequest *request = g_object_get_data (G_OBJECT (file),
@@ -147,9 +148,9 @@ aml_download_cache_write_directory_done (GObject *source, GAsyncResult *result,
   g_object_unref (file);
 }
 
-void
+static void
 aml_download_cache_write_parent_done (GObject *source, GAsyncResult *result,
-                         gpointer user_data)
+                                      gpointer user_data)
 {
   GFile *file = user_data;
   DownloadRequest *request = g_object_get_data (G_OBJECT (file),
@@ -185,9 +186,9 @@ aml_download_cache_write_parent_done (GObject *source, GAsyncResult *result,
                                aml_download_cache_write_directory_done, file);
 }
 
-void
+static void
 aml_download_cache_write_cache_done (GObject *source, GAsyncResult *result,
-                        gpointer user_data)
+                                     gpointer user_data)
 {
   GFile *file = user_data;
   DownloadRequest *request = g_object_get_data (G_OBJECT (file),
@@ -263,4 +264,3 @@ aml_download_cache_write (DownloadRequest *request, const char *response)
                                aml_download_cache_write_cache_done,
                                g_object_ref (file));
 }
-

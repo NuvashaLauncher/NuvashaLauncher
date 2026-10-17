@@ -3,6 +3,7 @@
  */
 
 #include "aml-sandbox.h"
+#include "aml-sandbox-private.h"
 #include "aml-sandbox-display.h"
 #include "aml-sandbox-mounts.h"
 #include "aml-open-broker.h"
@@ -10,39 +11,50 @@
 #include <unistd.h>
 
 
-static void
-add (GPtrArray *arguments, const char *value)
+void
+aml_sandbox_add_argument (GPtrArray *arguments, const char *value)
 {
   g_ptr_array_add (arguments, g_strdup (value));
+}
+
+void
+aml_sandbox_add_directory (GPtrArray *arguments, const char *path)
+{
+  aml_sandbox_add_argument (arguments, "--dir");
+  aml_sandbox_add_argument (arguments, path);
+}
+
+void
+aml_sandbox_bind_readonly_if_present (GPtrArray *arguments, const char *path)
+{
+  if (path != NULL && *path != '\0' && g_file_test (path, G_FILE_TEST_EXISTS))
+    {
+      aml_sandbox_add_argument (arguments, "--ro-bind-try");
+      aml_sandbox_add_argument (arguments, path);
+      aml_sandbox_add_argument (arguments, path);
+    }
 }
 
 static void
 add_pair (GPtrArray *arguments, const char *option, const char *value)
 {
-  add (arguments, option);
-  add (arguments, value);
+  aml_sandbox_add_argument (arguments, option);
+  aml_sandbox_add_argument (arguments, value);
 }
 
 static void
 add_environment (GPtrArray *arguments, const char *name, const char *value)
 {
-  add (arguments, "--setenv");
-  add (arguments, name);
-  add (arguments, value);
+  aml_sandbox_add_argument (arguments, "--setenv");
+  aml_sandbox_add_argument (arguments, name);
+  aml_sandbox_add_argument (arguments, value);
 }
 
 static void
 unset_environment (GPtrArray *arguments, const char *name)
 {
-  add (arguments, "--unsetenv");
-  add (arguments, name);
-}
-
-static void
-add_directory (GPtrArray *arguments, const char *path)
-{
-  add (arguments, "--dir");
-  add (arguments, path);
+  aml_sandbox_add_argument (arguments, "--unsetenv");
+  aml_sandbox_add_argument (arguments, name);
 }
 
 static void
@@ -58,18 +70,18 @@ add_runtime_directories (GPtrArray *arguments)
 
   /* Bind destinations live in a new root. Create only the empty directory
    * skeleton needed by the selected game/cache mounts. */
-  add_directory (arguments, "/home");
-  add_directory (arguments, home);
-  add_directory (arguments, home_local);
-  add_directory (arguments, home_share);
-  add_directory (arguments, home_data);
-  add_directory (arguments, "/run");
-  add_directory (arguments, "/run/user");
+  aml_sandbox_add_directory (arguments, "/home");
+  aml_sandbox_add_directory (arguments, home);
+  aml_sandbox_add_directory (arguments, home_local);
+  aml_sandbox_add_directory (arguments, home_share);
+  aml_sandbox_add_directory (arguments, home_data);
+  aml_sandbox_add_directory (arguments, "/run");
+  aml_sandbox_add_directory (arguments, "/run/user");
   if (runtime_parent != NULL)
-    add_directory (arguments, runtime_parent);
+    aml_sandbox_add_directory (arguments, runtime_parent);
   if (runtime != NULL)
-    add_directory (arguments, runtime);
-  add_directory (arguments, "/tmp/.X11-unix");
+    aml_sandbox_add_directory (arguments, runtime);
+  aml_sandbox_add_directory (arguments, "/tmp/.X11-unix");
 }
 
 GPtrArray *
@@ -100,15 +112,15 @@ aml_sandbox_wrap_arguments (GPtrArray               *command,
     }
 
   arguments = g_ptr_array_new_with_free_func (g_free);
-  add (arguments, bwrap);
-  add (arguments, "--die-with-parent");
-  add (arguments, "--new-session");
-  add (arguments, "--unshare-pid");
-  add (arguments, "--unshare-uts");
-  add (arguments, "--unshare-ipc");
-  add (arguments, "--unshare-cgroup");
+  aml_sandbox_add_argument (arguments, bwrap);
+  aml_sandbox_add_argument (arguments, "--die-with-parent");
+  aml_sandbox_add_argument (arguments, "--new-session");
+  aml_sandbox_add_argument (arguments, "--unshare-pid");
+  aml_sandbox_add_argument (arguments, "--unshare-uts");
+  aml_sandbox_add_argument (arguments, "--unshare-ipc");
+  aml_sandbox_add_argument (arguments, "--unshare-cgroup");
   if (!network_enabled)
-    add (arguments, "--unshare-net");
+    aml_sandbox_add_argument (arguments, "--unshare-net");
   add_pair (arguments, "--proc", "/proc");
   add_pair (arguments, "--dev", "/dev");
   add_pair (arguments, "--tmpfs", "/tmp");
@@ -131,20 +143,20 @@ aml_sandbox_wrap_arguments (GPtrArray               *command,
       /* Most mods use xdg-open. Replace only that entry point with AML's
        * one-purpose client; no shell or arbitrary executable is exposed. */
       add_pair (arguments, "--ro-bind", self_executable);
-      add (arguments, "/usr/bin/xdg-open");
+      aml_sandbox_add_argument (arguments, "/usr/bin/xdg-open");
     }
-  add (arguments, "--bind");
-  add (arguments, broker);
-  add (arguments, broker);
+  aml_sandbox_add_argument (arguments, "--bind");
+  aml_sandbox_add_argument (arguments, broker);
+  aml_sandbox_add_argument (arguments, broker);
   add_environment (arguments, "AML_OPEN_BROKER_SOCKET", broker);
   unset_environment (arguments, "DBUS_SESSION_BUS_ADDRESS");
   unset_environment (arguments, "DBUS_SYSTEM_BUS_ADDRESS");
   add_environment (arguments, "HOME", game_directory);
   add_pair (arguments, "--chdir", game_directory);
-  add (arguments, "--");
+  aml_sandbox_add_argument (arguments, "--");
 
   for (guint i = 0; i < command->len; i++)
-    add (arguments, g_ptr_array_index (command, i));
+    aml_sandbox_add_argument (arguments, g_ptr_array_index (command, i));
 
   return g_steal_pointer (&arguments);
 }

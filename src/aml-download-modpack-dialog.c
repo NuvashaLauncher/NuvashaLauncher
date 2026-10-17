@@ -14,12 +14,14 @@
  * about itself. */
 
 #include "aml-download-modpack-dialog-private.h"
+#include "aml-icon-load-private.h"
 #include "aml-content-format.h"
 
 #include "aml-dialogs.h"
 #include "aml-downloads.h"
 #include "aml-download.h"
 #include "aml-operation.h"
+#include "aml-ui-feedback.h"
 #include "aml-i18n.h"
 #include "aml-icons.h"
 #include "aml-markdown.h"
@@ -390,21 +392,6 @@ result_row_activated (AdwActionRow *row, gpointer user_data)
 
 /* What one row's icon load keeps alive: the widget the image goes in, and
  * the operation that has to be released when the answer arrives. */
-typedef struct
-{
-  GtkWidget *icon;
-  AmlTaskScope *operation;
-} IconLoad;
-
-static void
-icon_load_free (IconLoad *load)
-{
-  g_clear_object (&load->icon);
-  if (load->operation != NULL)
-    aml_operation_unref (load->operation);
-  g_free (load);
-}
-
 /* Puts the project icon in @icon when it has been fetched; the
  * placeholder stays when there is none. The widget is held for the length
  * of the fetch, so a row that goes away first is still there to be told. */
@@ -412,7 +399,7 @@ static void
 modpack_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                     gpointer user_data)
 {
-  IconLoad *load = user_data;
+  AmlIconLoad *load = user_data;
   g_autoptr (GError) error = NULL;
   g_autofree char *path = aml_icon_load_finish (result, &error);
 
@@ -421,7 +408,7 @@ modpack_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
              (const char *) g_object_get_data (G_OBJECT (load->icon),
                                                "aml-icon-url"));
 
-  icon_load_free (load);
+  aml_icon_load_free (load);
 }
 
 /* Kicks off one row's icon and remembers the url on the widget, so a
@@ -429,7 +416,7 @@ modpack_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 start_modpack_icon (GtkWidget *icon, const char *url)
 {
-  IconLoad *load = g_new0 (IconLoad, 1);
+  AmlIconLoad *load = g_new0 (AmlIconLoad, 1);
 
   g_object_set_data_full (G_OBJECT (icon), "aml-icon-url", g_strdup (url),
                           g_free);
@@ -1059,24 +1046,6 @@ plain_label (const char *text)
 
 /* The words the dialog shows while the description and the versions are
    on their way. */
-static GtkWidget *
-loading_child (void)
-{
-  GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
-  AdwSpinner *spinner = ADW_SPINNER (adw_spinner_new ());
-  GtkLabel *label = GTK_LABEL (gtk_label_new (_("Loading…")));
-
-  gtk_widget_set_valign (GTK_WIDGET (box), GTK_ALIGN_CENTER);
-  gtk_widget_set_halign (GTK_WIDGET (box), GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (GTK_WIDGET (spinner), GTK_ALIGN_CENTER);
-  gtk_widget_set_halign (GTK_WIDGET (spinner), GTK_ALIGN_CENTER);
-  gtk_widget_add_css_class (GTK_WIDGET (label), "dim-label");
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (spinner));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (label));
-
-  return GTK_WIDGET (box);
-}
-
 /* Closes the open pack, leaving the list the whole dialog again. The row
  * of the pack is the way in and the way out, so nothing has to stand
  * above the pack and push its name down. */
@@ -1478,7 +1447,7 @@ dialog_details_open (AmlDownloadModpackDialog *self)
   g_free (self->versions_problem);
   self->versions_problem = NULL;
 
-  show_details_page (self, loading_child ());
+  show_details_page (self, aml_ui_loading_child ());
 
   if (self->fetch != NULL)
     g_cancellable_cancel (self->fetch);

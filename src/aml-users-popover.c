@@ -9,6 +9,7 @@
 #include "aml-sign-in-dialog.h"
 #include "aml-skin-view.h"
 #include "aml-fs.h"
+#include "aml-ui-feedback.h"
 
 #include <libsoup/soup.h>
 
@@ -271,19 +272,13 @@ skin_name_for_url (const char *url)
 }
 
 static char *
-skin_identity (const char *url)
-{
-  return skin_name_for_url (url);
-}
-
-static char *
 cached_skin_path (const char *url)
 {
   if (url == NULL || (!g_str_has_prefix (url, "http://") &&
                       !g_str_has_prefix (url, "https://")))
     return NULL;
   {
-    g_autofree char *name = g_strconcat (skin_identity (url), ".png", NULL);
+    g_autofree char *name = g_strconcat (skin_name_for_url (url), ".png", NULL);
     return g_build_filename (skin_directory_path (), name, NULL);
   }
 }
@@ -337,7 +332,7 @@ append_local_skins (SkinMenu *menu)
         continue;
       path = g_build_filename (directory, name, NULL);
       uri = g_filename_to_uri (path, NULL, NULL);
-      g_autofree char *identity = uri != NULL ? skin_identity (uri) : NULL;
+      g_autofree char *identity = uri != NULL ? skin_name_for_url (uri) : NULL;
       if (uri == NULL || g_hash_table_contains (menu->skin_urls, identity) ||
           g_hash_table_contains (menu->deleted_skin_ids, identity))
         continue;
@@ -382,7 +377,7 @@ append_default_skins (SkinMenu *menu)
       if (!g_file_test (target_path, G_FILE_TEST_IS_REGULAR))
         aml_fs_copy_file (source, target, G_FILE_COPY_NONE, NULL, NULL);
       uri = g_filename_to_uri (target_path, NULL, NULL);
-      g_autofree char *identity = uri != NULL ? skin_identity (uri) : NULL;
+      g_autofree char *identity = uri != NULL ? skin_name_for_url (uri) : NULL;
       if (uri != NULL && !g_hash_table_contains (menu->skin_urls, identity) &&
           !g_hash_table_contains (menu->deleted_skin_ids, identity))
         {
@@ -703,13 +698,13 @@ remove_skin_row (SkinMenu *menu, GtkListBoxRow *row)
   else if (url != NULL && (g_str_has_prefix (url, "http://") ||
                            g_str_has_prefix (url, "https://")))
     {
-      g_autofree char *name = g_strconcat (skin_identity (url), ".png", NULL);
+      g_autofree char *name = g_strconcat (skin_name_for_url (url), ".png", NULL);
       path = g_build_filename (skin_directory_path (), name, NULL);
     }
   if (path != NULL)
     aml_fs_unlink (path, NULL);
   if (url != NULL)
-    g_hash_table_add (menu->deleted_skin_ids, g_strdup (skin_identity (url)));
+    g_hash_table_add (menu->deleted_skin_ids, g_strdup (skin_name_for_url (url)));
 
   int index = gtk_list_box_row_get_index (row);
   gtk_list_box_remove (menu->skins, GTK_WIDGET (row));
@@ -907,7 +902,7 @@ skin_row_new (SkinMenu *menu, const char *name, const char *url)
   set_avatar_icon (image);
   if (url != NULL)
     {
-      g_autofree char *identity = skin_identity (url);
+      g_autofree char *identity = skin_name_for_url (url);
       g_hash_table_add (menu->skin_urls, g_strdup (identity));
       g_object_set_data_full (G_OBJECT (row), "aml-skin-url", g_strdup (url), g_free);
       if (g_str_has_prefix (url, "file://"))
@@ -952,7 +947,7 @@ append_profile_skins (SkinMenu *menu, const char *json)
       if (url != NULL)
         {
           g_autofree char *fallback_name = NULL;
-          g_autofree char *identity = skin_identity (url);
+          g_autofree char *identity = skin_name_for_url (url);
           if (is_default_skin_alias (alias))
             {
               if (menu->current_skin_row != NULL)
@@ -1125,9 +1120,9 @@ skin_menu_new (AmlUsersPopover *owner, GtkImage *image, AmlAccount *account)
   if (account->type != AML_ACCOUNT_OFFLINE && account->avatar_url != NULL)
     {
       if (!g_hash_table_contains (data->skin_urls,
-                                  skin_identity (account->avatar_url)) &&
+                                  skin_name_for_url (account->avatar_url)) &&
           !g_hash_table_contains (data->deleted_skin_ids,
-                                  skin_identity (account->avatar_url)))
+                                  skin_name_for_url (account->avatar_url)))
         {
           g_autofree char *skin_name = skin_name_for_url (account->avatar_url);
           gboolean cached = FALSE;
@@ -1192,13 +1187,6 @@ show_error (AmlUsersPopover *self, const char *message)
 {
   gtk_label_set_text (GTK_LABEL (self->error_label), message);
   gtk_widget_set_visible (GTK_WIDGET (self->error_label), TRUE);
-}
-
-static void
-clear_error (AmlUsersPopover *self)
-{
-  gtk_label_set_text (GTK_LABEL (self->error_label), NULL);
-  gtk_widget_set_visible (GTK_WIDGET (self->error_label), FALSE);
 }
 
 /* The account a widget in a row is about, which is the id of the account
@@ -1417,7 +1405,7 @@ add_account (AmlUsersPopover *self, AmlAccount *account)
   if (!aml_accounts_add (self->accounts, account, &error))
     show_error (self, error->message);
   else
-    clear_error (self);
+    aml_ui_clear_error_label (self->error_label);
 }
 
 static void
