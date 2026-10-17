@@ -39,6 +39,7 @@ struct _AmlUsersPopover
      that wants one is on screen, and a fetch that is still running when
      the rows are built again is stopped with this. */
   GCancellable *avatars;
+  GHashTable *avatar_cache;
 
   char *active_name;
 };
@@ -100,13 +101,29 @@ face_texture (GdkTexture *skin)
                                  face_stride);
 }
 
+typedef struct
+{
+  GtkImage *image;
+  GHashTable *cache;
+  char *url;
+} AvatarLoad;
+
+static void
+avatar_load_free (AvatarLoad *load)
+{
+  g_clear_object (&load->image);
+  g_clear_pointer (&load->cache, g_hash_table_unref);
+  g_free (load->url);
+  g_free (load);
+}
+
 static void
 on_skin_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
 {
   /* The image is held by a reference for as long as the fetch lasts, so
      that a row which is gone by the time the skin arrives is not written
      to. */
-  g_autoptr (GtkImage) image = user_data;
+  AvatarLoad *load = user_data;
   g_autoptr (GError) error = NULL;
   g_autoptr (GBytes) bytes = NULL;
   g_autoptr (GdkTexture) skin = NULL;
@@ -117,17 +134,24 @@ on_skin_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
   /* A skin that cannot be fetched or read is no reason to fail anything:
      the icon every account has stands in for it. */
   if (bytes == NULL)
-    return;
+    goto done;
 
   skin = gdk_texture_new_from_bytes (bytes, &error);
 
   if (skin == NULL)
-    return;
+    goto done;
 
   face = face_texture (skin);
 
   if (face != NULL)
-    gtk_image_set_from_paintable (image, GDK_PAINTABLE (face));
+    {
+      g_hash_table_replace (load->cache, g_strdup (load->url),
+                            g_object_ref (face));
+      gtk_image_set_from_paintable (load->image, GDK_PAINTABLE (face));
+    }
+
+done:
+  avatar_load_free (load);
 }
 
 /* Shows the face of @url in @image, or leaves the icon that is already
@@ -138,13 +162,25 @@ set_avatar (AmlUsersPopover *self,
             const char       *url)
 {
   g_autoptr (GFile) file = NULL;
+  GdkTexture *cached = NULL;
+  AvatarLoad *load = NULL;
 
   if (url == NULL || *url == '\0')
     return;
 
+  cached = g_hash_table_lookup (self->avatar_cache, url);
+  if (cached != NULL)
+    {
+      gtk_image_set_from_paintable (image, GDK_PAINTABLE (cached));
+      return;
+    }
+
   file = g_file_new_for_uri (url);
-  g_file_load_bytes_async (file, self->avatars, on_skin_downloaded,
-                           g_object_ref (image));
+  load = g_new0 (AvatarLoad, 1);
+  load->image = g_object_ref (image);
+  load->cache = g_hash_table_ref (self->avatar_cache);
+  load->url = g_strdup (url);
+  g_file_load_bytes_async (file, self->avatars, on_skin_downloaded, load);
 }
 
 /* The icon every account has, and what an offline account has as its
@@ -765,6 +801,8 @@ aml_users_popover_constructed (GObject *object)
   G_OBJECT_CLASS (aml_users_popover_parent_class)->constructed (object);
 
   self->avatars = g_cancellable_new ();
+  self->avatar_cache = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
+                                              g_object_unref);
   rebuild (self);
 }
 
@@ -787,6 +825,7 @@ aml_users_popover_finalize (GObject *object)
 
   g_clear_object (&self->accounts);
   g_clear_object (&self->button_content);
+  g_clear_pointer (&self->avatar_cache, g_hash_table_unref);
   g_free (self->active_name);
 
   G_OBJECT_CLASS (aml_users_popover_parent_class)->finalize (object);
