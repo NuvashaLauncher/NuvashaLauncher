@@ -114,12 +114,6 @@ on_input_changed (GObject *object G_GNUC_UNUSED,
 }
 
 static void
-on_cancel_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
-{
-  adw_dialog_close (ADW_DIALOG (user_data));
-}
-
-static void
 on_create_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   AmlCreateInstanceDialog *self = AML_CREATE_INSTANCE_DIALOG (user_data);
@@ -257,7 +251,7 @@ aml_create_instance_dialog_init (AmlCreateInstanceDialog *self)
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (group)), GTK_WIDGET (self->directory_row));
 
   GtkButton *cancel_button = GTK_BUTTON (gtk_button_new_with_label (_("Cancel")));
-  g_signal_connect (cancel_button, "clicked", G_CALLBACK (on_cancel_clicked),
+  g_signal_connect (cancel_button, "clicked", G_CALLBACK (aml_ui_cancel_dialog),
                     self);
 
   self->create_button = GTK_BUTTON (gtk_button_new_with_label (_("Create")));

@@ -151,13 +151,13 @@ aml_loader_read_zip_entry (const char *path, const char *entry, GError **error)
           const void *block = NULL;
           size_t size = 0;
           la_int64_t offset = 0;
-          int status =
-            archive_read_data_block (archive, &block, &size, &offset);
+           int read_status =
+             archive_read_data_block (archive, &block, &size, &offset);
 
-          if (status == ARCHIVE_EOF)
-            break;
+           if (read_status == ARCHIVE_EOF)
+             break;
 
-          if (status != ARCHIVE_OK)
+           if (read_status != ARCHIVE_OK)
             {
               g_set_error (error, AML_LOADERS_ERROR,
                            AML_LOADERS_ERROR_INSTALLER,
@@ -317,7 +317,7 @@ aml_loader_write_jar_manifest_attribute (const char *path, const char *name,
       const void *block = NULL;
       size_t size = 0;
       la_int64_t offset = 0;
-      int status;
+       int copy_status;
 
       if (archive_entry_pathname (header) == NULL)
         {
@@ -398,9 +398,9 @@ aml_loader_write_jar_manifest_attribute (const char *path, const char *name,
 
           for (;;)
             {
-              status = archive_read_data_block (in, &block, &size, &offset);
+               copy_status = archive_read_data_block (in, &block, &size, &offset);
 
-              if (status != ARCHIVE_OK)
+               if (copy_status != ARCHIVE_OK)
                 break;
 
               if (archive_write_data (out, block, size) != (la_ssize_t) size)

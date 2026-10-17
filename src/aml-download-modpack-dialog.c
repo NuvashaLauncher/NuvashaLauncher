@@ -392,38 +392,8 @@ result_row_activated (AdwActionRow *row, gpointer user_data)
 
 /* What one row's icon load keeps alive: the widget the image goes in, and
  * the operation that has to be released when the answer arrives. */
-/* Puts the project icon in @icon when it has been fetched; the
- * placeholder stays when there is none. The widget is held for the length
- * of the fetch, so a row that goes away first is still there to be told. */
-static void
-modpack_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
-                    gpointer user_data)
-{
-  AmlIconLoad *load = user_data;
-  g_autoptr (GError) error = NULL;
-  g_autofree char *path = aml_icon_load_finish (result, &error);
-
-  if (path != NULL && !aml_icon_widget_set_file (load->icon, path))
-    g_debug ("the icon for \"%s\" could not be decoded",
-             (const char *) g_object_get_data (G_OBJECT (load->icon),
-                                               "aml-icon-url"));
-
-  aml_icon_load_free (load);
-}
-
 /* Kicks off one row's icon and remembers the url on the widget, so a
  * failed decode can name it in the log. */
-static void
-start_modpack_icon (GtkWidget *icon, const char *url)
-{
-  AmlIconLoad *load = g_new0 (AmlIconLoad, 1);
-
-  g_object_set_data_full (G_OBJECT (icon), "aml-icon-url", g_strdup (url),
-                          g_free);
-  load->icon = g_object_ref (icon);
-  load->operation = aml_icon_load_async (url, modpack_icon_ready, load);
-}
-
 /* The rows of a page of results. @append is FALSE for a new search, which
  * starts the list over, and TRUE for the next page, which is added to what
  * is already there. */
@@ -530,7 +500,7 @@ results_arrived (AmlDownloadModpackDialog *self, AmlModrinthResults *results,
           adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (GTK_WIDGET (row)), FALSE);
 
           gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
-          start_modpack_icon (icon, project->icon_url);
+          aml_icon_load_start (icon, project->icon_url);
 
           adw_action_row_add_prefix (ADW_ACTION_ROW (GTK_WIDGET (row)), icon);
 

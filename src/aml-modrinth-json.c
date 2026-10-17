@@ -513,9 +513,9 @@ aml_modrinth_results_from_json (const char *json, gssize length,
 
   {
     JsonArray *array = json_node_get_array (hits);
-    guint length = json_array_get_length (array);
+    guint hit_count = json_array_get_length (array);
 
-    for (guint i = 0; i < length; i++)
+    for (guint i = 0; i < hit_count; i++)
       {
         JsonNode *hit = json_array_get_element (array, i);
 

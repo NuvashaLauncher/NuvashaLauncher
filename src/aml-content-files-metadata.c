@@ -349,15 +349,15 @@ apply_local_json (AmlContentFile *file, const char *name,
         JsonObject *metadata = json_object_member (object, "metadata");
         if (metadata != NULL)
           {
-            char *name = json_string_member (metadata, "name");
+            char *metadata_name = json_string_member (metadata, "name");
             char *description = json_string_member (metadata, "description");
-            if (name != NULL)
+            if (metadata_name != NULL)
               {
                 g_free (file->project_name);
-                file->project_name = name;
+                file->project_name = metadata_name;
               }
             else
-              g_free (name);
+              g_free (metadata_name);
             file->description = description;
             *icon_member = json_icon_member (metadata);
           }

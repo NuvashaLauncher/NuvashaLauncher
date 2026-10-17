@@ -68,13 +68,6 @@ aml_content_index_entry_free (AmlContentIndexEntry *entry)
   g_free (entry);
 }
 
-static GPtrArray *
-empty_entries (void)
-{
-  return g_ptr_array_new_with_free_func (
-    (GDestroyNotify) aml_content_index_entry_free);
-}
-
 static void
 read_dependencies (JsonObject *object, AmlContentIndexEntry *entry)
 {
@@ -192,7 +185,8 @@ load_entries_sync (const char *instance_directory, AmlContentType type,
 {
   g_autofree char *directory = index_directory (instance_directory, type);
   GDir *dir = g_dir_open (directory, 0, NULL);
-  GPtrArray *entries = empty_entries ();
+  GPtrArray *entries = g_ptr_array_new_with_free_func (
+    (GDestroyNotify) aml_content_index_entry_free);
 
   if (dir == NULL)
     return entries;

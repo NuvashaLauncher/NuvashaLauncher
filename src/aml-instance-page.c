@@ -796,10 +796,10 @@ create_settings_page (AmlInstancePage *self)
   /* The loader and one of its versions: changing either of them changes
      what this instance runs, so both are stored like the version above. */
   {
-    AmlLoader loader = AML_LOADER_VANILLA;
+    AmlLoader instance_loader = AML_LOADER_VANILLA;
 
-    g_object_get (self->instance, "loader", &loader, NULL);
-    self->loader = loader;
+    g_object_get (self->instance, "loader", &instance_loader, NULL);
+    self->loader = instance_loader;
     self->loader_version = g_steal_pointer (&loader_version);
   }
 

@@ -14,5 +14,9 @@ typedef struct
 } AmlIconLoad;
 
 void aml_icon_load_free (AmlIconLoad *load);
+void aml_icon_load_apply (AmlIconLoad *load, GAsyncResult *result);
+void aml_icon_load_ready (GObject *source, GAsyncResult *result,
+                          gpointer user_data);
+AmlIconLoad *aml_icon_load_start (GtkWidget *icon, const char *url);
 
 #endif /* AML_ICON_LOAD_PRIVATE_H */
