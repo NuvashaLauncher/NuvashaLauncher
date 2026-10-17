@@ -76,7 +76,7 @@ Debian:
 sudo apt install build-essential pkg-config \
     gettext \
     libglib2.0-dev \
-    libgtk-4-dev libadwaita-1-dev libjson-glib-dev libsoup-3.0-dev \
+    libgtk-4-dev libadwaita-1-dev libepoxy-dev libjson-glib-dev libsoup-3.0-dev \
     libarchive-dev
 ```
 
