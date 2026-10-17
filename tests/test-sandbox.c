@@ -44,6 +44,8 @@ test_wraps_command (void)
   g_assert_true (contains (wrapped, "--unshare-pid"));
   g_assert_true (contains (wrapped, "--unshare-uts"));
   g_assert_true (contains (wrapped, "--setenv"));
+  g_assert_true (contains (wrapped, "AML_OPEN_BROKER_SOCKET"));
+  g_assert_true (contains (wrapped, "/usr/bin/xdg-open"));
   g_assert_true (contains (wrapped, root));
   g_assert_false (contains (wrapped, "--unshare-net"));
 

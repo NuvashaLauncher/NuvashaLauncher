@@ -13,6 +13,7 @@
 #include "aml-main-window.h"
 #include "aml-download.h"
 #include "aml-settings.h"
+#include "aml-open-broker.h"
 
 static void
 on_quit (GSimpleAction *action G_GNUC_UNUSED,
@@ -113,6 +114,12 @@ main (int argc, char **argv)
       g_print ("AML %s\n", AML_VERSION);
       return 0;
     }
+
+  /* This mode is mounted over xdg-open inside a game sandbox. It has no GTK
+   * startup and can only forward a file URI to AML's host-side broker. */
+  if (argc == 2 && g_getenv ("AML_OPEN_BROKER_SOCKET") != NULL)
+    return aml_open_broker_request (g_getenv ("AML_OPEN_BROKER_SOCKET"),
+                                    argv[1]);
 
   if (!gtk_init_check ())
     {
