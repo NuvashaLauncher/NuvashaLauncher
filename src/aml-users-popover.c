@@ -193,6 +193,31 @@ set_avatar_icon (GtkImage *image)
   gtk_image_set_from_icon_name (image, "avatar-default-symbolic");
 }
 
+static gboolean
+set_local_avatar (GtkImage *image, const char *path)
+{
+  g_autoptr (GFile) file = g_file_new_for_path (path);
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GdkTexture) skin = gdk_texture_new_from_file (file, &error);
+  g_autoptr (GdkTexture) face = NULL;
+
+  if (skin == NULL || (face = face_texture (skin)) == NULL)
+    return FALSE;
+  gtk_image_set_from_paintable (image, GDK_PAINTABLE (face));
+  return TRUE;
+}
+
+static char *
+default_steve_path (void)
+{
+  g_autofree char *global = g_build_filename (g_get_user_data_dir (), "AML", "skins", "defaults", "Steve.png", NULL);
+  g_autofree char *installed = g_build_filename (AML_DATA_DIR, "skins", "defaults", "Steve.png", NULL);
+  g_autofree char *source = g_build_filename (AML_SOURCE_DATA_DIR, "skins", "defaults", "Steve.png", NULL);
+  if (g_file_test (global, G_FILE_TEST_IS_REGULAR)) return g_steal_pointer (&global);
+  if (g_file_test (installed, G_FILE_TEST_IS_REGULAR)) return g_steal_pointer (&installed);
+  return g_steal_pointer (&source);
+}
+
 typedef struct
 {
   AmlUsersPopover *owner;
@@ -204,23 +229,147 @@ typedef struct
   GtkStringList *cape_list;
   GPtrArray *cape_ids;
   GPtrArray *cape_urls;
+  GHashTable *skin_urls;
+  GtkWidget *current_skin_row;
+  gboolean defaults_added;
+  SoupMessage *profile_message;
+  SoupMessage *cape_message;
   AmlAccount *account;
 } SkinMenu;
 
 static GtkWidget *skin_row_new (SkinMenu *menu, const char *name,
                                 const char *url);
 
+static char *
+skin_directory_path (void)
+{
+  return g_build_filename (g_get_user_data_dir (), "AML", "skins", NULL);
+}
+
+static char *
+skin_name_for_url (const char *url)
+{
+  if (url != NULL && (g_str_has_prefix (url, "http://") ||
+                      g_str_has_prefix (url, "https://")))
+    return g_compute_checksum_for_string (G_CHECKSUM_SHA256, url, -1);
+  if (url != NULL && g_str_has_prefix (url, "file://"))
+    {
+      g_autoptr (GFile) file = g_file_new_for_uri (url);
+      g_autofree char *basename = g_file_get_basename (file);
+      if (basename != NULL)
+        {
+          char *suffix = g_strrstr (basename, ".png");
+          if (suffix != NULL && suffix[4] == '\0')
+            *suffix = '\0';
+          return g_strdup (basename);
+        }
+    }
+  return g_strdup (_("Skin"));
+}
+
+static void
+append_local_skins (SkinMenu *menu)
+{
+  g_autofree char *directory = skin_directory_path ();
+  g_autoptr (GDir) dir = NULL;
+  const char *name;
+
+  if (g_mkdir_with_parents (directory, 0755) != 0 ||
+      (dir = g_dir_open (directory, 0, NULL)) == NULL)
+    return;
+  while ((name = g_dir_read_name (dir)) != NULL)
+    {
+      g_autofree char *path = NULL;
+      g_autofree char *uri = NULL;
+      if (!g_str_has_suffix (name, ".png"))
+        continue;
+      path = g_build_filename (directory, name, NULL);
+      uri = g_filename_to_uri (path, NULL, NULL);
+      if (uri == NULL || g_hash_table_contains (menu->skin_urls, uri))
+        continue;
+      gtk_list_box_append (menu->skins,
+                           skin_row_new (menu, name, uri));
+    }
+}
+
+static GtkWidget *
+append_default_skins (SkinMenu *menu)
+{
+  static const char *defaults[] = {
+    "Steve", "Alex", "Sunny", "Kai", "Makena", "Zuri", "Efe", "Ari", "Noor"
+  };
+  g_autofree char *source_dir = g_build_filename (AML_DATA_DIR, "skins", "defaults", NULL);
+  g_autofree char *source_fallback = g_build_filename (AML_SOURCE_DATA_DIR, "skins", "defaults", NULL);
+  g_autofree char *target_dir = g_build_filename (g_get_user_data_dir (), "AML", "skins", "defaults", NULL);
+  GtkWidget *steve_row = NULL;
+
+  if (menu->defaults_added || g_mkdir_with_parents (target_dir, 0755) != 0)
+    return NULL;
+  for (guint i = 0; i < G_N_ELEMENTS (defaults); i++)
+    {
+      const char *name = defaults[i];
+      g_autofree char *filename = g_strconcat (name, ".png", NULL);
+      g_autofree char *source_path = g_build_filename (source_dir, filename, NULL);
+      g_autofree char *fallback_path = g_build_filename (source_fallback, filename, NULL);
+      g_autofree char *target_path = g_build_filename (target_dir, filename, NULL);
+      g_autofree char *uri = NULL;
+      g_autoptr (GFile) source = NULL;
+      g_autoptr (GFile) target = NULL;
+
+      if (!g_file_test (source_path, G_FILE_TEST_IS_REGULAR))
+        {
+          g_clear_pointer (&source_path, g_free);
+          source_path = g_strdup (fallback_path);
+        }
+      if (!g_file_test (source_path, G_FILE_TEST_IS_REGULAR))
+        continue;
+      source = g_file_new_for_path (source_path);
+      target = g_file_new_for_path (target_path);
+      if (!g_file_test (target_path, G_FILE_TEST_IS_REGULAR))
+        g_file_copy (source, target, G_FILE_COPY_NONE, NULL, NULL, NULL, NULL);
+      uri = g_filename_to_uri (target_path, NULL, NULL);
+      if (uri != NULL && !g_hash_table_contains (menu->skin_urls, uri))
+        {
+          GtkWidget *row = skin_row_new (menu, name, uri);
+          gtk_list_box_append (menu->skins, row);
+          if (g_str_equal (name, "Steve"))
+            steve_row = row;
+        }
+    }
+  menu->defaults_added = TRUE;
+  return steve_row;
+}
+
 typedef struct
 {
   AmlSkinView *view;
   gboolean cape;
+  char *url;
 } SkinTextureLoad;
+
+static char *skin_directory_path (void);
 
 static void
 skin_texture_load_free (SkinTextureLoad *load)
 {
   g_clear_object (&load->view);
+  g_free (load->url);
   g_free (load);
+}
+
+static void
+cache_skin_bytes (const char *url, GBytes *bytes)
+{
+  g_autofree char *cache_directory = skin_directory_path ();
+  g_autofree char *hash = g_compute_checksum_for_string (G_CHECKSUM_SHA256,
+                                                          url, -1);
+  g_autofree char *name = g_strconcat (hash, ".png", NULL);
+  g_autofree char *path = g_build_filename (cache_directory, name, NULL);
+  gsize length = 0;
+  gconstpointer data = g_bytes_get_data (bytes, &length);
+
+  if (g_mkdir_with_parents (cache_directory, 0755) == 0)
+    g_file_set_contents (path, data, (gssize) length, NULL);
 }
 
 static void
@@ -234,6 +383,10 @@ on_view_texture_loaded (GObject *source, GAsyncResult *result, gpointer user_dat
 
   if (bytes != NULL)
     texture = gdk_texture_new_from_bytes (bytes, &error);
+  if (bytes != NULL && !load->cape && load->url != NULL &&
+      (g_str_has_prefix (load->url, "http://") ||
+       g_str_has_prefix (load->url, "https://")))
+    cache_skin_bytes (load->url, bytes);
   if (texture == NULL && error != NULL)
     g_warning ("Could not load skin preview texture: %s", error->message);
   if (texture != NULL)
@@ -262,6 +415,7 @@ load_view_texture (AmlSkinView *view, const char *url, gboolean cape)
   load = g_new0 (SkinTextureLoad, 1);
   load->view = g_object_ref (view);
   load->cape = cape;
+  load->url = g_strdup (url);
   g_file_load_bytes_async (file, NULL, on_view_texture_loaded, load);
 }
 
@@ -277,8 +431,8 @@ on_capes_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
   JsonArray *capes = NULL;
 
   if (bytes == NULL ||
-      soup_message_get_status (g_object_get_data (G_OBJECT (source),
-                                                  "aml-cape-message")) != 200)
+      menu->cape_message == NULL ||
+      soup_message_get_status (menu->cape_message) != 200)
     goto done;
 
   parser = json_parser_new ();
@@ -375,6 +529,7 @@ load_capes (SkinMenu *menu)
   g_free (authorization);
   g_object_set_data_full (G_OBJECT (session), "aml-cape-message", message,
                           g_object_unref);
+  menu->cape_message = g_object_ref (message);
   soup_session_send_and_read_async (session, message, G_PRIORITY_DEFAULT, NULL,
                                     on_capes_loaded, menu);
   g_object_unref (session);
@@ -392,6 +547,26 @@ on_skin_file_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
   file = gtk_file_dialog_open_finish (GTK_FILE_DIALOG (source), result, &error);
   if (file == NULL)
     goto done;
+
+  {
+    g_autofree char *directory = skin_directory_path ();
+    g_autofree char *source_uri = g_file_get_uri (file);
+    g_autofree char *hash = g_compute_checksum_for_string (G_CHECKSUM_SHA256,
+                                                            source_uri, -1);
+    g_autofree char *basename = g_strconcat (hash, ".png", NULL);
+    g_autofree char *destination_path = NULL;
+    g_autoptr (GFile) destination = NULL;
+
+    if (basename == NULL || g_mkdir_with_parents (directory, 0755) != 0)
+      goto done;
+    destination_path = g_build_filename (directory, basename, NULL);
+    destination = g_file_new_for_path (destination_path);
+    if (!g_file_copy (file, destination, G_FILE_COPY_OVERWRITE,
+                      NULL, NULL, NULL, &error))
+      goto done;
+    g_clear_object (&file);
+    file = g_steal_pointer (&destination);
+  }
 
   skin = gdk_texture_new_from_file (file, &error);
   if (skin == NULL ||
@@ -466,6 +641,24 @@ on_remove_skin_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 }
 
 static void
+on_open_skins_clicked (GtkButton *button G_GNUC_UNUSED,
+                       gpointer user_data G_GNUC_UNUSED)
+{
+  g_autofree char *directory =
+    g_build_filename (g_get_user_data_dir (), "AML", "skins", NULL);
+  g_autofree char *uri = NULL;
+  g_autoptr (GError) error = NULL;
+
+  if (g_mkdir_with_parents (directory, 0755) != 0)
+    return;
+  uri = g_filename_to_uri (directory, NULL, NULL);
+  if (uri == NULL ||
+      !g_app_info_launch_default_for_uri (uri, NULL, &error))
+    if (error != NULL)
+      g_warning ("Could not open skins folder: %s", error->message);
+}
+
+static void
 on_export_skin_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
   g_autoptr (GError) error = NULL;
@@ -513,7 +706,7 @@ on_skin_selected (GtkListBox *list, GtkListBoxRow *row, gpointer user_data)
   g_object_set_data_full (G_OBJECT (menu->dialog), "aml-selected-skin",
                           g_strdup (url), g_free);
   gtk_list_box_select_row (list, row);
-  set_avatar (menu->owner, menu->image, url);
+  set_avatar_icon (menu->image);
   load_view_texture (menu->view, url, FALSE);
 
   /* Keep AML's cached profile in step with the selection so the account row
@@ -540,9 +733,17 @@ skin_row_new (SkinMenu *menu, const char *name, const char *url)
   set_avatar_icon (image);
   if (url != NULL)
     {
+      g_hash_table_add (menu->skin_urls, g_strdup (url));
       g_object_set_data_full (G_OBJECT (row), "aml-skin-url", g_strdup (url), g_free);
-      /* The account avatar cache is used for the same Minecraft texture URL. */
-      set_avatar (menu->owner, image, url);
+      if (g_str_has_prefix (url, "file://"))
+        {
+          g_autoptr (GFile) file = g_file_new_for_uri (url);
+          g_autofree char *path = g_file_get_path (file);
+          if (path == NULL || !set_local_avatar (image, path))
+            set_avatar_icon (image);
+        }
+      else
+        set_avatar (menu->owner, image, url);
     }
   adw_action_row_add_prefix (row, GTK_WIDGET (image));
   return GTK_WIDGET (row);
@@ -570,7 +771,23 @@ append_profile_skins (SkinMenu *menu, const char *json)
       const char *url = json_object_get_string_member_with_default (skin, "url", NULL);
       const char *alias = json_object_get_string_member_with_default (skin, "alias", NULL);
       if (url != NULL)
-        gtk_list_box_append (menu->skins, skin_row_new (menu, alias, url));
+        {
+          g_autofree char *fallback_name = NULL;
+          if (g_hash_table_contains (menu->skin_urls, url))
+            {
+              if (menu->current_skin_row != NULL && alias != NULL && *alias != '\0')
+                adw_preferences_row_set_title (
+                  ADW_PREFERENCES_ROW (menu->current_skin_row), alias);
+              continue;
+            }
+          if (alias == NULL || *alias == '\0')
+            fallback_name = skin_name_for_url (url);
+          gtk_list_box_append (menu->skins,
+                               skin_row_new (menu,
+                                             alias != NULL && *alias != '\0'
+                                               ? alias : fallback_name,
+                                             url));
+        }
     }
 }
 
@@ -582,14 +799,15 @@ on_profile_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
   g_autoptr (GBytes) bytes =
     soup_session_send_and_read_finish (SOUP_SESSION (source), result, &error);
 
-  if (bytes != NULL && soup_message_get_status (
-        g_object_get_data (G_OBJECT (source), "aml-profile-message")) == 200)
+  if (bytes != NULL && menu->profile_message != NULL &&
+      soup_message_get_status (menu->profile_message) == 200)
     {
       gsize length = 0;
       const char *data = g_bytes_get_data (bytes, &length);
       g_autofree char *json = g_strndup (data, length);
       append_profile_skins (menu, json);
     }
+  append_default_skins (menu);
   /* Keep the controller alive: rows may be selected after the request
    * completes. */
 }
@@ -612,6 +830,7 @@ load_profile_skins (SkinMenu *menu)
   g_free (authorization);
   g_object_set_data_full (G_OBJECT (session), "aml-profile-message", message,
                           g_object_unref);
+  menu->profile_message = g_object_ref (message);
   soup_session_send_and_read_async (session, message, G_PRIORITY_DEFAULT, NULL,
                                     on_profile_loaded, menu);
   g_object_unref (session);
@@ -637,6 +856,7 @@ skin_menu_new (AmlUsersPopover *owner, GtkImage *image, AmlAccount *account)
   GtkDropDown *capes = GTK_DROP_DOWN (gtk_drop_down_new (G_LIST_MODEL (cape_list), NULL));
   GtkButton *import = GTK_BUTTON (gtk_button_new_with_label (_("Import skin…")));
   GtkButton *export = GTK_BUTTON (gtk_button_new_with_label (_("Export skin…")));
+  GtkButton *open_skins = GTK_BUTTON (gtk_button_new_from_icon_name ("folder-symbolic"));
   GtkButton *remove = GTK_BUTTON (gtk_button_new_from_icon_name ("user-trash-symbolic"));
   GtkBox *actions = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
   GtkBox *action_spacer = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
@@ -650,13 +870,15 @@ skin_menu_new (AmlUsersPopover *owner, GtkImage *image, AmlAccount *account)
   data->cape_list = g_object_ref (cape_list);
   data->cape_ids = g_ptr_array_new_with_free_func (g_free);
   data->cape_urls = g_ptr_array_new_with_free_func (g_free);
+  data->skin_urls = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
   data->capes = capes;
   data->account = account;
   g_object_set_data (G_OBJECT (slim_model), "aml-slim", GINT_TO_POINTER (1));
   g_signal_connect (import, "clicked", G_CALLBACK (on_import_skin_clicked), data);
   g_signal_connect (export, "clicked", G_CALLBACK (on_export_skin_clicked), data);
+  g_signal_connect (open_skins, "clicked", G_CALLBACK (on_open_skins_clicked), NULL);
   g_signal_connect (remove, "clicked", G_CALLBACK (on_remove_skin_clicked), data);
-  g_signal_connect (skins, "row-activated", G_CALLBACK (on_skin_selected), data);
+  g_signal_connect (skins, "row-selected", G_CALLBACK (on_skin_selected), data);
   g_signal_connect (default_model, "toggled", G_CALLBACK (on_model_toggled), data);
   g_signal_connect (slim_model, "toggled", G_CALLBACK (on_model_toggled), data);
 
@@ -675,7 +897,9 @@ skin_menu_new (AmlUsersPopover *owner, GtkImage *image, AmlAccount *account)
   gtk_widget_set_hexpand (GTK_WIDGET (export), FALSE);
   gtk_widget_set_hexpand (GTK_WIDGET (import), FALSE);
   gtk_widget_set_hexpand (GTK_WIDGET (remove), FALSE);
+  gtk_widget_set_hexpand (GTK_WIDGET (open_skins), FALSE);
   gtk_widget_set_halign (GTK_WIDGET (remove), GTK_ALIGN_END);
+  gtk_widget_set_tooltip_text (GTK_WIDGET (open_skins), _("Open Skins Folder"));
   gtk_widget_set_hexpand (GTK_WIDGET (action_spacer), TRUE);
   gtk_box_append (left, GTK_WIDGET (preview));
   gtk_box_append (left, GTK_WIDGET (capes));
@@ -686,6 +910,7 @@ skin_menu_new (AmlUsersPopover *owner, GtkImage *image, AmlAccount *account)
   gtk_box_append (actions, GTK_WIDGET (import));
   gtk_box_append (actions, GTK_WIDGET (export));
   gtk_box_append (actions, GTK_WIDGET (action_spacer));
+  gtk_box_append (actions, GTK_WIDGET (open_skins));
   gtk_box_append (actions, GTK_WIDGET (remove));
   gtk_box_append (right, GTK_WIDGET (actions));
   gtk_widget_set_margin_start (GTK_WIDGET (root), 24);
@@ -701,10 +926,34 @@ skin_menu_new (AmlUsersPopover *owner, GtkImage *image, AmlAccount *account)
   adw_toolbar_view_add_top_bar (toolbar, GTK_WIDGET (header));
   adw_toolbar_view_set_content (toolbar, GTK_WIDGET (root));
   adw_dialog_set_child (dialog, GTK_WIDGET (toolbar));
-  if (account->avatar_url != NULL)
+  append_local_skins (data);
+  if (account->type != AML_ACCOUNT_OFFLINE && account->avatar_url != NULL)
     {
-      gtk_list_box_append (skins, skin_row_new (data, _("Current skin"), account->avatar_url));
-      load_view_texture (preview, account->avatar_url, FALSE);
+      if (!g_hash_table_contains (data->skin_urls, account->avatar_url))
+        {
+          g_autofree char *skin_name = skin_name_for_url (account->avatar_url);
+          gboolean cached = FALSE;
+          if (g_str_has_prefix (account->avatar_url, "http://") ||
+              g_str_has_prefix (account->avatar_url, "https://"))
+            {
+              g_autofree char *cached_name = g_strconcat (skin_name, ".png", NULL);
+              g_autofree char *cached_path =
+                g_build_filename (skin_directory_path (), cached_name, NULL);
+              cached = g_file_test (cached_path, G_FILE_TEST_IS_REGULAR);
+            }
+          if (!cached)
+            {
+              data->current_skin_row = skin_row_new (data, skin_name, account->avatar_url);
+              gtk_list_box_append (skins, data->current_skin_row);
+            }
+          load_view_texture (preview, account->avatar_url, FALSE);
+        }
+    }
+  else
+    {
+      GtkWidget *steve_row = append_default_skins (data);
+      if (steve_row != NULL)
+        gtk_list_box_select_row (skins, GTK_LIST_BOX_ROW (steve_row));
     }
   g_signal_connect (capes, "notify::selected", G_CALLBACK (on_cape_selected), data);
   load_capes (data);
@@ -732,7 +981,7 @@ update_the_button (AmlUsersPopover *self)
     }
 
   self->active_name = g_strdup (account->name);
-  set_avatar (self, GTK_IMAGE (self->avatar_image), account->avatar_url);
+  set_avatar_icon (GTK_IMAGE (self->avatar_image));
 
 }
 
@@ -766,25 +1015,43 @@ static GtkWidget *skin_menu_new (AmlUsersPopover *owner, GtkImage *image,
                                  AmlAccount *account);
 
 static void
-on_row_activated (AdwActionRow *row, gpointer user_data G_GNUC_UNUSED)
+open_skin_menu_for_account (AmlUsersPopover *self, const char *id,
+                            GtkImage *image)
 {
-  AmlUsersPopover *self = AML_USERS_POPOVER (user_data);
-  const char *id = account_id_of (row);
   AmlAccount *account = aml_accounts_find (self->accounts, id);
-  GtkImage *image = g_object_get_data (G_OBJECT (row), "aml-account-image");
   GtkWidget *dialog;
 
   if (account == NULL || image == NULL)
     return;
-
-  /* The account chooser is only the launcher for this view.  Close it before
-   * presenting the dialog so it cannot retain keyboard focus underneath it. */
   gtk_popover_popdown (GTK_POPOVER (self));
   dialog = skin_menu_new (self, image, account);
   gtk_widget_set_focusable (dialog, TRUE);
   adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
   gtk_widget_grab_focus (dialog);
   g_object_unref (dialog);
+}
+
+static void
+on_avatar_clicked (GtkButton *button, gpointer user_data)
+{
+  AmlUsersPopover *self = AML_USERS_POPOVER (user_data);
+  const char *id = account_id_of (button);
+  GtkImage *image = GTK_IMAGE (gtk_button_get_child (button));
+
+  open_skin_menu_for_account (self, id, image);
+}
+
+static void
+on_row_activated (AdwActionRow *row, gpointer user_data G_GNUC_UNUSED)
+{
+  AmlUsersPopover *self = AML_USERS_POPOVER (user_data);
+  const char *id = account_id_of (row);
+  g_autoptr (GError) error = NULL;
+
+  if (id != NULL && !aml_accounts_set_active (self->accounts, id, &error))
+    show_error (self, error->message);
+  else
+    gtk_popover_popdown (GTK_POPOVER (self));
 }
 
 static void
@@ -819,6 +1086,9 @@ on_remove_clicked (GtkButton *button, gpointer user_data)
 
   if (id == NULL)
     return;
+
+  /* The account popover must not remain focused behind the confirmation. */
+  gtk_popover_popdown (GTK_POPOVER (self));
 
   heading = g_strdup_printf (
     "Remove %s?", name != NULL && *name != '\0' ? name : "this account");
@@ -858,6 +1128,7 @@ append_account_row (AmlUsersPopover *self, const AmlAccount *account)
 
   AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
   GtkImage *image = GTK_IMAGE (gtk_image_new ());
+  GtkButton *avatar = GTK_BUTTON (gtk_button_new ());
   GtkButton *remove = GTK_BUTTON (gtk_button_new_from_icon_name ("user-trash-symbolic"));
   g_autofree char *tooltip = NULL;
 
@@ -880,12 +1151,25 @@ append_account_row (AmlUsersPopover *self, const AmlAccount *account)
     gtk_widget_add_css_class (GTK_WIDGET (row), "warning");
 
   set_avatar_icon (GTK_IMAGE (image));
-  set_avatar (self, GTK_IMAGE (image), account->avatar_url);
+  if (account->type == AML_ACCOUNT_OFFLINE)
+    {
+      g_autofree char *steve = default_steve_path ();
+      if (!set_local_avatar (GTK_IMAGE (image), steve))
+        set_avatar_icon (GTK_IMAGE (image));
+    }
+  else
+    set_avatar (self, GTK_IMAGE (image), account->avatar_url);
   gtk_image_set_pixel_size (GTK_IMAGE (GTK_WIDGET (image)), AVATAR_SIZE);
   gtk_widget_set_valign (GTK_WIDGET (image), GTK_ALIGN_CENTER);
+  gtk_button_set_child (avatar, GTK_WIDGET (image));
+  gtk_button_set_has_frame (avatar, FALSE);
+  gtk_widget_set_valign (GTK_WIDGET (avatar), GTK_ALIGN_CENTER);
+  g_object_set_data_full (G_OBJECT (avatar), "aml-account-id",
+                          g_strdup (account->id), g_free);
+  g_signal_connect (avatar, "clicked", G_CALLBACK (on_avatar_clicked), self);
   g_object_set_data (G_OBJECT (row), "aml-account-image", image);
   adw_action_row_add_prefix (ADW_ACTION_ROW (GTK_WIDGET (row)),
-                             GTK_WIDGET (image));
+                             GTK_WIDGET (avatar));
 
   /* The mark of the one a launch plays as, at the far end of the row. */
   if (is_active)

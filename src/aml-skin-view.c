@@ -503,7 +503,8 @@ aml_skin_view_init (AmlSkinView *self)
   g_signal_connect (drag, "drag-begin", G_CALLBACK (on_drag_begin), self);
   g_signal_connect (drag, "drag-update", G_CALLBACK (on_drag_update), self);
   gtk_widget_add_controller (GTK_WIDGET (self), GTK_EVENT_CONTROLLER (drag));
-  self->yaw = 0; self->pitch = 0;
+  /* The atlas front is on the opposite side of the initial model view. */
+  self->yaw = G_PI; self->pitch = 0;
 }
 
 AmlSkinView *

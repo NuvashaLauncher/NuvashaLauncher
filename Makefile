@@ -23,6 +23,8 @@ PKG_CFLAGS := $(shell $(PKG_CONFIG) --cflags $(PKGS) | \
 PKG_LIBS := $(shell $(PKG_CONFIG) --libs $(PKGS)) -lm
 CPPFLAGS += -DAML_LOCALE_DIR=\"$(PREFIX)/share/locale\"
 CPPFLAGS += -DAML_VERSION=\"$(VERSION)\"
+CPPFLAGS += -DAML_DATA_DIR=\"$(PREFIX)/share/AML\"
+CPPFLAGS += -DAML_SOURCE_DATA_DIR=\"$(CURDIR)/data\"
 LOCALES := es_AR es_ES pt_BR fr de it ja ko zh_CN ru pl uk tr nl
 LOCALE_MOS := $(LOCALES:%=build/locale/%/LC_MESSAGES/aml.mo)
 
@@ -126,6 +128,10 @@ pot:
 
 install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 	install -Dm755 $(BIN) "$(DESTDIR)$(PREFIX)/bin/AML"
+	install -Dm644 data/skins/steve.png "$(DESTDIR)$(PREFIX)/share/AML/skins/steve.png"
+	@for skin in data/skins/defaults/*.png; do \
+		install -Dm644 "$$skin" "$(DESTDIR)$(PREFIX)/share/AML/skins/defaults/$$(basename "$$skin")"; \
+	done
 	install -Dm644 data/io.gitlab.anotherminecraftlauncher.AML.desktop \
 		"$(DESTDIR)$(PREFIX)/share/applications/io.gitlab.anotherminecraftlauncher.AML.desktop"
 	install -Dm644 data/icons/scalable/apps/io.gitlab.anotherminecraftlauncher.AML.svg \
@@ -141,6 +147,8 @@ install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 # the rest of the launcher.
 uninstall:
 	rm -f "$(DESTDIR)$(PREFIX)/bin/AML"
+	rm -f "$(DESTDIR)$(PREFIX)/share/AML/skins/steve.png"
+	rm -rf "$(DESTDIR)$(PREFIX)/share/AML/skins/defaults"
 	rm -f "$(DESTDIR)$(PREFIX)/share/applications/io.gitlab.anotherminecraftlauncher.AML.desktop"
 	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/io.gitlab.anotherminecraftlauncher.AML.svg"
 	rm -f "$(DESTDIR)$(PREFIX)/share/metainfo/io.gitlab.anotherminecraftlauncher.AML.metainfo.xml"
