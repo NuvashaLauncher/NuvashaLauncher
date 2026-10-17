@@ -38,7 +38,7 @@ static const char *vertex_shader =
 static const char *fragment_shader =
   "#version 330 core\n"
   "in vec2 uv; uniform sampler2D texture0; out vec4 color;\n"
-  "void main() { color = texture(texture0, uv); }\n";
+  "void main() { color = texture(texture0, uv); if (color.a < 0.1) discard; }\n";
 
 static const char *vertex_shader_legacy =
   "#version 120\n"
@@ -49,7 +49,7 @@ static const char *vertex_shader_legacy =
 static const char *fragment_shader_legacy =
   "#version 120\n"
   "varying vec2 uv; uniform sampler2D texture0;\n"
-  "void main() { gl_FragColor = texture2D(texture0, uv); }\n";
+  "void main() { gl_FragColor = texture2D(texture0, uv); if (gl_FragColor.a < 0.1) discard; }\n";
 
 static const char *vertex_shader_es =
   "precision mediump float; attribute vec3 position; attribute vec2 texcoord; varying vec2 uv;\n"
@@ -58,7 +58,7 @@ static const char *vertex_shader_es =
 
 static const char *fragment_shader_es =
   "precision mediump float; varying vec2 uv; uniform sampler2D texture0;\n"
-  "void main() { gl_FragColor = texture2D(texture0, uv); }\n";
+  "void main() { gl_FragColor = texture2D(texture0, uv); if (gl_FragColor.a < 0.1) discard; }\n";
 
 static GLuint
 compile_shader (GLenum type, const char *source)
@@ -101,6 +101,30 @@ upload_texture (GdkTexture *texture, GLuint *handle)
   source = g_malloc (stride * height);
   pixels = g_malloc (stride * height);
   gdk_texture_download (texture, source, stride);
+
+  /* PrismLauncher normalizes the alpha channel of skin files before giving
+   * them to OpenGL.  A number of otherwise valid Minecraft skins have
+   * transparent pixels in the base-layer atlas regions (often caused by
+   * image editors or old skin converters).  Those regions are not optional
+   * layers: they are the head, body and limbs and must be opaque. */
+  if (width == 64 && (height == 64 || height == 32))
+    {
+      int opaque_height = MIN (height, 16);
+
+      for (int y = 0; y < opaque_height; y++)
+        for (int x = 0; x < MIN (width, 32); x++)
+          source[(gsize) y * stride + (gsize) x * 4 + 3] = 255;
+
+      for (int y = 16; y < MIN (height, 32); y++)
+        for (int x = 0; x < width; x++)
+          source[(gsize) y * stride + (gsize) x * 4 + 3] = 255;
+
+      if (height == 64)
+        for (int y = 48; y < 64; y++)
+          for (int x = 16; x < 48; x++)
+            source[(gsize) y * stride + (gsize) x * 4 + 3] = 255;
+    }
+
   for (int y = 0; y < height; y++)
     for (int x = 0; x < width; x++)
       {
@@ -160,19 +184,24 @@ add_face (GArray *vertices, float x, float y, float z, float w, float h, float d
 {
   float x0 = x, x1 = x + w, y0 = y, y1 = y + h, z0 = z, z1 = z + d;
   float u0 = (float) tx / 64.f, u1 = (float) (tx + tw) / 64.f;
-  float v0 = 1.f - (float) (ty + th) / texture_height;
-  float v1 = 1.f - (float) ty / texture_height;
+  /* GdkTexture downloads rows top-to-bottom and upload_texture keeps that
+   * order.  PrismLauncher mirrors its QImage before uploading, so its UVs
+   * use 1-v; AML must address the unmirrored atlas directly instead. */
+  float v0 = (float) (ty + th) / texture_height;
+  float v1 = (float) ty / texture_height;
   Vertex q[4];
+  /* PrismLauncher uses a triangle-strip order: bottom-left, bottom-right,
+   * top-left, top-right.  Keep the indices consistent with that order. */
   switch (face)
     {
-    case 0: q[0]=(Vertex){x0,y0,z1,u0,v0}; q[1]=(Vertex){x1,y0,z1,u1,v0}; q[2]=(Vertex){x1,y1,z1,u1,v1}; q[3]=(Vertex){x0,y1,z1,u0,v1}; break;
-    case 1: q[0]=(Vertex){x1,y0,z0,u0,v0}; q[1]=(Vertex){x0,y0,z0,u1,v0}; q[2]=(Vertex){x0,y1,z0,u1,v1}; q[3]=(Vertex){x1,y1,z0,u0,v1}; break;
-    case 2: q[0]=(Vertex){x0,y0,z0,u0,v0}; q[1]=(Vertex){x0,y0,z1,u1,v0}; q[2]=(Vertex){x0,y1,z1,u1,v1}; q[3]=(Vertex){x0,y1,z0,u0,v1}; break;
-    case 3: q[0]=(Vertex){x1,y0,z1,u0,v0}; q[1]=(Vertex){x1,y0,z0,u1,v0}; q[2]=(Vertex){x1,y1,z0,u1,v1}; q[3]=(Vertex){x1,y1,z1,u0,v1}; break;
-    case 4: q[0]=(Vertex){x0,y1,z1,u0,v0}; q[1]=(Vertex){x1,y1,z1,u1,v0}; q[2]=(Vertex){x1,y1,z0,u1,v1}; q[3]=(Vertex){x0,y1,z0,u0,v1}; break;
-    default:q[0]=(Vertex){x0,y0,z0,u0,v0}; q[1]=(Vertex){x1,y0,z0,u1,v0}; q[2]=(Vertex){x1,y0,z1,u1,v1}; q[3]=(Vertex){x0,y0,z1,u0,v1}; break;
+    case 0: q[0]=(Vertex){x0,y0,z1,u0,v0}; q[1]=(Vertex){x1,y0,z1,u1,v0}; q[2]=(Vertex){x0,y1,z1,u0,v1}; q[3]=(Vertex){x1,y1,z1,u1,v1}; break;
+    case 1: q[0]=(Vertex){x1,y0,z1,u0,v0}; q[1]=(Vertex){x1,y0,z0,u1,v0}; q[2]=(Vertex){x1,y1,z1,u0,v1}; q[3]=(Vertex){x1,y1,z0,u1,v1}; break;
+    case 2: q[0]=(Vertex){x1,y0,z0,u0,v0}; q[1]=(Vertex){x0,y0,z0,u1,v0}; q[2]=(Vertex){x1,y1,z0,u0,v1}; q[3]=(Vertex){x0,y1,z0,u1,v1}; break;
+    case 3: q[0]=(Vertex){x0,y0,z0,u0,v0}; q[1]=(Vertex){x0,y0,z1,u1,v0}; q[2]=(Vertex){x0,y1,z0,u0,v1}; q[3]=(Vertex){x0,y1,z1,u1,v1}; break;
+    case 4: q[0]=(Vertex){x0,y0,z0,u0,v1}; q[1]=(Vertex){x1,y0,z0,u1,v1}; q[2]=(Vertex){x0,y0,z1,u0,v0}; q[3]=(Vertex){x1,y0,z1,u1,v0}; break;
+    default:q[0]=(Vertex){x0,y1,z1,u0,v0}; q[1]=(Vertex){x1,y1,z1,u1,v0}; q[2]=(Vertex){x0,y1,z0,u0,v1}; q[3]=(Vertex){x1,y1,z0,u1,v1}; break;
     }
-  guint indices[] = { 0, 1, 2, 0, 2, 3 };
+  guint indices[] = { 0, 1, 2, 1, 2, 3 };
   for (int i = 0; i < 6; i++) g_array_append_val (vertices, q[indices[i]]);
 }
 
@@ -184,15 +213,15 @@ add_box (GArray *v, float x, float y, float z, float w, float h, float d,
    * side strip, with top and bottom immediately above it. */
   add_face (v, x, y, z, w, h, d, 0, tx + (int)d, ty + (int)d,
             (int)w, (int)h, texture_height);
-  add_face (v, x, y, z, w, h, d, 1, tx + 2 * (int)d + (int)w, ty + (int)d,
+  add_face (v, x, y, z, w, h, d, 1, tx + (int)d + (int)w, ty + (int)d,
+            (int)d, (int)h, texture_height);
+  add_face (v, x, y, z, w, h, d, 2, tx + 2 * (int)d + (int)w, ty + (int)d,
             (int)w, (int)h, texture_height);
-  add_face (v, x, y, z, w, h, d, 2, tx, ty + (int)d,
+  add_face (v, x, y, z, w, h, d, 3, tx, ty + (int)d,
             (int)d, (int)h, texture_height);
-  add_face (v, x, y, z, w, h, d, 3, tx + (int)d + (int)w, ty + (int)d,
-            (int)d, (int)h, texture_height);
-  add_face (v, x, y, z, w, h, d, 4, tx + (int)d, ty,
+  add_face (v, x, y, z, w, h, d, 4, tx + (int)d + (int)w, ty,
             (int)w, (int)d, texture_height);
-  add_face (v, x, y, z, w, h, d, 5, tx + (int)d + (int)w, ty,
+  add_face (v, x, y, z, w, h, d, 5, tx + (int)d, ty,
             (int)w, (int)d, texture_height);
 }
 
@@ -245,6 +274,8 @@ draw_model (AmlSkinView *self)
        * jacket, sleeves and trousers layer of the Minecraft skin format. */
       add_box (v, -4.5f, -.5f, -4.5f, 9, 9, 9, 32, 0, texture_height);
       add_box (v, -4.25f, -12.25f, -2.25f, 8.5f, 12.5f, 4.5f, 16, 32, texture_height);
+      add_box (v, -4.15f, -24.25f, -2.25f, 4.5f, 12.5f, 4.5f, 0, 32, texture_height);
+      add_box (v, -.35f, -24.25f, -2.25f, 4.5f, 12.5f, 4.5f, 0, 48, texture_height);
       add_box (v, -6 - (arm_width + .5f) / 2.f, -12.25f, -2.25f,
                arm_width + .5f, 12.5f, 4.5f, 40, 32, texture_height);
       add_box (v, 6 - (arm_width + .5f) / 2.f, -12.25f, -2.25f,
@@ -277,12 +308,12 @@ draw_model (AmlSkinView *self)
   if (self->vertex_array != 0)
     glBindVertexArray (self->vertex_array);
   glEnableVertexAttribArray (0); glEnableVertexAttribArray (1);
-  g_array_append_vals (v, cape_v->data, cape_v->len);
-  glBufferData (GL_ARRAY_BUFFER, (GLsizeiptr) (v->len * sizeof (Vertex)),
-                v->data, GL_DYNAMIC_DRAW);
   glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, sizeof (Vertex), (void *) 0);
   glVertexAttribPointer (1, 2, GL_FLOAT, GL_FALSE, sizeof (Vertex),
                          (void *) (3 * sizeof (float)));
+  g_array_append_vals (v, cape_v->data, cape_v->len);
+  glBufferData (GL_ARRAY_BUFFER, (GLsizeiptr) (v->len * sizeof (Vertex)),
+                v->data, GL_DYNAMIC_DRAW);
   glDrawArrays (GL_TRIANGLES, 0, (GLsizei) skin_count);
   if (cape_v->len > 0 && self->cape_texture != 0)
     {
