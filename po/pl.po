@@ -240,8 +240,8 @@ msgstr "Limit wierszy"
 msgid "Open Log Folder After Crash"
 msgstr "Otwórz folder dziennika po awarii"
 
-msgid "About AML"
-msgstr "O AML"
+msgid "About comfy"
+msgstr "O comfy"
 
 msgid "Keyboard Shortcuts"
 msgstr "Skróty klawiaturowe"
@@ -367,8 +367,8 @@ msgstr "1 dzień"
 msgid "7 days"
 msgstr "7 dni"
 
-msgid "Clear AML Cache"
-msgstr "Wyczyść pamięć podręczną AML"
+msgid "Clear comfy Cache"
+msgstr "Wyczyść pamięć podręczną comfy"
 
 msgid "Show Shortcuts"
 msgstr "Pokaż skróty"
@@ -376,8 +376,8 @@ msgstr "Pokaż skróty"
 msgid "Quit"
 msgstr "Wyjdź"
 
-msgid "Clear AML Cache?"
-msgstr "Wyczyścić pamięć podręczną AML?"
+msgid "Clear comfy Cache?"
+msgstr "Wyczyścić pamięć podręczną comfy?"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -557,8 +557,8 @@ msgstr "%s pobrań"
 msgid "Cache Cleared"
 msgstr "Wyczyszczono pamięć podręczną"
 
-msgid "AML cache data was cleared successfully."
-msgstr "Dane pamięci podręcznej AML zostały pomyślnie usunięte."
+msgid "comfy cache data was cleared successfully."
+msgstr "Dane pamięci podręcznej comfy zostały pomyślnie usunięte."
 
 msgid "Cache Cleanup Failed"
 msgstr "Nie udało się wyczyścić pamięci podręcznej"

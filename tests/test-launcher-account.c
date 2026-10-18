@@ -12,7 +12,7 @@
  * that gets past its gate is stopped again at once. The one request that
  * does go out is the manifest of such a launch. */
 
-#include "aml-launcher.h"
+#include "comfy-launcher.h"
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -30,7 +30,7 @@ typedef struct
   GMainLoop *loop;
   guint watchdog;
   gboolean timed_out;
-  AmlLaunchState wanted;
+  ComfyLaunchState wanted;
 } Watch;
 
 static gboolean
@@ -45,24 +45,24 @@ watchdog_fired (gpointer user_data)
 }
 
 static void
-on_state (AmlLauncher *launcher G_GNUC_UNUSED, AmlLaunchState state,
+on_state (ComfyLauncher *launcher G_GNUC_UNUSED, ComfyLaunchState state,
           const char *detail G_GNUC_UNUSED, gpointer user_data)
 {
   Watch *watch = user_data;
 
-  if (state == watch->wanted || !aml_launch_state_is_busy (state))
+  if (state == watch->wanted || !comfy_launch_state_is_busy (state))
     g_main_loop_quit (watch->loop);
 }
 
 static void
-watch_until (Watch *watch, AmlLauncher *launcher, AmlLaunchState wanted)
+watch_until (Watch *watch, ComfyLauncher *launcher, ComfyLaunchState wanted)
 {
   watch->wanted = wanted;
 
   /* The answer to "is this account good" is synchronous, so the state is
      sometimes already the one that is waited for before the loop runs. */
-  if (aml_launcher_get_state (launcher) == wanted ||
-      !aml_launch_state_is_busy (aml_launcher_get_state (launcher)))
+  if (comfy_launcher_get_state (launcher) == wanted ||
+      !comfy_launch_state_is_busy (comfy_launcher_get_state (launcher)))
     return;
 
   watch->loop = g_main_loop_new (NULL, FALSE);
@@ -85,18 +85,18 @@ watch_until (Watch *watch, AmlLauncher *launcher, AmlLaunchState wanted)
  * A place to work and something to work on
  * ---------------------------------------------------------- */
 
-static AmlInstance *
+static ComfyInstance *
 new_instance (void)
 {
   g_autofree char *directory = g_build_filename (root, "instance", NULL);
   g_autoptr (GError) error = NULL;
-  AmlInstance *instance = NULL;
+  ComfyInstance *instance = NULL;
 
   if (g_mkdir_with_parents (directory, 0755) != 0)
     g_error ("the instance directory \"%s\" cannot be made", directory);
 
-  instance = aml_instance_new (NULL, "one", directory, "1.20.1",
-                               AML_LOADER_VANILLA, &error);
+  instance = comfy_instance_new (NULL, "one", directory, "1.20.1",
+                               comfy_LOADER_VANILLA, &error);
 
   if (instance == NULL)
     g_error ("the test instance cannot be made: %s", error->message);
@@ -104,27 +104,27 @@ new_instance (void)
   return instance;
 }
 
-static AmlAccounts *
+static ComfyAccounts *
 new_store (const char *name)
 {
   g_autofree char *path = g_build_filename (root, name, NULL);
 
-  return aml_accounts_new_for_path (path);
+  return comfy_accounts_new_for_path (path);
 }
 
 static void
-assert_log_has (AmlLauncher *launcher, const char *needle)
+assert_log_has (ComfyLauncher *launcher, const char *needle)
 {
-  g_autofree char *log = aml_launcher_get_log_text (launcher);
+  g_autofree char *log = comfy_launcher_get_log_text (launcher);
 
   if (strstr (log, needle) == NULL)
     g_error ("the log has no \"%s\":\n%s", needle, log);
 }
 
 static void
-assert_log_lacks (AmlLauncher *launcher, const char *needle)
+assert_log_lacks (ComfyLauncher *launcher, const char *needle)
 {
-  g_autofree char *log = aml_launcher_get_log_text (launcher);
+  g_autofree char *log = comfy_launcher_get_log_text (launcher);
 
   if (strstr (log, needle) != NULL)
     g_error ("the log has \"%s\" where it should not:\n%s", needle, log);
@@ -133,12 +133,12 @@ assert_log_lacks (AmlLauncher *launcher, const char *needle)
 /* A Microsoft account as it is after a sign-in: a profile, a token that
  * is good for another hour and a refresh token to trade for the next
  * one. */
-static AmlAccount *
+static ComfyAccount *
 microsoft_account (gboolean with_refresh_token)
 {
-  AmlAccount *account = g_new0 (AmlAccount, 1);
+  ComfyAccount *account = g_new0 (ComfyAccount, 1);
 
-  account->type = AML_ACCOUNT_MICROSOFT;
+  account->type = comfy_ACCOUNT_MICROSOFT;
   account->id = g_strdup ("069a79f444e94726a5befca90e38aaf5");
   account->name = g_strdup ("Notch");
   account->uuid = g_strdup ("069a79f4-44e9-4726-a5be-fca90e38aaf5");
@@ -161,35 +161,35 @@ microsoft_account (gboolean with_refresh_token)
 static void
 test_no_account_plays_offline (void)
 {
-  g_autoptr (AmlInstance) instance = new_instance ();
-  g_autoptr (AmlAccounts) accounts = new_store ("no-accounts.json");
-  g_autoptr (AmlLauncher) launcher =
-    aml_launcher_new (instance, NULL, accounts);
+  g_autoptr (ComfyInstance) instance = new_instance ();
+  g_autoptr (ComfyAccounts) accounts = new_store ("no-accounts.json");
+  g_autoptr (ComfyLauncher) launcher =
+    comfy_launcher_new (instance, NULL, accounts);
 
-  g_assert_cmpint (aml_launcher_get_state (launcher), ==, AML_LAUNCH_STOPPED);
+  g_assert_cmpint (comfy_launcher_get_state (launcher), ==, comfy_LAUNCH_STOPPED);
 
-  aml_launcher_start (launcher);
+  comfy_launcher_start (launcher);
 
   /* Preparing means the gate let it through: a launch that stopped at an
      account would be Failed before this. */
-  g_assert_cmpint (aml_launcher_get_state (launcher), ==, AML_LAUNCH_PREPARING);
+  g_assert_cmpint (comfy_launcher_get_state (launcher), ==, comfy_LAUNCH_PREPARING);
   assert_log_lacks (launcher, "no account to play as");
   assert_log_has (launcher, "preparing Minecraft 1.20.1");
 
-  aml_launcher_stop (launcher);
+  comfy_launcher_stop (launcher);
 
   /* A launcher without any accounts at all behaves the same rather than
      refusing to read a store that is not there. */
   {
-    g_autoptr (AmlLauncher) bare = aml_launcher_new (instance, NULL, NULL);
+    g_autoptr (ComfyLauncher) bare = comfy_launcher_new (instance, NULL, NULL);
 
-    g_assert_null (aml_launcher_get_accounts (bare));
+    g_assert_null (comfy_launcher_get_accounts (bare));
 
-    aml_launcher_start (bare);
-    g_assert_cmpint (aml_launcher_get_state (bare), ==, AML_LAUNCH_PREPARING);
+    comfy_launcher_start (bare);
+    g_assert_cmpint (comfy_launcher_get_state (bare), ==, comfy_LAUNCH_PREPARING);
     assert_log_lacks (bare, "no account to play as");
 
-    aml_launcher_stop (bare);
+    comfy_launcher_stop (bare);
   }
 
   g_print ("ok - a launch with no account plays offline as Player\n");
@@ -205,13 +205,13 @@ test_no_account_plays_offline (void)
 static void
 test_a_dead_token_asks_for_a_sign_in (void)
 {
-  g_autoptr (AmlInstance) instance = new_instance ();
-  g_autoptr (AmlAccounts) accounts = new_store ("dead-token.json");
-  g_autoptr (AmlLauncher) launcher =
-    aml_launcher_new (instance, NULL, accounts);
-  g_autoptr (AmlAccount) account = NULL;
+  g_autoptr (ComfyInstance) instance = new_instance ();
+  g_autoptr (ComfyAccounts) accounts = new_store ("dead-token.json");
+  g_autoptr (ComfyLauncher) launcher =
+    comfy_launcher_new (instance, NULL, accounts);
+  g_autoptr (ComfyAccount) account = NULL;
   g_autoptr (GError) error = NULL;
-  AmlAccount *active = NULL;
+  ComfyAccount *active = NULL;
   Watch watch = { 0 };
 
   /* An account of a family whose Microsoft sign-in has gone: the token
@@ -220,21 +220,21 @@ test_a_dead_token_asks_for_a_sign_in (void)
   account = microsoft_account (FALSE);
   account->expires_at = g_get_real_time () / 1000000 - 10;
 
-  g_assert_true (aml_accounts_add (accounts, account, &error));
+  g_assert_true (comfy_accounts_add (accounts, account, &error));
   g_assert_no_error (error);
 
-  aml_launcher_start (launcher);
+  comfy_launcher_start (launcher);
 
-  watch_until (&watch, launcher, AML_LAUNCH_NEEDS_SIGN_IN);
+  watch_until (&watch, launcher, comfy_LAUNCH_NEEDS_SIGN_IN);
 
-  g_assert_cmpint (aml_launcher_get_state (launcher), ==,
-                   AML_LAUNCH_NEEDS_SIGN_IN);
+  g_assert_cmpint (comfy_launcher_get_state (launcher), ==,
+                   comfy_LAUNCH_NEEDS_SIGN_IN);
   assert_log_has (launcher, "sign in again");
   assert_log_has (launcher, "Notch");
 
   /* What goes with the state is the sentence the user is shown. */
   {
-    const char *detail = aml_launcher_get_state_detail (launcher);
+    const char *detail = comfy_launcher_get_state_detail (launcher);
 
     g_assert_nonnull (detail);
     g_assert_nonnull (strstr (detail, "sign in"));
@@ -243,12 +243,12 @@ test_a_dead_token_asks_for_a_sign_in (void)
 
   /* A launch that needs a sign-in is not busy: nothing is running, and
      the user can start it again as soon as they have signed in. */
-  g_assert_false (aml_launch_state_is_busy (aml_launcher_get_state (launcher)));
+  g_assert_false (comfy_launch_state_is_busy (comfy_launcher_get_state (launcher)));
 
   /* The token that could not be traded is dropped from the store, so that
      the account says everywhere it is shown that it needs a sign-in
      rather than pretending to be ready. */
-  active = aml_accounts_get_active (accounts);
+  active = comfy_accounts_get_active (accounts);
   g_assert_nonnull (active);
   g_assert_null (active->access_token);
   g_assert_null (active->refresh_token);
@@ -273,27 +273,27 @@ test_a_dead_token_asks_for_a_sign_in (void)
 static void
 test_a_ready_account_gets_past_the_gate (void)
 {
-  g_autoptr (AmlInstance) instance = new_instance ();
-  g_autoptr (AmlAccounts) accounts = new_store ("ready.json");
-  g_autoptr (AmlLauncher) launcher =
-    aml_launcher_new (instance, NULL, accounts);
-  g_autoptr (AmlAccount) account = microsoft_account (TRUE);
+  g_autoptr (ComfyInstance) instance = new_instance ();
+  g_autoptr (ComfyAccounts) accounts = new_store ("ready.json");
+  g_autoptr (ComfyLauncher) launcher =
+    comfy_launcher_new (instance, NULL, accounts);
+  g_autoptr (ComfyAccount) account = microsoft_account (TRUE);
   g_autoptr (GError) error = NULL;
 
-  g_assert_true (aml_accounts_add (accounts, account, &error));
+  g_assert_true (comfy_accounts_add (accounts, account, &error));
   g_assert_no_error (error);
 
-  aml_launcher_start (launcher);
+  comfy_launcher_start (launcher);
 
   /* Preparing means the account was good: a launch that stops at the
      account never gets there. */
-  g_assert_cmpint (aml_launcher_get_state (launcher), ==,
-                   AML_LAUNCH_PREPARING);
+  g_assert_cmpint (comfy_launcher_get_state (launcher), ==,
+                   comfy_LAUNCH_PREPARING);
   assert_log_lacks (launcher, "no account to play as");
   assert_log_has (launcher, "preparing Minecraft 1.20.1");
 
   /* The launch is stopped again so that nothing is left fetching. */
-  aml_launcher_stop (launcher);
+  comfy_launcher_stop (launcher);
 
   g_print ("ok - a ready account is what a launch goes out with\n");
 }
@@ -303,14 +303,14 @@ test_a_ready_account_gets_past_the_gate (void)
 static void
 test_the_state_has_a_name (void)
 {
-  g_assert_cmpstr (aml_launch_state_to_string (AML_LAUNCH_NEEDS_SIGN_IN), ==,
+  g_assert_cmpstr (comfy_launch_state_to_string (comfy_LAUNCH_NEEDS_SIGN_IN), ==,
                    "Needs sign-in");
-  g_assert_cmpstr (aml_launch_state_to_string (AML_LAUNCH_PREPARING), ==,
+  g_assert_cmpstr (comfy_launch_state_to_string (comfy_LAUNCH_PREPARING), ==,
                    "Preparing");
-  g_assert_cmpstr (aml_launch_state_to_string (AML_LAUNCH_FAILED), ==,
+  g_assert_cmpstr (comfy_launch_state_to_string (comfy_LAUNCH_FAILED), ==,
                    "Failed");
-  g_assert_false (aml_launch_state_is_busy (AML_LAUNCH_NEEDS_SIGN_IN));
-  g_assert_true (aml_launch_state_is_busy (AML_LAUNCH_PREPARING));
+  g_assert_false (comfy_launch_state_is_busy (comfy_LAUNCH_NEEDS_SIGN_IN));
+  g_assert_true (comfy_launch_state_is_busy (comfy_LAUNCH_PREPARING));
 
   g_print ("ok - the sign-in state is a state with a name\n");
 }
@@ -322,7 +322,7 @@ main (void)
 
   g_print ("# Launcher account tests\n");
 
-  directory = g_dir_make_tmp ("aml-launcher-account-XXXXXX", NULL);
+  directory = g_dir_make_tmp ("comfy-launcher-account-XXXXXX", NULL);
 
   if (directory == NULL)
     g_error ("a temporary directory cannot be made");

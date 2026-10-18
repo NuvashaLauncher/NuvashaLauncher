@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* Checks every icon name AML writes in its source against the icon theme
+/* Checks every icon name comfy writes in its source against the icon theme
  * that is actually installed.
  *
  * An icon name that does not exist is not an error at build time and not
@@ -88,7 +88,7 @@ main (int argc, char **argv)
   names = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
   sorted = g_ptr_array_new ();
 
-  dir = g_dir_open (AML_SRC_DIR, 0, NULL);
+  dir = g_dir_open (comfy_SRC_DIR, 0, NULL);
   g_assert_nonnull (dir);
 
   while ((entry = g_dir_read_name (dir)) != NULL)
@@ -98,7 +98,7 @@ main (int argc, char **argv)
       if (!g_str_has_suffix (entry, ".c"))
         continue;
 
-      path = g_build_filename (AML_SRC_DIR, entry, NULL);
+      path = g_build_filename (comfy_SRC_DIR, entry, NULL);
       scan_file (path, names);
     }
 
@@ -116,7 +116,7 @@ main (int argc, char **argv)
 
   g_ptr_array_sort (sorted, by_name);
 
-  g_print ("found %u icon name(s) in %s\n", sorted->len, AML_SRC_DIR);
+  g_print ("found %u icon name(s) in %s\n", sorted->len, comfy_SRC_DIR);
 
   /* Asking the theme needs a display. Without one there is nothing to
      ask and nothing to fail: the check is skipped rather than faked. */

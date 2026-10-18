@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* AmlJavaRow: the first entry names the runtime the automatic choice
+/* ComfyJavaRow: the first entry names the runtime the automatic choice
  * stands for and that runtime is left out of the list below, so it is
  * shown once.
  *
@@ -16,12 +16,12 @@
  * no network. Needs a display to build the row, and skips itself when
  * there is none. */
 
-#include "aml-java-row.h"
+#include "comfy-java-row.h"
 
 #include <adwaita.h>
 #include <gtk/gtk.h>
 
-static AmlJavaRow *watched_row = NULL;
+static ComfyJavaRow *watched_row = NULL;
 static guint selected_calls = 0;
 
 static void
@@ -34,7 +34,7 @@ on_selected (GObject    *object G_GNUC_UNUSED,
   /* A regression recurses; fail while the stack can still hold it. */
   g_assert_cmpuint (selected_calls, <, 10);
 
-  aml_java_row_set_required_major (watched_row, 21);
+  comfy_java_row_set_required_major (watched_row, 21);
 }
 
 static guint
@@ -64,7 +64,7 @@ pump (int millis)
 int
 main (void)
 {
-  AmlJavaRow *row = NULL;
+  ComfyJavaRow *row = NULL;
   GtkStringList *model = NULL;
   GPtrArray *detected = NULL;
   guint n = 0;
@@ -87,16 +87,16 @@ main (void)
       return 77;
     }
 
-  row = aml_java_row_new ();
+  row = comfy_java_row_new ();
   g_object_ref_sink (row);
 
   /* The row has to be ready for the first entry to be named. */
-  aml_java_row_load (row, NULL);
+  comfy_java_row_load (row, NULL);
 
-  for (int i = 0; i < 500 && !aml_java_row_get_ready (row); i++)
+  for (int i = 0; i < 500 && !comfy_java_row_get_ready (row); i++)
     pump (10);
 
-  g_assert_true (aml_java_row_get_ready (row));
+  g_assert_true (comfy_java_row_get_ready (row));
 
   model = GTK_STRING_LIST (adw_combo_row_get_model (ADW_COMBO_ROW (row)));
   n = g_list_model_get_n_items (G_LIST_MODEL (model));
@@ -106,17 +106,17 @@ main (void)
    * entry and not repeated below. A machine with more than one runtime
    * whose names collide would show it twice for a reason of its own, so
    * this is checked where the answer is unambiguous. */
-  detected = aml_java_row_get_detected (row);
+  detected = comfy_java_row_get_detected (row);
 
   if (detected->len == 1)
     {
-      AmlJava *only = g_ptr_array_index (detected, 0);
+      ComfyJava *only = g_ptr_array_index (detected, 0);
 
       /* Asking for what that one runtime offers makes it the automatic
        * choice. */
       if (only->major_version > 0)
         {
-          aml_java_row_set_required_major (row, only->major_version);
+          comfy_java_row_set_required_major (row, only->major_version);
           pump (20);
           g_assert_cmpuint (count_name (model,
                                         gtk_string_list_get_string (model, 0)),
@@ -126,19 +126,19 @@ main (void)
 
   /* A missing exact runtime still selects a detected runtime visibly, while
    * the row reports that the instance remains on automatic selection. */
-  aml_java_row_set_required_major (row, G_MAXINT);
+  comfy_java_row_set_required_major (row, G_MAXINT);
   pump (20);
   model = GTK_STRING_LIST (adw_combo_row_get_model (ADW_COMBO_ROW (row)));
   g_assert_cmpuint (adw_combo_row_get_selected (ADW_COMBO_ROW (row)),
                     !=, GTK_INVALID_LIST_POSITION);
   g_assert_cmpstr (gtk_string_list_get_string (model, 0), !=, "");
-  g_assert_cmpstr (aml_java_row_get_selected_path (row), ==, "");
+  g_assert_cmpstr (comfy_java_row_get_selected_path (row), ==, "");
 
   /* Setting the requirement must not call the handler forever. */
   watched_row = row;
   selected_calls = 0;
   g_signal_connect (row, "notify::selected", G_CALLBACK (on_selected), NULL);
-  aml_java_row_set_required_major (row, 21);
+  comfy_java_row_set_required_major (row, 21);
   pump (100);
 
   g_assert_cmpuint (selected_calls, <, 10);

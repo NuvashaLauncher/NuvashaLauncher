@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* Tests for aml-auth-microsoft: what AML reads out of what each service
+/* Tests for comfy-auth-microsoft: what comfy reads out of what each service
  * of the sign-in answered.
  *
  * The chain is seven requests in a row, and every one of them answers
@@ -15,14 +15,14 @@
  * services document, so nothing here needs the network and nothing waits
  * for a browser. */
 
-#include "aml-auth-microsoft.h"
+#include "comfy-auth-microsoft.h"
 
 #include <glib.h>
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef AML_TEST_FIXTURES
-#define AML_TEST_FIXTURES "tests/fixtures"
+#ifndef comfy_TEST_FIXTURES
+#define comfy_TEST_FIXTURES "tests/fixtures"
 #endif
 
 /* The document of a fixture, which is what every answer of the chain is
@@ -30,7 +30,7 @@
 static char *
 fixture (const char *name)
 {
-  g_autofree char *path = g_build_filename (AML_TEST_FIXTURES, name, NULL);
+  g_autofree char *path = g_build_filename (comfy_TEST_FIXTURES, name, NULL);
   g_autofree char *json = NULL;
   g_autoptr (GError) error = NULL;
 
@@ -49,9 +49,9 @@ test_device_code (void)
 {
   g_autofree char *json = fixture ("auth-device-code.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (AmlDeviceCode) code = NULL;
+  g_autoptr (ComfyDeviceCode) code = NULL;
 
-  code = aml_auth_device_code_from_json (json, -1, &error);
+  code = comfy_auth_device_code_from_json (json, -1, &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (code);
@@ -92,27 +92,27 @@ test_device_code_errors (void)
 
   /* A refusal is not a code: there is nothing for a user to type. */
   g_assert_null (
-      aml_auth_device_code_from_json (error_json, -1, &error));
-  g_assert_error (error, AML_AUTH_ERROR, AML_AUTH_ERROR_DEVICE_CODE);
+      comfy_auth_device_code_from_json (error_json, -1, &error));
+  g_assert_error (error, comfy_AUTH_ERROR, comfy_AUTH_ERROR_DEVICE_CODE);
   g_assert_nonnull (strstr (error->message, "code to sign in with"));
   g_clear_error (&error);
 
   /* Neither is a document that is not one. */
-  g_assert_null (aml_auth_device_code_from_json (not_a_document, -1, &error));
-  g_assert_error (error, AML_AUTH_ERROR, AML_AUTH_ERROR_PARSE);
+  g_assert_null (comfy_auth_device_code_from_json (not_a_document, -1, &error));
+  g_assert_error (error, comfy_AUTH_ERROR, comfy_AUTH_ERROR_PARSE);
   g_clear_error (&error);
 
   /* A code without a place to type it would be nothing a user could do
      with, so it is refused rather than shown empty. */
-  g_assert_null (aml_auth_device_code_from_json (no_place, -1, &error));
-  g_assert_error (error, AML_AUTH_ERROR, AML_AUTH_ERROR_DEVICE_CODE);
+  g_assert_null (comfy_auth_device_code_from_json (no_place, -1, &error));
+  g_assert_error (error, comfy_AUTH_ERROR, comfy_AUTH_ERROR_DEVICE_CODE);
   g_clear_error (&error);
 
-  /* The interval a service does not give is one AML asks about every five
+  /* The interval a service does not give is one comfy asks about every five
      seconds, which is what the device code flow documents. */
   {
-    g_autoptr (AmlDeviceCode) code =
-      aml_auth_device_code_from_json (bare, -1, &error);
+    g_autoptr (ComfyDeviceCode) code =
+      comfy_auth_device_code_from_json (bare, -1, &error);
 
     g_assert_no_error (error);
     g_assert_nonnull (code);
@@ -133,9 +133,9 @@ test_token (void)
   g_autofree char *json = fixture ("auth-token-ok.json");
   const gint64 now = 1800000000;
   g_autoptr (GError) error = NULL;
-  g_autoptr (AmlOAuthToken) token = NULL;
+  g_autoptr (ComfyOAuthToken) token = NULL;
 
-  token = aml_auth_oauth_token_from_json (json, -1, now, &error);
+  token = comfy_auth_oauth_token_from_json (json, -1, now, &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (token);
@@ -168,25 +168,25 @@ test_polling (void)
 
   /* The user is in the browser: the answer is that they have not signed
      in yet, and there is no error in it. */
-  g_assert_false (aml_auth_polling_error (pending, -1, &slow, &error));
+  g_assert_false (comfy_auth_polling_error (pending, -1, &slow, &error));
   g_assert_no_error (error);
   g_assert_false (slow);
 
   /* A service that says the client is asking too fast is to be asked
      slower, and that is the whole of what it says. */
-  g_assert_false (aml_auth_polling_error (slow_down, -1, &slow, &error));
+  g_assert_false (comfy_auth_polling_error (slow_down, -1, &slow, &error));
   g_assert_no_error (error);
   g_assert_true (slow);
 
   /* A user who said no ends the wait: the sign-in was declined. */
-  g_assert_true (aml_auth_polling_error (declined, -1, &slow, &error));
-  g_assert_error (error, AML_AUTH_ERROR, AML_AUTH_ERROR_DECLINED);
+  g_assert_true (comfy_auth_polling_error (declined, -1, &slow, &error));
+  g_assert_error (error, comfy_AUTH_ERROR, comfy_AUTH_ERROR_DECLINED);
   g_assert_nonnull (strstr (error->message, "declined"));
   g_clear_error (&error);
 
   /* A code that ran out ends it too, and says to ask for a new one. */
-  g_assert_true (aml_auth_polling_error (expired, -1, &slow, &error));
-  g_assert_error (error, AML_AUTH_ERROR, AML_AUTH_ERROR_DECLINED);
+  g_assert_true (comfy_auth_polling_error (expired, -1, &slow, &error));
+  g_assert_error (error, comfy_AUTH_ERROR, comfy_AUTH_ERROR_DECLINED);
   g_assert_nonnull (strstr (error->message, "ran out"));
   g_clear_error (&error);
 
@@ -195,8 +195,8 @@ test_polling (void)
   {
     g_autofree char *unknown = g_strdup ("{\"error\":\"something_new\"}");
 
-    g_assert_true (aml_auth_polling_error (unknown, -1, &slow, &error));
-    g_assert_error (error, AML_AUTH_ERROR, AML_AUTH_ERROR_DECLINED);
+    g_assert_true (comfy_auth_polling_error (unknown, -1, &slow, &error));
+    g_assert_error (error, comfy_AUTH_ERROR, comfy_AUTH_ERROR_DECLINED);
     g_assert_nonnull (strstr (error->message, "something_new"));
     g_clear_error (&error);
   }
@@ -214,11 +214,11 @@ test_xbox_token (void)
   g_autofree char *user = fixture ("auth-xbl-user.json");
   g_autofree char *xsts = fixture ("auth-xsts-ok.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (AmlXboxToken) from_user = NULL;
-  g_autoptr (AmlXboxToken) from_xsts = NULL;
+  g_autoptr (ComfyXboxToken) from_user = NULL;
+  g_autoptr (ComfyXboxToken) from_xsts = NULL;
   g_autofree char *identity = NULL;
 
-  from_user = aml_auth_xbox_token_from_json (user, -1, &error);
+  from_user = comfy_auth_xbox_token_from_json (user, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (from_user);
   g_assert_cmpstr (from_user->token, ==,
@@ -226,7 +226,7 @@ test_xbox_token (void)
   g_assert_cmpstr (from_user->user_hash, ==,
                    "8535f6e5f7c14b9dbd6d1c48a4c1b8a3");
 
-  from_xsts = aml_auth_xbox_token_from_json (xsts, -1, &error);
+  from_xsts = comfy_auth_xbox_token_from_json (xsts, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (from_xsts);
   g_assert_cmpstr (from_xsts->token, ==,
@@ -235,7 +235,7 @@ test_xbox_token (void)
 
   /* What the services are given is the hash and the token in the form
      they document. */
-  identity = aml_auth_identity_token (from_xsts->user_hash, from_xsts->token);
+  identity = comfy_auth_identity_token (from_xsts->user_hash, from_xsts->token);
   g_assert_cmpstr (identity, ==,
                    "XBL3.0 x=8535f6e5f7c14b9dbd6d1c48a4c1b8a3;"
                    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.xsts.token");
@@ -257,29 +257,29 @@ test_xsts_refusals (void)
 
   /* A Microsoft account that has never been an Xbox one: what a user can
      do about it is sign in to xbox.com once. */
-  g_assert_null (aml_auth_xbox_token_from_json (no_profile, -1, &error));
-  g_assert_error (error, AML_AUTH_ERROR, AML_AUTH_ERROR_XBOX);
+  g_assert_null (comfy_auth_xbox_token_from_json (no_profile, -1, &error));
+  g_assert_error (error, comfy_AUTH_ERROR, comfy_AUTH_ERROR_XBOX);
   g_assert_nonnull (strstr (error->message, "xbox.com"));
   g_assert_nonnull (strstr (error->message, "2148916233"));
   g_clear_error (&error);
 
   /* A child account has to be added to a family before it can play. */
-  g_assert_null (aml_auth_xbox_token_from_json (child, -1, &error));
-  g_assert_error (error, AML_AUTH_ERROR, AML_AUTH_ERROR_XBOX);
+  g_assert_null (comfy_auth_xbox_token_from_json (child, -1, &error));
+  g_assert_error (error, comfy_AUTH_ERROR, comfy_AUTH_ERROR_XBOX);
   g_assert_nonnull (strstr (error->message, "family"));
   g_assert_nonnull (strstr (error->message, "2148916238"));
   g_clear_error (&error);
 
   /* An account from a country the services do not serve says so. */
-  g_assert_null (aml_auth_xbox_token_from_json (country, -1, &error));
-  g_assert_error (error, AML_AUTH_ERROR, AML_AUTH_ERROR_XBOX);
+  g_assert_null (comfy_auth_xbox_token_from_json (country, -1, &error));
+  g_assert_error (error, comfy_AUTH_ERROR, comfy_AUTH_ERROR_XBOX);
   g_assert_nonnull (strstr (error->message, "country"));
   g_clear_error (&error);
 
-  /* A number AML does not know is still said as a number, with what the
+  /* A number comfy does not know is still said as a number, with what the
      service said about it: a launcher must not invent a reason. */
-  g_assert_null (aml_auth_xbox_token_from_json (unknown, -1, &error));
-  g_assert_error (error, AML_AUTH_ERROR, AML_AUTH_ERROR_XBOX);
+  g_assert_null (comfy_auth_xbox_token_from_json (unknown, -1, &error));
+  g_assert_error (error, comfy_AUTH_ERROR, comfy_AUTH_ERROR_XBOX);
   g_assert_nonnull (strstr (error->message, "2148916222"));
   g_assert_nonnull (strstr (error->message, "South Korea"));
   g_clear_error (&error);
@@ -289,8 +289,8 @@ test_xsts_refusals (void)
   {
     g_autofree char *nothing = g_strdup ("{\"Token\":\"\"}");
 
-    g_assert_null (aml_auth_xbox_token_from_json (nothing, -1, &error));
-    g_assert_error (error, AML_AUTH_ERROR, AML_AUTH_ERROR_XBOX);
+    g_assert_null (comfy_auth_xbox_token_from_json (nothing, -1, &error));
+    g_assert_error (error, comfy_AUTH_ERROR, comfy_AUTH_ERROR_XBOX);
     g_clear_error (&error);
   }
 
@@ -308,9 +308,9 @@ test_minecraft_token (void)
   g_autofree char *refused = fixture ("auth-minecraft-app-not-registered.json");
   const gint64 now = 1800000000;
   g_autoptr (GError) error = NULL;
-  g_autoptr (AmlOAuthToken) token = NULL;
+  g_autoptr (ComfyOAuthToken) token = NULL;
 
-  token = aml_auth_minecraft_token_from_json (json, -1, now, &error);
+  token = comfy_auth_minecraft_token_from_json (json, -1, now, &error);
   g_assert_no_error (error);
   g_assert_nonnull (token);
   g_assert_cmpstr (token->access_token, ==,
@@ -324,8 +324,8 @@ test_minecraft_token (void)
   /* "Invalid app registration" is what the services answer an Azure
      application that is not registered for Minecraft with, and it comes
      through in their own words rather than as a status code. */
-  g_assert_null (aml_auth_minecraft_token_from_json (refused, -1, now, &error));
-  g_assert_error (error, AML_AUTH_ERROR, AML_AUTH_ERROR_XBOX);
+  g_assert_null (comfy_auth_minecraft_token_from_json (refused, -1, now, &error));
+  g_assert_error (error, comfy_AUTH_ERROR, comfy_AUTH_ERROR_XBOX);
   g_assert_nonnull (strstr (error->message, "Invalid app registration"));
   g_clear_error (&error);
 
@@ -345,7 +345,7 @@ test_entitlements (void)
 
   /* Owning it, under the name the store gives it now or the names it gave
      it before, is what a launch is allowed to start. */
-  g_assert_true (aml_auth_owns_minecraft_from_json (owned, -1, &error));
+  g_assert_true (comfy_auth_owns_minecraft_from_json (owned, -1, &error));
   g_assert_no_error (error);
 
   /* Current Minecraft services responses use entitlements/name rather
@@ -354,21 +354,21 @@ test_entitlements (void)
     const char *current =
       "{\"entitlements\":[{\"name\":\"product_minecraft\"}]}";
 
-    g_assert_true (aml_auth_owns_minecraft_from_json (current, -1, &error));
+    g_assert_true (comfy_auth_owns_minecraft_from_json (current, -1, &error));
     g_assert_no_error (error);
   }
 
   /* Owning something else is not owning the game: an account of a family
      that only bought the game says what is missing. */
-  g_assert_false (aml_auth_owns_minecraft_from_json (not_owned, -1, &error));
-  g_assert_error (error, AML_AUTH_ERROR, AML_AUTH_ERROR_NO_GAME);
+  g_assert_false (comfy_auth_owns_minecraft_from_json (not_owned, -1, &error));
+  g_assert_error (error, comfy_AUTH_ERROR, comfy_AUTH_ERROR_NO_GAME);
   g_assert_nonnull (strstr (error->message, "Minecraft: Java"));
   g_clear_error (&error);
 
   /* A document with no list in it is a refusal rather than a list of
      nothing, and the two say different things. */
-  g_assert_false (aml_auth_owns_minecraft_from_json (refused, -1, &error));
-  g_assert_error (error, AML_AUTH_ERROR, AML_AUTH_ERROR_XBOX);
+  g_assert_false (comfy_auth_owns_minecraft_from_json (refused, -1, &error));
+  g_assert_error (error, comfy_AUTH_ERROR, comfy_AUTH_ERROR_XBOX);
   g_assert_nonnull (strstr (error->message, "The user token is invalid"));
   g_clear_error (&error);
 
@@ -376,8 +376,8 @@ test_entitlements (void)
   {
     g_autofree char *empty = g_strdup ("{\"items\":[]}");
 
-    g_assert_false (aml_auth_owns_minecraft_from_json (empty, -1, &error));
-    g_assert_error (error, AML_AUTH_ERROR, AML_AUTH_ERROR_NO_GAME);
+    g_assert_false (comfy_auth_owns_minecraft_from_json (empty, -1, &error));
+    g_assert_error (error, comfy_AUTH_ERROR, comfy_AUTH_ERROR_NO_GAME);
     g_clear_error (&error);
   }
 
@@ -391,10 +391,10 @@ test_profile (void)
   g_autofree char *bare = fixture ("auth-profile-no-skin.json");
   g_autofree char *not_found = fixture ("auth-profile-not-found.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (AmlMinecraftProfile) profile = NULL;
+  g_autoptr (ComfyMinecraftProfile) profile = NULL;
   g_autofree char *uuid = NULL;
 
-  profile = aml_auth_profile_from_json (json, -1, &error);
+  profile = comfy_auth_profile_from_json (json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (profile);
   g_assert_cmpstr (profile->id, ==, "069a79f444e94726a5befca90e38aaf5");
@@ -407,32 +407,32 @@ test_profile (void)
 
   /* The game is given the id dashed, which is the form every account
      carries and the one the offline UUID is in as well. */
-  uuid = aml_auth_profile_uuid (profile->id);
+  uuid = comfy_auth_profile_uuid (profile->id);
   g_assert_cmpstr (uuid, ==, "069a79f4-44e9-4726-a5be-fca90e38aaf5");
 
   /* An id that is already dashed is taken as it is, in lower case. */
   {
-    g_autofree char *dashed = aml_auth_profile_uuid ("069A79F4-44E9-4726-A5BE-FCA90E38AAF5");
+    g_autofree char *dashed = comfy_auth_profile_uuid ("069A79F4-44E9-4726-A5BE-FCA90E38AAF5");
 
     g_assert_cmpstr (dashed, ==, "069a79f4-44e9-4726-a5be-fca90e38aaf5");
   }
 
-  /* An id that is not a uuid is not one, and AML does not turn it into
+  /* An id that is not a uuid is not one, and comfy does not turn it into
      one by guessing. */
-  g_assert_null (aml_auth_profile_uuid ("not-a-uuid"));
-  g_assert_null (aml_auth_profile_uuid ("069a79f444e94726a5befca90e38aaf"));
+  g_assert_null (comfy_auth_profile_uuid ("not-a-uuid"));
+  g_assert_null (comfy_auth_profile_uuid ("069a79f444e94726a5befca90e38aaf"));
 
   /* An account that owns the game and has never played it has no profile
      yet, which is not the same as not owning it. */
-  g_assert_null (aml_auth_profile_from_json (not_found, -1, &error));
-  g_assert_error (error, AML_AUTH_ERROR, AML_AUTH_ERROR_NO_PROFILE);
+  g_assert_null (comfy_auth_profile_from_json (not_found, -1, &error));
+  g_assert_error (error, comfy_AUTH_ERROR, comfy_AUTH_ERROR_NO_PROFILE);
   g_assert_nonnull (strstr (error->message, "never played"));
   g_clear_error (&error);
 
   /* A profile without a skin is a profile: it simply has no avatar. */
   {
-    g_autoptr (AmlMinecraftProfile) none =
-      aml_auth_profile_from_json (bare, -1, &error);
+    g_autoptr (ComfyMinecraftProfile) none =
+      comfy_auth_profile_from_json (bare, -1, &error);
 
     g_assert_no_error (error);
     g_assert_nonnull (none);
@@ -448,33 +448,33 @@ test_profile (void)
  * ---------------------------------------------------------- */
 
 /* The one constant a sign-in is configured with is in one place, and
-   AML_MICROSOFT_CLIENT_ID is what it is. What a build has to be able to
+   comfy_MICROSOFT_CLIENT_ID is what it is. What a build has to be able to
    do is say so when it is not set, which is why the tenant, the scope
    and the addresses are all here and nowhere else. */
 static void
 test_the_endpoints_are_the_documented_ones (void)
 {
-  g_assert_cmpstr (AML_MICROSOFT_TENANT, ==, "consumers");
-  g_assert_cmpstr (AML_MICROSOFT_SCOPE, ==, "XboxLive.signin offline_access");
-  g_assert_cmpstr (AML_MINECRAFT_RELYING_PARTY, ==,
+  g_assert_cmpstr (comfy_MICROSOFT_TENANT, ==, "consumers");
+  g_assert_cmpstr (comfy_MICROSOFT_SCOPE, ==, "XboxLive.signin offline_access");
+  g_assert_cmpstr (comfy_MINECRAFT_RELYING_PARTY, ==,
                    "rp://api.minecraftservices.com/");
-  g_assert_cmpstr (AML_XBOX_CONTRACT_VERSION, ==, "1");
+  g_assert_cmpstr (comfy_XBOX_CONTRACT_VERSION, ==, "1");
 
-  g_assert_cmpstr (AML_MICROSOFT_DEVICE_CODE_URL, ==,
+  g_assert_cmpstr (comfy_MICROSOFT_DEVICE_CODE_URL, ==,
                    "https://login.microsoftonline.com/consumers/oauth2/v2.0/"
                    "devicecode");
-  g_assert_cmpstr (AML_MICROSOFT_TOKEN_URL, ==,
+  g_assert_cmpstr (comfy_MICROSOFT_TOKEN_URL, ==,
                    "https://login.microsoftonline.com/consumers/oauth2/v2.0/"
                    "token");
-  g_assert_cmpstr (AML_XBOX_USER_URL, ==,
+  g_assert_cmpstr (comfy_XBOX_USER_URL, ==,
                    "https://user.auth.xboxlive.com/user/authenticate");
-  g_assert_cmpstr (AML_XBOX_XSTS_URL, ==,
+  g_assert_cmpstr (comfy_XBOX_XSTS_URL, ==,
                    "https://xsts.auth.xboxlive.com/xsts/authorize");
 
   /* The token is never a password and never a secret of the build: what
      is configured is the application id, which Microsoft publishes for
      every application it has. */
-  g_assert_cmpuint (strlen (AML_MICROSOFT_CLIENT_ID), >, 0);
+  g_assert_cmpuint (strlen (comfy_MICROSOFT_CLIENT_ID), >, 0);
 
   g_print ("ok - the chain asks the addresses the services document\n");
 }
