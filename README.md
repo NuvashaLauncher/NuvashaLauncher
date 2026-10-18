@@ -47,7 +47,7 @@ openSUSE:
 ```sh
 sudo zypper install gcc make gettext-tools pkg-config glib2-devel \
     gtk4-devel libadwaita-devel libepoxy-devel json-glib-devel \
-    libsoup3-devel libarchive-devel
+    libsoup-devel libarchive-devel
 ```
 
 Arch:
