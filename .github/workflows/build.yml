@@ -27,7 +27,7 @@ jobs:
           pacman -Syu --noconfirm
           pacman -S --noconfirm \
             base-devel pkgconf gettext \
-            glib2 gtk4 libadwaita epoxy json-glib libsoup3 libarchive
+            glib2 gtk4 libadwaita libepoxy json-glib libsoup3 libarchive
 
       - name: Build
         run: make fast
