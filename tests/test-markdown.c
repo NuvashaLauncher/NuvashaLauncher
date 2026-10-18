@@ -11,12 +11,12 @@
 
 #include <glib.h>
 
-#include "comfy-markdown.h"
+#include "leppoisa-markdown.h"
 
 static void
 check (const char *input, const char *expected)
 {
-  g_autofree char *markup = comfy_markdown_inline (input);
+  g_autofree char *markup = leppoisa_markdown_inline (input);
 
   g_assert_cmpstr (markup, ==, expected);
 }
@@ -54,7 +54,7 @@ test_link (void)
 static void
 test_null (void)
 {
-  g_assert_null (comfy_markdown_inline (NULL));
+  g_assert_null (leppoisa_markdown_inline (NULL));
   g_print ("ok - no text is no markup\n");
 }
 

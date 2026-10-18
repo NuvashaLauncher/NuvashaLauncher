@@ -236,8 +236,8 @@ msgstr "行数上限"
 msgid "Open Log Folder After Crash"
 msgstr "崩溃后打开日志文件夹"
 
-msgid "About Comfy Launcher"
-msgstr "关于Comfy Launcher"
+msgid "About Leppoisa Launcher"
+msgstr "关于Leppoisa Launcher"
 
 msgid "Keyboard Shortcuts"
 msgstr "热键"
@@ -363,8 +363,8 @@ msgstr "1 天"
 msgid "7 days"
 msgstr "7 天"
 
-msgid "Clear comfy Cache"
-msgstr "清除 comfy 缓存"
+msgid "Clear leppoisa Cache"
+msgstr "清除 leppoisa 缓存"
 
 msgid "Show Shortcuts"
 msgstr "显示快捷键"
@@ -372,8 +372,8 @@ msgstr "显示快捷键"
 msgid "Quit"
 msgstr "退出"
 
-msgid "Clear comfy Cache?"
-msgstr "清除 comfy 缓存？"
+msgid "Clear leppoisa Cache?"
+msgstr "清除 leppoisa 缓存？"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -549,8 +549,8 @@ msgstr "%s 次下载"
 msgid "Cache Cleared"
 msgstr "缓存已清除"
 
-msgid "comfy cache data was cleared successfully."
-msgstr "comfy 缓存数据已成功清除。"
+msgid "leppoisa cache data was cleared successfully."
+msgstr "leppoisa 缓存数据已成功清除。"
 
 msgid "Cache Cleanup Failed"
 msgstr "缓存清理失败"

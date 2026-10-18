@@ -2,18 +2,18 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* comfy, Comfy Launcher. GTK chooses the available display
+/* leppoisa, Leppoisa Launcher. GTK chooses the available display
  * backend at startup. */
 
 #include <adwaita.h>
 #include <gtk/gtk.h>
 
-#include "comfy-instance-manager.h"
-#include "comfy-i18n.h"
-#include "comfy-main-window.h"
-#include "comfy-download.h"
-#include "comfy-settings.h"
-#include "comfy-open-broker.h"
+#include "leppoisa-instance-manager.h"
+#include "leppoisa-i18n.h"
+#include "leppoisa-main-window.h"
+#include "leppoisa-download.h"
+#include "leppoisa-settings.h"
+#include "leppoisa-open-broker.h"
 
 static void
 on_quit (GSimpleAction *action G_GNUC_UNUSED,
@@ -44,7 +44,7 @@ static const char app_css[] =
       the corner of the icon beside it, and its colours are the text
       colour at a low alpha, so that it reads on any background and
       needs nothing from the palette. */
-   "label.comfy-badge {"
+   "label.leppoisa-badge {"
    "  font-size: 0.7em;"
    "  font-weight: bold;"
    "  padding: 0 0.3em;"
@@ -89,17 +89,17 @@ on_activate (GApplication *app, gpointer user_data G_GNUC_UNUSED)
 
   load_app_css ();
 
-  g_autoptr (ComfyInstanceManager) manager = comfy_instance_manager_new (NULL);
-  g_autoptr (ComfySettings) settings = comfy_settings_new ();
+  g_autoptr (LeppoisaInstanceManager) manager = leppoisa_instance_manager_new (NULL);
+  g_autoptr (LeppoisaSettings) settings = leppoisa_settings_new ();
   g_autoptr (GError) error = NULL;
 
-  comfy_i18n_init (comfy_settings_get_language (settings));
+  leppoisa_i18n_init (leppoisa_settings_get_language (settings));
 
-  if (!comfy_instance_manager_load (manager, &error))
+  if (!leppoisa_instance_manager_load (manager, &error))
     g_warning ("cannot read the instance list: %s", error->message);
 
-  ComfyMainWindow *main_window =
-    comfy_main_window_new (GTK_APPLICATION (app), manager);
+  LeppoisaMainWindow *main_window =
+    leppoisa_main_window_new (GTK_APPLICATION (app), manager);
 
   gtk_window_present (GTK_WINDOW (main_window));
 }
@@ -111,25 +111,25 @@ main (int argc, char **argv)
 
   if (argc == 2 && g_strcmp0 (argv[1], "--version") == 0)
     {
-      g_print ("comfy %s\n", comfy_VERSION);
+      g_print ("leppoisa %s\n", leppoisa_VERSION);
       return 0;
     }
 
   /* This mode is mounted over xdg-open inside a game sandbox. It has no GTK
-   * startup and can only forward a file URI to comfy's host-side broker. */
-  if (argc == 2 && g_getenv ("comfy_OPEN_BROKER_SOCKET") != NULL)
-    return comfy_open_broker_request (g_getenv ("comfy_OPEN_BROKER_SOCKET"),
+   * startup and can only forward a file URI to leppoisa's host-side broker. */
+  if (argc == 2 && g_getenv ("leppoisa_OPEN_BROKER_SOCKET") != NULL)
+    return leppoisa_open_broker_request (g_getenv ("leppoisa_OPEN_BROKER_SOCKET"),
                                     argv[1]);
 
   if (!gtk_init_check ())
     {
-      g_printerr ("comfy could not open a display.\n");
+      g_printerr ("leppoisa could not open a display.\n");
       return 1;
     }
 
-  g_set_application_name ("Comfy Launcher");
+  g_set_application_name ("Leppoisa Launcher");
 
-  app = adw_application_new ("com.github.comfylauncher.comfy",
+  app = adw_application_new ("com.github.leppoisalauncher.leppoisa",
                              G_APPLICATION_DEFAULT_FLAGS);
   g_action_map_add_action_entries (G_ACTION_MAP (app), app_entries,
                                    G_N_ELEMENTS (app_entries), app);

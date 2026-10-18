@@ -5,7 +5,7 @@
 #include <gio/gio.h>
 #include <glib.h>
 
-#include "comfy-line-reader.h"
+#include "leppoisa-line-reader.h"
 
 typedef struct {
   GMainLoop *loop;
@@ -48,14 +48,14 @@ test_reads_lines_until_eof (void)
   static const char contents[] = "first line\nsecond line\n";
   ReaderResult result = { 0 };
   g_autoptr (GInputStream) stream = NULL;
-  ComfyLineReader *reader = NULL;
+  LeppoisaLineReader *reader = NULL;
 
   result.loop = g_main_loop_new (NULL, FALSE);
   result.lines = g_ptr_array_new_with_free_func (g_free);
   stream = g_memory_input_stream_new_from_data (contents, -1, NULL);
-  reader = comfy_line_reader_new (stream, TRUE, on_line, on_done, &result,
+  reader = leppoisa_line_reader_new (stream, TRUE, on_line, on_done, &result,
                                 on_result_free);
-  comfy_line_reader_start (reader);
+  leppoisa_line_reader_start (reader);
   g_main_loop_run (result.loop);
 
   g_assert_true (result.done);

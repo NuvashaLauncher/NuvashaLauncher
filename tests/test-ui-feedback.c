@@ -5,7 +5,7 @@
 #include <adwaita.h>
 #include <glib.h>
 
-#include "comfy-ui-feedback.h"
+#include "leppoisa-ui-feedback.h"
 
 static void
 test_feedback_ignores_unattached_pages (void)
@@ -14,8 +14,8 @@ test_feedback_ignores_unattached_pages (void)
   GtkWidget *overlay = adw_toast_overlay_new ();
 
   /* Missing targets must be harmless before GTK has a root/window. */
-  comfy_ui_show_toast (NULL, NULL, "message");
-  comfy_ui_show_toast (page, overlay, "message");
+  leppoisa_ui_show_toast (NULL, NULL, "message");
+  leppoisa_ui_show_toast (page, overlay, "message");
   g_assert_null (gtk_widget_get_root (page));
   g_assert_nonnull (overlay);
   g_object_ref_sink (page);

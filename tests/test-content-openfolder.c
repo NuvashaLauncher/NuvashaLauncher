@@ -11,9 +11,9 @@
 #include <gtk/gtk.h>
 #include <libadwaita-1/adwaita.h>
 
-#include "comfy-content-page.h"
-#include "comfy-instance-manager.h"
-#include "comfy-modrinth.h"
+#include "leppoisa-content-page.h"
+#include "leppoisa-instance-manager.h"
+#include "leppoisa-modrinth.h"
 
 static GtkWidget *
 find_open_folder_button (GtkWidget *w)
@@ -45,12 +45,12 @@ find_open_folder_button (GtkWidget *w)
 int
 main (int argc, char **argv)
 {
-  g_autoptr (ComfyInstanceManager) manager = NULL;
+  g_autoptr (LeppoisaInstanceManager) manager = NULL;
   g_autoptr (GError) error = NULL;
   g_autofree char *directory = NULL;
   g_autofree char *mods_dir = NULL;
-  ComfyInstance *instance = NULL;
-  ComfyContentPage *page = NULL;
+  LeppoisaInstance *instance = NULL;
+  LeppoisaContentPage *page = NULL;
 
   (void) argc;
   (void) argv;
@@ -63,13 +63,13 @@ main (int argc, char **argv)
       return 77;
     }
 
-  g_autofree char *tmp = g_dir_make_tmp ("comfy-openfolder-XXXXXX", &error);
+  g_autofree char *tmp = g_dir_make_tmp ("leppoisa-openfolder-XXXXXX", &error);
   g_assert_no_error (error);
   g_autofree char *data_dir = g_build_filename (tmp, "data", NULL);
-  manager = comfy_instance_manager_new (data_dir);
+  manager = leppoisa_instance_manager_new (data_dir);
 
-  instance = comfy_instance_manager_create (manager, "Content", NULL, "1.21.1",
-                                          comfy_LOADER_FABRIC, "0.15.0", &error);
+  instance = leppoisa_instance_manager_create (manager, "Content", NULL, "1.21.1",
+                                          leppoisa_LOADER_FABRIC, "0.15.0", &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
@@ -79,7 +79,7 @@ main (int argc, char **argv)
   mods_dir = g_build_filename (directory, "mods", NULL);
   g_assert_false (g_file_test (mods_dir, G_FILE_TEST_IS_DIR));
 
-  page = comfy_content_page_new (instance, comfy_CONTENT_MOD);
+  page = leppoisa_content_page_new (instance, leppoisa_CONTENT_MOD);
 
   {
     GtkWidget *button = find_open_folder_button (GTK_WIDGET (page));

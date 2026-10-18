@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* Tests for comfy-modpack: what the index of a pack says, what its
+/* Tests for leppoisa-modpack: what the index of a pack says, what its
  * dependencies resolve to, what the two hashes of a file prove, and
  * what an install leaves behind when it cannot go through.
  *
@@ -13,8 +13,8 @@
  * no files and no loader installs from its overrides alone, which is
  * the whole pipeline minus the network. */
 
-#include "comfy-download-modpack-dialog.h"
-#include "comfy-modpack.h"
+#include "leppoisa-download-modpack-dialog.h"
+#include "leppoisa-modpack.h"
 
 #include <gtk/gtk.h>
 
@@ -32,7 +32,7 @@ static char *
 make_tmp_dir (void)
 {
   g_autoptr (GError) error = NULL;
-  char *dir = g_dir_make_tmp ("comfy-modpack-XXXXXX", &error);
+  char *dir = g_dir_make_tmp ("leppoisa-modpack-XXXXXX", &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (dir);
@@ -180,7 +180,7 @@ has_temp_dir (const char *directory)
     return FALSE;
 
   while ((name = g_dir_read_name (dir)) != NULL)
-    if (g_str_has_prefix (name, ".comfy-modpack-"))
+    if (g_str_has_prefix (name, ".leppoisa-modpack-"))
       {
         found = TRUE;
         break;
@@ -199,10 +199,10 @@ typedef struct
   GMainLoop *loop;
   GError *error;
   gboolean value;
-  ComfyInstance *instance;
+  LeppoisaInstance *instance;
   gboolean timed_out;
   guint watchdog;
-  ComfyTaskScope *operation;
+  LeppoisaTaskScope *operation;
 } AsyncWait;
 
 static gboolean
@@ -239,19 +239,19 @@ verify_file_done (GObject *source G_GNUC_UNUSED,
 {
   AsyncWait *wait = user_data;
 
-  wait->value = comfy_modpack_verify_file_finish (result, &wait->error);
-  comfy_task_scope_unref (wait->operation);
+  wait->value = leppoisa_modpack_verify_file_finish (result, &wait->error);
+  leppoisa_task_scope_unref (wait->operation);
   wait->operation = NULL;
   g_main_loop_quit (wait->loop);
 }
 
 /* Both hashes of the manifest against the bytes on disk, in place. */
 static gboolean
-verify_now (const ComfyModpackFile *file, const char *path, GError **error)
+verify_now (const LeppoisaModpackFile *file, const char *path, GError **error)
 {
   AsyncWait wait = { 0 };
 
-  wait.operation = comfy_modpack_verify_file_async (file, path, verify_file_done,
+  wait.operation = leppoisa_modpack_verify_file_async (file, path, verify_file_done,
                                                  &wait);
   async_wait_run (&wait);
 
@@ -266,10 +266,10 @@ install_done (GObject *source G_GNUC_UNUSED,
 {
   AsyncWait *wait = user_data;
 
-  wait->instance = comfy_modpack_install_finish (result, &wait->error);
+  wait->instance = leppoisa_modpack_install_finish (result, &wait->error);
   if (wait->operation != NULL)
     {
-      comfy_task_scope_unref (wait->operation);
+      leppoisa_task_scope_unref (wait->operation);
       wait->operation = NULL;
     }
   g_main_loop_quit (wait->loop);
@@ -281,20 +281,20 @@ export_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 {
   AsyncWait *wait = user_data;
 
-  wait->value = comfy_modpack_export_finish (result, &wait->error);
-  comfy_task_scope_unref (wait->operation);
+  wait->value = leppoisa_modpack_export_finish (result, &wait->error);
+  leppoisa_task_scope_unref (wait->operation);
   wait->operation = NULL;
   g_main_loop_quit (wait->loop);
 }
 
 /* The whole install, in place. */
-static ComfyInstance *
-install_now (ComfyModpack *pack, ComfyInstanceManager *manager, const char *name,
+static LeppoisaInstance *
+install_now (LeppoisaModpack *pack, LeppoisaInstanceManager *manager, const char *name,
              const char *directory, GError **error)
 {
   AsyncWait wait = { 0 };
 
-   wait.operation = comfy_modpack_install_async (
+   wait.operation = leppoisa_modpack_install_async (
      pack, manager, name, directory, NULL, NULL, install_done, &wait);
   async_wait_run (&wait);
 
@@ -303,11 +303,11 @@ install_now (ComfyModpack *pack, ComfyInstanceManager *manager, const char *name
 }
 
 static gboolean
-export_now (ComfyInstance *instance, const char *path, GError **error)
+export_now (LeppoisaInstance *instance, const char *path, GError **error)
 {
   AsyncWait wait = { 0 };
 
-  wait.operation = comfy_modpack_export_async (instance, path, NULL, NULL, NULL,
+  wait.operation = leppoisa_modpack_export_async (instance, path, NULL, NULL, NULL,
                                              FALSE, NULL, NULL, export_done,
                                              &wait);
   async_wait_run (&wait);
@@ -317,10 +317,10 @@ export_now (ComfyInstance *instance, const char *path, GError **error)
 }
 
 static guint
-manager_count (ComfyInstanceManager *manager)
+manager_count (LeppoisaInstanceManager *manager)
 {
   return g_list_model_get_n_items (
-    G_LIST_MODEL (comfy_instance_manager_get_instances (manager)));
+    G_LIST_MODEL (leppoisa_instance_manager_get_instances (manager)));
 }
 
 /* ---------------------------------------------------------- *
@@ -361,11 +361,11 @@ test_index_is_read (void)
     pack_index ("Example Pack", FILES_JSON,
                 "\"minecraft\":\"1.20.1\",\"fabric-loader\":\"0.15.11\"");
   g_autoptr (GError) error = NULL;
-  g_autoptr (ComfyModpack) pack = NULL;
-  ComfyModpackFile *first = NULL;
-  ComfyModpackFile *last = NULL;
+  g_autoptr (LeppoisaModpack) pack = NULL;
+  LeppoisaModpackFile *first = NULL;
+  LeppoisaModpackFile *last = NULL;
 
-  pack = comfy_modpack_new_from_json (json, -1, &error);
+  pack = leppoisa_modpack_new_from_json (json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (pack);
 
@@ -385,8 +385,8 @@ test_index_is_read (void)
   g_assert_cmpstr (first->sha512, ==,
                    "0123456789abcdef0123456789abcdef");
   g_assert_cmpint ((gint) first->file_size, ==, 12345);
-  g_assert_cmpint (first->env_client, ==, comfy_MODPACK_ENV_REQUIRED);
-  g_assert_cmpint (first->env_server, ==, comfy_MODPACK_ENV_UNSUPPORTED);
+  g_assert_cmpint (first->env_client, ==, leppoisa_MODPACK_ENV_REQUIRED);
+  g_assert_cmpint (first->env_server, ==, leppoisa_MODPACK_ENV_UNSUPPORTED);
   g_assert_cmpuint (first->downloads->len, ==, 1);
   g_assert_cmpstr (g_ptr_array_index (first->downloads, 0), ==,
                    "https://cdn.modrinth.com/data/aa/v1/sodium.jar");
@@ -394,8 +394,8 @@ test_index_is_read (void)
   /* The last file has no env object: what both sides can run. */
   last = g_ptr_array_index (pack->files, 3);
   g_assert_cmpstr (last->path, ==, "config/both.toml");
-  g_assert_cmpint (last->env_client, ==, comfy_MODPACK_ENV_UNSPECIFIED);
-  g_assert_cmpint (last->env_server, ==, comfy_MODPACK_ENV_UNSPECIFIED);
+  g_assert_cmpint (last->env_client, ==, leppoisa_MODPACK_ENV_UNSPECIFIED);
+  g_assert_cmpint (last->env_server, ==, leppoisa_MODPACK_ENV_UNSPECIFIED);
   g_assert_cmpint ((gint) last->file_size, ==, 42);
 
   g_print ("ok - the index of a pack is read whole\n");
@@ -408,27 +408,27 @@ test_client_files_by_env (void)
     pack_index ("Example Pack", FILES_JSON,
                 "\"minecraft\":\"1.20.1\",\"fabric-loader\":\"0.15.11\"");
   g_autoptr (GError) error = NULL;
-  g_autoptr (ComfyModpack) pack = NULL;
+  g_autoptr (LeppoisaModpack) pack = NULL;
   g_autoptr (GPtrArray) required = NULL;
   g_autoptr (GPtrArray) optional = NULL;
 
-  pack = comfy_modpack_new_from_json (json, -1, &error);
+  pack = leppoisa_modpack_new_from_json (json, -1, &error);
   g_assert_no_error (error);
 
-  required = comfy_modpack_required_client_files (pack);
-  optional = comfy_modpack_optional_client_files (pack);
+  required = leppoisa_modpack_required_client_files (pack);
+  optional = leppoisa_modpack_optional_client_files (pack);
 
   /* The client installs what it is required to have and what both
    * sides can run; what it is only offered it is offered, not saddled
    * with; what it must not see is never listed. */
   g_assert_cmpuint (required->len, ==, 2);
-  g_assert_cmpstr (((ComfyModpackFile *) g_ptr_array_index (required, 0))->path,
+  g_assert_cmpstr (((LeppoisaModpackFile *) g_ptr_array_index (required, 0))->path,
                    ==, "mods/sodium.jar");
-  g_assert_cmpstr (((ComfyModpackFile *) g_ptr_array_index (required, 1))->path,
+  g_assert_cmpstr (((LeppoisaModpackFile *) g_ptr_array_index (required, 1))->path,
                    ==, "config/both.toml");
 
   g_assert_cmpuint (optional->len, ==, 1);
-  g_assert_cmpstr (((ComfyModpackFile *) g_ptr_array_index (optional, 0))->path,
+  g_assert_cmpstr (((LeppoisaModpackFile *) g_ptr_array_index (optional, 0))->path,
                    ==, "mods/lithium.jar");
 
   g_print ("ok - the env of a file says which list it belongs to\n");
@@ -439,17 +439,17 @@ test_client_files_by_env (void)
  * ---------------------------------------------------------- */
 
 static void
-assert_loader (const char *deps_json, ComfyLoader loader,
+assert_loader (const char *deps_json, LeppoisaLoader loader,
                const char *minecraft, const char *loader_version)
 {
   g_autofree char *json = pack_index ("Resolve Pack", "", deps_json);
   g_autoptr (GError) error = NULL;
-  g_autoptr (ComfyModpack) pack = NULL;
+  g_autoptr (LeppoisaModpack) pack = NULL;
 
-  pack = comfy_modpack_new_from_json (json, -1, &error);
+  pack = leppoisa_modpack_new_from_json (json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (pack);
-  g_assert_true (comfy_modpack_resolve (pack, &error));
+  g_assert_true (leppoisa_modpack_resolve (pack, &error));
   g_assert_no_error (error);
 
   g_assert_cmpstr (pack->minecraft_version, ==, minecraft);
@@ -461,7 +461,7 @@ static void
 test_resolve_fabric (void)
 {
   assert_loader ("\"minecraft\":\"1.20.1\",\"fabric-loader\":\"0.15.11\"",
-                 comfy_LOADER_FABRIC, "1.20.1", "0.15.11");
+                 leppoisa_LOADER_FABRIC, "1.20.1", "0.15.11");
   g_print ("ok - a pack that names fabric-loader resolves to fabric\n");
 }
 
@@ -469,7 +469,7 @@ static void
 test_resolve_quilt (void)
 {
   assert_loader ("\"minecraft\":\"1.20.1\",\"quilt-loader\":\"0.21.0\"",
-                 comfy_LOADER_QUILT, "1.20.1", "0.21.0");
+                 leppoisa_LOADER_QUILT, "1.20.1", "0.21.0");
   g_print ("ok - a pack that names quilt-loader resolves to quilt\n");
 }
 
@@ -477,7 +477,7 @@ static void
 test_resolve_forge (void)
 {
   assert_loader ("\"minecraft\":\"1.20.1\",\"forge\":\"47.2.0\"",
-                 comfy_LOADER_FORGE, "1.20.1", "47.2.0");
+                 leppoisa_LOADER_FORGE, "1.20.1", "47.2.0");
   g_print ("ok - a pack that names forge resolves to forge\n");
 }
 
@@ -485,7 +485,7 @@ static void
 test_resolve_neoforge (void)
 {
   assert_loader ("\"minecraft\":\"1.20.1\",\"neoforge\":\"20.4.0\"",
-                 comfy_LOADER_NEOFORGE, "1.20.1", "20.4.0");
+                 leppoisa_LOADER_NEOFORGE, "1.20.1", "20.4.0");
   g_print ("ok - a pack that names neoforge resolves to neoforge\n");
 }
 
@@ -495,7 +495,7 @@ test_resolve_vanilla (void)
   /* A pack that names no loader runs on vanilla, and a name the
    * format does not know is ignored rather than refused. */
   assert_loader ("\"minecraft\":\"1.21\",\"some-future-loader\":\"9.9\"",
-                 comfy_LOADER_VANILLA, "1.21", NULL);
+                 leppoisa_LOADER_VANILLA, "1.21", NULL);
   g_print ("ok - a pack that names no loader resolves to vanilla\n");
 }
 
@@ -505,7 +505,7 @@ test_resolve_loader_choice (void)
   /* Two loaders named: the one the format puts first wins. */
   assert_loader ("\"minecraft\":\"1.20.1\",\"forge\":\"47.2.0\","
                  "\"fabric-loader\":\"0.15.11\"",
-                 comfy_LOADER_FABRIC, "1.20.1", "0.15.11");
+                 leppoisa_LOADER_FABRIC, "1.20.1", "0.15.11");
   g_print ("ok - of two loaders named, the first of the format wins\n");
 }
 
@@ -515,13 +515,13 @@ test_resolve_without_minecraft (void)
   g_autofree char *json =
     pack_index ("No Minecraft", "", "\"fabric-loader\":\"0.15.11\"");
   g_autoptr (GError) error = NULL;
-  g_autoptr (ComfyModpack) pack = NULL;
+  g_autoptr (LeppoisaModpack) pack = NULL;
 
-  pack = comfy_modpack_new_from_json (json, -1, &error);
+  pack = leppoisa_modpack_new_from_json (json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (pack);
-  g_assert_false (comfy_modpack_resolve (pack, &error));
-  g_assert_error (error, comfy_MODPACK_ERROR, comfy_MODPACK_ERROR_LOADER);
+  g_assert_false (leppoisa_modpack_resolve (pack, &error));
+  g_assert_error (error, leppoisa_MODPACK_ERROR, leppoisa_MODPACK_ERROR_LOADER);
 
   g_print ("ok - a pack that names no Minecraft version is refused\n");
 }
@@ -534,11 +534,11 @@ static void
 expect_refused (const char *json, guint code, const char *what)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (ComfyModpack) pack = NULL;
+  g_autoptr (LeppoisaModpack) pack = NULL;
 
-  pack = comfy_modpack_new_from_json (json, -1, &error);
+  pack = leppoisa_modpack_new_from_json (json, -1, &error);
   g_assert_null (pack);
-  g_assert_error (error, comfy_MODPACK_ERROR, code);
+  g_assert_error (error, leppoisa_MODPACK_ERROR, code);
   g_print ("ok - %s\n", what);
 }
 
@@ -549,13 +549,13 @@ test_format_refusals (void)
   expect_refused (
     "{\"formatVersion\":2,\"game\":\"minecraft\",\"versionId\":\"2\","
     "\"name\":\"Too New\",\"files\":[],\"dependencies\":{}}",
-    comfy_MODPACK_ERROR_FORMAT, "a format version comfy does not know");
+    leppoisa_MODPACK_ERROR_FORMAT, "a format version leppoisa does not know");
 
   /* A pack for another game. */
   expect_refused (
     "{\"formatVersion\":1,\"game\":\"dwarf-fortress\",\"versionId\":\"1\","
     "\"name\":\"Not Minecraft\",\"files\":[],\"dependencies\":{}}",
-    comfy_MODPACK_ERROR_FORMAT, "a pack for another game");
+    leppoisa_MODPACK_ERROR_FORMAT, "a pack for another game");
 
   /* A file with one hash missing. */
   expect_refused (
@@ -564,31 +564,31 @@ test_format_refusals (void)
     "{\"path\":\"mods/x.jar\",\"hashes\":{\"sha1\":\"aa\"},"
     "\"downloads\":[\"https://cdn.modrinth.com/x.jar\"]}],"
     "\"dependencies\":{}}",
-    comfy_MODPACK_ERROR_FORMAT, "a file with one hash missing");
+    leppoisa_MODPACK_ERROR_FORMAT, "a file with one hash missing");
 
   /* No files array at all. */
   expect_refused (
     "{\"formatVersion\":1,\"game\":\"minecraft\",\"versionId\":\"1\","
     "\"name\":\"No Files\",\"dependencies\":{}}",
-    comfy_MODPACK_ERROR_FORMAT, "an index without a files array");
+    leppoisa_MODPACK_ERROR_FORMAT, "an index without a files array");
 
   /* No name. */
   expect_refused (
     "{\"formatVersion\":1,\"game\":\"minecraft\",\"versionId\":\"1\","
     "\"files\":[],\"dependencies\":{}}",
-    comfy_MODPACK_ERROR_FORMAT, "an index without a name");
+    leppoisa_MODPACK_ERROR_FORMAT, "an index without a name");
 
   /* A files member that is not an array. */
   expect_refused (
     "{\"formatVersion\":1,\"game\":\"minecraft\",\"versionId\":\"1\","
     "\"name\":\"Odd Files\",\"files\":{},\"dependencies\":{}}",
-    comfy_MODPACK_ERROR_FORMAT, "a files member that is not an array");
+    leppoisa_MODPACK_ERROR_FORMAT, "a files member that is not an array");
 
   /* An entry of files that is not an object. */
   expect_refused (
     "{\"formatVersion\":1,\"game\":\"minecraft\",\"versionId\":\"1\","
     "\"name\":\"Odd Entry\",\"files\":[\"mods/x.jar\"],\"dependencies\":{}}",
-    comfy_MODPACK_ERROR_FORMAT, "an entry of files that is not an object");
+    leppoisa_MODPACK_ERROR_FORMAT, "an entry of files that is not an object");
 
   g_print ("ok - an index the format does not describe is refused\n");
 }
@@ -604,7 +604,7 @@ test_index_paths_are_refused (void)
     "\"hashes\":{\"sha1\":\"aa\",\"sha512\":\"bb\"},"
     "\"downloads\":[\"https://cdn.modrinth.com/escape.jar\"]}],"
     "\"dependencies\":{}}",
-    comfy_MODPACK_ERROR_PATH, "a path that steps out of the instance");
+    leppoisa_MODPACK_ERROR_PATH, "a path that steps out of the instance");
 
   /* An absolute path. */
   expect_refused (
@@ -614,7 +614,7 @@ test_index_paths_are_refused (void)
     "\"hashes\":{\"sha1\":\"aa\",\"sha512\":\"bb\"},"
     "\"downloads\":[\"https://cdn.modrinth.com/escape.jar\"]}],"
     "\"dependencies\":{}}",
-    comfy_MODPACK_ERROR_PATH, "an absolute path");
+    leppoisa_MODPACK_ERROR_PATH, "an absolute path");
 
   /* A path with the separator of another system. */
   expect_refused (
@@ -624,7 +624,7 @@ test_index_paths_are_refused (void)
     "\"hashes\":{\"sha1\":\"aa\",\"sha512\":\"bb\"},"
     "\"downloads\":[\"https://cdn.modrinth.com/escape.jar\"]}],"
     "\"dependencies\":{}}",
-    comfy_MODPACK_ERROR_PATH, "a path with a backslash in it");
+    leppoisa_MODPACK_ERROR_PATH, "a path with a backslash in it");
 
   /* A drive name. */
   expect_refused (
@@ -634,7 +634,7 @@ test_index_paths_are_refused (void)
     "\"hashes\":{\"sha1\":\"aa\",\"sha512\":\"bb\"},"
     "\"downloads\":[\"https://cdn.modrinth.com/escape.jar\"]}],"
     "\"dependencies\":{}}",
-    comfy_MODPACK_ERROR_PATH, "a path with a drive name in it");
+    leppoisa_MODPACK_ERROR_PATH, "a path with a drive name in it");
 
   g_print ("ok - a path the instance cannot hold is refused\n");
 }
@@ -643,10 +643,10 @@ static void
 test_broken_json_is_refused (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (ComfyModpack) pack = NULL;
+  g_autoptr (LeppoisaModpack) pack = NULL;
 
   /* Not JSON at all: the parser says so, in its own words. */
-  pack = comfy_modpack_new_from_json ("this is not json", -1, &error);
+  pack = leppoisa_modpack_new_from_json ("this is not json", -1, &error);
   g_assert_null (pack);
   g_assert_nonnull (error);
 
@@ -670,7 +670,7 @@ test_verify_hashes (void)
     G_CHECKSUM_SHA512, (const guchar *) payload, strlen (payload));
   g_autofree char *other_sha1 = g_compute_checksum_for_data (
     G_CHECKSUM_SHA1, (const guchar *) "something else", 14);
-  ComfyModpackFile file = { 0 };
+  LeppoisaModpackFile file = { 0 };
 
   g_assert_true (g_file_set_contents (path, payload, -1, &error));
   g_assert_no_error (error);
@@ -686,7 +686,7 @@ test_verify_hashes (void)
   /* A sha1 that does not match. */
   file.sha1 = other_sha1;
   g_assert_false (verify_now (&file, path, &error));
-  g_assert_error (error, comfy_MODPACK_ERROR, comfy_MODPACK_ERROR_HASH);
+  g_assert_error (error, leppoisa_MODPACK_ERROR, leppoisa_MODPACK_ERROR_HASH);
   g_assert_nonnull (strstr (error->message, "sha1"));
   g_clear_error (&error);
 
@@ -697,7 +697,7 @@ test_verify_hashes (void)
                 "000000000000000000000000000000000000000000000000000000000000"
                 "000000000000000000000000000000000000000000000000000000000000";
   g_assert_false (verify_now (&file, path, &error));
-  g_assert_error (error, comfy_MODPACK_ERROR, comfy_MODPACK_ERROR_HASH);
+  g_assert_error (error, leppoisa_MODPACK_ERROR, leppoisa_MODPACK_ERROR_HASH);
   g_assert_nonnull (strstr (error->message, "sha512"));
   g_clear_error (&error);
 
@@ -709,14 +709,14 @@ test_verify_hashes (void)
  * What an install leaves behind
  * ---------------------------------------------------------- */
 
-static ComfyInstanceManager *
+static LeppoisaInstanceManager *
 manager_new (const char *data_dir)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (ComfyInstanceManager) manager = comfy_instance_manager_new (data_dir);
+  g_autoptr (LeppoisaInstanceManager) manager = leppoisa_instance_manager_new (data_dir);
 
   g_assert_nonnull (manager);
-  g_assert_true (comfy_instance_manager_load (manager, &error));
+  g_assert_true (leppoisa_instance_manager_load (manager, &error));
   g_assert_no_error (error);
   g_assert_cmpuint (manager_count (manager), ==, 0);
 
@@ -733,14 +733,14 @@ test_install_offline (void)
     pack_index ("Offline Pack", "", "\"minecraft\":\"1.20.1\"");
   g_autofree char *instances_dir = g_build_filename (data_dir, "instances", NULL);
   g_autoptr (GError) error = NULL;
-  g_autoptr (ComfyInstanceManager) manager = NULL;
-  g_autoptr (ComfyModpack) pack = NULL;
-  g_autoptr (ComfyInstance) instance = NULL;
+  g_autoptr (LeppoisaInstanceManager) manager = NULL;
+  g_autoptr (LeppoisaModpack) pack = NULL;
+  g_autoptr (LeppoisaInstance) instance = NULL;
   g_autofree char *instance_dir = NULL;
   g_autofree char *name = NULL;
   g_autofree char *minecraft = NULL;
   g_autofree char *icon = NULL;
-  ComfyLoader loader = comfy_LOADER_VANILLA;
+  LeppoisaLoader loader = leppoisa_LOADER_VANILLA;
   g_autofree char *options = NULL;
   g_autofree char *client = NULL;
   g_autofree char *server = NULL;
@@ -760,11 +760,11 @@ test_install_offline (void)
 
   manager = manager_new (data_dir);
 
-  pack = comfy_modpack_new_from_zip (zip_path, &error);
+  pack = leppoisa_modpack_new_from_zip (zip_path, &error);
   g_assert_no_error (error);
   g_assert_nonnull (pack);
   g_assert_cmpstr (pack->archive_path, ==, zip_path);
-  g_assert_true (comfy_modpack_resolve (pack, &error));
+  g_assert_true (leppoisa_modpack_resolve (pack, &error));
   g_assert_no_error (error);
 
   /* No directory of its own: the manager's default for the name. */
@@ -777,7 +777,7 @@ test_install_offline (void)
                 "icon", &icon, NULL);
   g_assert_cmpstr (name, ==, "Offline Pack");
   g_assert_cmpstr (minecraft, ==, "1.20.1");
-  g_assert_cmpint (loader, ==, comfy_LOADER_VANILLA);
+  g_assert_cmpint (loader, ==, leppoisa_LOADER_VANILLA);
   g_assert_true (g_str_has_prefix (instance_dir, instances_dir));
   g_assert_true (g_file_test (instance_dir, G_FILE_TEST_IS_DIR));
   g_assert_nonnull (icon);
@@ -841,9 +841,9 @@ test_install_rolls_back (void)
   g_autofree char *index_json =
     pack_index ("Bad Pack", files_json, "\"minecraft\":\"1.20.1\"");
   g_autoptr (GError) error = NULL;
-  g_autoptr (ComfyInstanceManager) manager = NULL;
-  g_autoptr (ComfyModpack) pack = NULL;
-  g_autoptr (ComfyInstance) instance = NULL;
+  g_autoptr (LeppoisaInstanceManager) manager = NULL;
+  g_autoptr (LeppoisaModpack) pack = NULL;
+  g_autoptr (LeppoisaInstance) instance = NULL;
 
   ZipEntry entries[] = {
     { "modrinth.index.json", index_json, strlen (index_json), AE_IFREG,
@@ -854,15 +854,15 @@ test_install_rolls_back (void)
 
   manager = manager_new (data_dir);
 
-  pack = comfy_modpack_new_from_zip (zip_path, &error);
+  pack = leppoisa_modpack_new_from_zip (zip_path, &error);
   g_assert_no_error (error);
   g_assert_nonnull (pack);
-  g_assert_true (comfy_modpack_resolve (pack, &error));
+  g_assert_true (leppoisa_modpack_resolve (pack, &error));
   g_assert_no_error (error);
 
   instance = install_now (pack, manager, "Bad Pack", target, &error);
   g_assert_null (instance);
-  g_assert_error (error, comfy_MODPACK_ERROR, comfy_MODPACK_ERROR_URL);
+  g_assert_error (error, leppoisa_MODPACK_ERROR, leppoisa_MODPACK_ERROR_URL);
   g_clear_error (&error);
 
   /* Nothing of the pack is where it wanted to go, nothing of it is
@@ -888,9 +888,9 @@ test_install_leaves_user_data (void)
   g_autofree char *index_json =
     pack_index ("Taken Pack", "", "\"minecraft\":\"1.20.1\"");
   g_autoptr (GError) error = NULL;
-  g_autoptr (ComfyInstanceManager) manager = NULL;
-  g_autoptr (ComfyModpack) pack = NULL;
-  g_autoptr (ComfyInstance) instance = NULL;
+  g_autoptr (LeppoisaInstanceManager) manager = NULL;
+  g_autoptr (LeppoisaModpack) pack = NULL;
+  g_autoptr (LeppoisaInstance) instance = NULL;
 
   ZipEntry entries[] = {
     { "modrinth.index.json", index_json, strlen (index_json), AE_IFREG,
@@ -908,15 +908,15 @@ test_install_leaves_user_data (void)
 
   manager = manager_new (data_dir);
 
-  pack = comfy_modpack_new_from_zip (zip_path, &error);
+  pack = leppoisa_modpack_new_from_zip (zip_path, &error);
   g_assert_no_error (error);
   g_assert_nonnull (pack);
-  g_assert_true (comfy_modpack_resolve (pack, &error));
+  g_assert_true (leppoisa_modpack_resolve (pack, &error));
   g_assert_no_error (error);
 
   instance = install_now (pack, manager, "Taken Pack", target, &error);
   g_assert_null (instance);
-  g_assert_error (error, comfy_MODPACK_ERROR, comfy_MODPACK_ERROR_IO);
+  g_assert_error (error, leppoisa_MODPACK_ERROR, leppoisa_MODPACK_ERROR_IO);
   g_clear_error (&error);
 
   /* The user data is as it was, and no temporary directory was even
@@ -939,13 +939,13 @@ test_install_needs_resolve (void)
   g_autofree char *index_json =
     pack_index ("Unread Pack", "", "\"minecraft\":\"1.20.1\"");
   g_autoptr (GError) error = NULL;
-  g_autoptr (ComfyInstanceManager) manager = NULL;
-  g_autoptr (ComfyModpack) pack = NULL;
-  g_autoptr (ComfyInstance) instance = NULL;
+  g_autoptr (LeppoisaInstanceManager) manager = NULL;
+  g_autoptr (LeppoisaModpack) pack = NULL;
+  g_autoptr (LeppoisaInstance) instance = NULL;
 
   manager = manager_new (data_dir);
 
-  pack = comfy_modpack_new_from_json (index_json, -1, &error);
+  pack = leppoisa_modpack_new_from_json (index_json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (pack);
 
@@ -953,7 +953,7 @@ test_install_needs_resolve (void)
    * guessing a Minecraft version. */
   instance = install_now (pack, manager, "Unread Pack", NULL, &error);
   g_assert_null (instance);
-  g_assert_error (error, comfy_MODPACK_ERROR, comfy_MODPACK_ERROR_LOADER);
+  g_assert_error (error, leppoisa_MODPACK_ERROR, leppoisa_MODPACK_ERROR_LOADER);
   g_clear_error (&error);
 
   g_assert_cmpuint (manager_count (manager), ==, 0);
@@ -976,19 +976,19 @@ test_export_import_round_trip (void)
   g_autofree char *index =
     g_build_filename (source_dir, "mods", ".index", "index.json", NULL);
   g_autoptr (GError) error = NULL;
-  g_autoptr (ComfyInstanceManager) source_manager = manager_new (source_data);
-  g_autoptr (ComfyInstanceManager) target_manager = manager_new (target_data);
-  g_autoptr (ComfyInstance) source = NULL;
-  g_autoptr (ComfyModpack) pack = NULL;
-  g_autoptr (ComfyInstance) imported = NULL;
+  g_autoptr (LeppoisaInstanceManager) source_manager = manager_new (source_data);
+  g_autoptr (LeppoisaInstanceManager) target_manager = manager_new (target_data);
+  g_autoptr (LeppoisaInstance) source = NULL;
+  g_autoptr (LeppoisaModpack) pack = NULL;
+  g_autoptr (LeppoisaInstance) imported = NULL;
   g_autofree char *imported_dir = NULL;
   g_autofree char *imported_icon = NULL;
   g_autofree char *icon_bytes = NULL;
   g_autofree char *override_bytes = NULL;
-  ComfyLoader loader = comfy_LOADER_VANILLA;
+  LeppoisaLoader loader = leppoisa_LOADER_VANILLA;
 
-  source = comfy_instance_manager_create (source_manager, "Round Trip",
-                                        source_dir, "1.20.1", comfy_LOADER_FABRIC,
+  source = leppoisa_instance_manager_create (source_manager, "Round Trip",
+                                        source_dir, "1.20.1", leppoisa_LOADER_FABRIC,
                                         "0.15.11", &error);
   g_assert_no_error (error);
   g_assert_nonnull (source);
@@ -1016,7 +1016,7 @@ test_export_import_round_trip (void)
   g_assert_true (g_file_set_contents (index, "internal index", -1, &error));
   g_assert_no_error (error);
   g_object_set (source, "icon", icon_source, NULL);
-  g_assert_true (comfy_instance_manager_save (source_manager, &error));
+  g_assert_true (leppoisa_instance_manager_save (source_manager, &error));
   g_assert_no_error (error);
 
   g_assert_true (export_now (source, archive, &error));
@@ -1039,17 +1039,17 @@ test_export_import_round_trip (void)
     g_assert_cmpuint (icon_entries, ==, 1);
   }
 
-  pack = comfy_modpack_new_from_zip (archive, &error);
+  pack = leppoisa_modpack_new_from_zip (archive, &error);
   g_assert_no_error (error);
   g_assert_nonnull (pack);
-  g_assert_true (comfy_modpack_resolve (pack, &error));
+  g_assert_true (leppoisa_modpack_resolve (pack, &error));
   g_assert_no_error (error);
-  g_assert_cmpint (pack->loader, ==, comfy_LOADER_FABRIC);
+  g_assert_cmpint (pack->loader, ==, leppoisa_LOADER_FABRIC);
 
   /* The manifest loader is what this round trip verifies. Avoid asking the
    * live Fabric service during tests; the actual files, icon and overrides
    * are independent of the loader installer lookup. */
-  pack->loader = comfy_LOADER_VANILLA;
+  pack->loader = leppoisa_LOADER_VANILLA;
   g_clear_pointer (&pack->loader_version, g_free);
 
   imported = install_now (pack, target_manager, "Round Trip", NULL, &error);
@@ -1057,7 +1057,7 @@ test_export_import_round_trip (void)
   g_assert_nonnull (imported);
   g_object_get (imported, "loader", &loader, "directory", &imported_dir,
                 "icon", &imported_icon, NULL);
-  g_assert_cmpint (loader, ==, comfy_LOADER_VANILLA);
+  g_assert_cmpint (loader, ==, leppoisa_LOADER_VANILLA);
   g_assert_nonnull (imported_icon);
   icon_bytes = read_file (imported_icon);
   g_assert_cmpstr (icon_bytes, ==, "icon bytes");
@@ -1099,8 +1099,8 @@ test_dialog_imports_and_installs (void)
   g_autofree char *zip_path = g_build_filename (dir, "pack.mrpack", NULL);
   g_autofree char *index_json =
     pack_index ("Dialog Pack", "", "\"minecraft\":\"1.20.1\"");
-  g_autoptr (ComfyInstanceManager) manager = NULL;
-  g_autoptr (ComfyDownloadModpackDialog) dialog = NULL;
+  g_autoptr (LeppoisaInstanceManager) manager = NULL;
+  g_autoptr (LeppoisaDownloadModpackDialog) dialog = NULL;
   ZipEntry entries[] = {
     { "modrinth.index.json", index_json, strlen (index_json), AE_IFREG,
       NULL },
@@ -1113,7 +1113,7 @@ test_dialog_imports_and_installs (void)
   zip_write (zip_path, entries, G_N_ELEMENTS (entries));
   manager = manager_new (data_dir);
 
-  dialog = comfy_download_modpack_dialog_new_for_file (manager, zip_path);
+  dialog = leppoisa_download_modpack_dialog_new_for_file (manager, zip_path);
   g_assert_nonnull (dialog);
   /* The constructor returns a floating dialog, as GTK widget constructors
    * do. Keep the reference owned by this test rather than relying on an

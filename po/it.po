@@ -240,8 +240,8 @@ msgstr "Limite di righe"
 msgid "Open Log Folder After Crash"
 msgstr "Apri la cartella di registro dopo l'arresto anomalo"
 
-msgid "About Comfy Launcher"
-msgstr "Informazioni su Comfy Launcher"
+msgid "About Leppoisa Launcher"
+msgstr "Informazioni su Leppoisa Launcher"
 
 msgid "Keyboard Shortcuts"
 msgstr "Scorciatoie da tastiera"
@@ -367,8 +367,8 @@ msgstr "1 giorno"
 msgid "7 days"
 msgstr "7 giorni"
 
-msgid "Clear comfy Cache"
-msgstr "Svuota cache comfy"
+msgid "Clear leppoisa Cache"
+msgstr "Svuota cache leppoisa"
 
 msgid "Show Shortcuts"
 msgstr "Mostra scorciatoie"
@@ -376,8 +376,8 @@ msgstr "Mostra scorciatoie"
 msgid "Quit"
 msgstr "Esci"
 
-msgid "Clear comfy Cache?"
-msgstr "Svuotare la cache comfy?"
+msgid "Clear leppoisa Cache?"
+msgstr "Svuotare la cache leppoisa?"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -560,8 +560,8 @@ msgstr "%s download"
 msgid "Cache Cleared"
 msgstr "Cache svuotata"
 
-msgid "comfy cache data was cleared successfully."
-msgstr "I dati della cache di comfy sono stati eliminati correttamente."
+msgid "leppoisa cache data was cleared successfully."
+msgstr "I dati della cache di leppoisa sono stati eliminati correttamente."
 
 msgid "Cache Cleanup Failed"
 msgstr "Pulizia della cache non riuscita"

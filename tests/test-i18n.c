@@ -20,12 +20,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef comfy_SRC_DIR
-#define comfy_SRC_DIR "../src"
+#ifndef leppoisa_SRC_DIR
+#define leppoisa_SRC_DIR "../src"
 #endif
 
-#ifndef comfy_PO_DIR
-#define comfy_PO_DIR "../po"
+#ifndef leppoisa_PO_DIR
+#define leppoisa_PO_DIR "../po"
 #endif
 
 /* ---------------------------------------------------------- *
@@ -360,7 +360,7 @@ compare_names (gconstpointer a,
 static GPtrArray *
 catalog_paths (void)
 {
-  g_autoptr (GDir) directory = g_dir_open (comfy_PO_DIR, 0, NULL);
+  g_autoptr (GDir) directory = g_dir_open (leppoisa_PO_DIR, 0, NULL);
   GPtrArray *names;
   const char *entry;
 
@@ -392,7 +392,7 @@ main (void)
   /* Every msgid the source hands to gettext. */
   used = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
   {
-    g_autoptr (GDir) sources = g_dir_open (comfy_SRC_DIR, 0, NULL);
+    g_autoptr (GDir) sources = g_dir_open (leppoisa_SRC_DIR, 0, NULL);
     const char *entry;
 
     g_assert_nonnull (sources);
@@ -404,7 +404,7 @@ main (void)
         if (!g_str_has_suffix (entry, ".c"))
           continue;
 
-        path = g_build_filename (comfy_SRC_DIR, entry, NULL);
+        path = g_build_filename (leppoisa_SRC_DIR, entry, NULL);
         scan_file (path, used);
       }
   }
@@ -412,7 +412,7 @@ main (void)
   {
     guint n = g_hash_table_size (used);
 
-    g_print ("found %u translated string(s) in %s\n", n, comfy_SRC_DIR);
+    g_print ("found %u translated string(s) in %s\n", n, leppoisa_SRC_DIR);
     g_assert_cmpuint (n, >, 0);
   }
 
@@ -424,7 +424,7 @@ main (void)
   for (guint i = 0; i < paths->len; i++)
     {
       g_autofree char *path =
-        g_build_filename (comfy_PO_DIR, g_ptr_array_index (paths, i), NULL);
+        g_build_filename (leppoisa_PO_DIR, g_ptr_array_index (paths, i), NULL);
 
       g_ptr_array_add (catalogs, read_catalog (path));
     }

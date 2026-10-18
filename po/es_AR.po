@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: comfy\n"
+"Project-Id-Version: leppoisa\n"
 "Language: es_AR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -114,8 +114,8 @@ msgstr "Elegí el ejecutable de Java"
 msgid "the chosen file does not report a Java version"
 msgstr "el archivo elegido no informa una versión de Java"
 
-msgid "About Comfy Launcher"
-msgstr "Acerca de Comfy Launcher"
+msgid "About Leppoisa Launcher"
+msgstr "Acerca de Leppoisa Launcher"
 
 msgid "Create Instance"
 msgstr "Crear instancia"
@@ -370,8 +370,8 @@ msgstr "1 día"
 msgid "7 days"
 msgstr "7 días"
 
-msgid "Clear comfy Cache"
-msgstr "Borrar caché de comfy"
+msgid "Clear leppoisa Cache"
+msgstr "Borrar caché de leppoisa"
 
 msgid "Show Shortcuts"
 msgstr "Mostrar atajos de teclado"
@@ -379,8 +379,8 @@ msgstr "Mostrar atajos de teclado"
 msgid "Quit"
 msgstr "Salir"
 
-msgid "Clear comfy Cache?"
-msgstr "¿Borrar la caché de comfy?"
+msgid "Clear leppoisa Cache?"
+msgstr "¿Borrar la caché de leppoisa?"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -561,8 +561,8 @@ msgstr "%s descargas"
 msgid "Cache Cleared"
 msgstr "Caché limpiada"
 
-msgid "comfy cache data was cleared successfully."
-msgstr "Los datos de caché de comfy se limpiaron correctamente."
+msgid "leppoisa cache data was cleared successfully."
+msgstr "Los datos de caché de leppoisa se limpiaron correctamente."
 
 msgid "Cache Cleanup Failed"
 msgstr "Falló la limpieza de la caché"
