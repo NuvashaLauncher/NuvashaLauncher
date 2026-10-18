@@ -133,7 +133,6 @@ pot:
 
 install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 	install -Dm755 $(BIN) "$(DESTDIR)$(PREFIX)/bin/LeppoisaLauncher"
-	install -Dm644 data/skins/steve.png "$(DESTDIR)$(PREFIX)/share/leppoisa/skins/steve.png"
 	install -Dm644 data/pack.png "$(DESTDIR)$(PREFIX)/share/leppoisa/pack.png"
 	@for skin in data/skins/defaults/*.png; do \
 		install -Dm644 "$$skin" "$(DESTDIR)$(PREFIX)/share/leppoisa/skins/defaults/$$(basename "$$skin")"; \
@@ -153,7 +152,6 @@ install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 # the rest of the launcher.
 uninstall:
 	rm -f "$(DESTDIR)$(PREFIX)/bin/LeppoisaLauncher"
-	rm -f "$(DESTDIR)$(PREFIX)/share/leppoisa/skins/steve.png"
 	rm -f "$(DESTDIR)$(PREFIX)/share/leppoisa/pack.png"
 	rm -rf "$(DESTDIR)$(PREFIX)/share/leppoisa/skins/defaults"
 	rm -f "$(DESTDIR)$(PREFIX)/share/applications/com.github.leppoisalauncher.leppoisa.desktop"
