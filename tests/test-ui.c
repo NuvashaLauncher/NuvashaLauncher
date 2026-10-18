@@ -20,10 +20,10 @@
 
 #include <glib/gstdio.h>
 
-#include "aml-content-page.h"
-#include "aml-icons.h"
-#include "aml-instance-manager.h"
-#include "aml-modrinth.h"
+#include "comfy-content-page.h"
+#include "comfy-icons.h"
+#include "comfy-instance-manager.h"
+#include "comfy-modrinth.h"
 
 /* The titles the browser has to survive: an ampersand, a tag-like word
  * and a name that reads like markup. */
@@ -133,7 +133,7 @@ static void
 test_icon_decode (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autofree char *tmp = g_dir_make_tmp ("aml-ui-icon-XXXXXX", &error);
+  g_autofree char *tmp = g_dir_make_tmp ("comfy-ui-icon-XXXXXX", &error);
   g_autofree char *bad_path = NULL;
   g_autofree char *good_path = NULL;
   g_autofree guchar *png = NULL;
@@ -155,15 +155,15 @@ test_icon_decode (void)
                                       png_len, &error));
   g_assert_no_error (error);
 
-  icon = aml_icon_widget_new ("image-x-generic-symbolic");
+  icon = comfy_icon_widget_new ("image-x-generic-symbolic");
 
   /* A file that cannot be decoded leaves the placeholder in place. */
-  g_assert_false (aml_icon_widget_set_file (icon, bad_path));
+  g_assert_false (comfy_icon_widget_set_file (icon, bad_path));
   g_assert_cmpstr (gtk_stack_get_visible_child_name (GTK_STACK (icon)), ==,
                    "placeholder");
 
   /* A file that is an image is shown. */
-  g_assert_true (aml_icon_widget_set_file (icon, good_path));
+  g_assert_true (comfy_icon_widget_set_file (icon, good_path));
   g_assert_cmpstr (gtk_stack_get_visible_child_name (GTK_STACK (icon)), ==,
                    "icon");
 
@@ -175,11 +175,11 @@ test_icon_decode (void)
 
     g_assert_true (GTK_IS_IMAGE (shown));
     g_assert_cmpint (gtk_image_get_pixel_size (GTK_IMAGE (shown)), ==,
-                     AML_ICON_SIZE);
+                     comfy_ICON_SIZE);
   }
 
   /* A missing answer changes nothing. */
-  g_assert_false (aml_icon_widget_set_file (icon, NULL));
+  g_assert_false (comfy_icon_widget_set_file (icon, NULL));
 
   g_object_ref_sink (icon);
   g_object_unref (icon);
@@ -264,11 +264,11 @@ static void
 test_content_page_starts_single (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autofree char *tmp = g_dir_make_tmp ("aml-ui-split-XXXXXX", &error);
+  g_autofree char *tmp = g_dir_make_tmp ("comfy-ui-split-XXXXXX", &error);
   g_autofree char *data_dir = NULL;
-  g_autoptr (AmlInstanceManager) manager = NULL;
-  AmlInstance *instance = NULL;
-  AmlContentPage *page = NULL;
+  g_autoptr (ComfyInstanceManager) manager = NULL;
+  ComfyInstance *instance = NULL;
+  ComfyContentPage *page = NULL;
   GtkWidget *split = NULL;
   GtkWidget *installed = NULL;
 
@@ -276,14 +276,14 @@ test_content_page_starts_single (void)
   g_assert_nonnull (tmp);
 
   data_dir = g_build_filename (tmp, "data", NULL);
-  manager = aml_instance_manager_new (data_dir);
-  instance = aml_instance_manager_create (manager, "Split", NULL, "1.21.1",
-                                          AML_LOADER_FABRIC, "0.15.0",
+  manager = comfy_instance_manager_new (data_dir);
+  instance = comfy_instance_manager_create (manager, "Split", NULL, "1.21.1",
+                                          comfy_LOADER_FABRIC, "0.15.0",
                                           &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
-  page = aml_content_page_new (instance, AML_CONTENT_MOD);
+  page = comfy_content_page_new (instance, comfy_CONTENT_MOD);
   g_assert_nonnull (page);
 
   split = find_by_type (GTK_WIDGET (page), ADW_TYPE_NAVIGATION_SPLIT_VIEW);
@@ -316,27 +316,27 @@ static void
 test_page_disposed_while_scanning (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autofree char *tmp = g_dir_make_tmp ("aml-ui-page-XXXXXX", &error);
+  g_autofree char *tmp = g_dir_make_tmp ("comfy-ui-page-XXXXXX", &error);
   g_autofree char *data_dir = NULL;
-  g_autoptr (AmlInstanceManager) manager = NULL;
-  AmlInstance *instance = NULL;
-  AmlContentPage *page = NULL;
+  g_autoptr (ComfyInstanceManager) manager = NULL;
+  ComfyInstance *instance = NULL;
+  ComfyContentPage *page = NULL;
   gint64 deadline = 0;
 
   g_assert_no_error (error);
   g_assert_nonnull (tmp);
 
   data_dir = g_build_filename (tmp, "data", NULL);
-  manager = aml_instance_manager_new (data_dir);
-  instance = aml_instance_manager_create (manager, "Dispose", NULL, "1.21.1",
-                                          AML_LOADER_FABRIC, "0.15.0",
+  manager = comfy_instance_manager_new (data_dir);
+  instance = comfy_instance_manager_create (manager, "Dispose", NULL, "1.21.1",
+                                          comfy_LOADER_FABRIC, "0.15.0",
                                           &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
   /* Start the lazy scan before the page is dropped. */
-  page = aml_content_page_new (instance, AML_CONTENT_MOD);
-  aml_content_page_reset_for_tab_switch (page);
+  page = comfy_content_page_new (instance, comfy_CONTENT_MOD);
+  comfy_content_page_reset_for_tab_switch (page);
   g_object_ref_sink (page);
   g_object_unref (page);
 
@@ -358,11 +358,11 @@ static void
 test_pick_button_starts_empty (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autofree char *tmp = g_dir_make_tmp ("aml-ui-pick-XXXXXX", &error);
+  g_autofree char *tmp = g_dir_make_tmp ("comfy-ui-pick-XXXXXX", &error);
   g_autofree char *data_dir = NULL;
-  g_autoptr (AmlInstanceManager) manager = NULL;
-  AmlInstance *instance = NULL;
-  AmlContentPage *page = NULL;
+  g_autoptr (ComfyInstanceManager) manager = NULL;
+  ComfyInstance *instance = NULL;
+  ComfyContentPage *page = NULL;
   GtkWidget *icon = NULL;
   GtkWidget *button = NULL;
   GtkWidget *badge = NULL;
@@ -371,14 +371,14 @@ test_pick_button_starts_empty (void)
   g_assert_nonnull (tmp);
 
   data_dir = g_build_filename (tmp, "data", NULL);
-  manager = aml_instance_manager_new (data_dir);
-  instance = aml_instance_manager_create (manager, "Pick", NULL, "1.21.1",
-                                          AML_LOADER_FABRIC, "0.15.0",
+  manager = comfy_instance_manager_new (data_dir);
+  instance = comfy_instance_manager_create (manager, "Pick", NULL, "1.21.1",
+                                          comfy_LOADER_FABRIC, "0.15.0",
                                           &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
-  page = aml_content_page_new (instance, AML_CONTENT_MOD);
+  page = comfy_content_page_new (instance, comfy_CONTENT_MOD);
   g_assert_nonnull (page);
 
   /* The download icon of the foot is the button itself, and the number

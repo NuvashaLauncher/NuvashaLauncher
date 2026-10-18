@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: AML\n"
+"Project-Id-Version: comfy\n"
 "Language: es_AR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -114,8 +114,8 @@ msgstr "Elegí el ejecutable de Java"
 msgid "the chosen file does not report a Java version"
 msgstr "el archivo elegido no informa una versión de Java"
 
-msgid "About AML"
-msgstr "Acerca de AML"
+msgid "About comfy"
+msgstr "Acerca de comfy"
 
 msgid "Create Instance"
 msgstr "Crear instancia"
@@ -370,8 +370,8 @@ msgstr "1 día"
 msgid "7 days"
 msgstr "7 días"
 
-msgid "Clear AML Cache"
-msgstr "Borrar caché de AML"
+msgid "Clear comfy Cache"
+msgstr "Borrar caché de comfy"
 
 msgid "Show Shortcuts"
 msgstr "Mostrar atajos de teclado"
@@ -379,8 +379,8 @@ msgstr "Mostrar atajos de teclado"
 msgid "Quit"
 msgstr "Salir"
 
-msgid "Clear AML Cache?"
-msgstr "¿Borrar la caché de AML?"
+msgid "Clear comfy Cache?"
+msgstr "¿Borrar la caché de comfy?"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -561,8 +561,8 @@ msgstr "%s descargas"
 msgid "Cache Cleared"
 msgstr "Caché limpiada"
 
-msgid "AML cache data was cleared successfully."
-msgstr "Los datos de caché de AML se limpiaron correctamente."
+msgid "comfy cache data was cleared successfully."
+msgstr "Los datos de caché de comfy se limpiaron correctamente."
 
 msgid "Cache Cleanup Failed"
 msgstr "Falló la limpieza de la caché"

@@ -1,0 +1,11 @@
+# Copyright (C) 2026 Flia
+# SPDX-License-Identifier: GPL-3.0-only
+
+[Desktop Entry]
+Type=Application
+Name=comfy
+Comment=Comfy Launcher
+Exec=comfy
+Icon=io.gitlab.comfylauncher.comfy
+Terminal=false
+Categories=Game;

@@ -2,12 +2,12 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* Tests for AmlInstanceManager: persistence, atomic saves, duplication,
+/* Tests for ComfyInstanceManager: persistence, atomic saves, duplication,
  * deletion and path validation. Only temporary directories are used
  * (never the real data directory) and everything runs headless: no
  * application is ever launched. */
 
-#include "aml-instance-manager.h"
+#include "comfy-instance-manager.h"
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -27,14 +27,14 @@ typedef struct
   gboolean success;
   gboolean timed_out;
   guint watchdog;
-  AmlTaskScope *operation;
+  ComfyTaskScope *operation;
 } AsyncCall;
 
 static char *
 make_tmp_dir (void)
 {
   g_autoptr (GError) error = NULL;
-  char *dir = g_dir_make_tmp ("aml-test-XXXXXX", &error);
+  char *dir = g_dir_make_tmp ("comfy-test-XXXXXX", &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (dir);
@@ -122,7 +122,7 @@ count_entries (const char *path)
 }
 
 static char *
-prop_string (AmlInstance *instance, const char *property)
+prop_string (ComfyInstance *instance, const char *property)
 {
   char *value = NULL;
 
@@ -131,10 +131,10 @@ prop_string (AmlInstance *instance, const char *property)
 }
 
 static guint
-manager_count (AmlInstanceManager *manager)
+manager_count (ComfyInstanceManager *manager)
 {
   return g_list_model_get_n_items (
-    G_LIST_MODEL (aml_instance_manager_get_instances (manager)));
+    G_LIST_MODEL (comfy_instance_manager_get_instances (manager)));
 }
 
 static gboolean
@@ -181,9 +181,9 @@ duplicate_finished (GObject *source, GAsyncResult *result, gpointer user_data)
   AsyncCall *call = user_data;
 
   call->result =
-    aml_instance_manager_duplicate_finish (AML_INSTANCE_MANAGER (source),
+    comfy_instance_manager_duplicate_finish (comfy_INSTANCE_MANAGER (source),
                                            result, &call->error);
-  aml_task_scope_unref (call->operation);
+  comfy_task_scope_unref (call->operation);
   call->operation = NULL;
   g_main_loop_quit (call->loop);
 }
@@ -194,9 +194,9 @@ delete_finished (GObject *source, GAsyncResult *result, gpointer user_data)
   AsyncCall *call = user_data;
 
   call->success =
-    aml_instance_manager_delete_finish (AML_INSTANCE_MANAGER (source),
+    comfy_instance_manager_delete_finish (comfy_INSTANCE_MANAGER (source),
                                         result, &call->error);
-  aml_task_scope_unref (call->operation);
+  comfy_task_scope_unref (call->operation);
   call->operation = NULL;
   g_main_loop_quit (call->loop);
 }
@@ -207,9 +207,9 @@ open_folder_finished (GObject *source, GAsyncResult *result, gpointer user_data)
   AsyncCall *call = user_data;
 
   call->success =
-    aml_instance_manager_open_folder_finish (AML_INSTANCE_MANAGER (source),
+    comfy_instance_manager_open_folder_finish (comfy_INSTANCE_MANAGER (source),
                                              result, &call->error);
-  aml_task_scope_unref (call->operation);
+  comfy_task_scope_unref (call->operation);
   call->operation = NULL;
   g_main_loop_quit (call->loop);
 }
@@ -220,9 +220,9 @@ change_directory_finished (GObject *source, GAsyncResult *result,
 {
   AsyncCall *call = user_data;
 
-  call->success = aml_instance_manager_change_directory_finish (
-    AML_INSTANCE_MANAGER (source), result, &call->error);
-  aml_task_scope_unref (call->operation);
+  call->success = comfy_instance_manager_change_directory_finish (
+    comfy_INSTANCE_MANAGER (source), result, &call->error);
+  comfy_task_scope_unref (call->operation);
   call->operation = NULL;
   g_main_loop_quit (call->loop);
 }
@@ -237,14 +237,14 @@ test_create_and_persist (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
-  g_assert_nonnull (aml_instance_manager_get_instances (manager));
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
+  g_assert_nonnull (comfy_instance_manager_get_instances (manager));
   g_assert_cmpuint (manager_count (manager), ==, 0);
 
-  AmlInstance *instance =
-    aml_instance_manager_create (manager, "Pack One", NULL, "1.21.1",
-                                 AML_LOADER_FABRIC, "0.16.9", &error);
+  ComfyInstance *instance =
+    comfy_instance_manager_create (manager, "Pack One", NULL, "1.21.1",
+                                 comfy_LOADER_FABRIC, "0.16.9", &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
   g_assert_cmpuint (manager_count (manager), ==, 1);
@@ -283,16 +283,16 @@ test_create_and_persist (void)
   g_assert_cmpuint (json_array_get_length (json_node_get_array (array)), ==, 1);
 
   /* A fresh manager reads the same instance back. */
-  g_autoptr (AmlInstanceManager) fresh = aml_instance_manager_new (data_dir);
-  g_assert_true (aml_instance_manager_load (fresh, &error));
+  g_autoptr (ComfyInstanceManager) fresh = comfy_instance_manager_new (data_dir);
+  g_assert_true (comfy_instance_manager_load (fresh, &error));
   g_assert_no_error (error);
   g_assert_cmpuint (manager_count (fresh), ==, 1);
 
-  g_autoptr (AmlInstance) loaded =
+  g_autoptr (ComfyInstance) loaded =
     g_list_model_get_item (
-      G_LIST_MODEL (aml_instance_manager_get_instances (fresh)), 0);
-  g_assert_cmpstr (aml_instance_get_id (loaded), ==,
-                   aml_instance_get_id (instance));
+      G_LIST_MODEL (comfy_instance_manager_get_instances (fresh)), 0);
+  g_assert_cmpstr (comfy_instance_get_id (loaded), ==,
+                   comfy_instance_get_id (instance));
 
   g_autofree char *loaded_name = prop_string (loaded, "name");
   g_autofree char *loaded_version = prop_string (loaded, "minecraft-version");
@@ -305,8 +305,8 @@ test_create_and_persist (void)
   g_assert_cmpstr (loaded_loader_version, ==, "0.16.9");
   g_assert_cmpstr (loaded_directory, ==, directory);
 
-  g_assert_true (aml_instance_manager_get_by_id (
-    fresh, aml_instance_get_id (instance)) == loaded);
+  g_assert_true (comfy_instance_manager_get_by_id (
+    fresh, comfy_instance_get_id (instance)) == loaded);
 
   g_object_unref (instance);
   remove_recursive (data_dir);
@@ -321,12 +321,12 @@ test_create_explicit_directory (void)
   g_autofree char *chosen = g_build_filename (data_dir, "chosen", NULL);
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
 
-  AmlInstance *instance =
-    aml_instance_manager_create (manager, "Chosen", chosen, "1.20.4",
-                                 AML_LOADER_QUILT, NULL, &error);
+  ComfyInstance *instance =
+    comfy_instance_manager_create (manager, "Chosen", chosen, "1.20.4",
+                                 comfy_LOADER_QUILT, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
@@ -346,17 +346,17 @@ test_create_sanitized_name (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
 
   /* A name that cannot be used as a directory component is rejected rather
    * than silently changed. */
-  AmlInstance *instance =
-    aml_instance_manager_create (manager, "../../evil", NULL, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  ComfyInstance *instance =
+    comfy_instance_manager_create (manager, "../../evil", NULL, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_null (instance);
-  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
-                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_error (error, comfy_INSTANCE_MANAGER_ERROR,
+                  comfy_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_assert_cmpstr (error->message, ==,
                    "Instances cannot contain / in their name");
   g_clear_error (&error);
@@ -370,24 +370,24 @@ test_create_duplicate_names (void)
 {
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
 
-  AmlInstance *first =
-    aml_instance_manager_create (manager, "test", NULL, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  ComfyInstance *first =
+    comfy_instance_manager_create (manager, "test", NULL, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (first);
 
-  AmlInstance *second =
-    aml_instance_manager_create (manager, "test", NULL, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  ComfyInstance *second =
+    comfy_instance_manager_create (manager, "test", NULL, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (second);
 
-  AmlInstance *third =
-    aml_instance_manager_create (manager, "test", NULL, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  ComfyInstance *third =
+    comfy_instance_manager_create (manager, "test", NULL, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (third);
 
@@ -422,77 +422,77 @@ test_path_validation (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
 
-  AmlInstance *first =
-    aml_instance_manager_create (manager, "One", NULL, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  ComfyInstance *first =
+    comfy_instance_manager_create (manager, "One", NULL, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (first);
 
   g_autofree char *first_directory = prop_string (first, "directory");
 
   /* A relative path is refused. */
-  g_autoptr (AmlInstance) relative =
-    aml_instance_manager_create (manager, "Two", "relative/path", "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  g_autoptr (ComfyInstance) relative =
+    comfy_instance_manager_create (manager, "Two", "relative/path", "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_null (relative);
-  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
-                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_error (error, comfy_INSTANCE_MANAGER_ERROR,
+                  comfy_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_clear_error (&error);
 
   /* A path with ".." inside is refused and never created. */
   g_autofree char *escape =
     g_build_filename (data_dir, "instances", "..", "escape", NULL);
-  g_autoptr (AmlInstance) escaping =
-    aml_instance_manager_create (manager, "Three", escape, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  g_autoptr (ComfyInstance) escaping =
+    comfy_instance_manager_create (manager, "Three", escape, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_null (escaping);
-  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
-                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_error (error, comfy_INSTANCE_MANAGER_ERROR,
+                  comfy_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_clear_error (&error);
 
   g_autofree char *escape_canonical = g_canonicalize_filename (escape, NULL);
   g_assert_false (g_file_test (escape_canonical, G_FILE_TEST_EXISTS));
 
   /* The filesystem root is refused. */
-  g_autoptr (AmlInstance) root =
-    aml_instance_manager_create (manager, "Four", G_DIR_SEPARATOR_S, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  g_autoptr (ComfyInstance) root =
+    comfy_instance_manager_create (manager, "Four", G_DIR_SEPARATOR_S, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_null (root);
-  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
-                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_error (error, comfy_INSTANCE_MANAGER_ERROR,
+                  comfy_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_clear_error (&error);
 
   /* The directory of an existing instance is refused. */
-  g_autoptr (AmlInstance) same =
-    aml_instance_manager_create (manager, "Five", first_directory, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  g_autoptr (ComfyInstance) same =
+    comfy_instance_manager_create (manager, "Five", first_directory, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_null (same);
-  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
-                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_error (error, comfy_INSTANCE_MANAGER_ERROR,
+                  comfy_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_clear_error (&error);
 
   /* A directory containing an existing instance is refused. */
   g_autofree char *parent = g_path_get_dirname (first_directory);
-  g_autoptr (AmlInstance) containing =
-    aml_instance_manager_create (manager, "Six", parent, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  g_autoptr (ComfyInstance) containing =
+    comfy_instance_manager_create (manager, "Six", parent, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_null (containing);
-  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
-                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_error (error, comfy_INSTANCE_MANAGER_ERROR,
+                  comfy_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_clear_error (&error);
 
   /* A directory inside an existing instance is refused too. */
   g_autofree char *inside =
     g_build_filename (first_directory, "nested", NULL);
-  g_autoptr (AmlInstance) nested =
-    aml_instance_manager_create (manager, "Seven", inside, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  g_autoptr (ComfyInstance) nested =
+    comfy_instance_manager_create (manager, "Seven", inside, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_null (nested);
-  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
-                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_error (error, comfy_INSTANCE_MANAGER_ERROR,
+                  comfy_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_clear_error (&error);
   g_assert_false (g_file_test (inside, G_FILE_TEST_EXISTS));
 
@@ -511,11 +511,11 @@ test_load_missing_file (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
 
   /* First run: no file at all is a success with an empty list. */
-  g_assert_true (aml_instance_manager_load (manager, &error));
+  g_assert_true (comfy_instance_manager_load (manager, &error));
   g_assert_no_error (error);
   g_assert_cmpuint (manager_count (manager), ==, 0);
 
@@ -529,12 +529,12 @@ test_load_removes_missing_directory (void)
 {
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
 
-  AmlInstance *instance =
-    aml_instance_manager_create (manager, "Removed", NULL, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  ComfyInstance *instance =
+    comfy_instance_manager_create (manager, "Removed", NULL, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
   g_autofree char *directory = prop_string (instance, "directory");
@@ -542,9 +542,9 @@ test_load_removes_missing_directory (void)
 
   remove_recursive (directory);
 
-  g_autoptr (AmlInstanceManager) fresh =
-    aml_instance_manager_new (data_dir);
-  g_assert_true (aml_instance_manager_load (fresh, &error));
+  g_autoptr (ComfyInstanceManager) fresh =
+    comfy_instance_manager_new (data_dir);
+  g_assert_true (comfy_instance_manager_load (fresh, &error));
   g_assert_no_error (error);
   g_assert_cmpuint (manager_count (fresh), ==, 0);
 
@@ -581,10 +581,10 @@ test_corrupt_file (void)
   write_file (metadata_path, garbage);
 
   g_autoptr (GError) error = NULL;
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
 
-  g_assert_false (aml_instance_manager_load (manager, &error));
+  g_assert_false (comfy_instance_manager_load (manager, &error));
   g_assert_nonnull (error);
   g_clear_error (&error);
 
@@ -609,12 +609,12 @@ test_missing_field_file (void)
   write_file (metadata_path, text);
 
   g_autoptr (GError) error = NULL;
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
 
   /* An entry without the required fields is a corrupt file, reported
    * as an error instead of crashing. */
-  g_assert_false (aml_instance_manager_load (manager, &error));
+  g_assert_false (comfy_instance_manager_load (manager, &error));
   g_assert_nonnull (error);
   g_clear_error (&error);
 
@@ -636,12 +636,12 @@ test_version_mismatch (void)
   write_file (metadata_path, text);
 
   g_autoptr (GError) error = NULL;
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
 
-  g_assert_false (aml_instance_manager_load (manager, &error));
-  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
-                  AML_INSTANCE_MANAGER_ERROR_CORRUPT);
+  g_assert_false (comfy_instance_manager_load (manager, &error));
+  g_assert_error (error, comfy_INSTANCE_MANAGER_ERROR,
+                  comfy_INSTANCE_MANAGER_ERROR_CORRUPT);
   g_clear_error (&error);
 
   g_assert_cmpuint (manager_count (manager), ==, 0);
@@ -664,12 +664,12 @@ test_atomic_save_failure (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
 
-  AmlInstance *instance =
-    aml_instance_manager_create (manager, "Durable", NULL, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  ComfyInstance *instance =
+    comfy_instance_manager_create (manager, "Durable", NULL, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
@@ -683,7 +683,7 @@ test_atomic_save_failure (void)
    * file behind. */
   g_assert_cmpint (g_chmod (data_dir, 0500), ==, 0);
 
-  g_assert_false (aml_instance_manager_save (manager, &error));
+  g_assert_false (comfy_instance_manager_save (manager, &error));
   g_assert_nonnull (error);
   g_clear_error (&error);
 
@@ -705,16 +705,16 @@ test_rename (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
 
-  AmlInstance *instance =
-    aml_instance_manager_create (manager, "Original", NULL, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  ComfyInstance *instance =
+    comfy_instance_manager_create (manager, "Original", NULL, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
-  g_assert_true (aml_instance_manager_rename (manager, instance,
+  g_assert_true (comfy_instance_manager_rename (manager, instance,
                                               "  Renamed Pack  ", &error));
   g_assert_no_error (error);
 
@@ -722,19 +722,19 @@ test_rename (void)
   g_assert_cmpstr (name, ==, "Renamed Pack");
 
   /* The new name is on disk. */
-  g_autoptr (AmlInstanceManager) fresh = aml_instance_manager_new (data_dir);
-  g_assert_true (aml_instance_manager_load (fresh, &error));
+  g_autoptr (ComfyInstanceManager) fresh = comfy_instance_manager_new (data_dir);
+  g_assert_true (comfy_instance_manager_load (fresh, &error));
   g_assert_no_error (error);
   g_assert_cmpuint (manager_count (fresh), ==, 1);
 
-  g_autoptr (AmlInstance) loaded =
+  g_autoptr (ComfyInstance) loaded =
     g_list_model_get_item (
-      G_LIST_MODEL (aml_instance_manager_get_instances (fresh)), 0);
+      G_LIST_MODEL (comfy_instance_manager_get_instances (fresh)), 0);
   g_autofree char *loaded_name = prop_string (loaded, "name");
   g_assert_cmpstr (loaded_name, ==, "Renamed Pack");
 
   /* A blank name is refused and the old name survives. */
-  g_assert_false (aml_instance_manager_rename (manager, instance, "   ",
+  g_assert_false (comfy_instance_manager_rename (manager, instance, "   ",
                                                &error));
   g_assert_nonnull (error);
   g_clear_error (&error);
@@ -744,25 +744,25 @@ test_rename (void)
   g_assert_cmpstr (name, ==, "Renamed Pack");
 
   /* A path separator is reported specifically and leaves the old name. */
-  g_assert_false (aml_instance_manager_rename (manager, instance, "/",
+  g_assert_false (comfy_instance_manager_rename (manager, instance, "/",
                                                &error));
-  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
-                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_error (error, comfy_INSTANCE_MANAGER_ERROR,
+                  comfy_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_assert_cmpstr (error->message, ==,
                    "Instances cannot contain / in their name");
   g_clear_error (&error);
 
   /* Renaming an instance the manager does not know fails. */
-  g_autoptr (AmlInstance) stranger =
-    aml_instance_new (NULL, "Stranger", "/tmp/aml-test-stranger", "1.21.1",
-                      AML_LOADER_VANILLA, &error);
+  g_autoptr (ComfyInstance) stranger =
+    comfy_instance_new (NULL, "Stranger", "/tmp/comfy-test-stranger", "1.21.1",
+                      comfy_LOADER_VANILLA, &error);
   g_assert_no_error (error);
   g_assert_nonnull (stranger);
 
-  g_assert_false (aml_instance_manager_rename (manager, stranger,
+  g_assert_false (comfy_instance_manager_rename (manager, stranger,
                                                "Renamed", &error));
-  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
-                  AML_INSTANCE_MANAGER_ERROR_NOT_FOUND);
+  g_assert_error (error, comfy_INSTANCE_MANAGER_ERROR,
+                  comfy_INSTANCE_MANAGER_ERROR_NOT_FOUND);
   g_clear_error (&error);
 
   g_object_unref (instance);
@@ -776,30 +776,30 @@ test_model_updates_are_atomic (void)
 {
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
-  g_autoptr (AmlInstance) instance =
-    aml_instance_manager_create (manager, "Model", NULL, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
+  g_autoptr (ComfyInstance) instance =
+    comfy_instance_manager_create (manager, "Model", NULL, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
 
   g_assert_no_error (error);
-  g_assert_true (aml_instance_manager_set_string (
+  g_assert_true (comfy_instance_manager_set_string (
     manager, instance, "jvm-args", "-Xmx2G", &error));
   g_assert_no_error (error);
-  g_assert_true (aml_instance_manager_set_loader (
-    manager, instance, AML_LOADER_FABRIC, "0.15.0", &error));
+  g_assert_true (comfy_instance_manager_set_loader (
+    manager, instance, comfy_LOADER_FABRIC, "0.15.0", &error));
   g_assert_no_error (error);
-  g_assert_false (aml_instance_manager_set_string (
+  g_assert_false (comfy_instance_manager_set_string (
     manager, instance, "not-a-property", "value", &error));
-  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
-                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_error (error, comfy_INSTANCE_MANAGER_ERROR,
+                  comfy_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_clear_error (&error);
 
-  g_autoptr (AmlInstanceManager) fresh = aml_instance_manager_new (data_dir);
-  g_assert_true (aml_instance_manager_load (fresh, &error));
+  g_autoptr (ComfyInstanceManager) fresh = comfy_instance_manager_new (data_dir);
+  g_assert_true (comfy_instance_manager_load (fresh, &error));
   g_assert_no_error (error);
-  g_autoptr (AmlInstance) loaded = g_list_model_get_item (
-    G_LIST_MODEL (aml_instance_manager_get_instances (fresh)), 0);
+  g_autoptr (ComfyInstance) loaded = g_list_model_get_item (
+    G_LIST_MODEL (comfy_instance_manager_get_instances (fresh)), 0);
   g_autofree char *args = prop_string (loaded, "jvm-args");
   g_assert_cmpstr (args, ==, "-Xmx2G");
 
@@ -813,12 +813,12 @@ test_duplicate (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
 
-  AmlInstance *instance =
-    aml_instance_manager_create (manager, "Original", NULL, "1.21.1",
-                                 AML_LOADER_FABRIC, "0.16.9", &error);
+  ComfyInstance *instance =
+    comfy_instance_manager_create (manager, "Original", NULL, "1.21.1",
+                                 comfy_LOADER_FABRIC, "0.16.9", &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
@@ -840,17 +840,17 @@ test_duplicate (void)
   AsyncCall call = { 0 };
   call.loop = g_main_loop_new (NULL, FALSE);
 
-   call.operation = aml_instance_manager_duplicate_async (
+   call.operation = comfy_instance_manager_duplicate_async (
      manager, instance, duplicate_finished, &call);
   async_call_run (&call);
   g_assert_no_error (call.error);
   g_assert_nonnull (call.result);
 
-  AmlInstance *copy = call.result;
-  g_assert_cmpstr (aml_instance_get_id (copy), !=,
-                   aml_instance_get_id (instance));
-  g_assert_cmpstr (aml_instance_get_id (copy), !=, "");
-  g_assert_true (g_uuid_string_is_valid (aml_instance_get_id (copy)));
+  ComfyInstance *copy = call.result;
+  g_assert_cmpstr (comfy_instance_get_id (copy), !=,
+                   comfy_instance_get_id (instance));
+  g_assert_cmpstr (comfy_instance_get_id (copy), !=, "");
+  g_assert_true (g_uuid_string_is_valid (comfy_instance_get_id (copy)));
 
   g_autofree char *copy_name = prop_string (copy, "name");
   g_autofree char *copy_directory = prop_string (copy, "directory");
@@ -881,14 +881,14 @@ test_duplicate (void)
   /* Both instances are registered and both survive a reload. */
   g_assert_cmpuint (manager_count (manager), ==, 2);
 
-  g_autoptr (AmlInstanceManager) fresh = aml_instance_manager_new (data_dir);
-  g_assert_true (aml_instance_manager_load (fresh, &error));
+  g_autoptr (ComfyInstanceManager) fresh = comfy_instance_manager_new (data_dir);
+  g_assert_true (comfy_instance_manager_load (fresh, &error));
   g_assert_no_error (error);
   g_assert_cmpuint (manager_count (fresh), ==, 2);
-  g_assert_nonnull (aml_instance_manager_get_by_id (
-    fresh, aml_instance_get_id (instance)));
-  g_assert_nonnull (aml_instance_manager_get_by_id (
-    fresh, aml_instance_get_id (copy)));
+  g_assert_nonnull (comfy_instance_manager_get_by_id (
+    fresh, comfy_instance_get_id (instance)));
+  g_assert_nonnull (comfy_instance_manager_get_by_id (
+    fresh, comfy_instance_get_id (copy)));
 
   async_call_clear (&call);
   g_object_unref (copy);
@@ -904,12 +904,12 @@ test_duplicate_without_directory (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
 
-  AmlInstance *instance =
-    aml_instance_manager_create (manager, "Vanishing", NULL, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  ComfyInstance *instance =
+    comfy_instance_manager_create (manager, "Vanishing", NULL, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
@@ -926,7 +926,7 @@ test_duplicate_without_directory (void)
   AsyncCall call = { 0 };
   call.loop = g_main_loop_new (NULL, FALSE);
 
-   call.operation = aml_instance_manager_duplicate_async (
+   call.operation = comfy_instance_manager_duplicate_async (
      manager, instance, duplicate_finished, &call);
   async_call_run (&call);
   g_assert_error (call.error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND);
@@ -947,12 +947,12 @@ test_delete_metadata_only (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
 
-  AmlInstance *instance =
-    aml_instance_manager_create (manager, "Kept", NULL, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  ComfyInstance *instance =
+    comfy_instance_manager_create (manager, "Kept", NULL, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
@@ -961,7 +961,7 @@ test_delete_metadata_only (void)
   AsyncCall call = { 0 };
   call.loop = g_main_loop_new (NULL, FALSE);
 
-   call.operation = aml_instance_manager_delete_async (
+   call.operation = comfy_instance_manager_delete_async (
      manager, instance, FALSE, delete_finished, &call);
   async_call_run (&call);
   g_assert_no_error (call.error);
@@ -970,8 +970,8 @@ test_delete_metadata_only (void)
   g_assert_cmpuint (manager_count (manager), ==, 0);
   g_assert_true (g_file_test (directory, G_FILE_TEST_IS_DIR));
 
-  g_autoptr (AmlInstanceManager) fresh = aml_instance_manager_new (data_dir);
-  g_assert_true (aml_instance_manager_load (fresh, &error));
+  g_autoptr (ComfyInstanceManager) fresh = comfy_instance_manager_new (data_dir);
+  g_assert_true (comfy_instance_manager_load (fresh, &error));
   g_assert_no_error (error);
   g_assert_cmpuint (manager_count (fresh), ==, 0);
 
@@ -988,12 +988,12 @@ test_delete_with_directory (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
 
-  AmlInstance *instance =
-    aml_instance_manager_create (manager, "Gone", NULL, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  ComfyInstance *instance =
+    comfy_instance_manager_create (manager, "Gone", NULL, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
@@ -1006,7 +1006,7 @@ test_delete_with_directory (void)
   AsyncCall call = { 0 };
   call.loop = g_main_loop_new (NULL, FALSE);
 
-   call.operation = aml_instance_manager_delete_async (
+   call.operation = comfy_instance_manager_delete_async (
      manager, instance, TRUE, delete_finished, &call);
   async_call_run (&call);
   g_assert_no_error (call.error);
@@ -1015,8 +1015,8 @@ test_delete_with_directory (void)
   g_assert_cmpuint (manager_count (manager), ==, 0);
   g_assert_false (g_file_test (directory, G_FILE_TEST_EXISTS));
 
-  g_autoptr (AmlInstanceManager) fresh = aml_instance_manager_new (data_dir);
-  g_assert_true (aml_instance_manager_load (fresh, &error));
+  g_autoptr (ComfyInstanceManager) fresh = comfy_instance_manager_new (data_dir);
+  g_assert_true (comfy_instance_manager_load (fresh, &error));
   g_assert_no_error (error);
   g_assert_cmpuint (manager_count (fresh), ==, 0);
 
@@ -1033,23 +1033,23 @@ test_delete_unregistered (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
 
-  g_autoptr (AmlInstance) stranger =
-    aml_instance_new (NULL, "Stranger", "/tmp/aml-test-stranger", "1.21.1",
-                      AML_LOADER_VANILLA, &error);
+  g_autoptr (ComfyInstance) stranger =
+    comfy_instance_new (NULL, "Stranger", "/tmp/comfy-test-stranger", "1.21.1",
+                      comfy_LOADER_VANILLA, &error);
   g_assert_no_error (error);
   g_assert_nonnull (stranger);
 
   AsyncCall call = { 0 };
   call.loop = g_main_loop_new (NULL, FALSE);
 
-   call.operation = aml_instance_manager_delete_async (
+   call.operation = comfy_instance_manager_delete_async (
      manager, stranger, FALSE, delete_finished, &call);
   async_call_run (&call);
-  g_assert_error (call.error, AML_INSTANCE_MANAGER_ERROR,
-                  AML_INSTANCE_MANAGER_ERROR_NOT_FOUND);
+  g_assert_error (call.error, comfy_INSTANCE_MANAGER_ERROR,
+                  comfy_INSTANCE_MANAGER_ERROR_NOT_FOUND);
   g_assert_false (call.success);
 
   async_call_clear (&call);
@@ -1064,12 +1064,12 @@ test_open_folder_without_directory (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
 
-  AmlInstance *instance =
-    aml_instance_manager_create (manager, "Folderless", NULL, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  ComfyInstance *instance =
+    comfy_instance_manager_create (manager, "Folderless", NULL, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
@@ -1082,11 +1082,11 @@ test_open_folder_without_directory (void)
   call.loop = g_main_loop_new (NULL, FALSE);
 
   call.operation =
-    aml_instance_manager_open_folder_async (manager, instance,
+    comfy_instance_manager_open_folder_async (manager, instance,
                                             open_folder_finished, &call);
   async_call_run (&call);
-  g_assert_error (call.error, AML_INSTANCE_MANAGER_ERROR,
-                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_error (call.error, comfy_INSTANCE_MANAGER_ERROR,
+                  comfy_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_assert_false (call.success);
 
   async_call_clear (&call);
@@ -1102,18 +1102,18 @@ test_change_directory_validation (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
 
-  AmlInstance *first =
-    aml_instance_manager_create (manager, "One", NULL, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  ComfyInstance *first =
+    comfy_instance_manager_create (manager, "One", NULL, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (first);
 
-  AmlInstance *second =
-    aml_instance_manager_create (manager, "Two", NULL, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  ComfyInstance *second =
+    comfy_instance_manager_create (manager, "Two", NULL, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (second);
 
@@ -1128,16 +1128,16 @@ test_change_directory_validation (void)
 
   /* A path that does not exist yet and whose parent does is accepted. */
   g_autofree char *canonical = NULL;
-  g_assert_true (aml_instance_manager_check_new_directory (
+  g_assert_true (comfy_instance_manager_check_new_directory (
     manager, first, elsewhere, &canonical, &error));
   g_assert_no_error (error);
   g_assert_cmpstr (canonical, ==, elsewhere);
 
   /* A relative path is not. */
-  g_assert_false (aml_instance_manager_check_new_directory (
+  g_assert_false (comfy_instance_manager_check_new_directory (
     manager, first, "relative/path", NULL, &error));
-  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
-                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_error (error, comfy_INSTANCE_MANAGER_ERROR,
+                  comfy_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_clear_error (&error);
 
   /* Nor is one that climbs out with "..". */
@@ -1145,53 +1145,53 @@ test_change_directory_validation (void)
     g_autofree char *escape =
       g_build_filename (data_dir, "elsewhere", "..", "climb", NULL);
 
-    g_assert_false (aml_instance_manager_check_new_directory (
+    g_assert_false (comfy_instance_manager_check_new_directory (
       manager, first, escape, NULL, &error));
-    g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
-                    AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+    g_assert_error (error, comfy_INSTANCE_MANAGER_ERROR,
+                    comfy_INSTANCE_MANAGER_ERROR_INVALID_PATH);
     g_clear_error (&error);
   }
 
   /* The filesystem root is not. */
-  g_assert_false (aml_instance_manager_check_new_directory (
+  g_assert_false (comfy_instance_manager_check_new_directory (
     manager, first, G_DIR_SEPARATOR_S, NULL, &error));
-  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
-                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_error (error, comfy_INSTANCE_MANAGER_ERROR,
+                  comfy_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_clear_error (&error);
 
   /* The directory the instance already has is not a change. */
-  g_assert_false (aml_instance_manager_check_new_directory (
+  g_assert_false (comfy_instance_manager_check_new_directory (
     manager, first, first_directory, NULL, &error));
-  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
-                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_error (error, comfy_INSTANCE_MANAGER_ERROR,
+                  comfy_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_clear_error (&error);
 
   /* The directory of another instance is not, neither is one inside it
      or one that would contain it. */
-  g_assert_false (aml_instance_manager_check_new_directory (
+  g_assert_false (comfy_instance_manager_check_new_directory (
     manager, first, second_directory, NULL, &error));
-  g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
-                  AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_error (error, comfy_INSTANCE_MANAGER_ERROR,
+                  comfy_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_clear_error (&error);
 
   {
     g_autofree char *inside =
       g_build_filename (second_directory, "nested", NULL);
 
-    g_assert_false (aml_instance_manager_check_new_directory (
+    g_assert_false (comfy_instance_manager_check_new_directory (
       manager, first, inside, NULL, &error));
-    g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
-                    AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+    g_assert_error (error, comfy_INSTANCE_MANAGER_ERROR,
+                    comfy_INSTANCE_MANAGER_ERROR_INVALID_PATH);
     g_clear_error (&error);
   }
 
   {
     g_autofree char *parent = g_path_get_dirname (second_directory);
 
-    g_assert_false (aml_instance_manager_check_new_directory (
+    g_assert_false (comfy_instance_manager_check_new_directory (
       manager, first, parent, NULL, &error));
-    g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
-                    AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+    g_assert_error (error, comfy_INSTANCE_MANAGER_ERROR,
+                    comfy_INSTANCE_MANAGER_ERROR_INVALID_PATH);
     g_clear_error (&error);
   }
 
@@ -1202,10 +1202,10 @@ test_change_directory_validation (void)
 
     write_file (taken, "not an instance");
 
-    g_assert_false (aml_instance_manager_check_new_directory (
+    g_assert_false (comfy_instance_manager_check_new_directory (
       manager, first, taken, NULL, &error));
-    g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
-                    AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+    g_assert_error (error, comfy_INSTANCE_MANAGER_ERROR,
+                    comfy_INSTANCE_MANAGER_ERROR_INVALID_PATH);
     g_clear_error (&error);
 
     /* And what was there is untouched. */
@@ -1222,10 +1222,10 @@ test_change_directory_validation (void)
     g_autofree char *orphan =
       g_build_filename (data_dir, "no-such-parent", "child", NULL);
 
-    g_assert_false (aml_instance_manager_check_new_directory (
+    g_assert_false (comfy_instance_manager_check_new_directory (
       manager, first, orphan, NULL, &error));
-    g_assert_error (error, AML_INSTANCE_MANAGER_ERROR,
-                    AML_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+    g_assert_error (error, comfy_INSTANCE_MANAGER_ERROR,
+                    comfy_INSTANCE_MANAGER_ERROR_INVALID_PATH);
     g_clear_error (&error);
     g_assert_false (g_file_test (orphan, G_FILE_TEST_EXISTS));
   }
@@ -1252,12 +1252,12 @@ test_change_directory_moves_files (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
 
-  AmlInstance *instance =
-    aml_instance_manager_create (manager, "Mover", NULL, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  ComfyInstance *instance =
+    comfy_instance_manager_create (manager, "Mover", NULL, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
@@ -1280,7 +1280,7 @@ test_change_directory_moves_files (void)
   AsyncCall call = { 0 };
   call.loop = g_main_loop_new (NULL, FALSE);
 
-   call.operation = aml_instance_manager_change_directory_async (
+   call.operation = comfy_instance_manager_change_directory_async (
      manager, instance, new_directory, change_directory_finished, &call);
   async_call_run (&call);
 
@@ -1326,10 +1326,10 @@ test_change_directory_moves_files (void)
 
   /* A manager that reads the file back agrees. */
   {
-    g_autoptr (AmlInstanceManager) reloaded =
-      aml_instance_manager_new (data_dir);
+    g_autoptr (ComfyInstanceManager) reloaded =
+      comfy_instance_manager_new (data_dir);
 
-    g_assert_true (aml_instance_manager_load (reloaded, &error));
+    g_assert_true (comfy_instance_manager_load (reloaded, &error));
     g_assert_no_error (error);
     g_assert_cmpuint (manager_count (reloaded), ==, 1);
   }
@@ -1346,12 +1346,12 @@ test_change_directory_failure_keeps_everything (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (AmlInstanceManager) manager =
-    aml_instance_manager_new (data_dir);
+  g_autoptr (ComfyInstanceManager) manager =
+    comfy_instance_manager_new (data_dir);
 
-  AmlInstance *instance =
-    aml_instance_manager_create (manager, "Keeper", NULL, "1.21.1",
-                                 AML_LOADER_VANILLA, NULL, &error);
+  ComfyInstance *instance =
+    comfy_instance_manager_create (manager, "Keeper", NULL, "1.21.1",
+                                 comfy_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
@@ -1384,7 +1384,7 @@ test_change_directory_failure_keeps_everything (void)
   AsyncCall call = { 0 };
   call.loop = g_main_loop_new (NULL, FALSE);
 
-   call.operation = aml_instance_manager_change_directory_async (
+   call.operation = comfy_instance_manager_change_directory_async (
      manager, instance, new_directory, change_directory_finished, &call);
   async_call_run (&call);
 

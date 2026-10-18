@@ -241,8 +241,8 @@ msgstr "Satır sınırı"
 msgid "Open Log Folder After Crash"
 msgstr "Çökmeden sonra günlük klasörünü aç"
 
-msgid "About AML"
-msgstr "AML hakkında"
+msgid "About comfy"
+msgstr "comfy hakkında"
 
 msgid "Keyboard Shortcuts"
 msgstr "Klavye kısayolları"
@@ -368,8 +368,8 @@ msgstr "1 gün"
 msgid "7 days"
 msgstr "7 gün"
 
-msgid "Clear AML Cache"
-msgstr "AML önbelleğini temizle"
+msgid "Clear comfy Cache"
+msgstr "comfy önbelleğini temizle"
 
 msgid "Show Shortcuts"
 msgstr "Kısayolları Göster"
@@ -377,8 +377,8 @@ msgstr "Kısayolları Göster"
 msgid "Quit"
 msgstr "Çıkış"
 
-msgid "Clear AML Cache?"
-msgstr "AML önbelleği temizlensin mi?"
+msgid "Clear comfy Cache?"
+msgstr "comfy önbelleği temizlensin mi?"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -476,7 +476,7 @@ msgid "Show name, summary and version fields before exporting."
 msgstr "Dışa aktarmadan önce ad, özet ve sürüm alanlarını göster."
 
 msgid "Export complete"
-msgstr "Dışa aktarma tamamlandı"
+msgstr "Dışa aktarma tamcomfyandı"
 
 msgid "Export"
 msgstr "Dışa aktar"
@@ -558,8 +558,8 @@ msgstr "%s indirme"
 msgid "Cache Cleared"
 msgstr "Önbellek temizlendi"
 
-msgid "AML cache data was cleared successfully."
-msgstr "AML önbellek verileri başarıyla temizlendi."
+msgid "comfy cache data was cleared successfully."
+msgstr "comfy önbellek verileri başarıyla temizlendi."
 
 msgid "Cache Cleanup Failed"
 msgstr "Önbellek temizlenemedi"

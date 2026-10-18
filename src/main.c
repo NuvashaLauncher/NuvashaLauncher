@@ -2,18 +2,18 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* AML, Another Minecraft Launcher. GTK chooses the available display
+/* comfy, Comfy Launcher. GTK chooses the available display
  * backend at startup. */
 
 #include <adwaita.h>
 #include <gtk/gtk.h>
 
-#include "aml-instance-manager.h"
-#include "aml-i18n.h"
-#include "aml-main-window.h"
-#include "aml-download.h"
-#include "aml-settings.h"
-#include "aml-open-broker.h"
+#include "comfy-instance-manager.h"
+#include "comfy-i18n.h"
+#include "comfy-main-window.h"
+#include "comfy-download.h"
+#include "comfy-settings.h"
+#include "comfy-open-broker.h"
 
 static void
 on_quit (GSimpleAction *action G_GNUC_UNUSED,
@@ -44,7 +44,7 @@ static const char app_css[] =
       the corner of the icon beside it, and its colours are the text
       colour at a low alpha, so that it reads on any background and
       needs nothing from the palette. */
-   "label.aml-badge {"
+   "label.comfy-badge {"
    "  font-size: 0.7em;"
    "  font-weight: bold;"
    "  padding: 0 0.3em;"
@@ -89,17 +89,17 @@ on_activate (GApplication *app, gpointer user_data G_GNUC_UNUSED)
 
   load_app_css ();
 
-  g_autoptr (AmlInstanceManager) manager = aml_instance_manager_new (NULL);
-  g_autoptr (AmlSettings) settings = aml_settings_new ();
+  g_autoptr (ComfyInstanceManager) manager = comfy_instance_manager_new (NULL);
+  g_autoptr (ComfySettings) settings = comfy_settings_new ();
   g_autoptr (GError) error = NULL;
 
-  aml_i18n_init (aml_settings_get_language (settings));
+  comfy_i18n_init (comfy_settings_get_language (settings));
 
-  if (!aml_instance_manager_load (manager, &error))
+  if (!comfy_instance_manager_load (manager, &error))
     g_warning ("cannot read the instance list: %s", error->message);
 
-  AmlMainWindow *main_window =
-    aml_main_window_new (GTK_APPLICATION (app), manager);
+  ComfyMainWindow *main_window =
+    comfy_main_window_new (GTK_APPLICATION (app), manager);
 
   gtk_window_present (GTK_WINDOW (main_window));
 }
@@ -111,25 +111,25 @@ main (int argc, char **argv)
 
   if (argc == 2 && g_strcmp0 (argv[1], "--version") == 0)
     {
-      g_print ("AML %s\n", AML_VERSION);
+      g_print ("comfy %s\n", comfy_VERSION);
       return 0;
     }
 
   /* This mode is mounted over xdg-open inside a game sandbox. It has no GTK
-   * startup and can only forward a file URI to AML's host-side broker. */
-  if (argc == 2 && g_getenv ("AML_OPEN_BROKER_SOCKET") != NULL)
-    return aml_open_broker_request (g_getenv ("AML_OPEN_BROKER_SOCKET"),
+   * startup and can only forward a file URI to comfy's host-side broker. */
+  if (argc == 2 && g_getenv ("comfy_OPEN_BROKER_SOCKET") != NULL)
+    return comfy_open_broker_request (g_getenv ("comfy_OPEN_BROKER_SOCKET"),
                                     argv[1]);
 
   if (!gtk_init_check ())
     {
-      g_printerr ("AML could not open a display.\n");
+      g_printerr ("comfy could not open a display.\n");
       return 1;
     }
 
-  g_set_application_name ("Another Minecraft Launcher");
+  g_set_application_name ("Comfy Launcher");
 
-  app = adw_application_new ("io.gitlab.anotherminecraftlauncher.AML",
+  app = adw_application_new ("io.gitlab.comfylauncher.comfy",
                              G_APPLICATION_DEFAULT_FLAGS);
   g_action_map_add_action_entries (G_ACTION_MAP (app), app_entries,
                                    G_N_ELEMENTS (app_entries), app);

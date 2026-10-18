@@ -4,14 +4,14 @@
 
 #include <glib.h>
 
-#include "aml-content-format.h"
+#include "comfy-content-format.h"
 
 static void
 test_download_counts (void)
 {
-  g_autofree char *small = aml_content_format_downloads (42);
-  g_autofree char *thousands = aml_content_format_downloads (1250);
-  g_autofree char *millions = aml_content_format_downloads (2500000);
+  g_autofree char *small = comfy_content_format_downloads (42);
+  g_autofree char *thousands = comfy_content_format_downloads (1250);
+  g_autofree char *millions = comfy_content_format_downloads (2500000);
 
   g_assert_cmpstr (small, ==, "42 downloads");
   g_assert_cmpstr (thousands, ==, "1.2k downloads");
@@ -23,10 +23,10 @@ static void
 test_author_lines (void)
 {
   g_autofree char *licensed =
-    aml_content_format_author ("MIT", "Example Author");
+    comfy_content_format_author ("MIT", "Example Author");
   g_autofree char *author_only =
-    aml_content_format_author (NULL, "Example Author");
-  g_autofree char *empty_author = aml_content_format_author ("MIT", NULL);
+    comfy_content_format_author (NULL, "Example Author");
+  g_autofree char *empty_author = comfy_content_format_author ("MIT", NULL);
 
   g_assert_cmpstr (licensed, ==, "MIT  ·  by Example Author");
   g_assert_cmpstr (author_only, ==, "by Example Author");

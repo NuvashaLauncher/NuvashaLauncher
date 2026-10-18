@@ -240,8 +240,8 @@ msgstr "Обмеження рядків"
 msgid "Open Log Folder After Crash"
 msgstr "Відкрити теку журналів після збою"
 
-msgid "About AML"
-msgstr "Про AML"
+msgid "About comfy"
+msgstr "Про comfy"
 
 msgid "Keyboard Shortcuts"
 msgstr "Комбінації клавіш"
@@ -367,8 +367,8 @@ msgstr "1 день"
 msgid "7 days"
 msgstr "7 днів"
 
-msgid "Clear AML Cache"
-msgstr "Очистити кеш AML"
+msgid "Clear comfy Cache"
+msgstr "Очистити кеш comfy"
 
 msgid "Show Shortcuts"
 msgstr "Показати комбінації клавіш"
@@ -376,8 +376,8 @@ msgstr "Показати комбінації клавіш"
 msgid "Quit"
 msgstr "Вийти"
 
-msgid "Clear AML Cache?"
-msgstr "Очистити кеш AML?"
+msgid "Clear comfy Cache?"
+msgstr "Очистити кеш comfy?"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -557,8 +557,8 @@ msgstr "%s завантажень"
 msgid "Cache Cleared"
 msgstr "Кеш очищено"
 
-msgid "AML cache data was cleared successfully."
-msgstr "Дані кешу AML успішно очищено."
+msgid "comfy cache data was cleared successfully."
+msgstr "Дані кешу comfy успішно очищено."
 
 msgid "Cache Cleanup Failed"
 msgstr "Не вдалося очистити кеш"

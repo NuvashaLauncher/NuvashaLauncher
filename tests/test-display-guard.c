@@ -13,7 +13,7 @@
 static void
 test_refuses_to_start_without_display (void)
 {
-  gchar *argv[] = { (gchar *) AML_BIN, NULL };
+  gchar *argv[] = { (gchar *) comfy_BIN, NULL };
   g_auto (GStrv) env = g_get_environ ();
   g_autoptr (GError) error = NULL;
   gchar *child_stdout = NULL;
@@ -34,7 +34,7 @@ test_refuses_to_start_without_display (void)
   g_assert_cmpint (WEXITSTATUS (status), ==, 1);
 
   g_assert_nonnull (child_stderr);
-  g_assert_nonnull (strstr (child_stderr, "AML could not open a display"));
+  g_assert_nonnull (strstr (child_stderr, "comfy could not open a display"));
 
   g_free (child_stdout);
   g_free (child_stderr);
