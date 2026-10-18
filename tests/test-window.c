@@ -310,7 +310,7 @@ main (int argc, char **argv)
   g_log_set_writer_func (count_criticals, NULL, NULL);
 
   application =
-    adw_application_new ("io.gitlab.comfylauncher.comfy.windowtest",
+    adw_application_new ("com.github.comfylauncher.comfy.windowtest",
                                      G_APPLICATION_DEFAULT_FLAGS);
   run.application = G_APPLICATION (application);
 

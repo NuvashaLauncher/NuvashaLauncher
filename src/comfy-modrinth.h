@@ -35,7 +35,7 @@ G_BEGIN_DECLS
 /* Modrinth asks every client to name itself, and to carry an address its
  * operators can reach it at if they need to. */
 #define comfy_MODRINTH_USER_AGENT \
-  "comfy (https://gitlab.com/comfylauncher/comfy)"
+  "comfy (https://github.com/comfylauncher/comfy-launcher)"
 
 #define comfy_MODRINTH_ERROR (comfy_modrinth_error_quark ())
 

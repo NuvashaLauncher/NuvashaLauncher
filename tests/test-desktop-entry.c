@@ -13,7 +13,7 @@ test_desktop_entry (void)
 {
   g_autofree gchar *path =
     g_build_filename (comfy_DATA_DIR,
-                      "io.gitlab.comfylauncher.comfy.desktop", NULL);
+                      "com.github.comfylauncher.comfy.desktop", NULL);
   g_autoptr (GKeyFile) keys = g_key_file_new ();
   g_autoptr (GError) error = NULL;
   g_autofree gchar *type = NULL;
@@ -30,16 +30,16 @@ test_desktop_entry (void)
   g_assert_cmpstr (type, ==, "Application");
 
   name = g_key_file_get_string (keys, "Desktop Entry", "Name", NULL);
-  g_assert_cmpstr (name, ==, "comfy");
+  g_assert_cmpstr (name, ==, "Comfy Launcher");
 
   comment = g_key_file_get_string (keys, "Desktop Entry", "Comment", NULL);
-  g_assert_cmpstr (comment, ==, "Comfy Launcher");
+  g_assert_cmpstr (comment, ==, "Minecraft launcher for Linux");
 
   exec = g_key_file_get_string (keys, "Desktop Entry", "Exec", NULL);
   g_assert_cmpstr (exec, ==, "comfy");
 
   icon = g_key_file_get_string (keys, "Desktop Entry", "Icon", NULL);
-  g_assert_cmpstr (icon, ==, "io.gitlab.comfylauncher.comfy");
+  g_assert_cmpstr (icon, ==, "com.github.comfylauncher.comfy");
 
   g_assert_true (g_key_file_has_key (keys, "Desktop Entry", "Terminal", NULL));
   g_assert_false (g_key_file_get_boolean (keys, "Desktop Entry", "Terminal",

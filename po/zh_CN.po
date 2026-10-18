@@ -236,8 +236,8 @@ msgstr "行数上限"
 msgid "Open Log Folder After Crash"
 msgstr "崩溃后打开日志文件夹"
 
-msgid "About comfy"
-msgstr "关于comfy"
+msgid "About Comfy Launcher"
+msgstr "关于Comfy Launcher"
 
 msgid "Keyboard Shortcuts"
 msgstr "热键"

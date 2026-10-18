@@ -240,8 +240,8 @@ msgstr "Limit wierszy"
 msgid "Open Log Folder After Crash"
 msgstr "Otwórz folder dziennika po awarii"
 
-msgid "About comfy"
-msgstr "O comfy"
+msgid "About Comfy Launcher"
+msgstr "O Comfy Launcher"
 
 msgid "Keyboard Shortcuts"
 msgstr "Skróty klawiaturowe"

@@ -242,8 +242,8 @@ msgstr "Zeilenlimit"
 msgid "Open Log Folder After Crash"
 msgstr "Protokollordner nach Absturz öffnen"
 
-msgid "About comfy"
-msgstr "Über comfy"
+msgid "About Comfy Launcher"
+msgstr "Über Comfy Launcher"
 
 msgid "Keyboard Shortcuts"
 msgstr "Tastaturkürzel"

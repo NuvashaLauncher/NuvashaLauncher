@@ -240,8 +240,8 @@ msgstr "行数の上限"
 msgid "Open Log Folder After Crash"
 msgstr "クラッシュ後にログフォルダーを開く"
 
-msgid "About comfy"
-msgstr "comfyについて"
+msgid "About Comfy Launcher"
+msgstr "Comfy Launcherについて"
 
 msgid "Keyboard Shortcuts"
 msgstr "キーボードショートカット"
