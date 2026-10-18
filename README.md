@@ -5,19 +5,17 @@ management easy without leaving out the features that matter.
 
 ## Features
 
-- Separate instances with their own Minecraft version, loader, Java runtime,
-  and directory.
-- Modrinth browsing and installation for modpacks, mods, resource packs, and
-  shader packs.
-- Fabric, Quilt, Forge, and NeoForge support.
-- Microsoft account sign-in and offline accounts.
-- Logs for running games.
-- Optional bubblewrap sandboxing.
+- Modrinth browsing and installation for compatible modpacks, mods, resource
+  packs, and shader packs.
+- Automatic installation and version resolution for Fabric, Quilt, Forge, and
+  NeoForge.
+- `.mrpack` import and export with verified downloads and safe archive handling.
+- Optional bubblewrap sandboxing for the game process.
 
 ## Dependencies
 
-- C compiler
-- Make
+- C17-compatible compiler (GCC is used by default)
+- GNU Make
 - pkg-config
 - gettext
 - GLib
