@@ -32,8 +32,8 @@ struct _NuvashaDownloadModpackDialog
   /* Browse page widgets. */
   GtkSearchEntry *search_entry;
   AdwStatusPage *results_status;
-  GtkStack *results_stack;   /* one state at a time: loading, results,
-                                 empty or error */
+  AdwViewStack *results_stack; /* one state at a time: loading, results,
+                                  empty or error */
   AdwPreferencesGroup *results_group;
   GtkBox *loading_more;       /* spinner row at the bottom of the list */
   GtkBox *retry_row;          /* inline retry row when a page fails */

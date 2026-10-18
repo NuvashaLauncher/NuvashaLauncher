@@ -148,8 +148,8 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
   gtk_widget_set_hexpand (GTK_WIDGET (empty_page), TRUE);
   gtk_widget_set_vexpand (GTK_WIDGET (empty_page), TRUE);
 
-  self->ui.stack = GTK_STACK (gtk_stack_new ());
-  gtk_stack_add_named (GTK_STACK (self->ui.stack), GTK_WIDGET (empty_page), "empty");
+  self->ui.stack = ADW_VIEW_STACK (adw_view_stack_new ());
+  adw_view_stack_add_named (self->ui.stack, GTK_WIDGET (empty_page), "empty");
   gtk_widget_set_hexpand (GTK_WIDGET (self->ui.stack), TRUE);
   gtk_widget_set_vexpand (GTK_WIDGET (self->ui.stack), TRUE);
 

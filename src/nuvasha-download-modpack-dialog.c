@@ -531,8 +531,8 @@ results_arrived (NuvashaDownloadModpackDialog *self, NuvashaModrinthResults *res
     {
       gboolean empty = self->hits == NULL || self->hits->len == 0;
 
-      gtk_stack_set_visible_child_name (
-          GTK_STACK (self->results_stack), empty ? "empty" : "results");
+      adw_view_stack_set_visible_child_name (
+          self->results_stack, empty ? "empty" : "results");
     }
 
   gtk_widget_set_visible (GTK_WIDGET (self->loading_more), FALSE);
@@ -583,7 +583,7 @@ run_search (NuvashaDownloadModpackDialog *self, gboolean append)
   /* The first page of a search shows the loading state; a page that is
      added below what is already there shows a spinner at its end. */
   if (!append)
-    gtk_stack_set_visible_child_name (GTK_STACK (self->results_stack),
+    adw_view_stack_set_visible_child_name (self->results_stack,
                                       "loading");
   else
     {
@@ -676,8 +676,8 @@ on_search_done (GObject *source G_GNUC_UNUSED,
                 "Could not search Modrinth");
               adw_status_page_set_description (
                 ADW_STATUS_PAGE (self->error_status), escaped);
-              gtk_stack_set_visible_child_name (
-                GTK_STACK (self->results_stack), "error");
+              adw_view_stack_set_visible_child_name (self->results_stack,
+                                                     "error");
             }
         }
 
@@ -707,8 +707,8 @@ on_search_done (GObject *source G_GNUC_UNUSED,
                                      "Could not understand the answer");
           adw_status_page_set_description (
             ADW_STATUS_PAGE (self->error_status), escaped);
-          gtk_stack_set_visible_child_name (
-            GTK_STACK (self->results_stack), "error");
+          adw_view_stack_set_visible_child_name (self->results_stack,
+                                                 "error");
         }
 
       g_object_unref (self);
@@ -744,7 +744,7 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
      an empty answer, the error, or the spinner while the first page is
      on its way. A status page that stayed under the results was the bug
      this replaces. */
-  self->results_stack = GTK_STACK (gtk_stack_new ());
+  self->results_stack = ADW_VIEW_STACK (adw_view_stack_new ());
   gtk_widget_set_vexpand (GTK_WIDGET (self->results_stack), TRUE);
 
   self->results_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
@@ -808,7 +808,7 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)),
                                  GTK_WIDGET (self->results_group));
   gtk_widget_set_vexpand (GTK_WIDGET (scroller), TRUE);
-  gtk_stack_add_named (GTK_STACK (self->results_stack), GTK_WIDGET (scroller), "results");
+  adw_view_stack_add_named (self->results_stack, GTK_WIDGET (scroller), "results");
 
   /* An empty answer. */
   self->results_status = ADW_STATUS_PAGE (adw_status_page_new ());
@@ -819,14 +819,14 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
   adw_status_page_set_description (
     ADW_STATUS_PAGE (self->results_status),
     "No modpack matches what was asked for. Try another word");
-  gtk_stack_add_named (GTK_STACK (self->results_stack),
+  adw_view_stack_add_named (self->results_stack,
                        GTK_WIDGET (self->results_status), "empty");
 
   /* A search that could not be made. */
   self->error_status = ADW_STATUS_PAGE (adw_status_page_new ());
   adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->error_status),
                                  "dialog-error-symbolic");
-  gtk_stack_add_named (GTK_STACK (self->results_stack),
+  adw_view_stack_add_named (self->results_stack,
                        GTK_WIDGET (self->error_status), "error");
 
   /* The first page is on its way. */
@@ -834,9 +834,9 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
   gtk_widget_set_halign (GTK_WIDGET (loading), GTK_ALIGN_CENTER);
   gtk_box_append (GTK_BOX (GTK_WIDGET (loading)), GTK_WIDGET (loading_spinner));
   gtk_box_append (GTK_BOX (GTK_WIDGET (loading)), GTK_WIDGET (loading_label));
-  gtk_stack_add_named (GTK_STACK (self->results_stack), GTK_WIDGET (loading), "loading");
+  adw_view_stack_add_named (self->results_stack, GTK_WIDGET (loading), "loading");
 
-  gtk_stack_set_visible_child_name (GTK_STACK (self->results_stack),
+  adw_view_stack_set_visible_child_name (self->results_stack,
                                     "loading");
   gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (self->results_stack));
 

@@ -165,7 +165,7 @@ nuvasha_main_window_new (GtkApplication *application, NuvashaInstanceManager *ma
   gtk_widget_set_margin_end (scroll, 12);
   gtk_widget_set_hexpand (scroll, TRUE);
   gtk_widget_set_vexpand (scroll, TRUE);
-  gtk_stack_add_named (GTK_STACK (self->ui.stack), scroll, "instances");
+  adw_view_stack_add_named (self->ui.stack, scroll, "instances");
 
   /* The connection goes away with the window, which outlives every
    * callback it could receive. */
