@@ -1,4 +1,4 @@
-# leppoisa
+# Leppoisa Launcher
 
 Leppoisa Launcher, for Linux.
 
@@ -85,7 +85,7 @@ Fedora:
 ```
 sudo dnf install gcc make gettext pkgconf-pkg-config \
     glib2-devel \
-    gtk4-devel libadwaita-devel json-glib-devel libsoup3-devel \
+    gtk4-devel libadwaita-devel libepoxy-devel json-glib-devel libsoup3-devel \
     libarchive-devel
 ```
 
@@ -93,14 +93,14 @@ openSUSE:
 
 ```bash
 sudo zypper install gcc make gettext-tools pkg-config glib2-devel \
-    gtk4-devel libadwaita-devel json-glib-devel libsoup3-devel \
+    gtk4-devel libadwaita-devel libepoxy-devel json-glib-devel libsoup3-devel \
     libarchive-devel
 ```
 
 Arch:
 
 ```
-sudo pacman -S base-devel gettext pkgconf gtk4 libadwaita json-glib libsoup \
+sudo pacman -S base-devel gettext pkgconf gtk4 libadwaita libepoxy json-glib libsoup \
     libarchive
 ```
 
@@ -109,13 +109,14 @@ Gentoo:
 ```bash
 sudo emerge --ask sys-devel/gcc sys-devel/gettext dev-build/make \
     dev-util/pkgconf dev-libs/glib gui-libs/gtk:4 gui-libs/libadwaita \
+    gui-libs/libepoxy \
     dev-libs/json-glib net-libs/libsoup:3 app-arch/libarchive
 ```
 
 NixOS:
 
 ```bash
-nix-shell -p gcc gnumake gettext pkg-config glib gtk4 libadwaita \
+nix-shell -p gcc gnumake gettext pkg-config glib gtk4 libadwaita libepoxy \
     json-glib libsoup libarchive
 ```
 
@@ -124,8 +125,8 @@ nix-shell -p gcc gnumake gettext pkg-config glib gtk4 libadwaita \
 Clone the repository:
 
 ```
-git clone https://github.com/leppoisalauncher/leppoisa-launcher.git
-cd leppoisa
+git clone https://github.com/comfylauncher/comfy-launcher.git LeppoisaLauncher
+cd LeppoisaLauncher
 ```
 
 Build and install leppoisa:
