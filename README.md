@@ -75,7 +75,7 @@ nix-shell -p gcc gnumake gettext pkg-config glib gtk4 libadwaita libepoxy \
 ## Build and install
 
 ```sh
-git clone https://github.com/nuvashalauncher/nuvasha-launcher.git NuvashaLauncher
+git clone https://github.com/NuvashaLauncher/NuvashaLauncher.git NuvashaLauncher
 cd NuvashaLauncher
 make
 sudo make install PREFIX=/usr/local
