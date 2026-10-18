@@ -483,13 +483,6 @@ msgstr "Esportazione completata"
 msgid "Export"
 msgstr "Esporta"
 
-msgid ""
-"Optional metadata. Add a summary or version ID to help identify the exported "
-"pack."
-msgstr ""
-"Metadati facoltativi. Aggiungi un riepilogo o un ID versione per "
-"identificare più facilmente il pacchetto esportato."
-
 msgid "Installed %u item"
 msgid_plural "Installed %u items"
 msgstr[0] "%u elemento installato"
@@ -621,10 +614,6 @@ msgstr "Abilita sandbox"
 msgid "Allow sandbox network access"
 msgstr "Allow sandbox network access"
 # UI string
-msgid "Current skin"
-msgstr "Current skin"
-
-# UI string
 msgid "Skin"
 msgstr "Skin"
 
@@ -664,10 +653,6 @@ msgstr "Nessun mantello"
 msgid "Import skin…"
 msgstr "Importa skin…"
 
-
-# UI string
-msgid "Open Skins Folder"
-msgstr ""
 
 # UI string
 msgid "Delete skin?"

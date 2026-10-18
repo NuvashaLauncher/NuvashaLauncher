@@ -242,7 +242,7 @@ nuvasha_icon_load_async (const char *url, GAsyncReadyCallback callback,
           icon_load_free (load);
           return g_steal_pointer (&scope);
         }
-      g_unlink (load->path);
+      nuvasha_fs_unlink (load->path, NULL);
     }
 
   if (!nuvasha_fs_make_directory (directory, 0755, NULL))

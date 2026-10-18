@@ -480,13 +480,6 @@ msgstr "エクスポート完了"
 msgid "Export"
 msgstr "エクスポート"
 
-msgid ""
-"Optional metadata. Add a summary or version ID to help identify the exported "
-"pack."
-msgstr ""
-"オプションのメタデータ。エクスポートしたパックを識別しやすくするため、概要ま"
-"たはバージョン ID を追加できます。"
-
 msgid "Installed %u item"
 msgid_plural "Installed %u items"
 msgstr[0] "%u 個のアイテムをインストールしました"
@@ -618,10 +611,6 @@ msgstr "サンドボックスを有効にする"
 msgid "Allow sandbox network access"
 msgstr "Allow sandbox network access"
 # UI string
-msgid "Current skin"
-msgstr "Current skin"
-
-# UI string
 msgid "Skin"
 msgstr "Skin"
 
@@ -661,10 +650,6 @@ msgstr "マントなし"
 msgid "Import skin…"
 msgstr "スキンをインポート…"
 
-
-# UI string
-msgid "Open Skins Folder"
-msgstr ""
 
 # UI string
 msgid "Delete skin?"
