@@ -652,7 +652,7 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
   adw_about_dialog_set_developer_name (ADW_ABOUT_DIALOG (dialog), "Flia");
 
   adw_about_dialog_set_website (ADW_ABOUT_DIALOG (dialog),
-                                "https://github.com/nuvashalauncher/nuvasha-launcher");
+                                 "https://github.com/NuvashaLauncher/NuvashaLauncher");
   adw_about_dialog_set_copyright (ADW_ABOUT_DIALOG (dialog),
                                   "Copyright (C) 2026 Flia");
   adw_about_dialog_set_license_type (ADW_ABOUT_DIALOG (dialog),

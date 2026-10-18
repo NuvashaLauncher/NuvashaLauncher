@@ -35,7 +35,7 @@ G_BEGIN_DECLS
 /* Modrinth asks every client to name itself, and to carry an address its
  * operators can reach it at if they need to. */
 #define nuvasha_MODRINTH_USER_AGENT \
-  "nuvasha (https://github.com/nuvashalauncher/nuvasha-launcher)"
+  "nuvasha (https://github.com/NuvashaLauncher/NuvashaLauncher)"
 
 #define nuvasha_MODRINTH_ERROR (nuvasha_modrinth_error_quark ())
 

@@ -5,18 +5,21 @@
    <clipPath id="fabric"><path d="M30 30Q46 34 64 30Q82 34 98 30Q94 46 98 64Q94 82 98 98Q82 94 64 98Q46 94 30 98Q34 82 30 64Q34 46 30 30Z"/></clipPath>
   </defs>
 
-  <path d="M26 20Q44 24 64 20Q84 24 102 20Q110 18 108 26Q104 44 108 64Q104 84 108 102Q110 110 102 108Q84 104 64 108Q44 104 26 108Q18 110 20 102Q24 84 20 64Q24 44 20 26Q18 18 26 20Z" fill="#7774a5"/>
-  <!-- The same patch arrangement repeats in each quadrant. -->
-  <g clip-path="url(#fabric)">
-   <path d="M16 16H112V112H16Z" fill="#c3c6ea"/>
-   <path d="M16 16H48V48H16ZM80 16H112V48H80ZM16 80H48V112H16ZM80 80H112V112H80Z" fill="#f1d7a8"/>
-   <path d="M48 16H80V48H112V80H80V112H48V80H16V48H48Z" fill="#b3b7df"/>
-   <rect x="48" y="48" width="32" height="32" fill="#dfb8c7"/>
-  </g>
-  <!-- Identical tapered gathers at all four corners. -->
-  <path d="M26 26Q38 30 42 42Q30 38 26 26ZM102 26Q90 30 86 42Q98 38 102 26ZM26 102Q38 98 42 86Q30 90 26 102ZM102 102Q90 98 86 86Q98 90 102 102Z" fill="#7774a5"/>
-  <!-- Tufting is symmetric around the covered center button. -->
-  <path d="M52 52Q62 56 64 62Q66 56 76 52Q72 62 66 64Q72 66 76 76Q66 72 64 66Q62 72 52 76Q56 66 62 64Q56 62 52 52Z" fill="#b18fa8"/>
-  <circle cx="64" cy="66" r="6" fill="#7774a5"/>
-  <circle cx="64" cy="64" r="6" fill="#f5e8cd"/>
+   <!-- Match the near-edge-to-edge artwork used by the other app icons. -->
+   <g transform="translate(-21.333333 -21.333333) scale(1.3333333333)">
+    <path d="M26 20Q44 24 64 20Q84 24 102 20Q110 18 108 26Q104 44 108 64Q104 84 108 102Q110 110 102 108Q84 104 64 108Q44 104 26 108Q18 110 20 102Q24 84 20 64Q24 44 20 26Q18 18 26 20Z" fill="#7774a5"/>
+    <!-- The same patch arrangement repeats in each quadrant. -->
+    <g clip-path="url(#fabric)">
+     <path d="M16 16H112V112H16Z" fill="#c3c6ea"/>
+     <path d="M16 16H48V48H16ZM80 16H112V48H80ZM16 80H48V112H16ZM80 80H112V112H80Z" fill="#f1d7a8"/>
+     <path d="M48 16H80V48H112V80H80V112H48V80H16V48H48Z" fill="#b3b7df"/>
+     <rect x="48" y="48" width="32" height="32" fill="#dfb8c7"/>
+    </g>
+    <!-- Identical tapered gathers at all four corners. -->
+    <path d="M26 26Q38 30 42 42Q30 38 26 26ZM102 26Q90 30 86 42Q98 38 102 26ZM26 102Q38 98 42 86Q30 90 26 102ZM102 102Q90 98 86 86Q98 90 102 102Z" fill="#7774a5"/>
+    <!-- Tufting is symmetric around the covered center button. -->
+    <path d="M52 52Q62 56 64 62Q66 56 76 52Q72 62 66 64Q72 66 76 76Q66 72 64 66Q62 72 52 76Q56 66 62 64Q56 62 52 52Z" fill="#b18fa8"/>
+    <circle cx="64" cy="66" r="6" fill="#7774a5"/>
+    <circle cx="64" cy="64" r="6" fill="#f5e8cd"/>
+   </g>
 </svg>
