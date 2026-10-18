@@ -2,7 +2,7 @@
 
 Leppoisa Launcher, for Linux.
 
-leppoisa creates instances, installs modpacks and mods from Modrinth, resolves
+Leppoisa Launcher creates instances, installs modpacks and mods from Modrinth, resolves
 mod loaders, and runs the game. It is written in C against GTK4 and
 libadwaita, and it uses the public APIs of the services it talks to.
 
