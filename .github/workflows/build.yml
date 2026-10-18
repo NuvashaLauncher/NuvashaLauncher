@@ -8,7 +8,7 @@ jobs:
   linux:
     name: Linux ${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
-    container: debian:testing
+    container: archlinux:latest
     strategy:
       fail-fast: false
       matrix:
@@ -24,11 +24,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          apt-get update
-          apt-get install -y \
-            build-essential pkg-config gettext \
-            libglib2.0-dev libgtk-4-dev libadwaita-1-dev \
-            libepoxy-dev libjson-glib-dev libsoup-3.0-dev libarchive-dev
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm \
+            base-devel pkgconf gettext \
+            glib2 gtk4 libadwaita epoxy json-glib libsoup3 libarchive
 
       - name: Build
         run: make fast
