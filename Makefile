@@ -32,8 +32,8 @@ CFLAGS   := -std=c17 -Wall -Wextra -Wpedantic -MMD -MP
 RELFLAGS := -O2
 DBGFLAGS := -g -O0 -fsanitize=address,undefined -fno-sanitize-recover=all
 
-BIN    := build/comfy
-DBGBIN := build-debug/comfy
+BIN    := build/ComfyLauncher
+DBGBIN := build-debug/ComfyLauncher
 
 SRCS    := $(wildcard src/*.c)
 RELOBJS := $(patsubst src/%.c,build/%.o,$(SRCS))
@@ -52,9 +52,14 @@ TESTDEPS    := $(addsuffix .d,$(TESTBINS))
 TESTDBGBINS := $(patsubst tests/%.c,build-debug/tests/%,$(TESTSRCS))
 TESTDBGDEPS := $(addsuffix .d,$(TESTDBGBINS))
 
-.PHONY: all debug test test-debug test-lsan static-analysis pot clean install uninstall
+.PHONY: all fast debug test test-debug test-lsan static-analysis pot clean install uninstall
 
 all: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
+
+# Convenience target for local development. Keep parallelism opt-in so normal
+# `make` remains predictable for packaging and CI.
+fast:
+	+$(MAKE) -j$$(nproc) all
 
 debug: $(if $(SRCS),$(DBGBIN))
 
@@ -127,7 +132,7 @@ pot:
 		--files-from=po/POTFILES.in --output=po/comfy.pot
 
 install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
-	install -Dm755 $(BIN) "$(DESTDIR)$(PREFIX)/bin/comfy"
+	install -Dm755 $(BIN) "$(DESTDIR)$(PREFIX)/bin/ComfyLauncher"
 	install -Dm644 data/skins/steve.png "$(DESTDIR)$(PREFIX)/share/comfy/skins/steve.png"
 	install -Dm644 data/pack.png "$(DESTDIR)$(PREFIX)/share/comfy/pack.png"
 	@for skin in data/skins/defaults/*.png; do \
@@ -147,7 +152,7 @@ install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 # The same list the install loop uses, so the catalogs go back out with
 # the rest of the launcher.
 uninstall:
-	rm -f "$(DESTDIR)$(PREFIX)/bin/comfy"
+	rm -f "$(DESTDIR)$(PREFIX)/bin/ComfyLauncher"
 	rm -f "$(DESTDIR)$(PREFIX)/share/comfy/skins/steve.png"
 	rm -f "$(DESTDIR)$(PREFIX)/share/comfy/pack.png"
 	rm -rf "$(DESTDIR)$(PREFIX)/share/comfy/skins/defaults"

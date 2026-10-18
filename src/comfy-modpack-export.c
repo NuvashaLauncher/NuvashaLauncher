@@ -259,9 +259,18 @@ export_directory (ExportRun *run, struct archive *archive, const char *root,
             * available to compatible importers. Do not emit
            * the same source while walking the instance, or the ZIP gets
            * duplicate overrides/icon.png entries. */
-          if (run->icon_path != NULL &&
-              g_strcmp0 (source, run->icon_path) == 0)
-            continue;
+           if (run->icon_path != NULL)
+             {
+               g_autofree char *canonical_source =
+                 g_canonicalize_filename (source, NULL);
+               if (g_strcmp0 (canonical_source, run->icon_path) == 0)
+                 continue;
+               /* An externally selected icon supersedes the stale default
+                * icon that may still be present in the instance directory. */
+               if (g_str_equal (child_relative, "icon.png") &&
+                   !g_str_has_prefix (run->icon_path, root))
+                 continue;
+             }
 
           if (g_hash_table_contains (indexed_paths, child_relative))
             continue;
@@ -698,8 +707,15 @@ comfy_modpack_export_async (ComfyInstance *instance, const char *path,
                                               NULL);
   g_object_get (instance, "icon", &run->icon_path, NULL);
   if (run->icon_path != NULL &&
-      !g_file_test (run->icon_path, G_FILE_TEST_IS_REGULAR))
+       !g_file_test (run->icon_path, G_FILE_TEST_IS_REGULAR))
     g_clear_pointer (&run->icon_path, g_free);
+  else if (run->icon_path != NULL)
+    {
+      g_autofree char *canonical_icon =
+        g_canonicalize_filename (run->icon_path, NULL);
+      g_free (run->icon_path);
+      run->icon_path = g_steal_pointer (&canonical_icon);
+    }
   run->manifest = export_manifest (instance, pack_name, summary, version_id,
                                    &error);
 

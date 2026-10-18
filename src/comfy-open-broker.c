@@ -2,10 +2,10 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#define _GNU_SOURCE
 #define _XOPEN_SOURCE 700
 
 #include "comfy-open-broker.h"
+#include "comfy-fs.h"
 
 #include <errno.h>
 #include <limits.h>
@@ -13,8 +13,6 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <linux/openat2.h>
-#include <sys/syscall.h>
 #include <unistd.h>
 
 typedef struct {
@@ -55,13 +53,10 @@ static int
 open_checked_path (Broker *broker, const char *path)
 {
   char root[PATH_MAX], real_path[PATH_MAX];
-  const char *relative;
-  int root_fd;
+  g_autofree char *parent = NULL;
+  g_autofree char *basename = NULL;
+  int parent_fd;
   int fd;
-  struct open_how how = {
-    .flags = O_PATH | O_CLOEXEC,
-    .resolve = RESOLVE_BENEATH | RESOLVE_NO_SYMLINKS,
-  };
 
   if (realpath (broker->allowed_root, root) == NULL ||
       realpath (path, real_path) == NULL)
@@ -71,15 +66,18 @@ open_checked_path (Broker *broker, const char *path)
       (real_path[strlen (root)] != '\0' && real_path[strlen (root)] != '/'))
     return -1;
 
-  relative = real_path + strlen (root);
-  while (*relative == '/')
-    relative++;
-  root_fd = open (root, O_PATH | O_DIRECTORY | O_CLOEXEC);
-  if (root_fd < 0)
+  parent = g_path_get_dirname (real_path);
+  basename = g_path_get_basename (real_path);
+  parent_fd = comfy_fs_open_directory_nofollow (parent, NULL);
+  if (parent_fd < 0)
     return -1;
-  fd = syscall (SYS_openat2, root_fd, *relative != '\0' ? relative : ".",
-                &how, sizeof how);
-  close (root_fd);
+
+  /* Open every parent component without following symlinks, then pin the
+   * final object without following a final symlink. This uses the existing
+   * POSIX filesystem helpers rather than Linux's openat2 syscall. */
+  fd = openat (parent_fd, basename, O_RDONLY | O_CLOEXEC | O_NOFOLLOW |
+               (g_file_test (real_path, G_FILE_TEST_IS_DIR) ? O_DIRECTORY : 0));
+  close (parent_fd);
   return fd;
 }
 
@@ -131,7 +129,8 @@ launch_checked_path (Broker *broker, const char *path, GError **error)
   if (fd < 0)
     return FALSE;
 
-  /* O_PATH pins the object that was validated, avoiding a symlink/path race.
+  /* The descriptor pins the object that was validated, avoiding a
+   * symlink/path race.
    * The descriptor is retained because launching the desktop application is
    * not necessarily synchronous. */
   proc_path = g_strdup_printf ("/proc/%ld/fd/%d", (long) getpid (), fd);

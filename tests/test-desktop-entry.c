@@ -36,7 +36,7 @@ test_desktop_entry (void)
   g_assert_cmpstr (comment, ==, "Minecraft launcher for Linux");
 
   exec = g_key_file_get_string (keys, "Desktop Entry", "Exec", NULL);
-  g_assert_cmpstr (exec, ==, "comfy");
+  g_assert_cmpstr (exec, ==, "ComfyLauncher");
 
   icon = g_key_file_get_string (keys, "Desktop Entry", "Icon", NULL);
   g_assert_cmpstr (icon, ==, "com.github.comfylauncher.comfy");

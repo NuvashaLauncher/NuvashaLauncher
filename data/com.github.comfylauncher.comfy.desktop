@@ -5,7 +5,7 @@
 Type=Application
 Name=Comfy Launcher
 Comment=Minecraft launcher for Linux
-Exec=comfy
+Exec=ComfyLauncher
 Icon=com.github.comfylauncher.comfy
 Terminal=false
 Categories=Game;
