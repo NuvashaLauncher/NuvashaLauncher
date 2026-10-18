@@ -380,7 +380,11 @@ assign_default_instance_icon (ComfyInstance *instance, const char *directory)
 {
   g_autofree char *source_path = comfy_instance_default_icon_path ();
   g_autofree char *target_path = g_build_filename (directory, "icon.png", NULL);
-  if (source_path != NULL)
+  /* An imported instance (for example a modpack) may already contain its
+   * own icon. Never overwrite that user/pack-provided file with the default
+   * icon while registering the directory. */
+  if (source_path != NULL &&
+      !g_file_test (target_path, G_FILE_TEST_IS_REGULAR))
     {
       g_autoptr (GFile) source = g_file_new_for_path (source_path);
       g_autoptr (GFile) target = g_file_new_for_path (target_path);

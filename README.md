@@ -135,7 +135,7 @@ make
 sudo make install PREFIX=/usr/local
 ```
 
-The launcher is installed as `/usr/local/bin/comfy`.
+The launcher is installed as `/usr/local/bin/ComfyLauncher`.
 
 To uninstall a source installation:
 

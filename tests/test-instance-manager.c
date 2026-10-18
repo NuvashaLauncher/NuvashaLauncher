@@ -8,6 +8,7 @@
  * application is ever launched. */
 
 #include "comfy-instance-manager.h"
+#include "comfy-fs.h"
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -916,8 +917,13 @@ test_duplicate_without_directory (void)
   g_autofree char *directory = prop_string (instance, "directory");
   g_autofree char *instances_root =
     g_build_filename (data_dir, "instances", NULL);
+  g_autofree char *icon = g_build_filename (directory, "icon.png", NULL);
 
   g_assert_cmpuint (count_entries (instances_root), ==, 1);
+  /* New instances receive the default icon, so remove that generated file
+   * before simulating an externally deleted instance directory. */
+  g_assert_true (comfy_fs_unlink (icon, &error));
+  g_assert_no_error (error);
   g_assert_cmpint (g_rmdir (directory), ==, 0);
   g_assert_cmpuint (count_entries (instances_root), ==, 0);
 
@@ -1074,6 +1080,9 @@ test_open_folder_without_directory (void)
   g_assert_nonnull (instance);
 
   g_autofree char *directory = prop_string (instance, "directory");
+  g_autofree char *icon = g_build_filename (directory, "icon.png", NULL);
+  g_assert_true (comfy_fs_unlink (icon, &error));
+  g_assert_no_error (error);
   g_assert_cmpint (g_rmdir (directory), ==, 0);
 
   /* The directory is gone, so nothing is launched: the test fails

@@ -415,6 +415,8 @@ typedef struct
 
   char *old_directory;
   char *new_directory;
+  char *old_icon;
+  char *new_icon;
   GFile *destination;
   GError *undo_error; /* the failure the undo is cleaning up after */
 } MoveData;
@@ -433,6 +435,8 @@ move_data_free (MoveData *data)
   g_clear_object (&data->destination);
   g_free (data->old_directory);
   g_free (data->new_directory);
+  g_free (data->old_icon);
+  g_free (data->new_icon);
   g_clear_error (&data->undo_error);
   g_free (data);
 }
@@ -466,7 +470,11 @@ static void
 move_undo (MoveData *data, gboolean restore_instance, GError *error)
 {
   if (restore_instance)
-    comfy_instance_set_directory (data->instance, data->old_directory, NULL);
+    {
+      comfy_instance_set_directory (data->instance, data->old_directory, NULL);
+      if (data->old_icon != NULL)
+        comfy_instance_set_string (data->instance, "icon", data->old_icon, NULL);
+    }
 
   data->undo_error = error;
 
@@ -511,7 +519,9 @@ move_copy_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   /* The files are all in the new place; only now does the stored path
      change, and the file that records it is written whole. */
-    comfy_instance_set_directory (data->instance, data->new_directory, NULL);
+  comfy_instance_set_directory (data->instance, data->new_directory, NULL);
+  if (data->new_icon != NULL)
+    comfy_instance_set_string (data->instance, "icon", data->new_icon, NULL);
 
   if (!comfy_instance_manager_save (data->self, &error))
     {
@@ -560,19 +570,35 @@ comfy_instance_manager_change_directory_async (ComfyInstanceManager *self,
   data->task = g_steal_pointer (&task);
   data->scope = comfy_task_scope_ref (task_scope);
   data->instance = g_object_ref (instance);
-  data->old_directory = g_steal_pointer (&old_directory);
-  data->new_directory = g_strdup (path);
-  data->destination = g_file_new_for_path (path);
+   data->old_directory = g_steal_pointer (&old_directory);
+   data->new_directory = g_strdup (path);
+   data->destination = g_file_new_for_path (path);
+
+   g_object_get (instance, "icon", &data->old_icon, NULL);
+   if (data->old_icon != NULL &&
+       g_str_has_prefix (data->old_icon, data->old_directory) &&
+       (data->old_icon[strlen (data->old_directory)] == '\0' ||
+        data->old_icon[strlen (data->old_directory)] == '/'))
+     {
+       const char *relative = data->old_icon + strlen (data->old_directory);
+       while (*relative == '/')
+         relative++;
+       data->new_icon = g_build_filename (data->new_directory, relative, NULL);
+     }
 
   /* An instance whose directory is gone has nothing to move: the path is
      changed and saved, which is all that is left to do. */
-  if (!g_file_test (data->old_directory, G_FILE_TEST_IS_DIR))
-    {
-      comfy_instance_set_directory (instance, data->new_directory, NULL);
+   if (!g_file_test (data->old_directory, G_FILE_TEST_IS_DIR))
+     {
+       comfy_instance_set_directory (instance, data->new_directory, NULL);
+       if (data->new_icon != NULL)
+         comfy_instance_set_string (instance, "icon", data->new_icon, NULL);
 
-      if (!comfy_instance_manager_save (self, &local_error))
-        {
-          comfy_instance_set_directory (instance, data->old_directory, NULL);
+       if (!comfy_instance_manager_save (self, &local_error))
+         {
+           comfy_instance_set_directory (instance, data->old_directory, NULL);
+           if (data->old_icon != NULL)
+             comfy_instance_set_string (instance, "icon", data->old_icon, NULL);
           move_return_error (data, g_steal_pointer (&local_error));
           return comfy_task_scope_ref (task_scope);
         }
