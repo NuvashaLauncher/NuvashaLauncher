@@ -1,6 +1,6 @@
-# Leppoisa Launcher
+# Nuvasha Launcher
 
-Leppoisa Launcher is a Linux launcher for Minecraft. It manages separate
+Nuvasha Launcher is a Linux launcher for Minecraft. It manages separate
 instances, installs content from Modrinth, and starts the game with the
 selected Java runtime.
 
@@ -75,13 +75,13 @@ nix-shell -p gcc gnumake gettext pkg-config glib gtk4 libadwaita libepoxy \
 ## Build and install
 
 ```sh
-git clone https://github.com/leppoisalauncher/leppoisa-launcher.git LeppoisaLauncher
-cd LeppoisaLauncher
+git clone https://github.com/nuvashalauncher/nuvasha-launcher.git NuvashaLauncher
+cd NuvashaLauncher
 make
 sudo make install PREFIX=/usr/local
 ```
 
-The launcher is installed as `/usr/local/bin/LeppoisaLauncher`.
+The launcher is installed as `/usr/local/bin/NuvashaLauncher`.
 
 To uninstall it:
 
@@ -102,11 +102,11 @@ Other useful targets are `make debug`, `make test-debug`,
 
 ## Files
 
-Leppoisa stores its data in:
+Nuvasha stores its data in:
 
-- `~/.local/share/leppoisa`
-- `~/.cache/leppoisa`
-- `~/.config/leppoisa`
+- `~/.local/share/nuvasha`
+- `~/.cache/nuvasha`
+- `~/.config/nuvasha`
 
 Account tokens are stored in the accounts file with owner-only permissions.
 They are not encrypted.
@@ -118,5 +118,5 @@ and run `make`.
 
 ## License
 
-Leppoisa is free software released under the GNU General Public License,
+Nuvasha is free software released under the GNU General Public License,
 version 3.0 only. See [LICENSE](LICENSE).

@@ -241,8 +241,8 @@ msgstr "줄 수 제한"
 msgid "Open Log Folder After Crash"
 msgstr "충돌 후 로그 폴더 열기"
 
-msgid "About Leppoisa Launcher"
-msgstr "Leppoisa Launcher 소개"
+msgid "About Nuvasha Launcher"
+msgstr "Nuvasha Launcher 소개"
 
 msgid "Keyboard Shortcuts"
 msgstr "키보드 단축키"
@@ -368,8 +368,8 @@ msgstr "1일"
 msgid "7 days"
 msgstr "7일"
 
-msgid "Clear leppoisa Cache"
-msgstr "leppoisa 캐시 지우기"
+msgid "Clear nuvasha Cache"
+msgstr "nuvasha 캐시 지우기"
 
 msgid "Show Shortcuts"
 msgstr "바로 가기 표시"
@@ -377,8 +377,8 @@ msgstr "바로 가기 표시"
 msgid "Quit"
 msgstr "종료"
 
-msgid "Clear leppoisa Cache?"
-msgstr "leppoisa 캐시를 지울까요?"
+msgid "Clear nuvasha Cache?"
+msgstr "nuvasha 캐시를 지울까요?"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -556,8 +556,8 @@ msgstr "%s 다운로드"
 msgid "Cache Cleared"
 msgstr "캐시 삭제됨"
 
-msgid "leppoisa cache data was cleared successfully."
-msgstr "leppoisa 캐시 데이터를 성공적으로 삭제했습니다."
+msgid "nuvasha cache data was cleared successfully."
+msgstr "nuvasha 캐시 데이터를 성공적으로 삭제했습니다."
 
 msgid "Cache Cleanup Failed"
 msgstr "캐시 정리 실패"

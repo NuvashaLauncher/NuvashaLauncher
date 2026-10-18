@@ -240,8 +240,8 @@ msgstr "Limit wierszy"
 msgid "Open Log Folder After Crash"
 msgstr "Otwórz folder dziennika po awarii"
 
-msgid "About Leppoisa Launcher"
-msgstr "O Leppoisa Launcher"
+msgid "About Nuvasha Launcher"
+msgstr "O Nuvasha Launcher"
 
 msgid "Keyboard Shortcuts"
 msgstr "Skróty klawiaturowe"
@@ -367,8 +367,8 @@ msgstr "1 dzień"
 msgid "7 days"
 msgstr "7 dni"
 
-msgid "Clear leppoisa Cache"
-msgstr "Wyczyść pamięć podręczną leppoisa"
+msgid "Clear nuvasha Cache"
+msgstr "Wyczyść pamięć podręczną nuvasha"
 
 msgid "Show Shortcuts"
 msgstr "Pokaż skróty"
@@ -376,8 +376,8 @@ msgstr "Pokaż skróty"
 msgid "Quit"
 msgstr "Wyjdź"
 
-msgid "Clear leppoisa Cache?"
-msgstr "Wyczyścić pamięć podręczną leppoisa?"
+msgid "Clear nuvasha Cache?"
+msgstr "Wyczyścić pamięć podręczną nuvasha?"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -557,8 +557,8 @@ msgstr "%s pobrań"
 msgid "Cache Cleared"
 msgstr "Wyczyszczono pamięć podręczną"
 
-msgid "leppoisa cache data was cleared successfully."
-msgstr "Dane pamięci podręcznej leppoisa zostały pomyślnie usunięte."
+msgid "nuvasha cache data was cleared successfully."
+msgstr "Dane pamięci podręcznej nuvasha zostały pomyślnie usunięte."
 
 msgid "Cache Cleanup Failed"
 msgstr "Nie udało się wyczyścić pamięci podręcznej"

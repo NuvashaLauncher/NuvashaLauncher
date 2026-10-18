@@ -12,7 +12,7 @@
  * that gets past its gate is stopped again at once. The one request that
  * does go out is the manifest of such a launch. */
 
-#include "leppoisa-launcher.h"
+#include "nuvasha-launcher.h"
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -30,7 +30,7 @@ typedef struct
   GMainLoop *loop;
   guint watchdog;
   gboolean timed_out;
-  LeppoisaLaunchState wanted;
+  NuvashaLaunchState wanted;
 } Watch;
 
 static gboolean
@@ -45,24 +45,24 @@ watchdog_fired (gpointer user_data)
 }
 
 static void
-on_state (LeppoisaLauncher *launcher G_GNUC_UNUSED, LeppoisaLaunchState state,
+on_state (NuvashaLauncher *launcher G_GNUC_UNUSED, NuvashaLaunchState state,
           const char *detail G_GNUC_UNUSED, gpointer user_data)
 {
   Watch *watch = user_data;
 
-  if (state == watch->wanted || !leppoisa_launch_state_is_busy (state))
+  if (state == watch->wanted || !nuvasha_launch_state_is_busy (state))
     g_main_loop_quit (watch->loop);
 }
 
 static void
-watch_until (Watch *watch, LeppoisaLauncher *launcher, LeppoisaLaunchState wanted)
+watch_until (Watch *watch, NuvashaLauncher *launcher, NuvashaLaunchState wanted)
 {
   watch->wanted = wanted;
 
   /* The answer to "is this account good" is synchronous, so the state is
      sometimes already the one that is waited for before the loop runs. */
-  if (leppoisa_launcher_get_state (launcher) == wanted ||
-      !leppoisa_launch_state_is_busy (leppoisa_launcher_get_state (launcher)))
+  if (nuvasha_launcher_get_state (launcher) == wanted ||
+      !nuvasha_launch_state_is_busy (nuvasha_launcher_get_state (launcher)))
     return;
 
   watch->loop = g_main_loop_new (NULL, FALSE);
@@ -85,18 +85,18 @@ watch_until (Watch *watch, LeppoisaLauncher *launcher, LeppoisaLaunchState wante
  * A place to work and something to work on
  * ---------------------------------------------------------- */
 
-static LeppoisaInstance *
+static NuvashaInstance *
 new_instance (void)
 {
   g_autofree char *directory = g_build_filename (root, "instance", NULL);
   g_autoptr (GError) error = NULL;
-  LeppoisaInstance *instance = NULL;
+  NuvashaInstance *instance = NULL;
 
   if (g_mkdir_with_parents (directory, 0755) != 0)
     g_error ("the instance directory \"%s\" cannot be made", directory);
 
-  instance = leppoisa_instance_new (NULL, "one", directory, "1.20.1",
-                               leppoisa_LOADER_VANILLA, &error);
+  instance = nuvasha_instance_new (NULL, "one", directory, "1.20.1",
+                               nuvasha_LOADER_VANILLA, &error);
 
   if (instance == NULL)
     g_error ("the test instance cannot be made: %s", error->message);
@@ -104,27 +104,27 @@ new_instance (void)
   return instance;
 }
 
-static LeppoisaAccounts *
+static NuvashaAccounts *
 new_store (const char *name)
 {
   g_autofree char *path = g_build_filename (root, name, NULL);
 
-  return leppoisa_accounts_new_for_path (path);
+  return nuvasha_accounts_new_for_path (path);
 }
 
 static void
-assert_log_has (LeppoisaLauncher *launcher, const char *needle)
+assert_log_has (NuvashaLauncher *launcher, const char *needle)
 {
-  g_autofree char *log = leppoisa_launcher_get_log_text (launcher);
+  g_autofree char *log = nuvasha_launcher_get_log_text (launcher);
 
   if (strstr (log, needle) == NULL)
     g_error ("the log has no \"%s\":\n%s", needle, log);
 }
 
 static void
-assert_log_lacks (LeppoisaLauncher *launcher, const char *needle)
+assert_log_lacks (NuvashaLauncher *launcher, const char *needle)
 {
-  g_autofree char *log = leppoisa_launcher_get_log_text (launcher);
+  g_autofree char *log = nuvasha_launcher_get_log_text (launcher);
 
   if (strstr (log, needle) != NULL)
     g_error ("the log has \"%s\" where it should not:\n%s", needle, log);
@@ -133,12 +133,12 @@ assert_log_lacks (LeppoisaLauncher *launcher, const char *needle)
 /* A Microsoft account as it is after a sign-in: a profile, a token that
  * is good for another hour and a refresh token to trade for the next
  * one. */
-static LeppoisaAccount *
+static NuvashaAccount *
 microsoft_account (gboolean with_refresh_token)
 {
-  LeppoisaAccount *account = g_new0 (LeppoisaAccount, 1);
+  NuvashaAccount *account = g_new0 (NuvashaAccount, 1);
 
-  account->type = leppoisa_ACCOUNT_MICROSOFT;
+  account->type = nuvasha_ACCOUNT_MICROSOFT;
   account->id = g_strdup ("069a79f444e94726a5befca90e38aaf5");
   account->name = g_strdup ("Notch");
   account->uuid = g_strdup ("069a79f4-44e9-4726-a5be-fca90e38aaf5");
@@ -161,35 +161,35 @@ microsoft_account (gboolean with_refresh_token)
 static void
 test_no_account_plays_offline (void)
 {
-  g_autoptr (LeppoisaInstance) instance = new_instance ();
-  g_autoptr (LeppoisaAccounts) accounts = new_store ("no-accounts.json");
-  g_autoptr (LeppoisaLauncher) launcher =
-    leppoisa_launcher_new (instance, NULL, accounts);
+  g_autoptr (NuvashaInstance) instance = new_instance ();
+  g_autoptr (NuvashaAccounts) accounts = new_store ("no-accounts.json");
+  g_autoptr (NuvashaLauncher) launcher =
+    nuvasha_launcher_new (instance, NULL, accounts);
 
-  g_assert_cmpint (leppoisa_launcher_get_state (launcher), ==, leppoisa_LAUNCH_STOPPED);
+  g_assert_cmpint (nuvasha_launcher_get_state (launcher), ==, nuvasha_LAUNCH_STOPPED);
 
-  leppoisa_launcher_start (launcher);
+  nuvasha_launcher_start (launcher);
 
   /* Preparing means the gate let it through: a launch that stopped at an
      account would be Failed before this. */
-  g_assert_cmpint (leppoisa_launcher_get_state (launcher), ==, leppoisa_LAUNCH_PREPARING);
+  g_assert_cmpint (nuvasha_launcher_get_state (launcher), ==, nuvasha_LAUNCH_PREPARING);
   assert_log_lacks (launcher, "no account to play as");
   assert_log_has (launcher, "preparing Minecraft 1.20.1");
 
-  leppoisa_launcher_stop (launcher);
+  nuvasha_launcher_stop (launcher);
 
   /* A launcher without any accounts at all behaves the same rather than
      refusing to read a store that is not there. */
   {
-    g_autoptr (LeppoisaLauncher) bare = leppoisa_launcher_new (instance, NULL, NULL);
+    g_autoptr (NuvashaLauncher) bare = nuvasha_launcher_new (instance, NULL, NULL);
 
-    g_assert_null (leppoisa_launcher_get_accounts (bare));
+    g_assert_null (nuvasha_launcher_get_accounts (bare));
 
-    leppoisa_launcher_start (bare);
-    g_assert_cmpint (leppoisa_launcher_get_state (bare), ==, leppoisa_LAUNCH_PREPARING);
+    nuvasha_launcher_start (bare);
+    g_assert_cmpint (nuvasha_launcher_get_state (bare), ==, nuvasha_LAUNCH_PREPARING);
     assert_log_lacks (bare, "no account to play as");
 
-    leppoisa_launcher_stop (bare);
+    nuvasha_launcher_stop (bare);
   }
 
   g_print ("ok - a launch with no account plays offline as Player\n");
@@ -205,13 +205,13 @@ test_no_account_plays_offline (void)
 static void
 test_a_dead_token_asks_for_a_sign_in (void)
 {
-  g_autoptr (LeppoisaInstance) instance = new_instance ();
-  g_autoptr (LeppoisaAccounts) accounts = new_store ("dead-token.json");
-  g_autoptr (LeppoisaLauncher) launcher =
-    leppoisa_launcher_new (instance, NULL, accounts);
-  g_autoptr (LeppoisaAccount) account = NULL;
+  g_autoptr (NuvashaInstance) instance = new_instance ();
+  g_autoptr (NuvashaAccounts) accounts = new_store ("dead-token.json");
+  g_autoptr (NuvashaLauncher) launcher =
+    nuvasha_launcher_new (instance, NULL, accounts);
+  g_autoptr (NuvashaAccount) account = NULL;
   g_autoptr (GError) error = NULL;
-  LeppoisaAccount *active = NULL;
+  NuvashaAccount *active = NULL;
   Watch watch = { 0 };
 
   /* An account of a family whose Microsoft sign-in has gone: the token
@@ -220,21 +220,21 @@ test_a_dead_token_asks_for_a_sign_in (void)
   account = microsoft_account (FALSE);
   account->expires_at = g_get_real_time () / 1000000 - 10;
 
-  g_assert_true (leppoisa_accounts_add (accounts, account, &error));
+  g_assert_true (nuvasha_accounts_add (accounts, account, &error));
   g_assert_no_error (error);
 
-  leppoisa_launcher_start (launcher);
+  nuvasha_launcher_start (launcher);
 
-  watch_until (&watch, launcher, leppoisa_LAUNCH_NEEDS_SIGN_IN);
+  watch_until (&watch, launcher, nuvasha_LAUNCH_NEEDS_SIGN_IN);
 
-  g_assert_cmpint (leppoisa_launcher_get_state (launcher), ==,
-                   leppoisa_LAUNCH_NEEDS_SIGN_IN);
+  g_assert_cmpint (nuvasha_launcher_get_state (launcher), ==,
+                   nuvasha_LAUNCH_NEEDS_SIGN_IN);
   assert_log_has (launcher, "sign in again");
   assert_log_has (launcher, "Notch");
 
   /* What goes with the state is the sentence the user is shown. */
   {
-    const char *detail = leppoisa_launcher_get_state_detail (launcher);
+    const char *detail = nuvasha_launcher_get_state_detail (launcher);
 
     g_assert_nonnull (detail);
     g_assert_nonnull (strstr (detail, "sign in"));
@@ -243,12 +243,12 @@ test_a_dead_token_asks_for_a_sign_in (void)
 
   /* A launch that needs a sign-in is not busy: nothing is running, and
      the user can start it again as soon as they have signed in. */
-  g_assert_false (leppoisa_launch_state_is_busy (leppoisa_launcher_get_state (launcher)));
+  g_assert_false (nuvasha_launch_state_is_busy (nuvasha_launcher_get_state (launcher)));
 
   /* The token that could not be traded is dropped from the store, so that
      the account says everywhere it is shown that it needs a sign-in
      rather than pretending to be ready. */
-  active = leppoisa_accounts_get_active (accounts);
+  active = nuvasha_accounts_get_active (accounts);
   g_assert_nonnull (active);
   g_assert_null (active->access_token);
   g_assert_null (active->refresh_token);
@@ -273,27 +273,27 @@ test_a_dead_token_asks_for_a_sign_in (void)
 static void
 test_a_ready_account_gets_past_the_gate (void)
 {
-  g_autoptr (LeppoisaInstance) instance = new_instance ();
-  g_autoptr (LeppoisaAccounts) accounts = new_store ("ready.json");
-  g_autoptr (LeppoisaLauncher) launcher =
-    leppoisa_launcher_new (instance, NULL, accounts);
-  g_autoptr (LeppoisaAccount) account = microsoft_account (TRUE);
+  g_autoptr (NuvashaInstance) instance = new_instance ();
+  g_autoptr (NuvashaAccounts) accounts = new_store ("ready.json");
+  g_autoptr (NuvashaLauncher) launcher =
+    nuvasha_launcher_new (instance, NULL, accounts);
+  g_autoptr (NuvashaAccount) account = microsoft_account (TRUE);
   g_autoptr (GError) error = NULL;
 
-  g_assert_true (leppoisa_accounts_add (accounts, account, &error));
+  g_assert_true (nuvasha_accounts_add (accounts, account, &error));
   g_assert_no_error (error);
 
-  leppoisa_launcher_start (launcher);
+  nuvasha_launcher_start (launcher);
 
   /* Preparing means the account was good: a launch that stops at the
      account never gets there. */
-  g_assert_cmpint (leppoisa_launcher_get_state (launcher), ==,
-                   leppoisa_LAUNCH_PREPARING);
+  g_assert_cmpint (nuvasha_launcher_get_state (launcher), ==,
+                   nuvasha_LAUNCH_PREPARING);
   assert_log_lacks (launcher, "no account to play as");
   assert_log_has (launcher, "preparing Minecraft 1.20.1");
 
   /* The launch is stopped again so that nothing is left fetching. */
-  leppoisa_launcher_stop (launcher);
+  nuvasha_launcher_stop (launcher);
 
   g_print ("ok - a ready account is what a launch goes out with\n");
 }
@@ -303,14 +303,14 @@ test_a_ready_account_gets_past_the_gate (void)
 static void
 test_the_state_has_a_name (void)
 {
-  g_assert_cmpstr (leppoisa_launch_state_to_string (leppoisa_LAUNCH_NEEDS_SIGN_IN), ==,
+  g_assert_cmpstr (nuvasha_launch_state_to_string (nuvasha_LAUNCH_NEEDS_SIGN_IN), ==,
                    "Needs sign-in");
-  g_assert_cmpstr (leppoisa_launch_state_to_string (leppoisa_LAUNCH_PREPARING), ==,
+  g_assert_cmpstr (nuvasha_launch_state_to_string (nuvasha_LAUNCH_PREPARING), ==,
                    "Preparing");
-  g_assert_cmpstr (leppoisa_launch_state_to_string (leppoisa_LAUNCH_FAILED), ==,
+  g_assert_cmpstr (nuvasha_launch_state_to_string (nuvasha_LAUNCH_FAILED), ==,
                    "Failed");
-  g_assert_false (leppoisa_launch_state_is_busy (leppoisa_LAUNCH_NEEDS_SIGN_IN));
-  g_assert_true (leppoisa_launch_state_is_busy (leppoisa_LAUNCH_PREPARING));
+  g_assert_false (nuvasha_launch_state_is_busy (nuvasha_LAUNCH_NEEDS_SIGN_IN));
+  g_assert_true (nuvasha_launch_state_is_busy (nuvasha_LAUNCH_PREPARING));
 
   g_print ("ok - the sign-in state is a state with a name\n");
 }
@@ -322,7 +322,7 @@ main (void)
 
   g_print ("# Launcher account tests\n");
 
-  directory = g_dir_make_tmp ("leppoisa-launcher-account-XXXXXX", NULL);
+  directory = g_dir_make_tmp ("nuvasha-launcher-account-XXXXXX", NULL);
 
   if (directory == NULL)
     g_error ("a temporary directory cannot be made");

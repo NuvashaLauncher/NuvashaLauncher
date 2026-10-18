@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* Tests for leppoisa-java.
+/* Tests for nuvasha-java.
  *
  * String parsing is pure; the GSubprocess machinery is covered with
  * fake "java" shell scripts in a temporary directory that print one of
@@ -11,7 +11,7 @@
 /* symlink(), like realpath(), only exists under glibc's defaults. */
 #define _GNU_SOURCE
 
-#include "leppoisa-java.h"
+#include "nuvasha-java.h"
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -102,7 +102,7 @@ test_parse_banner_modern (void)
   g_autofree char *vendor = NULL;
   int major = 0;
 
-  g_assert_true (leppoisa_java_parse_version (report_openjdk_25, -1, &major,
+  g_assert_true (nuvasha_java_parse_version (report_openjdk_25, -1, &major,
                                          &arch, &vendor));
   g_assert_cmpint (major, ==, 25);
   g_assert_cmpstr (arch, ==, "64-bit");
@@ -110,13 +110,13 @@ test_parse_banner_modern (void)
 
   g_clear_pointer (&arch, g_free);
   g_clear_pointer (&vendor, g_free);
-  g_assert_true (leppoisa_java_parse_version (report_openjdk_21, -1, &major,
+  g_assert_true (nuvasha_java_parse_version (report_openjdk_21, -1, &major,
                                          &arch, &vendor));
   g_assert_cmpint (major, ==, 21);
 
   g_clear_pointer (&arch, g_free);
   g_clear_pointer (&vendor, g_free);
-  g_assert_true (leppoisa_java_parse_version (report_openjdk_17, -1, &major,
+  g_assert_true (nuvasha_java_parse_version (report_openjdk_17, -1, &major,
                                          &arch, &vendor));
   g_assert_cmpint (major, ==, 17);
 }
@@ -128,7 +128,7 @@ test_parse_banner_legacy_1_8 (void)
   g_autofree char *vendor = NULL;
   int major = 0;
 
-  g_assert_true (leppoisa_java_parse_version (report_oracle_18, -1, &major,
+  g_assert_true (nuvasha_java_parse_version (report_oracle_18, -1, &major,
                                          &arch, &vendor));
   g_assert_cmpint (major, ==, 8);
   g_assert_cmpstr (arch, ==, "64-bit");
@@ -142,7 +142,7 @@ test_parse_show_settings_picks_os_arch (void)
   g_autofree char *vendor = NULL;
   int major = 0;
 
-  g_assert_true (leppoisa_java_parse_version (report_with_settings, -1, &major,
+  g_assert_true (nuvasha_java_parse_version (report_with_settings, -1, &major,
                                          &arch, &vendor));
   g_assert_cmpint (major, ==, 21);
   g_assert_cmpstr (arch, ==, "amd64");
@@ -158,15 +158,15 @@ test_parse_odd_reports_still_parse (void)
 
   /* No "Runtime Environment" phrasing at all: the parser keeps what
    * it has instead of failing. */
-  g_assert_true (leppoisa_java_parse_version (report_adoptium, -1, &major,
+  g_assert_true (nuvasha_java_parse_version (report_adoptium, -1, &major,
                                          &arch, &vendor));
   g_assert_cmpint (major, ==, 17);
   g_assert_null (vendor);
 
-  g_assert_false (leppoisa_java_parse_version ("hello\nworld\n", -1, &major,
+  g_assert_false (nuvasha_java_parse_version ("hello\nworld\n", -1, &major,
                                           &arch, &vendor));
-  g_assert_false (leppoisa_java_parse_version ("", -1, &major, &arch, &vendor));
-  g_assert_false (leppoisa_java_parse_version ("java version \"\"\n", -1, &major,
+  g_assert_false (nuvasha_java_parse_version ("", -1, &major, &arch, &vendor));
+  g_assert_false (nuvasha_java_parse_version ("java version \"\"\n", -1, &major,
                                           &arch, &vendor));
 }
 
@@ -178,12 +178,12 @@ static GPtrArray *
 fake_java_list (void)
 {
   GPtrArray *list = g_ptr_array_new_with_free_func (
-    (GDestroyNotify) leppoisa_java_free);
+    (GDestroyNotify) nuvasha_java_free);
   int majors[] = { 8, 17, 21, 25 };
 
   for (guint i = 0; i < G_N_ELEMENTS (majors); i++)
     {
-      LeppoisaJava *java = g_new0 (LeppoisaJava, 1);
+      NuvashaJava *java = g_new0 (NuvashaJava, 1);
 
       java->executable =
         g_strdup_printf ("/fake/jdk/%d/bin/java", majors[i]);
@@ -200,22 +200,22 @@ static void
 test_best_compatible_prefers_closest (void)
 {
   g_autoptr (GPtrArray) list = fake_java_list ();
-  LeppoisaJava *best;
+  NuvashaJava *best;
 
-  best = leppoisa_java_best_compatible (list, 21);
+  best = nuvasha_java_best_compatible (list, 21);
   g_assert_nonnull (best);
   g_assert_cmpint (best->major_version, ==, 21);
 
-  best = leppoisa_java_best_compatible (list, 9);
+  best = nuvasha_java_best_compatible (list, 9);
   g_assert_nonnull (best);
   g_assert_cmpint (best->major_version, ==, 17);
 
-  best = leppoisa_java_best_compatible (list, 8);
+  best = nuvasha_java_best_compatible (list, 8);
   g_assert_nonnull (best);
   g_assert_cmpint (best->major_version, ==, 8);
 
   /* Newer than everything installed: there is no compatible Java. */
-  g_assert_null (leppoisa_java_best_compatible (list, 26));
+  g_assert_null (nuvasha_java_best_compatible (list, 26));
 }
 
 /* A headless runtime cannot show the game, so a windowed one that is
@@ -225,10 +225,10 @@ static void
 test_best_compatible_prefers_windowed (void)
 {
   g_autoptr (GPtrArray) list =
-    g_ptr_array_new_with_free_func ((GDestroyNotify) leppoisa_java_free);
-  LeppoisaJava *head = g_new0 (LeppoisaJava, 1);
-  LeppoisaJava *windowed = g_new0 (LeppoisaJava, 1);
-  LeppoisaJava *best = NULL;
+    g_ptr_array_new_with_free_func ((GDestroyNotify) nuvasha_java_free);
+  NuvashaJava *head = g_new0 (NuvashaJava, 1);
+  NuvashaJava *windowed = g_new0 (NuvashaJava, 1);
+  NuvashaJava *best = NULL;
 
   head->executable = g_strdup ("/headless/8/bin/java");
   head->major_version = 8;
@@ -241,7 +241,7 @@ test_best_compatible_prefers_windowed (void)
   g_ptr_array_add (list, head);
   g_ptr_array_add (list, windowed);
 
-  best = leppoisa_java_best_compatible (list, 8);
+  best = nuvasha_java_best_compatible (list, 8);
   g_assert_nonnull (best);
   g_assert_cmpint (best->major_version, ==, 21);
   g_assert_false (best->headless);
@@ -249,7 +249,7 @@ test_best_compatible_prefers_windowed (void)
   /* Only the headless one is left: it is still returned. */
   g_ptr_array_remove_index (list, 1);
 
-  best = leppoisa_java_best_compatible (list, 8);
+  best = nuvasha_java_best_compatible (list, 8);
   g_assert_nonnull (best);
   g_assert_true (best->headless);
 
@@ -260,54 +260,54 @@ static void
 test_compatibility_rule (void)
 {
   g_autoptr (GPtrArray) list = fake_java_list ();
-  LeppoisaJava *java = g_ptr_array_index (list, 0); /* major 8 */
+  NuvashaJava *java = g_ptr_array_index (list, 0); /* major 8 */
 
-  g_assert_true (leppoisa_java_is_compatible (java, 8));
-  g_assert_true (leppoisa_java_is_compatible (java, 1));
-  g_assert_false (leppoisa_java_is_compatible (java, 17));
+  g_assert_true (nuvasha_java_is_compatible (java, 8));
+  g_assert_true (nuvasha_java_is_compatible (java, 1));
+  g_assert_false (nuvasha_java_is_compatible (java, 17));
 }
 
 static void
 test_select_instance_then_closest (void)
 {
   g_autoptr (GPtrArray) list = fake_java_list ();
-  const LeppoisaJava *picked;
+  const NuvashaJava *picked;
 
   /* An explicitly selected runtime must match the required major too. */
-  g_assert_null (leppoisa_java_select (list, "/fake/jdk/25/bin/java", 8));
+  g_assert_null (nuvasha_java_select (list, "/fake/jdk/25/bin/java", 8));
 
   /* An instance setting cannot force Java 8 onto Java 17. */
-  g_assert_null (leppoisa_java_select (list, "/fake/jdk/8/bin/java", 17));
-  g_assert_null (leppoisa_java_select (list, "/fake/jdk/25/bin/java", 26));
+  g_assert_null (nuvasha_java_select (list, "/fake/jdk/8/bin/java", 17));
+  g_assert_null (nuvasha_java_select (list, "/fake/jdk/25/bin/java", 26));
 
   /* Selection itself does not hide the configured runtime's headless state;
    * the launcher can then explain why it cannot run the game with it. */
-  ((LeppoisaJava *) g_ptr_array_index (list, 1))->headless = TRUE;
-  picked = leppoisa_java_select (list, "/fake/jdk/17/bin/java", 17);
+  ((NuvashaJava *) g_ptr_array_index (list, 1))->headless = TRUE;
+  picked = nuvasha_java_select (list, "/fake/jdk/17/bin/java", 17);
   g_assert_nonnull (picked);
   g_assert_true (picked->headless);
 
   /* Older version documents omit javaVersion: zero means any usable Java,
    * both for an explicit instance choice and for automatic selection. */
-  picked = leppoisa_java_select (list, "/fake/jdk/17/bin/java", 0);
+  picked = nuvasha_java_select (list, "/fake/jdk/17/bin/java", 0);
   g_assert_nonnull (picked);
   g_assert_cmpint (picked->major_version, ==, 17);
-  picked = leppoisa_java_select (list, NULL, 0);
+  picked = nuvasha_java_select (list, NULL, 0);
   g_assert_nonnull (picked);
   g_assert_cmpint (picked->major_version, ==, 8);
 
   /* Nothing set: the exact required major is selected automatically. */
-  picked = leppoisa_java_select (list, NULL, 21);
+  picked = nuvasha_java_select (list, NULL, 21);
   g_assert_nonnull (picked);
   g_assert_cmpint (picked->major_version, ==, 21);
 
   /* A newer runtime is not silently selected when the exact major is absent. */
-  g_assert_null (leppoisa_java_select (list, NULL, 22));
+  g_assert_null (nuvasha_java_select (list, NULL, 22));
 
   /* An instance path detection never saw is not something this module
    * can fake: selection answers nothing. */
-  g_assert_null (leppoisa_java_select (list, "/elsewhere/bin/java", 8));
-  g_assert_null (leppoisa_java_select (list, NULL, 30));
+  g_assert_null (nuvasha_java_select (list, "/elsewhere/bin/java", 8));
+  g_assert_null (nuvasha_java_select (list, NULL, 30));
 }
 
 /* ---------------------------------------------------------- *
@@ -317,7 +317,7 @@ test_select_instance_then_closest (void)
 static char *
 fake_java_dir (void)
 {
-  g_autofree char *dir = g_dir_make_tmp ("leppoisa-test-java-XXXXXX", NULL);
+  g_autofree char *dir = g_dir_make_tmp ("nuvasha-test-java-XXXXXX", NULL);
 
   return g_steal_pointer (&dir);
 }
@@ -331,9 +331,9 @@ write_fake_java (const char *dir,
   g_autofree char *script = NULL;
 
   script = g_strdup_printf ("#!/bin/sh\n"
-                            "cat <<'leppoisa_REPORT'\n"
+                            "cat <<'nuvasha_REPORT'\n"
                             "%s"
-                            "leppoisa_REPORT\n",
+                            "nuvasha_REPORT\n",
                             report);
 
   if (!g_file_set_contents (path, script, -1, NULL) ||
@@ -348,8 +348,8 @@ typedef struct
   AsyncRun run;
   GPtrArray *javas;
   GError *error;
-  LeppoisaJava *single;
-  LeppoisaTaskScope *operation;
+  NuvashaJava *single;
+  NuvashaTaskScope *operation;
 } JavaCall;
 
 static void
@@ -359,8 +359,8 @@ list_finished (GObject *source G_GNUC_UNUSED,
 {
   JavaCall *call = user_data;
 
-  call->javas = leppoisa_java_probe_list_finish (result, &call->error);
-  leppoisa_task_scope_unref (call->operation);
+  call->javas = nuvasha_java_probe_list_finish (result, &call->error);
+  nuvasha_task_scope_unref (call->operation);
   call->operation = NULL;
   g_main_loop_quit (call->run.loop);
 }
@@ -372,8 +372,8 @@ single_finished (GObject *source G_GNUC_UNUSED,
 {
   JavaCall *call = user_data;
 
-  call->single = leppoisa_java_probe_finish (result, &call->error);
-  leppoisa_task_scope_unref (call->operation);
+  call->single = nuvasha_java_probe_finish (result, &call->error);
+  nuvasha_task_scope_unref (call->operation);
   call->operation = NULL;
   g_main_loop_quit (call->run.loop);
 }
@@ -403,7 +403,7 @@ test_probing_fake_scripts_and_dedup (void)
   executables[4] = NULL;
 
   call.javas = NULL;
-  call.operation = leppoisa_java_probe_list_async (g_strdupv (executables),
+  call.operation = nuvasha_java_probe_list_async (g_strdupv (executables),
                                              list_finished, &call);
   run_one (&call.run);
 
@@ -413,7 +413,7 @@ test_probing_fake_scripts_and_dedup (void)
 
   for (guint i = 0; i < call.javas->len; i++)
     {
-      LeppoisaJava *java = g_ptr_array_index (call.javas, i);
+      NuvashaJava *java = g_ptr_array_index (call.javas, i);
 
       if (java->major_version == 8)
         found8++;
@@ -430,7 +430,7 @@ test_probing_fake_scripts_and_dedup (void)
 static void
 test_detect_list_jre_layout_and_dedup (void)
 {
-  g_autofree char *base = g_dir_make_tmp ("leppoisa-detect-XXXXXX", NULL);
+  g_autofree char *base = g_dir_make_tmp ("nuvasha-detect-XXXXXX", NULL);
   g_autofree char *root = g_build_filename (base, "jvm", NULL);
   g_autofree char *jre_home = g_build_filename (root, "jre-8-home", NULL);
   g_autofree char *jre_home_bin =
@@ -496,7 +496,7 @@ test_detect_list_jre_layout_and_dedup (void)
   roots[0] = root;
   roots[1] = NULL;
 
-  call.operation = leppoisa_java_detect_list_async (roots, list_finished, &call);
+  call.operation = nuvasha_java_detect_list_async (roots, list_finished, &call);
   run_one (&call.run);
 
   g_assert_no_error (call.error);
@@ -504,7 +504,7 @@ test_detect_list_jre_layout_and_dedup (void)
 
   for (guint i = 0; i < call.javas->len; i++)
     {
-      LeppoisaJava *java = g_ptr_array_index (call.javas, i);
+      NuvashaJava *java = g_ptr_array_index (call.javas, i);
 
       if (g_str_has_suffix (java->executable, "jre-8-home/jre/bin/java"))
         {
@@ -537,7 +537,7 @@ test_detect_list_jre_layout_and_dedup (void)
 static void
 test_detect_headless_roots (void)
 {
-  g_autofree char *base = g_dir_make_tmp ("leppoisa-java-root-XXXXXX", NULL);
+  g_autofree char *base = g_dir_make_tmp ("nuvasha-java-root-XXXXXX", NULL);
   g_autofree char *root = g_build_filename (base, "jvm", NULL);
   g_autofree char *full = g_build_filename (root, "jdk-full", NULL);
   g_autofree char *bare = g_build_filename (root, "jdk-bare", NULL);
@@ -562,7 +562,7 @@ test_detect_headless_roots (void)
 
   roots[0] = root;
   roots[1] = NULL;
-  call.operation = leppoisa_java_detect_list_async (roots, list_finished, &call);
+  call.operation = nuvasha_java_detect_list_async (roots, list_finished, &call);
   run_one (&call.run);
 
   g_assert_no_error (call.error);
@@ -571,7 +571,7 @@ test_detect_headless_roots (void)
 
   for (guint i = 0; i < call.javas->len; i++)
     {
-      LeppoisaJava *java = g_ptr_array_index (call.javas, i);
+      NuvashaJava *java = g_ptr_array_index (call.javas, i);
 
       if (g_strstr_len (java->executable, -1, "jdk-full") != NULL)
         g_assert_false (java->headless);
@@ -592,7 +592,7 @@ test_probing_parses_the_report (void)
                                              report_with_settings);
   JavaCall call = { 0 };
 
-  call.operation = leppoisa_java_probe_async (script, single_finished, &call);
+  call.operation = nuvasha_java_probe_async (script, single_finished, &call);
   run_one (&call.run);
 
   g_assert_no_error (call.error);
@@ -602,7 +602,7 @@ test_probing_parses_the_report (void)
   g_assert_cmpstr (call.single->vendor, ==, "OpenJDK");
   g_assert_cmpstr (call.single->executable, ==, script);
 
-  leppoisa_java_free (call.single);
+  nuvasha_java_free (call.single);
 }
 
 int

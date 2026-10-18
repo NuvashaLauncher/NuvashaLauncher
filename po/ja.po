@@ -240,8 +240,8 @@ msgstr "行数の上限"
 msgid "Open Log Folder After Crash"
 msgstr "クラッシュ後にログフォルダーを開く"
 
-msgid "About Leppoisa Launcher"
-msgstr "Leppoisa Launcherについて"
+msgid "About Nuvasha Launcher"
+msgstr "Nuvasha Launcherについて"
 
 msgid "Keyboard Shortcuts"
 msgstr "キーボードショートカット"
@@ -367,8 +367,8 @@ msgstr "1日"
 msgid "7 days"
 msgstr "7日"
 
-msgid "Clear leppoisa Cache"
-msgstr "leppoisa キャッシュを消去"
+msgid "Clear nuvasha Cache"
+msgstr "nuvasha キャッシュを消去"
 
 msgid "Show Shortcuts"
 msgstr "ショートカットを表示"
@@ -376,8 +376,8 @@ msgstr "ショートカットを表示"
 msgid "Quit"
 msgstr "終了"
 
-msgid "Clear leppoisa Cache?"
-msgstr "leppoisa キャッシュを消去しますか？"
+msgid "Clear nuvasha Cache?"
+msgstr "nuvasha キャッシュを消去しますか？"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -557,8 +557,8 @@ msgstr "%s ダウンロード"
 msgid "Cache Cleared"
 msgstr "キャッシュを消去しました"
 
-msgid "leppoisa cache data was cleared successfully."
-msgstr "leppoisa のキャッシュデータを正常に消去しました。"
+msgid "nuvasha cache data was cleared successfully."
+msgstr "nuvasha のキャッシュデータを正常に消去しました。"
 
 msgid "Cache Cleanup Failed"
 msgstr "キャッシュの消去に失敗しました"

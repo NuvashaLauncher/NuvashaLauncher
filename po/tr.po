@@ -241,8 +241,8 @@ msgstr "Satır sınırı"
 msgid "Open Log Folder After Crash"
 msgstr "Çökmeden sonra günlük klasörünü aç"
 
-msgid "About Leppoisa Launcher"
-msgstr "Leppoisa Launcher hakkında"
+msgid "About Nuvasha Launcher"
+msgstr "Nuvasha Launcher hakkında"
 
 msgid "Keyboard Shortcuts"
 msgstr "Klavye kısayolları"
@@ -368,8 +368,8 @@ msgstr "1 gün"
 msgid "7 days"
 msgstr "7 gün"
 
-msgid "Clear leppoisa Cache"
-msgstr "leppoisa önbelleğini temizle"
+msgid "Clear nuvasha Cache"
+msgstr "nuvasha önbelleğini temizle"
 
 msgid "Show Shortcuts"
 msgstr "Kısayolları Göster"
@@ -377,8 +377,8 @@ msgstr "Kısayolları Göster"
 msgid "Quit"
 msgstr "Çıkış"
 
-msgid "Clear leppoisa Cache?"
-msgstr "leppoisa önbelleği temizlensin mi?"
+msgid "Clear nuvasha Cache?"
+msgstr "nuvasha önbelleği temizlensin mi?"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -476,7 +476,7 @@ msgid "Show name, summary and version fields before exporting."
 msgstr "Dışa aktarmadan önce ad, özet ve sürüm alanlarını göster."
 
 msgid "Export complete"
-msgstr "Dışa aktarma tamleppoisaandı"
+msgstr "Dışa aktarma tamnuvashaandı"
 
 msgid "Export"
 msgstr "Dışa aktar"
@@ -558,8 +558,8 @@ msgstr "%s indirme"
 msgid "Cache Cleared"
 msgstr "Önbellek temizlendi"
 
-msgid "leppoisa cache data was cleared successfully."
-msgstr "leppoisa önbellek verileri başarıyla temizlendi."
+msgid "nuvasha cache data was cleared successfully."
+msgstr "nuvasha önbellek verileri başarıyla temizlendi."
 
 msgid "Cache Cleanup Failed"
 msgstr "Önbellek temizlenemedi"

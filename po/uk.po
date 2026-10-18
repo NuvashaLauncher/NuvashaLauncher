@@ -240,8 +240,8 @@ msgstr "Обмеження рядків"
 msgid "Open Log Folder After Crash"
 msgstr "Відкрити теку журналів після збою"
 
-msgid "About Leppoisa Launcher"
-msgstr "Про Leppoisa Launcher"
+msgid "About Nuvasha Launcher"
+msgstr "Про Nuvasha Launcher"
 
 msgid "Keyboard Shortcuts"
 msgstr "Комбінації клавіш"
@@ -367,8 +367,8 @@ msgstr "1 день"
 msgid "7 days"
 msgstr "7 днів"
 
-msgid "Clear leppoisa Cache"
-msgstr "Очистити кеш leppoisa"
+msgid "Clear nuvasha Cache"
+msgstr "Очистити кеш nuvasha"
 
 msgid "Show Shortcuts"
 msgstr "Показати комбінації клавіш"
@@ -376,8 +376,8 @@ msgstr "Показати комбінації клавіш"
 msgid "Quit"
 msgstr "Вийти"
 
-msgid "Clear leppoisa Cache?"
-msgstr "Очистити кеш leppoisa?"
+msgid "Clear nuvasha Cache?"
+msgstr "Очистити кеш nuvasha?"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -557,8 +557,8 @@ msgstr "%s завантажень"
 msgid "Cache Cleared"
 msgstr "Кеш очищено"
 
-msgid "leppoisa cache data was cleared successfully."
-msgstr "Дані кешу leppoisa успішно очищено."
+msgid "nuvasha cache data was cleared successfully."
+msgstr "Дані кешу nuvasha успішно очищено."
 
 msgid "Cache Cleanup Failed"
 msgstr "Не вдалося очистити кеш"

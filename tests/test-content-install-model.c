@@ -4,7 +4,7 @@
 
 #include <glib.h>
 
-#include "leppoisa-content-install-model.h"
+#include "nuvasha-content-install-model.h"
 
 static guint freed;
 
@@ -19,8 +19,8 @@ static void
 test_model_owns_install_state (void)
 {
   freed = 0;
-  g_autoptr (LeppoisaContentInstallModel) model =
-    leppoisa_content_install_model_new (count_free);
+  g_autoptr (NuvashaContentInstallModel) model =
+    nuvasha_content_install_model_new (count_free);
 
   g_assert_nonnull (model->picks);
   g_assert_null (model->updates);

@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#include "leppoisa-cache.h"
-#include "leppoisa-settings.h"
+#include "nuvasha-cache.h"
+#include "nuvasha-settings.h"
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -14,7 +14,7 @@ static char *root;
 typedef struct
 {
   GMainLoop *loop;
-  LeppoisaTaskScope *operation;
+  NuvashaTaskScope *operation;
 } CacheClearWait;
 
 static void
@@ -26,51 +26,51 @@ cache_clear_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   g_assert_true (g_task_propagate_boolean (G_TASK (result), &error));
   g_assert_no_error (error);
-  leppoisa_task_scope_unref (wait->operation);
+  nuvasha_task_scope_unref (wait->operation);
   g_main_loop_quit (wait->loop);
 }
 
 static void
 test_defaults (void)
 {
-  g_autoptr (LeppoisaSettings) settings = leppoisa_settings_new ();
+  g_autoptr (NuvashaSettings) settings = nuvasha_settings_new ();
 
-  g_assert_true (leppoisa_settings_get_cache_modrinth_api_responses (settings));
-  g_assert_cmpint (leppoisa_settings_get_cache_expiration (settings), ==,
-                   leppoisa_SETTINGS_CACHE_EXPIRATION_1_HOUR);
-  g_assert_false (leppoisa_settings_get_sandbox_enabled (settings));
-  g_assert_true (leppoisa_settings_get_sandbox_network_enabled (settings));
+  g_assert_true (nuvasha_settings_get_cache_modrinth_api_responses (settings));
+  g_assert_cmpint (nuvasha_settings_get_cache_expiration (settings), ==,
+                   nuvasha_SETTINGS_CACHE_EXPIRATION_1_HOUR);
+  g_assert_false (nuvasha_settings_get_sandbox_enabled (settings));
+  g_assert_true (nuvasha_settings_get_sandbox_network_enabled (settings));
 }
 
 static void
 test_persistence (void)
 {
-  g_autoptr (LeppoisaSettings) settings = leppoisa_settings_new ();
-  g_autoptr (LeppoisaSettings) loaded = NULL;
+  g_autoptr (NuvashaSettings) settings = nuvasha_settings_new ();
+  g_autoptr (NuvashaSettings) loaded = NULL;
   g_autofree char *config = NULL;
   g_autofree char *contents = NULL;
   g_autoptr (GError) error = NULL;
 
-  g_assert_true (leppoisa_settings_set_cache_expiration (
-    settings, leppoisa_SETTINGS_CACHE_EXPIRATION_7_DAYS, &error));
+  g_assert_true (nuvasha_settings_set_cache_expiration (
+    settings, nuvasha_SETTINGS_CACHE_EXPIRATION_7_DAYS, &error));
   g_assert_no_error (error);
-  g_assert_true (leppoisa_settings_set_cache_modrinth_api_responses (
+  g_assert_true (nuvasha_settings_set_cache_modrinth_api_responses (
     settings, FALSE, &error));
   g_assert_no_error (error);
-  g_assert_true (leppoisa_settings_set_sandbox_enabled (settings, TRUE, &error));
+  g_assert_true (nuvasha_settings_set_sandbox_enabled (settings, TRUE, &error));
   g_assert_no_error (error);
-  g_assert_true (leppoisa_settings_set_sandbox_network_enabled (settings, FALSE,
+  g_assert_true (nuvasha_settings_set_sandbox_network_enabled (settings, FALSE,
                                                             &error));
   g_assert_no_error (error);
 
-  loaded = leppoisa_settings_new ();
-  g_assert_false (leppoisa_settings_get_cache_modrinth_api_responses (loaded));
-  g_assert_cmpint (leppoisa_settings_get_cache_expiration (loaded), ==,
-                   leppoisa_SETTINGS_CACHE_EXPIRATION_7_DAYS);
-  g_assert_true (leppoisa_settings_get_sandbox_enabled (loaded));
-  g_assert_false (leppoisa_settings_get_sandbox_network_enabled (loaded));
+  loaded = nuvasha_settings_new ();
+  g_assert_false (nuvasha_settings_get_cache_modrinth_api_responses (loaded));
+  g_assert_cmpint (nuvasha_settings_get_cache_expiration (loaded), ==,
+                   nuvasha_SETTINGS_CACHE_EXPIRATION_7_DAYS);
+  g_assert_true (nuvasha_settings_get_sandbox_enabled (loaded));
+  g_assert_false (nuvasha_settings_get_sandbox_network_enabled (loaded));
 
-  config = g_build_filename (g_get_user_config_dir (), "leppoisa", "config.json",
+  config = g_build_filename (g_get_user_config_dir (), "nuvasha", "config.json",
                              NULL);
   g_assert_true (g_file_get_contents (config, &contents, NULL, &error));
   g_assert_no_error (error);
@@ -85,9 +85,9 @@ static void
 test_corrupt_settings_quarantined (void)
 {
   g_autofree char *config =
-    g_build_filename (g_get_user_config_dir (), "leppoisa", "config.json", NULL);
+    g_build_filename (g_get_user_config_dir (), "nuvasha", "config.json", NULL);
   g_autofree char *backup = g_strconcat (config, ".corrupt", NULL);
-  g_autoptr (LeppoisaSettings) settings = NULL;
+  g_autoptr (NuvashaSettings) settings = NULL;
 
   g_remove (config);
   g_remove (backup);
@@ -95,36 +95,36 @@ test_corrupt_settings_quarantined (void)
 
   g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_WARNING,
                          "*settings file*is corrupt*");
-  settings = leppoisa_settings_new ();
+  settings = nuvasha_settings_new ();
   g_test_assert_expected_messages ();
   g_assert_true (g_file_test (backup, G_FILE_TEST_IS_REGULAR));
   g_assert_false (g_file_test (config, G_FILE_TEST_EXISTS));
-  g_assert_cmpint (leppoisa_settings_get_cache_expiration (settings), ==,
-                   leppoisa_SETTINGS_CACHE_EXPIRATION_1_HOUR);
+  g_assert_cmpint (nuvasha_settings_get_cache_expiration (settings), ==,
+                   nuvasha_SETTINGS_CACHE_EXPIRATION_1_HOUR);
 }
 
 static void
 test_invalid_expiration (void)
 {
-  g_autoptr (LeppoisaSettings) settings = leppoisa_settings_new ();
+  g_autoptr (NuvashaSettings) settings = nuvasha_settings_new ();
   g_autoptr (GError) error = NULL;
-  LeppoisaSettingsCacheExpiration previous =
-    leppoisa_settings_get_cache_expiration (settings);
+  NuvashaSettingsCacheExpiration previous =
+    nuvasha_settings_get_cache_expiration (settings);
 
-  g_assert_false (leppoisa_settings_set_cache_expiration (settings, 123, &error));
-  g_assert_error (error, leppoisa_SETTINGS_ERROR, leppoisa_SETTINGS_ERROR_INVALID);
-  g_assert_cmpint (leppoisa_settings_get_cache_expiration (settings), ==, previous);
+  g_assert_false (nuvasha_settings_set_cache_expiration (settings, 123, &error));
+  g_assert_error (error, nuvasha_SETTINGS_ERROR, nuvasha_SETTINGS_ERROR_INVALID);
+  g_assert_cmpint (nuvasha_settings_get_cache_expiration (settings), ==, previous);
 }
 
 static void
 test_cache_paths (void)
 {
-  g_autofree char *api = leppoisa_cache_get_api_directory ();
-  g_autofree char *files = leppoisa_cache_get_files_directory ();
+  g_autofree char *api = nuvasha_cache_get_api_directory ();
+  g_autofree char *files = nuvasha_cache_get_files_directory ();
   g_autofree char *expected_api = g_build_filename (g_get_user_cache_dir (),
-                                                     "leppoisa", "api", NULL);
+                                                     "nuvasha", "api", NULL);
   g_autofree char *expected_files = g_build_filename (g_get_user_cache_dir (),
-                                                       "leppoisa", "files", NULL);
+                                                       "nuvasha", "files", NULL);
 
   g_assert_cmpstr (api, ==, expected_api);
   g_assert_cmpstr (files, ==, expected_files);
@@ -133,11 +133,11 @@ test_cache_paths (void)
 static void
 test_cache_cleanup (void)
 {
-  g_autofree char *api = leppoisa_cache_get_api_directory ();
-  g_autofree char *files = leppoisa_cache_get_files_directory ();
-  g_autofree char *icons = g_build_filename (g_get_user_cache_dir (), "leppoisa",
+  g_autofree char *api = nuvasha_cache_get_api_directory ();
+  g_autofree char *files = nuvasha_cache_get_files_directory ();
+  g_autofree char *icons = g_build_filename (g_get_user_cache_dir (), "nuvasha",
                                               "icons", NULL);
-  g_autofree char *packs = g_build_filename (g_get_user_cache_dir (), "leppoisa",
+  g_autofree char *packs = g_build_filename (g_get_user_cache_dir (), "nuvasha",
                                              "packs", NULL);
   g_autofree char *instance = g_build_filename (root, "instance", NULL);
   g_autofree char *installed =
@@ -161,7 +161,7 @@ test_cache_cleanup (void)
   g_assert_true (g_file_set_contents (installed, "installed", -1, NULL));
 
    CacheClearWait wait = { loop, NULL };
-   wait.operation = leppoisa_cache_clear_all_async (cache_clear_done, &wait);
+   wait.operation = nuvasha_cache_clear_all_async (cache_clear_done, &wait);
   g_main_loop_run (loop);
 
   g_assert_false (g_file_test (api, G_FILE_TEST_EXISTS));
@@ -178,7 +178,7 @@ main (int argc, char **argv)
   g_autofree char *cache_home = NULL;
 
   g_test_init (&argc, &argv, NULL);
-  root = g_dir_make_tmp ("leppoisa-settings-XXXXXX", NULL);
+  root = g_dir_make_tmp ("nuvasha-settings-XXXXXX", NULL);
   g_assert_nonnull (root);
   config_home = g_build_filename (root, "config", NULL);
   cache_home = g_build_filename (root, "cache", NULL);

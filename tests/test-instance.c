@@ -2,12 +2,12 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* Tests for the LeppoisaInstance model: loader strings, name sanitization,
+/* Tests for the NuvashaInstance model: loader strings, name sanitization,
  * validation and JSON round trip. Runs headless and touches no
  * directories. */
 
-#include "leppoisa-instance.h"
-#include "leppoisa-instance-components.h"
+#include "nuvasha-instance.h"
+#include "nuvasha-instance-components.h"
 
 #include <glib.h>
 #include <stdlib.h>
@@ -30,7 +30,7 @@ parse_json (const char *text)
 }
 
 static char *
-prop_string (LeppoisaInstance *instance, const char *property)
+prop_string (NuvashaInstance *instance, const char *property)
 {
   char *value = NULL;
 
@@ -51,9 +51,9 @@ assert_safe_name (const char *name)
 static void
 test_loader_strings (void)
 {
-  const LeppoisaLoader loaders[] = {
-    leppoisa_LOADER_VANILLA, leppoisa_LOADER_FABRIC, leppoisa_LOADER_FORGE,
-    leppoisa_LOADER_NEOFORGE, leppoisa_LOADER_QUILT
+  const NuvashaLoader loaders[] = {
+    nuvasha_LOADER_VANILLA, nuvasha_LOADER_FABRIC, nuvasha_LOADER_FORGE,
+    nuvasha_LOADER_NEOFORGE, nuvasha_LOADER_QUILT
   };
   const char *names[] = {
     "vanilla", "fabric", "forge", "neoforge", "quilt"
@@ -61,17 +61,17 @@ test_loader_strings (void)
 
   for (guint i = 0; i < G_N_ELEMENTS (loaders); i++)
     {
-      g_assert_cmpstr (leppoisa_loader_to_string (loaders[i]), ==, names[i]);
+      g_assert_cmpstr (nuvasha_loader_to_string (loaders[i]), ==, names[i]);
 
-      LeppoisaLoader parsed = leppoisa_LOADER_VANILLA;
-      g_assert_true (leppoisa_loader_from_string (names[i], &parsed));
+      NuvashaLoader parsed = nuvasha_LOADER_VANILLA;
+      g_assert_true (nuvasha_loader_from_string (names[i], &parsed));
       g_assert_cmpint (parsed, ==, loaders[i]);
     }
 
-  LeppoisaLoader unknown = leppoisa_LOADER_VANILLA;
-  g_assert_false (leppoisa_loader_from_string ("sodium", &unknown));
-  g_assert_false (leppoisa_loader_from_string (NULL, &unknown));
-  g_assert_null (leppoisa_loader_to_string ((LeppoisaLoader) 99));
+  NuvashaLoader unknown = nuvasha_LOADER_VANILLA;
+  g_assert_false (nuvasha_loader_from_string ("sodium", &unknown));
+  g_assert_false (nuvasha_loader_from_string (NULL, &unknown));
+  g_assert_null (nuvasha_loader_to_string ((NuvashaLoader) 99));
 
   g_print ("ok - loader strings\n");
 }
@@ -79,46 +79,46 @@ test_loader_strings (void)
 static void
 test_sanitize_name (void)
 {
-  g_autofree char *plain = leppoisa_instance_sanitize_name ("Hello World");
+  g_autofree char *plain = nuvasha_instance_sanitize_name ("Hello World");
   g_assert_cmpstr (plain, ==, "Hello World");
 
-  g_autofree char *slash = leppoisa_instance_sanitize_name ("a/b");
+  g_autofree char *slash = nuvasha_instance_sanitize_name ("a/b");
   g_assert_cmpstr (slash, ==, "a-b");
 
-  g_autofree char *dot_dot = leppoisa_instance_sanitize_name ("..");
+  g_autofree char *dot_dot = nuvasha_instance_sanitize_name ("..");
   g_assert_cmpstr (dot_dot, ==, "instance");
 
-  g_autofree char *dots = leppoisa_instance_sanitize_name ("...");
+  g_autofree char *dots = nuvasha_instance_sanitize_name ("...");
   g_assert_cmpstr (dots, ==, "instance");
 
-  g_autofree char *empty = leppoisa_instance_sanitize_name ("");
+  g_autofree char *empty = nuvasha_instance_sanitize_name ("");
   g_assert_cmpstr (empty, ==, "instance");
 
-  g_autofree char *null_name = leppoisa_instance_sanitize_name (NULL);
+  g_autofree char *null_name = nuvasha_instance_sanitize_name (NULL);
   g_assert_cmpstr (null_name, ==, "instance");
 
-  g_autofree char *blanks = leppoisa_instance_sanitize_name ("   ");
+  g_autofree char *blanks = nuvasha_instance_sanitize_name ("   ");
   g_assert_cmpstr (blanks, ==, "instance");
 
-  g_autofree char *hidden = leppoisa_instance_sanitize_name (".hidden");
+  g_autofree char *hidden = nuvasha_instance_sanitize_name (".hidden");
   g_assert_cmpstr (hidden, ==, "hidden");
 
-  g_autofree char *inner = leppoisa_instance_sanitize_name ("a..b");
+  g_autofree char *inner = nuvasha_instance_sanitize_name ("a..b");
   g_assert_cmpstr (inner, ==, "a.b");
 
-  g_autofree char *padded = leppoisa_instance_sanitize_name ("  padded  ");
+  g_autofree char *padded = nuvasha_instance_sanitize_name ("  padded  ");
   g_assert_cmpstr (padded, ==, "padded");
 
   g_autofree char *escape =
-    leppoisa_instance_sanitize_name ("../../../etc/passwd");
+    nuvasha_instance_sanitize_name ("../../../etc/passwd");
   assert_safe_name (escape);
 
   g_autofree char *utf8 =
-    leppoisa_instance_sanitize_name ("Caf\xc3\xa9" "/Montr\xc3\xa9" "al");
+    nuvasha_instance_sanitize_name ("Caf\xc3\xa9" "/Montr\xc3\xa9" "al");
   g_assert_cmpstr (utf8, ==, "Caf\xc3\xa9" "-Montr\xc3\xa9" "al");
 
   g_autofree char *long_name = g_strnfill (100, 'a');
-  g_autofree char *capped = leppoisa_instance_sanitize_name (long_name);
+  g_autofree char *capped = nuvasha_instance_sanitize_name (long_name);
   assert_safe_name (capped);
   g_assert_cmpuint (strlen (capped), <=, 64);
 
@@ -129,13 +129,13 @@ static void
 test_normalize_name (void)
 {
   g_autofree char *trimmed =
-    leppoisa_instance_normalize_name (" \tCafe\xCC\x81  ");
-  g_autofree char *composed = leppoisa_instance_normalize_name ("Caf\xC3\xA9");
+    nuvasha_instance_normalize_name (" \tCafe\xCC\x81  ");
+  g_autofree char *composed = nuvasha_instance_normalize_name ("Caf\xC3\xA9");
   g_autofree char *stored = NULL;
   g_autoptr (GError) error = NULL;
-  g_autoptr (LeppoisaInstance) instance =
-    leppoisa_instance_new (NULL, " \tCafe\xCC\x81  ", "/tmp/normalized-instance",
-                      "1.21.1", leppoisa_LOADER_VANILLA, &error);
+  g_autoptr (NuvashaInstance) instance =
+    nuvasha_instance_new (NULL, " \tCafe\xCC\x81  ", "/tmp/normalized-instance",
+                      "1.21.1", nuvasha_LOADER_VANILLA, &error);
 
   g_assert_cmpstr (trimmed, ==, "Caf\xC3\xA9");
   g_assert_cmpstr (composed, ==, "Caf\xC3\xA9");
@@ -150,21 +150,21 @@ static void
 test_jvm_args_survive_null (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (LeppoisaInstance) instance =
-    leppoisa_instance_new (NULL, "Test", "/tmp/leppoisa-jvm-args-test", "1.21.1",
-                      leppoisa_LOADER_VANILLA, &error);
+  g_autoptr (NuvashaInstance) instance =
+    nuvasha_instance_new (NULL, "Test", "/tmp/nuvasha-jvm-args-test", "1.21.1",
+                      nuvasha_LOADER_VANILLA, &error);
   g_autofree char *stored = NULL;
   g_autofree char *round_tripped = NULL;
   g_autoptr (JsonNode) node = NULL;
-  g_autoptr (LeppoisaInstance) reloaded = NULL;
+  g_autoptr (NuvashaInstance) reloaded = NULL;
 
   g_assert_no_error (error);
 
   /* Clearing the field is the one write the model does not refuse:
-     leppoisa_instance_validate treats a null and an empty string alike, and
+     nuvasha_instance_validate treats a null and an empty string alike, and
      the UI passes an empty string for a cleared row. */
-  g_assert_true (leppoisa_instance_set_string (instance, "jvm-args", NULL, NULL));
-  g_assert_true (leppoisa_instance_validate (instance, NULL));
+  g_assert_true (nuvasha_instance_set_string (instance, "jvm-args", NULL, NULL));
+  g_assert_true (nuvasha_instance_validate (instance, NULL));
 
   /* What must not happen is the field holding a null, because the file
      would then carry "jvm_args": null and the parser refuses it. */
@@ -172,10 +172,10 @@ test_jvm_args_survive_null (void)
   g_assert_cmpstr (stored, ==, "");
 
   /* The whole point: an instance written after this still reads back. */
-  node = leppoisa_instance_to_json (instance);
+  node = nuvasha_instance_to_json (instance);
   g_assert_nonnull (node);
 
-  reloaded = leppoisa_instance_new_from_json (node, &error);
+  reloaded = nuvasha_instance_new_from_json (node, &error);
   g_assert_no_error (error);
   g_assert_nonnull (reloaded);
 
@@ -189,14 +189,14 @@ static void
 test_new_defaults (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (LeppoisaInstance) instance =
-    leppoisa_instance_new (NULL, "Test", "/tmp/leppoisa-instance-test", "1.21.1",
-                      leppoisa_LOADER_VANILLA, &error);
+  g_autoptr (NuvashaInstance) instance =
+    nuvasha_instance_new (NULL, "Test", "/tmp/nuvasha-instance-test", "1.21.1",
+                      nuvasha_LOADER_VANILLA, &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
-  const char *id = leppoisa_instance_get_id (instance);
+  const char *id = nuvasha_instance_get_id (instance);
   g_assert_nonnull (id);
   g_assert_true (g_uuid_string_is_valid (id));
 
@@ -210,7 +210,7 @@ test_new_defaults (void)
   g_assert_null (java_path);
   g_assert_null (icon);
 
-  g_assert_true (leppoisa_instance_validate (instance, &error));
+  g_assert_true (nuvasha_instance_validate (instance, &error));
   g_assert_no_error (error);
 
   g_print ("ok - instance defaults\n");
@@ -222,63 +222,63 @@ test_new_rejects_bad_values (void)
   g_autoptr (GError) error = NULL;
 
   /* A relative directory is not usable as an instance directory. */
-  g_autoptr (LeppoisaInstance) relative =
-    leppoisa_instance_new (NULL, "Test", "relative/path", "1.21.1",
-                      leppoisa_LOADER_VANILLA, &error);
+  g_autoptr (NuvashaInstance) relative =
+    nuvasha_instance_new (NULL, "Test", "relative/path", "1.21.1",
+                      nuvasha_LOADER_VANILLA, &error);
   g_assert_null (relative);
-  g_assert_error (error, leppoisa_INSTANCE_ERROR, leppoisa_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, nuvasha_INSTANCE_ERROR, nuvasha_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
-  g_autoptr (LeppoisaInstance) no_directory =
-    leppoisa_instance_new (NULL, "Test", NULL, "1.21.1",
-                      leppoisa_LOADER_VANILLA, &error);
+  g_autoptr (NuvashaInstance) no_directory =
+    nuvasha_instance_new (NULL, "Test", NULL, "1.21.1",
+                      nuvasha_LOADER_VANILLA, &error);
   g_assert_null (no_directory);
-  g_assert_error (error, leppoisa_INSTANCE_ERROR, leppoisa_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, nuvasha_INSTANCE_ERROR, nuvasha_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
   /* An empty name must never become an instance. */
-  g_autoptr (LeppoisaInstance) blank_name =
-    leppoisa_instance_new (NULL, "", "/tmp/leppoisa-instance-test", "1.21.1",
-                      leppoisa_LOADER_VANILLA, &error);
+  g_autoptr (NuvashaInstance) blank_name =
+    nuvasha_instance_new (NULL, "", "/tmp/nuvasha-instance-test", "1.21.1",
+                      nuvasha_LOADER_VANILLA, &error);
   g_assert_null (blank_name);
-  g_assert_error (error, leppoisa_INSTANCE_ERROR, leppoisa_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, nuvasha_INSTANCE_ERROR, nuvasha_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
-  g_autoptr (LeppoisaInstance) spaces_name =
-    leppoisa_instance_new (NULL, "   ", "/tmp/leppoisa-instance-test", "1.21.1",
-                      leppoisa_LOADER_VANILLA, &error);
+  g_autoptr (NuvashaInstance) spaces_name =
+    nuvasha_instance_new (NULL, "   ", "/tmp/nuvasha-instance-test", "1.21.1",
+                      nuvasha_LOADER_VANILLA, &error);
   g_assert_null (spaces_name);
-  g_assert_error (error, leppoisa_INSTANCE_ERROR, leppoisa_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, nuvasha_INSTANCE_ERROR, nuvasha_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
-  g_autoptr (LeppoisaInstance) no_version =
-    leppoisa_instance_new (NULL, "Test", "/tmp/leppoisa-instance-test", "",
-                      leppoisa_LOADER_VANILLA, &error);
+  g_autoptr (NuvashaInstance) no_version =
+    nuvasha_instance_new (NULL, "Test", "/tmp/nuvasha-instance-test", "",
+                      nuvasha_LOADER_VANILLA, &error);
   g_assert_null (no_version);
-  g_assert_error (error, leppoisa_INSTANCE_ERROR, leppoisa_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, nuvasha_INSTANCE_ERROR, nuvasha_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
   /* An unknown loader value is refused before it reaches the property. */
-  g_autoptr (LeppoisaInstance) bad_loader =
-    leppoisa_instance_new (NULL, "Test", "/tmp/leppoisa-instance-test", "1.21.1",
-                      (LeppoisaLoader) 99, &error);
+  g_autoptr (NuvashaInstance) bad_loader =
+    nuvasha_instance_new (NULL, "Test", "/tmp/nuvasha-instance-test", "1.21.1",
+                      (NuvashaLoader) 99, &error);
   g_assert_null (bad_loader);
-  g_assert_error (error, leppoisa_INSTANCE_ERROR, leppoisa_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, nuvasha_INSTANCE_ERROR, nuvasha_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
-  g_autoptr (LeppoisaInstance) bad_id =
-    leppoisa_instance_new ("not-a-uuid", "Test", "/tmp/leppoisa-instance-test",
-                      "1.21.1", leppoisa_LOADER_VANILLA, &error);
+  g_autoptr (NuvashaInstance) bad_id =
+    nuvasha_instance_new ("not-a-uuid", "Test", "/tmp/nuvasha-instance-test",
+                      "1.21.1", nuvasha_LOADER_VANILLA, &error);
   g_assert_null (bad_id);
-  g_assert_error (error, leppoisa_INSTANCE_ERROR, leppoisa_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, nuvasha_INSTANCE_ERROR, nuvasha_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
   /* The root directory is never an instance directory. */
-  g_autoptr (LeppoisaInstance) root =
-    leppoisa_instance_new (NULL, "Test", "/", "1.21.1",
-                      leppoisa_LOADER_VANILLA, &error);
+  g_autoptr (NuvashaInstance) root =
+    nuvasha_instance_new (NULL, "Test", "/", "1.21.1",
+                      nuvasha_LOADER_VANILLA, &error);
   g_assert_null (root);
-  g_assert_error (error, leppoisa_INSTANCE_ERROR, leppoisa_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, nuvasha_INSTANCE_ERROR, nuvasha_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
   g_print ("ok - invalid instance values are rejected\n");
@@ -288,46 +288,46 @@ static void
 test_validate (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (LeppoisaInstance) instance =
-    leppoisa_instance_new (NULL, "Valid", "/tmp/leppoisa-instance-test", "1.21.1",
-                      leppoisa_LOADER_NEOFORGE, &error);
+  g_autoptr (NuvashaInstance) instance =
+    nuvasha_instance_new (NULL, "Valid", "/tmp/nuvasha-instance-test", "1.21.1",
+                      nuvasha_LOADER_NEOFORGE, &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (instance);
-  g_assert_true (leppoisa_instance_validate (instance, &error));
+  g_assert_true (nuvasha_instance_validate (instance, &error));
   g_assert_no_error (error);
 
   /* An empty name breaks validation. */
   g_object_set (instance, "name", "", NULL);
-  g_assert_false (leppoisa_instance_validate (instance, &error));
-  g_assert_error (error, leppoisa_INSTANCE_ERROR, leppoisa_INSTANCE_ERROR_INVALID);
+  g_assert_false (nuvasha_instance_validate (instance, &error));
+  g_assert_error (error, nuvasha_INSTANCE_ERROR, nuvasha_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
   g_object_set (instance, "name", "Valid", NULL);
 
   /* JVM arguments are the one text field that may be empty: that is what
      an instance the user never wrote any for has. */
   g_object_set (instance, "jvm-args", "", NULL);
-  g_assert_true (leppoisa_instance_validate (instance, &error));
+  g_assert_true (nuvasha_instance_validate (instance, &error));
   g_assert_no_error (error);
   g_object_set (instance, "jvm-args", "-Xmx2G", NULL);
 
   /* A directory with ".." inside is not canonical. */
-  g_autoptr (LeppoisaInstance) escaping =
-    g_object_new (leppoisa_TYPE_INSTANCE,
+  g_autoptr (NuvashaInstance) escaping =
+    g_object_new (nuvasha_TYPE_INSTANCE,
                   "id", TEST_UUID,
                   "name", "Escaping",
-                  "directory", "/tmp/leppoisa-instance-test/../elsewhere",
+                  "directory", "/tmp/nuvasha-instance-test/../elsewhere",
                   "minecraft-version", "1.21.1",
-                  "loader", leppoisa_LOADER_VANILLA,
+                  "loader", nuvasha_LOADER_VANILLA,
                   NULL);
-  g_assert_false (leppoisa_instance_validate (escaping, &error));
-  g_assert_error (error, leppoisa_INSTANCE_ERROR, leppoisa_INSTANCE_ERROR_INVALID);
+  g_assert_false (nuvasha_instance_validate (escaping, &error));
+  g_assert_error (error, nuvasha_INSTANCE_ERROR, nuvasha_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
   /* An object built without any field reports the missing id. */
-  g_autoptr (LeppoisaInstance) empty = g_object_new (leppoisa_TYPE_INSTANCE, NULL);
-  g_assert_false (leppoisa_instance_validate (empty, &error));
-  g_assert_error (error, leppoisa_INSTANCE_ERROR, leppoisa_INSTANCE_ERROR_MISSING_FIELD);
+  g_autoptr (NuvashaInstance) empty = g_object_new (nuvasha_TYPE_INSTANCE, NULL);
+  g_assert_false (nuvasha_instance_validate (empty, &error));
+  g_assert_error (error, nuvasha_INSTANCE_ERROR, nuvasha_INSTANCE_ERROR_MISSING_FIELD);
   g_clear_error (&error);
 
   /* Empty means "not set" for the nullable fields. */
@@ -343,9 +343,9 @@ static void
 test_json_round_trip (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (LeppoisaInstance) original =
-    leppoisa_instance_new (NULL, "Fabric Pack", "/tmp/leppoisa-instance-fabric",
-                      "1.21.1", leppoisa_LOADER_FABRIC, &error);
+  g_autoptr (NuvashaInstance) original =
+    nuvasha_instance_new (NULL, "Fabric Pack", "/tmp/nuvasha-instance-fabric",
+                      "1.21.1", nuvasha_LOADER_FABRIC, &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (original);
@@ -357,18 +357,18 @@ test_json_round_trip (void)
                 "jvm-args", "-Xmx4G -Xms1G",
                 NULL);
 
-  JsonNode *node = leppoisa_instance_to_json (original);
+  JsonNode *node = nuvasha_instance_to_json (original);
   g_assert_nonnull (node);
 
-  g_autoptr (LeppoisaInstance) copy =
-    leppoisa_instance_new_from_json (node, &error);
+  g_autoptr (NuvashaInstance) copy =
+    nuvasha_instance_new_from_json (node, &error);
   json_node_unref (node);
 
   g_assert_no_error (error);
   g_assert_nonnull (copy);
 
-  g_assert_cmpstr (leppoisa_instance_get_id (copy), ==,
-                   leppoisa_instance_get_id (original));
+  g_assert_cmpstr (nuvasha_instance_get_id (copy), ==,
+                   nuvasha_instance_get_id (original));
 
   const char *fields[] = {
     "name", "directory", "minecraft-version", "loader-version", "icon",
@@ -382,9 +382,9 @@ test_json_round_trip (void)
       g_assert_cmpstr (actual, ==, expected);
     }
 
-  LeppoisaLoader loader = leppoisa_LOADER_VANILLA;
+  NuvashaLoader loader = nuvasha_LOADER_VANILLA;
   g_object_get (copy, "loader", &loader, NULL);
-  g_assert_cmpint (loader, ==, leppoisa_LOADER_FABRIC);
+  g_assert_cmpint (loader, ==, nuvasha_LOADER_FABRIC);
 
   g_print ("ok - json round trip\n");
 }
@@ -398,7 +398,7 @@ build_instance_json (const char *skip_member)
     "loader_version"
   };
   static const char *values[] = {
-    TEST_UUID, "Test", "/tmp/leppoisa-instance-test", "1.21.1", "fabric",
+    TEST_UUID, "Test", "/tmp/nuvasha-instance-test", "1.21.1", "fabric",
     "0.16.9"
   };
 
@@ -432,14 +432,14 @@ test_missing_fields (void)
       g_autoptr (GError) error = NULL;
       JsonNode *node = build_instance_json (required[i]);
 
-      g_autoptr (LeppoisaInstance) instance =
-        leppoisa_instance_new_from_json (node, &error);
+      g_autoptr (NuvashaInstance) instance =
+        nuvasha_instance_new_from_json (node, &error);
 
       json_node_unref (node);
 
       g_assert_null (instance);
-      g_assert_error (error, leppoisa_INSTANCE_ERROR,
-                      leppoisa_INSTANCE_ERROR_MISSING_FIELD);
+      g_assert_error (error, nuvasha_INSTANCE_ERROR,
+                      nuvasha_INSTANCE_ERROR_MISSING_FIELD);
     }
 
   g_print ("ok - missing fields fail cleanly\n");
@@ -453,19 +453,19 @@ test_malformed_json (void)
   /* Not a JSON object at all. */
   {
     g_autoptr (JsonParser) parser = parse_json ("42");
-    g_autoptr (LeppoisaInstance) instance =
-      leppoisa_instance_new_from_json (json_parser_get_root (parser), &error);
+    g_autoptr (NuvashaInstance) instance =
+      nuvasha_instance_new_from_json (json_parser_get_root (parser), &error);
     g_assert_null (instance);
-    g_assert_error (error, leppoisa_INSTANCE_ERROR, leppoisa_INSTANCE_ERROR_INVALID);
+    g_assert_error (error, nuvasha_INSTANCE_ERROR, nuvasha_INSTANCE_ERROR_INVALID);
     g_clear_error (&error);
   }
 
   {
     g_autoptr (JsonParser) parser = parse_json ("[1, 2]");
-    g_autoptr (LeppoisaInstance) instance =
-      leppoisa_instance_new_from_json (json_parser_get_root (parser), &error);
+    g_autoptr (NuvashaInstance) instance =
+      nuvasha_instance_new_from_json (json_parser_get_root (parser), &error);
     g_assert_null (instance);
-    g_assert_error (error, leppoisa_INSTANCE_ERROR, leppoisa_INSTANCE_ERROR_INVALID);
+    g_assert_error (error, nuvasha_INSTANCE_ERROR, nuvasha_INSTANCE_ERROR_INVALID);
     g_clear_error (&error);
   }
 
@@ -473,29 +473,29 @@ test_malformed_json (void)
   {
     g_autofree char *text =
       g_strdup_printf ("{\"id\": 42, \"name\": \"Test\", "
-                       "\"directory\": \"/tmp/leppoisa-instance-test\", "
+                       "\"directory\": \"/tmp/nuvasha-instance-test\", "
                        "\"minecraft_version\": \"1.21.1\", "
                        "\"loader\": \"vanilla\"}");
     g_autoptr (JsonParser) parser = parse_json (text);
-    g_autoptr (LeppoisaInstance) instance =
-      leppoisa_instance_new_from_json (json_parser_get_root (parser), &error);
+    g_autoptr (NuvashaInstance) instance =
+      nuvasha_instance_new_from_json (json_parser_get_root (parser), &error);
     g_assert_null (instance);
-    g_assert_error (error, leppoisa_INSTANCE_ERROR, leppoisa_INSTANCE_ERROR_INVALID);
+    g_assert_error (error, nuvasha_INSTANCE_ERROR, nuvasha_INSTANCE_ERROR_INVALID);
     g_clear_error (&error);
   }
 
   {
     g_autofree char *text =
       g_strdup_printf ("{\"id\": \"%s\", \"name\": \"Test\", "
-                       "\"directory\": \"/tmp/leppoisa-instance-test\", "
+                       "\"directory\": \"/tmp/nuvasha-instance-test\", "
                        "\"minecraft_version\": \"1.21.1\", "
                        "\"loader\": 7}",
                        TEST_UUID);
     g_autoptr (JsonParser) parser = parse_json (text);
-    g_autoptr (LeppoisaInstance) instance =
-      leppoisa_instance_new_from_json (json_parser_get_root (parser), &error);
+    g_autoptr (NuvashaInstance) instance =
+      nuvasha_instance_new_from_json (json_parser_get_root (parser), &error);
     g_assert_null (instance);
-    g_assert_error (error, leppoisa_INSTANCE_ERROR, leppoisa_INSTANCE_ERROR_INVALID);
+    g_assert_error (error, nuvasha_INSTANCE_ERROR, nuvasha_INSTANCE_ERROR_INVALID);
     g_clear_error (&error);
   }
 
@@ -503,15 +503,15 @@ test_malformed_json (void)
   {
     g_autofree char *text =
       g_strdup_printf ("{\"id\": \"%s\", \"name\": \"Test\", "
-                       "\"directory\": \"/tmp/leppoisa-instance-test\", "
+                       "\"directory\": \"/tmp/nuvasha-instance-test\", "
                        "\"minecraft_version\": \"1.21.1\", "
                        "\"loader\": \"sodium\"}",
                        TEST_UUID);
     g_autoptr (JsonParser) parser = parse_json (text);
-    g_autoptr (LeppoisaInstance) instance =
-      leppoisa_instance_new_from_json (json_parser_get_root (parser), &error);
+    g_autoptr (NuvashaInstance) instance =
+      nuvasha_instance_new_from_json (json_parser_get_root (parser), &error);
     g_assert_null (instance);
-    g_assert_error (error, leppoisa_INSTANCE_ERROR, leppoisa_INSTANCE_ERROR_INVALID);
+    g_assert_error (error, nuvasha_INSTANCE_ERROR, nuvasha_INSTANCE_ERROR_INVALID);
     g_clear_error (&error);
   }
 
@@ -520,13 +520,13 @@ test_malformed_json (void)
   {
     g_autofree char *text =
       g_strdup_printf ("{\"id\": \"%s\", \"name\": \"Test\", "
-                       "\"directory\": \"/tmp/leppoisa-instance-test\", "
+                       "\"directory\": \"/tmp/nuvasha-instance-test\", "
                        "\"minecraft_version\": \"1.21.1\", "
                        "\"loader\": \"vanilla\", \"jvm_args\": \"\"}",
                        TEST_UUID);
     g_autoptr (JsonParser) parser = parse_json (text);
-    g_autoptr (LeppoisaInstance) instance =
-      leppoisa_instance_new_from_json (json_parser_get_root (parser), &error);
+    g_autoptr (NuvashaInstance) instance =
+      nuvasha_instance_new_from_json (json_parser_get_root (parser), &error);
     g_autofree char *jvm_args = NULL;
 
     g_assert_no_error (error);
@@ -539,16 +539,16 @@ test_malformed_json (void)
   {
     g_autofree char *text =
       g_strdup_printf ("{\"id\": \"%s\", \"name\": \"Test\", "
-                       "\"directory\": \"/tmp/leppoisa-instance-test\", "
+                       "\"directory\": \"/tmp/nuvasha-instance-test\", "
                        "\"minecraft_version\": \"1.21.1\", "
                        "\"loader\": \"vanilla\", \"jvm_args\": null}",
                        TEST_UUID);
     g_autoptr (JsonParser) parser = parse_json (text);
-    g_autoptr (LeppoisaInstance) instance =
-      leppoisa_instance_new_from_json (json_parser_get_root (parser), &error);
+    g_autoptr (NuvashaInstance) instance =
+      nuvasha_instance_new_from_json (json_parser_get_root (parser), &error);
 
     g_assert_null (instance);
-    g_assert_error (error, leppoisa_INSTANCE_ERROR, leppoisa_INSTANCE_ERROR_INVALID);
+    g_assert_error (error, nuvasha_INSTANCE_ERROR, nuvasha_INSTANCE_ERROR_INVALID);
     g_clear_error (&error);
   }
 
@@ -564,13 +564,13 @@ test_optional_fields (void)
    * is none. */
   g_autofree char *text =
     g_strdup_printf ("{\"id\": \"%s\", \"name\": \"Minimal\", "
-                     "\"directory\": \"/tmp/leppoisa-instance-minimal\", "
+                     "\"directory\": \"/tmp/nuvasha-instance-minimal\", "
                      "\"minecraft_version\": \"1.21.1\", "
                      "\"loader\": \"vanilla\"}",
                      TEST_UUID);
   g_autoptr (JsonParser) parser = parse_json (text);
-  g_autoptr (LeppoisaInstance) instance =
-    leppoisa_instance_new_from_json (json_parser_get_root (parser), &error);
+  g_autoptr (NuvashaInstance) instance =
+    nuvasha_instance_new_from_json (json_parser_get_root (parser), &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (instance);
@@ -590,27 +590,27 @@ static void
 test_components (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (LeppoisaInstance) instance =
-    leppoisa_instance_new (TEST_UUID, "Components", "/tmp/components-instance",
-                      "1.20.1", leppoisa_LOADER_FABRIC, &error);
+  g_autoptr (NuvashaInstance) instance =
+    nuvasha_instance_new (TEST_UUID, "Components", "/tmp/components-instance",
+                      "1.20.1", nuvasha_LOADER_FABRIC, &error);
   g_autofree char *minecraft = NULL;
   g_autofree char *loader = NULL;
 
   g_assert_no_error (error);
-  g_assert_true (g_str_equal (leppoisa_instance_component_id_for_loader (
-                                leppoisa_LOADER_FABRIC), leppoisa_COMPONENT_FABRIC));
+  g_assert_true (g_str_equal (nuvasha_instance_component_id_for_loader (
+                                nuvasha_LOADER_FABRIC), nuvasha_COMPONENT_FABRIC));
 
-  minecraft = leppoisa_instance_component_get_version (instance,
-                                                   leppoisa_COMPONENT_MINECRAFT);
-  loader = leppoisa_instance_component_get_version (instance, leppoisa_COMPONENT_FABRIC);
+  minecraft = nuvasha_instance_component_get_version (instance,
+                                                   nuvasha_COMPONENT_MINECRAFT);
+  loader = nuvasha_instance_component_get_version (instance, nuvasha_COMPONENT_FABRIC);
   g_assert_cmpstr (minecraft, ==, "1.20.1");
   g_assert_null (loader);
 
-  g_assert_true (leppoisa_instance_component_set_version (
-    instance, leppoisa_COMPONENT_FABRIC, "0.15.11", &error));
+  g_assert_true (nuvasha_instance_component_set_version (
+    instance, nuvasha_COMPONENT_FABRIC, "0.15.11", &error));
   g_assert_no_error (error);
   g_clear_pointer (&loader, g_free);
-  loader = leppoisa_instance_component_get_version (instance, leppoisa_COMPONENT_FABRIC);
+  loader = nuvasha_instance_component_get_version (instance, nuvasha_COMPONENT_FABRIC);
   g_assert_cmpstr (loader, ==, "0.15.11");
 
   g_print ("ok - component versions use stable component ids\n");
