@@ -1,10 +1,7 @@
 # Nuvasha Launcher
 
-Nuvasha Launcher is a Linux launcher for Minecraft. It manages separate
-instances, installs content from Modrinth, and starts the game with the
-selected Java runtime.
-
-It uses GTK4 and libadwaita and works with both Wayland and X11.
+Nuvasha Launcher is a simple Minecraft launcher that aims to make instance
+management easy without leaving out the features that matter.
 
 ## Features
 
@@ -17,15 +14,21 @@ It uses GTK4 and libadwaita and works with both Wayland and X11.
 - Logs for running games.
 - Optional bubblewrap sandboxing.
 
-## Requirements
+## Dependencies
 
-- Linux
+- C compiler
+- Make
+- pkg-config
+- gettext
+- GLib
 - GTK 4.10 or newer
 - libadwaita 1.5 or newer
-- A C compiler, Make, pkg-config, gettext, and the development packages for
-  GLib, GTK, libadwaita, libepoxy, json-glib, libsoup, and libarchive
+- libepoxy
+- json-glib
+- libsoup
+- libarchive
 
-On Debian, install the dependencies with:
+Debian:
 
 ```sh
 sudo apt install build-essential pkg-config gettext \
@@ -88,33 +91,6 @@ To uninstall it:
 ```sh
 sudo make uninstall PREFIX=/usr/local
 ```
-
-## Development
-
-Run the test suite with:
-
-```sh
-make test
-```
-
-Other useful targets are `make debug`, `make test-debug`,
-`make test-lsan`, `make static-analysis`, and `make clean`.
-
-## Files
-
-Nuvasha stores its data in:
-
-- `~/.local/share/nuvasha`
-- `~/.cache/nuvasha`
-- `~/.config/nuvasha`
-
-Account tokens are stored in the accounts file with owner-only permissions.
-They are not encrypted.
-
-## Translations
-
-Translations are stored in `po/`. To update a translation, edit its catalog
-and run `make`.
 
 ## License
 
