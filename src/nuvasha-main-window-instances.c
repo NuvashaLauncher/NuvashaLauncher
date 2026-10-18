@@ -454,8 +454,8 @@ update_visible_page (NuvashaMainWindow *self)
   GListStore *instances = nuvasha_instance_manager_get_instances (self->model->manager);
   guint n_items = g_list_model_get_n_items (G_LIST_MODEL (instances));
 
-  gtk_stack_set_visible_child_name (GTK_STACK (self->ui.stack),
-                                    n_items > 0 ? "instances" : "empty");
+  adw_view_stack_set_visible_child_name (self->ui.stack,
+                                         n_items > 0 ? "instances" : "empty");
 }
 
 /* An instance that is gone leaves its launcher behind: a game running

@@ -21,7 +21,7 @@ struct _NuvashaMainWindow
 
   /* Core window UI state. */
   struct {
-    GtkStack *stack;    /* empty state or instance list */
+    AdwViewStack *stack; /* empty state or instance list */
     AdwBanner *banner;  /* launch failures and crash details */
   } ui;
 
