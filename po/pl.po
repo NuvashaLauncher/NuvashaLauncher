@@ -240,8 +240,8 @@ msgstr "Limit wierszy"
 msgid "Open Log Folder After Crash"
 msgstr "Otwórz folder dziennika po awarii"
 
-msgid "About Comfy Launcher"
-msgstr "O Comfy Launcher"
+msgid "About Leppoisa Launcher"
+msgstr "O Leppoisa Launcher"
 
 msgid "Keyboard Shortcuts"
 msgstr "Skróty klawiaturowe"
@@ -367,8 +367,8 @@ msgstr "1 dzień"
 msgid "7 days"
 msgstr "7 dni"
 
-msgid "Clear comfy Cache"
-msgstr "Wyczyść pamięć podręczną comfy"
+msgid "Clear leppoisa Cache"
+msgstr "Wyczyść pamięć podręczną leppoisa"
 
 msgid "Show Shortcuts"
 msgstr "Pokaż skróty"
@@ -376,8 +376,8 @@ msgstr "Pokaż skróty"
 msgid "Quit"
 msgstr "Wyjdź"
 
-msgid "Clear comfy Cache?"
-msgstr "Wyczyścić pamięć podręczną comfy?"
+msgid "Clear leppoisa Cache?"
+msgstr "Wyczyścić pamięć podręczną leppoisa?"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -557,8 +557,8 @@ msgstr "%s pobrań"
 msgid "Cache Cleared"
 msgstr "Wyczyszczono pamięć podręczną"
 
-msgid "comfy cache data was cleared successfully."
-msgstr "Dane pamięci podręcznej comfy zostały pomyślnie usunięte."
+msgid "leppoisa cache data was cleared successfully."
+msgstr "Dane pamięci podręcznej leppoisa zostały pomyślnie usunięte."
 
 msgid "Cache Cleanup Failed"
 msgstr "Nie udało się wyczyścić pamięci podręcznej"

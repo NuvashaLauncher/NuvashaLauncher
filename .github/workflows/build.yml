@@ -1,0 +1,40 @@
+name: Build and test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  linux:
+    name: Linux ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    container: debian:testing
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-24.04
+          - arch: ARM64
+            runner: ubuntu-24.04-arm
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y \
+            build-essential pkg-config gettext \
+            libglib2.0-dev libgtk-4-dev libadwaita-1-dev \
+            libepoxy-dev libjson-glib-dev libsoup-3.0-dev libarchive-dev
+
+      - name: Build
+        run: make fast
+
+      - name: Run tests
+        run: make test
+
+      - name: Run static analysis
+        run: make static-analysis

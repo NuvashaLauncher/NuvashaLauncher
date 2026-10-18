@@ -2,9 +2,9 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* Tests for comfy-modrinth.
+/* Tests for leppoisa-modrinth.
  *
- * What comfy has to get right when it reads Modrinth is not the network
+ * What leppoisa has to get right when it reads Modrinth is not the network
  * but the two things around it: the facets that narrow a search to the
  * instance it is for, and the rule that keeps an incompatible version
  * out of every list. Both are decided from data here, so nothing in
@@ -15,19 +15,19 @@
  * version and one for another loader) are shaped after real ones, and
  * the fixture that carries all four dependency kinds says so inside. */
 
-#include "comfy-content-page.h"
-#include "comfy-modrinth.h"
+#include "leppoisa-content-page.h"
+#include "leppoisa-modrinth.h"
 
 #include <glib.h>
 
-#ifndef comfy_TEST_FIXTURES
-#define comfy_TEST_FIXTURES "tests/fixtures"
+#ifndef leppoisa_TEST_FIXTURES
+#define leppoisa_TEST_FIXTURES "tests/fixtures"
 #endif
 
 static char *
 read_fixture (const char *name)
 {
-  g_autofree char *path = g_build_filename (comfy_TEST_FIXTURES, name, NULL);
+  g_autofree char *path = g_build_filename (leppoisa_TEST_FIXTURES, name, NULL);
   g_autofree char *json = NULL;
   g_autoptr (GError) error = NULL;
 
@@ -38,11 +38,11 @@ read_fixture (const char *name)
 }
 
 /* A search for @version and @loader, with the strings it owns. */
-static ComfyModrinthSearch *
-search_new (ComfyContentType type, const char *query, const char *version,
+static LeppoisaModrinthSearch *
+search_new (LeppoisaContentType type, const char *query, const char *version,
             const char *loader)
 {
-  ComfyModrinthSearch *search = g_new0 (ComfyModrinthSearch, 1);
+  LeppoisaModrinthSearch *search = g_new0 (LeppoisaModrinthSearch, 1);
 
   search->type = type;
   search->query = g_strdup (query != NULL ? query : "");
@@ -59,11 +59,11 @@ search_new (ComfyContentType type, const char *query, const char *version,
 static void
 test_facets_of_a_mod_search (void)
 {
-  g_autoptr (ComfyModrinthSearch) search =
-    search_new (comfy_CONTENT_MOD, "", "1.20.1", "fabric");
+  g_autoptr (LeppoisaModrinthSearch) search =
+    search_new (leppoisa_CONTENT_MOD, "", "1.20.1", "fabric");
   g_autofree char *facets = NULL;
 
-  facets = comfy_modrinth_facets (search);
+  facets = leppoisa_modrinth_facets (search);
 
   /* The project type, the Minecraft version and the loader, each one on
    * its own: that is what makes an answer compatible with the instance
@@ -80,9 +80,9 @@ test_facets_of_a_mod_search (void)
 static void
 test_facets_of_a_quilt_search (void)
 {
-  g_autoptr (ComfyModrinthSearch) search =
-    search_new (comfy_CONTENT_MOD, "", "1.20.1", "quilt");
-  g_autofree char *facets = comfy_modrinth_facets (search);
+  g_autoptr (LeppoisaModrinthSearch) search =
+    search_new (leppoisa_CONTENT_MOD, "", "1.20.1", "quilt");
+  g_autofree char *facets = leppoisa_modrinth_facets (search);
 
   g_assert_cmpstr (
       facets, ==,
@@ -95,15 +95,15 @@ test_facets_of_a_quilt_search (void)
 static void
 test_facets_of_a_pack_search (void)
 {
-  g_autoptr (ComfyModrinthSearch) search =
-    search_new (comfy_CONTENT_RESOURCE_PACK, NULL, "1.20.1", NULL);
+  g_autoptr (LeppoisaModrinthSearch) search =
+    search_new (leppoisa_CONTENT_RESOURCE_PACK, NULL, "1.20.1", NULL);
   g_autofree char *facets = NULL;
   g_autofree char *shaders = NULL;
 
   search->categories = g_ptr_array_new_with_free_func (g_free);
   g_ptr_array_add (search->categories, g_strdup ("32x"));
 
-  facets = comfy_modrinth_facets (search);
+  facets = leppoisa_modrinth_facets (search);
 
   /* A resource pack is loaded by the game itself, so there is no loader
    * in the facets, only the Minecraft version and what was asked for. */
@@ -111,8 +111,8 @@ test_facets_of_a_pack_search (void)
                    "[[\"project_type:resourcepack\"],[\"versions:1.20.1\"],"
                    "[\"categories:32x\"]]");
 
-  search->type = comfy_CONTENT_SHADER_PACK;
-  shaders = comfy_modrinth_facets (search);
+  search->type = leppoisa_CONTENT_SHADER_PACK;
+  shaders = leppoisa_modrinth_facets (search);
   g_assert_cmpstr (shaders, ==,
                    "[[\"project_type:shader\"],[\"versions:1.20.1\"],"
                    "[\"categories:32x\"]]");
@@ -123,17 +123,17 @@ test_facets_of_a_pack_search (void)
 static void
 test_search_url_paginates (void)
 {
-  g_autoptr (ComfyModrinthSearch) search =
-    search_new (comfy_CONTENT_MOD, "sodium", "1.20.1", "fabric");
+  g_autoptr (LeppoisaModrinthSearch) search =
+    search_new (leppoisa_CONTENT_MOD, "sodium", "1.20.1", "fabric");
   g_autofree char *url = NULL;
   g_autofree char *expected = NULL;
 
   search->offset = 40;
   search->limit = 20;
 
-  url = comfy_modrinth_search_url (search);
+  url = leppoisa_modrinth_search_url (search);
   expected = g_strdup_printf (
-      comfy_MODRINTH_URL "/search?query=sodium&facets=%s&offset=40&limit=20",
+      leppoisa_MODRINTH_URL "/search?query=sodium&facets=%s&offset=40&limit=20",
       "%5B%5B%22project_type%3Amod%22%5D%2C%5B%22versions%3A1.20.1%22%5D%2C"
       "%5B%22categories%3Afabric%22%5D%5D");
 
@@ -151,10 +151,10 @@ test_search_results (void)
 {
   g_autofree char *json = read_fixture ("modrinth-search-mods.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (ComfyModrinthResults) results = NULL;
-  ComfyModrinthProject *first = NULL;
+  g_autoptr (LeppoisaModrinthResults) results = NULL;
+  LeppoisaModrinthProject *first = NULL;
 
-  results = comfy_modrinth_results_from_json (json, -1, &error);
+  results = leppoisa_modrinth_results_from_json (json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (results);
   g_assert_cmpuint (results->projects->len, ==, 3);
@@ -179,10 +179,10 @@ test_search_without_hits (void)
 {
   g_autofree char *json = read_fixture ("modrinth-search-empty.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (ComfyModrinthResults) results = NULL;
+  g_autoptr (LeppoisaModrinthResults) results = NULL;
 
   /* Nothing found is an answer, not a failure. */
-  results = comfy_modrinth_results_from_json (json, -1, &error);
+  results = leppoisa_modrinth_results_from_json (json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (results);
   g_assert_cmpuint (results->projects->len, ==, 0);
@@ -197,11 +197,11 @@ test_search_rejects_malformed_hit (void)
   const char *json =
     "{\"total_hits\":1,\"hits\":[{\"slug\":\"missing-id\"}]}";
   g_autoptr (GError) error = NULL;
-  g_autoptr (ComfyModrinthResults) results =
-    comfy_modrinth_results_from_json (json, -1, &error);
+  g_autoptr (LeppoisaModrinthResults) results =
+    leppoisa_modrinth_results_from_json (json, -1, &error);
 
   g_assert_null (results);
-  g_assert_error (error, comfy_MODRINTH_ERROR, comfy_MODRINTH_ERROR_PARSE);
+  g_assert_error (error, leppoisa_MODRINTH_ERROR, leppoisa_MODRINTH_ERROR_PARSE);
 }
 
 /* ---------------------------------------------------------- *
@@ -213,9 +213,9 @@ test_project_details (void)
 {
   g_autofree char *json = read_fixture ("modrinth-project.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (ComfyModrinthDetails) details = NULL;
+  g_autoptr (LeppoisaModrinthDetails) details = NULL;
 
-  details = comfy_modrinth_details_from_json (json, -1, &error);
+  details = leppoisa_modrinth_details_from_json (json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (details);
 
@@ -248,9 +248,9 @@ test_categories_filter_by_project_type (void)
   g_autoptr (GPtrArray) shaders = NULL;
   g_autoptr (GPtrArray) modpacks = NULL;
   g_autoptr (GPtrArray) resourcepacks = NULL;
-  ComfyModrinthCategory *category = NULL;
+  LeppoisaModrinthCategory *category = NULL;
 
-  shaders = comfy_modrinth_categories_from_json (json, -1, "shader", NULL);
+  shaders = leppoisa_modrinth_categories_from_json (json, -1, "shader", NULL);
   g_assert_nonnull (shaders);
   g_assert_cmpuint (shaders->len, ==, 2);
 
@@ -261,14 +261,14 @@ test_categories_filter_by_project_type (void)
   category = g_ptr_array_index (shaders, 1);
   g_assert_cmpstr (category->name, ==, "colored-lighting");
 
-  modpacks = comfy_modrinth_categories_from_json (json, -1, "modpack", NULL);
+  modpacks = leppoisa_modrinth_categories_from_json (json, -1, "modpack", NULL);
   g_assert_cmpuint (modpacks->len, ==, 1);
   g_assert_cmpstr (
-      ((ComfyModrinthCategory *) g_ptr_array_index (modpacks, 0))->name, ==,
+      ((LeppoisaModrinthCategory *) g_ptr_array_index (modpacks, 0))->name, ==,
       "kitchen-sink");
 
   resourcepacks =
-      comfy_modrinth_categories_from_json (json, -1, "resourcepack", NULL);
+      leppoisa_modrinth_categories_from_json (json, -1, "resourcepack", NULL);
   g_assert_cmpuint (resourcepacks->len, ==, 1);
 
   g_print ("ok - categories are filtered by project type\n");
@@ -277,9 +277,9 @@ test_categories_filter_by_project_type (void)
 static void
 test_category_labels (void)
 {
-  g_autofree char *one = comfy_modrinth_category_label ("colored-lighting");
-  g_autofree char *two = comfy_modrinth_category_label ("512x+");
-  g_autofree char *three = comfy_modrinth_category_label ("kitchen-sink");
+  g_autofree char *one = leppoisa_modrinth_category_label ("colored-lighting");
+  g_autofree char *two = leppoisa_modrinth_category_label ("512x+");
+  g_autofree char *three = leppoisa_modrinth_category_label ("kitchen-sink");
 
   g_assert_cmpstr (one, ==, "Colored Lighting");
   g_assert_cmpstr (two, ==, "512x+");
@@ -292,14 +292,14 @@ test_category_labels (void)
 static void
 test_facets_with_categories (void)
 {
-  g_autoptr (ComfyModrinthSearch) search =
-    search_new (comfy_CONTENT_SHADER_PACK, "", "1.20.1", NULL);
+  g_autoptr (LeppoisaModrinthSearch) search =
+    search_new (leppoisa_CONTENT_SHADER_PACK, "", "1.20.1", NULL);
   g_autofree char *facets = NULL;
 
   search->categories = g_ptr_array_new_with_free_func (g_free);
   g_ptr_array_add (search->categories, g_strdup ("colored-lighting"));
 
-  facets = comfy_modrinth_facets (search);
+  facets = leppoisa_modrinth_facets (search);
 
   g_assert_cmpstr (facets, ==,
                    "[[\"project_type:shader\"],[\"versions:1.20.1\"],"
@@ -314,10 +314,10 @@ test_versions_of_a_mod (void)
   g_autofree char *json = read_fixture ("modrinth-versions-mods.json");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
-  ComfyModrinthVersion *version = NULL;
+  LeppoisaModrinthVersion *version = NULL;
 
-  versions = comfy_modrinth_versions_from_json (
-      json, -1, comfy_CONTENT_MOD, "1.20.1", "fabric", &error);
+  versions = leppoisa_modrinth_versions_from_json (
+      json, -1, leppoisa_CONTENT_MOD, "1.20.1", "fabric", &error);
   g_assert_no_error (error);
   g_assert_nonnull (versions);
 
@@ -337,7 +337,7 @@ test_versions_of_a_mod (void)
   /* The file of a version is what gets installed, with its hash, so that
    * the download can be verified against what Modrinth published. */
   {
-    ComfyModrinthFile *file = comfy_modrinth_version_primary_file (version);
+    LeppoisaModrinthFile *file = leppoisa_modrinth_version_primary_file (version);
 
     g_assert_nonnull (file);
     g_assert_cmpstr (file->filename, ==, "cloth-config-11.1.118-fabric.jar");
@@ -356,11 +356,11 @@ test_versions_of_a_pack (void)
     read_fixture ("modrinth-versions-resource-pack.json");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
-  ComfyModrinthVersion *version = NULL;
+  LeppoisaModrinthVersion *version = NULL;
 
   /* No loader is asked for: the game loads a pack itself. */
-  versions = comfy_modrinth_versions_from_json (
-      json, -1, comfy_CONTENT_RESOURCE_PACK, "1.20.1", NULL, &error);
+  versions = leppoisa_modrinth_versions_from_json (
+      json, -1, leppoisa_CONTENT_RESOURCE_PACK, "1.20.1", NULL, &error);
   g_assert_no_error (error);
   g_assert_cmpuint (versions->len, ==, 1);
 
@@ -370,8 +370,8 @@ test_versions_of_a_pack (void)
   /* The same answer asked for another loader is not narrowed: a pack
    * that says "minecraft" runs whatever runs the game. */
   {
-    g_autoptr (GPtrArray) any = comfy_modrinth_versions_from_json (
-        json, -1, comfy_CONTENT_RESOURCE_PACK, "1.20", "forge", &error);
+    g_autoptr (GPtrArray) any = leppoisa_modrinth_versions_from_json (
+        json, -1, leppoisa_CONTENT_RESOURCE_PACK, "1.20", "forge", &error);
 
     g_assert_no_error (error);
     g_assert_cmpuint (any->len, ==, 2);
@@ -381,9 +381,9 @@ test_versions_of_a_pack (void)
 }
 
 /* The version of the fixture with this number, whatever its game
-   versions: the one object of the answer comfy would refuse is needed on
+   versions: the one object of the answer leppoisa would refuse is needed on
    its own to be asked about. (transfer full) */
-static ComfyModrinthVersion *
+static LeppoisaModrinthVersion *
 version_from_fixture (const char *json, const char *number)
 {
   g_autoptr (JsonParser) parser = json_parser_new ();
@@ -412,7 +412,7 @@ version_from_fixture (const char *json, const char *number)
         {
           g_autofree char *one = json_to_string (item, FALSE);
 
-          return comfy_modrinth_version_from_json (one, -1, &error);
+          return leppoisa_modrinth_version_from_json (one, -1, &error);
         }
     }
 
@@ -434,13 +434,13 @@ test_versions_of_a_shader (void)
     read_fixture ("modrinth-shader-versions.json");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
-  ComfyModrinthVersion *version = NULL;
+  LeppoisaModrinthVersion *version = NULL;
 
   /* A loader is not asked for, and not asked about: the loaders a shader
      publishes are the programs that can read it, not the one running
      beside the game. */
-  versions = comfy_modrinth_versions_from_json (
-      json, -1, comfy_CONTENT_SHADER_PACK, "1.20.1", "fabric", &error);
+  versions = leppoisa_modrinth_versions_from_json (
+      json, -1, leppoisa_CONTENT_SHADER_PACK, "1.20.1", "fabric", &error);
   g_assert_no_error (error);
   g_assert_nonnull (versions);
 
@@ -461,20 +461,20 @@ test_versions_of_a_shader (void)
      game version whatever loaders it names, and does not fit a game
      version it does not list. */
   {
-    g_autoptr (ComfyModrinthVersion) fitted =
-      comfy_modrinth_version_copy (g_ptr_array_index (versions, 0));
-    g_autoptr (ComfyModrinthVersion) other_game =
+    g_autoptr (LeppoisaModrinthVersion) fitted =
+      leppoisa_modrinth_version_copy (g_ptr_array_index (versions, 0));
+    g_autoptr (LeppoisaModrinthVersion) other_game =
       version_from_fixture (json, "r2.1");
 
     g_assert_nonnull (fitted);
     g_assert_nonnull (other_game);
 
     /* Whatever runs beside the game, the shader fits its version. */
-    g_assert_true (comfy_modrinth_version_fits (fitted, comfy_CONTENT_SHADER_PACK,
+    g_assert_true (leppoisa_modrinth_version_fits (fitted, leppoisa_CONTENT_SHADER_PACK,
                                              "1.20.1", "fabric"));
-    g_assert_true (comfy_modrinth_version_fits (fitted, comfy_CONTENT_SHADER_PACK,
+    g_assert_true (leppoisa_modrinth_version_fits (fitted, leppoisa_CONTENT_SHADER_PACK,
                                              "1.20.1", "iris"));
-    g_assert_true (comfy_modrinth_version_fits (fitted, comfy_CONTENT_SHADER_PACK,
+    g_assert_true (leppoisa_modrinth_version_fits (fitted, leppoisa_CONTENT_SHADER_PACK,
                                              "1.20.1", "optifine"));
 
     /* A game version it does not list is refused, and a mod is still
@@ -482,16 +482,16 @@ test_versions_of_a_shader (void)
        work. */
     /* r5.9.3 lists 76 game versions and r2.1 lists neither 1.20.1 nor
        1.21, so each is refused a version it does not name. */
-    g_assert_false (comfy_modrinth_version_fits (fitted,
-                                              comfy_CONTENT_SHADER_PACK,
+    g_assert_false (leppoisa_modrinth_version_fits (fitted,
+                                              leppoisa_CONTENT_SHADER_PACK,
                                               "1.4.7", "iris"));
-    g_assert_false (comfy_modrinth_version_fits (other_game,
-                                              comfy_CONTENT_SHADER_PACK,
+    g_assert_false (leppoisa_modrinth_version_fits (other_game,
+                                              leppoisa_CONTENT_SHADER_PACK,
                                               "1.21", "iris"));
-    g_assert_false (comfy_modrinth_version_fits (other_game,
-                                              comfy_CONTENT_SHADER_PACK,
+    g_assert_false (leppoisa_modrinth_version_fits (other_game,
+                                              leppoisa_CONTENT_SHADER_PACK,
                                               "1.20.1", "iris"));
-    g_assert_false (comfy_modrinth_version_fits (fitted, comfy_CONTENT_MOD,
+    g_assert_false (leppoisa_modrinth_version_fits (fitted, leppoisa_CONTENT_MOD,
                                                "1.20.1", "fabric"));
   }
 
@@ -509,23 +509,23 @@ test_no_compatible_version (void)
 
   /* Nothing in the fixture runs on Minecraft 1.7.10, and nothing is
    * listed rather than something listed and refused afterwards. */
-  versions = comfy_modrinth_versions_from_json (
-      json, -1, comfy_CONTENT_MOD, "1.7.10", "fabric", &error);
+  versions = leppoisa_modrinth_versions_from_json (
+      json, -1, leppoisa_CONTENT_MOD, "1.7.10", "fabric", &error);
   g_assert_null (versions);
-  g_assert_error (error, comfy_MODRINTH_ERROR, comfy_MODRINTH_ERROR_NOT_FOUND);
+  g_assert_error (error, leppoisa_MODRINTH_ERROR, leppoisa_MODRINTH_ERROR_NOT_FOUND);
 
   /* The words a user reads are the ones the page shows. */
   g_assert_cmpstr (error->message, ==,
                    "No compatible version found for Minecraft 1.7.10 and "
                    "fabric.");
 
-  message = comfy_modrinth_no_compatible_message (comfy_CONTENT_MOD, "1.7.10",
+  message = leppoisa_modrinth_no_compatible_message (leppoisa_CONTENT_MOD, "1.7.10",
                                                 "quilt");
   g_assert_cmpstr (message, ==,
                    "No compatible version found for Minecraft 1.7.10 and "
                    "quilt.");
 
-  shaders = comfy_modrinth_no_compatible_message (comfy_CONTENT_SHADER_PACK,
+  shaders = leppoisa_modrinth_no_compatible_message (leppoisa_CONTENT_SHADER_PACK,
                                                  "1.7.10", NULL);
   g_assert_cmpstr (shaders, ==,
                    "No compatible version found for Minecraft 1.7.10.");
@@ -543,10 +543,10 @@ test_version_by_hash (void)
 {
   g_autofree char *json = read_fixture ("modrinth-version-by-hash.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (ComfyModrinthVersion) version = NULL;
-  ComfyModrinthFile *file = NULL;
+  g_autoptr (LeppoisaModrinthVersion) version = NULL;
+  LeppoisaModrinthFile *file = NULL;
 
-  version = comfy_modrinth_version_from_json (json, -1, &error);
+  version = leppoisa_modrinth_version_from_json (json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (version);
 
@@ -556,17 +556,17 @@ test_version_by_hash (void)
   g_assert_cmpstr (version->version_number, ==, "mc1.20.1-0.5.8");
 
   /* What an installed file shows under its name. */
-  file = comfy_modrinth_version_primary_file (version);
+  file = leppoisa_modrinth_version_primary_file (version);
   g_assert_nonnull (file);
   g_assert_cmpstr (file->sha1, ==,
                    "bdd6b8ac84b46ae56a3bbb761ce430c48e42e00d");
   g_assert_cmpint (file->size, ==, 942134);
 
   /* And it is a version this instance could run. */
-  g_assert_true (comfy_modrinth_version_fits (version, comfy_CONTENT_MOD, "1.20.1",
+  g_assert_true (leppoisa_modrinth_version_fits (version, leppoisa_CONTENT_MOD, "1.20.1",
                                            "fabric"));
   g_assert_false (
-      comfy_modrinth_version_fits (version, comfy_CONTENT_MOD, "1.21", "fabric"));
+      leppoisa_modrinth_version_fits (version, leppoisa_CONTENT_MOD, "1.21", "fabric"));
 
   /* Quilt runs Fabric mods, so a version that names only Fabric is a
      version of a Quilt instance too, and nothing else gets it. */
@@ -574,9 +574,9 @@ test_version_by_hash (void)
   version->loaders = g_ptr_array_new_with_free_func (g_free);
   g_ptr_array_add (version->loaders, g_strdup ("fabric"));
 
-  g_assert_true (comfy_modrinth_version_fits (version, comfy_CONTENT_MOD, "1.20.1",
+  g_assert_true (leppoisa_modrinth_version_fits (version, leppoisa_CONTENT_MOD, "1.20.1",
                                             "quilt"));
-  g_assert_false (comfy_modrinth_version_fits (version, comfy_CONTENT_MOD,
+  g_assert_false (leppoisa_modrinth_version_fits (version, leppoisa_CONTENT_MOD,
                                              "1.20.1", "neoforge"));
 
   g_print ("ok - the hash of a file says which version it is\n");
@@ -588,14 +588,14 @@ test_update_by_hash (void)
   g_autofree char *json = read_fixture ("modrinth-update-by-hash.json");
   g_autofree char *installed = read_fixture ("modrinth-version-by-hash.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (ComfyModrinthVersion) installed_version = NULL;
-  g_autoptr (ComfyModrinthVersion) update = NULL;
-  ComfyModrinthFile *file = NULL;
+  g_autoptr (LeppoisaModrinthVersion) installed_version = NULL;
+  g_autoptr (LeppoisaModrinthVersion) update = NULL;
+  LeppoisaModrinthFile *file = NULL;
 
-  installed_version = comfy_modrinth_version_from_json (installed, -1, &error);
+  installed_version = leppoisa_modrinth_version_from_json (installed, -1, &error);
   g_assert_no_error (error);
 
-  update = comfy_modrinth_version_from_json (json, -1, &error);
+  update = leppoisa_modrinth_version_from_json (json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (update);
 
@@ -606,9 +606,9 @@ test_update_by_hash (void)
   g_assert_cmpstr (update->version_id, ==, "OihdIimA");
   g_assert_true (strcmp (update->version_id, installed_version->version_id) != 0);
   g_assert_true (
-      comfy_modrinth_version_fits (update, comfy_CONTENT_MOD, "1.20.1", "fabric"));
+      leppoisa_modrinth_version_fits (update, leppoisa_CONTENT_MOD, "1.20.1", "fabric"));
 
-  file = comfy_modrinth_version_primary_file (update);
+  file = leppoisa_modrinth_version_primary_file (update);
   g_assert_cmpstr (file->filename, ==, "sodium-fabric-0.5.13+mc1.20.1.jar");
   g_assert_cmpstr (file->sha1, ==,
                    "bcdbf37d9494e405cba210d7a80ed58e756297b5");
@@ -616,11 +616,11 @@ test_update_by_hash (void)
   /* The endpoint can also answer with the version already installed, and
      the page must not offer that as an update: a version that carries
      the file on disk is the same one. */
-  g_assert_false (comfy_modrinth_version_has_hash (
+  g_assert_false (leppoisa_modrinth_version_has_hash (
     update, "bdd6b8ac84b46ae56a3bbb761ce430c48e42e00d"));
-  g_assert_true (comfy_modrinth_version_has_hash (
+  g_assert_true (leppoisa_modrinth_version_has_hash (
     installed_version, "bdd6b8ac84b46ae56a3bbb761ce430c48e42e00d"));
-  g_assert_true (comfy_modrinth_version_has_hash (update, file->sha1));
+  g_assert_true (leppoisa_modrinth_version_has_hash (update, file->sha1));
 
   g_print ("ok - the hash update answer is another version of the same "
            "project\n");
@@ -636,23 +636,23 @@ test_dependencies_of_a_version (void)
   g_autofree char *json =
     read_fixture ("modrinth-version-dependencies.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (ComfyModrinthVersion) version = NULL;
+  g_autoptr (LeppoisaModrinthVersion) version = NULL;
   g_autoptr (GPtrArray) pending = NULL;
   g_autoptr (GPtrArray) conflicts = NULL;
 
-  version = comfy_modrinth_version_from_json (json, -1, &error);
+  version = leppoisa_modrinth_version_from_json (json, -1, &error);
   g_assert_no_error (error);
   g_assert_cmpuint (version->dependencies->len, ==, 1);
 
-  pending = comfy_modrinth_resolve_install (version, NULL, &conflicts, &error);
+  pending = leppoisa_modrinth_resolve_install (version, NULL, &conflicts, &error);
   g_assert_no_error (error);
   g_assert_cmpuint (pending->len, ==, 1);
   g_assert_cmpuint (conflicts->len, ==, 0);
 
   {
-    ComfyModrinthDependency *dependency = g_ptr_array_index (pending, 0);
+    LeppoisaModrinthDependency *dependency = g_ptr_array_index (pending, 0);
 
-    g_assert_cmpint (dependency->type, ==, comfy_DEPENDENCY_REQUIRED);
+    g_assert_cmpint (dependency->type, ==, leppoisa_DEPENDENCY_REQUIRED);
     g_assert_cmpstr (dependency->project_id, ==, "AANobbMI");
     g_assert_cmpstr (dependency->version_id, ==, "ryOMVRuG");
   }
@@ -665,7 +665,7 @@ test_dependencies_of_a_version (void)
     g_autoptr (GPtrArray) again = NULL;
 
     g_hash_table_add (installed, g_strdup ("AANobbMI"));
-    again = comfy_modrinth_resolve_install (version, installed, NULL, &error);
+    again = leppoisa_modrinth_resolve_install (version, installed, NULL, &error);
 
     g_assert_no_error (error);
     g_assert_cmpuint (again->len, ==, 0);
@@ -681,13 +681,13 @@ test_dependency_kinds (void)
   g_autofree char *json =
     read_fixture ("modrinth-version-dependency-kinds.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (ComfyModrinthVersion) version = NULL;
+  g_autoptr (LeppoisaModrinthVersion) version = NULL;
   g_autoptr (GPtrArray) pending = NULL;
   g_autoptr (GPtrArray) conflicts = NULL;
   g_autoptr (GHashTable) installed =
     g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
-  version = comfy_modrinth_version_from_json (json, -1, &error);
+  version = leppoisa_modrinth_version_from_json (json, -1, &error);
   g_assert_no_error (error);
   g_assert_cmpuint (version->dependencies->len, ==, 5);
 
@@ -695,7 +695,7 @@ test_dependency_kinds (void)
    * has to say so before anything is written. */
   g_hash_table_add (installed, g_strdup ("4ZqxOvjD"));
 
-  pending = comfy_modrinth_resolve_install (version, installed, &conflicts,
+  pending = leppoisa_modrinth_resolve_install (version, installed, &conflicts,
                                           &error);
   g_assert_no_error (error);
 
@@ -703,16 +703,16 @@ test_dependency_kinds (void)
    * embedded ones are not fetched, and the duplicate of the required
    * dependency is one file, not two. */
   g_assert_cmpuint (pending->len, ==, 1);
-  g_assert_cmpstr (((ComfyModrinthDependency *) g_ptr_array_index (pending, 0))
+  g_assert_cmpstr (((LeppoisaModrinthDependency *) g_ptr_array_index (pending, 0))
                        ->project_id,
                    ==, "AANobbMI");
 
   g_assert_cmpuint (conflicts->len, ==, 1);
-  g_assert_cmpstr (((ComfyModrinthDependency *) g_ptr_array_index (conflicts, 0))
+  g_assert_cmpstr (((LeppoisaModrinthDependency *) g_ptr_array_index (conflicts, 0))
                        ->project_id,
                    ==, "4ZqxOvjD");
-  g_assert_cmpstr (comfy_modrinth_dependency_to_string (
-                       ((ComfyModrinthDependency *)
+  g_assert_cmpstr (leppoisa_modrinth_dependency_to_string (
+                       ((LeppoisaModrinthDependency *)
                             g_ptr_array_index (conflicts, 0))
                            ->type),
                    ==, "incompatible");
@@ -733,17 +733,17 @@ test_dependency_without_project (void)
     "\"dependencies\":[{\"version_id\":null,\"project_id\":null,"
     "\"file_name\":\"only-a-name.jar\",\"dependency_type\":\"required\"}]}";
   g_autoptr (GError) error = NULL;
-  g_autoptr (ComfyModrinthVersion) version = NULL;
+  g_autoptr (LeppoisaModrinthVersion) version = NULL;
   GPtrArray *pending = NULL;
 
-  version = comfy_modrinth_version_from_json (json, -1, &error);
+  version = leppoisa_modrinth_version_from_json (json, -1, &error);
   g_assert_no_error (error);
 
   /* A dependency that names no project names nothing that could be
    * fetched, and the install says so instead of going on without it. */
-  pending = comfy_modrinth_resolve_install (version, NULL, NULL, &error);
+  pending = leppoisa_modrinth_resolve_install (version, NULL, NULL, &error);
   g_assert_null (pending);
-  g_assert_error (error, comfy_MODRINTH_ERROR, comfy_MODRINTH_ERROR_PARSE);
+  g_assert_error (error, leppoisa_MODRINTH_ERROR, leppoisa_MODRINTH_ERROR_PARSE);
 
   g_print ("ok - a dependency that cannot be fetched stops the install\n");
 }
@@ -761,22 +761,22 @@ test_folder_and_disabled_names (void)
   g_autofree char *enabled = NULL;
   g_autofree char *again = NULL;
 
-  mods = comfy_content_folder_path ("/tmp/instance", comfy_CONTENT_MOD);
-  packs = comfy_content_folder_path ("/tmp/instance",
-                                   comfy_CONTENT_RESOURCE_PACK);
+  mods = leppoisa_content_folder_path ("/tmp/instance", leppoisa_CONTENT_MOD);
+  packs = leppoisa_content_folder_path ("/tmp/instance",
+                                   leppoisa_CONTENT_RESOURCE_PACK);
   g_assert_cmpstr (mods, ==, "/tmp/instance/mods");
   g_assert_cmpstr (packs, ==, "/tmp/instance/resourcepacks");
 
   /* Disabling puts the suffix on the name, which is what the loaders and
    * the game stop loading; enabling takes it off again. */
-  disabled = comfy_content_disabled_name ("sodium.jar", FALSE);
+  disabled = leppoisa_content_disabled_name ("sodium.jar", FALSE);
   g_assert_cmpstr (disabled, ==, "sodium.jar.disabled");
 
-  enabled = comfy_content_disabled_name (disabled, TRUE);
+  enabled = leppoisa_content_disabled_name (disabled, TRUE);
   g_assert_cmpstr (enabled, ==, "sodium.jar");
 
   /* A name that carries it twice does not get it twice. */
-  again = comfy_content_disabled_name (disabled, FALSE);
+  again = leppoisa_content_disabled_name (disabled, FALSE);
   g_assert_cmpstr (again, ==, "sodium.jar.disabled");
 
   g_print ("ok - a disabled file is the same file with a suffix on\n");
@@ -789,7 +789,7 @@ static GMainLoop *scanning = NULL;
 
 typedef struct
 {
-  ComfyTaskScope *operation;
+  LeppoisaTaskScope *operation;
 } ScanWait;
 
 static void
@@ -799,11 +799,11 @@ on_scan_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   ScanWait *wait = user_data;
 
   g_clear_pointer (&scanned, g_ptr_array_unref);
-  scanned = comfy_content_scan_finish (result, NULL);
+  scanned = leppoisa_content_scan_finish (result, NULL);
 
   if (wait->operation != NULL)
     {
-      comfy_task_scope_unref (wait->operation);
+      leppoisa_task_scope_unref (wait->operation);
       wait->operation = NULL;
     }
   g_free (wait);
@@ -814,7 +814,7 @@ on_scan_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 /* Reads a content folder and waits for it, which is the asynchronous
  * way the page does the same. (transfer full) */
 static GPtrArray *
-scan (const char *instance, ComfyContentType type)
+scan (const char *instance, LeppoisaContentType type)
 {
   GPtrArray *files = NULL;
 
@@ -826,7 +826,7 @@ scan (const char *instance, ComfyContentType type)
     ScanWait *wait = g_new0 (ScanWait, 1);
 
     wait->operation =
-      comfy_content_scan_async (instance, type, on_scan_finished, wait);
+      leppoisa_content_scan_async (instance, type, on_scan_finished, wait);
   }
   g_main_loop_run (scanning);
 
@@ -854,10 +854,10 @@ test_scan_and_toggle (void)
   g_autoptr (GFile) file = NULL;
   g_autoptr (GError) error = NULL;
 
-  instance = g_dir_make_tmp ("comfy-content-XXXXXX", NULL);
+  instance = g_dir_make_tmp ("leppoisa-content-XXXXXX", NULL);
   g_assert_nonnull (instance);
 
-  folder_path = comfy_content_folder_path (instance, comfy_CONTENT_MOD);
+  folder_path = leppoisa_content_folder_path (instance, leppoisa_CONTENT_MOD);
   folder = g_file_new_for_path (folder_path);
   g_assert_true (g_file_make_directory_with_parents (folder, NULL, &error));
   g_assert_no_error (error);
@@ -879,7 +879,7 @@ test_scan_and_toggle (void)
                                           &error));
   g_assert_no_error (error);
 
-  lithium = scan (instance, comfy_CONTENT_MOD);
+  lithium = scan (instance, leppoisa_CONTENT_MOD);
 
   /* Only the mods are listed, and both are: a disabled one is still in
      the folder and the user has to see it to enable it again. */
@@ -887,8 +887,8 @@ test_scan_and_toggle (void)
   g_assert_cmpuint (lithium->len, ==, 2);
 
   {
-    ComfyContentFile *disabled = g_ptr_array_index (lithium, 0);
-    ComfyContentFile *enabled = g_ptr_array_index (lithium, 1);
+    LeppoisaContentFile *disabled = g_ptr_array_index (lithium, 0);
+    LeppoisaContentFile *enabled = g_ptr_array_index (lithium, 1);
 
     /* Sorted by name, and the suffix is not part of the name a user
        reads. */
@@ -906,25 +906,25 @@ test_scan_and_toggle (void)
   /* Enabling it takes the suffix off, and disabling it puts it back. */
   {
     const char *disabled_path =
-      ((ComfyContentFile *) g_ptr_array_index (lithium, 0))->path;
+      ((LeppoisaContentFile *) g_ptr_array_index (lithium, 0))->path;
     g_autofree char *enabled_path =
       g_build_filename (folder_path, "lithium.jar", NULL);
 
     /* A disabled file is loaded again by taking the suffix off. */
     g_free (back);
-    back = comfy_content_set_disabled (disabled_path, FALSE, &error);
+    back = leppoisa_content_set_disabled (disabled_path, FALSE, &error);
     g_assert_no_error (error);
     g_assert_cmpstr (back, ==, enabled_path);
     g_assert_true (g_file_test (back, G_FILE_TEST_EXISTS));
 
     /* Asking for the state a file is already in is not a rename. */
-    same = comfy_content_set_disabled (back, FALSE, &error);
+    same = leppoisa_content_set_disabled (back, FALSE, &error);
     g_assert_no_error (error);
     g_assert_cmpstr (same, ==, back);
     g_assert_true (g_file_test (same, G_FILE_TEST_EXISTS));
 
     /* And it goes back to being a file the loader skips. */
-    renamed = comfy_content_set_disabled (back, TRUE, &error);
+    renamed = leppoisa_content_set_disabled (back, TRUE, &error);
     g_assert_no_error (error);
     g_assert_cmpstr (renamed, ==, disabled_path);
     g_assert_true (g_file_test (renamed, G_FILE_TEST_EXISTS));
@@ -934,14 +934,14 @@ test_scan_and_toggle (void)
      and the resource pack folder of an instance that has none is
      simply empty. */
   {
-    g_autoptr (GPtrArray) again = scan (instance, comfy_CONTENT_MOD);
+    g_autoptr (GPtrArray) again = scan (instance, leppoisa_CONTENT_MOD);
 
     g_assert_cmpuint (again->len, ==, 2);
-    g_assert_false (((ComfyContentFile *) g_ptr_array_index (again, 0))->enabled);
+    g_assert_false (((LeppoisaContentFile *) g_ptr_array_index (again, 0))->enabled);
   }
 
   {
-    g_autoptr (GPtrArray) none = scan (instance, comfy_CONTENT_SHADER_PACK);
+    g_autoptr (GPtrArray) none = scan (instance, leppoisa_CONTENT_SHADER_PACK);
 
     /* A folder that does not exist holds no files, which is what an
        instance that never installed a shader pack looks like. */
@@ -959,27 +959,27 @@ test_scan_and_toggle (void)
 static void
 test_content_types (void)
 {
-  g_assert_cmpstr (comfy_content_type_to_string (comfy_CONTENT_MOD), ==, "mod");
-  g_assert_cmpstr (comfy_content_type_to_string (comfy_CONTENT_RESOURCE_PACK), ==,
+  g_assert_cmpstr (leppoisa_content_type_to_string (leppoisa_CONTENT_MOD), ==, "mod");
+  g_assert_cmpstr (leppoisa_content_type_to_string (leppoisa_CONTENT_RESOURCE_PACK), ==,
                    "resourcepack");
-  g_assert_cmpstr (comfy_content_type_to_string (comfy_CONTENT_SHADER_PACK), ==,
+  g_assert_cmpstr (leppoisa_content_type_to_string (leppoisa_CONTENT_SHADER_PACK), ==,
                    "shader");
 
-  g_assert_cmpstr (comfy_content_type_folder (comfy_CONTENT_MOD), ==, "mods");
-  g_assert_cmpstr (comfy_content_type_folder (comfy_CONTENT_RESOURCE_PACK), ==,
+  g_assert_cmpstr (leppoisa_content_type_folder (leppoisa_CONTENT_MOD), ==, "mods");
+  g_assert_cmpstr (leppoisa_content_type_folder (leppoisa_CONTENT_RESOURCE_PACK), ==,
                    "resourcepacks");
-  g_assert_cmpstr (comfy_content_type_folder (comfy_CONTENT_SHADER_PACK), ==,
+  g_assert_cmpstr (leppoisa_content_type_folder (leppoisa_CONTENT_SHADER_PACK), ==,
                    "shaderpacks");
 
-  g_assert_cmpstr (comfy_content_type_extension (comfy_CONTENT_MOD), ==, ".jar");
-  g_assert_cmpstr (comfy_content_type_extension (comfy_CONTENT_RESOURCE_PACK), ==,
+  g_assert_cmpstr (leppoisa_content_type_extension (leppoisa_CONTENT_MOD), ==, ".jar");
+  g_assert_cmpstr (leppoisa_content_type_extension (leppoisa_CONTENT_RESOURCE_PACK), ==,
                    ".zip");
 
   /* Only a mod needs a loader, which is what makes the three pages the
    * same page with a different content type. */
-  g_assert_true (comfy_content_type_needs_loader (comfy_CONTENT_MOD));
-  g_assert_false (comfy_content_type_needs_loader (comfy_CONTENT_RESOURCE_PACK));
-  g_assert_false (comfy_content_type_needs_loader (comfy_CONTENT_SHADER_PACK));
+  g_assert_true (leppoisa_content_type_needs_loader (leppoisa_CONTENT_MOD));
+  g_assert_false (leppoisa_content_type_needs_loader (leppoisa_CONTENT_RESOURCE_PACK));
+  g_assert_false (leppoisa_content_type_needs_loader (leppoisa_CONTENT_SHADER_PACK));
 
   g_print ("ok - the three kinds name their own folders and loaders\n");
 }

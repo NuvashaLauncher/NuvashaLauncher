@@ -1,8 +1,8 @@
-# comfy
+# leppoisa
 
-Comfy Launcher, for Linux.
+Leppoisa Launcher, for Linux.
 
-comfy creates instances, installs modpacks and mods from Modrinth, resolves
+leppoisa creates instances, installs modpacks and mods from Modrinth, resolves
 mod loaders, and runs the game. It is written in C against GTK4 and
 libadwaita, and it uses the public APIs of the services it talks to.
 
@@ -23,10 +23,10 @@ Works with both Wayland and X11 through GTK4.
 
 ## Design notes
 
-GTK selects the available display backend at startup. comfy does not select or
+GTK selects the available display backend at startup. leppoisa does not select or
 require a specific window-system backend.
 
-There is no companion service, no updater and no telemetry. comfy only makes
+There is no companion service, no updater and no telemetry. leppoisa only makes
 requests when a task needs them, and only to the service that task needs.
 
 Downloads are checked against the hashes their manifest publishes before
@@ -58,16 +58,16 @@ rather than against a file that has to be kept in step with it.
 GTK 4.10+ and libadwaita 1.5+ are required.
 
 The optional game sandbox uses `bwrap` (bubblewrap). It is disabled by
-default and can be enabled through the global `sandbox-enabled` setting. When enabled, comfy keeps
+default and can be enabled through the global `sandbox-enabled` setting. When enabled, leppoisa keeps
 the instance and required caches writable, exposes Java, LWJGL natives,
 OpenGL/Vulkan drivers, Wayland/X11 and PipeWire, and leaves the game network
-available. comfy itself always remains outside the sandbox.
+available. leppoisa itself always remains outside the sandbox.
 
 Network access inside the sandbox is controlled separately by the global
 `sandbox-network-enabled` setting, which defaults to enabled. When disabled,
 the game runs without a network namespace connection.
 
-For legacy Minecraft versions using LWJGL 2, comfy automatically adds
+For legacy Minecraft versions using LWJGL 2, leppoisa automatically adds
 `-DLWJGL_DISABLE_XRANDR=true` when the optional `xrandr` command is absent.
 
 Debian:
@@ -124,18 +124,18 @@ nix-shell -p gcc gnumake gettext pkg-config glib gtk4 libadwaita \
 Clone the repository:
 
 ```
-git clone https://github.com/comfylauncher/comfy-launcher.git
-cd comfy
+git clone https://github.com/leppoisalauncher/leppoisa-launcher.git
+cd leppoisa
 ```
 
-Build and install comfy:
+Build and install leppoisa:
 
 ```bash
 make
 sudo make install PREFIX=/usr/local
 ```
 
-The launcher is installed as `/usr/local/bin/ComfyLauncher`.
+The launcher is installed as `/usr/local/bin/LeppoisaLauncher`.
 
 To uninstall a source installation:
 
@@ -163,14 +163,14 @@ reports those sites as leaks.
 Other targets:
 
 ```
-make debug         # a debug build with the sanitizers, for running comfy
+make debug         # a debug build with the sanitizers, for running leppoisa
 make clean         # remove build/ and build-debug/
 ```
 
-## Where comfy keeps its files
+## Where leppoisa keeps its files
 
-comfy keeps its data under `~/.local/share/comfy`, its caches under
-`~/.cache/comfy` and its settings under `~/.config/comfy`. The accounts file
+leppoisa keeps its data under `~/.local/share/leppoisa`, its caches under
+`~/.cache/leppoisa` and its settings under `~/.config/leppoisa`. The accounts file
 holds tokens and is written readable only by its owner, but the tokens
 are not encrypted: anyone who can read your user's files can read them.
 Native libraries extracted for a game are kept under that instance's
@@ -178,13 +178,13 @@ Native libraries extracted for a game are kept under that instance's
 
 ## Signing in
 
-comfy signs in with the Microsoft device code flow. The launcher shows a
+leppoisa signs in with the Microsoft device code flow. The launcher shows a
 code, the user enters it on a Microsoft page in their own browser, and the
 launcher polls for the result. There is no embedded web view, and the
 browser is never captured.
 
-The client ID and tenant are compiled in as `comfy_MICROSOFT_CLIENT_ID` and
-`comfy_MICROSOFT_TENANT` in `src/comfy-auth-microsoft.h`. A build with an
+The client ID and tenant are compiled in as `leppoisa_MICROSOFT_CLIENT_ID` and
+`leppoisa_MICROSOFT_TENANT` in `src/leppoisa-auth-microsoft.h`. A build with an
 empty client ID says so when a sign-in is attempted.
 
 The scopes requested are `XboxLive.signin` and `offline_access`. The
@@ -193,5 +193,5 @@ with. Accounts can be removed from the menu in the header.
 
 ## License
 
-comfy is free software, released under the GNU General Public License v3.0
+leppoisa is free software, released under the GNU General Public License v3.0
 only. See [LICENSE](LICENSE).

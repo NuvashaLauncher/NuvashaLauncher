@@ -1,7 +1,7 @@
 # Copyright (C) 2026 Flia
 # SPDX-License-Identifier: GPL-3.0-only
 #
-# Hand-written Makefile for comfy, Comfy Launcher.
+# Hand-written Makefile for leppoisa, Leppoisa Launcher.
 # Release objects live in build/, sanitizer objects in build-debug/.
 
 CC         := gcc
@@ -9,8 +9,8 @@ PKG_CONFIG ?= pkg-config
 PREFIX     ?= /usr/local
 VERSION    := $(strip $(shell cat VERSION))
 
-# Libraries comfy links against. GTK loads the available display backend at
-# runtime, so comfy does not link to a window-system backend directly.
+# Libraries leppoisa links against. GTK loads the available display backend at
+# runtime, so leppoisa does not link to a window-system backend directly.
 # gio-unix-2.0 is the Linux part of GIO itself (no display involved) and
 # provides the output stream that writes a download into its temporary
 # file descriptor.
@@ -21,19 +21,19 @@ PKGS := gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive gio-unix-2.0 epox
 PKG_CFLAGS := $(shell $(PKG_CONFIG) --cflags $(PKGS) | \
 	sed -e 's/ -I/ -isystem /g' -e 's/^-I/-isystem /')
 PKG_LIBS := $(shell $(PKG_CONFIG) --libs $(PKGS)) -lm
-CPPFLAGS += -Dcomfy_LOCALE_DIR=\"$(PREFIX)/share/locale\"
-CPPFLAGS += -Dcomfy_VERSION=\"$(VERSION)\"
-CPPFLAGS += -Dcomfy_DATA_DIR=\"$(PREFIX)/share/comfy\"
-CPPFLAGS += -Dcomfy_SOURCE_DATA_DIR=\"$(CURDIR)/data\"
+CPPFLAGS += -Dleppoisa_LOCALE_DIR=\"$(PREFIX)/share/locale\"
+CPPFLAGS += -Dleppoisa_VERSION=\"$(VERSION)\"
+CPPFLAGS += -Dleppoisa_DATA_DIR=\"$(PREFIX)/share/leppoisa\"
+CPPFLAGS += -Dleppoisa_SOURCE_DATA_DIR=\"$(CURDIR)/data\"
 LOCALES := es_AR es_ES pt_BR fr de it ja ko zh_CN ru pl uk tr nl
-LOCALE_MOS := $(LOCALES:%=build/locale/%/LC_MESSAGES/comfy.mo)
+LOCALE_MOS := $(LOCALES:%=build/locale/%/LC_MESSAGES/leppoisa.mo)
 
 CFLAGS   := -std=c17 -Wall -Wextra -Wpedantic -MMD -MP
 RELFLAGS := -O2
 DBGFLAGS := -g -O0 -fsanitize=address,undefined -fno-sanitize-recover=all
 
-BIN    := build/ComfyLauncher
-DBGBIN := build-debug/ComfyLauncher
+BIN    := build/LeppoisaLauncher
+DBGBIN := build-debug/LeppoisaLauncher
 
 SRCS    := $(wildcard src/*.c)
 RELOBJS := $(patsubst src/%.c,build/%.o,$(SRCS))
@@ -77,9 +77,9 @@ build-debug/%.o: src/%.c | build-debug
 
 build/tests/%: tests/%.c $(TESTLIBOBJS) | build/tests
 	$(CC) $(CFLAGS) $(RELFLAGS) -Isrc $(PKG_CFLAGS) \
-		-Dcomfy_DATA_DIR=\"$(CURDIR)/data\" -Dcomfy_BIN=\"$(CURDIR)/$(BIN)\" \
-		-Dcomfy_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
-		-Dcomfy_SRC_DIR=\"$(CURDIR)/src\" -Dcomfy_PO_DIR=\"$(CURDIR)/po\" \
+		-Dleppoisa_DATA_DIR=\"$(CURDIR)/data\" -Dleppoisa_BIN=\"$(CURDIR)/$(BIN)\" \
+		-Dleppoisa_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
+		-Dleppoisa_SRC_DIR=\"$(CURDIR)/src\" -Dleppoisa_PO_DIR=\"$(CURDIR)/po\" \
 		-o $@ $< $(TESTLIBOBJS) $(PKG_LIBS)
 
 # Tests never write to the real data directory and never touch the
@@ -96,9 +96,9 @@ test: $(if $(SRCS),$(BIN)) $(TESTBINS)
 # AddressSanitizer and UndefinedBehaviorSanitizer into build-debug/.
 build-debug/tests/%: tests/%.c $(TESTLIBDBGOBJS) | build-debug/tests
 	$(CC) $(CFLAGS) $(DBGFLAGS) -Isrc $(PKG_CFLAGS) \
-		-Dcomfy_DATA_DIR=\"$(CURDIR)/data\" -Dcomfy_BIN=\"$(CURDIR)/$(BIN)\" \
-		-Dcomfy_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
-		-Dcomfy_SRC_DIR=\"$(CURDIR)/src\" -Dcomfy_PO_DIR=\"$(CURDIR)/po\" \
+		-Dleppoisa_DATA_DIR=\"$(CURDIR)/data\" -Dleppoisa_BIN=\"$(CURDIR)/$(BIN)\" \
+		-Dleppoisa_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
+		-Dleppoisa_SRC_DIR=\"$(CURDIR)/src\" -Dleppoisa_PO_DIR=\"$(CURDIR)/po\" \
 		-o $@ $< $(TESTLIBDBGOBJS) $(PKG_LIBS)
 
 # The display guard test runs the release launcher, so test-debug builds both
@@ -129,38 +129,38 @@ static-analysis:
 
 pot:
 	xgettext --from-code=UTF-8 --language=C --keyword=_ --keyword=N_ \
-		--files-from=po/POTFILES.in --output=po/comfy.pot
+		--files-from=po/POTFILES.in --output=po/leppoisa.pot
 
 install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
-	install -Dm755 $(BIN) "$(DESTDIR)$(PREFIX)/bin/ComfyLauncher"
-	install -Dm644 data/skins/steve.png "$(DESTDIR)$(PREFIX)/share/comfy/skins/steve.png"
-	install -Dm644 data/pack.png "$(DESTDIR)$(PREFIX)/share/comfy/pack.png"
+	install -Dm755 $(BIN) "$(DESTDIR)$(PREFIX)/bin/LeppoisaLauncher"
+	install -Dm644 data/skins/steve.png "$(DESTDIR)$(PREFIX)/share/leppoisa/skins/steve.png"
+	install -Dm644 data/pack.png "$(DESTDIR)$(PREFIX)/share/leppoisa/pack.png"
 	@for skin in data/skins/defaults/*.png; do \
-		install -Dm644 "$$skin" "$(DESTDIR)$(PREFIX)/share/comfy/skins/defaults/$$(basename "$$skin")"; \
+		install -Dm644 "$$skin" "$(DESTDIR)$(PREFIX)/share/leppoisa/skins/defaults/$$(basename "$$skin")"; \
 	done
-	install -Dm644 data/com.github.comfylauncher.comfy.desktop \
-		"$(DESTDIR)$(PREFIX)/share/applications/com.github.comfylauncher.comfy.desktop"
-	install -Dm644 data/icons/scalable/apps/com.github.comfylauncher.comfy.svg \
-		"$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.comfylauncher.comfy.svg"
-	install -Dm644 data/com.github.comfylauncher.comfy.metainfo.xml \
-		"$(DESTDIR)$(PREFIX)/share/metainfo/com.github.comfylauncher.comfy.metainfo.xml"
+	install -Dm644 data/com.github.leppoisalauncher.leppoisa.desktop \
+		"$(DESTDIR)$(PREFIX)/share/applications/com.github.leppoisalauncher.leppoisa.desktop"
+	install -Dm644 data/icons/scalable/apps/com.github.leppoisalauncher.leppoisa.svg \
+		"$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.leppoisalauncher.leppoisa.svg"
+	install -Dm644 data/com.github.leppoisalauncher.leppoisa.metainfo.xml \
+		"$(DESTDIR)$(PREFIX)/share/metainfo/com.github.leppoisalauncher.leppoisa.metainfo.xml"
 	@for lang in $(LOCALES); do \
-		install -Dm644 build/locale/$$lang/LC_MESSAGES/comfy.mo \
-			"$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/comfy.mo"; \
+		install -Dm644 build/locale/$$lang/LC_MESSAGES/leppoisa.mo \
+			"$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/leppoisa.mo"; \
 	done
 
 # The same list the install loop uses, so the catalogs go back out with
 # the rest of the launcher.
 uninstall:
-	rm -f "$(DESTDIR)$(PREFIX)/bin/ComfyLauncher"
-	rm -f "$(DESTDIR)$(PREFIX)/share/comfy/skins/steve.png"
-	rm -f "$(DESTDIR)$(PREFIX)/share/comfy/pack.png"
-	rm -rf "$(DESTDIR)$(PREFIX)/share/comfy/skins/defaults"
-	rm -f "$(DESTDIR)$(PREFIX)/share/applications/com.github.comfylauncher.comfy.desktop"
-	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.comfylauncher.comfy.svg"
-	rm -f "$(DESTDIR)$(PREFIX)/share/metainfo/com.github.comfylauncher.comfy.metainfo.xml"
+	rm -f "$(DESTDIR)$(PREFIX)/bin/LeppoisaLauncher"
+	rm -f "$(DESTDIR)$(PREFIX)/share/leppoisa/skins/steve.png"
+	rm -f "$(DESTDIR)$(PREFIX)/share/leppoisa/pack.png"
+	rm -rf "$(DESTDIR)$(PREFIX)/share/leppoisa/skins/defaults"
+	rm -f "$(DESTDIR)$(PREFIX)/share/applications/com.github.leppoisalauncher.leppoisa.desktop"
+	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.leppoisalauncher.leppoisa.svg"
+	rm -f "$(DESTDIR)$(PREFIX)/share/metainfo/com.github.leppoisalauncher.leppoisa.metainfo.xml"
 	@for lang in $(LOCALES); do \
-		rm -f "$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/comfy.mo"; \
+		rm -f "$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/leppoisa.mo"; \
 	done
 
 clean:
@@ -169,7 +169,7 @@ clean:
 build build-debug build/tests build-debug/tests:
 	mkdir -p $@
 
-build/locale/%/LC_MESSAGES/comfy.mo: po/%.po
+build/locale/%/LC_MESSAGES/leppoisa.mo: po/%.po
 	mkdir -p $(dir $@)
 	msgfmt -o $@ $<
 
