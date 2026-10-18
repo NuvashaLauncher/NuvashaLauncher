@@ -8,7 +8,7 @@ jobs:
   linux:
     name: Linux ${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
-    container: archlinux:latest
+    container: fedora:latest
     strategy:
       fail-fast: false
       matrix:
@@ -24,10 +24,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pacman -Syu --noconfirm
-          pacman -S --noconfirm \
-            base-devel pkgconf gettext \
-            glib2 gtk4 libadwaita libepoxy json-glib libsoup3 libarchive
+          dnf install -y \
+            gcc gcc-c++ make pkgconf-pkg-config gettext \
+            glib2-devel gtk4-devel libadwaita-devel libepoxy-devel \
+            json-glib-devel libsoup3-devel libarchive-devel
 
       - name: Build
         run: make fast
