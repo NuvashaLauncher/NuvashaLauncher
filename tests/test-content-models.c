@@ -5,9 +5,19 @@
 #include <glib.h>
 
 #include "nuvasha-content-browser-model.h"
+#include "nuvasha-content-install-model.h"
+
+static guint freed;
 
 static void
-test_model_owns_browser_state (void)
+count_free (gpointer value)
+{
+  g_free (value);
+  freed++;
+}
+
+static void
+test_browser_model (void)
 {
   g_autoptr (NuvashaContentBrowserModel) model =
     nuvasha_content_browser_model_new ();
@@ -23,21 +33,40 @@ test_model_owns_browser_state (void)
   g_assert_false (model->searched);
   g_assert_false (model->loading_page);
   g_assert_cmpuint (model->offset, ==, 0);
+
   g_autoptr (GCancellable) more = g_object_ref (model->more);
   g_autoptr (GCancellable) cancellable = g_object_ref (model->cancellable);
   g_clear_pointer (&model, nuvasha_content_browser_model_free);
   g_assert_true (g_cancellable_is_cancelled (more));
   g_assert_true (g_cancellable_is_cancelled (cancellable));
-  g_print ("ok - browser model owns initialized search state\n");
+}
+
+static void
+test_install_model (void)
+{
+  freed = 0;
+  g_autoptr (NuvashaContentInstallModel) model =
+    nuvasha_content_install_model_new (count_free);
+
+  g_assert_nonnull (model->picks);
+  g_assert_null (model->updates);
+  g_assert_null (model->batch);
+  g_assert_false (model->updating);
+  g_assert_false (model->picking);
+  g_assert_cmpuint (model->update_index, ==, 0);
+  g_assert_cmpuint (model->pick_index, ==, 0);
+
+  g_ptr_array_add (model->picks, g_strdup ("selected-project"));
+  g_assert_cmpuint (model->picks->len, ==, 1);
+  g_clear_pointer (&model->picks, g_ptr_array_unref);
+  g_assert_cmpuint (freed, ==, 1);
 }
 
 int
-main (int argc, char **argv)
+main (void)
 {
-  (void) argc;
-  (void) argv;
-
-  g_print ("# Content browser model\n");
-  test_model_owns_browser_state ();
+  test_browser_model ();
+  test_install_model ();
+  g_print ("ok - content browser and install models own their state\n");
   return 0;
 }

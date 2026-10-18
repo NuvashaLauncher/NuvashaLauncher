@@ -16,6 +16,7 @@
  * accounts are never touched. No display means the test skips itself. */
 
 #include "nuvasha-main-window.h"
+#include "nuvasha-main-window-model.h"
 #include "nuvasha-instance-manager.h"
 
 #include <adwaita.h>
@@ -24,6 +25,19 @@
 #include <glib/gstdio.h>
 
 static guint criticals = 0;
+
+static void
+test_main_window_model_owns_services (void)
+{
+  g_autoptr (NuvashaMainWindowModel) model = nuvasha_main_window_model_new ();
+
+  g_assert_nonnull (model->settings);
+  g_assert_nonnull (model->accounts);
+  g_assert_nonnull (model->users_popover);
+  g_assert_nonnull (model->launchers);
+  g_assert_nonnull (model->instance_dialogs);
+  g_assert_null (model->manager);
+}
 
 static GLogWriterOutput
 count_criticals (GLogLevelFlags   log_level,
@@ -304,8 +318,10 @@ main (int argc, char **argv)
   if (!gtk_init_check ())
     {
       g_print ("skipped - no display, cannot build the window\n");
-       return 77;
+      return 77;
     }
+
+  test_main_window_model_owns_services ();
 
   g_log_set_writer_func (count_criticals, NULL, NULL);
 

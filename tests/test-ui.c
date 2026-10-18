@@ -24,6 +24,7 @@
 #include "nuvasha-icons.h"
 #include "nuvasha-instance-manager.h"
 #include "nuvasha-modrinth.h"
+#include "nuvasha-ui-feedback.h"
 
 /* The titles the browser has to survive: an ampersand, a tag-like word
  * and a name that reads like markup. */
@@ -35,6 +36,22 @@ static const char *const markup_titles[] = {
 };
 
 static guint markup_warnings = 0;
+
+static void
+test_feedback_ignores_unattached_pages (void)
+{
+  GtkWidget *page = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  GtkWidget *overlay = adw_toast_overlay_new ();
+
+  nuvasha_ui_show_toast (NULL, NULL, "message");
+  nuvasha_ui_show_toast (page, overlay, "message");
+  g_assert_null (gtk_widget_get_root (page));
+  g_assert_nonnull (overlay);
+  g_object_ref_sink (page);
+  g_object_unref (page);
+  g_object_ref_sink (overlay);
+  g_object_unref (overlay);
+}
 
 /* GTK logs through the structured writer, so the count is taken there
  * and the message is still handed to the default writer to be printed
@@ -425,6 +442,7 @@ main (int argc, char **argv)
   test_markup ();
   test_row_activation ();
   test_icon_decode ();
+  test_feedback_ignores_unattached_pages ();
   test_content_page_starts_single ();
   test_page_disposed_while_scanning ();
   test_pick_button_starts_empty ();
