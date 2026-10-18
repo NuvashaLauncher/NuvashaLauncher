@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#include "leppoisa-sandbox.h"
+#include "nuvasha-sandbox.h"
 
 #include <glib.h>
 
@@ -19,11 +19,11 @@ contains (GPtrArray *arguments, const char *value)
 static void
 test_wraps_command (void)
 {
-  g_autofree char *root = g_dir_make_tmp ("leppoisa-sandbox-XXXXXX", NULL);
+  g_autofree char *root = g_dir_make_tmp ("nuvasha-sandbox-XXXXXX", NULL);
   g_autoptr (GPtrArray) command = g_ptr_array_new_with_free_func (g_free);
   g_autoptr (GPtrArray) wrapped = NULL;
   g_autoptr (GPtrArray) offline_wrapped = NULL;
-  LeppoisaResolvedVersion resolved = { 0 };
+  NuvashaResolvedVersion resolved = { 0 };
   g_autoptr (GError) error = NULL;
 
   if (g_find_program_in_path ("bwrap") == NULL)
@@ -34,7 +34,7 @@ test_wraps_command (void)
 
   g_assert_nonnull (root);
   g_ptr_array_add (command, g_strdup ("/bin/true"));
-  wrapped = leppoisa_sandbox_wrap_arguments (command, &resolved, "/bin/true",
+  wrapped = nuvasha_sandbox_wrap_arguments (command, &resolved, "/bin/true",
                                         root, TRUE, &error);
 
   g_assert_no_error (error);
@@ -44,12 +44,12 @@ test_wraps_command (void)
   g_assert_true (contains (wrapped, "--unshare-pid"));
   g_assert_true (contains (wrapped, "--unshare-uts"));
   g_assert_true (contains (wrapped, "--setenv"));
-  g_assert_true (contains (wrapped, "leppoisa_OPEN_BROKER_SOCKET"));
+  g_assert_true (contains (wrapped, "nuvasha_OPEN_BROKER_SOCKET"));
   g_assert_true (contains (wrapped, "/usr/bin/xdg-open"));
   g_assert_true (contains (wrapped, root));
   g_assert_false (contains (wrapped, "--unshare-net"));
 
-  offline_wrapped = leppoisa_sandbox_wrap_arguments (command, &resolved, "/bin/true",
+  offline_wrapped = nuvasha_sandbox_wrap_arguments (command, &resolved, "/bin/true",
                                                root, FALSE, &error);
   g_assert_no_error (error);
   g_assert_nonnull (offline_wrapped);

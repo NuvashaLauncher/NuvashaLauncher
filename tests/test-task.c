@@ -5,10 +5,10 @@
 #include <gio/gio.h>
 #include <glib.h>
 
-#include "leppoisa-task.h"
+#include "nuvasha-task.h"
 
 typedef struct {
-  LeppoisaTaskSequence *sequence;
+  NuvashaTaskSequence *sequence;
   guint calls;
   gboolean data_freed;
 } SequenceData;
@@ -27,7 +27,7 @@ sequence_data_free (gpointer user_data)
 }
 
 static void
-sequence_step (LeppoisaTaskSequence *sequence G_GNUC_UNUSED, gpointer user_data)
+sequence_step (NuvashaTaskSequence *sequence G_GNUC_UNUSED, gpointer user_data)
 {
   SequenceData *data = user_data;
 
@@ -35,11 +35,11 @@ sequence_step (LeppoisaTaskSequence *sequence G_GNUC_UNUSED, gpointer user_data)
 
   if (data->calls == 1)
     {
-      leppoisa_task_sequence_next (data->sequence);
+      nuvasha_task_sequence_next (data->sequence);
       return;
     }
 
-  leppoisa_task_sequence_return_pointer (data->sequence, g_strdup ("complete"),
+  nuvasha_task_sequence_return_pointer (data->sequence, g_strdup ("complete"),
                                     g_free);
 }
 
@@ -64,11 +64,11 @@ test_sequence_progresses_and_cleans_up (void)
 
   result.loop = g_main_loop_new (NULL, FALSE);
 
-  data.sequence = leppoisa_task_sequence_new (NULL, sequence_done, &result,
+  data.sequence = nuvasha_task_sequence_new (NULL, sequence_done, &result,
                                           sequence_step, &data,
                                           sequence_data_free);
-  leppoisa_task_sequence_start (data.sequence);
-  leppoisa_task_sequence_unref (data.sequence);
+  nuvasha_task_sequence_start (data.sequence);
+  nuvasha_task_sequence_unref (data.sequence);
   g_main_loop_run (result.loop);
 
   g_assert_cmpuint (data.calls, ==, 2);
@@ -82,35 +82,35 @@ test_sequence_progresses_and_cleans_up (void)
 static void
 test_scope_ids_and_states (void)
 {
-  g_autoptr (LeppoisaTaskScope) first = leppoisa_task_scope_new (NULL, NULL, NULL, NULL);
-  g_autoptr (LeppoisaTaskScope) second = leppoisa_task_scope_new (NULL, NULL, NULL, NULL);
+  g_autoptr (NuvashaTaskScope) first = nuvasha_task_scope_new (NULL, NULL, NULL, NULL);
+  g_autoptr (NuvashaTaskScope) second = nuvasha_task_scope_new (NULL, NULL, NULL, NULL);
 
-  g_assert_cmpuint (leppoisa_task_scope_get_id (first), >, 0);
-  g_assert_cmpuint (leppoisa_task_scope_get_id (first), !=,
-                    leppoisa_task_scope_get_id (second));
-  g_assert_cmpint (leppoisa_task_scope_get_state (first), ==,
-                   leppoisa_TASK_STATE_QUEUED);
+  g_assert_cmpuint (nuvasha_task_scope_get_id (first), >, 0);
+  g_assert_cmpuint (nuvasha_task_scope_get_id (first), !=,
+                    nuvasha_task_scope_get_id (second));
+  g_assert_cmpint (nuvasha_task_scope_get_state (first), ==,
+                   nuvasha_TASK_STATE_QUEUED);
 
-  leppoisa_task_scope_set_state (first, leppoisa_TASK_STATE_RUNNING);
-  g_assert_cmpint (leppoisa_task_scope_get_state (first), ==,
-                   leppoisa_TASK_STATE_RUNNING);
-  leppoisa_task_scope_cancel (first);
-  g_assert_cmpint (leppoisa_task_scope_get_state (first), ==,
-                   leppoisa_TASK_STATE_CANCELLED);
+  nuvasha_task_scope_set_state (first, nuvasha_TASK_STATE_RUNNING);
+  g_assert_cmpint (nuvasha_task_scope_get_state (first), ==,
+                   nuvasha_TASK_STATE_RUNNING);
+  nuvasha_task_scope_cancel (first);
+  g_assert_cmpint (nuvasha_task_scope_get_state (first), ==,
+                   nuvasha_TASK_STATE_CANCELLED);
 
-  leppoisa_task_scope_return_boolean (second, TRUE);
-  g_assert_cmpint (leppoisa_task_scope_get_state (second), ==,
-                   leppoisa_TASK_STATE_COMPLETED);
+  nuvasha_task_scope_return_boolean (second, TRUE);
+  g_assert_cmpint (nuvasha_task_scope_get_state (second), ==,
+                   nuvasha_TASK_STATE_COMPLETED);
   g_print ("ok - operation ids and lifecycle states are observable\n");
 }
 
 static void
-error_step (LeppoisaTaskSequence *sequence G_GNUC_UNUSED, gpointer user_data)
+error_step (NuvashaTaskSequence *sequence G_GNUC_UNUSED, gpointer user_data)
 {
   SequenceData *data = user_data;
 
   data->calls++;
-  leppoisa_task_sequence_return_error (
+  nuvasha_task_sequence_return_error (
     data->sequence,
     g_error_new_literal (G_IO_ERROR, G_IO_ERROR_FAILED, "step failed"));
 }
@@ -135,11 +135,11 @@ test_sequence_returns_errors (void)
   SequenceResult result = { 0 };
 
   result.loop = g_main_loop_new (NULL, FALSE);
-  data.sequence = leppoisa_task_sequence_new (NULL, error_done, &result,
+  data.sequence = nuvasha_task_sequence_new (NULL, error_done, &result,
                                           error_step, &data,
                                           sequence_data_free);
-  leppoisa_task_sequence_start (data.sequence);
-  leppoisa_task_sequence_unref (data.sequence);
+  nuvasha_task_sequence_start (data.sequence);
+  nuvasha_task_sequence_unref (data.sequence);
   g_main_loop_run (result.loop);
 
   g_assert_cmpuint (data.calls, ==, 1);
@@ -170,11 +170,11 @@ test_sequence_honors_cancellation (void)
 
   result.loop = g_main_loop_new (NULL, FALSE);
   g_cancellable_cancel (cancellable);
-  data.sequence = leppoisa_task_sequence_new (cancellable, cancel_done, &result,
+  data.sequence = nuvasha_task_sequence_new (cancellable, cancel_done, &result,
                                           sequence_step, &data,
                                           sequence_data_free);
-  leppoisa_task_sequence_start (data.sequence);
-  leppoisa_task_sequence_unref (data.sequence);
+  nuvasha_task_sequence_start (data.sequence);
+  nuvasha_task_sequence_unref (data.sequence);
   g_main_loop_run (result.loop);
 
   g_assert_cmpuint (data.calls, ==, 0);
@@ -256,11 +256,11 @@ test_scope_free_releases_a_source_that_fired (void)
   guint fired = 0;
   guint before = criticals;
   g_autoptr (GCancellable) cancellable = g_cancellable_new ();
-  LeppoisaTaskScope *scope = leppoisa_task_scope_new (NULL, cancellable, NULL, NULL);
+  NuvashaTaskScope *scope = nuvasha_task_scope_new (NULL, cancellable, NULL, NULL);
   guint source = fire_and_dissolve (&fired);
 
-  leppoisa_task_scope_track_source (scope, source);
-  leppoisa_task_scope_unref (scope);
+  nuvasha_task_scope_track_source (scope, source);
+  nuvasha_task_scope_unref (scope);
 
   g_assert_cmpuint (criticals, ==, before);
   g_print ("ok - freeing a scope releases a source that already fired\n");
@@ -272,12 +272,12 @@ test_scope_cancel_releases_a_source_that_fired (void)
   guint fired = 0;
   guint before = criticals;
   g_autoptr (GCancellable) cancellable = g_cancellable_new ();
-  LeppoisaTaskScope *scope = leppoisa_task_scope_new (NULL, cancellable, NULL, NULL);
+  NuvashaTaskScope *scope = nuvasha_task_scope_new (NULL, cancellable, NULL, NULL);
   guint source = fire_and_dissolve (&fired);
 
-  leppoisa_task_scope_track_source (scope, source);
-  leppoisa_task_scope_cancel (scope);
-  leppoisa_task_scope_unref (scope);
+  nuvasha_task_scope_track_source (scope, source);
+  nuvasha_task_scope_cancel (scope);
+  nuvasha_task_scope_unref (scope);
 
   g_assert_cmpuint (criticals, ==, before);
   g_print ("ok - cancelling a scope releases a source that already fired\n");
@@ -289,12 +289,12 @@ test_scope_removes_a_source_that_fired (void)
   guint fired = 0;
   guint before = criticals;
   g_autoptr (GCancellable) cancellable = g_cancellable_new ();
-  LeppoisaTaskScope *scope = leppoisa_task_scope_new (NULL, cancellable, NULL, NULL);
+  NuvashaTaskScope *scope = nuvasha_task_scope_new (NULL, cancellable, NULL, NULL);
   guint source = fire_and_dissolve (&fired);
 
-  leppoisa_task_scope_track_source (scope, source);
-  leppoisa_task_scope_remove_source (scope, source);
-  leppoisa_task_scope_unref (scope);
+  nuvasha_task_scope_track_source (scope, source);
+  nuvasha_task_scope_remove_source (scope, source);
+  nuvasha_task_scope_unref (scope);
 
   g_assert_cmpuint (criticals, ==, before);
   g_print ("ok - removing one spent source leaves the rest of the scope\n");
@@ -310,13 +310,13 @@ test_scope_releases_mixed_sources (void)
   gboolean live_ran = FALSE;
   guint before = criticals;
   g_autoptr (GCancellable) cancellable = g_cancellable_new ();
-  LeppoisaTaskScope *scope = leppoisa_task_scope_new (NULL, cancellable, NULL, NULL);
+  NuvashaTaskScope *scope = nuvasha_task_scope_new (NULL, cancellable, NULL, NULL);
   guint spent = fire_and_dissolve (&fired);
   guint live = g_idle_add (scope_probe, &live_ran);
 
-  leppoisa_task_scope_track_source (scope, spent);
-  leppoisa_task_scope_track_source (scope, live);
-  leppoisa_task_scope_unref (scope);
+  nuvasha_task_scope_track_source (scope, spent);
+  nuvasha_task_scope_track_source (scope, live);
+  nuvasha_task_scope_unref (scope);
 
   while (g_main_context_pending (NULL))
     g_main_context_iteration (NULL, FALSE);
@@ -331,16 +331,16 @@ test_scope_cancels_owned_sources (void)
 {
   gboolean ran = FALSE;
   g_autoptr (GCancellable) cancellable = g_cancellable_new ();
-  LeppoisaTaskScope *scope = leppoisa_task_scope_new (NULL, cancellable, NULL, NULL);
+  NuvashaTaskScope *scope = nuvasha_task_scope_new (NULL, cancellable, NULL, NULL);
   guint source = g_idle_add (scope_probe, &ran);
 
-  leppoisa_task_scope_track_source (scope, source);
-  leppoisa_task_scope_cancel (scope);
+  nuvasha_task_scope_track_source (scope, source);
+  nuvasha_task_scope_cancel (scope);
   while (g_main_context_pending (NULL))
     g_main_context_iteration (NULL, FALSE);
 
   g_assert_false (ran);
-  leppoisa_task_scope_unref (scope);
+  nuvasha_task_scope_unref (scope);
   g_print ("ok - task scopes cancel and release owned sources\n");
 }
 
@@ -352,14 +352,14 @@ test_scope_cancellation_stress (void)
   for (guint i = 0; i < 1000; i++)
     {
       g_autoptr (GCancellable) cancellable = g_cancellable_new ();
-      LeppoisaTaskScope *scope = leppoisa_task_scope_new (NULL, cancellable, NULL,
+      NuvashaTaskScope *scope = nuvasha_task_scope_new (NULL, cancellable, NULL,
                                                 NULL);
       guint source = g_idle_add_full (
         G_PRIORITY_DEFAULT, scope_stress_probe, &callbacks, NULL);
 
-      leppoisa_task_scope_track_source (scope, source);
-      leppoisa_task_scope_cancel (scope);
-      leppoisa_task_scope_unref (scope);
+      nuvasha_task_scope_track_source (scope, source);
+      nuvasha_task_scope_cancel (scope);
+      nuvasha_task_scope_unref (scope);
     }
 
   while (g_main_context_pending (NULL))
@@ -372,16 +372,16 @@ test_scope_cancellation_stress (void)
 static void
 test_scope_reference_keeps_operation_alive (void)
 {
-  LeppoisaTaskScope *scope = leppoisa_task_scope_new (NULL, NULL, NULL, NULL);
-  LeppoisaTaskScope *held = leppoisa_task_scope_ref (scope);
+  NuvashaTaskScope *scope = nuvasha_task_scope_new (NULL, NULL, NULL, NULL);
+  NuvashaTaskScope *held = nuvasha_task_scope_ref (scope);
   g_autoptr (GCancellable) cancellable =
-    g_object_ref (leppoisa_task_scope_get_cancellable (held));
+    g_object_ref (nuvasha_task_scope_get_cancellable (held));
 
-  leppoisa_task_scope_unref (scope);
+  nuvasha_task_scope_unref (scope);
   g_assert_true (g_cancellable_is_cancelled (cancellable) == FALSE);
-  leppoisa_task_scope_cancel (held);
+  nuvasha_task_scope_cancel (held);
   g_assert_true (g_cancellable_is_cancelled (cancellable));
-  leppoisa_task_scope_unref (held);
+  nuvasha_task_scope_unref (held);
 
   g_print ("ok - task scope references keep operation state alive\n");
 }
@@ -391,7 +391,7 @@ test_scope_reference_keeps_operation_alive (void)
  * constructor has returned it. */
 typedef struct
 {
-  LeppoisaTaskScope *operation;
+  NuvashaTaskScope *operation;
   gboolean finished;
   gpointer value;
   char *path;
@@ -407,7 +407,7 @@ deferred_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   wait->finished = TRUE;
   wait->value = g_task_propagate_pointer (G_TASK (result), &wait->error);
   wait->path = wait->value;
-  leppoisa_task_scope_unref (wait->operation);
+  nuvasha_task_scope_unref (wait->operation);
   wait->operation = NULL;
 }
 
@@ -416,8 +416,8 @@ test_immediate_failure_completes_after_the_constructor (void)
 {
   DeferredWait wait = { 0 };
 
-  wait.operation = leppoisa_task_scope_new (NULL, NULL, deferred_done, &wait);
-  leppoisa_task_scope_return_error_deferred (
+  wait.operation = nuvasha_task_scope_new (NULL, NULL, deferred_done, &wait);
+  nuvasha_task_scope_return_error_deferred (
     wait.operation,
     g_error_new_literal (G_IO_ERROR, G_IO_ERROR_FAILED, "nothing to do"));
 
@@ -436,8 +436,8 @@ test_immediate_failure_completes_after_the_constructor (void)
    * arrives with its value, and it arrives after the constructor. */
   wait.finished = FALSE;
   wait.value = NULL;
-  wait.operation = leppoisa_task_scope_new (NULL, NULL, deferred_done, &wait);
-  leppoisa_task_scope_return_pointer_deferred (wait.operation,
+  wait.operation = nuvasha_task_scope_new (NULL, NULL, deferred_done, &wait);
+  nuvasha_task_scope_return_pointer_deferred (wait.operation,
                                           g_strdup ("/a/path"), g_free);
   g_assert_false (wait.finished);
 
@@ -456,7 +456,7 @@ test_immediate_failure_completes_after_the_constructor (void)
  * to stop the operation. */
 typedef struct
 {
-  LeppoisaTaskScope *operation;
+  NuvashaTaskScope *operation;
   gboolean finished;
   gboolean cancelled;
   GError *error;
@@ -470,7 +470,7 @@ followed_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   wait->finished = TRUE;
   g_task_propagate_boolean (G_TASK (result), &wait->error);
-  leppoisa_task_scope_unref (wait->operation);
+  nuvasha_task_scope_unref (wait->operation);
   wait->operation = NULL;
 }
 
@@ -480,7 +480,7 @@ followed_report_cancelled (gpointer user_data)
 {
   FollowedWait *wait = user_data;
 
-  wait->cancelled = leppoisa_task_scope_return_error_if_cancelled (wait->operation);
+  wait->cancelled = nuvasha_task_scope_return_error_if_cancelled (wait->operation);
   return G_SOURCE_REMOVE;
 }
 
@@ -492,15 +492,15 @@ test_scope_follows_a_cancellable_it_does_not_own (void)
   g_autoptr (GCancellable) own = NULL;
   guint before = criticals;
 
-  wait.operation = leppoisa_task_scope_new (NULL, NULL, followed_done, &wait);
-  own = g_object_ref (leppoisa_task_scope_get_cancellable (wait.operation));
-  leppoisa_task_scope_follow_cancellable (wait.operation, row);
+  wait.operation = nuvasha_task_scope_new (NULL, NULL, followed_done, &wait);
+  own = g_object_ref (nuvasha_task_scope_get_cancellable (wait.operation));
+  nuvasha_task_scope_follow_cancellable (wait.operation, row);
 
   g_assert_false (g_cancellable_is_cancelled (own));
   g_cancellable_cancel (row);
   g_assert_true (g_cancellable_is_cancelled (own));
 
-  leppoisa_task_scope_track_source (
+  nuvasha_task_scope_track_source (
     wait.operation, g_idle_add (followed_report_cancelled, &wait));
 
   while (g_main_context_pending (NULL))
@@ -519,7 +519,7 @@ test_scope_follows_a_cancellable_it_does_not_own (void)
  * That state has to find the scope still there. */
 typedef struct
 {
-  LeppoisaTaskScope *scope;
+  NuvashaTaskScope *scope;
   gboolean answered;
 } BorrowedState;
 
@@ -537,7 +537,7 @@ borrowed_state_free (BorrowedState *state)
   /* This is what every request cleanup does: it takes the scope's sources
      away. It must run against a scope that is still alive. */
   if (state->scope != NULL)
-    leppoisa_task_scope_remove_source (state->scope, 0);
+    nuvasha_task_scope_remove_source (state->scope, 0);
 
   g_free (state);
 }
@@ -548,12 +548,12 @@ test_a_released_operation_outlives_the_code_that_completed_it (void)
   BorrowedState *state = g_new0 (BorrowedState, 1);
   guint before = criticals;
 
-  state->scope = leppoisa_task_scope_unref_when_done (
-    leppoisa_task_scope_new (NULL, NULL, borrowed_done, NULL));
+  state->scope = nuvasha_task_scope_unref_when_done (
+    nuvasha_task_scope_new (NULL, NULL, borrowed_done, NULL));
 
   /* The completion runs from inside this call, as it does for an
      operation that finds out it has nothing to do. */
-  leppoisa_task_scope_return_boolean (state->scope, TRUE);
+  nuvasha_task_scope_return_boolean (state->scope, TRUE);
 
   borrowed_state_free (state);
 
@@ -569,7 +569,7 @@ test_a_released_operation_outlives_the_code_that_completed_it (void)
  * g_task_return_* call has returned, not merely until the callback starts. */
 typedef struct
 {
-  LeppoisaTaskScope *scope;
+  NuvashaTaskScope *scope;
 } CallbackRelease;
 
 static void
@@ -580,7 +580,7 @@ callback_releases_operation (GObject *source G_GNUC_UNUSED,
   CallbackRelease *release = user_data;
 
   g_task_propagate_boolean (G_TASK (result), NULL);
-  leppoisa_task_scope_unref (release->scope);
+  nuvasha_task_scope_unref (release->scope);
   release->scope = NULL;
 }
 
@@ -590,9 +590,9 @@ test_callback_can_release_owned_operation (void)
   CallbackRelease release = { NULL };
   guint before = criticals;
 
-  release.scope = leppoisa_task_scope_new (NULL, NULL,
+  release.scope = nuvasha_task_scope_new (NULL, NULL,
                                       callback_releases_operation, &release);
-  leppoisa_task_scope_return_boolean (release.scope, TRUE);
+  nuvasha_task_scope_return_boolean (release.scope, TRUE);
 
   while (g_main_context_pending (NULL))
     g_main_context_iteration (NULL, FALSE);
@@ -605,12 +605,12 @@ test_callback_can_release_owned_operation (void)
 static void
 test_scope_does_not_follow_its_own_cancellable (void)
 {
-  g_autoptr (LeppoisaTaskScope) scope = leppoisa_task_scope_new (NULL, NULL, NULL, NULL);
+  g_autoptr (NuvashaTaskScope) scope = nuvasha_task_scope_new (NULL, NULL, NULL, NULL);
   guint before = criticals;
 
-  leppoisa_task_scope_follow_cancellable (scope,
-                                    leppoisa_task_scope_get_cancellable (scope));
-  leppoisa_task_scope_cancel (scope);
+  nuvasha_task_scope_follow_cancellable (scope,
+                                    nuvasha_task_scope_get_cancellable (scope));
+  nuvasha_task_scope_cancel (scope);
 
   g_assert_cmpuint (criticals, ==, before);
   g_print ("ok - a scope does not recursively follow itself\n");
@@ -619,7 +619,7 @@ test_scope_does_not_follow_its_own_cancellable (void)
 /* A step that starts nothing and finishes nothing, so the test decides
  * when and how the sequence completes. */
 static void
-manual_step (LeppoisaTaskSequence *sequence G_GNUC_UNUSED, gpointer user_data)
+manual_step (NuvashaTaskSequence *sequence G_GNUC_UNUSED, gpointer user_data)
 {
   guint *steps = user_data;
   (*steps)++;
@@ -634,38 +634,38 @@ test_sequence_survives_completing_twice (void)
 {
   guint steps = 0;
   SequenceResult result = { 0 };
-  LeppoisaTaskSequence *sequence;
+  NuvashaTaskSequence *sequence;
   g_autofree char *first = g_strdup ("the one that counts");
 
   result.loop = g_main_loop_new (NULL, FALSE);
 
-  sequence = leppoisa_task_sequence_new (NULL, sequence_done, &result, manual_step,
+  sequence = nuvasha_task_sequence_new (NULL, sequence_done, &result, manual_step,
                                     &steps, NULL);
-  leppoisa_task_sequence_ref (sequence);
-  leppoisa_task_sequence_start (sequence);
-  leppoisa_task_sequence_unref (sequence);
+  nuvasha_task_sequence_ref (sequence);
+  nuvasha_task_sequence_start (sequence);
+  nuvasha_task_sequence_unref (sequence);
   g_assert_cmpuint (steps, ==, 1);
 
-  leppoisa_task_sequence_return_pointer (sequence, g_steal_pointer (&first),
+  nuvasha_task_sequence_return_pointer (sequence, g_steal_pointer (&first),
                                     g_free);
 
   /* Every way a late completion can arrive, each of which has to stop
      rather than act on state that is gone. The results handed to the
      ones that stop have to be released, which is what the result_free
      and the error are for. */
-  leppoisa_task_sequence_return_pointer (sequence, g_strdup ("again"), g_free);
-  leppoisa_task_sequence_return_error (sequence,
+  nuvasha_task_sequence_return_pointer (sequence, g_strdup ("again"), g_free);
+  nuvasha_task_sequence_return_error (sequence,
                                   g_error_new_literal (G_IO_ERROR,
                                                        G_IO_ERROR_FAILED,
                                                        "again"));
-  leppoisa_task_sequence_next (sequence);
+  nuvasha_task_sequence_next (sequence);
 
   g_main_loop_run (result.loop);
 
   /* The caller-owned reference keeps a late completion safe after the
    * result callback has released the task's reference. */
-  leppoisa_task_sequence_return_pointer (sequence, g_strdup ("late"), g_free);
-  leppoisa_task_sequence_unref (sequence);
+  nuvasha_task_sequence_return_pointer (sequence, g_strdup ("late"), g_free);
+  nuvasha_task_sequence_unref (sequence);
 
   /* One step, one completion, and the value the first one carried. */
   g_assert_cmpuint (steps, ==, 1);

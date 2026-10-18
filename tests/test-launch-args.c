@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* Tests for the parts of leppoisa-launcher that are only functions: the
+/* Tests for the parts of nuvasha-launcher that are only functions: the
  * offline UUID, the substitution of the placeholders a version
  * document writes, the command line a launch builds from a modern and
  * from a legacy document, and the printable form of a command line with
@@ -10,11 +10,11 @@
  *
  * No JVM, no network and no display are involved: the resolved version
  * the argument builder takes is written here by hand, which is the same
- * shape leppoisa_resolve_version_finish() hands back. */
+ * shape nuvasha_resolve_version_finish() hands back. */
 
-#include "leppoisa-launcher.h"
+#include "nuvasha-launcher.h"
 
-#include "leppoisa-minecraft-resolve.h"
+#include "nuvasha-minecraft-resolve.h"
 
 #include <glib.h>
 #include <stdlib.h>
@@ -70,25 +70,25 @@ at (GPtrArray *argv, guint index)
 
 /* A resolved version with everything filled in, the way the resolve
  * module hands it over after substituting what it knows. */
-static LeppoisaResolvedVersion *
+static NuvashaResolvedVersion *
 resolved_new (const char *version_id)
 {
-  LeppoisaResolvedVersion *resolved = g_new0 (LeppoisaResolvedVersion, 1);
+  NuvashaResolvedVersion *resolved = g_new0 (NuvashaResolvedVersion, 1);
 
   resolved->version_id = g_strdup (version_id);
   resolved->version_type = g_strdup ("release");
-  resolved->client_jar = g_strdup ("/home/u/.local/share/leppoisa/versions/1.20.1/"
+  resolved->client_jar = g_strdup ("/home/u/.local/share/nuvasha/versions/1.20.1/"
                                    "1.20.1.jar");
-  resolved->classpath = g_strdup ("/home/u/.local/share/leppoisa/libraries/lwjgl.jar:"
-                                  "/home/u/.local/share/leppoisa/versions/1.20.1/"
+  resolved->classpath = g_strdup ("/home/u/.local/share/nuvasha/libraries/lwjgl.jar:"
+                                  "/home/u/.local/share/nuvasha/versions/1.20.1/"
                                   "1.20.1.jar");
   resolved->natives_directory =
-    g_strdup ("/home/u/.local/share/leppoisa/natives");
-  resolved->assets_directory = g_strdup ("/home/u/.local/share/leppoisa/assets");
+    g_strdup ("/home/u/.local/share/nuvasha/natives");
+  resolved->assets_directory = g_strdup ("/home/u/.local/share/nuvasha/assets");
   resolved->assets_index_name = g_strdup ("12");
   resolved->main_class = g_strdup ("net.minecraft.client.main.Main");
   resolved->library_directory =
-    g_strdup ("/home/u/.local/share/leppoisa/libraries");
+    g_strdup ("/home/u/.local/share/nuvasha/libraries");
   resolved->java_major_version = 17;
 
   return resolved;
@@ -107,44 +107,44 @@ static void
 test_session_of_an_account (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (LeppoisaAccount) offline = leppoisa_account_new_offline ("Flia", &error);
-  LeppoisaLaunchSession session;
+  g_autoptr (NuvashaAccount) offline = nuvasha_account_new_offline ("Flia", &error);
+  NuvashaLaunchSession session;
 
   g_assert_no_error (error);
 
-  session = leppoisa_launch_session_for (offline);
+  session = nuvasha_launch_session_for (offline);
   g_assert_cmpstr (session.name, ==, "Flia");
   g_assert_cmpstr (session.uuid, ==, "41b05633-42e0-3a6f-b64b-6b64448dccdd");
-  g_assert_cmpstr (session.access_token, ==, leppoisa_LAUNCH_OFFLINE_TOKEN);
-  g_assert_cmpstr (session.user_type, ==, leppoisa_LAUNCH_OFFLINE_USER_TYPE);
+  g_assert_cmpstr (session.access_token, ==, nuvasha_LAUNCH_OFFLINE_TOKEN);
+  g_assert_cmpstr (session.user_type, ==, nuvasha_LAUNCH_OFFLINE_USER_TYPE);
 
   /* A Microsoft account is its own name, its own UUID and its own token,
      and the user type that says it is a real one. */
   {
-    g_autoptr (LeppoisaAccount) microsoft = g_new0 (LeppoisaAccount, 1);
-    g_autoptr (LeppoisaAccount) without_token = NULL;
+    g_autoptr (NuvashaAccount) microsoft = g_new0 (NuvashaAccount, 1);
+    g_autoptr (NuvashaAccount) without_token = NULL;
 
-    microsoft->type = leppoisa_ACCOUNT_MICROSOFT;
+    microsoft->type = nuvasha_ACCOUNT_MICROSOFT;
     microsoft->id = g_strdup ("069a79f444e94726a5befca90e38aaf5");
     microsoft->name = g_strdup ("Notch");
     microsoft->uuid = g_strdup ("069a79f4-44e9-4726-a5be-fca90e38aaf5");
     microsoft->access_token = g_strdup ("the-token-of-the-session");
 
-    session = leppoisa_launch_session_for (microsoft);
+    session = nuvasha_launch_session_for (microsoft);
     g_assert_cmpstr (session.name, ==, "Notch");
     g_assert_cmpstr (session.uuid, ==, "069a79f4-44e9-4726-a5be-fca90e38aaf5");
     g_assert_cmpstr (session.access_token, ==, "the-token-of-the-session");
-    g_assert_cmpstr (session.user_type, ==, leppoisa_LAUNCH_MICROSOFT_USER_TYPE);
+    g_assert_cmpstr (session.user_type, ==, nuvasha_LAUNCH_MICROSOFT_USER_TYPE);
 
     /* An account whose token is gone cannot be given one that is not
        there: the offline token is what the game is told rather than a
        null it would not survive. */
-    without_token = leppoisa_account_copy (microsoft);
+    without_token = nuvasha_account_copy (microsoft);
     g_clear_pointer (&without_token->access_token, g_free);
 
-    session = leppoisa_launch_session_for (without_token);
-    g_assert_cmpstr (session.access_token, ==, leppoisa_LAUNCH_OFFLINE_TOKEN);
-    g_assert_cmpstr (session.user_type, ==, leppoisa_LAUNCH_MICROSOFT_USER_TYPE);
+    session = nuvasha_launch_session_for (without_token);
+    g_assert_cmpstr (session.access_token, ==, nuvasha_LAUNCH_OFFLINE_TOKEN);
+    g_assert_cmpstr (session.user_type, ==, nuvasha_LAUNCH_MICROSOFT_USER_TYPE);
   }
 }
 
@@ -153,19 +153,19 @@ test_session_of_an_account (void)
 static void
 test_arguments_carry_the_account (void)
 {
-  g_autoptr (LeppoisaResolvedVersion) resolved = resolved_new ("1.20.1");
+  g_autoptr (NuvashaResolvedVersion) resolved = resolved_new ("1.20.1");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
-  g_autoptr (LeppoisaAccount) account = g_new0 (LeppoisaAccount, 1);
-  LeppoisaLaunchSession session;
+  g_autoptr (NuvashaAccount) account = g_new0 (NuvashaAccount, 1);
+  NuvashaLaunchSession session;
 
-  account->type = leppoisa_ACCOUNT_MICROSOFT;
+  account->type = nuvasha_ACCOUNT_MICROSOFT;
   account->id = g_strdup ("069a79f444e94726a5befca90e38aaf5");
   account->name = g_strdup ("Notch");
   account->uuid = g_strdup ("069a79f4-44e9-4726-a5be-fca90e38aaf5");
   account->access_token = g_strdup ("the-token-of-the-session");
 
-  session = leppoisa_launch_session_for (account);
+  session = nuvasha_launch_session_for (account);
 
   resolved->jvm_arguments = strings (NULL);
   resolved->game_arguments =
@@ -174,14 +174,14 @@ test_arguments_carry_the_account (void)
              "${user_type}", NULL);
   resolved->logging_argument = NULL;
 
-  argv = leppoisa_launch_build_arguments (resolved, &session, "/usr/bin/java",
+  argv = nuvasha_launch_build_arguments (resolved, &session, "/usr/bin/java",
                                      "/home/u/games/one", NULL, &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (argv);
 
   /* This document says nothing about the natives or the classpath, so
-     leppoisa adds both before the main class: java, the library path, "-cp",
+     nuvasha adds both before the main class: java, the library path, "-cp",
      the classpath, the main class and then the six words of the game
      arguments. */
   g_assert_cmpstr (at (argv, 4), ==, "net.minecraft.client.main.Main");
@@ -195,9 +195,9 @@ test_arguments_carry_the_account (void)
   g_assert_cmpstr (at (argv, 12), ==, "msa");
 
   /* The token is in the command line and never in what is shown of it: the
-     only form of a command line leppoisa prints is the redacted one. */
+     only form of a command line nuvasha prints is the redacted one. */
   {
-    g_autofree char *shown = leppoisa_launch_redact (argv);
+    g_autofree char *shown = nuvasha_launch_redact (argv);
 
     g_assert_null (strstr (shown, "the-token-of-the-session"));
     g_assert_nonnull (strstr (shown, "--accessToken '***'"));
@@ -213,16 +213,16 @@ test_substitute_known_and_unknown (void)
 {
   g_autoptr (GHashTable) placeholders =
     table ("auth_player_name", "Player", "game_directory", "/games/x", NULL);
-  g_autofree char *whole = leppoisa_launch_substitute (
+  g_autofree char *whole = nuvasha_launch_substitute (
     "--username ${auth_player_name} --gameDir ${game_directory}",
     placeholders);
   g_autofree char *partial =
-    leppoisa_launch_substitute ("-Dx=${auth_player_name}/extra", placeholders);
+    nuvasha_launch_substitute ("-Dx=${auth_player_name}/extra", placeholders);
   g_autofree char *unknown =
-    leppoisa_launch_substitute ("--x ${not_a_placeholder} y", placeholders);
-  g_autofree char *empty = leppoisa_launch_substitute ("nothing here",
+    nuvasha_launch_substitute ("--x ${not_a_placeholder} y", placeholders);
+  g_autofree char *empty = nuvasha_launch_substitute ("nothing here",
                                                   placeholders);
-  g_autofree char *unclosed = leppoisa_launch_substitute ("${unclosed",
+  g_autofree char *unclosed = nuvasha_launch_substitute ("${unclosed",
                                                       placeholders);
 
   g_assert_cmpstr (whole, ==,
@@ -234,7 +234,7 @@ test_substitute_known_and_unknown (void)
   g_assert_cmpstr (unknown, ==, "--x ${not_a_placeholder} y");
   g_assert_cmpstr (empty, ==, "nothing here");
   g_assert_cmpstr (unclosed, ==, "${unclosed");
-  g_assert_null (leppoisa_launch_substitute (NULL, placeholders));
+  g_assert_null (nuvasha_launch_substitute (NULL, placeholders));
 }
 
 /* ---------------------------------------------------------- *
@@ -244,11 +244,11 @@ test_substitute_known_and_unknown (void)
 static void
 test_build_arguments_modern (void)
 {
-  g_autoptr (LeppoisaResolvedVersion) resolved = resolved_new ("1.20.1");
+  g_autoptr (NuvashaResolvedVersion) resolved = resolved_new ("1.20.1");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
-  g_autoptr (LeppoisaAccount) account = leppoisa_account_new_offline ("Flia", NULL);
-  LeppoisaLaunchSession session;
+  g_autoptr (NuvashaAccount) account = nuvasha_account_new_offline ("Flia", NULL);
+  NuvashaLaunchSession session;
   guint classpaths = 0;
   guint library_paths = 0;
 
@@ -264,12 +264,12 @@ test_build_arguments_modern (void)
              "${assets_index_name}", "--uuid", "${auth_uuid}", "--userType",
              "${user_type}", "--versionType", "${version_type}", NULL);
   resolved->logging_argument =
-    g_strdup ("-Dlog4j.configurationFile=/home/u/.local/share/leppoisa/logging/"
+    g_strdup ("-Dlog4j.configurationFile=/home/u/.local/share/nuvasha/logging/"
               "client-1.20.1.xml");
 
-  session = leppoisa_launch_session_for (account);
+  session = nuvasha_launch_session_for (account);
 
-  argv = leppoisa_launch_build_arguments (resolved, &session, "/usr/bin/java",
+  argv = nuvasha_launch_build_arguments (resolved, &session, "/usr/bin/java",
                                      "/home/u/games/one", "-Xmx2G -Xss1M",
                                      &error);
 
@@ -280,7 +280,7 @@ test_build_arguments_modern (void)
 
   /* The document first, in the order it wrote them. */
   g_assert_cmpstr (at (argv, 1), ==,
-                   "-Djava.library.path=/home/u/.local/share/leppoisa/natives");
+                   "-Djava.library.path=/home/u/.local/share/nuvasha/natives");
   g_assert_cmpstr (at (argv, 2), ==, "-cp");
   g_assert_cmpstr (at (argv, 3), ==, resolved->classpath);
 
@@ -317,10 +317,10 @@ test_build_arguments_modern (void)
   g_assert_cmpstr (at (argv, 9), ==, "Flia");
   g_assert_cmpstr (at (argv, 11), ==, "1.20.1");
   g_assert_cmpstr (at (argv, 13), ==, "/home/u/games/one");
-  g_assert_cmpstr (at (argv, 15), ==, "/home/u/.local/share/leppoisa/assets");
+  g_assert_cmpstr (at (argv, 15), ==, "/home/u/.local/share/nuvasha/assets");
   g_assert_cmpstr (at (argv, 17), ==, "12");
   g_assert_cmpstr (at (argv, 19), ==, account->uuid);
-  g_assert_cmpstr (at (argv, 21), ==, leppoisa_LAUNCH_OFFLINE_USER_TYPE);
+  g_assert_cmpstr (at (argv, 21), ==, nuvasha_LAUNCH_OFFLINE_USER_TYPE);
   g_assert_cmpstr (at (argv, 23), ==, "release");
 }
 
@@ -335,12 +335,12 @@ test_build_arguments_modern (void)
 static void
 test_build_arguments_without_jvm_args (void)
 {
-  g_autoptr (LeppoisaResolvedVersion) resolved = resolved_new ("1.20.1");
+  g_autoptr (NuvashaResolvedVersion) resolved = resolved_new ("1.20.1");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) with_empty = NULL;
   g_autoptr (GPtrArray) with_none = NULL;
-  g_autoptr (LeppoisaAccount) account = leppoisa_account_new_offline ("Flia", NULL);
-  LeppoisaLaunchSession session;
+  g_autoptr (NuvashaAccount) account = nuvasha_account_new_offline ("Flia", NULL);
+  NuvashaLaunchSession session;
 
   resolved->jvm_arguments =
     strings ("-Djava.library.path=${natives_directory}", "-cp",
@@ -352,19 +352,19 @@ test_build_arguments_without_jvm_args (void)
              "${assets_index_name}", "--uuid", "${auth_uuid}", "--userType",
              "${user_type}", "--versionType", "${version_type}", NULL);
   resolved->logging_argument =
-    g_strdup ("-Dlog4j.configurationFile=/home/u/.local/share/leppoisa/logging/"
+    g_strdup ("-Dlog4j.configurationFile=/home/u/.local/share/nuvasha/logging/"
               "client-1.20.1.xml");
 
-  session = leppoisa_launch_session_for (account);
+  session = nuvasha_launch_session_for (account);
 
-  with_empty = leppoisa_launch_build_arguments (resolved, &session, "/usr/bin/java",
+  with_empty = nuvasha_launch_build_arguments (resolved, &session, "/usr/bin/java",
                                            "/home/u/games/one", "", &error);
   g_assert_no_error (error);
   g_assert_nonnull (with_empty);
 
   /* A missing value must behave the same, in case an instance written by
      hand left the field out entirely. */
-  with_none = leppoisa_launch_build_arguments (resolved, &session, "/usr/bin/java",
+  with_none = nuvasha_launch_build_arguments (resolved, &session, "/usr/bin/java",
                                          "/home/u/games/one", NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (with_none);
@@ -383,17 +383,17 @@ test_build_arguments_without_jvm_args (void)
 static void
 test_version_type_fallback (void)
 {
-  g_autoptr (LeppoisaResolvedVersion) resolved = resolved_new ("1.20.1");
+  g_autoptr (NuvashaResolvedVersion) resolved = resolved_new ("1.20.1");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
-  g_autoptr (LeppoisaAccount) account = leppoisa_account_new_offline ("Flia", NULL);
-  LeppoisaLaunchSession session = leppoisa_launch_session_for (account);
+  g_autoptr (NuvashaAccount) account = nuvasha_account_new_offline ("Flia", NULL);
+  NuvashaLaunchSession session = nuvasha_launch_session_for (account);
 
   g_clear_pointer (&resolved->version_type, g_free);
   resolved->jvm_arguments = strings (NULL);
   resolved->game_arguments = strings ("${version_type}", NULL);
 
-  argv = leppoisa_launch_build_arguments (resolved, &session, "/usr/bin/java",
+  argv = nuvasha_launch_build_arguments (resolved, &session, "/usr/bin/java",
                                      "/home/u/games/one", NULL, &error);
 
   g_assert_no_error (error);
@@ -408,15 +408,15 @@ test_version_type_fallback (void)
 static void
 test_build_arguments_legacy (void)
 {
-  g_autoptr (LeppoisaResolvedVersion) resolved = resolved_new ("1.8.9");
+  g_autoptr (NuvashaResolvedVersion) resolved = resolved_new ("1.8.9");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
-  g_autoptr (LeppoisaAccount) account = leppoisa_account_new_offline ("Flia", NULL);
-  LeppoisaLaunchSession session;
+  g_autoptr (NuvashaAccount) account = nuvasha_account_new_offline ("Flia", NULL);
+  NuvashaLaunchSession session;
   guint classpath = 0;
   guint main_class = 0;
 
-  session = leppoisa_launch_session_for (account);
+  session = nuvasha_launch_session_for (account);
 
   /* What a 1.8.9 document carries: no "arguments" object at all, only
      the one line of game arguments, and nothing for the JVM. */
@@ -429,17 +429,17 @@ test_build_arguments_legacy (void)
              "--versionType", "${version_type}", NULL);
   resolved->logging_argument = NULL;
 
-  argv = leppoisa_launch_build_arguments (resolved, &session, "/usr/bin/java",
+  argv = nuvasha_launch_build_arguments (resolved, &session, "/usr/bin/java",
                                      "/home/u/games/one", NULL, &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (argv);
 
   /* An old document says nothing about where the natives are and which
-     jars are on the classpath, so leppoisa adds both. */
+     jars are on the classpath, so nuvasha adds both. */
   g_assert_cmpstr (at (argv, 0), ==, "/usr/bin/java");
   g_assert_cmpstr (at (argv, 1), ==,
-                   "-Djava.library.path=/home/u/.local/share/leppoisa/natives");
+                   "-Djava.library.path=/home/u/.local/share/nuvasha/natives");
   g_assert_cmpstr (at (argv, 2), ==, "-cp");
   g_assert_cmpstr (at (argv, 3), ==, resolved->classpath);
 
@@ -467,24 +467,24 @@ test_build_arguments_legacy (void)
 static void
 test_build_arguments_legacy_session (void)
 {
-  g_autoptr (LeppoisaResolvedVersion) resolved = resolved_new ("1.6.4");
+  g_autoptr (NuvashaResolvedVersion) resolved = resolved_new ("1.6.4");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
-  g_autoptr (LeppoisaAccount) account = g_new0 (LeppoisaAccount, 1);
-  LeppoisaLaunchSession session;
+  g_autoptr (NuvashaAccount) account = g_new0 (NuvashaAccount, 1);
+  NuvashaLaunchSession session;
   guint main_class = 0;
 
-  account->type = leppoisa_ACCOUNT_MICROSOFT;
+  account->type = nuvasha_ACCOUNT_MICROSOFT;
   account->name = g_strdup ("Notch");
   account->uuid = g_strdup ("069a79f4-44e9-4726-a5be-fca90e38aaf5");
   account->access_token = g_strdup ("the-access-token");
-  session = leppoisa_launch_session_for (account);
+  session = nuvasha_launch_session_for (account);
 
   resolved->jvm_arguments = strings (NULL);
   resolved->game_arguments = strings ("--username", "${auth_player_name}",
                                       "--session", "${auth_session}", NULL);
 
-  argv = leppoisa_launch_build_arguments (resolved, &session, "/usr/bin/java",
+  argv = nuvasha_launch_build_arguments (resolved, &session, "/usr/bin/java",
                                      "/home/u/games/one", NULL, &error);
 
   g_assert_no_error (error);
@@ -498,7 +498,7 @@ test_build_arguments_legacy_session (void)
                    "token:the-access-token:069a79f4-44e9-4726-a5be-fca90e38aaf5");
 
   {
-    g_autofree char *shown = leppoisa_launch_redact (argv);
+    g_autofree char *shown = nuvasha_launch_redact (argv);
     g_assert_null (strstr (shown, "the-access-token"));
     g_assert_nonnull (strstr (shown, "--session '***'"));
   }
@@ -507,34 +507,34 @@ test_build_arguments_legacy_session (void)
 static void
 test_build_arguments_failures (void)
 {
-  g_autoptr (LeppoisaResolvedVersion) resolved = resolved_new ("1.20.1");
+  g_autoptr (NuvashaResolvedVersion) resolved = resolved_new ("1.20.1");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
-  g_autoptr (LeppoisaAccount) account = leppoisa_account_new_offline ("Flia", NULL);
-  LeppoisaLaunchSession session;
+  g_autoptr (NuvashaAccount) account = nuvasha_account_new_offline ("Flia", NULL);
+  NuvashaLaunchSession session;
 
-  session = leppoisa_launch_session_for (account);
+  session = nuvasha_launch_session_for (account);
   resolved->jvm_arguments = strings (NULL);
   resolved->game_arguments = strings ("--demo", NULL);
   g_clear_pointer (&resolved->main_class, g_free);
 
-  argv = leppoisa_launch_build_arguments (resolved, &session, "/usr/bin/java",
+  argv = nuvasha_launch_build_arguments (resolved, &session, "/usr/bin/java",
                                      "/home/u/games/one", NULL, &error);
 
   g_assert_null (argv);
-  g_assert_error (error, leppoisa_LAUNCH_ERROR, leppoisa_LAUNCH_ERROR_NO_MAIN_CLASS);
+  g_assert_error (error, nuvasha_LAUNCH_ERROR, nuvasha_LAUNCH_ERROR_NO_MAIN_CLASS);
   g_assert_nonnull (strstr (error->message, "1.20.1"));
   g_clear_error (&error);
 
   /* JVM arguments that are not a command line fail the launch instead of
      being split by guesswork. */
   resolved->main_class = g_strdup ("net.minecraft.client.main.Main");
-  argv = leppoisa_launch_build_arguments (resolved, &session, "/usr/bin/java",
+  argv = nuvasha_launch_build_arguments (resolved, &session, "/usr/bin/java",
                                      "/home/u/games/one", "-Xmx2G \"unclosed",
                                      &error);
 
   g_assert_null (argv);
-  g_assert_error (error, leppoisa_LAUNCH_ERROR, leppoisa_LAUNCH_ERROR_ARGUMENTS);
+  g_assert_error (error, nuvasha_LAUNCH_ERROR, nuvasha_LAUNCH_ERROR_ARGUMENTS);
 }
 
 /* ---------------------------------------------------------- *
@@ -548,14 +548,14 @@ test_redact (void)
     "/usr/bin/java", "-Xmx2G", "--accessToken", "s3cr3t-token", "--username",
     "Player", "--password=hunter2", "--session=legacy-secret",
     "--token", "token-secret", NULL);
-  g_autofree char *shown = leppoisa_launch_redact (argv);
+  g_autofree char *shown = nuvasha_launch_redact (argv);
   g_autoptr (GPtrArray) plain = strings ("/usr/bin/java", "-cp",
                                          "/games/one", "--demo", NULL);
   g_autoptr (GPtrArray) nothing = strings (NULL);
   g_autoptr (GPtrArray) blank = strings ("java", "--clientId", "", NULL);
-  g_autofree char *shown_plain = leppoisa_launch_redact (plain);
-  g_autofree char *empty = leppoisa_launch_redact (nothing);
-  g_autofree char *shown_blank = leppoisa_launch_redact (blank);
+  g_autofree char *shown_plain = nuvasha_launch_redact (plain);
+  g_autofree char *empty = nuvasha_launch_redact (nothing);
+  g_autofree char *shown_blank = nuvasha_launch_redact (blank);
 
   /* The token is gone, both as the value of the flag and as one
      argument. The stars are quoted, because a shell would read them as

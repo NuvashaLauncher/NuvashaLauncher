@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.github.nuvashalauncher.nuvasha</id>
+  <name>Nuvasha Launcher</name>
+  <summary>Nuvasha Launcher</summary>
+  <launchable type="desktop-id">com.github.nuvashalauncher.nuvasha.desktop</launchable>
+  <provides>
+    <binary>NuvashaLauncher</binary>
+  </provides>
+  <releases>
+    <release version="0.2" date="2026-10-18"/>
+  </releases>
+  <categories>
+    <category>Game</category>
+  </categories>
+  <content_rating type="oars-1.1"/>
+</component>

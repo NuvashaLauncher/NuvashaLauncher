@@ -4,13 +4,13 @@
 
 #include <glib.h>
 
-#include "leppoisa-content-browser-model.h"
+#include "nuvasha-content-browser-model.h"
 
 static void
 test_model_owns_browser_state (void)
 {
-  g_autoptr (LeppoisaContentBrowserModel) model =
-    leppoisa_content_browser_model_new ();
+  g_autoptr (NuvashaContentBrowserModel) model =
+    nuvasha_content_browser_model_new ();
 
   g_assert_nonnull (model->projects);
   g_assert_nonnull (model->project_icons);
@@ -25,7 +25,7 @@ test_model_owns_browser_state (void)
   g_assert_cmpuint (model->offset, ==, 0);
   g_autoptr (GCancellable) more = g_object_ref (model->more);
   g_autoptr (GCancellable) cancellable = g_object_ref (model->cancellable);
-  g_clear_pointer (&model, leppoisa_content_browser_model_free);
+  g_clear_pointer (&model, nuvasha_content_browser_model_free);
   g_assert_true (g_cancellable_is_cancelled (more));
   g_assert_true (g_cancellable_is_cancelled (cancellable));
   g_print ("ok - browser model owns initialized search state\n");

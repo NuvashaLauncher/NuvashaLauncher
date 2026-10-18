@@ -241,8 +241,8 @@ msgstr "Limite de lignes"
 msgid "Open Log Folder After Crash"
 msgstr "Ouvrir le dossier journal après un plantage"
 
-msgid "About Leppoisa Launcher"
-msgstr "À propos de l'Leppoisa Launcher"
+msgid "About Nuvasha Launcher"
+msgstr "À propos de l'Nuvasha Launcher"
 
 msgid "Keyboard Shortcuts"
 msgstr "Raccourcis Clavier"
@@ -370,8 +370,8 @@ msgstr "1 jour"
 msgid "7 days"
 msgstr "7 jours"
 
-msgid "Clear leppoisa Cache"
-msgstr "Vider le cache leppoisa"
+msgid "Clear nuvasha Cache"
+msgstr "Vider le cache nuvasha"
 
 msgid "Show Shortcuts"
 msgstr "Afficher les raccourcis"
@@ -379,8 +379,8 @@ msgstr "Afficher les raccourcis"
 msgid "Quit"
 msgstr "Quitter"
 
-msgid "Clear leppoisa Cache?"
-msgstr "Vider le cache leppoisa ?"
+msgid "Clear nuvasha Cache?"
+msgstr "Vider le cache nuvasha ?"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -562,8 +562,8 @@ msgstr "%s téléchargements"
 msgid "Cache Cleared"
 msgstr "Cache vidée"
 
-msgid "leppoisa cache data was cleared successfully."
-msgstr "Les données du cache leppoisa ont été supprimées avec succès."
+msgid "nuvasha cache data was cleared successfully."
+msgstr "Les données du cache nuvasha ont été supprimées avec succès."
 
 msgid "Cache Cleanup Failed"
 msgstr "Échec du nettoyage du cache"

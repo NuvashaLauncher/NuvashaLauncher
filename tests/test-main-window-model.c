@@ -5,12 +5,12 @@
 #include <gtk/gtk.h>
 #include <stdlib.h>
 
-#include "leppoisa-main-window-model.h"
+#include "nuvasha-main-window-model.h"
 
 static void
 test_model_owns_window_services (void)
 {
-  g_autoptr (LeppoisaMainWindowModel) model = NULL;
+  g_autoptr (NuvashaMainWindowModel) model = NULL;
 
   if (!gtk_init_check ())
     {
@@ -18,7 +18,7 @@ test_model_owns_window_services (void)
       exit (77);
     }
 
-  model = leppoisa_main_window_model_new ();
+  model = nuvasha_main_window_model_new ();
   g_assert_nonnull (model->settings);
   g_assert_nonnull (model->accounts);
   g_assert_nonnull (model->users_popover);

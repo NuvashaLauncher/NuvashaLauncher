@@ -4,28 +4,28 @@
 
 #include <glib.h>
 
-#include "leppoisa-launcher.h"
+#include "nuvasha-launcher.h"
 
 static void
 test_state_names (void)
 {
-  g_assert_cmpstr (leppoisa_launch_state_to_string (leppoisa_LAUNCH_PREPARING), ==,
+  g_assert_cmpstr (nuvasha_launch_state_to_string (nuvasha_LAUNCH_PREPARING), ==,
                    "Preparing");
-  g_assert_cmpstr (leppoisa_launch_state_to_string (leppoisa_LAUNCH_DOWNLOADING), ==,
+  g_assert_cmpstr (nuvasha_launch_state_to_string (nuvasha_LAUNCH_DOWNLOADING), ==,
                    "Downloading");
-  g_assert_cmpstr (leppoisa_launch_state_to_string (leppoisa_LAUNCH_LAUNCHING), ==,
+  g_assert_cmpstr (nuvasha_launch_state_to_string (nuvasha_LAUNCH_LAUNCHING), ==,
                    "Launching");
-  g_assert_cmpstr (leppoisa_launch_state_to_string (leppoisa_LAUNCH_RUNNING), ==,
+  g_assert_cmpstr (nuvasha_launch_state_to_string (nuvasha_LAUNCH_RUNNING), ==,
                    "Running");
-  g_assert_cmpstr (leppoisa_launch_state_to_string (leppoisa_LAUNCH_STOPPING), ==,
+  g_assert_cmpstr (nuvasha_launch_state_to_string (nuvasha_LAUNCH_STOPPING), ==,
                    "Stopping");
-  g_assert_cmpstr (leppoisa_launch_state_to_string (leppoisa_LAUNCH_STOPPED), ==,
+  g_assert_cmpstr (nuvasha_launch_state_to_string (nuvasha_LAUNCH_STOPPED), ==,
                    "Stopped");
-  g_assert_cmpstr (leppoisa_launch_state_to_string (leppoisa_LAUNCH_CRASHED), ==,
+  g_assert_cmpstr (nuvasha_launch_state_to_string (nuvasha_LAUNCH_CRASHED), ==,
                    "Crashed");
-  g_assert_cmpstr (leppoisa_launch_state_to_string (leppoisa_LAUNCH_FAILED), ==,
+  g_assert_cmpstr (nuvasha_launch_state_to_string (nuvasha_LAUNCH_FAILED), ==,
                    "Failed");
-  g_assert_cmpstr (leppoisa_launch_state_to_string (leppoisa_LAUNCH_NEEDS_SIGN_IN), ==,
+  g_assert_cmpstr (nuvasha_launch_state_to_string (nuvasha_LAUNCH_NEEDS_SIGN_IN), ==,
                    "Needs sign-in");
   g_print ("ok - launch states have stable display names\n");
 }
@@ -33,15 +33,15 @@ test_state_names (void)
 static void
 test_busy_states (void)
 {
-  g_assert_true (leppoisa_launch_state_is_busy (leppoisa_LAUNCH_PREPARING));
-  g_assert_true (leppoisa_launch_state_is_busy (leppoisa_LAUNCH_DOWNLOADING));
-  g_assert_true (leppoisa_launch_state_is_busy (leppoisa_LAUNCH_LAUNCHING));
-  g_assert_true (leppoisa_launch_state_is_busy (leppoisa_LAUNCH_RUNNING));
-  g_assert_true (leppoisa_launch_state_is_busy (leppoisa_LAUNCH_STOPPING));
-  g_assert_false (leppoisa_launch_state_is_busy (leppoisa_LAUNCH_STOPPED));
-  g_assert_false (leppoisa_launch_state_is_busy (leppoisa_LAUNCH_CRASHED));
-  g_assert_false (leppoisa_launch_state_is_busy (leppoisa_LAUNCH_FAILED));
-  g_assert_false (leppoisa_launch_state_is_busy (leppoisa_LAUNCH_NEEDS_SIGN_IN));
+  g_assert_true (nuvasha_launch_state_is_busy (nuvasha_LAUNCH_PREPARING));
+  g_assert_true (nuvasha_launch_state_is_busy (nuvasha_LAUNCH_DOWNLOADING));
+  g_assert_true (nuvasha_launch_state_is_busy (nuvasha_LAUNCH_LAUNCHING));
+  g_assert_true (nuvasha_launch_state_is_busy (nuvasha_LAUNCH_RUNNING));
+  g_assert_true (nuvasha_launch_state_is_busy (nuvasha_LAUNCH_STOPPING));
+  g_assert_false (nuvasha_launch_state_is_busy (nuvasha_LAUNCH_STOPPED));
+  g_assert_false (nuvasha_launch_state_is_busy (nuvasha_LAUNCH_CRASHED));
+  g_assert_false (nuvasha_launch_state_is_busy (nuvasha_LAUNCH_FAILED));
+  g_assert_false (nuvasha_launch_state_is_busy (nuvasha_LAUNCH_NEEDS_SIGN_IN));
   g_print ("ok - only active launch states are busy\n");
 }
 
