@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* Tests for the security of aml-modpack: the paths a pack may name,
+/* Tests for the security of comfy-modpack: the paths a pack may name,
  * the hosts it may ask for, and the archives it may be.
  *
  * The .mrpack fixtures are written by the test itself out of nothing
@@ -10,7 +10,7 @@
  * network. Every fixture is a small program of its own: a traversal
  * here, a symlink there, a bomb of entries or of bytes. */
 
-#include "aml-modpack.h"
+#include "comfy-modpack.h"
 
 #include <archive.h>
 #include <archive_entry.h>
@@ -26,7 +26,7 @@ static char *
 make_tmp_dir (void)
 {
   g_autoptr (GError) error = NULL;
-  char *dir = g_dir_make_tmp ("aml-mrpack-XXXXXX", &error);
+  char *dir = g_dir_make_tmp ("comfy-mrpack-XXXXXX", &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (dir);
@@ -320,11 +320,11 @@ static void
 expect_zip_refused (const char *what, const char *zip_path, guint code)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (AmlModpack) pack = NULL;
+  g_autoptr (ComfyModpack) pack = NULL;
 
-  pack = aml_modpack_new_from_zip (zip_path, &error);
+  pack = comfy_modpack_new_from_zip (zip_path, &error);
   g_assert_null (pack);
-  g_assert_error (error, AML_MODPACK_ERROR, code);
+  g_assert_error (error, comfy_MODPACK_ERROR, code);
   g_print ("ok - %s\n", what);
 }
 
@@ -336,34 +336,34 @@ static void
 test_path_is_safe (void)
 {
   /* What a pack may name. */
-  g_assert_true (aml_modpack_path_is_safe ("mods/sodium.jar"));
-  g_assert_true (aml_modpack_path_is_safe ("config/x.toml"));
-  g_assert_true (aml_modpack_path_is_safe ("options.txt"));
-  g_assert_true (aml_modpack_path_is_safe ("a/b/c/d.txt"));
+  g_assert_true (comfy_modpack_path_is_safe ("mods/sodium.jar"));
+  g_assert_true (comfy_modpack_path_is_safe ("config/x.toml"));
+  g_assert_true (comfy_modpack_path_is_safe ("options.txt"));
+  g_assert_true (comfy_modpack_path_is_safe ("a/b/c/d.txt"));
 
   /* What a pack may not name. */
-  g_assert_false (aml_modpack_path_is_safe (NULL));
-  g_assert_false (aml_modpack_path_is_safe (""));
-  g_assert_false (aml_modpack_path_is_safe ("../x"));
-  g_assert_false (aml_modpack_path_is_safe ("a/../b"));
-  g_assert_false (aml_modpack_path_is_safe (".."));
-  g_assert_false (aml_modpack_path_is_safe ("."));
-  g_assert_false (aml_modpack_path_is_safe ("a/./b"));
-  g_assert_false (aml_modpack_path_is_safe ("/etc/passwd"));
-  g_assert_false (aml_modpack_path_is_safe ("a\\b"));
-  g_assert_false (aml_modpack_path_is_safe ("C:/x"));
-  g_assert_false (aml_modpack_path_is_safe ("C:"));
-  g_assert_false (aml_modpack_path_is_safe ("a\nb"));
-  g_assert_false (aml_modpack_path_is_safe ("a\tb"));
-  g_assert_false (aml_modpack_path_is_safe ("a\x01" "b"));
+  g_assert_false (comfy_modpack_path_is_safe (NULL));
+  g_assert_false (comfy_modpack_path_is_safe (""));
+  g_assert_false (comfy_modpack_path_is_safe ("../x"));
+  g_assert_false (comfy_modpack_path_is_safe ("a/../b"));
+  g_assert_false (comfy_modpack_path_is_safe (".."));
+  g_assert_false (comfy_modpack_path_is_safe ("."));
+  g_assert_false (comfy_modpack_path_is_safe ("a/./b"));
+  g_assert_false (comfy_modpack_path_is_safe ("/etc/passwd"));
+  g_assert_false (comfy_modpack_path_is_safe ("a\\b"));
+  g_assert_false (comfy_modpack_path_is_safe ("C:/x"));
+  g_assert_false (comfy_modpack_path_is_safe ("C:"));
+  g_assert_false (comfy_modpack_path_is_safe ("a\nb"));
+  g_assert_false (comfy_modpack_path_is_safe ("a\tb"));
+  g_assert_false (comfy_modpack_path_is_safe ("a\x01" "b"));
 
   /* DEL, the one control byte above the printable range. */
-  g_assert_false (aml_modpack_path_is_safe ("a\x7f" "b"));
+  g_assert_false (comfy_modpack_path_is_safe ("a\x7f" "b"));
 
   /* A trailing / names an empty part. A directory entry of the
    * archive has its / taken off before this check, so what reaches
    * here is a name without one. */
-  g_assert_false (aml_modpack_path_is_safe ("mods/"));
+  g_assert_false (comfy_modpack_path_is_safe ("mods/"));
 
   g_print ("ok - a path the instance can hold is told from one it cannot\n");
 }
@@ -377,30 +377,30 @@ test_download_url_allowed (void)
 {
   /* The four hosts the format has for the files of a pack. */
   g_assert_true (
-    aml_modpack_download_url_allowed ("https://cdn.modrinth.com/data/x"));
+    comfy_modpack_download_url_allowed ("https://cdn.modrinth.com/data/x"));
   g_assert_true (
-    aml_modpack_download_url_allowed ("https://github.com/u/r/raw/f"));
-  g_assert_true (aml_modpack_download_url_allowed (
+    comfy_modpack_download_url_allowed ("https://github.com/u/r/raw/f"));
+  g_assert_true (comfy_modpack_download_url_allowed (
     "https://raw.githubusercontent.com/u/r/f"));
   g_assert_true (
-    aml_modpack_download_url_allowed ("https://gitlab.com/u/r"));
+    comfy_modpack_download_url_allowed ("https://gitlab.com/u/r"));
 
   /* Anything else: another scheme, another host, a host with a port
    * of its own, credentials in front of it, or a path that merely
    * walks through its name. */
   g_assert_false (
-    aml_modpack_download_url_allowed ("http://cdn.modrinth.com/x"));
-  g_assert_false (aml_modpack_download_url_allowed ("https://evil.com/x"));
+    comfy_modpack_download_url_allowed ("http://cdn.modrinth.com/x"));
+  g_assert_false (comfy_modpack_download_url_allowed ("https://evil.com/x"));
   g_assert_false (
-    aml_modpack_download_url_allowed ("https://cdn.modrinth.com.evil.com/x"));
+    comfy_modpack_download_url_allowed ("https://cdn.modrinth.com.evil.com/x"));
   g_assert_false (
-    aml_modpack_download_url_allowed ("https://cdn.modrinth.com@evil.com/x"));
+    comfy_modpack_download_url_allowed ("https://cdn.modrinth.com@evil.com/x"));
   g_assert_false (
-    aml_modpack_download_url_allowed ("https://user@github.com/x"));
+    comfy_modpack_download_url_allowed ("https://user@github.com/x"));
   g_assert_false (
-    aml_modpack_download_url_allowed ("https://cdn.modrinth.com:8443/x"));
+    comfy_modpack_download_url_allowed ("https://cdn.modrinth.com:8443/x"));
   g_assert_false (
-    aml_modpack_download_url_allowed ("https://evil.com/cdn.modrinth.com"));
+    comfy_modpack_download_url_allowed ("https://evil.com/cdn.modrinth.com"));
 
   g_print ("ok - a download URL is asked of the hosts the format names\n");
 }
@@ -426,7 +426,7 @@ test_archive_paths_are_refused (void)
 
     zip_write (zip_path, entries, G_N_ELEMENTS (entries));
     expect_zip_refused ("an entry that steps out of the instance", zip_path,
-                        AML_MODPACK_ERROR_PATH);
+                        comfy_MODPACK_ERROR_PATH);
   }
 
   /* An absolute path. */
@@ -439,7 +439,7 @@ test_archive_paths_are_refused (void)
 
     zip_write (zip_path, entries, G_N_ELEMENTS (entries));
     expect_zip_refused ("an entry with an absolute path", zip_path,
-                        AML_MODPACK_ERROR_PATH);
+                        comfy_MODPACK_ERROR_PATH);
   }
 
   /* A path with the separator of another system. */
@@ -452,7 +452,7 @@ test_archive_paths_are_refused (void)
 
     zip_write (zip_path, entries, G_N_ELEMENTS (entries));
     expect_zip_refused ("an entry with a backslash in it", zip_path,
-                        AML_MODPACK_ERROR_PATH);
+                        comfy_MODPACK_ERROR_PATH);
   }
 
   /* A drive name. */
@@ -465,7 +465,7 @@ test_archive_paths_are_refused (void)
 
     zip_write (zip_path, entries, G_N_ELEMENTS (entries));
     expect_zip_refused ("an entry with a drive name in it", zip_path,
-                        AML_MODPACK_ERROR_PATH);
+                        comfy_MODPACK_ERROR_PATH);
   }
 
   remove_recursive (dir);
@@ -489,7 +489,7 @@ test_archive_links_are_refused (void)
 
     zip_write (zip_path, entries, G_N_ELEMENTS (entries));
     expect_zip_refused ("an archive that holds a symlink", zip_path,
-                        AML_MODPACK_ERROR_PATH);
+                        comfy_MODPACK_ERROR_PATH);
   }
 
   /* A file through a symlink: the archive is refused at the symlink,
@@ -507,7 +507,7 @@ test_archive_links_are_refused (void)
 
     zip_write (zip_path, entries, G_N_ELEMENTS (entries));
     expect_zip_refused ("a file written through a symlink", zip_path,
-                        AML_MODPACK_ERROR_PATH);
+                        comfy_MODPACK_ERROR_PATH);
   }
 
   remove_recursive (dir);
@@ -523,7 +523,7 @@ test_archive_nul_index_is_refused (void)
 
   zip_write_nul_index (zip_path, index_json);
   expect_zip_refused ("an index that carries a NUL byte", zip_path,
-                      AML_MODPACK_ERROR_PATH);
+                      comfy_MODPACK_ERROR_PATH);
 
   remove_recursive (dir);
   g_print ("ok - an index with a raw NUL byte is refused\n");
@@ -540,7 +540,7 @@ test_archive_without_index_is_refused (void)
 
     zip_write (zip_path, entries, G_N_ELEMENTS (entries));
     expect_zip_refused ("an archive with no modrinth.index.json", zip_path,
-                        AML_MODPACK_ERROR_FORMAT);
+                        comfy_MODPACK_ERROR_FORMAT);
   }
 
   remove_recursive (dir);
@@ -555,7 +555,7 @@ test_not_a_zip_is_refused (void)
 
   write_not_a_zip (zip_path);
   expect_zip_refused ("a file that is not a zip", zip_path,
-                      AML_MODPACK_ERROR_ARCHIVE);
+                      comfy_MODPACK_ERROR_ARCHIVE);
 
   remove_recursive (dir);
   g_print ("ok - a file that is not a zip is refused\n");
@@ -570,9 +570,9 @@ test_archive_entry_bomb_is_refused (void)
 
   /* The index plus ten thousand small files: one more entry than one
    * pack carries. */
-  zip_write_entry_bomb (zip_path, index_json, AML_MODPACK_MAX_ENTRIES);
+  zip_write_entry_bomb (zip_path, index_json, comfy_MODPACK_MAX_ENTRIES);
   expect_zip_refused ("an archive with more entries than one pack", zip_path,
-                      AML_MODPACK_ERROR_BOMB);
+                      comfy_MODPACK_ERROR_BOMB);
 
   remove_recursive (dir);
   g_print ("ok - an archive of too many entries is refused\n");
@@ -589,14 +589,14 @@ test_archive_size_bomb_is_refused (void)
      is lowered to what the archive below crosses. What is checked is
      that an archive past whatever the cap is is refused, not the size of
      the cap itself. */
-  aml_modpack_set_content_limit ((guint64) 128 * 1024 * 1024);
+  comfy_modpack_set_content_limit ((guint64) 128 * 1024 * 1024);
 
   /* One entry that announces more content than one pack carries. */
   zip_write_size_bomb (zip_path, index_json, 129);
   expect_zip_refused ("an archive that announces too much content", zip_path,
-                      AML_MODPACK_ERROR_BOMB);
+                      comfy_MODPACK_ERROR_BOMB);
 
-  aml_modpack_set_content_limit (AML_MODPACK_MAX_CONTENT_SIZE);
+  comfy_modpack_set_content_limit (comfy_MODPACK_MAX_CONTENT_SIZE);
   remove_recursive (dir);
   g_print ("ok - an archive of too much content is refused\n");
 }
@@ -610,7 +610,7 @@ test_archive_index_bomb_is_refused (void)
   /* An index that is larger than one manifest can be. */
   zip_write_index_bomb (zip_path, 9);
   expect_zip_refused ("an index that decodes past one manifest", zip_path,
-                      AML_MODPACK_ERROR_BOMB);
+                      comfy_MODPACK_ERROR_BOMB);
 
   remove_recursive (dir);
   g_print ("ok - an index of too many bytes is refused\n");
@@ -623,7 +623,7 @@ test_safe_archive_opens (void)
   g_autofree char *index_json = pack_index ("Safe");
   g_autofree char *zip_path = g_build_filename (dir, "pack.mrpack", NULL);
   g_autoptr (GError) error = NULL;
-  g_autoptr (AmlModpack) pack = NULL;
+  g_autoptr (ComfyModpack) pack = NULL;
 
   {
     ZipEntry entries[] = {
@@ -636,7 +636,7 @@ test_safe_archive_opens (void)
     zip_write (zip_path, entries, G_N_ELEMENTS (entries));
   }
 
-  pack = aml_modpack_new_from_zip (zip_path, &error);
+  pack = comfy_modpack_new_from_zip (zip_path, &error);
   g_assert_no_error (error);
   g_assert_nonnull (pack);
   g_assert_cmpstr (pack->archive_path, ==, zip_path);

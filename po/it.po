@@ -240,8 +240,8 @@ msgstr "Limite di righe"
 msgid "Open Log Folder After Crash"
 msgstr "Apri la cartella di registro dopo l'arresto anomalo"
 
-msgid "About AML"
-msgstr "Informazioni su AML"
+msgid "About comfy"
+msgstr "Informazioni su comfy"
 
 msgid "Keyboard Shortcuts"
 msgstr "Scorciatoie da tastiera"
@@ -367,8 +367,8 @@ msgstr "1 giorno"
 msgid "7 days"
 msgstr "7 giorni"
 
-msgid "Clear AML Cache"
-msgstr "Svuota cache AML"
+msgid "Clear comfy Cache"
+msgstr "Svuota cache comfy"
 
 msgid "Show Shortcuts"
 msgstr "Mostra scorciatoie"
@@ -376,8 +376,8 @@ msgstr "Mostra scorciatoie"
 msgid "Quit"
 msgstr "Esci"
 
-msgid "Clear AML Cache?"
-msgstr "Svuotare la cache AML?"
+msgid "Clear comfy Cache?"
+msgstr "Svuotare la cache comfy?"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -560,8 +560,8 @@ msgstr "%s download"
 msgid "Cache Cleared"
 msgstr "Cache svuotata"
 
-msgid "AML cache data was cleared successfully."
-msgstr "I dati della cache di AML sono stati eliminati correttamente."
+msgid "comfy cache data was cleared successfully."
+msgstr "I dati della cache di comfy sono stati eliminati correttamente."
 
 msgid "Cache Cleanup Failed"
 msgstr "Pulizia della cache non riuscita"

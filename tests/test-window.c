@@ -15,8 +15,8 @@
  * Everything lives under a temporary XDG root, so the real settings and
  * accounts are never touched. No display means the test skips itself. */
 
-#include "aml-main-window.h"
-#include "aml-instance-manager.h"
+#include "comfy-main-window.h"
+#include "comfy-instance-manager.h"
 
 #include <adwaita.h>
 #include <gtk/gtk.h>
@@ -98,7 +98,7 @@ find_instance_dialog (GtkWidget *widget, const char *id)
 
       if (ADW_IS_DIALOG (child))
         {
-          other = g_object_get_data (G_OBJECT (child), "aml-instance-id");
+          other = g_object_get_data (G_OBJECT (child), "comfy-instance-id");
 
           if (other != NULL && g_strcmp0 (other, id) == 0)
             return ADW_DIALOG (child);
@@ -231,22 +231,22 @@ on_activate (GApplication *application, gpointer user_data)
 {
   Run *run = user_data;
   g_autoptr (GError) error = NULL;
-  g_autoptr (AmlInstanceManager) manager = NULL;
-  g_autoptr (AmlInstance) instance = NULL;
+  g_autoptr (ComfyInstanceManager) manager = NULL;
+  g_autoptr (ComfyInstance) instance = NULL;
 
-  manager = aml_instance_manager_new (NULL);
+  manager = comfy_instance_manager_new (NULL);
   g_assert_nonnull (manager);
 
-  instance = aml_instance_manager_create (manager, "Test", NULL, "1.21.1",
-                                          AML_LOADER_VANILLA, NULL, &error);
+  instance = comfy_instance_manager_create (manager, "Test", NULL, "1.21.1",
+                                          comfy_LOADER_VANILLA, NULL, &error);
 
   if (instance == NULL)
     g_error ("the instance cannot be created: %s", error->message);
 
-  run->instance_id = g_strdup (aml_instance_get_id (instance));
+  run->instance_id = g_strdup (comfy_instance_get_id (instance));
 
   /* The window keeps the manager for as long as it lives. */
-  run->window = GTK_WINDOW (aml_main_window_new (GTK_APPLICATION (application),
+  run->window = GTK_WINDOW (comfy_main_window_new (GTK_APPLICATION (application),
                                                  manager));
   g_assert_nonnull (run->window);
 
@@ -281,7 +281,7 @@ main (int argc, char **argv)
 #endif
 
   /* The settings and the accounts of the window go under this root. */
-  root = g_dir_make_tmp ("aml-window-XXXXXX", NULL);
+  root = g_dir_make_tmp ("comfy-window-XXXXXX", NULL);
 
   if (root == NULL)
     {
@@ -310,7 +310,7 @@ main (int argc, char **argv)
   g_log_set_writer_func (count_criticals, NULL, NULL);
 
   application =
-    adw_application_new ("io.gitlab.anotherminecraftlauncher.AML.windowtest",
+    adw_application_new ("io.gitlab.comfylauncher.comfy.windowtest",
                                      G_APPLICATION_DEFAULT_FLAGS);
   run.application = G_APPLICATION (application);
 

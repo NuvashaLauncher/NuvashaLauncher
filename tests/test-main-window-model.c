@@ -5,12 +5,12 @@
 #include <gtk/gtk.h>
 #include <stdlib.h>
 
-#include "aml-main-window-model.h"
+#include "comfy-main-window-model.h"
 
 static void
 test_model_owns_window_services (void)
 {
-  g_autoptr (AmlMainWindowModel) model = NULL;
+  g_autoptr (ComfyMainWindowModel) model = NULL;
 
   if (!gtk_init_check ())
     {
@@ -18,7 +18,7 @@ test_model_owns_window_services (void)
       exit (77);
     }
 
-  model = aml_main_window_model_new ();
+  model = comfy_main_window_model_new ();
   g_assert_nonnull (model->settings);
   g_assert_nonnull (model->accounts);
   g_assert_nonnull (model->users_popover);

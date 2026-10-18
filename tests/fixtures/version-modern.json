@@ -61,7 +61,7 @@
       },
       {
         "rules": [ { "action": "allow", "features": { "is_demo_user": true } } ],
-        "value": "-Dminecraft.launcher.brand=AML"
+        "value": "-Dminecraft.launcher.brand=comfy"
       }
     ],
     "game": [

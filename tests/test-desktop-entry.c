@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* Starter test: parses the desktop entry and checks the keys AML relies
+/* Starter test: parses the desktop entry and checks the keys comfy relies
  * on, including that no X11 specific key slipped in. Runs headless. */
 
 #include <glib.h>
@@ -12,8 +12,8 @@ static void
 test_desktop_entry (void)
 {
   g_autofree gchar *path =
-    g_build_filename (AML_DATA_DIR,
-                      "io.gitlab.anotherminecraftlauncher.AML.desktop", NULL);
+    g_build_filename (comfy_DATA_DIR,
+                      "io.gitlab.comfylauncher.comfy.desktop", NULL);
   g_autoptr (GKeyFile) keys = g_key_file_new ();
   g_autoptr (GError) error = NULL;
   g_autofree gchar *type = NULL;
@@ -30,16 +30,16 @@ test_desktop_entry (void)
   g_assert_cmpstr (type, ==, "Application");
 
   name = g_key_file_get_string (keys, "Desktop Entry", "Name", NULL);
-  g_assert_cmpstr (name, ==, "AML");
+  g_assert_cmpstr (name, ==, "comfy");
 
   comment = g_key_file_get_string (keys, "Desktop Entry", "Comment", NULL);
-  g_assert_cmpstr (comment, ==, "Another Minecraft Launcher");
+  g_assert_cmpstr (comment, ==, "Comfy Launcher");
 
   exec = g_key_file_get_string (keys, "Desktop Entry", "Exec", NULL);
-  g_assert_cmpstr (exec, ==, "AML");
+  g_assert_cmpstr (exec, ==, "comfy");
 
   icon = g_key_file_get_string (keys, "Desktop Entry", "Icon", NULL);
-  g_assert_cmpstr (icon, ==, "io.gitlab.anotherminecraftlauncher.AML");
+  g_assert_cmpstr (icon, ==, "io.gitlab.comfylauncher.comfy");
 
   g_assert_true (g_key_file_has_key (keys, "Desktop Entry", "Terminal", NULL));
   g_assert_false (g_key_file_get_boolean (keys, "Desktop Entry", "Terminal",

@@ -241,8 +241,8 @@ msgstr "Regellimiet"
 msgid "Open Log Folder After Crash"
 msgstr "Logmap openen na een crash"
 
-msgid "About AML"
-msgstr "Over AML"
+msgid "About comfy"
+msgstr "Over comfy"
 
 msgid "Keyboard Shortcuts"
 msgstr "Sneltoetsen"
@@ -368,8 +368,8 @@ msgstr "1 dag"
 msgid "7 days"
 msgstr "7 dagen"
 
-msgid "Clear AML Cache"
-msgstr "AML-cache wissen"
+msgid "Clear comfy Cache"
+msgstr "comfy-cache wissen"
 
 msgid "Show Shortcuts"
 msgstr "Sneltoetsen tonen"
@@ -377,8 +377,8 @@ msgstr "Sneltoetsen tonen"
 msgid "Quit"
 msgstr "Afsluiten"
 
-msgid "Clear AML Cache?"
-msgstr "AML-cache wissen?"
+msgid "Clear comfy Cache?"
+msgstr "comfy-cache wissen?"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -558,8 +558,8 @@ msgstr "%s downloads"
 msgid "Cache Cleared"
 msgstr "Cache gewist"
 
-msgid "AML cache data was cleared successfully."
-msgstr "De AML-cachegegevens zijn gewist."
+msgid "comfy cache data was cleared successfully."
+msgstr "De comfy-cachegegevens zijn gewist."
 
 msgid "Cache Cleanup Failed"
 msgstr "Cache wissen mislukt"
