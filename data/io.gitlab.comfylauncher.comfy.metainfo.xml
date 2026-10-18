@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.gitlab.comfylauncher.comfy</id>
+  <name>comfy</name>
+  <summary>Comfy Launcher</summary>
+  <launchable type="desktop-id">io.gitlab.comfylauncher.comfy.desktop</launchable>
+  <provides>
+    <binary>comfy</binary>
+  </provides>
+  <releases>
+    <release version="0.1" date="2026-10-14"/>
+  </releases>
+  <categories>
+    <category>Game</category>
+  </categories>
+  <content_rating type="oars-1.1"/>
+</component>

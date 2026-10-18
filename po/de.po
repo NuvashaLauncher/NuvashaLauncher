@@ -242,8 +242,8 @@ msgstr "Zeilenlimit"
 msgid "Open Log Folder After Crash"
 msgstr "Protokollordner nach Absturz öffnen"
 
-msgid "About AML"
-msgstr "Über AML"
+msgid "About comfy"
+msgstr "Über comfy"
 
 msgid "Keyboard Shortcuts"
 msgstr "Tastaturkürzel"
@@ -370,8 +370,8 @@ msgstr "1 Tag"
 msgid "7 days"
 msgstr "7 Tage"
 
-msgid "Clear AML Cache"
-msgstr "AML-Cache leeren"
+msgid "Clear comfy Cache"
+msgstr "comfy-Cache leeren"
 
 msgid "Show Shortcuts"
 msgstr "Tastenkürzel anzeigen"
@@ -379,8 +379,8 @@ msgstr "Tastenkürzel anzeigen"
 msgid "Quit"
 msgstr "Beenden"
 
-msgid "Clear AML Cache?"
-msgstr "AML-Cache leeren?"
+msgid "Clear comfy Cache?"
+msgstr "comfy-Cache leeren?"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -560,8 +560,8 @@ msgstr "%s Downloads"
 msgid "Cache Cleared"
 msgstr "Cache geleert"
 
-msgid "AML cache data was cleared successfully."
-msgstr "AML-Cache-Daten wurden erfolgreich gelöscht."
+msgid "comfy cache data was cleared successfully."
+msgstr "comfy-Cache-Daten wurden erfolgreich gelöscht."
 
 msgid "Cache Cleanup Failed"
 msgstr "Bereinigung des Caches fehlgeschlagen"

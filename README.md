@@ -1,8 +1,8 @@
-# AML
+# comfy
 
-Another Minecraft Launcher, for Linux.
+Comfy Launcher, for Linux.
 
-AML creates instances, installs modpacks and mods from Modrinth, resolves
+comfy creates instances, installs modpacks and mods from Modrinth, resolves
 mod loaders, and runs the game. It is written in C against GTK4 and
 libadwaita, and it uses the public APIs of the services it talks to.
 
@@ -23,10 +23,10 @@ Works with both Wayland and X11 through GTK4.
 
 ## Design notes
 
-GTK selects the available display backend at startup. AML does not select or
+GTK selects the available display backend at startup. comfy does not select or
 require a specific window-system backend.
 
-There is no companion service, no updater and no telemetry. AML only makes
+There is no companion service, no updater and no telemetry. comfy only makes
 requests when a task needs them, and only to the service that task needs.
 
 Downloads are checked against the hashes their manifest publishes before
@@ -58,16 +58,16 @@ rather than against a file that has to be kept in step with it.
 GTK 4.10+ and libadwaita 1.5+ are required.
 
 The optional game sandbox uses `bwrap` (bubblewrap). It is disabled by
-default and can be enabled through the global `sandbox-enabled` setting. When enabled, AML keeps
+default and can be enabled through the global `sandbox-enabled` setting. When enabled, comfy keeps
 the instance and required caches writable, exposes Java, LWJGL natives,
 OpenGL/Vulkan drivers, Wayland/X11 and PipeWire, and leaves the game network
-available. AML itself always remains outside the sandbox.
+available. comfy itself always remains outside the sandbox.
 
 Network access inside the sandbox is controlled separately by the global
 `sandbox-network-enabled` setting, which defaults to enabled. When disabled,
 the game runs without a network namespace connection.
 
-For legacy Minecraft versions using LWJGL 2, AML automatically adds
+For legacy Minecraft versions using LWJGL 2, comfy automatically adds
 `-DLWJGL_DISABLE_XRANDR=true` when the optional `xrandr` command is absent.
 
 Debian:
@@ -124,18 +124,18 @@ nix-shell -p gcc gnumake gettext pkg-config glib gtk4 libadwaita \
 Clone the repository:
 
 ```
-git clone https://gitlab.com/anotherminecraftlauncher/aml.git
-cd aml
+git clone https://gitlab.com/comfylauncher/comfy.git
+cd comfy
 ```
 
-Build and install AML:
+Build and install comfy:
 
 ```bash
 make
 sudo make install PREFIX=/usr/local
 ```
 
-The launcher is installed as `/usr/local/bin/AML`.
+The launcher is installed as `/usr/local/bin/comfy`.
 
 To uninstall a source installation:
 
@@ -163,14 +163,14 @@ reports those sites as leaks.
 Other targets:
 
 ```
-make debug         # a debug build with the sanitizers, for running AML
+make debug         # a debug build with the sanitizers, for running comfy
 make clean         # remove build/ and build-debug/
 ```
 
-## Where AML keeps its files
+## Where comfy keeps its files
 
-AML keeps its data under `~/.local/share/AML`, its caches under
-`~/.cache/AML` and its settings under `~/.config/AML`. The accounts file
+comfy keeps its data under `~/.local/share/comfy`, its caches under
+`~/.cache/comfy` and its settings under `~/.config/comfy`. The accounts file
 holds tokens and is written readable only by its owner, but the tokens
 are not encrypted: anyone who can read your user's files can read them.
 Native libraries extracted for a game are kept under that instance's
@@ -178,13 +178,13 @@ Native libraries extracted for a game are kept under that instance's
 
 ## Signing in
 
-AML signs in with the Microsoft device code flow. The launcher shows a
+comfy signs in with the Microsoft device code flow. The launcher shows a
 code, the user enters it on a Microsoft page in their own browser, and the
 launcher polls for the result. There is no embedded web view, and the
 browser is never captured.
 
-The client ID and tenant are compiled in as `AML_MICROSOFT_CLIENT_ID` and
-`AML_MICROSOFT_TENANT` in `src/aml-auth-microsoft.h`. A build with an
+The client ID and tenant are compiled in as `comfy_MICROSOFT_CLIENT_ID` and
+`comfy_MICROSOFT_TENANT` in `src/comfy-auth-microsoft.h`. A build with an
 empty client ID says so when a sign-in is attempted.
 
 The scopes requested are `XboxLive.signin` and `offline_access`. The
@@ -193,5 +193,5 @@ with. Accounts can be removed from the menu in the header.
 
 ## License
 
-AML is free software, released under the GNU General Public License v3.0
+comfy is free software, released under the GNU General Public License v3.0
 only. See [LICENSE](LICENSE).

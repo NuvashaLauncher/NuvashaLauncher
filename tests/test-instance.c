@@ -2,12 +2,12 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* Tests for the AmlInstance model: loader strings, name sanitization,
+/* Tests for the ComfyInstance model: loader strings, name sanitization,
  * validation and JSON round trip. Runs headless and touches no
  * directories. */
 
-#include "aml-instance.h"
-#include "aml-instance-components.h"
+#include "comfy-instance.h"
+#include "comfy-instance-components.h"
 
 #include <glib.h>
 #include <stdlib.h>
@@ -30,7 +30,7 @@ parse_json (const char *text)
 }
 
 static char *
-prop_string (AmlInstance *instance, const char *property)
+prop_string (ComfyInstance *instance, const char *property)
 {
   char *value = NULL;
 
@@ -51,9 +51,9 @@ assert_safe_name (const char *name)
 static void
 test_loader_strings (void)
 {
-  const AmlLoader loaders[] = {
-    AML_LOADER_VANILLA, AML_LOADER_FABRIC, AML_LOADER_FORGE,
-    AML_LOADER_NEOFORGE, AML_LOADER_QUILT
+  const ComfyLoader loaders[] = {
+    comfy_LOADER_VANILLA, comfy_LOADER_FABRIC, comfy_LOADER_FORGE,
+    comfy_LOADER_NEOFORGE, comfy_LOADER_QUILT
   };
   const char *names[] = {
     "vanilla", "fabric", "forge", "neoforge", "quilt"
@@ -61,17 +61,17 @@ test_loader_strings (void)
 
   for (guint i = 0; i < G_N_ELEMENTS (loaders); i++)
     {
-      g_assert_cmpstr (aml_loader_to_string (loaders[i]), ==, names[i]);
+      g_assert_cmpstr (comfy_loader_to_string (loaders[i]), ==, names[i]);
 
-      AmlLoader parsed = AML_LOADER_VANILLA;
-      g_assert_true (aml_loader_from_string (names[i], &parsed));
+      ComfyLoader parsed = comfy_LOADER_VANILLA;
+      g_assert_true (comfy_loader_from_string (names[i], &parsed));
       g_assert_cmpint (parsed, ==, loaders[i]);
     }
 
-  AmlLoader unknown = AML_LOADER_VANILLA;
-  g_assert_false (aml_loader_from_string ("sodium", &unknown));
-  g_assert_false (aml_loader_from_string (NULL, &unknown));
-  g_assert_null (aml_loader_to_string ((AmlLoader) 99));
+  ComfyLoader unknown = comfy_LOADER_VANILLA;
+  g_assert_false (comfy_loader_from_string ("sodium", &unknown));
+  g_assert_false (comfy_loader_from_string (NULL, &unknown));
+  g_assert_null (comfy_loader_to_string ((ComfyLoader) 99));
 
   g_print ("ok - loader strings\n");
 }
@@ -79,46 +79,46 @@ test_loader_strings (void)
 static void
 test_sanitize_name (void)
 {
-  g_autofree char *plain = aml_instance_sanitize_name ("Hello World");
+  g_autofree char *plain = comfy_instance_sanitize_name ("Hello World");
   g_assert_cmpstr (plain, ==, "Hello World");
 
-  g_autofree char *slash = aml_instance_sanitize_name ("a/b");
+  g_autofree char *slash = comfy_instance_sanitize_name ("a/b");
   g_assert_cmpstr (slash, ==, "a-b");
 
-  g_autofree char *dot_dot = aml_instance_sanitize_name ("..");
+  g_autofree char *dot_dot = comfy_instance_sanitize_name ("..");
   g_assert_cmpstr (dot_dot, ==, "instance");
 
-  g_autofree char *dots = aml_instance_sanitize_name ("...");
+  g_autofree char *dots = comfy_instance_sanitize_name ("...");
   g_assert_cmpstr (dots, ==, "instance");
 
-  g_autofree char *empty = aml_instance_sanitize_name ("");
+  g_autofree char *empty = comfy_instance_sanitize_name ("");
   g_assert_cmpstr (empty, ==, "instance");
 
-  g_autofree char *null_name = aml_instance_sanitize_name (NULL);
+  g_autofree char *null_name = comfy_instance_sanitize_name (NULL);
   g_assert_cmpstr (null_name, ==, "instance");
 
-  g_autofree char *blanks = aml_instance_sanitize_name ("   ");
+  g_autofree char *blanks = comfy_instance_sanitize_name ("   ");
   g_assert_cmpstr (blanks, ==, "instance");
 
-  g_autofree char *hidden = aml_instance_sanitize_name (".hidden");
+  g_autofree char *hidden = comfy_instance_sanitize_name (".hidden");
   g_assert_cmpstr (hidden, ==, "hidden");
 
-  g_autofree char *inner = aml_instance_sanitize_name ("a..b");
+  g_autofree char *inner = comfy_instance_sanitize_name ("a..b");
   g_assert_cmpstr (inner, ==, "a.b");
 
-  g_autofree char *padded = aml_instance_sanitize_name ("  padded  ");
+  g_autofree char *padded = comfy_instance_sanitize_name ("  padded  ");
   g_assert_cmpstr (padded, ==, "padded");
 
   g_autofree char *escape =
-    aml_instance_sanitize_name ("../../../etc/passwd");
+    comfy_instance_sanitize_name ("../../../etc/passwd");
   assert_safe_name (escape);
 
   g_autofree char *utf8 =
-    aml_instance_sanitize_name ("Caf\xc3\xa9" "/Montr\xc3\xa9" "al");
+    comfy_instance_sanitize_name ("Caf\xc3\xa9" "/Montr\xc3\xa9" "al");
   g_assert_cmpstr (utf8, ==, "Caf\xc3\xa9" "-Montr\xc3\xa9" "al");
 
   g_autofree char *long_name = g_strnfill (100, 'a');
-  g_autofree char *capped = aml_instance_sanitize_name (long_name);
+  g_autofree char *capped = comfy_instance_sanitize_name (long_name);
   assert_safe_name (capped);
   g_assert_cmpuint (strlen (capped), <=, 64);
 
@@ -129,13 +129,13 @@ static void
 test_normalize_name (void)
 {
   g_autofree char *trimmed =
-    aml_instance_normalize_name (" \tCafe\xCC\x81  ");
-  g_autofree char *composed = aml_instance_normalize_name ("Caf\xC3\xA9");
+    comfy_instance_normalize_name (" \tCafe\xCC\x81  ");
+  g_autofree char *composed = comfy_instance_normalize_name ("Caf\xC3\xA9");
   g_autofree char *stored = NULL;
   g_autoptr (GError) error = NULL;
-  g_autoptr (AmlInstance) instance =
-    aml_instance_new (NULL, " \tCafe\xCC\x81  ", "/tmp/normalized-instance",
-                      "1.21.1", AML_LOADER_VANILLA, &error);
+  g_autoptr (ComfyInstance) instance =
+    comfy_instance_new (NULL, " \tCafe\xCC\x81  ", "/tmp/normalized-instance",
+                      "1.21.1", comfy_LOADER_VANILLA, &error);
 
   g_assert_cmpstr (trimmed, ==, "Caf\xC3\xA9");
   g_assert_cmpstr (composed, ==, "Caf\xC3\xA9");
@@ -150,21 +150,21 @@ static void
 test_jvm_args_survive_null (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (AmlInstance) instance =
-    aml_instance_new (NULL, "Test", "/tmp/aml-jvm-args-test", "1.21.1",
-                      AML_LOADER_VANILLA, &error);
+  g_autoptr (ComfyInstance) instance =
+    comfy_instance_new (NULL, "Test", "/tmp/comfy-jvm-args-test", "1.21.1",
+                      comfy_LOADER_VANILLA, &error);
   g_autofree char *stored = NULL;
   g_autofree char *round_tripped = NULL;
   g_autoptr (JsonNode) node = NULL;
-  g_autoptr (AmlInstance) reloaded = NULL;
+  g_autoptr (ComfyInstance) reloaded = NULL;
 
   g_assert_no_error (error);
 
   /* Clearing the field is the one write the model does not refuse:
-     aml_instance_validate treats a null and an empty string alike, and
+     comfy_instance_validate treats a null and an empty string alike, and
      the UI passes an empty string for a cleared row. */
-  g_assert_true (aml_instance_set_string (instance, "jvm-args", NULL, NULL));
-  g_assert_true (aml_instance_validate (instance, NULL));
+  g_assert_true (comfy_instance_set_string (instance, "jvm-args", NULL, NULL));
+  g_assert_true (comfy_instance_validate (instance, NULL));
 
   /* What must not happen is the field holding a null, because the file
      would then carry "jvm_args": null and the parser refuses it. */
@@ -172,10 +172,10 @@ test_jvm_args_survive_null (void)
   g_assert_cmpstr (stored, ==, "");
 
   /* The whole point: an instance written after this still reads back. */
-  node = aml_instance_to_json (instance);
+  node = comfy_instance_to_json (instance);
   g_assert_nonnull (node);
 
-  reloaded = aml_instance_new_from_json (node, &error);
+  reloaded = comfy_instance_new_from_json (node, &error);
   g_assert_no_error (error);
   g_assert_nonnull (reloaded);
 
@@ -189,14 +189,14 @@ static void
 test_new_defaults (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (AmlInstance) instance =
-    aml_instance_new (NULL, "Test", "/tmp/aml-instance-test", "1.21.1",
-                      AML_LOADER_VANILLA, &error);
+  g_autoptr (ComfyInstance) instance =
+    comfy_instance_new (NULL, "Test", "/tmp/comfy-instance-test", "1.21.1",
+                      comfy_LOADER_VANILLA, &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
-  const char *id = aml_instance_get_id (instance);
+  const char *id = comfy_instance_get_id (instance);
   g_assert_nonnull (id);
   g_assert_true (g_uuid_string_is_valid (id));
 
@@ -210,7 +210,7 @@ test_new_defaults (void)
   g_assert_null (java_path);
   g_assert_null (icon);
 
-  g_assert_true (aml_instance_validate (instance, &error));
+  g_assert_true (comfy_instance_validate (instance, &error));
   g_assert_no_error (error);
 
   g_print ("ok - instance defaults\n");
@@ -222,63 +222,63 @@ test_new_rejects_bad_values (void)
   g_autoptr (GError) error = NULL;
 
   /* A relative directory is not usable as an instance directory. */
-  g_autoptr (AmlInstance) relative =
-    aml_instance_new (NULL, "Test", "relative/path", "1.21.1",
-                      AML_LOADER_VANILLA, &error);
+  g_autoptr (ComfyInstance) relative =
+    comfy_instance_new (NULL, "Test", "relative/path", "1.21.1",
+                      comfy_LOADER_VANILLA, &error);
   g_assert_null (relative);
-  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, comfy_INSTANCE_ERROR, comfy_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
-  g_autoptr (AmlInstance) no_directory =
-    aml_instance_new (NULL, "Test", NULL, "1.21.1",
-                      AML_LOADER_VANILLA, &error);
+  g_autoptr (ComfyInstance) no_directory =
+    comfy_instance_new (NULL, "Test", NULL, "1.21.1",
+                      comfy_LOADER_VANILLA, &error);
   g_assert_null (no_directory);
-  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, comfy_INSTANCE_ERROR, comfy_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
   /* An empty name must never become an instance. */
-  g_autoptr (AmlInstance) blank_name =
-    aml_instance_new (NULL, "", "/tmp/aml-instance-test", "1.21.1",
-                      AML_LOADER_VANILLA, &error);
+  g_autoptr (ComfyInstance) blank_name =
+    comfy_instance_new (NULL, "", "/tmp/comfy-instance-test", "1.21.1",
+                      comfy_LOADER_VANILLA, &error);
   g_assert_null (blank_name);
-  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, comfy_INSTANCE_ERROR, comfy_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
-  g_autoptr (AmlInstance) spaces_name =
-    aml_instance_new (NULL, "   ", "/tmp/aml-instance-test", "1.21.1",
-                      AML_LOADER_VANILLA, &error);
+  g_autoptr (ComfyInstance) spaces_name =
+    comfy_instance_new (NULL, "   ", "/tmp/comfy-instance-test", "1.21.1",
+                      comfy_LOADER_VANILLA, &error);
   g_assert_null (spaces_name);
-  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, comfy_INSTANCE_ERROR, comfy_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
-  g_autoptr (AmlInstance) no_version =
-    aml_instance_new (NULL, "Test", "/tmp/aml-instance-test", "",
-                      AML_LOADER_VANILLA, &error);
+  g_autoptr (ComfyInstance) no_version =
+    comfy_instance_new (NULL, "Test", "/tmp/comfy-instance-test", "",
+                      comfy_LOADER_VANILLA, &error);
   g_assert_null (no_version);
-  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, comfy_INSTANCE_ERROR, comfy_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
   /* An unknown loader value is refused before it reaches the property. */
-  g_autoptr (AmlInstance) bad_loader =
-    aml_instance_new (NULL, "Test", "/tmp/aml-instance-test", "1.21.1",
-                      (AmlLoader) 99, &error);
+  g_autoptr (ComfyInstance) bad_loader =
+    comfy_instance_new (NULL, "Test", "/tmp/comfy-instance-test", "1.21.1",
+                      (ComfyLoader) 99, &error);
   g_assert_null (bad_loader);
-  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, comfy_INSTANCE_ERROR, comfy_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
-  g_autoptr (AmlInstance) bad_id =
-    aml_instance_new ("not-a-uuid", "Test", "/tmp/aml-instance-test",
-                      "1.21.1", AML_LOADER_VANILLA, &error);
+  g_autoptr (ComfyInstance) bad_id =
+    comfy_instance_new ("not-a-uuid", "Test", "/tmp/comfy-instance-test",
+                      "1.21.1", comfy_LOADER_VANILLA, &error);
   g_assert_null (bad_id);
-  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, comfy_INSTANCE_ERROR, comfy_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
   /* The root directory is never an instance directory. */
-  g_autoptr (AmlInstance) root =
-    aml_instance_new (NULL, "Test", "/", "1.21.1",
-                      AML_LOADER_VANILLA, &error);
+  g_autoptr (ComfyInstance) root =
+    comfy_instance_new (NULL, "Test", "/", "1.21.1",
+                      comfy_LOADER_VANILLA, &error);
   g_assert_null (root);
-  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, comfy_INSTANCE_ERROR, comfy_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
   g_print ("ok - invalid instance values are rejected\n");
@@ -288,46 +288,46 @@ static void
 test_validate (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (AmlInstance) instance =
-    aml_instance_new (NULL, "Valid", "/tmp/aml-instance-test", "1.21.1",
-                      AML_LOADER_NEOFORGE, &error);
+  g_autoptr (ComfyInstance) instance =
+    comfy_instance_new (NULL, "Valid", "/tmp/comfy-instance-test", "1.21.1",
+                      comfy_LOADER_NEOFORGE, &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (instance);
-  g_assert_true (aml_instance_validate (instance, &error));
+  g_assert_true (comfy_instance_validate (instance, &error));
   g_assert_no_error (error);
 
   /* An empty name breaks validation. */
   g_object_set (instance, "name", "", NULL);
-  g_assert_false (aml_instance_validate (instance, &error));
-  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+  g_assert_false (comfy_instance_validate (instance, &error));
+  g_assert_error (error, comfy_INSTANCE_ERROR, comfy_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
   g_object_set (instance, "name", "Valid", NULL);
 
   /* JVM arguments are the one text field that may be empty: that is what
      an instance the user never wrote any for has. */
   g_object_set (instance, "jvm-args", "", NULL);
-  g_assert_true (aml_instance_validate (instance, &error));
+  g_assert_true (comfy_instance_validate (instance, &error));
   g_assert_no_error (error);
   g_object_set (instance, "jvm-args", "-Xmx2G", NULL);
 
   /* A directory with ".." inside is not canonical. */
-  g_autoptr (AmlInstance) escaping =
-    g_object_new (AML_TYPE_INSTANCE,
+  g_autoptr (ComfyInstance) escaping =
+    g_object_new (comfy_TYPE_INSTANCE,
                   "id", TEST_UUID,
                   "name", "Escaping",
-                  "directory", "/tmp/aml-instance-test/../elsewhere",
+                  "directory", "/tmp/comfy-instance-test/../elsewhere",
                   "minecraft-version", "1.21.1",
-                  "loader", AML_LOADER_VANILLA,
+                  "loader", comfy_LOADER_VANILLA,
                   NULL);
-  g_assert_false (aml_instance_validate (escaping, &error));
-  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+  g_assert_false (comfy_instance_validate (escaping, &error));
+  g_assert_error (error, comfy_INSTANCE_ERROR, comfy_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
   /* An object built without any field reports the missing id. */
-  g_autoptr (AmlInstance) empty = g_object_new (AML_TYPE_INSTANCE, NULL);
-  g_assert_false (aml_instance_validate (empty, &error));
-  g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_MISSING_FIELD);
+  g_autoptr (ComfyInstance) empty = g_object_new (comfy_TYPE_INSTANCE, NULL);
+  g_assert_false (comfy_instance_validate (empty, &error));
+  g_assert_error (error, comfy_INSTANCE_ERROR, comfy_INSTANCE_ERROR_MISSING_FIELD);
   g_clear_error (&error);
 
   /* Empty means "not set" for the nullable fields. */
@@ -343,9 +343,9 @@ static void
 test_json_round_trip (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (AmlInstance) original =
-    aml_instance_new (NULL, "Fabric Pack", "/tmp/aml-instance-fabric",
-                      "1.21.1", AML_LOADER_FABRIC, &error);
+  g_autoptr (ComfyInstance) original =
+    comfy_instance_new (NULL, "Fabric Pack", "/tmp/comfy-instance-fabric",
+                      "1.21.1", comfy_LOADER_FABRIC, &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (original);
@@ -357,18 +357,18 @@ test_json_round_trip (void)
                 "jvm-args", "-Xmx4G -Xms1G",
                 NULL);
 
-  JsonNode *node = aml_instance_to_json (original);
+  JsonNode *node = comfy_instance_to_json (original);
   g_assert_nonnull (node);
 
-  g_autoptr (AmlInstance) copy =
-    aml_instance_new_from_json (node, &error);
+  g_autoptr (ComfyInstance) copy =
+    comfy_instance_new_from_json (node, &error);
   json_node_unref (node);
 
   g_assert_no_error (error);
   g_assert_nonnull (copy);
 
-  g_assert_cmpstr (aml_instance_get_id (copy), ==,
-                   aml_instance_get_id (original));
+  g_assert_cmpstr (comfy_instance_get_id (copy), ==,
+                   comfy_instance_get_id (original));
 
   const char *fields[] = {
     "name", "directory", "minecraft-version", "loader-version", "icon",
@@ -382,9 +382,9 @@ test_json_round_trip (void)
       g_assert_cmpstr (actual, ==, expected);
     }
 
-  AmlLoader loader = AML_LOADER_VANILLA;
+  ComfyLoader loader = comfy_LOADER_VANILLA;
   g_object_get (copy, "loader", &loader, NULL);
-  g_assert_cmpint (loader, ==, AML_LOADER_FABRIC);
+  g_assert_cmpint (loader, ==, comfy_LOADER_FABRIC);
 
   g_print ("ok - json round trip\n");
 }
@@ -398,7 +398,7 @@ build_instance_json (const char *skip_member)
     "loader_version"
   };
   static const char *values[] = {
-    TEST_UUID, "Test", "/tmp/aml-instance-test", "1.21.1", "fabric",
+    TEST_UUID, "Test", "/tmp/comfy-instance-test", "1.21.1", "fabric",
     "0.16.9"
   };
 
@@ -432,14 +432,14 @@ test_missing_fields (void)
       g_autoptr (GError) error = NULL;
       JsonNode *node = build_instance_json (required[i]);
 
-      g_autoptr (AmlInstance) instance =
-        aml_instance_new_from_json (node, &error);
+      g_autoptr (ComfyInstance) instance =
+        comfy_instance_new_from_json (node, &error);
 
       json_node_unref (node);
 
       g_assert_null (instance);
-      g_assert_error (error, AML_INSTANCE_ERROR,
-                      AML_INSTANCE_ERROR_MISSING_FIELD);
+      g_assert_error (error, comfy_INSTANCE_ERROR,
+                      comfy_INSTANCE_ERROR_MISSING_FIELD);
     }
 
   g_print ("ok - missing fields fail cleanly\n");
@@ -453,19 +453,19 @@ test_malformed_json (void)
   /* Not a JSON object at all. */
   {
     g_autoptr (JsonParser) parser = parse_json ("42");
-    g_autoptr (AmlInstance) instance =
-      aml_instance_new_from_json (json_parser_get_root (parser), &error);
+    g_autoptr (ComfyInstance) instance =
+      comfy_instance_new_from_json (json_parser_get_root (parser), &error);
     g_assert_null (instance);
-    g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+    g_assert_error (error, comfy_INSTANCE_ERROR, comfy_INSTANCE_ERROR_INVALID);
     g_clear_error (&error);
   }
 
   {
     g_autoptr (JsonParser) parser = parse_json ("[1, 2]");
-    g_autoptr (AmlInstance) instance =
-      aml_instance_new_from_json (json_parser_get_root (parser), &error);
+    g_autoptr (ComfyInstance) instance =
+      comfy_instance_new_from_json (json_parser_get_root (parser), &error);
     g_assert_null (instance);
-    g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+    g_assert_error (error, comfy_INSTANCE_ERROR, comfy_INSTANCE_ERROR_INVALID);
     g_clear_error (&error);
   }
 
@@ -473,29 +473,29 @@ test_malformed_json (void)
   {
     g_autofree char *text =
       g_strdup_printf ("{\"id\": 42, \"name\": \"Test\", "
-                       "\"directory\": \"/tmp/aml-instance-test\", "
+                       "\"directory\": \"/tmp/comfy-instance-test\", "
                        "\"minecraft_version\": \"1.21.1\", "
                        "\"loader\": \"vanilla\"}");
     g_autoptr (JsonParser) parser = parse_json (text);
-    g_autoptr (AmlInstance) instance =
-      aml_instance_new_from_json (json_parser_get_root (parser), &error);
+    g_autoptr (ComfyInstance) instance =
+      comfy_instance_new_from_json (json_parser_get_root (parser), &error);
     g_assert_null (instance);
-    g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+    g_assert_error (error, comfy_INSTANCE_ERROR, comfy_INSTANCE_ERROR_INVALID);
     g_clear_error (&error);
   }
 
   {
     g_autofree char *text =
       g_strdup_printf ("{\"id\": \"%s\", \"name\": \"Test\", "
-                       "\"directory\": \"/tmp/aml-instance-test\", "
+                       "\"directory\": \"/tmp/comfy-instance-test\", "
                        "\"minecraft_version\": \"1.21.1\", "
                        "\"loader\": 7}",
                        TEST_UUID);
     g_autoptr (JsonParser) parser = parse_json (text);
-    g_autoptr (AmlInstance) instance =
-      aml_instance_new_from_json (json_parser_get_root (parser), &error);
+    g_autoptr (ComfyInstance) instance =
+      comfy_instance_new_from_json (json_parser_get_root (parser), &error);
     g_assert_null (instance);
-    g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+    g_assert_error (error, comfy_INSTANCE_ERROR, comfy_INSTANCE_ERROR_INVALID);
     g_clear_error (&error);
   }
 
@@ -503,15 +503,15 @@ test_malformed_json (void)
   {
     g_autofree char *text =
       g_strdup_printf ("{\"id\": \"%s\", \"name\": \"Test\", "
-                       "\"directory\": \"/tmp/aml-instance-test\", "
+                       "\"directory\": \"/tmp/comfy-instance-test\", "
                        "\"minecraft_version\": \"1.21.1\", "
                        "\"loader\": \"sodium\"}",
                        TEST_UUID);
     g_autoptr (JsonParser) parser = parse_json (text);
-    g_autoptr (AmlInstance) instance =
-      aml_instance_new_from_json (json_parser_get_root (parser), &error);
+    g_autoptr (ComfyInstance) instance =
+      comfy_instance_new_from_json (json_parser_get_root (parser), &error);
     g_assert_null (instance);
-    g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+    g_assert_error (error, comfy_INSTANCE_ERROR, comfy_INSTANCE_ERROR_INVALID);
     g_clear_error (&error);
   }
 
@@ -520,13 +520,13 @@ test_malformed_json (void)
   {
     g_autofree char *text =
       g_strdup_printf ("{\"id\": \"%s\", \"name\": \"Test\", "
-                       "\"directory\": \"/tmp/aml-instance-test\", "
+                       "\"directory\": \"/tmp/comfy-instance-test\", "
                        "\"minecraft_version\": \"1.21.1\", "
                        "\"loader\": \"vanilla\", \"jvm_args\": \"\"}",
                        TEST_UUID);
     g_autoptr (JsonParser) parser = parse_json (text);
-    g_autoptr (AmlInstance) instance =
-      aml_instance_new_from_json (json_parser_get_root (parser), &error);
+    g_autoptr (ComfyInstance) instance =
+      comfy_instance_new_from_json (json_parser_get_root (parser), &error);
     g_autofree char *jvm_args = NULL;
 
     g_assert_no_error (error);
@@ -539,16 +539,16 @@ test_malformed_json (void)
   {
     g_autofree char *text =
       g_strdup_printf ("{\"id\": \"%s\", \"name\": \"Test\", "
-                       "\"directory\": \"/tmp/aml-instance-test\", "
+                       "\"directory\": \"/tmp/comfy-instance-test\", "
                        "\"minecraft_version\": \"1.21.1\", "
                        "\"loader\": \"vanilla\", \"jvm_args\": null}",
                        TEST_UUID);
     g_autoptr (JsonParser) parser = parse_json (text);
-    g_autoptr (AmlInstance) instance =
-      aml_instance_new_from_json (json_parser_get_root (parser), &error);
+    g_autoptr (ComfyInstance) instance =
+      comfy_instance_new_from_json (json_parser_get_root (parser), &error);
 
     g_assert_null (instance);
-    g_assert_error (error, AML_INSTANCE_ERROR, AML_INSTANCE_ERROR_INVALID);
+    g_assert_error (error, comfy_INSTANCE_ERROR, comfy_INSTANCE_ERROR_INVALID);
     g_clear_error (&error);
   }
 
@@ -564,13 +564,13 @@ test_optional_fields (void)
    * is none. */
   g_autofree char *text =
     g_strdup_printf ("{\"id\": \"%s\", \"name\": \"Minimal\", "
-                     "\"directory\": \"/tmp/aml-instance-minimal\", "
+                     "\"directory\": \"/tmp/comfy-instance-minimal\", "
                      "\"minecraft_version\": \"1.21.1\", "
                      "\"loader\": \"vanilla\"}",
                      TEST_UUID);
   g_autoptr (JsonParser) parser = parse_json (text);
-  g_autoptr (AmlInstance) instance =
-    aml_instance_new_from_json (json_parser_get_root (parser), &error);
+  g_autoptr (ComfyInstance) instance =
+    comfy_instance_new_from_json (json_parser_get_root (parser), &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (instance);
@@ -590,27 +590,27 @@ static void
 test_components (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (AmlInstance) instance =
-    aml_instance_new (TEST_UUID, "Components", "/tmp/components-instance",
-                      "1.20.1", AML_LOADER_FABRIC, &error);
+  g_autoptr (ComfyInstance) instance =
+    comfy_instance_new (TEST_UUID, "Components", "/tmp/components-instance",
+                      "1.20.1", comfy_LOADER_FABRIC, &error);
   g_autofree char *minecraft = NULL;
   g_autofree char *loader = NULL;
 
   g_assert_no_error (error);
-  g_assert_true (g_str_equal (aml_instance_component_id_for_loader (
-                                AML_LOADER_FABRIC), AML_COMPONENT_FABRIC));
+  g_assert_true (g_str_equal (comfy_instance_component_id_for_loader (
+                                comfy_LOADER_FABRIC), comfy_COMPONENT_FABRIC));
 
-  minecraft = aml_instance_component_get_version (instance,
-                                                   AML_COMPONENT_MINECRAFT);
-  loader = aml_instance_component_get_version (instance, AML_COMPONENT_FABRIC);
+  minecraft = comfy_instance_component_get_version (instance,
+                                                   comfy_COMPONENT_MINECRAFT);
+  loader = comfy_instance_component_get_version (instance, comfy_COMPONENT_FABRIC);
   g_assert_cmpstr (minecraft, ==, "1.20.1");
   g_assert_null (loader);
 
-  g_assert_true (aml_instance_component_set_version (
-    instance, AML_COMPONENT_FABRIC, "0.15.11", &error));
+  g_assert_true (comfy_instance_component_set_version (
+    instance, comfy_COMPONENT_FABRIC, "0.15.11", &error));
   g_assert_no_error (error);
   g_clear_pointer (&loader, g_free);
-  loader = aml_instance_component_get_version (instance, AML_COMPONENT_FABRIC);
+  loader = comfy_instance_component_get_version (instance, comfy_COMPONENT_FABRIC);
   g_assert_cmpstr (loader, ==, "0.15.11");
 
   g_print ("ok - component versions use stable component ids\n");

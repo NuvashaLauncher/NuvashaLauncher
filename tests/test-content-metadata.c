@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#include "aml-content-files-private.h"
+#include "comfy-content-files-private.h"
 
 #include <archive.h>
 #include <archive_entry.h>
@@ -13,7 +13,7 @@
 static char *
 make_jar (const char *member, const char *contents)
 {
-  char *path = g_strdup ("/tmp/aml-metadata-XXXXXX.jar");
+  char *path = g_strdup ("/tmp/comfy-metadata-XXXXXX.jar");
   int fd = g_mkstemp (path);
   struct archive *archive = archive_write_new ();
   struct archive_entry *entry = archive_entry_new ();
@@ -44,11 +44,11 @@ main (void)
     "\"version\":\"1.2\",\"depends\":{\"other\":\"1\"}}");
   g_autofree char *truncated = make_jar (
     "fabric.mod.json", "{\"id\":\"example\",\"depends\":{\"other");
-  g_autoptr (AmlContentFile) file = g_new0 (AmlContentFile, 1);
-  g_autoptr (AmlContentFile) broken = g_new0 (AmlContentFile, 1);
+  g_autoptr (ComfyContentFile) file = g_new0 (ComfyContentFile, 1);
+  g_autoptr (ComfyContentFile) broken = g_new0 (ComfyContentFile, 1);
 
   file->path = g_strdup (valid);
-  aml_content_apply_local_metadata (file, AML_CONTENT_MOD);
+  comfy_content_apply_local_metadata (file, comfy_CONTENT_MOD);
   g_assert_true (file->local_metadata);
   g_assert_cmpstr (file->project_name, ==, "Example");
   g_assert_cmpstr (file->local_id, ==, "example");
@@ -58,7 +58,7 @@ main (void)
                    "other");
 
   broken->path = g_strdup (truncated);
-  aml_content_apply_local_metadata (broken, AML_CONTENT_MOD);
+  comfy_content_apply_local_metadata (broken, comfy_CONTENT_MOD);
   g_assert_false (broken->local_metadata);
   g_print ("ok - local metadata parsers handle valid and truncated JSON\n");
   return 0;
