@@ -173,7 +173,7 @@ comfy_main_window_build_ui (ComfyMainWindow *self)
   adw_application_window_set_content (ADW_APPLICATION_WINDOW (self),
                                       GTK_WIDGET (toolbar));
 
-  gtk_window_set_title (GTK_WINDOW (self), "comfy");
+  gtk_window_set_title (GTK_WINDOW (self), "Comfy Launcher");
   gtk_window_set_default_size (GTK_WINDOW (self), 960, 640);
 
   /* A download may already be running (a window opened while one does),

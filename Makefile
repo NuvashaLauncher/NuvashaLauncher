@@ -133,12 +133,12 @@ install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 	@for skin in data/skins/defaults/*.png; do \
 		install -Dm644 "$$skin" "$(DESTDIR)$(PREFIX)/share/comfy/skins/defaults/$$(basename "$$skin")"; \
 	done
-	install -Dm644 data/io.gitlab.comfylauncher.comfy.desktop \
-		"$(DESTDIR)$(PREFIX)/share/applications/io.gitlab.comfylauncher.comfy.desktop"
-	install -Dm644 data/icons/scalable/apps/io.gitlab.comfylauncher.comfy.svg \
-		"$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/io.gitlab.comfylauncher.comfy.svg"
-	install -Dm644 data/io.gitlab.comfylauncher.comfy.metainfo.xml \
-		"$(DESTDIR)$(PREFIX)/share/metainfo/io.gitlab.comfylauncher.comfy.metainfo.xml"
+	install -Dm644 data/com.github.comfylauncher.comfy.desktop \
+		"$(DESTDIR)$(PREFIX)/share/applications/com.github.comfylauncher.comfy.desktop"
+	install -Dm644 data/icons/scalable/apps/com.github.comfylauncher.comfy.svg \
+		"$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.comfylauncher.comfy.svg"
+	install -Dm644 data/com.github.comfylauncher.comfy.metainfo.xml \
+		"$(DESTDIR)$(PREFIX)/share/metainfo/com.github.comfylauncher.comfy.metainfo.xml"
 	@for lang in $(LOCALES); do \
 		install -Dm644 build/locale/$$lang/LC_MESSAGES/comfy.mo \
 			"$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/comfy.mo"; \
@@ -151,9 +151,9 @@ uninstall:
 	rm -f "$(DESTDIR)$(PREFIX)/share/comfy/skins/steve.png"
 	rm -f "$(DESTDIR)$(PREFIX)/share/comfy/pack.png"
 	rm -rf "$(DESTDIR)$(PREFIX)/share/comfy/skins/defaults"
-	rm -f "$(DESTDIR)$(PREFIX)/share/applications/io.gitlab.comfylauncher.comfy.desktop"
-	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/io.gitlab.comfylauncher.comfy.svg"
-	rm -f "$(DESTDIR)$(PREFIX)/share/metainfo/io.gitlab.comfylauncher.comfy.metainfo.xml"
+	rm -f "$(DESTDIR)$(PREFIX)/share/applications/com.github.comfylauncher.comfy.desktop"
+	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.comfylauncher.comfy.svg"
+	rm -f "$(DESTDIR)$(PREFIX)/share/metainfo/com.github.comfylauncher.comfy.metainfo.xml"
 	@for lang in $(LOCALES); do \
 		rm -f "$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/comfy.mo"; \
 	done

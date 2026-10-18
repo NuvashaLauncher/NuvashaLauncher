@@ -240,8 +240,8 @@ msgstr "Обмеження рядків"
 msgid "Open Log Folder After Crash"
 msgstr "Відкрити теку журналів після збою"
 
-msgid "About comfy"
-msgstr "Про comfy"
+msgid "About Comfy Launcher"
+msgstr "Про Comfy Launcher"
 
 msgid "Keyboard Shortcuts"
 msgstr "Комбінації клавіш"

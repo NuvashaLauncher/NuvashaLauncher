@@ -241,8 +241,8 @@ msgstr "Satır sınırı"
 msgid "Open Log Folder After Crash"
 msgstr "Çökmeden sonra günlük klasörünü aç"
 
-msgid "About comfy"
-msgstr "comfy hakkında"
+msgid "About Comfy Launcher"
+msgstr "Comfy Launcher hakkında"
 
 msgid "Keyboard Shortcuts"
 msgstr "Klavye kısayolları"

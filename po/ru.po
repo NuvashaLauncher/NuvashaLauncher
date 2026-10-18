@@ -241,8 +241,8 @@ msgstr "Ограничение строк"
 msgid "Open Log Folder After Crash"
 msgstr "Открыть папку журнала после сбоя"
 
-msgid "About comfy"
-msgstr "О comfy"
+msgid "About Comfy Launcher"
+msgstr "О Comfy Launcher"
 
 msgid "Keyboard Shortcuts"
 msgstr "Горячі клавіши"

@@ -644,21 +644,22 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
 {
   ComfyMainWindow *self = comfy_MAIN_WINDOW (user_data);
   AdwDialog *dialog = adw_about_dialog_new ();
-  const char *app_ids[] = { "io.gitlab.comfylauncher.comfy", NULL };
+  const char *app_ids[] = { "com.github.comfylauncher.comfy", NULL };
 
-  adw_about_dialog_set_application_name (ADW_ABOUT_DIALOG (dialog), "comfy");
+  adw_about_dialog_set_application_name (ADW_ABOUT_DIALOG (dialog),
+                                         "Comfy Launcher");
   adw_about_dialog_set_version (ADW_ABOUT_DIALOG (dialog), comfy_VERSION);
   adw_about_dialog_set_developer_name (ADW_ABOUT_DIALOG (dialog), "Flia");
 
   adw_about_dialog_set_website (ADW_ABOUT_DIALOG (dialog),
-                                "https://gitlab.com/comfylauncher/comfy");
+                                "https://github.com/comfylauncher/comfy-launcher");
   adw_about_dialog_set_copyright (ADW_ABOUT_DIALOG (dialog),
                                   "Copyright (C) 2026 Flia");
   adw_about_dialog_set_license_type (ADW_ABOUT_DIALOG (dialog),
                                      GTK_LICENSE_GPL_3_0_ONLY);
   adw_about_dialog_add_credit_section (ADW_ABOUT_DIALOG (dialog),
                                        "Application ID", app_ids);
-  adw_dialog_set_title (dialog, _("About comfy"));
+  adw_dialog_set_title (dialog, _("About Comfy Launcher"));
 
   adw_dialog_present (dialog, GTK_WIDGET (self));
 }
@@ -719,7 +720,7 @@ create_app_menu (void)
   g_menu_append_section (menu, NULL, G_MENU_MODEL (general));
 
   g_menu_append (rest, _("Keyboard Shortcuts"), "win.shortcuts");
-  g_menu_append (rest, _("About comfy"), "win.about");
+  g_menu_append (rest, _("About Comfy Launcher"), "win.about");
   g_menu_append_section (menu, NULL, G_MENU_MODEL (rest));
 
   return g_steal_pointer (&menu);

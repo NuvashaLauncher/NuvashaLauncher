@@ -240,8 +240,8 @@ msgstr "Límite de líneas"
 msgid "Open Log Folder After Crash"
 msgstr "Abrir carpeta de registro después del bloqueo"
 
-msgid "About comfy"
-msgstr "Acerca de comfy"
+msgid "About Comfy Launcher"
+msgstr "Acerca de Comfy Launcher"
 
 msgid "Keyboard Shortcuts"
 msgstr "Atajos de teclado"

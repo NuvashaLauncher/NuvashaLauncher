@@ -124,7 +124,7 @@ nix-shell -p gcc gnumake gettext pkg-config glib gtk4 libadwaita \
 Clone the repository:
 
 ```
-git clone https://gitlab.com/comfylauncher/comfy.git
+git clone https://github.com/comfylauncher/comfy-launcher.git
 cd comfy
 ```
 

@@ -241,8 +241,8 @@ msgstr "줄 수 제한"
 msgid "Open Log Folder After Crash"
 msgstr "충돌 후 로그 폴더 열기"
 
-msgid "About comfy"
-msgstr "comfy 소개"
+msgid "About Comfy Launcher"
+msgstr "Comfy Launcher 소개"
 
 msgid "Keyboard Shortcuts"
 msgstr "키보드 단축키"

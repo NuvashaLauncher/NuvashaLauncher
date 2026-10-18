@@ -114,8 +114,8 @@ msgstr "Elegí el ejecutable de Java"
 msgid "the chosen file does not report a Java version"
 msgstr "el archivo elegido no informa una versión de Java"
 
-msgid "About comfy"
-msgstr "Acerca de comfy"
+msgid "About Comfy Launcher"
+msgstr "Acerca de Comfy Launcher"
 
 msgid "Create Instance"
 msgstr "Crear instancia"
