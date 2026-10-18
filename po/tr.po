@@ -675,3 +675,5 @@ msgstr "Deri silinsin mi?"
 msgid "This skin will be removed from the skin library."
 msgstr "Bu deri, deri kitaplığından kaldırılacak."
 
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "Skin images must be 64x64 or 64x32 PNG files"

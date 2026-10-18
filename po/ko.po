@@ -673,3 +673,5 @@ msgstr "스킨을 삭제하시겠습니까?"
 msgid "This skin will be removed from the skin library."
 msgstr "이 스킨은 스킨 라이브러리에서 삭제됩니다."
 
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "Skin images must be 64x64 or 64x32 PNG files"
