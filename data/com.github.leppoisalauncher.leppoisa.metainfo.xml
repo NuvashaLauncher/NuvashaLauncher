@@ -5,10 +5,10 @@
   <summary>Leppoisa Launcher</summary>
   <launchable type="desktop-id">com.github.leppoisalauncher.leppoisa.desktop</launchable>
   <provides>
-    <binary>leppoisa</binary>
+    <binary>LeppoisaLauncher</binary>
   </provides>
   <releases>
-    <release version="0.1" date="2026-10-14"/>
+    <release version="0.2" date="2026-10-18"/>
   </releases>
   <categories>
     <category>Game</category>

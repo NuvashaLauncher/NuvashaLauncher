@@ -48,9 +48,8 @@ G_BEGIN_DECLS
 /* The name the game is told about through ${launcher_name}. */
 #define leppoisa_LAUNCHER_NAME "leppoisa"
 
-/* ${launcher_version}. leppoisa has no release number yet, so this is what
- * the game is told instead of one that was invented. */
-#define leppoisa_LAUNCHER_VERSION "dev"
+/* ${launcher_version}. Keep the value aligned with the application release. */
+#define leppoisa_LAUNCHER_VERSION leppoisa_VERSION
 
 /* What the game is told about an offline session: a token it cannot
  * authenticate with, and the user type that says the session is no real
