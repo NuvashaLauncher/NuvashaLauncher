@@ -677,3 +677,5 @@ msgstr "Eliminare la skin?"
 msgid "This skin will be removed from the skin library."
 msgstr "Questa skin verrà rimossa dalla raccolta."
 
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "Skin images must be 64x64 or 64x32 PNG files"

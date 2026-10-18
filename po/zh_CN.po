@@ -666,3 +666,5 @@ msgstr "删除皮肤？"
 msgid "This skin will be removed from the skin library."
 msgstr "此皮肤将从皮肤库中移除。"
 
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "Skin images must be 64x64 or 64x32 PNG files"
