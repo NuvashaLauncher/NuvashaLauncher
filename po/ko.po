@@ -479,13 +479,6 @@ msgstr "내보내기 완료"
 msgid "Export"
 msgstr "내보내기"
 
-msgid ""
-"Optional metadata. Add a summary or version ID to help identify the exported "
-"pack."
-msgstr ""
-"선택적 메타데이터입니다. 내보낸 팩을 식별하기 쉽도록 요약이나 버전 ID를 추가"
-"하세요."
-
 msgid "Installed %u item"
 msgid_plural "Installed %u items"
 msgstr[0] "아이템 %u개 설치됨"
@@ -617,10 +610,6 @@ msgstr "샌드박스 활성화"
 msgid "Allow sandbox network access"
 msgstr "Allow sandbox network access"
 # UI string
-msgid "Current skin"
-msgstr "Current skin"
-
-# UI string
 msgid "Skin"
 msgstr "Skin"
 
@@ -660,10 +649,6 @@ msgstr "망토 없음"
 msgid "Import skin…"
 msgstr "스킨 가져오기…"
 
-
-# UI string
-msgid "Open Skins Folder"
-msgstr ""
 
 # UI string
 msgid "Delete skin?"

@@ -35,7 +35,7 @@ broker_free (Broker *broker)
     for (guint i = 0; i < broker->open_fds->len; i++)
       close (g_array_index (broker->open_fds, int, i));
   if (broker->socket_path != NULL)
-    unlink (broker->socket_path);
+      nuvasha_fs_unlink (broker->socket_path, NULL);
   g_clear_pointer (&broker->open_fds, g_array_unref);
   g_clear_object (&broker->service);
   g_clear_pointer (&broker->socket_path, g_free);

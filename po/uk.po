@@ -480,13 +480,6 @@ msgstr "Експорт завершено"
 msgid "Export"
 msgstr "Експортувати"
 
-msgid ""
-"Optional metadata. Add a summary or version ID to help identify the exported "
-"pack."
-msgstr ""
-"Необов’язкові метадані. Додайте підсумок або ідентифікатор версії, щоб легше "
-"розпізнати експортований пакет."
-
 msgid "Installed %u item"
 msgid_plural "Installed %u items"
 msgstr[0] "Встановлено %u елемент"
@@ -618,10 +611,6 @@ msgstr "Увімкнути пісочницю"
 msgid "Allow sandbox network access"
 msgstr "Allow sandbox network access"
 # UI string
-msgid "Current skin"
-msgstr "Current skin"
-
-# UI string
 msgid "Skin"
 msgstr "Skin"
 
@@ -661,10 +650,6 @@ msgstr "Без плаща"
 msgid "Import skin…"
 msgstr "Імпортувати скін…"
 
-
-# UI string
-msgid "Open Skins Folder"
-msgstr ""
 
 # UI string
 msgid "Delete skin?"

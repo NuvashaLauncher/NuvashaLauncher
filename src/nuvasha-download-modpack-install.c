@@ -9,6 +9,7 @@
 #include "nuvasha-i18n.h"
 #include "nuvasha-operation.h"
 #include "nuvasha-modpack.h"
+#include "nuvasha-fs.h"
 
 #include <errno.h>
 #include <glib/gstdio.h>
@@ -532,7 +533,7 @@ dialog_start_features (NuvashaDownloadModpackDialog *self)
       }
 
     close (fd);
-    g_unlink (template);
+    nuvasha_fs_unlink (template, NULL);
     g_free (self->pack_path);
     self->pack_path = g_steal_pointer (&template);
 

@@ -20,13 +20,14 @@ static void
 test_wraps_command (void)
 {
   g_autofree char *root = g_dir_make_tmp ("nuvasha-sandbox-XXXXXX", NULL);
+  g_autofree char *bwrap = g_find_program_in_path ("bwrap");
   g_autoptr (GPtrArray) command = g_ptr_array_new_with_free_func (g_free);
   g_autoptr (GPtrArray) wrapped = NULL;
   g_autoptr (GPtrArray) offline_wrapped = NULL;
   NuvashaResolvedVersion resolved = { 0 };
   g_autoptr (GError) error = NULL;
 
-  if (g_find_program_in_path ("bwrap") == NULL)
+  if (bwrap == NULL)
     {
       g_test_skip ("bubblewrap is not installed");
       return;

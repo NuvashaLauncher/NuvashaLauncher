@@ -481,13 +481,6 @@ msgstr "Export voltooid"
 msgid "Export"
 msgstr "Exporteren"
 
-msgid ""
-"Optional metadata. Add a summary or version ID to help identify the exported "
-"pack."
-msgstr ""
-"Optionele metagegevens. Voeg een samenvatting of versie-ID toe om het "
-"geëxporteerde pakket gemakkelijker te herkennen."
-
 msgid "Installed %u item"
 msgid_plural "Installed %u items"
 msgstr[0] "%u item geïnstalleerd"
@@ -619,10 +612,6 @@ msgstr "Sandbox inschakelen"
 msgid "Allow sandbox network access"
 msgstr "Allow sandbox network access"
 # UI string
-msgid "Current skin"
-msgstr "Current skin"
-
-# UI string
 msgid "Skin"
 msgstr "Skin"
 
@@ -662,10 +651,6 @@ msgstr "Geen cape"
 msgid "Import skin…"
 msgstr "Skin importeren…"
 
-
-# UI string
-msgid "Open Skins Folder"
-msgstr ""
 
 # UI string
 msgid "Delete skin?"

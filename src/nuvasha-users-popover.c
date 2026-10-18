@@ -821,6 +821,17 @@ on_open_skins_clicked (GtkButton *button G_GNUC_UNUSED,
 }
 
 static void
+on_export_skin_copied (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  g_autoptr (GError) error = NULL;
+
+  if (!nuvasha_fs_copy_finish (G_FILE (source), result, &error))
+    g_warning ("Could not export skin: %s", error->message);
+
+  g_object_unref (user_data);
+}
+
+static void
 on_export_skin_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
   g_autoptr (GError) error = NULL;
@@ -829,9 +840,11 @@ on_export_skin_chosen (GObject *source, GAsyncResult *result, gpointer user_data
   GFile *source_file = user_data;
 
   if (destination != NULL)
-    g_file_copy_async (source_file, destination, G_FILE_COPY_OVERWRITE,
-                       G_PRIORITY_DEFAULT, NULL, NULL, NULL, NULL, NULL);
-  g_object_unref (source_file);
+    nuvasha_fs_copy_async (source_file, destination, G_FILE_COPY_OVERWRITE,
+                           G_PRIORITY_DEFAULT, NULL, NULL, NULL,
+                           on_export_skin_copied, source_file);
+  else
+    g_object_unref (source_file);
 }
 
 static void

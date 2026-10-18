@@ -481,13 +481,6 @@ msgstr "Dışa aktarma tamnuvashaandı"
 msgid "Export"
 msgstr "Dışa aktar"
 
-msgid ""
-"Optional metadata. Add a summary or version ID to help identify the exported "
-"pack."
-msgstr ""
-"İsteğe bağlı meta veriler. Dışa aktarılan paketi kolayca tanımak için bir "
-"özet veya sürüm kimliği ekleyin."
-
 msgid "Installed %u item"
 msgid_plural "Installed %u items"
 msgstr[0] "%u öğe yüklendi"
@@ -619,10 +612,6 @@ msgstr "Korumalı alanı etkinleştir"
 msgid "Allow sandbox network access"
 msgstr "Allow sandbox network access"
 # UI string
-msgid "Current skin"
-msgstr "Current skin"
-
-# UI string
 msgid "Skin"
 msgstr "Skin"
 
@@ -662,10 +651,6 @@ msgstr "Pelerin yok"
 msgid "Import skin…"
 msgstr "Kaplama içe aktar…"
 
-
-# UI string
-msgid "Open Skins Folder"
-msgstr ""
 
 # UI string
 msgid "Delete skin?"
