@@ -2,13 +2,9 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* NuvashaVersionRow: the "Minecraft Version" row, used both when an
- * instance is created and when its settings are edited.
- *
- * The row is a list of whatever Mojang's version manifest holds, so it
- * knows no version of its own: it shows that it is fetching the list,
- * that fetching failed and how to try again, and which version is
- * picked once the list is there. */
+/* NuvashaVersionRow: Minecraft version picker used during creation and
+ * settings editing. It loads versions from Mojang's manifest and exposes
+ * loading and retry states. */
 
 #ifndef nuvasha_VERSION_ROW_H
 #define nuvasha_VERSION_ROW_H

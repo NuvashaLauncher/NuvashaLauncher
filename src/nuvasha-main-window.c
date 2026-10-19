@@ -22,10 +22,7 @@
 
 G_DEFINE_FINAL_TYPE (NuvashaMainWindow, nuvasha_main_window, ADW_TYPE_APPLICATION_WINDOW)
 
-/* What a launch ends with is said out loud: a crash, a launch that never
-   got to the game, and an account that has to sign in again. It stays in
-   a banner until it is read, so a reason cannot be missed the way a
-   second-long toast is. */
+/* Keep launch failures in the window banner until they are dismissed. */
 static void
 on_window_launcher_state (NuvashaLauncher *launcher G_GNUC_UNUSED,
                           NuvashaLaunchState state,

@@ -34,10 +34,7 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
   AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
   GtkWidget *add_popover = NULL;
 
-  /* Flat is the default top-bar style, and it paints no surface of its
-     own, so the header would take the window background and read as the
-     same colour as the content under it. Raised is what gives a header
-     the colour every Adwaita header has. */
+  /* Use a raised header so it has its own surface. */
   adw_toolbar_view_set_top_bar_style (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)),
                                       ADW_TOOLBAR_RAISED);
 
@@ -57,10 +54,8 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
     set_menu_item_tooltip (add_popover, "Download Modpack",
                            "Search Modrinth and install a modpack");
 
-  /* Beside the "+": the downloads. A spinner appears while anything is
-     downloading and opens a dropdown of what is; the icon beside it
-     carries the number of what the content pages have picked and
-     installed at once. The button is hidden when there is neither. */
+  /* Show active downloads and the content-page selection count. Hide the
+   * button when both are empty. */
   self->downloads.icon = GTK_IMAGE (gtk_image_new_from_icon_name (
     "folder-download-symbolic"));
    self->downloads.spinner = ADW_SPINNER (adw_spinner_new ());
@@ -75,8 +70,7 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
     GtkPopover *popover = GTK_POPOVER (gtk_popover_new ());
     GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
 
-    /* The icon and the spinner share the middle: the icon says what the
-       button opens, the spinner that something is on its way. */
+    /* Place the download icon and spinner in the button. */
     gtk_widget_set_valign (GTK_WIDGET (self->downloads.icon), GTK_ALIGN_CENTER);
     gtk_box_append (GTK_BOX (GTK_WIDGET (icon_row)), GTK_WIDGET (self->downloads.icon));
     gtk_widget_set_valign (GTK_WIDGET (self->downloads.spinner), GTK_ALIGN_CENTER);
@@ -114,10 +108,7 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
   g_signal_connect_object (nuvasha_downloads_get_default (), "changed",
                            G_CALLBACK (on_downloads_changed), self, 0);
 
-  /* End of the header: the accounts, then the application menu. The
-   * button shows the avatar of the active account, and what is behind it
-   * is the list of the accounts this copy of nuvasha has, which is also where
-   * a new one is added. */
+  /* Add the account selector and application menu to the header. */
   /* The model owns the popover and its account store. */
   users_child = nuvasha_users_popover_get_button_content (self->model->users_popover);
   gtk_menu_button_set_child (GTK_MENU_BUTTON (GTK_WIDGET (users_button)), users_child);
@@ -126,8 +117,7 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
   /* The child is a box around the avatar, so the menu button does not
      recognize it as an icon button and would draw a frame behind it. */
   gtk_widget_add_css_class (GTK_WIDGET (users_button), "flat");
-  /* The button is an icon and nothing else, so it needs to be named for
-     what it opens rather than read from a label that is not there. */
+  /* Provide an accessible label for the icon-only button. */
   gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (users_button)),
                                    GTK_ACCESSIBLE_PROPERTY_LABEL, _("Accounts"),
                                   -1);
@@ -159,9 +149,7 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
                                 GTK_WIDGET (self->ui.stack));
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)), GTK_WIDGET (header));
 
-  /* A launch that ends badly is said in a banner under the header, where
-     it stays until it is read: a toast is gone in seconds, which is
-     exactly when a reason is worth having. */
+  /* Keep launch failures in a banner so the user can read them later. */
   self->ui.banner = ADW_BANNER (adw_banner_new (""));
   adw_banner_set_button_label (ADW_BANNER (self->ui.banner), "Dismiss");
   adw_banner_set_revealed (ADW_BANNER (self->ui.banner), FALSE);

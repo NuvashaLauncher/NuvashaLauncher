@@ -12,8 +12,8 @@
  * destroyed with it; only the struct is ours. */
 typedef struct {
   GtkBox *box;
-  GtkLabel *phase;          /* what it is doing, on the left */
-  GtkLabel *count;          /* how far it is, on the right */
+  GtkLabel *phase;          /* current operation */
+  GtkLabel *count;          /* progress */
   GtkProgressBar *bar;
 } DownloadRow;
 
@@ -29,8 +29,7 @@ on_download_cancel (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   nuvasha_download_cancel (nuvasha_DOWNLOAD (user_data));
 }
 
-/* What is on the right of the phase line: "312.0/500.0 MB" for a transfer
- * whose length the server gave, "12 of 48 files" for an install. */
+/* Format transfer progress for the download row. */
 static char *
 download_count_text (NuvashaDownload *download)
 {
@@ -59,8 +58,7 @@ void
 refresh_downloads (NuvashaMainWindow *self)
 {
   GPtrArray *jobs = nuvasha_downloads_get_all ();
-  /* What the content pages have picked: what the icon carries a number
-     of, and the reason the button is there when nothing is downloading. */
+  /* Include content-page selections in the header indicator. */
   GHashTableIter iter;
   gpointer key;
   gpointer value;

@@ -16,9 +16,7 @@
  * Writing files
  * ---------------------------------------------------------- */
 
-/* One file of an install: where it comes from, what it is called, and
- * the file it takes the place of, which is what an update leaves
- * behind. */
+/* One file in an install plan. */
 typedef struct {
   char *url;
   char *filename;
@@ -33,7 +31,7 @@ typedef struct {
   GPtrArray *incompatible_dependencies;
   char *label;
   char *replaces;
-  gboolean required; /* a dependency of what was asked for, not it */
+  gboolean required; /* required dependency, not the requested project */
 } InstallFile;
 
 static void
@@ -242,8 +240,7 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
-  /* What the header row shows: the phase line stays, the count on the
-     right moves with each file landed. */
+  /* Update the header progress after each file completes. */
   if (run->download != NULL)
     nuvasha_download_set_progress (run->download, run->index, run->files->len);
 
@@ -499,9 +496,8 @@ plan_free (PlanRun *plan)
   g_free (plan);
 }
 
-/* What the user is asked to confirm: the mods the install also needs,
- * one per line, and any conflict said in as many words. NULL when there
- * is nothing beside the file itself to say, which is the common case. */
+/* Build confirmation text for dependencies and conflicts, or NULL when
+ * the install needs no additional explanation. */
 static char *
 plan_text (NuvashaContentPage *self, PlanRun *plan)
 {
@@ -647,7 +643,7 @@ show_plan (NuvashaContentPage *self, PlanRun *plan)
   }
 }
 
-/* What @version needs that the plan does not have yet. A dependency
+/* Dependencies required by @version that are missing from the plan.
  * that names nothing to fetch stops the plan instead of writing half of
  * it. */
 static gboolean
@@ -723,7 +719,7 @@ plan_versions_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
-  /* The list is newest first, so the first is what an install takes. */
+  /* The newest compatible version is first. */
   version = g_ptr_array_steal_index (versions, 0);
   {
     const char *project_name = NULL;

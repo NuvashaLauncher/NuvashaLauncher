@@ -37,7 +37,7 @@ typedef struct {
 static void persist_identified_file (NuvashaContentPage *self,
                                      NuvashaContentFile *file);
 
-/* One file that has a newer version, and what to install for it. */
+/* One file with an available update. */
 typedef struct {
   NuvashaModrinthVersion *version; /* the newer version, owned */
   char *title;
@@ -45,8 +45,7 @@ typedef struct {
   gboolean disabled;
 } UpdateItem;
 
-/* The check for newer versions of everything Modrinth knows, and the
- * answer it built while it went. */
+/* State for an update check. */
 typedef struct {
   NuvashaContentPage *page; /* weakly held */
   guint index;
@@ -95,9 +94,7 @@ instance_string (NuvashaInstance *instance, const char *property)
 
 /* Words that are not Markdown and must read exactly as they are: an
  * error, or a description with no markup of its own. */
-/* A failure is said in a banner that stays until it is read: a toast is
- * gone in seconds, and a file that could not be installed is worth more
- * than that. */
+/* Show failures in a persistent banner. */
 void
 show_error (NuvashaContentPage *self, const char *what, GError *error)
 {
@@ -113,11 +110,7 @@ show_error (NuvashaContentPage *self, const char *what, GError *error)
   adw_banner_set_revealed (ADW_BANNER (self->banner), TRUE);
 }
 
-/* A spinner says that something is on its way, and nothing about how
- * long it will take. */
-/* Takes the rows a group was given back out of it. The rows are the ones
- * that were added, because the children of a group are the widgets
- * inside it. */
+/* Remove all rows from a preferences group. */
 void
 take_rows_out (GList **rows, AdwPreferencesGroup *group)
 {
@@ -136,11 +129,11 @@ take_rows_out (GList **rows, AdwPreferencesGroup *group)
 }
 
 /* ---------------------------------------------------------- *
- * Installed: the rows and what can be done to them
+ * Installed: file rows and actions
  * ---------------------------------------------------------- */
 
-/* Disables or enables one file by renaming it, and updates the one row it
- * is about. The folder is not read again: a rescan rebuilds every row and
+/* Enable or disable a file by renaming it and update its row. The folder is
+ * not rescanned: a rescan rebuilds every row and
  * asks Modrinth about every file a second time, and until it finished the
  * file still said it was enabled, so a fast second toggle tried to rename
  * a path that had already moved. TRUE when the file moved. */
@@ -295,8 +288,7 @@ description_line (const char *text, guint max_sentences)
   return g_string_free (g_steal_pointer (&out), FALSE);
 }
 
-/* What an installed file's project is, under its name. What the file is
- * called and where it lives is what the row's tooltip is for. */
+/* Build the project label and tooltip for an installed file row. */
 void
 row_show_description (GtkWidget *row, const char *description)
 {
@@ -500,7 +492,7 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
   g_object_unref (self);
 }
 
-/* What the confirmation was answered with. The path was copied onto the
+/* Handle the confirmation result. The path was copied onto the
  * alert, so a list that is read again while it is up cannot leave it
  * pointing at a file that is gone. */
 static void
@@ -610,9 +602,8 @@ file_row (NuvashaContentPage *self, NuvashaContentFile *file)
   AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
   GtkWidget *icon = nuvasha_icon_widget_new (nuvasha_content_type_icon (self->type));
 
-  /* A file name and a path are plain text: markup off first, because
-     either may hold an "&". Where the file lives is the row's tooltip;
-     under the name goes what the project is, once Modrinth says so. */
+  /* Treat file names and paths as plain text. The tooltip contains the path;
+     the subtitle contains project metadata when available. */
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), FALSE);
   adw_preferences_row_set_title (
     ADW_PREFERENCES_ROW (GTK_WIDGET (row)), file_display_name (file));
@@ -621,9 +612,8 @@ file_row (NuvashaContentPage *self, NuvashaContentFile *file)
   if (file->description != NULL && *file->description != '\0')
     row_show_description (GTK_WIDGET (row), file->description);
 
-  /* The same square as a browse row, with the icon of what this kind of
-     file is until the project it belongs to is known; the icon the
-     browser saw for that project replaces it then. */
+  /* Use a fixed icon square and replace the placeholder when project data
+     becomes available. */
   gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
   adw_action_row_add_prefix (ADW_ACTION_ROW (GTK_WIDGET (row)), icon);
   g_object_set_data (G_OBJECT (row), "nuvasha-icon", icon);
@@ -1106,7 +1096,7 @@ identify_start (IdentifyRun *run)
 
       /* A hash-matched index entry already identifies this file. The row is
        * ready from disk and reopening an instance must not ask Modrinth just
-       * to rediscover what the index already records. */
+       * to rediscover metadata already stored in the index. */
       if (row == NULL || file->sha1 == NULL)
         continue;
 
@@ -1274,8 +1264,7 @@ reload_installed (NuvashaContentPage *self)
   gtk_widget_set_visible (GTK_WIDGET (self->installed.scroller), FALSE);
   gtk_widget_set_visible (GTK_WIDGET (self->installed.loading), TRUE);
 
-  /* A scan that is still running is replaced: what it would answer is
-   * about a folder that has since changed. */
+  /* Cancel scans for the previous directory contents. */
   self->installed.scan = g_cancellable_new ();
   g_cancellable_cancel (previous);
   g_clear_object (&previous);
@@ -1290,9 +1279,7 @@ reload_installed (NuvashaContentPage *self)
   }
 }
 
-/* Update All: check every file Modrinth knows, ask once with the whole
- * list of what is newer, then install that list. Nothing is downloaded
- * before the list is confirmed. */
+  /* Update All: collect updates, confirm once, then install them. */
 
 static void
 update_item_free (UpdateItem *item)
@@ -1369,7 +1356,7 @@ plan_stopped (NuvashaContentPage *self)
     set_busy (self, FALSE);
 }
 
-/* What the confirmation was answered with. */
+/* Handle the update confirmation result. */
 static void
 on_update_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
@@ -1403,8 +1390,8 @@ on_update_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
   g_object_unref (self);
 }
 
-/* The check is over: what is newer is asked for in one question, and an
- * empty answer is said as such. */
+/* Finish the update check and show the confirmation dialog or an up-to-date
+ * message. */
 static void
 update_check_done (NuvashaContentPage *self, UpdateRun *run)
 {
@@ -1651,8 +1638,7 @@ nuvasha_content_page_new (NuvashaInstance *instance, NuvashaContentType type)
                                   GTK_ORIENTATION_VERTICAL);
   gtk_widget_set_vexpand (GTK_WIDGET (self), TRUE);
 
-  /* Only a mod is decided by a loader: an instance that runs the game
-   * itself has no mods to offer, and says so. */
+  /* Mods require a non-vanilla loader. */
   g_object_get (instance, "loader", &value, NULL);
 
   if (nuvasha_content_type_needs_loader (type))
@@ -1675,8 +1661,7 @@ nuvasha_content_page_new (NuvashaInstance *instance, NuvashaContentType type)
         }
     }
 
-  /* Modrinth reads its categories and loaders in lower case, which is
-   * what nuvasha_loader_to_string() writes. */
+  /* Modrinth expects lowercase loader names. */
   g_object_get (instance, "loader", &value, NULL);
   loader = nuvasha_loader_to_string (value);
   self->loader = loader != NULL ? g_strdup (loader) : NULL;
@@ -1735,9 +1720,7 @@ nuvasha_content_page_dispose (GObject *object)
   self->switcher = NULL;
   self->switcher_installed = NULL;
   self->switcher_browse = NULL;
-  /* The two action rows are held with a reference of their own, see
-     build_installed() and build_browse(); giving it back is what lets
-     them go when the page does. */
+  /* Release the action rows retained by the page. */
   g_clear_object (&self->installed.actions);
   g_clear_object (&self->browse_actions);
   self->installed.group = NULL;
@@ -1837,9 +1820,7 @@ nuvasha_content_page_class_init (NuvashaContentPageClass *klass)
 static void
 nuvasha_content_page_init (NuvashaContentPage *self)
 {
-  /* The list of what is picked is the page's own, and an instance that
-     needs a mod loader to offer mods still has one: what is built here
-     has to be there whatever the page goes on to show. Everything else
+  /* Keep the selected-file list and required loader state. Everything else
      is built in nuvasha_content_page_new(), which knows the instance and the
      kind of content. */
   self->install_model =

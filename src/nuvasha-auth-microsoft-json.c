@@ -13,8 +13,7 @@
  * Reading an answer
  * ---------------------------------------------------------- */
 
-/* Parses @json and hands out the object at its root. Nothing else of a
- * service is looked at: what it answered is all there is to read. */
+/* Parse @json and return its root object. */
 static gboolean
 open_object (const char          *json,
              gssize               length,

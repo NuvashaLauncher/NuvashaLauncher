@@ -86,8 +86,7 @@ nuvasha_account_offline_uuid (const char *name)
     digest[12], digest[13], digest[14], digest[15]);
 }
 
-/* The name a player may have: what java accepts, which is what the game
- * checks the name against anyway. */
+/* Validate a player name using the game's allowed format. */
 static gboolean
 name_is_a_player_name (const char *name, const char **why)
 {
@@ -182,8 +181,7 @@ nuvasha_account_token_is_valid (const NuvashaAccount *account, gint64 now)
  * The file
  * ---------------------------------------------------------- */
 
-/* What an account is in the file. The token is in here and in nowhere
- * else, which is why the file is written for nobody but the user. */
+/* Serialize one account to the stored JSON format. */
 static void
 account_to_json (JsonBuilder *builder, const NuvashaAccount *account)
 {
@@ -242,9 +240,7 @@ string_member (JsonObject *object, const char *name)
   return g_strdup (json_node_get_string (node));
 }
 
-/* One account out of the file, or NULL when what is there is not one.
-   An account that is half written is not an account a user can play as,
-   so it is left out rather than repaired. */
+/* Parse one account entry, or NULL for an incomplete or invalid entry. */
 static NuvashaAccount *
 account_from_json (JsonObject *object)
 {

@@ -2,30 +2,26 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* The Modrinth API v2, read with the download module's asynchronous
- * requests.
+/* Modrinth API v2 support, using asynchronous requests from the download
+ * module.
  *
  * The endpoints this uses, all of them GET unless said otherwise:
  *
- *   /search                       what a Browse page lists
- *   /project/<id>                 what a detail page shows
- *   /project/<id>/version         what a version list is read from,
+ *   /search                       Browse results
+ *   /project/<id>                 project details
+ *   /project/<id>/version         project versions,
  *                                 already narrowed by game_versions
  *                                 and loaders
  *   /version_file/<sha1>          which version a file on disk is
  *   /version_file/<sha1>/update   POST, whether that file has something
  *                                 newer that fits this instance
  *
- * What the server narrows is checked again here: a body only ever
- * becomes versions that fit the Minecraft version and the loader that
- * were asked for. That is what keeps an incompatible version out of
- * every list, and it is one rule in one place,
- * nuvasha_modrinth_version_fits(), rather than a copy of it per caller.
+ * Server-side filtering is checked again here. The shared
+ * nuvasha_modrinth_version_fits() rule prevents incompatible versions from
+ * reaching any list.
  *
- * Every function is called from the thread-default main context that
- * answers it, normally the GTK main loop, and nothing here blocks it:
- * the requests are the download module's, and the only work done on the
- * main loop is parsing a body that has already arrived. */
+ * Callbacks run in the caller's thread-default main context. Parsing happens
+ * after the download completes; this module does not block the main loop. */
 
 #include "nuvasha-modrinth.h"
 #include "nuvasha-modrinth-private.h"
@@ -43,12 +39,10 @@
  * The requests
  * ---------------------------------------------------------- */
 
-/* What a request hands its parsed answer to. */
+/* Callback receiving a parsed response. */
 typedef void (*AnswerFunc) (GTask *task, JsonNode *root);
 
-/* What an HTTP 404 means to a request: for an update check it is the
- * answer that nothing is newer, for a hash lookup it says the file is
- * not one Modrinth published. */
+/* Whether HTTP 404 is an error or an absent resource for a request. */
 typedef enum {
   nuvasha_NOT_FOUND_IS_ERROR, /* the answer came from a known place */
   nuvasha_NOT_FOUND_IS_ABSENT /* nothing there is an answer, not a failure */
@@ -128,19 +122,15 @@ request_new (GAsyncReadyCallback callback, gpointer user_data,
   return scope;
 }
 
-/* One way out of a request: an error of this module's domain, so that a
- * caller can tell an answer nuvasha cannot use from a network that is not
- * there. What the download module said is kept, since it names the url
- * that failed. */
+/* Return an error in this module's domain while preserving the failed URL
+ * and download error details. */
 static void
 fail (GTask *task, GError *error)
 {
   Request *request = g_task_get_task_data (task);
   GError *wrapped = NULL;
 
-  /* The cancellation is reported once, from here. The task must not be
-     answered by g_task_return_error_if_cancelled() first and by the
-     error below second: a GTask answers only once. */
+  /* Report cancellation here; a GTask must only be completed once. */
   if (g_cancellable_is_cancelled (g_task_get_cancellable (task)))
     {
       g_clear_error (&error);
@@ -174,8 +164,7 @@ fail (GTask *task, GError *error)
   nuvasha_task_scope_return_error (request->scope, wrapped);
 }
 
-/* The download module writes the status into its own message, which is
- * the one place the code of an HTTP error lives. */
+/* Check whether a download error represents HTTP 404. */
 static gboolean
 error_is_not_found (const GError *error)
 {
@@ -431,8 +420,7 @@ nuvasha_modrinth_details_finish (GAsyncResult *result, GError **error)
  * The versions of a project
  * ---------------------------------------------------------- */
 
-/* What a request has to remember about the instance it is asked for, so
- * that the answer is checked against the same one. */
+/* Instance context used to validate a request's response. */
 typedef struct {
   NuvashaContentType type;
   char *minecraft_version;
@@ -565,9 +553,7 @@ nuvasha_modrinth_category_free (NuvashaModrinthCategory *category)
   g_free (category);
 }
 
-/* "colored-lighting" is what a facet is built from and "Colored Lighting"
- * is what a person reads; the two are kept apart so the slug is never
- * changed on the way out. */
+/* Format a facet slug as a human-readable label without changing the slug. */
 char *
 nuvasha_modrinth_category_label (const char *name)
 {
@@ -658,9 +644,7 @@ nuvasha_modrinth_categories_from_json (const char *json, gssize length,
       if (nuvasha_json_object_of (item) == NULL)
         continue;
 
-      /* One project type publishes one list of categories, so the other
-       * kinds' categories are not offered here. This is also what keeps a
-       * pack page from offering "fabric". */
+      /* Use categories only for project types that publish them. */
       item_type = nuvasha_json_string (item, "project_type");
       name = nuvasha_json_string (item, "name");
 
@@ -883,7 +867,7 @@ nuvasha_modrinth_update_by_hash_finish (GAsyncResult *result, GError **error)
 }
 
 /* ---------------------------------------------------------- *
- * What an install of a version needs
+ * Dependencies required to install a version
  * ---------------------------------------------------------- */
 
 char *
@@ -918,9 +902,7 @@ nuvasha_modrinth_resolve_install (NuvashaModrinthVersion *version,
     return g_ptr_array_new_with_free_func (
         (GDestroyNotify) nuvasha_modrinth_dependency_free);
 
-  /* What @version says it does not run with, but only for what is
-   * actually installed: a conflict with something that is not there is
-   * nothing to decide about. */
+  /* Check conflicts only against content installed in this instance. */
   if (conflicts != NULL)
     {
       for (guint i = 0; i < version->dependencies->len; i++)
@@ -949,7 +931,7 @@ nuvasha_modrinth_resolve_install (NuvashaModrinthVersion *version,
       gboolean already = FALSE;
 
       /* Embedded is inside the file, optional is a choice and
-       * incompatible is a conflict: only what the version cannot run
+       * incompatible is a conflict: only dependencies the version cannot run
        * without is fetched. */
       if (dependency->type != nuvasha_DEPENDENCY_REQUIRED)
         continue;

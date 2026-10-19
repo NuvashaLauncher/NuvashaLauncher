@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* NuvashaLogsPage: what a running game has to say.
+/* NuvashaLogsPage: output from a running game.
  *
  * One page of the instance view that follows one NuvashaLauncher: the state
  * of the launch and its detail, the buttons that clear the log and open

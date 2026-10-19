@@ -2,16 +2,12 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* NuvashaDownloadModpackDialog: browsing Modrinth for modpacks and putting
- * one into a new instance.
+/* NuvashaDownloadModpackDialog: browse Modrinth and install a modpack.
  *
  * The browser is a split view: the list of packs on the left, the pack
  * that is opened on the right, and the list alone until one is. The
- * pages that fall on top of it (installing, an error, the pack's
- * optional files) cover the whole dialog and leave the open pack in its
- * half underneath. Nothing the pack needs for its Minecraft version or
- * its loader is asked of the user: both come from what the pack says
- * about itself. */
+ * pages for installation, errors, and optional files cover the dialog.
+ * Minecraft and loader versions come from the pack metadata. */
 
 #include "nuvasha-download-modpack-dialog-private.h"
 #include "nuvasha-icon-load-private.h"
@@ -58,9 +54,7 @@ static void close_details (NuvashaDownloadModpackDialog *self);
 static void show_details_error (NuvashaDownloadModpackDialog *self,
                                 const char *message);
 
-/* Points @field at @widget and watches it: when the details page that
- * holds @widget is destroyed, @field becomes NULL before a request that
- * is still running can touch it. */
+/* Store a weak pointer to @widget in @field. */
 static void
 details_watch (gpointer field, GtkWidget *widget)
 {
@@ -75,9 +69,7 @@ details_watch (gpointer field, GtkWidget *widget)
     g_object_add_weak_pointer (G_OBJECT (widget), field);
 }
 
-/* Drops every weak pointer this dialog holds, so a widget that outlives,
- * or is destroyed before, the signals still to come can never be touched
- * through a stale field. */
+/* Clear weak widget pointers before rebuilding the dialog. */
 static void
 dialog_forget_widgets (NuvashaDownloadModpackDialog *self)
 {
@@ -335,7 +327,7 @@ on_scroll_changed (GtkAdjustment *adjustment, gpointer user_data)
   run_search (self, TRUE);
 }
 
-/* A page that failed can be asked for again from the row that says so. */
+/* Retry a failed results page. */
 static void
 on_retry_page (NuvashaDownloadModpackDialog *self)
 {
@@ -390,8 +382,7 @@ result_row_activated (AdwActionRow *row, gpointer user_data)
   dialog_details_open (self);
 }
 
-/* What one row's icon load keeps alive: the widget the image goes in, and
- * the operation that has to be released when the answer arrives. */
+/* State retained while loading one row icon. */
 /* Kicks off one row's icon and remembers the url on the widget, so a
  * failed decode can name it in the log. */
 /* The rows of a page of results. @append is FALSE for a new search, which
@@ -580,8 +571,8 @@ run_search (NuvashaDownloadModpackDialog *self, gboolean append)
   ask->generation = ++self->search_generation;
 
 
-  /* The first page of a search shows the loading state; a page that is
-     added below what is already there shows a spinner at its end. */
+  /* Show the full loading state for the first page and an inline spinner for
+     subsequent pages. */
   if (!append)
     adw_view_stack_set_visible_child_name (self->results_stack,
                                       "loading");
@@ -596,9 +587,7 @@ run_search (NuvashaDownloadModpackDialog *self, gboolean append)
   escaped_facets = g_uri_escape_string ("[[\"project_type:modpack\"]]",
                                         NULL, FALSE);
 
-  /* An empty search asks for the popular packs rather than for
-     everything by relevance: a list of what is used most is a better
-     place to land on than an arbitrary one. */
+  /* Empty searches show popular packs ordered by downloads. */
   if (query == NULL || *query == '\0')
     url = g_strdup_printf (
       nuvasha_MODRINTH_URL "/search?query=%s&facets=%s&index=downloads"
@@ -609,7 +598,7 @@ run_search (NuvashaDownloadModpackDialog *self, gboolean append)
       nuvasha_MODRINTH_URL "/search?query=%s&facets=%s&offset=%u&limit=%u",
       escaped_query, escaped_facets, self->offset, RESULTS_PER_PAGE);
 
-  /* The callback holds a reference: closing the dialog while a search
+  /* The callback holds a reference, so closing the dialog while a search
    * is in flight finalizes it, and a callback that then reads self would
    * be reading freed memory. */
   nuvasha_operation_release (
@@ -1066,10 +1055,7 @@ author_of (NuvashaDownloadModpackDialog *self)
   return who != NULL && *who != '\0' ? who : NULL;
 }
 
-/* The whole content of the dialog, built in one go from what the answers
-   said. Nothing here is filled in as it arrives: the dialog shows a
-   spinner until this is called, so the name and the directory appear
-   together with the description and the versions. */
+/* Build the details view after metadata and versions are available. */
 static GtkWidget *
 details_content (NuvashaDownloadModpackDialog *self)
 {
@@ -1089,8 +1075,7 @@ details_content (NuvashaDownloadModpackDialog *self)
   box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 18);
   heading = adw_preferences_group_new ();
 
-  /* The title, then who wrote it and how often it was taken, the same
-     three lines the other contents open with. */
+  /* Show the title, author/license, and download count. */
   page = gtk_label_new (self->project != NULL && self->project->title != NULL
                           ? self->project->title
                           : "");
@@ -1132,8 +1117,8 @@ details_content (NuvashaDownloadModpackDialog *self)
   gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (heading));
   gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (self->body));
 
-  /* Where a version list that failed to load, or that holds nothing to
-     install, says so: it must not be a disabled button with no reason. */
+  /* Explain missing or failed version lists instead of disabling the button
+   * without feedback. */
   details_watch (&self->details_error, gtk_label_new (NULL));
   gtk_label_set_wrap (GTK_LABEL (self->details_error), TRUE);
   gtk_label_set_xalign (GTK_LABEL (self->details_error), 0);
@@ -1149,8 +1134,7 @@ details_content (NuvashaDownloadModpackDialog *self)
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)), GTK_WIDGET (box));
   gtk_widget_set_vexpand (GTK_WIDGET (scroller), TRUE);
 
-  /* The foot: every version the pack publishes, and the button that
-     installs the one shown. The newest is what it shows from the start. */
+  /* Version selector and download action. */
   details_watch (&self->dropdown, gtk_drop_down_new (NULL, NULL));
   gtk_widget_set_hexpand (GTK_WIDGET (self->dropdown), TRUE);
   gtk_widget_set_valign (GTK_WIDGET (self->dropdown), GTK_ALIGN_CENTER);
@@ -1206,8 +1190,7 @@ dialog_details_fill (NuvashaDownloadModpackDialog *self)
 
       gtk_drop_down_set_model (GTK_DROP_DOWN (self->dropdown),
                                G_LIST_MODEL (strings));
-      /* The newest version is what a user most often wants, so it is
-         what the drop-down shows from the start. */
+       /* Select the newest version by default. */
       gtk_drop_down_set_selected (GTK_DROP_DOWN (self->dropdown), 0);
       g_object_unref (strings);
     }

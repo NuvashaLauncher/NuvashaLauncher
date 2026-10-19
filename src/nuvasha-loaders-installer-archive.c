@@ -97,9 +97,7 @@ nuvasha_loader_write_install_file (const char *path, const void *data, gsize siz
   return TRUE;
 }
 
-/* The bytes of @entry inside the zip archive at @path, which is what an
- * installer is: a jar holding its profile, the document of the loader and
- * the patches it applies. */
+/* Read @entry from the installer JAR at @path. */
 GBytes *
 nuvasha_loader_read_zip_entry (const char *path, const char *entry, GError **error)
 {
@@ -207,7 +205,7 @@ nuvasha_loader_read_zip_entry (const char *path, const char *entry, GError **err
   return g_byte_array_free_to_bytes (bytes);
 }
 
-/* What the manifest of the jar at @path says about @name, or NULL. */
+/* Return manifest attribute @name from the JAR at @path, or NULL. */
 char *
 nuvasha_loader_jar_manifest_attribute (const char *path, const char *name)
 {
@@ -457,8 +455,7 @@ nuvasha_loader_write_jar_manifest_attribute (const char *path, const char *name,
   return TRUE;
 }
 
-/* The class a jar names as its main, which is how a processor says how it
- * is to be run: an install profile names the jar and never the class. */
+/* Return the JAR's Main-Class attribute. */
 char *
 nuvasha_loader_jar_main_class (const char *path, GError **error)
 {

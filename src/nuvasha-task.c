@@ -4,11 +4,8 @@
 
 #include "nuvasha-task-private.h"
 
-/* A cancellable the scope watches without owning it, so that a UI whose
- * cancel button lives on someone else's object still stops the work. The
- * handler borrows the scope and never outlives it: unref() disconnects
- * every entry before the scope goes away, and the handler holds no
- * reference, so the pair cannot form a cycle. */
+/* A cancellable followed by a task scope without taking ownership. The
+ * signal handler is disconnected before the scope is destroyed. */
 typedef struct
 {
   GCancellable *cancellable;
@@ -127,9 +124,7 @@ nuvasha_task_scope_unref (NuvashaTaskScope *scope)
   if (scope == NULL || !g_atomic_ref_count_dec (&scope->refs))
     return;
 
-  /* The task goes first: it is what the scope's borrowers are attached
-     to, and dropping it runs their cleanups while this scope is still
-     whole enough to answer them. */
+  /* Drop the task first so borrower cleanup runs while the scope is valid. */
   if (scope->owns_task)
     g_clear_object (&scope->task);
 
@@ -183,15 +178,8 @@ nuvasha_task_scope_set_check_cancellable (NuvashaTaskScope *scope, gboolean chec
   g_task_set_check_cancellable (scope->task, check);
 }
 
-/* A completion hands the operation to the caller's callback, and GTask
- * gives up its own reference before returning from that call. Nothing may
- * be freed underneath code that is still running there: the code that
- * completed the operation usually frees state that borrows its scope
- * straight afterwards. Releasing from the next main-loop turn is what
- * keeps that state looking at a scope that is still there.
- *
- * The reference the caller handed back is the one the idle owns: handing a
- * reference back means giving it away, not taking another one. */
+/* Defer the caller's unref until the callback returns. This prevents callback
+ * cleanup from destroying the scope while completion code still uses it. */
 static gboolean
 release_when_done_idle (gpointer user_data)
 {
@@ -293,9 +281,8 @@ nuvasha_task_scope_release_when_done (NuvashaTaskScope *scope, GCancellable *can
   nuvasha_task_scope_unref_when_done (scope);
 }
 
-/* What an operation that has nothing to wait for has to hand over. The
- * scope is borrowed: the idle below is tracked by the scope, so the scope
- * removes it before the scope can go away and the pointer stays valid. */
+/* Deferred completion for operations with no pending source. The scope tracks
+ * the idle source and removes it before destruction. */
 typedef enum
 {
   DEFERRED_POINTER,

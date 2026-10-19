@@ -142,10 +142,8 @@ static SoupSession *
 get_session (NuvashaDownloadService *service)
 {
   if (service->session == NULL)
-    /* max-conns is a construct property: it can only be given while
-       the session is created, and it matches the cap on transfers so
-       that our counter, not the socket pool, is what limits the
-       downloads. */
+     /* Set connection limits when constructing the session so they match
+        the transfer scheduler. */
     service->session = g_object_new (SOUP_TYPE_SESSION, "user-agent",
                             "nuvasha (Nuvasha Launcher)", "timeout",
                             (guint) 60, "max-conns", (gint) MAX_CONCURRENT,

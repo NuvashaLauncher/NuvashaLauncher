@@ -2,16 +2,10 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* NuvashaJavaRow: the Java picker, used by an instance's Settings page.
- * Like NuvashaVersionRow it shows when it is fetching, what it failed to
- * find, how to try again, and which installations exist once the scan
- * is there. The list ends in an entry that asks for another runtime:
- * picking it opens the file chooser, adds what comes back and selects
- * it, so a runtime the scan did not report is added from the row
- * itself. The public contract of get_selected_path(): NULL while
- * loading, after a failure, while the ask is picked, or when no runtime is
- * selected; "" while the automatic entry is picked; the executable path
- * otherwise. */
+/* NuvashaJavaRow: Java picker for an instance's Settings page. It loads
+ * detected runtimes and provides an entry for choosing a custom executable.
+ * get_selected_path() returns NULL while loading or failed, an empty string
+ * for the automatic entry, and the executable path otherwise. */
 
 #ifndef nuvasha_JAVA_ROW_H
 #define nuvasha_JAVA_ROW_H
@@ -29,7 +23,7 @@ G_DECLARE_FINAL_TYPE (NuvashaJavaRow, nuvasha_java_row, nuvasha, JAVA_ROW,
 
 NuvashaJavaRow *nuvasha_java_row_new (void);
 
- /* The Java version the instance's game needs. When the exact
+ /* The Java major version required by the instance. When the exact
   * @required_major is detected, it becomes the automatic choice; otherwise
   * the best detected runtime is shown while the launch remains automatic.
   * Set before or after load(); a change after load() fills the list again. */
@@ -41,7 +35,7 @@ void nuvasha_java_row_set_required_major (NuvashaJavaRow *self, int required_maj
  * again cancels the running load. */
 void nuvasha_java_row_load (NuvashaJavaRow *self, const char *wanted);
 
-/* The detected installations list, borrowed; NULL until the row loads.
+ /* Detected installations, borrowed; NULL until the row loads.
  * The array and its elements stay alive with the row. */
 GPtrArray *nuvasha_java_row_get_detected (NuvashaJavaRow *self);
 

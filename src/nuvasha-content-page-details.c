@@ -9,17 +9,13 @@
 #include "nuvasha-operation.h"
 #include "nuvasha-ui-feedback.h"
 
-/* One answer of the page of a project while what it shows is being
- * read: the page that opened it, weakly held, and the project the
- * versions are asked for. The page can be closed while a request is
- * still running, so the answer does nothing instead of touching memory
- * that is gone. */
+/* Tracks one asynchronous project-details request. The page is weakly
+ * referenced because it can close before the request finishes. */
 typedef struct {
   NuvashaContentPage *page; /* weak */
   char *project_id;     /* owned */
 
-  /* The operation this watch was made for. The watch lives through two
-     answers in a row, so it holds the handle of the one still running. */
+  /* Handle for the request currently associated with this watch. */
   NuvashaTaskScope *operation;
 } DetailsWatch;
 
@@ -73,13 +69,11 @@ on_version_picked (GtkCheckButton *check, gpointer user_data)
         pick_remove (self, version);
     }
 
-  /* What the list holds is what decides the state of the button, so a
-     click that could not be carried out leaves it where it was. */
+  /* The selected list controls the button state. */
   nuvasha_content_page_refresh_picks (self);
 }
 
-/* Another version is what the dropdown shows: the checkmark at its left
-   says whether that one is the one on the list. */
+/* Update the selected version and its checkmark. */
 static void
 on_version_selected (GObject *object G_GNUC_UNUSED,
                      GParamSpec *pspec G_GNUC_UNUSED, gpointer user_data)
@@ -98,8 +92,7 @@ on_version_selected (GObject *object G_GNUC_UNUSED,
 
 
 
-/* What the download button would take: the version the dropdown shows,
- * or NULL when none is chosen yet. */
+/* Return the version selected in the download dropdown, or NULL. */
 NuvashaModrinthVersion *
 selected_version (GtkDropDown *dropdown, GPtrArray *versions)
 {
@@ -112,8 +105,7 @@ selected_version (GtkDropDown *dropdown, GPtrArray *versions)
   return g_ptr_array_index (versions, index);
 }
 
-/* What a version is called: the name Modrinth writes, which already
- * holds the version itself. */
+/* Return the best available display name for a version. */
 const char *
 version_name_of (NuvashaModrinthVersion *version)
 {
@@ -126,8 +118,7 @@ version_name_of (NuvashaModrinthVersion *version)
   return version->version_id != NULL ? version->version_id : "the file";
 }
 
-/* The one button under the versions: it installs what the dropdown
- * shows, and the page it was in has done its work. */
+/* Start installing the version selected in the dropdown. */
 static void
 on_version_download_clicked (GtkButton *button, gpointer user_data)
 {
@@ -155,8 +146,7 @@ on_version_download_clicked (GtkButton *button, gpointer user_data)
               NULL, FALSE);
 }
 
-/* What a version reads as in the dropdown: its name and the day it was
- * published, so two versions of one project can be told apart. */
+/* Format a version label with its publication date. */
 static char *
 version_label (NuvashaModrinthVersion *version)
 {
@@ -230,10 +220,7 @@ nuvasha_content_page_close_detail (NuvashaContentPage *self)
   g_clear_pointer (&self->project.current_project_id, g_free);
 }
 
-/* The whole content of the page, built in one go from what the answers
- * said. Nothing here is filled in as it arrives: the page shows a
- * spinner until this is called, so the meta, count, description and
- * versions appear together. */
+/* Build the project details after its metadata and versions are available. */
 static GtkWidget *
 details_content (NuvashaContentPage *self)
 {
@@ -398,8 +385,7 @@ detail_fill (NuvashaContentPage *self)
 
       gtk_drop_down_set_model (GTK_DROP_DOWN (self->project.details_dropdown),
                                G_LIST_MODEL (labels));
-      /* The newest version is what a user most often wants, so it is
-         what the dropdown shows from the start. */
+      /* Select the newest version by default. */
       gtk_drop_down_set_selected (GTK_DROP_DOWN (self->project.details_dropdown), 0);
       g_object_unref (labels);
 
@@ -418,13 +404,12 @@ detail_fill (NuvashaContentPage *self)
 
     gtk_widget_set_sensitive (GTK_WIDGET (self->project.details_download),
                               have_versions && !self->installed.identifying);
-    /* Nothing to put on the list while the dropdown shows none. */
+      /* Disable selection when no versions are available. */
     gtk_widget_set_sensitive (GTK_WIDGET (self->project.details_check),
                               have_versions && !self->installed.identifying);
   }
 
-  /* The version the dropdown shows from the start is not on the list
-     until the checkmark says so. */
+  /* The default version is not selected until its checkmark is activated. */
   nuvasha_content_page_refresh_picks (self);
 }
 
@@ -445,8 +430,7 @@ on_detail_versions_ready (GObject *source G_GNUC_UNUSED,
       return;
     }
 
-  /* Another project was opened while this answer was on its way: the
-     project that is open now must not be filled with this one. */
+  /* Ignore results for a project that is no longer open. */
   if (g_strcmp0 (self->project.current_project_id, watch->project_id) != 0)
     {
       details_watch_free (watch);
@@ -457,8 +441,7 @@ on_detail_versions_ready (GObject *source G_GNUC_UNUSED,
 
   if (versions == NULL)
     {
-      /* What a project publishes for nothing that fits is said in the
-       * words the page shows everywhere else. */
+      /* Show the normal no-compatible-version message. */
       if (error != NULL && g_error_matches (error, nuvasha_MODRINTH_ERROR,
                                             nuvasha_MODRINTH_ERROR_NOT_FOUND))
         self->project.versions_problem = g_strdup (error->message);
@@ -495,8 +478,7 @@ on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
-  /* Another project was opened while this answer was on its way: the
-     project that is open now must not be filled with this one. */
+  /* Ignore results for a project that is no longer open. */
   if (g_strcmp0 (self->project.current_project_id, watch->project_id) != 0)
     {
       details_watch_free (watch);
@@ -507,9 +489,7 @@ on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     {
       set_busy (self, FALSE);
 
-      /* The reason is shown where the body would have been, on the
-         dialog that is already open, and not only in a toast that may be
-         behind it. */
+      /* Show the error in the open details page rather than only in a toast. */
       if (self->project.details_problem == NULL)
         self->project.details_problem =
           g_strdup (error != NULL ? error->message
@@ -524,10 +504,7 @@ on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   self->project.details_ready = TRUE;
   detail_fill (self);
 
-  /* Only versions that fit this instance are asked for, and only those
-     can reach the list. The watch goes on to the next answer, which is
-     the one that frees it, so it hands over the handle it was holding:
-     this answer is in. */
+  /* Fetch compatible versions next, reusing the request watch. */
   nuvasha_operation_unref (watch->operation);
   watch->operation = nuvasha_modrinth_versions_async (
     watch->project_id, self->type, self->minecraft_version, self->loader,
@@ -536,11 +513,8 @@ on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                                      self->browse.model->cancellable);
 }
 
-/* The dialog of @project: what it is, every version of it that fits this
- * instance, and the one button that installs the version chosen from
- * them. It is opened by activating a result row, so the version is
- * always chosen by the user and never picked unseen. The long
- * description is Markdown and is shown as such. */
+/* Open the details page for @project and its compatible versions. The user
+ * chooses the version; the description is rendered as Markdown. */
 void
 open_project_page (NuvashaContentPage *self, NuvashaModrinthProject *project)
 {

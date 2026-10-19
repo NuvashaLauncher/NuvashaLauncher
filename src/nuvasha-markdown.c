@@ -122,8 +122,7 @@ html_to_markdown (const char *text)
   REPLACE ("</?t(able|head|body|foot)[^>]*>", "\n\n",
            G_REGEX_CASELESS | G_REGEX_DOTALL);
 
-  /* <summary> is the headline of what a <details> folds away; the fold
-     itself is left open, so the words are what the reader sees. */
+  /* Keep the summary visible when converting <details>. */
   REPLACE ("<summary[^>]*>(.*?)</summary>", "\n\n**\\1**\n\n",
            G_REGEX_CASELESS | G_REGEX_DOTALL);
   REPLACE ("</?details[^>]*>", "\n\n", G_REGEX_CASELESS | G_REGEX_DOTALL);
@@ -140,8 +139,7 @@ html_to_markdown (const char *text)
 
   REPLACE ("<hr\\s*/?>", "\n\n---\n\n", G_REGEX_CASELESS | G_REGEX_DOTALL);
 
-  /* Whatever other tag is left names nothing a reader needs. The tags
-     the reader does render are left for the inline pass. */
+  /* Remove tags not handled by the inline pass. */
   REPLACE ("<(?!\\/?(?:sub|sup|strong|strike|del|code|em|u|s|b|i)(?=[\\s>/]))[^>]*>",
            "", G_REGEX_CASELESS | G_REGEX_DOTALL);
 
@@ -158,9 +156,7 @@ wrapped_label (const char *markup)
   g_autofree char *plain = NULL;
   g_autoptr (GError) error = NULL;
 
-  /* Modrinth descriptions are user content and occasionally contain HTML
-     with mismatched tags. Never pass invalid markup to GtkLabel: it logs a
-     warning and can leave the label with a broken size allocation. */
+   /* Validate user-provided markup before passing it to GtkLabel. */
   if (markup == NULL ||
       pango_parse_markup (markup, -1, 0, &attrs, &plain, NULL, &error))
     gtk_label_set_markup (GTK_LABEL (GTK_WIDGET (label)), markup != NULL ? markup : "");

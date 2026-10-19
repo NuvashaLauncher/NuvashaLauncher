@@ -92,8 +92,7 @@ typedef struct {
                          * NULL when it mentions no feature */
 } NuvashaRule;
 
-/* What rules are evaluated against: this machine and the features the
- * launcher enables. A feature that is not set counts as false. */
+/* Machine properties and enabled features used to evaluate rules. */
 typedef struct {
   char *os_name;
   char *os_arch;
@@ -174,8 +173,7 @@ typedef struct {
 G_DECLARE_FINAL_TYPE (NuvashaVersionManifest, nuvasha_version_manifest,
                       nuvasha, VERSION_MANIFEST, GObject)
 
-/* One row of the manifest. Owned by the manifest that holds it, so the
- * pointers stay valid exactly as long as it does. */
+/* One manifest entry, owned by its manifest. */
 typedef struct {
   char *id;
   NuvashaMcVersionType type;

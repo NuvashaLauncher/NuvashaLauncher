@@ -135,8 +135,7 @@ on_skin_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
 
   bytes = g_file_load_bytes_finish (G_FILE (source), result, NULL, &error);
 
-  /* A skin that cannot be fetched or read is no reason to fail anything:
-     the icon every account has stands in for it. */
+  /* Keep the default avatar when the skin cannot be loaded. */
   if (bytes == NULL)
     goto done;
 
@@ -158,8 +157,7 @@ done:
   avatar_load_free (load);
 }
 
-/* Shows the face of @url in @image, or leaves the icon that is already
-   there. It never blocks: the picture arrives when it arrives. */
+/* Load the face from @url without blocking the UI. */
 static void
 set_avatar (NuvashaUsersPopover *self,
             GtkImage        *image,
@@ -1167,10 +1165,7 @@ skin_menu_new (NuvashaUsersPopover *owner, GtkImage *image, NuvashaAccount *acco
   return dialog;
 }
 
-/* What the button in the header says about who this copy of nuvasha plays
-   as. An account that has to be signed in again says so there too: a
-   name that cannot be used is better known before a launch than after
-   one. */
+/* Update the header button for the active account. */
 static void
 update_the_button (NuvashaUsersPopover *self)
 {
@@ -1286,7 +1281,7 @@ on_remove_clicked (GtkButton *button, gpointer user_data)
   if (id == NULL)
     return;
 
-  /* The account popover must not remain focused behind the confirmation. */
+  /* Move focus away from the popover before showing the confirmation. */
   gtk_popover_popdown (GTK_POPOVER (self));
 
   heading = g_strdup_printf (

@@ -26,10 +26,7 @@
 
 #define nuvasha_MODPACK_FORMAT_VERSION 1
 
-/* The cap on what an archive may hold, nuvasha_MODPACK_MAX_CONTENT_SIZE
- * unless a caller lowered it. A test has no way to build a four gigabyte
- * archive to cross the real cap, so the bound is settable; nothing in
- * the launcher changes it. */
+/* Maximum inflated archive size. Tests may lower this limit. */
 static guint64 max_content_size = nuvasha_MODPACK_MAX_CONTENT_SIZE;
 
 void
@@ -613,10 +610,8 @@ nuvasha_modpack_optional_client_files (NuvashaModpack *modpack)
  * From the archive
  * ---------------------------------------------------------- */
 
-/* The entries of an archive are read through in front of any byte
- * they may carry: a link is never what a pack wants. A symlink would
- * point out of the instance, and a hardlink would share bytes with a
- * file that is no one's business here. */
+/* Validate entry metadata before reading entry data. Links are rejected:
+ * symlinks can escape the instance and hardlinks can alias unrelated files. */
 gboolean
 nuvasha_modpack_archive_entry_is_safe (const char *name, guint32 type,
                                     const char *hardlink, GError **error)
@@ -742,8 +737,7 @@ nuvasha_modpack_new_from_zip (const char *zip_path, GError **error)
 
       entry_size = archive_entry_size (header);
 
-      /* A directory ends in a /: what is a safe name under the root is
-       * a safe name without the / under it too. */
+      /* Strip a directory's trailing slash before validating its path. */
       if (archive_entry_filetype (header) == AE_IFDIR &&
           name[0] != '\0' && name[strlen (name) - 1] == '/')
         path = g_strndup (name, strlen (name) - 1);

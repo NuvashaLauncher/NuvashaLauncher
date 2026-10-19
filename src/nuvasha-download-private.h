@@ -45,10 +45,7 @@ typedef struct _DownloadRequest
   JsonParser *pending_parser;
   char *pending_cache_data;
 
-  /* What runs once this request holds a slot: the cache check and then
-     the transfer for a file, the transfer alone for JSON. Holding the
-     slot from the very start is what keeps a whole version's assets from
-     opening thousands of files at once to hash them. */
+  /* Start the cache check and transfer after acquiring a scheduler slot. */
   void (*begin) (struct _DownloadRequest *request);
 
   /* One attempt at a time. */

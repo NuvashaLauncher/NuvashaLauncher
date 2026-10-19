@@ -52,9 +52,7 @@ watch_output (NuvashaLauncher *self, GInputStream *stream, gboolean stderr_line)
  * The process
  * ---------------------------------------------------------- */
 
-/* The game was asked to stop and did not: it is ended for good. The
- * state still comes out as Stopped, because this stop was asked for and
- * not a crash, but the log says what happened. */
+/* Force-stop a game that ignored SIGTERM. Report it as stopped, not crashed. */
 gboolean
 on_stop_timeout (gpointer user_data)
 {

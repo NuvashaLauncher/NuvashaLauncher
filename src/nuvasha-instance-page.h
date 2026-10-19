@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* NuvashaInstancePage: what the dialog of one instance shows.
+/* NuvashaInstancePage: the contents of one instance dialog.
  *
  * It is a dialog page, not a navigation page: the dialog is already
  * named after the instance and has its own close button, so there is no

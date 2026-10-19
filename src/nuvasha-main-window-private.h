@@ -25,11 +25,11 @@ struct _NuvashaMainWindow
     AdwBanner *banner;  /* launch failures and crash details */
   } ui;
 
-  /* What is downloading right now, shown next to the "+" menu. */
+  /* Active downloads shown next to the "+" menu. */
   struct {
     GtkMenuButton *button; /* around the spinner */
     AdwSpinner *spinner;
-    GtkImage *icon;        /* what the button opens beside the spinner */
+    GtkImage *icon;        /* icon beside the spinner */
     GtkBox *list;          /* the box inside the dropdown */
     GHashTable *rows;    /* NuvashaDownload* -> DownloadRow* */
   } downloads;

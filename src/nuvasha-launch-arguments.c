@@ -11,13 +11,7 @@
  * The session
  * ---------------------------------------------------------- */
 
-/* What the game is told about the player, in the four words the version
- * document writes its placeholders for.
- *
- * An offline account has no token of its own and the game is told the one
- * it cannot use, so that the argument is there with or without a real
- * account behind it: that argument is also what tells the game the
- * session is not a real one. */
+/* Build the player session values used by the version placeholders. */
 NuvashaLaunchSession
 nuvasha_launch_session_for (const NuvashaAccount *account)
 {

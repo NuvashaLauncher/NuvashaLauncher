@@ -28,8 +28,8 @@
  * nobody else: they are never logged, never put in an error and never
  * written outside the accounts file, which is 0600.
  *
- * What a build without a registered application says: nuvasha_MICROSOFT_CLIENT_ID
- * has to be the application (client) ID of an Azure application
+ * A build must define nuvasha_MICROSOFT_CLIENT_ID as the application (client)
+ * ID of an Azure application
  * registered for the device code flow of a public client. When it is
  * empty, signing in fails here with nuvasha_AUTH_ERROR_NO_CLIENT_ID and says
  * which constant to fill in, rather than asking a user for a sign-in
@@ -52,12 +52,10 @@ G_BEGIN_DECLS
  * constant is what a build without one says out loud. */
 #define nuvasha_MICROSOFT_CLIENT_ID "cff4c467-c0ee-423f-9691-59fb99480fec"
 
-/* Personal Microsoft accounts are the ones a Minecraft account is, so the
- * tenant is the one that holds them. */
+/* Tenant used for personal Microsoft accounts. */
 #define nuvasha_MICROSOFT_TENANT "consumers"
 
-/* What the user consents to: signing in to Xbox Live, and a refresh
- * token so that the sign-in outlives the access token it starts with. */
+/* Permissions for Xbox Live sign-in and refresh tokens. */
 #define nuvasha_MICROSOFT_SCOPE "XboxLive.signin offline_access"
 
 #define nuvasha_MICROSOFT_DEVICE_CODE_URL \
@@ -68,7 +66,7 @@ G_BEGIN_DECLS
 #define nuvasha_XBOX_XSTS_URL "https://xsts.auth.xboxlive.com/xsts/authorize"
 #define nuvasha_MINECRAFT_SERVICES_URL "https://api.minecraftservices.com"
 
-/* What nuvasha says it is when it asks a service for something. */
+/* User-Agent sent to Microsoft services. */
 #define nuvasha_AUTH_USER_AGENT "nuvasha"
 
 /* The contract version the Xbox services answer the version they are
@@ -98,9 +96,8 @@ typedef enum {
 
 GQuark nuvasha_auth_error_quark (void);
 
-/* The code a user has to type into a browser of their own, and where.
- * @message is what Microsoft says about the sign-in, for a caller that
- * would rather show its words than write its own.
+/* Device code displayed to the user and its verification URI.
+ * @message contains Microsoft's display text.
  *
  * @device_code is what the token endpoint is polled with and the user
  * never sees it: it is the other half of the same pair the code they do
@@ -128,9 +125,8 @@ NuvashaTaskScope *nuvasha_auth_device_code_async (GAsyncReadyCallback callback,
 NuvashaDeviceCode *nuvasha_auth_device_code_finish (GAsyncResult *result,
                                             GError      **error);
 
-/* Polls the token endpoint until the user has signed in, and then runs
- * the rest of the chain: an account that owns Minecraft: Java, with its
- * profile, is what comes back.
+/* Poll the token endpoint until sign-in completes, then retrieve the
+ * Minecraft account and profile.
  *
  * Cancellable: cancelling stops the polling and nothing is stored.
  *
@@ -138,22 +134,17 @@ NuvashaDeviceCode *nuvasha_auth_device_code_finish (GAsyncResult *result,
  * nuvasha_AUTH_ERROR_XBOX when the Microsoft account has no Xbox profile or
  * is a child account, nuvasha_AUTH_ERROR_NO_GAME when it does not own
  * Minecraft: Java, and nuvasha_AUTH_ERROR_NO_PROFILE when it owns it but
- * has never played, which is what an account of a family that only
- * bought the game says. */
+ * has never played. */
 NuvashaTaskScope *nuvasha_auth_sign_in_async (const NuvashaDeviceCode *code,
                                       GAsyncReadyCallback callback,
                                       gpointer user_data);
 
-/* (transfer full). The account is not stored anywhere: the caller adds
-   it to the store, which is what writes it. */
+/* (transfer full). The caller owns and stores the returned account. */
 NuvashaAccount *nuvasha_auth_sign_in_finish (GAsyncResult *result, GError **error);
 
-/* A new access token for an account that still has a refresh token, and
- * then the rest of the chain again, so the profile of an account that
- * changed its name is what comes back.
+/* Refresh an account's access token and retrieve its current profile.
  *
- * nuvasha_AUTH_ERROR_DECLINED when Microsoft will not hand out a new one,
- * which is what the caller answers by asking the user to sign in again. */
+ * nuvasha_AUTH_ERROR_DECLINED when Microsoft requires sign-in again. */
 NuvashaTaskScope *nuvasha_auth_refresh_async (const NuvashaAccount *account,
                                       GAsyncReadyCallback callback,
                                       gpointer user_data);
@@ -164,10 +155,8 @@ NuvashaAccount *nuvasha_auth_refresh_finish (GAsyncResult *result, GError **erro
 /* ---------------------------------------------------------- *
  * One answer of the chain on its own
  *
- * The chain is a sequence of requests, and each of them is read here on
- * its own: what a service answered is read from what it answered with,
- * and nothing else. These are the seam a test hands a fixture to, and
- * they are the same code the chain above uses.
+ * Each service response is parsed independently. Tests provide fixtures to
+ * these functions, which are also used by the live authentication chain.
  * ---------------------------------------------------------- */
 
 /* The device authorization answer. (transfer full) */

@@ -247,9 +247,7 @@ nuvasha_loader_publishes_an_installer (NuvashaLoader loader)
   return loader_maven (loader, &coordinate) != NULL;
 }
 
-/* What separates the Minecraft version in the name of a maven loader
- * version from the loader's own numbers: a dash for Forge, a dot for
- * NeoForge. */
+/* Separator between the Minecraft and loader versions. */
 static char
 loader_version_separator (NuvashaLoader loader)
 {
@@ -301,9 +299,7 @@ nuvasha_loaders_version_runs_game (NuvashaLoader      loader,
   return g_str_has_prefix (loader_version, prefix);
 }
 
-/* What a maven loader version is once the Minecraft version it runs is
- * taken off it: what is left is what the loader itself published, and
- * what is read for a pre-release. */
+/* Return the loader-owned portion of a Maven version string. */
 static const char *
 loader_version_own_part (NuvashaLoader   loader,
                          const char *loader_version,

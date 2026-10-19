@@ -2,9 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* NuvashaJava: finding and understanding the Java runtimes on this
- * machine. Candidates are asked, one after the other and never on the
- * main loop thread, what they are; the results are what the UI lists. */
+/* Detect and inspect Java runtimes without blocking the main loop. */
 
 /* realpath() is glibc-only, and nuvasha only ever runs on Linux. */
 #define _GNU_SOURCE

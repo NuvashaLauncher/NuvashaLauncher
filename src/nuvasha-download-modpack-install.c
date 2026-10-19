@@ -27,10 +27,8 @@ void remove_pack_file (NuvashaDownloadModpackDialog *);
  * The pack fetched and the pack installed
  * ---------------------------------------------------------- */
 
-/* What one background install keeps alive: the dialog it was started
- * from (whose widgets may already be gone) and the manager's download.
- * Both are held, so the callbacks can run either while the dialog is up
- * or after it was closed. */
+/* References held by a background install so callbacks remain valid after
+ * the dialog closes. */
 typedef struct {
   NuvashaDownloadModpackDialog *dialog;
   NuvashaDownload *download;
@@ -55,15 +53,14 @@ on_install_progress (guint done,
 {
   InstallJob *job = user_data;
 
-  /* The install's "n of m files" lives in the header's dropdown; a NULL
+  /* The install's "n of m files" appears in the header; a NULL
    * path marks the transition from downloading to extraction. */
   if (path == NULL)
     nuvasha_download_set_detail (job->download, _("Extracting files"));
   nuvasha_download_set_progress (job->download, done, total);
 }
 
-/* A downloaded .mrpack is only needed until its overrides are laid down.
- * An imported file belongs to the user and is never removed here. */
+/* Remove downloaded archives after extraction, but never remove imports. */
 void
 remove_pack_file (NuvashaDownloadModpackDialog *self)
 {
