@@ -1,0 +1,617 @@
+msgid ""
+msgstr ""
+"Language: id\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+msgid "Cancel"
+msgstr "Membatalkan"
+
+msgid "Confirm"
+msgstr "Mengonfirmasi"
+
+msgid "Delete"
+msgstr "Menghapus"
+
+msgid "Retry"
+msgstr "Mencoba kembali"
+
+msgid "Loading…"
+msgstr "Memuat…"
+
+msgid "Download"
+msgstr "Unduh"
+
+msgid "Update All"
+msgstr "Perbarui Semua"
+
+msgid "Open Folder"
+msgstr "Buka Folder"
+
+msgid "Nothing installed yet"
+msgstr "Belum ada yang terpasang"
+
+msgid "Browse for something to put into the folder of this instance"
+msgstr "Telusuri sesuatu untuk dimasukkan ke dalam folder contoh ini"
+
+msgid "Installed"
+msgstr "Dipasang"
+
+msgid "Loading more…"
+msgstr "Memuat lebih banyak…"
+
+msgid "Nothing is selected"
+msgstr "Tidak ada yang dipilih"
+
+msgid "Install this version with the selected ones"
+msgstr "Instal versi ini dengan versi yang dipilih"
+
+msgid "Filter by category"
+msgstr "Filter berdasarkan kategori"
+
+msgid "Filter"
+msgstr "Menyaring"
+
+msgid "Nothing to show yet"
+msgstr "Belum ada yang bisa ditampilkan"
+
+msgid "Type what to look for, or browse everything Modrinth has for this instance"
+msgstr "Ketik apa yang ingin dicari, atau telusuri semua yang dimiliki Modrinth untuk contoh ini"
+
+msgid "Browse"
+msgstr "Jelajahi"
+
+msgid "No mod loader"
+msgstr "Tidak ada pemuat mod"
+
+msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
+msgstr "Mod memerlukan pemuat mod. Pilih Fabric, Quilt, Forge atau NeoForge di pengaturan instance ini terlebih dahulu"
+
+msgid "Create Instance"
+msgstr "Buat Contoh"
+
+msgid "Name"
+msgstr "Nama"
+
+msgid "Directory"
+msgstr "Direktori"
+
+msgid "Choose a folder"
+msgstr "Pilih folder"
+
+msgid "Create"
+msgstr "Membuat"
+
+msgid "Download Modpack"
+msgstr "Unduh Modpack"
+
+msgid "Loading modpacks…"
+msgstr "Memuat modpack…"
+
+msgid "Search modpacks"
+msgstr "Cari modpack"
+
+msgid "Close"
+msgstr "Menutup"
+
+msgid "Back"
+msgstr "Kembali"
+
+msgid "Install"
+msgstr "Memasang"
+
+msgid "Copy of %s"
+msgstr "Salinan %s"
+
+msgid "Choose Java executable"
+msgstr "Pilih Java yang dapat dieksekusi"
+
+msgid "the chosen file does not report a Java version"
+msgstr "file yang dipilih tidak melaporkan versi Java"
+
+msgid "Choose an Icon"
+msgstr "Pilih Ikon"
+
+msgid "Choose a Directory"
+msgstr "Pilih Direktori"
+
+msgid "Duplicated to \"%s\""
+msgstr "Digandakan menjadi \"%s\""
+
+msgid "Delete \"%s\"?"
+msgstr "Hapus \"%s\"?"
+
+msgid "General"
+msgstr "Umum"
+
+msgid "Icon"
+msgstr "Ikon"
+
+msgid "Change the Directory"
+msgstr "Ubah Direktori"
+
+msgid "Minecraft"
+msgstr "Minecraft"
+
+msgid "Java"
+msgstr "Jawa"
+
+msgid "Java Runtime"
+msgstr "Waktu Proses Java"
+
+msgid "No Java installation was found on this system"
+msgstr "Tidak ada instalasi Java yang ditemukan pada sistem ini"
+
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "Game ini memerlukan Java %d atau lebih baru, Java yang dipilih adalah %d"
+
+msgid "Add Java Runtime"
+msgstr "Tambahkan Waktu Proses Java"
+
+msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
+msgstr "Minecraft memerlukan Java tanpa kepala: di Arch gunakan paket jre-openjdk, bukan jre-openjdk-headless"
+
+msgid "JVM Arguments"
+msgstr "Argumen JVM"
+
+msgid "The configured Java was not detected; make sure it is still a usable java executable"
+msgstr "Java yang dikonfigurasi tidak terdeteksi; pastikan itu masih merupakan java executable yang dapat digunakan"
+
+msgid "Actions"
+msgstr "Tindakan"
+
+msgid "Duplicate"
+msgstr "Duplikat"
+
+msgid "Delete Instance"
+msgstr "Hapus Instans"
+
+msgid "Settings"
+msgstr "Pengaturan"
+
+msgid "Resource Packs"
+msgstr "Paket Sumber Daya"
+
+msgid "Shader Packs"
+msgstr "Paket Shader"
+
+msgid "Mods"
+msgstr "Modifikasi"
+
+msgid "Logs"
+msgstr "Log"
+
+msgid "Custom: %s"
+msgstr "Khusus: %s"
+
+msgid "the game was stopped by signal %d"
+msgstr "permainan dihentikan oleh sinyal %d"
+
+msgid "the game exited with code %d"
+msgstr "permainan keluar dengan kode %d"
+
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Tidak ditemukan versi %s yang kompatibel untuk Minecraft %s."
+
+msgid "Loader"
+msgstr "Pemuat"
+
+msgid "Loader Version"
+msgstr "Versi Pemuat"
+
+msgid "Clear"
+msgstr "Jernih"
+
+msgid "Search the log"
+msgstr "Cari lognya"
+
+msgid "Versions"
+msgstr "Versi"
+
+msgid "Show unstable Minecraft versions"
+msgstr "Tampilkan versi Minecraft yang tidak stabil"
+
+msgid "Show unstable Mod Loader versions"
+msgstr "Tampilkan versi Mod Loader yang tidak stabil"
+
+msgid "Language"
+msgstr "Bahasa"
+
+msgid "Interface language"
+msgstr "Bahasa antarmuka"
+
+msgid "Line Limit"
+msgstr "Batas Garis"
+
+msgid "Open Log Folder After Crash"
+msgstr "Buka Folder Log Setelah Crash"
+
+msgid "About Nuvasha Launcher"
+msgstr "Tentang Peluncur Nuvasha"
+
+msgid "Keyboard Shortcuts"
+msgstr "Pintasan Papan Ketik"
+
+msgid "Stop"
+msgstr "Berhenti"
+
+msgid "Play"
+msgstr "Bermain"
+
+msgid "Keep Playing"
+msgstr "Terus Bermain"
+
+msgid "Downloads"
+msgstr "Unduhan"
+
+msgid "Accounts"
+msgstr "Akun"
+
+msgid "No Instances Yet"
+msgstr "Belum Ada Contoh"
+
+msgid "Use the + button in the header to create one"
+msgstr "Gunakan tombol + di header untuk membuatnya"
+
+msgid "the loader cannot be resolved: %s"
+msgstr "pemuat tidak dapat diselesaikan: %s"
+
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Tidak ditemukan versi kompatibel untuk Minecraft %s dan %s."
+
+msgid "No compatible version found for Minecraft %s."
+msgstr "Tidak ditemukan versi kompatibel untuk Minecraft %s."
+
+msgid "Add Offline Account"
+msgstr "Tambahkan Akun Offline"
+
+msgid "a name can only hold letters, digits and underscores"
+msgstr "sebuah nama hanya dapat memuat huruf, angka, dan garis bawah"
+
+msgid "a name cannot be empty"
+msgstr "sebuah nama tidak boleh kosong"
+
+msgid "a name has to be 3 to 16 characters long"
+msgstr "sebuah nama harus terdiri dari 3 hingga 16 karakter"
+
+msgid "Add"
+msgstr "Menambahkan"
+
+msgid "asking Microsoft for a code"
+msgstr "meminta kode kepada Microsoft"
+
+msgid "waiting for the sign-in in the browser"
+msgstr "menunggu masuk di browser"
+
+msgid "Sign In"
+msgstr "Masuk"
+
+msgid "Open the page in your browser, then enter this code:"
+msgstr "Buka halaman tersebut di browser Anda, lalu masukkan kode ini:"
+
+msgid "Open the Page"
+msgstr "Buka Halaman"
+
+msgid "Try Again"
+msgstr "Coba Lagi"
+
+msgid "Remove"
+msgstr "Menghapus"
+
+msgid "Remove \"%s\""
+msgstr "Hapus \"%s\""
+
+msgid "Add Microsoft Account"
+msgstr "Tambahkan Akun Microsoft"
+
+msgid "Minecraft Version"
+msgstr "Versi Minecraft"
+
+msgid "Install the selected %s?"
+msgstr "Instal %s yang dipilih?"
+
+msgid "%s \"%s\""
+msgstr "%s \"%s\""
+
+msgid "Search"
+msgstr "Mencari"
+
+msgid "Update"
+msgstr "Memperbarui"
+
+msgid "Update the following %s"
+msgstr "Perbarui %s berikut"
+
+msgid "Dependencies:"
+msgstr "Ketergantungan:"
+
+msgid "The following mods depend on %s:\n%s"
+msgstr "Mod berikut bergantung pada %s:\n%s"
+
+msgid "Cache"
+msgstr "Cache"
+
+msgid "Cache Modrinth API responses"
+msgstr "Tembolok respons API Modrinth"
+
+msgid "Cache expiration"
+msgstr "Kedaluwarsa cache"
+
+msgid "1 hour"
+msgstr "1 jam"
+
+msgid "6 hours"
+msgstr "6 jam"
+
+msgid "1 day"
+msgstr "1 hari"
+
+msgid "7 days"
+msgstr "7 hari"
+
+msgid "Clear nuvasha Cache"
+msgstr "Hapus Cache nuvasha"
+
+msgid "Show Shortcuts"
+msgstr "Tampilkan Pintasan"
+
+msgid "Quit"
+msgstr "Berhenti"
+
+msgid "Clear nuvasha Cache?"
+msgstr "Hapus Cache nuvasha?"
+
+msgid "Import Modpack"
+msgstr "Impor Modpack"
+
+msgid "Modpack exported"
+msgstr "Modpack diekspor"
+
+msgid "Modrinth Modpacks (*.mrpack)"
+msgstr "Modpack Modrinth (*.mrpack)"
+
+msgid "The export location is not a local file"
+msgstr "Lokasi ekspor bukan file lokal"
+
+msgid "Export Modpack"
+msgstr "Ekspor Modpack"
+
+msgid "Importing modpack…"
+msgstr "Mengimpor modpack…"
+
+msgid "Reading modpack"
+msgstr "Membaca modpack"
+
+msgid "Exporting modpack"
+msgstr "Mengekspor modpack"
+
+msgid "Modpack export"
+msgstr "Ekspor modpack"
+
+msgid "Include transient files?"
+msgstr "Sertakan file sementara?"
+
+msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr "Log, laporan kerusakan, tangkapan layar, cache, dan unduhan biasanya dikecualikan."
+
+msgid "Clean Export"
+msgstr "Ekspor Bersih"
+
+msgid "Include All Files"
+msgstr "Sertakan Semua File"
+
+msgid "Pack Name"
+msgstr "Nama Paket"
+
+msgid "Summary"
+msgstr "Ringkasan"
+
+msgid "Version ID"
+msgstr "ID Versi"
+
+msgid "Downloading files"
+msgstr "Mengunduh file"
+
+msgid "Extracting files"
+msgstr "Mengekstrak file"
+
+msgid "Optional files"
+msgstr "File opsional"
+
+msgid "The pack lists these files but says they are not needed. Nothing of them is installed unless you ask. Default is off"
+msgstr "Paket tersebut berisi daftar file-file ini tetapi mengatakan bahwa file-file tersebut tidak diperlukan. Tidak ada satupun yang diinstal kecuali Anda memintanya. Defaultnya tidak aktif"
+
+msgid "Pack could not be fetched"
+msgstr "Paket tidak dapat diambil"
+
+msgid "Invalid pack"
+msgstr "Paket tidak valid"
+
+msgid "The pack does not define its install"
+msgstr "Paket tidak menentukan pemasangannya"
+
+msgid "Downloading Modpack"
+msgstr "Mengunduh Modpack"
+
+msgid "Writing archive"
+msgstr "Arsip penulisan"
+
+msgid "Export modpack metadata"
+msgstr "Ekspor metadata modpack"
+
+msgid "Ask for export metadata"
+msgstr "Minta metadata ekspor"
+
+msgid "Pack information"
+msgstr "Kemas informasi"
+
+msgid "Show name, summary and version fields before exporting."
+msgstr "Tampilkan bidang nama, ringkasan, dan versi sebelum mengekspor."
+
+msgid "Export complete"
+msgstr "Ekspor selesai"
+
+msgid "Export"
+msgstr "Ekspor"
+
+msgid "Installed %u item"
+msgid_plural "Installed %u items"
+msgstr[0] "Menginstal %u item"
+msgstr[1] "Menginstal %u item"
+
+msgid "Updated %u item"
+msgid_plural "Updated %u items"
+msgstr[0] "Memperbarui %u item"
+msgstr[1] "Memperbarui %u item"
+
+msgid "The icon must be a file on this computer"
+msgstr "Ikonnya harus berupa file di komputer ini"
+
+msgid "The game is running; stop it before moving its directory"
+msgstr "Permainan sedang berjalan; hentikan sebelum memindahkan direktorinya"
+
+msgid "%s is being installed"
+msgstr "%s sedang dipasang"
+
+msgid "no compatible version"
+msgstr "tidak ada versi yang kompatibel"
+
+msgid "Enabled"
+msgstr "Diaktifkan"
+
+msgid "Disabled"
+msgstr "Dengan disabilitas"
+
+msgid "Deleted"
+msgstr "Dihapus"
+
+msgid "Everything is up to date"
+msgstr "Semuanya mutakhir"
+
+msgid "Cannot create \"%s\": %s"
+msgstr "Tidak dapat membuat \"%s\": %s"
+
+msgid "This project publishes nothing that fits this instance."
+msgstr "Proyek ini tidak menerbitkan apa pun yang sesuai dengan contoh ini."
+
+msgid "Unknown"
+msgstr "Tidak dikenal"
+
+msgid "%s (unstable)"
+msgstr "%s (tidak stabil)"
+
+msgid "the next page could not be loaded"
+msgstr "halaman berikutnya tidak dapat dimuat"
+
+msgid "Other"
+msgstr "Lainnya"
+
+msgid "%.1fM downloads"
+msgstr "%.1fM unduhan"
+
+msgid "%.1fk downloads"
+msgstr "%.1fk unduhan"
+
+msgid "%s  ·  by %s"
+msgstr "%s · oleh %s"
+
+msgid "by %s"
+msgstr "oleh %s"
+
+msgid "%s downloads"
+msgstr "%s unduhan"
+
+msgid "Cache Cleared"
+msgstr "Tembolok Dihapus"
+
+msgid "nuvasha cache data was cleared successfully."
+msgstr "data cache nuvasha berhasil dibersihkan."
+
+msgid "Cache Cleanup Failed"
+msgstr "Pembersihan Cache Gagal"
+
+msgid "The cache could not be cleared."
+msgstr "Cache tidak dapat dihapus."
+
+msgid "the versions of this loader could not be read"
+msgstr "versi pemuat ini tidak dapat dibaca"
+
+msgid "Minecraft crashed"
+msgstr "Minecraft jatuh"
+
+msgid "Minecraft could not start"
+msgstr "Minecraft tidak dapat dimulai"
+
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft perlu masuk"
+
+msgid "The file cannot be renamed"
+msgstr "File tidak dapat diganti namanya"
+
+msgid "The file cannot be deleted"
+msgstr "File tidak dapat dihapus"
+
+msgid "The folder cannot be read"
+msgstr "Foldernya tidak dapat dibaca"
+
+msgid "The file could not be installed"
+msgstr "File tidak dapat diinstal"
+
+msgid "The folder cannot be created"
+msgstr "Folder tidak dapat dibuat"
+
+msgid "This cannot be installed"
+msgstr "Ini tidak dapat diinstal"
+
+msgid "Pick a Minecraft version first"
+msgstr "Pilih versi Minecraft terlebih dahulu"
+
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "Menghapus ketergantungan akan menghapus mod yang bergantung padanya"
+
+msgid "A dependent mod cannot be deleted"
+msgstr "Mod yang bergantung tidak dapat dihapus"
+
+msgid "Sandbox"
+msgstr "Bak pasir"
+
+msgid "Enable sandbox"
+msgstr "Aktifkan kotak pasir"
+
+msgid "Allow sandbox network access"
+msgstr "Izinkan akses jaringan kotak pasir"
+
+msgid "Slim model"
+msgstr "Modelnya ramping"
+
+msgid "OK"
+msgstr "OKE"
+
+msgid "Export skin…"
+msgstr "Ekspor kulit…"
+
+msgid "Imported skin"
+msgstr "Kulit impor"
+
+msgid "Default model"
+msgstr "Model bawaan"
+
+msgid "PNG skin texture"
+msgstr "Tekstur kulit PNG"
+
+msgid "Invalid skin"
+msgstr "Kulit tidak valid"
+
+msgid "No cape"
+msgstr "Tanpa jubah"
+
+msgid "Import skin…"
+msgstr "Impor kulit…"
+
+msgid "Delete skin?"
+msgstr "Hapus kulit?"
+
+msgid "This skin will be removed from the skin library."
+msgstr "Kulit ini akan dihapus dari perpustakaan kulit."
+
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "Gambar kulit harus berupa file PNG 64x64 atau 64x32"

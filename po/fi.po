@@ -1,0 +1,617 @@
+msgid ""
+msgstr ""
+"Language: fi\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+msgid "Cancel"
+msgstr "Peruuttaa"
+
+msgid "Confirm"
+msgstr "Vahvistaa"
+
+msgid "Delete"
+msgstr "Poistaa"
+
+msgid "Retry"
+msgstr "Yritä uudelleen"
+
+msgid "Loading…"
+msgstr "Ladataan…"
+
+msgid "Download"
+msgstr "Lataa"
+
+msgid "Update All"
+msgstr "Päivitä kaikki"
+
+msgid "Open Folder"
+msgstr "Avaa kansio"
+
+msgid "Nothing installed yet"
+msgstr "Mitään ei ole vielä asennettu"
+
+msgid "Browse for something to put into the folder of this instance"
+msgstr "Selaa, mitä haluat lisätä tämän ilmentymän kansioon"
+
+msgid "Installed"
+msgstr "Asennettu"
+
+msgid "Loading more…"
+msgstr "Ladataan lisää…"
+
+msgid "Nothing is selected"
+msgstr "Mitään ei ole valittu"
+
+msgid "Install this version with the selected ones"
+msgstr "Asenna tämä versio valittujen versioiden kanssa"
+
+msgid "Filter by category"
+msgstr "Suodata luokan mukaan"
+
+msgid "Filter"
+msgstr "Suodattaa"
+
+msgid "Nothing to show yet"
+msgstr "Ei vielä mitään näytettävää"
+
+msgid "Type what to look for, or browse everything Modrinth has for this instance"
+msgstr "Kirjoita mitä etsiä, tai selaa kaikkea, mitä Modrinth tarjoaa tähän tapaukseen"
+
+msgid "Browse"
+msgstr "Selaa"
+
+msgid "No mod loader"
+msgstr "Ei mod loaderia"
+
+msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
+msgstr "Modit tarvitsevat modloaderin. Valitse ensin Fabric, Quilt, Forge tai NeoForge tämän esiintymän asetuksista"
+
+msgid "Create Instance"
+msgstr "Luo ilmentymä"
+
+msgid "Name"
+msgstr "Nimi"
+
+msgid "Directory"
+msgstr "Hakemisto"
+
+msgid "Choose a folder"
+msgstr "Valitse kansio"
+
+msgid "Create"
+msgstr "Luoda"
+
+msgid "Download Modpack"
+msgstr "Lataa Modpack"
+
+msgid "Loading modpacks…"
+msgstr "Ladataan modpackeja…"
+
+msgid "Search modpacks"
+msgstr "Etsi modpackeja"
+
+msgid "Close"
+msgstr "Lähellä"
+
+msgid "Back"
+msgstr "Takaisin"
+
+msgid "Install"
+msgstr "Asentaa"
+
+msgid "Copy of %s"
+msgstr "Kopio %s:sta"
+
+msgid "Choose Java executable"
+msgstr "Valitse Java-suoritettava tiedosto"
+
+msgid "the chosen file does not report a Java version"
+msgstr "valittu tiedosto ei ilmoita Java-versiota"
+
+msgid "Choose an Icon"
+msgstr "Valitse kuvake"
+
+msgid "Choose a Directory"
+msgstr "Valitse hakemisto"
+
+msgid "Duplicated to \"%s\""
+msgstr "Kopioitu kohteeseen \"%s\""
+
+msgid "Delete \"%s\"?"
+msgstr "Poistetaanko \"%s\"?"
+
+msgid "General"
+msgstr "Kenraali"
+
+msgid "Icon"
+msgstr "Kuvake"
+
+msgid "Change the Directory"
+msgstr "Muuta hakemistoa"
+
+msgid "Minecraft"
+msgstr "Minecraft"
+
+msgid "Java"
+msgstr "Java"
+
+msgid "Java Runtime"
+msgstr "Java Runtime"
+
+msgid "No Java installation was found on this system"
+msgstr "Tästä järjestelmästä ei löytynyt Java-asennusta"
+
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "Tämä peli vaatii Java %d tai uudemman, valittu Java on %d"
+
+msgid "Add Java Runtime"
+msgstr "Lisää Java Runtime"
+
+msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
+msgstr "Minecraft tarvitsee päättömän Javan: Archissa käytä pakettia jre-openjdk, ei jre-openjdk-headless"
+
+msgid "JVM Arguments"
+msgstr "JVM:n argumentit"
+
+msgid "The configured Java was not detected; make sure it is still a usable java executable"
+msgstr "Määritettyä Javaa ei havaittu; varmista, että se on edelleen käyttökelpoinen Java-suoritettava tiedosto"
+
+msgid "Actions"
+msgstr "Toiminnot"
+
+msgid "Duplicate"
+msgstr "Kopioi"
+
+msgid "Delete Instance"
+msgstr "Poista ilmentymä"
+
+msgid "Settings"
+msgstr "Asetukset"
+
+msgid "Resource Packs"
+msgstr "Resurssipaketit"
+
+msgid "Shader Packs"
+msgstr "Shader-paketit"
+
+msgid "Mods"
+msgstr "Modit"
+
+msgid "Logs"
+msgstr "Lokit"
+
+msgid "Custom: %s"
+msgstr "Mukautettu: %s"
+
+msgid "the game was stopped by signal %d"
+msgstr "peli pysäytettiin signaalilla %d"
+
+msgid "the game exited with code %d"
+msgstr "peli poistui koodilla %d"
+
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Minecraftille %s ei löytynyt yhteensopivaa %s-versiota."
+
+msgid "Loader"
+msgstr "Loader"
+
+msgid "Loader Version"
+msgstr "Loader-versio"
+
+msgid "Clear"
+msgstr "Selkeä"
+
+msgid "Search the log"
+msgstr "Etsi lokista"
+
+msgid "Versions"
+msgstr "Versiot"
+
+msgid "Show unstable Minecraft versions"
+msgstr "Näytä epävakaat Minecraft-versiot"
+
+msgid "Show unstable Mod Loader versions"
+msgstr "Näytä epävakaat Mod Loader -versiot"
+
+msgid "Language"
+msgstr "Kieli"
+
+msgid "Interface language"
+msgstr "Käyttöliittymän kieli"
+
+msgid "Line Limit"
+msgstr "Linjarajoitus"
+
+msgid "Open Log Folder After Crash"
+msgstr "Avaa lokikansio kaatumisen jälkeen"
+
+msgid "About Nuvasha Launcher"
+msgstr "Tietoja Nuvasha Launcherista"
+
+msgid "Keyboard Shortcuts"
+msgstr "Pikanäppäimet"
+
+msgid "Stop"
+msgstr "Stop"
+
+msgid "Play"
+msgstr "Pelata"
+
+msgid "Keep Playing"
+msgstr "Jatka pelaamista"
+
+msgid "Downloads"
+msgstr "Lataukset"
+
+msgid "Accounts"
+msgstr "Tilit"
+
+msgid "No Instances Yet"
+msgstr "Ei vielä tapauksia"
+
+msgid "Use the + button in the header to create one"
+msgstr "Käytä otsikon + -painiketta luodaksesi sellaisen"
+
+msgid "the loader cannot be resolved: %s"
+msgstr "lataajaa ei voida ratkaista: %s"
+
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Minecraftille %s ja %s ei löytynyt yhteensopivaa versiota."
+
+msgid "No compatible version found for Minecraft %s."
+msgstr "Minecraftille %s ei löytynyt yhteensopivaa versiota."
+
+msgid "Add Offline Account"
+msgstr "Lisää offline-tili"
+
+msgid "a name can only hold letters, digits and underscores"
+msgstr "nimi voi sisältää vain kirjaimia, numeroita ja alaviivoja"
+
+msgid "a name cannot be empty"
+msgstr "nimi ei voi olla tyhjä"
+
+msgid "a name has to be 3 to 16 characters long"
+msgstr "Nimen on oltava 3–16 merkkiä pitkä"
+
+msgid "Add"
+msgstr "Lisätä"
+
+msgid "asking Microsoft for a code"
+msgstr "pyytää Microsoftilta koodia"
+
+msgid "waiting for the sign-in in the browser"
+msgstr "odottaa sisäänkirjautumista selaimessa"
+
+msgid "Sign In"
+msgstr "Kirjaudu sisään"
+
+msgid "Open the page in your browser, then enter this code:"
+msgstr "Avaa sivu selaimessasi ja kirjoita tämä koodi:"
+
+msgid "Open the Page"
+msgstr "Avaa sivu"
+
+msgid "Try Again"
+msgstr "Yritä uudelleen"
+
+msgid "Remove"
+msgstr "Poistaa"
+
+msgid "Remove \"%s\""
+msgstr "Poista \"%s\""
+
+msgid "Add Microsoft Account"
+msgstr "Lisää Microsoft-tili"
+
+msgid "Minecraft Version"
+msgstr "Minecraft versio"
+
+msgid "Install the selected %s?"
+msgstr "Asennetaanko valittu %s?"
+
+msgid "%s \"%s\""
+msgstr "%s \"%s\""
+
+msgid "Search"
+msgstr "Haku"
+
+msgid "Update"
+msgstr "Päivittää"
+
+msgid "Update the following %s"
+msgstr "Päivitä seuraava %s"
+
+msgid "Dependencies:"
+msgstr "Riippuvuudet:"
+
+msgid "The following mods depend on %s:\n%s"
+msgstr "Seuraavat modit riippuvat %s:sta:\n%s"
+
+msgid "Cache"
+msgstr "Välimuisti"
+
+msgid "Cache Modrinth API responses"
+msgstr "Tallenna Modrinth API -vastaukset välimuistiin"
+
+msgid "Cache expiration"
+msgstr "Välimuistin vanheneminen"
+
+msgid "1 hour"
+msgstr "1 tunti"
+
+msgid "6 hours"
+msgstr "6 tuntia"
+
+msgid "1 day"
+msgstr "1 päivä"
+
+msgid "7 days"
+msgstr "7 päivää"
+
+msgid "Clear nuvasha Cache"
+msgstr "Tyhjennä nuvasha-välimuisti"
+
+msgid "Show Shortcuts"
+msgstr "Näytä pikakuvakkeet"
+
+msgid "Quit"
+msgstr "Lopettaa"
+
+msgid "Clear nuvasha Cache?"
+msgstr "Tyhjennä nuvasha-välimuisti?"
+
+msgid "Import Modpack"
+msgstr "Tuo Modpack"
+
+msgid "Modpack exported"
+msgstr "Modpack vietiin"
+
+msgid "Modrinth Modpacks (*.mrpack)"
+msgstr "Modrinth Modpacks (*.mrpack)"
+
+msgid "The export location is not a local file"
+msgstr "Vientisijainti ei ole paikallinen tiedosto"
+
+msgid "Export Modpack"
+msgstr "Vie Modpack"
+
+msgid "Importing modpack…"
+msgstr "Tuodaan modpackia…"
+
+msgid "Reading modpack"
+msgstr "Modpackin lukeminen"
+
+msgid "Exporting modpack"
+msgstr "Viedään modpack"
+
+msgid "Modpack export"
+msgstr "Modpack vienti"
+
+msgid "Include transient files?"
+msgstr "Sisällytetäänkö ohimenevät tiedostot?"
+
+msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr "Lokit, virheraportit, kuvakaappaukset, välimuistit ja lataukset jätetään yleensä pois."
+
+msgid "Clean Export"
+msgstr "Puhdas vienti"
+
+msgid "Include All Files"
+msgstr "Sisällytä kaikki tiedostot"
+
+msgid "Pack Name"
+msgstr "Pakkauksen nimi"
+
+msgid "Summary"
+msgstr "Yhteenveto"
+
+msgid "Version ID"
+msgstr "Version tunnus"
+
+msgid "Downloading files"
+msgstr "Tiedostojen lataaminen"
+
+msgid "Extracting files"
+msgstr "Tiedostojen purkaminen"
+
+msgid "Optional files"
+msgstr "Valinnaiset tiedostot"
+
+msgid "The pack lists these files but says they are not needed. Nothing of them is installed unless you ask. Default is off"
+msgstr "Paketissa luetellaan nämä tiedostot, mutta sanotaan, että niitä ei tarvita. Mitään niistä ei asenneta, ellet pyydä. Oletus on pois päältä"
+
+msgid "Pack could not be fetched"
+msgstr "Pakettia ei voitu noutaa"
+
+msgid "Invalid pack"
+msgstr "Virheellinen paketti"
+
+msgid "The pack does not define its install"
+msgstr "Paketti ei määrittele asennusta"
+
+msgid "Downloading Modpack"
+msgstr "Ladataan Modpackia"
+
+msgid "Writing archive"
+msgstr "Kirjoitusarkisto"
+
+msgid "Export modpack metadata"
+msgstr "Vie modpack-metatiedot"
+
+msgid "Ask for export metadata"
+msgstr "Pyydä viemään metatietoja"
+
+msgid "Pack information"
+msgstr "Pakkauksen tiedot"
+
+msgid "Show name, summary and version fields before exporting."
+msgstr "Näytä nimi-, yhteenveto- ja versiokentät ennen vientiä."
+
+msgid "Export complete"
+msgstr "Vienti valmis"
+
+msgid "Export"
+msgstr "Viedä"
+
+msgid "Installed %u item"
+msgid_plural "Installed %u items"
+msgstr[0] "%u kohde asennettu"
+msgstr[1] "%u kohdetta asennettu"
+
+msgid "Updated %u item"
+msgid_plural "Updated %u items"
+msgstr[0] "Päivitetty %u kohdetta"
+msgstr[1] "Päivitetty %u kohdetta"
+
+msgid "The icon must be a file on this computer"
+msgstr "Kuvakkeen on oltava tällä tietokoneella oleva tiedosto"
+
+msgid "The game is running; stop it before moving its directory"
+msgstr "Peli on käynnissä; pysäytä se ennen hakemiston siirtämistä"
+
+msgid "%s is being installed"
+msgstr "%s asennetaan"
+
+msgid "no compatible version"
+msgstr "ei yhteensopivaa versiota"
+
+msgid "Enabled"
+msgstr "Käytössä"
+
+msgid "Disabled"
+msgstr "Ei käytössä"
+
+msgid "Deleted"
+msgstr "Poistettu"
+
+msgid "Everything is up to date"
+msgstr "Kaikki on ajan tasalla"
+
+msgid "Cannot create \"%s\": %s"
+msgstr "Ei voida luoda \"%s\": %s"
+
+msgid "This project publishes nothing that fits this instance."
+msgstr "Tämä projekti ei julkaise mitään, mikä sopii tähän tapaukseen."
+
+msgid "Unknown"
+msgstr "Tuntematon"
+
+msgid "%s (unstable)"
+msgstr "%s (epävakaa)"
+
+msgid "the next page could not be loaded"
+msgstr "seuraavaa sivua ei voitu ladata"
+
+msgid "Other"
+msgstr "Muut"
+
+msgid "%.1fM downloads"
+msgstr "%.1fM lataukset"
+
+msgid "%.1fk downloads"
+msgstr "%.1fk lataukset"
+
+msgid "%s  ·  by %s"
+msgstr "%s · kirjoittaja %s"
+
+msgid "by %s"
+msgstr "kirjoittaja %s"
+
+msgid "%s downloads"
+msgstr "%s latausta"
+
+msgid "Cache Cleared"
+msgstr "Välimuisti tyhjennetty"
+
+msgid "nuvasha cache data was cleared successfully."
+msgstr "nuvasha-välimuistin tiedot tyhjennettiin onnistuneesti."
+
+msgid "Cache Cleanup Failed"
+msgstr "Välimuistin puhdistus epäonnistui"
+
+msgid "The cache could not be cleared."
+msgstr "Välimuistia ei voitu tyhjentää."
+
+msgid "the versions of this loader could not be read"
+msgstr "tämän latausohjelman versioita ei voitu lukea"
+
+msgid "Minecraft crashed"
+msgstr "Minecraft kaatui"
+
+msgid "Minecraft could not start"
+msgstr "Minecraft ei voinut käynnistyä"
+
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft tarvitsee kirjautumisen"
+
+msgid "The file cannot be renamed"
+msgstr "Tiedostoa ei voi nimetä uudelleen"
+
+msgid "The file cannot be deleted"
+msgstr "Tiedostoa ei voi poistaa"
+
+msgid "The folder cannot be read"
+msgstr "Kansiota ei voi lukea"
+
+msgid "The file could not be installed"
+msgstr "Tiedostoa ei voitu asentaa"
+
+msgid "The folder cannot be created"
+msgstr "Kansiota ei voi luoda"
+
+msgid "This cannot be installed"
+msgstr "Tätä ei voi asentaa"
+
+msgid "Pick a Minecraft version first"
+msgstr "Valitse ensin Minecraft-versio"
+
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "Riippuvuuden poistaminen poistaa siitä riippuvan modin"
+
+msgid "A dependent mod cannot be deleted"
+msgstr "Riippuvaista modia ei voi poistaa"
+
+msgid "Sandbox"
+msgstr "Hiekkalaatikko"
+
+msgid "Enable sandbox"
+msgstr "Ota hiekkalaatikko käyttöön"
+
+msgid "Allow sandbox network access"
+msgstr "Salli pääsy hiekkalaatikkoverkkoon"
+
+msgid "Slim model"
+msgstr "Ohut malli"
+
+msgid "OK"
+msgstr "OK"
+
+msgid "Export skin…"
+msgstr "Vie ihoa…"
+
+msgid "Imported skin"
+msgstr "Tuotu iho"
+
+msgid "Default model"
+msgstr "Oletusmalli"
+
+msgid "PNG skin texture"
+msgstr "PNG-ihon rakenne"
+
+msgid "Invalid skin"
+msgstr "Virheellinen iho"
+
+msgid "No cape"
+msgstr "Ei viitta"
+
+msgid "Import skin…"
+msgstr "Tuo iho…"
+
+msgid "Delete skin?"
+msgstr "Poista iho?"
+
+msgid "This skin will be removed from the skin library."
+msgstr "Tämä iho poistetaan ihokirjastosta."
+
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "Skin kuvien tulee olla 64 x 64 tai 64 x 32 PNG-tiedostoja"

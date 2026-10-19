@@ -634,7 +634,7 @@ msgstr "PNG skin texture"
 
 # UI string
 msgid "Invalid skin"
-msgstr "Invalid skin"
+msgstr "无效的皮肤"
 
 # UI string
 msgid "No cape"
@@ -654,4 +654,4 @@ msgid "This skin will be removed from the skin library."
 msgstr "此皮肤将从皮肤库中移除。"
 
 msgid "Skin images must be 64x64 or 64x32 PNG files"
-msgstr "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "皮肤图片必须是64x64或64x32的PNG文件"

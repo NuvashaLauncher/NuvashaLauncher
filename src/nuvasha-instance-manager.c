@@ -164,14 +164,14 @@ default_instance_directory (NuvashaInstanceManager *self,
 
 /* Instance names are case-insensitively unique. Keep the first requested
  * name unchanged and give later instances the smallest numeric suffix that
- * is still available: test, test 2, test 3, ... . */
+ * is still available: test, test 1, test 2, ... . */
 char *
 unique_instance_name (NuvashaInstanceManager *self, const char *name)
 {
   if (!name_is_taken (self, NULL, name))
     return g_strdup (name);
 
-  for (guint suffix = 2; ; suffix++)
+  for (guint suffix = 1; ; suffix++)
     {
       g_autofree char *candidate =
         g_strdup_printf ("%s %u", name, suffix);

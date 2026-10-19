@@ -1,0 +1,617 @@
+msgid ""
+msgstr ""
+"Language: pt_PT\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Confirm"
+msgstr "Confirmar"
+
+msgid "Delete"
+msgstr "Excluir"
+
+msgid "Retry"
+msgstr "Tentar novamente"
+
+msgid "Loading…"
+msgstr "Carregando…"
+
+msgid "Download"
+msgstr "Download"
+
+msgid "Update All"
+msgstr "Atualizar tudo"
+
+msgid "Open Folder"
+msgstr "Abrir pasta"
+
+msgid "Nothing installed yet"
+msgstr "Nada instalado ainda"
+
+msgid "Browse for something to put into the folder of this instance"
+msgstr "Procure algo para colocar na pasta desta instância"
+
+msgid "Installed"
+msgstr "Instalado"
+
+msgid "Loading more…"
+msgstr "Carregando mais…"
+
+msgid "Nothing is selected"
+msgstr "Nada está selecionado"
+
+msgid "Install this version with the selected ones"
+msgstr "Instale esta versão com as selecionadas"
+
+msgid "Filter by category"
+msgstr "Filtrar por categoria"
+
+msgid "Filter"
+msgstr "Filtro"
+
+msgid "Nothing to show yet"
+msgstr "Nada para mostrar ainda"
+
+msgid "Type what to look for, or browse everything Modrinth has for this instance"
+msgstr "Digite o que procurar ou navegue por tudo que Modrinth tem para esta instância"
+
+msgid "Browse"
+msgstr "Navegar"
+
+msgid "No mod loader"
+msgstr "Sem carregador de mod"
+
+msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
+msgstr "Os mods precisam de um carregador de mods. Escolha Fabric, Quilt, Forge ou NeoForge nas configurações desta instância primeiro"
+
+msgid "Create Instance"
+msgstr "Criar instância"
+
+msgid "Name"
+msgstr "Nome"
+
+msgid "Directory"
+msgstr "Diretório"
+
+msgid "Choose a folder"
+msgstr "Escolha uma pasta"
+
+msgid "Create"
+msgstr "Criar"
+
+msgid "Download Modpack"
+msgstr "Baixar Modpack"
+
+msgid "Loading modpacks…"
+msgstr "Carregando modpacks…"
+
+msgid "Search modpacks"
+msgstr "Pesquisar modpacks"
+
+msgid "Close"
+msgstr "Fechar"
+
+msgid "Back"
+msgstr "Voltar"
+
+msgid "Install"
+msgstr "Instalar"
+
+msgid "Copy of %s"
+msgstr "Cópia de %s"
+
+msgid "Choose Java executable"
+msgstr "Escolha o executável Java"
+
+msgid "the chosen file does not report a Java version"
+msgstr "o arquivo escolhido não informa uma versão Java"
+
+msgid "Choose an Icon"
+msgstr "Escolha um ícone"
+
+msgid "Choose a Directory"
+msgstr "Escolha um diretório"
+
+msgid "Duplicated to \"%s\""
+msgstr "Duplicado para \"%s\""
+
+msgid "Delete \"%s\"?"
+msgstr "Excluir \"%s\"?"
+
+msgid "General"
+msgstr "Em geral"
+
+msgid "Icon"
+msgstr "Ícone"
+
+msgid "Change the Directory"
+msgstr "Alterar o diretório"
+
+msgid "Minecraft"
+msgstr "Minecraft"
+
+msgid "Java"
+msgstr "Java"
+
+msgid "Java Runtime"
+msgstr "Tempo de execução Java"
+
+msgid "No Java installation was found on this system"
+msgstr "Nenhuma instalação Java foi encontrada neste sistema"
+
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "Este jogo precisa de Java %d ou mais recente, o Java selecionado é %d"
+
+msgid "Add Java Runtime"
+msgstr "Adicionar Java Runtime"
+
+msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
+msgstr "O Minecraft precisa de um Java sem cabeça: no Arch use o pacote jre-openjdk, não o jre-openjdk-headless"
+
+msgid "JVM Arguments"
+msgstr "Argumentos JVM"
+
+msgid "The configured Java was not detected; make sure it is still a usable java executable"
+msgstr "O Java configurado não foi detectado; certifique-se de que ainda seja um executável java utilizável"
+
+msgid "Actions"
+msgstr "Ações"
+
+msgid "Duplicate"
+msgstr "Duplicado"
+
+msgid "Delete Instance"
+msgstr "Excluir instância"
+
+msgid "Settings"
+msgstr "Configurações"
+
+msgid "Resource Packs"
+msgstr "Pacotes de recursos"
+
+msgid "Shader Packs"
+msgstr "Pacotes de sombreadores"
+
+msgid "Mods"
+msgstr "Modificações"
+
+msgid "Logs"
+msgstr "Registros"
+
+msgid "Custom: %s"
+msgstr "Alfândega"
+
+msgid "the game was stopped by signal %d"
+msgstr "o jogo foi interrompido pelo sinal %d"
+
+msgid "the game exited with code %d"
+msgstr "o jogo foi encerrado com o código %d"
+
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Nenhuma versão compatível de %s encontrada para Minecraft %s."
+
+msgid "Loader"
+msgstr "Carregador"
+
+msgid "Loader Version"
+msgstr "Versão do carregador"
+
+msgid "Clear"
+msgstr "Claro"
+
+msgid "Search the log"
+msgstr "Pesquise o registro"
+
+msgid "Versions"
+msgstr "Versões"
+
+msgid "Show unstable Minecraft versions"
+msgstr "Mostrar versões instáveis ​​do Minecraft"
+
+msgid "Show unstable Mod Loader versions"
+msgstr "Mostrar versões instáveis ​​do Mod Loader"
+
+msgid "Language"
+msgstr "Linguagem"
+
+msgid "Interface language"
+msgstr "Idioma da interface"
+
+msgid "Line Limit"
+msgstr "Limite de linha"
+
+msgid "Open Log Folder After Crash"
+msgstr "Abrir pasta de log após falha"
+
+msgid "About Nuvasha Launcher"
+msgstr "Sobre o lançador Nuvasha"
+
+msgid "Keyboard Shortcuts"
+msgstr "Atalhos de teclado"
+
+msgid "Stop"
+msgstr "Parar"
+
+msgid "Play"
+msgstr "Jogar"
+
+msgid "Keep Playing"
+msgstr "Continue jogando"
+
+msgid "Downloads"
+msgstr "Transferências"
+
+msgid "Accounts"
+msgstr "Contas"
+
+msgid "No Instances Yet"
+msgstr "Nenhuma instância ainda"
+
+msgid "Use the + button in the header to create one"
+msgstr "Use o botão + no cabeçalho para criar um"
+
+msgid "the loader cannot be resolved: %s"
+msgstr "o carregador não pode ser resolvido: %s"
+
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Nenhuma versão compatível encontrada para Minecraft %s e %s."
+
+msgid "No compatible version found for Minecraft %s."
+msgstr "Nenhuma versão compatível encontrada para Minecraft %s."
+
+msgid "Add Offline Account"
+msgstr "Adicionar conta off-line"
+
+msgid "a name can only hold letters, digits and underscores"
+msgstr "um nome só pode conter letras, dígitos e sublinhados"
+
+msgid "a name cannot be empty"
+msgstr "um nome não pode estar vazio"
+
+msgid "a name has to be 3 to 16 characters long"
+msgstr "um nome deve ter de 3 a 16 caracteres"
+
+msgid "Add"
+msgstr "Adicionar"
+
+msgid "asking Microsoft for a code"
+msgstr "pedindo um código à Microsoft"
+
+msgid "waiting for the sign-in in the browser"
+msgstr "aguardando o login no navegador"
+
+msgid "Sign In"
+msgstr "Entrar"
+
+msgid "Open the page in your browser, then enter this code:"
+msgstr "Abra a página em seu navegador e digite este código:"
+
+msgid "Open the Page"
+msgstr "Abra a página"
+
+msgid "Try Again"
+msgstr "Tente novamente"
+
+msgid "Remove"
+msgstr "Remover"
+
+msgid "Remove \"%s\""
+msgstr "Remover \"%s\""
+
+msgid "Add Microsoft Account"
+msgstr "Adicionar conta da Microsoft"
+
+msgid "Minecraft Version"
+msgstr "Versão do Minecraft"
+
+msgid "Install the selected %s?"
+msgstr "Instalar os %s selecionados?"
+
+msgid "%s \"%s\""
+msgstr "%s \"%s\""
+
+msgid "Search"
+msgstr "Procurar"
+
+msgid "Update"
+msgstr "Atualizar"
+
+msgid "Update the following %s"
+msgstr "Atualize o seguinte %s"
+
+msgid "Dependencies:"
+msgstr "Dependências:"
+
+msgid "The following mods depend on %s:\n%s"
+msgstr "Os seguintes mods dependem de %s:\n%s"
+
+msgid "Cache"
+msgstr "Cache"
+
+msgid "Cache Modrinth API responses"
+msgstr "Cache de respostas da API Modrinth"
+
+msgid "Cache expiration"
+msgstr "Expiração do cache"
+
+msgid "1 hour"
+msgstr "1 hora"
+
+msgid "6 hours"
+msgstr "6 horas"
+
+msgid "1 day"
+msgstr "1 dia"
+
+msgid "7 days"
+msgstr "7 dias"
+
+msgid "Clear nuvasha Cache"
+msgstr "Limpar cache do nuvasha"
+
+msgid "Show Shortcuts"
+msgstr "Mostrar atalhos"
+
+msgid "Quit"
+msgstr "Desistir"
+
+msgid "Clear nuvasha Cache?"
+msgstr "Limpar cache do nuvasha?"
+
+msgid "Import Modpack"
+msgstr "Importar Modpack"
+
+msgid "Modpack exported"
+msgstr "Modpack exportado"
+
+msgid "Modrinth Modpacks (*.mrpack)"
+msgstr "Modrinth Modpacks (*.mrpack)"
+
+msgid "The export location is not a local file"
+msgstr "O local de exportação não é um arquivo local"
+
+msgid "Export Modpack"
+msgstr "Exportar Modpack"
+
+msgid "Importing modpack…"
+msgstr "Importando modpack…"
+
+msgid "Reading modpack"
+msgstr "Lendo modpack"
+
+msgid "Exporting modpack"
+msgstr "Exportando modpack"
+
+msgid "Modpack export"
+msgstr "Exportação de modpack"
+
+msgid "Include transient files?"
+msgstr "Incluir arquivos temporários?"
+
+msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr "Logs, relatórios de falhas, capturas de tela, caches e downloads são normalmente excluídos."
+
+msgid "Clean Export"
+msgstr "Exportação limpa"
+
+msgid "Include All Files"
+msgstr "Incluir todos os arquivos"
+
+msgid "Pack Name"
+msgstr "Nome do pacote"
+
+msgid "Summary"
+msgstr "Resumo"
+
+msgid "Version ID"
+msgstr "ID da versão"
+
+msgid "Downloading files"
+msgstr "Baixando arquivos"
+
+msgid "Extracting files"
+msgstr "Extraindo arquivos"
+
+msgid "Optional files"
+msgstr "Arquivos opcionais"
+
+msgid "The pack lists these files but says they are not needed. Nothing of them is installed unless you ask. Default is off"
+msgstr "O pacote lista esses arquivos, mas diz que eles não são necessários. Nenhum deles está instalado a menos que você pergunte. O padrão está desativado"
+
+msgid "Pack could not be fetched"
+msgstr "Não foi possível buscar o pacote"
+
+msgid "Invalid pack"
+msgstr "Pacote inválido"
+
+msgid "The pack does not define its install"
+msgstr "O pacote não define sua instalação"
+
+msgid "Downloading Modpack"
+msgstr "Baixando Modpack"
+
+msgid "Writing archive"
+msgstr "Arquivo de escrita"
+
+msgid "Export modpack metadata"
+msgstr "Exportar metadados do modpack"
+
+msgid "Ask for export metadata"
+msgstr "Solicite metadados de exportação"
+
+msgid "Pack information"
+msgstr "Informações do pacote"
+
+msgid "Show name, summary and version fields before exporting."
+msgstr "Mostre os campos de nome, resumo e versão antes de exportar."
+
+msgid "Export complete"
+msgstr "Exportação concluída"
+
+msgid "Export"
+msgstr "Exportar"
+
+msgid "Installed %u item"
+msgid_plural "Installed %u items"
+msgstr[0] "%u item instalado"
+msgstr[1] "%u itens instalados"
+
+msgid "Updated %u item"
+msgid_plural "Updated %u items"
+msgstr[0] "Item %u atualizado"
+msgstr[1] "%u itens atualizados"
+
+msgid "The icon must be a file on this computer"
+msgstr "O ícone deve ser um arquivo neste computador"
+
+msgid "The game is running; stop it before moving its directory"
+msgstr "O jogo está rodando; pare-o antes de mover seu diretório"
+
+msgid "%s is being installed"
+msgstr "%s está sendo instalado"
+
+msgid "no compatible version"
+msgstr "nenhuma versão compatível"
+
+msgid "Enabled"
+msgstr "Habilitado"
+
+msgid "Disabled"
+msgstr "Desabilitado"
+
+msgid "Deleted"
+msgstr "Excluído"
+
+msgid "Everything is up to date"
+msgstr "Está tudo atualizado"
+
+msgid "Cannot create \"%s\": %s"
+msgstr "Não foi possível criar \"%s\": %s"
+
+msgid "This project publishes nothing that fits this instance."
+msgstr "Este projeto não publica nada que se enquadre nesta instância."
+
+msgid "Unknown"
+msgstr "Desconhecido"
+
+msgid "%s (unstable)"
+msgstr "%s (instável)"
+
+msgid "the next page could not be loaded"
+msgstr "a próxima página não pôde ser carregada"
+
+msgid "Other"
+msgstr "Outro"
+
+msgid "%.1fM downloads"
+msgstr "%.1fM downloads"
+
+msgid "%.1fk downloads"
+msgstr "%.1fk downloads"
+
+msgid "%s  ·  by %s"
+msgstr "%s · por %s"
+
+msgid "by %s"
+msgstr "por %s"
+
+msgid "%s downloads"
+msgstr "%s downloads"
+
+msgid "Cache Cleared"
+msgstr "Cache limpo"
+
+msgid "nuvasha cache data was cleared successfully."
+msgstr "os dados do cache nuvasha foram limpos com sucesso."
+
+msgid "Cache Cleanup Failed"
+msgstr "Falha na limpeza do cache"
+
+msgid "The cache could not be cleared."
+msgstr "Não foi possível limpar o cache."
+
+msgid "the versions of this loader could not be read"
+msgstr "as versões deste carregador não puderam ser lidas"
+
+msgid "Minecraft crashed"
+msgstr "Minecraft travou"
+
+msgid "Minecraft could not start"
+msgstr "Minecraft não pôde iniciar"
+
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft precisa de login"
+
+msgid "The file cannot be renamed"
+msgstr "O arquivo não pode ser renomeado"
+
+msgid "The file cannot be deleted"
+msgstr "O arquivo não pode ser excluído"
+
+msgid "The folder cannot be read"
+msgstr "A pasta não pode ser lida"
+
+msgid "The file could not be installed"
+msgstr "O arquivo não pôde ser instalado"
+
+msgid "The folder cannot be created"
+msgstr "A pasta não pode ser criada"
+
+msgid "This cannot be installed"
+msgstr "Isso não pode ser instalado"
+
+msgid "Pick a Minecraft version first"
+msgstr "Escolha uma versão do Minecraft primeiro"
+
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "Excluir uma dependência exclui o mod que dependia dela"
+
+msgid "A dependent mod cannot be deleted"
+msgstr "Um mod dependente não pode ser excluído"
+
+msgid "Sandbox"
+msgstr "Caixa de areia"
+
+msgid "Enable sandbox"
+msgstr "Ativar sandbox"
+
+msgid "Allow sandbox network access"
+msgstr "Permitir acesso à rede sandbox"
+
+msgid "Slim model"
+msgstr "Modelo fino"
+
+msgid "OK"
+msgstr "OK"
+
+msgid "Export skin…"
+msgstr "Exportar skin…"
+
+msgid "Imported skin"
+msgstr "Pele importada"
+
+msgid "Default model"
+msgstr "Modelo padrão"
+
+msgid "PNG skin texture"
+msgstr "Textura de pele PNG"
+
+msgid "Invalid skin"
+msgstr "Pele inválida"
+
+msgid "No cape"
+msgstr "Sem capa"
+
+msgid "Import skin…"
+msgstr "Importar skin…"
+
+msgid "Delete skin?"
+msgstr "Excluir skin?"
+
+msgid "This skin will be removed from the skin library."
+msgstr "Este skin será removido da biblioteca de skins."
+
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "As imagens de skin devem ser arquivos PNG de 64x64 ou 64x32"

@@ -640,7 +640,7 @@ msgstr "PNG skin texture"
 
 # UI string
 msgid "Invalid skin"
-msgstr "Invalid skin"
+msgstr "Недопустимый скин"
 
 # UI string
 msgid "No cape"
@@ -660,4 +660,4 @@ msgid "This skin will be removed from the skin library."
 msgstr "Этот скин будет удалён из библиотеки."
 
 msgid "Skin images must be 64x64 or 64x32 PNG files"
-msgstr "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "Изображения скинов должны быть PNG-файлами размером 64x64 или 64x32"

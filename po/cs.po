@@ -1,0 +1,619 @@
+msgid ""
+msgstr ""
+"Language: cs\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+msgid "Cancel"
+msgstr "Zrušit"
+
+msgid "Confirm"
+msgstr "Potvrdit"
+
+msgid "Delete"
+msgstr "Vymazat"
+
+msgid "Retry"
+msgstr "Zkuste to znovu"
+
+msgid "Loading…"
+msgstr "Načítání…"
+
+msgid "Download"
+msgstr "Stáhnout"
+
+msgid "Update All"
+msgstr "Aktualizovat vše"
+
+msgid "Open Folder"
+msgstr "Otevřete složku"
+
+msgid "Nothing installed yet"
+msgstr "Zatím nic nainstalováno"
+
+msgid "Browse for something to put into the folder of this instance"
+msgstr "Vyhledejte něco, co chcete vložit do složky této instance"
+
+msgid "Installed"
+msgstr "Instalováno"
+
+msgid "Loading more…"
+msgstr "Načítání dalších…"
+
+msgid "Nothing is selected"
+msgstr "Není vybráno nic"
+
+msgid "Install this version with the selected ones"
+msgstr "Nainstalujte tuto verzi s vybranými"
+
+msgid "Filter by category"
+msgstr "Filtrujte podle kategorie"
+
+msgid "Filter"
+msgstr "Filtr"
+
+msgid "Nothing to show yet"
+msgstr "Zatím není co ukázat"
+
+msgid "Type what to look for, or browse everything Modrinth has for this instance"
+msgstr "Napište, co hledat, nebo procházejte vše, co má Modrinth pro tento případ"
+
+msgid "Browse"
+msgstr "Prohlížet"
+
+msgid "No mod loader"
+msgstr "Žádný zavaděč modů"
+
+msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
+msgstr "Mody potřebují nakladač modů. Nejprve v nastavení této instance vyberte Fabric, Quilt, Forge nebo NeoForge"
+
+msgid "Create Instance"
+msgstr "Vytvořit instanci"
+
+msgid "Name"
+msgstr "Jméno"
+
+msgid "Directory"
+msgstr "Adresář"
+
+msgid "Choose a folder"
+msgstr "Vyberte složku"
+
+msgid "Create"
+msgstr "Vytvořit"
+
+msgid "Download Modpack"
+msgstr "Stáhněte si Modpack"
+
+msgid "Loading modpacks…"
+msgstr "Načítání modpacků…"
+
+msgid "Search modpacks"
+msgstr "Prohledejte modpacky"
+
+msgid "Close"
+msgstr "Blízko"
+
+msgid "Back"
+msgstr "Zadní"
+
+msgid "Install"
+msgstr "Instalovat"
+
+msgid "Copy of %s"
+msgstr "Kopie %s"
+
+msgid "Choose Java executable"
+msgstr "Vyberte spustitelný soubor Java"
+
+msgid "the chosen file does not report a Java version"
+msgstr "vybraný soubor nehlásí verzi Java"
+
+msgid "Choose an Icon"
+msgstr "Vyberte ikonu"
+
+msgid "Choose a Directory"
+msgstr "Vyberte adresář"
+
+msgid "Duplicated to \"%s\""
+msgstr "Duplikováno do „%s“"
+
+msgid "Delete \"%s\"?"
+msgstr "Smazat \"%s\"?"
+
+msgid "General"
+msgstr "Generál"
+
+msgid "Icon"
+msgstr "Ikona"
+
+msgid "Change the Directory"
+msgstr "Změňte adresář"
+
+msgid "Minecraft"
+msgstr "Minecraft"
+
+msgid "Java"
+msgstr "Jáva"
+
+msgid "Java Runtime"
+msgstr "Java Runtime"
+
+msgid "No Java installation was found on this system"
+msgstr "V tomto systému nebyla nalezena žádná instalace Java"
+
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "Tato hra vyžaduje Java %d nebo novější, vybraná Java je %d"
+
+msgid "Add Java Runtime"
+msgstr "Přidat Java Runtime"
+
+msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
+msgstr "Minecraft potřebuje bezhlavou Javu: na Archu použijte balíček jre-openjdk, ne jre-openjdk-headless"
+
+msgid "JVM Arguments"
+msgstr "Argumenty JVM"
+
+msgid "The configured Java was not detected; make sure it is still a usable java executable"
+msgstr "Konfigurovaná Java nebyla detekována; ujistěte se, že je to stále použitelný spustitelný soubor Java"
+
+msgid "Actions"
+msgstr "Akce"
+
+msgid "Duplicate"
+msgstr "Duplikát"
+
+msgid "Delete Instance"
+msgstr "Smazat instanci"
+
+msgid "Settings"
+msgstr "Nastavení"
+
+msgid "Resource Packs"
+msgstr "Balíčky zdrojů"
+
+msgid "Shader Packs"
+msgstr "Shader Packs"
+
+msgid "Mods"
+msgstr "Mods"
+
+msgid "Logs"
+msgstr "Protokoly"
+
+msgid "Custom: %s"
+msgstr "Vlastní: %s"
+
+msgid "the game was stopped by signal %d"
+msgstr "hra byla zastavena signálem %d"
+
+msgid "the game exited with code %d"
+msgstr "hra skončila s kódem %d"
+
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Pro Minecraft %s nebyla nalezena žádná kompatibilní verze %s."
+
+msgid "Loader"
+msgstr "Nakladač"
+
+msgid "Loader Version"
+msgstr "Verze nakladače"
+
+msgid "Clear"
+msgstr "Jasný"
+
+msgid "Search the log"
+msgstr "Prohledejte protokol"
+
+msgid "Versions"
+msgstr "Verze"
+
+msgid "Show unstable Minecraft versions"
+msgstr "Zobrazit nestabilní verze Minecraftu"
+
+msgid "Show unstable Mod Loader versions"
+msgstr "Zobrazit nestabilní verze Mod Loader"
+
+msgid "Language"
+msgstr "Jazyk"
+
+msgid "Interface language"
+msgstr "Jazyk rozhraní"
+
+msgid "Line Limit"
+msgstr "Limit linky"
+
+msgid "Open Log Folder After Crash"
+msgstr "Otevřete složku protokolu po havárii"
+
+msgid "About Nuvasha Launcher"
+msgstr "O Nuvasha Launcher"
+
+msgid "Keyboard Shortcuts"
+msgstr "Klávesové zkratky"
+
+msgid "Stop"
+msgstr "Zastávka"
+
+msgid "Play"
+msgstr "Hrát"
+
+msgid "Keep Playing"
+msgstr "Pokračujte ve hře"
+
+msgid "Downloads"
+msgstr "Stahování"
+
+msgid "Accounts"
+msgstr "Účty"
+
+msgid "No Instances Yet"
+msgstr "Zatím žádné instance"
+
+msgid "Use the + button in the header to create one"
+msgstr "K vytvoření použijte tlačítko + v záhlaví"
+
+msgid "the loader cannot be resolved: %s"
+msgstr "zavaděč nelze vyřešit: %s"
+
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Pro Minecraft %s a %s nebyla nalezena žádná kompatibilní verze."
+
+msgid "No compatible version found for Minecraft %s."
+msgstr "Pro Minecraft %s nebyla nalezena žádná kompatibilní verze."
+
+msgid "Add Offline Account"
+msgstr "Přidat účet offline"
+
+msgid "a name can only hold letters, digits and underscores"
+msgstr "jméno může obsahovat pouze písmena, číslice a podtržítka"
+
+msgid "a name cannot be empty"
+msgstr "jméno nemůže být prázdné"
+
+msgid "a name has to be 3 to 16 characters long"
+msgstr "název musí mít 3 až 16 znaků"
+
+msgid "Add"
+msgstr "Přidat"
+
+msgid "asking Microsoft for a code"
+msgstr "požádat Microsoft o kód"
+
+msgid "waiting for the sign-in in the browser"
+msgstr "čekání na přihlášení v prohlížeči"
+
+msgid "Sign In"
+msgstr "Přihlaste se"
+
+msgid "Open the page in your browser, then enter this code:"
+msgstr "Otevřete stránku v prohlížeči a zadejte tento kód:"
+
+msgid "Open the Page"
+msgstr "Otevřete stránku"
+
+msgid "Try Again"
+msgstr "Zkuste to znovu"
+
+msgid "Remove"
+msgstr "Odstranit"
+
+msgid "Remove \"%s\""
+msgstr "Odebrat \"%s\""
+
+msgid "Add Microsoft Account"
+msgstr "Přidat účet Microsoft"
+
+msgid "Minecraft Version"
+msgstr "Verze Minecraft"
+
+msgid "Install the selected %s?"
+msgstr "Instalovat vybrané %s?"
+
+msgid "%s \"%s\""
+msgstr "%s \"%s\""
+
+msgid "Search"
+msgstr "Vyhledávání"
+
+msgid "Update"
+msgstr "Aktualizovat"
+
+msgid "Update the following %s"
+msgstr "Aktualizujte následující %s"
+
+msgid "Dependencies:"
+msgstr "Závislosti:"
+
+msgid "The following mods depend on %s:\n%s"
+msgstr "Následující mody závisí na %s:\n%s"
+
+msgid "Cache"
+msgstr "Cache"
+
+msgid "Cache Modrinth API responses"
+msgstr "Uložte odpovědi Modrinth API do mezipaměti"
+
+msgid "Cache expiration"
+msgstr "Vypršení platnosti mezipaměti"
+
+msgid "1 hour"
+msgstr "1 hodina"
+
+msgid "6 hours"
+msgstr "6 hodin"
+
+msgid "1 day"
+msgstr "1 den"
+
+msgid "7 days"
+msgstr "7 dní"
+
+msgid "Clear nuvasha Cache"
+msgstr "Vymažte mezipaměť nuvasha"
+
+msgid "Show Shortcuts"
+msgstr "Zobrazit zkratky"
+
+msgid "Quit"
+msgstr "Přestat"
+
+msgid "Clear nuvasha Cache?"
+msgstr "Vymazat mezipaměť nuvasha?"
+
+msgid "Import Modpack"
+msgstr "Importujte Modpack"
+
+msgid "Modpack exported"
+msgstr "Modpack exportován"
+
+msgid "Modrinth Modpacks (*.mrpack)"
+msgstr "Modrinth Modpacks (*.mrpack)"
+
+msgid "The export location is not a local file"
+msgstr "Místo exportu není místní soubor"
+
+msgid "Export Modpack"
+msgstr "Exportujte Modpack"
+
+msgid "Importing modpack…"
+msgstr "Import modpacku…"
+
+msgid "Reading modpack"
+msgstr "Čtení modpacku"
+
+msgid "Exporting modpack"
+msgstr "Export modpacku"
+
+msgid "Modpack export"
+msgstr "Export modpacku"
+
+msgid "Include transient files?"
+msgstr "Zahrnout přechodné soubory?"
+
+msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr "Protokoly, zprávy o selhání, snímky obrazovky, mezipaměti a stahování jsou obvykle vyloučeny."
+
+msgid "Clean Export"
+msgstr "Čistý export"
+
+msgid "Include All Files"
+msgstr "Zahrnout všechny soubory"
+
+msgid "Pack Name"
+msgstr "Název balíčku"
+
+msgid "Summary"
+msgstr "Shrnutí"
+
+msgid "Version ID"
+msgstr "ID verze"
+
+msgid "Downloading files"
+msgstr "Stahování souborů"
+
+msgid "Extracting files"
+msgstr "Extrahování souborů"
+
+msgid "Optional files"
+msgstr "Volitelné soubory"
+
+msgid "The pack lists these files but says they are not needed. Nothing of them is installed unless you ask. Default is off"
+msgstr "Balíček uvádí tyto soubory, ale říká, že nejsou potřeba. Nic z nich není nainstalováno, pokud o to nepožádáte. Výchozí nastavení je vypnuto"
+
+msgid "Pack could not be fetched"
+msgstr "Balíček se nepodařilo načíst"
+
+msgid "Invalid pack"
+msgstr "Neplatný balíček"
+
+msgid "The pack does not define its install"
+msgstr "Balíček nedefinuje jeho instalaci"
+
+msgid "Downloading Modpack"
+msgstr "Stahování Modpacku"
+
+msgid "Writing archive"
+msgstr "Psaní archivu"
+
+msgid "Export modpack metadata"
+msgstr "Exportujte metadata modpacku"
+
+msgid "Ask for export metadata"
+msgstr "Požádejte o export metadat"
+
+msgid "Pack information"
+msgstr "Informace o balení"
+
+msgid "Show name, summary and version fields before exporting."
+msgstr "Před exportem zobrazit pole pro název, souhrn a verzi."
+
+msgid "Export complete"
+msgstr "Export dokončen"
+
+msgid "Export"
+msgstr "Vývozní"
+
+msgid "Installed %u item"
+msgid_plural "Installed %u items"
+msgstr[0] "Nainstalována položka %u"
+msgstr[1] "Nainstalováno %u položek"
+msgstr[2] "Nainstalováno %u položek"
+
+msgid "Updated %u item"
+msgid_plural "Updated %u items"
+msgstr[0] "Aktualizováno %u položky"
+msgstr[1] "Aktualizováno %u položek"
+msgstr[2] "Aktualizováno %u položek"
+
+msgid "The icon must be a file on this computer"
+msgstr "Ikona musí být soubor v tomto počítači"
+
+msgid "The game is running; stop it before moving its directory"
+msgstr "Hra běží; zastavte jej před přesunem jeho adresáře"
+
+msgid "%s is being installed"
+msgstr "%s se instaluje"
+
+msgid "no compatible version"
+msgstr "žádná kompatibilní verze"
+
+msgid "Enabled"
+msgstr "Povoleno"
+
+msgid "Disabled"
+msgstr "Zakázáno"
+
+msgid "Deleted"
+msgstr "Smazáno"
+
+msgid "Everything is up to date"
+msgstr "Vše je aktuální"
+
+msgid "Cannot create \"%s\": %s"
+msgstr "Nelze vytvořit \"%s\": %s"
+
+msgid "This project publishes nothing that fits this instance."
+msgstr "Tento projekt nepublikuje nic, co by odpovídalo této instanci."
+
+msgid "Unknown"
+msgstr "Neznámý"
+
+msgid "%s (unstable)"
+msgstr "%s (nestabilní)"
+
+msgid "the next page could not be loaded"
+msgstr "další stránku nelze načíst"
+
+msgid "Other"
+msgstr "Ostatní"
+
+msgid "%.1fM downloads"
+msgstr "%.1fM stažení"
+
+msgid "%.1fk downloads"
+msgstr "%.1fk stažení"
+
+msgid "%s  ·  by %s"
+msgstr "%s · od %s"
+
+msgid "by %s"
+msgstr "od %s"
+
+msgid "%s downloads"
+msgstr "%s stažení"
+
+msgid "Cache Cleared"
+msgstr "Cache vymazána"
+
+msgid "nuvasha cache data was cleared successfully."
+msgstr "Data mezipaměti nuvasha byla úspěšně vymazána."
+
+msgid "Cache Cleanup Failed"
+msgstr "Vyčištění mezipaměti se nezdařilo"
+
+msgid "The cache could not be cleared."
+msgstr "Mezipaměť se nepodařilo vymazat."
+
+msgid "the versions of this loader could not be read"
+msgstr "verze tohoto zavaděče nelze přečíst"
+
+msgid "Minecraft crashed"
+msgstr "Minecraft havaroval"
+
+msgid "Minecraft could not start"
+msgstr "Minecraft nelze spustit"
+
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft potřebuje přihlášení"
+
+msgid "The file cannot be renamed"
+msgstr "Soubor nelze přejmenovat"
+
+msgid "The file cannot be deleted"
+msgstr "Soubor nelze smazat"
+
+msgid "The folder cannot be read"
+msgstr "Složku nelze číst"
+
+msgid "The file could not be installed"
+msgstr "Soubor nelze nainstalovat"
+
+msgid "The folder cannot be created"
+msgstr "Složku nelze vytvořit"
+
+msgid "This cannot be installed"
+msgstr "Toto nelze nainstalovat"
+
+msgid "Pick a Minecraft version first"
+msgstr "Nejprve si vyberte verzi Minecraftu"
+
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "Smazáním závislosti se smaže mod, který na ní závisel"
+
+msgid "A dependent mod cannot be deleted"
+msgstr "Závislý mod nelze smazat"
+
+msgid "Sandbox"
+msgstr "Pískoviště"
+
+msgid "Enable sandbox"
+msgstr "Povolit sandbox"
+
+msgid "Allow sandbox network access"
+msgstr "Povolit přístup k síti sandbox"
+
+msgid "Slim model"
+msgstr "Štíhlý model"
+
+msgid "OK"
+msgstr "OK"
+
+msgid "Export skin…"
+msgstr "Export skinu…"
+
+msgid "Imported skin"
+msgstr "Importovaná kůže"
+
+msgid "Default model"
+msgstr "Výchozí model"
+
+msgid "PNG skin texture"
+msgstr "Textura kůže PNG"
+
+msgid "Invalid skin"
+msgstr "Neplatný vzhled"
+
+msgid "No cape"
+msgstr "Bez pláštěnky"
+
+msgid "Import skin…"
+msgstr "Importovat vzhled…"
+
+msgid "Delete skin?"
+msgstr "Smazat skin?"
+
+msgid "This skin will be removed from the skin library."
+msgstr "Tento vzhled bude odstraněn z knihovny vzhledů."
+
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "Obrázky vzhledu musí mít velikost 64x64 nebo 64x32 PNG"

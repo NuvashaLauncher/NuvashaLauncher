@@ -1,0 +1,617 @@
+msgid ""
+msgstr ""
+"Language: nb\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+msgid "Cancel"
+msgstr "Kansellere"
+
+msgid "Confirm"
+msgstr "Bekrefte"
+
+msgid "Delete"
+msgstr "Slett"
+
+msgid "Retry"
+msgstr "Prøv på nytt"
+
+msgid "Loading…"
+msgstr "Laster inn …"
+
+msgid "Download"
+msgstr "Last ned"
+
+msgid "Update All"
+msgstr "Oppdater alle"
+
+msgid "Open Folder"
+msgstr "Åpne mappe"
+
+msgid "Nothing installed yet"
+msgstr "Ingenting installert ennå"
+
+msgid "Browse for something to put into the folder of this instance"
+msgstr "Bla etter noe å legge inn i mappen for denne forekomsten"
+
+msgid "Installed"
+msgstr "Installert"
+
+msgid "Loading more…"
+msgstr "Laster inn mer …"
+
+msgid "Nothing is selected"
+msgstr "Ingenting er valgt"
+
+msgid "Install this version with the selected ones"
+msgstr "Installer denne versjonen med de valgte"
+
+msgid "Filter by category"
+msgstr "Filtrer etter kategori"
+
+msgid "Filter"
+msgstr "Filter"
+
+msgid "Nothing to show yet"
+msgstr "Ingenting å vise ennå"
+
+msgid "Type what to look for, or browse everything Modrinth has for this instance"
+msgstr "Skriv inn hva du skal se etter, eller bla gjennom alt Modrinth har for dette tilfellet"
+
+msgid "Browse"
+msgstr "Bla gjennom"
+
+msgid "No mod loader"
+msgstr "Ingen mod-laster"
+
+msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
+msgstr "Mods trenger en mod-laster. Velg Fabric, Quilt, Forge eller NeoForge i innstillingene for denne instansen først"
+
+msgid "Create Instance"
+msgstr "Opprett forekomst"
+
+msgid "Name"
+msgstr "Navn"
+
+msgid "Directory"
+msgstr "Katalog"
+
+msgid "Choose a folder"
+msgstr "Velg en mappe"
+
+msgid "Create"
+msgstr "Skape"
+
+msgid "Download Modpack"
+msgstr "Last ned Modpack"
+
+msgid "Loading modpacks…"
+msgstr "Laster inn modpakker …"
+
+msgid "Search modpacks"
+msgstr "Søk etter modpacks"
+
+msgid "Close"
+msgstr "Lukke"
+
+msgid "Back"
+msgstr "Tilbake"
+
+msgid "Install"
+msgstr "Installer"
+
+msgid "Copy of %s"
+msgstr "Kopi av %s"
+
+msgid "Choose Java executable"
+msgstr "Velg Java kjørbar"
+
+msgid "the chosen file does not report a Java version"
+msgstr "den valgte filen rapporterer ikke en Java-versjon"
+
+msgid "Choose an Icon"
+msgstr "Velg et ikon"
+
+msgid "Choose a Directory"
+msgstr "Velg en katalog"
+
+msgid "Duplicated to \"%s\""
+msgstr "Duplisert til \"%s\""
+
+msgid "Delete \"%s\"?"
+msgstr "Vil du slette «%s»?"
+
+msgid "General"
+msgstr "General"
+
+msgid "Icon"
+msgstr "Ikon"
+
+msgid "Change the Directory"
+msgstr "Endre katalogen"
+
+msgid "Minecraft"
+msgstr "Minecraft"
+
+msgid "Java"
+msgstr "Java"
+
+msgid "Java Runtime"
+msgstr "Java kjøretid"
+
+msgid "No Java installation was found on this system"
+msgstr "Ingen Java-installasjon ble funnet på dette systemet"
+
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "Dette spillet trenger Java %d eller nyere, valgt Java er %d"
+
+msgid "Add Java Runtime"
+msgstr "Legg til Java Runtime"
+
+msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
+msgstr "Minecraft trenger en ikke-hodeløs Java: på Arch bruk jre-openjdk-pakken, ikke jre-openjdk-headless"
+
+msgid "JVM Arguments"
+msgstr "JVM-argumenter"
+
+msgid "The configured Java was not detected; make sure it is still a usable java executable"
+msgstr "Den konfigurerte Java ble ikke oppdaget; sørg for at det fortsatt er en brukbar java-kjørbar"
+
+msgid "Actions"
+msgstr "Handlinger"
+
+msgid "Duplicate"
+msgstr "Kopiere"
+
+msgid "Delete Instance"
+msgstr "Slett forekomst"
+
+msgid "Settings"
+msgstr "Innstillinger"
+
+msgid "Resource Packs"
+msgstr "Ressurspakker"
+
+msgid "Shader Packs"
+msgstr "Shader-pakker"
+
+msgid "Mods"
+msgstr "Mods"
+
+msgid "Logs"
+msgstr "Logger"
+
+msgid "Custom: %s"
+msgstr "Egendefinert: %s"
+
+msgid "the game was stopped by signal %d"
+msgstr "spillet ble stoppet av signal %d"
+
+msgid "the game exited with code %d"
+msgstr "spillet avsluttet med koden %d"
+
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Ingen kompatibel %s-versjon funnet for Minecraft %s."
+
+msgid "Loader"
+msgstr "Laster"
+
+msgid "Loader Version"
+msgstr "Lasterversjon"
+
+msgid "Clear"
+msgstr "Klar"
+
+msgid "Search the log"
+msgstr "Søk i loggen"
+
+msgid "Versions"
+msgstr "Versjoner"
+
+msgid "Show unstable Minecraft versions"
+msgstr "Vis ustabile Minecraft-versjoner"
+
+msgid "Show unstable Mod Loader versions"
+msgstr "Vis ustabile Mod Loader-versjoner"
+
+msgid "Language"
+msgstr "Språk"
+
+msgid "Interface language"
+msgstr "Grensesnittspråk"
+
+msgid "Line Limit"
+msgstr "Linjegrense"
+
+msgid "Open Log Folder After Crash"
+msgstr "Åpne loggmappe etter krasj"
+
+msgid "About Nuvasha Launcher"
+msgstr "Om Nuvasha Launcher"
+
+msgid "Keyboard Shortcuts"
+msgstr "Tastatursnarveier"
+
+msgid "Stop"
+msgstr "Stoppe"
+
+msgid "Play"
+msgstr "Spille"
+
+msgid "Keep Playing"
+msgstr "Fortsett å spille"
+
+msgid "Downloads"
+msgstr "Nedlastinger"
+
+msgid "Accounts"
+msgstr "Kontoer"
+
+msgid "No Instances Yet"
+msgstr "Ingen tilfeller ennå"
+
+msgid "Use the + button in the header to create one"
+msgstr "Bruk +-knappen i overskriften for å lage en"
+
+msgid "the loader cannot be resolved: %s"
+msgstr "lasteren kan ikke løses: %s"
+
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Ingen kompatibel versjon funnet for Minecraft %s og %s."
+
+msgid "No compatible version found for Minecraft %s."
+msgstr "Ingen kompatibel versjon funnet for Minecraft %s."
+
+msgid "Add Offline Account"
+msgstr "Legg til frakoblet konto"
+
+msgid "a name can only hold letters, digits and underscores"
+msgstr "et navn kan bare inneholde bokstaver, sifre og understreker"
+
+msgid "a name cannot be empty"
+msgstr "et navn kan ikke være tomt"
+
+msgid "a name has to be 3 to 16 characters long"
+msgstr "et navn må bestå av 3 til 16 tegn"
+
+msgid "Add"
+msgstr "Legge til"
+
+msgid "asking Microsoft for a code"
+msgstr "ber Microsoft om en kode"
+
+msgid "waiting for the sign-in in the browser"
+msgstr "venter på påloggingen i nettleseren"
+
+msgid "Sign In"
+msgstr "Logg på"
+
+msgid "Open the page in your browser, then enter this code:"
+msgstr "Åpne siden i nettleseren din, og skriv inn denne koden:"
+
+msgid "Open the Page"
+msgstr "Åpne siden"
+
+msgid "Try Again"
+msgstr "Prøv igjen"
+
+msgid "Remove"
+msgstr "Fjerne"
+
+msgid "Remove \"%s\""
+msgstr "Fjern \"%s\""
+
+msgid "Add Microsoft Account"
+msgstr "Legg til Microsoft-konto"
+
+msgid "Minecraft Version"
+msgstr "Minecraft versjon"
+
+msgid "Install the selected %s?"
+msgstr "Vil du installere den valgte %s?"
+
+msgid "%s \"%s\""
+msgstr "%s \"%s\""
+
+msgid "Search"
+msgstr "Søk"
+
+msgid "Update"
+msgstr "Oppdater"
+
+msgid "Update the following %s"
+msgstr "Oppdater følgende %s"
+
+msgid "Dependencies:"
+msgstr "Avhengigheter:"
+
+msgid "The following mods depend on %s:\n%s"
+msgstr "Følgende mods avhenger av %s:\n%s"
+
+msgid "Cache"
+msgstr "Cache"
+
+msgid "Cache Modrinth API responses"
+msgstr "Buffer Modrinth API-svar"
+
+msgid "Cache expiration"
+msgstr "Cache-utløp"
+
+msgid "1 hour"
+msgstr "1 time"
+
+msgid "6 hours"
+msgstr "6 timer"
+
+msgid "1 day"
+msgstr "1 dag"
+
+msgid "7 days"
+msgstr "7 dager"
+
+msgid "Clear nuvasha Cache"
+msgstr "Tøm nuvasha-bufferen"
+
+msgid "Show Shortcuts"
+msgstr "Vis snarveier"
+
+msgid "Quit"
+msgstr "Slutte"
+
+msgid "Clear nuvasha Cache?"
+msgstr "Tømme Nuvasha Cache?"
+
+msgid "Import Modpack"
+msgstr "Importer Modpack"
+
+msgid "Modpack exported"
+msgstr "Modpack eksportert"
+
+msgid "Modrinth Modpacks (*.mrpack)"
+msgstr "Modrinth Modpacks (*.mrpack)"
+
+msgid "The export location is not a local file"
+msgstr "Eksportstedet er ikke en lokal fil"
+
+msgid "Export Modpack"
+msgstr "Eksporter Modpack"
+
+msgid "Importing modpack…"
+msgstr "Importerer modpack …"
+
+msgid "Reading modpack"
+msgstr "Lese modpack"
+
+msgid "Exporting modpack"
+msgstr "Eksporterer modpack"
+
+msgid "Modpack export"
+msgstr "Modpack eksport"
+
+msgid "Include transient files?"
+msgstr "Inkludere forbigående filer?"
+
+msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr "Logger, krasjrapporter, skjermbilder, cacher og nedlastinger er normalt ekskludert."
+
+msgid "Clean Export"
+msgstr "Ren eksport"
+
+msgid "Include All Files"
+msgstr "Inkluder alle filer"
+
+msgid "Pack Name"
+msgstr "Pakkenavn"
+
+msgid "Summary"
+msgstr "Sammendrag"
+
+msgid "Version ID"
+msgstr "Versjons-ID"
+
+msgid "Downloading files"
+msgstr "Laster ned filer"
+
+msgid "Extracting files"
+msgstr "Trekker ut filer"
+
+msgid "Optional files"
+msgstr "Valgfrie filer"
+
+msgid "The pack lists these files but says they are not needed. Nothing of them is installed unless you ask. Default is off"
+msgstr "Pakken viser disse filene, men sier at de ikke er nødvendige. Ingenting av dem er installert med mindre du spør. Standard er av"
+
+msgid "Pack could not be fetched"
+msgstr "Pakken kunne ikke hentes"
+
+msgid "Invalid pack"
+msgstr "Ugyldig pakke"
+
+msgid "The pack does not define its install"
+msgstr "Pakken definerer ikke installasjonen"
+
+msgid "Downloading Modpack"
+msgstr "Laster ned Modpack"
+
+msgid "Writing archive"
+msgstr "Skrivearkiv"
+
+msgid "Export modpack metadata"
+msgstr "Eksporter modpack-metadata"
+
+msgid "Ask for export metadata"
+msgstr "Be om eksportmetadata"
+
+msgid "Pack information"
+msgstr "Pakkeinformasjon"
+
+msgid "Show name, summary and version fields before exporting."
+msgstr "Vis navn, sammendrag og versjonsfelt før eksport."
+
+msgid "Export complete"
+msgstr "Eksporten er fullført"
+
+msgid "Export"
+msgstr "Eksport"
+
+msgid "Installed %u item"
+msgid_plural "Installed %u items"
+msgstr[0] "Installerte %u element"
+msgstr[1] "Installerte %u elementer"
+
+msgid "Updated %u item"
+msgid_plural "Updated %u items"
+msgstr[0] "Oppdaterte %u element"
+msgstr[1] "Oppdaterte %u elementer"
+
+msgid "The icon must be a file on this computer"
+msgstr "Ikonet må være en fil på denne datamaskinen"
+
+msgid "The game is running; stop it before moving its directory"
+msgstr "Spillet kjører; stopp den før du flytter katalogen"
+
+msgid "%s is being installed"
+msgstr "%s blir installert"
+
+msgid "no compatible version"
+msgstr "ingen kompatibel versjon"
+
+msgid "Enabled"
+msgstr "Aktivert"
+
+msgid "Disabled"
+msgstr "Funksjonshemmet"
+
+msgid "Deleted"
+msgstr "Slettet"
+
+msgid "Everything is up to date"
+msgstr "Alt er oppdatert"
+
+msgid "Cannot create \"%s\": %s"
+msgstr "Kan ikke opprette \"%s\": %s"
+
+msgid "This project publishes nothing that fits this instance."
+msgstr "Dette prosjektet publiserer ingenting som passer til denne forekomsten."
+
+msgid "Unknown"
+msgstr "Ukjent"
+
+msgid "%s (unstable)"
+msgstr "%s (ustabil)"
+
+msgid "the next page could not be loaded"
+msgstr "neste side kunne ikke lastes"
+
+msgid "Other"
+msgstr "Annen"
+
+msgid "%.1fM downloads"
+msgstr "%.1fM nedlastinger"
+
+msgid "%.1fk downloads"
+msgstr "%.1fk nedlastinger"
+
+msgid "%s  ·  by %s"
+msgstr "%s · av %s"
+
+msgid "by %s"
+msgstr "av %s"
+
+msgid "%s downloads"
+msgstr "%s nedlastinger"
+
+msgid "Cache Cleared"
+msgstr "Buffer tømt"
+
+msgid "nuvasha cache data was cleared successfully."
+msgstr "nuvasha-bufferdata ble slettet."
+
+msgid "Cache Cleanup Failed"
+msgstr "Bufferopprydding mislyktes"
+
+msgid "The cache could not be cleared."
+msgstr "Bufferen kunne ikke tømmes."
+
+msgid "the versions of this loader could not be read"
+msgstr "versjonene av denne lasteren kunne ikke leses"
+
+msgid "Minecraft crashed"
+msgstr "Minecraft krasjet"
+
+msgid "Minecraft could not start"
+msgstr "Minecraft kunne ikke starte"
+
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft trenger en pålogging"
+
+msgid "The file cannot be renamed"
+msgstr "Filen kan ikke gis nytt navn"
+
+msgid "The file cannot be deleted"
+msgstr "Filen kan ikke slettes"
+
+msgid "The folder cannot be read"
+msgstr "Mappen kan ikke leses"
+
+msgid "The file could not be installed"
+msgstr "Filen kunne ikke installeres"
+
+msgid "The folder cannot be created"
+msgstr "Mappen kan ikke opprettes"
+
+msgid "This cannot be installed"
+msgstr "Dette kan ikke installeres"
+
+msgid "Pick a Minecraft version first"
+msgstr "Velg en Minecraft-versjon først"
+
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "Sletting av en avhengighet sletter moden som var avhengig av den"
+
+msgid "A dependent mod cannot be deleted"
+msgstr "En avhengig mod kan ikke slettes"
+
+msgid "Sandbox"
+msgstr "Sandkasse"
+
+msgid "Enable sandbox"
+msgstr "Aktiver sandkasse"
+
+msgid "Allow sandbox network access"
+msgstr "Tillat tilgang til sandkassenettverk"
+
+msgid "Slim model"
+msgstr "Slank modell"
+
+msgid "OK"
+msgstr "OK"
+
+msgid "Export skin…"
+msgstr "Eksporter hud…"
+
+msgid "Imported skin"
+msgstr "Importert hud"
+
+msgid "Default model"
+msgstr "Standardmodell"
+
+msgid "PNG skin texture"
+msgstr "PNG hudtekstur"
+
+msgid "Invalid skin"
+msgstr "Ugyldig hud"
+
+msgid "No cape"
+msgstr "Ingen kappe"
+
+msgid "Import skin…"
+msgstr "Importer hud…"
+
+msgid "Delete skin?"
+msgstr "Vil du slette skin?"
+
+msgid "This skin will be removed from the skin library."
+msgstr "Denne huden vil bli fjernet fra hudbiblioteket."
+
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "Hudbilder må være 64x64 eller 64x32 PNG-filer"

@@ -25,7 +25,7 @@ CPPFLAGS += -Dnuvasha_LOCALE_DIR=\"$(PREFIX)/share/locale\"
 CPPFLAGS += -Dnuvasha_VERSION=\"$(VERSION)\"
 CPPFLAGS += -Dnuvasha_DATA_DIR=\"$(PREFIX)/share/nuvasha\"
 CPPFLAGS += -Dnuvasha_SOURCE_DATA_DIR=\"$(CURDIR)/data\"
-LOCALES := es_AR es_ES pt_BR fr de it ja ko zh_CN ru pl uk tr nl
+LOCALES := es_AR es_ES pt_BR pt_PT fr de it ja ko zh_CN zh_TW ru pl uk tr nl cs hu sv da fi nb ro vi id ar
 LOCALE_MOS := $(LOCALES:%=build/locale/%/LC_MESSAGES/nuvasha.mo)
 
 CFLAGS   := -std=c17 -Wall -Wextra -Wpedantic -MMD -MP

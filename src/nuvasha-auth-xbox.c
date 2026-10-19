@@ -20,8 +20,10 @@ ask_xbl (AuthRequest *self, const char *access_token)
   json_builder_add_string_value (builder, "RPS");
   json_builder_set_member_name (builder, "SiteName");
   json_builder_add_string_value (builder, "user.auth.xboxlive.com");
+  g_autofree char *rps_ticket = g_strdup_printf ("d=%s", access_token);
+
   json_builder_set_member_name (builder, "RpsTicket");
-  json_builder_add_string_value (builder, access_token);
+  json_builder_add_string_value (builder, rps_ticket);
   json_builder_end_object (builder);
   json_builder_set_member_name (builder, "RelyingParty");
   json_builder_add_string_value (builder, "http://auth.xboxlive.com");

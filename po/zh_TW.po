@@ -1,0 +1,617 @@
+msgid ""
+msgstr ""
+"Language: zh_TW\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+msgid "Cancel"
+msgstr "取消"
+
+msgid "Confirm"
+msgstr "確認"
+
+msgid "Delete"
+msgstr "刪除"
+
+msgid "Retry"
+msgstr "重試"
+
+msgid "Loading…"
+msgstr "載入中…"
+
+msgid "Download"
+msgstr "下載"
+
+msgid "Update All"
+msgstr "全部更新"
+
+msgid "Open Folder"
+msgstr "打開資料夾"
+
+msgid "Nothing installed yet"
+msgstr "尚未安裝任何內容"
+
+msgid "Browse for something to put into the folder of this instance"
+msgstr "瀏覽尋找要放入此實例的資料夾中的內容"
+
+msgid "Installed"
+msgstr "已安裝"
+
+msgid "Loading more…"
+msgstr "加載更多..."
+
+msgid "Nothing is selected"
+msgstr "沒有選擇任何內容"
+
+msgid "Install this version with the selected ones"
+msgstr "與所選版本一起安裝此版本"
+
+msgid "Filter by category"
+msgstr "按類別過濾"
+
+msgid "Filter"
+msgstr "篩選"
+
+msgid "Nothing to show yet"
+msgstr "尚未顯示任何內容"
+
+msgid "Type what to look for, or browse everything Modrinth has for this instance"
+msgstr "輸入要尋找的內容，或瀏覽 Modrinth 為該實例提供的所有內容"
+
+msgid "Browse"
+msgstr "瀏覽"
+
+msgid "No mod loader"
+msgstr "沒有模組載入器"
+
+msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
+msgstr "Mod 需要 Mod 載入器。首先在此實例的設定中選擇 Fabric、Quilt、Forge 或 NeoForge"
+
+msgid "Create Instance"
+msgstr "建立實例"
+
+msgid "Name"
+msgstr "姓名"
+
+msgid "Directory"
+msgstr "目錄"
+
+msgid "Choose a folder"
+msgstr "選擇一個資料夾"
+
+msgid "Create"
+msgstr "創造"
+
+msgid "Download Modpack"
+msgstr "下載模組包"
+
+msgid "Loading modpacks…"
+msgstr "正在載入模組包..."
+
+msgid "Search modpacks"
+msgstr "搜尋模組包"
+
+msgid "Close"
+msgstr "關閉"
+
+msgid "Back"
+msgstr "後退"
+
+msgid "Install"
+msgstr "安裝"
+
+msgid "Copy of %s"
+msgstr "%s 的副本"
+
+msgid "Choose Java executable"
+msgstr "選擇Java執行檔"
+
+msgid "the chosen file does not report a Java version"
+msgstr "所選檔案不報告 Java 版本"
+
+msgid "Choose an Icon"
+msgstr "選擇一個圖標"
+
+msgid "Choose a Directory"
+msgstr "選擇目錄"
+
+msgid "Duplicated to \"%s\""
+msgstr "複製到“%s”"
+
+msgid "Delete \"%s\"?"
+msgstr "刪除“%s”？"
+
+msgid "General"
+msgstr "一般的"
+
+msgid "Icon"
+msgstr "圖示"
+
+msgid "Change the Directory"
+msgstr "更改目錄"
+
+msgid "Minecraft"
+msgstr "我的世界"
+
+msgid "Java"
+msgstr "爪哇"
+
+msgid "Java Runtime"
+msgstr "Java運行時"
+
+msgid "No Java installation was found on this system"
+msgstr "在此系統上未找到 Java 安裝"
+
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "遊戲需要 Java %d 或更高版本，選擇的 Java 是 %d"
+
+msgid "Add Java Runtime"
+msgstr "新增 Java 運行時"
+
+msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
+msgstr "Minecraft 需要非 headless Java：在 Arch 上使用 jre-openjdk 包，而不是 jre-openjdk-headless"
+
+msgid "JVM Arguments"
+msgstr "JVM 參數"
+
+msgid "The configured Java was not detected; make sure it is still a usable java executable"
+msgstr "未偵測到配置的Java；確保它仍然是可用的 java 執行檔"
+
+msgid "Actions"
+msgstr "行動"
+
+msgid "Duplicate"
+msgstr "複製"
+
+msgid "Delete Instance"
+msgstr "刪除實例"
+
+msgid "Settings"
+msgstr "設定"
+
+msgid "Resource Packs"
+msgstr "資源包"
+
+msgid "Shader Packs"
+msgstr "著色器包"
+
+msgid "Mods"
+msgstr "模組"
+
+msgid "Logs"
+msgstr "紀錄"
+
+msgid "Custom: %s"
+msgstr "海關"
+
+msgid "the game was stopped by signal %d"
+msgstr "遊戲因訊號%d而停止"
+
+msgid "the game exited with code %d"
+msgstr "遊戲退出，代碼為 %d"
+
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "找不到 Minecraft %s 的兼容 %s 版本。"
+
+msgid "Loader"
+msgstr "裝載機"
+
+msgid "Loader Version"
+msgstr "裝載機版本"
+
+msgid "Clear"
+msgstr "清除"
+
+msgid "Search the log"
+msgstr "搜尋日誌"
+
+msgid "Versions"
+msgstr "版本"
+
+msgid "Show unstable Minecraft versions"
+msgstr "顯示不穩定的 Minecraft 版本"
+
+msgid "Show unstable Mod Loader versions"
+msgstr "顯示不穩定的 Mod Loader 版本"
+
+msgid "Language"
+msgstr "語言"
+
+msgid "Interface language"
+msgstr "介面語言"
+
+msgid "Line Limit"
+msgstr "線路限制"
+
+msgid "Open Log Folder After Crash"
+msgstr "崩潰後打開日誌資料夾"
+
+msgid "About Nuvasha Launcher"
+msgstr "關於 Nuvasha 啟動器"
+
+msgid "Keyboard Shortcuts"
+msgstr "鍵盤快速鍵"
+
+msgid "Stop"
+msgstr "停止"
+
+msgid "Play"
+msgstr "玩"
+
+msgid "Keep Playing"
+msgstr "繼續玩"
+
+msgid "Downloads"
+msgstr "下載"
+
+msgid "Accounts"
+msgstr "帳戶"
+
+msgid "No Instances Yet"
+msgstr "還沒有實例"
+
+msgid "Use the + button in the header to create one"
+msgstr "使用標題中的 + 按鈕建立一個"
+
+msgid "the loader cannot be resolved: %s"
+msgstr "無法解析載入程式：%s"
+
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "找不到 Minecraft %s 和 %s 的兼容版本。"
+
+msgid "No compatible version found for Minecraft %s."
+msgstr "找不到 Minecraft %s 的兼容版本。"
+
+msgid "Add Offline Account"
+msgstr "新增離線帳戶"
+
+msgid "a name can only hold letters, digits and underscores"
+msgstr "名稱只能包含字母、數字和底線"
+
+msgid "a name cannot be empty"
+msgstr "名稱不能為空"
+
+msgid "a name has to be 3 to 16 characters long"
+msgstr "名稱長度必須為 3 到 16 個字符"
+
+msgid "Add"
+msgstr "添加"
+
+msgid "asking Microsoft for a code"
+msgstr "向微軟索取程式碼"
+
+msgid "waiting for the sign-in in the browser"
+msgstr "等待瀏覽器登入"
+
+msgid "Sign In"
+msgstr "登入"
+
+msgid "Open the page in your browser, then enter this code:"
+msgstr "在瀏覽器中開啟該頁面，然後輸入以下程式碼："
+
+msgid "Open the Page"
+msgstr "開啟頁面"
+
+msgid "Try Again"
+msgstr "再試一次"
+
+msgid "Remove"
+msgstr "消除"
+
+msgid "Remove \"%s\""
+msgstr "刪除“%s”"
+
+msgid "Add Microsoft Account"
+msgstr "新增微軟帳戶"
+
+msgid "Minecraft Version"
+msgstr "我的世界版本"
+
+msgid "Install the selected %s?"
+msgstr "安裝選定的%s？"
+
+msgid "%s \"%s\""
+msgstr "%s“%s”"
+
+msgid "Search"
+msgstr "搜尋"
+
+msgid "Update"
+msgstr "更新"
+
+msgid "Update the following %s"
+msgstr "更新以下 %s"
+
+msgid "Dependencies:"
+msgstr "依賴項："
+
+msgid "The following mods depend on %s:\n%s"
+msgstr "以下 mods 依賴 %s：\n%s"
+
+msgid "Cache"
+msgstr "快取"
+
+msgid "Cache Modrinth API responses"
+msgstr "快取 Modrinth API 回應"
+
+msgid "Cache expiration"
+msgstr "快取過期"
+
+msgid "1 hour"
+msgstr "1小時"
+
+msgid "6 hours"
+msgstr "6小時"
+
+msgid "1 day"
+msgstr "1天"
+
+msgid "7 days"
+msgstr "7天"
+
+msgid "Clear nuvasha Cache"
+msgstr "清除 nuvasha 緩存"
+
+msgid "Show Shortcuts"
+msgstr "顯示快捷方式"
+
+msgid "Quit"
+msgstr "辭職"
+
+msgid "Clear nuvasha Cache?"
+msgstr "清除 nuvasha 快取嗎？"
+
+msgid "Import Modpack"
+msgstr "導入模組包"
+
+msgid "Modpack exported"
+msgstr "模組包已匯出"
+
+msgid "Modrinth Modpacks (*.mrpack)"
+msgstr "Modrinth 模組包 (*.mrpack)"
+
+msgid "The export location is not a local file"
+msgstr "匯出位置不是本機文件"
+
+msgid "Export Modpack"
+msgstr "匯出模組包"
+
+msgid "Importing modpack…"
+msgstr "正在導入模組包..."
+
+msgid "Reading modpack"
+msgstr "閱讀模組包"
+
+msgid "Exporting modpack"
+msgstr "匯出模組包"
+
+msgid "Modpack export"
+msgstr "模組包匯出"
+
+msgid "Include transient files?"
+msgstr "包括臨時文件？"
+
+msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr "日誌、崩潰報告、螢幕截圖、快取和下載通常被排除在外。"
+
+msgid "Clean Export"
+msgstr "清潔出口"
+
+msgid "Include All Files"
+msgstr "包括所有文件"
+
+msgid "Pack Name"
+msgstr "套件名稱"
+
+msgid "Summary"
+msgstr "概括"
+
+msgid "Version ID"
+msgstr "版本號"
+
+msgid "Downloading files"
+msgstr "下載文件"
+
+msgid "Extracting files"
+msgstr "提取文件"
+
+msgid "Optional files"
+msgstr "可選文件"
+
+msgid "The pack lists these files but says they are not needed. Nothing of them is installed unless you ask. Default is off"
+msgstr "該包列出了這些文件，但表示不需要它們。除非您要求，否則不會安裝任何內容。預設關閉"
+
+msgid "Pack could not be fetched"
+msgstr "無法取得包"
+
+msgid "Invalid pack"
+msgstr "無效包"
+
+msgid "The pack does not define its install"
+msgstr "該套件未定義其安裝"
+
+msgid "Downloading Modpack"
+msgstr "下載模組包"
+
+msgid "Writing archive"
+msgstr "寫檔案"
+
+msgid "Export modpack metadata"
+msgstr "匯出模組包元數據"
+
+msgid "Ask for export metadata"
+msgstr "請求導出元數據"
+
+msgid "Pack information"
+msgstr "包裝訊息"
+
+msgid "Show name, summary and version fields before exporting."
+msgstr "匯出前顯示名稱、摘要和版本欄位。"
+
+msgid "Export complete"
+msgstr "匯出完成"
+
+msgid "Export"
+msgstr "出口"
+
+msgid "Installed %u item"
+msgid_plural "Installed %u items"
+msgstr[0] "已安裝 %u 項"
+msgstr[1] "已安裝 %u 個項目"
+
+msgid "Updated %u item"
+msgid_plural "Updated %u items"
+msgstr[0] "更新了 %u 項"
+msgstr[1] "更新了 %u 項"
+
+msgid "The icon must be a file on this computer"
+msgstr "該圖示必須是此計算機上的文件"
+
+msgid "The game is running; stop it before moving its directory"
+msgstr "遊戲正在運行；在移動其目錄之前停止它"
+
+msgid "%s is being installed"
+msgstr "%s 正在安裝"
+
+msgid "no compatible version"
+msgstr "沒有相容版本"
+
+msgid "Enabled"
+msgstr "啟用"
+
+msgid "Disabled"
+msgstr "殘障人士"
+
+msgid "Deleted"
+msgstr "已刪除"
+
+msgid "Everything is up to date"
+msgstr "一切都是最新的"
+
+msgid "Cannot create \"%s\": %s"
+msgstr "無法創建“%s”：%s"
+
+msgid "This project publishes nothing that fits this instance."
+msgstr "該項目沒有發布任何適合此實例的內容。"
+
+msgid "Unknown"
+msgstr "未知"
+
+msgid "%s (unstable)"
+msgstr "%s（不穩定）"
+
+msgid "the next page could not be loaded"
+msgstr "無法載入下一頁"
+
+msgid "Other"
+msgstr "其他"
+
+msgid "%.1fM downloads"
+msgstr "%.1fM 下載量"
+
+msgid "%.1fk downloads"
+msgstr "%.1fk 下載"
+
+msgid "%s  ·  by %s"
+msgstr "%s · 由 %s 撰寫"
+
+msgid "by %s"
+msgstr "由 %s 提供"
+
+msgid "%s downloads"
+msgstr "%s 下載"
+
+msgid "Cache Cleared"
+msgstr "快取已清除"
+
+msgid "nuvasha cache data was cleared successfully."
+msgstr "nuvasha快取資料已成功清除。"
+
+msgid "Cache Cleanup Failed"
+msgstr "快取清理失敗"
+
+msgid "The cache could not be cleared."
+msgstr "無法清除快取。"
+
+msgid "the versions of this loader could not be read"
+msgstr "無法讀取該載入程式的版本"
+
+msgid "Minecraft crashed"
+msgstr "我的世界崩潰了"
+
+msgid "Minecraft could not start"
+msgstr "我的世界無法啟動"
+
+msgid "Minecraft needs a sign-in"
+msgstr "我的世界需要登入"
+
+msgid "The file cannot be renamed"
+msgstr "該檔案無法重新命名"
+
+msgid "The file cannot be deleted"
+msgstr "檔案無法刪除"
+
+msgid "The folder cannot be read"
+msgstr "無法讀取該資料夾"
+
+msgid "The file could not be installed"
+msgstr "該檔案無法安裝"
+
+msgid "The folder cannot be created"
+msgstr "無法建立資料夾"
+
+msgid "This cannot be installed"
+msgstr "這個無法安裝"
+
+msgid "Pick a Minecraft version first"
+msgstr "首先選擇一個 Minecraft 版本"
+
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "刪除依賴項會刪除依賴它的 mod"
+
+msgid "A dependent mod cannot be deleted"
+msgstr "無法刪除依賴的模組"
+
+msgid "Sandbox"
+msgstr "沙盒"
+
+msgid "Enable sandbox"
+msgstr "啟用沙箱"
+
+msgid "Allow sandbox network access"
+msgstr "允許沙盒網路訪問"
+
+msgid "Slim model"
+msgstr "修身款"
+
+msgid "OK"
+msgstr "好的"
+
+msgid "Export skin…"
+msgstr "匯出皮膚..."
+
+msgid "Imported skin"
+msgstr "進口皮"
+
+msgid "Default model"
+msgstr "預設型號"
+
+msgid "PNG skin texture"
+msgstr "PNG皮膚紋理"
+
+msgid "Invalid skin"
+msgstr "無效皮膚"
+
+msgid "No cape"
+msgstr "無斗篷"
+
+msgid "Import skin…"
+msgstr "導入皮膚..."
+
+msgid "Delete skin?"
+msgstr "刪除皮膚？"
+
+msgid "This skin will be removed from the skin library."
+msgstr "該皮膚將從皮膚庫中刪除。"
+
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "皮膚圖像必須是 64x64 或 64x32 PNG 文件"

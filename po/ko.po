@@ -639,7 +639,7 @@ msgstr "PNG skin texture"
 
 # UI string
 msgid "Invalid skin"
-msgstr "Invalid skin"
+msgstr "잘못된 스킨"
 
 # UI string
 msgid "No cape"
@@ -659,4 +659,4 @@ msgid "This skin will be removed from the skin library."
 msgstr "이 스킨은 스킨 라이브러리에서 삭제됩니다."
 
 msgid "Skin images must be 64x64 or 64x32 PNG files"
-msgstr "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "스킨 이미지는 64x64 또는 64x32 PNG 파일이어야 합니다"

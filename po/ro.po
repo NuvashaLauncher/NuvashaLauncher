@@ -1,0 +1,619 @@
+msgid ""
+msgstr ""
+"Language: ro\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : (n==0 || (n%100>0 && n%100<20)) ? 1 : 2);\n"
+msgid "Cancel"
+msgstr "Anula"
+
+msgid "Confirm"
+msgstr "Confirma"
+
+msgid "Delete"
+msgstr "Şterge"
+
+msgid "Retry"
+msgstr "Reîncercați"
+
+msgid "Loading…"
+msgstr "Încărcare…"
+
+msgid "Download"
+msgstr "Descărcați"
+
+msgid "Update All"
+msgstr "Actualizați toate"
+
+msgid "Open Folder"
+msgstr "Deschideți folderul"
+
+msgid "Nothing installed yet"
+msgstr "Nimic instalat încă"
+
+msgid "Browse for something to put into the folder of this instance"
+msgstr "Căutați ceva de pus în folderul acestei instanțe"
+
+msgid "Installed"
+msgstr "Instalat"
+
+msgid "Loading more…"
+msgstr "Se încarcă mai multe…"
+
+msgid "Nothing is selected"
+msgstr "Nimic nu este selectat"
+
+msgid "Install this version with the selected ones"
+msgstr "Instalați această versiune cu cele selectate"
+
+msgid "Filter by category"
+msgstr "Filtrați după categorie"
+
+msgid "Filter"
+msgstr "Filtra"
+
+msgid "Nothing to show yet"
+msgstr "Nimic de arătat încă"
+
+msgid "Type what to look for, or browse everything Modrinth has for this instance"
+msgstr "Introdu ce să cauți sau răsfoiește tot ce are Modrinth pentru această instanță"
+
+msgid "Browse"
+msgstr "Răsfoiește"
+
+msgid "No mod loader"
+msgstr "Fără încărcător de mod"
+
+msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
+msgstr "Modurile au nevoie de un încărcător de mod. Alegeți mai întâi Fabric, Quilt, Forge sau NeoForge din setările acestei instanțe"
+
+msgid "Create Instance"
+msgstr "Creați o instanță"
+
+msgid "Name"
+msgstr "Nume"
+
+msgid "Directory"
+msgstr "Director"
+
+msgid "Choose a folder"
+msgstr "Alegeți un folder"
+
+msgid "Create"
+msgstr "Crea"
+
+msgid "Download Modpack"
+msgstr "Descărcați Modpack"
+
+msgid "Loading modpacks…"
+msgstr "Se încarcă modpack-uri..."
+
+msgid "Search modpacks"
+msgstr "Căutați modpack-uri"
+
+msgid "Close"
+msgstr "Aproape"
+
+msgid "Back"
+msgstr "Spate"
+
+msgid "Install"
+msgstr "Instala"
+
+msgid "Copy of %s"
+msgstr "Copie a lui %s"
+
+msgid "Choose Java executable"
+msgstr "Alegeți executabilul Java"
+
+msgid "the chosen file does not report a Java version"
+msgstr "fișierul ales nu raportează o versiune Java"
+
+msgid "Choose an Icon"
+msgstr "Alegeți o pictogramă"
+
+msgid "Choose a Directory"
+msgstr "Alegeți un Director"
+
+msgid "Duplicated to \"%s\""
+msgstr "Duplicat la „%s”"
+
+msgid "Delete \"%s\"?"
+msgstr "Ștergeți „%s”?"
+
+msgid "General"
+msgstr "General"
+
+msgid "Icon"
+msgstr "Pictogramă"
+
+msgid "Change the Directory"
+msgstr "Schimbați directorul"
+
+msgid "Minecraft"
+msgstr "Minecraft"
+
+msgid "Java"
+msgstr "Java"
+
+msgid "Java Runtime"
+msgstr "Java Runtime"
+
+msgid "No Java installation was found on this system"
+msgstr "Nu a fost găsită nicio instalare Java pe acest sistem"
+
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "Acest joc necesită Java %d sau mai nou, Java selectat este %d"
+
+msgid "Add Java Runtime"
+msgstr "Adăugați Java Runtime"
+
+msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
+msgstr "Minecraft are nevoie de un Java non-headless: pe Arch folosește pachetul jre-openjdk, nu jre-openjdk-headless"
+
+msgid "JVM Arguments"
+msgstr "Argumente JVM"
+
+msgid "The configured Java was not detected; make sure it is still a usable java executable"
+msgstr "Java configurat nu a fost detectat; asigurați-vă că este încă un executabil java utilizabil"
+
+msgid "Actions"
+msgstr "Acțiuni"
+
+msgid "Duplicate"
+msgstr "Duplicat"
+
+msgid "Delete Instance"
+msgstr "Ștergeți instanța"
+
+msgid "Settings"
+msgstr "Setări"
+
+msgid "Resource Packs"
+msgstr "Pachete de resurse"
+
+msgid "Shader Packs"
+msgstr "Pachete Shader"
+
+msgid "Mods"
+msgstr "Moduri"
+
+msgid "Logs"
+msgstr "Bușteni"
+
+msgid "Custom: %s"
+msgstr "Vamă"
+
+msgid "the game was stopped by signal %d"
+msgstr "jocul a fost oprit de semnalul %d"
+
+msgid "the game exited with code %d"
+msgstr "jocul a ieșit cu codul %d"
+
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Nu s-a găsit nicio versiune compatibilă %s pentru Minecraft %s."
+
+msgid "Loader"
+msgstr "Încărcător"
+
+msgid "Loader Version"
+msgstr "Versiune de încărcare"
+
+msgid "Clear"
+msgstr "Clar"
+
+msgid "Search the log"
+msgstr "Căutați în jurnal"
+
+msgid "Versions"
+msgstr "Versiuni"
+
+msgid "Show unstable Minecraft versions"
+msgstr "Afișează versiuni instabile de Minecraft"
+
+msgid "Show unstable Mod Loader versions"
+msgstr "Afișați versiunile instabile ale modului de încărcare"
+
+msgid "Language"
+msgstr "Limbă"
+
+msgid "Interface language"
+msgstr "Limbajul interfeței"
+
+msgid "Line Limit"
+msgstr "Limită de linie"
+
+msgid "Open Log Folder After Crash"
+msgstr "Deschideți dosarul Jurnal după blocare"
+
+msgid "About Nuvasha Launcher"
+msgstr "Despre Nuvasha Launcher"
+
+msgid "Keyboard Shortcuts"
+msgstr "Comenzi rapide de la tastatură"
+
+msgid "Stop"
+msgstr "Stop"
+
+msgid "Play"
+msgstr "Juca"
+
+msgid "Keep Playing"
+msgstr "Continuați să jucați"
+
+msgid "Downloads"
+msgstr "Descărcări"
+
+msgid "Accounts"
+msgstr "Conturi"
+
+msgid "No Instances Yet"
+msgstr "Nicio instanță încă"
+
+msgid "Use the + button in the header to create one"
+msgstr "Utilizați butonul + din antet pentru a crea unul"
+
+msgid "the loader cannot be resolved: %s"
+msgstr "încărcătorul nu poate fi rezolvat: %s"
+
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Nu s-a găsit nicio versiune compatibilă pentru Minecraft %s și %s."
+
+msgid "No compatible version found for Minecraft %s."
+msgstr "Nu s-a găsit nicio versiune compatibilă pentru Minecraft %s."
+
+msgid "Add Offline Account"
+msgstr "Adăugați un cont offline"
+
+msgid "a name can only hold letters, digits and underscores"
+msgstr "un nume poate conține doar litere, cifre și litere de subliniere"
+
+msgid "a name cannot be empty"
+msgstr "un nume nu poate fi gol"
+
+msgid "a name has to be 3 to 16 characters long"
+msgstr "un nume trebuie să aibă între 3 și 16 caractere"
+
+msgid "Add"
+msgstr "Adăuga"
+
+msgid "asking Microsoft for a code"
+msgstr "cerând Microsoft un cod"
+
+msgid "waiting for the sign-in in the browser"
+msgstr "așteptând conectarea în browser"
+
+msgid "Sign In"
+msgstr "Conectare"
+
+msgid "Open the page in your browser, then enter this code:"
+msgstr "Deschideți pagina în browser, apoi introduceți acest cod:"
+
+msgid "Open the Page"
+msgstr "Deschide pagina"
+
+msgid "Try Again"
+msgstr "Încearcă din nou"
+
+msgid "Remove"
+msgstr "Elimina"
+
+msgid "Remove \"%s\""
+msgstr "Eliminați „%s”"
+
+msgid "Add Microsoft Account"
+msgstr "Adăugați un cont Microsoft"
+
+msgid "Minecraft Version"
+msgstr "Versiunea Minecraft"
+
+msgid "Install the selected %s?"
+msgstr "Instalați %s selectat?"
+
+msgid "%s \"%s\""
+msgstr "%s „%s”"
+
+msgid "Search"
+msgstr "Căutare"
+
+msgid "Update"
+msgstr "Actualizare"
+
+msgid "Update the following %s"
+msgstr "Actualizați următoarele %s"
+
+msgid "Dependencies:"
+msgstr "Dependente:"
+
+msgid "The following mods depend on %s:\n%s"
+msgstr "Următoarele moduri depind de %s:\n%s"
+
+msgid "Cache"
+msgstr "Cache"
+
+msgid "Cache Modrinth API responses"
+msgstr "Memorați în cache răspunsurile API Modrinth"
+
+msgid "Cache expiration"
+msgstr "Expirarea memoriei cache"
+
+msgid "1 hour"
+msgstr "1 oră"
+
+msgid "6 hours"
+msgstr "6 ore"
+
+msgid "1 day"
+msgstr "1 zi"
+
+msgid "7 days"
+msgstr "7 zile"
+
+msgid "Clear nuvasha Cache"
+msgstr "Ștergeți memoria cache nuvasha"
+
+msgid "Show Shortcuts"
+msgstr "Afișați comenzile rapide"
+
+msgid "Quit"
+msgstr "Renunță"
+
+msgid "Clear nuvasha Cache?"
+msgstr "Ștergeți memoria cache nuvasha?"
+
+msgid "Import Modpack"
+msgstr "Import Modpack"
+
+msgid "Modpack exported"
+msgstr "Modpack exportat"
+
+msgid "Modrinth Modpacks (*.mrpack)"
+msgstr "Modrinth Modpack-uri (*.mrpack)"
+
+msgid "The export location is not a local file"
+msgstr "Locația de export nu este un fișier local"
+
+msgid "Export Modpack"
+msgstr "Export Modpack"
+
+msgid "Importing modpack…"
+msgstr "Se importă modpack..."
+
+msgid "Reading modpack"
+msgstr "Citirea modpack"
+
+msgid "Exporting modpack"
+msgstr "Se exportă modpack"
+
+msgid "Modpack export"
+msgstr "Export Modpack"
+
+msgid "Include transient files?"
+msgstr "Includeți fișiere tranzitorii?"
+
+msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr "Jurnalele, rapoartele de blocare, capturile de ecran, memoria cache și descărcările sunt în mod normal excluse."
+
+msgid "Clean Export"
+msgstr "Export curat"
+
+msgid "Include All Files"
+msgstr "Includeți toate fișierele"
+
+msgid "Pack Name"
+msgstr "Numele pachetului"
+
+msgid "Summary"
+msgstr "Rezumat"
+
+msgid "Version ID"
+msgstr "ID-ul versiunii"
+
+msgid "Downloading files"
+msgstr "Descărcarea fișierelor"
+
+msgid "Extracting files"
+msgstr "Extragerea fișierelor"
+
+msgid "Optional files"
+msgstr "Fișiere opționale"
+
+msgid "The pack lists these files but says they are not needed. Nothing of them is installed unless you ask. Default is off"
+msgstr "Pachetul listează aceste fișiere, dar spune că nu sunt necesare. Nimic din ele nu este instalat decât dacă întrebați. Setarea implicită este dezactivată"
+
+msgid "Pack could not be fetched"
+msgstr "Pachetul nu a putut fi preluat"
+
+msgid "Invalid pack"
+msgstr "Pachet nevalid"
+
+msgid "The pack does not define its install"
+msgstr "Pachetul nu definește instalarea acestuia"
+
+msgid "Downloading Modpack"
+msgstr "Descărcarea Modpack"
+
+msgid "Writing archive"
+msgstr "Arhiva de scriere"
+
+msgid "Export modpack metadata"
+msgstr "Exportați metadatele modpack-ului"
+
+msgid "Ask for export metadata"
+msgstr "Solicitați metadate de export"
+
+msgid "Pack information"
+msgstr "Informații despre pachet"
+
+msgid "Show name, summary and version fields before exporting."
+msgstr "Afișați câmpurile de nume, rezumat și versiune înainte de export."
+
+msgid "Export complete"
+msgstr "Export finalizat"
+
+msgid "Export"
+msgstr "Export"
+
+msgid "Installed %u item"
+msgid_plural "Installed %u items"
+msgstr[0] "S-a instalat %u articol"
+msgstr[1] "S-au instalat %u articole"
+msgstr[2] "S-au instalat %u articole"
+
+msgid "Updated %u item"
+msgid_plural "Updated %u items"
+msgstr[0] "S-a actualizat %u articol"
+msgstr[1] "Au fost actualizate %u articole"
+msgstr[2] "Au fost actualizate %u articole"
+
+msgid "The icon must be a file on this computer"
+msgstr "Pictograma trebuie să fie un fișier pe acest computer"
+
+msgid "The game is running; stop it before moving its directory"
+msgstr "Jocul rulează; opriți-l înainte de a-și muta directorul"
+
+msgid "%s is being installed"
+msgstr "%s este în curs de instalare"
+
+msgid "no compatible version"
+msgstr "nicio versiune compatibilă"
+
+msgid "Enabled"
+msgstr "Activat"
+
+msgid "Disabled"
+msgstr "Dezactivat"
+
+msgid "Deleted"
+msgstr "Șters"
+
+msgid "Everything is up to date"
+msgstr "Totul este la zi"
+
+msgid "Cannot create \"%s\": %s"
+msgstr "Nu se poate crea „%s”: %s"
+
+msgid "This project publishes nothing that fits this instance."
+msgstr "Acest proiect nu publică nimic care să se potrivească cu această instanță."
+
+msgid "Unknown"
+msgstr "Necunoscut"
+
+msgid "%s (unstable)"
+msgstr "%s (instabil)"
+
+msgid "the next page could not be loaded"
+msgstr "pagina următoare nu a putut fi încărcată"
+
+msgid "Other"
+msgstr "Alte"
+
+msgid "%.1fM downloads"
+msgstr "%.1fM descărcări"
+
+msgid "%.1fk downloads"
+msgstr "%.1fk descărcări"
+
+msgid "%s  ·  by %s"
+msgstr "%s · de %s"
+
+msgid "by %s"
+msgstr "de %s"
+
+msgid "%s downloads"
+msgstr "%s descărcări"
+
+msgid "Cache Cleared"
+msgstr "Cache golit"
+
+msgid "nuvasha cache data was cleared successfully."
+msgstr "Datele cache nuvasha au fost șterse cu succes."
+
+msgid "Cache Cleanup Failed"
+msgstr "Curățarea cache a eșuat"
+
+msgid "The cache could not be cleared."
+msgstr "Cache-ul nu a putut fi golit."
+
+msgid "the versions of this loader could not be read"
+msgstr "versiunile acestui încărcător nu au putut fi citite"
+
+msgid "Minecraft crashed"
+msgstr "Minecraft s-a prăbușit"
+
+msgid "Minecraft could not start"
+msgstr "Minecraft nu a putut porni"
+
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft are nevoie de conectare"
+
+msgid "The file cannot be renamed"
+msgstr "Fișierul nu poate fi redenumit"
+
+msgid "The file cannot be deleted"
+msgstr "Fișierul nu poate fi șters"
+
+msgid "The folder cannot be read"
+msgstr "Dosarul nu poate fi citit"
+
+msgid "The file could not be installed"
+msgstr "Fișierul nu a putut fi instalat"
+
+msgid "The folder cannot be created"
+msgstr "Dosarul nu poate fi creat"
+
+msgid "This cannot be installed"
+msgstr "Acesta nu poate fi instalat"
+
+msgid "Pick a Minecraft version first"
+msgstr "Alegeți mai întâi o versiune Minecraft"
+
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "Ștergerea unei dependențe șterge modul care depindea de ea"
+
+msgid "A dependent mod cannot be deleted"
+msgstr "Un mod dependent nu poate fi șters"
+
+msgid "Sandbox"
+msgstr "Cutie cu nisip"
+
+msgid "Enable sandbox"
+msgstr "Activați sandbox"
+
+msgid "Allow sandbox network access"
+msgstr "Permite accesul la rețea sandbox"
+
+msgid "Slim model"
+msgstr "Model subțire"
+
+msgid "OK"
+msgstr "Bine"
+
+msgid "Export skin…"
+msgstr "Exportați pielea..."
+
+msgid "Imported skin"
+msgstr "Piele importată"
+
+msgid "Default model"
+msgstr "Model implicit"
+
+msgid "PNG skin texture"
+msgstr "PNG textura pielii"
+
+msgid "Invalid skin"
+msgstr "Piele nevalidă"
+
+msgid "No cape"
+msgstr "Fără pelerină"
+
+msgid "Import skin…"
+msgstr "Importați pielea..."
+
+msgid "Delete skin?"
+msgstr "Ștergeți pielea?"
+
+msgid "This skin will be removed from the skin library."
+msgstr "Acest skin va fi eliminat din biblioteca de skin."
+
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "Imaginile de piele trebuie să aibă fișiere PNG de 64x64 sau 64x32"
