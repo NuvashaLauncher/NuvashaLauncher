@@ -260,13 +260,58 @@ skin_name_for_url (const char *url)
       g_autofree char *basename = g_file_get_basename (file);
       if (basename != NULL)
         {
-          char *suffix = g_strrstr (basename, ".png");
-          if (suffix != NULL && suffix[4] == '\0')
-            *suffix = '\0';
+          gsize length = strlen (basename);
+          if (length > 4 && g_ascii_strcasecmp (basename + length - 4, ".png") == 0)
+            basename[length - 4] = '\0';
           return g_strdup (basename);
         }
     }
   return g_strdup (_("Skin"));
+}
+
+static char *
+skin_display_name (const char *filename)
+{
+  char *name = g_strdup (filename);
+  gsize length;
+
+  if (name == NULL)
+    return NULL;
+  length = strlen (name);
+  if (length > 4 && g_ascii_strcasecmp (name + length - 4, ".png") == 0)
+    name[length - 4] = '\0';
+  return name;
+}
+
+static char *
+unique_skin_filename (const char *directory, const char *filename)
+{
+  g_autofree char *path = g_build_filename (directory, filename, NULL);
+  const char *extension = NULL;
+  g_autofree char *stem = NULL;
+
+  if (!g_file_test (path, G_FILE_TEST_EXISTS))
+    return g_strdup (filename);
+
+  {
+    gsize length = strlen (filename);
+    if (length > 4 &&
+        g_ascii_strcasecmp (filename + length - 4, ".png") == 0)
+      extension = filename + length - 4;
+  }
+  if (extension == NULL)
+    extension = filename + strlen (filename);
+  stem = g_strndup (filename, extension - filename);
+
+  for (guint suffix = 1; ; suffix++)
+    {
+      g_autofree char *candidate =
+        g_strdup_printf ("%s %u%s", stem, suffix, extension);
+      g_autofree char *candidate_path =
+        g_build_filename (directory, candidate, NULL);
+      if (!g_file_test (candidate_path, G_FILE_TEST_EXISTS))
+        return g_steal_pointer (&candidate);
+    }
 }
 
 static char *
@@ -326,7 +371,8 @@ append_local_skins (SkinMenu *menu)
     {
       g_autofree char *path = NULL;
       g_autofree char *uri = NULL;
-      if (!g_str_has_suffix (name, ".png"))
+      if (strlen (name) <= 4 ||
+          g_ascii_strcasecmp (name + strlen (name) - 4, ".png") != 0)
         continue;
       path = g_build_filename (directory, name, NULL);
       uri = g_filename_to_uri (path, NULL, NULL);
@@ -334,8 +380,9 @@ append_local_skins (SkinMenu *menu)
       if (uri == NULL || g_hash_table_contains (menu->skin_urls, identity) ||
           g_hash_table_contains (menu->deleted_skin_ids, identity))
         continue;
+      g_autofree char *display_name = skin_display_name (name);
       gtk_list_box_append (menu->skins,
-                           GTK_WIDGET (skin_row_new (menu, name, uri)));
+                           GTK_WIDGET (skin_row_new (menu, display_name, uri)));
     }
 }
 
@@ -603,29 +650,9 @@ on_skin_file_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
   if (file == NULL)
     goto done;
 
-  {
-    g_autofree char *directory = skin_directory_path ();
-    g_autofree char *source_uri = g_file_get_uri (file);
-    g_autofree char *hash = g_compute_checksum_for_string (G_CHECKSUM_SHA256,
-                                                            source_uri, -1);
-    g_autofree char *basename = g_strconcat (hash, ".png", NULL);
-    g_autofree char *destination_path = NULL;
-    g_autoptr (GFile) destination = NULL;
-
-    if (basename == NULL || !nuvasha_fs_make_directory (directory, 0755, NULL))
-      goto done;
-    destination_path = g_build_filename (directory, basename, NULL);
-    destination = g_file_new_for_path (destination_path);
-    if (!nuvasha_fs_copy_file (file, destination, G_FILE_COPY_OVERWRITE,
-                           NULL, &error))
-      goto done;
-    g_clear_object (&file);
-    file = g_steal_pointer (&destination);
-  }
-
   skin = gdk_texture_new_from_file (file, &error);
   if (skin == NULL ||
-      (gdk_texture_get_width (skin) != 64 && gdk_texture_get_width (skin) != 64) ||
+      gdk_texture_get_width (skin) != 64 ||
       (gdk_texture_get_height (skin) != 32 && gdk_texture_get_height (skin) != 64))
     {
       g_clear_error (&error);
@@ -633,6 +660,25 @@ on_skin_file_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
                                     _("Skin images must be 64x64 or 64x32 PNG files"));
       goto done;
     }
+
+  {
+    g_autofree char *directory = skin_directory_path ();
+    g_autofree char *source_basename = g_file_get_basename (file);
+    g_autofree char *destination_basename = NULL;
+    g_autofree char *destination_path = NULL;
+    g_autoptr (GFile) destination = NULL;
+
+    if (source_basename == NULL || !nuvasha_fs_make_directory (directory, 0755, NULL))
+      goto done;
+    destination_basename = unique_skin_filename (directory, source_basename);
+    destination_path = g_build_filename (directory, destination_basename, NULL);
+    destination = g_file_new_for_path (destination_path);
+    if (!nuvasha_fs_copy_file (file, destination, G_FILE_COPY_OVERWRITE,
+                           NULL, &error))
+      goto done;
+    g_clear_object (&file);
+    file = g_steal_pointer (&destination);
+  }
 
   /* Imported files are immediately usable as the row's preview. Uploading
    * is intentionally separate from choosing a local skin, just like the
@@ -643,8 +689,10 @@ on_skin_file_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
       gtk_image_set_from_paintable (menu->image, GDK_PAINTABLE (face));
       {
         char *uri = g_file_get_uri (file);
-        AdwActionRow *row = skin_row_new (menu, _("Imported skin"), uri);
-        gtk_list_box_append (menu->skins, GTK_WIDGET (row));
+        g_autofree char *basename = g_file_get_basename (file);
+        g_autofree char *display_name = skin_display_name (basename);
+        AdwActionRow *row = skin_row_new (menu, display_name, uri);
+        gtk_list_box_insert (menu->skins, GTK_WIDGET (row), 0);
         gtk_list_box_select_row (menu->skins, GTK_LIST_BOX_ROW (row));
         load_view_texture (menu->view, uri, FALSE);
         g_free (uri);

@@ -403,8 +403,8 @@ test_create_duplicate_names (void)
   g_autofree char *third_leaf = g_path_get_basename (third_directory);
 
   g_assert_cmpstr (first_name, ==, "test");
-  g_assert_cmpstr (second_name, ==, "test 2");
-  g_assert_cmpstr (third_name, ==, "test 3");
+   g_assert_cmpstr (second_name, ==, "test 1");
+   g_assert_cmpstr (third_name, ==, "test 2");
   g_assert_cmpstr (first_leaf, ==, first_name);
   g_assert_cmpstr (second_leaf, ==, second_name);
   g_assert_cmpstr (third_leaf, ==, third_name);

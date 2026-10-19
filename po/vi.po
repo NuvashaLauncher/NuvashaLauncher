@@ -1,0 +1,617 @@
+msgid ""
+msgstr ""
+"Language: vi\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+msgid "Cancel"
+msgstr "Hủy bỏ"
+
+msgid "Confirm"
+msgstr "Xác nhận"
+
+msgid "Delete"
+msgstr "Xóa bỏ"
+
+msgid "Retry"
+msgstr "Thử lại"
+
+msgid "Loading…"
+msgstr "Đang tải…"
+
+msgid "Download"
+msgstr "Tải xuống"
+
+msgid "Update All"
+msgstr "Cập nhật tất cả"
+
+msgid "Open Folder"
+msgstr "Mở thư mục"
+
+msgid "Nothing installed yet"
+msgstr "Chưa có gì được cài đặt"
+
+msgid "Browse for something to put into the folder of this instance"
+msgstr "Duyệt tìm thứ gì đó để đưa vào thư mục của phiên bản này"
+
+msgid "Installed"
+msgstr "Đã cài đặt"
+
+msgid "Loading more…"
+msgstr "Đang tải thêm…"
+
+msgid "Nothing is selected"
+msgstr "Không có gì được chọn"
+
+msgid "Install this version with the selected ones"
+msgstr "Cài đặt phiên bản này với những phiên bản đã chọn"
+
+msgid "Filter by category"
+msgstr "Lọc theo danh mục"
+
+msgid "Filter"
+msgstr "Lọc"
+
+msgid "Nothing to show yet"
+msgstr "Chưa có gì để hiển thị"
+
+msgid "Type what to look for, or browse everything Modrinth has for this instance"
+msgstr "Nhập nội dung cần tìm hoặc duyệt mọi thứ Modrinth có cho trường hợp này"
+
+msgid "Browse"
+msgstr "Duyệt qua"
+
+msgid "No mod loader"
+msgstr "Không có trình tải mod"
+
+msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
+msgstr "Mod cần một trình tải mod. Trước tiên hãy chọn Fabric, Quilt, Forge hoặc NeoForge trong cài đặt của phiên bản này"
+
+msgid "Create Instance"
+msgstr "Tạo phiên bản"
+
+msgid "Name"
+msgstr "Tên"
+
+msgid "Directory"
+msgstr "Thư mục"
+
+msgid "Choose a folder"
+msgstr "Chọn một thư mục"
+
+msgid "Create"
+msgstr "Tạo nên"
+
+msgid "Download Modpack"
+msgstr "Tải xuống Modpack"
+
+msgid "Loading modpacks…"
+msgstr "Đang tải modpack…"
+
+msgid "Search modpacks"
+msgstr "Tìm kiếm modpack"
+
+msgid "Close"
+msgstr "Đóng"
+
+msgid "Back"
+msgstr "Mặt sau"
+
+msgid "Install"
+msgstr "Cài đặt"
+
+msgid "Copy of %s"
+msgstr "Bản sao của %s"
+
+msgid "Choose Java executable"
+msgstr "Chọn tệp thực thi Java"
+
+msgid "the chosen file does not report a Java version"
+msgstr "tệp đã chọn không báo cáo phiên bản Java"
+
+msgid "Choose an Icon"
+msgstr "Chọn một biểu tượng"
+
+msgid "Choose a Directory"
+msgstr "Chọn một thư mục"
+
+msgid "Duplicated to \"%s\""
+msgstr "Đã sao chép vào \"%s\""
+
+msgid "Delete \"%s\"?"
+msgstr "Xóa \"%s\"?"
+
+msgid "General"
+msgstr "Tổng quan"
+
+msgid "Icon"
+msgstr "Biểu tượng"
+
+msgid "Change the Directory"
+msgstr "Thay đổi thư mục"
+
+msgid "Minecraft"
+msgstr "Minecraft"
+
+msgid "Java"
+msgstr "Java"
+
+msgid "Java Runtime"
+msgstr "Thời gian chạy Java"
+
+msgid "No Java installation was found on this system"
+msgstr "Không tìm thấy cài đặt Java trên hệ thống này"
+
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "Trò chơi này cần Java %d hoặc mới hơn, Java được chọn là %d"
+
+msgid "Add Java Runtime"
+msgstr "Thêm thời gian chạy Java"
+
+msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
+msgstr "Minecraft cần một non-headless Java: trên Arch sử dụng gói jre-openjdk, không phải jre-openjdk-headless"
+
+msgid "JVM Arguments"
+msgstr "Đối số JVM"
+
+msgid "The configured Java was not detected; make sure it is still a usable java executable"
+msgstr "Java được định cấu hình không được phát hiện; đảm bảo rằng nó vẫn là một tệp thực thi java có thể sử dụng được"
+
+msgid "Actions"
+msgstr "hành động"
+
+msgid "Duplicate"
+msgstr "Nhân bản"
+
+msgid "Delete Instance"
+msgstr "Xóa phiên bản"
+
+msgid "Settings"
+msgstr "Cài đặt"
+
+msgid "Resource Packs"
+msgstr "Gói tài nguyên"
+
+msgid "Shader Packs"
+msgstr "Gói đổ bóng"
+
+msgid "Mods"
+msgstr "mod"
+
+msgid "Logs"
+msgstr "Nhật ký"
+
+msgid "Custom: %s"
+msgstr "Tùy chỉnh: %s"
+
+msgid "the game was stopped by signal %d"
+msgstr "trò chơi đã bị dừng bởi tín hiệu %d"
+
+msgid "the game exited with code %d"
+msgstr "trò chơi đã thoát với mã %d"
+
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Không tìm thấy phiên bản %s tương thích cho Minecraft %s."
+
+msgid "Loader"
+msgstr "Trình tải"
+
+msgid "Loader Version"
+msgstr "Phiên bản tải"
+
+msgid "Clear"
+msgstr "Thông thoáng"
+
+msgid "Search the log"
+msgstr "Tìm kiếm nhật ký"
+
+msgid "Versions"
+msgstr "Phiên bản"
+
+msgid "Show unstable Minecraft versions"
+msgstr "Hiển thị các phiên bản Minecraft không ổn định"
+
+msgid "Show unstable Mod Loader versions"
+msgstr "Hiển thị các phiên bản Mod Loader không ổn định"
+
+msgid "Language"
+msgstr "Ngôn ngữ"
+
+msgid "Interface language"
+msgstr "Ngôn ngữ giao diện"
+
+msgid "Line Limit"
+msgstr "Giới hạn dòng"
+
+msgid "Open Log Folder After Crash"
+msgstr "Mở thư mục nhật ký sau sự cố"
+
+msgid "About Nuvasha Launcher"
+msgstr "Giới thiệu về Trình khởi chạy Nuvasha"
+
+msgid "Keyboard Shortcuts"
+msgstr "Phím tắt"
+
+msgid "Stop"
+msgstr "Dừng lại"
+
+msgid "Play"
+msgstr "Chơi"
+
+msgid "Keep Playing"
+msgstr "Tiếp tục chơi"
+
+msgid "Downloads"
+msgstr "Tải xuống"
+
+msgid "Accounts"
+msgstr "Tài khoản"
+
+msgid "No Instances Yet"
+msgstr "Chưa có trường hợp nào"
+
+msgid "Use the + button in the header to create one"
+msgstr "Sử dụng nút + trong tiêu đề để tạo một nút"
+
+msgid "the loader cannot be resolved: %s"
+msgstr "trình tải không thể giải quyết được: %s"
+
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Không tìm thấy phiên bản tương thích cho Minecraft %s và %s."
+
+msgid "No compatible version found for Minecraft %s."
+msgstr "Không tìm thấy phiên bản tương thích cho Minecraft %s."
+
+msgid "Add Offline Account"
+msgstr "Thêm tài khoản ngoại tuyến"
+
+msgid "a name can only hold letters, digits and underscores"
+msgstr "tên chỉ có thể chứa các chữ cái, chữ số và dấu gạch dưới"
+
+msgid "a name cannot be empty"
+msgstr "tên không được để trống"
+
+msgid "a name has to be 3 to 16 characters long"
+msgstr "tên phải dài từ 3 đến 16 ký tự"
+
+msgid "Add"
+msgstr "Thêm vào"
+
+msgid "asking Microsoft for a code"
+msgstr "yêu cầu Microsoft cung cấp mã"
+
+msgid "waiting for the sign-in in the browser"
+msgstr "chờ đăng nhập trên trình duyệt"
+
+msgid "Sign In"
+msgstr "Đăng nhập"
+
+msgid "Open the page in your browser, then enter this code:"
+msgstr "Mở trang trong trình duyệt của bạn, sau đó nhập mã này:"
+
+msgid "Open the Page"
+msgstr "Mở trang"
+
+msgid "Try Again"
+msgstr "Thử lại"
+
+msgid "Remove"
+msgstr "Di dời"
+
+msgid "Remove \"%s\""
+msgstr "Xóa \"%s\""
+
+msgid "Add Microsoft Account"
+msgstr "Thêm tài khoản Microsoft"
+
+msgid "Minecraft Version"
+msgstr "Phiên bản Minecraft"
+
+msgid "Install the selected %s?"
+msgstr "Cài đặt %s đã chọn?"
+
+msgid "%s \"%s\""
+msgstr "%s \"%s\""
+
+msgid "Search"
+msgstr "Tìm kiếm"
+
+msgid "Update"
+msgstr "Cập nhật"
+
+msgid "Update the following %s"
+msgstr "Cập nhật %s sau"
+
+msgid "Dependencies:"
+msgstr "Phụ thuộc:"
+
+msgid "The following mods depend on %s:\n%s"
+msgstr "Các mod sau phụ thuộc vào %s:\n%s"
+
+msgid "Cache"
+msgstr "Bộ nhớ đệm"
+
+msgid "Cache Modrinth API responses"
+msgstr "Phản hồi API Modrinth của bộ đệm"
+
+msgid "Cache expiration"
+msgstr "Hết hạn bộ nhớ đệm"
+
+msgid "1 hour"
+msgstr "1 giờ"
+
+msgid "6 hours"
+msgstr "6 giờ"
+
+msgid "1 day"
+msgstr "1 ngày"
+
+msgid "7 days"
+msgstr "7 ngày"
+
+msgid "Clear nuvasha Cache"
+msgstr "Xóa bộ nhớ cache nuvasha"
+
+msgid "Show Shortcuts"
+msgstr "Hiển thị phím tắt"
+
+msgid "Quit"
+msgstr "Từ bỏ"
+
+msgid "Clear nuvasha Cache?"
+msgstr "Xóa bộ nhớ cache nuvasha?"
+
+msgid "Import Modpack"
+msgstr "Nhập khẩu Modpack"
+
+msgid "Modpack exported"
+msgstr "Đã xuất modpack"
+
+msgid "Modrinth Modpacks (*.mrpack)"
+msgstr "Gói Modrinth (*.mrpack)"
+
+msgid "The export location is not a local file"
+msgstr "Vị trí xuất không phải là tệp cục bộ"
+
+msgid "Export Modpack"
+msgstr "Xuất Modpack"
+
+msgid "Importing modpack…"
+msgstr "Đang nhập modpack…"
+
+msgid "Reading modpack"
+msgstr "Đọc modpack"
+
+msgid "Exporting modpack"
+msgstr "Xuất modpack"
+
+msgid "Modpack export"
+msgstr "Xuất modpack"
+
+msgid "Include transient files?"
+msgstr "Bao gồm các tập tin tạm thời?"
+
+msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr "Nhật ký, báo cáo sự cố, ảnh chụp màn hình, bộ nhớ đệm và nội dung tải xuống thường bị loại trừ."
+
+msgid "Clean Export"
+msgstr "Xuất khẩu sạch"
+
+msgid "Include All Files"
+msgstr "Bao gồm tất cả các tệp"
+
+msgid "Pack Name"
+msgstr "Tên gói"
+
+msgid "Summary"
+msgstr "Bản tóm tắt"
+
+msgid "Version ID"
+msgstr "Mã phiên bản"
+
+msgid "Downloading files"
+msgstr "Đang tải tập tin"
+
+msgid "Extracting files"
+msgstr "Giải nén tập tin"
+
+msgid "Optional files"
+msgstr "Tệp tùy chọn"
+
+msgid "The pack lists these files but says they are not needed. Nothing of them is installed unless you ask. Default is off"
+msgstr "Gói liệt kê các tệp này nhưng cho biết chúng không cần thiết. Không có gì trong số chúng được cài đặt trừ khi bạn yêu cầu. Mặc định là tắt"
+
+msgid "Pack could not be fetched"
+msgstr "Không thể tìm nạp gói"
+
+msgid "Invalid pack"
+msgstr "Gói không hợp lệ"
+
+msgid "The pack does not define its install"
+msgstr "Gói không xác định cài đặt của nó"
+
+msgid "Downloading Modpack"
+msgstr "Đang tải xuống Modpack"
+
+msgid "Writing archive"
+msgstr "Viết lưu trữ"
+
+msgid "Export modpack metadata"
+msgstr "Xuất siêu dữ liệu modpack"
+
+msgid "Ask for export metadata"
+msgstr "Yêu cầu xuất siêu dữ liệu"
+
+msgid "Pack information"
+msgstr "Thông tin gói"
+
+msgid "Show name, summary and version fields before exporting."
+msgstr "Hiển thị các trường tên, tóm tắt và phiên bản trước khi xuất."
+
+msgid "Export complete"
+msgstr "Xuất hoàn tất"
+
+msgid "Export"
+msgstr "Xuất khẩu"
+
+msgid "Installed %u item"
+msgid_plural "Installed %u items"
+msgstr[0] "Đã cài đặt %u mục"
+msgstr[1] "Đã cài đặt %u mục"
+
+msgid "Updated %u item"
+msgid_plural "Updated %u items"
+msgstr[0] "Đã cập nhật %u mục"
+msgstr[1] "Đã cập nhật %u mục"
+
+msgid "The icon must be a file on this computer"
+msgstr "Biểu tượng phải là một tập tin trên máy tính này"
+
+msgid "The game is running; stop it before moving its directory"
+msgstr "Trò chơi đang chạy; dừng nó lại trước khi di chuyển thư mục của nó"
+
+msgid "%s is being installed"
+msgstr "%s đang được cài đặt"
+
+msgid "no compatible version"
+msgstr "không có phiên bản tương thích"
+
+msgid "Enabled"
+msgstr "Đã bật"
+
+msgid "Disabled"
+msgstr "Tàn tật"
+
+msgid "Deleted"
+msgstr "Đã xóa"
+
+msgid "Everything is up to date"
+msgstr "Mọi thứ đều được cập nhật"
+
+msgid "Cannot create \"%s\": %s"
+msgstr "Không thể tạo \"%s\": %s"
+
+msgid "This project publishes nothing that fits this instance."
+msgstr "Dự án này không xuất bản gì phù hợp với trường hợp này."
+
+msgid "Unknown"
+msgstr "Không xác định"
+
+msgid "%s (unstable)"
+msgstr "%s (không ổn định)"
+
+msgid "the next page could not be loaded"
+msgstr "trang tiếp theo không thể tải được"
+
+msgid "Other"
+msgstr "Khác"
+
+msgid "%.1fM downloads"
+msgstr "%.1fM lượt tải xuống"
+
+msgid "%.1fk downloads"
+msgstr "%1fk lượt tải xuống"
+
+msgid "%s  ·  by %s"
+msgstr "%s · bởi %s"
+
+msgid "by %s"
+msgstr "bởi %s"
+
+msgid "%s downloads"
+msgstr "%s lượt tải xuống"
+
+msgid "Cache Cleared"
+msgstr "Đã xóa bộ nhớ đệm"
+
+msgid "nuvasha cache data was cleared successfully."
+msgstr "dữ liệu bộ đệm nuvasha đã được xóa thành công."
+
+msgid "Cache Cleanup Failed"
+msgstr "Dọn dẹp bộ đệm không thành công"
+
+msgid "The cache could not be cleared."
+msgstr "Không thể xóa bộ nhớ đệm."
+
+msgid "the versions of this loader could not be read"
+msgstr "không thể đọc được các phiên bản của trình tải này"
+
+msgid "Minecraft crashed"
+msgstr "Minecraft bị rơi"
+
+msgid "Minecraft could not start"
+msgstr "Minecraft không thể bắt đầu"
+
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft cần đăng nhập"
+
+msgid "The file cannot be renamed"
+msgstr "Không thể đổi tên tập tin"
+
+msgid "The file cannot be deleted"
+msgstr "Không thể xóa tập tin"
+
+msgid "The folder cannot be read"
+msgstr "Thư mục không thể đọc được"
+
+msgid "The file could not be installed"
+msgstr "Không thể cài đặt tập tin"
+
+msgid "The folder cannot be created"
+msgstr "Không thể tạo thư mục"
+
+msgid "This cannot be installed"
+msgstr "Cái này không cài được"
+
+msgid "Pick a Minecraft version first"
+msgstr "Chọn phiên bản Minecraft trước"
+
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "Xóa một phần phụ thuộc sẽ xóa mod phụ thuộc vào nó"
+
+msgid "A dependent mod cannot be deleted"
+msgstr "Không thể xóa một mod phụ thuộc"
+
+msgid "Sandbox"
+msgstr "Hộp cát"
+
+msgid "Enable sandbox"
+msgstr "Bật hộp cát"
+
+msgid "Allow sandbox network access"
+msgstr "Cho phép truy cập mạng hộp cát"
+
+msgid "Slim model"
+msgstr "mô hình mỏng"
+
+msgid "OK"
+msgstr "ĐƯỢC RỒI"
+
+msgid "Export skin…"
+msgstr "Xuất khẩu da…"
+
+msgid "Imported skin"
+msgstr "Da nhập khẩu"
+
+msgid "Default model"
+msgstr "Mô hình mặc định"
+
+msgid "PNG skin texture"
+msgstr "kết cấu da PNG"
+
+msgid "Invalid skin"
+msgstr "Da không hợp lệ"
+
+msgid "No cape"
+msgstr "Không có áo choàng"
+
+msgid "Import skin…"
+msgstr "Da nhập khẩu…"
+
+msgid "Delete skin?"
+msgstr "Xóa da?"
+
+msgid "This skin will be removed from the skin library."
+msgstr "Da này sẽ bị xóa khỏi thư viện da."
+
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "Hình ảnh da phải là tệp PNG 64x64 hoặc 64x32"

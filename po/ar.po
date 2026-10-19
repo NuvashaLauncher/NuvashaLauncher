@@ -1,0 +1,625 @@
+msgid ""
+msgstr ""
+"Language: ar\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : (n%100>=3 && n%100<=10) ? 3 : (n%100>=11) ? 4 : 5);\n"
+msgid "Cancel"
+msgstr "يلغي"
+
+msgid "Confirm"
+msgstr "يتأكد"
+
+msgid "Delete"
+msgstr "يمسح"
+
+msgid "Retry"
+msgstr "أعد المحاولة"
+
+msgid "Loading…"
+msgstr "تحميل…"
+
+msgid "Download"
+msgstr "تحميل"
+
+msgid "Update All"
+msgstr "تحديث الكل"
+
+msgid "Open Folder"
+msgstr "افتح المجلد"
+
+msgid "Nothing installed yet"
+msgstr "لم يتم تثبيت أي شيء حتى الآن"
+
+msgid "Browse for something to put into the folder of this instance"
+msgstr "استعرض بحثًا عن شيء ما لوضعه في مجلد هذه الحالة"
+
+msgid "Installed"
+msgstr "تم التثبيت"
+
+msgid "Loading more…"
+msgstr "جارٍ تحميل المزيد…"
+
+msgid "Nothing is selected"
+msgstr "لم يتم تحديد أي شيء"
+
+msgid "Install this version with the selected ones"
+msgstr "تثبيت هذا الإصدار مع تلك المحددة"
+
+msgid "Filter by category"
+msgstr "تصفية حسب الفئة"
+
+msgid "Filter"
+msgstr "فلتر"
+
+msgid "Nothing to show yet"
+msgstr "لا شيء لإظهاره حتى الآن"
+
+msgid "Type what to look for, or browse everything Modrinth has for this instance"
+msgstr "اكتب ما تبحث عنه، أو تصفح كل ما لدى Modrinth في هذه الحالة"
+
+msgid "Browse"
+msgstr "تصفح"
+
+msgid "No mod loader"
+msgstr "لا يوجد محمل وزارة الدفاع"
+
+msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
+msgstr "تحتاج التعديلات إلى محمل تعديل. اختر Fabric أو Quilt أو Forge أو NeoForge في إعدادات هذا المثيل أولاً"
+
+msgid "Create Instance"
+msgstr "إنشاء مثيل"
+
+msgid "Name"
+msgstr "اسم"
+
+msgid "Directory"
+msgstr "دليل"
+
+msgid "Choose a folder"
+msgstr "اختر مجلدًا"
+
+msgid "Create"
+msgstr "يخلق"
+
+msgid "Download Modpack"
+msgstr "تحميل مودباك"
+
+msgid "Loading modpacks…"
+msgstr "جارٍ تحميل حزم التعديل…"
+
+msgid "Search modpacks"
+msgstr "ابحث في حزم التعديل"
+
+msgid "Close"
+msgstr "يغلق"
+
+msgid "Back"
+msgstr "خلف"
+
+msgid "Install"
+msgstr "ثَبَّتَ"
+
+msgid "Copy of %s"
+msgstr "نسخة من %s"
+
+msgid "Choose Java executable"
+msgstr "اختر جافا قابل للتنفيذ"
+
+msgid "the chosen file does not report a Java version"
+msgstr "الملف المختار لا يُبلغ عن إصدار Java"
+
+msgid "Choose an Icon"
+msgstr "اختر أيقونة"
+
+msgid "Choose a Directory"
+msgstr "اختر الدليل"
+
+msgid "Duplicated to \"%s\""
+msgstr "تم التكرار إلى \"%s\""
+
+msgid "Delete \"%s\"?"
+msgstr "هل تريد حذف \"%s\"؟"
+
+msgid "General"
+msgstr "عام"
+
+msgid "Icon"
+msgstr "رمز"
+
+msgid "Change the Directory"
+msgstr "تغيير الدليل"
+
+msgid "Minecraft"
+msgstr "ماين كرافت"
+
+msgid "Java"
+msgstr "جافا"
+
+msgid "Java Runtime"
+msgstr "جافا وقت التشغيل"
+
+msgid "No Java installation was found on this system"
+msgstr "لم يتم العثور على تثبيت Java على هذا النظام"
+
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "تحتاج هذه اللعبة إلى Java %d أو أحدث، Java المحدد هو %d"
+
+msgid "Add Java Runtime"
+msgstr "أضف وقت تشغيل جافا"
+
+msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
+msgstr "تحتاج لعبة Minecraft إلى Java غير مقطوعة الرأس: على Arch، استخدم الحزمة jre-openjdk، وليس jre-openjdk-headless"
+
+msgid "JVM Arguments"
+msgstr "حجج JVM"
+
+msgid "The configured Java was not detected; make sure it is still a usable java executable"
+msgstr "لم يتم اكتشاف Java التي تم تكوينها؛ تأكد من أنه لا يزال جافا قابلاً للاستخدام وقابلاً للتنفيذ"
+
+msgid "Actions"
+msgstr "الإجراءات"
+
+msgid "Duplicate"
+msgstr "ينسخ"
+
+msgid "Delete Instance"
+msgstr "حذف المثيل"
+
+msgid "Settings"
+msgstr "إعدادات"
+
+msgid "Resource Packs"
+msgstr "حزم الموارد"
+
+msgid "Shader Packs"
+msgstr "حزم شادر"
+
+msgid "Mods"
+msgstr "تعديل"
+
+msgid "Logs"
+msgstr "سجلات"
+
+msgid "Custom: %s"
+msgstr "جمارك"
+
+msgid "the game was stopped by signal %d"
+msgstr "تم إيقاف اللعبة بواسطة الإشارة %d"
+
+msgid "the game exited with code %d"
+msgstr "تم الخروج من اللعبة بالرمز %d"
+
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "لم يتم العثور على إصدار %s متوافق للعبة Minecraft %s."
+
+msgid "Loader"
+msgstr "محمل"
+
+msgid "Loader Version"
+msgstr "نسخة اللودر"
+
+msgid "Clear"
+msgstr "واضح"
+
+msgid "Search the log"
+msgstr "ابحث في السجل"
+
+msgid "Versions"
+msgstr "الإصدارات"
+
+msgid "Show unstable Minecraft versions"
+msgstr "عرض إصدارات Minecraft غير المستقرة"
+
+msgid "Show unstable Mod Loader versions"
+msgstr "إظهار إصدارات Mod Loader غير المستقرة"
+
+msgid "Language"
+msgstr "لغة"
+
+msgid "Interface language"
+msgstr "لغة الواجهة"
+
+msgid "Line Limit"
+msgstr "حد الخط"
+
+msgid "Open Log Folder After Crash"
+msgstr "افتح مجلد السجل بعد التعطل"
+
+msgid "About Nuvasha Launcher"
+msgstr "حول نوفاشا قاذفة"
+
+msgid "Keyboard Shortcuts"
+msgstr "اختصارات لوحة المفاتيح"
+
+msgid "Stop"
+msgstr "قف"
+
+msgid "Play"
+msgstr "يلعب"
+
+msgid "Keep Playing"
+msgstr "استمر في اللعب"
+
+msgid "Downloads"
+msgstr "التنزيلات"
+
+msgid "Accounts"
+msgstr "الحسابات"
+
+msgid "No Instances Yet"
+msgstr "لا توجد حالات حتى الآن"
+
+msgid "Use the + button in the header to create one"
+msgstr "استخدم الزر + الموجود في الرأس لإنشاء واحد"
+
+msgid "the loader cannot be resolved: %s"
+msgstr "لا يمكن حل المُحمل: %s"
+
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "لم يتم العثور على إصدار متوافق لـ Minecraft %s و%s."
+
+msgid "No compatible version found for Minecraft %s."
+msgstr "لم يتم العثور على إصدار متوافق لـ Minecraft %s."
+
+msgid "Add Offline Account"
+msgstr "إضافة حساب غير متصل"
+
+msgid "a name can only hold letters, digits and underscores"
+msgstr "يمكن أن يحتوي الاسم على أحرف وأرقام وشرطات سفلية فقط"
+
+msgid "a name cannot be empty"
+msgstr "لا يمكن أن يكون الاسم فارغًا"
+
+msgid "a name has to be 3 to 16 characters long"
+msgstr "يجب أن يتراوح طول الاسم من 3 إلى 16 حرفًا"
+
+msgid "Add"
+msgstr "يضيف"
+
+msgid "asking Microsoft for a code"
+msgstr "يطلب من Microsoft الحصول على رمز"
+
+msgid "waiting for the sign-in in the browser"
+msgstr "في انتظار تسجيل الدخول في المتصفح"
+
+msgid "Sign In"
+msgstr "تسجيل الدخول"
+
+msgid "Open the page in your browser, then enter this code:"
+msgstr "افتح الصفحة في متصفحك، ثم أدخل هذا الرمز:"
+
+msgid "Open the Page"
+msgstr "افتح الصفحة"
+
+msgid "Try Again"
+msgstr "حاول ثانية"
+
+msgid "Remove"
+msgstr "يزيل"
+
+msgid "Remove \"%s\""
+msgstr "إزالة \"%s\""
+
+msgid "Add Microsoft Account"
+msgstr "أضف حساب مايكروسوفت"
+
+msgid "Minecraft Version"
+msgstr "نسخة ماينكرافت"
+
+msgid "Install the selected %s?"
+msgstr "هل تريد تثبيت %s المحدد؟"
+
+msgid "%s \"%s\""
+msgstr "%s \"%s\""
+
+msgid "Search"
+msgstr "يبحث"
+
+msgid "Update"
+msgstr "تحديث"
+
+msgid "Update the following %s"
+msgstr "قم بتحديث %s التالي"
+
+msgid "Dependencies:"
+msgstr "التبعيات:"
+
+msgid "The following mods depend on %s:\n%s"
+msgstr "تعتمد التعديلات التالية على %s:\n%s"
+
+msgid "Cache"
+msgstr "مخبأ"
+
+msgid "Cache Modrinth API responses"
+msgstr "استجابات واجهة برمجة تطبيقات Modrinth لذاكرة التخزين المؤقت"
+
+msgid "Cache expiration"
+msgstr "انتهاء صلاحية ذاكرة التخزين المؤقت"
+
+msgid "1 hour"
+msgstr "1 ساعة"
+
+msgid "6 hours"
+msgstr "6 ساعات"
+
+msgid "1 day"
+msgstr "يوم واحد"
+
+msgid "7 days"
+msgstr "7 أيام"
+
+msgid "Clear nuvasha Cache"
+msgstr "مسح ذاكرة التخزين المؤقت نوفاشا"
+
+msgid "Show Shortcuts"
+msgstr "إظهار الاختصارات"
+
+msgid "Quit"
+msgstr "يترك"
+
+msgid "Clear nuvasha Cache?"
+msgstr "مسح ذاكرة التخزين المؤقت نوفاشا؟"
+
+msgid "Import Modpack"
+msgstr "استيراد مودباك"
+
+msgid "Modpack exported"
+msgstr "تم تصدير Modpack"
+
+msgid "Modrinth Modpacks (*.mrpack)"
+msgstr "Modrinth Modpacks (*.mrpack)"
+
+msgid "The export location is not a local file"
+msgstr "موقع التصدير ليس ملفًا محليًا"
+
+msgid "Export Modpack"
+msgstr "تصدير مودباك"
+
+msgid "Importing modpack…"
+msgstr "جارٍ استيراد حزمة التعديل..."
+
+msgid "Reading modpack"
+msgstr "قراءة modpack"
+
+msgid "Exporting modpack"
+msgstr "تصدير modpack"
+
+msgid "Modpack export"
+msgstr "تصدير Modpack"
+
+msgid "Include transient files?"
+msgstr "هل تريد تضمين الملفات المؤقتة؟"
+
+msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr "عادةً ما يتم استبعاد السجلات وتقارير الأعطال ولقطات الشاشة وذاكرة التخزين المؤقت والتنزيلات."
+
+msgid "Clean Export"
+msgstr "تصدير نظيف"
+
+msgid "Include All Files"
+msgstr "تضمين كافة الملفات"
+
+msgid "Pack Name"
+msgstr "اسم الحزمة"
+
+msgid "Summary"
+msgstr "ملخص"
+
+msgid "Version ID"
+msgstr "معرف الإصدار"
+
+msgid "Downloading files"
+msgstr "تنزيل الملفات"
+
+msgid "Extracting files"
+msgstr "استخراج الملفات"
+
+msgid "Optional files"
+msgstr "ملفات اختيارية"
+
+msgid "The pack lists these files but says they are not needed. Nothing of them is installed unless you ask. Default is off"
+msgstr "تسرد الحزمة هذه الملفات ولكنها تقول إنها غير ضرورية. لم يتم تثبيت أي منها إلا إذا طلبت ذلك. الافتراضي معطل"
+
+msgid "Pack could not be fetched"
+msgstr "تعذر جلب الحزمة"
+
+msgid "Invalid pack"
+msgstr "حزمة غير صالحة"
+
+msgid "The pack does not define its install"
+msgstr "لا تحدد الحزمة التثبيت الخاص بها"
+
+msgid "Downloading Modpack"
+msgstr "تحميل مودباك"
+
+msgid "Writing archive"
+msgstr "أرشيف الكتابة"
+
+msgid "Export modpack metadata"
+msgstr "تصدير البيانات التعريفية modpack"
+
+msgid "Ask for export metadata"
+msgstr "اطلب بيانات تعريف التصدير"
+
+msgid "Pack information"
+msgstr "معلومات الحزمة"
+
+msgid "Show name, summary and version fields before exporting."
+msgstr "إظهار حقول الاسم والملخص والإصدار قبل التصدير."
+
+msgid "Export complete"
+msgstr "اكتمل التصدير"
+
+msgid "Export"
+msgstr "يصدّر"
+
+msgid "Installed %u item"
+msgid_plural "Installed %u items"
+msgstr[0] "تم تثبيت %u عنصر"
+msgstr[1] "تم تثبيت %u من العناصر"
+msgstr[2] "تم تثبيت %u من العناصر"
+msgstr[3] "تم تثبيت %u من العناصر"
+msgstr[4] "تم تثبيت %u من العناصر"
+msgstr[5] "تم تثبيت %u من العناصر"
+
+msgid "Updated %u item"
+msgid_plural "Updated %u items"
+msgstr[0] "تم تحديث %u عنصر"
+msgstr[1] "تم تحديث %u من العناصر"
+msgstr[2] "تم تحديث %u من العناصر"
+msgstr[3] "تم تحديث %u من العناصر"
+msgstr[4] "تم تحديث %u من العناصر"
+msgstr[5] "تم تحديث %u من العناصر"
+
+msgid "The icon must be a file on this computer"
+msgstr "يجب أن يكون الرمز ملفًا على هذا الكمبيوتر"
+
+msgid "The game is running; stop it before moving its directory"
+msgstr "اللعبة قيد التشغيل. أوقفه قبل نقل الدليل الخاص به"
+
+msgid "%s is being installed"
+msgstr "يتم الآن تثبيت %s"
+
+msgid "no compatible version"
+msgstr "لا يوجد إصدار متوافق"
+
+msgid "Enabled"
+msgstr "ممكّن"
+
+msgid "Disabled"
+msgstr "عاجز"
+
+msgid "Deleted"
+msgstr "تم الحذف"
+
+msgid "Everything is up to date"
+msgstr "كل شيء محدث"
+
+msgid "Cannot create \"%s\": %s"
+msgstr "لا يمكن إنشاء \"%s\": %s"
+
+msgid "This project publishes nothing that fits this instance."
+msgstr "لا ينشر هذا المشروع أي شيء يناسب هذه الحالة."
+
+msgid "Unknown"
+msgstr "مجهول"
+
+msgid "%s (unstable)"
+msgstr "%s (غير مستقر)"
+
+msgid "the next page could not be loaded"
+msgstr "لا يمكن تحميل الصفحة التالية"
+
+msgid "Other"
+msgstr "آخر"
+
+msgid "%.1fM downloads"
+msgstr "%.1fM التنزيلات"
+
+msgid "%.1fk downloads"
+msgstr "%.1fk التنزيلات"
+
+msgid "%s  ·  by %s"
+msgstr "%s · بواسطة %s"
+
+msgid "by %s"
+msgstr "بواسطة %s"
+
+msgid "%s downloads"
+msgstr "%s التنزيلات"
+
+msgid "Cache Cleared"
+msgstr "تم مسح ذاكرة التخزين المؤقت"
+
+msgid "nuvasha cache data was cleared successfully."
+msgstr "تم مسح بيانات ذاكرة التخزين المؤقت nuvasha بنجاح."
+
+msgid "Cache Cleanup Failed"
+msgstr "فشل تنظيف ذاكرة التخزين المؤقت"
+
+msgid "The cache could not be cleared."
+msgstr "لا يمكن مسح ذاكرة التخزين المؤقت."
+
+msgid "the versions of this loader could not be read"
+msgstr "لا يمكن قراءة إصدارات هذا المُحمل"
+
+msgid "Minecraft crashed"
+msgstr "تحطمت لعبة ماينكرافت"
+
+msgid "Minecraft could not start"
+msgstr "ماين كرافت لا يمكن أن تبدأ"
+
+msgid "Minecraft needs a sign-in"
+msgstr "تحتاج لعبة Minecraft إلى تسجيل دخول"
+
+msgid "The file cannot be renamed"
+msgstr "لا يمكن إعادة تسمية الملف"
+
+msgid "The file cannot be deleted"
+msgstr "لا يمكن حذف الملف"
+
+msgid "The folder cannot be read"
+msgstr "لا يمكن قراءة المجلد"
+
+msgid "The file could not be installed"
+msgstr "لا يمكن تثبيت الملف"
+
+msgid "The folder cannot be created"
+msgstr "لا يمكن إنشاء المجلد"
+
+msgid "This cannot be installed"
+msgstr "لا يمكن تثبيت هذا"
+
+msgid "Pick a Minecraft version first"
+msgstr "اختر إصدار Minecraft أولاً"
+
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "يؤدي حذف التبعية إلى حذف النموذج الذي يعتمد عليها"
+
+msgid "A dependent mod cannot be deleted"
+msgstr "لا يمكن حذف الوضع التابع"
+
+msgid "Sandbox"
+msgstr "رمل"
+
+msgid "Enable sandbox"
+msgstr "تمكين وضع الحماية"
+
+msgid "Allow sandbox network access"
+msgstr "السماح بالوصول إلى شبكة وضع الحماية"
+
+msgid "Slim model"
+msgstr "نموذج نحيف"
+
+msgid "OK"
+msgstr "نعم"
+
+msgid "Export skin…"
+msgstr "تصدير الجلد..."
+
+msgid "Imported skin"
+msgstr "جلد مستورد"
+
+msgid "Default model"
+msgstr "النموذج الافتراضي"
+
+msgid "PNG skin texture"
+msgstr "PNG نسيج الجلد"
+
+msgid "Invalid skin"
+msgstr "جلد غير صالح"
+
+msgid "No cape"
+msgstr "لا الرأس"
+
+msgid "Import skin…"
+msgstr "استيراد الجلد..."
+
+msgid "Delete skin?"
+msgstr "هل تريد حذف الجلد؟"
+
+msgid "This skin will be removed from the skin library."
+msgstr "ستتم إزالة هذا الجلد من مكتبة الجلود."
+
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "يجب أن تكون صور الجلد ملفات PNG بحجم 64x64 أو 64x32"
