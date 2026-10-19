@@ -22,15 +22,11 @@ struct _NuvashaLogsPage
   GtkSearchEntry *search_bar;
   GtkSearchEntry *search_entry;
 
-  /* How many lines the text view holds, and whether the user is looking
-     at the end of the log: a view that has been scrolled up to read
-     something stays where it is. */
+  /* Number of rendered lines and whether the view follows the end. */
   guint rendered;
   gboolean following;
 
-  /* The search only ever hides lines, never loses them: the words live
-   * here, the view shows the ones that match. Clearing the search puts
-   * every line back. */
+  /* Keep all lines; filtering only changes which lines are displayed. */
   GPtrArray *lines; /* char*, one per line, in order */
   gboolean filtered;
 };

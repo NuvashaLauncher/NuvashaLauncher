@@ -23,18 +23,17 @@ struct _NuvashaLauncher
   char *game_directory;
 
   NuvashaLaunchState state;
-  char *detail; /* what goes with the state, NULL when there is nothing */
+  char *detail; /* optional state detail */
 
   /* Per-launch values that must not appear in game output or launcher logs. */
   char *log_access_token;
   char *log_session;
   char *log_uuid;
 
-  /* The log: the newest line last, trimmed to what the settings ask
-     for. */
+  /* Log lines, newest last and bounded by settings. */
   GPtrArray *lines;
 
-  /* What preparation has selected while a launch is on its way. */
+  /* Values selected during launch preparation. */
   struct {
     GCancellable *cancellable;
     NuvashaResolvedVersion *resolved;
@@ -55,9 +54,8 @@ struct _NuvashaLauncher
     gboolean stop_requested;
   } process;
 
-  /* The accounts a launch plays as. The active one of them is read when
-     the command line is built, so a token that was refreshed a moment
-     earlier is the one the game is run with. */
+  /* Accounts used by the launch; the active account is read when building
+   * the command line. */
   NuvashaAccounts *accounts;
   NuvashaTaskScope *scope;
 

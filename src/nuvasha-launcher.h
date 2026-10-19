@@ -51,19 +51,15 @@ G_BEGIN_DECLS
 /* ${launcher_version}. Keep the value aligned with the application release. */
 #define nuvasha_LAUNCHER_VERSION nuvasha_VERSION
 
-/* What the game is told about an offline session: a token it cannot
- * authenticate with, and the user type that says the session is no real
- * account. A Microsoft session is told "msa" and a token of its own. */
+/* Values passed to the game for offline and Microsoft sessions. */
 #define nuvasha_LAUNCH_OFFLINE_TOKEN "0"
 #define nuvasha_LAUNCH_OFFLINE_USER_TYPE "legacy"
 #define nuvasha_LAUNCH_MICROSOFT_USER_TYPE "msa"
 
-/* Who a game with nobody signed in plays as: the name a fresh Minecraft
- * falls back to, and the one its offline UUID is derived from. */
+/* Default name used for offline sessions and UUID generation. */
 #define nuvasha_LAUNCH_OFFLINE_NAME "Player"
 
-/* The window the game opens in, which is what ${resolution_width} and
- * ${resolution_height} mean. */
+/* Default values for ${resolution_width} and ${resolution_height}. */
 #define nuvasha_LAUNCH_WIDTH 854
 #define nuvasha_LAUNCH_HEIGHT 480
 
@@ -86,8 +82,7 @@ GQuark nuvasha_launch_error_quark (void);
  * The parts that are only functions
  * ---------------------------------------------------------- */
 
-/* What a launch is doing, and what it did. A state only ever comes from
- * something that really happened. */
+/* Current or final state of a launch. */
 typedef enum {
   nuvasha_LAUNCH_PREPARING,        /* the manifest, the resolve and the Java */
   nuvasha_LAUNCH_DOWNLOADING,      /* the resolve is fetching files */
@@ -115,8 +110,7 @@ const char *nuvasha_launch_state_to_string (NuvashaLaunchState state);
  * busy: nothing is running and the user can start it again. */
 gboolean nuvasha_launch_state_is_busy (NuvashaLaunchState state);
 
-/* What a launch runs as: the account, in the four words the game is
- * told about the player. */
+/* Account values passed to the game. */
 typedef struct {
   const char *name;
   const char *uuid;         /* dashed, as the account carries it */
@@ -131,8 +125,8 @@ typedef struct {
  * into @account, which the caller keeps. */
 NuvashaLaunchSession nuvasha_launch_session_for (const NuvashaAccount *account);
 
-/* @value with every ${name} @placeholders holds replaced by the value
- * for that name. A name the table does not hold is left exactly as the
+/* Replace each ${name} placeholder in @value with its corresponding value.
+ * A name the table does not hold is left exactly as the
  * document wrote it, because a launcher that does not know a
  * placeholder must not silently drop it. (transfer full) */
 char *nuvasha_launch_substitute (const char  *value,
@@ -151,13 +145,13 @@ char *nuvasha_launch_substitute (const char  *value,
  *
  * The placeholders the document wrote are replaced by the values of this
  * machine: the paths the resolve module handed over, the instance
- * directory, and @session, which is what the player is called, who they
- * are and the token the game authenticates with. Both the modern
+  * directory, and @session, which contains the player name, UUID, and token.
+  * Both the modern
  * "arguments" object and the legacy "minecraftArguments" line arrive in
  * @resolved, so both end up the same way here.
  *
- * @resolved is what nuvasha_resolve_version_finish() returned and is not
- * modified, @session what nuvasha_launch_session_for() returned, @java_executable
+  * @resolved is returned by nuvasha_resolve_version_finish() and is not
+  * modified, @session is returned by nuvasha_launch_session_for(), @java_executable
  * the java this launch runs with, @game_directory the directory the game
  * runs in, which is also the ${game_directory} of the arguments, and
  * @jvm_args the line the instance stores.
@@ -176,8 +170,7 @@ GPtrArray *nuvasha_launch_build_arguments (const NuvashaResolvedVersion *resolve
  * secret replaced by "***": --accessToken and its value, and anything
  * that follows a --password or a --token. This is the only form of a
  * command line nuvasha ever shows, so a token cannot reach a log. Arguments
- * are quoted the way a shell would, so what is printed is what could be
- * pasted into a terminal. (transfer full) */
+ * are shell-quoted so the result can be pasted into a terminal. (transfer full) */
 char *nuvasha_launch_redact (GPtrArray *argv);
 
 /* ---------------------------------------------------------- *
@@ -219,17 +212,15 @@ NuvashaInstance *nuvasha_launcher_get_instance (NuvashaLauncher *self);
 
 NuvashaLaunchState nuvasha_launcher_get_state (NuvashaLauncher *self);
 
-/* What goes with the state: the numbers while downloading, the reason a
- * launch failed, NULL when there is nothing to add. Borrowed. */
+/* Optional state detail: progress while downloading or a failure reason.
+ * Borrowed. */
 const char *nuvasha_launcher_get_state_detail (NuvashaLauncher *self);
 
 /* The directory the game runs in and writes its own files to. Borrowed
  * from the instance. */
 const char *nuvasha_launcher_get_game_directory (NuvashaLauncher *self);
 
-/* <game directory>/logs, where the game writes its own log, and
- * <game directory>/crash-reports, where it writes what it wrote about
- * itself the last time it died. (transfer full) */
+/* Return the game's log and crash-report directories. (transfer full) */
 char *nuvasha_launcher_get_log_directory (NuvashaLauncher *self);
 char *nuvasha_launcher_get_crash_report_directory (NuvashaLauncher *self);
 
@@ -262,8 +253,7 @@ gboolean nuvasha_launcher_spawn (NuvashaLauncher *self,
                              GPtrArray    *argv,
                              GError      **error);
 
-/* How many lines the log keeps before the oldest are dropped, which is
- * what the settings say, and at least one. */
+/* Maximum number of retained log lines. */
 guint nuvasha_launcher_get_line_limit (NuvashaLauncher *self);
 
 /* The number of lines the log holds right now. */

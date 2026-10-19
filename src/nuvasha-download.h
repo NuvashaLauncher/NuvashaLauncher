@@ -49,7 +49,7 @@ GQuark nuvasha_download_error_quark (void);
 void nuvasha_download_set_cache_settings (NuvashaDownloadService *service,
                                       NuvashaSettings *settings);
 
-/* Progress of a running transfer. @bytes_done is what arrived so far,
+/* Progress of a running transfer. @bytes_done is the received byte count,
  * @total is the announced length or -1 when the server did not say.
  * Called on the caller's main context; a download served from the
  * cache reports no progress at all. */
@@ -88,8 +88,7 @@ NuvashaTaskScope *nuvasha_download_file_async (NuvashaDownloadService *service,
                                        GAsyncReadyCallback callback,
                                        gpointer user_data);
 
-/* TRUE on success. The error is always one of NuvashaDownloadError; for
- * nuvasha_DOWNLOAD_ERROR_IO its message is what the file system said. */
+/* TRUE on success. Errors use NuvashaDownloadError. */
 gboolean nuvasha_download_file_finish (GAsyncResult *result,
                                    GError     **error);
 
@@ -108,13 +107,11 @@ NuvashaTaskScope *nuvasha_download_json_async (NuvashaDownloadService *service,
 JsonParser *nuvasha_download_json_finish (GAsyncResult *result,
                                       GError     **error);
 
-/* The hexadecimal digest of the bytes of @file, read in chunks and
- * never blocking the caller's main context. This is what a download is
- * verified against, and what a file already on disk is identified by.
+/* Calculate the hexadecimal digest of @file asynchronously.
  *
  * G_IO_ERROR_NOT_FOUND when there is no such file.
  *
- * (transfer full) the digest, lowercase and hexadecimal. */
+ * (transfer full) lowercase hexadecimal digest. */
 NuvashaTaskScope *nuvasha_download_file_hash_async (GFile *file,
                                              GChecksumType type,
                                              GAsyncReadyCallback callback,

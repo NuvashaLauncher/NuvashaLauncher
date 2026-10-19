@@ -2,25 +2,16 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* NuvashaUsersPopover: who this copy of nuvasha plays as.
- *
- * The header of the window shows this as a button with an avatar and the
- * name of the active account, and this is what is behind it: every
- * account the user has, which one of them is active, and the two ways of
- * adding one.
- *
- * The accounts themselves are in nuvasha-accounts.h and this follows that
- * store rather than keeping any of its own: what the popover shows is
- * rebuilt whenever the store says the accounts or the active one are not
- * what they were, which is also what happens after a sign-in.
+/* NuvashaUsersPopover: account selector shown in the window header.
+ * It follows NuvashaAccounts and rebuilds when the account list or active
+ * account changes.
  *
  * An offline account is a name and nothing else, so it says "Offline"
  * wherever it is shown and has no avatar. A Microsoft account carries the
  * name and the UUID the services gave, and its skin is fetched and shown
  * as the avatar when there is one.
  *
- * Adding a Microsoft account opens the sign-in dialog, which types a code
- * into a page of Microsoft's own and never asks for a password. Adding an
+ * Adding a Microsoft account opens the device-code sign-in dialog. Adding an
  * offline account opens a dialog that asks for a name and checks it is
  * one the game accepts. */
 
@@ -48,9 +39,7 @@ NuvashaAccounts *nuvasha_users_popover_get_accounts (NuvashaUsersPopover *self);
    (transfer full) */
 char *nuvasha_users_popover_get_active_name (NuvashaUsersPopover *self);
 
-/* What the menu button in the header shows: the avatar of the active
- * account and its name, and both of them follow the store. The caller
- * owns the returned widget. */
+/* Return header-button content for the active account. The caller owns it. */
 GtkWidget *nuvasha_users_popover_get_button_content (NuvashaUsersPopover *self);
 
 G_END_DECLS

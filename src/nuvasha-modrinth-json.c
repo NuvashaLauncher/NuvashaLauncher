@@ -443,8 +443,7 @@ nuvasha_modrinth_facets (const NuvashaModrinthSearch *search)
         }
     }
 
-  /* The builder holds one root, so the outer array is opened once and
-   * every facet goes into it. */
+  /* Build one root array containing all facets. */
   json_builder_begin_array (builder);
 
   for (guint i = 0; i < facets->len; i++)

@@ -131,8 +131,7 @@ nuvasha_content_page_build_installed (NuvashaContentPage *self)
                                       "view-list-symbolic");
 }
 
-/* The list of what Modrinth has for this instance is asked for when
- * Browse is looked at, not when the instance page is opened. */
+/* Load Modrinth content when Browse is opened. */
 /* Defined with the row it moves into, further down. */
 void nuvasha_content_page_move_actions_into_bar (NuvashaContentPage *self, gboolean browsing);
 
@@ -406,10 +405,8 @@ nuvasha_content_page_build_browse (NuvashaContentPage *self)
  * end of a toolbar row is for.
  * ---------------------------------------------------------- */
 
-/* The two buttons that show one of the lists. They carry the icons only:
- * the buttons have no words, so the row they share with the search field
- * stays one line at any width, and the tooltip is what says which list
- * each one shows. */
+  /* Icon-only list buttons keep the toolbar to one line; tooltips identify
+   * each view. */
 static void
 on_switcher_toggled (GtkToggleButton *button, gpointer user_data)
 {
@@ -455,16 +452,12 @@ nuvasha_content_page_build_bar (NuvashaContentPage *self)
                       G_CALLBACK (nuvasha_content_page_on_content_search_key), self);
   }
 
-  /* The actions go in before this and the switcher after it, so the
-     switcher ends up at the right end of the row however many actions
-     there are. Aligning inside a box would not move it: a box gives every
-     child its own width. */
+  /* Expand the spacer so the switcher stays at the right edge. */
   self->bar_spacer = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
   gtk_widget_set_hexpand (GTK_WIDGET (self->bar_spacer), TRUE);
 
-  /* Two buttons that behave as one choice, drawn as the linked pair of
-     GNOME. A view switcher of libadwaita always carries the words of a
-     page under its icon, and this row has no room for two lines. */
+  /* Use linked toggle buttons instead of a labeled Adwaita view switcher to
+     keep this compact toolbar to one line. */
   self->switcher = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
   gtk_widget_add_css_class (GTK_WIDGET (self->switcher), "linked");
 
@@ -496,8 +489,7 @@ nuvasha_content_page_build_bar (NuvashaContentPage *self)
   gtk_widget_set_margin_start (GTK_WIDGET (self->bar), 12);
   gtk_widget_set_margin_end (GTK_WIDGET (self->bar), 12);
 
-  /* A failure is said in a banner above the row, where it stays until it
-     is read; what a toast says is an operation that just worked. */
+  /* Keep failures in a banner; use toasts for transient success messages. */
   self->banner = ADW_BANNER (adw_banner_new (""));
   adw_banner_set_button_label (ADW_BANNER (self->banner), "Dismiss");
   adw_banner_set_revealed (ADW_BANNER (self->banner), FALSE);

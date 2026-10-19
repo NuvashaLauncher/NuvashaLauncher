@@ -14,7 +14,7 @@
  *
  *   Microsoft   a real Microsoft account, signed in through the device
  *               code flow and traded for a Minecraft profile by
- *               nuvasha-auth-microsoft.h. What is kept is the profile (name
+ *               nuvasha-auth-microsoft.h. Stored data includes the profile (name
  *               and UUID), the access token with the moment it stops
  *               being good and the refresh token that trades for a new
  *               one. No password is ever asked for or kept.
@@ -40,7 +40,7 @@ G_BEGIN_DECLS
 
 typedef enum {
   nuvasha_ACCOUNTS_ERROR_IO,      /* the file cannot be read or written */
-  nuvasha_ACCOUNTS_ERROR_INVALID, /* what it was asked to store makes no sense */
+  nuvasha_ACCOUNTS_ERROR_INVALID, /* invalid account data */
   nuvasha_ACCOUNTS_ERROR_UNKNOWN   /* there is no such account */
 } NuvashaAccountsError;
 
@@ -55,7 +55,7 @@ typedef enum {
   nuvasha_ACCOUNT_MICROSOFT  /* signed in with a Microsoft account */
 } NuvashaAccountType;
 
-/* One account. @id is what the store keys it by: the UUID of the
+/* One account. @id is the store key: the UUID of the
  * Minecraft profile for a Microsoft account, the name for an offline one,
  * which is what makes two offline accounts of one name one account.
  *
@@ -67,7 +67,7 @@ typedef struct {
   NuvashaAccountType type;
 
   char *id;
-  char *name;         /* what the game is told the player is called */
+  char *name;         /* player name passed to the game */
   char *uuid;         /* dashed and lowercase, as the game is given it */
 
   char *access_token; /* a Microsoft account only */
@@ -89,12 +89,11 @@ NuvashaAccount *nuvasha_account_new_offline (const char *name, GError **error);
 /* (transfer full) */
 NuvashaAccount *nuvasha_account_copy (const NuvashaAccount *account);
 
-/* An account as a boxed type, which is what makes it something a signal
- * can carry: the receiver is handed a copy of its own. */
+/* Boxed account type used by signals. */
 #define nuvasha_TYPE_ACCOUNT (nuvasha_account_get_type ())
 GType nuvasha_account_get_type (void);
 
-/* What a user reads: "Microsoft" or "Offline". Never NULL. */
+/* Human-readable account type: "Microsoft" or "Offline". */
 const char *nuvasha_account_type_name (NuvashaAccountType type);
 
 /* TRUE when the account can be played as at @now: an offline account
@@ -113,8 +112,7 @@ typedef struct _NuvashaAccounts NuvashaAccounts;
 
 G_DECLARE_FINAL_TYPE (NuvashaAccounts, nuvasha_accounts, nuvasha, ACCOUNTS, GObject)
 
-/* "changed" is what a view listens to: the list, the active account or
-   the tokens of one of them are not what they were. */
+/* Emitted when the list, active account, or account tokens change. */
 enum {
   nuvasha_ACCOUNTS_SIGNAL_CHANGED,
   nuvasha_ACCOUNTS_N_SIGNALS
@@ -123,8 +121,7 @@ enum {
 /* The store of the user's own file. (transfer full) */
 NuvashaAccounts *nuvasha_accounts_new (void);
 
-/* The same over another file, which is what a test writes into.
- * (transfer full) */
+/* Create a store backed by @filename. (transfer full) */
 NuvashaAccounts *nuvasha_accounts_new_for_path (const char *filename);
 
 /* The file the store keeps its accounts in. Never NULL. */
@@ -136,8 +133,7 @@ GPtrArray *nuvasha_accounts_list (NuvashaAccounts *self);
 
 guint nuvasha_accounts_count (NuvashaAccounts *self);
 
-/* The active account, or NULL when there is none: launching then says so
-   rather than playing as somebody nobody chose. */
+/* Return the active account, or NULL when none is selected. */
 NuvashaAccount *nuvasha_accounts_get_active (NuvashaAccounts *self);
 
 const char *nuvasha_accounts_get_active_id (NuvashaAccounts *self);
@@ -157,8 +153,7 @@ NuvashaAccount *nuvasha_accounts_find (NuvashaAccounts *self, const char *id);
 gboolean nuvasha_accounts_add (NuvashaAccounts *self, const NuvashaAccount *account,
                            GError **error);
 
-/* The same as adding: what nuvasha calls updating an account it already
-   keeps is the same thing. */
+/* Replace an existing account and keep it active. */
 gboolean nuvasha_accounts_update (NuvashaAccounts *self, const NuvashaAccount *account,
                               GError **error);
 

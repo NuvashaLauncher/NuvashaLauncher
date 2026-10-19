@@ -8,8 +8,7 @@
 #include "nuvasha-auth-microsoft.h"
 #include "nuvasha-operation.h"
 
-/* What the dialog is waiting for while there is nothing to show: the
- * code from Microsoft, and then the user with it. */
+/* Status messages shown while requesting and using the device code. */
 #define STEP_CODE _("asking Microsoft for a code")
 #define STEP_SIGN_IN _("waiting for the sign-in in the browser")
 
@@ -20,18 +19,16 @@ struct _NuvashaSignInDialog
   GCancellable *cancellable;
 
   AdwSpinner *spinner;
-  GtkBox *waiting;              /* the circle and what it is waiting for */
+  GtkBox *waiting;              /* spinner and status message */
   GtkLabel *waiting_label;
-  GtkLabel *instruction_label;  /* what to do with the code */
+  GtkLabel *instruction_label;  /* instructions for the code */
   GtkLabel *code_label;
   GtkLabel *uri_label;
   GtkButton *open_button;
   GtkLabel *error_label;
   GtkButton *retry_button;
 
-  /* What the chain polls with while the user is in the browser. It is
-     freed with the dialog and never shown: the user types the code that
-     belongs to it, not this. */
+  /* Device-code state used while the user signs in in the browser. */
   NuvashaDeviceCode *code;
 };
 
@@ -45,8 +42,7 @@ static void finish_sign_in (GObject      *source,
                            GAsyncResult *result,
                            gpointer      user_data);
 
-/* What went wrong, said in the words of the service that refused, with a
-   way to ask for a new code next to it. */
+/* Show the service error and the retry action. */
 static void
 show_error (NuvashaSignInDialog *self, const char *message)
 {
@@ -64,8 +60,7 @@ clear_error (NuvashaSignInDialog *self)
   gtk_widget_set_visible (GTK_WIDGET (self->retry_button), FALSE);
 }
 
-/* What is being waited for. There is nothing of a token or of an account
-   in this line: it names the step, never what the step answered. */
+/* Show the current sign-in step. */
 static void
 set_step (NuvashaSignInDialog *self, const char *step)
 {
@@ -155,10 +150,7 @@ on_code_ready (GObject      *source G_GNUC_UNUSED,
   g_clear_pointer (&self->code, nuvasha_device_code_free);
   self->code = code;
 
-  /* The code the user types, where they type it, and what to do with it.
-     The code is the one thing to act on, so it is the biggest thing the
-     dialog shows; the address is repeated under the button for a user who
-     would rather go there by hand. */
+  /* Show the code and verification URI. */
   gtk_label_set_text (GTK_LABEL (self->code_label), self->code->user_code);
   gtk_label_set_text (GTK_LABEL (self->uri_label),
                       self->code->verification_uri);
@@ -190,9 +182,7 @@ finish_sign_in (GObject      *source G_GNUC_UNUSED,
 
   if (account == NULL)
     {
-      /* Closing the dialog is the user saying no, which is not a failure
-         worth a sentence. Anything else is what the service said, in the
-         words it said it in. */
+      /* Cancellation is silent; other failures are shown to the user. */
       if (error != NULL &&
           g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         return;
@@ -208,8 +198,7 @@ finish_sign_in (GObject      *source G_GNUC_UNUSED,
                  0, account);
 }
 
-/* Asks Microsoft for a code and starts the wait over: what the Try again
-   button does, and what the dialog does when it is presented. */
+/* Request a device code and restart the sign-in flow. */
 static void
 begin_sign_in (NuvashaSignInDialog *self)
 {
@@ -293,8 +282,7 @@ nuvasha_sign_in_dialog_init (NuvashaSignInDialog *self)
 
   self->cancellable = g_cancellable_new ();
 
-  /* What to do with the code. One line, because the code and the button
-     under it are the whole of what this dialog is for. */
+  /* Instructions shown above the code. */
   self->instruction_label = GTK_LABEL (gtk_label_new (
       _("Open the page in your browser, then enter this code:")));
   gtk_label_set_wrap (GTK_LABEL (self->instruction_label), TRUE);
@@ -303,9 +291,7 @@ nuvasha_sign_in_dialog_init (NuvashaSignInDialog *self)
   gtk_label_set_xalign (GTK_LABEL (self->instruction_label), 0.5);
   gtk_widget_set_visible (GTK_WIDGET (self->instruction_label), FALSE);
 
-  /* The code is the one thing to act on, so it is the biggest thing here,
-     in monospace so its characters cannot be told apart from lookalikes,
-     and selectable so it can be copied by hand. */
+  /* Display the code prominently in selectable monospace text. */
   self->code_label = GTK_LABEL (gtk_label_new (NULL));
   gtk_widget_add_css_class (GTK_WIDGET (self->code_label), "title-1");
   gtk_widget_add_css_class (GTK_WIDGET (self->code_label), "monospace");
@@ -333,7 +319,7 @@ nuvasha_sign_in_dialog_init (NuvashaSignInDialog *self)
   gtk_label_set_xalign (GTK_LABEL (self->uri_label), 0.5);
   gtk_widget_set_visible (GTK_WIDGET (self->uri_label), FALSE);
 
-  /* What is being waited for, and a circle while it is. */
+  /* Status label and spinner shown while waiting. */
   self->spinner = ADW_SPINNER (adw_spinner_new ());
   self->waiting_label = GTK_LABEL (gtk_label_new (STEP_CODE));
   gtk_widget_add_css_class (GTK_WIDGET (self->waiting_label), "dim-label");
@@ -343,7 +329,7 @@ nuvasha_sign_in_dialog_init (NuvashaSignInDialog *self)
   gtk_box_append (GTK_BOX (self->waiting), GTK_WIDGET (self->spinner));
   gtk_box_append (GTK_BOX (self->waiting), GTK_WIDGET (self->waiting_label));
 
-  /* What went wrong, and a way to ask for a new code. */
+  /* Error message and retry action. */
   self->error_label = GTK_LABEL (gtk_label_new (NULL));
   gtk_label_set_wrap (GTK_LABEL (self->error_label), TRUE);
   gtk_label_set_xalign (GTK_LABEL (self->error_label), 0.5);
@@ -371,11 +357,8 @@ nuvasha_sign_in_dialog_init (NuvashaSignInDialog *self)
   gtk_box_append (GTK_BOX (body), GTK_WIDGET (self->error_label));
   gtk_box_append (GTK_BOX (body), GTK_WIDGET (self->retry_button));
 
-  /* A header bar of its own: a dialog closed by the button in its corner
-     is what every other dialog does, and it needs no Cancel at the
-     bottom. Inside an AdwDialog the header bar carries the dialog title
-     and that close button and nothing else; the back button it shows by
-     default has nothing to go back to here. */
+  /* Use a header bar with only the title and close button; this dialog has
+     no separate Cancel action. */
   header = adw_header_bar_new ();
   adw_header_bar_set_show_back_button (ADW_HEADER_BAR (header), FALSE);
   toolbar = adw_toolbar_view_new ();

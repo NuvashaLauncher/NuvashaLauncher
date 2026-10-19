@@ -55,9 +55,7 @@ nuvasha_content_page_on_scroll_changed (GtkAdjustment *adjustment, gpointer user
   nuvasha_content_page_run_search (self, TRUE);
 }
 
-/* A page that failed can be asked for again from the row that says it
- * failed. The offset is already where the page starts, so the same
- * question is asked again. */
+/* Retry the failed page using the existing pagination offset. */
 void
 nuvasha_content_page_on_retry_page_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
@@ -119,8 +117,7 @@ results_arrived (NuvashaContentPage *self, NuvashaModrinthResults *results,
 
       g_hash_table_add (self->browse.model->seen_ids, g_strdup (project->project_id));
 
-      /* What the browser saw, remembered for the installed rows of the
-         same project. */
+      /* Cache project metadata for installed rows. */
       if (project->icon_url != NULL && *project->icon_url != '\0')
         g_hash_table_insert (self->browse.model->project_icons,
                              g_strdup (project->project_id),
@@ -136,11 +133,8 @@ results_arrived (NuvashaContentPage *self, NuvashaModrinthResults *results,
                              g_strdup (project->project_id),
                              g_strdup (project->title));
 
-      /* The icon, then the name and the description under it. Nothing
-         else: who wrote it, how often it was taken, which game version
-         and which loader are what the details page is for. Markup is
-         turned off before the title and the description go in, because
-         both are plain text from Modrinth and may hold an "&". */
+      /* Show the icon, title, and short description. Details contain the
+         author, downloads, game version, and loader. */
       adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), FALSE);
       adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (row)),
                                      project->title);
@@ -149,9 +143,8 @@ results_arrived (NuvashaContentPage *self, NuvashaModrinthResults *results,
 
         adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (row)), line);
       }
-      /* Two lines at most, ending in an ellipsis when the description is
-         longer: every row is then the same height, whatever it holds.
-         The whole description is on the details page. */
+      /* Limit row descriptions to two lines; the full text is on the details
+         page. */
       adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (GTK_WIDGET (row)), 2);
       adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (GTK_WIDGET (row)), FALSE);
 
@@ -316,7 +309,7 @@ nuvasha_content_page_run_search (NuvashaContentPage *self, gboolean append)
   self->browse.model->pending_append = append;
   set_busy (self, TRUE);
 
-  /* The spinner at the bottom says a page is on its way. */
+  /* Show a spinner while loading the next page. */
   gtk_widget_set_visible (GTK_WIDGET (self->browse.loading_more), TRUE);
   gtk_widget_set_visible (GTK_WIDGET (self->browse.retry_row), FALSE);
 
@@ -361,17 +354,15 @@ nuvasha_content_page_on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpo
                                self->browse.model->debounce_source);
 }
 
-/* Escape means "forget what I typed". The bar of this page is always
- * open, so there is nothing for Escape to close and it would be swallowed
- * without clearing anything.
+/* Escape clears the search field. The search bar is always visible, so
+ * Escape is not used to close it.
  *
  * GTK4 has no key-press-event signal and no stop-searching signal on
  * GtkSearchEntry, so the key is taken with a controller of its own. It is
  * added after the one inside the search entry and both run on the bubble
  * phase, so this one is asked first.
  *
- * Clearing the text makes the entry emit "changed", which is what starts
- * the search again, this time for everything. */
+ * Clearing the text emits "changed" and reloads the unfiltered results. */
 gboolean
 nuvasha_content_page_on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
                guint keyval, guint keycode G_GNUC_UNUSED,

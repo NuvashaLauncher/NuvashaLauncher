@@ -459,8 +459,7 @@ move_undo_deleted (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   MoveData *data = user_data;
   g_autoptr (GError) ignored = NULL;
 
-  /* Best effort: the error that caused the undo is what the caller
-     needs to hear, not a failure to clean up after it. */
+  /* Preserve the original error if cleanup also fails. */
   delete_tree_finish (result, &ignored);
 
   move_return_error (data, g_steal_pointer (&data->undo_error));
@@ -485,10 +484,8 @@ move_undo (MoveData *data, gboolean restore_instance, GError *error)
     move_return_error (data, g_steal_pointer (&data->undo_error));
 }
 
-/* The move has already happened and been saved. What is left is a
- * directory that now holds a second copy of files that exist somewhere
- * else; failing to remove it leaves files behind rather than taking any
- * away, so the change stands and the leftover is said out loud. */
+/* Remove the old directory after a successful move. Cleanup failure does not
+ * undo the completed move. */
 static void
 move_old_removed (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                   gpointer user_data)

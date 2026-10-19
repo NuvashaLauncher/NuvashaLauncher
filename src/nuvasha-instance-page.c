@@ -2,16 +2,12 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* NuvashaInstancePage: the page of one instance.
+/* NuvashaInstancePage: settings, content, and logs for one instance.
  *
  * The settings page is where the instance itself is edited: every edit
- * is written through NuvashaInstanceManager, so what the page shows is what
- * instances.json holds. Resource Packs, Shader Packs and Mods are one
- * content page with a different content type, which reads the folder of
- * the instance and asks Modrinth only about what fits it. Logs shows
- * what the game of this instance printed, through the launcher the
- * dialog shares. Duplicating, opening the folder and deleting run as
- * asynchronous GIO operations and never block the main loop. */
+ * Settings are persisted through NuvashaInstanceManager. Content pages share
+ * one implementation with different content types. Logs shows this instance's
+ * game output. File operations use asynchronous GIO calls. */
 
 #include "nuvasha-instance-page-private.h"
 #include "nuvasha-i18n.h"

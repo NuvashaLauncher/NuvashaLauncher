@@ -2,20 +2,14 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* NuvashaResolve: putting a version onto this disk.
+/* Resolve and download a Minecraft version.
  *
- * See nuvasha-minecraft-resolve.h for what the module is for. The work is a
- * chain: the version document says which jars and which asset index are
- * needed, the download module fetches what is missing and verifies it
- * against the sha1 the document published, the natives jars are unpacked
- * with libarchive and the asset objects are copied into place when the
- * index asks for a virtual directory.
+ * The version document supplies the JARs and asset index. Missing files are
+ * downloaded and verified, native JARs are extracted, and virtual assets are
+ * copied into place.
  *
- * Every step hands the next one the baton. A step that starts several
- * transfers at once counts them, so the step after it begins when the
- * last one reports back; the first failure is remembered and told to
- * the rest through a cancellable, which keeps the queue inside the
- * download module from running on behind a request nobody waits for.
+ * Steps may start several transfers and advance after the last completes.
+ * The first failure cancels the remaining work.
  *
  * Every transfer goes through nuvasha_download_file_async(), which already
  * caps how many run at once, and every file this module reads or writes
@@ -37,8 +31,7 @@
 #include <json-glib/json-glib.h>
 #include <string.h>
 
-/* What a version document has to carry before nuvasha can do anything with
-   it. */
+/* Required fields in a version document. */
 #define NO_CLIENT_MESSAGE "this version document has no client jar"
 #define NO_MAIN_CLASS_MESSAGE "this version document names no main class"
 
@@ -71,7 +64,7 @@ typedef void (*ResolveStep) (ResolveRequest *request);
 typedef struct
 {
   ResolveRequest *request;
-  ResolveStep next; /* what runs once nothing is in flight any more */
+  ResolveStep next; /* step after all transfers finish */
 } PendingOperation;
 
 struct ResolveRequest
@@ -91,12 +84,11 @@ struct ResolveRequest
   char *virtual_dir;
   char *natives_dir;
   char *client_jar;
-  /* The jar a loader patched instead of the one the document names: a
-     file that is already there, so nothing is fetched for it. */
+  /* Existing client JAR produced by a loader, if any. */
   char *client_jar_override;
   char *logging_path;
   char *asset_index_id;   /* the file name of the index, "<id>.json" */
-  char *asset_index_name; /* what the game calls it */
+   char *asset_index_name; /* name used by the game */
   char *asset_base_url;
 
   NuvashaRuleContext *context;
@@ -109,7 +101,7 @@ struct ResolveRequest
   GCancellable *cancellable;
   GError *error;
 
-  const char *stage; /* what the progress refers to */
+  const char *stage; /* progress stage */
   guint pending;     /* operations in flight */
   guint done;        /* files finished in the current stage */
   guint total;       /* files in the current stage */
@@ -117,7 +109,7 @@ struct ResolveRequest
   /* The jars to unpack, filled while the libraries are planned. */
   GPtrArray *natives;
 
-  /* What the asset index asked for. */
+  /* Asset objects requested by the index. */
   GPtrArray *asset_hashes; /* char* */
   GHashTable *asset_paths; /* hash -> char* */
   gboolean asset_virtual;
@@ -185,8 +177,7 @@ operation_finished (ResolveRequest *request, ResolveStep next, GError *error)
     }
 }
 
-/* Gives the caller what was prepared, or the failure, once and once
-   only. */
+/* Complete the request with the resolved version or an error. */
 static void
 request_end (ResolveRequest *request, NuvashaResolvedVersion *resolved)
 {
@@ -328,8 +319,7 @@ expand_argument (const char *value, GHashTable *known)
 
           if (end != NULL)
             {
-              /* The name is what is between the braces, and nothing
-                 else: the rest of the argument follows the brace. */
+              /* Extract the placeholder name between the braces. */
               g_autofree char *name = g_strndup (start, end - start);
 
               replacement = g_hash_table_lookup (known, name);
@@ -363,8 +353,7 @@ expand_arguments (GPtrArray *arguments, GHashTable *known)
   return g_steal_pointer (&expanded);
 }
 
-/* Builds the answer out of what is on disk now. NULL on failure, with
-   @error filled in. */
+/* Build the resolved version from the files on disk. */
 static NuvashaResolvedVersion *
 build_result (ResolveRequest *request, GError **error)
 {
@@ -373,7 +362,7 @@ build_result (ResolveRequest *request, GError **error)
   g_autoptr (GPtrArray) game = NULL;
   g_autoptr (GHashTable) known = g_hash_table_new (g_str_hash, g_str_equal);
 
-  /* The request reaches this point only after it holds a description. */
+  /* The request has a version description at this point. */
   if (request->description->main_class == NULL)
     {
       g_set_error (error, nuvasha_RESOLVE_ERROR, nuvasha_RESOLVE_ERROR_INVALID,
@@ -383,7 +372,7 @@ build_result (ResolveRequest *request, GError **error)
     }
 
   /* A loader that patches the client jar produced one already: it is the
-     jar the game runs from, and the one at the end of the class path,
+     jar the game runs from and the final entry in the class path,
      which is where the class loader finds the classes of the game. */
   {
     const char *client_jar = request->client_jar_override != NULL
@@ -414,7 +403,7 @@ build_result (ResolveRequest *request, GError **error)
       request->description->java_version->major_version;
 
   /* A virtual index is a directory the game reads its assets from
-     directly, so that directory is what it is given as its assets root
+     directly, so that directory is used as its assets root
      and it is told no index name at all. */
   if (request->asset_virtual)
     {
@@ -472,8 +461,7 @@ resolve_finish (ResolveRequest *request)
     {
       resolved = build_result (request, &error);
 
-      /* What went wrong while putting the answer together is the
-         failure of the request, not something to swallow. */
+      /* Propagate failures while assembling the result. */
       request_fail (request, g_steal_pointer (&error));
     }
 
@@ -522,8 +510,7 @@ resolve_dependencies (ResolveRequest *request)
   files = nuvasha_resolve_library_files (description, request->context,
                                      request->libraries_dir);
 
-  /* The natives are remembered from the same walk, so the jars to
-     unpack are exactly the ones that were fetched. */
+  /* Unpack the native JARs collected during planning. */
   for (guint i = 0; i < files->len; i++)
     {
       const NuvashaResolveFile *file = g_ptr_array_index (files, i);
@@ -988,10 +975,7 @@ resolve_assets (ResolveRequest *request)
  * Entry point
  * ---------------------------------------------------------- */
 
-/* What the resolve needs to know about the document, once there is one:
-   where its logging file goes and what its asset index is called. Both
-   are asked of the document alone, whether it came from the manifest or
-   from a loader profile merged over it. */
+/* Read logging and asset-index metadata from the resolved document. */
 static void
 description_ready (ResolveRequest *request)
 {

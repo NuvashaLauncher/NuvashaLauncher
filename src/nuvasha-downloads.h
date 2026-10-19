@@ -9,8 +9,8 @@
  * stop it, and the header of the main window can show everything that is
  * still on its way, from anywhere in the app.
  *
- * The manager is a process wide singleton. Every entry carries what a
- * row needs (a title, a detail line and a fraction) and a GCancellable,
+ * The manager is a process-wide singleton. Each entry carries the title,
+ * detail, progress, and cancellable needed by its row,
  * so cancelling is one call away from the UI that shows it. */
 
 #ifndef nuvasha_DOWNLOADS_H
@@ -31,8 +31,7 @@ typedef enum {
   nuvasha_DOWNLOAD_UPDATE
 } NuvashaDownloadKind;
 
-/* What the progress counts: files for an install, bytes for a single
- * transfer. The UI formats each differently. */
+/* Progress units: files for installs, bytes for transfers. */
 typedef enum {
   nuvasha_DOWNLOAD_UNIT_COUNT,
   nuvasha_DOWNLOAD_UNIT_BYTES
@@ -46,7 +45,7 @@ G_DECLARE_FINAL_TYPE (NuvashaDownload, nuvasha_download, nuvasha, DOWNLOAD, GObj
 
 G_DECLARE_FINAL_TYPE (NuvashaDownloads, nuvasha_downloads, nuvasha, DOWNLOADS, GObject)
 
-/* The one manager of the process. */
+/* Process-wide download manager. */
 NuvashaDownloads *nuvasha_downloads_get_default (void);
 NuvashaDownloadService *nuvasha_downloads_get_service (void);
 
@@ -80,12 +79,7 @@ void nuvasha_download_finish (NuvashaDownload *self);
 
 guint nuvasha_downloads_count (void);
 
-/* How many files the user has picked across every content page for a
- * later install: what the header's download icon carries a small number
- * of. A page says its part with nuvasha_downloads_picked_add(), adding when
- * its list grows and passing the negative of what it added when its list
- * shrinks or the page goes away, so that what is shown is what the open
- * pages have on. */
+/* Number of files selected across content pages for later installation. */
 guint nuvasha_downloads_picked (void);
 
 void nuvasha_downloads_picked_add (gint delta);

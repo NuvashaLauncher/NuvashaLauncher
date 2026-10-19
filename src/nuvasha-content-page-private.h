@@ -47,18 +47,15 @@ struct _NuvashaContentPage
   char *loader; /* NULL for the content that needs none */
   char *folder; /* the folder of the instance this content lives in */
 
-  /* Borrowed from the widget tree of the page, and cleared in dispose()
-   * because a request can answer after the tree is gone. */
+  /* Borrowed widget-tree references; cleared in dispose() before async
+   * callbacks can use them. */
   AdwToastOverlay *toasts;
-  AdwBanner *banner; /* what a failure is said in, until it is read */
+  AdwBanner *banner; /* failure message */
   AdwViewStack *stack;
 
-  /* The row that decides between Installed and Browse: the actions of
-   * the list being shown on the left, the switcher on the right. Only
-   * one of the two action boxes is a child of it at a time. */
+  /* Toolbar containing the active list actions and view switcher. */
   GtkBox *bar;
-  GtkBox *bar_spacer; /* takes the room between the actions and the
-                         switcher, so the switcher sits at the right */
+  GtkBox *bar_spacer; /* expands between actions and switcher */
   GtkBox *switcher;
   GtkToggleButton *switcher_installed; /* the Installed button of the pair */
   GtkToggleButton *switcher_browse;    /* the Browse button of the pair */

@@ -2,17 +2,9 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* NuvashaVersionRow: filling the "Minecraft Version" row from Mojang's
- * version manifest.
- *
- * The row only ever shows what the manifest holds. Until the manifest
- * arrives it is insensitive and says that it is loading; when the
- * fetch fails it says why and offers a Retry; when it works the list
- * holds the version ids, releases only unless the settings ask for the
- * rest. The position in the model means nothing before that, so
- * get_selected() answers nothing at all while the row is loading or
- * empty: a consumer that saves what it is told never saves a version
- * nobody picked. */
+/* NuvashaVersionRow: Minecraft version picker backed by Mojang's manifest.
+ * It exposes loading and retry states and returns no selection until a
+ * version has been chosen. */
 
 #include "nuvasha-version-row.h"
 #include "nuvasha-i18n.h"

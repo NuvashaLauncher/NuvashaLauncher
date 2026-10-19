@@ -23,7 +23,7 @@ struct _NuvashaDownloadModpackDialog
   char *pack_path;
   gboolean imported;
 
-  /* What the user did by the end of the details page. */
+  /* User selections from the details page. */
   NuvashaModrinthProject *project;
   NuvashaModrinthVersion *version;
 
@@ -48,8 +48,7 @@ struct _NuvashaDownloadModpackDialog
   guint search_generation;   /* rejects answers from older searches */
   GHashTable *seen_ids;       /* project id -> NULL, no duplicate rows */
 
-  /* The browser is the left half; the pack that is opened is the right
-     half, empty until one is opened. */
+  /* Split view: browser on the left, selected pack on the right. */
   AdwNavigationSplitView *split;
   AdwNavigationPage *details_page; /* weak: the page of the open pack */
   GtkDropDown *dropdown;       /* the versions to install */
@@ -58,14 +57,13 @@ struct _NuvashaDownloadModpackDialog
   GtkLabel *meta;              /* license and author under the title */
   GtkLabel *count;             /* the download count, at the left */
 
-  /* What the dialog of a pack holds while it is up. */
+  /* State for the pack details dialog. */
   GPtrArray *versions; /* NuvashaModrinthVersion* of the details dialog */
   AdwEntryRow *name_entry;
   AdwActionRow *directory_row;
   GtkLabel *details_error; /* inline words when versions fail or are empty */
 
-  /* What the dialog of a pack is waiting for before it shows anything:
-     the long description and the versions. */
+  /* Whether the description and versions have loaded. */
   gboolean details_ready;
   gboolean versions_ready;
   guint details_generation;  /* rejects answers from older projects */
@@ -73,26 +71,23 @@ struct _NuvashaDownloadModpackDialog
   char *details_problem;       /* why the description is not there */
   char *versions_problem;      /* why the versions are not there */
 
-  /* Widgets of the pages that fall on top of the stack. */
-  /* (There is no installing page: the download is the manager's and is
-     shown in the header; the dialog closes the moment it starts.) */
+  /* No install page is needed; installation appears in the header and the
+   * dialog closes when it starts. */
 
-  /* The pack download, shown in the header while it runs. Weak: the
+  /* Pack download shown in the header. Weak: the
      manager owns it, and the pointer goes NULL when it is let go. It is
      the same entry for both phases, the compressed pack and the extract. */
   NuvashaDownload *pack_download;
 
-  /* What was being retried when an error was shown. */
+  /* Operation being retried after an error. */
   gboolean fail_is_install;
 
-  /* Set once the dialog is closed: what is still running must then do
-     nothing that needs its widgets. The install carries on, the pack
-     download is cancelled. */
+  /* Set when closed. Installation continues, but pack downloads are
+   * cancelled and callbacks must not access widgets. */
   gboolean closed;
 
-  /* The switches of the optional-files page and the files they word;
-   * for the question "which of the optional files does the user wish?"
-   * Both are reset each visit. */
+  /* Optional-file switches and their corresponding files. Reset on each
+   * visit. */
   GPtrArray *opt_switch_rows; /* AdwSwitchRow*/
   GPtrArray *opt_files;       /* borrowed/self counterpart list */
 
@@ -107,7 +102,7 @@ struct _NuvashaDownloadModpackDialog
   GPtrArray *hits;
 
   char *directory;     /* where the instance goes, NULL for the default */
-  char *instance_name; /* what the user typed on the details page */
+  char *instance_name; /* name entered on the details page */
   char *icon_path;     /* the fetched icon of the pack, NULL when it has
                           none; the new instance is given it */
 };

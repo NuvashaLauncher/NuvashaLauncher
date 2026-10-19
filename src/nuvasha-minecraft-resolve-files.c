@@ -445,7 +445,7 @@ nuvasha_resolve_classpath (NuvashaVersionDescription *description,
       first = FALSE;
     }
 
-  /* The client jar goes last, so it is the one at the end. */
+  /* Append the client JAR last. */
   if (client_jar != NULL)
     {
       if (!first)

@@ -2,11 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* NuvashaJavaRow: pick a Java. Mirrors NuvashaVersionRow's state machine: the
- * row shows it is fetching, it failed (with how to retry), or it holds
- * the installations detection found plus any custom path the instance
- * carries. The automatic choice is displayed even when the detected runtime
- * does not satisfy the game's exact Java requirement. */
+/* NuvashaJavaRow: Java picker with loading, retry, automatic, and custom
+ * runtime entries. */
 
 /* realpath wants glibc's default feature set; nuvasha is Linux-only. */
 #define _GNU_SOURCE
@@ -44,7 +41,7 @@ struct _NuvashaJavaRow
    * runtime, so it cannot stay selected. */
   guint restore;
 
-  /* What the first entry stands for when an automatic runtime exists.
+  /* Runtime represented by the automatic entry, when available.
    * That runtime is named in the first entry and left out of the list below
    * so it is not shown twice. */
   int required_major;
@@ -53,8 +50,7 @@ struct _NuvashaJavaRow
   char *wanted;
   gboolean probe_started;
 
-  /* The probed custom Java, even one that failed to report (then this
-   * holds an empty NuvashaJava with just the path), NULL until then. */
+  /* Custom Java probe result, including failed probes with only a path. */
   NuvashaJava *probed;
 
   gboolean ready;

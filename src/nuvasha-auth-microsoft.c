@@ -14,17 +14,14 @@ nuvasha_auth_error_quark (void)
   return g_quark_from_static_string ("nuvasha-auth-error");
 }
 
-/* Whether there is an Azure application to sign in with at all. The one
- * constant in this module is what decides it. */
+/* Whether an Azure application is configured for sign-in. */
 static gboolean
 client_id_is_set (void)
 {
   return nuvasha_MICROSOFT_CLIENT_ID[0] != '\0';
 }
 
-/* What a build without one says instead of asking a user for a sign-in it
- * cannot finish. It names the constant, because a build is not something
- * a user can go and change, and it says what it has to hold. */
+/* Error returned when sign-in is unavailable in this build. */
 static GError *
 no_client_id_error (void)
 {
@@ -71,8 +68,7 @@ struct _AuthRequest
   GInputStream *response_stream;
   GByteArray *response_bytes;
 
-  /* What the user is signing in with: either a code to wait on, or a
-   * refresh token that trades for the first step again. */
+  /* Device code or refresh token used by the current sign-in flow. */
   char *device_code;
   char *refresh_token;
   guint interval;  /* how often the token endpoint may be asked */
@@ -80,7 +76,7 @@ struct _AuthRequest
   gint64 now;      /* the moment the chain started, so that every expiry
                     * it reads counts from the same second */
 
-  /* What the chain has gathered on the way. */
+  /* Values collected during the sign-in flow. */
   char *microsoft_refresh_token; /* the one the account keeps */
   char *xbl_token;
   char *xbl_user_hash;
@@ -151,9 +147,7 @@ fail (AuthRequest *self, GError *error)
   g_clear_object (&self->task);
 }
 
-/* The other way out: what the chain was for, which is the caller's now.
-   A step finishes with either a code to sign in with or an account, so
-   what it hands back is what it is and how that is freed. */
+/* Complete the sign-in task and return the resulting account or code. */
 static void
 succeed (AuthRequest   *self,
          gpointer       result,
@@ -559,8 +553,7 @@ token_answered (AuthRequest *self)
       return;
     }
 
-  /* A service that says the client is asking too fast is to be asked
-     slower, and that is the whole of what the answer says. */
+  /* Respect the service's request to slow down polling. */
   if (slow_down)
     self->interval += 5;
 

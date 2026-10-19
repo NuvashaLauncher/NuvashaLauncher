@@ -2,10 +2,9 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* NuvashaResolve: getting a Minecraft version onto this disk, without
- * starting it.
+/* NuvashaResolve: download and prepare a Minecraft version without starting it.
  *
- * A version document names a client jar, a set of libraries (some of
+ * A version document names a client JAR, libraries (some with
  * them carrying natives for Linux) and an asset index. This module works
  * out where each of those belongs below g_get_user_data_dir()/nuvasha,
  * fetches what is missing with the download module (which verifies the
@@ -71,7 +70,7 @@ char *nuvasha_resolve_maven_path_classified (const char *coordinate,
                                          const char *classifier);
 
 /* ---------------------------------------------------------- *
- * Choosing what a version needs on this machine
+ * Choosing version files for this machine
  * ---------------------------------------------------------- */
 
 /* The classifier of the natives jar that fits @context, or NULL when
@@ -92,11 +91,11 @@ const char *nuvasha_resolve_native_classifier (const NuvashaLibrary       *libra
 gboolean nuvasha_resolve_entry_name_is_safe (const char *entry_name);
 
 /* ---------------------------------------------------------- *
- * What has to be on disk
+ * Files required on disk
  * ---------------------------------------------------------- */
 
-/* One file a version needs. @path is where it belongs, @url is where it
- * comes from and @sha1 is what it must hash to; @sha1 is NULL when the
+/* One required file. @path is its destination, @url is its source, and
+ * @sha1 is the expected hash; @sha1 is NULL when the
  * document published none, in which case nothing can be verified. A
  * natives file also carries the entry prefixes its jar must not be
  * unpacked for, borrowed from the version document and NULL when the

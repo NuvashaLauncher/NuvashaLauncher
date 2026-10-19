@@ -4,8 +4,8 @@
 
 /* NuvashaModpack: the Modrinth modpack format (.mrpack).
  *
- * A .mrpack is a zip that holds modrinth.index.json at its root: the
- * manifest of the pack, what it comes with and what it needs around it.
+ * A .mrpack is a ZIP containing modrinth.index.json at its root. The manifest
+ * lists installed files and dependencies;
  * Everything the pack installs is in the manifest's files array; the
  * zip itself only carries the overrides, the extra files a pack lays
  * over the instance.
@@ -33,7 +33,7 @@ typedef enum {
   nuvasha_MODPACK_ERROR_ARCHIVE,    /* the .mrpack cannot be read as a zip */
   nuvasha_MODPACK_ERROR_BOMB,       /* the archive is far larger than a pack */
   nuvasha_MODPACK_ERROR_URL,        /* a download URL is not one nuvasha accepts */
-  nuvasha_MODPACK_ERROR_HASH,       /* what arrived does not match the index */
+  nuvasha_MODPACK_ERROR_HASH,       /* downloaded data failed verification */
   nuvasha_MODPACK_ERROR_DOWNLOAD,   /* a file could not be downloaded */
   nuvasha_MODPACK_ERROR_LOADER,     /* the Minecraft version or loader is unknown */
   nuvasha_MODPACK_ERROR_IO,         /* the file system said no */
@@ -42,7 +42,7 @@ typedef enum {
 
 GQuark nuvasha_modpack_error_quark (void);
 
-/* What the archive may hold before it is called a bomb. A pack names
+/* Archive limits used to detect decompression bombs. A pack names
  * every file it installs in the manifest and the overrides are the
  * config files, resource packs and pre-generated worlds on top of them:
  * the biggest packs on Modrinth unpack well past a gigabyte, so the cap
@@ -52,8 +52,7 @@ GQuark nuvasha_modpack_error_quark (void);
 #define nuvasha_MODPACK_MAX_ENTRIES     (65536)
 #define nuvasha_MODPACK_MAX_CONTENT_SIZE (4ULL * 1024 * 1024 * 1024)
 
-/* The three states of a file for the client: the pack requires it, it
- * only offers it, or the client must not see it. */
+/* Client-side availability of a file. */
 typedef enum {
   nuvasha_MODPACK_ENV_UNSPECIFIED, /* no env object: what both sides want */
   nuvasha_MODPACK_ENV_REQUIRED,
@@ -77,7 +76,7 @@ void nuvasha_modpack_file_free (NuvashaModpackFile *file);
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaModpackFile, nuvasha_modpack_file_free)
 
-/* One entry of the dependencies object: what the pack needs by name,
+/* One entry in the dependency object: the required version for a name,
  * e.g. "minecraft" -> "1.20.1", "fabric-loader" -> "0.15.11". */
 typedef struct
 {
@@ -90,8 +89,7 @@ void nuvasha_modpack_dependency_free (NuvashaModpackDependency *dependency);
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaModpackDependency,
                                nuvasha_modpack_dependency_free)
 
-/* What the index holds, plus what the dependencies say once
- * nuvasha_modpack_resolve() read them. */
+/* Parsed index data plus resolved dependency information. */
 typedef struct
 {
   guint format_version;
@@ -166,7 +164,7 @@ guint64 nuvasha_modpack_get_content_limit (void);
 /* The hosts the format permits the files to come from. */
 gboolean nuvasha_modpack_download_url_allowed (const char *url);
 
-/* What an install reports between files. */
+/* Progress reported between files during installation. */
 typedef void (*NuvashaModpackProgressFunc) (guint files_done,
                                         guint files_total,
                                         const char *path,

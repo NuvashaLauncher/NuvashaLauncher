@@ -33,17 +33,13 @@ struct _NuvashaInstancePage
   AdwViewStack *stack; /* the view stack holding the pages of the instance */
   NuvashaLogsPage *logs_page; /* the last page, kept so a rebuild can move it back */
 
-  /* The Directory row: the chooser button that says where the instance is
-     and the spinner that shows a move in progress. A move in progress
-     makes the button insensitive, so a second one cannot start on top of
-     it. */
+  /* Directory chooser and move-progress spinner. */
   AdwActionRow *directory_row;
   GtkButton *directory_change;
   GtkLabel *directory_path_label; /* the path inside the chooser button */
   AdwSpinner *directory_spinner;
 
-  /* The Java row plus what we know about it. Row load = detection
-   * finishes; description load = the Minecraft version's javaVersion.  */
+  /* Java picker and required major version. */
   NuvashaJavaRow *java_row;
   int required_java;        /* 0 means "never found one / unknown" */
 
@@ -57,9 +53,7 @@ struct _NuvashaInstancePage
   char *export_summary;
   char *export_version;
 
-  /* The two loader rows, plain AdwComboRows added to the Minecraft group,
-     and what the instance runs now, so that a change that cannot be
-     written goes back to it. */
+  /* Loader controls and current persisted values for rollback. */
   NuvashaLoaderRow *loader_row;
   NuvashaLoader loader;
   char *loader_version;

@@ -56,9 +56,7 @@ on_instance_dialog_closed (AdwDialog *dialog, gpointer user_data)
     }
 }
 
-/* The dialog of an instance says the name of the instance, and says it
-   again when the name changes: a dialog left saying the old name is one
-   the user cannot match to anything. */
+/* Keep the instance dialog title synchronized with the instance name. */
 static void
 on_instance_renamed (NuvashaInstance *instance, GParamSpec *pspec G_GNUC_UNUSED,
                      gpointer user_data)
@@ -119,8 +117,7 @@ open_instance_dialog (NuvashaMainWindow *self, NuvashaInstance *instance)
   adw_dialog_set_child (dialog, page);
   g_free (name);
 
-  /* The id travels with the dialog, which is what makes it findable
-     again and closable when its instance is deleted. */
+  /* Store the instance ID so the dialog can be found after rebuilds. */
   g_object_set_data_full (G_OBJECT (dialog), "nuvasha-instance-id",
                           g_strdup (id), g_free);
   g_hash_table_insert (self->model->instance_dialogs, g_strdup (id), dialog);
@@ -141,9 +138,8 @@ open_instance_dialog (NuvashaMainWindow *self, NuvashaInstance *instance)
   adw_dialog_present (dialog, GTK_WIDGET (self));
 }
 
-/* Closes the dialog of an instance that is no longer in the list, which
- * is what deleting one does. A game that is still running keeps running:
- * its launcher is held by the table, not by the dialog. */
+/* Close dialogs for removed instances. Running launchers remain owned by the
+ * window's launcher table. */
 static void
 close_dialogs_of_removed_instances (NuvashaMainWindow *self)
 {
@@ -281,8 +277,7 @@ on_play_clicked (GtkButton *button, gpointer user_data)
   if (launcher == NULL)
     return;
 
-  /* One button for both: what a busy instance needs is a stop, and what
-     an idle one needs is a play. */
+  /* Stop busy instances; start idle ones. */
   if (nuvasha_launch_state_is_busy (nuvasha_launcher_get_state (launcher)))
     confirm_stop (self, launcher);
   else
@@ -409,8 +404,7 @@ create_instance_row (gpointer item, gpointer user_data)
 
   id = nuvasha_instance_get_id (instance);
 
-  /* The button leads back to this instance; the id is what its click
-     handler goes by. */
+  /* Store the instance ID for the click handler. */
   g_object_set_data_full (G_OBJECT (play), "nuvasha-instance-id", g_strdup (id),
                           g_free);
 

@@ -99,15 +99,14 @@ gboolean nuvasha_instance_manager_set_loader (NuvashaInstanceManager *self,
                                           const char *version,
                                           GError **error);
 
-/* Says whether @directory may become the directory of @instance, and
+/* Check whether @directory may become the directory of @instance, and
  * puts the canonical form of it in @canonical when that is not NULL.
  *
  * It must be absolute, must not contain "..", must be neither the
  * filesystem root nor the directory the instance already has, must not
  * be, contain or lie inside the directory of any other instance, must
  * not exist yet, and the directory it hangs off must exist. This is the
- * whole of what is checked before any file is touched, so a caller can
- * refuse a bad path without starting a move. */
+ * all checks happen before any file is touched. */
 gboolean nuvasha_instance_manager_check_new_directory (NuvashaInstanceManager *self,
                                                    NuvashaInstance *instance,
                                                    const char *directory,

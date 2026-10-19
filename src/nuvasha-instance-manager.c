@@ -2,12 +2,9 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* NuvashaInstanceManager: owns the instance list and keeps instances.json
- * in sync with it.
+/* Owns the instance list and keeps instances.json synchronized with it.
  *
- * Slow work (copying and deleting instance directories, launching the
- * file manager) runs through GIO async calls so the main loop never
- * blocks. */
+ * Copying, deleting, and opening directories use asynchronous GIO calls. */
 
 /* realpath wants glibc's default feature set; nuvasha is Linux-only. */
 #define _GNU_SOURCE

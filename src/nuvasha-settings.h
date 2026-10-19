@@ -53,7 +53,7 @@ GQuark nuvasha_settings_error_quark (void);
  * when there is nothing there to read. Never returns NULL. */
 NuvashaSettings *nuvasha_settings_new (void);
 
-/* FALSE unless the file says otherwise. */
+/* Whether snapshot versions are shown. */
 gboolean nuvasha_settings_get_show_snapshots (NuvashaSettings *self);
 
 /* Stores @value and writes the file. On failure the old value stays
@@ -74,16 +74,14 @@ gboolean nuvasha_settings_set_log_line_limit (NuvashaSettings *self,
                                           guint        limit,
                                           GError     **error);
 
-/* FALSE unless the file says otherwise: a crash does not open a folder
- * by itself, the user asks for the log folder when they want it. */
+/* Whether the log folder opens after a crash. */
 gboolean nuvasha_settings_get_open_logs_after_crash (NuvashaSettings *self);
 
 gboolean nuvasha_settings_set_open_logs_after_crash (NuvashaSettings *self,
                                                  gboolean     value,
                                                  GError     **error);
 
-/* FALSE unless the file says otherwise, so a loader list holds the
- * versions that loader calls stable and nothing else. */
+/* Whether unstable loader versions are shown. */
 gboolean nuvasha_settings_get_show_unstable_loaders (NuvashaSettings *self);
 
 gboolean nuvasha_settings_set_show_unstable_loaders (NuvashaSettings *self,
