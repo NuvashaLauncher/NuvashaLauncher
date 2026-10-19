@@ -935,6 +935,41 @@ skin_row_new (SkinMenu *menu, const char *name, const char *url)
 }
 
 static void
+select_saved_skin (SkinMenu *menu)
+{
+  GtkListBoxRow *match = NULL;
+  GtkListBoxRow *row = NULL;
+  GtkWidget *child = NULL;
+  const char *saved_url = menu->account != NULL ? menu->account->avatar_url : NULL;
+
+  for (child = gtk_widget_get_first_child (GTK_WIDGET (menu->skins));
+       child != NULL;
+       child = gtk_widget_get_next_sibling (child))
+    {
+      const char *url = g_object_get_data (G_OBJECT (child), "nuvasha-skin-url");
+
+      if (saved_url != NULL && g_strcmp0 (saved_url, url) == 0)
+        {
+          match = GTK_LIST_BOX_ROW (child);
+          break;
+        }
+
+      if (saved_url == NULL && url != NULL && skin_url_is_default (url) &&
+          g_str_has_suffix (url, "/Steve.png"))
+        row = GTK_LIST_BOX_ROW (child);
+    }
+
+  if (match == NULL)
+    match = row;
+
+  if (match != NULL)
+    {
+      menu->current_skin_row = ADW_ACTION_ROW (GTK_WIDGET (match));
+      gtk_list_box_select_row (menu->skins, match);
+    }
+}
+
+static void
 append_profile_skins (SkinMenu *menu, const char *json)
 {
   g_autoptr (JsonParser) parser = json_parser_new ();
@@ -1004,6 +1039,7 @@ on_profile_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
       append_profile_skins (menu, json);
     }
   append_default_skins (menu);
+  select_saved_skin (menu);
   /* Keep the controller alive: rows may be selected after the request
    * completes. */
 }
@@ -1128,6 +1164,7 @@ skin_menu_new (NuvashaUsersPopover *owner, GtkImage *image, NuvashaAccount *acco
   adw_toolbar_view_set_content (toolbar, GTK_WIDGET (root));
   adw_dialog_set_child (dialog, GTK_WIDGET (toolbar));
   append_local_skins (data);
+  append_default_skins (data);
   if (account->avatar_url != NULL && *account->avatar_url != '\0')
     {
       if (!g_hash_table_contains (data->skin_urls,
@@ -1136,18 +1173,18 @@ skin_menu_new (NuvashaUsersPopover *owner, GtkImage *image, NuvashaAccount *acco
                                   skin_name_for_url (account->avatar_url)))
         {
           g_autofree char *skin_name = skin_name_for_url (account->avatar_url);
-          data->current_skin_row = skin_row_new (data, skin_name, account->avatar_url);
-          gtk_list_box_append (skins, GTK_WIDGET (data->current_skin_row));
-          gtk_list_box_select_row (skins, GTK_LIST_BOX_ROW (data->current_skin_row));
+          if (!g_hash_table_contains (data->skin_urls, skin_name))
+            {
+              data->current_skin_row = skin_row_new (data, skin_name,
+                                                     account->avatar_url);
+              gtk_list_box_append (skins, GTK_WIDGET (data->current_skin_row));
+            }
           load_view_texture (preview, account->avatar_url, FALSE);
         }
     }
   else
-    {
-      AdwActionRow *steve_row = append_default_skins (data);
-      if (steve_row != NULL)
-        gtk_list_box_select_row (skins, GTK_LIST_BOX_ROW (steve_row));
-    }
+    select_saved_skin (data);
+  select_saved_skin (data);
   g_signal_connect (capes, "notify::selected", G_CALLBACK (on_cape_selected), data);
   load_capes (data);
   load_profile_skins (data);
@@ -1172,6 +1209,7 @@ update_the_button (NuvashaUsersPopover *self)
 
   self->active_name = g_strdup (account->name);
   set_avatar_icon (GTK_IMAGE (self->avatar_image));
+  set_avatar (self, GTK_IMAGE (self->avatar_image), account->avatar_url);
 
 }
 
