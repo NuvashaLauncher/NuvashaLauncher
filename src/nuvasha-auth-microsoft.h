@@ -50,7 +50,7 @@ G_BEGIN_DECLS
  * with. It has to be registered for the device code flow of a public
  * client, and it is the only place a sign-in is configured: an empty
  * constant is what a build without one says out loud. */
-#define nuvasha_MICROSOFT_CLIENT_ID "cff4c467-c0ee-423f-9691-59fb99480fec"
+#define nuvasha_MICROSOFT_CLIENT_ID "fe820571-8833-4058-b29a-e4d2c28f6beb"
 
 /* Tenant used for personal Microsoft accounts. */
 #define nuvasha_MICROSOFT_TENANT "consumers"
