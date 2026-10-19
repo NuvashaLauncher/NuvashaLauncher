@@ -162,6 +162,7 @@ on_content_tab_switched (GObject *stack, GParamSpec *pspec G_GNUC_UNUSED,
     nuvasha_content_page_reset_for_tab_switch (nuvasha_CONTENT_PAGE (child));
 }
 
+
 /* ---------------------------------------------------------- *
  * Saving the editable rows
  * ---------------------------------------------------------- */
@@ -304,6 +305,7 @@ on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
     version_wait_new (self, ++self->versions_generation));
 }
 
+
 /* ---------------------------------------------------------- *
  * The loader and the version of it
  * ---------------------------------------------------------- */
@@ -366,6 +368,7 @@ on_loader_changed (NuvashaLoaderRow *row, gpointer user_data)
      picked here and are built again. */
   rebuild_content_pages (self);
 }
+
 
 /* ---------------------------------------------------------- *
  * The Java row
@@ -533,6 +536,7 @@ on_java_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
   java_status_refresh (self);
 }
 
+
 /* ---------------------------------------------------------- *
  * The icon row
  * ---------------------------------------------------------- */
@@ -647,6 +651,7 @@ on_change_icon_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
                         NULL, on_icon_chosen, g_object_ref (self));
 }
 
+
 /* ---------------------------------------------------------- *
  * Rows
  * ---------------------------------------------------------- */
@@ -684,6 +689,7 @@ button_row (AdwPreferencesGroup *group,
 
   return GTK_WIDGET (row);
 }
+
 
 /* ---------------------------------------------------------- *
  * The five pages

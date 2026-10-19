@@ -325,6 +325,7 @@ nuvasha_java_parse_version (const char  *output,
   return TRUE;
 }
 
+
 /* ---------------------------------------------------------- *
  * Probing one executable
  * ---------------------------------------------------------- */
@@ -444,6 +445,7 @@ nuvasha_java_probe_finish (GAsyncResult  *result,
 
   return g_task_propagate_pointer (G_TASK (result), error);
 }
+
 
 /* ---------------------------------------------------------- *
  * Dedup + sequential probing over a list of candidates
@@ -577,6 +579,7 @@ nuvasha_java_probe_list_finish (GAsyncResult  *result,
 
   return g_task_propagate_pointer (G_TASK (result), error);
 }
+
 
 /* ---------------------------------------------------------- *
  * Detecting the installations on this machine

@@ -3,6 +3,7 @@
  */
 
 #include "nuvasha-auth-microsoft.h"
+#include "nuvasha-auth-microsoft-private.h"
 #include "nuvasha-task-private.h"
 
 #include <libsoup/soup.h>
@@ -15,14 +16,14 @@ nuvasha_auth_error_quark (void)
 }
 
 /* Whether an Azure application is configured for sign-in. */
-static gboolean
+gboolean
 client_id_is_set (void)
 {
   return nuvasha_MICROSOFT_CLIENT_ID[0] != '\0';
 }
 
 /* Error returned when sign-in is unavailable in this build. */
-static GError *
+GError *
 no_client_id_error (void)
 {
   return g_error_new (
@@ -33,64 +34,7 @@ no_client_id_error (void)
       "flow of a public client");
 }
 
-/* ---------------------------------------------------------- *
- * One request of the chain
- *
- * Every step is one request and one answer, and the step after it is
- * decided by what came back. Nothing is logged on the way: what these
- * answers hold are tokens, and a token is not something to write down.
- * ---------------------------------------------------------- */
-
-typedef enum {
-  STEP_DEVICE_CODE, /* asking for the code a user has to type */
-  STEP_TOKEN,       /* waiting for the user, then taking the token */
-  STEP_XBL,
-  STEP_XSTS,
-  STEP_MINECRAFT,
-  STEP_ENTITLEMENTS,
-  STEP_PROFILE
-} Step;
-
-typedef struct _AuthRequest AuthRequest;
-
-#define MAX_AUTH_RESPONSE_SIZE (4ULL * 1024ULL * 1024ULL)
-
-struct _AuthRequest
-{
-  GTask *task;
-  SoupMessage *message;
-  guint poll_source;
-  NuvashaTaskScope *scope;
-  Step step;
-
-  gint status;
-  char *body;
-  GInputStream *response_stream;
-  GByteArray *response_bytes;
-
-  /* Device code or refresh token used by the current sign-in flow. */
-  char *device_code;
-  char *refresh_token;
-  guint interval;  /* how often the token endpoint may be asked */
-  gint64 deadline; /* when the code stops being of any use, 0 for none */
-  gint64 now;      /* the moment the chain started, so that every expiry
-                    * it reads counts from the same second */
-
-  /* Values collected during the sign-in flow. */
-  char *microsoft_refresh_token; /* the one the account keeps */
-  char *xbl_token;
-  char *xbl_user_hash;
-  char *xsts_token;
-  char *mc_access_token;
-  gint64 mc_expires_at;
-};
-
-static void request_free (gpointer data);
-
-static void sent (SoupSession *session, GAsyncResult *result,
-                  gpointer user_data);
-static void auth_read_ready (GObject *source, GAsyncResult *result,
-                             gpointer user_data);
+/* Authentication request setup. */
 
 static SoupSession *
 auth_session (void)
@@ -110,7 +54,7 @@ auth_session (void)
 
 /* A sign-in is the task: the request lives as long as the task does, and
    the task is what is answered when it is over. */
-static AuthRequest *
+AuthRequest *
 request_new (NuvashaTaskScope *scope)
 {
   AuthRequest *self = g_new0 (AuthRequest, 1);
@@ -124,13 +68,13 @@ request_new (NuvashaTaskScope *scope)
   /* The cancellation of the task is this module's own: a sign-in that is
      cancelled stops waiting, and nothing is answered twice. */
   g_task_set_check_cancellable (self->task, FALSE);
-  g_task_set_task_data (self->task, self, request_free);
+  g_task_set_task_data (self->task, self, nuvasha_auth_request_free);
 
   return self;
 }
 
 /* The one way out of a sign-in: an error and no account. */
-static void
+void
 fail (AuthRequest *self, GError *error)
 {
   g_assert (error != NULL);
@@ -148,7 +92,7 @@ fail (AuthRequest *self, GError *error)
 }
 
 /* Complete the sign-in task and return the resulting account or code. */
-static void
+void
 succeed (AuthRequest   *self,
          gpointer       result,
          GDestroyNotify free_result)
@@ -166,7 +110,7 @@ succeed (AuthRequest   *self,
 /* Answers the task with the cancellation and says whether it did, which
    is how a cancelled sign-in stops instead of failing to reach a
    service that was never asked. */
-static gboolean
+gboolean
 answer_if_cancelled (AuthRequest *self)
 {
   GTask *task = NULL;
@@ -181,26 +125,26 @@ answer_if_cancelled (AuthRequest *self)
   return TRUE;
 }
 
-static void
+void
 device_code_answered (AuthRequest *self);
-static void token_answered (AuthRequest *self);
-static void xbl_answered (AuthRequest *self);
-static void xsts_answered (AuthRequest *self);
-static void minecraft_answered (AuthRequest *self);
-static void entitlements_answered (AuthRequest *self);
-static void profile_answered (AuthRequest *self);
-static void ask_xbl (AuthRequest *self, const char *access_token);
-static void ask_xsts (AuthRequest *self);
-static void ask_minecraft (AuthRequest *self);
-static void ask_entitlements (AuthRequest *self);
-static void ask_profile (AuthRequest *self);
+void token_answered (AuthRequest *self);
+void xbl_answered (AuthRequest *self);
+void xsts_answered (AuthRequest *self);
+void minecraft_answered (AuthRequest *self);
+void entitlements_answered (AuthRequest *self);
+void profile_answered (AuthRequest *self);
+void ask_xbl (AuthRequest *self, const char *access_token);
+void ask_xsts (AuthRequest *self);
+void ask_minecraft (AuthRequest *self);
+void ask_entitlements (AuthRequest *self);
+void ask_profile (AuthRequest *self);
 
 /* Sends one request and hands what came back to the step that asked for
  * it. The answer is kept as it arrived, whatever the status was: a
  * service that refuses something says why in the body of the refusal,
  * and that sentence is what a user is told. */
-static void
-send (AuthRequest         *self,
+void
+nuvasha_auth_send (AuthRequest         *self,
       const char          *url,
       const char          *method,
       const char          *body,
@@ -235,7 +179,7 @@ send (AuthRequest         *self,
        g_task_get_cancellable (self->task), (GAsyncReadyCallback) sent, self);
 }
 
-static void
+void
 sent (SoupSession         *session G_GNUC_UNUSED,
       GAsyncResult        *result,
       gpointer             user_data)
@@ -278,7 +222,7 @@ sent (SoupSession         *session G_GNUC_UNUSED,
                                    auth_read_ready, self);
 }
 
-static void
+void
 auth_read_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 {
   AuthRequest *self = user_data;
@@ -357,7 +301,7 @@ auth_read_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 
 /* What a service said when it refused something: the sentence it gave,
    and never the whole answer, which on a success is the token. */
-static GError *
+GError *
 refusal (const char  *body,
          gint          status,
          NuvashaAuthError  code,
@@ -399,638 +343,4 @@ refusal (const char  *body,
   return g_error_new (nuvasha_AUTH_ERROR, code, "%s (HTTP %d)%s%s", what, status,
                       said != NULL && *said != '\0' ? ": " : "",
                       said != NULL ? said : "");
-}
-
-/* ---------------------------------------------------------- *
- * The first step: a code to sign in with
- * ---------------------------------------------------------- */
-
-static void
-device_code_answered (AuthRequest *self)
-{
-  g_autoptr (NuvashaDeviceCode) code = NULL;
-  g_autoptr (GError) error = NULL;
-
-  if (self->status < 200 || self->status > 299)
-    {
-      fail (self,
-            refusal (self->body, self->status, nuvasha_AUTH_ERROR_DEVICE_CODE,
-                     "Microsoft would not give a code to sign in with"));
-      return;
-    }
-
-  code = nuvasha_auth_device_code_from_json (self->body, -1, &error);
-
-  if (code == NULL)
-    fail (self, g_steal_pointer (&error));
-  else
-    succeed (self, g_steal_pointer (&code),
-             (GDestroyNotify) nuvasha_device_code_free);
-}
-
-NuvashaTaskScope *
-nuvasha_auth_device_code_async (GAsyncReadyCallback callback, gpointer user_data)
-{
-  g_autoptr (NuvashaTaskScope) scope =
-    nuvasha_task_scope_new (NULL, NULL, callback, user_data);
-  g_autofree char *form = NULL;
-  AuthRequest *self = NULL;
-
-  self = request_new (scope);
-
-  if (!client_id_is_set ())
-    {
-      fail (self, no_client_id_error ());
-      return g_steal_pointer (&scope);
-    }
-
-  form = soup_form_encode ("client_id", nuvasha_MICROSOFT_CLIENT_ID, "scope",
-                           nuvasha_MICROSOFT_SCOPE, NULL);
-
-  send (self, nuvasha_MICROSOFT_DEVICE_CODE_URL, SOUP_METHOD_POST, form,
-        "application/x-www-form-urlencoded", NULL, STEP_DEVICE_CODE);
-
-  return g_steal_pointer (&scope);
-}
-
-NuvashaDeviceCode *
-nuvasha_auth_device_code_finish (GAsyncResult *result, GError **error)
-{
-  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
-  g_return_val_if_fail (error == NULL || *error == NULL, NULL);
-
-  return (NuvashaDeviceCode *) g_task_propagate_pointer (G_TASK (result), error);
-}
-
-/* ---------------------------------------------------------- *
- * The second step: waiting for the user
- * ---------------------------------------------------------- */
-
-/* The form the token endpoint is asked with, which is a different grant
- * depending on whether a code is being waited on or a token is being
- * refreshed. (transfer full) */
-static char *
-token_form (AuthRequest *self)
-{
-  if (self->refresh_token != NULL)
-    return soup_form_encode ("client_id", nuvasha_MICROSOFT_CLIENT_ID,
-                             "grant_type", "refresh_token", "refresh_token",
-                             self->refresh_token, "scope",
-                             nuvasha_MICROSOFT_SCOPE, NULL);
-
-  return soup_form_encode ("client_id", nuvasha_MICROSOFT_CLIENT_ID, "grant_type",
-                           "urn:ietf:params:oauth:grant-type:device_code",
-                           "device_code", self->device_code, "scope",
-                           nuvasha_MICROSOFT_SCOPE, NULL);
-}
-
-static void
-ask_for_token (AuthRequest *self)
-{
-  g_autofree char *form = token_form (self);
-
-  send (self, nuvasha_MICROSOFT_TOKEN_URL, SOUP_METHOD_POST, form,
-        "application/x-www-form-urlencoded", NULL, STEP_TOKEN);
-}
-
-/* The next poll, once the interval the service asked for has passed. */
-static gboolean
-poll_again (gpointer user_data)
-{
-  AuthRequest *self = user_data;
-  guint source_id = self->poll_source;
-
-  self->poll_source = 0;
-  nuvasha_task_scope_forget_source (self->scope, source_id);
-
-  if (self->task == NULL || answer_if_cancelled (self))
-    return G_SOURCE_REMOVE;
-
-  ask_for_token (self);
-
-  return G_SOURCE_REMOVE;
-}
-
-static void
-token_answered (AuthRequest *self)
-{
-  g_autoptr (NuvashaOAuthToken) token = NULL;
-  g_autoptr (GError) error = NULL;
-  gboolean slow_down = FALSE;
-
-  if (self->status == 200)
-    {
-      token = nuvasha_auth_oauth_token_from_json (self->body, -1, self->now, &error);
-
-      if (token == NULL)
-        {
-          fail (self, g_steal_pointer (&error));
-          return;
-        }
-
-      /* The refresh token is what the account keeps, so that the sign-in
-         outlives the token it starts with. */
-      if (token->refresh_token != NULL)
-        {
-          g_free (self->microsoft_refresh_token);
-          self->microsoft_refresh_token = g_strdup (token->refresh_token);
-        }
-
-      ask_xbl (self, token->access_token);
-      return;
-    }
-
-  /* Every poll answers that the user has not signed in yet until they
-     have, and that is the wait rather than a failure. */
-  if (nuvasha_auth_polling_error (self->body, -1, &slow_down, &error))
-    {
-      if (error == NULL)
-        error = g_error_new_literal (nuvasha_AUTH_ERROR, nuvasha_AUTH_ERROR_PARSE,
-                                     "the service refused the sign-in without "
-                                     "saying why");
-
-      fail (self, g_steal_pointer (&error));
-      return;
-    }
-
-  /* Respect the service's request to slow down polling. */
-  if (slow_down)
-    self->interval += 5;
-
-  /* The code is good for a quarter of an hour and no longer, so a user
-     who walked away is told rather than left waiting. */
-  if (self->deadline > 0 &&
-      g_get_real_time () / 1000000 >= self->deadline)
-    {
-      fail (self,
-            g_error_new_literal (nuvasha_AUTH_ERROR, nuvasha_AUTH_ERROR_DECLINED,
-                                 "the code ran out before the sign-in was "
-                                 "finished: ask for a new one"));
-      return;
-    }
-
-  self->poll_source = g_timeout_add_seconds (self->interval, poll_again, self);
-  nuvasha_task_scope_track_source (self->scope, self->poll_source);
-}
-
-/* ---------------------------------------------------------- *
- * The third step: Xbox Live
- * ---------------------------------------------------------- */
-
-static void
-ask_xbl (AuthRequest *self, const char *access_token)
-{
-  g_autoptr (JsonBuilder) builder = json_builder_new ();
-  g_autoptr (JsonGenerator) generator = json_generator_new ();
-  g_autoptr (JsonNode) root = NULL;
-  g_autofree char *ticket = NULL;
-  g_autofree char *body = NULL;
-  const char *headers[] = { "x-xbl-contract-version",
-                            nuvasha_XBOX_CONTRACT_VERSION, "Accept",
-                            "application/json", NULL };
-
-  /* The Microsoft token is handed over as a ticket of the sign-in, which
-     is how the Xbox services document the request. */
-  ticket = g_strconcat ("d=", access_token, NULL);
-
-  json_builder_begin_object (builder);
-  json_builder_set_member_name (builder, "Properties");
-  json_builder_begin_object (builder);
-  json_builder_set_member_name (builder, "AuthMethod");
-  json_builder_add_string_value (builder, "RPS");
-  json_builder_set_member_name (builder, "SiteName");
-  json_builder_add_string_value (builder, "user.auth.xboxlive.com");
-  json_builder_set_member_name (builder, "RpsTicket");
-  json_builder_add_string_value (builder, ticket);
-  json_builder_end_object (builder);
-  json_builder_set_member_name (builder, "RelyingParty");
-  json_builder_add_string_value (builder, "http://auth.xboxlive.com");
-  json_builder_set_member_name (builder, "TokenType");
-  json_builder_add_string_value (builder, "JWT");
-  json_builder_end_object (builder);
-
-  root = json_builder_get_root (builder);
-  json_generator_set_root (generator, root);
-  body = json_generator_to_data (generator, NULL);
-
-  send (self, nuvasha_XBOX_USER_URL, SOUP_METHOD_POST, body, "application/json",
-        headers, STEP_XBL);
-}
-
-static void
-xbl_answered (AuthRequest *self)
-{
-  g_autoptr (NuvashaXboxToken) token = NULL;
-  g_autoptr (GError) error = NULL;
-
-  if (self->status < 200 || self->status > 299)
-    {
-      fail (self, refusal (self->body, self->status, nuvasha_AUTH_ERROR_XBOX,
-                           "Xbox Live refused the sign-in"));
-      return;
-    }
-
-  token = nuvasha_auth_xbox_token_from_json (self->body, -1, &error);
-
-  if (token == NULL)
-    {
-      fail (self, g_steal_pointer (&error));
-      return;
-    }
-
-  g_free (self->xbl_token);
-  self->xbl_token = g_steal_pointer (&token->token);
-  g_free (self->xbl_user_hash);
-  self->xbl_user_hash = g_steal_pointer (&token->user_hash);
-
-  ask_xsts (self);
-}
-
-/* ---------------------------------------------------------- *
- * The fourth step: XSTS
- * ---------------------------------------------------------- */
-
-static void
-ask_xsts (AuthRequest *self)
-{
-  g_autoptr (JsonBuilder) builder = json_builder_new ();
-  g_autoptr (JsonGenerator) generator = json_generator_new ();
-  g_autoptr (JsonNode) root = NULL;
-  g_autofree char *body = NULL;
-  const char *headers[] = { "x-xbl-contract-version",
-                            nuvasha_XBOX_CONTRACT_VERSION, "Accept",
-                            "application/json", NULL };
-
-  /* The relying party is what says which services the token is for, and
-     the ones being asked for are the Minecraft services. */
-  json_builder_begin_object (builder);
-  json_builder_set_member_name (builder, "Properties");
-  json_builder_begin_object (builder);
-  json_builder_set_member_name (builder, "SandboxId");
-  json_builder_add_string_value (builder, "RETAIL");
-  json_builder_set_member_name (builder, "UserTokens");
-  json_builder_begin_array (builder);
-  json_builder_add_string_value (builder, self->xbl_token);
-  json_builder_end_array (builder);
-  json_builder_end_object (builder);
-  json_builder_set_member_name (builder, "RelyingParty");
-  json_builder_add_string_value (builder, nuvasha_MINECRAFT_RELYING_PARTY);
-  json_builder_set_member_name (builder, "TokenType");
-  json_builder_add_string_value (builder, "JWT");
-  json_builder_end_object (builder);
-
-  root = json_builder_get_root (builder);
-  json_generator_set_root (generator, root);
-  body = json_generator_to_data (generator, NULL);
-
-  send (self, nuvasha_XBOX_XSTS_URL, SOUP_METHOD_POST, body, "application/json",
-        headers, STEP_XSTS);
-}
-
-static void
-xsts_answered (AuthRequest *self)
-{
-  g_autoptr (NuvashaXboxToken) token = NULL;
-  g_autoptr (GError) error = NULL;
-
-  /* A refusal of XSTS comes as a number and a sentence, and the number
-     is the one that says what a user can do about it. */
-  token = nuvasha_auth_xbox_token_from_json (self->body, -1, &error);
-
-  if (token == NULL)
-    {
-      fail (self, g_steal_pointer (&error));
-      return;
-    }
-
-  if (self->status < 200 || self->status > 299)
-    {
-      fail (self, refusal (self->body, self->status, nuvasha_AUTH_ERROR_XBOX,
-                           "Xbox services refused the sign-in"));
-      return;
-    }
-
-  g_free (self->xsts_token);
-  self->xsts_token = g_steal_pointer (&token->token);
-
-  /* The services are told who the player is by the hash the user token
-     came with, and without it there is nobody to sign in as. */
-  if (self->xbl_user_hash == NULL)
-    {
-      fail (self, g_error_new_literal (nuvasha_AUTH_ERROR, nuvasha_AUTH_ERROR_PARSE,
-                                       "Xbox services answered with a token "
-                                       "and no user"));
-      return;
-    }
-
-  ask_minecraft (self);
-}
-
-/* ---------------------------------------------------------- *
- * The fifth step: the Minecraft services
- * ---------------------------------------------------------- */
-
-static void
-ask_minecraft (AuthRequest *self)
-{
-  g_autoptr (JsonBuilder) builder = json_builder_new ();
-  g_autoptr (JsonGenerator) generator = json_generator_new ();
-  g_autoptr (JsonNode) root = NULL;
-  g_autofree char *xtoken = NULL;
-  g_autofree char *body = NULL;
-  const char *headers[] = { "Accept", "application/json", NULL };
-
-  /* Current Minecraft services use the launcher login contract. The request
-   * sends the XBL3 token and explicitly identifies the PC launcher;
-   * the older login_with_xbox identityToken endpoint can return a token that
-   * is not accepted by the entitlement/profile services. */
-  xtoken = g_strdup_printf ("XBL3.0 x=%s;%s", self->xbl_user_hash,
-                            self->xsts_token);
-
-  json_builder_begin_object (builder);
-  json_builder_set_member_name (builder, "xtoken");
-  json_builder_add_string_value (builder, xtoken);
-  json_builder_set_member_name (builder, "platform");
-  json_builder_add_string_value (builder, "PC_LAUNCHER");
-  json_builder_end_object (builder);
-
-  root = json_builder_get_root (builder);
-  json_generator_set_root (generator, root);
-  body = json_generator_to_data (generator, NULL);
-
-  send (self, nuvasha_MINECRAFT_SERVICES_URL "/launcher/login",
-        SOUP_METHOD_POST, body, "application/json", headers, STEP_MINECRAFT);
-}
-
-static void
-minecraft_answered (AuthRequest *self)
-{
-  g_autoptr (NuvashaOAuthToken) token = NULL;
-  g_autoptr (GError) error = NULL;
-
-  if (self->status < 200 || self->status > 299)
-    {
-      /* "Invalid app registration" is what the services answer an Azure
-         application that is not registered for Minecraft with, and it
-         comes through in the sentence they give. */
-      fail (self, refusal (self->body, self->status, nuvasha_AUTH_ERROR_XBOX,
-                           "the Minecraft services refused the sign-in"));
-      return;
-    }
-
-  token = nuvasha_auth_minecraft_token_from_json (self->body, -1,
-                                              g_get_real_time () / 1000000,
-                                              &error);
-
-  if (token == NULL)
-    {
-      fail (self, g_steal_pointer (&error));
-      return;
-    }
-
-  g_free (self->mc_access_token);
-  self->mc_access_token = g_steal_pointer (&token->access_token);
-  self->mc_expires_at = token->expires_at;
-
-  ask_entitlements (self);
-}
-
-/* ---------------------------------------------------------- *
- * The sixth step: whether the account owns the game
- * ---------------------------------------------------------- */
-
-static void
-ask_entitlements (AuthRequest *self)
-{
-  g_autofree char *authorization = NULL;
-  g_autofree char *url = NULL;
-  g_autofree char *request_id = g_uuid_string_random ();
-  const char *headers[] = { "Authorization", NULL, "Accept",
-                            "application/json", NULL };
-
-  authorization = g_strconcat ("Bearer ", self->mc_access_token, NULL);
-  headers[1] = authorization;
-
-  /* Current Minecraft services use the license endpoint with a request id.
-     The older mcstore endpoint can return a legacy-shaped
-     response or reject otherwise valid accounts. */
-  url = g_strdup_printf (nuvasha_MINECRAFT_SERVICES_URL
-                         "/entitlements/license?requestId=%s", request_id);
-  send (self, url,
-        SOUP_METHOD_GET, NULL, NULL, headers, STEP_ENTITLEMENTS);
-}
-
-static void
-entitlements_answered (AuthRequest *self)
-{
-  g_autoptr (GError) error = NULL;
-
-  if (self->status < 200 || self->status > 299)
-    {
-      fail (self, refusal (self->body, self->status, nuvasha_AUTH_ERROR_XBOX,
-                           "the Minecraft services did not answer with what "
-                           "this account owns"));
-      return;
-    }
-
-  if (!nuvasha_auth_owns_minecraft_from_json (self->body, -1, &error))
-    fail (self, g_steal_pointer (&error));
-  else
-    ask_profile (self);
-}
-
-/* ---------------------------------------------------------- *
- * The seventh step: who the player is
- * ---------------------------------------------------------- */
-
-static void
-ask_profile (AuthRequest *self)
-{
-  g_autofree char *authorization = NULL;
-  const char *headers[] = { "Authorization", NULL, "Accept",
-                            "application/json", NULL };
-
-  authorization = g_strconcat ("Bearer ", self->mc_access_token, NULL);
-  headers[1] = authorization;
-
-  send (self, nuvasha_MINECRAFT_SERVICES_URL "/minecraft/profile",
-        SOUP_METHOD_GET, NULL, NULL, headers, STEP_PROFILE);
-}
-
-static void
-profile_answered (AuthRequest *self)
-{
-  g_autoptr (NuvashaMinecraftProfile) profile = NULL;
-  g_autoptr (GError) error = NULL;
-  g_autofree char *uuid = NULL;
-  NuvashaAccount *account = NULL;
-
-  profile = nuvasha_auth_profile_from_json (self->body, -1, &error);
-
-  if (profile == NULL)
-    {
-      /* The services answer 404 for an account that owns the game and has
-         never played it, which the parser says in its own words rather
-         than as a service that could not be reached. */
-      fail (self, g_steal_pointer (&error));
-      return;
-    }
-
-  if (self->status < 200 || self->status > 299)
-    {
-      fail (self, refusal (self->body, self->status, nuvasha_AUTH_ERROR_NO_PROFILE,
-                           "the Minecraft services have no profile for this "
-                           "account"));
-      return;
-    }
-
-  uuid = nuvasha_auth_profile_uuid (profile->id);
-
-  if (uuid == NULL)
-    {
-      fail (self,
-            g_error_new (nuvasha_AUTH_ERROR, nuvasha_AUTH_ERROR_PARSE,
-                         "the Minecraft services answered with a profile id "
-                         "that is not a uuid"));
-      return;
-    }
-
-  /* What the launcher is handed: who the player is, and the token it is
-     run with. Nothing else of the chain is kept. */
-  account = g_new0 (NuvashaAccount, 1);
-  account->type = nuvasha_ACCOUNT_MICROSOFT;
-  account->id = g_strdup (profile->id);
-  account->name = g_strdup (profile->name);
-  account->uuid = g_steal_pointer (&uuid);
-  account->access_token = g_strdup (self->mc_access_token);
-  account->expires_at = self->mc_expires_at;
-  account->refresh_token = g_strdup (self->microsoft_refresh_token);
-  account->avatar_url = g_strdup (profile->avatar_url);
-
-  succeed (self, account, (GDestroyNotify) nuvasha_account_free);
-}
-
-/* ---------------------------------------------------------- *
- * Signing in, and refreshing
- * ---------------------------------------------------------- */
-
-NuvashaTaskScope *
-nuvasha_auth_sign_in_async (const NuvashaDeviceCode   *code,
-                        GAsyncReadyCallback    callback,
-                        gpointer               user_data)
-{
-  g_autoptr (NuvashaTaskScope) scope =
-    nuvasha_task_scope_new (NULL, NULL, callback, user_data);
-  AuthRequest *self = NULL;
-
-  g_return_val_if_fail (code != NULL, NULL);
-  g_return_val_if_fail (code->device_code != NULL, NULL);
-
-  self = request_new (scope);
-
-  if (!client_id_is_set ())
-    {
-      fail (self, no_client_id_error ());
-      return g_steal_pointer (&scope);
-    }
-
-  self->device_code = g_strdup (code->device_code);
-  self->interval = code->interval > 0 ? code->interval : 5;
-  self->deadline = self->now + code->expires_in;
-
-  ask_for_token (self);
-
-  return g_steal_pointer (&scope);
-}
-
-NuvashaAccount *
-nuvasha_auth_sign_in_finish (GAsyncResult *result, GError **error)
-{
-  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
-  g_return_val_if_fail (error == NULL || *error == NULL, NULL);
-
-  return (NuvashaAccount *) g_task_propagate_pointer (G_TASK (result), error);
-}
-
-NuvashaTaskScope *
-nuvasha_auth_refresh_async (const NuvashaAccount   *account,
-                        GAsyncReadyCallback callback,
-                        gpointer            user_data)
-{
-  g_autoptr (NuvashaTaskScope) scope =
-    nuvasha_task_scope_new (NULL, NULL, callback, user_data);
-  AuthRequest *self = NULL;
-
-  g_return_val_if_fail (account != NULL, NULL);
-
-  self = request_new (scope);
-
-  if (!client_id_is_set ())
-    {
-      fail (self, no_client_id_error ());
-      return g_steal_pointer (&scope);
-    }
-
-  /* An account with no refresh token has nothing to be refreshed with,
-     and the only thing to be done about it is for the user to sign in
-     again: what the caller is told. */
-  if (account->refresh_token == NULL || *account->refresh_token == '\0')
-    {
-      fail (self,
-            g_error_new (nuvasha_AUTH_ERROR, nuvasha_AUTH_ERROR_DECLINED,
-                         "\"%s\" has to sign in again before it can play",
-                         account->name != NULL ? account->name
-                                               : "this account"));
-      return g_steal_pointer (&scope);
-    }
-
-  self->refresh_token = g_strdup (account->refresh_token);
-  /* Microsoft does not always return a new refresh token on a refresh;
-     keep the one the account already holds when it does not. */
-  self->microsoft_refresh_token = g_strdup (account->refresh_token);
-
-  ask_for_token (self);
-
-  return g_steal_pointer (&scope);
-}
-
-NuvashaAccount *
-nuvasha_auth_refresh_finish (GAsyncResult *result, GError **error)
-{
-  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
-  g_return_val_if_fail (error == NULL || *error == NULL, NULL);
-
-  return (NuvashaAccount *) g_task_propagate_pointer (G_TASK (result), error);
-}
-
-/* ---------------------------------------------------------- *
- * Letting go
- *
- * The request is the data of the task, so it is freed when the task is:
- * the caller drops the task when it has been answered and this frees
- * what was gathered on the way, tokens and all.
- * ---------------------------------------------------------- */
-
-static void
-request_free (gpointer data)
-{
-  AuthRequest *self = data;
-
-  /* The scope owns the task this request is the data of, so reaching here
-     is the scope going away: it has already released the sources the poll
-     was waiting on. */
-
-  g_clear_object (&self->task);
-  g_clear_object (&self->message);
-  g_clear_object (&self->response_stream);
-  g_clear_pointer (&self->response_bytes, g_byte_array_unref);
-  g_free (self->body);
-  g_free (self->device_code);
-  g_free (self->refresh_token);
-  g_free (self->microsoft_refresh_token);
-  g_free (self->xbl_token);
-  g_free (self->xbl_user_hash);
-  g_free (self->xsts_token);
-  g_free (self->mc_access_token);
-  g_free (self);
 }

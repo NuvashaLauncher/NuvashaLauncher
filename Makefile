@@ -35,7 +35,7 @@ DBGFLAGS := -g -O0 -fsanitize=address,undefined -fno-sanitize-recover=all
 BIN    := build/NuvashaLauncher
 DBGBIN := build-debug/NuvashaLauncher
 
-SRCS    := $(wildcard src/*.c)
+SRCS    := $(filter-out $(wildcard src/*-part.c),$(wildcard src/*.c))
 RELOBJS := $(patsubst src/%.c,build/%.o,$(SRCS))
 DBGOBJS := $(patsubst src/%.c,build-debug/%.o,$(SRCS))
 RELDEPS := $(RELOBJS:.o=.d)
@@ -124,6 +124,7 @@ test-lsan: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS)
 
 static-analysis:
 	@set -e; for source in src/*.c; do \
+	    case "$$source" in *-part.c) continue;; esac; \
 	    $(CC) $(CPPFLAGS) -std=c17 -Wall -Wextra -Wpedantic -fanalyzer -c -o /dev/null \
 	    $(PKG_CFLAGS) -Isrc "$$source"; done
 

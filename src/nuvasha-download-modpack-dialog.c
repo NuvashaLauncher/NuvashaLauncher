@@ -875,6 +875,7 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
     run_search (self, FALSE);
 }
 
+
 /* ---------------------------------------------------------- *
  * Versions of the details page
  * ---------------------------------------------------------- */

@@ -272,6 +272,7 @@ download_file (ResolveRequest *request, ResolveStep next, const char *url,
     request->cancellable);
 }
 
+
 /* ---------------------------------------------------------- *
  * The result
  * ---------------------------------------------------------- */
@@ -468,6 +469,7 @@ resolve_finish (ResolveRequest *request)
   request_end (request, resolved);
 }
 
+
 /* ---------------------------------------------------------- *
  * Dependencies: the client jar, the libraries, the logging file
  * ---------------------------------------------------------- */
@@ -626,6 +628,7 @@ resolve_natives (ResolveRequest *request)
     nuvasha_task_scope_unref_when_done (extracting);
   }
 }
+
 
 /* ---------------------------------------------------------- *
  * Assets
@@ -970,6 +973,7 @@ resolve_assets (ResolveRequest *request)
                  description->asset_index->sha1);
   report (request);
 }
+
 
 /* ---------------------------------------------------------- *
  * Entry point
