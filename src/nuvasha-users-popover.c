@@ -1128,7 +1128,7 @@ skin_menu_new (NuvashaUsersPopover *owner, GtkImage *image, NuvashaAccount *acco
   adw_toolbar_view_set_content (toolbar, GTK_WIDGET (root));
   adw_dialog_set_child (dialog, GTK_WIDGET (toolbar));
   append_local_skins (data);
-  if (account->type != nuvasha_ACCOUNT_OFFLINE && account->avatar_url != NULL)
+  if (account->avatar_url != NULL && *account->avatar_url != '\0')
     {
       if (!g_hash_table_contains (data->skin_urls,
                                   skin_name_for_url (account->avatar_url)) &&
@@ -1136,20 +1136,9 @@ skin_menu_new (NuvashaUsersPopover *owner, GtkImage *image, NuvashaAccount *acco
                                   skin_name_for_url (account->avatar_url)))
         {
           g_autofree char *skin_name = skin_name_for_url (account->avatar_url);
-          gboolean cached = FALSE;
-          if (g_str_has_prefix (account->avatar_url, "http://") ||
-              g_str_has_prefix (account->avatar_url, "https://"))
-            {
-              g_autofree char *cached_name = g_strconcat (skin_name, ".png", NULL);
-              g_autofree char *cached_path =
-                g_build_filename (skin_directory_path (), cached_name, NULL);
-              cached = g_file_test (cached_path, G_FILE_TEST_IS_REGULAR);
-            }
-          if (!cached)
-            {
-              data->current_skin_row = skin_row_new (data, skin_name, account->avatar_url);
-              gtk_list_box_append (skins, GTK_WIDGET (data->current_skin_row));
-            }
+          data->current_skin_row = skin_row_new (data, skin_name, account->avatar_url);
+          gtk_list_box_append (skins, GTK_WIDGET (data->current_skin_row));
+          gtk_list_box_select_row (skins, GTK_LIST_BOX_ROW (data->current_skin_row));
           load_view_texture (preview, account->avatar_url, FALSE);
         }
     }
