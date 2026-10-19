@@ -457,6 +457,7 @@ drain_pending (InstallRequest *request)
     g_task_get_cancellable (request->task));
 }
 
+
 /* ---------------------------------------------------------- *
  * What the names in the arguments of a processor stand for
  * ---------------------------------------------------------- */
@@ -683,6 +684,7 @@ substitute_argument (InstallRequest *request, const char *argument,
 
   return g_strdup (result->str);
 }
+
 
 /* ---------------------------------------------------------- *
  * The steps of an install
@@ -1114,8 +1116,7 @@ stage_processor (InstallRequest *request)
   drain_pending (request);
 }
 
-/* One processor, run the way its profile says: the java that runs the game
- * runs this too, with the class the jar of the processor names. */
+/* Run one processor using the configured Java and processor main class. */
 static void
 stage_run (InstallRequest *request)
 {

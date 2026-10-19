@@ -50,17 +50,12 @@
 #define MAX_RETRY_AFTER_MS (30 * 1000)
 
 /* Transfers running at the same time. */
-#define MAX_CONCURRENT 8
-#define MAX_BULK_CONCURRENT 6
 
 /* Bytes taken from the network in one step. */
 #define CHUNK_SIZE (64 * 1024)
-#define DOWNLOAD_PRIORITY_BULK 0
-#define DOWNLOAD_PRIORITY_INTERACTIVE 100
 
 /* API documents are parsed in the main context. Refuse unexpectedly huge
  * responses before they can monopolize memory or freeze the UI. */
-#define MAX_JSON_RESPONSE_SIZE (64ULL * 1024ULL * 1024ULL)
 
 GQuark
 nuvasha_download_error_quark (void)
@@ -126,7 +121,7 @@ nuvasha_download_service_free (NuvashaDownloadService *owned_service)
   g_free (owned_service);
 }
 
-static void
+void
 service_destroy_if_requested (NuvashaDownloadService *service)
 {
   if (!service->destroy_requested ||
@@ -168,12 +163,12 @@ static void attempt_next (DownloadRequest *request);
 static void attempt_failed (DownloadRequest *request, GError *error);
 static gboolean retry_when_due (gpointer user_data);
 static gboolean retry_cancelled (gpointer user_data);
-static gboolean queued_cancelled (gpointer user_data);
+gboolean queued_cancelled (gpointer user_data);
 static void send_ready (GObject *source, GAsyncResult *result,
                         gpointer user_data);
-static void json_stream_ready (GObject *source, GAsyncResult *result,
+void nuvasha_download_json_stream_ready (GObject *source, GAsyncResult *result,
                                gpointer user_data);
-static void json_process_body (DownloadRequest *request, GBytes *body);
+void nuvasha_download_json_process_body (DownloadRequest *request, GBytes *body);
 static void cache_ready (GObject *source, GAsyncResult *result,
                               gpointer user_data);
 static void json_cache_start (DownloadRequest *request);
@@ -240,7 +235,7 @@ usable_url (const char *url)
   return message != NULL;
 }
 
-static gint
+gint
 compare_waiting_requests (gconstpointer left, gconstpointer right,
                           gpointer user_data G_GNUC_UNUSED)
 {
@@ -252,215 +247,7 @@ compare_waiting_requests (gconstpointer left, gconstpointer right,
   return a->priority > b->priority ? -1 : 1;
 }
 
-/* ---------------------------------------------------------- *
- * Slots: at most MAX_CONCURRENT transfers at a time
- * ---------------------------------------------------------- */
 
-static void
-start_transfer (DownloadRequest *request)
-{
-  NuvashaDownloadService *service = request->service;
-  gboolean interactive = request->priority >= DOWNLOAD_PRIORITY_INTERACTIVE;
-  guint total = service->interactive_running + service->bulk_running;
-  gboolean has_slot = total < MAX_CONCURRENT &&
-                      (interactive || service->bulk_running < MAX_BULK_CONCURRENT);
-
-  if (has_slot)
-    {
-      if (interactive)
-        service->interactive_running++;
-      else
-        service->bulk_running++;
-      request->holds_slot = TRUE;
-      nuvasha_task_scope_set_state (request->scope, nuvasha_TASK_STATE_RUNNING);
-      g_debug ("download operation=%" G_GUINT64_FORMAT " start pool=%s active=%u queued=%u/%u",
-               nuvasha_task_scope_get_id (request->scope), interactive ? "interactive" : "bulk",
-               nuvasha_download_service_active (service),
-               nuvasha_download_service_queued_interactive (service),
-               nuvasha_download_service_queued_bulk (service));
-      request->begin (request);
-      return;
-    }
-
-  GQueue *queue = interactive ? &service->interactive_waiting
-                              : &service->bulk_waiting;
-  GCancellable *cancellable = g_task_get_cancellable (request->task);
-
-  g_queue_insert_sorted (queue, request, compare_waiting_requests, NULL);
-  g_debug ("download operation=%" G_GUINT64_FORMAT " queued pool=%s queued=%u/%u",
-           nuvasha_task_scope_get_id (request->scope), interactive ? "interactive" : "bulk",
-           nuvasha_download_service_queued_interactive (service),
-           nuvasha_download_service_queued_bulk (service));
-
-  /* Watched through the scope, so the watch is removed along with every
-     other source this request owns. nuvasha_cancellable_watch() hands the
-     callback this request and not the cancellable, which a cancellable
-     source would have done instead. */
-  request->queue_cancel_source =
-    nuvasha_cancellable_watch (cancellable, queued_cancelled, request, NULL);
-  nuvasha_task_scope_track_source (request->scope, request->queue_cancel_source);
-}
-
-static void
-release_slot (DownloadRequest *request)
-{
-  NuvashaDownloadService *service = request->service;
-  if (!request->holds_slot)
-    return;
-
-  request->holds_slot = FALSE;
-  if (request->priority >= DOWNLOAD_PRIORITY_INTERACTIVE)
-    service->interactive_running--;
-  else
-    service->bulk_running--;
-
-  while (service->interactive_running + service->bulk_running < MAX_CONCURRENT)
-    {
-      DownloadRequest *next = NULL;
-      gboolean interactive_available =
-        !g_queue_is_empty (&service->interactive_waiting);
-      gboolean bulk_available =
-        service->bulk_running < MAX_BULK_CONCURRENT &&
-        !g_queue_is_empty (&service->bulk_waiting);
-
-      /* Alternate between classes whenever both have work. This preserves
-       * responsiveness without allowing a long stream of interactive/API
-       * requests to starve the bulk queue. Priority still applies within
-       * each class through g_queue_insert_sorted(). */
-      if (interactive_available && bulk_available && service->prefer_interactive)
-        next = g_queue_pop_head (&service->interactive_waiting);
-      else if (interactive_available && !bulk_available)
-        next = g_queue_pop_head (&service->interactive_waiting);
-      else if (bulk_available)
-        next = g_queue_pop_head (&service->bulk_waiting);
-      else if (interactive_available)
-        next = g_queue_pop_head (&service->interactive_waiting);
-
-      if (next == NULL)
-        break;
-
-      if (next->queue_cancel_source != 0)
-        {
-          nuvasha_task_scope_remove_source (next->scope,
-                                        next->queue_cancel_source);
-          next->queue_cancel_source = 0;
-        }
-
-      if (next->priority >= DOWNLOAD_PRIORITY_INTERACTIVE)
-        {
-          service->interactive_running++;
-          service->prefer_interactive = FALSE;
-        }
-      else
-        {
-          service->bulk_running++;
-          service->prefer_interactive = TRUE;
-        }
-      next->holds_slot = TRUE;
-      nuvasha_task_scope_set_state (next->scope, nuvasha_TASK_STATE_RUNNING);
-      g_debug ("download operation=%" G_GUINT64_FORMAT " dequeued active=%u queued=%u/%u",
-               nuvasha_task_scope_get_id (next->scope), nuvasha_download_service_active (service),
-               nuvasha_download_service_queued_interactive (service),
-               nuvasha_download_service_queued_bulk (service));
-      next->begin (next);
-    }
-
-  service_destroy_if_requested (service);
-}
-
-void
-nuvasha_download_service_cancel_queued (NuvashaDownloadService *owned_service)
-{
-  if (owned_service == NULL)
-    return;
-  NuvashaDownloadService *service = owned_service;
-
-  while (!g_queue_is_empty (&service->interactive_waiting))
-    {
-      DownloadRequest *request =
-        g_queue_pop_head (&service->interactive_waiting);
-      if (request->queue_cancel_source != 0)
-        {
-          nuvasha_task_scope_remove_source (request->scope,
-                                        request->queue_cancel_source);
-          request->queue_cancel_source = 0;
-        }
-      nuvasha_download_request_fail (request, nuvasha_download_cancelled_error ());
-    }
-
-  while (!g_queue_is_empty (&service->bulk_waiting))
-    {
-      DownloadRequest *request = g_queue_pop_head (&service->bulk_waiting);
-      if (request->queue_cancel_source != 0)
-        {
-          nuvasha_task_scope_remove_source (request->scope,
-                                        request->queue_cancel_source);
-          request->queue_cancel_source = 0;
-        }
-      nuvasha_download_request_fail (request, nuvasha_download_cancelled_error ());
-    }
-}
-
-/* ---------------------------------------------------------- *
- * The temporary file
- * ---------------------------------------------------------- */
-
-/* Closing a local descriptor is a single system call and cannot wait
- * for data, so it is done synchronously here. */
-static void
-close_sink (DownloadRequest *request)
-{
-  if (request->sink != NULL)
-    {
-      g_output_stream_close (request->sink, NULL, NULL);
-      g_clear_object (&request->sink);
-    }
-
-  request->fd = -1;
-}
-
-/* Removes what an attempt has written so far. */
-static void
-discard_temporary (DownloadRequest *request)
-{
-  if (request->tmp_path != NULL)
-    {
-      if (request->parent_fd >= 0 && request->tmp_name != NULL)
-        nuvasha_fs_unlink_at (request->parent_fd, request->tmp_name, NULL);
-      else
-        nuvasha_fs_unlink (request->tmp_path, NULL);
-      g_clear_pointer (&request->tmp_path, g_free);
-    }
-  g_clear_pointer (&request->tmp_name, g_free);
-  if (request->parent_fd >= 0)
-    {
-      close (request->parent_fd);
-      request->parent_fd = -1;
-    }
-
-  close_sink (request);
-}
-
-static gboolean
-open_temporary (DownloadRequest *request, GError **error)
-{
-  g_autofree char *directory = g_path_get_dirname (request->dest_path);
-
-  /* Do not create a temporary beside a destination reached through a
-   * symlink. The download is later published with rename(), so accepting a
-   * substituted parent would write into a directory other than the one the
-   * caller selected. The instance installer creates real private temporary
-   * directories, and rejecting symlink parents is the safe default for all
-   * other callers too. */
-  request->fd = nuvasha_fs_open_temporary_file_nofollow (
-    directory, &request->tmp_name, &request->tmp_path, &request->parent_fd,
-    error);
-  if (request->fd < 0)
-    return FALSE;
-  request->sink = g_unix_output_stream_new (request->fd, TRUE);
-
-  return TRUE;
-}
 
 /* ---------------------------------------------------------- *
  * Ending a request
@@ -489,7 +276,7 @@ request_free (DownloadRequest *request)
     nuvasha_task_scope_remove_source (request->scope,
                                   request->queue_cancel_source);
 
-  close_sink (request);
+  nuvasha_download_close_sink (request);
   g_clear_pointer (&request->chunk, g_bytes_unref);
   g_clear_pointer (&request->json_body, g_byte_array_unref);
   g_clear_pointer (&request->checksum, g_checksum_free);
@@ -532,8 +319,8 @@ nuvasha_download_request_fail (DownloadRequest *request, GError *error)
                                                : nuvasha_TASK_STATE_FAILED);
   g_debug ("download operation=%" G_GUINT64_FORMAT " %s", 
            nuvasha_task_scope_get_id (scope), cancelled ? "cancelled" : "failed");
-  discard_temporary (request);
-  release_slot (request);
+  nuvasha_download_discard_temporary (request);
+  nuvasha_download_release_slot (request);
   request_free (request);
   nuvasha_task_scope_return_error (scope, error);
 }
@@ -545,7 +332,7 @@ request_succeed (DownloadRequest *request)
   g_debug ("download operation=%" G_GUINT64_FORMAT " completed",
            nuvasha_task_scope_get_id (scope));
 
-  release_slot (request);
+  nuvasha_download_release_slot (request);
   request_free (request);
   nuvasha_task_scope_return_boolean (scope, TRUE);
 }
@@ -557,10 +344,11 @@ nuvasha_download_request_succeed_json (DownloadRequest *request, JsonParser *par
   g_debug ("download operation=%" G_GUINT64_FORMAT " completed",
            nuvasha_task_scope_get_id (scope));
 
-  release_slot (request);
+  nuvasha_download_release_slot (request);
   request_free (request);
   nuvasha_task_scope_return_pointer (scope, parser, g_object_unref);
 }
+
 
 /* ---------------------------------------------------------- *
  * Checking the cache before downloading
@@ -845,6 +633,7 @@ cache_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   }
 }
 
+
 /* ---------------------------------------------------------- *
  * Reading the response status
  * ---------------------------------------------------------- */
@@ -887,7 +676,7 @@ retry_after_ms (DownloadRequest *request)
 /* NULL when the response is a success status, otherwise the error this
  * attempt ends with. HTTP 429 gets its own code so the caller can see
  * that the server asked to slow down. */
-static GError *
+GError *
 check_status (DownloadRequest *request)
 {
   guint status = soup_message_get_status (request->message);
@@ -910,6 +699,7 @@ check_status (DownloadRequest *request)
                       status, reason != NULL ? reason : "Error", url);
 }
 
+
 /* ---------------------------------------------------------- *
  * Transferring the body
  * ---------------------------------------------------------- */
@@ -921,8 +711,8 @@ report_progress (DownloadRequest *request)
     request->progress (request->done, request->total, request->user_data);
 }
 
-static void read_next_chunk (DownloadRequest *request);
-static void end_attempt (DownloadRequest *request, GError *error);
+void read_next_chunk (DownloadRequest *request);
+void end_attempt (DownloadRequest *request, GError *error);
 
 static void
 send_ready (GObject *source, GAsyncResult *result, gpointer user_data)
@@ -963,7 +753,7 @@ send_ready (GObject *source, GAsyncResult *result, gpointer user_data)
   read_next_chunk (request);
 }
 
-static void
+void
 read_next_chunk (DownloadRequest *request)
 {
   g_input_stream_read_bytes_async (request->source, CHUNK_SIZE,
@@ -993,7 +783,7 @@ read_chunk_ready (GObject *source, GAsyncResult *result, gpointer user_data)
         {
           g_autoptr (GBytes) body =
             g_byte_array_free_to_bytes (g_steal_pointer (&request->json_body));
-          json_process_body (request, body);
+          nuvasha_download_json_process_body (request, body);
         }
       else
         end_attempt (request, NULL);
@@ -1108,7 +898,7 @@ verify_and_install (DownloadRequest *request)
       return;
     }
 
-  close_sink (request);
+  nuvasha_download_close_sink (request);
 
   g_autofree char *destination_name = g_path_get_basename (request->dest_path);
   g_autoptr (GError) rename_error = NULL;
@@ -1143,7 +933,7 @@ verify_and_install (DownloadRequest *request)
 /* Ends one attempt. A NULL @error means that a file body arrived
  * complete, which only a file request reports. The response stream is
  * always closed first so the connection goes back to the session. */
-static void
+void
 end_attempt (DownloadRequest *request, GError *error)
 {
   g_assert (request->pending_error == NULL);
@@ -1184,6 +974,7 @@ attempt_next (DownloadRequest *request)
 
   verify_and_install (request);
 }
+
 
 /* ---------------------------------------------------------- *
  * Retrying an attempt
@@ -1260,7 +1051,7 @@ attempt_failed (DownloadRequest *request, GError *error)
 
   if (retry)
     {
-      discard_temporary (request);
+      nuvasha_download_discard_temporary (request);
       g_clear_error (&error);
       nuvasha_task_scope_set_state (request->scope, nuvasha_TASK_STATE_RETRYING);
       g_debug ("download operation=%" G_GUINT64_FORMAT " retry attempt=%u",
@@ -1323,7 +1114,7 @@ retry_cancelled (gpointer user_data)
 
 /* Cancelled while waiting for a transfer slot. The watch is torn down by
    returning G_SOURCE_REMOVE, which also means this cannot be asked twice. */
-static gboolean
+gboolean
 queued_cancelled (gpointer user_data)
 {
   DownloadRequest *request = user_data;
@@ -1338,6 +1129,7 @@ queued_cancelled (gpointer user_data)
 
   return G_SOURCE_REMOVE;
 }
+
 
 /* ---------------------------------------------------------- *
  * Starting one attempt
@@ -1400,11 +1192,11 @@ start_attempt (DownloadRequest *request)
       request->json_body = g_byte_array_new ();
       soup_session_send_async (get_session (request->service), request->message,
                                G_PRIORITY_DEFAULT, cancellable,
-                               json_stream_ready, request);
+                               nuvasha_download_json_stream_ready, request);
       return;
     }
 
-  if (!open_temporary (request, &error))
+  if (!nuvasha_download_open_temporary (request, &error))
     {
       nuvasha_download_request_fail (request, g_steal_pointer (&error));
       return;
@@ -1418,128 +1210,8 @@ start_attempt (DownloadRequest *request)
                            request);
 }
 
-/* ---------------------------------------------------------- *
- * JSON bodies
- * ---------------------------------------------------------- */
 
-static void
-json_process_body (DownloadRequest *request, GBytes *body)
-{
-  g_autoptr (GError) error = NULL;
-  GError *status_error = NULL;
-  g_autoptr (JsonParser) parser = NULL;
-  g_autoptr (GError) parse_error = NULL;
-  g_autofree char *response = NULL;
-  gsize size = 0;
-  const char *data = NULL;
 
-  status_error = check_status (request);
-
-  if (request->stale_json != NULL &&
-      soup_message_get_status (request->message) == SOUP_STATUS_NOT_MODIFIED)
-    {
-      g_autoptr (JsonParser) stale = json_parser_new ();
-
-      if (json_parser_load_from_data (stale, request->stale_json, -1, NULL) &&
-          json_parser_get_root (stale) != NULL)
-        {
-          g_clear_error (&status_error);
-          nuvasha_download_request_succeed_json (request, g_steal_pointer (&stale));
-          return;
-        }
-    }
-
-  if (status_error != NULL)
-    {
-      end_attempt (request, status_error);
-      return;
-    }
-
-  parser = json_parser_new ();
-  data = g_bytes_get_data (body, &size);
-
-  {
-    const char *etag = soup_message_headers_get_one (
-      soup_message_get_response_headers (request->message), "ETag");
-
-    g_clear_pointer (&request->response_etag, g_free);
-    request->response_etag = g_strdup (etag);
-  }
-
-  if (size > MAX_JSON_RESPONSE_SIZE)
-    {
-      nuvasha_download_request_fail (request,
-                    g_error_new (nuvasha_DOWNLOAD_ERROR, nuvasha_DOWNLOAD_ERROR_IO,
-                                 "the JSON response is too large (%zu bytes)",
-                                 size));
-      return;
-    }
-
-  if (!json_parser_load_from_data (parser, data != NULL ? data : "",
-                                   (gssize) size, &parse_error))
-    {
-      /* A body that is not JSON would come back unchanged on a retry,
-         so the parse error is reported as it is. */
-      nuvasha_download_request_fail (request, g_steal_pointer (&parse_error));
-      return;
-    }
-
-  if (json_parser_get_root (parser) == NULL)
-    {
-      /* json-glib accepts an empty document without complaint; there
-         is nothing to hand to a caller though. */
-      nuvasha_download_request_fail (request,
-                    g_error_new_literal (JSON_PARSER_ERROR,
-                                         JSON_PARSER_ERROR_PARSE,
-                                         "the response body holds no JSON"));
-      return;
-    }
-
-  if (request->api_cache && request->cache_path != NULL)
-    {
-      data = g_bytes_get_data (body, &size);
-      response = g_strndup (data, size);
-      request->pending_parser = g_steal_pointer (&parser);
-      nuvasha_download_cache_write (request, response);
-      return;
-    }
-
-  nuvasha_download_request_succeed_json (request, g_steal_pointer (&parser));
-}
-
-static void
-json_stream_ready (GObject *source, GAsyncResult *result, gpointer user_data)
-{
-  DownloadRequest *request = user_data;
-  g_autoptr (GError) error = NULL;
-  GInputStream *stream = soup_session_send_finish (SOUP_SESSION (source),
-                                                   result, &error);
-  SoupMessageHeaders *headers = NULL;
-  goffset length = -1;
-
-  if (stream == NULL)
-    {
-      end_attempt (request, g_steal_pointer (&error));
-      return;
-    }
-
-  request->source = stream;
-  headers = soup_message_get_response_headers (request->message);
-  length = soup_message_headers_get_content_length (headers);
-  if (length > (goffset) MAX_JSON_RESPONSE_SIZE)
-    {
-      end_attempt (request,
-                   g_error_new_literal (nuvasha_DOWNLOAD_ERROR,
-                                        nuvasha_DOWNLOAD_ERROR_IO,
-                                        "the JSON response is too large"));
-      return;
-    }
-  read_next_chunk (request);
-}
-
-/* ---------------------------------------------------------- *
- * The public interface
- * ---------------------------------------------------------- */
 
 NuvashaTaskScope *
 nuvasha_download_file_async (NuvashaDownloadService *service, const char *url,
@@ -1592,7 +1264,7 @@ nuvasha_download_file_async (NuvashaDownloadService *service, const char *url,
   request->priority = DOWNLOAD_PRIORITY_BULK;
   request->begin = file_request_start;
 
-  start_transfer (request);
+  nuvasha_download_start_transfer (request);
 
   return g_steal_pointer (&scope);
 }
@@ -1646,7 +1318,7 @@ nuvasha_download_json_async (NuvashaDownloadService *service, const char *url,
   request->priority = DOWNLOAD_PRIORITY_INTERACTIVE;
   request->begin = start_attempt;
 
-  start_transfer (request);
+  nuvasha_download_start_transfer (request);
 
   return g_steal_pointer (&scope);
 }
@@ -1703,7 +1375,7 @@ nuvasha_download_json_cached_async (NuvashaDownloadService *service, const char 
   request->total = -1;
   request->priority = DOWNLOAD_PRIORITY_INTERACTIVE;
   request->begin = json_cache_start;
-  start_transfer (request);
+  nuvasha_download_start_transfer (request);
 
   return g_steal_pointer (&scope);
 }
@@ -1747,7 +1419,7 @@ nuvasha_download_json_post_cached_async (NuvashaDownloadService *service,
   request->total = -1;
   request->priority = DOWNLOAD_PRIORITY_INTERACTIVE;
   request->begin = json_cache_start;
-  start_transfer (request);
+  nuvasha_download_start_transfer (request);
 
   return g_steal_pointer (&scope);
 }

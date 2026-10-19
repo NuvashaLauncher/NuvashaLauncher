@@ -9,6 +9,11 @@
 
 #include <libsoup/soup.h>
 
+#define MAX_CONCURRENT 8
+#define MAX_BULK_CONCURRENT 6
+#define DOWNLOAD_PRIORITY_BULK 0
+#define DOWNLOAD_PRIORITY_INTERACTIVE 100
+
 struct _NuvashaDownloadService {
   SoupSession *session;
   guint interactive_running;
@@ -90,3 +95,21 @@ void nuvasha_download_request_succeed_json (DownloadRequest *request,
 void nuvasha_download_cache_write (DownloadRequest *request, const char *response);
 
 #endif
+
+void nuvasha_download_close_sink (DownloadRequest *request);
+void nuvasha_download_discard_temporary (DownloadRequest *request);
+gboolean nuvasha_download_open_temporary (DownloadRequest *request, GError **error);
+
+void nuvasha_download_start_transfer (DownloadRequest *request);
+void nuvasha_download_release_slot (DownloadRequest *request);
+gint compare_waiting_requests (gconstpointer left, gconstpointer right, gpointer user_data);
+gboolean queued_cancelled (gpointer user_data);
+void service_destroy_if_requested (NuvashaDownloadService *service);
+
+void nuvasha_download_json_process_body (DownloadRequest *request, GBytes *body);
+void nuvasha_download_json_stream_ready (GObject *source, GAsyncResult *result, gpointer user_data);
+
+#define MAX_JSON_RESPONSE_SIZE (64ULL * 1024ULL * 1024ULL)
+GError *check_status (DownloadRequest *request);
+void end_attempt (DownloadRequest *request, GError *error);
+void read_next_chunk (DownloadRequest *request);

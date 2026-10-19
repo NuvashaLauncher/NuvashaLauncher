@@ -57,4 +57,3 @@ nuvasha_launch_state_is_busy (NuvashaLaunchState state)
          state == nuvasha_LAUNCH_LAUNCHING || state == nuvasha_LAUNCH_RUNNING ||
          state == nuvasha_LAUNCH_STOPPING;
 }
-

@@ -1279,6 +1279,8 @@ reload_installed (NuvashaContentPage *self)
   }
 }
 
+
+
   /* Update All: collect updates, confirm once, then install them. */
 
 static void

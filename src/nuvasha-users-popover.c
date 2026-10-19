@@ -1186,6 +1186,7 @@ update_the_button (NuvashaUsersPopover *self)
 
 }
 
+
 /* ------------------------------------------------------ *
  * One account
  * ------------------------------------------------------ */
@@ -1399,6 +1400,7 @@ append_account_row (NuvashaUsersPopover *self, const NuvashaAccount *account)
   gtk_list_box_append (GTK_LIST_BOX (self->list_box), GTK_WIDGET (row));
 }
 
+
 /* ------------------------------------------------------ *
  * Adding one
  * ------------------------------------------------------ */
@@ -1453,6 +1455,7 @@ on_add_offline_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
   gtk_popover_popdown (GTK_POPOVER (self));
 }
+
 
 /* ------------------------------------------------------ *
  * The whole list
