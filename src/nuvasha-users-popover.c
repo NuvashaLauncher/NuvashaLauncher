@@ -1374,9 +1374,14 @@ append_account_row (NuvashaUsersPopover *self, const NuvashaAccount *account)
   set_avatar_icon (GTK_IMAGE (image));
   if (account->type == nuvasha_ACCOUNT_OFFLINE)
     {
-      g_autofree char *steve = default_steve_path ();
-      if (!set_local_avatar (GTK_IMAGE (image), steve))
-        set_avatar_icon (GTK_IMAGE (image));
+      if (account->avatar_url != NULL && *account->avatar_url != '\0')
+        set_avatar (self, GTK_IMAGE (image), account->avatar_url);
+      else
+        {
+          g_autofree char *steve = default_steve_path ();
+          if (!set_local_avatar (GTK_IMAGE (image), steve))
+            set_avatar_icon (GTK_IMAGE (image));
+        }
     }
   else
     set_avatar (self, GTK_IMAGE (image), account->avatar_url);
