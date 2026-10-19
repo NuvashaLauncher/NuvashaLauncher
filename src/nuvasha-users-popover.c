@@ -1209,7 +1209,6 @@ update_the_button (NuvashaUsersPopover *self)
 
   self->active_name = g_strdup (account->name);
   set_avatar_icon (GTK_IMAGE (self->avatar_image));
-  set_avatar (self, GTK_IMAGE (self->avatar_image), account->avatar_url);
 
 }
 
