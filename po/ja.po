@@ -367,17 +367,11 @@ msgstr "1日"
 msgid "7 days"
 msgstr "7日"
 
-msgid "Clear nuvasha Cache"
-msgstr "nuvasha キャッシュを消去"
-
 msgid "Show Shortcuts"
 msgstr "ショートカットを表示"
 
 msgid "Quit"
 msgstr "終了"
-
-msgid "Clear nuvasha Cache?"
-msgstr "nuvasha キャッシュを消去しますか？"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -550,9 +544,6 @@ msgstr "%s ダウンロード"
 msgid "Cache Cleared"
 msgstr "キャッシュを消去しました"
 
-msgid "nuvasha cache data was cleared successfully."
-msgstr "nuvasha のキャッシュデータを正常に消去しました。"
-
 msgid "Cache Cleanup Failed"
 msgstr "キャッシュの消去に失敗しました"
 
@@ -609,7 +600,7 @@ msgid "Enable sandbox"
 msgstr "サンドボックスを有効にする"
 
 msgid "Allow sandbox network access"
-msgstr "Allow sandbox network access"
+msgstr "サンドボックスのネットワークアクセスを許可する"
 # UI string
 msgid "Skin"
 msgstr "Skin"
@@ -620,15 +611,11 @@ msgstr "スリムモデル"
 
 # UI string
 msgid "OK"
-msgstr "OK"
+msgstr "わかった"
 
 # UI string
 msgid "Export skin…"
 msgstr "スキンをエクスポート…"
-
-# UI string
-msgid "Imported skin"
-msgstr "Imported skin"
 
 # UI string
 msgid "Default model"
@@ -636,7 +623,7 @@ msgstr "標準モデル"
 
 # UI string
 msgid "PNG skin texture"
-msgstr "PNG skin texture"
+msgstr "PNGのスキンテクスチャ"
 
 # UI string
 msgid "Invalid skin"
@@ -650,7 +637,6 @@ msgstr "マントなし"
 msgid "Import skin…"
 msgstr "スキンをインポート…"
 
-
 # UI string
 msgid "Delete skin?"
 msgstr "スキンを削除しますか？"
@@ -661,3 +647,254 @@ msgstr "このスキンはスキンライブラリから削除されます。"
 
 msgid "Skin images must be 64x64 or 64x32 PNG files"
 msgstr "スキン画像は64x64または64x32のPNGファイルである必要があります"
+
+msgid "Bahasa Indonesia"
+msgstr "Bahasa Indonesia"
+
+msgid "Browse Modpacks"
+msgstr "Modパックを閲覧する"
+
+msgid "Choose Files"
+msgstr "ファイルを選択"
+
+msgid "Clear Nuvasha Cache"
+msgstr "Nuvashaのキャッシュをクリアする"
+
+msgid "Clear Nuvasha Cache?"
+msgstr "Nuvashaのキャッシュを消去しますか？"
+
+msgid ""
+"Conflicts\n"
+msgstr ""
+"対立\n"
+
+msgid "Content"
+msgstr "目次"
+
+msgid "Could not install"
+msgstr "インストールできませんでした"
+
+msgid "Could not install the modpack"
+msgstr "MODパックをインストールできませんでした"
+
+msgid "Could not load categories"
+msgstr "カテゴリを読み込めませんでした"
+
+msgid "Could not search Modrinth"
+msgstr "Modrinth の検索に失敗しました"
+
+msgid "Could not understand the answer"
+msgstr "その答えが理解できなかった"
+
+msgid "Dansk"
+msgstr "Dansk"
+
+msgid "Deutsch"
+msgstr "Deutsch"
+
+msgid "Disable"
+msgstr "無効にする"
+
+msgid "Dismiss"
+msgstr "閉じる"
+
+msgid "Enable"
+msgstr "有効にする"
+
+msgid "English"
+msgstr "English"
+
+msgid "Español (Argentina)"
+msgstr "Español (Argentina)"
+
+msgid "Español (España)"
+msgstr "Español (España)"
+
+msgid "Fabric"
+msgstr "Fabric"
+
+msgid "Forge"
+msgstr "Forge"
+
+msgid "Français"
+msgstr "Français"
+
+msgid "Images"
+msgstr "画像"
+
+msgid "Installing"
+msgstr "インストール"
+
+msgid "Instances cannot contain %s in their name"
+msgstr "インスタンスの名前%sには、以下を含めることはできません"
+
+msgid "It carries files that Nuvasha does not recognize."
+msgstr "Nuvashaが認識できないファイルが含まれています。"
+
+msgid "Italiano"
+msgstr "Italiano"
+
+msgid "Magyar"
+msgstr "Magyar"
+
+msgid "Microsoft"
+msgstr "Microsoft"
+
+msgid "Microsoft returned an unsafe verification address"
+msgstr "マイクロソフトは、安全でない検証アドレスを返しました"
+
+msgid "Microsoft would not give a code to sign in with"
+msgstr "マイクロソフトは、ログイン用のコードを提供してくれませんでした"
+
+msgid "Microsoft · Needs sign-in"
+msgstr "Microsoft · サインインが必要です"
+
+msgid "Modrinth does not know this file"
+msgstr "Modrinthはこのファイルを知りません"
+
+msgid "Modrinth is asking Nuvasha to slow down, too many requests"
+msgstr "モドリンスはヌヴァシャにペースを落とすよう頼んでいる。依頼が多すぎるからだ。"
+
+msgid "Nederlands"
+msgstr "Nederlands"
+
+msgid "NeoForge"
+msgstr "NeoForge"
+
+msgid "No compatible Java runtime was found."
+msgstr "互換性のあるJavaランタイムが見つかりませんでした。"
+
+msgid "No modpack matches what was asked for. Try another word"
+msgstr "ご指定の内容に一致するモッドパックはありません。別のキーワードをお試しください。"
+
+msgid "None"
+msgstr "なし"
+
+msgid "Norsk (bokmål)"
+msgstr "Norsk (bokmål)"
+
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"
+
+msgid "Nuvasha cache data was cleared successfully."
+msgstr "Nuvashaのキャッシュデータは正常に消去されました。"
+
+msgid "Offline"
+msgstr "オフライン"
+
+msgid "Pick a Minecraft version from the list."
+msgstr "リストからMinecraftのバージョンを選んでください。"
+
+msgid "Pick a version of the loader, or pick another loader."
+msgstr "ローダーのバージョンを選択するか、別のローダーを選択してください。"
+
+msgid "Polski"
+msgstr "Polski"
+
+msgid "Português (Brasil)"
+msgstr "Português (Brasil)"
+
+msgid "Português (Portugal)"
+msgstr "Português (Portugal)"
+
+msgid "Quilt"
+msgstr "Quilt"
+
+msgid "Remove %s?"
+msgstr "削除する%s？"
+
+msgid "Română"
+msgstr "Română"
+
+msgid "Search Modrinth and install a modpack"
+msgstr "Modrinthを検索して、Modpackをインストールする"
+
+msgid "Skin"
+msgstr "肌"
+
+msgid "Stop %s?"
+msgstr "ストップ%s？"
+
+msgid "Suomi"
+msgstr "Suomi"
+
+msgid "Svenska"
+msgstr "Svenska"
+
+msgid "System default"
+msgstr "システムのデフォルト設定"
+
+msgid "The account is removed from Nuvasha and its saved sign-in is forgotten. The game itself is not touched."
+msgstr "そのアカウントはNuvashaから削除され、保存されていたログイン情報は消去されます。ゲーム本体には一切影響はありません。"
+
+msgid "The game is running and will close. Progress since the last save is lost."
+msgstr "ゲームが実行中ですが、まもなく終了します。前回のセーブ以降に進めた内容は失われます。"
+
+msgid "This project publishes no pack file Nuvasha can install."
+msgstr "このプロジェクトでは、Nuvashaがインストールできるパックファイルは公開されていません。"
+
+msgid "This version has no pack file"
+msgstr "このバージョンにはパックファイルが含まれていません"
+
+msgid "Tiếng Việt"
+msgstr "Tiếng Việt"
+
+msgid "Türkçe"
+msgstr "Türkçe"
+
+msgid "Unavailable"
+msgstr "利用不可"
+
+msgid "Vanilla"
+msgstr "Vanilla"
+
+msgid "Xbox Live is not available for the country this account is registered in"
+msgstr "このアカウントが登録されている国では、Xbox Liveをご利用いただけません"
+
+msgid "the game"
+msgstr "そのゲーム"
+
+msgid "the instance name cannot be used as a directory name"
+msgstr "インスタンス名はディレクトリ名として使用できません"
+
+msgid "the instance name is empty"
+msgstr "インスタンス名が空です"
+
+msgid "the sign-in did not finish"
+msgstr "サインインが完了しませんでした"
+
+msgid "this Microsoft account has no Xbox profile behind it yet: sign in to xbox.com once with it, then sign in here again"
+msgstr "このMicrosoftアカウントにはまだXboxプロファイルが紐付けられていません。一度xbox.comにこのアカウントでサインインしてから、こちらに再度サインインしてください。"
+
+msgid "this account"
+msgstr "このアカウント"
+
+msgid "this account needs an adult to verify it before it can play, which is what South Korean accounts have to do"
+msgstr "このアカウントは、プレイを開始する前に成人による確認が必要ですが、これは韓国のアカウントでも同様の手続きが必要です。"
+
+msgid "this is a child account: it has to be added to a Microsoft family by an adult before it can play"
+msgstr "これは子供用アカウントです。ゲームをプレイするには、大人がMicrosoftファミリーにこのアカウントを追加する必要があります。"
+
+msgid "Čeština"
+msgstr "Čeština"
+
+msgid "Русский"
+msgstr "Русский"
+
+msgid "Українська"
+msgstr "Українська"
+
+msgid "العربية"
+msgstr "العربية"
+
+msgid "日本語"
+msgstr "日本語"
+
+msgid "简体中文"
+msgstr "简体中文"
+
+msgid "繁體中文"
+msgstr "繁體中文"
+
+msgid "한국어"
+msgstr "한국어"

@@ -58,7 +58,7 @@ nuvasha_account_copy (const NuvashaAccount *account)
 const char *
 nuvasha_account_type_name (NuvashaAccountType type)
 {
-  return type == nuvasha_ACCOUNT_MICROSOFT ? "Microsoft" : "Offline";
+  return type == nuvasha_ACCOUNT_MICROSOFT ? _("Microsoft") : _("Offline");
 }
 
 char *

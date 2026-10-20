@@ -100,7 +100,7 @@ on_install_done (GObject *source G_GNUC_UNUSED,
           !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         {
           self->fail_is_install = TRUE;
-          push_error (self, "Could not install the modpack", error->message,
+           push_error (self, _("Could not install the modpack"), error->message,
                       G_CALLBACK (on_error_retry_install));
         }
       else if (!g_error_matches (error, nuvasha_MODPACK_ERROR,
@@ -206,12 +206,12 @@ build_optional_page (NuvashaDownloadModpackDialog *self,
   GtkButton *install = GTK_BUTTON (gtk_button_new_with_label (_("Install")));
   GtkWidget *page = NULL;
 
-  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)), GTK_WIDGET (header));
+  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), GTK_WIDGET (header));
 
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (GTK_WIDGET (heading)),
+  adw_preferences_group_set_title (heading,
                                    _("Optional files"));
   adw_preferences_group_set_description (
-    ADW_PREFERENCES_GROUP (heading),
+    heading,
     _("The pack lists these files but says they are not needed. Nothing of "
       "them is installed unless you ask. Default is off"));
 
@@ -225,19 +225,19 @@ build_optional_page (NuvashaDownloadModpackDialog *self,
       NuvashaModpackFile *file = g_ptr_array_index (optional_files, i);
       AdwSwitchRow *row = ADW_SWITCH_ROW (adw_switch_row_new ());
 
-      adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), FALSE);
-      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), file->path);
-      adw_switch_row_set_active (ADW_SWITCH_ROW (GTK_WIDGET (row)), FALSE);
+      adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
+      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), file->path);
+      adw_switch_row_set_active (ADW_SWITCH_ROW (row), FALSE);
       gtk_widget_add_css_class (GTK_WIDGET (row), "dim-label");
 
-      adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (heading)), GTK_WIDGET (row));
+      adw_preferences_group_add (heading, GTK_WIDGET (row));
       g_ptr_array_add (self->opt_switch_rows, row);
       g_ptr_array_add (self->opt_files, file);
     }
 
   gtk_widget_add_css_class (GTK_WIDGET (install), "suggested-action");
-  gtk_box_append (GTK_BOX (GTK_WIDGET (buttons)), GTK_WIDGET (cancel));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (buttons)), GTK_WIDGET (install));
+  gtk_box_append (GTK_BOX (buttons), GTK_WIDGET (cancel));
+  gtk_box_append (GTK_BOX (buttons), GTK_WIDGET (install));
   gtk_widget_set_margin_start (GTK_WIDGET (buttons), 12);
   gtk_widget_set_margin_end (GTK_WIDGET (buttons), 12);
   gtk_widget_set_margin_bottom (GTK_WIDGET (buttons), 12);
@@ -251,16 +251,16 @@ build_optional_page (NuvashaDownloadModpackDialog *self,
   AdwPreferencesPage *page_holder =
     ADW_PREFERENCES_PAGE (adw_preferences_page_new ());
 
-  adw_preferences_page_add (page_holder, ADW_PREFERENCES_GROUP (GTK_WIDGET (heading)));
+  adw_preferences_page_add (page_holder, heading);
 
   GtkBox *boxy = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
 
-  gtk_box_append (GTK_BOX (GTK_WIDGET (boxy)), GTK_WIDGET (page_holder));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (boxy)), GTK_WIDGET (buttons));
+  gtk_box_append (GTK_BOX (boxy), GTK_WIDGET (page_holder));
+  gtk_box_append (GTK_BOX (boxy), GTK_WIDGET (buttons));
 
-  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)), GTK_WIDGET (boxy));
-  page = GTK_WIDGET (adw_navigation_page_new (GTK_WIDGET (toolbar), "Choose Files"));
-  adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (GTK_WIDGET (page)), "optional");
+  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), GTK_WIDGET (boxy));
+  page = GTK_WIDGET (adw_navigation_page_new (GTK_WIDGET (toolbar), _("Choose Files")));
+  adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (page), "optional");
 
   return page;
 }
@@ -482,8 +482,8 @@ dialog_start_features (NuvashaDownloadModpackDialog *self)
   if (file == NULL)
     {
       self->fail_is_install = FALSE;
-      push_error (self, "This version has no pack file",
-                  "It carries files that nuvasha does not recognize.",
+       push_error (self, _("This version has no pack file"),
+                   _("It carries files that Nuvasha does not recognize."),
                   G_CALLBACK (on_error_retry_fetch));
       return FALSE;
     }

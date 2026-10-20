@@ -148,7 +148,7 @@ fail (GTask *task, GError *error)
       if (error->code == nuvasha_DOWNLOAD_ERROR_RATE_LIMITED)
         wrapped = g_error_new_literal (
             nuvasha_MODRINTH_ERROR, nuvasha_MODRINTH_ERROR_RATE_LIMIT,
-            "Modrinth is asking nuvasha to slow down, too many requests");
+            _("Modrinth is asking Nuvasha to slow down, too many requests"));
       else if (error->code == nuvasha_DOWNLOAD_ERROR_HTTP)
         wrapped = g_error_new (nuvasha_MODRINTH_ERROR, nuvasha_MODRINTH_ERROR_HTTP,
                                "%s", error->message);
@@ -209,7 +209,7 @@ json_flight_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                  request->scope,
                  g_error_new_literal (nuvasha_MODRINTH_ERROR,
                                       nuvasha_MODRINTH_ERROR_NOT_FOUND,
-                                      "Modrinth does not know this file"));
+                                       _("Modrinth does not know this file")));
               continue;
             }
 
@@ -268,7 +268,7 @@ json_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
             task,
             g_error_new_literal (nuvasha_MODRINTH_ERROR,
                                  nuvasha_MODRINTH_ERROR_NOT_FOUND,
-                                 "Modrinth does not know this file"));
+                                  _("Modrinth does not know this file")));
           return;
         }
 

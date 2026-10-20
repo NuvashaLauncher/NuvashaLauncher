@@ -1012,7 +1012,7 @@ select_saved_skin (SkinMenu *menu)
 
   if (match != NULL)
     {
-      menu->current_skin_row = ADW_ACTION_ROW (GTK_WIDGET (match));
+      menu->current_skin_row = ADW_ACTION_ROW (match);
       gtk_list_box_select_row (menu->skins, match);
     }
 }
@@ -1360,11 +1360,11 @@ on_remove_clicked (GtkButton *button, gpointer user_data)
   gtk_popover_popdown (GTK_POPOVER (self));
 
   heading = g_strdup_printf (
-    "Remove %s?", name != NULL && *name != '\0' ? name : "this account");
+    _("Remove %s?"), name != NULL && *name != '\0' ? name : _("this account"));
 
   alert = ADW_ALERT_DIALOG (adw_alert_dialog_new (
-      heading, "The account is removed from nuvasha and its saved sign-in is "
-               "forgotten. The game itself is not touched."));
+      heading, _("The account is removed from Nuvasha and its saved sign-in is "
+                 "forgotten. The game itself is not touched.")));
   adw_alert_dialog_set_heading_use_markup (alert, FALSE);
   adw_alert_dialog_set_body_use_markup (alert, FALSE);
   adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
@@ -1403,16 +1403,16 @@ append_account_row (NuvashaUsersPopover *self, const NuvashaAccount *account)
 
   /* The name and the kind are plain text: an account name may hold an
      "&". Owned by the row, which is itself the clickable target. */
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), FALSE);
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), account->name);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), account->name);
 
   /* The kind of account is on every row: an offline session and a
      Microsoft one are not the same thing to play with, and the user is
      the one who has to know which one a launch will run as. An account
      whose token has run out says so here, which is earlier than finding
      it out from a launch that stops. */
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (row)),
-                               needs_sign_in ? "Microsoft · Needs sign-in"
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (row),
+                                needs_sign_in ? _("Microsoft · Needs sign-in")
                                              : nuvasha_account_type_name (
                                                    account->type));
 
@@ -1433,7 +1433,7 @@ append_account_row (NuvashaUsersPopover *self, const NuvashaAccount *account)
     }
   else
     set_avatar (self, GTK_IMAGE (image), account->avatar_url);
-  gtk_image_set_pixel_size (GTK_IMAGE (GTK_WIDGET (image)), AVATAR_SIZE);
+  gtk_image_set_pixel_size (GTK_IMAGE (image), AVATAR_SIZE);
   gtk_widget_set_valign (GTK_WIDGET (image), GTK_ALIGN_CENTER);
   gtk_button_set_child (avatar, GTK_WIDGET (image));
   gtk_button_set_has_frame (avatar, FALSE);
@@ -1442,7 +1442,7 @@ append_account_row (NuvashaUsersPopover *self, const NuvashaAccount *account)
                           g_strdup (account->id), g_free);
   g_signal_connect (avatar, "clicked", G_CALLBACK (on_avatar_clicked), self);
   g_object_set_data (G_OBJECT (row), "nuvasha-account-image", image);
-  adw_action_row_add_prefix (ADW_ACTION_ROW (GTK_WIDGET (row)),
+  adw_action_row_add_prefix (ADW_ACTION_ROW (row),
                              GTK_WIDGET (avatar));
 
   /* The mark of the one a launch plays as, at the far end of the row. */
@@ -1452,12 +1452,12 @@ append_account_row (NuvashaUsersPopover *self, const NuvashaAccount *account)
 
       gtk_widget_add_css_class (GTK_WIDGET (check), "accent");
       gtk_widget_set_valign (GTK_WIDGET (check), GTK_ALIGN_CENTER);
-      adw_action_row_add_suffix (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (check));
+      adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (check));
     }
 
   tooltip = g_strdup_printf (_("Remove \"%s\""), account->name);
   gtk_widget_set_tooltip_text (GTK_WIDGET (remove), tooltip);
-  gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (remove)),
+  gtk_accessible_update_property (GTK_ACCESSIBLE (remove),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL, tooltip, -1);
   gtk_widget_add_css_class (GTK_WIDGET (remove), "flat");
   gtk_widget_set_valign (GTK_WIDGET (remove), GTK_ALIGN_CENTER);
@@ -1466,12 +1466,12 @@ append_account_row (NuvashaUsersPopover *self, const NuvashaAccount *account)
   g_object_set_data_full (G_OBJECT (remove), "nuvasha-account-name",
                           g_strdup (account->name), g_free);
   g_signal_connect (remove, "clicked", G_CALLBACK (on_remove_clicked), self);
-  adw_action_row_add_suffix (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (remove));
+  adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (remove));
 
   /* Which account a row opens travels with the row: the list is built again
      whenever the store changes, and a row is never asked about anything
      else. */
-  gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (GTK_WIDGET (row)), TRUE);
+  gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
   g_object_set_data_full (G_OBJECT (row), "nuvasha-account-id",
                           g_strdup (account->id), g_free);
   g_signal_connect (row, "activated", G_CALLBACK (on_row_activated), self);
@@ -1587,16 +1587,16 @@ nuvasha_users_popover_init (NuvashaUsersPopover *self)
   /* A row is chosen by clicking it, not by a selection the list keeps:
      the active account is the store's business. The list scrolls instead
      of the popover growing without end when there are many accounts. */
-  gtk_list_box_set_selection_mode (GTK_LIST_BOX (GTK_WIDGET (rows)), GTK_SELECTION_NONE);
+  gtk_list_box_set_selection_mode (GTK_LIST_BOX (rows), GTK_SELECTION_NONE);
   gtk_widget_add_css_class (GTK_WIDGET (rows), "boxed-list");
   gtk_widget_set_size_request (GTK_WIDGET (scrolled), USERS_WIDTH, -1);
   gtk_scrolled_window_set_propagate_natural_width (
       GTK_SCROLLED_WINDOW (scrolled), TRUE);
   gtk_widget_set_halign (GTK_WIDGET (scrolled), GTK_ALIGN_CENTER);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (GTK_WIDGET (scrolled)),
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled),
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (GTK_WIDGET (scrolled)), GTK_WIDGET (rows));
-  gtk_scrolled_window_set_max_content_height (GTK_SCROLLED_WINDOW (GTK_WIDGET (scrolled)),
+  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scrolled), GTK_WIDGET (rows));
+  gtk_scrolled_window_set_max_content_height (GTK_SCROLLED_WINDOW (scrolled),
                                               420);
   gtk_scrolled_window_set_propagate_natural_height (
       GTK_SCROLLED_WINDOW (scrolled), TRUE);
@@ -1628,10 +1628,10 @@ nuvasha_users_popover_init (NuvashaUsersPopover *self)
                     self);
 
   GtkBox *content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (scrolled));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (microsoft));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (offline));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (self->error_label));
+  gtk_box_append (GTK_BOX (content), GTK_WIDGET (scrolled));
+  gtk_box_append (GTK_BOX (content), GTK_WIDGET (microsoft));
+  gtk_box_append (GTK_BOX (content), GTK_WIDGET (offline));
+  gtk_box_append (GTK_BOX (content), GTK_WIDGET (self->error_label));
 
   gtk_popover_set_child (GTK_POPOVER (self), GTK_WIDGET (content));
 

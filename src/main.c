@@ -27,53 +27,6 @@ static const GActionEntry app_entries[] = {
   { .name = "quit", .activate = on_quit },
 };
 
-/* The half of a browser that holds the list is not a sidebar, it is the
- * same page with a project beside it: it keeps the page colour instead
- * of the sidebar colour a split view would give it.
- *
- * The first row of a list of projects is not rounded at the top, so the
- * list reads as one piece that starts where the row above it ends. */
-static const char app_css[] =
-  "navigation-split-view.flat-split > .sidebar-pane,"
-  "navigation-split-view.flat-split > .sidebar-pane:backdrop {"
-  "  background-color: transparent;"
-  "  color: inherit;"
-  "}"
-   /* The small number on the corner of a download icon: how many files
-      are picked for one install. It is round, small and pulled back over
-      the corner of the icon beside it, and its colours are the text
-      colour at a low alpha, so that it reads on any background and
-      needs nothing from the palette. */
-   "label.nuvasha-badge {"
-   "  font-size: 0.7em;"
-   "  font-weight: bold;"
-   "  padding: 0 0.3em;"
-   "  min-width: 1.1em;"
-   "  min-height: 1.1em;"
-   "  border-radius: 0.8em;"
-   "  background-color: alpha(currentColor, 0.25);"
-   "  margin: 0;"
-   "}";
-
-static void
-load_app_css (void)
-{
-  static gboolean loaded = FALSE;
-
-  if (loaded)
-    return;
-
-  GtkCssProvider *provider = gtk_css_provider_new ();
-
-  gtk_css_provider_load_from_string (provider, app_css);
-  gtk_style_context_add_provider_for_display (
-    gdk_display_get_default (), GTK_STYLE_PROVIDER (provider),
-    GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-
-  g_object_unref (provider);
-  loaded = TRUE;
-}
-
 static void
 on_activate (GApplication *app, gpointer user_data G_GNUC_UNUSED)
 {
@@ -87,8 +40,6 @@ on_activate (GApplication *app, gpointer user_data G_GNUC_UNUSED)
       return;
     }
 
-  load_app_css ();
-
   g_autoptr (NuvashaInstanceManager) manager = nuvasha_instance_manager_new (NULL);
   g_autoptr (NuvashaSettings) settings = nuvasha_settings_new ();
   g_autoptr (GError) error = NULL;
@@ -99,7 +50,7 @@ on_activate (GApplication *app, gpointer user_data G_GNUC_UNUSED)
     g_warning ("cannot read the instance list: %s", error->message);
 
   NuvashaMainWindow *main_window =
-    nuvasha_main_window_new (GTK_APPLICATION (app), manager);
+    nuvasha_main_window_new (ADW_APPLICATION (app), manager);
 
   gtk_window_present (GTK_WINDOW (main_window));
 }

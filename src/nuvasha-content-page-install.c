@@ -387,14 +387,14 @@ start_fetch (NuvashaContentPage *self, GPtrArray *files)
       title = self->project.current_project_title;
 
     if (title == NULL)
-      title = "Content";
+       title = _("Content");
 
     /* Keep our own reference: nuvasha_download_finish() removes the manager's
        reference when the run ends, while fetch_free() still releases the
        reference held by the run below. */
     run->download = g_object_ref (
         nuvasha_downloads_add (content_download_kind (self->type), title));
-    nuvasha_download_set_detail (run->download, "Installing");
+     nuvasha_download_set_detail (run->download, _("Installing"));
     nuvasha_download_set_progress (run->download, 0, count);
   }
 
@@ -552,7 +552,7 @@ plan_text (NuvashaContentPage *self, PlanRun *plan)
           if (text->len > 0)
             g_string_append_c (text, '\n');
 
-          g_string_append (text, "Conflicts\n");
+           g_string_append (text, _("Conflicts\n"));
           g_string_append (text, notes->str);
         }
     }
@@ -623,7 +623,7 @@ show_plan (NuvashaContentPage *self, PlanRun *plan)
     const char *title = plan->title != NULL ? plan->title : "the file";
        g_autofree char *heading =
        g_strdup_printf (_("%s \"%s\""),
-                        action == NULL ? "Install" : action, title);
+                         action == NULL ? _("Install") : action, title);
      g_autofree char *body = plan_text (self, plan);
     AdwAlertDialog *alert =
       ADW_ALERT_DIALOG (adw_alert_dialog_new (heading, body));

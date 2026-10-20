@@ -197,7 +197,7 @@ static void
 show_loading (NuvashaLoaderRow *self)
 {
   g_autoptr (GtkStringList) list = NULL;
-  const char * const loading[] = { "Loading…", NULL };
+  const char * const loading[] = { _("Loading…"), NULL };
 
   list = gtk_string_list_new (loading);
 
@@ -225,7 +225,7 @@ static void
 show_error (NuvashaLoaderRow *self, const char *message, gboolean retry)
 {
   g_autoptr (GtkStringList) list = NULL;
-  const char *nothing[] = { "None", NULL };
+  const char *nothing[] = { _("None"), NULL };
 
   self->ready = FALSE;
   /* The Retry button is a suffix of the row, so the row itself has to
@@ -254,7 +254,7 @@ show_empty (NuvashaLoaderRow *self)
 {
   g_autoptr (GtkStringList) list = NULL;
   g_autofree char *message = NULL;
-  const char *nothing[] = { "None", NULL };
+  const char *nothing[] = { _("None"), NULL };
 
   self->ready = FALSE;
   self->interactive = FALSE;
@@ -555,20 +555,20 @@ nuvasha_loader_row_new (void)
   return self;
 }
 
-GtkWidget *
+AdwComboRow *
 nuvasha_loader_row_get_loader_row (NuvashaLoaderRow *self)
 {
   g_return_val_if_fail (nuvasha_IS_LOADER_ROW (self), NULL);
 
-  return GTK_WIDGET (self->loader_row);
+  return self->loader_row;
 }
 
-GtkWidget *
+AdwComboRow *
 nuvasha_loader_row_get_version_row (NuvashaLoaderRow *self)
 {
   g_return_val_if_fail (nuvasha_IS_LOADER_ROW (self), NULL);
 
-  return GTK_WIDGET (self->version_row);
+  return self->version_row;
 }
 
 void

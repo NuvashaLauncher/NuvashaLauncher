@@ -706,10 +706,10 @@ nuvasha_instance_manager_create (NuvashaInstanceManager *self,
       g_set_error (error, nuvasha_INSTANCE_MANAGER_ERROR,
                    nuvasha_INSTANCE_MANAGER_ERROR_INVALID_PATH,
                    normalized_name[0] == '\0'
-                     ? "the instance name is empty"
-                     : forbidden != NULL
-                       ? "Instances cannot contain %s in their name"
-                       : "the instance name cannot be used as a directory name",
+                      ? _("the instance name is empty")
+                      : forbidden != NULL
+                        ? _("Instances cannot contain %s in their name")
+                        : _("the instance name cannot be used as a directory name"),
                    normalized_name[0] == '\0' || forbidden == NULL
                      ? "" : forbidden);
       return NULL;
@@ -800,11 +800,11 @@ nuvasha_instance_manager_rename (NuvashaInstanceManager *self,
 
       g_set_error (error, nuvasha_INSTANCE_MANAGER_ERROR,
                    nuvasha_INSTANCE_MANAGER_ERROR_INVALID_PATH,
-                   stripped[0] == '\0'
-                     ? "the instance name is empty"
-                     : forbidden != NULL
-                       ? "Instances cannot contain %s in their name"
-                       : "the instance name cannot be used as a directory name",
+                    stripped[0] == '\0'
+                      ? _("the instance name is empty")
+                      : forbidden != NULL
+                        ? _("Instances cannot contain %s in their name")
+                        : _("the instance name cannot be used as a directory name"),
                    stripped[0] == '\0' || forbidden == NULL
                      ? "" : forbidden);
       return FALSE;

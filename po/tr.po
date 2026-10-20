@@ -368,17 +368,11 @@ msgstr "1 gün"
 msgid "7 days"
 msgstr "7 gün"
 
-msgid "Clear nuvasha Cache"
-msgstr "nuvasha önbelleğini temizle"
-
 msgid "Show Shortcuts"
 msgstr "Kısayolları Göster"
 
 msgid "Quit"
 msgstr "Çıkış"
-
-msgid "Clear nuvasha Cache?"
-msgstr "nuvasha önbelleği temizlensin mi?"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -551,9 +545,6 @@ msgstr "%s indirme"
 msgid "Cache Cleared"
 msgstr "Önbellek temizlendi"
 
-msgid "nuvasha cache data was cleared successfully."
-msgstr "nuvasha önbellek verileri başarıyla temizlendi."
-
 msgid "Cache Cleanup Failed"
 msgstr "Önbellek temizlenemedi"
 
@@ -610,7 +601,7 @@ msgid "Enable sandbox"
 msgstr "Korumalı alanı etkinleştir"
 
 msgid "Allow sandbox network access"
-msgstr "Allow sandbox network access"
+msgstr "Sandbox’ın ağ erişimine izin ver"
 # UI string
 msgid "Skin"
 msgstr "Skin"
@@ -621,15 +612,11 @@ msgstr "İnce model"
 
 # UI string
 msgid "OK"
-msgstr "OK"
+msgstr "Tamam"
 
 # UI string
 msgid "Export skin…"
 msgstr "Kaplamayı dışa aktar…"
-
-# UI string
-msgid "Imported skin"
-msgstr "Imported skin"
 
 # UI string
 msgid "Default model"
@@ -637,7 +624,7 @@ msgstr "Varsayılan model"
 
 # UI string
 msgid "PNG skin texture"
-msgstr "PNG skin texture"
+msgstr "PNG cilt dokusu"
 
 # UI string
 msgid "Invalid skin"
@@ -651,7 +638,6 @@ msgstr "Pelerin yok"
 msgid "Import skin…"
 msgstr "Kaplama içe aktar…"
 
-
 # UI string
 msgid "Delete skin?"
 msgstr "Deri silinsin mi?"
@@ -662,3 +648,254 @@ msgstr "Bu deri, deri kitaplığından kaldırılacak."
 
 msgid "Skin images must be 64x64 or 64x32 PNG files"
 msgstr "Skin görselleri 64x64 veya 64x32 PNG dosyaları olmalıdır"
+
+msgid "Bahasa Indonesia"
+msgstr "Bahasa Indonesia"
+
+msgid "Browse Modpacks"
+msgstr "Mod Paketlerine Göz At"
+
+msgid "Choose Files"
+msgstr "Dosyaları Seç"
+
+msgid "Clear Nuvasha Cache"
+msgstr "Nuvasha Önbelleğini Temizle"
+
+msgid "Clear Nuvasha Cache?"
+msgstr "Nuvasha önbelleğini temizlemek mi?"
+
+msgid ""
+"Conflicts\n"
+msgstr ""
+"Çatışmalar\n"
+
+msgid "Content"
+msgstr "İçerik"
+
+msgid "Could not install"
+msgstr "Yükleme yapılamadı"
+
+msgid "Could not install the modpack"
+msgstr "Mod paketi yüklenemedi"
+
+msgid "Could not load categories"
+msgstr "Kategoriler yüklenemedi"
+
+msgid "Could not search Modrinth"
+msgstr "Modrinth'te arama yapılamadı"
+
+msgid "Could not understand the answer"
+msgstr "Cevabı anlayamadım"
+
+msgid "Dansk"
+msgstr "Dansk"
+
+msgid "Deutsch"
+msgstr "Deutsch"
+
+msgid "Disable"
+msgstr "Devre dışı bırak"
+
+msgid "Dismiss"
+msgstr "Kapat"
+
+msgid "Enable"
+msgstr "Etkinleştir"
+
+msgid "English"
+msgstr "English"
+
+msgid "Español (Argentina)"
+msgstr "Español (Argentina)"
+
+msgid "Español (España)"
+msgstr "Español (España)"
+
+msgid "Fabric"
+msgstr "Fabric"
+
+msgid "Forge"
+msgstr "Forge"
+
+msgid "Français"
+msgstr "Français"
+
+msgid "Images"
+msgstr "Görseller"
+
+msgid "Installing"
+msgstr "Yükleme"
+
+msgid "Instances cannot contain %s in their name"
+msgstr "Örneklerin adlarında%s şunlar bulunamaz:"
+
+msgid "It carries files that Nuvasha does not recognize."
+msgstr "Nuvasha’nın tanımadığı dosyalar içeriyor."
+
+msgid "Italiano"
+msgstr "Italiano"
+
+msgid "Magyar"
+msgstr "Magyar"
+
+msgid "Microsoft"
+msgstr "Microsoft"
+
+msgid "Microsoft returned an unsafe verification address"
+msgstr "Microsoft, güvenli olmayan bir doğrulama adresi döndürdü"
+
+msgid "Microsoft would not give a code to sign in with"
+msgstr "Microsoft, oturum açmak için bir kod vermedi"
+
+msgid "Microsoft · Needs sign-in"
+msgstr "Microsoft · Oturum açılması gerekiyor"
+
+msgid "Modrinth does not know this file"
+msgstr "Modrinth bu dosyayı tanımıyor"
+
+msgid "Modrinth is asking Nuvasha to slow down, too many requests"
+msgstr "Modrinth, Nuvasha’dan biraz yavaşlamasını istiyor; çok fazla istek var"
+
+msgid "Nederlands"
+msgstr "Nederlands"
+
+msgid "NeoForge"
+msgstr "NeoForge"
+
+msgid "No compatible Java runtime was found."
+msgstr "Uyumlu bir Java çalışma ortamı bulunamadı."
+
+msgid "No modpack matches what was asked for. Try another word"
+msgstr "İstenen şartlara uyan mod paketi bulunamadı. Başka bir kelime deneyin"
+
+msgid "None"
+msgstr "Yok"
+
+msgid "Norsk (bokmål)"
+msgstr "Norsk (bokmål)"
+
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"
+
+msgid "Nuvasha cache data was cleared successfully."
+msgstr "Nuvasha önbellek verileri başarıyla silindi."
+
+msgid "Offline"
+msgstr "Çevrimdışı"
+
+msgid "Pick a Minecraft version from the list."
+msgstr "Listeden bir Minecraft sürümü seçin."
+
+msgid "Pick a version of the loader, or pick another loader."
+msgstr "Yükleyicinin bir sürümünü seçin ya da başka bir yükleyici seçin."
+
+msgid "Polski"
+msgstr "Polski"
+
+msgid "Português (Brasil)"
+msgstr "Português (Brasil)"
+
+msgid "Português (Portugal)"
+msgstr "Português (Portugal)"
+
+msgid "Quilt"
+msgstr "Quilt"
+
+msgid "Remove %s?"
+msgstr "Silmek mi%s?"
+
+msgid "Română"
+msgstr "Română"
+
+msgid "Search Modrinth and install a modpack"
+msgstr "Modrinth'te arama yap ve bir mod paketi yükle"
+
+msgid "Skin"
+msgstr "Cilt"
+
+msgid "Stop %s?"
+msgstr "Dur mu%s?"
+
+msgid "Suomi"
+msgstr "Suomi"
+
+msgid "Svenska"
+msgstr "Svenska"
+
+msgid "System default"
+msgstr "Sistem varsayılanı"
+
+msgid "The account is removed from Nuvasha and its saved sign-in is forgotten. The game itself is not touched."
+msgstr "Hesap Nuvasha'dan kaldırılır ve kaydedilmiş oturum açma bilgileri silinir. Oyunun kendisine herhangi bir müdahale yapılmaz."
+
+msgid "The game is running and will close. Progress since the last save is lost."
+msgstr "Oyun çalışıyor ve kapanacak. Son kaydetme işleminden bu yana kaydedilen ilerleme kaybolacak."
+
+msgid "This project publishes no pack file Nuvasha can install."
+msgstr "Bu proje, Nuvasha'nın yükleyebileceği herhangi bir paket dosyası yayınlamamaktadır."
+
+msgid "This version has no pack file"
+msgstr "Bu sürümde paket dosyası bulunmamaktadır"
+
+msgid "Tiếng Việt"
+msgstr "Tiếng Việt"
+
+msgid "Türkçe"
+msgstr "Türkçe"
+
+msgid "Unavailable"
+msgstr "Mevcut değil"
+
+msgid "Vanilla"
+msgstr "Vanilla"
+
+msgid "Xbox Live is not available for the country this account is registered in"
+msgstr "Bu hesabın kayıtlı olduğu ülkede Xbox Live hizmeti sunulmamaktadır"
+
+msgid "the game"
+msgstr "oyun"
+
+msgid "the instance name cannot be used as a directory name"
+msgstr "örnek adı, dizin adı olarak kullanılamaz"
+
+msgid "the instance name is empty"
+msgstr "örnek adı boş"
+
+msgid "the sign-in did not finish"
+msgstr "oturum açma işlemi tamamlanmadı"
+
+msgid "this Microsoft account has no Xbox profile behind it yet: sign in to xbox.com once with it, then sign in here again"
+msgstr "Bu Microsoft hesabına henüz bir Xbox profili atanmamış: Bu hesapla xbox.com'da bir kez oturum açın, ardından buraya tekrar oturum açın"
+
+msgid "this account"
+msgstr "bu hesap"
+
+msgid "this account needs an adult to verify it before it can play, which is what South Korean accounts have to do"
+msgstr "Bu hesabın oyun oynamaya başlayabilmesi için bir yetişkin tarafından doğrulanması gerekiyor; Güney Koreli hesapların da yapması gereken budur"
+
+msgid "this is a child account: it has to be added to a Microsoft family by an adult before it can play"
+msgstr "Bu bir çocuk hesabıdır: Oyun oynamaya başlayabilmesi için bir yetişkin tarafından bir Microsoft Ailesi’ne eklenmesi gerekir"
+
+msgid "Čeština"
+msgstr "Čeština"
+
+msgid "Русский"
+msgstr "Русский"
+
+msgid "Українська"
+msgstr "Українська"
+
+msgid "العربية"
+msgstr "العربية"
+
+msgid "日本語"
+msgstr "日本語"
+
+msgid "简体中文"
+msgstr "简体中文"
+
+msgid "繁體中文"
+msgstr "繁體中文"
+
+msgid "한국어"
+msgstr "한국어"

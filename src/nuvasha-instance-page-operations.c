@@ -271,26 +271,26 @@ show_export_metadata (NuvashaInstancePage *self)
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (data->version),
                                   _("Version ID"));
   gtk_widget_add_css_class (GTK_WIDGET (heading), "title-2");
-  gtk_label_set_justify (GTK_LABEL (GTK_WIDGET (heading)), GTK_JUSTIFY_CENTER);
-  gtk_label_set_xalign (GTK_LABEL (GTK_WIDGET (heading)), 0.5f);
+  gtk_label_set_justify (GTK_LABEL (heading), GTK_JUSTIFY_CENTER);
+  gtk_label_set_xalign (GTK_LABEL (heading), 0.5f);
   gtk_widget_set_margin_bottom (GTK_WIDGET (heading), 12);
   gtk_editable_set_text (GTK_EDITABLE (data->name), name != NULL ? name : "");
   gtk_editable_set_text (GTK_EDITABLE (data->version), "");
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (fields)),
+  adw_preferences_group_add (fields,
                              GTK_WIDGET (data->name));
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (fields)),
+  adw_preferences_group_add (fields,
                              GTK_WIDGET (data->summary));
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (fields)),
+  adw_preferences_group_add (fields,
                              GTK_WIDGET (data->version));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (heading));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (fields));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (heading));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (fields));
   gtk_widget_set_margin_start (GTK_WIDGET (box), 12);
   gtk_widget_set_margin_end (GTK_WIDGET (box), 12);
   gtk_widget_set_margin_top (GTK_WIDGET (box), 12);
   gtk_widget_set_margin_bottom (GTK_WIDGET (box), 12);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (buttons));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (buttons)), GTK_WIDGET (cancel));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (buttons)), GTK_WIDGET (export_button));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (buttons));
+  gtk_box_append (GTK_BOX (buttons), GTK_WIDGET (cancel));
+  gtk_box_append (GTK_BOX (buttons), GTK_WIDGET (export_button));
   gtk_widget_set_halign (GTK_WIDGET (buttons), GTK_ALIGN_CENTER);
   gtk_widget_add_css_class (GTK_WIDGET (export_button), "suggested-action");
   g_signal_connect (cancel, "clicked",

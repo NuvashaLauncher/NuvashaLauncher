@@ -368,17 +368,11 @@ msgstr "1일"
 msgid "7 days"
 msgstr "7일"
 
-msgid "Clear nuvasha Cache"
-msgstr "nuvasha 캐시 지우기"
-
 msgid "Show Shortcuts"
 msgstr "바로 가기 표시"
 
 msgid "Quit"
 msgstr "종료"
-
-msgid "Clear nuvasha Cache?"
-msgstr "nuvasha 캐시를 지울까요?"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -549,9 +543,6 @@ msgstr "%s 다운로드"
 msgid "Cache Cleared"
 msgstr "캐시 삭제됨"
 
-msgid "nuvasha cache data was cleared successfully."
-msgstr "nuvasha 캐시 데이터를 성공적으로 삭제했습니다."
-
 msgid "Cache Cleanup Failed"
 msgstr "캐시 정리 실패"
 
@@ -608,7 +599,7 @@ msgid "Enable sandbox"
 msgstr "샌드박스 활성화"
 
 msgid "Allow sandbox network access"
-msgstr "Allow sandbox network access"
+msgstr "샌드박스 네트워크 액세스 허용"
 # UI string
 msgid "Skin"
 msgstr "Skin"
@@ -619,15 +610,11 @@ msgstr "슬림 모델"
 
 # UI string
 msgid "OK"
-msgstr "OK"
+msgstr "알겠습니다"
 
 # UI string
 msgid "Export skin…"
 msgstr "스킨 내보내기…"
-
-# UI string
-msgid "Imported skin"
-msgstr "Imported skin"
 
 # UI string
 msgid "Default model"
@@ -635,7 +622,7 @@ msgstr "기본 모델"
 
 # UI string
 msgid "PNG skin texture"
-msgstr "PNG skin texture"
+msgstr "PNG 스킨 텍스처"
 
 # UI string
 msgid "Invalid skin"
@@ -649,7 +636,6 @@ msgstr "망토 없음"
 msgid "Import skin…"
 msgstr "스킨 가져오기…"
 
-
 # UI string
 msgid "Delete skin?"
 msgstr "스킨을 삭제하시겠습니까?"
@@ -660,3 +646,254 @@ msgstr "이 스킨은 스킨 라이브러리에서 삭제됩니다."
 
 msgid "Skin images must be 64x64 or 64x32 PNG files"
 msgstr "스킨 이미지는 64x64 또는 64x32 PNG 파일이어야 합니다"
+
+msgid "Bahasa Indonesia"
+msgstr "Bahasa Indonesia"
+
+msgid "Browse Modpacks"
+msgstr "모드팩 둘러보기"
+
+msgid "Choose Files"
+msgstr "파일 선택"
+
+msgid "Clear Nuvasha Cache"
+msgstr "Nuvasha 캐시 지우기"
+
+msgid "Clear Nuvasha Cache?"
+msgstr "Nuvasha 캐시를 지울까요?"
+
+msgid ""
+"Conflicts\n"
+msgstr ""
+"갈등\n"
+
+msgid "Content"
+msgstr "내용"
+
+msgid "Could not install"
+msgstr "설치를 완료할 수 없습니다."
+
+msgid "Could not install the modpack"
+msgstr "모드팩을 설치할 수 없습니다."
+
+msgid "Could not load categories"
+msgstr "카테고리를 불러올 수 없습니다"
+
+msgid "Could not search Modrinth"
+msgstr "Modrinth를 검색할 수 없습니다."
+
+msgid "Could not understand the answer"
+msgstr "답변을 이해할 수 없었습니다"
+
+msgid "Dansk"
+msgstr "Dansk"
+
+msgid "Deutsch"
+msgstr "Deutsch"
+
+msgid "Disable"
+msgstr "비활성화"
+
+msgid "Dismiss"
+msgstr "닫기"
+
+msgid "Enable"
+msgstr "활성화"
+
+msgid "English"
+msgstr "English"
+
+msgid "Español (Argentina)"
+msgstr "Español (Argentina)"
+
+msgid "Español (España)"
+msgstr "Español (España)"
+
+msgid "Fabric"
+msgstr "Fabric"
+
+msgid "Forge"
+msgstr "Forge"
+
+msgid "Français"
+msgstr "Français"
+
+msgid "Images"
+msgstr "이미지"
+
+msgid "Installing"
+msgstr "설치"
+
+msgid "Instances cannot contain %s in their name"
+msgstr "인스턴스의 이름에는%s 다음을 포함할 수 없습니다."
+
+msgid "It carries files that Nuvasha does not recognize."
+msgstr "이 파일은 Nuvasha가 인식하지 못하는 파일입니다."
+
+msgid "Italiano"
+msgstr "Italiano"
+
+msgid "Magyar"
+msgstr "Magyar"
+
+msgid "Microsoft"
+msgstr "Microsoft"
+
+msgid "Microsoft returned an unsafe verification address"
+msgstr "마이크로소프트가 안전하지 않은 확인 주소를 반환했습니다."
+
+msgid "Microsoft would not give a code to sign in with"
+msgstr "마이크로소프트는 로그인할 수 있는 코드를 제공하지 않았습니다."
+
+msgid "Microsoft · Needs sign-in"
+msgstr "Microsoft · 로그인이 필요합니다"
+
+msgid "Modrinth does not know this file"
+msgstr "Modrinth는 이 파일을 인식하지 못합니다."
+
+msgid "Modrinth is asking Nuvasha to slow down, too many requests"
+msgstr "모드린스는 누바샤에게 속도를 늦춰 달라고 요청하고 있다. 요청이 너무 많기 때문이다."
+
+msgid "Nederlands"
+msgstr "Nederlands"
+
+msgid "NeoForge"
+msgstr "NeoForge"
+
+msgid "No compatible Java runtime was found."
+msgstr "호환되는 Java 런타임이 발견되지 않았습니다."
+
+msgid "No modpack matches what was asked for. Try another word"
+msgstr "요청하신 내용과 일치하는 모드팩이 없습니다. 다른 단어를 입력해 보세요."
+
+msgid "None"
+msgstr "없음"
+
+msgid "Norsk (bokmål)"
+msgstr "Norsk (bokmål)"
+
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"
+
+msgid "Nuvasha cache data was cleared successfully."
+msgstr "Nuvasha 캐시 데이터가 성공적으로 삭제되었습니다."
+
+msgid "Offline"
+msgstr "오프라인"
+
+msgid "Pick a Minecraft version from the list."
+msgstr "목록에서 마인크래프트 버전을 하나 선택하세요."
+
+msgid "Pick a version of the loader, or pick another loader."
+msgstr "로더 버전을 선택하거나 다른 로더를 선택하세요."
+
+msgid "Polski"
+msgstr "Polski"
+
+msgid "Português (Brasil)"
+msgstr "Português (Brasil)"
+
+msgid "Português (Portugal)"
+msgstr "Português (Portugal)"
+
+msgid "Quilt"
+msgstr "Quilt"
+
+msgid "Remove %s?"
+msgstr "제거할까요%s?"
+
+msgid "Română"
+msgstr "Română"
+
+msgid "Search Modrinth and install a modpack"
+msgstr "Modrinth에서 검색하여 모드팩을 설치하세요"
+
+msgid "Skin"
+msgstr "피부"
+
+msgid "Stop %s?"
+msgstr "멈출까요%s?"
+
+msgid "Suomi"
+msgstr "Suomi"
+
+msgid "Svenska"
+msgstr "Svenska"
+
+msgid "System default"
+msgstr "시스템 기본값"
+
+msgid "The account is removed from Nuvasha and its saved sign-in is forgotten. The game itself is not touched."
+msgstr "해당 계정은 Nuvasha에서 삭제되며, 저장된 로그인 정보도 삭제됩니다. 게임 자체에는 아무런 영향이 없습니다."
+
+msgid "The game is running and will close. Progress since the last save is lost."
+msgstr "게임이 실행 중이며 곧 종료됩니다. 마지막 저장 이후의 진행 상황은 사라집니다."
+
+msgid "This project publishes no pack file Nuvasha can install."
+msgstr "이 프로젝트는 Nuvasha가 설치할 수 있는 팩 파일을 제공하지 않습니다."
+
+msgid "This version has no pack file"
+msgstr "이 버전에는 팩 파일이 포함되어 있지 않습니다."
+
+msgid "Tiếng Việt"
+msgstr "Tiếng Việt"
+
+msgid "Türkçe"
+msgstr "Türkçe"
+
+msgid "Unavailable"
+msgstr "이용 불가"
+
+msgid "Vanilla"
+msgstr "Vanilla"
+
+msgid "Xbox Live is not available for the country this account is registered in"
+msgstr "이 계정이 등록된 국가에서는 Xbox Live를 이용할 수 없습니다."
+
+msgid "the game"
+msgstr "게임"
+
+msgid "the instance name cannot be used as a directory name"
+msgstr "인스턴스 이름을 디렉터리 이름으로 사용할 수 없습니다."
+
+msgid "the instance name is empty"
+msgstr "인스턴스 이름이 비어 있습니다."
+
+msgid "the sign-in did not finish"
+msgstr "로그인이 완료되지 않았습니다"
+
+msgid "this Microsoft account has no Xbox profile behind it yet: sign in to xbox.com once with it, then sign in here again"
+msgstr "이 Microsoft 계정에는 아직 연결된 Xbox 프로필이 없습니다. 해당 계정으로 xbox.com에 한 번 로그인한 다음, 이곳에서 다시 로그인해 주세요."
+
+msgid "this account"
+msgstr "이 계정"
+
+msgid "this account needs an adult to verify it before it can play, which is what South Korean accounts have to do"
+msgstr "이 계정은 게임을 시작하기 전에 성인의 인증을 받아야 하는데, 이는 한국 계정의 경우 반드시 거쳐야 하는 절차입니다."
+
+msgid "this is a child account: it has to be added to a Microsoft family by an adult before it can play"
+msgstr "이 계정은 자녀 계정입니다. 게임을 하려면 먼저 성인이 이 계정을 Microsoft 가족 그룹에 추가해야 합니다."
+
+msgid "Čeština"
+msgstr "Čeština"
+
+msgid "Русский"
+msgstr "Русский"
+
+msgid "Українська"
+msgstr "Українська"
+
+msgid "العربية"
+msgstr "العربية"
+
+msgid "日本語"
+msgstr "日本語"
+
+msgid "简体中文"
+msgstr "简体中文"
+
+msgid "繁體中文"
+msgstr "繁體中文"
+
+msgid "한국어"
+msgstr "한국어"

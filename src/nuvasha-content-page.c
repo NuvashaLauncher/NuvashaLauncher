@@ -298,7 +298,7 @@ row_show_description (GtkWidget *row, const char *description)
     return;
 
   short_text = description_line (description, 2);
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (row)), short_text);
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), short_text);
 }
 
 /* The switch of a mod row: on means the mod loads, off means its file
@@ -316,7 +316,7 @@ on_mod_toggled (GtkSwitch *sw, gboolean state G_GNUC_UNUSED, gpointer user_data)
     return TRUE;
 
   gtk_widget_set_tooltip_text (GTK_WIDGET (sw),
-                               file->enabled ? "Disable" : "Enable");
+                                file->enabled ? _("Disable") : _("Enable"));
 
   return FALSE;
 }
@@ -420,7 +420,7 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
                           if (handler != 0)
                             g_signal_handler_unblock (switch_widget, handler);
                           gtk_widget_set_tooltip_text (
-                            GTK_WIDGET (switch_widget), "Enable");
+                             GTK_WIDGET (switch_widget), _("Enable"));
                           }
                     }
                 }
@@ -604,18 +604,18 @@ file_row (NuvashaContentPage *self, NuvashaContentFile *file)
 
   /* Treat file names and paths as plain text. The tooltip contains the path;
      the subtitle contains project metadata when available. */
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
   adw_preferences_row_set_title (
-    ADW_PREFERENCES_ROW (GTK_WIDGET (row)), file_display_name (file));
-  adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (GTK_WIDGET (row)), 2);
-  adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (GTK_WIDGET (row)), FALSE);
+    ADW_PREFERENCES_ROW (row), file_display_name (file));
+  adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 2);
+  adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (row), FALSE);
   if (file->description != NULL && *file->description != '\0')
     row_show_description (GTK_WIDGET (row), file->description);
 
   /* Use a fixed icon square and replace the placeholder when project data
      becomes available. */
   gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
-  adw_action_row_add_prefix (ADW_ACTION_ROW (GTK_WIDGET (row)), icon);
+  adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
   g_object_set_data (G_OBJECT (row), "nuvasha-icon", icon);
 
   /* Only a mod is something that can be turned off: a resource pack or a
@@ -625,20 +625,20 @@ file_row (NuvashaContentPage *self, NuvashaContentFile *file)
     {
       GtkSwitch *sw = GTK_SWITCH (gtk_switch_new ());
 
-      gtk_switch_set_active (GTK_SWITCH (GTK_WIDGET (sw)), file->enabled);
+      gtk_switch_set_active (GTK_SWITCH (sw), file->enabled);
       gtk_widget_set_valign (GTK_WIDGET (sw), GTK_ALIGN_CENTER);
       gtk_widget_set_tooltip_text (GTK_WIDGET (sw),
-                                   file->enabled ? "Disable" : "Enable");
-      gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (sw)),
+                                    file->enabled ? _("Disable") : _("Enable"));
+      gtk_accessible_update_property (GTK_ACCESSIBLE (sw),
                                       GTK_ACCESSIBLE_PROPERTY_LABEL,
-                                      "Enabled", -1);
+                                       _("Enabled"), -1);
       g_object_set_data (G_OBJECT (sw), "nuvasha-file", file);
       g_object_set_data (G_OBJECT (row), "nuvasha-mod-switch", sw);
       g_object_set_data (
         G_OBJECT (sw), "nuvasha-toggle-handler",
         GSIZE_TO_POINTER (g_signal_connect (
           sw, "state-set", G_CALLBACK (on_mod_toggled), self)));
-      adw_action_row_add_suffix (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (sw));
+      adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (sw));
     }
 
   /* Every kind of file can be deleted. On a mod the button sits after
@@ -653,12 +653,12 @@ file_row (NuvashaContentPage *self, NuvashaContentFile *file)
     gtk_widget_set_focus_on_click (GTK_WIDGET (trash), FALSE);
     gtk_widget_set_valign (GTK_WIDGET (trash), GTK_ALIGN_CENTER);
    gtk_widget_set_tooltip_text (GTK_WIDGET (trash), _("Delete"));
-    gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (trash)),
+    gtk_accessible_update_property (GTK_ACCESSIBLE (trash),
                                     GTK_ACCESSIBLE_PROPERTY_LABEL,
-                                    "Delete", -1);
+                                     _("Delete"), -1);
     g_object_set_data (G_OBJECT (trash), "nuvasha-file", file);
     g_signal_connect (trash, "clicked", G_CALLBACK (on_trash_clicked), self);
-    adw_action_row_add_suffix (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (trash));
+    adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (trash));
   }
 
   /* The row carries the file it is about, so the switch does not have to
@@ -1649,9 +1649,9 @@ nuvasha_content_page_new (NuvashaInstance *instance, NuvashaContentType type)
         {
           AdwStatusPage *status = ADW_STATUS_PAGE (adw_status_page_new ());
 
-          adw_status_page_set_icon_name (ADW_STATUS_PAGE (GTK_WIDGET (status)),
+          adw_status_page_set_icon_name (ADW_STATUS_PAGE (status),
                                          nuvasha_content_type_icon (type));
-          adw_status_page_set_title (ADW_STATUS_PAGE (GTK_WIDGET (status)),
+          adw_status_page_set_title (ADW_STATUS_PAGE (status),
                                       _("No mod loader"));
           adw_status_page_set_description (
               ADW_STATUS_PAGE (status),

@@ -9,6 +9,7 @@
 #include "nuvasha-download.h"
 #include "nuvasha-downloads.h"
 #include "nuvasha-minecraft-resolve.h"
+#include "nuvasha-i18n.h"
 
 #include <json-glib/json-glib.h>
 #include <string.h>
@@ -59,22 +60,22 @@ nuvasha_loader_display_name (NuvashaLoader loader)
   switch (loader)
     {
     case nuvasha_LOADER_VANILLA:
-      return "Vanilla";
+      return _("Vanilla");
 
     case nuvasha_LOADER_FABRIC:
-      return "Fabric";
+      return _("Fabric");
 
     case nuvasha_LOADER_QUILT:
-      return "Quilt";
+      return _("Quilt");
 
     case nuvasha_LOADER_FORGE:
-      return "Forge";
+      return _("Forge");
 
     case nuvasha_LOADER_NEOFORGE:
-      return "NeoForge";
+      return _("NeoForge");
     }
 
-  return "Vanilla";
+  return _("Vanilla");
 }
 
 void

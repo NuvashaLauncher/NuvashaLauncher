@@ -112,7 +112,7 @@ open_the_page (NuvashaSignInDialog *self)
 
   if (!is_safe_verification_uri (self->code->verification_uri))
     {
-      show_error (self, "Microsoft returned an unsafe verification address");
+       show_error (self, _("Microsoft returned an unsafe verification address"));
       return;
     }
 
@@ -143,7 +143,7 @@ on_code_ready (GObject      *source G_GNUC_UNUSED,
 
       show_error (self, error != NULL
                           ? error->message
-                          : "Microsoft would not give a code to sign in with");
+                           : _("Microsoft would not give a code to sign in with"));
       return;
     }
 
@@ -189,7 +189,7 @@ finish_sign_in (GObject      *source G_GNUC_UNUSED,
 
       show_error (self, error != NULL
                           ? error->message
-                          : "the sign-in did not finish");
+                           : _("the sign-in did not finish"));
       return;
     }
 
@@ -263,9 +263,9 @@ icon_label_button (const char *icon_name, const char *label)
 
   gtk_widget_set_valign (GTK_WIDGET (icon), GTK_ALIGN_CENTER);
   gtk_widget_set_valign (GTK_WIDGET (text), GTK_ALIGN_CENTER);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (icon));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (text));
-  gtk_button_set_child (GTK_BUTTON (GTK_WIDGET (button)), GTK_WIDGET (box));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (icon));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (text));
+  gtk_button_set_child (GTK_BUTTON (button), GTK_WIDGET (box));
 
   return GTK_WIDGET (button);
 }
@@ -273,9 +273,9 @@ icon_label_button (const char *icon_name, const char *label)
 static void
 nuvasha_sign_in_dialog_init (NuvashaSignInDialog *self)
 {
-  GtkWidget *body = NULL;
-  GtkWidget *toolbar = NULL;
-  GtkWidget *header = NULL;
+  GtkBox *body = NULL;
+  AdwToolbarView *toolbar = NULL;
+  AdwHeaderBar *header = NULL;
 
   adw_dialog_set_title (ADW_DIALOG (self), _("Sign In"));
   adw_dialog_set_content_width (ADW_DIALOG (self), 440);
@@ -344,11 +344,11 @@ nuvasha_sign_in_dialog_init (NuvashaSignInDialog *self)
   g_signal_connect (self->retry_button, "clicked",
                     G_CALLBACK (on_retry_clicked), self);
 
-  body = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
-  gtk_widget_set_margin_start (body, 24);
-  gtk_widget_set_margin_end (body, 24);
-  gtk_widget_set_margin_top (body, 24);
-  gtk_widget_set_margin_bottom (body, 24);
+  body = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
+  gtk_widget_set_margin_start (GTK_WIDGET (body), 24);
+  gtk_widget_set_margin_end (GTK_WIDGET (body), 24);
+  gtk_widget_set_margin_top (GTK_WIDGET (body), 24);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (body), 24);
   gtk_box_append (GTK_BOX (body), GTK_WIDGET (self->instruction_label));
   gtk_box_append (GTK_BOX (body), GTK_WIDGET (self->code_label));
   gtk_box_append (GTK_BOX (body), GTK_WIDGET (self->open_button));
@@ -359,13 +359,13 @@ nuvasha_sign_in_dialog_init (NuvashaSignInDialog *self)
 
   /* Use a header bar with only the title and close button; this dialog has
      no separate Cancel action. */
-  header = adw_header_bar_new ();
-  adw_header_bar_set_show_back_button (ADW_HEADER_BAR (header), FALSE);
-  toolbar = adw_toolbar_view_new ();
-  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
-  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), body);
+  header = ADW_HEADER_BAR (adw_header_bar_new ());
+  adw_header_bar_set_show_back_button (header, FALSE);
+  toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
+  adw_toolbar_view_add_top_bar (toolbar, GTK_WIDGET (header));
+  adw_toolbar_view_set_content (toolbar, GTK_WIDGET (body));
 
-  adw_dialog_set_child (ADW_DIALOG (self), toolbar);
+  adw_dialog_set_child (ADW_DIALOG (self), GTK_WIDGET (toolbar));
 }
 
 static void

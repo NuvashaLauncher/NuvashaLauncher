@@ -181,7 +181,7 @@ msgid "Logs"
 msgstr "سجلات"
 
 msgid "Custom: %s"
-msgstr "جمارك"
+msgstr "جمارك: %s"
 
 msgid "the game was stopped by signal %d"
 msgstr "تم إيقاف اللعبة بواسطة الإشارة %d"
@@ -348,17 +348,11 @@ msgstr "يوم واحد"
 msgid "7 days"
 msgstr "7 أيام"
 
-msgid "Clear nuvasha Cache"
-msgstr "مسح ذاكرة التخزين المؤقت نوفاشا"
-
 msgid "Show Shortcuts"
 msgstr "إظهار الاختصارات"
 
 msgid "Quit"
 msgstr "يترك"
-
-msgid "Clear nuvasha Cache?"
-msgstr "مسح ذاكرة التخزين المؤقت نوفاشا؟"
 
 msgid "Import Modpack"
 msgstr "استيراد مودباك"
@@ -367,7 +361,7 @@ msgid "Modpack exported"
 msgstr "تم تصدير Modpack"
 
 msgid "Modrinth Modpacks (*.mrpack)"
-msgstr "Modrinth Modpacks (*.mrpack)"
+msgstr "Modpacks Modrinth (*.mrpack)"
 
 msgid "The export location is not a local file"
 msgstr "موقع التصدير ليس ملفًا محليًا"
@@ -531,9 +525,6 @@ msgstr "%s التنزيلات"
 msgid "Cache Cleared"
 msgstr "تم مسح ذاكرة التخزين المؤقت"
 
-msgid "nuvasha cache data was cleared successfully."
-msgstr "تم مسح بيانات ذاكرة التخزين المؤقت nuvasha بنجاح."
-
 msgid "Cache Cleanup Failed"
 msgstr "فشل تنظيف ذاكرة التخزين المؤقت"
 
@@ -597,14 +588,11 @@ msgstr "نعم"
 msgid "Export skin…"
 msgstr "تصدير الجلد..."
 
-msgid "Imported skin"
-msgstr "جلد مستورد"
-
 msgid "Default model"
 msgstr "النموذج الافتراضي"
 
 msgid "PNG skin texture"
-msgstr "PNG نسيج الجلد"
+msgstr "نسيج بشرة PNG"
 
 msgid "Invalid skin"
 msgstr "جلد غير صالح"
@@ -623,3 +611,257 @@ msgstr "ستتم إزالة هذا الجلد من مكتبة الجلود."
 
 msgid "Skin images must be 64x64 or 64x32 PNG files"
 msgstr "يجب أن تكون صور الجلد ملفات PNG بحجم 64x64 أو 64x32"
+
+msgid "Bahasa Indonesia"
+msgstr "Bahasa Indonesia"
+
+msgid "Browse Modpacks"
+msgstr "تصفح حزم التعديل"
+
+msgid "Cancel"
+msgstr "إلغاء"
+
+msgid "Choose Files"
+msgstr "اختر الملفات"
+
+msgid "Clear Nuvasha Cache"
+msgstr "مسح ذاكرة التخزين المؤقت لـ Nuvasha"
+
+msgid "Clear Nuvasha Cache?"
+msgstr "مسح ذاكرة التخزين المؤقت لـ Nuvasha؟"
+
+msgid ""
+"Conflicts\n"
+msgstr ""
+"الصراعات\n"
+
+msgid "Content"
+msgstr "المحتوى"
+
+msgid "Could not install"
+msgstr "تعذر التثبيت"
+
+msgid "Could not install the modpack"
+msgstr "تعذر تثبيت حزمة التعديلات"
+
+msgid "Could not load categories"
+msgstr "تعذر تحميل الفئات"
+
+msgid "Could not search Modrinth"
+msgstr "تعذر البحث عن Modrinth"
+
+msgid "Could not understand the answer"
+msgstr "لم أستطع فهم الإجابة"
+
+msgid "Dansk"
+msgstr "Dansk"
+
+msgid "Deutsch"
+msgstr "Deutsch"
+
+msgid "Disable"
+msgstr "تعطيل"
+
+msgid "Dismiss"
+msgstr "إغلاق"
+
+msgid "Enable"
+msgstr "تمكين"
+
+msgid "English"
+msgstr "English"
+
+msgid "Español (Argentina)"
+msgstr "Español (Argentina)"
+
+msgid "Español (España)"
+msgstr "Español (España)"
+
+msgid "Fabric"
+msgstr "Fabric"
+
+msgid "Forge"
+msgstr "Forge"
+
+msgid "Français"
+msgstr "Français"
+
+msgid "Images"
+msgstr "الصور"
+
+msgid "Installing"
+msgstr "التثبيت"
+
+msgid "Instances cannot contain %s in their name"
+msgstr "لا يجوز أن تحتوي الحالات في%s أسمائها على"
+
+msgid "It carries files that Nuvasha does not recognize."
+msgstr "يحتوي على ملفات لا يتعرف عليها برنامج Nuvasha."
+
+msgid "Italiano"
+msgstr "Italiano"
+
+msgid "Magyar"
+msgstr "Magyar"
+
+msgid "Microsoft"
+msgstr "Microsoft"
+
+msgid "Microsoft returned an unsafe verification address"
+msgstr "أرجعت «مايكروسوفت» عنوان تحقق غير آمن"
+
+msgid "Microsoft would not give a code to sign in with"
+msgstr "لم توفر «مايكروسوفت» رمزًا يمكن استخدامُه لتسجيل الدخول"
+
+msgid "Microsoft · Needs sign-in"
+msgstr "مايكروسوفت · يلزم تسجيل الدخول"
+
+msgid "Modrinth does not know this file"
+msgstr "Modrinth لا يعرف هذا الملف"
+
+msgid "Modrinth is asking Nuvasha to slow down, too many requests"
+msgstr "تطلب «مودرينث» من «نوفاشا» أن تبطئ من وتيرة العمل، فهناك عدد كبير جدًا من الطلبات"
+
+msgid "Nederlands"
+msgstr "Nederlands"
+
+msgid "NeoForge"
+msgstr "NeoForge"
+
+msgid "No compatible Java runtime was found."
+msgstr "لم يتم العثور على بيئة تشغيل Java متوافقة."
+
+msgid "No modpack matches what was asked for. Try another word"
+msgstr "لا توجد حزمة تعديلات تتطابق مع ما تم طلبه. جرب كلمة أخرى"
+
+msgid "None"
+msgstr "لا شيء"
+
+msgid "Norsk (bokmål)"
+msgstr "Norsk (bokmål)"
+
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"
+
+msgid "Nuvasha cache data was cleared successfully."
+msgstr "تم مسح بيانات ذاكرة التخزين المؤقت لـ Nuvasha بنجاح."
+
+msgid "Offline"
+msgstr "غير متصل"
+
+msgid "Pick a Minecraft version from the list."
+msgstr "اختر إصدارًا من Minecraft من القائمة."
+
+msgid "Pick a version of the loader, or pick another loader."
+msgstr "اختر إصدارًا من أداة التحميل، أو اختر أداة تحميل أخرى."
+
+msgid "Polski"
+msgstr "Polski"
+
+msgid "Português (Brasil)"
+msgstr "Português (Brasil)"
+
+msgid "Português (Portugal)"
+msgstr "Português (Portugal)"
+
+msgid "Quilt"
+msgstr "Quilt"
+
+msgid "Remove %s?"
+msgstr "إزالة؟%s"
+
+msgid "Română"
+msgstr "Română"
+
+msgid "Search Modrinth and install a modpack"
+msgstr "ابحث عن «Modrinth» وقم بتثبيت حزمة التعديلات"
+
+msgid "Skin"
+msgstr "البشرة"
+
+msgid "Stop %s?"
+msgstr "توقف؟%s"
+
+msgid "Suomi"
+msgstr "Suomi"
+
+msgid "Svenska"
+msgstr "Svenska"
+
+msgid "System default"
+msgstr "الإعدادات الافتراضية للنظام"
+
+msgid "The account is removed from Nuvasha and its saved sign-in is forgotten. The game itself is not touched."
+msgstr "يتم حذف الحساب من Nuvasha ويتم مسح بيانات تسجيل الدخول المحفوظة الخاصة به. ولا يتم إجراء أي تغيير على اللعبة نفسها."
+
+msgid "The game is running and will close. Progress since the last save is lost."
+msgstr "اللعبة قيد التشغيل وستُغلق. سيتم فقدان التقدم الذي تم إحرازه منذ آخر عملية حفظ."
+
+msgid "This project publishes no pack file Nuvasha can install."
+msgstr "لا ينشر هذا المشروع أي ملف حزمة يمكن لـ Nuvasha تثبيته."
+
+msgid "This version has no pack file"
+msgstr "لا يحتوي هذا الإصدار على ملف حزمة"
+
+msgid "Tiếng Việt"
+msgstr "Tiếng Việt"
+
+msgid "Türkçe"
+msgstr "Türkçe"
+
+msgid "Unavailable"
+msgstr "غير متوفر"
+
+msgid "Vanilla"
+msgstr "Vanilla"
+
+msgid "Xbox Live is not available for the country this account is registered in"
+msgstr "خدمة Xbox Live غير متوفرة في البلد الذي تم تسجيل هذا الحساب فيه"
+
+msgid "the game"
+msgstr "اللعبة"
+
+msgid "the instance name cannot be used as a directory name"
+msgstr "لا يمكن استخدام اسم المثيل كاسم مجلد"
+
+msgid "the instance name is empty"
+msgstr "اسم المثيل فارغ"
+
+msgid "the sign-in did not finish"
+msgstr "لم تكتمل عملية تسجيل الدخول"
+
+msgid "this Microsoft account has no Xbox profile behind it yet: sign in to xbox.com once with it, then sign in here again"
+msgstr "لا يوجد حتى الآن ملف تعريف Xbox مرتبط بهذا الحساب الخاص بـ Microsoft: قم بتسجيل الدخول إلى موقع xbox.com مرة واحدة باستخدام هذا الحساب، ثم قم بتسجيل الدخول هنا مرة أخرى"
+
+msgid "this account"
+msgstr "هذا الحساب"
+
+msgid "this account needs an adult to verify it before it can play, which is what South Korean accounts have to do"
+msgstr "يحتاج هذا الحساب إلى شخص بالغ للتحقق منه قبل أن يتمكن من اللعب، وهذا ما يتعين على الحسابات الكورية الجنوبية القيام به"
+
+msgid "this is a child account: it has to be added to a Microsoft family by an adult before it can play"
+msgstr "هذا حساب طفل: يجب أن يضيفه شخص بالغ إلى «عائلة مايكروسوفت» قبل أن يتمكن الطفل من اللعب"
+
+msgid "Čeština"
+msgstr "Čeština"
+
+msgid "Русский"
+msgstr "Русский"
+
+msgid "Українська"
+msgstr "Українська"
+
+msgid "العربية"
+msgstr "العربية"
+
+msgid "日本語"
+msgstr "日本語"
+
+msgid "简体中文"
+msgstr "简体中文"
+
+msgid "繁體中文"
+msgstr "繁體中文"
+
+msgid "한국어"
+msgstr "한국어"

@@ -21,7 +21,7 @@ G_DECLARE_FINAL_TYPE (NuvashaMainWindow, nuvasha_main_window, nuvasha, MAIN_WIND
 
 /* Shows the instances of @manager and follows the manager's store. The
  * window takes its own reference on @manager until it is destroyed. */
-NuvashaMainWindow *nuvasha_main_window_new (GtkApplication      *application,
+NuvashaMainWindow *nuvasha_main_window_new (AdwApplication      *application,
                                     NuvashaInstanceManager *manager);
 
 G_END_DECLS

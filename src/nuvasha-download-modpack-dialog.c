@@ -220,8 +220,8 @@ build_import_page (NuvashaDownloadModpackDialog *self)
 
   gtk_widget_set_halign (GTK_WIDGET (box), GTK_ALIGN_CENTER);
   gtk_widget_set_valign (GTK_WIDGET (box), GTK_ALIGN_CENTER);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (spinner));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (label));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (spinner));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (label));
   adw_navigation_view_add (ADW_NAVIGATION_VIEW (self->nav),
                            ADW_NAVIGATION_PAGE (page));
 }
@@ -475,30 +475,30 @@ results_arrived (NuvashaDownloadModpackDialog *self, NuvashaModrinthResults *res
              are what the details page is for. Markup off first: the
              title and the description are plain Modrinth text and may
              hold an "&". */
-          adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (row)),
+          adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row),
                                               FALSE);
-          adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (row)),
+          adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
                                          project->title);
           {
             g_autofree char *line = one_line (project->description);
 
-            adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (row)), line);
+            adw_action_row_set_subtitle (ADW_ACTION_ROW (row), line);
           }
           /* Two lines at most, ending in an ellipsis when the
              description is longer: every row is the same height, and the
              whole description is on the details page. */
-          adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (GTK_WIDGET (row)), 2);
-          adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (GTK_WIDGET (row)), FALSE);
+          adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 2);
+          adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (row), FALSE);
 
           gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
           nuvasha_icon_load_start (icon, project->icon_url);
 
-          adw_action_row_add_prefix (ADW_ACTION_ROW (GTK_WIDGET (row)), icon);
+          adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
 
           /* An AdwActionRow is not activatable by default, so the row
              itself is made one: a click anywhere on it opens the
              details page. */
-          gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (GTK_WIDGET (row)), TRUE);
+          gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
 
           g_ptr_array_add (self->hits,
                            nuvasha_modrinth_project_copy (project));
@@ -662,7 +662,7 @@ on_search_done (GObject *source G_GNUC_UNUSED,
 
               adw_status_page_set_title (
                 ADW_STATUS_PAGE (self->error_status),
-                "Could not search Modrinth");
+                 _("Could not search Modrinth"));
               adw_status_page_set_description (
                 ADW_STATUS_PAGE (self->error_status), escaped);
               adw_view_stack_set_visible_child_name (self->results_stack,
@@ -693,7 +693,7 @@ on_search_done (GObject *source G_GNUC_UNUSED,
           g_autofree char *escaped = g_markup_escape_text (error->message, -1);
 
           adw_status_page_set_title (ADW_STATUS_PAGE (self->error_status),
-                                     "Could not understand the answer");
+                                      _("Could not understand the answer"));
           adw_status_page_set_description (
             ADW_STATUS_PAGE (self->error_status), escaped);
           adw_view_stack_set_visible_child_name (self->results_stack,
@@ -740,7 +740,6 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
 
   /* The list starts where the search row above it ends: its first row is
      not rounded at the top, so the two read as one piece. */
-  gtk_widget_add_css_class (GTK_WIDGET (self->results_group), "flush");
 
   self->search_entry = GTK_SEARCH_ENTRY (gtk_search_entry_new ());
   gtk_widget_set_hexpand (GTK_WIDGET (self->search_entry), TRUE);
@@ -749,17 +748,17 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
   g_signal_connect (self->search_entry, "changed",
                     G_CALLBACK (on_search_changed), self);
 
-  gtk_box_append (GTK_BOX (GTK_WIDGET (top)), GTK_WIDGET (self->search_entry));
+  gtk_box_append (GTK_BOX (top), GTK_WIDGET (self->search_entry));
   gtk_widget_add_css_class (GTK_WIDGET (close_button), "flat");
   gtk_widget_set_tooltip_text (GTK_WIDGET (close_button), _("Close"));
   g_signal_connect_swapped (close_button, "clicked",
                             G_CALLBACK (adw_dialog_close), self);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (top)), GTK_WIDGET (close_button));
+  gtk_box_append (GTK_BOX (top), GTK_WIDGET (close_button));
   gtk_widget_set_margin_start (GTK_WIDGET (top), 12);
   gtk_widget_set_margin_end (GTK_WIDGET (top), 12);
   gtk_widget_set_margin_top (GTK_WIDGET (top), 6);
   gtk_widget_set_margin_bottom (GTK_WIDGET (top), 6);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (root)), GTK_WIDGET (top));
+  gtk_box_append (GTK_BOX (root), GTK_WIDGET (top));
 
   /* The list. The bottom of it holds a spinner while the next page is on
      its way and a retry row when a page failed. */
@@ -767,8 +766,8 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
   gtk_widget_set_margin_top (GTK_WIDGET (loading_more), 12);
   gtk_widget_set_margin_bottom (GTK_WIDGET (loading_more), 12);
   gtk_widget_set_visible (GTK_WIDGET (loading_more), FALSE);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (loading_more)), GTK_WIDGET (more_spinner));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (loading_more)), GTK_WIDGET (more_label));
+  gtk_box_append (GTK_BOX (loading_more), GTK_WIDGET (more_spinner));
+  gtk_box_append (GTK_BOX (loading_more), GTK_WIDGET (more_label));
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->results_group),
                               GTK_WIDGET (loading_more));
 
@@ -776,10 +775,10 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
   gtk_widget_set_margin_top (GTK_WIDGET (retry_row), 12);
   gtk_widget_set_margin_bottom (GTK_WIDGET (retry_row), 12);
   gtk_widget_set_visible (GTK_WIDGET (retry_row), FALSE);
-  gtk_label_set_wrap (GTK_LABEL (GTK_WIDGET (retry_label)), TRUE);
+  gtk_label_set_wrap (GTK_LABEL (retry_label), TRUE);
   gtk_widget_add_css_class (GTK_WIDGET (retry_label), "dim-label");
-  gtk_box_append (GTK_BOX (GTK_WIDGET (retry_row)), GTK_WIDGET (retry_label));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (retry_row)), GTK_WIDGET (retry_button));
+  gtk_box_append (GTK_BOX (retry_row), GTK_WIDGET (retry_label));
+  gtk_box_append (GTK_BOX (retry_row), GTK_WIDGET (retry_button));
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->results_group),
                               GTK_WIDGET (retry_row));
 
@@ -790,11 +789,11 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
   g_signal_connect_swapped (retry_button, "clicked",
                             G_CALLBACK (on_retry_page), self);
 
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)),
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
   /* The group is the whole width of the list: a row of the browser has to
      cover it rather than sit centered in a clamp of its own. */
-  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)),
+  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
                                  GTK_WIDGET (self->results_group));
   gtk_widget_set_vexpand (GTK_WIDGET (scroller), TRUE);
   adw_view_stack_add_named (self->results_stack, GTK_WIDGET (scroller), "results");
@@ -807,7 +806,7 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
                              _("Nothing to show yet"));
   adw_status_page_set_description (
     ADW_STATUS_PAGE (self->results_status),
-    "No modpack matches what was asked for. Try another word");
+     _("No modpack matches what was asked for. Try another word"));
   adw_view_stack_add_named (self->results_stack,
                        GTK_WIDGET (self->results_status), "empty");
 
@@ -821,19 +820,19 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
   /* The first page is on its way. */
   gtk_widget_set_valign (GTK_WIDGET (loading), GTK_ALIGN_CENTER);
   gtk_widget_set_halign (GTK_WIDGET (loading), GTK_ALIGN_CENTER);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (loading)), GTK_WIDGET (loading_spinner));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (loading)), GTK_WIDGET (loading_label));
+  gtk_box_append (GTK_BOX (loading), GTK_WIDGET (loading_spinner));
+  gtk_box_append (GTK_BOX (loading), GTK_WIDGET (loading_label));
   adw_view_stack_add_named (self->results_stack, GTK_WIDGET (loading), "loading");
 
   adw_view_stack_set_visible_child_name (self->results_stack,
                                     "loading");
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (self->results_stack));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (self->results_stack));
 
   /* The list asks for the next page when it is scrolled to its end.
      GTK4 has no edge-reached signal, so the adjustment is watched. */
   {
     GtkAdjustment *adjustment =
-      gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)));
+      gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (scroller));
 
     g_signal_connect (adjustment, "value-changed",
                       G_CALLBACK (on_scroll_changed), self);
@@ -844,12 +843,10 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
      is the list alone. */
   self->split = ADW_NAVIGATION_SPLIT_VIEW (adw_navigation_split_view_new ());
   gtk_widget_set_vexpand (GTK_WIDGET (self->split), TRUE);
-  /* Named, so the stylesheet keeps the list half the colour of the dialog
-     instead of the sidebar colour a split view would give it. */
-  gtk_widget_add_css_class (GTK_WIDGET (self->split), "flat-split");
+   /* Named so the navigation split view can identify the browse page. */
   adw_navigation_split_view_set_sidebar (
     ADW_NAVIGATION_SPLIT_VIEW (self->split),
-    adw_navigation_page_new (GTK_WIDGET (box), "Browse Modpacks"));
+     adw_navigation_page_new (GTK_WIDGET (box), _("Browse Modpacks")));
   adw_navigation_split_view_set_collapsed (
     ADW_NAVIGATION_SPLIT_VIEW (self->split), TRUE);
   /* Two halves of one width, rather than the narrow column a split view
@@ -860,10 +857,10 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
     ADW_NAVIGATION_SPLIT_VIEW (self->split), 360);
   adw_navigation_split_view_set_max_sidebar_width (
     ADW_NAVIGATION_SPLIT_VIEW (self->split), 640);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (root)), GTK_WIDGET (self->split));
+  gtk_box_append (GTK_BOX (root), GTK_WIDGET (self->split));
 
   page = GTK_WIDGET (adw_navigation_page_new (GTK_WIDGET (root), ""));
-  adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (GTK_WIDGET (page)), "browse");
+  adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (page), "browse");
 
   adw_navigation_view_add (ADW_NAVIGATION_VIEW (self->nav),
                            ADW_NAVIGATION_PAGE (page));
@@ -996,10 +993,10 @@ plain_label (const char *text)
 {
   GtkLabel *label = GTK_LABEL (gtk_label_new (text != NULL ? text : ""));
 
-  gtk_label_set_wrap (GTK_LABEL (GTK_WIDGET (label)), TRUE);
-  gtk_label_set_wrap_mode (GTK_LABEL (GTK_WIDGET (label)), PANGO_WRAP_WORD_CHAR);
-  gtk_label_set_xalign (GTK_LABEL (GTK_WIDGET (label)), 0);
-  gtk_label_set_selectable (GTK_LABEL (GTK_WIDGET (label)), TRUE);
+  gtk_label_set_wrap (GTK_LABEL (label), TRUE);
+  gtk_label_set_wrap_mode (GTK_LABEL (label), PANGO_WRAP_WORD_CHAR);
+  gtk_label_set_xalign (GTK_LABEL (label), 0);
+  gtk_label_set_selectable (GTK_LABEL (label), TRUE);
 
   return GTK_WIDGET (label);
 }
@@ -1080,10 +1077,10 @@ details_content (NuvashaDownloadModpackDialog *self)
   page = gtk_label_new (self->project != NULL && self->project->title != NULL
                           ? self->project->title
                           : "");
-  gtk_label_set_wrap (GTK_LABEL (GTK_WIDGET (page)), TRUE);
-  gtk_label_set_xalign (GTK_LABEL (GTK_WIDGET (page)), 0);
+  gtk_label_set_wrap (GTK_LABEL (page), TRUE);
+  gtk_label_set_xalign (GTK_LABEL (page), 0);
   gtk_widget_add_css_class (GTK_WIDGET (page), "title-2");
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (heading)), GTK_WIDGET (page));
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), GTK_WIDGET (page));
 
   {
     g_autofree char *text = NULL;
@@ -1094,14 +1091,14 @@ details_content (NuvashaDownloadModpackDialog *self)
     details_watch (&self->meta, gtk_label_new (text));
     gtk_label_set_xalign (GTK_LABEL (self->meta), 0);
     gtk_widget_add_css_class (GTK_WIDGET (self->meta), "dim-label");
-    adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (heading)), GTK_WIDGET (self->meta));
+    adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), GTK_WIDGET (self->meta));
   }
 
    downloads = nuvasha_content_format_downloads (self->project->downloads);
   details_watch (&self->count, gtk_label_new (downloads));
   gtk_label_set_xalign (GTK_LABEL (self->count), 0);
   gtk_widget_add_css_class (GTK_WIDGET (self->count), "dim-label");
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (heading)), GTK_WIDGET (self->count));
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), GTK_WIDGET (self->count));
 
   /* The long description, in Markdown. */
   details_watch (&self->body, gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
@@ -1115,8 +1112,8 @@ details_content (NuvashaDownloadModpackDialog *self)
     gtk_box_append (GTK_BOX (self->body),
                     plain_label (self->project->description));
 
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (heading));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (self->body));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (heading));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (self->body));
 
   /* Explain missing or failed version lists instead of disabling the button
    * without feedback. */
@@ -1125,14 +1122,14 @@ details_content (NuvashaDownloadModpackDialog *self)
   gtk_label_set_xalign (GTK_LABEL (self->details_error), 0);
   gtk_widget_add_css_class (GTK_WIDGET (self->details_error), "dim-label");
   gtk_widget_set_visible (GTK_WIDGET (self->details_error), FALSE);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (self->details_error));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (self->details_error));
 
   gtk_widget_set_margin_top (GTK_WIDGET (box), 12);
   gtk_widget_set_margin_bottom (GTK_WIDGET (box), 12);
   gtk_widget_set_margin_start (GTK_WIDGET (box), 18);
   gtk_widget_set_margin_end (GTK_WIDGET (box), 18);
 
-  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)), GTK_WIDGET (box));
+  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller), GTK_WIDGET (box));
   gtk_widget_set_vexpand (GTK_WIDGET (scroller), TRUE);
 
   /* Version selector and download action. */
@@ -1182,8 +1179,8 @@ dialog_details_fill (NuvashaDownloadModpackDialog *self)
     show_details_error (self, self->versions_problem);
   else if (self->versions != NULL && self->versions->len == 0)
     show_details_error (self,
-                        "This project publishes no pack file nuvasha can "
-                        "install.");
+                         _("This project publishes no pack file Nuvasha can "
+                           "install."));
 
   if (self->versions != NULL && self->versions->len > 0)
     {
@@ -1470,35 +1467,36 @@ build_error_page (NuvashaDownloadModpackDialog *self,
   GtkButton *back_btn = GTK_BUTTON (gtk_button_new_with_label (_("Back")));
   GtkWidget *page = NULL;
 
-  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)), GTK_WIDGET (header));
+  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), GTK_WIDGET (header));
 
   status = ADW_STATUS_PAGE (adw_status_page_new ());
-  adw_status_page_set_icon_name (ADW_STATUS_PAGE (GTK_WIDGET (status)),
+  adw_status_page_set_icon_name (ADW_STATUS_PAGE (status),
                                  "dialog-error-symbolic");
-  adw_status_page_set_title (ADW_STATUS_PAGE (GTK_WIDGET (status)), what);
+  adw_status_page_set_title (ADW_STATUS_PAGE (status), what);
   {
     g_autofree char *escaped =
       g_markup_escape_text (message != NULL ? message : "", -1);
 
-    adw_status_page_set_description (ADW_STATUS_PAGE (GTK_WIDGET (status)), escaped);
+    adw_status_page_set_description (ADW_STATUS_PAGE (status), escaped);
   }
 
   gtk_widget_add_css_class (GTK_WIDGET (retry_btn), "suggested-action");
   g_signal_connect (retry_btn, "clicked", retry, self);
   g_signal_connect (back_btn, "clicked", cancel, self);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (buttons)), GTK_WIDGET (retry_btn));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (buttons)), GTK_WIDGET (back_btn));
+  gtk_box_append (GTK_BOX (buttons), GTK_WIDGET (retry_btn));
+  gtk_box_append (GTK_BOX (buttons), GTK_WIDGET (back_btn));
   gtk_widget_set_halign (GTK_WIDGET (buttons), GTK_ALIGN_CENTER);
 
   box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (status));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (buttons));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (status));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (buttons));
   gtk_widget_set_vexpand (GTK_WIDGET (status), TRUE);
   gtk_widget_set_valign (GTK_WIDGET (status), GTK_ALIGN_CENTER);
 
-  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)), GTK_WIDGET (box));
-  page = GTK_WIDGET (adw_navigation_page_new (GTK_WIDGET (toolbar), "Could not install"));
-  adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (GTK_WIDGET (page)), "error");
+  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), GTK_WIDGET (box));
+  page = GTK_WIDGET (adw_navigation_page_new (GTK_WIDGET (toolbar),
+                                               _("Could not install")));
+  adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (page), "error");
 
   return page;
 }

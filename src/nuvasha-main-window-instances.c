@@ -88,7 +88,7 @@ open_instance_dialog (NuvashaMainWindow *self, NuvashaInstance *instance)
 {
   const char *id = nuvasha_instance_get_id (instance);
   AdwDialog *dialog = NULL;
-  GtkWidget *page = NULL;
+  NuvashaInstancePage *page = NULL;
   char *name = NULL;
 
   if (id == NULL)
@@ -102,9 +102,9 @@ open_instance_dialog (NuvashaMainWindow *self, NuvashaInstance *instance)
       return;
     }
 
-  page = GTK_WIDGET (
-    nuvasha_instance_page_new (self->model->manager, instance, self->model->settings,
-                           window_launcher (self, id)));
+  page = nuvasha_instance_page_new (self->model->manager, instance,
+                                    self->model->settings,
+                                    window_launcher (self, id));
 
   g_object_get (instance, "name", &name, NULL);
 
@@ -114,7 +114,7 @@ open_instance_dialog (NuvashaMainWindow *self, NuvashaInstance *instance)
      the room they had. */
   adw_dialog_set_content_width (dialog, 900);
   adw_dialog_set_content_height (dialog, 620);
-  adw_dialog_set_child (dialog, page);
+  adw_dialog_set_child (dialog, GTK_WIDGET (page));
   g_free (name);
 
   /* Store the instance ID so the dialog can be found after rebuilds. */
@@ -177,7 +177,7 @@ row_update (GtkWidget *play, NuvashaLauncher *launcher)
     GTK_WIDGET (g_object_get_data (G_OBJECT (play), "nuvasha-label"));
 
   gtk_label_set_label (GTK_LABEL (label), busy ? _("Stop") : _("Play"));
-  gtk_image_set_from_icon_name (GTK_IMAGE (GTK_WIDGET (icon)),
+  gtk_image_set_from_icon_name (GTK_IMAGE (icon),
                                 busy ? "media-playback-stop-symbolic"
                                      : "media-playback-start-symbolic");
   gtk_widget_set_tooltip_text (GTK_WIDGET (play), busy ? _("Stop") : _("Play"));
@@ -250,11 +250,11 @@ confirm_stop (NuvashaMainWindow *self, NuvashaLauncher *launcher)
 
   g_object_get (instance, "name", &name, NULL);
   heading = g_strdup_printf (
-    "Stop %s?", name != NULL && *name != '\0' ? name : "the game");
+    _("Stop %s?"), name != NULL && *name != '\0' ? name : _("the game"));
 
   alert = ADW_ALERT_DIALOG (adw_alert_dialog_new (
-      heading, "The game is running and will close. Progress since the last "
-               "save is lost."));
+      heading, _("The game is running and will close. Progress since the last "
+                 "save is lost.")));
   adw_alert_dialog_set_heading_use_markup (alert, FALSE);
   adw_alert_dialog_set_body_use_markup (alert, FALSE);
   adw_alert_dialog_add_response (alert, "cancel", _("Keep Playing"));
@@ -365,26 +365,26 @@ create_instance_row (gpointer item, gpointer user_data)
     subtitle = g_strdup (minecraft_version);
 
   /* Names and versions are plain text and may hold an "&". */
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), FALSE);
-  adw_action_row_set_title_lines (ADW_ACTION_ROW (GTK_WIDGET (row)), 1);
-  adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (GTK_WIDGET (row)), 1);
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), name);
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (row)), subtitle);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
+  adw_action_row_set_title_lines (ADW_ACTION_ROW (row), 1);
+  adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 1);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), name);
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), subtitle);
 
-  gtk_image_set_pixel_size (GTK_IMAGE (GTK_WIDGET (icon)), 48);
+  gtk_image_set_pixel_size (GTK_IMAGE (icon), 48);
   gtk_widget_set_size_request (GTK_WIDGET (icon), 48, 48);
   gtk_widget_set_valign (GTK_WIDGET (icon), GTK_ALIGN_CENTER);
-  adw_action_row_add_prefix (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (icon));
+  adw_action_row_add_prefix (ADW_ACTION_ROW (row), GTK_WIDGET (icon));
 
-  gtk_image_set_pixel_size (GTK_IMAGE (GTK_WIDGET (play_icon)), 16);
+  gtk_image_set_pixel_size (GTK_IMAGE (play_icon), 16);
   gtk_widget_set_size_request (GTK_WIDGET (play_icon), 16, 16);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (play_box)), GTK_WIDGET (play_icon));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (play_box)), GTK_WIDGET (play_label));
-  gtk_button_set_child (GTK_BUTTON (GTK_WIDGET (play)), GTK_WIDGET (play_box));
+  gtk_box_append (GTK_BOX (play_box), GTK_WIDGET (play_icon));
+  gtk_box_append (GTK_BOX (play_box), GTK_WIDGET (play_label));
+  gtk_button_set_child (GTK_BUTTON (play), GTK_WIDGET (play_box));
   gtk_widget_set_valign (GTK_WIDGET (play), GTK_ALIGN_CENTER);
   gtk_widget_add_css_class (GTK_WIDGET (play), "suggested-action");
   gtk_widget_set_tooltip_text (GTK_WIDGET (play), _("Play"));
-  gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (play)),
+  gtk_accessible_update_property (GTK_ACCESSIBLE (play),
                                    GTK_ACCESSIBLE_PROPERTY_LABEL, _("Play"), -1);
 
   /* The play state swaps the icon and the label, so they are known by
@@ -392,7 +392,7 @@ create_instance_row (gpointer item, gpointer user_data)
   g_object_set_data (G_OBJECT (play), "nuvasha-icon", play_icon);
   g_object_set_data (G_OBJECT (play), "nuvasha-label", play_label);
 
-  adw_action_row_add_suffix (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (play));
+  adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (play));
 
   g_signal_connect (play, "clicked", G_CALLBACK (on_play_clicked), self);
 
@@ -417,7 +417,7 @@ create_instance_row (gpointer item, gpointer user_data)
 
   /* A click anywhere on the row, outside its buttons, opens the
      instance. An AdwActionRow is not activatable by default. */
-  gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (GTK_WIDGET (row)), TRUE);
+  gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
 
   return GTK_WIDGET (row);
 }

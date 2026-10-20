@@ -367,17 +367,11 @@ msgstr "1 giorno"
 msgid "7 days"
 msgstr "7 giorni"
 
-msgid "Clear nuvasha Cache"
-msgstr "Svuota cache nuvasha"
-
 msgid "Show Shortcuts"
 msgstr "Mostra scorciatoie"
 
 msgid "Quit"
 msgstr "Esci"
-
-msgid "Clear nuvasha Cache?"
-msgstr "Svuotare la cache nuvasha?"
 
 # New modpack import/export actions use English until translators provide localized text.
 msgid "Import Modpack"
@@ -553,9 +547,6 @@ msgstr "%s download"
 msgid "Cache Cleared"
 msgstr "Cache svuotata"
 
-msgid "nuvasha cache data was cleared successfully."
-msgstr "I dati della cache di nuvasha sono stati eliminati correttamente."
-
 msgid "Cache Cleanup Failed"
 msgstr "Pulizia della cache non riuscita"
 
@@ -612,7 +603,7 @@ msgid "Enable sandbox"
 msgstr "Abilita sandbox"
 
 msgid "Allow sandbox network access"
-msgstr "Allow sandbox network access"
+msgstr "Consenti l'accesso alla rete della sandbox"
 # UI string
 msgid "Skin"
 msgstr "Skin"
@@ -623,15 +614,11 @@ msgstr "Modello snello"
 
 # UI string
 msgid "OK"
-msgstr "OK"
+msgstr "Va bene"
 
 # UI string
 msgid "Export skin…"
 msgstr "Esporta skin…"
-
-# UI string
-msgid "Imported skin"
-msgstr "Imported skin"
 
 # UI string
 msgid "Default model"
@@ -639,7 +626,7 @@ msgstr "Modello predefinito"
 
 # UI string
 msgid "PNG skin texture"
-msgstr "PNG skin texture"
+msgstr "Texture della pelle PNG"
 
 # UI string
 msgid "Invalid skin"
@@ -653,7 +640,6 @@ msgstr "Nessun mantello"
 msgid "Import skin…"
 msgstr "Importa skin…"
 
-
 # UI string
 msgid "Delete skin?"
 msgstr "Eliminare la skin?"
@@ -664,3 +650,254 @@ msgstr "Questa skin verrà rimossa dalla raccolta."
 
 msgid "Skin images must be 64x64 or 64x32 PNG files"
 msgstr "Le immagini delle skin devono essere file PNG 64x64 o 64x32"
+
+msgid "Bahasa Indonesia"
+msgstr "Bahasa Indonesia"
+
+msgid "Browse Modpacks"
+msgstr "Sfoglia i modpack"
+
+msgid "Choose Files"
+msgstr "Seleziona i file"
+
+msgid "Clear Nuvasha Cache"
+msgstr "Svuota la cache di Nuvasha"
+
+msgid "Clear Nuvasha Cache?"
+msgstr "Svuotare la cache di Nuvasha?"
+
+msgid ""
+"Conflicts\n"
+msgstr ""
+"Conflitti\n"
+
+msgid "Content"
+msgstr "Contenuto"
+
+msgid "Could not install"
+msgstr "Impossibile eseguire l'installazione"
+
+msgid "Could not install the modpack"
+msgstr "Impossibile installare il modpack"
+
+msgid "Could not load categories"
+msgstr "Impossibile caricare le categorie"
+
+msgid "Could not search Modrinth"
+msgstr "Impossibile effettuare la ricerca su Modrinth"
+
+msgid "Could not understand the answer"
+msgstr "Non sono riuscito a capire la risposta"
+
+msgid "Dansk"
+msgstr "Dansk"
+
+msgid "Deutsch"
+msgstr "Deutsch"
+
+msgid "Disable"
+msgstr "Disattiva"
+
+msgid "Dismiss"
+msgstr "Ignora"
+
+msgid "Enable"
+msgstr "Abilita"
+
+msgid "English"
+msgstr "English"
+
+msgid "Español (Argentina)"
+msgstr "Español (Argentina)"
+
+msgid "Español (España)"
+msgstr "Español (España)"
+
+msgid "Fabric"
+msgstr "Fabric"
+
+msgid "Forge"
+msgstr "Forge"
+
+msgid "Français"
+msgstr "Français"
+
+msgid "Images"
+msgstr "Immagini"
+
+msgid "Installing"
+msgstr "Installazione"
+
+msgid "Instances cannot contain %s in their name"
+msgstr "Le istanze non possono contenere  %snel proprio nome"
+
+msgid "It carries files that Nuvasha does not recognize."
+msgstr "Contiene file che Nuvasha non riconosce."
+
+msgid "Italiano"
+msgstr "Italiano"
+
+msgid "Magyar"
+msgstr "Magyar"
+
+msgid "Microsoft"
+msgstr "Microsoft"
+
+msgid "Microsoft returned an unsafe verification address"
+msgstr "Microsoft ha restituito un indirizzo di verifica non sicuro"
+
+msgid "Microsoft would not give a code to sign in with"
+msgstr "Microsoft non ha fornito un codice per effettuare l'accesso"
+
+msgid "Microsoft · Needs sign-in"
+msgstr "Microsoft · È necessario effettuare l'accesso"
+
+msgid "Modrinth does not know this file"
+msgstr "Modrinth non riconosce questo file"
+
+msgid "Modrinth is asking Nuvasha to slow down, too many requests"
+msgstr "Modrinth chiede a Nuvasha di rallentare un po', ci sono troppe richieste"
+
+msgid "Nederlands"
+msgstr "Nederlands"
+
+msgid "NeoForge"
+msgstr "NeoForge"
+
+msgid "No compatible Java runtime was found."
+msgstr "Non è stato trovato alcun runtime Java compatibile."
+
+msgid "No modpack matches what was asked for. Try another word"
+msgstr "Non ci sono modpack che corrispondono alla ricerca. Prova con un'altra parola"
+
+msgid "None"
+msgstr "Nessuno"
+
+msgid "Norsk (bokmål)"
+msgstr "Norsk (bokmål)"
+
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"
+
+msgid "Nuvasha cache data was cleared successfully."
+msgstr "I dati della cache di Nuvasha sono stati cancellati correttamente."
+
+msgid "Offline"
+msgstr "Offline"
+
+msgid "Pick a Minecraft version from the list."
+msgstr "Scegli una versione di Minecraft dall'elenco."
+
+msgid "Pick a version of the loader, or pick another loader."
+msgstr "Scegli una versione del caricatore oppure scegli un altro caricatore."
+
+msgid "Polski"
+msgstr "Polski"
+
+msgid "Português (Brasil)"
+msgstr "Português (Brasil)"
+
+msgid "Português (Portugal)"
+msgstr "Português (Portugal)"
+
+msgid "Quilt"
+msgstr "Quilt"
+
+msgid "Remove %s?"
+msgstr "Rimuovi%s?"
+
+msgid "Română"
+msgstr "Română"
+
+msgid "Search Modrinth and install a modpack"
+msgstr "Cerca Modrinth e installa un modpack"
+
+msgid "Skin"
+msgstr "Pelle"
+
+msgid "Stop %s?"
+msgstr "Basta%s?"
+
+msgid "Suomi"
+msgstr "Suomi"
+
+msgid "Svenska"
+msgstr "Svenska"
+
+msgid "System default"
+msgstr "Impostazioni predefinite del sistema"
+
+msgid "The account is removed from Nuvasha and its saved sign-in is forgotten. The game itself is not touched."
+msgstr "L'account viene rimosso da Nuvasha e i dati di accesso salvati vengono cancellati. Il gioco in sé rimane inalterato."
+
+msgid "The game is running and will close. Progress since the last save is lost."
+msgstr "Il gioco è in esecuzione e sta per chiudersi. I progressi effettuati dall'ultimo salvataggio andranno persi."
+
+msgid "This project publishes no pack file Nuvasha can install."
+msgstr "Questo progetto non pubblica alcun file di pacchetto che Nuvasha possa installare."
+
+msgid "This version has no pack file"
+msgstr "Questa versione non contiene alcun file di pacchetto"
+
+msgid "Tiếng Việt"
+msgstr "Tiếng Việt"
+
+msgid "Türkçe"
+msgstr "Türkçe"
+
+msgid "Unavailable"
+msgstr "Non disponibile"
+
+msgid "Vanilla"
+msgstr "Vanilla"
+
+msgid "Xbox Live is not available for the country this account is registered in"
+msgstr "Xbox Live non è disponibile nel Paese in cui è registrato questo account"
+
+msgid "the game"
+msgstr "il gioco"
+
+msgid "the instance name cannot be used as a directory name"
+msgstr "il nome dell'istanza non può essere utilizzato come nome di directory"
+
+msgid "the instance name is empty"
+msgstr "il nome dell'istanza è vuoto"
+
+msgid "the sign-in did not finish"
+msgstr "L'accesso non è stato completato"
+
+msgid "this Microsoft account has no Xbox profile behind it yet: sign in to xbox.com once with it, then sign in here again"
+msgstr "Questo account Microsoft non è ancora associato a nessun profilo Xbox: accedi una volta a xbox.com con questo account, poi accedi nuovamente qui"
+
+msgid "this account"
+msgstr "questo account"
+
+msgid "this account needs an adult to verify it before it can play, which is what South Korean accounts have to do"
+msgstr "Questo account deve essere verificato da un adulto prima di poter giocare, proprio come avviene per gli account sudcoreani"
+
+msgid "this is a child account: it has to be added to a Microsoft family by an adult before it can play"
+msgstr "Questo è un account per bambini: deve essere aggiunto a una famiglia Microsoft da un adulto prima di poter giocare"
+
+msgid "Čeština"
+msgstr "Čeština"
+
+msgid "Русский"
+msgstr "Русский"
+
+msgid "Українська"
+msgstr "Українська"
+
+msgid "العربية"
+msgstr "العربية"
+
+msgid "日本語"
+msgstr "日本語"
+
+msgid "简体中文"
+msgstr "简体中文"
+
+msgid "繁體中文"
+msgstr "繁體中文"
+
+msgid "한국어"
+msgstr "한국어"

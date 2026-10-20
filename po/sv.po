@@ -136,7 +136,7 @@ msgid "Java"
 msgstr "Java"
 
 msgid "Java Runtime"
-msgstr "Java Runtime"
+msgstr "Java-körningsmiljö"
 
 msgid "No Java installation was found on this system"
 msgstr "Ingen Java-installation hittades på detta system"
@@ -348,17 +348,11 @@ msgstr "1 dag"
 msgid "7 days"
 msgstr "7 dagar"
 
-msgid "Clear nuvasha Cache"
-msgstr "Rensa nuvasha-cachen"
-
 msgid "Show Shortcuts"
 msgstr "Visa genvägar"
 
 msgid "Quit"
 msgstr "Sluta"
-
-msgid "Clear nuvasha Cache?"
-msgstr "Rensa nuvasha-cachen?"
 
 msgid "Import Modpack"
 msgstr "Importera Modpack"
@@ -385,7 +379,7 @@ msgid "Exporting modpack"
 msgstr "Exporterar modpack"
 
 msgid "Modpack export"
-msgstr "Modpack export"
+msgstr "Export av modpaket"
 
 msgid "Include transient files?"
 msgstr "Inkludera övergående filer?"
@@ -523,9 +517,6 @@ msgstr "%s nedladdningar"
 msgid "Cache Cleared"
 msgstr "Cache rensad"
 
-msgid "nuvasha cache data was cleared successfully."
-msgstr "nuvasha-cachedata rensades framgångsrikt."
-
 msgid "Cache Cleanup Failed"
 msgstr "Cacherensning misslyckades"
 
@@ -566,7 +557,7 @@ msgid "Pick a Minecraft version first"
 msgstr "Välj en Minecraft-version först"
 
 msgid "Deleting a dependency deletes the mod that depended on it"
-msgstr ""
+msgstr "Om man tar bort ett beroende tas även det tillägg bort som var beroende av det"
 
 msgid "A dependent mod cannot be deleted"
 msgstr "En beroende mod kan inte tas bort"
@@ -584,34 +575,285 @@ msgid "Slim model"
 msgstr "Smal modell"
 
 msgid "OK"
-msgstr "OK"
+msgstr "Okej"
 
 msgid "Export skin…"
 msgstr "Exportera skal..."
-
-msgid "Imported skin"
-msgstr "Importerad hud"
 
 msgid "Default model"
 msgstr "Standardmodell"
 
 msgid "PNG skin texture"
-msgstr "PNG hudstruktur"
+msgstr "PNG-hudtextur"
 
 msgid "Invalid skin"
 msgstr "Ogiltig hud"
 
 msgid "No cape"
-msgstr ""
+msgstr "Ingen cape"
 
 msgid "Import skin…"
-msgstr ""
+msgstr "Importera utseende…"
 
 msgid "Delete skin?"
-msgstr ""
+msgstr "Ta bort skinnet?"
 
 msgid "This skin will be removed from the skin library."
 msgstr "Denna hud kommer att tas bort från hudbiblioteket."
 
 msgid "Skin images must be 64x64 or 64x32 PNG files"
 msgstr "Skalbilder måste vara 64x64 eller 64x32 PNG-filer"
+
+msgid "Bahasa Indonesia"
+msgstr "Bahasa Indonesia"
+
+msgid "Browse Modpacks"
+msgstr "Bläddra bland modpack"
+
+msgid "Cancel"
+msgstr "Avbryt"
+
+msgid "Choose Files"
+msgstr "Välj filer"
+
+msgid "Clear Nuvasha Cache"
+msgstr "Rensa Nuvasha-cachen"
+
+msgid "Clear Nuvasha Cache?"
+msgstr "Rensa Nuvasha-cachen?"
+
+msgid ""
+"Conflicts\n"
+msgstr ""
+"Konflikter\n"
+
+msgid "Content"
+msgstr "Innehåll"
+
+msgid "Could not install"
+msgstr "Det gick inte att installera"
+
+msgid "Could not install the modpack"
+msgstr "Det gick inte att installera modpaketet"
+
+msgid "Could not load categories"
+msgstr "Det gick inte att ladda kategorierna"
+
+msgid "Could not search Modrinth"
+msgstr "Det gick inte att söka efter Modrinth"
+
+msgid "Could not understand the answer"
+msgstr "Jag kunde inte förstå svaret"
+
+msgid "Dansk"
+msgstr "Dansk"
+
+msgid "Deutsch"
+msgstr "Deutsch"
+
+msgid "Disable"
+msgstr "Inaktivera"
+
+msgid "Dismiss"
+msgstr "Stäng"
+
+msgid "Enable"
+msgstr "Aktivera"
+
+msgid "English"
+msgstr "English"
+
+msgid "Español (Argentina)"
+msgstr "Español (Argentina)"
+
+msgid "Español (España)"
+msgstr "Español (España)"
+
+msgid "Fabric"
+msgstr "Fabric"
+
+msgid "Forge"
+msgstr "Forge"
+
+msgid "Français"
+msgstr "Français"
+
+msgid "Images"
+msgstr "Bilder"
+
+msgid "Installing"
+msgstr "Installation"
+
+msgid "Instances cannot contain %s in their name"
+msgstr "Instanser får inte innehålla  %si sitt namn"
+
+msgid "It carries files that Nuvasha does not recognize."
+msgstr "Den innehåller filer som Nuvasha inte känner igen."
+
+msgid "Italiano"
+msgstr "Italiano"
+
+msgid "Magyar"
+msgstr "Magyar"
+
+msgid "Microsoft"
+msgstr "Microsoft"
+
+msgid "Microsoft returned an unsafe verification address"
+msgstr "Microsoft returnerade en osäker verifieringsadress"
+
+msgid "Microsoft would not give a code to sign in with"
+msgstr "Microsoft ville inte ge mig en kod att logga in med"
+
+msgid "Microsoft · Needs sign-in"
+msgstr "Microsoft · Inloggning krävs"
+
+msgid "Modrinth does not know this file"
+msgstr "Modrinth känner inte till den här filen"
+
+msgid "Modrinth is asking Nuvasha to slow down, too many requests"
+msgstr "Modrinth ber Nuvasha att ta det lugnare, det är för många förfrågningar"
+
+msgid "Nederlands"
+msgstr "Nederlands"
+
+msgid "NeoForge"
+msgstr "NeoForge"
+
+msgid "No compatible Java runtime was found."
+msgstr "Ingen kompatibel Java-körmiljö hittades."
+
+msgid "No modpack matches what was asked for. Try another word"
+msgstr "Inget modpack stämmer överens med det som efterfrågades. Prova med ett annat ord"
+
+msgid "None"
+msgstr "Inget"
+
+msgid "Norsk (bokmål)"
+msgstr "Norsk (bokmål)"
+
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"
+
+msgid "Nuvasha cache data was cleared successfully."
+msgstr "Cachedata för Nuvasha har rensats utan problem."
+
+msgid "Offline"
+msgstr "Offline"
+
+msgid "Pick a Minecraft version from the list."
+msgstr "Välj en Minecraft-version från listan."
+
+msgid "Pick a version of the loader, or pick another loader."
+msgstr "Välj en version av laddaren, eller välj en annan laddare."
+
+msgid "Polski"
+msgstr "Polski"
+
+msgid "Português (Brasil)"
+msgstr "Português (Brasil)"
+
+msgid "Português (Portugal)"
+msgstr "Português (Portugal)"
+
+msgid "Quilt"
+msgstr "Quilt"
+
+msgid "Remove %s?"
+msgstr "Ta bort%s?"
+
+msgid "Română"
+msgstr "Română"
+
+msgid "Search Modrinth and install a modpack"
+msgstr "Sök efter Modrinth och installera ett modpaket"
+
+msgid "Skin"
+msgstr "Hud"
+
+msgid "Stop %s?"
+msgstr "Stopp%s?"
+
+msgid "Suomi"
+msgstr "Suomi"
+
+msgid "Svenska"
+msgstr "Svenska"
+
+msgid "System default"
+msgstr "Systemets standardinställning"
+
+msgid "The account is removed from Nuvasha and its saved sign-in is forgotten. The game itself is not touched."
+msgstr "Kontot tas bort från Nuvasha och den sparade inloggningen raderas. Spelet i sig påverkas inte."
+
+msgid "The game is running and will close. Progress since the last save is lost."
+msgstr "Spelet är igång och kommer att stängas. Framstegen sedan den senaste sparningen går förlorade."
+
+msgid "This project publishes no pack file Nuvasha can install."
+msgstr "Detta projekt publicerar ingen paketfil som Nuvasha kan installera."
+
+msgid "This version has no pack file"
+msgstr "Den här versionen har ingen packfil"
+
+msgid "Tiếng Việt"
+msgstr "Tiếng Việt"
+
+msgid "Türkçe"
+msgstr "Türkçe"
+
+msgid "Unavailable"
+msgstr "Ej tillgängligt"
+
+msgid "Vanilla"
+msgstr "Vanilla"
+
+msgid "Xbox Live is not available for the country this account is registered in"
+msgstr "Xbox Live är inte tillgängligt i det land där detta konto är registrerat"
+
+msgid "the game"
+msgstr "spelet"
+
+msgid "the instance name cannot be used as a directory name"
+msgstr "instansnamnet kan inte användas som katalognamn"
+
+msgid "the instance name is empty"
+msgstr "instansnamnet är tomt"
+
+msgid "the sign-in did not finish"
+msgstr "inloggningen slutfördes inte"
+
+msgid "this Microsoft account has no Xbox profile behind it yet: sign in to xbox.com once with it, then sign in here again"
+msgstr "Det här Microsoft-kontot har ännu ingen Xbox-profil kopplad till sig: logga in på xbox.com en gång med det, och logga sedan in här igen"
+
+msgid "this account"
+msgstr "detta konto"
+
+msgid "this account needs an adult to verify it before it can play, which is what South Korean accounts have to do"
+msgstr "Det här kontot måste verifieras av en vuxen innan det kan användas, vilket är vad sydkoreanska konton måste göra"
+
+msgid "this is a child account: it has to be added to a Microsoft family by an adult before it can play"
+msgstr "Detta är ett barnkonto: det måste läggas till i en Microsoft-familj av en vuxen innan barnet kan spela"
+
+msgid "Čeština"
+msgstr "Čeština"
+
+msgid "Русский"
+msgstr "Русский"
+
+msgid "Українська"
+msgstr "Українська"
+
+msgid "العربية"
+msgstr "العربية"
+
+msgid "日本語"
+msgstr "日本語"
+
+msgid "简体中文"
+msgstr "简体中文"
+
+msgid "繁體中文"
+msgstr "繁體中文"
+
+msgid "한국어"
+msgstr "한국어"
