@@ -388,9 +388,8 @@ create_instance_row (gpointer item, gpointer user_data)
   AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
   GtkImage *icon = GTK_IMAGE (gtk_image_new_from_icon_name ("applications-games-symbolic"));
   GtkButton *play = GTK_BUTTON (gtk_button_new ());
-  GtkButton *handle = GTK_BUTTON (gtk_button_new ());
-  GtkImage *handle_icon = GTK_IMAGE (
-    gtk_image_new_from_icon_name ("list-drag-handle-symbolic"));
+  GtkButton *handle = GTK_BUTTON (
+    gtk_button_new_from_icon_name ("list-drag-handle-symbolic"));
   GtkDragSource *drag_source = gtk_drag_source_new ();
   GtkDropTarget *drop_target = NULL;
   GtkBox *play_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
@@ -429,10 +428,6 @@ create_instance_row (gpointer item, gpointer user_data)
 
   gtk_widget_add_css_class (GTK_WIDGET (handle), "flat");
   gtk_widget_set_valign (GTK_WIDGET (handle), GTK_ALIGN_CENTER);
-  gtk_widget_set_size_request (GTK_WIDGET (handle), 32, 32);
-  gtk_image_set_pixel_size (handle_icon, 24);
-  gtk_button_set_child (handle, GTK_WIDGET (handle_icon));
-  gtk_widget_set_focus_on_click (GTK_WIDGET (handle), FALSE);
   gtk_widget_set_tooltip_text (GTK_WIDGET (handle), _("Reorder"));
   gtk_accessible_update_property (GTK_ACCESSIBLE (handle),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL,
