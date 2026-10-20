@@ -421,6 +421,11 @@ create_instance_row (gpointer item, gpointer user_data)
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), name);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (row), subtitle);
 
+  gtk_image_set_pixel_size (GTK_IMAGE (icon), 48);
+  gtk_widget_set_size_request (GTK_WIDGET (icon), 48, 48);
+  gtk_widget_set_valign (GTK_WIDGET (icon), GTK_ALIGN_CENTER);
+  adw_action_row_add_prefix (ADW_ACTION_ROW (row), GTK_WIDGET (icon));
+
   gtk_widget_add_css_class (GTK_WIDGET (handle), "flat");
   gtk_widget_set_valign (GTK_WIDGET (handle), GTK_ALIGN_CENTER);
   gtk_widget_set_tooltip_text (GTK_WIDGET (handle), _("Reorder"));
@@ -428,11 +433,6 @@ create_instance_row (gpointer item, gpointer user_data)
                                   GTK_ACCESSIBLE_PROPERTY_LABEL,
                                   _("Reorder"), -1);
   adw_action_row_add_prefix (ADW_ACTION_ROW (row), GTK_WIDGET (handle));
-
-  gtk_image_set_pixel_size (GTK_IMAGE (icon), 48);
-  gtk_widget_set_size_request (GTK_WIDGET (icon), 48, 48);
-  gtk_widget_set_valign (GTK_WIDGET (icon), GTK_ALIGN_CENTER);
-  adw_action_row_add_prefix (ADW_ACTION_ROW (row), GTK_WIDGET (icon));
 
   gtk_drag_source_set_actions (drag_source, GDK_ACTION_MOVE);
   g_signal_connect (drag_source, "prepare",
