@@ -322,6 +322,52 @@ on_row_icon_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
   row_set_icon (GTK_IMAGE (user_data), nuvasha_INSTANCE (object));
 }
 
+static GdkContentProvider *
+on_instance_drag_prepare (GtkDragSource *source G_GNUC_UNUSED,
+                           double x G_GNUC_UNUSED,
+                           double y G_GNUC_UNUSED,
+                           gpointer user_data)
+{
+  GValue value = G_VALUE_INIT;
+  GdkContentProvider *provider = NULL;
+
+  g_value_init (&value, nuvasha_TYPE_INSTANCE);
+  g_value_set_object (&value, user_data);
+  provider = gdk_content_provider_new_for_value (&value);
+  g_value_unset (&value);
+
+  return provider;
+}
+
+static gboolean
+on_instance_drop (GtkDropTarget *target,
+                  const GValue *value,
+                  double x G_GNUC_UNUSED,
+                  double y,
+                  gpointer user_data)
+{
+  NuvashaMainWindow *self = nuvasha_MAIN_WINDOW (user_data);
+  GtkListBoxRow *row = g_object_get_data (G_OBJECT (target),
+                                          "nuvasha-instance-row");
+  NuvashaInstance *instance = g_value_get_object (value);
+  NuvashaInstance *target_instance = row != NULL
+    ? g_object_get_data (G_OBJECT (row), "nuvasha-instance") : NULL;
+  g_autoptr (GError) error = NULL;
+
+  if (instance == NULL || target_instance == NULL || row == NULL)
+    return FALSE;
+
+  if (!nuvasha_instance_manager_move (
+        self->model->manager, instance, target_instance,
+        y > gtk_widget_get_height (GTK_WIDGET (row)) / 2.0, &error))
+    {
+      g_warning ("Could not reorder instances: %s", error->message);
+      return FALSE;
+    }
+
+  return TRUE;
+}
+
 /* One row of the instance list: an AdwActionRow of the boxed list,
  * the same kind of row the content pages and the modpack browser use,
  * so the list is sized and margined exactly like theirs. Every button
@@ -342,6 +388,10 @@ create_instance_row (gpointer item, gpointer user_data)
   AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
   GtkImage *icon = GTK_IMAGE (gtk_image_new_from_icon_name ("applications-games-symbolic"));
   GtkButton *play = GTK_BUTTON (gtk_button_new ());
+  GtkButton *handle = GTK_BUTTON (
+    gtk_button_new_from_icon_name ("list-drag-handle-symbolic"));
+  GtkDragSource *drag_source = gtk_drag_source_new ();
+  GtkDropTarget *drop_target = NULL;
   GtkBox *play_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
   GtkImage *play_icon = GTK_IMAGE (gtk_image_new_from_icon_name ("media-playback-start-symbolic"));
   GtkLabel *play_label = GTK_LABEL (gtk_label_new (_("Play")));
@@ -371,10 +421,31 @@ create_instance_row (gpointer item, gpointer user_data)
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), name);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (row), subtitle);
 
+  gtk_widget_add_css_class (GTK_WIDGET (handle), "flat");
+  gtk_widget_set_valign (GTK_WIDGET (handle), GTK_ALIGN_CENTER);
+  gtk_widget_set_tooltip_text (GTK_WIDGET (handle), _("Reorder"));
+  gtk_accessible_update_property (GTK_ACCESSIBLE (handle),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                  _("Reorder"), -1);
+  adw_action_row_add_prefix (ADW_ACTION_ROW (row), GTK_WIDGET (handle));
+
   gtk_image_set_pixel_size (GTK_IMAGE (icon), 48);
   gtk_widget_set_size_request (GTK_WIDGET (icon), 48, 48);
   gtk_widget_set_valign (GTK_WIDGET (icon), GTK_ALIGN_CENTER);
   adw_action_row_add_prefix (ADW_ACTION_ROW (row), GTK_WIDGET (icon));
+
+  gtk_drag_source_set_actions (drag_source, GDK_ACTION_MOVE);
+  g_signal_connect (drag_source, "prepare",
+                    G_CALLBACK (on_instance_drag_prepare), instance);
+  gtk_widget_add_controller (GTK_WIDGET (handle),
+                             GTK_EVENT_CONTROLLER (drag_source));
+
+  g_object_set_data (G_OBJECT (row), "nuvasha-instance", instance);
+  drop_target = gtk_drop_target_new (nuvasha_TYPE_INSTANCE, GDK_ACTION_MOVE);
+  g_object_set_data (G_OBJECT (drop_target), "nuvasha-instance-row", row);
+  g_signal_connect (drop_target, "drop", G_CALLBACK (on_instance_drop), self);
+  gtk_widget_add_controller (GTK_WIDGET (row),
+                             GTK_EVENT_CONTROLLER (drop_target));
 
   gtk_image_set_pixel_size (GTK_IMAGE (play_icon), 16);
   gtk_widget_set_size_request (GTK_WIDGET (play_icon), 16, 16);

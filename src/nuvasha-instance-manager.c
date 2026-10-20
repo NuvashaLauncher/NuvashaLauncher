@@ -412,6 +412,51 @@ nuvasha_instance_manager_get_by_id (NuvashaInstanceManager *self, const char *id
   return NULL;
 }
 
+gboolean
+nuvasha_instance_manager_move (NuvashaInstanceManager *self,
+                                NuvashaInstance *instance,
+                                NuvashaInstance *target,
+                                gboolean after,
+                                GError **error)
+{
+  GListStore *store;
+  guint instance_position = 0;
+  guint target_position = 0;
+  guint new_position;
+  g_autoptr (NuvashaInstance) keep = NULL;
+
+  g_return_val_if_fail (nuvasha_IS_INSTANCE_MANAGER (self), FALSE);
+  g_return_val_if_fail (nuvasha_IS_INSTANCE (instance), FALSE);
+  g_return_val_if_fail (nuvasha_IS_INSTANCE (target), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  store = self->instances;
+  if (instance == target ||
+      !g_list_store_find (store, instance, &instance_position) ||
+      !g_list_store_find (store, target, &target_position))
+    return TRUE;
+
+  new_position = target_position + (after ? 1 : 0);
+  if (instance_position < new_position)
+    new_position--;
+
+  if (new_position == instance_position)
+    return TRUE;
+
+  keep = g_object_ref (instance);
+  g_list_store_remove (store, instance_position);
+  g_list_store_insert (store, new_position, keep);
+
+  if (!nuvasha_instance_manager_save (self, error))
+    {
+      g_list_store_remove (store, new_position);
+      g_list_store_insert (store, instance_position, keep);
+      return FALSE;
+    }
+
+  return TRUE;
+}
+
 NuvashaInstance *
 nuvasha_instance_manager_create (NuvashaInstanceManager *self,
                              const char *name,
