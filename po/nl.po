@@ -762,9 +762,6 @@ msgstr "Nederlands"
 msgid "NeoForge"
 msgstr "NeoForge"
 
-msgid "No compatible Java runtime was found."
-msgstr "Er is geen compatibele Java-runtime gevonden."
-
 msgid "No modpack matches what was asked for. Try another word"
 msgstr "Er is geen modpack dat aan de zoekopdracht voldoet. Probeer een ander woord"
 
@@ -810,9 +807,6 @@ msgstr "Română"
 msgid "Search Modrinth and install a modpack"
 msgstr "Zoek naar Modrinth en installeer een modpack"
 
-msgid "Skin"
-msgstr "Huid"
-
 msgid "Stop %s?"
 msgstr "Stop%s?"
 
@@ -842,9 +836,6 @@ msgstr "Tiếng Việt"
 
 msgid "Türkçe"
 msgstr "Türkçe"
-
-msgid "Unavailable"
-msgstr "Niet beschikbaar"
 
 msgid "Vanilla"
 msgstr "Vanilla"

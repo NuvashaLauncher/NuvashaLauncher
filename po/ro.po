@@ -612,9 +612,6 @@ msgstr "Bahasa Indonesia"
 msgid "Browse Modpacks"
 msgstr "Răsfoiește pachetele de moduri"
 
-msgid "Cancel"
-msgstr "Anulează"
-
 msgid "Choose Files"
 msgstr "Alegeți fișierele"
 

@@ -610,9 +610,6 @@ msgstr "Bahasa Indonesia"
 msgid "Browse Modpacks"
 msgstr "浏览模组包"
 
-msgid "Cancel"
-msgstr "取消"
-
 msgid "Choose Files"
 msgstr "选择文件"
 

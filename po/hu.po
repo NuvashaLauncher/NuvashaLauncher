@@ -610,9 +610,6 @@ msgstr "Bahasa Indonesia"
 msgid "Browse Modpacks"
 msgstr "Modcsomagok böngészése"
 
-msgid "Cancel"
-msgstr "Mégse"
-
 msgid "Choose Files"
 msgstr "Fájlok kiválasztása"
 

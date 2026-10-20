@@ -471,12 +471,10 @@ msgstr "导出"
 msgid "Installed %u item"
 msgid_plural "Installed %u items"
 msgstr[0] "已安装 %u 个项目"
-msgstr[1] "已安装 %u 个项目"
 
 msgid "Updated %u item"
 msgid_plural "Updated %u items"
 msgstr[0] "已更新 %u 个项目"
-msgstr[1] "已更新 %u 个项目"
 
 msgid "The icon must be a file on this computer"
 msgstr "图标必须是此计算机上的文件"
@@ -755,9 +753,6 @@ msgstr "Nederlands"
 msgid "NeoForge"
 msgstr "NeoForge"
 
-msgid "No compatible Java runtime was found."
-msgstr "未找到兼容的 Java 运行时环境。"
-
 msgid "No modpack matches what was asked for. Try another word"
 msgstr "没有符合要求的模组包。请尝试输入其他关键词"
 
@@ -803,9 +798,6 @@ msgstr "Română"
 msgid "Search Modrinth and install a modpack"
 msgstr "搜索 Modrinth 并安装模组包"
 
-msgid "Skin"
-msgstr "皮肤"
-
 msgid "Stop %s?"
 msgstr "停%s？"
 
@@ -835,9 +827,6 @@ msgstr "Tiếng Việt"
 
 msgid "Türkçe"
 msgstr "Türkçe"
-
-msgid "Unavailable"
-msgstr "不可用"
 
 msgid "Vanilla"
 msgstr "Vanilla"
