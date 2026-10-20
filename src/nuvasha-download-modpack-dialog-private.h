@@ -109,6 +109,11 @@ struct _NuvashaDownloadModpackDialog
 
 
 void operation_done (gpointer user_data);
+void details_watch (gpointer field, GtkWidget *widget);
+void build_browse_page (NuvashaDownloadModpackDialog *, gboolean start_search);
+void close_details (NuvashaDownloadModpackDialog *);
+void dialog_details_open (NuvashaDownloadModpackDialog *);
+void on_modpack_download_clicked (GtkButton *, gpointer);
 GtkWidget *build_error_page (NuvashaDownloadModpackDialog *, const char *,
                              const char *, GCallback, GCallback);
 void push_error (NuvashaDownloadModpackDialog *, const char *, const char *,

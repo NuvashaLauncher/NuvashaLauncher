@@ -31,6 +31,11 @@ void page_watch_free (PageWatch *watch);
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (PageWatch, page_watch_free)
 void take_rows_out (GList **rows, AdwPreferencesGroup *group);
 void file_row_refresh (GtkWidget *row);
+void installed_filter_rows (NuvashaContentPage *self);
+GtkWidget *file_row (NuvashaContentPage *self, NuvashaContentFile *file);
+void load_visible_icons (NuvashaContentPage *self);
+void persist_identified_file (NuvashaContentPage *self,
+                              NuvashaContentFile *file);
 char *description_line (const char *text, guint max_sentences);
 void row_show_description (GtkWidget *row, const char *description);
 void reload_installed (NuvashaContentPage *self);
