@@ -102,6 +102,8 @@ gboolean nuvasha_download_open_temporary (DownloadRequest *request, GError **err
 
 void nuvasha_download_start_transfer (DownloadRequest *request);
 void start_attempt (DownloadRequest *request);
+SoupSession *get_session (NuvashaDownloadService *service);
+char *url_for_message (const char *url);
 gboolean request_was_cancelled (DownloadRequest *request, GError *error);
 void request_succeed (DownloadRequest *request);
 void nuvasha_download_file_cache_start (DownloadRequest *request);
