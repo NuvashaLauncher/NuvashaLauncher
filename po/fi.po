@@ -682,7 +682,7 @@ msgid "Installing"
 msgstr "Asennus"
 
 msgid "Instances cannot contain %s in their name"
-msgstr "Nimissä%s ei saa esiintyä"
+msgstr "Nimissä ei saa esiintyä %s"
 
 msgid "It carries files that Nuvasha does not recognize."
 msgstr "Siinä on tiedostoja, joita Nuvasha ei tunnista."
@@ -757,7 +757,7 @@ msgid "Quilt"
 msgstr "Quilt"
 
 msgid "Remove %s?"
-msgstr "Poista%s?"
+msgstr "Poista %s?"
 
 msgid "Română"
 msgstr "Română"
@@ -769,7 +769,7 @@ msgid "Skin"
 msgstr "Iho"
 
 msgid "Stop %s?"
-msgstr "Pysähdytäänkö%s?"
+msgstr "Pysähdytäänkö %s?"
 
 msgid "Suomi"
 msgstr "Suomi"

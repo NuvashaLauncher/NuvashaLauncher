@@ -727,7 +727,7 @@ msgid "Installing"
 msgstr "Yükleme"
 
 msgid "Instances cannot contain %s in their name"
-msgstr "Örneklerin adlarında%s şunlar bulunamaz:"
+msgstr "Örneklerin adlarında %s şunlar bulunamaz:"
 
 msgid "It carries files that Nuvasha does not recognize."
 msgstr "Nuvasha’nın tanımadığı dosyalar içeriyor."
@@ -799,7 +799,7 @@ msgid "Quilt"
 msgstr "Quilt"
 
 msgid "Remove %s?"
-msgstr "Silmek mi%s?"
+msgstr "Silmek mi %s?"
 
 msgid "Română"
 msgstr "Română"
@@ -808,7 +808,7 @@ msgid "Search Modrinth and install a modpack"
 msgstr "Modrinth'te arama yap ve bir mod paketi yükle"
 
 msgid "Stop %s?"
-msgstr "Dur mu%s?"
+msgstr "Dur mu %s?"
 
 msgid "Suomi"
 msgstr "Suomi"

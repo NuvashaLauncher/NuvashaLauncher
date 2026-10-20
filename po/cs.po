@@ -684,7 +684,7 @@ msgid "Installing"
 msgstr "Instalace"
 
 msgid "Instances cannot contain %s in their name"
-msgstr "Instance nesmí obsahovat %sve svém názvu"
+msgstr "Instance nesmí obsahovat %s ve svém názvu"
 
 msgid "It carries files that Nuvasha does not recognize."
 msgstr "Obsahuje soubory, které Nuvasha nerozpozná."
@@ -759,7 +759,7 @@ msgid "Quilt"
 msgstr "Quilt"
 
 msgid "Remove %s?"
-msgstr "Odstranit%s?"
+msgstr "Odstranit %s?"
 
 msgid "Română"
 msgstr "Română"
@@ -771,7 +771,7 @@ msgid "Skin"
 msgstr "Kůže"
 
 msgid "Stop %s?"
-msgstr "Stop%s?"
+msgstr "Stop %s?"
 
 msgid "Suomi"
 msgstr "Suomi"
