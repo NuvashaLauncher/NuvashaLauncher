@@ -476,12 +476,10 @@ msgstr "내보내기"
 msgid "Installed %u item"
 msgid_plural "Installed %u items"
 msgstr[0] "아이템 %u개 설치됨"
-msgstr[1] "아이템 %u개 설치됨"
 
 msgid "Updated %u item"
 msgid_plural "Updated %u items"
 msgstr[0] "아이템 %u개 업데이트됨"
-msgstr[1] "아이템 %u개 업데이트됨"
 
 msgid "The icon must be a file on this computer"
 msgstr "아이콘은 이 컴퓨터에 있는 파일이어야 합니다"
@@ -760,9 +758,6 @@ msgstr "Nederlands"
 msgid "NeoForge"
 msgstr "NeoForge"
 
-msgid "No compatible Java runtime was found."
-msgstr "호환되는 Java 런타임이 발견되지 않았습니다."
-
 msgid "No modpack matches what was asked for. Try another word"
 msgstr "요청하신 내용과 일치하는 모드팩이 없습니다. 다른 단어를 입력해 보세요."
 
@@ -808,9 +803,6 @@ msgstr "Română"
 msgid "Search Modrinth and install a modpack"
 msgstr "Modrinth에서 검색하여 모드팩을 설치하세요"
 
-msgid "Skin"
-msgstr "피부"
-
 msgid "Stop %s?"
 msgstr "멈출까요%s?"
 
@@ -840,9 +832,6 @@ msgstr "Tiếng Việt"
 
 msgid "Türkçe"
 msgstr "Türkçe"
-
-msgid "Unavailable"
-msgstr "이용 불가"
 
 msgid "Vanilla"
 msgstr "Vanilla"
