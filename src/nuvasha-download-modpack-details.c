@@ -1,0 +1,591 @@
+/* Modrinth modpack details and version selection. */
+#include "nuvasha-download-modpack-dialog-private.h"
+#include "nuvasha-icon-load-private.h"
+#include "nuvasha-content-format.h"
+#include "nuvasha-downloads.h"
+#include "nuvasha-download.h"
+#include "nuvasha-operation.h"
+#include "nuvasha-ui-feedback.h"
+#include "nuvasha-i18n.h"
+#include "nuvasha-icons.h"
+#include "nuvasha-markdown.h"
+#include "nuvasha-modpack.h"
+#include "nuvasha-modrinth.h"
+#include "nuvasha-task.h"
+#include <json-glib/json-glib.h>
+#include <string.h>
+
+static void show_details_error (NuvashaDownloadModpackDialog *, const char *);
+
+/* ---------------------------------------------------------- *
+ * Versions of the details page
+ * ---------------------------------------------------------- */
+
+static void
+version_row_label (NuvashaModrinthVersion *version, char *out, guint size)
+{
+  const char *name = version->version_number != NULL ? version->version_number : version->name;
+  const char *game =
+      version->game_versions != NULL && version->game_versions->len > 0
+          ? g_ptr_array_index (version->game_versions, 0)
+          : "?";
+  const char *loader =
+      version->loaders != NULL && version->loaders->len > 0
+          ? g_ptr_array_index (version->loaders, 0)
+          : "vanilla";
+
+  g_snprintf (out, size, "%s · %s · %s", name, game, loader);
+}
+
+static gint
+by_date_desc (gconstpointer a, gconstpointer b)
+{
+  const NuvashaModrinthVersion *va = *(const NuvashaModrinthVersion *const *) a;
+  const NuvashaModrinthVersion *vb = *(const NuvashaModrinthVersion *const *) b;
+
+  return g_strcmp0 (vb->date_published, va->date_published);
+}
+
+static GtkStringList *
+build_version_strings (GPtrArray *versions)
+{
+  GtkStringList *strings = gtk_string_list_new (NULL);
+
+  for (guint i = 0; i < versions->len; i++)
+    {
+      NuvashaModrinthVersion *version = g_ptr_array_index (versions, i);
+      char label[160];
+
+      version_row_label (version, label, sizeof label);
+      gtk_string_list_append (strings, label);
+    }
+
+  return strings;
+}
+
+static GPtrArray *
+versions_of_answer (JsonNode *root, GError **error)
+{
+  JsonArray *array = NULL;
+  GPtrArray *versions = NULL;
+
+  if (!JSON_NODE_HOLDS_ARRAY (root))
+    {
+      g_set_error_literal (error, nuvasha_MODRINTH_ERROR,
+                           nuvasha_MODRINTH_ERROR_PARSE,
+                           "the answer is not a list of versions");
+      return NULL;
+    }
+
+  versions = g_ptr_array_new_with_free_func ((GDestroyNotify)
+    nuvasha_modrinth_version_free);
+
+  array = json_node_get_array (root);
+
+  for (guint i = 0; i < json_array_get_length (array); i++)
+    {
+      JsonNode *element = json_array_get_element (array, i);
+      g_autofree char *json = nuvasha_modrinth_json_node_to_string (element);
+      NuvashaModrinthVersion *version =
+        nuvasha_modrinth_version_from_json (json, -1, NULL);
+
+      if (version == NULL)
+        continue;
+
+      {
+        gboolean is_a_pack = FALSE;
+
+        for (guint j = 0;
+             version->files != NULL && j < version->files->len;
+             j++)
+          {
+            NuvashaModrinthFile *file = g_ptr_array_index (version->files, j);
+
+            if (file->filename != NULL &&
+                g_str_has_suffix (file->filename, ".mrpack"))
+              is_a_pack = TRUE;
+          }
+
+        if (!is_a_pack)
+          {
+            nuvasha_modrinth_version_free (version);
+            continue;
+          }
+      }
+
+      g_ptr_array_add (versions, version);
+    }
+
+  g_ptr_array_sort (versions, by_date_desc);
+
+  return versions;
+}
+
+/* ---------------------------------------------------------- *
+ * The dialog of a pack
+ *
+ * The same one the mods, resource packs and shader packs open: the
+ * description in Markdown, and a foot with the versions in a drop-down
+ * over the button that installs the one shown. A pack becomes an
+ * instance of its own rather than a file in one, so the name it takes
+ * and where it goes are asked for here too, below the description.
+ * ---------------------------------------------------------- */
+
+/* Words that are not Markdown and must read exactly as they are. */
+static GtkWidget *
+plain_label (const char *text)
+{
+  GtkLabel *label = GTK_LABEL (gtk_label_new (text != NULL ? text : ""));
+
+  gtk_label_set_wrap (GTK_LABEL (label), TRUE);
+  gtk_label_set_wrap_mode (GTK_LABEL (label), PANGO_WRAP_WORD_CHAR);
+  gtk_label_set_xalign (GTK_LABEL (label), 0);
+  gtk_label_set_selectable (GTK_LABEL (label), TRUE);
+
+  return GTK_WIDGET (label);
+}
+
+/* The words the dialog shows while the description and the versions are
+   on their way. */
+/* Closes the open pack, leaving the list the whole dialog again. The row
+ * of the pack is the way in and the way out, so nothing has to stand
+ * above the pack and push its name down. */
+void
+close_details (NuvashaDownloadModpackDialog *self)
+{
+  if (self->split == NULL)
+    return;
+
+  adw_navigation_split_view_set_content (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split), NULL);
+  adw_navigation_split_view_set_collapsed (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split), TRUE);
+  details_watch (&self->details_page, NULL);
+
+  /* Keep the browser at its wide size even when the details half is closed,
+     matching the other content browsers. */
+}
+
+/* Puts @body in the right half of the browser, beside the list, and takes
+ * the whole width of the list back to half. A pack shown before is
+ * replaced. */
+static void
+show_details_page (NuvashaDownloadModpackDialog *self, GtkWidget *body)
+{
+  AdwNavigationPage *page = ADW_NAVIGATION_PAGE (adw_navigation_page_new (body,
+                                                         self->project->title));
+
+  details_watch (&self->details_page, GTK_WIDGET (page));
+  adw_navigation_split_view_set_content (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split), ADW_NAVIGATION_PAGE (page));
+  adw_navigation_split_view_set_collapsed (
+    ADW_NAVIGATION_SPLIT_VIEW (self->split), FALSE);
+
+  /* The dialog is already wide enough for both halves. */
+}
+
+/* The author the search answer named. A project answer does not name one:
+   it carries the team as the team's project id. */
+static const char *
+author_of (NuvashaDownloadModpackDialog *self)
+{
+  const char *who = self->project != NULL ? self->project->author : NULL;
+
+  if (who == NULL || *who == '\0')
+    who = self->details != NULL ? self->details->author : NULL;
+
+  return who != NULL && *who != '\0' ? who : NULL;
+}
+
+/* Build the details view after metadata and versions are available. */
+static GtkWidget *
+details_content (NuvashaDownloadModpackDialog *self)
+{
+  GtkWidget *content = NULL;
+  GtkWidget *scroller = NULL;
+  GtkWidget *box = NULL;
+  GtkWidget *page = NULL;
+  GtkWidget *heading = NULL;
+  GtkWidget *bar = NULL;
+  g_autofree char *downloads = NULL;
+  const char *who = author_of (self);
+
+  if (self->project == NULL)
+    return gtk_label_new ("");
+
+  scroller = gtk_scrolled_window_new ();
+  box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 18);
+  heading = adw_preferences_group_new ();
+
+  /* Show the title, author/license, and download count. */
+  page = gtk_label_new (self->project != NULL && self->project->title != NULL
+                          ? self->project->title
+                          : "");
+  gtk_label_set_wrap (GTK_LABEL (page), TRUE);
+  gtk_label_set_xalign (GTK_LABEL (page), 0);
+  gtk_widget_add_css_class (GTK_WIDGET (page), "title-2");
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), GTK_WIDGET (page));
+
+  {
+    g_autofree char *text = NULL;
+
+    text = nuvasha_content_format_author (
+      self->details != NULL ? self->details->license : NULL, who);
+
+    details_watch (&self->meta, gtk_label_new (text));
+    gtk_label_set_xalign (GTK_LABEL (self->meta), 0);
+    gtk_widget_add_css_class (GTK_WIDGET (self->meta), "dim-label");
+    adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), GTK_WIDGET (self->meta));
+  }
+
+   downloads = nuvasha_content_format_downloads (self->project->downloads);
+  details_watch (&self->count, gtk_label_new (downloads));
+  gtk_label_set_xalign (GTK_LABEL (self->count), 0);
+  gtk_widget_add_css_class (GTK_WIDGET (self->count), "dim-label");
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), GTK_WIDGET (self->count));
+
+  /* The long description, in Markdown. */
+  details_watch (&self->body, gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
+
+  if (self->details_problem != NULL)
+    gtk_box_append (GTK_BOX (self->body), plain_label (self->details_problem));
+  else if (self->details != NULL && self->details->body != NULL &&
+           *self->details->body != '\0')
+    nuvasha_markdown_render (GTK_BOX (self->body), self->details->body);
+  else
+    gtk_box_append (GTK_BOX (self->body),
+                    plain_label (self->project->description));
+
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (heading));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (self->body));
+
+  /* Explain missing or failed version lists instead of disabling the button
+   * without feedback. */
+  details_watch (&self->details_error, gtk_label_new (NULL));
+  gtk_label_set_wrap (GTK_LABEL (self->details_error), TRUE);
+  gtk_label_set_xalign (GTK_LABEL (self->details_error), 0);
+  gtk_widget_add_css_class (GTK_WIDGET (self->details_error), "dim-label");
+  gtk_widget_set_visible (GTK_WIDGET (self->details_error), FALSE);
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (self->details_error));
+
+  gtk_widget_set_margin_top (GTK_WIDGET (box), 12);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (box), 12);
+  gtk_widget_set_margin_start (GTK_WIDGET (box), 18);
+  gtk_widget_set_margin_end (GTK_WIDGET (box), 18);
+
+  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller), GTK_WIDGET (box));
+  gtk_widget_set_vexpand (GTK_WIDGET (scroller), TRUE);
+
+  /* Version selector and download action. */
+  details_watch (&self->dropdown, gtk_drop_down_new (NULL, NULL));
+  gtk_widget_set_hexpand (GTK_WIDGET (self->dropdown), TRUE);
+  gtk_widget_set_valign (GTK_WIDGET (self->dropdown), GTK_ALIGN_CENTER);
+
+  details_watch (&self->download_button, gtk_button_new_with_label (_("Download")));
+  gtk_widget_add_css_class (GTK_WIDGET (self->download_button), "suggested-action");
+  gtk_widget_set_valign (GTK_WIDGET (self->download_button), GTK_ALIGN_CENTER);
+  /* Nothing can be installed before the versions have arrived. */
+  gtk_widget_set_sensitive (GTK_WIDGET (self->download_button), FALSE);
+  g_signal_connect (self->download_button, "clicked",
+                    G_CALLBACK (on_modpack_download_clicked), self);
+
+  bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  gtk_box_append (GTK_BOX (bar), GTK_WIDGET (self->dropdown));
+  gtk_box_append (GTK_BOX (bar), GTK_WIDGET (self->download_button));
+  gtk_widget_set_margin_top (bar, 12);
+  gtk_widget_set_margin_bottom (bar, 12);
+  gtk_widget_set_margin_start (bar, 12);
+  gtk_widget_set_margin_end (bar, 12);
+
+  content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  gtk_box_append (GTK_BOX (content), GTK_WIDGET (scroller));
+  gtk_box_append (GTK_BOX (content),
+                  gtk_separator_new (GTK_ORIENTATION_HORIZONTAL));
+  gtk_box_append (GTK_BOX (content), bar);
+
+  return content;
+}
+
+/* Puts the real content in the half once both the description and the
+   versions are in. */
+static void
+dialog_details_fill (NuvashaDownloadModpackDialog *self)
+{
+  if (self->details_page == NULL)
+    return;
+  if (!self->details_ready || !self->versions_ready)
+    return;
+
+  adw_navigation_page_set_child (ADW_NAVIGATION_PAGE (self->details_page),
+                                 details_content (self));
+
+  if (self->versions_problem != NULL)
+    show_details_error (self, self->versions_problem);
+  else if (self->versions != NULL && self->versions->len == 0)
+    show_details_error (self,
+                         _("This project publishes no pack file Nuvasha can "
+                           "install."));
+
+  if (self->versions != NULL && self->versions->len > 0)
+    {
+      GtkStringList *strings = build_version_strings (self->versions);
+
+      gtk_drop_down_set_model (GTK_DROP_DOWN (self->dropdown),
+                               G_LIST_MODEL (strings));
+       /* Select the newest version by default. */
+      gtk_drop_down_set_selected (GTK_DROP_DOWN (self->dropdown), 0);
+      g_object_unref (strings);
+    }
+
+  if (self->download_button != NULL)
+    gtk_widget_set_sensitive (GTK_WIDGET (self->download_button),
+                              self->versions != NULL && self->versions->len > 0);
+}
+
+/* Get the modpack's list of published versions and show it on the
+ * already-pushed details page. */
+static void
+show_details_error (NuvashaDownloadModpackDialog *self, const char *message)
+{
+  if (self->details_error == NULL)
+    return;
+
+  gtk_label_set_text (GTK_LABEL (self->details_error),
+                      message != NULL ? message : "");
+  gtk_widget_set_visible (GTK_WIDGET (self->details_error), message != NULL);
+}
+
+typedef struct
+{
+  NuvashaDownloadModpackDialog *dialog;
+  guint generation;
+} VersionsAsk;
+
+static void
+versions_ask_free (VersionsAsk *ask)
+{
+  g_object_unref (ask->dialog);
+  g_free (ask);
+}
+
+static void
+on_versions_answer (GObject *source G_GNUC_UNUSED,
+                    GAsyncResult *result,
+                    gpointer user_data)
+{
+  VersionsAsk *ask = user_data;
+  NuvashaDownloadModpackDialog *self = ask->dialog;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (JsonParser) parser = NULL;
+  g_autoptr (GPtrArray) versions = NULL;
+
+  parser = nuvasha_download_json_finish (result, &error);
+
+  if (ask->generation != self->details_generation)
+    {
+      versions_ask_free (ask);
+      return;
+    }
+
+  if (parser == NULL)
+    {
+      if (!g_error_matches (error, nuvasha_DOWNLOAD_ERROR,
+                            nuvasha_DOWNLOAD_ERROR_CANCELLED))
+        {
+          g_free (self->versions_problem);
+          self->versions_problem =
+            g_strdup (error != NULL ? error->message
+                                    : "the versions could not be read");
+        }
+
+      versions_ask_free (ask);
+      return;
+    }
+
+  versions = versions_of_answer (json_parser_get_root (parser), &error);
+
+  if (versions == NULL)
+    {
+      g_free (self->versions_problem);
+      self->versions_problem =
+        g_strdup (error != NULL ? error->message : "the versions could not be read");
+      versions_ask_free (ask);
+      return;
+    }
+
+  g_ptr_array_sort (versions, by_date_desc);
+
+  g_clear_pointer (&self->versions, g_ptr_array_unref);
+  self->versions = versions;
+  versions = NULL;
+
+  self->versions_ready = TRUE;
+  dialog_details_fill (self);
+
+  versions_ask_free (ask);
+}
+
+static void dialog_details_fill (NuvashaDownloadModpackDialog *self);
+
+/* One answer the dialog asked for and has not released yet: the dialog it
+ * belongs to, which can be closed while the request is on its way, and
+ * the operation handle the answer is meant to release. */
+typedef struct
+{
+  NuvashaDownloadModpackDialog *dialog;
+  NuvashaTaskScope *operation;
+  guint generation;
+} DetailsAsk;
+
+static void
+ask_free (DetailsAsk *ask)
+{
+  g_clear_object (&ask->dialog);
+
+  if (ask->operation != NULL)
+    nuvasha_operation_unref (ask->operation);
+
+  g_free (ask);
+}
+
+/* The long description of the pack, read once the dialog is up. */
+static void
+on_details_answer (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                   gpointer user_data)
+{
+  DetailsAsk *ask = user_data;
+  NuvashaDownloadModpackDialog *self = ask->dialog;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (NuvashaModrinthDetails) details = NULL;
+
+  details = nuvasha_modrinth_details_finish (result, &error);
+
+  if (ask->generation != self->details_generation)
+    {
+      ask_free (ask);
+      return;
+    }
+
+  if (details == NULL)
+    {
+      if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+        {
+          g_free (self->details_problem);
+          self->details_problem =
+            g_strdup (error != NULL ? error->message
+                                    : "the pack cannot be read");
+        }
+    }
+  else
+    {
+      g_clear_pointer (&self->details, nuvasha_modrinth_details_free);
+      self->details = g_steal_pointer (&details);
+    }
+
+  self->details_ready = TRUE;
+  dialog_details_fill (self);
+
+  ask_free (ask);
+}
+
+/* The icon of the project is previewed from the shared icon cache. It is
+ * copied into the new instance before that instance points at it: clearing
+ * nuvasha's cache must never remove an instance's icon. The reference the load
+ * holds keeps the dialog alive until the answer is in. */
+typedef struct
+{
+  NuvashaDownloadModpackDialog *dialog;
+  NuvashaTaskScope *operation;
+} ProjectIconLoad;
+
+static void
+project_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                    gpointer user_data)
+{
+  ProjectIconLoad *load = user_data;
+  NuvashaDownloadModpackDialog *self = load->dialog;
+  g_autoptr (GError) error = NULL;
+  g_autofree char *path = nuvasha_icon_load_finish (result, &error);
+
+  if (path != NULL)
+    {
+      g_free (self->icon_path);
+      self->icon_path = g_steal_pointer (&path);
+    }
+
+  g_clear_object (&load->dialog);
+  if (load->operation != NULL)
+    nuvasha_operation_unref (load->operation);
+  g_free (load);
+}
+
+void
+dialog_details_open (NuvashaDownloadModpackDialog *self)
+{
+  g_autofree char *escaped_id = NULL;
+  g_autofree char *url = NULL;
+
+  if (self->project == NULL)
+    return;
+
+  escaped_id = g_uri_escape_string (self->project->project_id, NULL, FALSE);
+  url = g_strdup_printf (nuvasha_MODRINTH_URL "/project/%s/version", escaped_id);
+
+  /* Nothing is shown until the description and the versions are both in,
+     so the half does not fill itself in piece by piece. */
+  self->details_ready = FALSE;
+  self->versions_ready = FALSE;
+  self->details_generation++;
+  g_clear_pointer (&self->details, nuvasha_modrinth_details_free);
+  g_free (self->details_problem);
+  self->details_problem = NULL;
+  g_free (self->versions_problem);
+  self->versions_problem = NULL;
+
+  show_details_page (self, nuvasha_ui_loading_child ());
+
+  if (self->fetch != NULL)
+    g_cancellable_cancel (self->fetch);
+
+  g_clear_object (&self->fetch);
+  self->fetch = g_cancellable_new ();
+
+  /* A stale icon of another project has no business on this one. */
+  g_clear_pointer (&self->icon_path, g_free);
+
+  if (self->project->icon_url != NULL && *self->project->icon_url != '\0')
+    {
+      ProjectIconLoad *load = g_new0 (ProjectIconLoad, 1);
+
+      load->dialog = g_object_ref (self);
+      load->operation = nuvasha_icon_load_async (self->project->icon_url,
+                                             project_icon_ready, load);
+      /* The same fetch cancellable the details and versions use, so one
+         new project cancels all three. */
+      nuvasha_operation_follow (load->operation, self->fetch);
+    }
+
+  /* The long description, and the versions of the pack beside it. */
+  {
+    DetailsAsk *ask = g_new0 (DetailsAsk, 1);
+
+    ask->dialog = g_object_ref (self);
+    ask->generation = self->details_generation;
+    ask->operation = nuvasha_modrinth_details_async (self->project->project_id,
+                                                  on_details_answer, ask);
+    /* The same fetch cancellable the versions answer uses, so opening
+       another project stops this one. */
+    nuvasha_operation_follow (ask->operation, self->fetch);
+  }
+
+  {
+    VersionsAsk *ask = g_new0 (VersionsAsk, 1);
+
+    ask->dialog = g_object_ref (self);
+    ask->generation = self->details_generation;
+    nuvasha_operation_release (
+      nuvasha_download_json_async (nuvasha_downloads_get_service (), url,
+                               on_versions_answer, ask),
+      self->fetch);
+  }
+}

@@ -101,6 +101,12 @@ void nuvasha_download_discard_temporary (DownloadRequest *request);
 gboolean nuvasha_download_open_temporary (DownloadRequest *request, GError **error);
 
 void nuvasha_download_start_transfer (DownloadRequest *request);
+void start_attempt (DownloadRequest *request);
+gboolean request_was_cancelled (DownloadRequest *request, GError *error);
+void request_succeed (DownloadRequest *request);
+void nuvasha_download_file_cache_start (DownloadRequest *request);
+void json_cache_start (DownloadRequest *request);
+void global_cache_directory_ready (GObject *, GAsyncResult *, gpointer);
 void nuvasha_download_release_slot (DownloadRequest *request);
 gint compare_waiting_requests (gconstpointer left, gconstpointer right, gpointer user_data);
 gboolean queued_cancelled (gpointer user_data);

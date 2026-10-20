@@ -1,0 +1,1036 @@
+/* Avatar loading and the account skin manager. */
+#include "nuvasha-users-popover-private.h"
+#include "nuvasha-fs.h"
+#include "nuvasha-ui-feedback.h"
+#include "nuvasha-i18n.h"
+#include <libsoup/soup.h>
+
+#define AVATAR_SIZE 40
+
+/* A skin is a picture of 64 by 64 and the face of it is 8 by 8 of that,
+ * in the middle of the top of the picture. */
+#define SKIN_SIZE 64
+#define FACE_SIZE 8
+#define FACE_X 8
+#define FACE_Y 8
+
+typedef struct
+{
+  NuvashaUsersPopover *owner;
+  GtkImage *image;
+  NuvashaSkinView *view;
+  AdwDialog *dialog;
+  GtkListBox *skins;
+  GtkDropDown *capes;
+  GtkStringList *cape_list;
+  GPtrArray *cape_ids;
+  GPtrArray *cape_urls;
+  GHashTable *skin_urls;
+  AdwActionRow *current_skin_row;
+  GtkButton *remove_button;
+  gboolean defaults_added;
+  SoupMessage *profile_message;
+  SoupMessage *cape_message;
+  GHashTable *deleted_skin_ids;
+  NuvashaAccount *account;
+} SkinMenu;
+
+static AdwActionRow *skin_row_new (SkinMenu *menu, const char *name,
+                                   const char *url);
+
+static char *
+skin_directory_path (void)
+{
+  return g_build_filename (g_get_user_data_dir (), "nuvasha", "skins", NULL);
+}
+
+static char *
+skin_name_for_url (const char *url)
+{
+  if (url != NULL && (g_str_has_prefix (url, "http://") ||
+                      g_str_has_prefix (url, "https://")))
+    return g_compute_checksum_for_string (G_CHECKSUM_SHA256, url, -1);
+  if (url != NULL && g_str_has_prefix (url, "file://"))
+    {
+      g_autoptr (GFile) file = g_file_new_for_uri (url);
+      g_autofree char *basename = g_file_get_basename (file);
+      if (basename != NULL)
+        {
+          gsize length = strlen (basename);
+          if (length > 4 && g_ascii_strcasecmp (basename + length - 4, ".png") == 0)
+            basename[length - 4] = '\0';
+          return g_strdup (basename);
+        }
+    }
+  return g_strdup (_("Skin"));
+}
+
+static char *
+skin_display_name (const char *filename)
+{
+  char *name = g_strdup (filename);
+  gsize length;
+
+  if (name == NULL)
+    return NULL;
+  length = strlen (name);
+  if (length > 4 && g_ascii_strcasecmp (name + length - 4, ".png") == 0)
+    name[length - 4] = '\0';
+  return name;
+}
+
+static char *
+unique_skin_filename (const char *directory, const char *filename)
+{
+  g_autofree char *path = g_build_filename (directory, filename, NULL);
+  const char *extension = NULL;
+  g_autofree char *stem = NULL;
+
+  if (!g_file_test (path, G_FILE_TEST_EXISTS))
+    return g_strdup (filename);
+
+  {
+    gsize length = strlen (filename);
+    if (length > 4 &&
+        g_ascii_strcasecmp (filename + length - 4, ".png") == 0)
+      extension = filename + length - 4;
+  }
+  if (extension == NULL)
+    extension = filename + strlen (filename);
+  stem = g_strndup (filename, extension - filename);
+
+  for (guint suffix = 1; ; suffix++)
+    {
+      g_autofree char *candidate =
+        g_strdup_printf ("%s %u%s", stem, suffix, extension);
+      g_autofree char *candidate_path =
+        g_build_filename (directory, candidate, NULL);
+      if (!g_file_test (candidate_path, G_FILE_TEST_EXISTS))
+        return g_steal_pointer (&candidate);
+    }
+}
+
+static char *
+cached_skin_path (const char *url)
+{
+  if (url == NULL || (!g_str_has_prefix (url, "http://") &&
+                      !g_str_has_prefix (url, "https://")))
+    return NULL;
+  {
+    g_autofree char *name = g_strconcat (skin_name_for_url (url), ".png", NULL);
+    return g_build_filename (skin_directory_path (), name, NULL);
+  }
+}
+
+static gboolean
+is_default_skin_alias (const char *alias)
+{
+  static const char *defaults[] = {
+    "STEVE", "ALEX", "SUNNY", "KAI", "MAKENA", "ZURI", "EFE", "ARI", "NOOR"
+  };
+  if (alias == NULL)
+    return FALSE;
+  for (guint i = 0; i < G_N_ELEMENTS (defaults); i++)
+    if (g_ascii_strcasecmp (alias, defaults[i]) == 0)
+      return TRUE;
+  return FALSE;
+}
+
+static gboolean
+skin_url_is_default (const char *url)
+{
+  g_autofree char *defaults =
+    g_build_filename (g_get_user_data_dir (), "nuvasha", "skins", "defaults", NULL);
+  g_autofree char *path = NULL;
+  g_autofree char *prefix = NULL;
+  g_autoptr (GFile) file = NULL;
+
+  if (url == NULL || !g_str_has_prefix (url, "file://"))
+    return FALSE;
+  file = g_file_new_for_uri (url);
+  path = g_file_get_path (file);
+  prefix = g_strconcat (defaults, G_DIR_SEPARATOR_S, NULL);
+  return path != NULL && g_str_has_prefix (path, prefix);
+}
+
+static void
+append_local_skins (SkinMenu *menu)
+{
+  g_autofree char *directory = skin_directory_path ();
+  g_autoptr (GDir) dir = NULL;
+  const char *name;
+
+  if (!nuvasha_fs_make_directory (directory, 0755, NULL) ||
+      (dir = g_dir_open (directory, 0, NULL)) == NULL)
+    return;
+  while ((name = g_dir_read_name (dir)) != NULL)
+    {
+      g_autofree char *path = NULL;
+      g_autofree char *uri = NULL;
+      if (strlen (name) <= 4 ||
+          g_ascii_strcasecmp (name + strlen (name) - 4, ".png") != 0)
+        continue;
+      path = g_build_filename (directory, name, NULL);
+      uri = g_filename_to_uri (path, NULL, NULL);
+      g_autofree char *identity = uri != NULL ? skin_name_for_url (uri) : NULL;
+      if (uri == NULL || g_hash_table_contains (menu->skin_urls, identity) ||
+          g_hash_table_contains (menu->deleted_skin_ids, identity))
+        continue;
+      g_autofree char *display_name = skin_display_name (name);
+      gtk_list_box_append (menu->skins,
+                           GTK_WIDGET (skin_row_new (menu, display_name, uri)));
+    }
+}
+
+static AdwActionRow *
+append_default_skins (SkinMenu *menu)
+{
+  static const char *defaults[] = {
+    "Steve", "Alex", "Sunny", "Kai", "Makena", "Zuri", "Efe", "Ari", "Noor"
+  };
+  g_autofree char *source_dir = g_build_filename (nuvasha_DATA_DIR, "skins", "defaults", NULL);
+  g_autofree char *source_fallback = g_build_filename (nuvasha_SOURCE_DATA_DIR, "skins", "defaults", NULL);
+  g_autofree char *target_dir = g_build_filename (g_get_user_data_dir (), "nuvasha", "skins", "defaults", NULL);
+  AdwActionRow *steve_row = NULL;
+
+  if (menu->defaults_added || !nuvasha_fs_make_directory (target_dir, 0755, NULL))
+    return NULL;
+  for (guint i = 0; i < G_N_ELEMENTS (defaults); i++)
+    {
+      const char *name = defaults[i];
+      g_autofree char *filename = g_strconcat (name, ".png", NULL);
+      g_autofree char *source_path = g_build_filename (source_dir, filename, NULL);
+      g_autofree char *fallback_path = g_build_filename (source_fallback, filename, NULL);
+      g_autofree char *target_path = g_build_filename (target_dir, filename, NULL);
+      g_autofree char *uri = NULL;
+      g_autoptr (GFile) source = NULL;
+      g_autoptr (GFile) target = NULL;
+
+      if (!g_file_test (source_path, G_FILE_TEST_IS_REGULAR))
+        {
+          g_clear_pointer (&source_path, g_free);
+          source_path = g_strdup (fallback_path);
+        }
+      if (!g_file_test (source_path, G_FILE_TEST_IS_REGULAR))
+        continue;
+      source = g_file_new_for_path (source_path);
+      target = g_file_new_for_path (target_path);
+      if (!g_file_test (target_path, G_FILE_TEST_IS_REGULAR))
+        nuvasha_fs_copy_file (source, target, G_FILE_COPY_NONE, NULL, NULL);
+      uri = g_filename_to_uri (target_path, NULL, NULL);
+      g_autofree char *identity = uri != NULL ? skin_name_for_url (uri) : NULL;
+      if (uri != NULL && !g_hash_table_contains (menu->skin_urls, identity) &&
+          !g_hash_table_contains (menu->deleted_skin_ids, identity))
+        {
+          AdwActionRow *row = skin_row_new (menu, name, uri);
+          gtk_list_box_append (menu->skins, GTK_WIDGET (row));
+          if (g_str_equal (name, "Steve"))
+            steve_row = row;
+        }
+    }
+  menu->defaults_added = TRUE;
+  return steve_row;
+}
+
+typedef struct
+{
+  NuvashaSkinView *view;
+  gboolean cape;
+  char *url;
+} SkinTextureLoad;
+
+static char *skin_directory_path (void);
+
+static void
+skin_texture_load_free (SkinTextureLoad *load)
+{
+  g_clear_object (&load->view);
+  g_free (load->url);
+  g_free (load);
+}
+
+static void
+cache_skin_bytes (NuvashaSkinView *view, const char *url, GBytes *bytes)
+{
+  g_autofree char *cache_directory = skin_directory_path ();
+  g_autofree char *hash = g_compute_checksum_for_string (G_CHECKSUM_SHA256,
+                                                          url, -1);
+  g_autofree char *name = g_strconcat (hash, ".png", NULL);
+  g_autofree char *path = g_build_filename (cache_directory, name, NULL);
+  gsize length = 0;
+  gconstpointer data = g_bytes_get_data (bytes, &length);
+
+  {
+    GHashTable *deleted = g_object_get_data (G_OBJECT (view),
+                                             "nuvasha-deleted-skin-ids");
+    if (deleted != NULL && g_hash_table_contains (deleted, hash))
+      return;
+  }
+  if (nuvasha_fs_make_directory (cache_directory, 0755, NULL))
+    nuvasha_fs_replace_contents (path, data, (gssize) length, 0600, NULL);
+}
+
+static void
+on_view_texture_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  SkinTextureLoad *load = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GBytes) bytes =
+    g_file_load_bytes_finish (G_FILE (source), result, NULL, &error);
+  g_autoptr (GdkTexture) texture = NULL;
+
+  if (bytes != NULL)
+    texture = gdk_texture_new_from_bytes (bytes, &error);
+  if (bytes != NULL && !load->cape && load->url != NULL &&
+      (g_str_has_prefix (load->url, "http://") ||
+       g_str_has_prefix (load->url, "https://")))
+    cache_skin_bytes (load->view, load->url, bytes);
+  if (texture == NULL && error != NULL)
+    g_warning ("Could not load skin preview texture: %s", error->message);
+  if (texture != NULL)
+    {
+      if (load->cape)
+        nuvasha_skin_view_set_cape (load->view, texture);
+      else
+        nuvasha_skin_view_set_skin (load->view, texture);
+    }
+  skin_texture_load_free (load);
+}
+
+static void
+load_view_texture (NuvashaSkinView *view, const char *url, gboolean cape)
+{
+  g_autoptr (GFile) file = NULL;
+  SkinTextureLoad *load;
+
+  if (url == NULL || *url == '\0')
+    {
+      if (cape)
+        nuvasha_skin_view_set_cape (view, NULL);
+      return;
+    }
+  file = g_file_new_for_uri (url);
+  load = g_new0 (SkinTextureLoad, 1);
+  load->view = g_object_ref (view);
+  load->cape = cape;
+  load->url = g_strdup (url);
+  g_file_load_bytes_async (file, NULL, on_view_texture_loaded, load);
+}
+
+static void
+on_capes_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  SkinMenu *menu = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GBytes) bytes =
+    soup_session_send_and_read_finish (SOUP_SESSION (source), result, &error);
+  g_autoptr (JsonParser) parser = NULL;
+  JsonNode *root = NULL;
+  JsonArray *capes = NULL;
+
+  if (bytes == NULL ||
+      menu->cape_message == NULL ||
+      soup_message_get_status (menu->cape_message) != 200)
+    goto done;
+
+  parser = json_parser_new ();
+  if (!json_parser_load_from_data (parser, g_bytes_get_data (bytes, NULL),
+                                   (gssize) g_bytes_get_size (bytes), &error))
+    goto done;
+
+  root = json_parser_get_root (parser);
+  if (!JSON_NODE_HOLDS_OBJECT (root))
+    goto done;
+  {
+    JsonNode *node = json_object_get_member (json_node_get_object (root), "capes");
+    if (node == NULL || !JSON_NODE_HOLDS_ARRAY (node))
+      goto done;
+    capes = json_node_get_array (node);
+  }
+
+  for (guint i = 0; i < json_array_get_length (capes); i++)
+    {
+      JsonNode *item = json_array_get_element (capes, i);
+      JsonObject *object;
+      const char *id;
+      const char *alias;
+      const char *url;
+      const char *state;
+
+      if (!JSON_NODE_HOLDS_OBJECT (item))
+        continue;
+      object = json_node_get_object (item);
+      id = json_object_get_string_member_with_default (object, "id", NULL);
+      alias = json_object_get_string_member_with_default (object, "alias", id);
+      url = json_object_get_string_member_with_default (object, "url", NULL);
+      state = json_object_get_string_member_with_default (object, "state", NULL);
+      if (id == NULL || *id == '\0')
+        continue;
+      g_ptr_array_add (menu->cape_ids, g_strdup (id));
+      g_ptr_array_add (menu->cape_urls, g_strdup (url != NULL ? url : ""));
+      gtk_string_list_append (menu->cape_list,
+                              alias != NULL && *alias != '\0' ? alias : id);
+      if (state != NULL && g_str_equal (state, "ACTIVE"))
+        gtk_drop_down_set_selected (menu->capes, menu->cape_ids->len);
+    }
+
+done:
+  g_object_set_data (G_OBJECT (menu->dialog), "nuvasha-capes-loaded",
+                     GINT_TO_POINTER (1));
+}
+
+static void
+on_cape_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
+                  gpointer user_data)
+{
+  SkinMenu *menu = user_data;
+  guint selected = gtk_drop_down_get_selected (GTK_DROP_DOWN (object));
+
+  if (selected == 0 || selected - 1 >= menu->cape_urls->len)
+    {
+      nuvasha_skin_view_set_cape (menu->view, NULL);
+      return;
+    }
+  load_view_texture (menu->view,
+                     g_ptr_array_index (menu->cape_urls, selected - 1), TRUE);
+}
+
+static void
+on_model_toggled (GtkCheckButton *button, gpointer user_data)
+{
+  SkinMenu *menu = user_data;
+  if (gtk_check_button_get_active (button))
+    nuvasha_skin_view_set_slim (menu->view,
+                            g_object_get_data (G_OBJECT (button), "nuvasha-slim") != NULL);
+}
+
+static void
+load_capes (SkinMenu *menu)
+{
+  SoupSession *session;
+  SoupMessage *message;
+  const char *token;
+  char *authorization;
+
+  if (menu->account == NULL || menu->account->type != nuvasha_ACCOUNT_MICROSOFT ||
+      menu->account->access_token == NULL ||
+      !nuvasha_account_token_is_valid (menu->account, g_get_real_time () / 1000000))
+    return;
+
+  session = soup_session_new_with_options ("user-agent", "nuvasha", NULL);
+  message = soup_message_new (SOUP_METHOD_GET,
+                              "https://api.minecraftservices.com/minecraft/profile");
+  token = menu->account->access_token;
+  authorization = g_strconcat ("Bearer ", token, NULL);
+  soup_message_headers_replace (soup_message_get_request_headers (message),
+                                "Authorization", authorization);
+  g_free (authorization);
+  g_object_set_data_full (G_OBJECT (session), "nuvasha-cape-message", message,
+                          g_object_unref);
+  menu->cape_message = g_object_ref (message);
+  soup_session_send_and_read_async (session, message, G_PRIORITY_DEFAULT, NULL,
+                                    on_capes_loaded, menu);
+  g_object_unref (session);
+}
+
+static void
+on_skin_file_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  SkinMenu *menu = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GFile) file = NULL;
+  g_autoptr (GdkTexture) skin = NULL;
+  g_autoptr (GdkTexture) face = NULL;
+
+  file = gtk_file_dialog_open_finish (GTK_FILE_DIALOG (source), result, &error);
+  if (file == NULL)
+    goto done;
+
+  skin = gdk_texture_new_from_file (file, &error);
+  if (skin == NULL ||
+      gdk_texture_get_width (skin) != 64 ||
+      (gdk_texture_get_height (skin) != 32 && gdk_texture_get_height (skin) != 64))
+    {
+      g_clear_error (&error);
+       error = g_error_new_literal (G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
+                                    _("Skin images must be 64x64 or 64x32 PNG files"));
+      goto done;
+    }
+
+  {
+    g_autofree char *directory = skin_directory_path ();
+    g_autofree char *source_basename = g_file_get_basename (file);
+    g_autofree char *destination_basename = NULL;
+    g_autofree char *destination_path = NULL;
+    g_autoptr (GFile) destination = NULL;
+
+    if (source_basename == NULL || !nuvasha_fs_make_directory (directory, 0755, NULL))
+      goto done;
+    destination_basename = unique_skin_filename (directory, source_basename);
+    destination_path = g_build_filename (directory, destination_basename, NULL);
+    destination = g_file_new_for_path (destination_path);
+    if (!nuvasha_fs_copy_file (file, destination, G_FILE_COPY_OVERWRITE,
+                           NULL, &error))
+      goto done;
+    g_clear_object (&file);
+    file = g_steal_pointer (&destination);
+  }
+
+  /* Imported files are immediately usable as the row's preview. Uploading
+   * is intentionally separate from choosing a local skin, just like the
+   * skin manager in PrismLauncher. */
+  face = face_texture (skin);
+  if (face != NULL)
+    {
+      gtk_image_set_from_paintable (menu->image, GDK_PAINTABLE (face));
+      {
+        char *uri = g_file_get_uri (file);
+        g_autofree char *basename = g_file_get_basename (file);
+        g_autofree char *display_name = skin_display_name (basename);
+        AdwActionRow *row = skin_row_new (menu, display_name, uri);
+        gtk_list_box_insert (menu->skins, GTK_WIDGET (row), 0);
+        gtk_list_box_select_row (menu->skins, GTK_LIST_BOX_ROW (row));
+        load_view_texture (menu->view, uri, FALSE);
+        g_free (uri);
+      }
+    }
+
+done:
+  if (error != NULL &&
+      !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+    {
+      AdwAlertDialog *alert = ADW_ALERT_DIALOG (
+        adw_alert_dialog_new (_("Invalid skin"), error->message));
+      adw_alert_dialog_add_response (alert, "ok", _("OK"));
+      adw_alert_dialog_set_close_response (alert, "ok");
+      adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (menu->dialog));
+    }
+  /* The dialog owns the skin list and may still be open after the file
+   * chooser returns.  Its small controller is kept for the lifetime of the
+   * dialog. */
+}
+
+static void
+on_import_skin_clicked (GtkButton *button, gpointer user_data)
+{
+  SkinMenu *source = user_data;
+  GtkFileDialog *dialog = gtk_file_dialog_new ();
+  GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (button));
+  GtkFileFilter *filter = gtk_file_filter_new ();
+
+  gtk_file_filter_set_name (filter, _("PNG skin texture"));
+  gtk_file_filter_add_mime_type (filter, "image/png");
+  gtk_file_dialog_set_default_filter (dialog, filter);
+  gtk_file_dialog_open (dialog, GTK_WINDOW (root), NULL,
+                        on_skin_file_chosen, source);
+  g_object_unref (dialog);
+}
+
+static void
+remove_skin_row (SkinMenu *menu, GtkListBoxRow *row)
+{
+  const char *url = g_object_get_data (G_OBJECT (row), "nuvasha-skin-url");
+  g_autofree char *path = NULL;
+
+  if (url != NULL && g_str_has_prefix (url, "file://"))
+    {
+      g_autoptr (GFile) file = g_file_new_for_uri (url);
+      path = g_file_get_path (file);
+    }
+  else if (url != NULL && (g_str_has_prefix (url, "http://") ||
+                           g_str_has_prefix (url, "https://")))
+    {
+      g_autofree char *name = g_strconcat (skin_name_for_url (url), ".png", NULL);
+      path = g_build_filename (skin_directory_path (), name, NULL);
+    }
+  if (path != NULL)
+    nuvasha_fs_unlink (path, NULL);
+  if (url != NULL)
+    g_hash_table_add (menu->deleted_skin_ids, g_strdup (skin_name_for_url (url)));
+
+  int index = gtk_list_box_row_get_index (row);
+  gtk_list_box_remove (menu->skins, GTK_WIDGET (row));
+  row = gtk_list_box_get_row_at_index (menu->skins, index);
+  if (row == NULL && index > 0)
+    row = gtk_list_box_get_row_at_index (menu->skins, index - 1);
+  if (row != NULL)
+    gtk_list_box_select_row (menu->skins, row);
+  else
+    nuvasha_users_set_avatar_icon (menu->image);
+}
+
+static void
+on_active_skin_delete_done (GObject *source, GAsyncResult *result,
+                            gpointer user_data G_GNUC_UNUSED)
+{
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GBytes) bytes =
+    soup_session_send_and_read_finish (SOUP_SESSION (source), result, &error);
+  SoupMessage *message = g_object_get_data (G_OBJECT (source),
+                                            "nuvasha-delete-skin-message");
+
+  if (bytes == NULL || message == NULL || soup_message_get_status (message) >= 300)
+    g_warning ("Could not delete active Minecraft skin: %s",
+               error != NULL ? error->message : "server rejected the request");
+}
+
+static void
+delete_active_skin (SkinMenu *menu)
+{
+  SoupSession *session;
+  SoupMessage *message;
+  char *authorization;
+
+  if (menu->account == NULL || menu->account->type != nuvasha_ACCOUNT_MICROSOFT ||
+      menu->account->access_token == NULL)
+    return;
+  session = soup_session_new_with_options ("user-agent", "nuvasha", NULL);
+  message = soup_message_new (SOUP_METHOD_DELETE,
+                              "https://api.minecraftservices.com/minecraft/profile/skins/active");
+  authorization = g_strconcat ("Bearer ", menu->account->access_token, NULL);
+  soup_message_headers_replace (soup_message_get_request_headers (message),
+                                "Authorization", authorization);
+  g_free (authorization);
+  g_object_set_data_full (G_OBJECT (session), "nuvasha-delete-skin-message",
+                          message, g_object_unref);
+  soup_session_send_and_read_async (session, message, G_PRIORITY_DEFAULT, NULL,
+                                    on_active_skin_delete_done, NULL);
+  g_object_unref (session);
+}
+
+static void
+on_remove_skin_confirmed (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  SkinMenu *menu = user_data;
+  const char *response =
+    adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
+  GtkListBoxRow *row = g_object_get_data (G_OBJECT (source), "nuvasha-skin-row");
+
+  if (g_str_equal (response, "remove") && row != NULL)
+    {
+      const char *url = g_object_get_data (G_OBJECT (row), "nuvasha-skin-url");
+      if (url != NULL && menu->account != NULL &&
+          g_strcmp0 (url, menu->account->avatar_url) == 0)
+        delete_active_skin (menu);
+      remove_skin_row (menu, row);
+    }
+}
+
+static void
+on_remove_skin_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  SkinMenu *menu = user_data;
+  GtkListBoxRow *row = gtk_list_box_get_selected_row (menu->skins);
+  const char *url;
+
+  if (row == NULL ||
+      (url = g_object_get_data (G_OBJECT (row), "nuvasha-skin-url")) == NULL ||
+      skin_url_is_default (url))
+    return;
+
+  {
+    AdwAlertDialog *alert = ADW_ALERT_DIALOG (
+      adw_alert_dialog_new (_("Delete skin?"),
+                            _("This skin will be removed from the skin library.")));
+    adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
+    adw_alert_dialog_add_response (alert, "remove", _("Delete"));
+    adw_alert_dialog_set_response_appearance (alert, "remove",
+                                              ADW_RESPONSE_DESTRUCTIVE);
+    adw_alert_dialog_set_default_response (alert, "cancel");
+    adw_alert_dialog_set_close_response (alert, "cancel");
+    g_object_set_data (G_OBJECT (alert), "nuvasha-skin-row", row);
+    adw_alert_dialog_choose (alert, GTK_WIDGET (menu->dialog), NULL,
+                             on_remove_skin_confirmed, menu);
+  }
+}
+
+static void
+on_open_skins_clicked (GtkButton *button G_GNUC_UNUSED,
+                       gpointer user_data G_GNUC_UNUSED)
+{
+  g_autofree char *directory =
+    g_build_filename (g_get_user_data_dir (), "nuvasha", "skins", NULL);
+  g_autofree char *uri = NULL;
+  g_autoptr (GError) error = NULL;
+
+  if (!nuvasha_fs_make_directory (directory, 0755, NULL))
+    return;
+  uri = g_filename_to_uri (directory, NULL, NULL);
+  if (uri == NULL ||
+      !g_app_info_launch_default_for_uri (uri, NULL, &error))
+    if (error != NULL)
+      g_warning ("Could not open skins folder: %s", error->message);
+}
+
+static void
+on_export_skin_copied (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  g_autoptr (GError) error = NULL;
+
+  if (!nuvasha_fs_copy_finish (G_FILE (source), result, &error))
+    g_warning ("Could not export skin: %s", error->message);
+
+  g_object_unref (user_data);
+}
+
+static void
+on_export_skin_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GFile) destination =
+    gtk_file_dialog_save_finish (GTK_FILE_DIALOG (source), result, &error);
+  GFile *source_file = user_data;
+
+  if (destination != NULL)
+    nuvasha_fs_copy_async (source_file, destination, G_FILE_COPY_OVERWRITE,
+                           G_PRIORITY_DEFAULT, NULL, NULL, NULL,
+                           on_export_skin_copied, source_file);
+  else
+    g_object_unref (source_file);
+}
+
+static void
+on_export_skin_clicked (GtkButton *button, gpointer user_data)
+{
+  SkinMenu *menu = user_data;
+  GtkListBoxRow *row = gtk_list_box_get_selected_row (menu->skins);
+  const char *url;
+  GtkFileDialog *dialog;
+
+  if (row == NULL ||
+      (url = g_object_get_data (G_OBJECT (row), "nuvasha-skin-url")) == NULL)
+    return;
+  dialog = gtk_file_dialog_new ();
+  gtk_file_dialog_set_initial_name (dialog, "skin.png");
+  gtk_file_dialog_save (dialog,
+                        GTK_WINDOW (gtk_widget_get_root (GTK_WIDGET (button))),
+                        NULL, on_export_skin_chosen, g_file_new_for_uri (url));
+  g_object_unref (dialog);
+}
+
+static void
+on_skin_selected (GtkListBox *list, GtkListBoxRow *row, gpointer user_data)
+{
+  SkinMenu *menu = user_data;
+  const char *url;
+
+  if (row == NULL)
+    return;
+  url = g_object_get_data (G_OBJECT (row), "nuvasha-skin-url");
+  if (menu->remove_button != NULL)
+    gtk_widget_set_sensitive (GTK_WIDGET (menu->remove_button),
+                              url != NULL && !skin_url_is_default (url));
+
+  if (url == NULL)
+    return;
+
+  /* Selecting a skin is the change action.  The profile service accepts the
+   * URL of a skin already owned by the account; keep the row's avatar in sync
+   * immediately while the service refresh happens on the next profile load. */
+  g_object_set_data_full (G_OBJECT (menu->dialog), "nuvasha-selected-skin",
+                          g_strdup (url), g_free);
+  gtk_list_box_select_row (list, row);
+  nuvasha_users_set_avatar_icon (menu->image);
+  load_view_texture (menu->view, url, FALSE);
+
+  /* Keep nuvasha's cached profile in step with the selection so the account row
+   * and the next opening of this manager show the selected skin. */
+  if (menu->owner != NULL && menu->account != NULL)
+    {
+      g_autoptr (NuvashaAccount) account = nuvasha_account_copy (menu->account);
+      g_autoptr (GError) error = NULL;
+      g_free (account->avatar_url);
+      account->avatar_url = g_strdup (url);
+      nuvasha_accounts_update (menu->owner->accounts, account, &error);
+    }
+}
+
+static AdwActionRow *
+skin_row_new (SkinMenu *menu, const char *name, const char *url)
+{
+  AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
+  GtkImage *image = GTK_IMAGE (gtk_image_new_from_icon_name ("image-x-generic-symbolic"));
+
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
+                                 name != NULL && *name != '\0' ? name : _("Skin"));
+  gtk_image_set_pixel_size (image, AVATAR_SIZE);
+  nuvasha_users_set_avatar_icon (image);
+  if (url != NULL)
+    {
+      g_autofree char *identity = skin_name_for_url (url);
+      g_hash_table_add (menu->skin_urls, g_strdup (identity));
+      g_object_set_data_full (G_OBJECT (row), "nuvasha-skin-url", g_strdup (url), g_free);
+      if (g_str_has_prefix (url, "file://"))
+        {
+          g_autoptr (GFile) file = g_file_new_for_uri (url);
+          g_autofree char *path = g_file_get_path (file);
+          if (path == NULL || !nuvasha_users_set_local_avatar (image, path))
+            nuvasha_users_set_avatar_icon (image);
+        }
+      else
+        {
+          g_autofree char *cached = cached_skin_path (url);
+          if (cached == NULL || !nuvasha_users_set_local_avatar (image, cached))
+            nuvasha_users_set_avatar (menu->owner, image, url);
+        }
+    }
+  adw_action_row_add_prefix (row, GTK_WIDGET (image));
+  return row;
+}
+
+static void
+select_saved_skin (SkinMenu *menu)
+{
+  GtkListBoxRow *match = NULL;
+  GtkListBoxRow *row = NULL;
+  GtkWidget *child = NULL;
+  const char *saved_url = menu->account != NULL ? menu->account->avatar_url : NULL;
+
+  for (child = gtk_widget_get_first_child (GTK_WIDGET (menu->skins));
+       child != NULL;
+       child = gtk_widget_get_next_sibling (child))
+    {
+      const char *url = g_object_get_data (G_OBJECT (child), "nuvasha-skin-url");
+
+      if (saved_url != NULL && g_strcmp0 (saved_url, url) == 0)
+        {
+          match = GTK_LIST_BOX_ROW (child);
+          break;
+        }
+
+      if (saved_url == NULL && url != NULL && skin_url_is_default (url) &&
+          g_str_has_suffix (url, "/Steve.png"))
+        row = GTK_LIST_BOX_ROW (child);
+    }
+
+  if (match == NULL)
+    match = row;
+
+  if (match != NULL)
+    {
+      menu->current_skin_row = ADW_ACTION_ROW (match);
+      gtk_list_box_select_row (menu->skins, match);
+    }
+}
+
+static void
+append_profile_skins (SkinMenu *menu, const char *json)
+{
+  g_autoptr (JsonParser) parser = json_parser_new ();
+  JsonNode *root;
+  JsonArray *skins;
+
+  if (!json_parser_load_from_data (parser, json, -1, NULL))
+    return;
+  root = json_parser_get_root (parser);
+  if (!JSON_NODE_HOLDS_OBJECT (root))
+    return;
+  root = json_object_get_member (json_node_get_object (root), "skins");
+  if (root == NULL || !JSON_NODE_HOLDS_ARRAY (root))
+    return;
+  skins = json_node_get_array (root);
+  for (guint i = 0; i < json_array_get_length (skins); i++)
+    {
+      JsonObject *skin = json_node_get_object (json_array_get_element (skins, i));
+      const char *url = json_object_get_string_member_with_default (skin, "url", NULL);
+      const char *alias = json_object_get_string_member_with_default (skin, "alias", NULL);
+      if (url != NULL)
+        {
+          g_autofree char *fallback_name = NULL;
+          g_autofree char *identity = skin_name_for_url (url);
+          if (is_default_skin_alias (alias))
+            {
+              if (menu->current_skin_row != NULL)
+                {
+                  gtk_list_box_remove (menu->skins,
+                                       GTK_WIDGET (menu->current_skin_row));
+                  menu->current_skin_row = NULL;
+                }
+              continue;
+            }
+          if (g_hash_table_contains (menu->skin_urls, identity))
+            {
+              if (menu->current_skin_row != NULL && alias != NULL && *alias != '\0')
+                adw_preferences_row_set_title (
+                  ADW_PREFERENCES_ROW (menu->current_skin_row), alias);
+              continue;
+            }
+          if (alias == NULL || *alias == '\0')
+            fallback_name = skin_name_for_url (url);
+          gtk_list_box_append (menu->skins,
+                               GTK_WIDGET (skin_row_new (menu,
+                                             alias != NULL && *alias != '\0'
+                                               ? alias : fallback_name,
+                                             url)));
+        }
+    }
+}
+
+static void
+on_profile_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  SkinMenu *menu = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GBytes) bytes =
+    soup_session_send_and_read_finish (SOUP_SESSION (source), result, &error);
+
+  if (bytes != NULL && menu->profile_message != NULL &&
+      soup_message_get_status (menu->profile_message) == 200)
+    {
+      gsize length = 0;
+      const char *data = g_bytes_get_data (bytes, &length);
+      g_autofree char *json = g_strndup (data, length);
+      append_profile_skins (menu, json);
+    }
+  append_default_skins (menu);
+  select_saved_skin (menu);
+  /* Keep the controller alive: rows may be selected after the request
+   * completes. */
+}
+
+static void
+load_profile_skins (SkinMenu *menu)
+{
+  SoupSession *session;
+  SoupMessage *message;
+  char *authorization;
+
+  if (menu->account == NULL || menu->account->access_token == NULL)
+    return;
+  session = soup_session_new_with_options ("user-agent", "nuvasha", NULL);
+  message = soup_message_new (SOUP_METHOD_GET,
+                              "https://api.minecraftservices.com/minecraft/profile");
+  authorization = g_strconcat ("Bearer ", menu->account->access_token, NULL);
+  soup_message_headers_replace (soup_message_get_request_headers (message),
+                                "Authorization", authorization);
+  g_free (authorization);
+  g_object_set_data_full (G_OBJECT (session), "nuvasha-profile-message", message,
+                          g_object_unref);
+  menu->profile_message = g_object_ref (message);
+  soup_session_send_and_read_async (session, message, G_PRIORITY_DEFAULT, NULL,
+                                    on_profile_loaded, menu);
+  g_object_unref (session);
+}
+
+AdwDialog *
+nuvasha_users_skin_menu_new (NuvashaUsersPopover *owner, GtkImage *image, NuvashaAccount *account)
+{
+  AdwDialog *dialog = adw_dialog_new ();
+  AdwHeaderBar *header = ADW_HEADER_BAR (adw_header_bar_new ());
+  AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
+  GtkBox *root = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 18));
+  GtkBox *left = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 10));
+  GtkBox *right = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 10));
+  GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
+  GtkListBox *skins = GTK_LIST_BOX (gtk_list_box_new ());
+  NuvashaSkinView *preview = nuvasha_skin_view_new ();
+  GtkCheckButton *default_model = GTK_CHECK_BUTTON (
+    gtk_check_button_new_with_label (_("Default model")));
+  GtkCheckButton *slim_model = GTK_CHECK_BUTTON (
+    gtk_check_button_new_with_label (_("Slim model")));
+  GtkStringList *cape_list = gtk_string_list_new ((const char *[]) { _("No cape"), NULL });
+  GtkDropDown *capes = GTK_DROP_DOWN (gtk_drop_down_new (G_LIST_MODEL (cape_list), NULL));
+  GtkButton *import = GTK_BUTTON (gtk_button_new_with_label (_("Import skin…")));
+  GtkButton *export = GTK_BUTTON (gtk_button_new_with_label (_("Export skin…")));
+  GtkButton *open_skins = GTK_BUTTON (gtk_button_new_from_icon_name ("folder-symbolic"));
+  GtkButton *remove = GTK_BUTTON (gtk_button_new_from_icon_name ("user-trash-symbolic"));
+  GtkBox *actions = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+  GtkBox *action_spacer = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+  SkinMenu *data = g_new0 (SkinMenu, 1);
+
+  data->image = g_object_ref (image);
+  data->view = g_object_ref (preview);
+  data->owner = owner;
+  data->dialog = g_object_ref (dialog);
+  data->skins = g_object_ref (skins);
+  data->cape_list = g_object_ref (cape_list);
+  data->cape_ids = g_ptr_array_new_with_free_func (g_free);
+  data->cape_urls = g_ptr_array_new_with_free_func (g_free);
+  data->skin_urls = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+  data->deleted_skin_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+  data->capes = capes;
+  data->account = account;
+  data->remove_button = remove;
+  g_object_set_data (G_OBJECT (preview), "nuvasha-deleted-skin-ids",
+                     data->deleted_skin_ids);
+  g_object_set_data (G_OBJECT (slim_model), "nuvasha-slim", GINT_TO_POINTER (1));
+  g_signal_connect (import, "clicked", G_CALLBACK (on_import_skin_clicked), data);
+  g_signal_connect (export, "clicked", G_CALLBACK (on_export_skin_clicked), data);
+  g_signal_connect (open_skins, "clicked", G_CALLBACK (on_open_skins_clicked), NULL);
+  g_signal_connect (remove, "clicked", G_CALLBACK (on_remove_skin_clicked), data);
+  g_signal_connect (skins, "row-selected", G_CALLBACK (on_skin_selected), data);
+  g_signal_connect (default_model, "toggled", G_CALLBACK (on_model_toggled), data);
+  g_signal_connect (slim_model, "toggled", G_CALLBACK (on_model_toggled), data);
+
+  gtk_widget_set_size_request (GTK_WIDGET (left), 220, -1);
+  gtk_widget_set_hexpand (GTK_WIDGET (right), TRUE);
+  gtk_widget_set_vexpand (GTK_WIDGET (right), TRUE);
+  gtk_widget_set_vexpand (GTK_WIDGET (scroller), TRUE);
+  gtk_widget_set_hexpand (GTK_WIDGET (scroller), TRUE);
+  gtk_widget_add_css_class (GTK_WIDGET (skins), "boxed-list");
+  gtk_widget_set_halign (GTK_WIDGET (preview), GTK_ALIGN_FILL);
+  gtk_widget_set_vexpand (GTK_WIDGET (preview), TRUE);
+  gtk_widget_set_size_request (GTK_WIDGET (preview), 220, 300);
+  gtk_check_button_set_group (slim_model, default_model);
+  gtk_check_button_set_active (default_model, TRUE);
+  gtk_widget_add_css_class (GTK_WIDGET (remove), "destructive-action");
+  gtk_widget_set_hexpand (GTK_WIDGET (export), FALSE);
+  gtk_widget_set_hexpand (GTK_WIDGET (import), FALSE);
+  gtk_widget_set_hexpand (GTK_WIDGET (remove), FALSE);
+  gtk_widget_set_hexpand (GTK_WIDGET (open_skins), FALSE);
+  gtk_widget_set_halign (GTK_WIDGET (remove), GTK_ALIGN_END);
+  gtk_widget_set_tooltip_text (GTK_WIDGET (open_skins), _("Open Folder"));
+  gtk_widget_set_tooltip_text (GTK_WIDGET (remove), _("Delete"));
+  gtk_widget_set_hexpand (GTK_WIDGET (action_spacer), TRUE);
+  gtk_box_append (left, GTK_WIDGET (preview));
+  gtk_box_append (left, GTK_WIDGET (capes));
+  gtk_box_append (left, GTK_WIDGET (default_model));
+  gtk_box_append (left, GTK_WIDGET (slim_model));
+  gtk_scrolled_window_set_child (scroller, GTK_WIDGET (skins));
+  gtk_box_append (right, GTK_WIDGET (scroller));
+  gtk_box_append (actions, GTK_WIDGET (import));
+  gtk_box_append (actions, GTK_WIDGET (export));
+  gtk_box_append (actions, GTK_WIDGET (action_spacer));
+  gtk_box_append (actions, GTK_WIDGET (open_skins));
+  gtk_box_append (actions, GTK_WIDGET (remove));
+  gtk_box_append (right, GTK_WIDGET (actions));
+  gtk_widget_set_margin_start (GTK_WIDGET (root), 24);
+  gtk_widget_set_margin_end (GTK_WIDGET (root), 24);
+  gtk_widget_set_margin_top (GTK_WIDGET (root), 24);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (root), 24);
+  gtk_box_append (root, GTK_WIDGET (left));
+  gtk_box_append (root, GTK_WIDGET (right));
+  adw_dialog_set_title (dialog, _("Skin"));
+  adw_dialog_set_content_width (dialog, 860);
+  adw_dialog_set_content_height (dialog, 560);
+  adw_header_bar_set_show_back_button (header, FALSE);
+  adw_toolbar_view_add_top_bar (toolbar, GTK_WIDGET (header));
+  adw_toolbar_view_set_content (toolbar, GTK_WIDGET (root));
+  adw_dialog_set_child (dialog, GTK_WIDGET (toolbar));
+  append_local_skins (data);
+  append_default_skins (data);
+  if (account->avatar_url != NULL && *account->avatar_url != '\0')
+    {
+      if (!g_hash_table_contains (data->skin_urls,
+                                  skin_name_for_url (account->avatar_url)) &&
+          !g_hash_table_contains (data->deleted_skin_ids,
+                                  skin_name_for_url (account->avatar_url)))
+        {
+          g_autofree char *skin_name = skin_name_for_url (account->avatar_url);
+          if (!g_hash_table_contains (data->skin_urls, skin_name))
+            {
+              data->current_skin_row = skin_row_new (data, skin_name,
+                                                     account->avatar_url);
+              gtk_list_box_append (skins, GTK_WIDGET (data->current_skin_row));
+            }
+          load_view_texture (preview, account->avatar_url, FALSE);
+        }
+    }
+  else
+    select_saved_skin (data);
+  select_saved_skin (data);
+  g_signal_connect (capes, "notify::selected", G_CALLBACK (on_cape_selected), data);
+  load_capes (data);
+  load_profile_skins (data);
+  return dialog;
+}

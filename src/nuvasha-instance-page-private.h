@@ -61,6 +61,10 @@ struct _NuvashaInstancePage
 
 
 char *instance_string (NuvashaInstance *instance, const char *property);
+char *loader_display_name (NuvashaInstance *instance);
+void refresh_in_list (NuvashaInstancePage *self);
+void rebuild_content_pages (NuvashaInstancePage *self);
+GtkWidget *create_settings_page (NuvashaInstancePage *self);
 void instance_page_show_toast (NuvashaInstancePage *self, const char *message);
 void update_directory_row (NuvashaInstancePage *self);
 void on_change_directory_clicked (GtkButton *, gpointer);

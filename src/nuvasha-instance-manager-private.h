@@ -20,6 +20,7 @@ struct _NuvashaInstanceManager
 
 char *instance_directory (NuvashaInstance *instance);
 char *instance_name (NuvashaInstance *instance);
+char *instance_name_key (const char *name);
 char *unique_instance_name (NuvashaInstanceManager *self, const char *name);
 char *default_instance_directory (NuvashaInstanceManager *self, const char *name);
 gboolean check_instance_directory (NuvashaInstanceManager *self,
@@ -32,5 +33,6 @@ NuvashaTaskScope *copy_tree_async (GFile *source, GFile *destination,
                                GAsyncReadyCallback callback,
                                gpointer user_data);
 gboolean copy_tree_finish (GAsyncResult *result, GError **error);
+gboolean check_instance_directories (gpointer user_data);
 
 #endif
