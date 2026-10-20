@@ -171,8 +171,8 @@ version_item_setup (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
 {
   GtkLabel *label = GTK_LABEL (gtk_label_new (NULL));
 
-  gtk_label_set_ellipsize (GTK_LABEL (GTK_WIDGET (label)), PANGO_ELLIPSIZE_END);
-  gtk_label_set_xalign (GTK_LABEL (GTK_WIDGET (label)), 0);
+  gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_END);
+  gtk_label_set_xalign (GTK_LABEL (label), 0);
   gtk_list_item_set_child (item, GTK_WIDGET (label));
 }
 
@@ -183,7 +183,7 @@ version_item_bind (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
   GtkWidget *label = gtk_list_item_get_child (item);
   GtkStringObject *object = gtk_list_item_get_item (item);
 
-  gtk_label_set_text (GTK_LABEL (GTK_WIDGET (label)),
+  gtk_label_set_text (GTK_LABEL (label),
                       object != NULL ? gtk_string_object_get_string (object)
                                      : "");
 }
@@ -285,8 +285,8 @@ details_content (NuvashaContentPage *self)
     gtk_box_append (GTK_BOX (self->project.details_body),
                     plain_label (self->project.details->description));
 
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), heading);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (self->project.details_body));
+  gtk_box_append (GTK_BOX (box), heading);
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (self->project.details_body));
 
   gtk_widget_set_margin_top (GTK_WIDGET (box), 12);
   gtk_widget_set_margin_bottom (GTK_WIDGET (box), 12);

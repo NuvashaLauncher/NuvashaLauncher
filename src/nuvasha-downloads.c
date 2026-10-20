@@ -4,6 +4,7 @@
 
 #include "nuvasha-downloads.h"
 #include "nuvasha-download.h"
+#include "nuvasha-i18n.h"
 
 struct _NuvashaDownload
 {
@@ -233,7 +234,7 @@ nuvasha_downloads_add (NuvashaDownloadKind kind, const char *title)
   NuvashaDownload *download = g_object_new (nuvasha_TYPE_DOWNLOAD, NULL);
 
   download->kind = kind;
-  download->title = g_strdup (title != NULL ? title : "Download");
+  download->title = g_strdup (title != NULL ? title : _("Download"));
   download->cancellable = g_cancellable_new ();
 
   g_ptr_array_add (self->jobs, download);

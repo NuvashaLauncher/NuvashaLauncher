@@ -107,17 +107,17 @@ nuvasha_main_window_init (NuvashaMainWindow *self)
 
 
 NuvashaMainWindow *
-nuvasha_main_window_new (GtkApplication *application, NuvashaInstanceManager *manager)
+nuvasha_main_window_new (AdwApplication *application, NuvashaInstanceManager *manager)
 {
-  g_return_val_if_fail (GTK_IS_APPLICATION (application), NULL);
+  g_return_val_if_fail (ADW_IS_APPLICATION (application), NULL);
   g_return_val_if_fail (nuvasha_IS_INSTANCE_MANAGER (manager), NULL);
 
   NuvashaMainWindow *self = g_object_new (nuvasha_TYPE_MAIN_WINDOW,
                                       "application", application,
                                       NULL);
   GListStore *instances = nuvasha_instance_manager_get_instances (manager);
-  GtkWidget *list = NULL;
-  GtkWidget *scroll = NULL;
+  GtkListBox *list = NULL;
+  GtkScrolledWindow *scroll = NULL;
 
   self->model->manager = g_object_ref (manager);
 
@@ -129,40 +129,40 @@ nuvasha_main_window_new (GtkApplication *application, NuvashaInstanceManager *ma
     const char *shortcuts[] = { "F1", NULL };
     const char *quit[] = { "<primary>q", NULL };
 
-    gtk_application_set_accels_for_action (application, "win.create-instance",
+    gtk_application_set_accels_for_action (GTK_APPLICATION (application), "win.create-instance",
                                            create);
-    gtk_application_set_accels_for_action (application, "win.settings",
+    gtk_application_set_accels_for_action (GTK_APPLICATION (application), "win.settings",
                                            settings);
-    gtk_application_set_accels_for_action (application, "win.shortcuts",
+    gtk_application_set_accels_for_action (GTK_APPLICATION (application), "win.shortcuts",
                                            shortcuts);
-    gtk_application_set_accels_for_action (application, "app.quit", quit);
+    gtk_application_set_accels_for_action (GTK_APPLICATION (application), "app.quit", quit);
   }
 
   /* The instances are a boxed list, the same list the content pages and
      the modpack browser use, on a margin the way a boxed list is meant
      to sit: its card has round corners on every side. */
-  list = gtk_list_box_new ();
-  gtk_widget_add_css_class (list, "boxed-list");
+   list = GTK_LIST_BOX (gtk_list_box_new ());
+   gtk_widget_add_css_class (GTK_WIDGET (list), "boxed-list");
   /* The card background of the list only covers its rows: the space
      under them is the window background, the same colour as the hairline
      between two rows, instead of the whole window being card coloured. */
-  gtk_widget_set_valign (list, GTK_ALIGN_START);
-  gtk_list_box_set_selection_mode (GTK_LIST_BOX (list),
-                                   GTK_SELECTION_NONE);
-  g_signal_connect (list, "row-activated", G_CALLBACK (on_row_activate),
-                    self);
-  gtk_list_box_bind_model (GTK_LIST_BOX (list), G_LIST_MODEL (instances),
-                           create_instance_row, self, NULL);
+   gtk_widget_set_valign (GTK_WIDGET (list), GTK_ALIGN_START);
+   gtk_list_box_set_selection_mode (list,
+                                    GTK_SELECTION_NONE);
+   g_signal_connect (list, "row-activated", G_CALLBACK (on_row_activate),
+                     self);
+   gtk_list_box_bind_model (list, G_LIST_MODEL (instances),
+                            create_instance_row, self, NULL);
 
-  scroll = gtk_scrolled_window_new ();
-  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroll), list);
-  gtk_widget_set_margin_top (scroll, 12);
-  gtk_widget_set_margin_bottom (scroll, 12);
-  gtk_widget_set_margin_start (scroll, 12);
-  gtk_widget_set_margin_end (scroll, 12);
-  gtk_widget_set_hexpand (scroll, TRUE);
-  gtk_widget_set_vexpand (scroll, TRUE);
-  adw_view_stack_add_named (self->ui.stack, scroll, "instances");
+   scroll = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
+   gtk_scrolled_window_set_child (scroll, GTK_WIDGET (list));
+   gtk_widget_set_margin_top (GTK_WIDGET (scroll), 12);
+   gtk_widget_set_margin_bottom (GTK_WIDGET (scroll), 12);
+   gtk_widget_set_margin_start (GTK_WIDGET (scroll), 12);
+   gtk_widget_set_margin_end (GTK_WIDGET (scroll), 12);
+   gtk_widget_set_hexpand (GTK_WIDGET (scroll), TRUE);
+   gtk_widget_set_vexpand (GTK_WIDGET (scroll), TRUE);
+  adw_view_stack_add_named (self->ui.stack, GTK_WIDGET (scroll), "instances");
 
   /* The connection goes away with the window, which outlives every
    * callback it could receive. */

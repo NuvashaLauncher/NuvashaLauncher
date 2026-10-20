@@ -127,7 +127,7 @@ rebuild_content_pages (NuvashaInstancePage *self)
       adw_view_stack_add_titled_with_icon (
         ADW_VIEW_STACK (self->stack),
         GTK_WIDGET (nuvasha_content_page_new (self->instance, pages[i].type)),
-        pages[i].name, pages[i].title, pages[i].icon);
+         pages[i].name, _(pages[i].title), pages[i].icon);
     }
 
   /* A page that is added again lands at the end, after Logs. Logs is put
@@ -138,7 +138,7 @@ rebuild_content_pages (NuvashaInstancePage *self)
       adw_view_stack_remove (ADW_VIEW_STACK (self->stack),
                              GTK_WIDGET (self->logs_page));
       adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (self->stack),
-                                           GTK_WIDGET (self->logs_page), "logs", "Logs",
+                                            GTK_WIDGET (self->logs_page), "logs", _("Logs"),
                                         "edit-clear-all-symbolic");
     }
 
@@ -171,7 +171,7 @@ static void
 on_name_apply (AdwEntryRow *row, gpointer user_data)
 {
   NuvashaInstancePage *self = nuvasha_INSTANCE_PAGE (user_data);
-  const char *text = gtk_editable_get_text (GTK_EDITABLE (GTK_WIDGET (row)));
+  const char *text = gtk_editable_get_text (GTK_EDITABLE (row));
   g_autofree char *current = instance_string (self->instance, "name");
   g_autoptr (GError) error = NULL;
 
@@ -184,13 +184,13 @@ on_name_apply (AdwEntryRow *row, gpointer user_data)
       /* The edit never reached the file: the row shows the stored name
        * again instead of a name that does not exist. */
       instance_page_show_toast (self, error->message);
-      gtk_editable_set_text (GTK_EDITABLE (GTK_WIDGET (row)), current);
+      gtk_editable_set_text (GTK_EDITABLE (row), current);
       return;
     }
 
   g_autofree char *renamed = instance_string (self->instance, "name");
 
-  gtk_editable_set_text (GTK_EDITABLE (GTK_WIDGET (row)), renamed);
+  gtk_editable_set_text (GTK_EDITABLE (row), renamed);
 
   /* The tab follows the name: the window watches the instance for this,
      because the tab is the window's and not the page's. */
@@ -201,7 +201,7 @@ static void
 on_jvm_args_apply (AdwEntryRow *row, gpointer user_data)
 {
   NuvashaInstancePage *self = nuvasha_INSTANCE_PAGE (user_data);
-  const char *text = gtk_editable_get_text (GTK_EDITABLE (GTK_WIDGET (row)));
+  const char *text = gtk_editable_get_text (GTK_EDITABLE (row));
   g_autofree char *current = instance_string (self->instance, "jvm-args");
   g_autoptr (GError) error = NULL;
 
@@ -215,7 +215,7 @@ on_jvm_args_apply (AdwEntryRow *row, gpointer user_data)
     {
       nuvasha_instance_set_string (self->instance, "jvm-args", current, NULL);
       instance_page_show_toast (self, error->message);
-      gtk_editable_set_text (GTK_EDITABLE (GTK_WIDGET (row)), current);
+      gtk_editable_set_text (GTK_EDITABLE (row), current);
       return;
     }
 }
@@ -411,7 +411,7 @@ java_status_refresh (NuvashaInstancePage *self)
             _("This game needs Java %d or newer, selected Java is %d"),
             self->required_java, effective->major_version);
 
-          adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (row)), description);
+          adw_action_row_set_subtitle (ADW_ACTION_ROW (row), description);
           return;
         }
     }
@@ -428,7 +428,7 @@ java_status_refresh (NuvashaInstancePage *self)
                     "jre-openjdk package, not jre-openjdk-headless");
     }
 
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (row)), message);
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), message);
 }
 
 static void
@@ -555,17 +555,17 @@ path_button (const char *path, GtkLabel **label)
 
   /* A path is long, and the middle of it is what tells two paths apart.
      The cap keeps a deep path from making the row as wide as itself. */
-  gtk_label_set_ellipsize (GTK_LABEL (GTK_WIDGET (text)), PANGO_ELLIPSIZE_MIDDLE);
-  gtk_label_set_max_width_chars (GTK_LABEL (GTK_WIDGET (text)), 30);
+  gtk_label_set_ellipsize (GTK_LABEL (text), PANGO_ELLIPSIZE_MIDDLE);
+  gtk_label_set_max_width_chars (GTK_LABEL (text), 30);
 
   gtk_widget_set_valign (GTK_WIDGET (image), GTK_ALIGN_CENTER);
   gtk_widget_set_valign (GTK_WIDGET (text), GTK_ALIGN_CENTER);
   gtk_widget_set_valign (GTK_WIDGET (arrow), GTK_ALIGN_CENTER);
 
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (image));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (text));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (arrow));
-  gtk_button_set_child (GTK_BUTTON (GTK_WIDGET (button)), GTK_WIDGET (box));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (image));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (text));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (arrow));
+  gtk_button_set_child (GTK_BUTTON (button), GTK_WIDGET (box));
 
   if (label != NULL)
     *label = GTK_LABEL (text);
@@ -641,7 +641,7 @@ on_change_icon_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   g_autoptr (GListStore) filters = g_list_store_new (GTK_TYPE_FILE_FILTER);
 
   gtk_file_dialog_set_title (dialog, _("Choose an Icon"));
-  gtk_file_filter_set_name (filter, "Images");
+   gtk_file_filter_set_name (filter, _("Images"));
   gtk_file_filter_add_mime_type (filter, "image/*");
   g_list_store_append (filters, filter);
   gtk_file_dialog_set_filters (dialog, G_LIST_MODEL (filters));
@@ -669,8 +669,8 @@ button_row (AdwPreferencesGroup *group,
   AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
   GtkButton *button = GTK_BUTTON (gtk_button_new_from_icon_name (icon_name));
 
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), title);
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (row)), subtitle);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), title);
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), subtitle);
 
   gtk_widget_add_css_class (GTK_WIDGET (button), "flat");
   gtk_widget_set_valign (GTK_WIDGET (button), GTK_ALIGN_CENTER);
@@ -678,13 +678,13 @@ button_row (AdwPreferencesGroup *group,
 
   /* The row carries the title for a reader; the button is only its icon,
      so it needs a name of its own for a screen reader to say. */
-  gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (button)),
+  gtk_accessible_update_property (GTK_ACCESSIBLE (button),
                                 GTK_ACCESSIBLE_PROPERTY_LABEL, title, -1);
 
   g_signal_connect (button, "clicked", callback, user_data);
 
-  adw_action_row_add_suffix (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (button));
-  adw_action_row_set_activatable_widget (ADW_ACTION_ROW (GTK_WIDGET (row)), GTK_WIDGET (button));
+  adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (button));
+  adw_action_row_set_activatable_widget (ADW_ACTION_ROW (row), GTK_WIDGET (button));
   adw_preferences_group_add (group, GTK_WIDGET (row));
 
   return GTK_WIDGET (row);
@@ -721,20 +721,20 @@ create_settings_page (NuvashaInstancePage *self)
 
   /* Names, paths and arguments are text from the user or the disk: none
      of them is markup. */
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (name_row)), FALSE);
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (jvm_args_row)),
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (name_row), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (jvm_args_row),
                                       FALSE);
 
   gtk_widget_set_vexpand (GTK_WIDGET (page), TRUE);
 
   /* General */
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (GTK_WIDGET (general)), _("General"));
+  adw_preferences_group_set_title (general, _("General"));
 
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (name_row)), _("Name"));
-  adw_entry_row_set_show_apply_button (ADW_ENTRY_ROW (GTK_WIDGET (name_row)), TRUE);
-  gtk_editable_set_text (GTK_EDITABLE (GTK_WIDGET (name_row)), name);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (name_row), _("Name"));
+  adw_entry_row_set_show_apply_button (ADW_ENTRY_ROW (name_row), TRUE);
+  gtk_editable_set_text (GTK_EDITABLE (name_row), name);
   g_signal_connect (name_row, "apply", G_CALLBACK (on_name_apply), self);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (general)), GTK_WIDGET (name_row));
+  adw_preferences_group_add (general, GTK_WIDGET (name_row));
 
   self->icon_row = ADW_ACTION_ROW (adw_action_row_new ());
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->icon_row),
@@ -752,7 +752,7 @@ create_settings_page (NuvashaInstancePage *self)
   adw_action_row_add_suffix (ADW_ACTION_ROW (self->icon_row), change_icon);
   adw_action_row_set_activatable_widget (ADW_ACTION_ROW (self->icon_row),
                                          change_icon);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (general)), GTK_WIDGET (self->icon_row));
+  adw_preferences_group_add (general, GTK_WIDGET (self->icon_row));
   update_icon_row (self);
 
   /* Directory: where the files are. Pressing the button moves every file
@@ -781,20 +781,20 @@ create_settings_page (NuvashaInstancePage *self)
                              GTK_WIDGET (self->directory_change));
   adw_action_row_set_activatable_widget (ADW_ACTION_ROW (self->directory_row),
                                          GTK_WIDGET (self->directory_change));
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (general)),
+  adw_preferences_group_add (general,
                              GTK_WIDGET (self->directory_row));
   update_directory_row (self);
 
   /* Minecraft: the list of versions comes from Mojang's manifest,
    * fetched as the page is built. The version this instance runs stays
    * in the list even when the filter would hide its type. */
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (GTK_WIDGET (minecraft)),
+  adw_preferences_group_set_title (minecraft,
                                     _("Minecraft"));
   g_signal_connect (version_row, "notify::selected",
                     G_CALLBACK (on_version_selected), self);
   nuvasha_version_row_load (nuvasha_VERSION_ROW (version_row), self->settings,
                         minecraft_version);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (minecraft)), version_row);
+  adw_preferences_group_add (minecraft, version_row);
   /* The loader and one of its versions: changing either of them changes
      what this instance runs, so both are stored like the version above. */
   {
@@ -813,19 +813,19 @@ create_settings_page (NuvashaInstancePage *self)
 
   /* Rows of the same Minecraft group, drawn and behaving like the version
      row above. */
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (minecraft)),
-                             nuvasha_loader_row_get_loader_row (
-                               self->loader_row));
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (minecraft)),
-                             nuvasha_loader_row_get_version_row (
-                               self->loader_row));
+  adw_preferences_group_add (minecraft,
+                              GTK_WIDGET (nuvasha_loader_row_get_loader_row (
+                                self->loader_row)));
+  adw_preferences_group_add (minecraft,
+                              GTK_WIDGET (nuvasha_loader_row_get_version_row (
+                                self->loader_row)));
 
   /* Java: the installations detection found. The row ends in an entry
      that adds one it did not report, so that is where they are added
      from. */
   GtkWidget *java_row = GTK_WIDGET (nuvasha_java_row_new ());
 
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (GTK_WIDGET (java)), _("Java"));
+  adw_preferences_group_set_title (java, _("Java"));
 
   g_signal_connect (java_row, "notify::selected",
                     G_CALLBACK (on_java_selected), self);
@@ -838,15 +838,15 @@ create_settings_page (NuvashaInstancePage *self)
   nuvasha_java_row_load (nuvasha_JAVA_ROW (java_row), java_path);
   self->java_row = nuvasha_JAVA_ROW (java_row);
 
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (java)), java_row);
+  adw_preferences_group_add (java, java_row);
 
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (jvm_args_row)),
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (jvm_args_row),
                                  _("JVM Arguments"));
-  adw_entry_row_set_show_apply_button (ADW_ENTRY_ROW (GTK_WIDGET (jvm_args_row)), TRUE);
-  gtk_editable_set_text (GTK_EDITABLE (GTK_WIDGET (jvm_args_row)), jvm_args);
+  adw_entry_row_set_show_apply_button (ADW_ENTRY_ROW (jvm_args_row), TRUE);
+  gtk_editable_set_text (GTK_EDITABLE (jvm_args_row), jvm_args);
   g_signal_connect (jvm_args_row, "apply", G_CALLBACK (on_jvm_args_apply),
                     self);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (java)), GTK_WIDGET (jvm_args_row));
+  adw_preferences_group_add (java, GTK_WIDGET (jvm_args_row));
 
   /* The Java row's compatibility warning needs the javaVersion field of
    * the instance's version document; fetching is offline-friendly via
@@ -856,30 +856,30 @@ create_settings_page (NuvashaInstancePage *self)
     version_wait_new (self, ++self->versions_generation));
 
   /* Actions */
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (GTK_WIDGET (actions)), _("Actions"));
-  button_row (ADW_PREFERENCES_GROUP (actions), _("Duplicate"), NULL,
+  adw_preferences_group_set_title (actions, _("Actions"));
+  button_row (actions, _("Duplicate"), NULL,
               "edit-copy-symbolic", G_CALLBACK (on_duplicate_clicked), self);
-  button_row (ADW_PREFERENCES_GROUP (actions), _("Open Folder"), NULL,
+  button_row (actions, _("Open Folder"), NULL,
               "folder-symbolic", G_CALLBACK (on_open_folder_clicked),
               self);
-  button_row (ADW_PREFERENCES_GROUP (actions), _("Export Modpack"),
+  button_row (actions, _("Export Modpack"),
               NULL,
               "document-save-symbolic", G_CALLBACK (on_export_clicked), self);
-  delete_row = button_row (ADW_PREFERENCES_GROUP (actions), _("Delete Instance"),
+  delete_row = button_row (actions, _("Delete Instance"),
                            NULL, "user-trash-symbolic",
                            G_CALLBACK (on_delete_clicked), self);
   gtk_widget_add_css_class (
     adw_action_row_get_activatable_widget (ADW_ACTION_ROW (delete_row)),
     "destructive-action");
 
-  adw_preferences_page_add (ADW_PREFERENCES_PAGE (GTK_WIDGET (page)),
-                            ADW_PREFERENCES_GROUP (general));
-  adw_preferences_page_add (ADW_PREFERENCES_PAGE (GTK_WIDGET (page)),
-                            ADW_PREFERENCES_GROUP (minecraft));
-  adw_preferences_page_add (ADW_PREFERENCES_PAGE (GTK_WIDGET (page)),
-                            ADW_PREFERENCES_GROUP (java));
-  adw_preferences_page_add (ADW_PREFERENCES_PAGE (GTK_WIDGET (page)),
-                            ADW_PREFERENCES_GROUP (actions));
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+                            general);
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+                            minecraft);
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+                            java);
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+                            actions);
 
   return GTK_WIDGET (page);
 }
@@ -929,7 +929,7 @@ nuvasha_instance_page_new (NuvashaInstanceManager *manager, NuvashaInstance *ins
   g_signal_connect_object (launcher, "state",
                            G_CALLBACK (on_page_launcher_state), self, 0);
 
-  adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (GTK_WIDGET (stack)),
+  adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (stack),
                                        create_settings_page (self),
                                         "settings", _("Settings"),
                                        "preferences-system-symbolic");
@@ -950,7 +950,7 @@ nuvasha_instance_page_new (NuvashaInstanceManager *manager, NuvashaInstance *ins
      shares with the row, so the game can be watched from here. */
   self->logs_page = nuvasha_logs_page_new (launcher);
   g_object_ref (self->logs_page);
-  adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (GTK_WIDGET (stack)),
+  adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (stack),
                                         GTK_WIDGET (self->logs_page), "logs", _("Logs"),
                                        "utilities-terminal-symbolic");
 
@@ -963,19 +963,19 @@ nuvasha_instance_page_new (NuvashaInstanceManager *manager, NuvashaInstance *ins
   /* The header holds only this switcher. There is no back button here:
    the dialog is named after the instance and its close button is what
    leaves it. */
-  adw_view_switcher_set_policy (ADW_VIEW_SWITCHER (GTK_WIDGET (switcher)),
+  adw_view_switcher_set_policy (ADW_VIEW_SWITCHER (switcher),
                                 ADW_VIEW_SWITCHER_POLICY_WIDE);
-  adw_view_switcher_set_stack (ADW_VIEW_SWITCHER (GTK_WIDGET (switcher)),
+  adw_view_switcher_set_stack (ADW_VIEW_SWITCHER (switcher),
                                ADW_VIEW_STACK (stack));
-  adw_header_bar_set_title_widget (ADW_HEADER_BAR (GTK_WIDGET (header)), GTK_WIDGET (switcher));
+  adw_header_bar_set_title_widget (ADW_HEADER_BAR (header), GTK_WIDGET (switcher));
 
   self->toast_overlay = ADW_TOAST_OVERLAY (adw_toast_overlay_new ());
   adw_toast_overlay_set_child (ADW_TOAST_OVERLAY (self->toast_overlay), GTK_WIDGET (stack));
 
   gtk_widget_set_vexpand (GTK_WIDGET (toolbar), TRUE);
   gtk_widget_set_hexpand (GTK_WIDGET (toolbar), TRUE);
-  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)), GTK_WIDGET (header));
-  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)),
+  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), GTK_WIDGET (header));
+  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar),
                                 GTK_WIDGET (self->toast_overlay));
 
   /* The dialog holds this box, and the box holds the toolbar view of the

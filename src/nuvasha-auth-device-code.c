@@ -1,6 +1,7 @@
 /* Microsoft device-code authentication step. */
 
 #include "nuvasha-auth-microsoft-private.h"
+#include "nuvasha-i18n.h"
 
 void
 device_code_answered (AuthRequest *self)
@@ -12,7 +13,7 @@ device_code_answered (AuthRequest *self)
     {
       fail (self,
             refusal (self->body, self->status, nuvasha_AUTH_ERROR_DEVICE_CODE,
-                     "Microsoft would not give a code to sign in with"));
+                     _("Microsoft would not give a code to sign in with")));
       return;
     }
 

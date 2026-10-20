@@ -135,18 +135,18 @@ results_arrived (NuvashaContentPage *self, NuvashaModrinthResults *results,
 
       /* Show the icon, title, and short description. Details contain the
          author, downloads, game version, and loader. */
-      adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), FALSE);
-      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (row)),
+      adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
+      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
                                      project->title);
       {
         g_autofree char *line = description_line (project->description, 0);
 
-        adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (row)), line);
+        adw_action_row_set_subtitle (ADW_ACTION_ROW (row), line);
       }
       /* Limit row descriptions to two lines; the full text is on the details
          page. */
-      adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (GTK_WIDGET (row)), 2);
-      adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (GTK_WIDGET (row)), FALSE);
+      adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 2);
+      adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (row), FALSE);
 
       gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
       nuvasha_icon_load_start (icon, project->icon_url);
@@ -158,12 +158,12 @@ results_arrived (NuvashaContentPage *self, NuvashaModrinthResults *results,
                          g_ptr_array_index (self->browse.model->results,
                                             self->browse.model->results->len - 1));
 
-      adw_action_row_add_prefix (ADW_ACTION_ROW (GTK_WIDGET (row)), icon);
+      adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
 
       /* The whole row opens the project, where the version is chosen.
        * An AdwActionRow is not activatable by default, so the row
        * itself is made one: a click on it activates the row. */
-      gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (GTK_WIDGET (row)), TRUE);
+      gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
       g_signal_connect (row, "activated", G_CALLBACK (nuvasha_content_page_on_result_activated),
                         self);
 
@@ -479,7 +479,7 @@ fill_categories (NuvashaContentPage *self, GPtrArray *categories)
             current = g_strdup (category->header != NULL ? category->header
                                                         : "other");
 
-            gtk_label_set_xalign (GTK_LABEL (GTK_WIDGET (heading)), 0.0);
+            gtk_label_set_xalign (GTK_LABEL (heading), 0.0);
             gtk_widget_add_css_class (GTK_WIDGET (heading), "caption");
             gtk_widget_add_css_class (GTK_WIDGET (heading), "dim-label");
             gtk_widget_set_margin_top (GTK_WIDGET (heading), 6);
@@ -548,13 +548,13 @@ categories_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       {
         GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 6));
         GtkLabel *label = GTK_LABEL (gtk_label_new (
-            error != NULL ? error->message : "Could not load categories"));
+            error != NULL ? error->message : _("Could not load categories")));
         GtkButton *retry = GTK_BUTTON (gtk_button_new_with_label (_("Retry")));
 
-        gtk_label_set_wrap (GTK_LABEL (GTK_WIDGET (label)), TRUE);
+        gtk_label_set_wrap (GTK_LABEL (label), TRUE);
         gtk_widget_set_size_request (GTK_WIDGET (box), 220, -1);
-        gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (label));
-        gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (retry));
+        gtk_box_append (GTK_BOX (box), GTK_WIDGET (label));
+        gtk_box_append (GTK_BOX (box), GTK_WIDGET (retry));
 
         gtk_box_append (GTK_BOX (self->browse.filter_box), GTK_WIDGET (box));
         g_signal_connect (retry, "clicked",

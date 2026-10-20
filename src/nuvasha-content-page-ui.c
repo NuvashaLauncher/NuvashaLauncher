@@ -19,7 +19,7 @@ toolbar_button (const char *icon_name, const char *label, GCallback callback,
   gtk_widget_add_css_class (GTK_WIDGET (button), "flat");
   gtk_widget_set_valign (GTK_WIDGET (button), GTK_ALIGN_CENTER);
   gtk_widget_set_tooltip_text (GTK_WIDGET (button), label);
-  gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (button)),
+  gtk_accessible_update_property (GTK_ACCESSIBLE (button),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL, label, -1);
   g_signal_connect (button, "clicked", callback, user_data);
 
@@ -51,12 +51,12 @@ nuvasha_content_page_build_installed (NuvashaContentPage *self)
    self->installed.search_bar = GTK_SEARCH_ENTRY (search_bar);
    self->installed.search_entry = GTK_SEARCH_ENTRY (search_bar);
    gtk_widget_set_hexpand (GTK_WIDGET (search_bar), TRUE);
-    gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (GTK_WIDGET (search_bar)),
+    gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_bar),
                                             _("Search"));
      gtk_widget_set_visible (GTK_WIDGET (search_bar), TRUE);
    g_signal_connect (search_bar, "changed",
                      G_CALLBACK (nuvasha_content_page_on_installed_search_changed), self);
-     gtk_box_append (GTK_BOX (GTK_WIDGET (actions)), GTK_WIDGET (search_bar));
+     gtk_box_append (GTK_BOX (actions), GTK_WIDGET (search_bar));
 
     self->installed.update_all = GTK_BUTTON (toolbar_button (
       "software-update-available-symbolic", _("Update All"),
@@ -68,14 +68,14 @@ nuvasha_content_page_build_installed (NuvashaContentPage *self)
    self->installed.update_content = update_content;
    self->installed.update_spinner = update_spinner;
    gtk_widget_set_sensitive (GTK_WIDGET (self->installed.update_all), FALSE);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (actions)), GTK_WIDGET (self->installed.update_all));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (actions)),
+  gtk_box_append (GTK_BOX (actions), GTK_WIDGET (self->installed.update_all));
+  gtk_box_append (GTK_BOX (actions),
                   toolbar_button ("folder-symbolic", _("Open Folder"),
                                   G_CALLBACK (nuvasha_content_page_on_open_folder_clicked), self));
     self->browse.spinner = ADW_SPINNER (adw_spinner_new ());
    gtk_widget_set_valign (GTK_WIDGET (self->browse.spinner), GTK_ALIGN_CENTER);
   gtk_widget_set_visible (GTK_WIDGET (self->browse.spinner), FALSE);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (actions)), GTK_WIDGET (self->browse.spinner));
+  gtk_box_append (GTK_BOX (actions), GTK_WIDGET (self->browse.spinner));
 
   /* The actions belong to the toolbar row above both lists, not to this
      one of them: they are the same row whichever list is shown, and
@@ -105,7 +105,6 @@ nuvasha_content_page_build_installed (NuvashaContentPage *self)
 
   /* The list starts where the row above it ends: its first row is not
      rounded at the top, so the two read as one piece. */
-  gtk_widget_add_css_class (GTK_WIDGET (group), "flush");
 
    self->installed.group = group;
    self->installed.scroller = GTK_SCROLLED_WINDOW (scroller);
@@ -113,18 +112,18 @@ nuvasha_content_page_build_installed (NuvashaContentPage *self)
      gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (scroller)),
      "value-changed", G_CALLBACK (nuvasha_content_page_on_installed_scroll_changed),
      self);
-  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)),
+  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
                                  GTK_WIDGET (group));
   gtk_widget_set_vexpand (GTK_WIDGET (scroller), TRUE);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)),
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 
   gtk_widget_set_vexpand (GTK_WIDGET (content), TRUE);
-   gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (loading));
-   gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (self->installed.status));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (scroller));
+   gtk_box_append (GTK_BOX (content), GTK_WIDGET (loading));
+   gtk_box_append (GTK_BOX (content), GTK_WIDGET (self->installed.status));
+  gtk_box_append (GTK_BOX (content), GTK_WIDGET (scroller));
   gtk_widget_set_visible (GTK_WIDGET (scroller), FALSE);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (content));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (content));
 
   adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (self->stack), GTK_WIDGET (box),
                                         "installed", _("Installed"),
@@ -223,7 +222,7 @@ nuvasha_content_page_build_browse (NuvashaContentPage *self)
   /* The field takes the room the row has, the way the modpack browser's
      search does, rather than a fixed width of its own. */
   gtk_widget_set_hexpand (GTK_WIDGET (search_bar), TRUE);
-  gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (GTK_WIDGET (search_bar)),
+  gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_bar),
                                             _("Search"));
   gtk_widget_set_visible (GTK_WIDGET (search_bar), TRUE);
 
@@ -237,22 +236,22 @@ nuvasha_content_page_build_browse (NuvashaContentPage *self)
     g_signal_connect (keys, "key-pressed", G_CALLBACK (nuvasha_content_page_on_search_key), self);
   }
 
-  gtk_box_append (GTK_BOX (GTK_WIDGET (top)), GTK_WIDGET (search_bar));
+  gtk_box_append (GTK_BOX (top), GTK_WIDGET (search_bar));
 
-  gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (GTK_WIDGET (filter_button)),
+  gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (filter_button),
                                  "view-more-symbolic");
     gtk_widget_set_tooltip_text (GTK_WIDGET (filter_button), _("Filter by category"));
-  gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (filter_button)),
+  gtk_accessible_update_property (GTK_ACCESSIBLE (filter_button),
                                      GTK_ACCESSIBLE_PROPERTY_LABEL, _("Filter"),
                                   -1);
   gtk_widget_set_valign (GTK_WIDGET (filter_button), GTK_ALIGN_CENTER);
   gtk_widget_add_css_class (GTK_WIDGET (filter_button), "flat");
-  gtk_menu_button_set_popover (GTK_MENU_BUTTON (GTK_WIDGET (filter_button)), GTK_WIDGET (popover));
+  gtk_menu_button_set_popover (GTK_MENU_BUTTON (filter_button), GTK_WIDGET (popover));
   /* A click opens the popover but does not emit "activate" on the
      menu button, so the load hangs off the popover's "show" instead. */
   g_signal_connect (popover, "show",
                     G_CALLBACK (nuvasha_content_page_on_filter_clicked), self);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (top)), GTK_WIDGET (filter_button));
+  gtk_box_append (GTK_BOX (top), GTK_WIDGET (filter_button));
 
   /* The row takes the room the bar has, the search inside it takes most
      of that, and the filter and the switcher sit at its right. */
@@ -264,7 +263,7 @@ nuvasha_content_page_build_browse (NuvashaContentPage *self)
   gtk_widget_set_margin_bottom (GTK_WIDGET (filter_box), 6);
   gtk_widget_set_margin_start (GTK_WIDGET (filter_box), 6);
   gtk_widget_set_margin_end (GTK_WIDGET (filter_box), 6);
-  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (GTK_WIDGET (filter_scroller)),
+  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (filter_scroller),
                                   GTK_WIDGET (filter_box));
   /* Wide enough to read a category and its heading, and no taller than
      the popover can be: a long list scrolls instead of running off the
@@ -274,7 +273,7 @@ nuvasha_content_page_build_browse (NuvashaContentPage *self)
       GTK_SCROLLED_WINDOW (filter_scroller), 420);
   gtk_scrolled_window_set_propagate_natural_height (
       GTK_SCROLLED_WINDOW (filter_scroller), TRUE);
-  gtk_popover_set_child (GTK_POPOVER (GTK_WIDGET (popover)), GTK_WIDGET (filter_scroller));
+  gtk_popover_set_child (GTK_POPOVER (popover), GTK_WIDGET (filter_scroller));
 
    self->browse_actions = GTK_BOX (top);
   g_object_ref_sink (top);
@@ -290,21 +289,20 @@ nuvasha_content_page_build_browse (NuvashaContentPage *self)
         "instance"));
   /* The list starts where the row above it ends: its first row is not
      rounded at the top, so the two read as one piece. */
-  gtk_widget_add_css_class (GTK_WIDGET (group), "flush");
 
    self->browse.results_group = group;
    self->browse.results_scroller = GTK_SCROLLED_WINDOW (scroller);
-  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)),
+  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
                                  GTK_WIDGET (group));
   gtk_widget_set_vexpand (GTK_WIDGET (scroller), TRUE);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)),
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 
   gtk_widget_set_vexpand (GTK_WIDGET (content), TRUE);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (self->browse.results_status));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (scroller));
+  gtk_box_append (GTK_BOX (content), GTK_WIDGET (self->browse.results_status));
+  gtk_box_append (GTK_BOX (content), GTK_WIDGET (scroller));
   gtk_widget_set_visible (GTK_WIDGET (scroller), FALSE);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (content));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (content));
 
   /* The foot of the list: the button that installs everything the
      checkmarks of the versions have on, and nothing else. It is a plain
@@ -314,30 +312,31 @@ nuvasha_content_page_build_browse (NuvashaContentPage *self)
   gtk_widget_set_valign (GTK_WIDGET (pick_button), GTK_ALIGN_CENTER);
    pick_accessible_label = g_strdup_printf (
        _("Install the selected %s?"), nuvasha_content_type_title (self->type));
-   gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (pick_button)),
+   gtk_accessible_update_property (GTK_ACCESSIBLE (pick_button),
                                    GTK_ACCESSIBLE_PROPERTY_LABEL,
                                    pick_accessible_label, -1);
-  gtk_button_set_child (GTK_BUTTON (GTK_WIDGET (pick_button)), GTK_WIDGET (pick_icon));
+  gtk_button_set_child (GTK_BUTTON (pick_button), GTK_WIDGET (pick_icon));
   g_signal_connect (pick_button, "clicked",
                     G_CALLBACK (nuvasha_content_page_on_pick_button_clicked), self);
 
    /* Keep the count attached to the button without putting it inside the
       button's hit target. The overlay keeps it correctly positioned at
       every scale without changing the button's width. */
-   gtk_widget_add_css_class (GTK_WIDGET (pick_badge), "nuvasha-badge");
+   gtk_widget_add_css_class (GTK_WIDGET (pick_badge), "caption-heading");
+   gtk_widget_add_css_class (GTK_WIDGET (pick_badge), "numeric");
    gtk_widget_set_valign (GTK_WIDGET (pick_badge), GTK_ALIGN_START);
    gtk_widget_set_halign (GTK_WIDGET (pick_badge), GTK_ALIGN_END);
    gtk_widget_set_margin_top (GTK_WIDGET (pick_badge), 1);
    gtk_widget_set_margin_end (GTK_WIDGET (pick_badge), 1);
 
-   gtk_overlay_set_child (GTK_OVERLAY (GTK_WIDGET (pick_overlay)), GTK_WIDGET (pick_button));
-   gtk_overlay_add_overlay (GTK_OVERLAY (GTK_WIDGET (pick_overlay)), GTK_WIDGET (pick_badge));
-   gtk_box_append (GTK_BOX (GTK_WIDGET (foot)), GTK_WIDGET (pick_overlay));
+   gtk_overlay_set_child (GTK_OVERLAY (pick_overlay), GTK_WIDGET (pick_button));
+   gtk_overlay_add_overlay (GTK_OVERLAY (pick_overlay), GTK_WIDGET (pick_badge));
+   gtk_box_append (GTK_BOX (foot), GTK_WIDGET (pick_overlay));
   gtk_widget_set_margin_start (GTK_WIDGET (foot), 12);
   gtk_widget_set_margin_end (GTK_WIDGET (foot), 12);
   gtk_widget_set_margin_top (GTK_WIDGET (foot), 6);
   gtk_widget_set_margin_bottom (GTK_WIDGET (foot), 6);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (foot));
+  gtk_box_append (GTK_BOX (box), GTK_WIDGET (foot));
 
    self->pick_button = GTK_BUTTON (pick_button);
    self->pick_badge = GTK_LABEL (pick_badge);
@@ -355,8 +354,8 @@ nuvasha_content_page_build_browse (NuvashaContentPage *self)
   gtk_widget_set_margin_top (GTK_WIDGET (loading_more), 12);
   gtk_widget_set_margin_bottom (GTK_WIDGET (loading_more), 12);
   gtk_widget_set_visible (GTK_WIDGET (loading_more), FALSE);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (loading_more)), GTK_WIDGET (loading_spinner));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (loading_more)), GTK_WIDGET (loading_label));
+  gtk_box_append (GTK_BOX (loading_more), GTK_WIDGET (loading_spinner));
+  gtk_box_append (GTK_BOX (loading_more), GTK_WIDGET (loading_label));
   adw_preferences_group_add (group, GTK_WIDGET (loading_more));
 
   gtk_widget_set_halign (GTK_WIDGET (retry_row), GTK_ALIGN_CENTER);
@@ -364,10 +363,10 @@ nuvasha_content_page_build_browse (NuvashaContentPage *self)
   gtk_widget_set_margin_top (GTK_WIDGET (retry_row), 12);
   gtk_widget_set_margin_bottom (GTK_WIDGET (retry_row), 12);
   gtk_widget_set_visible (GTK_WIDGET (retry_row), FALSE);
-  gtk_label_set_wrap (GTK_LABEL (GTK_WIDGET (retry_label)), TRUE);
+  gtk_label_set_wrap (GTK_LABEL (retry_label), TRUE);
   gtk_widget_add_css_class (GTK_WIDGET (retry_label), "dim-label");
-  gtk_box_append (GTK_BOX (GTK_WIDGET (retry_row)), GTK_WIDGET (retry_label));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (retry_row)), GTK_WIDGET (retry_button));
+  gtk_box_append (GTK_BOX (retry_row), GTK_WIDGET (retry_label));
+  gtk_box_append (GTK_BOX (retry_row), GTK_WIDGET (retry_button));
   adw_preferences_group_add (group, GTK_WIDGET (retry_row));
 
    self->browse.loading_more = GTK_BOX (loading_more);
@@ -383,7 +382,7 @@ nuvasha_content_page_build_browse (NuvashaContentPage *self)
      the value is at the upper bound. */
   {
     GtkAdjustment *adjustment =
-      gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)));
+      gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (scroller));
 
     g_signal_connect (adjustment, "value-changed",
                       G_CALLBACK (nuvasha_content_page_on_scroll_changed), self);
@@ -426,12 +425,12 @@ switcher_button (const char *icon_name, const char *label)
 {
   GtkToggleButton *button = GTK_TOGGLE_BUTTON (gtk_toggle_button_new ());
 
-  gtk_button_set_icon_name (GTK_BUTTON (GTK_WIDGET (button)), icon_name);
+  gtk_button_set_icon_name (GTK_BUTTON (button), icon_name);
   gtk_widget_add_css_class (GTK_WIDGET (button), "flat");
   gtk_widget_set_valign (GTK_WIDGET (button), GTK_ALIGN_CENTER);
-     gtk_widget_set_tooltip_text (GTK_WIDGET (button), _(label));
-  gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (button)),
-                                    GTK_ACCESSIBLE_PROPERTY_LABEL, _(label), -1);
+     gtk_widget_set_tooltip_text (GTK_WIDGET (button), label);
+  gtk_accessible_update_property (GTK_ACCESSIBLE (button),
+                                     GTK_ACCESSIBLE_PROPERTY_LABEL, label, -1);
 
   return GTK_WIDGET (button);
 }
@@ -462,9 +461,9 @@ nuvasha_content_page_build_bar (NuvashaContentPage *self)
   gtk_widget_add_css_class (GTK_WIDGET (self->switcher), "linked");
 
   self->switcher_installed = GTK_TOGGLE_BUTTON (
-    switcher_button ("view-list-symbolic", "Installed"));
+    switcher_button ("view-list-symbolic", _("Installed")));
   self->switcher_browse = GTK_TOGGLE_BUTTON (
-    switcher_button ("web-browser-symbolic", "Browse"));
+    switcher_button ("web-browser-symbolic", _("Browse")));
 
   gtk_toggle_button_set_group (GTK_TOGGLE_BUTTON (self->switcher_browse),
                                GTK_TOGGLE_BUTTON (self->switcher_installed));
@@ -491,14 +490,14 @@ nuvasha_content_page_build_bar (NuvashaContentPage *self)
 
   /* Keep failures in a banner; use toasts for transient success messages. */
   self->banner = ADW_BANNER (adw_banner_new (""));
-  adw_banner_set_button_label (ADW_BANNER (self->banner), "Dismiss");
+  adw_banner_set_button_label (ADW_BANNER (self->banner), _("Dismiss"));
   adw_banner_set_revealed (ADW_BANNER (self->banner), FALSE);
   g_signal_connect (self->banner, "button-clicked",
                     G_CALLBACK (on_banner_dismiss), self);
 
-  gtk_box_append (GTK_BOX (GTK_WIDGET (inner)), GTK_WIDGET (self->banner));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (inner)), GTK_WIDGET (self->bar));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (inner)), GTK_WIDGET (self->stack));
+  gtk_box_append (GTK_BOX (inner), GTK_WIDGET (self->banner));
+  gtk_box_append (GTK_BOX (inner), GTK_WIDGET (self->bar));
+  gtk_box_append (GTK_BOX (inner), GTK_WIDGET (self->stack));
 
   /* The list is the left half; the project that is opened is the right
      half, and is empty until one is opened. Collapsed shows one page at a
@@ -506,10 +505,8 @@ nuvasha_content_page_build_bar (NuvashaContentPage *self)
   self->project.split = ADW_NAVIGATION_SPLIT_VIEW (
     adw_navigation_split_view_new ());
   gtk_widget_set_vexpand (GTK_WIDGET (self->project.split), TRUE);
-  /* Named, so the stylesheet keeps the left half the colour of the page
-     instead of the sidebar colour it would take on its own. */
-  gtk_widget_add_css_class (GTK_WIDGET (self->project.split), "flat-split");
-  adw_navigation_split_view_set_sidebar (
+   /* Named so the navigation split view can identify the browse page. */
+   adw_navigation_split_view_set_sidebar (
     ADW_NAVIGATION_SPLIT_VIEW (self->project.split),
     adw_navigation_page_new (GTK_WIDGET (inner), nuvasha_content_type_title (self->type)));
   adw_navigation_split_view_set_collapsed (

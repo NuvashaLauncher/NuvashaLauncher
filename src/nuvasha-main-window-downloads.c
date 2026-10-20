@@ -106,8 +106,8 @@ refresh_downloads (NuvashaMainWindow *self)
           gtk_widget_set_halign (GTK_WIDGET (title), GTK_ALIGN_START);
           gtk_widget_add_css_class (GTK_WIDGET (title), "heading");
           gtk_widget_set_hexpand (GTK_WIDGET (title), TRUE);
-          gtk_label_set_ellipsize (GTK_LABEL (GTK_WIDGET (title)), PANGO_ELLIPSIZE_END);
-          gtk_label_set_xalign (GTK_LABEL (GTK_WIDGET (title)), 0.0f);
+          gtk_label_set_ellipsize (GTK_LABEL (title), PANGO_ELLIPSIZE_END);
+          gtk_label_set_xalign (GTK_LABEL (title), 0.0f);
 
           row = g_new0 (DownloadRow, 1);
            row->box = GTK_BOX (box);
@@ -139,21 +139,21 @@ refresh_downloads (NuvashaMainWindow *self)
           gtk_widget_add_css_class (GTK_WIDGET (cancel), "flat");
           gtk_widget_set_valign (GTK_WIDGET (cancel), GTK_ALIGN_CENTER);
           gtk_widget_set_tooltip_text (GTK_WIDGET (cancel), _("Cancel"));
-          gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (cancel)),
+          gtk_accessible_update_property (GTK_ACCESSIBLE (cancel),
                                           GTK_ACCESSIBLE_PROPERTY_LABEL,
-                                          "Cancel", -1);
+                                           _("Cancel"), -1);
 
           g_signal_connect (cancel, "clicked", G_CALLBACK (on_download_cancel),
                             download);
 
-          gtk_box_append (GTK_BOX (GTK_WIDGET (sub)), GTK_WIDGET (row->phase));
-          gtk_box_append (GTK_BOX (GTK_WIDGET (sub)), GTK_WIDGET (row->count));
-          gtk_box_append (GTK_BOX (GTK_WIDGET (line_box)), GTK_WIDGET (row->bar));
-          gtk_box_append (GTK_BOX (GTK_WIDGET (line_box)), GTK_WIDGET (cancel));
+          gtk_box_append (GTK_BOX (sub), GTK_WIDGET (row->phase));
+          gtk_box_append (GTK_BOX (sub), GTK_WIDGET (row->count));
+          gtk_box_append (GTK_BOX (line_box), GTK_WIDGET (row->bar));
+          gtk_box_append (GTK_BOX (line_box), GTK_WIDGET (cancel));
 
-          gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (title));
-          gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (sub));
-          gtk_box_append (GTK_BOX (GTK_WIDGET (box)), GTK_WIDGET (line_box));
+          gtk_box_append (GTK_BOX (box), GTK_WIDGET (title));
+          gtk_box_append (GTK_BOX (box), GTK_WIDGET (sub));
+          gtk_box_append (GTK_BOX (box), GTK_WIDGET (line_box));
           gtk_box_append (GTK_BOX (self->downloads.list), GTK_WIDGET (box));
 
           g_hash_table_insert (self->downloads.rows, download, row);

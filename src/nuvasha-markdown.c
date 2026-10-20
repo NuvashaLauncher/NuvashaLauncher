@@ -159,7 +159,7 @@ wrapped_label (const char *markup)
    /* Validate user-provided markup before passing it to GtkLabel. */
   if (markup == NULL ||
       pango_parse_markup (markup, -1, 0, &attrs, &plain, NULL, &error))
-    gtk_label_set_markup (GTK_LABEL (GTK_WIDGET (label)), markup != NULL ? markup : "");
+    gtk_label_set_markup (GTK_LABEL (label), markup != NULL ? markup : "");
   else
     {
       g_autoptr (GRegex) tags =
@@ -167,13 +167,13 @@ wrapped_label (const char *markup)
       g_autofree char *fallback =
         g_regex_replace (tags, markup, -1, 0, "", 0, NULL);
 
-      gtk_label_set_text (GTK_LABEL (GTK_WIDGET (label)), fallback != NULL ? fallback : "");
+      gtk_label_set_text (GTK_LABEL (label), fallback != NULL ? fallback : "");
     }
 
-  gtk_label_set_wrap (GTK_LABEL (GTK_WIDGET (label)), TRUE);
-  gtk_label_set_wrap_mode (GTK_LABEL (GTK_WIDGET (label)), PANGO_WRAP_WORD_CHAR);
-  gtk_label_set_xalign (GTK_LABEL (GTK_WIDGET (label)), 0);
-  gtk_label_set_selectable (GTK_LABEL (GTK_WIDGET (label)), TRUE);
+  gtk_label_set_wrap (GTK_LABEL (label), TRUE);
+  gtk_label_set_wrap_mode (GTK_LABEL (label), PANGO_WRAP_WORD_CHAR);
+  gtk_label_set_xalign (GTK_LABEL (label), 0);
+  gtk_label_set_selectable (GTK_LABEL (label), TRUE);
 
   return GTK_WIDGET (label);
 }
@@ -269,7 +269,7 @@ image_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
          it is being drawn. A texture is never symbolic. */
       if (texture != NULL)
         {
-          gtk_picture_set_paintable (GTK_PICTURE (GTK_WIDGET (picture)),
+          gtk_picture_set_paintable (GTK_PICTURE (picture),
                                      GDK_PAINTABLE (texture));
           {
             int width = gdk_paintable_get_intrinsic_width (
@@ -332,8 +332,8 @@ image_block (const char *url)
 
   /* The aspect frame supplies the correct height; the picture itself must
      be allowed to scale down to the description column's width. */
-  gtk_picture_set_can_shrink (GTK_PICTURE (GTK_WIDGET (picture)), TRUE);
-  gtk_picture_set_content_fit (GTK_PICTURE (GTK_WIDGET (picture)), GTK_CONTENT_FIT_CONTAIN);
+  gtk_picture_set_can_shrink (GTK_PICTURE (picture), TRUE);
+  gtk_picture_set_content_fit (GTK_PICTURE (picture), GTK_CONTENT_FIT_CONTAIN);
   gtk_widget_set_hexpand (GTK_WIDGET (picture), TRUE);
   gtk_widget_set_halign (GTK_WIDGET (picture), GTK_ALIGN_FILL);
   gtk_widget_set_visible (GTK_WIDGET (picture), FALSE);
@@ -488,8 +488,8 @@ table_block (GPtrArray *rows)
 {
   GtkGrid *grid = GTK_GRID (gtk_grid_new ());
 
-  gtk_grid_set_row_spacing (GTK_GRID (GTK_WIDGET (grid)), 4);
-  gtk_grid_set_column_spacing (GTK_GRID (GTK_WIDGET (grid)), 12);
+  gtk_grid_set_row_spacing (GTK_GRID (grid), 4);
+  gtk_grid_set_column_spacing (GTK_GRID (grid), 12);
   gtk_widget_set_hexpand (GTK_WIDGET (grid), TRUE);
   gtk_widget_set_margin_top (GTK_WIDGET (grid), 4);
   gtk_widget_set_margin_bottom (GTK_WIDGET (grid), 4);
@@ -521,7 +521,7 @@ table_block (GPtrArray *rows)
 
             gtk_widget_set_hexpand (widget, TRUE);
             gtk_widget_set_valign (widget, GTK_ALIGN_START);
-            gtk_grid_attach (GTK_GRID (GTK_WIDGET (grid)), widget, column, r, 1, 1);
+            gtk_grid_attach (GTK_GRID (grid), widget, column, r, 1, 1);
             column++;
           }
         }
@@ -664,8 +664,8 @@ nuvasha_markdown_render (GtkBox *box, const char *markdown)
           gtk_widget_add_css_class (GTK_WIDGET (dot), "dim-label");
           gtk_widget_set_valign (item, GTK_ALIGN_START);
           gtk_widget_set_hexpand (item, TRUE);
-          gtk_box_append (GTK_BOX (GTK_WIDGET (row)), GTK_WIDGET (dot));
-          gtk_box_append (GTK_BOX (GTK_WIDGET (row)), item);
+          gtk_box_append (GTK_BOX (row), GTK_WIDGET (dot));
+          gtk_box_append (GTK_BOX (row), item);
           gtk_box_append (GTK_BOX (box), GTK_WIDGET (row));
           i++;
           continue;
@@ -679,8 +679,8 @@ nuvasha_markdown_render (GtkBox *box, const char *markdown)
             text_block (g_strstrip ((char *) line + 1), "dim-label");
 
           gtk_widget_set_hexpand (GTK_WIDGET (label), TRUE);
-          gtk_box_append (GTK_BOX (GTK_WIDGET (row)), GTK_WIDGET (bar));
-          gtk_box_append (GTK_BOX (GTK_WIDGET (row)), GTK_WIDGET (label));
+          gtk_box_append (GTK_BOX (row), GTK_WIDGET (bar));
+          gtk_box_append (GTK_BOX (row), GTK_WIDGET (label));
           gtk_box_append (GTK_BOX (box), GTK_WIDGET (row));
           i++;
           continue;

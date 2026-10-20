@@ -97,7 +97,7 @@ nuvasha_offline_account_dialog_init (NuvashaOfflineAccountDialog *self)
   adw_entry_row_set_activates_default (ADW_ENTRY_ROW (self->name_row), TRUE);
 
   AdwPreferencesGroup *group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (group)),
+  adw_preferences_group_add (group,
                              GTK_WIDGET (self->name_row));
 
   self->error_label = GTK_LABEL (gtk_label_new (NULL));
@@ -118,8 +118,8 @@ nuvasha_offline_account_dialog_init (NuvashaOfflineAccountDialog *self)
 
   GtkBox *buttons = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
   gtk_widget_set_halign (GTK_WIDGET (buttons), GTK_ALIGN_CENTER);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (buttons)), GTK_WIDGET (cancel_button));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (buttons)), GTK_WIDGET (self->add_button));
+  gtk_box_append (GTK_BOX (buttons), GTK_WIDGET (cancel_button));
+  gtk_box_append (GTK_BOX (buttons), GTK_WIDGET (self->add_button));
 
   /* Keep this form like the export-metadata form: a natural vertical box
      containing the field group, the validation message, and the buttons.
@@ -130,9 +130,9 @@ nuvasha_offline_account_dialog_init (NuvashaOfflineAccountDialog *self)
   gtk_widget_set_margin_end (GTK_WIDGET (content), 12);
   gtk_widget_set_margin_top (GTK_WIDGET (content), 12);
   gtk_widget_set_margin_bottom (GTK_WIDGET (content), 12);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (group));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (self->error_label));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (buttons));
+  gtk_box_append (GTK_BOX (content), GTK_WIDGET (group));
+  gtk_box_append (GTK_BOX (content), GTK_WIDGET (self->error_label));
+  gtk_box_append (GTK_BOX (content), GTK_WIDGET (buttons));
   adw_dialog_set_child (ADW_DIALOG (self), GTK_WIDGET (content));
 
   adw_dialog_set_default_widget (ADW_DIALOG (self),

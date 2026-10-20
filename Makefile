@@ -1,7 +1,7 @@
 # Copyright (C) 2026 Flia
 # SPDX-License-Identifier: GPL-3.0-only
 #
-# Hand-written Makefile for nuvasha, Nuvasha Launcher.
+# Hand-written Makefile for Nuvasha Launcher.
 # Release objects live in build/, sanitizer objects in build-debug/.
 
 CC         := gcc

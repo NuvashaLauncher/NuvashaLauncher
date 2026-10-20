@@ -7,6 +7,7 @@
  * NuvashaInstanceManager; a failure is reported inline in the dialog. */
 
 #include "nuvasha-create-instance-dialog.h"
+#include "nuvasha-dialogs.h"
 #include "nuvasha-i18n.h"
 #include "nuvasha-ui-feedback.h"
 
@@ -132,14 +133,14 @@ on_create_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
    * guards against the row being emptied underneath it. */
   if (version == NULL)
     {
-      show_error (self, "Pick a Minecraft version from the list.");
+      show_error (self, _("Pick a Minecraft version from the list."));
       return;
     }
 
   if (loader != nuvasha_LOADER_VANILLA && loader_version == NULL)
     {
       show_error (self,
-                  "Pick a version of the loader, or pick another loader.");
+                  _("Pick a version of the loader, or pick another loader."));
       return;
     }
 
@@ -206,6 +207,7 @@ nuvasha_create_instance_dialog_init (NuvashaCreateInstanceDialog *self)
 {
   adw_dialog_set_title (ADW_DIALOG (self), _("Create Instance"));
   adw_dialog_set_follows_content_size (ADW_DIALOG (self), FALSE);
+  nuvasha_dialog_set_standard_size (ADW_DIALOG (self));
 
   self->name_row = ADW_ENTRY_ROW (adw_entry_row_new ());
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->name_row), _("Name"));
@@ -242,13 +244,13 @@ nuvasha_create_instance_dialog_init (NuvashaCreateInstanceDialog *self)
                                          GTK_WIDGET (pick_button));
 
   AdwPreferencesGroup *group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (group)), GTK_WIDGET (self->name_row));
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (group)), GTK_WIDGET (self->version_row));
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (group)),
-                             nuvasha_loader_row_get_loader_row (self->loader_row));
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (group)),
-                             nuvasha_loader_row_get_version_row (self->loader_row));
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (group)), GTK_WIDGET (self->directory_row));
+  adw_preferences_group_add (group, GTK_WIDGET (self->name_row));
+  adw_preferences_group_add (group, GTK_WIDGET (self->version_row));
+  adw_preferences_group_add (group,
+                              GTK_WIDGET (nuvasha_loader_row_get_loader_row (self->loader_row)));
+  adw_preferences_group_add (group,
+                              GTK_WIDGET (nuvasha_loader_row_get_version_row (self->loader_row)));
+  adw_preferences_group_add (group, GTK_WIDGET (self->directory_row));
 
   GtkButton *cancel_button = GTK_BUTTON (gtk_button_new_with_label (_("Cancel")));
   g_signal_connect (cancel_button, "clicked", G_CALLBACK (nuvasha_ui_cancel_dialog),
@@ -261,8 +263,8 @@ nuvasha_create_instance_dialog_init (NuvashaCreateInstanceDialog *self)
 
   GtkBox *buttons = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
   gtk_widget_set_halign (GTK_WIDGET (buttons), GTK_ALIGN_CENTER);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (buttons)), GTK_WIDGET (cancel_button));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (buttons)), GTK_WIDGET (self->create_button));
+  gtk_box_append (GTK_BOX (buttons), GTK_WIDGET (cancel_button));
+  gtk_box_append (GTK_BOX (buttons), GTK_WIDGET (self->create_button));
 
   GtkBox *content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   gtk_box_set_spacing (content, 12);
@@ -273,9 +275,9 @@ nuvasha_create_instance_dialog_init (NuvashaCreateInstanceDialog *self)
   GtkLabel *heading = GTK_LABEL (gtk_label_new (_("Create Instance")));
   gtk_widget_add_css_class (GTK_WIDGET (heading), "title-2");
   gtk_label_set_xalign (GTK_LABEL (heading), 0.5f);
-  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (heading));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (group));
-  gtk_box_append (GTK_BOX (GTK_WIDGET (content)), GTK_WIDGET (buttons));
+  gtk_box_append (GTK_BOX (content), GTK_WIDGET (heading));
+  gtk_box_append (GTK_BOX (content), GTK_WIDGET (group));
+  gtk_box_append (GTK_BOX (content), GTK_WIDGET (buttons));
   self->toast_overlay = ADW_TOAST_OVERLAY (adw_toast_overlay_new ());
   adw_toast_overlay_set_child (self->toast_overlay, GTK_WIDGET (content));
   adw_dialog_set_child (ADW_DIALOG (self), GTK_WIDGET (self->toast_overlay));

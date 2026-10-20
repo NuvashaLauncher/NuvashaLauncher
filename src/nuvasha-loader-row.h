@@ -55,10 +55,10 @@ NuvashaLoaderRow *nuvasha_loader_row_new (void);
 
 /* The "Loader" row. Add it to the group of the page, next to the
  * dropdowns that are already there. */
-GtkWidget *nuvasha_loader_row_get_loader_row (NuvashaLoaderRow *self);
+AdwComboRow *nuvasha_loader_row_get_loader_row (NuvashaLoaderRow *self);
 
 /* The "Loader Version" row, for the same group. */
-GtkWidget *nuvasha_loader_row_get_version_row (NuvashaLoaderRow *self);
+AdwComboRow *nuvasha_loader_row_get_version_row (NuvashaLoaderRow *self);
 
 /* Loads the versions of @loader for @game_version, picking
    @loader_version, and remembers @game_version for the loads that come

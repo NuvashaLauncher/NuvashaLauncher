@@ -260,7 +260,7 @@ on_activate (GApplication *application, gpointer user_data)
   run->instance_id = g_strdup (nuvasha_instance_get_id (instance));
 
   /* The window keeps the manager for as long as it lives. */
-  run->window = GTK_WINDOW (nuvasha_main_window_new (GTK_APPLICATION (application),
+  run->window = GTK_WINDOW (nuvasha_main_window_new (ADW_APPLICATION (application),
                                                  manager));
   g_assert_nonnull (run->window);
 

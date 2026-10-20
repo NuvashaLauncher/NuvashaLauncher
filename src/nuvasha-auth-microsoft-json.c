@@ -6,6 +6,7 @@
  * authentication chain remains in nuvasha-auth-microsoft.c. */
 
 #include "nuvasha-auth-microsoft.h"
+#include "nuvasha-i18n.h"
 
 #include <string.h>
 
@@ -295,23 +296,23 @@ xsts_refusal (gint64 code)
     {
     case 2148916233:
       /* The Microsoft account has never been an Xbox one. */
-      return "this Microsoft account has no Xbox profile behind it yet: "
-             "sign in to xbox.com once with it, then sign in here again";
+      return _("this Microsoft account has no Xbox profile behind it yet: "
+               "sign in to xbox.com once with it, then sign in here again");
 
     case 2148916238:
       /* A child account, which the services do not serve. */
-      return "this is a child account: it has to be added to a Microsoft "
-             "family by an adult before it can play";
+      return _("this is a child account: it has to be added to a Microsoft "
+               "family by an adult before it can play");
 
     case 2148916235:
     case 2148916236:
-      return "Xbox Live is not available for the country this account is "
-             "registered in";
+      return _("Xbox Live is not available for the country this account is "
+               "registered in");
 
     case 2148916222:
     case 2148916223:
-      return "this account needs an adult to verify it before it can play, "
-             "which is what South Korean accounts have to do";
+      return _("this account needs an adult to verify it before it can play, "
+               "which is what South Korean accounts have to do");
 
     default:
       return NULL;

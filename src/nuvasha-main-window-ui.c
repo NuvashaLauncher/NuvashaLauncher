@@ -35,24 +35,24 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
   GtkWidget *add_popover = NULL;
 
   /* Use a raised header so it has its own surface. */
-  adw_toolbar_view_set_top_bar_style (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)),
+  adw_toolbar_view_set_top_bar_style (ADW_TOOLBAR_VIEW (toolbar),
                                       ADW_TOOLBAR_RAISED);
 
   g_action_map_add_action_entries (G_ACTION_MAP (self), window_entries,
                                    window_entries_count, self);
 
   /* Start of the header: the "+" menu. */
-  gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (GTK_WIDGET (add_button)),
+  gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (add_button),
                                  "list-add-symbolic");
-  gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (GTK_WIDGET (add_button)),
+  gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (add_button),
                                   G_MENU_MODEL (add_menu));
-  adw_header_bar_pack_start (ADW_HEADER_BAR (GTK_WIDGET (header)), GTK_WIDGET (add_button));
+  adw_header_bar_pack_start (ADW_HEADER_BAR (header), GTK_WIDGET (add_button));
 
   add_popover = GTK_WIDGET (
-    gtk_menu_button_get_popover (GTK_MENU_BUTTON (GTK_WIDGET (add_button))));
+    gtk_menu_button_get_popover (GTK_MENU_BUTTON (add_button)));
   if (add_popover != NULL)
-    set_menu_item_tooltip (add_popover, "Download Modpack",
-                           "Search Modrinth and install a modpack");
+     set_menu_item_tooltip (add_popover, _("Download Modpack"),
+                            _("Search Modrinth and install a modpack"));
 
   /* Show active downloads and the content-page selection count. Hide the
    * button when both are empty. */
@@ -72,9 +72,9 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
 
     /* Place the download icon and spinner in the button. */
     gtk_widget_set_valign (GTK_WIDGET (self->downloads.icon), GTK_ALIGN_CENTER);
-    gtk_box_append (GTK_BOX (GTK_WIDGET (icon_row)), GTK_WIDGET (self->downloads.icon));
+    gtk_box_append (GTK_BOX (icon_row), GTK_WIDGET (self->downloads.icon));
     gtk_widget_set_valign (GTK_WIDGET (self->downloads.spinner), GTK_ALIGN_CENTER);
-    gtk_box_append (GTK_BOX (GTK_WIDGET (icon_row)), GTK_WIDGET (self->downloads.spinner));
+    gtk_box_append (GTK_BOX (icon_row), GTK_WIDGET (self->downloads.spinner));
 
     gtk_menu_button_set_child (GTK_MENU_BUTTON (self->downloads.button),
                                GTK_WIDGET (icon_row));
@@ -87,22 +87,22 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
                                     -1);
     gtk_widget_set_visible (GTK_WIDGET (self->downloads.button), FALSE);
 
-    gtk_box_append (GTK_BOX (GTK_WIDGET (packed)), GTK_WIDGET (self->downloads.button));
+    gtk_box_append (GTK_BOX (packed), GTK_WIDGET (self->downloads.button));
 
-    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)),
+    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
                                     GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
     gtk_scrolled_window_set_propagate_natural_height (
       GTK_SCROLLED_WINDOW (scroller), TRUE);
     gtk_scrolled_window_set_max_content_height (
       GTK_SCROLLED_WINDOW (scroller), 360);
-    gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (GTK_WIDGET (scroller)),
+    gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
                                    GTK_WIDGET (self->downloads.list));
-    gtk_popover_set_child (GTK_POPOVER (GTK_WIDGET (popover)), GTK_WIDGET (scroller));
-    gtk_popover_set_has_arrow (GTK_POPOVER (GTK_WIDGET (popover)), FALSE);
+    gtk_popover_set_child (GTK_POPOVER (popover), GTK_WIDGET (scroller));
+    gtk_popover_set_has_arrow (GTK_POPOVER (popover), FALSE);
     gtk_menu_button_set_popover (GTK_MENU_BUTTON (self->downloads.button),
                                  GTK_WIDGET (popover));
 
-    adw_header_bar_pack_start (ADW_HEADER_BAR (GTK_WIDGET (header)), GTK_WIDGET (packed));
+    adw_header_bar_pack_start (ADW_HEADER_BAR (header), GTK_WIDGET (packed));
   }
 
   g_signal_connect_object (nuvasha_downloads_get_default (), "changed",
@@ -111,29 +111,29 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
   /* Add the account selector and application menu to the header. */
   /* The model owns the popover and its account store. */
   users_child = nuvasha_users_popover_get_button_content (self->model->users_popover);
-  gtk_menu_button_set_child (GTK_MENU_BUTTON (GTK_WIDGET (users_button)), users_child);
-  gtk_menu_button_set_popover (GTK_MENU_BUTTON (GTK_WIDGET (users_button)),
+  gtk_menu_button_set_child (GTK_MENU_BUTTON (users_button), users_child);
+  gtk_menu_button_set_popover (GTK_MENU_BUTTON (users_button),
                               GTK_WIDGET (self->model->users_popover));
   /* The child is a box around the avatar, so the menu button does not
      recognize it as an icon button and would draw a frame behind it. */
   gtk_widget_add_css_class (GTK_WIDGET (users_button), "flat");
   /* Provide an accessible label for the icon-only button. */
-  gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (users_button)),
+  gtk_accessible_update_property (GTK_ACCESSIBLE (users_button),
                                    GTK_ACCESSIBLE_PROPERTY_LABEL, _("Accounts"),
                                   -1);
 
-  gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (GTK_WIDGET (app_menu_button)),
+  gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (app_menu_button),
                                  "open-menu-symbolic");
-  gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (GTK_WIDGET (app_menu_button)),
+  gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (app_menu_button),
                                   G_MENU_MODEL (app_menu));
 
-  adw_header_bar_pack_end (ADW_HEADER_BAR (GTK_WIDGET (header)), GTK_WIDGET (app_menu_button));
-  adw_header_bar_pack_end (ADW_HEADER_BAR (GTK_WIDGET (header)), GTK_WIDGET (users_button));
+  adw_header_bar_pack_end (ADW_HEADER_BAR (header), GTK_WIDGET (app_menu_button));
+  adw_header_bar_pack_end (ADW_HEADER_BAR (header), GTK_WIDGET (users_button));
 
   /* The empty state has no button in the middle: the "+" menu is the
    * only way to create an instance. */
-  adw_status_page_set_title (ADW_STATUS_PAGE (GTK_WIDGET (empty_page)), _("No Instances Yet"));
-  adw_status_page_set_description (ADW_STATUS_PAGE (GTK_WIDGET (empty_page)),
+  adw_status_page_set_title (ADW_STATUS_PAGE (empty_page), _("No Instances Yet"));
+  adw_status_page_set_description (ADW_STATUS_PAGE (empty_page),
                                    _("Use the + button in the header to create one"));
   gtk_widget_set_hexpand (GTK_WIDGET (empty_page), TRUE);
   gtk_widget_set_vexpand (GTK_WIDGET (empty_page), TRUE);
@@ -145,23 +145,23 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
 
   /* The list is the content of the window: an instance is a window of
      its own and is never a page here. */
-  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)),
+  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar),
                                 GTK_WIDGET (self->ui.stack));
-  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)), GTK_WIDGET (header));
+  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), GTK_WIDGET (header));
 
   /* Keep launch failures in a banner so the user can read them later. */
   self->ui.banner = ADW_BANNER (adw_banner_new (""));
-  adw_banner_set_button_label (ADW_BANNER (self->ui.banner), "Dismiss");
+  adw_banner_set_button_label (ADW_BANNER (self->ui.banner), _("Dismiss"));
   adw_banner_set_revealed (ADW_BANNER (self->ui.banner), FALSE);
   g_signal_connect (self->ui.banner, "button-clicked",
                     G_CALLBACK (on_main_window_banner_dismiss), NULL);
-  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (GTK_WIDGET (toolbar)),
+  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar),
                                 GTK_WIDGET (self->ui.banner));
 
   adw_application_window_set_content (ADW_APPLICATION_WINDOW (self),
                                       GTK_WIDGET (toolbar));
 
-  gtk_window_set_title (GTK_WINDOW (self), "Nuvasha Launcher");
+  gtk_window_set_title (GTK_WINDOW (self), _("Nuvasha Launcher"));
   gtk_window_set_default_size (GTK_WINDOW (self), 960, 640);
 
   /* A download may already be running (a window opened while one does),

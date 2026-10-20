@@ -15,8 +15,8 @@ on_create_instance (GSimpleAction *action G_GNUC_UNUSED,
                     gpointer       user_data)
 {
   NuvashaMainWindow *self = nuvasha_MAIN_WINDOW (user_data);
-  GtkWidget *dialog = GTK_WIDGET (
-    nuvasha_create_instance_dialog_new (self->model->manager, self->model->settings));
+  NuvashaCreateInstanceDialog *dialog =
+    nuvasha_create_instance_dialog_new (self->model->manager, self->model->settings);
 
   adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
 }
@@ -27,8 +27,8 @@ on_download_modpack (GSimpleAction *action G_GNUC_UNUSED,
                      gpointer       user_data)
 {
   NuvashaMainWindow *self = nuvasha_MAIN_WINDOW (user_data);
-  GtkWidget *dialog = GTK_WIDGET (nuvasha_download_modpack_dialog_new (
-    self->model->manager));
+  NuvashaDownloadModpackDialog *dialog =
+    nuvasha_download_modpack_dialog_new (self->model->manager);
 
   adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
 }
@@ -64,8 +64,8 @@ on_import_modpack_chosen (GObject *source, GAsyncResult *result,
         return;
       }
 
-    GtkWidget *dialog = GTK_WIDGET (
-      nuvasha_download_modpack_dialog_new_for_file (self->model->manager, path));
+    NuvashaDownloadModpackDialog *dialog =
+      nuvasha_download_modpack_dialog_new_for_file (self->model->manager, path);
 
     /* Import runs as a background install: its NuvashaDownload entry appears
      * beside the + button just like a downloaded modpack. */
@@ -116,7 +116,7 @@ on_show_snapshots_toggled (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
     return;
 
   adw_switch_row_set_active (row, stored);
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (row)), error->message);
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), error->message);
 }
 
 /* Written the moment the value changes. A spin row can produce a value
@@ -322,7 +322,7 @@ on_clear_cache_clicked (GtkButton *button G_GNUC_UNUSED,
 {
   NuvashaMainWindow *self = nuvasha_MAIN_WINDOW (user_data);
   AdwAlertDialog *alert = ADW_ALERT_DIALOG (
-    adw_alert_dialog_new (_("Clear nuvasha Cache?"), NULL));
+    adw_alert_dialog_new (_("Clear Nuvasha Cache?"), NULL));
 
   adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
   adw_alert_dialog_add_response (alert, "clear", _("Clear"));
@@ -355,7 +355,7 @@ on_cache_cleared (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   if (success)
     alert = ADW_ALERT_DIALOG (
       adw_alert_dialog_new (_("Cache Cleared"),
-                            _("nuvasha cache data was cleared successfully.")));
+                            _("Nuvasha cache data was cleared successfully.")));
   else
     alert = ADW_ALERT_DIALOG (
       adw_alert_dialog_new (_("Cache Cleanup Failed"),
@@ -364,7 +364,7 @@ on_cache_cleared (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   adw_alert_dialog_set_heading_use_markup (alert, FALSE);
   adw_alert_dialog_set_body_use_markup (alert, FALSE);
-  adw_alert_dialog_add_response (alert, "ok", "OK");
+  adw_alert_dialog_add_response (alert, "ok", _("OK"));
   adw_alert_dialog_set_default_response (alert, "ok");
   adw_alert_dialog_set_close_response (alert, "ok");
   adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (self));
@@ -408,7 +408,7 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   AdwPreferencesGroup *sandbox_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwComboRow *language_row = ADW_COMBO_ROW (adw_combo_row_new ());
   AdwSwitchRow *row = ADW_SWITCH_ROW (adw_switch_row_new ());
-  GtkWidget *limit_row = NULL;
+  AdwSpinRow *limit_row = NULL;
   AdwSwitchRow *unstable_row = ADW_SWITCH_ROW (adw_switch_row_new ());
   AdwSwitchRow *crash_row = ADW_SWITCH_ROW (adw_switch_row_new ());
   AdwSwitchRow *cache_api_row = ADW_SWITCH_ROW (adw_switch_row_new ());
@@ -421,95 +421,95 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
 
   /* Every one of these rows can show a path or an error message from
      GIO, which is plain text and may hold an "&". */
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (row)), FALSE);
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (unstable_row)),
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (unstable_row),
                                       FALSE);
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (crash_row)), FALSE);
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (cache_api_row)), FALSE);
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (cache_expiration_row)), FALSE);
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (clear_cache_row)), FALSE);
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (export_metadata_row)), FALSE);
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (delete_dependents_row)), FALSE);
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (sandbox_row)), FALSE);
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (GTK_WIDGET (sandbox_network_row)), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (crash_row), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (cache_api_row), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (cache_expiration_row), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (clear_cache_row), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (export_metadata_row), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (delete_dependents_row), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (sandbox_row), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (sandbox_network_row), FALSE);
 
   adw_dialog_set_title (dialog, _("Settings"));
   adw_preferences_dialog_set_search_enabled (ADW_PREFERENCES_DIALOG (dialog),
                                              FALSE);
 
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (GTK_WIDGET (versions_group)),
+  adw_preferences_group_set_title (versions_group,
                                      _("Versions"));
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (GTK_WIDGET (general_group)),
+  adw_preferences_group_set_title (general_group,
                                    _("General"));
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (GTK_WIDGET (sandbox_group)),
+  adw_preferences_group_set_title (sandbox_group,
                                    _("Sandbox"));
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (export_metadata_row)),
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (export_metadata_row),
                                   _("Ask for export metadata"));
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (GTK_WIDGET (export_metadata_row)),
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (export_metadata_row),
                                _("Show name, summary and version fields before exporting."));
-  adw_switch_row_set_active (ADW_SWITCH_ROW (GTK_WIDGET (export_metadata_row)),
+  adw_switch_row_set_active (ADW_SWITCH_ROW (export_metadata_row),
                              nuvasha_settings_get_export_metadata (self->model->settings));
    g_signal_connect (export_metadata_row, "notify::active",
                      G_CALLBACK (on_export_metadata_toggled), self);
-   adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (general_group)),
+   adw_preferences_group_add (general_group,
                                 GTK_WIDGET (export_metadata_row));
 
    adw_preferences_row_set_title (
-     ADW_PREFERENCES_ROW (GTK_WIDGET (delete_dependents_row)),
+     ADW_PREFERENCES_ROW (delete_dependents_row),
      _("Deleting a dependency deletes the mod that depended on it"));
    adw_switch_row_set_active (
      delete_dependents_row,
      nuvasha_settings_get_delete_dependents (self->model->settings));
    g_signal_connect (delete_dependents_row, "notify::active",
                     G_CALLBACK (on_delete_dependents_toggled), self);
-   adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (general_group)),
+   adw_preferences_group_add (general_group,
                                 GTK_WIDGET (delete_dependents_row));
 
-   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (sandbox_row)),
+   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (sandbox_row),
                                    _("Enable sandbox"));
    adw_switch_row_set_active (
      sandbox_row, nuvasha_settings_get_sandbox_enabled (self->model->settings));
    g_signal_connect (sandbox_row, "notify::active",
                      G_CALLBACK (on_sandbox_toggled), self);
-   adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (sandbox_group)),
+   adw_preferences_group_add (sandbox_group,
                                GTK_WIDGET (sandbox_row));
 
    adw_preferences_row_set_title (
-     ADW_PREFERENCES_ROW (GTK_WIDGET (sandbox_network_row)),
+     ADW_PREFERENCES_ROW (sandbox_network_row),
      _("Allow sandbox network access"));
    adw_switch_row_set_active (
      sandbox_network_row,
      nuvasha_settings_get_sandbox_network_enabled (self->model->settings));
    g_signal_connect (sandbox_network_row, "notify::active",
                      G_CALLBACK (on_sandbox_network_toggled), self);
-   adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (sandbox_group)),
+   adw_preferences_group_add (sandbox_group,
                                GTK_WIDGET (sandbox_network_row));
 
-   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (row)),
+   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
                                   _("Show unstable Minecraft versions"));
-  adw_switch_row_set_active (ADW_SWITCH_ROW (GTK_WIDGET (row)),
+  adw_switch_row_set_active (ADW_SWITCH_ROW (row),
                              nuvasha_settings_get_show_snapshots (self->model->settings));
 
   /* Connected after the value was set, so opening the dialog never
    * writes anything by itself. */
   g_signal_connect (row, "notify::active",
                     G_CALLBACK (on_show_snapshots_toggled), self);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (versions_group)), GTK_WIDGET (row));
+  adw_preferences_group_add (versions_group, GTK_WIDGET (row));
 
   /* The loader versions live under the same choice: both say what the
      version lists hold. */
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (unstable_row)),
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (unstable_row),
                                   _("Show unstable Mod Loader versions"));
   adw_switch_row_set_active (
     ADW_SWITCH_ROW (unstable_row),
     nuvasha_settings_get_show_unstable_loaders (self->model->settings));
   g_signal_connect (unstable_row, "notify::active",
                     G_CALLBACK (on_show_unstable_loaders_toggled), self);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (versions_group)),
+  adw_preferences_group_add (versions_group,
                               GTK_WIDGET (unstable_row));
 
   /* Logs */
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (GTK_WIDGET (logs_group)),
+  adw_preferences_group_set_title (logs_group,
                                    _("Logs"));
 
   {
@@ -526,52 +526,52 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
           selected = (guint) i;
       }
 
-    adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (GTK_WIDGET (language_group)),
+    adw_preferences_group_set_title (language_group,
                                      _("Language"));
-    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (language_row)),
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (language_row),
                                    _("Interface language"));
-    adw_combo_row_set_model (ADW_COMBO_ROW (GTK_WIDGET (language_row)),
+    adw_combo_row_set_model (ADW_COMBO_ROW (language_row),
                              G_LIST_MODEL (model));
-    adw_combo_row_set_selected (ADW_COMBO_ROW (GTK_WIDGET (language_row)), selected);
+    adw_combo_row_set_selected (ADW_COMBO_ROW (language_row), selected);
     g_signal_connect (language_row, "notify::selected",
                       G_CALLBACK (on_language_selected), self);
-    adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (language_group)),
+    adw_preferences_group_add (language_group,
                                 GTK_WIDGET (language_row));
     g_object_unref (model);
   }
 
-  limit_row = adw_spin_row_new (
+  limit_row = ADW_SPIN_ROW (adw_spin_row_new (
     gtk_adjustment_new (nuvasha_settings_get_log_line_limit (self->model->settings), 100,
                         100000, 500, 5000, 0),
-    0, 0);
-  adw_spin_row_set_digits (ADW_SPIN_ROW (limit_row), 0);
-  adw_spin_row_set_numeric (ADW_SPIN_ROW (limit_row), TRUE);
+    0, 0));
+  adw_spin_row_set_digits (limit_row, 0);
+  adw_spin_row_set_numeric (limit_row, TRUE);
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (limit_row), FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (limit_row),
                                   _("Line Limit"));
   g_signal_connect (limit_row, "notify::value",
                     G_CALLBACK (on_log_limit_changed), self);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (logs_group)), limit_row);
+  adw_preferences_group_add (logs_group, GTK_WIDGET (limit_row));
 
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (crash_row)),
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (crash_row),
                                   _("Open Log Folder After Crash"));
   adw_switch_row_set_active (
     ADW_SWITCH_ROW (crash_row),
     nuvasha_settings_get_open_logs_after_crash (self->model->settings));
   g_signal_connect (crash_row, "notify::active",
                     G_CALLBACK (on_open_logs_after_crash_toggled), self);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (logs_group)), GTK_WIDGET (crash_row));
+  adw_preferences_group_add (logs_group, GTK_WIDGET (crash_row));
 
-  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (GTK_WIDGET (cache_group)),
+  adw_preferences_group_set_title (cache_group,
                                     _("Cache"));
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (cache_api_row)),
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (cache_api_row),
                                   _("Cache Modrinth API responses"));
   adw_switch_row_set_active (
     ADW_SWITCH_ROW (cache_api_row),
     nuvasha_settings_get_cache_modrinth_api_responses (self->model->settings));
   g_signal_connect (cache_api_row, "notify::active",
                     G_CALLBACK (on_cache_modrinth_api_responses_toggled), self);
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (cache_group)), GTK_WIDGET (cache_api_row));
+  adw_preferences_group_add (cache_group, GTK_WIDGET (cache_api_row));
 
   {
     GtkStringList *model = gtk_string_list_new (NULL);
@@ -592,45 +592,45 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
         if (values[i] == current)
           selected = i;
       }
-    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (cache_expiration_row)),
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (cache_expiration_row),
                                     _("Cache expiration"));
-    adw_combo_row_set_model (ADW_COMBO_ROW (GTK_WIDGET (cache_expiration_row)),
+    adw_combo_row_set_model (ADW_COMBO_ROW (cache_expiration_row),
                              G_LIST_MODEL (model));
-    adw_combo_row_set_selected (ADW_COMBO_ROW (GTK_WIDGET (cache_expiration_row)), selected);
+    adw_combo_row_set_selected (ADW_COMBO_ROW (cache_expiration_row), selected);
     g_signal_connect (cache_expiration_row, "notify::selected",
                       G_CALLBACK (on_cache_expiration_selected), self);
-    adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (cache_group)),
+    adw_preferences_group_add (cache_group,
                                 GTK_WIDGET (cache_expiration_row));
     g_object_unref (model);
   }
 
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (GTK_WIDGET (clear_cache_row)),
-                                  _("Clear nuvasha Cache"));
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (clear_cache_row),
+                                  _("Clear Nuvasha Cache"));
   {
     GtkButton *button = GTK_BUTTON (gtk_button_new_from_icon_name ("user-trash-symbolic"));
     gtk_widget_add_css_class (GTK_WIDGET (button), "flat");
-    gtk_widget_set_tooltip_text (GTK_WIDGET (button), _("Clear nuvasha Cache"));
-    gtk_accessible_update_property (GTK_ACCESSIBLE (GTK_WIDGET (button)),
+    gtk_widget_set_tooltip_text (GTK_WIDGET (button), _("Clear Nuvasha Cache"));
+    gtk_accessible_update_property (GTK_ACCESSIBLE (button),
                                     GTK_ACCESSIBLE_PROPERTY_LABEL,
-                                    _("Clear nuvasha Cache"), -1);
+                                    _("Clear Nuvasha Cache"), -1);
     g_signal_connect (button, "clicked", G_CALLBACK (on_clear_cache_clicked),
                       self);
-    adw_action_row_add_suffix (ADW_ACTION_ROW (GTK_WIDGET (clear_cache_row)), GTK_WIDGET (button));
+    adw_action_row_add_suffix (clear_cache_row, GTK_WIDGET (button));
   }
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (GTK_WIDGET (cache_group)), GTK_WIDGET (clear_cache_row));
+  adw_preferences_group_add (cache_group, GTK_WIDGET (clear_cache_row));
 
-  adw_preferences_page_add (ADW_PREFERENCES_PAGE (GTK_WIDGET (page)),
-                             ADW_PREFERENCES_GROUP (general_group));
-  adw_preferences_page_add (ADW_PREFERENCES_PAGE (GTK_WIDGET (page)),
-                             ADW_PREFERENCES_GROUP (versions_group));
-  adw_preferences_page_add (ADW_PREFERENCES_PAGE (GTK_WIDGET (page)),
-                             ADW_PREFERENCES_GROUP (logs_group));
-  adw_preferences_page_add (ADW_PREFERENCES_PAGE (GTK_WIDGET (page)),
-                             ADW_PREFERENCES_GROUP (language_group));
-  adw_preferences_page_add (ADW_PREFERENCES_PAGE (GTK_WIDGET (page)),
-                             ADW_PREFERENCES_GROUP (cache_group));
-  adw_preferences_page_add (ADW_PREFERENCES_PAGE (GTK_WIDGET (page)),
-                             ADW_PREFERENCES_GROUP (sandbox_group));
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+                             general_group);
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+                             versions_group);
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+                             logs_group);
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+                             language_group);
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+                             cache_group);
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+                             sandbox_group);
   adw_preferences_dialog_add (ADW_PREFERENCES_DIALOG (dialog),
                               ADW_PREFERENCES_PAGE (page));
 

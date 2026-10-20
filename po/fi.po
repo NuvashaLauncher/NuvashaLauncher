@@ -136,7 +136,7 @@ msgid "Java"
 msgstr "Java"
 
 msgid "Java Runtime"
-msgstr "Java Runtime"
+msgstr "Java-ajoympäristö"
 
 msgid "No Java installation was found on this system"
 msgstr "Tästä järjestelmästä ei löytynyt Java-asennusta"
@@ -193,7 +193,7 @@ msgid "No compatible %s version found for Minecraft %s."
 msgstr "Minecraftille %s ei löytynyt yhteensopivaa %s-versiota."
 
 msgid "Loader"
-msgstr "Loader"
+msgstr "Lataaja"
 
 msgid "Loader Version"
 msgstr "Loader-versio"
@@ -232,7 +232,7 @@ msgid "Keyboard Shortcuts"
 msgstr "Pikanäppäimet"
 
 msgid "Stop"
-msgstr "Stop"
+msgstr "Pysähdy"
 
 msgid "Play"
 msgstr "Pelata"
@@ -348,17 +348,11 @@ msgstr "1 päivä"
 msgid "7 days"
 msgstr "7 päivää"
 
-msgid "Clear nuvasha Cache"
-msgstr "Tyhjennä nuvasha-välimuisti"
-
 msgid "Show Shortcuts"
 msgstr "Näytä pikakuvakkeet"
 
 msgid "Quit"
 msgstr "Lopettaa"
-
-msgid "Clear nuvasha Cache?"
-msgstr "Tyhjennä nuvasha-välimuisti?"
 
 msgid "Import Modpack"
 msgstr "Tuo Modpack"
@@ -367,7 +361,7 @@ msgid "Modpack exported"
 msgstr "Modpack vietiin"
 
 msgid "Modrinth Modpacks (*.mrpack)"
-msgstr "Modrinth Modpacks (*.mrpack)"
+msgstr "Modrinth-modipaketit (*.mrpack)"
 
 msgid "The export location is not a local file"
 msgstr "Vientisijainti ei ole paikallinen tiedosto"
@@ -523,9 +517,6 @@ msgstr "%s latausta"
 msgid "Cache Cleared"
 msgstr "Välimuisti tyhjennetty"
 
-msgid "nuvasha cache data was cleared successfully."
-msgstr "nuvasha-välimuistin tiedot tyhjennettiin onnistuneesti."
-
 msgid "Cache Cleanup Failed"
 msgstr "Välimuistin puhdistus epäonnistui"
 
@@ -584,19 +575,16 @@ msgid "Slim model"
 msgstr "Ohut malli"
 
 msgid "OK"
-msgstr "OK"
+msgstr "Selvä"
 
 msgid "Export skin…"
 msgstr "Vie ihoa…"
-
-msgid "Imported skin"
-msgstr "Tuotu iho"
 
 msgid "Default model"
 msgstr "Oletusmalli"
 
 msgid "PNG skin texture"
-msgstr "PNG-ihon rakenne"
+msgstr "PNG-kuvan pintarakenne"
 
 msgid "Invalid skin"
 msgstr "Virheellinen iho"
@@ -615,3 +603,257 @@ msgstr "Tämä iho poistetaan ihokirjastosta."
 
 msgid "Skin images must be 64x64 or 64x32 PNG files"
 msgstr "Skin kuvien tulee olla 64 x 64 tai 64 x 32 PNG-tiedostoja"
+
+msgid "Bahasa Indonesia"
+msgstr "Bahasa Indonesia"
+
+msgid "Browse Modpacks"
+msgstr "Selaa modpaketteja"
+
+msgid "Cancel"
+msgstr "Peruuta"
+
+msgid "Choose Files"
+msgstr "Valitse tiedostot"
+
+msgid "Clear Nuvasha Cache"
+msgstr "Tyhjennä Nuvashan välimuisti"
+
+msgid "Clear Nuvasha Cache?"
+msgstr "Tyhjennetäänkö Nuvashan välimuisti?"
+
+msgid ""
+"Conflicts\n"
+msgstr ""
+"Konfliktit\n"
+
+msgid "Content"
+msgstr "Sisältö"
+
+msgid "Could not install"
+msgstr "Asennusta ei voitu suorittaa"
+
+msgid "Could not install the modpack"
+msgstr "Modpakettia ei voitu asentaa"
+
+msgid "Could not load categories"
+msgstr "Kategorioita ei voitu ladata"
+
+msgid "Could not search Modrinth"
+msgstr "Modrinthia ei löytynyt"
+
+msgid "Could not understand the answer"
+msgstr "En ymmärtänyt vastausta"
+
+msgid "Dansk"
+msgstr "Dansk"
+
+msgid "Deutsch"
+msgstr "Deutsch"
+
+msgid "Disable"
+msgstr "Poista käytöstä"
+
+msgid "Dismiss"
+msgstr "Hylkää"
+
+msgid "Enable"
+msgstr "Ota käyttöön"
+
+msgid "English"
+msgstr "English"
+
+msgid "Español (Argentina)"
+msgstr "Español (Argentina)"
+
+msgid "Español (España)"
+msgstr "Español (España)"
+
+msgid "Fabric"
+msgstr "Fabric"
+
+msgid "Forge"
+msgstr "Forge"
+
+msgid "Français"
+msgstr "Français"
+
+msgid "Images"
+msgstr "Kuvat"
+
+msgid "Installing"
+msgstr "Asennus"
+
+msgid "Instances cannot contain %s in their name"
+msgstr "Nimissä%s ei saa esiintyä"
+
+msgid "It carries files that Nuvasha does not recognize."
+msgstr "Siinä on tiedostoja, joita Nuvasha ei tunnista."
+
+msgid "Italiano"
+msgstr "Italiano"
+
+msgid "Magyar"
+msgstr "Magyar"
+
+msgid "Microsoft"
+msgstr "Microsoft"
+
+msgid "Microsoft returned an unsafe verification address"
+msgstr "Microsoft palautti epäluotettavan vahvistusosoitteen"
+
+msgid "Microsoft would not give a code to sign in with"
+msgstr "Microsoft ei antanut koodia, jolla olisi voinut kirjautua sisään"
+
+msgid "Microsoft · Needs sign-in"
+msgstr "Microsoft · Kirjautuminen vaaditaan"
+
+msgid "Modrinth does not know this file"
+msgstr "Modrinth ei tunne tätä tiedostoa"
+
+msgid "Modrinth is asking Nuvasha to slow down, too many requests"
+msgstr "Modrinth pyytää Nuvashaa hidastamaan vauhtia, pyyntöjä on liikaa"
+
+msgid "Nederlands"
+msgstr "Nederlands"
+
+msgid "NeoForge"
+msgstr "NeoForge"
+
+msgid "No compatible Java runtime was found."
+msgstr "Yhteensopivaa Java-ajoympäristöä ei löytynyt."
+
+msgid "No modpack matches what was asked for. Try another word"
+msgstr "Yhtään modpakettia ei löytynyt haetun mukaisena. Kokeile toista hakusanaa"
+
+msgid "None"
+msgstr "Ei mitään"
+
+msgid "Norsk (bokmål)"
+msgstr "Norsk (bokmål)"
+
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"
+
+msgid "Nuvasha cache data was cleared successfully."
+msgstr "Nuvashan välimuistitiedot tyhjennettiin onnistuneesti."
+
+msgid "Offline"
+msgstr "Offline"
+
+msgid "Pick a Minecraft version from the list."
+msgstr "Valitse Minecraft-versio luettelosta."
+
+msgid "Pick a version of the loader, or pick another loader."
+msgstr "Valitse latausohjelman versio tai valitse toinen latausohjelma."
+
+msgid "Polski"
+msgstr "Polski"
+
+msgid "Português (Brasil)"
+msgstr "Português (Brasil)"
+
+msgid "Português (Portugal)"
+msgstr "Português (Portugal)"
+
+msgid "Quilt"
+msgstr "Quilt"
+
+msgid "Remove %s?"
+msgstr "Poista%s?"
+
+msgid "Română"
+msgstr "Română"
+
+msgid "Search Modrinth and install a modpack"
+msgstr "Etsi Modrinth ja asenna modipaketti"
+
+msgid "Skin"
+msgstr "Iho"
+
+msgid "Stop %s?"
+msgstr "Pysähdytäänkö%s?"
+
+msgid "Suomi"
+msgstr "Suomi"
+
+msgid "Svenska"
+msgstr "Svenska"
+
+msgid "System default"
+msgstr "Järjestelmän oletusasetus"
+
+msgid "The account is removed from Nuvasha and its saved sign-in is forgotten. The game itself is not touched."
+msgstr "Tili poistetaan Nuvashasta ja sen tallennetut kirjautumistiedot nollataan. Itse peliin ei tehdä muutoksia."
+
+msgid "The game is running and will close. Progress since the last save is lost."
+msgstr "Peli on käynnissä ja sulkeutuu. Edistyksesi viimeisimmän tallennuksen jälkeen menetetään."
+
+msgid "This project publishes no pack file Nuvasha can install."
+msgstr "Tämä projekti ei julkaise mitään pakettitiedostoa, jonka Nuvasha voisi asentaa."
+
+msgid "This version has no pack file"
+msgstr "Tässä versiossa ei ole pakettitiedostoa"
+
+msgid "Tiếng Việt"
+msgstr "Tiếng Việt"
+
+msgid "Türkçe"
+msgstr "Türkçe"
+
+msgid "Unavailable"
+msgstr "Ei saatavilla"
+
+msgid "Vanilla"
+msgstr "Vanilla"
+
+msgid "Xbox Live is not available for the country this account is registered in"
+msgstr "Xbox Live ei ole käytettävissä siinä maassa, johon tämä tili on rekisteröity"
+
+msgid "the game"
+msgstr "peli"
+
+msgid "the instance name cannot be used as a directory name"
+msgstr "instanssin nimeä ei voi käyttää hakemiston nimenä"
+
+msgid "the instance name is empty"
+msgstr "instanssin nimi on tyhjä"
+
+msgid "the sign-in did not finish"
+msgstr "kirjautuminen ei onnistunut"
+
+msgid "this Microsoft account has no Xbox profile behind it yet: sign in to xbox.com once with it, then sign in here again"
+msgstr "Tähän Microsoft-tiliin ei ole vielä liitetty Xbox-profiilia: kirjaudu sillä kerran sisään osoitteessa xbox.com ja kirjaudu sitten uudelleen sisään täällä"
+
+msgid "this account"
+msgstr "tämä tili"
+
+msgid "this account needs an adult to verify it before it can play, which is what South Korean accounts have to do"
+msgstr "Tämä tili vaatii aikuisen vahvistuksen ennen kuin sillä voi pelata, mikä on sama menettely kuin Etelä-Korean tileillä"
+
+msgid "this is a child account: it has to be added to a Microsoft family by an adult before it can play"
+msgstr "Tämä on lapsitili: aikuisen on lisättävä se Microsoft-perheeseen, ennen kuin lapsi voi pelata"
+
+msgid "Čeština"
+msgstr "Čeština"
+
+msgid "Русский"
+msgstr "Русский"
+
+msgid "Українська"
+msgstr "Українська"
+
+msgid "العربية"
+msgstr "العربية"
+
+msgid "日本語"
+msgstr "日本語"
+
+msgid "简体中文"
+msgstr "简体中文"
+
+msgid "繁體中文"
+msgstr "繁體中文"
+
+msgid "한국어"
+msgstr "한국어"
