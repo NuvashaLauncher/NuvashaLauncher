@@ -14,8 +14,7 @@
     </clipPath>
   </defs>
 
-  <g transform="translate(16 16)">
-    <g transform="scale(1.0)">
+  <g transform="scale(1.3333333)">
       <path d="M26 20Q44 24 64 20Q84 24 102 20Q110 18 108 26Q104 44 108 64Q104 84 108 102Q110 110 102 108Q84 104 64 108Q44 104 26 108Q18 110 20 102Q24 84 20 64Q24 44 20 26Q18 18 26 20Z" fill="#7774a5"/>
       <g clip-path="url(#fabric)">
         <path d="M16 16H112V112H16Z" fill="#c3c6ea"/>
@@ -27,9 +26,8 @@
       <path d="M52 52Q62 56 64 62Q66 56 76 52Q72 62 66 64Q72 66 76 76Q66 72 64 66Q62 72 52 76Q56 66 62 64Q56 62 52 52Z" fill="#b18fa8"/>
       <circle cx="64" cy="66" r="6" fill="#7774a5"/>
       <circle cx="64" cy="64" r="6" fill="#f5e8cd"/>
-    </g>
   </g>
 
   <text x="168" y="91" class="wordmark" font-size="76" letter-spacing="1">nuvasha</text>
-  <text x="172" y="130" class="subtitle" font-size="31" letter-spacing="8">LAUNCHER</text>
+  <text x="172" y="130" class="subtitle" font-size="31" letter-spacing="6">launcher</text>
 </svg>
