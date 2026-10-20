@@ -564,6 +564,9 @@ on_trash_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 GtkWidget *
 file_row (NuvashaContentPage *self, NuvashaContentFile *file)
 {
+  g_return_val_if_fail (nuvasha_IS_CONTENT_PAGE (self), NULL);
+  g_return_val_if_fail (file != NULL, NULL);
+
   AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
   GtkWidget *icon = nuvasha_icon_widget_new (nuvasha_content_type_icon (self->type));
 
