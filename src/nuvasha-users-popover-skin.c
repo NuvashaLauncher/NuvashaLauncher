@@ -480,15 +480,21 @@ on_export_skin_clicked (GtkButton *button, gpointer user_data)
   GtkListBoxRow *row = gtk_list_box_get_selected_row (menu->skins);
   const char *url;
   GtkFileDialog *dialog;
+  g_autoptr (GFile) source_file = NULL;
+  g_autofree char *initial_name = NULL;
 
   if (row == NULL ||
       (url = g_object_get_data (G_OBJECT (row), "nuvasha-skin-url")) == NULL)
     return;
+  source_file = g_file_new_for_uri (url);
+  initial_name = g_file_get_basename (source_file);
   dialog = gtk_file_dialog_new ();
-  gtk_file_dialog_set_initial_name (dialog, "skin.png");
+  gtk_file_dialog_set_initial_name (
+    dialog, initial_name != NULL && *initial_name != '\0'
+              ? initial_name : "skin.png");
   gtk_file_dialog_save (dialog,
                         GTK_WINDOW (gtk_widget_get_root (GTK_WIDGET (button))),
-                        NULL, on_export_skin_chosen, g_file_new_for_uri (url));
+                        NULL, on_export_skin_chosen, g_object_ref (source_file));
   g_object_unref (dialog);
 }
 
