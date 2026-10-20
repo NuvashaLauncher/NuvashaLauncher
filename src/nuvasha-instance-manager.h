@@ -62,15 +62,7 @@ char *nuvasha_instance_manager_default_directory (NuvashaInstanceManager *self,
 /* The registered instance with this id, or NULL. Borrowed from the
  * store. */
 NuvashaInstance *nuvasha_instance_manager_get_by_id (NuvashaInstanceManager *self,
-                                              const char *id);
-
-/* Moves @instance immediately before or after @target and persists the new
- * order in instances.json. */
-gboolean nuvasha_instance_manager_move (NuvashaInstanceManager *self,
-                                        NuvashaInstance *instance,
-                                        NuvashaInstance *target,
-                                        gboolean after,
-                                        GError **error);
+                                             const char *id);
 
  /* Creates an instance and registers it. @directory is the directory the
   * user picked; NULL derives it from the unique name under
