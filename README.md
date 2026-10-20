@@ -2,8 +2,10 @@
   <img alt="Nuvasha Launcher" src="data/nuvasha-logo.svg" width="40%">
 </p>
 
-Nuvasha Launcher is a simple Minecraft launcher that aims to make instance
-management easy without leaving out the features that matter.
+<p align="center">
+  Nuvasha Launcher is a simple Minecraft launcher that aims to make instance<br>
+  management easy without leaving out the features that matter.
+</p>
 
 ## Features
 
@@ -14,7 +16,9 @@ management easy without leaving out the features that matter.
 - `.mrpack` import and export with verified downloads and safe archive handling.
 - Optional bubblewrap sandboxing for the game process.
 
-## Dependencies
+## Installation
+
+### Dependencies
 
 - C17-compatible compiler (GCC is used by default)
 - GNU Make
@@ -28,7 +32,7 @@ management easy without leaving out the features that matter.
 - libsoup
 - libarchive
 
-Debian:
+#### Debian
 
 ```sh
 sudo apt install build-essential pkg-config gettext \
@@ -36,7 +40,7 @@ sudo apt install build-essential pkg-config gettext \
     libjson-glib-dev libsoup-3.0-dev libarchive-dev
 ```
 
-Fedora:
+#### Fedora
 
 ```sh
 sudo dnf install gcc make gettext pkgconf-pkg-config \
@@ -44,7 +48,7 @@ sudo dnf install gcc make gettext pkgconf-pkg-config \
     json-glib-devel libsoup3-devel libarchive-devel
 ```
 
-openSUSE:
+#### openSUSE
 
 ```sh
 sudo zypper install gcc make gettext-tools pkg-config glib2-devel \
@@ -52,14 +56,14 @@ sudo zypper install gcc make gettext-tools pkg-config glib2-devel \
     libsoup-devel libarchive-devel
 ```
 
-Arch:
+#### Arch
 
 ```sh
 sudo pacman -S base-devel gettext pkgconf gtk4 libadwaita libepoxy \
     json-glib libsoup libarchive
 ```
 
-Gentoo:
+#### Gentoo
 
 ```sh
 sudo emerge --ask sys-devel/gcc sys-devel/gettext dev-build/make \
@@ -68,14 +72,14 @@ sudo emerge --ask sys-devel/gcc sys-devel/gettext dev-build/make \
     app-arch/libarchive
 ```
 
-NixOS:
+#### NixOS
 
 ```sh
 nix-shell -p gcc gnumake gettext pkg-config glib gtk4 libadwaita libepoxy \
     json-glib libsoup libarchive
 ```
 
-## Build and install
+## Building from source
 
 ```sh
 git clone https://github.com/NuvashaLauncher/NuvashaLauncher.git NuvashaLauncher
@@ -90,6 +94,16 @@ To uninstall it:
 
 ```sh
 sudo make uninstall PREFIX=/usr/local
+```
+
+## Development
+
+Useful local checks:
+
+```sh
+make fast
+make static-analysis
+make test
 ```
 
 ## License
