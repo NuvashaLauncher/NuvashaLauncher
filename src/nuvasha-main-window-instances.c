@@ -328,52 +328,15 @@ on_instance_drag_prepare (GtkDragSource *source G_GNUC_UNUSED,
                            double y G_GNUC_UNUSED,
                            gpointer user_data)
 {
-  GtkWidget *handle = user_data;
-  NuvashaInstance *instance = g_object_get_data (
-    G_OBJECT (handle), "nuvasha-instance");
   GValue value = G_VALUE_INIT;
   GdkContentProvider *provider = NULL;
 
   g_value_init (&value, nuvasha_TYPE_INSTANCE);
-  g_value_set_object (&value, instance);
+  g_value_set_object (&value, user_data);
   provider = gdk_content_provider_new_for_value (&value);
   g_value_unset (&value);
 
   return provider;
-}
-
-static void
-on_instance_drag_begin (GtkDragSource *source,
-                        GdkDrag *drag G_GNUC_UNUSED,
-                        gpointer user_data)
-{
-  GtkWidget *handle = user_data;
-  GtkWidget *row = g_object_get_data (G_OBJECT (handle),
-                                      "nuvasha-instance-row");
-  GdkPaintable *paintable = NULL;
-
-  if (row == NULL)
-    return;
-
-  paintable = gtk_widget_paintable_new (row);
-  gtk_drag_source_set_icon (source, paintable, 16,
-                            gtk_widget_get_height (row) / 2);
-  g_object_unref (paintable);
-  gtk_widget_set_opacity (row, 0.45);
-}
-
-static void
-on_instance_drag_end (GtkDragSource *source G_GNUC_UNUSED,
-                      GdkDrag *drag G_GNUC_UNUSED,
-                      gboolean delete_data G_GNUC_UNUSED,
-                      gpointer user_data)
-{
-  GtkWidget *handle = user_data;
-  GtkWidget *row = g_object_get_data (G_OBJECT (handle),
-                                      "nuvasha-instance-row");
-
-  if (row != NULL)
-    gtk_widget_set_opacity (row, 1.0);
 }
 
 static gboolean
@@ -478,17 +441,11 @@ create_instance_row (gpointer item, gpointer user_data)
 
   gtk_drag_source_set_actions (drag_source, GDK_ACTION_MOVE);
   g_signal_connect (drag_source, "prepare",
-                    G_CALLBACK (on_instance_drag_prepare), handle);
-  g_signal_connect (drag_source, "drag-begin",
-                    G_CALLBACK (on_instance_drag_begin), handle);
-  g_signal_connect (drag_source, "drag-end",
-                    G_CALLBACK (on_instance_drag_end), handle);
+                    G_CALLBACK (on_instance_drag_prepare), instance);
   gtk_widget_add_controller (GTK_WIDGET (handle),
                              GTK_EVENT_CONTROLLER (drag_source));
 
   g_object_set_data (G_OBJECT (row), "nuvasha-instance", instance);
-  g_object_set_data (G_OBJECT (handle), "nuvasha-instance", instance);
-  g_object_set_data (G_OBJECT (handle), "nuvasha-instance-row", row);
   drop_target = gtk_drop_target_new (nuvasha_TYPE_INSTANCE, GDK_ACTION_MOVE);
   g_object_set_data (G_OBJECT (drop_target), "nuvasha-instance-row", row);
   g_signal_connect (drop_target, "drop", G_CALLBACK (on_instance_drop), self);
