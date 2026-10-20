@@ -96,16 +96,6 @@ To uninstall it:
 sudo make uninstall PREFIX=/usr/local
 ```
 
-## Development
-
-Useful local checks:
-
-```sh
-make fast
-make static-analysis
-make test
-```
-
 ## License
 
 Nuvasha is free software released under the GNU General Public License,
