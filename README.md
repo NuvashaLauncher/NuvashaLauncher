@@ -1,14 +1,6 @@
-<table align="center">
-  <tr>
-    <td>
-      <img src="data/icons/scalable/apps/com.github.nuvashalauncher.nuvasha.svg" alt="Nuvasha logo" width="144">
-    </td>
-    <td>
-      <h1>nuvasha</h1>
-      <h2>launcher</h2>
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <img src="data/nuvasha-logo.svg" alt="Nuvasha Launcher" width="480">
+</p>
 
 Nuvasha Launcher is a simple Minecraft launcher that aims to make instance
 management easy without leaving out the features that matter.
