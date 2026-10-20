@@ -729,7 +729,7 @@ msgid "Installing"
 msgstr "Installazione"
 
 msgid "Instances cannot contain %s in their name"
-msgstr "Le istanze non possono contenere  %snel proprio nome"
+msgstr "Le istanze non possono contenere %s nel proprio nome"
 
 msgid "It carries files that Nuvasha does not recognize."
 msgstr "Contiene file che Nuvasha non riconosce."
@@ -801,7 +801,7 @@ msgid "Quilt"
 msgstr "Quilt"
 
 msgid "Remove %s?"
-msgstr "Rimuovi%s?"
+msgstr "Rimuovi %s?"
 
 msgid "Română"
 msgstr "Română"
@@ -810,7 +810,7 @@ msgid "Search Modrinth and install a modpack"
 msgstr "Cerca Modrinth e installa un modpack"
 
 msgid "Stop %s?"
-msgstr "Basta%s?"
+msgstr "Basta %s?"
 
 msgid "Suomi"
 msgstr "Suomi"

@@ -682,7 +682,7 @@ msgid "Installing"
 msgstr "Instalação"
 
 msgid "Instances cannot contain %s in their name"
-msgstr "As instâncias não podem conter  %sno seu nome"
+msgstr "As instâncias não podem conter %s no seu nome"
 
 msgid "It carries files that Nuvasha does not recognize."
 msgstr "Contém ficheiros que o Nuvasha não reconhece."
@@ -757,7 +757,7 @@ msgid "Quilt"
 msgstr "Quilt"
 
 msgid "Remove %s?"
-msgstr "Remover%s?"
+msgstr "Remover %s?"
 
 msgid "Română"
 msgstr "Română"
@@ -769,7 +769,7 @@ msgid "Skin"
 msgstr "Pele"
 
 msgid "Stop %s?"
-msgstr "Parar%s?"
+msgstr "Parar %s?"
 
 msgid "Suomi"
 msgstr "Suomi"

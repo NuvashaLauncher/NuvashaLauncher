@@ -726,7 +726,7 @@ msgid "Installing"
 msgstr "Встановлення"
 
 msgid "Instances cannot contain %s in their name"
-msgstr "Інстанції не можуть містити %sу своїй назві"
+msgstr "Інстанції не можуть містити %s у своїй назві"
 
 msgid "It carries files that Nuvasha does not recognize."
 msgstr "У ньому містяться файли, які Nuvasha не розпізнає."
@@ -798,7 +798,7 @@ msgid "Quilt"
 msgstr "Quilt"
 
 msgid "Remove %s?"
-msgstr "Видалити%s?"
+msgstr "Видалити %s?"
 
 msgid "Română"
 msgstr "Română"
@@ -807,7 +807,7 @@ msgid "Search Modrinth and install a modpack"
 msgstr "Знайдіть Modrinth та встановіть модпак"
 
 msgid "Stop %s?"
-msgstr "Стоп%s?"
+msgstr "Стоп %s?"
 
 msgid "Suomi"
 msgstr "Suomi"

@@ -731,7 +731,7 @@ msgid "Installing"
 msgstr "Installation"
 
 msgid "Instances cannot contain %s in their name"
-msgstr "Les instances ne peuvent pas contenir  %sdans leur nom"
+msgstr "Les instances ne peuvent pas contenir %s dans leur nom"
 
 msgid "It carries files that Nuvasha does not recognize."
 msgstr "Il contient des fichiers que Nuvasha ne reconnaît pas."

@@ -682,7 +682,7 @@ msgid "Installing"
 msgstr "Menginstal"
 
 msgid "Instances cannot contain %s in their name"
-msgstr "Nama instance tidak boleh mengandung%s"
+msgstr "Nama instance tidak boleh mengandung %s"
 
 msgid "It carries files that Nuvasha does not recognize."
 msgstr "File-file tersebut tidak dikenali oleh Nuvasha."
@@ -769,7 +769,7 @@ msgid "Skin"
 msgstr "Kulit"
 
 msgid "Stop %s?"
-msgstr "Berhenti%s?"
+msgstr "Berhenti %s?"
 
 msgid "Suomi"
 msgstr "Suomi"
