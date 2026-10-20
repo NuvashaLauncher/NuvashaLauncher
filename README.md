@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="data/nuvasha-logo.svg" alt="Nuvasha Launcher" width="480">
+  <img alt="Nuvasha Launcher" src="data/nuvasha-logo.svg" width="40%">
 </p>
 
 Nuvasha Launcher is a simple Minecraft launcher that aims to make instance
