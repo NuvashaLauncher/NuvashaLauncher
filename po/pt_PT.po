@@ -580,8 +580,8 @@ msgstr "Tudo bem"
 msgid "Export skin…"
 msgstr "Exportar skin…"
 
-msgid "Default model"
-msgstr "Modelo padrão"
+msgid "Classic model"
+msgstr "Modelo clássico"
 
 msgid "PNG skin texture"
 msgstr "Textura de pele em formato PNG"

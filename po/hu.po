@@ -580,8 +580,8 @@ msgstr "RENDBEN"
 msgid "Export skin…"
 msgstr "Bőr exportálása…"
 
-msgid "Default model"
-msgstr "Alapértelmezett modell"
+msgid "Classic model"
+msgstr "Klasszikus modell"
 
 msgid "PNG skin texture"
 msgstr "PNG bőrtextúra"

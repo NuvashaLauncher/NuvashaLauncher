@@ -588,8 +588,8 @@ msgstr "نعم"
 msgid "Export skin…"
 msgstr "تصدير الجلد..."
 
-msgid "Default model"
-msgstr "النموذج الافتراضي"
+msgid "Classic model"
+msgstr "النموذج الكلاسيكي"
 
 msgid "PNG skin texture"
 msgstr "نسيج بشرة PNG"

@@ -616,8 +616,8 @@ msgid "Export skin…"
 msgstr "スキンをエクスポート…"
 
 # UI string
-msgid "Default model"
-msgstr "標準モデル"
+msgid "Classic model"
+msgstr "クラシックモデル"
 
 # UI string
 msgid "PNG skin texture"

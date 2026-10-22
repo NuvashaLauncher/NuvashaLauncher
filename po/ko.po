@@ -615,8 +615,8 @@ msgid "Export skin…"
 msgstr "스킨 내보내기…"
 
 # UI string
-msgid "Default model"
-msgstr "기본 모델"
+msgid "Classic model"
+msgstr "클래식 모델"
 
 # UI string
 msgid "PNG skin texture"

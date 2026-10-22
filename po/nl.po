@@ -619,8 +619,8 @@ msgid "Export skin…"
 msgstr "Skin exporteren…"
 
 # UI string
-msgid "Default model"
-msgstr "Standaardmodel"
+msgid "Classic model"
+msgstr "Klassiek model"
 
 # UI string
 msgid "PNG skin texture"

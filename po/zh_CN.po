@@ -610,8 +610,8 @@ msgid "Export skin…"
 msgstr "导出皮肤…"
 
 # UI string
-msgid "Default model"
-msgstr "默认模型"
+msgid "Classic model"
+msgstr "经典模型"
 
 # UI string
 msgid "PNG skin texture"

@@ -623,7 +623,7 @@ msgid "Export skin…"
 msgstr "Exporter le skin…"
 
 # UI string
-msgid "Default model"
+msgid "Classic model"
 msgstr "Modèle classique"
 
 # UI string

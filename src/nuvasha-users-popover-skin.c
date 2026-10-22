@@ -144,14 +144,17 @@ on_skin_upload_done (GObject *source, GAsyncResult *result, gpointer user_data)
   SoupMessage *message = g_object_get_data (G_OBJECT (source), "nuvasha-skin-message");
   if (response == NULL || message == NULL || soup_message_get_status (message) >= 300)
     {
+      guint status = message != NULL ? soup_message_get_status (message) : 0;
       gsize length = 0;
       const char *body = response != NULL ? g_bytes_get_data (response, &length) : NULL;
       g_autofree char *body_text = body != NULL ? g_strndup (body, length) : NULL;
       g_warning ("Could not upload Minecraft skin (HTTP %u): %s%s%s",
-                 message != NULL ? soup_message_get_status (message) : 0,
+                 status,
                  error != NULL ? error->message : "server rejected the request",
                  body != NULL && length > 0 ? ": " : "",
                  body_text != NULL && length > 0 ? body_text : "");
+      if (menu != NULL && status == 429)
+        menu->skin_upload_retry_after = g_get_real_time () / 1000000 + 15;
     }
   if (menu != NULL)
     menu->skin_upload_in_flight = FALSE;
@@ -217,9 +220,6 @@ upload_skin_url (SkinMenu *menu, const char *url)
   if (menu->account == NULL || menu->account->access_token == NULL ||
       !nuvasha_account_token_is_valid (menu->account, g_get_real_time () / 1000000))
     return;
-  if (menu->skin_upload_in_flight)
-    return;
-  menu->skin_upload_in_flight = TRUE;
   session = soup_session_new_with_options ("user-agent", SKIN_API_USER_AGENT, NULL);
   message = soup_message_new (SOUP_METHOD_POST,
                               "https://api.minecraftservices.com/minecraft/profile/skins");
@@ -268,9 +268,11 @@ upload_selected_skin (SkinMenu *menu, const char *url)
     return;
   if (menu->skin_upload_in_flight)
     return;
+  if (menu->skin_upload_retry_after > g_get_real_time () / 1000000)
+    return;
+  menu->skin_upload_in_flight = TRUE;
   if (!g_str_has_prefix (url, "file://"))
     {
-      menu->skin_upload_in_flight = TRUE;
       upload_skin_url (menu, url);
       return;
     }
@@ -589,8 +591,16 @@ on_active_skin_delete_done (GObject *source, GAsyncResult *result,
                                             "nuvasha-delete-skin-message");
 
   if (bytes == NULL || message == NULL || soup_message_get_status (message) >= 300)
-    g_warning ("Could not delete active Minecraft skin: %s",
-               error != NULL ? error->message : "server rejected the request");
+    {
+      gsize length = 0;
+      const char *body = bytes != NULL ? g_bytes_get_data (bytes, &length) : NULL;
+      g_autofree char *body_text = body != NULL ? g_strndup (body, length) : NULL;
+      g_warning ("Could not delete active Minecraft skin (HTTP %u): %s%s%s",
+                 message != NULL ? soup_message_get_status (message) : 0,
+                 error != NULL ? error->message : "server rejected the request",
+                 body_text != NULL && length > 0 ? ": " : "",
+                 body_text != NULL && length > 0 ? body_text : "");
+    }
 }
 
 static void
@@ -952,7 +962,7 @@ nuvasha_users_skin_menu_new (NuvashaUsersPopover *owner, GtkImage *image, Nuvash
   GtkListBox *skins = GTK_LIST_BOX (gtk_list_box_new ());
   NuvashaSkinView *preview = nuvasha_skin_view_new ();
   GtkCheckButton *default_model = GTK_CHECK_BUTTON (
-    gtk_check_button_new_with_label (_("Default model")));
+    gtk_check_button_new_with_label (_("Classic model")));
   GtkCheckButton *slim_model = GTK_CHECK_BUTTON (
     gtk_check_button_new_with_label (_("Slim model")));
   GtkStringList *cape_list = gtk_string_list_new ((const char *[]) { _("No cape"), NULL });

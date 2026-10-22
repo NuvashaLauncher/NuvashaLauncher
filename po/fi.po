@@ -580,8 +580,8 @@ msgstr "Selvä"
 msgid "Export skin…"
 msgstr "Vie ihoa…"
 
-msgid "Default model"
-msgstr "Oletusmalli"
+msgid "Classic model"
+msgstr "Klassinen malli"
 
 msgid "PNG skin texture"
 msgstr "PNG-kuvan pintarakenne"
