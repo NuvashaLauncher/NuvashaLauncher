@@ -33,6 +33,8 @@ nuvasha_account_free (NuvashaAccount *account)
   g_free (account->access_token);
   g_free (account->refresh_token);
   g_free (account->avatar_url);
+  g_free (account->skin_model);
+  g_free (account->cape_id);
   g_free (account);
 }
 
@@ -51,6 +53,8 @@ nuvasha_account_copy (const NuvashaAccount *account)
   copy->access_token = g_strdup (account->access_token);
   copy->refresh_token = g_strdup (account->refresh_token);
   copy->avatar_url = g_strdup (account->avatar_url);
+  copy->skin_model = g_strdup (account->skin_model);
+  copy->cape_id = g_strdup (account->cape_id);
 
   return copy;
 }
@@ -224,6 +228,18 @@ account_to_json (JsonBuilder *builder, const NuvashaAccount *account)
   else
     json_builder_add_null_value (builder);
 
+  json_builder_set_member_name (builder, "skin-model");
+  if (account->skin_model != NULL)
+    json_builder_add_string_value (builder, account->skin_model);
+  else
+    json_builder_add_null_value (builder);
+
+  json_builder_set_member_name (builder, "cape-id");
+  if (account->cape_id != NULL)
+    json_builder_add_string_value (builder, account->cape_id);
+  else
+    json_builder_add_null_value (builder);
+
   json_builder_end_object (builder);
 }
 
@@ -271,6 +287,8 @@ account_from_json (JsonObject *object)
   account->access_token = string_member (object, "access-token");
   account->refresh_token = string_member (object, "refresh-token");
   account->avatar_url = string_member (object, "avatar");
+  account->skin_model = string_member (object, "skin-model");
+  account->cape_id = string_member (object, "cape-id");
 
   {
     JsonNode *node = json_object_get_member (object, "expires-at");
@@ -622,6 +640,8 @@ nuvasha_accounts_add (NuvashaAccounts *self, const NuvashaAccount *account, GErr
       g_clear_pointer (&known->access_token, g_free);
       g_clear_pointer (&known->refresh_token, g_free);
       g_clear_pointer (&known->avatar_url, g_free);
+      g_clear_pointer (&known->skin_model, g_free);
+      g_clear_pointer (&known->cape_id, g_free);
       known->type = replacement->type;
       known->id = g_steal_pointer (&replacement->id);
       known->name = g_steal_pointer (&replacement->name);
@@ -630,6 +650,8 @@ nuvasha_accounts_add (NuvashaAccounts *self, const NuvashaAccount *account, GErr
       known->expires_at = replacement->expires_at;
       known->refresh_token = g_steal_pointer (&replacement->refresh_token);
       known->avatar_url = g_steal_pointer (&replacement->avatar_url);
+      known->skin_model = g_steal_pointer (&replacement->skin_model);
+      known->cape_id = g_steal_pointer (&replacement->cape_id);
       nuvasha_account_free (replacement);
     }
   else

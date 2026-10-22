@@ -5,6 +5,8 @@
 #include "nuvasha-i18n.h"
 #include <libsoup/soup.h>
 
+#define SKIN_API_USER_AGENT "NuvashaLauncher/" nuvasha_VERSION
+
 #define AVATAR_SIZE 40
 
 /* A skin is a picture of 64 by 64 and the face of it is 8 by 8 of that,
@@ -24,6 +26,22 @@ typedef struct
   gboolean cape;
   char *url;
 } SkinTextureLoad;
+
+static void on_active_skin_delete_done (GObject *, GAsyncResult *, gpointer);
+static void change_cape_on_server (SkinMenu *, const char *);
+static void upload_selected_skin (SkinMenu *, const char *);
+
+static void
+save_cape_choice (SkinMenu *menu)
+{
+  g_autoptr (NuvashaAccount) account = NULL;
+  g_autoptr (GError) error = NULL;
+  if (menu->owner == NULL || menu->account == NULL)
+    return;
+  account = nuvasha_account_copy (menu->account);
+  if (!nuvasha_accounts_update (menu->owner->accounts, account, &error) && error != NULL)
+    g_warning ("Could not save cape choice: %s", error->message);
+}
 
 static void
 skin_texture_load_free (SkinTextureLoad *load)
@@ -101,6 +119,168 @@ load_view_texture (NuvashaSkinView *view, const char *url, gboolean cape)
   g_file_load_bytes_async (file, NULL, on_view_texture_loaded, load);
 }
 
+typedef struct {
+  SkinMenu *menu;
+  char *url;
+} SkinUpload;
+
+static void
+skin_upload_free (SkinUpload *upload)
+{
+  g_free (upload->url);
+  g_free (upload);
+}
+
+static void
+on_skin_upload_done (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  SkinUpload *upload = user_data;
+  SkinMenu *menu = upload != NULL ? upload->menu
+                                  : g_object_get_data (G_OBJECT (source),
+                                                        "nuvasha-skin-menu");
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GBytes) response =
+    soup_session_send_and_read_finish (SOUP_SESSION (source), result, &error);
+  SoupMessage *message = g_object_get_data (G_OBJECT (source), "nuvasha-skin-message");
+  if (response == NULL || message == NULL || soup_message_get_status (message) >= 300)
+    {
+      gsize length = 0;
+      const char *body = response != NULL ? g_bytes_get_data (response, &length) : NULL;
+      g_autofree char *body_text = body != NULL ? g_strndup (body, length) : NULL;
+      g_warning ("Could not upload Minecraft skin (HTTP %u): %s%s%s",
+                 message != NULL ? soup_message_get_status (message) : 0,
+                 error != NULL ? error->message : "server rejected the request",
+                 body != NULL && length > 0 ? ": " : "",
+                 body_text != NULL && length > 0 ? body_text : "");
+    }
+  if (menu != NULL)
+    menu->skin_upload_in_flight = FALSE;
+  if (upload != NULL)
+    skin_upload_free (upload);
+}
+
+static void
+send_skin_upload (SkinUpload *upload, GBytes *bytes)
+{
+  SoupSession *session = soup_session_new_with_options ("user-agent", SKIN_API_USER_AGENT, NULL);
+  SoupMessage *message = soup_message_new (SOUP_METHOD_POST,
+    "https://api.minecraftservices.com/minecraft/profile/skins");
+  g_autofree char *authorization =
+    g_strconcat ("Bearer ", upload->menu->account->access_token, NULL);
+  g_autofree char *content_type = NULL;
+  g_autoptr (GBytes) body = NULL;
+  GByteArray *payload = g_byte_array_new ();
+  const char *boundary = "------------------------NuvashaSkin";
+  const char *variant = upload->menu->slim_model != NULL &&
+                        gtk_check_button_get_active (upload->menu->slim_model)
+                          ? "SLIM" : "CLASSIC";
+  gsize length = 0;
+  gconstpointer data = g_bytes_get_data (bytes, &length);
+
+  /* Do not use SoupMultipart here. Its generated 64-character boundary is
+   * rejected by the Minecraft services edge, while the same form with a
+   * conventional boundary is accepted (and is what Prism/curl send). */
+  g_byte_array_append (payload, (const guint8 *) "--", 2);
+  g_byte_array_append (payload, (const guint8 *) boundary, strlen (boundary));
+  g_byte_array_append (payload, (const guint8 *) "\r\nContent-Disposition: form-data; name=\"file\"; filename=\"skin.png\"\r\nContent-Type: image/png\r\n\r\n",
+                       strlen ("\r\nContent-Disposition: form-data; name=\"file\"; filename=\"skin.png\"\r\nContent-Type: image/png\r\n\r\n"));
+  g_byte_array_append (payload, data, length);
+  g_byte_array_append (payload, (const guint8 *) "\r\n--", 4);
+  g_byte_array_append (payload, (const guint8 *) boundary, strlen (boundary));
+  g_byte_array_append (payload, (const guint8 *) "\r\nContent-Disposition: form-data; name=\"variant\"\r\n\r\n",
+                       strlen ("\r\nContent-Disposition: form-data; name=\"variant\"\r\n\r\n"));
+  g_byte_array_append (payload, (const guint8 *) variant, strlen (variant));
+  g_byte_array_append (payload, (const guint8 *) "\r\n--", 4);
+  g_byte_array_append (payload, (const guint8 *) boundary, strlen (boundary));
+  g_byte_array_append (payload, (const guint8 *) "--\r\n", 4);
+  body = g_byte_array_free_to_bytes (payload);
+  content_type = g_strdup_printf ("multipart/form-data; boundary=%s", boundary);
+  soup_message_set_request_body_from_bytes (message, content_type, body);
+  soup_message_headers_replace (soup_message_get_request_headers (message),
+                                "Authorization", authorization);
+  g_object_set_data_full (G_OBJECT (session), "nuvasha-skin-message", message,
+                          g_object_unref);
+  g_object_set_data (G_OBJECT (session), "nuvasha-skin-menu", upload->menu);
+  soup_session_send_and_read_async (session, message, G_PRIORITY_DEFAULT, NULL,
+                                    on_skin_upload_done, upload);
+  g_object_unref (session);
+}
+
+static void
+upload_skin_url (SkinMenu *menu, const char *url)
+{
+  SoupSession *session;
+  SoupMessage *message;
+  g_autofree char *authorization = NULL;
+  g_autofree char *json = NULL;
+
+  if (menu->account == NULL || menu->account->access_token == NULL ||
+      !nuvasha_account_token_is_valid (menu->account, g_get_real_time () / 1000000))
+    return;
+  if (menu->skin_upload_in_flight)
+    return;
+  menu->skin_upload_in_flight = TRUE;
+  session = soup_session_new_with_options ("user-agent", SKIN_API_USER_AGENT, NULL);
+  message = soup_message_new (SOUP_METHOD_POST,
+                              "https://api.minecraftservices.com/minecraft/profile/skins");
+  authorization = g_strconcat ("Bearer ", menu->account->access_token, NULL);
+  json = g_strdup_printf ("{\"url\":\"%s\",\"variant\":\"%s\"}", url,
+    menu->slim_model != NULL && gtk_check_button_get_active (menu->slim_model)
+      ? "SLIM" : "CLASSIC");
+  soup_message_headers_replace (soup_message_get_request_headers (message),
+                                "Authorization", authorization);
+  soup_message_set_request_body_from_bytes (message, "application/json",
+                                            g_bytes_new (json, strlen (json)));
+  g_object_set_data_full (G_OBJECT (session), "nuvasha-skin-message", message,
+                          g_object_unref);
+  g_object_set_data (G_OBJECT (session), "nuvasha-skin-menu", menu);
+  soup_session_send_and_read_async (session, message, G_PRIORITY_DEFAULT, NULL,
+                                    on_skin_upload_done, NULL);
+  g_object_unref (session);
+}
+
+static void
+on_skin_upload_file_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  SkinUpload *upload = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GBytes) bytes =
+    g_file_load_bytes_finish (G_FILE (source), result, NULL, &error);
+  if (bytes == NULL)
+    {
+      g_warning ("Could not read skin for upload: %s", error->message);
+      upload->menu->skin_upload_in_flight = FALSE;
+      skin_upload_free (upload);
+      return;
+    }
+  send_skin_upload (upload, bytes);
+}
+
+static void
+upload_selected_skin (SkinMenu *menu, const char *url)
+{
+  g_autoptr (GFile) file = NULL;
+  SkinUpload *upload;
+  if (menu->account == NULL || menu->account->access_token == NULL || url == NULL ||
+      !nuvasha_account_token_is_valid (menu->account, g_get_real_time () / 1000000) ||
+      (!g_str_has_prefix (url, "file://") &&
+       !(g_str_has_prefix (url, "http://") || g_str_has_prefix (url, "https://"))))
+    return;
+  if (menu->skin_upload_in_flight)
+    return;
+  if (!g_str_has_prefix (url, "file://"))
+    {
+      menu->skin_upload_in_flight = TRUE;
+      upload_skin_url (menu, url);
+      return;
+    }
+  file = g_file_new_for_uri (url);
+  upload = g_new0 (SkinUpload, 1);
+  upload->menu = menu;
+  upload->url = g_strdup (url);
+  g_file_load_bytes_async (file, NULL, on_skin_upload_file_loaded, upload);
+}
+
 static void
 on_capes_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
 {
@@ -173,19 +353,74 @@ on_cape_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
   if (selected == 0 || selected - 1 >= menu->cape_urls->len)
     {
       nuvasha_skin_view_set_cape (menu->view, NULL);
+      g_free (menu->account->cape_id);
+      menu->account->cape_id = NULL;
+      save_cape_choice (menu);
+      change_cape_on_server (menu, NULL);
       return;
     }
   load_view_texture (menu->view,
                      g_ptr_array_index (menu->cape_urls, selected - 1), TRUE);
+  g_free (menu->account->cape_id);
+  menu->account->cape_id = g_strdup (g_ptr_array_index (menu->cape_ids, selected - 1));
+  save_cape_choice (menu);
+  change_cape_on_server (menu, menu->account->cape_id);
+}
+
+static void
+change_cape_on_server (SkinMenu *menu, const char *cape_id)
+{
+  SoupSession *session;
+  SoupMessage *message;
+  g_autofree char *authorization = NULL;
+  g_autofree char *json = NULL;
+
+  if (menu->account == NULL || menu->account->access_token == NULL ||
+      !nuvasha_account_token_is_valid (menu->account, g_get_real_time () / 1000000))
+    return;
+  session = soup_session_new_with_options ("user-agent", SKIN_API_USER_AGENT, NULL);
+  message = soup_message_new (cape_id != NULL ? SOUP_METHOD_PUT : SOUP_METHOD_DELETE,
+                              "https://api.minecraftservices.com/minecraft/profile/capes/active");
+  authorization = g_strconcat ("Bearer ", menu->account->access_token, NULL);
+  soup_message_headers_replace (soup_message_get_request_headers (message),
+                                "Authorization", authorization);
+  if (cape_id != NULL)
+    {
+      json = g_strdup_printf ("{\"capeId\":\"%s\"}", cape_id);
+      soup_message_set_request_body_from_bytes (message, "application/json",
+                                                g_bytes_new (json, strlen (json)));
+    }
+  g_object_set_data_full (G_OBJECT (session), "nuvasha-delete-skin-message",
+                          message, g_object_unref);
+  soup_session_send_and_read_async (session, message, G_PRIORITY_DEFAULT, NULL,
+                                    on_active_skin_delete_done, NULL);
+  g_object_unref (session);
 }
 
 static void
 on_model_toggled (GtkCheckButton *button, gpointer user_data)
 {
   SkinMenu *menu = user_data;
-  if (gtk_check_button_get_active (button))
+  if (gtk_check_button_get_active (button) && !menu->applying_profile)
     nuvasha_skin_view_set_slim (menu->view,
                             g_object_get_data (G_OBJECT (button), "nuvasha-slim") != NULL);
+
+  if (gtk_check_button_get_active (button) && !menu->applying_profile &&
+      menu->account != NULL && menu->owner != NULL)
+    {
+      g_autoptr (NuvashaAccount) account = nuvasha_account_copy (menu->account);
+      g_autoptr (GError) error = NULL;
+      g_free (account->skin_model);
+      account->skin_model = g_strdup (menu->slim_model == button ? "SLIM" : "CLASSIC");
+      if (!nuvasha_accounts_update (menu->owner->accounts, account, &error) && error != NULL)
+        g_warning ("Could not save skin model: %s", error->message);
+      {
+        GtkListBoxRow *row = gtk_list_box_get_selected_row (menu->skins);
+        const char *url = row != NULL
+          ? g_object_get_data (G_OBJECT (row), "nuvasha-skin-url") : NULL;
+        upload_selected_skin (menu, url);
+      }
+    }
 }
 
 static void
@@ -201,7 +436,7 @@ load_capes (SkinMenu *menu)
       !nuvasha_account_token_is_valid (menu->account, g_get_real_time () / 1000000))
     return;
 
-  session = soup_session_new_with_options ("user-agent", "nuvasha", NULL);
+  session = soup_session_new_with_options ("user-agent", SKIN_API_USER_AGENT, NULL);
   message = soup_message_new (SOUP_METHOD_GET,
                               "https://api.minecraftservices.com/minecraft/profile");
   token = menu->account->access_token;
@@ -368,7 +603,7 @@ delete_active_skin (SkinMenu *menu)
   if (menu->account == NULL || menu->account->type != nuvasha_ACCOUNT_MICROSOFT ||
       menu->account->access_token == NULL)
     return;
-  session = soup_session_new_with_options ("user-agent", "nuvasha", NULL);
+  session = soup_session_new_with_options ("user-agent", SKIN_API_USER_AGENT, NULL);
   message = soup_message_new (SOUP_METHOD_DELETE,
                               "https://api.minecraftservices.com/minecraft/profile/skins/active");
   authorization = g_strconcat ("Bearer ", menu->account->access_token, NULL);
@@ -531,7 +766,12 @@ on_skin_selected (GtkListBox *list, GtkListBoxRow *row, gpointer user_data)
       g_autoptr (GError) error = NULL;
       g_free (account->avatar_url);
       account->avatar_url = g_strdup (url);
+      g_free (account->skin_model);
+      account->skin_model = g_strdup (menu->slim_model != NULL &&
+                                      gtk_check_button_get_active (menu->slim_model)
+                                        ? "SLIM" : "CLASSIC");
       nuvasha_accounts_update (menu->owner->accounts, account, &error);
+      upload_selected_skin (menu, url);
     }
 }
 
@@ -630,12 +870,9 @@ append_profile_skins (SkinMenu *menu, const char *json)
           g_autofree char *identity = skin_name_for_url (url);
           if (is_default_skin_alias (alias))
             {
-              if (menu->current_skin_row != NULL)
-                {
-                  gtk_list_box_remove (menu->skins,
-                                       GTK_WIDGET (menu->current_skin_row));
-                  menu->current_skin_row = NULL;
-                }
+              /* The bundled Steve/Alex entries are already in the local
+               * library. Never remove the currently selected local/imported
+               * row merely because the profile also advertises a default. */
               continue;
             }
           if (g_hash_table_contains (menu->skin_urls, identity))
@@ -687,7 +924,7 @@ load_profile_skins (SkinMenu *menu)
 
   if (menu->account == NULL || menu->account->access_token == NULL)
     return;
-  session = soup_session_new_with_options ("user-agent", "nuvasha", NULL);
+  session = soup_session_new_with_options ("user-agent", SKIN_API_USER_AGENT, NULL);
   message = soup_message_new (SOUP_METHOD_GET,
                               "https://api.minecraftservices.com/minecraft/profile");
   authorization = g_strconcat ("Bearer ", menu->account->access_token, NULL);
@@ -741,6 +978,8 @@ nuvasha_users_skin_menu_new (NuvashaUsersPopover *owner, GtkImage *image, Nuvash
   data->capes = capes;
   data->account = account;
   data->remove_button = remove;
+  data->default_model = default_model;
+  data->slim_model = slim_model;
   g_object_set_data (G_OBJECT (preview), "nuvasha-deleted-skin-ids",
                      data->deleted_skin_ids);
   g_object_set_data (G_OBJECT (slim_model), "nuvasha-slim", GINT_TO_POINTER (1));
@@ -762,7 +1001,20 @@ nuvasha_users_skin_menu_new (NuvashaUsersPopover *owner, GtkImage *image, Nuvash
   gtk_widget_set_vexpand (GTK_WIDGET (preview), TRUE);
   gtk_widget_set_size_request (GTK_WIDGET (preview), 220, 300);
   gtk_check_button_set_group (slim_model, default_model);
-  gtk_check_button_set_active (default_model, TRUE);
+  data->applying_profile = TRUE;
+  gtk_check_button_set_active (default_model,
+                               g_ascii_strcasecmp (account->skin_model != NULL
+                                                     ? account->skin_model : "CLASSIC",
+                                                   "SLIM") != 0);
+  gtk_check_button_set_active (slim_model,
+                               g_ascii_strcasecmp (account->skin_model != NULL
+                                                     ? account->skin_model : "CLASSIC",
+                                                   "SLIM") == 0);
+  nuvasha_skin_view_set_slim (preview,
+                              g_ascii_strcasecmp (account->skin_model != NULL
+                                                    ? account->skin_model : "CLASSIC",
+                                                  "SLIM") == 0);
+  data->applying_profile = FALSE;
   gtk_widget_add_css_class (GTK_WIDGET (remove), "destructive-action");
   gtk_widget_set_hexpand (GTK_WIDGET (export), FALSE);
   gtk_widget_set_hexpand (GTK_WIDGET (import), FALSE);

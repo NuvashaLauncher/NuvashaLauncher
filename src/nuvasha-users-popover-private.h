@@ -40,6 +40,10 @@ typedef struct
   GHashTable *skin_urls;
   AdwActionRow *current_skin_row;
   GtkButton *remove_button;
+  GtkCheckButton *default_model;
+  GtkCheckButton *slim_model;
+  gboolean applying_profile;
+  gboolean skin_upload_in_flight;
   gboolean defaults_added;
   SoupMessage *profile_message;
   SoupMessage *cape_message;
