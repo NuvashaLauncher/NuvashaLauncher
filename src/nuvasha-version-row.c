@@ -363,7 +363,7 @@ nuvasha_version_row_init (NuvashaVersionRow *self)
   gtk_widget_add_css_class (GTK_WIDGET (self->retry), "flat");
   gtk_widget_set_valign (GTK_WIDGET (self->retry), GTK_ALIGN_CENTER);
   gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
-  g_signal_connect (self->retry, "clicked", G_CALLBACK (on_retry_clicked),
-                    self);
+  g_signal_connect_object (self->retry, "clicked", G_CALLBACK (on_retry_clicked),
+                           self, 0);
   adw_action_row_add_suffix (ADW_ACTION_ROW (self), GTK_WIDGET (self->retry));
 }

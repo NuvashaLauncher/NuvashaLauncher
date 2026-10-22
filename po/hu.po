@@ -864,3 +864,6 @@ msgstr "A Minecraft Services elutasította a kérést (HTTP %u)%s%s"
 
 msgid "Minecraft Services error"
 msgstr "Minecraft Services-hiba"
+
+msgid "Application menu"
+msgstr "Application menu"

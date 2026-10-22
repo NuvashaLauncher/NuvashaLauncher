@@ -866,3 +866,6 @@ msgstr "Minecraft Services požadavek odmítly (HTTP %u)%s%s"
 
 msgid "Minecraft Services error"
 msgstr "Chyba Minecraft Services"
+
+msgid "Application menu"
+msgstr "Application menu"

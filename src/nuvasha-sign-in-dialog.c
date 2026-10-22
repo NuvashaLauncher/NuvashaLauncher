@@ -305,8 +305,8 @@ nuvasha_sign_in_dialog_init (NuvashaSignInDialog *self)
   gtk_widget_add_css_class (GTK_WIDGET (self->open_button), "suggested-action");
   gtk_widget_set_halign (GTK_WIDGET (self->open_button), GTK_ALIGN_CENTER);
   gtk_widget_set_visible (GTK_WIDGET (self->open_button), FALSE);
-  g_signal_connect (self->open_button, "clicked", G_CALLBACK (on_open_clicked),
-                    self);
+  g_signal_connect_object (self->open_button, "clicked", G_CALLBACK (on_open_clicked),
+                           self, 0);
 
   /* The address the code is entered at, for a user who would rather open
      the page themselves than follow the button. */
@@ -341,8 +341,8 @@ nuvasha_sign_in_dialog_init (NuvashaSignInDialog *self)
   gtk_widget_add_css_class (GTK_WIDGET (self->retry_button), "flat");
   gtk_widget_set_halign (GTK_WIDGET (self->retry_button), GTK_ALIGN_CENTER);
   gtk_widget_set_visible (GTK_WIDGET (self->retry_button), FALSE);
-  g_signal_connect (self->retry_button, "clicked",
-                    G_CALLBACK (on_retry_clicked), self);
+  g_signal_connect_object (self->retry_button, "clicked",
+                           G_CALLBACK (on_retry_clicked), self, 0);
 
   body = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
   gtk_widget_set_margin_start (GTK_WIDGET (body), 24);

@@ -529,7 +529,7 @@ button_row (AdwPreferencesGroup *group,
   gtk_accessible_update_property (GTK_ACCESSIBLE (button),
                                 GTK_ACCESSIBLE_PROPERTY_LABEL, title, -1);
 
-  g_signal_connect (button, "clicked", callback, user_data);
+  g_signal_connect_object (button, "clicked", callback, user_data, 0);
 
   adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (button));
   adw_action_row_set_activatable_widget (ADW_ACTION_ROW (row), GTK_WIDGET (button));
@@ -581,7 +581,7 @@ create_settings_page (NuvashaInstancePage *self)
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (name_row), _("Name"));
   adw_entry_row_set_show_apply_button (ADW_ENTRY_ROW (name_row), TRUE);
   gtk_editable_set_text (GTK_EDITABLE (name_row), name);
-  g_signal_connect (name_row, "apply", G_CALLBACK (on_name_apply), self);
+  g_signal_connect_object (name_row, "apply", G_CALLBACK (on_name_apply), self, 0);
   adw_preferences_group_add (general, GTK_WIDGET (name_row));
 
   self->icon_row = ADW_ACTION_ROW (adw_action_row_new ());
@@ -595,8 +595,8 @@ create_settings_page (NuvashaInstancePage *self)
   gtk_widget_add_css_class (change_icon, "flat");
   gtk_widget_set_valign (change_icon, GTK_ALIGN_CENTER);
    gtk_widget_set_tooltip_text (change_icon, _("Choose an Icon"));
-  g_signal_connect (change_icon, "clicked",
-                    G_CALLBACK (on_change_icon_clicked), self);
+  g_signal_connect_object (change_icon, "clicked",
+                           G_CALLBACK (on_change_icon_clicked), self, 0);
   adw_action_row_add_suffix (ADW_ACTION_ROW (self->icon_row), change_icon);
   adw_action_row_set_activatable_widget (ADW_ACTION_ROW (self->icon_row),
                                          change_icon);
@@ -616,8 +616,8 @@ create_settings_page (NuvashaInstancePage *self)
   gtk_widget_add_css_class (GTK_WIDGET (self->directory_change), "flat");
   gtk_widget_set_valign (GTK_WIDGET (self->directory_change), GTK_ALIGN_CENTER);
    gtk_widget_set_tooltip_text (GTK_WIDGET (self->directory_change), _("Change the Directory"));
-  g_signal_connect (self->directory_change, "clicked",
-                    G_CALLBACK (on_change_directory_clicked), self);
+   g_signal_connect_object (self->directory_change, "clicked",
+                            G_CALLBACK (on_change_directory_clicked), self, 0);
 
   self->directory_spinner = ADW_SPINNER (adw_spinner_new ());
   gtk_widget_set_valign (GTK_WIDGET (self->directory_spinner), GTK_ALIGN_CENTER);
@@ -638,8 +638,8 @@ create_settings_page (NuvashaInstancePage *self)
    * in the list even when the filter would hide its type. */
   adw_preferences_group_set_title (minecraft,
                                     _("Minecraft"));
-  g_signal_connect (version_row, "notify::selected",
-                    G_CALLBACK (on_version_selected), self);
+  g_signal_connect_object (version_row, "notify::selected",
+                           G_CALLBACK (on_version_selected), self, 0);
   nuvasha_version_row_load (nuvasha_VERSION_ROW (version_row), self->settings,
                         minecraft_version);
   adw_preferences_group_add (minecraft, version_row);
@@ -654,8 +654,8 @@ create_settings_page (NuvashaInstancePage *self)
   }
 
   self->loader_row = nuvasha_loader_row_new ();
-  g_signal_connect (self->loader_row, "changed",
-                    G_CALLBACK (on_loader_changed), self);
+  g_signal_connect_object (self->loader_row, "changed",
+                           G_CALLBACK (on_loader_changed), self, 0);
   nuvasha_loader_row_load (self->loader_row, self->settings,
                        self->loader, self->loader_version, minecraft_version);
 
@@ -675,8 +675,8 @@ create_settings_page (NuvashaInstancePage *self)
 
   adw_preferences_group_set_title (java, _("Java"));
 
-  g_signal_connect (java_row, "notify::selected",
-                    G_CALLBACK (on_java_selected), self);
+  g_signal_connect_object (java_row, "notify::selected",
+                           G_CALLBACK (on_java_selected), self, 0);
   /* Known before the scan lands, so the first fill already names the
      runtime the automatic choice stands for and leaves it out of the
      list. The required version is not known yet and is set once the

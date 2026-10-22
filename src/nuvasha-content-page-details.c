@@ -310,8 +310,8 @@ details_content (NuvashaContentPage *self)
                                   GTK_ACCESSIBLE_PROPERTY_LABEL,
                                   _("Install this version with the selected "
                                     "ones"), -1);
-  g_signal_connect (self->project.details_check, "toggled",
-                    G_CALLBACK (on_version_picked), self);
+  g_signal_connect_object (self->project.details_check, "toggled",
+                           G_CALLBACK (on_version_picked), self, 0);
 
   watch_widget (&self->project.details_dropdown, gtk_drop_down_new (NULL, NULL));
   {
@@ -322,8 +322,8 @@ details_content (NuvashaContentPage *self)
                                     factory);
     g_object_unref (factory);
   }
-  g_signal_connect (self->project.details_dropdown, "notify::selected",
-                    G_CALLBACK (on_version_selected), self);
+  g_signal_connect_object (self->project.details_dropdown, "notify::selected",
+                           G_CALLBACK (on_version_selected), self, 0);
   gtk_widget_set_hexpand (GTK_WIDGET (self->project.details_dropdown), TRUE);
   gtk_widget_set_valign (GTK_WIDGET (self->project.details_dropdown), GTK_ALIGN_CENTER);
 
@@ -331,8 +331,8 @@ details_content (NuvashaContentPage *self)
   gtk_widget_add_css_class (GTK_WIDGET (self->project.details_download), "suggested-action");
   gtk_widget_set_valign (GTK_WIDGET (self->project.details_download), GTK_ALIGN_CENTER);
   gtk_widget_set_sensitive (GTK_WIDGET (self->project.details_download), FALSE);
-  g_signal_connect (self->project.details_download, "clicked",
-                    G_CALLBACK (on_version_download_clicked), self);
+  g_signal_connect_object (self->project.details_download, "clicked",
+                           G_CALLBACK (on_version_download_clicked), self, 0);
 
   bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   gtk_box_append (GTK_BOX (bar), GTK_WIDGET (self->project.details_check));

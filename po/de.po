@@ -902,3 +902,6 @@ msgstr "Minecraft Services hat die Anfrage abgelehnt (HTTP %u)%s%s"
 
 msgid "Minecraft Services error"
 msgstr "Minecraft-Services-Fehler"
+
+msgid "Application menu"
+msgstr "Application menu"

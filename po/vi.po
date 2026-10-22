@@ -864,3 +864,6 @@ msgstr "Minecraft Services đã từ chối yêu cầu (HTTP %u)%s%s"
 
 msgid "Minecraft Services error"
 msgstr "Lỗi Minecraft Services"
+
+msgid "Application menu"
+msgstr "Application menu"

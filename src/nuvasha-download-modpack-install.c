@@ -243,10 +243,10 @@ build_optional_page (NuvashaDownloadModpackDialog *self,
   gtk_widget_set_margin_bottom (GTK_WIDGET (buttons), 12);
   gtk_widget_set_halign (GTK_WIDGET (buttons), GTK_ALIGN_END);
 
-  g_signal_connect (cancel, "clicked", G_CALLBACK (on_optional_cancel),
-                    self);
-  g_signal_connect (install, "clicked", G_CALLBACK (on_optional_install),
-                    self);
+  g_signal_connect_object (cancel, "clicked", G_CALLBACK (on_optional_cancel),
+                           self, 0);
+  g_signal_connect_object (install, "clicked", G_CALLBACK (on_optional_install),
+                           self, 0);
 
   AdwPreferencesPage *page_holder =
     ADW_PREFERENCES_PAGE (adw_preferences_page_new ());

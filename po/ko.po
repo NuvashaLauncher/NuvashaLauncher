@@ -896,3 +896,6 @@ msgstr "Minecraft Services가 요청을 거부했습니다 (HTTP %u)%s%s"
 
 msgid "Minecraft Services error"
 msgstr "Minecraft Services 오류"
+
+msgid "Application menu"
+msgstr "Application menu"

@@ -108,13 +108,13 @@ nuvasha_offline_account_dialog_init (NuvashaOfflineAccountDialog *self)
   gtk_widget_set_visible (GTK_WIDGET (self->error_label), FALSE);
 
   GtkButton *cancel_button = GTK_BUTTON (gtk_button_new_with_label (_("Cancel")));
-  g_signal_connect (cancel_button, "clicked", G_CALLBACK (nuvasha_ui_cancel_dialog),
-                    self);
+  g_signal_connect_object (cancel_button, "clicked", G_CALLBACK (nuvasha_ui_cancel_dialog),
+                           self, 0);
 
   self->add_button = GTK_BUTTON (gtk_button_new_with_label (_("Add")));
   gtk_widget_add_css_class (GTK_WIDGET (self->add_button), "suggested-action");
-  g_signal_connect (self->add_button, "clicked", G_CALLBACK (on_add_clicked),
-                    self);
+  g_signal_connect_object (self->add_button, "clicked", G_CALLBACK (on_add_clicked),
+                           self, 0);
 
   GtkBox *buttons = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
   gtk_widget_set_halign (GTK_WIDGET (buttons), GTK_ALIGN_CENTER);
@@ -138,8 +138,8 @@ nuvasha_offline_account_dialog_init (NuvashaOfflineAccountDialog *self)
   adw_dialog_set_default_widget (ADW_DIALOG (self),
                                  GTK_WIDGET (self->add_button));
 
-  g_signal_connect (self->name_row, "notify::text",
-                    G_CALLBACK (on_input_changed), self);
+  g_signal_connect_object (self->name_row, "notify::text",
+                           G_CALLBACK (on_input_changed), self, 0);
 
   update_add_button (self);
 }

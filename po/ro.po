@@ -866,3 +866,6 @@ msgstr "Minecraft Services a respins solicitarea (HTTP %u)%s%s"
 
 msgid "Minecraft Services error"
 msgstr "Eroare Minecraft Services"
+
+msgid "Application menu"
+msgstr "Application menu"

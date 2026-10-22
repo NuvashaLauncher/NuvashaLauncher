@@ -449,8 +449,8 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
                                _("Show name, summary and version fields before exporting."));
   adw_switch_row_set_active (ADW_SWITCH_ROW (export_metadata_row),
                              nuvasha_settings_get_export_metadata (self->model->settings));
-   g_signal_connect (export_metadata_row, "notify::active",
-                     G_CALLBACK (on_export_metadata_toggled), self);
+    g_signal_connect_object (export_metadata_row, "notify::active",
+                             G_CALLBACK (on_export_metadata_toggled), self, 0);
    adw_preferences_group_add (general_group,
                                 GTK_WIDGET (export_metadata_row));
 
@@ -460,8 +460,8 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
    adw_switch_row_set_active (
      delete_dependents_row,
      nuvasha_settings_get_delete_dependents (self->model->settings));
-   g_signal_connect (delete_dependents_row, "notify::active",
-                    G_CALLBACK (on_delete_dependents_toggled), self);
+    g_signal_connect_object (delete_dependents_row, "notify::active",
+                             G_CALLBACK (on_delete_dependents_toggled), self, 0);
    adw_preferences_group_add (general_group,
                                 GTK_WIDGET (delete_dependents_row));
 
@@ -469,8 +469,8 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
                                    _("Enable sandbox"));
    adw_switch_row_set_active (
      sandbox_row, nuvasha_settings_get_sandbox_enabled (self->model->settings));
-   g_signal_connect (sandbox_row, "notify::active",
-                     G_CALLBACK (on_sandbox_toggled), self);
+    g_signal_connect_object (sandbox_row, "notify::active",
+                             G_CALLBACK (on_sandbox_toggled), self, 0);
    adw_preferences_group_add (sandbox_group,
                                GTK_WIDGET (sandbox_row));
 
@@ -480,8 +480,8 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
    adw_switch_row_set_active (
      sandbox_network_row,
      nuvasha_settings_get_sandbox_network_enabled (self->model->settings));
-   g_signal_connect (sandbox_network_row, "notify::active",
-                     G_CALLBACK (on_sandbox_network_toggled), self);
+    g_signal_connect_object (sandbox_network_row, "notify::active",
+                             G_CALLBACK (on_sandbox_network_toggled), self, 0);
    adw_preferences_group_add (sandbox_group,
                                GTK_WIDGET (sandbox_network_row));
 
@@ -492,8 +492,8 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
 
   /* Connected after the value was set, so opening the dialog never
    * writes anything by itself. */
-  g_signal_connect (row, "notify::active",
-                    G_CALLBACK (on_show_snapshots_toggled), self);
+   g_signal_connect_object (row, "notify::active",
+                            G_CALLBACK (on_show_snapshots_toggled), self, 0);
   adw_preferences_group_add (versions_group, GTK_WIDGET (row));
 
   /* The loader versions live under the same choice: both say what the
@@ -503,8 +503,8 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   adw_switch_row_set_active (
     ADW_SWITCH_ROW (unstable_row),
     nuvasha_settings_get_show_unstable_loaders (self->model->settings));
-  g_signal_connect (unstable_row, "notify::active",
-                    G_CALLBACK (on_show_unstable_loaders_toggled), self);
+   g_signal_connect_object (unstable_row, "notify::active",
+                            G_CALLBACK (on_show_unstable_loaders_toggled), self, 0);
   adw_preferences_group_add (versions_group,
                               GTK_WIDGET (unstable_row));
 
@@ -533,8 +533,8 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
     adw_combo_row_set_model (ADW_COMBO_ROW (language_row),
                              G_LIST_MODEL (model));
     adw_combo_row_set_selected (ADW_COMBO_ROW (language_row), selected);
-    g_signal_connect (language_row, "notify::selected",
-                      G_CALLBACK (on_language_selected), self);
+     g_signal_connect_object (language_row, "notify::selected",
+                              G_CALLBACK (on_language_selected), self, 0);
     adw_preferences_group_add (language_group,
                                 GTK_WIDGET (language_row));
     g_object_unref (model);
@@ -549,8 +549,8 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (limit_row), FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (limit_row),
                                   _("Line Limit"));
-  g_signal_connect (limit_row, "notify::value",
-                    G_CALLBACK (on_log_limit_changed), self);
+   g_signal_connect_object (limit_row, "notify::value",
+                            G_CALLBACK (on_log_limit_changed), self, 0);
   adw_preferences_group_add (logs_group, GTK_WIDGET (limit_row));
 
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (crash_row),
@@ -558,8 +558,8 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   adw_switch_row_set_active (
     ADW_SWITCH_ROW (crash_row),
     nuvasha_settings_get_open_logs_after_crash (self->model->settings));
-  g_signal_connect (crash_row, "notify::active",
-                    G_CALLBACK (on_open_logs_after_crash_toggled), self);
+   g_signal_connect_object (crash_row, "notify::active",
+                            G_CALLBACK (on_open_logs_after_crash_toggled), self, 0);
   adw_preferences_group_add (logs_group, GTK_WIDGET (crash_row));
 
   adw_preferences_group_set_title (cache_group,
@@ -569,8 +569,8 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   adw_switch_row_set_active (
     ADW_SWITCH_ROW (cache_api_row),
     nuvasha_settings_get_cache_modrinth_api_responses (self->model->settings));
-  g_signal_connect (cache_api_row, "notify::active",
-                    G_CALLBACK (on_cache_modrinth_api_responses_toggled), self);
+   g_signal_connect_object (cache_api_row, "notify::active",
+                            G_CALLBACK (on_cache_modrinth_api_responses_toggled), self, 0);
   adw_preferences_group_add (cache_group, GTK_WIDGET (cache_api_row));
 
   {
@@ -597,8 +597,8 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
     adw_combo_row_set_model (ADW_COMBO_ROW (cache_expiration_row),
                              G_LIST_MODEL (model));
     adw_combo_row_set_selected (ADW_COMBO_ROW (cache_expiration_row), selected);
-    g_signal_connect (cache_expiration_row, "notify::selected",
-                      G_CALLBACK (on_cache_expiration_selected), self);
+     g_signal_connect_object (cache_expiration_row, "notify::selected",
+                              G_CALLBACK (on_cache_expiration_selected), self, 0);
     adw_preferences_group_add (cache_group,
                                 GTK_WIDGET (cache_expiration_row));
     g_object_unref (model);
@@ -613,8 +613,8 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
     gtk_accessible_update_property (GTK_ACCESSIBLE (button),
                                     GTK_ACCESSIBLE_PROPERTY_LABEL,
                                     _("Clear Nuvasha Cache"), -1);
-    g_signal_connect (button, "clicked", G_CALLBACK (on_clear_cache_clicked),
-                      self);
+     g_signal_connect_object (button, "clicked", G_CALLBACK (on_clear_cache_clicked),
+                              self, 0);
     adw_action_row_add_suffix (clear_cache_row, GTK_WIDGET (button));
   }
   adw_preferences_group_add (cache_group, GTK_WIDGET (clear_cache_row));

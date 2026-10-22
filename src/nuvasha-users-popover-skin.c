@@ -915,6 +915,12 @@ nuvasha_users_skin_menu_new (NuvashaUsersPopover *owner, GtkImage *image, Nuvash
   GtkButton *remove = GTK_BUTTON (gtk_button_new_from_icon_name ("user-trash-symbolic"));
   GtkBox *actions = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
   GtkBox *action_spacer = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+  g_autoptr (AdwBreakpointCondition) narrow_condition =
+    adw_breakpoint_condition_new_length (ADW_BREAKPOINT_CONDITION_MAX_WIDTH,
+                                         700, ADW_LENGTH_UNIT_PX);
+  g_autoptr (AdwBreakpoint) narrow_breakpoint =
+    adw_breakpoint_new (narrow_condition);
+  GValue vertical = G_VALUE_INIT;
   SkinMenu *data = g_new0 (SkinMenu, 1);
 
   data->image = g_object_ref (image);
@@ -978,6 +984,12 @@ nuvasha_users_skin_menu_new (NuvashaUsersPopover *owner, GtkImage *image, Nuvash
   gtk_widget_set_halign (GTK_WIDGET (remove), GTK_ALIGN_END);
   gtk_widget_set_tooltip_text (GTK_WIDGET (open_skins), _("Open Folder"));
   gtk_widget_set_tooltip_text (GTK_WIDGET (remove), _("Delete"));
+  gtk_accessible_update_property (GTK_ACCESSIBLE (open_skins),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                  _("Open Folder"), -1);
+  gtk_accessible_update_property (GTK_ACCESSIBLE (remove),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                  _("Delete"), -1);
   gtk_widget_set_hexpand (GTK_WIDGET (action_spacer), TRUE);
   gtk_box_append (left, GTK_WIDGET (preview));
   gtk_box_append (left, GTK_WIDGET (capes));
@@ -991,15 +1003,24 @@ nuvasha_users_skin_menu_new (NuvashaUsersPopover *owner, GtkImage *image, Nuvash
   gtk_box_append (actions, GTK_WIDGET (open_skins));
   gtk_box_append (actions, GTK_WIDGET (remove));
   gtk_box_append (right, GTK_WIDGET (actions));
+  gtk_widget_add_css_class (GTK_WIDGET (actions), "nuvasha-skin-actions");
   gtk_widget_set_margin_start (GTK_WIDGET (root), 24);
   gtk_widget_set_margin_end (GTK_WIDGET (root), 24);
   gtk_widget_set_margin_top (GTK_WIDGET (root), 24);
   gtk_widget_set_margin_bottom (GTK_WIDGET (root), 24);
   gtk_box_append (root, GTK_WIDGET (left));
   gtk_box_append (root, GTK_WIDGET (right));
+  gtk_widget_set_size_request (GTK_WIDGET (root), 420, 400);
+  g_value_init (&vertical, GTK_TYPE_ORIENTATION);
+  g_value_set_enum (&vertical, GTK_ORIENTATION_VERTICAL);
+  adw_breakpoint_add_setter (narrow_breakpoint, G_OBJECT (root),
+                             "orientation", &vertical);
+  g_value_unset (&vertical);
   adw_dialog_set_title (dialog, _("Skin"));
   adw_dialog_set_content_width (dialog, 860);
   adw_dialog_set_content_height (dialog, 560);
+  gtk_widget_set_size_request (GTK_WIDGET (dialog), 420, 400);
+  adw_dialog_add_breakpoint (dialog, g_steal_pointer (&narrow_breakpoint));
   adw_header_bar_set_show_back_button (header, FALSE);
   adw_toolbar_view_add_top_bar (toolbar, GTK_WIDGET (header));
   adw_toolbar_view_set_content (toolbar, GTK_WIDGET (root));

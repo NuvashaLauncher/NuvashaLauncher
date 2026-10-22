@@ -864,3 +864,6 @@ msgstr "Minecraft Services menolak permintaan (HTTP %u)%s%s"
 
 msgid "Minecraft Services error"
 msgstr "Kesalahan Minecraft Services"
+
+msgid "Application menu"
+msgstr "Application menu"

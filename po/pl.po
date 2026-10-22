@@ -899,3 +899,6 @@ msgstr "Minecraft Services odrzuciło żądanie (HTTP %u)%s%s"
 
 msgid "Minecraft Services error"
 msgstr "Błąd Minecraft Services"
+
+msgid "Application menu"
+msgstr "Application menu"

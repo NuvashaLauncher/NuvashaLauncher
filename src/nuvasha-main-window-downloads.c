@@ -100,8 +100,10 @@ refresh_downloads (NuvashaMainWindow *self)
           GtkLabel *title = GTK_LABEL (gtk_label_new (nuvasha_download_get_title (download)));
           GtkBox *sub = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
           GtkBox *line_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
-          GtkButton *cancel = GTK_BUTTON (gtk_button_new_from_icon_name (
-            "window-close-symbolic"));
+           GtkButton *cancel = GTK_BUTTON (gtk_button_new_from_icon_name (
+             "window-close-symbolic"));
+
+           gtk_widget_add_css_class (GTK_WIDGET (box), "nuvasha-download-row");
 
           gtk_widget_set_halign (GTK_WIDGET (title), GTK_ALIGN_START);
           gtk_widget_add_css_class (GTK_WIDGET (title), "heading");

@@ -625,7 +625,7 @@ file_row (NuvashaContentPage *self, NuvashaContentFile *file)
                                     GTK_ACCESSIBLE_PROPERTY_LABEL,
                                      _("Delete"), -1);
     g_object_set_data (G_OBJECT (trash), "nuvasha-file", file);
-    g_signal_connect (trash, "clicked", G_CALLBACK (on_trash_clicked), self);
+    g_signal_connect_object (trash, "clicked", G_CALLBACK (on_trash_clicked), self, 0);
     adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (trash));
   }
 
@@ -858,8 +858,9 @@ nuvasha_content_page_new (NuvashaInstance *instance, NuvashaContentType type)
   nuvasha_content_page_build_installed (self);
   nuvasha_content_page_build_browse (self);
 
-  g_signal_connect (self->stack, "notify::visible-child-name",
-                    G_CALLBACK (nuvasha_content_page_on_stack_switched), self);
+  g_signal_connect_object (self->stack, "notify::visible-child-name",
+                           G_CALLBACK (nuvasha_content_page_on_stack_switched),
+                           self, 0);
 
   nuvasha_content_page_build_bar (self);
   nuvasha_content_page_move_actions_into_bar (self, FALSE);

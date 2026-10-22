@@ -230,7 +230,7 @@ append_account_row (NuvashaUsersPopover *self, const NuvashaAccount *account)
   gtk_widget_set_valign (GTK_WIDGET (avatar), GTK_ALIGN_CENTER);
   g_object_set_data_full (G_OBJECT (avatar), "nuvasha-account-id",
                           g_strdup (account->id), g_free);
-  g_signal_connect (avatar, "clicked", G_CALLBACK (on_avatar_clicked), self);
+  g_signal_connect_object (avatar, "clicked", G_CALLBACK (on_avatar_clicked), self, 0);
   g_object_set_data (G_OBJECT (row), "nuvasha-account-image", image);
   adw_action_row_add_prefix (ADW_ACTION_ROW (row),
                              GTK_WIDGET (avatar));
@@ -255,7 +255,7 @@ append_account_row (NuvashaUsersPopover *self, const NuvashaAccount *account)
                           g_strdup (account->id), g_free);
   g_object_set_data_full (G_OBJECT (remove), "nuvasha-account-name",
                           g_strdup (account->name), g_free);
-  g_signal_connect (remove, "clicked", G_CALLBACK (on_remove_clicked), self);
+  g_signal_connect_object (remove, "clicked", G_CALLBACK (on_remove_clicked), self, 0);
   adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (remove));
 
   /* Which account a row opens travels with the row: the list is built again
@@ -264,7 +264,7 @@ append_account_row (NuvashaUsersPopover *self, const NuvashaAccount *account)
   gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
   g_object_set_data_full (G_OBJECT (row), "nuvasha-account-id",
                           g_strdup (account->id), g_free);
-  g_signal_connect (row, "activated", G_CALLBACK (on_row_activated), self);
+  g_signal_connect_object (row, "activated", G_CALLBACK (on_row_activated), self, 0);
 
   gtk_list_box_append (GTK_LIST_BOX (self->list_box), GTK_WIDGET (row));
 }

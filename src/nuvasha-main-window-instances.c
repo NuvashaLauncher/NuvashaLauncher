@@ -394,7 +394,7 @@ create_instance_row (gpointer item, gpointer user_data)
 
   adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (play));
 
-  g_signal_connect (play, "clicked", G_CALLBACK (on_play_clicked), self);
+  g_signal_connect_object (play, "clicked", G_CALLBACK (on_play_clicked), self, 0);
 
   /* The icon follows the instance's; the connection goes with the
      image, so a row that is destroyed stops following it on its own. */
