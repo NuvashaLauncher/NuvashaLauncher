@@ -452,7 +452,7 @@ toolbar_button (const char *icon_name, const char *label, GCallback callback,
   gtk_widget_set_tooltip_text (GTK_WIDGET (button), label);
   gtk_accessible_update_property (GTK_ACCESSIBLE (button),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL, label, -1);
-  g_signal_connect (button, "clicked", callback, user_data);
+  g_signal_connect_object (button, "clicked", callback, user_data, 0);
 
   return GTK_WIDGET (button);
 }
@@ -508,21 +508,21 @@ nuvasha_logs_page_new (NuvashaLauncher *launcher)
   gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (self->search_entry),
                                          _("Search the log"));
     gtk_widget_set_visible (GTK_WIDGET (self->search_bar), TRUE);
-  g_signal_connect (self->search_entry, "changed",
-                    G_CALLBACK (on_search_changed), self);
+  g_signal_connect_object (self->search_entry, "changed",
+                           G_CALLBACK (on_search_changed), self, 0);
   {
     GtkEventController *keys = gtk_event_controller_key_new ();
 
     gtk_event_controller_set_propagation_phase (keys, GTK_PHASE_BUBBLE);
      gtk_widget_add_controller (GTK_WIDGET (self->search_entry), keys);
-     g_signal_connect (keys, "key-pressed", G_CALLBACK (on_search_key), self);
+      g_signal_connect_object (keys, "key-pressed", G_CALLBACK (on_search_key), self, 0);
    }
    {
      GtkEventController *keys = gtk_event_controller_key_new ();
 
      gtk_event_controller_set_propagation_phase (keys, GTK_PHASE_CAPTURE);
      gtk_widget_add_controller (GTK_WIDGET (self), keys);
-     g_signal_connect (keys, "key-pressed", G_CALLBACK (on_search_key), self);
+      g_signal_connect_object (keys, "key-pressed", G_CALLBACK (on_search_key), self, 0);
    }
 
    gtk_widget_set_hexpand (GTK_WIDGET (self->search_bar), TRUE);
@@ -563,16 +563,17 @@ nuvasha_logs_page_new (NuvashaLauncher *launcher)
 
   adjustment =
     gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (self->scroller));
-  g_signal_connect (adjustment, "value-changed",
-                    G_CALLBACK (on_adjustment_changed), self);
+   g_signal_connect_object (adjustment, "value-changed",
+                            G_CALLBACK (on_adjustment_changed), self, 0);
 
-  g_signal_connect (self->launcher, "state", G_CALLBACK (on_state_changed),
-                    self);
-  g_signal_connect (self->launcher, "output", G_CALLBACK (on_output), self);
+  g_signal_connect_object (self->launcher, "state", G_CALLBACK (on_state_changed),
+                           self, 0);
+  g_signal_connect_object (self->launcher, "output", G_CALLBACK (on_output),
+                           self, 0);
 
   update_controls (self);
   reload_log (self);
-  g_signal_connect (self, "map", G_CALLBACK (on_first_map), self);
+   g_signal_connect_object (self, "map", G_CALLBACK (on_first_map), self, 0);
 
   return self;
 }

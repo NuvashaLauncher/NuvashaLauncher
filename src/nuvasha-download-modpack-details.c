@@ -286,8 +286,8 @@ details_content (NuvashaDownloadModpackDialog *self)
   gtk_widget_set_valign (GTK_WIDGET (self->download_button), GTK_ALIGN_CENTER);
   /* Nothing can be installed before the versions have arrived. */
   gtk_widget_set_sensitive (GTK_WIDGET (self->download_button), FALSE);
-  g_signal_connect (self->download_button, "clicked",
-                    G_CALLBACK (on_modpack_download_clicked), self);
+  g_signal_connect_object (self->download_button, "clicked",
+                           G_CALLBACK (on_modpack_download_clicked), self, 0);
 
   bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   gtk_box_append (GTK_BOX (bar), GTK_WIDGET (self->dropdown));

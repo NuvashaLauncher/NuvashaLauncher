@@ -28,6 +28,23 @@ static const GActionEntry app_entries[] = {
 };
 
 static void
+load_application_css (void)
+{
+  g_autoptr (GtkCssProvider) provider = gtk_css_provider_new ();
+  g_autofree char *installed = g_build_filename (nuvasha_DATA_DIR,
+                                                 "nuvasha.css", NULL);
+  g_autofree char *source = g_build_filename (nuvasha_SOURCE_DATA_DIR,
+                                               "nuvasha.css", NULL);
+  const char *path = g_file_test (installed, G_FILE_TEST_IS_REGULAR)
+    ? installed : source;
+
+  gtk_css_provider_load_from_path (provider, path);
+  gtk_style_context_add_provider_for_display (
+    gdk_display_get_default (), GTK_STYLE_PROVIDER (provider),
+    GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+}
+
+static void
 on_activate (GApplication *app, gpointer user_data G_GNUC_UNUSED)
 {
   GtkWindow *window = gtk_application_get_active_window (GTK_APPLICATION (app));
@@ -79,6 +96,7 @@ main (int argc, char **argv)
     }
 
   g_set_application_name ("Nuvasha Launcher");
+  load_application_css ();
 
   app = adw_application_new ("com.github.nuvashalauncher.nuvasha",
                              G_APPLICATION_DEFAULT_FLAGS);

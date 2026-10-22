@@ -497,8 +497,8 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
   gtk_widget_set_hexpand (GTK_WIDGET (self->search_entry), TRUE);
   gtk_search_entry_set_placeholder_text (
     GTK_SEARCH_ENTRY (self->search_entry), _("Search modpacks"));
-  g_signal_connect (self->search_entry, "changed",
-                    G_CALLBACK (on_search_changed), self);
+  g_signal_connect_object (self->search_entry, "changed",
+                           G_CALLBACK (on_search_changed), self, 0);
 
   gtk_box_append (GTK_BOX (top), GTK_WIDGET (self->search_entry));
   gtk_widget_add_css_class (GTK_WIDGET (close_button), "flat");

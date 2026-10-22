@@ -164,8 +164,8 @@ results_arrived (NuvashaContentPage *self, NuvashaModrinthResults *results,
        * An AdwActionRow is not activatable by default, so the row
        * itself is made one: a click on it activates the row. */
       gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
-      g_signal_connect (row, "activated", G_CALLBACK (nuvasha_content_page_on_result_activated),
-                        self);
+       g_signal_connect_object (row, "activated", G_CALLBACK (nuvasha_content_page_on_result_activated),
+                                self, 0);
 
       adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->browse.results_group),
                                  row);
@@ -503,8 +503,8 @@ fill_categories (NuvashaContentPage *self, GPtrArray *categories)
         gtk_widget_set_halign (GTK_WIDGET (button), GTK_ALIGN_FILL);
         g_object_set_data_full (G_OBJECT (button), "nuvasha-category",
                                 g_strdup (category->name), g_free);
-        g_signal_connect (button, "toggled", G_CALLBACK (on_category_toggled),
-                          self);
+        g_signal_connect_object (button, "toggled", G_CALLBACK (on_category_toggled),
+                                 self, 0);
         gtk_box_append (GTK_BOX (self->browse.filter_box), GTK_WIDGET (button));
       }
   }
@@ -559,8 +559,8 @@ categories_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         gtk_box_append (GTK_BOX (box), GTK_WIDGET (retry));
 
         gtk_box_append (GTK_BOX (self->browse.filter_box), GTK_WIDGET (box));
-        g_signal_connect (retry, "clicked",
-                          G_CALLBACK (load_categories_again), self);
+        g_signal_connect_object (retry, "clicked",
+                                 G_CALLBACK (load_categories_again), self, 0);
       }
 
       page_watch_free (watch);

@@ -900,3 +900,6 @@ msgstr "Minecraft Services isteği reddetti (HTTP %u)%s%s"
 
 msgid "Minecraft Services error"
 msgstr "Minecraft Services hatası"
+
+msgid "Application menu"
+msgstr "Application menu"

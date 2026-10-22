@@ -864,3 +864,6 @@ msgstr "Minecraft Services avviste forespørselen (HTTP %u)%s%s"
 
 msgid "Minecraft Services error"
 msgstr "Minecraft Services-feil"
+
+msgid "Application menu"
+msgstr "Application menu"

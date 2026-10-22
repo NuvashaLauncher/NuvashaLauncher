@@ -864,3 +864,6 @@ msgstr "Minecraft Services avvisade begäran (HTTP %u)%s%s"
 
 msgid "Minecraft Services error"
 msgstr "Minecraft Services-fel"
+
+msgid "Application menu"
+msgstr "Application menu"

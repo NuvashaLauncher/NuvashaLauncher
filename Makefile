@@ -135,6 +135,7 @@ pot:
 install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 	install -Dm755 $(BIN) "$(DESTDIR)$(PREFIX)/bin/NuvashaLauncher"
 	install -Dm644 data/pack.png "$(DESTDIR)$(PREFIX)/share/nuvasha/pack.png"
+	install -Dm644 data/nuvasha.css "$(DESTDIR)$(PREFIX)/share/nuvasha/nuvasha.css"
 	@for skin in data/skins/defaults/*.png; do \
 		install -Dm644 "$$skin" "$(DESTDIR)$(PREFIX)/share/nuvasha/skins/defaults/$$(basename "$$skin")"; \
 	done
@@ -154,6 +155,7 @@ install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 uninstall:
 	rm -f "$(DESTDIR)$(PREFIX)/bin/NuvashaLauncher"
 	rm -f "$(DESTDIR)$(PREFIX)/share/nuvasha/pack.png"
+	rm -f "$(DESTDIR)$(PREFIX)/share/nuvasha/nuvasha.css"
 	rm -rf "$(DESTDIR)$(PREFIX)/share/nuvasha/skins/defaults"
 	rm -f "$(DESTDIR)$(PREFIX)/share/applications/com.github.nuvashalauncher.nuvasha.desktop"
 	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.nuvashalauncher.nuvasha.svg"

@@ -897,3 +897,6 @@ msgstr "Minecraft Services がリクエストを拒否しました（HTTP %u）%
 
 msgid "Minecraft Services error"
 msgstr "Minecraft Services のエラー"
+
+msgid "Application menu"
+msgstr "Application menu"

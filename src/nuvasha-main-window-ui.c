@@ -35,6 +35,7 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
   GtkWidget *add_popover = NULL;
 
   /* Use a raised header so it has its own surface. */
+  gtk_widget_add_css_class (GTK_WIDGET (toolbar), "nuvasha-main-toolbar");
   adw_toolbar_view_set_top_bar_style (ADW_TOOLBAR_VIEW (toolbar),
                                       ADW_TOOLBAR_RAISED);
 
@@ -44,6 +45,9 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
   /* Start of the header: the "+" menu. */
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (add_button),
                                  "list-add-symbolic");
+  gtk_widget_set_tooltip_text (GTK_WIDGET (add_button), _("Add"));
+  gtk_accessible_update_property (GTK_ACCESSIBLE (add_button),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL, _("Add"), -1);
   gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (add_button),
                                   G_MENU_MODEL (add_menu));
   adw_header_bar_pack_start (ADW_HEADER_BAR (header), GTK_WIDGET (add_button));
@@ -124,6 +128,10 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
 
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (app_menu_button),
                                  "open-menu-symbolic");
+  gtk_widget_set_tooltip_text (GTK_WIDGET (app_menu_button), _("Application menu"));
+  gtk_accessible_update_property (GTK_ACCESSIBLE (app_menu_button),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                  _("Application menu"), -1);
   gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (app_menu_button),
                                   G_MENU_MODEL (app_menu));
 
@@ -137,6 +145,7 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
                                    _("Use the + button in the header to create one"));
   gtk_widget_set_hexpand (GTK_WIDGET (empty_page), TRUE);
   gtk_widget_set_vexpand (GTK_WIDGET (empty_page), TRUE);
+  gtk_widget_add_css_class (GTK_WIDGET (empty_page), "nuvasha-empty-state");
 
   self->ui.stack = ADW_VIEW_STACK (adw_view_stack_new ());
   adw_view_stack_add_named (self->ui.stack, GTK_WIDGET (empty_page), "empty");
@@ -153,8 +162,8 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
   self->ui.banner = ADW_BANNER (adw_banner_new (""));
   adw_banner_set_button_label (ADW_BANNER (self->ui.banner), _("Dismiss"));
   adw_banner_set_revealed (ADW_BANNER (self->ui.banner), FALSE);
-  g_signal_connect (self->ui.banner, "button-clicked",
-                    G_CALLBACK (on_main_window_banner_dismiss), NULL);
+  g_signal_connect_object (self->ui.banner, "button-clicked",
+                           G_CALLBACK (on_main_window_banner_dismiss), self, 0);
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar),
                                 GTK_WIDGET (self->ui.banner));
 

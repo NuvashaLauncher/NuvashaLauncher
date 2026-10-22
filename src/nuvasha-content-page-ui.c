@@ -21,7 +21,7 @@ toolbar_button (const char *icon_name, const char *label, GCallback callback,
   gtk_widget_set_tooltip_text (GTK_WIDGET (button), label);
   gtk_accessible_update_property (GTK_ACCESSIBLE (button),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL, label, -1);
-  g_signal_connect (button, "clicked", callback, user_data);
+  g_signal_connect_object (button, "clicked", callback, user_data, 0);
 
   return GTK_WIDGET (button);
 }
@@ -226,14 +226,15 @@ nuvasha_content_page_build_browse (NuvashaContentPage *self)
                                             _("Search"));
   gtk_widget_set_visible (GTK_WIDGET (search_bar), TRUE);
 
-  g_signal_connect (search_bar, "changed",
-                    G_CALLBACK (nuvasha_content_page_on_search_changed), self);
+  g_signal_connect_object (search_bar, "changed",
+                           G_CALLBACK (nuvasha_content_page_on_search_changed), self, 0);
   {
     GtkEventController *keys = gtk_event_controller_key_new ();
 
     gtk_event_controller_set_propagation_phase (keys, GTK_PHASE_BUBBLE);
     gtk_widget_add_controller (GTK_WIDGET (search_bar), keys);
-    g_signal_connect (keys, "key-pressed", G_CALLBACK (nuvasha_content_page_on_search_key), self);
+    g_signal_connect_object (keys, "key-pressed",
+                             G_CALLBACK (nuvasha_content_page_on_search_key), self, 0);
   }
 
   gtk_box_append (GTK_BOX (top), GTK_WIDGET (search_bar));
@@ -249,8 +250,8 @@ nuvasha_content_page_build_browse (NuvashaContentPage *self)
   gtk_menu_button_set_popover (GTK_MENU_BUTTON (filter_button), GTK_WIDGET (popover));
   /* A click opens the popover but does not emit "activate" on the
      menu button, so the load hangs off the popover's "show" instead. */
-  g_signal_connect (popover, "show",
-                    G_CALLBACK (nuvasha_content_page_on_filter_clicked), self);
+  g_signal_connect_object (popover, "show",
+                           G_CALLBACK (nuvasha_content_page_on_filter_clicked), self, 0);
   gtk_box_append (GTK_BOX (top), GTK_WIDGET (filter_button));
 
   /* The row takes the room the bar has, the search inside it takes most
@@ -470,10 +471,10 @@ nuvasha_content_page_build_bar (NuvashaContentPage *self)
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (self->switcher_installed),
                                 TRUE);
 
-  g_signal_connect (self->switcher_installed, "toggled",
-                    G_CALLBACK (on_switcher_toggled), self);
-  g_signal_connect (self->switcher_browse, "toggled",
-                    G_CALLBACK (on_switcher_toggled), self);
+  g_signal_connect_object (self->switcher_installed, "toggled",
+                           G_CALLBACK (on_switcher_toggled), self, 0);
+  g_signal_connect_object (self->switcher_browse, "toggled",
+                           G_CALLBACK (on_switcher_toggled), self, 0);
 
   gtk_box_append (GTK_BOX (self->switcher), GTK_WIDGET (self->switcher_installed));
   gtk_box_append (GTK_BOX (self->switcher), GTK_WIDGET (self->switcher_browse));
@@ -492,8 +493,8 @@ nuvasha_content_page_build_bar (NuvashaContentPage *self)
   self->banner = ADW_BANNER (adw_banner_new (""));
   adw_banner_set_button_label (ADW_BANNER (self->banner), _("Dismiss"));
   adw_banner_set_revealed (ADW_BANNER (self->banner), FALSE);
-  g_signal_connect (self->banner, "button-clicked",
-                    G_CALLBACK (on_banner_dismiss), self);
+  g_signal_connect_object (self->banner, "button-clicked",
+                           G_CALLBACK (on_banner_dismiss), self, 0);
 
   gtk_box_append (GTK_BOX (inner), GTK_WIDGET (self->banner));
   gtk_box_append (GTK_BOX (inner), GTK_WIDGET (self->bar));
