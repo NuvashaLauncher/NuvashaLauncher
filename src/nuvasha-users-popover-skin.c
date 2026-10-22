@@ -44,30 +44,12 @@ show_minecraft_service_error (SkinMenu *menu, const char *title, GError *error)
 }
 
 static void
-on_skin_dialog_closed (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_data)
+on_skin_dialog_close_attempt (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_data)
 {
   SkinMenu *menu = user_data;
-  if (menu->cancellable != NULL)
-    g_cancellable_cancel (menu->cancellable);
-}
 
-static void
-skin_menu_free (SkinMenu *menu)
-{
-  if (menu == NULL)
-    return;
   if (menu->cancellable != NULL)
     g_cancellable_cancel (menu->cancellable);
-  g_clear_object (&menu->cancellable);
-  g_clear_object (&menu->image);
-  g_clear_object (&menu->view);
-  g_clear_object (&menu->skins);
-  g_clear_object (&menu->cape_list);
-  g_clear_pointer (&menu->cape_ids, g_ptr_array_unref);
-  g_clear_pointer (&menu->cape_urls, g_ptr_array_unref);
-  g_clear_pointer (&menu->skin_urls, g_hash_table_unref);
-  g_clear_pointer (&menu->deleted_skin_ids, g_hash_table_unref);
-  g_free (menu);
 }
 
 static void
@@ -951,8 +933,6 @@ nuvasha_users_skin_menu_new (NuvashaUsersPopover *owner, GtkImage *image, Nuvash
   data->default_model = default_model;
   data->slim_model = slim_model;
   data->cancellable = g_cancellable_new ();
-  g_object_set_data_full (G_OBJECT (dialog), "nuvasha-skin-menu", data,
-                          (GDestroyNotify) skin_menu_free);
   g_object_set_data (G_OBJECT (preview), "nuvasha-deleted-skin-ids",
                      data->deleted_skin_ids);
   g_object_set_data (G_OBJECT (slim_model), "nuvasha-slim", GINT_TO_POINTER (1));
@@ -963,7 +943,8 @@ nuvasha_users_skin_menu_new (NuvashaUsersPopover *owner, GtkImage *image, Nuvash
   g_signal_connect (skins, "row-selected", G_CALLBACK (on_skin_selected), data);
   g_signal_connect (default_model, "toggled", G_CALLBACK (on_model_toggled), data);
   g_signal_connect (slim_model, "toggled", G_CALLBACK (on_model_toggled), data);
-  g_signal_connect (dialog, "closed", G_CALLBACK (on_skin_dialog_closed), data);
+  g_signal_connect (dialog, "close-attempt",
+                   G_CALLBACK (on_skin_dialog_close_attempt), data);
 
   gtk_widget_set_size_request (GTK_WIDGET (left), 220, -1);
   gtk_widget_set_hexpand (GTK_WIDGET (right), TRUE);
