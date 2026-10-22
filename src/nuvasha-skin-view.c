@@ -145,7 +145,7 @@ upload_texture (NuvashaSkinView *self, GdkTexture *texture, GLuint *handle,
       const int arm_ranges[][2] = { { 40, 56 }, { 32, 48 } };
       const int arm_rows[][2] = { { 16, 32 }, { 48, 64 } };
       for (guint range = 0; range < G_N_ELEMENTS (arm_ranges); range++)
-        for (int y = arm_rows[range][0] + 4; y < arm_rows[range][1]; y++)
+        for (int y = arm_rows[range][0]; y < arm_rows[range][1]; y++)
           for (int x = arm_ranges[range][0]; x < arm_ranges[range][1]; x++)
             {
               guchar *pixel = expanded + (gsize) y * stride + (gsize) x * 4;
