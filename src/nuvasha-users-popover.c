@@ -88,7 +88,6 @@ open_skin_menu_for_account (NuvashaUsersPopover *self, const char *id,
   gtk_widget_set_focusable (GTK_WIDGET (dialog), TRUE);
   adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
   gtk_widget_grab_focus (GTK_WIDGET (dialog));
-  g_object_unref (dialog);
 }
 
 static void
