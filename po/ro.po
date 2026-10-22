@@ -582,8 +582,8 @@ msgstr "Bine"
 msgid "Export skin…"
 msgstr "Exportați pielea..."
 
-msgid "Default model"
-msgstr "Model implicit"
+msgid "Classic model"
+msgstr "Model clasic"
 
 msgid "PNG skin texture"
 msgstr "Textura pielii PNG"

@@ -619,8 +619,8 @@ msgid "Export skin…"
 msgstr "Kaplamayı dışa aktar…"
 
 # UI string
-msgid "Default model"
-msgstr "Varsayılan model"
+msgid "Classic model"
+msgstr "Klasik model"
 
 # UI string
 msgid "PNG skin texture"

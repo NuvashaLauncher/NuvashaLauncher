@@ -580,8 +580,8 @@ msgstr "好的"
 msgid "Export skin…"
 msgstr "匯出皮膚..."
 
-msgid "Default model"
-msgstr "預設型號"
+msgid "Classic model"
+msgstr "經典模型"
 
 msgid "PNG skin texture"
 msgstr "PNG 皮肤纹理"

@@ -582,8 +582,8 @@ msgstr "Dobře"
 msgid "Export skin…"
 msgstr "Export skinu…"
 
-msgid "Default model"
-msgstr "Výchozí model"
+msgid "Classic model"
+msgstr "Klasický model"
 
 msgid "PNG skin texture"
 msgstr "Textura kůže PNG"

@@ -20,6 +20,7 @@ struct _NuvashaSkinView
   GLuint vertex_array;
   GLuint program;
   gboolean slim;
+  gboolean slim_texture;
   gboolean ready;
   double yaw;
   double pitch;
@@ -80,7 +81,8 @@ compile_shader (GLenum type, const char *source)
 }
 
 static void
-upload_texture (GdkTexture *texture, GLuint *handle, gboolean skin)
+upload_texture (NuvashaSkinView *self, GdkTexture *texture, GLuint *handle,
+                gboolean skin)
 {
   int width, height;
   gsize stride;
@@ -101,6 +103,72 @@ upload_texture (GdkTexture *texture, GLuint *handle, gboolean skin)
   stride = (gsize) width * 4;
   source = g_malloc (stride * height);
   gdk_texture_download (texture, source, stride);
+
+  /* Slim atlases reserve transparent columns between the three-pixel arm
+   * faces. If the user asks to display that atlas with classic four-pixel
+   * geometry, those columns must not be sampled as part of the arm. */
+  if (skin)
+    {
+      /* The last column of the classic right-arm back face is unused in a
+       * standard slim atlas. Check it against an opaque arm pixel rather
+       * than counting every gap: several valid Alex skins keep the other
+       * reserved columns opaque. */
+      self->slim_texture = height > 20 &&
+        source[(gsize) 20 * stride + 55 * 4 + 3] < 128 &&
+        source[(gsize) 20 * stride + 40 * 4 + 3] >= 128;
+    }
+
+  /* PrismLauncher’s legacy skin compatibility path expands a slim atlas to
+   * the classic arm layout before drawing it. Without these copied columns,
+   * the classic back-arm UVs land on the unused slim columns (usually black).
+   * Keep the source image intact; this only changes the OpenGL preview. */
+  if (skin && !self->slim && self->slim_texture && width == 64 && height == 64)
+    {
+      g_autofree guchar *expanded = g_memdup2 (source, stride * height);
+
+      for (int y = 16; y < 32; y++)
+        for (int x = 0; x < 9; x++)
+          memcpy (expanded + (gsize) y * stride + (gsize) (46 + x) * 4,
+                  source + (gsize) y * stride + (gsize) (45 + x) * 4, 4);
+      for (int y = 16; y < 20; y++)
+        for (int x = 0; x < 2; x++)
+          memcpy (expanded + (gsize) y * stride + (gsize) (50 + x) * 4,
+                  source + (gsize) y * stride + (gsize) (49 + x) * 4, 4);
+      for (int y = 20; y < 32; y++)
+        for (int x = 0; x < 2; x++)
+          memcpy (expanded + (gsize) y * stride + (gsize) (54 + x) * 4,
+                  source + (gsize) y * stride + (gsize) (53 + x) * 4, 4);
+
+      /* The base atlas is made opaque below. Fill any remaining transparent
+       * slim-only columns first, otherwise that normalization turns them
+       * into black pixels on classic arms. */
+      const int arm_ranges[][2] = { { 40, 56 }, { 32, 48 } };
+      const int arm_rows[][2] = { { 16, 32 }, { 48, 64 } };
+      for (guint range = 0; range < G_N_ELEMENTS (arm_ranges); range++)
+        for (int y = arm_rows[range][0] + 4; y < arm_rows[range][1]; y++)
+          for (int x = arm_ranges[range][0]; x < arm_ranges[range][1]; x++)
+            {
+              guchar *pixel = expanded + (gsize) y * stride + (gsize) x * 4;
+              if (pixel[3] >= 128)
+                continue;
+              int source_x = -1;
+              for (int distance = 1; distance < 16 && source_x < 0; distance++)
+                {
+                  int left = x - distance, right = x + distance;
+                  if (left >= arm_ranges[range][0] &&
+                      expanded[(gsize) y * stride + (gsize) left * 4 + 3] >= 128)
+                    source_x = left;
+                  else if (right < arm_ranges[range][1] &&
+                           expanded[(gsize) y * stride + (gsize) right * 4 + 3] >= 128)
+                    source_x = right;
+                }
+              if (source_x >= 0)
+                memcpy (pixel, expanded + (gsize) y * stride +
+                        (gsize) source_x * 4, 4);
+            }
+      g_free (source);
+      source = g_steal_pointer (&expanded);
+    }
 
   /* Expand legacy 64x32 skins to the modern 64x64 atlas, matching
    * PrismLauncher’s improveSkin() conversion. */
@@ -306,8 +374,8 @@ draw_model (NuvashaSkinView *self)
   add_box (v, -4, -12, -2, 8, 12, 4, 16, 16, 8, 12, 4, 64);
   add_box (v, -3.9f, -24, -2, 4, 12, 4, 0, 16, 4, 12, 4, 64);
   add_box (v, -.1f, -24, -2, 4, 12, 4, 16, 48, 4, 12, 4, 64);
-  add_box (v, -4 - arm_width, -12, -2, arm_width, 12, 4, arm_x, 16, arm_width, 12, 4, 64);
-  add_box (v, 4, -12, -2, arm_width, 12, 4, 32, 48, arm_width, 12, 4, 64);
+   add_box (v, -4 - arm_width, -12, -2, arm_width, 12, 4, arm_x, 16, arm_width, 12, 4, 64);
+   add_box (v, 4, -12, -2, arm_width, 12, 4, 32, 48, arm_width, 12, 4, 64);
   /* The second layer is deliberately slightly larger: this is the hat,
    * jacket, sleeves and trousers layer of the Minecraft skin format. */
   add_box (v, -4.5f, -.5f, -4.5f, 9, 9, 9, 32, 0, 8, 8, 8, 64);
@@ -315,9 +383,9 @@ draw_model (NuvashaSkinView *self)
   add_box (v, -4.15f, -24.25f, -2.25f, 4.5f, 12.5f, 4.5f, 0, 32, 4, 12, 4, 64);
   add_box (v, -.35f, -24.25f, -2.25f, 4.5f, 12.5f, 4.5f, 0, 48, 4, 12, 4, 64);
   add_box (v, -6 - (arm_width + .5f) / 2.f, -12.25f, -2.25f,
-           arm_width + .5f, 12.5f, 4.5f, 40, 32, arm_width, 12, 4, 64);
+            arm_width + .5f, 12.5f, 4.5f, 40, 32, arm_width, 12, 4, 64);
   add_box (v, 6 - (arm_width + .5f) / 2.f, -12.25f, -2.25f,
-           arm_width + .5f, 12.5f, 4.5f, 48, 48, arm_width, 12, 4, 64);
+            arm_width + .5f, 12.5f, 4.5f, 48, 48, arm_width, 12, 4, 64);
   skin_count = v->len;
   if (self->cape_texture != 0)
     {
@@ -418,8 +486,8 @@ on_realize (GtkGLArea *area, gpointer user_data G_GNUC_UNUSED)
   glGenBuffers (1, &self->vertex_buffer);
   if (major >= 3)
     glGenVertexArrays (1, &self->vertex_array);
-  upload_texture (self->skin, &self->skin_texture, TRUE);
-  upload_texture (self->cape, &self->cape_texture, FALSE);
+  upload_texture (self, self->skin, &self->skin_texture, TRUE);
+  upload_texture (self, self->cape, &self->cape_texture, FALSE);
 }
 
 static void
@@ -513,7 +581,7 @@ void
 nuvasha_skin_view_set_skin (NuvashaSkinView *self, GdkTexture *texture)
 {
   g_set_object (&self->skin, texture);
-  if (self->ready) { gtk_gl_area_make_current (GTK_GL_AREA (self)); upload_texture (texture, &self->skin_texture, TRUE); }
+  if (self->ready) { gtk_gl_area_make_current (GTK_GL_AREA (self)); upload_texture (self, texture, &self->skin_texture, TRUE); }
   gtk_widget_queue_draw (GTK_WIDGET (self));
 }
 
@@ -521,12 +589,18 @@ void
 nuvasha_skin_view_set_cape (NuvashaSkinView *self, GdkTexture *texture)
 {
   g_set_object (&self->cape, texture);
-  if (self->ready) { gtk_gl_area_make_current (GTK_GL_AREA (self)); upload_texture (texture, &self->cape_texture, FALSE); }
+  if (self->ready) { gtk_gl_area_make_current (GTK_GL_AREA (self)); upload_texture (self, texture, &self->cape_texture, FALSE); }
   gtk_widget_queue_draw (GTK_WIDGET (self));
 }
 
 void
 nuvasha_skin_view_set_slim (NuvashaSkinView *self, gboolean slim)
 {
-  self->slim = slim; gtk_widget_queue_draw (GTK_WIDGET (self));
+  self->slim = slim;
+  if (self->ready)
+    {
+      gtk_gl_area_make_current (GTK_GL_AREA (self));
+      upload_texture (self, self->skin, &self->skin_texture, TRUE);
+    }
+  gtk_widget_queue_draw (GTK_WIDGET (self));
 }

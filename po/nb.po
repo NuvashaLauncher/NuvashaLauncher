@@ -580,8 +580,8 @@ msgstr "Greit"
 msgid "Export skin…"
 msgstr "Eksporter hud…"
 
-msgid "Default model"
-msgstr "Standardmodell"
+msgid "Classic model"
+msgstr "Klassisk modell"
 
 msgid "PNG skin texture"
 msgstr "PNG-hudtekstur"

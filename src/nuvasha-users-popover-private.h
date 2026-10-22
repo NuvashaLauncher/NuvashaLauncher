@@ -44,6 +44,7 @@ typedef struct
   GtkCheckButton *slim_model;
   gboolean applying_profile;
   gboolean skin_upload_in_flight;
+  gint64 skin_upload_retry_after;
   gboolean defaults_added;
   SoupMessage *profile_message;
   SoupMessage *cape_message;

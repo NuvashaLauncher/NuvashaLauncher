@@ -580,8 +580,8 @@ msgstr "ĐƯỢC RỒI"
 msgid "Export skin…"
 msgstr "Xuất khẩu da…"
 
-msgid "Default model"
-msgstr "Mô hình mặc định"
+msgid "Classic model"
+msgstr "Mô hình cổ điển"
 
 msgid "PNG skin texture"
 msgstr "Kết cấu skin PNG"

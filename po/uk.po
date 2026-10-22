@@ -618,8 +618,8 @@ msgid "Export skin…"
 msgstr "Експортувати скін…"
 
 # UI string
-msgid "Default model"
-msgstr "Стандартна модель"
+msgid "Classic model"
+msgstr "Класична модель"
 
 # UI string
 msgid "PNG skin texture"

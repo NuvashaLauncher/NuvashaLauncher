@@ -580,8 +580,8 @@ msgstr "OKE"
 msgid "Export skin…"
 msgstr "Ekspor kulit…"
 
-msgid "Default model"
-msgstr "Model bawaan"
+msgid "Classic model"
+msgstr "Model klasik"
 
 msgid "PNG skin texture"
 msgstr "Tekstur kulit PNG"
