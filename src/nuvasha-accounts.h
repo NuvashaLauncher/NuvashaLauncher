@@ -75,6 +75,8 @@ typedef struct {
   char *refresh_token;
 
   char *avatar_url;   /* when the profile published one */
+  char *skin_model;   /* CLASSIC or SLIM */
+  char *cape_id;      /* currently selected cape, or NULL */
 } NuvashaAccount;
 
 void nuvasha_account_free (NuvashaAccount *account);

@@ -65,6 +65,8 @@ profile_answered (AuthRequest *self)
   account->expires_at = self->mc_expires_at;
   account->refresh_token = g_strdup (self->microsoft_refresh_token);
   account->avatar_url = g_strdup (profile->avatar_url);
+  account->skin_model = g_strdup (profile->skin_model);
+  account->cape_id = g_strdup (profile->cape_id);
 
   succeed (self, account, (GDestroyNotify) nuvasha_account_free);
 }

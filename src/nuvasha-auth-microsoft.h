@@ -232,6 +232,8 @@ typedef struct {
   char *id;          /* 32 hex characters, as the services publish it */
   char *name;
   char *avatar_url;  /* the skin that is worn, NULL when there is none */
+  char *skin_model;  /* CLASSIC or SLIM */
+  char *cape_id;     /* currently selected cape, or NULL */
 } NuvashaMinecraftProfile;
 
 void nuvasha_minecraft_profile_free (NuvashaMinecraftProfile *profile);

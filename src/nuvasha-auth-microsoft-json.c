@@ -534,6 +534,8 @@ nuvasha_minecraft_profile_free (NuvashaMinecraftProfile *profile)
   g_free (profile->id);
   g_free (profile->name);
   g_free (profile->avatar_url);
+  g_free (profile->skin_model);
+  g_free (profile->cape_id);
   g_free (profile);
 }
 
@@ -588,21 +590,60 @@ nuvasha_auth_profile_from_json (const char *json, gssize length, GError **error)
           JsonNode *item = json_array_get_element (array, i);
           g_autofree char *state = NULL;
           g_autofree char *url = NULL;
+          g_autofree char *variant = NULL;
+          const char *model = NULL;
+          JsonNode *metadata = NULL;
 
           if (!JSON_NODE_HOLDS_OBJECT (item))
             continue;
 
           state = string_of (json_node_get_object (item), "state");
           url = string_of (json_node_get_object (item), "url");
+          variant = string_of (json_node_get_object (item), "variant");
+          metadata = json_object_get_member (json_node_get_object (item), "metadata");
+          if (metadata != NULL && JSON_NODE_HOLDS_OBJECT (metadata))
+            model = json_object_get_string_member_with_default (
+              json_node_get_object (metadata), "model", NULL);
 
           if (url != NULL && *url != '\0' &&
               (state == NULL || g_str_equal (state, "ACTIVE")))
             {
               profile->avatar_url = g_steal_pointer (&url);
+              /* The services API has returned both `variant` values such as
+               * "classic" and the older metadata form `model: "default"`.
+               * Store one canonical value so the UI does not fall back to
+               * Classic every time the account is reloaded. */
+              profile->skin_model = g_strdup (
+                ((variant != NULL && g_ascii_strcasecmp (variant, "slim") == 0) ||
+                 (model != NULL && g_ascii_strcasecmp (model, "slim") == 0))
+                  ? "SLIM" : "CLASSIC");
               break;
             }
         }
-    }
+      }
+
+  {
+    JsonNode *capes = json_object_get_member (object, "capes");
+    if (capes != NULL && JSON_NODE_HOLDS_ARRAY (capes))
+      {
+        JsonArray *cape_array = json_node_get_array (capes);
+        for (guint i = 0; i < json_array_get_length (cape_array); i++)
+          {
+            JsonNode *item = json_array_get_element (cape_array, i);
+            JsonObject *cape;
+            g_autofree char *state = NULL;
+            if (!JSON_NODE_HOLDS_OBJECT (item))
+              continue;
+            cape = json_node_get_object (item);
+            state = string_of (cape, "state");
+            if (g_strcmp0 (state, "ACTIVE") == 0)
+              {
+                profile->cape_id = string_of (cape, "id");
+                break;
+              }
+          }
+      }
+  }
 
   return profile;
 }
