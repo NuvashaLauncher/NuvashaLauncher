@@ -295,6 +295,7 @@ image_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
             }
           guint source_id = g_idle_add (image_resize_idle,
                                         g_object_ref (picture));
+          g_source_set_name_by_id (source_id, "nuvasha-markdown-image-resize");
           g_object_set_data (G_OBJECT (picture), "nuvasha-image-source",
                              GUINT_TO_POINTER (source_id));
           nuvasha_task_scope_track_source (scope, source_id);

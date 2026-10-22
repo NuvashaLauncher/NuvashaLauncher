@@ -10,6 +10,7 @@
 #include <glib/gstdio.h>
 #include <string.h>
 
+#define ACCOUNTS_FORMAT_VERSION 2
 
 GQuark
 nuvasha_accounts_error_quark (void)
@@ -389,6 +390,9 @@ save (NuvashaAccounts *self, GError **error)
   builder = json_builder_new ();
   json_builder_begin_object (builder);
 
+  json_builder_set_member_name (builder, "version");
+  json_builder_add_int_value (builder, ACCOUNTS_FORMAT_VERSION);
+
   json_builder_set_member_name (builder, "accounts");
   json_builder_begin_array (builder);
 
@@ -458,6 +462,15 @@ load (NuvashaAccounts *self)
   root = json_parser_get_root (parser);
 
   if (root == NULL || !JSON_NODE_HOLDS_OBJECT (root))
+    {
+      quarantine_corrupt_file (self->filename);
+      return;
+    }
+
+  node = json_object_get_member (json_node_get_object (root), "version");
+  if (node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
+      json_node_get_value_type (node) == G_TYPE_INT64 &&
+      json_node_get_int (node) > ACCOUNTS_FORMAT_VERSION)
     {
       quarantine_corrupt_file (self->filename);
       return;

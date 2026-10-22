@@ -217,8 +217,10 @@ nuvasha_launcher_stop (NuvashaLauncher *self)
 
   if (self->process.stop_timeout == 0)
     {
-      self->process.stop_timeout =
-        g_timeout_add_seconds (nuvasha_LAUNCH_STOP_TIMEOUT, on_stop_timeout, self);
+      self->process.stop_timeout = g_timeout_add_seconds (
+        nuvasha_LAUNCH_STOP_TIMEOUT, on_stop_timeout, self);
+      g_source_set_name_by_id (self->process.stop_timeout,
+                               "nuvasha-launch-stop-timeout");
       nuvasha_task_scope_track_source (self->scope, self->process.stop_timeout);
     }
 }

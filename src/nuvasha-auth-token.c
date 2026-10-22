@@ -103,5 +103,6 @@ token_answered (AuthRequest *self)
     }
 
   self->poll_source = g_timeout_add_seconds (self->interval, poll_again, self);
+  g_source_set_name_by_id (self->poll_source, "nuvasha-auth-token-poll");
   nuvasha_task_scope_track_source (self->scope, self->poll_source);
 }

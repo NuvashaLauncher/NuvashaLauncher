@@ -599,7 +599,7 @@ nuvasha_fs_remove_tree_async (const char *path, GAsyncReadyCallback callback,
 gboolean
 nuvasha_fs_remove_tree_finish (GAsyncResult *result, GError **error)
 {
-  g_return_val_if_fail (g_task_is_valid (result, NULL), FALSE);
+  g_return_val_if_fail (nuvasha_task_result_is_valid (result, "nuvasha-task-scope"), FALSE);
   return g_task_propagate_boolean (G_TASK (result), error);
 }
 
@@ -729,6 +729,6 @@ nuvasha_fs_copy_tree_async (GFile *source, GFile *destination,
 gboolean
 nuvasha_fs_copy_tree_finish (GAsyncResult *result, GError **error)
 {
-  g_return_val_if_fail (g_task_is_valid (result, NULL), FALSE);
+  g_return_val_if_fail (nuvasha_task_result_is_valid (result, "nuvasha-task-scope"), FALSE);
   return g_task_propagate_boolean (G_TASK (result), error);
 }

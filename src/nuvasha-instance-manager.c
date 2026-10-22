@@ -319,6 +319,8 @@ nuvasha_instance_manager_init (NuvashaInstanceManager *self)
   self->instances = g_list_store_new (nuvasha_TYPE_INSTANCE);
   self->directory_check_source =
     g_timeout_add_seconds (1, check_instance_directories, self);
+  g_source_set_name_by_id (self->directory_check_source,
+                           "nuvasha-instance-directory-check");
 }
 
 NuvashaInstanceManager *
@@ -716,7 +718,7 @@ copy_tree_async (GFile *source, GFile *destination,
 gboolean
 copy_tree_finish (GAsyncResult *result, GError **error)
 {
-  g_return_val_if_fail (g_task_is_valid (result, NULL), FALSE);
+  g_return_val_if_fail (nuvasha_task_result_is_valid (result, "nuvasha-task-scope"), FALSE);
 
   return g_task_propagate_boolean (G_TASK (result), error);
 }

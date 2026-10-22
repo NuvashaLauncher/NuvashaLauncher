@@ -350,6 +350,8 @@ nuvasha_content_page_on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpo
 
   self->browse.model->debounce_source =
     g_timeout_add (SEARCH_DELAY_MS, on_search_timeout, self);
+  g_source_set_name_by_id (self->browse.model->debounce_source,
+                           "nuvasha-content-search-debounce");
   nuvasha_operation_track (self->browse.model->scope,
                                self->browse.model->debounce_source);
 }

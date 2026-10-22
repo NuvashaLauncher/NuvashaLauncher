@@ -57,14 +57,22 @@ void nuvasha_task_sequence_return_error (NuvashaTaskSequence *sequence,
  * source IDs and removes them before its task data is destroyed. Each owner
  * must hold a reference until it no longer needs the operation; this makes
  * it safe to hand one operation to both the task data and a caller. */
-NuvashaTaskScope *nuvasha_task_scope_new (GObject *source_object,
-                                  GCancellable *cancellable,
-                                  GAsyncReadyCallback callback,
-                                  gpointer user_data);
+NuvashaTaskScope *nuvasha_task_scope_new_tagged (GObject *source_object,
+                                          GCancellable *cancellable,
+                                          GAsyncReadyCallback callback,
+                                          gpointer user_data,
+                                          const char *source_tag);
+#define nuvasha_task_scope_new(source_object, cancellable, callback, user_data) \
+  nuvasha_task_scope_new_tagged ((source_object), (cancellable), (callback), \
+                                 (user_data), G_STRFUNC)
 NuvashaTaskScope *nuvasha_task_scope_ref (NuvashaTaskScope *scope);
 void nuvasha_task_scope_unref (NuvashaTaskScope *scope);
 guint64 nuvasha_task_scope_get_id (const NuvashaTaskScope *scope);
 NuvashaTaskState nuvasha_task_scope_get_state (const NuvashaTaskScope *scope);
+void nuvasha_task_scope_set_source_tag (NuvashaTaskScope *scope,
+                                        gpointer          source_tag);
+gboolean nuvasha_task_result_is_valid (GAsyncResult *result,
+                                       const char *expected_tag);
 void nuvasha_task_scope_set_state (NuvashaTaskScope *scope, NuvashaTaskState state);
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaTaskScope, nuvasha_task_scope_unref)
 GCancellable *nuvasha_task_scope_get_cancellable (const NuvashaTaskScope *scope);

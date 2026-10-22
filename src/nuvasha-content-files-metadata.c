@@ -639,7 +639,7 @@ nuvasha_content_load_local_icon_async (NuvashaContentFile *file,
 char *
 nuvasha_content_load_local_icon_finish (GAsyncResult *result, GError **error)
 {
-  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
+  g_return_val_if_fail (nuvasha_task_result_is_valid (result, "nuvasha-task-scope"), NULL);
   return g_task_propagate_pointer (G_TASK (result), error);
 }
 

@@ -213,7 +213,7 @@ nuvasha_instance_page_new (NuvashaInstanceManager *manager, NuvashaInstance *ins
   adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (stack),
                                        create_settings_page (self),
                                         "settings", _("Settings"),
-                                       "preferences-system-symbolic");
+                                        "emblem-system-symbolic");
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack),
     GTK_WIDGET (nuvasha_content_page_new (instance, nuvasha_CONTENT_RESOURCE_PACK)),

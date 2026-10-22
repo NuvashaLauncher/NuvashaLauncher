@@ -256,6 +256,7 @@ nuvasha_download_modpack_dialog_new_for_file (NuvashaInstanceManager *manager,
                              (gpointer *) &self->pack_download);
   build_import_page (self);
   self->import_idle = g_idle_add (start_import_idle, g_object_ref (self));
+  g_source_set_name_by_id (self->import_idle, "nuvasha-modpack-import-idle");
   nuvasha_operation_track (self->scope, self->import_idle);
   return self;
 }

@@ -145,7 +145,7 @@ nuvasha_modpack_verify_file_async (const NuvashaModpackFile *file,
 gboolean
 nuvasha_modpack_verify_file_finish (GAsyncResult *result, GError **error)
 {
-  g_return_val_if_fail (g_task_is_valid (result, NULL), FALSE);
+  g_return_val_if_fail (nuvasha_task_result_is_valid (result, "nuvasha-task-scope"), FALSE);
 
   return g_task_propagate_boolean (G_TASK (result), error);
 }
