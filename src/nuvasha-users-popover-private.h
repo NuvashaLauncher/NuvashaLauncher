@@ -45,9 +45,8 @@ typedef struct
   gboolean applying_profile;
   gboolean skin_upload_in_flight;
   gint64 skin_upload_retry_after;
+  GCancellable *cancellable;
   gboolean defaults_added;
-  SoupMessage *profile_message;
-  SoupMessage *cape_message;
   GHashTable *deleted_skin_ids;
   NuvashaAccount *account;
 } SkinMenu;

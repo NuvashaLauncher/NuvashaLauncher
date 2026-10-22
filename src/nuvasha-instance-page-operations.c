@@ -207,6 +207,8 @@ on_export_metadata_closed (AdwDialog *dialog G_GNUC_UNUSED,
   data->page->export_idle = g_idle_add_full (
     G_PRIORITY_DEFAULT, export_metadata_free_idle, data,
     (GDestroyNotify) export_metadata_free);
+  g_source_set_name_by_id (data->page->export_idle,
+                           "nuvasha-instance-export-cleanup");
   nuvasha_operation_track (data->page->scope, data->page->export_idle);
 }
 

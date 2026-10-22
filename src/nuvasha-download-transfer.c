@@ -442,6 +442,7 @@ attempt_failed (DownloadRequest *request, GError *error)
       g_debug ("download operation=%" G_GUINT64_FORMAT " retry attempt=%u",
                nuvasha_task_scope_get_id (request->scope), request->attempts + 1);
       request->retry_source = g_timeout_add (delay_ms, retry_when_due, request);
+      g_source_set_name_by_id (request->retry_source, "nuvasha-download-retry");
       nuvasha_task_scope_track_source (request->scope, request->retry_source);
       request->retry_cancel_source =
         nuvasha_cancellable_watch (g_task_get_cancellable (request->task),
@@ -594,6 +595,5 @@ start_attempt (DownloadRequest *request)
                            G_PRIORITY_DEFAULT, cancellable, send_ready,
                            request);
 }
-
 
 

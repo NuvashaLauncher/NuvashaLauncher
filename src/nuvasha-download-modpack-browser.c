@@ -46,6 +46,7 @@ on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
     nuvasha_operation_remove (self->scope, self->debounce);
 
   self->debounce = g_timeout_add (SEARCH_DELAY_MS, on_search_timeout, self);
+  g_source_set_name_by_id (self->debounce, "nuvasha-modpack-search-debounce");
   nuvasha_operation_track (self->scope, self->debounce);
 }
 

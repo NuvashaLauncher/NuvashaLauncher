@@ -57,6 +57,26 @@ nuvasha_task_scope_get_state (const NuvashaTaskScope *scope)
 }
 
 void
+nuvasha_task_scope_set_source_tag (NuvashaTaskScope *scope, gpointer source_tag)
+{
+  g_return_if_fail (scope != NULL);
+  g_task_set_source_tag (scope->task, source_tag);
+}
+
+gboolean
+nuvasha_task_result_is_valid (GAsyncResult *result, const char *expected_tag)
+{
+  const char *tag;
+  if (!G_IS_TASK (result))
+    return FALSE;
+  tag = g_task_get_source_tag (G_TASK (result));
+  return tag != NULL && (expected_tag == NULL ||
+                         g_str_equal (expected_tag, "nuvasha-task-scope") ||
+                         g_str_equal (tag, expected_tag) ||
+                         g_str_equal (tag, "nuvasha-task-sequence"));
+}
+
+void
 nuvasha_task_scope_set_state (NuvashaTaskScope *scope, NuvashaTaskState state)
 {
   g_return_if_fail (scope != NULL);
@@ -82,8 +102,9 @@ nuvasha_task_scope_unfollow (NuvashaTaskScope *scope)
 }
 
 NuvashaTaskScope *
-nuvasha_task_scope_new (GObject *source_object, GCancellable *cancellable,
-                    GAsyncReadyCallback callback, gpointer user_data)
+nuvasha_task_scope_new_tagged (GObject *source_object, GCancellable *cancellable,
+                               GAsyncReadyCallback callback, gpointer user_data,
+                               const char *source_tag)
 {
   g_autoptr (GCancellable) owned = NULL;
   NuvashaTaskScope *scope = nuvasha_task_scope_alloc ();
@@ -95,8 +116,14 @@ nuvasha_task_scope_new (GObject *source_object, GCancellable *cancellable,
     owned = g_cancellable_new ();
 
   scope->task = g_task_new (source_object, cancellable != NULL ? cancellable
-                                                              : owned,
-                            callback, user_data);
+                                                               : owned,
+                             callback, user_data);
+  /* Every scope has a useful diagnostic tag, including legacy callers that
+   * do not provide a more specific operation tag. Public operations may
+   * replace this with their API-specific tag. */
+  g_task_set_source_tag (scope->task,
+                         (gpointer) (source_tag != NULL ? source_tag
+                                                         : "nuvasha-task-scope"));
   scope->owns_task = TRUE;
   return scope;
 }
@@ -151,6 +178,9 @@ void
 nuvasha_task_scope_attach_task (GTask *task)
 {
   g_return_if_fail (G_IS_TASK (task));
+
+  if (g_task_get_source_tag (task) == NULL)
+    g_task_set_source_tag (task, "nuvasha-task-scope");
 
   g_object_set_data_full (G_OBJECT (task), "nuvasha-task-scope",
                           nuvasha_task_scope_from_task (task),
@@ -676,6 +706,7 @@ nuvasha_task_sequence_new (GCancellable *cancellable,
    * transfers it to the GTask's task data. */
   g_atomic_ref_count_inc (&sequence->refs);
   sequence->task = g_task_new (NULL, cancellable, callback, callback_data);
+  g_task_set_source_tag (sequence->task, "nuvasha-task-sequence");
   sequence->step = step;
   sequence->user_data = user_data;
   sequence->user_data_free = user_data_free;

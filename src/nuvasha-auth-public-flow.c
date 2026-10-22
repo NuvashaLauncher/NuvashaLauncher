@@ -11,6 +11,8 @@ nuvasha_auth_sign_in_async (const NuvashaDeviceCode   *code,
     nuvasha_task_scope_new (NULL, NULL, callback, user_data);
   AuthRequest *self = NULL;
 
+  nuvasha_task_scope_set_source_tag (scope, "nuvasha_auth_sign_in_async");
+
   g_return_val_if_fail (code != NULL, NULL);
   g_return_val_if_fail (code->device_code != NULL, NULL);
 
@@ -34,7 +36,8 @@ nuvasha_auth_sign_in_async (const NuvashaDeviceCode   *code,
 NuvashaAccount *
 nuvasha_auth_sign_in_finish (GAsyncResult *result, GError **error)
 {
-  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
+  g_return_val_if_fail (nuvasha_task_result_is_valid (result,
+                                                       "nuvasha_auth_sign_in_async"), NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
   return (NuvashaAccount *) g_task_propagate_pointer (G_TASK (result), error);
@@ -48,6 +51,8 @@ nuvasha_auth_refresh_async (const NuvashaAccount   *account,
   g_autoptr (NuvashaTaskScope) scope =
     nuvasha_task_scope_new (NULL, NULL, callback, user_data);
   AuthRequest *self = NULL;
+
+  nuvasha_task_scope_set_source_tag (scope, "nuvasha_auth_refresh_async");
 
   g_return_val_if_fail (account != NULL, NULL);
 
@@ -85,7 +90,8 @@ nuvasha_auth_refresh_async (const NuvashaAccount   *account,
 NuvashaAccount *
 nuvasha_auth_refresh_finish (GAsyncResult *result, GError **error)
 {
-  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
+  g_return_val_if_fail (nuvasha_task_result_is_valid (result,
+                                                       "nuvasha_auth_refresh_async"), NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
   return (NuvashaAccount *) g_task_propagate_pointer (G_TASK (result), error);

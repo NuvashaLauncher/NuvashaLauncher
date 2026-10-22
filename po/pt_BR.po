@@ -890,3 +890,13 @@ msgstr "繁體中文"
 
 msgid "한국어"
 msgstr "한국어"
+
+# Minecraft Services API errors
+msgid "Minecraft Services is rate limiting requests; try again shortly"
+msgstr "O Minecraft Services está limitando as solicitações; tente novamente em instantes"
+
+msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
+msgstr "O Minecraft Services rejeitou a solicitação (HTTP %u)%s%s"
+
+msgid "Minecraft Services error"
+msgstr "Erro do Minecraft Services"

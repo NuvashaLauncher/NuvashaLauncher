@@ -330,7 +330,7 @@ nuvasha_content_metadata_async (GPtrArray *files, NuvashaContentType type,
 gboolean
 nuvasha_content_metadata_finish (GAsyncResult *result, GError **error)
 {
-  g_return_val_if_fail (g_task_is_valid (result, NULL), FALSE);
+  g_return_val_if_fail (nuvasha_task_result_is_valid (result, "nuvasha-task-scope"), FALSE);
   return g_task_propagate_boolean (G_TASK (result), error);
 }
 
@@ -662,7 +662,7 @@ nuvasha_content_scan_async (const char *instance_directory, NuvashaContentType t
 GPtrArray *
 nuvasha_content_scan_finish (GAsyncResult *result, GError **error)
 {
-  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
+  g_return_val_if_fail (nuvasha_task_result_is_valid (result, "nuvasha-task-scope"), NULL);
 
   return g_task_propagate_pointer (G_TASK (result), error);
 }

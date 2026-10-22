@@ -367,7 +367,7 @@ nuvasha_modrinth_search_async (const NuvashaModrinthSearch *search,
 NuvashaModrinthResults *
 nuvasha_modrinth_search_finish (GAsyncResult *result, GError **error)
 {
-  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
+  g_return_val_if_fail (nuvasha_task_result_is_valid (result, "nuvasha-task-scope"), NULL);
 
   return g_task_propagate_pointer (G_TASK (result), error);
 }
@@ -411,7 +411,7 @@ nuvasha_modrinth_details_async (const char *project_id, GAsyncReadyCallback call
 NuvashaModrinthDetails *
 nuvasha_modrinth_details_finish (GAsyncResult *result, GError **error)
 {
-  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
+  g_return_val_if_fail (nuvasha_task_result_is_valid (result, "nuvasha-task-scope"), NULL);
 
   return g_task_propagate_pointer (G_TASK (result), error);
 }
@@ -534,7 +534,7 @@ nuvasha_modrinth_versions_async (const char *project_id, NuvashaContentType type
 GPtrArray *
 nuvasha_modrinth_versions_finish (GAsyncResult *result, GError **error)
 {
-  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
+  g_return_val_if_fail (nuvasha_task_result_is_valid (result, "nuvasha-task-scope"), NULL);
 
   return g_task_propagate_pointer (G_TASK (result), error);
 }
@@ -581,7 +581,7 @@ nuvasha_modrinth_categories_async (const char        *project_type,
 GPtrArray *
 nuvasha_modrinth_categories_finish (GAsyncResult *result, GError **error)
 {
-  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
+  g_return_val_if_fail (nuvasha_task_result_is_valid (result, "nuvasha-task-scope"), NULL);
 
   return g_task_propagate_pointer (G_TASK (result), error);
 }
@@ -633,7 +633,7 @@ nuvasha_modrinth_version_by_hash_async (const char *sha1,
 NuvashaModrinthVersion *
 nuvasha_modrinth_version_by_hash_finish (GAsyncResult *result, GError **error)
 {
-  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
+  g_return_val_if_fail (nuvasha_task_result_is_valid (result, "nuvasha-task-scope"), NULL);
 
   return g_task_propagate_pointer (G_TASK (result), error);
 }
@@ -739,7 +739,7 @@ nuvasha_modrinth_update_by_hash_async (NuvashaContentType type, const char *sha1
 NuvashaModrinthVersion *
 nuvasha_modrinth_update_by_hash_finish (GAsyncResult *result, GError **error)
 {
-  g_return_val_if_fail (g_task_is_valid (result, NULL), NULL);
+  g_return_val_if_fail (nuvasha_task_result_is_valid (result, "nuvasha-task-scope"), NULL);
 
   return g_task_propagate_pointer (G_TASK (result), error);
 }
