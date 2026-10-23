@@ -430,23 +430,23 @@ test_persistence (void)
   }
 
   {
-    g_autofree char *legacy_path = temporary_path ("legacy-token-fields.json");
-    g_autoptr (NuvashaAccounts) legacy_store = NULL;
-    NuvashaAccount *legacy_account;
-    const char *legacy_json =
-      "{\"version\":1,\"accounts\":[{\"type\":\"microsoft\","
-      "\"id\":\"legacy-json-test\",\"name\":\"Legacy\","
-      "\"uuid\":\"legacy-json-test\",\"access-token\":\"old\","
+    g_autofree char *token_fields_path = temporary_path ("token-fields.json");
+    g_autoptr (NuvashaAccounts) token_fields_store = NULL;
+    NuvashaAccount *token_fields_account;
+    const char *token_fields_json =
+      "{\"version\":2,\"accounts\":[{\"type\":\"microsoft\","
+      "\"id\":\"token-fields-test\",\"name\":\"Test\","
+      "\"uuid\":\"token-fields-test\",\"access-token\":\"old\","
       "\"refresh-token\":\"old-refresh\"}]}";
 
-    nuvasha_secret_store_clear ("legacy-json-test");
-    g_assert_true (g_file_set_contents (legacy_path, legacy_json, -1, NULL));
-    legacy_store = nuvasha_accounts_new_for_path (legacy_path);
-    legacy_account = nuvasha_accounts_find (legacy_store, "legacy-json-test");
-    g_assert_nonnull (legacy_account);
-    g_assert_null (legacy_account->access_token);
-    g_assert_null (legacy_account->refresh_token);
-    g_remove (legacy_path);
+    nuvasha_secret_store_clear ("token-fields-test");
+    g_assert_true (g_file_set_contents (token_fields_path, token_fields_json, -1, NULL));
+    token_fields_store = nuvasha_accounts_new_for_path (token_fields_path);
+    token_fields_account = nuvasha_accounts_find (token_fields_store, "token-fields-test");
+    g_assert_nonnull (token_fields_account);
+    g_assert_null (token_fields_account->access_token);
+    g_assert_null (token_fields_account->refresh_token);
+    g_remove (token_fields_path);
   }
 
   g_print ("ok - accounts and their tokens survive a restart, 0600\n");

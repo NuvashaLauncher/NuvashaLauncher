@@ -27,6 +27,8 @@ CPPFLAGS += -Dnuvasha_DATA_DIR=\"$(PREFIX)/share/nuvasha\"
 CPPFLAGS += -Dnuvasha_SOURCE_DATA_DIR=\"$(CURDIR)/data\"
 LOCALES := es_AR es_ES pt_BR pt_PT fr de it ja ko zh_CN zh_TW ru pl uk tr nl cs hu sv da fi nb ro vi id ar
 LOCALE_MOS := $(LOCALES:%=build/locale/%/LC_MESSAGES/nuvasha.mo)
+SCHEMA_XML := data/com.github.nuvashalauncher.Nuvasha.gschema.xml
+SCHEMA_COMPILED := build/schemas/gschemas.compiled
 
 CFLAGS   := -std=c17 -Wall -Wextra -Wpedantic -MMD -MP
 RELFLAGS := -O2
@@ -59,9 +61,9 @@ TESTDEPS    := $(addsuffix .d,$(TESTBINS))
 TESTDBGBINS := $(patsubst tests/%.c,build-debug/tests/%,$(TESTSRCS))
 TESTDBGDEPS := $(addsuffix .d,$(TESTDBGBINS))
 
-.PHONY: all fast debug test test-debug test-lsan static-analysis pot clean install uninstall
+.PHONY: all fast debug test test-display test-debug test-lsan static-analysis pot clean install uninstall
 
-all: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
+all: $(if $(SRCS),$(BIN)) $(LOCALE_MOS) $(SCHEMA_COMPILED)
 
 # Convenience target for local development. Keep parallelism opt-in so normal
 # `make` remains predictable for packaging and CI.
@@ -102,11 +104,20 @@ build/tests/%: tests/%.c $(TESTLIBOBJS) | build/tests
 # network. Only the icon name audit opens a display, and it skips itself
 # when there is none; the test that runs the launcher runs it with DISPLAY
 # and display variables removed.
-test: $(if $(SRCS),$(BIN)) $(TESTBINS)
-	@pass=0; skip=0; for t in $(TESTBINS); do echo "RUN  $$t"; ./$$t; status=$$?; \
+test: $(if $(SRCS),$(BIN)) $(TESTBINS) $(SCHEMA_COMPILED)
+	@pass=0; skip=0; for t in $(TESTBINS); do echo "RUN  $$t"; GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t; status=$$?; \
 		if test $$status -eq 77; then skip=$$((skip + 1)); \
 		elif test $$status -ne 0; then exit $$status; else pass=$$((pass + 1)); fi; done; \
 		echo "PASS $$pass test(s), SKIP $$skip test(s)"
+
+# Run the same suite with a virtual display when xvfb is installed. This
+# keeps display-backed GTK coverage available in CI without making it a build
+# prerequisite for headless development machines.
+test-display:
+	@if ! command -v xvfb-run >/dev/null 2>&1; then \
+		echo "SKIP test-display: xvfb-run is unavailable"; exit 77; \
+	fi
+	+xvfb-run -a $(MAKE) test
 
 # Same tests, but every test and every src object is built with
 # AddressSanitizer and UndefinedBehaviorSanitizer into build-debug/.
@@ -119,8 +130,8 @@ build-debug/tests/%: tests/%.c $(TESTLIBDBGOBJS) | build-debug/tests
 
 # The display guard test runs the release launcher, so test-debug builds both
 # binaries.
-test-debug: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS)
-	@pass=0; skip=0; for t in $(TESTDBGBINS); do echo "RUN  $$t"; ./$$t; status=$$?; \
+test-debug: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS) $(SCHEMA_COMPILED)
+	@pass=0; skip=0; for t in $(TESTDBGBINS); do echo "RUN  $$t"; GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t; status=$$?; \
 		if test $$status -eq 77; then skip=$$((skip + 1)); \
 		elif test $$status -ne 0; then exit $$status; else pass=$$((pass + 1)); fi; done; \
 		echo "PASS $$pass test(s), SKIP $$skip test(s)"
@@ -129,11 +140,11 @@ test-debug: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS)
 # explicit so CI does not silently lose leak checking when sanitizer defaults
 # change. The options are set per test rather than around a recursive make,
 # so the suite runs once and every test is the one being leak checked.
-test-lsan: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS)
+test-lsan: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS) $(SCHEMA_COMPILED)
 	@pass=0; skip=0; for t in $(TESTDBGBINS); do echo "RUN  $$t"; \
 	  ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 \
 	  LSAN_OPTIONS=detect_leaks=1:exitcode=1 \
-	  ./$$t; status=$$?; \
+	  GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t; status=$$?; \
 		if test $$status -eq 77; then skip=$$((skip + 1)); \
 		elif test $$status -ne 0; then exit $$status; else pass=$$((pass + 1)); fi; done; \
 		echo "PASS $$pass test(s), SKIP $$skip test(s)"
@@ -148,7 +159,7 @@ pot:
 	xgettext --from-code=UTF-8 --language=C --keyword=_ --keyword=N_ \
 		--files-from=po/POTFILES.in --output=po/nuvasha.pot
 
-install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
+install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS) $(SCHEMA_COMPILED)
 	install -Dm755 $(BIN) "$(DESTDIR)$(PREFIX)/bin/NuvashaLauncher"
 	install -Dm644 data/pack.png "$(DESTDIR)$(PREFIX)/share/nuvasha/pack.png"
 	install -Dm644 data/nuvasha.css "$(DESTDIR)$(PREFIX)/share/nuvasha/nuvasha.css"
@@ -161,6 +172,8 @@ install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS)
 		"$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.nuvashalauncher.nuvasha.svg"
 	install -Dm644 data/com.github.nuvashalauncher.nuvasha.metainfo.xml \
 		"$(DESTDIR)$(PREFIX)/share/metainfo/com.github.nuvashalauncher.nuvasha.metainfo.xml"
+	install -Dm644 $(SCHEMA_COMPILED) \
+		"$(DESTDIR)$(PREFIX)/share/glib-2.0/schemas/gschemas.compiled"
 	@for lang in $(LOCALES); do \
 		install -Dm644 build/locale/$$lang/LC_MESSAGES/nuvasha.mo \
 			"$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/nuvasha.mo"; \
@@ -176,6 +189,7 @@ uninstall:
 	rm -f "$(DESTDIR)$(PREFIX)/share/applications/com.github.nuvashalauncher.nuvasha.desktop"
 	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.nuvashalauncher.nuvasha.svg"
 	rm -f "$(DESTDIR)$(PREFIX)/share/metainfo/com.github.nuvashalauncher.nuvasha.metainfo.xml"
+	rm -f "$(DESTDIR)$(PREFIX)/share/glib-2.0/schemas/gschemas.compiled"
 	@for lang in $(LOCALES); do \
 		rm -f "$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/nuvasha.mo"; \
 	done
@@ -184,6 +198,12 @@ clean:
 	rm -rf build build-debug
 
 build build-debug build/tests build-debug/tests:
+	mkdir -p $@
+
+$(SCHEMA_COMPILED): $(SCHEMA_XML) | build/schemas
+	glib-compile-schemas --targetdir=build/schemas data
+
+build/schemas:
 	mkdir -p $@
 
 build/locale/%/LC_MESSAGES/nuvasha.mo: po/%.po

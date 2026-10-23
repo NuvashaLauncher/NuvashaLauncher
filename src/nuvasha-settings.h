@@ -2,8 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* NuvashaSettings: the small file of choices the whole application shares,
- * <config dir>/nuvasha/config.json.
+/* NuvashaSettings: the desktop preferences shared by the application.
  *
  * One object, eleven options so far: whether the version lists also show
  * snapshots and the versions Mojang no longer serves, whether the loader
@@ -13,8 +12,7 @@
  * an instance runs with is not
  * one of them: it is the automatic choice, unless the instance itself
  * names another runtime. The file is read once when the object is
- * created and written on every change; a file that is missing, unreadable
- * or nonsense leaves the defaults in place instead of failing. */
+ * created and written on every change through GSettings. */
 
 #ifndef nuvasha_SETTINGS_H
 #define nuvasha_SETTINGS_H
@@ -49,8 +47,7 @@ GQuark nuvasha_settings_error_quark (void);
 #define nuvasha_SETTINGS_DEFAULT_CACHE_EXPIRATION \
   nuvasha_SETTINGS_CACHE_EXPIRATION_1_HOUR
 
-/* Reads <config dir>/nuvasha/config.json, falling back to the defaults
- * when there is nothing there to read. Never returns NULL. */
+/* Reads the installed GSettings schema and defaults. Never returns NULL. */
 NuvashaSettings *nuvasha_settings_new (void);
 
 /* Whether snapshot versions are shown. */
