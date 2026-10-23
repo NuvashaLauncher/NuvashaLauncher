@@ -18,6 +18,7 @@ struct _NuvashaMainWindow
   AdwApplicationWindow parent_instance;
 
   NuvashaMainWindowModel *model;
+  GSettings *window_settings;
 
   /* Core window UI state. */
   struct {

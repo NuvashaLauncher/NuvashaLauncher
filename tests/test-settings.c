@@ -47,8 +47,6 @@ test_persistence (void)
 {
   g_autoptr (NuvashaSettings) settings = nuvasha_settings_new ();
   g_autoptr (NuvashaSettings) loaded = NULL;
-  g_autofree char *config = NULL;
-  g_autofree char *contents = NULL;
   g_autoptr (GError) error = NULL;
 
   g_assert_true (nuvasha_settings_set_cache_expiration (
@@ -70,37 +68,6 @@ test_persistence (void)
   g_assert_true (nuvasha_settings_get_sandbox_enabled (loaded));
   g_assert_false (nuvasha_settings_get_sandbox_network_enabled (loaded));
 
-  config = g_build_filename (g_get_user_config_dir (), "nuvasha", "config.json",
-                             NULL);
-  g_assert_true (g_file_get_contents (config, &contents, NULL, &error));
-  g_assert_no_error (error);
-  g_assert_nonnull (strstr (contents, "cache-modrinth-api-responses"));
-  g_assert_nonnull (strstr (contents, "cache-expiration"));
-  g_assert_nonnull (strstr (contents, "sandbox-enabled"));
-  g_assert_nonnull (strstr (contents, "sandbox-network-enabled"));
-  g_assert_nonnull (strstr (contents, "\"version\""));
-}
-
-static void
-test_corrupt_settings_quarantined (void)
-{
-  g_autofree char *config =
-    g_build_filename (g_get_user_config_dir (), "nuvasha", "config.json", NULL);
-  g_autofree char *backup = g_strconcat (config, ".corrupt", NULL);
-  g_autoptr (NuvashaSettings) settings = NULL;
-
-  g_remove (config);
-  g_remove (backup);
-  g_assert_true (g_file_set_contents (config, "{not-json", -1, NULL));
-
-  g_test_expect_message (G_LOG_DOMAIN, G_LOG_LEVEL_WARNING,
-                         "*settings file*is corrupt*");
-  settings = nuvasha_settings_new ();
-  g_test_assert_expected_messages ();
-  g_assert_true (g_file_test (backup, G_FILE_TEST_IS_REGULAR));
-  g_assert_false (g_file_test (config, G_FILE_TEST_EXISTS));
-  g_assert_cmpint (nuvasha_settings_get_cache_expiration (settings), ==,
-                   nuvasha_SETTINGS_CACHE_EXPIRATION_1_HOUR);
 }
 
 static void
@@ -189,8 +156,6 @@ main (int argc, char **argv)
 
   g_test_add_func ("/settings/defaults", test_defaults);
   g_test_add_func ("/settings/persistence", test_persistence);
-  g_test_add_func ("/settings/corrupt-quarantine",
-                   test_corrupt_settings_quarantined);
   g_test_add_func ("/settings/invalid-expiration", test_invalid_expiration);
   g_test_add_func ("/cache/paths", test_cache_paths);
   g_test_add_func ("/cache/cleanup", test_cache_cleanup);

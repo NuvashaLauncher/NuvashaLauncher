@@ -63,6 +63,44 @@ on_window_launcher_state (NuvashaLauncher *launcher G_GNUC_UNUSED,
   adw_banner_set_revealed (ADW_BANNER (self->ui.banner), TRUE);
 }
 
+static GSettings *
+window_settings_new (void)
+{
+  GSettingsSchemaSource *source = g_settings_schema_source_get_default ();
+  GSettingsSchema *schema = source != NULL
+    ? g_settings_schema_source_lookup (source,
+                                       "com.github.nuvashalauncher.Nuvasha",
+                                       TRUE)
+    : NULL;
+
+  if (schema == NULL)
+    return NULL;
+
+  GSettings *settings = g_settings_new_full (schema, NULL, NULL);
+  g_settings_schema_unref (schema);
+  return settings;
+}
+
+static gboolean
+on_window_close_request (GtkWindow *window, gpointer user_data)
+{
+  NuvashaMainWindow *self = nuvasha_MAIN_WINDOW (user_data);
+  int width = 0;
+  int height = 0;
+
+  if (self->window_settings == NULL)
+    return FALSE;
+
+  gtk_window_get_default_size (window, &width, &height);
+  if (width > 0)
+    g_settings_set_int (self->window_settings, "window-width", width);
+  if (height > 0)
+    g_settings_set_int (self->window_settings, "window-height", height);
+  g_settings_set_boolean (self->window_settings, "window-maximized",
+                          gtk_window_is_maximized (window));
+  return FALSE;
+}
+
 /* The launcher of one instance, made when it is first asked for. It is
  * the one launcher the row and the page of that instance share, which
  * is what keeps a game from being started twice. */
@@ -102,6 +140,18 @@ static void
 nuvasha_main_window_init (NuvashaMainWindow *self)
 {
   self->model = nuvasha_main_window_model_new ();
+  self->window_settings = window_settings_new ();
+  if (self->window_settings != NULL)
+    {
+      gtk_window_set_default_size (
+        GTK_WINDOW (self),
+        g_settings_get_int (self->window_settings, "window-width"),
+        g_settings_get_int (self->window_settings, "window-height"));
+      if (g_settings_get_boolean (self->window_settings, "window-maximized"))
+        gtk_window_maximize (GTK_WINDOW (self));
+    }
+  g_signal_connect_object (self, "close-request",
+                           G_CALLBACK (on_window_close_request), self, 0);
   nuvasha_main_window_build_ui (self);
 }
 
@@ -185,6 +235,7 @@ nuvasha_main_window_dispose (GObject *object)
      the user; it only lets go of the ones that are not running. */
   nuvasha_main_window_model_free (self->model);
   self->model = NULL;
+  g_clear_object (&self->window_settings);
   g_clear_pointer (&self->downloads.rows, g_hash_table_unref);
 
   G_OBJECT_CLASS (nuvasha_main_window_parent_class)->dispose (object);
