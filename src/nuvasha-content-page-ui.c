@@ -5,6 +5,7 @@
 #include "nuvasha-content-page-private.h"
 #include "nuvasha-i18n.h"
 #include "nuvasha-markdown.h"
+#include "nuvasha-ui-feedback.h"
 
 
 
@@ -16,11 +17,8 @@ toolbar_button (const char *icon_name, const char *label, GCallback callback,
 {
   GtkButton *button = GTK_BUTTON (gtk_button_new_from_icon_name (icon_name));
 
-  gtk_widget_add_css_class (GTK_WIDGET (button), "flat");
   gtk_widget_set_valign (GTK_WIDGET (button), GTK_ALIGN_CENTER);
-  gtk_widget_set_tooltip_text (GTK_WIDGET (button), label);
-  gtk_accessible_update_property (GTK_ACCESSIBLE (button),
-                                  GTK_ACCESSIBLE_PROPERTY_LABEL, label, -1);
+  nuvasha_ui_prepare_icon_button (GTK_WIDGET (button), label);
   g_signal_connect_object (button, "clicked", callback, user_data, 0);
 
   return GTK_WIDGET (button);
@@ -54,8 +52,8 @@ nuvasha_content_page_build_installed (NuvashaContentPage *self)
     gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_bar),
                                             _("Search"));
      gtk_widget_set_visible (GTK_WIDGET (search_bar), TRUE);
-   g_signal_connect (search_bar, "changed",
-                     G_CALLBACK (nuvasha_content_page_on_installed_search_changed), self);
+    g_signal_connect_object (search_bar, "changed",
+                             G_CALLBACK (nuvasha_content_page_on_installed_search_changed), self, 0);
      gtk_box_append (GTK_BOX (actions), GTK_WIDGET (search_bar));
 
     self->installed.update_all = GTK_BUTTON (toolbar_button (
@@ -108,10 +106,10 @@ nuvasha_content_page_build_installed (NuvashaContentPage *self)
 
    self->installed.group = group;
    self->installed.scroller = GTK_SCROLLED_WINDOW (scroller);
-   g_signal_connect (
-     gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (scroller)),
-     "value-changed", G_CALLBACK (nuvasha_content_page_on_installed_scroll_changed),
-     self);
+    g_signal_connect_object (
+      gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (scroller)),
+      "value-changed", G_CALLBACK (nuvasha_content_page_on_installed_scroll_changed),
+      self, 0);
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
                                  GTK_WIDGET (group));
   gtk_widget_set_vexpand (GTK_WIDGET (scroller), TRUE);
@@ -241,12 +239,9 @@ nuvasha_content_page_build_browse (NuvashaContentPage *self)
 
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (filter_button),
                                  "view-more-symbolic");
-    gtk_widget_set_tooltip_text (GTK_WIDGET (filter_button), _("Filter by category"));
-  gtk_accessible_update_property (GTK_ACCESSIBLE (filter_button),
-                                     GTK_ACCESSIBLE_PROPERTY_LABEL, _("Filter"),
-                                  -1);
+  nuvasha_ui_prepare_icon_button (GTK_WIDGET (filter_button),
+                                  _("Filter by category"));
   gtk_widget_set_valign (GTK_WIDGET (filter_button), GTK_ALIGN_CENTER);
-  gtk_widget_add_css_class (GTK_WIDGET (filter_button), "flat");
   gtk_menu_button_set_popover (GTK_MENU_BUTTON (filter_button), GTK_WIDGET (popover));
   /* A click opens the popover but does not emit "activate" on the
      menu button, so the load hangs off the popover's "show" instead. */
@@ -317,8 +312,8 @@ nuvasha_content_page_build_browse (NuvashaContentPage *self)
                                    GTK_ACCESSIBLE_PROPERTY_LABEL,
                                    pick_accessible_label, -1);
   gtk_button_set_child (GTK_BUTTON (pick_button), GTK_WIDGET (pick_icon));
-  g_signal_connect (pick_button, "clicked",
-                    G_CALLBACK (nuvasha_content_page_on_pick_button_clicked), self);
+   g_signal_connect_object (pick_button, "clicked",
+                            G_CALLBACK (nuvasha_content_page_on_pick_button_clicked), self, 0);
 
    /* Keep the count attached to the button without putting it inside the
       button's hit target. The overlay keeps it correctly positioned at
@@ -374,8 +369,8 @@ nuvasha_content_page_build_browse (NuvashaContentPage *self)
    self->browse.retry_row = GTK_BOX (retry_row);
    self->browse.retry_label = GTK_LABEL (retry_label);
 
-  g_signal_connect (retry_button, "clicked",
-                    G_CALLBACK (nuvasha_content_page_on_retry_page_clicked), self);
+   g_signal_connect_object (retry_button, "clicked",
+                            G_CALLBACK (nuvasha_content_page_on_retry_page_clicked), self, 0);
 
   /* The list asks for the next page when it is scrolled to the end.
      GTK4 has no edge-reached signal on GtkScrolledWindow, so the
@@ -385,8 +380,8 @@ nuvasha_content_page_build_browse (NuvashaContentPage *self)
     GtkAdjustment *adjustment =
       gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (scroller));
 
-    g_signal_connect (adjustment, "value-changed",
-                      G_CALLBACK (nuvasha_content_page_on_scroll_changed), self);
+     g_signal_connect_object (adjustment, "value-changed",
+                              G_CALLBACK (nuvasha_content_page_on_scroll_changed), self, 0);
   }
 
   adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (self->stack), GTK_WIDGET (box),
@@ -427,11 +422,8 @@ switcher_button (const char *icon_name, const char *label)
   GtkToggleButton *button = GTK_TOGGLE_BUTTON (gtk_toggle_button_new ());
 
   gtk_button_set_icon_name (GTK_BUTTON (button), icon_name);
-  gtk_widget_add_css_class (GTK_WIDGET (button), "flat");
+  nuvasha_ui_prepare_icon_button (GTK_WIDGET (button), label);
   gtk_widget_set_valign (GTK_WIDGET (button), GTK_ALIGN_CENTER);
-     gtk_widget_set_tooltip_text (GTK_WIDGET (button), label);
-  gtk_accessible_update_property (GTK_ACCESSIBLE (button),
-                                     GTK_ACCESSIBLE_PROPERTY_LABEL, label, -1);
 
   return GTK_WIDGET (button);
 }
@@ -441,15 +433,18 @@ nuvasha_content_page_build_bar (NuvashaContentPage *self)
 {
   GtkBox *inner = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
 
-  self->bar = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+   self->bar = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+  gtk_widget_add_css_class (GTK_WIDGET (self->bar), "nuvasha-content-toolbar");
+  gtk_widget_add_css_class (GTK_WIDGET (self->bar), "nuvasha-compact-toolbar");
+  gtk_widget_add_css_class (GTK_WIDGET (self->bar), "nuvasha-page-actions");
 
   {
     GtkEventController *keys = gtk_event_controller_key_new ();
 
     gtk_event_controller_set_propagation_phase (keys, GTK_PHASE_CAPTURE);
     gtk_widget_add_controller (GTK_WIDGET (self), keys);
-    g_signal_connect (keys, "key-pressed",
-                      G_CALLBACK (nuvasha_content_page_on_content_search_key), self);
+    g_signal_connect_object (keys, "key-pressed",
+                             G_CALLBACK (nuvasha_content_page_on_content_search_key), self, 0);
   }
 
   /* Expand the spacer so the switcher stays at the right edge. */

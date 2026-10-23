@@ -31,6 +31,7 @@ struct _NuvashaInstancePage
   AdwActionRow *icon_row;
   GtkLabel *icon_path_label; /* the icon path inside the chooser button */
   AdwViewStack *stack; /* the view stack holding the pages of the instance */
+  AdwViewSwitcher *switcher;
   NuvashaLogsPage *logs_page; /* the last page, kept so a rebuild can move it back */
 
   /* Directory chooser and move-progress spinner. */

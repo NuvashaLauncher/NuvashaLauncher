@@ -112,7 +112,11 @@ results_arrived (NuvashaContentPage *self, NuvashaModrinthResults *results,
       if (g_hash_table_contains (self->browse.model->seen_ids, project->project_id))
         continue;
 
-      row = adw_action_row_new ();
+      {
+        g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
+          "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-content-result-row.ui");
+        row = GTK_WIDGET (g_object_ref (gtk_builder_get_object (builder, "row")));
+      }
       icon = nuvasha_icon_widget_new (nuvasha_content_type_icon (self->type));
 
       g_hash_table_add (self->browse.model->seen_ids, g_strdup (project->project_id));

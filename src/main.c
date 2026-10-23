@@ -31,14 +31,8 @@ static void
 load_application_css (void)
 {
   g_autoptr (GtkCssProvider) provider = gtk_css_provider_new ();
-  g_autofree char *installed = g_build_filename (nuvasha_DATA_DIR,
-                                                 "nuvasha.css", NULL);
-  g_autofree char *source = g_build_filename (nuvasha_SOURCE_DATA_DIR,
-                                               "nuvasha.css", NULL);
-  const char *path = g_file_test (installed, G_FILE_TEST_IS_REGULAR)
-    ? installed : source;
-
-  gtk_css_provider_load_from_path (provider, path);
+  gtk_css_provider_load_from_resource (
+    provider, "/com/github/nuvashalauncher/nuvasha/nuvasha.css");
   gtk_style_context_add_provider_for_display (
     gdk_display_get_default (), GTK_STYLE_PROVIDER (provider),
     GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);

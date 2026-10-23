@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="GtkBox" id="loading">
+    <property name="orientation">vertical</property>
+    <property name="spacing">6</property>
+    <property name="halign">center</property>
+    <property name="valign">center</property>
+    <child><object class="AdwSpinner"/></child>
+    <child>
+      <object class="GtkLabel">
+        <property name="label" translatable="yes">Loading modpacks…</property>
+      </object>
+    </child>
+  </object>
+  <object class="AdwStatusPage" id="empty">
+    <property name="icon-name">system-search-symbolic</property>
+    <property name="title" translatable="yes">Nothing to show yet</property>
+    <property name="description" translatable="yes">No modpack matches what was asked for. Try another word</property>
+  </object>
+  <object class="AdwStatusPage" id="error">
+    <property name="icon-name">dialog-error-symbolic</property>
+  </object>
+  <object class="GtkBox" id="loading_more">
+    <property name="orientation">horizontal</property>
+    <property name="spacing">6</property>
+    <property name="halign">center</property>
+    <property name="margin-top">12</property>
+    <property name="margin-bottom">12</property>
+    <child><object class="AdwSpinner"/></child>
+    <child><object class="GtkLabel"><property name="label" translatable="yes">Loading more…</property></object></child>
+  </object>
+  <object class="GtkBox" id="retry_row">
+    <property name="orientation">horizontal</property>
+    <property name="spacing">6</property>
+    <property name="halign">center</property>
+    <property name="margin-top">12</property>
+    <property name="margin-bottom">12</property>
+    <property name="visible">False</property>
+    <child><object class="GtkLabel" id="retry_label"><property name="wrap">True</property></object></child>
+    <child><object class="GtkButton" id="retry_button"><property name="label" translatable="yes">Retry</property></object></child>
+  </object>
+</interface>

@@ -29,6 +29,24 @@
 
 G_DEFINE_FINAL_TYPE (NuvashaContentPage, nuvasha_content_page, GTK_TYPE_BOX)
 
+static void
+on_content_page_width_changed (GObject *object,
+                                GParamSpec *pspec G_GNUC_UNUSED,
+                                gpointer user_data G_GNUC_UNUSED)
+{
+  NuvashaContentPage *self = nuvasha_CONTENT_PAGE (object);
+  int width = gtk_widget_get_width (GTK_WIDGET (self));
+  gboolean narrow = width > 0 && width < 720;
+
+  if (self->bar == NULL)
+    return;
+  gtk_orientable_set_orientation (GTK_ORIENTABLE (self->bar),
+                                  narrow ? GTK_ORIENTATION_VERTICAL
+                                         : GTK_ORIENTATION_HORIZONTAL);
+  gtk_widget_set_hexpand (GTK_WIDGET (self->bar_spacer), !narrow);
+  gtk_widget_set_vexpand (GTK_WIDGET (self->bar_spacer), narrow);
+}
+
 typedef struct {
   NuvashaContentPage *page;
   GtkWidget *row;
@@ -567,7 +585,10 @@ file_row (NuvashaContentPage *self, NuvashaContentFile *file)
   g_return_val_if_fail (nuvasha_IS_CONTENT_PAGE (self), NULL);
   g_return_val_if_fail (file != NULL, NULL);
 
-  AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
+  g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
+    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-content-file-row.ui");
+  AdwActionRow *row = ADW_ACTION_ROW (g_object_ref (
+    gtk_builder_get_object (builder, "row")));
   GtkWidget *icon = nuvasha_icon_widget_new (nuvasha_content_type_icon (self->type));
 
   /* Treat file names and paths as plain text. The tooltip contains the path;
@@ -604,8 +625,8 @@ file_row (NuvashaContentPage *self, NuvashaContentFile *file)
       g_object_set_data (G_OBJECT (row), "nuvasha-mod-switch", sw);
       g_object_set_data (
         G_OBJECT (sw), "nuvasha-toggle-handler",
-        GSIZE_TO_POINTER (g_signal_connect (
-          sw, "state-set", G_CALLBACK (on_mod_toggled), self)));
+         GSIZE_TO_POINTER (g_signal_connect_object (
+           sw, "state-set", G_CALLBACK (on_mod_toggled), self, 0)));
       adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (sw));
     }
 
@@ -614,16 +635,12 @@ file_row (NuvashaContentPage *self, NuvashaContentFile *file)
   {
     GtkButton *trash = GTK_BUTTON (gtk_button_new_from_icon_name ("user-trash-symbolic"));
 
-    gtk_widget_add_css_class (GTK_WIDGET (trash), "flat");
+     nuvasha_ui_prepare_icon_button (GTK_WIDGET (trash), _("Delete"));
     /* Do not let clicking delete move keyboard focus into a row that is
      * about to disappear. GTK would otherwise focus the first remaining row
      * when this button is removed, which scrolls the list to the top. */
     gtk_widget_set_focus_on_click (GTK_WIDGET (trash), FALSE);
     gtk_widget_set_valign (GTK_WIDGET (trash), GTK_ALIGN_CENTER);
-   gtk_widget_set_tooltip_text (GTK_WIDGET (trash), _("Delete"));
-    gtk_accessible_update_property (GTK_ACCESSIBLE (trash),
-                                    GTK_ACCESSIBLE_PROPERTY_LABEL,
-                                     _("Delete"), -1);
     g_object_set_data (G_OBJECT (trash), "nuvasha-file", file);
     g_signal_connect_object (trash, "clicked", G_CALLBACK (on_trash_clicked), self, 0);
     adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (trash));
@@ -733,15 +750,29 @@ nuvasha_content_page_on_installed_scroll_changed (
 
 
 static void
+folder_open_request_free (gpointer data)
+{
+  PageWatch *request = data;
+  page_watch_free (request);
+}
+
+static void
 open_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                gpointer user_data)
 {
+  PageWatch *request = user_data;
   g_autoptr (GError) error = NULL;
 
   if (!g_app_info_launch_default_for_uri_finish (result, &error))
-    g_warning ("the folder does not open: %s", error->message);
+    {
+      g_autofree char *message =
+        g_strdup_printf (_("The folder could not be opened: %s"),
+                         error->message);
+      if (request->page != NULL)
+        show_toast (request->page, message);
+    }
 
-  g_free (user_data);
+  folder_open_request_free (request);
 }
 
 void
@@ -771,8 +802,11 @@ nuvasha_content_page_on_open_folder_clicked (GtkButton *button G_GNUC_UNUSED, gp
 
   /* GIO hands the folder to the desktop the way a double click in a file
    * manager does: nothing goes through a shell. */
-  g_app_info_launch_default_for_uri_async (uri, NULL, NULL, open_finished,
-                                           g_strdup (uri));
+  {
+    PageWatch *request = page_watch_new (self);
+    g_app_info_launch_default_for_uri_async (uri, NULL, NULL, open_finished,
+                                             request);
+  }
 }
 
 NuvashaContentPage *
@@ -788,6 +822,7 @@ nuvasha_content_page_new (NuvashaInstance *instance, NuvashaContentType type)
   self = g_object_new (nuvasha_TYPE_CONTENT_PAGE, NULL);
   self->instance = g_object_ref (instance);
   self->type = type;
+  gtk_widget_add_css_class (GTK_WIDGET (self), "nuvasha-main-content");
   self->minecraft_version = instance_string (instance, "minecraft-version");
   self->browse.model = nuvasha_content_browser_model_new ();
   self->installed.scan = g_cancellable_new ();
@@ -864,6 +899,8 @@ nuvasha_content_page_new (NuvashaInstance *instance, NuvashaContentType type)
 
   nuvasha_content_page_build_bar (self);
   nuvasha_content_page_move_actions_into_bar (self, FALSE);
+  g_signal_connect_object (self, "notify::width",
+                           G_CALLBACK (on_content_page_width_changed), self, 0);
 
   return self;
 }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="AdwActionRow" id="row">
+    <property name="use-markup">False</property>
+    <property name="subtitle-lines">2</property>
+    <property name="subtitle-selectable">False</property>
+  </object>
+</interface>

@@ -3,6 +3,7 @@
  */
 
 #include "nuvasha-offline-account-dialog.h"
+#include "nuvasha-dialogs.h"
 #include "nuvasha-i18n.h"
 #include "nuvasha-ui-feedback.h"
 
@@ -13,6 +14,8 @@ struct _NuvashaOfflineAccountDialog
   AdwEntryRow *name_row;
   GtkLabel *error_label;
   GtkButton *add_button;
+  GtkButton *cancel_button;
+  GtkBox *content;
 };
 
 G_DEFINE_FINAL_TYPE (NuvashaOfflineAccountDialog, nuvasha_offline_account_dialog,
@@ -88,65 +91,39 @@ on_add_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 static void
 nuvasha_offline_account_dialog_init (NuvashaOfflineAccountDialog *self)
 {
-  adw_dialog_set_title (ADW_DIALOG (self), _("Add Offline Account"));
-
-  self->name_row = ADW_ENTRY_ROW (adw_entry_row_new ());
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->name_row),
-                                 "Name");
-  adw_entry_row_set_max_length (ADW_ENTRY_ROW (self->name_row), 16);
-  adw_entry_row_set_activates_default (ADW_ENTRY_ROW (self->name_row), TRUE);
-
-  AdwPreferencesGroup *group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
-  adw_preferences_group_add (group,
-                             GTK_WIDGET (self->name_row));
-
-  self->error_label = GTK_LABEL (gtk_label_new (NULL));
-  gtk_label_set_wrap (GTK_LABEL (self->error_label), TRUE);
-  gtk_label_set_xalign (GTK_LABEL (self->error_label), 0.0);
+  gtk_widget_init_template (GTK_WIDGET (self));
+  nuvasha_dialog_add_content_margin_breakpoint (ADW_DIALOG (self),
+                                                GTK_WIDGET (self->content),
+                                                440, 6);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->name_row), _("Name"));
+  adw_entry_row_set_max_length (self->name_row, 16);
+  adw_entry_row_set_activates_default (self->name_row, TRUE);
+  gtk_label_set_wrap (self->error_label, TRUE);
+  gtk_label_set_xalign (self->error_label, 0.0);
   gtk_widget_add_css_class (GTK_WIDGET (self->error_label), "error");
   gtk_widget_set_valign (GTK_WIDGET (self->error_label), GTK_ALIGN_START);
   gtk_widget_set_visible (GTK_WIDGET (self->error_label), FALSE);
-
-  GtkButton *cancel_button = GTK_BUTTON (gtk_button_new_with_label (_("Cancel")));
-  g_signal_connect_object (cancel_button, "clicked", G_CALLBACK (nuvasha_ui_cancel_dialog),
-                           self, 0);
-
-  self->add_button = GTK_BUTTON (gtk_button_new_with_label (_("Add")));
+  gtk_button_set_label (self->cancel_button, _("Cancel"));
+  gtk_button_set_label (self->add_button, _("Add"));
   gtk_widget_add_css_class (GTK_WIDGET (self->add_button), "suggested-action");
-  g_signal_connect_object (self->add_button, "clicked", G_CALLBACK (on_add_clicked),
-                           self, 0);
-
-  GtkBox *buttons = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
-  gtk_widget_set_halign (GTK_WIDGET (buttons), GTK_ALIGN_CENTER);
-  gtk_box_append (GTK_BOX (buttons), GTK_WIDGET (cancel_button));
-  gtk_box_append (GTK_BOX (buttons), GTK_WIDGET (self->add_button));
-
-  /* Keep this form like the export-metadata form: a natural vertical box
-     containing the field group, the validation message, and the buttons.
-     A preferences page here adds a scrolling allocation around the entry
-     and can let the message paint over the row. */
-  GtkBox *content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
-  gtk_widget_set_margin_start (GTK_WIDGET (content), 12);
-  gtk_widget_set_margin_end (GTK_WIDGET (content), 12);
-  gtk_widget_set_margin_top (GTK_WIDGET (content), 12);
-  gtk_widget_set_margin_bottom (GTK_WIDGET (content), 12);
-  gtk_box_append (GTK_BOX (content), GTK_WIDGET (group));
-  gtk_box_append (GTK_BOX (content), GTK_WIDGET (self->error_label));
-  gtk_box_append (GTK_BOX (content), GTK_WIDGET (buttons));
-  adw_dialog_set_child (ADW_DIALOG (self), GTK_WIDGET (content));
-
-  adw_dialog_set_default_widget (ADW_DIALOG (self),
-                                 GTK_WIDGET (self->add_button));
-
-  g_signal_connect_object (self->name_row, "notify::text",
-                           G_CALLBACK (on_input_changed), self, 0);
-
+  g_signal_connect_object (self->cancel_button, "clicked", G_CALLBACK (nuvasha_ui_cancel_dialog), self, 0);
+  g_signal_connect_object (self->add_button, "clicked", G_CALLBACK (on_add_clicked), self, 0);
+  g_signal_connect_object (self->name_row, "notify::text", G_CALLBACK (on_input_changed), self, 0);
+  adw_dialog_set_default_widget (ADW_DIALOG (self), GTK_WIDGET (self->add_button));
   update_add_button (self);
 }
 
 static void
 nuvasha_offline_account_dialog_class_init (NuvashaOfflineAccountDialogClass *klass)
 {
+  GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+  gtk_widget_class_set_template_from_resource (widget_class,
+      "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-offline-account.ui");
+  gtk_widget_class_bind_template_child (widget_class, NuvashaOfflineAccountDialog, name_row);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaOfflineAccountDialog, error_label);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaOfflineAccountDialog, add_button);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaOfflineAccountDialog, cancel_button);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaOfflineAccountDialog, content);
   nuvasha_offline_account_dialog_signals[nuvasha_OFFLINE_ACCOUNT_DIALOG_SIGNAL_ACCOUNT_ADDED] =
     g_signal_new ("account-added", G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 1,

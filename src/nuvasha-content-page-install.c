@@ -149,8 +149,12 @@ remove_duplicate_project_files (NuvashaContentPage *self, const char *project_id
 
        if (!nuvasha_content_remove_file (installed->path, &error) &&
           !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
-        g_warning ("the duplicate file \"%s\" could not be removed: %s",
-                   installed->path, error != NULL ? error->message : "unknown error");
+         {
+           g_autofree char *message = g_strdup_printf (
+             _("The duplicate file \"%s\" could not be removed: %s"),
+             installed->path, error != NULL ? error->message : "unknown error");
+           show_toast (self, message);
+         }
       else
         {
           g_autofree char *directory = NULL;
@@ -247,9 +251,13 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   /* The new version is in place, so the file it replaces can go. */
   if (file != NULL && file->replaces != NULL)
     {
-       if (!nuvasha_content_remove_file (file->replaces, NULL))
-        g_warning ("the file \"%s\" it replaces could not be removed",
-                   file->replaces);
+       if (!nuvasha_content_remove_file (file->replaces, NULL) && run->page != NULL)
+         {
+           g_autofree char *message = g_strdup_printf (
+             _("The replaced file \"%s\" could not be removed"),
+             file->replaces);
+           show_toast (run->page, message);
+         }
     }
 
   if (run->page != NULL && file != NULL)

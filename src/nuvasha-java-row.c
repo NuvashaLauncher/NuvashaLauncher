@@ -9,6 +9,7 @@
 #define _GNU_SOURCE
 
 #include "nuvasha-java-row.h"
+#include "nuvasha-ui-feedback.h"
 #include "nuvasha-i18n.h"
 
 #include <stdlib.h>
@@ -769,8 +770,8 @@ nuvasha_java_row_init (NuvashaJavaRow *self)
     g_object_unref (popup_factory);
   }
 
-   self->retry = GTK_BUTTON (gtk_button_new_with_label (_("Retry")));
-  gtk_widget_add_css_class (GTK_WIDGET (self->retry), "flat");
+    self->retry = GTK_BUTTON (gtk_button_new_with_label (_("Retry")));
+   nuvasha_ui_prepare_icon_button (GTK_WIDGET (self->retry), _("Retry"));
   gtk_widget_set_valign (GTK_WIDGET (self->retry), GTK_ALIGN_CENTER);
   gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
   g_signal_connect_object (self->retry, "clicked", G_CALLBACK (on_retry_clicked),
@@ -779,5 +780,5 @@ nuvasha_java_row_init (NuvashaJavaRow *self)
 
   /* First, so the entry that asks for a runtime can put the selection
      back before whoever uses the row sees it. */
-  g_signal_connect (self, "notify::selected", G_CALLBACK (on_picked), self);
+  g_signal_connect_object (self, "notify::selected", G_CALLBACK (on_picked), self, 0);
 }

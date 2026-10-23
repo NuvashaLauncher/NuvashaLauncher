@@ -737,11 +737,15 @@ on_skin_selected (GtkListBox *list, GtkListBoxRow *row, gpointer user_data)
 AdwActionRow *
 skin_row_new (SkinMenu *menu, const char *name, const char *url)
 {
-  AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
-  GtkImage *image = GTK_IMAGE (gtk_image_new_from_icon_name ("image-x-generic-symbolic"));
+  g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
+    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-skin-row.ui");
+  AdwActionRow *row = ADW_ACTION_ROW (g_object_ref (
+    gtk_builder_get_object (builder, "row")));
+  GtkImage *image = GTK_IMAGE (gtk_builder_get_object (builder, "avatar"));
 
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
                                  name != NULL && *name != '\0' ? name : _("Skin"));
+  gtk_image_set_from_icon_name (image, "image-x-generic-symbolic");
   gtk_image_set_pixel_size (image, AVATAR_SIZE);
   nuvasha_users_set_avatar_icon (image);
   if (url != NULL)
@@ -894,28 +898,27 @@ load_profile_skins (SkinMenu *menu)
 AdwDialog *
 nuvasha_users_skin_menu_new (NuvashaUsersPopover *owner, GtkImage *image, NuvashaAccount *account)
 {
+  nuvasha_skin_view_get_type ();
   AdwDialog *dialog = adw_dialog_new ();
   AdwHeaderBar *header = ADW_HEADER_BAR (adw_header_bar_new ());
   AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
-  GtkBox *root = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 18));
-  GtkBox *left = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 10));
-  GtkBox *right = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 10));
-  GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
-  GtkListBox *skins = GTK_LIST_BOX (gtk_list_box_new ());
-  NuvashaSkinView *preview = nuvasha_skin_view_new ();
-  GtkCheckButton *default_model = GTK_CHECK_BUTTON (
-    gtk_check_button_new_with_label (_("Classic model")));
-  GtkCheckButton *slim_model = GTK_CHECK_BUTTON (
-    gtk_check_button_new_with_label (_("Slim model")));
+  g_autoptr (GtkBuilder) content_builder = gtk_builder_new_from_resource (
+    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-skin-content.ui");
+  GtkBox *root = GTK_BOX (gtk_builder_get_object (content_builder, "root"));
+  GtkBox *left = GTK_BOX (gtk_builder_get_object (content_builder, "left"));
+  GtkBox *right = GTK_BOX (gtk_builder_get_object (content_builder, "right"));
+  GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_builder_get_object (content_builder, "scroller"));
+  GtkListBox *skins = GTK_LIST_BOX (gtk_builder_get_object (content_builder, "skins"));
+  NuvashaSkinView *preview = nuvasha_SKIN_VIEW (gtk_builder_get_object (content_builder, "preview"));
+  GtkCheckButton *default_model = GTK_CHECK_BUTTON (gtk_builder_get_object (content_builder, "classic-model"));
+  GtkCheckButton *slim_model = GTK_CHECK_BUTTON (gtk_builder_get_object (content_builder, "slim-model"));
   GtkStringList *cape_list = gtk_string_list_new ((const char *[]) { _("No cape"), NULL });
-  GtkDropDown *capes = GTK_DROP_DOWN (gtk_drop_down_new (G_LIST_MODEL (cape_list), NULL));
-  GtkButton *import = GTK_BUTTON (gtk_button_new_with_label (_("Import skin…")));
-  GtkButton *export = GTK_BUTTON (gtk_button_new_with_label (_("Export skin…")));
-  GtkButton *open_skins = GTK_BUTTON (gtk_button_new_from_icon_name ("folder-symbolic"));
-  GtkButton *remove = GTK_BUTTON (gtk_button_new_from_icon_name ("user-trash-symbolic"));
-  GtkBox *actions = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
-  GtkBox *action_spacer = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
-  g_autoptr (AdwBreakpointCondition) narrow_condition =
+  GtkDropDown *capes = GTK_DROP_DOWN (gtk_builder_get_object (content_builder, "capes"));
+  GtkButton *import = GTK_BUTTON (gtk_builder_get_object (content_builder, "import"));
+  GtkButton *export = GTK_BUTTON (gtk_builder_get_object (content_builder, "export"));
+  GtkButton *open_skins = GTK_BUTTON (gtk_builder_get_object (content_builder, "open-skins"));
+  GtkButton *remove = GTK_BUTTON (gtk_builder_get_object (content_builder, "remove"));
+  AdwBreakpointCondition *narrow_condition =
     adw_breakpoint_condition_new_length (ADW_BREAKPOINT_CONDITION_MAX_WIDTH,
                                          700, ADW_LENGTH_UNIT_PX);
   g_autoptr (AdwBreakpoint) narrow_breakpoint =
@@ -958,6 +961,7 @@ nuvasha_users_skin_menu_new (NuvashaUsersPopover *owner, GtkImage *image, Nuvash
   gtk_widget_set_vexpand (GTK_WIDGET (scroller), TRUE);
   gtk_widget_set_hexpand (GTK_WIDGET (scroller), TRUE);
   gtk_widget_add_css_class (GTK_WIDGET (skins), "boxed-list");
+  gtk_widget_add_css_class (GTK_WIDGET (skins), "nuvasha-list-section");
   gtk_widget_set_halign (GTK_WIDGET (preview), GTK_ALIGN_FILL);
   gtk_widget_set_vexpand (GTK_WIDGET (preview), TRUE);
   gtk_widget_set_size_request (GTK_WIDGET (preview), 220, 300);
@@ -976,40 +980,20 @@ nuvasha_users_skin_menu_new (NuvashaUsersPopover *owner, GtkImage *image, Nuvash
                                                     ? account->skin_model : "CLASSIC",
                                                   "SLIM") == 0);
   data->applying_profile = FALSE;
+  nuvasha_ui_prepare_icon_button (GTK_WIDGET (open_skins), _("Open Folder"));
+  nuvasha_ui_prepare_icon_button (GTK_WIDGET (remove), _("Delete"));
   gtk_widget_add_css_class (GTK_WIDGET (remove), "destructive-action");
   gtk_widget_set_hexpand (GTK_WIDGET (export), FALSE);
   gtk_widget_set_hexpand (GTK_WIDGET (import), FALSE);
   gtk_widget_set_hexpand (GTK_WIDGET (remove), FALSE);
   gtk_widget_set_hexpand (GTK_WIDGET (open_skins), FALSE);
   gtk_widget_set_halign (GTK_WIDGET (remove), GTK_ALIGN_END);
-  gtk_widget_set_tooltip_text (GTK_WIDGET (open_skins), _("Open Folder"));
-  gtk_widget_set_tooltip_text (GTK_WIDGET (remove), _("Delete"));
   gtk_accessible_update_property (GTK_ACCESSIBLE (open_skins),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL,
                                   _("Open Folder"), -1);
   gtk_accessible_update_property (GTK_ACCESSIBLE (remove),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL,
                                   _("Delete"), -1);
-  gtk_widget_set_hexpand (GTK_WIDGET (action_spacer), TRUE);
-  gtk_box_append (left, GTK_WIDGET (preview));
-  gtk_box_append (left, GTK_WIDGET (capes));
-  gtk_box_append (left, GTK_WIDGET (default_model));
-  gtk_box_append (left, GTK_WIDGET (slim_model));
-  gtk_scrolled_window_set_child (scroller, GTK_WIDGET (skins));
-  gtk_box_append (right, GTK_WIDGET (scroller));
-  gtk_box_append (actions, GTK_WIDGET (import));
-  gtk_box_append (actions, GTK_WIDGET (export));
-  gtk_box_append (actions, GTK_WIDGET (action_spacer));
-  gtk_box_append (actions, GTK_WIDGET (open_skins));
-  gtk_box_append (actions, GTK_WIDGET (remove));
-  gtk_box_append (right, GTK_WIDGET (actions));
-  gtk_widget_add_css_class (GTK_WIDGET (actions), "nuvasha-skin-actions");
-  gtk_widget_set_margin_start (GTK_WIDGET (root), 24);
-  gtk_widget_set_margin_end (GTK_WIDGET (root), 24);
-  gtk_widget_set_margin_top (GTK_WIDGET (root), 24);
-  gtk_widget_set_margin_bottom (GTK_WIDGET (root), 24);
-  gtk_box_append (root, GTK_WIDGET (left));
-  gtk_box_append (root, GTK_WIDGET (right));
   gtk_widget_set_size_request (GTK_WIDGET (root), 420, 400);
   g_value_init (&vertical, GTK_TYPE_ORIENTATION);
   g_value_set_enum (&vertical, GTK_ORIENTATION_VERTICAL);

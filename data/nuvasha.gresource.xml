@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/com/github/nuvashalauncher/nuvasha">
+    <file>nuvasha.css</file>
+    <file>ui/nuvasha-sign-in.ui</file>
+    <file>ui/nuvasha-offline-account.ui</file>
+    <file>ui/nuvasha-create-instance.ui</file>
+    <file>ui/nuvasha-modpack-import.ui</file>
+    <file>ui/nuvasha-modpack-dialog.ui</file>
+    <file>ui/nuvasha-modpack-browser-toolbar.ui</file>
+    <file>ui/nuvasha-modpack-browser-states.ui</file>
+    <file>ui/nuvasha-modpack-details-toolbar.ui</file>
+    <file>ui/nuvasha-modpack-optional.ui</file>
+    <file>ui/nuvasha-modpack-error.ui</file>
+    <file>ui/nuvasha-modpack-details-body.ui</file>
+    <file>ui/nuvasha-content-result-row.ui</file>
+    <file>ui/nuvasha-content-file-row.ui</file>
+    <file>ui/nuvasha-content-details.ui</file>
+    <file>ui/nuvasha-download-row.ui</file>
+    <file>ui/nuvasha-skin-row.ui</file>
+    <file>ui/nuvasha-downloads-popover.ui</file>
+    <file>ui/nuvasha-main-shell.ui</file>
+    <file>ui/nuvasha-skin-content.ui</file>
+  </gresource>
+</gresources>

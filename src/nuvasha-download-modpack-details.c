@@ -202,18 +202,26 @@ static GtkWidget *
 details_content (NuvashaDownloadModpackDialog *self)
 {
   GtkWidget *content = NULL;
-  GtkWidget *scroller = NULL;
+  GtkScrolledWindow *scroller = NULL;
   GtkWidget *box = NULL;
   GtkWidget *page = NULL;
   GtkWidget *heading = NULL;
   GtkWidget *bar = NULL;
+  g_autoptr (GtkBuilder) body_builder = gtk_builder_new_from_resource (
+    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-modpack-details-body.ui");
+  g_autoptr (GtkBuilder) toolbar_builder = gtk_builder_new_from_resource (
+    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-modpack-details-toolbar.ui");
   g_autofree char *downloads = NULL;
   const char *who = author_of (self);
 
   if (self->project == NULL)
     return gtk_label_new ("");
 
-  scroller = gtk_scrolled_window_new ();
+  content = GTK_WIDGET (gtk_builder_get_object (body_builder, "content"));
+  nuvasha_ui_prepare_dialog_content (content);
+  scroller = GTK_SCROLLED_WINDOW (gtk_builder_get_object (body_builder, "scroller"));
+  details_watch (&self->details_error, GTK_WIDGET (gtk_builder_get_object (
+    body_builder, "error-label")));
   box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 18);
   heading = adw_preferences_group_new ();
 
@@ -261,11 +269,7 @@ details_content (NuvashaDownloadModpackDialog *self)
 
   /* Explain missing or failed version lists instead of disabling the button
    * without feedback. */
-  details_watch (&self->details_error, gtk_label_new (NULL));
-  gtk_label_set_wrap (GTK_LABEL (self->details_error), TRUE);
-  gtk_label_set_xalign (GTK_LABEL (self->details_error), 0);
   gtk_widget_add_css_class (GTK_WIDGET (self->details_error), "dim-label");
-  gtk_widget_set_visible (GTK_WIDGET (self->details_error), FALSE);
   gtk_box_append (GTK_BOX (box), GTK_WIDGET (self->details_error));
 
   gtk_widget_set_margin_top (GTK_WIDGET (box), 12);
@@ -273,34 +277,18 @@ details_content (NuvashaDownloadModpackDialog *self)
   gtk_widget_set_margin_start (GTK_WIDGET (box), 18);
   gtk_widget_set_margin_end (GTK_WIDGET (box), 18);
 
-  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller), GTK_WIDGET (box));
-  gtk_widget_set_vexpand (GTK_WIDGET (scroller), TRUE);
+  gtk_scrolled_window_set_child (scroller, GTK_WIDGET (box));
 
   /* Version selector and download action. */
-  details_watch (&self->dropdown, gtk_drop_down_new (NULL, NULL));
-  gtk_widget_set_hexpand (GTK_WIDGET (self->dropdown), TRUE);
-  gtk_widget_set_valign (GTK_WIDGET (self->dropdown), GTK_ALIGN_CENTER);
-
-  details_watch (&self->download_button, gtk_button_new_with_label (_("Download")));
-  gtk_widget_add_css_class (GTK_WIDGET (self->download_button), "suggested-action");
-  gtk_widget_set_valign (GTK_WIDGET (self->download_button), GTK_ALIGN_CENTER);
+  bar = GTK_WIDGET (gtk_builder_get_object (toolbar_builder, "toolbar"));
+  details_watch (&self->dropdown, GTK_WIDGET (gtk_builder_get_object (toolbar_builder, "dropdown")));
+  details_watch (&self->download_button,
+                 GTK_WIDGET (gtk_builder_get_object (toolbar_builder, "download-button")));
   /* Nothing can be installed before the versions have arrived. */
   gtk_widget_set_sensitive (GTK_WIDGET (self->download_button), FALSE);
   g_signal_connect_object (self->download_button, "clicked",
                            G_CALLBACK (on_modpack_download_clicked), self, 0);
 
-  bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  gtk_box_append (GTK_BOX (bar), GTK_WIDGET (self->dropdown));
-  gtk_box_append (GTK_BOX (bar), GTK_WIDGET (self->download_button));
-  gtk_widget_set_margin_top (bar, 12);
-  gtk_widget_set_margin_bottom (bar, 12);
-  gtk_widget_set_margin_start (bar, 12);
-  gtk_widget_set_margin_end (bar, 12);
-
-  content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-  gtk_box_append (GTK_BOX (content), GTK_WIDGET (scroller));
-  gtk_box_append (GTK_BOX (content),
-                  gtk_separator_new (GTK_ORIENTATION_HORIZONTAL));
   gtk_box_append (GTK_BOX (content), bar);
 
   return content;

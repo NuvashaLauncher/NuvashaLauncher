@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="GtkBox" id="top">
+    <property name="css-classes">nuvasha-toolbar-actions</property>
+    <property name="orientation">horizontal</property>
+    <property name="spacing">6</property>
+    <property name="margin-start">12</property>
+    <property name="margin-end">12</property>
+    <property name="margin-top">6</property>
+    <property name="margin-bottom">6</property>
+    <child>
+      <object class="GtkSearchEntry" id="search-entry">
+        <property name="hexpand">True</property>
+        <property name="placeholder-text" translatable="yes">Search modpacks</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkButton" id="close-button">
+        <property name="icon-name">window-close-symbolic</property>
+        <property name="tooltip-text" translatable="yes">Close</property>
+        <property name="css-classes">flat</property>
+      </object>
+    </child>
+  </object>
+</interface>

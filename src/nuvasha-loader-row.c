@@ -3,6 +3,7 @@
  */
 
 #include "nuvasha-loader-row.h"
+#include "nuvasha-ui-feedback.h"
 #include "nuvasha-i18n.h"
 #include "nuvasha-download.h"
 
@@ -533,7 +534,7 @@ nuvasha_loader_row_new (void)
                                   _("Loader Version"));
   self->retry = GTK_BUTTON (
     g_object_ref_sink (gtk_button_new_with_label (_("Retry"))));
-  gtk_widget_add_css_class (GTK_WIDGET (self->retry), "flat");
+  nuvasha_ui_prepare_icon_button (GTK_WIDGET (self->retry), _("Retry"));
   gtk_widget_set_valign (GTK_WIDGET (self->retry), GTK_ALIGN_CENTER);
   gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
   adw_action_row_add_suffix (ADW_ACTION_ROW (self->version_row), GTK_WIDGET (self->retry));

@@ -4,6 +4,7 @@
 
 #include "nuvasha-logs-page.h"
 #include "nuvasha-i18n.h"
+#include "nuvasha-ui-feedback.h"
 
 #include <gdk/gdkevents.h>
 
@@ -448,10 +449,7 @@ toolbar_button (const char *icon_name, const char *label, GCallback callback,
 
   gtk_image_set_pixel_size (GTK_IMAGE (icon), 16);
   gtk_button_set_child (GTK_BUTTON (button), GTK_WIDGET (icon));
-  gtk_widget_add_css_class (GTK_WIDGET (button), "flat");
-  gtk_widget_set_tooltip_text (GTK_WIDGET (button), label);
-  gtk_accessible_update_property (GTK_ACCESSIBLE (button),
-                                  GTK_ACCESSIBLE_PROPERTY_LABEL, label, -1);
+  nuvasha_ui_prepare_icon_button (GTK_WIDGET (button), label);
   g_signal_connect_object (button, "clicked", callback, user_data, 0);
 
   return GTK_WIDGET (button);
@@ -471,6 +469,7 @@ nuvasha_logs_page_new (NuvashaLauncher *launcher)
   g_return_val_if_fail (nuvasha_IS_LAUNCHER (launcher), NULL);
 
   self = g_object_new (nuvasha_TYPE_LOGS_PAGE, NULL);
+  gtk_widget_add_css_class (GTK_WIDGET (self), "nuvasha-main-content");
   self->launcher = g_object_ref (launcher);
   self->lines = g_ptr_array_new_with_free_func (g_free);
 

@@ -59,6 +59,14 @@ test_skin_dialog_close (void)
   g_assert_cmpuint (criticals, ==, 0);
 }
 
+#if defined(__SANITIZE_ADDRESS__)
+static void
+test_skin_dialog_close_under_asan (void)
+{
+  g_test_skip ("GTK/Pango display caches are outside ASan ownership");
+}
+#endif
+
 int
 main (int argc, char **argv)
 {
@@ -66,6 +74,10 @@ main (int argc, char **argv)
   if (!gtk_init_check ())
     return 77;
   g_log_set_writer_func (count_criticals, NULL, NULL);
+#if defined(__SANITIZE_ADDRESS__)
+  g_test_add_func ("/skin-dialog/close", test_skin_dialog_close_under_asan);
+#else
   g_test_add_func ("/skin-dialog/close", test_skin_dialog_close);
+#endif
   return g_test_run ();
 }

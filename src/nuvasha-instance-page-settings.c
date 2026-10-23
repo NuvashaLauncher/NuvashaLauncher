@@ -520,14 +520,8 @@ button_row (AdwPreferencesGroup *group,
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), title);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (row), subtitle);
 
-  gtk_widget_add_css_class (GTK_WIDGET (button), "flat");
   gtk_widget_set_valign (GTK_WIDGET (button), GTK_ALIGN_CENTER);
-  gtk_widget_set_tooltip_text (GTK_WIDGET (button), title);
-
-  /* The row carries the title for a reader; the button is only its icon,
-     so it needs a name of its own for a screen reader to say. */
-  gtk_accessible_update_property (GTK_ACCESSIBLE (button),
-                                GTK_ACCESSIBLE_PROPERTY_LABEL, title, -1);
+  nuvasha_ui_prepare_icon_button (GTK_WIDGET (button), title);
 
   g_signal_connect_object (button, "clicked", callback, user_data, 0);
 
@@ -547,6 +541,7 @@ GtkWidget *
 create_settings_page (NuvashaInstancePage *self)
 {
   AdwPreferencesPage *page = ADW_PREFERENCES_PAGE (adw_preferences_page_new ());
+  gtk_widget_add_css_class (GTK_WIDGET (page), "nuvasha-settings-page");
   g_autofree char *name = instance_string (self->instance, "name");
   g_autofree char *directory = instance_string (self->instance, "directory");
   g_autofree char *minecraft_version =
@@ -564,6 +559,11 @@ create_settings_page (NuvashaInstancePage *self)
   AdwPreferencesGroup *minecraft = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwPreferencesGroup *java = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwPreferencesGroup *actions = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+
+  gtk_widget_add_css_class (GTK_WIDGET (general), "nuvasha-preferences-surface");
+  gtk_widget_add_css_class (GTK_WIDGET (minecraft), "nuvasha-preferences-surface");
+  gtk_widget_add_css_class (GTK_WIDGET (java), "nuvasha-preferences-surface");
+  gtk_widget_add_css_class (GTK_WIDGET (actions), "nuvasha-preferences-surface");
   GtkWidget *change_icon = NULL;
   GtkWidget *delete_row = NULL;
 
@@ -592,9 +592,8 @@ create_settings_page (NuvashaInstancePage *self)
   /* The button is the path and the chooser at once: pressing it picks a
      file, and what it picked is written in it. */
   change_icon = path_button (NULL, &self->icon_path_label);
-  gtk_widget_add_css_class (change_icon, "flat");
   gtk_widget_set_valign (change_icon, GTK_ALIGN_CENTER);
-   gtk_widget_set_tooltip_text (change_icon, _("Choose an Icon"));
+  nuvasha_ui_prepare_icon_button (change_icon, _("Choose an Icon"));
   g_signal_connect_object (change_icon, "clicked",
                            G_CALLBACK (on_change_icon_clicked), self, 0);
   adw_action_row_add_suffix (ADW_ACTION_ROW (self->icon_row), change_icon);
@@ -613,9 +612,9 @@ create_settings_page (NuvashaInstancePage *self)
 
    self->directory_change = GTK_BUTTON (path_button (
      directory, &self->directory_path_label));
-  gtk_widget_add_css_class (GTK_WIDGET (self->directory_change), "flat");
-  gtk_widget_set_valign (GTK_WIDGET (self->directory_change), GTK_ALIGN_CENTER);
-   gtk_widget_set_tooltip_text (GTK_WIDGET (self->directory_change), _("Change the Directory"));
+   gtk_widget_set_valign (GTK_WIDGET (self->directory_change), GTK_ALIGN_CENTER);
+   nuvasha_ui_prepare_icon_button (GTK_WIDGET (self->directory_change),
+                                   _("Change the Directory"));
    g_signal_connect_object (self->directory_change, "clicked",
                             G_CALLBACK (on_change_directory_clicked), self, 0);
 
@@ -692,8 +691,8 @@ create_settings_page (NuvashaInstancePage *self)
                                  _("JVM Arguments"));
   adw_entry_row_set_show_apply_button (ADW_ENTRY_ROW (jvm_args_row), TRUE);
   gtk_editable_set_text (GTK_EDITABLE (jvm_args_row), jvm_args);
-  g_signal_connect (jvm_args_row, "apply", G_CALLBACK (on_jvm_args_apply),
-                    self);
+  g_signal_connect_object (jvm_args_row, "apply", G_CALLBACK (on_jvm_args_apply),
+                           self, 0);
   adw_preferences_group_add (java, GTK_WIDGET (jvm_args_row));
 
   /* The Java row's compatibility warning needs the javaVersion field of

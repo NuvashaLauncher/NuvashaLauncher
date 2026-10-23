@@ -228,13 +228,15 @@ details_content (NuvashaContentPage *self)
   GtkWidget *scroller = NULL;
   GtkWidget *box = NULL;
   GtkWidget *heading = NULL;
-  GtkWidget *bar = NULL;
+  g_autoptr (GtkBuilder) details_builder = gtk_builder_new_from_resource (
+    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-content-details.ui");
   GtkWidget *title = NULL;
   GtkWidget *meta = NULL;
   GtkWidget *count = NULL;
   g_autofree char *downloads = NULL;
 
-  scroller = gtk_scrolled_window_new ();
+  content = GTK_WIDGET (gtk_builder_get_object (details_builder, "content"));
+  scroller = GTK_WIDGET (gtk_builder_get_object (details_builder, "scroller"));
   box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 18);
   heading = adw_preferences_group_new ();
 
@@ -300,7 +302,8 @@ details_content (NuvashaContentPage *self)
      puts the one shown on the list the button at the foot of the other
      page installs, and the button that installs this one on its own.
      The newest is what the dropdown shows from the start. */
-  watch_widget (&self->project.details_check, gtk_check_button_new ());
+   watch_widget (&self->project.details_check,
+                 GTK_WIDGET (gtk_builder_get_object (details_builder, "details-check")));
   gtk_widget_set_valign (GTK_WIDGET (self->project.details_check), GTK_ALIGN_CENTER);
   gtk_widget_set_sensitive (GTK_WIDGET (self->project.details_check), FALSE);
   gtk_widget_set_tooltip_text (GTK_WIDGET (self->project.details_check),
@@ -313,7 +316,8 @@ details_content (NuvashaContentPage *self)
   g_signal_connect_object (self->project.details_check, "toggled",
                            G_CALLBACK (on_version_picked), self, 0);
 
-  watch_widget (&self->project.details_dropdown, gtk_drop_down_new (NULL, NULL));
+   watch_widget (&self->project.details_dropdown,
+                 GTK_WIDGET (gtk_builder_get_object (details_builder, "details-dropdown")));
   {
     GtkListItemFactory *factory = version_factory ();
 
@@ -327,29 +331,14 @@ details_content (NuvashaContentPage *self)
   gtk_widget_set_hexpand (GTK_WIDGET (self->project.details_dropdown), TRUE);
   gtk_widget_set_valign (GTK_WIDGET (self->project.details_dropdown), GTK_ALIGN_CENTER);
 
-  watch_widget (&self->project.details_download, gtk_button_new_with_label (_("Download")));
-  gtk_widget_add_css_class (GTK_WIDGET (self->project.details_download), "suggested-action");
+   watch_widget (&self->project.details_download,
+                 GTK_WIDGET (gtk_builder_get_object (details_builder, "details-download")));
   gtk_widget_set_valign (GTK_WIDGET (self->project.details_download), GTK_ALIGN_CENTER);
   gtk_widget_set_sensitive (GTK_WIDGET (self->project.details_download), FALSE);
   g_signal_connect_object (self->project.details_download, "clicked",
                            G_CALLBACK (on_version_download_clicked), self, 0);
 
-  bar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  gtk_box_append (GTK_BOX (bar), GTK_WIDGET (self->project.details_check));
-  gtk_box_append (GTK_BOX (bar), GTK_WIDGET (self->project.details_dropdown));
-  gtk_box_append (GTK_BOX (bar), GTK_WIDGET (self->project.details_download));
-  gtk_widget_set_margin_top (bar, 12);
-  gtk_widget_set_margin_bottom (bar, 12);
-  gtk_widget_set_margin_start (bar, 12);
-  gtk_widget_set_margin_end (bar, 12);
-
-  content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-  gtk_box_append (GTK_BOX (content), scroller);
-  gtk_box_append (GTK_BOX (content),
-                  gtk_separator_new (GTK_ORIENTATION_HORIZONTAL));
-  gtk_box_append (GTK_BOX (content), bar);
-
-  return content;
+   return content;
 }
 
 /* Puts the real content in the page once both the description and the

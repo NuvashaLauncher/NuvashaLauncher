@@ -6,6 +6,7 @@
 #include "nuvasha-download.h"
 #include "nuvasha-downloads.h"
 #include "nuvasha-i18n.h"
+#include "nuvasha-ui-feedback.h"
 
 /* One dropdown entry: the box GTK owns plus the widgets that change as
  * the download does. The box is a child of the downloads list, so it is
@@ -96,66 +97,21 @@ refresh_downloads (NuvashaMainWindow *self)
 
       if (row == NULL)
         {
-          GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 4));
+          g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
+            "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-download-row.ui");
+          GtkBox *box = GTK_BOX (gtk_builder_get_object (builder, "box"));
           GtkLabel *title = GTK_LABEL (gtk_label_new (nuvasha_download_get_title (download)));
-          GtkBox *sub = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
-          GtkBox *line_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
-           GtkButton *cancel = GTK_BUTTON (gtk_button_new_from_icon_name (
-             "window-close-symbolic"));
-
-           gtk_widget_add_css_class (GTK_WIDGET (box), "nuvasha-download-row");
-
-          gtk_widget_set_halign (GTK_WIDGET (title), GTK_ALIGN_START);
-          gtk_widget_add_css_class (GTK_WIDGET (title), "heading");
-          gtk_widget_set_hexpand (GTK_WIDGET (title), TRUE);
-          gtk_label_set_ellipsize (GTK_LABEL (title), PANGO_ELLIPSIZE_END);
-          gtk_label_set_xalign (GTK_LABEL (title), 0.0f);
-
+          GtkButton *cancel = GTK_BUTTON (gtk_builder_get_object (builder, "cancel"));
           row = g_new0 (DownloadRow, 1);
-           row->box = GTK_BOX (box);
-           row->phase = GTK_LABEL (gtk_label_new (NULL));
-           row->count = GTK_LABEL (gtk_label_new (NULL));
-           row->bar = GTK_PROGRESS_BAR (gtk_progress_bar_new ());
-
-          /* The phase ("Downloading compressed modpack") on the left and
-             the amount ("312.0/500.0 MB") on the right, under the title. */
-          gtk_widget_set_halign (GTK_WIDGET (row->phase), GTK_ALIGN_START);
-          gtk_widget_set_hexpand (GTK_WIDGET (row->phase), TRUE);
-          gtk_label_set_xalign (GTK_LABEL (row->phase), 0.0f);
-          gtk_widget_add_css_class (GTK_WIDGET (row->phase), "dim-label");
-
-          gtk_widget_set_halign (GTK_WIDGET (row->count), GTK_ALIGN_END);
-          gtk_widget_set_valign (GTK_WIDGET (row->count), GTK_ALIGN_CENTER);
-          gtk_widget_add_css_class (GTK_WIDGET (row->count), "dim-label");
-          gtk_label_set_xalign (GTK_LABEL (row->count), 1.0f);
-
-          gtk_widget_set_margin_start (GTK_WIDGET (box), 12);
-          gtk_widget_set_margin_end (GTK_WIDGET (box), 12);
-          gtk_widget_set_margin_top (GTK_WIDGET (box), 8);
-          gtk_widget_set_margin_bottom (GTK_WIDGET (box), 8);
-          gtk_widget_set_size_request (GTK_WIDGET (box), 360, -1);
-
-          /* The bar takes the room and the × sits right of it. */
-          gtk_widget_set_hexpand (GTK_WIDGET (row->bar), TRUE);
-          gtk_widget_set_valign (GTK_WIDGET (row->bar), GTK_ALIGN_CENTER);
-          gtk_widget_add_css_class (GTK_WIDGET (cancel), "flat");
-          gtk_widget_set_valign (GTK_WIDGET (cancel), GTK_ALIGN_CENTER);
-          gtk_widget_set_tooltip_text (GTK_WIDGET (cancel), _("Cancel"));
-          gtk_accessible_update_property (GTK_ACCESSIBLE (cancel),
-                                          GTK_ACCESSIBLE_PROPERTY_LABEL,
-                                           _("Cancel"), -1);
-
-          g_signal_connect (cancel, "clicked", G_CALLBACK (on_download_cancel),
-                            download);
-
-          gtk_box_append (GTK_BOX (sub), GTK_WIDGET (row->phase));
-          gtk_box_append (GTK_BOX (sub), GTK_WIDGET (row->count));
-          gtk_box_append (GTK_BOX (line_box), GTK_WIDGET (row->bar));
-          gtk_box_append (GTK_BOX (line_box), GTK_WIDGET (cancel));
-
-          gtk_box_append (GTK_BOX (box), GTK_WIDGET (title));
-          gtk_box_append (GTK_BOX (box), GTK_WIDGET (sub));
-          gtk_box_append (GTK_BOX (box), GTK_WIDGET (line_box));
+          row->box = box;
+          row->phase = GTK_LABEL (gtk_builder_get_object (builder, "phase"));
+          row->count = GTK_LABEL (gtk_builder_get_object (builder, "count"));
+          row->bar = GTK_PROGRESS_BAR (gtk_builder_get_object (builder, "bar"));
+          gtk_label_set_ellipsize (title, PANGO_ELLIPSIZE_END);
+          gtk_box_prepend (box, GTK_WIDGET (title));
+           nuvasha_ui_prepare_icon_button (GTK_WIDGET (cancel), _("Cancel"));
+          g_signal_connect_object (cancel, "clicked",
+                                   G_CALLBACK (on_download_cancel), download, 0);
           gtk_box_append (GTK_BOX (self->downloads.list), GTK_WIDGET (box));
 
           g_hash_table_insert (self->downloads.rows, download, row);

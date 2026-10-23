@@ -23,6 +23,7 @@ struct _NuvashaMainWindow
   struct {
     AdwViewStack *stack; /* empty state or instance list */
     AdwBanner *banner;  /* launch failures and crash details */
+    AdwToolbarView *toolbar;
   } ui;
 
   /* Active downloads shown next to the "+" menu. */

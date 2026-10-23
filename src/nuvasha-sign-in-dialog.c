@@ -3,6 +3,8 @@
  */
 
 #include "nuvasha-sign-in-dialog.h"
+#include "nuvasha-dialogs.h"
+#include "nuvasha-ui-feedback.h"
 #include "nuvasha-i18n.h"
 
 #include "nuvasha-auth-microsoft.h"
@@ -27,6 +29,7 @@ struct _NuvashaSignInDialog
   GtkButton *open_button;
   GtkLabel *error_label;
   GtkButton *retry_button;
+  GtkBox *body;
 
   /* Device-code state used while the user signs in in the browser. */
   NuvashaDeviceCode *code;
@@ -253,119 +256,51 @@ on_closed (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_data)
 
 /* A button whose face is an icon and a word, the way a button that does
  * one clear thing is written. */
-static GtkWidget *
-icon_label_button (const char *icon_name, const char *label)
-{
-  GtkButton *button = GTK_BUTTON (gtk_button_new ());
-  GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8));
-  GtkImage *icon = GTK_IMAGE (gtk_image_new_from_icon_name (icon_name));
-  GtkLabel *text = GTK_LABEL (gtk_label_new (label));
-
-  gtk_widget_set_valign (GTK_WIDGET (icon), GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (GTK_WIDGET (text), GTK_ALIGN_CENTER);
-  gtk_box_append (GTK_BOX (box), GTK_WIDGET (icon));
-  gtk_box_append (GTK_BOX (box), GTK_WIDGET (text));
-  gtk_button_set_child (GTK_BUTTON (button), GTK_WIDGET (box));
-
-  return GTK_WIDGET (button);
-}
-
 static void
 nuvasha_sign_in_dialog_init (NuvashaSignInDialog *self)
 {
-  GtkBox *body = NULL;
-  AdwToolbarView *toolbar = NULL;
-  AdwHeaderBar *header = NULL;
-
-  adw_dialog_set_title (ADW_DIALOG (self), _("Sign In"));
-  adw_dialog_set_content_width (ADW_DIALOG (self), 440);
-
+  gtk_widget_init_template (GTK_WIDGET (self));
+  nuvasha_dialog_add_content_margin_breakpoint (ADW_DIALOG (self),
+                                                GTK_WIDGET (self->body),
+                                                440, 12);
   self->cancellable = g_cancellable_new ();
 
-  /* Instructions shown above the code. */
-  self->instruction_label = GTK_LABEL (gtk_label_new (
-      _("Open the page in your browser, then enter this code:")));
-  gtk_label_set_wrap (GTK_LABEL (self->instruction_label), TRUE);
-  gtk_label_set_justify (GTK_LABEL (self->instruction_label),
-                         GTK_JUSTIFY_CENTER);
-  gtk_label_set_xalign (GTK_LABEL (self->instruction_label), 0.5);
-  gtk_widget_set_visible (GTK_WIDGET (self->instruction_label), FALSE);
-
-  /* Display the code prominently in selectable monospace text. */
-  self->code_label = GTK_LABEL (gtk_label_new (NULL));
+  gtk_label_set_text (self->instruction_label,
+                      _("Open the page in your browser, then enter this code:"));
+  gtk_label_set_selectable (self->code_label, TRUE);
+  gtk_label_set_xalign (self->code_label, 0.5f);
   gtk_widget_add_css_class (GTK_WIDGET (self->code_label), "title-1");
   gtk_widget_add_css_class (GTK_WIDGET (self->code_label), "monospace");
-  gtk_label_set_selectable (GTK_LABEL (self->code_label), TRUE);
-  gtk_label_set_xalign (GTK_LABEL (self->code_label), 0.5);
-  gtk_widget_set_visible (GTK_WIDGET (self->code_label), FALSE);
-
-  self->open_button = GTK_BUTTON (icon_label_button ("web-browser-symbolic",
-                                          _("Open the Page")));
   gtk_widget_add_css_class (GTK_WIDGET (self->open_button), "pill");
   gtk_widget_add_css_class (GTK_WIDGET (self->open_button), "suggested-action");
   gtk_widget_set_halign (GTK_WIDGET (self->open_button), GTK_ALIGN_CENTER);
-  gtk_widget_set_visible (GTK_WIDGET (self->open_button), FALSE);
-  g_signal_connect_object (self->open_button, "clicked", G_CALLBACK (on_open_clicked),
-                           self, 0);
-
-  /* The address the code is entered at, for a user who would rather open
-     the page themselves than follow the button. */
-  self->uri_label = GTK_LABEL (gtk_label_new (NULL));
   gtk_widget_add_css_class (GTK_WIDGET (self->uri_label), "dim-label");
   gtk_widget_add_css_class (GTK_WIDGET (self->uri_label), "caption");
-  gtk_label_set_wrap (GTK_LABEL (self->uri_label), TRUE);
-  gtk_label_set_selectable (GTK_LABEL (self->uri_label), TRUE);
-  gtk_label_set_justify (GTK_LABEL (self->uri_label), GTK_JUSTIFY_CENTER);
-  gtk_label_set_xalign (GTK_LABEL (self->uri_label), 0.5);
-  gtk_widget_set_visible (GTK_WIDGET (self->uri_label), FALSE);
-
-  /* Status label and spinner shown while waiting. */
-  self->spinner = ADW_SPINNER (adw_spinner_new ());
-  self->waiting_label = GTK_LABEL (gtk_label_new (STEP_CODE));
+  gtk_label_set_selectable (self->uri_label, TRUE);
+  gtk_label_set_justify (self->uri_label, GTK_JUSTIFY_CENTER);
+  gtk_label_set_xalign (self->uri_label, 0.5f);
   gtk_widget_add_css_class (GTK_WIDGET (self->waiting_label), "dim-label");
-  self->waiting = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8));
   gtk_widget_set_halign (GTK_WIDGET (self->waiting), GTK_ALIGN_CENTER);
   gtk_widget_set_valign (GTK_WIDGET (self->waiting), GTK_ALIGN_CENTER);
-  gtk_box_append (GTK_BOX (self->waiting), GTK_WIDGET (self->spinner));
-  gtk_box_append (GTK_BOX (self->waiting), GTK_WIDGET (self->waiting_label));
-
-  /* Error message and retry action. */
-  self->error_label = GTK_LABEL (gtk_label_new (NULL));
-  gtk_label_set_wrap (GTK_LABEL (self->error_label), TRUE);
-  gtk_label_set_xalign (GTK_LABEL (self->error_label), 0.5);
-  gtk_label_set_justify (GTK_LABEL (self->error_label), GTK_JUSTIFY_CENTER);
+  gtk_label_set_wrap (self->error_label, TRUE);
+  gtk_label_set_xalign (self->error_label, 0.5f);
+  gtk_label_set_justify (self->error_label, GTK_JUSTIFY_CENTER);
   gtk_widget_add_css_class (GTK_WIDGET (self->error_label), "error");
-  gtk_widget_set_visible (GTK_WIDGET (self->error_label), FALSE);
-
-  self->retry_button = GTK_BUTTON (gtk_button_new_with_label (_("Try Again")));
-  gtk_widget_add_css_class (GTK_WIDGET (self->retry_button), "flat");
   gtk_widget_set_halign (GTK_WIDGET (self->retry_button), GTK_ALIGN_CENTER);
+
+  gtk_widget_set_visible (GTK_WIDGET (self->instruction_label), FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->code_label), FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->open_button), FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->uri_label), FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->error_label), FALSE);
   gtk_widget_set_visible (GTK_WIDGET (self->retry_button), FALSE);
-  g_signal_connect_object (self->retry_button, "clicked",
-                           G_CALLBACK (on_retry_clicked), self, 0);
 
-  body = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
-  gtk_widget_set_margin_start (GTK_WIDGET (body), 24);
-  gtk_widget_set_margin_end (GTK_WIDGET (body), 24);
-  gtk_widget_set_margin_top (GTK_WIDGET (body), 24);
-  gtk_widget_set_margin_bottom (GTK_WIDGET (body), 24);
-  gtk_box_append (GTK_BOX (body), GTK_WIDGET (self->instruction_label));
-  gtk_box_append (GTK_BOX (body), GTK_WIDGET (self->code_label));
-  gtk_box_append (GTK_BOX (body), GTK_WIDGET (self->open_button));
-  gtk_box_append (GTK_BOX (body), GTK_WIDGET (self->uri_label));
-  gtk_box_append (GTK_BOX (body), GTK_WIDGET (self->waiting));
-  gtk_box_append (GTK_BOX (body), GTK_WIDGET (self->error_label));
-  gtk_box_append (GTK_BOX (body), GTK_WIDGET (self->retry_button));
-
-  /* Use a header bar with only the title and close button; this dialog has
-     no separate Cancel action. */
-  header = ADW_HEADER_BAR (adw_header_bar_new ());
-  adw_header_bar_set_show_back_button (header, FALSE);
-  toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
-  adw_toolbar_view_add_top_bar (toolbar, GTK_WIDGET (header));
-  adw_toolbar_view_set_content (toolbar, GTK_WIDGET (body));
-
-  adw_dialog_set_child (ADW_DIALOG (self), GTK_WIDGET (toolbar));
+  gtk_button_set_label (self->open_button, _("Open the Page"));
+  gtk_button_set_icon_name (self->open_button, "web-browser-symbolic");
+  gtk_button_set_label (self->retry_button, _("Try Again"));
+  nuvasha_ui_prepare_icon_button (GTK_WIDGET (self->retry_button), _("Try Again"));
+  g_signal_connect_object (self->open_button, "clicked", G_CALLBACK (on_open_clicked), self, 0);
+  g_signal_connect_object (self->retry_button, "clicked", G_CALLBACK (on_retry_clicked), self, 0);
 }
 
 static void
@@ -394,6 +329,20 @@ static void
 nuvasha_sign_in_dialog_class_init (NuvashaSignInDialogClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+
+  gtk_widget_class_set_template_from_resource (widget_class,
+      "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-sign-in.ui");
+  gtk_widget_class_bind_template_child (widget_class, NuvashaSignInDialog, spinner);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaSignInDialog, waiting);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaSignInDialog, waiting_label);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaSignInDialog, instruction_label);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaSignInDialog, code_label);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaSignInDialog, uri_label);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaSignInDialog, open_button);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaSignInDialog, error_label);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaSignInDialog, retry_button);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaSignInDialog, body);
 
   object_class->dispose = nuvasha_sign_in_dialog_dispose;
   object_class->finalize = nuvasha_sign_in_dialog_finalize;

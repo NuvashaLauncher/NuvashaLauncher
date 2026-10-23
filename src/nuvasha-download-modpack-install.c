@@ -118,8 +118,10 @@ on_install_done (GObject *source G_GNUC_UNUSED,
     {
       if (!nuvasha_modpack_install_icon (self->manager, instance, self->icon_path,
                                      &error))
-        g_warning ("the icon of the new instance could not be copied: %s",
-                   error != NULL ? error->message : "unknown error");
+        if (!self->closed)
+          push_error (self, _("Could not copy the instance icon"),
+                      error != NULL ? error->message : _("Unknown error"),
+                      G_CALLBACK (on_error_back));
     }
 
   install_job_free (job);
@@ -198,15 +200,16 @@ static GtkWidget *
 build_optional_page (NuvashaDownloadModpackDialog *self,
                      GPtrArray *optional_files)
 {
-  AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
-  AdwHeaderBar *header = ADW_HEADER_BAR (adw_header_bar_new ());
-  AdwPreferencesGroup *heading = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
-  GtkBox *buttons = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
-  GtkButton *cancel = GTK_BUTTON (gtk_button_new_with_label (_("Cancel")));
-  GtkButton *install = GTK_BUTTON (gtk_button_new_with_label (_("Install")));
-  GtkWidget *page = NULL;
-
-  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), GTK_WIDGET (header));
+  g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
+    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-modpack-optional.ui");
+  AdwPreferencesGroup *heading = ADW_PREFERENCES_GROUP (
+    adw_preferences_group_new ());
+  GtkButton *cancel = GTK_BUTTON (gtk_builder_get_object (builder, "cancel-button"));
+  GtkButton *install = GTK_BUTTON (gtk_builder_get_object (builder, "install-button"));
+  GtkWidget *page = GTK_WIDGET (g_object_ref (
+    gtk_builder_get_object (builder, "page")));
+  AdwPreferencesPage *page_holder = ADW_PREFERENCES_PAGE (
+    gtk_builder_get_object (builder, "page-holder"));
 
   adw_preferences_group_set_title (heading,
                                    _("Optional files"));
@@ -236,31 +239,13 @@ build_optional_page (NuvashaDownloadModpackDialog *self,
     }
 
   gtk_widget_add_css_class (GTK_WIDGET (install), "suggested-action");
-  gtk_box_append (GTK_BOX (buttons), GTK_WIDGET (cancel));
-  gtk_box_append (GTK_BOX (buttons), GTK_WIDGET (install));
-  gtk_widget_set_margin_start (GTK_WIDGET (buttons), 12);
-  gtk_widget_set_margin_end (GTK_WIDGET (buttons), 12);
-  gtk_widget_set_margin_bottom (GTK_WIDGET (buttons), 12);
-  gtk_widget_set_halign (GTK_WIDGET (buttons), GTK_ALIGN_END);
 
   g_signal_connect_object (cancel, "clicked", G_CALLBACK (on_optional_cancel),
                            self, 0);
   g_signal_connect_object (install, "clicked", G_CALLBACK (on_optional_install),
                            self, 0);
 
-  AdwPreferencesPage *page_holder =
-    ADW_PREFERENCES_PAGE (adw_preferences_page_new ());
-
   adw_preferences_page_add (page_holder, heading);
-
-  GtkBox *boxy = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
-
-  gtk_box_append (GTK_BOX (boxy), GTK_WIDGET (page_holder));
-  gtk_box_append (GTK_BOX (boxy), GTK_WIDGET (buttons));
-
-  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), GTK_WIDGET (boxy));
-  page = GTK_WIDGET (adw_navigation_page_new (GTK_WIDGET (toolbar), _("Choose Files")));
-  adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (page), "optional");
 
   return page;
 }

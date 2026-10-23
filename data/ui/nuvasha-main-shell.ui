@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="AdwToolbarView" id="toolbar">
+    <property name="top-bar-style">raised</property>
+    <child type="top"><object class="AdwHeaderBar" id="header"/></child>
+    <property name="content"><object class="AdwViewStack" id="stack"/></property>
+  </object>
+</interface>

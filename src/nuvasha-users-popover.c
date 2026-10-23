@@ -246,10 +246,7 @@ append_account_row (NuvashaUsersPopover *self, const NuvashaAccount *account)
     }
 
   tooltip = g_strdup_printf (_("Remove \"%s\""), account->name);
-  gtk_widget_set_tooltip_text (GTK_WIDGET (remove), tooltip);
-  gtk_accessible_update_property (GTK_ACCESSIBLE (remove),
-                                  GTK_ACCESSIBLE_PROPERTY_LABEL, tooltip, -1);
-  gtk_widget_add_css_class (GTK_WIDGET (remove), "flat");
+  nuvasha_ui_prepare_icon_button (GTK_WIDGET (remove), tooltip);
   gtk_widget_set_valign (GTK_WIDGET (remove), GTK_ALIGN_CENTER);
   g_object_set_data_full (G_OBJECT (remove), "nuvasha-account-id",
                           g_strdup (account->id), g_free);
@@ -379,6 +376,7 @@ nuvasha_users_popover_init (NuvashaUsersPopover *self)
      of the popover growing without end when there are many accounts. */
   gtk_list_box_set_selection_mode (GTK_LIST_BOX (rows), GTK_SELECTION_NONE);
   gtk_widget_add_css_class (GTK_WIDGET (rows), "boxed-list");
+  gtk_widget_add_css_class (GTK_WIDGET (rows), "nuvasha-list-section");
   gtk_widget_set_size_request (GTK_WIDGET (scrolled), USERS_WIDTH, -1);
   gtk_scrolled_window_set_propagate_natural_width (
       GTK_SCROLLED_WINDOW (scrolled), TRUE);
@@ -412,10 +410,10 @@ nuvasha_users_popover_init (NuvashaUsersPopover *self)
   gtk_widget_set_halign (GTK_WIDGET (offline), GTK_ALIGN_CENTER);
   gtk_widget_set_margin_top (GTK_WIDGET (microsoft), 6);
   gtk_widget_set_margin_bottom (GTK_WIDGET (offline), 12);
-  g_signal_connect (microsoft, "clicked",
-                    G_CALLBACK (on_add_microsoft_clicked), self);
-  g_signal_connect (offline, "clicked", G_CALLBACK (on_add_offline_clicked),
-                    self);
+  g_signal_connect_object (microsoft, "clicked",
+                           G_CALLBACK (on_add_microsoft_clicked), self, 0);
+  g_signal_connect_object (offline, "clicked", G_CALLBACK (on_add_offline_clicked),
+                           self, 0);
 
   GtkBox *content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   gtk_box_append (GTK_BOX (content), GTK_WIDGET (scrolled));

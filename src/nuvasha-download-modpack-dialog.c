@@ -44,6 +44,20 @@ G_DEFINE_FINAL_TYPE (NuvashaDownloadModpackDialog, nuvasha_download_modpack_dial
 
 static void build_import_page (NuvashaDownloadModpackDialog *self);
 
+static void
+on_modpack_dialog_width_changed (GObject *object,
+                                 GParamSpec *pspec G_GNUC_UNUSED,
+                                 gpointer user_data G_GNUC_UNUSED)
+{
+  NuvashaDownloadModpackDialog *self =
+    nuvasha_DOWNLOAD_MODPACK_DIALOG (object);
+  int width = gtk_widget_get_width (GTK_WIDGET (self));
+
+  if (self->split == NULL || width <= 0)
+    return;
+  adw_navigation_split_view_set_collapsed (self->split, width < 820);
+}
+
 /* Store a weak pointer to @widget in @field. */
 void
 details_watch (gpointer field, GtkWidget *widget)
@@ -137,8 +151,12 @@ static void
 nuvasha_download_modpack_dialog_class_init (NuvashaDownloadModpackDialogClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
-  (void) klass;
+  gtk_widget_class_set_template_from_resource (widget_class,
+      "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-modpack-dialog.ui");
+  gtk_widget_class_bind_template_child (widget_class,
+                                        NuvashaDownloadModpackDialog, nav);
 
   object_class->dispose = dialog_dispose;
 }
@@ -161,6 +179,7 @@ on_dialog_closed (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_data)
 static void
 nuvasha_download_modpack_dialog_init (NuvashaDownloadModpackDialog *self)
 {
+  gtk_widget_init_template (GTK_WIDGET (self));
   self->search = g_cancellable_new ();
   self->fetch = g_cancellable_new ();
   self->scope = nuvasha_operation_new (NULL, self->search, NULL, NULL);
@@ -170,21 +189,20 @@ nuvasha_download_modpack_dialog_init (NuvashaDownloadModpackDialog *self)
   self->seen_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                           NULL);
 
-  g_signal_connect (self, "closed", G_CALLBACK (on_dialog_closed), self);
+  g_signal_connect_object (self, "closed", G_CALLBACK (on_dialog_closed), self, 0);
 
-  adw_dialog_set_title (ADW_DIALOG (self), _("Download Modpack"));
+  g_signal_connect_object (self, "notify::width",
+                           G_CALLBACK (on_modpack_dialog_width_changed), self, 0);
+
   nuvasha_dialog_set_standard_size (ADW_DIALOG (self));
   adw_dialog_set_content_width (ADW_DIALOG (self),
                                 nuvasha_DIALOG_WIDE_CONTENT_WIDTH);
 
-  self->nav = ADW_NAVIGATION_VIEW (adw_navigation_view_new ());
   /* The installing page appears in place instead of sliding in: the
      movement is not information, and the pages of this dialog are few
      and shallow enough that an instant change reads cleanly. */
   adw_navigation_view_set_animate_transitions (
     ADW_NAVIGATION_VIEW (self->nav), FALSE);
-  adw_dialog_set_child (ADW_DIALOG (self), GTK_WIDGET (self->nav));
-
 }
 
 NuvashaDownloadModpackDialog *
@@ -202,18 +220,13 @@ nuvasha_download_modpack_dialog_new (NuvashaInstanceManager *manager)
 static void
 build_import_page (NuvashaDownloadModpackDialog *self)
 {
-  GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
-  AdwSpinner *spinner = ADW_SPINNER (adw_spinner_new ());
-  GtkLabel *label = GTK_LABEL (gtk_label_new (_("Importing modpack…")));
+  g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
+    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-modpack-import.ui");
   AdwNavigationPage *page = ADW_NAVIGATION_PAGE (
-    adw_navigation_page_new (GTK_WIDGET (box), _("Import Modpack")));
+    g_object_ref (gtk_builder_get_object (builder, "page")));
 
-  gtk_widget_set_halign (GTK_WIDGET (box), GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (GTK_WIDGET (box), GTK_ALIGN_CENTER);
-  gtk_box_append (GTK_BOX (box), GTK_WIDGET (spinner));
-  gtk_box_append (GTK_BOX (box), GTK_WIDGET (label));
-  adw_navigation_view_add (ADW_NAVIGATION_VIEW (self->nav),
-                           ADW_NAVIGATION_PAGE (page));
+  adw_navigation_view_add (ADW_NAVIGATION_VIEW (self->nav), page);
+  g_object_unref (page);
 }
 
 static gboolean
@@ -276,20 +289,17 @@ build_error_page (NuvashaDownloadModpackDialog *self,
                   GCallback retry,
                   GCallback cancel)
 {
-  AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
-  AdwHeaderBar *header = ADW_HEADER_BAR (adw_header_bar_new ());
-  GtkWidget *box = NULL;
-  AdwStatusPage *status = NULL;
-  GtkBox *buttons = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
-  GtkButton *retry_btn = GTK_BUTTON (gtk_button_new_with_label (_("Retry")));
-  GtkButton *back_btn = GTK_BUTTON (gtk_button_new_with_label (_("Back")));
-  GtkWidget *page = NULL;
+  g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
+    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-modpack-error.ui");
+  GtkWidget *page = GTK_WIDGET (g_object_ref (
+    gtk_builder_get_object (builder, "page")));
+  AdwStatusPage *status = ADW_STATUS_PAGE (
+    gtk_builder_get_object (builder, "status"));
+  GtkButton *retry_btn = GTK_BUTTON (gtk_builder_get_object (builder, "retry-button"));
+  GtkButton *back_btn = GTK_BUTTON (gtk_builder_get_object (builder, "back-button"));
 
-  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), GTK_WIDGET (header));
+  nuvasha_ui_prepare_dialog_content (page);
 
-  status = ADW_STATUS_PAGE (adw_status_page_new ());
-  adw_status_page_set_icon_name (ADW_STATUS_PAGE (status),
-                                 "dialog-error-symbolic");
   adw_status_page_set_title (ADW_STATUS_PAGE (status), what);
   {
     g_autofree char *escaped =
@@ -299,23 +309,8 @@ build_error_page (NuvashaDownloadModpackDialog *self,
   }
 
   gtk_widget_add_css_class (GTK_WIDGET (retry_btn), "suggested-action");
-  g_signal_connect (retry_btn, "clicked", retry, self);
-  g_signal_connect (back_btn, "clicked", cancel, self);
-  gtk_box_append (GTK_BOX (buttons), GTK_WIDGET (retry_btn));
-  gtk_box_append (GTK_BOX (buttons), GTK_WIDGET (back_btn));
-  gtk_widget_set_halign (GTK_WIDGET (buttons), GTK_ALIGN_CENTER);
-
-  box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
-  gtk_box_append (GTK_BOX (box), GTK_WIDGET (status));
-  gtk_box_append (GTK_BOX (box), GTK_WIDGET (buttons));
-  gtk_widget_set_vexpand (GTK_WIDGET (status), TRUE);
-  gtk_widget_set_valign (GTK_WIDGET (status), GTK_ALIGN_CENTER);
-
-  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), GTK_WIDGET (box));
-  page = GTK_WIDGET (adw_navigation_page_new (GTK_WIDGET (toolbar),
-                                               _("Could not install")));
-  adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (page), "error");
-
+  g_signal_connect_object (retry_btn, "clicked", retry, self, 0);
+  g_signal_connect_object (back_btn, "clicked", cancel, self, 0);
   return page;
 }
 
