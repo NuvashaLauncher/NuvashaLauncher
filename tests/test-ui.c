@@ -411,7 +411,7 @@ test_pick_button_starts_empty (void)
      show, which is what an insensitive button says on its own. */
    g_assert_false (gtk_widget_get_sensitive (button));
    {
-     g_autofree char *tooltip = gtk_widget_get_tooltip_text (button);
+     const char *tooltip = gtk_widget_get_tooltip_text (button);
      g_assert_cmpstr (tooltip, ==, "Nothing is selected");
    }
 

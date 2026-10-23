@@ -44,7 +44,7 @@ nuvasha_dialog_add_content_margin_breakpoint (AdwDialog *dialog,
                                               int        margin)
 {
   AdwBreakpointCondition *condition;
-  g_autoptr (AdwBreakpoint) breakpoint;
+  g_autoptr (AdwBreakpoint) breakpoint = NULL;
   GValue value = G_VALUE_INIT;
 
   g_return_if_fail (ADW_IS_DIALOG (dialog));
