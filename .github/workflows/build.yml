@@ -25,9 +25,9 @@ jobs:
       - name: Install dependencies
         run: |
           dnf install -y \
-            gcc gcc-c++ make pkgconf-pkg-config gettext \
-            glib2-devel gtk4-devel libadwaita-devel libepoxy-devel \
-            json-glib-devel libsoup3-devel libarchive-devel
+             gcc gcc-c++ make pkgconf-pkg-config gettext \
+             glib2-devel gtk4-devel libadwaita-devel libepoxy-devel \
+            json-glib-devel libsoup3-devel libarchive-devel libsecret-devel
 
       - name: Build
         run: make fast
