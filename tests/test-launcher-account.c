@@ -13,6 +13,7 @@
  * does go out is the manifest of such a launch. */
 
 #include "nuvasha-launcher.h"
+#include "nuvasha-secret-store.h"
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -279,6 +280,14 @@ test_a_ready_account_gets_past_the_gate (void)
     nuvasha_launcher_new (instance, NULL, accounts);
   g_autoptr (NuvashaAccount) account = microsoft_account (TRUE);
   g_autoptr (GError) error = NULL;
+
+  if (!nuvasha_secret_store_save ("nuvasha-launcher-test-probe",
+                                  "access", "refresh"))
+    {
+      g_test_skip ("Secret Service is unavailable in this environment");
+      return;
+    }
+  nuvasha_secret_store_clear ("nuvasha-launcher-test-probe");
 
   g_assert_true (nuvasha_accounts_add (accounts, account, &error));
   g_assert_no_error (error);
