@@ -279,12 +279,19 @@ on_capes_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   JsonArray *capes = NULL;
 
   if (bytes == NULL || error != NULL)
-    goto done;
+    {
+      if (error != NULL)
+        show_minecraft_service_error (menu, _("Could not load capes"), error);
+      goto done;
+    }
 
   parser = json_parser_new ();
   if (!json_parser_load_from_data (parser, g_bytes_get_data (bytes, NULL),
                                    (gssize) g_bytes_get_size (bytes), &error))
-    goto done;
+    {
+      show_minecraft_service_error (menu, _("Could not load capes"), error);
+      goto done;
+    }
 
   root = json_parser_get_root (parser);
   if (!JSON_NODE_HOLDS_OBJECT (root))
@@ -292,9 +299,18 @@ on_capes_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   {
     JsonNode *node = json_object_get_member (json_node_get_object (root), "capes");
     if (node == NULL || !JSON_NODE_HOLDS_ARRAY (node))
-      goto done;
+      {
+        g_autoptr (GError) shape_error = g_error_new_literal (
+          nuvasha_MINECRAFT_SERVICES_ERROR,
+          nuvasha_MINECRAFT_SERVICES_ERROR_RESPONSE,
+          _("Minecraft did not return a cape list."));
+        show_minecraft_service_error (menu, _("Could not load capes"), shape_error);
+        goto done;
+      }
     capes = json_node_get_array (node);
   }
+
+  menu->applying_profile = TRUE;
 
   for (guint i = 0; i < json_array_get_length (capes); i++)
     {
@@ -321,8 +337,10 @@ on_capes_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       if (state != NULL && g_str_equal (state, "ACTIVE"))
         gtk_drop_down_set_selected (menu->capes, menu->cape_ids->len);
     }
+  menu->applying_profile = FALSE;
 
 done:
+  menu->applying_profile = FALSE;
   g_object_set_data (G_OBJECT (menu->dialog), "nuvasha-capes-loaded",
                      GINT_TO_POINTER (1));
 }
@@ -333,6 +351,9 @@ on_cape_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
 {
   SkinMenu *menu = user_data;
   guint selected = gtk_drop_down_get_selected (GTK_DROP_DOWN (object));
+
+  if (menu->applying_profile)
+    return;
 
   if (selected == 0 || selected - 1 >= menu->cape_urls->len)
     {
@@ -719,7 +740,7 @@ on_skin_selected (GtkListBox *list, GtkListBoxRow *row, gpointer user_data)
 
   /* Keep nuvasha's cached profile in step with the selection so the account row
    * and the next opening of this manager show the selected skin. */
-  if (menu->owner != NULL && menu->account != NULL)
+  if (!menu->applying_profile && menu->owner != NULL && menu->account != NULL)
     {
       g_autoptr (NuvashaAccount) account = nuvasha_account_copy (menu->account);
       g_autoptr (GError) error = NULL;
@@ -918,6 +939,7 @@ nuvasha_users_skin_menu_new (NuvashaUsersPopover *owner, GtkImage *image, Nuvash
   GtkButton *export = GTK_BUTTON (gtk_builder_get_object (content_builder, "export"));
   GtkButton *open_skins = GTK_BUTTON (gtk_builder_get_object (content_builder, "open-skins"));
   GtkButton *remove = GTK_BUTTON (gtk_builder_get_object (content_builder, "remove"));
+  gtk_drop_down_set_model (capes, G_LIST_MODEL (cape_list));
   AdwBreakpointCondition *narrow_condition =
     adw_breakpoint_condition_new_length (ADW_BREAKPOINT_CONDITION_MAX_WIDTH,
                                          700, ADW_LENGTH_UNIT_PX);
@@ -1029,8 +1051,11 @@ nuvasha_users_skin_menu_new (NuvashaUsersPopover *owner, GtkImage *image, Nuvash
         }
     }
   else
-    select_saved_skin (data);
-  select_saved_skin (data);
+    {
+      data->applying_profile = TRUE;
+      select_saved_skin (data);
+      data->applying_profile = FALSE;
+    }
   g_signal_connect (capes, "notify::selected", G_CALLBACK (on_cape_selected), data);
   load_capes (data);
   load_profile_skins (data);
