@@ -30,6 +30,16 @@ temporary_path (const char *name)
   return g_steal_pointer (&path);
 }
 
+static gboolean
+secret_service_available (void)
+{
+  gboolean available = nuvasha_secret_store_save (
+    "nuvasha-test-service-probe", "access", "refresh");
+
+  nuvasha_secret_store_clear ("nuvasha-test-service-probe");
+  return available;
+}
+
 static void
 check_permission (const char *path, int mode)
 {
@@ -302,6 +312,12 @@ test_persistence (void)
   account->refresh_token = g_strdup ("the-refresh-token");
   account->avatar_url = g_strdup ("https://example.invalid/skin.png");
 
+  if (!secret_service_available ())
+    {
+      g_test_skip ("Secret Service is unavailable in this environment");
+      return;
+    }
+
   g_assert_true (nuvasha_accounts_add (store, account, &error));
   g_assert_no_error (error);
 
@@ -479,6 +495,11 @@ test_adding_the_same_account_twice (void)
   g_signal_connect (store, "changed", G_CALLBACK (on_changed), &changed);
 
   account = microsoft_account (1800000000, "first-token");
+  if (!secret_service_available ())
+    {
+      g_test_skip ("Secret Service is unavailable in this environment");
+      return;
+    }
   g_assert_true (nuvasha_accounts_add (store, account, &error));
   g_assert_no_error (error);
   g_assert_cmpuint (changed, ==, 1);
