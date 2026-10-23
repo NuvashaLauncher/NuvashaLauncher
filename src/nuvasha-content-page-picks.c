@@ -129,10 +129,12 @@ nuvasha_content_page_refresh_picks (NuvashaContentPage *self)
                                    nuvasha_content_type_title (self->type));
 
       gtk_widget_set_sensitive (GTK_WIDGET (self->pick_button), count > 0);
-      gtk_widget_set_tooltip_text (
-           GTK_WIDGET (self->pick_button),
-           count == 0 ? _("Nothing is selected")
-                      : tooltip);
+      const char *label = count == 0 ? _("Nothing is selected") : tooltip;
+
+      gtk_widget_set_tooltip_text (GTK_WIDGET (self->pick_button), label);
+      gtk_accessible_update_property (GTK_ACCESSIBLE (self->pick_button),
+                                      GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                      label, -1);
     }
 
   refresh_pick_check (self);

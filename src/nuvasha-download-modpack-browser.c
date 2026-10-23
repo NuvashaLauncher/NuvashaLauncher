@@ -259,8 +259,8 @@ results_arrived (NuvashaDownloadModpackDialog *self, NuvashaModrinthResults *res
                                                 self->hits->len - 1));
           g_ptr_array_add (self->rows, row);
 
-          g_signal_connect (row, "activated",
-                            G_CALLBACK (result_row_activated), self);
+          g_signal_connect_object (row, "activated",
+                                   G_CALLBACK (result_row_activated), self, 0);
           adw_preferences_group_add (
               ADW_PREFERENCES_GROUP (self->results_group), row);
           shown++;
@@ -467,19 +467,22 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
 {
   GtkWidget *page = NULL;
   GtkBox *root = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
+  gtk_widget_add_css_class (GTK_WIDGET (root), "nuvasha-main-content");
+  gtk_widget_add_css_class (GTK_WIDGET (root), "nuvasha-results-card");
   GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
-  GtkBox *top = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+  g_autoptr (GtkBuilder) toolbar_builder = gtk_builder_new_from_resource (
+    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-modpack-browser-toolbar.ui");
+  GtkBox *top = GTK_BOX (gtk_builder_get_object (toolbar_builder, "top"));
   GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
-  GtkBox *loading = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 6));
-  AdwSpinner *loading_spinner = ADW_SPINNER (adw_spinner_new ());
-  GtkLabel *loading_label = GTK_LABEL (gtk_label_new (_("Loading modpacks…")));
-  GtkBox *loading_more = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
-  AdwSpinner *more_spinner = ADW_SPINNER (adw_spinner_new ());
-  GtkLabel *more_label = GTK_LABEL (gtk_label_new (_("Loading more…")));
-  GtkBox *retry_row = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
-  GtkLabel *retry_label = GTK_LABEL (gtk_label_new (NULL));
-  GtkButton *retry_button = GTK_BUTTON (gtk_button_new_with_label (_("Retry")));
-  GtkButton *close_button = GTK_BUTTON (gtk_button_new_from_icon_name ("window-close-symbolic"));
+  g_autoptr (GtkBuilder) states_builder = gtk_builder_new_from_resource (
+    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-modpack-browser-states.ui");
+  GtkBox *loading = GTK_BOX (gtk_builder_get_object (states_builder, "loading"));
+  GtkBox *loading_more = GTK_BOX (gtk_builder_get_object (states_builder, "loading_more"));
+  GtkBox *retry_row = GTK_BOX (gtk_builder_get_object (states_builder, "retry_row"));
+  GtkLabel *retry_label = GTK_LABEL (gtk_builder_get_object (states_builder, "retry_label"));
+  GtkButton *retry_button = GTK_BUTTON (gtk_builder_get_object (states_builder, "retry_button"));
+  GtkButton *close_button = GTK_BUTTON (gtk_builder_get_object (
+    toolbar_builder, "close-button"));
 
   /* Exactly one of these is shown at any moment: the list, the words for
      an empty answer, the error, or the spinner while the first page is
@@ -489,48 +492,28 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
   gtk_widget_set_vexpand (GTK_WIDGET (self->results_stack), TRUE);
 
   self->results_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+  gtk_widget_add_css_class (GTK_WIDGET (self->results_group), "nuvasha-list-section");
+  gtk_widget_add_css_class (GTK_WIDGET (self->results_group), "nuvasha-preferences-surface");
 
   /* The list starts where the search row above it ends: its first row is
      not rounded at the top, so the two read as one piece. */
 
-  self->search_entry = GTK_SEARCH_ENTRY (gtk_search_entry_new ());
-  gtk_widget_set_hexpand (GTK_WIDGET (self->search_entry), TRUE);
-  gtk_search_entry_set_placeholder_text (
-    GTK_SEARCH_ENTRY (self->search_entry), _("Search modpacks"));
+  self->search_entry = GTK_SEARCH_ENTRY (gtk_builder_get_object (
+    toolbar_builder, "search-entry"));
   g_signal_connect_object (self->search_entry, "changed",
                            G_CALLBACK (on_search_changed), self, 0);
 
-  gtk_box_append (GTK_BOX (top), GTK_WIDGET (self->search_entry));
-  gtk_widget_add_css_class (GTK_WIDGET (close_button), "flat");
-  gtk_widget_set_tooltip_text (GTK_WIDGET (close_button), _("Close"));
   g_signal_connect_swapped (close_button, "clicked",
                             G_CALLBACK (adw_dialog_close), self);
-  gtk_box_append (GTK_BOX (top), GTK_WIDGET (close_button));
-  gtk_widget_set_margin_start (GTK_WIDGET (top), 12);
-  gtk_widget_set_margin_end (GTK_WIDGET (top), 12);
-  gtk_widget_set_margin_top (GTK_WIDGET (top), 6);
-  gtk_widget_set_margin_bottom (GTK_WIDGET (top), 6);
   gtk_box_append (GTK_BOX (root), GTK_WIDGET (top));
 
   /* The list. The bottom of it holds a spinner while the next page is on
      its way and a retry row when a page failed. */
-  gtk_widget_set_halign (GTK_WIDGET (loading_more), GTK_ALIGN_CENTER);
-  gtk_widget_set_margin_top (GTK_WIDGET (loading_more), 12);
-  gtk_widget_set_margin_bottom (GTK_WIDGET (loading_more), 12);
   gtk_widget_set_visible (GTK_WIDGET (loading_more), FALSE);
-  gtk_box_append (GTK_BOX (loading_more), GTK_WIDGET (more_spinner));
-  gtk_box_append (GTK_BOX (loading_more), GTK_WIDGET (more_label));
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->results_group),
                               GTK_WIDGET (loading_more));
 
-  gtk_widget_set_halign (GTK_WIDGET (retry_row), GTK_ALIGN_CENTER);
-  gtk_widget_set_margin_top (GTK_WIDGET (retry_row), 12);
-  gtk_widget_set_margin_bottom (GTK_WIDGET (retry_row), 12);
-  gtk_widget_set_visible (GTK_WIDGET (retry_row), FALSE);
-  gtk_label_set_wrap (GTK_LABEL (retry_label), TRUE);
   gtk_widget_add_css_class (GTK_WIDGET (retry_label), "dim-label");
-  gtk_box_append (GTK_BOX (retry_row), GTK_WIDGET (retry_label));
-  gtk_box_append (GTK_BOX (retry_row), GTK_WIDGET (retry_button));
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->results_group),
                               GTK_WIDGET (retry_row));
 
@@ -551,29 +534,20 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
   adw_view_stack_add_named (self->results_stack, GTK_WIDGET (scroller), "results");
 
   /* An empty answer. */
-  self->results_status = ADW_STATUS_PAGE (adw_status_page_new ());
-  adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->results_status),
-                                 "system-search-symbolic");
-  adw_status_page_set_title (ADW_STATUS_PAGE (self->results_status),
-                             _("Nothing to show yet"));
-  adw_status_page_set_description (
-    ADW_STATUS_PAGE (self->results_status),
-     _("No modpack matches what was asked for. Try another word"));
+  self->results_status = ADW_STATUS_PAGE (g_object_ref (
+    gtk_builder_get_object (states_builder, "empty")));
+  gtk_widget_add_css_class (GTK_WIDGET (self->results_status), "nuvasha-status-page");
   adw_view_stack_add_named (self->results_stack,
                        GTK_WIDGET (self->results_status), "empty");
 
   /* A search that could not be made. */
-  self->error_status = ADW_STATUS_PAGE (adw_status_page_new ());
-  adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->error_status),
-                                 "dialog-error-symbolic");
+  self->error_status = ADW_STATUS_PAGE (g_object_ref (
+    gtk_builder_get_object (states_builder, "error")));
+  gtk_widget_add_css_class (GTK_WIDGET (self->error_status), "nuvasha-status-page");
   adw_view_stack_add_named (self->results_stack,
                        GTK_WIDGET (self->error_status), "error");
 
   /* The first page is on its way. */
-  gtk_widget_set_valign (GTK_WIDGET (loading), GTK_ALIGN_CENTER);
-  gtk_widget_set_halign (GTK_WIDGET (loading), GTK_ALIGN_CENTER);
-  gtk_box_append (GTK_BOX (loading), GTK_WIDGET (loading_spinner));
-  gtk_box_append (GTK_BOX (loading), GTK_WIDGET (loading_label));
   adw_view_stack_add_named (self->results_stack, GTK_WIDGET (loading), "loading");
 
   adw_view_stack_set_visible_child_name (self->results_stack,
@@ -586,8 +560,8 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
     GtkAdjustment *adjustment =
       gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (scroller));
 
-    g_signal_connect (adjustment, "value-changed",
-                      G_CALLBACK (on_scroll_changed), self);
+    g_signal_connect_object (adjustment, "value-changed",
+                             G_CALLBACK (on_scroll_changed), self, 0);
   }
 
   /* The list is the left half; the pack that is opened is the right half,
@@ -599,8 +573,9 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
   adw_navigation_split_view_set_sidebar (
     ADW_NAVIGATION_SPLIT_VIEW (self->split),
      adw_navigation_page_new (GTK_WIDGET (box), _("Browse Modpacks")));
-  adw_navigation_split_view_set_collapsed (
-    ADW_NAVIGATION_SPLIT_VIEW (self->split), TRUE);
+   adw_navigation_split_view_set_collapsed (
+     ADW_NAVIGATION_SPLIT_VIEW (self->split),
+     gtk_widget_get_width (GTK_WIDGET (self)) < 820);
   /* Two halves of one width, rather than the narrow column a split view
      gives a sidebar by default. */
   adw_navigation_split_view_set_sidebar_width_fraction (

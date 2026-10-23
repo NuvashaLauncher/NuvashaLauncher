@@ -16,3 +16,104 @@
 .nuvasha-skin-actions {
   padding-top: 6px;
 }
+
+.nuvasha-settings-page > scrolledwindow {
+  padding-bottom: 12px;
+}
+
+.nuvasha-content-toolbar {
+  padding: 6px 12px;
+}
+
+.nuvasha-instance-row {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  min-height: 60px;
+}
+
+.nuvasha-dialog-content {
+  padding: 24px;
+}
+
+.nuvasha-dialog-actions {
+  padding: 12px;
+}
+
+.nuvasha-toolbar-actions {
+  padding: 6px 12px;
+}
+
+.nuvasha-results-card {
+  margin: 12px;
+}
+
+.nuvasha-main-content {
+  padding: 12px;
+}
+
+.nuvasha-main-content > .card,
+.nuvasha-main-content > scrolledwindow {
+  border-radius: 12px;
+}
+
+.nuvasha-compact-toolbar {
+  padding: 4px 8px;
+}
+
+.nuvasha-list-section {
+  margin: 0 12px 12px;
+}
+
+.nuvasha-content-file-row,
+.nuvasha-skin-row {
+  min-height: 52px;
+}
+
+.nuvasha-status-content {
+  padding: 18px;
+}
+
+.nuvasha-results-card,
+.nuvasha-download-row,
+.nuvasha-instance-row,
+.nuvasha-list-section {
+  border-radius: 12px;
+}
+
+.nuvasha-dialog-content > .boxed-list,
+.nuvasha-dialog-content > .card {
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+
+.nuvasha-settings-page preferencesgroup,
+.nuvasha-settings-page preferencesgroup > row,
+.nuvasha-list-section > row {
+  margin-bottom: 2px;
+}
+
+.nuvasha-toolbar-actions > button,
+.nuvasha-skin-actions > button {
+  min-height: 34px;
+}
+
+.nuvasha-empty-state,
+.nuvasha-status-content {
+  border-radius: 14px;
+}
+
+.nuvasha-status-page {
+  padding: 18px;
+}
+
+.nuvasha-preferences-surface {
+  margin: 0 12px 12px;
+}
+
+.nuvasha-preferences-surface > row {
+  min-height: 48px;
+}
+
+.nuvasha-page-actions {
+  padding: 8px 12px;
+}

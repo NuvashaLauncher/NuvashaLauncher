@@ -180,6 +180,9 @@ row_update (GtkWidget *play, NuvashaLauncher *launcher)
   gtk_image_set_from_icon_name (GTK_IMAGE (icon),
                                 busy ? "media-playback-stop-symbolic"
                                      : "media-playback-start-symbolic");
+  gtk_accessible_update_property (GTK_ACCESSIBLE (play),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                  busy ? _("Stop") : _("Play"), -1);
   gtk_widget_set_tooltip_text (GTK_WIDGET (play), busy ? _("Stop") : _("Play"));
 
   /* The green belongs to a game that is about to start, not to a stop:
@@ -370,6 +373,7 @@ create_instance_row (gpointer item, gpointer user_data)
   adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 1);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), name);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (row), subtitle);
+  gtk_widget_add_css_class (GTK_WIDGET (row), "nuvasha-instance-row");
 
   gtk_image_set_pixel_size (GTK_IMAGE (icon), 48);
   gtk_widget_set_size_request (GTK_WIDGET (icon), 48, 48);

@@ -143,14 +143,15 @@ nuvasha_main_window_new (AdwApplication *application, NuvashaInstanceManager *ma
      to sit: its card has round corners on every side. */
    list = GTK_LIST_BOX (gtk_list_box_new ());
    gtk_widget_add_css_class (GTK_WIDGET (list), "boxed-list");
+   gtk_widget_add_css_class (GTK_WIDGET (list), "nuvasha-list-section");
   /* The card background of the list only covers its rows: the space
      under them is the window background, the same colour as the hairline
      between two rows, instead of the whole window being card coloured. */
    gtk_widget_set_valign (GTK_WIDGET (list), GTK_ALIGN_START);
    gtk_list_box_set_selection_mode (list,
                                     GTK_SELECTION_NONE);
-   g_signal_connect (list, "row-activated", G_CALLBACK (on_row_activate),
-                     self);
+    g_signal_connect_object (list, "row-activated", G_CALLBACK (on_row_activate),
+                             self, 0);
    gtk_list_box_bind_model (list, G_LIST_MODEL (instances),
                             create_instance_row, self, NULL);
 

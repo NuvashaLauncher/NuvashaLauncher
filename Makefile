@@ -14,7 +14,7 @@ VERSION    := $(strip $(shell cat VERSION))
 # gio-unix-2.0 is the Linux part of GIO itself (no display involved) and
 # provides the output stream that writes a download into its temporary
 # file descriptor.
-PKGS := gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive gio-unix-2.0 epoxy
+PKGS := gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive gio-unix-2.0 epoxy libsecret-1
 
 # pkg-config prints -I paths; use -isystem so warnings are only about our
 # own code and not about the GTK/GLib headers themselves.
@@ -38,6 +38,11 @@ DBGBIN := build-debug/NuvashaLauncher
 SRCS    := $(filter-out $(wildcard src/*-part.c),$(wildcard src/*.c))
 RELOBJS := $(patsubst src/%.c,build/%.o,$(SRCS))
 DBGOBJS := $(patsubst src/%.c,build-debug/%.o,$(SRCS))
+RESOURCE_C := build/nuvasha-resources.c
+RESOURCE_O := build/nuvasha-resources.o
+RESOURCE_DBG_O := build-debug/nuvasha-resources.o
+RELOBJS += $(RESOURCE_O)
+DBGOBJS += $(RESOURCE_DBG_O)
 RELDEPS := $(RELOBJS:.o=.d)
 DBGDEPS := $(DBGOBJS:.o=.d)
 
@@ -46,6 +51,8 @@ DBGDEPS := $(DBGOBJS:.o=.d)
 TESTLIBSRCS := $(filter-out src/main.c,$(SRCS))
 TESTLIBOBJS := $(patsubst src/%.c,build/%.o,$(TESTLIBSRCS))
 TESTLIBDBGOBJS := $(patsubst src/%.c,build-debug/%.o,$(TESTLIBSRCS))
+TESTLIBOBJS += $(RESOURCE_O)
+TESTLIBDBGOBJS += $(RESOURCE_DBG_O)
 TESTSRCS    := $(wildcard tests/test-*.c)
 TESTBINS    := $(patsubst tests/%.c,build/tests/%,$(TESTSRCS))
 TESTDEPS    := $(addsuffix .d,$(TESTBINS))
@@ -70,10 +77,19 @@ $(DBGBIN): $(DBGOBJS) | build-debug
 	$(CC) $(DBGFLAGS) -o $@ $(DBGOBJS) $(PKG_LIBS)
 
 build/%.o: src/%.c | build
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(RELFLAGS) $(PKG_CFLAGS) -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(RELFLAGS) $(PKG_CFLAGS) -Wno-overlength-strings -c -o $@ $<
+
+$(RESOURCE_C): data/nuvasha.gresource.xml data/nuvasha.css $(wildcard data/ui/*.ui) | build
+	glib-compile-resources --generate-source --target=$@ --sourcedir=data $<
+
+$(RESOURCE_O): $(RESOURCE_C) | build
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(RELFLAGS) $(PKG_CFLAGS) -Wno-overlength-strings -c -o $@ $<
 
 build-debug/%.o: src/%.c | build-debug
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DBGFLAGS) $(PKG_CFLAGS) -c -o $@ $<
+
+$(RESOURCE_DBG_O): $(RESOURCE_C) | build-debug
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DBGFLAGS) $(PKG_CFLAGS) -Wno-overlength-strings -c -o $@ $(RESOURCE_C)
 
 build/tests/%: tests/%.c $(TESTLIBOBJS) | build/tests
 	$(CC) $(CFLAGS) $(RELFLAGS) -Isrc $(PKG_CFLAGS) \

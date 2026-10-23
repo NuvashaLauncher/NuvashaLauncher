@@ -10,6 +10,7 @@
  * a user would find after a restart. */
 
 #include "nuvasha-accounts.h"
+#include "nuvasha-secret-store.h"
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -382,10 +383,71 @@ test_persistence (void)
     g_assert_cmpuint (nuvasha_accounts_count (store_wrong_type), ==, 0);
   }
 
-  /* What the file holds is the token in plain sight, which is why it is
-     0600: a token is not a password, but it is not public either. */
+  /* Credentials are never serialized in the account file. */
   g_assert_true (g_file_get_contents (path, &text, NULL, NULL));
-  g_assert_nonnull (strstr (text, "the-access-token"));
+  {
+    g_autofree char *stored_access = NULL;
+    g_autofree char *stored_refresh = NULL;
+    g_assert_true (nuvasha_secret_store_load (
+      "069a79f444e94726a5befca90e38aaf5",
+      &stored_access, &stored_refresh));
+    g_assert_null (strstr (text, "the-access-token"));
+  }
+
+  {
+    g_autofree char *stored_access = NULL;
+    g_autofree char *stored_refresh = NULL;
+    const char *secret_id = "nuvasha-test-special-token";
+    gboolean available = nuvasha_secret_store_save (
+      secret_id, "access-quote-\\\"", "refresh-backslash-\\\\");
+
+    if (available)
+      {
+        g_assert_true (nuvasha_secret_store_load (
+          secret_id, &stored_access, &stored_refresh));
+        g_assert_cmpstr (stored_access, ==, "access-quote-\\\"");
+        g_assert_cmpstr (stored_refresh, ==, "refresh-backslash-\\\\");
+        nuvasha_secret_store_clear (secret_id);
+        g_assert_false (nuvasha_secret_store_load (
+          secret_id, &stored_access, &stored_refresh));
+      }
+  }
+
+  {
+    g_autofree char *stored_access = NULL;
+    g_autofree char *stored_refresh = NULL;
+    gboolean had_secret = nuvasha_secret_store_load (
+      "069a79f444e94726a5befca90e38aaf5",
+      &stored_access, &stored_refresh);
+
+    g_assert_true (nuvasha_accounts_remove (
+      store, "069a79f444e94726a5befca90e38aaf5", &error));
+    g_assert_no_error (error);
+    if (had_secret)
+      g_assert_false (nuvasha_secret_store_load (
+        "069a79f444e94726a5befca90e38aaf5",
+        &stored_access, &stored_refresh));
+  }
+
+  {
+    g_autofree char *legacy_path = temporary_path ("legacy-token-fields.json");
+    g_autoptr (NuvashaAccounts) legacy_store = NULL;
+    NuvashaAccount *legacy_account;
+    const char *legacy_json =
+      "{\"version\":1,\"accounts\":[{\"type\":\"microsoft\","
+      "\"id\":\"legacy-json-test\",\"name\":\"Legacy\","
+      "\"uuid\":\"legacy-json-test\",\"access-token\":\"old\","
+      "\"refresh-token\":\"old-refresh\"}]}";
+
+    nuvasha_secret_store_clear ("legacy-json-test");
+    g_assert_true (g_file_set_contents (legacy_path, legacy_json, -1, NULL));
+    legacy_store = nuvasha_accounts_new_for_path (legacy_path);
+    legacy_account = nuvasha_accounts_find (legacy_store, "legacy-json-test");
+    g_assert_nonnull (legacy_account);
+    g_assert_null (legacy_account->access_token);
+    g_assert_null (legacy_account->refresh_token);
+    g_remove (legacy_path);
+  }
 
   g_print ("ok - accounts and their tokens survive a restart, 0600\n");
 }

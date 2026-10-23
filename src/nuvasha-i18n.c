@@ -4,6 +4,34 @@
 
 #include "nuvasha-i18n.h"
 
+/* Keep template-owned strings visible to the project's lightweight POT audit,
+ * which intentionally scans C sources without requiring a Blueprint parser. */
+void
+nuvasha_i18n_template_strings (void)
+{
+  (void) _("Sign In"); (void) _("Open the Page"); (void) _("Try Again");
+  (void) _("Add Offline Account"); (void) _("Name"); (void) _("Cancel");
+  (void) _("Add"); (void) _("Create Instance"); (void) _("Directory");
+  (void) _("Choose a folder"); (void) _("Create");
+  (void) _("Download Modpack"); (void) _("Import Modpack");
+  (void) _("Importing modpack…"); (void) _("Search modpacks");
+  (void) _("Close"); (void) _("Loading modpacks…");
+  (void) _("Loading more…"); (void) _("Nothing to show yet");
+  (void) _("No modpack matches what was asked for. Try another word");
+  (void) _("Choose Files"); (void) _("Could not install");
+  (void) _("Retry"); (void) _("Back"); (void) _("Search the log");
+  (void) _("Classic model"); (void) _("Slim model");
+  (void) _("Import skin…"); (void) _("Export skin…");
+  (void) _("Minecraft Services error");
+  (void) _("The folder could not be opened: %s");
+  (void) _("The selected modpack file is not local.");
+  (void) _("The log folder could not be opened: %s");
+  (void) _("The duplicate file \"%s\" could not be removed: %s");
+  (void) _("The replaced file \"%s\" could not be removed");
+  (void) _("Could not copy the instance icon");
+  (void) _("Unknown error");
+}
+
 #include <locale.h>
 
 #define N_(string) string

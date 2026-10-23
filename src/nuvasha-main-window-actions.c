@@ -3,6 +3,7 @@
  */
 
 #include "nuvasha-main-window-private.h"
+#include "nuvasha-ui-feedback.h"
 #include "nuvasha-cache.h"
 #include "nuvasha-create-instance-dialog.h"
 #include "nuvasha-download-modpack-dialog.h"
@@ -59,7 +60,9 @@ on_import_modpack_chosen (GObject *source, GAsyncResult *result,
 
     if (path == NULL)
       {
-        g_warning ("cannot import a non-local modpack file");
+        adw_banner_set_title (self->ui.banner,
+                              _("The selected modpack file is not local."));
+        adw_banner_set_revealed (self->ui.banner, TRUE);
         g_object_unref (self);
         return;
       }
@@ -608,11 +611,7 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
                                   _("Clear Nuvasha Cache"));
   {
     GtkButton *button = GTK_BUTTON (gtk_button_new_from_icon_name ("user-trash-symbolic"));
-    gtk_widget_add_css_class (GTK_WIDGET (button), "flat");
-    gtk_widget_set_tooltip_text (GTK_WIDGET (button), _("Clear Nuvasha Cache"));
-    gtk_accessible_update_property (GTK_ACCESSIBLE (button),
-                                    GTK_ACCESSIBLE_PROPERTY_LABEL,
-                                    _("Clear Nuvasha Cache"), -1);
+    nuvasha_ui_prepare_icon_button (GTK_WIDGET (button), _("Clear Nuvasha Cache"));
      g_signal_connect_object (button, "clicked", G_CALLBACK (on_clear_cache_clicked),
                               self, 0);
     adw_action_row_add_suffix (clear_cache_row, GTK_WIDGET (button));

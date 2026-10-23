@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="AdwActionRow" id="row">
+    <property name="use-markup">False</property>
+    <property name="css-classes">nuvasha-skin-row</property>
+  </object>
+  <object class="GtkImage" id="avatar"/>
+</interface>

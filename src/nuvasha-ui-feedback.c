@@ -51,3 +51,24 @@ nuvasha_ui_show_toast (GtkWidget  *page,
   adw_toast_set_use_markup (toast, FALSE);
   adw_toast_overlay_add_toast (ADW_TOAST_OVERLAY (overlay), toast);
 }
+
+void
+nuvasha_ui_prepare_icon_button (GtkWidget *button, const char *label)
+{
+  g_return_if_fail (GTK_IS_WIDGET (button));
+  g_return_if_fail (label != NULL);
+
+  gtk_widget_add_css_class (button, "flat");
+  gtk_widget_set_tooltip_text (button, label);
+  gtk_accessible_update_property (GTK_ACCESSIBLE (button),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL, label, -1);
+}
+
+void
+nuvasha_ui_prepare_dialog_content (GtkWidget *content)
+{
+  g_return_if_fail (GTK_IS_WIDGET (content));
+  gtk_widget_add_css_class (content, "nuvasha-dialog-content");
+  gtk_widget_set_hexpand (content, TRUE);
+  gtk_widget_set_vexpand (content, TRUE);
+}

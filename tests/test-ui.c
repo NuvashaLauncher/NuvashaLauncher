@@ -409,7 +409,11 @@ test_pick_button_starts_empty (void)
 
   /* Nothing is picked: there is nothing to install and no number to
      show, which is what an insensitive button says on its own. */
-  g_assert_false (gtk_widget_get_sensitive (button));
+   g_assert_false (gtk_widget_get_sensitive (button));
+   {
+     g_autofree char *tooltip = gtk_widget_get_tooltip_text (button);
+     g_assert_cmpstr (tooltip, ==, "Nothing is selected");
+   }
 
   badge = gtk_widget_get_parent (button);
   g_assert_true (GTK_IS_OVERLAY (badge));

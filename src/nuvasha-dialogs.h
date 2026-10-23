@@ -35,6 +35,39 @@ nuvasha_dialog_set_standard_size (AdwDialog *dialog)
   adw_dialog_set_content_height (dialog, nuvasha_DIALOG_CONTENT_HEIGHT);
 }
 
+/* AdwBreakpoint takes ownership of its condition. Keep that transfer in one
+ * helper so every narrow dialog follows the same lifetime rule. */
+static inline void
+nuvasha_dialog_add_content_margin_breakpoint (AdwDialog *dialog,
+                                              GtkWidget *content,
+                                              int        max_width,
+                                              int        margin)
+{
+  AdwBreakpointCondition *condition;
+  g_autoptr (AdwBreakpoint) breakpoint;
+  GValue value = G_VALUE_INIT;
+
+  g_return_if_fail (ADW_IS_DIALOG (dialog));
+  g_return_if_fail (GTK_IS_WIDGET (content));
+
+  condition = adw_breakpoint_condition_new_length (
+    ADW_BREAKPOINT_CONDITION_MAX_WIDTH, max_width, ADW_LENGTH_UNIT_PX);
+  breakpoint = adw_breakpoint_new (condition);
+
+  g_value_init (&value, G_TYPE_INT);
+  g_value_set_int (&value, margin);
+  adw_breakpoint_add_setter (breakpoint, G_OBJECT (content),
+                             "margin-start", &value);
+  adw_breakpoint_add_setter (breakpoint, G_OBJECT (content),
+                             "margin-end", &value);
+  adw_breakpoint_add_setter (breakpoint, G_OBJECT (content),
+                             "margin-top", &value);
+  adw_breakpoint_add_setter (breakpoint, G_OBJECT (content),
+                             "margin-bottom", &value);
+  g_value_unset (&value);
+  adw_dialog_add_breakpoint (dialog, g_steal_pointer (&breakpoint));
+}
+
 G_END_DECLS
 
 #endif /* nuvasha_DIALOGS_H */

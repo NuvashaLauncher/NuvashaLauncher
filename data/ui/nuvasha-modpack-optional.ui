@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="AdwNavigationPage" id="page">
+    <property name="title" translatable="yes">Choose Files</property>
+    <property name="tag">optional</property>
+    <property name="child">
+      <object class="AdwToolbarView">
+        <child type="top"><object class="AdwHeaderBar"/></child>
+        <property name="content">
+          <object class="GtkBox" id="boxy">
+            <property name="css-classes">nuvasha-dialog-content</property>
+            <property name="orientation">vertical</property>
+            <child><object class="AdwPreferencesPage" id="page-holder"/></child>
+            <child>
+              <object class="GtkBox" id="buttons">
+                <property name="css-classes">nuvasha-page-actions</property>
+                <property name="orientation">horizontal</property>
+                <property name="spacing">6</property>
+                <property name="halign">end</property>
+                <property name="margin-start">12</property>
+                <property name="margin-end">12</property>
+                <property name="margin-bottom">12</property>
+                <child><object class="GtkButton" id="cancel-button"/></child>
+                <child><object class="GtkButton" id="install-button"/></child>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </property>
+  </object>
+</interface>

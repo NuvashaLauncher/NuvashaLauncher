@@ -907,3 +907,24 @@ msgstr "Erreur de Minecraft Services"
 
 msgid "Application menu"
 msgstr "Application menu"
+
+msgid "The folder could not be opened: %s"
+msgstr "The folder could not be opened: %s"
+
+msgid "The selected modpack file is not local."
+msgstr "The selected modpack file is not local."
+
+msgid "The log folder could not be opened: %s"
+msgstr "The log folder could not be opened: %s"
+
+msgid "The duplicate file \"%s\" could not be removed: %s"
+msgstr "The duplicate file \"%s\" could not be removed: %s"
+
+msgid "The replaced file \"%s\" could not be removed"
+msgstr "The replaced file \"%s\" could not be removed"
+
+msgid "Could not copy the instance icon"
+msgstr "Could not copy the instance icon"
+
+msgid "Unknown error"
+msgstr "Unknown error"

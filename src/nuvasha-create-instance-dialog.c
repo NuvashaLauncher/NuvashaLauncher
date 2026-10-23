@@ -29,8 +29,11 @@ struct _NuvashaCreateInstanceDialog
   NuvashaVersionRow *version_row;
   NuvashaLoaderRow *loader_row; /* its two rows are filled when it opens */
   AdwActionRow *directory_row;
+  AdwPreferencesGroup *group;
   AdwToastOverlay *toast_overlay;
+  GtkBox *content;
   GtkButton *create_button;
+  GtkButton *cancel_button;
 };
 
 G_DEFINE_FINAL_TYPE (NuvashaCreateInstanceDialog, nuvasha_create_instance_dialog,
@@ -205,93 +208,44 @@ on_pick_directory (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 static void
 nuvasha_create_instance_dialog_init (NuvashaCreateInstanceDialog *self)
 {
-  adw_dialog_set_title (ADW_DIALOG (self), _("Create Instance"));
-  adw_dialog_set_follows_content_size (ADW_DIALOG (self), FALSE);
-  nuvasha_dialog_set_standard_size (ADW_DIALOG (self));
-
-  self->name_row = ADW_ENTRY_ROW (adw_entry_row_new ());
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->name_row), _("Name"));
-  adw_entry_row_set_activates_default (ADW_ENTRY_ROW (self->name_row), TRUE);
-
-  /* The real versions of Mojang's manifest, fetched when the dialog is
-   * created; the row fills itself and says so while it works. */
-  self->version_row = nuvasha_version_row_new ();
-
-  /* The loader and the version of it. Filled when the dialog opens and
-     again whenever the Minecraft version above changes. */
-  self->loader_row = nuvasha_loader_row_new ();
-
-  /* What NuvashaInstanceManager derives when no directory is picked:
-   * <data dir>/instances. */
   g_autofree char *default_directory =
     g_build_filename (g_get_user_data_dir (), "nuvasha", "instances", NULL);
+  GtkButton *pick_button;
 
+  gtk_widget_init_template (GTK_WIDGET (self));
+  nuvasha_dialog_add_content_margin_breakpoint (ADW_DIALOG (self),
+                                                GTK_WIDGET (self->content),
+                                                600, 6);
+  adw_dialog_set_follows_content_size (ADW_DIALOG (self), FALSE);
+  nuvasha_dialog_set_standard_size (ADW_DIALOG (self));
+  adw_entry_row_set_activates_default (self->name_row, TRUE);
+  adw_entry_row_set_max_length (self->name_row, 16);
+
+  self->version_row = nuvasha_version_row_new ();
+  self->loader_row = nuvasha_loader_row_new ();
   self->directory_row = ADW_ACTION_ROW (adw_action_row_new ());
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->directory_row),
-                                      FALSE);
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->directory_row),
-                                  _("Directory"));
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (self->directory_row),
-                               default_directory);
-
-  GtkButton *pick_button = GTK_BUTTON (gtk_button_new_from_icon_name ("folder-symbolic"));
-  gtk_widget_add_css_class (GTK_WIDGET (pick_button), "flat");
-  gtk_widget_set_valign (GTK_WIDGET (pick_button), GTK_ALIGN_CENTER);
-  gtk_widget_set_tooltip_text (GTK_WIDGET (pick_button), _("Choose a folder"));
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->directory_row), _("Directory"));
+  adw_action_row_set_subtitle (self->directory_row, default_directory);
+  pick_button = GTK_BUTTON (gtk_button_new_from_icon_name ("folder-symbolic"));
+  nuvasha_ui_prepare_icon_button (GTK_WIDGET (pick_button), _("Choose a folder"));
   g_signal_connect_object (pick_button, "clicked", G_CALLBACK (on_pick_directory), self, 0);
-  adw_action_row_add_suffix (ADW_ACTION_ROW (self->directory_row), GTK_WIDGET (pick_button));
-  adw_action_row_set_activatable_widget (ADW_ACTION_ROW (self->directory_row),
-                                         GTK_WIDGET (pick_button));
+  adw_action_row_add_suffix (self->directory_row, GTK_WIDGET (pick_button));
+  adw_action_row_set_activatable_widget (self->directory_row, GTK_WIDGET (pick_button));
 
-  AdwPreferencesGroup *group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
-  adw_preferences_group_add (group, GTK_WIDGET (self->name_row));
-  adw_preferences_group_add (group, GTK_WIDGET (self->version_row));
-  adw_preferences_group_add (group,
-                              GTK_WIDGET (nuvasha_loader_row_get_loader_row (self->loader_row)));
-  adw_preferences_group_add (group,
-                              GTK_WIDGET (nuvasha_loader_row_get_version_row (self->loader_row)));
-  adw_preferences_group_add (group, GTK_WIDGET (self->directory_row));
+  adw_preferences_group_add (self->group, GTK_WIDGET (self->version_row));
+  adw_preferences_group_add (self->group, GTK_WIDGET (nuvasha_loader_row_get_loader_row (self->loader_row)));
+  adw_preferences_group_add (self->group, GTK_WIDGET (nuvasha_loader_row_get_version_row (self->loader_row)));
+  adw_preferences_group_add (self->group, GTK_WIDGET (self->directory_row));
 
-  GtkButton *cancel_button = GTK_BUTTON (gtk_button_new_with_label (_("Cancel")));
-  g_signal_connect_object (cancel_button, "clicked", G_CALLBACK (nuvasha_ui_cancel_dialog),
-                           self, 0);
-
-  self->create_button = GTK_BUTTON (gtk_button_new_with_label (_("Create")));
+  gtk_button_set_label (self->cancel_button, _("Cancel"));
+  gtk_button_set_label (self->create_button, _("Create"));
   gtk_widget_add_css_class (GTK_WIDGET (self->create_button), "suggested-action");
-  g_signal_connect_object (self->create_button, "clicked", G_CALLBACK (on_create_clicked),
-                           self, 0);
-
-  GtkBox *buttons = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
-  gtk_widget_set_halign (GTK_WIDGET (buttons), GTK_ALIGN_CENTER);
-  gtk_box_append (GTK_BOX (buttons), GTK_WIDGET (cancel_button));
-  gtk_box_append (GTK_BOX (buttons), GTK_WIDGET (self->create_button));
-
-  GtkBox *content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
-  gtk_box_set_spacing (content, 12);
-  gtk_widget_set_margin_start (GTK_WIDGET (content), 12);
-  gtk_widget_set_margin_end (GTK_WIDGET (content), 12);
-  gtk_widget_set_margin_top (GTK_WIDGET (content), 12);
-  gtk_widget_set_margin_bottom (GTK_WIDGET (content), 12);
-  GtkLabel *heading = GTK_LABEL (gtk_label_new (_("Create Instance")));
-  gtk_widget_add_css_class (GTK_WIDGET (heading), "title-2");
-  gtk_label_set_xalign (GTK_LABEL (heading), 0.5f);
-  gtk_box_append (GTK_BOX (content), GTK_WIDGET (heading));
-  gtk_box_append (GTK_BOX (content), GTK_WIDGET (group));
-  gtk_box_append (GTK_BOX (content), GTK_WIDGET (buttons));
-  self->toast_overlay = ADW_TOAST_OVERLAY (adw_toast_overlay_new ());
-  adw_toast_overlay_set_child (self->toast_overlay, GTK_WIDGET (content));
-  adw_dialog_set_child (ADW_DIALOG (self), GTK_WIDGET (self->toast_overlay));
-
-  adw_dialog_set_default_widget (ADW_DIALOG (self),
-                                 GTK_WIDGET (self->create_button));
-
-  g_signal_connect_object (self->name_row, "notify::text", G_CALLBACK (on_input_changed),
-                           self, 0);
-  g_signal_connect_object (self->version_row, "notify::selected",
-                           G_CALLBACK (on_version_selected), self, 0);
-  g_signal_connect_object (self->loader_row, "changed",
-                           G_CALLBACK (on_loader_changed), self, 0);
-
+  g_signal_connect_object (self->cancel_button, "clicked", G_CALLBACK (nuvasha_ui_cancel_dialog), self, 0);
+  g_signal_connect_object (self->create_button, "clicked", G_CALLBACK (on_create_clicked), self, 0);
+  g_signal_connect_object (self->name_row, "notify::text", G_CALLBACK (on_input_changed), self, 0);
+  g_signal_connect_object (self->version_row, "notify::selected", G_CALLBACK (on_version_selected), self, 0);
+  g_signal_connect_object (self->loader_row, "changed", G_CALLBACK (on_loader_changed), self, 0);
+  adw_dialog_set_default_widget (ADW_DIALOG (self), GTK_WIDGET (self->create_button));
   update_create_button (self);
 }
 
@@ -350,6 +304,15 @@ static void
 nuvasha_create_instance_dialog_class_init (NuvashaCreateInstanceDialogClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+  gtk_widget_class_set_template_from_resource (widget_class,
+      "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-create-instance.ui");
+  gtk_widget_class_bind_template_child (widget_class, NuvashaCreateInstanceDialog, name_row);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaCreateInstanceDialog, group);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaCreateInstanceDialog, toast_overlay);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaCreateInstanceDialog, content);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaCreateInstanceDialog, cancel_button);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaCreateInstanceDialog, create_button);
 
   object_class->dispose = nuvasha_create_instance_dialog_dispose;
   object_class->finalize = nuvasha_create_instance_dialog_finalize;

@@ -12,11 +12,27 @@
 #include "nuvasha-i18n.h"
 #include "nuvasha-settings.h"
 #include "nuvasha-users-popover.h"
+#include "nuvasha-ui-feedback.h"
 
 static void
 on_main_window_banner_dismiss (AdwBanner *banner, gpointer user_data G_GNUC_UNUSED)
 {
   adw_banner_set_revealed (banner, FALSE);
+}
+
+static void
+on_main_window_width_changed (GObject *object,
+                               GParamSpec *pspec G_GNUC_UNUSED,
+                               gpointer user_data G_GNUC_UNUSED)
+{
+  NuvashaMainWindow *self = nuvasha_MAIN_WINDOW (object);
+  int width = gtk_widget_get_width (GTK_WIDGET (self));
+
+  if (self->ui.toolbar == NULL || width <= 0)
+    return;
+  adw_toolbar_view_set_top_bar_style (
+    self->ui.toolbar,
+    width < 700 ? ADW_TOOLBAR_FLAT : ADW_TOOLBAR_RAISED);
 }
 
 void
@@ -25,14 +41,22 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
 
   g_autoptr (GMenu) add_menu = create_add_menu ();
   g_autoptr (GMenu) app_menu = create_app_menu ();
-  AdwHeaderBar *header = ADW_HEADER_BAR (adw_header_bar_new ());
+  g_autoptr (GtkBuilder) shell_builder = gtk_builder_new_from_resource (
+    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-main-shell.ui");
+  AdwHeaderBar *header = ADW_HEADER_BAR (gtk_builder_get_object (
+    shell_builder, "header"));
   GtkMenuButton *add_button = GTK_MENU_BUTTON (gtk_menu_button_new ());
   GtkMenuButton *users_button = GTK_MENU_BUTTON (gtk_menu_button_new ());
   GtkMenuButton *app_menu_button = GTK_MENU_BUTTON (gtk_menu_button_new ());
   GtkWidget *users_child = NULL;
   AdwStatusPage *empty_page = ADW_STATUS_PAGE (adw_status_page_new ());
-  AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
+  AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (gtk_builder_get_object (
+    shell_builder, "toolbar"));
   GtkWidget *add_popover = NULL;
+
+  self->ui.toolbar = toolbar;
+  g_signal_connect_object (self, "notify::width",
+                           G_CALLBACK (on_main_window_width_changed), self, 0);
 
   /* Use a raised header so it has its own surface. */
   gtk_widget_add_css_class (GTK_WIDGET (toolbar), "nuvasha-main-toolbar");
@@ -45,9 +69,7 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
   /* Start of the header: the "+" menu. */
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (add_button),
                                  "list-add-symbolic");
-  gtk_widget_set_tooltip_text (GTK_WIDGET (add_button), _("Add"));
-  gtk_accessible_update_property (GTK_ACCESSIBLE (add_button),
-                                  GTK_ACCESSIBLE_PROPERTY_LABEL, _("Add"), -1);
+  nuvasha_ui_prepare_icon_button (GTK_WIDGET (add_button), _("Add"));
   gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (add_button),
                                   G_MENU_MODEL (add_menu));
   adw_header_bar_pack_start (ADW_HEADER_BAR (header), GTK_WIDGET (add_button));
@@ -82,13 +104,10 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
 
     gtk_menu_button_set_child (GTK_MENU_BUTTON (self->downloads.button),
                                GTK_WIDGET (icon_row));
-    gtk_widget_add_css_class (GTK_WIDGET (self->downloads.button), "flat");
     gtk_menu_button_set_always_show_arrow (
       GTK_MENU_BUTTON (self->downloads.button), FALSE);
-  gtk_widget_set_tooltip_text (GTK_WIDGET (self->downloads.button), _("Downloads"));
-    gtk_accessible_update_property (GTK_ACCESSIBLE (self->downloads.button),
-                                    GTK_ACCESSIBLE_PROPERTY_LABEL, _("Downloads"),
-                                    -1);
+    nuvasha_ui_prepare_icon_button (GTK_WIDGET (self->downloads.button),
+                                    _("Downloads"));
     gtk_widget_set_visible (GTK_WIDGET (self->downloads.button), FALSE);
 
     gtk_box_append (GTK_BOX (packed), GTK_WIDGET (self->downloads.button));
@@ -120,18 +139,12 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
                               GTK_WIDGET (self->model->users_popover));
   /* The child is a box around the avatar, so the menu button does not
      recognize it as an icon button and would draw a frame behind it. */
-  gtk_widget_add_css_class (GTK_WIDGET (users_button), "flat");
-  /* Provide an accessible label for the icon-only button. */
-  gtk_accessible_update_property (GTK_ACCESSIBLE (users_button),
-                                   GTK_ACCESSIBLE_PROPERTY_LABEL, _("Accounts"),
-                                  -1);
+   nuvasha_ui_prepare_icon_button (GTK_WIDGET (users_button), _("Accounts"));
 
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (app_menu_button),
                                  "open-menu-symbolic");
-  gtk_widget_set_tooltip_text (GTK_WIDGET (app_menu_button), _("Application menu"));
-  gtk_accessible_update_property (GTK_ACCESSIBLE (app_menu_button),
-                                  GTK_ACCESSIBLE_PROPERTY_LABEL,
-                                  _("Application menu"), -1);
+  nuvasha_ui_prepare_icon_button (GTK_WIDGET (app_menu_button),
+                                  _("Application menu"));
   gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (app_menu_button),
                                   G_MENU_MODEL (app_menu));
 
@@ -147,17 +160,14 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
   gtk_widget_set_vexpand (GTK_WIDGET (empty_page), TRUE);
   gtk_widget_add_css_class (GTK_WIDGET (empty_page), "nuvasha-empty-state");
 
-  self->ui.stack = ADW_VIEW_STACK (adw_view_stack_new ());
+  self->ui.stack = ADW_VIEW_STACK (gtk_builder_get_object (shell_builder, "stack"));
   adw_view_stack_add_named (self->ui.stack, GTK_WIDGET (empty_page), "empty");
   gtk_widget_set_hexpand (GTK_WIDGET (self->ui.stack), TRUE);
   gtk_widget_set_vexpand (GTK_WIDGET (self->ui.stack), TRUE);
+  gtk_widget_add_css_class (GTK_WIDGET (self->ui.stack), "nuvasha-main-content");
 
   /* The list is the content of the window: an instance is a window of
      its own and is never a page here. */
-  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar),
-                                GTK_WIDGET (self->ui.stack));
-  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), GTK_WIDGET (header));
-
   /* Keep launch failures in a banner so the user can read them later. */
   self->ui.banner = ADW_BANNER (adw_banner_new (""));
   adw_banner_set_button_label (ADW_BANNER (self->ui.banner), _("Dismiss"));

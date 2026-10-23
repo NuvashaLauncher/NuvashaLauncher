@@ -162,6 +162,22 @@ on_content_tab_switched (GObject *stack, GParamSpec *pspec G_GNUC_UNUSED,
     nuvasha_content_page_reset_for_tab_switch (nuvasha_CONTENT_PAGE (child));
 }
 
+static void
+on_instance_page_width_changed (GObject *object,
+                                GParamSpec *pspec G_GNUC_UNUSED,
+                                gpointer user_data G_GNUC_UNUSED)
+{
+  NuvashaInstancePage *self = nuvasha_INSTANCE_PAGE (object);
+  int width = gtk_widget_get_width (GTK_WIDGET (self));
+
+  if (self->switcher == NULL || width <= 0)
+    return;
+  adw_view_switcher_set_policy (
+    self->switcher,
+    width < 700 ? ADW_VIEW_SWITCHER_POLICY_NARROW
+                : ADW_VIEW_SWITCHER_POLICY_WIDE);
+}
+
 
 /* Settings-page implementation lives in nuvasha-instance-page-settings.c. */
 
@@ -198,12 +214,21 @@ nuvasha_instance_page_new (NuvashaInstanceManager *manager, NuvashaInstance *ins
   AdwViewSwitcher *switcher = ADW_VIEW_SWITCHER (adw_view_switcher_new ());
   AdwHeaderBar *header = ADW_HEADER_BAR (adw_header_bar_new ());
   AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
+  AdwNavigationView *settings_navigation;
+  AdwNavigationPage *settings_page;
   g_autofree char *name = instance_string (instance, "name");
 
   self->manager = g_object_ref (manager);
   self->instance = g_object_ref (instance);
   self->settings = g_object_ref (settings);
   self->launcher = g_object_ref (launcher);
+  self->switcher = switcher;
+  g_signal_connect_object (self, "notify::width",
+                           G_CALLBACK (on_instance_page_width_changed), self, 0);
+  settings_navigation = ADW_NAVIGATION_VIEW (adw_navigation_view_new ());
+  settings_page = adw_navigation_page_new (create_settings_page (self),
+                                           _("Settings"));
+  adw_navigation_view_add (settings_navigation, settings_page);
 
   /* The Directory row cannot move files out from under a running game, so
      it follows the state of the launch the page shares with the row. */
@@ -211,8 +236,8 @@ nuvasha_instance_page_new (NuvashaInstanceManager *manager, NuvashaInstance *ins
                            G_CALLBACK (on_page_launcher_state), self, 0);
 
   adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (stack),
-                                       create_settings_page (self),
-                                        "settings", _("Settings"),
+                                       GTK_WIDGET (settings_navigation),
+                                       "settings", _("Settings"),
                                         "emblem-system-symbolic");
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack),
@@ -237,9 +262,8 @@ nuvasha_instance_page_new (NuvashaInstanceManager *manager, NuvashaInstance *ins
 
   /* Kept so that the content pages can be built again when the loader or
      the Minecraft version changes. */
-  self->stack = ADW_VIEW_STACK (stack);
-  g_signal_connect (stack, "notify::visible-child",
-                    G_CALLBACK (on_content_tab_switched), self);
+  g_signal_connect_object (stack, "notify::visible-child",
+                           G_CALLBACK (on_content_tab_switched), self, 0);
 
   /* The header holds only this switcher. There is no back button here:
    the dialog is named after the instance and its close button is what
@@ -247,23 +271,20 @@ nuvasha_instance_page_new (NuvashaInstanceManager *manager, NuvashaInstance *ins
   adw_view_switcher_set_policy (ADW_VIEW_SWITCHER (switcher),
                                 ADW_VIEW_SWITCHER_POLICY_WIDE);
   adw_view_switcher_set_stack (ADW_VIEW_SWITCHER (switcher),
-                               ADW_VIEW_STACK (stack));
-  adw_header_bar_set_title_widget (ADW_HEADER_BAR (header), GTK_WIDGET (switcher));
-
+                                ADW_VIEW_STACK (stack));
+  self->stack = stack;
   self->toast_overlay = ADW_TOAST_OVERLAY (adw_toast_overlay_new ());
-  adw_toast_overlay_set_child (ADW_TOAST_OVERLAY (self->toast_overlay), GTK_WIDGET (stack));
-
+  adw_toast_overlay_set_child (self->toast_overlay, GTK_WIDGET (stack));
+  gtk_box_append (GTK_BOX (self), GTK_WIDGET (toolbar));
+  adw_toolbar_view_add_top_bar (toolbar, GTK_WIDGET (header));
+  adw_toolbar_view_set_content (toolbar, GTK_WIDGET (self->toast_overlay));
   gtk_widget_set_vexpand (GTK_WIDGET (toolbar), TRUE);
   gtk_widget_set_hexpand (GTK_WIDGET (toolbar), TRUE);
-  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), GTK_WIDGET (header));
-  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar),
-                                GTK_WIDGET (self->toast_overlay));
 
   /* The dialog holds this box, and the box holds the toolbar view of the
      instance: there is no navigation page and no back button between the
      switcher and the five pages of the instance. */
-  gtk_box_append (GTK_BOX (self), GTK_WIDGET (toolbar));
-  gtk_accessible_update_property (GTK_ACCESSIBLE (self),
+   gtk_accessible_update_property (GTK_ACCESSIBLE (self),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL, name, -1);
 
   return self;
@@ -329,7 +350,6 @@ static void
 nuvasha_instance_page_class_init (NuvashaInstancePageClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
-
   object_class->dispose = nuvasha_instance_page_dispose;
   object_class->finalize = nuvasha_instance_page_finalize;
 }
