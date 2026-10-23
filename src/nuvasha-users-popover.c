@@ -16,8 +16,8 @@
 
 /* How wide the list is: enough for a name and its kind to be read, and no
  * wider than the header the button of it sits in. */
-#define USERS_WIDTH 360
-#define USERS_ROWS_WIDTH 336
+#define USERS_WIDTH 420
+#define USERS_ROWS_WIDTH 396
 
 /* A skin is a picture of 64 by 64 and the face is 8 by 8 of it, in the
  * middle row. What is shown here is that face, at the size a row is
@@ -408,6 +408,12 @@ nuvasha_users_popover_init (NuvashaUsersPopover *self)
   gtk_widget_add_css_class (GTK_WIDGET (offline), "flat");
   gtk_widget_set_halign (GTK_WIDGET (microsoft), GTK_ALIGN_CENTER);
   gtk_widget_set_halign (GTK_WIDGET (offline), GTK_ALIGN_CENTER);
+  gtk_widget_set_hexpand (GTK_WIDGET (microsoft), TRUE);
+  gtk_widget_set_hexpand (GTK_WIDGET (offline), TRUE);
+  gtk_widget_set_margin_start (GTK_WIDGET (microsoft), 12);
+  gtk_widget_set_margin_end (GTK_WIDGET (microsoft), 12);
+  gtk_widget_set_margin_start (GTK_WIDGET (offline), 12);
+  gtk_widget_set_margin_end (GTK_WIDGET (offline), 12);
   gtk_widget_set_margin_top (GTK_WIDGET (microsoft), 6);
   gtk_widget_set_margin_bottom (GTK_WIDGET (offline), 12);
   g_signal_connect_object (microsoft, "clicked",

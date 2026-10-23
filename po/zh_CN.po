@@ -915,3 +915,22 @@ msgstr "Could not copy the instance icon"
 
 msgid "Unknown error"
 msgstr "Unknown error"
+msgid "The sign-in request expired. Start again to get a new code."
+msgstr "The sign-in request expired. Start again to get a new code."
+
+msgid "Microsoft could not be reached. Check your connection and try again."
+msgstr "Microsoft could not be reached. Check your connection and try again."
+
+msgid "Microsoft sign-in failed. Try again."
+msgstr "Microsoft sign-in failed. Try again."
+
+msgid "Open Microsoft sign-in in your browser, then enter this code:"
+msgstr "Open Microsoft sign-in in your browser, then enter this code:"
+
+msgid "Open in browser"
+msgstr "Open in browser"
+msgid "Could not load capes"
+msgstr "Could not load capes"
+
+msgid "Minecraft did not return a cape list."
+msgstr "Minecraft did not return a cape list."

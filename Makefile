@@ -25,6 +25,7 @@ CPPFLAGS += -Dnuvasha_LOCALE_DIR=\"$(PREFIX)/share/locale\"
 CPPFLAGS += -Dnuvasha_VERSION=\"$(VERSION)\"
 CPPFLAGS += -Dnuvasha_DATA_DIR=\"$(PREFIX)/share/nuvasha\"
 CPPFLAGS += -Dnuvasha_SOURCE_DATA_DIR=\"$(CURDIR)/data\"
+CPPFLAGS += -Dnuvasha_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\"
 LOCALES := es_AR es_ES pt_BR pt_PT fr de it ja ko zh_CN zh_TW ru pl uk tr nl cs hu sv da fi nb ro vi id ar
 LOCALE_MOS := $(LOCALES:%=build/locale/%/LC_MESSAGES/nuvasha.mo)
 SCHEMA_XML := data/com.github.nuvashalauncher.Nuvasha.gschema.xml
@@ -96,6 +97,7 @@ $(RESOURCE_DBG_O): $(RESOURCE_C) | build-debug
 build/tests/%: tests/%.c $(TESTLIBOBJS) | build/tests
 	$(CC) $(CFLAGS) $(RELFLAGS) -Isrc $(PKG_CFLAGS) \
 		-Dnuvasha_DATA_DIR=\"$(CURDIR)/data\" -Dnuvasha_BIN=\"$(CURDIR)/$(BIN)\" \
+		-Dnuvasha_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\" \
 		-Dnuvasha_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
 		-Dnuvasha_SRC_DIR=\"$(CURDIR)/src\" -Dnuvasha_PO_DIR=\"$(CURDIR)/po\" \
 		-o $@ $< $(TESTLIBOBJS) $(PKG_LIBS)
@@ -124,6 +126,7 @@ test-display:
 build-debug/tests/%: tests/%.c $(TESTLIBDBGOBJS) | build-debug/tests
 	$(CC) $(CFLAGS) $(DBGFLAGS) -Isrc $(PKG_CFLAGS) \
 		-Dnuvasha_DATA_DIR=\"$(CURDIR)/data\" -Dnuvasha_BIN=\"$(CURDIR)/$(BIN)\" \
+		-Dnuvasha_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\" \
 		-Dnuvasha_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
 		-Dnuvasha_SRC_DIR=\"$(CURDIR)/src\" -Dnuvasha_PO_DIR=\"$(CURDIR)/po\" \
 		-o $@ $< $(TESTLIBDBGOBJS) $(PKG_LIBS)

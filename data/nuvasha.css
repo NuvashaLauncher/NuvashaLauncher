@@ -35,6 +35,18 @@
   padding: 24px;
 }
 
+.nuvasha-sign-in-code {
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: alpha(@accent_bg_color, 0.14);
+}
+
+.nuvasha-sign-in-error {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: alpha(@error_bg_color, 0.14);
+}
+
 .nuvasha-dialog-actions {
   padding: 12px;
 }

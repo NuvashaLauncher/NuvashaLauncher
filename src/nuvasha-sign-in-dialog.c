@@ -49,7 +49,19 @@ static void finish_sign_in (GObject      *source,
 static void
 show_error (NuvashaSignInDialog *self, const char *message)
 {
-  gtk_label_set_text (GTK_LABEL (self->error_label), message);
+  const char *friendly = message;
+
+  if (message != NULL && (g_strstr_len (message, -1, "invalid_grant") != NULL ||
+                          g_strstr_len (message, -1, "AADSTS70000") != NULL))
+    friendly = _("The sign-in request expired. Start again to get a new code.");
+  else if (message != NULL && g_strstr_len (message, -1, "Network") != NULL)
+    friendly = _("Microsoft could not be reached. Check your connection and try again.");
+  else if (message != NULL)
+    friendly = _("Microsoft sign-in failed. Try again.");
+
+  if (message != NULL && friendly != message)
+    g_debug ("Microsoft sign-in failed: %s", message);
+  gtk_label_set_text (GTK_LABEL (self->error_label), friendly);
   gtk_widget_set_visible (GTK_WIDGET (self->error_label), message != NULL);
   gtk_widget_set_visible (GTK_WIDGET (self->retry_button), TRUE);
   gtk_widget_set_visible (GTK_WIDGET (self->waiting), FALSE);
@@ -160,7 +172,6 @@ on_code_ready (GObject      *source G_GNUC_UNUSED,
 
   gtk_widget_set_visible (GTK_WIDGET (self->instruction_label), TRUE);
   gtk_widget_set_visible (GTK_WIDGET (self->code_label), TRUE);
-  gtk_widget_set_visible (GTK_WIDGET (self->uri_label), TRUE);
   gtk_widget_set_visible (GTK_WIDGET (self->open_button), TRUE);
 
   /* The page opens by itself, and the button is there for a user who
@@ -260,6 +271,7 @@ static void
 nuvasha_sign_in_dialog_init (NuvashaSignInDialog *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
+  adw_dialog_set_follows_content_size (ADW_DIALOG (self), TRUE);
   nuvasha_dialog_add_content_margin_breakpoint (ADW_DIALOG (self),
                                                 GTK_WIDGET (self->body),
                                                 440, 12);
@@ -267,18 +279,35 @@ nuvasha_sign_in_dialog_init (NuvashaSignInDialog *self)
 
   gtk_label_set_text (self->instruction_label,
                       _("Open the page in your browser, then enter this code:"));
+  gtk_label_set_wrap (self->instruction_label, TRUE);
+  gtk_widget_add_css_class (GTK_WIDGET (self->instruction_label), "title-3");
+  gtk_widget_set_halign (GTK_WIDGET (self->instruction_label), GTK_ALIGN_CENTER);
   gtk_label_set_selectable (self->code_label, TRUE);
   gtk_label_set_xalign (self->code_label, 0.5f);
   gtk_widget_add_css_class (GTK_WIDGET (self->code_label), "title-1");
   gtk_widget_add_css_class (GTK_WIDGET (self->code_label), "monospace");
+  gtk_widget_add_css_class (GTK_WIDGET (self->code_label), "nuvasha-sign-in-code");
+  {
+    GtkBox *button_content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8));
+    GtkImage *button_icon = GTK_IMAGE (gtk_image_new_from_icon_name ("web-browser-symbolic"));
+    GtkLabel *button_label = GTK_LABEL (gtk_label_new (_("Open the Page")));
+
+    gtk_box_append (button_content, GTK_WIDGET (button_icon));
+    gtk_box_append (button_content, GTK_WIDGET (button_label));
+    gtk_button_set_child (self->open_button, GTK_WIDGET (button_content));
+  }
   gtk_widget_add_css_class (GTK_WIDGET (self->open_button), "pill");
   gtk_widget_add_css_class (GTK_WIDGET (self->open_button), "suggested-action");
   gtk_widget_set_halign (GTK_WIDGET (self->open_button), GTK_ALIGN_CENTER);
+  gtk_widget_set_hexpand (GTK_WIDGET (self->open_button), TRUE);
+  gtk_widget_set_margin_start (GTK_WIDGET (self->open_button), 12);
+  gtk_widget_set_margin_end (GTK_WIDGET (self->open_button), 12);
   gtk_widget_add_css_class (GTK_WIDGET (self->uri_label), "dim-label");
   gtk_widget_add_css_class (GTK_WIDGET (self->uri_label), "caption");
   gtk_label_set_selectable (self->uri_label, TRUE);
   gtk_label_set_justify (self->uri_label, GTK_JUSTIFY_CENTER);
   gtk_label_set_xalign (self->uri_label, 0.5f);
+  gtk_label_set_wrap (self->uri_label, TRUE);
   gtk_widget_add_css_class (GTK_WIDGET (self->waiting_label), "dim-label");
   gtk_widget_set_halign (GTK_WIDGET (self->waiting), GTK_ALIGN_CENTER);
   gtk_widget_set_valign (GTK_WIDGET (self->waiting), GTK_ALIGN_CENTER);
@@ -286,6 +315,7 @@ nuvasha_sign_in_dialog_init (NuvashaSignInDialog *self)
   gtk_label_set_xalign (self->error_label, 0.5f);
   gtk_label_set_justify (self->error_label, GTK_JUSTIFY_CENTER);
   gtk_widget_add_css_class (GTK_WIDGET (self->error_label), "error");
+  gtk_widget_add_css_class (GTK_WIDGET (self->error_label), "nuvasha-sign-in-error");
   gtk_widget_set_halign (GTK_WIDGET (self->retry_button), GTK_ALIGN_CENTER);
 
   gtk_widget_set_visible (GTK_WIDGET (self->instruction_label), FALSE);

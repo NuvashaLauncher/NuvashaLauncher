@@ -468,7 +468,16 @@ static void
 nuvasha_settings_init (NuvashaSettings *self)
 {
   {
-    GSettingsSchemaSource *source = g_settings_schema_source_get_default ();
+    GSettingsSchemaSource *source = NULL;
+    GSettingsSchemaSource *default_source;
+    g_autoptr (GError) schema_error = NULL;
+
+    if (g_file_test (nuvasha_BUILD_SCHEMA_DIR, G_FILE_TEST_IS_DIR))
+      source = g_settings_schema_source_new_from_directory (
+        nuvasha_BUILD_SCHEMA_DIR, NULL, FALSE, &schema_error);
+    default_source = g_settings_schema_source_get_default ();
+    if (source == NULL)
+      source = default_source;
     GSettingsSchema *schema = source != NULL
       ? g_settings_schema_source_lookup (source,
                                          "com.github.nuvashalauncher.Nuvasha",
@@ -478,6 +487,8 @@ nuvasha_settings_init (NuvashaSettings *self)
     g_return_if_fail (schema != NULL);
     self->desktop_settings = g_settings_new_full (schema, NULL, NULL);
     g_settings_schema_unref (schema);
+    if (source != default_source && source != NULL)
+      g_settings_schema_source_unref (source);
   }
   self->log_line_limit = nuvasha_SETTINGS_DEFAULT_LOG_LINE_LIMIT;
   self->cache_modrinth_api_responses = TRUE;
