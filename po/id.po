@@ -57,9 +57,6 @@ msgstr "Instal versi ini dengan versi yang dipilih"
 msgid "Filter by category"
 msgstr "Filter berdasarkan kategori"
 
-msgid "Filter"
-msgstr "Menyaring"
-
 msgid "Nothing to show yet"
 msgstr "Belum ada yang bisa ditampilkan"
 
@@ -294,9 +291,6 @@ msgstr "Masuk"
 
 msgid "Open the page in your browser, then enter this code:"
 msgstr "Buka halaman tersebut di browser Anda, lalu masukkan kode ini:"
-
-msgid "Open the Page"
-msgstr "Buka Halaman"
 
 msgid "Try Again"
 msgstr "Coba Lagi"
@@ -900,9 +894,6 @@ msgstr "Microsoft could not be reached. Check your connection and try again."
 
 msgid "Microsoft sign-in failed. Try again."
 msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open Microsoft sign-in in your browser, then enter this code:"
-msgstr "Open Microsoft sign-in in your browser, then enter this code:"
 
 msgid "Open in browser"
 msgstr "Buka di browser"

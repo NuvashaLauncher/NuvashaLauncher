@@ -57,9 +57,6 @@ msgstr "Installer denne version med de valgte"
 msgid "Filter by category"
 msgstr "Filtrer efter kategori"
 
-msgid "Filter"
-msgstr "Filter"
-
 msgid "Nothing to show yet"
 msgstr "Intet at vise endnu"
 
@@ -294,9 +291,6 @@ msgstr "Log ind"
 
 msgid "Open the page in your browser, then enter this code:"
 msgstr "Åbn siden i din browser, og indtast derefter denne kode:"
-
-msgid "Open the Page"
-msgstr "Åbn siden"
 
 msgid "Try Again"
 msgstr "Prøv igen"
@@ -900,9 +894,6 @@ msgstr "Microsoft could not be reached. Check your connection and try again."
 
 msgid "Microsoft sign-in failed. Try again."
 msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open Microsoft sign-in in your browser, then enter this code:"
-msgstr "Open Microsoft sign-in in your browser, then enter this code:"
 
 msgid "Open in browser"
 msgstr "Åbn i browser"

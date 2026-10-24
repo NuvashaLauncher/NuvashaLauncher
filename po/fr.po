@@ -58,9 +58,6 @@ msgstr "Installer cette version avec les autres sélectionnées"
 msgid "Filter by category"
 msgstr "Filtrer par forme pharmaceutique"
 
-msgid "Filter"
-msgstr "Filtrer"
-
 msgid "Nothing to show yet"
 msgstr "Rien à afficher"
 
@@ -312,9 +309,6 @@ msgstr "Connexion"
 
 msgid "Open the page in your browser, then enter this code:"
 msgstr "Ouvrez la page dans votre navigateur, puis entrez ce code :"
-
-msgid "Open the Page"
-msgstr "Ouvrir la page"
 
 msgid "Try Again"
 msgstr "Veuillez réessayer"
@@ -940,9 +934,6 @@ msgstr "Microsoft could not be reached. Check your connection and try again."
 
 msgid "Microsoft sign-in failed. Try again."
 msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open Microsoft sign-in in your browser, then enter this code:"
-msgstr "Open Microsoft sign-in in your browser, then enter this code:"
 
 msgid "Open in browser"
 msgstr "Ouvrir dans le navigateur"

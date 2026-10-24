@@ -58,9 +58,6 @@ msgstr "Bu sürümü seçili sürümlerle birlikte kur"
 msgid "Filter by category"
 msgstr "Kategoriye göre filtrele"
 
-msgid "Filter"
-msgstr "Filtrele"
-
 msgid "Nothing to show yet"
 msgstr "Henüz gösterilecek bir şey yok"
 
@@ -310,9 +307,6 @@ msgstr "Oturum aç"
 
 msgid "Open the page in your browser, then enter this code:"
 msgstr "Sayfayı tarayıcınızda açın, ardından bu kodu girin:"
-
-msgid "Open the Page"
-msgstr "Sayfayı Aç"
 
 msgid "Try Again"
 msgstr "Tekrar Dene"
@@ -936,9 +930,6 @@ msgstr "Microsoft could not be reached. Check your connection and try again."
 
 msgid "Microsoft sign-in failed. Try again."
 msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open Microsoft sign-in in your browser, then enter this code:"
-msgstr "Open Microsoft sign-in in your browser, then enter this code:"
 
 msgid "Open in browser"
 msgstr "Tarayıcıda aç"

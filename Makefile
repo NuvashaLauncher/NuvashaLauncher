@@ -105,10 +105,9 @@ build/tests/%: tests/%.c $(TESTLIBOBJS) | build/tests
 		-Dnuvasha_SRC_DIR=\"$(CURDIR)/src\" -Dnuvasha_PO_DIR=\"$(CURDIR)/po\" \
 		-o $@ $< $(TESTLIBOBJS) $(PKG_LIBS)
 
-# Tests never write to the real data directory and never touch the
-# network. Only the icon name audit opens a display, and it skips itself
-# when there is none; the test that runs the launcher runs it with DISPLAY
-# and display variables removed.
+# Tests never write to the real data directory and never touch the network.
+# Display-backed tests use invisible windows so they can exercise GTK without
+# covering the developer's desktop; they skip when no display is available.
 test: $(if $(SRCS),$(BIN)) $(TESTBINS) $(SCHEMA_COMPILED)
 	@set -e; test_tmp=$$(mktemp -d "$(CURDIR)/build/test-tmp-XXXXXX"); \
 	trap 'rm -rf "$$test_tmp"' EXIT HUP INT TERM; \

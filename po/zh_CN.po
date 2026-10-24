@@ -58,9 +58,6 @@ msgstr "与所选版本一起安装此版本"
 msgid "Filter by category"
 msgstr "按类别筛选"
 
-msgid "Filter"
-msgstr "筛选"
-
 msgid "Nothing to show yet"
 msgstr "没有可显示内容"
 
@@ -305,9 +302,6 @@ msgstr "登入"
 
 msgid "Open the page in your browser, then enter this code:"
 msgstr "在浏览器中打开页面，然后输入此代码："
-
-msgid "Open the Page"
-msgstr "打开页面"
 
 msgid "Try Again"
 msgstr "再试一次"
@@ -927,9 +921,6 @@ msgstr "Microsoft could not be reached. Check your connection and try again."
 
 msgid "Microsoft sign-in failed. Try again."
 msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open Microsoft sign-in in your browser, then enter this code:"
-msgstr "Open Microsoft sign-in in your browser, then enter this code:"
 
 msgid "Open in browser"
 msgstr "在浏览器中打开"

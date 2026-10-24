@@ -58,9 +58,6 @@ msgstr "선택한 항목과 함께 이 버전을 설치"
 msgid "Filter by category"
 msgstr "카테고리별 필터링"
 
-msgid "Filter"
-msgstr "필터"
-
 msgid "Nothing to show yet"
 msgstr "보여줄 항목 없음"
 
@@ -310,9 +307,6 @@ msgstr "로그인"
 
 msgid "Open the page in your browser, then enter this code:"
 msgstr "브라우저에서 페이지를 연 다음 다음 코드를 입력하세요."
-
-msgid "Open the Page"
-msgstr "페이지 열기"
 
 msgid "Try Again"
 msgstr "다시 시도"
@@ -932,9 +926,6 @@ msgstr "Microsoft could not be reached. Check your connection and try again."
 
 msgid "Microsoft sign-in failed. Try again."
 msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open Microsoft sign-in in your browser, then enter this code:"
-msgstr "Open Microsoft sign-in in your browser, then enter this code:"
 
 msgid "Open in browser"
 msgstr "브라우저에서 열기"

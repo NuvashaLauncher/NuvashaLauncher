@@ -57,9 +57,6 @@ msgstr "تثبيت هذا الإصدار مع تلك المحددة"
 msgid "Filter by category"
 msgstr "تصفية حسب الفئة"
 
-msgid "Filter"
-msgstr "فلتر"
-
 msgid "Nothing to show yet"
 msgstr "لا شيء لإظهاره حتى الآن"
 
@@ -294,9 +291,6 @@ msgstr "تسجيل الدخول"
 
 msgid "Open the page in your browser, then enter this code:"
 msgstr "افتح الصفحة في متصفحك، ثم أدخل هذا الرمز:"
-
-msgid "Open the Page"
-msgstr "افتح الصفحة"
 
 msgid "Try Again"
 msgstr "حاول ثانية"
@@ -908,9 +902,6 @@ msgstr "Microsoft could not be reached. Check your connection and try again."
 
 msgid "Microsoft sign-in failed. Try again."
 msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open Microsoft sign-in in your browser, then enter this code:"
-msgstr "Open Microsoft sign-in in your browser, then enter this code:"
 
 msgid "Open in browser"
 msgstr "افتح في المتصفح"

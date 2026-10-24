@@ -57,9 +57,6 @@ msgstr "Instalați această versiune cu cele selectate"
 msgid "Filter by category"
 msgstr "Filtrați după categorie"
 
-msgid "Filter"
-msgstr "Filtra"
-
 msgid "Nothing to show yet"
 msgstr "Nimic de arătat încă"
 
@@ -294,9 +291,6 @@ msgstr "Conectare"
 
 msgid "Open the page in your browser, then enter this code:"
 msgstr "Deschideți pagina în browser, apoi introduceți acest cod:"
-
-msgid "Open the Page"
-msgstr "Deschide pagina"
 
 msgid "Try Again"
 msgstr "Încearcă din nou"
@@ -902,9 +896,6 @@ msgstr "Microsoft could not be reached. Check your connection and try again."
 
 msgid "Microsoft sign-in failed. Try again."
 msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open Microsoft sign-in in your browser, then enter this code:"
-msgstr "Open Microsoft sign-in in your browser, then enter this code:"
 
 msgid "Open in browser"
 msgstr "Deschide în browser"

@@ -26,6 +26,48 @@
 
 static guint criticals = 0;
 
+/* The current launcher shell is assembled from the main-shell template and
+ * then receives its header controls in code. Keep the window test tied to
+ * that contract, not just to the instance dialog below it. */
+static GtkWidget *
+find_widget_type (GtkWidget *widget, GType type)
+{
+  if (widget == NULL)
+    return NULL;
+
+  if (G_TYPE_CHECK_INSTANCE_TYPE (widget, type))
+    return widget;
+
+  for (GtkWidget *child = gtk_widget_get_first_child (widget); child != NULL;
+       child = gtk_widget_get_next_sibling (child))
+    {
+      GtkWidget *found = find_widget_type (child, type);
+
+      if (found != NULL)
+        return found;
+    }
+
+  return NULL;
+}
+
+static guint
+count_widget_type (GtkWidget *widget, GType type)
+{
+  guint count = 0;
+
+  if (widget == NULL)
+    return 0;
+
+  if (G_TYPE_CHECK_INSTANCE_TYPE (widget, type))
+    count++;
+
+  for (GtkWidget *child = gtk_widget_get_first_child (widget); child != NULL;
+       child = gtk_widget_get_next_sibling (child))
+    count += count_widget_type (child, type);
+
+  return count;
+}
+
 static void
 test_main_window_model_owns_services (void)
 {
@@ -187,6 +229,12 @@ advance (gpointer user_data)
           run->step = 0;
           return G_SOURCE_CONTINUE;
         }
+      g_assert_nonnull (find_widget_type (GTK_WIDGET (run->window),
+                                          ADW_TYPE_TOOLBAR_VIEW));
+      g_assert_nonnull (find_widget_type (GTK_WIDGET (run->window),
+                                          ADW_TYPE_VIEW_STACK));
+      g_assert_cmpuint (count_widget_type (GTK_WIDGET (run->window),
+                                           GTK_TYPE_MENU_BUTTON), >=, 3);
       return G_SOURCE_CONTINUE;
 
     case 1:
@@ -264,6 +312,10 @@ on_activate (GApplication *application, gpointer user_data)
                                                  manager));
   g_assert_nonnull (run->window);
 
+  /* This is an interaction/ownership test, not a screenshot test. Keep the
+   * real display-backed widget tree without covering the user's desktop. */
+  gtk_widget_set_opacity (GTK_WIDGET (run->window), 0.0);
+  gtk_widget_set_focusable (GTK_WIDGET (run->window), FALSE);
   gtk_window_present (run->window);
   g_timeout_add (200, advance, run);
 }
