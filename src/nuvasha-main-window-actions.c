@@ -395,12 +395,9 @@ on_clear_cache_confirmed (GObject *source, GAsyncResult *result,
   wait->operation = nuvasha_cache_clear_all_async (on_cache_cleared, wait);
 }
 
-static void
-on_settings (GSimpleAction *action G_GNUC_UNUSED,
-             GVariant      *parameter G_GNUC_UNUSED,
-             gpointer       user_data)
+static AdwDialog *
+create_settings_dialog (NuvashaMainWindow *self)
 {
-  NuvashaMainWindow *self = nuvasha_MAIN_WINDOW (user_data);
   AdwDialog *dialog = adw_preferences_dialog_new ();
   AdwPreferencesPage *page = ADW_PREFERENCES_PAGE (adw_preferences_page_new ());
   AdwPreferencesGroup *versions_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
@@ -637,6 +634,17 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
                              sandbox_group);
   adw_preferences_dialog_add (ADW_PREFERENCES_DIALOG (dialog),
                               ADW_PREFERENCES_PAGE (page));
+
+  return dialog;
+}
+
+static void
+on_settings (GSimpleAction *action G_GNUC_UNUSED,
+             GVariant      *parameter G_GNUC_UNUSED,
+             gpointer       user_data)
+{
+  NuvashaMainWindow *self = nuvasha_MAIN_WINDOW (user_data);
+  AdwDialog *dialog = create_settings_dialog (self);
 
   adw_dialog_present (dialog, GTK_WIDGET (self));
 }

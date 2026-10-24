@@ -30,7 +30,7 @@ jobs:
             json-glib-devel libsoup3-devel libarchive-devel libsecret-devel
 
       - name: Build
-        run: make fast
+        run: make fast CFLAGS="-std=c17 -Wall -Wextra -Wpedantic -Werror -MMD -MP"
 
       - name: Run tests
         run: make test
