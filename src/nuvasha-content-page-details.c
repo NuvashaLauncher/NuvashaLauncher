@@ -274,8 +274,8 @@ details_content (NuvashaContentPage *self)
   gtk_widget_add_css_class (count, "dim-label");
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), count);
 
-  /* The long description, in Markdown: headings, links and images are
-     read and shown as widgets rather than as the raw text. */
+  /* The long description, in Markdown: headings and links are read and shown
+     as widgets rather than as the raw text. */
   watch_widget (&self->project.details_body, gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
 
   if (self->project.details_problem != NULL)

@@ -118,6 +118,7 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
       GTK_SCROLLED_WINDOW (scroller), TRUE);
     gtk_scrolled_window_set_max_content_height (
       GTK_SCROLLED_WINDOW (scroller), 360);
+    gtk_widget_set_size_request (GTK_WIDGET (scroller), 360, -1);
     gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
                                    GTK_WIDGET (self->downloads.list));
     gtk_popover_set_child (GTK_POPOVER (popover), GTK_WIDGET (scroller));

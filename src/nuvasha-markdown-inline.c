@@ -356,8 +356,7 @@ inline_into (GString *out, const char *text, gsize length, gboolean allow_html)
             }
         }
 
-      /* An image is words until it can be drawn; as an inline span its
-         alt text is what there is. */
+      /* Images are omitted from inline text. */
       if (c == '!' && i + 1 < length && text[i + 1] == '[')
         {
           const char *after = NULL;

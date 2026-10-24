@@ -295,7 +295,9 @@ export_directory (ExportRun *run, struct archive *archive, const char *root,
 static gboolean
 export_indexed_files (ExportRun *run, GCancellable *cancellable, GError **error)
 {
-  static const char *folders[] = { "mods", "resourcepacks", "shaderpacks" };
+  static const char *folders[] = {
+    "mods", "resourcepacks", "shaderpacks", "datapacks"
+  };
   g_autoptr (JsonParser) manifest_parser = json_parser_new ();
   JsonNode *manifest_root = NULL;
   JsonObject *manifest = NULL;
@@ -611,6 +613,9 @@ export_manifest (NuvashaInstance *instance, const char *pack_name,
   g_autofree char *version = NULL;
   g_autofree char *loader_version = NULL;
   g_autofree char *icon = NULL;
+  g_autofree char *stored_pack_name = NULL;
+  g_autofree char *stored_summary = NULL;
+  g_autofree char *stored_version_id = NULL;
   g_autoptr (JsonBuilder) builder = json_builder_new ();
   g_autoptr (JsonGenerator) generator = json_generator_new ();
   g_autoptr (JsonNode) root = NULL;
@@ -620,7 +625,18 @@ export_manifest (NuvashaInstance *instance, const char *pack_name,
 
   g_object_get (instance, "name", &name, "minecraft_version", &version,
                 "loader", &loader, "loader_version", &loader_version,
-                "icon", &icon, NULL);
+                "icon", &icon, "modpack-name", &stored_pack_name,
+                "modpack-summary", &stored_summary,
+                "modpack-version-id", &stored_version_id, NULL);
+
+  const char *effective_name = pack_name != NULL && *pack_name != '\0'
+                                 ? pack_name
+                                 : stored_pack_name != NULL
+                                   ? stored_pack_name : name;
+  const char *effective_summary = summary != NULL && *summary != '\0'
+                                    ? summary : stored_summary;
+  const char *effective_version_id = version_id != NULL && *version_id != '\0'
+                                      ? version_id : stored_version_id;
 
   if (version == NULL || *version == '\0')
     {
@@ -636,18 +652,17 @@ export_manifest (NuvashaInstance *instance, const char *pack_name,
   json_builder_add_string_value (builder, "minecraft");
   json_builder_set_member_name (builder, "name");
   json_builder_add_string_value (builder,
-                                 pack_name != NULL && *pack_name != '\0'
-                                   ? pack_name
-                                   : name != NULL ? name : "nuvasha Instance");
-  if (summary != NULL && *summary != '\0')
+                                 effective_name != NULL && *effective_name != '\0'
+                                   ? effective_name : "nuvasha Instance");
+  if (effective_summary != NULL && *effective_summary != '\0')
     {
       json_builder_set_member_name (builder, "summary");
-      json_builder_add_string_value (builder, summary);
+      json_builder_add_string_value (builder, effective_summary);
     }
-  if (version_id != NULL && *version_id != '\0')
+  if (effective_version_id != NULL && *effective_version_id != '\0')
     {
       json_builder_set_member_name (builder, "versionId");
-      json_builder_add_string_value (builder, version_id);
+      json_builder_add_string_value (builder, effective_version_id);
     }
   json_builder_set_member_name (builder, "dependencies");
   json_builder_begin_object (builder);

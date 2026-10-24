@@ -4,9 +4,6 @@
 
 #include "nuvasha-markdown.h"
 #include "nuvasha-markdown-private.h"
-#include "nuvasha-task.h"
-
-#include "nuvasha-icons.h"
 
 #include <string.h>
 
@@ -211,158 +208,6 @@ text_block (const char *markdown, const char *css_class)
   return label;
 }
 
-/* The picture of an image, filled in when the file has been fetched. */
-static void
-image_resize (GtkWidget *picture)
-{
-  const char *ratio_text = g_object_get_data (
-    G_OBJECT (picture), "nuvasha-image-ratio");
-  double ratio = ratio_text != NULL ? g_ascii_strtod (ratio_text, NULL) : 0.0;
-  int width = gtk_widget_get_width (GTK_WIDGET (picture));
-
-  if (ratio > 0.0 && width > 0)
-    gtk_widget_set_size_request (GTK_WIDGET (picture), -1,
-                                 MAX (1, (int) ((double) width / ratio + 0.5)));
-}
-
-static gboolean
-image_resize_idle (gpointer user_data)
-{
-  GtkWidget *picture = GTK_WIDGET (user_data);
-  NuvashaTaskScope *scope = g_object_get_data (G_OBJECT (picture),
-                                           "nuvasha-image-scope");
-  guint source_id = GPOINTER_TO_UINT (
-    g_object_get_data (G_OBJECT (picture), "nuvasha-image-source"));
-
-  if (scope != NULL)
-    nuvasha_task_scope_forget_source (scope, source_id);
-  image_resize (picture);
-  g_object_unref (picture);
-  return G_SOURCE_REMOVE;
-}
-
-/* What one image load keeps alive: the picture the texture goes in, and
- * the operation that has to be released when the answer arrives. */
-typedef struct
-{
-  GtkWidget *picture;
-  NuvashaTaskScope *operation;
-} ImageLoad;
-
-static void
-image_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
-             gpointer user_data)
-{
-  ImageLoad *load = user_data;
-  GtkWidget *picture = load->picture;
-  g_autoptr (GError) error = NULL;
-  g_autofree char *path = nuvasha_icon_load_finish (result, &error);
-
-  if (path != NULL)
-    {
-      g_autoptr (GFile) file = g_file_new_for_path (path);
-      g_autoptr (GdkTexture) texture = gdk_texture_new_from_file (file, NULL);
-
-      /* A decoded texture, not the file: gtk_picture_set_file() hands
-         some formats back as a symbolic paintable, and a symbolic
-         picture laid out at a height of zero trips a Gtk critical while
-         it is being drawn. A texture is never symbolic. */
-      if (texture != NULL)
-        {
-          gtk_picture_set_paintable (GTK_PICTURE (picture),
-                                     GDK_PAINTABLE (texture));
-          {
-            int width = gdk_paintable_get_intrinsic_width (
-              GDK_PAINTABLE (texture));
-            int height = gdk_paintable_get_intrinsic_height (
-              GDK_PAINTABLE (texture));
-
-            if (width > 0 && height > 0)
-              g_object_set_data_full (
-                G_OBJECT (picture), "nuvasha-image-ratio",
-                g_strdup_printf ("%.17g", (double) width / (double) height),
-                g_free);
-          }
-          gtk_widget_set_visible (GTK_WIDGET (picture), TRUE);
-          gtk_widget_queue_resize (GTK_WIDGET (picture));
-          NuvashaTaskScope *scope = g_object_get_data (
-            G_OBJECT (picture), "nuvasha-image-scope");
-          if (scope == NULL)
-            {
-              scope = nuvasha_task_scope_new (NULL, NULL, NULL, NULL);
-              g_object_set_data_full (G_OBJECT (picture), "nuvasha-image-scope",
-                                      scope, (GDestroyNotify) nuvasha_task_scope_unref);
-            }
-          guint source_id = g_idle_add (image_resize_idle,
-                                        g_object_ref (picture));
-          g_source_set_name_by_id (source_id, "nuvasha-markdown-image-resize");
-          g_object_set_data (G_OBJECT (picture), "nuvasha-image-source",
-                             GUINT_TO_POINTER (source_id));
-          nuvasha_task_scope_track_source (scope, source_id);
-        }
-    }
-
-  g_clear_object (&load->picture);
-  if (load->operation != NULL)
-    nuvasha_task_scope_unref (load->operation);
-  g_free (load);
-}
-
-/* Modrinth writes an image with an absolute url, or one that starts at
- * the site root. */
-static char *
-resolve_image_url (const char *url)
-{
-  if (url == NULL || *url == '\0')
-    return NULL;
-
-  if (g_str_has_prefix (url, "//"))
-    return g_strconcat ("https:", url, NULL);
-
-  if (url[0] == '/')
-    return g_strconcat ("https://cdn.modrinth.com", url, NULL);
-
-  return g_strdup (url);
-}
-
-static GtkWidget *
-image_block (const char *url)
-{
-  GtkPicture *picture = GTK_PICTURE (gtk_picture_new ());
-  g_autofree char *resolved = resolve_image_url (url);
-
-  /* The aspect frame supplies the correct height; the picture itself must
-     be allowed to scale down to the description column's width. */
-  gtk_picture_set_can_shrink (GTK_PICTURE (picture), TRUE);
-  gtk_picture_set_content_fit (GTK_PICTURE (picture), GTK_CONTENT_FIT_CONTAIN);
-  gtk_widget_set_hexpand (GTK_WIDGET (picture), TRUE);
-  gtk_widget_set_halign (GTK_WIDGET (picture), GTK_ALIGN_FILL);
-  gtk_widget_set_visible (GTK_WIDGET (picture), FALSE);
-
-  if (resolved != NULL && nuvasha_markdown_url_is_safe (resolved))
-    {
-      ImageLoad *load = g_new0 (ImageLoad, 1);
-
-      load->picture = GTK_WIDGET (g_object_ref (picture));
-      load->operation = nuvasha_icon_load_async (resolved, image_ready, load);
-    }
-
-  return GTK_WIDGET (picture);
-}
-
-/* Reads "![alt](url)" filling the whole of @line, with or without an
- * outer "[…](link)" around it. TRUE when the line is one image, in which
- * case @url is set to the image's url, which the caller frees. */
-static gboolean
-line_is_image (const char *line, char **url)
-{
-  /* Descriptions deliberately do not display remote images. */
-  (void) line;
-  (void) url;
-  return FALSE;
-
-}
-
 static guint
 heading_level (const char *line)
 {
@@ -510,15 +355,7 @@ table_block (GPtrArray *rows)
           {
             g_autofree char *cell = g_strdup (cells[c]);
             const char *text = g_strstrip (cell);
-            g_autofree char *image_url = NULL;
-            GtkWidget *widget = NULL;
-
-            /* A cell that is one image is the image, as Modrinth draws it;
-               anything else is the words it holds. */
-            if (line_is_image (text, &image_url))
-              widget = image_block (image_url);
-            else
-              widget = text_block (text, NULL);
+            GtkWidget *widget = text_block (text, NULL);
 
             gtk_widget_set_hexpand (widget, TRUE);
             gtk_widget_set_valign (widget, GTK_ALIGN_START);
@@ -540,7 +377,7 @@ starts_block (const char *line)
   gboolean block =
     heading_level (line) > 0 || g_str_has_prefix (line, "```") ||
     g_str_has_prefix (line, ">") || is_rule (line) ||
-    is_table_row (line) || line_is_image (line, NULL);
+    is_table_row (line);
 
   if (!block && list_item (line, &content, &bullet))
     block = TRUE;
@@ -572,7 +409,6 @@ nuvasha_markdown_render (GtkBox *box, const char *markdown)
       guint level = 0;
       const char *content = NULL;
       g_autofree char *bullet = NULL;
-      g_autofree char *image_url = NULL;
 
       if (is_blank (line))
         {
@@ -619,13 +455,6 @@ nuvasha_markdown_render (GtkBox *box, const char *markdown)
 
           gtk_box_append (
               GTK_BOX (box), text_block (g_strstrip ((char *) line + level), css));
-          i++;
-          continue;
-        }
-
-      if (line_is_image (line, &image_url))
-        {
-          gtk_box_append (GTK_BOX (box), image_block (image_url));
           i++;
           continue;
         }

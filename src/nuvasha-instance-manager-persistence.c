@@ -6,7 +6,7 @@
 #include <json-glib/json-glib.h>
 #include <string.h>
 
-#define INSTANCES_FORMAT_VERSION 1
+#define INSTANCES_FORMAT_VERSION 2
 #define METADATA_FILE "instances.json"
 #define CORRUPT_SUFFIX ".corrupt"
 

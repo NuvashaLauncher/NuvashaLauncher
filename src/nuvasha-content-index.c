@@ -15,6 +15,7 @@
 
 #define INDEX_DIRECTORY ".index"
 #define INDEX_PROVIDER "Modrinth"
+#define CONTENT_INDEX_FORMAT_VERSION 2
 
 static char *
 index_directory (const char *instance_directory, NuvashaContentType type)
@@ -97,6 +98,18 @@ static NuvashaContentIndexEntry *
 entry_from_object (JsonObject *object, GError **error)
 {
   NuvashaContentIndexEntry *entry = g_new0 (NuvashaContentIndexEntry, 1);
+  JsonNode *version = json_object_get_member (object, "version");
+
+  if (version == NULL || !JSON_NODE_HOLDS_VALUE (version) ||
+      json_node_get_value_type (version) != G_TYPE_INT64 ||
+      json_node_get_int (version) != CONTENT_INDEX_FORMAT_VERSION)
+    {
+      g_set_error (error, nuvasha_CONTENT_INDEX_ERROR,
+                   nuvasha_CONTENT_INDEX_ERROR_INVALID,
+                   "content metadata has unsupported format version");
+      g_free (entry);
+      return NULL;
+    }
 
   entry->filename = g_strdup (json_object_get_string_member_with_default (
     object, "filename", ""));
@@ -307,6 +320,8 @@ entry_to_json (NuvashaContentIndexEntry *entry, gsize *length)
   g_autoptr (JsonNode) root = NULL;
 
   json_builder_begin_object (builder);
+  json_builder_set_member_name (builder, "version");
+  json_builder_add_int_value (builder, CONTENT_INDEX_FORMAT_VERSION);
 #define ADD_STRING(name, value) \
   G_STMT_START { json_builder_set_member_name (builder, name); \
     json_builder_add_string_value (builder, (value) != NULL ? (value) : ""); } G_STMT_END

@@ -53,6 +53,9 @@ enum
   PROP_ICON,
   PROP_JAVA_PATH,
   PROP_JVM_ARGS,
+  PROP_MODPACK_NAME,
+  PROP_MODPACK_SUMMARY,
+  PROP_MODPACK_VERSION_ID,
   N_PROPS
 };
 
@@ -627,7 +630,22 @@ nuvasha_instance_set_property (GObject      *object,
        * back and the manager answers by quarantining every instance in
        * it. */
       self->jvm_args = g_strdup (g_value_get_string (value) != NULL
-                                   ? g_value_get_string (value) : "");
+                                    ? g_value_get_string (value) : "");
+      break;
+
+    case PROP_MODPACK_NAME:
+      g_free (self->modpack_name);
+      self->modpack_name = optional_string (g_value_get_string (value));
+      break;
+
+    case PROP_MODPACK_SUMMARY:
+      g_free (self->modpack_summary);
+      self->modpack_summary = optional_string (g_value_get_string (value));
+      break;
+
+    case PROP_MODPACK_VERSION_ID:
+      g_free (self->modpack_version_id);
+      self->modpack_version_id = optional_string (g_value_get_string (value));
       break;
 
     default:
@@ -682,6 +700,18 @@ nuvasha_instance_get_property (GObject    *object,
       g_value_set_string (value, self->jvm_args);
       break;
 
+    case PROP_MODPACK_NAME:
+      g_value_set_string (value, self->modpack_name);
+      break;
+
+    case PROP_MODPACK_SUMMARY:
+      g_value_set_string (value, self->modpack_summary);
+      break;
+
+    case PROP_MODPACK_VERSION_ID:
+      g_value_set_string (value, self->modpack_version_id);
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -701,6 +731,9 @@ nuvasha_instance_finalize (GObject *object)
   g_free (self->icon);
   g_free (self->java_path);
   g_free (self->jvm_args);
+  g_free (self->modpack_name);
+  g_free (self->modpack_summary);
+  g_free (self->modpack_version_id);
   g_clear_pointer (&self->components, g_hash_table_unref);
 
   G_OBJECT_CLASS (nuvasha_instance_parent_class)->finalize (object);
@@ -768,7 +801,22 @@ nuvasha_instance_class_init (NuvashaInstanceClass *klass)
     g_param_spec_string ("jvm-args", "JVM arguments",
                          "Command line arguments passed to the JVM",
                          DEFAULT_JVM_ARGS,
-                         G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+                          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  properties[PROP_MODPACK_NAME] =
+    g_param_spec_string ("modpack-name", "Modpack name",
+                         "Original modpack name, or NULL",
+                         NULL, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  properties[PROP_MODPACK_SUMMARY] =
+    g_param_spec_string ("modpack-summary", "Modpack summary",
+                         "Original modpack summary, or NULL",
+                         NULL, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  properties[PROP_MODPACK_VERSION_ID] =
+    g_param_spec_string ("modpack-version-id", "Modpack version ID",
+                         "Original modpack version ID, or NULL",
+                         NULL, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, N_PROPS, properties);
 }

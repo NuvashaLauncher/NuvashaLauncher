@@ -260,7 +260,7 @@ test_create_and_persist (void)
    g_assert_cmpstr (directory_name, ==, "Pack One");
   g_assert_true (g_file_test (directory, G_FILE_TEST_IS_DIR));
 
-  /* The metadata file carries format version 1 and one entry. */
+  /* The metadata file carries format version 2 and one entry. */
   g_autofree char *metadata_path =
     g_build_filename (data_dir, "instances.json", NULL);
   g_assert_true (g_file_test (metadata_path, G_FILE_TEST_EXISTS));
@@ -277,7 +277,7 @@ test_create_and_persist (void)
   JsonNode *version = json_object_get_member (object, "version");
   g_assert_nonnull (version);
   g_assert_cmpint (json_node_get_value_type (version), ==, G_TYPE_INT64);
-  g_assert_cmpint (json_node_get_int (version), ==, 1);
+  g_assert_cmpint (json_node_get_int (version), ==, 2);
 
   JsonNode *array = json_object_get_member (object, "instances");
   g_assert_true (JSON_NODE_HOLDS_ARRAY (array));
@@ -604,7 +604,7 @@ test_missing_field_file (void)
   g_autofree char *metadata_path =
     g_build_filename (data_dir, "instances.json", NULL);
   g_autofree char *text =
-    g_strdup ("{\"version\": 1, \"instances\": [{"
+    g_strdup ("{\"version\": 2, \"instances\": [{"
               "\"id\": \"11111111-2222-3333-4444-555555555555\","
               "\"name\": \"Broken\"}]}");
   write_file (metadata_path, text);
@@ -633,7 +633,7 @@ test_version_mismatch (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autofree char *metadata_path =
     g_build_filename (data_dir, "instances.json", NULL);
-  const char *text = "{\"version\": 2, \"instances\": []}";
+  const char *text = "{\"version\": 1, \"instances\": []}";
   write_file (metadata_path, text);
 
   g_autoptr (GError) error = NULL;
