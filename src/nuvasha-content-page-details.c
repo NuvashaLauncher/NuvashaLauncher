@@ -235,7 +235,8 @@ details_content (NuvashaContentPage *self)
   GtkWidget *count = NULL;
   g_autofree char *downloads = NULL;
 
-  content = GTK_WIDGET (gtk_builder_get_object (details_builder, "content"));
+  content = GTK_WIDGET (g_object_ref (
+    gtk_builder_get_object (details_builder, "content")));
   scroller = GTK_WIDGET (gtk_builder_get_object (details_builder, "scroller"));
   box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 18);
   heading = adw_preferences_group_new ();
@@ -352,8 +353,13 @@ detail_fill (NuvashaContentPage *self)
   if (!self->project.details_ready || !self->project.versions_ready)
     return;
 
-  adw_navigation_page_set_child (ADW_NAVIGATION_PAGE (self->project.details_page),
-                                 details_content (self));
+  {
+    GtkWidget *content = details_content (self);
+
+    adw_navigation_page_set_child (ADW_NAVIGATION_PAGE (self->project.details_page),
+                                   content);
+    g_object_unref (content);
+  }
 
   if (self->project.versions_problem != NULL)
     show_toast (self, self->project.versions_problem);

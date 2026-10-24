@@ -460,7 +460,6 @@ nuvasha_logs_page_new (NuvashaLauncher *launcher)
 {
   NuvashaLogsPage *self;
   GtkWidget *row;
-  GtkWidget *search_box;
   GtkWidget *actions;
   GtkWidget *card;
   GtkWidget *text;
@@ -478,11 +477,8 @@ nuvasha_logs_page_new (NuvashaLauncher *launcher)
   gtk_widget_set_vexpand (GTK_WIDGET (self), TRUE);
 
   /* What the launch is doing, and the buttons that act on the log. */
-  row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
-  gtk_widget_set_margin_top (row, 6);
-  gtk_widget_set_margin_bottom (row, 6);
-  gtk_widget_set_margin_start (row, 12);
-  gtk_widget_set_margin_end (row, 12);
+  row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  gtk_widget_add_css_class (row, "nuvasha-content-toolbar");
 
   self->state = GTK_LABEL (gtk_label_new (NULL));
   gtk_widget_add_css_class (GTK_WIDGET (self->state), "heading");
@@ -496,6 +492,8 @@ nuvasha_logs_page_new (NuvashaLauncher *launcher)
   self->open = GTK_BUTTON (toolbar_button ("folder-symbolic", _("Open Folder"),
                                G_CALLBACK (on_open_clicked), self));
   actions = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  gtk_widget_add_css_class (actions, "nuvasha-toolbar-actions");
+  gtk_widget_set_valign (actions, GTK_ALIGN_CENTER);
   gtk_box_append (GTK_BOX (actions), GTK_WIDGET (self->clear));
   gtk_box_append (GTK_BOX (actions), GTK_WIDGET (self->open));
 
@@ -504,6 +502,7 @@ nuvasha_logs_page_new (NuvashaLauncher *launcher)
    self->search_bar = GTK_SEARCH_ENTRY (gtk_search_entry_new ());
    self->search_entry = self->search_bar;
    gtk_widget_set_hexpand (GTK_WIDGET (self->search_entry), TRUE);
+   gtk_widget_set_valign (GTK_WIDGET (self->search_entry), GTK_ALIGN_CENTER);
   gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (self->search_entry),
                                          _("Search the log"));
     gtk_widget_set_visible (GTK_WIDGET (self->search_bar), TRUE);
@@ -525,10 +524,7 @@ nuvasha_logs_page_new (NuvashaLauncher *launcher)
    }
 
    gtk_widget_set_hexpand (GTK_WIDGET (self->search_bar), TRUE);
-   search_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-   gtk_widget_set_hexpand (search_box, TRUE);
-   gtk_box_append (GTK_BOX (search_box), GTK_WIDGET (self->search_bar));
-   gtk_box_append (GTK_BOX (row), search_box);
+   gtk_box_append (GTK_BOX (row), GTK_WIDGET (self->search_bar));
    gtk_box_append (GTK_BOX (row), actions);
    gtk_widget_set_hexpand (row, TRUE);
    gtk_box_append (GTK_BOX (self), row);
