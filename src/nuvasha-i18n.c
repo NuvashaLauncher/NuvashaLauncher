@@ -9,7 +9,7 @@
 void
 nuvasha_i18n_template_strings (void)
 {
-  (void) _("Sign In"); (void) _("Open the Page"); (void) _("Try Again");
+  (void) _("Sign In"); (void) _("Open in browser"); (void) _("Try Again");
   (void) _("Add Offline Account"); (void) _("Name"); (void) _("Cancel");
   (void) _("Add"); (void) _("Create Instance"); (void) _("Directory");
   (void) _("Choose a folder"); (void) _("Create");

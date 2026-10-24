@@ -937,7 +937,7 @@ msgid "Open Microsoft sign-in in your browser, then enter this code:"
 msgstr "Open Microsoft sign-in in your browser, then enter this code:"
 
 msgid "Open in browser"
-msgstr "Open in browser"
+msgstr "Abrir no navegador"
 msgid "Could not load capes"
 msgstr "Could not load capes"
 

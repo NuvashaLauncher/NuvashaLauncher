@@ -3,29 +3,43 @@
   <template class="NuvashaOfflineAccountDialog" parent="AdwDialog">
     <property name="title" translatable="yes">Add Offline Account</property>
     <child>
-      <object class="GtkBox" id="content">
-        <property name="css-classes">nuvasha-dialog-content</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">12</property>
-        <property name="margin-start">12</property>
-        <property name="margin-end">12</property>
-        <property name="margin-top">12</property>
-        <property name="margin-bottom">12</property>
-        <child>
-          <object class="AdwPreferencesGroup">
-            <child><object class="AdwEntryRow" id="name_row"/></child>
+      <object class="AdwToolbarView">
+        <child type="top">
+          <object class="AdwHeaderBar">
+            <property name="show-start-title-buttons">False</property>
+            <property name="title-widget">
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Add Offline Account</property>
+                <property name="css-classes">title</property>
+              </object>
+            </property>
           </object>
         </child>
-        <child><object class="GtkLabel" id="error_label"/></child>
-        <child>
-          <object class="GtkBox">
-            <property name="orientation">horizontal</property>
-            <property name="spacing">6</property>
-            <property name="halign">center</property>
-            <child><object class="GtkButton" id="cancel_button"/></child>
-            <child><object class="GtkButton" id="add_button"/></child>
+        <property name="content">
+          <object class="GtkBox" id="content">
+            <property name="orientation">vertical</property>
+            <property name="spacing">8</property>
+            <property name="margin-start">12</property>
+            <property name="margin-end">12</property>
+            <property name="margin-top">12</property>
+            <property name="margin-bottom">12</property>
+            <child>
+              <object class="AdwPreferencesGroup">
+                <child><object class="AdwEntryRow" id="name_row"/></child>
+              </object>
+            </child>
+            <child><object class="GtkLabel" id="error_label"/></child>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">6</property>
+                <property name="halign">center</property>
+                <child><object class="GtkButton" id="cancel_button"/></child>
+                <child><object class="GtkButton" id="add_button"/></child>
+              </object>
+            </child>
           </object>
-        </child>
+        </property>
       </object>
     </child>
   </template>
