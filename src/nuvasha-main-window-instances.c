@@ -373,7 +373,7 @@ create_instance_row (gpointer item, gpointer user_data)
   adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 1);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), name);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (row), subtitle);
-  gtk_widget_add_css_class (GTK_WIDGET (row), "nuvasha-instance-row");
+   gtk_widget_add_css_class (GTK_WIDGET (row), "nuvasha-instance-row");
 
   gtk_image_set_pixel_size (GTK_IMAGE (icon), 48);
   gtk_widget_set_size_request (GTK_WIDGET (icon), 48, 48);

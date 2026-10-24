@@ -822,7 +822,6 @@ nuvasha_content_page_new (NuvashaInstance *instance, NuvashaContentType type)
   self = g_object_new (nuvasha_TYPE_CONTENT_PAGE, NULL);
   self->instance = g_object_ref (instance);
   self->type = type;
-  gtk_widget_add_css_class (GTK_WIDGET (self), "nuvasha-main-content");
   self->minecraft_version = instance_string (instance, "minecraft-version");
   self->browse.model = nuvasha_content_browser_model_new ();
   self->installed.scan = g_cancellable_new ();
