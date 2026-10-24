@@ -59,16 +59,16 @@ test_offline_account (void)
   g_autoptr (GError) error = NULL;
   NuvashaAccount *account = NULL;
 
-  account = nuvasha_account_new_offline ("Flia", &error);
+  account = nuvasha_account_new_offline ("TestUser", &error);
   g_assert_no_error (error);
   g_assert_nonnull (account);
 
   /* An offline account is a name and nothing else: no token, nothing to
      refresh, and it says so wherever it is shown. */
   g_assert_cmpint (account->type, ==, nuvasha_ACCOUNT_OFFLINE);
-  g_assert_cmpstr (account->id, ==, "Flia");
-  g_assert_cmpstr (account->name, ==, "Flia");
-  g_assert_cmpstr (account->uuid, ==, "41b05633-42e0-3a6f-b64b-6b64448dccdd");
+  g_assert_cmpstr (account->id, ==, "TestUser");
+  g_assert_cmpstr (account->name, ==, "TestUser");
+  g_assert_cmpstr (account->uuid, ==, "097d3392-865a-3f3c-8b4a-da1c3473466c");
   g_assert_null (account->access_token);
   g_assert_null (account->refresh_token);
   g_assert_cmpstr (nuvasha_account_type_name (account->type), ==, "Offline");
@@ -99,11 +99,11 @@ test_offline_uuid_derivation (void)
 
   {
     g_autofree char *player = nuvasha_account_offline_uuid ("Player");
-    g_autofree char *flia = nuvasha_account_offline_uuid ("Flia");
+    g_autofree char *test_user = nuvasha_account_offline_uuid ("TestUser");
     g_autofree char *jeb = nuvasha_account_offline_uuid ("jeb_");
 
     g_assert_cmpstr (player, ==, "a01e3843-e521-3998-958a-f459800e4d11");
-    g_assert_cmpstr (flia, ==, "41b05633-42e0-3a6f-b64b-6b64448dccdd");
+    g_assert_cmpstr (test_user, ==, "097d3392-865a-3f3c-8b4a-da1c3473466c");
     g_assert_cmpstr (jeb, ==, "a762f560-4fce-3236-812a-b80efff0b62b");
   }
 
@@ -244,7 +244,7 @@ test_one_active_account (void)
   g_assert_null (nuvasha_accounts_get_active (store));
   g_assert_null (nuvasha_accounts_get_active_id (store));
 
-  one = nuvasha_account_new_offline ("Flia", &error);
+  one = nuvasha_account_new_offline ("TestUser", &error);
   g_assert_no_error (error);
 
   two = nuvasha_account_new_offline ("jeb_", &error);
@@ -252,7 +252,7 @@ test_one_active_account (void)
 
   g_assert_true (nuvasha_accounts_add (store, one, &error));
   g_assert_no_error (error);
-  g_assert_cmpstr (nuvasha_accounts_get_active_id (store), ==, "Flia");
+  g_assert_cmpstr (nuvasha_accounts_get_active_id (store), ==, "TestUser");
 
   /* Adding a second account makes it the active one: a user who just
      signed in meant to play as that one. */
@@ -262,20 +262,20 @@ test_one_active_account (void)
   g_assert_cmpstr (nuvasha_accounts_get_active_id (store), ==, "jeb_");
 
   /* There is one active account and it is one of the accounts. */
-  g_assert_true (nuvasha_accounts_set_active (store, "Flia", &error));
+  g_assert_true (nuvasha_accounts_set_active (store, "TestUser", &error));
   g_assert_no_error (error);
-  g_assert_cmpstr (nuvasha_accounts_get_active_id (store), ==, "Flia");
-  g_assert_cmpstr (nuvasha_accounts_get_active (store)->name, ==, "Flia");
+  g_assert_cmpstr (nuvasha_accounts_get_active_id (store), ==, "TestUser");
+  g_assert_cmpstr (nuvasha_accounts_get_active (store)->name, ==, "TestUser");
 
   /* An account that is not there cannot be made active. */
   g_assert_false (nuvasha_accounts_set_active (store, "nobody", &error));
   g_assert_error (error, nuvasha_ACCOUNTS_ERROR, nuvasha_ACCOUNTS_ERROR_UNKNOWN);
   g_clear_error (&error);
-  g_assert_cmpstr (nuvasha_accounts_get_active_id (store), ==, "Flia");
+  g_assert_cmpstr (nuvasha_accounts_get_active_id (store), ==, "TestUser");
 
   /* Removing the active account hands the active one on to what is
      left, so the store never has an active account that is gone. */
-  g_assert_true (nuvasha_accounts_remove (store, "Flia", &error));
+  g_assert_true (nuvasha_accounts_remove (store, "TestUser", &error));
   g_assert_no_error (error);
   g_assert_cmpuint (nuvasha_accounts_count (store), ==, 1);
   g_assert_cmpstr (nuvasha_accounts_get_active_id (store), ==, "jeb_");
@@ -519,17 +519,17 @@ test_adding_the_same_account_twice (void)
 
   /* Two offline accounts of one name are one account as well, because the
      name is what they are keyed by. */
-  other = nuvasha_account_new_offline ("Flia", &error);
+  other = nuvasha_account_new_offline ("TestUser", &error);
   g_assert_no_error (error);
   g_assert_true (nuvasha_accounts_add (store, other, &error));
   g_assert_true (nuvasha_accounts_add (store, other, &error));
   g_assert_cmpuint (nuvasha_accounts_count (store), ==, 2);
-  g_assert_cmpstr (nuvasha_accounts_get_active_id (store), ==, "Flia");
+  g_assert_cmpstr (nuvasha_accounts_get_active_id (store), ==, "TestUser");
 
   /* Picking the active account again is not a change: a view would do
      nothing about it and there is nothing to write. */
   changed = 0;
-  g_assert_true (nuvasha_accounts_set_active (store, "Flia", &error));
+  g_assert_true (nuvasha_accounts_set_active (store, "TestUser", &error));
   g_assert_no_error (error);
   g_assert_cmpuint (changed, ==, 0);
 

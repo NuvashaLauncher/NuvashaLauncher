@@ -480,8 +480,7 @@ on_skin_file_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
   }
 
   /* Imported files are immediately usable as the row's preview. Uploading
-   * is intentionally separate from choosing a local skin, just like the
-   * skin manager in PrismLauncher. */
+   * is intentionally separate from choosing a local skin. */
   face = face_texture (skin);
   if (face != NULL)
     {

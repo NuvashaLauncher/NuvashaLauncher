@@ -422,8 +422,8 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   AdwSwitchRow *sandbox_row = ADW_SWITCH_ROW (adw_switch_row_new ());
   AdwSwitchRow *sandbox_network_row = ADW_SWITCH_ROW (adw_switch_row_new ());
 
-  /* Match Epiphany's AdwPreferencesDialog template: bound the settings
-   * surface to a usable width and a scrollable maximum-height-sized page. */
+   /* Bound the settings surface to a usable width and a scrollable
+    * maximum-height-sized page. */
   adw_dialog_set_content_width (dialog, 640);
   adw_dialog_set_content_height (dialog, 580);
 
@@ -653,7 +653,7 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
   adw_about_dialog_set_application_name (ADW_ABOUT_DIALOG (dialog),
                                          "Nuvasha Launcher");
   adw_about_dialog_set_version (ADW_ABOUT_DIALOG (dialog), nuvasha_VERSION);
-  adw_about_dialog_set_developer_name (ADW_ABOUT_DIALOG (dialog), "Flia");
+  adw_about_dialog_set_developer_name (ADW_ABOUT_DIALOG (dialog), "TestUser");
 
   adw_about_dialog_set_website (ADW_ABOUT_DIALOG (dialog),
                                  "https://github.com/NuvashaLauncher/NuvashaLauncher");

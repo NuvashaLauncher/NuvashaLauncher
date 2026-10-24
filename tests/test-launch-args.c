@@ -107,14 +107,14 @@ static void
 test_session_of_an_account (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaAccount) offline = nuvasha_account_new_offline ("Flia", &error);
+  g_autoptr (NuvashaAccount) offline = nuvasha_account_new_offline ("TestUser", &error);
   NuvashaLaunchSession session;
 
   g_assert_no_error (error);
 
   session = nuvasha_launch_session_for (offline);
-  g_assert_cmpstr (session.name, ==, "Flia");
-  g_assert_cmpstr (session.uuid, ==, "41b05633-42e0-3a6f-b64b-6b64448dccdd");
+  g_assert_cmpstr (session.name, ==, "TestUser");
+  g_assert_cmpstr (session.uuid, ==, "097d3392-865a-3f3c-8b4a-da1c3473466c");
   g_assert_cmpstr (session.access_token, ==, nuvasha_LAUNCH_OFFLINE_TOKEN);
   g_assert_cmpstr (session.user_type, ==, nuvasha_LAUNCH_OFFLINE_USER_TYPE);
 
@@ -247,7 +247,7 @@ test_build_arguments_modern (void)
   g_autoptr (NuvashaResolvedVersion) resolved = resolved_new ("1.20.1");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
-  g_autoptr (NuvashaAccount) account = nuvasha_account_new_offline ("Flia", NULL);
+  g_autoptr (NuvashaAccount) account = nuvasha_account_new_offline ("TestUser", NULL);
   NuvashaLaunchSession session;
   guint classpaths = 0;
   guint library_paths = 0;
@@ -314,7 +314,7 @@ test_build_arguments_modern (void)
   g_assert_cmpstr (at (argv, 6), ==, resolved->logging_argument);
   g_assert_cmpstr (at (argv, 7), ==, "net.minecraft.client.main.Main");
   g_assert_cmpstr (at (argv, 8), ==, "--username");
-  g_assert_cmpstr (at (argv, 9), ==, "Flia");
+  g_assert_cmpstr (at (argv, 9), ==, "TestUser");
   g_assert_cmpstr (at (argv, 11), ==, "1.20.1");
   g_assert_cmpstr (at (argv, 13), ==, "/home/u/games/one");
   g_assert_cmpstr (at (argv, 15), ==, "/home/u/.local/share/nuvasha/assets");
@@ -339,7 +339,7 @@ test_build_arguments_without_jvm_args (void)
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) with_empty = NULL;
   g_autoptr (GPtrArray) with_none = NULL;
-  g_autoptr (NuvashaAccount) account = nuvasha_account_new_offline ("Flia", NULL);
+  g_autoptr (NuvashaAccount) account = nuvasha_account_new_offline ("TestUser", NULL);
   NuvashaLaunchSession session;
 
   resolved->jvm_arguments =
@@ -386,7 +386,7 @@ test_version_type_fallback (void)
   g_autoptr (NuvashaResolvedVersion) resolved = resolved_new ("1.20.1");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
-  g_autoptr (NuvashaAccount) account = nuvasha_account_new_offline ("Flia", NULL);
+  g_autoptr (NuvashaAccount) account = nuvasha_account_new_offline ("TestUser", NULL);
   NuvashaLaunchSession session = nuvasha_launch_session_for (account);
 
   g_clear_pointer (&resolved->version_type, g_free);
@@ -411,7 +411,7 @@ test_build_arguments_legacy (void)
   g_autoptr (NuvashaResolvedVersion) resolved = resolved_new ("1.8.9");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
-  g_autoptr (NuvashaAccount) account = nuvasha_account_new_offline ("Flia", NULL);
+  g_autoptr (NuvashaAccount) account = nuvasha_account_new_offline ("TestUser", NULL);
   NuvashaLaunchSession session;
   guint classpath = 0;
   guint main_class = 0;
@@ -458,7 +458,7 @@ test_build_arguments_legacy (void)
 
   g_assert_cmpuint (main_class, >, classpath);
   g_assert_cmpstr (at (argv, main_class + 1), ==, "--username");
-  g_assert_cmpstr (at (argv, main_class + 2), ==, "Flia");
+  g_assert_cmpstr (at (argv, main_class + 2), ==, "TestUser");
   g_assert_cmpstr (at (argv, main_class + 4), ==, "1.8.9");
   g_assert_cmpstr (at (argv, main_class + 6), ==, "/home/u/games/one");
   g_assert_cmpstr (at (argv, main_class + 14), ==, "legacy");
@@ -510,7 +510,7 @@ test_build_arguments_failures (void)
   g_autoptr (NuvashaResolvedVersion) resolved = resolved_new ("1.20.1");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
-  g_autoptr (NuvashaAccount) account = nuvasha_account_new_offline ("Flia", NULL);
+  g_autoptr (NuvashaAccount) account = nuvasha_account_new_offline ("TestUser", NULL);
   NuvashaLaunchSession session;
 
   session = nuvasha_launch_session_for (account);
