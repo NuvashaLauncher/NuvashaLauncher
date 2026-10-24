@@ -667,8 +667,8 @@ nuvasha_content_apply_local_metadata (NuvashaContentFile *file, NuvashaContentTy
   char *icon_member = NULL;
   g_autoptr (GByteArray) metadata = NULL;
 
-  /* Read the declared metadata files directly. This avoids depending on ZIP
-   * entry order and ensures Forge/NeoForge sections are parsed reliably. */
+  /* Read the declared metadata files directly so Forge/NeoForge sections are
+   * parsed reliably. */
   metadata = read_archive_member (file->path, "fabric.mod.json");
   if (metadata != NULL)
     apply_local_json (file, "fabric.mod.json", metadata->data, metadata->len,

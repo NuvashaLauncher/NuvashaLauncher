@@ -31,13 +31,20 @@
 - json-glib
 - libsoup
 - libarchive
+- libsecret
+- bubblewrap (`bwrap`)
+
+### Runtime dependencies
+
+- A Java runtime compatible with the Minecraft version being launched
 
 #### Debian
 
 ```sh
 sudo apt install build-essential pkg-config gettext \
     libglib2.0-dev libgtk-4-dev libadwaita-1-dev libepoxy-dev \
-    libjson-glib-dev libsoup-3.0-dev libarchive-dev
+    libjson-glib-dev libsoup-3.0-dev libarchive-dev libsecret-1-dev \
+    bubblewrap
 ```
 
 #### Fedora
@@ -45,7 +52,8 @@ sudo apt install build-essential pkg-config gettext \
 ```sh
 sudo dnf install gcc make gettext pkgconf-pkg-config \
     glib2-devel gtk4-devel libadwaita-devel libepoxy-devel \
-    json-glib-devel libsoup3-devel libarchive-devel
+    json-glib-devel libsoup3-devel libarchive-devel libsecret-devel \
+    bubblewrap
 ```
 
 #### openSUSE
@@ -53,14 +61,14 @@ sudo dnf install gcc make gettext pkgconf-pkg-config \
 ```sh
 sudo zypper install gcc make gettext-tools pkg-config glib2-devel \
     gtk4-devel libadwaita-devel libepoxy-devel json-glib-devel \
-    libsoup-devel libarchive-devel
+    libsoup-devel libarchive-devel libsecret-devel bubblewrap
 ```
 
 #### Arch
 
 ```sh
 sudo pacman -S base-devel gettext pkgconf gtk4 libadwaita libepoxy \
-    json-glib libsoup libarchive
+    json-glib libsoup libarchive libsecret bubblewrap
 ```
 
 #### Gentoo
@@ -69,14 +77,14 @@ sudo pacman -S base-devel gettext pkgconf gtk4 libadwaita libepoxy \
 sudo emerge --ask sys-devel/gcc sys-devel/gettext dev-build/make \
     dev-util/pkgconf dev-libs/glib gui-libs/gtk:4 gui-libs/libadwaita \
     gui-libs/libepoxy dev-libs/json-glib net-libs/libsoup:3 \
-    app-arch/libarchive
+    app-arch/libarchive app-crypt/libsecret sys-apps/bubblewrap
 ```
 
 #### NixOS
 
 ```sh
 nix-shell -p gcc gnumake gettext pkg-config glib gtk4 libadwaita libepoxy \
-    json-glib libsoup libarchive
+    json-glib libsoup libarchive libsecret bubblewrap
 ```
 
 ## Building from source

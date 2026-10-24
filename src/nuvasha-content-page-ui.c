@@ -451,8 +451,7 @@ nuvasha_content_page_build_bar (NuvashaContentPage *self)
   self->bar_spacer = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
   gtk_widget_set_hexpand (GTK_WIDGET (self->bar_spacer), TRUE);
 
-  /* Use linked toggle buttons instead of a labeled Adwaita view switcher to
-     keep this compact toolbar to one line. */
+  /* Use linked toggle buttons to keep this compact toolbar to one line. */
   self->switcher = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
   gtk_widget_add_css_class (GTK_WIDGET (self->switcher), "linked");
 
@@ -555,9 +554,8 @@ nuvasha_content_page_move_actions_into_bar (NuvashaContentPage *self, gboolean b
   if (wanted != NULL && gtk_widget_get_parent (wanted) != GTK_WIDGET (self->bar))
     gtk_box_insert_child_after (GTK_BOX (self->bar), wanted, NULL);
 
-   /* Both action rows contain an expanding search entry. The spacer used by
-      the old Installed-only toolbar would consume that room and leave the
-      entry at its natural width. */
+  /* Both action rows contain an expanding search entry, so the spacer is
+     hidden while either action row is visible. */
    if (self->bar_spacer != NULL)
      gtk_widget_set_visible (GTK_WIDGET (self->bar_spacer), FALSE);
 }

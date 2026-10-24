@@ -182,7 +182,7 @@ nuvasha_java_select (GPtrArray  *javas,
     }
 
   /* Older version documents do not declare a Java version. Pick the
-     closest usable runtime rather than looking for the impossible major 0. */
+   * closest usable runtime. */
   if (required_major == 0)
     return nuvasha_java_best_compatible (javas, 0);
 

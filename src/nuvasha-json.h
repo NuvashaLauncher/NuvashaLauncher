@@ -26,8 +26,8 @@ gboolean nuvasha_json_boolean (JsonNode *node, const char *name,
 gint64 nuvasha_json_int (JsonNode *node, const char *name, gint64 fallback);
 GPtrArray *nuvasha_json_string_array (JsonNode *node, const char *name);
 
-/* Required-field readers for API documents. Unlike the optional readers
- * above, these distinguish malformed responses from absent optional data. */
+/* Required-field readers for API documents. These distinguish malformed
+ * responses from absent optional data. */
 gboolean nuvasha_json_require_string (JsonNode *node, const char *name,
                                   char **value, GError **error);
 

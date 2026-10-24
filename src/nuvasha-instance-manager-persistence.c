@@ -202,7 +202,7 @@ parse_instances_json (const char *contents, gssize length, GError **error)
   return g_list_reverse (list);
 }
 
-/* Keeps an unreadable file around instead of deleting it. */
+/* Preserve an unreadable file for recovery or reporting. */
 static void
 quarantine_corrupt_file (const char *path)
 {

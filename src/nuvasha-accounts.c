@@ -749,7 +749,8 @@ nuvasha_accounts_remove (NuvashaAccounts *self, const char *id, GError **error)
       if (!g_str_equal (account->id, id))
         continue;
 
-      if (!nuvasha_secret_store_clear (id, &secret_error))
+      if (account->type == nuvasha_ACCOUNT_MICROSOFT &&
+          !nuvasha_secret_store_clear (id, &secret_error))
         {
           g_set_error (error, nuvasha_ACCOUNTS_ERROR,
                        nuvasha_ACCOUNTS_ERROR_IO,
