@@ -112,7 +112,7 @@ build/tests/%: tests/%.c $(TESTLIBOBJS) | build/tests
 test: $(if $(SRCS),$(BIN)) $(TESTBINS) $(SCHEMA_COMPILED)
 	@set -e; test_tmp=$$(mktemp -d "$(CURDIR)/build/test-tmp-XXXXXX"); \
 	trap 'rm -rf "$$test_tmp"' EXIT HUP INT TERM; \
-	pass=0; skip=0; for t in $(TESTBINS); do echo "RUN  $$t"; TMPDIR="$$test_tmp" GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t; status=$$?; \
+	pass=0; skip=0; for t in $(TESTBINS); do echo "RUN  $$t"; if TMPDIR="$$test_tmp" GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t; then status=0; else status=$$?; fi; \
 		if test $$status -eq 77; then skip=$$((skip + 1)); \
 		elif test $$status -ne 0; then exit $$status; else pass=$$((pass + 1)); fi; done; \
 		echo "PASS $$pass test(s), SKIP $$skip test(s)"
@@ -141,7 +141,7 @@ build-debug/tests/%: tests/%.c $(TESTLIBDBGOBJS) | build-debug/tests
 test-debug: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS) $(SCHEMA_COMPILED)
 	@set -e; test_tmp=$$(mktemp -d "$(CURDIR)/build/test-tmp-XXXXXX"); \
 	trap 'rm -rf "$$test_tmp"' EXIT HUP INT TERM; \
-	pass=0; skip=0; for t in $(TESTDBGBINS); do echo "RUN  $$t"; TMPDIR="$$test_tmp" GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t; status=$$?; \
+	pass=0; skip=0; for t in $(TESTDBGBINS); do echo "RUN  $$t"; if TMPDIR="$$test_tmp" GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t; then status=0; else status=$$?; fi; \
 		if test $$status -eq 77; then skip=$$((skip + 1)); \
 		elif test $$status -ne 0; then exit $$status; else pass=$$((pass + 1)); fi; done; \
 		echo "PASS $$pass test(s), SKIP $$skip test(s)"
@@ -154,10 +154,10 @@ test-lsan: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS) $(SCHEMA_COMPILED)
 	@set -e; test_tmp=$$(mktemp -d "$(CURDIR)/build/test-tmp-XXXXXX"); \
 	trap 'rm -rf "$$test_tmp"' EXIT HUP INT TERM; \
 	pass=0; skip=0; for t in $(TESTDBGBINS); do echo "RUN  $$t"; \
-		  ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 \
-		  LSAN_OPTIONS=detect_leaks=1:exitcode=1 \
-		  TMPDIR="$$test_tmp" \
-		  GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t; status=$$?; \
+		  if ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 \
+		     LSAN_OPTIONS=detect_leaks=1:exitcode=1 \
+		     TMPDIR="$$test_tmp" \
+		     GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t; then status=0; else status=$$?; fi; \
 		if test $$status -eq 77; then skip=$$((skip + 1)); \
 		elif test $$status -ne 0; then exit $$status; else pass=$$((pass + 1)); fi; done; \
 		echo "PASS $$pass test(s), SKIP $$skip test(s)"
