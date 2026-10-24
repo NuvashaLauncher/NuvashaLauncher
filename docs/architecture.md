@@ -13,7 +13,7 @@ arranged as they are.
 Nuvasha is a Linux GTK 4/libadwaita desktop application. It manages Minecraft
 instances, obtains Minecraft and Modrinth content, chooses a Java runtime, and
 starts one game process per instance. It is a single executable and does not
-run a local daemon or a background service of its own.
+require a separate daemon or background service.
 
 The application is event-driven. Network requests, subprocesses, and longer
 filesystem operations expose GIO-style asynchronous APIs. Results are handed
@@ -88,6 +88,7 @@ flowchart TD
     Content[Modrinth and content models]
     Packs[Modpack import/export/install]
     Versions[Minecraft metadata and rules]
+    Loaders[Loader metadata and installation]
     Resolve[Version resolve]
     Downloads[Download service, slots, cache]
     Launch[Launcher and process monitor]
@@ -106,10 +107,12 @@ flowchart TD
     Packs --> Downloads
     Packs --> Instances
     Launch --> Versions
+    Launch --> Loaders
     Launch --> Resolve
     Launch --> Java
     Launch --> Accounts
     Resolve --> Versions
+    Resolve --> Loaders
     Resolve --> Downloads
     Launch --> Sandbox
     Instances --> FS
@@ -295,6 +298,23 @@ Network-provided archive entries are not trusted. Native extraction rejects
 unsafe paths and skips links. The resolver only writes regular files and real
 directories below the intended destination.
 
+### Mod loaders
+
+`nuvasha-loaders.c` supports Vanilla, Fabric, Quilt, Forge, and NeoForge, but
+the installation paths are not identical:
+
+- Fabric and Quilt publish version lists and profile documents. Their profiles
+  are merged over the Minecraft version document and their Maven coordinates
+  are converted into the same resolved-file inputs used by vanilla versions.
+- Forge and NeoForge publish installer JARs. Nuvasha downloads the installer,
+  reads its install profile, runs the client-side processors with Java, and
+  stores the resulting loader installation under the shared data directory.
+
+Loader installations are separate from instance directories. The launcher
+uses the resulting client JAR and merged version document when resolving and
+launching an instance. A failed or unsupported installer stops before a game
+is started; it does not register a partially prepared loader as usable.
+
 ### Modrinth content
 
 `nuvasha-modrinth.c` is deliberately Modrinth-specific. It builds API facets,
@@ -381,11 +401,11 @@ placeholders, the main class, and game arguments into an argv array. The
 redacted form is the only form used in logs. Access tokens and values after
 the relevant password/token options are replaced before output is recorded.
 
-Java detection probes candidates asynchronously, parses `java -version` and
-related properties, rejects headless runtimes, and chooses the instance's
-explicit Java when one is configured. Otherwise it chooses the compatible
-runtime required by the version document; it does not silently downgrade to a
-different major version.
+Java detection probes candidates asynchronously and parses `java -version` and
+related properties, including whether the runtime has AWT's X11 bridge. It
+prefers a window-capable compatible runtime and chooses the instance's
+explicit Java when one is configured. Launch preparation rejects a selected
+headless runtime; it does not silently downgrade to a different major version.
 
 Stopping sends `SIGTERM` first and escalates after five seconds. Process output
 is consumed by the line-reader helper and retained only up to the configured
@@ -411,12 +431,13 @@ container manager: it is a launch wrapper for one resolved game. If `bwrap`
 cannot be found or the broker cannot start, launch preparation fails instead
 of falling back silently to an unsandboxed process.
 
-The broker is a host-side socket service scoped to the game directory. The
-sandbox exposes Nuvasha's own executable under `/nuvasha-bin/xdg-open`; that
-entry forwards a checked path to the broker. The broker canonicalizes and
-opens only paths beneath the instance directory, then asks the desktop to open
-the resulting URI. This keeps common mod behavior working without exposing
-the host's shell or arbitrary executables inside the sandbox.
+The broker is an in-process host-side socket service scoped to the game
+directory. The sandbox exposes Nuvasha's own executable under
+`/nuvasha-bin/xdg-open`; that entry forwards a checked path to the broker. The
+broker canonicalizes and opens only paths beneath the instance directory, then
+asks the desktop to open the resulting URI. This keeps common mod behavior
+working without exposing the host's shell or arbitrary executables inside the
+sandbox.
 
 ## Persistence and filesystem layout
 

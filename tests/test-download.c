@@ -536,6 +536,33 @@ test_checksum_mismatch (void)
 }
 
 static void
+test_invalid_expected_hash (void)
+{
+  g_autofree char *dir = make_test_dir ();
+  g_autofree char *dest = g_build_filename (dir, "game.jar", NULL);
+  g_autofree char *url = server_url ("/file");
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+
+  fixture.hits = 0;
+  async_run_init (&run);
+  call_file (&run, &call, url, dest, "../outside", G_CHECKSUM_SHA256);
+  async_run_wait (&run);
+
+  g_assert_error (call.error, nuvasha_DOWNLOAD_ERROR,
+                  nuvasha_DOWNLOAD_ERROR_CHECKSUM);
+  g_assert_false (call.success);
+  g_assert_cmpuint (fixture.hits, ==, 0);
+  g_assert_false (g_file_test (dest, G_FILE_TEST_EXISTS));
+
+  async_call_clear (&call);
+  async_run_clear (&run);
+  remove_test_dir (dir);
+
+  g_print ("ok - invalid expected hashes are rejected\n");
+}
+
+static void
 test_cached_reuse (void)
 {
   g_autofree char *dir = make_test_dir ();
@@ -1306,6 +1333,7 @@ main (int argc, char **argv)
 
   test_successful_download ();
   test_checksum_mismatch ();
+  test_invalid_expected_hash ();
   test_cached_reuse ();
   test_global_file_cache_reuse ();
   test_corrupt_cache_redownload ();
