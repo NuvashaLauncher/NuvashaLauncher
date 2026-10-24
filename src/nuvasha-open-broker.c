@@ -73,8 +73,7 @@ open_checked_path (Broker *broker, const char *path)
     return -1;
 
   /* Open every parent component without following symlinks, then pin the
-   * final object without following a final symlink. This uses the existing
-   * POSIX filesystem helpers rather than Linux's openat2 syscall. */
+   * final object without following a final symlink. */
   fd = openat (parent_fd, basename, O_RDONLY | O_CLOEXEC | O_NOFOLLOW |
                (g_file_test (real_path, G_FILE_TEST_IS_DIR) ? O_DIRECTORY : 0));
   close (parent_fd);

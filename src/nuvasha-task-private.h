@@ -8,7 +8,7 @@
 #include "nuvasha-task.h"
 
 /* Internal bridge for operations implemented on top of an existing GTask.
- * Public callers own NuvashaTaskScope instead of borrowing task ownership. */
+ * Public callers own NuvashaTaskScope; the task keeps its own reference. */
 NuvashaTaskScope *nuvasha_task_scope_from_task (GTask *task);
 void nuvasha_task_scope_attach_task (GTask *task);
 GTask *nuvasha_task_scope_task (const NuvashaTaskScope *scope);

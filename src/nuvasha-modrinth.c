@@ -703,8 +703,8 @@ nuvasha_modrinth_update_by_hash_async (NuvashaContentType type, const char *sha1
   g_return_val_if_fail (sha1 != NULL, NULL);
   g_return_val_if_fail (minecraft_version != NULL, NULL);
 
-  /* Both narrowings are already JSON arrays, so the body is written
-   * around them rather than through a builder. */
+  /* Both narrowings are already JSON arrays, so they can be inserted directly
+   * into the request body. */
   game_versions = nuvasha_modrinth_string_array_json (minecraft_version);
   loaders = nuvasha_modrinth_string_array_json (
     nuvasha_content_type_needs_loader (type) && loader != NULL ? loader

@@ -16,8 +16,8 @@ G_BEGIN_DECLS
 #define nuvasha_COMPONENT_QUILT "org.quiltmc.quilt-loader"
 
 /* Component-style access over nuvasha's existing instance JSON. This keeps the
- * current format compatible while allowing resolver and UI code to refer to
- * versioned components by stable IDs instead of fields. */
+ * current format compatible while giving resolver and UI code stable IDs for
+ * versioned components. */
 char *nuvasha_instance_component_get_version (NuvashaInstance *instance,
                                           const char *component_id);
 gboolean nuvasha_instance_component_set_version (NuvashaInstance *instance,

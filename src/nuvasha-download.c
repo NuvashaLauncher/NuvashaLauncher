@@ -269,7 +269,7 @@ nuvasha_download_request_fail (DownloadRequest *request, GError *error)
 
   nuvasha_task_scope_set_state (scope, cancelled ? nuvasha_TASK_STATE_CANCELLED
                                                : nuvasha_TASK_STATE_FAILED);
-  g_debug ("download operation=%" G_GUINT64_FORMAT " %s", 
+  g_debug ("download operation=%" G_GUINT64_FORMAT " %s",
            nuvasha_task_scope_get_id (scope), cancelled ? "cancelled" : "failed");
   nuvasha_download_discard_temporary (request);
   nuvasha_download_release_slot (request);

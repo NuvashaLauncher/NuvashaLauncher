@@ -1,0 +1,538 @@
+# Nuvasha architecture
+
+This is a maintainer's map of Nuvasha Launcher. It describes the boundaries
+between the parts of the program, the flows that cross those boundaries, and
+the rules that are easy to break during a seemingly small change.
+
+It is deliberately not a catalogue of every source file. The public headers
+are the detailed API reference; this document explains why the pieces are
+arranged as they are.
+
+## What the program is
+
+Nuvasha is a Linux GTK 4/libadwaita desktop application. It manages Minecraft
+instances, obtains Minecraft and Modrinth content, chooses a Java runtime, and
+starts one game process per instance. It is a single executable and does not
+run a local daemon or a background service of its own.
+
+The application is event-driven. Network requests, subprocesses, and longer
+filesystem operations expose GIO-style asynchronous APIs. Results are handed
+back to the thread-default main context that started the operation, normally
+the GTK main loop. UI code starts operations and reacts to signals or
+callbacks; it does not own the lower-level transfer or process state.
+
+The main process contains two kinds of state:
+
+- **Application state:** instances, accounts, settings, active downloads, and
+  launchers.
+- **Content state:** Minecraft metadata, libraries, assets, natives, cached API
+  responses, and files inside instance directories.
+
+The boundary matters. An instance is a model object and knows how to validate
+and serialize itself, but it does not perform network I/O or create widgets.
+Likewise, the UI presents a launcher or a download entry but does not become
+the owner of that operation.
+
+## System context
+
+```mermaid
+flowchart LR
+    User[User]
+    Nuvasha[Nuvasha Launcher]
+    Mojang[Mojang launcher metadata
+and game resources]
+    Modrinth[Modrinth API and files]
+    Microsoft[Microsoft identity,
+Xbox Live, Minecraft services]
+    Desktop[Desktop URI handler]
+    Java[Selected Java runtime]
+    Bwrap[bubblewrap]
+
+    User <--> Nuvasha
+    Nuvasha --> Mojang
+    Nuvasha --> Modrinth
+    Nuvasha --> Microsoft
+    Nuvasha --> Java
+    Nuvasha -. when sandbox is enabled .-> Bwrap
+    Nuvasha --> Desktop
+```
+
+External services are used directly by their owning modules:
+
+- Mojang's version manifest and version documents are parsed by
+  `nuvasha-minecraft-versions.c`; resolved files are fetched by the download
+  service.
+- The Modrinth v2 API is handled by `nuvasha-modrinth.c`. There is currently
+  one content provider, so there is no provider abstraction to keep in sync.
+- Microsoft device authorization, Xbox Live/XSTS, Minecraft authentication,
+  entitlements, and profile requests are the steps in
+  `nuvasha-auth-microsoft.c`.
+- `GAppInfo` opens URIs through the desktop. Sandboxed games reach that
+  capability through Nuvasha's small host-side open broker instead of being
+  given a general-purpose host command.
+
+## Static structure
+
+The source is split by responsibility rather than by a framework layer. Most
+modules have a public header describing the contract and, where necessary, a
+private header for shared implementation state.
+
+```mermaid
+flowchart TD
+    Main[main.c]
+    Window[Main window and pages]
+    Model[Main-window model]
+    Instances[Instance model and manager]
+    Accounts[Accounts and authentication]
+    Settings[Settings]
+    Content[Modrinth and content models]
+    Packs[Modpack import/export/install]
+    Versions[Minecraft metadata and rules]
+    Resolve[Version resolve]
+    Downloads[Download service, slots, cache]
+    Launch[Launcher and process monitor]
+    Java[Java detection]
+    Sandbox[Sandbox and open broker]
+    FS[Filesystem and JSON helpers]
+
+    Main --> Window
+    Window --> Model
+    Model --> Instances
+    Model --> Accounts
+    Model --> Settings
+    Window --> Content
+    Window --> Packs
+    Content --> Downloads
+    Packs --> Downloads
+    Packs --> Instances
+    Launch --> Versions
+    Launch --> Resolve
+    Launch --> Java
+    Launch --> Accounts
+    Resolve --> Versions
+    Resolve --> Downloads
+    Launch --> Sandbox
+    Instances --> FS
+    Accounts --> FS
+    Downloads --> FS
+```
+
+### Application and UI
+
+`main.c` creates the `AdwApplication`, initializes translations, loads the
+instance store and presents the one `NuvashaMainWindow`. A second activation
+focuses the existing window rather than creating another one.
+
+The main window owns a `NuvashaMainWindowModel`. The model groups the
+process-wide objects used by the UI:
+
+- `NuvashaInstanceManager`
+- `NuvashaDownloadService` and the `NuvashaDownloads` display manager
+- `NuvashaSettings`
+- `NuvashaAccounts`
+- the users popover
+- launchers and instance dialogs, keyed by instance
+
+The window is the presentation boundary. `nuvasha-main-window-*.c` files
+connect model signals to widgets, while page and dialog modules handle their
+own views. Widgets declared in `data/ui/*.ui` and the stylesheet are compiled
+into a GResource by the Makefile. The UI is therefore available from the
+installed binary; it is not read from the source tree at runtime.
+
+The downloads display is intentionally separate from the dialog that started a
+download. `NuvashaDownloads` is process-wide, owns entries while they run, and
+lets the header show work started from any page. Closing an installer dialog
+does not cancel its operation.
+
+### Instances
+
+`NuvashaInstance` is a validated, serializable model for one Minecraft
+installation. It contains a stable ID, display name, directory, Minecraft
+version, loader, loader version, Java choice, JVM arguments, and component
+metadata. It has no widgets, network calls, or persistence side effects.
+
+`NuvashaInstanceManager` owns the `GListStore` of instances and persists the
+list to `instances.json`. It also owns operations that change the directory
+layout:
+
+- create and register an instance;
+- rename or update validated properties;
+- duplicate an instance;
+- move an instance to another directory;
+- delete an instance, with an explicit choice about deleting its files;
+- open its directory with the desktop file manager.
+
+Directory checks happen before files are touched. A new instance directory
+must be absolute, must not contain `..`, and must not be the same as, inside,
+or a parent of another instance directory. Moves and deletes are asynchronous
+and use rollback-oriented ordering so a failed operation does not silently
+remove the registered instance or its old files.
+
+### Accounts and authentication
+
+Accounts support two modes:
+
+- **Offline:** a validated player name and the UUID derived from
+  `OfflinePlayer:<name>`.
+- **Microsoft:** a Minecraft profile, access token, expiry, refresh token, and
+  cosmetic profile data.
+
+`NuvashaAccounts` owns the active account and emits changes for the UI. Account
+metadata is stored in the user's data directory in `accounts.json`, written
+atomically with mode `0600`. Access and refresh tokens are stored through
+`libsecret` and are looked up by account ID; they are not meant to live in the
+JSON metadata file.
+
+The Microsoft sign-in chain is asynchronous and explicit:
+
+1. Request a device code.
+2. Poll the Microsoft token endpoint until the user completes sign-in.
+3. Exchange the Microsoft token with Xbox Live.
+4. Exchange the Xbox token with XSTS.
+5. Obtain a Minecraft access token.
+6. Check Java entitlements.
+7. Fetch the Minecraft profile and store the resulting account.
+
+No password is handled by Nuvasha. A token is considered unusable slightly
+before its reported expiry so a launch does not begin with a token that will
+expire during startup. If refresh fails, the launcher enters
+`Needs sign-in` instead of attempting to start a game with stale credentials.
+
+### Settings
+
+`NuvashaSettings` is a typed wrapper around the installed GSettings schema in
+`data/com.github.nuvashalauncher.Nuvasha.gschema.xml`. It validates values and
+writes each accepted change. The settings include version-list filters, log
+retention, language, Modrinth API caching, export behavior, dependency delete
+behavior, and sandbox/network switches. Window geometry is kept separately by
+the window code.
+
+The sandbox is currently opt-in in the schema. Its network switch is
+independent: enabling the sandbox does not automatically disable the game's
+network access.
+
+## Asynchronous work and ownership
+
+`nuvasha-task.c` provides the common operation contract. There are two related
+types:
+
+- `NuvashaTaskScope` owns one asynchronous operation, its cancellable, tracked
+  GLib sources, callback result, and lifecycle state.
+- `NuvashaTaskSequence` runs a series of asynchronous steps. A step starts one
+  operation and advances the sequence from its completion callback.
+
+The scope is reference counted because the operation state and its caller may
+outlive one another. A caller can cancel an operation without freeing the
+state that a late callback still needs. Source IDs are tracked and removed
+before task data is destroyed. Immediate results are deferred to an idle
+callback where necessary, so an `_async()` function never calls its completion
+callback before it returns its handle.
+
+When adding asynchronous code:
+
+1. Create a scope before starting work.
+2. Keep all state needed by the callback in scope-owned data.
+3. Check cancellation at the operation's boundaries.
+4. Complete through the scope's result helpers.
+5. Release the caller's scope reference according to the ownership contract.
+
+This is the central lifetime rule of the project. A callback must not assume
+that the widget that started an operation still exists.
+
+## Downloads, caches, and content
+
+### Transfer service
+
+`NuvashaDownloadService` owns one `SoupSession`, two waiting queues, and the
+active-transfer counts. Interactive work has priority over bulk installation
+work. The current limits are eight concurrent transfers overall and six bulk
+transfers; the exact scheduling behavior lives in `nuvasha-download-slots.c`.
+
+File transfers follow this sequence:
+
+1. Check for a verified destination or global hash cache hit.
+2. Wait for a transfer slot.
+3. Create a temporary file beside the destination.
+4. Stream the response into it while calculating the expected checksum.
+5. Check the HTTP result and checksum.
+6. Flush/sync the file and atomically rename it into place.
+7. Release the slot and complete the task.
+
+An existing file with the expected hash is reused. A wrong checksum is retried
+once; network failures, HTTP 5xx responses, and HTTP 429 responses use bounded
+retries and `Retry-After` where appropriate. A 404 and other non-retryable
+statuses fail directly. Cancellation or failure discards the temporary file
+and never replaces a valid destination.
+
+JSON requests use the same transfer and retry machinery. API responses can be
+cached with their creation time and ETag. When enabled, an expired entry is
+revalidated; if the network is unavailable, a stale response can be used as a
+fallback. Cache clearing only removes the global cache tree, not installed
+instance content or its indexes.
+
+### Minecraft metadata and resolution
+
+`nuvasha-minecraft-versions.c` parses Mojang's version manifest and version
+documents. It evaluates the document's OS and feature rules, resolves
+`inheritsFrom` chains while detecting cycles, and supports both modern
+structured arguments and legacy `minecraftArguments`.
+
+`nuvasha-minecraft-resolve.c` turns a version description into a
+`NuvashaResolvedVersion`:
+
+- applicable libraries are converted to Maven paths;
+- native classifiers are selected for the current Linux architecture;
+- the client JAR, libraries, logging configuration, asset index, and asset
+  objects are downloaded and hash-checked;
+- native JARs are extracted into a separate directory;
+- the final classpath and argument arrays are assembled in document order.
+
+Resolved Minecraft data is kept below the user's data/cache locations rather
+than inside the instance directory. The instance directory receives the game
+files and logs; shared client artifacts can be reused by multiple instances.
+
+Network-provided archive entries are not trusted. Native extraction rejects
+unsafe paths and skips links. The resolver only writes regular files and real
+directories below the intended destination.
+
+### Modrinth content
+
+`nuvasha-modrinth.c` is deliberately Modrinth-specific. It builds API facets,
+parses search/project/version answers, and filters compatibility before data
+reaches the UI:
+
+- mods must match the instance's Minecraft version and loader;
+- resource packs and shader packs must match the Minecraft version;
+- incompatible versions are not merely hidden at install time—they are not
+  offered as compatible results.
+
+Content pages use models and rows, not raw API JSON. Details are converted from
+Modrinth Markdown to the restricted GTK markup the UI expects.
+
+`nuvasha-content-index.c` maintains local metadata for installed content. The
+index records hashes, filenames, provider/project identity, versions,
+environment flags, and required/optional/incompatible dependencies. It lets
+the UI identify and update installed content without treating the directory
+listing as the source of truth.
+
+### Modpacks
+
+An `.mrpack` contains a root `modrinth.index.json`, downloaded files described
+by that index, and an overrides tree. The modpack module:
+
+- validates the format and supported game;
+- resolves the Minecraft version and loader from dependencies;
+- checks every path before writing it;
+- accepts downloads only from hosts permitted by the format;
+- verifies file hashes;
+- rejects links and unsafe archive entries;
+- caps archive entries and inflated content to limit decompression bombs;
+- installs into a fresh directory before registering the instance.
+
+Optional files are selected by the user. Required files are installed first;
+dependency deletion behavior is controlled by settings. An installation that
+cannot finish should leave the existing instance and metadata intact.
+
+## Launch pipeline
+
+`NuvashaLauncher` belongs to one instance and is the owner of that instance's
+launch state, log buffer, preparation scope, and child process. A launcher
+refuses a second start while its state is busy.
+
+```mermaid
+sequenceDiagram
+    participant UI
+    participant L as NuvashaLauncher
+    participant A as Accounts
+    participant V as Version metadata
+    participant R as Resolver
+    participant J as Java detector
+    participant S as Sandbox
+    participant P as Game process
+
+    UI->>L: start()
+    L->>A: get active account / refresh if needed
+    L->>V: fetch manifest and version description
+    L->>R: download and prepare required files
+    R-->>L: resolved version and progress
+    L->>J: detect/select compatible Java
+    L->>L: build and redact argv
+    opt sandbox enabled
+        L->>S: wrap argv with bwrap
+    end
+    L->>P: spawn
+    P-->>L: stdout/stderr lines
+    P-->>L: exit status or signal
+    L-->>UI: state and output signals
+```
+
+The public state sequence is:
+
+`Preparing` → `Downloading` → `Launching` → `Running` → `Stopping` →
+`Stopped` or `Crashed`.
+
+Failures before process start use `Failed`. An account that needs a new
+login uses `Needs sign-in`; that state is not busy, because no game process is
+running and the user may retry after signing in.
+
+The command-line builder is kept testable without a JVM or network. It merges
+version arguments, instance JVM arguments, paths from the resolver, account
+placeholders, the main class, and game arguments into an argv array. The
+redacted form is the only form used in logs. Access tokens and values after
+the relevant password/token options are replaced before output is recorded.
+
+Java detection probes candidates asynchronously, parses `java -version` and
+related properties, rejects headless runtimes, and chooses the instance's
+explicit Java when one is configured. Otherwise it chooses the compatible
+runtime required by the version document; it does not silently downgrade to a
+different major version.
+
+Stopping sends `SIGTERM` first and escalates after five seconds. Process output
+is consumed by the line-reader helper and retained only up to the configured
+log-line limit. Crash reports are associated with the process start time so an
+old report is not mistaken for a crash from the current launch.
+
+## Sandbox boundary
+
+When enabled, `nuvasha-sandbox.c` wraps an already-complete Java command with
+`bwrap`. The wrapper:
+
+- creates a new process/session environment;
+- separates PID, UTS, IPC, cgroup, and—when requested—network namespaces;
+- supplies `/proc`, `/dev`, and a temporary `/tmp`;
+- mounts only the system and game runtime paths needed by the resolved game;
+- mounts the instance directory as the game home;
+- removes DBus session/system addresses;
+- starts a per-game open broker;
+- hands the final Java argv to the sandbox.
+
+`nuvasha-sandbox-mounts.c` owns the mount policy. The sandbox is not a general
+container manager: it is a launch wrapper for one resolved game. If `bwrap`
+cannot be found or the broker cannot start, launch preparation fails instead
+of falling back silently to an unsandboxed process.
+
+The broker is a host-side socket service scoped to the game directory. The
+sandbox exposes Nuvasha's own executable under `/nuvasha-bin/xdg-open`; that
+entry forwards a checked path to the broker. The broker canonicalizes and
+opens only paths beneath the instance directory, then asks the desktop to open
+the resulting URI. This keeps common mod behavior working without exposing
+the host's shell or arbitrary executables inside the sandbox.
+
+## Persistence and filesystem layout
+
+The exact base directories follow GLib's user-data and user-cache locations.
+The important files are:
+
+| Data | Location/purpose |
+| --- | --- |
+| Instance registry | `<user data>/nuvasha/instances.json` |
+| Instance content | Registered instance directories, each with game files and logs |
+| Account metadata | `<user data>/nuvasha/accounts.json` |
+| Account tokens | Desktop secret service, keyed by account ID |
+| Shared resolved content | `<user data>/nuvasha/` shared client artifacts and assets |
+| Version metadata | `<user cache>/nuvasha/versions/` |
+| API responses | `<user cache>/nuvasha/` API cache tree |
+| GSettings | Installed schema and the user's GSettings backend |
+
+Writes that represent a complete document use temporary files and replacement
+where the module contract promises atomicity. Do not add a direct
+`g_file_set_contents()` write to an existing registry, account file, or cache
+format without preserving the module's failure behavior.
+
+## Security properties
+
+The security-sensitive code is distributed across the file, archive, account,
+and process boundaries:
+
+- Downloaded files are hash-checked when the source publishes a hash and are
+  never installed directly over an existing destination.
+- Instance and archive paths reject traversal, absolute paths, backslashes,
+  links, and overlapping instance directories where those checks apply.
+- ZIP entry counts and inflated size are bounded.
+- Modpack download URLs are restricted to hosts allowed by the format.
+- Account metadata is mode `0600`; tokens use libsecret and never enter logs,
+  error messages, or redacted command output.
+- The sandbox has an explicit mount and environment policy and can remove game
+  network access.
+- UI text that can contain paths or service errors is treated as plain text,
+  not markup.
+
+These are architectural properties, not optional cleanup. A new importer,
+content provider, or launcher argument path must preserve them at its own
+boundary.
+
+## Build and test shape
+
+The repository uses a hand-written `Makefile`:
+
+- `make` builds the release binary, compiled resources, schemas, and locales.
+- `make fast` builds the release target in parallel.
+- `make debug` builds a separate AddressSanitizer/UndefinedBehaviorSanitizer
+  binary under `build-debug/`.
+- `make test` builds and runs each `tests/test-*.c` binary.
+- `make test-display` repeats the suite under `xvfb-run` when available.
+- `make test-debug` and `make test-lsan` exercise the sanitizer build.
+- `make static-analysis` runs GCC's analyzer over source files.
+
+Tests are intentionally layered. Parsers, path rules, argument builders,
+security checks, and state machines can run without a display, network, JVM,
+or live account. Download and Modrinth tests use local fixtures/servers. UI
+tests instantiate the compiled resource templates, and display-sensitive tests
+skip or use a virtual display when the environment does not provide one.
+
+CI builds both x86_64 and ARM64 Fedora containers, treats compiler warnings as
+errors for the release build, runs the test suite, and runs static analysis.
+
+## Adding or changing a subsystem
+
+Use the existing boundary that owns the behavior:
+
+- Add a persisted instance field to `NuvashaInstance`, its JSON conversion,
+  validation, manager update path, and relevant tests together.
+- Add a preference to the GSettings schema, then expose validated accessors in
+  `NuvashaSettings` and bind it in the settings UI.
+- Add a network operation through the download service rather than creating a
+  second `SoupSession` or an ad-hoc retry loop.
+- Keep response parsing in a plain data function with fixture-based tests;
+  keep the live async request as a thin wrapper around it.
+- Add a launch preparation step without putting blocking work in the UI or
+  bypassing the launcher's state machine.
+- Add a sandbox mount only when the game truly needs it, and document why the
+  path is safe to expose.
+- Keep long-lived operations owned by their manager or launcher, not by the
+  dialog that happened to start them.
+
+When a change alters one of the decisions above, update this document and add
+an ADR if the change affects security, persistence, external interfaces,
+dependency choice, or a quality property such as cancellability or atomicity.
+
+## Decisions worth preserving
+
+These are the choices most likely to be misunderstood later:
+
+1. **One process, shared main-context asynchronous APIs.** This keeps GTK
+   ownership predictable while allowing network, filesystem, and child-process
+   work to make progress without blocking the UI.
+2. **A reusable download service instead of per-feature HTTP code.** It gives
+   every caller the same slot scheduling, retry, cancellation, hashing, and
+   temporary-file behavior.
+3. **Plain parsers beside asynchronous wrappers.** Tests can cover protocol and
+   security rules with fixtures, while live code remains responsible for
+   transport and lifetime management.
+4. **Install into safe temporary/fresh locations before registration.** A
+   failed import or move must not leave metadata pointing at an incomplete
+   installation.
+5. **Sandboxing as a wrapper around a finished command.** Argument construction
+   remains testable and usable without bwrap; the sandbox adds isolation at the
+   final process boundary and fails explicitly if it cannot provide it.
+6. **No provider abstraction for Modrinth yet.** Modrinth is the product's
+   current content source. An abstraction should be introduced only when a
+   second provider creates a real need, not as empty indirection.
+
+## Keeping this document useful
+
+Update this file when a change affects module ownership, a persisted format,
+an external protocol, a process boundary, a security invariant, or the build
+and test contract. Do not update it for a renamed local helper or an ordinary
+UI rearrangement. If a detail belongs to one function's ownership rules, put
+it in that function's header comment instead.

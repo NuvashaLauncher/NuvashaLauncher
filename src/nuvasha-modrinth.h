@@ -5,8 +5,7 @@
 /* NuvashaModrinth: reading the Modrinth API v2 for the three kinds of
  * content an instance carries: mods, resource packs and shader packs.
  *
- * Modrinth is the only provider nuvasha asks. There is no provider selector
- * and no abstraction behind it: this module speaks the Modrinth API.
+ * This module speaks the Modrinth API directly.
  *
  * Compatibility is decided here and never shown to a user afterwards:
  * a mod is only ever listed for the Minecraft version and the loader of
