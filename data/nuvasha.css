@@ -25,6 +25,10 @@
   padding: 6px 12px;
 }
 
+.nuvasha-modpack-results row {
+  border-radius: 0;
+}
+
 .nuvasha-instance-row {
   padding-top: 4px;
   padding-bottom: 4px;
@@ -33,6 +37,10 @@
 
 .nuvasha-dialog-content {
   padding: 24px;
+}
+
+.nuvasha-modpack-details-content {
+  padding-bottom: 6px;
 }
 
 .nuvasha-sign-in-code {

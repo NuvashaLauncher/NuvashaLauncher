@@ -213,11 +213,12 @@ nuvasha_create_instance_dialog_init (NuvashaCreateInstanceDialog *self)
   GtkButton *pick_button;
 
   gtk_widget_init_template (GTK_WIDGET (self));
+  gtk_widget_set_size_request (GTK_WIDGET (self), 360, 200);
   nuvasha_dialog_add_content_margin_breakpoint (ADW_DIALOG (self),
                                                 GTK_WIDGET (self->content),
                                                 600, 6);
-  adw_dialog_set_follows_content_size (ADW_DIALOG (self), FALSE);
-  nuvasha_dialog_set_standard_size (ADW_DIALOG (self));
+  adw_dialog_set_follows_content_size (ADW_DIALOG (self), TRUE);
+  adw_dialog_set_content_width (ADW_DIALOG (self), 560);
   adw_entry_row_set_activates_default (self->name_row, TRUE);
   adw_entry_row_set_max_length (self->name_row, 16);
 

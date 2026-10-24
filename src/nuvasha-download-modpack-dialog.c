@@ -197,6 +197,7 @@ nuvasha_download_modpack_dialog_init (NuvashaDownloadModpackDialog *self)
   nuvasha_dialog_set_standard_size (ADW_DIALOG (self));
   adw_dialog_set_content_width (ADW_DIALOG (self),
                                 nuvasha_DIALOG_WIDE_CONTENT_WIDTH);
+  adw_dialog_set_content_height (ADW_DIALOG (self), 580);
 
   /* The installing page appears in place instead of sliding in: the
      movement is not information, and the pages of this dialog are few

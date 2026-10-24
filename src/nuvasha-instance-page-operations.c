@@ -263,7 +263,8 @@ show_export_metadata (NuvashaInstancePage *self)
   data->summary = ADW_ENTRY_ROW (adw_entry_row_new ());
   data->version = ADW_ENTRY_ROW (adw_entry_row_new ());
   adw_dialog_set_title (data->dialog, _("Export modpack metadata"));
-  adw_dialog_set_follows_content_size (data->dialog, FALSE);
+  adw_dialog_set_follows_content_size (data->dialog, TRUE);
+  adw_dialog_set_content_width (data->dialog, 560);
   g_signal_connect (data->dialog, "closed",
                     G_CALLBACK (on_export_metadata_closed), data);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (data->name),

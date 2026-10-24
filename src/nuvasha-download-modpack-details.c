@@ -217,11 +217,23 @@ details_content (NuvashaDownloadModpackDialog *self)
   if (self->project == NULL)
     return gtk_label_new ("");
 
-  content = GTK_WIDGET (gtk_builder_get_object (body_builder, "content"));
+  /* Keep the builder's root alive after the builder is released below. */
+  content = GTK_WIDGET (g_object_ref (gtk_builder_get_object (
+    body_builder, "content")));
   nuvasha_ui_prepare_dialog_content (content);
+  gtk_widget_add_css_class (content, "nuvasha-modpack-details-content");
   scroller = GTK_SCROLLED_WINDOW (gtk_builder_get_object (body_builder, "scroller"));
-  details_watch (&self->details_error, GTK_WIDGET (gtk_builder_get_object (
-    body_builder, "error-label")));
+  {
+    GtkWidget *error_label = GTK_WIDGET (gtk_builder_get_object (
+      body_builder, "error-label"));
+    GtkWidget *parent = gtk_widget_get_parent (error_label);
+
+    /* The template starts the label under @content, but the details page
+     * places it below the Markdown body instead. Move it before appending. */
+    if (parent != NULL && GTK_IS_BOX (parent))
+      gtk_box_remove (GTK_BOX (parent), error_label);
+    details_watch (&self->details_error, error_label);
+  }
   box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 18);
   heading = adw_preferences_group_new ();
 
@@ -289,7 +301,13 @@ details_content (NuvashaDownloadModpackDialog *self)
   g_signal_connect_object (self->download_button, "clicked",
                            G_CALLBACK (on_modpack_download_clicked), self, 0);
 
-  gtk_box_append (GTK_BOX (content), bar);
+  {
+    GtkWidget *parent = gtk_widget_get_parent (bar);
+
+    if (parent != NULL && GTK_IS_BOX (parent))
+      gtk_box_remove (GTK_BOX (parent), bar);
+    gtk_box_append (GTK_BOX (content), bar);
+  }
 
   return content;
 }
@@ -304,8 +322,13 @@ dialog_details_fill (NuvashaDownloadModpackDialog *self)
   if (!self->details_ready || !self->versions_ready)
     return;
 
-  adw_navigation_page_set_child (ADW_NAVIGATION_PAGE (self->details_page),
-                                 details_content (self));
+   {
+     GtkWidget *content = details_content (self);
+
+     adw_navigation_page_set_child (ADW_NAVIGATION_PAGE (self->details_page),
+                                    content);
+     g_object_unref (content);
+   }
 
   if (self->versions_problem != NULL)
     show_details_error (self, self->versions_problem);
