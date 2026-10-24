@@ -4,6 +4,15 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+
+msgid "cannot clear credentials for account \"%s\": %s"
+msgstr "не вдалося видалити облікові дані облікового запису «%s»: %s"
+
+msgid "unknown Secret Service error"
+msgstr "невідома помилка Secret Service"
+
+msgid "cannot store credentials for account \"%s\""
+msgstr "не вдалося зберегти облікові дані облікового запису «%s»"
 msgid "Cancel"
 msgstr "Скасувати"
 

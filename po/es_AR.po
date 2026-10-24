@@ -7,6 +7,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+
+msgid "cannot clear credentials for account \"%s\": %s"
+msgstr "no se pueden eliminar las credenciales de la cuenta \"%s\": %s"
+
+msgid "unknown Secret Service error"
+msgstr "error desconocido del servicio de secretos"
+
+msgid "cannot store credentials for account \"%s\""
+msgstr "no se pueden guardar las credenciales de la cuenta \"%s\""
 msgid "Language"
 msgstr "Idioma"
 

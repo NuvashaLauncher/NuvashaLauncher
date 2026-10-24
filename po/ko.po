@@ -4,6 +4,15 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+
+msgid "cannot clear credentials for account \"%s\": %s"
+msgstr "%s 계정의 자격 증명을 삭제할 수 없습니다: %s"
+
+msgid "unknown Secret Service error"
+msgstr "알 수 없는 Secret Service 오류"
+
+msgid "cannot store credentials for account \"%s\""
+msgstr "%s 계정의 자격 증명을 저장할 수 없습니다"
 msgid "Cancel"
 msgstr "취소"
 

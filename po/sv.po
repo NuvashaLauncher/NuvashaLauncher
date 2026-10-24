@@ -6,6 +6,15 @@ msgstr ""
 msgid "Cancel"
 msgstr "Avboka"
 
+
+msgid "cannot clear credentials for account \"%s\": %s"
+msgstr "kan inte rensa autentiseringsuppgifterna för kontot ”%s”: %s"
+
+msgid "unknown Secret Service error"
+msgstr "okänt fel i Secret Service"
+
+msgid "cannot store credentials for account \"%s\""
+msgstr "kan inte spara autentiseringsuppgifterna för kontot ”%s”"
 msgid "Confirm"
 msgstr "Bekräfta"
 

@@ -6,6 +6,15 @@ msgstr ""
 msgid "Cancel"
 msgstr "Anula"
 
+
+msgid "cannot clear credentials for account \"%s\": %s"
+msgstr "acreditările contului „%s” nu pot fi șterse: %s"
+
+msgid "unknown Secret Service error"
+msgstr "eroare necunoscută a serviciului Secret Service"
+
+msgid "cannot store credentials for account \"%s\""
+msgstr "acreditările contului „%s” nu pot fi salvate"
 msgid "Confirm"
 msgstr "Confirma"
 

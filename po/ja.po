@@ -4,6 +4,15 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+
+msgid "cannot clear credentials for account \"%s\": %s"
+msgstr "アカウント「%s」の認証情報を削除できません: %s"
+
+msgid "unknown Secret Service error"
+msgstr "不明な Secret Service エラー"
+
+msgid "cannot store credentials for account \"%s\""
+msgstr "アカウント「%s」の認証情報を保存できません"
 msgid "Cancel"
 msgstr "キャンセル"
 

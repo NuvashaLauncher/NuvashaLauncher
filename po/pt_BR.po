@@ -4,6 +4,15 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+
+msgid "cannot clear credentials for account \"%s\": %s"
+msgstr "não foi possível apagar as credenciais da conta \"%s\": %s"
+
+msgid "unknown Secret Service error"
+msgstr "erro desconhecido do Secret Service"
+
+msgid "cannot store credentials for account \"%s\""
+msgstr "não foi possível salvar as credenciais da conta \"%s\""
 msgid "Cancel"
 msgstr "Cancelar"
 

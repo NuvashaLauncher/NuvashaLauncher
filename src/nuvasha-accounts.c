@@ -393,7 +393,20 @@ save (NuvashaAccounts *self, GError **error)
           account->access_token == NULL || account->refresh_token == NULL)
         {
           if (account->type == nuvasha_ACCOUNT_MICROSOFT)
-            nuvasha_secret_store_clear (account->id);
+            {
+              g_autoptr (GError) secret_error = NULL;
+
+              if (!nuvasha_secret_store_clear (account->id, &secret_error))
+                {
+                  g_set_error (error, nuvasha_ACCOUNTS_ERROR,
+                               nuvasha_ACCOUNTS_ERROR_IO,
+                               _("cannot clear credentials for account \"%s\": %s"),
+                               account->name,
+                               secret_error != NULL ? secret_error->message
+                                                     : _("unknown Secret Service error"));
+                  return FALSE;
+                }
+            }
           continue;
         }
 
@@ -402,7 +415,7 @@ save (NuvashaAccounts *self, GError **error)
         {
           g_set_error (error, nuvasha_ACCOUNTS_ERROR,
                        nuvasha_ACCOUNTS_ERROR_IO,
-                       "cannot store credentials for account \"%s\"",
+                        _("cannot store credentials for account \"%s\""),
                        account->name);
           return FALSE;
         }
@@ -730,11 +743,25 @@ nuvasha_accounts_remove (NuvashaAccounts *self, const char *id, GError **error)
   for (guint i = 0; i < self->accounts->len; i++)
     {
       NuvashaAccount *account = g_ptr_array_index (self->accounts, i);
+      g_autofree char *old_active_id = NULL;
+      g_autoptr (GError) secret_error = NULL;
 
       if (!g_str_equal (account->id, id))
         continue;
 
-      g_ptr_array_remove_index (self->accounts, i);
+      if (!nuvasha_secret_store_clear (id, &secret_error))
+        {
+          g_set_error (error, nuvasha_ACCOUNTS_ERROR,
+                       nuvasha_ACCOUNTS_ERROR_IO,
+                       _("cannot clear credentials for account \"%s\": %s"),
+                       account->name,
+                       secret_error != NULL ? secret_error->message
+                                              : _("unknown Secret Service error"));
+          return FALSE;
+        }
+
+      old_active_id = g_strdup (self->active_id);
+      account = g_ptr_array_steal_index (self->accounts, i);
 
       /* The account that was active is gone: what is left takes its
          place, and a store with nothing left has no active account. */
@@ -749,9 +776,14 @@ nuvasha_accounts_remove (NuvashaAccounts *self, const char *id, GError **error)
         }
 
       if (!save (self, error))
-        return FALSE;
+        {
+          g_ptr_array_insert (self->accounts, i, account);
+          g_free (self->active_id);
+          self->active_id = g_steal_pointer (&old_active_id);
+          return FALSE;
+        }
 
-      nuvasha_secret_store_clear (id);
+      nuvasha_account_free (account);
       emit_changed (self);
 
       return TRUE;

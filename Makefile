@@ -110,7 +110,9 @@ build/tests/%: tests/%.c $(TESTLIBOBJS) | build/tests
 # when there is none; the test that runs the launcher runs it with DISPLAY
 # and display variables removed.
 test: $(if $(SRCS),$(BIN)) $(TESTBINS) $(SCHEMA_COMPILED)
-	@pass=0; skip=0; for t in $(TESTBINS); do echo "RUN  $$t"; GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t; status=$$?; \
+	@set -e; test_tmp=$$(mktemp -d "$(CURDIR)/build/test-tmp-XXXXXX"); \
+	trap 'rm -rf "$$test_tmp"' EXIT HUP INT TERM; \
+	pass=0; skip=0; for t in $(TESTBINS); do echo "RUN  $$t"; TMPDIR="$$test_tmp" GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t; status=$$?; \
 		if test $$status -eq 77; then skip=$$((skip + 1)); \
 		elif test $$status -ne 0; then exit $$status; else pass=$$((pass + 1)); fi; done; \
 		echo "PASS $$pass test(s), SKIP $$skip test(s)"
@@ -137,7 +139,9 @@ build-debug/tests/%: tests/%.c $(TESTLIBDBGOBJS) | build-debug/tests
 # The display guard test runs the release launcher, so test-debug builds both
 # binaries.
 test-debug: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS) $(SCHEMA_COMPILED)
-	@pass=0; skip=0; for t in $(TESTDBGBINS); do echo "RUN  $$t"; GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t; status=$$?; \
+	@set -e; test_tmp=$$(mktemp -d "$(CURDIR)/build/test-tmp-XXXXXX"); \
+	trap 'rm -rf "$$test_tmp"' EXIT HUP INT TERM; \
+	pass=0; skip=0; for t in $(TESTDBGBINS); do echo "RUN  $$t"; TMPDIR="$$test_tmp" GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t; status=$$?; \
 		if test $$status -eq 77; then skip=$$((skip + 1)); \
 		elif test $$status -ne 0; then exit $$status; else pass=$$((pass + 1)); fi; done; \
 		echo "PASS $$pass test(s), SKIP $$skip test(s)"
@@ -147,10 +151,13 @@ test-debug: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS) $(SCHEMA_COMPILED)
 # change. The options are set per test rather than around a recursive make,
 # so the suite runs once and every test is the one being leak checked.
 test-lsan: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS) $(SCHEMA_COMPILED)
-	@pass=0; skip=0; for t in $(TESTDBGBINS); do echo "RUN  $$t"; \
-	  ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 \
-	  LSAN_OPTIONS=detect_leaks=1:exitcode=1 \
-	  GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t; status=$$?; \
+	@set -e; test_tmp=$$(mktemp -d "$(CURDIR)/build/test-tmp-XXXXXX"); \
+	trap 'rm -rf "$$test_tmp"' EXIT HUP INT TERM; \
+	pass=0; skip=0; for t in $(TESTDBGBINS); do echo "RUN  $$t"; \
+		  ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 \
+		  LSAN_OPTIONS=detect_leaks=1:exitcode=1 \
+		  TMPDIR="$$test_tmp" \
+		  GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t; status=$$?; \
 		if test $$status -eq 77; then skip=$$((skip + 1)); \
 		elif test $$status -ne 0; then exit $$status; else pass=$$((pass + 1)); fi; done; \
 		echo "PASS $$pass test(s), SKIP $$skip test(s)"
