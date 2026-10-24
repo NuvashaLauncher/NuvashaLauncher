@@ -221,6 +221,13 @@ test_a_dead_token_asks_for_a_sign_in (void)
   account = microsoft_account (FALSE);
   account->expires_at = g_get_real_time () / 1000000 - 10;
 
+  if (!nuvasha_secret_store_clear ("nuvasha-launcher-test-dead", &error))
+    {
+      g_test_skip ("Secret Service is unavailable in this environment");
+      return;
+    }
+  g_clear_error (&error);
+
   g_assert_true (nuvasha_accounts_add (accounts, account, &error));
   g_assert_no_error (error);
 
