@@ -271,6 +271,7 @@ static void
 nuvasha_sign_in_dialog_init (NuvashaSignInDialog *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
+  gtk_widget_set_size_request (GTK_WIDGET (self), 360, 280);
   adw_dialog_set_follows_content_size (ADW_DIALOG (self), TRUE);
   nuvasha_dialog_add_content_margin_breakpoint (ADW_DIALOG (self),
                                                 GTK_WIDGET (self->body),
