@@ -82,6 +82,7 @@ test_stylesheet_parses (void)
   g_object_unref (provider);
 }
 
+#if !defined(__SANITIZE_ADDRESS__)
 static void
 test_custom_templates_instantiate (void)
 {
@@ -100,6 +101,7 @@ test_custom_templates_instantiate (void)
   g_assert_true (nuvasha_IS_SIGN_IN_DIALOG (sign_in));
   g_assert_true (GTK_IS_WIDGET (offline));
 }
+#endif
 
 #if defined(__SANITIZE_ADDRESS__)
 static void

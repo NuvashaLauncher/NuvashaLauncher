@@ -187,6 +187,22 @@ usable_url (const char *url)
   return message != NULL;
 }
 
+static gboolean
+usable_expected_hash (const char *hash, GChecksumType type)
+{
+  gssize digest_length = g_checksum_type_get_length (type);
+
+  if (hash == NULL || digest_length <= 0 ||
+      strlen (hash) != (gsize) digest_length * 2)
+    return FALSE;
+
+  for (const char *p = hash; *p != '\0'; p++)
+    if (!g_ascii_isxdigit (*p))
+      return FALSE;
+
+  return TRUE;
+}
+
 gint
 compare_waiting_requests (gconstpointer left, gconstpointer right,
                           gpointer user_data G_GNUC_UNUSED)
@@ -322,6 +338,17 @@ nuvasha_download_file_async (NuvashaDownloadService *service, const char *url,
   /* Cancellation is reported by this module, in its own error domain,
      so GTask must not replace the error with G_IO_ERROR_CANCELLED. */
   g_task_set_check_cancellable (nuvasha_task_scope_task (scope), FALSE);
+
+  if (expected_hash != NULL &&
+      !usable_expected_hash (expected_hash, hash_type))
+    {
+      nuvasha_task_scope_return_error_deferred (
+        scope,
+        g_error_new_literal (nuvasha_DOWNLOAD_ERROR,
+                             nuvasha_DOWNLOAD_ERROR_CHECKSUM,
+                             "the expected checksum is not valid"));
+      return g_steal_pointer (&scope);
+    }
 
   if (!usable_url (url))
     {
