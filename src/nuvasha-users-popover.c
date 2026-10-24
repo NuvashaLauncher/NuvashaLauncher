@@ -315,6 +315,8 @@ on_add_offline_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   NuvashaUsersPopover *self = nuvasha_USERS_POPOVER (user_data);
   NuvashaOfflineAccountDialog *dialog = nuvasha_offline_account_dialog_new ();
 
+  nuvasha_offline_account_dialog_set_accounts (dialog, self->accounts);
+
   g_signal_connect_object (dialog, "account-added",
                             G_CALLBACK (on_account_added), self, 0);
 

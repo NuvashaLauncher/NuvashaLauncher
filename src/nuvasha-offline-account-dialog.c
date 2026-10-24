@@ -16,6 +16,7 @@ struct _NuvashaOfflineAccountDialog
   GtkButton *add_button;
   GtkButton *cancel_button;
   GtkBox *content;
+  NuvashaAccounts *accounts;
 };
 
 G_DEFINE_FINAL_TYPE (NuvashaOfflineAccountDialog, nuvasha_offline_account_dialog,
@@ -27,8 +28,28 @@ static guint
 static void
 show_error (NuvashaOfflineAccountDialog *self, const char *message)
 {
-  gtk_label_set_text (self->error_label, message);
-  gtk_widget_set_visible (GTK_WIDGET (self->error_label), TRUE);
+  (void) message;
+  gtk_widget_set_visible (GTK_WIDGET (self->error_label), FALSE);
+}
+
+static gboolean
+offline_name_exists (NuvashaOfflineAccountDialog *self, const char *name)
+{
+  if (self->accounts == NULL)
+    return FALSE;
+
+  GPtrArray *accounts = nuvasha_accounts_list (self->accounts);
+
+  for (guint i = 0; i < accounts->len; i++)
+    {
+      NuvashaAccount *existing = g_ptr_array_index (accounts, i);
+
+      if (existing->type == nuvasha_ACCOUNT_OFFLINE &&
+          g_strcmp0 (existing->name, name) == 0)
+        return TRUE;
+    }
+
+  return FALSE;
 }
 
 /* The Add button is sensitive when the name is one the game accepts, and
@@ -46,6 +67,9 @@ update_add_button (NuvashaOfflineAccountDialog *self)
   g_strstrip (name);
   account = nuvasha_account_new_offline (name, &error);
 
+  if (account != NULL && offline_name_exists (self, name))
+    g_clear_pointer (&account, nuvasha_account_free);
+
   gtk_widget_set_sensitive (GTK_WIDGET (self->add_button), account != NULL);
 
   /* An empty entry is not a mistake, it is one no one has typed in yet:
@@ -53,7 +77,7 @@ update_add_button (NuvashaOfflineAccountDialog *self)
   if (account != NULL || name[0] == '\0')
     nuvasha_ui_clear_error_label (self->error_label);
   else
-    show_error (self, error->message);
+    nuvasha_ui_clear_error_label (self->error_label);
 }
 
 static void
@@ -77,9 +101,10 @@ on_add_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 
   /* The button is insensitive when this fails, so this only guards
      against the entry being emptied underneath it. */
-  if (account == NULL)
+  if (account == NULL || offline_name_exists (self, name))
     {
-      show_error (self, error->message);
+      if (account == NULL)
+        show_error (self, error->message);
       return;
     }
 
@@ -92,7 +117,10 @@ static void
 nuvasha_offline_account_dialog_init (NuvashaOfflineAccountDialog *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
-  gtk_widget_set_size_request (GTK_WIDGET (self), 360, 220);
+  /* Keep a nonzero baseline for Adwaita's surface sizing, but let the
+   * header and form determine the actual height. */
+  gtk_widget_set_size_request (GTK_WIDGET (self), 360, 1);
+  adw_dialog_set_follows_content_size (ADW_DIALOG (self), TRUE);
   nuvasha_dialog_add_content_margin_breakpoint (ADW_DIALOG (self),
                                                 GTK_WIDGET (self->content),
                                                 440, 6);
@@ -135,4 +163,15 @@ NuvashaOfflineAccountDialog *
 nuvasha_offline_account_dialog_new (void)
 {
   return g_object_new (nuvasha_TYPE_OFFLINE_ACCOUNT_DIALOG, NULL);
+}
+
+void
+nuvasha_offline_account_dialog_set_accounts (NuvashaOfflineAccountDialog *self,
+                                             NuvashaAccounts *accounts)
+{
+  g_return_if_fail (nuvasha_IS_OFFLINE_ACCOUNT_DIALOG (self));
+  g_return_if_fail (accounts == NULL || nuvasha_IS_ACCOUNTS (accounts));
+
+  self->accounts = accounts;
+  update_add_button (self);
 }

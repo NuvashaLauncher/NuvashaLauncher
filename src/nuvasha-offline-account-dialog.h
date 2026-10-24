@@ -38,6 +38,11 @@ enum {
 /* The dialog, which starts with an empty name and nothing added. */
 NuvashaOfflineAccountDialog *nuvasha_offline_account_dialog_new (void);
 
+/* The store is optional for template/tests, but enables duplicate-name
+ * validation when the dialog is opened from the account popover. */
+void nuvasha_offline_account_dialog_set_accounts (NuvashaOfflineAccountDialog *self,
+                                                  NuvashaAccounts *accounts);
+
 G_END_DECLS
 
 #endif /* nuvasha_OFFLINE_ACCOUNT_DIALOG_H */

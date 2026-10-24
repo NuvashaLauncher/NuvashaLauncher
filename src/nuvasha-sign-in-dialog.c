@@ -285,18 +285,11 @@ nuvasha_sign_in_dialog_init (NuvashaSignInDialog *self)
   gtk_widget_set_halign (GTK_WIDGET (self->instruction_label), GTK_ALIGN_CENTER);
   gtk_label_set_selectable (self->code_label, TRUE);
   gtk_label_set_xalign (self->code_label, 0.5f);
+  gtk_widget_set_halign (GTK_WIDGET (self->code_label), GTK_ALIGN_CENTER);
+  gtk_widget_set_hexpand (GTK_WIDGET (self->code_label), FALSE);
   gtk_widget_add_css_class (GTK_WIDGET (self->code_label), "title-1");
   gtk_widget_add_css_class (GTK_WIDGET (self->code_label), "monospace");
   gtk_widget_add_css_class (GTK_WIDGET (self->code_label), "nuvasha-sign-in-code");
-  {
-    GtkBox *button_content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8));
-    GtkImage *button_icon = GTK_IMAGE (gtk_image_new_from_icon_name ("web-browser-symbolic"));
-    GtkLabel *button_label = GTK_LABEL (gtk_label_new (_("Open the Page")));
-
-    gtk_box_append (button_content, GTK_WIDGET (button_icon));
-    gtk_box_append (button_content, GTK_WIDGET (button_label));
-    gtk_button_set_child (self->open_button, GTK_WIDGET (button_content));
-  }
   gtk_widget_add_css_class (GTK_WIDGET (self->open_button), "pill");
   gtk_widget_add_css_class (GTK_WIDGET (self->open_button), "suggested-action");
   gtk_widget_set_halign (GTK_WIDGET (self->open_button), GTK_ALIGN_CENTER);
@@ -326,8 +319,7 @@ nuvasha_sign_in_dialog_init (NuvashaSignInDialog *self)
   gtk_widget_set_visible (GTK_WIDGET (self->error_label), FALSE);
   gtk_widget_set_visible (GTK_WIDGET (self->retry_button), FALSE);
 
-  gtk_button_set_label (self->open_button, _("Open the Page"));
-  gtk_button_set_icon_name (self->open_button, "web-browser-symbolic");
+   gtk_button_set_label (self->open_button, _("Open in browser"));
   gtk_button_set_label (self->retry_button, _("Try Again"));
   nuvasha_ui_prepare_icon_button (GTK_WIDGET (self->retry_button), _("Try Again"));
   g_signal_connect_object (self->open_button, "clicked", G_CALLBACK (on_open_clicked), self, 0);
