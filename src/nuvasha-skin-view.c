@@ -118,7 +118,7 @@ upload_texture (NuvashaSkinView *self, GdkTexture *texture, GLuint *handle,
         source[(gsize) 20 * stride + 40 * 4 + 3] >= 128;
     }
 
-  /* PrismLauncher’s legacy skin compatibility path expands a slim atlas to
+  /* The legacy skin compatibility path expands a slim atlas to
    * the classic arm layout before drawing it. Without these copied columns,
    * the classic back-arm UVs land on the unused slim columns (usually black).
    * Keep the source image intact; this only changes the OpenGL preview. */
@@ -170,8 +170,7 @@ upload_texture (NuvashaSkinView *self, GdkTexture *texture, GLuint *handle,
       source = g_steal_pointer (&expanded);
     }
 
-  /* Expand legacy 64x32 skins to the modern 64x64 atlas, matching
-   * PrismLauncher’s improveSkin() conversion. */
+  /* Expand legacy 64x32 skins to the modern 64x64 atlas. */
   if (skin && width == 64 && height == 32)
     {
       static const int legacy_faces[][6] = {
@@ -211,8 +210,8 @@ upload_texture (NuvashaSkinView *self, GdkTexture *texture, GLuint *handle,
   /* Allocate this only after legacy skins have been expanded. */
   pixels = g_malloc (stride * height);
 
-  /* PrismLauncher normalizes the alpha channel of skin files before giving
-   * them to OpenGL.  A number of otherwise valid Minecraft skins have
+  /* Normalize the alpha channel of skin files before giving them to OpenGL.
+   * A number of otherwise valid Minecraft skins have
    * transparent pixels in the base-layer atlas regions (often caused by
    * image editors or old skin converters).  Those regions are not optional
    * layers: they are the head, body and limbs and must be opaque. */
@@ -294,13 +293,12 @@ add_face (GArray *vertices, float x, float y, float z, float w, float h, float d
   float x0 = x, x1 = x + w, y0 = y, y1 = y + h, z0 = z, z1 = z + d;
   float u0 = (float) tx / 64.f, u1 = (float) (tx + tw) / 64.f;
   /* GdkTexture downloads rows top-to-bottom and upload_texture keeps that
-   * order.  PrismLauncher mirrors its QImage before uploading, so its UVs
-   * use 1-v; nuvasha must address the unmirrored atlas directly instead. */
+   * order, so these UVs address the unmirrored atlas directly. */
   float v0 = (float) (ty + th) / texture_height;
   float v1 = (float) ty / texture_height;
   Vertex q[4];
-  /* PrismLauncher uses a triangle-strip order: bottom-left, bottom-right,
-   * top-left, top-right.  Keep the indices consistent with that order. */
+  /* Use a triangle-strip order: bottom-left, bottom-right, top-left,
+   * top-right. */
   switch (face)
     {
     case 0: q[0]=(Vertex){x0,y0,z1,u0,v0}; q[1]=(Vertex){x1,y0,z1,u1,v0}; q[2]=(Vertex){x0,y1,z1,u0,v1}; q[3]=(Vertex){x1,y1,z1,u1,v1}; break;
@@ -345,8 +343,8 @@ rotate_cape (GArray *vertices)
       Vertex *vertex = &g_array_index (vertices, Vertex, i);
       float y;
 
-      /* PrismLauncher turns the cape around its Y axis first, putting it
-       * behind the player, then lets it hang back slightly around X. */
+      /* Turn the cape around its Y axis first, putting it behind the player,
+       * then let it hang back slightly around X. */
       vertex->x = -vertex->x;
       vertex->z = -vertex->z;
       y = vertex->y;
