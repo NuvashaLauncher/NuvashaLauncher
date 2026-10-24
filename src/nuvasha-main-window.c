@@ -199,7 +199,7 @@ nuvasha_main_window_new (AdwApplication *application, NuvashaInstanceManager *ma
      between two rows, instead of the whole window being card coloured. */
    gtk_widget_set_valign (GTK_WIDGET (list), GTK_ALIGN_START);
    gtk_list_box_set_selection_mode (list,
-                                    GTK_SELECTION_NONE);
+                                     GTK_SELECTION_NONE);
     g_signal_connect_object (list, "row-activated", G_CALLBACK (on_row_activate),
                              self, 0);
    gtk_list_box_bind_model (list, G_LIST_MODEL (instances),

@@ -87,7 +87,6 @@
 
 .nuvasha-results-card,
 .nuvasha-download-row,
-.nuvasha-instance-row,
 .nuvasha-list-section {
   border-radius: 12px;
 }
@@ -99,8 +98,7 @@
 }
 
 .nuvasha-settings-page preferencesgroup,
-.nuvasha-settings-page preferencesgroup > row,
-.nuvasha-list-section > row {
+.nuvasha-settings-page preferencesgroup > row {
   margin-bottom: 2px;
 }
 
