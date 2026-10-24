@@ -92,6 +92,7 @@ static void
 nuvasha_offline_account_dialog_init (NuvashaOfflineAccountDialog *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
+  gtk_widget_set_size_request (GTK_WIDGET (self), 360, 220);
   nuvasha_dialog_add_content_margin_breakpoint (ADW_DIALOG (self),
                                                 GTK_WIDGET (self->content),
                                                 440, 6);
