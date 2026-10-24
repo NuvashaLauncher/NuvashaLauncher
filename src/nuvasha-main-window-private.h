@@ -19,6 +19,7 @@ struct _NuvashaMainWindow
 
   NuvashaMainWindowModel *model;
   GSettings *window_settings;
+  guint background_quit_source;
 
   /* Core window UI state. */
   struct {
@@ -44,6 +45,9 @@ void nuvasha_main_window_build_ui (NuvashaMainWindow *self);
 void download_row_free (gpointer data);
 NuvashaLauncher *window_launcher (NuvashaMainWindow *self, const char *instance_id);
 void update_visible_page (NuvashaMainWindow *self);
+void nuvasha_main_window_show_crash_logs (NuvashaMainWindow *self,
+                                          NuvashaLauncher *launcher);
+void nuvasha_main_window_maybe_quit_background (NuvashaMainWindow *self);
 GtkWidget *create_instance_row (gpointer item, gpointer user_data);
 void on_row_activate (GtkListBox *list, GtkListBoxRow *row,
                       gpointer user_data);

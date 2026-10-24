@@ -138,6 +138,34 @@ open_instance_dialog (NuvashaMainWindow *self, NuvashaInstance *instance)
   adw_dialog_present (dialog, GTK_WIDGET (self));
 }
 
+void
+nuvasha_main_window_show_crash_logs (NuvashaMainWindow *self,
+                                     NuvashaLauncher *launcher)
+{
+  NuvashaInstance *instance;
+  const char *id;
+  AdwDialog *dialog;
+  GtkWidget *child;
+
+  g_return_if_fail (nuvasha_IS_MAIN_WINDOW (self));
+  g_return_if_fail (nuvasha_IS_LAUNCHER (launcher));
+
+  instance = nuvasha_launcher_get_instance (launcher);
+  id = instance != NULL ? nuvasha_instance_get_id (instance) : NULL;
+  if (instance == NULL || id == NULL)
+    return;
+
+  open_instance_dialog (self, instance);
+  dialog = dialog_of_instance (self, id);
+  if (dialog == NULL)
+    return;
+
+  child = adw_dialog_get_child (dialog);
+  if (child != NULL && nuvasha_IS_INSTANCE_PAGE (child))
+    nuvasha_instance_page_show_logs (nuvasha_INSTANCE_PAGE (child));
+  adw_dialog_present (dialog, GTK_WIDGET (self));
+}
+
 /* Close dialogs for removed instances. Running launchers remain owned by the
  * window's launcher table. */
 static void

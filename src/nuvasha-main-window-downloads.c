@@ -160,5 +160,8 @@ refresh_downloads (NuvashaMainWindow *self)
 void
 on_downloads_changed (NuvashaDownloads *downloads G_GNUC_UNUSED, gpointer user_data)
 {
-  refresh_downloads (user_data);
+  NuvashaMainWindow *self = user_data;
+
+  refresh_downloads (self);
+  nuvasha_main_window_maybe_quit_background (self);
 }

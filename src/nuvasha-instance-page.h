@@ -38,9 +38,12 @@ G_DECLARE_FINAL_TYPE (NuvashaInstancePage, nuvasha_instance_page, nuvasha, INSTA
  * destroyed. Like every widget it starts with a floating reference:
  * adw_tab_view_append() takes that reference. */
 NuvashaInstancePage *nuvasha_instance_page_new (NuvashaInstanceManager *manager,
-                                        NuvashaInstance       *instance,
-                                        NuvashaSettings        *settings,
-                                        NuvashaLauncher       *launcher);
+                                         NuvashaInstance       *instance,
+                                         NuvashaSettings        *settings,
+                                         NuvashaLauncher       *launcher);
+
+/* Selects the instance's live log view. */
+void nuvasha_instance_page_show_logs (NuvashaInstancePage *self);
 
 G_END_DECLS
 

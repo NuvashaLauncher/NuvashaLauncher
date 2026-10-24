@@ -153,7 +153,16 @@ typedef struct {
   char *url;
   char *variant;
   GCancellable *cancellable;
+  gboolean background_counted;
 } SkinUpload;
+
+static guint skin_background_operations;
+
+gboolean
+nuvasha_users_skin_background_work_active (void)
+{
+  return skin_background_operations > 0;
+}
 
 static void
 skin_upload_free (SkinUpload *upload)
@@ -162,6 +171,17 @@ skin_upload_free (SkinUpload *upload)
   g_free (upload->variant);
   g_clear_object (&upload->cancellable);
   g_free (upload);
+}
+
+static void
+skin_upload_background_finish (SkinUpload *upload)
+{
+  if (upload != NULL && upload->background_counted)
+    {
+      upload->background_counted = FALSE;
+      if (skin_background_operations > 0)
+        skin_background_operations--;
+    }
 }
 
 static void
@@ -203,6 +223,8 @@ on_skin_upload_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
           menu->skin_upload_retry_attempt = 0;
         }
     }
+  if (!rate_limited)
+    skin_upload_background_finish (upload);
   if (upload != NULL)
     skin_upload_free (upload);
 
@@ -255,6 +277,8 @@ upload_skin_url (SkinMenu *menu, const char *url, const char *variant)
   upload->url = g_strdup (url);
   upload->variant = g_strdup (variant);
   upload->cancellable = g_cancellable_new ();
+  upload->background_counted = TRUE;
+  skin_background_operations++;
   menu->skin_upload_cancellable = g_object_ref (upload->cancellable);
   nuvasha_minecraft_services_send_async (message, upload->cancellable,
                                          on_skin_upload_done, upload);
@@ -275,6 +299,7 @@ on_skin_upload_file_loaded (GObject *source, GAsyncResult *result, gpointer user
       g_warning ("Could not read skin for upload: %s", error->message);
       menu->skin_upload_in_flight = FALSE;
       g_clear_object (&menu->skin_upload_cancellable);
+      skin_upload_background_finish (upload);
       skin_upload_free (upload);
       start_pending_skin_upload (menu);
       return;
@@ -285,6 +310,7 @@ on_skin_upload_file_loaded (GObject *source, GAsyncResult *result, gpointer user
 
       menu->skin_upload_in_flight = FALSE;
       g_clear_object (&menu->skin_upload_cancellable);
+      skin_upload_background_finish (upload);
       skin_upload_free (upload);
       start_pending_skin_upload (menu);
       return;
@@ -345,6 +371,8 @@ start_pending_skin_upload (SkinMenu *menu)
     upload->url = g_steal_pointer (&url);
     upload->variant = g_steal_pointer (&variant);
     upload->cancellable = g_cancellable_new ();
+    upload->background_counted = TRUE;
+    skin_background_operations++;
     menu->skin_upload_cancellable = g_object_ref (upload->cancellable);
     g_file_load_bytes_async (file, upload->cancellable,
                              on_skin_upload_file_loaded, upload);
@@ -533,6 +561,7 @@ send_pending_cape_change (SkinMenu *menu)
       soup_message_set_request_body_from_bytes (message, "application/json",
                                                 g_bytes_new (json, strlen (json)));
     }
+  skin_background_operations++;
   nuvasha_minecraft_services_send_async (message, menu->cancellable,
                                          on_active_skin_delete_done, menu);
   g_object_unref (message);
@@ -699,6 +728,8 @@ on_active_skin_delete_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     g_task_propagate_pointer (G_TASK (result), &error);
   SkinMenu *menu = user_data;
 
+  if (skin_background_operations > 0)
+    skin_background_operations--;
   if (menu->closed)
     return;
 
@@ -725,6 +756,7 @@ delete_active_skin (SkinMenu *menu)
   message = nuvasha_minecraft_services_message (
     SOUP_METHOD_DELETE, "/minecraft/profile/skins/active",
     menu->account->access_token);
+  skin_background_operations++;
   nuvasha_minecraft_services_send_async (message, menu->cancellable,
                                          on_active_skin_delete_done, menu);
   g_object_unref (message);

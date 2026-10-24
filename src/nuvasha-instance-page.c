@@ -291,6 +291,15 @@ nuvasha_instance_page_new (NuvashaInstanceManager *manager, NuvashaInstance *ins
   return self;
 }
 
+void
+nuvasha_instance_page_show_logs (NuvashaInstancePage *self)
+{
+  g_return_if_fail (nuvasha_IS_INSTANCE_PAGE (self));
+
+  if (self->stack != NULL)
+    adw_view_stack_set_visible_child_name (ADW_VIEW_STACK (self->stack), "logs");
+}
+
 static void
 nuvasha_instance_page_dispose (GObject *object)
 {
