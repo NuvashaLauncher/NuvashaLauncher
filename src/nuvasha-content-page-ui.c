@@ -479,9 +479,7 @@ nuvasha_content_page_build_bar (NuvashaContentPage *self)
   gtk_box_append (GTK_BOX (self->bar), GTK_WIDGET (self->bar_spacer));
   gtk_box_append (GTK_BOX (self->bar), GTK_WIDGET (self->switcher));
 
-  gtk_widget_set_margin_top (GTK_WIDGET (self->bar), 6);
-  gtk_widget_set_margin_bottom (GTK_WIDGET (self->bar), 6);
-  gtk_widget_set_margin_start (GTK_WIDGET (self->bar), 12);
+   gtk_widget_set_margin_start (GTK_WIDGET (self->bar), 12);
   gtk_widget_set_margin_end (GTK_WIDGET (self->bar), 12);
 
   /* Keep failures in a banner; use toasts for transient success messages. */

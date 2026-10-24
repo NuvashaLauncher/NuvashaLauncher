@@ -444,11 +444,9 @@ static GtkWidget *
 toolbar_button (const char *icon_name, const char *label, GCallback callback,
                gpointer user_data)
 {
-  GtkButton *button = GTK_BUTTON (gtk_button_new ());
-  GtkImage *icon = GTK_IMAGE (gtk_image_new_from_icon_name (icon_name));
+  GtkButton *button = GTK_BUTTON (gtk_button_new_from_icon_name (icon_name));
 
-  gtk_image_set_pixel_size (GTK_IMAGE (icon), 16);
-  gtk_button_set_child (GTK_BUTTON (button), GTK_WIDGET (icon));
+  gtk_widget_set_valign (GTK_WIDGET (button), GTK_ALIGN_CENTER);
   nuvasha_ui_prepare_icon_button (GTK_WIDGET (button), label);
   g_signal_connect_object (button, "clicked", callback, user_data, 0);
 
@@ -463,22 +461,31 @@ nuvasha_logs_page_new (NuvashaLauncher *launcher)
   GtkWidget *actions;
   GtkWidget *card;
   GtkWidget *text;
+  GtkWidget *inner;
+  AdwViewStack *stack;
+  AdwNavigationSplitView *split;
+  AdwNavigationPage *page;
+  AdwBanner *banner;
   GtkAdjustment *adjustment;
 
   g_return_val_if_fail (nuvasha_IS_LAUNCHER (launcher), NULL);
 
   self = g_object_new (nuvasha_TYPE_LOGS_PAGE, NULL);
-  gtk_widget_add_css_class (GTK_WIDGET (self), "nuvasha-main-content");
   self->launcher = g_object_ref (launcher);
   self->lines = g_ptr_array_new_with_free_func (g_free);
+  inner = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
   gtk_orientable_set_orientation (GTK_ORIENTABLE (self),
                                   GTK_ORIENTATION_VERTICAL);
   gtk_widget_set_vexpand (GTK_WIDGET (self), TRUE);
 
-  /* What the launch is doing, and the buttons that act on the log. */
-  row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  gtk_widget_add_css_class (row, "nuvasha-content-toolbar");
+   /* Use the same toolbar surface as every content tab. */
+   row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+   gtk_widget_add_css_class (row, "nuvasha-content-toolbar");
+   gtk_widget_add_css_class (row, "nuvasha-compact-toolbar");
+   gtk_widget_add_css_class (row, "nuvasha-page-actions");
+   gtk_widget_set_margin_start (row, 12);
+   gtk_widget_set_margin_end (row, 12);
 
   self->state = GTK_LABEL (gtk_label_new (NULL));
   gtk_widget_add_css_class (GTK_WIDGET (self->state), "heading");
@@ -489,11 +496,10 @@ nuvasha_logs_page_new (NuvashaLauncher *launcher)
   self->clear = GTK_BUTTON (toolbar_button ("edit-clear-symbolic", _("Clear"),
                                 G_CALLBACK (on_clear_clicked), self));
 
-  self->open = GTK_BUTTON (toolbar_button ("folder-symbolic", _("Open Folder"),
-                               G_CALLBACK (on_open_clicked), self));
-  actions = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  gtk_widget_add_css_class (actions, "nuvasha-toolbar-actions");
-  gtk_widget_set_valign (actions, GTK_ALIGN_CENTER);
+   self->open = GTK_BUTTON (toolbar_button ("folder-symbolic", _("Open Folder"),
+                                G_CALLBACK (on_open_clicked), self));
+   actions = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+   gtk_widget_set_valign (actions, GTK_ALIGN_CENTER);
   gtk_box_append (GTK_BOX (actions), GTK_WIDGET (self->clear));
   gtk_box_append (GTK_BOX (actions), GTK_WIDGET (self->open));
 
@@ -527,7 +533,7 @@ nuvasha_logs_page_new (NuvashaLauncher *launcher)
    gtk_box_append (GTK_BOX (row), GTK_WIDGET (self->search_bar));
    gtk_box_append (GTK_BOX (row), actions);
    gtk_widget_set_hexpand (row, TRUE);
-   gtk_box_append (GTK_BOX (self), row);
+   gtk_box_append (GTK_BOX (inner), row);
 
   /* The lines themselves. Read only: this is what the game printed,
      nothing to write into. */
@@ -554,7 +560,27 @@ nuvasha_logs_page_new (NuvashaLauncher *launcher)
   gtk_widget_set_margin_end (card, 12);
   gtk_widget_set_margin_bottom (card, 12);
   gtk_widget_set_vexpand (card, TRUE);
-  gtk_box_append (GTK_BOX (self), card);
+   banner = ADW_BANNER (adw_banner_new (""));
+   adw_banner_set_revealed (banner, FALSE);
+   gtk_box_insert_child_after (GTK_BOX (inner), GTK_WIDGET (banner), NULL);
+
+   stack = ADW_VIEW_STACK (adw_view_stack_new ());
+   gtk_widget_set_vexpand (GTK_WIDGET (stack), TRUE);
+   adw_view_stack_add_named (stack, card, "logs");
+   gtk_box_append (GTK_BOX (inner), GTK_WIDGET (stack));
+
+   /* Match the content tabs: their page is a collapsed navigation split with
+    * the visible content held by an AdwNavigationPage. This keeps the Logs
+    * toolbar and surface in the same layout chain as Mods and packs. */
+   split = ADW_NAVIGATION_SPLIT_VIEW (adw_navigation_split_view_new ());
+   gtk_widget_set_vexpand (GTK_WIDGET (split), TRUE);
+   page = ADW_NAVIGATION_PAGE (adw_navigation_page_new (inner, _("Logs")));
+   adw_navigation_split_view_set_sidebar (split, page);
+   adw_navigation_split_view_set_collapsed (split, TRUE);
+   adw_navigation_split_view_set_sidebar_width_fraction (split, 0.5);
+   adw_navigation_split_view_set_min_sidebar_width (split, 360);
+   adw_navigation_split_view_set_max_sidebar_width (split, 700);
+   gtk_box_append (GTK_BOX (self), GTK_WIDGET (split));
 
   adjustment =
     gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (self->scroller));
