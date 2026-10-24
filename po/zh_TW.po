@@ -231,8 +231,6 @@ msgstr "介面語言"
 msgid "Line Limit"
 msgstr "線路限制"
 
-msgid "Open Log Folder After Crash"
-msgstr "崩潰後打開日誌資料夾"
 
 msgid "About Nuvasha Launcher"
 msgstr "關於 Nuvasha 啟動器"

@@ -231,8 +231,6 @@ msgstr "Limbajul interfeței"
 msgid "Line Limit"
 msgstr "Limită de linie"
 
-msgid "Open Log Folder After Crash"
-msgstr "Deschideți dosarul Jurnal după blocare"
 
 msgid "About Nuvasha Launcher"
 msgstr "Despre Nuvasha Launcher"

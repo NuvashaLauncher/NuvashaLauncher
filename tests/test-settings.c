@@ -35,6 +35,8 @@ test_defaults (void)
 {
   g_autoptr (NuvashaSettings) settings = nuvasha_settings_new ();
 
+  g_assert_false (nuvasha_settings_get_show_unstable_versions (settings));
+  g_assert_true (nuvasha_settings_get_delete_dependents (settings));
   g_assert_true (nuvasha_settings_get_cache_modrinth_api_responses (settings));
   g_assert_cmpint (nuvasha_settings_get_cache_expiration (settings), ==,
                    nuvasha_SETTINGS_CACHE_EXPIRATION_1_HOUR);

@@ -247,8 +247,6 @@ msgstr "Язык интерфейса"
 msgid "Line Limit"
 msgstr "Ограничение строк"
 
-msgid "Open Log Folder After Crash"
-msgstr "Открыть папку журнала после сбоя"
 
 msgid "About Nuvasha Launcher"
 msgstr "О Nuvasha Launcher"

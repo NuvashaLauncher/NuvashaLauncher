@@ -246,8 +246,6 @@ msgstr "Lingua dell’interfaccia"
 msgid "Line Limit"
 msgstr "Limite di righe"
 
-msgid "Open Log Folder After Crash"
-msgstr "Apri la cartella di registro dopo l'arresto anomalo"
 
 msgid "About Nuvasha Launcher"
 msgstr "Informazioni su Nuvasha Launcher"

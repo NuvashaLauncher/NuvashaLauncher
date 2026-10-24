@@ -242,8 +242,6 @@ msgstr "界面语言"
 msgid "Line Limit"
 msgstr "行数上限"
 
-msgid "Open Log Folder After Crash"
-msgstr "崩溃后打开日志文件夹"
 
 msgid "About Nuvasha Launcher"
 msgstr "关于Nuvasha Launcher"

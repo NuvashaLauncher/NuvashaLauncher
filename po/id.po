@@ -231,8 +231,6 @@ msgstr "Bahasa antarmuka"
 msgid "Line Limit"
 msgstr "Batas Garis"
 
-msgid "Open Log Folder After Crash"
-msgstr "Buka Folder Log Setelah Crash"
 
 msgid "About Nuvasha Launcher"
 msgstr "Tentang Peluncur Nuvasha"

@@ -10,50 +10,11 @@
  * Where the game ends
  * ---------------------------------------------------------- */
 
-/* The desktop says no when it wants to. Nothing about that is worth a
-   word in the log of a game: the folder is a convenience, and the button
-   that asks for it is there for the next try. */
-static void
-log_folder_opened (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
-                   gpointer user_data G_GNUC_UNUSED)
-{
-  g_autoptr (GError) error = NULL;
-
-  if (!g_app_info_launch_default_for_uri_finish (result, &error))
-    g_debug ("the log folder does not open: %s", error->message);
-}
-
-static void
-open_log_folder (NuvashaLauncher *self)
-{
-  g_autofree char *directory = nuvasha_launcher_get_log_directory (self);
-  g_autofree char *uri = NULL;
-
-  /* A game that never got far enough to write a log has no folder to
-     open, which is not worth a word in the log. */
-  if (!g_file_test (directory, G_FILE_TEST_IS_DIR))
-    return;
-
-  uri = g_filename_to_uri (directory, NULL, NULL);
-
-  if (uri == NULL)
-    return;
-
-  /* GIO hands the folder to the desktop the same way a double click in
-     a file manager does; nothing is run through a shell. */
-  g_app_info_launch_default_for_uri_async (uri, NULL, NULL,
-                                           log_folder_opened, NULL);
-}
-
 static void
 game_crashed (NuvashaLauncher *self, const char *reason)
 {
   log_line (self, TAG_STATE, "the game crashed: %s", reason);
   set_state (self, nuvasha_LAUNCH_CRASHED, reason);
-
-  if (self->settings != NULL &&
-      nuvasha_settings_get_open_logs_after_crash (self->settings))
-    open_log_folder (self);
 }
 
 /* Nothing else can make a game that ended with zero a crash except a

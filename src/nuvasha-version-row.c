@@ -104,7 +104,8 @@ static void
 fill (NuvashaVersionRow *self, NuvashaVersionManifest *manifest)
 {
   g_autoptr (GPtrArray) ids = g_ptr_array_new_with_free_func (g_free);
-  gboolean snapshots = nuvasha_settings_get_show_snapshots (self->settings);
+  gboolean unstable =
+    nuvasha_settings_get_show_unstable_versions (self->settings);
   guint position = GTK_INVALID_LIST_POSITION;
 
   self->ready = FALSE;
@@ -119,7 +120,7 @@ fill (NuvashaVersionRow *self, NuvashaVersionManifest *manifest)
            * even when the filter would hide its type. */
           position = ids->len;
         }
-      else if (!snapshots && entry->type != nuvasha_MC_TYPE_RELEASE)
+      else if (!unstable && entry->type != nuvasha_MC_TYPE_RELEASE)
         continue;
 
       g_ptr_array_add (ids, g_strdup (entry->id));

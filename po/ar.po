@@ -231,8 +231,6 @@ msgstr "لغة الواجهة"
 msgid "Line Limit"
 msgstr "حد الخط"
 
-msgid "Open Log Folder After Crash"
-msgstr "افتح مجلد السجل بعد التعطل"
 
 msgid "About Nuvasha Launcher"
 msgstr "حول نوفاشا قاذفة"

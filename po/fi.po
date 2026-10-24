@@ -231,8 +231,6 @@ msgstr "Käyttöliittymän kieli"
 msgid "Line Limit"
 msgstr "Linjarajoitus"
 
-msgid "Open Log Folder After Crash"
-msgstr "Avaa lokikansio kaatumisen jälkeen"
 
 msgid "About Nuvasha Launcher"
 msgstr "Tietoja Nuvasha Launcherista"

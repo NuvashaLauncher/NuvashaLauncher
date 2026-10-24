@@ -247,8 +247,6 @@ msgstr "Taal van de interface"
 msgid "Line Limit"
 msgstr "Regellimiet"
 
-msgid "Open Log Folder After Crash"
-msgstr "Logmap openen na een crash"
 
 msgid "About Nuvasha Launcher"
 msgstr "Over Nuvasha Launcher"

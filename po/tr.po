@@ -247,8 +247,6 @@ msgstr "Arayüz dili"
 msgid "Line Limit"
 msgstr "Satır sınırı"
 
-msgid "Open Log Folder After Crash"
-msgstr "Çökmeden sonra günlük klasörünü aç"
 
 msgid "About Nuvasha Launcher"
 msgstr "Nuvasha Launcher hakkında"
