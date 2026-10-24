@@ -49,8 +49,6 @@
  * cannot stall the launcher for minutes. */
 #define MAX_RETRY_AFTER_MS (30 * 1000)
 
-/* Transfers running at the same time. */
-
 /* Bytes taken from the network in one step. */
 #define CHUNK_SIZE (64 * 1024)
 
