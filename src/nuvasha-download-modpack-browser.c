@@ -488,8 +488,8 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
   gtk_widget_set_vexpand (GTK_WIDGET (self->results_stack), TRUE);
 
   self->results_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
-  gtk_widget_add_css_class (GTK_WIDGET (self->results_group), "nuvasha-list-section");
-  gtk_widget_add_css_class (GTK_WIDGET (self->results_group), "nuvasha-preferences-surface");
+  gtk_widget_add_css_class (GTK_WIDGET (self->results_group),
+                            "nuvasha-modpack-results");
 
   /* The list starts where the search row above it ends: its first row is
      not rounded at the top, so the two read as one piece. */
@@ -562,11 +562,17 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
      empty until one is opened. Collapsed shows one page at a time, which
      is the list alone. */
   self->split = ADW_NAVIGATION_SPLIT_VIEW (adw_navigation_split_view_new ());
+  gtk_widget_add_css_class (GTK_WIDGET (self->split), "background");
   gtk_widget_set_vexpand (GTK_WIDGET (self->split), TRUE);
    /* Named so the navigation split view can identify the browse page. */
-  adw_navigation_split_view_set_sidebar (
-    ADW_NAVIGATION_SPLIT_VIEW (self->split),
-     adw_navigation_page_new (GTK_WIDGET (box), _("Browse Modpacks")));
+   {
+     AdwNavigationPage *sidebar = ADW_NAVIGATION_PAGE (
+       adw_navigation_page_new (GTK_WIDGET (box), _("Browse Modpacks")));
+
+     gtk_widget_add_css_class (GTK_WIDGET (sidebar), "background");
+     adw_navigation_split_view_set_sidebar (
+       ADW_NAVIGATION_SPLIT_VIEW (self->split), sidebar);
+   }
    adw_navigation_split_view_set_collapsed (
      ADW_NAVIGATION_SPLIT_VIEW (self->split),
      gtk_widget_get_width (GTK_WIDGET (self)) < 820);
@@ -574,10 +580,10 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
      gives a sidebar by default. */
   adw_navigation_split_view_set_sidebar_width_fraction (
     ADW_NAVIGATION_SPLIT_VIEW (self->split), 0.5);
-  adw_navigation_split_view_set_min_sidebar_width (
-    ADW_NAVIGATION_SPLIT_VIEW (self->split), 360);
-  adw_navigation_split_view_set_max_sidebar_width (
-    ADW_NAVIGATION_SPLIT_VIEW (self->split), 640);
+   adw_navigation_split_view_set_min_sidebar_width (
+     ADW_NAVIGATION_SPLIT_VIEW (self->split), 360);
+   adw_navigation_split_view_set_max_sidebar_width (
+     ADW_NAVIGATION_SPLIT_VIEW (self->split), 640);
   gtk_box_append (GTK_BOX (root), GTK_WIDGET (self->split));
 
   page = GTK_WIDGET (adw_navigation_page_new (GTK_WIDGET (root), ""));

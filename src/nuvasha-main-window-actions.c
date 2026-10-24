@@ -422,6 +422,11 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
   AdwSwitchRow *sandbox_row = ADW_SWITCH_ROW (adw_switch_row_new ());
   AdwSwitchRow *sandbox_network_row = ADW_SWITCH_ROW (adw_switch_row_new ());
 
+  /* Match Epiphany's AdwPreferencesDialog template: bound the settings
+   * surface to a usable width and a scrollable maximum-height-sized page. */
+  adw_dialog_set_content_width (dialog, 640);
+  adw_dialog_set_content_height (dialog, 580);
+
   /* Every one of these rows can show a path or an error message from
      GIO, which is plain text and may hold an "&". */
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);

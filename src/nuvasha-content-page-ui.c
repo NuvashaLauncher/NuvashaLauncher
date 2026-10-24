@@ -496,13 +496,20 @@ nuvasha_content_page_build_bar (NuvashaContentPage *self)
   /* The list is the left half; the project that is opened is the right
      half, and is empty until one is opened. Collapsed shows one page at a
      time, which is the list alone. */
-  self->project.split = ADW_NAVIGATION_SPLIT_VIEW (
-    adw_navigation_split_view_new ());
+   self->project.split = ADW_NAVIGATION_SPLIT_VIEW (
+     adw_navigation_split_view_new ());
+   gtk_widget_add_css_class (GTK_WIDGET (self->project.split), "background");
   gtk_widget_set_vexpand (GTK_WIDGET (self->project.split), TRUE);
    /* Named so the navigation split view can identify the browse page. */
-   adw_navigation_split_view_set_sidebar (
-    ADW_NAVIGATION_SPLIT_VIEW (self->project.split),
-    adw_navigation_page_new (GTK_WIDGET (inner), nuvasha_content_type_title (self->type)));
+   {
+     AdwNavigationPage *sidebar = ADW_NAVIGATION_PAGE (
+       adw_navigation_page_new (GTK_WIDGET (inner),
+                                nuvasha_content_type_title (self->type)));
+
+     gtk_widget_add_css_class (GTK_WIDGET (sidebar), "background");
+     adw_navigation_split_view_set_sidebar (
+       ADW_NAVIGATION_SPLIT_VIEW (self->project.split), sidebar);
+   }
   adw_navigation_split_view_set_collapsed (
     ADW_NAVIGATION_SPLIT_VIEW (self->project.split), TRUE);
   adw_navigation_split_view_set_sidebar_width_fraction (

@@ -6,7 +6,6 @@
       <object class="AdwToastOverlay" id="toast_overlay">
         <property name="child">
           <object class="GtkBox" id="content">
-            <property name="css-classes">nuvasha-dialog-content</property>
             <property name="orientation">vertical</property>
             <property name="spacing">12</property>
             <property name="margin-start">12</property>
