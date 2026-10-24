@@ -47,7 +47,16 @@ on_window_launcher_state (NuvashaLauncher *launcher G_GNUC_UNUSED,
       break;
 
     default:
+      if (!nuvasha_launch_state_is_busy (state))
+        nuvasha_main_window_maybe_quit_background (self);
       return;
+    }
+
+  if (state == nuvasha_LAUNCH_CRASHED)
+    {
+      gtk_widget_set_visible (GTK_WIDGET (self), TRUE);
+      gtk_window_present (GTK_WINDOW (self));
+      nuvasha_main_window_show_crash_logs (self, launcher);
     }
 
   if (self->ui.banner == NULL)
@@ -61,6 +70,61 @@ on_window_launcher_state (NuvashaLauncher *launcher G_GNUC_UNUSED,
   adw_banner_set_use_markup (ADW_BANNER (self->ui.banner), FALSE);
   adw_banner_set_title (ADW_BANNER (self->ui.banner), message);
   adw_banner_set_revealed (ADW_BANNER (self->ui.banner), TRUE);
+
+  if (state != nuvasha_LAUNCH_CRASHED)
+    nuvasha_main_window_maybe_quit_background (self);
+}
+
+static gboolean
+window_has_background_work (NuvashaMainWindow *self)
+{
+  GHashTableIter iter;
+  gpointer value = NULL;
+
+  if (nuvasha_downloads_count () > 0)
+    return TRUE;
+
+  if (nuvasha_users_skin_background_work_active ())
+    return TRUE;
+
+  g_hash_table_iter_init (&iter, self->model->launchers);
+  while (g_hash_table_iter_next (&iter, NULL, &value))
+    if (nuvasha_launch_state_is_busy (
+          nuvasha_launcher_get_state (nuvasha_LAUNCHER (value))))
+      return TRUE;
+
+  return FALSE;
+}
+
+void
+nuvasha_main_window_maybe_quit_background (NuvashaMainWindow *self)
+{
+  if (!gtk_widget_get_visible (GTK_WIDGET (self)) &&
+      !window_has_background_work (self))
+    g_application_quit (G_APPLICATION (gtk_window_get_application (
+      GTK_WINDOW (self))));
+}
+
+static gboolean
+background_quit_tick (gpointer user_data)
+{
+  NuvashaMainWindow *self = nuvasha_MAIN_WINDOW (user_data);
+
+  if (gtk_widget_get_visible (GTK_WIDGET (self)))
+    {
+      self->background_quit_source = 0;
+      return G_SOURCE_REMOVE;
+    }
+
+  if (!window_has_background_work (self))
+    {
+      self->background_quit_source = 0;
+      g_application_quit (G_APPLICATION (gtk_window_get_application (
+        GTK_WINDOW (self))));
+      return G_SOURCE_REMOVE;
+    }
+
+  return G_SOURCE_CONTINUE;
 }
 
 static GSettings *
@@ -90,6 +154,15 @@ on_window_close_request (GtkWindow *window, gpointer user_data)
 
   if (self->window_settings == NULL)
     return FALSE;
+
+  if (window_has_background_work (self))
+    {
+      gtk_widget_set_visible (GTK_WIDGET (window), FALSE);
+      if (self->background_quit_source == 0)
+        self->background_quit_source =
+          g_timeout_add_seconds (1, background_quit_tick, self);
+      return TRUE;
+    }
 
   gtk_window_get_default_size (window, &width, &height);
   if (width > 0)
@@ -229,6 +302,12 @@ static void
 nuvasha_main_window_dispose (GObject *object)
 {
   NuvashaMainWindow *self = nuvasha_MAIN_WINDOW (object);
+
+  if (self->background_quit_source != 0)
+    {
+      g_source_remove (self->background_quit_source);
+      self->background_quit_source = 0;
+    }
 
   /* A running game keeps its own launcher alive through the process
      readers, so dropping the table here never kills a game in front of

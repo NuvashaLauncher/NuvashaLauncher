@@ -42,6 +42,9 @@ char *nuvasha_users_popover_get_active_name (NuvashaUsersPopover *self);
 /* Return header-button content for the active account. The caller owns it. */
 GtkWidget *nuvasha_users_popover_get_button_content (NuvashaUsersPopover *self);
 
+/* TRUE while a skin or cape request is active or waiting to retry. */
+gboolean nuvasha_users_skin_background_work_active (void);
+
 G_END_DECLS
 
 #endif /* nuvasha_USERS_POPOVER_H */
