@@ -15,7 +15,8 @@ gboolean nuvasha_secret_store_save (const char *account_id,
 gboolean nuvasha_secret_store_load (const char *account_id,
                                     char      **access_token,
                                     char      **refresh_token);
-void     nuvasha_secret_store_clear (const char *account_id);
+gboolean nuvasha_secret_store_clear (const char *account_id,
+                                     GError    **error);
 
 G_END_DECLS
 

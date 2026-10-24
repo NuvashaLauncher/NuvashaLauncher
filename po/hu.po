@@ -6,6 +6,15 @@ msgstr ""
 msgid "Cancel"
 msgstr "Mégsem"
 
+
+msgid "cannot clear credentials for account \"%s\": %s"
+msgstr "nem sikerült törölni a(z) „%s” fiók hitelesítő adatait: %s"
+
+msgid "unknown Secret Service error"
+msgstr "ismeretlen Secret Service-hiba"
+
+msgid "cannot store credentials for account \"%s\""
+msgstr "nem sikerült menteni a(z) „%s” fiók hitelesítő adatait"
 msgid "Confirm"
 msgstr "Erősítse meg"
 

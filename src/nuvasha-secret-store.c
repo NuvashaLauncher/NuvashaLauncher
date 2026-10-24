@@ -97,12 +97,19 @@ nuvasha_secret_store_load (const char *account_id,
   return TRUE;
 }
 
-void
-nuvasha_secret_store_clear (const char *account_id)
+gboolean
+nuvasha_secret_store_clear (const char *account_id, GError **error)
 {
-  g_autoptr (GError) error = NULL;
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
-  if (account_id != NULL && *account_id != '\0')
-    secret_password_clear_sync (&schema, NULL, &error,
-                                "account-id", account_id, NULL);
+  if (account_id == NULL || *account_id == '\0')
+    return FALSE;
+
+  if (secret_password_clear_sync (&schema, NULL, error,
+                                  "account-id", account_id, NULL))
+    return TRUE;
+
+  /* libsecret reports FALSE without an error when there was no matching
+   * item. That is already the desired state for a clear operation. */
+  return error == NULL || *error == NULL;
 }

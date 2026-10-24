@@ -6,6 +6,15 @@ msgstr ""
 msgid "Cancel"
 msgstr "Ophæve"
 
+
+msgid "cannot clear credentials for account \"%s\": %s"
+msgstr "kontoets legitimationsoplysninger kunne ikke slettes for \"%s\": %s"
+
+msgid "unknown Secret Service error"
+msgstr "ukendt fejl i Secret Service"
+
+msgid "cannot store credentials for account \"%s\""
+msgstr "kontoets legitimationsoplysninger kunne ikke gemmes for \"%s\""
 msgid "Confirm"
 msgstr "Bekræfte"
 

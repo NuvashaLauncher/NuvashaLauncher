@@ -36,7 +36,7 @@ secret_service_available (void)
   gboolean available = nuvasha_secret_store_save (
     "nuvasha-test-service-probe", "access", "refresh");
 
-  nuvasha_secret_store_clear ("nuvasha-test-service-probe");
+  nuvasha_secret_store_clear ("nuvasha-test-service-probe", NULL);
   return available;
 }
 
@@ -423,7 +423,7 @@ test_persistence (void)
           secret_id, &stored_access, &stored_refresh));
         g_assert_cmpstr (stored_access, ==, "access-quote-\\\"");
         g_assert_cmpstr (stored_refresh, ==, "refresh-backslash-\\\\");
-        nuvasha_secret_store_clear (secret_id);
+        g_assert_true (nuvasha_secret_store_clear (secret_id, NULL));
         g_assert_false (nuvasha_secret_store_load (
           secret_id, &stored_access, &stored_refresh));
       }
@@ -455,7 +455,7 @@ test_persistence (void)
       "\"uuid\":\"token-fields-test\",\"access-token\":\"old\","
       "\"refresh-token\":\"old-refresh\"}]}";
 
-    nuvasha_secret_store_clear ("token-fields-test");
+    nuvasha_secret_store_clear ("token-fields-test", NULL);
     g_assert_true (g_file_set_contents (token_fields_path, token_fields_json, -1, NULL));
     token_fields_store = nuvasha_accounts_new_for_path (token_fields_path);
     token_fields_account = nuvasha_accounts_find (token_fields_store, "token-fields-test");

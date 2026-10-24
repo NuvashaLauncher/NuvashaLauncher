@@ -6,6 +6,15 @@ msgstr ""
 msgid "Cancel"
 msgstr "Peruuttaa"
 
+
+msgid "cannot clear credentials for account \"%s\": %s"
+msgstr "tilin \"%s\" tunnistetietoja ei voi poistaa: %s"
+
+msgid "unknown Secret Service error"
+msgstr "tuntematon Secret Service -virhe"
+
+msgid "cannot store credentials for account \"%s\""
+msgstr "tilin \"%s\" tunnistetietoja ei voi tallentaa"
 msgid "Confirm"
 msgstr "Vahvistaa"
 

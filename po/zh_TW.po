@@ -6,6 +6,15 @@ msgstr ""
 msgid "Cancel"
 msgstr "取消"
 
+
+msgid "cannot clear credentials for account \"%s\": %s"
+msgstr "無法清除帳戶「%s」的憑證：%s"
+
+msgid "unknown Secret Service error"
+msgstr "未知的 Secret Service 錯誤"
+
+msgid "cannot store credentials for account \"%s\""
+msgstr "無法儲存帳戶「%s」的憑證"
 msgid "Confirm"
 msgstr "確認"
 

@@ -6,6 +6,15 @@ msgstr ""
 msgid "Cancel"
 msgstr "Membatalkan"
 
+
+msgid "cannot clear credentials for account \"%s\": %s"
+msgstr "tidak dapat menghapus kredensial akun \"%s\": %s"
+
+msgid "unknown Secret Service error"
+msgstr "kesalahan Secret Service yang tidak diketahui"
+
+msgid "cannot store credentials for account \"%s\""
+msgstr "tidak dapat menyimpan kredensial akun \"%s\""
 msgid "Confirm"
 msgstr "Mengonfirmasi"
 

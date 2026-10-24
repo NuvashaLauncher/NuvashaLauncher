@@ -6,6 +6,15 @@ msgstr ""
 msgid "Cancel"
 msgstr "Hủy bỏ"
 
+
+msgid "cannot clear credentials for account \"%s\": %s"
+msgstr "không thể xóa thông tin xác thực của tài khoản \"%s\": %s"
+
+msgid "unknown Secret Service error"
+msgstr "lỗi Secret Service không xác định"
+
+msgid "cannot store credentials for account \"%s\""
+msgstr "không thể lưu thông tin xác thực của tài khoản \"%s\""
 msgid "Confirm"
 msgstr "Xác nhận"
 

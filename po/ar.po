@@ -6,6 +6,15 @@ msgstr ""
 msgid "Cancel"
 msgstr "يلغي"
 
+
+msgid "cannot clear credentials for account \"%s\": %s"
+msgstr "تعذر مسح بيانات اعتماد الحساب \"%s\": %s"
+
+msgid "unknown Secret Service error"
+msgstr "خطأ غير معروف في خدمة الأسرار"
+
+msgid "cannot store credentials for account \"%s\""
+msgstr "تعذر تخزين بيانات اعتماد الحساب \"%s\""
 msgid "Confirm"
 msgstr "يتأكد"
 

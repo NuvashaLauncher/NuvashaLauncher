@@ -7,6 +7,7 @@
 #include <archive.h>
 #include <archive_entry.h>
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -60,6 +61,8 @@ main (void)
   broken->path = g_strdup (truncated);
   nuvasha_content_apply_local_metadata (broken, nuvasha_CONTENT_MOD);
   g_assert_false (broken->local_metadata);
+  g_assert_cmpint (g_unlink (valid), ==, 0);
+  g_assert_cmpint (g_unlink (truncated), ==, 0);
   g_print ("ok - local metadata parsers handle valid and truncated JSON\n");
   return 0;
 }

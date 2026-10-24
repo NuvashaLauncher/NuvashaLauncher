@@ -287,7 +287,7 @@ test_a_ready_account_gets_past_the_gate (void)
       g_test_skip ("Secret Service is unavailable in this environment");
       return;
     }
-  nuvasha_secret_store_clear ("nuvasha-launcher-test-probe");
+  nuvasha_secret_store_clear ("nuvasha-launcher-test-probe", NULL);
 
   g_assert_true (nuvasha_accounts_add (accounts, account, &error));
   g_assert_no_error (error);
