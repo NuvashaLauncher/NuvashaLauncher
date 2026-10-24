@@ -7,9 +7,8 @@
 #include "nuvasha-settings.h"
 
 /* The keys stored by the desktop settings schema. */
-#define SHOW_SNAPSHOTS_KEY "show-snapshots"
+#define SHOW_UNSTABLE_VERSIONS_KEY "show-unstable-versions"
 #define LOG_LINE_LIMIT_KEY "log-line-limit"
-#define OPEN_LOGS_AFTER_CRASH_KEY "open-logs-after-crash"
 #define SHOW_UNSTABLE_LOADERS_KEY "show-unstable-loaders"
 #define LANGUAGE_KEY "language"
 #define CACHE_MODRINTH_API_RESPONSES_KEY "cache-modrinth-api-responses"
@@ -26,9 +25,8 @@ struct _NuvashaSettings
 {
   GObject parent_instance;
 
-  gboolean show_snapshots;
+  gboolean show_unstable_versions;
   guint log_line_limit;
-  gboolean open_logs_after_crash;
   gboolean show_unstable_loaders;
   char *language;
   gboolean cache_modrinth_api_responses;
@@ -52,13 +50,11 @@ nuvasha_settings_error_quark (void)
 static void
 load (NuvashaSettings *self)
 {
-  self->show_snapshots = g_settings_get_boolean (self->desktop_settings,
-                                                  SHOW_SNAPSHOTS_KEY);
+  self->show_unstable_versions = g_settings_get_boolean (
+    self->desktop_settings, SHOW_UNSTABLE_VERSIONS_KEY);
   self->log_line_limit = MAX (LOG_LINE_LIMIT_FLOOR,
                                g_settings_get_uint (self->desktop_settings,
                                                     LOG_LINE_LIMIT_KEY));
-  self->open_logs_after_crash = g_settings_get_boolean (
-    self->desktop_settings, OPEN_LOGS_AFTER_CRASH_KEY);
   self->show_unstable_loaders = g_settings_get_boolean (
     self->desktop_settings, SHOW_UNSTABLE_LOADERS_KEY);
   g_free (self->language);
@@ -83,12 +79,10 @@ save (NuvashaSettings *self, GError **error)
   g_return_val_if_fail (self->desktop_settings != NULL, FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
-  g_settings_set_boolean (self->desktop_settings, SHOW_SNAPSHOTS_KEY,
-                          self->show_snapshots);
+  g_settings_set_boolean (self->desktop_settings, SHOW_UNSTABLE_VERSIONS_KEY,
+                          self->show_unstable_versions);
   g_settings_set_uint (self->desktop_settings, LOG_LINE_LIMIT_KEY,
                        self->log_line_limit);
-  g_settings_set_boolean (self->desktop_settings, OPEN_LOGS_AFTER_CRASH_KEY,
-                          self->open_logs_after_crash);
   g_settings_set_boolean (self->desktop_settings, SHOW_UNSTABLE_LOADERS_KEY,
                           self->show_unstable_loaders);
   g_settings_set_string (self->desktop_settings, LANGUAGE_KEY,
@@ -224,31 +218,31 @@ nuvasha_settings_set_sandbox_network_enabled (NuvashaSettings *self, gboolean va
 }
 
 gboolean
-nuvasha_settings_get_show_snapshots (NuvashaSettings *self)
+nuvasha_settings_get_show_unstable_versions (NuvashaSettings *self)
 {
   g_return_val_if_fail (nuvasha_IS_SETTINGS (self), FALSE);
 
-  return self->show_snapshots;
+  return self->show_unstable_versions;
 }
 
 gboolean
-nuvasha_settings_set_show_snapshots (NuvashaSettings *self,
-                                 gboolean     value,
-                                 GError     **error)
+nuvasha_settings_set_show_unstable_versions (NuvashaSettings *self,
+                                           gboolean     value,
+                                           GError     **error)
 {
   gboolean previous;
 
   g_return_val_if_fail (nuvasha_IS_SETTINGS (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
-  previous = self->show_snapshots;
-  self->show_snapshots = value;
+  previous = self->show_unstable_versions;
+  self->show_unstable_versions = value;
 
   if (save (self, error))
     return TRUE;
 
   /* The file did not change, so neither does the answer. */
-  self->show_snapshots = previous;
+  self->show_unstable_versions = previous;
   return FALSE;
 }
 
@@ -286,35 +280,6 @@ nuvasha_settings_set_log_line_limit (NuvashaSettings *self,
 
   /* The file did not change, so neither does the answer. */
   self->log_line_limit = previous;
-  return FALSE;
-}
-
-gboolean
-nuvasha_settings_get_open_logs_after_crash (NuvashaSettings *self)
-{
-  g_return_val_if_fail (nuvasha_IS_SETTINGS (self), FALSE);
-
-  return self->open_logs_after_crash;
-}
-
-gboolean
-nuvasha_settings_set_open_logs_after_crash (NuvashaSettings *self,
-                                        gboolean     value,
-                                        GError     **error)
-{
-  gboolean previous;
-
-  g_return_val_if_fail (nuvasha_IS_SETTINGS (self), FALSE);
-  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
-
-  previous = self->open_logs_after_crash;
-  self->open_logs_after_crash = value;
-
-  if (save (self, error))
-    return TRUE;
-
-  /* The file did not change, so neither does the answer. */
-  self->open_logs_after_crash = previous;
   return FALSE;
 }
 

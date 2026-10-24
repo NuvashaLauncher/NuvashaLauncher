@@ -247,8 +247,6 @@ msgstr "인터페이스 언어"
 msgid "Line Limit"
 msgstr "줄 수 제한"
 
-msgid "Open Log Folder After Crash"
-msgstr "충돌 후 로그 폴더 열기"
 
 msgid "About Nuvasha Launcher"
 msgstr "Nuvasha Launcher 소개"

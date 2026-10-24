@@ -66,8 +66,6 @@ msgstr ""
 msgid "Line Limit"
 msgstr "Límite de líneas"
 
-msgid "Open Log Folder After Crash"
-msgstr "Abrir la carpeta de registros después de un cierre inesperado"
 
 msgid "Retry"
 msgstr "Reintentar"

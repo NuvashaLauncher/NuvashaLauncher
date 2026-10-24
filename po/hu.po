@@ -231,8 +231,6 @@ msgstr "Interfész nyelve"
 msgid "Line Limit"
 msgstr "Vonalkorlát"
 
-msgid "Open Log Folder After Crash"
-msgstr "Nyissa meg a Naplómappát az összeomlás után"
 
 msgid "About Nuvasha Launcher"
 msgstr "A Nuvasha Launcherről"

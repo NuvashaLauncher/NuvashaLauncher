@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
   <schema id="com.github.nuvashalauncher.Nuvasha" path="/com/github/nuvashalauncher/nuvasha/">
-    <key name="show-snapshots" type="b"><default>false</default></key>
+    <key name="show-unstable-versions" type="b"><default>false</default></key>
     <key name="log-line-limit" type="u"><default>5000</default></key>
-    <key name="open-logs-after-crash" type="b"><default>false</default></key>
     <key name="show-unstable-loaders" type="b"><default>false</default></key>
     <key name="language" type="s"><default>''</default></key>
     <key name="cache-modrinth-api-responses" type="b"><default>true</default></key>
     <key name="cache-expiration" type="u"><default>3600</default></key>
     <key name="export-metadata" type="b"><default>true</default></key>
-    <key name="delete-dependents" type="b"><default>false</default></key>
+    <key name="delete-dependents" type="b"><default>true</default></key>
     <key name="sandbox-enabled" type="b"><default>false</default></key>
     <key name="sandbox-network-enabled" type="b"><default>true</default></key>
     <key name="window-width" type="i">

@@ -231,8 +231,6 @@ msgstr "Ngôn ngữ giao diện"
 msgid "Line Limit"
 msgstr "Giới hạn dòng"
 
-msgid "Open Log Folder After Crash"
-msgstr "Mở thư mục nhật ký sau sự cố"
 
 msgid "About Nuvasha Launcher"
 msgstr "Giới thiệu về Trình khởi chạy Nuvasha"

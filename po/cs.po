@@ -231,8 +231,6 @@ msgstr "Jazyk rozhraní"
 msgid "Line Limit"
 msgstr "Limit linky"
 
-msgid "Open Log Folder After Crash"
-msgstr "Otevřete složku protokolu po havárii"
 
 msgid "About Nuvasha Launcher"
 msgstr "O Nuvasha Launcher"

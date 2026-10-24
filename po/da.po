@@ -231,8 +231,6 @@ msgstr "Interface sprog"
 msgid "Line Limit"
 msgstr "Linjegrænse"
 
-msgid "Open Log Folder After Crash"
-msgstr "Åbn Log-mappe efter nedbrud"
 
 msgid "About Nuvasha Launcher"
 msgstr "Om Nuvasha Launcher"

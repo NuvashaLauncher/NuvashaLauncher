@@ -103,19 +103,22 @@ on_import_modpack (GSimpleAction *action G_GNUC_UNUSED,
  * the setting keeps the value it had, the switch goes back to it and
  * the row says why: the dialog and the file never disagree. */
 static void
-on_show_snapshots_toggled (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
-                           gpointer user_data)
+on_show_unstable_versions_toggled (GObject *object,
+                                   GParamSpec *pspec G_GNUC_UNUSED,
+                                   gpointer user_data)
 {
   NuvashaMainWindow *self = nuvasha_MAIN_WINDOW (user_data);
   AdwSwitchRow *row = ADW_SWITCH_ROW (object);
   gboolean active = adw_switch_row_get_active (row);
-  gboolean stored = nuvasha_settings_get_show_snapshots (self->model->settings);
+  gboolean stored =
+    nuvasha_settings_get_show_unstable_versions (self->model->settings);
   g_autoptr (GError) error = NULL;
 
   if (active == stored)
     return;
 
-  if (nuvasha_settings_set_show_snapshots (self->model->settings, active, &error))
+  if (nuvasha_settings_set_show_unstable_versions (self->model->settings,
+                                                   active, &error))
     return;
 
   adw_switch_row_set_active (row, stored);
@@ -160,23 +163,6 @@ on_show_unstable_loaders_toggled (GObject *object,
   if (!nuvasha_settings_set_show_unstable_loaders (self->model->settings, active, NULL))
     adw_switch_row_set_active (
       row, nuvasha_settings_get_show_unstable_loaders (self->model->settings));
-}
-
-static void
-on_open_logs_after_crash_toggled (GObject *object,
-                                  GParamSpec *pspec G_GNUC_UNUSED,
-                                  gpointer user_data)
-{
-  NuvashaMainWindow *self = nuvasha_MAIN_WINDOW (user_data);
-  AdwSwitchRow *row = ADW_SWITCH_ROW (object);
-  gboolean active = adw_switch_row_get_active (row);
-
-  if (active == nuvasha_settings_get_open_logs_after_crash (self->model->settings))
-    return;
-
-  if (!nuvasha_settings_set_open_logs_after_crash (self->model->settings, active, NULL))
-    adw_switch_row_set_active (
-      row, nuvasha_settings_get_open_logs_after_crash (self->model->settings));
 }
 
 static void
@@ -410,7 +396,6 @@ create_settings_dialog (NuvashaMainWindow *self)
   AdwSwitchRow *row = ADW_SWITCH_ROW (adw_switch_row_new ());
   AdwSpinRow *limit_row = NULL;
   AdwSwitchRow *unstable_row = ADW_SWITCH_ROW (adw_switch_row_new ());
-  AdwSwitchRow *crash_row = ADW_SWITCH_ROW (adw_switch_row_new ());
   AdwSwitchRow *cache_api_row = ADW_SWITCH_ROW (adw_switch_row_new ());
   AdwComboRow *cache_expiration_row = ADW_COMBO_ROW (adw_combo_row_new ());
   AdwActionRow *clear_cache_row = ADW_ACTION_ROW (adw_action_row_new ());
@@ -429,7 +414,6 @@ create_settings_dialog (NuvashaMainWindow *self)
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (unstable_row),
                                       FALSE);
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (crash_row), FALSE);
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (cache_api_row), FALSE);
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (cache_expiration_row), FALSE);
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (clear_cache_row), FALSE);
@@ -493,12 +477,13 @@ create_settings_dialog (NuvashaMainWindow *self)
    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
                                   _("Show unstable Minecraft versions"));
   adw_switch_row_set_active (ADW_SWITCH_ROW (row),
-                             nuvasha_settings_get_show_snapshots (self->model->settings));
+                             nuvasha_settings_get_show_unstable_versions (
+                               self->model->settings));
 
   /* Connected after the value was set, so opening the dialog never
    * writes anything by itself. */
    g_signal_connect_object (row, "notify::active",
-                            G_CALLBACK (on_show_snapshots_toggled), self, 0);
+                             G_CALLBACK (on_show_unstable_versions_toggled), self, 0);
   adw_preferences_group_add (versions_group, GTK_WIDGET (row));
 
   /* The loader versions live under the same choice: both say what the
@@ -557,15 +542,6 @@ create_settings_dialog (NuvashaMainWindow *self)
    g_signal_connect_object (limit_row, "notify::value",
                             G_CALLBACK (on_log_limit_changed), self, 0);
   adw_preferences_group_add (logs_group, GTK_WIDGET (limit_row));
-
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (crash_row),
-                                  _("Open Log Folder After Crash"));
-  adw_switch_row_set_active (
-    ADW_SWITCH_ROW (crash_row),
-    nuvasha_settings_get_open_logs_after_crash (self->model->settings));
-   g_signal_connect_object (crash_row, "notify::active",
-                            G_CALLBACK (on_open_logs_after_crash_toggled), self, 0);
-  adw_preferences_group_add (logs_group, GTK_WIDGET (crash_row));
 
   adw_preferences_group_set_title (cache_group,
                                     _("Cache"));
