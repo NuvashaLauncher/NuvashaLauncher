@@ -138,13 +138,17 @@ nuvasha_sandbox_wrap_arguments (GPtrArray               *command,
     }
 
   self_executable = g_file_read_link ("/proc/self/exe", NULL);
-  if (self_executable != NULL)
-    {
-      /* Most mods use xdg-open. Replace only that entry point with nuvasha's
-       * one-purpose client; no shell or arbitrary executable is exposed. */
-      add_pair (arguments, "--ro-bind", self_executable);
-      nuvasha_sandbox_add_argument (arguments, "/usr/bin/xdg-open");
-    }
+   if (self_executable != NULL)
+     {
+       /* Most mods use xdg-open. Put nuvasha's one-purpose client in a
+        * dedicated PATH directory instead of trying to create a file under
+        * the read-only /usr mount. No shell or arbitrary executable is
+        * exposed. */
+       nuvasha_sandbox_add_directory (arguments, "/nuvasha-bin");
+       add_pair (arguments, "--ro-bind", self_executable);
+       nuvasha_sandbox_add_argument (arguments, "/nuvasha-bin/xdg-open");
+       add_environment (arguments, "PATH", "/nuvasha-bin:/usr/bin:/bin");
+     }
   nuvasha_sandbox_add_argument (arguments, "--bind");
   nuvasha_sandbox_add_argument (arguments, broker);
   nuvasha_sandbox_add_argument (arguments, broker);
