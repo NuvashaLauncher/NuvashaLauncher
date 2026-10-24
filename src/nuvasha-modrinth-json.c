@@ -41,6 +41,8 @@ nuvasha_content_type_to_string (NuvashaContentType type)
       return "resourcepack";
     case nuvasha_CONTENT_SHADER_PACK:
       return "shader";
+    case nuvasha_CONTENT_DATAPACK:
+      return "datapack";
     case nuvasha_CONTENT_MOD:
     default:
       return "mod";
@@ -56,6 +58,8 @@ nuvasha_content_type_title (NuvashaContentType type)
       return _("Resource Packs");
     case nuvasha_CONTENT_SHADER_PACK:
       return _("Shader Packs");
+    case nuvasha_CONTENT_DATAPACK:
+      return "Datapacks";
     case nuvasha_CONTENT_MOD:
     default:
       return _("Mods");
@@ -71,6 +75,8 @@ nuvasha_content_type_folder (NuvashaContentType type)
       return "resourcepacks";
     case nuvasha_CONTENT_SHADER_PACK:
       return "shaderpacks";
+    case nuvasha_CONTENT_DATAPACK:
+      return "datapacks";
     case nuvasha_CONTENT_MOD:
     default:
       return "mods";
@@ -98,6 +104,8 @@ nuvasha_content_type_icon (NuvashaContentType type)
       return "image-x-generic-symbolic";
     case nuvasha_CONTENT_SHADER_PACK:
       return "applications-graphics-symbolic";
+    case nuvasha_CONTENT_DATAPACK:
+      return "package-x-generic-symbolic";
     case nuvasha_CONTENT_MOD:
     default:
       return "view-list-symbolic";

@@ -116,6 +116,8 @@ typedef struct
   GPtrArray *files; /* merged required + chosen optional, borrowed */
   guint total;
   guint current;
+  guint pending_index_writes;
+  GError *index_error;
   guint attempt;       /* which URL of the current file */
   gboolean saw_disallowed;
   gboolean saw_download_error;
@@ -133,7 +135,26 @@ static void install_file_done (GObject *, GAsyncResult *, gpointer);
 static void install_file_verified (GObject *, GAsyncResult *, gpointer);
 static void install_loader_versions (GObject *, GAsyncResult *, gpointer);
 static void install_register (InstallRun *run);
+static void install_finish_registration (InstallRun *run);
+static void install_index_written (GObject *, GAsyncResult *, gpointer);
+static void install_fail (InstallRun *run, GError *error);
 static void overrides_extracted (GObject *, GAsyncResult *, gpointer);
+
+static char *
+modpack_environment (NuvashaModpackEnv environment)
+{
+  switch (environment)
+    {
+    case nuvasha_MODPACK_ENV_OPTIONAL:
+      return "optional";
+    case nuvasha_MODPACK_ENV_UNSUPPORTED:
+      return "unsupported";
+    case nuvasha_MODPACK_ENV_REQUIRED:
+    case nuvasha_MODPACK_ENV_UNSPECIFIED:
+    default:
+      return "required";
+    }
+}
 
 static void
 seed_manifest_indexes (InstallRun *run)
@@ -161,6 +182,10 @@ seed_manifest_indexes (InstallRun *run)
         {
           type = nuvasha_CONTENT_SHADER_PACK;
         }
+      else if (g_str_has_prefix (file->path, "datapacks/"))
+        {
+          type = nuvasha_CONTENT_DATAPACK;
+        }
       else
         continue;
 
@@ -183,17 +208,57 @@ seed_manifest_indexes (InstallRun *run)
             }
         }
       entry.filename = filename;
+      entry.size = (guint64) file->file_size;
       entry.hash = file->sha1;
       entry.hash512 = file->sha512;
       entry.download_url = (char *) url;
-      entry.env_client = "required";
-      entry.env_server = type == nuvasha_CONTENT_MOD ? "required" : "unsupported";
+      entry.env_client = modpack_environment (file->env_client);
+      entry.env_server = modpack_environment (file->env_server);
       entry.provider = "Modrinth";
       entry.project_id = project_id;
       entry.version_id = version_id;
+
+      {
+        g_autofree char *path =
+          g_build_filename (run->target, file->path, NULL);
+        GStatBuf info;
+
+        if (g_stat (path, &info) == 0)
+          {
+            entry.size = (guint64) info.st_size;
+            entry.mtime_usec = (gint64) info.st_mtime * G_USEC_PER_SEC +
+                               info.st_mtim.tv_nsec / 1000;
+          }
+      }
+
+      run->pending_index_writes++;
       nuvasha_task_scope_release_when_done (
-        nuvasha_content_index_update_async (run->target, type, &entry, NULL, NULL),
+        nuvasha_content_index_update_async (run->target, type, &entry,
+                                             install_index_written, run),
         run->cancellable);
+    }
+}
+
+static void
+install_index_written (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                       gpointer user_data)
+{
+  InstallRun *run = user_data;
+  g_autoptr (GError) error = NULL;
+
+  if (!nuvasha_content_index_modify_finish (result, &error) &&
+      run->index_error == NULL)
+    run->index_error = g_steal_pointer (&error);
+
+  g_assert (run->pending_index_writes > 0);
+  run->pending_index_writes--;
+
+  if (run->pending_index_writes == 0)
+    {
+      if (run->index_error != NULL)
+        install_fail (run, g_steal_pointer (&run->index_error));
+      else
+        install_finish_registration (run);
     }
 }
 
@@ -334,10 +399,8 @@ install_loader_versions (GObject *source G_GNUC_UNUSED,
 static void
 install_register (InstallRun *run)
 {
-  g_autoptr (NuvashaInstance) instance = NULL;
   g_autoptr (GError) error = NULL;
   g_autofree char *temp = NULL;
-  NuvashaModpack *pack = run->pack;
 
   /* Everything of the pack is in its temp directory: rename is the
    * atomic set-in-place, and there is nothing of ours next to the
@@ -356,6 +419,20 @@ install_register (InstallRun *run)
 
   run->moved = TRUE;
 
+  seed_manifest_indexes (run);
+  if (run->pending_index_writes > 0)
+    return;
+
+  install_finish_registration (run);
+}
+
+static void
+install_finish_registration (InstallRun *run)
+{
+  g_autoptr (NuvashaInstance) instance = NULL;
+  g_autoptr (GError) error = NULL;
+  NuvashaModpack *pack = run->pack;
+
   instance = nuvasha_instance_manager_create (run->manager, run->name,
                                           run->target, pack->minecraft_version,
                                           pack->loader, pack->loader_version,
@@ -363,7 +440,17 @@ install_register (InstallRun *run)
 
   if (instance == NULL)
     {
-      nuvasha_fs_remove_tree (run->target);
+      install_fail (run, g_steal_pointer (&error));
+      return;
+    }
+
+  g_object_set (instance,
+                "modpack-name", pack->name,
+                "modpack-summary", pack->summary,
+                "modpack-version-id", pack->version_id,
+                NULL);
+  if (!nuvasha_instance_manager_save (run->manager, &error))
+    {
       install_fail (run, g_steal_pointer (&error));
       return;
     }
@@ -377,17 +464,11 @@ install_register (InstallRun *run)
           nuvasha_instance_set_string (instance, "icon", icon, &error);
           if (!nuvasha_instance_manager_save (run->manager, &error))
             {
-              nuvasha_fs_remove_tree (run->target);
               install_fail (run, g_steal_pointer (&error));
               return;
             }
         }
     }
-
-  /* The manifest gives us the hashes and download URLs immediately. Project
-   * names, dependencies and icons are filled in later by the content page's
-   * Modrinth hash lookup. */
-  seed_manifest_indexes (run);
 
   nuvasha_task_scope_return_pointer (run->scope, g_object_ref (instance),
                                  g_object_unref);

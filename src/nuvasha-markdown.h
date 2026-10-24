@@ -6,10 +6,9 @@
  * shown as widgets.
  *
  * Modrinth serves a project's long description as Markdown, with headings,
- * lists, links and images. A GtkLabel cannot hold an image, and Pango
- * markup is not Markdown, so the text is read here and one widget per
- * block is built: a label for a paragraph or a heading, a picture for an
- * image, a link that opens in the browser for a link.
+ * lists, links and images. The text is read here and one widget per block is
+ * built: a label for a paragraph or a heading, and a link that opens in the
+ * browser for a link. Remote images are omitted.
  *
  * Only the parts Modrinth bodies use are understood. Anything else is
  * shown as the plain text it is rather than dropped. */
@@ -22,9 +21,7 @@
 G_BEGIN_DECLS
 
 /* Renders @markdown into @box, a vertical box, appending one widget per
- * block. Images are fetched asynchronously and appear in place when they
- * arrive; a link opens in the browser the way a link does everywhere
- * else. */
+ * block. A link opens in the browser the way a link does everywhere else. */
 void nuvasha_markdown_render (GtkBox *box, const char *markdown);
 
 /* The Pango markup of one span of inline Markdown: emphasis, code spans

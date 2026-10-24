@@ -256,6 +256,13 @@ show_export_metadata (NuvashaInstancePage *self)
   GtkButton *cancel = GTK_BUTTON (gtk_button_new_with_label (_("Cancel")));
   GtkButton *export_button = GTK_BUTTON (gtk_button_new_with_label (_("Export")));
   g_autofree char *name = instance_string (self->instance, "name");
+  g_autofree char *stored_name = NULL;
+  g_autofree char *stored_summary = NULL;
+  g_autofree char *stored_version = NULL;
+
+  g_object_get (self->instance, "modpack-name", &stored_name,
+                "modpack-summary", &stored_summary,
+                "modpack-version-id", &stored_version, NULL);
 
   data->page = g_object_ref (self);
   data->dialog = ADW_DIALOG (g_object_ref_sink (adw_dialog_new ()));
@@ -277,8 +284,13 @@ show_export_metadata (NuvashaInstancePage *self)
   gtk_label_set_justify (GTK_LABEL (heading), GTK_JUSTIFY_CENTER);
   gtk_label_set_xalign (GTK_LABEL (heading), 0.5f);
   gtk_widget_set_margin_bottom (GTK_WIDGET (heading), 12);
-  gtk_editable_set_text (GTK_EDITABLE (data->name), name != NULL ? name : "");
-  gtk_editable_set_text (GTK_EDITABLE (data->version), "");
+  gtk_editable_set_text (GTK_EDITABLE (data->name),
+                         stored_name != NULL ? stored_name
+                         : name != NULL ? name : "");
+  gtk_editable_set_text (GTK_EDITABLE (data->summary),
+                         stored_summary != NULL ? stored_summary : "");
+  gtk_editable_set_text (GTK_EDITABLE (data->version),
+                         stored_version != NULL ? stored_version : "");
   adw_preferences_group_add (fields,
                              GTK_WIDGET (data->name));
   adw_preferences_group_add (fields,

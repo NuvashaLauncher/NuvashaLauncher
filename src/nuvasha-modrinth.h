@@ -53,24 +53,23 @@ char *nuvasha_modrinth_json_node_to_string (JsonNode *node);
  * The kinds of content
  * ---------------------------------------------------------- */
 
-/* What a content page shows. Mods need a loader, the other two only
+/* What a content page shows. Mods need a loader, the other content types only
  * need the Minecraft version. */
 typedef enum {
   nuvasha_CONTENT_MOD,
   nuvasha_CONTENT_RESOURCE_PACK,
   nuvasha_CONTENT_SHADER_PACK,
+  nuvasha_CONTENT_DATAPACK,
 } NuvashaContentType;
 
-/* What Modrinth calls this kind of content in a facet: "mod",
- * "resourcepack" or "shader". Never NULL. */
+/* What Modrinth calls this kind of content in a facet: "mod", "resourcepack",
+ * "shader" or "datapack". Never NULL. */
 const char *nuvasha_content_type_to_string (NuvashaContentType type);
 
-/* What the page and the rows are titled: "Mods", "Resource Packs" or
- * "Shader Packs". Never NULL. */
+/* What the page and the rows are titled. Never NULL. */
 const char *nuvasha_content_type_title (NuvashaContentType type);
 
-/* The folder of the instance this content goes in: "mods",
- * "resourcepacks" or "shaderpacks". Never NULL. */
+/* The folder of the instance this content goes in. Never NULL. */
 const char *nuvasha_content_type_folder (NuvashaContentType type);
 
 /* TRUE for the kind that only runs on a mod loader. */

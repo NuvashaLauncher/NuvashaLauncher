@@ -100,15 +100,15 @@ refresh_downloads (NuvashaMainWindow *self)
           g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
             "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-download-row.ui");
           GtkBox *box = GTK_BOX (gtk_builder_get_object (builder, "box"));
-          GtkLabel *title = GTK_LABEL (gtk_label_new (nuvasha_download_get_title (download)));
+           GtkLabel *title = GTK_LABEL (gtk_builder_get_object (builder, "title"));
           GtkButton *cancel = GTK_BUTTON (gtk_builder_get_object (builder, "cancel"));
           row = g_new0 (DownloadRow, 1);
           row->box = box;
           row->phase = GTK_LABEL (gtk_builder_get_object (builder, "phase"));
           row->count = GTK_LABEL (gtk_builder_get_object (builder, "count"));
           row->bar = GTK_PROGRESS_BAR (gtk_builder_get_object (builder, "bar"));
-          gtk_label_set_ellipsize (title, PANGO_ELLIPSIZE_END);
-          gtk_box_prepend (box, GTK_WIDGET (title));
+           gtk_label_set_text (title, nuvasha_download_get_title (download));
+           gtk_label_set_ellipsize (title, PANGO_ELLIPSIZE_END);
            nuvasha_ui_prepare_icon_button (GTK_WIDGET (cancel), _("Cancel"));
           g_signal_connect_object (cancel, "clicked",
                                    G_CALLBACK (on_download_cancel), download, 0);

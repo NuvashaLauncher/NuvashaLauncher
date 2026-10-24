@@ -27,11 +27,9 @@ gboolean nuvasha_fs_replace_contents (const char *path, const void *contents,
                                   gssize length, int mode, GError **error);
 gboolean nuvasha_fs_make_private_directory (const char *path, GError **error);
 gboolean nuvasha_fs_make_directory (const char *path, int mode, GError **error);
-gboolean nuvasha_fs_file_size_within (const char *path, goffset maximum,
-                                   GError **error);
 gboolean nuvasha_fs_get_contents_within (const char *path, goffset maximum,
-                                     char **contents, gsize *length,
-                                     GError **error);
+                                      char **contents, gsize *length,
+                                      GError **error);
 gboolean nuvasha_fs_unlink (const char *path, GError **error);
 gboolean nuvasha_fs_rename (const char *source, const char *destination,
                         GError **error);

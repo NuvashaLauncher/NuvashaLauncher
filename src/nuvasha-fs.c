@@ -59,27 +59,6 @@ nuvasha_fs_make_directory (const char *path, int mode, GError **error)
 }
 
 gboolean
-nuvasha_fs_file_size_within (const char *path, goffset maximum, GError **error)
-{
-  GStatBuf info;
-
-  if (g_stat (path, &info) != 0)
-    {
-      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
-                   "cannot inspect \"%s\": %s", path, g_strerror (errno));
-      return FALSE;
-    }
-
-  if (!S_ISREG (info.st_mode) || info.st_size > maximum)
-    {
-      g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_INVAL,
-                   "file \"%s\" exceeds the permitted size", path);
-      return FALSE;
-    }
-  return TRUE;
-}
-
-gboolean
 nuvasha_fs_get_contents_within (const char *path, goffset maximum,
                             char **contents, gsize *length, GError **error)
 {

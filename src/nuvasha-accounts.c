@@ -502,9 +502,9 @@ load (NuvashaAccounts *self)
     }
 
   node = json_object_get_member (json_node_get_object (root), "version");
-  if (node != NULL && JSON_NODE_HOLDS_VALUE (node) &&
-      json_node_get_value_type (node) == G_TYPE_INT64 &&
-      json_node_get_int (node) > ACCOUNTS_FORMAT_VERSION)
+  if (node == NULL || !JSON_NODE_HOLDS_VALUE (node) ||
+      json_node_get_value_type (node) != G_TYPE_INT64 ||
+      json_node_get_int (node) != ACCOUNTS_FORMAT_VERSION)
     {
       quarantine_corrupt_file (self->filename);
       return;

@@ -121,6 +121,15 @@ test_concurrent_updates_are_serialized (void)
   g_assert_true (g_file_test (second_path, G_FILE_TEST_IS_REGULAR));
 
   {
+    g_autofree char *metadata = NULL;
+    gsize length = 0;
+
+    g_assert_true (g_file_get_contents (first_path, &metadata, &length, NULL));
+    g_assert_nonnull (g_strstr_len (metadata, (gssize) length,
+                                    "\"version\" : 2"));
+  }
+
+  {
     LoadWait *load = g_new0 (LoadWait, 1);
 
     load->loop = loop;

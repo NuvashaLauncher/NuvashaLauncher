@@ -13,6 +13,9 @@ struct _NuvashaInstance
   char *icon;
   char *java_path;
   char *jvm_args;
+  char *modpack_name;
+  char *modpack_summary;
+  char *modpack_version_id;
   GHashTable *components;
 };
 #endif

@@ -164,6 +164,19 @@ nuvasha_instance_new_from_json (JsonNode *node, GError **error)
   if (!get_jvm_args (object, &jvm_args, error))
     return NULL;
 
+  const char *modpack_name = NULL;
+  if (!get_optional_string (object, "modpack_name", &modpack_name, error))
+    return NULL;
+
+  const char *modpack_summary = NULL;
+  if (!get_optional_string (object, "modpack_summary", &modpack_summary, error))
+    return NULL;
+
+  const char *modpack_version_id = NULL;
+  if (!get_optional_string (object, "modpack_version_id", &modpack_version_id,
+                            error))
+    return NULL;
+
   NuvashaInstance *self =
     nuvasha_instance_new (id, name, directory, minecraft_version, loader, error);
 
@@ -173,9 +186,12 @@ nuvasha_instance_new_from_json (JsonNode *node, GError **error)
   g_object_set (self,
                 "loader_version", loader_version,
                 "icon", icon,
-                "java_path", java_path,
-                "jvm_args", jvm_args,
-                NULL);
+                 "java_path", java_path,
+                 "jvm_args", jvm_args,
+                 "modpack_name", modpack_name,
+                 "modpack_summary", modpack_summary,
+                 "modpack_version_id", modpack_version_id,
+                 NULL);
 
   if (!nuvasha_instance_validate (self, error))
     {
@@ -235,6 +251,9 @@ nuvasha_instance_to_json (NuvashaInstance *self)
   add_optional_member (builder, "java_path", self->java_path);
 
   add_optional_member (builder, "jvm_args", self->jvm_args);
+  add_optional_member (builder, "modpack_name", self->modpack_name);
+  add_optional_member (builder, "modpack_summary", self->modpack_summary);
+  add_optional_member (builder, "modpack_version_id", self->modpack_version_id);
 
   json_builder_end_object (builder);
 
