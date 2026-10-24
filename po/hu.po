@@ -57,9 +57,6 @@ msgstr "Telepítse ezt a verziót a kiválasztott verziókkal"
 msgid "Filter by category"
 msgstr "Szűrés kategória szerint"
 
-msgid "Filter"
-msgstr "Szűrő"
-
 msgid "Nothing to show yet"
 msgstr "Még nincs mit mutatni"
 
@@ -294,9 +291,6 @@ msgstr "Jelentkezzen be"
 
 msgid "Open the page in your browser, then enter this code:"
 msgstr "Nyissa meg az oldalt a böngészőjében, majd írja be ezt a kódot:"
-
-msgid "Open the Page"
-msgstr "Nyissa meg az oldalt"
 
 msgid "Try Again"
 msgstr "Próbáld újra"
@@ -900,9 +894,6 @@ msgstr "Microsoft could not be reached. Check your connection and try again."
 
 msgid "Microsoft sign-in failed. Try again."
 msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open Microsoft sign-in in your browser, then enter this code:"
-msgstr "Open Microsoft sign-in in your browser, then enter this code:"
 
 msgid "Open in browser"
 msgstr "Megnyitás böngészőben"

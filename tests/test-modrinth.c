@@ -964,24 +964,31 @@ test_content_types (void)
                    "resourcepack");
   g_assert_cmpstr (nuvasha_content_type_to_string (nuvasha_CONTENT_SHADER_PACK), ==,
                    "shader");
+  g_assert_cmpstr (nuvasha_content_type_to_string (nuvasha_CONTENT_DATAPACK), ==,
+                   "datapack");
 
   g_assert_cmpstr (nuvasha_content_type_folder (nuvasha_CONTENT_MOD), ==, "mods");
   g_assert_cmpstr (nuvasha_content_type_folder (nuvasha_CONTENT_RESOURCE_PACK), ==,
                    "resourcepacks");
   g_assert_cmpstr (nuvasha_content_type_folder (nuvasha_CONTENT_SHADER_PACK), ==,
                    "shaderpacks");
+  g_assert_cmpstr (nuvasha_content_type_folder (nuvasha_CONTENT_DATAPACK), ==,
+                   "datapacks");
 
   g_assert_cmpstr (nuvasha_content_type_extension (nuvasha_CONTENT_MOD), ==, ".jar");
   g_assert_cmpstr (nuvasha_content_type_extension (nuvasha_CONTENT_RESOURCE_PACK), ==,
                    ".zip");
+  g_assert_cmpstr (nuvasha_content_type_extension (nuvasha_CONTENT_DATAPACK), ==,
+                   ".zip");
 
-  /* Only a mod needs a loader, which is what makes the three pages the
-   * same page with a different content type. */
+  /* Only a mod needs a loader, which makes all content pages share the same
+   * page implementation with a different content type. */
   g_assert_true (nuvasha_content_type_needs_loader (nuvasha_CONTENT_MOD));
   g_assert_false (nuvasha_content_type_needs_loader (nuvasha_CONTENT_RESOURCE_PACK));
   g_assert_false (nuvasha_content_type_needs_loader (nuvasha_CONTENT_SHADER_PACK));
+  g_assert_false (nuvasha_content_type_needs_loader (nuvasha_CONTENT_DATAPACK));
 
-  g_print ("ok - the three kinds name their own folders and loaders\n");
+  g_print ("ok - the content kinds name their own folders and loaders\n");
 }
 
 int

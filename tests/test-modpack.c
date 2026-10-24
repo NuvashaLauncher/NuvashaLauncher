@@ -2,6 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+#define _GNU_SOURCE
+
 /* Tests for nuvasha-modpack: what the index of a pack says, what its
  * dependencies resolve to, what the two hashes of a file prove, and
  * what an install leaves behind when it cannot go through.
@@ -14,6 +16,7 @@
  * the whole pipeline minus the network. */
 
 #include "nuvasha-download-modpack-dialog.h"
+#include "nuvasha-content-index.h"
 #include "nuvasha-modpack.h"
 
 #include <gtk/gtk.h>
@@ -287,6 +290,18 @@ export_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_main_loop_quit (wait->loop);
 }
 
+static void
+index_update_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                   gpointer user_data)
+{
+  AsyncWait *wait = user_data;
+
+  wait->value = nuvasha_content_index_modify_finish (result, &wait->error);
+  nuvasha_task_scope_unref (wait->operation);
+  wait->operation = NULL;
+  g_main_loop_quit (wait->loop);
+}
+
 /* The whole install, in place. */
 static NuvashaInstance *
 install_now (NuvashaModpack *pack, NuvashaInstanceManager *manager, const char *name,
@@ -310,6 +325,20 @@ export_now (NuvashaInstance *instance, const char *path, GError **error)
   wait.operation = nuvasha_modpack_export_async (instance, path, NULL, NULL, NULL,
                                              FALSE, NULL, NULL, export_done,
                                              &wait);
+  async_wait_run (&wait);
+
+  *error = wait.error;
+  return wait.value;
+}
+
+static gboolean
+index_update_now (const char *directory, NuvashaContentType type,
+                  NuvashaContentIndexEntry *entry, GError **error)
+{
+  AsyncWait wait = { 0 };
+
+  wait.operation = nuvasha_content_index_update_async (
+    directory, type, entry, index_update_done, &wait);
   async_wait_run (&wait);
 
   *error = wait.error;
@@ -1082,6 +1111,84 @@ test_export_import_round_trip (void)
   g_print ("ok - export and import preserve loader, icon and overrides\n");
 }
 
+static void
+test_export_preserves_managed_datapack (void)
+{
+  g_autofree char *root = make_tmp_dir ();
+  g_autofree char *data_dir = g_build_filename (root, "data", NULL);
+  g_autofree char *source_dir = g_build_filename (root, "source", NULL);
+  g_autofree char *datapack_dir = g_build_filename (source_dir, "datapacks",
+                                                    NULL);
+  g_autofree char *datapack = g_build_filename (source_dir, "datapacks",
+                                                "example.zip", NULL);
+  g_autofree char *archive = g_build_filename (root, "managed.mrpack", NULL);
+  g_autoptr (GError) error = NULL;
+  g_autoptr (NuvashaInstanceManager) manager = manager_new (data_dir);
+  g_autoptr (NuvashaInstance) instance = NULL;
+  g_autoptr (NuvashaModpack) exported = NULL;
+  NuvashaContentIndexEntry entry = { 0 };
+  GStatBuf stat_buf;
+
+  instance = nuvasha_instance_manager_create (manager, "Managed Pack",
+                                               source_dir, "1.20.1",
+                                               nuvasha_LOADER_FABRIC, "0.15.11",
+                                               &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+  g_assert_cmpint (g_mkdir_with_parents (datapack_dir, 0755), ==, 0);
+  g_assert_true (g_file_set_contents (datapack, "datapack bytes", -1, &error));
+  g_assert_no_error (error);
+  g_assert_cmpint (g_stat (datapack, &stat_buf), ==, 0);
+
+  entry.filename = "example.zip";
+  entry.size = stat_buf.st_size;
+  entry.mtime_usec = (gint64) stat_buf.st_mtim.tv_sec * G_USEC_PER_SEC +
+                     stat_buf.st_mtim.tv_nsec / 1000;
+  entry.hash = "0123456789abcdef0123456789abcdef01234567";
+  entry.hash512 = "0123456789abcdef0123456789abcdef";
+  entry.download_url = "https://cdn.modrinth.com/data/pack/v1/example.zip";
+  entry.env_client = "required";
+  entry.env_server = "required";
+  entry.provider = "Modrinth";
+  entry.project_id = "pack";
+  entry.version_id = "v1";
+
+  g_assert_true (index_update_now (source_dir, nuvasha_CONTENT_DATAPACK,
+                                   &entry, &error));
+  g_assert_no_error (error);
+  g_object_set (instance,
+                "modpack-name", "Managed Pack Original",
+                "modpack-summary", "kept summary",
+                "modpack-version-id", "original-version",
+                NULL);
+  g_assert_true (nuvasha_instance_manager_save (manager, &error));
+  g_assert_no_error (error);
+
+  g_assert_true (export_now (instance, archive, &error));
+  g_assert_no_error (error);
+  exported = nuvasha_modpack_new_from_zip (archive, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (exported);
+  g_assert_cmpstr (exported->name, ==, "Managed Pack Original");
+  g_assert_cmpstr (exported->summary, ==, "kept summary");
+  g_assert_cmpstr (exported->version_id, ==, "original-version");
+  g_assert_cmpuint (exported->files->len, ==, 1);
+  {
+    NuvashaModpackFile *file = g_ptr_array_index (exported->files, 0);
+
+    g_assert_cmpstr (file->path, ==, "datapacks/example.zip");
+    g_assert_cmpstr (file->sha1, ==,
+                     "0123456789abcdef0123456789abcdef01234567");
+    g_assert_cmpint (file->env_client, ==, nuvasha_MODPACK_ENV_REQUIRED);
+    g_assert_cmpint (file->env_server, ==, nuvasha_MODPACK_ENV_REQUIRED);
+    g_assert_cmpstr (g_ptr_array_index (file->downloads, 0), ==,
+                     "https://cdn.modrinth.com/data/pack/v1/example.zip");
+  }
+
+  remove_recursive (root);
+  g_print ("ok - export preserves managed datapacks and metadata\n");
+}
+
 /* ---------------------------------------------------------- *
  * The dialog's own flow
  *
@@ -1124,6 +1231,8 @@ test_dialog_imports_and_installs (void)
   window = GTK_WINDOW (g_object_ref_sink (gtk_window_new ()));
   anchor = GTK_BUTTON (gtk_button_new ());
   gtk_window_set_child (window, GTK_WIDGET (anchor));
+  gtk_widget_set_opacity (GTK_WIDGET (window), 0.0);
+  gtk_widget_set_focusable (GTK_WIDGET (window), FALSE);
   gtk_window_present (window);
   while (g_main_context_pending (NULL))
     g_main_context_iteration (NULL, FALSE);
@@ -1189,6 +1298,8 @@ main (int argc, char **argv)
   g_test_add_func ("/modpack/install-unresolved", test_install_needs_resolve);
   g_test_add_func ("/modpack/export-import-round-trip",
                    test_export_import_round_trip);
+  g_test_add_func ("/modpack/export-managed-datapack",
+                   test_export_preserves_managed_datapack);
 
   if (gtk_init_check ())
     {

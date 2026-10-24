@@ -57,9 +57,6 @@ msgstr "Nainstalujte tuto verzi s vybranými"
 msgid "Filter by category"
 msgstr "Filtrujte podle kategorie"
 
-msgid "Filter"
-msgstr "Filtr"
-
 msgid "Nothing to show yet"
 msgstr "Zatím není co ukázat"
 
@@ -294,9 +291,6 @@ msgstr "Přihlaste se"
 
 msgid "Open the page in your browser, then enter this code:"
 msgstr "Otevřete stránku v prohlížeči a zadejte tento kód:"
-
-msgid "Open the Page"
-msgstr "Otevřete stránku"
 
 msgid "Try Again"
 msgstr "Zkuste to znovu"
@@ -902,9 +896,6 @@ msgstr "Microsoft could not be reached. Check your connection and try again."
 
 msgid "Microsoft sign-in failed. Try again."
 msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open Microsoft sign-in in your browser, then enter this code:"
-msgstr "Open Microsoft sign-in in your browser, then enter this code:"
 
 msgid "Open in browser"
 msgstr "Otevřít v prohlížeči"

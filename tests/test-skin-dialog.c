@@ -46,6 +46,8 @@ test_skin_dialog_close (void)
   image = GTK_IMAGE (g_object_ref_sink (gtk_image_new ()));
   window = GTK_WINDOW (gtk_window_new ());
   gtk_window_set_child (window, GTK_WIDGET (button));
+  gtk_widget_set_opacity (GTK_WIDGET (window), 0.0);
+  gtk_widget_set_focusable (GTK_WIDGET (window), FALSE);
   gtk_window_present (window);
   drain ();
 

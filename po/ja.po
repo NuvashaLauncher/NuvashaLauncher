@@ -58,9 +58,6 @@ msgstr "選択したものと一緒にこのバージョンをインストール
 msgid "Filter by category"
 msgstr "カテゴリーで絞り込む"
 
-msgid "Filter"
-msgstr "絞り込み"
-
 msgid "Nothing to show yet"
 msgstr "表示するものはありません"
 
@@ -309,9 +306,6 @@ msgstr "サインイン"
 
 msgid "Open the page in your browser, then enter this code:"
 msgstr "ブラウザでページを開き、次のコードを入力します。"
-
-msgid "Open the Page"
-msgstr "ページを開く"
 
 msgid "Try Again"
 msgstr "もう一度お試しください"
@@ -933,9 +927,6 @@ msgstr "Microsoft could not be reached. Check your connection and try again."
 
 msgid "Microsoft sign-in failed. Try again."
 msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open Microsoft sign-in in your browser, then enter this code:"
-msgstr "Open Microsoft sign-in in your browser, then enter this code:"
 
 msgid "Open in browser"
 msgstr "ブラウザーで開く"

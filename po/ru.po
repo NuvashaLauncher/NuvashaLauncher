@@ -58,9 +58,6 @@ msgstr "Установить эту версию вместе с выбранн�
 msgid "Filter by category"
 msgstr "Фильтр по категории"
 
-msgid "Filter"
-msgstr "Фильтр"
-
 msgid "Nothing to show yet"
 msgstr "Здесь пока пусто"
 
@@ -310,9 +307,6 @@ msgstr "Войти"
 
 msgid "Open the page in your browser, then enter this code:"
 msgstr "Откройте страницу в браузере и введите этот код:"
-
-msgid "Open the Page"
-msgstr "Открыть страницу"
 
 msgid "Try Again"
 msgstr "Повторите попытку"
@@ -935,9 +929,6 @@ msgstr "Microsoft could not be reached. Check your connection and try again."
 
 msgid "Microsoft sign-in failed. Try again."
 msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open Microsoft sign-in in your browser, then enter this code:"
-msgstr "Open Microsoft sign-in in your browser, then enter this code:"
 
 msgid "Open in browser"
 msgstr "Открыть в браузере"
