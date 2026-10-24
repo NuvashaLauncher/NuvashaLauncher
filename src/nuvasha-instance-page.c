@@ -272,6 +272,7 @@ nuvasha_instance_page_new (NuvashaInstanceManager *manager, NuvashaInstance *ins
                                 ADW_VIEW_SWITCHER_POLICY_WIDE);
   adw_view_switcher_set_stack (ADW_VIEW_SWITCHER (switcher),
                                 ADW_VIEW_STACK (stack));
+  adw_header_bar_set_title_widget (header, GTK_WIDGET (switcher));
   self->stack = stack;
   self->toast_overlay = ADW_TOAST_OVERLAY (adw_toast_overlay_new ());
   adw_toast_overlay_set_child (self->toast_overlay, GTK_WIDGET (stack));

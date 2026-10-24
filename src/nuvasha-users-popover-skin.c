@@ -29,6 +29,8 @@ typedef struct
 static void on_active_skin_delete_done (GObject *, GAsyncResult *, gpointer);
 static void change_cape_on_server (SkinMenu *, const char *);
 static void upload_selected_skin (SkinMenu *, const char *);
+static void append_profile_skins (SkinMenu *, const char *);
+static void select_saved_skin (SkinMenu *);
 
 static void
 show_minecraft_service_error (SkinMenu *menu, const char *title, GError *error)
@@ -293,6 +295,13 @@ on_capes_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       goto done;
     }
 
+  {
+    gsize length = 0;
+    const char *data = g_bytes_get_data (bytes, &length);
+    g_autofree char *json = g_strndup (data, length);
+    append_profile_skins (menu, json);
+  }
+
   root = json_parser_get_root (parser);
   if (!JSON_NODE_HOLDS_OBJECT (root))
     goto done;
@@ -335,12 +344,18 @@ on_capes_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       gtk_string_list_append (menu->cape_list,
                               alias != NULL && *alias != '\0' ? alias : id);
       if (state != NULL && g_str_equal (state, "ACTIVE"))
-        gtk_drop_down_set_selected (menu->capes, menu->cape_ids->len);
+        {
+          gtk_drop_down_set_selected (menu->capes, menu->cape_ids->len);
+          if (url != NULL && *url != '\0')
+            load_view_texture (menu->view, url, TRUE);
+        }
     }
   menu->applying_profile = FALSE;
 
 done:
   menu->applying_profile = FALSE;
+  append_default_skins (menu);
+  select_saved_skin (menu);
   g_object_set_data (G_OBJECT (menu->dialog), "nuvasha-capes-loaded",
                      GINT_TO_POINTER (1));
 }
@@ -419,23 +434,6 @@ on_model_toggled (GtkCheckButton *button, gpointer user_data)
         upload_selected_skin (menu, url);
       }
     }
-}
-
-static void
-load_capes (SkinMenu *menu)
-{
-  SoupMessage *message;
-
-  if (menu->account == NULL || menu->account->type != nuvasha_ACCOUNT_MICROSOFT ||
-      menu->account->access_token == NULL ||
-      !nuvasha_account_token_is_valid (menu->account, g_get_real_time () / 1000000))
-    return;
-
-  message = nuvasha_minecraft_services_message (
-    SOUP_METHOD_GET, "/minecraft/profile", menu->account->access_token);
-  nuvasha_minecraft_services_send_async (message, menu->cancellable,
-                                         on_capes_loaded, menu);
-  g_object_unref (message);
 }
 
 static void
@@ -878,31 +876,6 @@ append_profile_skins (SkinMenu *menu, const char *json)
 }
 
 static void
-on_profile_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
-                   gpointer user_data)
-{
-  SkinMenu *menu = user_data;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (GBytes) bytes =
-    g_task_propagate_pointer (G_TASK (result), &error);
-
-  if (g_cancellable_is_cancelled (menu->cancellable))
-    return;
-
-  if (bytes != NULL && error == NULL)
-    {
-      gsize length = 0;
-      const char *data = g_bytes_get_data (bytes, &length);
-      g_autofree char *json = g_strndup (data, length);
-      append_profile_skins (menu, json);
-    }
-  append_default_skins (menu);
-  select_saved_skin (menu);
-  /* Keep the controller alive: rows may be selected after the request
-   * completes. */
-}
-
-static void
 load_profile_skins (SkinMenu *menu)
 {
   SoupMessage *message;
@@ -912,7 +885,7 @@ load_profile_skins (SkinMenu *menu)
   message = nuvasha_minecraft_services_message (
     SOUP_METHOD_GET, "/minecraft/profile", menu->account->access_token);
   nuvasha_minecraft_services_send_async (message, menu->cancellable,
-                                         on_profile_loaded, menu);
+                                         on_capes_loaded, menu);
   g_object_unref (message);
 }
 
@@ -1057,7 +1030,6 @@ nuvasha_users_skin_menu_new (NuvashaUsersPopover *owner, GtkImage *image, Nuvash
       data->applying_profile = FALSE;
     }
   g_signal_connect (capes, "notify::selected", G_CALLBACK (on_cape_selected), data);
-  load_capes (data);
   load_profile_skins (data);
   return dialog;
 }

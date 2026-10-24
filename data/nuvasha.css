@@ -2,7 +2,7 @@
  * surfaces and reusable visual states so the launcher follows Adwaita themes. */
 
 .nuvasha-main-toolbar {
-  padding: 0 6px;
+  padding: 0;
 }
 
 .nuvasha-empty-state {
