@@ -28,7 +28,11 @@ typedef struct
 
 static void on_active_skin_delete_done (GObject *, GAsyncResult *, gpointer);
 static void change_cape_on_server (SkinMenu *, const char *);
-static void upload_selected_skin (SkinMenu *, const char *);
+static void send_pending_cape_change (SkinMenu *);
+static void upload_selected_skin (SkinMenu *, const char *, const char *);
+static void start_pending_skin_upload (SkinMenu *);
+static gboolean retry_pending_skin_upload (gpointer);
+static void schedule_pending_skin_upload (SkinMenu *, guint);
 static void append_profile_skins (SkinMenu *, const char *);
 static void select_saved_skin (SkinMenu *);
 
@@ -38,6 +42,9 @@ show_minecraft_service_error (SkinMenu *menu, const char *title, GError *error)
   AdwAlertDialog *alert;
 
   if (menu == NULL || error == NULL || menu->dialog == NULL)
+    return;
+  if (error->domain == nuvasha_MINECRAFT_SERVICES_ERROR &&
+      error->code == nuvasha_MINECRAFT_SERVICES_ERROR_RATE_LIMITED)
     return;
   alert = ADW_ALERT_DIALOG (adw_alert_dialog_new (title, error->message));
   adw_alert_dialog_add_response (alert, "ok", _("OK"));
@@ -50,8 +57,7 @@ on_skin_dialog_close_attempt (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_dat
 {
   SkinMenu *menu = user_data;
 
-  if (menu->cancellable != NULL)
-    g_cancellable_cancel (menu->cancellable);
+  menu->closed = TRUE;
 }
 
 static void
@@ -145,12 +151,16 @@ load_view_texture (NuvashaSkinView *view, const char *url, gboolean cape)
 typedef struct {
   SkinMenu *menu;
   char *url;
+  char *variant;
+  GCancellable *cancellable;
 } SkinUpload;
 
 static void
 skin_upload_free (SkinUpload *upload)
 {
   g_free (upload->url);
+  g_free (upload->variant);
+  g_clear_object (&upload->cancellable);
   g_free (upload);
 }
 
@@ -163,20 +173,47 @@ on_skin_upload_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_autoptr (GError) error = NULL;
   g_autoptr (GBytes) response =
     g_task_propagate_pointer (G_TASK (result), &error);
-  if (response == NULL || error != NULL)
+  gboolean rate_limited = error != NULL &&
+                          error->domain == nuvasha_MINECRAFT_SERVICES_ERROR &&
+                          error->code == nuvasha_MINECRAFT_SERVICES_ERROR_RATE_LIMITED;
+
+  if (menu != NULL && (response == NULL || error != NULL) && rate_limited)
     {
-      g_warning ("Could not upload Minecraft skin: %s",
-                 error != NULL ? error->message : "empty response");
-      if (menu != NULL && error != NULL &&
-          error->code == nuvasha_MINECRAFT_SERVICES_ERROR_RATE_LIMITED)
-        menu->skin_upload_retry_after = g_get_real_time () / 1000000 +
-          nuvasha_minecraft_services_retry_delay (NULL, 0);
-      show_minecraft_service_error (menu, _("Minecraft Services error"), error);
+      guint delay = nuvasha_minecraft_services_retry_delay (
+        NULL, menu->skin_upload_retry_attempt++);
+
+      /* Keep the failed selection unless the user has already selected a
+       * newer one. The next attempt always uses the latest pending URL. */
+      if (menu->skin_upload_pending_url == NULL && upload != NULL)
+        menu->skin_upload_pending_url = g_strdup (upload->url);
+      menu->skin_upload_retry_after = g_get_real_time () / 1000000 + delay;
+      schedule_pending_skin_upload (menu, delay);
     }
+  else if (menu != NULL && (response == NULL || error != NULL))
+    g_debug ("skin upload failed: %s",
+             error != NULL ? error->message : "empty response");
+
   if (menu != NULL)
-    menu->skin_upload_in_flight = FALSE;
+    {
+      menu->skin_upload_in_flight = FALSE;
+      g_clear_object (&menu->skin_upload_cancellable);
+      if (response != NULL && error == NULL)
+        {
+          menu->skin_upload_retry_after = 0;
+          menu->skin_upload_retry_attempt = 0;
+        }
+    }
   if (upload != NULL)
     skin_upload_free (upload);
+
+  if (menu != NULL && !rate_limited)
+    {
+      gboolean succeeded = response != NULL && error == NULL;
+
+      start_pending_skin_upload (menu);
+      if (succeeded && !menu->skin_upload_in_flight)
+        send_pending_cape_change (menu);
+    }
 }
 
 static void
@@ -186,20 +223,17 @@ send_skin_upload (SkinUpload *upload, GBytes *bytes)
     SOUP_METHOD_POST, "/minecraft/profile/skins",
     upload->menu->account->access_token);
   g_autoptr (GBytes) body = NULL;
-  const char *variant = upload->menu->slim_model != NULL &&
-                        gtk_check_button_get_active (upload->menu->slim_model)
-                          ? "SLIM" : "CLASSIC";
   g_autofree char *content_type = NULL;
-  body = nuvasha_minecraft_services_skin_multipart (bytes, variant,
+  body = nuvasha_minecraft_services_skin_multipart (bytes, upload->variant,
                                                      &content_type);
   soup_message_set_request_body_from_bytes (message, content_type, body);
-  nuvasha_minecraft_services_send_async (message, upload->menu->cancellable,
+  nuvasha_minecraft_services_send_async (message, upload->cancellable,
                                          on_skin_upload_done, upload);
   g_object_unref (message);
 }
 
 static void
-upload_skin_url (SkinMenu *menu, const char *url)
+upload_skin_url (SkinMenu *menu, const char *url, const char *variant)
 {
   SoupMessage *message;
   SkinUpload *upload;
@@ -208,17 +242,21 @@ upload_skin_url (SkinMenu *menu, const char *url)
   if (menu->account == NULL || menu->account->access_token == NULL ||
       !nuvasha_account_token_is_valid (menu->account, g_get_real_time () / 1000000))
     return;
+  if (variant == NULL || *variant == '\0')
+    variant = "CLASSIC";
   message = nuvasha_minecraft_services_message (
     SOUP_METHOD_POST, "/minecraft/profile/skins", menu->account->access_token);
-  json = g_strdup_printf ("{\"url\":\"%s\",\"variant\":\"%s\"}", url,
-    menu->slim_model != NULL && gtk_check_button_get_active (menu->slim_model)
-      ? "SLIM" : "CLASSIC");
+  json = g_strdup_printf ("{\"url\":\"%s\",\"variant\":\"%s\"}",
+                          url, variant);
   soup_message_set_request_body_from_bytes (message, "application/json",
                                             g_bytes_new (json, strlen (json)));
   upload = g_new0 (SkinUpload, 1);
   upload->menu = menu;
   upload->url = g_strdup (url);
-  nuvasha_minecraft_services_send_async (message, menu->cancellable,
+  upload->variant = g_strdup (variant);
+  upload->cancellable = g_cancellable_new ();
+  menu->skin_upload_cancellable = g_object_ref (upload->cancellable);
+  nuvasha_minecraft_services_send_async (message, upload->cancellable,
                                          on_skin_upload_done, upload);
   g_object_unref (message);
 }
@@ -232,40 +270,127 @@ on_skin_upload_file_loaded (GObject *source, GAsyncResult *result, gpointer user
     g_file_load_bytes_finish (G_FILE (source), result, NULL, &error);
   if (bytes == NULL)
     {
+      SkinMenu *menu = upload->menu;
+
       g_warning ("Could not read skin for upload: %s", error->message);
-      upload->menu->skin_upload_in_flight = FALSE;
+      menu->skin_upload_in_flight = FALSE;
+      g_clear_object (&menu->skin_upload_cancellable);
       skin_upload_free (upload);
+      start_pending_skin_upload (menu);
+      return;
+    }
+  if (upload->menu->skin_upload_pending_url != NULL)
+    {
+      SkinMenu *menu = upload->menu;
+
+      menu->skin_upload_in_flight = FALSE;
+      g_clear_object (&menu->skin_upload_cancellable);
+      skin_upload_free (upload);
+      start_pending_skin_upload (menu);
       return;
     }
   send_skin_upload (upload, bytes);
 }
 
 static void
-upload_selected_skin (SkinMenu *menu, const char *url)
+start_pending_skin_upload (SkinMenu *menu)
 {
   g_autoptr (GFile) file = NULL;
   SkinUpload *upload;
-  if (menu->account == NULL || menu->account->access_token == NULL || url == NULL ||
+  gint64 now = g_get_real_time () / 1000000;
+
+  if (menu == NULL || menu->skin_upload_pending_url == NULL ||
+      menu->account == NULL || menu->account->access_token == NULL ||
       !nuvasha_account_token_is_valid (menu->account, g_get_real_time () / 1000000) ||
-      (!g_str_has_prefix (url, "file://") &&
-       !(g_str_has_prefix (url, "http://") || g_str_has_prefix (url, "https://"))))
+      menu->skin_upload_in_flight)
     return;
-  if (menu->skin_upload_in_flight)
-    return;
-  if (menu->skin_upload_retry_after > g_get_real_time () / 1000000)
-    return;
-  menu->skin_upload_in_flight = TRUE;
-  if (!g_str_has_prefix (url, "file://"))
+
+  if (menu->skin_upload_retry_after > now)
     {
-      upload_skin_url (menu, url);
+      guint delay = (guint) (menu->skin_upload_retry_after - now);
+
+      if (menu->skin_upload_retry_source == 0)
+        schedule_pending_skin_upload (menu, delay);
       return;
     }
-  file = g_file_new_for_uri (url);
-  upload = g_new0 (SkinUpload, 1);
-  upload->menu = menu;
-  upload->url = g_strdup (url);
-  g_file_load_bytes_async (file, upload->menu->cancellable,
-                           on_skin_upload_file_loaded, upload);
+
+  if (menu->skin_upload_retry_source != 0)
+    {
+      g_source_remove (menu->skin_upload_retry_source);
+      menu->skin_upload_retry_source = 0;
+    }
+
+  {
+    g_autofree char *url = g_steal_pointer (&menu->skin_upload_pending_url);
+    g_autofree char *variant = g_steal_pointer (&menu->skin_upload_pending_variant);
+
+    if (variant == NULL || *variant == '\0')
+      variant = g_strdup ("CLASSIC");
+
+    if (!g_str_has_prefix (url, "file://") &&
+        !g_str_has_prefix (url, "http://") &&
+        !g_str_has_prefix (url, "https://"))
+      return;
+
+    menu->skin_upload_in_flight = TRUE;
+    if (!g_str_has_prefix (url, "file://"))
+      {
+        upload_skin_url (menu, url, variant);
+        return;
+      }
+
+    file = g_file_new_for_uri (url);
+    upload = g_new0 (SkinUpload, 1);
+    upload->menu = menu;
+    upload->url = g_steal_pointer (&url);
+    upload->variant = g_steal_pointer (&variant);
+    upload->cancellable = g_cancellable_new ();
+    menu->skin_upload_cancellable = g_object_ref (upload->cancellable);
+    g_file_load_bytes_async (file, upload->cancellable,
+                             on_skin_upload_file_loaded, upload);
+  }
+}
+
+static gboolean
+retry_pending_skin_upload (gpointer user_data)
+{
+  SkinMenu *menu = user_data;
+
+  menu->skin_upload_retry_source = 0;
+  menu->skin_upload_retry_after = 0;
+  start_pending_skin_upload (menu);
+  return G_SOURCE_REMOVE;
+}
+
+static void
+upload_selected_skin (SkinMenu *menu, const char *url, const char *variant)
+{
+  if (menu == NULL || url == NULL ||
+      (!g_str_has_prefix (url, "file://") &&
+       !g_str_has_prefix (url, "http://") &&
+       !g_str_has_prefix (url, "https://")))
+    return;
+
+  if (menu->skin_upload_in_flight && menu->skin_upload_cancellable != NULL)
+    g_cancellable_cancel (menu->skin_upload_cancellable);
+  g_free (menu->skin_upload_pending_url);
+  menu->skin_upload_pending_url = g_strdup (url);
+  g_free (menu->skin_upload_pending_variant);
+  menu->skin_upload_pending_variant = g_strdup (
+    variant != NULL && g_ascii_strcasecmp (variant, "SLIM") == 0
+      ? "SLIM" : "CLASSIC");
+
+  if (!menu->skin_upload_in_flight)
+    start_pending_skin_upload (menu);
+}
+
+static void
+schedule_pending_skin_upload (SkinMenu *menu, guint delay)
+{
+  if (menu->skin_upload_retry_source != 0)
+    g_source_remove (menu->skin_upload_retry_source);
+  menu->skin_upload_retry_source = g_timeout_add_seconds (
+    MAX (1u, delay), retry_pending_skin_upload, menu);
 }
 
 static void
@@ -280,20 +405,16 @@ on_capes_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   JsonNode *root = NULL;
   JsonArray *capes = NULL;
 
+  if (menu->closed)
+    return;
+
   if (bytes == NULL || error != NULL)
-    {
-      if (error != NULL)
-        show_minecraft_service_error (menu, _("Could not load capes"), error);
-      goto done;
-    }
+    goto done;
 
   parser = json_parser_new ();
   if (!json_parser_load_from_data (parser, g_bytes_get_data (bytes, NULL),
                                    (gssize) g_bytes_get_size (bytes), &error))
-    {
-      show_minecraft_service_error (menu, _("Could not load capes"), error);
-      goto done;
-    }
+    goto done;
 
   {
     gsize length = 0;
@@ -308,14 +429,7 @@ on_capes_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   {
     JsonNode *node = json_object_get_member (json_node_get_object (root), "capes");
     if (node == NULL || !JSON_NODE_HOLDS_ARRAY (node))
-      {
-        g_autoptr (GError) shape_error = g_error_new_literal (
-          nuvasha_MINECRAFT_SERVICES_ERROR,
-          nuvasha_MINECRAFT_SERVICES_ERROR_RESPONSE,
-          _("Minecraft did not return a cape list."));
-        show_minecraft_service_error (menu, _("Could not load capes"), shape_error);
-        goto done;
-      }
+      goto done;
     capes = json_node_get_array (node);
   }
 
@@ -390,16 +504,30 @@ on_cape_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
 static void
 change_cape_on_server (SkinMenu *menu, const char *cape_id)
 {
+  g_free (menu->pending_cape_id);
+  menu->pending_cape_id = g_strdup (cape_id != NULL ? cape_id : "");
+
+  if (menu->skin_upload_in_flight)
+    return;
+
+  send_pending_cape_change (menu);
+}
+
+static void
+send_pending_cape_change (SkinMenu *menu)
+{
   SoupMessage *message;
   g_autofree char *json = NULL;
+  g_autofree char *cape_id = NULL;
 
   if (menu->account == NULL || menu->account->access_token == NULL ||
       !nuvasha_account_token_is_valid (menu->account, g_get_real_time () / 1000000))
     return;
+  cape_id = g_steal_pointer (&menu->pending_cape_id);
   message = nuvasha_minecraft_services_message (
-    cape_id != NULL ? SOUP_METHOD_PUT : SOUP_METHOD_DELETE,
+    cape_id != NULL && *cape_id != '\0' ? SOUP_METHOD_PUT : SOUP_METHOD_DELETE,
     "/minecraft/profile/capes/active", menu->account->access_token);
-  if (cape_id != NULL)
+  if (cape_id != NULL && *cape_id != '\0')
     {
       json = g_strdup_printf ("{\"capeId\":\"%s\"}", cape_id);
       soup_message_set_request_body_from_bytes (message, "application/json",
@@ -431,7 +559,8 @@ on_model_toggled (GtkCheckButton *button, gpointer user_data)
         GtkListBoxRow *row = gtk_list_box_get_selected_row (menu->skins);
         const char *url = row != NULL
           ? g_object_get_data (G_OBJECT (row), "nuvasha-skin-url") : NULL;
-        upload_selected_skin (menu, url);
+        upload_selected_skin (menu, url,
+                              menu->slim_model == button ? "SLIM" : "CLASSIC");
       }
     }
 }
@@ -570,8 +699,15 @@ on_active_skin_delete_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     g_task_propagate_pointer (G_TASK (result), &error);
   SkinMenu *menu = user_data;
 
+  if (menu->closed)
+    return;
+
   if (bytes == NULL || error != NULL)
     {
+      if (error != NULL &&
+          error->domain == nuvasha_MINECRAFT_SERVICES_ERROR &&
+          error->code == nuvasha_MINECRAFT_SERVICES_ERROR_RATE_LIMITED)
+        return;
       g_warning ("Could not change active Minecraft skin or cape: %s",
                  error != NULL ? error->message : "empty response");
       show_minecraft_service_error (menu, _("Minecraft Services error"), error);
@@ -748,7 +884,9 @@ on_skin_selected (GtkListBox *list, GtkListBoxRow *row, gpointer user_data)
                                       gtk_check_button_get_active (menu->slim_model)
                                         ? "SLIM" : "CLASSIC");
       nuvasha_accounts_update (menu->owner->accounts, account, &error);
-      upload_selected_skin (menu, url);
+       upload_selected_skin (menu, url,
+                             g_ascii_strcasecmp (account->skin_model, "SLIM") == 0
+                               ? "SLIM" : "CLASSIC");
     }
 }
 

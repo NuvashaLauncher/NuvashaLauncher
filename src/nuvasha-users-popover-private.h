@@ -43,8 +43,15 @@ typedef struct
   GtkCheckButton *default_model;
   GtkCheckButton *slim_model;
   gboolean applying_profile;
+  gboolean closed;
   gboolean skin_upload_in_flight;
   gint64 skin_upload_retry_after;
+  guint skin_upload_retry_source;
+  guint skin_upload_retry_attempt;
+  char *skin_upload_pending_url;
+  char *skin_upload_pending_variant;
+  GCancellable *skin_upload_cancellable;
+  char *pending_cape_id;
   GCancellable *cancellable;
   gboolean defaults_added;
   GHashTable *deleted_skin_ids;

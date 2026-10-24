@@ -93,7 +93,7 @@ nuvasha_minecraft_services_response_error (SoupMessage *message, GBytes *body)
   if (status == 429)
     return g_error_new (nuvasha_MINECRAFT_SERVICES_ERROR,
                         nuvasha_MINECRAFT_SERVICES_ERROR_RATE_LIMITED,
-                        _("Minecraft Services is rate limiting requests; try again shortly"));
+                        "rate limited");
   if (status < 200 || status >= 300)
     return g_error_new (nuvasha_MINECRAFT_SERVICES_ERROR,
                         nuvasha_MINECRAFT_SERVICES_ERROR_HTTP,
@@ -113,8 +113,9 @@ nuvasha_minecraft_services_skin_multipart (GBytes *skin,
   gsize length = 0;
   gconstpointer data;
 
+  if (variant == NULL || *variant == '\0')
+    variant = "CLASSIC";
   g_return_val_if_fail (skin != NULL, NULL);
-  g_return_val_if_fail (variant != NULL, NULL);
   g_return_val_if_fail (content_type != NULL, NULL);
 
   data = g_bytes_get_data (skin, &length);

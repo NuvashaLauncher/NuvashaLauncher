@@ -865,9 +865,6 @@ msgid "한국어"
 msgstr "한국어"
 
 # Minecraft Services API errors
-msgid "Minecraft Services is rate limiting requests; try again shortly"
-msgstr "Minecraft Services membatasi permintaan; coba lagi sebentar lagi"
-
 msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
 msgstr "Minecraft Services menolak permintaan (HTTP %u)%s%s"
 
@@ -911,8 +908,3 @@ msgstr "Open Microsoft sign-in in your browser, then enter this code:"
 
 msgid "Open in browser"
 msgstr "Buka di browser"
-msgid "Could not load capes"
-msgstr "Could not load capes"
-
-msgid "Minecraft did not return a cape list."
-msgstr "Minecraft did not return a cape list."
