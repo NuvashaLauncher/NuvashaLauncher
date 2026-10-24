@@ -467,8 +467,6 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
 {
   GtkWidget *page = NULL;
   GtkBox *root = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
-  gtk_widget_add_css_class (GTK_WIDGET (root), "nuvasha-main-content");
-  gtk_widget_add_css_class (GTK_WIDGET (root), "nuvasha-results-card");
   GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   g_autoptr (GtkBuilder) toolbar_builder = gtk_builder_new_from_resource (
     "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-modpack-browser-toolbar.ui");
@@ -481,8 +479,6 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
   GtkBox *retry_row = GTK_BOX (gtk_builder_get_object (states_builder, "retry_row"));
   GtkLabel *retry_label = GTK_LABEL (gtk_builder_get_object (states_builder, "retry_label"));
   GtkButton *retry_button = GTK_BUTTON (gtk_builder_get_object (states_builder, "retry_button"));
-  GtkButton *close_button = GTK_BUTTON (gtk_builder_get_object (
-    toolbar_builder, "close-button"));
 
   /* Exactly one of these is shown at any moment: the list, the words for
      an empty answer, the error, or the spinner while the first page is
@@ -503,8 +499,6 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
   g_signal_connect_object (self->search_entry, "changed",
                            G_CALLBACK (on_search_changed), self, 0);
 
-  g_signal_connect_swapped (close_button, "clicked",
-                            G_CALLBACK (adw_dialog_close), self);
   gtk_box_append (GTK_BOX (root), GTK_WIDGET (top));
 
   /* The list. The bottom of it holds a spinner while the next page is on
