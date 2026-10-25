@@ -180,6 +180,8 @@ install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS) $(SCHEMA_COMPILED)
 	done
 	install -Dm644 data/com.github.nuvashalauncher.nuvasha.desktop \
 		"$(DESTDIR)$(PREFIX)/share/applications/com.github.nuvashalauncher.nuvasha.desktop"
+	install -Dm644 data/application-x-modrinth-modpack.xml \
+		"$(DESTDIR)$(PREFIX)/share/mime/packages/application-x-modrinth-modpack.xml"
 	install -Dm644 data/icons/scalable/apps/com.github.nuvashalauncher.nuvasha.svg \
 		"$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.nuvashalauncher.nuvasha.svg"
 	install -Dm644 data/com.github.nuvashalauncher.nuvasha.metainfo.xml \
@@ -199,6 +201,7 @@ uninstall:
 	rm -f "$(DESTDIR)$(PREFIX)/share/nuvasha/nuvasha.css"
 	rm -rf "$(DESTDIR)$(PREFIX)/share/nuvasha/skins/defaults"
 	rm -f "$(DESTDIR)$(PREFIX)/share/applications/com.github.nuvashalauncher.nuvasha.desktop"
+	rm -f "$(DESTDIR)$(PREFIX)/share/mime/packages/application-x-modrinth-modpack.xml"
 	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.nuvashalauncher.nuvasha.svg"
 	rm -f "$(DESTDIR)$(PREFIX)/share/metainfo/com.github.nuvashalauncher.nuvasha.metainfo.xml"
 	rm -f "$(DESTDIR)$(PREFIX)/share/glib-2.0/schemas/gschemas.compiled"

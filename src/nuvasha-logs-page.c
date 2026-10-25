@@ -30,12 +30,40 @@ struct _NuvashaLogsPage
   /* Keep all lines; filtering only changes which lines are displayed. */
   GPtrArray *lines; /* char*, one per line, in order */
   gboolean filtered;
+
+  /* Setting the adjustment while GTK is recalculating its bounds emits a
+   * value-changed signal too. Keep that internal move from looking like a
+   * user scrolling away from the live tail. */
+  gboolean auto_scrolling;
+  guint scroll_idle;
 };
 
 G_DEFINE_FINAL_TYPE (NuvashaLogsPage, nuvasha_logs_page, GTK_TYPE_BOX)
 
 static void scroll_to_end (NuvashaLogsPage *self);
 static void show_lines (NuvashaLogsPage *self);
+
+static gboolean
+scroll_to_end_idle (gpointer user_data)
+{
+  NuvashaLogsPage *self = nuvasha_LOGS_PAGE (user_data);
+
+  self->scroll_idle = 0;
+  if (self->following)
+    scroll_to_end (self);
+
+  return G_SOURCE_REMOVE;
+}
+
+static void
+schedule_scroll_to_end (NuvashaLogsPage *self)
+{
+  if (self->scroll_idle == 0)
+    self->scroll_idle = g_idle_add_full (G_PRIORITY_DEFAULT_IDLE,
+                                         scroll_to_end_idle,
+                                         g_object_ref (self),
+                                         g_object_unref);
+}
 
 /* Launcher lines carry internal stream tags and some Minecraft versions
  * emit Log4j XML records. Keep those details for diagnostics internally,
@@ -226,7 +254,7 @@ append_line (NuvashaLogsPage *self, const char *line)
       self->rendered = self->lines->len;
 
       if (self->following)
-        scroll_to_end (self);
+        schedule_scroll_to_end (self);
 
       return;
     }
@@ -234,7 +262,7 @@ append_line (NuvashaLogsPage *self, const char *line)
   show_lines (self);
 
   if (self->following)
-    scroll_to_end (self);
+    schedule_scroll_to_end (self);
 }
 
 /* ---------------------------------------------------------- *
@@ -403,10 +431,14 @@ scroll_to_end (NuvashaLogsPage *self)
 {
   GtkAdjustment *adjustment =
     gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (self->scroller));
+  gdouble end = gtk_adjustment_get_upper (adjustment) -
+                gtk_adjustment_get_page_size (adjustment);
+  gdouble lower = gtk_adjustment_get_lower (adjustment);
 
-  gtk_adjustment_set_value (adjustment, gtk_adjustment_get_upper (adjustment) -
-                                        gtk_adjustment_get_page_size (
-                                          adjustment));
+  end = MAX (lower, end);
+  self->auto_scrolling = TRUE;
+  gtk_adjustment_set_value (adjustment, end);
+  self->auto_scrolling = FALSE;
 }
 
 static void
@@ -415,11 +447,30 @@ on_adjustment_changed (GtkAdjustment *adjustment, gpointer user_data)
   NuvashaLogsPage *self = nuvasha_LOGS_PAGE (user_data);
   gdouble at_end;
 
+  if (self->auto_scrolling)
+    return;
+
   at_end = gtk_adjustment_get_upper (adjustment) -
            gtk_adjustment_get_page_size (adjustment) -
-           gtk_adjustment_get_step_increment (adjustment);
+           gtk_adjustment_get_lower (adjustment);
 
-  self->following = gtk_adjustment_get_value (adjustment) >= at_end;
+  at_end = MAX (gtk_adjustment_get_lower (adjustment), at_end);
+
+  /* One pixel avoids losing the live tail to fractional adjustment values. */
+  self->following = gtk_adjustment_get_value (adjustment) >= at_end - 1.0;
+}
+
+/* GtkTextView updates the adjustment's upper bound after its buffer changes.
+ * Setting the value before that happens only reaches the old bottom. The
+ * `changed` signal is the GTK-supported point at which the new bottom exists,
+ * so follow it there when the user was already following the log. */
+static void
+on_adjustment_bounds_changed (GtkAdjustment *adjustment, gpointer user_data)
+{
+  NuvashaLogsPage *self = nuvasha_LOGS_PAGE (user_data);
+
+  if (self->following)
+    schedule_scroll_to_end (self);
 }
 
 /* The page is built before it is on the screen, so the log of a game
@@ -582,10 +633,12 @@ nuvasha_logs_page_new (NuvashaLauncher *launcher)
    adw_navigation_split_view_set_max_sidebar_width (split, 700);
    gtk_box_append (GTK_BOX (self), GTK_WIDGET (split));
 
-  adjustment =
-    gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (self->scroller));
-   g_signal_connect_object (adjustment, "value-changed",
-                            G_CALLBACK (on_adjustment_changed), self, 0);
+   adjustment =
+     gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (self->scroller));
+    g_signal_connect_object (adjustment, "value-changed",
+                             G_CALLBACK (on_adjustment_changed), self, 0);
+    g_signal_connect_object (adjustment, "changed",
+                             G_CALLBACK (on_adjustment_bounds_changed), self, 0);
 
   g_signal_connect_object (self->launcher, "state", G_CALLBACK (on_state_changed),
                            self, 0);
@@ -608,6 +661,12 @@ nuvasha_logs_page_dispose (GObject *object)
      the connections go before anything else can arrive. */
   if (self->launcher != NULL)
     g_signal_handlers_disconnect_by_data (self->launcher, self);
+
+  if (self->scroll_idle != 0)
+    {
+      g_source_remove (self->scroll_idle);
+      self->scroll_idle = 0;
+    }
 
   G_OBJECT_CLASS (nuvasha_logs_page_parent_class)->dispose (object);
 }
