@@ -123,8 +123,11 @@ flowchart TD
 ### Application and UI
 
 `main.c` creates the `AdwApplication`, initializes translations, loads the
-instance store and presents the one `NuvashaMainWindow`. A second activation
-focuses the existing window rather than creating another one.
+instance store and normally presents the one `NuvashaMainWindow`. A second
+activation focuses the existing window rather than creating another one. The
+same executable also accepts a command-line instance ID and can launch that
+instance through the normal launcher state machine without opening the main
+window; live output remains owned by the launcher's log buffer.
 
 The main window owns a `NuvashaMainWindowModel`. The model groups the
 process-wide objects used by the UI:
@@ -161,6 +164,7 @@ layout:
 - create and register an instance;
 - rename or update validated properties;
 - duplicate an instance;
+- reorder instances in the user-visible list and persist that order;
 - move an instance to another directory;
 - delete an instance, with an explicit choice about deleting its files;
 - open its directory with the desktop file manager.
@@ -327,7 +331,13 @@ reaches the UI:
   offered as compatible results.
 
 Content pages use models and rows, not raw API JSON. Details are converted from
-Modrinth Markdown to the restricted GTK markup the UI expects.
+Modrinth Markdown to the restricted GTK markup the UI expects. Installed
+content pages share an edit/selection model: checkboxes can select files for
+bulk deletion, the action footer appears only when something is selected, and
+the existing dependency-delete policy is applied by the same deletion pipeline
+as a single-file delete. Update All uses that page's asynchronous operation
+state and exposes its scan/install progress and cancellation through a
+downloads-style popover.
 
 `nuvasha-content-index.c` maintains local metadata for installed content. The
 index records hashes, filenames, provider/project identity, versions,
