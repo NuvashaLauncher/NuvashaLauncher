@@ -5,7 +5,7 @@
 Type=Application
 Name=Nuvasha Launcher
 Comment=Minecraft launcher for Linux
-Exec=NuvashaLauncher --import %f
+Exec=NuvashaLauncher %f
 Icon=com.github.nuvashalauncher.nuvasha
 Terminal=false
 Categories=Game;
