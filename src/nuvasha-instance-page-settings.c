@@ -229,6 +229,7 @@ java_status_refresh (NuvashaInstancePage *self)
   const NuvashaJava *effective = NULL;
   const char *message = NULL;
   GPtrArray *detected;
+  const char *selected_path;
   g_autofree char *current = NULL;
 
   if (self->java_row == NULL || !nuvasha_java_row_get_ready (row))
@@ -241,15 +242,17 @@ java_status_refresh (NuvashaInstancePage *self)
      and that same runtime is taken out of the list below so it is not
      shown twice. */
   nuvasha_java_row_set_required_major (row, self->required_java);
+  selected_path = nuvasha_java_row_get_selected_path (row);
 
-  if (detected->len == 0 && current == NULL)
-    message = _("No Java installation was found on this system");
-
-  if (message == NULL && self->required_java > 0)
+   if (message == NULL && self->required_java > 0)
     {
       effective = nuvasha_java_select (detected, current, self->required_java);
 
-      if (effective == NULL && current != NULL)
+       if (effective == NULL && current != NULL &&
+           !g_file_test (current, G_FILE_TEST_IS_EXECUTABLE) &&
+           !(selected_path != NULL && *selected_path != '\0' &&
+             g_strcmp0 (selected_path, current) == 0 &&
+             g_file_test (selected_path, G_FILE_TEST_IS_EXECUTABLE)))
         message = _("The configured Java was not detected; make sure it "
                      "is still a usable java executable");
       else if (effective != NULL &&

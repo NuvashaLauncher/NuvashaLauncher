@@ -10,7 +10,9 @@
 #include "nuvasha-loaders.h"
 #include "nuvasha-minecraft-resolve.h"
 #include "nuvasha-minecraft-versions.h"
+#ifndef nuvasha_FLATPAK
 #include "nuvasha-sandbox.h"
+#endif
 
 #include <string.h>
 
@@ -93,7 +95,9 @@ run_the_game (NuvashaLauncher *self)
 {
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
+#ifndef nuvasha_FLATPAK
   g_autoptr (GPtrArray) sandbox_argv = NULL;
+#endif
   g_autofree char *jvm_args = NULL;
   g_autofree char *offline_uuid = NULL;
   NuvashaAccount *account = NULL;
@@ -135,6 +139,7 @@ run_the_game (NuvashaLauncher *self)
       return;
     }
 
+#ifndef nuvasha_FLATPAK
   if (self->settings != NULL &&
       nuvasha_settings_get_sandbox_enabled (self->settings))
     {
@@ -153,6 +158,7 @@ run_the_game (NuvashaLauncher *self)
       argv = g_steal_pointer (&sandbox_argv);
       log_line (self, TAG_STATE, "bubblewrap sandbox enabled");
     }
+#endif
 
   /* Who the game is about to run as. The token is not in this line: the
      command line that is logged by the spawn carries it redacted, and
@@ -175,17 +181,55 @@ run_the_game (NuvashaLauncher *self)
 typedef struct {
   NuvashaLauncher *launcher;
   NuvashaTaskScope *operation;
+  GPtrArray *javas;
 } JavaSearch;
 
 static void
 java_search_free (JavaSearch *search)
 {
   g_clear_object (&search->launcher);
+  g_clear_pointer (&search->javas, g_ptr_array_unref);
 
   if (search->operation != NULL)
     nuvasha_task_scope_unref (search->operation);
 
   g_free (search);
+}
+
+static void
+on_custom_java_probed (GObject *source G_GNUC_UNUSED,
+                       GAsyncResult *result,
+                       gpointer user_data)
+{
+  JavaSearch *search = user_data;
+  NuvashaLauncher *self = search->launcher;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (NuvashaJava) custom =
+    nuvasha_java_probe_finish (result, &error);
+  g_autofree char *instance_java = NULL;
+  const NuvashaJava *java = NULL;
+
+  if (custom == NULL)
+    {
+      launch_finished_with_error (self, g_steal_pointer (&error));
+      java_search_free (search);
+      return;
+    }
+
+  g_ptr_array_add (search->javas, g_steal_pointer (&custom));
+  java = choose_java (self, search->javas,
+                      self->preparation.resolved != NULL
+                        ? self->preparation.resolved->java_major_version : 0,
+                      &instance_java);
+  if (java == NULL)
+    {
+      java_search_free (search);
+      return;
+    }
+
+  remember_java (self, java);
+  run_the_game (self);
+  java_search_free (search);
 }
 
 static void
@@ -211,6 +255,22 @@ on_java_detected (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   if (self->process.stop_requested)
     {
       java_search_free (search);
+      return;
+    }
+
+  g_object_get (self->instance, "java-path", &instance_java, NULL);
+  if (instance_java != NULL && *instance_java != '\0')
+    {
+      /* Explicit runtimes selected through Flatpak portals are not part of
+       * the host-runtime scan. Probe that configured executable directly and
+       * add its result to the candidates before selecting Java. */
+      nuvasha_task_scope_unref (search->operation);
+      search->operation = NULL;
+      search->javas = g_steal_pointer (&javas);
+      search->operation = nuvasha_java_probe_async (
+        instance_java, on_custom_java_probed, search);
+      nuvasha_task_scope_follow_cancellable (search->operation,
+                                             self->preparation.cancellable);
       return;
     }
 

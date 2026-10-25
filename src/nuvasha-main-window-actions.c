@@ -193,6 +193,7 @@ on_delete_dependents_toggled (GObject *object,
       row, nuvasha_settings_get_delete_dependents (self->model->settings));
 }
 
+#ifndef nuvasha_FLATPAK
 static void
 on_sandbox_toggled (GObject *object,
                     GParamSpec *pspec G_GNUC_UNUSED,
@@ -227,6 +228,7 @@ on_sandbox_network_toggled (GObject *object,
     adw_switch_row_set_active (
       row, nuvasha_settings_get_sandbox_network_enabled (self->model->settings));
 }
+#endif
 
 static void
 on_language_selected (GObject *object,
@@ -385,7 +387,9 @@ create_settings_dialog (NuvashaMainWindow *self)
   AdwPreferencesGroup *language_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwPreferencesGroup *cache_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwPreferencesGroup *general_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+#ifndef nuvasha_FLATPAK
   AdwPreferencesGroup *sandbox_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+#endif
   AdwComboRow *language_row = ADW_COMBO_ROW (adw_combo_row_new ());
   AdwSwitchRow *row = ADW_SWITCH_ROW (adw_switch_row_new ());
   AdwSpinRow *limit_row = NULL;
@@ -395,8 +399,10 @@ create_settings_dialog (NuvashaMainWindow *self)
   AdwActionRow *clear_cache_row = ADW_ACTION_ROW (adw_action_row_new ());
   AdwSwitchRow *export_metadata_row = ADW_SWITCH_ROW (adw_switch_row_new ());
   AdwSwitchRow *delete_dependents_row = ADW_SWITCH_ROW (adw_switch_row_new ());
+#ifndef nuvasha_FLATPAK
   AdwSwitchRow *sandbox_row = ADW_SWITCH_ROW (adw_switch_row_new ());
   AdwSwitchRow *sandbox_network_row = ADW_SWITCH_ROW (adw_switch_row_new ());
+#endif
 
    /* Bound the settings surface to a usable width and a scrollable
     * maximum-height-sized page. */
@@ -413,8 +419,10 @@ create_settings_dialog (NuvashaMainWindow *self)
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (clear_cache_row), FALSE);
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (export_metadata_row), FALSE);
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (delete_dependents_row), FALSE);
+#ifndef nuvasha_FLATPAK
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (sandbox_row), FALSE);
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (sandbox_network_row), FALSE);
+#endif
 
   adw_dialog_set_title (dialog, _("Settings"));
   adw_preferences_dialog_set_search_enabled (ADW_PREFERENCES_DIALOG (dialog),
@@ -423,9 +431,11 @@ create_settings_dialog (NuvashaMainWindow *self)
   adw_preferences_group_set_title (versions_group,
                                      _("Versions"));
   adw_preferences_group_set_title (general_group,
-                                   _("General"));
+                                    _("General"));
+#ifndef nuvasha_FLATPAK
   adw_preferences_group_set_title (sandbox_group,
-                                   _("Sandbox"));
+                                    _("Sandbox"));
+#endif
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (export_metadata_row),
                                   _("Ask for export metadata"));
   adw_action_row_set_subtitle (ADW_ACTION_ROW (export_metadata_row),
@@ -446,8 +456,9 @@ create_settings_dialog (NuvashaMainWindow *self)
     g_signal_connect_object (delete_dependents_row, "notify::active",
                              G_CALLBACK (on_delete_dependents_toggled), self, 0);
    adw_preferences_group_add (general_group,
-                                GTK_WIDGET (delete_dependents_row));
+                                 GTK_WIDGET (delete_dependents_row));
 
+#ifndef nuvasha_FLATPAK
    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (sandbox_row),
                                    _("Enable sandbox"));
    adw_switch_row_set_active (
@@ -467,6 +478,7 @@ create_settings_dialog (NuvashaMainWindow *self)
                              G_CALLBACK (on_sandbox_network_toggled), self, 0);
    adw_preferences_group_add (sandbox_group,
                                GTK_WIDGET (sandbox_network_row));
+#endif
 
    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
                                   _("Show unstable Minecraft versions"));
@@ -600,8 +612,10 @@ create_settings_dialog (NuvashaMainWindow *self)
                              language_group);
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                              cache_group);
+#ifndef nuvasha_FLATPAK
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                              sandbox_group);
+#endif
   adw_preferences_dialog_add (ADW_PREFERENCES_DIALOG (dialog),
                               ADW_PREFERENCES_PAGE (page));
 

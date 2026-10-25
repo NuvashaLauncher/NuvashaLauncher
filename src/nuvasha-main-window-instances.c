@@ -530,6 +530,16 @@ row_set_icon (GtkImage *image, NuvashaInstance *instance)
         }
     }
 
+  {
+    g_autoptr (GdkTexture) fallback = gdk_texture_new_from_resource (
+      "/com/github/nuvashalauncher/nuvasha/pack.png");
+    if (fallback != NULL)
+      {
+        gtk_image_set_from_paintable (image, GDK_PAINTABLE (fallback));
+        return;
+      }
+  }
+
   gtk_image_set_from_icon_name (image, "applications-games-symbolic");
 }
 

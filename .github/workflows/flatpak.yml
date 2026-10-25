@@ -1,0 +1,21 @@
+name: Flatpak
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - flatpak
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Build Flatpak bundle
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: NuvashaLauncher.flatpak
+          manifest-path: packaging/flatpak/com.github.nuvashalauncher.Nuvasha.yml
+          cache: true

@@ -142,8 +142,6 @@ msgstr "Jawa"
 msgid "Java Runtime"
 msgstr "Waktu Proses Java"
 
-msgid "No Java installation was found on this system"
-msgstr "Tidak ada instalasi Java yang ditemukan pada sistem ini"
 
 msgid "This game needs Java %d or newer, selected Java is %d"
 msgstr "Game ini memerlukan Java %d atau lebih baru, Java yang dipilih adalah %d"

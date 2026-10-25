@@ -147,8 +147,6 @@ msgstr "Java"
 msgid "Java Runtime"
 msgstr "Java 运行时"
 
-msgid "No Java installation was found on this system"
-msgstr "在此系统中未找到 Java 安装"
 
 msgid "This game needs Java %d or newer, selected Java is %d"
 msgstr "此游戏需要 Java %d 或更高版本，当前选择的是 Java %d"

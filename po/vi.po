@@ -142,8 +142,6 @@ msgstr "Java"
 msgid "Java Runtime"
 msgstr "Thời gian chạy Java"
 
-msgid "No Java installation was found on this system"
-msgstr "Không tìm thấy cài đặt Java trên hệ thống này"
 
 msgid "This game needs Java %d or newer, selected Java is %d"
 msgstr "Trò chơi này cần Java %d hoặc mới hơn, Java được chọn là %d"

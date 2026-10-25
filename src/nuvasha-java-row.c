@@ -17,6 +17,7 @@
 
 static void custom_loaded (GObject*, GAsyncResult*, gpointer);
 static void on_picked (GObject*, GParamSpec*, gpointer);
+static void fill (NuvashaJavaRow *self);
 
 struct _NuvashaJavaRow
 {
@@ -34,12 +35,6 @@ struct _NuvashaJavaRow
   GPtrArray *ids;   /* strdupped paths; the automatic entry has a NULL id */
   GPtrArray *names; /* the titles shown in the model */
 
-  /* Where the add entry sits in the model, GTK_INVALID_LIST_POSITION
-   * while the list does not hold one. */
-  guint add_index;
-
-  /* The entry to go back to when the add entry is picked: it names no
-   * runtime, so it cannot stay selected. */
   guint restore;
 
   /* Runtime represented by the automatic entry, when available.
@@ -59,6 +54,7 @@ struct _NuvashaJavaRow
   gboolean automatic_selection;
   gboolean rebuilding;
   GtkButton *retry;
+  GtkButton *add_button;
 
   /* The request the row is waiting for. Borrowed from the JavaAsk that
      started it: that one releases it when the answer arrives, and a
@@ -151,23 +147,21 @@ show_loading (NuvashaJavaRow *self)
   g_ptr_array_add (names, g_strdup (_("Loading…")));
 
   self->ready = FALSE;
-  self->add_index = GTK_INVALID_LIST_POSITION;
   put_model (self, g_steal_pointer (&names), 0);
   gtk_widget_set_sensitive (GTK_WIDGET (self), FALSE);
   gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->add_button), FALSE);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self), NULL);
 }
 
 static void
 show_error (NuvashaJavaRow *self, const char *message)
 {
-  g_autoptr (GPtrArray) names = g_ptr_array_new_with_free_func (g_free);
-
-  self->ready = FALSE;
-  self->add_index = GTK_INVALID_LIST_POSITION;
-  put_model (self, g_steal_pointer (&names), GTK_INVALID_LIST_POSITION);
+  /* Reuse the normal model construction so the combo keeps its factory,
+   * selection and Add Java Runtime entry exactly as it does after a
+   * successful scan. */
+  fill (self);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self), message);
-  gtk_widget_set_sensitive (GTK_WIDGET (self), TRUE);
   gtk_widget_set_visible (GTK_WIDGET (self->retry), TRUE);
 }
 
@@ -245,10 +239,15 @@ fill (NuvashaJavaRow *self)
         position = names->len - 1;
     }
 
-  /* The trailing entry is how a runtime detection did not report gets
-     added. It names no runtime, so it gets no id. */
-  g_ptr_array_add (names, g_strdup (_("Add Java Runtime")));
-  self->add_index = names->len - 1;
+  /* Keep one blank item when detection found nothing. AdwComboRow uses the
+   * model to keep the row enabled, while the error is shown only in the
+   * subtitle and the real recovery action is the suffix button. */
+  if (names->len == 0)
+    {
+      g_ptr_array_add (names, g_strdup (""));
+      position = 0;
+    }
+
 
   g_clear_pointer (&self->ids, g_ptr_array_unref);
   self->ids = ids;
@@ -258,7 +257,7 @@ fill (NuvashaJavaRow *self)
 
   /* Keep a real item selected so the popup is usable even when no exact
      automatic runtime exists. */
-  if (position == GTK_INVALID_LIST_POSITION && names->len > 0)
+  if (position == GTK_INVALID_LIST_POSITION && names->len > 0 && ids->len > 0)
     position = 0;
 
   /* Filled in below, once the model carries the entry this points at. */
@@ -266,6 +265,9 @@ fill (NuvashaJavaRow *self)
   put_model (self, names, position);
 
   gtk_widget_set_sensitive (GTK_WIDGET (self), TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (self->add_button),
+                          (self->javas == NULL || self->javas->len == 0) &&
+                          self->probed == NULL);
   gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self), NULL);
 
@@ -372,6 +374,10 @@ custom_loaded (GObject      *source G_GNUC_UNUSED,
     }
 
   fill (self);
+  /* Reloading a configured custom runtime can keep the same numeric combo
+   * selection, so notify the owner even when GTK suppresses a selected-value
+   * change. The instance page must revalidate its status subtitle. */
+  g_object_notify (G_OBJECT (self), "selected");
   java_ask_free (ask);
 }
 
@@ -422,11 +428,27 @@ add_probed (GObject      *source G_GNUC_UNUSED,
     }
 
   {
-    const char *executable = probe->executable;
-    nuvasha_java_row_set_custom (self, executable, g_steal_pointer (&probe));
+      const char *executable = probe->executable;
+      nuvasha_java_row_set_custom (self, executable, g_steal_pointer (&probe));
+      /* A custom runtime can occupy the same numeric selection as the
+       * placeholder it replaces. GTK then quite correctly suppresses
+       * notify::selected, but the owning instance still needs to persist the
+       * newly probed executable. */
+      g_object_notify (G_OBJECT (self), "selected");
   }
 
   java_ask_free (ask);
+}
+
+static void
+probe_custom_path (NuvashaJavaRow *self, const char *path)
+{
+  JavaAsk *ask = g_new0 (JavaAsk, 1);
+
+  ask->row = g_object_ref (self);
+  ask->operation = nuvasha_java_probe_async (path, add_probed, ask);
+  nuvasha_task_scope_follow_cancellable (ask->operation, self->cancellable);
+  self->operation = ask->operation;
 }
 
 static void
@@ -461,16 +483,75 @@ add_chosen (GObject *dialog, GAsyncResult *result, gpointer user_data)
         _("the chosen file does not report a Java version"));
     else
       {
-        JavaAsk *ask = g_new0 (JavaAsk, 1);
-
-        ask->row = g_object_ref (self);
-        ask->operation = nuvasha_java_probe_async (path, add_probed, ask);
-        nuvasha_task_scope_follow_cancellable (ask->operation, self->cancellable);
-        self->operation = ask->operation;
+        probe_custom_path (self, path);
       }
   }
 
   g_object_unref (self);
+}
+
+ #ifdef nuvasha_FLATPAK
+static void
+add_folder_chosen (GObject *dialog, GAsyncResult *result, gpointer user_data)
+{
+  NuvashaJavaRow *self = nuvasha_JAVA_ROW (user_data);
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GFile) folder = gtk_file_dialog_select_folder_finish (
+    GTK_FILE_DIALOG (dialog), result, &error);
+
+  g_object_unref (dialog);
+
+  if (folder == NULL)
+    {
+      if (error != NULL &&
+          !g_error_matches (error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_DISMISSED) &&
+          !g_error_matches (error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_CANCELLED))
+        adw_action_row_set_subtitle (ADW_ACTION_ROW (self), error->message);
+      g_object_unref (self);
+      return;
+    }
+
+  {
+    g_autofree char *directory = g_file_get_path (folder);
+    g_autofree char *java = directory != NULL
+      ? g_build_filename (directory, "bin", "java", NULL) : NULL;
+
+    if (java == NULL || !g_file_test (java, G_FILE_TEST_IS_EXECUTABLE))
+      adw_action_row_set_subtitle (
+        ADW_ACTION_ROW (self),
+        "The selected directory does not contain bin/java");
+    else
+      probe_custom_path (self, java);
+  }
+
+  g_object_unref (self);
+}
+ #endif
+
+static void
+open_add_dialog (NuvashaJavaRow *self)
+{
+  GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
+  GtkFileDialog *dialog = gtk_file_dialog_new ();
+  g_autoptr (GFile) home = g_file_new_for_path (g_get_home_dir ());
+
+  gtk_file_dialog_set_initial_folder (dialog, home);
+#ifdef nuvasha_FLATPAK
+  gtk_file_dialog_set_title (dialog, "Choose Java runtime directory");
+  gtk_file_dialog_select_folder (dialog,
+                                 GTK_IS_WINDOW (root) ? GTK_WINDOW (root) : NULL,
+                                 NULL, add_folder_chosen, g_object_ref (self));
+#else
+  gtk_file_dialog_set_title (dialog, _("Choose Java executable"));
+  gtk_file_dialog_open (dialog, GTK_IS_WINDOW (root) ? GTK_WINDOW (root) : NULL,
+                        NULL, add_chosen, g_object_ref (self));
+#endif
+}
+
+static void
+on_add_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  open_add_dialog (nuvasha_JAVA_ROW (user_data));
 }
 
 static void
@@ -479,36 +560,16 @@ on_picked (GObject    *object G_GNUC_UNUSED,
            gpointer    user_data)
 {
   NuvashaJavaRow *self = nuvasha_JAVA_ROW (user_data);
-  GtkRoot *root;
-  GtkFileDialog *dialog;
   guint selected = adw_combo_row_get_selected (ADW_COMBO_ROW (self));
 
   if (self->rebuilding)
     return;
 
-  if (selected != self->add_index)
+  if (selected < self->ids->len)
     {
-      /* Anything else in the list names a runtime, and is where the ask
-         goes back to. */
-      if (selected < self->ids->len)
-        {
-          self->restore = selected;
-          self->automatic_selection = FALSE;
-        }
-
-      return;
+      self->restore = selected;
+      self->automatic_selection = self->ids->pdata[selected] == NULL;
     }
-
-  /* Connected before whoever uses the row, so the selection is already
-     back on a runtime by the time its handler asks which one was
-     picked. */
-  adw_combo_row_set_selected (ADW_COMBO_ROW (self), self->restore);
-
-  root = gtk_widget_get_root (GTK_WIDGET (self));
-  dialog = gtk_file_dialog_new ();
-  gtk_file_dialog_set_title (dialog, _("Choose Java executable"));
-  gtk_file_dialog_open (dialog, GTK_IS_WINDOW (root) ? GTK_WINDOW (root) : NULL,
-                        NULL, add_chosen, g_object_ref (self));
 }
 
 /* ---------------------------------------------------------- *
@@ -705,6 +766,7 @@ nuvasha_java_row_dispose (GObject *object)
   g_cancellable_cancel (self->cancellable);
   g_clear_object (&self->cancellable);
   self->retry = NULL;
+  self->add_button = NULL;
 
   G_OBJECT_CLASS (nuvasha_java_row_parent_class)->dispose (object);
 }
@@ -745,8 +807,7 @@ nuvasha_java_row_init (NuvashaJavaRow *self)
   self->names = g_ptr_array_new_with_free_func (g_free);
   self->required_major = 0;
   self->automatic_selection = FALSE;
-  self->add_index = GTK_INVALID_LIST_POSITION;
-  self->restore = 0;
+   self->restore = 0;
 
   {
     GtkSignalListItemFactory *button_factory =
@@ -780,5 +841,13 @@ nuvasha_java_row_init (NuvashaJavaRow *self)
 
   /* First, so the entry that asks for a runtime can put the selection
      back before whoever uses the row sees it. */
-  g_signal_connect_object (self, "notify::selected", G_CALLBACK (on_picked), self, 0);
+   g_signal_connect_object (self, "notify::selected", G_CALLBACK (on_picked), self, 0);
+
+   self->add_button = GTK_BUTTON (gtk_button_new_with_label (_("Add Java Runtime")));
+   gtk_widget_set_valign (GTK_WIDGET (self->add_button), GTK_ALIGN_CENTER);
+   gtk_widget_set_visible (GTK_WIDGET (self->add_button), FALSE);
+   g_signal_connect (self->add_button, "clicked",
+                     G_CALLBACK (on_add_clicked), self);
+   adw_action_row_add_suffix (ADW_ACTION_ROW (self),
+                              GTK_WIDGET (self->add_button));
 }

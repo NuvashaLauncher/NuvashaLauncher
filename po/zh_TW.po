@@ -142,8 +142,6 @@ msgstr "爪哇"
 msgid "Java Runtime"
 msgstr "Java運行時"
 
-msgid "No Java installation was found on this system"
-msgstr "在此系統上未找到 Java 安裝"
 
 msgid "This game needs Java %d or newer, selected Java is %d"
 msgstr "遊戲需要 Java %d 或更高版本，選擇的 Java 是 %d"

@@ -2,6 +2,7 @@
 <gresources>
   <gresource prefix="/com/github/nuvashalauncher/nuvasha">
     <file>nuvasha.css</file>
+    <file>pack.png</file>
     <file>ui/nuvasha-sign-in.ui</file>
     <file>ui/nuvasha-offline-account.ui</file>
     <file>ui/nuvasha-create-instance.ui</file>

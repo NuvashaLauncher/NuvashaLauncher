@@ -150,8 +150,6 @@ msgstr "Java"
 msgid "Java Runtime"
 msgstr "Environnement d’exécution Java"
 
-msgid "No Java installation was found on this system"
-msgstr "Aucune installation de Java n’a été trouvée sur ce système"
 
 msgid "This game needs Java %d or newer, selected Java is %d"
 msgstr "Ce jeu nécessite Java %d ou plus récent, le Java sélectionné est %d"
