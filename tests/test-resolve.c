@@ -142,10 +142,6 @@ fixture_stop (void)
   g_clear_pointer (&fixture.base, g_free);
 }
 
-/* ---------------------------------------------------------- *
- * Documents and small helpers
- * ---------------------------------------------------------- */
-
 static char *
 fixture_text (const char *name)
 {
@@ -467,7 +463,7 @@ test_native_classifiers (void)
   /* The natives table names the classifier directly. */
   g_assert_cmpstr (nuvasha_resolve_native_classifier (platform, x86), ==,
                    "natives-linux");
-  /* Another system has its own classifier in the same table. */
+
   g_assert_cmpstr (nuvasha_resolve_native_classifier (platform, windows), ==,
                    "natives-windows");
   /* A library that publishes no classifier has no natives to pick. */
@@ -479,7 +475,7 @@ test_native_classifiers (void)
                    "natives-linux-x86_64");
   g_assert_cmpstr (nuvasha_resolve_native_classifier (per_machine, arm), ==,
                    "natives-linux-arm64");
-  /* Nothing was published for this machine, so nothing is invented. */
+
   g_assert_null (nuvasha_resolve_native_classifier (per_machine, other));
   /* The names of another system are not picked up. */
   g_assert_null (nuvasha_resolve_native_classifier (per_machine, windows));
@@ -1103,7 +1099,6 @@ resolve_progress (const NuvashaResolveProgress *progress, gpointer user_data)
   call->last_stage = g_strdup (progress->stage);
 }
 
-/* Everything the server has to answer with for one resolve. */
 typedef struct
 {
   const char *id;      /* the version id, also the name of its document */

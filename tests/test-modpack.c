@@ -193,10 +193,6 @@ has_temp_dir (const char *directory)
   return found;
 }
 
-/* ---------------------------------------------------------- *
- * Waiting for what reports back
- * ---------------------------------------------------------- */
-
 typedef struct
 {
   GMainLoop *loop;
@@ -447,9 +443,6 @@ test_client_files_by_env (void)
   required = nuvasha_modpack_required_client_files (pack);
   optional = nuvasha_modpack_optional_client_files (pack);
 
-  /* The client installs what it is required to have and what both
-   * sides can run; what it is only offered it is offered, not saddled
-   * with; what it must not see is never listed. */
   g_assert_cmpuint (required->len, ==, 2);
   g_assert_cmpstr (((NuvashaModpackFile *) g_ptr_array_index (required, 0))->path,
                    ==, "mods/sodium.jar");
@@ -462,10 +455,6 @@ test_client_files_by_env (void)
 
   g_print ("ok - the env of a file says which list it belongs to\n");
 }
-
-/* ---------------------------------------------------------- *
- * What the dependencies resolve to
- * ---------------------------------------------------------- */
 
 static void
 assert_loader (const char *deps_json, NuvashaLoader loader,
@@ -824,8 +813,6 @@ test_install_offline (void)
     g_assert_false (g_file_test (imported_index, G_FILE_TEST_EXISTS));
   }
 
-  /* overrides lands, client-overrides lands on top of it, and
-   * server-overrides has nothing to do on the client. */
   {
     g_autofree char *options_path =
       g_build_filename (instance_dir, "config", "options.txt", NULL);

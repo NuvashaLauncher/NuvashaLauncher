@@ -237,7 +237,7 @@ nuvasha_instance_manager_load (NuvashaInstanceManager *self, GError **error)
                                    nuvasha_FS_MAX_INSTANCE_METADATA_SIZE,
                                    &contents, &length, &local_error))
     {
-      /* First run: there simply is nothing to load yet. */
+
       if (g_error_matches (local_error, G_FILE_ERROR, G_FILE_ERROR_NOENT))
         {
           g_list_store_remove_all (self->instances);

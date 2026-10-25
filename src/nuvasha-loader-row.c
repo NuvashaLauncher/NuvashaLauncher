@@ -461,7 +461,6 @@ start_versions (NuvashaLoaderRow *self, NuvashaLoader loader, const char *wanted
   g_clear_object (&self->cancellable);
   self->cancellable = g_cancellable_new ();
 
-  /* Vanilla has nothing to load. */
   if (loader == nuvasha_LOADER_VANILLA)
     {
       self->ready = FALSE;
@@ -507,7 +506,6 @@ nuvasha_loader_row_new (void)
   g_autofree const char **names = NULL;
   guint count = 0;
 
-  /* Only the loaders nuvasha installs, in the order they are read. */
   count = nuvasha_loaders_supported_count ();
   names = g_new0 (const char *, count + 1);
 
@@ -651,8 +649,6 @@ nuvasha_loader_row_dispose (GObject *object)
   g_clear_object (&self->cancellable);
   g_clear_object (&self->settings);
 
-  /* The rows are ours. A group that still holds one keeps it alive, and
-     its handlers went with this object. */
   g_clear_object (&self->retry);
   g_clear_object (&self->version_row);
   g_clear_object (&self->loader_row);

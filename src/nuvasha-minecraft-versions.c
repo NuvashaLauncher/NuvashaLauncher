@@ -97,7 +97,7 @@ typedef struct
   char *path;       /* cache file of the document being read */
   char *next_id;    /* the version to fetch next, NULL when there is none */
   NuvashaVersionManifest *manifest;
-  NuvashaVersionDescription *merged; /* what has been merged so far */
+  NuvashaVersionDescription *merged;
   GHashTable *seen;              /* ids already on this chain */
 } LoadRequest;
 

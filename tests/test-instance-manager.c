@@ -1149,7 +1149,6 @@ test_change_directory_validation (void)
                   nuvasha_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_clear_error (&error);
 
-  /* Nor is one that climbs out with "..". */
   {
     g_autofree char *escape =
       g_build_filename (data_dir, "elsewhere", "..", "climb", NULL);
@@ -1217,7 +1216,6 @@ test_change_directory_validation (void)
                     nuvasha_INSTANCE_MANAGER_ERROR_INVALID_PATH);
     g_clear_error (&error);
 
-    /* And what was there is untouched. */
     {
       g_autofree char *contents = read_file (taken);
 
@@ -1420,7 +1418,6 @@ test_change_directory_failure_keeps_everything (void)
     g_assert_nonnull (strstr (metadata, old_directory));
   }
 
-  /* Whatever the copy managed to write was taken away again. */
   g_assert_false (g_file_test (new_directory, G_FILE_TEST_EXISTS));
 
   g_assert_cmpint (g_chmod (parent, 0755), ==, 0);

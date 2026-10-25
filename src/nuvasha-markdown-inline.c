@@ -40,8 +40,6 @@ inline_link (GString *out, const char *text, gsize length, gboolean allow_html,
   g_autofree char *url = NULL;
   gsize depth = 0;
 
-  /* The label may hold a nested "![…](…)" of its own, so the "]" that
-     closes it is the one at depth zero, not the first one there is. */
   for (const char *p = text; p < text + length; p++)
     {
       if (*p == '[')
@@ -69,7 +67,6 @@ inline_link (GString *out, const char *text, gsize length, gboolean allow_html,
   label = g_strndup (text, close - text);
   url = g_strndup (close + 2, paren - (close + 2));
 
-  /* A title may follow the url after whitespace; only the url is used. */
   {
     char *space = strpbrk (url, " \t\n");
 
@@ -171,7 +168,6 @@ entity_into (GString *out, const char *text, gsize length, gsize *consumed)
   if (length < 3 || text[0] != '&')
     return FALSE;
 
-  /* No entity is longer than "&hellip;"; a ";" past that is not one. */
   semi = memchr (text, ';', MIN (length, 12));
 
   if (semi == NULL)
@@ -382,7 +378,6 @@ inline_into (GString *out, const char *text, gsize length, gboolean allow_html)
             }
         }
 
-      /* Bold, before the one-char emphasis it starts with. */
       if (i + 1 < length && c == text[i + 1] && (c == '*' || c == '_'))
         {
           const char *hay = text + i + 2;
@@ -424,7 +419,6 @@ inline_into (GString *out, const char *text, gsize length, gboolean allow_html)
             }
         }
 
-      /* Italic: a single delimiter, only when it holds words. */
       if ((c == '*' || c == '_') && i + 1 < length && text[i + 1] != ' ' &&
           text[i + 1] != c)
         {
@@ -478,5 +472,3 @@ nuvasha_markdown_inline_allow_html (const char *text)
   inline_into (out, text, strlen (text), TRUE);
   return g_string_free (g_steal_pointer (&out), FALSE);
 }
-
-/* The same, with the body's own HTML tags passed through. */

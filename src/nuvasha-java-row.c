@@ -5,7 +5,7 @@
 /* NuvashaJavaRow: Java picker with loading, retry, automatic, and custom
  * runtime entries. */
 
-/* realpath wants glibc's default feature set; nuvasha is Linux-only. */
+/* realpath() is provided by glibc; Nuvasha targets Linux. */
 #define _GNU_SOURCE
 
 #include "nuvasha-java-row.h"

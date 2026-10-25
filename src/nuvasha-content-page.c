@@ -58,13 +58,8 @@ void start_plan (NuvashaContentPage *self, NuvashaModrinthVersion *version,
                         const char *title, const char *replaces,
                         gboolean disabled);
 void batch_next (NuvashaContentPage *self);
-/* A plan that could not be carried out stops where it is; a batch it was
- * part of goes on to the next one. */
-void plan_stopped (NuvashaContentPage *self);
 
-/* ---------------------------------------------------------- *
- * Small helpers
- * ---------------------------------------------------------- */
+void plan_stopped (NuvashaContentPage *self);
 
 static char *
 instance_string (NuvashaInstance *instance, const char *property)
@@ -744,10 +739,6 @@ nuvasha_content_page_on_installed_scroll_changed (
 {
   load_visible_icons (user_data);
 }
-
-
-
-
 
 static void
 folder_open_request_free (gpointer data)

@@ -81,8 +81,7 @@ on_activate (GApplication *app, gpointer user_data G_GNUC_UNUSED)
         window = GTK_WINDOW (windows->data);
     }
 
-  /* One window only: a second launch presents the window that exists
-   * instead of opening another one. */
+  /* Reuse the existing application window on subsequent activations. */
   if (window != NULL)
     {
       gtk_window_present (window);
@@ -179,9 +178,8 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
 
   if (launch_id != NULL)
     {
-      /* Keep the application and its window alive for the game, but do not
-       * present the UI. This is the same background lifetime used after the
-       * user closes the window while Minecraft is running. */
+      /* Keep the application window registered while launch work is active,
+       * without presenting it. */
       NuvashaMainWindow *window = ensure_main_window (app, FALSE);
 
       if (!nuvasha_main_window_launch_instance (window, launch_id, &error))

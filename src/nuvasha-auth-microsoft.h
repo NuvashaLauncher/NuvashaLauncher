@@ -66,7 +66,6 @@ G_BEGIN_DECLS
 #define nuvasha_XBOX_XSTS_URL "https://xsts.auth.xboxlive.com/xsts/authorize"
 #define nuvasha_MINECRAFT_SERVICES_URL "https://api.minecraftservices.com"
 
-/* User-Agent sent to Microsoft services. */
 #define nuvasha_AUTH_USER_AGENT "nuvasha"
 
 /* The contract version the Xbox services answer the version they are
@@ -89,7 +88,7 @@ typedef enum {
   nuvasha_AUTH_ERROR_PENDING,       /* the user has not signed in yet */
   nuvasha_AUTH_ERROR_XBOX,          /* Xbox Live or XSTS refused */
   nuvasha_AUTH_ERROR_NO_GAME,       /* the account does not own Minecraft: Java */
-  nuvasha_AUTH_ERROR_NO_PROFILE,    /* it owns it but has never played */
+  nuvasha_AUTH_ERROR_NO_PROFILE,    /* it owns Minecraft but has no profile */
   nuvasha_AUTH_ERROR_NETWORK,       /* the request never arrived */
   nuvasha_AUTH_ERROR_PARSE          /* an answer nuvasha cannot read */
 } NuvashaAuthError;

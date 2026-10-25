@@ -109,10 +109,7 @@ upload_texture (NuvashaSkinView *self, GdkTexture *texture, GLuint *handle,
    * geometry, those columns must not be sampled as part of the arm. */
   if (skin)
     {
-      /* The last column of the classic right-arm back face is unused in a
-       * standard slim atlas. Check it against an opaque arm pixel rather
-       * than counting every gap: several valid Alex skins keep the other
-       * reserved columns opaque. */
+
       self->slim_texture = height > 20 &&
         source[(gsize) 20 * stride + 55 * 4 + 3] < 128 &&
         source[(gsize) 20 * stride + 40 * 4 + 3] >= 128;
@@ -139,9 +136,6 @@ upload_texture (NuvashaSkinView *self, GdkTexture *texture, GLuint *handle,
           memcpy (expanded + (gsize) y * stride + (gsize) (54 + x) * 4,
                   source + (gsize) y * stride + (gsize) (53 + x) * 4, 4);
 
-      /* The base atlas is made opaque below. Fill any remaining transparent
-       * slim-only columns first, otherwise that normalization turns them
-       * into black pixels on classic arms. */
       const int arm_ranges[][2] = { { 40, 56 }, { 32, 48 } };
       const int arm_rows[][2] = { { 16, 32 }, { 48, 64 } };
       for (guint range = 0; range < G_N_ELEMENTS (arm_ranges); range++)
@@ -207,7 +201,6 @@ upload_texture (NuvashaSkinView *self, GdkTexture *texture, GLuint *handle,
       stride = 64 * 4;
     }
 
-  /* Allocate this only after legacy skins have been expanded. */
   pixels = g_malloc (stride * height);
 
   /* Normalize the alpha channel of skin files before giving them to OpenGL.

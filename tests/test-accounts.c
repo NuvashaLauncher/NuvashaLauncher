@@ -151,7 +151,6 @@ test_offline_name_validation (void)
   g_assert_error (error, nuvasha_ACCOUNTS_ERROR, nuvasha_ACCOUNTS_ERROR_INVALID);
   g_clear_error (&error);
 
-  /* The edges of what is allowed are allowed. */
   account = nuvasha_account_new_offline ("abc", &error);
   g_assert_no_error (error);
   g_assert_nonnull (account);
@@ -468,8 +467,6 @@ test_persistence (void)
   g_print ("ok - accounts and their tokens survive a restart, 0600\n");
 }
 
-/* A view is told when the accounts or the active one are not what they
-   were, which is what this counts. */
 static void
 on_changed (NuvashaAccounts *store G_GNUC_UNUSED, gpointer user_data)
 {

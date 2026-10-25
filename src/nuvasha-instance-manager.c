@@ -6,7 +6,7 @@
  *
  * Copying, deleting, and opening directories use asynchronous GIO calls. */
 
-/* realpath wants glibc's default feature set; nuvasha is Linux-only. */
+/* realpath() is provided by glibc; Nuvasha targets Linux. */
 #define _GNU_SOURCE
 
 #include "nuvasha-instance-manager-private.h"
@@ -22,13 +22,11 @@
 static void assign_default_instance_icon (NuvashaInstance *instance,
                                           const char *directory);
 
-
 /* Layout version of instances.json. */
 #define INSTANCES_FORMAT_VERSION 2
 
 #define METADATA_FILE "instances.json"
 #define CORRUPT_SUFFIX ".corrupt"
-
 
 G_DEFINE_TYPE (NuvashaInstanceManager, nuvasha_instance_manager, G_TYPE_OBJECT)
 

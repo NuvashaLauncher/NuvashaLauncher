@@ -66,17 +66,12 @@ test_supported_loaders (void)
   g_assert_true (vanilla);
   g_assert_true (fabric);
 
-  /* The names are what a user reads, never the string of the enum. */
   g_assert_cmpstr (nuvasha_loader_display_name (nuvasha_LOADER_VANILLA), ==, "Vanilla");
   g_assert_cmpstr (nuvasha_loader_display_name (nuvasha_LOADER_FABRIC), ==, "Fabric");
   g_assert_cmpstr (nuvasha_loader_display_name (nuvasha_LOADER_QUILT), ==, "Quilt");
 
   g_print ("ok - the loader lists hold the loaders nuvasha installs\n");
 }
-
-/* ---------------------------------------------------------- *
- * What Fabric Meta answers
- * ---------------------------------------------------------- */
 
 static void
 test_fabric_version_list (void)
@@ -112,10 +107,6 @@ test_fabric_version_list (void)
   g_print ("ok - a Fabric list is read, newest first, with what is stable\n");
 }
 
-/* ---------------------------------------------------------- *
- * What Quilt Meta answers
- * ---------------------------------------------------------- */
-
 static void
 test_quilt_version_list (void)
 {
@@ -147,10 +138,6 @@ test_quilt_version_list (void)
 
   g_print ("ok - a Quilt list is read and a pre-release is not stable\n");
 }
-
-/* ---------------------------------------------------------- *
- * Answers that hold nothing
- * ---------------------------------------------------------- */
 
 static void
 test_empty_and_broken_answers (void)
@@ -295,7 +282,6 @@ test_neoforge_version_list (void)
   g_assert_cmpuint (versions->len, ==, 3);
   g_assert_cmpstr (version_at (versions, 0)->version, ==, "21.1.256");
 
-  /* These are releases: nothing follows their numbers. */
   g_assert_true (version_at (versions, 0)->stable);
   g_assert_true (version_at (versions, 2)->stable);
 
@@ -647,7 +633,6 @@ test_versions_for_display (void)
     g_assert_cmpstr (version_at (shown, 0)->version, ==, "2.0.0-beta");
   }
 
-  /* Nothing published is nothing to pick. */
   {
     g_autoptr (GPtrArray) none = g_ptr_array_new ();
 
@@ -659,10 +644,6 @@ test_versions_for_display (void)
 
   g_print ("ok - a list hides unstable versions but keeps a chosen one\n");
 }
-
-/* ---------------------------------------------------------- *
- * What the two ways of installing refuse
- * ---------------------------------------------------------- */
 
 /* Both entry points refuse what the other one is for, and they say which
  * of them to use instead. These answers arrive through the main loop, as

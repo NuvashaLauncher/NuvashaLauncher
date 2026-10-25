@@ -4,7 +4,7 @@
 
 /* Detect and inspect Java runtimes without blocking the main loop. */
 
-/* realpath() is glibc-only, and nuvasha only ever runs on Linux. */
+/* realpath() is provided by glibc; Nuvasha targets Linux. */
 #define _GNU_SOURCE
 
 #include "nuvasha-java.h"
@@ -114,7 +114,7 @@ NuvashaJava *
 nuvasha_java_best_compatible (GPtrArray *javas, int required_major)
 {
   NuvashaJava *best = NULL;          /* the closest one that can open a window */
-  NuvashaJava *best_headless = NULL; /* only used when nothing else fits */
+  NuvashaJava *best_headless = NULL; /* fallback when no windowed runtime fits */
 
   g_return_val_if_fail (javas != NULL, NULL);
 
@@ -188,7 +188,7 @@ nuvasha_java_select (GPtrArray  *javas,
 
   /* Automatic selection must not silently choose a different major. A
    * newer JVM may be technically compatible, but it is not the runtime the
-   * user asked for and can behave differently with loaders and launchers.
+   * required major version and can behave differently with loaders and launchers.
    * Leave the automatic choice unset until the required major is present. */
   for (guint i = 0; i < javas->len; i++)
     {
@@ -325,11 +325,6 @@ nuvasha_java_parse_version (const char  *output,
   return TRUE;
 }
 
-
-/* ---------------------------------------------------------- *
- * Probing one executable
- * ---------------------------------------------------------- */
-
 typedef struct
 {
   /* Borrowed from the operation the caller owns until the answer. */
@@ -446,7 +441,6 @@ nuvasha_java_probe_finish (GAsyncResult  *result,
   return g_task_propagate_pointer (G_TASK (result), error);
 }
 
-
 /* ---------------------------------------------------------- *
  * Dedup + sequential probing over a list of candidates
  * ---------------------------------------------------------- */
@@ -512,8 +506,6 @@ probe_list_sequence_step (NuvashaTaskSequence *sequence G_GNUC_UNUSED,
       nuvasha_java_probe_async (list->executables[list->next], probe_list_probed,
                             list);
 
-    /* One probe of many: it follows the sequence's cancellation and
-       releases itself once it has answered. */
     nuvasha_task_scope_follow_cancellable (
       probe, nuvasha_task_sequence_get_cancellable (list->sequence));
     nuvasha_task_scope_unref_when_done (probe);
@@ -579,7 +571,6 @@ nuvasha_java_probe_list_finish (GAsyncResult  *result,
 
   return g_task_propagate_pointer (G_TASK (result), error);
 }
-
 
 /* ---------------------------------------------------------- *
  * Detecting the installations on this machine
@@ -656,8 +647,6 @@ default_roots (void)
   return out;
 }
 
-/* Only executable regular files are candidates: directories, devices
- * and scripts that are not executable cannot be probed. */
 static void
 add_candidate (GPtrArray  *candidates,
                const char *path)
@@ -700,7 +689,6 @@ collect_candidates (void)
   return (char **) g_ptr_array_free (g_steal_pointer (&candidates), FALSE);
 }
 
-/* For nuvasha_java_detect_list: only the caller's roots are scanned. */
 static char **
 collect_candidates_list (char **roots)
 {

@@ -246,7 +246,6 @@ test_best_compatible_prefers_windowed (void)
   g_assert_cmpint (best->major_version, ==, 21);
   g_assert_false (best->headless);
 
-  /* Only the headless one is left: it is still returned. */
   g_ptr_array_remove_index (list, 1);
 
   best = nuvasha_java_best_compatible (list, 8);
@@ -296,7 +295,6 @@ test_select_instance_then_closest (void)
   g_assert_nonnull (picked);
   g_assert_cmpint (picked->major_version, ==, 8);
 
-  /* Nothing set: the exact required major is selected automatically. */
   picked = nuvasha_java_select (list, NULL, 21);
   g_assert_nonnull (picked);
   g_assert_cmpint (picked->major_version, ==, 21);
@@ -526,7 +524,6 @@ test_detect_list_jre_layout_and_dedup (void)
         g_error ("unexpected entry: %s", java->executable);
     }
 
-  /* The symlinked "default" installed loses: must be probed only once. */
   g_assert_cmpuint (found_jre, ==, 1);
   g_assert_cmpuint (found_real, ==, 1);
   g_assert_cmpuint (found_head, ==, 1);

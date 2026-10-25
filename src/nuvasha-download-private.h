@@ -33,7 +33,7 @@ typedef struct _DownloadRequest
   /* Set once when the request is created. */
   char *url;
   char *dest_path;       /* NULL for a JSON request */
-  char *expected_hash;   /* NULL: nothing to verify */
+  char *expected_hash;   /* NULL for an unverified request */
   GChecksumType hash_type;
   char *body;            /* NULL: a GET request */
   char *user_agent;      /* NULL: the session's own */

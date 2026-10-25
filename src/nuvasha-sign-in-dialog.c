@@ -196,7 +196,7 @@ finish_sign_in (GObject      *source G_GNUC_UNUSED,
 
   if (account == NULL)
     {
-      /* Cancellation is silent; other failures are shown to the user. */
+
       if (error != NULL &&
           g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         return;

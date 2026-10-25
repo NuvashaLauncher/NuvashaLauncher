@@ -26,7 +26,6 @@
 #include "nuvasha-task.h"
 #include "nuvasha-operation.h"
 
-
 G_DEFINE_FINAL_TYPE (NuvashaInstancePage, nuvasha_instance_page,
                      GTK_TYPE_BOX)
 
@@ -142,7 +141,6 @@ rebuild_content_pages (NuvashaInstancePage *self)
                                         "edit-clear-all-symbolic");
     }
 
-  /* What the user was looking at is not thrown away by the rebuild. */
   if (visible != NULL)
     adw_view_stack_set_visible_child_name (ADW_VIEW_STACK (self->stack),
                                            visible);
@@ -177,7 +175,6 @@ on_instance_page_width_changed (GObject *object,
     width < 700 ? ADW_VIEW_SWITCHER_POLICY_NARROW
                 : ADW_VIEW_SWITCHER_POLICY_WIDE);
 }
-
 
 /* Settings-page implementation lives in nuvasha-instance-page-settings.c. */
 

@@ -15,7 +15,6 @@
 #define MAX_VERSION_VALUE_LENGTH 1024
 #include <sys/utsname.h>
 
-
 /* ---------------------------------------------------------- *
  * Types and errors
  * ---------------------------------------------------------- */
@@ -62,9 +61,6 @@ nuvasha_mc_version_type_to_string (NuvashaMcVersionType type)
 
   return version_type_names[type];
 }
-
-
-
 
 G_DEFINE_FINAL_TYPE (NuvashaVersionManifest, nuvasha_version_manifest, G_TYPE_OBJECT)
 
@@ -468,8 +464,6 @@ nuvasha_version_description_merge (NuvashaVersionDescription *parent,
                                           ? child->java_version
                                           : parent->java_version);
 
-  /* Libraries and arguments are appended, parent first: whatever the
-   * child adds comes after what it inherits. */
   self->libraries = concat_libraries (parent->libraries, child->libraries);
   self->jvm_arguments = concat_arguments (parent->jvm_arguments,
                                           child->jvm_arguments);

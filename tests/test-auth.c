@@ -56,7 +56,6 @@ test_device_code (void)
   g_assert_no_error (error);
   g_assert_nonnull (code);
 
-  /* What the user reads, and where they type it. */
   g_assert_cmpstr (code->user_code, ==, "ABCDE-FGHIJ");
   g_assert_cmpstr (code->verification_uri, ==,
                    "https://microsoft.com/devicelogin");
@@ -123,10 +122,6 @@ test_device_code_errors (void)
   g_print ("ok - the code a user types, and the refusals that are not one\n");
 }
 
-/* ---------------------------------------------------------- *
- * Waiting for the user
- * ---------------------------------------------------------- */
-
 static void
 test_token (void)
 {
@@ -178,7 +173,6 @@ test_polling (void)
   g_assert_no_error (error);
   g_assert_true (slow);
 
-  /* A user who said no ends the wait: the sign-in was declined. */
   g_assert_true (nuvasha_auth_polling_error (declined, -1, &slow, &error));
   g_assert_error (error, nuvasha_AUTH_ERROR, nuvasha_AUTH_ERROR_DECLINED);
   g_assert_nonnull (strstr (error->message, "declined"));
@@ -243,8 +237,6 @@ test_xbox_token (void)
   g_print ("ok - Xbox Live and XSTS answer a token and the user it is for\n");
 }
 
-/* XSTS answers a refusal as a number, and every number that is known is
-   a sentence a user can do something with. */
 static void
 test_xsts_refusals (void)
 {
@@ -447,10 +439,6 @@ test_profile (void)
  * The client id
  * ---------------------------------------------------------- */
 
-/* The one constant a sign-in is configured with is in one place, and
-   nuvasha_MICROSOFT_CLIENT_ID is what it is. What a build has to be able to
-   do is say so when it is not set, which is why the tenant, the scope
-   and the addresses are all here and nowhere else. */
 static void
 test_the_endpoints_are_the_documented_ones (void)
 {

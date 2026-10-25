@@ -190,9 +190,6 @@ nuvasha_launch_build_arguments (const NuvashaResolvedVersion *resolved,
   put_placeholder (placeholders, "launcher_name", nuvasha_LAUNCHER_NAME);
   put_placeholder (placeholders, "launcher_version", nuvasha_LAUNCHER_VERSION);
 
-  /* What the machine knows. The paths the resolve module already
-     substituted are repeated here so this function is the whole answer
-     on its own. */
   put_placeholder (placeholders, "game_directory", game_directory);
   put_placeholder (placeholders, "version_name", resolved->version_id);
   put_placeholder (placeholders, "version_type",

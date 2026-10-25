@@ -296,7 +296,7 @@ details_content (NuvashaDownloadModpackDialog *self)
   details_watch (&self->dropdown, GTK_WIDGET (gtk_builder_get_object (toolbar_builder, "dropdown")));
   details_watch (&self->download_button,
                  GTK_WIDGET (gtk_builder_get_object (toolbar_builder, "download-button")));
-  /* Nothing can be installed before the versions have arrived. */
+
   gtk_widget_set_sensitive (GTK_WIDGET (self->download_button), FALSE);
   g_signal_connect_object (self->download_button, "clicked",
                            G_CALLBACK (on_modpack_download_clicked), self, 0);
@@ -542,8 +542,6 @@ dialog_details_open (NuvashaDownloadModpackDialog *self)
   escaped_id = g_uri_escape_string (self->project->project_id, NULL, FALSE);
   url = g_strdup_printf (nuvasha_MODRINTH_URL "/project/%s/version", escaped_id);
 
-  /* Nothing is shown until the description and the versions are both in,
-     so the half does not fill itself in piece by piece. */
   self->details_ready = FALSE;
   self->versions_ready = FALSE;
   self->details_generation++;

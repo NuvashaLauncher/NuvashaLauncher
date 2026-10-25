@@ -21,10 +21,6 @@
 #include <glib/gstdio.h>
 #include <string.h>
 
-/* ---------------------------------------------------------- *
- * Checking what arrived
- * ---------------------------------------------------------- */
-
 typedef struct
 {
   char *path;
@@ -389,8 +385,6 @@ extract_layers (const char *archive_path, const char *directory,
   return TRUE;
 }
 
-/* client-overrides wins over overrides, so it lands on top of what
- * overrides wrote; server-overrides has nothing to do on the client. */
 static gboolean
 extract_overrides (const char *archive_path,
                    const char *directory,

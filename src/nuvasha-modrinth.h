@@ -42,7 +42,7 @@ typedef enum {
   nuvasha_MODRINTH_ERROR_NETWORK,   /* the API could not be reached */
   nuvasha_MODRINTH_ERROR_HTTP,      /* an HTTP status that is not success */
   nuvasha_MODRINTH_ERROR_RATE_LIMIT, /* HTTP 429, too many requests */
-  nuvasha_MODRINTH_ERROR_PARSE,     /* the answer was not what it must be */
+  nuvasha_MODRINTH_ERROR_PARSE,
   nuvasha_MODRINTH_ERROR_NOT_FOUND  /* no such project, version or hash */
 } NuvashaModrinthError;
 
@@ -99,8 +99,8 @@ typedef struct {
 
   /* What the /search answer also said: every Minecraft version the
    * project lists itself for, and what it tags itself with. */
-  GPtrArray *versions;   /* const char*, never NULL */
-  GPtrArray *categories; /* const char*, never NULL */
+  GPtrArray *versions;
+  GPtrArray *categories;
 } NuvashaModrinthProject;
 
 void nuvasha_modrinth_project_free (NuvashaModrinthProject *project);
@@ -131,7 +131,7 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaModrinthSearch, nuvasha_modrinth_search_fr
 /* What a search answers: the projects that matched and how many there
  * are in all, which is what the pagination is read from. */
 typedef struct {
-  GPtrArray *projects; /* NuvashaModrinthProject*, never NULL */
+  GPtrArray *projects;
   guint64 total_hits;
 } NuvashaModrinthResults;
 

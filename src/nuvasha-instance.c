@@ -38,7 +38,6 @@ nuvasha_instance_default_icon_path (void)
 
 #include "nuvasha-instance-private.h"
 
-
 G_DEFINE_TYPE (NuvashaInstance, nuvasha_instance, G_TYPE_OBJECT)
 
 enum
@@ -144,13 +143,12 @@ nuvasha_instance_sanitize_name (const char *name)
       if (c == '/')
         c = '-';                      /* never a path separator */
       else if (c == '.' && last_dot)
-        continue;                     /* never ".." */
+        continue;
 
       g_string_append_c (out, c);
       last_dot = (c == '.');
     }
 
-  /* Cap the length, but only at a character boundary. */
   if (out->len > MAX_NAME_LENGTH)
     {
       gsize offset = 0;

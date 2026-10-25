@@ -18,7 +18,6 @@ nuvasha_download_close_sink (DownloadRequest *request)
   request->fd = -1;
 }
 
-/* Removes what an attempt has written so far. */
 void
 nuvasha_download_discard_temporary (DownloadRequest *request)
 {

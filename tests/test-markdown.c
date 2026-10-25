@@ -45,8 +45,6 @@ test_link (void)
   check ("[Modrinth](https://modrinth.com)",
          "<a href=\"https://modrinth.com\">Modrinth</a>");
 
-  /* A link that cannot be opened is the words it names, and nothing
-     more. */
   check ("[click](file:///etc/passwd)", "click");
   g_print ("ok - only a link that can be opened becomes one\n");
 }

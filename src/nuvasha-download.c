@@ -42,7 +42,6 @@
 /* Attempts for a transport error, an HTTP 5xx or an HTTP 429. */
 #define MAX_ATTEMPTS 3
 
-/* Pause before a new attempt when the server asked for nothing. */
 #define RETRY_DELAY_MS 100
 
 /* Longest pause taken from a Retry-After header, so a download queue
@@ -67,7 +66,6 @@ nuvasha_download_error_quark (void)
 
 /* One session for the whole launcher: a session per download would
  * throw away the connection pool. It lives until the process exits. */
-
 
 guint
 nuvasha_download_service_active (const NuvashaDownloadService *service)
@@ -145,10 +143,6 @@ get_session (NuvashaDownloadService *service)
   return service->session;
 }
 
-/* ---------------------------------------------------------- *
- * Small helpers
- * ---------------------------------------------------------- */
-
 /* The URL without query or fragment. Query parameters may carry
  * signatures or tokens, and error messages end up in the log. */
 char *
@@ -214,8 +208,6 @@ compare_waiting_requests (gconstpointer left, gconstpointer right,
     return 0;
   return a->priority > b->priority ? -1 : 1;
 }
-
-
 
 /* ---------------------------------------------------------- *
  * Ending a request
@@ -316,7 +308,6 @@ nuvasha_download_request_succeed_json (DownloadRequest *request, JsonParser *par
   request_free (request);
   nuvasha_task_scope_return_pointer (scope, parser, g_object_unref);
 }
-
 
 /* Transfer and retry state machine lives in nuvasha-download-transfer.c. */
 NuvashaTaskScope *

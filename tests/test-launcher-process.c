@@ -33,7 +33,7 @@ typedef struct
   NuvashaLauncher *launcher;
   NuvashaLaunchState wanted;
   NuvashaLaunchState state;
-  const char *line; /* what a wait for output looks for */
+  const char *line;
   char *detail;
   guint changes;
 } Watch;
@@ -227,7 +227,6 @@ argv_of (char *program)
   return argv;
 }
 
-/* An hour ago, so a crash report of an earlier run looks like one. */
 static void
 make_an_hour_old (const char *path)
 {
@@ -369,7 +368,6 @@ test_old_crash_report_does_not_count (void)
   g_assert_cmpint (g_mkdir_with_parents (reports, 0755), ==, 0);
   g_assert_true (g_file_set_contents (report, "an old crash\n", -1, NULL));
 
-  /* A report of a run before this one says nothing about this one. */
   make_an_hour_old (report);
 
   instance = new_instance ("oldreport");
@@ -416,8 +414,6 @@ test_child_environment (void)
 
   assert_log_has (launcher, "[stdout] GDK_BACKEND=unset");
 
-  /* Nothing else about the environment is touched: what the caller
-     exported arrives unchanged. */
   assert_log_has (launcher, expected_display);
 
   /* The game runs in the directory of its instance. */

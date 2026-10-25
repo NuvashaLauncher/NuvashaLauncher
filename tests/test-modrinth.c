@@ -159,7 +159,6 @@ test_search_results (void)
   g_assert_nonnull (results);
   g_assert_cmpuint (results->projects->len, ==, 3);
 
-  /* What the pagination is read from. */
   g_assert_cmpuint (results->total_hits, ==, 17609);
 
   first = g_ptr_array_index (results->projects, 0);
@@ -181,7 +180,6 @@ test_search_without_hits (void)
   g_autoptr (GError) error = NULL;
   g_autoptr (NuvashaModrinthResults) results = NULL;
 
-  /* Nothing found is an answer, not a failure. */
   results = nuvasha_modrinth_results_from_json (json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (results);
@@ -326,7 +324,6 @@ test_versions_of_a_mod (void)
    * Only the two that run on Fabric 1.20.1 may be listed. */
   g_assert_cmpuint (versions->len, ==, 2);
 
-  /* Newest first, which is the order a user reads them in. */
   version = g_ptr_array_index (versions, 0);
   g_assert_cmpstr (version->version_number, ==, "11.1.136+fabric");
   g_assert_cmpstr (version->name, ==, "[Fabric 1.20(.1)] v11.1.136");

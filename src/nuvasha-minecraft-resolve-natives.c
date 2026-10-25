@@ -89,7 +89,7 @@ is_writable_target (GFile *file, GError **error)
       NULL, error);
 
   if (info == NULL)
-    return TRUE; /* nothing is there: it can be created */
+    return TRUE;
 
   if (g_file_info_get_file_type (info) != G_FILE_TYPE_REGULAR)
     {
