@@ -8,9 +8,6 @@ msgstr ""
 msgid "cannot clear credentials for account \"%s\": %s"
 msgstr "не вдалося видалити облікові дані облікового запису «%s»: %s"
 
-msgid "unknown Secret Service error"
-msgstr "невідома помилка Secret Service"
-
 msgid "cannot store credentials for account \"%s\""
 msgstr "не вдалося зберегти облікові дані облікового запису «%s»"
 msgid "Cancel"
@@ -590,14 +587,6 @@ msgstr "Видалення залежності видаляє мод, який 
 msgid "A dependent mod cannot be deleted"
 msgstr "Не вдалося видалити залежний мод"
 
-msgid "Sandbox"
-msgstr "Пісочниця"
-
-msgid "Enable sandbox"
-msgstr "Увімкнути пісочницю"
-
-msgid "Allow sandbox network access"
-msgstr "Дозволити доступ до мережі пісочниці"
 # UI string
 msgid "Skin"
 msgstr "Skin"

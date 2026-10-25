@@ -10,9 +10,6 @@ msgstr "يلغي"
 msgid "cannot clear credentials for account \"%s\": %s"
 msgstr "تعذر مسح بيانات اعتماد الحساب \"%s\": %s"
 
-msgid "unknown Secret Service error"
-msgstr "خطأ غير معروف في خدمة الأسرار"
-
 msgid "cannot store credentials for account \"%s\""
 msgstr "تعذر تخزين بيانات اعتماد الحساب \"%s\""
 msgid "Confirm"
@@ -566,15 +563,6 @@ msgstr "يؤدي حذف التبعية إلى حذف النموذج الذي ي�
 
 msgid "A dependent mod cannot be deleted"
 msgstr "لا يمكن حذف الوضع التابع"
-
-msgid "Sandbox"
-msgstr "رمل"
-
-msgid "Enable sandbox"
-msgstr "تمكين وضع الحماية"
-
-msgid "Allow sandbox network access"
-msgstr "السماح بالوصول إلى شبكة وضع الحماية"
 
 msgid "Slim model"
 msgstr "نموذج نحيف"

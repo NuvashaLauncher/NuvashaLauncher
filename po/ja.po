@@ -8,9 +8,6 @@ msgstr ""
 msgid "cannot clear credentials for account \"%s\": %s"
 msgstr "アカウント「%s」の認証情報を削除できません: %s"
 
-msgid "unknown Secret Service error"
-msgstr "不明な Secret Service エラー"
-
 msgid "cannot store credentials for account \"%s\""
 msgstr "アカウント「%s」の認証情報を保存できません"
 msgid "Cancel"
@@ -588,14 +585,6 @@ msgstr "依存関係を削除すると、その依存関係に依存していた
 msgid "A dependent mod cannot be deleted"
 msgstr "依存する Mod を削除できません"
 
-msgid "Sandbox"
-msgstr "サンドボックス"
-
-msgid "Enable sandbox"
-msgstr "サンドボックスを有効にする"
-
-msgid "Allow sandbox network access"
-msgstr "サンドボックスのネットワークアクセスを許可する"
 # UI string
 msgid "Skin"
 msgstr "Skin"

@@ -10,9 +10,6 @@ msgstr "Avboka"
 msgid "cannot clear credentials for account \"%s\": %s"
 msgstr "kan inte rensa autentiseringsuppgifterna för kontot ”%s”: %s"
 
-msgid "unknown Secret Service error"
-msgstr "okänt fel i Secret Service"
-
 msgid "cannot store credentials for account \"%s\""
 msgstr "kan inte spara autentiseringsuppgifterna för kontot ”%s”"
 msgid "Confirm"
@@ -558,15 +555,6 @@ msgstr "Om man tar bort ett beroende tas även det tillägg bort som var beroend
 
 msgid "A dependent mod cannot be deleted"
 msgstr "En beroende mod kan inte tas bort"
-
-msgid "Sandbox"
-msgstr "Sandlåda"
-
-msgid "Enable sandbox"
-msgstr "Aktivera sandlåda"
-
-msgid "Allow sandbox network access"
-msgstr "Tillåt nätverksåtkomst till sandlåda"
 
 msgid "Slim model"
 msgstr "Smal modell"

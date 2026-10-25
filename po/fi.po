@@ -10,9 +10,6 @@ msgstr "Peruuttaa"
 msgid "cannot clear credentials for account \"%s\": %s"
 msgstr "tilin \"%s\" tunnistetietoja ei voi poistaa: %s"
 
-msgid "unknown Secret Service error"
-msgstr "tuntematon Secret Service -virhe"
-
 msgid "cannot store credentials for account \"%s\""
 msgstr "tilin \"%s\" tunnistetietoja ei voi tallentaa"
 msgid "Confirm"
@@ -558,15 +555,6 @@ msgstr "Riippuvuuden poistaminen poistaa siitä riippuvan modin"
 
 msgid "A dependent mod cannot be deleted"
 msgstr "Riippuvaista modia ei voi poistaa"
-
-msgid "Sandbox"
-msgstr "Hiekkalaatikko"
-
-msgid "Enable sandbox"
-msgstr "Ota hiekkalaatikko käyttöön"
-
-msgid "Allow sandbox network access"
-msgstr "Salli pääsy hiekkalaatikkoverkkoon"
 
 msgid "Slim model"
 msgstr "Ohut malli"

@@ -27,7 +27,7 @@ jobs:
           dnf install -y \
              gcc gcc-c++ make pkgconf-pkg-config gettext \
              glib2-devel gtk4-devel libadwaita-devel libepoxy-devel \
-            json-glib-devel libsoup3-devel libarchive-devel libsecret-devel
+             json-glib-devel libsoup3-devel libarchive-devel
 
       - name: Build
         run: make fast CFLAGS="-std=c17 -Wall -Wextra -Wpedantic -Werror -MMD -MP"

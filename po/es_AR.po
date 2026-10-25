@@ -11,9 +11,6 @@ msgstr ""
 msgid "cannot clear credentials for account \"%s\": %s"
 msgstr "no se pueden eliminar las credenciales de la cuenta \"%s\": %s"
 
-msgid "unknown Secret Service error"
-msgstr "error desconocido del servicio de secretos"
-
 msgid "cannot store credentials for account \"%s\""
 msgstr "no se pueden guardar las credenciales de la cuenta \"%s\""
 msgid "Language"
@@ -594,14 +591,6 @@ msgstr "Eliminar una dependencia elimina el mod que dependía de ella"
 msgid "A dependent mod cannot be deleted"
 msgstr "No se puede eliminar un mod dependiente"
 
-msgid "Sandbox"
-msgstr "Sandbox"
-
-msgid "Enable sandbox"
-msgstr "Activar sandbox"
-
-msgid "Allow sandbox network access"
-msgstr "Permitir acceso a la red del sandbox"
 # UI string
 msgid "Skin"
 msgstr "Skin"

@@ -40,8 +40,6 @@ test_defaults (void)
   g_assert_true (nuvasha_settings_get_cache_modrinth_api_responses (settings));
   g_assert_cmpint (nuvasha_settings_get_cache_expiration (settings), ==,
                    nuvasha_SETTINGS_CACHE_EXPIRATION_1_HOUR);
-  g_assert_false (nuvasha_settings_get_sandbox_enabled (settings));
-  g_assert_true (nuvasha_settings_get_sandbox_network_enabled (settings));
 }
 
 static void
@@ -57,19 +55,10 @@ test_persistence (void)
   g_assert_true (nuvasha_settings_set_cache_modrinth_api_responses (
     settings, FALSE, &error));
   g_assert_no_error (error);
-  g_assert_true (nuvasha_settings_set_sandbox_enabled (settings, TRUE, &error));
-  g_assert_no_error (error);
-  g_assert_true (nuvasha_settings_set_sandbox_network_enabled (settings, FALSE,
-                                                            &error));
-  g_assert_no_error (error);
-
   loaded = nuvasha_settings_new ();
   g_assert_false (nuvasha_settings_get_cache_modrinth_api_responses (loaded));
   g_assert_cmpint (nuvasha_settings_get_cache_expiration (loaded), ==,
                    nuvasha_SETTINGS_CACHE_EXPIRATION_7_DAYS);
-  g_assert_true (nuvasha_settings_get_sandbox_enabled (loaded));
-  g_assert_false (nuvasha_settings_get_sandbox_network_enabled (loaded));
-
 }
 
 static void

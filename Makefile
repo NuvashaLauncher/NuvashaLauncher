@@ -15,7 +15,7 @@ FLATPAK    ?= 0
 # gio-unix-2.0 is the Linux part of GIO itself (no display involved) and
 # provides the output stream that writes a download into its temporary
 # file descriptor.
-PKGS := gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive gio-unix-2.0 epoxy libsecret-1
+PKGS := gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive gio-unix-2.0 epoxy
 
 # pkg-config prints -I paths; use -isystem so warnings are only about our
 # own code and not about the GTK/GLib headers themselves.

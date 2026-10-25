@@ -14,7 +14,6 @@
 - Automatic installation and version resolution for Fabric, Quilt, Forge, and
   NeoForge.
 - `.mrpack` import and export with verified downloads and safe archive handling.
-- Optional bubblewrap sandboxing for the game process.
 
 ## Installation
 
@@ -37,10 +36,9 @@ flatpak run com.github.nuvashalauncher.nuvasha
 available. Nuvasha does not bundle a Java runtime. Add a compatible runtime in
 the launcher and select it for an instance when needed.
 
-The Flatpak build uses Flatpak's sandbox instead of Nuvasha's optional
-bubblewrap wrapper. It does not request unrestricted access to the host home
-directory. The builder requires `flatpak` and `flatpak-builder`; distribution
-packages may use different names for them.
+The Flatpak build uses Flatpak's application isolation and does not request
+unrestricted access to the host home directory. The builder requires `flatpak`
+and `flatpak-builder`; distribution packages may use different names for them.
 
 ### Dependencies
 
@@ -55,8 +53,6 @@ packages may use different names for them.
 - json-glib
 - libsoup
 - libarchive
-- libsecret
-- bubblewrap (`bwrap`)
 
 ### Runtime dependencies
 
@@ -67,8 +63,7 @@ packages may use different names for them.
 ```sh
 sudo apt install build-essential pkg-config gettext \
     libglib2.0-dev libgtk-4-dev libadwaita-1-dev libepoxy-dev \
-    libjson-glib-dev libsoup-3.0-dev libarchive-dev libsecret-1-dev \
-    bubblewrap
+    libjson-glib-dev libsoup-3.0-dev libarchive-dev
 ```
 
 #### Fedora
@@ -76,8 +71,7 @@ sudo apt install build-essential pkg-config gettext \
 ```sh
 sudo dnf install gcc make gettext pkgconf-pkg-config \
     glib2-devel gtk4-devel libadwaita-devel libepoxy-devel \
-    json-glib-devel libsoup3-devel libarchive-devel libsecret-devel \
-    bubblewrap
+    json-glib-devel libsoup3-devel libarchive-devel
 ```
 
 #### openSUSE
@@ -85,14 +79,14 @@ sudo dnf install gcc make gettext pkgconf-pkg-config \
 ```sh
 sudo zypper install gcc make gettext-tools pkg-config glib2-devel \
     gtk4-devel libadwaita-devel libepoxy-devel json-glib-devel \
-    libsoup-devel libarchive-devel libsecret-devel bubblewrap
+    libsoup-devel libarchive-devel
 ```
 
 #### Arch
 
 ```sh
 sudo pacman -S base-devel gettext pkgconf gtk4 libadwaita libepoxy \
-    json-glib libsoup libarchive libsecret bubblewrap
+    json-glib libsoup libarchive
 ```
 
 #### Gentoo
@@ -101,14 +95,14 @@ sudo pacman -S base-devel gettext pkgconf gtk4 libadwaita libepoxy \
 sudo emerge --ask sys-devel/gcc sys-devel/gettext dev-build/make \
     dev-util/pkgconf dev-libs/glib gui-libs/gtk:4 gui-libs/libadwaita \
     gui-libs/libepoxy dev-libs/json-glib net-libs/libsoup:3 \
-    app-arch/libarchive app-crypt/libsecret sys-apps/bubblewrap
+    app-arch/libarchive
 ```
 
 #### NixOS
 
 ```sh
 nix-shell -p gcc gnumake gettext pkg-config glib gtk4 libadwaita libepoxy \
-    json-glib libsoup libarchive libsecret bubblewrap
+    json-glib libsoup libarchive
 ```
 
 ## Building from source

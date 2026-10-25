@@ -33,10 +33,6 @@ and serialize itself, but it does not perform network I/O or create widgets.
 Likewise, the UI presents a launcher or a download entry but does not become
 the owner of that operation.
 
-There are two process-isolation paths. A native build can wrap the game with
-Nuvasha's own bubblewrap launcher. A Flatpak build runs the same launcher and
-game inside Flatpak's application sandbox and does not add a second wrapper.
-
 ## System context
 
 ```mermaid
@@ -50,7 +46,6 @@ and game resources]
 Xbox Live, Minecraft services]
     Desktop[Desktop URI handler]
     Java[Selected Java runtime]
-    Bwrap[bubblewrap]
     Flatpak[Flatpak application sandbox]
 
     User <--> Nuvasha
@@ -58,7 +53,6 @@ Xbox Live, Minecraft services]
     Nuvasha --> Modrinth
     Nuvasha --> Microsoft
     Nuvasha --> Java
-    Nuvasha -. native build, sandbox enabled .-> Bwrap
     Flatpak -. contains the Flatpak build .-> Nuvasha
     Nuvasha --> Desktop
 ```
@@ -73,9 +67,7 @@ External services are used directly by their owning modules:
 - Microsoft device authorization, Xbox Live/XSTS, Minecraft authentication,
   entitlements, and profile requests are the steps in
   `nuvasha-auth-microsoft.c`.
-- `GAppInfo` opens URIs through the desktop. Sandboxed games reach that
-  capability through Nuvasha's small host-side open broker instead of being
-  given a general-purpose host command.
+- `GAppInfo` opens URIs through the desktop.
 
 ## Static structure
 
@@ -99,7 +91,6 @@ flowchart TD
     Downloads[Download service, slots, cache]
     Launch[Launcher and process monitor]
     Java[Java detection]
-    Sandbox[Native bwrap sandbox and open broker]
     Flatpak[Flatpak application sandbox]
     FS[Filesystem and JSON helpers]
 
@@ -121,7 +112,6 @@ flowchart TD
     Resolve --> Versions
     Resolve --> Loaders
     Resolve --> Downloads
-    Launch -. native build only .-> Sandbox
     Launch -. Flatpak build .-> Flatpak
     Instances --> FS
     Accounts --> FS
@@ -194,9 +184,8 @@ Accounts support two modes:
 
 `NuvashaAccounts` owns the active account and emits changes for the UI. Account
 metadata is stored in the user's data directory in `accounts.json`, written
-atomically with mode `0600`. Access and refresh tokens are stored through
-`libsecret` and are looked up by account ID; they are not meant to live in the
-JSON metadata file.
+atomically with mode `0600`. Access and refresh tokens are stored in the same
+JSON file with the account metadata.
 
 The Microsoft sign-in chain is asynchronous and explicit:
 
@@ -219,12 +208,8 @@ expire during startup. If refresh fails, the launcher enters
 `data/com.github.nuvashalauncher.Nuvasha.gschema.xml`. It validates values and
 writes each accepted change. The settings include version-list filters, log
 retention, language, Modrinth API caching, export behavior, dependency delete
-behavior, and sandbox/network switches. Window geometry is kept separately by
+ behavior. Window geometry is kept separately by
 the window code.
-
-The sandbox is currently opt-in in the schema. Its network switch is
-independent: enabling the sandbox does not automatically disable the game's
-network access.
 
 ## Asynchronous work and ownership
 
@@ -385,7 +370,6 @@ sequenceDiagram
     participant V as Version metadata
     participant R as Resolver
     participant J as Java detector
-    participant S as Sandbox
     participant P as Game process
 
     UI->>L: start()
@@ -395,12 +379,6 @@ sequenceDiagram
     R-->>L: resolved version and progress
     L->>J: detect/select compatible Java
     L->>L: build and redact argv
-    opt native build with sandbox enabled
-        L->>S: wrap argv with bwrap
-    end
-    opt Flatpak build
-        Note over L,P: Launcher and game already run inside Flatpak's sandbox
-    end
     L->>P: spawn
     P-->>L: stdout/stderr lines
     P-->>L: exit status or signal
@@ -433,48 +411,15 @@ is consumed by the line-reader helper and retained only up to the configured
 log-line limit. Crash reports are associated with the process start time so an
 old report is not mistaken for a crash from the current launch.
 
-## Sandbox boundary
-
-When enabled, `nuvasha-sandbox.c` wraps an already-complete Java command with
-`bwrap`. The wrapper:
-
-- creates a new process/session environment;
-- separates PID, UTS, IPC, cgroup, and—when requested—network namespaces;
-- supplies `/proc`, `/dev`, and a temporary `/tmp`;
-- mounts only the system and game runtime paths needed by the resolved game;
-- mounts the instance directory as the game home;
-- removes DBus session/system addresses;
-- starts a per-game open broker;
-- hands the final Java argv to the sandbox.
-
-`nuvasha-sandbox-mounts.c` owns the mount policy. The sandbox is not a general
-container manager: it is a launch wrapper for one resolved game. If `bwrap`
-cannot be found or the broker cannot start, launch preparation fails instead
-of falling back silently to an unsandboxed process.
-
-The broker is an in-process host-side socket service scoped to the game
-directory. The sandbox exposes Nuvasha's own executable under
-`/nuvasha-bin/xdg-open`; that entry forwards a checked path to the broker. The
-broker canonicalizes and opens only paths beneath the instance directory, then
-asks the desktop to open the resulting URI. This keeps common mod behavior
-working without exposing the host's shell or arbitrary executables inside the
-sandbox.
-
 ## Flatpak boundary
 
 Flatpak is a packaging and runtime variant, not a second launcher
-implementation. The manifest builds the same source with `FLATPAK=1`. That
-define changes the launch boundary in these ways:
-
-- the game is spawned directly instead of being passed through
-  `nuvasha-sandbox.c`;
-- the native bubblewrap settings are omitted from the Settings dialog;
-- Java runtimes selected by the user can be probed even when they are not in
-  the runtime's normal host search paths.
+implementation. The manifest builds the same source with `FLATPAK=1`. Java
+runtimes selected by the user can be probed even when they are not in the
+runtime's normal host search paths.
 
 The application manifest grants network access, Wayland and fallback X11
-display sockets, PulseAudio compatibility audio, Secret Service access for
-account tokens, and device access required by the graphics stack. It does not
+  account data, and device access required by the graphics stack. It does not
 grant `filesystem=home`. Flatpak therefore remains the outer process boundary
 for the launcher and the game, while the application still uses its normal
 GLib data and cache directories inside the per-application data area.
@@ -495,7 +440,7 @@ The important files are:
 | Instance registry | `<user data>/nuvasha/instances.json` |
 | Instance content | Registered instance directories, each with game files and logs |
 | Account metadata | `<user data>/nuvasha/accounts.json` |
-| Account tokens | Desktop secret service, keyed by account ID |
+| Account tokens | `<user data>/nuvasha/accounts.json`, mode `0600` |
 | Shared resolved content | `<user data>/nuvasha/` shared client artifacts and assets |
 | Version metadata | `<user cache>/nuvasha/versions/` |
 | API responses | `<user cache>/nuvasha/` API cache tree |
@@ -517,10 +462,8 @@ and process boundaries:
   links, and overlapping instance directories where those checks apply.
 - ZIP entry counts and inflated size are bounded.
 - Modpack download URLs are restricted to hosts allowed by the format.
-- Account metadata is mode `0600`; tokens use libsecret and never enter logs,
-  error messages, or redacted command output.
-- The sandbox has an explicit mount and environment policy and can remove game
-  network access.
+- Account metadata and tokens are stored in `accounts.json` with mode `0600`
+  and never enter logs, error messages, or redacted command output.
 - UI text that can contain paths or service errors is treated as plain text,
   not markup.
 
@@ -567,8 +510,6 @@ Use the existing boundary that owns the behavior:
   keep the live async request as a thin wrapper around it.
 - Add a launch preparation step without putting blocking work in the UI or
   bypassing the launcher's state machine.
-- Add a sandbox mount only when the game truly needs it, and document why the
-  path is safe to expose.
 - Keep long-lived operations owned by their manager or launcher, not by the
   dialog that happened to start them.
 
@@ -592,10 +533,7 @@ These are the choices most likely to be misunderstood later:
 4. **Install into safe temporary/fresh locations before registration.** A
    failed import or move must not leave metadata pointing at an incomplete
    installation.
-5. **Sandboxing as a wrapper around a finished command.** Argument construction
-   remains testable and usable without bwrap; the sandbox adds isolation at the
-   final process boundary and fails explicitly if it cannot provide it.
-6. **No provider abstraction for Modrinth yet.** Modrinth is the product's
+5. **No provider abstraction for Modrinth yet.** Modrinth is the product's
    current content source. An abstraction should be introduced only when a
    second provider creates a real need, not as empty indirection.
 

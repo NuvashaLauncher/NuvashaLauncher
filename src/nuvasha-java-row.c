@@ -460,6 +460,7 @@ probe_custom_path (NuvashaJavaRow *self, const char *path)
   self->operation = ask->operation;
 }
 
+#ifndef nuvasha_FLATPAK
 static void
 add_chosen (GObject *dialog, GAsyncResult *result, gpointer user_data)
 {
@@ -498,8 +499,9 @@ add_chosen (GObject *dialog, GAsyncResult *result, gpointer user_data)
 
   g_object_unref (self);
 }
+#endif /* !nuvasha_FLATPAK */
 
- #ifdef nuvasha_FLATPAK
+#ifdef nuvasha_FLATPAK
 static void
 add_folder_chosen (GObject *dialog, GAsyncResult *result, gpointer user_data)
 {

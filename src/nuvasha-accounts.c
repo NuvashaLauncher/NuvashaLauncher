@@ -3,7 +3,6 @@
  */
 
 #include "nuvasha-accounts.h"
-#include "nuvasha-secret-store.h"
 #include "nuvasha-fs.h"
 #include "nuvasha-i18n.h"
 
@@ -208,6 +207,18 @@ account_to_json (JsonBuilder *builder, const NuvashaAccount *account)
 
   if (account->type == nuvasha_ACCOUNT_MICROSOFT)
     {
+      json_builder_set_member_name (builder, "access-token");
+      if (account->access_token != NULL)
+        json_builder_add_string_value (builder, account->access_token);
+      else
+        json_builder_add_null_value (builder);
+
+      json_builder_set_member_name (builder, "refresh-token");
+      if (account->refresh_token != NULL)
+        json_builder_add_string_value (builder, account->refresh_token);
+      else
+        json_builder_add_null_value (builder);
+
       json_builder_set_member_name (builder, "expires-at");
       json_builder_add_int_value (builder, account->expires_at);
     }
@@ -276,14 +287,8 @@ account_from_json (JsonObject *object)
   account->uuid = g_steal_pointer (&uuid);
   if (account->type == nuvasha_ACCOUNT_MICROSOFT)
     {
-      g_autofree char *access_token = NULL;
-      g_autofree char *refresh_token = NULL;
-
-      if (nuvasha_secret_store_load (account->id, &access_token, &refresh_token))
-        {
-          account->access_token = g_steal_pointer (&access_token);
-          account->refresh_token = g_steal_pointer (&refresh_token);
-        }
+      account->access_token = string_member (object, "access-token");
+      account->refresh_token = string_member (object, "refresh-token");
     }
   account->avatar_url = string_member (object, "avatar");
   account->skin_model = string_member (object, "skin-model");
@@ -385,42 +390,6 @@ save (NuvashaAccounts *self, GError **error)
   g_autofree char *directory = NULL;
   g_autofree char *data = NULL;
 
-  for (guint i = 0; i < self->accounts->len; i++)
-    {
-      NuvashaAccount *account = g_ptr_array_index (self->accounts, i);
-
-      if (account->type != nuvasha_ACCOUNT_MICROSOFT ||
-          account->access_token == NULL || account->refresh_token == NULL)
-        {
-          if (account->type == nuvasha_ACCOUNT_MICROSOFT)
-            {
-              g_autoptr (GError) secret_error = NULL;
-
-              if (!nuvasha_secret_store_clear (account->id, &secret_error))
-                {
-                  g_set_error (error, nuvasha_ACCOUNTS_ERROR,
-                               nuvasha_ACCOUNTS_ERROR_IO,
-                               _("cannot clear credentials for account \"%s\": %s"),
-                               account->name,
-                               secret_error != NULL ? secret_error->message
-                                                     : _("unknown Secret Service error"));
-                  return FALSE;
-                }
-            }
-          continue;
-        }
-
-      if (!nuvasha_secret_store_save (account->id, account->access_token,
-                                      account->refresh_token))
-        {
-          g_set_error (error, nuvasha_ACCOUNTS_ERROR,
-                       nuvasha_ACCOUNTS_ERROR_IO,
-                        _("cannot store credentials for account \"%s\""),
-                       account->name);
-          return FALSE;
-        }
-    }
-
   builder = json_builder_new ();
   json_builder_begin_object (builder);
 
@@ -458,9 +427,9 @@ save (NuvashaAccounts *self, GError **error)
       return FALSE;
     }
 
-  /* Mode 0600 and written whole or not at all: account metadata remains
-     private, and a save that is interrupted may never leave half of one
-     behind. Credentials live in Secret Service, not in this file. */
+  /* Mode 0600 and written whole or not at all: account metadata and tokens
+     remain private, and a save that is interrupted may never leave half of
+     one behind. */
   if (!nuvasha_fs_replace_contents (self->filename, data, -1, 0600,
                                 &local_error))
     {
@@ -744,22 +713,8 @@ nuvasha_accounts_remove (NuvashaAccounts *self, const char *id, GError **error)
     {
       NuvashaAccount *account = g_ptr_array_index (self->accounts, i);
       g_autofree char *old_active_id = NULL;
-      g_autoptr (GError) secret_error = NULL;
-
       if (!g_str_equal (account->id, id))
         continue;
-
-      if (account->type == nuvasha_ACCOUNT_MICROSOFT &&
-          !nuvasha_secret_store_clear (id, &secret_error))
-        {
-          g_set_error (error, nuvasha_ACCOUNTS_ERROR,
-                       nuvasha_ACCOUNTS_ERROR_IO,
-                       _("cannot clear credentials for account \"%s\": %s"),
-                       account->name,
-                       secret_error != NULL ? secret_error->message
-                                              : _("unknown Secret Service error"));
-          return FALSE;
-        }
 
       old_active_id = g_strdup (self->active_id);
       account = g_ptr_array_steal_index (self->accounts, i);

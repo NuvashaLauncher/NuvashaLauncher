@@ -10,9 +10,6 @@ msgstr "Ophæve"
 msgid "cannot clear credentials for account \"%s\": %s"
 msgstr "kontoets legitimationsoplysninger kunne ikke slettes for \"%s\": %s"
 
-msgid "unknown Secret Service error"
-msgstr "ukendt fejl i Secret Service"
-
 msgid "cannot store credentials for account \"%s\""
 msgstr "kontoets legitimationsoplysninger kunne ikke gemmes for \"%s\""
 msgid "Confirm"
@@ -558,15 +555,6 @@ msgstr "Sletning af en afhængighed sletter den mod, der afhang af den"
 
 msgid "A dependent mod cannot be deleted"
 msgstr "En afhængig mod kan ikke slettes"
-
-msgid "Sandbox"
-msgstr "Sandkasse"
-
-msgid "Enable sandbox"
-msgstr "Aktiver sandkasse"
-
-msgid "Allow sandbox network access"
-msgstr "Tillad sandbox-netværksadgang"
 
 msgid "Slim model"
 msgstr "Slank model"

@@ -10,9 +10,6 @@ msgstr "Zrušit"
 msgid "cannot clear credentials for account \"%s\": %s"
 msgstr "nelze odstranit přihlašovací údaje účtu „%s“: %s"
 
-msgid "unknown Secret Service error"
-msgstr "neznámá chyba služby Secret Service"
-
 msgid "cannot store credentials for account \"%s\""
 msgstr "nelze uložit přihlašovací údaje účtu „%s“"
 msgid "Confirm"
@@ -560,15 +557,6 @@ msgstr "Smazáním závislosti se smaže mod, který na ní závisel"
 
 msgid "A dependent mod cannot be deleted"
 msgstr "Závislý mod nelze smazat"
-
-msgid "Sandbox"
-msgstr "Pískoviště"
-
-msgid "Enable sandbox"
-msgstr "Povolit sandbox"
-
-msgid "Allow sandbox network access"
-msgstr "Povolit přístup k síti sandbox"
 
 msgid "Slim model"
 msgstr "Štíhlý model"

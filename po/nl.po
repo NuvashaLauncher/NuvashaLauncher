@@ -8,9 +8,6 @@ msgstr ""
 msgid "cannot clear credentials for account \"%s\": %s"
 msgstr "kan de inloggegevens voor account \"%s\" niet verwijderen: %s"
 
-msgid "unknown Secret Service error"
-msgstr "onbekende fout in Secret Service"
-
 msgid "cannot store credentials for account \"%s\""
 msgstr "kan de inloggegevens voor account \"%s\" niet opslaan"
 msgid "Cancel"
@@ -591,14 +588,6 @@ msgstr "Een afhankelijkheid verwijderen verwijdert de mod die ervan afhankelijk 
 msgid "A dependent mod cannot be deleted"
 msgstr "Een afhankelijke mod kan niet worden verwijderd"
 
-msgid "Sandbox"
-msgstr "Sandbox"
-
-msgid "Enable sandbox"
-msgstr "Sandbox inschakelen"
-
-msgid "Allow sandbox network access"
-msgstr "Toegang tot het sandbox-netwerk toestaan"
 # UI string
 msgid "Skin"
 msgstr "Skin"

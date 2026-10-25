@@ -10,9 +10,6 @@ msgstr "Anula"
 msgid "cannot clear credentials for account \"%s\": %s"
 msgstr "acreditările contului „%s” nu pot fi șterse: %s"
 
-msgid "unknown Secret Service error"
-msgstr "eroare necunoscută a serviciului Secret Service"
-
 msgid "cannot store credentials for account \"%s\""
 msgstr "acreditările contului „%s” nu pot fi salvate"
 msgid "Confirm"
@@ -560,15 +557,6 @@ msgstr "Ștergerea unei dependențe șterge modul care depindea de ea"
 
 msgid "A dependent mod cannot be deleted"
 msgstr "Un mod dependent nu poate fi șters"
-
-msgid "Sandbox"
-msgstr "Cutie cu nisip"
-
-msgid "Enable sandbox"
-msgstr "Activați sandbox"
-
-msgid "Allow sandbox network access"
-msgstr "Permite accesul la rețea sandbox"
 
 msgid "Slim model"
 msgstr "Model subțire"

@@ -8,9 +8,6 @@ msgstr ""
 msgid "cannot clear credentials for account \"%s\": %s"
 msgstr "Anmeldedaten für Konto \"%s\" können nicht gelöscht werden: %s"
 
-msgid "unknown Secret Service error"
-msgstr "unbekannter Fehler des Secret Service"
-
 msgid "cannot store credentials for account \"%s\""
 msgstr "Anmeldedaten für Konto \"%s\" können nicht gespeichert werden"
 msgid "Cancel"
@@ -593,14 +590,6 @@ msgstr "Das Löschen einer Abhängigkeit löscht das davon abhängige Mod"
 msgid "A dependent mod cannot be deleted"
 msgstr "Ein abhängiges Mod kann nicht gelöscht werden"
 
-msgid "Sandbox"
-msgstr "Sandbox"
-
-msgid "Enable sandbox"
-msgstr "Sandbox aktivieren"
-
-msgid "Allow sandbox network access"
-msgstr "Netzwerkzugriff für die Sandbox zulassen"
 # UI string
 msgid "Skin"
 msgstr "Skin"

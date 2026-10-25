@@ -7,7 +7,7 @@
  * One object, ten options so far: whether the version lists also show
  * unstable Minecraft versions, whether the loader lists also show the
  * versions a loader does not call stable, how many lines the log of a running
- * game keeps, and whether the game sandbox is enabled. Which Java
+ * game keeps. Which Java
  * an instance runs with is not
  * one of them: it is the automatic choice, unless the instance itself
  * names another runtime. The file is read once when the object is
@@ -105,20 +105,6 @@ gboolean nuvasha_settings_get_delete_dependents (NuvashaSettings *self);
 gboolean nuvasha_settings_set_delete_dependents (NuvashaSettings *self,
                                               gboolean value,
                                               GError **error);
-
-/* FALSE by default: the game is started directly unless the user opts into
- * the bubblewrap sandbox. */
-gboolean nuvasha_settings_get_sandbox_enabled (NuvashaSettings *self);
-gboolean nuvasha_settings_set_sandbox_enabled (NuvashaSettings *self,
-                                           gboolean value,
-                                           GError **error);
-
-/* TRUE by default: the sandbox keeps the game's network access unless the
- * user explicitly disables it. */
-gboolean nuvasha_settings_get_sandbox_network_enabled (NuvashaSettings *self);
-gboolean nuvasha_settings_set_sandbox_network_enabled (NuvashaSettings *self,
-                                                   gboolean value,
-                                                   GError **error);
 
 G_END_DECLS
 

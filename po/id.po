@@ -10,9 +10,6 @@ msgstr "Membatalkan"
 msgid "cannot clear credentials for account \"%s\": %s"
 msgstr "tidak dapat menghapus kredensial akun \"%s\": %s"
 
-msgid "unknown Secret Service error"
-msgstr "kesalahan Secret Service yang tidak diketahui"
-
 msgid "cannot store credentials for account \"%s\""
 msgstr "tidak dapat menyimpan kredensial akun \"%s\""
 msgid "Confirm"
@@ -558,15 +555,6 @@ msgstr "Menghapus ketergantungan akan menghapus mod yang bergantung padanya"
 
 msgid "A dependent mod cannot be deleted"
 msgstr "Mod yang bergantung tidak dapat dihapus"
-
-msgid "Sandbox"
-msgstr "Bak pasir"
-
-msgid "Enable sandbox"
-msgstr "Aktifkan kotak pasir"
-
-msgid "Allow sandbox network access"
-msgstr "Izinkan akses jaringan kotak pasir"
 
 msgid "Slim model"
 msgstr "Modelnya ramping"

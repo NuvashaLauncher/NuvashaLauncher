@@ -8,9 +8,6 @@ msgstr ""
 msgid "cannot clear credentials for account \"%s\": %s"
 msgstr "\"%s\" hesabının kimlik bilgileri temizlenemiyor: %s"
 
-msgid "unknown Secret Service error"
-msgstr "bilinmeyen Secret Service hatası"
-
 msgid "cannot store credentials for account \"%s\""
 msgstr "\"%s\" hesabının kimlik bilgileri kaydedilemiyor"
 msgid "Cancel"
@@ -591,14 +588,6 @@ msgstr "Bir bağımlılığı silmek, ona bağlı olan modu da siler"
 msgid "A dependent mod cannot be deleted"
 msgstr "Bağımlı mod silinemiyor"
 
-msgid "Sandbox"
-msgstr "Korumalı alan"
-
-msgid "Enable sandbox"
-msgstr "Korumalı alanı etkinleştir"
-
-msgid "Allow sandbox network access"
-msgstr "Sandbox’ın ağ erişimine izin ver"
 # UI string
 msgid "Skin"
 msgstr "Skin"

@@ -10,9 +10,6 @@ msgstr "Mégsem"
 msgid "cannot clear credentials for account \"%s\": %s"
 msgstr "nem sikerült törölni a(z) „%s” fiók hitelesítő adatait: %s"
 
-msgid "unknown Secret Service error"
-msgstr "ismeretlen Secret Service-hiba"
-
 msgid "cannot store credentials for account \"%s\""
 msgstr "nem sikerült menteni a(z) „%s” fiók hitelesítő adatait"
 msgid "Confirm"
@@ -558,15 +555,6 @@ msgstr "Egy függőség törlése törli a tőle függő modot"
 
 msgid "A dependent mod cannot be deleted"
 msgstr "Egy függő mod nem törölhető"
-
-msgid "Sandbox"
-msgstr "Sandbox"
-
-msgid "Enable sandbox"
-msgstr "Sandbox engedélyezése"
-
-msgid "Allow sandbox network access"
-msgstr "Engedélyezze a sandbox hálózati hozzáférést"
 
 msgid "Slim model"
 msgstr "Vékony modell"
