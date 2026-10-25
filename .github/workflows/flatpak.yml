@@ -9,9 +9,21 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container: fedora:latest
     steps:
       - name: Check out source
         uses: actions/checkout@v4
+
+      - name: Install Flatpak tooling
+        run: |
+          dnf install -y \
+            ca-certificates \
+            flatpak \
+            flatpak-builder \
+            git \
+            xorg-x11-server-Xvfb
+          flatpak remote-add --if-not-exists flathub \
+            https://flathub.org/repo/flathub.flatpakrepo
 
       - name: Build Flatpak bundle
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
