@@ -31,6 +31,9 @@ void page_watch_free (PageWatch *watch);
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (PageWatch, page_watch_free)
 void take_rows_out (GList **rows, AdwPreferencesGroup *group);
 void file_row_refresh (GtkWidget *row);
+void content_page_toggle_edit (GtkButton *button, gpointer user_data);
+void content_page_update_selection (NuvashaContentPage *self);
+void content_page_bulk_delete (GtkButton *button, gpointer user_data);
 void installed_filter_rows (NuvashaContentPage *self);
 GtkWidget *file_row (NuvashaContentPage *self, NuvashaContentFile *file);
 void load_visible_icons (NuvashaContentPage *self);
@@ -81,6 +84,12 @@ struct _NuvashaContentPage
     GCancellable *scan;
     gboolean loaded;
     gboolean identifying;
+    GtkButton *edit_button;
+    GtkActionBar *selection_footer;
+    GtkLabel *selection_label;
+    GtkButton *selection_delete;
+    GHashTable *selected_paths; /* path -> TRUE */
+    gboolean edit_mode;
   } installed;
   GtkBox *browse_actions;
 
@@ -128,6 +137,7 @@ struct _NuvashaContentPage
 
   GtkButton *pick_button;
   GtkLabel *pick_badge;
+  GtkActionBar *pick_footer;
 };
 
 

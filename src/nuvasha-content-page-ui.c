@@ -33,7 +33,7 @@ void
 nuvasha_content_page_build_installed (NuvashaContentPage *self)
 {
   GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
-  GtkBox *actions = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+   GtkBox *actions = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
    GtkSearchEntry *search_bar = GTK_SEARCH_ENTRY (gtk_search_entry_new ());
   GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
   GtkBox *content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
@@ -42,8 +42,14 @@ nuvasha_content_page_build_installed (NuvashaContentPage *self)
   GtkImage *update_icon = GTK_IMAGE (gtk_image_new_from_icon_name (
     "software-update-available-symbolic"));
   AdwSpinner *update_spinner = ADW_SPINNER (adw_spinner_new ());
-  AdwPreferencesGroup *group =
-    ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+   AdwPreferencesGroup *group =
+     ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+   GtkButton *edit_button = GTK_BUTTON (gtk_button_new_from_icon_name (
+     "document-edit-symbolic"));
+   GtkActionBar *selection_footer = GTK_ACTION_BAR (gtk_action_bar_new ());
+   GtkLabel *selection_label = GTK_LABEL (gtk_label_new (""));
+   GtkButton *selection_delete = GTK_BUTTON (gtk_button_new_from_icon_name (
+     "user-trash-symbolic"));
 
    gtk_widget_set_hexpand (GTK_WIDGET (actions), TRUE);
    self->installed.search_bar = GTK_SEARCH_ENTRY (search_bar);
@@ -55,6 +61,12 @@ nuvasha_content_page_build_installed (NuvashaContentPage *self)
     g_signal_connect_object (search_bar, "changed",
                              G_CALLBACK (nuvasha_content_page_on_installed_search_changed), self, 0);
      gtk_box_append (GTK_BOX (actions), GTK_WIDGET (search_bar));
+     nuvasha_ui_prepare_icon_button (GTK_WIDGET (edit_button), _("Edit mode"));
+     gtk_widget_set_tooltip_text (GTK_WIDGET (edit_button), _("Edit mode"));
+     gtk_box_append (GTK_BOX (actions), GTK_WIDGET (edit_button));
+     g_signal_connect (edit_button, "clicked",
+                       G_CALLBACK (content_page_toggle_edit), self);
+     self->installed.edit_button = edit_button;
 
     self->installed.update_all = GTK_BUTTON (toolbar_button (
       "software-update-available-symbolic", _("Update All"),
@@ -85,6 +97,16 @@ nuvasha_content_page_build_installed (NuvashaContentPage *self)
      be the last reference to it and would destroy the box and the
      spinner inside it while self->browse.spinner still points at them. */
    self->installed.actions = GTK_BOX (actions);
+   self->installed.selection_footer = selection_footer;
+   self->installed.selection_label = selection_label;
+   self->installed.selection_delete = selection_delete;
+   gtk_action_bar_set_center_widget (selection_footer, GTK_WIDGET (selection_label));
+   gtk_action_bar_pack_end (selection_footer, GTK_WIDGET (selection_delete));
+   nuvasha_ui_prepare_icon_button (GTK_WIDGET (selection_delete), _("Delete"));
+   gtk_widget_set_visible (GTK_WIDGET (selection_delete), FALSE);
+   gtk_action_bar_set_revealed (selection_footer, FALSE);
+   g_signal_connect (selection_delete, "clicked",
+                     G_CALLBACK (content_page_bulk_delete), self);
   g_object_ref_sink (actions);
 
    self->installed.status = ADW_STATUS_PAGE (adw_status_page_new ());
@@ -121,7 +143,8 @@ nuvasha_content_page_build_installed (NuvashaContentPage *self)
    gtk_box_append (GTK_BOX (content), GTK_WIDGET (self->installed.status));
   gtk_box_append (GTK_BOX (content), GTK_WIDGET (scroller));
   gtk_widget_set_visible (GTK_WIDGET (scroller), FALSE);
-  gtk_box_append (GTK_BOX (box), GTK_WIDGET (content));
+   gtk_box_append (GTK_BOX (box), GTK_WIDGET (content));
+   gtk_box_append (GTK_BOX (box), GTK_WIDGET (selection_footer));
 
   adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (self->stack), GTK_WIDGET (box),
                                         "installed", _("Installed"),
@@ -205,7 +228,7 @@ nuvasha_content_page_build_browse (NuvashaContentPage *self)
   GtkBox *retry_row = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
   GtkLabel *retry_label = GTK_LABEL (gtk_label_new (NULL));
   GtkButton *retry_button = GTK_BUTTON (gtk_button_new_with_label (_("Retry")));
-  GtkBox *foot = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+   GtkActionBar *foot = GTK_ACTION_BAR (gtk_action_bar_new ());
   GtkButton *pick_button = GTK_BUTTON (gtk_button_new ());
   GtkImage *pick_icon = GTK_IMAGE (gtk_image_new_from_icon_name (
       "folder-download-symbolic"));
@@ -327,15 +350,14 @@ nuvasha_content_page_build_browse (NuvashaContentPage *self)
 
    gtk_overlay_set_child (GTK_OVERLAY (pick_overlay), GTK_WIDGET (pick_button));
    gtk_overlay_add_overlay (GTK_OVERLAY (pick_overlay), GTK_WIDGET (pick_badge));
-   gtk_box_append (GTK_BOX (foot), GTK_WIDGET (pick_overlay));
-  gtk_widget_set_margin_start (GTK_WIDGET (foot), 12);
-  gtk_widget_set_margin_end (GTK_WIDGET (foot), 12);
-  gtk_widget_set_margin_top (GTK_WIDGET (foot), 6);
-  gtk_widget_set_margin_bottom (GTK_WIDGET (foot), 6);
+    gtk_action_bar_pack_start (foot, GTK_WIDGET (pick_overlay));
+   gtk_widget_add_css_class (GTK_WIDGET (foot), "nuvasha-content-selection-footer");
+   gtk_action_bar_set_revealed (foot, FALSE);
   gtk_box_append (GTK_BOX (box), GTK_WIDGET (foot));
 
    self->pick_button = GTK_BUTTON (pick_button);
    self->pick_badge = GTK_LABEL (pick_badge);
+   self->pick_footer = foot;
 
   /* Nothing is picked yet: the button starts where the list starts, with
      no number on it and nothing to install. */
@@ -478,8 +500,8 @@ nuvasha_content_page_build_bar (NuvashaContentPage *self)
   gtk_box_append (GTK_BOX (self->bar), GTK_WIDGET (self->bar_spacer));
   gtk_box_append (GTK_BOX (self->bar), GTK_WIDGET (self->switcher));
 
-   gtk_widget_set_margin_start (GTK_WIDGET (self->bar), 12);
-  gtk_widget_set_margin_end (GTK_WIDGET (self->bar), 12);
+   gtk_widget_set_margin_start (GTK_WIDGET (self->bar), 0);
+   gtk_widget_set_margin_end (GTK_WIDGET (self->bar), 0);
 
   /* Keep failures in a banner; use toasts for transient success messages. */
   self->banner = ADW_BANNER (adw_banner_new (""));

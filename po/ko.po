@@ -52,8 +52,6 @@ msgstr "정보 가져오는 중"
 msgid "Nothing is selected"
 msgstr "선택된 항목이 없습니다"
 
-msgid "Install this version with the selected ones"
-msgstr "선택한 항목과 함께 이 버전을 설치"
 
 msgid "Filter by category"
 msgstr "카테고리별 필터링"
@@ -940,3 +938,19 @@ msgstr "%u/%u개 선택됨"
 #: src/nuvasha-main-window.c
 msgid "The following instances will be deleted:\n%s"
 msgstr "다음 인스턴스가 삭제됩니다:\n%s"
+
+#: src/nuvasha-content-page.c
+msgid "Delete selected %s?"
+msgstr "Delete selected %s?"
+
+#: src/nuvasha-content-page.c
+msgid "Selected %s:\n%s"
+msgstr "Selected %s:\n%s"
+
+#: src/nuvasha-content-page.c
+msgid "Selected %s:\n%s\n\nDependencies:\n%s"
+msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
+
+#: src/nuvasha-main-window-ui.c
+msgid "Edit mode"
+msgstr "편집 모드"

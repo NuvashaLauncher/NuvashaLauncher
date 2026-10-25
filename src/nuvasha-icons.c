@@ -282,6 +282,9 @@ nuvasha_icon_widget_new (const char *placeholder_icon_name)
       placeholder_icon_name != NULL ? placeholder_icon_name
                                     : "image-x-generic-symbolic"));
 
+  gtk_widget_add_css_class (GTK_WIDGET (stack), "nuvasha-content-icon");
+  gtk_widget_set_overflow (GTK_WIDGET (stack), GTK_OVERFLOW_HIDDEN);
+
   gtk_image_set_pixel_size (GTK_IMAGE (placeholder), 32);
   gtk_widget_set_size_request (GTK_WIDGET (placeholder), nuvasha_ICON_SIZE, nuvasha_ICON_SIZE);
   gtk_widget_set_halign (GTK_WIDGET (placeholder), GTK_ALIGN_CENTER);
@@ -384,6 +387,7 @@ nuvasha_icon_widget_set_file (GtkWidget *widget, const char *path)
   icon = gtk_image_new_from_paintable (GDK_PAINTABLE (texture));
   gtk_image_set_pixel_size (GTK_IMAGE (icon), nuvasha_ICON_SIZE);
   gtk_widget_set_size_request (icon, nuvasha_ICON_SIZE, nuvasha_ICON_SIZE);
+  gtk_widget_set_overflow (icon, GTK_OVERFLOW_HIDDEN);
 
   old_icon = gtk_stack_get_child_by_name (GTK_STACK (widget), "icon");
   if (old_icon != NULL)

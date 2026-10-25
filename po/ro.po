@@ -51,8 +51,6 @@ msgstr "Se încarcă mai multe…"
 msgid "Nothing is selected"
 msgstr "Nimic nu este selectat"
 
-msgid "Install this version with the selected ones"
-msgstr "Instalați această versiune cu cele selectate"
 
 msgid "Filter by category"
 msgstr "Filtrați după categorie"
@@ -910,3 +908,19 @@ msgstr "%u/%u selectate"
 #: src/nuvasha-main-window.c
 msgid "The following instances will be deleted:\n%s"
 msgstr "Următoarele instanțe vor fi șterse:\n%s"
+
+#: src/nuvasha-content-page.c
+msgid "Delete selected %s?"
+msgstr "Delete selected %s?"
+
+#: src/nuvasha-content-page.c
+msgid "Selected %s:\n%s"
+msgstr "Selected %s:\n%s"
+
+#: src/nuvasha-content-page.c
+msgid "Selected %s:\n%s\n\nDependencies:\n%s"
+msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
+
+#: src/nuvasha-main-window-ui.c
+msgid "Edit mode"
+msgstr "Mod de editare"

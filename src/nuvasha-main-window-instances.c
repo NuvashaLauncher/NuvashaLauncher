@@ -290,6 +290,8 @@ instance_row_drag_begin (AdwActionRow *row, GdkDrag *drag)
     gtk_image_set_from_paintable (
       GTK_IMAGE (drag_icon),
       gtk_image_get_paintable (GTK_IMAGE (instance_icon)));
+  gtk_widget_add_css_class (drag_icon, "nuvasha-instance-icon");
+  gtk_widget_set_overflow (drag_icon, GTK_OVERFLOW_HIDDEN);
   gtk_image_set_pixel_size (GTK_IMAGE (drag_icon), 48);
   adw_action_row_add_prefix (ADW_ACTION_ROW (drag_row), drag_icon);
   gtk_list_box_append (GTK_LIST_BOX (drag_list), drag_row);
@@ -601,6 +603,8 @@ create_instance_row (gpointer item, gpointer user_data)
   gtk_image_set_pixel_size (GTK_IMAGE (icon), 48);
   gtk_widget_set_size_request (GTK_WIDGET (icon), 48, 48);
   gtk_widget_set_valign (GTK_WIDGET (icon), GTK_ALIGN_CENTER);
+  gtk_widget_add_css_class (GTK_WIDGET (icon), "nuvasha-instance-icon");
+  gtk_widget_set_overflow (GTK_WIDGET (icon), GTK_OVERFLOW_HIDDEN);
   /* add_prefix prepends: add the checkbox first so the handle appears on
    * its left, matching the edit-mode order in the UI. */
   adw_action_row_add_prefix (ADW_ACTION_ROW (row), GTK_WIDGET (check));

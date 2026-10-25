@@ -52,8 +52,6 @@ msgstr "読み込み中…"
 msgid "Nothing is selected"
 msgstr "何も選択されていません"
 
-msgid "Install this version with the selected ones"
-msgstr "選択したものと一緒にこのバージョンをインストール"
 
 msgid "Filter by category"
 msgstr "カテゴリーで絞り込む"
@@ -941,3 +939,19 @@ msgstr "%u/%u 個選択中"
 #: src/nuvasha-main-window.c
 msgid "The following instances will be deleted:\n%s"
 msgstr "次のインスタンスが削除されます:\n%s"
+
+#: src/nuvasha-content-page.c
+msgid "Delete selected %s?"
+msgstr "Delete selected %s?"
+
+#: src/nuvasha-content-page.c
+msgid "Selected %s:\n%s"
+msgstr "Selected %s:\n%s"
+
+#: src/nuvasha-content-page.c
+msgid "Selected %s:\n%s\n\nDependencies:\n%s"
+msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
+
+#: src/nuvasha-main-window-ui.c
+msgid "Edit mode"
+msgstr "編集モード"

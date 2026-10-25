@@ -137,6 +137,9 @@ nuvasha_content_page_refresh_picks (NuvashaContentPage *self)
                                       label, -1);
     }
 
+  if (self->pick_footer != NULL)
+    gtk_action_bar_set_revealed (self->pick_footer, count > 0);
+
   refresh_pick_check (self);
 }
 
