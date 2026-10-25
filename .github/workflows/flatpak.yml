@@ -9,7 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: fedora:latest
+    container:
+      image: fedora:latest
+      options: --privileged
     steps:
       - name: Check out source
         uses: actions/checkout@v4
