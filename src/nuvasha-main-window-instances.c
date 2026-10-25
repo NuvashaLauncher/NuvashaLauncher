@@ -999,6 +999,13 @@ update_visible_page (NuvashaMainWindow *self)
   GListStore *instances = nuvasha_instance_manager_get_instances (self->model->manager);
   guint n_items = g_list_model_get_n_items (G_LIST_MODEL (instances));
 
+  if (self->ui.edit != NULL)
+    {
+      if (n_items == 0 && self->ui.edit_mode)
+        set_instance_edit_mode (self);
+      gtk_widget_set_visible (GTK_WIDGET (self->ui.edit), n_items > 0);
+    }
+
   adw_view_stack_set_visible_child_name (self->ui.stack,
                                          n_items > 0 ? "instances" : "empty");
 }
