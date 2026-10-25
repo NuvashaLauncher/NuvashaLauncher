@@ -897,3 +897,14 @@ msgstr "Microsoft sign-in failed. Try again."
 
 msgid "Open in browser"
 msgstr "Öppna i webbläsare"
+#: src/nuvasha-main-window.c
+msgid "Edit instances"
+msgstr "Redigera instanser"
+
+#: src/nuvasha-main-window.c
+msgid "%u/%u selected"
+msgstr "%u/%u valda"
+
+#: src/nuvasha-main-window.c
+msgid "The following instances will be deleted:\n%s"
+msgstr "Följande instanser kommer att tas bort:\n%s"

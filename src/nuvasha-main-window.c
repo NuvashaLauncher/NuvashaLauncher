@@ -267,6 +267,7 @@ static void
 nuvasha_main_window_init (NuvashaMainWindow *self)
 {
   self->model = nuvasha_main_window_model_new ();
+  self->ui.edit_mode = FALSE;
   self->window_settings = window_settings_new ();
   if (self->window_settings != NULL)
     {
@@ -293,10 +294,12 @@ nuvasha_main_window_new (AdwApplication *application, NuvashaInstanceManager *ma
                                       "application", application,
                                       NULL);
   GListStore *instances = nuvasha_instance_manager_get_instances (manager);
-  GtkListBox *list = NULL;
-  GtkScrolledWindow *scroll = NULL;
+   GtkListBox *list = NULL;
+   GtkScrolledWindow *scroll = NULL;
 
   self->model->manager = g_object_ref (manager);
+  self->ui.selected_instances = g_hash_table_new_full (g_str_hash, g_str_equal,
+                                                        g_free, NULL);
 
   /* The standard shortcuts, registered on the application because the
      window is not the one that owns them. */
@@ -325,8 +328,7 @@ nuvasha_main_window_new (AdwApplication *application, NuvashaInstanceManager *ma
      under them is the window background, the same colour as the hairline
      between two rows, instead of the whole window being card coloured. */
    gtk_widget_set_valign (GTK_WIDGET (list), GTK_ALIGN_START);
-   gtk_list_box_set_selection_mode (list,
-                                     GTK_SELECTION_NONE);
+   gtk_list_box_set_selection_mode (list, GTK_SELECTION_NONE);
     g_signal_connect_object (list, "row-activated", G_CALLBACK (on_row_activate),
                              self, 0);
    gtk_list_box_bind_model (list, G_LIST_MODEL (instances),
@@ -340,7 +342,8 @@ nuvasha_main_window_new (AdwApplication *application, NuvashaInstanceManager *ma
    gtk_widget_set_margin_end (GTK_WIDGET (scroll), 12);
    gtk_widget_set_hexpand (GTK_WIDGET (scroll), TRUE);
    gtk_widget_set_vexpand (GTK_WIDGET (scroll), TRUE);
-  adw_view_stack_add_named (self->ui.stack, GTK_WIDGET (scroll), "instances");
+   adw_view_stack_add_named (self->ui.stack, GTK_WIDGET (scroll), "instances");
+   self->ui.instances = list;
 
   /* The connection goes away with the window, which outlives every
    * callback it could receive. */
@@ -369,6 +372,7 @@ nuvasha_main_window_dispose (GObject *object)
   nuvasha_main_window_model_free (self->model);
   self->model = NULL;
   g_clear_object (&self->window_settings);
+  g_clear_pointer (&self->ui.selected_instances, g_hash_table_unref);
   g_clear_pointer (&self->downloads.rows, g_hash_table_unref);
 
   G_OBJECT_CLASS (nuvasha_main_window_parent_class)->dispose (object);

@@ -48,6 +48,12 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
   GtkMenuButton *add_button = GTK_MENU_BUTTON (gtk_menu_button_new ());
   GtkMenuButton *users_button = GTK_MENU_BUTTON (gtk_menu_button_new ());
   GtkMenuButton *app_menu_button = GTK_MENU_BUTTON (gtk_menu_button_new ());
+  GtkButton *edit_button = GTK_BUTTON (gtk_button_new_from_icon_name (
+    "document-edit-symbolic"));
+  GtkButton *footer_delete = GTK_BUTTON (gtk_button_new_from_icon_name (
+    "user-trash-symbolic"));
+  GtkActionBar *selection_footer = GTK_ACTION_BAR (gtk_action_bar_new ());
+  GtkLabel *selection_label = GTK_LABEL (gtk_label_new (""));
   GtkWidget *users_child = NULL;
   AdwStatusPage *empty_page = ADW_STATUS_PAGE (adw_status_page_new ());
   AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (gtk_builder_get_object (
@@ -73,6 +79,27 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
   gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (add_button),
                                   G_MENU_MODEL (add_menu));
   adw_header_bar_pack_start (ADW_HEADER_BAR (header), GTK_WIDGET (add_button));
+
+  self->ui.edit = edit_button;
+  self->ui.footer_delete = footer_delete;
+  self->ui.selection_footer = selection_footer;
+  self->ui.selection_label = selection_label;
+  gtk_widget_set_tooltip_text (GTK_WIDGET (edit_button), _("Edit instances"));
+  gtk_widget_set_tooltip_text (GTK_WIDGET (footer_delete), _("Delete"));
+  nuvasha_ui_prepare_icon_button (GTK_WIDGET (edit_button), _("Edit instances"));
+  nuvasha_ui_prepare_icon_button (GTK_WIDGET (footer_delete), _("Delete"));
+  gtk_widget_set_visible (GTK_WIDGET (footer_delete), FALSE);
+  gtk_action_bar_set_center_widget (selection_footer, GTK_WIDGET (selection_label));
+  gtk_action_bar_pack_end (selection_footer, GTK_WIDGET (footer_delete));
+  gtk_action_bar_set_revealed (selection_footer, FALSE);
+  adw_header_bar_pack_start (ADW_HEADER_BAR (header), GTK_WIDGET (edit_button));
+  adw_toolbar_view_add_bottom_bar (toolbar, GTK_WIDGET (selection_footer));
+  adw_toolbar_view_set_bottom_bar_style (toolbar, ADW_TOOLBAR_RAISED);
+  adw_toolbar_view_set_reveal_bottom_bars (toolbar, TRUE);
+  g_signal_connect_swapped (edit_button, "clicked",
+                            G_CALLBACK (set_instance_edit_mode), self);
+  g_signal_connect_swapped (footer_delete, "clicked",
+                            G_CALLBACK (bulk_delete_instances), self);
 
   add_popover = GTK_WIDGET (
     gtk_menu_button_get_popover (GTK_MENU_BUTTON (add_button)));

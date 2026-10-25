@@ -899,3 +899,14 @@ msgstr "Microsoft sign-in failed. Try again."
 
 msgid "Open in browser"
 msgstr "Deschide în browser"
+#: src/nuvasha-main-window.c
+msgid "Edit instances"
+msgstr "Editează instanțele"
+
+#: src/nuvasha-main-window.c
+msgid "%u/%u selected"
+msgstr "%u/%u selectate"
+
+#: src/nuvasha-main-window.c
+msgid "The following instances will be deleted:\n%s"
+msgstr "Următoarele instanțe vor fi șterse:\n%s"

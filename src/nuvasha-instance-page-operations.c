@@ -625,3 +625,24 @@ on_delete_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL, on_delete_chosen,
                            g_object_ref (self));
 }
+
+void
+nuvasha_instance_page_trigger_export (NuvashaInstancePage *self)
+{
+  g_return_if_fail (nuvasha_IS_INSTANCE_PAGE (self));
+  on_export_clicked (NULL, self);
+}
+
+void
+nuvasha_instance_page_trigger_delete (NuvashaInstancePage *self)
+{
+  g_return_if_fail (nuvasha_IS_INSTANCE_PAGE (self));
+  on_delete_clicked (NULL, self);
+}
+
+void
+nuvasha_instance_page_trigger_duplicate (NuvashaInstancePage *self)
+{
+  g_return_if_fail (nuvasha_IS_INSTANCE_PAGE (self));
+  on_duplicate_clicked (NULL, self);
+}
