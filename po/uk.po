@@ -149,8 +149,6 @@ msgstr "Java"
 msgid "Java Runtime"
 msgstr "Середовище виконання Java"
 
-msgid "No Java installation was found on this system"
-msgstr "У цій системі не знайдено встановлень Java"
 
 msgid "This game needs Java %d or newer, selected Java is %d"
 msgstr "Для цієї гри потрібна Java %d або новіша, вибрано Java %d"

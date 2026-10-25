@@ -142,8 +142,6 @@ msgstr "جافا"
 msgid "Java Runtime"
 msgstr "جافا وقت التشغيل"
 
-msgid "No Java installation was found on this system"
-msgstr "لم يتم العثور على تثبيت Java على هذا النظام"
 
 msgid "This game needs Java %d or newer, selected Java is %d"
 msgstr "تحتاج هذه اللعبة إلى Java %d أو أحدث، Java المحدد هو %d"

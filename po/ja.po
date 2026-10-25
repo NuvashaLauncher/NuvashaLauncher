@@ -149,8 +149,6 @@ msgstr "Java"
 msgid "Java Runtime"
 msgstr "Java ランタイム"
 
-msgid "No Java installation was found on this system"
-msgstr "このシステムに Java のインストールが見つかりませんでした"
 
 msgid "This game needs Java %d or newer, selected Java is %d"
 msgstr "このゲームには Java %d 以降が必要です。選択されている Java は %d です"

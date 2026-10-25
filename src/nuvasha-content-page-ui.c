@@ -82,7 +82,10 @@ nuvasha_content_page_build_installed (NuvashaContentPage *self)
    gtk_stack_add_named (update_content, GTK_WIDGET (update_icon), "icon");
    gtk_stack_add_named (update_content, GTK_WIDGET (update_spinner), "spinner");
    gtk_stack_set_visible_child_name (update_content, "icon");
-    gtk_widget_set_parent (GTK_WIDGET (update_popover), GTK_WIDGET (update_all));
+     /* Keep the popover owned by the action row rather than by the button.
+      * This lets the page tear it down before its button is finalized. */
+     gtk_widget_set_parent (GTK_WIDGET (update_popover), GTK_WIDGET (actions));
+     gtk_widget_set_visible (GTK_WIDGET (update_popover), FALSE);
     gtk_label_set_text (update_title, _("Fetching updates"));
      gtk_label_set_text (update_phase, _("Progress"));
     nuvasha_ui_prepare_icon_button (GTK_WIDGET (update_cancel), _("Cancel"));
@@ -99,7 +102,9 @@ nuvasha_content_page_build_installed (NuvashaContentPage *self)
    gtk_popover_set_has_arrow (update_popover, FALSE);
    self->installed.update_content = update_content;
    self->installed.update_spinner = update_spinner;
-    self->installed.update_popover = update_popover;
+   self->installed.update_popover = update_popover;
+   g_object_add_weak_pointer (G_OBJECT (update_popover),
+                              (gpointer *) &self->installed.update_popover);
     self->installed.update_phase = update_phase;
    self->installed.update_count = update_count;
    self->installed.update_bar = update_bar;

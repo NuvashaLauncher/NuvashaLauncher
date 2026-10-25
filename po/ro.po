@@ -142,8 +142,6 @@ msgstr "Java"
 msgid "Java Runtime"
 msgstr "Mediul de execuție Java"
 
-msgid "No Java installation was found on this system"
-msgstr "Nu a fost găsită nicio instalare Java pe acest sistem"
 
 msgid "This game needs Java %d or newer, selected Java is %d"
 msgstr "Acest joc necesită Java %d sau mai nou, Java selectat este %d"

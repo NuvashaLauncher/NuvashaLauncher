@@ -142,8 +142,6 @@ msgstr "Jáva"
 msgid "Java Runtime"
 msgstr "Java Runtime"
 
-msgid "No Java installation was found on this system"
-msgstr "Ezen a rendszeren nem található Java telepítés"
 
 msgid "This game needs Java %d or newer, selected Java is %d"
 msgstr "Ehhez a játékhoz %d vagy újabb Java szükséges, a kiválasztott Java %d"

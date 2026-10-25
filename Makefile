@@ -8,6 +8,7 @@ CC         := gcc
 PKG_CONFIG ?= pkg-config
 PREFIX     ?= /usr/local
 VERSION    := $(strip $(shell cat VERSION))
+FLATPAK    ?= 0
 
 # Libraries nuvasha links against. GTK loads the available display backend at
 # runtime, so nuvasha does not link to a window-system backend directly.
@@ -29,6 +30,9 @@ CPPFLAGS += -Dnuvasha_VERSION=\"$(VERSION)\"
 CPPFLAGS += -Dnuvasha_DATA_DIR=\"$(PREFIX)/share/nuvasha\"
 CPPFLAGS += -Dnuvasha_SOURCE_DATA_DIR=\"$(CURDIR)/data\"
 CPPFLAGS += -Dnuvasha_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\"
+ifeq ($(FLATPAK),1)
+CPPFLAGS += -Dnuvasha_FLATPAK
+endif
 LOCALES := es_AR es_ES pt_BR pt_PT fr de it ja ko zh_CN zh_TW ru pl uk tr nl cs hu sv da fi nb ro vi id ar
 LOCALE_MOS := $(LOCALES:%=build/locale/%/LC_MESSAGES/nuvasha.mo)
 SCHEMA_XML := data/com.github.nuvashalauncher.Nuvasha.gschema.xml
