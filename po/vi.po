@@ -897,3 +897,14 @@ msgstr "Microsoft sign-in failed. Try again."
 
 msgid "Open in browser"
 msgstr "Mở trong trình duyệt"
+#: src/nuvasha-main-window.c
+msgid "Edit instances"
+msgstr "Chỉnh sửa phiên bản"
+
+#: src/nuvasha-main-window.c
+msgid "%u/%u selected"
+msgstr "Đã chọn %u/%u"
+
+#: src/nuvasha-main-window.c
+msgid "The following instances will be deleted:\n%s"
+msgstr "Các phiên bản sau sẽ bị xóa:\n%s"

@@ -933,3 +933,14 @@ msgstr "Microsoft sign-in failed. Try again."
 
 msgid "Open in browser"
 msgstr "Abrir no navegador"
+#: src/nuvasha-main-window.c
+msgid "Edit instances"
+msgstr "Editar instâncias"
+
+#: src/nuvasha-main-window.c
+msgid "%u/%u selected"
+msgstr "%u/%u selecionadas"
+
+#: src/nuvasha-main-window.c
+msgid "The following instances will be deleted:\n%s"
+msgstr "As seguintes instâncias serão excluídas:\n%s"

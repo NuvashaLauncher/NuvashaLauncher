@@ -929,3 +929,14 @@ msgstr "Microsoft sign-in failed. Try again."
 
 msgid "Open in browser"
 msgstr "브라우저에서 열기"
+#: src/nuvasha-main-window.c
+msgid "Edit instances"
+msgstr "인스턴스 편집"
+
+#: src/nuvasha-main-window.c
+msgid "%u/%u selected"
+msgstr "%u/%u개 선택됨"
+
+#: src/nuvasha-main-window.c
+msgid "The following instances will be deleted:\n%s"
+msgstr "다음 인스턴스가 삭제됩니다:\n%s"

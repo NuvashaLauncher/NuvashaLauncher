@@ -5,6 +5,7 @@
 #include "nuvasha-main-window-private.h"
 #include "nuvasha-instance-page.h"
 #include "nuvasha-i18n.h"
+#include "nuvasha-ui-feedback.h"
 
 /* ---------------------------------------------------------- *
  * The dialogs of the instances
@@ -203,6 +204,13 @@ row_update (GtkWidget *play, NuvashaLauncher *launcher)
     GTK_WIDGET (g_object_get_data (G_OBJECT (play), "nuvasha-icon"));
   GtkWidget *label =
     GTK_WIDGET (g_object_get_data (G_OBJECT (play), "nuvasha-label"));
+  GtkWidget *check =
+    GTK_WIDGET (g_object_get_data (G_OBJECT (play), "nuvasha-check"));
+  GtkWidget *instance_icon =
+    GTK_WIDGET (g_object_get_data (G_OBJECT (play), "nuvasha-instance-icon"));
+  GtkWidget *edit_actions =
+    GTK_WIDGET (g_object_get_data (G_OBJECT (play), "nuvasha-edit-actions"));
+  NuvashaMainWindow *self = g_object_get_data (G_OBJECT (play), "nuvasha-window");
 
   gtk_label_set_label (GTK_LABEL (label), busy ? _("Stop") : _("Play"));
   gtk_image_set_from_icon_name (GTK_IMAGE (icon),
@@ -212,6 +220,10 @@ row_update (GtkWidget *play, NuvashaLauncher *launcher)
                                   GTK_ACCESSIBLE_PROPERTY_LABEL,
                                   busy ? _("Stop") : _("Play"), -1);
   gtk_widget_set_tooltip_text (GTK_WIDGET (play), busy ? _("Stop") : _("Play"));
+  gtk_widget_set_visible (GTK_WIDGET (play), self == NULL || !self->ui.edit_mode);
+  gtk_widget_set_visible (check, self != NULL && self->ui.edit_mode);
+  gtk_widget_set_visible (instance_icon, self == NULL || !self->ui.edit_mode);
+  gtk_widget_set_visible (edit_actions, self != NULL && self->ui.edit_mode);
 
   /* The green belongs to a game that is about to start, not to a stop:
      an idle row asks, a running one only allows stopping. */
@@ -219,6 +231,179 @@ row_update (GtkWidget *play, NuvashaLauncher *launcher)
     gtk_widget_remove_css_class (GTK_WIDGET (play), "suggested-action");
   else
     gtk_widget_add_css_class (GTK_WIDGET (play), "suggested-action");
+}
+
+static void
+on_instance_check_toggled (GtkCheckButton *check, gpointer user_data)
+{
+  NuvashaMainWindow *self = user_data;
+  const char *id = g_object_get_data (G_OBJECT (check), "nuvasha-instance-id");
+
+  if (id == NULL || !self->ui.edit_mode)
+    return;
+
+  if (gtk_check_button_get_active (check))
+    g_hash_table_add (self->ui.selected_instances, g_strdup (id));
+  else
+    g_hash_table_remove (self->ui.selected_instances, id);
+
+  update_instance_selection_ui (self);
+}
+
+static GdkContentProvider *
+instance_row_drag_prepare (AdwActionRow *row,
+                           double        x G_GNUC_UNUSED,
+                           double        y G_GNUC_UNUSED)
+{
+  NuvashaMainWindow *self = g_object_get_data (G_OBJECT (row),
+                                                "nuvasha-window");
+
+  if (self == NULL || !self->ui.edit_mode)
+    return NULL;
+
+  return gdk_content_provider_new_typed (ADW_TYPE_ACTION_ROW, row);
+}
+
+static void
+instance_row_drag_begin (AdwActionRow *row, GdkDrag *drag)
+{
+  GtkWidget *drag_list = gtk_list_box_new ();
+  GtkWidget *drag_row = adw_action_row_new ();
+  GtkWidget *drag_icon = gtk_image_new_from_icon_name (
+    "applications-games-symbolic");
+  GtkWidget *instance_icon = g_object_get_data (
+    G_OBJECT (row), "nuvasha-instance-icon");
+  GtkWidget *drag_surface;
+  int width = gtk_widget_get_width (GTK_WIDGET (row));
+  int height = gtk_widget_get_height (GTK_WIDGET (row));
+
+  gtk_widget_set_size_request (drag_list, width, height);
+  gtk_widget_add_css_class (drag_list, "boxed-list");
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (drag_row), FALSE);
+  adw_preferences_row_set_title (
+    ADW_PREFERENCES_ROW (drag_row),
+    adw_preferences_row_get_title (ADW_PREFERENCES_ROW (row)));
+  adw_action_row_set_subtitle (
+    ADW_ACTION_ROW (drag_row), adw_action_row_get_subtitle (row));
+  if (instance_icon != NULL &&
+      gtk_image_get_paintable (GTK_IMAGE (instance_icon)) != NULL)
+    gtk_image_set_from_paintable (
+      GTK_IMAGE (drag_icon),
+      gtk_image_get_paintable (GTK_IMAGE (instance_icon)));
+  gtk_image_set_pixel_size (GTK_IMAGE (drag_icon), 48);
+  adw_action_row_add_prefix (ADW_ACTION_ROW (drag_row), drag_icon);
+  gtk_list_box_append (GTK_LIST_BOX (drag_list), drag_row);
+
+  drag_surface = gtk_drag_icon_get_for_drag (drag);
+  gtk_widget_add_css_class (drag_surface, "boxed-list");
+  gtk_drag_icon_set_child (GTK_DRAG_ICON (drag_surface), drag_list);
+}
+
+static gboolean
+instance_row_drop (AdwActionRow *target,
+                   const GValue *value,
+                   double        x G_GNUC_UNUSED,
+                   double        y G_GNUC_UNUSED)
+{
+  AdwActionRow *source;
+  NuvashaMainWindow *self;
+  GListStore *instances;
+  NuvashaInstance *source_instance;
+  GtkWidget *source_list;
+  GtkWidget *target_list;
+  guint source_position;
+  guint target_position;
+  g_autoptr (NuvashaInstance) instance = NULL;
+  g_autoptr (GError) error = NULL;
+
+  if (!G_VALUE_HOLDS (value, ADW_TYPE_ACTION_ROW))
+    return FALSE;
+
+  source = g_value_get_object (value);
+  self = g_object_get_data (G_OBJECT (target), "nuvasha-window");
+  if (self == NULL || !self->ui.edit_mode)
+    return FALSE;
+
+  instances = nuvasha_instance_manager_get_instances (self->model->manager);
+  source_list = gtk_widget_get_parent (GTK_WIDGET (source));
+  target_list = gtk_widget_get_parent (GTK_WIDGET (target));
+
+  if (source_list == NULL || source_list != target_list ||
+      !GTK_IS_LIST_BOX (source_list))
+    return FALSE;
+
+  source_instance = nuvasha_instance_manager_get_by_id (
+    self->model->manager,
+    g_object_get_data (G_OBJECT (source), "nuvasha-instance-id"));
+
+  if (source == target || source_instance == NULL)
+    return FALSE;
+
+  source_position = gtk_list_box_row_get_index (GTK_LIST_BOX_ROW (source));
+  target_position = gtk_list_box_row_get_index (GTK_LIST_BOX_ROW (target));
+  instance = g_list_model_get_item (G_LIST_MODEL (instances), source_position);
+  g_list_store_remove (instances, source_position);
+  g_list_store_insert (instances, target_position, instance);
+
+  if (!nuvasha_instance_manager_save (self->model->manager, &error))
+    {
+      g_list_store_remove (instances, target_position);
+      g_list_store_insert (instances, source_position, instance);
+      adw_banner_set_title (self->ui.banner, error->message);
+      adw_banner_set_revealed (self->ui.banner, TRUE);
+    }
+
+  return TRUE;
+}
+
+typedef enum {
+  INSTANCE_ROW_EXPORT,
+  INSTANCE_ROW_DUPLICATE,
+  INSTANCE_ROW_DELETE
+} InstanceRowAction;
+
+static void
+on_instance_row_action (GtkButton *button, gpointer user_data)
+{
+  NuvashaMainWindow *self = user_data;
+  const char *id = g_object_get_data (G_OBJECT (button), "nuvasha-instance-id");
+  InstanceRowAction action = GPOINTER_TO_INT (
+    g_object_get_data (G_OBJECT (button), "nuvasha-row-action"));
+  NuvashaInstance *instance = nuvasha_instance_manager_get_by_id (
+    self->model->manager, id);
+  NuvashaInstancePage *page;
+
+  if (instance == NULL)
+    return;
+
+  switch (action)
+    {
+    case INSTANCE_ROW_EXPORT:
+      /* Reuse the existing export flow, but keep its settings page out of
+       * the way: the page is only an operation owner for the popup/dialog. */
+      page = nuvasha_instance_page_new (self->model->manager, instance,
+                                        self->model->settings,
+                                        window_launcher (self, id));
+      g_object_ref_sink (page);
+      nuvasha_instance_page_trigger_export (page);
+      g_object_unref (page);
+      break;
+    case INSTANCE_ROW_DUPLICATE:
+      page = nuvasha_instance_page_new (self->model->manager, instance,
+                                        self->model->settings,
+                                        window_launcher (self, id));
+      g_object_ref_sink (page);
+      nuvasha_instance_page_trigger_duplicate (page);
+      g_object_unref (page);
+      break;
+    case INSTANCE_ROW_DELETE:
+      /* Use the same confirmation popup as the bulk action, without opening
+       * the instance settings dialog. */
+      g_hash_table_remove_all (self->ui.selected_instances);
+      g_hash_table_add (self->ui.selected_instances, g_strdup (id));
+      bulk_delete_instances (self);
+      break;
+    }
 }
 
 static void
@@ -373,6 +558,16 @@ create_instance_row (gpointer item, gpointer user_data)
   AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
   GtkImage *icon = GTK_IMAGE (gtk_image_new_from_icon_name ("applications-games-symbolic"));
   GtkButton *play = GTK_BUTTON (gtk_button_new ());
+  GtkCheckButton *check = GTK_CHECK_BUTTON (gtk_check_button_new ());
+  GtkImage *drag_handle = GTK_IMAGE (gtk_image_new_from_icon_name (
+    "list-drag-handle-symbolic"));
+  GtkBox *edit_actions = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+  GtkButton *row_export = GTK_BUTTON (gtk_button_new_from_icon_name (
+    "document-save-symbolic"));
+  GtkButton *row_duplicate = GTK_BUTTON (gtk_button_new_from_icon_name (
+    "edit-copy-symbolic"));
+  GtkButton *row_delete = GTK_BUTTON (gtk_button_new_from_icon_name (
+    "user-trash-symbolic"));
   GtkBox *play_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
   GtkImage *play_icon = GTK_IMAGE (gtk_image_new_from_icon_name ("media-playback-start-symbolic"));
   GtkLabel *play_label = GTK_LABEL (gtk_label_new (_("Play")));
@@ -406,7 +601,16 @@ create_instance_row (gpointer item, gpointer user_data)
   gtk_image_set_pixel_size (GTK_IMAGE (icon), 48);
   gtk_widget_set_size_request (GTK_WIDGET (icon), 48, 48);
   gtk_widget_set_valign (GTK_WIDGET (icon), GTK_ALIGN_CENTER);
+  /* add_prefix prepends: add the checkbox first so the handle appears on
+   * its left, matching the edit-mode order in the UI. */
+  adw_action_row_add_prefix (ADW_ACTION_ROW (row), GTK_WIDGET (check));
+  adw_action_row_add_prefix (ADW_ACTION_ROW (row), GTK_WIDGET (drag_handle));
   adw_action_row_add_prefix (ADW_ACTION_ROW (row), GTK_WIDGET (icon));
+  gtk_widget_set_visible (GTK_WIDGET (check), self->ui.edit_mode);
+  gtk_widget_set_visible (GTK_WIDGET (drag_handle), self->ui.edit_mode);
+  gtk_image_set_pixel_size (drag_handle, 16);
+  gtk_widget_set_size_request (GTK_WIDGET (drag_handle), 16, 16);
+  gtk_widget_set_valign (GTK_WIDGET (drag_handle), GTK_ALIGN_CENTER);
 
   gtk_image_set_pixel_size (GTK_IMAGE (play_icon), 16);
   gtk_widget_set_size_request (GTK_WIDGET (play_icon), 16, 16);
@@ -419,14 +623,74 @@ create_instance_row (gpointer item, gpointer user_data)
   gtk_accessible_update_property (GTK_ACCESSIBLE (play),
                                    GTK_ACCESSIBLE_PROPERTY_LABEL, _("Play"), -1);
 
+  /* The row controls need the ID before their signal handlers are wired. */
+  id = nuvasha_instance_get_id (instance);
+
   /* The play state swaps the icon and the label, so they are known by
      the button itself rather than walked for. */
   g_object_set_data (G_OBJECT (play), "nuvasha-icon", play_icon);
+  g_object_set_data (G_OBJECT (play), "nuvasha-instance-icon", icon);
   g_object_set_data (G_OBJECT (play), "nuvasha-label", play_label);
+  g_object_set_data (G_OBJECT (play), "nuvasha-check", check);
+  g_object_set_data (G_OBJECT (play), "nuvasha-drag-handle", drag_handle);
+  g_object_set_data (G_OBJECT (play), "nuvasha-edit-actions", edit_actions);
+  g_object_set_data (G_OBJECT (play), "nuvasha-window", self);
+  g_object_set_data_full (G_OBJECT (check), "nuvasha-instance-id",
+                          g_strdup (id), g_free);
+  gtk_check_button_set_active (check, FALSE);
+  g_signal_connect (check, "toggled",
+                    G_CALLBACK (on_instance_check_toggled), self);
+
+  gtk_widget_set_visible (GTK_WIDGET (edit_actions), self->ui.edit_mode);
+  nuvasha_ui_prepare_icon_button (GTK_WIDGET (row_export), _("Export"));
+  nuvasha_ui_prepare_icon_button (GTK_WIDGET (row_duplicate), _("Duplicate"));
+  nuvasha_ui_prepare_icon_button (GTK_WIDGET (row_delete), _("Delete"));
+  gtk_box_append (edit_actions, GTK_WIDGET (row_export));
+  gtk_box_append (edit_actions, GTK_WIDGET (row_duplicate));
+  gtk_box_append (edit_actions, GTK_WIDGET (row_delete));
+  for (guint i = 0; i < 3; i++)
+    {
+      GtkButton *button = GTK_BUTTON (gtk_widget_get_first_child (
+        GTK_WIDGET (edit_actions)));
+      for (guint j = 0; j < i; j++)
+        button = GTK_BUTTON (gtk_widget_get_next_sibling (GTK_WIDGET (button)));
+      g_object_set_data_full (G_OBJECT (button), "nuvasha-instance-id",
+                              g_strdup (id), g_free);
+      g_object_set_data (G_OBJECT (button), "nuvasha-row-action",
+                         GINT_TO_POINTER (i));
+      g_signal_connect (button, "clicked",
+                        G_CALLBACK (on_instance_row_action), self);
+    }
 
   adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (play));
+  adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (edit_actions));
+
+  g_object_set_data (G_OBJECT (row), "nuvasha-window", self);
+  g_object_set_data_full (G_OBJECT (row), "nuvasha-instance-id",
+                          g_strdup (id), g_free);
+  g_object_set_data (G_OBJECT (row), "nuvasha-instance-icon", icon);
+  {
+    GtkDragSource *source = gtk_drag_source_new ();
+    GtkDropTarget *target = gtk_drop_target_new (ADW_TYPE_ACTION_ROW,
+                                                  GDK_ACTION_MOVE);
+    gtk_drag_source_set_actions (source, GDK_ACTION_MOVE);
+    g_signal_connect_swapped (source, "prepare",
+                              G_CALLBACK (instance_row_drag_prepare), row);
+    g_signal_connect_swapped (source, "drag-begin",
+                              G_CALLBACK (instance_row_drag_begin), row);
+    /* The whole row is draggable in edit mode. Interactive child widgets
+     * (checkboxes and action buttons) keep handling their own clicks. */
+    gtk_widget_add_controller (GTK_WIDGET (row),
+                               GTK_EVENT_CONTROLLER (source));
+    gtk_drop_target_set_preload (target, TRUE);
+    g_signal_connect_swapped (target, "drop",
+                              G_CALLBACK (instance_row_drop), row);
+    gtk_widget_add_controller (GTK_WIDGET (row),
+                               GTK_EVENT_CONTROLLER (target));
+  }
 
   g_signal_connect_object (play, "clicked", G_CALLBACK (on_play_clicked), self, 0);
+  g_object_set_data (G_OBJECT (row), "nuvasha-play", play);
 
   /* The icon follows the instance's; the connection goes with the
      image, so a row that is destroyed stops following it on its own. */
@@ -452,6 +716,261 @@ create_instance_row (gpointer item, gpointer user_data)
   gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
 
   return GTK_WIDGET (row);
+}
+
+void
+update_instance_selection_ui (NuvashaMainWindow *self)
+{
+  guint selected = g_hash_table_size (self->ui.selected_instances);
+  guint total = g_list_model_get_n_items (
+    G_LIST_MODEL (nuvasha_instance_manager_get_instances (self->model->manager)));
+
+  if (self->ui.selection_label != NULL)
+    {
+      g_autofree char *text = g_strdup_printf (_("%u/%u selected"), selected, total);
+      gtk_label_set_text (self->ui.selection_label, text);
+    }
+
+  if (self->ui.selection_footer != NULL)
+    gtk_action_bar_set_revealed (self->ui.selection_footer,
+                                 self->ui.edit_mode && selected > 0);
+
+  if (self->ui.footer_delete != NULL)
+    {
+      gtk_widget_set_sensitive (GTK_WIDGET (self->ui.footer_delete), selected > 0);
+      gtk_widget_set_visible (GTK_WIDGET (self->ui.footer_delete),
+                              self->ui.edit_mode && selected > 0);
+    }
+}
+
+void
+set_instance_edit_mode (NuvashaMainWindow *self)
+{
+  self->ui.edit_mode = !self->ui.edit_mode;
+  if (!self->ui.edit_mode)
+    g_hash_table_remove_all (self->ui.selected_instances);
+
+  for (GtkWidget *row = gtk_widget_get_first_child (GTK_WIDGET (self->ui.instances));
+       row != NULL; row = gtk_widget_get_next_sibling (row))
+    {
+      GtkWidget *play = g_object_get_data (G_OBJECT (row), "nuvasha-play");
+      GtkWidget *check = play != NULL
+        ? g_object_get_data (G_OBJECT (play), "nuvasha-check") : NULL;
+      GtkWidget *icon = play != NULL
+        ? g_object_get_data (G_OBJECT (play), "nuvasha-instance-icon") : NULL;
+      GtkWidget *edit_actions = play != NULL
+        ? g_object_get_data (G_OBJECT (play), "nuvasha-edit-actions") : NULL;
+      GtkWidget *drag_handle = play != NULL
+        ? g_object_get_data (G_OBJECT (play), "nuvasha-drag-handle") : NULL;
+
+      if (play == NULL)
+        continue;
+      gtk_widget_set_visible (play, !self->ui.edit_mode);
+      gtk_widget_set_visible (check, self->ui.edit_mode);
+      gtk_widget_set_visible (icon, !self->ui.edit_mode);
+      gtk_widget_set_visible (edit_actions, self->ui.edit_mode);
+      gtk_widget_set_visible (drag_handle, self->ui.edit_mode);
+      if (check != NULL)
+        gtk_check_button_set_active (
+          GTK_CHECK_BUTTON (check),
+          self->ui.selected_instances != NULL &&
+          g_object_get_data (G_OBJECT (check), "nuvasha-instance-id") != NULL &&
+          g_hash_table_contains (self->ui.selected_instances,
+                                 g_object_get_data (G_OBJECT (check),
+                                                    "nuvasha-instance-id")));
+    }
+
+  update_instance_selection_ui (self);
+}
+
+static void
+on_bulk_duplicate_ready (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  NuvashaMainWindow *self = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (NuvashaInstance) copy =
+    nuvasha_instance_manager_duplicate_finish (
+      nuvasha_INSTANCE_MANAGER (source), result, &error);
+
+  if (copy == NULL && error != NULL)
+    adw_banner_set_title (self->ui.banner, error->message);
+  g_object_unref (self);
+}
+
+void
+bulk_duplicate_instances (NuvashaMainWindow *self)
+{
+  GListStore *instances = nuvasha_instance_manager_get_instances (self->model->manager);
+
+  for (guint i = 0; i < g_list_model_get_n_items (G_LIST_MODEL (instances)); i++)
+    {
+      g_autoptr (NuvashaInstance) instance =
+        g_list_model_get_item (G_LIST_MODEL (instances), i);
+      if (nuvasha_instance_get_id (instance) != NULL &&
+          g_hash_table_contains (self->ui.selected_instances,
+                                 nuvasha_instance_get_id (instance)))
+        nuvasha_instance_manager_duplicate_async (self->model->manager, instance,
+                                                   on_bulk_duplicate_ready,
+                                                   g_object_ref (self));
+    }
+}
+
+typedef struct {
+  NuvashaMainWindow *window;
+  NuvashaTaskScope *operation;
+} BulkDeleteWait;
+
+static void
+bulk_delete_wait_free (BulkDeleteWait *wait)
+{
+  g_object_unref (wait->window);
+  nuvasha_task_scope_unref (wait->operation);
+  g_free (wait);
+}
+
+static void
+on_bulk_delete_ready (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  BulkDeleteWait *wait = user_data;
+  g_autoptr (GError) error = NULL;
+
+  if (!nuvasha_instance_manager_delete_finish (
+        nuvasha_INSTANCE_MANAGER (source), result, &error) &&
+      !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+    adw_banner_set_title (wait->window->ui.banner, error->message);
+
+  bulk_delete_wait_free (wait);
+}
+
+static void
+on_bulk_delete_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  NuvashaMainWindow *self = user_data;
+  const char *response = adw_alert_dialog_choose_finish (
+    ADW_ALERT_DIALOG (source), result);
+
+  if (g_strcmp0 (response, "delete") == 0)
+    {
+      g_autoptr (GPtrArray) selected = g_ptr_array_new_with_free_func (g_object_unref);
+      GHashTableIter iter;
+      gpointer key;
+
+      g_hash_table_iter_init (&iter, self->ui.selected_instances);
+      while (g_hash_table_iter_next (&iter, &key, NULL))
+        {
+          NuvashaInstance *instance =
+            nuvasha_instance_manager_get_by_id (self->model->manager, key);
+          if (instance != NULL)
+            g_ptr_array_add (selected, g_object_ref (instance));
+        }
+
+      g_hash_table_remove_all (self->ui.selected_instances);
+      set_instance_edit_mode (self);
+      for (guint i = 0; i < selected->len; i++)
+        {
+          BulkDeleteWait *wait = g_new0 (BulkDeleteWait, 1);
+          wait->window = g_object_ref (self);
+          wait->operation = nuvasha_instance_manager_delete_async (
+            self->model->manager, g_ptr_array_index (selected, i), TRUE,
+            on_bulk_delete_ready, wait);
+        }
+    }
+
+  g_object_unref (self);
+}
+
+void
+bulk_export_instances (NuvashaMainWindow *self)
+{
+  /* The existing export dialog and policy flow belong to the instance page.
+   * Open the selected instance there rather than duplicating that workflow. */
+  GListStore *instances = nuvasha_instance_manager_get_instances (self->model->manager);
+  for (guint i = 0; i < g_list_model_get_n_items (G_LIST_MODEL (instances)); i++)
+    {
+      g_autoptr (NuvashaInstance) instance =
+        g_list_model_get_item (G_LIST_MODEL (instances), i);
+      if (nuvasha_instance_get_id (instance) != NULL &&
+          g_hash_table_contains (self->ui.selected_instances,
+                                 nuvasha_instance_get_id (instance)))
+        {
+          open_instance_dialog (self, instance);
+          {
+            AdwDialog *dialog = dialog_of_instance (
+              self, nuvasha_instance_get_id (instance));
+            GtkWidget *page = dialog != NULL ? adw_dialog_get_child (dialog) : NULL;
+            if (page != NULL && nuvasha_IS_INSTANCE_PAGE (page))
+              nuvasha_instance_page_trigger_export (nuvasha_INSTANCE_PAGE (page));
+          }
+          break;
+        }
+    }
+}
+
+void
+bulk_delete_instances (NuvashaMainWindow *self)
+{
+  g_autofree char *heading = NULL;
+  g_autofree char *body = NULL;
+  guint selected = g_hash_table_size (self->ui.selected_instances);
+
+  if (selected > 1)
+    {
+      GString *names = g_string_new (NULL);
+      GHashTableIter iter;
+      gpointer key = NULL;
+
+      g_hash_table_iter_init (&iter, self->ui.selected_instances);
+      while (g_hash_table_iter_next (&iter, &key, NULL))
+        {
+          NuvashaInstance *instance =
+            nuvasha_instance_manager_get_by_id (self->model->manager, key);
+          g_autofree char *name = NULL;
+
+          if (instance != NULL)
+            g_object_get (instance, "name", &name, NULL);
+          if (name == NULL || *name == '\0')
+            name = g_strdup ("Unnamed instance");
+          if (names->len > 0)
+            g_string_append_c (names, '\n');
+          g_string_append (names, name);
+        }
+
+      body = g_strdup_printf (_("The following instances will be deleted:\n%s"),
+                              names->str);
+      g_string_free (names, TRUE);
+    }
+
+  if (selected == 1)
+    {
+      GHashTableIter iter;
+      gpointer key = NULL;
+      g_hash_table_iter_init (&iter, self->ui.selected_instances);
+      if (g_hash_table_iter_next (&iter, &key, NULL))
+        {
+          NuvashaInstance *instance =
+            nuvasha_instance_manager_get_by_id (self->model->manager, key);
+          g_autofree char *name = NULL;
+          if (instance != NULL)
+            g_object_get (instance, "name", &name, NULL);
+          heading = g_strdup_printf (_("Delete \"%s\"?"),
+                                     name != NULL ? name : "instance");
+        }
+    }
+
+  if (heading == NULL)
+    heading = g_strdup_printf (_("Delete \"%s\"?"), "selected instances");
+
+  /* Bulk deletion is confirmed by the same destructive Adwaita alert style
+   * used by the existing instance action. The actual removals remain the
+   * manager's asynchronous delete operation. */
+  AdwAlertDialog *alert = ADW_ALERT_DIALOG (adw_alert_dialog_new (
+    heading, body));
+  adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
+  adw_alert_dialog_add_response (alert, "delete", _("Delete"));
+  adw_alert_dialog_set_response_appearance (alert, "delete", ADW_RESPONSE_DESTRUCTIVE);
+  adw_alert_dialog_set_close_response (alert, "cancel");
+  adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL,
+                           on_bulk_delete_chosen, g_object_ref (self));
 }
 
 /* A row clicked anywhere but on its buttons opens the instance. The
@@ -523,4 +1042,5 @@ on_instances_changed (NuvashaMainWindow *self,
      with it. This is how deleting an instance closes its dialog,
      whichever screen the delete was asked from. */
   close_dialogs_of_removed_instances (self);
+  update_instance_selection_ui (self);
 }

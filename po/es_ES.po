@@ -933,3 +933,14 @@ msgstr "Falló el inicio de sesión de Microsoft. Intentá de nuevo."
 
 msgid "Open in browser"
 msgstr "Abrir en el navegador"
+#: src/nuvasha-main-window.c
+msgid "Edit instances"
+msgstr "Editar instancias"
+
+#: src/nuvasha-main-window.c
+msgid "%u/%u selected"
+msgstr "%u/%u seleccionadas"
+
+#: src/nuvasha-main-window.c
+msgid "The following instances will be deleted:\n%s"
+msgstr "Se eliminarán las siguientes instancias:\n%s"

@@ -897,3 +897,14 @@ msgstr "Microsoft sign-in failed. Try again."
 
 msgid "Open in browser"
 msgstr "在瀏覽器中開啟"
+#: src/nuvasha-main-window.c
+msgid "Edit instances"
+msgstr "編輯實例"
+
+#: src/nuvasha-main-window.c
+msgid "%u/%u selected"
+msgstr "已選取 %u/%u"
+
+#: src/nuvasha-main-window.c
+msgid "The following instances will be deleted:\n%s"
+msgstr "將刪除以下實例：\n%s"

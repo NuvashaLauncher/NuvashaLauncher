@@ -26,6 +26,13 @@ struct _NuvashaMainWindow
     AdwViewStack *stack; /* empty state or instance list */
     AdwBanner *banner;  /* launch failures and crash details */
     AdwToolbarView *toolbar;
+    GtkListBox *instances;
+    GtkButton *edit;
+    GtkButton *footer_delete;
+    GtkActionBar *selection_footer;
+    GtkLabel *selection_label;
+    GHashTable *selected_instances; /* instance ID -> TRUE */
+    gboolean edit_mode;
   } ui;
 
   /* Active downloads shown next to the "+" menu. */
@@ -53,6 +60,11 @@ void on_row_activate (GtkListBox *list, GtkListBoxRow *row,
                       gpointer user_data);
 void on_instances_changed (NuvashaMainWindow *self, GListModel *model,
                            guint position, guint removed, guint added);
+void set_instance_edit_mode (NuvashaMainWindow *self);
+void update_instance_selection_ui (NuvashaMainWindow *self);
+void bulk_export_instances (NuvashaMainWindow *self);
+void bulk_duplicate_instances (NuvashaMainWindow *self);
+void bulk_delete_instances (NuvashaMainWindow *self);
 GMenu *create_add_menu (void);
 GMenu *create_app_menu (void);
 void set_menu_item_tooltip (GtkWidget *root, const char *label_text,

@@ -905,3 +905,14 @@ msgstr "Microsoft sign-in failed. Try again."
 
 msgid "Open in browser"
 msgstr "افتح في المتصفح"
+#: src/nuvasha-main-window.c
+msgid "Edit instances"
+msgstr "تحرير المثيلات"
+
+#: src/nuvasha-main-window.c
+msgid "%u/%u selected"
+msgstr "%u/%u محددة"
+
+#: src/nuvasha-main-window.c
+msgid "The following instances will be deleted:\n%s"
+msgstr "سيتم حذف المثيلات التالية:\n%s"

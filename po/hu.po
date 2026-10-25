@@ -897,3 +897,14 @@ msgstr "Microsoft sign-in failed. Try again."
 
 msgid "Open in browser"
 msgstr "Megnyitás böngészőben"
+#: src/nuvasha-main-window.c
+msgid "Edit instances"
+msgstr "Példányok szerkesztése"
+
+#: src/nuvasha-main-window.c
+msgid "%u/%u selected"
+msgstr "%u/%u kiválasztva"
+
+#: src/nuvasha-main-window.c
+msgid "The following instances will be deleted:\n%s"
+msgstr "A következő példányok törölve lesznek:\n%s"
