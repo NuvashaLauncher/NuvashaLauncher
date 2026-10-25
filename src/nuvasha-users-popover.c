@@ -27,7 +27,6 @@
  * header icons rather than a row's. */
 #define HEADER_AVATAR_SIZE 16
 
-
 G_DEFINE_FINAL_TYPE (NuvashaUsersPopover, nuvasha_users_popover, GTK_TYPE_POPOVER)
 
 /* Update the header button for the active account. */
@@ -50,7 +49,6 @@ update_the_button (NuvashaUsersPopover *self)
   nuvasha_users_set_avatar_icon (GTK_IMAGE (self->avatar_image));
 
 }
-
 
 /* ------------------------------------------------------ *
  * One account
@@ -266,11 +264,6 @@ append_account_row (NuvashaUsersPopover *self, const NuvashaAccount *account)
   gtk_list_box_append (GTK_LIST_BOX (self->list_box), GTK_WIDGET (row));
 }
 
-
-/* ------------------------------------------------------ *
- * Adding one
- * ------------------------------------------------------ */
-
 /* An account the user just signed in to, or typed a name for, goes into
    the store, which is what makes it the active one and writes it down. */
 static void
@@ -323,7 +316,6 @@ on_add_offline_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
   gtk_popover_popdown (GTK_POPOVER (self));
 }
-
 
 /* ------------------------------------------------------ *
  * The whole list

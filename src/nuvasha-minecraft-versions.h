@@ -24,8 +24,6 @@
 
 G_BEGIN_DECLS
 
-/* The address Mojang's own launcher uses. launchermeta.mojang.com
- * answers with the very same bytes for the older spelling. */
 #define nuvasha_VERSION_MANIFEST_URL \
   "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
 
@@ -53,7 +51,6 @@ typedef enum {
   nuvasha_MC_TYPE_OLD_ALPHA
 } NuvashaMcVersionType;
 
-/* FALSE for anything that is not one of the four type strings. */
 gboolean nuvasha_mc_version_type_from_string (const char       *string,
                                           NuvashaMcVersionType *type);
 
@@ -118,7 +115,6 @@ void nuvasha_rule_context_set_feature (NuvashaRuleContext *context,
                                    const char     *name,
                                    gboolean        value);
 
-/* FALSE for a feature that was never set. */
 gboolean nuvasha_rule_context_get_feature (NuvashaRuleContext *context,
                                        const char     *name);
 
@@ -220,7 +216,7 @@ struct _NuvashaVersionDescription
   char *id;
   NuvashaMcVersionType type;
   char *main_class;
-  char *inherits_from; /* NULL when it inherits from nothing */
+  char *inherits_from;
 
   char *assets;
   NuvashaDownloadInfo *asset_index;

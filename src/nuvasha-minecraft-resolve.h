@@ -43,7 +43,7 @@ typedef enum {
   nuvasha_RESOLVE_ERROR_IO,          /* a directory or file could not be made */
   nuvasha_RESOLVE_ERROR_INVALID,      /* the version cannot be resolved as it is */
   nuvasha_RESOLVE_ERROR_UNSAFE_PATH,  /* a jar entry points out of its directory */
-  nuvasha_RESOLVE_ERROR_ASSETS        /* the asset index is not what we expect */
+  nuvasha_RESOLVE_ERROR_ASSETS
 } NuvashaResolveError;
 
 GQuark nuvasha_resolve_error_quark (void);

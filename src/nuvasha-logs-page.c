@@ -27,8 +27,7 @@ struct _NuvashaLogsPage
   guint rendered;
   gboolean following;
 
-  /* Keep all lines; filtering only changes which lines are displayed. */
-  GPtrArray *lines; /* char*, one per line, in order */
+  GPtrArray *lines; /* char*, one line per entry, in display order */
   gboolean filtered;
 
   /* Setting the adjustment while GTK is recalculating its bounds emits a
@@ -465,7 +464,8 @@ on_adjustment_changed (GtkAdjustment *adjustment, gpointer user_data)
  * `changed` signal is the GTK-supported point at which the new bottom exists,
  * so follow it there when the user was already following the log. */
 static void
-on_adjustment_bounds_changed (GtkAdjustment *adjustment, gpointer user_data)
+on_adjustment_bounds_changed (GtkAdjustment *adjustment G_GNUC_UNUSED,
+                              gpointer user_data)
 {
   NuvashaLogsPage *self = nuvasha_LOGS_PAGE (user_data);
 

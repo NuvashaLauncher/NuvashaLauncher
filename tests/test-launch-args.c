@@ -375,7 +375,6 @@ test_build_arguments_without_jvm_args (void)
   for (guint i = 0; i < with_empty->len; i++)
     g_assert_cmpstr (at (with_empty, i), ==, at (with_none, i));
 
-  /* Nothing that looks like a heap size was invented for it. */
   for (guint i = 0; i < with_empty->len; i++)
     g_assert_null (strstr (at (with_empty, i), "-Xmx"));
 }

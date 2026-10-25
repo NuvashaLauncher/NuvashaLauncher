@@ -195,7 +195,6 @@ test_icon_decode (void)
                      nuvasha_ICON_SIZE);
   }
 
-  /* A missing answer changes nothing. */
   g_assert_false (nuvasha_icon_widget_set_file (icon, NULL));
 
   g_object_ref_sink (icon);

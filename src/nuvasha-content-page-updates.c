@@ -93,8 +93,6 @@ update_batch_next (NuvashaContentPage *self)
   item = g_ptr_array_index (self->install_model->updates, self->install_model->update_index);
   self->install_model->update_index++;
 
-  /* The batch was confirmed once, as a whole: this plan is not asked for
-     again, it is simply carried out. */
   update_button_busy (self, TRUE);
   start_plan (self, nuvasha_modrinth_version_copy (item->version), item->title,
               item->path, item->disabled);

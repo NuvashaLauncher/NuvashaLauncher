@@ -42,7 +42,7 @@ struct _NuvashaInstancePage
 
   /* Java picker and required major version. */
   NuvashaJavaRow *java_row;
-  int required_java;        /* 0 means "never found one / unknown" */
+  int required_java;
 
   /* The manifest and version-document reads the Java warning is built
      from. One at a time: a new version picked stops the last read. */
@@ -59,7 +59,6 @@ struct _NuvashaInstancePage
   NuvashaLoader loader;
   char *loader_version;
 };
-
 
 char *instance_string (NuvashaInstance *instance, const char *property);
 char *loader_display_name (NuvashaInstance *instance);

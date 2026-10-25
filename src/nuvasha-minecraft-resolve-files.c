@@ -13,10 +13,6 @@
 
 #define CLASSPATH_SEPARATOR ":"
 
-/* ---------------------------------------------------------- *
- * Small helpers
- * ---------------------------------------------------------- */
-
 /* A version id or a file name from a document is only a file name after
    everything a file name cannot hold has been taken out of it. */
 char *
@@ -177,8 +173,6 @@ nuvasha_resolve_maven_path_classified (const char *coordinate,
  * Choosing the natives of a library
  * ---------------------------------------------------------- */
 
-/* The spellings of one architecture that are in use in the names of
-   natives jars, the ones that are actually published first. */
 static const char *const *
 arch_spellings (const char *arch)
 {

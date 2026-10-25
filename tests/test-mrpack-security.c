@@ -147,8 +147,6 @@ zip_write (const char *path, const ZipEntry *entries, gsize count)
   archive_write_free (archive);
 }
 
-/* Writes a .mrpack whose entries are the index and then @count small
- * files, for the bomb of entries. */
 static void
 zip_write_entry_bomb (const char *path, const char *index_json, guint count)
 {
@@ -357,7 +355,6 @@ test_path_is_safe (void)
   g_assert_false (nuvasha_modpack_path_is_safe ("a\tb"));
   g_assert_false (nuvasha_modpack_path_is_safe ("a\x01" "b"));
 
-  /* DEL, the one control byte above the printable range. */
   g_assert_false (nuvasha_modpack_path_is_safe ("a\x7f" "b"));
 
   /* A trailing / names an empty part. A directory entry of the

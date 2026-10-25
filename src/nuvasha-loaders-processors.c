@@ -93,9 +93,6 @@ processor_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   install_failed (request, g_steal_pointer (&error));
 }
-/* ---------------------------------------------------------- *
- * What the names in the arguments of a processor stand for
- * ---------------------------------------------------------- */
 
 /* The profile of the install, as the parser that read it keeps it. */
 JsonObject *

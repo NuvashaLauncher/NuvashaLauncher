@@ -116,7 +116,6 @@ compare_versions (const char *left, const char *right)
           while (g_ascii_isdigit (*right_end))
             right_end++;
 
-          /* The leading zeros say nothing about which is newer. */
           while (left_significant < left_end && *left_significant == '0')
             left_significant++;
           while (right_significant < right_end && *right_significant == '0')
@@ -148,7 +147,6 @@ compare_versions (const char *left, const char *right)
       right++;
     }
 
-  /* What is left of one of them is what makes it longer. */
   if (*left == *right)
     return 0;
 
@@ -174,10 +172,6 @@ version_is_final (const char *version)
 
   return TRUE;
 }
-
-/* ---------------------------------------------------------- *
- * Where the loaders publish what
- * ---------------------------------------------------------- */
 
 /* How @loader is reached. NULL for a loader this module does not know,
  * and for the loaders that have no meta service: those are reached

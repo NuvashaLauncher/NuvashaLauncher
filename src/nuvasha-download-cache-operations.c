@@ -282,8 +282,6 @@ cache_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
-  /* Missing, unreadable or stale: fetch it again. The slot is already
-     held, so this goes straight to the transfer. */
   g_clear_error (&error);
   request->global_cache_path = nuvasha_download_global_cache_path (request->expected_hash);
   {

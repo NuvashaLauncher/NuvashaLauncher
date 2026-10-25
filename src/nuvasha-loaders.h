@@ -119,8 +119,6 @@ guint nuvasha_loaders_supported_count (void);
 /* TRUE when nuvasha installs @loader and runs a game with it. */
 gboolean nuvasha_loader_is_supported (NuvashaLoader loader);
 
-/* What a user reads: "Vanilla", "Fabric", "Quilt", "Forge" or
- * "NeoForge". Never NULL. */
 const char *nuvasha_loader_display_name (NuvashaLoader loader);
 
 /* TRUE when a loader is installed by running the installer it publishes
@@ -222,7 +220,7 @@ NuvashaVersionDescription *nuvasha_loaders_profile_finish (GAsyncResult  *result
  * merge over the Minecraft one, and the jar the game starts from. */
 typedef struct {
   NuvashaVersionDescription *description; /* transfer full, never NULL */
-  char *client_jar;                   /* transfer full, never NULL */
+  char *client_jar;                       /* transfer full, never NULL */
 } NuvashaLoaderInstall;
 
 void nuvasha_loader_install_free (NuvashaLoaderInstall *install);

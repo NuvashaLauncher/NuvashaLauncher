@@ -221,7 +221,6 @@ results_arrived (NuvashaContentPage *self, NuvashaModrinthResults *results,
     gtk_widget_set_visible (GTK_WIDGET (self->browse.loading_more), FALSE);
     gtk_widget_set_visible (GTK_WIDGET (self->browse.retry_row), FALSE);
 
-    /* Nothing more to ask for once the total is reached. */
     if (self->browse.model->offset >= self->browse.model->total_hits)
       gtk_widget_set_visible (GTK_WIDGET (self->browse.loading_more), FALSE);
   }
@@ -398,7 +397,6 @@ active_search_entry (NuvashaContentPage *self)
            : GTK_WIDGET (self->installed.search_entry);
 }
 
-
 gboolean
 nuvasha_content_page_on_content_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
                        guint keyval, guint keycode G_GNUC_UNUSED,
@@ -501,8 +499,7 @@ fill_categories (NuvashaContentPage *self, GPtrArray *categories)
         }
 
         gtk_widget_add_css_class (GTK_WIDGET (button), "flat");
-        /* The whole width of the popover is the target, so a category is
-           not a small checkbox at the left that has to be aimed at. */
+
         gtk_widget_set_hexpand (GTK_WIDGET (button), TRUE);
         gtk_widget_set_halign (GTK_WIDGET (button), GTK_ALIGN_FILL);
         g_object_set_data_full (G_OBJECT (button), "nuvasha-category",
@@ -600,8 +597,7 @@ on_category_toggled (GtkCheckButton *button, gpointer user_data)
     g_ptr_array_add (self->browse.model->categories, g_strdup (category));
   else
     {
-      /* What is left of the filter, without the one that was turned
-       * off. */
+
       GPtrArray *kept = g_ptr_array_new_with_free_func (g_free);
 
       for (guint i = 0; i < self->browse.model->categories->len; i++)

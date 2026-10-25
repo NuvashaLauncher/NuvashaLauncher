@@ -316,7 +316,7 @@ fetch_next (FetchRun *run)
                list is read once, when the whole batch is done. */
             update_batch_next (self);
           else if (self->install_model->picking)
-            /* One pick of the batch is in: the next one follows. */
+
             batch_next (self);
           else
             {

@@ -233,7 +233,6 @@ test_modern_version (void)
   g_assert_nonnull (version->logging->file);
   g_assert_cmpstr (version->logging->file->id, ==, "client-1.21.xml");
 
-  /* The modern arguments, and nothing of the legacy line. */
   g_assert_true (version->modern_arguments);
   g_assert_null (version->minecraft_arguments);
 
@@ -473,8 +472,6 @@ test_rules (void)
   g_assert_false (nuvasha_library_allowed (find_library (rules, "osx-only"),
                                        linux64));
 
-  /* 32 bit and 64 bit are different machines, and the two names of
-   * the arm machine are the same one. */
   g_assert_false (nuvasha_library_allowed (find_library (rules, "x86-only"),
                                        linux64));
   g_assert_true (nuvasha_library_allowed (find_library (rules, "x86-only"),
@@ -614,10 +611,6 @@ test_inheritance_merge (void)
 
   g_print ("ok - a profile is merged over the version it inherits from\n");
 }
-
-/* ---------------------------------------------------------- *
- * Fetching: one server standing in for Mojang
- * ---------------------------------------------------------- */
 
 typedef struct
 {
@@ -1102,8 +1095,6 @@ test_version_load_errors (void)
   g_assert_cmpuint (fixture.hits, ==, 0);
   async_call_clear (&call);
 
-  /* A pair of documents that inherit from each other end as soon as
-   * the second one points back. */
   call_load (&run, &call, manifest, "cycle-a");
   async_run_wait (&run);
 
@@ -1112,8 +1103,6 @@ test_version_load_errors (void)
   g_assert_cmpuint (fixture.hits, ==, 2);
   async_call_clear (&call);
 
-  /* The same again, this time from the copies the first attempt
-   * left behind. */
   call_load (&run, &call, manifest, "cycle-a");
   async_run_wait (&run);
 

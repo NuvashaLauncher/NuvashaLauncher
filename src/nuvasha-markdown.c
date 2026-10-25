@@ -50,7 +50,6 @@ html_to_markdown (const char *text)
   g_autofree char *step = NULL;
   char *out = NULL;
 
-  /* Comments carry no words, only a note to whoever edits the body. */
   step = regex_replace (text, "<!--.*?-->", "", G_REGEX_DOTALL);
   out = g_steal_pointer (&step);
 
@@ -189,7 +188,6 @@ on_activate_link (GtkLabel *label, const char *uri,
   return TRUE;
 }
 
-/* A paragraph or a heading: one label whose links open. */
 static GtkWidget *
 text_block (const char *markdown, const char *css_class)
 {
@@ -396,8 +394,6 @@ nuvasha_markdown_render (GtkBox *box, const char *markdown)
   if (markdown == NULL)
     return;
 
-  /* The HTML a body carries is turned into Markdown first, so both are
-     read by the same blocks below. */
   text = html_to_markdown (markdown);
   lines = g_strsplit (text, "\n", -1);
 

@@ -60,7 +60,6 @@ on_install_progress (guint done,
   nuvasha_download_set_progress (job->download, done, total);
 }
 
-/* Remove downloaded archives after extraction, but never remove imports. */
 void
 remove_pack_file (NuvashaDownloadModpackDialog *self)
 {
@@ -270,7 +269,6 @@ on_optional_install (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   start_install (self);
 }
 
-
 /* The name the pack gives itself is what the instance follows. The name
  * field shows the Modrinth project title until the pack is read; a field
  * still holding that title, or holding nothing, is replaced by the pack's
@@ -291,7 +289,7 @@ adopt_pack_name (NuvashaDownloadModpackDialog *self)
       if (typed != NULL && *typed != '\0' &&
           g_strcmp0 (typed, self->project != NULL ? self->project->title : NULL)
             != 0)
-        return; /* the user named it: that is what it is called */
+        return;
 
       gtk_editable_set_text (GTK_EDITABLE (self->name_entry), pack_name);
     }
@@ -304,8 +302,6 @@ adopt_pack_name (NuvashaDownloadModpackDialog *self)
       self->instance_name = g_strdup (pack_name);
     }
 }
-
-/* Fetch the .mrpack, parse it, and decide if the user has options. */
 
 /* What the pack file weighs as it arrives, e.g. "312.4/500.0 MB". The
  * manager entry formats it; the dialog only hands the numbers over. */

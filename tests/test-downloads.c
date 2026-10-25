@@ -80,7 +80,6 @@ test_progress_and_detail (void)
   g_assert_cmpint (nuvasha_download_get_unit (download), ==,
                    nuvasha_DOWNLOAD_UNIT_COUNT);
 
-  /* Setting the same values again changes nothing and says nothing. */
   changes = changed;
   nuvasha_download_set_progress (download, 2, 4);
   nuvasha_download_set_detail (download, "0 of 4 files");

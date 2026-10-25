@@ -300,9 +300,6 @@ test_scope_removes_a_source_that_fired (void)
   g_print ("ok - removing one spent source leaves the rest of the scope\n");
 }
 
-/* Both shapes at once: some sources have fired and some have not, which
-   is what a scope really looks like when it is torn down part way
-   through. Removing the live ones must not disturb the spent ones. */
 static void
 test_scope_releases_mixed_sources (void)
 {
@@ -474,7 +471,6 @@ followed_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   wait->operation = NULL;
 }
 
-/* What the work in flight does when it notices the cancellation. */
 static gboolean
 followed_report_cancelled (gpointer user_data)
 {

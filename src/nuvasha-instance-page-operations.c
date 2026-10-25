@@ -455,8 +455,6 @@ on_directory_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
     gtk_file_dialog_select_folder_finish (GTK_FILE_DIALOG (source), result,
                                           &error);
 
-  /* The chooser being dismissed is not a failure and there is nothing to
-     report for it. */
   if (file == NULL)
     {
       if (error != NULL &&

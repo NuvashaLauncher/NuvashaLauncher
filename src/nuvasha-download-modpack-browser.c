@@ -322,7 +322,6 @@ run_search (NuvashaDownloadModpackDialog *self, gboolean append)
   ask->dialog = g_object_ref (self);
   ask->generation = ++self->search_generation;
 
-
   /* Show the full loading state for the first page and an inline spinner for
      subsequent pages. */
   if (!append)
@@ -576,8 +575,7 @@ build_browse_page (NuvashaDownloadModpackDialog *self, gboolean start_search)
    adw_navigation_split_view_set_collapsed (
      ADW_NAVIGATION_SPLIT_VIEW (self->split),
      gtk_widget_get_width (GTK_WIDGET (self)) < 820);
-  /* Two halves of one width, rather than the narrow column a split view
-     gives a sidebar by default. */
+
   adw_navigation_split_view_set_sidebar_width_fraction (
     ADW_NAVIGATION_SPLIT_VIEW (self->split), 0.5);
    adw_navigation_split_view_set_min_sidebar_width (

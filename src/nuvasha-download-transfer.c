@@ -84,7 +84,6 @@ check_status (DownloadRequest *request)
                       status, reason != NULL ? reason : "Error", url);
 }
 
-
 /* ---------------------------------------------------------- *
  * Transferring the body
  * ---------------------------------------------------------- */
@@ -112,7 +111,7 @@ send_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 
   if (stream == NULL)
     {
-      /* Nothing has been written yet. */
+
       end_attempt (request, g_steal_pointer (&error));
       return;
     }
@@ -360,7 +359,6 @@ attempt_next (DownloadRequest *request)
   verify_and_install (request);
 }
 
-
 /* ---------------------------------------------------------- *
  * Retrying an attempt
  * ---------------------------------------------------------- */
@@ -412,7 +410,7 @@ attempt_failed (DownloadRequest *request, GError *error)
   else if (g_error_matches (error, nuvasha_DOWNLOAD_ERROR,
                             nuvasha_DOWNLOAD_ERROR_CHECKSUM))
     {
-      /* Wrong bytes: one fresh transfer, and no more than that. */
+
       retry = !request->hash_retried && request->attempts < MAX_ATTEMPTS;
       request->hash_retried = retry;
     }
@@ -516,11 +514,6 @@ queued_cancelled (gpointer user_data)
   return G_SOURCE_REMOVE;
 }
 
-
-/* ---------------------------------------------------------- *
- * Starting one attempt
- * ---------------------------------------------------------- */
-
 void
 start_attempt (DownloadRequest *request)
 {
@@ -572,7 +565,6 @@ start_attempt (DownloadRequest *request)
       soup_message_get_request_headers (request->message), "If-None-Match",
       request->cache_etag);
 
-
   if (request->json)
     {
       request->json_body = g_byte_array_new ();
@@ -595,5 +587,3 @@ start_attempt (DownloadRequest *request)
                            G_PRIORITY_DEFAULT, cancellable, send_ready,
                            request);
 }
-
-

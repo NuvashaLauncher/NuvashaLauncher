@@ -399,8 +399,6 @@ defer_completion (NuvashaTaskScope *scope, DeferredCompletion *deferred)
   deferred->scope = nuvasha_task_scope_ref (scope);
   deferred->task = g_object_ref (scope->task);
 
-  /* Tracked apart from the scope's own sources: cancelling must not take
-     these away, only the end of the scope does. */
   source_id = g_idle_add_full (G_PRIORITY_DEFAULT, deferred_completion_return,
                               deferred, deferred_completion_free);
   if (source_id != 0)

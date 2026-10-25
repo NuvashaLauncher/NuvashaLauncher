@@ -45,7 +45,7 @@ typedef void (*AnswerFunc) (GTask *task, JsonNode *root);
 /* Whether HTTP 404 is an error or an absent resource for a request. */
 typedef enum {
   nuvasha_NOT_FOUND_IS_ERROR, /* the answer came from a known place */
-  nuvasha_NOT_FOUND_IS_ABSENT /* nothing there is an answer, not a failure */
+  nuvasha_NOT_FOUND_IS_ABSENT
 } NuvashaNotFoundRule;
 
 typedef struct {
@@ -58,7 +58,7 @@ typedef struct {
 
 typedef struct {
   char *key;
-  GPtrArray *tasks; /* GTask*, one for each caller */
+  GPtrArray *tasks;
 } JsonFlight;
 
 static GHashTable *json_flights;
@@ -130,7 +130,6 @@ fail (GTask *task, GError *error)
   Request *request = g_task_get_task_data (task);
   GError *wrapped = NULL;
 
-  /* Report cancellation here; a GTask must only be completed once. */
   if (g_cancellable_is_cancelled (g_task_get_cancellable (task)))
     {
       g_clear_error (&error);
@@ -416,7 +415,6 @@ nuvasha_modrinth_details_finish (GAsyncResult *result, GError **error)
   return g_task_propagate_pointer (G_TASK (result), error);
 }
 
-
 /* ---------------------------------------------------------- *
  * The versions of a project
  * ---------------------------------------------------------- */
@@ -539,7 +537,6 @@ nuvasha_modrinth_versions_finish (GAsyncResult *result, GError **error)
   return g_task_propagate_pointer (G_TASK (result), error);
 }
 
-
 static void
 categories_answer (GTask *task, JsonNode *root)
 {
@@ -585,7 +582,6 @@ nuvasha_modrinth_categories_finish (GAsyncResult *result, GError **error)
 
   return g_task_propagate_pointer (G_TASK (result), error);
 }
-
 
 /* ---------------------------------------------------------- *
  * One version out of the hash of a file
@@ -650,7 +646,6 @@ nuvasha_modrinth_version_by_id_async (const char *version_id,
   return get_async (url, callback, user_data, version_answer,
                     nuvasha_NOT_FOUND_IS_ERROR);
 }
-
 
 /* ---------------------------------------------------------- *
  * An update out of the hash of a file
@@ -743,7 +738,6 @@ nuvasha_modrinth_update_by_hash_finish (GAsyncResult *result, GError **error)
 
   return g_task_propagate_pointer (G_TASK (result), error);
 }
-
 
 /* ---------------------------------------------------------- *
  * Dependencies required to install a version

@@ -55,7 +55,7 @@ NuvashaTaskScope *nuvasha_icon_load_async (const char        *url,
                                    GAsyncReadyCallback callback,
                                    gpointer           user_data);
 
-/* (transfer full). NULL when there is nothing to show. */
+/* (transfer full). NULL when no icon is available. */
 char *nuvasha_icon_load_finish (GAsyncResult *result, GError **error);
 
 /* The directory the icons are kept in, for a test to look at.

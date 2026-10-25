@@ -54,7 +54,7 @@ GQuark nuvasha_modpack_error_quark (void);
 
 /* Client-side availability of a file. */
 typedef enum {
-  nuvasha_MODPACK_ENV_UNSPECIFIED, /* no env object: what both sides want */
+  nuvasha_MODPACK_ENV_UNSPECIFIED, /* no environment restriction */
   nuvasha_MODPACK_ENV_REQUIRED,
   nuvasha_MODPACK_ENV_OPTIONAL,
   nuvasha_MODPACK_ENV_UNSUPPORTED

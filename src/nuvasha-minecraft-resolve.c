@@ -60,7 +60,6 @@ typedef struct ResolveRequest ResolveRequest;
 
 typedef void (*ResolveStep) (ResolveRequest *request);
 
-/* One transfer in flight. */
 typedef struct
 {
   ResolveRequest *request;
@@ -272,7 +271,6 @@ download_file (ResolveRequest *request, ResolveStep next, const char *url,
     request->cancellable);
 }
 
-
 /* ---------------------------------------------------------- *
  * The result
  * ---------------------------------------------------------- */
@@ -469,7 +467,6 @@ resolve_finish (ResolveRequest *request)
   request_end (request, resolved);
 }
 
-
 /* ---------------------------------------------------------- *
  * Dependencies: the client jar, the libraries, the logging file
  * ---------------------------------------------------------- */
@@ -551,7 +548,7 @@ resolve_dependencies (ResolveRequest *request)
     }
   else
     {
-      /* Nothing to hand log4j later. */
+
       g_clear_pointer (&request->logging_path, g_free);
     }
 
@@ -628,7 +625,6 @@ resolve_natives (ResolveRequest *request)
     nuvasha_task_scope_unref_when_done (extracting);
   }
 }
-
 
 /* ---------------------------------------------------------- *
  * Assets
@@ -838,7 +834,6 @@ resolve_objects (ResolveRequest *request)
     json_object_has_member (root, "map_to_resources") &&
     json_object_get_boolean_member (root, "map_to_resources");
 
-  /* The index is one of the files of this stage, and it is done. */
   request->total = request->done + json_object_get_size (objects);
   report (request);
 
@@ -973,7 +968,6 @@ resolve_assets (ResolveRequest *request)
                  description->asset_index->sha1);
   report (request);
 }
-
 
 /* ---------------------------------------------------------- *
  * Entry point

@@ -48,7 +48,6 @@ open_object (const char          *json,
   return TRUE;
 }
 
-/* The string member @member of @object, or NULL when it is not one. */
 static char *
 string_of (JsonObject *object, const char *member)
 {
@@ -286,9 +285,6 @@ nuvasha_xbox_token_free (NuvashaXboxToken *token)
   g_free (token);
 }
 
-/* The words for the refusals XSTS answers in numbers. Every one of them is
- * something a user can be told and can do something about, which a number
- * is not. */
 static const char *
 xsts_refusal (gint64 code)
 {
@@ -370,8 +366,6 @@ nuvasha_auth_xbox_token_from_json (const char *json, gssize length,
       token->user_hash != NULL && *token->user_hash != '\0')
     return token;
 
-  /* A refusal: XSTS answers with a number and a sentence, and the number
-     is the one that says what a user can do about it. */
   if (int_of (object, "XErr", &xerr))
     {
       const char *words = xsts_refusal (xerr);

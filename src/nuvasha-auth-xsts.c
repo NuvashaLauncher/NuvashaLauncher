@@ -45,8 +45,6 @@ xsts_answered (AuthRequest *self)
   g_autoptr (NuvashaXboxToken) token = NULL;
   g_autoptr (GError) error = NULL;
 
-  /* A refusal of XSTS comes as a number and a sentence, and the number
-     is the one that says what a user can do about it. */
   token = nuvasha_auth_xbox_token_from_json (self->body, -1, &error);
 
   if (token == NULL)

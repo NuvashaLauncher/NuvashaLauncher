@@ -78,10 +78,6 @@ typedef enum {
 
 GQuark nuvasha_launch_error_quark (void);
 
-/* ---------------------------------------------------------- *
- * The parts that are only functions
- * ---------------------------------------------------------- */
-
 /* Current or final state of a launch. */
 typedef enum {
   nuvasha_LAUNCH_PREPARING,        /* the manifest, the resolve and the Java */
@@ -91,7 +87,7 @@ typedef enum {
   nuvasha_LAUNCH_STOPPING,         /* a stop was asked for and not finished */
   nuvasha_LAUNCH_STOPPED,          /* the game ended by itself, or was stopped */
   nuvasha_LAUNCH_CRASHED,          /* it ended with a failure */
-  nuvasha_LAUNCH_FAILED,           /* it never started */
+  nuvasha_LAUNCH_FAILED,            /* launch preparation failed */
   nuvasha_LAUNCH_NEEDS_SIGN_IN     /* the account has to sign in again */
 } NuvashaLaunchState;
 
@@ -99,9 +95,7 @@ typedef enum {
 #define nuvasha_TYPE_LAUNCH_STATE (nuvasha_launch_state_get_type ())
 GType nuvasha_launch_state_get_type (void);
 
-/* The same string the enum member spells: "Preparing", "Downloading",
- * "Launching", "Running", "Stopping", "Stopped", "Crashed", "Failed" or
- * "Needs sign-in". Never NULL. */
+/* Returns the stable display name of @state. */
 const char *nuvasha_launch_state_to_string (NuvashaLaunchState state);
 
 /* TRUE for the states a launch passes through and lives in: everything
@@ -259,8 +253,6 @@ guint nuvasha_launcher_get_line_limit (NuvashaLauncher *self);
 /* The number of lines the log holds right now. */
 guint nuvasha_launcher_get_line_count (NuvashaLauncher *self);
 
-/* Every line logged so far, oldest first, as one string with "\n"
- * between the lines and none at the end. (transfer full) */
 char *nuvasha_launcher_get_log_text (NuvashaLauncher *self);
 
 /* Drops every line logged so far. */
