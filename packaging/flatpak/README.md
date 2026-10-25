@@ -5,7 +5,7 @@ bubblewrap integration. Flatpak itself is the sandbox for this build.
 
 ## Local build
 
-Install `flatpak`, `flatpak-builder`, and the GNOME 48 runtime and SDK, then
+Install `flatpak`, `flatpak-builder`, and the GNOME 51 runtime and SDK, then
 run from the repository root:
 
 ```sh

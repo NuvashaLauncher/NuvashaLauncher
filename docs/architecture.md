@@ -33,6 +33,10 @@ and serialize itself, but it does not perform network I/O or create widgets.
 Likewise, the UI presents a launcher or a download entry but does not become
 the owner of that operation.
 
+There are two process-isolation paths. A native build can wrap the game with
+Nuvasha's own bubblewrap launcher. A Flatpak build runs the same launcher and
+game inside Flatpak's application sandbox and does not add a second wrapper.
+
 ## System context
 
 ```mermaid
@@ -47,13 +51,15 @@ Xbox Live, Minecraft services]
     Desktop[Desktop URI handler]
     Java[Selected Java runtime]
     Bwrap[bubblewrap]
+    Flatpak[Flatpak application sandbox]
 
     User <--> Nuvasha
     Nuvasha --> Mojang
     Nuvasha --> Modrinth
     Nuvasha --> Microsoft
     Nuvasha --> Java
-    Nuvasha -. when sandbox is enabled .-> Bwrap
+    Nuvasha -. native build, sandbox enabled .-> Bwrap
+    Flatpak -. contains the Flatpak build .-> Nuvasha
     Nuvasha --> Desktop
 ```
 
@@ -93,7 +99,8 @@ flowchart TD
     Downloads[Download service, slots, cache]
     Launch[Launcher and process monitor]
     Java[Java detection]
-    Sandbox[Sandbox and open broker]
+    Sandbox[Native bwrap sandbox and open broker]
+    Flatpak[Flatpak application sandbox]
     FS[Filesystem and JSON helpers]
 
     Main --> Window
@@ -114,7 +121,8 @@ flowchart TD
     Resolve --> Versions
     Resolve --> Loaders
     Resolve --> Downloads
-    Launch --> Sandbox
+    Launch -. native build only .-> Sandbox
+    Launch -. Flatpak build .-> Flatpak
     Instances --> FS
     Accounts --> FS
     Downloads --> FS
@@ -387,8 +395,11 @@ sequenceDiagram
     R-->>L: resolved version and progress
     L->>J: detect/select compatible Java
     L->>L: build and redact argv
-    opt sandbox enabled
+    opt native build with sandbox enabled
         L->>S: wrap argv with bwrap
+    end
+    opt Flatpak build
+        Note over L,P: Launcher and game already run inside Flatpak's sandbox
     end
     L->>P: spawn
     P-->>L: stdout/stderr lines
@@ -449,6 +460,31 @@ asks the desktop to open the resulting URI. This keeps common mod behavior
 working without exposing the host's shell or arbitrary executables inside the
 sandbox.
 
+## Flatpak boundary
+
+Flatpak is a packaging and runtime variant, not a second launcher
+implementation. The manifest builds the same source with `FLATPAK=1`. That
+define changes the launch boundary in these ways:
+
+- the game is spawned directly instead of being passed through
+  `nuvasha-sandbox.c`;
+- the native bubblewrap settings are omitted from the Settings dialog;
+- Java runtimes selected by the user can be probed even when they are not in
+  the runtime's normal host search paths.
+
+The application manifest grants network access, Wayland and fallback X11
+display sockets, PulseAudio compatibility audio, Secret Service access for
+account tokens, and device access required by the graphics stack. It does not
+grant `filesystem=home`. Flatpak therefore remains the outer process boundary
+for the launcher and the game, while the application still uses its normal
+GLib data and cache directories inside the per-application data area.
+
+Flatpak does not bundle a JRE. A custom runtime is added through the Java
+picker as a runtime directory containing `bin/java`; the executable is probed
+before it is accepted. The selected paths are registered in the shared
+`custom-java-paths` setting and are available to all instance pages in that
+Flatpak installation. An instance still stores its own selected Java path.
+
 ## Persistence and filesystem layout
 
 The exact base directories follow GLib's user-data and user-cache locations.
@@ -504,6 +540,9 @@ The repository uses a hand-written `Makefile`:
 - `make test-display` repeats the suite under `xvfb-run` when available.
 - `make test-debug` and `make test-lsan` exercise the sanitizer build.
 - `make static-analysis` runs GCC's analyzer over source files.
+- `flatpak-builder` builds the manifest in
+  `packaging/flatpak/com.github.nuvashalauncher.Nuvasha.yml` with the GNOME 51
+  runtime.
 
 Tests are intentionally layered. Parsers, path rules, argument builders,
 security checks, and state machines can run without a display, network, JVM,
