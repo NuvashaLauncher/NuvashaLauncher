@@ -18,6 +18,30 @@
 
 ## Installation
 
+### Flatpak
+
+The repository includes a Flatpak manifest using the GNOME 51 runtime. The
+manifest currently follows the `flatpak` branch, so build that branch from a
+fresh checkout:
+
+```sh
+git clone --branch flatpak https://github.com/NuvashaLauncher/NuvashaLauncher.git
+cd NuvashaLauncher
+flatpak-builder --user --install --force-clean \
+    build/flatpak \
+    packaging/flatpak/com.github.nuvashalauncher.Nuvasha.yml
+flatpak run com.github.nuvashalauncher.nuvasha
+```
+
+`flatpak-builder` installs the GNOME runtime and SDK when they are not already
+available. Nuvasha does not bundle a Java runtime. Add a compatible runtime in
+the launcher and select it for an instance when needed.
+
+The Flatpak build uses Flatpak's sandbox instead of Nuvasha's optional
+bubblewrap wrapper. It does not request unrestricted access to the host home
+directory. The builder requires `flatpak` and `flatpak-builder`; distribution
+packages may use different names for them.
+
 ### Dependencies
 
 - C17-compatible compiler (GCC is used by default)

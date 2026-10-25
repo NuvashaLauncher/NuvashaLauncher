@@ -24,7 +24,10 @@ typedef struct
   NuvashaSkinView *view;
   gboolean cape;
   char *url;
+  SoupMessage *message;
 } SkinTextureLoad;
+
+static SoupSession *skin_session;
 
 static void on_active_skin_delete_done (GObject *, GAsyncResult *, gpointer);
 static void change_cape_on_server (SkinMenu *, const char *);
@@ -76,6 +79,7 @@ static void
 skin_texture_load_free (SkinTextureLoad *load)
 {
   g_clear_object (&load->view);
+  g_clear_object (&load->message);
   g_free (load->url);
   g_free (load);
 }
@@ -102,12 +106,8 @@ cache_skin_bytes (NuvashaSkinView *view, const char *url, GBytes *bytes)
 }
 
 static void
-on_view_texture_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
+finish_view_texture_load (SkinTextureLoad *load, GBytes *bytes, GError *error)
 {
-  SkinTextureLoad *load = user_data;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (GBytes) bytes =
-    g_file_load_bytes_finish (G_FILE (source), result, NULL, &error);
   g_autoptr (GdkTexture) texture = NULL;
 
   if (bytes != NULL)
@@ -129,6 +129,38 @@ on_view_texture_loaded (GObject *source, GAsyncResult *result, gpointer user_dat
 }
 
 static void
+on_view_file_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  SkinTextureLoad *load = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GBytes) bytes =
+    g_file_load_bytes_finish (G_FILE (source), result, NULL, &error);
+
+  finish_view_texture_load (load, bytes, error);
+}
+
+static void
+on_view_http_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  SkinTextureLoad *load = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GBytes) bytes = soup_session_send_and_read_finish (
+    SOUP_SESSION (source), result, &error);
+
+  if (load->message != NULL &&
+      SOUP_STATUS_IS_SUCCESSFUL (soup_message_get_status (load->message)) == FALSE)
+    {
+      g_clear_pointer (&bytes, g_bytes_unref);
+      g_clear_error (&error);
+      g_set_error (&error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                   "skin request returned HTTP status %u",
+                   soup_message_get_status (load->message));
+    }
+
+  finish_view_texture_load (load, bytes, error);
+}
+
+static void
 load_view_texture (NuvashaSkinView *view, const char *url, gboolean cape)
 {
   g_autoptr (GFile) file = NULL;
@@ -145,7 +177,18 @@ load_view_texture (NuvashaSkinView *view, const char *url, gboolean cape)
   load->view = g_object_ref (view);
   load->cape = cape;
   load->url = g_strdup (url);
-  g_file_load_bytes_async (file, NULL, on_view_texture_loaded, load);
+
+  if (g_str_has_prefix (url, "http://") || g_str_has_prefix (url, "https://"))
+    {
+      if (skin_session == NULL)
+        skin_session = soup_session_new ();
+      load->message = soup_message_new ("GET", url);
+      soup_session_send_and_read_async (skin_session, load->message,
+                                        G_PRIORITY_DEFAULT, NULL,
+                                        on_view_http_loaded, load);
+    }
+  else
+    g_file_load_bytes_async (file, NULL, on_view_file_loaded, load);
 }
 
 typedef struct {
