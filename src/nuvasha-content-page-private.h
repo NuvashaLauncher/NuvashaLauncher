@@ -78,18 +78,21 @@ struct _NuvashaContentPage
     GtkButton *update_all;
     GtkStack *update_content;
     AdwSpinner *update_spinner;
+    GtkPopover *update_popover;
+    GtkLabel *update_phase;
+    GtkLabel *update_count;
+    GtkProgressBar *update_bar;
+    GtkButton *update_cancel;
     GPtrArray *files;     /* NuvashaContentFile* */
     GHashTable *rows;     /* path -> row */
     GList *rows_list;     /* rows of the Installed group */
     GCancellable *scan;
     gboolean loaded;
     gboolean identifying;
-    GtkButton *edit_button;
     GtkActionBar *selection_footer;
     GtkLabel *selection_label;
     GtkButton *selection_delete;
     GHashTable *selected_paths; /* path -> TRUE */
-    gboolean edit_mode;
   } installed;
   GtkBox *browse_actions;
 
@@ -151,7 +154,9 @@ void nuvasha_content_page_move_actions_into_bar (NuvashaContentPage *self,
 void nuvasha_content_page_on_installed_search_changed (GtkEditable *editable,
                                                    gpointer user_data);
 void nuvasha_content_page_on_update_all_clicked (GtkButton *button,
-                                             gpointer user_data);
+                                              gpointer user_data);
+void nuvasha_content_page_on_update_cancel (GtkButton *button,
+                                            gpointer user_data);
 void nuvasha_content_page_on_open_folder_clicked (GtkButton *button,
                                               gpointer user_data);
 void nuvasha_content_page_on_search_changed (GtkEditable *editable,

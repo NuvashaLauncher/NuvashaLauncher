@@ -52,6 +52,8 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
     "document-edit-symbolic"));
   GtkButton *footer_delete = GTK_BUTTON (gtk_button_new_from_icon_name (
     "user-trash-symbolic"));
+  GtkButton *footer_export = GTK_BUTTON (gtk_button_new_from_icon_name (
+    "document-save-symbolic"));
   GtkActionBar *selection_footer = GTK_ACTION_BAR (gtk_action_bar_new ());
   GtkLabel *selection_label = GTK_LABEL (gtk_label_new (""));
   GtkWidget *users_child = NULL;
@@ -82,14 +84,19 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
 
   self->ui.edit = edit_button;
   self->ui.footer_delete = footer_delete;
+  self->ui.footer_export = footer_export;
   self->ui.selection_footer = selection_footer;
   self->ui.selection_label = selection_label;
   gtk_widget_set_tooltip_text (GTK_WIDGET (edit_button), _("Edit mode"));
   gtk_widget_set_tooltip_text (GTK_WIDGET (footer_delete), _("Delete"));
+  gtk_widget_set_tooltip_text (GTK_WIDGET (footer_export), _("Export"));
   nuvasha_ui_prepare_icon_button (GTK_WIDGET (edit_button), _("Edit mode"));
   nuvasha_ui_prepare_icon_button (GTK_WIDGET (footer_delete), _("Delete"));
+  nuvasha_ui_prepare_icon_button (GTK_WIDGET (footer_export), _("Export"));
   gtk_widget_set_visible (GTK_WIDGET (footer_delete), FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (footer_export), FALSE);
   gtk_action_bar_set_center_widget (selection_footer, GTK_WIDGET (selection_label));
+  gtk_action_bar_pack_end (selection_footer, GTK_WIDGET (footer_export));
   gtk_action_bar_pack_end (selection_footer, GTK_WIDGET (footer_delete));
   gtk_action_bar_set_revealed (selection_footer, FALSE);
   adw_header_bar_pack_start (ADW_HEADER_BAR (header), GTK_WIDGET (edit_button));
@@ -100,6 +107,8 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
                             G_CALLBACK (set_instance_edit_mode), self);
   g_signal_connect_swapped (footer_delete, "clicked",
                             G_CALLBACK (bulk_delete_instances), self);
+  g_signal_connect_swapped (footer_export, "clicked",
+                            G_CALLBACK (bulk_export_instances), self);
 
   add_popover = GTK_WIDGET (
     gtk_menu_button_get_popover (GTK_MENU_BUTTON (add_button)));

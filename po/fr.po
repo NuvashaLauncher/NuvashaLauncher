@@ -962,3 +962,15 @@ msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
 #: src/nuvasha-main-window-ui.c
 msgid "Edit mode"
 msgstr "Mode édition"
+
+#: src/nuvasha-content-page-ui.c
+msgid "Fetching updates"
+msgstr "Récupération des mises à jour"
+
+#: src/nuvasha-content-page-ui.c
+msgid "Progress %u/%u"
+msgstr "Progress %u/%u"
+
+#: src/nuvasha-content-page-ui.c
+msgid "Progress"
+msgstr "Progression"

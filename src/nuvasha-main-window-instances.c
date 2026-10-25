@@ -745,6 +745,12 @@ update_instance_selection_ui (NuvashaMainWindow *self)
       gtk_widget_set_visible (GTK_WIDGET (self->ui.footer_delete),
                               self->ui.edit_mode && selected > 0);
     }
+  if (self->ui.footer_export != NULL)
+    {
+      gtk_widget_set_sensitive (GTK_WIDGET (self->ui.footer_export), selected > 0);
+      gtk_widget_set_visible (GTK_WIDGET (self->ui.footer_export),
+                              self->ui.edit_mode && selected > 0);
+    }
 }
 
 void
@@ -883,31 +889,70 @@ on_bulk_delete_chosen (GObject *source, GAsyncResult *result, gpointer user_data
   g_object_unref (self);
 }
 
+static void
+on_bulk_export_folder_chosen (GObject *source, GAsyncResult *result,
+                              gpointer user_data)
+{
+  NuvashaMainWindow *self = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GFile) folder = gtk_file_dialog_select_folder_finish (
+    GTK_FILE_DIALOG (source), result, &error);
+
+  if (folder != NULL)
+    {
+      g_autofree char *directory = g_file_get_path (folder);
+      g_autoptr (GPtrArray) selected = g_ptr_array_new_with_free_func (g_free);
+      GHashTableIter iter;
+      gpointer key;
+
+      g_hash_table_iter_init (&iter, self->ui.selected_instances);
+      while (g_hash_table_iter_next (&iter, &key, NULL))
+        g_ptr_array_add (selected, g_strdup (key));
+
+      g_hash_table_remove_all (self->ui.selected_instances);
+      set_instance_edit_mode (self);
+
+      for (guint i = 0; i < selected->len; i++)
+        {
+          const char *id = g_ptr_array_index (selected, i);
+          NuvashaInstance *instance =
+            nuvasha_instance_manager_get_by_id (self->model->manager, id);
+          if (instance != NULL)
+            {
+              g_autofree char *name = NULL;
+              g_autofree char *filename = NULL;
+              g_autofree char *path = NULL;
+              NuvashaInstancePage *page;
+
+              g_object_get (instance, "name", &name, NULL);
+              filename = g_strdup_printf ("%s.mrpack",
+                                          name != NULL ? name : "instance");
+              path = g_build_filename (directory, filename, NULL);
+              page = nuvasha_instance_page_new (
+                self->model->manager, instance, self->model->settings,
+                window_launcher (self, id));
+              g_object_ref_sink (page);
+              nuvasha_instance_page_export_to_path (page, path);
+              g_object_unref (page);
+            }
+        }
+    }
+  else if (error != NULL &&
+           !g_error_matches (error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_CANCELLED) &&
+           !g_error_matches (error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_DISMISSED))
+    adw_banner_set_title (self->ui.banner, error->message);
+
+  g_object_unref (self);
+}
+
 void
 bulk_export_instances (NuvashaMainWindow *self)
 {
-  /* The existing export dialog and policy flow belong to the instance page.
-   * Open the selected instance there rather than duplicating that workflow. */
-  GListStore *instances = nuvasha_instance_manager_get_instances (self->model->manager);
-  for (guint i = 0; i < g_list_model_get_n_items (G_LIST_MODEL (instances)); i++)
-    {
-      g_autoptr (NuvashaInstance) instance =
-        g_list_model_get_item (G_LIST_MODEL (instances), i);
-      if (nuvasha_instance_get_id (instance) != NULL &&
-          g_hash_table_contains (self->ui.selected_instances,
-                                 nuvasha_instance_get_id (instance)))
-        {
-          open_instance_dialog (self, instance);
-          {
-            AdwDialog *dialog = dialog_of_instance (
-              self, nuvasha_instance_get_id (instance));
-            GtkWidget *page = dialog != NULL ? adw_dialog_get_child (dialog) : NULL;
-            if (page != NULL && nuvasha_IS_INSTANCE_PAGE (page))
-              nuvasha_instance_page_trigger_export (nuvasha_INSTANCE_PAGE (page));
-          }
-          break;
-        }
-    }
+  GtkFileDialog *dialog = gtk_file_dialog_new ();
+  gtk_file_dialog_set_title (dialog, _("Choose a Directory"));
+  gtk_file_dialog_select_folder (dialog, GTK_WINDOW (self), NULL,
+                                 on_bulk_export_folder_chosen,
+                                 g_object_ref (self));
 }
 
 void

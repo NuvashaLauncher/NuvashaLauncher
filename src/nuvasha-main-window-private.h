@@ -29,6 +29,7 @@ struct _NuvashaMainWindow
     GtkListBox *instances;
     GtkButton *edit;
     GtkButton *footer_delete;
+    GtkButton *footer_export;
     GtkActionBar *selection_footer;
     GtkLabel *selection_label;
     GHashTable *selected_instances; /* instance ID -> TRUE */

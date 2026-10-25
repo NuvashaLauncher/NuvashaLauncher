@@ -955,3 +955,15 @@ msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
 #: src/nuvasha-main-window-ui.c
 msgid "Edit mode"
 msgstr "編集モード"
+
+#: src/nuvasha-content-page-ui.c
+msgid "Fetching updates"
+msgstr "更新を取得中"
+
+#: src/nuvasha-content-page-ui.c
+msgid "Progress %u/%u"
+msgstr "Progress %u/%u"
+
+#: src/nuvasha-content-page-ui.c
+msgid "Progress"
+msgstr "進捗"

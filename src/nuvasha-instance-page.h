@@ -48,6 +48,8 @@ void nuvasha_instance_page_show_logs (NuvashaInstancePage *self);
 void nuvasha_instance_page_trigger_export (NuvashaInstancePage *self);
 void nuvasha_instance_page_trigger_delete (NuvashaInstancePage *self);
 void nuvasha_instance_page_trigger_duplicate (NuvashaInstancePage *self);
+void nuvasha_instance_page_export_to_path (NuvashaInstancePage *self,
+                                           const char *path);
 
 G_END_DECLS
 
