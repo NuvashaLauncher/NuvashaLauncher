@@ -149,9 +149,12 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
   GVariantDict *options =
     g_application_command_line_get_options_dict (command_line);
   const char *import_path = NULL;
+  const char *file_path = NULL;
   const char *launch_id = NULL;
   gboolean show_version = FALSE;
   gboolean show_instances = FALSE;
+  g_auto (GStrv) arguments = NULL;
+  int argument_count = 0;
   g_autoptr (GError) error = NULL;
 
   g_variant_dict_lookup (options, "import", "&s", &import_path);
@@ -159,9 +162,18 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
   g_variant_dict_lookup (options, "version", "b", &show_version);
   g_variant_dict_lookup (options, "list-instances", "b", &show_instances);
 
+  arguments = g_application_command_line_get_arguments (command_line,
+                                                        &argument_count);
+  for (int i = 1; i < argument_count; i++)
+    if (arguments[i][0] != '-' && g_str_has_suffix (arguments[i], ".mrpack"))
+      {
+        file_path = arguments[i];
+        break;
+      }
+
   if (show_version)
     {
-      g_application_command_line_print (command_line, "nuvasha %s\n",
+      g_application_command_line_print (command_line, "NuvashaLauncher %s\n",
                                         nuvasha_VERSION);
       return 0;
     }
@@ -169,7 +181,7 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
   if (show_instances)
     return list_instances ();
 
-  if (launch_id != NULL && import_path != NULL)
+  if (launch_id != NULL && (import_path != NULL || file_path != NULL))
     {
       g_application_command_line_printerr (
         command_line, "--launch and --import cannot be used together.\n");
@@ -200,6 +212,13 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
       return 0;
     }
 
+  if (file_path != NULL)
+    {
+      NuvashaMainWindow *window = ensure_main_window (app, TRUE);
+      nuvasha_main_window_import_file (window, file_path);
+      return 0;
+    }
+
   g_application_activate (app);
   return 0;
 }
@@ -211,7 +230,7 @@ main (int argc, char **argv)
 
   if (argc == 2 && g_strcmp0 (argv[1], "--version") == 0)
     {
-      g_print ("nuvasha %s\n", nuvasha_VERSION);
+      g_print ("NuvashaLauncher %s\n", nuvasha_VERSION);
       return 0;
     }
 

@@ -36,7 +36,7 @@ test_desktop_entry (void)
   g_assert_cmpstr (comment, ==, "Minecraft launcher for Linux");
 
   exec = g_key_file_get_string (keys, "Desktop Entry", "Exec", NULL);
-  g_assert_cmpstr (exec, ==, "NuvashaLauncher --import %f");
+  g_assert_cmpstr (exec, ==, "NuvashaLauncher %f");
 
   g_autofree gchar *mime_type =
     g_key_file_get_string (keys, "Desktop Entry", "MimeType", NULL);
