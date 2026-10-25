@@ -24,6 +24,15 @@ G_DECLARE_FINAL_TYPE (NuvashaMainWindow, nuvasha_main_window, nuvasha, MAIN_WIND
 NuvashaMainWindow *nuvasha_main_window_new (AdwApplication      *application,
                                     NuvashaInstanceManager *manager);
 
+/* Starts an instance by its stable ID without presenting the window. */
+gboolean nuvasha_main_window_launch_instance (NuvashaMainWindow *self,
+                                              const char *instance_id,
+                                              GError **error);
+
+/* Starts the normal import flow for a local .mrpack file. */
+void nuvasha_main_window_import_file (NuvashaMainWindow *self,
+                                      const char *path);
+
 G_END_DECLS
 
 #endif /* nuvasha_MAIN_WINDOW_H */

@@ -67,13 +67,7 @@ on_import_modpack_chosen (GObject *source, GAsyncResult *result,
         return;
       }
 
-    NuvashaDownloadModpackDialog *dialog =
-      nuvasha_download_modpack_dialog_new_for_file (self->model->manager, path);
-
-    /* Import runs as a background install: its NuvashaDownload entry appears
-     * beside the + button just like a downloaded modpack. */
-    g_object_ref_sink (dialog);
-    g_object_unref (dialog);
+    nuvasha_main_window_import_file (self, path);
   }
 
   g_object_unref (self);

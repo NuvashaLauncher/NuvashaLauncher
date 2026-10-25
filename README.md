@@ -104,6 +104,21 @@ To uninstall it:
 sudo make uninstall PREFIX=/usr/local
 ```
 
+## Command line
+
+```sh
+NuvashaLauncher                 # open the launcher
+NuvashaLauncher --import pack.mrpack
+NuvashaLauncher --launch INSTANCE_ID
+NuvashaLauncher --list-instances
+NuvashaLauncher --version
+```
+
+`--launch` starts the instance while keeping Nuvasha running in the
+background, without presenting its window. `.mrpack` files are also registered
+with the desktop as files Nuvasha can open. Use `--list-instances` to find the
+UUID required by `--launch`.
+
 ## License
 
 Nuvasha is free software released under the GNU General Public License,

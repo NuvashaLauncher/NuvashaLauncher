@@ -22,6 +22,60 @@
 
 G_DEFINE_FINAL_TYPE (NuvashaMainWindow, nuvasha_main_window, ADW_TYPE_APPLICATION_WINDOW)
 
+gboolean
+nuvasha_main_window_launch_instance (NuvashaMainWindow *self,
+                                     const char *instance_id,
+                                     GError **error)
+{
+  NuvashaInstance *instance;
+  NuvashaLauncher *launcher;
+
+  g_return_val_if_fail (nuvasha_IS_MAIN_WINDOW (self), FALSE);
+  g_return_val_if_fail (instance_id != NULL && *instance_id != '\0', FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  instance = nuvasha_instance_manager_get_by_id (self->model->manager,
+                                                  instance_id);
+  if (instance == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND,
+                   "no instance has ID \"%s\"", instance_id);
+      return FALSE;
+    }
+
+  launcher = window_launcher (self, instance_id);
+  if (launcher == NULL)
+    {
+      g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                           "the instance launcher could not be created");
+      return FALSE;
+    }
+
+  if (nuvasha_launch_state_is_busy (nuvasha_launcher_get_state (launcher)))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_BUSY,
+                   "instance \"%s\" is already running", instance_id);
+      return FALSE;
+    }
+
+  nuvasha_launcher_start (launcher);
+  return TRUE;
+}
+
+void
+nuvasha_main_window_import_file (NuvashaMainWindow *self, const char *path)
+{
+  NuvashaDownloadModpackDialog *dialog;
+
+  g_return_if_fail (nuvasha_IS_MAIN_WINDOW (self));
+  g_return_if_fail (path != NULL && *path != '\0');
+
+  dialog = nuvasha_download_modpack_dialog_new_for_file (
+    self->model->manager, path);
+  g_object_ref_sink (dialog);
+  g_object_unref (dialog);
+}
+
 /* Keep launch failures in the window banner until they are dismissed. */
 static void
 on_window_launcher_state (NuvashaLauncher *launcher G_GNUC_UNUSED,
