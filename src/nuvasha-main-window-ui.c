@@ -84,9 +84,9 @@ nuvasha_main_window_build_ui (NuvashaMainWindow *self)
   self->ui.footer_delete = footer_delete;
   self->ui.selection_footer = selection_footer;
   self->ui.selection_label = selection_label;
-  gtk_widget_set_tooltip_text (GTK_WIDGET (edit_button), _("Edit instances"));
+  gtk_widget_set_tooltip_text (GTK_WIDGET (edit_button), _("Edit mode"));
   gtk_widget_set_tooltip_text (GTK_WIDGET (footer_delete), _("Delete"));
-  nuvasha_ui_prepare_icon_button (GTK_WIDGET (edit_button), _("Edit instances"));
+  nuvasha_ui_prepare_icon_button (GTK_WIDGET (edit_button), _("Edit mode"));
   nuvasha_ui_prepare_icon_button (GTK_WIDGET (footer_delete), _("Delete"));
   gtk_widget_set_visible (GTK_WIDGET (footer_delete), FALSE);
   gtk_action_bar_set_center_widget (selection_footer, GTK_WIDGET (selection_label));

@@ -307,14 +307,7 @@ details_content (NuvashaContentPage *self)
                  GTK_WIDGET (gtk_builder_get_object (details_builder, "details-check")));
   gtk_widget_set_valign (GTK_WIDGET (self->project.details_check), GTK_ALIGN_CENTER);
   gtk_widget_set_sensitive (GTK_WIDGET (self->project.details_check), FALSE);
-  gtk_widget_set_tooltip_text (GTK_WIDGET (self->project.details_check),
-                               _("Install this version with the selected "
-                                 "ones"));
-  gtk_accessible_update_property (GTK_ACCESSIBLE (self->project.details_check),
-                                  GTK_ACCESSIBLE_PROPERTY_LABEL,
-                                  _("Install this version with the selected "
-                                    "ones"), -1);
-  g_signal_connect_object (self->project.details_check, "toggled",
+   g_signal_connect_object (self->project.details_check, "toggled",
                            G_CALLBACK (on_version_picked), self, 0);
 
    watch_widget (&self->project.details_dropdown,

@@ -52,8 +52,6 @@ msgstr "加载更多"
 msgid "Nothing is selected"
 msgstr "未选择任何内容"
 
-msgid "Install this version with the selected ones"
-msgstr "与所选版本一起安装此版本"
 
 msgid "Filter by category"
 msgstr "按类别筛选"
@@ -935,3 +933,19 @@ msgstr "已选择 %u/%u"
 #: src/nuvasha-main-window.c
 msgid "The following instances will be deleted:\n%s"
 msgstr "将删除以下实例：\n%s"
+
+#: src/nuvasha-content-page.c
+msgid "Delete selected %s?"
+msgstr "Delete selected %s?"
+
+#: src/nuvasha-content-page.c
+msgid "Selected %s:\n%s"
+msgstr "Selected %s:\n%s"
+
+#: src/nuvasha-content-page.c
+msgid "Selected %s:\n%s\n\nDependencies:\n%s"
+msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
+
+#: src/nuvasha-main-window-ui.c
+msgid "Edit mode"
+msgstr "编辑模式"

@@ -51,8 +51,6 @@ msgstr "Laster inn mer …"
 msgid "Nothing is selected"
 msgstr "Ingenting er valgt"
 
-msgid "Install this version with the selected ones"
-msgstr "Installer denne versjonen med de valgte"
 
 msgid "Filter by category"
 msgstr "Filtrer etter kategori"
@@ -908,3 +906,19 @@ msgstr "%u/%u valgt"
 #: src/nuvasha-main-window.c
 msgid "The following instances will be deleted:\n%s"
 msgstr "Følgende instanser blir slettet:\n%s"
+
+#: src/nuvasha-content-page.c
+msgid "Delete selected %s?"
+msgstr "Delete selected %s?"
+
+#: src/nuvasha-content-page.c
+msgid "Selected %s:\n%s"
+msgstr "Selected %s:\n%s"
+
+#: src/nuvasha-content-page.c
+msgid "Selected %s:\n%s\n\nDependencies:\n%s"
+msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
+
+#: src/nuvasha-main-window-ui.c
+msgid "Edit mode"
+msgstr "Redigeringsmodus"

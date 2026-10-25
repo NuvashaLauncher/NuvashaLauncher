@@ -52,8 +52,6 @@ msgstr "Загрузка больше результатов..."
 msgid "Nothing is selected"
 msgstr "Ничего не выбрано"
 
-msgid "Install this version with the selected ones"
-msgstr "Установить эту версию вместе с выбранными"
 
 msgid "Filter by category"
 msgstr "Фильтр по категории"
@@ -943,3 +941,19 @@ msgstr "Выбрано: %u/%u"
 #: src/nuvasha-main-window.c
 msgid "The following instances will be deleted:\n%s"
 msgstr "Следующие экземпляры будут удалены:\n%s"
+
+#: src/nuvasha-content-page.c
+msgid "Delete selected %s?"
+msgstr "Delete selected %s?"
+
+#: src/nuvasha-content-page.c
+msgid "Selected %s:\n%s"
+msgstr "Selected %s:\n%s"
+
+#: src/nuvasha-content-page.c
+msgid "Selected %s:\n%s\n\nDependencies:\n%s"
+msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
+
+#: src/nuvasha-main-window-ui.c
+msgid "Edit mode"
+msgstr "Режим редактирования"

@@ -51,8 +51,6 @@ msgstr "Đang tải thêm…"
 msgid "Nothing is selected"
 msgstr "Không có gì được chọn"
 
-msgid "Install this version with the selected ones"
-msgstr "Cài đặt phiên bản này với những phiên bản đã chọn"
 
 msgid "Filter by category"
 msgstr "Lọc theo danh mục"
@@ -908,3 +906,19 @@ msgstr "Đã chọn %u/%u"
 #: src/nuvasha-main-window.c
 msgid "The following instances will be deleted:\n%s"
 msgstr "Các phiên bản sau sẽ bị xóa:\n%s"
+
+#: src/nuvasha-content-page.c
+msgid "Delete selected %s?"
+msgstr "Delete selected %s?"
+
+#: src/nuvasha-content-page.c
+msgid "Selected %s:\n%s"
+msgstr "Selected %s:\n%s"
+
+#: src/nuvasha-content-page.c
+msgid "Selected %s:\n%s\n\nDependencies:\n%s"
+msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
+
+#: src/nuvasha-main-window-ui.c
+msgid "Edit mode"
+msgstr "Chế độ chỉnh sửa"

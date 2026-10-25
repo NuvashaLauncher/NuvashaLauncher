@@ -51,8 +51,6 @@ msgstr "جارٍ تحميل المزيد…"
 msgid "Nothing is selected"
 msgstr "لم يتم تحديد أي شيء"
 
-msgid "Install this version with the selected ones"
-msgstr "تثبيت هذا الإصدار مع تلك المحددة"
 
 msgid "Filter by category"
 msgstr "تصفية حسب الفئة"
@@ -916,3 +914,19 @@ msgstr "%u/%u محددة"
 #: src/nuvasha-main-window.c
 msgid "The following instances will be deleted:\n%s"
 msgstr "سيتم حذف المثيلات التالية:\n%s"
+
+#: src/nuvasha-content-page.c
+msgid "Delete selected %s?"
+msgstr "Delete selected %s?"
+
+#: src/nuvasha-content-page.c
+msgid "Selected %s:\n%s"
+msgstr "Selected %s:\n%s"
+
+#: src/nuvasha-content-page.c
+msgid "Selected %s:\n%s\n\nDependencies:\n%s"
+msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
+
+#: src/nuvasha-main-window-ui.c
+msgid "Edit mode"
+msgstr "وضع التحرير"

@@ -535,8 +535,8 @@ nuvasha_logs_page_new (NuvashaLauncher *launcher)
    gtk_widget_add_css_class (row, "nuvasha-content-toolbar");
    gtk_widget_add_css_class (row, "nuvasha-compact-toolbar");
    gtk_widget_add_css_class (row, "nuvasha-page-actions");
-   gtk_widget_set_margin_start (row, 12);
-   gtk_widget_set_margin_end (row, 12);
+    gtk_widget_set_margin_start (row, 0);
+    gtk_widget_set_margin_end (row, 0);
 
   self->state = GTK_LABEL (gtk_label_new (NULL));
   gtk_widget_add_css_class (GTK_WIDGET (self->state), "heading");

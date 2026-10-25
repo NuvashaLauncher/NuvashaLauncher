@@ -22,7 +22,7 @@
 }
 
 .nuvasha-content-toolbar {
-  padding: 6px 12px;
+  padding: 6px 0;
 }
 
 .nuvasha-modpack-results row {
@@ -34,6 +34,20 @@
   padding-bottom: 4px;
   min-height: 60px;
 }
+
+.nuvasha-instance-icon {
+  border-radius: 50%;
+}
+
+.nuvasha-content-icon {
+  border-radius: 50%;
+}
+
+.nuvasha-content-selection-footer {
+  background-color: @window_bg_color;
+  box-shadow: none;
+}
+
 
 .nuvasha-dialog-content {
   padding: 24px;

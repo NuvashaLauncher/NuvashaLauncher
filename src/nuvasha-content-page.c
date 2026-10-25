@@ -204,6 +204,18 @@ file_row_refresh (GtkWidget *row)
   if (file == NULL || !GTK_IS_WIDGET (row))
     return;
 
+  {
+    GtkWidget *check = g_object_get_data (G_OBJECT (row), "nuvasha-file-check");
+    GtkWidget *trash = g_object_get_data (G_OBJECT (row), "nuvasha-file-trash");
+    GtkWidget *sw = g_object_get_data (G_OBJECT (row), "nuvasha-mod-switch");
+    if (check != NULL)
+      gtk_widget_set_visible (check, self->installed.edit_mode);
+    if (trash != NULL)
+      gtk_widget_set_visible (trash, !self->installed.edit_mode);
+    if (sw != NULL)
+      gtk_widget_set_visible (sw, !self->installed.edit_mode);
+  }
+
   if (file->project_name != NULL && *file->project_name != '\0')
     title = file->project_name;
 
@@ -216,6 +228,50 @@ file_row_refresh (GtkWidget *row)
     row_show_description (row, file->description);
 
   installed_filter_rows (self);
+}
+
+static void
+on_content_file_check_toggled (GtkCheckButton *check, gpointer user_data)
+{
+  NuvashaContentPage *self = user_data;
+  const char *path = g_object_get_data (G_OBJECT (check), "nuvasha-file-path");
+
+  if (path == NULL || !self->installed.edit_mode)
+    return;
+  if (gtk_check_button_get_active (check))
+    g_hash_table_add (self->installed.selected_paths, g_strdup (path));
+  else
+    g_hash_table_remove (self->installed.selected_paths, path);
+  content_page_update_selection (self);
+}
+
+void
+content_page_update_selection (NuvashaContentPage *self)
+{
+  guint selected = g_hash_table_size (self->installed.selected_paths);
+  guint total = self->installed.files != NULL ? self->installed.files->len : 0;
+  g_autofree char *text = g_strdup_printf (_("%u/%u selected"), selected, total);
+
+  gtk_label_set_text (self->installed.selection_label, text);
+  gtk_action_bar_set_revealed (self->installed.selection_footer,
+                               self->installed.edit_mode && selected > 0);
+  gtk_widget_set_visible (GTK_WIDGET (self->installed.selection_delete),
+                          self->installed.edit_mode && selected > 0);
+  gtk_widget_set_sensitive (GTK_WIDGET (self->installed.selection_delete),
+                            selected > 0);
+}
+
+void
+content_page_toggle_edit (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  NuvashaContentPage *self = user_data;
+  self->installed.edit_mode = !self->installed.edit_mode;
+  if (!self->installed.edit_mode)
+    g_hash_table_remove_all (self->installed.selected_paths);
+
+  for (GList *link = self->installed.rows_list; link != NULL; link = link->next)
+    file_row_refresh (GTK_WIDGET (link->data));
+  content_page_update_selection (self);
 }
 
 /* The first @max_sentences sentences of @text (0 for all of it), with
@@ -574,6 +630,164 @@ on_trash_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
                            g_object_ref (self));
 }
 
+static GPtrArray *
+content_file_dependents (NuvashaContentPage *self,
+                         NuvashaContentFile *file,
+                         GString           *names)
+{
+  GPtrArray *paths = g_ptr_array_new_with_free_func (g_free);
+
+  if (file->project_id == NULL)
+    return paths;
+
+  for (guint i = 0; i < self->installed.files->len; i++)
+    {
+      NuvashaContentFile *other = g_ptr_array_index (self->installed.files, i);
+      const char *other_title;
+
+      if (other == file || other->required_dependencies == NULL)
+        continue;
+      for (guint j = 0; j < other->required_dependencies->len; j++)
+        if (g_strcmp0 (g_ptr_array_index (other->required_dependencies, j),
+                       file->project_id) == 0 ||
+            g_strcmp0 (g_ptr_array_index (other->required_dependencies, j),
+                       file->local_id) == 0)
+          {
+            other_title = file_display_name (other);
+            if (names != NULL)
+              {
+                if (names->len > 0)
+                  g_string_append_c (names, '\n');
+                g_string_append (names, other_title);
+              }
+            g_ptr_array_add (paths, g_strdup (other->path));
+            break;
+          }
+    }
+
+  return paths;
+}
+
+static void
+on_bulk_content_delete_chosen (GObject *source, GAsyncResult *result,
+                               gpointer user_data)
+{
+  NuvashaContentPage *self = user_data;
+  const char *response = adw_alert_dialog_choose_finish (
+    ADW_ALERT_DIALOG (source), result);
+
+  if (g_strcmp0 (response, "confirm") == 0)
+    {
+      GHashTableIter iter;
+      gpointer key;
+      g_autoptr (GPtrArray) paths = g_ptr_array_new_with_free_func (g_free);
+
+      g_hash_table_iter_init (&iter, self->installed.selected_paths);
+      while (g_hash_table_iter_next (&iter, &key, NULL))
+        g_ptr_array_add (paths, g_strdup (key));
+
+      g_hash_table_remove_all (self->installed.selected_paths);
+      content_page_toggle_edit (NULL, self);
+
+      for (guint i = 0; i < paths->len; i++)
+        {
+          const char *path = g_ptr_array_index (paths, i);
+          NuvashaContentFile *file = NULL;
+          g_autoptr (GFile) target = NULL;
+          g_autoptr (GPtrArray) dependents = NULL;
+
+          for (guint j = 0; j < self->installed.files->len; j++)
+            {
+              NuvashaContentFile *candidate =
+                g_ptr_array_index (self->installed.files, j);
+              if (g_strcmp0 (candidate->path, path) == 0)
+                {
+                  file = candidate;
+                  break;
+                }
+            }
+          if (file == NULL)
+            continue;
+
+          dependents = content_file_dependents (self, file, NULL);
+          target = g_file_new_for_path (path);
+          g_object_set_data_full (G_OBJECT (target), "nuvasha-path",
+                                  g_strdup (path), g_free);
+          g_object_set_data_full (G_OBJECT (target), "nuvasha-dependent-paths",
+                                  g_ptr_array_ref (dependents),
+                                  (GDestroyNotify) g_ptr_array_unref);
+          nuvasha_content_delete_async (target, G_PRIORITY_DEFAULT, NULL,
+                                        on_deleted, g_object_ref (self));
+        }
+    }
+
+  g_object_unref (self);
+}
+
+void
+content_page_bulk_delete (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  NuvashaContentPage *self = user_data;
+  GHashTableIter iter;
+  gpointer key;
+  GString *names = g_string_new (NULL);
+  GString *dependencies = g_string_new (NULL);
+  g_autofree char *heading = NULL;
+  g_autofree char *body = NULL;
+  g_autoptr (NuvashaSettings) settings = nuvasha_settings_new ();
+  gboolean include_dependencies =
+    nuvasha_settings_get_delete_dependents (settings);
+
+  g_hash_table_iter_init (&iter, self->installed.selected_paths);
+  while (g_hash_table_iter_next (&iter, &key, NULL))
+    {
+      NuvashaContentFile *file = NULL;
+      for (guint i = 0; i < self->installed.files->len; i++)
+        {
+          NuvashaContentFile *candidate =
+            g_ptr_array_index (self->installed.files, i);
+          if (g_strcmp0 (candidate->path, key) == 0)
+            {
+              file = candidate;
+              break;
+            }
+        }
+      if (file == NULL)
+        continue;
+      if (names->len > 0)
+        g_string_append_c (names, '\n');
+      g_string_append (names, file_display_name (file));
+      if (include_dependencies)
+        {
+          g_autoptr (GPtrArray) unused =
+            content_file_dependents (self, file, dependencies);
+        }
+    }
+
+  const char *kind = self->type == nuvasha_CONTENT_MOD ? "mods" :
+                     self->type == nuvasha_CONTENT_SHADER_PACK ? "shaderpacks" :
+                     self->type == nuvasha_CONTENT_RESOURCE_PACK ? "resourcepacks" :
+                     "datapacks";
+  heading = g_strdup_printf (_("Delete selected %s?"), kind);
+  if (dependencies->len > 0)
+    body = g_strdup_printf (_("Selected %s:\n%s\n\nDependencies:\n%s"),
+                            nuvasha_content_type_title (self->type),
+                            names->str, dependencies->str);
+  else
+    body = g_strdup_printf (_("Selected %s:\n%s"),
+                            nuvasha_content_type_title (self->type), names->str);
+  AdwAlertDialog *alert = ADW_ALERT_DIALOG (adw_alert_dialog_new (heading, body));
+  adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
+  adw_alert_dialog_add_response (alert, "confirm", _("Delete"));
+  adw_alert_dialog_set_response_appearance (alert, "confirm",
+                                            ADW_RESPONSE_DESTRUCTIVE);
+  adw_alert_dialog_set_close_response (alert, "cancel");
+  adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL,
+                           on_bulk_content_delete_chosen, g_object_ref (self));
+  g_string_free (names, TRUE);
+  g_string_free (dependencies, TRUE);
+}
+
 GtkWidget *
 file_row (NuvashaContentPage *self, NuvashaContentFile *file)
 {
@@ -585,6 +799,7 @@ file_row (NuvashaContentPage *self, NuvashaContentFile *file)
   AdwActionRow *row = ADW_ACTION_ROW (g_object_ref (
     gtk_builder_get_object (builder, "row")));
   GtkWidget *icon = nuvasha_icon_widget_new (nuvasha_content_type_icon (self->type));
+  GtkCheckButton *check = GTK_CHECK_BUTTON (gtk_check_button_new ());
 
   /* Treat file names and paths as plain text. The tooltip contains the path;
      the subtitle contains project metadata when available. */
@@ -599,8 +814,15 @@ file_row (NuvashaContentPage *self, NuvashaContentFile *file)
   /* Use a fixed icon square and replace the placeholder when project data
      becomes available. */
   gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
+  gtk_widget_set_visible (GTK_WIDGET (check), self->installed.edit_mode);
+  gtk_widget_set_valign (GTK_WIDGET (check), GTK_ALIGN_CENTER);
+  g_object_set_data_full (G_OBJECT (check), "nuvasha-file-path",
+                          g_strdup (file->path), g_free);
+  g_signal_connect (check, "toggled",
+                    G_CALLBACK (on_content_file_check_toggled), self);
   adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
   g_object_set_data (G_OBJECT (row), "nuvasha-icon", icon);
+  g_object_set_data (G_OBJECT (row), "nuvasha-file-check", check);
 
   /* Only a mod is something that can be turned off: a resource pack or a
      shader pack is loaded whenever it is present, so neither has a
@@ -636,10 +858,12 @@ file_row (NuvashaContentPage *self, NuvashaContentFile *file)
      * when this button is removed, which scrolls the list to the top. */
     gtk_widget_set_focus_on_click (GTK_WIDGET (trash), FALSE);
     gtk_widget_set_valign (GTK_WIDGET (trash), GTK_ALIGN_CENTER);
-    g_object_set_data (G_OBJECT (trash), "nuvasha-file", file);
-    g_signal_connect_object (trash, "clicked", G_CALLBACK (on_trash_clicked), self, 0);
-    adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (trash));
+     g_object_set_data (G_OBJECT (trash), "nuvasha-file", file);
+     g_object_set_data (G_OBJECT (row), "nuvasha-file-trash", trash);
+     g_signal_connect_object (trash, "clicked", G_CALLBACK (on_trash_clicked), self, 0);
+     adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (trash));
   }
+  adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (check));
 
   /* The row carries the file it is about, so the switch does not have to
      know where the file came from. */
@@ -979,6 +1203,7 @@ nuvasha_content_page_finalize (GObject *object)
   g_clear_object (&self->instance);
   g_clear_pointer (&self->installed.files, g_ptr_array_unref);
   g_clear_pointer (&self->installed.rows, g_hash_table_unref);
+  g_clear_pointer (&self->installed.selected_paths, g_hash_table_unref);
   nuvasha_content_browser_model_free (self->browse.model);
   self->browse.model = NULL;
   g_list_free (self->installed.rows_list);
@@ -1016,4 +1241,6 @@ nuvasha_content_page_init (NuvashaContentPage *self)
      kind of content. */
   self->install_model =
     nuvasha_content_install_model_new ((GDestroyNotify) pick_free);
+  self->installed.selected_paths = g_hash_table_new_full (g_str_hash, g_str_equal,
+                                                          g_free, NULL);
 }

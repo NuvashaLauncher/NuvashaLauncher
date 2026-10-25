@@ -51,8 +51,6 @@ msgstr "Načítání dalších…"
 msgid "Nothing is selected"
 msgstr "Není vybráno nic"
 
-msgid "Install this version with the selected ones"
-msgstr "Nainstalujte tuto verzi s vybranými"
 
 msgid "Filter by category"
 msgstr "Filtrujte podle kategorie"
@@ -910,3 +908,19 @@ msgstr "%u/%u vybráno"
 #: src/nuvasha-main-window.c
 msgid "The following instances will be deleted:\n%s"
 msgstr "Následující instance budou odstraněny:\n%s"
+
+#: src/nuvasha-content-page.c
+msgid "Delete selected %s?"
+msgstr "Delete selected %s?"
+
+#: src/nuvasha-content-page.c
+msgid "Selected %s:\n%s"
+msgstr "Selected %s:\n%s"
+
+#: src/nuvasha-content-page.c
+msgid "Selected %s:\n%s\n\nDependencies:\n%s"
+msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
+
+#: src/nuvasha-main-window-ui.c
+msgid "Edit mode"
+msgstr "Režim úprav"
