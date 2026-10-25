@@ -15,8 +15,6 @@
 #define CACHE_EXPIRATION_KEY "cache-expiration"
 #define EXPORT_METADATA_KEY "export-metadata"
 #define DELETE_DEPENDENTS_KEY "delete-dependents"
-#define SANDBOX_ENABLED_KEY "sandbox-enabled"
-#define SANDBOX_NETWORK_ENABLED_KEY "sandbox-network-enabled"
 
 /* A stored limit below this is not a number a log can be trimmed to. */
 #define LOG_LINE_LIMIT_FLOOR 1
@@ -33,8 +31,6 @@ struct _NuvashaSettings
   NuvashaSettingsCacheExpiration cache_expiration;
   gboolean export_metadata;
   gboolean delete_dependents;
-  gboolean sandbox_enabled;
-  gboolean sandbox_network_enabled;
   GSettings *desktop_settings;
 };
 
@@ -67,10 +63,6 @@ load (NuvashaSettings *self)
     self->desktop_settings, EXPORT_METADATA_KEY);
   self->delete_dependents = g_settings_get_boolean (
     self->desktop_settings, DELETE_DEPENDENTS_KEY);
-  self->sandbox_enabled = g_settings_get_boolean (
-    self->desktop_settings, SANDBOX_ENABLED_KEY);
-  self->sandbox_network_enabled = g_settings_get_boolean (
-    self->desktop_settings, SANDBOX_NETWORK_ENABLED_KEY);
 }
 
 static gboolean
@@ -96,11 +88,6 @@ save (NuvashaSettings *self, GError **error)
                           self->export_metadata);
   g_settings_set_boolean (self->desktop_settings, DELETE_DEPENDENTS_KEY,
                           self->delete_dependents);
-  g_settings_set_boolean (self->desktop_settings, SANDBOX_ENABLED_KEY,
-                          self->sandbox_enabled);
-  g_settings_set_boolean (self->desktop_settings,
-                          SANDBOX_NETWORK_ENABLED_KEY,
-                          self->sandbox_network_enabled);
   return TRUE;
 }
 
@@ -162,58 +149,6 @@ nuvasha_settings_set_delete_dependents (NuvashaSettings *self, gboolean value,
     return TRUE;
 
   self->delete_dependents = previous;
-  return FALSE;
-}
-
-gboolean
-nuvasha_settings_get_sandbox_enabled (NuvashaSettings *self)
-{
-  g_return_val_if_fail (nuvasha_IS_SETTINGS (self), FALSE);
-
-  return self->sandbox_enabled;
-}
-
-gboolean
-nuvasha_settings_set_sandbox_enabled (NuvashaSettings *self, gboolean value,
-                                  GError **error)
-{
-  gboolean previous;
-
-  g_return_val_if_fail (nuvasha_IS_SETTINGS (self), FALSE);
-  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
-
-  previous = self->sandbox_enabled;
-  self->sandbox_enabled = value;
-  if (save (self, error))
-    return TRUE;
-
-  self->sandbox_enabled = previous;
-  return FALSE;
-}
-
-gboolean
-nuvasha_settings_get_sandbox_network_enabled (NuvashaSettings *self)
-{
-  g_return_val_if_fail (nuvasha_IS_SETTINGS (self), TRUE);
-
-  return self->sandbox_network_enabled;
-}
-
-gboolean
-nuvasha_settings_set_sandbox_network_enabled (NuvashaSettings *self, gboolean value,
-                                           GError **error)
-{
-  gboolean previous;
-
-  g_return_val_if_fail (nuvasha_IS_SETTINGS (self), FALSE);
-  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
-
-  previous = self->sandbox_network_enabled;
-  self->sandbox_network_enabled = value;
-  if (save (self, error))
-    return TRUE;
-
-  self->sandbox_network_enabled = previous;
   return FALSE;
 }
 
@@ -459,5 +394,4 @@ nuvasha_settings_init (NuvashaSettings *self)
   self->cache_modrinth_api_responses = TRUE;
   self->cache_expiration = nuvasha_SETTINGS_DEFAULT_CACHE_EXPIRATION;
   self->export_metadata = TRUE;
-  self->sandbox_network_enabled = TRUE;
 }

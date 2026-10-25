@@ -10,9 +10,6 @@
 #include "nuvasha-loaders.h"
 #include "nuvasha-minecraft-resolve.h"
 #include "nuvasha-minecraft-versions.h"
-#ifndef nuvasha_FLATPAK
-#include "nuvasha-sandbox.h"
-#endif
 
 #include <string.h>
 
@@ -95,9 +92,6 @@ run_the_game (NuvashaLauncher *self)
 {
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
-#ifndef nuvasha_FLATPAK
-  g_autoptr (GPtrArray) sandbox_argv = NULL;
-#endif
   g_autofree char *jvm_args = NULL;
   g_autofree char *offline_uuid = NULL;
   NuvashaAccount *account = NULL;
@@ -138,27 +132,6 @@ run_the_game (NuvashaLauncher *self)
       launcher_failed (self, error->message);
       return;
     }
-
-#ifndef nuvasha_FLATPAK
-  if (self->settings != NULL &&
-      nuvasha_settings_get_sandbox_enabled (self->settings))
-    {
-      sandbox_argv = nuvasha_sandbox_wrap_arguments (
-        argv, self->preparation.resolved, self->preparation.java_executable,
-        self->game_directory,
-        nuvasha_settings_get_sandbox_network_enabled (self->settings), &error);
-
-      if (sandbox_argv == NULL)
-        {
-          launcher_failed (self, error->message);
-          return;
-        }
-
-      g_clear_pointer (&argv, g_ptr_array_unref);
-      argv = g_steal_pointer (&sandbox_argv);
-      log_line (self, TAG_STATE, "bubblewrap sandbox enabled");
-    }
-#endif
 
   /* Who the game is about to run as. The token is not in this line: the
      command line that is logged by the spawn carries it redacted, and

@@ -10,9 +10,6 @@ msgstr "Hủy bỏ"
 msgid "cannot clear credentials for account \"%s\": %s"
 msgstr "không thể xóa thông tin xác thực của tài khoản \"%s\": %s"
 
-msgid "unknown Secret Service error"
-msgstr "lỗi Secret Service không xác định"
-
 msgid "cannot store credentials for account \"%s\""
 msgstr "không thể lưu thông tin xác thực của tài khoản \"%s\""
 msgid "Confirm"
@@ -558,15 +555,6 @@ msgstr "Xóa một phần phụ thuộc sẽ xóa mod phụ thuộc vào nó"
 
 msgid "A dependent mod cannot be deleted"
 msgstr "Không thể xóa một mod phụ thuộc"
-
-msgid "Sandbox"
-msgstr "Hộp cát"
-
-msgid "Enable sandbox"
-msgstr "Bật hộp cát"
-
-msgid "Allow sandbox network access"
-msgstr "Cho phép truy cập mạng hộp cát"
 
 msgid "Slim model"
 msgstr "mô hình mỏng"

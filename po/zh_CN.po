@@ -8,9 +8,6 @@ msgstr ""
 msgid "cannot clear credentials for account \"%s\": %s"
 msgstr "无法清除帐户“%s”的凭据：%s"
 
-msgid "unknown Secret Service error"
-msgstr "未知的 Secret Service 错误"
-
 msgid "cannot store credentials for account \"%s\""
 msgstr "无法保存帐户“%s”的凭据"
 msgid "Cancel"
@@ -582,14 +579,6 @@ msgstr "删除依赖项会删除依赖它的模组"
 msgid "A dependent mod cannot be deleted"
 msgstr "无法删除依赖的模组"
 
-msgid "Sandbox"
-msgstr "沙盒"
-
-msgid "Enable sandbox"
-msgstr "启用沙盒"
-
-msgid "Allow sandbox network access"
-msgstr "允许沙箱访问网络"
 # UI string
 msgid "Skin"
 msgstr "Skin"

@@ -8,9 +8,6 @@ msgstr ""
 msgid "cannot clear credentials for account \"%s\": %s"
 msgstr "nie można usunąć danych uwierzytelniających konta „%s”: %s"
 
-msgid "unknown Secret Service error"
-msgstr "nieznany błąd usługi Secret Service"
-
 msgid "cannot store credentials for account \"%s\""
 msgstr "nie można zapisać danych uwierzytelniających konta „%s”"
 msgid "Cancel"
@@ -590,14 +587,6 @@ msgstr "Usunięcie zależności usuwa mod, który od niej zależał"
 msgid "A dependent mod cannot be deleted"
 msgstr "Nie można usunąć zależnego moda"
 
-msgid "Sandbox"
-msgstr "Piaskownica"
-
-msgid "Enable sandbox"
-msgstr "Włącz piaskownicę"
-
-msgid "Allow sandbox network access"
-msgstr "Zezwól na dostęp do sieci w środowisku testowym"
 # UI string
 msgid "Skin"
 msgstr "Skin"

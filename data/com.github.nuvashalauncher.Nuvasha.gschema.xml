@@ -10,8 +10,6 @@
     <key name="export-metadata" type="b"><default>false</default></key>
     <key name="custom-java-paths" type="as"><default>[]</default></key>
     <key name="delete-dependents" type="b"><default>true</default></key>
-    <key name="sandbox-enabled" type="b"><default>false</default></key>
-    <key name="sandbox-network-enabled" type="b"><default>true</default></key>
     <key name="window-width" type="i">
       <default>960</default>
     </key>

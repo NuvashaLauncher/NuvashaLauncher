@@ -94,11 +94,7 @@ src/nuvasha-modrinth-json.c
 src/nuvasha-modrinth-versions-json.c
 src/nuvasha-modrinth.c
 src/nuvasha-offline-account-dialog.c
-src/nuvasha-open-broker.c
 src/nuvasha-operation.c
-src/nuvasha-sandbox-display.c
-src/nuvasha-sandbox-mounts.c
-src/nuvasha-sandbox.c
 src/nuvasha-settings.c
 src/nuvasha-sign-in-dialog.c
 src/nuvasha-skin-view.c

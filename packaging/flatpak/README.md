@@ -1,7 +1,8 @@
 # Flatpak packaging
 
 The Flatpak build uses the GNOME runtime and disables Nuvasha's optional
-bubblewrap integration. Flatpak itself is the sandbox for this build.
+the native game-process isolation code. Flatpak provides the application
+isolation for this build.
 
 ## Local build
 
@@ -17,4 +18,4 @@ flatpak run com.github.nuvashalauncher.nuvasha
 
 The manifest follows the `flatpak` branch so the packaging changes and the
 Flatpak-specific build flag are included. Native builds continue to use the
-normal Makefile path and retain their sandbox settings.
+normal Makefile path.

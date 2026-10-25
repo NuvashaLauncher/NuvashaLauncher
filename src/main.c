@@ -13,7 +13,6 @@
 #include "nuvasha-main-window.h"
 #include "nuvasha-download.h"
 #include "nuvasha-settings.h"
-#include "nuvasha-open-broker.h"
 
 static void
 on_quit (GSimpleAction *action G_GNUC_UNUSED,
@@ -236,12 +235,6 @@ main (int argc, char **argv)
 
   if (argc == 2 && g_strcmp0 (argv[1], "--list-instances") == 0)
     return list_instances ();
-
-  /* This mode is mounted over xdg-open inside a game sandbox. It has no GTK
-   * startup and can only forward a file URI to nuvasha's host-side broker. */
-  if (argc == 2 && g_getenv ("nuvasha_OPEN_BROKER_SOCKET") != NULL)
-    return nuvasha_open_broker_request (g_getenv ("nuvasha_OPEN_BROKER_SOCKET"),
-                                    argv[1]);
 
   if (!gtk_init_check ())
     {

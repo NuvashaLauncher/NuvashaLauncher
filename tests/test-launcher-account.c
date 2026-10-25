@@ -13,7 +13,6 @@
  * does go out is the manifest of such a launch. */
 
 #include "nuvasha-launcher.h"
-#include "nuvasha-secret-store.h"
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -221,13 +220,6 @@ test_a_dead_token_asks_for_a_sign_in (void)
   account = microsoft_account (FALSE);
   account->expires_at = g_get_real_time () / 1000000 - 10;
 
-  if (!nuvasha_secret_store_clear ("nuvasha-launcher-test-dead", &error))
-    {
-      g_test_skip ("Secret Service is unavailable in this environment");
-      return;
-    }
-  g_clear_error (&error);
-
   g_assert_true (nuvasha_accounts_add (accounts, account, &error));
   g_assert_no_error (error);
 
@@ -287,14 +279,6 @@ test_a_ready_account_gets_past_the_gate (void)
     nuvasha_launcher_new (instance, NULL, accounts);
   g_autoptr (NuvashaAccount) account = microsoft_account (TRUE);
   g_autoptr (GError) error = NULL;
-
-  if (!nuvasha_secret_store_save ("nuvasha-launcher-test-probe",
-                                  "access", "refresh"))
-    {
-      g_test_skip ("Secret Service is unavailable in this environment");
-      return;
-    }
-  nuvasha_secret_store_clear ("nuvasha-launcher-test-probe", NULL);
 
   g_assert_true (nuvasha_accounts_add (accounts, account, &error));
   g_assert_no_error (error);

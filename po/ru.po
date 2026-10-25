@@ -8,9 +8,6 @@ msgstr ""
 msgid "cannot clear credentials for account \"%s\": %s"
 msgstr "не удалось удалить учетные данные учетной записи «%s»: %s"
 
-msgid "unknown Secret Service error"
-msgstr "неизвестная ошибка Secret Service"
-
 msgid "cannot store credentials for account \"%s\""
 msgstr "не удалось сохранить учетные данные учетной записи «%s»"
 msgid "Cancel"
@@ -590,14 +587,6 @@ msgstr "Удаление зависимости удаляет мод, кото�
 msgid "A dependent mod cannot be deleted"
 msgstr "Невозможно удалить зависимый мод"
 
-msgid "Sandbox"
-msgstr "Песочница"
-
-msgid "Enable sandbox"
-msgstr "Включить песочницу"
-
-msgid "Allow sandbox network access"
-msgstr "Разрешить доступ к сети «песочницы»"
 # UI string
 msgid "Skin"
 msgstr "Skin"

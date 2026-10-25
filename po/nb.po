@@ -10,9 +10,6 @@ msgstr "Kansellere"
 msgid "cannot clear credentials for account \"%s\": %s"
 msgstr "kan ikke slette legitimasjonen for kontoen «%s»: %s"
 
-msgid "unknown Secret Service error"
-msgstr "ukjent Secret Service-feil"
-
 msgid "cannot store credentials for account \"%s\""
 msgstr "kan ikke lagre legitimasjonen for kontoen «%s»"
 msgid "Confirm"
@@ -558,15 +555,6 @@ msgstr "Sletting av en avhengighet sletter moden som var avhengig av den"
 
 msgid "A dependent mod cannot be deleted"
 msgstr "En avhengig mod kan ikke slettes"
-
-msgid "Sandbox"
-msgstr "Sandkasse"
-
-msgid "Enable sandbox"
-msgstr "Aktiver sandkasse"
-
-msgid "Allow sandbox network access"
-msgstr "Tillat tilgang til sandkassenettverk"
 
 msgid "Slim model"
 msgstr "Slank modell"

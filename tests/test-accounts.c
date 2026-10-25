@@ -10,7 +10,6 @@
  * a user would find after a restart. */
 
 #include "nuvasha-accounts.h"
-#include "nuvasha-secret-store.h"
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -28,16 +27,6 @@ temporary_path (const char *name)
   path = g_build_filename (directory, name, NULL);
 
   return g_steal_pointer (&path);
-}
-
-static gboolean
-secret_service_available (void)
-{
-  gboolean available = nuvasha_secret_store_save (
-    "nuvasha-test-service-probe", "access", "refresh");
-
-  nuvasha_secret_store_clear ("nuvasha-test-service-probe", NULL);
-  return available;
 }
 
 static void
@@ -311,12 +300,6 @@ test_persistence (void)
   account->refresh_token = g_strdup ("the-refresh-token");
   account->avatar_url = g_strdup ("https://example.invalid/skin.png");
 
-  if (!secret_service_available ())
-    {
-      g_test_skip ("Secret Service is unavailable in this environment");
-      return;
-    }
-
   g_assert_true (nuvasha_accounts_add (store, account, &error));
   g_assert_no_error (error);
 
@@ -398,51 +381,22 @@ test_persistence (void)
     g_assert_cmpuint (nuvasha_accounts_count (store_wrong_type), ==, 0);
   }
 
-  /* Credentials are never serialized in the account file. */
+  /* The tokens are in the file, so that a restart finds them without
+     anything else having to be asked. */
   g_assert_true (g_file_get_contents (path, &text, NULL, NULL));
-  {
-    g_autofree char *stored_access = NULL;
-    g_autofree char *stored_refresh = NULL;
-    g_assert_true (nuvasha_secret_store_load (
-      "069a79f444e94726a5befca90e38aaf5",
-      &stored_access, &stored_refresh));
-    g_assert_null (strstr (text, "the-access-token"));
-  }
+  g_assert_nonnull (strstr (text, "the-access-token"));
+  g_assert_nonnull (strstr (text, "the-refresh-token"));
 
-  {
-    g_autofree char *stored_access = NULL;
-    g_autofree char *stored_refresh = NULL;
-    const char *secret_id = "nuvasha-test-special-token";
-    gboolean available = nuvasha_secret_store_save (
-      secret_id, "access-quote-\\\"", "refresh-backslash-\\\\");
+  /* Taking an account out of the store takes its tokens out of the file
+     with it. */
+  g_assert_true (nuvasha_accounts_remove (
+    store, "069a79f444e94726a5befca90e38aaf5", &error));
+  g_assert_no_error (error);
 
-    if (available)
-      {
-        g_assert_true (nuvasha_secret_store_load (
-          secret_id, &stored_access, &stored_refresh));
-        g_assert_cmpstr (stored_access, ==, "access-quote-\\\"");
-        g_assert_cmpstr (stored_refresh, ==, "refresh-backslash-\\\\");
-        g_assert_true (nuvasha_secret_store_clear (secret_id, NULL));
-        g_assert_false (nuvasha_secret_store_load (
-          secret_id, &stored_access, &stored_refresh));
-      }
-  }
-
-  {
-    g_autofree char *stored_access = NULL;
-    g_autofree char *stored_refresh = NULL;
-    gboolean had_secret = nuvasha_secret_store_load (
-      "069a79f444e94726a5befca90e38aaf5",
-      &stored_access, &stored_refresh);
-
-    g_assert_true (nuvasha_accounts_remove (
-      store, "069a79f444e94726a5befca90e38aaf5", &error));
-    g_assert_no_error (error);
-    if (had_secret)
-      g_assert_false (nuvasha_secret_store_load (
-        "069a79f444e94726a5befca90e38aaf5",
-        &stored_access, &stored_refresh));
-  }
+  g_clear_pointer (&text, g_free);
+  g_assert_true (g_file_get_contents (path, &text, NULL, NULL));
+  g_assert_null (strstr (text, "the-access-token"));
+  g_assert_null (strstr (text, "the-refresh-token"));
 
   {
     g_autofree char *token_fields_path = temporary_path ("token-fields.json");
@@ -454,13 +408,12 @@ test_persistence (void)
       "\"uuid\":\"token-fields-test\",\"access-token\":\"old\","
       "\"refresh-token\":\"old-refresh\"}]}";
 
-    nuvasha_secret_store_clear ("token-fields-test", NULL);
     g_assert_true (g_file_set_contents (token_fields_path, token_fields_json, -1, NULL));
     token_fields_store = nuvasha_accounts_new_for_path (token_fields_path);
     token_fields_account = nuvasha_accounts_find (token_fields_store, "token-fields-test");
     g_assert_nonnull (token_fields_account);
-    g_assert_null (token_fields_account->access_token);
-    g_assert_null (token_fields_account->refresh_token);
+    g_assert_cmpstr (token_fields_account->access_token, ==, "old");
+    g_assert_cmpstr (token_fields_account->refresh_token, ==, "old-refresh");
     g_remove (token_fields_path);
   }
 
@@ -492,11 +445,6 @@ test_adding_the_same_account_twice (void)
   g_signal_connect (store, "changed", G_CALLBACK (on_changed), &changed);
 
   account = microsoft_account (1800000000, "first-token");
-  if (!secret_service_available ())
-    {
-      g_test_skip ("Secret Service is unavailable in this environment");
-      return;
-    }
   g_assert_true (nuvasha_accounts_add (store, account, &error));
   g_assert_no_error (error);
   g_assert_cmpuint (changed, ==, 1);

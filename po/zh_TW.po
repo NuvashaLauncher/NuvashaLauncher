@@ -10,9 +10,6 @@ msgstr "取消"
 msgid "cannot clear credentials for account \"%s\": %s"
 msgstr "無法清除帳戶「%s」的憑證：%s"
 
-msgid "unknown Secret Service error"
-msgstr "未知的 Secret Service 錯誤"
-
 msgid "cannot store credentials for account \"%s\""
 msgstr "無法儲存帳戶「%s」的憑證"
 msgid "Confirm"
@@ -558,15 +555,6 @@ msgstr "刪除依賴項會刪除依賴它的 mod"
 
 msgid "A dependent mod cannot be deleted"
 msgstr "無法刪除依賴的模組"
-
-msgid "Sandbox"
-msgstr "沙盒"
-
-msgid "Enable sandbox"
-msgstr "啟用沙箱"
-
-msgid "Allow sandbox network access"
-msgstr "允許沙盒網路訪問"
 
 msgid "Slim model"
 msgstr "修身款"
