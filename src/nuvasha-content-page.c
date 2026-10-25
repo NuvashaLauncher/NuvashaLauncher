@@ -209,11 +209,11 @@ file_row_refresh (GtkWidget *row)
     GtkWidget *trash = g_object_get_data (G_OBJECT (row), "nuvasha-file-trash");
     GtkWidget *sw = g_object_get_data (G_OBJECT (row), "nuvasha-mod-switch");
     if (check != NULL)
-      gtk_widget_set_visible (check, self->installed.edit_mode);
+      gtk_widget_set_visible (check, TRUE);
     if (trash != NULL)
-      gtk_widget_set_visible (trash, !self->installed.edit_mode);
+      gtk_widget_set_visible (trash, TRUE);
     if (sw != NULL)
-      gtk_widget_set_visible (sw, !self->installed.edit_mode);
+      gtk_widget_set_visible (sw, TRUE);
   }
 
   if (file->project_name != NULL && *file->project_name != '\0')
@@ -236,7 +236,7 @@ on_content_file_check_toggled (GtkCheckButton *check, gpointer user_data)
   NuvashaContentPage *self = user_data;
   const char *path = g_object_get_data (G_OBJECT (check), "nuvasha-file-path");
 
-  if (path == NULL || !self->installed.edit_mode)
+  if (path == NULL)
     return;
   if (gtk_check_button_get_active (check))
     g_hash_table_add (self->installed.selected_paths, g_strdup (path));
@@ -253,10 +253,9 @@ content_page_update_selection (NuvashaContentPage *self)
   g_autofree char *text = g_strdup_printf (_("%u/%u selected"), selected, total);
 
   gtk_label_set_text (self->installed.selection_label, text);
-  gtk_action_bar_set_revealed (self->installed.selection_footer,
-                               self->installed.edit_mode && selected > 0);
+  gtk_action_bar_set_revealed (self->installed.selection_footer, selected > 0);
   gtk_widget_set_visible (GTK_WIDGET (self->installed.selection_delete),
-                          self->installed.edit_mode && selected > 0);
+                          selected > 0);
   gtk_widget_set_sensitive (GTK_WIDGET (self->installed.selection_delete),
                             selected > 0);
 }
@@ -265,13 +264,7 @@ void
 content_page_toggle_edit (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   NuvashaContentPage *self = user_data;
-  self->installed.edit_mode = !self->installed.edit_mode;
-  if (!self->installed.edit_mode)
-    g_hash_table_remove_all (self->installed.selected_paths);
-
-  for (GList *link = self->installed.rows_list; link != NULL; link = link->next)
-    file_row_refresh (GTK_WIDGET (link->data));
-  content_page_update_selection (self);
+  (void) self;
 }
 
 /* The first @max_sentences sentences of @text (0 for all of it), with
@@ -814,7 +807,7 @@ file_row (NuvashaContentPage *self, NuvashaContentFile *file)
   /* Use a fixed icon square and replace the placeholder when project data
      becomes available. */
   gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
-  gtk_widget_set_visible (GTK_WIDGET (check), self->installed.edit_mode);
+  gtk_widget_set_visible (GTK_WIDGET (check), TRUE);
   gtk_widget_set_valign (GTK_WIDGET (check), GTK_ALIGN_CENTER);
   g_object_set_data_full (G_OBJECT (check), "nuvasha-file-path",
                           g_strdup (file->path), g_free);
@@ -847,6 +840,9 @@ file_row (NuvashaContentPage *self, NuvashaContentFile *file)
       adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (sw));
     }
 
+  /* The selection check sits immediately to the left of the trash action. */
+  adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (check));
+
   /* Every kind of file can be deleted. On a mod the button sits after
      the switch, at the right end of the row. */
   {
@@ -863,8 +859,6 @@ file_row (NuvashaContentPage *self, NuvashaContentFile *file)
      g_signal_connect_object (trash, "clicked", G_CALLBACK (on_trash_clicked), self, 0);
      adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (trash));
   }
-  adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (check));
-
   /* The row carries the file it is about, so the switch does not have to
      know where the file came from. */
   g_object_set_data (G_OBJECT (row), "nuvasha-file", file);
@@ -1138,12 +1132,20 @@ nuvasha_content_page_dispose (GObject *object)
   /* Release the action rows retained by the page. */
   g_clear_object (&self->installed.actions);
   g_clear_object (&self->browse_actions);
+  if (self->installed.update_popover != NULL &&
+      gtk_widget_get_parent (GTK_WIDGET (self->installed.update_popover)) != NULL)
+    gtk_widget_unparent (GTK_WIDGET (self->installed.update_popover));
   self->installed.group = NULL;
   self->installed.scroller = NULL;
   self->installed.status = NULL;
   self->installed.loading = NULL;
   self->installed.update_content = NULL;
   self->installed.update_spinner = NULL;
+  self->installed.update_popover = NULL;
+  self->installed.update_phase = NULL;
+  self->installed.update_count = NULL;
+  self->installed.update_bar = NULL;
+  self->installed.update_cancel = NULL;
   self->installed.search_bar = NULL;
   self->installed.search_entry = NULL;
   self->installed.update_all = NULL;

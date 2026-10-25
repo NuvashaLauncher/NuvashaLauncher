@@ -44,12 +44,22 @@ nuvasha_content_page_build_installed (NuvashaContentPage *self)
   AdwSpinner *update_spinner = ADW_SPINNER (adw_spinner_new ());
    AdwPreferencesGroup *group =
      ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
-   GtkButton *edit_button = GTK_BUTTON (gtk_button_new_from_icon_name (
-     "document-edit-symbolic"));
    GtkActionBar *selection_footer = GTK_ACTION_BAR (gtk_action_bar_new ());
    GtkLabel *selection_label = GTK_LABEL (gtk_label_new (""));
    GtkButton *selection_delete = GTK_BUTTON (gtk_button_new_from_icon_name (
      "user-trash-symbolic"));
+   GtkButton *update_all = GTK_BUTTON (gtk_button_new ());
+    GtkPopover *update_popover = GTK_POPOVER (gtk_popover_new ());
+    GtkScrolledWindow *update_scroller = GTK_SCROLLED_WINDOW (
+      gtk_scrolled_window_new ());
+    g_autoptr (GtkBuilder) update_builder = gtk_builder_new_from_resource (
+      "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-download-row.ui");
+    GtkBox *update_box = GTK_BOX (gtk_builder_get_object (update_builder, "box"));
+    GtkLabel *update_title = GTK_LABEL (gtk_builder_get_object (update_builder, "title"));
+    GtkLabel *update_phase = GTK_LABEL (gtk_builder_get_object (update_builder, "phase"));
+    GtkLabel *update_count = GTK_LABEL (gtk_builder_get_object (update_builder, "count"));
+    GtkProgressBar *update_bar = GTK_PROGRESS_BAR (gtk_builder_get_object (update_builder, "bar"));
+    GtkButton *update_cancel = GTK_BUTTON (gtk_builder_get_object (update_builder, "cancel"));
 
    gtk_widget_set_hexpand (GTK_WIDGET (actions), TRUE);
    self->installed.search_bar = GTK_SEARCH_ENTRY (search_bar);
@@ -61,22 +71,40 @@ nuvasha_content_page_build_installed (NuvashaContentPage *self)
     g_signal_connect_object (search_bar, "changed",
                              G_CALLBACK (nuvasha_content_page_on_installed_search_changed), self, 0);
      gtk_box_append (GTK_BOX (actions), GTK_WIDGET (search_bar));
-     nuvasha_ui_prepare_icon_button (GTK_WIDGET (edit_button), _("Edit mode"));
-     gtk_widget_set_tooltip_text (GTK_WIDGET (edit_button), _("Edit mode"));
-     gtk_box_append (GTK_BOX (actions), GTK_WIDGET (edit_button));
-     g_signal_connect (edit_button, "clicked",
-                       G_CALLBACK (content_page_toggle_edit), self);
-     self->installed.edit_button = edit_button;
 
-    self->installed.update_all = GTK_BUTTON (toolbar_button (
-      "software-update-available-symbolic", _("Update All"),
-      G_CALLBACK (nuvasha_content_page_on_update_all_clicked), self));
+     gtk_button_set_child (update_all, GTK_WIDGET (update_content));
+    gtk_widget_set_tooltip_text (GTK_WIDGET (update_all), _("Update All"));
+    gtk_accessible_update_property (GTK_ACCESSIBLE (update_all),
+                                    GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                    _("Update All"), -1);
+    g_signal_connect (update_all, "clicked",
+                      G_CALLBACK (nuvasha_content_page_on_update_all_clicked), self);
    gtk_stack_add_named (update_content, GTK_WIDGET (update_icon), "icon");
    gtk_stack_add_named (update_content, GTK_WIDGET (update_spinner), "spinner");
    gtk_stack_set_visible_child_name (update_content, "icon");
-   gtk_button_set_child (self->installed.update_all, GTK_WIDGET (update_content));
+    gtk_widget_set_parent (GTK_WIDGET (update_popover), GTK_WIDGET (update_all));
+    gtk_label_set_text (update_title, _("Fetching updates"));
+     gtk_label_set_text (update_phase, _("Progress"));
+    nuvasha_ui_prepare_icon_button (GTK_WIDGET (update_cancel), _("Cancel"));
+    gtk_widget_set_visible (GTK_WIDGET (update_cancel), FALSE);
+    g_signal_connect (update_cancel, "clicked",
+                      G_CALLBACK (nuvasha_content_page_on_update_cancel), self);
+    gtk_scrolled_window_set_policy (update_scroller, GTK_POLICY_NEVER,
+                                    GTK_POLICY_AUTOMATIC);
+    gtk_scrolled_window_set_propagate_natural_height (update_scroller, TRUE);
+    gtk_scrolled_window_set_max_content_height (update_scroller, 360);
+     gtk_widget_set_size_request (GTK_WIDGET (update_scroller), 320, -1);
+    gtk_scrolled_window_set_child (update_scroller, GTK_WIDGET (update_box));
+    gtk_popover_set_child (update_popover, GTK_WIDGET (update_scroller));
+   gtk_popover_set_has_arrow (update_popover, FALSE);
    self->installed.update_content = update_content;
    self->installed.update_spinner = update_spinner;
+    self->installed.update_popover = update_popover;
+    self->installed.update_phase = update_phase;
+   self->installed.update_count = update_count;
+   self->installed.update_bar = update_bar;
+    self->installed.update_cancel = update_cancel;
+   self->installed.update_all = update_all;
    gtk_widget_set_sensitive (GTK_WIDGET (self->installed.update_all), FALSE);
   gtk_box_append (GTK_BOX (actions), GTK_WIDGET (self->installed.update_all));
   gtk_box_append (GTK_BOX (actions),

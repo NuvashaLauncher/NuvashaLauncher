@@ -646,3 +646,30 @@ nuvasha_instance_page_trigger_duplicate (NuvashaInstancePage *self)
   g_return_if_fail (nuvasha_IS_INSTANCE_PAGE (self));
   on_duplicate_clicked (NULL, self);
 }
+
+void
+nuvasha_instance_page_export_to_path (NuvashaInstancePage *self,
+                                      const char *path)
+{
+  g_autofree char *name = NULL;
+
+  g_return_if_fail (nuvasha_IS_INSTANCE_PAGE (self));
+  g_return_if_fail (path != NULL && *path != '\0');
+
+  if (self->export_operation != NULL)
+    return;
+
+  g_object_get (self->instance, "name", &name, NULL);
+  self->export_include_transient = FALSE;
+  self->export_download = nuvasha_downloads_add (
+    nuvasha_DOWNLOAD_UPDATE, name != NULL ? name : _("Modpack export"));
+  nuvasha_download_set_detail (self->export_download, _("Exporting modpack"));
+  g_object_add_weak_pointer (G_OBJECT (self->export_download),
+                             (gpointer *) &self->export_download);
+  self->export_operation = nuvasha_modpack_export_async (
+    self->instance, path, NULL, NULL, NULL, FALSE,
+    on_export_progress, self, on_export_done, g_object_ref (self));
+  nuvasha_operation_follow (self->export_operation,
+                            nuvasha_download_get_cancellable (
+                              self->export_download));
+}

@@ -58,8 +58,47 @@ update_button_busy (NuvashaContentPage *self, gboolean busy)
   gtk_widget_set_sensitive (
     GTK_WIDGET (self->installed.update_all),
     self->installed.files != NULL && self->installed.files->len > 0);
-  gtk_widget_set_can_target (GTK_WIDGET (self->installed.update_all), !busy);
-  gtk_widget_set_focusable (GTK_WIDGET (self->installed.update_all), !busy);
+   gtk_widget_set_can_target (GTK_WIDGET (self->installed.update_all), TRUE);
+  gtk_widget_set_focusable (GTK_WIDGET (self->installed.update_all), TRUE);
+  if (self->installed.update_cancel != NULL)
+    gtk_widget_set_visible (GTK_WIDGET (self->installed.update_cancel), busy);
+}
+
+void
+nuvasha_content_page_on_update_cancel (GtkButton *button G_GNUC_UNUSED,
+                                       gpointer user_data)
+{
+  NuvashaContentPage *self = user_data;
+  UpdateRun *run = g_object_get_data (G_OBJECT (self), "nuvasha-update-run");
+
+  if (run != NULL)
+    {
+      g_object_set_data (G_OBJECT (self), "nuvasha-update-run", NULL);
+      update_run_free (run);
+    }
+  g_cancellable_cancel (self->browse.model->cancellable);
+  g_clear_object (&self->browse.model->cancellable);
+  self->browse.model->cancellable = g_cancellable_new ();
+  g_clear_pointer (&self->install_model->updates, g_ptr_array_unref);
+  self->install_model->update_index = 0;
+  self->install_model->updating = FALSE;
+  update_button_busy (self, FALSE);
+  if (self->installed.update_popover != NULL)
+    gtk_popover_popdown (self->installed.update_popover);
+}
+
+static void
+update_progress (NuvashaContentPage *self, guint done, guint total)
+{
+  g_autofree char *count = g_strdup_printf ("%u/%u", done, total);
+
+  if (self->installed.update_phase != NULL)
+    gtk_label_set_text (self->installed.update_phase, _("Progress"));
+  if (self->installed.update_count != NULL)
+    gtk_label_set_text (self->installed.update_count, count);
+  if (self->installed.update_bar != NULL)
+    gtk_progress_bar_set_fraction (self->installed.update_bar,
+                                   total > 0 ? (double) done / total : 0.0);
 }
 
 /* Starts the next one of a confirmed batch. When the last one is in, the
@@ -91,6 +130,8 @@ update_batch_next (NuvashaContentPage *self)
     }
 
   item = g_ptr_array_index (self->install_model->updates, self->install_model->update_index);
+  update_progress (self, self->install_model->update_index,
+                   self->install_model->updates->len);
   self->install_model->update_index++;
 
   update_button_busy (self, TRUE);
@@ -278,6 +319,7 @@ update_check_next (UpdateRun *run)
       NuvashaContentFile *file = g_ptr_array_index (self->installed.files, run->index);
 
       run->index++;
+      update_progress (self, run->index, self->installed.files->len);
 
       if (file->sha1 == NULL || file->project_id == NULL)
         continue;
@@ -307,6 +349,8 @@ nuvasha_content_page_on_update_all_clicked (GtkButton *button G_GNUC_UNUSED, gpo
   if (g_object_get_data (G_OBJECT (self), "nuvasha-update-run") != NULL ||
       self->install_model->updating)
     {
+      if (self->installed.update_popover != NULL)
+        gtk_popover_popup (self->installed.update_popover);
       g_free (run);
       return;
     }
@@ -316,5 +360,7 @@ nuvasha_content_page_on_update_all_clicked (GtkButton *button G_GNUC_UNUSED, gpo
   run->items =
     g_ptr_array_new_with_free_func ((GDestroyNotify) update_item_free);
   g_object_set_data (G_OBJECT (self), "nuvasha-update-run", run);
+  if (self->installed.update_popover != NULL)
+    gtk_popover_popup (self->installed.update_popover);
   update_check_next (run);
 }
