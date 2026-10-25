@@ -78,8 +78,11 @@ const NuvashaJava *nuvasha_java_select (GPtrArray *javas,
 /* Runs "<executable> -version" (stderr is merged into stdout, the
  * flags Go answers) and parses what comes back. */
 NuvashaTaskScope *nuvasha_java_probe_async (const char *executable,
-                                    GAsyncReadyCallback callback,
-                                    gpointer user_data);
+                                     GAsyncReadyCallback callback,
+                                     gpointer user_data);
+
+/* Persists a successfully probed custom runtime for all instance rows. */
+void nuvasha_java_register_custom_path (const char *executable);
 
 /* (transfer full). Errors from the spawn, from nuvasha_JAVA_ERROR and
  * G_IO_ERROR_CANCELLED for a cancelled caller. */

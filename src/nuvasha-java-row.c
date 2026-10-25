@@ -35,6 +35,7 @@ struct _NuvashaJavaRow
   GPtrArray *ids;   /* strdupped paths; the automatic entry has a NULL id */
   GPtrArray *names; /* the titles shown in the model */
 
+  guint add_index;
   guint restore;
 
   /* Runtime represented by the automatic entry, when available.
@@ -147,6 +148,7 @@ show_loading (NuvashaJavaRow *self)
   g_ptr_array_add (names, g_strdup (_("Loading…")));
 
   self->ready = FALSE;
+  self->add_index = GTK_INVALID_LIST_POSITION;
   put_model (self, g_steal_pointer (&names), 0);
   gtk_widget_set_sensitive (GTK_WIDGET (self), FALSE);
   gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
@@ -239,6 +241,13 @@ fill (NuvashaJavaRow *self)
         position = names->len - 1;
     }
 
+  self->add_index = GTK_INVALID_LIST_POSITION;
+  if (ids->len > 0)
+    {
+      g_ptr_array_add (names, g_strdup (_("Add Java Runtime")));
+      self->add_index = names->len - 1;
+    }
+
   /* Keep one blank item when detection found nothing. AdwComboRow uses the
    * model to keep the row enabled, while the error is shown only in the
    * subtitle and the real recovery action is the suffix button. */
@@ -266,8 +275,7 @@ fill (NuvashaJavaRow *self)
 
   gtk_widget_set_sensitive (GTK_WIDGET (self), TRUE);
   gtk_widget_set_visible (GTK_WIDGET (self->add_button),
-                          (self->javas == NULL || self->javas->len == 0) &&
-                          self->probed == NULL);
+                          ids->len == 0);
   gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self), NULL);
 
@@ -362,6 +370,7 @@ custom_loaded (GObject      *source G_GNUC_UNUSED,
 
   if (custom != NULL)
     {
+      nuvasha_java_register_custom_path (custom->executable);
       nuvasha_java_free (self->probed);
       self->probed = custom;
     }
@@ -565,7 +574,12 @@ on_picked (GObject    *object G_GNUC_UNUSED,
   if (self->rebuilding)
     return;
 
-  if (selected < self->ids->len)
+  if (selected == self->add_index)
+    {
+      adw_combo_row_set_selected (ADW_COMBO_ROW (self), self->restore);
+      open_add_dialog (self);
+    }
+  else if (selected < self->ids->len)
     {
       self->restore = selected;
       self->automatic_selection = self->ids->pdata[selected] == NULL;
@@ -801,12 +815,13 @@ nuvasha_java_row_init (NuvashaJavaRow *self)
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self), FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self), _("Java Runtime"));
 
-  self->ready = FALSE;
+   self->ready = FALSE;
   self->javas = g_ptr_array_new_with_free_func ((GDestroyNotify) nuvasha_java_free);
   self->ids = g_ptr_array_new_with_free_func (g_free);
-  self->names = g_ptr_array_new_with_free_func (g_free);
-  self->required_major = 0;
-  self->automatic_selection = FALSE;
+   self->names = g_ptr_array_new_with_free_func (g_free);
+   self->required_major = 0;
+   self->automatic_selection = FALSE;
+   self->add_index = GTK_INVALID_LIST_POSITION;
    self->restore = 0;
 
   {

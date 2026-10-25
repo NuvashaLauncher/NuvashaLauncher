@@ -10,6 +10,7 @@
 #include "nuvasha-java.h"
 #include "nuvasha-task.h"
 
+#include <gio/gio.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -236,6 +237,8 @@ nuvasha_java_parse_version (const char  *output,
   char *arch = NULL;
   char *arch_fallback = NULL;
   char *vendor_out = NULL;
+  char *vendor_property = NULL;
+  char *vendor_version = NULL;
 
   g_return_val_if_fail (output != NULL, FALSE);
 
@@ -271,7 +274,35 @@ nuvasha_java_parse_version (const char  *output,
       else if (arch_fallback == NULL &&
                g_strstr_len (lines[i], length, "32-Bit") != NULL)
         arch_fallback = g_strdup ("32-bit");
+
+      if (vendor_property == NULL &&
+          g_strstr_len (lines[i], length, "java.vendor =") != NULL)
+        {
+          char *equals = strchr (lines[i], '=');
+          vendor_property = g_strdup (g_strstrip (equals + 1));
+        }
+
+      if (vendor_version == NULL &&
+          g_strstr_len (lines[i], length, "java.vendor.version =") != NULL)
+        {
+          char *equals = strchr (lines[i], '=');
+          vendor_version = g_strdup (g_strstrip (equals + 1));
+        }
     }
+
+  if (vendor_property != NULL)
+    {
+      /* Temurin identifies itself in java.vendor.version as
+       * "Temurin-<version>"; use that distribution name instead of the
+       * generic OpenJDK runtime banner. Other vendors use java.vendor. */
+      if (vendor_version != NULL &&
+          g_str_has_prefix (vendor_version, "Temurin-"))
+        vendor_out = g_strdup ("Temurin");
+      else
+        vendor_out = g_steal_pointer (&vendor_property);
+    }
+  g_free (vendor_property);
+  g_free (vendor_version);
 
   /* The explicit os.arch wins; the 64-Bit/32-Bit banner is the
    * fallback for reports where the JVM did not print its properties. */
@@ -289,7 +320,7 @@ nuvasha_java_parse_version (const char  *output,
     {
       char *cut = g_strstr_len (lines[i], length, "Runtime Environment");
 
-      if (cut != NULL && strchr (lines[i], '=') == NULL)
+      if (vendor_out == NULL && cut != NULL && strchr (lines[i], '=') == NULL)
         {
           g_autofree char *prefix = g_strndup (lines[i], cut - lines[i]);
 
@@ -659,6 +690,31 @@ add_candidate (GPtrArray  *candidates,
     g_ptr_array_add (candidates, g_strdup (path));
 }
 
+void
+nuvasha_java_register_custom_path (const char *executable)
+{
+  g_autoptr (GSettings) settings = NULL;
+  g_auto (GStrv) stored = NULL;
+  g_autoptr (GPtrArray) paths = g_ptr_array_new_with_free_func (g_free);
+
+  if (executable == NULL || *executable == '\0')
+    return;
+
+  settings = g_settings_new ("com.github.nuvashalauncher.Nuvasha");
+  stored = g_settings_get_strv (settings, "custom-java-paths");
+  for (guint i = 0; stored != NULL && stored[i] != NULL; i++)
+    {
+      if (g_strcmp0 (stored[i], executable) == 0)
+        return;
+      g_ptr_array_add (paths, g_strdup (stored[i]));
+    }
+
+  g_ptr_array_add (paths, g_strdup (executable));
+  g_ptr_array_add (paths, NULL);
+  g_settings_set_strv (settings, "custom-java-paths",
+                       (const char * const *) paths->pdata);
+}
+
 /* The system the Fedora, Arch etc. layout plus $JAVA_HOME and PATH. */
 static char **
 collect_candidates (void)
@@ -680,6 +736,15 @@ collect_candidates (void)
 
       add_candidate (candidates, candidate);
     }
+
+  {
+    g_autoptr (GSettings) settings = g_settings_new (
+      "com.github.nuvashalauncher.Nuvasha");
+    g_auto (GStrv) custom = g_settings_get_strv (settings, "custom-java-paths");
+
+    for (guint i = 0; custom != NULL && custom[i] != NULL; i++)
+      add_candidate (candidates, custom[i]);
+  }
 
   g_autofree char *on_path = g_find_program_in_path ("java");
   add_candidate (candidates, on_path);
