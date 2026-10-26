@@ -13,6 +13,7 @@
 #include "nuvasha-main-window.h"
 #include "nuvasha-download.h"
 #include "nuvasha-settings.h"
+#include "nuvasha-accounts.h"
 
 static void
 on_quit (GSimpleAction *action G_GNUC_UNUSED,
@@ -25,6 +26,23 @@ on_quit (GSimpleAction *action G_GNUC_UNUSED,
 static const GActionEntry app_entries[] = {
   { .name = "quit", .activate = on_quit },
 };
+
+typedef struct {
+  GMainLoop *loop;
+  NuvashaInstanceManager *manager;
+  gboolean *success;
+} DeleteData;
+
+static void
+finish_delete (GObject *source G_GNUC_UNUSED, GAsyncResult *result, gpointer user_data)
+{
+  DeleteData *data = user_data;
+  g_autoptr (GError) error = NULL;
+  *data->success = nuvasha_instance_manager_delete_finish (data->manager, result, &error);
+  if (error != NULL)
+    g_printerr ("%s\n", error->message);
+  g_main_loop_quit (data->loop);
+}
 
 static int
 list_instances (void)
@@ -55,6 +73,78 @@ list_instances (void)
     }
 
   return 0;
+}
+
+static NuvashaAccount *
+find_account (NuvashaAccounts *accounts, const char *key)
+{
+  for (guint i = 0; i < nuvasha_accounts_count (accounts); i++)
+    {
+      NuvashaAccount *account = g_ptr_array_index (nuvasha_accounts_list (accounts), i);
+      if (g_strcmp0 (account->id, key) == 0 || g_strcmp0 (account->uuid, key) == 0 ||
+          g_strcmp0 (account->name, key) == 0)
+        return account;
+    }
+  return NULL;
+}
+
+static int
+list_accounts (void)
+{
+  g_autoptr (NuvashaAccounts) accounts = nuvasha_accounts_new ();
+  g_print ("%-36s  %s\n", "UUID", "NAME");
+  for (guint i = 0; i < nuvasha_accounts_count (accounts); i++)
+    {
+      NuvashaAccount *account = g_ptr_array_index (nuvasha_accounts_list (accounts), i);
+      g_print ("%-36s  %s%s\n", account->uuid, account->name,
+               g_strcmp0 (account->id, nuvasha_accounts_get_active_id (accounts)) == 0
+                 ? "  *" : "");
+    }
+  return 0;
+}
+
+static int
+change_account (const char *key, gboolean remove)
+{
+  g_autoptr (NuvashaAccounts) accounts = nuvasha_accounts_new ();
+  NuvashaAccount *account = find_account (accounts, key);
+  g_autoptr (GError) error = NULL;
+  if (account == NULL)
+    {
+      g_printerr ("no account matches \"%s\"\n", key);
+      return 1;
+    }
+  if (remove ? !nuvasha_accounts_remove (accounts, account->id, &error)
+             : !nuvasha_accounts_set_active (accounts, account->id, &error))
+    {
+      g_printerr ("%s\n", error->message);
+      return 1;
+    }
+  return 0;
+}
+
+static int
+remove_instance (const char *id)
+{
+  g_autoptr (NuvashaInstanceManager) manager = nuvasha_instance_manager_new (NULL);
+  g_autoptr (GError) error = NULL;
+  NuvashaInstance *instance;
+  GMainLoop *loop;
+  gboolean success = FALSE;
+
+  if (!nuvasha_instance_manager_load (manager, &error))
+    { g_printerr ("%s\n", error->message); return 1; }
+  instance = nuvasha_instance_manager_get_by_id (manager, id);
+  if (instance == NULL)
+    { g_printerr ("no instance has ID \"%s\"\n", id); return 1; }
+
+  loop = g_main_loop_new (NULL, FALSE);
+  DeleteData data = { loop, manager, &success };
+  nuvasha_instance_manager_delete_async (manager, instance, TRUE,
+                                          finish_delete, &data);
+  g_main_loop_run (loop);
+  g_main_loop_unref (loop);
+  return success ? 0 : 1;
 }
 
 static void
@@ -150,8 +240,13 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
   const char *import_path = NULL;
   const char *file_path = NULL;
   const char *launch_id = NULL;
+  const char *account_id = NULL;
   gboolean show_version = FALSE;
   gboolean show_instances = FALSE;
+  gboolean show_accounts = FALSE;
+  const char *switch_account = NULL;
+  const char *remove_account_key = NULL;
+  const char *remove_instance_id = NULL;
   g_auto (GStrv) arguments = NULL;
   int argument_count = 0;
   g_autoptr (GError) error = NULL;
@@ -160,6 +255,11 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
   g_variant_dict_lookup (options, "launch", "&s", &launch_id);
   g_variant_dict_lookup (options, "version", "b", &show_version);
   g_variant_dict_lookup (options, "list-instances", "b", &show_instances);
+  g_variant_dict_lookup (options, "list-accounts", "b", &show_accounts);
+  g_variant_dict_lookup (options, "switch-account", "&s", &switch_account);
+  g_variant_dict_lookup (options, "remove-account", "&s", &remove_account_key);
+  g_variant_dict_lookup (options, "remove-instance", "&s", &remove_instance_id);
+  g_variant_dict_lookup (options, "account", "&s", &account_id);
 
   arguments = g_application_command_line_get_arguments (command_line,
                                                         &argument_count);
@@ -179,6 +279,14 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
 
   if (show_instances)
     return list_instances ();
+  if (show_accounts)
+    return list_accounts ();
+  if (switch_account != NULL)
+    return change_account (switch_account, FALSE);
+  if (remove_account_key != NULL)
+    return change_account (remove_account_key, TRUE);
+  if (remove_instance_id != NULL)
+    return remove_instance (remove_instance_id);
 
   if (launch_id != NULL && (import_path != NULL || file_path != NULL))
     {
@@ -193,7 +301,7 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
        * without presenting it. */
       NuvashaMainWindow *window = ensure_main_window (app, FALSE);
 
-      if (!nuvasha_main_window_launch_instance (window, launch_id, &error))
+       if (!nuvasha_main_window_launch_instance_as (window, launch_id, account_id, &error))
         {
           g_application_command_line_printerr (command_line, "%s\n",
                                                 error->message);
@@ -236,6 +344,16 @@ main (int argc, char **argv)
   if (argc == 2 && g_strcmp0 (argv[1], "--list-instances") == 0)
     return list_instances ();
 
+  if (argc == 2 && g_strcmp0 (argv[1], "--list-accounts") == 0)
+    return list_accounts ();
+
+  if (argc == 3 && g_strcmp0 (argv[1], "--switch-account") == 0)
+    return change_account (argv[2], FALSE);
+  if (argc == 3 && g_strcmp0 (argv[1], "--remove-account") == 0)
+    return change_account (argv[2], TRUE);
+  if (argc == 3 && g_strcmp0 (argv[1], "--remove-instance") == 0)
+    return remove_instance (argv[2]);
+
   if (!gtk_init_check ())
     {
       g_printerr ("nuvasha could not open a display.\n");
@@ -259,7 +377,17 @@ main (int argc, char **argv)
                                  "INSTANCE_ID");
   g_application_add_main_option (G_APPLICATION (app), "list-instances", 0, 0,
                                  G_OPTION_ARG_NONE, "List instance IDs and names",
-                                 NULL);
+                                  NULL);
+  g_application_add_main_option (G_APPLICATION (app), "list-accounts", 0, 0,
+                                 G_OPTION_ARG_NONE, "List account UUIDs and names", NULL);
+  g_application_add_main_option (G_APPLICATION (app), "switch-account", 0, 0,
+                                 G_OPTION_ARG_STRING, "Make an account active", "ACCOUNT");
+  g_application_add_main_option (G_APPLICATION (app), "remove-account", 0, 0,
+                                 G_OPTION_ARG_STRING, "Remove an account by UUID or name", "ACCOUNT");
+  g_application_add_main_option (G_APPLICATION (app), "remove-instance", 0, 0,
+                                 G_OPTION_ARG_STRING, "Remove an instance by UUID", "INSTANCE_ID");
+  g_application_add_main_option (G_APPLICATION (app), "account", 0, 0,
+                                 G_OPTION_ARG_STRING, "Use this account for the launch", "ACCOUNT");
   g_signal_connect (app, "activate", G_CALLBACK (on_activate), NULL);
   g_signal_connect (app, "command-line", G_CALLBACK (on_command_line), NULL);
 

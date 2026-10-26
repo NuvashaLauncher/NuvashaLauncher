@@ -28,6 +28,10 @@ NuvashaMainWindow *nuvasha_main_window_new (AdwApplication      *application,
 gboolean nuvasha_main_window_launch_instance (NuvashaMainWindow *self,
                                               const char *instance_id,
                                               GError **error);
+gboolean nuvasha_main_window_launch_instance_as (NuvashaMainWindow *self,
+                                                const char *instance_id,
+                                                const char *account_id,
+                                                GError **error);
 
 /* Starts the normal import flow for a local .mrpack file. */
 void nuvasha_main_window_import_file (NuvashaMainWindow *self,

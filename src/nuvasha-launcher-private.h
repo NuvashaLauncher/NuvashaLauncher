@@ -57,6 +57,7 @@ struct _NuvashaLauncher
   /* Accounts used by the launch; the active account is read when building
    * the command line. */
   NuvashaAccounts *accounts;
+  char *account_id_override;
   NuvashaTaskScope *scope;
 
 };

@@ -201,6 +201,12 @@ NuvashaLauncher *nuvasha_launcher_new (NuvashaInstance  *instance,
  * without any. Borrowed. */
 NuvashaAccounts *nuvasha_launcher_get_accounts (NuvashaLauncher *self);
 
+/* Select an account only for this launch; does not change the saved active
+ * account.  @account_id may be an account id, UUID, or name. */
+gboolean nuvasha_launcher_set_account (NuvashaLauncher *self,
+                                       const char *account_id,
+                                       GError **error);
+
 /* The instance this launcher belongs to. Borrowed. */
 NuvashaInstance *nuvasha_launcher_get_instance (NuvashaLauncher *self);
 
