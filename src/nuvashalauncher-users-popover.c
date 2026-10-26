@@ -70,7 +70,29 @@ account_id_of (gpointer widget)
 }
 
 AdwDialog *nuvashalauncher_users_skin_menu_new (nuvashalauncherUsersPopover *owner, GtkImage *image,
-                                 nuvashalauncherAccount *account);
+                                  nuvashalauncherAccount *account);
+
+static void on_account_added (AdwDialog *dialog, nuvashalauncherAccount *account,
+                              gpointer user_data);
+
+static gboolean
+account_needs_sign_in (const nuvashalauncherAccount *account)
+{
+  return account != NULL && account->type == nuvashalauncher_ACCOUNT_MICROSOFT &&
+         !nuvashalauncher_account_token_is_valid (account,
+                                                   g_get_real_time () / 1000000);
+}
+
+static void
+open_microsoft_sign_in (nuvashalauncherUsersPopover *self)
+{
+  nuvashalauncherSignInDialog *dialog = nuvashalauncher_sign_in_dialog_new ();
+
+  g_signal_connect_object (dialog, "signed-in", G_CALLBACK (on_account_added),
+                           self, 0);
+  adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
+  gtk_popover_popdown (GTK_POPOVER (self));
+}
 
 static void
 open_skin_menu_for_account (nuvashalauncherUsersPopover *self, const char *id,
@@ -94,6 +116,13 @@ on_avatar_clicked (GtkButton *button, gpointer user_data)
   nuvashalauncherUsersPopover *self = nuvashalauncher_USERS_POPOVER (user_data);
   const char *id = account_id_of (button);
   GtkImage *image = GTK_IMAGE (gtk_button_get_child (button));
+  nuvashalauncherAccount *account = nuvashalauncher_accounts_find (self->accounts, id);
+
+  if (account_needs_sign_in (account))
+    {
+      open_microsoft_sign_in (self);
+      return;
+    }
 
   open_skin_menu_for_account (self, id, image);
 }
@@ -104,6 +133,13 @@ on_row_activated (AdwActionRow *row, gpointer user_data G_GNUC_UNUSED)
   nuvashalauncherUsersPopover *self = nuvashalauncher_USERS_POPOVER (user_data);
   const char *id = account_id_of (row);
   g_autoptr (GError) error = NULL;
+  nuvashalauncherAccount *account = nuvashalauncher_accounts_find (self->accounts, id);
+
+  if (account_needs_sign_in (account))
+    {
+      open_microsoft_sign_in (self);
+      return;
+    }
 
   if (id != NULL && !nuvashalauncher_accounts_set_active (self->accounts, id, &error))
     show_error (self, error->message);
@@ -167,10 +203,10 @@ on_remove_clicked (GtkButton *button, gpointer user_data)
                            g_object_ref (self));
 }
 
-/* One account as a row of the list. The whole row opens the skin settings
- * for the account it is about, rather than requiring a click on the face.
- * The account that is active carries a check mark, and the trash button
- * takes an account out. */
+/* One account as a row of the list. A healthy account can open its skin
+ * settings, while an expired Microsoft account opens the sign-in flow from
+ * the same row. The account that is active carries a check mark, and the
+ * trash button takes an account out. */
 static void
 append_account_row (nuvashalauncherUsersPopover *self, const nuvashalauncherAccount *account)
 {
@@ -179,9 +215,7 @@ append_account_row (nuvashalauncherUsersPopover *self, const nuvashalauncherAcco
                    ? nuvashalauncher_accounts_get_active_id (self->accounts)
                    : "",
                  account->id);
-  gboolean needs_sign_in =
-    account->type == nuvashalauncher_ACCOUNT_MICROSOFT &&
-    !nuvashalauncher_account_token_is_valid (account, g_get_real_time () / 1000000);
+  gboolean needs_sign_in = account_needs_sign_in (account);
 
   AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
   GtkImage *image = GTK_IMAGE (gtk_image_new ());
@@ -291,15 +325,8 @@ static void
 on_add_microsoft_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   nuvashalauncherUsersPopover *self = nuvashalauncher_USERS_POPOVER (user_data);
-  nuvashalauncherSignInDialog *dialog = nuvashalauncher_sign_in_dialog_new ();
 
-  /* Weak, so that the handler does not keep the dialog alive for as long
-     as it is connected to it. */
-  g_signal_connect_object (dialog, "signed-in", G_CALLBACK (on_account_added),
-                           self, 0);
-
-  adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
-  gtk_popover_popdown (GTK_POPOVER (self));
+  open_microsoft_sign_in (self);
 }
 
 static void

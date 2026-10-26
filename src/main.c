@@ -158,6 +158,27 @@ load_application_css (void)
     GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 }
 
+static nuvashalauncherMainWindow *
+create_main_window (GApplication *app, gboolean present)
+{
+  g_autoptr (nuvashalauncherInstanceManager) manager =
+    nuvashalauncher_instance_manager_new (NULL);
+  g_autoptr (nuvashalauncherSettings) settings = nuvashalauncher_settings_new ();
+  g_autoptr (GError) error = NULL;
+  nuvashalauncherMainWindow *window;
+
+  nuvashalauncher_i18n_init (nuvashalauncher_settings_get_language (settings));
+
+  if (!nuvashalauncher_instance_manager_load (manager, &error))
+    g_warning ("cannot read the instance list: %s", error->message);
+
+  window = nuvashalauncher_main_window_new (ADW_APPLICATION (app), manager);
+  if (present)
+    gtk_window_present (GTK_WINDOW (window));
+
+  return window;
+}
+
 static void
 on_activate (GApplication *app, gpointer user_data G_GNUC_UNUSED)
 {
@@ -177,19 +198,7 @@ on_activate (GApplication *app, gpointer user_data G_GNUC_UNUSED)
       return;
     }
 
-  g_autoptr (nuvashalauncherInstanceManager) manager = nuvashalauncher_instance_manager_new (NULL);
-  g_autoptr (nuvashalauncherSettings) settings = nuvashalauncher_settings_new ();
-  g_autoptr (GError) error = NULL;
-
-  nuvashalauncher_i18n_init (nuvashalauncher_settings_get_language (settings));
-
-  if (!nuvashalauncher_instance_manager_load (manager, &error))
-    g_warning ("cannot read the instance list: %s", error->message);
-
-  nuvashalauncherMainWindow *main_window =
-    nuvashalauncher_main_window_new (ADW_APPLICATION (app), manager);
-
-  gtk_window_present (GTK_WINDOW (main_window));
+  create_main_window (app, TRUE);
 }
 
 static nuvashalauncherMainWindow *
@@ -212,23 +221,7 @@ ensure_main_window (GApplication *app, gboolean present)
       return nuvashalauncher_MAIN_WINDOW (existing);
     }
 
-  g_autoptr (nuvashalauncherInstanceManager) manager =
-    nuvashalauncher_instance_manager_new (NULL);
-  g_autoptr (nuvashalauncherSettings) settings = nuvashalauncher_settings_new ();
-  g_autoptr (GError) error = NULL;
-
-  nuvashalauncher_i18n_init (nuvashalauncher_settings_get_language (settings));
-
-  if (!nuvashalauncher_instance_manager_load (manager, &error))
-    g_warning ("cannot read the instance list: %s", error->message);
-
-  nuvashalauncherMainWindow *window =
-    nuvashalauncher_main_window_new (ADW_APPLICATION (app), manager);
-
-  if (present)
-    gtk_window_present (GTK_WINDOW (window));
-
-  return window;
+  return create_main_window (app, present);
 }
 
 static int
@@ -261,6 +254,15 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
   g_variant_dict_lookup (options, "remove-instance", "&s", &remove_instance_id);
   g_variant_dict_lookup (options, "account", "&s", &account_id);
 
+  arguments = g_application_command_line_get_arguments (command_line,
+                                                        &argument_count);
+  for (int i = 1; i < argument_count; i++)
+    if (arguments[i][0] != '-' && g_str_has_suffix (arguments[i], ".mrpack"))
+      {
+        file_path = arguments[i];
+        break;
+      }
+
   {
     guint actions = (show_version || show_instances || show_accounts) +
                     (switch_account != NULL) + (remove_account_key != NULL) +
@@ -275,15 +277,6 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
         return 2;
       }
   }
-
-  arguments = g_application_command_line_get_arguments (command_line,
-                                                        &argument_count);
-  for (int i = 1; i < argument_count; i++)
-    if (arguments[i][0] != '-' && g_str_has_suffix (arguments[i], ".mrpack"))
-      {
-        file_path = arguments[i];
-        break;
-      }
 
   if (show_version)
     {

@@ -87,9 +87,6 @@ nuvashalauncher_main_window_build_ui (nuvashalauncherMainWindow *self)
   self->ui.footer_export = footer_export;
   self->ui.selection_footer = selection_footer;
   self->ui.selection_label = selection_label;
-  gtk_widget_set_tooltip_text (GTK_WIDGET (edit_button), _("Edit mode"));
-  gtk_widget_set_tooltip_text (GTK_WIDGET (footer_delete), _("Delete"));
-  gtk_widget_set_tooltip_text (GTK_WIDGET (footer_export), _("Export"));
   nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (edit_button), _("Edit mode"));
   nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (footer_delete), _("Delete"));
   nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (footer_export), _("Export"));
@@ -217,7 +214,7 @@ nuvashalauncher_main_window_build_ui (nuvashalauncherMainWindow *self)
   adw_application_window_set_content (ADW_APPLICATION_WINDOW (self),
                                       GTK_WIDGET (toolbar));
 
-  gtk_window_set_title (GTK_WINDOW (self), _("Nuvasha Launcher"));
+    gtk_window_set_title (GTK_WINDOW (self), "Nuvasha Launcher");
   gtk_window_set_default_size (GTK_WINDOW (self), 960, 640);
 
   /* A download may already be running (a window opened while one does),

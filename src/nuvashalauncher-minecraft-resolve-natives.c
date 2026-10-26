@@ -15,6 +15,9 @@
 #include <string.h>
 #include <unistd.h>
 
+#define MAX_NATIVE_ENTRY_SIZE (64 * 1024 * 1024)
+#define MAX_NATIVE_TOTAL_SIZE (256 * 1024 * 1024)
+
 /* ---------------------------------------------------------- *
  * Unpacking the natives
  * ---------------------------------------------------------- */
@@ -152,6 +155,7 @@ typedef struct
   GPtrArray *jars; /* nuvashalauncherResolveFile*, a reference */
   char *directory;
   guint index;
+  guint64 extracted_bytes;
 } ExtractRequest;
 
 /* One jar, open, while its entries are written one at a time. The bytes
@@ -185,6 +189,8 @@ extract_step_free (ExtractStep *step)
 
 static void extract_next_jar (ExtractRequest *request);
 static void extract_entries (ExtractStep *step);
+static void extract_jar_info_ready (GObject *source, GAsyncResult *result,
+                                    gpointer user_data);
 
 /* Ends the whole request. Consumes @error, which may be NULL. */
 static void
@@ -235,6 +241,8 @@ extract_read_ready (GObject *source, GAsyncResult *result, gpointer user_data)
       extract_step_free (step);
       return;
     }
+
+  step->request->extracted_bytes += g_bytes_get_size (step->bytes);
 
   extract_entries (step);
 }
@@ -289,6 +297,15 @@ read_entry (struct archive *archive, GBytes **data, GError **error)
 
       if (size > 0)
         g_byte_array_append (buffer, block, size);
+
+      if (buffer->len > MAX_NATIVE_ENTRY_SIZE)
+        {
+          g_set_error (error, nuvashalauncher_RESOLVE_ERROR,
+                       nuvashalauncher_RESOLVE_ERROR_INVALID,
+                       "a native entry is larger than %u MiB",
+                       MAX_NATIVE_ENTRY_SIZE / (1024 * 1024));
+          return FALSE;
+        }
     }
 
   if (buffer->len == 0)
@@ -394,6 +411,19 @@ extract_entries (ExtractStep *step)
           return;
         }
 
+      if (request->extracted_bytes > MAX_NATIVE_TOTAL_SIZE ||
+          g_bytes_get_size (data) > MAX_NATIVE_TOTAL_SIZE - request->extracted_bytes)
+        {
+          extract_finished (
+              request,
+              g_error_new (nuvashalauncher_RESOLVE_ERROR,
+                           nuvashalauncher_RESOLVE_ERROR_INVALID,
+                           "native libraries are larger than %u MiB",
+                           MAX_NATIVE_TOTAL_SIZE / (1024 * 1024)));
+          extract_step_free (step);
+          return;
+        }
+
        nuvashalauncher_fs_replace_contents_bytes_async (file, data, NULL, FALSE,
                                             G_FILE_CREATE_NONE,
                                             g_task_get_cancellable (
@@ -427,7 +457,43 @@ extract_next_jar (ExtractRequest *request)
   step = g_new0 (ExtractStep, 1);
   step->request = request;
 
-  g_file_load_bytes_async (file, g_task_get_cancellable (request->task),
+  g_file_query_info_async (file, G_FILE_ATTRIBUTE_STANDARD_TYPE ","
+                           G_FILE_ATTRIBUTE_STANDARD_SIZE,
+                           G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+                           G_PRIORITY_DEFAULT,
+                           g_task_get_cancellable (request->task),
+                           extract_jar_info_ready, step);
+}
+
+static void
+extract_jar_info_ready (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  ExtractStep *step = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GFileInfo) info =
+    g_file_query_info_finish (G_FILE (source), result, &error);
+
+  if (info == NULL)
+    {
+      extract_finished (step->request, g_steal_pointer (&error));
+      extract_step_free (step);
+      return;
+    }
+
+  if (g_file_info_get_file_type (info) != G_FILE_TYPE_REGULAR ||
+      g_file_info_get_size (info) > MAX_NATIVE_TOTAL_SIZE)
+    {
+      extract_finished (
+          step->request,
+          g_error_new_literal (nuvashalauncher_RESOLVE_ERROR,
+                               nuvashalauncher_RESOLVE_ERROR_INVALID,
+                               "a native archive is too large or is not a regular file"));
+      extract_step_free (step);
+      return;
+    }
+
+  g_file_load_bytes_async (G_FILE (source),
+                           g_task_get_cancellable (step->request->task),
                            extract_read_ready, step);
 }
 

@@ -460,7 +460,6 @@ probe_custom_path (nuvashalauncherJavaRow *self, const char *path)
   self->operation = ask->operation;
 }
 
-#ifndef nuvashalauncher_FLATPAK
 static void
 add_chosen (GObject *dialog, GAsyncResult *result, gpointer user_data)
 {
@@ -499,45 +498,6 @@ add_chosen (GObject *dialog, GAsyncResult *result, gpointer user_data)
 
   g_object_unref (self);
 }
-#endif /* !nuvashalauncher_FLATPAK */
-
-#ifdef nuvashalauncher_FLATPAK
-static void
-add_folder_chosen (GObject *dialog, GAsyncResult *result, gpointer user_data)
-{
-  nuvashalauncherJavaRow *self = nuvashalauncher_JAVA_ROW (user_data);
-  g_autoptr (GError) error = NULL;
-  g_autoptr (GFile) folder = gtk_file_dialog_select_folder_finish (
-    GTK_FILE_DIALOG (dialog), result, &error);
-
-  g_object_unref (dialog);
-
-  if (folder == NULL)
-    {
-      if (error != NULL &&
-          !g_error_matches (error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_DISMISSED) &&
-          !g_error_matches (error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_CANCELLED))
-        adw_action_row_set_subtitle (ADW_ACTION_ROW (self), error->message);
-      g_object_unref (self);
-      return;
-    }
-
-  {
-    g_autofree char *directory = g_file_get_path (folder);
-    g_autofree char *java = directory != NULL
-      ? g_build_filename (directory, "bin", "java", NULL) : NULL;
-
-    if (java == NULL || !g_file_test (java, G_FILE_TEST_IS_EXECUTABLE))
-      adw_action_row_set_subtitle (
-        ADW_ACTION_ROW (self),
-        "The selected directory does not contain bin/java");
-    else
-      probe_custom_path (self, java);
-  }
-
-  g_object_unref (self);
-}
- #endif
 
 static void
 open_add_dialog (nuvashalauncherJavaRow *self)
@@ -547,16 +507,9 @@ open_add_dialog (nuvashalauncherJavaRow *self)
   g_autoptr (GFile) home = g_file_new_for_path (g_get_home_dir ());
 
   gtk_file_dialog_set_initial_folder (dialog, home);
-#ifdef nuvashalauncher_FLATPAK
-  gtk_file_dialog_set_title (dialog, "Choose Java runtime directory");
-  gtk_file_dialog_select_folder (dialog,
-                                 GTK_IS_WINDOW (root) ? GTK_WINDOW (root) : NULL,
-                                 NULL, add_folder_chosen, g_object_ref (self));
-#else
   gtk_file_dialog_set_title (dialog, _("Choose Java executable"));
   gtk_file_dialog_open (dialog, GTK_IS_WINDOW (root) ? GTK_WINDOW (root) : NULL,
                         NULL, add_chosen, g_object_ref (self));
-#endif
 }
 
 static void

@@ -22,6 +22,7 @@ drain (void)
     g_main_context_iteration (NULL, FALSE);
 }
 
+#if !defined(__SANITIZE_ADDRESS__)
 static void
 test_skin_dialog_close (void)
 {
@@ -60,6 +61,7 @@ test_skin_dialog_close (void)
   drain ();
   g_assert_cmpuint (criticals, ==, 0);
 }
+#endif
 
 #if defined(__SANITIZE_ADDRESS__)
 static void

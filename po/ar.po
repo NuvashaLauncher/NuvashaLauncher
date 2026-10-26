@@ -715,8 +715,6 @@ msgstr "لا شيء"
 msgid "Norsk (bokmål)"
 msgstr "Norsk (bokmål)"
 
-msgid "nuvashalauncher"
-msgstr "nuvashalauncher"
 
 msgid "nuvashalauncher cache data was cleared successfully."
 msgstr "تم مسح بيانات ذاكرة التخزين المؤقت لـ nuvashalauncher بنجاح."

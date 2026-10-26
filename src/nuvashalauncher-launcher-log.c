@@ -97,12 +97,12 @@ log_line (nuvashalauncher *self,
 
   limit = nuvashalauncher_launcher_get_line_limit (self);
 
-  g_ptr_array_add (self->lines, g_strdup (line));
+  g_queue_push_tail (self->lines, g_strdup (line));
 
   /* The oldest line goes first: a long game must not grow the log for
      ever. */
-  while (self->lines->len > limit)
-    g_ptr_array_remove_index (self->lines, 0);
+  while (g_queue_get_length (self->lines) > limit)
+    g_free (g_queue_pop_head (self->lines));
 
   g_signal_emit (self, nuvashalauncher_launcher_signals[nuvashalauncher_LAUNCHER_SIGNAL_OUTPUT], 0,
                  line, g_strcmp0 (tag, TAG_STDERR) == 0);
@@ -113,7 +113,7 @@ nuvashalauncher_launcher_get_line_count (nuvashalauncher *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_LAUNCHER (self), 0);
 
-  return self->lines->len;
+  return g_queue_get_length (self->lines);
 }
 
 char *
@@ -125,12 +125,12 @@ nuvashalauncher_launcher_get_log_text (nuvashalauncher *self)
 
   text = g_string_new (NULL);
 
-  for (guint i = 0; i < self->lines->len; i++)
+  for (GList *item = self->lines->head; item != NULL; item = item->next)
     {
-      if (i > 0)
+      if (item != self->lines->head)
         g_string_append_c (text, '\n');
 
-      g_string_append (text, g_ptr_array_index (self->lines, i));
+      g_string_append (text, item->data);
     }
 
   return g_string_free (text, FALSE);
@@ -141,5 +141,5 @@ nuvashalauncher_launcher_clear_log (nuvashalauncher *self)
 {
   g_return_if_fail (nuvashalauncher_IS_LAUNCHER (self));
 
-  g_ptr_array_set_size (self->lines, 0);
+  g_queue_clear_full (self->lines, g_free);
 }

@@ -27,7 +27,7 @@ struct _nuvashalauncherLogsPage
   guint rendered;
   gboolean following;
 
-  GPtrArray *lines; /* char*, one line per entry, in display order */
+  GQueue *lines; /* char*, one line per entry, in display order */
   gboolean filtered;
 
   /* Setting the adjustment while GTK is recalculating its bounds emits a
@@ -154,9 +154,9 @@ show_lines (nuvashalauncherLogsPage *self)
 
   built = g_string_new (NULL);
 
-  for (guint i = 0; i < self->lines->len; i++)
+  for (GList *item = self->lines->head; item != NULL; item = item->next)
     {
-       const char *line = g_ptr_array_index (self->lines, i);
+       const char *line = item->data;
 
       if (needle != NULL && *needle != '\0' &&
           strstr (line, needle) == NULL)
@@ -182,7 +182,7 @@ reload_log (nuvashalauncherLogsPage *self)
 {
   g_autofree char *text = nuvashalauncher_launcher_get_log_text (self->launcher);
 
-  g_ptr_array_set_size (self->lines, 0);
+  g_queue_clear_full (self->lines, g_free);
 
   if (text != NULL && *text != '\0')
     {
@@ -193,7 +193,7 @@ reload_log (nuvashalauncherLogsPage *self)
           g_autofree char *line = display_line (split[i]);
 
           if (line != NULL && *line != '\0')
-            g_ptr_array_add (self->lines, g_steal_pointer (&line));
+            g_queue_push_tail (self->lines, g_steal_pointer (&line));
         }
     }
 
@@ -215,13 +215,13 @@ append_line (nuvashalauncherLogsPage *self, const char *line)
   guint limit = nuvashalauncher_launcher_get_line_limit (self->launcher);
   gboolean removed = FALSE;
 
-  g_ptr_array_add (self->lines, g_strdup (line));
+  g_queue_push_tail (self->lines, g_strdup (line));
 
   /* The launcher drops the oldest line when its log is full, so the page
      drops the same one and stays the same log. */
-  while (self->lines->len > limit)
+  while (g_queue_get_length (self->lines) > limit)
     {
-      g_ptr_array_remove_index (self->lines, 0);
+      g_free (g_queue_pop_head (self->lines));
       removed = TRUE;
     }
 
@@ -250,7 +250,7 @@ append_line (nuvashalauncherLogsPage *self, const char *line)
       gtk_text_buffer_get_end_iter (buffer, &end);
       gtk_text_buffer_insert (buffer, &end, line, -1);
 
-      self->rendered = self->lines->len;
+      self->rendered = g_queue_get_length (self->lines);
 
       if (self->following)
         schedule_scroll_to_end (self);
@@ -523,7 +523,7 @@ nuvashalauncher_logs_page_new (nuvashalauncher *launcher)
 
   self = g_object_new (nuvashalauncher_TYPE_LOGS_PAGE, NULL);
   self->launcher = g_object_ref (launcher);
-  self->lines = g_ptr_array_new_with_free_func (g_free);
+  self->lines = g_queue_new ();
   inner = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
   gtk_orientable_set_orientation (GTK_ORIENTABLE (self),
@@ -677,7 +677,11 @@ nuvashalauncher_logs_page_finalize (GObject *object)
   nuvashalauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (object);
 
   g_clear_object (&self->launcher);
-  g_clear_pointer (&self->lines, g_ptr_array_unref);
+  if (self->lines != NULL)
+    {
+      g_queue_free_full (self->lines, g_free);
+      self->lines = NULL;
+    }
 
   G_OBJECT_CLASS (nuvashalauncher_logs_page_parent_class)->finalize (object);
 }

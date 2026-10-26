@@ -53,15 +53,24 @@ nuvashalauncher_ui_show_toast (GtkWidget  *page,
 }
 
 void
+nuvashalauncher_ui_set_action_label (GtkWidget *button, const char *label)
+{
+  g_return_if_fail (GTK_IS_WIDGET (button));
+  g_return_if_fail (label != NULL);
+
+  gtk_widget_set_tooltip_text (button, label);
+  gtk_accessible_update_property (GTK_ACCESSIBLE (button),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL, label, -1);
+}
+
+void
 nuvashalauncher_ui_prepare_icon_button (GtkWidget *button, const char *label)
 {
   g_return_if_fail (GTK_IS_WIDGET (button));
   g_return_if_fail (label != NULL);
 
   gtk_widget_add_css_class (button, "flat");
-  gtk_widget_set_tooltip_text (button, label);
-  gtk_accessible_update_property (GTK_ACCESSIBLE (button),
-                                  GTK_ACCESSIBLE_PROPERTY_LABEL, label, -1);
+  nuvashalauncher_ui_set_action_label (button, label);
 }
 
 void

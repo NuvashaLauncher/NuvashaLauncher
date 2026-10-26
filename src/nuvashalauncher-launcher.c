@@ -254,7 +254,11 @@ nuvashalauncher_launcher_finalize (GObject *object)
   g_clear_object (&self->settings);
   g_clear_object (&self->accounts);
   g_clear_pointer (&self->account_id_override, g_free);
-  g_clear_pointer (&self->lines, g_ptr_array_unref);
+  if (self->lines != NULL)
+    {
+      g_queue_free_full (self->lines, g_free);
+      self->lines = NULL;
+    }
   g_free (self->detail);
   g_free (self->log_access_token);
   g_free (self->log_session);
@@ -290,7 +294,7 @@ nuvashalauncher_launcher_class_init (nuvashalauncherClass *klass)
 static void
 nuvashalauncher_launcher_init (nuvashalauncher *self)
 {
-  self->lines = g_ptr_array_new_with_free_func (g_free);
+  self->lines = g_queue_new ();
   self->scope = nuvashalauncher_task_scope_new (NULL, NULL, NULL, NULL);
   self->state = nuvashalauncher_LAUNCH_STOPPED;
 }

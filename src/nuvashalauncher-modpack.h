@@ -163,6 +163,8 @@ guint64 nuvashalauncher_modpack_get_content_limit (void);
 
 /* The hosts the format permits the files to come from. */
 gboolean nuvashalauncher_modpack_download_url_allowed (const char *url);
+gboolean nuvashalauncher_modpack_redirect_allowed (const char *original,
+                                                   const char *redirected);
 
 /* Progress reported between files during installation. */
 typedef void (*nuvashalauncherModpackProgressFunc) (guint files_done,

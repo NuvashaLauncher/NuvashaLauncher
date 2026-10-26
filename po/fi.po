@@ -707,8 +707,6 @@ msgstr "Ei mitään"
 msgid "Norsk (bokmål)"
 msgstr "Norsk (bokmål)"
 
-msgid "nuvashalauncher"
-msgstr "nuvashalauncher"
 
 msgid "nuvashalauncher cache data was cleared successfully."
 msgstr "nuvashalaunchern välimuistitiedot tyhjennettiin onnistuneesti."

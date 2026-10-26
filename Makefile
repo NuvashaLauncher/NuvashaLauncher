@@ -69,7 +69,7 @@ TESTDEPS    := $(addsuffix .d,$(TESTBINS))
 TESTDBGBINS := $(patsubst tests/%.c,build-debug/tests/%,$(TESTSRCS))
 TESTDBGDEPS := $(addsuffix .d,$(TESTDBGBINS))
 
-.PHONY: all fast debug test test-display test-debug test-lsan static-analysis pot clean install uninstall
+.PHONY: all fast debug test test-display test-flatpak-runtime test-debug test-lsan static-analysis pot clean install uninstall
 
 all: $(if $(SRCS),$(BIN)) $(LOCALE_MOS) $(SCHEMA_COMPILED)
 
@@ -120,14 +120,47 @@ test: $(if $(SRCS),$(BIN)) $(TESTBINS) $(SCHEMA_COMPILED)
 		elif test $$status -ne 0; then exit $$status; else pass=$$((pass + 1)); fi; done; \
 		echo "PASS $$pass test(s), SKIP $$skip test(s)"
 
-# Run the same suite with a virtual display when xvfb is installed. This
-# keeps display-backed GTK coverage available in CI without making it a build
-# prerequisite for headless development machines.
+# Run the same suite with an existing Wayland session when available, or with
+# a virtual X display as a fallback. This keeps display-backed GTK coverage
+# available without making either compositor a build prerequisite.
 test-display:
-	@if ! command -v xvfb-run >/dev/null 2>&1; then \
-		echo "SKIP test-display: xvfb-run is unavailable"; exit 77; \
+	@if test -n "$$WAYLAND_DISPLAY" && test -n "$$XDG_RUNTIME_DIR" && \
+	   test -S "$$XDG_RUNTIME_DIR/$$WAYLAND_DISPLAY"; then \
+		echo "RUN test-display: existing Wayland session"; \
+		GDK_BACKEND=wayland $(MAKE) test; \
+	elif command -v xvfb-run >/dev/null 2>&1; then \
+		xvfb-run -a $(MAKE) test; \
+	else \
+		echo "SKIP test-display: no Wayland session or xvfb-run"; exit 77; \
 	fi
-	+xvfb-run -a $(MAKE) test
+
+# Smoke-test an installed Flatpak without launching Minecraft. The test checks
+# the packaged command, sandbox data directory, host-data isolation, and the
+# network permission used by the launcher for Mojang metadata.
+test-flatpak-runtime:
+	@if ! command -v flatpak >/dev/null 2>&1; then \
+		echo "SKIP test-flatpak-runtime: flatpak is unavailable"; exit 77; \
+	fi
+	@if ! flatpak info com.github.nuvashalauncher.nuvashalauncher >/dev/null 2>&1; then \
+		echo "SKIP test-flatpak-runtime: application is not installed"; exit 77; \
+	fi
+	@set -eu; \
+	version=$$(flatpak run com.github.nuvashalauncher.nuvashalauncher --version); \
+	test "$$version" = "nuvashalauncher $(VERSION)"; \
+	flatpak run com.github.nuvashalauncher.nuvashalauncher --list-instances >/dev/null; \
+	flatpak run com.github.nuvashalauncher.nuvashalauncher --list-accounts >/dev/null; \
+	flatpak run --command=sh com.github.nuvashalauncher.nuvashalauncher -c '\
+		set -eu; \
+		test -w "$$XDG_DATA_HOME"; \
+		probe="$$XDG_DATA_HOME/.runtime-smoke"; \
+		printf flatpak-runtime > "$$probe"; \
+		test "$$(cat "$$probe")" = flatpak-runtime; \
+		rm -f "$$probe"; \
+		! test -e "$$HOME/.local/share/nuvashalauncher/accounts.json"; \
+		curl --fail --silent --show-error --max-time 10 \
+			https://piston-meta.mojang.com/mc/game/version_manifest_v2.json \
+			-o /dev/null'; \
+	echo "PASS Flatpak runtime smoke test"
 
 # Same tests, but every test and every src object is built with
 # AddressSanitizer and UndefinedBehaviorSanitizer into build-debug/.

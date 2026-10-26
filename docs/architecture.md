@@ -129,8 +129,10 @@ flowchart TD
 instance store and normally presents the one `nuvashalauncherMainWindow`. A second
 activation focuses the existing window rather than creating another one. The
 same executable also accepts a command-line instance ID and can launch that
-instance through the normal launcher state machine without opening the main
-window; live output remains owned by the launcher's log buffer.
+instance through the normal launcher state machine without presenting the main
+window; the window/model is still created to reuse the normal ownership and
+launcher state machine, while live output remains owned by the launcher's log
+buffer.
 
 The main window owns a `nuvashalauncherMainWindowModel`. The model groups the
 process-wide objects used by the UI:
@@ -415,8 +417,8 @@ explicit Java when one is configured. Launch preparation rejects a selected
 headless runtime; it does not silently downgrade to a different major version.
 
 Stopping sends `SIGTERM` first and escalates after five seconds. Process output
-is consumed by the line-reader helper and retained only up to the configured
-log-line limit. Crash reports are associated with the process start time so an
+is consumed by the line-reader helper, capped per line, and retained only up to
+the configured log-line limit. Crash reports are associated with the process start time so an
 old report is not mistaken for a crash from the current launch.
 
 ## Flatpak boundary
@@ -494,6 +496,9 @@ The repository uses a hand-written `Makefile`:
   binary under `build-debug/`.
 - `make test` builds and runs each `tests/test-*.c` binary.
 - `make test-display` repeats the suite under `xvfb-run` when available.
+- `make test-flatpak-runtime` smoke-tests an installed Flatpak's CLI, sandbox
+  data directory, host-data isolation, and network permission without starting
+  Minecraft.
 - `make test-debug` and `make test-lsan` exercise the sanitizer build.
 - `make static-analysis` runs GCC's analyzer over source files.
 - `flatpak-builder` builds the manifest in

@@ -220,7 +220,10 @@ nuvashalauncher_create_instance_dialog_init (nuvashalauncherCreateInstanceDialog
   adw_dialog_set_follows_content_size (ADW_DIALOG (self), TRUE);
   adw_dialog_set_content_width (ADW_DIALOG (self), 560);
   adw_entry_row_set_activates_default (self->name_row, TRUE);
-  adw_entry_row_set_max_length (self->name_row, 16);
+  /* Keep the entry in sync with the model's 64-byte sanitized name limit.
+   * The model remains authoritative because names can also come from imports
+   * and modpack metadata. */
+  adw_entry_row_set_max_length (self->name_row, 64);
 
   self->version_row = nuvashalauncher_version_row_new ();
   self->loader_row = nuvashalauncher_loader_row_new ();
