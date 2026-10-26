@@ -26,6 +26,7 @@ jobs:
         run: |
           dnf install -y \
              gcc gcc-c++ make pkgconf-pkg-config gettext \
+             libasan libubsan \
              glib2-devel gtk4-devel libadwaita-devel libepoxy-devel \
              json-glib-devel libsoup3-devel libarchive-devel
 
