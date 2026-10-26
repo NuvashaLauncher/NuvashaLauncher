@@ -34,6 +34,7 @@ typedef struct _DownloadRequest
   char *url;
   char *dest_path;       /* NULL for a JSON request */
   char *expected_hash;   /* NULL for an unverified request */
+  goffset max_size;      /* -1 when the caller supplied no limit */
   GChecksumType hash_type;
   char *body;            /* NULL: a GET request */
   char *user_agent;      /* NULL: the session's own */

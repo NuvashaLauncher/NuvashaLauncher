@@ -80,6 +80,8 @@ typedef struct {
 
 void install_failed (InstallRequest *, GError *);
 void report_progress (InstallRequest *);
+void queue_file (InstallRequest *, InstallFileKind, const char *, const char *,
+                 const char *, const char *, gboolean);
 void queue_artifact (InstallRequest *, const char *, gboolean);
 void queue_unpacked (InstallRequest *, const char *);
 void drain_pending (InstallRequest *);

@@ -120,15 +120,22 @@ test: $(if $(SRCS),$(BIN)) $(TESTBINS) $(SCHEMA_COMPILED)
 		elif test $$status -ne 0; then exit $$status; else pass=$$((pass + 1)); fi; done; \
 		echo "PASS $$pass test(s), SKIP $$skip test(s)"
 
-# Run the same suite with an existing Wayland session. Display-backed GTK
-# coverage is intentionally skipped when no Wayland compositor is available.
+# Run the suite with an existing Wayland session when available. Fall back to
+# Xvfb so display-backed coverage still runs in headless CI.
 test-display:
 	@if test -n "$$WAYLAND_DISPLAY" && test -n "$$XDG_RUNTIME_DIR" && \
 	   test -S "$$XDG_RUNTIME_DIR/$$WAYLAND_DISPLAY"; then \
 		echo "RUN test-display: existing Wayland session"; \
 		GDK_BACKEND=wayland $(MAKE) test; \
+	elif command -v xvfb-run >/dev/null 2>&1; then \
+		echo "RUN test-display: Xvfb fallback"; \
+	if command -v dbus-run-session >/dev/null 2>&1; then \
+		dbus-run-session -- xvfb-run --auto-servernum env GDK_BACKEND=x11 $(MAKE) test; \
 	else \
-		echo "SKIP test-display: no Wayland session"; exit 77; \
+		xvfb-run --auto-servernum env GDK_BACKEND=x11 $(MAKE) test; \
+	fi; \
+	else \
+		echo "SKIP test-display: no Wayland session or Xvfb"; exit 77; \
 	fi
 
 # Smoke-test an installed Flatpak without launching Minecraft. The test checks

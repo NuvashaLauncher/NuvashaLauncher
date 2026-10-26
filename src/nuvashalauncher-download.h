@@ -80,13 +80,25 @@ typedef void (*nuvashalauncherDownloadProgressFunc) (goffset bytes_done,
  *
  * @progress and @callback both receive @user_data. */
 nuvashalauncherTaskScope *nuvashalauncher_download_file_async (nuvashalauncherDownloadService *service,
-                                       const char *url,
-                                       const char *dest_path,
+                                        const char *url,
+                                        const char *dest_path,
                                        const char *expected_hash,
                                        GChecksumType hash_type,
                                        nuvashalauncherDownloadProgressFunc progress,
-                                       GAsyncReadyCallback callback,
-                                       gpointer user_data);
+                                        GAsyncReadyCallback callback,
+                                        gpointer user_data);
+
+/* Like nuvashalauncher_download_file_async(), but rejects a response larger
+ * than @max_size bytes. Pass -1 when no caller-supplied limit is available. */
+nuvashalauncherTaskScope *nuvashalauncher_download_file_limited_async (nuvashalauncherDownloadService *service,
+                                                const char *url,
+                                                const char *dest_path,
+                                                const char *expected_hash,
+                                                GChecksumType hash_type,
+                                                goffset max_size,
+                                                nuvashalauncherDownloadProgressFunc progress,
+                                                GAsyncReadyCallback callback,
+                                                gpointer user_data);
 
 /* TRUE on success. Errors use nuvashalauncherDownloadError. */
 gboolean nuvashalauncher_download_file_finish (GAsyncResult *result,

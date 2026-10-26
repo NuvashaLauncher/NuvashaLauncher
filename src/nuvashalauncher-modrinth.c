@@ -36,298 +36,6 @@
 #include <string.h>
 
 /* ---------------------------------------------------------- *
- * The requests
- * ---------------------------------------------------------- */
-
-/* Callback receiving a parsed response. */
-typedef void (*AnswerFunc) (GTask *task, JsonNode *root);
-
-/* Whether HTTP 404 is an error or an absent resource for a request. */
-typedef enum {
-  nuvashalauncher_NOT_FOUND_IS_ERROR, /* the answer came from a known place */
-  nuvashalauncher_NOT_FOUND_IS_ABSENT
-} nuvashalauncherNotFoundRule;
-
-typedef struct {
-  AnswerFunc answer;
-  nuvashalauncherNotFoundRule not_found;
-  nuvashalauncherTaskScope *scope;
-  void *data;
-  GDestroyNotify free_data;
-} Request;
-
-typedef struct {
-  char *key;
-  GPtrArray *tasks;
-} JsonFlight;
-
-static GHashTable *json_flights;
-
-static void
-json_flight_free (JsonFlight *flight)
-{
-  g_free (flight->key);
-  g_clear_pointer (&flight->tasks, g_ptr_array_unref);
-  g_free (flight);
-}
-
-static void
-request_free (gpointer data)
-{
-  Request *request = data;
-
-  if (request->data != NULL && request->free_data != NULL)
-    request->free_data (request->data);
-
-  g_free (request);
-}
-
-static void
-request_return_error (GTask *task, GError *error)
-{
-  Request *request = g_task_get_task_data (task);
-  nuvashalauncher_task_scope_return_error (request->scope, error);
-}
-
-static void
-request_return_pointer (GTask *task, gpointer value, GDestroyNotify free_value)
-{
-  Request *request = g_task_get_task_data (task);
-  nuvashalauncher_task_scope_return_pointer (request->scope, value, free_value);
-}
-
-static nuvashalauncherTaskScope *
-request_new (GAsyncReadyCallback callback, gpointer user_data,
-             AnswerFunc answer, nuvashalauncherNotFoundRule not_found, void *data,
-             GDestroyNotify free_data)
-{
-  nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
-  GTask *task = nuvashalauncher_task_scope_task (scope);
-  Request *request = g_new0 (Request, 1);
-
-  /* Borrowed: this request is the task's own data and the scope owns that
-     task. The caller keeps the operation alive until its callback. */
-  request->scope = scope;
-
-  request->answer = answer;
-  request->not_found = not_found;
-  request->data = data;
-  request->free_data = free_data;
-
-  /* Cancellation is reported in this module's own domain, so GTask must
-   * not replace the error with G_IO_ERROR_CANCELLED. */
-  g_task_set_check_cancellable (task, FALSE);
-  g_task_set_task_data (task, request, request_free);
-
-  return scope;
-}
-
-/* Return an error in this module's domain while preserving the failed URL
- * and download error details. */
-static void
-fail (GTask *task, GError *error)
-{
-  Request *request = g_task_get_task_data (task);
-  GError *wrapped = NULL;
-
-  if (g_cancellable_is_cancelled (g_task_get_cancellable (task)))
-    {
-      g_clear_error (&error);
-
-      nuvashalauncher_task_scope_return_error (
-        request->scope,
-        g_error_new_literal (nuvashalauncher_MODRINTH_ERROR,
-                             nuvashalauncher_MODRINTH_ERROR_NETWORK,
-                             "the request was cancelled"));
-      return;
-    }
-
-  if (error->domain == nuvashalauncher_DOWNLOAD_ERROR)
-    {
-      if (error->code == nuvashalauncher_DOWNLOAD_ERROR_RATE_LIMITED)
-        wrapped = g_error_new_literal (
-            nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_RATE_LIMIT,
-            _("Modrinth is asking nuvashalauncher to slow down, too many requests"));
-      else if (error->code == nuvashalauncher_DOWNLOAD_ERROR_HTTP)
-        wrapped = g_error_new (nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_HTTP,
-                               "%s", error->message);
-      else
-        wrapped = g_error_new (nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_NETWORK,
-                               "%s", error->message);
-    }
-  else
-    wrapped = g_error_new (nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_PARSE,
-                           "%s", error->message);
-
-  g_error_free (error);
-  nuvashalauncher_task_scope_return_error (request->scope, wrapped);
-}
-
-/* Check whether a download error represents HTTP 404. */
-static gboolean
-error_is_not_found (const GError *error)
-{
-  return error->domain == nuvashalauncher_DOWNLOAD_ERROR &&
-         error->code == nuvashalauncher_DOWNLOAD_ERROR_HTTP &&
-         strstr (error->message, "HTTP 404") != NULL;
-}
-
-static void
-json_flight_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
-                  gpointer user_data)
-{
-  JsonFlight *flight = user_data;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (JsonParser) parser = nuvashalauncher_download_json_finish (result, &error);
-  JsonNode *root = parser != NULL ? json_parser_get_root (parser) : NULL;
-
-  /* Remove before delivering callbacks: a callback may immediately request
-   * the same URL again, and that request must start a fresh flight. */
-  g_hash_table_steal (json_flights, flight->key);
-
-  for (guint i = 0; i < flight->tasks->len; i++)
-    {
-      GTask *task = g_ptr_array_index (flight->tasks, i);
-      Request *request = g_task_get_task_data (task);
-
-      if (nuvashalauncher_task_scope_return_error_if_cancelled (request->scope))
-        continue;
-
-      if (parser == NULL)
-        {
-          if (error_is_not_found (error) &&
-              request->not_found == nuvashalauncher_NOT_FOUND_IS_ABSENT)
-            {
-               nuvashalauncher_task_scope_return_pointer (request->scope, NULL, NULL);
-              continue;
-            }
-
-          if (error_is_not_found (error))
-            {
-               nuvashalauncher_task_scope_return_error (
-                 request->scope,
-                 g_error_new_literal (nuvashalauncher_MODRINTH_ERROR,
-                                      nuvashalauncher_MODRINTH_ERROR_NOT_FOUND,
-                                       _("Modrinth does not know this file")));
-              continue;
-            }
-
-          fail (task, g_error_copy (error));
-          continue;
-        }
-
-      if (root == NULL)
-        {
-           nuvashalauncher_task_scope_return_error (
-             request->scope,
-             g_error_new_literal (nuvashalauncher_MODRINTH_ERROR,
-                                  nuvashalauncher_MODRINTH_ERROR_PARSE,
-                                  "the answer holds no JSON"));
-          continue;
-        }
-
-      {
-        g_autoptr (JsonNode) answer = json_node_copy (root);
-        request->answer (task, answer);
-      }
-    }
-
-  json_flight_free (flight);
-}
-
-static void
-json_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
-            gpointer user_data)
-{
-  /* The flight stores this task as callback data without owning another
-     reference. Keep one while this callback uses the task, but do not treat
-     the borrowed callback pointer itself as an owned reference. */
-  g_autoptr (GTask) task = g_object_ref (user_data);
-  Request *request = g_task_get_task_data (task);
-  g_autoptr (JsonParser) parser = NULL;
-  g_autoptr (GError) error = NULL;
-  JsonNode *root = NULL;
-
-  parser = nuvashalauncher_download_json_finish (result, &error);
-
-  if (parser == NULL)
-    {
-      if (error_is_not_found (error) &&
-          request->not_found == nuvashalauncher_NOT_FOUND_IS_ABSENT)
-        {
-          g_clear_error (&error);
-          request_return_pointer (task, NULL, NULL);
-          return;
-        }
-
-      if (error_is_not_found (error))
-        {
-          g_clear_error (&error);
-          request_return_error (
-            task,
-            g_error_new_literal (nuvashalauncher_MODRINTH_ERROR,
-                                 nuvashalauncher_MODRINTH_ERROR_NOT_FOUND,
-                                  _("Modrinth does not know this file")));
-          return;
-        }
-
-      fail (task, g_steal_pointer (&error));
-      return;
-    }
-
-  root = json_parser_get_root (parser);
-
-  if (root == NULL)
-    {
-      request_return_error (
-        task,
-        g_error_new_literal (nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_PARSE,
-                             "the answer holds no JSON"));
-      return;
-    }
-
-  /* The node is copied out of the parser, so nothing of it outlives
-   * this call. */
-  {
-    g_autoptr (JsonNode) answer = json_node_copy (root);
-    request->answer (task, answer);
-  }
-}
-
-static nuvashalauncherTaskScope *
-get_async (const char *url, GAsyncReadyCallback callback, gpointer user_data,
-           AnswerFunc answer, nuvashalauncherNotFoundRule not_found)
-{
-  g_autoptr (nuvashalauncherTaskScope) scope =
-    request_new (callback, user_data, answer, not_found, NULL, NULL);
-  GTask *task = nuvashalauncher_task_scope_task (scope);
-  JsonFlight *flight = NULL;
-
-  if (json_flights == NULL)
-    json_flights = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
-                                          (GDestroyNotify) json_flight_free);
-
-  flight = g_hash_table_lookup (json_flights, url);
-  if (flight != NULL)
-    {
-      g_ptr_array_add (flight->tasks, g_object_ref (task));
-      return g_steal_pointer (&scope);
-    }
-
-  flight = g_new0 (JsonFlight, 1);
-  flight->key = g_strdup (url);
-  flight->tasks = g_ptr_array_new_with_free_func (g_object_unref);
-  g_ptr_array_add (flight->tasks, g_object_ref (task));
-  g_hash_table_insert (json_flights, g_strdup (url), flight);
-
-  nuvashalauncher_task_scope_release_when_done (
-    nuvashalauncher_download_json_cached_async (nuvashalauncher_downloads_get_service (), url, json_flight_done, flight),
-    nuvashalauncher_task_scope_get_cancellable (scope));
-
-  return g_steal_pointer (&scope);
-}
-
-/* ---------------------------------------------------------- *
  * Searches
  * ---------------------------------------------------------- */
 
@@ -342,11 +50,11 @@ search_answer (GTask *task, JsonNode *root)
 
   if (results == NULL)
     {
-      request_return_error (task, g_steal_pointer (&error));
+      nuvashalauncher_modrinth_request_return_error (task, g_steal_pointer (&error));
       return;
     }
 
-  request_return_pointer (task, results,
+  nuvashalauncher_modrinth_request_return_pointer (task, results,
                          (GDestroyNotify) nuvashalauncher_modrinth_results_free);
 }
 
@@ -359,7 +67,7 @@ nuvashalauncher_modrinth_search_async (const nuvashalauncherModrinthSearch *sear
   g_return_val_if_fail (search != NULL, NULL);
 
   url = nuvashalauncher_modrinth_search_url (search);
-  return get_async (url, callback, user_data, search_answer,
+  return nuvashalauncher_modrinth_get_async (url, callback, user_data, search_answer,
                     nuvashalauncher_NOT_FOUND_IS_ERROR);
 }
 
@@ -382,11 +90,11 @@ details_answer (GTask *task, JsonNode *root)
 
   if (details == NULL)
     {
-      request_return_error (task, g_steal_pointer (&error));
+      nuvashalauncher_modrinth_request_return_error (task, g_steal_pointer (&error));
       return;
     }
 
-  request_return_pointer (task, details,
+  nuvashalauncher_modrinth_request_return_pointer (task, details,
                          (GDestroyNotify) nuvashalauncher_modrinth_details_free);
 }
 
@@ -404,7 +112,7 @@ nuvashalauncher_modrinth_details_async (const char *project_id, GAsyncReadyCallb
 
     url = g_strdup_printf (nuvashalauncher_MODRINTH_URL "/project/%s", escaped_id);
   }
-  return get_async (url, callback, user_data, details_answer,
+  return nuvashalauncher_modrinth_get_async (url, callback, user_data, details_answer,
                     nuvashalauncher_NOT_FOUND_IS_ERROR);
 }
 nuvashalauncherModrinthDetails *
@@ -452,7 +160,7 @@ instance_ask_new (nuvashalauncherContentType type, const char *minecraft_version
 static void
 versions_answer (GTask *task, JsonNode *root)
 {
-  Request *request = g_task_get_task_data (task);
+  nuvashalauncherModrinthRequest *request = g_task_get_task_data (task);
   InstanceAsk *asked = request->data;
   g_autofree char *json = json_to_string (root, FALSE);
   g_autoptr (GError) error = NULL;
@@ -464,11 +172,11 @@ versions_answer (GTask *task, JsonNode *root)
 
   if (versions == NULL)
     {
-      request_return_error (task, g_steal_pointer (&error));
+      nuvashalauncher_modrinth_request_return_error (task, g_steal_pointer (&error));
       return;
     }
 
-  request_return_pointer (task, versions, (GDestroyNotify) g_ptr_array_unref);
+  nuvashalauncher_modrinth_request_return_pointer (task, versions, (GDestroyNotify) g_ptr_array_unref);
 }
 
 nuvashalauncherTaskScope *
@@ -516,13 +224,13 @@ nuvashalauncher_modrinth_versions_async (const char *project_id, nuvashalauncher
         nuvashalauncher_MODRINTH_URL "/project/%s/version?game_versions=%s",
         escaped_id, escaped_game);
 
-  scope = request_new (callback, user_data, versions_answer,
+  scope = nuvashalauncher_modrinth_request_new (callback, user_data, versions_answer,
                        nuvashalauncher_NOT_FOUND_IS_ERROR,
                        instance_ask_new (type, minecraft_version, loader),
                        instance_ask_free);
 
   nuvashalauncher_task_scope_release_when_done (
-    nuvashalauncher_download_json_cached_async (nuvashalauncher_downloads_get_service (), url, json_ready,
+    nuvashalauncher_download_json_cached_async (nuvashalauncher_downloads_get_service (), url, nuvashalauncher_modrinth_json_ready,
                                     nuvashalauncher_task_scope_task (scope)),
     nuvashalauncher_task_scope_get_cancellable (scope));
 
@@ -542,7 +250,7 @@ categories_answer (GTask *task, JsonNode *root)
 {
   g_autofree char *json = json_to_string (root, FALSE);
   g_autoptr (GError) error = NULL;
-  Request *request = g_task_get_task_data (task);
+  nuvashalauncherModrinthRequest *request = g_task_get_task_data (task);
   GPtrArray *categories = NULL;
 
   categories = nuvashalauncher_modrinth_categories_from_json (
@@ -550,11 +258,11 @@ categories_answer (GTask *task, JsonNode *root)
 
   if (categories == NULL)
     {
-      request_return_error (task, g_steal_pointer (&error));
+      nuvashalauncher_modrinth_request_return_error (task, g_steal_pointer (&error));
       return;
     }
 
-  request_return_pointer (task, categories, (GDestroyNotify) g_ptr_array_unref);
+  nuvashalauncher_modrinth_request_return_pointer (task, categories, (GDestroyNotify) g_ptr_array_unref);
 }
 
 nuvashalauncherTaskScope *
@@ -565,10 +273,10 @@ nuvashalauncher_modrinth_categories_async (const char        *project_type,
   g_autofree char *url = g_strdup_printf (nuvashalauncher_MODRINTH_URL "/tag/category");
   g_autoptr (nuvashalauncherTaskScope) scope = NULL;
 
-  scope = request_new (callback, user_data, categories_answer,
+  scope = nuvashalauncher_modrinth_request_new (callback, user_data, categories_answer,
                        nuvashalauncher_NOT_FOUND_IS_ERROR, g_strdup (project_type), g_free);
   nuvashalauncher_task_scope_release_when_done (
-    nuvashalauncher_download_json_cached_async (nuvashalauncher_downloads_get_service (), url, json_ready,
+    nuvashalauncher_download_json_cached_async (nuvashalauncher_downloads_get_service (), url, nuvashalauncher_modrinth_json_ready,
                                     nuvashalauncher_task_scope_task (scope)),
     nuvashalauncher_task_scope_get_cancellable (scope));
 
@@ -598,11 +306,11 @@ version_answer (GTask *task, JsonNode *root)
 
   if (version == NULL)
     {
-      request_return_error (task, g_steal_pointer (&error));
+      nuvashalauncher_modrinth_request_return_error (task, g_steal_pointer (&error));
       return;
     }
 
-  request_return_pointer (task, version,
+  nuvashalauncher_modrinth_request_return_pointer (task, version,
                          (GDestroyNotify) nuvashalauncher_modrinth_version_free);
 }
 
@@ -622,7 +330,7 @@ nuvashalauncher_modrinth_version_by_hash_async (const char *sha1,
     url = g_strdup_printf (nuvashalauncher_MODRINTH_URL "/version_file/%s?algorithm=sha1",
                            escaped_sha1);
   }
-  return get_async (url, callback, user_data, version_answer,
+  return nuvashalauncher_modrinth_get_async (url, callback, user_data, version_answer,
                     nuvashalauncher_NOT_FOUND_IS_ERROR);
 }
 
@@ -643,7 +351,7 @@ nuvashalauncher_modrinth_version_by_id_async (const char *version_id,
   g_autofree char *url = g_strdup_printf (nuvashalauncher_MODRINTH_URL "/version/%s",
                                           escaped);
 
-  return get_async (url, callback, user_data, version_answer,
+  return nuvashalauncher_modrinth_get_async (url, callback, user_data, version_answer,
                     nuvashalauncher_NOT_FOUND_IS_ERROR);
 }
 
@@ -654,7 +362,7 @@ nuvashalauncher_modrinth_version_by_id_async (const char *version_id,
 static void
 update_answer (GTask *task, JsonNode *root)
 {
-  Request *request = g_task_get_task_data (task);
+  nuvashalauncherModrinthRequest *request = g_task_get_task_data (task);
   InstanceAsk *asked = request->data;
   g_autofree char *json = json_to_string (root, FALSE);
   g_autoptr (GError) error = NULL;
@@ -664,7 +372,7 @@ update_answer (GTask *task, JsonNode *root)
 
   if (version == NULL)
     {
-      request_return_error (task, g_steal_pointer (&error));
+      nuvashalauncher_modrinth_request_return_error (task, g_steal_pointer (&error));
       return;
     }
 
@@ -674,11 +382,11 @@ update_answer (GTask *task, JsonNode *root)
                                   asked->minecraft_version, asked->loader))
     {
       nuvashalauncher_modrinth_version_free (version);
-      request_return_pointer (task, NULL, NULL);
+      nuvashalauncher_modrinth_request_return_pointer (task, NULL, NULL);
       return;
     }
 
-  request_return_pointer (task, version,
+  nuvashalauncher_modrinth_request_return_pointer (task, version,
                          (GDestroyNotify) nuvashalauncher_modrinth_version_free);
 }
 
@@ -717,14 +425,14 @@ nuvashalauncher_modrinth_update_by_hash_async (nuvashalauncherContentType type, 
         escaped_sha1);
   }
 
-  scope = request_new (callback, user_data, update_answer,
+  scope = nuvashalauncher_modrinth_request_new (callback, user_data, update_answer,
                        nuvashalauncher_NOT_FOUND_IS_ABSENT,
                        instance_ask_new (type, minecraft_version, loader),
                        instance_ask_free);
 
   nuvashalauncher_task_scope_release_when_done (
     nuvashalauncher_download_json_post_cached_async (nuvashalauncher_downloads_get_service (), url, body, nuvashalauncher_MODRINTH_USER_AGENT,
-                                         json_ready,
+                                         nuvashalauncher_modrinth_json_ready,
                                          nuvashalauncher_task_scope_task (scope)),
     nuvashalauncher_task_scope_get_cancellable (scope));
 

@@ -197,6 +197,16 @@ send_ready (GObject *source, GAsyncResult *result, gpointer user_data)
                          headers)
                      : -1;
 
+  if (!request->json && request->max_size >= 0 &&
+      request->total > request->max_size)
+    {
+      end_attempt (request,
+                   g_error_new_literal (nuvashalauncher_DOWNLOAD_ERROR,
+                                        nuvashalauncher_DOWNLOAD_ERROR_IO,
+                                        "the download is larger than the permitted size"));
+      return;
+    }
+
   report_progress (request);
   read_next_chunk (request);
 }
@@ -243,6 +253,17 @@ read_chunk_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 
   request->chunk = g_steal_pointer (&bytes);
   data = g_bytes_get_data (request->chunk, &size);
+
+  if (!request->json && request->max_size >= 0 &&
+      (request->done > request->max_size ||
+       (goffset) size > request->max_size - request->done))
+    {
+      end_attempt (request,
+                   g_error_new_literal (nuvashalauncher_DOWNLOAD_ERROR,
+                                        nuvashalauncher_DOWNLOAD_ERROR_IO,
+                                        "the download is larger than the permitted size"));
+      return;
+    }
 
   if (request->json)
     {

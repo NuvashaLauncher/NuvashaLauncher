@@ -593,9 +593,10 @@ dispatch_download (InstallRun *run)
         return;
       }
 
-    nuvashalauncher_task_scope_release_when_done (
-      nuvashalauncher_download_file_async (nuvashalauncher_downloads_get_service (), url, dest, NULL, 0, NULL, install_file_done,
-                               run),
+       nuvashalauncher_task_scope_release_when_done (
+       nuvashalauncher_download_file_limited_async (nuvashalauncher_downloads_get_service (), url, dest, NULL, 0,
+                                                    file->file_size, NULL, install_file_done,
+                                run),
       run->cancellable);
   }
 }
