@@ -9,11 +9,41 @@
 
 ## Features
 
-- Modrinth browsing and installation for compatible modpacks, mods, resource
-  packs, and shader packs.
-- Automatic installation and version resolution for Fabric, Quilt, Forge, and
-  NeoForge.
-- `.mrpack` import and export with verified downloads and safe archive handling.
+### Modpack management
+
+Browse Modrinth and install compatible modpacks without manually assembling
+their files. Import and export `.mrpack` files with verified downloads,
+dependency handling, and safe archive extraction.
+
+### Mod and content management
+
+Find and manage individual mods, resource packs, shader packs, and datapacks
+through Modrinth. Content is organized inside each instance and can be enabled
+or disabled without mixing files between setups.
+
+### Instance management
+
+Create separate Minecraft instances with their own worlds, mods, settings,
+loader versions, Java selection, icons, and logs. Duplicate, rename, move,
+export, and remove instances without affecting the others.
+
+### Loader and version support
+
+Install and resolve Fabric, Quilt, Forge, and NeoForge versions alongside
+vanilla Minecraft. Nuvasha handles version metadata, libraries, assets, native
+files, and loader-specific dependencies for each instance.
+
+### Accounts, skins, and capes
+
+Play with Microsoft or offline accounts, switch accounts per launch, and manage
+accounts from the command line. Customize skins, skin models, and capes while
+keeping previews available when the menu is reopened.
+
+### Lightweight and native
+
+Built with GTK 4 and libadwaita, Nuvasha stays focused on launching and
+managing Minecraft rather than embedding a full web browser. It supports native
+Linux installations as well as Flatpak packaging.
 
 ## Installation
 
@@ -30,9 +60,6 @@ flatpak-builder --user --install --force-clean \
     packaging/flatpak/com.github.nuvashalauncher.Nuvasha.yml
 flatpak run com.github.nuvashalauncher.nuvasha
 ```
-
-Nuvasha does not bundle a Java runtime. Add a compatible runtime in the
-launcher and select it for an instance when needed.
 
 ### Dependencies
 
@@ -115,36 +142,6 @@ To uninstall it:
 ```sh
 sudo make uninstall PREFIX=/usr/local
 ```
-
-## Command line
-
-```sh
-NuvashaLauncher                 # open the launcher
-NuvashaLauncher --import pack.mrpack
-NuvashaLauncher --launch INSTANCE_ID
-NuvashaLauncher --list-instances
-NuvashaLauncher --list-accounts
-NuvashaLauncher --switch-account ACCOUNT_UUID_OR_NAME
-NuvashaLauncher --remove-account ACCOUNT_UUID_OR_NAME
-NuvashaLauncher --remove-instance INSTANCE_ID
-NuvashaLauncher --launch INSTANCE_ID --account ACCOUNT_UUID_OR_NAME
-NuvashaLauncher --version
-```
-
-`--launch` starts the instance while keeping Nuvasha running in the
-background, without presenting its window. `.mrpack` files are also registered
-with the desktop as files Nuvasha can open. Use `--list-instances` and
-`--list-accounts` to find the UUIDs used by the other commands. Account names
-are accepted where an account is specified. `--account` selects an account for
-one launch without changing the active account.
-
-If installed, Bash completion is available for `NuvashaLauncher` options and
-file arguments.
-
-Microsoft account tokens are stored in the user's `accounts.json` with mode
-`0600`. Nuvasha must read the tokens to authenticate Minecraft, so keeping them
-in a separate desktop secret store would not prevent the launcher from having
-access to them during a launch.
 
 ## License
 
