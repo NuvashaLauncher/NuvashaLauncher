@@ -87,8 +87,10 @@ test_account_commands (void)
 static void
 test_remove_instance_command (void)
 {
+  g_autofree char *manager_path =
+    g_build_filename (data_home, "nuvasha", NULL);
   g_autoptr (NuvashaInstanceManager) manager =
-    nuvasha_instance_manager_new (NULL);
+    nuvasha_instance_manager_new (manager_path);
   g_autoptr (NuvashaInstanceManager) reloaded = NULL;
   g_autoptr (NuvashaInstance) instance = NULL;
   g_autoptr (GError) error = NULL;
@@ -96,7 +98,6 @@ test_remove_instance_command (void)
   g_autofree char *directory = NULL;
   int status = -1;
 
-  g_setenv ("XDG_DATA_HOME", data_home, TRUE);
   g_assert_true (nuvasha_instance_manager_load (manager, &error));
   g_assert_no_error (error);
   instance = nuvasha_instance_manager_create (manager, "CLI Test Instance", NULL,
@@ -110,7 +111,7 @@ test_remove_instance_command (void)
   g_assert_cmpint (status, ==, 0);
   g_clear_pointer (&output, g_free);
 
-  reloaded = nuvasha_instance_manager_new (NULL);
+  reloaded = nuvasha_instance_manager_new (manager_path);
   g_assert_true (nuvasha_instance_manager_load (reloaded, &error));
   g_assert_no_error (error);
   g_assert_null (nuvasha_instance_manager_get_by_id (
