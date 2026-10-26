@@ -3,6 +3,7 @@
  */
 
 #include "nuvasha-accounts.h"
+#include "nuvasha-instance-manager.h"
 
 #include <glib.h>
 #include <stdlib.h>
@@ -83,14 +84,52 @@ test_account_commands (void)
   g_clear_pointer (&output, g_free);
 }
 
+static void
+test_remove_instance_command (void)
+{
+  g_autoptr (NuvashaInstanceManager) manager =
+    nuvasha_instance_manager_new (NULL);
+  g_autoptr (NuvashaInstanceManager) reloaded = NULL;
+  g_autoptr (NuvashaInstance) instance = NULL;
+  g_autoptr (GError) error = NULL;
+  g_autofree char *output = NULL;
+  g_autofree char *directory = NULL;
+  int status = -1;
+
+  g_setenv ("XDG_DATA_HOME", data_home, TRUE);
+  g_assert_true (nuvasha_instance_manager_load (manager, &error));
+  g_assert_no_error (error);
+  instance = nuvasha_instance_manager_create (manager, "CLI Test Instance", NULL,
+                                               "1.20.1", nuvasha_LOADER_VANILLA,
+                                               NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+  g_object_get (instance, "directory", &directory, NULL);
+
+  output = run_cli ("--remove-instance", nuvasha_instance_get_id (instance), &status);
+  g_assert_cmpint (status, ==, 0);
+  g_clear_pointer (&output, g_free);
+
+  reloaded = nuvasha_instance_manager_new (NULL);
+  g_assert_true (nuvasha_instance_manager_load (reloaded, &error));
+  g_assert_no_error (error);
+  g_assert_null (nuvasha_instance_manager_get_by_id (
+    reloaded, nuvasha_instance_get_id (instance)));
+  g_assert_false (g_file_test (directory, G_FILE_TEST_EXISTS));
+
+  g_print ("ok - the instance CLI command removes metadata and files\n");
+}
+
 int
 main (void)
 {
   data_home = g_dir_make_tmp ("nuvasha-cli-XXXXXX", NULL);
   if (data_home == NULL)
     g_error ("could not make a temporary data directory");
+  g_setenv ("XDG_DATA_HOME", data_home, TRUE);
 
   test_account_commands ();
+  test_remove_instance_command ();
   g_free (data_home);
   g_print ("ok - account CLI commands list, switch and remove accounts\n");
   return EXIT_SUCCESS;
