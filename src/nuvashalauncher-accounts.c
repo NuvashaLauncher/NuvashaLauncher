@@ -446,13 +446,19 @@ load (nuvashalauncherAccounts *self)
 {
   g_autofree char *text = NULL;
   g_autoptr (JsonParser) parser = NULL;
+  g_autoptr (GError) read_error = NULL;
   JsonNode *root = NULL;
   JsonNode *node = NULL;
 
   if (!nuvashalauncher_fs_get_contents_within (self->filename,
-                                   nuvashalauncher_FS_MAX_SMALL_METADATA_SIZE,
-                                   &text, NULL, NULL))
-    return;
+                                    nuvashalauncher_FS_MAX_SMALL_METADATA_SIZE,
+                                    &text, NULL, &read_error))
+    {
+      if (!g_error_matches (read_error, G_FILE_ERROR, G_FILE_ERROR_NOENT))
+        g_warning ("cannot read the accounts file \"%s\": %s",
+                   self->filename, read_error->message);
+      return;
+    }
 
   parser = json_parser_new ();
 
@@ -629,6 +635,9 @@ gboolean
 nuvashalauncher_accounts_add (nuvashalauncherAccounts *self, const nuvashalauncherAccount *account, GError **error)
 {
   nuvashalauncherAccount *known = NULL;
+  nuvashalauncherAccount *previous = NULL;
+  g_autofree char *previous_active_id = NULL;
+  guint added_index = G_MAXUINT;
 
   g_return_val_if_fail (nuvashalauncher_IS_ACCOUNTS (self), FALSE);
   g_return_val_if_fail (account != NULL, FALSE);
@@ -644,11 +653,13 @@ nuvashalauncher_accounts_add (nuvashalauncherAccounts *self, const nuvashalaunch
     }
 
   known = nuvashalauncher_accounts_find (self, account->id);
+  previous_active_id = g_strdup (self->active_id);
 
   if (known != NULL)
     {
       /* Signing in again replaces what was there, which is how a
          refreshed token and a changed profile are stored. */
+      previous = nuvashalauncher_account_copy (known);
       nuvashalauncherAccount *replacement = nuvashalauncher_account_copy (account);
 
       g_free (known->id);
@@ -673,6 +684,7 @@ nuvashalauncher_accounts_add (nuvashalauncherAccounts *self, const nuvashalaunch
     }
   else
     {
+      added_index = self->accounts->len;
       g_ptr_array_add (self->accounts, nuvashalauncher_account_copy (account));
     }
 
@@ -682,7 +694,38 @@ nuvashalauncher_accounts_add (nuvashalauncherAccounts *self, const nuvashalaunch
   self->active_id = g_strdup (account->id);
 
   if (!save (self, error))
-    return FALSE;
+    {
+      if (known != NULL)
+        {
+          g_free (known->id);
+          g_free (known->name);
+          g_free (known->uuid);
+          g_free (known->access_token);
+          g_free (known->refresh_token);
+          g_free (known->avatar_url);
+          g_free (known->skin_model);
+          g_free (known->cape_id);
+          known->type = previous->type;
+          known->id = g_steal_pointer (&previous->id);
+          known->name = g_steal_pointer (&previous->name);
+          known->uuid = g_steal_pointer (&previous->uuid);
+          known->access_token = g_steal_pointer (&previous->access_token);
+          known->expires_at = previous->expires_at;
+          known->refresh_token = g_steal_pointer (&previous->refresh_token);
+          known->avatar_url = g_steal_pointer (&previous->avatar_url);
+          known->skin_model = g_steal_pointer (&previous->skin_model);
+          known->cape_id = g_steal_pointer (&previous->cape_id);
+        }
+      else if (added_index != G_MAXUINT)
+        g_ptr_array_remove_index (self->accounts, added_index);
+
+      g_clear_pointer (&self->active_id, g_free);
+      self->active_id = g_steal_pointer (&previous_active_id);
+      g_clear_pointer (&previous, nuvashalauncher_account_free);
+      return FALSE;
+    }
+
+  g_clear_pointer (&previous, nuvashalauncher_account_free);
 
   emit_changed (self);
 

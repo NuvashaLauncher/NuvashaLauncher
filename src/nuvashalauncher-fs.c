@@ -28,6 +28,17 @@ nuvashalauncher_fs_replace_contents (const char *path, const void *contents,
       return FALSE;
     }
 
+  /* GLib preserves the permissions of an existing file when replacing it.
+   * Enforce the requested mode explicitly so callers storing credentials do
+   * not silently retain permissions such as 0644 from an older file. */
+  if (g_chmod (path, mode) != 0)
+    {
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                   "cannot set permissions on \"%s\": %s", path,
+                   g_strerror (errno));
+      return FALSE;
+    }
+
   return TRUE;
 }
 
