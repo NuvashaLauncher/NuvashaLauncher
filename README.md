@@ -60,7 +60,7 @@ flatpak-builder --user --install --force-clean \
 flatpak run com.github.nuvashalauncher.nuvasha
 ```
 
-### Native installation
+### Native
 
 #### Dependencies
 

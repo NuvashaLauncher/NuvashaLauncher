@@ -39,6 +39,7 @@ the owner of that operation.
 flowchart LR
     User[User]
     Nuvasha[Nuvasha Launcher]
+    CLI[CLI commands]
     Mojang[Mojang launcher metadata
 and game resources]
     Modrinth[Modrinth API and files]
@@ -49,6 +50,7 @@ Xbox Live, Minecraft services]
     Flatpak[Flatpak application sandbox]
 
     User <--> Nuvasha
+    User --> CLI --> Nuvasha
     Nuvasha --> Mojang
     Nuvasha --> Modrinth
     Nuvasha --> Microsoft
@@ -90,6 +92,7 @@ flowchart TD
     Downloads[Download service, slots, cache]
     Launch[Launcher and process monitor]
     Java[Java detection]
+    Skins[Skins and capes]
     Flatpak[Flatpak application sandbox]
     FS[Filesystem and JSON helpers]
 
@@ -98,6 +101,7 @@ flowchart TD
     Model --> Instances
     Model --> Accounts
     Model --> Settings
+    Model --> Skins
     Window --> Content
     Window --> Packs
     Content --> Downloads
@@ -108,6 +112,7 @@ flowchart TD
     Launch --> Resolve
     Launch --> Java
     Launch --> Accounts
+    Skins --> Accounts
     Resolve --> Versions
     Resolve --> Loaders
     Resolve --> Downloads
@@ -115,6 +120,7 @@ flowchart TD
     Instances --> FS
     Accounts --> FS
     Downloads --> FS
+    Skins --> FS
 ```
 
 ### Application and UI
