@@ -10,6 +10,7 @@
 
 #define ASSET_BUCKET_LENGTH 2
 #define ASSET_RESOURCE_PREFIX "minecraft/"
+#define ASSET_SHA1_LENGTH 40
 
 /* Asset-index planning, object downloads, and virtual asset copies. */
 
@@ -19,8 +20,12 @@ asset_object_path (ResolveRequest *request, const char *hash, char **bucket)
   g_autofree char *name = NULL;
   g_autofree char *directory = NULL;
 
-  if (hash == NULL || strlen (hash) < ASSET_BUCKET_LENGTH)
+  if (hash == NULL || strlen (hash) != ASSET_SHA1_LENGTH)
     return NULL;
+
+  for (const char *p = hash; *p != '\0'; p++)
+    if (!g_ascii_isxdigit (*p))
+      return NULL;
 
   name = g_strndup (hash, ASSET_BUCKET_LENGTH);
   directory = g_build_filename (request->objects_dir, name, NULL);
@@ -244,7 +249,22 @@ resolve_objects (ResolveRequest *request)
         JsonObject *object = json_node_get_object (node);
 
         if (json_object_has_member (object, "hash"))
-          hash = json_object_get_string_member (object, "hash");
+          {
+            JsonNode *hash_node = json_object_get_member (object, "hash");
+
+            if (!JSON_NODE_HOLDS_VALUE (hash_node) ||
+                json_node_get_value_type (hash_node) != G_TYPE_STRING)
+              {
+                request_fail_and_wait (
+                  request,
+                  g_error_new (nuvashalauncher_RESOLVE_ERROR,
+                               nuvashalauncher_RESOLVE_ERROR_ASSETS,
+                               "the asset \"%s\" has an invalid hash", name));
+                return;
+              }
+
+            hash = json_node_get_string (hash_node);
+          }
 
         if (json_object_has_member (object, "path"))
           asset_path = json_object_get_string_member (object, "path");

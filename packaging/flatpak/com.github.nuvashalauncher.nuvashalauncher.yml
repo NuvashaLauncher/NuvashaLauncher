@@ -19,4 +19,5 @@ modules:
     sources:
       - type: git
         url: https://github.com/nuvashalauncher/nuvashalauncher.git
+        # Build from the current main-branch commit.
         branch: main
