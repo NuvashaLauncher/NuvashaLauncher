@@ -19,4 +19,4 @@ modules:
     sources:
       - type: git
         url: https://github.com/nuvashalauncher/nuvashalauncher.git
-        commit: 57beb8d244dee669f42a2ce268fe8e0da9648b1f
+        commit: 0ae6c6a6db384e34e22fa8f9dd7bf16b4ae70e20
