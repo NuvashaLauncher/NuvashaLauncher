@@ -23,6 +23,7 @@ jobs:
             flatpak \
             flatpak-builder \
             git \
+            make \
             xorg-x11-server-Xvfb
           flatpak remote-add --if-not-exists flathub \
             https://flathub.org/repo/flathub.flatpakrepo
@@ -33,3 +34,9 @@ jobs:
           bundle: nuvashalauncher.flatpak
           manifest-path: packaging/flatpak/com.github.nuvashalauncher.nuvashalauncher.yml
           cache: true
+
+      - name: Install Flatpak bundle
+        run: flatpak install --user --noninteractive nuvashalauncher.flatpak
+
+      - name: Run Flatpak smoke test
+        run: make test-flatpak-runtime

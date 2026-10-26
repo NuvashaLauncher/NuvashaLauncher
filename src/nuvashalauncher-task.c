@@ -16,13 +16,14 @@ struct _nuvashalauncherTaskScope
 {
   gatomicrefcount refs;
   guint64 id;
-  nuvashalauncherTaskState state;
+  gint state;
   GTask *task;
+  GMainContext *context;
   GArray *sources;
   GArray *completions;
   GArray *followed;
   gboolean owns_task;
-  gboolean unref_when_done;
+  gint unref_when_done;
 };
 
 static gint next_task_id;
@@ -53,7 +54,7 @@ nuvashalauncherTaskState
 nuvashalauncher_task_scope_get_state (const nuvashalauncherTaskScope *scope)
 {
   g_return_val_if_fail (scope != NULL, nuvashalauncher_TASK_STATE_FAILED);
-  return scope->state;
+  return (nuvashalauncherTaskState) g_atomic_int_get (&scope->state);
 }
 
 void
@@ -70,20 +71,33 @@ nuvashalauncher_task_result_is_valid (GAsyncResult *result, const char *expected
   if (!G_IS_TASK (result))
     return FALSE;
   tag = g_task_get_source_tag (G_TASK (result));
-  return tag != NULL && (expected_tag == NULL ||
-                         g_str_equal (expected_tag, "nuvashalauncher-task-scope") ||
-                         g_str_equal (tag, expected_tag) ||
-                         g_str_equal (tag, "nuvashalauncher-task-sequence"));
+  if (tag == NULL)
+    return FALSE;
+
+  if (expected_tag == NULL)
+    return TRUE;
+
+  if (g_str_equal (tag, expected_tag) ||
+      g_str_equal (tag, "nuvashalauncher-task-sequence"))
+    return TRUE;
+
+  /* A generic scope result must actually have been created by this helper;
+   * a caller-supplied GTask with an arbitrary diagnostic tag is not enough. */
+  return g_str_equal (expected_tag, "nuvashalauncher-task-scope") &&
+         g_object_get_data (G_OBJECT (result),
+                            "nuvashalauncher-task-scope-marker") != NULL;
 }
 
 void
 nuvashalauncher_task_scope_set_state (nuvashalauncherTaskScope *scope, nuvashalauncherTaskState state)
 {
   g_return_if_fail (scope != NULL);
-  if (scope->state != state)
+  nuvashalauncherTaskState previous =
+    (nuvashalauncherTaskState) g_atomic_int_get (&scope->state);
+  if (previous != state)
     g_debug ("operation=%" G_GUINT64_FORMAT " state=%d->%d", scope->id,
-             scope->state, state);
-  scope->state = state;
+             previous, state);
+  g_atomic_int_set (&scope->state, state);
 }
 
 static void
@@ -116,15 +130,18 @@ nuvashalauncher_task_scope_new_tagged (GObject *source_object, GCancellable *can
     owned = g_cancellable_new ();
 
   scope->task = g_task_new (source_object, cancellable != NULL ? cancellable
-                                                               : owned,
+                                                                : owned,
                              callback, user_data);
+  scope->context = g_main_context_ref (g_task_get_context (scope->task));
   /* Every scope has a useful diagnostic tag, including legacy callers that
    * do not provide a more specific operation tag. Public operations may
    * replace this with their API-specific tag. */
   g_task_set_source_tag (scope->task,
                          (gpointer) (source_tag != NULL ? source_tag
-                                                         : "nuvashalauncher-task-scope"));
-  scope->owns_task = TRUE;
+                                                          : "nuvashalauncher-task-scope"));
+  g_object_set_data (G_OBJECT (scope->task),
+                     "nuvashalauncher-task-scope-marker", scope->task);
+  nuvashalauncher_task_scope_take_task (scope);
   return scope;
 }
 
@@ -134,6 +151,7 @@ nuvashalauncher_task_scope_from_task (GTask *task)
   nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_alloc ();
 
   scope->task = task;
+  scope->context = g_main_context_ref (g_task_get_context (task));
   return scope;
 }
 
@@ -158,19 +176,22 @@ nuvashalauncher_task_scope_unref (nuvashalauncherTaskScope *scope)
   for (guint i = 0; i < scope->sources->len; i++)
     {
       guint source_id = g_array_index (scope->sources, guint, i);
-      if (g_main_context_find_source_by_id (NULL, source_id) != NULL)
-        g_source_remove (source_id);
+       GSource *source = g_main_context_find_source_by_id (scope->context, source_id);
+       if (source != NULL)
+         g_source_destroy (source);
     }
   for (guint i = 0; i < scope->completions->len; i++)
     {
       guint source_id = g_array_index (scope->completions, guint, i);
-      if (g_main_context_find_source_by_id (NULL, source_id) != NULL)
-        g_source_remove (source_id);
+       GSource *source = g_main_context_find_source_by_id (scope->context, source_id);
+       if (source != NULL)
+         g_source_destroy (source);
     }
   g_array_unref (scope->sources);
   g_array_unref (scope->completions);
   nuvashalauncher_task_scope_unfollow (scope);
   g_array_unref (scope->followed);
+  g_main_context_unref (scope->context);
   g_free (scope);
 }
 
@@ -181,6 +202,9 @@ nuvashalauncher_task_scope_attach_task (GTask *task)
 
   if (g_task_get_source_tag (task) == NULL)
     g_task_set_source_tag (task, "nuvashalauncher-task-scope");
+
+  g_object_set_data (G_OBJECT (task),
+                     "nuvashalauncher-task-scope-marker", task);
 
   g_object_set_data_full (G_OBJECT (task), "nuvashalauncher-task-scope",
                           nuvashalauncher_task_scope_from_task (task),
@@ -220,8 +244,12 @@ release_when_done_idle (gpointer user_data)
 static void
 scope_release_when_done (nuvashalauncherTaskScope *scope)
 {
-  scope->unref_when_done = FALSE;
-  g_idle_add_full (G_PRIORITY_DEFAULT, release_when_done_idle, scope, NULL);
+  g_atomic_int_set (&scope->unref_when_done, FALSE);
+  GSource *source = g_idle_source_new ();
+  g_source_set_priority (source, G_PRIORITY_DEFAULT);
+  g_source_set_callback (source, release_when_done_idle, scope, NULL);
+  g_source_attach (source, scope->context);
+  g_source_unref (source);
 }
 
 gboolean
@@ -236,7 +264,7 @@ nuvashalauncher_task_scope_return_error_if_cancelled (nuvashalauncherTaskScope *
   cancelled = g_task_return_error_if_cancelled (scope->task);
   if (cancelled)
     nuvashalauncher_task_scope_set_state (scope, nuvashalauncher_TASK_STATE_CANCELLED);
-  if (cancelled && scope->unref_when_done)
+  if (cancelled && g_atomic_int_get (&scope->unref_when_done))
     scope_release_when_done (scope);
 
   nuvashalauncher_task_scope_unref (hold);
@@ -254,9 +282,9 @@ nuvashalauncher_task_scope_return_pointer (nuvashalauncherTaskScope *scope, gpoi
   nuvashalauncher_task_scope_set_state (scope, nuvashalauncher_TASK_STATE_COMPLETED);
 
   hold = nuvashalauncher_task_scope_ref (scope);
-  release = scope->unref_when_done;
+  release = g_atomic_int_get (&scope->unref_when_done);
   g_task_return_pointer (scope->task, result, result_free);
-  if (release && scope->unref_when_done)
+  if (release && g_atomic_int_get (&scope->unref_when_done))
     scope_release_when_done (scope);
   nuvashalauncher_task_scope_unref (hold);
 }
@@ -271,9 +299,9 @@ nuvashalauncher_task_scope_return_error (nuvashalauncherTaskScope *scope, GError
   nuvashalauncher_task_scope_set_state (scope, nuvashalauncher_TASK_STATE_FAILED);
 
   hold = nuvashalauncher_task_scope_ref (scope);
-  release = scope->unref_when_done;
+  release = g_atomic_int_get (&scope->unref_when_done);
   g_task_return_error (scope->task, error);
-  if (release && scope->unref_when_done)
+  if (release && g_atomic_int_get (&scope->unref_when_done))
     scope_release_when_done (scope);
   nuvashalauncher_task_scope_unref (hold);
 }
@@ -289,9 +317,9 @@ nuvashalauncher_task_scope_return_boolean (nuvashalauncherTaskScope *scope, gboo
                                           : nuvashalauncher_TASK_STATE_FAILED);
 
   hold = nuvashalauncher_task_scope_ref (scope);
-  release = scope->unref_when_done;
+  release = g_atomic_int_get (&scope->unref_when_done);
   g_task_return_boolean (scope->task, result);
-  if (release && scope->unref_when_done)
+  if (release && g_atomic_int_get (&scope->unref_when_done))
     scope_release_when_done (scope);
   nuvashalauncher_task_scope_unref (hold);
 }
@@ -300,7 +328,7 @@ nuvashalauncherTaskScope *
 nuvashalauncher_task_scope_unref_when_done (nuvashalauncherTaskScope *scope)
 {
   g_return_val_if_fail (scope != NULL, NULL);
-  scope->unref_when_done = TRUE;
+  g_atomic_int_set (&scope->unref_when_done, TRUE);
   return scope;
 }
 
@@ -399,8 +427,12 @@ defer_completion (nuvashalauncherTaskScope *scope, DeferredCompletion *deferred)
   deferred->scope = nuvashalauncher_task_scope_ref (scope);
   deferred->task = g_object_ref (scope->task);
 
-  source_id = g_idle_add_full (G_PRIORITY_DEFAULT, deferred_completion_return,
-                              deferred, deferred_completion_free);
+  GSource *source = g_idle_source_new ();
+  g_source_set_priority (source, G_PRIORITY_DEFAULT);
+  g_source_set_callback (source, deferred_completion_return, deferred,
+                         deferred_completion_free);
+  source_id = g_source_attach (source, scope->context);
+  g_source_unref (source);
   if (source_id != 0)
     g_array_append_val (scope->completions, source_id);
 }
@@ -468,8 +500,9 @@ nuvashalauncher_task_scope_remove_source (nuvashalauncherTaskScope *scope, guint
   for (guint i = 0; i < scope->sources->len; i++)
     if (g_array_index (scope->sources, guint, i) == source_id)
       {
-        if (g_main_context_find_source_by_id (NULL, source_id) != NULL)
-          g_source_remove (source_id);
+        GSource *source = g_main_context_find_source_by_id (scope->context, source_id);
+        if (source != NULL)
+          g_source_destroy (source);
         g_array_remove_index_fast (scope->sources, i);
         return;
       }
@@ -498,8 +531,9 @@ nuvashalauncher_task_scope_cancel (nuvashalauncherTaskScope *scope)
   for (guint i = 0; i < scope->sources->len; i++)
     {
       guint source_id = g_array_index (scope->sources, guint, i);
-      if (g_main_context_find_source_by_id (NULL, source_id) != NULL)
-        g_source_remove (source_id);
+       GSource *source = g_main_context_find_source_by_id (scope->context, source_id);
+       if (source != NULL)
+         g_source_destroy (source);
     }
   g_array_set_size (scope->sources, 0);
 }
@@ -538,266 +572,10 @@ nuvashalauncher_task_scope_follow_cancellable (nuvashalauncherTaskScope *scope, 
   g_array_append_val (scope->followed, followed);
 }
 
-/* ---------------------------------------------------------- *
- * Watching a cancellable
- * ---------------------------------------------------------- */
-
-/* The state behind nuvashalauncher_cancellable_watch(). It lives as long as the source
-   does, and the source's destroy notify is what tears it down. */
-typedef struct
-{
-  GCancellable *cancellable;
-  GSourceFunc callback;
-  gpointer user_data;
-  GDestroyNotify notify;
-  gulong handler;
-} CancellableWatch;
-
-/* Answers from a source dispatch, which is a main-loop turn of its own. By
-   then the cancellable's emission has returned, so the disconnect below is
-   not one made from inside that emission, which GLib deadlocks on. */
-static gboolean
-watch_dispatch (gpointer user_data)
-{
-  CancellableWatch *watch = user_data;
-
-  return watch->callback (watch->user_data);
-}
-
-static void
-watch_free (gpointer user_data)
-{
-  CancellableWatch *watch = user_data;
-
-  if (watch->handler != 0)
-    g_cancellable_disconnect (watch->cancellable, watch->handler);
-  g_clear_object (&watch->cancellable);
-
-  if (watch->notify != NULL)
-    watch->notify (watch->user_data);
-  g_free (watch);
-}
-
-/* Marks the watch ready. Connecting to a cancellable that is already
-   cancelled runs this before nuvashalauncher_cancellable_watch() has attached the
-   source, which is harmless: the source is not due until it is told. */
-static void
-watch_cancelled (GCancellable *cancellable G_GNUC_UNUSED,
-                 gpointer      user_data)
-{
-  g_source_set_ready_time (user_data, 0);
-}
-
-guint
-nuvashalauncher_cancellable_watch (GCancellable  *cancellable,
-                       GSourceFunc    callback,
-                       gpointer       user_data,
-                       GDestroyNotify notify)
-{
-  CancellableWatch *watch = g_new0 (CancellableWatch, 1);
-  GSource *source;
-  guint source_id;
-
-  g_return_val_if_fail (G_IS_CANCELLABLE (cancellable), 0);
-  g_return_val_if_fail (callback != NULL, 0);
-
-  watch->callback = callback;
-  watch->user_data = user_data;
-  watch->notify = notify;
-  watch->cancellable = g_object_ref (cancellable);
-
-  /* A timeout that is due at a time that has not come: GLib compares a
-     plain source's ready time against the clock, so this is how a source is
-     written that stays quiet until it is told to speak. An idle source
-     would not do - it ignores the ready time and dispatches on the first
-     turn of the loop, cancelled or not. */
-  source = g_timeout_source_new (0);
-  g_source_set_ready_time (source, G_MAXINT64);
-  g_source_set_callback (source, watch_dispatch, watch, watch_free);
-  watch->handler =
-    g_cancellable_connect (cancellable, G_CALLBACK (watch_cancelled), source,
-                           NULL);
-
-  source_id = g_source_attach (source, NULL);
-  g_source_unref (source);
-
-  return source_id;
-}
-
-struct _nuvashalauncherTaskSequence
-{
-  gatomicrefcount refs;
-  GTask *task;
-  nuvashalauncherTaskSequenceStep step;
-  gpointer user_data;
-  GDestroyNotify user_data_free;
-  gboolean finished;
-};
-
-static void
-sequence_finalize (gpointer user_data)
-{
-  nuvashalauncher_task_sequence_unref (user_data);
-}
-
-/* Lets go of the step state and finishes the sequence. The struct itself
- * is not freed here: it is handed to the task it was built on, which
- * frees it when the task is finalized.
- *
- * The reason is the finished flag. A caller keeps the sequence pointer
- * after the sequence completes, and a late second completion reads that
- * flag to see that there is nothing left to do. Freeing the struct at
- * the moment of completion makes that read a read of freed memory, so
- * the flag can never be true and the protection it is written to give is
- * not there at all. Tying the struct to the task keeps it readable for
- * as long as anyone can still hold the pointer, because a caller that
- * holds the pointer also holds the task. */
-static void
-sequence_finish (nuvashalauncherTaskSequence *sequence)
-{
-  if (sequence->user_data_free != NULL)
-    {
-      sequence->user_data_free (sequence->user_data);
-      sequence->user_data_free = NULL;
-      sequence->user_data = NULL;
-    }
-
-  /* Transfer the sequence's internal lifetime reference to the task. */
-  g_task_set_task_data (sequence->task, sequence, sequence_finalize);
-
-  /* The task goes out to whoever completes it, and the sequence rides
-     along with it, so the reference taken in nuvashalauncher_task_sequence_new is
-     given back here. A completed sequence has no task left to hand
-     out, which is why the finished flag is checked before that. */
-  g_clear_object (&sequence->task);
-}
-
-nuvashalauncherTaskSequence *
-nuvashalauncher_task_sequence_ref (nuvashalauncherTaskSequence *sequence)
-{
-  g_return_val_if_fail (sequence != NULL, NULL);
-  g_atomic_ref_count_inc (&sequence->refs);
-  return sequence;
-}
 
 void
-nuvashalauncher_task_sequence_unref (nuvashalauncherTaskSequence *sequence)
+nuvashalauncher_task_scope_take_task (nuvashalauncherTaskScope *scope)
 {
-  if (sequence == NULL || !g_atomic_ref_count_dec (&sequence->refs))
-    return;
-
-  g_free (sequence);
-}
-
-nuvashalauncherTaskSequence *
-nuvashalauncher_task_sequence_new (GCancellable *cancellable,
-                       GAsyncReadyCallback callback,
-                       gpointer callback_data,
-                       nuvashalauncherTaskSequenceStep step,
-                       gpointer user_data,
-                       GDestroyNotify user_data_free)
-{
-  nuvashalauncherTaskSequence *sequence = g_new0 (nuvashalauncherTaskSequence, 1);
-
-  g_atomic_ref_count_init (&sequence->refs);
-  /* One reference belongs to the caller; the other lasts until completion
-   * transfers it to the GTask's task data. */
-  g_atomic_ref_count_inc (&sequence->refs);
-  sequence->task = g_task_new (NULL, cancellable, callback, callback_data);
-  g_task_set_source_tag (sequence->task, "nuvashalauncher-task-sequence");
-  sequence->step = step;
-  sequence->user_data = user_data;
-  sequence->user_data_free = user_data_free;
-  return sequence;
-}
-
-GCancellable *
-nuvashalauncher_task_sequence_get_cancellable (const nuvashalauncherTaskSequence *sequence)
-{
-  g_return_val_if_fail (sequence != NULL, NULL);
-  return g_task_get_cancellable (sequence->task);
-}
-
-nuvashalauncherTaskScope *
-nuvashalauncher_task_sequence_scope (nuvashalauncherTaskSequence *sequence)
-{
-  nuvashalauncherTaskScope *scope;
-
-  g_return_val_if_fail (sequence != NULL, NULL);
-
-  /* A scope that takes over a reference of its own: the sequence keeps
-     the task running regardless, and this is the reference that lets the
-     handle outlive the caller that stored it. */
-  scope = nuvashalauncher_task_scope_from_task (g_object_ref (sequence->task));
+  g_return_if_fail (scope != NULL);
   scope->owns_task = TRUE;
-  return scope;
-}
-
-void
-nuvashalauncher_task_sequence_start (nuvashalauncherTaskSequence *sequence)
-{
-  g_return_if_fail (sequence != NULL);
-  g_return_if_fail (sequence->step != NULL);
-
-  if (g_task_return_error_if_cancelled (sequence->task))
-    {
-      sequence->finished = TRUE;
-      sequence_finish (sequence);
-      return;
-    }
-
-  sequence->step (sequence, sequence->user_data);
-}
-
-void
-nuvashalauncher_task_sequence_next (nuvashalauncherTaskSequence *sequence)
-{
-  g_return_if_fail (sequence != NULL);
-
-  if (sequence->finished)
-    return;
-
-  if (g_task_return_error_if_cancelled (sequence->task))
-    {
-      sequence->finished = TRUE;
-      sequence_finish (sequence);
-      return;
-    }
-
-  sequence->step (sequence, sequence->user_data);
-}
-
-void
-nuvashalauncher_task_sequence_return_pointer (nuvashalauncherTaskSequence *sequence,
-                                  gpointer result,
-                                  GDestroyNotify result_free)
-{
-  g_return_if_fail (sequence != NULL);
-
-  if (sequence->finished)
-    {
-      if (result_free != NULL)
-        result_free (result);
-      return;
-    }
-
-  sequence->finished = TRUE;
-  g_task_return_pointer (sequence->task, result, result_free);
-  sequence_finish (sequence);
-}
-
-void
-nuvashalauncher_task_sequence_return_error (nuvashalauncherTaskSequence *sequence, GError *error)
-{
-  g_return_if_fail (sequence != NULL);
-
-  if (sequence->finished)
-    {
-      g_error_free (error);
-      return;
-    }
-
-  sequence->finished = TRUE;
-  g_task_return_error (sequence->task, error);
-  sequence_finish (sequence);
 }

@@ -99,6 +99,15 @@ main (void)
   g_assert_true (nuvashalauncher_java_row_get_ready (row));
 
   model = GTK_STRING_LIST (adw_combo_row_get_model (ADW_COMBO_ROW (row)));
+  detected = nuvashalauncher_java_row_get_detected (row);
+
+  if (detected->len == 0)
+    {
+      g_object_unref (row);
+      g_print ("skipped - no Java runtime was detected\n");
+      return 77;
+    }
+
   n = g_list_model_get_n_items (G_LIST_MODEL (model));
   g_assert_cmpuint (n, >=, 1);
 
@@ -106,8 +115,6 @@ main (void)
    * entry and not repeated below. A machine with more than one runtime
    * whose names collide would show it twice for a reason of its own, so
    * this is checked where the answer is unambiguous. */
-  detected = nuvashalauncher_java_row_get_detected (row);
-
   if (detected->len == 1)
     {
       nuvashalauncherJava *only = g_ptr_array_index (detected, 0);

@@ -12,6 +12,7 @@
 nuvashalauncherTaskScope *nuvashalauncher_task_scope_from_task (GTask *task);
 void nuvashalauncher_task_scope_attach_task (GTask *task);
 GTask *nuvashalauncher_task_scope_task (const nuvashalauncherTaskScope *scope);
+void nuvashalauncher_task_scope_take_task (nuvashalauncherTaskScope *scope);
 
 /* Internal cancellable watch with caller-owned callback data. */
 guint nuvashalauncher_cancellable_watch (GCancellable  *cancellable,

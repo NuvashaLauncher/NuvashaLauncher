@@ -154,6 +154,15 @@ file_from_node (JsonNode *node, GError **error)
   file->sha512 = g_steal_pointer (&sha512);
   file->file_size = (goffset) nuvashalauncher_json_int (node, "fileSize", 0);
 
+  if (file->file_size < 0)
+    {
+      g_set_error (error, nuvashalauncher_MODPACK_ERROR,
+                   nuvashalauncher_MODPACK_ERROR_FORMAT,
+                   "\"%s\" has an invalid file size", file->path);
+      nuvashalauncher_modpack_file_free (file);
+      return NULL;
+    }
+
   {
     JsonNode *env = json_object_get_member (object, "env");
 

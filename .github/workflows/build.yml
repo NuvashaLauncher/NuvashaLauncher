@@ -27,13 +27,23 @@ jobs:
           dnf install -y \
              gcc gcc-c++ make pkgconf-pkg-config gettext \
              glib2-devel gtk4-devel libadwaita-devel libepoxy-devel \
-             json-glib-devel libsoup3-devel libarchive-devel
+             json-glib-devel libsoup3-devel libarchive-devel \
+             xorg-x11-server-Xvfb dbus-daemon
 
       - name: Build
         run: make fast CFLAGS="-std=c17 -Wall -Wextra -Wpedantic -Werror -MMD -MP"
 
       - name: Run tests
-        run: make test
+        run: dbus-uuidgen --ensure=/etc/machine-id && make test
+
+      - name: Run display-backed tests
+        run: make test-display
+
+      - name: Run sanitizer tests
+        run: make test-debug
+
+      - name: Run leak sanitizer tests
+        run: make test-lsan
 
       - name: Run static analysis
         run: make static-analysis

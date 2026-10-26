@@ -104,6 +104,47 @@ test_scope_ids_and_states (void)
   g_print ("ok - operation ids and lifecycle states are observable\n");
 }
 
+typedef struct
+{
+  GMainLoop *loop;
+  gboolean called;
+} ContextResult;
+
+static void
+custom_context_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                     gpointer user_data)
+{
+  ContextResult *data = user_data;
+  g_autoptr (GError) error = NULL;
+
+  g_assert_true (g_task_propagate_boolean (G_TASK (result), &error));
+  g_assert_no_error (error);
+  data->called = TRUE;
+  g_main_loop_quit (data->loop);
+}
+
+static void
+test_scope_uses_task_context (void)
+{
+  GMainContext *context = g_main_context_new ();
+  ContextResult result = { 0 };
+  g_autoptr (nuvashalauncherTaskScope) scope = NULL;
+
+  result.loop = g_main_loop_new (context, FALSE);
+  g_main_context_push_thread_default (context);
+  scope = nuvashalauncher_task_scope_new (NULL, NULL, custom_context_done,
+                                          &result);
+  g_main_context_pop_thread_default (context);
+
+  nuvashalauncher_task_scope_return_boolean_deferred (scope, TRUE);
+  g_main_loop_run (result.loop);
+
+  g_assert_true (result.called);
+  g_main_loop_unref (result.loop);
+  g_main_context_unref (context);
+  g_print ("ok - task completions use their thread-default context\n");
+}
+
 static void
 error_step (nuvashalauncherTaskSequence *sequence G_GNUC_UNUSED, gpointer user_data)
 {
@@ -694,6 +735,7 @@ main (int argc, char **argv)
   test_callback_can_release_owned_operation ();
   test_scope_does_not_follow_its_own_cancellable ();
   test_scope_ids_and_states ();
+  test_scope_uses_task_context ();
 
   g_print ("# Task scope and sources it has already lost\n");
   test_scope_free_releases_a_source_that_fired ();

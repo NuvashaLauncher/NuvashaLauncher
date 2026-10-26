@@ -316,6 +316,8 @@ extract_layers (const char *archive_path, const char *directory,
       g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_ARCHIVE,
                    "the pack cannot be opened: %s",
                    archive_error_string (archive));
+      if (fd >= 0)
+        close (fd);
       archive_read_free (archive);
       return FALSE;
     }

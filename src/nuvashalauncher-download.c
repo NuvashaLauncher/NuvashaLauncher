@@ -300,16 +300,30 @@ nuvashalauncher_download_request_succeed_json (DownloadRequest *request, JsonPar
 /* Transfer and retry state machine lives in nuvashalauncher-download-transfer.c. */
 nuvashalauncherTaskScope *
 nuvashalauncher_download_file_async (nuvashalauncherDownloadService *service, const char *url,
-                         const char *dest_path,
+                          const char *dest_path,
                          const char *expected_hash,
                          GChecksumType hash_type,
-                         nuvashalauncherDownloadProgressFunc progress,
-                         GAsyncReadyCallback callback,
-                         gpointer user_data)
+                          nuvashalauncherDownloadProgressFunc progress,
+                          GAsyncReadyCallback callback,
+                          gpointer user_data)
+{
+  return nuvashalauncher_download_file_limited_async (
+    service, url, dest_path, expected_hash, hash_type, -1, progress, callback,
+    user_data);
+}
+
+nuvashalauncherTaskScope *
+nuvashalauncher_download_file_limited_async (nuvashalauncherDownloadService *service,
+                          const char *url, const char *dest_path,
+                          const char *expected_hash, GChecksumType hash_type,
+                          goffset max_size,
+                          nuvashalauncherDownloadProgressFunc progress,
+                          GAsyncReadyCallback callback, gpointer user_data)
 {
   g_return_val_if_fail (url != NULL, NULL);
   g_return_val_if_fail (dest_path != NULL, NULL);
   g_return_val_if_fail (g_path_is_absolute (dest_path), NULL);
+  g_return_val_if_fail (max_size >= -1, NULL);
 
   g_autoptr (nuvashalauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
@@ -349,9 +363,10 @@ nuvashalauncher_download_file_async (nuvashalauncherDownloadService *service, co
   request->scope = scope;
    request->service = service;
    request->task = g_object_ref (nuvashalauncher_task_scope_task (scope));
-  request->url = g_strdup (url);
-  request->dest_path = g_strdup (dest_path);
-  request->expected_hash = g_strdup (expected_hash);
+   request->url = g_strdup (url);
+   request->dest_path = g_strdup (dest_path);
+   request->expected_hash = g_strdup (expected_hash);
+   request->max_size = max_size;
   request->hash_type = hash_type;
   request->progress = progress;
   request->user_data = user_data;

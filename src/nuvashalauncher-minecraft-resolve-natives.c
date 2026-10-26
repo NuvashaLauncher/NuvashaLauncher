@@ -11,6 +11,7 @@
 #include <archive.h>
 #include <archive_entry.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <glib/gstdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -81,29 +82,6 @@ is_plain_directory (GFile *file, GError **error)
   return TRUE;
 }
 
-/* TRUE when @file holds nothing yet, or something this module wrote
-   before. A symlink where a regular file belongs is refused for the same
-   reason a symlink is refused as a directory. */
-static gboolean
-is_writable_target (GFile *file, GError **error)
-{
-  g_autoptr (GFileInfo) info = g_file_query_info (
-      file, G_FILE_ATTRIBUTE_STANDARD_TYPE, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-      NULL, error);
-
-  if (info == NULL)
-    return TRUE;
-
-  if (g_file_info_get_file_type (info) != G_FILE_TYPE_REGULAR)
-    {
-      g_set_error (error, nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_UNSAFE_PATH,
-                   "\"%s\" is not a regular file", g_file_peek_path (file));
-      return FALSE;
-    }
-
-  return TRUE;
-}
-
 /* Creates every directory of @relative below @root, refusing anything
    that is not a plain directory on the way. */
 static gboolean
@@ -166,6 +144,98 @@ typedef struct
   struct archive *archive;
   GBytes *bytes;
 } ExtractStep;
+
+typedef struct
+{
+  char *directory;
+  char *relative;
+  GBytes *data;
+} NativeWrite;
+
+static void extract_write_ready (GObject *source, GAsyncResult *result,
+                                 gpointer user_data);
+
+static void
+native_write_free (NativeWrite *output)
+{
+  g_free (output->directory);
+  g_free (output->relative);
+  g_clear_pointer (&output->data, g_bytes_unref);
+  g_free (output);
+}
+
+static void
+native_write_thread (GTask *task,
+                     gpointer source_object G_GNUC_UNUSED,
+                     gpointer task_data,
+                     GCancellable *cancellable)
+{
+  NativeWrite *output = task_data;
+  g_autoptr (GError) error = NULL;
+  gsize length = 0;
+  const guint8 *data = g_bytes_get_data (output->data, &length);
+  int fd = nuvashalauncher_fs_open_file_nofollow (
+    output->directory, output->relative,
+    O_WRONLY | O_CREAT | O_TRUNC, 0755, 0644, &error);
+
+  if (fd < 0)
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  for (gsize written = 0; written < length;)
+    {
+      ssize_t count = write (fd, data + written, length - written);
+
+      if (count < 0 && errno == EINTR)
+        continue;
+      if (count < 0)
+        {
+          g_set_error (&error, G_IO_ERROR, g_io_error_from_errno (errno),
+                       "cannot write native file \"%s\": %s",
+                       output->relative, g_strerror (errno));
+          close (fd);
+          g_task_return_error (task, g_steal_pointer (&error));
+          return;
+        }
+      written += (gsize) count;
+    }
+
+  if (close (fd) != 0)
+    {
+      g_set_error (&error, G_IO_ERROR, g_io_error_from_errno (errno),
+                   "cannot close native file \"%s\": %s",
+                   output->relative, g_strerror (errno));
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  if (g_cancellable_is_cancelled (cancellable))
+    {
+      g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_CANCELLED,
+                               "native extraction was cancelled");
+      return;
+    }
+
+  g_task_return_boolean (task, TRUE);
+}
+
+static void
+native_write_async (ExtractStep *step, const char *relative, GBytes *data)
+{
+  NativeWrite *output = g_new0 (NativeWrite, 1);
+  GTask *task = g_task_new (NULL,
+                            g_task_get_cancellable (step->request->task),
+                            extract_write_ready, step);
+
+  output->directory = g_strdup (step->request->directory);
+  output->relative = g_strdup (relative);
+  output->data = g_bytes_ref (data);
+  g_task_set_task_data (task, output, (GDestroyNotify) native_write_free);
+  g_task_run_in_thread (task, native_write_thread);
+  g_object_unref (task);
+}
 
 static void
 extract_request_free (ExtractRequest *request)
@@ -249,14 +319,13 @@ extract_read_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 
 /* One entry has been written: back into the jar for the next one. */
 static void
-extract_write_ready (GObject *source, GAsyncResult *result, gpointer user_data)
+extract_write_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                     gpointer user_data)
 {
   g_autoptr (GError) error = NULL;
   ExtractStep *step = user_data;
 
-  nuvashalauncher_fs_replace_contents_finish (G_FILE (source), result, NULL, &error);
-
-  if (error != NULL)
+  if (!g_task_propagate_boolean (G_TASK (result), &error))
     {
       extract_finished (step->request, g_steal_pointer (&error));
       extract_step_free (step);
@@ -331,14 +400,14 @@ extract_entries (ExtractStep *step)
   ExtractRequest *request = step->request;
   nuvashalauncherResolveFile *jar = g_ptr_array_index (request->jars, request->index);
   struct archive_entry *entry = NULL;
+  int status;
 
-  while (archive_read_next_header (step->archive, &entry) == ARCHIVE_OK)
+  while ((status = archive_read_next_header (step->archive, &entry)) == ARCHIVE_OK)
     {
       const char *name = archive_entry_pathname (entry);
       g_autofree char *relative = NULL;
       g_autofree char *path = NULL;
       g_autoptr (GBytes) data = NULL;
-      g_autoptr (GFile) file = NULL;
       g_autoptr (GError) error = NULL;
       gsize length = 0;
       mode_t filetype = archive_entry_filetype (entry);
@@ -395,15 +464,6 @@ extract_entries (ExtractStep *step)
           return;
         }
 
-      file = g_file_new_for_path (path);
-
-      if (!is_writable_target (file, &error))
-        {
-          extract_finished (request, g_steal_pointer (&error));
-          extract_step_free (step);
-          return;
-        }
-
       if (!read_entry (step->archive, &data, &error))
         {
           extract_finished (request, g_steal_pointer (&error));
@@ -424,11 +484,19 @@ extract_entries (ExtractStep *step)
           return;
         }
 
-       nuvashalauncher_fs_replace_contents_bytes_async (file, data, NULL, FALSE,
-                                            G_FILE_CREATE_NONE,
-                                            g_task_get_cancellable (
-                                                request->task),
-                                            extract_write_ready, step);
+       native_write_async (step, relative, data);
+       return;
+    }
+
+  if (status != ARCHIVE_EOF)
+    {
+      extract_finished (
+          request,
+          g_error_new (nuvashalauncher_RESOLVE_ERROR,
+                       nuvashalauncher_RESOLVE_ERROR_INVALID,
+                       "cannot read native archive \"%s\": %s",
+                       jar->path, archive_error_string (step->archive)));
+      extract_step_free (step);
       return;
     }
 
