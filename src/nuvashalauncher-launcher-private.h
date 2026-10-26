@@ -47,7 +47,7 @@ struct _nuvashalauncher
     gboolean terminated_by_signal;
     int exit_status;
     int term_signal;
-    gint64 started_at; /* unix seconds, for crash reports */
+    gint64 started_at; /* unix microseconds, for crash reports */
     guint readers;
     guint stop_timeout;
     guint last_percent;
@@ -82,5 +82,7 @@ void remember_java (nuvashalauncher *self, const nuvashalauncherJava *java);
 void on_resolved (GObject *source, GAsyncResult *result, gpointer user_data);
 void on_resolve_progress (const nuvashalauncherResolveProgress *progress,
                           gpointer user_data);
+void nuvashalauncher_launcher_signal_process_group (nuvashalauncher *self,
+                                                    int signal_number);
 
 #endif /* nuvashalauncher_LAUNCHER_PRIVATE_H */

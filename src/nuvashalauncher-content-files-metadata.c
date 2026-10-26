@@ -13,6 +13,9 @@
 
 #include <archive.h>
 #include <archive_entry.h>
+
+#define MAX_LOCAL_ARCHIVE_MEMBER_SIZE (1024 * 1024)
+#define MAX_LOCAL_ARCHIVE_ENTRIES 10000
 #include <json-glib/json-glib.h>
 #include <string.h>
 
@@ -266,14 +269,28 @@ archive_entry_bytes (struct archive *archive, struct archive_entry *header,
   la_int64_t offset = 0;
   GByteArray *bytes = g_byte_array_new ();
 
-  if (!archive_entry_size_is_set (header) || size < 0 || size > 1024 * 1024)
+  if (!archive_entry_size_is_set (header) || size < 0 ||
+      size > MAX_LOCAL_ARCHIVE_MEMBER_SIZE)
     {
       g_byte_array_unref (bytes);
       return FALSE;
     }
-  while (archive_read_data_block (archive, &block, &block_size, &offset) ==
-         ARCHIVE_OK)
-    g_byte_array_append (bytes, block, block_size);
+  for (;;)
+    {
+      int status = archive_read_data_block (archive, &block, &block_size, &offset);
+
+      if (status == ARCHIVE_EOF)
+        break;
+      if (status != ARCHIVE_OK ||
+          block_size > MAX_LOCAL_ARCHIVE_MEMBER_SIZE - bytes->len)
+        {
+          g_byte_array_unref (bytes);
+          return FALSE;
+        }
+
+      g_byte_array_append (bytes, block, block_size);
+    }
+
   *out = bytes;
   return TRUE;
 }
@@ -284,6 +301,9 @@ read_archive_member (const char *path, const char *member)
   struct archive *archive = archive_read_new ();
   struct archive_entry *header = NULL;
   GByteArray *bytes = NULL;
+  guint entries = 0;
+  int status = ARCHIVE_EOF;
+  gboolean found = FALSE;
 
   archive_read_support_format_zip (archive);
   if (archive_read_open_filename (archive, path, 64 * 1024) != ARCHIVE_OK)
@@ -291,16 +311,24 @@ read_archive_member (const char *path, const char *member)
       archive_read_free (archive);
       return NULL;
     }
-  while (archive_read_next_header (archive, &header) == ARCHIVE_OK)
+  while ((status = archive_read_next_header (archive, &header)) == ARCHIVE_OK)
     {
+      if (++entries > MAX_LOCAL_ARCHIVE_ENTRIES)
+        break;
+
       if (g_strcmp0 (archive_entry_pathname (header), member) == 0 &&
           archive_entry_filetype (header) == AE_IFREG)
         {
+          found = TRUE;
           archive_entry_bytes (archive, header, &bytes);
           break;
         }
       archive_read_data_skip (archive);
     }
+
+  if (!found && status != ARCHIVE_EOF)
+    g_clear_pointer (&bytes, g_byte_array_unref);
+
   archive_read_close (archive);
   archive_read_free (archive);
 

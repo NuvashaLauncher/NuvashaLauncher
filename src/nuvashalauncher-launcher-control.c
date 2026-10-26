@@ -213,7 +213,7 @@ nuvashalauncher_launcher_stop (nuvashalauncher *self)
   /* Minecraft has its own way of ending; SIGTERM is what every launcher
      sends first, and a game that hangs is stopped for good after the
      timeout. */
-  g_subprocess_send_signal (self->process.process, SIGTERM);
+  nuvashalauncher_launcher_signal_process_group (self, SIGTERM);
 
   if (self->process.stop_timeout == 0)
     {

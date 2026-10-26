@@ -7,7 +7,9 @@
 #include "nuvashalauncher-line-reader.h"
 
 #include <signal.h>
+#include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 /* Internal subprocess, output, and crash-report workflow. */
 
@@ -21,6 +23,38 @@ on_output_line (const char *line, gboolean stderr_line, gpointer user_data)
   nuvashalauncher *self = nuvashalauncher_LAUNCHER (user_data);
 
   log_line (self, stderr_line ? TAG_STDERR : TAG_STDOUT, "%s", line);
+}
+
+static void
+child_setup (gpointer user_data G_GNUC_UNUSED)
+{
+  /* Keep Java and its descendants in a private group so stopping an instance
+   * cannot leave helper processes running after the game exits. */
+  setpgid (0, 0);
+}
+
+void
+nuvashalauncher_launcher_signal_process_group (nuvashalauncher *self,
+                                               int signal_number)
+{
+  const char *identifier = NULL;
+  char *end = NULL;
+  gint64 pid = 0;
+
+  g_return_if_fail (nuvashalauncher_IS_LAUNCHER (self));
+
+  if (self->process.process != NULL)
+    identifier = g_subprocess_get_identifier (self->process.process);
+
+  if (identifier != NULL)
+    pid = g_ascii_strtoll (identifier, &end, 10);
+
+  if (pid > 1 && end != identifier && *end == '\0' && kill ((pid_t) -pid,
+                                                               signal_number) == 0)
+    return;
+
+  if (self->process.process != NULL)
+    g_subprocess_send_signal (self->process.process, signal_number);
 }
 
 static void
@@ -66,8 +100,7 @@ on_stop_timeout (gpointer user_data)
             "the game did not stop within %d seconds, ending it now",
             nuvashalauncher_LAUNCH_STOP_TIMEOUT);
 
-  if (self->process.process != NULL)
-    g_subprocess_force_exit (self->process.process);
+  nuvashalauncher_launcher_signal_process_group (self, SIGKILL);
 
   return G_SOURCE_REMOVE;
 }
@@ -140,7 +173,8 @@ nuvashalauncher_launcher_spawn (nuvashalauncher *self, GPtrArray *argv, GError *
   arguments = (const char *const *) vector;
 
   launcher = g_subprocess_launcher_new (G_SUBPROCESS_FLAGS_STDOUT_PIPE |
-                                        G_SUBPROCESS_FLAGS_STDERR_PIPE);
+                                         G_SUBPROCESS_FLAGS_STDERR_PIPE);
+  g_subprocess_launcher_set_child_setup (launcher, child_setup, NULL, NULL);
 
   /* The game is not nuvashalauncher and must not inherit a GDK backend selection. Nothing
      else about the environment is changed, DISPLAY included. */
@@ -157,6 +191,11 @@ nuvashalauncher_launcher_spawn (nuvashalauncher *self, GPtrArray *argv, GError *
   shown = nuvashalauncher_launch_redact (argv);
   log_line (self, TAG_STATE, "%s", shown);
 
+  /* Capture the start boundary before spawning: a very short-lived process
+   * can create its crash report before spawnv() returns to this thread. */
+  now = g_date_time_new_now_utc ();
+  self->process.started_at = now != NULL ? g_date_time_to_unix_usec (now) : 0;
+
   self->process.process =
     g_subprocess_launcher_spawnv (launcher, arguments, &spawn_error);
 
@@ -169,9 +208,7 @@ nuvashalauncher_launcher_spawn (nuvashalauncher *self, GPtrArray *argv, GError *
       return FALSE;
     }
 
-  now = g_date_time_new_now_utc ();
-  self->process.started_at = now != NULL ? g_date_time_to_unix (now) : 0;
-  self->process.exited = FALSE;
+   self->process.exited = FALSE;
   self->process.exited_normally = FALSE;
   self->process.terminated_by_signal = FALSE;
   self->process.exit_status = 0;

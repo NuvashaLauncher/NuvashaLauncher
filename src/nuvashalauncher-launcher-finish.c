@@ -17,6 +17,10 @@ game_crashed (nuvashalauncher *self, const char *reason)
   set_state (self, nuvashalauncher_LAUNCH_CRASHED, reason);
 }
 
+static void finish_after_natives_removed (GObject *source, GAsyncResult *result,
+                                          gpointer user_data);
+static void finish_launch_after_natives (nuvashalauncher *self);
+
 /* Nothing else can make a game that ended with zero a crash except a
  * report it wrote while it was dying, so that is what is asked for. A
  * report of an earlier run does not count: the launch time is what the
@@ -40,9 +44,19 @@ crash_reports_listed (GObject *source, GAsyncResult *result,
           gboolean written_now = FALSE;
 
           if (g_file_info_get_file_type (info) == G_FILE_TYPE_REGULAR)
-            written_now =
-              g_file_info_get_attribute_uint64 (
-                info, G_FILE_ATTRIBUTE_TIME_MODIFIED) >= (guint64) self->process.started_at;
+            {
+              guint64 modified_seconds = g_file_info_get_attribute_uint64 (
+                info, G_FILE_ATTRIBUTE_TIME_MODIFIED);
+              guint32 modified_usec = g_file_info_get_attribute_uint32 (
+                info, G_FILE_ATTRIBUTE_TIME_MODIFIED_USEC);
+              gint64 started_seconds = self->process.started_at / G_USEC_PER_SEC;
+              gint64 started_usec = self->process.started_at % G_USEC_PER_SEC;
+
+              written_now = modified_seconds > (guint64) started_seconds ||
+                            (modified_seconds == (guint64) started_seconds &&
+                             (modified_usec == 0 ||
+                              modified_usec >= (guint32) started_usec));
+            }
 
           /* Every report is looked at, and what is left of the
              directory goes with the loop instead of piling up. */
@@ -90,8 +104,19 @@ finish_launch (nuvashalauncher *self)
   {
     g_autofree char *natives =
       g_build_filename (self->game_directory, "natives", NULL);
-    nuvashalauncher_fs_remove_tree (natives);
+    nuvashalauncherTaskScope *cleanup =
+      nuvashalauncher_fs_remove_tree_async (natives,
+                                            finish_after_natives_removed,
+                                            g_object_ref (self));
+
+    /* The callback owns the launcher reference until cleanup completes. */
+    nuvashalauncher_task_scope_unref_when_done (cleanup);
   }
+}
+
+static void
+finish_launch_after_natives (nuvashalauncher *self)
+{
 
   if (self->process.stop_timeout != 0)
     {
@@ -128,8 +153,26 @@ finish_launch (nuvashalauncher *self)
     g_file_enumerate_children_async (
       reports,
       G_FILE_ATTRIBUTE_STANDARD_NAME "," G_FILE_ATTRIBUTE_STANDARD_TYPE ","
-      G_FILE_ATTRIBUTE_TIME_MODIFIED,
+      G_FILE_ATTRIBUTE_TIME_MODIFIED "," G_FILE_ATTRIBUTE_TIME_MODIFIED_USEC,
       G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, G_PRIORITY_DEFAULT, NULL,
       crash_reports_listed, g_object_ref (self));
   }
+}
+
+static void
+finish_after_natives_removed (GObject *source G_GNUC_UNUSED,
+                              GAsyncResult *result,
+                              gpointer user_data)
+{
+  nuvashalauncher *self = nuvashalauncher_LAUNCHER (user_data);
+  g_autoptr (GError) error = NULL;
+
+  if (!nuvashalauncher_fs_remove_tree_finish (result, &error) && error != NULL)
+    log_line (self, TAG_STATE, "the natives directory cannot be removed: %s",
+              error->message);
+
+  /* The actual state transition happens only after cleanup has stopped touching
+   * the instance directory. */
+  finish_launch_after_natives (self);
+  g_object_unref (self);
 }
