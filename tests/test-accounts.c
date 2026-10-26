@@ -363,7 +363,10 @@ test_persistence (void)
       "\"uuid\":\"uuid\"}],\"active\":\"id\"}";
 
     g_assert_true (g_file_set_contents (unknown, json, -1, NULL));
+    g_test_expect_message (NULL, G_LOG_LEVEL_WARNING,
+                           "*accounts file*is corrupt; it was moved to*");
     store_unknown = nuvasha_accounts_new_for_path (unknown);
+    g_test_assert_expected_messages ();
     g_assert_cmpuint (nuvasha_accounts_count (store_unknown), ==, 0);
     g_assert_null (nuvasha_accounts_get_active (store_unknown));
   }
@@ -377,7 +380,10 @@ test_persistence (void)
       "\"name\":\"Name\",\"uuid\":\"uuid\"}]}";
 
     g_assert_true (g_file_set_contents (wrong_type, json, -1, NULL));
+    g_test_expect_message (NULL, G_LOG_LEVEL_WARNING,
+                           "*accounts file*is corrupt; it was moved to*");
     store_wrong_type = nuvasha_accounts_new_for_path (wrong_type);
+    g_test_assert_expected_messages ();
     g_assert_cmpuint (nuvasha_accounts_count (store_wrong_type), ==, 0);
   }
 
