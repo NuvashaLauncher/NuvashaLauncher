@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="AdwNavigationPage" id="page">
+    <property name="title" translatable="yes">Could not install</property>
+    <property name="tag">error</property>
+    <property name="child">
+      <object class="AdwToolbarView">
+        <child type="top"><object class="AdwHeaderBar"/></child>
+        <property name="content">
+          <object class="GtkBox" id="content">
+            <property name="css-classes">nuvashalauncher-dialog-content</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">6</property>
+            <child>
+              <object class="AdwStatusPage" id="status">
+                <property name="icon-name">dialog-error-symbolic</property>
+                <property name="vexpand">True</property>
+                <property name="valign">center</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox" id="buttons">
+                <property name="css-classes">nuvashalauncher-page-actions</property>
+                <property name="orientation">horizontal</property>
+                <property name="spacing">6</property>
+                <property name="halign">center</property>
+                <child><object class="GtkButton" id="retry-button"><property name="label" translatable="yes">Retry</property></object></child>
+                <child><object class="GtkButton" id="back-button"><property name="label" translatable="yes">Back</property></object></child>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </property>
+  </object>
+</interface>

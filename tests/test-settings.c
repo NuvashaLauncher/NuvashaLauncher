@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#include "nuvasha-cache.h"
-#include "nuvasha-settings.h"
+#include "nuvashalauncher-cache.h"
+#include "nuvashalauncher-settings.h"
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -14,7 +14,7 @@ static char *root;
 typedef struct
 {
   GMainLoop *loop;
-  NuvashaTaskScope *operation;
+  nuvashalauncherTaskScope *operation;
 } CacheClearWait;
 
 static void
@@ -26,63 +26,63 @@ cache_clear_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   g_assert_true (g_task_propagate_boolean (G_TASK (result), &error));
   g_assert_no_error (error);
-  nuvasha_task_scope_unref (wait->operation);
+  nuvashalauncher_task_scope_unref (wait->operation);
   g_main_loop_quit (wait->loop);
 }
 
 static void
 test_defaults (void)
 {
-  g_autoptr (NuvashaSettings) settings = nuvasha_settings_new ();
+  g_autoptr (nuvashalauncherSettings) settings = nuvashalauncher_settings_new ();
 
-  g_assert_false (nuvasha_settings_get_show_unstable_versions (settings));
-  g_assert_true (nuvasha_settings_get_delete_dependents (settings));
-  g_assert_true (nuvasha_settings_get_cache_modrinth_api_responses (settings));
-  g_assert_cmpint (nuvasha_settings_get_cache_expiration (settings), ==,
-                   nuvasha_SETTINGS_CACHE_EXPIRATION_1_HOUR);
+  g_assert_false (nuvashalauncher_settings_get_show_unstable_versions (settings));
+  g_assert_true (nuvashalauncher_settings_get_delete_dependents (settings));
+  g_assert_true (nuvashalauncher_settings_get_cache_modrinth_api_responses (settings));
+  g_assert_cmpint (nuvashalauncher_settings_get_cache_expiration (settings), ==,
+                   nuvashalauncher_SETTINGS_CACHE_EXPIRATION_1_HOUR);
 }
 
 static void
 test_persistence (void)
 {
-  g_autoptr (NuvashaSettings) settings = nuvasha_settings_new ();
-  g_autoptr (NuvashaSettings) loaded = NULL;
+  g_autoptr (nuvashalauncherSettings) settings = nuvashalauncher_settings_new ();
+  g_autoptr (nuvashalauncherSettings) loaded = NULL;
   g_autoptr (GError) error = NULL;
 
-  g_assert_true (nuvasha_settings_set_cache_expiration (
-    settings, nuvasha_SETTINGS_CACHE_EXPIRATION_7_DAYS, &error));
+  g_assert_true (nuvashalauncher_settings_set_cache_expiration (
+    settings, nuvashalauncher_SETTINGS_CACHE_EXPIRATION_7_DAYS, &error));
   g_assert_no_error (error);
-  g_assert_true (nuvasha_settings_set_cache_modrinth_api_responses (
+  g_assert_true (nuvashalauncher_settings_set_cache_modrinth_api_responses (
     settings, FALSE, &error));
   g_assert_no_error (error);
-  loaded = nuvasha_settings_new ();
-  g_assert_false (nuvasha_settings_get_cache_modrinth_api_responses (loaded));
-  g_assert_cmpint (nuvasha_settings_get_cache_expiration (loaded), ==,
-                   nuvasha_SETTINGS_CACHE_EXPIRATION_7_DAYS);
+  loaded = nuvashalauncher_settings_new ();
+  g_assert_false (nuvashalauncher_settings_get_cache_modrinth_api_responses (loaded));
+  g_assert_cmpint (nuvashalauncher_settings_get_cache_expiration (loaded), ==,
+                   nuvashalauncher_SETTINGS_CACHE_EXPIRATION_7_DAYS);
 }
 
 static void
 test_invalid_expiration (void)
 {
-  g_autoptr (NuvashaSettings) settings = nuvasha_settings_new ();
+  g_autoptr (nuvashalauncherSettings) settings = nuvashalauncher_settings_new ();
   g_autoptr (GError) error = NULL;
-  NuvashaSettingsCacheExpiration previous =
-    nuvasha_settings_get_cache_expiration (settings);
+  nuvashalauncherSettingsCacheExpiration previous =
+    nuvashalauncher_settings_get_cache_expiration (settings);
 
-  g_assert_false (nuvasha_settings_set_cache_expiration (settings, 123, &error));
-  g_assert_error (error, nuvasha_SETTINGS_ERROR, nuvasha_SETTINGS_ERROR_INVALID);
-  g_assert_cmpint (nuvasha_settings_get_cache_expiration (settings), ==, previous);
+  g_assert_false (nuvashalauncher_settings_set_cache_expiration (settings, 123, &error));
+  g_assert_error (error, nuvashalauncher_SETTINGS_ERROR, nuvashalauncher_SETTINGS_ERROR_INVALID);
+  g_assert_cmpint (nuvashalauncher_settings_get_cache_expiration (settings), ==, previous);
 }
 
 static void
 test_cache_paths (void)
 {
-  g_autofree char *api = nuvasha_cache_get_api_directory ();
-  g_autofree char *files = nuvasha_cache_get_files_directory ();
+  g_autofree char *api = nuvashalauncher_cache_get_api_directory ();
+  g_autofree char *files = nuvashalauncher_cache_get_files_directory ();
   g_autofree char *expected_api = g_build_filename (g_get_user_cache_dir (),
-                                                     "nuvasha", "api", NULL);
+                                                     "nuvashalauncher", "api", NULL);
   g_autofree char *expected_files = g_build_filename (g_get_user_cache_dir (),
-                                                       "nuvasha", "files", NULL);
+                                                       "nuvashalauncher", "files", NULL);
 
   g_assert_cmpstr (api, ==, expected_api);
   g_assert_cmpstr (files, ==, expected_files);
@@ -91,11 +91,11 @@ test_cache_paths (void)
 static void
 test_cache_cleanup (void)
 {
-  g_autofree char *api = nuvasha_cache_get_api_directory ();
-  g_autofree char *files = nuvasha_cache_get_files_directory ();
-  g_autofree char *icons = g_build_filename (g_get_user_cache_dir (), "nuvasha",
+  g_autofree char *api = nuvashalauncher_cache_get_api_directory ();
+  g_autofree char *files = nuvashalauncher_cache_get_files_directory ();
+  g_autofree char *icons = g_build_filename (g_get_user_cache_dir (), "nuvashalauncher",
                                               "icons", NULL);
-  g_autofree char *packs = g_build_filename (g_get_user_cache_dir (), "nuvasha",
+  g_autofree char *packs = g_build_filename (g_get_user_cache_dir (), "nuvashalauncher",
                                              "packs", NULL);
   g_autofree char *instance = g_build_filename (root, "instance", NULL);
   g_autofree char *installed =
@@ -119,7 +119,7 @@ test_cache_cleanup (void)
   g_assert_true (g_file_set_contents (installed, "installed", -1, NULL));
 
    CacheClearWait wait = { loop, NULL };
-   wait.operation = nuvasha_cache_clear_all_async (cache_clear_done, &wait);
+   wait.operation = nuvashalauncher_cache_clear_all_async (cache_clear_done, &wait);
   g_main_loop_run (loop);
 
   g_assert_false (g_file_test (api, G_FILE_TEST_EXISTS));
@@ -136,7 +136,7 @@ main (int argc, char **argv)
   g_autofree char *cache_home = NULL;
 
   g_test_init (&argc, &argv, NULL);
-  root = g_dir_make_tmp ("nuvasha-settings-XXXXXX", NULL);
+  root = g_dir_make_tmp ("nuvashalauncher-settings-XXXXXX", NULL);
   g_assert_nonnull (root);
   config_home = g_build_filename (root, "config", NULL);
   cache_home = g_build_filename (root, "cache", NULL);

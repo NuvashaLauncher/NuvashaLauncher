@@ -1,9 +1,9 @@
 <p align="center">
-  <img alt="Nuvasha Launcher" src="data/nuvasha-logo.svg" width="40%">
+  <img alt="nuvashalauncher" src="data/nuvashalauncher-logo.svg" width="40%">
 </p>
 
 <p align="center">
-  Nuvasha Launcher is a simple Minecraft launcher that aims to make instance<br>
+  nuvashalauncher is a simple Minecraft launcher that aims to make instance<br>
   management easy without leaving out the features that matter.
 </p>
 
@@ -30,7 +30,7 @@ export, and remove instances without affecting the others.
 ### Loader and version support
 
 Install and resolve Fabric, Quilt, Forge, and NeoForge versions alongside
-vanilla Minecraft. Nuvasha handles version metadata, libraries, assets, native
+vanilla Minecraft. nuvashalauncher handles version metadata, libraries, assets, native
 files, and loader-specific dependencies for each instance.
 
 ### Accounts, skins, and capes
@@ -41,7 +41,7 @@ keeping previews available when the menu is reopened.
 
 ### Lightweight and native
 
-Built with GTK 4 and libadwaita, Nuvasha is a focused, native-feeling Linux
+Built with GTK 4 and libadwaita, nuvashalauncher is a focused, native-feeling Linux
 launcher. It supports both regular native installations and Flatpak packaging.
 
 ## Installation
@@ -52,12 +52,12 @@ The repository includes a Flatpak manifest using the GNOME 51 runtime. Build it
 from the `main` branch:
 
 ```sh
-git clone --branch main https://github.com/NuvashaLauncher/NuvashaLauncher.git
-cd NuvashaLauncher
+git clone --branch main https://github.com/nuvashalauncher/nuvashalauncher.git
+cd nuvashalauncher
 flatpak-builder --user --install --force-clean \
     build/flatpak \
-    packaging/flatpak/com.github.nuvashalauncher.Nuvasha.yml
-flatpak run com.github.nuvashalauncher.nuvasha
+    packaging/flatpak/com.github.nuvashalauncher.nuvashalauncher.yml
+flatpak run com.github.nuvashalauncher.nuvashalauncher
 ```
 
 ### Native
@@ -130,13 +130,13 @@ nix-shell -p gcc gnumake gettext pkg-config glib gtk4 libadwaita libepoxy \
 #### Building from source
 
 ```sh
-git clone https://github.com/NuvashaLauncher/NuvashaLauncher.git NuvashaLauncher
-cd NuvashaLauncher
+git clone https://github.com/nuvashalauncher/nuvashalauncher.git nuvashalauncher
+cd nuvashalauncher
 make
 sudo make install PREFIX=/usr/local
 ```
 
-The launcher is installed as `/usr/local/bin/NuvashaLauncher`.
+The launcher is installed as `/usr/local/bin/nuvashalauncher`.
 
 To uninstall it:
 
@@ -146,5 +146,5 @@ sudo make uninstall PREFIX=/usr/local
 
 ## License
 
-Nuvasha is free software released under the GNU General Public License,
+nuvashalauncher is free software released under the GNU General Public License,
 version 3.0 only. See [LICENSE](LICENSE).

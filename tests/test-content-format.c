@@ -4,14 +4,14 @@
 
 #include <glib.h>
 
-#include "nuvasha-content-format.h"
+#include "nuvashalauncher-content-format.h"
 
 static void
 test_download_counts (void)
 {
-  g_autofree char *small = nuvasha_content_format_downloads (42);
-  g_autofree char *thousands = nuvasha_content_format_downloads (1250);
-  g_autofree char *millions = nuvasha_content_format_downloads (2500000);
+  g_autofree char *small = nuvashalauncher_content_format_downloads (42);
+  g_autofree char *thousands = nuvashalauncher_content_format_downloads (1250);
+  g_autofree char *millions = nuvashalauncher_content_format_downloads (2500000);
 
   g_assert_cmpstr (small, ==, "42 downloads");
   g_assert_cmpstr (thousands, ==, "1.2k downloads");
@@ -23,10 +23,10 @@ static void
 test_author_lines (void)
 {
   g_autofree char *licensed =
-    nuvasha_content_format_author ("MIT", "Example Author");
+    nuvashalauncher_content_format_author ("MIT", "Example Author");
   g_autofree char *author_only =
-    nuvasha_content_format_author (NULL, "Example Author");
-  g_autofree char *empty_author = nuvasha_content_format_author ("MIT", NULL);
+    nuvashalauncher_content_format_author (NULL, "Example Author");
+  g_autofree char *empty_author = nuvashalauncher_content_format_author ("MIT", NULL);
 
   g_assert_cmpstr (licensed, ==, "MIT  ·  by Example Author");
   g_assert_cmpstr (author_only, ==, "by Example Author");

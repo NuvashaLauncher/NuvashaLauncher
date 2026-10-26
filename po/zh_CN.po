@@ -226,8 +226,8 @@ msgid "Line Limit"
 msgstr "行数上限"
 
 
-msgid "About Nuvasha Launcher"
-msgstr "关于Nuvasha Launcher"
+msgid "About nuvashalauncher"
+msgstr "关于nuvashalauncher"
 
 msgid "Keyboard Shortcuts"
 msgstr "热键"
@@ -628,11 +628,11 @@ msgstr "浏览模组包"
 msgid "Choose Files"
 msgstr "选择文件"
 
-msgid "Clear Nuvasha Cache"
-msgstr "清除 Nuvasha 缓存"
+msgid "Clear nuvashalauncher Cache"
+msgstr "清除 nuvashalauncher 缓存"
 
-msgid "Clear Nuvasha Cache?"
-msgstr "清除 Nuvasha 缓存？"
+msgid "Clear nuvashalauncher Cache?"
+msgstr "清除 nuvashalauncher 缓存？"
 
 msgid ""
 "Conflicts\n"
@@ -699,8 +699,8 @@ msgstr "安装"
 msgid "Instances cannot contain %s in their name"
 msgstr "实例的名称%s中不能包含"
 
-msgid "It carries files that Nuvasha does not recognize."
-msgstr "其中包含 Nuvasha 无法识别的文件。"
+msgid "It carries files that nuvashalauncher does not recognize."
+msgstr "其中包含 nuvashalauncher 无法识别的文件。"
 
 msgid "Italiano"
 msgstr "Italiano"
@@ -723,7 +723,7 @@ msgstr "微软 · 需要登录"
 msgid "Modrinth does not know this file"
 msgstr "Modrinth 不认识这个文件"
 
-msgid "Modrinth is asking Nuvasha to slow down, too many requests"
+msgid "Modrinth is asking nuvashalauncher to slow down, too many requests"
 msgstr "莫德林斯正要求努瓦莎放慢节奏，请求太多了"
 
 msgid "Nederlands"
@@ -741,11 +741,11 @@ msgstr "无"
 msgid "Norsk (bokmål)"
 msgstr "Norsk (bokmål)"
 
-msgid "Nuvasha Launcher"
-msgstr "Nuvasha Launcher"
+msgid "nuvashalauncher"
+msgstr "nuvashalauncher"
 
-msgid "Nuvasha cache data was cleared successfully."
-msgstr "Nuvasha 缓存数据已成功清除。"
+msgid "nuvashalauncher cache data was cleared successfully."
+msgstr "nuvashalauncher 缓存数据已成功清除。"
 
 msgid "Offline"
 msgstr "离线"
@@ -789,14 +789,14 @@ msgstr "Svenska"
 msgid "System default"
 msgstr "系统默认值"
 
-msgid "The account is removed from Nuvasha and its saved sign-in is forgotten. The game itself is not touched."
-msgstr "该账号将从 Nuvasha 中移除，其保存的登录信息也将被清除。游戏本身不会受到任何影响。"
+msgid "The account is removed from nuvashalauncher and its saved sign-in is forgotten. The game itself is not touched."
+msgstr "该账号将从 nuvashalauncher 中移除，其保存的登录信息也将被清除。游戏本身不会受到任何影响。"
 
 msgid "The game is running and will close. Progress since the last save is lost."
 msgstr "游戏正在运行，即将关闭。自上次保存以来的进度将丢失。"
 
-msgid "This project publishes no pack file Nuvasha can install."
-msgstr "该项目未发布任何 Nuvasha 可安装的包文件。"
+msgid "This project publishes no pack file nuvashalauncher can install."
+msgstr "该项目未发布任何 nuvashalauncher 可安装的包文件。"
 
 msgid "This version has no pack file"
 msgstr "此版本没有压缩包"
@@ -903,35 +903,35 @@ msgstr "Microsoft sign-in failed. Try again."
 msgid "Open in browser"
 msgstr "在浏览器中打开"
 
-#: src/nuvasha-main-window.c
+#: src/nuvashalauncher-main-window.c
 msgid "%u/%u selected"
 msgstr "已选择 %u/%u"
 
-#: src/nuvasha-main-window.c
+#: src/nuvashalauncher-main-window.c
 msgid "The following instances will be deleted:\n%s"
 msgstr "将删除以下实例：\n%s"
 
-#: src/nuvasha-content-page.c
+#: src/nuvashalauncher-content-page.c
 msgid "Delete selected %s?"
 msgstr "Delete selected %s?"
 
-#: src/nuvasha-content-page.c
+#: src/nuvashalauncher-content-page.c
 msgid "Selected %s:\n%s"
 msgstr "Selected %s:\n%s"
 
-#: src/nuvasha-content-page.c
+#: src/nuvashalauncher-content-page.c
 msgid "Selected %s:\n%s\n\nDependencies:\n%s"
 msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
 
-#: src/nuvasha-main-window-ui.c
+#: src/nuvashalauncher-main-window-ui.c
 msgid "Edit mode"
 msgstr "编辑模式"
 
-#: src/nuvasha-content-page-ui.c
+#: src/nuvashalauncher-content-page-ui.c
 msgid "Fetching updates"
 msgstr "正在获取更新"
 
 
-#: src/nuvasha-content-page-ui.c
+#: src/nuvashalauncher-content-page-ui.c
 msgid "Progress"
 msgstr "进度"

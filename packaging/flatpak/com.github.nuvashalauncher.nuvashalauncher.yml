@@ -1,0 +1,22 @@
+app-id: com.github.nuvashalauncher.nuvashalauncher
+runtime: org.gnome.Platform
+runtime-version: '51'
+sdk: org.gnome.Sdk
+command: nuvashalauncher
+finish-args:
+  - --share=ipc
+  - --share=network
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --socket=pulseaudio
+  - --device=all
+modules:
+  - name: nuvashalauncher
+    buildsystem: simple
+    build-commands:
+      - make FLATPAK=1 PREFIX=/app
+      - make FLATPAK=1 PREFIX=/app install
+    sources:
+      - type: git
+        url: https://github.com/nuvashalauncher/nuvashalauncher.git
+        branch: main

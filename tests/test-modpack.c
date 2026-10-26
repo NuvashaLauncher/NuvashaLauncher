@@ -4,7 +4,7 @@
 
 #define _GNU_SOURCE
 
-/* Tests for nuvasha-modpack: what the index of a pack says, what its
+/* Tests for nuvashalauncher-modpack: what the index of a pack says, what its
  * dependencies resolve to, what the two hashes of a file prove, and
  * what an install leaves behind when it cannot go through.
  *
@@ -15,9 +15,9 @@
  * no files and no loader installs from its overrides alone, which is
  * the whole pipeline minus the network. */
 
-#include "nuvasha-download-modpack-dialog.h"
-#include "nuvasha-content-index.h"
-#include "nuvasha-modpack.h"
+#include "nuvashalauncher-download-modpack-dialog.h"
+#include "nuvashalauncher-content-index.h"
+#include "nuvashalauncher-modpack.h"
 
 #include <gtk/gtk.h>
 
@@ -35,7 +35,7 @@ static char *
 make_tmp_dir (void)
 {
   g_autoptr (GError) error = NULL;
-  char *dir = g_dir_make_tmp ("nuvasha-modpack-XXXXXX", &error);
+  char *dir = g_dir_make_tmp ("nuvashalauncher-modpack-XXXXXX", &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (dir);
@@ -183,7 +183,7 @@ has_temp_dir (const char *directory)
     return FALSE;
 
   while ((name = g_dir_read_name (dir)) != NULL)
-    if (g_str_has_prefix (name, ".nuvasha-modpack-"))
+    if (g_str_has_prefix (name, ".nuvashalauncher-modpack-"))
       {
         found = TRUE;
         break;
@@ -198,10 +198,10 @@ typedef struct
   GMainLoop *loop;
   GError *error;
   gboolean value;
-  NuvashaInstance *instance;
+  nuvashalauncherInstance *instance;
   gboolean timed_out;
   guint watchdog;
-  NuvashaTaskScope *operation;
+  nuvashalauncherTaskScope *operation;
 } AsyncWait;
 
 static gboolean
@@ -238,19 +238,19 @@ verify_file_done (GObject *source G_GNUC_UNUSED,
 {
   AsyncWait *wait = user_data;
 
-  wait->value = nuvasha_modpack_verify_file_finish (result, &wait->error);
-  nuvasha_task_scope_unref (wait->operation);
+  wait->value = nuvashalauncher_modpack_verify_file_finish (result, &wait->error);
+  nuvashalauncher_task_scope_unref (wait->operation);
   wait->operation = NULL;
   g_main_loop_quit (wait->loop);
 }
 
 /* Both hashes of the manifest against the bytes on disk, in place. */
 static gboolean
-verify_now (const NuvashaModpackFile *file, const char *path, GError **error)
+verify_now (const nuvashalauncherModpackFile *file, const char *path, GError **error)
 {
   AsyncWait wait = { 0 };
 
-  wait.operation = nuvasha_modpack_verify_file_async (file, path, verify_file_done,
+  wait.operation = nuvashalauncher_modpack_verify_file_async (file, path, verify_file_done,
                                                  &wait);
   async_wait_run (&wait);
 
@@ -265,10 +265,10 @@ install_done (GObject *source G_GNUC_UNUSED,
 {
   AsyncWait *wait = user_data;
 
-  wait->instance = nuvasha_modpack_install_finish (result, &wait->error);
+  wait->instance = nuvashalauncher_modpack_install_finish (result, &wait->error);
   if (wait->operation != NULL)
     {
-      nuvasha_task_scope_unref (wait->operation);
+      nuvashalauncher_task_scope_unref (wait->operation);
       wait->operation = NULL;
     }
   g_main_loop_quit (wait->loop);
@@ -280,8 +280,8 @@ export_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 {
   AsyncWait *wait = user_data;
 
-  wait->value = nuvasha_modpack_export_finish (result, &wait->error);
-  nuvasha_task_scope_unref (wait->operation);
+  wait->value = nuvashalauncher_modpack_export_finish (result, &wait->error);
+  nuvashalauncher_task_scope_unref (wait->operation);
   wait->operation = NULL;
   g_main_loop_quit (wait->loop);
 }
@@ -292,20 +292,20 @@ index_update_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 {
   AsyncWait *wait = user_data;
 
-  wait->value = nuvasha_content_index_modify_finish (result, &wait->error);
-  nuvasha_task_scope_unref (wait->operation);
+  wait->value = nuvashalauncher_content_index_modify_finish (result, &wait->error);
+  nuvashalauncher_task_scope_unref (wait->operation);
   wait->operation = NULL;
   g_main_loop_quit (wait->loop);
 }
 
 /* The whole install, in place. */
-static NuvashaInstance *
-install_now (NuvashaModpack *pack, NuvashaInstanceManager *manager, const char *name,
+static nuvashalauncherInstance *
+install_now (nuvashalauncherModpack *pack, nuvashalauncherInstanceManager *manager, const char *name,
              const char *directory, GError **error)
 {
   AsyncWait wait = { 0 };
 
-   wait.operation = nuvasha_modpack_install_async (
+   wait.operation = nuvashalauncher_modpack_install_async (
      pack, manager, name, directory, NULL, NULL, install_done, &wait);
   async_wait_run (&wait);
 
@@ -314,11 +314,11 @@ install_now (NuvashaModpack *pack, NuvashaInstanceManager *manager, const char *
 }
 
 static gboolean
-export_now (NuvashaInstance *instance, const char *path, GError **error)
+export_now (nuvashalauncherInstance *instance, const char *path, GError **error)
 {
   AsyncWait wait = { 0 };
 
-  wait.operation = nuvasha_modpack_export_async (instance, path, NULL, NULL, NULL,
+  wait.operation = nuvashalauncher_modpack_export_async (instance, path, NULL, NULL, NULL,
                                              FALSE, NULL, NULL, export_done,
                                              &wait);
   async_wait_run (&wait);
@@ -328,12 +328,12 @@ export_now (NuvashaInstance *instance, const char *path, GError **error)
 }
 
 static gboolean
-index_update_now (const char *directory, NuvashaContentType type,
-                  NuvashaContentIndexEntry *entry, GError **error)
+index_update_now (const char *directory, nuvashalauncherContentType type,
+                  nuvashalauncherContentIndexEntry *entry, GError **error)
 {
   AsyncWait wait = { 0 };
 
-  wait.operation = nuvasha_content_index_update_async (
+  wait.operation = nuvashalauncher_content_index_update_async (
     directory, type, entry, index_update_done, &wait);
   async_wait_run (&wait);
 
@@ -342,10 +342,10 @@ index_update_now (const char *directory, NuvashaContentType type,
 }
 
 static guint
-manager_count (NuvashaInstanceManager *manager)
+manager_count (nuvashalauncherInstanceManager *manager)
 {
   return g_list_model_get_n_items (
-    G_LIST_MODEL (nuvasha_instance_manager_get_instances (manager)));
+    G_LIST_MODEL (nuvashalauncher_instance_manager_get_instances (manager)));
 }
 
 /* ---------------------------------------------------------- *
@@ -386,11 +386,11 @@ test_index_is_read (void)
     pack_index ("Example Pack", FILES_JSON,
                 "\"minecraft\":\"1.20.1\",\"fabric-loader\":\"0.15.11\"");
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaModpack) pack = NULL;
-  NuvashaModpackFile *first = NULL;
-  NuvashaModpackFile *last = NULL;
+  g_autoptr (nuvashalauncherModpack) pack = NULL;
+  nuvashalauncherModpackFile *first = NULL;
+  nuvashalauncherModpackFile *last = NULL;
 
-  pack = nuvasha_modpack_new_from_json (json, -1, &error);
+  pack = nuvashalauncher_modpack_new_from_json (json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (pack);
 
@@ -410,8 +410,8 @@ test_index_is_read (void)
   g_assert_cmpstr (first->sha512, ==,
                    "0123456789abcdef0123456789abcdef");
   g_assert_cmpint ((gint) first->file_size, ==, 12345);
-  g_assert_cmpint (first->env_client, ==, nuvasha_MODPACK_ENV_REQUIRED);
-  g_assert_cmpint (first->env_server, ==, nuvasha_MODPACK_ENV_UNSUPPORTED);
+  g_assert_cmpint (first->env_client, ==, nuvashalauncher_MODPACK_ENV_REQUIRED);
+  g_assert_cmpint (first->env_server, ==, nuvashalauncher_MODPACK_ENV_UNSUPPORTED);
   g_assert_cmpuint (first->downloads->len, ==, 1);
   g_assert_cmpstr (g_ptr_array_index (first->downloads, 0), ==,
                    "https://cdn.modrinth.com/data/aa/v1/sodium.jar");
@@ -419,8 +419,8 @@ test_index_is_read (void)
   /* The last file has no env object: what both sides can run. */
   last = g_ptr_array_index (pack->files, 3);
   g_assert_cmpstr (last->path, ==, "config/both.toml");
-  g_assert_cmpint (last->env_client, ==, nuvasha_MODPACK_ENV_UNSPECIFIED);
-  g_assert_cmpint (last->env_server, ==, nuvasha_MODPACK_ENV_UNSPECIFIED);
+  g_assert_cmpint (last->env_client, ==, nuvashalauncher_MODPACK_ENV_UNSPECIFIED);
+  g_assert_cmpint (last->env_server, ==, nuvashalauncher_MODPACK_ENV_UNSPECIFIED);
   g_assert_cmpint ((gint) last->file_size, ==, 42);
 
   g_print ("ok - the index of a pack is read whole\n");
@@ -433,41 +433,41 @@ test_client_files_by_env (void)
     pack_index ("Example Pack", FILES_JSON,
                 "\"minecraft\":\"1.20.1\",\"fabric-loader\":\"0.15.11\"");
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaModpack) pack = NULL;
+  g_autoptr (nuvashalauncherModpack) pack = NULL;
   g_autoptr (GPtrArray) required = NULL;
   g_autoptr (GPtrArray) optional = NULL;
 
-  pack = nuvasha_modpack_new_from_json (json, -1, &error);
+  pack = nuvashalauncher_modpack_new_from_json (json, -1, &error);
   g_assert_no_error (error);
 
-  required = nuvasha_modpack_required_client_files (pack);
-  optional = nuvasha_modpack_optional_client_files (pack);
+  required = nuvashalauncher_modpack_required_client_files (pack);
+  optional = nuvashalauncher_modpack_optional_client_files (pack);
 
   g_assert_cmpuint (required->len, ==, 2);
-  g_assert_cmpstr (((NuvashaModpackFile *) g_ptr_array_index (required, 0))->path,
+  g_assert_cmpstr (((nuvashalauncherModpackFile *) g_ptr_array_index (required, 0))->path,
                    ==, "mods/sodium.jar");
-  g_assert_cmpstr (((NuvashaModpackFile *) g_ptr_array_index (required, 1))->path,
+  g_assert_cmpstr (((nuvashalauncherModpackFile *) g_ptr_array_index (required, 1))->path,
                    ==, "config/both.toml");
 
   g_assert_cmpuint (optional->len, ==, 1);
-  g_assert_cmpstr (((NuvashaModpackFile *) g_ptr_array_index (optional, 0))->path,
+  g_assert_cmpstr (((nuvashalauncherModpackFile *) g_ptr_array_index (optional, 0))->path,
                    ==, "mods/lithium.jar");
 
   g_print ("ok - the env of a file says which list it belongs to\n");
 }
 
 static void
-assert_loader (const char *deps_json, NuvashaLoader loader,
+assert_loader (const char *deps_json, nuvashalauncherLoader loader,
                const char *minecraft, const char *loader_version)
 {
   g_autofree char *json = pack_index ("Resolve Pack", "", deps_json);
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaModpack) pack = NULL;
+  g_autoptr (nuvashalauncherModpack) pack = NULL;
 
-  pack = nuvasha_modpack_new_from_json (json, -1, &error);
+  pack = nuvashalauncher_modpack_new_from_json (json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (pack);
-  g_assert_true (nuvasha_modpack_resolve (pack, &error));
+  g_assert_true (nuvashalauncher_modpack_resolve (pack, &error));
   g_assert_no_error (error);
 
   g_assert_cmpstr (pack->minecraft_version, ==, minecraft);
@@ -479,7 +479,7 @@ static void
 test_resolve_fabric (void)
 {
   assert_loader ("\"minecraft\":\"1.20.1\",\"fabric-loader\":\"0.15.11\"",
-                 nuvasha_LOADER_FABRIC, "1.20.1", "0.15.11");
+                 nuvashalauncher_LOADER_FABRIC, "1.20.1", "0.15.11");
   g_print ("ok - a pack that names fabric-loader resolves to fabric\n");
 }
 
@@ -487,7 +487,7 @@ static void
 test_resolve_quilt (void)
 {
   assert_loader ("\"minecraft\":\"1.20.1\",\"quilt-loader\":\"0.21.0\"",
-                 nuvasha_LOADER_QUILT, "1.20.1", "0.21.0");
+                 nuvashalauncher_LOADER_QUILT, "1.20.1", "0.21.0");
   g_print ("ok - a pack that names quilt-loader resolves to quilt\n");
 }
 
@@ -495,7 +495,7 @@ static void
 test_resolve_forge (void)
 {
   assert_loader ("\"minecraft\":\"1.20.1\",\"forge\":\"47.2.0\"",
-                 nuvasha_LOADER_FORGE, "1.20.1", "47.2.0");
+                 nuvashalauncher_LOADER_FORGE, "1.20.1", "47.2.0");
   g_print ("ok - a pack that names forge resolves to forge\n");
 }
 
@@ -503,7 +503,7 @@ static void
 test_resolve_neoforge (void)
 {
   assert_loader ("\"minecraft\":\"1.20.1\",\"neoforge\":\"20.4.0\"",
-                 nuvasha_LOADER_NEOFORGE, "1.20.1", "20.4.0");
+                 nuvashalauncher_LOADER_NEOFORGE, "1.20.1", "20.4.0");
   g_print ("ok - a pack that names neoforge resolves to neoforge\n");
 }
 
@@ -513,7 +513,7 @@ test_resolve_vanilla (void)
   /* A pack that names no loader runs on vanilla, and a name the
    * format does not know is ignored rather than refused. */
   assert_loader ("\"minecraft\":\"1.21\",\"some-future-loader\":\"9.9\"",
-                 nuvasha_LOADER_VANILLA, "1.21", NULL);
+                 nuvashalauncher_LOADER_VANILLA, "1.21", NULL);
   g_print ("ok - a pack that names no loader resolves to vanilla\n");
 }
 
@@ -523,7 +523,7 @@ test_resolve_loader_choice (void)
   /* Two loaders named: the one the format puts first wins. */
   assert_loader ("\"minecraft\":\"1.20.1\",\"forge\":\"47.2.0\","
                  "\"fabric-loader\":\"0.15.11\"",
-                 nuvasha_LOADER_FABRIC, "1.20.1", "0.15.11");
+                 nuvashalauncher_LOADER_FABRIC, "1.20.1", "0.15.11");
   g_print ("ok - of two loaders named, the first of the format wins\n");
 }
 
@@ -533,13 +533,13 @@ test_resolve_without_minecraft (void)
   g_autofree char *json =
     pack_index ("No Minecraft", "", "\"fabric-loader\":\"0.15.11\"");
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaModpack) pack = NULL;
+  g_autoptr (nuvashalauncherModpack) pack = NULL;
 
-  pack = nuvasha_modpack_new_from_json (json, -1, &error);
+  pack = nuvashalauncher_modpack_new_from_json (json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (pack);
-  g_assert_false (nuvasha_modpack_resolve (pack, &error));
-  g_assert_error (error, nuvasha_MODPACK_ERROR, nuvasha_MODPACK_ERROR_LOADER);
+  g_assert_false (nuvashalauncher_modpack_resolve (pack, &error));
+  g_assert_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_LOADER);
 
   g_print ("ok - a pack that names no Minecraft version is refused\n");
 }
@@ -552,11 +552,11 @@ static void
 expect_refused (const char *json, guint code, const char *what)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaModpack) pack = NULL;
+  g_autoptr (nuvashalauncherModpack) pack = NULL;
 
-  pack = nuvasha_modpack_new_from_json (json, -1, &error);
+  pack = nuvashalauncher_modpack_new_from_json (json, -1, &error);
   g_assert_null (pack);
-  g_assert_error (error, nuvasha_MODPACK_ERROR, code);
+  g_assert_error (error, nuvashalauncher_MODPACK_ERROR, code);
   g_print ("ok - %s\n", what);
 }
 
@@ -567,13 +567,13 @@ test_format_refusals (void)
   expect_refused (
     "{\"formatVersion\":2,\"game\":\"minecraft\",\"versionId\":\"2\","
     "\"name\":\"Too New\",\"files\":[],\"dependencies\":{}}",
-    nuvasha_MODPACK_ERROR_FORMAT, "a format version nuvasha does not know");
+    nuvashalauncher_MODPACK_ERROR_FORMAT, "a format version nuvashalauncher does not know");
 
   /* A pack for another game. */
   expect_refused (
     "{\"formatVersion\":1,\"game\":\"dwarf-fortress\",\"versionId\":\"1\","
     "\"name\":\"Not Minecraft\",\"files\":[],\"dependencies\":{}}",
-    nuvasha_MODPACK_ERROR_FORMAT, "a pack for another game");
+    nuvashalauncher_MODPACK_ERROR_FORMAT, "a pack for another game");
 
   /* A file with one hash missing. */
   expect_refused (
@@ -582,31 +582,31 @@ test_format_refusals (void)
     "{\"path\":\"mods/x.jar\",\"hashes\":{\"sha1\":\"aa\"},"
     "\"downloads\":[\"https://cdn.modrinth.com/x.jar\"]}],"
     "\"dependencies\":{}}",
-    nuvasha_MODPACK_ERROR_FORMAT, "a file with one hash missing");
+    nuvashalauncher_MODPACK_ERROR_FORMAT, "a file with one hash missing");
 
   /* No files array at all. */
   expect_refused (
     "{\"formatVersion\":1,\"game\":\"minecraft\",\"versionId\":\"1\","
     "\"name\":\"No Files\",\"dependencies\":{}}",
-    nuvasha_MODPACK_ERROR_FORMAT, "an index without a files array");
+    nuvashalauncher_MODPACK_ERROR_FORMAT, "an index without a files array");
 
   /* No name. */
   expect_refused (
     "{\"formatVersion\":1,\"game\":\"minecraft\",\"versionId\":\"1\","
     "\"files\":[],\"dependencies\":{}}",
-    nuvasha_MODPACK_ERROR_FORMAT, "an index without a name");
+    nuvashalauncher_MODPACK_ERROR_FORMAT, "an index without a name");
 
   /* A files member that is not an array. */
   expect_refused (
     "{\"formatVersion\":1,\"game\":\"minecraft\",\"versionId\":\"1\","
     "\"name\":\"Odd Files\",\"files\":{},\"dependencies\":{}}",
-    nuvasha_MODPACK_ERROR_FORMAT, "a files member that is not an array");
+    nuvashalauncher_MODPACK_ERROR_FORMAT, "a files member that is not an array");
 
   /* An entry of files that is not an object. */
   expect_refused (
     "{\"formatVersion\":1,\"game\":\"minecraft\",\"versionId\":\"1\","
     "\"name\":\"Odd Entry\",\"files\":[\"mods/x.jar\"],\"dependencies\":{}}",
-    nuvasha_MODPACK_ERROR_FORMAT, "an entry of files that is not an object");
+    nuvashalauncher_MODPACK_ERROR_FORMAT, "an entry of files that is not an object");
 
   g_print ("ok - an index the format does not describe is refused\n");
 }
@@ -622,7 +622,7 @@ test_index_paths_are_refused (void)
     "\"hashes\":{\"sha1\":\"aa\",\"sha512\":\"bb\"},"
     "\"downloads\":[\"https://cdn.modrinth.com/escape.jar\"]}],"
     "\"dependencies\":{}}",
-    nuvasha_MODPACK_ERROR_PATH, "a path that steps out of the instance");
+    nuvashalauncher_MODPACK_ERROR_PATH, "a path that steps out of the instance");
 
   /* An absolute path. */
   expect_refused (
@@ -632,7 +632,7 @@ test_index_paths_are_refused (void)
     "\"hashes\":{\"sha1\":\"aa\",\"sha512\":\"bb\"},"
     "\"downloads\":[\"https://cdn.modrinth.com/escape.jar\"]}],"
     "\"dependencies\":{}}",
-    nuvasha_MODPACK_ERROR_PATH, "an absolute path");
+    nuvashalauncher_MODPACK_ERROR_PATH, "an absolute path");
 
   /* A path with the separator of another system. */
   expect_refused (
@@ -642,7 +642,7 @@ test_index_paths_are_refused (void)
     "\"hashes\":{\"sha1\":\"aa\",\"sha512\":\"bb\"},"
     "\"downloads\":[\"https://cdn.modrinth.com/escape.jar\"]}],"
     "\"dependencies\":{}}",
-    nuvasha_MODPACK_ERROR_PATH, "a path with a backslash in it");
+    nuvashalauncher_MODPACK_ERROR_PATH, "a path with a backslash in it");
 
   /* A drive name. */
   expect_refused (
@@ -652,7 +652,7 @@ test_index_paths_are_refused (void)
     "\"hashes\":{\"sha1\":\"aa\",\"sha512\":\"bb\"},"
     "\"downloads\":[\"https://cdn.modrinth.com/escape.jar\"]}],"
     "\"dependencies\":{}}",
-    nuvasha_MODPACK_ERROR_PATH, "a path with a drive name in it");
+    nuvashalauncher_MODPACK_ERROR_PATH, "a path with a drive name in it");
 
   g_print ("ok - a path the instance cannot hold is refused\n");
 }
@@ -661,10 +661,10 @@ static void
 test_broken_json_is_refused (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaModpack) pack = NULL;
+  g_autoptr (nuvashalauncherModpack) pack = NULL;
 
   /* Not JSON at all: the parser says so, in its own words. */
-  pack = nuvasha_modpack_new_from_json ("this is not json", -1, &error);
+  pack = nuvashalauncher_modpack_new_from_json ("this is not json", -1, &error);
   g_assert_null (pack);
   g_assert_nonnull (error);
 
@@ -688,7 +688,7 @@ test_verify_hashes (void)
     G_CHECKSUM_SHA512, (const guchar *) payload, strlen (payload));
   g_autofree char *other_sha1 = g_compute_checksum_for_data (
     G_CHECKSUM_SHA1, (const guchar *) "something else", 14);
-  NuvashaModpackFile file = { 0 };
+  nuvashalauncherModpackFile file = { 0 };
 
   g_assert_true (g_file_set_contents (path, payload, -1, &error));
   g_assert_no_error (error);
@@ -704,7 +704,7 @@ test_verify_hashes (void)
   /* A sha1 that does not match. */
   file.sha1 = other_sha1;
   g_assert_false (verify_now (&file, path, &error));
-  g_assert_error (error, nuvasha_MODPACK_ERROR, nuvasha_MODPACK_ERROR_HASH);
+  g_assert_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_HASH);
   g_assert_nonnull (strstr (error->message, "sha1"));
   g_clear_error (&error);
 
@@ -715,7 +715,7 @@ test_verify_hashes (void)
                 "000000000000000000000000000000000000000000000000000000000000"
                 "000000000000000000000000000000000000000000000000000000000000";
   g_assert_false (verify_now (&file, path, &error));
-  g_assert_error (error, nuvasha_MODPACK_ERROR, nuvasha_MODPACK_ERROR_HASH);
+  g_assert_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_HASH);
   g_assert_nonnull (strstr (error->message, "sha512"));
   g_clear_error (&error);
 
@@ -727,14 +727,14 @@ test_verify_hashes (void)
  * What an install leaves behind
  * ---------------------------------------------------------- */
 
-static NuvashaInstanceManager *
+static nuvashalauncherInstanceManager *
 manager_new (const char *data_dir)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaInstanceManager) manager = nuvasha_instance_manager_new (data_dir);
+  g_autoptr (nuvashalauncherInstanceManager) manager = nuvashalauncher_instance_manager_new (data_dir);
 
   g_assert_nonnull (manager);
-  g_assert_true (nuvasha_instance_manager_load (manager, &error));
+  g_assert_true (nuvashalauncher_instance_manager_load (manager, &error));
   g_assert_no_error (error);
   g_assert_cmpuint (manager_count (manager), ==, 0);
 
@@ -751,14 +751,14 @@ test_install_offline (void)
     pack_index ("Offline Pack", "", "\"minecraft\":\"1.20.1\"");
   g_autofree char *instances_dir = g_build_filename (data_dir, "instances", NULL);
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaInstanceManager) manager = NULL;
-  g_autoptr (NuvashaModpack) pack = NULL;
-  g_autoptr (NuvashaInstance) instance = NULL;
+  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
+  g_autoptr (nuvashalauncherModpack) pack = NULL;
+  g_autoptr (nuvashalauncherInstance) instance = NULL;
   g_autofree char *instance_dir = NULL;
   g_autofree char *name = NULL;
   g_autofree char *minecraft = NULL;
   g_autofree char *icon = NULL;
-  NuvashaLoader loader = nuvasha_LOADER_VANILLA;
+  nuvashalauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
   g_autofree char *options = NULL;
   g_autofree char *client = NULL;
   g_autofree char *server = NULL;
@@ -778,11 +778,11 @@ test_install_offline (void)
 
   manager = manager_new (data_dir);
 
-  pack = nuvasha_modpack_new_from_zip (zip_path, &error);
+  pack = nuvashalauncher_modpack_new_from_zip (zip_path, &error);
   g_assert_no_error (error);
   g_assert_nonnull (pack);
   g_assert_cmpstr (pack->archive_path, ==, zip_path);
-  g_assert_true (nuvasha_modpack_resolve (pack, &error));
+  g_assert_true (nuvashalauncher_modpack_resolve (pack, &error));
   g_assert_no_error (error);
 
   /* No directory of its own: the manager's default for the name. */
@@ -795,7 +795,7 @@ test_install_offline (void)
                 "icon", &icon, NULL);
   g_assert_cmpstr (name, ==, "Offline Pack");
   g_assert_cmpstr (minecraft, ==, "1.20.1");
-  g_assert_cmpint (loader, ==, nuvasha_LOADER_VANILLA);
+  g_assert_cmpint (loader, ==, nuvashalauncher_LOADER_VANILLA);
   g_assert_true (g_str_has_prefix (instance_dir, instances_dir));
   g_assert_true (g_file_test (instance_dir, G_FILE_TEST_IS_DIR));
   g_assert_nonnull (icon);
@@ -857,9 +857,9 @@ test_install_rolls_back (void)
   g_autofree char *index_json =
     pack_index ("Bad Pack", files_json, "\"minecraft\":\"1.20.1\"");
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaInstanceManager) manager = NULL;
-  g_autoptr (NuvashaModpack) pack = NULL;
-  g_autoptr (NuvashaInstance) instance = NULL;
+  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
+  g_autoptr (nuvashalauncherModpack) pack = NULL;
+  g_autoptr (nuvashalauncherInstance) instance = NULL;
 
   ZipEntry entries[] = {
     { "modrinth.index.json", index_json, strlen (index_json), AE_IFREG,
@@ -870,15 +870,15 @@ test_install_rolls_back (void)
 
   manager = manager_new (data_dir);
 
-  pack = nuvasha_modpack_new_from_zip (zip_path, &error);
+  pack = nuvashalauncher_modpack_new_from_zip (zip_path, &error);
   g_assert_no_error (error);
   g_assert_nonnull (pack);
-  g_assert_true (nuvasha_modpack_resolve (pack, &error));
+  g_assert_true (nuvashalauncher_modpack_resolve (pack, &error));
   g_assert_no_error (error);
 
   instance = install_now (pack, manager, "Bad Pack", target, &error);
   g_assert_null (instance);
-  g_assert_error (error, nuvasha_MODPACK_ERROR, nuvasha_MODPACK_ERROR_URL);
+  g_assert_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_URL);
   g_clear_error (&error);
 
   /* Nothing of the pack is where it wanted to go, nothing of it is
@@ -904,9 +904,9 @@ test_install_leaves_user_data (void)
   g_autofree char *index_json =
     pack_index ("Taken Pack", "", "\"minecraft\":\"1.20.1\"");
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaInstanceManager) manager = NULL;
-  g_autoptr (NuvashaModpack) pack = NULL;
-  g_autoptr (NuvashaInstance) instance = NULL;
+  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
+  g_autoptr (nuvashalauncherModpack) pack = NULL;
+  g_autoptr (nuvashalauncherInstance) instance = NULL;
 
   ZipEntry entries[] = {
     { "modrinth.index.json", index_json, strlen (index_json), AE_IFREG,
@@ -924,15 +924,15 @@ test_install_leaves_user_data (void)
 
   manager = manager_new (data_dir);
 
-  pack = nuvasha_modpack_new_from_zip (zip_path, &error);
+  pack = nuvashalauncher_modpack_new_from_zip (zip_path, &error);
   g_assert_no_error (error);
   g_assert_nonnull (pack);
-  g_assert_true (nuvasha_modpack_resolve (pack, &error));
+  g_assert_true (nuvashalauncher_modpack_resolve (pack, &error));
   g_assert_no_error (error);
 
   instance = install_now (pack, manager, "Taken Pack", target, &error);
   g_assert_null (instance);
-  g_assert_error (error, nuvasha_MODPACK_ERROR, nuvasha_MODPACK_ERROR_IO);
+  g_assert_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO);
   g_clear_error (&error);
 
   /* The user data is as it was, and no temporary directory was even
@@ -955,13 +955,13 @@ test_install_needs_resolve (void)
   g_autofree char *index_json =
     pack_index ("Unread Pack", "", "\"minecraft\":\"1.20.1\"");
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaInstanceManager) manager = NULL;
-  g_autoptr (NuvashaModpack) pack = NULL;
-  g_autoptr (NuvashaInstance) instance = NULL;
+  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
+  g_autoptr (nuvashalauncherModpack) pack = NULL;
+  g_autoptr (nuvashalauncherInstance) instance = NULL;
 
   manager = manager_new (data_dir);
 
-  pack = nuvasha_modpack_new_from_json (index_json, -1, &error);
+  pack = nuvashalauncher_modpack_new_from_json (index_json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (pack);
 
@@ -969,7 +969,7 @@ test_install_needs_resolve (void)
    * guessing a Minecraft version. */
   instance = install_now (pack, manager, "Unread Pack", NULL, &error);
   g_assert_null (instance);
-  g_assert_error (error, nuvasha_MODPACK_ERROR, nuvasha_MODPACK_ERROR_LOADER);
+  g_assert_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_LOADER);
   g_clear_error (&error);
 
   g_assert_cmpuint (manager_count (manager), ==, 0);
@@ -992,19 +992,19 @@ test_export_import_round_trip (void)
   g_autofree char *index =
     g_build_filename (source_dir, "mods", ".index", "index.json", NULL);
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaInstanceManager) source_manager = manager_new (source_data);
-  g_autoptr (NuvashaInstanceManager) target_manager = manager_new (target_data);
-  g_autoptr (NuvashaInstance) source = NULL;
-  g_autoptr (NuvashaModpack) pack = NULL;
-  g_autoptr (NuvashaInstance) imported = NULL;
+  g_autoptr (nuvashalauncherInstanceManager) source_manager = manager_new (source_data);
+  g_autoptr (nuvashalauncherInstanceManager) target_manager = manager_new (target_data);
+  g_autoptr (nuvashalauncherInstance) source = NULL;
+  g_autoptr (nuvashalauncherModpack) pack = NULL;
+  g_autoptr (nuvashalauncherInstance) imported = NULL;
   g_autofree char *imported_dir = NULL;
   g_autofree char *imported_icon = NULL;
   g_autofree char *icon_bytes = NULL;
   g_autofree char *override_bytes = NULL;
-  NuvashaLoader loader = nuvasha_LOADER_VANILLA;
+  nuvashalauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
 
-  source = nuvasha_instance_manager_create (source_manager, "Round Trip",
-                                        source_dir, "1.20.1", nuvasha_LOADER_FABRIC,
+  source = nuvashalauncher_instance_manager_create (source_manager, "Round Trip",
+                                        source_dir, "1.20.1", nuvashalauncher_LOADER_FABRIC,
                                         "0.15.11", &error);
   g_assert_no_error (error);
   g_assert_nonnull (source);
@@ -1032,7 +1032,7 @@ test_export_import_round_trip (void)
   g_assert_true (g_file_set_contents (index, "internal index", -1, &error));
   g_assert_no_error (error);
   g_object_set (source, "icon", icon_source, NULL);
-  g_assert_true (nuvasha_instance_manager_save (source_manager, &error));
+  g_assert_true (nuvashalauncher_instance_manager_save (source_manager, &error));
   g_assert_no_error (error);
 
   g_assert_true (export_now (source, archive, &error));
@@ -1055,17 +1055,17 @@ test_export_import_round_trip (void)
     g_assert_cmpuint (icon_entries, ==, 1);
   }
 
-  pack = nuvasha_modpack_new_from_zip (archive, &error);
+  pack = nuvashalauncher_modpack_new_from_zip (archive, &error);
   g_assert_no_error (error);
   g_assert_nonnull (pack);
-  g_assert_true (nuvasha_modpack_resolve (pack, &error));
+  g_assert_true (nuvashalauncher_modpack_resolve (pack, &error));
   g_assert_no_error (error);
-  g_assert_cmpint (pack->loader, ==, nuvasha_LOADER_FABRIC);
+  g_assert_cmpint (pack->loader, ==, nuvashalauncher_LOADER_FABRIC);
 
   /* The manifest loader is what this round trip verifies. Avoid asking the
    * live Fabric service during tests; the actual files, icon and overrides
    * are independent of the loader installer lookup. */
-  pack->loader = nuvasha_LOADER_VANILLA;
+  pack->loader = nuvashalauncher_LOADER_VANILLA;
   g_clear_pointer (&pack->loader_version, g_free);
 
   imported = install_now (pack, target_manager, "Round Trip", NULL, &error);
@@ -1073,7 +1073,7 @@ test_export_import_round_trip (void)
   g_assert_nonnull (imported);
   g_object_get (imported, "loader", &loader, "directory", &imported_dir,
                 "icon", &imported_icon, NULL);
-  g_assert_cmpint (loader, ==, nuvasha_LOADER_VANILLA);
+  g_assert_cmpint (loader, ==, nuvashalauncher_LOADER_VANILLA);
   g_assert_nonnull (imported_icon);
   icon_bytes = read_file (imported_icon);
   g_assert_cmpstr (icon_bytes, ==, "icon bytes");
@@ -1110,15 +1110,15 @@ test_export_preserves_managed_datapack (void)
                                                 "example.zip", NULL);
   g_autofree char *archive = g_build_filename (root, "managed.mrpack", NULL);
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaInstanceManager) manager = manager_new (data_dir);
-  g_autoptr (NuvashaInstance) instance = NULL;
-  g_autoptr (NuvashaModpack) exported = NULL;
-  NuvashaContentIndexEntry entry = { 0 };
+  g_autoptr (nuvashalauncherInstanceManager) manager = manager_new (data_dir);
+  g_autoptr (nuvashalauncherInstance) instance = NULL;
+  g_autoptr (nuvashalauncherModpack) exported = NULL;
+  nuvashalauncherContentIndexEntry entry = { 0 };
   GStatBuf stat_buf;
 
-  instance = nuvasha_instance_manager_create (manager, "Managed Pack",
+  instance = nuvashalauncher_instance_manager_create (manager, "Managed Pack",
                                                source_dir, "1.20.1",
-                                               nuvasha_LOADER_FABRIC, "0.15.11",
+                                               nuvashalauncher_LOADER_FABRIC, "0.15.11",
                                                &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
@@ -1140,7 +1140,7 @@ test_export_preserves_managed_datapack (void)
   entry.project_id = "pack";
   entry.version_id = "v1";
 
-  g_assert_true (index_update_now (source_dir, nuvasha_CONTENT_DATAPACK,
+  g_assert_true (index_update_now (source_dir, nuvashalauncher_CONTENT_DATAPACK,
                                    &entry, &error));
   g_assert_no_error (error);
   g_object_set (instance,
@@ -1148,12 +1148,12 @@ test_export_preserves_managed_datapack (void)
                 "modpack-summary", "kept summary",
                 "modpack-version-id", "original-version",
                 NULL);
-  g_assert_true (nuvasha_instance_manager_save (manager, &error));
+  g_assert_true (nuvashalauncher_instance_manager_save (manager, &error));
   g_assert_no_error (error);
 
   g_assert_true (export_now (instance, archive, &error));
   g_assert_no_error (error);
-  exported = nuvasha_modpack_new_from_zip (archive, &error);
+  exported = nuvashalauncher_modpack_new_from_zip (archive, &error);
   g_assert_no_error (error);
   g_assert_nonnull (exported);
   g_assert_cmpstr (exported->name, ==, "Managed Pack Original");
@@ -1161,13 +1161,13 @@ test_export_preserves_managed_datapack (void)
   g_assert_cmpstr (exported->version_id, ==, "original-version");
   g_assert_cmpuint (exported->files->len, ==, 1);
   {
-    NuvashaModpackFile *file = g_ptr_array_index (exported->files, 0);
+    nuvashalauncherModpackFile *file = g_ptr_array_index (exported->files, 0);
 
     g_assert_cmpstr (file->path, ==, "datapacks/example.zip");
     g_assert_cmpstr (file->sha1, ==,
                      "0123456789abcdef0123456789abcdef01234567");
-    g_assert_cmpint (file->env_client, ==, nuvasha_MODPACK_ENV_REQUIRED);
-    g_assert_cmpint (file->env_server, ==, nuvasha_MODPACK_ENV_REQUIRED);
+    g_assert_cmpint (file->env_client, ==, nuvashalauncher_MODPACK_ENV_REQUIRED);
+    g_assert_cmpint (file->env_server, ==, nuvashalauncher_MODPACK_ENV_REQUIRED);
     g_assert_cmpstr (g_ptr_array_index (file->downloads, 0), ==,
                      "https://cdn.modrinth.com/data/pack/v1/example.zip");
   }
@@ -1193,8 +1193,8 @@ test_dialog_imports_and_installs (void)
   g_autofree char *zip_path = g_build_filename (dir, "pack.mrpack", NULL);
   g_autofree char *index_json =
     pack_index ("Dialog Pack", "", "\"minecraft\":\"1.20.1\"");
-  g_autoptr (NuvashaInstanceManager) manager = NULL;
-  g_autoptr (NuvashaDownloadModpackDialog) dialog = NULL;
+  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
+  g_autoptr (nuvashalauncherDownloadModpackDialog) dialog = NULL;
   g_autoptr (GtkWindow) window = NULL;
   GtkButton *anchor;
   ZipEntry entries[] = {
@@ -1209,7 +1209,7 @@ test_dialog_imports_and_installs (void)
   zip_write (zip_path, entries, G_N_ELEMENTS (entries));
   manager = manager_new (data_dir);
 
-  dialog = nuvasha_download_modpack_dialog_new_for_file (manager, zip_path);
+  dialog = nuvashalauncher_download_modpack_dialog_new_for_file (manager, zip_path);
   g_assert_nonnull (dialog);
   /* The constructor returns a floating dialog, as GTK widget constructors
    * do. Keep the reference owned by this test rather than relying on an

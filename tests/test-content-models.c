@@ -4,8 +4,8 @@
 
 #include <glib.h>
 
-#include "nuvasha-content-browser-model.h"
-#include "nuvasha-content-install-model.h"
+#include "nuvashalauncher-content-browser-model.h"
+#include "nuvashalauncher-content-install-model.h"
 
 static guint freed;
 
@@ -19,8 +19,8 @@ count_free (gpointer value)
 static void
 test_browser_model (void)
 {
-  g_autoptr (NuvashaContentBrowserModel) model =
-    nuvasha_content_browser_model_new ();
+  g_autoptr (nuvashalauncherContentBrowserModel) model =
+    nuvashalauncher_content_browser_model_new ();
 
   g_assert_nonnull (model->projects);
   g_assert_nonnull (model->project_icons);
@@ -36,7 +36,7 @@ test_browser_model (void)
 
   g_autoptr (GCancellable) more = g_object_ref (model->more);
   g_autoptr (GCancellable) cancellable = g_object_ref (model->cancellable);
-  g_clear_pointer (&model, nuvasha_content_browser_model_free);
+  g_clear_pointer (&model, nuvashalauncher_content_browser_model_free);
   g_assert_true (g_cancellable_is_cancelled (more));
   g_assert_true (g_cancellable_is_cancelled (cancellable));
 }
@@ -45,8 +45,8 @@ static void
 test_install_model (void)
 {
   freed = 0;
-  g_autoptr (NuvashaContentInstallModel) model =
-    nuvasha_content_install_model_new (count_free);
+  g_autoptr (nuvashalauncherContentInstallModel) model =
+    nuvashalauncher_content_install_model_new (count_free);
 
   g_assert_nonnull (model->picks);
   g_assert_null (model->updates);

@@ -1,7 +1,7 @@
 # Copyright (C) 2026 Flia
 # SPDX-License-Identifier: GPL-3.0-only
 #
-# Hand-written Makefile for Nuvasha Launcher.
+# Hand-written Makefile for nuvashalauncher.
 # Release objects live in build/, sanitizer objects in build-debug/.
 
 CC         := gcc
@@ -10,8 +10,8 @@ PREFIX     ?= /usr/local
 VERSION    := $(strip $(shell cat VERSION))
 FLATPAK    ?= 0
 
-# Libraries nuvasha links against. GTK loads the available display backend at
-# runtime, so nuvasha does not link to a window-system backend directly.
+# Libraries nuvashalauncher links against. GTK loads the available display backend at
+# runtime, so nuvashalauncher does not link to a window-system backend directly.
 # gio-unix-2.0 is the Linux part of GIO itself (no display involved) and
 # provides the output stream that writes a download into its temporary
 # file descriptor.
@@ -25,32 +25,32 @@ PKG_LIBS := $(shell $(PKG_CONFIG) --libs $(PKGS)) -lm
 ifeq ($(strip $(PKG_CFLAGS)),)
 $(error pkg-config could not find the required development packages: $(PKGS))
 endif
-CPPFLAGS += -Dnuvasha_LOCALE_DIR=\"$(PREFIX)/share/locale\"
-CPPFLAGS += -Dnuvasha_VERSION=\"$(VERSION)\"
-CPPFLAGS += -Dnuvasha_DATA_DIR=\"$(PREFIX)/share/nuvasha\"
-CPPFLAGS += -Dnuvasha_SOURCE_DATA_DIR=\"$(CURDIR)/data\"
-CPPFLAGS += -Dnuvasha_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\"
+CPPFLAGS += -Dnuvashalauncher_LOCALE_DIR=\"$(PREFIX)/share/locale\"
+CPPFLAGS += -Dnuvashalauncher_VERSION=\"$(VERSION)\"
+CPPFLAGS += -Dnuvashalauncher_DATA_DIR=\"$(PREFIX)/share/nuvashalauncher\"
+CPPFLAGS += -Dnuvashalauncher_SOURCE_DATA_DIR=\"$(CURDIR)/data\"
+CPPFLAGS += -Dnuvashalauncher_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\"
 ifeq ($(FLATPAK),1)
-CPPFLAGS += -Dnuvasha_FLATPAK
+CPPFLAGS += -Dnuvashalauncher_FLATPAK
 endif
 LOCALES := es_AR es_ES pt_BR pt_PT fr de it ja ko zh_CN zh_TW ru pl uk tr nl cs hu sv da fi nb ro vi id ar
-LOCALE_MOS := $(LOCALES:%=build/locale/%/LC_MESSAGES/nuvasha.mo)
-SCHEMA_XML := data/com.github.nuvashalauncher.Nuvasha.gschema.xml
+LOCALE_MOS := $(LOCALES:%=build/locale/%/LC_MESSAGES/nuvashalauncher.mo)
+SCHEMA_XML := data/com.github.nuvashalauncher.nuvashalauncher.gschema.xml
 SCHEMA_COMPILED := build/schemas/gschemas.compiled
 
 CFLAGS   := -std=c17 -Wall -Wextra -Wpedantic -MMD -MP
 RELFLAGS := -O2
 DBGFLAGS := -g -O0 -fsanitize=address,undefined -fno-sanitize-recover=all
 
-BIN    := build/NuvashaLauncher
-DBGBIN := build-debug/NuvashaLauncher
+BIN    := build/nuvashalauncher
+DBGBIN := build-debug/nuvashalauncher
 
 SRCS    := $(filter-out $(wildcard src/*-part.c),$(wildcard src/*.c))
 RELOBJS := $(patsubst src/%.c,build/%.o,$(SRCS))
 DBGOBJS := $(patsubst src/%.c,build-debug/%.o,$(SRCS))
-RESOURCE_C := build/nuvasha-resources.c
-RESOURCE_O := build/nuvasha-resources.o
-RESOURCE_DBG_O := build-debug/nuvasha-resources.o
+RESOURCE_C := build/nuvashalauncher-resources.c
+RESOURCE_O := build/nuvashalauncher-resources.o
+RESOURCE_DBG_O := build-debug/nuvashalauncher-resources.o
 RELOBJS += $(RESOURCE_O)
 DBGOBJS += $(RESOURCE_DBG_O)
 RELDEPS := $(RELOBJS:.o=.d)
@@ -89,7 +89,7 @@ $(DBGBIN): $(DBGOBJS) | build-debug
 build/%.o: src/%.c | build
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(RELFLAGS) $(PKG_CFLAGS) -Wno-overlength-strings -c -o $@ $<
 
-$(RESOURCE_C): data/nuvasha.gresource.xml data/nuvasha.css $(wildcard data/ui/*.ui) | build
+$(RESOURCE_C): data/nuvashalauncher.gresource.xml data/nuvashalauncher.css $(wildcard data/ui/*.ui) | build
 	glib-compile-resources --generate-source --target=$@ --sourcedir=data $<
 
 $(RESOURCE_O): $(RESOURCE_C) | build
@@ -103,10 +103,10 @@ $(RESOURCE_DBG_O): $(RESOURCE_C) | build-debug
 
 build/tests/%: tests/%.c $(TESTLIBOBJS) | build/tests
 	$(CC) $(CFLAGS) $(RELFLAGS) -Isrc $(PKG_CFLAGS) \
-		-Dnuvasha_DATA_DIR=\"$(CURDIR)/data\" -Dnuvasha_BIN=\"$(CURDIR)/$(BIN)\" \
-		-Dnuvasha_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\" \
-		-Dnuvasha_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
-		-Dnuvasha_SRC_DIR=\"$(CURDIR)/src\" -Dnuvasha_PO_DIR=\"$(CURDIR)/po\" \
+		-Dnuvashalauncher_DATA_DIR=\"$(CURDIR)/data\" -Dnuvashalauncher_BIN=\"$(CURDIR)/$(BIN)\" \
+		-Dnuvashalauncher_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\" \
+		-Dnuvashalauncher_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
+		-Dnuvashalauncher_SRC_DIR=\"$(CURDIR)/src\" -Dnuvashalauncher_PO_DIR=\"$(CURDIR)/po\" \
 		-o $@ $< $(TESTLIBOBJS) $(PKG_LIBS)
 
 # Tests never write to the real data directory and never touch the network.
@@ -133,10 +133,10 @@ test-display:
 # AddressSanitizer and UndefinedBehaviorSanitizer into build-debug/.
 build-debug/tests/%: tests/%.c $(TESTLIBDBGOBJS) | build-debug/tests
 	$(CC) $(CFLAGS) $(DBGFLAGS) -Isrc $(PKG_CFLAGS) \
-		-Dnuvasha_DATA_DIR=\"$(CURDIR)/data\" -Dnuvasha_BIN=\"$(CURDIR)/$(BIN)\" \
-		-Dnuvasha_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\" \
-		-Dnuvasha_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
-		-Dnuvasha_SRC_DIR=\"$(CURDIR)/src\" -Dnuvasha_PO_DIR=\"$(CURDIR)/po\" \
+		-Dnuvashalauncher_DATA_DIR=\"$(CURDIR)/data\" -Dnuvashalauncher_BIN=\"$(CURDIR)/$(BIN)\" \
+		-Dnuvashalauncher_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\" \
+		-Dnuvashalauncher_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
+		-Dnuvashalauncher_SRC_DIR=\"$(CURDIR)/src\" -Dnuvashalauncher_PO_DIR=\"$(CURDIR)/po\" \
 		-o $@ $< $(TESTLIBDBGOBJS) $(PKG_LIBS)
 
 # The display guard test runs the release launcher, so test-debug builds both
@@ -173,47 +173,47 @@ static-analysis:
 
 pot:
 	xgettext --from-code=UTF-8 --language=C --keyword=_ --keyword=N_ \
-		--files-from=po/POTFILES.in --output=po/nuvasha.pot
+		--files-from=po/POTFILES.in --output=po/nuvashalauncher.pot
 
 install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS) $(SCHEMA_COMPILED)
-	install -Dm755 $(BIN) "$(DESTDIR)$(PREFIX)/bin/NuvashaLauncher"
-	install -Dm644 data/pack.png "$(DESTDIR)$(PREFIX)/share/nuvasha/pack.png"
-	install -Dm644 data/nuvasha.css "$(DESTDIR)$(PREFIX)/share/nuvasha/nuvasha.css"
+	install -Dm755 $(BIN) "$(DESTDIR)$(PREFIX)/bin/nuvashalauncher"
+	install -Dm644 data/pack.png "$(DESTDIR)$(PREFIX)/share/nuvashalauncher/pack.png"
+	install -Dm644 data/nuvashalauncher.css "$(DESTDIR)$(PREFIX)/share/nuvashalauncher/nuvashalauncher.css"
 	@for skin in data/skins/defaults/*.png; do \
-		install -Dm644 "$$skin" "$(DESTDIR)$(PREFIX)/share/nuvasha/skins/defaults/$$(basename "$$skin")"; \
+		install -Dm644 "$$skin" "$(DESTDIR)$(PREFIX)/share/nuvashalauncher/skins/defaults/$$(basename "$$skin")"; \
 	done
-	install -Dm644 data/com.github.nuvashalauncher.nuvasha.desktop \
-		"$(DESTDIR)$(PREFIX)/share/applications/com.github.nuvashalauncher.nuvasha.desktop"
-	install -Dm644 data/NuvashaLauncher.bash \
-		"$(DESTDIR)$(PREFIX)/share/bash-completion/completions/NuvashaLauncher"
-	install -Dm644 data/com.github.nuvashalauncher.nuvasha.xml \
-		"$(DESTDIR)$(PREFIX)/share/mime/packages/com.github.nuvashalauncher.nuvasha.xml"
-	install -Dm644 data/icons/scalable/apps/com.github.nuvashalauncher.nuvasha.svg \
-		"$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.nuvashalauncher.nuvasha.svg"
-	install -Dm644 data/com.github.nuvashalauncher.nuvasha.metainfo.xml \
-		"$(DESTDIR)$(PREFIX)/share/metainfo/com.github.nuvashalauncher.nuvasha.metainfo.xml"
+	install -Dm644 data/com.github.nuvashalauncher.nuvashalauncher.desktop \
+		"$(DESTDIR)$(PREFIX)/share/applications/com.github.nuvashalauncher.nuvashalauncher.desktop"
+	install -Dm644 data/nuvashalauncher.bash \
+		"$(DESTDIR)$(PREFIX)/share/bash-completion/completions/nuvashalauncher"
+	install -Dm644 data/com.github.nuvashalauncher.nuvashalauncher.xml \
+		"$(DESTDIR)$(PREFIX)/share/mime/packages/com.github.nuvashalauncher.nuvashalauncher.xml"
+	install -Dm644 data/icons/scalable/apps/com.github.nuvashalauncher.nuvashalauncher.svg \
+		"$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.nuvashalauncher.nuvashalauncher.svg"
+	install -Dm644 data/com.github.nuvashalauncher.nuvashalauncher.metainfo.xml \
+		"$(DESTDIR)$(PREFIX)/share/metainfo/com.github.nuvashalauncher.nuvashalauncher.metainfo.xml"
 	install -Dm644 $(SCHEMA_COMPILED) \
 		"$(DESTDIR)$(PREFIX)/share/glib-2.0/schemas/gschemas.compiled"
 	@for lang in $(LOCALES); do \
-		install -Dm644 build/locale/$$lang/LC_MESSAGES/nuvasha.mo \
-			"$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/nuvasha.mo"; \
+		install -Dm644 build/locale/$$lang/LC_MESSAGES/nuvashalauncher.mo \
+			"$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/nuvashalauncher.mo"; \
 	done
 
 # The same list the install loop uses, so the catalogs go back out with
 # the rest of the launcher.
 uninstall:
-	rm -f "$(DESTDIR)$(PREFIX)/bin/NuvashaLauncher"
-	rm -f "$(DESTDIR)$(PREFIX)/share/nuvasha/pack.png"
-	rm -f "$(DESTDIR)$(PREFIX)/share/nuvasha/nuvasha.css"
-	rm -rf "$(DESTDIR)$(PREFIX)/share/nuvasha/skins/defaults"
-	rm -f "$(DESTDIR)$(PREFIX)/share/applications/com.github.nuvashalauncher.nuvasha.desktop"
-	rm -f "$(DESTDIR)$(PREFIX)/share/bash-completion/completions/NuvashaLauncher"
-	rm -f "$(DESTDIR)$(PREFIX)/share/mime/packages/com.github.nuvashalauncher.nuvasha.xml"
-	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.nuvashalauncher.nuvasha.svg"
-	rm -f "$(DESTDIR)$(PREFIX)/share/metainfo/com.github.nuvashalauncher.nuvasha.metainfo.xml"
+	rm -f "$(DESTDIR)$(PREFIX)/bin/nuvashalauncher"
+	rm -f "$(DESTDIR)$(PREFIX)/share/nuvashalauncher/pack.png"
+	rm -f "$(DESTDIR)$(PREFIX)/share/nuvashalauncher/nuvashalauncher.css"
+	rm -rf "$(DESTDIR)$(PREFIX)/share/nuvashalauncher/skins/defaults"
+	rm -f "$(DESTDIR)$(PREFIX)/share/applications/com.github.nuvashalauncher.nuvashalauncher.desktop"
+	rm -f "$(DESTDIR)$(PREFIX)/share/bash-completion/completions/nuvashalauncher"
+	rm -f "$(DESTDIR)$(PREFIX)/share/mime/packages/com.github.nuvashalauncher.nuvashalauncher.xml"
+	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.nuvashalauncher.nuvashalauncher.svg"
+	rm -f "$(DESTDIR)$(PREFIX)/share/metainfo/com.github.nuvashalauncher.nuvashalauncher.metainfo.xml"
 	rm -f "$(DESTDIR)$(PREFIX)/share/glib-2.0/schemas/gschemas.compiled"
 	@for lang in $(LOCALES); do \
-		rm -f "$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/nuvasha.mo"; \
+		rm -f "$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/nuvashalauncher.mo"; \
 	done
 
 clean:
@@ -228,7 +228,7 @@ $(SCHEMA_COMPILED): $(SCHEMA_XML) | build/schemas
 build/schemas:
 	mkdir -p $@
 
-build/locale/%/LC_MESSAGES/nuvasha.mo: po/%.po
+build/locale/%/LC_MESSAGES/nuvashalauncher.mo: po/%.po
 	mkdir -p $(dir $@)
 	msgfmt -o $@ $<
 

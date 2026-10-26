@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#include "nuvasha-content-index.h"
+#include "nuvashalauncher-content-index.h"
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -12,7 +12,7 @@
 typedef struct {
   GMainLoop *loop;
   guint *completed;
-  NuvashaTaskScope *operation;
+  nuvashalauncherTaskScope *operation;
 } UpdateWait;
 
 static void
@@ -22,7 +22,7 @@ update_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   UpdateWait *wait = user_data;
   g_autoptr (GError) error = NULL;
 
-  if (!nuvasha_content_index_modify_finish (result, &error))
+  if (!nuvashalauncher_content_index_modify_finish (result, &error))
     g_error ("content index update failed: %s", error->message);
 
   (*wait->completed)++;
@@ -30,14 +30,14 @@ update_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     g_main_loop_quit (wait->loop);
 
   /* The handle released only once the answer is in. */
-  nuvasha_task_scope_unref (wait->operation);
+  nuvashalauncher_task_scope_unref (wait->operation);
   wait->operation = NULL;
   g_free (wait);
 }
 
 typedef struct {
   GMainLoop *loop;
-  NuvashaTaskScope *operation;
+  nuvashalauncherTaskScope *operation;
 } LoadWait;
 
 static void
@@ -47,34 +47,34 @@ load_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   LoadWait *wait = user_data;
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) entries =
-    nuvasha_content_index_load_finish (result, &error);
+    nuvashalauncher_content_index_load_finish (result, &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (entries);
   g_assert_cmpuint (entries->len, ==, 2);
 
-  nuvasha_task_scope_unref (wait->operation);
+  nuvashalauncher_task_scope_unref (wait->operation);
   wait->operation = NULL;
   g_main_loop_quit (wait->loop);
   g_free (wait);
 }
 
 static void
-start_update (const char *root, NuvashaContentIndexEntry *entry, GMainLoop *loop,
+start_update (const char *root, nuvashalauncherContentIndexEntry *entry, GMainLoop *loop,
               guint *completed)
 {
   UpdateWait *wait = g_new0 (UpdateWait, 1);
 
   wait->loop = loop;
   wait->completed = completed;
-  wait->operation = nuvasha_content_index_update_async (root, nuvasha_CONTENT_MOD,
+  wait->operation = nuvashalauncher_content_index_update_async (root, nuvashalauncher_CONTENT_MOD,
                                                      entry, update_done, wait);
 }
 
 static void
 test_concurrent_updates_are_serialized (void)
 {
-  g_autofree char *root = g_dir_make_tmp ("nuvasha-content-index-XXXXXX", NULL);
+  g_autofree char *root = g_dir_make_tmp ("nuvashalauncher-content-index-XXXXXX", NULL);
   g_autofree char *index_directory = g_build_filename (root, "mods", ".index",
                                                        NULL);
   g_autofree char *first_path = NULL;
@@ -82,7 +82,7 @@ test_concurrent_updates_are_serialized (void)
   g_autofree char *mods_directory = g_build_filename (root, "mods", NULL);
   GMainLoop *loop = g_main_loop_new (NULL, FALSE);
   guint completed = 0;
-  NuvashaContentIndexEntry first = {
+  nuvashalauncherContentIndexEntry first = {
     .filename = "first.jar",
     .hash = "first-sha1",
     .hash512 = "first-sha512",
@@ -94,7 +94,7 @@ test_concurrent_updates_are_serialized (void)
     .version_id = "first-version",
     .version_name = "1.0",
   };
-  NuvashaContentIndexEntry second = {
+  nuvashalauncherContentIndexEntry second = {
     .filename = "second.jar",
     .hash = "second-sha1",
     .hash512 = "second-sha512",
@@ -113,9 +113,9 @@ test_concurrent_updates_are_serialized (void)
   start_update (root, &second, loop, &completed);
   g_main_loop_run (loop);
 
-  first_path = nuvasha_content_index_entry_path (root, nuvasha_CONTENT_MOD,
+  first_path = nuvashalauncher_content_index_entry_path (root, nuvashalauncher_CONTENT_MOD,
                                              first.filename);
-  second_path = nuvasha_content_index_entry_path (root, nuvasha_CONTENT_MOD,
+  second_path = nuvashalauncher_content_index_entry_path (root, nuvashalauncher_CONTENT_MOD,
                                               second.filename);
   g_assert_true (g_file_test (first_path, G_FILE_TEST_IS_REGULAR));
   g_assert_true (g_file_test (second_path, G_FILE_TEST_IS_REGULAR));
@@ -133,7 +133,7 @@ test_concurrent_updates_are_serialized (void)
     LoadWait *load = g_new0 (LoadWait, 1);
 
     load->loop = loop;
-    load->operation = nuvasha_content_index_load_async (root, nuvasha_CONTENT_MOD,
+    load->operation = nuvashalauncher_content_index_load_async (root, nuvashalauncher_CONTENT_MOD,
                                                     load_done, load);
   }
   g_main_loop_run (loop);

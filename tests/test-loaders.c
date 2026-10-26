@@ -2,9 +2,9 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* Tests for nuvasha-loaders.
+/* Tests for nuvashalauncher-loaders.
  *
- * Every loader answers with a document of its own, and what nuvasha has to
+ * Every loader answers with a document of its own, and what nuvashalauncher has to
  * get right is reading it: which versions a loader has for one Minecraft
  * version, which of those it calls stable, and the document those
  * versions are, whose libraries publish a maven address instead of a
@@ -14,20 +14,20 @@
  * what the loaders themselves published, so nothing here needs the
  * network. */
 
-#include "nuvasha-loaders.h"
+#include "nuvashalauncher-loaders.h"
 
-#include "nuvasha-download.h"
-#include "nuvasha-minecraft-resolve.h"
+#include "nuvashalauncher-download.h"
+#include "nuvashalauncher-minecraft-resolve.h"
 
 #include <glib.h>
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef nuvasha_TEST_FIXTURES
-#define nuvasha_TEST_FIXTURES "tests/fixtures"
+#ifndef nuvashalauncher_TEST_FIXTURES
+#define nuvashalauncher_TEST_FIXTURES "tests/fixtures"
 #endif
 
-static const NuvashaLoaderVersion *
+static const nuvashalauncherLoaderVersion *
 version_at (GPtrArray *versions, guint index)
 {
   g_assert_cmpuint (index, <, versions->len);
@@ -42,8 +42,8 @@ version_at (GPtrArray *versions, guint index)
 static void
 test_supported_loaders (void)
 {
-  const NuvashaLoader *loaders = nuvasha_loaders_supported ();
-  guint count = nuvasha_loaders_supported_count ();
+  const nuvashalauncherLoader *loaders = nuvashalauncher_loaders_supported ();
+  guint count = nuvashalauncher_loaders_supported_count ();
   gboolean vanilla = FALSE;
   gboolean fabric = FALSE;
 
@@ -53,24 +53,24 @@ test_supported_loaders (void)
 
   for (guint i = 0; i < count; i++)
     {
-      g_assert_true (nuvasha_loader_is_supported (loaders[i]));
-      g_assert_nonnull (nuvasha_loader_display_name (loaders[i]));
+      g_assert_true (nuvashalauncher_loader_is_supported (loaders[i]));
+      g_assert_nonnull (nuvashalauncher_loader_display_name (loaders[i]));
 
-      if (loaders[i] == nuvasha_LOADER_VANILLA)
+      if (loaders[i] == nuvashalauncher_LOADER_VANILLA)
         vanilla = TRUE;
 
-      if (loaders[i] == nuvasha_LOADER_FABRIC)
+      if (loaders[i] == nuvashalauncher_LOADER_FABRIC)
         fabric = TRUE;
     }
 
   g_assert_true (vanilla);
   g_assert_true (fabric);
 
-  g_assert_cmpstr (nuvasha_loader_display_name (nuvasha_LOADER_VANILLA), ==, "Vanilla");
-  g_assert_cmpstr (nuvasha_loader_display_name (nuvasha_LOADER_FABRIC), ==, "Fabric");
-  g_assert_cmpstr (nuvasha_loader_display_name (nuvasha_LOADER_QUILT), ==, "Quilt");
+  g_assert_cmpstr (nuvashalauncher_loader_display_name (nuvashalauncher_LOADER_VANILLA), ==, "Vanilla");
+  g_assert_cmpstr (nuvashalauncher_loader_display_name (nuvashalauncher_LOADER_FABRIC), ==, "Fabric");
+  g_assert_cmpstr (nuvashalauncher_loader_display_name (nuvashalauncher_LOADER_QUILT), ==, "Quilt");
 
-  g_print ("ok - the loader lists hold the loaders nuvasha installs\n");
+  g_print ("ok - the loader lists hold the loaders nuvashalauncher installs\n");
 }
 
 static void
@@ -80,11 +80,11 @@ test_fabric_version_list (void)
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
 
-  if (!g_file_get_contents (nuvasha_TEST_FIXTURES "/fabric-loader-list.json",
+  if (!g_file_get_contents (nuvashalauncher_TEST_FIXTURES "/fabric-loader-list.json",
                             &json, NULL, &error))
     g_error ("the fixture cannot be read: %s", error->message);
 
-  versions = nuvasha_loaders_versions_from_json (json, -1, &error);
+  versions = nuvashalauncher_loaders_versions_from_json (json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (versions);
   g_assert_cmpuint (versions->len, ==, 5);
@@ -114,11 +114,11 @@ test_quilt_version_list (void)
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
 
-  if (!g_file_get_contents (nuvasha_TEST_FIXTURES "/quilt-loader-list.json",
+  if (!g_file_get_contents (nuvashalauncher_TEST_FIXTURES "/quilt-loader-list.json",
                             &json, NULL, &error))
     g_error ("the fixture cannot be read: %s", error->message);
 
-  versions = nuvasha_loaders_versions_from_json (json, -1, &error);
+  versions = nuvashalauncher_loaders_versions_from_json (json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (versions);
   g_assert_cmpuint (versions->len, ==, 4);
@@ -148,21 +148,21 @@ test_empty_and_broken_answers (void)
   /* A loader with no version for that Minecraft version answers with an
      empty list, which is not the same as an error the user has to read
      twice. */
-  versions = nuvasha_loaders_versions_from_json ("[]", -1, &error);
+  versions = nuvashalauncher_loaders_versions_from_json ("[]", -1, &error);
   g_assert_null (versions);
-  g_assert_error (error, nuvasha_LOADERS_ERROR, nuvasha_LOADERS_ERROR_NO_VERSIONS);
+  g_assert_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_NO_VERSIONS);
   g_clear_error (&error);
 
   /* Something that is not a list at all is refused as well. */
-  versions = nuvasha_loaders_versions_from_json ("{\"error\": \"nope\"}", -1,
+  versions = nuvashalauncher_loaders_versions_from_json ("{\"error\": \"nope\"}", -1,
                                              &error);
   g_assert_null (versions);
-  g_assert_error (error, nuvasha_LOADERS_ERROR, nuvasha_LOADERS_ERROR_NO_VERSIONS);
+  g_assert_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_NO_VERSIONS);
   g_clear_error (&error);
 
   /* An entry that says nothing about a version is left out instead of
      becoming an empty row. */
-  versions = nuvasha_loaders_versions_from_json (
+  versions = nuvashalauncher_loaders_versions_from_json (
     "[{\"loader\": {}}, {\"loader\": {\"version\": \"0.19.5\"}}]", -1, &error);
   g_assert_no_error (error);
   g_assert_cmpuint (versions->len, ==, 1);
@@ -181,11 +181,11 @@ test_which_loaders_publish_an_installer (void)
   /* The two that serve a version document of their own and the two that
      publish an installer are installed in different ways, and the launcher
      asks which it is dealing with. */
-  g_assert_false (nuvasha_loader_publishes_an_installer (nuvasha_LOADER_VANILLA));
-  g_assert_false (nuvasha_loader_publishes_an_installer (nuvasha_LOADER_FABRIC));
-  g_assert_false (nuvasha_loader_publishes_an_installer (nuvasha_LOADER_QUILT));
-  g_assert_true (nuvasha_loader_publishes_an_installer (nuvasha_LOADER_NEOFORGE));
-  g_assert_true (nuvasha_loader_publishes_an_installer (nuvasha_LOADER_FORGE));
+  g_assert_false (nuvashalauncher_loader_publishes_an_installer (nuvashalauncher_LOADER_VANILLA));
+  g_assert_false (nuvashalauncher_loader_publishes_an_installer (nuvashalauncher_LOADER_FABRIC));
+  g_assert_false (nuvashalauncher_loader_publishes_an_installer (nuvashalauncher_LOADER_QUILT));
+  g_assert_true (nuvashalauncher_loader_publishes_an_installer (nuvashalauncher_LOADER_NEOFORGE));
+  g_assert_true (nuvashalauncher_loader_publishes_an_installer (nuvashalauncher_LOADER_FORGE));
 
   g_print ("ok - the loaders that publish an installer are told apart\n");
 }
@@ -198,47 +198,47 @@ test_compatibility_filtering (void)
 {
   /* Forge: "1.20.1-47.2.0" runs 1.20.1 and nothing else, so a longer game
      version is not a prefix match. */
-  g_assert_true (nuvasha_loaders_version_runs_game (nuvasha_LOADER_FORGE,
+  g_assert_true (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_FORGE,
                                                 "1.20.1-47.2.0", "1.20.1"));
-  g_assert_false (nuvasha_loaders_version_runs_game (nuvasha_LOADER_FORGE,
+  g_assert_false (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_FORGE,
                                                  "1.20.1-47.2.0", "1.20"));
-  g_assert_false (nuvasha_loaders_version_runs_game (nuvasha_LOADER_FORGE,
+  g_assert_false (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_FORGE,
                                                  "1.20.1-47.2.0", "1.20.2"));
-  g_assert_true (nuvasha_loaders_version_runs_game (nuvasha_LOADER_FORGE,
+  g_assert_true (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_FORGE,
                                                 "1.21-51.0.33", "1.21"));
 
   /* NeoForge: "26.3.0.51-beta" runs 26.3, and a version of another game
      does not. */
-  g_assert_true (nuvasha_loaders_version_runs_game (nuvasha_LOADER_NEOFORGE,
+  g_assert_true (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE,
                                                 "26.3.0.51-beta", "26.3"));
-  g_assert_true (nuvasha_loaders_version_runs_game (nuvasha_LOADER_NEOFORGE,
+  g_assert_true (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE,
                                                 "21.1.256", "21.1"));
-  g_assert_false (nuvasha_loaders_version_runs_game (nuvasha_LOADER_NEOFORGE,
+  g_assert_false (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE,
                                                  "21.1.256", "21.11"));
-  g_assert_false (nuvasha_loaders_version_runs_game (nuvasha_LOADER_NEOFORGE,
+  g_assert_false (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE,
                                                  "20.2.3-beta", "26.3"));
 
   /* Modern NeoForge drops the leading "1." of a Minecraft version and
      writes a missing patch as 0, so the question is asked with the real
      Minecraft version the user picked. */
-  g_assert_true (nuvasha_loaders_version_runs_game (nuvasha_LOADER_NEOFORGE,
+  g_assert_true (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE,
                                                 "21.1.256", "1.21.1"));
-  g_assert_false (nuvasha_loaders_version_runs_game (nuvasha_LOADER_NEOFORGE,
+  g_assert_false (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE,
                                                  "21.1.256", "1.21"));
-  g_assert_true (nuvasha_loaders_version_runs_game (nuvasha_LOADER_NEOFORGE,
+  g_assert_true (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE,
                                                 "21.0.5", "1.21"));
-  g_assert_true (nuvasha_loaders_version_runs_game (nuvasha_LOADER_NEOFORGE,
+  g_assert_true (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE,
                                                 "20.2.3-beta", "1.20.2"));
-  g_assert_false (nuvasha_loaders_version_runs_game (nuvasha_LOADER_NEOFORGE,
+  g_assert_false (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE,
                                                  "20.2.3-beta", "1.20.1"));
 
   /* A loader that publishes no installer is not asked the question: its
      versions are its own and name no game. */
-  g_assert_false (nuvasha_loaders_version_runs_game (nuvasha_LOADER_FABRIC,
+  g_assert_false (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_FABRIC,
                                                  "0.19.5", "26.3"));
-  g_assert_false (nuvasha_loaders_version_runs_game (nuvasha_LOADER_NEOFORGE, NULL,
+  g_assert_false (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE, NULL,
                                                  "26.3"));
-  g_assert_false (nuvasha_loaders_version_runs_game (nuvasha_LOADER_NEOFORGE,
+  g_assert_false (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE,
                                                  "26.3.0.51-beta", NULL));
 
   g_print ("ok - the versions of a loader are told apart by their names\n");
@@ -253,14 +253,14 @@ test_neoforge_version_list (void)
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
 
-  if (!g_file_get_contents (nuvasha_TEST_FIXTURES "/neoforge-versions.json", &json,
+  if (!g_file_get_contents (nuvashalauncher_TEST_FIXTURES "/neoforge-versions.json", &json,
                             NULL, &error))
     g_error ("the fixture cannot be read: %s", error->message);
 
   /* The maven holds every version NeoForge ever published, for every game;
      only the ones named after the game that was asked for are versions of
      it. */
-  versions = nuvasha_loaders_maven_versions_from_json (nuvasha_LOADER_NEOFORGE, "26.3",
+  versions = nuvashalauncher_loaders_maven_versions_from_json (nuvashalauncher_LOADER_NEOFORGE, "26.3",
                                                     json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (versions);
@@ -276,7 +276,7 @@ test_neoforge_version_list (void)
 
   /* Another game version out of the same answer. */
   g_clear_pointer (&versions, g_ptr_array_unref);
-  versions = nuvasha_loaders_maven_versions_from_json (nuvasha_LOADER_NEOFORGE,
+  versions = nuvashalauncher_loaders_maven_versions_from_json (nuvashalauncher_LOADER_NEOFORGE,
                                                     "21.1", json, -1, &error);
   g_assert_no_error (error);
   g_assert_cmpuint (versions->len, ==, 3);
@@ -288,7 +288,7 @@ test_neoforge_version_list (void)
   /* The same list asked for with the real Minecraft version the user
      picked, which NeoForge spells without the leading "1.". */
   g_clear_pointer (&versions, g_ptr_array_unref);
-  versions = nuvasha_loaders_maven_versions_from_json (nuvasha_LOADER_NEOFORGE,
+  versions = nuvashalauncher_loaders_maven_versions_from_json (nuvashalauncher_LOADER_NEOFORGE,
                                                    "1.21.1", json, -1, &error);
   g_assert_no_error (error);
   g_assert_cmpuint (versions->len, ==, 3);
@@ -296,11 +296,11 @@ test_neoforge_version_list (void)
 
   /* A game no version of NeoForge runs. */
   g_clear_pointer (&versions, g_ptr_array_unref);
-  versions = nuvasha_loaders_maven_versions_from_json (nuvasha_LOADER_NEOFORGE,
+  versions = nuvashalauncher_loaders_maven_versions_from_json (nuvashalauncher_LOADER_NEOFORGE,
                                                     "1.20.1", json, -1,
                                                     &error);
   g_assert_null (versions);
-  g_assert_error (error, nuvasha_LOADERS_ERROR, nuvasha_LOADERS_ERROR_NO_VERSIONS);
+  g_assert_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_NO_VERSIONS);
 
   g_print ("ok - a NeoForge maven is read and filtered by game version\n");
 }
@@ -314,11 +314,11 @@ test_forge_version_list (void)
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
 
-  if (!g_file_get_contents (nuvasha_TEST_FIXTURES "/forge-versions.json", &json,
+  if (!g_file_get_contents (nuvashalauncher_TEST_FIXTURES "/forge-versions.json", &json,
                             NULL, &error))
     g_error ("the fixture cannot be read: %s", error->message);
 
-  versions = nuvasha_loaders_maven_versions_from_json (nuvasha_LOADER_FORGE, "1.20.1",
+  versions = nuvashalauncher_loaders_maven_versions_from_json (nuvashalauncher_LOADER_FORGE, "1.20.1",
                                                     json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (versions);
@@ -336,7 +336,7 @@ test_forge_version_list (void)
   g_assert_true (version_at (versions, 2)->stable);
 
   g_clear_pointer (&versions, g_ptr_array_unref);
-  versions = nuvasha_loaders_maven_versions_from_json (nuvasha_LOADER_FORGE, "1.16.5",
+  versions = nuvashalauncher_loaders_maven_versions_from_json (nuvashalauncher_LOADER_FORGE, "1.16.5",
                                                     json, -1, &error);
   g_assert_no_error (error);
   g_assert_cmpuint (versions->len, ==, 1);
@@ -353,10 +353,10 @@ test_a_maven_that_answers_nothing (void)
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
 
-  versions = nuvasha_loaders_maven_versions_from_json (
-    nuvasha_LOADER_FORGE, "1.20.1", "{\"status\": 404}", -1, &error);
+  versions = nuvashalauncher_loaders_maven_versions_from_json (
+    nuvashalauncher_LOADER_FORGE, "1.20.1", "{\"status\": 404}", -1, &error);
   g_assert_null (versions);
-  g_assert_error (error, nuvasha_LOADERS_ERROR, nuvasha_LOADERS_ERROR_NO_VERSIONS);
+  g_assert_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_NO_VERSIONS);
 
   g_print ("ok - a maven that answers nothing is refused\n");
 }
@@ -365,12 +365,12 @@ test_a_maven_that_answers_nothing (void)
  * The document of a loader version
  * ---------------------------------------------------------- */
 
-static const NuvashaLibrary *
-find_library (NuvashaVersionDescription *description, const char *name)
+static const nuvashalauncherLibrary *
+find_library (nuvashalauncherVersionDescription *description, const char *name)
 {
   for (guint i = 0; i < description->libraries->len; i++)
     {
-      const NuvashaLibrary *library = g_ptr_array_index (description->libraries, i);
+      const nuvashalauncherLibrary *library = g_ptr_array_index (description->libraries, i);
 
       if (g_strcmp0 (library->name, name) == 0)
         return library;
@@ -384,10 +384,10 @@ test_fabric_profile (void)
 {
   g_autofree char *json = NULL;
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaVersionDescription) profile = NULL;
-  g_autoptr (NuvashaVersionDescription) vanilla = NULL;
-  g_autoptr (NuvashaVersionDescription) merged = NULL;
-  const NuvashaLibrary *library = NULL;
+  g_autoptr (nuvashalauncherVersionDescription) profile = NULL;
+  g_autoptr (nuvashalauncherVersionDescription) vanilla = NULL;
+  g_autoptr (nuvashalauncherVersionDescription) merged = NULL;
+  const nuvashalauncherLibrary *library = NULL;
   const char *vanilla_document =
     "{\"id\": \"1.20.1\", \"type\": \"release\","
     " \"mainClass\": \"net.minecraft.client.main.Main\","
@@ -402,11 +402,11 @@ test_fabric_profile (void)
     "   \"downloads\": {\"artifact\": {\"path\": \"org/lwjgl/lwjgl/3.3.3/lwjgl.jar\","
     "     \"sha1\": \"ef\", \"url\": \"https://example.invalid/lwjgl.jar\"}}}]}";
 
-  if (!g_file_get_contents (nuvasha_TEST_FIXTURES "/fabric-profile.json", &json,
+  if (!g_file_get_contents (nuvashalauncher_TEST_FIXTURES "/fabric-profile.json", &json,
                             NULL, &error))
     g_error ("the fixture cannot be read: %s", error->message);
 
-  profile = nuvasha_loaders_profile_from_json (json, -1, &error);
+  profile = nuvashalauncher_loaders_profile_from_json (json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (profile);
 
@@ -420,7 +420,7 @@ test_fabric_profile (void)
   g_assert_cmpuint (profile->libraries->len, ==, 4);
   g_assert_cmpuint (profile->jvm_arguments->len, ==, 1);
   {
-    const NuvashaArgument *argument = g_ptr_array_index (profile->jvm_arguments, 0);
+    const nuvashalauncherArgument *argument = g_ptr_array_index (profile->jvm_arguments, 0);
 
     g_assert_cmpuint (argument->values->len, ==, 1);
     g_assert_cmpstr (g_ptr_array_index (argument->values, 0), ==,
@@ -458,12 +458,12 @@ test_fabric_profile (void)
 
   /* The merge a loader instance runs: the loader document on top of the
      Minecraft version it inherits from. */
-  vanilla = nuvasha_version_description_new_from_json (vanilla_document, -1,
+  vanilla = nuvashalauncher_version_description_new_from_json (vanilla_document, -1,
                                                    &error);
   g_assert_no_error (error);
   g_assert_nonnull (vanilla);
 
-  merged = nuvasha_version_description_merge (vanilla, profile);
+  merged = nuvashalauncher_version_description_merge (vanilla, profile);
   g_assert_nonnull (merged);
   g_assert_cmpstr (merged->id, ==, profile->id);
   g_assert_cmpstr (merged->main_class, ==, profile->main_class);
@@ -480,7 +480,7 @@ test_fabric_profile (void)
   /* The libraries of the version come first, the ones of the loader
      after them, and the arguments of both are there. */
   {
-    const NuvashaLibrary *first = g_ptr_array_index (merged->libraries, 0);
+    const nuvashalauncherLibrary *first = g_ptr_array_index (merged->libraries, 0);
 
     g_assert_cmpstr (first->name, ==, "org.lwjgl:lwjgl:3.3.3");
   }
@@ -497,14 +497,14 @@ test_quilt_profile (void)
 {
   g_autofree char *json = NULL;
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaVersionDescription) profile = NULL;
-  const NuvashaLibrary *library = NULL;
+  g_autoptr (nuvashalauncherVersionDescription) profile = NULL;
+  const nuvashalauncherLibrary *library = NULL;
 
-  if (!g_file_get_contents (nuvasha_TEST_FIXTURES "/quilt-profile.json", &json,
+  if (!g_file_get_contents (nuvashalauncher_TEST_FIXTURES "/quilt-profile.json", &json,
                             NULL, &error))
     g_error ("the fixture cannot be read: %s", error->message);
 
-  profile = nuvasha_loaders_profile_from_json (json, -1, &error);
+  profile = nuvashalauncher_loaders_profile_from_json (json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (profile);
 
@@ -544,19 +544,19 @@ test_profile_without_a_maven_address (void)
 
   /* A library that names no jar at all is refused: a document that
      silently loses a library would start a game that cannot work. */
-  g_assert_null (nuvasha_loaders_profile_from_json (
+  g_assert_null (nuvashalauncher_loaders_profile_from_json (
     "{\"id\": \"x\", \"type\": \"release\","
     " \"libraries\": [{\"name\": \"no:where:1.0\"}]}", -1, &error));
-  g_assert_error (error, nuvasha_LOADERS_ERROR, nuvasha_LOADERS_ERROR_NO_MAVEN);
+  g_assert_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_NO_MAVEN);
   g_clear_error (&error);
 
   /* Coordinates that make no path are refused as well, because the path
      they would write into the library directory has to be a name. */
-  g_assert_null (nuvasha_loaders_profile_from_json (
+  g_assert_null (nuvashalauncher_loaders_profile_from_json (
     "{\"id\": \"x\", \"type\": \"release\","
     " \"libraries\": [{\"name\": \"../evil:evil:1.0\","
     "                 \"url\": \"https://example.invalid/\"}]}", -1, &error));
-  g_assert_error (error, nuvasha_LOADERS_ERROR, nuvasha_LOADERS_ERROR_NO_MAVEN);
+  g_assert_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_NO_MAVEN);
 
   g_print ("ok - a profile with no usable maven address is refused\n");
 }
@@ -577,16 +577,16 @@ test_versions_for_display (void)
   g_autoptr (GPtrArray) shown = NULL;
   guint selected = 0;
 
-  if (!g_file_get_contents (nuvasha_TEST_FIXTURES "/fabric-loader-list.json",
+  if (!g_file_get_contents (nuvashalauncher_TEST_FIXTURES "/fabric-loader-list.json",
                             &json, NULL, &error))
     g_error ("the fixture cannot be read: %s", error->message);
 
-  published = nuvasha_loaders_versions_from_json (json, -1, &error);
+  published = nuvashalauncher_loaders_versions_from_json (json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (published);
 
   /* Stable only, and the newest stable version is picked. */
-  shown = nuvasha_loaders_versions_for_display (published, FALSE, NULL, &selected);
+  shown = nuvashalauncher_loaders_versions_for_display (published, FALSE, NULL, &selected);
   g_assert_nonnull (shown);
   g_assert_cmpuint (shown->len, >, 0);
   g_assert_cmpuint (selected, ==, 0);
@@ -597,14 +597,14 @@ test_versions_for_display (void)
 
   /* Asking for unstable versions shows the whole list. */
   g_clear_pointer (&shown, g_ptr_array_unref);
-  shown = nuvasha_loaders_versions_for_display (published, TRUE, NULL, &selected);
+  shown = nuvashalauncher_loaders_versions_for_display (published, TRUE, NULL, &selected);
   g_assert_cmpuint (shown->len, ==, published->len);
   g_assert_cmpstr (version_at (shown, selected)->version, ==, "0.19.5");
 
   /* An instance that runs an unstable version keeps it even when the
      setting hides unstable versions, and that version is the pick. */
   g_clear_pointer (&shown, g_ptr_array_unref);
-  shown = nuvasha_loaders_versions_for_display (published, FALSE,
+  shown = nuvashalauncher_loaders_versions_for_display (published, FALSE,
                                             "0.10.7+build.214", &selected);
   g_assert_cmpuint (selected, <, shown->len);
   g_assert_cmpstr (version_at (shown, selected)->version, ==,
@@ -615,11 +615,11 @@ test_versions_for_display (void)
   {
     static const char *const betas_ids[] = { "2.0.0-beta", "1.0.0-beta" };
     g_autoptr (GPtrArray) betas =
-      g_ptr_array_new_with_free_func ((GDestroyNotify) nuvasha_loader_version_free);
+      g_ptr_array_new_with_free_func ((GDestroyNotify) nuvashalauncher_loader_version_free);
 
     for (guint i = 0; i < G_N_ELEMENTS (betas_ids); i++)
       {
-        NuvashaLoaderVersion *version = g_new0 (NuvashaLoaderVersion, 1);
+        nuvashalauncherLoaderVersion *version = g_new0 (nuvashalauncherLoaderVersion, 1);
 
         version->version = g_strdup (betas_ids[i]);
         version->stable = FALSE;
@@ -627,7 +627,7 @@ test_versions_for_display (void)
       }
 
     g_clear_pointer (&shown, g_ptr_array_unref);
-    shown = nuvasha_loaders_versions_for_display (betas, TRUE, NULL, &selected);
+    shown = nuvashalauncher_loaders_versions_for_display (betas, TRUE, NULL, &selected);
     g_assert_cmpuint (shown->len, ==, 2);
     g_assert_cmpuint (selected, ==, 0);
     g_assert_cmpstr (version_at (shown, 0)->version, ==, "2.0.0-beta");
@@ -637,7 +637,7 @@ test_versions_for_display (void)
     g_autoptr (GPtrArray) none = g_ptr_array_new ();
 
     g_clear_pointer (&shown, g_ptr_array_unref);
-    shown = nuvasha_loaders_versions_for_display (none, TRUE, NULL, &selected);
+    shown = nuvashalauncher_loaders_versions_for_display (none, TRUE, NULL, &selected);
     g_assert_cmpuint (shown->len, ==, 0);
     g_assert_cmpuint (selected, ==, G_MAXUINT);
   }
@@ -653,11 +653,11 @@ typedef struct
 {
   GMainLoop *loop;
   GError *error;
-  NuvashaLoaderInstall *install;
-  NuvashaVersionDescription *profile;
+  nuvashalauncherLoaderInstall *install;
+  nuvashalauncherVersionDescription *profile;
   GPtrArray *versions;
   guint watchdog;
-  NuvashaTaskScope *operation;
+  nuvashalauncherTaskScope *operation;
 } Wait;
 
 static gboolean
@@ -676,8 +676,8 @@ on_install_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 {
   Wait *wait = user_data;
 
-  wait->install = nuvasha_loaders_install_finish (result, &wait->error);
-  nuvasha_task_scope_unref (wait->operation);
+  wait->install = nuvashalauncher_loaders_install_finish (result, &wait->error);
+  nuvashalauncher_task_scope_unref (wait->operation);
   wait->operation = NULL;
   g_main_loop_quit (wait->loop);
 }
@@ -688,8 +688,8 @@ on_profile_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 {
   Wait *wait = user_data;
 
-  wait->profile = nuvasha_loaders_profile_finish (result, &wait->error);
-  nuvasha_task_scope_unref (wait->operation);
+  wait->profile = nuvashalauncher_loaders_profile_finish (result, &wait->error);
+  nuvashalauncher_task_scope_unref (wait->operation);
   wait->operation = NULL;
   g_main_loop_quit (wait->loop);
 }
@@ -700,8 +700,8 @@ on_versions_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 {
   Wait *wait = user_data;
 
-  wait->versions = nuvasha_loaders_versions_finish (result, &wait->error);
-  nuvasha_task_scope_unref (wait->operation);
+  wait->versions = nuvashalauncher_loaders_versions_finish (result, &wait->error);
+  nuvashalauncher_task_scope_unref (wait->operation);
   wait->operation = NULL;
   g_main_loop_quit (wait->loop);
 }
@@ -722,9 +722,9 @@ test_cancelled_versions_deliver_nothing (void)
      request is what the last screen left behind. */
   g_cancellable_cancel (cancellable);
 
-  wait.operation = nuvasha_loaders_versions_async (nuvasha_LOADER_FABRIC, "1.20.1",
+  wait.operation = nuvashalauncher_loaders_versions_async (nuvashalauncher_LOADER_FABRIC, "1.20.1",
                                                on_versions_finished, &wait);
-  nuvasha_task_scope_follow_cancellable (wait.operation, cancellable);
+  nuvashalauncher_task_scope_follow_cancellable (wait.operation, cancellable);
 
   g_main_loop_run (wait.loop);
   g_source_remove (wait.watchdog);
@@ -733,8 +733,8 @@ test_cancelled_versions_deliver_nothing (void)
   g_assert_null (wait.versions);
   g_assert_nonnull (wait.error);
   g_assert_true (
-    g_error_matches (wait.error, nuvasha_DOWNLOAD_ERROR,
-                     nuvasha_DOWNLOAD_ERROR_CANCELLED) ||
+    g_error_matches (wait.error, nuvashalauncher_DOWNLOAD_ERROR,
+                     nuvashalauncher_DOWNLOAD_ERROR_CANCELLED) ||
     g_error_matches (wait.error, G_IO_ERROR, G_IO_ERROR_CANCELLED));
   g_clear_error (&wait.error);
 
@@ -749,21 +749,21 @@ test_install_of_a_loader_that_publishes_none (void)
 {
   g_autofree char *json = NULL;
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaVersionDescription) document = NULL;
+  g_autoptr (nuvashalauncherVersionDescription) document = NULL;
   Wait wait = { 0 };
 
-  if (!g_file_get_contents (nuvasha_TEST_FIXTURES "/fabric-profile.json", &json,
+  if (!g_file_get_contents (nuvashalauncher_TEST_FIXTURES "/fabric-profile.json", &json,
                             NULL, &error))
     g_error ("the fixture cannot be read: %s", error->message);
 
-  document = nuvasha_loaders_profile_from_json (json, -1, &error);
+  document = nuvashalauncher_loaders_profile_from_json (json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (document);
 
   wait.loop = g_main_loop_new (NULL, FALSE);
   wait.watchdog = g_timeout_add_seconds (20, watchdog_fired, &wait);
 
-  wait.operation = nuvasha_loaders_install_async (nuvasha_LOADER_FABRIC, "1.20.1",
+  wait.operation = nuvashalauncher_loaders_install_async (nuvashalauncher_LOADER_FABRIC, "1.20.1",
                                               "0.19.5", document, "/bin/true",
                                               NULL, NULL, NULL,
                                               on_install_finished, &wait);
@@ -773,7 +773,7 @@ test_install_of_a_loader_that_publishes_none (void)
   g_main_loop_unref (wait.loop);
 
   g_assert_null (wait.install);
-  g_assert_error (wait.error, nuvasha_LOADERS_ERROR, nuvasha_LOADERS_ERROR_UNSUPPORTED);
+  g_assert_error (wait.error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_UNSUPPORTED);
   g_assert_nonnull (strstr (wait.error->message, "Fabric"));
   g_clear_error (&wait.error);
 
@@ -790,7 +790,7 @@ test_profile_of_a_loader_that_publishes_an_installer (void)
   wait.loop = g_main_loop_new (NULL, FALSE);
   wait.watchdog = g_timeout_add_seconds (20, watchdog_fired, &wait);
 
-  wait.operation = nuvasha_loaders_profile_async (nuvasha_LOADER_FORGE, "1.20.1",
+  wait.operation = nuvashalauncher_loaders_profile_async (nuvashalauncher_LOADER_FORGE, "1.20.1",
                                               "1.20.1-47.2.0",
                                               on_profile_finished, &wait);
 
@@ -799,8 +799,8 @@ test_profile_of_a_loader_that_publishes_an_installer (void)
   g_main_loop_unref (wait.loop);
 
   g_assert_null (wait.profile);
-  g_assert_error (wait.error, nuvasha_LOADERS_ERROR, nuvasha_LOADERS_ERROR_UNSUPPORTED);
-  g_assert_nonnull (strstr (wait.error->message, "nuvasha_loaders_install_async"));
+  g_assert_error (wait.error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_UNSUPPORTED);
+  g_assert_nonnull (strstr (wait.error->message, "nuvashalauncher_loaders_install_async"));
   g_clear_error (&wait.error);
 
   g_print ("ok - a loader with no profile is refused for one\n");

@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#include "nuvasha-accounts.h"
-#include "nuvasha-instance-manager.h"
+#include "nuvashalauncher-accounts.h"
+#include "nuvashalauncher-instance-manager.h"
 
 #include <glib.h>
 #include <stdlib.h>
@@ -14,7 +14,7 @@ static char *data_home;
 static char *
 run_cli (const char *first, const char *second, int *status)
 {
-  const char *argv[] = { nuvasha_BIN, first, second, NULL };
+  const char *argv[] = { nuvashalauncher_BIN, first, second, NULL };
   gchar **env = g_get_environ ();
   char *output = NULL;
   char *errors = NULL;
@@ -34,11 +34,11 @@ static void
 test_account_commands (void)
 {
   g_autofree char *accounts_path =
-    g_build_filename (data_home, "nuvasha", "accounts.json", NULL);
-  g_autoptr (NuvashaAccounts) accounts =
-    nuvasha_accounts_new_for_path (accounts_path);
-  g_autoptr (NuvashaAccount) first = NULL;
-  g_autoptr (NuvashaAccount) second = NULL;
+    g_build_filename (data_home, "nuvashalauncher", "accounts.json", NULL);
+  g_autoptr (nuvashalauncherAccounts) accounts =
+    nuvashalauncher_accounts_new_for_path (accounts_path);
+  g_autoptr (nuvashalauncherAccount) first = NULL;
+  g_autoptr (nuvashalauncherAccount) second = NULL;
   g_autoptr (GError) error = NULL;
   g_autofree char *output = NULL;
   g_autofree char *accounts_dir = NULL;
@@ -47,13 +47,13 @@ test_account_commands (void)
   accounts_dir = g_path_get_dirname (accounts_path);
   g_assert_cmpint (g_mkdir_with_parents (accounts_dir, 0700), ==, 0);
 
-  first = nuvasha_account_new_offline ("Alex", &error);
+  first = nuvashalauncher_account_new_offline ("Alex", &error);
   g_assert_no_error (error);
-  second = nuvasha_account_new_offline ("Steve", &error);
+  second = nuvashalauncher_account_new_offline ("Steve", &error);
   g_assert_no_error (error);
-  g_assert_true (nuvasha_accounts_add (accounts, first, &error));
+  g_assert_true (nuvashalauncher_accounts_add (accounts, first, &error));
   g_assert_no_error (error);
-  g_assert_true (nuvasha_accounts_add (accounts, second, &error));
+  g_assert_true (nuvashalauncher_accounts_add (accounts, second, &error));
   g_assert_no_error (error);
 
   output = run_cli ("--list-accounts", NULL, &status);
@@ -68,16 +68,16 @@ test_account_commands (void)
   g_assert_cmpint (status, ==, 0);
   g_clear_pointer (&output, g_free);
   g_clear_object (&accounts);
-  accounts = nuvasha_accounts_new_for_path (accounts_path);
-  g_assert_cmpstr (nuvasha_accounts_get_active_id (accounts), ==, first->id);
+  accounts = nuvashalauncher_accounts_new_for_path (accounts_path);
+  g_assert_cmpstr (nuvashalauncher_accounts_get_active_id (accounts), ==, first->id);
 
   output = run_cli ("--remove-account", second->uuid, &status);
   g_assert_cmpint (status, ==, 0);
   g_clear_pointer (&output, g_free);
   g_clear_object (&accounts);
-  accounts = nuvasha_accounts_new_for_path (accounts_path);
-  g_assert_cmpuint (nuvasha_accounts_count (accounts), ==, 1);
-  g_assert_nonnull (nuvasha_accounts_find (accounts, first->id));
+  accounts = nuvashalauncher_accounts_new_for_path (accounts_path);
+  g_assert_cmpuint (nuvashalauncher_accounts_count (accounts), ==, 1);
+  g_assert_nonnull (nuvashalauncher_accounts_find (accounts, first->id));
 
   output = run_cli ("--remove-account", "does-not-exist", &status);
   g_assert_cmpint (status, !=, 0);
@@ -88,34 +88,34 @@ static void
 test_remove_instance_command (void)
 {
   g_autofree char *manager_path =
-    g_build_filename (data_home, "nuvasha", NULL);
-  g_autoptr (NuvashaInstanceManager) manager =
-    nuvasha_instance_manager_new (manager_path);
-  g_autoptr (NuvashaInstanceManager) reloaded = NULL;
-  g_autoptr (NuvashaInstance) instance = NULL;
+    g_build_filename (data_home, "nuvashalauncher", NULL);
+  g_autoptr (nuvashalauncherInstanceManager) manager =
+    nuvashalauncher_instance_manager_new (manager_path);
+  g_autoptr (nuvashalauncherInstanceManager) reloaded = NULL;
+  g_autoptr (nuvashalauncherInstance) instance = NULL;
   g_autoptr (GError) error = NULL;
   g_autofree char *output = NULL;
   g_autofree char *directory = NULL;
   int status = -1;
 
-  g_assert_true (nuvasha_instance_manager_load (manager, &error));
+  g_assert_true (nuvashalauncher_instance_manager_load (manager, &error));
   g_assert_no_error (error);
-  instance = nuvasha_instance_manager_create (manager, "CLI Test Instance", NULL,
-                                               "1.20.1", nuvasha_LOADER_VANILLA,
+  instance = nuvashalauncher_instance_manager_create (manager, "CLI Test Instance", NULL,
+                                               "1.20.1", nuvashalauncher_LOADER_VANILLA,
                                                NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
   g_object_get (instance, "directory", &directory, NULL);
 
-  output = run_cli ("--remove-instance", nuvasha_instance_get_id (instance), &status);
+  output = run_cli ("--remove-instance", nuvashalauncher_instance_get_id (instance), &status);
   g_assert_cmpint (status, ==, 0);
   g_clear_pointer (&output, g_free);
 
-  reloaded = nuvasha_instance_manager_new (manager_path);
-  g_assert_true (nuvasha_instance_manager_load (reloaded, &error));
+  reloaded = nuvashalauncher_instance_manager_new (manager_path);
+  g_assert_true (nuvashalauncher_instance_manager_load (reloaded, &error));
   g_assert_no_error (error);
-  g_assert_null (nuvasha_instance_manager_get_by_id (
-    reloaded, nuvasha_instance_get_id (instance)));
+  g_assert_null (nuvashalauncher_instance_manager_get_by_id (
+    reloaded, nuvashalauncher_instance_get_id (instance)));
   g_assert_false (g_file_test (directory, G_FILE_TEST_EXISTS));
 
   g_print ("ok - the instance CLI command removes metadata and files\n");
@@ -124,7 +124,7 @@ test_remove_instance_command (void)
 int
 main (void)
 {
-  data_home = g_dir_make_tmp ("nuvasha-cli-XXXXXX", NULL);
+  data_home = g_dir_make_tmp ("nuvashalauncher-cli-XXXXXX", NULL);
   if (data_home == NULL)
     g_error ("could not make a temporary data directory");
   g_setenv ("XDG_DATA_HOME", data_home, TRUE);

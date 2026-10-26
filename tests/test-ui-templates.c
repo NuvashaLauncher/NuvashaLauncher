@@ -1,16 +1,16 @@
 #include <gio/gio.h>
 #include <glib.h>
 #include <gtk/gtk.h>
-#include "nuvasha-create-instance-dialog.h"
-#include "nuvasha-instance-manager.h"
-#include "nuvasha-offline-account-dialog.h"
-#include "nuvasha-settings.h"
-#include "nuvasha-sign-in-dialog.h"
+#include "nuvashalauncher-create-instance-dialog.h"
+#include "nuvashalauncher-instance-manager.h"
+#include "nuvashalauncher-offline-account-dialog.h"
+#include "nuvashalauncher-settings.h"
+#include "nuvashalauncher-sign-in-dialog.h"
 
 static void
 test_templates_are_bundled (void)
 {
-  const char *directory = "/com/github/nuvashalauncher/nuvasha/ui";
+  const char *directory = "/com/github/nuvashalauncher/nuvashalauncher/ui";
   g_autoptr (GError) error = NULL;
   g_auto (GStrv) names = g_resources_enumerate_children (
     directory, G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
@@ -40,20 +40,20 @@ static void
 test_builder_templates_parse (void)
 {
   static const char *paths[] = {
-    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-modpack-import.ui",
-    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-main-shell.ui",
-    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-modpack-browser-toolbar.ui",
-    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-modpack-browser-states.ui",
-    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-modpack-details-toolbar.ui",
-    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-modpack-details-body.ui",
-    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-modpack-optional.ui",
-    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-modpack-error.ui",
-    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-content-result-row.ui",
-    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-content-file-row.ui",
-    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-download-row.ui",
-    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-skin-row.ui",
-    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-downloads-popover.ui",
-    "/com/github/nuvashalauncher/nuvasha/ui/nuvasha-content-details.ui",
+    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-import.ui",
+    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-main-shell.ui",
+    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-browser-toolbar.ui",
+    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-browser-states.ui",
+    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-details-toolbar.ui",
+    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-details-body.ui",
+    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-optional.ui",
+    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-error.ui",
+    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-content-result-row.ui",
+    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-content-file-row.ui",
+    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-download-row.ui",
+    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-skin-row.ui",
+    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-downloads-popover.ui",
+    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-content-details.ui",
   };
 
   for (guint i = 0; i < G_N_ELEMENTS (paths); i++)
@@ -73,7 +73,7 @@ test_stylesheet_parses (void)
   GtkCssProvider *provider = gtk_css_provider_new ();
 
   gtk_css_provider_load_from_resource (
-    provider, "/com/github/nuvashalauncher/nuvasha/nuvasha.css");
+    provider, "/com/github/nuvashalauncher/nuvashalauncher/nuvashalauncher.css");
   g_assert_true (GTK_IS_CSS_PROVIDER (provider));
 
   g_object_unref (provider);
@@ -83,19 +83,19 @@ test_stylesheet_parses (void)
 static void
 test_custom_templates_instantiate (void)
 {
-  g_autoptr (NuvashaOfflineAccountDialog) offline =
-    g_object_ref_sink (nuvasha_offline_account_dialog_new ());
-  g_autoptr (NuvashaInstanceManager) manager =
-    nuvasha_instance_manager_new (NULL);
-  g_autoptr (NuvashaSettings) settings = nuvasha_settings_new ();
-  g_autoptr (NuvashaCreateInstanceDialog) create =
-    g_object_ref_sink (nuvasha_create_instance_dialog_new (manager, settings));
-  g_autoptr (NuvashaSignInDialog) sign_in =
-    g_object_ref_sink (nuvasha_sign_in_dialog_new ());
+  g_autoptr (nuvashalauncherOfflineAccountDialog) offline =
+    g_object_ref_sink (nuvashalauncher_offline_account_dialog_new ());
+  g_autoptr (nuvashalauncherInstanceManager) manager =
+    nuvashalauncher_instance_manager_new (NULL);
+  g_autoptr (nuvashalauncherSettings) settings = nuvashalauncher_settings_new ();
+  g_autoptr (nuvashalauncherCreateInstanceDialog) create =
+    g_object_ref_sink (nuvashalauncher_create_instance_dialog_new (manager, settings));
+  g_autoptr (nuvashalauncherSignInDialog) sign_in =
+    g_object_ref_sink (nuvashalauncher_sign_in_dialog_new ());
 
-  g_assert_true (nuvasha_IS_OFFLINE_ACCOUNT_DIALOG (offline));
-  g_assert_true (nuvasha_IS_CREATE_INSTANCE_DIALOG (create));
-  g_assert_true (nuvasha_IS_SIGN_IN_DIALOG (sign_in));
+  g_assert_true (nuvashalauncher_IS_OFFLINE_ACCOUNT_DIALOG (offline));
+  g_assert_true (nuvashalauncher_IS_CREATE_INSTANCE_DIALOG (create));
+  g_assert_true (nuvashalauncher_IS_SIGN_IN_DIALOG (sign_in));
   g_assert_true (GTK_IS_WIDGET (offline));
 }
 #endif

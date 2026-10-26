@@ -230,8 +230,8 @@ msgid "Line Limit"
 msgstr "Limite di righe"
 
 
-msgid "About Nuvasha Launcher"
-msgstr "Informazioni su Nuvasha Launcher"
+msgid "About nuvashalauncher"
+msgstr "Informazioni su nuvashalauncher"
 
 msgid "Keyboard Shortcuts"
 msgstr "Scorciatoie da tastiera"
@@ -639,11 +639,11 @@ msgstr "Sfoglia i modpack"
 msgid "Choose Files"
 msgstr "Seleziona i file"
 
-msgid "Clear Nuvasha Cache"
-msgstr "Svuota la cache di Nuvasha"
+msgid "Clear nuvashalauncher Cache"
+msgstr "Svuota la cache di nuvashalauncher"
 
-msgid "Clear Nuvasha Cache?"
-msgstr "Svuotare la cache di Nuvasha?"
+msgid "Clear nuvashalauncher Cache?"
+msgstr "Svuotare la cache di nuvashalauncher?"
 
 msgid ""
 "Conflicts\n"
@@ -710,8 +710,8 @@ msgstr "Installazione"
 msgid "Instances cannot contain %s in their name"
 msgstr "Le istanze non possono contenere %s nel proprio nome"
 
-msgid "It carries files that Nuvasha does not recognize."
-msgstr "Contiene file che Nuvasha non riconosce."
+msgid "It carries files that nuvashalauncher does not recognize."
+msgstr "Contiene file che nuvashalauncher non riconosce."
 
 msgid "Italiano"
 msgstr "Italiano"
@@ -734,8 +734,8 @@ msgstr "Microsoft · È necessario effettuare l'accesso"
 msgid "Modrinth does not know this file"
 msgstr "Modrinth non riconosce questo file"
 
-msgid "Modrinth is asking Nuvasha to slow down, too many requests"
-msgstr "Modrinth chiede a Nuvasha di rallentare un po', ci sono troppe richieste"
+msgid "Modrinth is asking nuvashalauncher to slow down, too many requests"
+msgstr "Modrinth chiede a nuvashalauncher di rallentare un po', ci sono troppe richieste"
 
 msgid "Nederlands"
 msgstr "Nederlands"
@@ -752,11 +752,11 @@ msgstr "Nessuno"
 msgid "Norsk (bokmål)"
 msgstr "Norsk (bokmål)"
 
-msgid "Nuvasha Launcher"
-msgstr "Nuvasha Launcher"
+msgid "nuvashalauncher"
+msgstr "nuvashalauncher"
 
-msgid "Nuvasha cache data was cleared successfully."
-msgstr "I dati della cache di Nuvasha sono stati cancellati correttamente."
+msgid "nuvashalauncher cache data was cleared successfully."
+msgstr "I dati della cache di nuvashalauncher sono stati cancellati correttamente."
 
 msgid "Offline"
 msgstr "Offline"
@@ -800,14 +800,14 @@ msgstr "Svenska"
 msgid "System default"
 msgstr "Impostazioni predefinite del sistema"
 
-msgid "The account is removed from Nuvasha and its saved sign-in is forgotten. The game itself is not touched."
-msgstr "L'account viene rimosso da Nuvasha e i dati di accesso salvati vengono cancellati. Il gioco in sé rimane inalterato."
+msgid "The account is removed from nuvashalauncher and its saved sign-in is forgotten. The game itself is not touched."
+msgstr "L'account viene rimosso da nuvashalauncher e i dati di accesso salvati vengono cancellati. Il gioco in sé rimane inalterato."
 
 msgid "The game is running and will close. Progress since the last save is lost."
 msgstr "Il gioco è in esecuzione e sta per chiudersi. I progressi effettuati dall'ultimo salvataggio andranno persi."
 
-msgid "This project publishes no pack file Nuvasha can install."
-msgstr "Questo progetto non pubblica alcun file di pacchetto che Nuvasha possa installare."
+msgid "This project publishes no pack file nuvashalauncher can install."
+msgstr "Questo progetto non pubblica alcun file di pacchetto che nuvashalauncher possa installare."
 
 msgid "This version has no pack file"
 msgstr "Questa versione non contiene alcun file di pacchetto"
@@ -914,35 +914,35 @@ msgstr "Microsoft sign-in failed. Try again."
 msgid "Open in browser"
 msgstr "Apri nel browser"
 
-#: src/nuvasha-main-window.c
+#: src/nuvashalauncher-main-window.c
 msgid "%u/%u selected"
 msgstr "%u/%u selezionate"
 
-#: src/nuvasha-main-window.c
+#: src/nuvashalauncher-main-window.c
 msgid "The following instances will be deleted:\n%s"
 msgstr "Le seguenti istanze verranno eliminate:\n%s"
 
-#: src/nuvasha-content-page.c
+#: src/nuvashalauncher-content-page.c
 msgid "Delete selected %s?"
 msgstr "Delete selected %s?"
 
-#: src/nuvasha-content-page.c
+#: src/nuvashalauncher-content-page.c
 msgid "Selected %s:\n%s"
 msgstr "Selected %s:\n%s"
 
-#: src/nuvasha-content-page.c
+#: src/nuvashalauncher-content-page.c
 msgid "Selected %s:\n%s\n\nDependencies:\n%s"
 msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
 
-#: src/nuvasha-main-window-ui.c
+#: src/nuvashalauncher-main-window-ui.c
 msgid "Edit mode"
 msgstr "Modalità modifica"
 
-#: src/nuvasha-content-page-ui.c
+#: src/nuvashalauncher-content-page-ui.c
 msgid "Fetching updates"
 msgstr "Recupero degli aggiornamenti"
 
 
-#: src/nuvasha-content-page-ui.c
+#: src/nuvashalauncher-content-page-ui.c
 msgid "Progress"
 msgstr "Avanzamento"

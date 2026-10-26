@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* Tests for nuvasha-minecraft-versions.
+/* Tests for nuvashalauncher-minecraft-versions.
  *
  * Parsing and rule evaluation run against the JSON documents in
  * tests/fixtures. Fetching runs against a tiny libsoup server on the
@@ -11,7 +11,7 @@
  * a temporary XDG_CACHE_HOME, set before anything can ask for the
  * real one. */
 
-#include "nuvasha-minecraft-versions.h"
+#include "nuvashalauncher-minecraft-versions.h"
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -19,8 +19,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef nuvasha_TEST_FIXTURES
-#define nuvasha_TEST_FIXTURES "tests/fixtures"
+#ifndef nuvashalauncher_TEST_FIXTURES
+#define nuvashalauncher_TEST_FIXTURES "tests/fixtures"
 #endif
 
 /* The cache these tests write into. g_get_user_cache_dir() remembers
@@ -35,7 +35,7 @@ static char *cache_home;
 static char *
 fixture_text (const char *name)
 {
-  g_autofree char *path = g_build_filename (nuvasha_TEST_FIXTURES, name, NULL);
+  g_autofree char *path = g_build_filename (nuvashalauncher_TEST_FIXTURES, name, NULL);
   g_autoptr (GError) error = NULL;
   char *contents = NULL;
 
@@ -45,14 +45,14 @@ fixture_text (const char *name)
   return contents;
 }
 
-static NuvashaVersionDescription *
+static nuvashalauncherVersionDescription *
 fixture_version (const char *name)
 {
   g_autofree char *text = fixture_text (name);
   g_autoptr (GError) error = NULL;
-  NuvashaVersionDescription *description;
+  nuvashalauncherVersionDescription *description;
 
-  description = nuvasha_version_description_new_from_json (text, -1, &error);
+  description = nuvashalauncher_version_description_new_from_json (text, -1, &error);
 
   if (description == NULL)
     g_error ("the fixture \"%s\" does not parse: %s", name, error->message);
@@ -60,12 +60,12 @@ fixture_version (const char *name)
   return description;
 }
 
-static const NuvashaLibrary *
-find_library (NuvashaVersionDescription *description, const char *name)
+static const nuvashalauncherLibrary *
+find_library (nuvashalauncherVersionDescription *description, const char *name)
 {
   for (guint i = 0; i < description->libraries->len; i++)
     {
-      NuvashaLibrary *library = g_ptr_array_index (description->libraries, i);
+      nuvashalauncherLibrary *library = g_ptr_array_index (description->libraries, i);
 
       if (g_str_equal (library->name, name))
         return library;
@@ -90,11 +90,11 @@ test_manifest_parsing (void)
 {
   g_autofree char *text = fixture_text ("manifest.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaVersionManifest) manifest = NULL;
-  NuvashaMcVersionType type = nuvasha_MC_TYPE_RELEASE;
-  const NuvashaVersionEntry *entry;
+  g_autoptr (nuvashalauncherVersionManifest) manifest = NULL;
+  nuvashalauncherMcVersionType type = nuvashalauncher_MC_TYPE_RELEASE;
+  const nuvashalauncherVersionEntry *entry;
 
-  manifest = nuvasha_version_manifest_new_from_json (text, -1, &error);
+  manifest = nuvashalauncher_version_manifest_new_from_json (text, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (manifest);
 
@@ -104,31 +104,31 @@ test_manifest_parsing (void)
 
   entry = g_ptr_array_index (manifest->entries, 0);
   g_assert_cmpstr (entry->id, ==, "24w33one");
-  g_assert_cmpint (entry->type, ==, nuvasha_MC_TYPE_SNAPSHOT);
+  g_assert_cmpint (entry->type, ==, nuvashalauncher_MC_TYPE_SNAPSHOT);
   g_assert_cmpstr (entry->sha1, ==,
                    "655c2da7d6815e84864a0f9a055c90e36337b0b4");
   g_assert_cmpstr (entry->release_time, ==, "2024-08-15T10:00:00+00:00");
   g_assert_true (g_str_has_prefix (entry->url,
                                    "https://piston-meta.mojang.com/"));
 
-  entry = nuvasha_version_manifest_find (manifest, "b1.7.3");
+  entry = nuvashalauncher_version_manifest_find (manifest, "b1.7.3");
   g_assert_nonnull (entry);
-  g_assert_cmpint (entry->type, ==, nuvasha_MC_TYPE_OLD_BETA);
+  g_assert_cmpint (entry->type, ==, nuvashalauncher_MC_TYPE_OLD_BETA);
 
-  entry = nuvasha_version_manifest_find (manifest, "rd-132211");
+  entry = nuvashalauncher_version_manifest_find (manifest, "rd-132211");
   g_assert_nonnull (entry);
-  g_assert_cmpint (entry->type, ==, nuvasha_MC_TYPE_OLD_ALPHA);
+  g_assert_cmpint (entry->type, ==, nuvashalauncher_MC_TYPE_OLD_ALPHA);
 
-  g_assert_null (nuvasha_version_manifest_find (manifest, "not-a-version"));
+  g_assert_null (nuvashalauncher_version_manifest_find (manifest, "not-a-version"));
 
   /* The type strings are the four Mojang writes, no others. */
-  g_assert_true (nuvasha_mc_version_type_from_string ("old_beta", &type));
-  g_assert_cmpint (type, ==, nuvasha_MC_TYPE_OLD_BETA);
-  g_assert_false (nuvasha_mc_version_type_from_string ("beta", &type));
-  g_assert_false (nuvasha_mc_version_type_from_string (NULL, &type));
-  g_assert_cmpstr (nuvasha_mc_version_type_to_string (nuvasha_MC_TYPE_RELEASE), ==,
+  g_assert_true (nuvashalauncher_mc_version_type_from_string ("old_beta", &type));
+  g_assert_cmpint (type, ==, nuvashalauncher_MC_TYPE_OLD_BETA);
+  g_assert_false (nuvashalauncher_mc_version_type_from_string ("beta", &type));
+  g_assert_false (nuvashalauncher_mc_version_type_from_string (NULL, &type));
+  g_assert_cmpstr (nuvashalauncher_mc_version_type_to_string (nuvashalauncher_MC_TYPE_RELEASE), ==,
                    "release");
-  g_assert_null (nuvasha_mc_version_type_to_string ((NuvashaMcVersionType) 99));
+  g_assert_null (nuvashalauncher_mc_version_type_to_string ((nuvashalauncherMcVersionType) 99));
 
   g_print ("ok - the manifest lists releases, snapshots and the old versions\n");
 }
@@ -137,51 +137,51 @@ static void
 test_manifest_malformed (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaVersionManifest) manifest = NULL;
+  g_autoptr (nuvashalauncherVersionManifest) manifest = NULL;
   g_autofree char *incomplete = fixture_text ("manifest-incomplete.json");
 
   /* Not JSON at all. */
-  manifest = nuvasha_version_manifest_new_from_json ("{\"latest\":", -1, &error);
+  manifest = nuvashalauncher_version_manifest_new_from_json ("{\"latest\":", -1, &error);
   g_assert_null (manifest);
-  g_assert_error (error, nuvasha_MC_ERROR, nuvasha_MC_ERROR_INVALID);
+  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID);
   g_clear_error (&error);
 
   /* JSON, but not the shape of a manifest. */
-  manifest = nuvasha_version_manifest_new_from_json ("[]", -1, &error);
+  manifest = nuvashalauncher_version_manifest_new_from_json ("[]", -1, &error);
   g_assert_null (manifest);
-  g_assert_error (error, nuvasha_MC_ERROR, nuvasha_MC_ERROR_INVALID);
+  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID);
   g_clear_error (&error);
 
   /* Nothing says which version is the latest. */
-  manifest = nuvasha_version_manifest_new_from_json ("{\"versions\": []}", -1,
+  manifest = nuvashalauncher_version_manifest_new_from_json ("{\"versions\": []}", -1,
                                                  &error);
   g_assert_null (manifest);
-  g_assert_error (error, nuvasha_MC_ERROR, nuvasha_MC_ERROR_MISSING);
+  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_MISSING);
   g_clear_error (&error);
 
   /* A latest without its snapshot. */
-  manifest = nuvasha_version_manifest_new_from_json (
+  manifest = nuvashalauncher_version_manifest_new_from_json (
     "{\"latest\": {\"release\": \"1.21.1\"}, \"versions\": []}", -1, &error);
   g_assert_null (manifest);
-  g_assert_error (error, nuvasha_MC_ERROR, nuvasha_MC_ERROR_MISSING);
+  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_MISSING);
   g_clear_error (&error);
 
   /* An entry without a sha1 cannot be verified, so it is not an
    * entry. */
-  manifest = nuvasha_version_manifest_new_from_json (incomplete, -1, &error);
+  manifest = nuvashalauncher_version_manifest_new_from_json (incomplete, -1, &error);
   g_assert_null (manifest);
-  g_assert_error (error, nuvasha_MC_ERROR, nuvasha_MC_ERROR_MISSING);
+  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_MISSING);
   g_clear_error (&error);
 
   /* A type outside the four. */
-  manifest = nuvasha_version_manifest_new_from_json (
+  manifest = nuvashalauncher_version_manifest_new_from_json (
     "{\"latest\": {\"release\": \"x\", \"snapshot\": \"y\"},"
     " \"versions\": [{\"id\": \"x\", \"type\": \"beta\","
     " \"url\": \"https://example.invalid/x.json\","
     " \"sha1\": \"1111111111111111111111111111111111111111\","
     " \"releaseTime\": \"2024-01-01T00:00:00+00:00\"}]}", -1, &error);
   g_assert_null (manifest);
-  g_assert_error (error, nuvasha_MC_ERROR, nuvasha_MC_ERROR_INVALID);
+  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID);
   g_clear_error (&error);
 
   g_print ("ok - a manifest that is not a manifest is rejected\n");
@@ -194,14 +194,14 @@ test_manifest_malformed (void)
 static void
 test_modern_version (void)
 {
-  g_autoptr (NuvashaVersionDescription) version =
+  g_autoptr (nuvashalauncherVersionDescription) version =
     fixture_version ("version-modern.json");
-  const NuvashaDownloadInfo *asset_index;
-  const NuvashaArgument *argument;
-  const NuvashaLibrary *library;
+  const nuvashalauncherDownloadInfo *asset_index;
+  const nuvashalauncherArgument *argument;
+  const nuvashalauncherLibrary *library;
 
   g_assert_cmpstr (version->id, ==, "1.21.1");
-  g_assert_cmpint (version->type, ==, nuvasha_MC_TYPE_RELEASE);
+  g_assert_cmpint (version->type, ==, nuvashalauncher_MC_TYPE_RELEASE);
   g_assert_cmpstr (version->main_class, ==, "net.minecraft.client.main.Main");
   g_assert_cmpstr (version->assets, ==, "1.21");
   g_assert_null (version->inherits_from);
@@ -279,7 +279,7 @@ test_modern_version (void)
 
   /* A document without the legacy line answers with no words at all. */
   {
-    g_autoptr (GPtrArray) argv = nuvasha_version_description_legacy_argv (version);
+    g_autoptr (GPtrArray) argv = nuvashalauncher_version_description_legacy_argv (version);
 
     g_assert_cmpuint (argv->len, ==, 0);
   }
@@ -290,9 +290,9 @@ test_modern_version (void)
 static void
 test_legacy_version (void)
 {
-  g_autoptr (NuvashaVersionDescription) version =
+  g_autoptr (nuvashalauncherVersionDescription) version =
     fixture_version ("version-legacy.json");
-  const NuvashaLibrary *library;
+  const nuvashalauncherLibrary *library;
   g_autoptr (GPtrArray) argv = NULL;
 
   g_assert_cmpstr (version->id, ==, "1.5.2");
@@ -303,7 +303,7 @@ test_legacy_version (void)
   g_assert_cmpuint (version->game_arguments->len, ==, 0);
   g_assert_nonnull (version->minecraft_arguments);
 
-  argv = nuvasha_version_description_legacy_argv (version);
+  argv = nuvashalauncher_version_description_legacy_argv (version);
   g_assert_cmpuint (argv->len, ==, 12);
   g_assert_cmpstr (g_ptr_array_index (argv, 0), ==, "--username");
   g_assert_cmpstr (g_ptr_array_index (argv, 11), ==,
@@ -328,7 +328,7 @@ test_legacy_version (void)
                    "natives-osx");
 
   {
-    const NuvashaDownloadInfo *info =
+    const nuvashalauncherDownloadInfo *info =
       g_hash_table_lookup (library->classifiers, "natives-linux");
 
     g_assert_cmpstr (info->path, ==,
@@ -361,18 +361,18 @@ test_missing_fields (void)
 {
   g_autofree char *incomplete = fixture_text ("version-incomplete.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaVersionDescription) version = NULL;
+  g_autoptr (nuvashalauncherVersionDescription) version = NULL;
 
   /* The identity of a document is what it must carry. */
-  version = nuvasha_version_description_new_from_json (incomplete, -1, &error);
+  version = nuvashalauncher_version_description_new_from_json (incomplete, -1, &error);
   g_assert_null (version);
-  g_assert_error (error, nuvasha_MC_ERROR, nuvasha_MC_ERROR_MISSING);
+  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_MISSING);
   g_clear_error (&error);
 
-  version = nuvasha_version_description_new_from_json ("{\"id\": \"x\"}", -1,
+  version = nuvashalauncher_version_description_new_from_json ("{\"id\": \"x\"}", -1,
                                                    &error);
   g_assert_null (version);
-  g_assert_error (error, nuvasha_MC_ERROR, nuvasha_MC_ERROR_MISSING);
+  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_MISSING);
   g_clear_error (&error);
 
   g_print ("ok - a version without id or type is rejected\n");
@@ -382,55 +382,55 @@ static void
 test_malformed_fields (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaVersionDescription) version = NULL;
+  g_autoptr (nuvashalauncherVersionDescription) version = NULL;
 
   /* Not JSON. */
-  version = nuvasha_version_description_new_from_json ("<html>", -1, &error);
+  version = nuvashalauncher_version_description_new_from_json ("<html>", -1, &error);
   g_assert_null (version);
-  g_assert_error (error, nuvasha_MC_ERROR, nuvasha_MC_ERROR_INVALID);
+  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID);
   g_clear_error (&error);
 
   /* JSON that is not an object. */
-  version = nuvasha_version_description_new_from_json ("\"1.21.1\"", -1, &error);
+  version = nuvashalauncher_version_description_new_from_json ("\"1.21.1\"", -1, &error);
   g_assert_null (version);
-  g_assert_error (error, nuvasha_MC_ERROR, nuvasha_MC_ERROR_INVALID);
+  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID);
   g_clear_error (&error);
 
   /* A type outside the four. */
-  version = nuvasha_version_description_new_from_json (
+  version = nuvashalauncher_version_description_new_from_json (
     "{\"id\": \"x\", \"type\": \"beta\"}", -1, &error);
   g_assert_null (version);
-  g_assert_error (error, nuvasha_MC_ERROR, nuvasha_MC_ERROR_INVALID);
+  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID);
   g_clear_error (&error);
 
   /* A field of the wrong shape. */
-  version = nuvasha_version_description_new_from_json (
+  version = nuvashalauncher_version_description_new_from_json (
     "{\"id\": \"x\", \"type\": \"release\", \"mainClass\": 42}", -1, &error);
   g_assert_null (version);
-  g_assert_error (error, nuvasha_MC_ERROR, nuvasha_MC_ERROR_INVALID);
+  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID);
   g_clear_error (&error);
 
-  version = nuvasha_version_description_new_from_json (
+  version = nuvashalauncher_version_description_new_from_json (
     "{\"id\": \"x\", \"type\": \"release\", \"libraries\": {}}", -1, &error);
   g_assert_null (version);
-  g_assert_error (error, nuvasha_MC_ERROR, nuvasha_MC_ERROR_INVALID);
+  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID);
   g_clear_error (&error);
 
   /* A rule nobody can obey. */
-  version = nuvasha_version_description_new_from_json (
+  version = nuvashalauncher_version_description_new_from_json (
     "{\"id\": \"x\", \"type\": \"release\", \"libraries\":"
     " [{\"name\": \"a:b:c\", \"rules\": [{\"action\": \"maybe\"}]}]}", -1,
     &error);
   g_assert_null (version);
-  g_assert_error (error, nuvasha_MC_ERROR, nuvasha_MC_ERROR_INVALID);
+  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID);
   g_clear_error (&error);
 
   /* An argument without anything to say. */
-  version = nuvasha_version_description_new_from_json (
+  version = nuvashalauncher_version_description_new_from_json (
     "{\"id\": \"x\", \"type\": \"release\", \"arguments\":"
     " {\"game\": [{\"rules\": [{\"action\": \"allow\"}]}]}}", -1, &error);
   g_assert_null (version);
-  g_assert_error (error, nuvasha_MC_ERROR, nuvasha_MC_ERROR_MISSING);
+  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_MISSING);
   g_clear_error (&error);
 
   g_print ("ok - a version document with malformed fields is rejected\n");
@@ -443,97 +443,97 @@ test_malformed_fields (void)
 static void
 test_rules (void)
 {
-  g_autoptr (NuvashaVersionDescription) rules =
+  g_autoptr (nuvashalauncherVersionDescription) rules =
     fixture_version ("version-rules.json");
-  g_autoptr (NuvashaVersionDescription) modern =
+  g_autoptr (nuvashalauncherVersionDescription) modern =
     fixture_version ("version-modern.json");
-  g_autoptr (NuvashaRuleContext) host = nuvasha_rule_context_new ();
-  g_autoptr (NuvashaRuleContext) linux64 =
-    nuvasha_rule_context_new_for ("linux", "x86_64", "6.8.0-nuvasha");
-  g_autoptr (NuvashaRuleContext) linux32 =
-    nuvasha_rule_context_new_for ("linux", "x86", "6.8.0-nuvasha");
-  g_autoptr (NuvashaRuleContext) linux_arm =
-    nuvasha_rule_context_new_for ("linux", "aarch64", "5.15.0-arm");
-  g_autoptr (NuvashaRuleContext) windows =
-    nuvasha_rule_context_new_for ("windows", "amd64", "10.0");
-  g_autoptr (NuvashaRuleContext) demo =
-    nuvasha_rule_context_new_for ("linux", "x86_64", "6.8.0-nuvasha");
-  NuvashaArgument *argument;
+  g_autoptr (nuvashalauncherRuleContext) host = nuvashalauncher_rule_context_new ();
+  g_autoptr (nuvashalauncherRuleContext) linux64 =
+    nuvashalauncher_rule_context_new_for ("linux", "x86_64", "6.8.0-nuvashalauncher");
+  g_autoptr (nuvashalauncherRuleContext) linux32 =
+    nuvashalauncher_rule_context_new_for ("linux", "x86", "6.8.0-nuvashalauncher");
+  g_autoptr (nuvashalauncherRuleContext) linux_arm =
+    nuvashalauncher_rule_context_new_for ("linux", "aarch64", "5.15.0-arm");
+  g_autoptr (nuvashalauncherRuleContext) windows =
+    nuvashalauncher_rule_context_new_for ("windows", "amd64", "10.0");
+  g_autoptr (nuvashalauncherRuleContext) demo =
+    nuvashalauncher_rule_context_new_for ("linux", "x86_64", "6.8.0-nuvashalauncher");
+  nuvashalauncherArgument *argument;
 
   /* This machine is Linux, whatever the kernel calls itself. */
   g_assert_cmpstr (host->os_name, ==, "linux");
   g_assert_nonnull (host->os_arch);
-  g_assert_false (nuvasha_rule_context_get_feature (host, "is_demo_user"));
+  g_assert_false (nuvashalauncher_rule_context_get_feature (host, "is_demo_user"));
 
-  g_assert_true (nuvasha_library_allowed (find_library (rules, "linux-only"),
+  g_assert_true (nuvashalauncher_library_allowed (find_library (rules, "linux-only"),
                                       linux64));
-  g_assert_false (nuvasha_library_allowed (find_library (rules, "windows-only"),
+  g_assert_false (nuvashalauncher_library_allowed (find_library (rules, "windows-only"),
                                        linux64));
-  g_assert_false (nuvasha_library_allowed (find_library (rules, "osx-only"),
+  g_assert_false (nuvashalauncher_library_allowed (find_library (rules, "osx-only"),
                                        linux64));
 
-  g_assert_false (nuvasha_library_allowed (find_library (rules, "x86-only"),
+  g_assert_false (nuvashalauncher_library_allowed (find_library (rules, "x86-only"),
                                        linux64));
-  g_assert_true (nuvasha_library_allowed (find_library (rules, "x86-only"),
+  g_assert_true (nuvashalauncher_library_allowed (find_library (rules, "x86-only"),
                                       linux32));
-  g_assert_true (nuvasha_library_allowed (find_library (rules, "arm64-only"),
+  g_assert_true (nuvashalauncher_library_allowed (find_library (rules, "arm64-only"),
                                       linux_arm));
-  g_assert_true (nuvasha_library_allowed (find_library (rules, "aarch64-only"),
+  g_assert_true (nuvashalauncher_library_allowed (find_library (rules, "aarch64-only"),
                                       linux_arm));
-  g_assert_false (nuvasha_library_allowed (find_library (rules, "arm64-only"),
+  g_assert_false (nuvashalauncher_library_allowed (find_library (rules, "arm64-only"),
                                        linux64));
 
   /* Rules without conditions always match, and the last match wins. */
-  g_assert_true (nuvasha_library_allowed (find_library (rules, "unconditional"),
+  g_assert_true (nuvashalauncher_library_allowed (find_library (rules, "unconditional"),
                                       linux64));
   g_assert_false (
-    nuvasha_library_allowed (find_library (rules, "allow-then-disallow"),
+    nuvashalauncher_library_allowed (find_library (rules, "allow-then-disallow"),
                          linux64));
   g_assert_true (
-    nuvasha_library_allowed (find_library (rules, "disallow-osx-then-allow"),
+    nuvashalauncher_library_allowed (find_library (rules, "disallow-osx-then-allow"),
                          linux64));
 
   /* Features are off until somebody turns them on. */
-  g_assert_false (nuvasha_library_allowed (find_library (rules, "demo-only"),
+  g_assert_false (nuvashalauncher_library_allowed (find_library (rules, "demo-only"),
                                        linux64));
-  nuvasha_rule_context_set_feature (demo, "is_demo_user", TRUE);
-  g_assert_true (nuvasha_rule_context_get_feature (demo, "is_demo_user"));
-  g_assert_true (nuvasha_library_allowed (find_library (rules, "demo-only"),
+  nuvashalauncher_rule_context_set_feature (demo, "is_demo_user", TRUE);
+  g_assert_true (nuvashalauncher_rule_context_get_feature (demo, "is_demo_user"));
+  g_assert_true (nuvashalauncher_library_allowed (find_library (rules, "demo-only"),
                                       demo));
-  g_assert_false (nuvasha_library_allowed (find_library (rules, "not-demo"),
+  g_assert_false (nuvashalauncher_library_allowed (find_library (rules, "not-demo"),
                                        demo));
-  g_assert_true (nuvasha_library_allowed (find_library (rules, "not-demo"),
+  g_assert_true (nuvashalauncher_library_allowed (find_library (rules, "not-demo"),
                                       linux64));
 
   /* os.version is a regular expression over the kernel version. */
-  g_assert_true (nuvasha_library_allowed (find_library (rules, "kernel-6-only"),
+  g_assert_true (nuvashalauncher_library_allowed (find_library (rules, "kernel-6-only"),
                                       linux64));
-  g_assert_false (nuvasha_library_allowed (find_library (rules, "kernel-6-only"),
+  g_assert_false (nuvashalauncher_library_allowed (find_library (rules, "kernel-6-only"),
                                        linux_arm));
 
   /* No rules at all means nothing took the version away. */
-  g_assert_true (nuvasha_library_allowed (find_library (rules, "no-rules"),
+  g_assert_true (nuvashalauncher_library_allowed (find_library (rules, "no-rules"),
                                       linux64));
-  g_assert_true (nuvasha_rules_allow (NULL, linux64));
+  g_assert_true (nuvashalauncher_rules_allow (NULL, linux64));
 
   /* The same rule on another machine: the matcher compares, it does
    * not simply refuse everything but Linux. */
-  g_assert_true (nuvasha_library_allowed (find_library (rules, "windows-only"),
+  g_assert_true (nuvashalauncher_library_allowed (find_library (rules, "windows-only"),
                                       windows));
-  g_assert_false (nuvasha_library_allowed (find_library (rules, "linux-only"),
+  g_assert_false (nuvashalauncher_library_allowed (find_library (rules, "linux-only"),
                                        windows));
 
   /* Arguments carry their own rules. */
   argument = g_ptr_array_index (modern->game_arguments, 8);
-  g_assert_false (nuvasha_argument_allowed (argument, linux64));
-  g_assert_true (nuvasha_argument_allowed (argument, demo));
+  g_assert_false (nuvashalauncher_argument_allowed (argument, linux64));
+  g_assert_true (nuvashalauncher_argument_allowed (argument, demo));
 
   argument = g_ptr_array_index (modern->jvm_arguments, 2);
-  g_assert_true (nuvasha_argument_allowed (argument, linux64));
+  g_assert_true (nuvashalauncher_argument_allowed (argument, linux64));
 
   /* Turning a feature back off puts it where it started. */
-  nuvasha_rule_context_set_feature (demo, "is_demo_user", FALSE);
-  g_assert_false (nuvasha_rule_context_get_feature (demo, "is_demo_user"));
+  nuvashalauncher_rule_context_set_feature (demo, "is_demo_user", FALSE);
+  g_assert_false (nuvashalauncher_rule_context_get_feature (demo, "is_demo_user"));
 
   g_print ("ok - rules answer for linux, for the architecture and for features\n");
 }
@@ -545,18 +545,18 @@ test_rules (void)
 static void
 test_inheritance_merge (void)
 {
-  g_autoptr (NuvashaVersionDescription) parent =
+  g_autoptr (nuvashalauncherVersionDescription) parent =
     fixture_version ("version-parent.json");
-  g_autoptr (NuvashaVersionDescription) child =
+  g_autoptr (nuvashalauncherVersionDescription) child =
     fixture_version ("version-child.json");
-  g_autoptr (NuvashaVersionDescription) grandchild =
+  g_autoptr (nuvashalauncherVersionDescription) grandchild =
     fixture_version ("version-grandchild.json");
-  g_autoptr (NuvashaVersionDescription) merged = NULL;
-  g_autoptr (NuvashaVersionDescription) higher = NULL;
-  const NuvashaLibrary *library;
-  const NuvashaArgument *argument;
+  g_autoptr (nuvashalauncherVersionDescription) merged = NULL;
+  g_autoptr (nuvashalauncherVersionDescription) higher = NULL;
+  const nuvashalauncherLibrary *library;
+  const nuvashalauncherArgument *argument;
 
-  merged = nuvasha_version_description_merge (parent, child);
+  merged = nuvashalauncher_version_description_merge (parent, child);
   g_assert_nonnull (merged);
 
   /* The child is the version the user asked for. */
@@ -595,7 +595,7 @@ test_inheritance_merge (void)
 
   /* One step further up: the merged profile keeps the chain of the
    * version it inherited from, so the next parent is found. */
-  higher = nuvasha_version_description_merge (child, grandchild);
+  higher = nuvashalauncher_version_description_merge (child, grandchild);
   g_assert_nonnull (higher);
   g_assert_cmpstr (higher->id, ==, "my-profile");
   g_assert_cmpstr (higher->inherits_from, ==, "1.21.1");
@@ -605,7 +605,7 @@ test_inheritance_merge (void)
   g_assert_cmpuint (higher->jvm_arguments->len, ==, 1);
   g_assert_cmpuint (higher->game_arguments->len, ==, 2);
   g_assert_cmpstr (g_ptr_array_index (
-                     ((NuvashaArgument *) g_ptr_array_index (
+                     ((nuvashalauncherArgument *) g_ptr_array_index (
                         higher->game_arguments, 0))->values, 0),
                    ==, "--quickPlayPath");
 
@@ -736,7 +736,7 @@ fixture_start (void)
 
   fixture.files = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                          free_string);
-  fixture.server = soup_server_new ("server-header", "nuvasha-test", NULL);
+  fixture.server = soup_server_new ("server-header", "nuvashalauncher-test", NULL);
 
   if (!soup_server_listen_local (fixture.server, 0, 0, &error))
     g_error ("the test server cannot listen: %s", error->message);
@@ -805,15 +805,15 @@ typedef struct
 {
   AsyncRun *run;
   GError *error;
-  NuvashaVersionManifest *manifest;
-  NuvashaVersionDescription *description;
-  NuvashaTaskScope *operation;
+  nuvashalauncherVersionManifest *manifest;
+  nuvashalauncherVersionDescription *description;
+  nuvashalauncherTaskScope *operation;
 } AsyncCall;
 
 static void
 call_finished (AsyncCall *call)
 {
-  nuvasha_task_scope_unref (call->operation);
+  nuvashalauncher_task_scope_unref (call->operation);
   call->operation = NULL;
 
   if (--call->run->pending == 0)
@@ -879,7 +879,7 @@ manifest_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 {
   AsyncCall *call = user_data;
 
-  call->manifest = nuvasha_version_manifest_fetch_finish (result, &call->error);
+  call->manifest = nuvashalauncher_version_manifest_fetch_finish (result, &call->error);
   call_finished (call);
 }
 
@@ -889,7 +889,7 @@ load_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 {
   AsyncCall *call = user_data;
 
-  call->description = nuvasha_version_load_finish (result, &call->error);
+  call->description = nuvashalauncher_version_load_finish (result, &call->error);
   call_finished (call);
 }
 
@@ -899,21 +899,21 @@ call_manifest (AsyncRun *run, AsyncCall *call, const char *url)
   call->run = run;
   run->pending++;
 
-  call->operation = nuvasha_version_manifest_fetch_async (url, manifest_finished,
+  call->operation = nuvashalauncher_version_manifest_fetch_async (url, manifest_finished,
                                                       call);
-  nuvasha_task_scope_follow_cancellable (call->operation, run->cancellable);
+  nuvashalauncher_task_scope_follow_cancellable (call->operation, run->cancellable);
 }
 
 static void
-call_load (AsyncRun *run, AsyncCall *call, NuvashaVersionManifest *manifest,
+call_load (AsyncRun *run, AsyncCall *call, nuvashalauncherVersionManifest *manifest,
            const char *version_id)
 {
   call->run = run;
   run->pending++;
 
-  call->operation = nuvasha_version_load_async (manifest, version_id,
+  call->operation = nuvashalauncher_version_load_async (manifest, version_id,
                                              load_finished, call);
-  nuvasha_task_scope_follow_cancellable (call->operation, run->cancellable);
+  nuvashalauncher_task_scope_follow_cancellable (call->operation, run->cancellable);
 }
 
 /* ---------------------------------------------------------- *
@@ -924,7 +924,7 @@ static char *
 cache_file (const char *name)
 {
   g_autofree char *directory =
-    g_build_filename (g_get_user_cache_dir (), "nuvasha", "versions", NULL);
+    g_build_filename (g_get_user_cache_dir (), "nuvashalauncher", "versions", NULL);
 
   return g_build_filename (directory, name, NULL);
 }
@@ -977,14 +977,14 @@ test_manifest_fetch (void)
 
 /* The manifest of the tests, parsed without going through the
  * network. */
-static NuvashaVersionManifest *
+static nuvashalauncherVersionManifest *
 local_manifest (void)
 {
   g_autofree char *json = manifest_json ();
   g_autoptr (GError) error = NULL;
-  NuvashaVersionManifest *manifest;
+  nuvashalauncherVersionManifest *manifest;
 
-  manifest = nuvasha_version_manifest_new_from_json (json, -1, &error);
+  manifest = nuvashalauncher_version_manifest_new_from_json (json, -1, &error);
 
   if (manifest == NULL)
     g_error ("the manifest of the test server does not parse: %s",
@@ -996,7 +996,7 @@ local_manifest (void)
 static void
 test_version_load (void)
 {
-  g_autoptr (NuvashaVersionManifest) manifest = local_manifest ();
+  g_autoptr (nuvashalauncherVersionManifest) manifest = local_manifest ();
   g_autofree char *parent_cache = cache_file ("1.21.1.json");
   AsyncRun run = { 0 };
   AsyncCall call = { 0 };
@@ -1078,7 +1078,7 @@ test_version_load (void)
 static void
 test_version_load_errors (void)
 {
-  g_autoptr (NuvashaVersionManifest) manifest = local_manifest ();
+  g_autoptr (nuvashalauncherVersionManifest) manifest = local_manifest ();
   AsyncRun run = { 0 };
   AsyncCall call = { 0 };
 
@@ -1091,7 +1091,7 @@ test_version_load_errors (void)
   async_run_wait (&run);
 
   g_assert_null (call.description);
-  g_assert_error (call.error, nuvasha_MC_ERROR, nuvasha_MC_ERROR_NOT_FOUND);
+  g_assert_error (call.error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_NOT_FOUND);
   g_assert_cmpuint (fixture.hits, ==, 0);
   async_call_clear (&call);
 
@@ -1099,7 +1099,7 @@ test_version_load_errors (void)
   async_run_wait (&run);
 
   g_assert_null (call.description);
-  g_assert_error (call.error, nuvasha_MC_ERROR, nuvasha_MC_ERROR_CYCLE);
+  g_assert_error (call.error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_CYCLE);
   g_assert_cmpuint (fixture.hits, ==, 2);
   async_call_clear (&call);
 
@@ -1107,7 +1107,7 @@ test_version_load_errors (void)
   async_run_wait (&run);
 
   g_assert_null (call.description);
-  g_assert_error (call.error, nuvasha_MC_ERROR, nuvasha_MC_ERROR_CYCLE);
+  g_assert_error (call.error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_CYCLE);
   g_assert_cmpuint (fixture.hits, ==, 2);
   async_call_clear (&call);
 
@@ -1127,7 +1127,7 @@ cache_start (void)
 {
   g_autoptr (GError) error = NULL;
 
-  cache_home = g_dir_make_tmp ("nuvasha-versions-cache-XXXXXX", &error);
+  cache_home = g_dir_make_tmp ("nuvashalauncher-versions-cache-XXXXXX", &error);
 
   if (cache_home == NULL)
     g_error ("the cache directory of the test cannot be made: %s",
@@ -1140,9 +1140,9 @@ static void
 cache_stop (void)
 {
   g_autofree char *directory =
-     g_build_filename (cache_home, "nuvasha", "versions", NULL);
-  g_autofree char *nuvasha_directory =
-    g_build_filename (cache_home, "nuvasha", NULL);
+     g_build_filename (cache_home, "nuvashalauncher", "versions", NULL);
+  g_autofree char *nuvashalauncher_directory =
+    g_build_filename (cache_home, "nuvashalauncher", NULL);
   g_autoptr (GDir) dir = g_dir_open (directory, 0, NULL);
 
   if (dir != NULL)
@@ -1158,7 +1158,7 @@ cache_stop (void)
     }
 
   g_rmdir (directory);
-  g_rmdir (nuvasha_directory);
+  g_rmdir (nuvashalauncher_directory);
   g_rmdir (cache_home);
 }
 
