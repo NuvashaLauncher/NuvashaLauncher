@@ -22,8 +22,22 @@ PKGS := gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive gio-unix-2.0 epox
 PKG_CFLAGS := $(shell $(PKG_CONFIG) --cflags $(PKGS) | \
 	sed -e 's/ -I/ -isystem /g' -e 's/^-I/-isystem /')
 PKG_LIBS := $(shell $(PKG_CONFIG) --libs $(PKGS)) -lm
+
+# Goals that compile nothing and so must keep working on hosts without the
+# development packages. test-flatpak-runtime only drives the flatpak CLI to
+# smoke-test an already-installed bundle; clean only deletes build output.
+NO_BUILD_GOALS := test-flatpak-runtime clean
+ifneq ($(filter-out $(NO_BUILD_GOALS),$(MAKECMDGOALS)),)
+NEEDS_BUILD := 1
+else ifeq ($(MAKECMDGOALS),)
+# No goal named: the default goal builds the launcher.
+NEEDS_BUILD := 1
+endif
+
+ifeq ($(NEEDS_BUILD),1)
 ifeq ($(strip $(PKG_CFLAGS)),)
 $(error pkg-config could not find the required development packages: $(PKGS))
+endif
 endif
 CPPFLAGS += -Dnuvashalauncher_LOCALE_DIR=\"$(PREFIX)/share/locale\"
 CPPFLAGS += -Dnuvashalauncher_VERSION=\"$(VERSION)\"
