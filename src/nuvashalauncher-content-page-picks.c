@@ -8,6 +8,7 @@
 #include "nuvashalauncher-content-page-private.h"
 #include "nuvashalauncher-i18n.h"
 #include "nuvashalauncher-modrinth.h"
+#include "nuvashalauncher-ui-feedback.h"
 
 /* ---------------------------------------------------------- *
  * What the user picked
@@ -131,10 +132,7 @@ nuvashalauncher_content_page_refresh_picks (nuvashalauncherContentPage *self)
       gtk_widget_set_sensitive (GTK_WIDGET (self->pick_button), count > 0);
       const char *label = count == 0 ? _("Nothing is selected") : tooltip;
 
-      gtk_widget_set_tooltip_text (GTK_WIDGET (self->pick_button), label);
-      gtk_accessible_update_property (GTK_ACCESSIBLE (self->pick_button),
-                                      GTK_ACCESSIBLE_PROPERTY_LABEL,
-                                      label, -1);
+      nuvashalauncher_ui_set_action_label (GTK_WIDGET (self->pick_button), label);
     }
 
   if (self->pick_footer != NULL)

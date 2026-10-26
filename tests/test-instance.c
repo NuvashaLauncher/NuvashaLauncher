@@ -121,6 +121,7 @@ test_sanitize_name (void)
   g_autofree char *capped = nuvashalauncher_instance_sanitize_name (long_name);
   assert_safe_name (capped);
   g_assert_cmpuint (strlen (capped), <=, 64);
+  g_assert_cmpuint (strlen (capped), <=, 64);
 
   g_print ("ok - name sanitization\n");
 }

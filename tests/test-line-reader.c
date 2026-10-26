@@ -4,6 +4,7 @@
 
 #include <gio/gio.h>
 #include <glib.h>
+#include <string.h>
 
 #include "nuvashalauncher-line-reader.h"
 
@@ -70,6 +71,36 @@ test_reads_lines_until_eof (void)
   g_print ("ok - line reader emits lines, tags stderr and cleans up at EOF\n");
 }
 
+static void
+test_truncates_long_lines (void)
+{
+  const gsize length = 1024 * 1024 + 32;
+  ReaderResult result = { 0 };
+  g_autofree char *contents = g_malloc (length + 1);
+  g_autoptr (GInputStream) stream = NULL;
+  nuvashalauncherLineReader *reader = NULL;
+
+  memset (contents, 'x', length);
+  contents[length] = '\n';
+  result.loop = g_main_loop_new (NULL, FALSE);
+  result.lines = g_ptr_array_new_with_free_func (g_free);
+  stream = g_memory_input_stream_new_from_data (contents, length + 1, NULL);
+  reader = nuvashalauncher_line_reader_new (stream, FALSE, on_line, on_done,
+                                             &result, on_result_free);
+  nuvashalauncher_line_reader_start (reader);
+  g_main_loop_run (result.loop);
+
+  g_assert_true (result.done);
+  g_assert_cmpuint (result.lines->len, ==, 1);
+  g_assert_true (g_str_has_suffix (g_ptr_array_index (result.lines, 0),
+                                   "[line truncated]"));
+  g_assert_true (result.data_freed);
+
+  g_ptr_array_unref (result.lines);
+  g_main_loop_unref (result.loop);
+  g_print ("ok - line reader bounds oversized output\n");
+}
+
 int
 main (int argc, char **argv)
 {
@@ -78,5 +109,6 @@ main (int argc, char **argv)
 
   g_print ("# Line reader\n");
   test_reads_lines_until_eof ();
+  test_truncates_long_lines ();
   return 0;
 }

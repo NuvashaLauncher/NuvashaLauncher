@@ -707,8 +707,6 @@ msgstr "Không có"
 msgid "Norsk (bokmål)"
 msgstr "Norsk (bokmål)"
 
-msgid "nuvashalauncher"
-msgstr "nuvashalauncher"
 
 msgid "nuvashalauncher cache data was cleared successfully."
 msgstr "Đã xóa dữ liệu bộ nhớ đệm của nuvashalauncher thành công."

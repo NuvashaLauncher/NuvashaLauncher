@@ -381,6 +381,8 @@ test_download_url_allowed (void)
     "https://raw.githubusercontent.com/u/r/f"));
   g_assert_true (
     nuvashalauncher_modpack_download_url_allowed ("https://gitlab.com/u/r"));
+  g_assert_true (
+    nuvashalauncher_modpack_download_url_allowed ("https://GITHUB.com/u/r/raw/f"));
 
   /* Anything else: another scheme, another host, a host with a port
    * of its own, credentials in front of it, or a path that merely
@@ -398,6 +400,16 @@ test_download_url_allowed (void)
     nuvashalauncher_modpack_download_url_allowed ("https://cdn.modrinth.com:8443/x"));
   g_assert_false (
     nuvashalauncher_modpack_download_url_allowed ("https://evil.com/cdn.modrinth.com"));
+  g_assert_false (
+    nuvashalauncher_modpack_download_url_allowed ("https://[not-an-ip]/x"));
+  g_assert_false (
+    nuvashalauncher_modpack_download_url_allowed ("https://github.com:443/u/r/raw/f"));
+  g_assert_true (nuvashalauncher_modpack_redirect_allowed (
+    "https://github.com/u/r/raw/f", "https://cdn.modrinth.com/data/x"));
+  g_assert_false (nuvashalauncher_modpack_redirect_allowed (
+    "https://github.com/u/r/raw/f", "https://evil.example/x"));
+  g_assert_true (nuvashalauncher_modpack_redirect_allowed (
+    "https://example.test/x", "https://evil.example/x"));
 
   g_print ("ok - a download URL is asked of the hosts the format names\n");
 }

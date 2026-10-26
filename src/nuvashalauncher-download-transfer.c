@@ -4,6 +4,7 @@
 #include "nuvashalauncher-fs.h"
 #include "nuvashalauncher-task-private.h"
 #include "nuvashalauncher-downloads.h"
+#include "nuvashalauncher-modpack.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <gio/gunixoutputstream.h>
@@ -117,6 +118,29 @@ send_ready (GObject *source, GAsyncResult *result, gpointer user_data)
     }
 
   request->source = stream;
+
+  /* Modrinth pack manifests permit only a small host allowlist.  libsoup
+   * follows redirects by default, so validate the final URI as well as the
+   * manifest URL before accepting the body. */
+  if (nuvashalauncher_modpack_download_url_allowed (request->url))
+    {
+      g_autofree char *final_url = NULL;
+      GUri *uri = soup_message_get_uri (request->message);
+
+      if (uri != NULL)
+        final_url = g_uri_to_string (uri);
+
+      if (final_url == NULL ||
+          !nuvashalauncher_modpack_redirect_allowed (request->url, final_url))
+        {
+          end_attempt (request,
+                       g_error_new_literal (nuvashalauncher_DOWNLOAD_ERROR,
+                                            nuvashalauncher_DOWNLOAD_ERROR_NETWORK,
+                                            "a modpack download redirected to an unapproved host"));
+          return;
+        }
+    }
+
   status_error = check_status (request);
 
   if (status_error != NULL)

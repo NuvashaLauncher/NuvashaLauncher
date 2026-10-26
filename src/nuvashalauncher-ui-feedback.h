@@ -19,6 +19,7 @@ void nuvashalauncher_ui_clear_error_label (GtkLabel *label);
 void nuvashalauncher_ui_cancel_dialog (GtkButton *button, gpointer user_data);
 
 /* Shared presentation helpers for icon-only controls and dialog surfaces. */
+void nuvashalauncher_ui_set_action_label (GtkWidget *button, const char *label);
 void nuvashalauncher_ui_prepare_icon_button (GtkWidget *button, const char *label);
 void nuvashalauncher_ui_prepare_dialog_content (GtkWidget *content);
 

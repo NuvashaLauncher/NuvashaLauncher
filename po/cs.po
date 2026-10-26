@@ -709,8 +709,6 @@ msgstr "Žádné"
 msgid "Norsk (bokmål)"
 msgstr "Norsk (bokmål)"
 
-msgid "nuvashalauncher"
-msgstr "nuvashalauncher"
 
 msgid "nuvashalauncher cache data was cleared successfully."
 msgstr "Data z mezipaměti nuvashalauncher byla úspěšně vymazána."

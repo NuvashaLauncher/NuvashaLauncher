@@ -707,8 +707,6 @@ msgstr "Tidak ada"
 msgid "Norsk (bokmål)"
 msgstr "Norsk (bokmål)"
 
-msgid "nuvashalauncher"
-msgstr "nuvashalauncher"
 
 msgid "nuvashalauncher cache data was cleared successfully."
 msgstr "Data cache nuvashalauncher telah dihapus dengan sukses."

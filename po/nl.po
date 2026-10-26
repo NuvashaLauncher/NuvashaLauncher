@@ -750,8 +750,6 @@ msgstr "Geen"
 msgid "Norsk (bokmål)"
 msgstr "Norsk (bokmål)"
 
-msgid "nuvashalauncher"
-msgstr "nuvashalauncher"
 
 msgid "nuvashalauncher cache data was cleared successfully."
 msgstr "De cachegegevens van nuvashalauncher zijn succesvol gewist."

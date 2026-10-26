@@ -31,7 +31,7 @@ struct _nuvashalauncher
   char *log_uuid;
 
   /* Log lines, newest last and bounded by settings. */
-  GPtrArray *lines;
+  GQueue *lines;
 
   /* Values selected during launch preparation. */
   struct {

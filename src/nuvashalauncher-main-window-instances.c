@@ -216,10 +216,8 @@ row_update (GtkWidget *play, nuvashalauncher *launcher)
   gtk_image_set_from_icon_name (GTK_IMAGE (icon),
                                 busy ? "media-playback-stop-symbolic"
                                      : "media-playback-start-symbolic");
-  gtk_accessible_update_property (GTK_ACCESSIBLE (play),
-                                  GTK_ACCESSIBLE_PROPERTY_LABEL,
-                                  busy ? _("Stop") : _("Play"), -1);
-  gtk_widget_set_tooltip_text (GTK_WIDGET (play), busy ? _("Stop") : _("Play"));
+  nuvashalauncher_ui_set_action_label (GTK_WIDGET (play),
+                                       busy ? _("Stop") : _("Play"));
   gtk_widget_set_visible (GTK_WIDGET (play), self == NULL || !self->ui.edit_mode);
   gtk_widget_set_visible (check, self != NULL && self->ui.edit_mode);
   gtk_widget_set_visible (instance_icon, self == NULL || !self->ui.edit_mode);
@@ -633,9 +631,7 @@ create_instance_row (gpointer item, gpointer user_data)
   gtk_button_set_child (GTK_BUTTON (play), GTK_WIDGET (play_box));
   gtk_widget_set_valign (GTK_WIDGET (play), GTK_ALIGN_CENTER);
   gtk_widget_add_css_class (GTK_WIDGET (play), "suggested-action");
-  gtk_widget_set_tooltip_text (GTK_WIDGET (play), _("Play"));
-  gtk_accessible_update_property (GTK_ACCESSIBLE (play),
-                                   GTK_ACCESSIBLE_PROPERTY_LABEL, _("Play"), -1);
+  nuvashalauncher_ui_set_action_label (GTK_WIDGET (play), _("Play"));
 
   /* The row controls need the ID before their signal handlers are wired. */
   id = nuvashalauncher_instance_get_id (instance);

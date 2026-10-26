@@ -73,10 +73,7 @@ nuvashalauncher_content_page_build_installed (nuvashalauncherContentPage *self)
      gtk_box_append (GTK_BOX (actions), GTK_WIDGET (search_bar));
 
      gtk_button_set_child (update_all, GTK_WIDGET (update_content));
-    gtk_widget_set_tooltip_text (GTK_WIDGET (update_all), _("Update All"));
-    gtk_accessible_update_property (GTK_ACCESSIBLE (update_all),
-                                    GTK_ACCESSIBLE_PROPERTY_LABEL,
-                                    _("Update All"), -1);
+     nuvashalauncher_ui_set_action_label (GTK_WIDGET (update_all), _("Update All"));
     g_signal_connect (update_all, "clicked",
                       G_CALLBACK (nuvashalauncher_content_page_on_update_all_clicked), self);
    gtk_stack_add_named (update_content, GTK_WIDGET (update_icon), "icon");

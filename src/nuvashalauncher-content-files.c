@@ -184,6 +184,7 @@ typedef struct
   GPtrArray *index_entries; /* nuvashalauncherContentIndexEntry* */
   guint index;
   guint hash_pending;
+  guint hash_next_index;
   gboolean hash_cancelled;
   guint local_pending;
   gboolean local_cancelled;
@@ -193,6 +194,7 @@ typedef struct
 } ScanRun;
 
 static void scan_hash_next (ScanRun *run);
+static void scan_hash_start_more (ScanRun *run);
 static void batch_read_next (ScanRun *run);
 static int compare_files (gconstpointer a, gconstpointer b);
 static void scan_free (ScanRun *run);
@@ -565,37 +567,37 @@ scan_hash_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   g_free (input);
   run->hash_pending--;
-  if (run->hash_pending == 0)
+  if (run->hash_cancelled)
     {
-      if (run->hash_cancelled)
+      if (run->hash_pending == 0)
         {
-           nuvashalauncher_task_scope_return_error (
-             run->scope,
-             g_error_new_literal (G_IO_ERROR, G_IO_ERROR_CANCELLED,
-                                  "cancelled"));
+          nuvashalauncher_task_scope_return_error (
+            run->scope,
+            g_error_new_literal (G_IO_ERROR, G_IO_ERROR_CANCELLED,
+                                 "cancelled"));
           scan_free (run);
         }
-      else
-        scan_finish (run);
+      return;
     }
+
+  scan_hash_start_more (run);
 }
 
 static void
 scan_hash_next (ScanRun *run)
 {
   run->hash_pending = 0;
-  for (guint i = 0; i < run->files->len; i++)
-    if (((nuvashalauncherContentFile *) g_ptr_array_index (run->files, i))->sha1 == NULL)
-      run->hash_pending++;
+  run->hash_next_index = 0;
+  scan_hash_start_more (run);
+}
 
-  if (run->hash_pending == 0)
+static void
+scan_hash_start_more (ScanRun *run)
+{
+  while (run->hash_pending < 8 && run->hash_next_index < run->files->len)
     {
-      scan_finish (run);
-      return;
-    }
-  for (guint i = 0; i < run->files->len; i++)
-    {
-      nuvashalauncherContentFile *file = g_ptr_array_index (run->files, i);
+      nuvashalauncherContentFile *file =
+        g_ptr_array_index (run->files, run->hash_next_index++);
 
       if (file->sha1 != NULL)
         continue;
@@ -605,10 +607,14 @@ scan_hash_next (ScanRun *run)
       input->run = run;
       input->file = file;
       nuvashalauncher_task_scope_release_when_done (
-          nuvashalauncher_download_file_hash_async (handle, G_CHECKSUM_SHA1,
-                                        scan_hash_ready, input),
-          nuvashalauncher_task_scope_get_cancellable (run->scope));
+           nuvashalauncher_download_file_hash_async (handle, G_CHECKSUM_SHA1,
+                                         scan_hash_ready, input),
+           nuvashalauncher_task_scope_get_cancellable (run->scope));
+      run->hash_pending++;
     }
+
+  if (run->hash_pending == 0 && run->hash_next_index >= run->files->len)
+    scan_finish (run);
 }
 
 static int
