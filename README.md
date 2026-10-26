@@ -138,6 +138,11 @@ with the desktop as files Nuvasha can open. Use `--list-instances` and
 are accepted where an account is specified. `--account` selects an account for
 one launch without changing the active account.
 
+Microsoft account tokens are stored in the user's `accounts.json` with mode
+`0600`. Nuvasha must read the tokens to authenticate Minecraft, so keeping them
+in a separate desktop secret store would not prevent the launcher from having
+access to them during a launch.
+
 ## License
 
 Nuvasha is free software released under the GNU General Public License,

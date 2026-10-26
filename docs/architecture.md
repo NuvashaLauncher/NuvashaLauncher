@@ -462,8 +462,11 @@ and process boundaries:
   links, and overlapping instance directories where those checks apply.
 - ZIP entry counts and inflated size are bounded.
 - Modpack download URLs are restricted to hosts allowed by the format.
-- Account metadata and tokens are stored in `accounts.json` with mode `0600`
-  and never enter logs, error messages, or redacted command output.
+- Account metadata and tokens are stored in `accounts.json` with mode `0600`.
+  This is intentional: the launcher must read the tokens to authenticate the
+  Minecraft process, so a separate secret store would not remove the
+  launcher's access to them. Tokens never enter logs, error messages, or
+  redacted command output.
 - UI text that can contain paths or service errors is treated as plain text,
   not markup.
 
