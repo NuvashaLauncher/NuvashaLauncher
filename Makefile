@@ -17,12 +17,6 @@ FLATPAK    ?= 0
 # file descriptor.
 PKGS := gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive gio-unix-2.0 epoxy
 
-# pkg-config prints -I paths; use -isystem so warnings are only about our
-# own code and not about the GTK/GLib headers themselves.
-PKG_CFLAGS := $(shell $(PKG_CONFIG) --cflags $(PKGS) | \
-	sed -e 's/ -I/ -isystem /g' -e 's/^-I/-isystem /')
-PKG_LIBS := $(shell $(PKG_CONFIG) --libs $(PKGS)) -lm
-
 # Goals that compile nothing and so must keep working on hosts without the
 # development packages. test-flatpak-runtime only drives the flatpak CLI to
 # smoke-test an already-installed bundle; clean only deletes build output.
@@ -35,9 +29,19 @@ NEEDS_BUILD := 1
 endif
 
 ifeq ($(NEEDS_BUILD),1)
+# pkg-config prints -I paths; use -isystem so warnings are only about our
+# own code and not about the GTK/GLib headers themselves.
+PKG_CFLAGS := $(shell $(PKG_CONFIG) --cflags $(PKGS) | \
+	sed -e 's/ -I/ -isystem /g' -e 's/^-I/-isystem /')
+PKG_LIBS := $(shell $(PKG_CONFIG) --libs $(PKGS)) -lm
 ifeq ($(strip $(PKG_CFLAGS)),)
 $(error pkg-config could not find the required development packages: $(PKGS))
 endif
+else
+# This goal compiles nothing, so skip pkg-config entirely: probing it here
+# would only print "not found" noise on hosts without the dev packages.
+PKG_CFLAGS :=
+PKG_LIBS    :=
 endif
 CPPFLAGS += -Dnuvashalauncher_LOCALE_DIR=\"$(PREFIX)/share/locale\"
 CPPFLAGS += -Dnuvashalauncher_VERSION=\"$(VERSION)\"
