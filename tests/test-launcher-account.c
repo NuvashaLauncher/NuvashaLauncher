@@ -298,6 +298,33 @@ test_a_ready_account_gets_past_the_gate (void)
   g_print ("ok - a ready account is what a launch goes out with\n");
 }
 
+static void
+test_launch_can_use_another_account (void)
+{
+  g_autoptr (NuvashaInstance) instance = new_instance ();
+  g_autoptr (NuvashaAccounts) accounts = new_store ("launch-account.json");
+  g_autoptr (NuvashaLauncher) launcher =
+    nuvasha_launcher_new (instance, NULL, accounts);
+  g_autoptr (NuvashaAccount) first = NULL;
+  g_autoptr (NuvashaAccount) second = NULL;
+  g_autoptr (GError) error = NULL;
+
+  first = nuvasha_account_new_offline ("Alex", &error);
+  g_assert_no_error (error);
+  second = nuvasha_account_new_offline ("Steve", &error);
+  g_assert_no_error (error);
+  g_assert_true (nuvasha_accounts_add (accounts, first, &error));
+  g_assert_true (nuvasha_accounts_add (accounts, second, &error));
+  g_assert_no_error (error);
+  g_assert_cmpstr (nuvasha_accounts_get_active (accounts)->name, ==, "Steve");
+
+  g_assert_true (nuvasha_launcher_set_account (launcher, first->uuid, &error));
+  g_assert_no_error (error);
+  g_assert_cmpstr (nuvasha_accounts_get_active (accounts)->name, ==, "Steve");
+
+  g_print ("ok - a launch can use an account without changing the active one\n");
+}
+
 /* The name of the state is what a view shows, so it is part of what the
    launcher promises. */
 static void
@@ -332,6 +359,7 @@ main (void)
   test_no_account_plays_offline ();
   test_a_dead_token_asks_for_a_sign_in ();
   test_a_ready_account_gets_past_the_gate ();
+  test_launch_can_use_another_account ();
   test_the_state_has_a_name ();
 
   return EXIT_SUCCESS;
