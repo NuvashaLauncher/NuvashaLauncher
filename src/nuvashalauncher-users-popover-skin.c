@@ -68,6 +68,26 @@ skin_menu_free (SkinMenu *menu)
   g_free (menu);
 }
 
+static gboolean
+release_skin_menu_controller (gpointer user_data)
+{
+  AdwDialog *dialog = user_data;
+  SkinMenu *menu = g_object_steal_data (
+    G_OBJECT (dialog), "nuvashalauncher-skin-menu");
+
+  skin_menu_free (menu);
+  g_object_unref (dialog);
+  return G_SOURCE_REMOVE;
+}
+
+static void
+on_skin_dialog_closed (AdwDialog *dialog, gpointer user_data G_GNUC_UNUSED)
+{
+  /* The dialog remains owned by Adwaita. Only release our controller after
+   * the close signal has returned, so the widget tree can tear itself down. */
+  g_idle_add (release_skin_menu_controller, g_object_ref (dialog));
+}
+
 static void
 show_minecraft_service_error (SkinMenu *menu, const char *title, GError *error)
 {
@@ -1264,7 +1284,8 @@ nuvashalauncher_users_skin_menu_new (nuvashalauncherUsersPopover *owner, GtkImag
   g_signal_connect (default_model, "toggled", G_CALLBACK (on_model_toggled), data);
   g_signal_connect (slim_model, "toggled", G_CALLBACK (on_model_toggled), data);
   g_signal_connect (dialog, "close-attempt",
-                   G_CALLBACK (on_skin_dialog_close_attempt), data);
+                    G_CALLBACK (on_skin_dialog_close_attempt), data);
+  g_signal_connect (dialog, "closed", G_CALLBACK (on_skin_dialog_closed), NULL);
 
   gtk_widget_set_size_request (GTK_WIDGET (left), 220, -1);
   gtk_widget_set_hexpand (GTK_WIDGET (right), TRUE);
