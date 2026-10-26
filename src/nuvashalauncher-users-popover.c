@@ -32,6 +32,12 @@ G_DEFINE_FINAL_TYPE (nuvashalauncherUsersPopover, nuvashalauncher_users_popover,
 static gboolean
 release_skin_dialog_reference (gpointer user_data)
 {
+  AdwDialog *dialog = user_data;
+
+  /* Adwaita can emit "closed" before it has detached the toolbar view. Do
+   * that explicitly before releasing the construction reference, otherwise
+   * the dialog finalizer sees live children and GTK reports invalid objects. */
+  adw_dialog_set_child (dialog, NULL);
   g_object_unref (user_data);
   return G_SOURCE_REMOVE;
 }
