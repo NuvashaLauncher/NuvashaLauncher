@@ -8,6 +8,7 @@
 #include "nuvashalauncher-task-private.h"
 
 #include <errno.h>
+#include <dirent.h>
 #include <fcntl.h>
 #include <glib/gstdio.h>
 #include <sys/stat.h>
@@ -512,32 +513,76 @@ failed:
   return -1;
 }
 
+/* Remove a tree relative to an already-open parent directory. All directory
+ * traversal is descriptor-relative and uses O_NOFOLLOW, so a pathname race
+ * cannot turn cleanup into a walk through a symlink. Errors are deliberately
+ * best-effort here: callers use this helper for cleanup and do not expect a
+ * missing path to make the original operation fail. */
+static void
+remove_tree_at (int parent_fd, const char *name)
+{
+  struct stat info;
+  int fd = -1;
+
+  if (fstatat (parent_fd, name, &info, AT_SYMLINK_NOFOLLOW) != 0)
+    return;
+
+  if (!S_ISDIR (info.st_mode) || S_ISLNK (info.st_mode))
+    {
+      unlinkat (parent_fd, name, 0);
+      return;
+    }
+
+  fd = openat (parent_fd, name,
+               O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
+  if (fd < 0)
+    return;
+
+  {
+    DIR *directory = fdopendir (fd);
+
+    if (directory == NULL)
+      {
+        close (fd);
+        return;
+      }
+
+    for (struct dirent *entry = readdir (directory);
+         entry != NULL; entry = readdir (directory))
+      {
+        if (g_str_equal (entry->d_name, ".") ||
+            g_str_equal (entry->d_name, ".."))
+          continue;
+
+        remove_tree_at (dirfd (directory), entry->d_name);
+      }
+
+    closedir (directory);
+  }
+
+  /* AT_REMOVEDIR never follows a symlink. If the directory name was replaced
+   * while it was being cleaned, this fails rather than deleting a new tree. */
+  unlinkat (parent_fd, name, AT_REMOVEDIR);
+}
+
 void
 nuvashalauncher_fs_remove_tree (const char *path)
 {
-  GStatBuf stat_buf;
+  g_autofree char *parent = NULL;
+  g_autofree char *name = NULL;
+  int parent_fd = -1;
 
-  if (path == NULL || g_lstat (path, &stat_buf) != 0)
+  if (path == NULL || !g_path_is_absolute (path))
     return;
 
-  if (S_ISDIR (stat_buf.st_mode) && !S_ISLNK (stat_buf.st_mode))
-    {
-      g_autoptr (GDir) directory = g_dir_open (path, 0, NULL);
-      const char *name = NULL;
+  parent = g_path_get_dirname (path);
+  name = g_path_get_basename (path);
+  parent_fd = nuvashalauncher_fs_open_directory_nofollow (parent, NULL);
+  if (parent_fd < 0)
+    return;
 
-      if (directory != NULL)
-        while ((name = g_dir_read_name (directory)) != NULL)
-          {
-            g_autofree char *child = g_build_filename (path, name, NULL);
-            nuvashalauncher_fs_remove_tree (child);
-          }
-
-      g_rmdir (path);
-    }
-  else
-    {
-      g_unlink (path);
-    }
+  remove_tree_at (parent_fd, name);
+  close (parent_fd);
 }
 
 typedef struct {

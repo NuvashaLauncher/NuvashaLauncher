@@ -36,6 +36,32 @@ make_jar (const char *member, const char *contents)
   return path;
 }
 
+static char *
+make_large_jar (void)
+{
+  g_autofree char *contents = g_malloc0 (1024 * 1024 + 1);
+  char *path = g_strdup ("/tmp/nuvashalauncher-metadata-large-XXXXXX.jar");
+  int fd = g_mkstemp (path);
+  struct archive *archive = archive_write_new ();
+  struct archive_entry *entry = archive_entry_new ();
+
+  g_assert_cmpint (fd, >=, 0);
+  close (fd);
+  g_assert_cmpint (archive_write_set_format_zip (archive), ==, ARCHIVE_OK);
+  g_assert_cmpint (archive_write_open_filename (archive, path), ==, ARCHIVE_OK);
+  archive_entry_set_pathname (entry, "fabric.mod.json");
+  archive_entry_set_filetype (entry, AE_IFREG);
+  archive_entry_set_perm (entry, 0644);
+  archive_entry_set_size (entry, 1024 * 1024 + 1);
+  g_assert_cmpint (archive_write_header (archive, entry), ==, ARCHIVE_OK);
+  g_assert_cmpint (archive_write_data (archive, contents, 1024 * 1024 + 1),
+                   ==, 1024 * 1024 + 1);
+  archive_entry_free (entry);
+  g_assert_cmpint (archive_write_close (archive), ==, ARCHIVE_OK);
+  archive_write_free (archive);
+  return path;
+}
+
 int
 main (void)
 {
@@ -45,8 +71,11 @@ main (void)
     "\"version\":\"1.2\",\"depends\":{\"other\":\"1\"}}");
   g_autofree char *truncated = make_jar (
     "fabric.mod.json", "{\"id\":\"example\",\"depends\":{\"other");
+  g_autofree char *large = make_large_jar ();
   g_autoptr (nuvashalauncherContentFile) file = g_new0 (nuvashalauncherContentFile, 1);
   g_autoptr (nuvashalauncherContentFile) broken = g_new0 (nuvashalauncherContentFile, 1);
+  g_autoptr (nuvashalauncherContentFile) oversized =
+    g_new0 (nuvashalauncherContentFile, 1);
 
   file->path = g_strdup (valid);
   nuvashalauncher_content_apply_local_metadata (file, nuvashalauncher_CONTENT_MOD);
@@ -61,8 +90,13 @@ main (void)
   broken->path = g_strdup (truncated);
   nuvashalauncher_content_apply_local_metadata (broken, nuvashalauncher_CONTENT_MOD);
   g_assert_false (broken->local_metadata);
+  oversized->path = g_strdup (large);
+  nuvashalauncher_content_apply_local_metadata (oversized,
+                                                nuvashalauncher_CONTENT_MOD);
+  g_assert_false (oversized->local_metadata);
   g_assert_cmpint (g_unlink (valid), ==, 0);
   g_assert_cmpint (g_unlink (truncated), ==, 0);
-  g_print ("ok - local metadata parsers handle valid and truncated JSON\n");
+  g_assert_cmpint (g_unlink (large), ==, 0);
+  g_print ("ok - local metadata parsers handle valid, truncated, and oversized entries\n");
   return 0;
 }
