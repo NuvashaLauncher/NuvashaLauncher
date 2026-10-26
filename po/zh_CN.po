@@ -3,13 +3,6 @@ msgstr ""
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-
-
-msgid "cannot clear credentials for account \"%s\": %s"
-msgstr "无法清除帐户“%s”的凭据：%s"
-
-msgid "cannot store credentials for account \"%s\""
-msgstr "无法保存帐户“%s”的凭据"
 msgid "Cancel"
 msgstr "取消"
 
@@ -909,9 +902,6 @@ msgstr "Microsoft sign-in failed. Try again."
 
 msgid "Open in browser"
 msgstr "在浏览器中打开"
-#: src/nuvasha-main-window.c
-msgid "Edit instances"
-msgstr "编辑实例"
 
 #: src/nuvasha-main-window.c
 msgid "%u/%u selected"
@@ -941,9 +931,6 @@ msgstr "编辑模式"
 msgid "Fetching updates"
 msgstr "正在获取更新"
 
-#: src/nuvasha-content-page-ui.c
-msgid "Progress %u/%u"
-msgstr "Progress %u/%u"
 
 #: src/nuvasha-content-page-ui.c
 msgid "Progress"

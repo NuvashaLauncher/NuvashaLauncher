@@ -184,6 +184,8 @@ install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS) $(SCHEMA_COMPILED)
 	done
 	install -Dm644 data/com.github.nuvashalauncher.nuvasha.desktop \
 		"$(DESTDIR)$(PREFIX)/share/applications/com.github.nuvashalauncher.nuvasha.desktop"
+	install -Dm644 data/NuvashaLauncher.bash \
+		"$(DESTDIR)$(PREFIX)/share/bash-completion/completions/NuvashaLauncher"
 	install -Dm644 data/com.github.nuvashalauncher.nuvasha.xml \
 		"$(DESTDIR)$(PREFIX)/share/mime/packages/com.github.nuvashalauncher.nuvasha.xml"
 	install -Dm644 data/icons/scalable/apps/com.github.nuvashalauncher.nuvasha.svg \
@@ -205,6 +207,7 @@ uninstall:
 	rm -f "$(DESTDIR)$(PREFIX)/share/nuvasha/nuvasha.css"
 	rm -rf "$(DESTDIR)$(PREFIX)/share/nuvasha/skins/defaults"
 	rm -f "$(DESTDIR)$(PREFIX)/share/applications/com.github.nuvashalauncher.nuvasha.desktop"
+	rm -f "$(DESTDIR)$(PREFIX)/share/bash-completion/completions/NuvashaLauncher"
 	rm -f "$(DESTDIR)$(PREFIX)/share/mime/packages/com.github.nuvashalauncher.nuvasha.xml"
 	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.nuvashalauncher.nuvasha.svg"
 	rm -f "$(DESTDIR)$(PREFIX)/share/metainfo/com.github.nuvashalauncher.nuvasha.metainfo.xml"

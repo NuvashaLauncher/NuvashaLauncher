@@ -5,13 +5,6 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 msgid "Cancel"
 msgstr "Kansellere"
-
-
-msgid "cannot clear credentials for account \"%s\": %s"
-msgstr "kan ikke slette legitimasjonen for kontoen «%s»: %s"
-
-msgid "cannot store credentials for account \"%s\""
-msgstr "kan ikke lagre legitimasjonen for kontoen «%s»"
 msgid "Confirm"
 msgstr "Bekrefte"
 
@@ -881,9 +874,6 @@ msgstr "Microsoft sign-in failed. Try again."
 
 msgid "Open in browser"
 msgstr "Åpne i nettleser"
-#: src/nuvasha-main-window.c
-msgid "Edit instances"
-msgstr "Rediger instanser"
 
 #: src/nuvasha-main-window.c
 msgid "%u/%u selected"
@@ -913,9 +903,6 @@ msgstr "Redigeringsmodus"
 msgid "Fetching updates"
 msgstr "Henter oppdateringer"
 
-#: src/nuvasha-content-page-ui.c
-msgid "Progress %u/%u"
-msgstr "Progress %u/%u"
 
 #: src/nuvasha-content-page-ui.c
 msgid "Progress"

@@ -5,13 +5,6 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 msgid "Cancel"
 msgstr "Hủy bỏ"
-
-
-msgid "cannot clear credentials for account \"%s\": %s"
-msgstr "không thể xóa thông tin xác thực của tài khoản \"%s\": %s"
-
-msgid "cannot store credentials for account \"%s\""
-msgstr "không thể lưu thông tin xác thực của tài khoản \"%s\""
 msgid "Confirm"
 msgstr "Xác nhận"
 
@@ -881,9 +874,6 @@ msgstr "Microsoft sign-in failed. Try again."
 
 msgid "Open in browser"
 msgstr "Mở trong trình duyệt"
-#: src/nuvasha-main-window.c
-msgid "Edit instances"
-msgstr "Chỉnh sửa phiên bản"
 
 #: src/nuvasha-main-window.c
 msgid "%u/%u selected"
@@ -913,9 +903,6 @@ msgstr "Chế độ chỉnh sửa"
 msgid "Fetching updates"
 msgstr "Đang tải bản cập nhật"
 
-#: src/nuvasha-content-page-ui.c
-msgid "Progress %u/%u"
-msgstr "Progress %u/%u"
 
 #: src/nuvasha-content-page-ui.c
 msgid "Progress"

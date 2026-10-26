@@ -3,13 +3,6 @@ msgstr ""
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-
-
-msgid "cannot clear credentials for account \"%s\": %s"
-msgstr "%s 계정의 자격 증명을 삭제할 수 없습니다: %s"
-
-msgid "cannot store credentials for account \"%s\""
-msgstr "%s 계정의 자격 증명을 저장할 수 없습니다"
 msgid "Cancel"
 msgstr "취소"
 
@@ -914,9 +907,6 @@ msgstr "Microsoft sign-in failed. Try again."
 
 msgid "Open in browser"
 msgstr "브라우저에서 열기"
-#: src/nuvasha-main-window.c
-msgid "Edit instances"
-msgstr "인스턴스 편집"
 
 #: src/nuvasha-main-window.c
 msgid "%u/%u selected"
@@ -946,9 +936,6 @@ msgstr "편집 모드"
 msgid "Fetching updates"
 msgstr "업데이트 가져오는 중"
 
-#: src/nuvasha-content-page-ui.c
-msgid "Progress %u/%u"
-msgstr "Progress %u/%u"
 
 #: src/nuvasha-content-page-ui.c
 msgid "Progress"
