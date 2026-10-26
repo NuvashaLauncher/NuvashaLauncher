@@ -29,6 +29,25 @@
 
 G_DEFINE_FINAL_TYPE (nuvashalauncherUsersPopover, nuvashalauncher_users_popover, GTK_TYPE_POPOVER)
 
+static gboolean
+release_skin_dialog_reference (gpointer user_data)
+{
+  AdwDialog *dialog = user_data;
+
+  /* Adwaita can emit "closed" before it has detached the toolbar view. Do
+   * that explicitly before releasing the construction reference, otherwise
+   * the dialog finalizer sees live children and GTK reports invalid objects. */
+  adw_dialog_set_child (dialog, NULL);
+  g_object_unref (user_data);
+  return G_SOURCE_REMOVE;
+}
+
+static void
+on_skin_dialog_closed (AdwDialog *dialog, gpointer user_data G_GNUC_UNUSED)
+{
+  g_idle_add (release_skin_dialog_reference, dialog);
+}
+
 /* Update the header button for the active account. */
 static void
 update_the_button (nuvashalauncherUsersPopover *self)
@@ -84,6 +103,10 @@ open_skin_menu_for_account (nuvashalauncherUsersPopover *self, const char *id,
   gtk_popover_popdown (GTK_POPOVER (self));
   dialog = nuvashalauncher_users_skin_menu_new (self, image, account);
   gtk_widget_set_focusable (GTK_WIDGET (dialog), TRUE);
+  /* Keep the construction reference until Adwaita has finished removing the
+   * dialog's child hierarchy. Releasing it from the closed signal itself is
+   * still too early on some Adwaita versions, so defer it one main-loop turn. */
+  g_signal_connect (dialog, "closed", G_CALLBACK (on_skin_dialog_closed), NULL);
   adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
   gtk_widget_grab_focus (GTK_WIDGET (dialog));
 }
