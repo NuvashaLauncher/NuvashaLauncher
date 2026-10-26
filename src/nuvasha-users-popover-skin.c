@@ -38,6 +38,7 @@ static gboolean retry_pending_skin_upload (gpointer);
 static void schedule_pending_skin_upload (SkinMenu *, guint);
 static void append_profile_skins (SkinMenu *, const char *);
 static void select_saved_skin (SkinMenu *);
+static void apply_profile_json (SkinMenu *, const char *);
 
 static void
 show_minecraft_service_error (SkinMenu *menu, const char *title, GError *error)
@@ -112,7 +113,7 @@ finish_view_texture_load (SkinTextureLoad *load, GBytes *bytes, GError *error)
 
   if (bytes != NULL)
     texture = gdk_texture_new_from_bytes (bytes, &error);
-  if (bytes != NULL && !load->cape && load->url != NULL &&
+  if (bytes != NULL && load->url != NULL &&
       (g_str_has_prefix (load->url, "http://") ||
        g_str_has_prefix (load->url, "https://")))
     cache_skin_bytes (load->view, load->url, bytes);
@@ -164,6 +165,7 @@ static void
 load_view_texture (NuvashaSkinView *view, const char *url, gboolean cape)
 {
   g_autoptr (GFile) file = NULL;
+  g_autofree char *cached = NULL;
   SkinTextureLoad *load;
 
   if (url == NULL || *url == '\0')
@@ -172,13 +174,22 @@ load_view_texture (NuvashaSkinView *view, const char *url, gboolean cape)
         nuvasha_skin_view_set_cape (view, NULL);
       return;
     }
-  file = g_file_new_for_uri (url);
+  if (g_str_has_prefix (url, "http://") || g_str_has_prefix (url, "https://"))
+    {
+      cached = cached_skin_path (url);
+      if (cached != NULL && g_file_test (cached, G_FILE_TEST_IS_REGULAR))
+        file = g_file_new_for_path (cached);
+    }
+  if (file == NULL)
+    file = g_file_new_for_uri (url);
   load = g_new0 (SkinTextureLoad, 1);
   load->view = g_object_ref (view);
   load->cape = cape;
   load->url = g_strdup (url);
 
-  if (g_str_has_prefix (url, "http://") || g_str_has_prefix (url, "https://"))
+  if ((g_str_has_prefix (url, "http://") ||
+       g_str_has_prefix (url, "https://")) &&
+      (cached == NULL || !g_file_test (cached, G_FILE_TEST_IS_REGULAR)))
     {
       if (skin_session == NULL)
         skin_session = soup_session_new ();
@@ -472,40 +483,86 @@ on_capes_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_autoptr (GError) error = NULL;
   g_autoptr (GBytes) bytes =
     g_task_propagate_pointer (G_TASK (result), &error);
-  g_autoptr (JsonParser) parser = NULL;
-  JsonNode *root = NULL;
-  JsonArray *capes = NULL;
 
   if (menu->closed)
-    return;
+    {
+      if (bytes != NULL && error == NULL)
+        {
+          gsize length = 0;
+          const char *data = g_bytes_get_data (bytes, &length);
+          g_hash_table_replace (menu->owner->profile_cache,
+                                g_strdup (menu->account->uuid != NULL
+                                            ? menu->account->uuid : menu->account->id),
+                                g_strndup (data, length));
+        }
+      else
+        g_hash_table_replace (menu->owner->profile_cache,
+                              g_strdup (menu->account->uuid != NULL
+                                          ? menu->account->uuid : menu->account->id),
+                              g_strdup (""));
+      return;
+    }
 
   if (bytes == NULL || error != NULL)
-    goto done;
-
-  parser = json_parser_new ();
-  if (!json_parser_load_from_data (parser, g_bytes_get_data (bytes, NULL),
-                                   (gssize) g_bytes_get_size (bytes), &error))
-    goto done;
+    {
+      g_hash_table_replace (menu->owner->profile_cache,
+                            g_strdup (menu->account->uuid != NULL
+                                        ? menu->account->uuid : menu->account->id),
+                            g_strdup (""));
+      goto done;
+    }
 
   {
     gsize length = 0;
     const char *data = g_bytes_get_data (bytes, &length);
     g_autofree char *json = g_strndup (data, length);
-    append_profile_skins (menu, json);
+    g_hash_table_replace (menu->owner->profile_cache,
+                          g_strdup (menu->account->uuid != NULL
+                                      ? menu->account->uuid : menu->account->id),
+                          g_strdup (json));
+    apply_profile_json (menu, json);
   }
 
+done:
+  menu->applying_profile = FALSE;
+  append_default_skins (menu);
+  select_saved_skin (menu);
+  g_object_set_data (G_OBJECT (menu->dialog), "nuvasha-capes-loaded",
+                     GINT_TO_POINTER (1));
+}
+
+static void
+clear_profile_capes (SkinMenu *menu)
+{
+  while (g_list_model_get_n_items (G_LIST_MODEL (menu->cape_list)) > 1)
+    gtk_string_list_remove (menu->cape_list,
+                            g_list_model_get_n_items (G_LIST_MODEL (menu->cape_list)) - 1);
+  g_ptr_array_set_size (menu->cape_ids, 0);
+  g_ptr_array_set_size (menu->cape_urls, 0);
+  gtk_drop_down_set_selected (menu->capes, 0);
+}
+
+static void
+apply_profile_json (SkinMenu *menu, const char *json)
+{
+  g_autoptr (JsonParser) parser = json_parser_new ();
+  JsonNode *root;
+  JsonNode *node;
+  JsonArray *capes;
+
+  if (!json_parser_load_from_data (parser, json, -1, NULL))
+    return;
   root = json_parser_get_root (parser);
   if (!JSON_NODE_HOLDS_OBJECT (root))
-    goto done;
-  {
-    JsonNode *node = json_object_get_member (json_node_get_object (root), "capes");
-    if (node == NULL || !JSON_NODE_HOLDS_ARRAY (node))
-      goto done;
-    capes = json_node_get_array (node);
-  }
+    return;
+  node = json_object_get_member (json_node_get_object (root), "capes");
+  if (node == NULL || !JSON_NODE_HOLDS_ARRAY (node))
+    return;
+  capes = json_node_get_array (node);
 
+  clear_profile_capes (menu);
+  append_profile_skins (menu, json);
   menu->applying_profile = TRUE;
-
   for (guint i = 0; i < json_array_get_length (capes); i++)
     {
       JsonNode *item = json_array_get_element (capes, i);
@@ -528,16 +585,15 @@ on_capes_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       g_ptr_array_add (menu->cape_urls, g_strdup (url != NULL ? url : ""));
       gtk_string_list_append (menu->cape_list,
                               alias != NULL && *alias != '\0' ? alias : id);
-      if (state != NULL && g_str_equal (state, "ACTIVE"))
+      if ((state != NULL && g_str_equal (state, "ACTIVE")) ||
+          (menu->account->cape_id != NULL &&
+           g_str_equal (menu->account->cape_id, id)))
         {
           gtk_drop_down_set_selected (menu->capes, menu->cape_ids->len);
           if (url != NULL && *url != '\0')
             load_view_texture (menu->view, url, TRUE);
         }
     }
-  menu->applying_profile = FALSE;
-
-done:
   menu->applying_profile = FALSE;
   append_default_skins (menu);
   select_saved_skin (menu);
@@ -1091,9 +1147,18 @@ static void
 load_profile_skins (SkinMenu *menu)
 {
   SoupMessage *message;
+  const char *key;
+  const char *cached;
 
   if (menu->account == NULL || menu->account->access_token == NULL)
     return;
+  key = menu->account->uuid != NULL ? menu->account->uuid : menu->account->id;
+  cached = g_hash_table_lookup (menu->owner->profile_cache, key);
+  if (cached != NULL)
+    {
+      apply_profile_json (menu, cached);
+      return;
+    }
   message = nuvasha_minecraft_services_message (
     SOUP_METHOD_GET, "/minecraft/profile", menu->account->access_token);
   nuvasha_minecraft_services_send_async (message, menu->cancellable,

@@ -16,6 +16,7 @@ struct _NuvashaUsersPopover
   GtkBox *button_content;
   GCancellable *avatars;
   GHashTable *avatar_cache;
+  GHashTable *profile_cache; /* account UUID -> last fetched profile JSON */
   char *active_name;
 };
 

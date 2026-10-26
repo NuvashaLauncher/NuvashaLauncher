@@ -451,6 +451,8 @@ nuvasha_users_popover_constructed (GObject *object)
   self->avatars = g_cancellable_new ();
   self->avatar_cache = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                               g_object_unref);
+  self->profile_cache = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
+                                               g_free);
   rebuild (self);
 }
 
@@ -474,6 +476,7 @@ nuvasha_users_popover_finalize (GObject *object)
   g_clear_object (&self->accounts);
   g_clear_object (&self->button_content);
   g_clear_pointer (&self->avatar_cache, g_hash_table_unref);
+  g_clear_pointer (&self->profile_cache, g_hash_table_unref);
   g_free (self->active_name);
 
   G_OBJECT_CLASS (nuvasha_users_popover_parent_class)->finalize (object);
