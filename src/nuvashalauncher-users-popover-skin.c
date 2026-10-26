@@ -784,6 +784,7 @@ on_skin_file_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
         AdwActionRow *row = skin_row_new (menu, display_name, uri);
         gtk_list_box_insert (menu->skins, GTK_WIDGET (row), 0);
         gtk_list_box_select_row (menu->skins, GTK_LIST_BOX_ROW (row));
+        g_object_unref (row);
         load_view_texture (menu->view, uri, FALSE);
         g_free (uri);
       }
@@ -1169,11 +1170,12 @@ append_profile_skins (SkinMenu *menu, const char *json)
             }
           if (alias == NULL || *alias == '\0')
             fallback_name = skin_name_for_url (url);
-          gtk_list_box_append (menu->skins,
-                               GTK_WIDGET (skin_row_new (menu,
-                                             alias != NULL && *alias != '\0'
-                                               ? alias : fallback_name,
-                                             url)));
+           {
+             AdwActionRow *row = skin_row_new (
+               menu, alias != NULL && *alias != '\0' ? alias : fallback_name, url);
+             gtk_list_box_append (menu->skins, GTK_WIDGET (row));
+             g_object_unref (row);
+           }
         }
     }
 }
@@ -1333,6 +1335,7 @@ nuvashalauncher_users_skin_menu_new (nuvashalauncherUsersPopover *owner, GtkImag
               data->current_skin_row = skin_row_new (data, skin_name,
                                                      account->avatar_url);
               gtk_list_box_append (skins, GTK_WIDGET (data->current_skin_row));
+              g_object_unref (data->current_skin_row);
             }
           load_view_texture (preview, account->avatar_url, FALSE);
         }
