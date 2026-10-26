@@ -375,7 +375,7 @@ main (int argc, char **argv)
       return 1;
     }
 
-  g_set_application_name ("nuvashalauncher");
+  g_set_application_name ("Nuvasha Launcher");
   load_application_css ();
 
   app = adw_application_new ("com.github.nuvashalauncher.nuvashalauncher",
