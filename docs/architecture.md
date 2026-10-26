@@ -62,8 +62,7 @@ External services are used directly by their owning modules:
 - Mojang's version manifest and version documents are parsed by
   `nuvasha-minecraft-versions.c`; resolved files are fetched by the download
   service.
-- The Modrinth v2 API is handled by `nuvasha-modrinth.c`. There is currently
-  one content provider, so there is no provider abstraction to keep in sync.
+- The Modrinth v2 API is handled by `nuvasha-modrinth.c`.
 - Microsoft device authorization, Xbox Live/XSTS, Minecraft authentication,
   entitlements, and profile requests are the steps in
   `nuvasha-auth-microsoft.c`.
@@ -162,7 +161,6 @@ layout:
 - create and register an instance;
 - rename or update validated properties;
 - duplicate an instance;
-- reorder instances in the user-visible list and persist that order;
 - move an instance to another directory;
 - delete an instance, with an explicit choice about deleting its files;
 - open its directory with the desktop file manager.
@@ -186,6 +184,10 @@ Accounts support two modes:
 metadata is stored in the user's data directory in `accounts.json`, written
 atomically with mode `0600`. Access and refresh tokens are stored in the same
 JSON file with the account metadata.
+
+The skin menu keeps the fetched profile, skin list, and cape list in memory for
+the lifetime of the launcher. Skin and cape textures are cached separately so
+cape images cannot appear in the saved-skin library.
 
 The Microsoft sign-in chain is asynchronous and explicit:
 
@@ -418,11 +420,11 @@ implementation. The manifest builds the same source with `FLATPAK=1`. Java
 runtimes selected by the user can be probed even when they are not in the
 runtime's normal host search paths.
 
-The application manifest grants network access, Wayland and fallback X11
-  account data, and device access required by the graphics stack. It does not
-grant `filesystem=home`. Flatpak therefore remains the outer process boundary
-for the launcher and the game, while the application still uses its normal
-GLib data and cache directories inside the per-application data area.
+The application manifest grants network access, Wayland and fallback X11,
+audio, and device access required by the graphics stack. It does not grant
+`filesystem=home`. Flatpak therefore remains the outer process boundary for
+the launcher and the game, while the application uses its normal GLib data and
+cache directories inside the per-application data area.
 
 Flatpak does not bundle a JRE. A custom runtime is added through the Java
 picker as a runtime directory containing `bin/java`; the executable is probed
@@ -442,6 +444,7 @@ The important files are:
 | Account metadata | `<user data>/nuvasha/accounts.json` |
 | Account tokens | `<user data>/nuvasha/accounts.json`, mode `0600` |
 | Shared resolved content | `<user data>/nuvasha/` shared client artifacts and assets |
+| Saved skins and cape textures | `<user data>/nuvasha/skins/` |
 | Version metadata | `<user cache>/nuvasha/versions/` |
 | API responses | `<user cache>/nuvasha/` API cache tree |
 | GSettings | Installed schema and the user's GSettings backend |
@@ -466,7 +469,8 @@ and process boundaries:
   This is intentional: the launcher must read the tokens to authenticate the
   Minecraft process, so a separate secret store would not remove the
   launcher's access to them. Tokens never enter logs, error messages, or
-  redacted command output.
+  redacted command output; Minecraft still receives the access token through
+  the launch arguments it requires.
 - UI text that can contain paths or service errors is treated as plain text,
   not markup.
 
