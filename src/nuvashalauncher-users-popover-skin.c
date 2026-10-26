@@ -80,22 +80,12 @@ release_skin_menu_controller (gpointer user_data)
   return G_SOURCE_REMOVE;
 }
 
-static gboolean
-release_skin_dialog_reference (gpointer user_data)
-{
-  g_object_unref (user_data);
-  return G_SOURCE_REMOVE;
-}
-
 static void
 on_skin_dialog_closed (AdwDialog *dialog, gpointer user_data G_GNUC_UNUSED)
 {
   /* The dialog remains owned by Adwaita. Only release our controller after
    * the close signal has returned, so the widget tree can tear itself down. */
   g_idle_add (release_skin_menu_controller, g_object_ref (dialog));
-  /* Keep the construction reference through the close animation. Adwaita's
-   * internal breakpoint child is detached asynchronously after `closed`. */
-  g_timeout_add (500, release_skin_dialog_reference, dialog);
 }
 
 static void
