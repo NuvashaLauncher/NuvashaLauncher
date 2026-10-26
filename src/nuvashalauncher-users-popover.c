@@ -86,10 +86,6 @@ open_skin_menu_for_account (nuvashalauncherUsersPopover *self, const char *id,
   gtk_widget_set_focusable (GTK_WIDGET (dialog), TRUE);
   adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
   gtk_widget_grab_focus (GTK_WIDGET (dialog));
-  /* adw_dialog_present() keeps the dialog alive until it closes; release the
-   * construction reference so its skin-menu controller and child widgets can
-   * be destroyed after the close animation. */
-  g_object_unref (dialog);
 }
 
 static void
