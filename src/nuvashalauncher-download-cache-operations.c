@@ -7,6 +7,7 @@
 #include <string.h>
 
 static void cache_ready (GObject *, GAsyncResult *, gpointer);
+static void cache_info_ready (GObject *, GAsyncResult *, gpointer);
 static void cache_load_ready (GObject *, GAsyncResult *, gpointer);
 static void global_cache_copy_ready (GObject *, GAsyncResult *, gpointer);
 static void global_cache_copy_hash_ready (GObject *, GAsyncResult *, gpointer);
@@ -44,7 +45,10 @@ global_cache_copy (DownloadRequest *request)
   g_autoptr (GFile) source = g_file_new_for_path (request->dest_path);
   g_autoptr (GFile) destination =
     g_file_new_for_path (request->global_cache_path);
-  nuvashalauncher_fs_copy_async (source, destination, G_FILE_COPY_OVERWRITE,
+  /* Do not overwrite an existing cache pathname. In particular, a cache
+   * pathname must never be followed as a symlink during publication. A
+   * verified existing entry is handled by the hash check below. */
+  nuvashalauncher_fs_copy_async (source, destination, G_FILE_COPY_NONE,
                      G_PRIORITY_DEFAULT, g_task_get_cancellable (request->task),
                      NULL, NULL, global_cache_copy_ready, request);
 }
@@ -294,9 +298,47 @@ json_cache_start (DownloadRequest *request)
   {
     g_autoptr (GFile) file = g_file_new_for_path (request->cache_path);
 
-    g_file_load_contents_async (file, g_task_get_cancellable (request->task),
-                                cache_load_ready, request);
+    g_file_query_info_async (file,
+                             G_FILE_ATTRIBUTE_STANDARD_TYPE ","
+                             G_FILE_ATTRIBUTE_STANDARD_SIZE,
+                             G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+                             G_PRIORITY_DEFAULT,
+                             g_task_get_cancellable (request->task),
+                             cache_info_ready, request);
   }
+}
+
+static void
+cache_info_ready (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  DownloadRequest *request = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GFileInfo) info =
+    g_file_query_info_finish (G_FILE (source), result, &error);
+
+  if (info == NULL)
+    {
+      if (request_was_cancelled (request, error))
+        {
+          nuvashalauncher_download_request_fail (
+            request, nuvashalauncher_download_cancelled_error ());
+          return;
+        }
+
+      start_attempt (request);
+      return;
+    }
+
+  if (g_file_info_get_file_type (info) != G_FILE_TYPE_REGULAR ||
+      g_file_info_get_size (info) > nuvashalauncher_FS_MAX_REMOTE_JSON_SIZE)
+    {
+      start_attempt (request);
+      return;
+    }
+
+  g_file_load_contents_async (G_FILE (source),
+                               g_task_get_cancellable (request->task),
+                               cache_load_ready, request);
 }
 
 static void

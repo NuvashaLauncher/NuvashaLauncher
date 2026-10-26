@@ -518,25 +518,40 @@ failed:
  * cannot turn cleanup into a walk through a symlink. Errors are deliberately
  * best-effort here: callers use this helper for cleanup and do not expect a
  * missing path to make the original operation fail. */
-static void
-remove_tree_at (int parent_fd, const char *name)
+static gboolean
+remove_tree_at (int parent_fd, const char *name, GError **error)
 {
   struct stat info;
   int fd = -1;
 
   if (fstatat (parent_fd, name, &info, AT_SYMLINK_NOFOLLOW) != 0)
-    return;
+    {
+      if (errno == ENOENT)
+        return TRUE;
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                   "cannot inspect \"%s\": %s", name, g_strerror (errno));
+      return FALSE;
+    }
 
   if (!S_ISDIR (info.st_mode) || S_ISLNK (info.st_mode))
     {
-      unlinkat (parent_fd, name, 0);
-      return;
+      if (unlinkat (parent_fd, name, 0) != 0 && errno != ENOENT)
+        {
+          g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                       "cannot remove \"%s\": %s", name, g_strerror (errno));
+          return FALSE;
+        }
+      return TRUE;
     }
 
   fd = openat (parent_fd, name,
                O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
   if (fd < 0)
-    return;
+    {
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                   "cannot open \"%s\": %s", name, g_strerror (errno));
+      return FALSE;
+    }
 
   {
     DIR *directory = fdopendir (fd);
@@ -544,9 +559,14 @@ remove_tree_at (int parent_fd, const char *name)
     if (directory == NULL)
       {
         close (fd);
-        return;
+        g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                     "cannot read \"%s\": %s", name, g_strerror (errno));
+        return FALSE;
       }
 
+    gboolean success = TRUE;
+
+    errno = 0;
     for (struct dirent *entry = readdir (directory);
          entry != NULL; entry = readdir (directory))
       {
@@ -554,15 +574,63 @@ remove_tree_at (int parent_fd, const char *name)
             g_str_equal (entry->d_name, ".."))
           continue;
 
-        remove_tree_at (dirfd (directory), entry->d_name);
+        if (!remove_tree_at (dirfd (directory), entry->d_name, error))
+          {
+            success = FALSE;
+            break;
+          }
+      }
+
+    if (errno != 0 && (error == NULL || *error == NULL))
+      {
+        g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                     "cannot read \"%s\": %s", name, g_strerror (errno));
+        success = FALSE;
       }
 
     closedir (directory);
+
+    if (!success)
+      return FALSE;
   }
 
   /* AT_REMOVEDIR never follows a symlink. If the directory name was replaced
    * while it was being cleaned, this fails rather than deleting a new tree. */
-  unlinkat (parent_fd, name, AT_REMOVEDIR);
+  if (unlinkat (parent_fd, name, AT_REMOVEDIR) != 0 && errno != ENOENT)
+    {
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                   "cannot remove directory \"%s\": %s", name,
+                   g_strerror (errno));
+      return FALSE;
+    }
+
+  return TRUE;
+}
+
+static gboolean
+remove_tree_strict (const char *path, GError **error)
+{
+  g_autofree char *parent = NULL;
+  g_autofree char *name = NULL;
+  int parent_fd = -1;
+  gboolean result;
+
+  if (path == NULL || !g_path_is_absolute (path))
+    {
+      g_set_error_literal (error, G_FILE_ERROR, G_FILE_ERROR_INVAL,
+                           "cannot remove a non-absolute path");
+      return FALSE;
+    }
+
+  parent = g_path_get_dirname (path);
+  name = g_path_get_basename (path);
+  parent_fd = nuvashalauncher_fs_open_directory_nofollow (parent, error);
+  if (parent_fd < 0)
+    return FALSE;
+
+  result = remove_tree_at (parent_fd, name, error);
+  close (parent_fd);
+  return result;
 }
 
 void
@@ -578,11 +646,11 @@ nuvashalauncher_fs_remove_tree (const char *path)
   parent = g_path_get_dirname (path);
   name = g_path_get_basename (path);
   parent_fd = nuvashalauncher_fs_open_directory_nofollow (parent, NULL);
-  if (parent_fd < 0)
-    return;
-
-  remove_tree_at (parent_fd, name);
-  close (parent_fd);
+  if (parent_fd >= 0)
+    {
+      (void) remove_tree_at (parent_fd, name, NULL);
+      close (parent_fd);
+    }
 }
 
 typedef struct {
@@ -608,7 +676,13 @@ remove_tree_thread (GTask *task G_GNUC_UNUSED,
   if (nuvashalauncher_task_scope_return_error_if_cancelled (scope))
     return;
 
-  nuvashalauncher_fs_remove_tree (data->path);
+  g_autoptr (GError) error = NULL;
+
+  if (!remove_tree_strict (data->path, &error))
+    {
+      nuvashalauncher_task_scope_return_error (scope, g_steal_pointer (&error));
+      return;
+    }
 
   if (!nuvashalauncher_task_scope_return_error_if_cancelled (scope))
     nuvashalauncher_task_scope_return_boolean (scope, TRUE);
