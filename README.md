@@ -17,7 +17,7 @@ dependency handling, and safe archive extraction.
 
 ### Mod and content management
 
-Find and manage individual mods, resource packs, shader packs, and datapacks
+Find and manage individual mods, resource packs, and shader packs
 through Modrinth. Content is organized inside each instance and can be enabled
 or disabled without mixing files between setups.
 
@@ -41,9 +41,8 @@ keeping previews available when the menu is reopened.
 
 ### Lightweight and native
 
-Built with GTK 4 and libadwaita, Nuvasha stays focused on launching and
-managing Minecraft rather than embedding a full web browser. It supports native
-Linux installations as well as Flatpak packaging.
+Built with GTK 4 and libadwaita, Nuvasha is a focused, native-feeling Linux
+launcher. It supports both regular native installations and Flatpak packaging.
 
 ## Installation
 
@@ -61,7 +60,9 @@ flatpak-builder --user --install --force-clean \
 flatpak run com.github.nuvashalauncher.nuvasha
 ```
 
-### Dependencies
+### Native installation
+
+#### Dependencies
 
 - C17-compatible compiler (GCC is used by default)
 - GNU Make
@@ -75,7 +76,7 @@ flatpak run com.github.nuvashalauncher.nuvasha
 - libsoup
 - libarchive
 
-### Runtime dependencies
+#### Runtime dependencies
 
 - A Java runtime compatible with the Minecraft version being launched
 
@@ -126,7 +127,7 @@ nix-shell -p gcc gnumake gettext pkg-config glib gtk4 libadwaita libepoxy \
     json-glib libsoup libarchive
 ```
 
-## Building from source
+#### Building from source
 
 ```sh
 git clone https://github.com/NuvashaLauncher/NuvashaLauncher.git NuvashaLauncher
