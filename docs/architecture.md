@@ -495,7 +495,8 @@ The repository uses a hand-written `Makefile`:
 - `make debug` builds a separate AddressSanitizer/UndefinedBehaviorSanitizer
   binary under `build-debug/`.
 - `make test` builds and runs each `tests/test-*.c` binary.
-- `make test-display` repeats the suite under `xvfb-run` when available.
+- `make test-display` repeats the suite under an existing Wayland session,
+  and skips itself when there is no compositor.
 - `make test-flatpak-runtime` smoke-tests an installed Flatpak's CLI, sandbox
   data directory, host-data isolation, and network permission without starting
   Minecraft.
