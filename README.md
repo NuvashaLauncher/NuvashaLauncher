@@ -60,6 +60,13 @@ flatpak-builder --user --install --force-clean \
 flatpak run com.github.nuvashalauncher.nuvashalauncher
 ```
 
+To uninstall the Flatpak and remove its sandbox data:
+
+```sh
+flatpak uninstall --user --delete-data \
+    com.github.nuvashalauncher.nuvashalauncher
+```
+
 ### Native
 
 #### Dependencies
