@@ -65,6 +65,7 @@ char *skin_name_for_url (const char *);
 char *skin_display_name (const char *);
 char *unique_skin_filename (const char *, const char *);
 char *cached_skin_path (const char *);
+char *cached_cape_path (const char *);
 gboolean is_default_skin_alias (const char *);
 gboolean skin_url_is_default (const char *);
 void append_local_skins (SkinMenu *);

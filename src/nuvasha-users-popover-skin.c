@@ -86,22 +86,29 @@ skin_texture_load_free (SkinTextureLoad *load)
 }
 
 static void
-cache_skin_bytes (NuvashaSkinView *view, const char *url, GBytes *bytes)
+cache_skin_bytes (NuvashaSkinView *view, const char *url, GBytes *bytes,
+                  gboolean cape)
 {
   g_autofree char *cache_directory = skin_directory_path ();
   g_autofree char *hash = g_compute_checksum_for_string (G_CHECKSUM_SHA256,
                                                           url, -1);
-  g_autofree char *name = g_strconcat (hash, ".png", NULL);
-  g_autofree char *path = g_build_filename (cache_directory, name, NULL);
+  g_autofree char *path = cape ? cached_cape_path (url) : cached_skin_path (url);
   gsize length = 0;
   gconstpointer data = g_bytes_get_data (bytes, &length);
 
   {
     GHashTable *deleted = g_object_get_data (G_OBJECT (view),
                                              "nuvasha-deleted-skin-ids");
-    if (deleted != NULL && g_hash_table_contains (deleted, hash))
+    if (!cape && deleted != NULL && g_hash_table_contains (deleted, hash))
       return;
   }
+  if (cape)
+    {
+      g_autofree char *cape_directory =
+        g_build_filename (cache_directory, "capes", NULL);
+      g_clear_pointer (&cache_directory, g_free);
+      cache_directory = g_steal_pointer (&cape_directory);
+    }
   if (nuvasha_fs_make_directory (cache_directory, 0755, NULL))
     nuvasha_fs_replace_contents (path, data, (gssize) length, 0600, NULL);
 }
@@ -116,7 +123,7 @@ finish_view_texture_load (SkinTextureLoad *load, GBytes *bytes, GError *error)
   if (bytes != NULL && load->url != NULL &&
       (g_str_has_prefix (load->url, "http://") ||
        g_str_has_prefix (load->url, "https://")))
-    cache_skin_bytes (load->view, load->url, bytes);
+     cache_skin_bytes (load->view, load->url, bytes, load->cape);
   if (texture == NULL && error != NULL)
     g_warning ("Could not load skin preview texture: %s", error->message);
   if (texture != NULL)
@@ -176,7 +183,7 @@ load_view_texture (NuvashaSkinView *view, const char *url, gboolean cape)
     }
   if (g_str_has_prefix (url, "http://") || g_str_has_prefix (url, "https://"))
     {
-      cached = cached_skin_path (url);
+      cached = cape ? cached_cape_path (url) : cached_skin_path (url);
       if (cached != NULL && g_file_test (cached, G_FILE_TEST_IS_REGULAR))
         file = g_file_new_for_path (cached);
     }

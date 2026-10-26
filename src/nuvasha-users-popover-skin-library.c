@@ -88,6 +88,18 @@ cached_skin_path (const char *url)
   }
 }
 
+char *
+cached_cape_path (const char *url)
+{
+  g_autofree char *name = NULL;
+
+  if (url == NULL || (!g_str_has_prefix (url, "http://") &&
+                      !g_str_has_prefix (url, "https://")))
+    return NULL;
+  name = g_strconcat (skin_name_for_url (url), ".png", NULL);
+  return g_build_filename (skin_directory_path (), "capes", name, NULL);
+}
+
 gboolean
 is_default_skin_alias (const char *alias)
 {
@@ -136,6 +148,18 @@ append_local_skins (SkinMenu *menu)
       if (strlen (name) <= 4 ||
           g_ascii_strcasecmp (name + strlen (name) - 4, ".png") != 0)
         continue;
+      /* SHA-256 URL caches are refreshed from the profile response. They are
+       * not user-imported skins; keeping them out of this local-library scan
+       * also prevents old cape caches from appearing as skins. */
+      if (strlen (name) == 68)
+        {
+          gboolean hash_name = TRUE;
+          for (gsize i = 0; i < 64; i++)
+            if (!g_ascii_isxdigit (name[i]))
+              { hash_name = FALSE; break; }
+          if (hash_name)
+            continue;
+        }
       path = g_build_filename (directory, name, NULL);
       uri = g_filename_to_uri (path, NULL, NULL);
       g_autofree char *identity = uri != NULL ? skin_name_for_url (uri) : NULL;
