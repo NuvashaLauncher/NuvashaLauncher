@@ -41,6 +41,34 @@ static void select_saved_skin (SkinMenu *);
 static void apply_profile_json (SkinMenu *, const char *);
 
 static void
+skin_menu_free (SkinMenu *menu)
+{
+  if (menu == NULL)
+    return;
+
+  if (menu->skin_upload_retry_source != 0)
+    g_source_remove (menu->skin_upload_retry_source);
+  if (menu->cancellable != NULL)
+    g_cancellable_cancel (menu->cancellable);
+  if (menu->skin_upload_cancellable != NULL)
+    g_cancellable_cancel (menu->skin_upload_cancellable);
+  g_clear_pointer (&menu->skin_upload_pending_url, g_free);
+  g_clear_pointer (&menu->skin_upload_pending_variant, g_free);
+  g_clear_pointer (&menu->pending_cape_id, g_free);
+  g_clear_object (&menu->skin_upload_cancellable);
+  g_clear_object (&menu->cancellable);
+  g_clear_object (&menu->image);
+  g_clear_object (&menu->view);
+  g_clear_object (&menu->skins);
+  g_clear_object (&menu->cape_list);
+  g_clear_pointer (&menu->cape_ids, g_ptr_array_unref);
+  g_clear_pointer (&menu->cape_urls, g_ptr_array_unref);
+  g_clear_pointer (&menu->skin_urls, g_hash_table_unref);
+  g_clear_pointer (&menu->deleted_skin_ids, g_hash_table_unref);
+  g_free (menu);
+}
+
+static void
 show_minecraft_service_error (SkinMenu *menu, const char *title, GError *error)
 {
   AdwAlertDialog *alert;
@@ -1217,6 +1245,8 @@ nuvashalauncher_users_skin_menu_new (nuvashalauncherUsersPopover *owner, GtkImag
   data->deleted_skin_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
   data->capes = capes;
   data->account = account;
+  g_object_set_data_full (G_OBJECT (dialog), "nuvashalauncher-skin-menu",
+                          data, (GDestroyNotify) skin_menu_free);
   data->remove_button = remove;
   data->default_model = default_model;
   data->slim_model = slim_model;
