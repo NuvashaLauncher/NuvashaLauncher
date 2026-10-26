@@ -51,6 +51,9 @@ active_account (NuvashaLauncher *self)
   if (self->accounts == NULL)
     return NULL;
 
+  if (self->account_id_override != NULL)
+    return nuvasha_accounts_find (self->accounts, self->account_id_override);
+
   return nuvasha_accounts_get_active (self->accounts);
 }
 
@@ -189,6 +192,40 @@ nuvasha_launcher_get_accounts (NuvashaLauncher *self)
   return self->accounts;
 }
 
+gboolean
+nuvasha_launcher_set_account (NuvashaLauncher *self, const char *account_id,
+                               GError **error)
+{
+  NuvashaAccount *account;
+
+  g_return_val_if_fail (nuvasha_IS_LAUNCHER (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  account = NULL;
+  if (self->accounts != NULL)
+    {
+      account = nuvasha_accounts_find (self->accounts, account_id);
+      for (guint i = 0; account == NULL && i < nuvasha_accounts_count (self->accounts); i++)
+        {
+          NuvashaAccount *candidate =
+            g_ptr_array_index (nuvasha_accounts_list (self->accounts), i);
+          if (g_strcmp0 (candidate->uuid, account_id) == 0 ||
+              g_strcmp0 (candidate->name, account_id) == 0)
+            account = candidate;
+        }
+    }
+  if (account == NULL)
+    {
+      g_set_error (error, nuvasha_ACCOUNTS_ERROR, nuvasha_ACCOUNTS_ERROR_UNKNOWN,
+                   "there is no account \"%s\"", account_id != NULL ? account_id : "");
+      return FALSE;
+    }
+
+  g_free (self->account_id_override);
+  self->account_id_override = g_strdup (account->id);
+  return TRUE;
+}
+
 static void
 nuvasha_launcher_dispose (GObject *object)
 {
@@ -216,6 +253,7 @@ nuvasha_launcher_finalize (GObject *object)
   g_clear_object (&self->instance);
   g_clear_object (&self->settings);
   g_clear_object (&self->accounts);
+  g_clear_pointer (&self->account_id_override, g_free);
   g_clear_pointer (&self->lines, g_ptr_array_unref);
   g_free (self->detail);
   g_free (self->log_access_token);

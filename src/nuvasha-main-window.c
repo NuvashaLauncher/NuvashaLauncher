@@ -27,6 +27,15 @@ nuvasha_main_window_launch_instance (NuvashaMainWindow *self,
                                      const char *instance_id,
                                      GError **error)
 {
+  return nuvasha_main_window_launch_instance_as (self, instance_id, NULL, error);
+}
+
+gboolean
+nuvasha_main_window_launch_instance_as (NuvashaMainWindow *self,
+                                        const char *instance_id,
+                                        const char *account_id,
+                                        GError **error)
+{
   NuvashaInstance *instance;
   NuvashaLauncher *launcher;
 
@@ -50,6 +59,10 @@ nuvasha_main_window_launch_instance (NuvashaMainWindow *self,
                            "the instance launcher could not be created");
       return FALSE;
     }
+
+  if (account_id != NULL &&
+      !nuvasha_launcher_set_account (launcher, account_id, error))
+    return FALSE;
 
   if (nuvasha_launch_state_is_busy (nuvasha_launcher_get_state (launcher)))
     {
