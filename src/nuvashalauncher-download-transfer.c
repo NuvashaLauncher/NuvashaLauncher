@@ -25,6 +25,46 @@ static void attempt_next (DownloadRequest *);
 static void attempt_failed (DownloadRequest *, GError *);
 static gboolean retry_when_due (gpointer);
 static gboolean retry_cancelled (gpointer);
+static void publish_download (DownloadRequest *);
+
+static void
+fsync_thread (GTask *task,
+               gpointer source_object G_GNUC_UNUSED,
+               gpointer task_data,
+               GCancellable *cancellable G_GNUC_UNUSED)
+{
+  DownloadRequest *request = task_data;
+  int errsv;
+
+  if (fsync (request->fd) == 0)
+    {
+      g_task_return_boolean (task, TRUE);
+      return;
+    }
+
+  errsv = errno;
+  g_task_return_new_error (task, nuvashalauncher_DOWNLOAD_ERROR,
+                           nuvashalauncher_DOWNLOAD_ERROR_IO,
+                           "cannot flush \"%s\": %s", request->tmp_path,
+                           g_strerror (errsv));
+}
+
+static void
+fsync_ready (GObject *source G_GNUC_UNUSED,
+             GAsyncResult *result,
+             gpointer user_data)
+{
+  DownloadRequest *request = user_data;
+  g_autoptr (GError) error = NULL;
+
+  if (!g_task_propagate_boolean (G_TASK (result), &error))
+    {
+      attempt_failed (request, g_steal_pointer (&error));
+      return;
+    }
+
+  publish_download (request);
+}
 
 static gint64
 retry_after_ms (DownloadRequest *request)
@@ -293,19 +333,22 @@ verify_and_install (DownloadRequest *request)
       return;
     }
 
-  /* Every byte is in the kernel: flush the file before it gets its
-   * final name. fsync() has no asynchronous form in GIO. */
-  if (fsync (request->fd) != 0)
-    {
-      int errsv = errno;
+  /* Every byte is in the kernel: flush the file before it gets its final
+   * name. The flush runs in a worker because fsync() has no asynchronous GIO
+   * equivalent and may block on a slow filesystem. */
+  {
+    GTask *task = g_task_new (NULL,
+                              g_task_get_cancellable (request->task),
+                              fsync_ready, request);
+    g_task_set_task_data (task, request, NULL);
+    g_task_run_in_thread (task, fsync_thread);
+    g_object_unref (task);
+  }
+}
 
-      attempt_failed (request,
-                      g_error_new (nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_IO,
-                                   "cannot flush \"%s\": %s",
-                                   request->tmp_path, g_strerror (errsv)));
-      return;
-    }
-
+static void
+publish_download (DownloadRequest *request)
+{
   nuvashalauncher_download_close_sink (request);
 
   g_autofree char *destination_name = g_path_get_basename (request->dest_path);

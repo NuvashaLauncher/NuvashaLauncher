@@ -39,18 +39,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-/* Attempts for a transport error, an HTTP 5xx or an HTTP 429. */
-#define MAX_ATTEMPTS 3
-
-#define RETRY_DELAY_MS 100
-
-/* Longest pause taken from a Retry-After header, so a download queue
- * cannot stall the launcher for minutes. */
-#define MAX_RETRY_AFTER_MS (30 * 1000)
-
-/* Bytes taken from the network in one step. */
-#define CHUNK_SIZE (64 * 1024)
-
 /* API documents are parsed in the main context. Refuse unexpectedly huge
  * responses before they can monopolize memory or freeze the UI. */
 

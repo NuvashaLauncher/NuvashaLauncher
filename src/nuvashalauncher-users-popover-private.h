@@ -27,8 +27,26 @@ gboolean nuvashalauncher_users_set_local_avatar (GtkImage *, const char *);
 char *nuvashalauncher_users_default_steve_path (void);
 AdwDialog *nuvashalauncher_users_skin_menu_new (nuvashalauncherUsersPopover *, GtkImage *, nuvashalauncherAccount *);
 
-typedef struct
+typedef struct _SkinMenu SkinMenu;
+SkinMenu *skin_menu_ref (SkinMenu *);
+void skin_menu_unref (SkinMenu *);
+void on_skin_dialog_close_attempt (AdwDialog *, gpointer);
+void on_skin_dialog_closed (AdwDialog *, gpointer);
+void on_model_toggled (GtkCheckButton *, gpointer);
+void load_profile_skins (SkinMenu *);
+void load_view_texture (nuvashalauncherSkinView *, const char *, gboolean);
+void upload_selected_skin (SkinMenu *, const char *, const char *);
+void on_cape_selected (GObject *, GParamSpec *, gpointer);
+void on_active_skin_delete_done (GObject *, GAsyncResult *, gpointer);
+void delete_active_skin (SkinMenu *);
+void append_profile_skins (SkinMenu *, const char *);
+void select_saved_skin (SkinMenu *);
+void apply_profile_json (SkinMenu *, const char *);
+void on_capes_loaded (GObject *, GAsyncResult *, gpointer);
+
+struct _SkinMenu
 {
+  grefcount refs;
   nuvashalauncherUsersPopover *owner;
   GtkImage *image;
   nuvashalauncherSkinView *view;
@@ -57,7 +75,7 @@ typedef struct
   gboolean defaults_added;
   GHashTable *deleted_skin_ids;
   nuvashalauncherAccount *account;
-} SkinMenu;
+};
 
 AdwActionRow *skin_row_new (SkinMenu *, const char *, const char *);
 char *skin_directory_path (void);

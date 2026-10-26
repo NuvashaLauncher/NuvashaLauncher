@@ -10,6 +10,8 @@ static void cache_ready (GObject *, GAsyncResult *, gpointer);
 static void cache_load_ready (GObject *, GAsyncResult *, gpointer);
 static void global_cache_copy_ready (GObject *, GAsyncResult *, gpointer);
 static void global_cache_copy_hash_ready (GObject *, GAsyncResult *, gpointer);
+static void global_cache_restore_ready (GObject *, GAsyncResult *, gpointer);
+static void global_cache_restore_hash_ready (GObject *, GAsyncResult *, gpointer);
 static void global_cache_files_ready (GObject *, GAsyncResult *, gpointer);
 void global_cache_directory_ready (GObject *, GAsyncResult *, gpointer);
 
@@ -45,6 +47,106 @@ global_cache_copy (DownloadRequest *request)
   nuvashalauncher_fs_copy_async (source, destination, G_FILE_COPY_OVERWRITE,
                      G_PRIORITY_DEFAULT, g_task_get_cancellable (request->task),
                      NULL, NULL, global_cache_copy_ready, request);
+}
+
+/* Restore a verified global artifact through the same no-follow temporary
+ * file path used by a network download. Never copy directly over an instance
+ * destination: it may have been replaced by a symlink since the cache check. */
+static void
+global_cache_restore (DownloadRequest *request)
+{
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GFile) source =
+    g_file_new_for_path (request->global_cache_path);
+  g_autoptr (GFile) destination = NULL;
+
+  if (!nuvashalauncher_download_open_temporary (request, &error))
+    {
+      nuvashalauncher_download_request_fail (request, g_steal_pointer (&error));
+      return;
+    }
+
+  destination = g_file_new_for_path (request->tmp_path);
+  nuvashalauncher_download_close_sink (request);
+  nuvashalauncher_fs_copy_async (source, destination, G_FILE_COPY_OVERWRITE,
+                                 G_PRIORITY_DEFAULT,
+                                 g_task_get_cancellable (request->task),
+                                 NULL, NULL, global_cache_restore_ready,
+                                 request);
+}
+
+static void
+global_cache_restore_ready (GObject *source, GAsyncResult *result,
+                            gpointer user_data)
+{
+  DownloadRequest *request = user_data;
+  g_autoptr (GError) error = NULL;
+  GFile *temporary = G_FILE (source);
+
+  if (!nuvashalauncher_fs_copy_finish (temporary, result, &error))
+    {
+      if (request_was_cancelled (request, error))
+        {
+          nuvashalauncher_download_request_fail (
+            request, nuvashalauncher_download_cancelled_error ());
+          return;
+        }
+      nuvashalauncher_download_request_fail (request, g_steal_pointer (&error));
+      return;
+    }
+
+  {
+    g_autoptr (GFile) file = g_file_new_for_path (request->tmp_path);
+    nuvashalauncher_task_scope_release_when_done (
+      nuvashalauncher_download_hash_file_async (
+        file, request->hash_type, global_cache_restore_hash_ready, request),
+      g_task_get_cancellable (request->task));
+  }
+}
+
+static void
+global_cache_restore_hash_ready (GObject *source G_GNUC_UNUSED,
+                                 GAsyncResult *result,
+                                 gpointer user_data)
+{
+  DownloadRequest *request = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autofree char *digest =
+    nuvashalauncher_download_file_hash_finish (result, &error);
+
+  if (request_was_cancelled (request, error))
+    {
+      nuvashalauncher_download_request_fail (
+        request, nuvashalauncher_download_cancelled_error ());
+      return;
+    }
+
+  if (digest == NULL ||
+      g_ascii_strcasecmp (digest, request->expected_hash) != 0)
+    {
+      nuvashalauncher_download_discard_temporary (request);
+      start_attempt (request);
+      return;
+    }
+
+  {
+    g_autofree char *destination_name = g_path_get_basename (request->dest_path);
+    g_autoptr (GError) rename_error = NULL;
+
+    if (!nuvashalauncher_fs_rename_at (request->parent_fd, request->tmp_name,
+                                       destination_name, &rename_error))
+      {
+        nuvashalauncher_download_request_fail (
+          request,
+          g_error_new (nuvashalauncher_DOWNLOAD_ERROR,
+                       nuvashalauncher_DOWNLOAD_ERROR_IO,
+                       "cannot restore \"%s\": %s", request->dest_path,
+                       rename_error->message));
+        return;
+      }
+  }
+
+  request_succeed (request);
 }
 
 void
@@ -167,14 +269,7 @@ global_cache_hash_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   if (digest != NULL &&
       g_ascii_strcasecmp (digest, request->expected_hash) == 0)
     {
-      g_autoptr (GFile) cache_file =
-        g_file_new_for_path (request->global_cache_path);
-      g_autoptr (GFile) destination = g_file_new_for_path (request->dest_path);
-
-       nuvashalauncher_fs_copy_async (cache_file, destination, G_FILE_COPY_OVERWRITE,
-                         G_PRIORITY_DEFAULT,
-                         g_task_get_cancellable (request->task), NULL, NULL,
-                         global_cache_copy_ready, request);
+      global_cache_restore (request);
       return;
     }
 
