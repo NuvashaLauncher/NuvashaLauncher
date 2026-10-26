@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="900" height="160" viewBox="0 0 900 160">
+<svg xmlns="http://www.w3.org/2000/svg" width="530" height="160" viewBox="0 0 530 160">
   <title>nuvashalauncher</title>
   <style>
     .wordmark { fill: #24292f; font-family: sans-serif; font-weight: 700; }
@@ -28,6 +28,6 @@
       <circle cx="64" cy="64" r="6" fill="#f5e8cd"/>
   </g>
 
-  <text x="168" y="91" class="wordmark" font-size="76" letter-spacing="1">nuvashalauncher</text>
+  <text x="168" y="91" class="wordmark" font-size="76" letter-spacing="1">nuvasha</text>
   <text x="172" y="138" class="subtitle" font-size="42" letter-spacing="4">launcher</text>
 </svg>
