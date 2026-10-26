@@ -2,14 +2,14 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* Tests for nuvasha-download. A tiny libsoup server on the loopback
+/* Tests for nuvashalauncher-download. A tiny libsoup server on the loopback
  * interface stands in for the network, so the tests are hermetic and
  * headless: they need neither the internet nor a display. Every test
  * uses its own temporary directory. */
 
-#include "nuvasha-download.h"
-#include "nuvasha-downloads.h"
-#include "nuvasha-cache.h"
+#include "nuvashalauncher-download.h"
+#include "nuvashalauncher-downloads.h"
+#include "nuvashalauncher-cache.h"
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -38,7 +38,7 @@ typedef struct
 } Fixture;
 
 static Fixture fixture;
-static NuvashaSettings *cache_settings;
+static nuvashalauncherSettings *cache_settings;
 
 static void
 reply_with (SoupServerMessage *message, guint status,
@@ -133,7 +133,7 @@ fixture_start (void)
   GSList *uris = NULL;
   char *uri_string = NULL;
 
-  fixture.server = soup_server_new ("server-header", "nuvasha-test", NULL);
+  fixture.server = soup_server_new ("server-header", "nuvashalauncher-test", NULL);
 
   if (!soup_server_listen_local (fixture.server, 0, 0, &error))
     g_error ("the test server cannot listen: %s", error->message);
@@ -196,7 +196,7 @@ static char *
 make_test_dir (void)
 {
   g_autoptr (GError) error = NULL;
-  char *dir = g_dir_make_tmp ("nuvasha-test-XXXXXX", &error);
+  char *dir = g_dir_make_tmp ("nuvashalauncher-test-XXXXXX", &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (dir);
@@ -277,13 +277,13 @@ typedef struct
   goffset progress_done;
   goffset progress_total;
   gboolean cancel_on_progress;
-  NuvashaTaskScope *operation;
+  nuvashalauncherTaskScope *operation;
 } AsyncCall;
 
 static void
 call_finished (AsyncCall *call)
 {
-  nuvasha_task_scope_unref (call->operation);
+  nuvashalauncher_task_scope_unref (call->operation);
   call->operation = NULL;
 
   if (--call->run->pending == 0)
@@ -362,7 +362,7 @@ download_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 {
   AsyncCall *call = user_data;
 
-  call->success = nuvasha_download_file_finish (result, &call->error);
+  call->success = nuvashalauncher_download_file_finish (result, &call->error);
   call_finished (call);
 }
 
@@ -372,7 +372,7 @@ json_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 {
   AsyncCall *call = user_data;
 
-  call->parser = nuvasha_download_json_finish (result, &call->error);
+  call->parser = nuvashalauncher_download_json_finish (result, &call->error);
   call_finished (call);
 }
 
@@ -384,10 +384,10 @@ call_file (AsyncRun *run, AsyncCall *call, const char *url,
   call->run = run;
   run->pending++;
 
-  call->operation = nuvasha_download_file_async (nuvasha_downloads_get_service (), url, dest_path, expected_hash,
+  call->operation = nuvashalauncher_download_file_async (nuvashalauncher_downloads_get_service (), url, dest_path, expected_hash,
                                              hash_type, progress_cb,
                                              download_finished, call);
-  nuvasha_task_scope_follow_cancellable (call->operation, run->cancellable);
+  nuvashalauncher_task_scope_follow_cancellable (call->operation, run->cancellable);
 }
 
 static void
@@ -396,8 +396,8 @@ call_json (AsyncRun *run, AsyncCall *call, const char *url)
   call->run = run;
   run->pending++;
 
-  call->operation = nuvasha_download_json_async (nuvasha_downloads_get_service (), url, json_finished, call);
-  nuvasha_task_scope_follow_cancellable (call->operation, run->cancellable);
+  call->operation = nuvashalauncher_download_json_async (nuvashalauncher_downloads_get_service (), url, json_finished, call);
+  nuvashalauncher_task_scope_follow_cancellable (call->operation, run->cancellable);
 }
 
 static void
@@ -405,14 +405,14 @@ call_cached_json (AsyncRun *run, AsyncCall *call, const char *url)
 {
   call->run = run;
   run->pending++;
-  call->operation = nuvasha_download_json_cached_async (nuvasha_downloads_get_service (), url, json_finished, call);
-  nuvasha_task_scope_follow_cancellable (call->operation, run->cancellable);
+  call->operation = nuvashalauncher_download_json_cached_async (nuvashalauncher_downloads_get_service (), url, json_finished, call);
+  nuvashalauncher_task_scope_follow_cancellable (call->operation, run->cancellable);
 }
 
 static void
 clear_api_cache (void)
 {
-  g_autofree char *directory = nuvasha_cache_get_api_directory ();
+  g_autofree char *directory = nuvashalauncher_cache_get_api_directory ();
   GDir *dir = g_dir_open (directory, 0, NULL);
   const char *name = NULL;
 
@@ -429,7 +429,7 @@ clear_api_cache (void)
 static void
 clear_global_file_cache (void)
 {
-  g_autofree char *directory = nuvasha_cache_get_files_directory ();
+  g_autofree char *directory = nuvashalauncher_cache_get_files_directory ();
   GDir *dir = g_dir_open (directory, 0, NULL);
   const char *name = NULL;
 
@@ -446,7 +446,7 @@ clear_global_file_cache (void)
 static char *
 cached_path (const char *method, const char *url, const char *body)
 {
-  g_autofree char *directory = nuvasha_cache_get_api_directory ();
+  g_autofree char *directory = nuvashalauncher_cache_get_api_directory ();
   g_autofree char *key = g_strdup_printf ("%s\n%s\n%s", method, url,
                                            body != NULL ? body : "");
   g_autofree char *digest =
@@ -520,8 +520,8 @@ test_checksum_mismatch (void)
   call_file (&run, &call, url, dest, expected, G_CHECKSUM_SHA256);
   async_run_wait (&run);
 
-  g_assert_error (call.error, nuvasha_DOWNLOAD_ERROR,
-                  nuvasha_DOWNLOAD_ERROR_CHECKSUM);
+  g_assert_error (call.error, nuvashalauncher_DOWNLOAD_ERROR,
+                  nuvashalauncher_DOWNLOAD_ERROR_CHECKSUM);
   g_assert_false (call.success);
   /* A wrong hash repeats the transfer exactly once. */
   g_assert_cmpuint (fixture.hits, ==, 2);
@@ -549,8 +549,8 @@ test_invalid_expected_hash (void)
   call_file (&run, &call, url, dest, "../outside", G_CHECKSUM_SHA256);
   async_run_wait (&run);
 
-  g_assert_error (call.error, nuvasha_DOWNLOAD_ERROR,
-                  nuvasha_DOWNLOAD_ERROR_CHECKSUM);
+  g_assert_error (call.error, nuvashalauncher_DOWNLOAD_ERROR,
+                  nuvashalauncher_DOWNLOAD_ERROR_CHECKSUM);
   g_assert_false (call.success);
   g_assert_cmpuint (fixture.hits, ==, 0);
   g_assert_false (g_file_test (dest, G_FILE_TEST_EXISTS));
@@ -693,7 +693,7 @@ test_cancellation (void)
   call_file (&run, &call, url, dest, expected, G_CHECKSUM_SHA256);
   async_run_wait (&run);
 
-  g_assert_error (call.error, nuvasha_DOWNLOAD_ERROR, nuvasha_DOWNLOAD_ERROR_CANCELLED);
+  g_assert_error (call.error, nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_CANCELLED);
   g_assert_false (call.success);
   g_assert_cmpuint (fixture.hits, ==, 1);
   g_assert_cmpuint (call.progress_calls, >=, 2);
@@ -729,7 +729,7 @@ test_cancellation_before_start (void)
   call_file (&run, &call, url, dest, expected, G_CHECKSUM_SHA256);
   async_run_wait (&run);
 
-  g_assert_error (call.error, nuvasha_DOWNLOAD_ERROR, nuvasha_DOWNLOAD_ERROR_CANCELLED);
+  g_assert_error (call.error, nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_CANCELLED);
   g_assert_cmpuint (fixture.hits, ==, 0);
   g_assert_cmpuint (dir_entry_count (dir), ==, 0);
 
@@ -791,7 +791,7 @@ test_not_found_is_not_retried (void)
   call_file (&run, &call, url, dest, NULL, G_CHECKSUM_SHA256);
   async_run_wait (&run);
 
-  g_assert_error (call.error, nuvasha_DOWNLOAD_ERROR, nuvasha_DOWNLOAD_ERROR_HTTP);
+  g_assert_error (call.error, nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_HTTP);
   g_assert_false (call.success);
   g_assert_cmpuint (fixture.hits, ==, 1);
   g_assert_false (g_file_test (dest, G_FILE_TEST_EXISTS));
@@ -819,8 +819,8 @@ test_rate_limit (void)
   call_file (&run, &call, url, dest, NULL, G_CHECKSUM_SHA256);
   async_run_wait (&run);
 
-  g_assert_error (call.error, nuvasha_DOWNLOAD_ERROR,
-                  nuvasha_DOWNLOAD_ERROR_RATE_LIMITED);
+  g_assert_error (call.error, nuvashalauncher_DOWNLOAD_ERROR,
+                  nuvashalauncher_DOWNLOAD_ERROR_RATE_LIMITED);
   g_assert_false (call.success);
   /* Retry-After: 0 makes every wait immediate, the attempts remain. */
   g_assert_cmpuint (fixture.hits, ==, 3);
@@ -879,7 +879,7 @@ test_json_not_found (void)
   call_json (&run, &call, url);
   async_run_wait (&run);
 
-  g_assert_error (call.error, nuvasha_DOWNLOAD_ERROR, nuvasha_DOWNLOAD_ERROR_HTTP);
+  g_assert_error (call.error, nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_HTTP);
   g_assert_null (call.parser);
   g_assert_cmpuint (fixture.hits, ==, 1);
 
@@ -897,7 +897,7 @@ test_api_cache_hit (void)
   AsyncCall call = { 0 };
 
   clear_api_cache ();
-  g_assert_true (nuvasha_settings_set_cache_modrinth_api_responses (
+  g_assert_true (nuvashalauncher_settings_set_cache_modrinth_api_responses (
     cache_settings, TRUE, NULL));
   fixture.hits = 0;
   async_run_init (&run);
@@ -927,7 +927,7 @@ test_api_cache_disabled_and_keys (void)
   AsyncCall call = { 0 };
 
   clear_api_cache ();
-  g_assert_true (nuvasha_settings_set_cache_modrinth_api_responses (
+  g_assert_true (nuvashalauncher_settings_set_cache_modrinth_api_responses (
     cache_settings, FALSE, NULL));
   fixture.hits = 0;
   async_run_init (&run);
@@ -942,7 +942,7 @@ test_api_cache_disabled_and_keys (void)
   async_call_clear (&call);
   async_run_clear (&run);
 
-  g_assert_true (nuvasha_settings_set_cache_modrinth_api_responses (
+  g_assert_true (nuvashalauncher_settings_set_cache_modrinth_api_responses (
     cache_settings, TRUE, NULL));
   fixture.hits = 0;
   async_run_init (&run);
@@ -969,8 +969,8 @@ test_api_cache_expiration_and_failed_response (void)
   AsyncCall call = { 0 };
 
   clear_api_cache ();
-  g_assert_true (nuvasha_settings_set_cache_expiration (
-    cache_settings, nuvasha_SETTINGS_CACHE_EXPIRATION_7_DAYS, NULL));
+  g_assert_true (nuvashalauncher_settings_set_cache_expiration (
+    cache_settings, nuvashalauncher_SETTINGS_CACHE_EXPIRATION_7_DAYS, NULL));
   fixture.hits = 0;
   async_run_init (&run);
   call_cached_json (&run, &call, url);
@@ -991,8 +991,8 @@ test_api_cache_expiration_and_failed_response (void)
   async_call_clear (&call);
   async_run_clear (&run);
 
-  g_assert_true (nuvasha_settings_set_cache_expiration (
-    cache_settings, nuvasha_SETTINGS_CACHE_EXPIRATION_1_HOUR, NULL));
+  g_assert_true (nuvashalauncher_settings_set_cache_expiration (
+    cache_settings, nuvashalauncher_SETTINGS_CACHE_EXPIRATION_1_HOUR, NULL));
   async_run_init (&run);
   call_cached_json (&run, &call, url);
   async_run_wait (&run);
@@ -1035,10 +1035,10 @@ test_api_cache_etag (void)
   gsize length = 0;
 
   clear_api_cache ();
-  g_assert_true (nuvasha_settings_set_cache_modrinth_api_responses (
+  g_assert_true (nuvashalauncher_settings_set_cache_modrinth_api_responses (
     cache_settings, TRUE, NULL));
-  g_assert_true (nuvasha_settings_set_cache_expiration (
-    cache_settings, nuvasha_SETTINGS_CACHE_EXPIRATION_1_HOUR, NULL));
+  g_assert_true (nuvashalauncher_settings_set_cache_expiration (
+    cache_settings, nuvashalauncher_SETTINGS_CACHE_EXPIRATION_1_HOUR, NULL));
   fixture.hits = 0;
 
   async_run_init (&run);
@@ -1115,8 +1115,8 @@ test_api_cache_cancellation (void)
   call_cached_json (&run, &call, "http://127.0.0.1:1/cancel");
   g_cancellable_cancel (run.cancellable);
   async_run_wait (&run);
-  g_assert_error (call.error, nuvasha_DOWNLOAD_ERROR,
-                  nuvasha_DOWNLOAD_ERROR_CANCELLED);
+  g_assert_error (call.error, nuvashalauncher_DOWNLOAD_ERROR,
+                  nuvashalauncher_DOWNLOAD_ERROR_CANCELLED);
   async_call_clear (&call);
   async_run_clear (&run);
 
@@ -1137,7 +1137,7 @@ test_invalid_url (void)
   call_file (&run, &call, "not a url at all", dest, NULL, G_CHECKSUM_SHA256);
   async_run_wait (&run);
 
-  g_assert_error (call.error, nuvasha_DOWNLOAD_ERROR, nuvasha_DOWNLOAD_ERROR_NETWORK);
+  g_assert_error (call.error, nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_NETWORK);
   g_assert_cmpuint (fixture.hits, ==, 0);
   g_assert_cmpuint (dir_entry_count (dir), ==, 0);
 
@@ -1165,7 +1165,7 @@ test_connection_refused (void)
              G_CHECKSUM_SHA256);
   async_run_wait (&run);
 
-  g_assert_error (call.error, nuvasha_DOWNLOAD_ERROR, nuvasha_DOWNLOAD_ERROR_NETWORK);
+  g_assert_error (call.error, nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_NETWORK);
   g_assert_false (call.success);
   g_assert_cmpuint (fixture.hits, ==, 0);
   g_assert_cmpuint (dir_entry_count (dir), ==, 0);
@@ -1183,7 +1183,7 @@ released_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 {
   guint *finished = user_data;
 
-  (void) nuvasha_download_file_finish (result, NULL);
+  (void) nuvashalauncher_download_file_finish (result, NULL);
   (*finished)--;
 }
 
@@ -1282,8 +1282,8 @@ test_released_download_outlives_its_row (void)
       g_autofree char *path = g_build_filename (dir, name, NULL);
 
       finished++;
-      nuvasha_task_scope_release_when_done (
-        nuvasha_download_file_async (nuvasha_downloads_get_service (), url, path, expected, G_CHECKSUM_SHA256, NULL,
+      nuvashalauncher_task_scope_release_when_done (
+        nuvashalauncher_download_file_async (nuvashalauncher_downloads_get_service (), url, path, expected, G_CHECKSUM_SHA256, NULL,
                                  released_done, &finished),
         row);
 
@@ -1314,7 +1314,7 @@ test_released_download_outlives_its_row (void)
 int
 main (int argc, char **argv)
 {
-  g_autofree char *root = g_dir_make_tmp ("nuvasha-api-cache-XXXXXX", NULL);
+  g_autofree char *root = g_dir_make_tmp ("nuvashalauncher-api-cache-XXXXXX", NULL);
   g_autofree char *config = g_build_filename (root, "config", NULL);
   g_autofree char *cache = g_build_filename (root, "cache", NULL);
 
@@ -1325,8 +1325,8 @@ main (int argc, char **argv)
   g_mkdir_with_parents (cache, 0755);
   g_setenv ("XDG_CONFIG_HOME", config, TRUE);
   g_setenv ("XDG_CACHE_HOME", cache, TRUE);
-  cache_settings = nuvasha_settings_new ();
-  nuvasha_download_set_cache_settings (nuvasha_downloads_get_service (),
+  cache_settings = nuvashalauncher_settings_new ();
+  nuvashalauncher_download_set_cache_settings (nuvashalauncher_downloads_get_service (),
                                    cache_settings);
 
   fixture_start ();

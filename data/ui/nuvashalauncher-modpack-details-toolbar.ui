@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="GtkBox" id="toolbar">
+    <property name="orientation">vertical</property>
+    <child><object class="GtkSeparator"/></child>
+    <child>
+      <object class="GtkBox" id="actions">
+        <property name="css-classes">nuvashalauncher-toolbar-actions</property>
+        <property name="orientation">horizontal</property>
+        <property name="spacing">6</property>
+        <property name="margin-start">12</property>
+        <property name="margin-end">12</property>
+        <property name="margin-top">6</property>
+        <property name="margin-bottom">0</property>
+        <child><object class="GtkDropDown" id="dropdown"><property name="hexpand">True</property></object></child>
+        <child>
+          <object class="GtkButton" id="download-button">
+            <property name="label" translatable="yes">Download</property>
+            <property name="css-classes">suggested-action</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

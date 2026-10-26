@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* Starter test: parses the desktop entry and checks the keys nuvasha relies
+/* Starter test: parses the desktop entry and checks the keys nuvashalauncher relies
  * on, including that no X11 specific key slipped in. Runs headless. */
 
 #include <glib.h>
@@ -12,8 +12,8 @@ static void
 test_desktop_entry (void)
 {
   g_autofree gchar *path =
-    g_build_filename (nuvasha_DATA_DIR,
-                      "com.github.nuvashalauncher.nuvasha.desktop", NULL);
+    g_build_filename (nuvashalauncher_DATA_DIR,
+                      "com.github.nuvashalauncher.nuvashalauncher.desktop", NULL);
   g_autoptr (GKeyFile) keys = g_key_file_new ();
   g_autoptr (GError) error = NULL;
   g_autofree gchar *type = NULL;
@@ -36,14 +36,14 @@ test_desktop_entry (void)
   g_assert_cmpstr (comment, ==, "Minecraft launcher for Linux");
 
   exec = g_key_file_get_string (keys, "Desktop Entry", "Exec", NULL);
-  g_assert_cmpstr (exec, ==, "NuvashaLauncher %f");
+  g_assert_cmpstr (exec, ==, "nuvashalauncher %f");
 
   g_autofree gchar *mime_type =
     g_key_file_get_string (keys, "Desktop Entry", "MimeType", NULL);
   g_assert_cmpstr (mime_type, ==, "application/x-modrinth-modpack;");
 
   icon = g_key_file_get_string (keys, "Desktop Entry", "Icon", NULL);
-  g_assert_cmpstr (icon, ==, "com.github.nuvashalauncher.nuvasha");
+  g_assert_cmpstr (icon, ==, "com.github.nuvashalauncher.nuvashalauncher");
 
   g_assert_true (g_key_file_has_key (keys, "Desktop Entry", "Terminal", NULL));
   g_assert_false (g_key_file_get_boolean (keys, "Desktop Entry", "Terminal",

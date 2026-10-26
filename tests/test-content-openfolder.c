@@ -11,9 +11,9 @@
 #include <gtk/gtk.h>
 #include <libadwaita-1/adwaita.h>
 
-#include "nuvasha-content-page.h"
-#include "nuvasha-instance-manager.h"
-#include "nuvasha-modrinth.h"
+#include "nuvashalauncher-content-page.h"
+#include "nuvashalauncher-instance-manager.h"
+#include "nuvashalauncher-modrinth.h"
 
 static GtkWidget *
 find_open_folder_button (GtkWidget *w)
@@ -45,12 +45,12 @@ find_open_folder_button (GtkWidget *w)
 int
 main (int argc, char **argv)
 {
-  g_autoptr (NuvashaInstanceManager) manager = NULL;
+  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
   g_autoptr (GError) error = NULL;
   g_autofree char *directory = NULL;
   g_autofree char *mods_dir = NULL;
-  NuvashaInstance *instance = NULL;
-  NuvashaContentPage *page = NULL;
+  nuvashalauncherInstance *instance = NULL;
+  nuvashalauncherContentPage *page = NULL;
 
   (void) argc;
   (void) argv;
@@ -63,13 +63,13 @@ main (int argc, char **argv)
       return 77;
     }
 
-  g_autofree char *tmp = g_dir_make_tmp ("nuvasha-openfolder-XXXXXX", &error);
+  g_autofree char *tmp = g_dir_make_tmp ("nuvashalauncher-openfolder-XXXXXX", &error);
   g_assert_no_error (error);
   g_autofree char *data_dir = g_build_filename (tmp, "data", NULL);
-  manager = nuvasha_instance_manager_new (data_dir);
+  manager = nuvashalauncher_instance_manager_new (data_dir);
 
-  instance = nuvasha_instance_manager_create (manager, "Content", NULL, "1.21.1",
-                                          nuvasha_LOADER_FABRIC, "0.15.0", &error);
+  instance = nuvashalauncher_instance_manager_create (manager, "Content", NULL, "1.21.1",
+                                          nuvashalauncher_LOADER_FABRIC, "0.15.0", &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
@@ -79,7 +79,7 @@ main (int argc, char **argv)
   mods_dir = g_build_filename (directory, "mods", NULL);
   g_assert_false (g_file_test (mods_dir, G_FILE_TEST_IS_DIR));
 
-  page = nuvasha_content_page_new (instance, nuvasha_CONTENT_MOD);
+  page = nuvashalauncher_content_page_new (instance, nuvashalauncher_CONTENT_MOD);
 
   {
     GtkWidget *button = find_open_folder_button (GTK_WIDGET (page));

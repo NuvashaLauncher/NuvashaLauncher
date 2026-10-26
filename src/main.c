@@ -2,18 +2,18 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvasha, Nuvasha Launcher. GTK chooses the available display
+/* nuvashalauncher, nuvashalauncher. GTK chooses the available display
  * backend at startup. */
 
 #include <adwaita.h>
 #include <gtk/gtk.h>
 
-#include "nuvasha-instance-manager.h"
-#include "nuvasha-i18n.h"
-#include "nuvasha-main-window.h"
-#include "nuvasha-download.h"
-#include "nuvasha-settings.h"
-#include "nuvasha-accounts.h"
+#include "nuvashalauncher-instance-manager.h"
+#include "nuvashalauncher-i18n.h"
+#include "nuvashalauncher-main-window.h"
+#include "nuvashalauncher-download.h"
+#include "nuvashalauncher-settings.h"
+#include "nuvashalauncher-accounts.h"
 
 static void
 on_quit (GSimpleAction *action G_GNUC_UNUSED,
@@ -29,7 +29,7 @@ static const GActionEntry app_entries[] = {
 
 typedef struct {
   GMainLoop *loop;
-  NuvashaInstanceManager *manager;
+  nuvashalauncherInstanceManager *manager;
   gboolean *success;
 } DeleteData;
 
@@ -38,7 +38,7 @@ finish_delete (GObject *source G_GNUC_UNUSED, GAsyncResult *result, gpointer use
 {
   DeleteData *data = user_data;
   g_autoptr (GError) error = NULL;
-  *data->success = nuvasha_instance_manager_delete_finish (data->manager, result, &error);
+  *data->success = nuvashalauncher_instance_manager_delete_finish (data->manager, result, &error);
   if (error != NULL)
     g_printerr ("%s\n", error->message);
   g_main_loop_quit (data->loop);
@@ -47,25 +47,25 @@ finish_delete (GObject *source G_GNUC_UNUSED, GAsyncResult *result, gpointer use
 static int
 list_instances (void)
 {
-  g_autoptr (NuvashaInstanceManager) manager =
-    nuvasha_instance_manager_new (NULL);
+  g_autoptr (nuvashalauncherInstanceManager) manager =
+    nuvashalauncher_instance_manager_new (NULL);
   g_autoptr (GError) error = NULL;
   GListModel *instances;
 
-  if (!nuvasha_instance_manager_load (manager, &error))
+  if (!nuvashalauncher_instance_manager_load (manager, &error))
     {
       g_printerr ("cannot read the instance list: %s\n", error->message);
       return 1;
     }
 
-  instances = G_LIST_MODEL (nuvasha_instance_manager_get_instances (manager));
+  instances = G_LIST_MODEL (nuvashalauncher_instance_manager_get_instances (manager));
   g_print ("%-36s  %s\n", "UUID", "NAME");
 
   for (guint i = 0; i < g_list_model_get_n_items (instances); i++)
     {
-      g_autoptr (NuvashaInstance) instance =
+      g_autoptr (nuvashalauncherInstance) instance =
         g_list_model_get_item (instances, i);
-      const char *id = nuvasha_instance_get_id (instance);
+      const char *id = nuvashalauncher_instance_get_id (instance);
       g_autofree char *name = NULL;
 
       g_object_get (instance, "name", &name, NULL);
@@ -75,12 +75,12 @@ list_instances (void)
   return 0;
 }
 
-static NuvashaAccount *
-find_account (NuvashaAccounts *accounts, const char *key)
+static nuvashalauncherAccount *
+find_account (nuvashalauncherAccounts *accounts, const char *key)
 {
-  for (guint i = 0; i < nuvasha_accounts_count (accounts); i++)
+  for (guint i = 0; i < nuvashalauncher_accounts_count (accounts); i++)
     {
-      NuvashaAccount *account = g_ptr_array_index (nuvasha_accounts_list (accounts), i);
+      nuvashalauncherAccount *account = g_ptr_array_index (nuvashalauncher_accounts_list (accounts), i);
       if (g_strcmp0 (account->id, key) == 0 || g_strcmp0 (account->uuid, key) == 0 ||
           g_strcmp0 (account->name, key) == 0)
         return account;
@@ -91,13 +91,13 @@ find_account (NuvashaAccounts *accounts, const char *key)
 static int
 list_accounts (void)
 {
-  g_autoptr (NuvashaAccounts) accounts = nuvasha_accounts_new ();
+  g_autoptr (nuvashalauncherAccounts) accounts = nuvashalauncher_accounts_new ();
   g_print ("%-36s  %s\n", "UUID", "NAME");
-  for (guint i = 0; i < nuvasha_accounts_count (accounts); i++)
+  for (guint i = 0; i < nuvashalauncher_accounts_count (accounts); i++)
     {
-      NuvashaAccount *account = g_ptr_array_index (nuvasha_accounts_list (accounts), i);
+      nuvashalauncherAccount *account = g_ptr_array_index (nuvashalauncher_accounts_list (accounts), i);
       g_print ("%-36s  %s%s\n", account->uuid, account->name,
-               g_strcmp0 (account->id, nuvasha_accounts_get_active_id (accounts)) == 0
+               g_strcmp0 (account->id, nuvashalauncher_accounts_get_active_id (accounts)) == 0
                  ? "  *" : "");
     }
   return 0;
@@ -106,16 +106,16 @@ list_accounts (void)
 static int
 change_account (const char *key, gboolean remove)
 {
-  g_autoptr (NuvashaAccounts) accounts = nuvasha_accounts_new ();
-  NuvashaAccount *account = find_account (accounts, key);
+  g_autoptr (nuvashalauncherAccounts) accounts = nuvashalauncher_accounts_new ();
+  nuvashalauncherAccount *account = find_account (accounts, key);
   g_autoptr (GError) error = NULL;
   if (account == NULL)
     {
       g_printerr ("no account matches \"%s\"\n", key);
       return 1;
     }
-  if (remove ? !nuvasha_accounts_remove (accounts, account->id, &error)
-             : !nuvasha_accounts_set_active (accounts, account->id, &error))
+  if (remove ? !nuvashalauncher_accounts_remove (accounts, account->id, &error)
+             : !nuvashalauncher_accounts_set_active (accounts, account->id, &error))
     {
       g_printerr ("%s\n", error->message);
       return 1;
@@ -126,21 +126,21 @@ change_account (const char *key, gboolean remove)
 static int
 remove_instance (const char *id)
 {
-  g_autoptr (NuvashaInstanceManager) manager = nuvasha_instance_manager_new (NULL);
+  g_autoptr (nuvashalauncherInstanceManager) manager = nuvashalauncher_instance_manager_new (NULL);
   g_autoptr (GError) error = NULL;
-  NuvashaInstance *instance;
+  nuvashalauncherInstance *instance;
   GMainLoop *loop;
   gboolean success = FALSE;
 
-  if (!nuvasha_instance_manager_load (manager, &error))
+  if (!nuvashalauncher_instance_manager_load (manager, &error))
     { g_printerr ("%s\n", error->message); return 1; }
-  instance = nuvasha_instance_manager_get_by_id (manager, id);
+  instance = nuvashalauncher_instance_manager_get_by_id (manager, id);
   if (instance == NULL)
     { g_printerr ("no instance has ID \"%s\"\n", id); return 1; }
 
   loop = g_main_loop_new (NULL, FALSE);
   DeleteData data = { loop, manager, &success };
-  nuvasha_instance_manager_delete_async (manager, instance, TRUE,
+  nuvashalauncher_instance_manager_delete_async (manager, instance, TRUE,
                                           finish_delete, &data);
   g_main_loop_run (loop);
   g_main_loop_unref (loop);
@@ -152,7 +152,7 @@ load_application_css (void)
 {
   g_autoptr (GtkCssProvider) provider = gtk_css_provider_new ();
   gtk_css_provider_load_from_resource (
-    provider, "/com/github/nuvashalauncher/nuvasha/nuvasha.css");
+    provider, "/com/github/nuvashalauncher/nuvashalauncher/nuvashalauncher.css");
   gtk_style_context_add_provider_for_display (
     gdk_display_get_default (), GTK_STYLE_PROVIDER (provider),
     GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
@@ -177,22 +177,22 @@ on_activate (GApplication *app, gpointer user_data G_GNUC_UNUSED)
       return;
     }
 
-  g_autoptr (NuvashaInstanceManager) manager = nuvasha_instance_manager_new (NULL);
-  g_autoptr (NuvashaSettings) settings = nuvasha_settings_new ();
+  g_autoptr (nuvashalauncherInstanceManager) manager = nuvashalauncher_instance_manager_new (NULL);
+  g_autoptr (nuvashalauncherSettings) settings = nuvashalauncher_settings_new ();
   g_autoptr (GError) error = NULL;
 
-  nuvasha_i18n_init (nuvasha_settings_get_language (settings));
+  nuvashalauncher_i18n_init (nuvashalauncher_settings_get_language (settings));
 
-  if (!nuvasha_instance_manager_load (manager, &error))
+  if (!nuvashalauncher_instance_manager_load (manager, &error))
     g_warning ("cannot read the instance list: %s", error->message);
 
-  NuvashaMainWindow *main_window =
-    nuvasha_main_window_new (ADW_APPLICATION (app), manager);
+  nuvashalauncherMainWindow *main_window =
+    nuvashalauncher_main_window_new (ADW_APPLICATION (app), manager);
 
   gtk_window_present (GTK_WINDOW (main_window));
 }
 
-static NuvashaMainWindow *
+static nuvashalauncherMainWindow *
 ensure_main_window (GApplication *app, gboolean present)
 {
   GtkWindow *existing =
@@ -209,21 +209,21 @@ ensure_main_window (GApplication *app, gboolean present)
     {
       if (present)
         gtk_window_present (existing);
-      return nuvasha_MAIN_WINDOW (existing);
+      return nuvashalauncher_MAIN_WINDOW (existing);
     }
 
-  g_autoptr (NuvashaInstanceManager) manager =
-    nuvasha_instance_manager_new (NULL);
-  g_autoptr (NuvashaSettings) settings = nuvasha_settings_new ();
+  g_autoptr (nuvashalauncherInstanceManager) manager =
+    nuvashalauncher_instance_manager_new (NULL);
+  g_autoptr (nuvashalauncherSettings) settings = nuvashalauncher_settings_new ();
   g_autoptr (GError) error = NULL;
 
-  nuvasha_i18n_init (nuvasha_settings_get_language (settings));
+  nuvashalauncher_i18n_init (nuvashalauncher_settings_get_language (settings));
 
-  if (!nuvasha_instance_manager_load (manager, &error))
+  if (!nuvashalauncher_instance_manager_load (manager, &error))
     g_warning ("cannot read the instance list: %s", error->message);
 
-  NuvashaMainWindow *window =
-    nuvasha_main_window_new (ADW_APPLICATION (app), manager);
+  nuvashalauncherMainWindow *window =
+    nuvashalauncher_main_window_new (ADW_APPLICATION (app), manager);
 
   if (present)
     gtk_window_present (GTK_WINDOW (window));
@@ -287,8 +287,8 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
 
   if (show_version)
     {
-      g_application_command_line_print (command_line, "NuvashaLauncher %s\n",
-                                        nuvasha_VERSION);
+      g_application_command_line_print (command_line, "nuvashalauncher %s\n",
+                                        nuvashalauncher_VERSION);
       return 0;
     }
 
@@ -314,9 +314,9 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
     {
       /* Keep the application window registered while launch work is active,
        * without presenting it. */
-      NuvashaMainWindow *window = ensure_main_window (app, FALSE);
+      nuvashalauncherMainWindow *window = ensure_main_window (app, FALSE);
 
-       if (!nuvasha_main_window_launch_instance_as (window, launch_id, account_id, &error))
+       if (!nuvashalauncher_main_window_launch_instance_as (window, launch_id, account_id, &error))
         {
           g_application_command_line_printerr (command_line, "%s\n",
                                                 error->message);
@@ -329,15 +329,15 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
 
   if (import_path != NULL)
     {
-      NuvashaMainWindow *window = ensure_main_window (app, TRUE);
-      nuvasha_main_window_import_file (window, import_path);
+      nuvashalauncherMainWindow *window = ensure_main_window (app, TRUE);
+      nuvashalauncher_main_window_import_file (window, import_path);
       return 0;
     }
 
   if (file_path != NULL)
     {
-      NuvashaMainWindow *window = ensure_main_window (app, TRUE);
-      nuvasha_main_window_import_file (window, file_path);
+      nuvashalauncherMainWindow *window = ensure_main_window (app, TRUE);
+      nuvashalauncher_main_window_import_file (window, file_path);
       return 0;
     }
 
@@ -352,7 +352,7 @@ main (int argc, char **argv)
 
   if (argc == 2 && g_strcmp0 (argv[1], "--version") == 0)
     {
-      g_print ("NuvashaLauncher %s\n", nuvasha_VERSION);
+      g_print ("nuvashalauncher %s\n", nuvashalauncher_VERSION);
       return 0;
     }
 
@@ -371,14 +371,14 @@ main (int argc, char **argv)
 
   if (!gtk_init_check ())
     {
-      g_printerr ("nuvasha could not open a display.\n");
+      g_printerr ("nuvashalauncher could not open a display.\n");
       return 1;
     }
 
-  g_set_application_name ("Nuvasha Launcher");
+  g_set_application_name ("nuvashalauncher");
   load_application_css ();
 
-  app = adw_application_new ("com.github.nuvashalauncher.nuvasha",
+  app = adw_application_new ("com.github.nuvashalauncher.nuvashalauncher",
                              G_APPLICATION_HANDLES_COMMAND_LINE);
   g_action_map_add_action_entries (G_ACTION_MAP (app), app_entries,
                                    G_N_ELEMENTS (app_entries), app);

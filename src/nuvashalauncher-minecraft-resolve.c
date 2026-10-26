@@ -1,0 +1,1213 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
+/* Resolve and download a Minecraft version.
+ *
+ * The version document supplies the JARs and asset index. Missing files are
+ * downloaded and verified, native JARs are extracted, and virtual assets are
+ * copied into place.
+ *
+ * Steps may start several transfers and advance after the last completes.
+ * The first failure cancels the remaining work.
+ *
+ * Every transfer goes through nuvashalauncher_download_file_async(), which already
+ * caps how many run at once, and every file this module reads or writes
+ * of its own does so through GIO. Nothing here waits for a socket, for
+ * a disk or for a jar in the main loop. */
+
+#include "nuvashalauncher-minecraft-resolve-private.h"
+#include "nuvashalauncher-task-private.h"
+
+#include "nuvashalauncher-download.h"
+#include "nuvashalauncher-downloads.h"
+#include "nuvashalauncher-fs.h"
+
+#include <archive.h>
+#include <archive_entry.h>
+
+#include <errno.h>
+#include <glib/gstdio.h>
+#include <json-glib/json-glib.h>
+#include <string.h>
+
+/* Required fields in a version document. */
+#define NO_CLIENT_MESSAGE "this version document has no client jar"
+#define NO_MAIN_CLASS_MESSAGE "this version document names no main class"
+
+/* The objects of an asset index are named after their own hash and live
+   in a directory named after its first characters, the way Mojang lays
+   them out. */
+#define ASSET_BUCKET_LENGTH 2
+
+/* The directory the game reads a virtual asset index out of. */
+#define ASSET_VIRTUAL_SUBDIR "virtual"
+
+/* The prefix the resources of the game have in a map_to_resources index. */
+#define ASSET_RESOURCE_PREFIX "minecraft/"
+
+GQuark
+nuvashalauncher_resolve_error_quark (void)
+{
+  return g_quark_from_static_string ("nuvashalauncher-resolve-error");
+}
+
+/* ---------------------------------------------------------- *
+ * The request that puts a whole version on disk
+ * ---------------------------------------------------------- */
+
+typedef struct ResolveRequest ResolveRequest;
+
+typedef void (*ResolveStep) (ResolveRequest *request);
+
+typedef struct
+{
+  ResolveRequest *request;
+  ResolveStep next; /* step after all transfers finish */
+} PendingOperation;
+
+struct ResolveRequest
+{
+  GTask *task;
+  nuvashalauncherTaskScope *scope;
+  nuvashalauncherVersionManifest *manifest;
+  nuvashalauncherVersionDescription *description;
+
+  char *version_id;
+  char *data_dir;
+  char *libraries_dir;
+  char *versions_dir;
+  char *assets_dir;
+  char *indexes_dir;
+  char *objects_dir;
+  char *virtual_dir;
+  char *natives_dir;
+  char *client_jar;
+  /* Existing client JAR produced by a loader, if any. */
+  char *client_jar_override;
+  char *logging_path;
+  char *asset_index_id;   /* the file name of the index, "<id>.json" */
+   char *asset_index_name; /* name used by the game */
+  char *asset_base_url;
+
+  nuvashalauncherRuleContext *context;
+  nuvashalauncherResolveProgressFunc progress;
+  gpointer progress_data;
+
+  /* The first failure is kept; the rest of the queue is told to stop
+     through this cancellable, which the operation's own cancellation
+     follows. */
+  GCancellable *cancellable;
+  GError *error;
+
+  const char *stage; /* progress stage */
+  guint pending;     /* operations in flight */
+  guint done;        /* files finished in the current stage */
+  guint total;       /* files in the current stage */
+
+  /* The jars to unpack, filled while the libraries are planned. */
+  GPtrArray *natives;
+
+  /* Asset objects requested by the index. */
+  GPtrArray *asset_hashes; /* char* */
+  GHashTable *asset_paths; /* hash -> char* */
+  gboolean asset_virtual;
+  gboolean asset_map_to_resources;
+};
+
+static void request_free (ResolveRequest *request);
+static void resolve_finish (ResolveRequest *request);
+
+static void
+request_fail (ResolveRequest *request, GError *error)
+{
+  if (error == NULL)
+    return;
+
+  if (request->error == NULL)
+    request->error = error;
+  else
+    g_error_free (error);
+}
+
+/* A stage may discover a bad entry after it has already started other
+ * operations.  Those callbacks still own a borrowed pointer to @request,
+ * so cancellation alone is not enough: final cleanup waits for them. */
+static void
+request_fail_and_wait (ResolveRequest *request, GError *error)
+{
+  request_fail (request, error);
+  g_cancellable_cancel (request->cancellable);
+
+  if (request->pending == 0)
+    resolve_finish (request);
+}
+
+static void
+report (ResolveRequest *request)
+{
+  nuvashalauncherResolveProgress progress = { request->stage, request->done,
+                                  request->total };
+
+  if (request->progress != NULL)
+    request->progress (&progress, request->progress_data);
+}
+
+/* Starts counting one more operation. */
+static void
+operation_started (ResolveRequest *request)
+{
+  request->pending++;
+}
+
+/* One operation ended. When nothing is left the stage is over and
+   whatever comes next runs. */
+static void
+operation_finished (ResolveRequest *request, ResolveStep next, GError *error)
+{
+  request_fail (request, error);
+
+  if (--request->pending == 0)
+    {
+      if (request->error != NULL)
+        g_cancellable_cancel (request->cancellable);
+
+      next (request);
+    }
+}
+
+/* Complete the request with the resolved version or an error. */
+static void
+request_end (ResolveRequest *request, nuvashalauncherResolvedVersion *resolved)
+{
+  if (resolved != NULL)
+    nuvashalauncher_task_scope_return_pointer (request->scope, resolved,
+                                   (GDestroyNotify) nuvashalauncher_resolved_version_free);
+  else if (request->error != NULL)
+    nuvashalauncher_task_scope_return_error (request->scope,
+                                 g_steal_pointer (&request->error));
+  else
+    nuvashalauncher_task_scope_return_error (
+      request->scope,
+      g_error_new_literal (nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_INVALID,
+                           "the version cannot be resolved"));
+
+  request_free (request);
+}
+
+static void
+request_free (ResolveRequest *request)
+{
+  g_clear_object (&request->task);
+  g_clear_object (&request->manifest);
+  g_clear_object (&request->description);
+  g_clear_pointer (&request->context, nuvashalauncher_rule_context_free);
+  g_clear_object (&request->cancellable);
+  g_clear_error (&request->error);
+  g_clear_pointer (&request->natives, g_ptr_array_unref);
+  g_clear_pointer (&request->asset_hashes, g_ptr_array_unref);
+  g_clear_pointer (&request->asset_paths, g_hash_table_unref);
+  g_free (request->version_id);
+  g_free (request->data_dir);
+  g_free (request->libraries_dir);
+  g_free (request->versions_dir);
+  g_free (request->assets_dir);
+  g_free (request->indexes_dir);
+  g_free (request->objects_dir);
+  g_free (request->virtual_dir);
+  g_free (request->natives_dir);
+  g_free (request->client_jar);
+  g_free (request->client_jar_override);
+  g_free (request->logging_path);
+  g_free (request->asset_index_id);
+  g_free (request->asset_index_name);
+  g_free (request->asset_base_url);
+  g_free (request);
+}
+
+static void resolve_dependencies (ResolveRequest *request);
+static void resolve_natives (ResolveRequest *request);
+static void resolve_assets (ResolveRequest *request);
+static void resolve_copies (ResolveRequest *request);
+
+/* ---------------------------------------------------------- *
+ * Downloads
+ * ---------------------------------------------------------- */
+
+static void
+file_downloaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                 gpointer user_data)
+{
+  PendingOperation *pending = user_data;
+  ResolveRequest *request = pending->request;
+  g_autoptr (GError) error = NULL;
+
+  if (!nuvashalauncher_download_file_finish (result, &error))
+    operation_finished (request, pending->next, g_steal_pointer (&error));
+  else
+    {
+      request->done++;
+      report (request);
+      operation_finished (request, pending->next, NULL);
+    }
+
+  g_free (pending);
+}
+
+static void
+download_file (ResolveRequest *request, ResolveStep next, const char *url,
+               const char *path, const char *sha1)
+{
+  PendingOperation *pending = g_new0 (PendingOperation, 1);
+
+  pending->request = request;
+  pending->next = next;
+
+  operation_started (request);
+
+  nuvashalauncher_task_scope_release_when_done (
+    nuvashalauncher_download_file_async (nuvashalauncher_downloads_get_service (), url, path, sha1, G_CHECKSUM_SHA1, NULL,
+                             file_downloaded, pending),
+    request->cancellable);
+}
+
+/* ---------------------------------------------------------- *
+ * The result
+ * ---------------------------------------------------------- */
+
+void
+nuvashalauncher_resolved_version_free (nuvashalauncherResolvedVersion *resolved)
+{
+  if (resolved == NULL)
+    return;
+
+  g_free (resolved->version_id);
+  g_free (resolved->version_type);
+  g_free (resolved->client_jar);
+  g_free (resolved->classpath);
+  g_free (resolved->natives_directory);
+  g_free (resolved->assets_directory);
+  g_free (resolved->assets_index_name);
+  g_free (resolved->main_class);
+  g_free (resolved->library_directory);
+  g_free (resolved->logging_argument);
+  g_clear_pointer (&resolved->jvm_arguments, g_ptr_array_unref);
+  g_clear_pointer (&resolved->game_arguments, g_ptr_array_unref);
+  g_free (resolved);
+}
+
+/* Replaces the ${...} placeholders whose value is known here. Anything
+   else, which depends on an account or on a window, is left as the
+   document wrote it. */
+static char *
+expand_argument (const char *value, GHashTable *known)
+{
+  GString *out = g_string_new (NULL);
+  const char *p = value;
+
+  while (*p != '\0')
+    {
+      const char *start = NULL;
+      const char *end = NULL;
+      const char *replacement = NULL;
+
+      if (p[0] == '$' && p[1] == '{')
+        {
+          start = p + 2;
+          end = strchr (start, '}');
+
+          if (end != NULL)
+            {
+              /* Extract the placeholder name between the braces. */
+              g_autofree char *name = g_strndup (start, end - start);
+
+              replacement = g_hash_table_lookup (known, name);
+            }
+        }
+
+      if (replacement == NULL)
+        {
+          g_string_append_c (out, *p);
+          p++;
+          continue;
+        }
+
+      g_string_append (out, replacement);
+      p = end + 1;
+    }
+
+  return g_string_free (out, FALSE);
+}
+
+static GPtrArray *
+expand_arguments (GPtrArray *arguments, GHashTable *known)
+{
+  g_autoptr (GPtrArray) expanded =
+    g_ptr_array_new_with_free_func (g_free);
+
+  for (guint i = 0; i < arguments->len; i++)
+    g_ptr_array_add (
+        expanded, expand_argument (g_ptr_array_index (arguments, i), known));
+
+  return g_steal_pointer (&expanded);
+}
+
+/* Build the resolved version from the files on disk. */
+static nuvashalauncherResolvedVersion *
+build_result (ResolveRequest *request, GError **error)
+{
+  nuvashalauncherResolvedVersion *resolved = g_new0 (nuvashalauncherResolvedVersion, 1);
+  g_autoptr (GPtrArray) jvm = NULL;
+  g_autoptr (GPtrArray) game = NULL;
+  g_autoptr (GHashTable) known = g_hash_table_new (g_str_hash, g_str_equal);
+
+  /* The request has a version description at this point. */
+  if (request->description->main_class == NULL)
+    {
+      g_set_error (error, nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_INVALID,
+                   "%s", NO_MAIN_CLASS_MESSAGE);
+      g_free (resolved);
+      return NULL;
+    }
+
+  /* A loader that patches the client jar produced one already: it is the
+     jar the game runs from and the final entry in the class path,
+     which is where the class loader finds the classes of the game. */
+  {
+    const char *client_jar = request->client_jar_override != NULL
+                               ? request->client_jar_override
+                               : request->client_jar;
+
+    resolved->client_jar = g_strdup (client_jar);
+    resolved->classpath =
+      nuvashalauncher_resolve_classpath (request->description, request->context,
+                             request->libraries_dir, client_jar);
+  }
+
+  resolved->version_id = g_strdup (request->description->id);
+  resolved->version_type = g_strdup (
+    nuvashalauncher_mc_version_type_to_string (request->description->type));
+  resolved->natives_directory = g_strdup (request->natives_dir);
+  resolved->library_directory = g_strdup (request->libraries_dir);
+  resolved->main_class = g_strdup (request->description->main_class);
+
+  if (resolved->classpath == NULL)
+    {
+      nuvashalauncher_resolved_version_free (resolved);
+      return NULL;
+    }
+
+  if (request->description->java_version != NULL)
+    resolved->java_major_version =
+      request->description->java_version->major_version;
+
+  /* A virtual index is a directory the game reads its assets from
+     directly, so that directory is used as its assets root
+     and it is told no index name at all. */
+  if (request->asset_virtual)
+    {
+      resolved->assets_directory =
+        g_build_filename (request->virtual_dir, request->asset_index_name,
+                          NULL);
+      resolved->assets_index_name = NULL;
+    }
+  else
+    {
+      resolved->assets_directory = g_strdup (request->assets_dir);
+      resolved->assets_index_name = g_strdup (request->asset_index_name);
+    }
+
+  if (request->description->logging != NULL &&
+      request->logging_path != NULL)
+    {
+      g_autoptr (GHashTable) path_only =
+        g_hash_table_new (g_str_hash, g_str_equal);
+
+      g_hash_table_insert (path_only, "path", request->logging_path);
+      resolved->logging_argument =
+        expand_argument (request->description->logging->argument, path_only);
+    }
+
+  g_hash_table_insert (known, "classpath", resolved->classpath);
+  g_hash_table_insert (known, "natives_directory", request->natives_dir);
+  g_hash_table_insert (known, "library_directory", request->libraries_dir);
+  g_hash_table_insert (known, "assets_root", resolved->assets_directory);
+  /* Pre-1.7 version documents call the same directory game_assets. */
+  g_hash_table_insert (known, "game_assets", resolved->assets_directory);
+  g_hash_table_insert (known, "assets_index_name",
+                       resolved->assets_index_name != NULL
+                         ? resolved->assets_index_name
+                         : request->asset_index_name);
+  g_hash_table_insert (known, "version_name", resolved->version_id);
+  g_hash_table_insert (known, "version_type", resolved->version_type);
+
+  jvm = nuvashalauncher_resolve_jvm_arguments (request->description, request->context);
+  game = nuvashalauncher_resolve_game_arguments (request->description, request->context);
+
+  resolved->jvm_arguments = expand_arguments (jvm, known);
+  resolved->game_arguments = expand_arguments (game, known);
+
+  return resolved;
+}
+
+static void
+resolve_finish (ResolveRequest *request)
+{
+  g_autoptr (GError) error = NULL;
+  nuvashalauncherResolvedVersion *resolved = NULL;
+
+  if (request->error == NULL)
+    {
+      resolved = build_result (request, &error);
+
+      /* Propagate failures while assembling the result. */
+      request_fail (request, g_steal_pointer (&error));
+    }
+
+  request_end (request, resolved);
+}
+
+/* ---------------------------------------------------------- *
+ * Dependencies: the client jar, the libraries, the logging file
+ * ---------------------------------------------------------- */
+
+static void
+natives_extracted (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                   gpointer user_data)
+{
+  ResolveRequest *request = user_data;
+  g_autoptr (GError) error = NULL;
+
+  if (!nuvashalauncher_resolve_extract_natives_finish (result, &error))
+    request_fail (request, g_steal_pointer (&error));
+
+  if (request->error != NULL)
+    {
+      resolve_finish (request);
+      return;
+    }
+
+  resolve_assets (request);
+}
+
+static void
+resolve_dependencies (ResolveRequest *request)
+{
+  nuvashalauncherVersionDescription *description = request->description;
+  g_autoptr (GPtrArray) files = NULL;
+  g_autoptr (GError) error = NULL;
+
+  if (description->client == NULL || description->client->url == NULL)
+    {
+      request_fail (request,
+                    g_error_new (nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_INVALID,
+                                 "%s", NO_CLIENT_MESSAGE));
+      resolve_finish (request);
+      return;
+    }
+
+  files = nuvashalauncher_resolve_library_files (description, request->context,
+                                     request->libraries_dir);
+
+  /* Unpack the native JARs collected during planning. */
+  for (guint i = 0; i < files->len; i++)
+    {
+      const nuvashalauncherResolveFile *file = g_ptr_array_index (files, i);
+
+      if (file->natives)
+        g_ptr_array_add (request->natives,
+                         nuvashalauncher_resolve_file_new (file->path, file->url,
+                                               file->sha1, TRUE,
+                                               file->exclude));
+    }
+
+  if (!nuvashalauncher_resolve_ensure_parent_directory (request->client_jar, &error))
+    {
+      request_fail (request, g_steal_pointer (&error));
+      resolve_finish (request);
+      return;
+    }
+
+  request->stage = "dependencies";
+  request->done = 0;
+  /* The client jar, whether it is fetched from the document or handed in
+     by a loader that patched one. */
+  request->total = files->len + 1;
+
+  if (description->logging != NULL && description->logging->file != NULL &&
+      description->logging->file->url != NULL)
+    {
+      if (!nuvashalauncher_resolve_ensure_parent_directory (request->logging_path, &error))
+        {
+          request_fail (request, g_steal_pointer (&error));
+          resolve_finish (request);
+          return;
+        }
+
+      request->total++;
+    }
+  else
+    {
+
+      g_clear_pointer (&request->logging_path, g_free);
+    }
+
+  /* The download module writes into a directory that already exists. */
+  for (guint i = 0; i < files->len; i++)
+    {
+      const nuvashalauncherResolveFile *file = g_ptr_array_index (files, i);
+
+      if (!nuvashalauncher_resolve_ensure_parent_directory (file->path, &error))
+        {
+          request_fail (request, g_steal_pointer (&error));
+          resolve_finish (request);
+          return;
+        }
+    }
+
+  for (guint i = 0; i < files->len; i++)
+    {
+      const nuvashalauncherResolveFile *file = g_ptr_array_index (files, i);
+
+      download_file (request, resolve_natives, file->url, file->path,
+                     file->sha1);
+    }
+
+  /* A loader that patches the client jar produced one already: it is run
+     as it is, and nothing is fetched for it. Counting it as one of the
+     files keeps the progress of a loader instance the same as it is
+     without one. */
+  if (request->client_jar_override != NULL)
+    {
+      request->done++;
+      report (request);
+    }
+  else
+    download_file (request, resolve_natives, description->client->url,
+                   request->client_jar, description->client->sha1);
+
+  if (request->logging_path != NULL)
+    download_file (request, resolve_natives, description->logging->file->url,
+                   request->logging_path, description->logging->file->sha1);
+
+  report (request);
+}
+
+static void
+resolve_natives (ResolveRequest *request)
+{
+  g_autoptr (GError) error = NULL;
+
+  if (request->error != NULL)
+    {
+      resolve_finish (request);
+      return;
+    }
+
+  if (request->natives->len == 0)
+    {
+      resolve_assets (request);
+      return;
+    }
+
+  if (!nuvashalauncher_resolve_ensure_directory (request->natives_dir, &error))
+    {
+      request_fail (request, g_steal_pointer (&error));
+      resolve_finish (request);
+      return;
+    }
+
+  {
+    nuvashalauncherTaskScope *extracting = nuvashalauncher_resolve_extract_natives_async (
+      request->natives, request->natives_dir, natives_extracted, request);
+
+    nuvashalauncher_task_scope_follow_cancellable (extracting, request->cancellable);
+    nuvashalauncher_task_scope_unref_when_done (extracting);
+  }
+}
+
+/* ---------------------------------------------------------- *
+ * Assets
+ * ---------------------------------------------------------- */
+
+/* Where the object named @hash belongs, and the two characters that
+   name the bucket it lives in. NULL when @hash is no usable name. */
+static char *
+asset_object_path (ResolveRequest *request, const char *hash, char **bucket)
+{
+  g_autofree char *name = NULL;
+  g_autofree char *directory = NULL;
+
+  if (hash == NULL || strlen (hash) < ASSET_BUCKET_LENGTH)
+    return NULL;
+
+  name = g_strndup (hash, ASSET_BUCKET_LENGTH);
+  directory = g_build_filename (request->objects_dir, name, NULL);
+
+  if (bucket != NULL)
+    *bucket = g_strdup (name);
+
+  return g_build_filename (directory, hash, NULL);
+}
+
+/* One object was copied into the virtual directory. */
+static void
+asset_copied (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+              gpointer user_data)
+{
+  ResolveRequest *request = user_data;
+  g_autoptr (GError) error = NULL;
+
+  if (!nuvashalauncher_fs_copy_finish (G_FILE (source), result, &error))
+    {
+      operation_finished (request, resolve_finish, g_steal_pointer (&error));
+      return;
+    }
+
+  request->done++;
+  report (request);
+  operation_finished (request, resolve_finish, NULL);
+}
+
+/* Copies the objects the index expects to find under the virtual
+   directory of the assets. A copy that is already there is left alone,
+   because a second resolve must not rewrite what the first one wrote. */
+static void
+resolve_copies (ResolveRequest *request)
+{
+  guint started = 0;
+
+  if (request->error != NULL)
+    {
+      resolve_finish (request);
+      return;
+    }
+
+  for (guint i = 0; i < request->asset_hashes->len; i++)
+    {
+      const char *hash = g_ptr_array_index (request->asset_hashes, i);
+      const char *path = g_hash_table_lookup (request->asset_paths, hash);
+      g_autofree char *source = NULL;
+      g_autofree char *target = NULL;
+      g_autoptr (GFile) source_file = NULL;
+      g_autoptr (GFile) target_file = NULL;
+      g_autoptr (GError) error = NULL;
+
+      if (path == NULL)
+        continue;
+
+      source = asset_object_path (request, hash, NULL);
+
+      if (source == NULL)
+        continue;
+
+      target = g_build_filename (request->virtual_dir,
+                                 request->asset_index_name, path, NULL);
+      target_file = g_file_new_for_path (target);
+
+      if (g_file_query_exists (target_file, NULL))
+        continue;
+
+      if (!nuvashalauncher_resolve_ensure_parent_directory (target, &error))
+        {
+          request_fail_and_wait (request, g_steal_pointer (&error));
+          return;
+        }
+
+      source_file = g_file_new_for_path (source);
+
+      operation_started (request);
+      request->total++;
+      started++;
+
+      nuvashalauncher_fs_copy_async (source_file, target_file, G_FILE_COPY_OVERWRITE,
+                         G_PRIORITY_DEFAULT, request->cancellable, NULL, NULL,
+                         asset_copied, request);
+    }
+
+  report (request);
+
+  if (started == 0)
+    resolve_finish (request);
+}
+
+/* Every object of the index is on the disk now. */
+static void
+assets_downloaded (ResolveRequest *request)
+{
+  if (request->error != NULL)
+    {
+      resolve_finish (request);
+      return;
+    }
+
+  /* A virtual index is read as files, so the game is pointed at the
+     copies; every other index is read from the objects themselves. */
+  if (request->asset_virtual)
+    resolve_copies (request);
+  else
+    resolve_finish (request);
+}
+
+static void
+objects_downloaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                    gpointer user_data)
+{
+  PendingOperation *pending = user_data;
+  ResolveRequest *request = pending->request;
+  g_autoptr (GError) error = NULL;
+
+  if (!nuvashalauncher_download_file_finish (result, &error))
+    operation_finished (request, assets_downloaded, g_steal_pointer (&error));
+  else
+    {
+      request->done++;
+      report (request);
+      operation_finished (request, assets_downloaded, NULL);
+    }
+
+  g_free (pending);
+}
+
+/* The index is on the disk: every object it names is fetched. The whole
+   list is handed to the download module at once, which is what caps how
+   many of them run at a time. */
+static void
+resolve_objects (ResolveRequest *request)
+{
+  g_autofree char *path = NULL;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (JsonParser) parser = json_parser_new ();
+  g_autofree char *text = NULL;
+  gsize length = 0;
+  JsonNode *root_node = NULL;
+  JsonObject *root = NULL;
+  JsonObject *objects = NULL;
+  JsonObjectIter iter;
+  const char *name = NULL;
+  JsonNode *node = NULL;
+  guint started = 0;
+
+  if (request->error != NULL)
+    {
+      resolve_finish (request);
+      return;
+    }
+
+  path = g_build_filename (request->indexes_dir, request->asset_index_id, NULL);
+
+  if (!nuvashalauncher_fs_get_contents_within (path, nuvashalauncher_FS_MAX_ASSET_INDEX_SIZE,
+                                   &text, &length, &error) ||
+      !json_parser_load_from_data (parser, text, (gssize) length, &error) ||
+      !JSON_NODE_HOLDS_OBJECT (json_parser_get_root (parser)))
+    {
+      g_autoptr (GError) local = g_steal_pointer (&error);
+
+      request_fail (request,
+                    g_error_new (nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_ASSETS,
+                                 "the asset index \"%s\" cannot be read: %s",
+                                 path,
+                                 local != NULL ? local->message
+                                               : "it is not a JSON object"));
+      resolve_finish (request);
+      return;
+    }
+
+  root_node = json_parser_get_root (parser);
+  root = json_node_get_object (root_node);
+
+  if (!json_object_has_member (root, "objects") ||
+      !JSON_NODE_HOLDS_OBJECT (json_object_get_member (root, "objects")))
+    {
+      request_fail (request,
+                    g_error_new (nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_ASSETS,
+                                 "the asset index \"%s\" has no objects",
+                                 path));
+      resolve_finish (request);
+      return;
+    }
+
+  objects = json_object_get_object_member (root, "objects");
+  request->asset_virtual = json_object_has_member (root, "virtual") &&
+                           json_object_get_boolean_member (root, "virtual");
+  request->asset_map_to_resources =
+    json_object_has_member (root, "map_to_resources") &&
+    json_object_get_boolean_member (root, "map_to_resources");
+
+  request->total = request->done + json_object_get_size (objects);
+  report (request);
+
+  json_object_iter_init (&iter, objects);
+
+  while (json_object_iter_next (&iter, &name, &node))
+    {
+      const char *hash = name;
+      const char *asset_path = NULL;
+      g_autofree char *destination = NULL;
+      g_autofree char *bucket = NULL;
+      g_autofree char *url = NULL;
+      g_autoptr (GError) local = NULL;
+      PendingOperation *pending;
+
+      if (!JSON_NODE_HOLDS_OBJECT (node))
+        {
+          request_fail_and_wait (
+              request,
+              g_error_new (nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_ASSETS,
+                           "the asset \"%s\" of \"%s\" is not an object",
+                           name, path));
+          return;
+        }
+
+      {
+        JsonObject *object = json_node_get_object (node);
+
+        if (json_object_has_member (object, "hash"))
+          hash = json_object_get_string_member (object, "hash");
+
+        if (json_object_has_member (object, "path"))
+          asset_path = json_object_get_string_member (object, "path");
+      }
+
+      destination = asset_object_path (request, hash, &bucket);
+
+      if (destination == NULL)
+        {
+          request_fail_and_wait (request,
+                                 g_error_new (nuvashalauncher_RESOLVE_ERROR,
+                                              nuvashalauncher_RESOLVE_ERROR_ASSETS,
+                                              "\"%s\" is not a usable asset name",
+                                              hash));
+          return;
+        }
+
+      if (asset_path != NULL && !nuvashalauncher_resolve_entry_name_is_safe (asset_path))
+        {
+          request_fail_and_wait (
+              request,
+              g_error_new (nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_UNSAFE_PATH,
+                           "the asset \"%s\" of \"%s\" would be copied to "
+                           "\"%s\", outside the assets directory",
+                           hash, path, asset_path));
+          return;
+        }
+
+      if (!nuvashalauncher_resolve_ensure_parent_directory (destination, &local))
+        {
+          request_fail_and_wait (request, g_steal_pointer (&local));
+          return;
+        }
+
+      g_ptr_array_add (request->asset_hashes, g_strdup (hash));
+
+      if (asset_path != NULL)
+        {
+          /* A map_to_resources index already carries the prefix the
+             game looks under; one that does not is read as a resource
+             of the game. */
+          if (request->asset_virtual && request->asset_map_to_resources &&
+              !g_str_has_prefix (asset_path, ASSET_RESOURCE_PREFIX))
+            g_hash_table_insert (
+                request->asset_paths, g_strdup (hash),
+                g_strconcat (ASSET_RESOURCE_PREFIX, asset_path, NULL));
+          else
+            g_hash_table_insert (request->asset_paths, g_strdup (hash),
+                                 g_strdup (asset_path));
+        }
+
+      url = g_strdup_printf ("%s/%s/%s", request->asset_base_url, bucket, hash);
+
+      pending = g_new0 (PendingOperation, 1);
+      pending->request = request;
+      pending->next = assets_downloaded;
+
+      operation_started (request);
+      started++;
+
+      /* An object is named after its own hash, so the bytes can be
+         checked against it. */
+      nuvashalauncher_task_scope_release_when_done (
+        nuvashalauncher_download_file_async (nuvashalauncher_downloads_get_service (), url, destination, hash, G_CHECKSUM_SHA1,
+                                 NULL, objects_downloaded, pending),
+        request->cancellable);
+    }
+
+  if (started == 0)
+    assets_downloaded (request);
+}
+
+static void
+resolve_assets (ResolveRequest *request)
+{
+  nuvashalauncherVersionDescription *description = request->description;
+  g_autofree char *path = NULL;
+  g_autoptr (GError) error = NULL;
+
+  if (description->asset_index == NULL ||
+      description->asset_index->url == NULL)
+    {
+      /* A version this old needs no assets at all. */
+      resolve_finish (request);
+      return;
+    }
+
+  path = g_build_filename (request->indexes_dir, request->asset_index_id, NULL);
+
+  if (!nuvashalauncher_resolve_ensure_parent_directory (path, &error))
+    {
+      request_fail (request, g_steal_pointer (&error));
+      resolve_finish (request);
+      return;
+    }
+
+  request->stage = "assets";
+  request->done = 0;
+  request->total = 1;
+
+  download_file (request, resolve_objects, description->asset_index->url, path,
+                 description->asset_index->sha1);
+  report (request);
+}
+
+/* ---------------------------------------------------------- *
+ * Entry point
+ * ---------------------------------------------------------- */
+
+/* Read logging and asset-index metadata from the resolved document. */
+static void
+description_ready (ResolveRequest *request)
+{
+  /* The configuration log4j is given keeps the name the document gave
+     it, or a plain one when it gave none. */
+  if (request->description->logging != NULL &&
+      request->description->logging->file != NULL)
+    {
+      g_autofree char *logging_name = nuvashalauncher_resolve_safe_name (
+          request->description->logging->file->id != NULL
+            ? request->description->logging->file->id
+            : "client-logging.xml");
+
+      request->logging_path = g_build_filename (request->data_dir, "logging",
+                                                logging_name, NULL);
+    }
+
+  /* The game is told what the index is called, which the document
+     answers in "assets", and the copy of it on disk is named after the
+     id the index itself carries. */
+  g_free (request->asset_index_name);
+  request->asset_index_name = nuvashalauncher_resolve_safe_name (
+    request->description->assets != NULL ? request->description->assets
+                                         : request->version_id);
+
+  g_free (request->asset_index_id);
+
+  if (request->description->asset_index != NULL &&
+      request->description->asset_index->id != NULL)
+    {
+      g_autofree char *safe =
+        nuvashalauncher_resolve_safe_name (request->description->asset_index->id);
+
+      request->asset_index_id = g_strconcat (safe, ".json", NULL);
+    }
+  else
+    {
+      g_autofree char *safe =
+        nuvashalauncher_resolve_safe_name (request->description->assets != NULL
+                     ? request->description->assets
+                     : request->version_id);
+
+      request->asset_index_id = g_strconcat (safe, ".json", NULL);
+    }
+
+  resolve_dependencies (request);
+}
+
+static void
+version_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                gpointer user_data)
+{
+  ResolveRequest *request = user_data;
+  g_autoptr (GError) error = NULL;
+
+  request->description = nuvashalauncher_version_load_finish (result, &error);
+
+  if (request->description == NULL)
+    {
+      request_fail (request, g_steal_pointer (&error));
+      resolve_finish (request);
+      return;
+    }
+
+  description_ready (request);
+}
+
+/* Everything a resolve needs before it knows which document it resolves:
+   where the files go, how it may be cancelled and who to tell about the
+ * progress. The description is added by the caller. */
+static ResolveRequest *
+request_new (const char         *version_id,
+             const char         *data_dir,
+             const char         *natives_dir,
+             const char         *asset_base_url,
+             nuvashalauncherTaskScope       *scope,
+             nuvashalauncherResolveProgressFunc progress,
+             gpointer              progress_data)
+{
+  ResolveRequest *request = g_new0 (ResolveRequest, 1);
+  g_autofree char *name = nuvashalauncher_resolve_safe_name (version_id);
+  g_autofree char *jar = g_strconcat (name, ".jar", NULL);
+
+  /* Borrowed: the caller's handle keeps the operation alive, and the
+     request is answered before it goes away. */
+  request->task = g_object_ref (nuvashalauncher_task_scope_task (scope));
+  request->scope = scope;
+  g_task_set_check_cancellable (request->task, FALSE);
+  request->version_id = g_strdup (version_id);
+  request->data_dir = data_dir != NULL
+                        ? g_strdup (data_dir)
+                        : g_build_filename (g_get_user_data_dir (),
+                                            nuvashalauncher_RESOLVE_DATA_SUBDIR, NULL);
+  request->libraries_dir =
+    g_build_filename (request->data_dir, "libraries", NULL);
+  request->assets_dir = g_build_filename (request->data_dir, "assets", NULL);
+  request->indexes_dir =
+    g_build_filename (request->assets_dir, "indexes", NULL);
+  request->objects_dir =
+    g_build_filename (request->assets_dir, "objects", NULL);
+  request->virtual_dir =
+    g_build_filename (request->assets_dir, ASSET_VIRTUAL_SUBDIR, NULL);
+  request->natives_dir = natives_dir != NULL
+                           ? g_strdup (natives_dir)
+                           : g_build_filename (request->data_dir, "natives",
+                                               NULL);
+  request->asset_base_url = asset_base_url != NULL
+                              ? g_strdup (asset_base_url)
+                              : g_strdup (nuvashalauncher_RESOLVE_ASSET_BASE_URL);
+  request->context = nuvashalauncher_rule_context_new ();
+  request->progress = progress;
+  request->progress_data = progress_data;
+  request->cancellable = g_cancellable_new ();
+  request->asset_hashes = g_ptr_array_new_with_free_func (g_free);
+  request->asset_paths = g_hash_table_new_full (g_str_hash, g_str_equal,
+                                                g_free, g_free);
+  request->natives =
+    g_ptr_array_new_with_free_func ((GDestroyNotify) nuvashalauncher_resolve_file_free);
+  request->versions_dir =
+    g_build_filename (request->data_dir, "versions", name, NULL);
+  request->client_jar = g_build_filename (request->versions_dir, jar, NULL);
+
+  /* The operation owns the cancellation: whoever started it stops it
+     through the handle it was given. The cancellable above is cancelled on
+     a failure as well, which the caller knows nothing about. */
+  nuvashalauncher_task_scope_follow_cancellable (scope, request->cancellable);
+
+  return request;
+}
+
+/* The directories the resolve writes into have to be there before
+   anything is fetched into them. */
+static gboolean
+request_make_directories (ResolveRequest *request)
+{
+  g_autoptr (GError) error = NULL;
+
+  if (!nuvashalauncher_resolve_ensure_directory (request->libraries_dir, &error) ||
+      !nuvashalauncher_resolve_ensure_directory (request->assets_dir, &error) ||
+      !nuvashalauncher_resolve_ensure_directory (request->versions_dir, &error))
+    {
+      request_fail (request, g_steal_pointer (&error));
+      return FALSE;
+    }
+
+  return TRUE;
+}
+
+nuvashalauncherTaskScope *
+nuvashalauncher_resolve_version_async (nuvashalauncherVersionManifest *manifest,
+                           const char         *version_id,
+                           const char         *data_dir,
+                           const char         *natives_dir,
+                           const char         *asset_base_url,
+                           nuvashalauncherResolveProgressFunc progress,
+                           gpointer              progress_data,
+                           GAsyncReadyCallback   callback,
+                           gpointer              user_data)
+{
+  g_autoptr (nuvashalauncherTaskScope) scope =
+    nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
+  ResolveRequest *request;
+
+  g_return_val_if_fail (nuvashalauncher_IS_VERSION_MANIFEST (manifest), NULL);
+  g_return_val_if_fail (version_id != NULL, NULL);
+
+  request = request_new (version_id, data_dir, natives_dir, asset_base_url,
+                         scope, progress, progress_data);
+  request->manifest = g_object_ref (manifest);
+
+  if (!request_make_directories (request))
+    {
+      resolve_finish (request);
+      return g_steal_pointer (&scope);
+    }
+
+  {
+    nuvashalauncherTaskScope *loading = nuvashalauncher_version_load_async (manifest, version_id,
+                                                    version_loaded, request);
+
+    nuvashalauncher_task_scope_follow_cancellable (loading, request->cancellable);
+    nuvashalauncher_task_scope_unref_when_done (loading);
+  }
+
+  return g_steal_pointer (&scope);
+}
+
+nuvashalauncherTaskScope *
+nuvashalauncher_resolve_description_async (nuvashalauncherVersionDescription *description,
+                               const char             *version_id,
+                               const char             *client_jar,
+                               const char             *data_dir,
+                               const char             *natives_dir,
+                               const char             *asset_base_url,
+                               nuvashalauncherResolveProgressFunc   progress,
+                               gpointer                progress_data,
+                               GAsyncReadyCallback     callback,
+                               gpointer                user_data)
+{
+  g_autoptr (nuvashalauncherTaskScope) scope =
+    nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
+  ResolveRequest *request;
+
+  g_return_val_if_fail (nuvashalauncher_IS_VERSION_DESCRIPTION (description), NULL);
+  g_return_val_if_fail (version_id != NULL, NULL);
+  g_return_val_if_fail (client_jar == NULL || g_file_test (client_jar,
+                                                           G_FILE_TEST_IS_REGULAR),
+                        NULL);
+
+  request = request_new (version_id, data_dir, natives_dir, asset_base_url,
+                         scope, progress, progress_data);
+
+  /* The document is the one the caller merged: there is no manifest to
+     follow an inheritsFrom from, because it has been followed already. */
+  request->description = g_object_ref (description);
+
+  if (client_jar != NULL)
+    request->client_jar_override = g_strdup (client_jar);
+
+  if (!request_make_directories (request))
+    {
+      resolve_finish (request);
+      return g_steal_pointer (&scope);
+    }
+
+  description_ready (request);
+
+  return g_steal_pointer (&scope);
+}
+
+nuvashalauncherResolvedVersion *
+nuvashalauncher_resolve_version_finish (GAsyncResult *result, GError **error)
+{
+  g_return_val_if_fail (nuvashalauncher_task_result_is_valid (result, "nuvashalauncher-task-scope"), NULL);
+
+  return g_task_propagate_pointer (G_TASK (result), error);
+}

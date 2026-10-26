@@ -215,8 +215,8 @@ msgid "Line Limit"
 msgstr "Limit linky"
 
 
-msgid "About Nuvasha Launcher"
-msgstr "O Nuvasha Launcher"
+msgid "About nuvashalauncher"
+msgstr "O nuvashalauncher"
 
 msgid "Keyboard Shortcuts"
 msgstr "Klávesové zkratky"
@@ -593,11 +593,11 @@ msgstr "Procházet modpacky"
 msgid "Choose Files"
 msgstr "Vybrat soubory"
 
-msgid "Clear Nuvasha Cache"
-msgstr "Vymazat mezipaměť Nuvasha"
+msgid "Clear nuvashalauncher Cache"
+msgstr "Vymazat mezipaměť nuvashalauncher"
 
-msgid "Clear Nuvasha Cache?"
-msgstr "Vymazat mezipaměť Nuvasha?"
+msgid "Clear nuvashalauncher Cache?"
+msgstr "Vymazat mezipaměť nuvashalauncher?"
 
 msgid ""
 "Conflicts\n"
@@ -664,8 +664,8 @@ msgstr "Instalace"
 msgid "Instances cannot contain %s in their name"
 msgstr "Instance nesmí obsahovat %s ve svém názvu"
 
-msgid "It carries files that Nuvasha does not recognize."
-msgstr "Obsahuje soubory, které Nuvasha nerozpozná."
+msgid "It carries files that nuvashalauncher does not recognize."
+msgstr "Obsahuje soubory, které nuvashalauncher nerozpozná."
 
 msgid "Italiano"
 msgstr "Italiano"
@@ -688,7 +688,7 @@ msgstr "Microsoft · Je nutné se přihlásit"
 msgid "Modrinth does not know this file"
 msgstr "Modrinth tento soubor nezná"
 
-msgid "Modrinth is asking Nuvasha to slow down, too many requests"
+msgid "Modrinth is asking nuvashalauncher to slow down, too many requests"
 msgstr "Modrinth žádá Nuvashu, aby zpomalila, je tu příliš mnoho požadavků"
 
 msgid "Nederlands"
@@ -709,11 +709,11 @@ msgstr "Žádné"
 msgid "Norsk (bokmål)"
 msgstr "Norsk (bokmål)"
 
-msgid "Nuvasha Launcher"
-msgstr "Nuvasha Launcher"
+msgid "nuvashalauncher"
+msgstr "nuvashalauncher"
 
-msgid "Nuvasha cache data was cleared successfully."
-msgstr "Data z mezipaměti Nuvasha byla úspěšně vymazána."
+msgid "nuvashalauncher cache data was cleared successfully."
+msgstr "Data z mezipaměti nuvashalauncher byla úspěšně vymazána."
 
 msgid "Offline"
 msgstr "Offline"
@@ -760,14 +760,14 @@ msgstr "Svenska"
 msgid "System default"
 msgstr "Výchozí nastavení systému"
 
-msgid "The account is removed from Nuvasha and its saved sign-in is forgotten. The game itself is not touched."
-msgstr "Účet je odstraněn ze služby Nuvasha a uložené přihlašovací údaje jsou smazány. Samotná hra tím není nijak ovlivněna."
+msgid "The account is removed from nuvashalauncher and its saved sign-in is forgotten. The game itself is not touched."
+msgstr "Účet je odstraněn ze služby nuvashalauncher a uložené přihlašovací údaje jsou smazány. Samotná hra tím není nijak ovlivněna."
 
 msgid "The game is running and will close. Progress since the last save is lost."
 msgstr "Hra právě běží a bude ukončena. Pokrok od posledního uložení bude ztracen."
 
-msgid "This project publishes no pack file Nuvasha can install."
-msgstr "Tento projekt nezveřejňuje žádný balíček, který by Nuvasha mohla nainstalovat."
+msgid "This project publishes no pack file nuvashalauncher can install."
+msgstr "Tento projekt nezveřejňuje žádný balíček, který by nuvashalauncher mohla nainstalovat."
 
 msgid "This version has no pack file"
 msgstr "Tato verze neobsahuje žádný balíček"
@@ -877,35 +877,35 @@ msgstr "Microsoft sign-in failed. Try again."
 msgid "Open in browser"
 msgstr "Otevřít v prohlížeči"
 
-#: src/nuvasha-main-window.c
+#: src/nuvashalauncher-main-window.c
 msgid "%u/%u selected"
 msgstr "%u/%u vybráno"
 
-#: src/nuvasha-main-window.c
+#: src/nuvashalauncher-main-window.c
 msgid "The following instances will be deleted:\n%s"
 msgstr "Následující instance budou odstraněny:\n%s"
 
-#: src/nuvasha-content-page.c
+#: src/nuvashalauncher-content-page.c
 msgid "Delete selected %s?"
 msgstr "Delete selected %s?"
 
-#: src/nuvasha-content-page.c
+#: src/nuvashalauncher-content-page.c
 msgid "Selected %s:\n%s"
 msgstr "Selected %s:\n%s"
 
-#: src/nuvasha-content-page.c
+#: src/nuvashalauncher-content-page.c
 msgid "Selected %s:\n%s\n\nDependencies:\n%s"
 msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
 
-#: src/nuvasha-main-window-ui.c
+#: src/nuvashalauncher-main-window-ui.c
 msgid "Edit mode"
 msgstr "Režim úprav"
 
-#: src/nuvasha-content-page-ui.c
+#: src/nuvashalauncher-content-page-ui.c
 msgid "Fetching updates"
 msgstr "Načítání aktualizací"
 
 
-#: src/nuvasha-content-page-ui.c
+#: src/nuvashalauncher-content-page-ui.c
 msgid "Progress"
 msgstr "Průběh"

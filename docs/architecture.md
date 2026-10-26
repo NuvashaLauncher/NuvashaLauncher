@@ -1,6 +1,6 @@
-# Nuvasha architecture
+# nuvashalauncher architecture
 
-This is a maintainer's map of Nuvasha Launcher. It describes the boundaries
+This is a maintainer's map of nuvashalauncher. It describes the boundaries
 between the parts of the program, the flows that cross those boundaries, and
 the rules that are easy to break during a seemingly small change.
 
@@ -10,7 +10,7 @@ arranged as they are.
 
 ## What the program is
 
-Nuvasha is a Linux GTK 4/libadwaita desktop application. It manages Minecraft
+nuvashalauncher is a Linux GTK 4/libadwaita desktop application. It manages Minecraft
 instances, obtains Minecraft and Modrinth content, chooses a Java runtime, and
 starts one game process per instance. It is a single executable and does not
 require a separate daemon or background service.
@@ -38,7 +38,7 @@ the owner of that operation.
 ```mermaid
 flowchart LR
     User[User]
-    Nuvasha[Nuvasha Launcher]
+    nuvashalauncher[nuvashalauncher]
     CLI[CLI commands]
     Mojang[Mojang launcher metadata
 and game resources]
@@ -49,25 +49,25 @@ Xbox Live, Minecraft services]
     Java[Selected Java runtime]
     Flatpak[Flatpak application sandbox]
 
-    User <--> Nuvasha
-    User --> CLI --> Nuvasha
-    Nuvasha --> Mojang
-    Nuvasha --> Modrinth
-    Nuvasha --> Microsoft
-    Nuvasha --> Java
-    Flatpak -. contains the Flatpak build .-> Nuvasha
-    Nuvasha --> Desktop
+    User <--> nuvashalauncher
+    User --> CLI --> nuvashalauncher
+    nuvashalauncher --> Mojang
+    nuvashalauncher --> Modrinth
+    nuvashalauncher --> Microsoft
+    nuvashalauncher --> Java
+    Flatpak -. contains the Flatpak build .-> nuvashalauncher
+    nuvashalauncher --> Desktop
 ```
 
 External services are used directly by their owning modules:
 
 - Mojang's version manifest and version documents are parsed by
-  `nuvasha-minecraft-versions.c`; resolved files are fetched by the download
+  `nuvashalauncher-minecraft-versions.c`; resolved files are fetched by the download
   service.
-- The Modrinth v2 API is handled by `nuvasha-modrinth.c`.
+- The Modrinth v2 API is handled by `nuvashalauncher-modrinth.c`.
 - Microsoft device authorization, Xbox Live/XSTS, Minecraft authentication,
   entitlements, and profile requests are the steps in
-  `nuvasha-auth-microsoft.c`.
+  `nuvashalauncher-auth-microsoft.c`.
 - `GAppInfo` opens URIs through the desktop.
 
 ## Static structure
@@ -126,41 +126,41 @@ flowchart TD
 ### Application and UI
 
 `main.c` creates the `AdwApplication`, initializes translations, loads the
-instance store and normally presents the one `NuvashaMainWindow`. A second
+instance store and normally presents the one `nuvashalauncherMainWindow`. A second
 activation focuses the existing window rather than creating another one. The
 same executable also accepts a command-line instance ID and can launch that
 instance through the normal launcher state machine without opening the main
 window; live output remains owned by the launcher's log buffer.
 
-The main window owns a `NuvashaMainWindowModel`. The model groups the
+The main window owns a `nuvashalauncherMainWindowModel`. The model groups the
 process-wide objects used by the UI:
 
-- `NuvashaInstanceManager`
-- `NuvashaDownloadService` and the `NuvashaDownloads` display manager
-- `NuvashaSettings`
-- `NuvashaAccounts`
+- `nuvashalauncherInstanceManager`
+- `nuvashalauncherDownloadService` and the `nuvashalauncherDownloads` display manager
+- `nuvashalauncherSettings`
+- `nuvashalauncherAccounts`
 - the users popover
 - launchers and instance dialogs, keyed by instance
 
-The window is the presentation boundary. `nuvasha-main-window-*.c` files
+The window is the presentation boundary. `nuvashalauncher-main-window-*.c` files
 connect model signals to widgets, while page and dialog modules handle their
 own views. Widgets declared in `data/ui/*.ui` and the stylesheet are compiled
 into a GResource by the Makefile. The UI is therefore available from the
 installed binary; it is not read from the source tree at runtime.
 
 The downloads display is intentionally separate from the dialog that started a
-download. `NuvashaDownloads` is process-wide, owns entries while they run, and
+download. `nuvashalauncherDownloads` is process-wide, owns entries while they run, and
 lets the header show work started from any page. Closing an installer dialog
 does not cancel its operation.
 
 ### Instances
 
-`NuvashaInstance` is a validated, serializable model for one Minecraft
+`nuvashalauncherInstance` is a validated, serializable model for one Minecraft
 installation. It contains a stable ID, display name, directory, Minecraft
 version, loader, loader version, Java choice, JVM arguments, and component
 metadata. It has no widgets, network calls, or persistence side effects.
 
-`NuvashaInstanceManager` owns the `GListStore` of instances and persists the
+`nuvashalauncherInstanceManager` owns the `GListStore` of instances and persists the
 list to `instances.json`. It also owns operations that change the directory
 layout:
 
@@ -186,7 +186,7 @@ Accounts support two modes:
 - **Microsoft:** a Minecraft profile, access token, expiry, refresh token, and
   cosmetic profile data.
 
-`NuvashaAccounts` owns the active account and emits changes for the UI. Account
+`nuvashalauncherAccounts` owns the active account and emits changes for the UI. Account
 metadata is stored in the user's data directory in `accounts.json`, written
 atomically with mode `0600`. Access and refresh tokens are stored in the same
 JSON file with the account metadata.
@@ -205,15 +205,15 @@ The Microsoft sign-in chain is asynchronous and explicit:
 6. Check Java entitlements.
 7. Fetch the Minecraft profile and store the resulting account.
 
-No password is handled by Nuvasha. A token is considered unusable slightly
+No password is handled by nuvashalauncher. A token is considered unusable slightly
 before its reported expiry so a launch does not begin with a token that will
 expire during startup. If refresh fails, the launcher enters
 `Needs sign-in` instead of attempting to start a game with stale credentials.
 
 ### Settings
 
-`NuvashaSettings` is a typed wrapper around the installed GSettings schema in
-`data/com.github.nuvashalauncher.Nuvasha.gschema.xml`. It validates values and
+`nuvashalauncherSettings` is a typed wrapper around the installed GSettings schema in
+`data/com.github.nuvashalauncher.nuvashalauncher.gschema.xml`. It validates values and
 writes each accepted change. The settings include version-list filters, log
 retention, language, Modrinth API caching, export behavior, dependency delete
  behavior. Window geometry is kept separately by
@@ -221,12 +221,12 @@ the window code.
 
 ## Asynchronous work and ownership
 
-`nuvasha-task.c` provides the common operation contract. There are two related
+`nuvashalauncher-task.c` provides the common operation contract. There are two related
 types:
 
-- `NuvashaTaskScope` owns one asynchronous operation, its cancellable, tracked
+- `nuvashalauncherTaskScope` owns one asynchronous operation, its cancellable, tracked
   GLib sources, callback result, and lifecycle state.
-- `NuvashaTaskSequence` runs a series of asynchronous steps. A step starts one
+- `nuvashalauncherTaskSequence` runs a series of asynchronous steps. A step starts one
   operation and advances the sequence from its completion callback.
 
 The scope is reference counted because the operation state and its caller may
@@ -251,10 +251,10 @@ that the widget that started an operation still exists.
 
 ### Transfer service
 
-`NuvashaDownloadService` owns one `SoupSession`, two waiting queues, and the
+`nuvashalauncherDownloadService` owns one `SoupSession`, two waiting queues, and the
 active-transfer counts. Interactive work has priority over bulk installation
 work. The current limits are eight concurrent transfers overall and six bulk
-transfers; the exact scheduling behavior lives in `nuvasha-download-slots.c`.
+transfers; the exact scheduling behavior lives in `nuvashalauncher-download-slots.c`.
 
 File transfers follow this sequence:
 
@@ -280,13 +280,13 @@ instance content or its indexes.
 
 ### Minecraft metadata and resolution
 
-`nuvasha-minecraft-versions.c` parses Mojang's version manifest and version
+`nuvashalauncher-minecraft-versions.c` parses Mojang's version manifest and version
 documents. It evaluates the document's OS and feature rules, resolves
 `inheritsFrom` chains while detecting cycles, and supports both modern
 structured arguments and legacy `minecraftArguments`.
 
-`nuvasha-minecraft-resolve.c` turns a version description into a
-`NuvashaResolvedVersion`:
+`nuvashalauncher-minecraft-resolve.c` turns a version description into a
+`nuvashalauncherResolvedVersion`:
 
 - applicable libraries are converted to Maven paths;
 - native classifiers are selected for the current Linux architecture;
@@ -305,13 +305,13 @@ directories below the intended destination.
 
 ### Mod loaders
 
-`nuvasha-loaders.c` supports Vanilla, Fabric, Quilt, Forge, and NeoForge, but
+`nuvashalauncher-loaders.c` supports Vanilla, Fabric, Quilt, Forge, and NeoForge, but
 the installation paths are not identical:
 
 - Fabric and Quilt publish version lists and profile documents. Their profiles
   are merged over the Minecraft version document and their Maven coordinates
   are converted into the same resolved-file inputs used by vanilla versions.
-- Forge and NeoForge publish installer JARs. Nuvasha downloads the installer,
+- Forge and NeoForge publish installer JARs. nuvashalauncher downloads the installer,
   reads its install profile, runs the client-side processors with Java, and
   stores the resulting loader installation under the shared data directory.
 
@@ -322,7 +322,7 @@ is started; it does not register a partially prepared loader as usable.
 
 ### Modrinth content
 
-`nuvasha-modrinth.c` is deliberately Modrinth-specific. It builds API facets,
+`nuvashalauncher-modrinth.c` is deliberately Modrinth-specific. It builds API facets,
 parses search/project/version answers, and filters compatibility before data
 reaches the UI:
 
@@ -340,7 +340,7 @@ as a single-file delete. Update All uses that page's asynchronous operation
 state and exposes its scan/install progress and cancellation through a
 downloads-style popover.
 
-`nuvasha-content-index.c` maintains local metadata for installed content. The
+`nuvashalauncher-content-index.c` maintains local metadata for installed content. The
 index records hashes, filenames, provider/project identity, versions,
 environment flags, and required/optional/incompatible dependencies. It lets
 the UI identify and update installed content without treating the directory
@@ -366,14 +366,14 @@ cannot finish should leave the existing instance and metadata intact.
 
 ## Launch pipeline
 
-`NuvashaLauncher` belongs to one instance and is the owner of that instance's
+`nuvashalauncher` belongs to one instance and is the owner of that instance's
 launch state, log buffer, preparation scope, and child process. A launcher
 refuses a second start while its state is busy.
 
 ```mermaid
 sequenceDiagram
     participant UI
-    participant L as NuvashaLauncher
+    participant L as nuvashalauncher
     participant A as Accounts
     participant V as Version metadata
     participant R as Resolver
@@ -445,14 +445,14 @@ The important files are:
 
 | Data | Location/purpose |
 | --- | --- |
-| Instance registry | `<user data>/nuvasha/instances.json` |
+| Instance registry | `<user data>/nuvashalauncher/instances.json` |
 | Instance content | Registered instance directories, each with game files and logs |
-| Account metadata | `<user data>/nuvasha/accounts.json` |
-| Account tokens | `<user data>/nuvasha/accounts.json`, mode `0600` |
-| Shared resolved content | `<user data>/nuvasha/` shared client artifacts and assets |
-| Saved skins and cape textures | `<user data>/nuvasha/skins/` |
-| Version metadata | `<user cache>/nuvasha/versions/` |
-| API responses | `<user cache>/nuvasha/` API cache tree |
+| Account metadata | `<user data>/nuvashalauncher/accounts.json` |
+| Account tokens | `<user data>/nuvashalauncher/accounts.json`, mode `0600` |
+| Shared resolved content | `<user data>/nuvashalauncher/` shared client artifacts and assets |
+| Saved skins and cape textures | `<user data>/nuvashalauncher/skins/` |
+| Version metadata | `<user cache>/nuvashalauncher/versions/` |
+| API responses | `<user cache>/nuvashalauncher/` API cache tree |
 | GSettings | Installed schema and the user's GSettings backend |
 
 Writes that represent a complete document use temporary files and replacement
@@ -497,7 +497,7 @@ The repository uses a hand-written `Makefile`:
 - `make test-debug` and `make test-lsan` exercise the sanitizer build.
 - `make static-analysis` runs GCC's analyzer over source files.
 - `flatpak-builder` builds the manifest in
-  `packaging/flatpak/com.github.nuvashalauncher.Nuvasha.yml` with the GNOME 51
+  `packaging/flatpak/com.github.nuvashalauncher.nuvashalauncher.yml` with the GNOME 51
   runtime.
 
 Tests are intentionally layered. Parsers, path rules, argument builders,
@@ -513,10 +513,10 @@ errors for the release build, runs the test suite, and runs static analysis.
 
 Use the existing boundary that owns the behavior:
 
-- Add a persisted instance field to `NuvashaInstance`, its JSON conversion,
+- Add a persisted instance field to `nuvashalauncherInstance`, its JSON conversion,
   validation, manager update path, and relevant tests together.
 - Add a preference to the GSettings schema, then expose validated accessors in
-  `NuvashaSettings` and bind it in the settings UI.
+  `nuvashalauncherSettings` and bind it in the settings UI.
 - Add a network operation through the download service rather than creating a
   second `SoupSession` or an ad-hoc retry loop.
 - Keep response parsing in a plain data function with fixture-based tests;

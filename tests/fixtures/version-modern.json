@@ -61,7 +61,7 @@
       },
       {
         "rules": [ { "action": "allow", "features": { "is_demo_user": true } } ],
-        "value": "-Dminecraft.launcher.brand=nuvasha"
+        "value": "-Dminecraft.launcher.brand=nuvashalauncher"
       }
     ],
     "game": [

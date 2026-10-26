@@ -15,9 +15,9 @@
  * Everything lives under a temporary XDG root, so the real settings and
  * accounts are never touched. No display means the test skips itself. */
 
-#include "nuvasha-main-window.h"
-#include "nuvasha-main-window-model.h"
-#include "nuvasha-instance-manager.h"
+#include "nuvashalauncher-main-window.h"
+#include "nuvashalauncher-main-window-model.h"
+#include "nuvashalauncher-instance-manager.h"
 
 #include <adwaita.h>
 #include <gtk/gtk.h>
@@ -71,7 +71,7 @@ count_widget_type (GtkWidget *widget, GType type)
 static void
 test_main_window_model_owns_services (void)
 {
-  g_autoptr (NuvashaMainWindowModel) model = nuvasha_main_window_model_new ();
+  g_autoptr (nuvashalauncherMainWindowModel) model = nuvashalauncher_main_window_model_new ();
 
   g_assert_nonnull (model->settings);
   g_assert_nonnull (model->accounts);
@@ -154,7 +154,7 @@ find_instance_dialog (GtkWidget *widget, const char *id)
 
       if (ADW_IS_DIALOG (child))
         {
-          other = g_object_get_data (G_OBJECT (child), "nuvasha-instance-id");
+          other = g_object_get_data (G_OBJECT (child), "nuvashalauncher-instance-id");
 
           if (other != NULL && g_strcmp0 (other, id) == 0)
             return ADW_DIALOG (child);
@@ -293,22 +293,22 @@ on_activate (GApplication *application, gpointer user_data)
 {
   Run *run = user_data;
   g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaInstanceManager) manager = NULL;
-  g_autoptr (NuvashaInstance) instance = NULL;
+  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
+  g_autoptr (nuvashalauncherInstance) instance = NULL;
 
-  manager = nuvasha_instance_manager_new (NULL);
+  manager = nuvashalauncher_instance_manager_new (NULL);
   g_assert_nonnull (manager);
 
-  instance = nuvasha_instance_manager_create (manager, "Test", NULL, "1.21.1",
-                                          nuvasha_LOADER_VANILLA, NULL, &error);
+  instance = nuvashalauncher_instance_manager_create (manager, "Test", NULL, "1.21.1",
+                                          nuvashalauncher_LOADER_VANILLA, NULL, &error);
 
   if (instance == NULL)
     g_error ("the instance cannot be created: %s", error->message);
 
-  run->instance_id = g_strdup (nuvasha_instance_get_id (instance));
+  run->instance_id = g_strdup (nuvashalauncher_instance_get_id (instance));
 
   /* The window keeps the manager for as long as it lives. */
-  run->window = GTK_WINDOW (nuvasha_main_window_new (ADW_APPLICATION (application),
+  run->window = GTK_WINDOW (nuvashalauncher_main_window_new (ADW_APPLICATION (application),
                                                  manager));
   g_assert_nonnull (run->window);
 
@@ -347,7 +347,7 @@ main (int argc, char **argv)
 #endif
 
   /* The settings and the accounts of the window go under this root. */
-  root = g_dir_make_tmp ("nuvasha-window-XXXXXX", NULL);
+  root = g_dir_make_tmp ("nuvashalauncher-window-XXXXXX", NULL);
 
   if (root == NULL)
     {
@@ -378,7 +378,7 @@ main (int argc, char **argv)
   g_log_set_writer_func (count_criticals, NULL, NULL);
 
   application =
-    adw_application_new ("com.github.nuvashalauncher.nuvasha.windowtest",
+    adw_application_new ("com.github.nuvashalauncher.nuvashalauncher.windowtest",
                                      G_APPLICATION_DEFAULT_FLAGS);
   run.application = G_APPLICATION (application);
 

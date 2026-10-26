@@ -30,6 +30,6 @@ jobs:
       - name: Build Flatpak bundle
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
-          bundle: NuvashaLauncher.flatpak
-          manifest-path: packaging/flatpak/com.github.nuvashalauncher.Nuvasha.yml
+          bundle: nuvashalauncher.flatpak
+          manifest-path: packaging/flatpak/com.github.nuvashalauncher.nuvashalauncher.yml
           cache: true

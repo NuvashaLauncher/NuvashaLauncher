@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="nuvashalauncherSignInDialog" parent="AdwDialog">
+    <property name="title" translatable="yes">Sign In</property>
+    <property name="content-width">440</property>
+    <child>
+      <object class="AdwToolbarView" id="toolbar">
+        <child type="top">
+          <object class="AdwHeaderBar">
+            <property name="show-back-button">False</property>
+          </object>
+        </child>
+        <property name="content">
+          <object class="GtkBox" id="body">
+            <property name="css-classes">nuvashalauncher-dialog-content</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <property name="hexpand">True</property>
+            <property name="margin-start">24</property>
+            <property name="margin-end">24</property>
+            <property name="margin-top">12</property>
+            <property name="margin-bottom">18</property>
+            <child><object class="GtkLabel" id="instruction_label"/></child>
+            <child><object class="GtkLabel" id="code_label"/></child>
+            <child><object class="GtkButton" id="open_button"/></child>
+            <child><object class="GtkLabel" id="uri_label"><property name="visible">False</property></object></child>
+            <child>
+              <object class="GtkBox" id="waiting">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">8</property>
+                <child><object class="AdwSpinner" id="spinner"/></child>
+                <child><object class="GtkLabel" id="waiting_label"/></child>
+              </object>
+            </child>
+            <child><object class="GtkLabel" id="error_label"/></child>
+            <child><object class="GtkButton" id="retry_button"/></child>
+          </object>
+        </property>
+      </object>
+    </child>
+  </template>
+</interface>

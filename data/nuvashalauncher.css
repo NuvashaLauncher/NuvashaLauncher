@@ -1,0 +1,151 @@
+/* Shared nuvashalauncher UI styling. Keep layout in widgets; use this file for
+ * surfaces and reusable visual states so the launcher follows Adwaita themes. */
+
+.nuvashalauncher-main-toolbar {
+  padding: 0;
+}
+
+.nuvashalauncher-empty-state {
+  padding: 24px;
+}
+
+.nuvashalauncher-download-row {
+  padding: 6px 8px;
+}
+
+.nuvashalauncher-skin-actions {
+  padding-top: 6px;
+}
+
+.nuvashalauncher-settings-page > scrolledwindow {
+  padding-bottom: 12px;
+}
+
+.nuvashalauncher-content-toolbar {
+  padding: 6px 0;
+}
+
+.nuvashalauncher-modpack-results row {
+  border-radius: 0;
+}
+
+.nuvashalauncher-instance-row {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  min-height: 60px;
+}
+
+.nuvashalauncher-instance-icon {
+  border-radius: 50%;
+}
+
+.nuvashalauncher-content-icon {
+  border-radius: 50%;
+}
+
+.nuvashalauncher-content-selection-footer {
+  background-color: @window_bg_color;
+  box-shadow: none;
+}
+
+
+.nuvashalauncher-dialog-content {
+  padding: 24px;
+}
+
+.nuvashalauncher-modpack-details-content {
+  padding-bottom: 6px;
+}
+
+.nuvashalauncher-sign-in-code {
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: alpha(@accent_bg_color, 0.14);
+}
+
+.nuvashalauncher-sign-in-error {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: alpha(@error_bg_color, 0.14);
+}
+
+.nuvashalauncher-dialog-actions {
+  padding: 12px;
+}
+
+.nuvashalauncher-toolbar-actions {
+  padding: 6px 12px;
+}
+
+.nuvashalauncher-results-card {
+  margin: 12px;
+}
+
+.nuvashalauncher-main-content {
+  padding: 12px;
+}
+
+.nuvashalauncher-main-content > .card,
+.nuvashalauncher-main-content > scrolledwindow {
+  border-radius: 12px;
+}
+
+.nuvashalauncher-compact-toolbar {
+  padding: 4px 8px;
+}
+
+.nuvashalauncher-list-section {
+  margin: 0 12px 12px;
+}
+
+.nuvashalauncher-content-file-row,
+.nuvashalauncher-skin-row {
+  min-height: 52px;
+}
+
+.nuvashalauncher-status-content {
+  padding: 18px;
+}
+
+.nuvashalauncher-results-card,
+.nuvashalauncher-download-row,
+.nuvashalauncher-list-section {
+  border-radius: 12px;
+}
+
+.nuvashalauncher-dialog-content > .boxed-list,
+.nuvashalauncher-dialog-content > .card {
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+
+.nuvashalauncher-settings-page preferencesgroup,
+.nuvashalauncher-settings-page preferencesgroup > row {
+  margin-bottom: 2px;
+}
+
+.nuvashalauncher-toolbar-actions > button,
+.nuvashalauncher-skin-actions > button {
+  min-height: 34px;
+}
+
+.nuvashalauncher-empty-state,
+.nuvashalauncher-status-content {
+  border-radius: 14px;
+}
+
+.nuvashalauncher-status-page {
+  padding: 18px;
+}
+
+.nuvashalauncher-preferences-surface {
+  margin: 0 12px 12px;
+}
+
+.nuvashalauncher-preferences-surface > row {
+  min-height: 48px;
+}
+
+.nuvashalauncher-page-actions {
+  padding: 8px 12px;
+}

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="nuvashalauncherDownloadModpackDialog" parent="AdwDialog">
+    <property name="title" translatable="yes">Download Modpack</property>
+    <child><object class="AdwNavigationView" id="nav"/></child>
+  </template>
+</interface>

@@ -11,12 +11,12 @@
 
 #include <glib.h>
 
-#include "nuvasha-markdown.h"
+#include "nuvashalauncher-markdown.h"
 
 static void
 check (const char *input, const char *expected)
 {
-  g_autofree char *markup = nuvasha_markdown_inline (input);
+  g_autofree char *markup = nuvashalauncher_markdown_inline (input);
 
   g_assert_cmpstr (markup, ==, expected);
 }
@@ -52,7 +52,7 @@ test_link (void)
 static void
 test_null (void)
 {
-  g_assert_null (nuvasha_markdown_inline (NULL));
+  g_assert_null (nuvashalauncher_markdown_inline (NULL));
   g_print ("ok - no text is no markup\n");
 }
 

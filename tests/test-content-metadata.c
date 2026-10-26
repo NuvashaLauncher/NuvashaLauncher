@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#include "nuvasha-content-files-private.h"
+#include "nuvashalauncher-content-files-private.h"
 
 #include <archive.h>
 #include <archive_entry.h>
@@ -14,7 +14,7 @@
 static char *
 make_jar (const char *member, const char *contents)
 {
-  char *path = g_strdup ("/tmp/nuvasha-metadata-XXXXXX.jar");
+  char *path = g_strdup ("/tmp/nuvashalauncher-metadata-XXXXXX.jar");
   int fd = g_mkstemp (path);
   struct archive *archive = archive_write_new ();
   struct archive_entry *entry = archive_entry_new ();
@@ -45,11 +45,11 @@ main (void)
     "\"version\":\"1.2\",\"depends\":{\"other\":\"1\"}}");
   g_autofree char *truncated = make_jar (
     "fabric.mod.json", "{\"id\":\"example\",\"depends\":{\"other");
-  g_autoptr (NuvashaContentFile) file = g_new0 (NuvashaContentFile, 1);
-  g_autoptr (NuvashaContentFile) broken = g_new0 (NuvashaContentFile, 1);
+  g_autoptr (nuvashalauncherContentFile) file = g_new0 (nuvashalauncherContentFile, 1);
+  g_autoptr (nuvashalauncherContentFile) broken = g_new0 (nuvashalauncherContentFile, 1);
 
   file->path = g_strdup (valid);
-  nuvasha_content_apply_local_metadata (file, nuvasha_CONTENT_MOD);
+  nuvashalauncher_content_apply_local_metadata (file, nuvashalauncher_CONTENT_MOD);
   g_assert_true (file->local_metadata);
   g_assert_cmpstr (file->project_name, ==, "Example");
   g_assert_cmpstr (file->local_id, ==, "example");
@@ -59,7 +59,7 @@ main (void)
                    "other");
 
   broken->path = g_strdup (truncated);
-  nuvasha_content_apply_local_metadata (broken, nuvasha_CONTENT_MOD);
+  nuvashalauncher_content_apply_local_metadata (broken, nuvashalauncher_CONTENT_MOD);
   g_assert_false (broken->local_metadata);
   g_assert_cmpint (g_unlink (valid), ==, 0);
   g_assert_cmpint (g_unlink (truncated), ==, 0);

@@ -5,7 +5,7 @@
 /* symlink(), like realpath(), only exists under glibc's defaults. */
 #define _GNU_SOURCE
 
-/* Tests for nuvasha-minecraft-resolve.
+/* Tests for nuvashalauncher-minecraft-resolve.
  *
  * Maven paths, classifier choice, rule filtering, classpath order and
  * the arguments run against the documents in tests/fixtures. The
@@ -16,9 +16,9 @@
  * logging file. Nothing needs the internet and nothing needs a display.
  * Every test writes below its own temporary directory. */
 
-#include "nuvasha-minecraft-resolve.h"
+#include "nuvashalauncher-minecraft-resolve.h"
 
-#include "nuvasha-minecraft-versions.h"
+#include "nuvashalauncher-minecraft-versions.h"
 
 #include <archive.h>
 #include <archive_entry.h>
@@ -31,8 +31,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#ifndef nuvasha_TEST_FIXTURES
-#define nuvasha_TEST_FIXTURES "tests/fixtures"
+#ifndef nuvashalauncher_TEST_FIXTURES
+#define nuvashalauncher_TEST_FIXTURES "tests/fixtures"
 #endif
 
 /* The version documents these tests resolve go to the cache directory of
@@ -107,7 +107,7 @@ fixture_start (void)
 
   fixture.files =
     g_hash_table_new_full (g_str_hash, g_str_equal, g_free, free_string);
-  fixture.server = soup_server_new ("server-header", "nuvasha-test", NULL);
+  fixture.server = soup_server_new ("server-header", "nuvashalauncher-test", NULL);
 
   if (!soup_server_listen_local (fixture.server, 0, 0, &error))
     g_error ("the test server cannot listen: %s", error->message);
@@ -145,7 +145,7 @@ fixture_stop (void)
 static char *
 fixture_text (const char *name)
 {
-  g_autofree char *path = g_build_filename (nuvasha_TEST_FIXTURES, name, NULL);
+  g_autofree char *path = g_build_filename (nuvashalauncher_TEST_FIXTURES, name, NULL);
   g_autoptr (GError) error = NULL;
   char *contents = NULL;
 
@@ -155,12 +155,12 @@ fixture_text (const char *name)
   return contents;
 }
 
-static NuvashaVersionDescription *
+static nuvashalauncherVersionDescription *
 version_from_json (const char *json)
 {
   g_autoptr (GError) error = NULL;
-  NuvashaVersionDescription *description =
-    nuvasha_version_description_new_from_json (json, -1, &error);
+  nuvashalauncherVersionDescription *description =
+    nuvashalauncher_version_description_new_from_json (json, -1, &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (description);
@@ -168,7 +168,7 @@ version_from_json (const char *json)
   return description;
 }
 
-static NuvashaVersionDescription *
+static nuvashalauncherVersionDescription *
 fixture_version (const char *name)
 {
   g_autofree char *text = fixture_text (name);
@@ -176,12 +176,12 @@ fixture_version (const char *name)
   return version_from_json (text);
 }
 
-static NuvashaLibrary *
-find_library (NuvashaVersionDescription *description, const char *name)
+static nuvashalauncherLibrary *
+find_library (nuvashalauncherVersionDescription *description, const char *name)
 {
   for (guint i = 0; i < description->libraries->len; i++)
     {
-      NuvashaLibrary *library = g_ptr_array_index (description->libraries, i);
+      nuvashalauncherLibrary *library = g_ptr_array_index (description->libraries, i);
 
       if (g_str_equal (library->name, name))
         return library;
@@ -219,7 +219,7 @@ static char *
 make_test_dir (void)
 {
   g_autoptr (GError) error = NULL;
-  char *dir = g_dir_make_tmp ("nuvasha-resolve-XXXXXX", &error);
+  char *dir = g_dir_make_tmp ("nuvashalauncher-resolve-XXXXXX", &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (dir);
@@ -232,7 +232,7 @@ cache_start (void)
 {
   g_autoptr (GError) error = NULL;
 
-  cache_home = g_dir_make_tmp ("nuvasha-resolve-cache-XXXXXX", &error);
+  cache_home = g_dir_make_tmp ("nuvashalauncher-resolve-cache-XXXXXX", &error);
 
   if (cache_home == NULL)
     g_error ("the cache directory of the test cannot be made: %s",
@@ -246,8 +246,8 @@ cache_start (void)
 static void
 cache_stop (void)
 {
-  g_autofree char *nuvasha = g_build_filename (cache_home, "nuvasha", NULL);
-  g_autoptr (GDir) dir = g_dir_open (nuvasha, 0, NULL);
+  g_autofree char *nuvashalauncher = g_build_filename (cache_home, "nuvashalauncher", NULL);
+  g_autoptr (GDir) dir = g_dir_open (nuvashalauncher, 0, NULL);
 
   if (dir != NULL)
     {
@@ -255,13 +255,13 @@ cache_stop (void)
 
       while ((name = g_dir_read_name (dir)) != NULL)
         {
-          g_autofree char *path = g_build_filename (nuvasha, name, NULL);
+          g_autofree char *path = g_build_filename (nuvashalauncher, name, NULL);
 
           g_remove (path);
         }
     }
 
-  g_rmdir (nuvasha);
+  g_rmdir (nuvashalauncher);
   g_rmdir (cache_home);
 }
 
@@ -351,17 +351,17 @@ async_run_clear (AsyncRun *run)
 static void
 test_maven_paths (void)
 {
-  g_autofree char *plain = nuvasha_resolve_maven_path ("org.lwjgl:lwjgl:3.3.3");
+  g_autofree char *plain = nuvashalauncher_resolve_maven_path ("org.lwjgl:lwjgl:3.3.3");
   g_autofree char *classified =
-    nuvasha_resolve_maven_path ("com.mojang:jtracy:1.14.38:natives-linux");
-  g_autofree char *zip = nuvasha_resolve_maven_path (
+    nuvashalauncher_resolve_maven_path ("com.mojang:jtracy:1.14.38:natives-linux");
+  g_autofree char *zip = nuvashalauncher_resolve_maven_path (
       "de.oceanlabs.mcp:mcp_config:1.21-20240808.103037@zip");
   g_autofree char *added =
-    nuvasha_resolve_maven_path_classified ("org.lwjgl.lwjgl:lwjgl-platform:2.9.0",
+    nuvashalauncher_resolve_maven_path_classified ("org.lwjgl.lwjgl:lwjgl-platform:2.9.0",
                                        "natives-linux");
-  g_autofree char *with_extension = nuvasha_resolve_maven_path_classified (
+  g_autofree char *with_extension = nuvashalauncher_resolve_maven_path_classified (
       "org.lwjgl:lwjgl:3.3.3", "natives-linux@zip");
-  g_autofree char *kept = nuvasha_resolve_maven_path_classified (
+  g_autofree char *kept = nuvashalauncher_resolve_maven_path_classified (
       "com.mojang:jtracy:1.14.38:natives-linux", "natives-windows");
 
   g_assert_cmpstr (plain, ==, "org/lwjgl/lwjgl/3.3.3/lwjgl-3.3.3.jar");
@@ -381,16 +381,16 @@ test_maven_paths (void)
 
   /* Nothing that would step out of the libraries directory is a
      coordinate. */
-  g_assert_null (nuvasha_resolve_maven_path ("org.lwjgl:lwjgl"));
-  g_assert_null (nuvasha_resolve_maven_path ("org.lwjgl::3.3.3"));
-  g_assert_null (nuvasha_resolve_maven_path ("org.lwjgl:lwjgl:"));
-  g_assert_null (nuvasha_resolve_maven_path ("../evil:lwjgl:3.3.3"));
-  g_assert_null (nuvasha_resolve_maven_path ("org.lwjgl:..:3.3.3"));
-  g_assert_null (nuvasha_resolve_maven_path ("org.lwjgl:lwjgl:3.3.3:../../x"));
-  g_assert_null (nuvasha_resolve_maven_path ("org/lwjgl:lwjgl:3.3.3"));
-  g_assert_null (nuvasha_resolve_maven_path ("org.lwjgl:lwjgl:3.3.3@a/b"));
-  g_assert_null (nuvasha_resolve_maven_path ("org.lwjgl:lwjgl:3.3.3:natives/../x"));
-  g_assert_null (nuvasha_resolve_maven_path (NULL));
+  g_assert_null (nuvashalauncher_resolve_maven_path ("org.lwjgl:lwjgl"));
+  g_assert_null (nuvashalauncher_resolve_maven_path ("org.lwjgl::3.3.3"));
+  g_assert_null (nuvashalauncher_resolve_maven_path ("org.lwjgl:lwjgl:"));
+  g_assert_null (nuvashalauncher_resolve_maven_path ("../evil:lwjgl:3.3.3"));
+  g_assert_null (nuvashalauncher_resolve_maven_path ("org.lwjgl:..:3.3.3"));
+  g_assert_null (nuvashalauncher_resolve_maven_path ("org.lwjgl:lwjgl:3.3.3:../../x"));
+  g_assert_null (nuvashalauncher_resolve_maven_path ("org/lwjgl:lwjgl:3.3.3"));
+  g_assert_null (nuvashalauncher_resolve_maven_path ("org.lwjgl:lwjgl:3.3.3@a/b"));
+  g_assert_null (nuvashalauncher_resolve_maven_path ("org.lwjgl:lwjgl:3.3.3:natives/../x"));
+  g_assert_null (nuvashalauncher_resolve_maven_path (NULL));
 
   g_print ("ok - maven paths are built from coordinates\n");
 }
@@ -402,19 +402,19 @@ test_maven_paths (void)
 static void
 test_entry_names (void)
 {
-  g_assert_true (nuvasha_resolve_entry_name_is_safe ("liblwjgl.so"));
-  g_assert_true (nuvasha_resolve_entry_name_is_safe ("org/lwjgl/liblwjgl.so"));
-  g_assert_true (nuvasha_resolve_entry_name_is_safe ("...weird name..."));
+  g_assert_true (nuvashalauncher_resolve_entry_name_is_safe ("liblwjgl.so"));
+  g_assert_true (nuvashalauncher_resolve_entry_name_is_safe ("org/lwjgl/liblwjgl.so"));
+  g_assert_true (nuvashalauncher_resolve_entry_name_is_safe ("...weird name..."));
 
-  g_assert_false (nuvasha_resolve_entry_name_is_safe (NULL));
-  g_assert_false (nuvasha_resolve_entry_name_is_safe (""));
-  g_assert_false (nuvasha_resolve_entry_name_is_safe ("/etc/passwd"));
-  g_assert_false (nuvasha_resolve_entry_name_is_safe ("../escape.so"));
-  g_assert_false (nuvasha_resolve_entry_name_is_safe ("a/../../escape.so"));
-  g_assert_false (nuvasha_resolve_entry_name_is_safe ("a/.."));
-  g_assert_false (nuvasha_resolve_entry_name_is_safe ("a//b.so"));
-  g_assert_false (nuvasha_resolve_entry_name_is_safe ("a\\b.so"));
-  g_assert_false (nuvasha_resolve_entry_name_is_safe ("a/./b.so"));
+  g_assert_false (nuvashalauncher_resolve_entry_name_is_safe (NULL));
+  g_assert_false (nuvashalauncher_resolve_entry_name_is_safe (""));
+  g_assert_false (nuvashalauncher_resolve_entry_name_is_safe ("/etc/passwd"));
+  g_assert_false (nuvashalauncher_resolve_entry_name_is_safe ("../escape.so"));
+  g_assert_false (nuvashalauncher_resolve_entry_name_is_safe ("a/../../escape.so"));
+  g_assert_false (nuvashalauncher_resolve_entry_name_is_safe ("a/.."));
+  g_assert_false (nuvashalauncher_resolve_entry_name_is_safe ("a//b.so"));
+  g_assert_false (nuvashalauncher_resolve_entry_name_is_safe ("a\\b.so"));
+  g_assert_false (nuvashalauncher_resolve_entry_name_is_safe ("a/./b.so"));
 
   g_print ("ok - only safe entry names are accepted\n");
 }
@@ -425,7 +425,7 @@ test_entry_names (void)
 
 /* A document whose only library publishes one natives jar per
    machine. */
-static NuvashaVersionDescription *
+static nuvashalauncherVersionDescription *
 architecture_document (void)
 {
   return version_from_json (
@@ -443,42 +443,42 @@ architecture_document (void)
 static void
 test_native_classifiers (void)
 {
-  g_autoptr (NuvashaVersionDescription) legacy =
+  g_autoptr (nuvashalauncherVersionDescription) legacy =
     fixture_version ("version-legacy.json");
-  g_autoptr (NuvashaVersionDescription) arch = architecture_document ();
-  g_autoptr (NuvashaRuleContext) x86 =
-    nuvasha_rule_context_new_for ("linux", "x86_64", NULL);
-  g_autoptr (NuvashaRuleContext) arm =
-    nuvasha_rule_context_new_for ("linux", "aarch64", NULL);
-  g_autoptr (NuvashaRuleContext) other =
-    nuvasha_rule_context_new_for ("linux", "riscv64", NULL);
-  g_autoptr (NuvashaRuleContext) windows =
-    nuvasha_rule_context_new_for ("windows", "x86_64", NULL);
-  NuvashaLibrary *platform =
+  g_autoptr (nuvashalauncherVersionDescription) arch = architecture_document ();
+  g_autoptr (nuvashalauncherRuleContext) x86 =
+    nuvashalauncher_rule_context_new_for ("linux", "x86_64", NULL);
+  g_autoptr (nuvashalauncherRuleContext) arm =
+    nuvashalauncher_rule_context_new_for ("linux", "aarch64", NULL);
+  g_autoptr (nuvashalauncherRuleContext) other =
+    nuvashalauncher_rule_context_new_for ("linux", "riscv64", NULL);
+  g_autoptr (nuvashalauncherRuleContext) windows =
+    nuvashalauncher_rule_context_new_for ("windows", "x86_64", NULL);
+  nuvashalauncherLibrary *platform =
     find_library (legacy, "org.lwjgl.lwjgl:lwjgl-platform:2.9.0");
-  NuvashaLibrary *scala =
+  nuvashalauncherLibrary *scala =
     find_library (legacy, "org.scala-lang:scala-library:2.10.2");
-  NuvashaLibrary *per_machine = find_library (arch, "org.lwjgl:lwjgl:3.3.3");
+  nuvashalauncherLibrary *per_machine = find_library (arch, "org.lwjgl:lwjgl:3.3.3");
 
   /* The natives table names the classifier directly. */
-  g_assert_cmpstr (nuvasha_resolve_native_classifier (platform, x86), ==,
+  g_assert_cmpstr (nuvashalauncher_resolve_native_classifier (platform, x86), ==,
                    "natives-linux");
 
-  g_assert_cmpstr (nuvasha_resolve_native_classifier (platform, windows), ==,
+  g_assert_cmpstr (nuvashalauncher_resolve_native_classifier (platform, windows), ==,
                    "natives-windows");
   /* A library that publishes no classifier has no natives to pick. */
-  g_assert_null (nuvasha_resolve_native_classifier (scala, x86));
+  g_assert_null (nuvashalauncher_resolve_native_classifier (scala, x86));
 
   /* One jar per machine: the architecture decides the name, with every
      spelling that is published for it tried. */
-  g_assert_cmpstr (nuvasha_resolve_native_classifier (per_machine, x86), ==,
+  g_assert_cmpstr (nuvashalauncher_resolve_native_classifier (per_machine, x86), ==,
                    "natives-linux-x86_64");
-  g_assert_cmpstr (nuvasha_resolve_native_classifier (per_machine, arm), ==,
+  g_assert_cmpstr (nuvashalauncher_resolve_native_classifier (per_machine, arm), ==,
                    "natives-linux-arm64");
 
-  g_assert_null (nuvasha_resolve_native_classifier (per_machine, other));
+  g_assert_null (nuvashalauncher_resolve_native_classifier (per_machine, other));
   /* The names of another system are not picked up. */
-  g_assert_null (nuvasha_resolve_native_classifier (per_machine, windows));
+  g_assert_null (nuvashalauncher_resolve_native_classifier (per_machine, windows));
 
   g_print ("ok - the natives classifier of this machine is chosen\n");
 }
@@ -498,7 +498,7 @@ test_native_classifiers (void)
 static void
 test_classifier_is_not_natives (void)
 {
-  g_autoptr (NuvashaVersionDescription) description = version_from_json (
+  g_autoptr (nuvashalauncherVersionDescription) description = version_from_json (
       "{\"id\": \"x\", \"type\": \"release\", \"libraries\": ["
       " {\"name\": \"io.netty:netty-transport-native-epoll:4.2.16:linux-x86_64\","
       "  \"downloads\": {\"artifact\": {\"path\":"
@@ -508,22 +508,22 @@ test_classifier_is_not_natives (void)
       "  \"downloads\": {\"artifact\": {\"path\":"
       "   \"org/lwjgl/lwjgl/3.4.3/lwjgl-3.4.3-natives-linux.jar\","
       "   \"sha1\": \"bb\", \"url\": \"http://x/lwjgl-natives.jar\"}}}]}");
-  g_autoptr (NuvashaRuleContext) context =
-    nuvasha_rule_context_new_for ("linux", "x86_64", NULL);
+  g_autoptr (nuvashalauncherRuleContext) context =
+    nuvashalauncher_rule_context_new_for ("linux", "x86_64", NULL);
   g_autofree char *libraries =
     g_build_filename ("/data", "libraries", NULL);
   g_autofree char *classpath =
-    nuvasha_resolve_classpath (description, context, libraries, NULL);
+    nuvashalauncher_resolve_classpath (description, context, libraries, NULL);
   g_autoptr (GPtrArray) files =
-    nuvasha_resolve_library_files (description, context, libraries);
+    nuvashalauncher_resolve_library_files (description, context, libraries);
   g_auto (GStrv) entries = NULL;
 
   g_assert_cmpuint (description->libraries->len, ==, 2);
   g_assert_cmpuint (files->len, ==, 2);
 
   /* Neither of them is a jar to unpack. */
-  g_assert_false (((NuvashaResolveFile *) g_ptr_array_index (files, 0))->natives);
-  g_assert_false (((NuvashaResolveFile *) g_ptr_array_index (files, 1))->natives);
+  g_assert_false (((nuvashalauncherResolveFile *) g_ptr_array_index (files, 0))->natives);
+  g_assert_false (((nuvashalauncherResolveFile *) g_ptr_array_index (files, 1))->natives);
 
   entries = g_strsplit (classpath, ":", -1);
   g_assert_cmpuint (g_strv_length (entries), ==, 2);
@@ -540,16 +540,16 @@ test_classifier_is_not_natives (void)
 static void
 test_rule_filtering (void)
 {
-  g_autoptr (NuvashaVersionDescription) legacy =
+  g_autoptr (nuvashalauncherVersionDescription) legacy =
     fixture_version ("version-legacy.json");
-  g_autoptr (NuvashaRuleContext) linux =
-    nuvasha_rule_context_new_for ("linux", "x86_64", NULL);
-  g_autoptr (NuvashaRuleContext) mac =
-    nuvasha_rule_context_new_for ("osx", "x86_64", NULL);
-  NuvashaLibrary *windows_only =
+  g_autoptr (nuvashalauncherRuleContext) linux =
+    nuvashalauncher_rule_context_new_for ("linux", "x86_64", NULL);
+  g_autoptr (nuvashalauncherRuleContext) mac =
+    nuvashalauncher_rule_context_new_for ("osx", "x86_64", NULL);
+  nuvashalauncherLibrary *windows_only =
     find_library (legacy, "com.example:windows-only:1.0");
-  NuvashaLibrary *linux_only = find_library (legacy, "com.example:linux-only:1.0");
-  NuvashaLibrary *scala =
+  nuvashalauncherLibrary *linux_only = find_library (legacy, "com.example:linux-only:1.0");
+  nuvashalauncherLibrary *scala =
     find_library (legacy, "org.scala-lang:scala-library:2.10.2");
   g_autofree char *libraries =
     g_build_filename ("/data", "libraries", NULL);
@@ -557,22 +557,22 @@ test_rule_filtering (void)
 
   /* A rule that names another system does not match, and when no rule
      matches the library is out. */
-  g_assert_false (nuvasha_library_allowed (windows_only, linux));
-  g_assert_false (nuvasha_library_allowed (windows_only, mac));
-  g_assert_true (nuvasha_library_allowed (linux_only, linux));
-  g_assert_false (nuvasha_library_allowed (linux_only, mac));
+  g_assert_false (nuvashalauncher_library_allowed (windows_only, linux));
+  g_assert_false (nuvashalauncher_library_allowed (windows_only, mac));
+  g_assert_true (nuvashalauncher_library_allowed (linux_only, linux));
+  g_assert_false (nuvashalauncher_library_allowed (linux_only, mac));
   /* No rules at all means allowed everywhere. */
-  g_assert_true (nuvasha_library_allowed (scala, mac));
+  g_assert_true (nuvashalauncher_library_allowed (scala, mac));
 
   /* Only the libraries that apply here are planned, and a library that
      names no jar of its own contributes nothing. */
-  files = nuvasha_resolve_library_files (legacy, linux, libraries);
+  files = nuvashalauncher_resolve_library_files (legacy, linux, libraries);
   g_assert_nonnull (files);
   g_assert_cmpuint (files->len, ==, 2); /* the scala jar, the natives jar */
 
   for (guint i = 0; i < files->len; i++)
     {
-      const NuvashaResolveFile *file = g_ptr_array_index (files, i);
+      const nuvashalauncherResolveFile *file = g_ptr_array_index (files, i);
 
       g_assert_nonnull (file->url);
       g_assert_nonnull (file->path);
@@ -584,11 +584,11 @@ test_rule_filtering (void)
   /* The one natives jar of the document is marked as one, and it is the
      first library of the document that has a jar at all. */
   {
-    const NuvashaResolveFile *file = g_ptr_array_index (files, 0);
+    const nuvashalauncherResolveFile *file = g_ptr_array_index (files, 0);
 
     g_assert_true (file->natives);
     g_assert_cmpstr (g_ptr_array_index (file->exclude, 0), ==, "META-INF/");
-    g_assert_false (((NuvashaResolveFile *) g_ptr_array_index (files, 1))->natives);
+    g_assert_false (((nuvashalauncherResolveFile *) g_ptr_array_index (files, 1))->natives);
   }
 
   g_print ("ok - rules decide which libraries this machine uses\n");
@@ -597,12 +597,12 @@ test_rule_filtering (void)
 static void
 test_classpath_order (void)
 {
-  g_autoptr (NuvashaVersionDescription) modern =
+  g_autoptr (nuvashalauncherVersionDescription) modern =
     fixture_version ("version-modern.json");
-  g_autoptr (NuvashaVersionDescription) legacy =
+  g_autoptr (nuvashalauncherVersionDescription) legacy =
     fixture_version ("version-legacy.json");
-  g_autoptr (NuvashaRuleContext) context =
-    nuvasha_rule_context_new_for ("linux", "x86_64", NULL);
+  g_autoptr (nuvashalauncherRuleContext) context =
+    nuvashalauncher_rule_context_new_for ("linux", "x86_64", NULL);
   g_autofree char *libraries =
     g_build_filename ("/data", "libraries", NULL);
   g_autofree char *client =
@@ -611,7 +611,7 @@ test_classpath_order (void)
   g_autofree char *legacy_classpath = NULL;
   g_auto (GStrv) entries = NULL;
 
-  classpath = nuvasha_resolve_classpath (modern, context, libraries, client);
+  classpath = nuvashalauncher_resolve_classpath (modern, context, libraries, client);
   g_assert_nonnull (classpath);
 
   entries = g_strsplit (classpath, ":", -1);
@@ -634,7 +634,7 @@ test_classpath_order (void)
   /* The client jar goes last. */
   g_assert_cmpstr (entries[3], ==, client);
 
-  legacy_classpath = nuvasha_resolve_classpath (legacy, context, libraries, client);
+  legacy_classpath = nuvashalauncher_resolve_classpath (legacy, context, libraries, client);
 
   g_strfreev (entries);
   entries = g_strsplit (legacy_classpath, ":", -1);
@@ -659,16 +659,16 @@ test_classpath_order (void)
 static void
 test_arguments (void)
 {
-  g_autoptr (NuvashaVersionDescription) modern =
+  g_autoptr (nuvashalauncherVersionDescription) modern =
     fixture_version ("version-modern.json");
-  g_autoptr (NuvashaVersionDescription) legacy =
+  g_autoptr (nuvashalauncherVersionDescription) legacy =
     fixture_version ("version-legacy.json");
-  g_autoptr (NuvashaRuleContext) context =
-    nuvasha_rule_context_new_for ("linux", "x86_64", NULL);
-  g_autoptr (GPtrArray) jvm = nuvasha_resolve_jvm_arguments (modern, context);
-  g_autoptr (GPtrArray) game = nuvasha_resolve_game_arguments (modern, context);
+  g_autoptr (nuvashalauncherRuleContext) context =
+    nuvashalauncher_rule_context_new_for ("linux", "x86_64", NULL);
+  g_autoptr (GPtrArray) jvm = nuvashalauncher_resolve_jvm_arguments (modern, context);
+  g_autoptr (GPtrArray) game = nuvashalauncher_resolve_game_arguments (modern, context);
   g_autoptr (GPtrArray) old_game =
-    nuvasha_resolve_game_arguments (legacy, context);
+    nuvashalauncher_resolve_game_arguments (legacy, context);
 
   /* The jvm arguments of this machine: the plain ones plus the one that
      asks for a bigger stack. The ones for macOS, for Windows and for a
@@ -754,7 +754,7 @@ typedef struct
   AsyncRun *run;
   gboolean success;
   GError *error;
-  NuvashaTaskScope *operation;
+  nuvashalauncherTaskScope *operation;
 } ExtractCall;
 
 static void
@@ -763,8 +763,8 @@ extract_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 {
   ExtractCall *call = user_data;
 
-  call->success = nuvasha_resolve_extract_natives_finish (result, &call->error);
-  nuvasha_task_scope_unref (call->operation);
+  call->success = nuvashalauncher_resolve_extract_natives_finish (result, &call->error);
+  nuvashalauncher_task_scope_unref (call->operation);
   call->operation = NULL;
 
   if (--call->run->pending == 0)
@@ -777,8 +777,8 @@ extract_one (const char *jar, const char *natives_dir, GPtrArray *exclude,
              ExtractCall *call)
 {
   g_autoptr (GPtrArray) jars =
-    g_ptr_array_new_with_free_func ((GDestroyNotify) nuvasha_resolve_file_free);
-  NuvashaResolveFile *file = g_new0 (NuvashaResolveFile, 1);
+    g_ptr_array_new_with_free_func ((GDestroyNotify) nuvashalauncher_resolve_file_free);
+  nuvashalauncherResolveFile *file = g_new0 (nuvashalauncherResolveFile, 1);
 
   file->path = g_strdup (jar);
   file->natives = TRUE;
@@ -787,7 +787,7 @@ extract_one (const char *jar, const char *natives_dir, GPtrArray *exclude,
   g_ptr_array_add (jars, file);
 
   call->run->pending++;
-  call->operation = nuvasha_resolve_extract_natives_async (jars, natives_dir,
+  call->operation = nuvashalauncher_resolve_extract_natives_async (jars, natives_dir,
                                                        extract_finished, call);
 }
 
@@ -909,7 +909,7 @@ test_malicious_jar (void)
     { "../escaped.so", "outside", FALSE },
   };
   static const JarEntry absolute[] = {
-    { "/tmp/nuvasha-resolve-escaped.so", "outside", FALSE },
+    { "/tmp/nuvashalauncher-resolve-escaped.so", "outside", FALSE },
   };
   static const JarEntry nested[] = {
     { "sub/../../escaped.so", "outside", FALSE },
@@ -938,8 +938,8 @@ test_malicious_jar (void)
   async_run_clear (&run);
 
   g_assert_null (call.success);
-  g_assert_error (call.error, nuvasha_RESOLVE_ERROR,
-                  nuvasha_RESOLVE_ERROR_UNSAFE_PATH);
+  g_assert_error (call.error, nuvashalauncher_RESOLVE_ERROR,
+                  nuvashalauncher_RESOLVE_ERROR_UNSAFE_PATH);
   {
     g_autofree char *escaped = g_build_filename (dir, "escaped.so", NULL);
 
@@ -955,9 +955,9 @@ test_malicious_jar (void)
   async_run_clear (&run);
 
   g_assert_null (call.success);
-  g_assert_error (call.error, nuvasha_RESOLVE_ERROR,
-                  nuvasha_RESOLVE_ERROR_UNSAFE_PATH);
-  g_assert_false (g_file_test ("/tmp/nuvasha-resolve-escaped.so",
+  g_assert_error (call.error, nuvashalauncher_RESOLVE_ERROR,
+                  nuvashalauncher_RESOLVE_ERROR_UNSAFE_PATH);
+  g_assert_false (g_file_test ("/tmp/nuvashalauncher-resolve-escaped.so",
                                G_FILE_TEST_EXISTS));
   g_clear_error (&call.error);
 
@@ -968,8 +968,8 @@ test_malicious_jar (void)
   async_run_clear (&run);
 
   g_assert_null (call.success);
-  g_assert_error (call.error, nuvasha_RESOLVE_ERROR,
-                  nuvasha_RESOLVE_ERROR_UNSAFE_PATH);
+  g_assert_error (call.error, nuvashalauncher_RESOLVE_ERROR,
+                  nuvashalauncher_RESOLVE_ERROR_UNSAFE_PATH);
   g_clear_error (&call.error);
 
   /* A link inside a jar is skipped: honouring one would put a name of
@@ -1049,14 +1049,14 @@ test_symlinked_directory (void)
 typedef struct
 {
   AsyncRun *run;
-  NuvashaVersionManifest *manifest;
-  NuvashaResolvedVersion *resolved;
+  nuvashalauncherVersionManifest *manifest;
+  nuvashalauncherResolvedVersion *resolved;
   GError *error;
   guint progress_calls;
   guint last_done;
   guint last_total;
   char *last_stage;
-  NuvashaTaskScope *operation;
+  nuvashalauncherTaskScope *operation;
 } ResolveCall;
 
 static void
@@ -1065,8 +1065,8 @@ manifest_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 {
   ResolveCall *call = user_data;
 
-  call->manifest = nuvasha_version_manifest_fetch_finish (result, &call->error);
-  nuvasha_task_scope_unref (call->operation);
+  call->manifest = nuvashalauncher_version_manifest_fetch_finish (result, &call->error);
+  nuvashalauncher_task_scope_unref (call->operation);
   call->operation = NULL;
 
   if (--call->run->pending == 0)
@@ -1079,8 +1079,8 @@ resolve_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 {
   ResolveCall *call = user_data;
 
-  call->resolved = nuvasha_resolve_version_finish (result, &call->error);
-  nuvasha_task_scope_unref (call->operation);
+  call->resolved = nuvashalauncher_resolve_version_finish (result, &call->error);
+  nuvashalauncher_task_scope_unref (call->operation);
   call->operation = NULL;
 
   if (--call->run->pending == 0)
@@ -1088,7 +1088,7 @@ resolve_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 }
 
 static void
-resolve_progress (const NuvashaResolveProgress *progress, gpointer user_data)
+resolve_progress (const nuvashalauncherResolveProgress *progress, gpointer user_data)
 {
   ResolveCall *call = user_data;
 
@@ -1278,19 +1278,19 @@ fetch_manifest (AsyncRun *run, ResolveCall *call, const char *url)
   call->run = run;
   run->pending++;
 
-  call->operation = nuvasha_version_manifest_fetch_async (url, manifest_finished,
+  call->operation = nuvashalauncher_version_manifest_fetch_async (url, manifest_finished,
                                                       call);
 }
 
 static void
-start_resolve (AsyncRun *run, ResolveCall *call, NuvashaVersionManifest *manifest,
+start_resolve (AsyncRun *run, ResolveCall *call, nuvashalauncherVersionManifest *manifest,
                const char *version_id, const char *data_dir,
                const char *natives_dir, const char *asset_base_url)
 {
   call->run = run;
   run->pending++;
 
-  call->operation = nuvasha_resolve_version_async (manifest, version_id, data_dir,
+  call->operation = nuvashalauncher_resolve_version_async (manifest, version_id, data_dir,
                                                natives_dir, asset_base_url,
                                                resolve_progress, call,
                                                resolve_finished, call);
@@ -1460,7 +1460,7 @@ test_resolve_modern (void)
   g_assert_true (g_file_test (logging_file, G_FILE_TEST_EXISTS));
   g_assert_cmpstr (call.resolved->logging_argument, ==, path);
 
-  /* The placeholders nuvasha knows are in, the ones it does not are not. */
+  /* The placeholders nuvashalauncher knows are in, the ones it does not are not. */
   g_assert_cmpuint (call.resolved->jvm_arguments->len, ==, 3);
   g_free (path);
   path = g_strdup_printf ("-Djava.library.path=%s", natives_dir);
@@ -1487,7 +1487,7 @@ test_resolve_modern (void)
   g_assert_cmpuint (call.last_done, ==, call.last_total);
 
   /* A second resolve asks the network for nothing. */
-  g_clear_pointer (&call.resolved, nuvasha_resolved_version_free);
+  g_clear_pointer (&call.resolved, nuvashalauncher_resolved_version_free);
   g_clear_error (&call.error);
   fixture.hits = 0;
 
@@ -1501,7 +1501,7 @@ test_resolve_modern (void)
   g_assert_cmpstr (call.resolved->classpath, ==, classpath);
 
   g_clear_object (&call.manifest);
-  g_clear_pointer (&call.resolved, nuvasha_resolved_version_free);
+  g_clear_pointer (&call.resolved, nuvashalauncher_resolved_version_free);
   g_clear_error (&call.error);
   g_clear_pointer (&text, g_free);
   g_free (call.last_stage);
@@ -1576,7 +1576,7 @@ test_resolve_legacy_assets (void)
   }
 
   g_clear_object (&call.manifest);
-  g_clear_pointer (&call.resolved, nuvasha_resolved_version_free);
+  g_clear_pointer (&call.resolved, nuvashalauncher_resolved_version_free);
   g_clear_error (&call.error);
   g_clear_pointer (&text, g_free);
   g_free (call.last_stage);
@@ -1614,7 +1614,7 @@ test_resolve_failures (void)
   async_run_wait (&run);
 
   g_assert_null (call.resolved);
-  g_assert_error (call.error, nuvasha_MC_ERROR, nuvasha_MC_ERROR_NOT_FOUND);
+  g_assert_error (call.error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_NOT_FOUND);
 
   g_clear_error (&call.error);
   g_clear_object (&call.manifest);
