@@ -5,13 +5,6 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 msgid "Cancel"
 msgstr "Mégsem"
-
-
-msgid "cannot clear credentials for account \"%s\": %s"
-msgstr "nem sikerült törölni a(z) „%s” fiók hitelesítő adatait: %s"
-
-msgid "cannot store credentials for account \"%s\""
-msgstr "nem sikerült menteni a(z) „%s” fiók hitelesítő adatait"
 msgid "Confirm"
 msgstr "Erősítse meg"
 
@@ -881,9 +874,6 @@ msgstr "Microsoft sign-in failed. Try again."
 
 msgid "Open in browser"
 msgstr "Megnyitás böngészőben"
-#: src/nuvasha-main-window.c
-msgid "Edit instances"
-msgstr "Példányok szerkesztése"
 
 #: src/nuvasha-main-window.c
 msgid "%u/%u selected"
@@ -913,9 +903,6 @@ msgstr "Szerkesztési mód"
 msgid "Fetching updates"
 msgstr "Frissítések lekérése"
 
-#: src/nuvasha-content-page-ui.c
-msgid "Progress %u/%u"
-msgstr "Progress %u/%u"
 
 #: src/nuvasha-content-page-ui.c
 msgid "Progress"

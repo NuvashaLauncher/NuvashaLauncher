@@ -5,13 +5,6 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 msgid "Cancel"
 msgstr "Avboka"
-
-
-msgid "cannot clear credentials for account \"%s\": %s"
-msgstr "kan inte rensa autentiseringsuppgifterna för kontot ”%s”: %s"
-
-msgid "cannot store credentials for account \"%s\""
-msgstr "kan inte spara autentiseringsuppgifterna för kontot ”%s”"
 msgid "Confirm"
 msgstr "Bekräfta"
 
@@ -881,9 +874,6 @@ msgstr "Microsoft sign-in failed. Try again."
 
 msgid "Open in browser"
 msgstr "Öppna i webbläsare"
-#: src/nuvasha-main-window.c
-msgid "Edit instances"
-msgstr "Redigera instanser"
 
 #: src/nuvasha-main-window.c
 msgid "%u/%u selected"
@@ -913,9 +903,6 @@ msgstr "Redigeringsläge"
 msgid "Fetching updates"
 msgstr "Hämtar uppdateringar"
 
-#: src/nuvasha-content-page-ui.c
-msgid "Progress %u/%u"
-msgstr "Progress %u/%u"
 
 #: src/nuvasha-content-page-ui.c
 msgid "Progress"

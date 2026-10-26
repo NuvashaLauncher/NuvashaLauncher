@@ -3,13 +3,6 @@ msgstr ""
 "Language: pl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-
-msgid "cannot clear credentials for account \"%s\": %s"
-msgstr "nie można usunąć danych uwierzytelniających konta „%s”: %s"
-
-msgid "cannot store credentials for account \"%s\""
-msgstr "nie można zapisać danych uwierzytelniających konta „%s”"
 msgid "Cancel"
 msgstr "Anuluj"
 
@@ -917,9 +910,6 @@ msgstr "Microsoft sign-in failed. Try again."
 
 msgid "Open in browser"
 msgstr "Otwórz w przeglądarce"
-#: src/nuvasha-main-window.c
-msgid "Edit instances"
-msgstr "Edytuj instancje"
 
 #: src/nuvasha-main-window.c
 msgid "%u/%u selected"
@@ -949,9 +939,6 @@ msgstr "Tryb edycji"
 msgid "Fetching updates"
 msgstr "Pobieranie aktualizacji"
 
-#: src/nuvasha-content-page-ui.c
-msgid "Progress %u/%u"
-msgstr "Progress %u/%u"
 
 #: src/nuvasha-content-page-ui.c
 msgid "Progress"

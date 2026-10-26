@@ -3,13 +3,6 @@ msgstr ""
 "Language: tr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-
-msgid "cannot clear credentials for account \"%s\": %s"
-msgstr "\"%s\" hesabının kimlik bilgileri temizlenemiyor: %s"
-
-msgid "cannot store credentials for account \"%s\""
-msgstr "\"%s\" hesabının kimlik bilgileri kaydedilemiyor"
 msgid "Cancel"
 msgstr "İptal"
 
@@ -918,9 +911,6 @@ msgstr "Microsoft sign-in failed. Try again."
 
 msgid "Open in browser"
 msgstr "Tarayıcıda aç"
-#: src/nuvasha-main-window.c
-msgid "Edit instances"
-msgstr "Örnekleri düzenle"
 
 #: src/nuvasha-main-window.c
 msgid "%u/%u selected"
@@ -950,9 +940,6 @@ msgstr "Düzenleme modu"
 msgid "Fetching updates"
 msgstr "Güncellemeler alınıyor"
 
-#: src/nuvasha-content-page-ui.c
-msgid "Progress %u/%u"
-msgstr "Progress %u/%u"
 
 #: src/nuvasha-content-page-ui.c
 msgid "Progress"

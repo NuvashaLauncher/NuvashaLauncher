@@ -3,13 +3,6 @@ msgstr ""
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-
-
-msgid "cannot clear credentials for account \"%s\": %s"
-msgstr "アカウント「%s」の認証情報を削除できません: %s"
-
-msgid "cannot store credentials for account \"%s\""
-msgstr "アカウント「%s」の認証情報を保存できません"
 msgid "Cancel"
 msgstr "キャンセル"
 
@@ -915,9 +908,6 @@ msgstr "Microsoft sign-in failed. Try again."
 
 msgid "Open in browser"
 msgstr "ブラウザーで開く"
-#: src/nuvasha-main-window.c
-msgid "Edit instances"
-msgstr "インスタンスを編集"
 
 #: src/nuvasha-main-window.c
 msgid "%u/%u selected"
@@ -947,9 +937,6 @@ msgstr "編集モード"
 msgid "Fetching updates"
 msgstr "更新を取得中"
 
-#: src/nuvasha-content-page-ui.c
-msgid "Progress %u/%u"
-msgstr "Progress %u/%u"
 
 #: src/nuvasha-content-page-ui.c
 msgid "Progress"

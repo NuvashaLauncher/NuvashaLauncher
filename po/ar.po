@@ -5,13 +5,6 @@ msgstr ""
 "Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : (n%100>=3 && n%100<=10) ? 3 : (n%100>=11) ? 4 : 5);\n"
 msgid "Cancel"
 msgstr "يلغي"
-
-
-msgid "cannot clear credentials for account \"%s\": %s"
-msgstr "تعذر مسح بيانات اعتماد الحساب \"%s\": %s"
-
-msgid "cannot store credentials for account \"%s\""
-msgstr "تعذر تخزين بيانات اعتماد الحساب \"%s\""
 msgid "Confirm"
 msgstr "يتأكد"
 
@@ -889,9 +882,6 @@ msgstr "Microsoft sign-in failed. Try again."
 
 msgid "Open in browser"
 msgstr "افتح في المتصفح"
-#: src/nuvasha-main-window.c
-msgid "Edit instances"
-msgstr "تحرير المثيلات"
 
 #: src/nuvasha-main-window.c
 msgid "%u/%u selected"
@@ -921,9 +911,6 @@ msgstr "وضع التحرير"
 msgid "Fetching updates"
 msgstr "جارٍ جلب التحديثات"
 
-#: src/nuvasha-content-page-ui.c
-msgid "Progress %u/%u"
-msgstr "Progress %u/%u"
 
 #: src/nuvasha-content-page-ui.c
 msgid "Progress"

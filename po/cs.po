@@ -5,13 +5,6 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 msgid "Cancel"
 msgstr "Zrušit"
-
-
-msgid "cannot clear credentials for account \"%s\": %s"
-msgstr "nelze odstranit přihlašovací údaje účtu „%s“: %s"
-
-msgid "cannot store credentials for account \"%s\""
-msgstr "nelze uložit přihlašovací údaje účtu „%s“"
 msgid "Confirm"
 msgstr "Potvrdit"
 
@@ -883,9 +876,6 @@ msgstr "Microsoft sign-in failed. Try again."
 
 msgid "Open in browser"
 msgstr "Otevřít v prohlížeči"
-#: src/nuvasha-main-window.c
-msgid "Edit instances"
-msgstr "Upravit instance"
 
 #: src/nuvasha-main-window.c
 msgid "%u/%u selected"
@@ -915,9 +905,6 @@ msgstr "Režim úprav"
 msgid "Fetching updates"
 msgstr "Načítání aktualizací"
 
-#: src/nuvasha-content-page-ui.c
-msgid "Progress %u/%u"
-msgstr "Progress %u/%u"
 
 #: src/nuvasha-content-page-ui.c
 msgid "Progress"

@@ -5,13 +5,6 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : (n==0 || (n%100>0 && n%100<20)) ? 1 : 2);\n"
 msgid "Cancel"
 msgstr "Anula"
-
-
-msgid "cannot clear credentials for account \"%s\": %s"
-msgstr "acreditările contului „%s” nu pot fi șterse: %s"
-
-msgid "cannot store credentials for account \"%s\""
-msgstr "acreditările contului „%s” nu pot fi salvate"
 msgid "Confirm"
 msgstr "Confirma"
 
@@ -883,9 +876,6 @@ msgstr "Microsoft sign-in failed. Try again."
 
 msgid "Open in browser"
 msgstr "Deschide în browser"
-#: src/nuvasha-main-window.c
-msgid "Edit instances"
-msgstr "Editează instanțele"
 
 #: src/nuvasha-main-window.c
 msgid "%u/%u selected"
@@ -915,9 +905,6 @@ msgstr "Mod de editare"
 msgid "Fetching updates"
 msgstr "Se preiau actualizările"
 
-#: src/nuvasha-content-page-ui.c
-msgid "Progress %u/%u"
-msgstr "Progress %u/%u"
 
 #: src/nuvasha-content-page-ui.c
 msgid "Progress"

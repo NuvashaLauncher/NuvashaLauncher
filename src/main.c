@@ -261,6 +261,21 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
   g_variant_dict_lookup (options, "remove-instance", "&s", &remove_instance_id);
   g_variant_dict_lookup (options, "account", "&s", &account_id);
 
+  {
+    guint actions = (show_version || show_instances || show_accounts) +
+                    (switch_account != NULL) + (remove_account_key != NULL) +
+                    (remove_instance_id != NULL) + (launch_id != NULL) +
+                    (import_path != NULL || file_path != NULL);
+
+    if (actions > 1 || (account_id != NULL && launch_id == NULL))
+      {
+        g_application_command_line_printerr (
+          command_line,
+          "choose one command at a time; --account requires --launch INSTANCE_ID.\n");
+        return 2;
+      }
+  }
+
   arguments = g_application_command_line_get_arguments (command_line,
                                                         &argument_count);
   for (int i = 1; i < argument_count; i++)
@@ -375,11 +390,11 @@ main (int argc, char **argv)
   g_application_add_main_option (G_APPLICATION (app), "launch", 'l', 0,
                                  G_OPTION_ARG_STRING, "Launch an instance by ID",
                                  "INSTANCE_ID");
-  g_application_add_main_option (G_APPLICATION (app), "list-instances", 0, 0,
-                                 G_OPTION_ARG_NONE, "List instance IDs and names",
+   g_application_add_main_option (G_APPLICATION (app), "list-instances", 0, 0,
+                                  G_OPTION_ARG_NONE, "List instance UUIDs and names",
                                   NULL);
   g_application_add_main_option (G_APPLICATION (app), "list-accounts", 0, 0,
-                                 G_OPTION_ARG_NONE, "List account UUIDs and names", NULL);
+                                  G_OPTION_ARG_NONE, "List account UUIDs and names", NULL);
   g_application_add_main_option (G_APPLICATION (app), "switch-account", 0, 0,
                                  G_OPTION_ARG_STRING, "Make an account active", "ACCOUNT");
   g_application_add_main_option (G_APPLICATION (app), "remove-account", 0, 0,
