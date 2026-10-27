@@ -188,7 +188,7 @@ nuvashalauncher_java_select (GPtrArray  *javas,
   if (required_major == 0)
     return nuvashalauncher_java_best_compatible (javas, 0);
 
-  /* Automatic selection must not silently choose a different major. A
+  /* Automatic selection must not choose a different major. A
    * newer JVM may be technically compatible, but it is not the runtime the
    * required major version and can behave differently with loaders and launchers.
    * Leave the automatic choice unset until the required major is present. */

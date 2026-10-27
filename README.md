@@ -39,10 +39,10 @@ Play with Microsoft or offline accounts, switch accounts per launch, and manage
 accounts from the command line. Customize skins, skin models, and capes while
 keeping previews available when the menu is reopened.
 
-### Lightweight and native
+### Native Linux application
 
-Built with GTK 4 and libadwaita, nuvashalauncher is a focused, native-feeling Linux
-launcher. It supports both regular native installations and Flatpak packaging.
+Built with GTK 4 and libadwaita, nuvashalauncher runs on Linux. It can be built
+as a regular installation or packaged with Flatpak.
 
 ## Installation
 

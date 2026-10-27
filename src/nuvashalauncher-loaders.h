@@ -18,8 +18,8 @@
  *   Quilt Meta    meta.quiltmc.org/v3/versions/loader/<game>  the same
  *                 shape, and the profile at the same place.
  *
- * Both publish their libraries the way a maven repository does: a name
- * and the address of the repository, not a download. That is turned into
+ * Both publish their libraries as repository names and URLs, not as direct
+ * downloads. That is turned into
  * the downloads a version document carries, so the one resolve module
  * fetches everything from the library list of the merged document.
  *

@@ -392,8 +392,7 @@ on_open_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   if (uri == NULL)
     return;
 
-  /* GIO hands the folder to the desktop the way a double click in a file
-     manager does: nothing goes through a shell. */
+  /* Open the folder through the desktop, without invoking a shell. */
   g_app_info_launch_default_for_uri_async (uri, NULL, NULL, open_finished,
                                            g_strdup (uri));
 }

@@ -59,7 +59,7 @@ char *nuvashalauncher_instance_default_icon_path (void);
 
 /* (transfer full) NFC-normalized display name with Unicode surrounding
  * whitespace removed. Control characters remain in the result so validation
- * can reject them rather than silently changing what the user entered. */
+ * can reject them instead of changing the user's input. */
 char *nuvashalauncher_instance_normalize_name (const char *name);
 
 /* Creates an instance and validates every field. @id may be NULL to

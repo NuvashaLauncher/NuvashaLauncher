@@ -7,9 +7,8 @@
  *
  * The chain is seven requests in a row, and every one of them answers
  * either with something to go on with or with a refusal. What has to be
- * right is reading both: the code to type, the tokens, the user, what the
- * account owns and who the player is — and the refusals, in the words a
- * user can do something with rather than as the numbers a service sent.
+ * right is reading the code, tokens, user, account ownership, player profile,
+ * and useful error messages rather than raw service status codes.
  *
  * The answers come from the fixtures in tests/fixtures, in the shape the
  * services document, so nothing here needs the network and nothing waits

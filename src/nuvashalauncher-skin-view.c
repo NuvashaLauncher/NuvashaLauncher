@@ -367,7 +367,7 @@ draw_model (nuvashalauncherSkinView *self)
   add_box (v, -.1f, -24, -2, 4, 12, 4, 16, 48, 4, 12, 4, 64);
    add_box (v, -4 - arm_width, -12, -2, arm_width, 12, 4, arm_x, 16, arm_width, 12, 4, 64);
    add_box (v, 4, -12, -2, arm_width, 12, 4, 32, 48, arm_width, 12, 4, 64);
-  /* The second layer is deliberately slightly larger: this is the hat,
+  /* The second layer is slightly larger because it is the hat,
    * jacket, sleeves and trousers layer of the Minecraft skin format. */
   add_box (v, -4.5f, -.5f, -4.5f, 9, 9, 9, 32, 0, 8, 8, 8, 64);
   add_box (v, -4.25f, -12.25f, -2.25f, 8.5f, 12.5f, 4.5f, 16, 32, 8, 12, 4, 64);

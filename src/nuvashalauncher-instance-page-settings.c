@@ -95,9 +95,7 @@ on_manifest_loaded (GObject *source G_GNUC_UNUSED,
                     GAsyncResult *result,
                     gpointer user_data);
 
-/* Picking another version stores it the way the name row stores a
- * name. The row answers nothing while it is still loading the list or
- * after it failed, so there is no version to store then. */
+/* Store a selected version only after the version list has loaded. */
 static void
 on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
                      gpointer user_data)

@@ -122,7 +122,7 @@ nuvashalauncherLaunchSession nuvashalauncher_launch_session_for (const nuvashala
 /* Replace each ${name} placeholder in @value with its corresponding value.
  * A name the table does not hold is left exactly as the
  * document wrote it, because a launcher that does not know a
- * placeholder must not silently drop it. (transfer full) */
+ * unknown placeholders are preserved. (transfer full) */
 char *nuvashalauncher_launch_substitute (const char  *value,
                              GHashTable  *placeholders);
 

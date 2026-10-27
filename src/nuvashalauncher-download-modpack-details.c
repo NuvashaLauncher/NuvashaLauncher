@@ -147,9 +147,7 @@ plain_label (const char *text)
 
 /* The words the dialog shows while the description and the versions are
    on their way. */
-/* Closes the open pack, leaving the list the whole dialog again. The row
- * of the pack is the way in and the way out, so nothing has to stand
- * above the pack and push its name down. */
+/* Close the details view and return to the project list. */
 void
 close_details (nuvashalauncherDownloadModpackDialog *self)
 {

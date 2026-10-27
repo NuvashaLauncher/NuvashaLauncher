@@ -14,7 +14,7 @@
 
 /* Remove a tree relative to an already-open parent directory. All directory
  * traversal is descriptor-relative and uses O_NOFOLLOW, so a pathname race
- * cannot turn cleanup into a walk through a symlink. Errors are deliberately
+ * cannot turn cleanup into a walk through a symlink. Errors are
  * best-effort here: callers use this helper for cleanup and do not expect a
  * missing path to make the original operation fail. */
 static gboolean

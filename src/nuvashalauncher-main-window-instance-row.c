@@ -193,8 +193,8 @@ on_instance_row_action (GtkButton *button, gpointer user_data)
   switch (action)
     {
     case INSTANCE_ROW_EXPORT:
-      /* Reuse the existing export flow, but keep its settings page out of
-       * the way: the page is only an operation owner for the popup/dialog. */
+      /* Reuse the export flow without showing the settings page. The page
+       * owns the popup operation. */
       page = nuvashalauncher_instance_page_new (self->model->manager, instance,
                                         self->model->settings,
                                         window_launcher (self, id));
@@ -516,8 +516,7 @@ create_instance_row (gpointer item, gpointer user_data)
   g_signal_connect_object (play, "clicked", G_CALLBACK (on_play_clicked), self, 0);
   g_object_set_data (G_OBJECT (row), "nuvashalauncher-play", play);
 
-  /* The icon follows the instance's; the connection goes with the
-     image, so a row that is destroyed stops following it on its own. */
+  /* Keep the row icon in sync with the instance while the row exists. */
   row_set_icon (GTK_IMAGE (icon), instance);
   g_signal_connect_object (instance, "notify::icon",
                            G_CALLBACK (on_row_icon_changed), icon, 0);
@@ -541,4 +540,3 @@ create_instance_row (gpointer item, gpointer user_data)
 
   return GTK_WIDGET (row);
 }
-

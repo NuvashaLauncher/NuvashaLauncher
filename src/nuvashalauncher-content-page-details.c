@@ -201,11 +201,8 @@ version_factory (void)
 
 /* The words the page shows while the description and the versions are
  * on their way. */
-/* Closes the page of the open project, leaving the list the whole width
- * of the page again. An answer that is still on its way finds no page to
- * fill and does nothing. The list row of the project is the way in and
- * the way out, so nothing here has to stand above the project and push
- * its name down. */
+/* Close the project details view and return to the list. A late response is
+ * ignored when the details view no longer exists. */
 void
 nuvashalauncher_content_page_close_detail (nuvashalauncherContentPage *self)
 {
@@ -299,10 +296,8 @@ details_content (nuvashalauncherContentPage *self)
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller), GTK_WIDGET (box));
   gtk_widget_set_vexpand (scroller, TRUE);
 
-  /* The foot: every version this instance can take, the checkmark that
-     puts the one shown on the list the button at the foot of the other
-     page installs, and the button that installs this one on its own.
-     The newest is what the dropdown shows from the start. */
+  /* Show the available versions, the selected version, and the install
+     action. The newest version is selected initially. */
    watch_widget (&self->project.details_check,
                  GTK_WIDGET (gtk_builder_get_object (details_builder, "details-check")));
   gtk_widget_set_valign (GTK_WIDGET (self->project.details_check), GTK_ALIGN_CENTER);
@@ -555,10 +550,7 @@ open_project_page (nuvashalauncherContentPage *self, nuvashalauncherModrinthProj
   }
 }
 
-/* A click on a row opens its project in the other half. A click on the
- * row of the project that is already open closes it again: the list is
- * the way in and the way out, so no button has to stand over the project
- * and push it down. */
+/* Open the selected project, or close its details view if it is already open. */
 void
 nuvashalauncher_content_page_on_result_activated (AdwActionRow *row, gpointer user_data)
 {

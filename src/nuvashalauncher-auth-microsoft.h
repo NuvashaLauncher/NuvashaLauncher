@@ -152,7 +152,7 @@ nuvashalauncherTaskScope *nuvashalauncher_auth_refresh_async (const nuvashalaunc
 nuvashalauncherAccount *nuvashalauncher_auth_refresh_finish (GAsyncResult *result, GError **error);
 
 /* ---------------------------------------------------------- *
- * One answer of the chain on its own
+ * Individual authentication responses
  *
  * Each service response is parsed independently. Tests provide fixtures to
  * these functions, which are also used by the live authentication chain.
