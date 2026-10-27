@@ -24,8 +24,7 @@ jobs:
             flatpak \
             flatpak-builder \
             git \
-            make \
-            xvfb
+            make
           flatpak remote-add --if-not-exists flathub \
             https://flathub.org/repo/flathub.flatpakrepo
 
