@@ -1,6 +1,19 @@
 #include "test-download-common.h"
 
 static void
+call_file_limited (AsyncRun *run, AsyncCall *call, const char *url,
+                   const char *dest_path, goffset max_size)
+{
+  call->run = run;
+  run->pending++;
+  call->operation = nuvashalauncher_download_file_limited_async (
+    nuvashalauncher_downloads_get_service (), url, dest_path, NULL,
+    G_CHECKSUM_SHA256, max_size, progress_cb, download_finished, call);
+  nuvashalauncher_task_scope_follow_cancellable (call->operation,
+                                                 run->cancellable);
+}
+
+static void
 test_successful_download (void)
 {
   g_autofree char *dir = make_test_dir ();
