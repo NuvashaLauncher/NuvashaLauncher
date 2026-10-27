@@ -8,9 +8,9 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     container:
-      image: fedora:latest
+      image: ubuntu:26.04
       options: --privileged
     steps:
       - name: Check out source
@@ -18,13 +18,14 @@ jobs:
 
       - name: Install Flatpak tooling
         run: |
-          dnf install -y \
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y \
             ca-certificates \
             flatpak \
             flatpak-builder \
             git \
             make \
-            xorg-x11-server-Xvfb
+            xvfb
           flatpak remote-add --if-not-exists flathub \
             https://flathub.org/repo/flathub.flatpakrepo
 
