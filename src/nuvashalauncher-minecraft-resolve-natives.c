@@ -87,11 +87,9 @@ is_plain_directory (GFile *file, GError **error)
 static gboolean
 make_parents (const char *root, const char *relative, GError **error)
 {
-  g_auto (GStrv) parts = NULL;
+  g_auto (GStrv) parts = g_strsplit (relative, "/", -1);
   g_autofree char *path = g_strdup (root);
   g_autoptr (GFile) child = NULL;
-
-  parts = g_strsplit (relative, "/", -1);
 
   /* The last part is the file itself. */
   for (guint i = 0; parts[i + 1] != NULL; i++)
