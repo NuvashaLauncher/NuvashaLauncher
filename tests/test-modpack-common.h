@@ -31,7 +31,7 @@
  * Helpers
  * ---------------------------------------------------------- */
 
-static char *
+static inline inline char *
 make_tmp_dir (void)
 {
   g_autoptr (GError) error = NULL;
@@ -44,7 +44,7 @@ make_tmp_dir (void)
 
 /* Synchronous recursive delete, test cleanup only. Symlinks are
  * removed, never followed. */
-static void
+static inline void
 remove_recursive (const char *path)
 {
   g_autoptr (GFile) file = g_file_new_for_path (path);
@@ -82,7 +82,7 @@ remove_recursive (const char *path)
   g_file_delete (file, NULL, NULL);
 }
 
-static char *
+static inline inline char *
 read_file (const char *path)
 {
   g_autoptr (GError) error = NULL;
@@ -97,7 +97,7 @@ read_file (const char *path)
 /* An index of a pack with the members the format requires. @files is
  * what goes inside the files array, brackets and commas included: an
  * empty pack passes "" and one file passes "{...}". */
-static char *
+static inline inline char *
 pack_index (const char *name, const char *files, const char *deps)
 {
   return g_strdup_printf (
@@ -125,7 +125,7 @@ typedef struct
  * entry carries its target and nothing else: the writer puts the
  * target in the entry itself, and writing data alongside it would
  * make the archive inconsistent. */
-static void
+static inline void
 zip_write (const char *path, const ZipEntry *entries, gsize count)
 {
   struct archive *archive = archive_write_new ();
@@ -172,7 +172,7 @@ zip_write (const char *path, const ZipEntry *entries, gsize count)
 }
 
 /* Whether a directory holds a temporary directory of an install. */
-static gboolean
+static inline gboolean
 has_temp_dir (const char *directory)
 {
   GDir *dir = g_dir_open (directory, 0, NULL);
@@ -204,7 +204,7 @@ typedef struct
   nuvashalauncherTaskScope *operation;
 } AsyncWait;
 
-static gboolean
+static inline gboolean
 async_timeout (gpointer user_data)
 {
   AsyncWait *wait = user_data;
@@ -215,7 +215,7 @@ async_timeout (gpointer user_data)
   return G_SOURCE_REMOVE;
 }
 
-static void
+static inline void
 async_wait_run (AsyncWait *wait)
 {
   wait->loop = g_main_loop_new (NULL, FALSE);
@@ -231,7 +231,7 @@ async_wait_run (AsyncWait *wait)
   g_assert_false (wait->timed_out);
 }
 
-static void
+static inline void
 verify_file_done (GObject *source G_GNUC_UNUSED,
                   GAsyncResult *result,
                   gpointer user_data)
@@ -245,7 +245,7 @@ verify_file_done (GObject *source G_GNUC_UNUSED,
 }
 
 /* Both hashes of the manifest against the bytes on disk, in place. */
-static gboolean
+static inline gboolean
 verify_now (const nuvashalauncherModpackFile *file, const char *path, GError **error)
 {
   AsyncWait wait = { 0 };
@@ -258,7 +258,7 @@ verify_now (const nuvashalauncherModpackFile *file, const char *path, GError **e
   return wait.value;
 }
 
-static void
+static inline void
 install_done (GObject *source G_GNUC_UNUSED,
               GAsyncResult *result,
               gpointer user_data)
@@ -274,7 +274,7 @@ install_done (GObject *source G_GNUC_UNUSED,
   g_main_loop_quit (wait->loop);
 }
 
-static void
+static inline void
 export_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
              gpointer user_data)
 {
@@ -286,7 +286,7 @@ export_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_main_loop_quit (wait->loop);
 }
 
-static void
+static inline void
 index_update_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                    gpointer user_data)
 {
@@ -299,7 +299,7 @@ index_update_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 }
 
 /* The whole install, in place. */
-static nuvashalauncherInstance *
+static inline nuvashalauncherInstance *
 install_now (nuvashalauncherModpack *pack, nuvashalauncherInstanceManager *manager, const char *name,
              const char *directory, GError **error)
 {
@@ -313,7 +313,7 @@ install_now (nuvashalauncherModpack *pack, nuvashalauncherInstanceManager *manag
   return wait.instance;
 }
 
-static gboolean
+static inline gboolean
 export_now (nuvashalauncherInstance *instance, const char *path, GError **error)
 {
   AsyncWait wait = { 0 };
@@ -327,7 +327,7 @@ export_now (nuvashalauncherInstance *instance, const char *path, GError **error)
   return wait.value;
 }
 
-static gboolean
+static inline gboolean
 index_update_now (const char *directory, nuvashalauncherContentType type,
                   nuvashalauncherContentIndexEntry *entry, GError **error)
 {
@@ -341,7 +341,7 @@ index_update_now (const char *directory, nuvashalauncherContentType type,
   return wait.value;
 }
 
-static guint
+static inline guint
 manager_count (nuvashalauncherInstanceManager *manager)
 {
   return g_list_model_get_n_items (
@@ -354,7 +354,7 @@ manager_count (nuvashalauncherInstanceManager *manager)
 
 /* Four files that between them carry every state of env: required,
  * optional, unsupported, and no env object at all. */
-static const char *FILES_JSON =
+static const char *FILES_JSON G_GNUC_UNUSED =
   "{\"path\":\"mods/sodium.jar\","
   "\"hashes\":{\"sha1\":\"0123456789abcdef0123456789abcdef01234567\","
   "\"sha512\":\"0123456789abcdef0123456789abcdef\"},"
@@ -383,7 +383,7 @@ static const char *FILES_JSON =
 
 
 
-static void
+static inline void
 assert_loader (const char *deps_json, nuvashalauncherLoader loader,
                const char *minecraft, const char *loader_version)
 {
@@ -420,7 +420,7 @@ assert_loader (const char *deps_json, nuvashalauncherLoader loader,
  * What the format refuses
  * ---------------------------------------------------------- */
 
-static void
+static inline void
 expect_refused (const char *json, guint code, const char *what)
 {
   g_autoptr (GError) error = NULL;
@@ -448,7 +448,7 @@ expect_refused (const char *json, guint code, const char *what)
  * What an install leaves behind
  * ---------------------------------------------------------- */
 
-static nuvashalauncherInstanceManager *
+static inline nuvashalauncherInstanceManager *
 manager_new (const char *data_dir)
 {
   g_autoptr (GError) error = NULL;

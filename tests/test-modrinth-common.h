@@ -24,7 +24,7 @@
 #define nuvashalauncher_TEST_FIXTURES "tests/fixtures"
 #endif
 
-static char *
+static inline inline char *
 read_fixture (const char *name)
 {
   g_autofree char *path = g_build_filename (nuvashalauncher_TEST_FIXTURES, name, NULL);
@@ -38,7 +38,7 @@ read_fixture (const char *name)
 }
 
 /* A search for @version and @loader, with the strings it owns. */
-static nuvashalauncherModrinthSearch *
+static inline nuvashalauncherModrinthSearch *
 search_new (nuvashalauncherContentType type, const char *query, const char *version,
             const char *loader)
 {
@@ -102,7 +102,7 @@ search_new (nuvashalauncherContentType type, const char *query, const char *vers
 /* The version of the fixture with this number, whatever its game
    versions: the one object of the answer nuvashalauncher would refuse is needed on
    its own to be asked about. (transfer full) */
-static nuvashalauncherModrinthVersion *
+static inline nuvashalauncherModrinthVersion *
 version_from_fixture (const char *json, const char *number)
 {
   g_autoptr (JsonParser) parser = json_parser_new ();
@@ -184,7 +184,7 @@ typedef struct
   nuvashalauncherTaskScope *operation;
 } ScanWait;
 
-static void
+static inline void
 on_scan_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                   gpointer user_data)
 {
@@ -205,7 +205,7 @@ on_scan_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
 /* Reads a content folder and waits for it, which is the asynchronous
  * way the page does the same. (transfer full) */
-static GPtrArray *
+static inline GPtrArray *
 scan (const char *instance, nuvashalauncherContentType type)
 {
   GPtrArray *files = NULL;

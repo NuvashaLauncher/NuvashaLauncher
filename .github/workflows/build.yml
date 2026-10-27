@@ -8,27 +8,28 @@ jobs:
   linux:
     name: Linux ${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
-    container: fedora:latest
+    container: ubuntu:26.04
     strategy:
       fail-fast: false
       matrix:
         include:
           - arch: x86_64
-            runner: ubuntu-24.04
+            runner: ubuntu-26.04
           - arch: ARM64
-            runner: ubuntu-24.04-arm
+            runner: ubuntu-26.04-arm
 
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install dependencies
         run: |
-          dnf install -y \
-             gcc gcc-c++ make pkgconf-pkg-config gettext \
-             libasan libubsan \
-             glib2-devel gtk4-devel libadwaita-devel libepoxy-devel \
-             json-glib-devel libsoup3-devel libarchive-devel
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y \
+             gcc g++ make pkg-config gettext \
+             libasan8 libubsan1 \
+             libglib2.0-dev libgtk-4-dev libadwaita-1-dev libepoxy-dev \
+             libjson-glib-dev libsoup-3.0-dev libarchive-dev
 
       - name: Build
         run: make fast CFLAGS="-std=c17 -Wall -Wextra -Wpedantic -Werror -MMD -MP"
