@@ -352,37 +352,6 @@ manager_count (nuvashalauncherInstanceManager *manager)
  * What the index of a pack says
  * ---------------------------------------------------------- */
 
-/* Four files that between them carry every state of env: required,
- * optional, unsupported, and no env object at all. */
-static const char *FILES_JSON G_GNUC_UNUSED =
-  "{\"path\":\"mods/sodium.jar\","
-  "\"hashes\":{\"sha1\":\"0123456789abcdef0123456789abcdef01234567\","
-  "\"sha512\":\"0123456789abcdef0123456789abcdef\"},"
-  "\"fileSize\":12345,"
-  "\"downloads\":[\"https://cdn.modrinth.com/data/aa/v1/sodium.jar\"],"
-  "\"env\":{\"client\":\"required\",\"server\":\"unsupported\"}},"
-  "{\"path\":\"mods/lithium.jar\","
-  "\"hashes\":{\"sha1\":\"1123456789abcdef0123456789abcdef01234567\","
-  "\"sha512\":\"1123456789abcdef0123456789abcdef\"},"
-  "\"fileSize\":6789,"
-  "\"downloads\":[\"https://cdn.modrinth.com/data/bb/v1/lithium.jar\"],"
-  "\"env\":{\"client\":\"optional\",\"server\":\"required\"}},"
-  "{\"path\":\"mods/caffeine.jar\","
-  "\"hashes\":{\"sha1\":\"2123456789abcdef0123456789abcdef01234567\","
-  "\"sha512\":\"2123456789abcdef0123456789abcdef\"},"
-  "\"fileSize\":111,"
-  "\"downloads\":[\"https://cdn.modrinth.com/data/cc/v1/caffeine.jar\"],"
-  "\"env\":{\"client\":\"unsupported\",\"server\":\"required\"}},"
-  "{\"path\":\"config/both.toml\","
-  "\"hashes\":{\"sha1\":\"3123456789abcdef0123456789abcdef01234567\","
-  "\"sha512\":\"3123456789abcdef0123456789abcdef\"},"
-  "\"fileSize\":42,"
-  "\"downloads\":[\"https://cdn.modrinth.com/data/dd/v1/both.toml\"]}";
-
-
-
-
-
 static inline void
 assert_loader (const char *deps_json, nuvashalauncherLoader loader,
                const char *minecraft, const char *loader_version)
