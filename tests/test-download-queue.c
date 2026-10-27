@@ -1,6 +1,16 @@
 #include "test-download-common.h"
 
 static void
+released_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+               gpointer user_data)
+{
+  guint *finished = user_data;
+
+  (void) nuvashalauncher_download_file_finish (result, NULL);
+  (*finished)--;
+}
+
+static void
 test_many_at_once (void)
 {
   g_autofree char *dir = make_test_dir ();

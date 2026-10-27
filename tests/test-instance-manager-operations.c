@@ -1,5 +1,81 @@
 #include "test-instance-manager-common.h"
 
+/* Helpers for the asynchronous manager operations tested in this file. */
+static gboolean
+async_timeout (gpointer user_data)
+{
+  AsyncCall *call = user_data;
+  call->timed_out = TRUE;
+  g_main_loop_quit (call->loop);
+  return G_SOURCE_REMOVE;
+}
+
+static void
+async_call_run (AsyncCall *call)
+{
+  call->watchdog = g_timeout_add_seconds (15, async_timeout, call);
+  g_main_loop_run (call->loop);
+  if (!call->timed_out)
+    g_source_remove (call->watchdog);
+  g_assert_false (call->timed_out);
+}
+
+static void
+async_call_clear (AsyncCall *call)
+{
+  if (call->loop != NULL)
+    {
+      g_main_loop_unref (call->loop);
+      call->loop = NULL;
+    }
+  g_clear_error (&call->error);
+}
+
+static void
+duplicate_finished (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  AsyncCall *call = user_data;
+  call->result = nuvashalauncher_instance_manager_duplicate_finish (
+    nuvashalauncher_INSTANCE_MANAGER (source), result, &call->error);
+  nuvashalauncher_task_scope_unref (call->operation);
+  call->operation = NULL;
+  g_main_loop_quit (call->loop);
+}
+
+static void
+delete_finished (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  AsyncCall *call = user_data;
+  call->success = nuvashalauncher_instance_manager_delete_finish (
+    nuvashalauncher_INSTANCE_MANAGER (source), result, &call->error);
+  nuvashalauncher_task_scope_unref (call->operation);
+  call->operation = NULL;
+  g_main_loop_quit (call->loop);
+}
+
+static void
+open_folder_finished (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  AsyncCall *call = user_data;
+  call->success = nuvashalauncher_instance_manager_open_folder_finish (
+    nuvashalauncher_INSTANCE_MANAGER (source), result, &call->error);
+  nuvashalauncher_task_scope_unref (call->operation);
+  call->operation = NULL;
+  g_main_loop_quit (call->loop);
+}
+
+static void
+change_directory_finished (GObject *source, GAsyncResult *result,
+                            gpointer user_data)
+{
+  AsyncCall *call = user_data;
+  call->success = nuvashalauncher_instance_manager_change_directory_finish (
+    nuvashalauncher_INSTANCE_MANAGER (source), result, &call->error);
+  nuvashalauncher_task_scope_unref (call->operation);
+  call->operation = NULL;
+  g_main_loop_quit (call->loop);
+}
+
 static void
 test_rename (void)
 {

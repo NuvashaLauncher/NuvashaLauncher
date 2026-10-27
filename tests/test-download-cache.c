@@ -1,6 +1,63 @@
 #include "test-download-common.h"
 
 static void
+json_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+               gpointer user_data)
+{
+  AsyncCall *call = user_data;
+  call->parser = nuvashalauncher_download_json_finish (result, &call->error);
+  call_finished (call);
+}
+
+static void
+call_json (AsyncRun *run, AsyncCall *call, const char *url)
+{
+  call->run = run;
+  run->pending++;
+  call->operation = nuvashalauncher_download_json_async (
+    nuvashalauncher_downloads_get_service (), url, json_finished, call);
+  nuvashalauncher_task_scope_follow_cancellable (call->operation, run->cancellable);
+}
+
+static void
+call_cached_json (AsyncRun *run, AsyncCall *call, const char *url)
+{
+  call->run = run;
+  run->pending++;
+  call->operation = nuvashalauncher_download_json_cached_async (
+    nuvashalauncher_downloads_get_service (), url, json_finished, call);
+  nuvashalauncher_task_scope_follow_cancellable (call->operation, run->cancellable);
+}
+
+static void
+clear_api_cache (void)
+{
+  g_autofree char *directory = nuvashalauncher_cache_get_api_directory ();
+  GDir *dir = g_dir_open (directory, 0, NULL);
+  const char *name = NULL;
+
+  if (dir == NULL)
+    return;
+  while ((name = g_dir_read_name (dir)) != NULL)
+    {
+      g_autofree char *path = g_build_filename (directory, name, NULL);
+      g_remove (path);
+    }
+  g_dir_close (dir);
+}
+
+static char *
+cached_path (const char *method, const char *url, const char *body)
+{
+  g_autofree char *directory = nuvashalauncher_cache_get_api_directory ();
+  g_autofree char *key = g_strdup_printf ("%s\n%s\n%s", method, url,
+                                           body != NULL ? body : "");
+  g_autofree char *digest =
+    g_compute_checksum_for_string (G_CHECKSUM_SHA256, key, -1);
+  return g_build_filename (directory, digest, NULL);
+}
+
+static void
 test_cached_reuse (void)
 {
   g_autofree char *dir = make_test_dir ();
