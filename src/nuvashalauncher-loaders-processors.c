@@ -285,7 +285,6 @@ substitute_argument (InstallRequest *request, const char *argument,
   for (const char *p = argument; *p != '\0'; p++)
     {
       const char *end = NULL;
-      g_autofree char *name = NULL;
       const char *value = NULL;
 
       if (*p != '{')
@@ -303,7 +302,7 @@ substitute_argument (InstallRequest *request, const char *argument,
           continue;
         }
 
-      name = g_strndup (p + 1, end - p - 1);
+      g_autofree char *name = g_strndup (p + 1, end - p - 1);
 
       if (!resolve_variable (request, name, error))
         return NULL;
