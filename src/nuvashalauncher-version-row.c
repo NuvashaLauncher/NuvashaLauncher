@@ -126,10 +126,7 @@ fill (nuvashalauncherVersionRow *self, nuvashalauncherVersionManifest *manifest)
       g_ptr_array_add (ids, g_strdup (entry->id));
     }
 
-  /* A version that was asked for but the manifest does not hold at all
-     (an instance that runs a version Mojang has since removed) stays in
-     the list on its own, so opening the instance shows what it runs and
-     never changes it. */
+  /* Preserve the instance's version if Mojang removed it from the manifest. */
   if (self->wanted != NULL && position == GTK_INVALID_LIST_POSITION)
     {
       g_ptr_array_insert (ids, 0, g_strdup (self->wanted));
@@ -143,11 +140,8 @@ fill (nuvashalauncherVersionRow *self, nuvashalauncherVersionManifest *manifest)
       ids->len > 0)
     position = 0;
 
-  /* The model is replaced with the row marked as not ready, so the
-     selection it makes on its own (GtkSingleSelection picks the first
-     item) is not read by a screen as a version the user picked. Once the
-     real selection is in place, the row says so a single time, and that
-     answer is the version the screens store. */
+  /* Mark the row as unavailable while replacing the model. This prevents
+     GtkSingleSelection's temporary first item from being treated as user input. */
   set_entries (self, g_steal_pointer (&ids), position);
 
   self->ready = TRUE;
@@ -197,9 +191,7 @@ manifest_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_autoptr (GError) error = NULL;
   g_autoptr (nuvashalauncherVersionManifest) manifest = NULL;
 
-  /* The answer belongs to the load this row already replaced, which
-   * was cancelled on the way out: it says nothing about the list the
-   * row shows now. */
+  /* Ignore results from an operation replaced by a newer load. */
   if (self != NULL && self->operation == ask->operation)
     {
       manifest = nuvashalauncher_version_manifest_fetch_finish (result, &error);

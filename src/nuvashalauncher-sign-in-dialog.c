@@ -113,10 +113,8 @@ is_safe_verification_uri (const char *address)
          (port == -1 || port == 443);
 }
 
-/* Opens the page Microsoft serves through GIO, the way the desktop opens
-   any other link: never through a command that would run whatever is
-   under that name on the PATH. The address is on the dialog as well, for
-   a user who would rather open it themselves. */
+/* Open Microsoft's page through GIO, not through a command found on PATH.
+   The dialog also displays the address for manual opening. */
 static void
 open_the_page (nuvashalauncherSignInDialog *self)
 {
@@ -265,7 +263,7 @@ on_closed (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_data)
   g_cancellable_cancel (self->cancellable);
 }
 
-/* A button whose face is an icon and a word, the way a button that does
+/* A button with an icon and a word, as used for actions that do
  * one clear thing is written. */
 static void
 nuvashalauncher_sign_in_dialog_init (nuvashalauncherSignInDialog *self)

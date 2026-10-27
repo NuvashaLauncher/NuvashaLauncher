@@ -268,7 +268,7 @@ nuvashalauncher_downloads_count (void)
    files are picked across every content page and installed with one
    press of the button at the foot of their list. A page says its part
    when what it has on changes and when it goes away, so the count of a
-   page that took its picks with it drops out on its own. */
+   page that took its picks removes them when it is destroyed. */
 guint
 nuvashalauncher_downloads_picked (void)
 {

@@ -106,10 +106,7 @@ take_rows_out (GPtrArray **rows, AdwPreferencesGroup *group)
   *rows = g_ptr_array_new ();
 }
 
-/* A click on a row opens its pack in the other half. A click on the row
- * of the pack that is already open closes it again: the list is the way
- * in and the way out, so no button has to stand over the pack and push
- * its name down. */
+/* Open the selected pack, or close its details view if it is already open. */
 static void
 result_row_activated (AdwActionRow *row, gpointer user_data)
 {

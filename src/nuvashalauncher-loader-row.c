@@ -392,8 +392,7 @@ versions_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
 
-  /* The answer belongs to the load this row already replaced, which was
-     cancelled on the way out. */
+  /* Ignore results from an operation replaced by a newer load. */
   if (self != NULL && self->operation == ask->operation)
     {
       versions = nuvashalauncher_loaders_versions_finish (result, &error);

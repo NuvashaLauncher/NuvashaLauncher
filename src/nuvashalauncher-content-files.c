@@ -520,8 +520,8 @@ scan_index_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       run->index_operation = NULL;
     }
 
-  /* A missing or damaged index is deliberately not fatal: the existing
-   * hash lookup repairs what it can, and the folder remains usable offline. */
+  /* A missing or damaged index is recoverable. Rebuild what the hash lookup
+   * can determine and keep the folder usable offline. */
   if (entries == NULL)
     {
       g_clear_error (&error);

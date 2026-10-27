@@ -9,8 +9,8 @@
 
 
 
-/* One flat button with a symbolic icon, the way GNOME writes a toolbar
- * action: the label is the tooltip and the accessible name. */
+/* Create a flat toolbar button with a symbolic icon. The label is used as
+ * both the tooltip and the accessible name. */
 static GtkWidget *
 toolbar_button (const char *icon_name, const char *label, GCallback callback,
                 gpointer user_data)

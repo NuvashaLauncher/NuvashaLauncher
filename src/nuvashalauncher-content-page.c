@@ -108,8 +108,7 @@ nuvashalauncher_content_page_on_open_folder_clicked (GtkButton *button G_GNUC_UN
   if (uri == NULL)
     return;
 
-  /* GIO hands the folder to the desktop the way a double click in a file
-   * manager does: nothing goes through a shell. */
+  /* Open the folder through the desktop, without invoking a shell. */
   {
     PageWatch *request = page_watch_new (self);
     g_app_info_launch_default_for_uri_async (uri, NULL, NULL, open_finished,

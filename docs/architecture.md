@@ -1,12 +1,10 @@
 # nuvashalauncher architecture
 
-This is a maintainer's map of nuvashalauncher. It describes the boundaries
-between the parts of the program, the flows that cross those boundaries, and
-the rules that are easy to break during a seemingly small change.
+This document describes nuvashalauncher's module boundaries, cross-module flows,
+and invariants.
 
-It is deliberately not a catalogue of every source file. The public headers
-are the detailed API reference; this document explains why the pieces are
-arranged as they are.
+It does not list every source file. Public headers contain the API reference;
+this document records the design decisions behind the module layout.
 
 ## What the program is
 
@@ -150,7 +148,7 @@ own views. Widgets declared in `data/ui/*.ui` and the stylesheet are compiled
 into a GResource by the Makefile. The UI is therefore available from the
 installed binary; it is not read from the source tree at runtime.
 
-The downloads display is intentionally separate from the dialog that started a
+The downloads display is separate from the dialog that started a
 download. `nuvashalauncherDownloads` is process-wide, owns entries while they run, and
 lets the header show work started from any page. Closing an installer dialog
 does not cancel its operation.
@@ -176,8 +174,8 @@ layout:
 Directory checks happen before files are touched. A new instance directory
 must be absolute, must not contain `..`, and must not be the same as, inside,
 or a parent of another instance directory. Moves and deletes are asynchronous
-and use rollback-oriented ordering so a failed operation does not silently
-remove the registered instance or its old files.
+and update the model only after the filesystem operation succeeds, so a failed
+operation leaves the registered instance and its old files in place.
 
 ### Accounts and authentication
 
@@ -324,13 +322,13 @@ is started; it does not register a partially prepared loader as usable.
 
 ### Modrinth content
 
-`nuvashalauncher-modrinth.c` is deliberately Modrinth-specific. It builds API facets,
+`nuvashalauncher-modrinth.c` is Modrinth-specific. It builds API facets,
 parses search/project/version answers, and filters compatibility before data
 reaches the UI:
 
 - mods must match the instance's Minecraft version and loader;
 - resource packs and shader packs must match the Minecraft version;
-- incompatible versions are not merely hidden at install time—they are not
+- incompatible versions are rejected at install time; they are not
   offered as compatible results.
 
 Content pages use models and rows, not raw API JSON. Details are converted from
@@ -414,7 +412,7 @@ Java detection probes candidates asynchronously and parses `java -version` and
 related properties, including whether the runtime has AWT's X11 bridge. It
 prefers a window-capable compatible runtime and chooses the instance's
 explicit Java when one is configured. Launch preparation rejects a selected
-headless runtime; it does not silently downgrade to a different major version.
+headless runtime; it does not downgrade to a different major version.
 
 Stopping sends `SIGTERM` first and escalates after five seconds. Process output
 is consumed by the line-reader helper, capped per line, and retained only up to
@@ -443,7 +441,7 @@ Flatpak installation. An instance still stores its own selected Java path.
 ## Persistence and filesystem layout
 
 The exact base directories follow GLib's user-data and user-cache locations.
-The important files are:
+The main files are:
 
 | Data | Location/purpose |
 | --- | --- |
@@ -506,7 +504,7 @@ The repository uses a hand-written `Makefile`:
   `packaging/flatpak/com.github.nuvashalauncher.nuvashalauncher.yml` with the GNOME 51
   runtime.
 
-Tests are intentionally layered. Parsers, path rules, argument builders,
+Tests are layered. Parsers, path rules, argument builders,
 security checks, and state machines can run without a display, network, JVM,
 or live account. Download and Modrinth tests use local fixtures/servers. UI
 tests instantiate the compiled resource templates, and display-sensitive tests

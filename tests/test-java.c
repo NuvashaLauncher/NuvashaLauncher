@@ -299,7 +299,7 @@ test_select_instance_then_closest (void)
   g_assert_nonnull (picked);
   g_assert_cmpint (picked->major_version, ==, 21);
 
-  /* A newer runtime is not silently selected when the exact major is absent. */
+  /* Do not select a different major when the requested one is absent. */
   g_assert_null (nuvashalauncher_java_select (list, NULL, 22));
 
   /* An instance path detection never saw is not something this module

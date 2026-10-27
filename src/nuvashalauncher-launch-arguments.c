@@ -112,8 +112,7 @@ argv_has (GPtrArray *argv, const char *option, const char *prefix)
   return FALSE;
 }
 
-/* Appends the words of one command line the way a shell would split
- * them. Fails rather than guesses when the line does not parse. */
+/* Split one command line into words. Fail if parsing does not succeed. */
 static gboolean
 add_shell_words (GPtrArray *argv, const char *line, GError **error)
 {
