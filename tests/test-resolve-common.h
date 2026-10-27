@@ -54,20 +54,20 @@ typedef struct
 
 static Fixture fixture;
 
-static void
+static inline void
 free_string (gpointer data)
 {
   g_string_free (data, TRUE);
 }
 
-static void
+static inline void
 serve (const char *path, const void *data, gsize length)
 {
   g_hash_table_replace (fixture.files, g_strdup (path),
                         g_string_new_len (data, length));
 }
 
-static void
+static inline void
 server_handler (SoupServer *server, SoupServerMessage *message,
                 const char *path, GHashTable *query, gpointer user_data)
 {
@@ -92,13 +92,13 @@ server_handler (SoupServer *server, SoupServerMessage *message,
                                     SOUP_MEMORY_COPY, body->str, body->len);
 }
 
-static char *
+static inline inline char *
 server_url (const char *path)
 {
   return g_strconcat (fixture.base, path, NULL);
 }
 
-static void
+static inline void
 fixture_start (void)
 {
   g_autoptr (GError) error = NULL;
@@ -134,7 +134,7 @@ fixture_start (void)
   g_slist_free_full (uris, (GDestroyNotify) g_uri_unref);
 }
 
-static void
+static inline void
 fixture_stop (void)
 {
   g_clear_pointer (&fixture.files, g_hash_table_unref);
@@ -142,7 +142,7 @@ fixture_stop (void)
   g_clear_pointer (&fixture.base, g_free);
 }
 
-static char *
+static inline inline char *
 fixture_text (const char *name)
 {
   g_autofree char *path = g_build_filename (nuvashalauncher_TEST_FIXTURES, name, NULL);
@@ -155,7 +155,7 @@ fixture_text (const char *name)
   return contents;
 }
 
-static nuvashalauncherVersionDescription *
+static inline nuvashalauncherVersionDescription *
 version_from_json (const char *json)
 {
   g_autoptr (GError) error = NULL;
@@ -168,7 +168,7 @@ version_from_json (const char *json)
   return description;
 }
 
-static nuvashalauncherVersionDescription *
+static inline nuvashalauncherVersionDescription *
 fixture_version (const char *name)
 {
   g_autofree char *text = fixture_text (name);
@@ -176,7 +176,7 @@ fixture_version (const char *name)
   return version_from_json (text);
 }
 
-static nuvashalauncherLibrary *
+static inline nuvashalauncherLibrary *
 find_library (nuvashalauncherVersionDescription *description, const char *name)
 {
   for (guint i = 0; i < description->libraries->len; i++)
@@ -191,19 +191,19 @@ find_library (nuvashalauncherVersionDescription *description, const char *name)
   return NULL;
 }
 
-static char *
+static inline inline char *
 sha1_of (const void *data, gsize length)
 {
   return g_compute_checksum_for_data (G_CHECKSUM_SHA1, data, length);
 }
 
-static char *
+static inline inline char *
 sha1_of_text (const char *text)
 {
   return sha1_of (text, strlen (text));
 }
 
-static gboolean
+static inline gboolean
 holds (GPtrArray *arguments, const char *needle)
 {
   for (guint i = 0; i < arguments->len; i++)
@@ -215,7 +215,7 @@ holds (GPtrArray *arguments, const char *needle)
   return FALSE;
 }
 
-static char *
+static inline inline char *
 make_test_dir (void)
 {
   g_autoptr (GError) error = NULL;
@@ -227,7 +227,7 @@ make_test_dir (void)
   return dir;
 }
 
-static void
+static inline void
 cache_start (void)
 {
   g_autoptr (GError) error = NULL;
@@ -243,7 +243,7 @@ cache_start (void)
   g_setenv ("XDG_CACHE_HOME", cache_home, TRUE);
 }
 
-static void
+static inline void
 cache_stop (void)
 {
   g_autofree char *nuvashalauncher = g_build_filename (cache_home, "nuvashalauncher", NULL);
@@ -265,7 +265,7 @@ cache_stop (void)
   g_rmdir (cache_home);
 }
 
-static void
+static inline void
 remove_test_dir (const char *path)
 {
   g_autoptr (GPtrArray) children = g_ptr_array_new_with_free_func (g_free);
@@ -306,13 +306,13 @@ typedef struct
   gboolean timed_out;
 } AsyncRun;
 
-static void
+static inline void
 async_run_init (AsyncRun *run)
 {
   run->loop = g_main_loop_new (NULL, FALSE);
 }
 
-static gboolean
+static inline gboolean
 async_timeout (gpointer user_data)
 {
   AsyncRun *run = user_data;
@@ -323,7 +323,7 @@ async_timeout (gpointer user_data)
   return G_SOURCE_REMOVE;
 }
 
-static void
+static inline void
 async_run_wait (AsyncRun *run)
 {
   run->watchdog = g_timeout_add_seconds (30, async_timeout, run);
@@ -337,7 +337,7 @@ async_run_wait (AsyncRun *run)
   g_assert_false (run->timed_out);
 }
 
-static void
+static inline void
 async_run_clear (AsyncRun *run)
 {
   g_main_loop_unref (run->loop);
@@ -362,7 +362,7 @@ async_run_clear (AsyncRun *run)
 
 /* A document whose only library publishes one natives jar per
    machine. */
-static nuvashalauncherVersionDescription *
+static inline nuvashalauncherVersionDescription *
 architecture_document (void)
 {
   return version_from_json (
@@ -414,7 +414,7 @@ typedef struct
   gboolean link;
 } JarEntry;
 
-static void
+static inline void
 write_jar (const char *path, const JarEntry *entries, guint count)
 {
   struct archive *writer = archive_write_new ();
@@ -466,7 +466,7 @@ typedef struct
   nuvashalauncherTaskScope *operation;
 } ExtractCall;
 
-static void
+static inline void
 extract_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                   gpointer user_data)
 {
@@ -481,7 +481,7 @@ extract_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 }
 
 /* Unpacks one jar into @natives_dir. */
-static void
+static inline void
 extract_one (const char *jar, const char *natives_dir, GPtrArray *exclude,
              ExtractCall *call)
 {
@@ -527,7 +527,7 @@ typedef struct
   nuvashalauncherTaskScope *operation;
 } ResolveCall;
 
-static void
+static inline void
 manifest_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                    gpointer user_data)
 {
@@ -541,7 +541,7 @@ manifest_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     g_main_loop_quit (call->run->loop);
 }
 
-static void
+static inline void
 resolve_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                   gpointer user_data)
 {
@@ -555,7 +555,7 @@ resolve_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     g_main_loop_quit (call->run->loop);
 }
 
-static void
+static inline void
 resolve_progress (const nuvashalauncherResolveProgress *progress, gpointer user_data)
 {
   ResolveCall *call = user_data;
@@ -582,7 +582,7 @@ typedef struct
 } Served;
 
 /* The asset index the objects belong to. */
-static char *
+static inline inline char *
 asset_index_json (const Served *served)
 {
   GString *json = g_string_new ("{\"objects\": {");
@@ -610,7 +610,7 @@ asset_index_json (const Served *served)
 }
 
 /* The version document, with the address of the test server in it. */
-static char *
+static inline inline char *
 version_json (const Served *served)
 {
   g_autofree char *index = asset_index_json (served);
@@ -673,7 +673,7 @@ version_json (const Served *served)
 
 /* Publishes every file of @served on the test server. @jar_dir is where
    the real natives jar is written to be read back. */
-static void
+static inline void
 serve_version (Served *served, const char *jar_dir)
 {
   static const JarEntry natives_entries[] = {
@@ -740,7 +740,7 @@ serve_version (Served *served, const char *jar_dir)
   serve ("/manifest.json", manifest, strlen (manifest));
 }
 
-static void
+static inline void
 fetch_manifest (AsyncRun *run, ResolveCall *call, const char *url)
 {
   call->run = run;
@@ -750,7 +750,7 @@ fetch_manifest (AsyncRun *run, ResolveCall *call, const char *url)
                                                       call);
 }
 
-static void
+static inline void
 start_resolve (AsyncRun *run, ResolveCall *call, nuvashalauncherVersionManifest *manifest,
                const char *version_id, const char *data_dir,
                const char *natives_dir, const char *asset_base_url)
@@ -764,7 +764,7 @@ start_resolve (AsyncRun *run, ResolveCall *call, nuvashalauncherVersionManifest 
                                                resolve_finished, call);
 }
 
-static char *
+static inline inline char *
 read_text_file (const char *path)
 {
   char *contents = NULL;
@@ -775,7 +775,7 @@ read_text_file (const char *path)
   return contents;
 }
 
-static void
+static inline void
 fill_served (Served *served, const char *id, const char *assets)
 {
   memset (served, 0, sizeof (*served));
@@ -793,14 +793,14 @@ fill_served (Served *served, const char *id, const char *assets)
                                  served->objects[i]->len);
 }
 
-static void
+static inline void
 free_string_contents (gpointer data)
 {
   if (data != NULL)
     g_string_free (data, TRUE);
 }
 
-static void
+static inline void
 free_served (Served *served)
 {
   g_clear_pointer (&served->client, free_string_contents);

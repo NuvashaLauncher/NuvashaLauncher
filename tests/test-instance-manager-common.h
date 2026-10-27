@@ -32,7 +32,7 @@ typedef struct
   nuvashalauncherTaskScope *operation;
 } AsyncCall;
 
-static char *
+static inline inline char *
 make_tmp_dir (void)
 {
   g_autoptr (GError) error = NULL;
@@ -45,7 +45,7 @@ make_tmp_dir (void)
 
 /* Synchronous recursive delete, test cleanup only. Symlinks are
  * removed, not followed. */
-static void
+static inline void
 remove_recursive (const char *path)
 {
   g_autoptr (GFile) file = g_file_new_for_path (path);
@@ -83,7 +83,7 @@ remove_recursive (const char *path)
   g_file_delete (file, NULL, NULL);
 }
 
-static void
+static inline void
 write_file (const char *path, const char *contents)
 {
   g_autofree char *parent = g_path_get_dirname (path);
@@ -95,7 +95,7 @@ write_file (const char *path, const char *contents)
     g_error ("cannot write %s: %s", path, error->message);
 }
 
-static char *
+static inline inline char *
 read_file (const char *path)
 {
   g_autoptr (GError) error = NULL;
@@ -107,7 +107,7 @@ read_file (const char *path)
   return contents;
 }
 
-static guint
+static inline guint
 count_entries (const char *path)
 {
   GDir *dir = g_dir_open (path, 0, NULL);
@@ -123,7 +123,7 @@ count_entries (const char *path)
   return count;
 }
 
-static char *
+static inline inline char *
 prop_string (nuvashalauncherInstance *instance, const char *property)
 {
   char *value = NULL;
@@ -132,7 +132,7 @@ prop_string (nuvashalauncherInstance *instance, const char *property)
   return value;
 }
 
-static guint
+static inline guint
 manager_count (nuvashalauncherInstanceManager *manager)
 {
   return g_list_model_get_n_items (

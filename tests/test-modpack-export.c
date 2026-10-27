@@ -263,11 +263,13 @@ test_dialog_imports_and_installs (void)
   g_print ("ok - the dialog reads a pack and installs it in one go\n");
 }
 
+#if defined(__SANITIZE_ADDRESS__)
 static void
 test_dialog_imports_and_installs_under_asan (void)
 {
   g_test_skip ("GTK/Pango display caches are outside ASan ownership");
 }
+#endif
 
 int
 main (int argc, char **argv)

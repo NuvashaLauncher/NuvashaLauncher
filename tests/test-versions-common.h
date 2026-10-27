@@ -32,7 +32,7 @@ static char *cache_home;
  * Fixture documents
  * ---------------------------------------------------------- */
 
-static char *
+static inline inline char *
 fixture_text (const char *name)
 {
   g_autofree char *path = g_build_filename (nuvashalauncher_TEST_FIXTURES, name, NULL);
@@ -45,7 +45,7 @@ fixture_text (const char *name)
   return contents;
 }
 
-static nuvashalauncherVersionDescription *
+static inline nuvashalauncherVersionDescription *
 fixture_version (const char *name)
 {
   g_autofree char *text = fixture_text (name);
@@ -60,7 +60,7 @@ fixture_version (const char *name)
   return description;
 }
 
-static const nuvashalauncherLibrary *
+static inline inline const nuvashalauncherLibrary *
 find_library (nuvashalauncherVersionDescription *description, const char *name)
 {
   for (guint i = 0; i < description->libraries->len; i++)
@@ -75,7 +75,7 @@ find_library (nuvashalauncherVersionDescription *description, const char *name)
   return NULL;
 }
 
-static char *
+static inline inline char *
 hash_of (const void *data, gsize length)
 {
   return g_compute_checksum_for_data (G_CHECKSUM_SHA1, data, length);
@@ -150,7 +150,7 @@ typedef struct
 
 static Fixture fixture;
 
-static char *
+static inline inline char *
 served_body (const ServedVersion *version)
 {
   if (version->body != NULL)
@@ -159,20 +159,20 @@ served_body (const ServedVersion *version)
   return fixture_text (version->fixture);
 }
 
-static void
+static inline void
 free_string (gpointer data)
 {
   g_string_free (data, TRUE);
 }
 
-static void
+static inline void
 serve (const char *path, const void *data, gsize length)
 {
   g_hash_table_replace (fixture.files, g_strdup (path),
                         g_string_new_len (data, length));
 }
 
-static void
+static inline void
 server_handler (SoupServer *server, SoupServerMessage *message,
                 const char *path, GHashTable *query, gpointer user_data)
 {
@@ -199,7 +199,7 @@ server_handler (SoupServer *server, SoupServerMessage *message,
 
 /* The manifest the way Mojang writes it, with the address of the test
  * server in every entry. */
-static char *
+static inline inline char *
 manifest_json (void)
 {
   GString *json = g_string_new (
@@ -226,13 +226,13 @@ manifest_json (void)
   return g_string_free (json, FALSE);
 }
 
-static char *
+static inline inline char *
 server_url (const char *path)
 {
   return g_strconcat (fixture.base, path, NULL);
 }
 
-static void
+static inline void
 fixture_start (void)
 {
   g_autoptr (GError) error = NULL;
@@ -285,7 +285,7 @@ fixture_start (void)
   }
 }
 
-static void
+static inline void
 fixture_stop (void)
 {
   g_clear_pointer (&fixture.files, g_hash_table_unref);
@@ -315,7 +315,7 @@ typedef struct
   nuvashalauncherTaskScope *operation;
 } AsyncCall;
 
-static void
+static inline void
 call_finished (AsyncCall *call)
 {
   nuvashalauncher_task_scope_unref (call->operation);
@@ -326,7 +326,7 @@ call_finished (AsyncCall *call)
 }
 
 /* A callback that never arrives fails the test instead of hanging. */
-static gboolean
+static inline gboolean
 async_timeout (gpointer user_data)
 {
   AsyncRun *run = user_data;
@@ -337,14 +337,14 @@ async_timeout (gpointer user_data)
   return G_SOURCE_REMOVE;
 }
 
-static void
+static inline void
 async_run_init (AsyncRun *run)
 {
   run->loop = g_main_loop_new (NULL, FALSE);
   run->cancellable = g_cancellable_new ();
 }
 
-static void
+static inline void
 async_run_wait (AsyncRun *run)
 {
   run->watchdog = g_timeout_add_seconds (30, async_timeout, run);
@@ -358,7 +358,7 @@ async_run_wait (AsyncRun *run)
   g_assert_false (run->timed_out);
 }
 
-static void
+static inline void
 async_run_clear (AsyncRun *run)
 {
   if (run->loop != NULL)
@@ -370,7 +370,7 @@ async_run_clear (AsyncRun *run)
   g_clear_object (&run->cancellable);
 }
 
-static void
+static inline void
 async_call_clear (AsyncCall *call)
 {
   g_clear_error (&call->error);
@@ -378,7 +378,7 @@ async_call_clear (AsyncCall *call)
   g_clear_object (&call->description);
 }
 
-static void
+static inline void
 manifest_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                    gpointer user_data)
 {
@@ -388,7 +388,7 @@ manifest_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   call_finished (call);
 }
 
-static void
+static inline void
 load_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                gpointer user_data)
 {
@@ -398,7 +398,7 @@ load_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   call_finished (call);
 }
 
-static void
+static inline void
 call_manifest (AsyncRun *run, AsyncCall *call, const char *url)
 {
   call->run = run;
@@ -409,7 +409,7 @@ call_manifest (AsyncRun *run, AsyncCall *call, const char *url)
   nuvashalauncher_task_scope_follow_cancellable (call->operation, run->cancellable);
 }
 
-static void
+static inline void
 call_load (AsyncRun *run, AsyncCall *call, nuvashalauncherVersionManifest *manifest,
            const char *version_id)
 {
@@ -425,7 +425,7 @@ call_load (AsyncRun *run, AsyncCall *call, nuvashalauncherVersionManifest *manif
  * Fetching
  * ---------------------------------------------------------- */
 
-static char *
+static inline inline char *
 cache_file (const char *name)
 {
   g_autofree char *directory =
@@ -438,7 +438,7 @@ cache_file (const char *name)
 
 /* The manifest of the tests, parsed without going through the
  * network. */
-static nuvashalauncherVersionManifest *
+static inline nuvashalauncherVersionManifest *
 local_manifest (void)
 {
   g_autofree char *json = manifest_json ();
@@ -464,7 +464,7 @@ local_manifest (void)
 
 /* g_get_user_cache_dir() remembers its first answer, so the
  * environment is set before anything can ask for it. */
-static void
+static inline void
 cache_start (void)
 {
   g_autoptr (GError) error = NULL;
@@ -478,7 +478,7 @@ cache_start (void)
   g_setenv ("XDG_CACHE_HOME", cache_home, TRUE);
 }
 
-static void
+static inline void
 cache_stop (void)
 {
   g_autofree char *directory =

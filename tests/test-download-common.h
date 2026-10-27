@@ -41,7 +41,7 @@ typedef struct
 static Fixture fixture;
 static nuvashalauncherSettings *cache_settings;
 
-static void
+static inline void
 reply_with (SoupServerMessage *message, guint status,
             const char *content_type, const char *body, gsize length)
 {
@@ -52,7 +52,7 @@ reply_with (SoupServerMessage *message, guint status,
                                       body, length);
 }
 
-static void
+static inline void
 server_handler (SoupServer *server, SoupServerMessage *message,
                 const char *path, GHashTable *query, gpointer user_data)
 {
@@ -110,7 +110,7 @@ server_handler (SoupServer *server, SoupServerMessage *message,
     reply_with (message, 404, NULL, NULL, 0);
 }
 
-static GString *
+static inline GString *
 make_body (gsize size)
 {
   GString *body = g_string_sized_new (size);
@@ -121,13 +121,13 @@ make_body (gsize size)
   return body;
 }
 
-static void
+static inline void
 free_body (gpointer data)
 {
   g_string_free (data, TRUE);
 }
 
-static void
+static inline void
 fixture_start (void)
 {
   g_autoptr (GError) error = NULL;
@@ -167,7 +167,7 @@ fixture_start (void)
   fixture.big_body = make_body (BIG_BODY_SIZE);
 }
 
-static void
+static inline void
 fixture_stop (void)
 {
   soup_server_disconnect (fixture.server);
@@ -177,7 +177,7 @@ fixture_stop (void)
   g_clear_pointer (&fixture.base, g_free);
 }
 
-static char *
+static inline inline char *
 server_url (const char *path)
 {
   return g_strconcat (fixture.base, path, NULL);
@@ -187,13 +187,13 @@ server_url (const char *path)
  * Helpers
  * ---------------------------------------------------------- */
 
-static char *
+static inline inline char *
 hash_of (const void *data, gsize length, GChecksumType type)
 {
   return g_compute_checksum_for_data (type, data, length);
 }
 
-static char *
+static inline inline char *
 make_test_dir (void)
 {
   g_autoptr (GError) error = NULL;
@@ -206,7 +206,7 @@ make_test_dir (void)
 }
 
 /* Removes a flat test directory, temporary files included. */
-static void
+static inline void
 remove_test_dir (const char *path)
 {
   GDir *dir = g_dir_open (path, 0, NULL);
@@ -229,7 +229,7 @@ remove_test_dir (const char *path)
 
 /* Files in the test directory: anything but the destination itself is
  * a temporary file left behind. */
-static guint
+static inline guint
 dir_entry_count (const char *path)
 {
   GDir *dir = g_dir_open (path, 0, NULL);
@@ -245,7 +245,7 @@ dir_entry_count (const char *path)
   return count;
 }
 
-static char *
+static inline inline char *
 read_text_file (const char *path)
 {
   char *contents = NULL;
@@ -281,7 +281,7 @@ typedef struct
   nuvashalauncherTaskScope *operation;
 } AsyncCall;
 
-static void
+static inline void
 call_finished (AsyncCall *call)
 {
   nuvashalauncher_task_scope_unref (call->operation);
@@ -292,7 +292,7 @@ call_finished (AsyncCall *call)
 }
 
 /* A callback that never arrives fails the test instead of hanging. */
-static gboolean
+static inline gboolean
 async_timeout (gpointer user_data)
 {
   AsyncRun *run = user_data;
@@ -303,14 +303,14 @@ async_timeout (gpointer user_data)
   return G_SOURCE_REMOVE;
 }
 
-static void
+static inline void
 async_run_init (AsyncRun *run)
 {
   run->loop = g_main_loop_new (NULL, FALSE);
   run->cancellable = g_cancellable_new ();
 }
 
-static void
+static inline void
 async_run_wait (AsyncRun *run)
 {
   run->watchdog = g_timeout_add_seconds (30, async_timeout, run);
@@ -324,7 +324,7 @@ async_run_wait (AsyncRun *run)
   g_assert_false (run->timed_out);
 }
 
-static void
+static inline void
 async_run_clear (AsyncRun *run)
 {
   /* GMainLoop is refcounted but is not a GObject. */
@@ -337,14 +337,14 @@ async_run_clear (AsyncRun *run)
   g_clear_object (&run->cancellable);
 }
 
-static void
+static inline void
 async_call_clear (AsyncCall *call)
 {
   g_clear_error (&call->error);
   g_clear_object (&call->parser);
 }
 
-static void
+static inline void
 progress_cb (goffset bytes_done, goffset total, gpointer user_data)
 {
   AsyncCall *call = user_data;
@@ -357,7 +357,7 @@ progress_cb (goffset bytes_done, goffset total, gpointer user_data)
     g_cancellable_cancel (call->run->cancellable);
 }
 
-static void
+static inline void
 download_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                    gpointer user_data)
 {
@@ -367,7 +367,7 @@ download_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   call_finished (call);
 }
 
-static void
+static inline void
 call_file (AsyncRun *run, AsyncCall *call, const char *url,
            const char *dest_path, const char *expected_hash,
            GChecksumType hash_type)
@@ -381,7 +381,7 @@ call_file (AsyncRun *run, AsyncCall *call, const char *url,
   nuvashalauncher_task_scope_follow_cancellable (call->operation, run->cancellable);
 }
 
-static void
+static inline void
 clear_global_file_cache (void)
 {
   g_autofree char *directory = nuvashalauncher_cache_get_files_directory ();
