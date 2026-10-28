@@ -4,14 +4,10 @@
 
 #include "nuvashalauncher-accounts.h"
 #include "nuvashalauncher-accounts-private.h"
-#include "nuvashalauncher-fs.h"
 #include "nuvashalauncher-i18n.h"
+#include "nuvashalauncher-secret-store.h"
 
-#include <errno.h>
-#include <glib/gstdio.h>
 #include <string.h>
-
-#define ACCOUNTS_FORMAT_VERSION 2
 
 GQuark
 nuvashalauncher_accounts_error_quark (void)
@@ -184,18 +180,14 @@ nuvashalauncher_account_token_is_valid (const nuvashalauncherAccount *account, g
 }
 
 /* ---------------------------------------------------------- *
- * The file
- * ---------------------------------------------------------- */
-
-/* ---------------------------------------------------------- *
- * The store
+ * Secret Service-backed store
  * ---------------------------------------------------------- */
 
 struct _nuvashalauncherAccounts
 {
   GObject parent_instance;
 
-  char *filename;
+  char *filename; /* retained for the path-constructor API; never persisted */
   GPtrArray *accounts; /* nuvashalauncherAccount*, element free nuvashalauncher_account_free */
   char *active_id;
 };
@@ -208,6 +200,12 @@ static void
 emit_changed (nuvashalauncherAccounts *self)
 {
   g_signal_emit (self, nuvashalauncher_accounts_signals[nuvashalauncher_ACCOUNTS_SIGNAL_CHANGED], 0);
+}
+
+static gboolean
+active_is (nuvashalauncherAccounts *self, const char *id)
+{
+  return self->active_id != NULL && g_str_equal (self->active_id, id);
 }
 
 nuvashalauncherAccount *
@@ -229,181 +227,16 @@ nuvashalauncher_accounts_find (nuvashalauncherAccounts *self, const char *id)
   return NULL;
 }
 
-/* TRUE when @id is the one account that is active. */
 static gboolean
-active_is (nuvashalauncherAccounts *self, const char *id)
+save_account (const nuvashalauncherAccount *account, GError **error)
 {
-  return self->active_id != NULL && g_str_equal (self->active_id, id);
-}
-
-/* Keep a file that cannot be understood so a user can recover it or report
- * it. The store starts empty, but never destroys the original evidence. */
-static void
-quarantine_corrupt_file (const char *path)
-{
-  g_autofree char *base = g_strconcat (path, ".corrupt", NULL);
-  g_autofree char *corrupt_path = NULL;
-
-  for (guint i = 0; i < 1000; i++)
-    {
-      corrupt_path = i == 0 ? g_strdup (base)
-                            : g_strdup_printf ("%s.%u", base, i);
-      if (!g_file_test (corrupt_path, G_FILE_TEST_EXISTS))
-        break;
-      g_clear_pointer (&corrupt_path, g_free);
-    }
-
-  if (corrupt_path == NULL ||
-      !nuvashalauncher_fs_rename (path, corrupt_path, NULL))
-    g_warning ("could not quarantine the accounts file \"%s\": %s",
-               path, g_strerror (errno));
-  else
-    g_warning ("the accounts file \"%s\" is corrupt; it was moved to \"%s\"",
-               path, corrupt_path);
+  return nuvashalauncher_secret_store_save_account (account, error);
 }
 
 static gboolean
-save (nuvashalauncherAccounts *self, GError **error)
+save_active (const char *id, GError **error)
 {
-  g_autoptr (JsonBuilder) builder = NULL;
-  g_autoptr (JsonGenerator) generator = NULL;
-  g_autoptr (JsonNode) root = NULL;
-  g_autoptr (GError) local_error = NULL;
-  g_autofree char *directory = NULL;
-  g_autofree char *data = NULL;
-
-  builder = json_builder_new ();
-  json_builder_begin_object (builder);
-
-  json_builder_set_member_name (builder, "version");
-  json_builder_add_int_value (builder, ACCOUNTS_FORMAT_VERSION);
-
-  json_builder_set_member_name (builder, "accounts");
-  json_builder_begin_array (builder);
-
-  for (guint i = 0; i < self->accounts->len; i++)
-    account_to_json (builder, g_ptr_array_index (self->accounts, i));
-
-  json_builder_end_array (builder);
-
-  json_builder_set_member_name (builder, "active");
-  if (self->active_id != NULL)
-    json_builder_add_string_value (builder, self->active_id);
-  else
-    json_builder_add_null_value (builder);
-
-  json_builder_end_object (builder);
-
-  root = json_builder_get_root (builder);
-  generator = json_generator_new ();
-  json_generator_set_root (generator, root);
-  json_generator_set_pretty (generator, TRUE);
-  data = json_generator_to_data (generator, NULL);
-
-  directory = g_path_get_dirname (self->filename);
-
-  if (!nuvashalauncher_fs_make_private_directory (directory, &local_error))
-    {
-      g_set_error (error, nuvashalauncher_ACCOUNTS_ERROR, nuvashalauncher_ACCOUNTS_ERROR_IO,
-                   "%s", local_error->message);
-      return FALSE;
-    }
-
-  /* Mode 0600 and written whole or not at all: account metadata and tokens
-     remain private, and a save that is interrupted may never leave half of
-     one behind. */
-  if (!nuvashalauncher_fs_replace_contents (self->filename, data, -1, 0600,
-                                &local_error))
-    {
-      g_prefix_error (&local_error, "cannot save \"%s\": ", self->filename);
-      g_propagate_error (error, g_steal_pointer (&local_error));
-      return FALSE;
-    }
-
-  return TRUE;
-}
-
-static void
-load (nuvashalauncherAccounts *self)
-{
-  g_autofree char *text = NULL;
-  g_autoptr (JsonParser) parser = NULL;
-  g_autoptr (GError) read_error = NULL;
-  JsonNode *root = NULL;
-  JsonNode *node = NULL;
-
-  if (!nuvashalauncher_fs_get_contents_within (self->filename,
-                                    nuvashalauncher_FS_MAX_SMALL_METADATA_SIZE,
-                                    &text, NULL, &read_error))
-    {
-      if (!g_error_matches (read_error, G_FILE_ERROR, G_FILE_ERROR_NOENT))
-        g_warning ("cannot read the accounts file \"%s\": %s",
-                   self->filename, read_error->message);
-      return;
-    }
-
-  parser = json_parser_new ();
-
-  if (!json_parser_load_from_data (parser, text, -1, NULL))
-    {
-      quarantine_corrupt_file (self->filename);
-      return;
-    }
-
-  root = json_parser_get_root (parser);
-
-  if (root == NULL || !JSON_NODE_HOLDS_OBJECT (root))
-    {
-      quarantine_corrupt_file (self->filename);
-      return;
-    }
-
-  node = json_object_get_member (json_node_get_object (root), "version");
-  if (node == NULL || !JSON_NODE_HOLDS_VALUE (node) ||
-      json_node_get_value_type (node) != G_TYPE_INT64 ||
-      json_node_get_int (node) != ACCOUNTS_FORMAT_VERSION)
-    {
-      quarantine_corrupt_file (self->filename);
-      return;
-    }
-
-  node = json_object_get_member (json_node_get_object (root), "accounts");
-
-  if (node != NULL && JSON_NODE_HOLDS_ARRAY (node))
-    {
-      JsonArray *array = json_node_get_array (node);
-
-      for (guint i = 0; i < json_array_get_length (array); i++)
-        {
-          JsonNode *element = json_array_get_element (array, i);
-          nuvashalauncherAccount *account = NULL;
-
-          if (!JSON_NODE_HOLDS_OBJECT (element))
-            continue;
-
-          account = account_from_json (json_node_get_object (element));
-
-          /* Two entries of one identity are one account: the file wins
-             over what is already here, and a duplicate is dropped. */
-          if (account == NULL || nuvashalauncher_accounts_find (self, account->id) != NULL)
-            {
-              nuvashalauncher_account_free (account);
-              continue;
-            }
-
-          g_ptr_array_add (self->accounts, account);
-        }
-    }
-
-  {
-    g_autofree char *active = string_member (json_node_get_object (root),
-                                             "active");
-
-    /* An active account that is not there is no active account at all. */
-    if (active != NULL && nuvashalauncher_accounts_find (self, active) != NULL)
-      self->active_id = g_steal_pointer (&active);
-  }
-
+  return nuvashalauncher_secret_store_save_active (id, error);
 }
 
 nuvashalauncherAccounts *
@@ -418,7 +251,28 @@ nuvashalauncher_accounts_new_for_path (const char *filename)
   self->accounts = g_ptr_array_new_with_free_func (
     (GDestroyNotify) nuvashalauncher_account_free);
 
-  load (self);
+  {
+    g_autoptr (GPtrArray) loaded = NULL;
+    g_autofree char *active = NULL;
+    g_autoptr (GError) error = NULL;
+
+    if (nuvashalauncher_secret_store_load (&loaded, &active, &error))
+      {
+        for (guint i = 0; i < loaded->len; i++)
+          {
+            nuvashalauncherAccount *account = g_ptr_array_index (loaded, i);
+
+            if (nuvashalauncher_accounts_find (self, account->id) == NULL)
+              g_ptr_array_add (self->accounts,
+                               nuvashalauncher_account_copy (account));
+          }
+
+        if (active != NULL && nuvashalauncher_accounts_find (self, active) != NULL)
+          self->active_id = g_steal_pointer (&active);
+      }
+    else if (error != NULL)
+      g_warning ("cannot read accounts from Secret Service: %s", error->message);
+  }
 
   return self;
 }
@@ -500,7 +354,7 @@ nuvashalauncher_accounts_set_active (nuvashalauncherAccounts *self, const char *
 
     self->active_id = g_strdup (id);
 
-    if (!save (self, error))
+    if (!save_active (id, error))
       {
         g_free (self->active_id);
         self->active_id = g_steal_pointer (&previous);
@@ -575,8 +429,17 @@ nuvashalauncher_accounts_add (nuvashalauncherAccounts *self, const nuvashalaunch
   g_free (self->active_id);
   self->active_id = g_strdup (account->id);
 
-  if (!save (self, error))
+  if (!save_account (account, error) || !save_active (account->id, error))
     {
+      if (known != NULL)
+        save_account (previous, NULL);
+      else
+        nuvashalauncher_secret_store_remove_account (account->id, NULL);
+      if (previous_active_id != NULL)
+        save_active (previous_active_id, NULL);
+      else
+        nuvashalauncher_secret_store_clear_active (NULL);
+
       if (known != NULL)
         {
           g_free (known->id);
@@ -656,8 +519,17 @@ nuvashalauncher_accounts_remove (nuvashalauncherAccounts *self, const char *id, 
                           ->id);
         }
 
-      if (!save (self, error))
+      if (!nuvashalauncher_secret_store_remove_account (id, error) ||
+          (old_active_id != NULL && g_str_equal (old_active_id, id) &&
+           (self->active_id != NULL
+              ? !save_active (self->active_id, error)
+              : !nuvashalauncher_secret_store_clear_active (error))))
         {
+          /* Restore both memory and the keyring entry if the second half of
+           * the removal could not be committed. */
+          nuvashalauncher_secret_store_save_account (account, NULL);
+          if (old_active_id != NULL)
+            save_active (old_active_id, NULL);
           g_ptr_array_insert (self->accounts, i, account);
           g_free (self->active_id);
           self->active_id = g_steal_pointer (&old_active_id);

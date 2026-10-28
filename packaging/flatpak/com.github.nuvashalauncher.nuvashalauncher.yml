@@ -10,6 +10,7 @@ finish-args:
   - --socket=wayland
   - --socket=pulseaudio
   - --device=dri
+  - --talk-name=org.freedesktop.secrets
 modules:
   - name: nuvashalauncher
     buildsystem: simple

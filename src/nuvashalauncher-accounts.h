@@ -20,13 +20,10 @@
  *               one. No password is ever asked for or kept.
  *
  * Exactly one account is active, and it is the one the launcher runs the
- * game as. Tokens are never logged, never printed in an error and never
- * put anywhere but this file, which is written for nobody but the user:
- * mode 0600, written whole or not at all.
- *
- * The file is <user data dir>/nuvashalauncher/accounts.json. A file that is missing,
- * unreadable or nonsense leaves the store empty rather than failing, the
- * same as the settings file. */
+ * game as. Tokens are never logged or printed in an error. Account records,
+ * including offline accounts and cosmetic selections, are stored in the
+ * desktop Secret Service. The filename accepted by the test/path constructor
+ * remains only as an API compatibility value; it is not read or written. */
 
 #ifndef nuvashalauncher_ACCOUNTS_H
 #define nuvashalauncher_ACCOUNTS_H

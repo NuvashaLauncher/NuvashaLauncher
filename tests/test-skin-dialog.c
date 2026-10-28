@@ -1,4 +1,5 @@
 #include "nuvashalauncher-users-popover-private.h"
+#include "nuvashalauncher-secret-store.h"
 
 #include <adwaita.h>
 #include <gtk/gtk.h>
@@ -99,6 +100,8 @@ test_skin_dialog_close (void)
   gtk_window_destroy (g_steal_pointer (&window));
   drain ();
   g_clear_object (&owner);
+  nuvashalauncher_secret_store_remove_account ("SkinTest", NULL);
+  nuvashalauncher_secret_store_clear_active (NULL);
   g_assert_cmpuint (criticals, ==, 0);
 }
 
@@ -188,6 +191,8 @@ test_missing_local_skin_cleans_upload_state (void)
   drain ();
   gtk_window_destroy (g_steal_pointer (&window));
   drain ();
+  nuvashalauncher_secret_store_remove_account ("SkinTest", NULL);
+  nuvashalauncher_secret_store_clear_active (NULL);
   g_remove (accounts_path);
   g_remove (preview_path);
   g_rmdir (root);

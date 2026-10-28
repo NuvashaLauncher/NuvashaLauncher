@@ -82,17 +82,19 @@ flatpak uninstall --user --delete-data \
 - json-glib
 - libsoup
 - libarchive
+- libsecret
 
 #### Runtime dependencies
 
 - A Java runtime compatible with the Minecraft version being launched
+- A Secret Service provider, such as GNOME Keyring or KWallet
 
 #### Debian
 
 ```sh
 sudo apt install build-essential pkg-config gettext \
     libglib2.0-dev libgtk-4-dev libadwaita-1-dev libepoxy-dev \
-    libjson-glib-dev libsoup-3.0-dev libarchive-dev
+    libjson-glib-dev libsoup-3.0-dev libarchive-dev libsecret-1-dev
 ```
 
 #### Fedora
@@ -100,7 +102,7 @@ sudo apt install build-essential pkg-config gettext \
 ```sh
 sudo dnf install gcc make gettext pkgconf-pkg-config \
     glib2-devel gtk4-devel libadwaita-devel libepoxy-devel \
-    json-glib-devel libsoup3-devel libarchive-devel
+    json-glib-devel libsoup3-devel libarchive-devel libsecret-devel
 ```
 
 #### openSUSE
@@ -108,14 +110,14 @@ sudo dnf install gcc make gettext pkgconf-pkg-config \
 ```sh
 sudo zypper install gcc make gettext-tools pkg-config glib2-devel \
     gtk4-devel libadwaita-devel libepoxy-devel json-glib-devel \
-    libsoup-devel libarchive-devel
+    libsoup-devel libarchive-devel libsecret-devel
 ```
 
 #### Arch
 
 ```sh
 sudo pacman -S base-devel gettext pkgconf gtk4 libadwaita libepoxy \
-    json-glib libsoup libarchive
+    json-glib libsoup libarchive libsecret
 ```
 
 #### Gentoo
@@ -124,14 +126,14 @@ sudo pacman -S base-devel gettext pkgconf gtk4 libadwaita libepoxy \
 sudo emerge --ask sys-devel/gcc sys-devel/gettext dev-build/make \
     dev-util/pkgconf dev-libs/glib gui-libs/gtk:4 gui-libs/libadwaita \
     gui-libs/libepoxy dev-libs/json-glib net-libs/libsoup:3 \
-    app-arch/libarchive
+    app-arch/libarchive app-crypt/libsecret
 ```
 
 #### NixOS
 
 ```sh
 nix-shell -p gcc gnumake gettext pkg-config glib gtk4 libadwaita libepoxy \
-    json-glib libsoup libarchive
+    json-glib libsoup libarchive libsecret
 ```
 
 #### Building from source
@@ -141,6 +143,17 @@ git clone https://github.com/nuvashalauncher/nuvashalauncher.git nuvashalauncher
 cd nuvashalauncher
 make
 sudo make install PREFIX=/usr/local
+```
+
+The install target also refreshes the desktop entry, MIME, icon, and GSettings
+schemas used by the launcher when the corresponding system tools are available.
+For a staged or minimal installation, these caches can be refreshed manually:
+
+```sh
+sudo update-desktop-database /usr/local/share/applications
+sudo update-mime-database /usr/local/share/mime
+sudo gtk-update-icon-cache -f -t /usr/local/share/icons/hicolor
+sudo glib-compile-schemas /usr/local/share/glib-2.0/schemas
 ```
 
 The launcher is installed as `/usr/local/bin/nuvashalauncher`.
