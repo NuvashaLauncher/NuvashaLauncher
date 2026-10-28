@@ -735,6 +735,7 @@ test_the_endpoints_are_the_documented_ones (void)
 int
 main (void)
 {
+  g_setenv ("NUVASHA_TEST_SECRET_STORE", "1", TRUE);
   g_print ("# Microsoft sign-in tests\n");
 
   test_device_code ();

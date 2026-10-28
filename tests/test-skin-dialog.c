@@ -209,6 +209,7 @@ test_missing_local_skin_cleans_upload_state (void)
 int
 main (int argc, char **argv)
 {
+  g_setenv ("NUVASHA_TEST_SECRET_STORE", "1", TRUE);
   g_test_init (&argc, &argv, NULL);
   if (!gtk_init_check ())
     return 77;

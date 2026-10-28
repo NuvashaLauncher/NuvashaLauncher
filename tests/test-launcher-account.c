@@ -361,6 +361,7 @@ main (void)
 {
   g_autofree char *directory = NULL;
 
+  g_setenv ("NUVASHA_TEST_SECRET_STORE", "1", TRUE);
   g_print ("# Launcher account tests\n");
 
   directory = g_dir_make_tmp ("nuvashalauncher-launcher-account-XXXXXX", NULL);

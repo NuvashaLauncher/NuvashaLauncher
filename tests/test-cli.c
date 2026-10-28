@@ -134,6 +134,7 @@ test_remove_instance_command (void)
 int
 main (void)
 {
+  g_setenv ("NUVASHA_TEST_SECRET_STORE", "1", TRUE);
   data_home = g_dir_make_tmp ("nuvashalauncher-cli-XXXXXX", NULL);
   if (data_home == NULL)
     g_error ("could not make a temporary data directory");
