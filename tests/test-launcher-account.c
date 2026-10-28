@@ -13,6 +13,7 @@
  * does go out is the manifest of such a launch. */
 
 #include "nuvashalauncher-launcher.h"
+#include "nuvashalauncher-secret-store.h"
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -373,6 +374,15 @@ main (void)
   test_a_ready_account_gets_past_the_gate ();
   test_launch_can_use_another_account ();
   test_the_state_has_a_name ();
+
+  /* These tests exercise persistence with fixed identities. Do not leave
+   * their Secret Service items in the developer's keyring or in later test
+   * processes. */
+  nuvashalauncher_secret_store_remove_account (
+    "069a79f444e94726a5befca90e38aaf5", NULL);
+  nuvashalauncher_secret_store_remove_account ("Alex", NULL);
+  nuvashalauncher_secret_store_remove_account ("Steve", NULL);
+  nuvashalauncher_secret_store_clear_active (NULL);
 
   return EXIT_SUCCESS;
 }
