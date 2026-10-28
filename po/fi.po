@@ -8,6 +8,9 @@ msgstr "Peruuttaa"
 msgid "Confirm"
 msgstr "Vahvistaa"
 
+msgid "Customize"
+msgstr "Mukauta"
+
 msgid "Delete"
 msgstr "Poistaa"
 
@@ -283,9 +286,6 @@ msgstr "Yritä uudelleen"
 
 msgid "Remove"
 msgstr "Poistaa"
-
-msgid "Remove \"%s\""
-msgstr "Poista \"%s\""
 
 msgid "Add Microsoft Account"
 msgstr "Lisää Microsoft-tili"

@@ -273,11 +273,6 @@ on_skin_selected (GtkListBox *list, GtkListBoxRow *row, gpointer user_data)
   if (url == NULL)
     return;
 
-  /* Selecting a skin is the change action.  The profile service accepts the
-   * URL of a skin already owned by the account; keep the row's avatar in sync
-   * immediately while the service refresh happens on the next profile load. */
-  g_object_set_data_full (G_OBJECT (menu->dialog), "nuvashalauncher-selected-skin",
-                          g_strdup (url), g_free);
   gtk_list_box_select_row (list, row);
   nuvashalauncher_users_set_avatar_icon (menu->image);
   load_view_texture (menu->view, url, FALSE);
@@ -295,9 +290,9 @@ on_skin_selected (GtkListBox *list, GtkListBoxRow *row, gpointer user_data)
                                       gtk_check_button_get_active (menu->slim_model)
                                         ? "SLIM" : "CLASSIC");
       nuvashalauncher_accounts_update (menu->owner->accounts, account, &error);
-       upload_selected_skin (menu, url,
-                             g_ascii_strcasecmp (account->skin_model, "SLIM") == 0
-                               ? "SLIM" : "CLASSIC");
+      upload_selected_skin (menu, url,
+                            g_ascii_strcasecmp (account->skin_model, "SLIM") == 0
+                              ? "SLIM" : "CLASSIC");
     }
 }
 

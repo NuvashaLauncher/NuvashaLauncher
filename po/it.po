@@ -9,6 +9,9 @@ msgstr "Annulla"
 msgid "Confirm"
 msgstr "Conferma"
 
+msgid "Customize"
+msgstr "Personalizza"
+
 msgid "Delete"
 msgstr "Elimina"
 
@@ -298,9 +301,6 @@ msgstr "Riprovare"
 
 msgid "Remove"
 msgstr "Rimuovi"
-
-msgid "Remove \"%s\""
-msgstr "Rimuovi \"%s\""
 
 msgid "Add Microsoft Account"
 msgstr "Aggiungi account Microsoft"

@@ -246,6 +246,71 @@ upload_texture (nuvashalauncherSkinView *self, GdkTexture *texture, GLuint *hand
   glBindTexture (GL_TEXTURE_2D, 0);
 }
 
+GBytes *
+nuvashalauncher_skin_prepare_classic_upload (GBytes *skin)
+{
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GdkTexture) texture = NULL;
+  g_autoptr (GBytes) pixels_bytes = NULL;
+  g_autoptr (GBytes) result = NULL;
+  g_autofree guchar *pixels = NULL;
+  g_autofree guchar *source = NULL;
+  int width, height;
+  gsize stride;
+  gboolean slim;
+
+  g_return_val_if_fail (skin != NULL, NULL);
+
+  texture = gdk_texture_new_from_bytes (skin, &error);
+  if (texture == NULL)
+    return g_bytes_ref (skin);
+  width = gdk_texture_get_width (texture);
+  height = gdk_texture_get_height (texture);
+  if (width != 64 || height != 64)
+    return g_bytes_ref (skin);
+
+  stride = (gsize) width * 4;
+  pixels = g_malloc (stride * height);
+  gdk_texture_download (texture, pixels, stride);
+  slim = pixels[(gsize) 20 * stride + 55 * 4 + 3] < 128 &&
+         pixels[(gsize) 20 * stride + 40 * 4 + 3] >= 128;
+  if (!slim)
+    return g_bytes_ref (skin);
+  source = g_memdup2 (pixels, stride * height);
+
+  /* This is the same atlas expansion used by the classic preview above. */
+  for (int y = 16; y < 32; y++)
+    for (int x = 0; x < 9; x++)
+      memcpy (pixels + (gsize) y * stride + (gsize) (46 + x) * 4,
+              source + (gsize) y * stride + (gsize) (45 + x) * 4, 4);
+  for (int y = 16; y < 20; y++)
+    for (int x = 0; x < 2; x++)
+      memcpy (pixels + (gsize) y * stride + (gsize) (50 + x) * 4,
+              source + (gsize) y * stride + (gsize) (49 + x) * 4, 4);
+  for (int y = 20; y < 32; y++)
+    for (int x = 0; x < 2; x++)
+      memcpy (pixels + (gsize) y * stride + (gsize) (54 + x) * 4,
+              source + (gsize) y * stride + (gsize) (53 + x) * 4, 4);
+
+  /* Match the preview's base-layer alpha normalization as well. */
+  for (int y = 0; y < 16; y++)
+    for (int x = 0; x < 32; x++)
+      pixels[(gsize) y * stride + (gsize) x * 4 + 3] = 255;
+  for (int y = 16; y < 32; y++)
+    for (int x = 0; x < 64; x++)
+      pixels[(gsize) y * stride + (gsize) x * 4 + 3] = 255;
+  for (int y = 48; y < 64; y++)
+    for (int x = 16; x < 48; x++)
+      pixels[(gsize) y * stride + (gsize) x * 4 + 3] = 255;
+
+  pixels_bytes = g_bytes_new_take (g_steal_pointer (&pixels), stride * height);
+  g_clear_object (&texture);
+  texture = gdk_memory_texture_new (width, height, GDK_MEMORY_R8G8B8A8,
+                                    pixels_bytes, stride);
+  result = gdk_texture_save_to_png_bytes (texture);
+  return g_steal_pointer (&result);
+}
+
 static void
 matrix_identity (float *m)
 {

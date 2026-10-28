@@ -8,6 +8,9 @@ msgstr "يلغي"
 msgid "Confirm"
 msgstr "يتأكد"
 
+msgid "Customize"
+msgstr "تخصيص"
+
 msgid "Delete"
 msgstr "يمسح"
 
@@ -283,9 +286,6 @@ msgstr "حاول ثانية"
 
 msgid "Remove"
 msgstr "يزيل"
-
-msgid "Remove \"%s\""
-msgstr "إزالة \"%s\""
 
 msgid "Add Microsoft Account"
 msgstr "أضف حساب مايكروسوفت"

@@ -8,6 +8,9 @@ msgstr "Zrušit"
 msgid "Confirm"
 msgstr "Potvrdit"
 
+msgid "Customize"
+msgstr "Přizpůsobit"
+
 msgid "Delete"
 msgstr "Vymazat"
 
@@ -283,9 +286,6 @@ msgstr "Zkuste to znovu"
 
 msgid "Remove"
 msgstr "Odstranit"
-
-msgid "Remove \"%s\""
-msgstr "Odebrat \"%s\""
 
 msgid "Add Microsoft Account"
 msgstr "Přidat účet Microsoft"

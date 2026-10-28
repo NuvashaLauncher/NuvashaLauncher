@@ -22,6 +22,24 @@
 
 G_DEFINE_FINAL_TYPE (nuvashalauncherMainWindow, nuvashalauncher_main_window, ADW_TYPE_APPLICATION_WINDOW)
 
+static gboolean
+on_main_window_key_pressed (GtkEventControllerKey *controller G_GNUC_UNUSED,
+                            guint keyval,
+                            guint keycode G_GNUC_UNUSED,
+                            GdkModifierType state G_GNUC_UNUSED,
+                            gpointer user_data)
+{
+  nuvashalauncherMainWindow *self = user_data;
+
+  if (keyval == GDK_KEY_Escape && self->ui.edit_mode)
+    {
+      set_instance_edit_mode (self);
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
 gboolean
 nuvashalauncher_main_window_launch_instance (nuvashalauncherMainWindow *self,
                                      const char *instance_id,
@@ -293,6 +311,12 @@ nuvashalauncher_main_window_init (nuvashalauncherMainWindow *self)
     }
   g_signal_connect_object (self, "close-request",
                            G_CALLBACK (on_window_close_request), self, 0);
+  {
+    GtkEventController *keys = gtk_event_controller_key_new ();
+    g_signal_connect (keys, "key-pressed",
+                      G_CALLBACK (on_main_window_key_pressed), self);
+    gtk_widget_add_controller (GTK_WIDGET (self), keys);
+  }
   nuvashalauncher_main_window_build_ui (self);
 }
 

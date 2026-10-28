@@ -8,6 +8,9 @@ msgstr "Mégsem"
 msgid "Confirm"
 msgstr "Erősítse meg"
 
+msgid "Customize"
+msgstr "Testreszabás"
+
 msgid "Delete"
 msgstr "Töröl"
 
@@ -283,9 +286,6 @@ msgstr "Próbáld újra"
 
 msgid "Remove"
 msgstr "Távolítsa el"
-
-msgid "Remove \"%s\""
-msgstr "\"%s\" eltávolítása"
 
 msgid "Add Microsoft Account"
 msgstr "Microsoft-fiók hozzáadása"

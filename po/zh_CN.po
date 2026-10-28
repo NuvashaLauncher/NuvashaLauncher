@@ -9,6 +9,9 @@ msgstr "取消"
 msgid "Confirm"
 msgstr "確認"
 
+msgid "Customize"
+msgstr "自定义"
+
 msgid "Delete"
 msgstr "删除"
 
@@ -294,9 +297,6 @@ msgstr "再试一次"
 
 msgid "Remove"
 msgstr "移除"
-
-msgid "Remove \"%s\""
-msgstr "添加或删除 %s"
 
 msgid "Add Microsoft Account"
 msgstr "添加 Microsoft 账户"

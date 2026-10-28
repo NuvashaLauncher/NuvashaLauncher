@@ -8,6 +8,9 @@ msgstr "取消"
 msgid "Confirm"
 msgstr "確認"
 
+msgid "Customize"
+msgstr "自訂"
+
 msgid "Delete"
 msgstr "刪除"
 
@@ -283,9 +286,6 @@ msgstr "再試一次"
 
 msgid "Remove"
 msgstr "消除"
-
-msgid "Remove \"%s\""
-msgstr "刪除“%s”"
 
 msgid "Add Microsoft Account"
 msgstr "新增微軟帳戶"

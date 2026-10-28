@@ -8,6 +8,9 @@ msgstr "Hủy bỏ"
 msgid "Confirm"
 msgstr "Xác nhận"
 
+msgid "Customize"
+msgstr "Tùy chỉnh"
+
 msgid "Delete"
 msgstr "Xóa bỏ"
 
@@ -283,9 +286,6 @@ msgstr "Thử lại"
 
 msgid "Remove"
 msgstr "Di dời"
-
-msgid "Remove \"%s\""
-msgstr "Xóa \"%s\""
 
 msgid "Add Microsoft Account"
 msgstr "Thêm tài khoản Microsoft"

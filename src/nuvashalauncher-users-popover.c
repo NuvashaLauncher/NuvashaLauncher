@@ -111,18 +111,12 @@ open_skin_menu_for_account (nuvashalauncherUsersPopover *self, const char *id,
 }
 
 static void
-on_avatar_clicked (GtkButton *button, gpointer user_data)
+on_skin_menu_clicked (GtkButton *button, gpointer user_data)
 {
   nuvashalauncherUsersPopover *self = nuvashalauncher_USERS_POPOVER (user_data);
   const char *id = account_id_of (button);
-  GtkImage *image = GTK_IMAGE (gtk_button_get_child (button));
-  nuvashalauncherAccount *account = nuvashalauncher_accounts_find (self->accounts, id);
-
-  if (account_needs_sign_in (account))
-    {
-      open_microsoft_sign_in (self);
-      return;
-    }
+  GtkImage *image = g_object_get_data (G_OBJECT (button),
+                                       "nuvashalauncher-account-image");
 
   open_skin_menu_for_account (self, id, image);
 }
@@ -203,10 +197,9 @@ on_remove_clicked (GtkButton *button, gpointer user_data)
                            g_object_ref (self));
 }
 
-/* One account as a row of the list. A healthy account can open its skin
- * settings, while an expired Microsoft account opens the sign-in flow from
- * the same row. The account that is active carries a check mark, and the
- * trash button takes an account out. */
+/* One account as a row of the list. The account that is active carries a
+ * check mark, the skin button opens skin settings, and the trash button takes
+ * an account out. Expired Microsoft accounts hide the skin button. */
 static void
 append_account_row (nuvashalauncherUsersPopover *self, const nuvashalauncherAccount *account)
 {
@@ -219,7 +212,7 @@ append_account_row (nuvashalauncherUsersPopover *self, const nuvashalauncherAcco
 
   AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
   GtkImage *image = GTK_IMAGE (gtk_image_new ());
-  GtkButton *avatar = GTK_BUTTON (gtk_button_new ());
+  GtkButton *skin = NULL;
   GtkButton *remove = GTK_BUTTON (gtk_button_new_from_icon_name ("user-trash-symbolic"));
   g_autofree char *tooltip = NULL;
 
@@ -257,15 +250,8 @@ append_account_row (nuvashalauncherUsersPopover *self, const nuvashalauncherAcco
     nuvashalauncher_users_set_avatar (self, GTK_IMAGE (image), account->avatar_url);
   gtk_image_set_pixel_size (GTK_IMAGE (image), AVATAR_SIZE);
   gtk_widget_set_valign (GTK_WIDGET (image), GTK_ALIGN_CENTER);
-  gtk_button_set_child (avatar, GTK_WIDGET (image));
-  gtk_button_set_has_frame (avatar, FALSE);
-  gtk_widget_set_valign (GTK_WIDGET (avatar), GTK_ALIGN_CENTER);
-  g_object_set_data_full (G_OBJECT (avatar), "nuvashalauncher-account-id",
-                          g_strdup (account->id), g_free);
-  g_signal_connect_object (avatar, "clicked", G_CALLBACK (on_avatar_clicked), self, 0);
   g_object_set_data (G_OBJECT (row), "nuvashalauncher-account-image", image);
-  adw_action_row_add_prefix (ADW_ACTION_ROW (row),
-                             GTK_WIDGET (avatar));
+  adw_action_row_add_prefix (ADW_ACTION_ROW (row), GTK_WIDGET (image));
 
   /* The mark of the one a launch plays as, at the far end of the row. */
   if (is_active)
@@ -277,7 +263,21 @@ append_account_row (nuvashalauncherUsersPopover *self, const nuvashalauncherAcco
       adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (check));
     }
 
-  tooltip = g_strdup_printf (_("Remove \"%s\""), account->name);
+  if (!needs_sign_in)
+    {
+      const char *skin_tooltip = _("Customize");
+      skin = GTK_BUTTON (gtk_button_new_from_icon_name (
+        "preferences-desktop-appearance-symbolic"));
+      nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (skin), skin_tooltip);
+      gtk_widget_set_valign (GTK_WIDGET (skin), GTK_ALIGN_CENTER);
+      g_object_set_data_full (G_OBJECT (skin), "nuvashalauncher-account-id",
+                              g_strdup (account->id), g_free);
+      g_object_set_data (G_OBJECT (skin), "nuvashalauncher-account-image", image);
+      g_signal_connect_object (skin, "clicked", G_CALLBACK (on_skin_menu_clicked), self, 0);
+      adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (skin));
+    }
+
+  tooltip = g_strdup (_("Delete"));
   nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (remove), tooltip);
   gtk_widget_set_valign (GTK_WIDGET (remove), GTK_ALIGN_CENTER);
   g_object_set_data_full (G_OBJECT (remove), "nuvashalauncher-account-id",
@@ -371,8 +371,17 @@ rebuild (nuvashalauncherUsersPopover *self)
      above the two buttons that add one. */
   gtk_widget_set_visible (GTK_WIDGET (self->list_scroller), accounts->len > 0);
 
-  for (guint i = 0; i < accounts->len; i++)
-    append_account_row (self, g_ptr_array_index (accounts, i));
+  /* Keep Microsoft accounts together at the top while preserving the
+     insertion order within each account type. */
+  for (guint pass = 0; pass < 2; pass++)
+    for (guint i = 0; i < accounts->len; i++)
+      {
+        nuvashalauncherAccount *account = g_ptr_array_index (accounts, i);
+        gboolean microsoft = account->type == nuvashalauncher_ACCOUNT_MICROSOFT;
+
+        if ((pass == 0 && microsoft) || (pass == 1 && !microsoft))
+          append_account_row (self, account);
+      }
 
   update_the_button (self);
 }

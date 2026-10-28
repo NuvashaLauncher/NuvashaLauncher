@@ -8,6 +8,9 @@ msgstr "Ophæve"
 msgid "Confirm"
 msgstr "Bekræfte"
 
+msgid "Customize"
+msgstr "Tilpas"
+
 msgid "Delete"
 msgstr "Slet"
 
@@ -283,9 +286,6 @@ msgstr "Prøv igen"
 
 msgid "Remove"
 msgstr "Fjerne"
-
-msgid "Remove \"%s\""
-msgstr "Fjern \"%s\""
 
 msgid "Add Microsoft Account"
 msgstr "Tilføj Microsoft-konto"

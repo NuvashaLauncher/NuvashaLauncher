@@ -9,6 +9,9 @@ msgstr "취소"
 msgid "Confirm"
 msgstr "확인"
 
+msgid "Customize"
+msgstr "사용자 지정"
+
 msgid "Delete"
 msgstr "삭제"
 
@@ -299,9 +302,6 @@ msgstr "다시 시도"
 
 msgid "Remove"
 msgstr "제거"
-
-msgid "Remove \"%s\""
-msgstr "“%s” 삭제"
 
 msgid "Add Microsoft Account"
 msgstr "Microsoft 계정 추가"
