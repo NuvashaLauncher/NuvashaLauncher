@@ -47,15 +47,15 @@ crash_reports_listed (GObject *source, GAsyncResult *result,
             {
               guint64 modified_seconds = g_file_info_get_attribute_uint64 (
                 info, G_FILE_ATTRIBUTE_TIME_MODIFIED);
-              guint32 modified_usec = g_file_info_get_attribute_uint32 (
-                info, G_FILE_ATTRIBUTE_TIME_MODIFIED_USEC);
               gint64 started_seconds = self->process.started_at / G_USEC_PER_SEC;
-              gint64 started_usec = self->process.started_at % G_USEC_PER_SEC;
 
-              written_now = modified_seconds > (guint64) started_seconds ||
-                            (modified_seconds == (guint64) started_seconds &&
-                             (modified_usec == 0 ||
-                              modified_usec >= (guint32) started_usec));
+              /* Crash-report mtimes are not consistently available with
+               * microsecond precision (notably on some ARM filesystems).
+               * The launch boundary is deliberately second-granularity:
+               * accepting any report from the launch second avoids treating
+               * a report written after spawn as an old report merely because
+               * its timestamp was rounded down. */
+              written_now = modified_seconds >= (guint64) started_seconds;
             }
 
           /* Every report is looked at, and what is left of the
@@ -153,7 +153,7 @@ finish_launch_after_natives (nuvashalauncher *self)
     g_file_enumerate_children_async (
       reports,
       G_FILE_ATTRIBUTE_STANDARD_NAME "," G_FILE_ATTRIBUTE_STANDARD_TYPE ","
-      G_FILE_ATTRIBUTE_TIME_MODIFIED "," G_FILE_ATTRIBUTE_TIME_MODIFIED_USEC,
+      G_FILE_ATTRIBUTE_TIME_MODIFIED,
       G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, G_PRIORITY_DEFAULT, NULL,
       crash_reports_listed, g_object_ref (self));
   }
