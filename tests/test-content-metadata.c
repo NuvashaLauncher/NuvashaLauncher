@@ -37,6 +37,37 @@ make_jar (const char *member, const char *contents)
 }
 
 static char *
+make_jar_with_two_members (const char *member_one, const char *contents_one,
+                           const char *member_two, const char *contents_two)
+{
+  char *path = g_strdup ("/tmp/nuvashalauncher-metadata-two-XXXXXX.jar");
+  int fd = g_mkstemp (path);
+  struct archive *archive = archive_write_new ();
+  const char *members[] = { member_one, member_two };
+  const char *contents[] = { contents_one, contents_two };
+
+  g_assert_cmpint (fd, >=, 0);
+  close (fd);
+  g_assert_cmpint (archive_write_set_format_zip (archive), ==, ARCHIVE_OK);
+  g_assert_cmpint (archive_write_open_filename (archive, path), ==, ARCHIVE_OK);
+  for (guint i = 0; i < G_N_ELEMENTS (members); i++)
+    {
+      struct archive_entry *entry = archive_entry_new ();
+      archive_entry_set_pathname (entry, members[i]);
+      archive_entry_set_filetype (entry, AE_IFREG);
+      archive_entry_set_perm (entry, 0644);
+      archive_entry_set_size (entry, strlen (contents[i]));
+      g_assert_cmpint (archive_write_header (archive, entry), ==, ARCHIVE_OK);
+      g_assert_cmpint (archive_write_data (archive, contents[i], strlen (contents[i])),
+                       ==, (la_ssize_t) strlen (contents[i]));
+      archive_entry_free (entry);
+    }
+  g_assert_cmpint (archive_write_close (archive), ==, ARCHIVE_OK);
+  archive_write_free (archive);
+  return path;
+}
+
+static char *
 make_large_jar (void)
 {
   g_autofree char *contents = g_malloc0 (1024 * 1024 + 1);
@@ -72,9 +103,36 @@ main (void)
   g_autofree char *truncated = make_jar (
     "fabric.mod.json", "{\"id\":\"example\",\"depends\":{\"other");
   g_autofree char *large = make_large_jar ();
+  g_autofree char *quilt = make_jar (
+    "quilt.mod.json",
+    "{\"quilt_loader\":{\"id\":\"quilt-example\",\"version\":\"2.0\","
+    "\"metadata\":{\"name\":\"Quilt Example\",\"description\":\"quilt desc\","
+    "\"icon\":{\"16\":\"small.png\",\"64\":\"large.png\"}},"
+    "\"depends\":{\"minecraft\":\"1.20\",\"qsl\":\"*\"}}}");
+  g_autofree char *forge = make_jar (
+    "META-INF/mods.toml",
+    "modLoader=\"javafml\"\n[[mods]]\nmodId=\"forge_example\"\n"
+    "version=\"3.0\"\ndisplayName=\"Forge Example\"\n"
+    "description=\"forge desc\"\nlogoFile=\"logo.png\"\n");
+  g_autofree char *mcmod = make_jar (
+    "mcmod.info",
+    "[{\"modid\":\"legacy\",\"name\":\"Legacy Example\","
+    "\"description\":\"legacy desc\",\"version\":\"0.9\","
+    "\"logoFile\":\"legacy.png\"}]");
+  g_autofree char *pack = make_jar_with_two_members (
+    "pack.mcmeta", "{\"pack\":{\"description\":\"Resource description\"}}",
+    "ignored.txt", "not metadata");
   g_autoptr (nuvashalauncherContentFile) file = g_new0 (nuvashalauncherContentFile, 1);
   g_autoptr (nuvashalauncherContentFile) broken = g_new0 (nuvashalauncherContentFile, 1);
   g_autoptr (nuvashalauncherContentFile) oversized =
+    g_new0 (nuvashalauncherContentFile, 1);
+  g_autoptr (nuvashalauncherContentFile) quilt_file =
+    g_new0 (nuvashalauncherContentFile, 1);
+  g_autoptr (nuvashalauncherContentFile) forge_file =
+    g_new0 (nuvashalauncherContentFile, 1);
+  g_autoptr (nuvashalauncherContentFile) mcmod_file =
+    g_new0 (nuvashalauncherContentFile, 1);
+  g_autoptr (nuvashalauncherContentFile) pack_file =
     g_new0 (nuvashalauncherContentFile, 1);
 
   file->path = g_strdup (valid);
@@ -97,6 +155,40 @@ main (void)
   g_assert_cmpint (g_unlink (valid), ==, 0);
   g_assert_cmpint (g_unlink (truncated), ==, 0);
   g_assert_cmpint (g_unlink (large), ==, 0);
-  g_print ("ok - local metadata parsers handle valid, truncated, and oversized entries\n");
+  quilt_file->path = g_strdup (quilt);
+  nuvashalauncher_content_apply_local_metadata (quilt_file, nuvashalauncher_CONTENT_MOD);
+  g_assert_true (quilt_file->local_metadata);
+  g_assert_cmpstr (quilt_file->project_name, ==, "Quilt Example");
+  g_assert_cmpstr (quilt_file->local_id, ==, "quilt-example");
+  g_assert_cmpstr (quilt_file->description, ==, "quilt desc");
+  g_assert_cmpstr (g_ptr_array_index (quilt_file->required_dependencies, 0), ==, "qsl");
+  g_assert_cmpstr (quilt_file->local_icon_member, ==, "large.png");
+
+  forge_file->path = g_strdup (forge);
+  nuvashalauncher_content_apply_local_metadata (forge_file, nuvashalauncher_CONTENT_MOD);
+  g_assert_true (forge_file->local_metadata);
+  g_assert_cmpstr (forge_file->project_name, ==, "Forge Example");
+  g_assert_cmpstr (forge_file->local_id, ==, "forge_example");
+  g_assert_cmpstr (forge_file->version_name, ==, "3.0");
+  g_assert_cmpstr (forge_file->local_icon_member, ==, "logo.png");
+
+  mcmod_file->path = g_strdup (mcmod);
+  nuvashalauncher_content_apply_local_metadata (mcmod_file, nuvashalauncher_CONTENT_MOD);
+  g_assert_true (mcmod_file->local_metadata);
+  g_assert_cmpstr (mcmod_file->project_name, ==, "Legacy Example");
+  g_assert_cmpstr (mcmod_file->local_id, ==, "legacy");
+  g_assert_cmpstr (mcmod_file->version_name, ==, "0.9");
+
+  pack_file->path = g_strdup (pack);
+  nuvashalauncher_content_apply_local_metadata (
+    pack_file, nuvashalauncher_CONTENT_RESOURCE_PACK);
+  g_assert_true (pack_file->local_metadata);
+  g_assert_cmpstr (pack_file->description, ==, "Resource description");
+
+  g_assert_cmpint (g_unlink (quilt), ==, 0);
+  g_assert_cmpint (g_unlink (forge), ==, 0);
+  g_assert_cmpint (g_unlink (mcmod), ==, 0);
+  g_assert_cmpint (g_unlink (pack), ==, 0);
+  g_print ("ok - local metadata parsers handle Fabric, Quilt, Forge, legacy, and packs\n");
   return 0;
 }

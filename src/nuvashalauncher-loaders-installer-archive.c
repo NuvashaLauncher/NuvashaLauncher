@@ -117,6 +117,8 @@ nuvashalauncher_loader_read_zip_entry (const char *path, const char *entry, GErr
       g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
                    "the installer at \"%s\" cannot be read: %s", path,
                    archive_error_string (archive));
+      if (fd >= 0)
+        close (fd);
       archive_read_free (archive);
       return NULL;
     }
@@ -186,6 +188,8 @@ nuvashalauncher_loader_read_zip_entry (const char *path, const char *entry, GErr
     archive_message = g_strdup (archive_error_string (archive));
 
   archive_read_close (archive);
+  close (fd);
+  fd = -1;
   archive_read_free (archive);
 
   if (bytes == NULL && error != NULL && *error == NULL)
@@ -261,6 +265,7 @@ nuvashalauncher_loader_write_jar_manifest_attribute (const char *path, const cha
   gboolean ok = TRUE;
   g_autoptr (GError) local_error = NULL;
   int status = ARCHIVE_EOF;
+  int temporary_fd = -1;
 
   in = archive_read_new ();
 
@@ -272,6 +277,8 @@ nuvashalauncher_loader_write_jar_manifest_attribute (const char *path, const cha
       g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
                    "the patched client jar at \"%s\" cannot be read: %s", path,
                    archive_error_string (in));
+      if (fd >= 0)
+        close (fd);
       archive_read_free (in);
       return FALSE;
     }
@@ -281,12 +288,14 @@ nuvashalauncher_loader_write_jar_manifest_attribute (const char *path, const cha
      broken game. */
   {
     g_autoptr (GError) temporary_error = NULL;
-    int temporary_fd = nuvashalauncher_fs_open_temporary_file (
+    temporary_fd = nuvashalauncher_fs_open_temporary_file (
       temporary_directory, ".nuvashalauncher-new-XXXXXX", &temporary, &temporary_error);
 
     if (temporary_fd < 0)
       {
         g_propagate_error (error, g_steal_pointer (&temporary_error));
+        close (fd);
+        fd = -1;
         archive_read_free (in);
         return FALSE;
       }
@@ -300,6 +309,10 @@ nuvashalauncher_loader_write_jar_manifest_attribute (const char *path, const cha
                      nuvashalauncher_LOADERS_ERROR_INSTALLER,
                      "the patched client jar at \"%s\" cannot be written: %s",
                      path, archive_error_string (out));
+        close (fd);
+        fd = -1;
+        close (temporary_fd);
+        temporary_fd = -1;
         archive_read_free (in);
         archive_write_free (out);
         nuvashalauncher_fs_unlink (temporary, NULL);
@@ -419,6 +432,8 @@ nuvashalauncher_loader_write_jar_manifest_attribute (const char *path, const cha
     ok = FALSE;
 
   archive_read_close (in);
+  close (fd);
+  fd = -1;
   archive_read_free (in);
 
   if (!ok || archive_write_close (out) != ARCHIVE_OK)
@@ -427,12 +442,16 @@ nuvashalauncher_loader_write_jar_manifest_attribute (const char *path, const cha
                    "the patched client jar at \"%s\" cannot be written: %s",
                    path, out != NULL ? archive_error_string (out) : "");
       archive_write_free (out);
+      close (temporary_fd);
+      temporary_fd = -1;
 
       nuvashalauncher_fs_unlink (temporary, NULL);
       return FALSE;
     }
 
   archive_write_free (out);
+  close (temporary_fd);
+  temporary_fd = -1;
 
   if (!written)
     {

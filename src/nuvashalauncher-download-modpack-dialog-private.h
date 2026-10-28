@@ -112,6 +112,7 @@ void operation_done (gpointer user_data);
 void details_watch (gpointer field, GtkWidget *widget);
 void build_browse_page (nuvashalauncherDownloadModpackDialog *, gboolean start_search);
 void close_details (nuvashalauncherDownloadModpackDialog *);
+GtkWidget *details_content (nuvashalauncherDownloadModpackDialog *);
 void dialog_details_open (nuvashalauncherDownloadModpackDialog *);
 void on_modpack_download_clicked (GtkButton *, gpointer);
 GtkWidget *build_error_page (nuvashalauncherDownloadModpackDialog *, const char *,

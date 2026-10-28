@@ -317,7 +317,10 @@ extract_layers (const char *archive_path, const char *directory,
                    "the pack cannot be opened: %s",
                    archive_error_string (archive));
       if (fd >= 0)
-        close (fd);
+        {
+          close (fd);
+          fd = -1;
+        }
       archive_read_free (archive);
       return FALSE;
     }
@@ -330,6 +333,8 @@ extract_layers (const char *archive_path, const char *directory,
                                nuvashalauncher_MODPACK_ERROR_BOMB,
                                "the archive has more entries than one pack");
           archive_read_close (archive);
+          close (fd);
+          fd = -1;
           archive_read_free (archive);
           return FALSE;
         }
@@ -339,6 +344,8 @@ extract_layers (const char *archive_path, const char *directory,
             archive_entry_hardlink (header), error))
         {
           archive_read_close (archive);
+          close (fd);
+          fd = -1;
           archive_read_free (archive);
           return FALSE;
         }
@@ -357,6 +364,8 @@ extract_layers (const char *archive_path, const char *directory,
           !extract_entry (archive, header, directory, prefix, used, error))
         {
           archive_read_close (archive);
+          close (fd);
+          fd = -1;
           archive_read_free (archive);
           return FALSE;
         }
@@ -364,6 +373,8 @@ extract_layers (const char *archive_path, const char *directory,
       if (archive_read_data_skip (archive) != ARCHIVE_OK)
         {
           archive_read_close (archive);
+          close (fd);
+          fd = -1;
           archive_read_free (archive);
           g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_ARCHIVE,
                        "the archive cannot be read all the way through");
@@ -377,11 +388,15 @@ extract_layers (const char *archive_path, const char *directory,
                    "the overrides cannot be read: %s",
                    archive_error_string (archive));
       archive_read_close (archive);
+      close (fd);
+      fd = -1;
       archive_read_free (archive);
       return FALSE;
     }
 
   archive_read_close (archive);
+  close (fd);
+  fd = -1;
   archive_read_free (archive);
 
   return TRUE;

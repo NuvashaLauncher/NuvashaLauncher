@@ -269,11 +269,9 @@ main (int argc, char **argv)
   g_test_init (&argc, &argv, NULL);
   g_test_add_func ("/modpack/export-import-round-trip", test_export_import_round_trip);
   g_test_add_func ("/modpack/export-managed-datapack", test_export_preserves_managed_datapack);
-#if !defined(__SANITIZE_ADDRESS__)
   if (gtk_init_check ())
     {
       g_test_add_func ("/modpack/dialog-import", test_dialog_imports_and_installs);
     }
-#endif
   return g_test_run ();
 }

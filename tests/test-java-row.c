@@ -71,16 +71,6 @@ main (void)
 
   g_print ("# Java row\n");
 
-#ifdef __SANITIZE_ADDRESS__
-  /* The combo row wraps its model in a GtkListView, whose process-global
-     allocations LeakSanitizer reports as leaks of this test. The test
-     runs under make test; the sanitizer run skips it rather than failing
-     on the toolkit's own memory. */
-  g_print ("skipped - the sanitizer run does not attribute Gtk's own "
-           "allocations\n");
-  return EXIT_SUCCESS;
-#endif
-
   if (!gtk_init_check ())
     {
       g_print ("skipped - no display, cannot build the row\n");

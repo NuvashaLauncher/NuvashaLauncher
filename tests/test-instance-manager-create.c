@@ -430,6 +430,48 @@ test_version_mismatch (void)
   g_print ("ok - unsupported metadata version\n");
 }
 
+static void
+test_duplicate_metadata_entries_are_quarantined (void)
+{
+  const char *ids[] = {
+    "{\"id\":\"11111111-2222-3333-4444-555555555555\",\"name\":\"One\","
+    "\"directory\":\"/tmp/one\",\"minecraft_version\":\"1.21.1\",\"loader\":\"vanilla\"}",
+    "{\"id\":\"11111111-2222-3333-4444-555555555555\",\"name\":\"Two\","
+    "\"directory\":\"/tmp/two\",\"minecraft_version\":\"1.21.1\",\"loader\":\"vanilla\"}"
+  };
+  const char *names[] = {
+    "{\"id\":\"11111111-2222-3333-4444-555555555555\",\"name\":\"Pack\","
+    "\"directory\":\"/tmp/one\",\"minecraft_version\":\"1.21.1\",\"loader\":\"vanilla\"}",
+    "{\"id\":\"66666666-7777-8888-9999-000000000000\",\"name\":\" pack \","
+    "\"directory\":\"/tmp/two\",\"minecraft_version\":\"1.21.1\",\"loader\":\"vanilla\"}"
+  };
+
+  for (guint case_index = 0; case_index < 2; case_index++)
+    {
+      g_autofree char *data_dir = make_tmp_dir ();
+      g_autofree char *metadata_path =
+        g_build_filename (data_dir, "instances.json", NULL);
+      g_autofree char *text = g_strdup_printf (
+        "{\"version\":2,\"instances\":[%s,%s]}",
+        case_index == 0 ? ids[0] : names[0],
+        case_index == 0 ? ids[1] : names[1]);
+      g_autoptr (GError) error = NULL;
+      g_autoptr (nuvashalauncherInstanceManager) manager =
+        nuvashalauncher_instance_manager_new (data_dir);
+
+      write_file (metadata_path, text);
+      g_assert_false (nuvashalauncher_instance_manager_load (manager, &error));
+      g_assert_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
+                      nuvashalauncher_INSTANCE_MANAGER_ERROR_CORRUPT);
+      g_clear_error (&error);
+      g_assert_cmpuint (manager_count (manager), ==, 0);
+      assert_quarantined (data_dir, text);
+      remove_recursive (data_dir);
+    }
+
+  g_print ("ok - duplicate ids and normalized names quarantine metadata\n");
+}
+
 
 static void
 test_atomic_save_failure (void)
@@ -494,6 +536,7 @@ main (int argc, char **argv)
   test_corrupt_file ();
   test_missing_field_file ();
   test_version_mismatch ();
+  test_duplicate_metadata_entries_are_quarantined ();
   test_atomic_save_failure ();
   return 0;
 }

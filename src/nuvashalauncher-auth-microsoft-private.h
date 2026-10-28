@@ -19,7 +19,17 @@ typedef struct _AuthRequest {
   char *xsts_token; char *mc_access_token; gint64 mc_expires_at;
 } AuthRequest;
 
+typedef void (*nuvashalauncherAuthTransportFunc) (AuthRequest *self,
+                                                  const char *url,
+                                                  const char *method,
+                                                  const char *body,
+                                                  const char **headers,
+                                                  Step step,
+                                                  gpointer user_data);
+
 void nuvashalauncher_auth_request_free (gpointer data);
+void nuvashalauncher_auth_set_transport_for_tests (nuvashalauncherAuthTransportFunc transport,
+                                                   gpointer user_data);
 void sent (SoupSession *session, GAsyncResult *result, gpointer user_data);
 void auth_read_ready (GObject *source, GAsyncResult *result, gpointer user_data);
 

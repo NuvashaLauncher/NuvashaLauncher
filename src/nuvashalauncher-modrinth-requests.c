@@ -276,7 +276,10 @@ nuvashalauncher_modrinth_get_async (const char *url, GAsyncReadyCallback callbac
   flight->key = g_strdup (url);
   flight->tasks = g_ptr_array_new_with_free_func (g_object_unref);
   g_ptr_array_add (flight->tasks, g_object_ref (task));
-  g_hash_table_insert (json_flights, g_strdup (url), flight);
+  /* The flight owns its key. Stealing the entry before callbacks lets the
+   * flight be freed immediately; using the same allocation for the table key
+   * ensures that ownership is released exactly once. */
+  g_hash_table_insert (json_flights, flight->key, flight);
 
   nuvashalauncher_task_scope_release_when_done (
     nuvashalauncher_download_json_cached_async (nuvashalauncher_downloads_get_service (), url, json_flight_done, flight),

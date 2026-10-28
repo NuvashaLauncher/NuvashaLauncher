@@ -15,10 +15,151 @@
  * for a browser. */
 
 #include "nuvashalauncher-auth-microsoft.h"
+#include "nuvashalauncher-auth-microsoft-private.h"
 
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+typedef struct
+{
+  GMainLoop *loop;
+  nuvashalauncherTaskScope *scope;
+  GError *error;
+} AuthWait;
+
+typedef struct
+{
+  GMainLoop *loop;
+  nuvashalauncherTaskScope *scope;
+  nuvashalauncherAccount *account;
+  GError *error;
+  gboolean refresh;
+} AuthSuccessWait;
+
+typedef void (*AuthAnswerFunc) (AuthRequest *);
+
+static char *fixture (const char *name);
+
+static void
+auth_success_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                       gpointer user_data)
+{
+  AuthSuccessWait *wait = user_data;
+
+  if (wait->refresh)
+    wait->account = nuvashalauncher_auth_refresh_finish (result, &wait->error);
+  else
+    wait->account = nuvashalauncher_auth_sign_in_finish (result, &wait->error);
+
+  nuvashalauncher_task_scope_unref (wait->scope);
+  wait->scope = NULL;
+  g_main_loop_quit (wait->loop);
+}
+
+static void
+auth_fixture_transport (AuthRequest *self, const char *url, const char *method,
+                         const char *body, const char **headers, Step step,
+                         gpointer user_data G_GNUC_UNUSED)
+{
+  const char *name = NULL;
+
+  g_assert_cmpstr (method, ==, step == STEP_TOKEN ? SOUP_METHOD_POST :
+                   step == STEP_PROFILE || step == STEP_ENTITLEMENTS ? SOUP_METHOD_GET :
+                   SOUP_METHOD_POST);
+  g_assert_nonnull (body || step == STEP_PROFILE || step == STEP_ENTITLEMENTS);
+  g_assert_nonnull (headers || step == STEP_TOKEN || step == STEP_PROFILE ||
+                    step == STEP_ENTITLEMENTS);
+
+  switch (step)
+    {
+    case STEP_TOKEN:
+      g_assert_cmpstr (url, ==, nuvashalauncher_MICROSOFT_TOKEN_URL);
+      name = "auth-token-ok.json";
+      break;
+    case STEP_XBL:
+      g_assert_cmpstr (url, ==, nuvashalauncher_XBOX_USER_URL);
+      name = "auth-xbl-user.json";
+      break;
+    case STEP_XSTS:
+      g_assert_cmpstr (url, ==, nuvashalauncher_XBOX_XSTS_URL);
+      name = "auth-xsts-ok.json";
+      break;
+    case STEP_MINECRAFT:
+      g_assert_cmpstr (url, ==, nuvashalauncher_MINECRAFT_SERVICES_URL "/launcher/login");
+      name = "auth-minecraft-token.json";
+      break;
+    case STEP_ENTITLEMENTS:
+      g_assert_true (g_str_has_prefix (url, nuvashalauncher_MINECRAFT_SERVICES_URL
+                                       "/entitlements/license?requestId="));
+      name = "auth-entitlements-owned.json";
+      break;
+    case STEP_PROFILE:
+      g_assert_cmpstr (url, ==, nuvashalauncher_MINECRAFT_SERVICES_URL "/minecraft/profile");
+      name = "auth-profile.json";
+      break;
+    default:
+      g_assert_not_reached ();
+    }
+
+  /* The real response reader replaces the previous response body before
+   * dispatching the next state. Keep the fixture transport's ownership
+   * semantics identical to that boundary. */
+  g_free (self->body);
+  self->body = NULL;
+  self->step = step;
+  self->status = 200;
+  self->body = fixture (name);
+
+  switch (step)
+    {
+    case STEP_TOKEN: token_answered (self); break;
+    case STEP_XBL: xbl_answered (self); break;
+    case STEP_XSTS: xsts_answered (self); break;
+    case STEP_MINECRAFT: minecraft_answered (self); break;
+    case STEP_ENTITLEMENTS: entitlements_answered (self); break;
+    case STEP_PROFILE: profile_answered (self); break;
+    default: g_assert_not_reached ();
+    }
+}
+
+static void
+auth_error_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                     gpointer user_data)
+{
+  AuthWait *wait = user_data;
+
+  g_assert_false (g_task_propagate_boolean (G_TASK (result), &wait->error));
+  nuvashalauncher_task_scope_unref (wait->scope);
+  wait->scope = NULL;
+  g_main_loop_quit (wait->loop);
+}
+
+static void
+run_auth_error_answer (const char *fixture_name, gint status,
+                       AuthAnswerFunc answer, nuvashalauncherAuthError code,
+                       const char *message)
+{
+  g_autofree char *body = fixture (fixture_name);
+  AuthWait wait = { 0 };
+  AuthRequest *request = NULL;
+
+  wait.loop = g_main_loop_new (NULL, FALSE);
+  wait.scope = nuvashalauncher_task_scope_new (NULL, NULL,
+                                               auth_error_finished, &wait);
+  request = request_new (wait.scope);
+  request->status = status;
+  request->body = g_strdup (body);
+  answer (request);
+  g_main_loop_run (wait.loop);
+
+  g_assert_null (wait.scope);
+  g_assert_error (wait.error, nuvashalauncher_AUTH_ERROR, code);
+  g_assert_nonnull (strstr (wait.error->message, message));
+  g_clear_error (&wait.error);
+  g_main_loop_unref (wait.loop);
+}
 
 #ifndef nuvashalauncher_TEST_FIXTURES
 #define nuvashalauncher_TEST_FIXTURES "tests/fixtures"
@@ -434,6 +575,122 @@ test_profile (void)
   g_print ("ok - the profile says who the player is and what they wear\n");
 }
 
+/* Exercise the real token-step transition, rather than only its JSON parser.
+ * An expired device code must complete the asynchronous sign-in with a
+ * declined error and release the request state; it must not leave a polling
+ * source behind. */
+static void
+test_expired_token_completes_sign_in (void)
+{
+  g_autofree char *body = fixture ("auth-token-expired.json");
+  AuthWait wait = { 0 };
+  AuthRequest *request = NULL;
+
+  wait.loop = g_main_loop_new (NULL, FALSE);
+  wait.scope = nuvashalauncher_task_scope_new (NULL, NULL,
+                                               auth_error_finished, &wait);
+  request = request_new (wait.scope);
+  request->status = 400;
+  request->body = g_strdup (body);
+  request->deadline = g_get_real_time () / 1000000 + 60;
+
+  token_answered (request);
+  g_main_loop_run (wait.loop);
+
+  g_assert_null (wait.scope);
+  g_assert_error (wait.error, nuvashalauncher_AUTH_ERROR,
+                  nuvashalauncher_AUTH_ERROR_DECLINED);
+  g_assert_nonnull (strstr (wait.error->message, "code ran out"));
+  g_clear_error (&wait.error);
+  g_main_loop_unref (wait.loop);
+
+  g_print ("ok - an expired token response completes sign-in as declined\n");
+}
+
+static void
+test_service_state_refusals_complete_sign_in (void)
+{
+  /* These are the actual answer handlers, not just parser calls: every
+   * refusal must finish the same asynchronous request exactly once. */
+  run_auth_error_answer ("auth-xsts-child-account.json", 401, xsts_answered,
+                         nuvashalauncher_AUTH_ERROR_XBOX, "child account");
+  run_auth_error_answer ("auth-minecraft-app-not-registered.json", 403,
+                         minecraft_answered, nuvashalauncher_AUTH_ERROR_XBOX,
+                         "Invalid app registration");
+  run_auth_error_answer ("auth-entitlements-not-owned.json", 200,
+                         entitlements_answered, nuvashalauncher_AUTH_ERROR_NO_GAME,
+                         "Minecraft: Java");
+  run_auth_error_answer ("auth-profile-not-found.json", 404, profile_answered,
+                         nuvashalauncher_AUTH_ERROR_NO_PROFILE, "never played");
+
+  g_print ("ok - service refusals complete each authentication state\n");
+}
+
+static void
+test_successful_sign_in_refresh_and_persistence (void)
+{
+  nuvashalauncherDeviceCode code = { 0 };
+  AuthSuccessWait wait = { 0 };
+  g_autoptr (nuvashalauncherAccount) account = NULL;
+  g_autoptr (nuvashalauncherAccounts) accounts = NULL;
+  g_autoptr (nuvashalauncherAccounts) reopened = NULL;
+  g_autofree char *directory = NULL;
+  g_autofree char *path = NULL;
+  g_autoptr (GError) error = NULL;
+
+  code.device_code = (char *) "device-code-for-test";
+  code.interval = 1;
+  code.expires_in = 600;
+  wait.loop = g_main_loop_new (NULL, FALSE);
+  nuvashalauncher_auth_set_transport_for_tests (auth_fixture_transport, NULL);
+
+  wait.scope = nuvashalauncher_auth_sign_in_async (&code, auth_success_finished, &wait);
+  g_main_loop_run (wait.loop);
+  g_assert_null (wait.scope);
+  g_assert_no_error (wait.error);
+  g_assert_nonnull (wait.account);
+  account = g_steal_pointer (&wait.account);
+  g_assert_cmpint (account->type, ==, nuvashalauncher_ACCOUNT_MICROSOFT);
+  g_assert_cmpstr (account->name, ==, "Notch");
+  g_assert_cmpstr (account->uuid, ==, "069a79f4-44e9-4726-a5be-fca90e38aaf5");
+  g_assert_cmpstr (account->access_token, ==,
+                   "eyJhbGciOiJIUzI1NiJ9.minecraft.services.token");
+  g_assert_cmpstr (account->refresh_token, ==, "M.R3_BAY.the-refresh-token");
+
+  /* The refresh path starts with the stored Microsoft refresh token and the
+   * same production service chain replaces the access token/profile state. */
+  wait.refresh = TRUE;
+  wait.scope = nuvashalauncher_auth_refresh_async (account, auth_success_finished, &wait);
+  g_main_loop_run (wait.loop);
+  g_assert_null (wait.scope);
+  g_assert_no_error (wait.error);
+  g_assert_nonnull (wait.account);
+  g_assert_cmpstr (wait.account->refresh_token, ==, account->refresh_token);
+  g_assert_cmpstr (wait.account->uuid, ==, account->uuid);
+  g_clear_pointer (&wait.account, nuvashalauncher_account_free);
+
+  directory = g_dir_make_tmp ("nuvashalauncher-auth-XXXXXX", &error);
+  g_assert_no_error (error);
+  path = g_build_filename (directory, "accounts.json", NULL);
+  accounts = nuvashalauncher_accounts_new_for_path (path);
+  g_assert_true (nuvashalauncher_accounts_add (accounts, account, &error));
+  g_assert_no_error (error);
+  reopened = nuvashalauncher_accounts_new_for_path (path);
+  g_assert_cmpuint (nuvashalauncher_accounts_count (reopened), ==, 1);
+  g_assert_cmpstr (nuvashalauncher_accounts_get_active (reopened)->access_token, ==,
+                   account->access_token);
+  g_assert_cmpstr (nuvashalauncher_accounts_get_active (reopened)->refresh_token, ==,
+                   account->refresh_token);
+
+  nuvashalauncher_auth_set_transport_for_tests (NULL, NULL);
+  g_clear_error (&wait.error);
+  g_main_loop_unref (wait.loop);
+  g_assert_cmpint (g_remove (path), ==, 0);
+  g_assert_cmpint (g_rmdir (directory), ==, 0);
+
+  g_print ("ok - successful sign-in, refresh and persistence preserve identity\n");
+}
+
 /* ---------------------------------------------------------- *
  * The client id
  * ---------------------------------------------------------- */
@@ -480,6 +737,9 @@ main (void)
   test_minecraft_token ();
   test_entitlements ();
   test_profile ();
+  test_expired_token_completes_sign_in ();
+  test_service_state_refusals_complete_sign_in ();
+  test_successful_sign_in_refresh_and_persistence ();
   test_the_endpoints_are_the_documented_ones ();
 
   return EXIT_SUCCESS;

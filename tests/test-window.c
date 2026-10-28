@@ -336,16 +336,6 @@ main (int argc, char **argv)
 
   g_print ("# Window ownership\n");
 
-#ifdef __SANITIZE_ADDRESS__
-  /* GTK keeps process-global allocations that LeakSanitizer would report
-     as leaks of this test. The window is checked under make test; the
-     sanitizer run skips it rather than failing on the toolkit's own
-     memory. */
-  g_print ("skipped - the sanitizer run does not attribute Gtk's own "
-           "allocations\n");
-   return 77;
-#endif
-
   /* The settings and the accounts of the window go under this root. */
   root = g_dir_make_tmp ("nuvashalauncher-window-XXXXXX", NULL);
 
