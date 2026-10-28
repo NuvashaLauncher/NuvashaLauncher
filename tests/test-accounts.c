@@ -30,6 +30,15 @@ temporary_path (const char *name)
   return g_steal_pointer (&path);
 }
 
+static void
+remove_temporary_path (const char *path)
+{
+  g_autofree char *directory = g_path_get_dirname (path);
+
+  g_remove (path);
+  g_assert_cmpint (g_rmdir (directory), ==, 0);
+}
+
 /* ---------------------------------------------------------- *
  * What an account is
  * ---------------------------------------------------------- */
@@ -240,6 +249,7 @@ test_one_active_account (void)
   if (!nuvashalauncher_accounts_add (store, one, &error))
     {
       g_test_skip ("Secret Service is unavailable in this environment");
+      remove_temporary_path (path);
       return;
     }
   g_assert_no_error (error);
@@ -280,6 +290,8 @@ test_one_active_account (void)
   g_assert_false (nuvashalauncher_accounts_remove (store, "jeb_", &error));
   g_assert_error (error, nuvashalauncher_ACCOUNTS_ERROR, nuvashalauncher_ACCOUNTS_ERROR_UNKNOWN);
 
+  remove_temporary_path (path);
+
   g_print ("ok - there is one active account and it is one of them\n");
 }
 
@@ -308,6 +320,7 @@ test_persistence (void)
   if (!nuvashalauncher_accounts_add (store, account, &error))
     {
       g_test_skip ("Secret Service is unavailable in this environment");
+      remove_temporary_path (path);
       return;
     }
   g_assert_no_error (error);
@@ -331,6 +344,8 @@ test_persistence (void)
   g_assert_no_error (error);
   g_assert_cmpuint (nuvashalauncher_accounts_count (store), ==, 0);
   g_assert_null (nuvashalauncher_accounts_get_active (store));
+
+  remove_temporary_path (path);
 
   g_print ("ok - complete account records survive a restart in Secret Service\n");
 }
@@ -366,6 +381,7 @@ test_adding_the_same_account_twice (void)
   if (!nuvashalauncher_accounts_add (store, account, &error))
     {
       g_test_skip ("Secret Service is unavailable in this environment");
+      remove_temporary_path (path);
       return;
     }
   g_assert_no_error (error);
@@ -403,6 +419,8 @@ test_adding_the_same_account_twice (void)
   nuvashalauncher_secret_store_remove_account ("069a79f444e94726a5befca90e38aaf5", NULL);
   nuvashalauncher_secret_store_remove_account ("TestUser", NULL);
   nuvashalauncher_secret_store_clear_active (NULL);
+
+  remove_temporary_path (path);
 
   g_print ("ok - signing in again replaces the account it signed in to\n");
 }
