@@ -43,6 +43,14 @@
     <color type="primary">#7774a5</color>
   </branding>
   <releases>
+    <release version="0.8" date="2026-10-28">
+      <description>
+        <p>Account records now use the desktop Secret Service, preserving
+        offline and Microsoft identities, tokens, cosmetics, and active-account
+        state. This release also improves account persistence tests, headless
+        test handling, and sanitizer cleanup.</p>
+      </description>
+    </release>
     <release version="0.7" date="2026-10-27">
       <description>
         <p>Improved sign-in, content navigation, instance version handling, and
