@@ -271,7 +271,11 @@ nuvashalauncher_accounts_new_for_path (const char *filename)
           self->active_id = g_steal_pointer (&active);
       }
     else if (error != NULL)
-      g_warning ("cannot read accounts from Secret Service: %s", error->message);
+      /* The account API has no load-error return path. A Secret Service
+       * provider is commonly unavailable in headless CLI/test environments;
+       * treat that the same as an empty store and keep diagnostics quiet. A
+       * later account write still reports the actual backend error. */
+      g_debug ("cannot read accounts from Secret Service: %s", error->message);
   }
 
   return self;
