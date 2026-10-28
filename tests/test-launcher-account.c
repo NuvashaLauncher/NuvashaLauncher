@@ -13,6 +13,7 @@
  * does go out is the manifest of such a launch. */
 
 #include "nuvashalauncher-launcher.h"
+#include "nuvashalauncher-fs.h"
 #include "nuvashalauncher-secret-store.h"
 
 #include <glib.h>
@@ -383,6 +384,7 @@ main (void)
   nuvashalauncher_secret_store_remove_account ("Alex", NULL);
   nuvashalauncher_secret_store_remove_account ("Steve", NULL);
   nuvashalauncher_secret_store_clear_active (NULL);
+  nuvashalauncher_fs_remove_tree (root);
 
   return EXIT_SUCCESS;
 }

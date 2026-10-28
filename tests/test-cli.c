@@ -3,6 +3,7 @@
  */
 
 #include "nuvashalauncher-accounts.h"
+#include "nuvashalauncher-fs.h"
 #include "nuvashalauncher-instance-manager.h"
 #include "nuvashalauncher-secret-store.h"
 
@@ -140,6 +141,7 @@ main (void)
 
   test_account_commands ();
   test_remove_instance_command ();
+  nuvashalauncher_fs_remove_tree (data_home);
   g_free (data_home);
   g_print ("ok - account CLI commands list, switch and remove accounts\n");
   return EXIT_SUCCESS;
