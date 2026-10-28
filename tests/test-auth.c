@@ -676,6 +676,9 @@ test_successful_sign_in_refresh_and_persistence (void)
   if (!nuvashalauncher_accounts_add (accounts, account, &error))
     {
       g_test_skip ("Secret Service is unavailable in this environment");
+      nuvashalauncher_auth_set_transport_for_tests (NULL, NULL);
+      g_clear_error (&wait.error);
+      g_main_loop_unref (wait.loop);
       return;
     }
   g_assert_no_error (error);
