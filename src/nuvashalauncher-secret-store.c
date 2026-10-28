@@ -24,6 +24,37 @@ static const SecretSchema active_schema = {
   0, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 
+/* Tests run against a separate schema so they can never enumerate, update,
+ * or remove a real user's account items, even when the test process has
+ * access to the user's Secret Service. */
+static const SecretSchema test_account_schema = {
+  "com.github.nuvashalauncher.TestAccount",
+  SECRET_SCHEMA_NONE,
+  { { "account-id", SECRET_SCHEMA_ATTRIBUTE_STRING }, { NULL, 0 } },
+  0, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+};
+
+static const SecretSchema test_active_schema = {
+  "com.github.nuvashalauncher.TestActiveAccount",
+  SECRET_SCHEMA_NONE,
+  { { "kind", SECRET_SCHEMA_ATTRIBUTE_STRING }, { NULL, 0 } },
+  0, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+};
+
+static const SecretSchema *
+account_schema_for_store (void)
+{
+  return g_strcmp0 (g_getenv ("NUVASHA_TEST_SECRET_STORE"), "1") == 0
+    ? &test_account_schema : &account_schema;
+}
+
+static const SecretSchema *
+active_schema_for_store (void)
+{
+  return g_strcmp0 (g_getenv ("NUVASHA_TEST_SECRET_STORE"), "1") == 0
+    ? &test_active_schema : &active_schema;
+}
+
 static gboolean
 secret_error (GError **error, GError *cause)
 {
@@ -76,6 +107,8 @@ nuvashalauncher_secret_store_load (GPtrArray **accounts,
   g_autofree char *active = NULL;
   g_autoptr (SecretService) service = NULL;
   g_autoptr (GHashTable) attributes = NULL;
+  const SecretSchema *account_schema = account_schema_for_store ();
+  const SecretSchema *active_schema = active_schema_for_store ();
   GList *items = NULL;
   GPtrArray *loaded = NULL;
 
@@ -90,7 +123,7 @@ nuvashalauncher_secret_store_load (GPtrArray **accounts,
   loaded = g_ptr_array_new_with_free_func (
     (GDestroyNotify) nuvashalauncher_account_free);
   attributes = g_hash_table_new (g_str_hash, g_str_equal);
-  items = secret_service_search_sync (service, &account_schema, attributes,
+  items = secret_service_search_sync (service, account_schema, attributes,
                                       SECRET_SEARCH_ALL | SECRET_SEARCH_UNLOCK,
                                       NULL, &local_error);
   if (local_error != NULL)
@@ -119,7 +152,7 @@ nuvashalauncher_secret_store_load (GPtrArray **accounts,
     }
   g_list_free_full (items, g_object_unref);
 
-  active = secret_password_lookup_sync (&active_schema, NULL, &local_error,
+  active = secret_password_lookup_sync (active_schema, NULL, &local_error,
                                         "kind", "active-account", NULL);
   if (local_error != NULL)
     {
@@ -142,7 +175,7 @@ nuvashalauncher_secret_store_save_account (const nuvashalauncherAccount *account
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   payload = account_payload (account);
-  if (!secret_password_store_sync (&account_schema, SECRET_COLLECTION_DEFAULT,
+  if (!secret_password_store_sync (account_schema_for_store (), SECRET_COLLECTION_DEFAULT,
                                    "Nuvasha Launcher account", payload, NULL,
                                    error, "account-id", account->id, NULL))
     return FALSE;
@@ -156,7 +189,7 @@ nuvashalauncher_secret_store_save_active (const char *account_id, GError **error
   g_return_val_if_fail (account_id != NULL, FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
-  if (!secret_password_store_sync (&active_schema, SECRET_COLLECTION_DEFAULT,
+  if (!secret_password_store_sync (active_schema_for_store (), SECRET_COLLECTION_DEFAULT,
                                    "Nuvasha Launcher active account", account_id,
                                    NULL, error, "kind", "active-account", NULL))
     return FALSE;
@@ -169,7 +202,7 @@ nuvashalauncher_secret_store_remove_account (const char *account_id, GError **er
   g_return_val_if_fail (account_id != NULL, FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
-  if (!secret_password_clear_sync (&account_schema, NULL, error,
+  if (!secret_password_clear_sync (account_schema_for_store (), NULL, error,
                                    "account-id", account_id, NULL) &&
       (error == NULL || *error != NULL))
     return FALSE;
@@ -181,7 +214,7 @@ nuvashalauncher_secret_store_clear_active (GError **error)
 {
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
-  if (!secret_password_clear_sync (&active_schema, NULL, error,
+  if (!secret_password_clear_sync (active_schema_for_store (), NULL, error,
                                    "kind", "active-account", NULL) &&
       (error == NULL || *error != NULL))
     return FALSE;
