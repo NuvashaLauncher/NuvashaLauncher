@@ -105,7 +105,7 @@ nuvashalauncher_modrinth_fail (GTask *task, GError *error)
       if (error->code == nuvashalauncher_DOWNLOAD_ERROR_RATE_LIMITED)
         wrapped = g_error_new_literal (
             nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_RATE_LIMIT,
-            _("Modrinth is asking nuvashalauncher to slow down, too many requests"));
+            _("Modrinth is asking Nuvasha Launcher to slow down, too many requests"));
       else if (error->code == nuvashalauncher_DOWNLOAD_ERROR_HTTP)
         wrapped = g_error_new (nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_HTTP,
                                "%s", error->message);

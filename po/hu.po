@@ -215,8 +215,8 @@ msgid "Line Limit"
 msgstr "Vonalkorlát"
 
 
-msgid "About nuvashalauncher"
-msgstr "A nuvashalauncherről"
+msgid "About Nuvasha Launcher"
+msgstr "A Nuvasha Launcherről"
 
 msgid "Keyboard Shortcuts"
 msgstr "Billentyűparancsok"
@@ -591,11 +591,11 @@ msgstr "Modcsomagok böngészése"
 msgid "Choose Files"
 msgstr "Fájlok kiválasztása"
 
-msgid "Clear nuvashalauncher Cache"
-msgstr "A nuvashalauncher gyorsítótárának törlése"
+msgid "Clear Nuvasha Launcher Cache"
+msgstr "A Nuvasha Launcher gyorsítótárának törlése"
 
-msgid "Clear nuvashalauncher Cache?"
-msgstr "Törölni kell a nuvashalauncher gyorsítótárat?"
+msgid "Clear Nuvasha Launcher Cache?"
+msgstr "Törölni kell a Nuvasha Launcher gyorsítótárat?"
 
 msgid ""
 "Conflicts\n"
@@ -662,8 +662,8 @@ msgstr "Telepítés"
 msgid "Instances cannot contain %s in their name"
 msgstr "Az példányok neve nem tartalmazhatja %s"
 
-msgid "It carries files that nuvashalauncher does not recognize."
-msgstr "Olyan fájlokat tartalmaz, amelyeket a nuvashalauncher nem ismer fel."
+msgid "It carries files that Nuvasha Launcher does not recognize."
+msgstr "Olyan fájlokat tartalmaz, amelyeket a Nuvasha Launcher nem ismer fel."
 
 msgid "Italiano"
 msgstr "Italiano"
@@ -686,7 +686,7 @@ msgstr "Microsoft · Bejelentkezés szükséges"
 msgid "Modrinth does not know this file"
 msgstr "A Modrinth nem ismeri ezt a fájlt"
 
-msgid "Modrinth is asking nuvashalauncher to slow down, too many requests"
+msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
 msgstr "Modrinth arra kéri Nuvashát, hogy lassítson, túl sok a kérés"
 
 msgid "Nederlands"
@@ -708,8 +708,8 @@ msgid "Norsk (bokmål)"
 msgstr "Norsk (bokmål)"
 
 
-msgid "nuvashalauncher cache data was cleared successfully."
-msgstr "A nuvashalauncher gyorsítótár adatai sikeresen törölve lettek."
+msgid "Nuvasha Launcher cache data was cleared successfully."
+msgstr "A Nuvasha Launcher gyorsítótár adatai sikeresen törölve lettek."
 
 msgid "Offline"
 msgstr "Offline"
@@ -756,14 +756,14 @@ msgstr "Svenska"
 msgid "System default"
 msgstr "A rendszer alapértelmezett beállítása"
 
-msgid "The account is removed from nuvashalauncher and its saved sign-in is forgotten. The game itself is not touched."
-msgstr "A fiókot eltávolítják a nuvashalauncher-ból, és a mentett bejelentkezési adatok törlődnek. Maga a játék nem változik."
+msgid "The account is removed from Nuvasha Launcher and its saved sign-in is forgotten. The game itself is not touched."
+msgstr "A fiókot eltávolítják a Nuvasha Launcher-ból, és a mentett bejelentkezési adatok törlődnek. Maga a játék nem változik."
 
 msgid "The game is running and will close. Progress since the last save is lost."
 msgstr "A játék fut, és hamarosan bezárul. Az utolsó mentés óta elért eredmények elvesznek."
 
-msgid "This project publishes no pack file nuvashalauncher can install."
-msgstr "Ez a projekt nem tesz közzé olyan csomagfájlt, amelyet a nuvashalauncher telepíthetne."
+msgid "This project publishes no pack file Nuvasha Launcher can install."
+msgstr "Ez a projekt nem tesz közzé olyan csomagfájlt, amelyet a Nuvasha Launcher telepíthetne."
 
 msgid "This version has no pack file"
 msgstr "Ennek a verziónak nincs csomagfájlja"

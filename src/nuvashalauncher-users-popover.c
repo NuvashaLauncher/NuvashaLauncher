@@ -187,7 +187,7 @@ on_remove_clicked (GtkButton *button, gpointer user_data)
     _("Remove %s?"), name != NULL && *name != '\0' ? name : _("this account"));
 
   alert = ADW_ALERT_DIALOG (adw_alert_dialog_new (
-      heading, _("The account is removed from nuvashalauncher and its saved sign-in is "
+      heading, _("The account is removed from Nuvasha Launcher and its saved sign-in is "
                  "forgotten. The game itself is not touched.")));
   adw_alert_dialog_set_heading_use_markup (alert, FALSE);
   adw_alert_dialog_set_body_use_markup (alert, FALSE);

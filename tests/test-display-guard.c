@@ -34,7 +34,7 @@ test_refuses_to_start_without_display (void)
   g_assert_cmpint (WEXITSTATUS (status), ==, 1);
 
   g_assert_nonnull (child_stderr);
-  g_assert_nonnull (strstr (child_stderr, "nuvashalauncher could not open a display"));
+  g_assert_nonnull (strstr (child_stderr, "Nuvasha Launcher could not open a display"));
 
   g_free (child_stdout);
   g_free (child_stderr);

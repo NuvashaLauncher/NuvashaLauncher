@@ -215,8 +215,8 @@ msgid "Line Limit"
 msgstr "Limită de linie"
 
 
-msgid "About nuvashalauncher"
-msgstr "Despre nuvashalauncher"
+msgid "About Nuvasha Launcher"
+msgstr "Despre Nuvasha Launcher"
 
 msgid "Keyboard Shortcuts"
 msgstr "Comenzi rapide de la tastatură"
@@ -593,11 +593,11 @@ msgstr "Răsfoiește pachetele de moduri"
 msgid "Choose Files"
 msgstr "Alegeți fișierele"
 
-msgid "Clear nuvashalauncher Cache"
-msgstr "Șterge cache-ul nuvashalauncher"
+msgid "Clear Nuvasha Launcher Cache"
+msgstr "Șterge cache-ul Nuvasha Launcher"
 
-msgid "Clear nuvashalauncher Cache?"
-msgstr "Să ștergi memoria cache a nuvashalauncher?"
+msgid "Clear Nuvasha Launcher Cache?"
+msgstr "Să ștergi memoria cache a Nuvasha Launcher?"
 
 msgid ""
 "Conflicts\n"
@@ -664,8 +664,8 @@ msgstr "Instalarea"
 msgid "Instances cannot contain %s in their name"
 msgstr "Instanțele nu pot conține %s în numele lor"
 
-msgid "It carries files that nuvashalauncher does not recognize."
-msgstr "Conține fișiere pe care nuvashalauncher nu le recunoaște."
+msgid "It carries files that Nuvasha Launcher does not recognize."
+msgstr "Conține fișiere pe care Nuvasha Launcher nu le recunoaște."
 
 msgid "Italiano"
 msgstr "Italiano"
@@ -688,8 +688,8 @@ msgstr "Microsoft · Este necesară autentificarea"
 msgid "Modrinth does not know this file"
 msgstr "Modrinth nu cunoaște acest fișier"
 
-msgid "Modrinth is asking nuvashalauncher to slow down, too many requests"
-msgstr "Modrinth îi cere lui nuvashalauncher să o ia mai încet, sunt prea multe solicitări"
+msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
+msgstr "Modrinth îi cere lui Nuvasha Launcher să o ia mai încet, sunt prea multe solicitări"
 
 msgid "Nederlands"
 msgstr "Nederlands"
@@ -710,8 +710,8 @@ msgid "Norsk (bokmål)"
 msgstr "Norsk (bokmål)"
 
 
-msgid "nuvashalauncher cache data was cleared successfully."
-msgstr "Datele din memoria cache nuvashalauncher au fost șterse cu succes."
+msgid "Nuvasha Launcher cache data was cleared successfully."
+msgstr "Datele din memoria cache Nuvasha Launcher au fost șterse cu succes."
 
 msgid "Offline"
 msgstr "Offline"
@@ -758,14 +758,14 @@ msgstr "Svenska"
 msgid "System default"
 msgstr "Setarea implicită a sistemului"
 
-msgid "The account is removed from nuvashalauncher and its saved sign-in is forgotten. The game itself is not touched."
-msgstr "Contul este șters din nuvashalauncher, iar datele de conectare salvate sunt uitate. Jocul în sine nu este afectat."
+msgid "The account is removed from Nuvasha Launcher and its saved sign-in is forgotten. The game itself is not touched."
+msgstr "Contul este șters din Nuvasha Launcher, iar datele de conectare salvate sunt uitate. Jocul în sine nu este afectat."
 
 msgid "The game is running and will close. Progress since the last save is lost."
 msgstr "Jocul rulează și se va închide. Progresul înregistrat de la ultima salvare se va pierde."
 
-msgid "This project publishes no pack file nuvashalauncher can install."
-msgstr "Acest proiect nu publică niciun fișier de pachet pe care nuvashalauncher să îl poată instala."
+msgid "This project publishes no pack file Nuvasha Launcher can install."
+msgstr "Acest proiect nu publică niciun fișier de pachet pe care Nuvasha Launcher să îl poată instala."
 
 msgid "This version has no pack file"
 msgstr "Această versiune nu conține niciun fișier de pachet"

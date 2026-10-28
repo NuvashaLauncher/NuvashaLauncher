@@ -270,7 +270,7 @@ on_clear_cache_clicked (GtkButton *button G_GNUC_UNUSED,
 {
   nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   AdwAlertDialog *alert = ADW_ALERT_DIALOG (
-    adw_alert_dialog_new (_("Clear nuvashalauncher Cache?"), NULL));
+     adw_alert_dialog_new (_("Clear Nuvasha Launcher Cache?"), NULL));
 
   adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
   adw_alert_dialog_add_response (alert, "clear", _("Clear"));
@@ -303,7 +303,7 @@ on_cache_cleared (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   if (success)
     alert = ADW_ALERT_DIALOG (
       adw_alert_dialog_new (_("Cache Cleared"),
-                            _("nuvashalauncher cache data was cleared successfully.")));
+                             _("Nuvasha Launcher cache data was cleared successfully.")));
   else
     alert = ADW_ALERT_DIALOG (
       adw_alert_dialog_new (_("Cache Cleanup Failed"),
@@ -519,10 +519,10 @@ create_settings_dialog (nuvashalauncherMainWindow *self)
   }
 
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (clear_cache_row),
-                                  _("Clear nuvashalauncher Cache"));
+                                   _("Clear Nuvasha Launcher Cache"));
   {
     GtkButton *button = GTK_BUTTON (gtk_button_new_from_icon_name ("user-trash-symbolic"));
-    nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (button), _("Clear nuvashalauncher Cache"));
+     nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (button), _("Clear Nuvasha Launcher Cache"));
      g_signal_connect_object (button, "clicked", G_CALLBACK (on_clear_cache_clicked),
                               self, 0);
     adw_action_row_add_suffix (clear_cache_row, GTK_WIDGET (button));
@@ -578,7 +578,7 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
                                      GTK_LICENSE_GPL_3_0_ONLY);
   adw_about_dialog_add_credit_section (ADW_ABOUT_DIALOG (dialog),
                                        "Application ID", app_ids);
-  adw_dialog_set_title (dialog, _("About nuvashalauncher"));
+  adw_dialog_set_title (dialog, _("About Nuvasha Launcher"));
 
   adw_dialog_present (dialog, GTK_WIDGET (self));
 }
@@ -639,7 +639,7 @@ create_app_menu (void)
   g_menu_append_section (menu, NULL, G_MENU_MODEL (general));
 
   g_menu_append (rest, _("Keyboard Shortcuts"), "win.shortcuts");
-  g_menu_append (rest, _("About nuvashalauncher"), "win.about");
+  g_menu_append (rest, _("About Nuvasha Launcher"), "win.about");
   g_menu_append_section (menu, NULL, G_MENU_MODEL (rest));
 
   return g_steal_pointer (&menu);

@@ -1,6 +1,6 @@
 # Flatpak packaging
 
-The manifest builds nuvashalauncher with the GNOME 51 runtime and the Flatpak-specific
+The manifest builds Nuvasha Launcher with the GNOME 51 runtime and the Flatpak-specific
 build settings.
 
 ## Local build

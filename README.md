@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  nuvashalauncher is a simple Minecraft launcher that aims to make instance<br>
+  Nuvasha Launcher is a simple Minecraft launcher that aims to make instance<br>
   management easy without leaving out the features that matter.
 </p>
 
@@ -30,7 +30,7 @@ export, and remove instances without affecting the others.
 ### Loader and version support
 
 Install and resolve Fabric, Quilt, Forge, and NeoForge versions alongside
-vanilla Minecraft. nuvashalauncher handles version metadata, libraries, assets, native
+vanilla Minecraft. Nuvasha Launcher handles version metadata, libraries, assets, native
 files, and loader-specific dependencies for each instance.
 
 ### Accounts, skins, and capes
@@ -41,7 +41,7 @@ keeping previews available when the menu is reopened.
 
 ### Native Linux application
 
-Built with GTK 4 and libadwaita, nuvashalauncher runs on Linux. It can be built
+Built with GTK 4 and libadwaita, Nuvasha Launcher runs on Linux. It can be built
 as a regular installation or packaged with Flatpak.
 
 ## Installation
@@ -153,5 +153,5 @@ sudo make uninstall PREFIX=/usr/local
 
 ## License
 
-nuvashalauncher is free software released under the GNU General Public License,
+Nuvasha Launcher is free software released under the GNU General Public License,
 version 3.0 only. See [LICENSE](LICENSE).

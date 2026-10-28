@@ -464,7 +464,7 @@ dialog_start_features (nuvashalauncherDownloadModpackDialog *self)
     {
       self->fail_is_install = FALSE;
        push_error (self, _("This version has no pack file"),
-                   _("It carries files that nuvashalauncher does not recognize."),
+                   _("It carries files that Nuvasha Launcher does not recognize."),
                   G_CALLBACK (on_error_retry_fetch));
       return FALSE;
     }
