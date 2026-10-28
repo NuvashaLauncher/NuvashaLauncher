@@ -2,19 +2,54 @@
 <component type="desktop-application">
   <id>com.github.nuvashalauncher.nuvashalauncher</id>
   <name>Nuvasha Launcher</name>
-  <summary>Nuvasha Launcher</summary>
+  <summary>Minecraft launcher for Linux</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-only</project_license>
+  <developer id="com.github.nuvashalauncher">
+    <name>Flia</name>
+  </developer>
+  <project_group>NuvashaLauncher</project_group>
+  <update_contact>43163973-anotherminecraftlauncher@users.noreply.gitlab.com</update_contact>
   <description>
-    <p>A Minecraft launcher for managing instances, installing Modrinth content, and launching the game.</p>
+    <p>Nuvasha Launcher keeps Minecraft installations separate, so each instance
+    can have its own version, loader, Java runtime, settings, mods, and worlds.</p>
+    <p>Browse Modrinth to install modpacks, mods, resource packs, and shaders.
+    Local <code>.mrpack</code> files can be imported and exported, with downloads
+    checked before they are installed.</p>
+    <p>The launcher supports vanilla Minecraft and the Fabric, Quilt, Forge, and
+    NeoForge loaders. It can use Microsoft or offline accounts, and includes
+    account-specific skins and capes.</p>
+    <p>Instances can be duplicated, moved, renamed, exported, and removed
+    independently. Nuvasha Launcher is built with GTK 4 and libadwaita for Linux
+    and is also available as a Flatpak.</p>
   </description>
-  <url type="homepage">https://github.com/nuvashalauncher/nuvashalauncher</url>
+  <url type="homepage">https://github.com/NuvashaLauncher/NuvashaLauncher</url>
+  <url type="bugtracker">https://github.com/NuvashaLauncher/NuvashaLauncher/issues</url>
+  <url type="vcs-browser">https://github.com/NuvashaLauncher/NuvashaLauncher</url>
+  <url type="help">https://github.com/NuvashaLauncher/NuvashaLauncher#readme</url>
   <launchable type="desktop-id">com.github.nuvashalauncher.nuvashalauncher.desktop</launchable>
+  <translation type="gettext">nuvashalauncher</translation>
   <provides>
     <binary>nuvashalauncher</binary>
   </provides>
+  <keywords>
+    <keyword>minecraft</keyword>
+    <keyword>modpack</keyword>
+    <keyword>modrinth</keyword>
+    <keyword>java</keyword>
+    <keyword>launcher</keyword>
+  </keywords>
+  <branding>
+    <color type="primary">#7774a5</color>
+  </branding>
   <releases>
-    <release version="0.7" date="2026-10-27"/>
+    <release version="0.7" date="2026-10-27">
+      <description>
+        <p>Improved sign-in, content navigation, instance version handling, and
+        skin previews. This release also strengthens archive safety, download
+        cleanup, Java discovery, and test coverage.</p>
+      </description>
+    </release>
     <release version="0.6" date="2026-10-26"/>
     <release version="0.5" date="2026-10-25"/>
     <release version="0.4" date="2026-10-25"/>

@@ -15,7 +15,7 @@ FLATPAK    ?= 0
 # gio-unix-2.0 is the Linux part of GIO itself (no display involved) and
 # provides the output stream that writes a download into its temporary
 # file descriptor.
-PKGS := gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive gio-unix-2.0 epoxy
+PKGS := gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive gio-unix-2.0 epoxy libsecret-1
 
 # Goals that compile nothing and so must keep working on hosts without the
 # development packages. test-flatpak-runtime only drives the flatpak CLI to
@@ -255,12 +255,28 @@ install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS) $(SCHEMA_COMPILED)
 		"$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.nuvashalauncher.nuvashalauncher.svg"
 	install -Dm644 data/com.github.nuvashalauncher.nuvashalauncher.metainfo.xml \
 		"$(DESTDIR)$(PREFIX)/share/metainfo/com.github.nuvashalauncher.nuvashalauncher.metainfo.xml"
-	install -Dm644 $(SCHEMA_COMPILED) \
-		"$(DESTDIR)$(PREFIX)/share/glib-2.0/schemas/gschemas.compiled"
+	install -Dm644 $(SCHEMA_XML) \
+		"$(DESTDIR)$(PREFIX)/share/glib-2.0/schemas/com.github.nuvashalauncher.nuvashalauncher.gschema.xml"
 	@for lang in $(LOCALES); do \
 		install -Dm644 build/locale/$$lang/LC_MESSAGES/nuvashalauncher.mo \
 			"$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/nuvashalauncher.mo"; \
 	done
+	@schema_dir="$(DESTDIR)$(PREFIX)/share/glib-2.0/schemas"; \
+	if command -v glib-compile-schemas >/dev/null 2>&1; then \
+		glib-compile-schemas "$$schema_dir"; \
+	fi
+	@desktop_dir="$(DESTDIR)$(PREFIX)/share/applications"; \
+	if command -v update-desktop-database >/dev/null 2>&1; then \
+		update-desktop-database "$$desktop_dir"; \
+	fi
+	@mime_dir="$(DESTDIR)$(PREFIX)/share/mime"; \
+	if command -v update-mime-database >/dev/null 2>&1; then \
+		update-mime-database "$$mime_dir"; \
+	fi
+	@icon_dir="$(DESTDIR)$(PREFIX)/share/icons/hicolor"; \
+	if command -v gtk-update-icon-cache >/dev/null 2>&1 && test -f "$$icon_dir/index.theme"; then \
+		gtk-update-icon-cache -f -t "$$icon_dir"; \
+	fi
 
 # The same list the install loop uses, so the catalogs go back out with
 # the rest of the launcher.
@@ -274,10 +290,26 @@ uninstall:
 	rm -f "$(DESTDIR)$(PREFIX)/share/mime/packages/com.github.nuvashalauncher.nuvashalauncher.xml"
 	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.nuvashalauncher.nuvashalauncher.svg"
 	rm -f "$(DESTDIR)$(PREFIX)/share/metainfo/com.github.nuvashalauncher.nuvashalauncher.metainfo.xml"
-	rm -f "$(DESTDIR)$(PREFIX)/share/glib-2.0/schemas/gschemas.compiled"
+	rm -f "$(DESTDIR)$(PREFIX)/share/glib-2.0/schemas/com.github.nuvashalauncher.nuvashalauncher.gschema.xml"
 	@for lang in $(LOCALES); do \
 		rm -f "$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/nuvashalauncher.mo"; \
 	done
+	@schema_dir="$(DESTDIR)$(PREFIX)/share/glib-2.0/schemas"; \
+	if test -d "$$schema_dir" && command -v glib-compile-schemas >/dev/null 2>&1; then \
+		glib-compile-schemas "$$schema_dir"; \
+	fi
+	@desktop_dir="$(DESTDIR)$(PREFIX)/share/applications"; \
+	if test -d "$$desktop_dir" && command -v update-desktop-database >/dev/null 2>&1; then \
+		update-desktop-database "$$desktop_dir"; \
+	fi
+	@mime_dir="$(DESTDIR)$(PREFIX)/share/mime"; \
+	if test -d "$$mime_dir" && command -v update-mime-database >/dev/null 2>&1; then \
+		update-mime-database "$$mime_dir"; \
+	fi
+	@icon_dir="$(DESTDIR)$(PREFIX)/share/icons/hicolor"; \
+	if test -f "$$icon_dir/index.theme" && command -v gtk-update-icon-cache >/dev/null 2>&1; then \
+		gtk-update-icon-cache -f -t "$$icon_dir"; \
+	fi
 
 clean:
 	rm -rf build build-debug

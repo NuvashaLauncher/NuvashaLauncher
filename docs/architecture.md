@@ -186,10 +186,12 @@ Accounts support two modes:
 - **Microsoft:** a Minecraft profile, access token, expiry, refresh token, and
   cosmetic profile data.
 
-`nuvashalauncherAccounts` owns the active account and emits changes for the UI. Account
-metadata is stored in the user's data directory in `accounts.json`, written
-atomically with mode `0600`. Access and refresh tokens are stored in the same
-JSON file with the account metadata.
+`nuvashalauncherAccounts` owns the active account and emits changes for the UI. Complete
+account records—including offline accounts, cosmetic selections, and Microsoft
+credentials—are stored as separate items in the desktop Secret Service, keyed by the
+stable account ID. The active account ID is stored in a separate Secret Service item.
+The account JSON file is no longer read or written; this storage format is a clean break
+and does not migrate older account files or keyring entries.
 
 The skin menu keeps the fetched profile, skin list, and cape list in memory for
 the lifetime of the launcher. Skin and cape textures are cached separately so
@@ -447,8 +449,8 @@ The main files are:
 | --- | --- |
 | Instance registry | `<user data>/nuvashalauncher/instances.json` |
 | Instance content | Registered instance directories, each with game files and logs |
-| Account metadata | `<user data>/nuvashalauncher/accounts.json` |
-| Account tokens | `<user data>/nuvashalauncher/accounts.json`, mode `0600` |
+| Account records | Desktop Secret Service, one item per account keyed by account ID |
+| Active account | Desktop Secret Service, separate active-account item |
 | Shared resolved content | `<user data>/nuvashalauncher/` shared client artifacts and assets |
 | Saved skins and cape textures | `<user data>/nuvashalauncher/skins/` |
 | Version metadata | `<user cache>/nuvashalauncher/versions/` |
@@ -471,12 +473,11 @@ and process boundaries:
   links, and overlapping instance directories where those checks apply.
 - ZIP entry counts and inflated size are bounded.
 - Modpack download URLs are restricted to hosts allowed by the format.
-- Account metadata and tokens are stored in `accounts.json` with mode `0600`.
+- Complete account records and tokens are stored in the desktop Secret Service.
   This is intentional: the launcher must read the tokens to authenticate the
-  Minecraft process, so a separate secret store would not remove the
-  launcher's access to them. Tokens never enter logs, error messages, or
-  redacted command output; Minecraft still receives the access token through
-  the launch arguments it requires.
+  Minecraft process. Tokens never enter logs, error messages, or redacted
+  command output; Minecraft still receives the access token through the launch
+  arguments it requires.
 - UI text that can contain paths or service errors is treated as plain text,
   not markup.
 

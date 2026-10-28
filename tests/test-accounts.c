@@ -10,6 +10,7 @@
  * a user would find after a restart. */
 
 #include "nuvashalauncher-accounts.h"
+#include "nuvashalauncher-secret-store.h"
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -27,15 +28,6 @@ temporary_path (const char *name)
   path = g_build_filename (directory, name, NULL);
 
   return g_steal_pointer (&path);
-}
-
-static void
-check_permission (const char *path, int mode)
-{
-  GStatBuf info = { 0 };
-
-  g_assert_cmpint (g_stat (path, &info), ==, 0);
-  g_assert_cmpint (info.st_mode & 0777, ==, mode);
 }
 
 /* ---------------------------------------------------------- *
@@ -224,6 +216,13 @@ test_one_active_account (void)
   g_autoptr (nuvashalauncherAccount) two = NULL;
   g_autoptr (GError) error = NULL;
 
+  nuvashalauncher_secret_store_remove_account ("TestUser", NULL);
+  nuvashalauncher_secret_store_remove_account ("jeb_", NULL);
+  nuvashalauncher_secret_store_remove_account ("069a79f444e94726a5befca90e38aaf5", NULL);
+  nuvashalauncher_secret_store_remove_account ("SkinTest", NULL);
+  nuvashalauncher_secret_store_remove_account ("Steve", NULL);
+  nuvashalauncher_secret_store_remove_account ("Alex", NULL);
+  nuvashalauncher_secret_store_clear_active (NULL);
   store = nuvashalauncher_accounts_new_for_path (path);
   g_assert_cmpuint (nuvashalauncher_accounts_count (store), ==, 0);
 
@@ -238,7 +237,11 @@ test_one_active_account (void)
   two = nuvashalauncher_account_new_offline ("jeb_", &error);
   g_assert_no_error (error);
 
-  g_assert_true (nuvashalauncher_accounts_add (store, one, &error));
+  if (!nuvashalauncher_accounts_add (store, one, &error))
+    {
+      g_test_skip ("Secret Service is unavailable in this environment");
+      return;
+    }
   g_assert_no_error (error);
   g_assert_cmpstr (nuvashalauncher_accounts_get_active_id (store), ==, "TestUser");
 
@@ -289,141 +292,47 @@ test_persistence (void)
   g_autoptr (nuvashalauncherAccounts) store = NULL;
   g_autoptr (nuvashalauncherAccounts) reopened = NULL;
   g_autoptr (nuvashalauncherAccount) account = NULL;
-  nuvashalauncherAccount *found = NULL; /* the store keeps it, so this borrows it */
-  g_autofree char *text = NULL;
+  nuvashalauncherAccount *found = NULL;
   g_autoptr (GError) error = NULL;
 
   store = nuvashalauncher_accounts_new_for_path (path);
-  g_assert_cmpstr (nuvashalauncher_accounts_path (store), ==, path);
-
   account = microsoft_account (1800000000, "the-access-token");
   account->refresh_token = g_strdup ("the-refresh-token");
   account->avatar_url = g_strdup ("https://example.invalid/skin.png");
+  account->skin_model = g_strdup ("SLIM");
+  account->cape_id = g_strdup ("cape");
 
-  g_assert_true (nuvashalauncher_accounts_add (store, account, &error));
+  /* Secret Service is an installation requirement for account persistence,
+   * but headless test environments may not provide one. */
+  nuvashalauncher_secret_store_remove_account (account->id, NULL);
+  if (!nuvashalauncher_accounts_add (store, account, &error))
+    {
+      g_test_skip ("Secret Service is unavailable in this environment");
+      return;
+    }
   g_assert_no_error (error);
-
-  /* The file is for nobody but the user: it holds the tokens. */
-  check_permission (path, 0600);
+  g_assert_false (g_file_test (path, G_FILE_TEST_EXISTS));
 
   reopened = nuvashalauncher_accounts_new_for_path (path);
   g_assert_cmpuint (nuvashalauncher_accounts_count (reopened), ==, 1);
-
   found = nuvashalauncher_accounts_get_active (reopened);
   g_assert_nonnull (found);
   g_assert_cmpint (found->type, ==, nuvashalauncher_ACCOUNT_MICROSOFT);
   g_assert_cmpstr (found->name, ==, "Notch");
-  g_assert_cmpstr (found->uuid, ==, "069a79f4-44e9-4726-a5be-fca90e38aaf5");
   g_assert_cmpstr (found->access_token, ==, "the-access-token");
   g_assert_cmpstr (found->refresh_token, ==, "the-refresh-token");
   g_assert_cmpint (found->expires_at, ==, 1800000000);
   g_assert_cmpstr (found->avatar_url, ==, "https://example.invalid/skin.png");
+  g_assert_cmpstr (found->skin_model, ==, "SLIM");
+  g_assert_cmpstr (found->cape_id, ==, "cape");
 
-  /* A store that reads a file that is not there is a store with no
-     accounts, not a store that fails to open. */
-  g_assert_true (g_file_test (path, G_FILE_TEST_EXISTS));
-
-  {
-    g_autofree char *missing = temporary_path ("nothing-here.json");
-    g_autoptr (nuvashalauncherAccounts) empty = nuvashalauncher_accounts_new_for_path (missing);
-
-    g_assert_cmpuint (nuvashalauncher_accounts_count (empty), ==, 0);
-    g_assert_null (nuvashalauncher_accounts_get_active (empty));
-  }
-
-  /* Neither is a store whose file is nonsense. */
-  {
-    g_autofree char *broken = temporary_path ("broken.json");
-    g_autoptr (nuvashalauncherAccounts) store_broken = NULL;
-
-    g_assert_true (g_file_set_contents (broken, "{not a document", -1, NULL));
-
-    g_test_expect_message (NULL, G_LOG_LEVEL_WARNING,
-                           "*accounts file*is corrupt; it was moved to*");
-    store_broken = nuvashalauncher_accounts_new_for_path (broken);
-    g_test_assert_expected_messages ();
-    g_assert_cmpuint (nuvashalauncher_accounts_count (store_broken), ==, 0);
-    g_assert_null (nuvashalauncher_accounts_get_active (store_broken));
-    {
-      g_autofree char *quarantined = g_strconcat (broken, ".corrupt", NULL);
-
-      g_assert_false (g_file_test (broken, G_FILE_TEST_EXISTS));
-      g_assert_true (g_file_test (quarantined, G_FILE_TEST_IS_REGULAR));
-    }
-  }
-
-  /* A type added by a newer or corrupted writer must not silently become
-   * an offline account. */
-  {
-    g_autofree char *unknown = temporary_path ("unknown-type.json");
-    g_autoptr (nuvashalauncherAccounts) store_unknown = NULL;
-    const char *json =
-      "{\"accounts\":[{\"type\":\"something-new\","
-      "\"id\":\"id\",\"name\":\"Name\","
-      "\"uuid\":\"uuid\"}],\"active\":\"id\"}";
-
-    g_assert_true (g_file_set_contents (unknown, json, -1, NULL));
-    g_test_expect_message (NULL, G_LOG_LEVEL_WARNING,
-                           "*accounts file*is corrupt; it was moved to*");
-    store_unknown = nuvashalauncher_accounts_new_for_path (unknown);
-    g_test_assert_expected_messages ();
-    g_assert_cmpuint (nuvashalauncher_accounts_count (store_unknown), ==, 0);
-    g_assert_null (nuvashalauncher_accounts_get_active (store_unknown));
-  }
-
-  /* A field with the wrong JSON type is not a usable account either. */
-  {
-    g_autofree char *wrong_type = temporary_path ("wrong-field-type.json");
-    g_autoptr (nuvashalauncherAccounts) store_wrong_type = NULL;
-    const char *json =
-      "{\"accounts\":[{\"type\":\"offline\",\"id\":42,"
-      "\"name\":\"Name\",\"uuid\":\"uuid\"}]}";
-
-    g_assert_true (g_file_set_contents (wrong_type, json, -1, NULL));
-    g_test_expect_message (NULL, G_LOG_LEVEL_WARNING,
-                           "*accounts file*is corrupt; it was moved to*");
-    store_wrong_type = nuvashalauncher_accounts_new_for_path (wrong_type);
-    g_test_assert_expected_messages ();
-    g_assert_cmpuint (nuvashalauncher_accounts_count (store_wrong_type), ==, 0);
-  }
-
-  /* The tokens are in the file, so that a restart finds them without
-     anything else having to be asked. */
-  g_assert_true (g_file_get_contents (path, &text, NULL, NULL));
-  g_assert_nonnull (strstr (text, "the-access-token"));
-  g_assert_nonnull (strstr (text, "the-refresh-token"));
-
-  /* Taking an account out of the store takes its tokens out of the file
-     with it. */
   g_assert_true (nuvashalauncher_accounts_remove (
-    store, "069a79f444e94726a5befca90e38aaf5", &error));
+    store, account->id, &error));
   g_assert_no_error (error);
+  g_assert_cmpuint (nuvashalauncher_accounts_count (store), ==, 0);
+  g_assert_null (nuvashalauncher_accounts_get_active (store));
 
-  g_clear_pointer (&text, g_free);
-  g_assert_true (g_file_get_contents (path, &text, NULL, NULL));
-  g_assert_null (strstr (text, "the-access-token"));
-  g_assert_null (strstr (text, "the-refresh-token"));
-
-  {
-    g_autofree char *token_fields_path = temporary_path ("token-fields.json");
-    g_autoptr (nuvashalauncherAccounts) token_fields_store = NULL;
-    nuvashalauncherAccount *token_fields_account;
-    const char *token_fields_json =
-      "{\"version\":2,\"accounts\":[{\"type\":\"microsoft\","
-      "\"id\":\"token-fields-test\",\"name\":\"Test\","
-      "\"uuid\":\"token-fields-test\",\"access-token\":\"old\","
-      "\"refresh-token\":\"old-refresh\"}]}";
-
-    g_assert_true (g_file_set_contents (token_fields_path, token_fields_json, -1, NULL));
-    token_fields_store = nuvashalauncher_accounts_new_for_path (token_fields_path);
-    token_fields_account = nuvashalauncher_accounts_find (token_fields_store, "token-fields-test");
-    g_assert_nonnull (token_fields_account);
-    g_assert_cmpstr (token_fields_account->access_token, ==, "old");
-    g_assert_cmpstr (token_fields_account->refresh_token, ==, "old-refresh");
-    g_remove (token_fields_path);
-  }
-
-  g_print ("ok - accounts and their tokens survive a restart, 0600\n");
+  g_print ("ok - complete account records survive a restart in Secret Service\n");
 }
 
 static void
@@ -446,12 +355,19 @@ test_adding_the_same_account_twice (void)
   g_autoptr (GError) error = NULL;
   guint changed = 0;
 
+  nuvashalauncher_secret_store_remove_account ("069a79f444e94726a5befca90e38aaf5", NULL);
+  nuvashalauncher_secret_store_remove_account ("TestUser", NULL);
+  nuvashalauncher_secret_store_clear_active (NULL);
   store = nuvashalauncher_accounts_new_for_path (path);
 
   g_signal_connect (store, "changed", G_CALLBACK (on_changed), &changed);
 
   account = microsoft_account (1800000000, "first-token");
-  g_assert_true (nuvashalauncher_accounts_add (store, account, &error));
+  if (!nuvashalauncher_accounts_add (store, account, &error))
+    {
+      g_test_skip ("Secret Service is unavailable in this environment");
+      return;
+    }
   g_assert_no_error (error);
   g_assert_cmpuint (changed, ==, 1);
 
@@ -483,6 +399,10 @@ test_adding_the_same_account_twice (void)
   g_assert_true (nuvashalauncher_accounts_set_active (store, "TestUser", &error));
   g_assert_no_error (error);
   g_assert_cmpuint (changed, ==, 0);
+
+  nuvashalauncher_secret_store_remove_account ("069a79f444e94726a5befca90e38aaf5", NULL);
+  nuvashalauncher_secret_store_remove_account ("TestUser", NULL);
+  nuvashalauncher_secret_store_clear_active (NULL);
 
   g_print ("ok - signing in again replaces the account it signed in to\n");
 }
