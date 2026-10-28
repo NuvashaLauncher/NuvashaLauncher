@@ -89,6 +89,13 @@ watch_until (Watch *watch, nuvashalauncher *launcher, nuvashalauncherLaunchState
 
   g_main_loop_run (watch->loop);
 
+  /* A final launch state can be emitted from an async completion whose
+   * cleanup schedules one last idle unref. Drain that completion before the
+   * test releases the launcher and its main loop, otherwise sanitizer runs
+   * can finish with the cleanup scope still pending. */
+  while (g_main_context_pending (NULL))
+    g_main_context_iteration (NULL, FALSE);
+
   if (!watch->timed_out)
     g_source_remove (watch->watchdog);
 
