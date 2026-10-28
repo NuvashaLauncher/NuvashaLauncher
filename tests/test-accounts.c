@@ -428,6 +428,7 @@ test_adding_the_same_account_twice (void)
 int
 main (void)
 {
+  g_setenv ("NUVASHA_TEST_SECRET_STORE", "1", TRUE);
   g_print ("# Account tests\n");
 
   test_offline_account ();
