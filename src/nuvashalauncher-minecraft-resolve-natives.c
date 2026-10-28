@@ -87,7 +87,7 @@ is_plain_directory (GFile *file, GError **error)
 static gboolean
 make_parents (const char *root, const char *relative, GError **error)
 {
-  g_auto (GStrv) parts = g_strsplit (relative, "/", -1);
+  GStrv parts = g_strsplit (relative, "/", -1);
   g_autofree char *path = g_strdup (root);
   g_autoptr (GFile) child = NULL;
 
@@ -108,6 +108,7 @@ make_parents (const char *root, const char *relative, GError **error)
           if (!is_plain_directory (child, &local))
             {
               g_propagate_error (error, g_steal_pointer (&local));
+              g_strfreev (parts);
               return FALSE;
             }
 
@@ -117,10 +118,12 @@ make_parents (const char *root, const char *relative, GError **error)
       if (!nuvashalauncher_fs_make_directory (path, 0755, &local))
         {
           g_propagate_error (error, g_steal_pointer (&local));
+          g_strfreev (parts);
           return FALSE;
         }
     }
 
+  g_strfreev (parts);
   return TRUE;
 }
 
