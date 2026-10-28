@@ -568,16 +568,16 @@ nuvashalauncher_users_skin_menu_new (nuvashalauncherUsersPopover *owner, GtkImag
   append_default_skins (data);
   if (account->avatar_url != NULL && *account->avatar_url != '\0')
     {
-      if (!g_hash_table_contains (data->skin_urls,
-                                  skin_name_for_url (account->avatar_url)) &&
-          !g_hash_table_contains (data->deleted_skin_ids,
-                                  skin_name_for_url (account->avatar_url)))
+      g_autofree char *avatar_skin_name =
+        skin_name_for_url (account->avatar_url);
+
+      if (!g_hash_table_contains (data->skin_urls, avatar_skin_name) &&
+          !g_hash_table_contains (data->deleted_skin_ids, avatar_skin_name))
         {
-          g_autofree char *skin_name = skin_name_for_url (account->avatar_url);
-          if (!g_hash_table_contains (data->skin_urls, skin_name))
+          if (!g_hash_table_contains (data->skin_urls, avatar_skin_name))
             {
-              data->current_skin_row = skin_row_new (data, skin_name,
-                                                     account->avatar_url);
+              data->current_skin_row = skin_row_new (data, avatar_skin_name,
+                                                      account->avatar_url);
               gtk_list_box_append (skins, GTK_WIDGET (data->current_skin_row));
             }
           load_view_texture (preview, account->avatar_url, FALSE);

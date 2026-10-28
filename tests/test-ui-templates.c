@@ -79,7 +79,6 @@ test_stylesheet_parses (void)
   g_object_unref (provider);
 }
 
-#if !defined(__SANITIZE_ADDRESS__)
 static void
 test_custom_templates_instantiate (void)
 {
@@ -98,15 +97,6 @@ test_custom_templates_instantiate (void)
   g_assert_true (nuvashalauncher_IS_SIGN_IN_DIALOG (sign_in));
   g_assert_true (GTK_IS_WIDGET (offline));
 }
-#endif
-
-#if defined(__SANITIZE_ADDRESS__)
-static void
-test_custom_templates_instantiate_under_asan (void)
-{
-  g_test_skip ("GTK/Pango display caches are outside ASan ownership");
-}
-#endif
 
 int
 main (int argc, char **argv)
@@ -117,12 +107,7 @@ main (int argc, char **argv)
   g_test_add_func ("/ui/templates-are-bundled", test_templates_are_bundled);
   g_test_add_func ("/ui/templates-parse", test_builder_templates_parse);
   g_test_add_func ("/ui/stylesheet-parses", test_stylesheet_parses);
-#if defined(__SANITIZE_ADDRESS__)
-  g_test_add_func ("/ui/custom-templates-instantiate",
-                   test_custom_templates_instantiate_under_asan);
-#else
   g_test_add_func ("/ui/custom-templates-instantiate",
                    test_custom_templates_instantiate);
-#endif
   return g_test_run ();
 }

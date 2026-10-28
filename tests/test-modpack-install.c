@@ -1,5 +1,22 @@
 #include "test-modpack-common.h"
 
+static guint
+open_fd_count (void)
+{
+  g_autoptr (GError) error = NULL;
+  GDir *directory = g_dir_open ("/proc/self/fd", 0, &error);
+  guint count = 0;
+
+  g_assert_no_error (error);
+  g_assert_nonnull (directory);
+
+  while (g_dir_read_name (directory) != NULL)
+    count++;
+
+  g_dir_close (directory);
+  return count;
+}
+
 static void
 test_install_offline (void)
 {
@@ -94,6 +111,23 @@ test_install_offline (void)
    * next to it. */
   g_assert_cmpuint (manager_count (manager), ==, 1);
   g_assert_false (has_temp_dir (instances_dir));
+
+  /* The override extraction opens the archive separately from the index
+   * read above. Repeating the whole operation catches descriptors that are
+   * left behind by that path. */
+  guint before = open_fd_count ();
+  for (guint i = 0; i < 16; i++)
+    {
+      g_autofree char *repeat_name = g_strdup_printf ("Offline Pack %u", i);
+      g_autofree char *repeat_directory =
+        g_build_filename (instances_dir, repeat_name, NULL);
+      g_autoptr (nuvashalauncherInstance) repeat =
+        install_now (pack, manager, repeat_name, repeat_directory, &error);
+
+      g_assert_no_error (error);
+      g_assert_nonnull (repeat);
+    }
+  g_assert_cmpuint (open_fd_count (), ==, before);
 
   remove_recursive (dir);
   g_print ("ok - a pack with no files installs from its overrides\n");

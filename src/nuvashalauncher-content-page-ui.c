@@ -381,8 +381,7 @@ nuvashalauncher_content_page_build_browse (nuvashalauncherContentPage *self)
    gtk_overlay_set_child (GTK_OVERLAY (pick_overlay), GTK_WIDGET (pick_button));
    gtk_overlay_add_overlay (GTK_OVERLAY (pick_overlay), GTK_WIDGET (pick_badge));
     gtk_action_bar_pack_start (foot, GTK_WIDGET (pick_overlay));
-   gtk_widget_add_css_class (GTK_WIDGET (foot), "nuvashalauncher-content-selection-footer");
-   gtk_action_bar_set_revealed (foot, FALSE);
+    gtk_action_bar_set_revealed (foot, FALSE);
   gtk_box_append (GTK_BOX (box), GTK_WIDGET (foot));
 
    self->pick_button = GTK_BUTTON (pick_button);

@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include "test-download-common.h"
 
 static void
@@ -164,6 +166,43 @@ test_corrupt_cache_redownload (void)
   remove_test_dir (dir);
 
   g_print ("ok - a corrupt cache entry is downloaded again\n");
+}
+
+static void
+test_destination_symlink_is_not_replaced (void)
+{
+  g_autofree char *dir = make_test_dir ();
+  g_autofree char *destination = g_build_filename (dir, "game.jar", NULL);
+  g_autofree char *sentinel = g_build_filename (dir, "sentinel", NULL);
+  g_autofree char *url = server_url ("/file");
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+  g_autofree char *contents = NULL;
+
+  g_assert_true (g_file_set_contents (sentinel, "keep this file", -1, NULL));
+  g_assert_cmpint (symlink (sentinel, destination), ==, 0);
+
+  fixture.hits = 0;
+  async_run_init (&run);
+  call_file (&run, &call, url, destination, NULL, G_CHECKSUM_SHA1);
+  async_run_wait (&run);
+
+  /* Publishing is an atomic rename: it replaces the link itself rather
+   * than opening it and writing through to the linked file. */
+  g_assert_no_error (call.error);
+  g_assert_true (call.success);
+  g_assert_false (g_file_test (destination, G_FILE_TEST_IS_SYMLINK));
+  contents = read_text_file (sentinel);
+  g_assert_cmpstr (contents, ==, "keep this file");
+  g_clear_pointer (&contents, g_free);
+  contents = read_text_file (destination);
+  g_assert_cmpmem (contents, FILE_BODY_SIZE, fixture.file_body->str,
+                   fixture.file_body->len);
+
+  async_call_clear (&call);
+  async_run_clear (&run);
+  remove_test_dir (dir);
+  g_print ("ok - a download does not follow a destination symlink\n");
 }
 
 static void
@@ -475,6 +514,7 @@ main (int argc, char **argv)
   test_cached_reuse ();
   test_global_file_cache_reuse ();
   test_corrupt_cache_redownload ();
+  test_destination_symlink_is_not_replaced ();
   test_json_download ();
   test_json_not_found ();
   test_api_cache_hit ();

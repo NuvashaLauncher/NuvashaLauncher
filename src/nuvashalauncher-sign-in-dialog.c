@@ -285,9 +285,10 @@ nuvashalauncher_sign_in_dialog_init (nuvashalauncherSignInDialog *self)
   gtk_label_set_xalign (self->code_label, 0.5f);
   gtk_widget_set_halign (GTK_WIDGET (self->code_label), GTK_ALIGN_CENTER);
   gtk_widget_set_hexpand (GTK_WIDGET (self->code_label), FALSE);
-  gtk_widget_add_css_class (GTK_WIDGET (self->code_label), "title-1");
-  gtk_widget_add_css_class (GTK_WIDGET (self->code_label), "monospace");
-  gtk_widget_add_css_class (GTK_WIDGET (self->code_label), "nuvashalauncher-sign-in-code");
+   gtk_widget_add_css_class (GTK_WIDGET (self->code_label), "title-1");
+   gtk_widget_add_css_class (GTK_WIDGET (self->code_label), "monospace");
+   gtk_widget_add_css_class (GTK_WIDGET (self->code_label), "card");
+   gtk_widget_add_css_class (GTK_WIDGET (self->code_label), "nuvashalauncher-sign-in-code");
   gtk_widget_add_css_class (GTK_WIDGET (self->open_button), "pill");
   gtk_widget_add_css_class (GTK_WIDGET (self->open_button), "suggested-action");
   gtk_widget_set_halign (GTK_WIDGET (self->open_button), GTK_ALIGN_CENTER);
@@ -306,9 +307,7 @@ nuvashalauncher_sign_in_dialog_init (nuvashalauncherSignInDialog *self)
   gtk_label_set_wrap (self->error_label, TRUE);
   gtk_label_set_xalign (self->error_label, 0.5f);
   gtk_label_set_justify (self->error_label, GTK_JUSTIFY_CENTER);
-  gtk_widget_add_css_class (GTK_WIDGET (self->error_label), "error");
-  gtk_widget_add_css_class (GTK_WIDGET (self->error_label), "nuvashalauncher-sign-in-error");
-  gtk_widget_set_halign (GTK_WIDGET (self->retry_button), GTK_ALIGN_CENTER);
+   gtk_widget_set_halign (GTK_WIDGET (self->retry_button), GTK_ALIGN_CENTER);
 
   gtk_widget_set_visible (GTK_WIDGET (self->instruction_label), FALSE);
   gtk_widget_set_visible (GTK_WIDGET (self->code_label), FALSE);

@@ -1,0 +1,17 @@
+# GTK/Pango/fontconfig process-global caches reached by display-backed tests.
+# These patterns are intentionally limited to allocation stacks that begin in
+# the named third-party routines; application-originated allocations remain
+# visible to LeakSanitizer.
+leak:FcFontSetList
+leak:FcFontRenderPrepare
+leak:FcConfigSetDefaultSubstitute
+leak:pango_context_get_metrics
+leak:pango_layout_get_size
+leak:gtk_list_view_set_model
+leak:gtk_widget_realize
+leak:gtk_widget_show
+# GTK 4.24.1's settings style provider creates a computed accent-color
+# GtkCssValue for each style resolution and leaves it alive at process exit.
+# A standalone GtkButton measurement reproduces this exact allocation; this
+# function-specific suppression does not cover application allocations.
+leak:gtk_settings_style_provider_get_color

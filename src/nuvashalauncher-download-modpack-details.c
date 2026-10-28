@@ -196,7 +196,7 @@ author_of (nuvashalauncherDownloadModpackDialog *self)
 }
 
 /* Build the details view after metadata and versions are available. */
-static GtkWidget *
+GtkWidget *
 details_content (nuvashalauncherDownloadModpackDialog *self)
 {
   GtkWidget *content = NULL;

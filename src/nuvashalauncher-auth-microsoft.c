@@ -9,6 +9,17 @@
 #include <libsoup/soup.h>
 #include <string.h>
 
+static nuvashalauncherAuthTransportFunc test_transport = NULL;
+static gpointer test_transport_data = NULL;
+
+void
+nuvashalauncher_auth_set_transport_for_tests (nuvashalauncherAuthTransportFunc transport,
+                                              gpointer user_data)
+{
+  test_transport = transport;
+  test_transport_data = user_data;
+}
+
 GQuark
 nuvashalauncher_auth_error_quark (void)
 {
@@ -153,6 +164,12 @@ nuvashalauncher_auth_send (AuthRequest         *self,
       Step                 step)
 {
   SoupMessageHeaders *request_headers = NULL;
+
+  if (test_transport != NULL)
+    {
+      test_transport (self, url, method, body, headers, step, test_transport_data);
+      return;
+    }
 
   g_assert (self->message == NULL);
 

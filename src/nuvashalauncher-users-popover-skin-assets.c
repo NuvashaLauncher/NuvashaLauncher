@@ -17,6 +17,7 @@ face_texture (GdkTexture *skin)
   gsize face_stride = (gsize) AVATAR_SIZE * 4;
   g_autofree guchar *pixels = NULL;
   g_autofree guchar *face = NULL;
+  g_autoptr (GBytes) bytes = NULL;
 
   if (skin == NULL || gdk_texture_get_width (skin) != SKIN_SIZE ||
       (gdk_texture_get_height (skin) != SKIN_SIZE &&
@@ -45,11 +46,10 @@ face_texture (GdkTexture *skin)
         }
     }
 
+  bytes = g_bytes_new_take (g_steal_pointer (&face),
+                            face_stride * AVATAR_SIZE);
   return gdk_memory_texture_new (AVATAR_SIZE, AVATAR_SIZE,
-                                 GDK_MEMORY_B8G8R8A8,
-                                 g_bytes_new_take (g_steal_pointer (&face),
-                                                  face_stride * AVATAR_SIZE),
-                                 face_stride);
+                                 GDK_MEMORY_B8G8R8A8, bytes, face_stride);
 }
 
 typedef struct

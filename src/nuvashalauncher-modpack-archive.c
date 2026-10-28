@@ -192,7 +192,10 @@ nuvashalauncher_modpack_new_from_zip (const char *zip_path, GError **error)
                    "the modpack cannot be read: %s",
                    archive_error_string (archive));
       if (fd >= 0)
-        close (fd);
+        {
+          close (fd);
+          fd = -1;
+        }
       archive_read_free (archive);
       return NULL;
     }
@@ -290,6 +293,8 @@ nuvashalauncher_modpack_new_from_zip (const char *zip_path, GError **error)
     }
 
   archive_read_close (archive);
+  close (fd);
+  fd = -1;
   archive_read_free (archive);
 
   if (index_bytes == NULL)
@@ -337,6 +342,8 @@ nuvashalauncher_modpack_new_from_zip (const char *zip_path, GError **error)
 error:
 
   archive_read_close (archive);
+  close (fd);
+  fd = -1;
   archive_read_free (archive);
 
   return NULL;
