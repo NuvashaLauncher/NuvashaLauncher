@@ -29,7 +29,7 @@ jobs:
              gcc make pkg-config gettext \
              libasan8 libubsan1 \
              libglib2.0-dev libgtk-4-dev libadwaita-1-dev libepoxy-dev \
-             libjson-glib-dev libsoup-3.0-dev libarchive-dev
+             libjson-glib-dev libsoup-3.0-dev libarchive-dev libsecret-1-dev
 
       - name: Build
         run: make fast CFLAGS="-std=c17 -Wall -Wextra -Wpedantic -Werror -MMD -MP"
