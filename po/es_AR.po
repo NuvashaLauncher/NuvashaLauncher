@@ -170,6 +170,9 @@ msgstr "Duplicado como \"%s\""
 msgid "Delete \"%s\"?"
 msgstr "¿Eliminar \"%s\"?"
 
+msgid "Customize"
+msgstr "Personalizar"
+
 msgid "Delete"
 msgstr "Eliminar"
 
@@ -211,9 +214,6 @@ msgstr "Iniciar sesión"
 
 msgid "Remove"
 msgstr "Eliminar"
-
-msgid "Remove \"%s\""
-msgstr "Eliminar \"%s\""
 
 msgid "Confirm"
 msgstr "Confirmar"

@@ -503,6 +503,23 @@ on_row_activate (GtkListBox *list G_GNUC_UNUSED, GtkListBoxRow *row,
                  gpointer user_data)
 {
   nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+
+  if (self->ui.edit_mode)
+    {
+      GtkWidget *play = g_object_get_data (G_OBJECT (row),
+                                           "nuvashalauncher-play");
+      GtkWidget *check = play != NULL
+        ? g_object_get_data (G_OBJECT (play), "nuvashalauncher-check") : NULL;
+
+      if (check != NULL)
+        {
+          gtk_check_button_set_active (
+            GTK_CHECK_BUTTON (check),
+            !gtk_check_button_get_active (GTK_CHECK_BUTTON (check)));
+          return;
+        }
+    }
+
   GListStore *instances = nuvashalauncher_instance_manager_get_instances (self->model->manager);
   nuvashalauncherInstance *instance =
     g_list_model_get_item (G_LIST_MODEL (instances),

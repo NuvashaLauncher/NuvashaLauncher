@@ -9,6 +9,9 @@ msgstr "İptal"
 msgid "Confirm"
 msgstr "Onayla"
 
+msgid "Customize"
+msgstr "Özelleştir"
+
 msgid "Delete"
 msgstr "Sil"
 
@@ -299,9 +302,6 @@ msgstr "Tekrar Dene"
 
 msgid "Remove"
 msgstr "Kaldır"
-
-msgid "Remove \"%s\""
-msgstr "\"%s\" kaldır"
 
 msgid "Add Microsoft Account"
 msgstr "Microsoft Hesabı Ekle"

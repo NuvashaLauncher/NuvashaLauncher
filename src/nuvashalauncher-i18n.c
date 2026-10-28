@@ -21,6 +21,7 @@ nuvashalauncher_i18n_template_strings (void)
   (void) _("Choose Files"); (void) _("Could not install");
   (void) _("Retry"); (void) _("Back"); (void) _("Search the log");
   (void) _("Classic model"); (void) _("Slim model");
+  (void) _("Customize"); (void) _("Delete");
   (void) _("Import skin…"); (void) _("Export skin…");
   (void) _("Minecraft Services error");
   (void) _("The folder could not be opened: %s");

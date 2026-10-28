@@ -9,6 +9,9 @@ msgstr "Скасувати"
 msgid "Confirm"
 msgstr "Підтвердити"
 
+msgid "Customize"
+msgstr "Налаштувати"
+
 msgid "Delete"
 msgstr "Видалити"
 
@@ -298,9 +301,6 @@ msgstr "Спробувати ще раз"
 
 msgid "Remove"
 msgstr "Вилучити"
-
-msgid "Remove \"%s\""
-msgstr "Вилучити \"%s\""
 
 msgid "Add Microsoft Account"
 msgstr "Додати обліковий запис Microsoft"

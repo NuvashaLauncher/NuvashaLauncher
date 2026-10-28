@@ -8,6 +8,9 @@ msgstr "Anula"
 msgid "Confirm"
 msgstr "Confirma"
 
+msgid "Customize"
+msgstr "Personalizare"
+
 msgid "Delete"
 msgstr "Şterge"
 
@@ -283,9 +286,6 @@ msgstr "Încearcă din nou"
 
 msgid "Remove"
 msgstr "Elimina"
-
-msgid "Remove \"%s\""
-msgstr "Eliminați „%s”"
 
 msgid "Add Microsoft Account"
 msgstr "Adăugați un cont Microsoft"

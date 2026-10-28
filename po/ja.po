@@ -9,6 +9,9 @@ msgstr "キャンセル"
 msgid "Confirm"
 msgstr "確認"
 
+msgid "Customize"
+msgstr "カスタマイズ"
+
 msgid "Delete"
 msgstr "削除"
 
@@ -298,9 +301,6 @@ msgstr "もう一度お試しください"
 
 msgid "Remove"
 msgstr "削除"
-
-msgid "Remove \"%s\""
-msgstr "「%s」を削除"
 
 msgid "Add Microsoft Account"
 msgstr "Microsoft アカウントを追加"

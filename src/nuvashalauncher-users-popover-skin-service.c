@@ -19,10 +19,12 @@ typedef struct {
   char *url;
   char *variant;
   GCancellable *cancellable;
+  SoupMessage *message;
   gboolean background_counted;
 } SkinUpload;
 
 static guint skin_background_operations;
+static SoupSession *skin_upload_session;
 
 gboolean
 nuvashalauncher_users_skin_background_work_active (void)
@@ -38,6 +40,7 @@ skin_upload_free (SkinUpload *upload)
   g_free (upload->url);
   g_free (upload->variant);
   g_clear_object (&upload->cancellable);
+  g_clear_object (&upload->message);
   g_free (upload);
   skin_menu_unref (menu);
 }
@@ -130,7 +133,7 @@ on_skin_dialog_closed (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_data)
 
   /* Profile/cape requests belong to the dialog and can stop here. Skin
    * uploads deliberately use their own cancellable and retain the menu
-   * context until they finish. */
+  * context until they finish. */
   menu->closed = TRUE;
   g_cancellable_cancel (menu->cancellable);
   skin_menu_unref (menu);
@@ -210,9 +213,12 @@ send_skin_upload (SkinUpload *upload, GBytes *bytes)
     SOUP_METHOD_POST, "/minecraft/profile/skins",
     upload->menu->account->access_token);
   g_autoptr (GBytes) body = NULL;
+  g_autoptr (GBytes) prepared = NULL;
   g_autofree char *content_type = NULL;
-  body = nuvashalauncher_minecraft_services_skin_multipart (bytes, upload->variant,
-                                                     &content_type);
+  prepared = g_ascii_strcasecmp (upload->variant, "CLASSIC") == 0
+    ? nuvashalauncher_skin_prepare_classic_upload (bytes) : g_bytes_ref (bytes);
+  body = nuvashalauncher_minecraft_services_skin_multipart (prepared, upload->variant,
+                                                      &content_type);
   soup_message_set_request_body_from_bytes (message, content_type, body);
   nuvashalauncher_minecraft_services_send_async (message, upload->cancellable,
                                          on_skin_upload_done, upload);
@@ -220,34 +226,37 @@ send_skin_upload (SkinUpload *upload, GBytes *bytes)
 }
 
 static void
-upload_skin_url (SkinMenu *menu, const char *url, const char *variant)
+on_skin_download_done (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  SoupMessage *message;
-  SkinUpload *upload;
-  g_autofree char *json = NULL;
+  SkinUpload *upload = user_data;
+  SkinMenu *menu = skin_menu_ref (upload->menu);
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GBytes) bytes = soup_session_send_and_read_finish (
+    SOUP_SESSION (source), result, &error);
 
-  if (menu->account == NULL || menu->account->access_token == NULL ||
-      !nuvashalauncher_account_token_is_valid (menu->account, g_get_real_time () / 1000000))
-    return;
-  if (variant == NULL || *variant == '\0')
-    variant = "CLASSIC";
-  message = nuvashalauncher_minecraft_services_message (
-    SOUP_METHOD_POST, "/minecraft/profile/skins", menu->account->access_token);
-  json = g_strdup_printf ("{\"url\":\"%s\",\"variant\":\"%s\"}",
-                          url, variant);
-  soup_message_set_request_body_from_bytes (message, "application/json",
-                                            g_bytes_new (json, strlen (json)));
-  upload = g_new0 (SkinUpload, 1);
-  upload->menu = skin_menu_ref (menu);
-  upload->url = g_strdup (url);
-  upload->variant = g_strdup (variant);
-  upload->cancellable = g_cancellable_new ();
-  upload->background_counted = TRUE;
-  skin_background_operations++;
-  menu->skin_upload_cancellable = g_object_ref (upload->cancellable);
-  nuvashalauncher_minecraft_services_send_async (message, upload->cancellable,
-                                         on_skin_upload_done, upload);
-  g_object_unref (message);
+  if (upload->message != NULL &&
+      !SOUP_STATUS_IS_SUCCESSFUL (soup_message_get_status (upload->message)))
+    {
+      g_clear_pointer (&bytes, g_bytes_unref);
+      g_clear_error (&error);
+      g_set_error (&error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                   "skin request returned HTTP status %u",
+                   soup_message_get_status (upload->message));
+    }
+  if (bytes == NULL)
+    {
+      g_warning ("Could not download skin for upload: %s",
+                 error != NULL ? error->message : "unknown error");
+      upload->menu->skin_upload_in_flight = FALSE;
+      g_clear_object (&upload->menu->skin_upload_cancellable);
+      skin_upload_background_finish (upload);
+      skin_upload_free (upload);
+      start_pending_skin_upload (menu);
+      skin_menu_unref (menu);
+      return;
+    }
+  send_skin_upload (upload, bytes);
+  skin_menu_unref (menu);
 }
 
 static void
@@ -326,7 +335,20 @@ start_pending_skin_upload (SkinMenu *menu)
     menu->skin_upload_in_flight = TRUE;
     if (!g_str_has_prefix (url, "file://"))
       {
-        upload_skin_url (menu, url, variant);
+        upload = g_new0 (SkinUpload, 1);
+        upload->menu = skin_menu_ref (menu);
+        upload->url = g_steal_pointer (&url);
+        upload->variant = g_steal_pointer (&variant);
+        upload->cancellable = g_cancellable_new ();
+        upload->background_counted = TRUE;
+        skin_background_operations++;
+        menu->skin_upload_cancellable = g_object_ref (upload->cancellable);
+        if (skin_upload_session == NULL)
+          skin_upload_session = soup_session_new ();
+        upload->message = soup_message_new (SOUP_METHOD_GET, upload->url);
+        soup_session_send_and_read_async (skin_upload_session, upload->message,
+                                          G_PRIORITY_DEFAULT, upload->cancellable,
+                                          on_skin_download_done, upload);
         return;
       }
 
@@ -576,8 +598,8 @@ send_pending_cape_change (SkinMenu *menu)
     }
   skin_background_operations++;
   nuvashalauncher_minecraft_services_send_async (message, menu->cancellable,
-                                         on_active_skin_delete_done,
-                                         skin_menu_ref (menu));
+                                          on_active_skin_delete_done,
+                                          skin_menu_ref (menu));
   g_object_unref (message);
 }
 
@@ -660,4 +682,3 @@ delete_active_skin (SkinMenu *menu)
                                          skin_menu_ref (menu));
   g_object_unref (message);
 }
-

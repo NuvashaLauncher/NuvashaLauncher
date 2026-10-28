@@ -17,6 +17,11 @@ void nuvashalauncher_skin_view_set_skin (nuvashalauncherSkinView *self, GdkTextu
 void nuvashalauncher_skin_view_set_cape (nuvashalauncherSkinView *self, GdkTexture *texture);
 void nuvashalauncher_skin_view_set_slim (nuvashalauncherSkinView *self, gboolean slim);
 
+/* Return a PNG suitable for uploading as a classic skin.  Slim skin atlases
+ * need their missing classic arm columns filled before Mojang's services
+ * consume them. */
+GBytes *nuvashalauncher_skin_prepare_classic_upload (GBytes *skin);
+
 G_END_DECLS
 
 #endif

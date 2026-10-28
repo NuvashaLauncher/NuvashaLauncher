@@ -8,6 +8,9 @@ msgstr "Kansellere"
 msgid "Confirm"
 msgstr "Bekrefte"
 
+msgid "Customize"
+msgstr "Tilpass"
+
 msgid "Delete"
 msgstr "Slett"
 
@@ -283,9 +286,6 @@ msgstr "Prøv igjen"
 
 msgid "Remove"
 msgstr "Fjerne"
-
-msgid "Remove \"%s\""
-msgstr "Fjern \"%s\""
 
 msgid "Add Microsoft Account"
 msgstr "Legg til Microsoft-konto"

@@ -9,6 +9,9 @@ msgstr "Отмена"
 msgid "Confirm"
 msgstr "Подтверждение"
 
+msgid "Customize"
+msgstr "Настроить"
+
 msgid "Delete"
 msgstr "Удалить"
 
@@ -299,9 +302,6 @@ msgstr "Повторите попытку"
 
 msgid "Remove"
 msgstr "Снимите"
-
-msgid "Remove \"%s\""
-msgstr "Удалить \"%s\""
 
 msgid "Add Microsoft Account"
 msgstr "Добавить учётную запись Microsoft"

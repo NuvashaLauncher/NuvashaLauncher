@@ -8,6 +8,9 @@ msgstr "Avboka"
 msgid "Confirm"
 msgstr "Bekräfta"
 
+msgid "Customize"
+msgstr "Anpassa"
+
 msgid "Delete"
 msgstr "Radera"
 
@@ -283,9 +286,6 @@ msgstr "Försök igen"
 
 msgid "Remove"
 msgstr "Ta bort"
-
-msgid "Remove \"%s\""
-msgstr "Ta bort \"%s\""
 
 msgid "Add Microsoft Account"
 msgstr "Lägg till Microsoft-konto"

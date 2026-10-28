@@ -8,6 +8,9 @@ msgstr "Membatalkan"
 msgid "Confirm"
 msgstr "Mengonfirmasi"
 
+msgid "Customize"
+msgstr "Sesuaikan"
+
 msgid "Delete"
 msgstr "Menghapus"
 
@@ -283,9 +286,6 @@ msgstr "Coba Lagi"
 
 msgid "Remove"
 msgstr "Menghapus"
-
-msgid "Remove \"%s\""
-msgstr "Hapus \"%s\""
 
 msgid "Add Microsoft Account"
 msgstr "Tambahkan Akun Microsoft"

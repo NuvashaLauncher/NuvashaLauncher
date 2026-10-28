@@ -187,6 +187,18 @@ on_content_file_check_toggled (GtkCheckButton *check, gpointer user_data)
   content_page_update_selection (self);
 }
 
+static void
+on_content_file_row_activated (AdwActionRow *row, gpointer user_data)
+{
+  GtkCheckButton *check = g_object_get_data (G_OBJECT (row),
+                                             "nuvashalauncher-file-check");
+
+  if (check != NULL)
+    gtk_check_button_set_active (check, !gtk_check_button_get_active (check));
+
+  (void) user_data;
+}
+
 void
 content_page_update_selection (nuvashalauncherContentPage *self)
 {
@@ -805,6 +817,9 @@ file_row (nuvashalauncherContentPage *self, nuvashalauncherContentFile *file)
      know where the file came from. */
   g_object_set_data (G_OBJECT (row), "nuvashalauncher-file", file);
   g_object_set_data (G_OBJECT (row), "nuvashalauncher-page", self);
+  gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
+  g_signal_connect (row, "activated",
+                    G_CALLBACK (on_content_file_row_activated), self);
 
   file_row_refresh (GTK_WIDGET (row));
 
