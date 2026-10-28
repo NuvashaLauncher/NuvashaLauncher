@@ -166,7 +166,7 @@ test-flatpak-runtime:
 	fi
 	@set -eu; \
 	version=$$(flatpak run com.github.nuvashalauncher.nuvashalauncher --version); \
-	test "$$version" = "nuvashalauncher $(VERSION)"; \
+  test "$$version" = "Nuvasha Launcher $(VERSION)"; \
 	flatpak run com.github.nuvashalauncher.nuvashalauncher --list-instances >/dev/null; \
 	flatpak run com.github.nuvashalauncher.nuvashalauncher --list-accounts >/dev/null; \
 	flatpak run --command=sh com.github.nuvashalauncher.nuvashalauncher -c '\
