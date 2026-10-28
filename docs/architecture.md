@@ -43,6 +43,8 @@ and game resources]
     Modrinth[Modrinth API and files]
     Microsoft[Microsoft identity,
 Xbox Live, Minecraft services]
+    Secrets[Desktop Secret Service
+account keyring]
     Desktop[Desktop URI handler]
     Java[Selected Java runtime]
     Flatpak[Flatpak application sandbox]
@@ -52,6 +54,7 @@ Xbox Live, Minecraft services]
     launcher --> Mojang
     launcher --> Modrinth
     launcher --> Microsoft
+    launcher <--> Secrets
     launcher --> Java
     Flatpak -. contains the Flatpak build .-> launcher
     launcher --> Desktop
@@ -66,6 +69,10 @@ External services are used directly by their owning modules:
 - Microsoft device authorization, Xbox Live/XSTS, Minecraft authentication,
   entitlements, and profile requests are the steps in
   `nuvashalauncher-auth-microsoft.c`.
+- Account records and the active-account selection are stored through the
+  desktop Secret Service by `nuvashalauncher-secret-store.c`. The launcher
+  requires a Secret Service provider for account persistence; no account data
+  is migrated from the old JSON or legacy keyring formats.
 - `GAppInfo` opens URIs through the desktop.
 
 ## Static structure
