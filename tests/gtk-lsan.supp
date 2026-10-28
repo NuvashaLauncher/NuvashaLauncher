@@ -5,6 +5,8 @@
 leak:FcFontSetList
 leak:FcFontRenderPrepare
 leak:FcConfigSetDefaultSubstitute
+# Fontconfig initializes process-global configuration on a worker thread.
+leak:FcInit
 leak:pango_context_get_metrics
 leak:pango_layout_get_size
 leak:gtk_list_view_set_model
@@ -15,3 +17,5 @@ leak:gtk_widget_show
 # A standalone GtkButton measurement reproduces this exact allocation; this
 # function-specific suppression does not cover application allocations.
 leak:gtk_settings_style_provider_get_color
+# GTK's X11 GL setup leaves Mesa/EGL process-global state alive at exit.
+leak:gdk_display_prepare_gl
