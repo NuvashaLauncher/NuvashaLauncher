@@ -32,6 +32,9 @@ coverage.
 - Make account integration tests skip cleanly when Secret Service is absent.
 - Fix sanitizer cleanup for skipped authentication tests and asynchronous
   launcher cleanup.
+- Isolate test account data in dedicated Secret Service schemas so tests cannot
+  touch a user's real account items.
+- Clean up test-created keyring entries and temporary directories.
 - Keep strict CI builds working with `-Werror`.
 
 ## Verification
