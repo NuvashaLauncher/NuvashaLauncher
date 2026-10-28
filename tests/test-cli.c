@@ -4,6 +4,7 @@
 
 #include "nuvashalauncher-accounts.h"
 #include "nuvashalauncher-instance-manager.h"
+#include "nuvashalauncher-secret-store.h"
 
 #include <glib.h>
 #include <stdlib.h>
@@ -86,6 +87,10 @@ test_account_commands (void)
   output = run_cli ("--remove-account", "does-not-exist", &status);
   g_assert_cmpint (status, !=, 0);
   g_clear_pointer (&output, g_free);
+
+  nuvashalauncher_secret_store_remove_account (first->id, NULL);
+  nuvashalauncher_secret_store_remove_account (second->id, NULL);
+  nuvashalauncher_secret_store_clear_active (NULL);
 }
 
 static void
