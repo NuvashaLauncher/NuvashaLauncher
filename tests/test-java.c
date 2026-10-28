@@ -390,7 +390,7 @@ test_probing_fake_scripts_and_dedup (void)
   guint found8 = 0;
   guint found17 = 0;
 
-  symlink (script8, link8);
+   g_assert_cmpint (symlink (script8, link8), ==, 0);
 
   /* script8 and its symlink are the same real path, so only one of
    * them can be listed; a script exiting badly is skipped. */
@@ -483,7 +483,7 @@ test_detect_list_jre_layout_and_dedup (void)
 
   /* A "default" directory that is a symlink to the main install: the
    * scan must list the install once, not twice. */
-  symlink (real_home, std_link);
+   g_assert_cmpint (symlink (real_home, std_link), ==, 0);
 
   /* A candidate that is not executable: skipped. */
   g_autofree char *plain_java =
