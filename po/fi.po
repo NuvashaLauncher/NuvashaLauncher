@@ -215,8 +215,8 @@ msgid "Line Limit"
 msgstr "Linjarajoitus"
 
 
-msgid "About nuvashalauncher"
-msgstr "Tietoja nuvashalauncherista"
+msgid "About Nuvasha Launcher"
+msgstr "Tietoja Nuvasha Launcherista"
 
 msgid "Keyboard Shortcuts"
 msgstr "Pikanäppäimet"
@@ -591,11 +591,11 @@ msgstr "Selaa modpaketteja"
 msgid "Choose Files"
 msgstr "Valitse tiedostot"
 
-msgid "Clear nuvashalauncher Cache"
-msgstr "Tyhjennä nuvashalaunchern välimuisti"
+msgid "Clear Nuvasha Launcher Cache"
+msgstr "Tyhjennä Nuvasha Launchern välimuisti"
 
-msgid "Clear nuvashalauncher Cache?"
-msgstr "Tyhjennetäänkö nuvashalaunchern välimuisti?"
+msgid "Clear Nuvasha Launcher Cache?"
+msgstr "Tyhjennetäänkö Nuvasha Launchern välimuisti?"
 
 msgid ""
 "Conflicts\n"
@@ -662,8 +662,8 @@ msgstr "Asennus"
 msgid "Instances cannot contain %s in their name"
 msgstr "Nimissä ei saa esiintyä %s"
 
-msgid "It carries files that nuvashalauncher does not recognize."
-msgstr "Siinä on tiedostoja, joita nuvashalauncher ei tunnista."
+msgid "It carries files that Nuvasha Launcher does not recognize."
+msgstr "Siinä on tiedostoja, joita Nuvasha Launcher ei tunnista."
 
 msgid "Italiano"
 msgstr "Italiano"
@@ -686,8 +686,8 @@ msgstr "Microsoft · Kirjautuminen vaaditaan"
 msgid "Modrinth does not know this file"
 msgstr "Modrinth ei tunne tätä tiedostoa"
 
-msgid "Modrinth is asking nuvashalauncher to slow down, too many requests"
-msgstr "Modrinth pyytää nuvashalaunchera hidastamaan vauhtia, pyyntöjä on liikaa"
+msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
+msgstr "Modrinth pyytää Nuvasha Launchera hidastamaan vauhtia, pyyntöjä on liikaa"
 
 msgid "Nederlands"
 msgstr "Nederlands"
@@ -708,8 +708,8 @@ msgid "Norsk (bokmål)"
 msgstr "Norsk (bokmål)"
 
 
-msgid "nuvashalauncher cache data was cleared successfully."
-msgstr "nuvashalaunchern välimuistitiedot tyhjennettiin onnistuneesti."
+msgid "Nuvasha Launcher cache data was cleared successfully."
+msgstr "Nuvasha Launchern välimuistitiedot tyhjennettiin onnistuneesti."
 
 msgid "Offline"
 msgstr "Offline"
@@ -756,14 +756,14 @@ msgstr "Svenska"
 msgid "System default"
 msgstr "Järjestelmän oletusasetus"
 
-msgid "The account is removed from nuvashalauncher and its saved sign-in is forgotten. The game itself is not touched."
-msgstr "Tili poistetaan nuvashalaunchersta ja sen tallennetut kirjautumistiedot nollataan. Itse peliin ei tehdä muutoksia."
+msgid "The account is removed from Nuvasha Launcher and its saved sign-in is forgotten. The game itself is not touched."
+msgstr "Tili poistetaan Nuvasha Launchersta ja sen tallennetut kirjautumistiedot nollataan. Itse peliin ei tehdä muutoksia."
 
 msgid "The game is running and will close. Progress since the last save is lost."
 msgstr "Peli on käynnissä ja sulkeutuu. Edistyksesi viimeisimmän tallennuksen jälkeen menetetään."
 
-msgid "This project publishes no pack file nuvashalauncher can install."
-msgstr "Tämä projekti ei julkaise mitään pakettitiedostoa, jonka nuvashalauncher voisi asentaa."
+msgid "This project publishes no pack file Nuvasha Launcher can install."
+msgstr "Tämä projekti ei julkaise mitään pakettitiedostoa, jonka Nuvasha Launcher voisi asentaa."
 
 msgid "This version has no pack file"
 msgstr "Tässä versiossa ei ole pakettitiedostoa"

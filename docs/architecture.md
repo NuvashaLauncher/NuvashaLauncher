@@ -1,6 +1,6 @@
-# nuvashalauncher architecture
+# Nuvasha Launcher architecture
 
-This document describes nuvashalauncher's module boundaries, cross-module flows,
+This document describes Nuvasha Launcher's module boundaries, cross-module flows,
 and invariants.
 
 It does not list every source file. Public headers contain the API reference;
@@ -8,7 +8,7 @@ this document records the design decisions behind the module layout.
 
 ## What the program is
 
-nuvashalauncher is a Linux GTK 4/libadwaita desktop application. It manages Minecraft
+Nuvasha Launcher is a Linux GTK 4/libadwaita desktop application. It manages Minecraft
 instances, obtains Minecraft and Modrinth content, chooses a Java runtime, and
 starts one game process per instance. It is a single executable and does not
 require a separate daemon or background service.
@@ -36,7 +36,7 @@ the owner of that operation.
 ```mermaid
 flowchart LR
     User[User]
-    nuvashalauncher[nuvashalauncher]
+    launcher[Nuvasha Launcher]
     CLI[CLI commands]
     Mojang[Mojang launcher metadata
 and game resources]
@@ -47,14 +47,14 @@ Xbox Live, Minecraft services]
     Java[Selected Java runtime]
     Flatpak[Flatpak application sandbox]
 
-    User <--> nuvashalauncher
-    User --> CLI --> nuvashalauncher
-    nuvashalauncher --> Mojang
-    nuvashalauncher --> Modrinth
-    nuvashalauncher --> Microsoft
-    nuvashalauncher --> Java
-    Flatpak -. contains the Flatpak build .-> nuvashalauncher
-    nuvashalauncher --> Desktop
+    User <--> launcher
+    User --> CLI --> launcher
+    launcher --> Mojang
+    launcher --> Modrinth
+    launcher --> Microsoft
+    launcher --> Java
+    Flatpak -. contains the Flatpak build .-> launcher
+    launcher --> Desktop
 ```
 
 External services are used directly by their owning modules:
@@ -205,7 +205,7 @@ The Microsoft sign-in chain is asynchronous and explicit:
 6. Check Java entitlements.
 7. Fetch the Minecraft profile and store the resulting account.
 
-No password is handled by nuvashalauncher. A token is considered unusable slightly
+No password is handled by Nuvasha Launcher. A token is considered unusable slightly
 before its reported expiry so a launch does not begin with a token that will
 expire during startup. If refresh fails, the launcher enters
 `Needs sign-in` instead of attempting to start a game with stale credentials.
@@ -311,7 +311,7 @@ the installation paths are not identical:
 - Fabric and Quilt publish version lists and profile documents. Their profiles
   are merged over the Minecraft version document and their Maven coordinates
   are converted into the same resolved-file inputs used by vanilla versions.
-- Forge and NeoForge publish installer JARs. nuvashalauncher downloads the installer,
+- Forge and NeoForge publish installer JARs. Nuvasha Launcher downloads the installer,
   reads its install profile, runs the client-side processors with Java, and
   stores the resulting loader installation under the shared data directory.
 
@@ -366,14 +366,14 @@ cannot finish should leave the existing instance and metadata intact.
 
 ## Launch pipeline
 
-`nuvashalauncher` belongs to one instance and is the owner of that instance's
+Nuvasha Launcher belongs to one instance and is the owner of that instance's
 launch state, log buffer, preparation scope, and child process. A launcher
 refuses a second start while its state is busy.
 
 ```mermaid
 sequenceDiagram
     participant UI
-    participant L as nuvashalauncher
+    participant L as Nuvasha Launcher
     participant A as Accounts
     participant V as Version metadata
     participant R as Resolver

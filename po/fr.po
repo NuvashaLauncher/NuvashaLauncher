@@ -231,8 +231,8 @@ msgid "Line Limit"
 msgstr "Limite de lignes"
 
 
-msgid "About nuvashalauncher"
-msgstr "À propos de l'nuvashalauncher"
+msgid "About Nuvasha Launcher"
+msgstr "À propos de l'Nuvasha Launcher"
 
 msgid "Keyboard Shortcuts"
 msgstr "Raccourcis Clavier"
@@ -641,11 +641,11 @@ msgstr "Parcourir les modpacks"
 msgid "Choose Files"
 msgstr "Sélectionner des fichiers"
 
-msgid "Clear nuvashalauncher Cache"
-msgstr "Vider le cache de nuvashalauncher"
+msgid "Clear Nuvasha Launcher Cache"
+msgstr "Vider le cache de Nuvasha Launcher"
 
-msgid "Clear nuvashalauncher Cache?"
-msgstr "Vider le cache de nuvashalauncher ?"
+msgid "Clear Nuvasha Launcher Cache?"
+msgstr "Vider le cache de Nuvasha Launcher ?"
 
 msgid ""
 "Conflicts\n"
@@ -712,8 +712,8 @@ msgstr "Installation"
 msgid "Instances cannot contain %s in their name"
 msgstr "Les instances ne peuvent pas contenir %s dans leur nom"
 
-msgid "It carries files that nuvashalauncher does not recognize."
-msgstr "Il contient des fichiers que nuvashalauncher ne reconnaît pas."
+msgid "It carries files that Nuvasha Launcher does not recognize."
+msgstr "Il contient des fichiers que Nuvasha Launcher ne reconnaît pas."
 
 msgid "Italiano"
 msgstr "Italiano"
@@ -736,8 +736,8 @@ msgstr "Microsoft · Connexion requise"
 msgid "Modrinth does not know this file"
 msgstr "Modrinth ne connaît pas ce fichier"
 
-msgid "Modrinth is asking nuvashalauncher to slow down, too many requests"
-msgstr "Modrinth demande à nuvashalauncher de ralentir le rythme, il y a trop de demandes"
+msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
+msgstr "Modrinth demande à Nuvasha Launcher de ralentir le rythme, il y a trop de demandes"
 
 msgid "Nederlands"
 msgstr "Nederlands"
@@ -755,8 +755,8 @@ msgid "Norsk (bokmål)"
 msgstr "Norsk (bokmål)"
 
 
-msgid "nuvashalauncher cache data was cleared successfully."
-msgstr "Les données du cache nuvashalauncher ont été effacées avec succès."
+msgid "Nuvasha Launcher cache data was cleared successfully."
+msgstr "Les données du cache Nuvasha Launcher ont été effacées avec succès."
 
 msgid "Offline"
 msgstr "Hors ligne"
@@ -800,14 +800,14 @@ msgstr "Svenska"
 msgid "System default"
 msgstr "Paramètres par défaut du système"
 
-msgid "The account is removed from nuvashalauncher and its saved sign-in is forgotten. The game itself is not touched."
-msgstr "Le compte est supprimé de nuvashalauncher et ses identifiants enregistrés sont effacés. Le jeu lui-même n'est pas affecté."
+msgid "The account is removed from Nuvasha Launcher and its saved sign-in is forgotten. The game itself is not touched."
+msgstr "Le compte est supprimé de Nuvasha Launcher et ses identifiants enregistrés sont effacés. Le jeu lui-même n'est pas affecté."
 
 msgid "The game is running and will close. Progress since the last save is lost."
 msgstr "Le jeu est en cours d'exécution et va se fermer. La progression enregistrée depuis la dernière sauvegarde sera perdue."
 
-msgid "This project publishes no pack file nuvashalauncher can install."
-msgstr "Ce projet ne publie aucun fichier de paquet que nuvashalauncher puisse installer."
+msgid "This project publishes no pack file Nuvasha Launcher can install."
+msgstr "Ce projet ne publie aucun fichier de paquet que Nuvasha Launcher puisse installer."
 
 msgid "This version has no pack file"
 msgstr "Cette version ne contient pas de fichier d'installation"

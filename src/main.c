@@ -291,7 +291,7 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
 
   if (show_version)
     {
-      g_application_command_line_print (command_line, "nuvashalauncher %s\n",
+       g_application_command_line_print (command_line, "Nuvasha Launcher %s\n",
                                         nuvashalauncher_VERSION);
       return 0;
     }
@@ -358,7 +358,7 @@ main (int argc, char **argv)
 
   if (argc == 2 && g_strcmp0 (argv[1], "--version") == 0)
     {
-      g_print ("nuvashalauncher %s\n", nuvashalauncher_VERSION);
+       g_print ("Nuvasha Launcher %s\n", nuvashalauncher_VERSION);
       return 0;
     }
 
@@ -377,7 +377,7 @@ main (int argc, char **argv)
 
   if (!gtk_init_check ())
     {
-      g_printerr ("nuvashalauncher could not open a display.\n");
+       g_printerr ("Nuvasha Launcher could not open a display.\n");
       return 1;
     }
 

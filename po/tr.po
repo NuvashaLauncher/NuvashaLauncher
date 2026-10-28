@@ -231,8 +231,8 @@ msgid "Line Limit"
 msgstr "Satır sınırı"
 
 
-msgid "About nuvashalauncher"
-msgstr "nuvashalauncher hakkında"
+msgid "About Nuvasha Launcher"
+msgstr "Nuvasha Launcher hakkında"
 
 msgid "Keyboard Shortcuts"
 msgstr "Klavye kısayolları"
@@ -637,11 +637,11 @@ msgstr "Mod Paketlerine Göz At"
 msgid "Choose Files"
 msgstr "Dosyaları Seç"
 
-msgid "Clear nuvashalauncher Cache"
-msgstr "nuvashalauncher Önbelleğini Temizle"
+msgid "Clear Nuvasha Launcher Cache"
+msgstr "Nuvasha Launcher Önbelleğini Temizle"
 
-msgid "Clear nuvashalauncher Cache?"
-msgstr "nuvashalauncher önbelleğini temizlemek mi?"
+msgid "Clear Nuvasha Launcher Cache?"
+msgstr "Nuvasha Launcher önbelleğini temizlemek mi?"
 
 msgid ""
 "Conflicts\n"
@@ -708,8 +708,8 @@ msgstr "Yükleme"
 msgid "Instances cannot contain %s in their name"
 msgstr "Örneklerin adlarında %s şunlar bulunamaz:"
 
-msgid "It carries files that nuvashalauncher does not recognize."
-msgstr "nuvashalauncher’nın tanımadığı dosyalar içeriyor."
+msgid "It carries files that Nuvasha Launcher does not recognize."
+msgstr "Nuvasha Launcher’nın tanımadığı dosyalar içeriyor."
 
 msgid "Italiano"
 msgstr "Italiano"
@@ -732,8 +732,8 @@ msgstr "Microsoft · Oturum açılması gerekiyor"
 msgid "Modrinth does not know this file"
 msgstr "Modrinth bu dosyayı tanımıyor"
 
-msgid "Modrinth is asking nuvashalauncher to slow down, too many requests"
-msgstr "Modrinth, nuvashalauncher’dan biraz yavaşlamasını istiyor; çok fazla istek var"
+msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
+msgstr "Modrinth, Nuvasha Launcher’dan biraz yavaşlamasını istiyor; çok fazla istek var"
 
 msgid "Nederlands"
 msgstr "Nederlands"
@@ -751,8 +751,8 @@ msgid "Norsk (bokmål)"
 msgstr "Norsk (bokmål)"
 
 
-msgid "nuvashalauncher cache data was cleared successfully."
-msgstr "nuvashalauncher önbellek verileri başarıyla silindi."
+msgid "Nuvasha Launcher cache data was cleared successfully."
+msgstr "Nuvasha Launcher önbellek verileri başarıyla silindi."
 
 msgid "Offline"
 msgstr "Çevrimdışı"
@@ -796,14 +796,14 @@ msgstr "Svenska"
 msgid "System default"
 msgstr "Sistem varsayılanı"
 
-msgid "The account is removed from nuvashalauncher and its saved sign-in is forgotten. The game itself is not touched."
-msgstr "Hesap nuvashalauncher'dan kaldırılır ve kaydedilmiş oturum açma bilgileri silinir. Oyunun kendisine herhangi bir müdahale yapılmaz."
+msgid "The account is removed from Nuvasha Launcher and its saved sign-in is forgotten. The game itself is not touched."
+msgstr "Hesap Nuvasha Launcher'dan kaldırılır ve kaydedilmiş oturum açma bilgileri silinir. Oyunun kendisine herhangi bir müdahale yapılmaz."
 
 msgid "The game is running and will close. Progress since the last save is lost."
 msgstr "Oyun çalışıyor ve kapanacak. Son kaydetme işleminden bu yana kaydedilen ilerleme kaybolacak."
 
-msgid "This project publishes no pack file nuvashalauncher can install."
-msgstr "Bu proje, nuvashalauncher'nın yükleyebileceği herhangi bir paket dosyası yayınlamamaktadır."
+msgid "This project publishes no pack file Nuvasha Launcher can install."
+msgstr "Bu proje, Nuvasha Launcher'nın yükleyebileceği herhangi bir paket dosyası yayınlamamaktadır."
 
 msgid "This version has no pack file"
 msgstr "Bu sürümde paket dosyası bulunmamaktadır"

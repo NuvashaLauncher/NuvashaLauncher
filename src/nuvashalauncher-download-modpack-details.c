@@ -332,7 +332,7 @@ dialog_details_fill (nuvashalauncherDownloadModpackDialog *self)
     show_details_error (self, self->versions_problem);
   else if (self->versions != NULL && self->versions->len == 0)
     show_details_error (self,
-                         _("This project publishes no pack file nuvashalauncher can "
+                         _("This project publishes no pack file Nuvasha Launcher can "
                            "install."));
 
   if (self->versions != NULL && self->versions->len > 0)

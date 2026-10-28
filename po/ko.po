@@ -231,8 +231,8 @@ msgid "Line Limit"
 msgstr "줄 수 제한"
 
 
-msgid "About nuvashalauncher"
-msgstr "nuvashalauncher 소개"
+msgid "About Nuvasha Launcher"
+msgstr "Nuvasha Launcher 소개"
 
 msgid "Keyboard Shortcuts"
 msgstr "키보드 단축키"
@@ -633,11 +633,11 @@ msgstr "모드팩 둘러보기"
 msgid "Choose Files"
 msgstr "파일 선택"
 
-msgid "Clear nuvashalauncher Cache"
-msgstr "nuvashalauncher 캐시 지우기"
+msgid "Clear Nuvasha Launcher Cache"
+msgstr "Nuvasha Launcher 캐시 지우기"
 
-msgid "Clear nuvashalauncher Cache?"
-msgstr "nuvashalauncher 캐시를 지울까요?"
+msgid "Clear Nuvasha Launcher Cache?"
+msgstr "Nuvasha Launcher 캐시를 지울까요?"
 
 msgid ""
 "Conflicts\n"
@@ -704,8 +704,8 @@ msgstr "설치"
 msgid "Instances cannot contain %s in their name"
 msgstr "인스턴스의 이름에는%s 다음을 포함할 수 없습니다."
 
-msgid "It carries files that nuvashalauncher does not recognize."
-msgstr "이 파일은 nuvashalauncher가 인식하지 못하는 파일입니다."
+msgid "It carries files that Nuvasha Launcher does not recognize."
+msgstr "이 파일은 Nuvasha Launcher가 인식하지 못하는 파일입니다."
 
 msgid "Italiano"
 msgstr "Italiano"
@@ -728,7 +728,7 @@ msgstr "Microsoft · 로그인이 필요합니다"
 msgid "Modrinth does not know this file"
 msgstr "Modrinth는 이 파일을 인식하지 못합니다."
 
-msgid "Modrinth is asking nuvashalauncher to slow down, too many requests"
+msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
 msgstr "모드린스는 누바샤에게 속도를 늦춰 달라고 요청하고 있다. 요청이 너무 많기 때문이다."
 
 msgid "Nederlands"
@@ -747,8 +747,8 @@ msgid "Norsk (bokmål)"
 msgstr "Norsk (bokmål)"
 
 
-msgid "nuvashalauncher cache data was cleared successfully."
-msgstr "nuvashalauncher 캐시 데이터가 성공적으로 삭제되었습니다."
+msgid "Nuvasha Launcher cache data was cleared successfully."
+msgstr "Nuvasha Launcher 캐시 데이터가 성공적으로 삭제되었습니다."
 
 msgid "Offline"
 msgstr "오프라인"
@@ -792,14 +792,14 @@ msgstr "Svenska"
 msgid "System default"
 msgstr "시스템 기본값"
 
-msgid "The account is removed from nuvashalauncher and its saved sign-in is forgotten. The game itself is not touched."
-msgstr "해당 계정은 nuvashalauncher에서 삭제되며, 저장된 로그인 정보도 삭제됩니다. 게임 자체에는 아무런 영향이 없습니다."
+msgid "The account is removed from Nuvasha Launcher and its saved sign-in is forgotten. The game itself is not touched."
+msgstr "해당 계정은 Nuvasha Launcher에서 삭제되며, 저장된 로그인 정보도 삭제됩니다. 게임 자체에는 아무런 영향이 없습니다."
 
 msgid "The game is running and will close. Progress since the last save is lost."
 msgstr "게임이 실행 중이며 곧 종료됩니다. 마지막 저장 이후의 진행 상황은 사라집니다."
 
-msgid "This project publishes no pack file nuvashalauncher can install."
-msgstr "이 프로젝트는 nuvashalauncher가 설치할 수 있는 팩 파일을 제공하지 않습니다."
+msgid "This project publishes no pack file Nuvasha Launcher can install."
+msgstr "이 프로젝트는 Nuvasha Launcher가 설치할 수 있는 팩 파일을 제공하지 않습니다."
 
 msgid "This version has no pack file"
 msgstr "이 버전에는 팩 파일이 포함되어 있지 않습니다."
