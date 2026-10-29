@@ -907,3 +907,12 @@ msgstr "Načítání aktualizací"
 #: src/nuvashalauncher-content-page-ui.c
 msgid "Progress"
 msgstr "Průběh"
+
+msgid "Enter Edit Mode"
+msgstr "Vstoupit do režimu úprav"
+
+msgid "Delete Selected"
+msgstr "Smazat vybrané"
+
+msgid "Exit Edit Mode / Close Search"
+msgstr "Ukončit režim úprav / Zavřít vyhledávání"

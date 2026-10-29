@@ -905,3 +905,12 @@ msgstr "Henter opdateringer"
 #: src/nuvashalauncher-content-page-ui.c
 msgid "Progress"
 msgstr "Fremskridt"
+
+msgid "Enter Edit Mode"
+msgstr "Gå til redigeringstilstand"
+
+msgid "Delete Selected"
+msgstr "Slet valgte"
+
+msgid "Exit Edit Mode / Close Search"
+msgstr "Forlad redigeringstilstand / Luk søgning"

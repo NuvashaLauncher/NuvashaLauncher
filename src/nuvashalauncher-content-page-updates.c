@@ -49,6 +49,29 @@ update_item_free (UpdateItem *item)
 }
 
 static void
+position_update_popover (nuvashalauncherContentPage *self, GtkButton *button)
+{
+  graphene_rect_t bounds;
+  GdkRectangle pointing_to;
+
+  if (self->installed.update_popover == NULL)
+    return;
+
+  if (!gtk_widget_compute_bounds (GTK_WIDGET (button),
+                                  GTK_WIDGET (self->installed.actions),
+                                  &bounds))
+    return;
+
+  pointing_to = (GdkRectangle) {
+    (int) graphene_rect_get_x (&bounds),
+    (int) graphene_rect_get_y (&bounds),
+    (int) graphene_rect_get_width (&bounds),
+    (int) graphene_rect_get_height (&bounds)
+  };
+  gtk_popover_set_pointing_to (self->installed.update_popover, &pointing_to);
+}
+
+static void
 update_button_busy (nuvashalauncherContentPage *self, gboolean busy)
 {
   if (self->installed.update_content == NULL)
@@ -116,6 +139,8 @@ update_batch_next (nuvashalauncherContentPage *self)
       self->install_model->update_index = 0;
       self->install_model->updating = FALSE;
       update_button_busy (self, FALSE);
+      if (self->installed.update_popover != NULL)
+        gtk_popover_popdown (self->installed.update_popover);
 
       if (done > 0)
         {
@@ -190,6 +215,8 @@ static void
 update_check_done (nuvashalauncherContentPage *self, UpdateRun *run)
 {
   update_button_busy (self, FALSE);
+  if (self->installed.update_popover != NULL)
+    gtk_popover_popdown (self->installed.update_popover);
   g_object_set_data (G_OBJECT (self), "nuvashalauncher-update-run", NULL);
 
   if (run->items->len == 0)
@@ -341,10 +368,13 @@ update_check_next (UpdateRun *run)
 }
 
 void
-nuvashalauncher_content_page_on_update_all_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+nuvashalauncher_content_page_on_update_all_clicked (GtkButton *button,
+                                                    gpointer user_data)
 {
   nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
   UpdateRun *run = g_new0 (UpdateRun, 1);
+
+  position_update_popover (self, button);
 
   if (g_object_get_data (G_OBJECT (self), "nuvashalauncher-update-run") != NULL ||
       self->install_model->updating)
@@ -358,7 +388,7 @@ nuvashalauncher_content_page_on_update_all_clicked (GtkButton *button G_GNUC_UNU
   run->page = self;
   g_object_add_weak_pointer (G_OBJECT (self), (gpointer *) &run->page);
   run->items =
-    g_ptr_array_new_with_free_func ((GDestroyNotify) update_item_free);
+  g_ptr_array_new_with_free_func ((GDestroyNotify) update_item_free);
   g_object_set_data (G_OBJECT (self), "nuvashalauncher-update-run", run);
   if (self->installed.update_popover != NULL)
     gtk_popover_popup (self->installed.update_popover);

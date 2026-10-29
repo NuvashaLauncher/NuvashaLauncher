@@ -905,3 +905,12 @@ msgstr "A obter atualizações"
 #: src/nuvashalauncher-content-page-ui.c
 msgid "Progress"
 msgstr "Progresso"
+
+msgid "Enter Edit Mode"
+msgstr "Entrar no modo de edição"
+
+msgid "Delete Selected"
+msgstr "Eliminar selecionados"
+
+msgid "Exit Edit Mode / Close Search"
+msgstr "Sair do modo de edição / Fechar pesquisa"

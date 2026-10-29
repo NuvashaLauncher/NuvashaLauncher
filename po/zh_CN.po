@@ -933,3 +933,12 @@ msgstr "正在获取更新"
 #: src/nuvashalauncher-content-page-ui.c
 msgid "Progress"
 msgstr "进度"
+
+msgid "Enter Edit Mode"
+msgstr "进入编辑模式"
+
+msgid "Delete Selected"
+msgstr "删除所选项"
+
+msgid "Exit Edit Mode / Close Search"
+msgstr "退出编辑模式 / 关闭搜索"

@@ -122,6 +122,8 @@ typedef struct
   gboolean saw_disallowed;
   gboolean saw_download_error;
   gboolean saw_hash_error;
+  char *last_download_url;
+  char *last_download_error;
   gboolean moved;
   nuvashalauncherModpackProgressFunc progress;
   gpointer progress_data; /* user_data both for the result and progress */
@@ -276,6 +278,8 @@ install_run_free (InstallRun *run)
   g_free (run->name);
   g_free (run->target);
   g_free (run->temp);
+  g_free (run->last_download_url);
+  g_free (run->last_download_error);
   g_free (run);
 }
 
@@ -494,6 +498,8 @@ install_next (InstallRun *run)
   run->saw_disallowed = FALSE;
   run->saw_download_error = FALSE;
   run->saw_hash_error = FALSE;
+  g_clear_pointer (&run->last_download_url, g_free);
+  g_clear_pointer (&run->last_download_error, g_free);
 
   dispatch_download (run);
 }
@@ -519,6 +525,16 @@ dispatch_download (InstallRun *run)
 {
   nuvashalauncherModpackFile *file = g_ptr_array_index (run->files, run->current);
   const char *url = NULL;
+
+  if (file->downloads == NULL || file->downloads->len == 0)
+    {
+      g_autoptr (GError) error = NULL;
+      g_set_error (&error, nuvashalauncher_MODPACK_ERROR,
+                   nuvashalauncher_MODPACK_ERROR_DOWNLOAD,
+                   "\"%s\" has no download URL", file->path);
+      install_fail (run, g_steal_pointer (&error));
+      return;
+    }
 
   while (run->attempt < file->downloads->len)
     {
@@ -546,7 +562,10 @@ dispatch_download (InstallRun *run)
         {
           g_set_error (&error, nuvashalauncher_MODPACK_ERROR,
                        nuvashalauncher_MODPACK_ERROR_DOWNLOAD,
-                       "\"%s\" could not be downloaded", file->path);
+                       "\"%s\" could not be downloaded from %s: %s",
+                       file->path,
+                       run->last_download_url != NULL ? run->last_download_url : "an available URL",
+                       run->last_download_error != NULL ? run->last_download_error : "unknown download error");
         }
       else if (run->saw_disallowed)
         {
@@ -593,10 +612,13 @@ dispatch_download (InstallRun *run)
         return;
       }
 
+       /* fileSize is advisory metadata and can become stale when a CDN
+        * republishes a file. The manifest hashes are authoritative, so do
+        * not reject a valid file before its checksum can be verified. */
        nuvashalauncher_task_scope_release_when_done (
        nuvashalauncher_download_file_limited_async (nuvashalauncher_downloads_get_service (), url, dest, NULL, 0,
-                                                    file->file_size, NULL, install_file_done,
-                                run),
+                                                     -1, NULL, install_file_done,
+                                 run),
       run->cancellable);
   }
 }
@@ -608,6 +630,11 @@ install_file_done (GObject *source G_GNUC_UNUSED,
 {
   InstallRun *run = user_data;
   g_autoptr (GError) error = NULL;
+  nuvashalauncherModpackFile *file =
+    g_ptr_array_index (run->files, run->current);
+  const char *failed_url = file->downloads != NULL && run->attempt < file->downloads->len
+                             ? g_ptr_array_index (file->downloads, run->attempt)
+                             : NULL;
 
   if (!nuvashalauncher_download_file_finish (result, &error))
     {
@@ -623,6 +650,10 @@ install_file_done (GObject *source G_GNUC_UNUSED,
         }
 
       run->saw_download_error = TRUE;
+      g_free (run->last_download_url);
+      run->last_download_url = g_strdup (failed_url);
+      g_free (run->last_download_error);
+      run->last_download_error = g_strdup (error->message);
 
       /* The next URL of the same file may work where the last did not. */
       run->attempt++;
@@ -631,7 +662,6 @@ install_file_done (GObject *source G_GNUC_UNUSED,
     }
 
   {
-    nuvashalauncherModpackFile *file = g_ptr_array_index (run->files, run->current);
     g_autofree char *dest = g_build_filename (run->temp, file->path, NULL);
 
     nuvashalauncher_task_scope_release_when_done (

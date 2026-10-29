@@ -944,3 +944,12 @@ msgstr "Aktualisierungen werden abgerufen"
 #: src/nuvashalauncher-content-page-ui.c
 msgid "Progress"
 msgstr "Fortschritt"
+
+msgid "Enter Edit Mode"
+msgstr "Bearbeitungsmodus aktivieren"
+
+msgid "Delete Selected"
+msgstr "Ausgewählte löschen"
+
+msgid "Exit Edit Mode / Close Search"
+msgstr "Bearbeitungsmodus verlassen / Suche schließen"

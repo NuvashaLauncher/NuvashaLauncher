@@ -71,6 +71,8 @@ struct _nuvashalauncherContentPage
     GtkBox *actions;
     GtkSearchEntry *search_bar;
     GtkSearchEntry *search_entry;
+    GtkButton *search_button;
+    GtkBox *search_spacer;
     AdwPreferencesGroup *group;
     GtkScrolledWindow *scroller;
     AdwStatusPage *status;
@@ -106,6 +108,7 @@ struct _nuvashalauncherContentPage
     GtkSearchEntry *search_bar;
     GtkBox *filter_box;
     GtkMenuButton *filter_button;
+    GtkPopover *filter_popover;
     GtkBox *loading_more; /* spinner row at the bottom of the list */
     GtkBox *retry_row;    /* inline retry row when a page fails */
     GtkLabel *retry_label;
@@ -146,6 +149,8 @@ struct _nuvashalauncherContentPage
 
 /* Internal page-construction callbacks shared with the UI module. */
 void nuvashalauncher_content_page_build_installed (nuvashalauncherContentPage *self);
+void nuvashalauncher_content_page_set_installed_search_visible (
+  nuvashalauncherContentPage *self, gboolean visible);
 void nuvashalauncher_content_page_build_browse (nuvashalauncherContentPage *self);
 void nuvashalauncher_content_page_build_bar (nuvashalauncherContentPage *self);
 void nuvashalauncher_content_page_move_actions_into_bar (nuvashalauncherContentPage *self,
@@ -154,7 +159,7 @@ void nuvashalauncher_content_page_move_actions_into_bar (nuvashalauncherContentP
 void nuvashalauncher_content_page_on_installed_search_changed (GtkEditable *editable,
                                                    gpointer user_data);
 void nuvashalauncher_content_page_on_update_all_clicked (GtkButton *button,
-                                              gpointer user_data);
+                                                        gpointer user_data);
 void nuvashalauncher_content_page_on_update_cancel (GtkButton *button,
                                             gpointer user_data);
 void nuvashalauncher_content_page_on_open_folder_clicked (GtkButton *button,
@@ -166,7 +171,7 @@ gboolean nuvashalauncher_content_page_on_search_key (GtkEventControllerKey *cont
                                          GdkModifierType state,
                                          gpointer user_data);
 void nuvashalauncher_content_page_on_filter_clicked (GtkWidget *popover,
-                                         gpointer user_data);
+                                          gpointer user_data);
 void nuvashalauncher_content_page_on_pick_button_clicked (GtkButton *button,
                                               gpointer user_data);
 void nuvashalauncher_content_page_on_retry_page_clicked (GtkButton *button,

@@ -905,3 +905,12 @@ msgstr "Mengambil pembaruan"
 #: src/nuvashalauncher-content-page-ui.c
 msgid "Progress"
 msgstr "Progres"
+
+msgid "Enter Edit Mode"
+msgstr "Masuk Mode Edit"
+
+msgid "Delete Selected"
+msgstr "Hapus yang Dipilih"
+
+msgid "Exit Edit Mode / Close Search"
+msgstr "Keluar dari Mode Edit / Tutup Pencarian"

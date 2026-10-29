@@ -22,6 +22,8 @@ struct _nuvashalauncherLogsPage
   GtkScrolledWindow *scroller;
   GtkSearchEntry *search_bar;
   GtkSearchEntry *search_entry;
+  GtkButton *search_button;
+  GtkBox *search_spacer;
 
   /* Number of rendered lines and whether the view follows the end. */
   guint rendered;
@@ -293,6 +295,24 @@ on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
     }
 }
 
+static void
+on_search_button_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  nuvashalauncherLogsPage *self = user_data;
+  gboolean visible = gtk_widget_get_visible (GTK_WIDGET (self->search_entry));
+
+  gtk_widget_set_visible (GTK_WIDGET (self->search_entry), !visible);
+  gtk_widget_set_hexpand (GTK_WIDGET (self->search_entry), !visible);
+  gtk_widget_set_hexpand (GTK_WIDGET (self->search_spacer), visible);
+  if (!visible)
+    gtk_widget_grab_focus (GTK_WIDGET (self->search_entry));
+  else
+    {
+      gtk_editable_set_text (GTK_EDITABLE (self->search_entry), "");
+      gtk_widget_grab_focus (GTK_WIDGET (self));
+    }
+}
+
 /* Escape means "forget what I typed". This bar can be closed as well, so
  * Escape does both and the focus goes back to the page: a bar closed with
  * words still in it looks like a search that is still on.
@@ -312,6 +332,8 @@ on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED, guint keyval,
   if (keyval == GDK_KEY_f && (state & GDK_CONTROL_MASK))
     {
       gtk_widget_set_visible (GTK_WIDGET (self->search_bar), TRUE);
+      gtk_widget_set_hexpand (GTK_WIDGET (self->search_entry), TRUE);
+      gtk_widget_set_hexpand (GTK_WIDGET (self->search_spacer), FALSE);
       gtk_widget_grab_focus (GTK_WIDGET (self->search_entry));
       return GDK_EVENT_STOP;
     }
@@ -319,17 +341,10 @@ on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED, guint keyval,
   if (keyval != GDK_KEY_Escape)
     return GDK_EVENT_PROPAGATE;
 
-  if (*gtk_editable_get_text (GTK_EDITABLE (self->search_entry)) != '\0')
-    {
-      gtk_editable_set_text (GTK_EDITABLE (self->search_entry), "");
-      self->filtered = FALSE;
-      show_lines (self);
-      self->following = TRUE;
-      scroll_to_end (self);
-    }
-
-  gtk_widget_set_visible (GTK_WIDGET (self->search_bar), TRUE);
-  gtk_widget_grab_focus (GTK_WIDGET (self->search_entry));
+  gtk_widget_set_visible (GTK_WIDGET (self->search_bar), FALSE);
+  gtk_widget_set_hexpand (GTK_WIDGET (self->search_entry), FALSE);
+  gtk_widget_set_hexpand (GTK_WIDGET (self->search_spacer), TRUE);
+  gtk_editable_set_text (GTK_EDITABLE (self->search_entry), "");
   gtk_widget_grab_focus (GTK_WIDGET (self));
 
   return GDK_EVENT_STOP;
@@ -555,22 +570,20 @@ nuvashalauncher_logs_page_new (nuvashalauncher *launcher)
 
   /* Searching the log: a bar over the lines, closed until Ctrl+F opens
    * it. The lines are kept either way, so nothing here can lose one. */
-   self->search_bar = GTK_SEARCH_ENTRY (gtk_search_entry_new ());
-   self->search_entry = self->search_bar;
-   gtk_widget_set_hexpand (GTK_WIDGET (self->search_entry), TRUE);
+    self->search_bar = GTK_SEARCH_ENTRY (gtk_search_entry_new ());
+     self->search_entry = self->search_bar;
+     self->search_button = GTK_BUTTON (gtk_button_new_from_icon_name ("system-search-symbolic"));
+    self->search_spacer = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
    gtk_widget_set_valign (GTK_WIDGET (self->search_entry), GTK_ALIGN_CENTER);
   gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (self->search_entry),
                                          _("Search the log"));
-    gtk_widget_set_visible (GTK_WIDGET (self->search_bar), TRUE);
+     gtk_widget_set_visible (GTK_WIDGET (self->search_bar), FALSE);
   g_signal_connect_object (self->search_entry, "changed",
                            G_CALLBACK (on_search_changed), self, 0);
-  {
-    GtkEventController *keys = gtk_event_controller_key_new ();
-
-    gtk_event_controller_set_propagation_phase (keys, GTK_PHASE_BUBBLE);
-     gtk_widget_add_controller (GTK_WIDGET (self->search_entry), keys);
-      g_signal_connect_object (keys, "key-pressed", G_CALLBACK (on_search_key), self, 0);
-   }
+   nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (self->search_button), _("Search"));
+   gtk_widget_set_valign (GTK_WIDGET (self->search_button), GTK_ALIGN_CENTER);
+   g_signal_connect (self->search_button, "clicked",
+                     G_CALLBACK (on_search_button_clicked), self);
    {
      GtkEventController *keys = gtk_event_controller_key_new ();
 
@@ -579,9 +592,14 @@ nuvashalauncher_logs_page_new (nuvashalauncher *launcher)
       g_signal_connect_object (keys, "key-pressed", G_CALLBACK (on_search_key), self, 0);
    }
 
-   gtk_widget_set_hexpand (GTK_WIDGET (self->search_bar), TRUE);
-   gtk_box_append (GTK_BOX (row), GTK_WIDGET (self->search_bar));
-   gtk_box_append (GTK_BOX (row), actions);
+    gtk_widget_set_hexpand (GTK_WIDGET (self->search_entry), FALSE);
+     gtk_box_append (GTK_BOX (row), GTK_WIDGET (self->search_button));
+     gtk_box_append (GTK_BOX (row), GTK_WIDGET (self->search_bar));
+    {
+      gtk_widget_set_hexpand (GTK_WIDGET (self->search_spacer), TRUE);
+      gtk_box_append (GTK_BOX (row), GTK_WIDGET (self->search_spacer));
+    }
+    gtk_box_append (GTK_BOX (row), actions);
    gtk_widget_set_hexpand (row, TRUE);
    gtk_box_append (GTK_BOX (inner), row);
 

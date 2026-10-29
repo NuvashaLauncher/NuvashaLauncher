@@ -155,7 +155,7 @@ nuvashalauncher_main_window_build_ui (nuvashalauncherMainWindow *self)
     gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
                                    GTK_WIDGET (self->downloads.list));
     gtk_popover_set_child (GTK_POPOVER (popover), GTK_WIDGET (scroller));
-    gtk_popover_set_has_arrow (GTK_POPOVER (popover), FALSE);
+     gtk_popover_set_has_arrow (GTK_POPOVER (popover), TRUE);
     gtk_menu_button_set_popover (GTK_MENU_BUTTON (self->downloads.button),
                                  GTK_WIDGET (popover));
 
