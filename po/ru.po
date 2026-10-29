@@ -941,3 +941,12 @@ msgstr "Получение обновлений"
 #: src/nuvashalauncher-content-page-ui.c
 msgid "Progress"
 msgstr "Прогресс"
+
+msgid "Enter Edit Mode"
+msgstr "Войти в режим редактирования"
+
+msgid "Delete Selected"
+msgstr "Удалить выбранное"
+
+msgid "Exit Edit Mode / Close Search"
+msgstr "Выйти из режима редактирования / Закрыть поиск"

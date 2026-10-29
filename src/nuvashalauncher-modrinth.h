@@ -60,6 +60,7 @@ typedef enum {
   nuvashalauncher_CONTENT_RESOURCE_PACK,
   nuvashalauncher_CONTENT_SHADER_PACK,
   nuvashalauncher_CONTENT_DATAPACK,
+  nuvashalauncher_CONTENT_MODPACK,
 } nuvashalauncherContentType;
 
 /* What Modrinth calls this kind of content in a facet: "mod", "resourcepack",
@@ -120,6 +121,9 @@ typedef struct {
   char *minecraft_version;
   char *loader;           /* "fabric", "forge", ... or NULL */
   GPtrArray *categories;  /* (element-free) const char* */
+  GPtrArray *minecraft_versions; /* (element-free) const char* */
+  GPtrArray *loaders;      /* (element-free) const char* */
+  char *sort;              /* relevance, downloads, newest, updated, follows */
   guint offset;
   guint limit;
 } nuvashalauncherModrinthSearch;

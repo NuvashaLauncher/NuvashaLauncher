@@ -24,6 +24,31 @@ toolbar_button (const char *icon_name, const char *label, GCallback callback,
   return GTK_WIDGET (button);
 }
 
+void
+nuvashalauncher_content_page_set_installed_search_visible (
+  nuvashalauncherContentPage *self, gboolean visible)
+{
+  gtk_widget_set_visible (GTK_WIDGET (self->installed.search_entry), visible);
+  gtk_widget_set_hexpand (GTK_WIDGET (self->installed.search_entry), visible);
+  gtk_widget_set_hexpand (GTK_WIDGET (self->installed.search_spacer), !visible);
+  if (visible)
+    gtk_widget_grab_focus (GTK_WIDGET (self->installed.search_entry));
+  else
+    {
+      gtk_editable_set_text (GTK_EDITABLE (self->installed.search_entry), "");
+      gtk_widget_grab_focus (GTK_WIDGET (self));
+    }
+}
+
+static void
+on_installed_search_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  nuvashalauncherContentPage *self = user_data;
+
+  nuvashalauncher_content_page_set_installed_search_visible (
+    self, !gtk_widget_get_visible (GTK_WIDGET (self->installed.search_entry)));
+}
+
 
 /* ---------------------------------------------------------- *
  * Building the page
@@ -35,6 +60,8 @@ nuvashalauncher_content_page_build_installed (nuvashalauncherContentPage *self)
   GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
    GtkBox *actions = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
    GtkSearchEntry *search_bar = GTK_SEARCH_ENTRY (gtk_search_entry_new ());
+   GtkButton *search_button = GTK_BUTTON (gtk_button_new_from_icon_name ("system-search-symbolic"));
+   GtkBox *actions_spacer = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
   GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
   GtkBox *content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   AdwSpinner *loading = ADW_SPINNER (adw_spinner_new ());
@@ -63,14 +90,22 @@ nuvashalauncher_content_page_build_installed (nuvashalauncherContentPage *self)
 
    gtk_widget_set_hexpand (GTK_WIDGET (actions), TRUE);
    self->installed.search_bar = GTK_SEARCH_ENTRY (search_bar);
-   self->installed.search_entry = GTK_SEARCH_ENTRY (search_bar);
-   gtk_widget_set_hexpand (GTK_WIDGET (search_bar), TRUE);
+    self->installed.search_entry = GTK_SEARCH_ENTRY (search_bar);
+     self->installed.search_button = search_button;
+    self->installed.search_spacer = actions_spacer;
     gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_bar),
                                             _("Search"));
-     gtk_widget_set_visible (GTK_WIDGET (search_bar), TRUE);
+      gtk_widget_set_visible (GTK_WIDGET (search_bar), FALSE);
     g_signal_connect_object (search_bar, "changed",
                              G_CALLBACK (nuvashalauncher_content_page_on_installed_search_changed), self, 0);
-     gtk_box_append (GTK_BOX (actions), GTK_WIDGET (search_bar));
+      nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (search_button), _("Search"));
+      gtk_widget_set_valign (GTK_WIDGET (search_button), GTK_ALIGN_CENTER);
+      g_signal_connect (search_button, "clicked",
+                        G_CALLBACK (on_installed_search_clicked), self);
+      gtk_box_append (GTK_BOX (actions), GTK_WIDGET (search_button));
+      gtk_box_append (GTK_BOX (actions), GTK_WIDGET (search_bar));
+      gtk_widget_set_hexpand (GTK_WIDGET (actions_spacer), TRUE);
+      gtk_box_append (GTK_BOX (actions), GTK_WIDGET (actions_spacer));
 
      gtk_button_set_child (update_all, GTK_WIDGET (update_content));
      nuvashalauncher_ui_set_action_label (GTK_WIDGET (update_all), _("Update All"));
@@ -79,10 +114,8 @@ nuvashalauncher_content_page_build_installed (nuvashalauncherContentPage *self)
    gtk_stack_add_named (update_content, GTK_WIDGET (update_icon), "icon");
    gtk_stack_add_named (update_content, GTK_WIDGET (update_spinner), "spinner");
    gtk_stack_set_visible_child_name (update_content, "icon");
-     /* Keep the popover owned by the action row rather than by the button.
-      * This lets the page tear it down before its button is finalized. */
-     gtk_widget_set_parent (GTK_WIDGET (update_popover), GTK_WIDGET (actions));
-     gtk_widget_set_visible (GTK_WIDGET (update_popover), FALSE);
+      gtk_widget_set_parent (GTK_WIDGET (update_popover), GTK_WIDGET (actions));
+      gtk_widget_set_visible (GTK_WIDGET (update_popover), FALSE);
     gtk_label_set_text (update_title, _("Fetching updates"));
      gtk_label_set_text (update_phase, _("Progress"));
     nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (update_cancel), _("Cancel"));
@@ -96,7 +129,7 @@ nuvashalauncher_content_page_build_installed (nuvashalauncherContentPage *self)
      gtk_widget_set_size_request (GTK_WIDGET (update_scroller), 320, -1);
     gtk_scrolled_window_set_child (update_scroller, GTK_WIDGET (update_box));
     gtk_popover_set_child (update_popover, GTK_WIDGET (update_scroller));
-   gtk_popover_set_has_arrow (update_popover, FALSE);
+    gtk_popover_set_has_arrow (update_popover, TRUE);
    self->installed.update_content = update_content;
    self->installed.update_spinner = update_spinner;
    self->installed.update_popover = update_popover;
@@ -106,7 +139,7 @@ nuvashalauncher_content_page_build_installed (nuvashalauncherContentPage *self)
    self->installed.update_count = update_count;
    self->installed.update_bar = update_bar;
     self->installed.update_cancel = update_cancel;
-   self->installed.update_all = update_all;
+    self->installed.update_all = update_all;
    gtk_widget_set_sensitive (GTK_WIDGET (self->installed.update_all), FALSE);
   gtk_box_append (GTK_BOX (actions), GTK_WIDGET (self->installed.update_all));
   gtk_box_append (GTK_BOX (actions),
@@ -224,13 +257,10 @@ nuvashalauncher_content_page_reset_for_tab_switch (nuvashalauncherContentPage *s
 {
   g_return_if_fail (nuvashalauncher_IS_CONTENT_PAGE (self));
 
-  if (self->browse.filter_button != NULL)
-    {
-      GtkPopover *popover = gtk_menu_button_get_popover (
-        self->browse.filter_button);
-      if (popover != NULL)
-        gtk_popover_popdown (popover);
-    }
+   if (self->browse.filter_popover != NULL)
+     {
+       gtk_popover_popdown (self->browse.filter_popover);
+     }
 
   nuvashalauncher_content_page_close_detail (self);
   if (self->stack != NULL)
@@ -248,6 +278,7 @@ nuvashalauncher_content_page_build_browse (nuvashalauncherContentPage *self)
    GtkSearchEntry *search_bar = GTK_SEARCH_ENTRY (gtk_search_entry_new ());
   GtkMenuButton *filter_button = GTK_MENU_BUTTON (gtk_menu_button_new ());
   GtkPopover *popover = GTK_POPOVER (gtk_popover_new ());
+  GtkOverlay *search_overlay = GTK_OVERLAY (gtk_overlay_new ());
   GtkBox *filter_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   GtkScrolledWindow *filter_scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
   GtkBox *content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
@@ -288,26 +319,28 @@ nuvashalauncher_content_page_build_browse (nuvashalauncherContentPage *self)
                              G_CALLBACK (nuvashalauncher_content_page_on_search_key), self, 0);
   }
 
-  gtk_box_append (GTK_BOX (top), GTK_WIDGET (search_bar));
-
-  gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (filter_button),
-                                 "view-more-symbolic");
-  nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (filter_button),
-                                  _("Filter by category"));
-  gtk_widget_set_valign (GTK_WIDGET (filter_button), GTK_ALIGN_CENTER);
-  gtk_menu_button_set_popover (GTK_MENU_BUTTON (filter_button), GTK_WIDGET (popover));
+   gtk_menu_button_set_icon_name (filter_button, "view-more-symbolic");
+   nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (filter_button),
+                                            _("Filter by category"));
+   gtk_widget_set_halign (GTK_WIDGET (filter_button), GTK_ALIGN_END);
+   gtk_widget_set_valign (GTK_WIDGET (filter_button), GTK_ALIGN_CENTER);
+   gtk_overlay_set_child (search_overlay, GTK_WIDGET (search_bar));
+   gtk_widget_set_hexpand (GTK_WIDGET (search_overlay), TRUE);
+   gtk_overlay_add_overlay (search_overlay, GTK_WIDGET (filter_button));
+   gtk_menu_button_set_popover (filter_button, GTK_WIDGET (popover));
+   gtk_box_append (GTK_BOX (top), GTK_WIDGET (search_overlay));
   /* A click opens the popover but does not emit "activate" on the
      menu button, so the load hangs off the popover's "show" instead. */
-  g_signal_connect_object (popover, "show",
-                           G_CALLBACK (nuvashalauncher_content_page_on_filter_clicked), self, 0);
-  gtk_box_append (GTK_BOX (top), GTK_WIDGET (filter_button));
+   g_signal_connect_object (popover, "show",
+                            G_CALLBACK (nuvashalauncher_content_page_on_filter_clicked), self, 0);
 
   /* The row takes the room the bar has, the search inside it takes most
      of that, and the filter and the switcher sit at its right. */
   gtk_widget_set_hexpand (GTK_WIDGET (top), TRUE);
 
    self->browse.filter_box = GTK_BOX (filter_box);
-   self->browse.filter_button = filter_button;
+     self->browse.filter_button = filter_button;
+   self->browse.filter_popover = popover;
   gtk_widget_set_margin_top (GTK_WIDGET (filter_box), 6);
   gtk_widget_set_margin_bottom (GTK_WIDGET (filter_box), 6);
   gtk_widget_set_margin_start (GTK_WIDGET (filter_box), 6);

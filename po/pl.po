@@ -941,3 +941,12 @@ msgstr "Pobieranie aktualizacji"
 #: src/nuvashalauncher-content-page-ui.c
 msgid "Progress"
 msgstr "Postęp"
+
+msgid "Enter Edit Mode"
+msgstr "Wejdź w tryb edycji"
+
+msgid "Delete Selected"
+msgstr "Usuń zaznaczone"
+
+msgid "Exit Edit Mode / Close Search"
+msgstr "Wyjdź z trybu edycji / Zamknij wyszukiwanie"

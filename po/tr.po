@@ -942,3 +942,12 @@ msgstr "Güncellemeler alınıyor"
 #: src/nuvashalauncher-content-page-ui.c
 msgid "Progress"
 msgstr "İlerleme"
+
+msgid "Enter Edit Mode"
+msgstr "Düzenleme Moduna Gir"
+
+msgid "Delete Selected"
+msgstr "Seçilenleri Sil"
+
+msgid "Exit Edit Mode / Close Search"
+msgstr "Düzenleme Modundan Çık / Aramayı Kapat"

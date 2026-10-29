@@ -151,6 +151,34 @@ test_search_url_paginates (void)
 }
 
 static void
+test_modpack_filters_are_or_groups_and_sort (void)
+{
+  g_autoptr (nuvashalauncherModrinthSearch) search =
+    search_new (nuvashalauncher_CONTENT_MODPACK, "pack", NULL, NULL);
+  g_autofree char *facets = NULL;
+  g_autofree char *url = NULL;
+
+  search->minecraft_versions = g_ptr_array_new_with_free_func (g_free);
+  g_ptr_array_add (search->minecraft_versions, g_strdup ("1.20.1"));
+  g_ptr_array_add (search->minecraft_versions, g_strdup ("1.21.1"));
+  search->loaders = g_ptr_array_new_with_free_func (g_free);
+  g_ptr_array_add (search->loaders, g_strdup ("fabric"));
+  g_ptr_array_add (search->loaders, g_strdup ("neoforge"));
+  search->sort = g_strdup ("updated");
+  search->offset = 40;
+  search->limit = 20;
+
+  facets = nuvashalauncher_modrinth_facets (search);
+  g_assert_cmpstr (facets, ==,
+    "[[\"project_type:modpack\"],[\"versions:1.20.1\",\"versions:1.21.1\"],"
+    "[\"categories:fabric\",\"categories:neoforge\"]]");
+  url = nuvashalauncher_modrinth_search_url (search);
+  g_assert_nonnull (strstr (url, "index=updated"));
+  g_assert_nonnull (strstr (url, "offset=40"));
+  g_print ("ok - modpack versions and loaders preserve facet grouping and sorting\n");
+}
+
+static void
 test_search_results (void)
 {
   g_autofree char *json = read_fixture ("modrinth-search-mods.json");
@@ -510,6 +538,7 @@ main (int argc, char **argv)
   g_test_add_func ("/modrinth/category_labels", test_category_labels);
   g_test_add_func ("/modrinth/facets_with_categories", test_facets_with_categories);
   g_test_add_func ("/modrinth/search_url_paginates", test_search_url_paginates);
+  g_test_add_func ("/modrinth/modpack_filters", test_modpack_filters_are_or_groups_and_sort);
   g_test_add_func ("/modrinth/search_results", test_search_results);
   g_test_add_func ("/modrinth/search_without_hits", test_search_without_hits);
   g_test_add_func ("/modrinth/search_rejects_malformed_hit", test_search_rejects_malformed_hit);

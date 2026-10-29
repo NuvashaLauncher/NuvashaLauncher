@@ -944,3 +944,12 @@ msgstr "Recupero degli aggiornamenti"
 #: src/nuvashalauncher-content-page-ui.c
 msgid "Progress"
 msgstr "Avanzamento"
+
+msgid "Enter Edit Mode"
+msgstr "Entra in modalità modifica"
+
+msgid "Delete Selected"
+msgstr "Elimina selezionati"
+
+msgid "Exit Edit Mode / Close Search"
+msgstr "Esci dalla modalità modifica / Chiudi ricerca"

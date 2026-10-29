@@ -905,3 +905,12 @@ msgstr "Haetaan päivityksiä"
 #: src/nuvashalauncher-content-page-ui.c
 msgid "Progress"
 msgstr "Edistyminen"
+
+msgid "Enter Edit Mode"
+msgstr "Siirry muokkaustilaan"
+
+msgid "Delete Selected"
+msgstr "Poista valitut"
+
+msgid "Exit Edit Mode / Close Search"
+msgstr "Poistu muokkaustilasta / Sulje haku"

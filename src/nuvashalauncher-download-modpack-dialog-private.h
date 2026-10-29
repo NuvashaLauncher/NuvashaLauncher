@@ -31,6 +31,14 @@ struct _nuvashalauncherDownloadModpackDialog
 
   /* Browse page widgets. */
   GtkSearchEntry *search_entry;
+  GtkDropDown *filter_version_dropdown;
+  GtkStringList *filter_version_model;
+  nuvashalauncherTaskScope *version_catalog;
+  GtkMenuButton *filter_button;
+  GtkPopover *filter_popover;
+  GPtrArray *filter_versions; /* selected strings */
+  GPtrArray *filter_loaders;  /* selected strings */
+  char *sort;
   AdwStatusPage *results_status;
   AdwViewStack *results_stack; /* one state at a time: loading, results,
                                   empty or error */

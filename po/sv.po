@@ -905,3 +905,12 @@ msgstr "Hämtar uppdateringar"
 #: src/nuvashalauncher-content-page-ui.c
 msgid "Progress"
 msgstr "Förlopp"
+
+msgid "Enter Edit Mode"
+msgstr "Gå in i redigeringsläge"
+
+msgid "Delete Selected"
+msgstr "Ta bort markerade"
+
+msgid "Exit Edit Mode / Close Search"
+msgstr "Avsluta redigeringsläge / Stäng sökning"

@@ -11,6 +11,7 @@
 #include "nuvashalauncher-markdown.h"
 #include "nuvashalauncher-modpack.h"
 #include "nuvashalauncher-modrinth.h"
+#include "nuvashalauncher-minecraft-versions.h"
 #include "nuvashalauncher-task.h"
 #include <json-glib/json-glib.h>
 #include <string.h>
@@ -20,6 +21,123 @@
 
 static void run_search (nuvashalauncherDownloadModpackDialog *self, gboolean append);
 static void on_search_done (GObject *, GAsyncResult *, gpointer);
+static void on_modpack_filter_changed (GtkWidget *, gpointer);
+
+typedef struct {
+  nuvashalauncherDownloadModpackDialog *dialog;
+} VersionCatalogAsk;
+
+static void
+version_catalog_ask_free (VersionCatalogAsk *ask)
+{
+  g_object_unref (ask->dialog);
+  g_free (ask);
+}
+
+static VersionCatalogAsk *
+version_catalog_ask_new (nuvashalauncherDownloadModpackDialog *dialog)
+{
+  VersionCatalogAsk *ask = g_new0 (VersionCatalogAsk, 1);
+  ask->dialog = g_object_ref (dialog);
+  return ask;
+}
+
+static void
+on_version_catalog_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                          gpointer user_data)
+{
+  VersionCatalogAsk *ask = user_data;
+  nuvashalauncherDownloadModpackDialog *self = ask->dialog;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (nuvashalauncherVersionManifest) manifest =
+    nuvashalauncher_version_manifest_fetch_finish (result, &error);
+
+  if (manifest != NULL && self->filter_version_model != NULL)
+    {
+      for (guint i = 0; i < manifest->entries->len; i++)
+        {
+          const nuvashalauncherVersionEntry *entry =
+            g_ptr_array_index (manifest->entries, i);
+
+          if (entry->type == nuvashalauncher_MC_TYPE_RELEASE)
+            gtk_string_list_append (self->filter_version_model, entry->id);
+        }
+
+    }
+
+  version_catalog_ask_free (ask);
+}
+
+static void
+on_modpack_version_changed (GObject *object G_GNUC_UNUSED,
+                            GParamSpec *pspec G_GNUC_UNUSED,
+                            gpointer user_data)
+{
+  nuvashalauncherDownloadModpackDialog *self = user_data;
+  guint selected = gtk_drop_down_get_selected (self->filter_version_dropdown);
+
+  g_ptr_array_set_size (self->filter_versions, 0);
+  if (selected > 0)
+    g_ptr_array_add (self->filter_versions, g_strdup (
+      gtk_string_list_get_string (self->filter_version_model, selected)));
+
+  on_modpack_filter_changed (NULL, self);
+}
+
+static void
+on_modpack_filter_changed (GtkWidget *widget G_GNUC_UNUSED, gpointer user_data)
+{
+  nuvashalauncherDownloadModpackDialog *self = user_data;
+  self->offset = 0;
+  run_search (self, FALSE);
+}
+
+static void
+on_modpack_sort_changed (GObject *object G_GNUC_UNUSED, GParamSpec *pspec G_GNUC_UNUSED,
+                         gpointer user_data)
+{
+  nuvashalauncherDownloadModpackDialog *self = user_data;
+  GtkDropDown *drop = GTK_DROP_DOWN (object);
+  const char *label = gtk_string_list_get_string (
+    GTK_STRING_LIST (gtk_drop_down_get_model (drop)),
+    gtk_drop_down_get_selected (drop));
+  const char *sort = g_strcmp0 (label, "Downloads") == 0 ? "downloads" :
+                     g_strcmp0 (label, "Newest") == 0 ? "newest" :
+                     g_strcmp0 (label, "Recently updated") == 0 ? "updated" :
+                     g_strcmp0 (label, "Followers") == 0 ? "follows" : "relevance";
+  g_free (self->sort);
+  self->sort = g_strdup (sort);
+  on_modpack_filter_changed (NULL, self);
+}
+
+static void
+on_modpack_filter_toggled (GtkCheckButton *button, gpointer user_data)
+{
+  nuvashalauncherDownloadModpackDialog *self = user_data;
+  GPtrArray *values = g_object_get_data (G_OBJECT (button), "filter-values");
+  const char *value = g_object_get_data (G_OBJECT (button), "filter-value");
+
+  if (gtk_check_button_get_active (button))
+    g_ptr_array_add (values, g_strdup (value));
+  else
+    for (guint i = 0; i < values->len; i++)
+      if (g_strcmp0 (g_ptr_array_index (values, i), value) == 0)
+        { g_ptr_array_remove_index (values, i); break; }
+
+  on_modpack_filter_changed (GTK_WIDGET (button), self);
+}
+
+static GtkWidget *
+filter_check (const char *label, const char *value, GPtrArray *values,
+             nuvashalauncherDownloadModpackDialog *self)
+{
+  GtkCheckButton *button = GTK_CHECK_BUTTON (gtk_check_button_new_with_label (label));
+  gtk_widget_add_css_class (GTK_WIDGET (button), "flat");
+  g_object_set_data (G_OBJECT (button), "filter-value", (gpointer) value);
+  g_object_set_data (G_OBJECT (button), "filter-values", values);
+  g_signal_connect (button, "toggled", G_CALLBACK (on_modpack_filter_toggled), self);
+  return GTK_WIDGET (button);
+}
 
 /* ---------------------------------------------------------- *
  * The browser page
@@ -286,9 +404,9 @@ run_search (nuvashalauncherDownloadModpackDialog *self, gboolean append)
 {
   const char *query =
     gtk_editable_get_text (GTK_EDITABLE (self->search_entry));
-  g_autofree char *escaped_query = NULL;
-  g_autofree char *escaped_facets = NULL;
   g_autofree char *url = NULL;
+  g_autoptr (nuvashalauncherModrinthSearch) search =
+    g_new0 (nuvashalauncherModrinthSearch, 1);
   typedef struct {
     nuvashalauncherDownloadModpackDialog *dialog;
     guint generation;
@@ -330,21 +448,17 @@ run_search (nuvashalauncherDownloadModpackDialog *self, gboolean append)
       gtk_widget_set_visible (GTK_WIDGET (self->retry_row), FALSE);
     }
 
-  escaped_query =
-    g_uri_escape_string (query != NULL ? query : "", NULL, FALSE);
-  escaped_facets = g_uri_escape_string ("[[\"project_type:modpack\"]]",
-                                        NULL, FALSE);
-
-  /* Empty searches show popular packs ordered by downloads. */
-  if (query == NULL || *query == '\0')
-    url = g_strdup_printf (
-      nuvashalauncher_MODRINTH_URL "/search?query=%s&facets=%s&index=downloads"
-                       "&offset=%u&limit=%u",
-      escaped_query, escaped_facets, self->offset, RESULTS_PER_PAGE);
-  else
-    url = g_strdup_printf (
-      nuvashalauncher_MODRINTH_URL "/search?query=%s&facets=%s&offset=%u&limit=%u",
-      escaped_query, escaped_facets, self->offset, RESULTS_PER_PAGE);
+  search->type = nuvashalauncher_CONTENT_MODPACK;
+  search->query = g_strdup (query != NULL ? query : "");
+  search->minecraft_versions = self->filter_versions != NULL
+    ? g_ptr_array_ref (self->filter_versions) : NULL;
+  search->loaders = self->filter_loaders != NULL
+    ? g_ptr_array_ref (self->filter_loaders) : NULL;
+  search->sort = g_strdup (self->sort != NULL ? self->sort :
+                           (query == NULL || *query == '\0' ? "downloads" : "relevance"));
+  search->offset = self->offset;
+  search->limit = RESULTS_PER_PAGE;
+  url = nuvashalauncher_modrinth_search_url (search);
 
   /* The callback holds a reference, so closing the dialog while a search
    * is in flight finalizes it, and a callback that then reads self would
@@ -476,6 +590,8 @@ build_browse_page (nuvashalauncherDownloadModpackDialog *self, gboolean start_se
   GtkLabel *retry_label = GTK_LABEL (gtk_builder_get_object (states_builder, "retry_label"));
   GtkButton *retry_button = GTK_BUTTON (gtk_builder_get_object (states_builder, "retry_button"));
 
+  gtk_widget_set_hexpand (GTK_WIDGET (top), TRUE);
+
   /* Exactly one of these is shown at any moment: the list, the words for
      an empty answer, the error, or the spinner while the first page is
      on its way. A status page that stayed under the results was the bug
@@ -494,6 +610,61 @@ build_browse_page (nuvashalauncherDownloadModpackDialog *self, gboolean start_se
     toolbar_builder, "search-entry"));
   g_signal_connect_object (self->search_entry, "changed",
                            G_CALLBACK (on_search_changed), self, 0);
+
+  self->filter_versions = g_ptr_array_new_with_free_func (g_free);
+  self->filter_loaders = g_ptr_array_new_with_free_func (g_free);
+  self->sort = NULL;
+  {
+    GtkBox *toolbar = GTK_BOX (gtk_widget_get_last_child (GTK_WIDGET (top)));
+    GtkMenuButton *button = GTK_MENU_BUTTON (gtk_menu_button_new ());
+    GtkPopover *popover = GTK_POPOVER (gtk_popover_new ());
+    GtkOverlay *search_overlay = GTK_OVERLAY (gtk_overlay_new ());
+    GtkBox *filters = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
+    GtkStringList *version_model = gtk_string_list_new ((const char *[]) {
+      "All Versions", NULL });
+    GtkDropDown *version_dropdown = GTK_DROP_DOWN (
+      gtk_drop_down_new (G_LIST_MODEL (version_model), NULL));
+    GtkStringList *sort_model = gtk_string_list_new ((const char *[]) {
+      "Downloads", "Relevance", "Newest", "Recently updated", "Followers", NULL });
+    GtkDropDown *sort = GTK_DROP_DOWN (gtk_drop_down_new (G_LIST_MODEL (sort_model), NULL));
+
+    gtk_menu_button_set_icon_name (button, "view-more-symbolic");
+    nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (button), "Filter modpacks");
+    gtk_widget_set_hexpand (GTK_WIDGET (version_dropdown), TRUE);
+    gtk_drop_down_set_enable_search (version_dropdown, TRUE);
+    gtk_widget_set_margin_start (GTK_WIDGET (filters), 8);
+    gtk_widget_set_margin_end (GTK_WIDGET (filters), 8);
+    gtk_widget_set_margin_top (GTK_WIDGET (filters), 8);
+    gtk_widget_set_margin_bottom (GTK_WIDGET (filters), 8);
+    gtk_box_append (filters, GTK_WIDGET (version_dropdown));
+    gtk_box_append (filters, filter_check ("Fabric", "fabric", self->filter_loaders, self));
+    gtk_box_append (filters, filter_check ("Forge", "forge", self->filter_loaders, self));
+    gtk_box_append (filters, filter_check ("NeoForge", "neoforge", self->filter_loaders, self));
+    gtk_box_append (filters, filter_check ("Quilt", "quilt", self->filter_loaders, self));
+    gtk_box_append (filters, GTK_WIDGET (sort));
+    gtk_menu_button_set_popover (button, GTK_WIDGET (popover));
+    gtk_popover_set_child (popover, GTK_WIDGET (filters));
+    g_signal_connect (sort, "notify::selected", G_CALLBACK (on_modpack_sort_changed), self);
+    gtk_box_remove (toolbar, GTK_WIDGET (self->search_entry));
+    gtk_widget_set_hexpand (GTK_WIDGET (toolbar), TRUE);
+    gtk_overlay_set_child (search_overlay, GTK_WIDGET (self->search_entry));
+    gtk_overlay_add_overlay (search_overlay, GTK_WIDGET (button));
+    gtk_widget_set_halign (GTK_WIDGET (button), GTK_ALIGN_END);
+    gtk_widget_set_valign (GTK_WIDGET (button), GTK_ALIGN_CENTER);
+    gtk_widget_set_hexpand (GTK_WIDGET (search_overlay), TRUE);
+    gtk_widget_set_halign (GTK_WIDGET (search_overlay), GTK_ALIGN_FILL);
+    gtk_box_append (toolbar, GTK_WIDGET (search_overlay));
+    self->filter_button = button;
+    self->filter_popover = popover;
+    self->filter_version_model = version_model;
+    self->filter_version_dropdown = version_dropdown;
+    g_signal_connect (version_dropdown, "notify::selected",
+                      G_CALLBACK (on_modpack_version_changed), self);
+
+    self->version_catalog = nuvashalauncher_version_manifest_fetch_async (
+      nuvashalauncher_VERSION_MANIFEST_URL, on_version_catalog_ready,
+      version_catalog_ask_new (self));
+  }
 
   gtk_box_append (GTK_BOX (root), GTK_WIDGET (top));
 

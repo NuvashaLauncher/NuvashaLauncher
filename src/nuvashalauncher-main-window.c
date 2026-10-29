@@ -26,14 +26,36 @@ static gboolean
 on_main_window_key_pressed (GtkEventControllerKey *controller G_GNUC_UNUSED,
                             guint keyval,
                             guint keycode G_GNUC_UNUSED,
-                            GdkModifierType state G_GNUC_UNUSED,
+                            GdkModifierType state,
                             gpointer user_data)
 {
   nuvashalauncherMainWindow *self = user_data;
+  GtkWidget *focus = gtk_window_get_focus (GTK_WINDOW (self));
+
+  /* Let text fields and other controls keep their own Ctrl-key behavior. */
+  if (focus != NULL && GTK_IS_EDITABLE (focus))
+    return FALSE;
 
   if (keyval == GDK_KEY_Escape && self->ui.edit_mode)
     {
       set_instance_edit_mode (self);
+      return TRUE;
+    }
+
+  if (g_strcmp0 (adw_view_stack_get_visible_child_name (self->ui.stack),
+                 "instances") != 0 || !(state & GDK_CONTROL_MASK))
+    return FALSE;
+
+  if (keyval == GDK_KEY_e && !self->ui.edit_mode)
+    {
+      set_instance_edit_mode (self);
+      return TRUE;
+    }
+
+  if (keyval == GDK_KEY_d && self->ui.edit_mode &&
+      g_hash_table_size (self->ui.selected_instances) > 0)
+    {
+      bulk_delete_instances (self);
       return TRUE;
     }
 
@@ -313,6 +335,7 @@ nuvashalauncher_main_window_init (nuvashalauncherMainWindow *self)
                            G_CALLBACK (on_window_close_request), self, 0);
   {
     GtkEventController *keys = gtk_event_controller_key_new ();
+    gtk_event_controller_set_propagation_phase (keys, GTK_PHASE_CAPTURE);
     g_signal_connect (keys, "key-pressed",
                       G_CALLBACK (on_main_window_key_pressed), self);
     gtk_widget_add_controller (GTK_WIDGET (self), keys);

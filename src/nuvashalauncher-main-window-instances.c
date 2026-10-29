@@ -30,6 +30,18 @@ dialog_of_instance (nuvashalauncherMainWindow *self, const char *id)
   return g_hash_table_lookup (self->model->instance_dialogs, id);
 }
 
+static gboolean
+restore_instance_list_focus (gpointer user_data)
+{
+  nuvashalauncherMainWindow *self = user_data;
+
+  if (self->ui.instances != NULL)
+    gtk_widget_grab_focus (GTK_WIDGET (self->ui.instances));
+
+  g_object_unref (self);
+  return G_SOURCE_REMOVE;
+}
+
 /* A dialog that was closed is not open any more. AdwDialog emits this
    while it is still alive, so the borrowed pointer leaves the table
    before the dialog is freed. */
@@ -43,6 +55,10 @@ on_instance_dialog_closed (AdwDialog *dialog, gpointer user_data)
    * as well, so large content lists and their decoded textures are released
    * immediately instead of waiting for the dialog object to be finalized. */
   adw_dialog_set_child (dialog, NULL);
+  /* Settings pages contain editable controls. Restore focus to the instance
+   * list so window-level shortcuts such as Ctrl+A are handled by the launcher
+   * rather than by the former settings entry. */
+  g_idle_add (restore_instance_list_focus, g_object_ref (self));
 
   if (id != NULL)
     {

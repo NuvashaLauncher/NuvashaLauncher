@@ -43,6 +43,8 @@ nuvashalauncher_content_type_to_string (nuvashalauncherContentType type)
       return "shader";
     case nuvashalauncher_CONTENT_DATAPACK:
       return "datapack";
+    case nuvashalauncher_CONTENT_MODPACK:
+      return "modpack";
     case nuvashalauncher_CONTENT_MOD:
     default:
       return "mod";
@@ -378,6 +380,9 @@ nuvashalauncher_modrinth_search_free (nuvashalauncherModrinthSearch *search)
   g_free (search->minecraft_version);
   g_free (search->loader);
   g_clear_pointer (&search->categories, g_ptr_array_unref);
+  g_clear_pointer (&search->minecraft_versions, g_ptr_array_unref);
+  g_clear_pointer (&search->loaders, g_ptr_array_unref);
+  g_free (search->sort);
   g_free (search);
 }
 
@@ -434,11 +439,29 @@ nuvashalauncher_modrinth_facets (const nuvashalauncherModrinthSearch *search)
   if (search->minecraft_version != NULL && *search->minecraft_version != '\0')
     facet_add (facets, "versions", search->minecraft_version);
 
+  if (search->minecraft_versions != NULL && search->minecraft_versions->len > 0)
+    {
+      GPtrArray *inner = g_ptr_array_new_with_free_func (g_free);
+      for (guint i = 0; i < search->minecraft_versions->len; i++)
+        g_ptr_array_add (inner, g_strdup_printf ("versions:%s",
+                          (char *) g_ptr_array_index (search->minecraft_versions, i)));
+      g_ptr_array_add (facets, g_steal_pointer (&inner));
+    }
+
   /* Only a mod is narrowed by loader: the game loads a resource pack
    * and a shader pack itself, whatever runs it. */
   if (nuvashalauncher_content_type_needs_loader (search->type) && search->loader != NULL &&
       *search->loader != '\0')
     facet_add_loaders (facets, search->loader);
+
+  if (search->loaders != NULL && search->loaders->len > 0)
+    {
+      GPtrArray *inner = g_ptr_array_new_with_free_func (g_free);
+      for (guint i = 0; i < search->loaders->len; i++)
+        g_ptr_array_add (inner, g_strdup_printf ("categories:%s",
+                          (char *) g_ptr_array_index (search->loaders, i)));
+      g_ptr_array_add (facets, g_steal_pointer (&inner));
+    }
 
   if (search->categories != NULL)
     {
@@ -486,6 +509,11 @@ nuvashalauncher_modrinth_search_url (const nuvashalauncherModrinthSearch *search
   query = g_uri_escape_string (search->query != NULL ? search->query : "",
                               NULL, FALSE);
   escaped = g_uri_escape_string (facets, NULL, FALSE);
+
+  if (search->sort != NULL && *search->sort != '\0')
+    return g_strdup_printf (
+        nuvashalauncher_MODRINTH_URL "/search?query=%s&facets=%s&index=%s&offset=%u&limit=%u", query,
+        escaped, search->sort, search->offset, search->limit > 0 ? search->limit : 20);
 
   return g_strdup_printf (
       nuvashalauncher_MODRINTH_URL "/search?query=%s&facets=%s&offset=%u&limit=%u", query,

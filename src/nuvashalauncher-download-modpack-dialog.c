@@ -78,6 +78,8 @@ static void
 dialog_forget_widgets (nuvashalauncherDownloadModpackDialog *self)
 {
   self->split = NULL;
+  self->filter_version_dropdown = NULL;
+  self->filter_version_model = NULL;
 
   details_watch (&self->details_page, NULL);
   details_watch (&self->dropdown, NULL);
@@ -100,6 +102,9 @@ dialog_dispose (GObject *object)
   if (self->fetch != NULL)
     g_cancellable_cancel (self->fetch);
 
+  if (self->version_catalog != NULL)
+    nuvashalauncher_operation_cancel (self->version_catalog);
+
   if (self->scope != NULL)
     {
       nuvashalauncher_operation_cancel (self->scope);
@@ -120,6 +125,8 @@ dialog_dispose (GObject *object)
   g_clear_object (&self->manager);
   g_clear_object (&self->search);
   g_clear_object (&self->fetch);
+  nuvashalauncher_operation_unref (self->version_catalog);
+  self->version_catalog = NULL;
   nuvashalauncher_operation_unref (self->scope);
   self->scope = NULL;
   g_clear_pointer (&self->project, nuvashalauncher_modrinth_project_free);
@@ -134,6 +141,9 @@ dialog_dispose (GObject *object)
   g_clear_pointer (&self->opt_switch_rows, g_ptr_array_unref);
   g_clear_pointer (&self->opt_files, g_ptr_array_unref);
   g_clear_pointer (&self->seen_ids, g_hash_table_unref);
+  g_clear_pointer (&self->filter_versions, g_ptr_array_unref);
+  g_clear_pointer (&self->filter_loaders, g_ptr_array_unref);
+  g_clear_pointer (&self->sort, g_free);
    remove_pack_file (self);
    /* Imported archives belong to the caller and are not deleted, but the
     * dialog still owns the path string it stored. */
