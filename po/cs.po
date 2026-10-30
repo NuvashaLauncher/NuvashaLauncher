@@ -913,6 +913,3 @@ msgstr "Vstoupit do režimu úprav"
 
 msgid "Delete Selected"
 msgstr "Smazat vybrané"
-
-msgid "Exit Edit Mode / Close Search"
-msgstr "Ukončit režim úprav / Zavřít vyhledávání"

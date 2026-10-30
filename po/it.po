@@ -950,6 +950,3 @@ msgstr "Entra in modalità modifica"
 
 msgid "Delete Selected"
 msgstr "Elimina selezionati"
-
-msgid "Exit Edit Mode / Close Search"
-msgstr "Esci dalla modalità modifica / Chiudi ricerca"

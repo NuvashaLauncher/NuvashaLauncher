@@ -944,6 +944,3 @@ msgstr "편집 모드 들어가기"
 
 msgid "Delete Selected"
 msgstr "선택 항목 삭제"
-
-msgid "Exit Edit Mode / Close Search"
-msgstr "편집 모드 종료 / 검색 닫기"

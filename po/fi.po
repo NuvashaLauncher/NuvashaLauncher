@@ -911,6 +911,3 @@ msgstr "Siirry muokkaustilaan"
 
 msgid "Delete Selected"
 msgstr "Poista valitut"
-
-msgid "Exit Edit Mode / Close Search"
-msgstr "Poistu muokkaustilasta / Sulje haku"

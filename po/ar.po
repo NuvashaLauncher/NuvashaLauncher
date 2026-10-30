@@ -919,6 +919,3 @@ msgstr "الدخول إلى وضع التحرير"
 
 msgid "Delete Selected"
 msgstr "حذف المحدد"
-
-msgid "Exit Edit Mode / Close Search"
-msgstr "الخروج من وضع التحرير / إغلاق البحث"

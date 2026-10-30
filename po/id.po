@@ -911,6 +911,3 @@ msgstr "Masuk Mode Edit"
 
 msgid "Delete Selected"
 msgstr "Hapus yang Dipilih"
-
-msgid "Exit Edit Mode / Close Search"
-msgstr "Keluar dari Mode Edit / Tutup Pencarian"

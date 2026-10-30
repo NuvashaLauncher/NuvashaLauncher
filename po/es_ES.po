@@ -948,6 +948,3 @@ msgstr "Entrar en modo de edición"
 
 msgid "Delete Selected"
 msgstr "Eliminar seleccionados"
-
-msgid "Exit Edit Mode / Close Search"
-msgstr "Salir del modo de edición / Cerrar búsqueda"

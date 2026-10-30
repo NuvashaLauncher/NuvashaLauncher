@@ -160,6 +160,7 @@ test_missing_local_skin_cleans_upload_state (void)
   window = GTK_WINDOW (gtk_window_new ());
   gtk_window_set_child (window, GTK_WIDGET (anchor));
   gtk_widget_set_opacity (GTK_WIDGET (window), 0.0);
+  gtk_widget_set_focusable (GTK_WIDGET (window), FALSE);
   gtk_window_present (window);
   drain ();
   dialog = nuvashalauncher_users_skin_menu_new (owner, image, account);

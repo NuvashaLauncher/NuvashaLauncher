@@ -947,6 +947,3 @@ msgstr "Wejdź w tryb edycji"
 
 msgid "Delete Selected"
 msgstr "Usuń zaznaczone"
-
-msgid "Exit Edit Mode / Close Search"
-msgstr "Wyjdź z trybu edycji / Zamknij wyszukiwanie"

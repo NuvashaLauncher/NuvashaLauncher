@@ -945,6 +945,3 @@ msgstr "編集モードに入る"
 
 msgid "Delete Selected"
 msgstr "選択した項目を削除"
-
-msgid "Exit Edit Mode / Close Search"
-msgstr "編集モードを終了 / 検索を閉じる"

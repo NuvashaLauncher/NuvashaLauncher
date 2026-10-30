@@ -911,6 +911,3 @@ msgstr "Gå inn i redigeringsmodus"
 
 msgid "Delete Selected"
 msgstr "Slett valgte"
-
-msgid "Exit Edit Mode / Close Search"
-msgstr "Avslutt redigeringsmodus / Lukk søk"

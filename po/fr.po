@@ -952,6 +952,3 @@ msgstr "Passer en mode édition"
 
 msgid "Delete Selected"
 msgstr "Supprimer la sélection"
-
-msgid "Exit Edit Mode / Close Search"
-msgstr "Quitter le mode édition / Fermer la recherche"
