@@ -2,6 +2,7 @@
 
 #include "nuvashalauncher-modrinth.h"
 #include "nuvashalauncher-json.h"
+#include <glib/gi18n.h>
 
 #include <string.h>
 
@@ -20,14 +21,82 @@ nuvashalauncher_modrinth_category_free (nuvashalauncherModrinthCategory *categor
   g_free (category);
 }
 
-/* Format a facet slug as a human-readable label without changing the slug. */
+/* Translate known facets without changing their API identifiers. Unknown
+ * future categories still get a readable fallback rather than disappearing. */
 char *
 nuvashalauncher_modrinth_category_label (const char *name)
 {
   g_autofree char *spaced = NULL;
+  static const struct { const char *slug; const char *label; } labels[] = {
+    { "adventure", N_("Adventure") },
+    { "atmosphere", N_("Atmosphere") },
+    { "audio", N_("Audio") },
+    { "blocks", N_("Blocks") },
+    { "bloom", N_("Bloom") },
+    { "cartoon", N_("Cartoon") },
+    { "categories", N_("Categories") },
+    { "colored-lighting", N_("Colored Lighting") },
+    { "combat", N_("Combat") },
+    { "core-shaders", N_("Core Shaders") },
+    { "cursed", N_("Cursed") },
+    { "decoration", N_("Decoration") },
+    { "economy", N_("Economy") },
+    { "entities", N_("Entities") },
+    { "environment", N_("Environment") },
+    { "equipment", N_("Equipment") },
+    { "fantasy", N_("Fantasy") },
+    { "features", N_("Features") },
+    { "foliage", N_("Foliage") },
+    { "fonts", N_("Fonts") },
+    { "food", N_("Food") },
+    { "game-mechanics", N_("Game Mechanics") },
+    { "gui", N_("Interface") },
+    { "high", N_("High") },
+    { "items", N_("Items") },
+    { "library", N_("Library") },
+    { "locale", N_("Language") },
+    { "low", N_("Low") },
+    { "magic", N_("Magic") },
+    { "management", N_("Management") },
+    { "medium", N_("Medium") },
+    { "minigame", N_("Minigame") },
+    { "mobs", N_("Mobs") },
+    { "modded", N_("Modded") },
+    { "models", N_("Models") },
+    { "optimization", N_("Optimization") },
+    { "path-tracing", N_("Path Tracing") },
+    { "performance impact", N_("Performance Impact") },
+    { "potato", N_("Potato") },
+    { "realistic", N_("Realistic") },
+    { "reflections", N_("Reflections") },
+    { "resolutions", N_("Resolutions") },
+    { "screenshot", N_("Screenshot") },
+    { "semi-realistic", N_("Semi-realistic") },
+    { "shadows", N_("Shadows") },
+    { "simplistic", N_("Simplistic") },
+    { "social", N_("Social") },
+    { "storage", N_("Storage") },
+    { "technology", N_("Technology") },
+    { "themed", N_("Themed") },
+    { "transportation", N_("Transportation") },
+    { "tweaks", N_("Tweaks") },
+    { "utility", N_("Utility") },
+    { "vanilla-like", N_("Vanilla-like") },
+    { "worldgen", N_("World Generation") },
+  };
 
   if (name == NULL || *name == '\0')
     return g_strdup ("");
+
+  for (guint i = 0; i < G_N_ELEMENTS (labels); i++)
+    if (g_str_equal (name, labels[i].slug))
+      return g_strdup (_(labels[i].label));
+
+  /* Resolution identifiers and technical acronyms are language-neutral. */
+  if (g_ascii_isdigit (*name))
+    return g_strdup (name);
+  if (g_str_equal (name, "pbr"))
+    return g_strdup ("PBR");
 
   spaced = g_strdelimit (g_strdup (name), "-_", ' ');
 

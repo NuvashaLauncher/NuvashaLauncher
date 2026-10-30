@@ -104,10 +104,9 @@ struct _nuvashalauncherContentPage
     AdwPreferencesGroup *results_group;
     GtkScrolledWindow *results_scroller;
     AdwStatusPage *results_status;
-    GtkSearchEntry *search_entry;
-    GtkSearchEntry *search_bar;
+    GtkEntry *search_entry;
+    GtkEntry *search_bar;
     GtkBox *filter_box;
-    GtkMenuButton *filter_button;
     GtkPopover *filter_popover;
     GtkBox *loading_more; /* spinner row at the bottom of the list */
     GtkBox *retry_row;    /* inline retry row when a page fails */

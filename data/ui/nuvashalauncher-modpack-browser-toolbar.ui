@@ -21,7 +21,7 @@
         <property name="spacing">6</property>
         <property name="hexpand">True</property>
         <child>
-          <object class="GtkSearchEntry" id="search-entry">
+          <object class="nuvashalauncherFilterEntry" id="search-entry">
             <property name="hexpand">True</property>
             <property name="placeholder-text" translatable="yes">Search modpacks</property>
           </object>
