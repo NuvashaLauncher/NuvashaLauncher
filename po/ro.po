@@ -913,6 +913,3 @@ msgstr "Intră în modul de editare"
 
 msgid "Delete Selected"
 msgstr "Șterge selecția"
-
-msgid "Exit Edit Mode / Close Search"
-msgstr "Ieși din modul de editare / Închide căutarea"

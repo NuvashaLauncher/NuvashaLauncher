@@ -948,6 +948,3 @@ msgstr "Bewerkingsmodus openen"
 
 msgid "Delete Selected"
 msgstr "Geselecteerde verwijderen"
-
-msgid "Exit Edit Mode / Close Search"
-msgstr "Bewerkingsmodus verlaten / Zoekopdracht sluiten"

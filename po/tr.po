@@ -948,6 +948,3 @@ msgstr "Düzenleme Moduna Gir"
 
 msgid "Delete Selected"
 msgstr "Seçilenleri Sil"
-
-msgid "Exit Edit Mode / Close Search"
-msgstr "Düzenleme Modundan Çık / Aramayı Kapat"

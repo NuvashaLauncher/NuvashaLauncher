@@ -133,12 +133,20 @@ fill (nuvashalauncherVersionRow *self, nuvashalauncherVersionManifest *manifest)
       position = 0;
     }
 
-  /* Nothing was asked for: the newest version is what a new instance is
-     made with, and the manifest is newest first, so that is the first
-     entry that was kept. */
-  if (self->wanted == NULL && position == GTK_INVALID_LIST_POSITION &&
-      ids->len > 0)
-    position = 0;
+  /* A new instance always starts on Mojang's latest stable release.  The
+     manifest is normally newest first, but its explicit latest.release
+     field is authoritative and remains stable when snapshots are shown. */
+  if (self->wanted == NULL && position == GTK_INVALID_LIST_POSITION)
+    {
+      for (guint i = 0; i < ids->len; i++)
+        {
+          if (g_str_equal (g_ptr_array_index (ids, i), manifest->latest_release))
+            {
+              position = i;
+              break;
+            }
+        }
+    }
 
   /* Mark the row as unavailable while replacing the model. This prevents
      GtkSingleSelection's temporary first item from being treated as user input. */

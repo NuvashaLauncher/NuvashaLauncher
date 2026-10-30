@@ -639,9 +639,13 @@ start_attempt (DownloadRequest *request)
     }
 
   if (request->body != NULL)
-    soup_message_set_request_body_from_bytes (
-        request->message, "application/json",
-        g_bytes_new (request->body, strlen (request->body)));
+    {
+      g_autoptr (GBytes) body =
+        g_bytes_new (request->body, strlen (request->body));
+
+      soup_message_set_request_body_from_bytes (
+        request->message, "application/json", body);
+    }
 
   if (request->user_agent != NULL)
     soup_message_headers_replace (

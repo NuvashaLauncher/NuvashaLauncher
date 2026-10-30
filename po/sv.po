@@ -911,6 +911,3 @@ msgstr "Gå in i redigeringsläge"
 
 msgid "Delete Selected"
 msgstr "Ta bort markerade"
-
-msgid "Exit Edit Mode / Close Search"
-msgstr "Avsluta redigeringsläge / Stäng sökning"

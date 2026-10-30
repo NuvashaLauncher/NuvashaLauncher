@@ -911,6 +911,3 @@ msgstr "進入編輯模式"
 
 msgid "Delete Selected"
 msgstr "刪除所選項目"
-
-msgid "Exit Edit Mode / Close Search"
-msgstr "退出編輯模式 / 關閉搜尋"

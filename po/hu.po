@@ -911,6 +911,3 @@ msgstr "Szerkesztési mód bekapcsolása"
 
 msgid "Delete Selected"
 msgstr "Kijelöltek törlése"
-
-msgid "Exit Edit Mode / Close Search"
-msgstr "Kilépés a szerkesztési módból / Keresés bezárása"

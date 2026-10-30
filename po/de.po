@@ -950,6 +950,3 @@ msgstr "Bearbeitungsmodus aktivieren"
 
 msgid "Delete Selected"
 msgstr "Ausgewählte löschen"
-
-msgid "Exit Edit Mode / Close Search"
-msgstr "Bearbeitungsmodus verlassen / Suche schließen"

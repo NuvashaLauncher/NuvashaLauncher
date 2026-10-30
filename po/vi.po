@@ -911,6 +911,3 @@ msgstr "Vào chế độ chỉnh sửa"
 
 msgid "Delete Selected"
 msgstr "Xóa mục đã chọn"
-
-msgid "Exit Edit Mode / Close Search"
-msgstr "Thoát chế độ chỉnh sửa / Đóng tìm kiếm"

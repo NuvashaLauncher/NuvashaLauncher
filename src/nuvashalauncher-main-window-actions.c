@@ -567,8 +567,9 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
 
   adw_about_dialog_set_application_name (ADW_ABOUT_DIALOG (dialog),
                                          "nuvashalauncher");
+  adw_about_dialog_set_application_icon (ADW_ABOUT_DIALOG (dialog), app_ids[0]);
   adw_about_dialog_set_version (ADW_ABOUT_DIALOG (dialog), nuvashalauncher_VERSION);
-  adw_about_dialog_set_developer_name (ADW_ABOUT_DIALOG (dialog), "TestUser");
+  adw_about_dialog_set_developer_name (ADW_ABOUT_DIALOG (dialog), "Flia");
 
   adw_about_dialog_set_website (ADW_ABOUT_DIALOG (dialog),
                                  "https://github.com/nuvashalauncher/nuvashalauncher");
@@ -600,16 +601,14 @@ on_shortcuts (GSimpleAction *action G_GNUC_UNUSED,
     general, adw_shortcuts_item_new (_("Create Instance"), "<primary>n"));
   adw_shortcuts_section_add (
     general, adw_shortcuts_item_new (_("Settings"), "<primary>comma"));
-   adw_shortcuts_section_add (
-     general, adw_shortcuts_item_new (_("Quit"), "<primary>q"));
-   adw_shortcuts_section_add (
-     general, adw_shortcuts_item_new (_("Enter Edit Mode"), "<primary>e"));
-   adw_shortcuts_section_add (
-     general, adw_shortcuts_item_new (_("Delete Selected"), "<primary>d"));
-   adw_shortcuts_section_add (
-     general, adw_shortcuts_item_new (_("Search"), "<primary>f"));
-   adw_shortcuts_section_add (
-     general, adw_shortcuts_item_new (_("Exit Edit Mode / Close Search"), "Escape"));
+  adw_shortcuts_section_add (
+    general, adw_shortcuts_item_new (_("Quit"), "<primary>q"));
+  adw_shortcuts_section_add (
+    general, adw_shortcuts_item_new (_("Enter Edit Mode"), "<primary>e"));
+  adw_shortcuts_section_add (
+    general, adw_shortcuts_item_new (_("Delete Selected"), "<primary>d"));
+  adw_shortcuts_section_add (
+    general, adw_shortcuts_item_new (_("Search"), "<primary>f"));
 
   adw_shortcuts_dialog_add (ADW_SHORTCUTS_DIALOG (dialog), general);
   adw_dialog_present (dialog, GTK_WIDGET (self));
