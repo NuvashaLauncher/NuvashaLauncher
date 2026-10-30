@@ -362,10 +362,7 @@ nuvashalauncher_content_page_on_search_changed (GtkEditable *editable G_GNUC_UNU
 /* Escape clears the search field. The search bar is always visible, so
  * Escape is not used to close it.
  *
- * GTK4 has no key-press-event signal and no stop-searching signal on
- * GtkSearchEntry, so the key is taken with a controller of its own. It is
- * added after the one inside the search entry and both run on the bubble
- * phase, so this one is asked first.
+ * The key is handled by a controller on the entry.
  *
  * Clearing the text emits "changed" and reloads the unfiltered results. */
 gboolean

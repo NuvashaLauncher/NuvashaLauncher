@@ -30,11 +30,10 @@ struct _nuvashalauncherDownloadModpackDialog
   nuvashalauncherModpack *modpack; /* owned, parsed from pack_path */
 
   /* Browse page widgets. */
-  GtkSearchEntry *search_entry;
+  GtkEntry *search_entry;
   GtkDropDown *filter_version_dropdown;
   GtkStringList *filter_version_model;
   nuvashalauncherTaskScope *version_catalog;
-  GtkMenuButton *filter_button;
   GtkPopover *filter_popover;
   GPtrArray *filter_versions; /* selected strings */
   GPtrArray *filter_loaders;  /* selected strings */

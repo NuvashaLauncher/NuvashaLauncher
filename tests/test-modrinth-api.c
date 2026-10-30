@@ -101,10 +101,18 @@ test_category_labels (void)
   g_autofree char *one = nuvashalauncher_modrinth_category_label ("colored-lighting");
   g_autofree char *two = nuvashalauncher_modrinth_category_label ("512x+");
   g_autofree char *three = nuvashalauncher_modrinth_category_label ("kitchen-sink");
+  g_autofree char *resolution = nuvashalauncher_modrinth_category_label ("8x-");
+  g_autofree char *acronym = nuvashalauncher_modrinth_category_label ("pbr");
+  g_autofree char *heading = nuvashalauncher_modrinth_category_label ("performance impact");
+  g_autofree char *worldgen = nuvashalauncher_modrinth_category_label ("worldgen");
 
   g_assert_cmpstr (one, ==, "Colored Lighting");
   g_assert_cmpstr (two, ==, "512x+");
   g_assert_cmpstr (three, ==, "Kitchen Sink");
+  g_assert_cmpstr (resolution, ==, "8x-");
+  g_assert_cmpstr (acronym, ==, "PBR");
+  g_assert_cmpstr (heading, ==, "Performance Impact");
+  g_assert_cmpstr (worldgen, ==, "World Generation");
 
   g_print ("ok - category labels are readable\n");
 }

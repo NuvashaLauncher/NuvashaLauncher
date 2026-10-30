@@ -6,6 +6,7 @@
 #include "nuvashalauncher-i18n.h"
 #include "nuvashalauncher-markdown.h"
 #include "nuvashalauncher-ui-feedback.h"
+#include "nuvashalauncher-filter-entry.h"
 
 
 
@@ -275,10 +276,8 @@ nuvashalauncher_content_page_build_browse (nuvashalauncherContentPage *self)
 {
   GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   GtkBox *top = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
-   GtkSearchEntry *search_bar = GTK_SEARCH_ENTRY (gtk_search_entry_new ());
-  GtkMenuButton *filter_button = GTK_MENU_BUTTON (gtk_menu_button_new ());
+  GtkEntry *search_bar = GTK_ENTRY (g_object_new (nuvashalauncher_TYPE_FILTER_ENTRY, NULL));
   GtkPopover *popover = GTK_POPOVER (gtk_popover_new ());
-  GtkOverlay *search_overlay = GTK_OVERLAY (gtk_overlay_new ());
   GtkBox *filter_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   GtkScrolledWindow *filter_scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
   GtkBox *content = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
@@ -299,12 +298,12 @@ nuvashalauncher_content_page_build_browse (nuvashalauncherContentPage *self)
   AdwPreferencesGroup *group =
     ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
 
-   self->browse.search_entry = GTK_SEARCH_ENTRY (search_bar);
-   self->browse.search_bar = GTK_SEARCH_ENTRY (search_bar);
+   self->browse.search_entry = search_bar;
+   self->browse.search_bar = search_bar;
   /* The field takes the room the row has, the way the modpack browser's
      search does, rather than a fixed width of its own. */
   gtk_widget_set_hexpand (GTK_WIDGET (search_bar), TRUE);
-  gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_bar),
+  gtk_entry_set_placeholder_text (search_bar,
                                             _("Search"));
   gtk_widget_set_visible (GTK_WIDGET (search_bar), TRUE);
 
@@ -319,27 +318,18 @@ nuvashalauncher_content_page_build_browse (nuvashalauncherContentPage *self)
                              G_CALLBACK (nuvashalauncher_content_page_on_search_key), self, 0);
   }
 
-   gtk_menu_button_set_icon_name (filter_button, "view-more-symbolic");
-   nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (filter_button),
-                                            _("Filter by category"));
-   gtk_widget_set_halign (GTK_WIDGET (filter_button), GTK_ALIGN_END);
-   gtk_widget_set_valign (GTK_WIDGET (filter_button), GTK_ALIGN_CENTER);
-   gtk_overlay_set_child (search_overlay, GTK_WIDGET (search_bar));
-   gtk_widget_set_hexpand (GTK_WIDGET (search_overlay), TRUE);
-   gtk_overlay_add_overlay (search_overlay, GTK_WIDGET (filter_button));
-   gtk_menu_button_set_popover (filter_button, GTK_WIDGET (popover));
-   gtk_box_append (GTK_BOX (top), GTK_WIDGET (search_overlay));
-  /* A click opens the popover but does not emit "activate" on the
-     menu button, so the load hangs off the popover's "show" instead. */
+   nuvashalauncher_filter_entry_set_popover (
+     nuvashalauncher_FILTER_ENTRY (search_bar), popover, _("Filter by category"));
+   gtk_box_append (GTK_BOX (top), GTK_WIDGET (search_bar));
+  /* Load categories when the leading filter icon opens the popover. */
    g_signal_connect_object (popover, "show",
                             G_CALLBACK (nuvashalauncher_content_page_on_filter_clicked), self, 0);
 
-  /* The row takes the room the bar has, the search inside it takes most
-     of that, and the filter and the switcher sit at its right. */
+   /* The row takes the room the bar has; the filter replaces the search
+      icon at the start, leaving the clear button at the other end. */
   gtk_widget_set_hexpand (GTK_WIDGET (top), TRUE);
 
    self->browse.filter_box = GTK_BOX (filter_box);
-     self->browse.filter_button = filter_button;
    self->browse.filter_popover = popover;
   gtk_widget_set_margin_top (GTK_WIDGET (filter_box), 6);
   gtk_widget_set_margin_bottom (GTK_WIDGET (filter_box), 6);

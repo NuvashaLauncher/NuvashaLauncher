@@ -6,6 +6,7 @@
 #include "nuvashalauncher-offline-account-dialog.h"
 #include "nuvashalauncher-settings.h"
 #include "nuvashalauncher-sign-in-dialog.h"
+#include "nuvashalauncher-filter-entry.h"
 
 static void
 test_templates_are_bundled (void)
@@ -39,6 +40,7 @@ test_templates_are_bundled (void)
 static void
 test_builder_templates_parse (void)
 {
+  g_type_ensure (nuvashalauncher_TYPE_FILTER_ENTRY);
   static const char *paths[] = {
     "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-import.ui",
     "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-main-shell.ui",
