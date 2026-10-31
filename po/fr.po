@@ -1079,3 +1079,102 @@ msgstr "Passer en mode édition"
 
 msgid "Delete Selected"
 msgstr "Supprimer la sélection"
+
+msgid "A new crash report was created. Open the logs for details."
+msgstr "Un rapport de plantage a été créé. Ouvrez les journaux pour les détails."
+
+msgid "Access was denied. Check the folder permissions."
+msgstr "Accès refusé. Vérifiez les permissions du dossier."
+
+msgid "An offline account with this name already exists."
+msgstr "Un compte hors ligne porte déjà ce nom."
+
+msgid "Choose another instance name or directory."
+msgstr "Choisissez un autre nom ou dossier pour cette instance."
+
+msgid "Could not install this mod loader. Choose another version or inspect Technical Details."
+msgstr "Impossible d’installer ce chargeur de mods. Choisissez une autre version ou consultez les détails techniques."
+
+msgid "Could not load project details. Try again."
+msgstr "Impossible de charger les détails du projet. Réessayez."
+
+msgid "Could not load versions. Try again."
+msgstr "Impossible de charger les versions. Réessayez."
+
+msgid "Could not open the browser. Open the displayed address manually."
+msgstr "Impossible d’ouvrir le navigateur. Ouvrez manuellement l’adresse affichée."
+
+msgid "Could not read or write files. Check the location, permissions, and free disk space."
+msgstr "Impossible de lire ou écrire les fichiers. Vérifiez l’emplacement, les permissions et l’espace libre."
+
+msgid "Could not save the account. Check your system keyring and file permissions."
+msgstr "Impossible d’enregistrer le compte. Vérifiez le trousseau système et les permissions des fichiers."
+
+msgid "Microsoft returned an unsafe sign-in address. Update the launcher before trying again."
+msgstr "Microsoft a renvoyé une adresse de connexion non sûre. Mettez le lanceur à jour avant de réessayer."
+
+msgid "Microsoft sign-in is not configured in this build. Update the launcher."
+msgstr "La connexion Microsoft n’est pas configurée dans cette version du lanceur. Mettez-le à jour."
+
+msgid "Select a Java runtime with desktop support, not a headless installation."
+msgstr "Sélectionnez un environnement Java avec prise en charge graphique, pas une installation sans interface graphique."
+
+msgid "Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
+msgstr "Créez un profil Minecraft: Java Edition sur minecraft.net, puis réessayez."
+
+msgid "Sign-in was declined. Start again if you want to sign in."
+msgstr "La connexion a été refusée. Recommencez si vous souhaitez vous connecter."
+
+msgid "Technical Details"
+msgstr "Détails techniques"
+
+msgid "The Java executable could not be used. Select a working Java runtime."
+msgstr "Impossible d’utiliser l’exécutable Java. Sélectionnez un environnement Java fonctionnel."
+
+msgid "The archive is invalid or unsafe. Download it again from a trusted source."
+msgstr "L’archive est invalide ou non sûre. Téléchargez-la à nouveau depuis une source fiable."
+
+msgid "The connection failed. Check your internet connection and try again."
+msgstr "La connexion a échoué. Vérifiez votre accès à Internet et réessayez."
+
+msgid "The destination already exists. Choose another location."
+msgstr "La destination existe déjà. Choisissez un autre emplacement."
+
+msgid "The downloaded file failed verification. It was not installed. Try downloading it again."
+msgstr "Le fichier téléchargé n’a pas passé la vérification et n’a pas été installé. Téléchargez-le à nouveau."
+
+msgid "The file or folder was not found. Check its location."
+msgstr "Fichier ou dossier introuvable. Vérifiez son emplacement."
+
+msgid "The game metadata is invalid or unavailable. Refresh the version list and try again."
+msgstr "Les métadonnées du jeu sont invalides ou indisponibles. Actualisez la liste des versions et réessayez."
+
+msgid "The operation failed. See Technical Details for more information."
+msgstr "L’opération a échoué. Consultez les détails techniques pour en savoir plus."
+
+msgid "The requested file, project, or compatible version was not found."
+msgstr "Le fichier, projet ou version compatible demandé est introuvable."
+
+msgid "The service rejected the request. Try again later."
+msgstr "Le service a rejeté la requête. Réessayez plus tard."
+
+msgid "The service returned an invalid response. Try again later."
+msgstr "Le service a renvoyé une réponse invalide. Réessayez plus tard."
+
+msgid "There is not enough free disk space."
+msgstr "L’espace disque libre est insuffisant."
+
+msgid "This account does not own Minecraft: Java Edition."
+msgstr "Ce compte ne possède pas Minecraft: Java Edition."
+
+msgid "This instance is no longer available. Refresh the instance list."
+msgstr "Cette instance n’est plus disponible. Actualisez la liste des instances."
+
+msgid "Too many requests. Wait a moment and try again."
+msgstr "Trop de requêtes. Patientez un instant et réessayez."
+
+msgid "Your instance settings are invalid. Check the selected version and JVM arguments."
+msgstr "Les paramètres de l’instance sont invalides. Vérifiez la version sélectionnée et les arguments JVM."
+
+msgid "Your saved sign-in is no longer valid. Sign in again."
+msgstr "La connexion enregistrée n’est plus valide. Reconnectez-vous."

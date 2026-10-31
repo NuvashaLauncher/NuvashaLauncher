@@ -203,7 +203,7 @@ nuvashalauncher_launcher_spawn (nuvashalauncher *self, GPtrArray *argv, GError *
 
   if (self->process.process == NULL)
     {
-      launcher_failed (self, spawn_error->message);
+      launch_finished_with_error (self, g_error_copy (spawn_error));
       g_propagate_error (error, g_steal_pointer (&spawn_error));
       return FALSE;
     }

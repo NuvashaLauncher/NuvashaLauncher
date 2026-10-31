@@ -68,8 +68,7 @@ choose_java (nuvashalauncher *self, GPtrArray *javas, int required,
   if (java->headless)
     {
       launcher_failed (self,
-                       "the selected Java is a headless one: the game "
-                       "needs a Java that can open a window");
+                       _("Select a Java runtime with desktop support, not a headless installation."));
       return NULL;
     }
 
@@ -129,7 +128,7 @@ run_the_game (nuvashalauncher *self)
 
   if (argv == NULL)
     {
-      launcher_failed (self, error->message);
+      launch_finished_with_error (self, g_steal_pointer (&error));
       return;
     }
 

@@ -1038,3 +1038,102 @@ msgstr "Vào chế độ chỉnh sửa"
 
 msgid "Delete Selected"
 msgstr "Xóa mục đã chọn"
+
+msgid "A new crash report was created. Open the logs for details."
+msgstr "Đã tạo báo cáo sự cố mới. Mở nhật ký để xem chi tiết."
+
+msgid "Access was denied. Check the folder permissions."
+msgstr "Truy cập bị từ chối. Kiểm tra quyền của thư mục."
+
+msgid "An offline account with this name already exists."
+msgstr "Đã có tài khoản ngoại tuyến với tên này."
+
+msgid "Choose another instance name or directory."
+msgstr "Chọn tên hoặc thư mục khác cho phiên bản cài đặt."
+
+msgid "Could not install this mod loader. Choose another version or inspect Technical Details."
+msgstr "Không thể cài bộ nạp mod này. Chọn phiên bản khác hoặc xem chi tiết kỹ thuật."
+
+msgid "Could not load project details. Try again."
+msgstr "Không thể tải chi tiết dự án. Hãy thử lại."
+
+msgid "Could not load versions. Try again."
+msgstr "Không thể tải các phiên bản. Hãy thử lại."
+
+msgid "Could not open the browser. Open the displayed address manually."
+msgstr "Không thể mở trình duyệt. Hãy tự mở địa chỉ được hiển thị."
+
+msgid "Could not read or write files. Check the location, permissions, and free disk space."
+msgstr "Không thể đọc hoặc ghi tệp. Kiểm tra vị trí, quyền và dung lượng trống."
+
+msgid "Could not save the account. Check your system keyring and file permissions."
+msgstr "Không thể lưu tài khoản. Kiểm tra kho khóa hệ thống và quyền truy cập tệp."
+
+msgid "Microsoft returned an unsafe sign-in address. Update the launcher before trying again."
+msgstr "Microsoft trả về địa chỉ đăng nhập không an toàn. Cập nhật trình khởi chạy trước khi thử lại."
+
+msgid "Microsoft sign-in is not configured in this build. Update the launcher."
+msgstr "Bản dựng này chưa cấu hình đăng nhập Microsoft. Hãy cập nhật trình khởi chạy."
+
+msgid "Select a Java runtime with desktop support, not a headless installation."
+msgstr "Chọn môi trường Java có hỗ trợ giao diện đồ họa, không phải bản headless."
+
+msgid "Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
+msgstr "Tạo hồ sơ Minecraft: Java Edition trên minecraft.net, rồi thử lại."
+
+msgid "Sign-in was declined. Start again if you want to sign in."
+msgstr "Đăng nhập bị từ chối. Bắt đầu lại nếu bạn muốn đăng nhập."
+
+msgid "Technical Details"
+msgstr "Chi tiết kỹ thuật"
+
+msgid "The Java executable could not be used. Select a working Java runtime."
+msgstr "Không thể dùng tệp thực thi Java. Chọn môi trường Java hoạt động được."
+
+msgid "The archive is invalid or unsafe. Download it again from a trusted source."
+msgstr "Tệp nén không hợp lệ hoặc không an toàn. Tải lại từ nguồn đáng tin cậy."
+
+msgid "The connection failed. Check your internet connection and try again."
+msgstr "Kết nối thất bại. Kiểm tra kết nối internet rồi thử lại."
+
+msgid "The destination already exists. Choose another location."
+msgstr "Đích đã tồn tại. Chọn vị trí khác."
+
+msgid "The downloaded file failed verification. It was not installed. Try downloading it again."
+msgstr "Tệp tải xuống không vượt qua xác minh và chưa được cài. Hãy tải lại."
+
+msgid "The file or folder was not found. Check its location."
+msgstr "Không tìm thấy tệp hoặc thư mục. Kiểm tra vị trí."
+
+msgid "The game metadata is invalid or unavailable. Refresh the version list and try again."
+msgstr "Siêu dữ liệu trò chơi không hợp lệ hoặc không có sẵn. Làm mới danh sách phiên bản rồi thử lại."
+
+msgid "The operation failed. See Technical Details for more information."
+msgstr "Thao tác thất bại. Xem chi tiết kỹ thuật để biết thêm."
+
+msgid "The requested file, project, or compatible version was not found."
+msgstr "Không tìm thấy tệp, dự án hoặc phiên bản tương thích được yêu cầu."
+
+msgid "The service rejected the request. Try again later."
+msgstr "Dịch vụ từ chối yêu cầu. Hãy thử lại sau."
+
+msgid "The service returned an invalid response. Try again later."
+msgstr "Dịch vụ trả về phản hồi không hợp lệ. Hãy thử lại sau."
+
+msgid "There is not enough free disk space."
+msgstr "Không đủ dung lượng đĩa trống."
+
+msgid "This account does not own Minecraft: Java Edition."
+msgstr "Tài khoản này không sở hữu Minecraft: Java Edition."
+
+msgid "This instance is no longer available. Refresh the instance list."
+msgstr "Phiên bản cài đặt này không còn khả dụng. Làm mới danh sách phiên bản cài đặt."
+
+msgid "Too many requests. Wait a moment and try again."
+msgstr "Quá nhiều yêu cầu. Đợi một chút rồi thử lại."
+
+msgid "Your instance settings are invalid. Check the selected version and JVM arguments."
+msgstr "Cài đặt không hợp lệ. Kiểm tra phiên bản đã chọn và đối số JVM."
+
+msgid "Your saved sign-in is no longer valid. Sign in again."
+msgstr "Phiên đăng nhập đã lưu không còn hợp lệ. Hãy đăng nhập lại."

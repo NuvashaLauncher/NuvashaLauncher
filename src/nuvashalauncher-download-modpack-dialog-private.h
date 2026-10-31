@@ -4,6 +4,7 @@
 
 #ifndef nuvashalauncher_DOWNLOAD_MODPACK_DIALOG_PRIVATE_H
 #define nuvashalauncher_DOWNLOAD_MODPACK_DIALOG_PRIVATE_H
+#include "nuvashalauncher-ui-feedback.h"
 
 #include "nuvashalauncher-download-modpack-dialog.h"
 #include "nuvashalauncher-download.h"
@@ -124,6 +125,7 @@ void dialog_details_open (nuvashalauncherDownloadModpackDialog *);
 void on_modpack_download_clicked (GtkButton *, gpointer);
 GtkWidget *build_error_page (nuvashalauncherDownloadModpackDialog *, const char *,
                              const char *, GCallback, GCallback);
+void push_failure (nuvashalauncherDownloadModpackDialog *, const char *, const GError *, GCallback);
 void push_error (nuvashalauncherDownloadModpackDialog *, const char *, const char *,
                  GCallback);
 void dialog_details_show_again (nuvashalauncherDownloadModpackDialog *);

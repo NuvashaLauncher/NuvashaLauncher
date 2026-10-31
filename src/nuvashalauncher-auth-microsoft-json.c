@@ -258,12 +258,14 @@ nuvashalauncher_auth_polling_error (const char *json, gssize length, gboolean *s
 
   if (g_str_equal (error_code, "expired_token"))
     {
-      g_set_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_DECLINED,
+      g_set_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_EXPIRED,
                    "the code ran out before the sign-in was finished");
       return TRUE;
     }
 
-  g_set_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_DECLINED, "%s%s%s",
+  g_set_error (error, nuvashalauncher_AUTH_ERROR,
+               g_str_equal (error_code, "invalid_grant")
+                 ? nuvashalauncher_AUTH_ERROR_REAUTH : nuvashalauncher_AUTH_ERROR_SERVICE, "%s%s%s",
                error_code, said != NULL ? ": " : "",
                said != NULL ? said : "");
 
@@ -369,8 +371,20 @@ nuvashalauncher_auth_xbox_token_from_json (const char *json, gssize length,
   if (int_of (object, "XErr", &xerr))
     {
       const char *words = xsts_refusal (xerr);
+      nuvashalauncherAuthError code = nuvashalauncher_AUTH_ERROR_XBOX;
 
-      g_set_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX, "%s (XErr %"
+      switch (xerr)
+        {
+        case 2148916233: code = nuvashalauncher_AUTH_ERROR_XBOX_PROFILE; break;
+        case 2148916238: code = nuvashalauncher_AUTH_ERROR_XBOX_FAMILY; break;
+        case 2148916235:
+        case 2148916236: code = nuvashalauncher_AUTH_ERROR_XBOX_COUNTRY; break;
+        case 2148916222:
+        case 2148916223: code = nuvashalauncher_AUTH_ERROR_XBOX_AGE; break;
+        default: break;
+        }
+
+      g_set_error (error, nuvashalauncher_AUTH_ERROR, code, "%s (XErr %"
                    G_GINT64_FORMAT ")%s%s", words != NULL ? words
                                                           : "Xbox services "
                                                             "refused the "

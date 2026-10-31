@@ -152,7 +152,7 @@ on_create_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
                                           &error);
   if (instance == NULL)
     {
-      show_error (self, error->message);
+      nuvashalauncher_ui_error_toast (GTK_WIDGET (self), GTK_WIDGET (self->toast_overlay), error);
       return;
     }
 
@@ -179,7 +179,7 @@ on_folder_selected (GObject *source, GAsyncResult *result, gpointer user_data)
           return;
         }
 
-      show_error (self, error->message);
+      nuvashalauncher_ui_error_toast (GTK_WIDGET (self), GTK_WIDGET (self->toast_overlay), error);
       g_object_unref (self);
       return;
     }

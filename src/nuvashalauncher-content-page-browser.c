@@ -249,6 +249,11 @@ search_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   if (results == NULL)
     {
+      if (nuvashalauncher_error_is_cancelled (error))
+        {
+          page_watch_free (watch);
+          return;
+        }
       take_rows_out (&self->browse.result_rows,
                  ADW_PREFERENCES_GROUP (self->browse.results_group));
       g_clear_pointer (&self->browse.model->results, g_ptr_array_unref);
@@ -260,16 +265,19 @@ search_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       if (append)
         {
           g_autofree char *message =
-            error != NULL ? g_strdup (error->message)
+            error != NULL ? g_strdup (nuvashalauncher_error_message (error))
                    : g_strdup (_("the next page could not be loaded"));
 
           gtk_label_set_text (GTK_LABEL (self->browse.retry_label), message);
+          gtk_widget_set_tooltip_text (GTK_WIDGET (self->browse.retry_label),
+                                       error != NULL ? nuvashalauncher_error_message (error) : NULL);
           gtk_widget_set_visible (GTK_WIDGET (self->browse.retry_row), TRUE);
         }
       else if (error != NULL &&
                !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         {
-          g_autofree char *escaped = g_markup_escape_text (error->message, -1);
+          g_autofree char *escaped = g_markup_escape_text (nuvashalauncher_error_message (error), -1);
+          show_error (self, _("Could not search Modrinth"), error);
 
           adw_status_page_set_description (ADW_STATUS_PAGE (self->browse.results_status),
                                            escaped);
@@ -593,7 +601,9 @@ categories_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       {
         GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 6));
         GtkLabel *label = GTK_LABEL (gtk_label_new (
-            error != NULL ? error->message : _("Could not load categories")));
+            error != NULL ? nuvashalauncher_error_message (error) : _("Could not load categories")));
+          gtk_widget_set_tooltip_text (GTK_WIDGET (label),
+                                       error != NULL ? nuvashalauncher_error_message (error) : NULL);
         GtkButton *retry = GTK_BUTTON (gtk_button_new_with_label (_("Retry")));
 
         gtk_label_set_wrap (GTK_LABEL (label), TRUE);

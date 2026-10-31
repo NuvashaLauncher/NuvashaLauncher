@@ -152,8 +152,8 @@ remove_duplicate_project_files (nuvashalauncherContentPage *self, const char *pr
          {
            g_autofree char *message = g_strdup_printf (
              _("The duplicate file \"%s\" could not be removed: %s"),
-             installed->path, error != NULL ? error->message : "unknown error");
-           show_toast (self, message);
+             installed->path, nuvashalauncher_error_message (error));
+           show_error (self, message, error);
          }
       else
         {
@@ -667,7 +667,7 @@ plan_take (PlanRun *plan, nuvashalauncherModrinthVersion *version)
     {
       if (self != NULL)
         {
-           show_error (self, _("This cannot be installed"), error);
+           show_error (self, _("The file could not be installed"), error);
           plan_stopped (self);
         }
 
@@ -718,8 +718,7 @@ plan_versions_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
        * words the page shows everywhere else. */
       if (self != NULL)
         {
-          show_toast (self, error != NULL ? error->message
-                                          : _("no compatible version"));
+           show_error (self, _("Could not load versions. Try again."), error);
           plan_stopped (self);
         }
 

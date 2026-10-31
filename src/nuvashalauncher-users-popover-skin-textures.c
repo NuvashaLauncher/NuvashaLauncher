@@ -66,9 +66,16 @@ finish_view_texture_load (SkinTextureLoad *load, GBytes *bytes, GError *error)
        g_str_has_prefix (load->url, "https://")))
      cache_skin_bytes (load->view, load->url, bytes, load->cape);
   if (texture == NULL && error != NULL)
-    g_warning ("Could not load skin preview texture: %s", error->message);
+    {
+      GtkLabel *label = g_object_get_data (G_OBJECT (load->view), "preview-error");
+      if (label != NULL && !nuvashalauncher_error_is_cancelled (error))
+        nuvashalauncher_ui_error_label (label, error);
+    }
   if (texture != NULL)
     {
+      GtkLabel *label = g_object_get_data (G_OBJECT (load->view), "preview-error");
+      if (label != NULL)
+        nuvashalauncher_ui_clear_error_label (label);
       if (load->cape)
         nuvashalauncher_skin_view_set_cape (load->view, texture);
       else
@@ -101,7 +108,8 @@ on_view_http_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
     {
       g_clear_pointer (&bytes, g_bytes_unref);
       g_clear_error (&error);
-      g_set_error (&error, G_IO_ERROR, G_IO_ERROR_FAILED,
+      g_set_error (&error, nuvashalauncher_MINECRAFT_SERVICES_ERROR,
+                   nuvashalauncher_MINECRAFT_SERVICES_ERROR_HTTP,
                    "skin request returned HTTP status %u",
                    soup_message_get_status (load->message));
     }

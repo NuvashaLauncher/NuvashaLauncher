@@ -326,6 +326,21 @@ build_error_page (nuvashalauncherDownloadModpackDialog *self,
 }
 
 void
+push_failure (nuvashalauncherDownloadModpackDialog *self,
+              const char *what, const GError *error, GCallback retry)
+{
+  if (nuvashalauncher_error_is_cancelled (error))
+    return;
+  GtkWidget *page = build_error_page (self, what,
+    nuvashalauncher_error_message (error), retry, G_CALLBACK (on_error_back));
+  GtkWidget *toolbar = adw_navigation_page_get_child (ADW_NAVIGATION_PAGE (page));
+  GtkWidget *content = adw_toolbar_view_get_content (ADW_TOOLBAR_VIEW (toolbar));
+  if (error != NULL)
+    gtk_box_append (GTK_BOX (content), nuvashalauncher_ui_error_details (error));
+  adw_navigation_view_push (self->nav, ADW_NAVIGATION_PAGE (page));
+}
+
+void
 push_error (nuvashalauncherDownloadModpackDialog *self,
             const char *what,
             const char *message,

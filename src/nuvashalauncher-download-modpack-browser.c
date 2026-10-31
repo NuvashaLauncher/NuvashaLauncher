@@ -514,15 +514,15 @@ on_search_done (GObject *source G_GNUC_UNUSED,
           if (self->append)
             {
               /* A page that failed is offered again from the list. */
-              gtk_label_set_text (GTK_LABEL (self->retry_label),
-                                  error->message);
+              nuvashalauncher_ui_error_label (self->retry_label, error);
               gtk_widget_set_visible (GTK_WIDGET (self->loading_more), FALSE);
               gtk_widget_set_visible (GTK_WIDGET (self->retry_row), TRUE);
             }
           else
             {
               g_autofree char *escaped =
-                g_markup_escape_text (error->message, -1);
+                g_markup_escape_text (nuvashalauncher_error_message (error), -1);
+              adw_status_page_set_child (self->error_status, nuvashalauncher_ui_error_details (error));
 
               adw_status_page_set_title (
                 ADW_STATUS_PAGE (self->error_status),
@@ -548,16 +548,17 @@ on_search_done (GObject *source G_GNUC_UNUSED,
 
       if (self->append)
         {
-          gtk_label_set_text (GTK_LABEL (self->retry_label), error->message);
+          nuvashalauncher_ui_error_label (self->retry_label, error);
           gtk_widget_set_visible (GTK_WIDGET (self->loading_more), FALSE);
           gtk_widget_set_visible (GTK_WIDGET (self->retry_row), TRUE);
         }
       else
         {
-          g_autofree char *escaped = g_markup_escape_text (error->message, -1);
+          g_autofree char *escaped = g_markup_escape_text (nuvashalauncher_error_message (error), -1);
+          adw_status_page_set_child (self->error_status, nuvashalauncher_ui_error_details (error));
 
           adw_status_page_set_title (ADW_STATUS_PAGE (self->error_status),
-                                      _("Could not understand the answer"));
+                                      _("The service returned an invalid response. Try again later."));
           adw_status_page_set_description (
             ADW_STATUS_PAGE (self->error_status), escaped);
           adw_view_stack_set_visible_child_name (self->results_stack,

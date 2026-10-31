@@ -207,7 +207,10 @@ manifest_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       if (manifest != NULL)
         fill (self, manifest);
       else
-        show_error (self, error->message);
+        {
+          show_error (self, nuvashalauncher_error_message (error));
+          gtk_widget_set_tooltip_text (GTK_WIDGET (self), nuvashalauncher_error_message (error));
+        }
     }
 
   /* The reference the load took on the row, and its handle. */

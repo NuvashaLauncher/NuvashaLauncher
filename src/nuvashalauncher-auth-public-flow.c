@@ -70,7 +70,7 @@ nuvashalauncher_auth_refresh_async (const nuvashalauncherAccount   *account,
   if (account->refresh_token == NULL || *account->refresh_token == '\0')
     {
       fail (self,
-            g_error_new (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_DECLINED,
+            g_error_new (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_REAUTH,
                          "\"%s\" has to sign in again before it can play",
                          account->name != NULL ? account->name
                                                : "this account"));

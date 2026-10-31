@@ -94,8 +94,7 @@ nuvashalauncher_modrinth_fail (GTask *task, GError *error)
 
       nuvashalauncher_task_scope_return_error (
         request->scope,
-        g_error_new_literal (nuvashalauncher_MODRINTH_ERROR,
-                             nuvashalauncher_MODRINTH_ERROR_NETWORK,
+        g_error_new_literal (G_IO_ERROR, G_IO_ERROR_CANCELLED,
                              "the request was cancelled"));
       return;
     }
@@ -109,6 +108,12 @@ nuvashalauncher_modrinth_fail (GTask *task, GError *error)
       else if (error->code == nuvashalauncher_DOWNLOAD_ERROR_HTTP)
         wrapped = g_error_new (nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_HTTP,
                                "%s", error->message);
+      else if (error->code == nuvashalauncher_DOWNLOAD_ERROR_INVALID)
+        wrapped = g_error_new (nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_PARSE,
+                               "%s", error->message);
+      else if (error->code == nuvashalauncher_DOWNLOAD_ERROR_IO ||
+               error->code == nuvashalauncher_DOWNLOAD_ERROR_CANCELLED)
+        wrapped = g_steal_pointer (&error);
       else
         wrapped = g_error_new (nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_NETWORK,
                                "%s", error->message);
@@ -117,7 +122,7 @@ nuvashalauncher_modrinth_fail (GTask *task, GError *error)
     wrapped = g_error_new (nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_PARSE,
                            "%s", error->message);
 
-  g_error_free (error);
+  g_clear_error (&error);
   nuvashalauncher_task_scope_return_error (request->scope, wrapped);
 }
 

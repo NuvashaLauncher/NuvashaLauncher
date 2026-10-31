@@ -6,6 +6,7 @@
 #define nuvashalauncher_CONTENT_PAGE_PRIVATE_H
 
 #include "nuvashalauncher-content-page.h"
+#include "nuvashalauncher-ui-feedback.h"
 #include "nuvashalauncher-content-browser-model.h"
 #include "nuvashalauncher-content-install-model.h"
 

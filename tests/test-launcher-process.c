@@ -354,7 +354,7 @@ test_crash_report_makes_a_crash (void)
   watch_until (&watch, launcher, nuvashalauncher_LAUNCH_CRASHED);
 
   g_assert_cmpint (watch.state, ==, nuvashalauncher_LAUNCH_CRASHED);
-  g_assert_cmpstr (watch.detail, ==, "the game wrote a crash report");
+  g_assert_cmpstr (watch.detail, ==, "A new crash report was created. Open the logs for details.");
 
   watch_clear (&watch);
 }

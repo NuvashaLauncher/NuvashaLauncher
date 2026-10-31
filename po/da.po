@@ -1038,3 +1038,102 @@ msgstr "Gå til redigeringstilstand"
 
 msgid "Delete Selected"
 msgstr "Slet valgte"
+
+msgid "A new crash report was created. Open the logs for details."
+msgstr "Der blev oprettet en ny nedbrudsrapport. Åbn logfilerne for detaljer."
+
+msgid "Access was denied. Check the folder permissions."
+msgstr "Adgang nægtet. Kontrollér mappens rettigheder."
+
+msgid "An offline account with this name already exists."
+msgstr "Der findes allerede en offlinekonto med dette navn."
+
+msgid "Choose another instance name or directory."
+msgstr "Vælg et andet instansnavn eller en anden mappe."
+
+msgid "Could not install this mod loader. Choose another version or inspect Technical Details."
+msgstr "Modindlæseren kunne ikke installeres. Vælg en anden version eller se tekniske detaljer."
+
+msgid "Could not load project details. Try again."
+msgstr "Projektdetaljerne kunne ikke indlæses. Prøv igen."
+
+msgid "Could not load versions. Try again."
+msgstr "Versionerne kunne ikke indlæses. Prøv igen."
+
+msgid "Could not open the browser. Open the displayed address manually."
+msgstr "Browseren kunne ikke åbnes. Åbn den viste adresse manuelt."
+
+msgid "Could not read or write files. Check the location, permissions, and free disk space."
+msgstr "Filer kunne ikke læses eller skrives. Kontrollér placering, rettigheder og ledig diskplads."
+
+msgid "Could not save the account. Check your system keyring and file permissions."
+msgstr "Kontoen kunne ikke gemmes. Kontrollér systemets nøglering og filrettigheder."
+
+msgid "Microsoft returned an unsafe sign-in address. Update the launcher before trying again."
+msgstr "Microsoft returnerede en usikker loginadresse. Opdatér starteren, før du prøver igen."
+
+msgid "Microsoft sign-in is not configured in this build. Update the launcher."
+msgstr "Microsoft-login er ikke konfigureret i denne udgave. Opdatér starteren."
+
+msgid "Select a Java runtime with desktop support, not a headless installation."
+msgstr "Vælg et Java-miljø med skrivebordsunderstøttelse, ikke en headless-installation."
+
+msgid "Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
+msgstr "Opret en Minecraft: Java Edition-profil på minecraft.net, og prøv igen."
+
+msgid "Sign-in was declined. Start again if you want to sign in."
+msgstr "Login blev afvist. Start forfra, hvis du vil logge ind."
+
+msgid "Technical Details"
+msgstr "Tekniske detaljer"
+
+msgid "The Java executable could not be used. Select a working Java runtime."
+msgstr "Java-programmet kunne ikke bruges. Vælg et fungerende Java-miljø."
+
+msgid "The archive is invalid or unsafe. Download it again from a trusted source."
+msgstr "Arkivet er ugyldigt eller usikkert. Hent det igen fra en pålidelig kilde."
+
+msgid "The connection failed. Check your internet connection and try again."
+msgstr "Forbindelsen mislykkedes. Kontrollér internetforbindelsen, og prøv igen."
+
+msgid "The destination already exists. Choose another location."
+msgstr "Destinationen findes allerede. Vælg en anden placering."
+
+msgid "The downloaded file failed verification. It was not installed. Try downloading it again."
+msgstr "Den hentede fil bestod ikke kontrollen og blev ikke installeret. Hent den igen."
+
+msgid "The file or folder was not found. Check its location."
+msgstr "Filen eller mappen blev ikke fundet. Kontrollér placeringen."
+
+msgid "The game metadata is invalid or unavailable. Refresh the version list and try again."
+msgstr "Spillets metadata er ugyldige eller utilgængelige. Opdatér versionslisten, og prøv igen."
+
+msgid "The operation failed. See Technical Details for more information."
+msgstr "Handlingen mislykkedes. Se tekniske detaljer for mere information."
+
+msgid "The requested file, project, or compatible version was not found."
+msgstr "Den ønskede fil, projektet eller en kompatibel version blev ikke fundet."
+
+msgid "The service rejected the request. Try again later."
+msgstr "Tjenesten afviste anmodningen. Prøv senere."
+
+msgid "The service returned an invalid response. Try again later."
+msgstr "Tjenesten returnerede et ugyldigt svar. Prøv senere."
+
+msgid "There is not enough free disk space."
+msgstr "Der er ikke nok ledig diskplads."
+
+msgid "This account does not own Minecraft: Java Edition."
+msgstr "Denne konto ejer ikke Minecraft: Java Edition."
+
+msgid "This instance is no longer available. Refresh the instance list."
+msgstr "Denne instans er ikke længere tilgængelig. Opdatér instanslisten."
+
+msgid "Too many requests. Wait a moment and try again."
+msgstr "For mange anmodninger. Vent et øjeblik, og prøv igen."
+
+msgid "Your instance settings are invalid. Check the selected version and JVM arguments."
+msgstr "Instansindstillingerne er ugyldige. Kontrollér den valgte version og JVM-argumenterne."
+
+msgid "Your saved sign-in is no longer valid. Sign in again."
+msgstr "Det gemte login er ikke længere gyldigt. Log ind igen."

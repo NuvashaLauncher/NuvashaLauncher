@@ -320,7 +320,7 @@ test_polling (void)
 
   /* A code that ran out ends it too, and says to ask for a new one. */
   g_assert_true (nuvashalauncher_auth_polling_error (expired, -1, &slow, &error));
-  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_DECLINED);
+  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_EXPIRED);
   g_assert_nonnull (strstr (error->message, "ran out"));
   g_clear_error (&error);
 
@@ -330,7 +330,7 @@ test_polling (void)
     g_autofree char *unknown = g_strdup ("{\"error\":\"something_new\"}");
 
     g_assert_true (nuvashalauncher_auth_polling_error (unknown, -1, &slow, &error));
-    g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_DECLINED);
+    g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_SERVICE);
     g_assert_nonnull (strstr (error->message, "something_new"));
     g_clear_error (&error);
   }
@@ -390,28 +390,28 @@ test_xsts_refusals (void)
   /* A Microsoft account that has never been an Xbox one: what a user can
      do about it is sign in to xbox.com once. */
   g_assert_null (nuvashalauncher_auth_xbox_token_from_json (no_profile, -1, &error));
-  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX);
+  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX_PROFILE);
   g_assert_nonnull (strstr (error->message, "xbox.com"));
   g_assert_nonnull (strstr (error->message, "2148916233"));
   g_clear_error (&error);
 
   /* A child account has to be added to a family before it can play. */
   g_assert_null (nuvashalauncher_auth_xbox_token_from_json (child, -1, &error));
-  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX);
+  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX_FAMILY);
   g_assert_nonnull (strstr (error->message, "family"));
   g_assert_nonnull (strstr (error->message, "2148916238"));
   g_clear_error (&error);
 
   /* An account from a country the services do not serve says so. */
   g_assert_null (nuvashalauncher_auth_xbox_token_from_json (country, -1, &error));
-  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX);
+  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX_COUNTRY);
   g_assert_nonnull (strstr (error->message, "country"));
   g_clear_error (&error);
 
   /* A number nuvashalauncher does not know is still said as a number, with what the
      service said about it: a launcher must not invent a reason. */
   g_assert_null (nuvashalauncher_auth_xbox_token_from_json (unknown, -1, &error));
-  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX);
+  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX_AGE);
   g_assert_nonnull (strstr (error->message, "2148916222"));
   g_assert_nonnull (strstr (error->message, "South Korea"));
   g_clear_error (&error);
@@ -599,12 +599,12 @@ test_expired_token_completes_sign_in (void)
 
   g_assert_null (wait.scope);
   g_assert_error (wait.error, nuvashalauncher_AUTH_ERROR,
-                  nuvashalauncher_AUTH_ERROR_DECLINED);
+                   nuvashalauncher_AUTH_ERROR_EXPIRED);
   g_assert_nonnull (strstr (wait.error->message, "code ran out"));
   g_clear_error (&wait.error);
   g_main_loop_unref (wait.loop);
 
-  g_print ("ok - an expired token response completes sign-in as declined\n");
+  g_print ("ok - an expired token response completes sign-in as expired\n");
 }
 
 static void
@@ -613,7 +613,7 @@ test_service_state_refusals_complete_sign_in (void)
   /* These are the actual answer handlers, not just parser calls: every
    * refusal must finish the same asynchronous request exactly once. */
   run_auth_error_answer ("auth-xsts-child-account.json", 401, xsts_answered,
-                         nuvashalauncher_AUTH_ERROR_XBOX, "child account");
+                         nuvashalauncher_AUTH_ERROR_XBOX_FAMILY, "child account");
   run_auth_error_answer ("auth-minecraft-app-not-registered.json", 403,
                          minecraft_answered, nuvashalauncher_AUTH_ERROR_XBOX,
                          "Invalid app registration");

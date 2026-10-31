@@ -109,6 +109,22 @@ test_skin_dialog_close (void)
   g_assert_cmpuint (criticals, ==, 0);
 }
 
+static GtkWidget *
+find_error_label (GtkWidget *widget, const char *diagnostic)
+{
+  if (GTK_IS_LABEL (widget) && gtk_widget_get_visible (widget) &&
+      g_strcmp0 (gtk_label_get_text (GTK_LABEL (widget)), diagnostic) == 0)
+    return widget;
+  for (GtkWidget *child = gtk_widget_get_first_child (widget); child != NULL;
+       child = gtk_widget_get_next_sibling (child))
+    {
+      GtkWidget *found = find_error_label (child, diagnostic);
+      if (found != NULL)
+        return found;
+    }
+  return NULL;
+}
+
 static void
 test_missing_local_skin_cleans_upload_state (void)
 {
@@ -188,12 +204,15 @@ test_missing_local_skin_cleans_upload_state (void)
   gtk_list_box_select_row (skins, target);
   g_object_set_data_full (G_OBJECT (target), "nuvashalauncher-skin-url",
                           g_strdup (uri), g_free);
-  g_test_expect_message (NULL, G_LOG_LEVEL_WARNING, "*");
   gtk_check_button_set_active (slim, TRUE);
 
   while (nuvashalauncher_users_skin_background_work_active ())
     g_main_context_iteration (NULL, TRUE);
-  g_test_assert_expected_messages ();
+  GtkWidget *status = find_error_label (dialog_child,
+                                        "The file or folder was not found. Check its location.");
+  g_assert_nonnull (status);
+  g_assert_cmpstr (gtk_label_get_text (GTK_LABEL (status)), ==,
+                   "The file or folder was not found. Check its location.");
 
   g_assert_false (nuvashalauncher_users_skin_background_work_active ());
   g_assert_true (adw_dialog_close (dialog));

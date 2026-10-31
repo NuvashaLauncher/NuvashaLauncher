@@ -1074,3 +1074,102 @@ msgstr "Увійти в режим редагування"
 
 msgid "Delete Selected"
 msgstr "Видалити вибране"
+
+msgid "A new crash report was created. Open the logs for details."
+msgstr "Створено новий звіт про збій. Відкрийте журнали для подробиць."
+
+msgid "Access was denied. Check the folder permissions."
+msgstr "Доступ заборонено. Перевірте права на папку."
+
+msgid "An offline account with this name already exists."
+msgstr "Автономний обліковий запис із таким ім’ям уже існує."
+
+msgid "Choose another instance name or directory."
+msgstr "Виберіть інше ім’я або папку екземпляра."
+
+msgid "Could not install this mod loader. Choose another version or inspect Technical Details."
+msgstr "Не вдалося встановити завантажувач модів. Виберіть іншу версію або відкрийте технічні відомості."
+
+msgid "Could not load project details. Try again."
+msgstr "Не вдалося завантажити відомості про проєкт. Спробуйте знову."
+
+msgid "Could not load versions. Try again."
+msgstr "Не вдалося завантажити версії. Спробуйте знову."
+
+msgid "Could not open the browser. Open the displayed address manually."
+msgstr "Не вдалося відкрити браузер. Відкрийте показану адресу вручну."
+
+msgid "Could not read or write files. Check the location, permissions, and free disk space."
+msgstr "Не вдалося прочитати або записати файли. Перевірте шлях, права та вільне місце."
+
+msgid "Could not save the account. Check your system keyring and file permissions."
+msgstr "Не вдалося зберегти обліковий запис. Перевірте системну в’язку ключів і права на файли."
+
+msgid "Microsoft returned an unsafe sign-in address. Update the launcher before trying again."
+msgstr "Microsoft повернула небезпечну адресу входу. Оновіть лаунчер перед повторною спробою."
+
+msgid "Microsoft sign-in is not configured in this build. Update the launcher."
+msgstr "У цій збірці не налаштовано вхід через Microsoft. Оновіть лаунчер."
+
+msgid "Select a Java runtime with desktop support, not a headless installation."
+msgstr "Виберіть середовище Java з підтримкою графічного інтерфейсу, а не headless-версію."
+
+msgid "Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
+msgstr "Створіть профіль Minecraft: Java Edition на minecraft.net і спробуйте знову."
+
+msgid "Sign-in was declined. Start again if you want to sign in."
+msgstr "Вхід відхилено. Почніть знову, якщо хочете ввійти."
+
+msgid "Technical Details"
+msgstr "Технічні відомості"
+
+msgid "The Java executable could not be used. Select a working Java runtime."
+msgstr "Не вдалося використати виконуваний файл Java. Виберіть робоче середовище Java."
+
+msgid "The archive is invalid or unsafe. Download it again from a trusted source."
+msgstr "Архів некоректний або небезпечний. Завантажте його знову з надійного джерела."
+
+msgid "The connection failed. Check your internet connection and try again."
+msgstr "Помилка з’єднання. Перевірте інтернет і спробуйте знову."
+
+msgid "The destination already exists. Choose another location."
+msgstr "Місце призначення вже існує. Виберіть інше розташування."
+
+msgid "The downloaded file failed verification. It was not installed. Try downloading it again."
+msgstr "Завантажений файл не пройшов перевірку та не був установлений. Завантажте його знову."
+
+msgid "The file or folder was not found. Check its location."
+msgstr "Файл або папку не знайдено. Перевірте розташування."
+
+msgid "The game metadata is invalid or unavailable. Refresh the version list and try again."
+msgstr "Метадані гри некоректні або недоступні. Оновіть список версій і спробуйте знову."
+
+msgid "The operation failed. See Technical Details for more information."
+msgstr "Операцію не виконано. Подробиці в технічних відомостях."
+
+msgid "The requested file, project, or compatible version was not found."
+msgstr "Запитаний файл, проєкт або сумісну версію не знайдено."
+
+msgid "The service rejected the request. Try again later."
+msgstr "Сервіс відхилив запит. Спробуйте пізніше."
+
+msgid "The service returned an invalid response. Try again later."
+msgstr "Сервіс повернув некоректну відповідь. Спробуйте пізніше."
+
+msgid "There is not enough free disk space."
+msgstr "Недостатньо вільного місця на диску."
+
+msgid "This account does not own Minecraft: Java Edition."
+msgstr "Цей обліковий запис не володіє Minecraft: Java Edition."
+
+msgid "This instance is no longer available. Refresh the instance list."
+msgstr "Цей екземпляр більше недоступний. Оновіть список екземплярів."
+
+msgid "Too many requests. Wait a moment and try again."
+msgstr "Забагато запитів. Зачекайте та спробуйте знову."
+
+msgid "Your instance settings are invalid. Check the selected version and JVM arguments."
+msgstr "Некоректні налаштування екземпляра. Перевірте вибрану версію та аргументи JVM."
+
+msgid "Your saved sign-in is no longer valid. Sign in again."
+msgstr "Збережений вхід більше недійсний. Увійдіть знову."

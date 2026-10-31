@@ -229,8 +229,8 @@ sent (SoupSession         *session G_GNUC_UNUSED,
         soup_message_get_response_headers (self->message)) >
       (goffset) MAX_AUTH_RESPONSE_SIZE)
     {
-      fail (self, g_error_new_literal (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_NETWORK,
-                                       "the sign-in response is too large"));
+      fail (self, g_error_new_literal (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_PARSE,
+                                     "the sign-in response is too large"));
       return;
     }
   g_input_stream_read_bytes_async (self->response_stream, 64 * 1024,
@@ -257,8 +257,8 @@ auth_read_ready (GObject *source, GAsyncResult *result, gpointer user_data)
   size = g_bytes_get_size (chunk);
   if (self->response_bytes->len + size > MAX_AUTH_RESPONSE_SIZE)
     {
-      fail (self, g_error_new_literal (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_NETWORK,
-                                       "the sign-in response is too large"));
+      fail (self, g_error_new_literal (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_PARSE,
+                                     "the sign-in response is too large"));
       return;
     }
 

@@ -1038,3 +1038,102 @@ msgstr "Masuk Mode Edit"
 
 msgid "Delete Selected"
 msgstr "Hapus yang Dipilih"
+
+msgid "A new crash report was created. Open the logs for details."
+msgstr "Laporan kerusakan baru telah dibuat. Buka log untuk rinciannya."
+
+msgid "Access was denied. Check the folder permissions."
+msgstr "Akses ditolak. Periksa izin folder."
+
+msgid "An offline account with this name already exists."
+msgstr "Akun luring dengan nama ini sudah ada."
+
+msgid "Choose another instance name or directory."
+msgstr "Pilih nama atau direktori instans lain."
+
+msgid "Could not install this mod loader. Choose another version or inspect Technical Details."
+msgstr "Pemuat mod ini tidak dapat dipasang. Pilih versi lain atau lihat rincian teknis."
+
+msgid "Could not load project details. Try again."
+msgstr "Rincian proyek tidak dapat dimuat. Coba lagi."
+
+msgid "Could not load versions. Try again."
+msgstr "Versi tidak dapat dimuat. Coba lagi."
+
+msgid "Could not open the browser. Open the displayed address manually."
+msgstr "Peramban tidak dapat dibuka. Buka alamat yang ditampilkan secara manual."
+
+msgid "Could not read or write files. Check the location, permissions, and free disk space."
+msgstr "Berkas tidak dapat dibaca atau ditulis. Periksa lokasi, izin, dan ruang kosong."
+
+msgid "Could not save the account. Check your system keyring and file permissions."
+msgstr "Akun tidak dapat disimpan. Periksa gantungan kunci sistem dan izin berkas."
+
+msgid "Microsoft returned an unsafe sign-in address. Update the launcher before trying again."
+msgstr "Microsoft mengembalikan alamat masuk yang tidak aman. Perbarui peluncur sebelum mencoba lagi."
+
+msgid "Microsoft sign-in is not configured in this build. Update the launcher."
+msgstr "Masuk Microsoft belum dikonfigurasi dalam build ini. Perbarui peluncur."
+
+msgid "Select a Java runtime with desktop support, not a headless installation."
+msgstr "Pilih lingkungan Java dengan dukungan desktop, bukan instalasi headless."
+
+msgid "Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
+msgstr "Buat profil Minecraft: Java Edition di minecraft.net, lalu coba lagi."
+
+msgid "Sign-in was declined. Start again if you want to sign in."
+msgstr "Masuk ditolak. Mulai lagi jika ingin masuk."
+
+msgid "Technical Details"
+msgstr "Rincian teknis"
+
+msgid "The Java executable could not be used. Select a working Java runtime."
+msgstr "Program Java tidak dapat digunakan. Pilih lingkungan Java yang berfungsi."
+
+msgid "The archive is invalid or unsafe. Download it again from a trusted source."
+msgstr "Arsip tidak valid atau tidak aman. Unduh ulang dari sumber tepercaya."
+
+msgid "The connection failed. Check your internet connection and try again."
+msgstr "Koneksi gagal. Periksa koneksi internet dan coba lagi."
+
+msgid "The destination already exists. Choose another location."
+msgstr "Tujuan sudah ada. Pilih lokasi lain."
+
+msgid "The downloaded file failed verification. It was not installed. Try downloading it again."
+msgstr "Berkas unduhan gagal diverifikasi dan tidak dipasang. Unduh lagi."
+
+msgid "The file or folder was not found. Check its location."
+msgstr "Berkas atau folder tidak ditemukan. Periksa lokasinya."
+
+msgid "The game metadata is invalid or unavailable. Refresh the version list and try again."
+msgstr "Metadata gim tidak valid atau tidak tersedia. Segarkan daftar versi dan coba lagi."
+
+msgid "The operation failed. See Technical Details for more information."
+msgstr "Operasi gagal. Lihat rincian teknis untuk informasi lebih lanjut."
+
+msgid "The requested file, project, or compatible version was not found."
+msgstr "Berkas, proyek, atau versi kompatibel yang diminta tidak ditemukan."
+
+msgid "The service rejected the request. Try again later."
+msgstr "Layanan menolak permintaan. Coba lagi nanti."
+
+msgid "The service returned an invalid response. Try again later."
+msgstr "Layanan mengembalikan respons tidak valid. Coba lagi nanti."
+
+msgid "There is not enough free disk space."
+msgstr "Ruang kosong pada disk tidak cukup."
+
+msgid "This account does not own Minecraft: Java Edition."
+msgstr "Akun ini tidak memiliki Minecraft: Java Edition."
+
+msgid "This instance is no longer available. Refresh the instance list."
+msgstr "Instans ini tidak lagi tersedia. Segarkan daftar instans."
+
+msgid "Too many requests. Wait a moment and try again."
+msgstr "Terlalu banyak permintaan. Tunggu sebentar dan coba lagi."
+
+msgid "Your instance settings are invalid. Check the selected version and JVM arguments."
+msgstr "Pengaturan instans tidak valid. Periksa versi yang dipilih dan argumen JVM."
+
+msgid "Your saved sign-in is no longer valid. Sign in again."
+msgstr "Informasi masuk tersimpan tidak lagi valid. Masuk lagi."

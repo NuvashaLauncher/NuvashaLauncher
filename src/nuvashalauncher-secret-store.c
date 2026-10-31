@@ -59,7 +59,13 @@ static gboolean
 secret_error (GError **error, GError *cause)
 {
   if (cause != NULL)
-    g_propagate_error (error, cause);
+    {
+      /* Keep the diagnostic, but identify keyring failures as account errors
+       * rather than mistaking D-Bus failures for network or file errors. */
+      g_set_error_literal (error, nuvashalauncher_ACCOUNTS_ERROR,
+                            nuvashalauncher_ACCOUNTS_ERROR_IO, cause->message);
+      g_error_free (cause);
+    }
   else
     g_set_error (error, nuvashalauncher_ACCOUNTS_ERROR,
                  nuvashalauncher_ACCOUNTS_ERROR_IO,

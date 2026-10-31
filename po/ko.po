@@ -1071,3 +1071,102 @@ msgstr "편집 모드 들어가기"
 
 msgid "Delete Selected"
 msgstr "선택 항목 삭제"
+
+msgid "A new crash report was created. Open the logs for details."
+msgstr "새 충돌 보고서가 생성되었습니다. 자세한 내용은 로그를 확인하세요."
+
+msgid "Access was denied. Check the folder permissions."
+msgstr "접근이 거부되었습니다. 폴더 권한을 확인하세요."
+
+msgid "An offline account with this name already exists."
+msgstr "이 이름의 오프라인 계정이 이미 있습니다."
+
+msgid "Choose another instance name or directory."
+msgstr "다른 인스턴스 이름이나 폴더를 선택하세요."
+
+msgid "Could not install this mod loader. Choose another version or inspect Technical Details."
+msgstr "이 모드 로더를 설치하지 못했습니다. 다른 버전을 선택하거나 기술 세부 정보를 확인하세요."
+
+msgid "Could not load project details. Try again."
+msgstr "프로젝트 세부 정보를 불러오지 못했습니다. 다시 시도하세요."
+
+msgid "Could not load versions. Try again."
+msgstr "버전을 불러오지 못했습니다. 다시 시도하세요."
+
+msgid "Could not open the browser. Open the displayed address manually."
+msgstr "브라우저를 열지 못했습니다. 표시된 주소를 직접 여세요."
+
+msgid "Could not read or write files. Check the location, permissions, and free disk space."
+msgstr "파일을 읽거나 쓰지 못했습니다. 위치, 권한, 여유 공간을 확인하세요."
+
+msgid "Could not save the account. Check your system keyring and file permissions."
+msgstr "계정을 저장하지 못했습니다. 시스템 키링과 파일 권한을 확인하세요."
+
+msgid "Microsoft returned an unsafe sign-in address. Update the launcher before trying again."
+msgstr "Microsoft가 안전하지 않은 로그인 주소를 반환했습니다. 런처를 업데이트한 뒤 다시 시도하세요."
+
+msgid "Microsoft sign-in is not configured in this build. Update the launcher."
+msgstr "이 빌드에는 Microsoft 로그인이 구성되지 않았습니다. 런처를 업데이트하세요."
+
+msgid "Select a Java runtime with desktop support, not a headless installation."
+msgstr "헤드리스 설치 대신 데스크톱을 지원하는 Java 런타임을 선택하세요."
+
+msgid "Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
+msgstr "minecraft.net에서 Minecraft: Java Edition 프로필을 만든 뒤 다시 시도하세요."
+
+msgid "Sign-in was declined. Start again if you want to sign in."
+msgstr "로그인이 거부되었습니다. 로그인하려면 처음부터 다시 시작하세요."
+
+msgid "Technical Details"
+msgstr "기술 세부 정보"
+
+msgid "The Java executable could not be used. Select a working Java runtime."
+msgstr "Java 실행 파일을 사용하지 못했습니다. 정상 작동하는 Java 런타임을 선택하세요."
+
+msgid "The archive is invalid or unsafe. Download it again from a trusted source."
+msgstr "압축 파일이 잘못되었거나 안전하지 않습니다. 신뢰할 수 있는 출처에서 다시 다운로드하세요."
+
+msgid "The connection failed. Check your internet connection and try again."
+msgstr "연결에 실패했습니다. 인터넷 연결을 확인하고 다시 시도하세요."
+
+msgid "The destination already exists. Choose another location."
+msgstr "대상이 이미 있습니다. 다른 위치를 선택하세요."
+
+msgid "The downloaded file failed verification. It was not installed. Try downloading it again."
+msgstr "다운로드한 파일의 검증에 실패하여 설치하지 않았습니다. 다시 다운로드하세요."
+
+msgid "The file or folder was not found. Check its location."
+msgstr "파일이나 폴더를 찾지 못했습니다. 위치를 확인하세요."
+
+msgid "The game metadata is invalid or unavailable. Refresh the version list and try again."
+msgstr "게임 메타데이터가 잘못되었거나 사용할 수 없습니다. 버전 목록을 새로고침하고 다시 시도하세요."
+
+msgid "The operation failed. See Technical Details for more information."
+msgstr "작업에 실패했습니다. 기술 세부 정보를 확인하세요."
+
+msgid "The requested file, project, or compatible version was not found."
+msgstr "요청한 파일, 프로젝트 또는 호환 버전을 찾지 못했습니다."
+
+msgid "The service rejected the request. Try again later."
+msgstr "서비스가 요청을 거부했습니다. 나중에 다시 시도하세요."
+
+msgid "The service returned an invalid response. Try again later."
+msgstr "서비스가 잘못된 응답을 반환했습니다. 나중에 다시 시도하세요."
+
+msgid "There is not enough free disk space."
+msgstr "디스크 여유 공간이 부족합니다."
+
+msgid "This account does not own Minecraft: Java Edition."
+msgstr "이 계정은 Minecraft: Java Edition을 소유하지 않습니다."
+
+msgid "This instance is no longer available. Refresh the instance list."
+msgstr "이 인스턴스를 더 이상 사용할 수 없습니다. 인스턴스 목록을 새로고침하세요."
+
+msgid "Too many requests. Wait a moment and try again."
+msgstr "요청이 너무 많습니다. 잠시 기다렸다가 다시 시도하세요."
+
+msgid "Your instance settings are invalid. Check the selected version and JVM arguments."
+msgstr "인스턴스 설정이 잘못되었습니다. 선택한 버전과 JVM 인수를 확인하세요."
+
+msgid "Your saved sign-in is no longer valid. Sign in again."
+msgstr "저장된 로그인 정보가 더 이상 유효하지 않습니다. 다시 로그인하세요."

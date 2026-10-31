@@ -9,6 +9,7 @@
 #include "nuvashalauncher-loaders.h"
 #include "nuvashalauncher-minecraft-resolve.h"
 #include "nuvashalauncher-minecraft-versions.h"
+#include "nuvashalauncher-i18n.h"
 
 /* Internal loader-install/profile pipeline. */
 
@@ -201,10 +202,9 @@ on_manifest_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
            that has no loader version, is a broken instance rather than a
            game to run: saying so is better than running the wrong thing. */
         if (!nuvashalauncher_loader_is_supported (loader))
-          launcher_failed (self, "this build of nuvashalauncher does not install "
-                                 "that loader");
+          launcher_failed (self, _("Could not install this mod loader. Choose another version or inspect Technical Details."));
         else if (loader_version == NULL || *loader_version == '\0')
-          launcher_failed (self, "the instance has no loader version");
+          launcher_failed (self, _("Your instance settings are invalid. Check the selected version and JVM arguments."));
         else
           resolve_with_a_loader (self, manifest, loader, loader_version);
 

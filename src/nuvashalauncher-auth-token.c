@@ -96,7 +96,7 @@ token_answered (AuthRequest *self)
       g_get_real_time () / 1000000 >= self->deadline)
     {
       fail (self,
-            g_error_new_literal (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_DECLINED,
+            g_error_new_literal (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_EXPIRED,
                                  "the code ran out before the sign-in was "
                                  "finished: ask for a new one"));
       return;

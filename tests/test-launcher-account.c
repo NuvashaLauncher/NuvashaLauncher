@@ -13,6 +13,8 @@
  * does go out is the manifest of such a launch. */
 
 #include "nuvashalauncher-launcher.h"
+#include "nuvashalauncher-launcher-private.h"
+#include "nuvashalauncher-auth-microsoft.h"
 #include "nuvashalauncher-fs.h"
 #include "nuvashalauncher-secret-store.h"
 
@@ -235,7 +237,7 @@ test_a_dead_token_asks_for_a_sign_in (void)
 
   g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==,
                    nuvashalauncher_LAUNCH_NEEDS_SIGN_IN);
-  assert_log_has (launcher, "sign in again");
+    assert_log_has (launcher, "Sign in again");
   assert_log_has (launcher, "Notch");
 
   /* What goes with the state is the sentence the user is shown. */
@@ -243,7 +245,7 @@ test_a_dead_token_asks_for_a_sign_in (void)
     const char *detail = nuvashalauncher_launcher_get_state_detail (launcher);
 
     g_assert_nonnull (detail);
-    g_assert_nonnull (strstr (detail, "sign in"));
+    g_assert_nonnull (strstr (detail, "Sign in again"));
     g_assert_nonnull (strstr (detail, "Notch"));
   }
 
@@ -342,6 +344,42 @@ test_launch_can_use_another_account (void)
 /* The name of the state is what a view shows, so it is part of what the
    launcher promises. */
 static void
+test_network_failure_preserves_tokens (void)
+{
+  g_autoptr (nuvashalauncherInstance) instance = new_instance ();
+  g_autoptr (nuvashalauncherAccounts) accounts = new_store ("temporary-outage.json");
+  g_autoptr (nuvashalauncher) launcher =
+    nuvashalauncher_launcher_new (instance, NULL, accounts);
+  g_autoptr (nuvashalauncherAccount) account = microsoft_account (TRUE);
+  g_autoptr (GError) error = NULL;
+
+  if (!nuvashalauncher_accounts_add (accounts, account, &error))
+    { g_test_skip ("Secret Service is unavailable"); return; }
+  g_assert_no_error (error);
+  error = g_error_new_literal (nuvashalauncher_AUTH_ERROR,
+    nuvashalauncher_AUTH_ERROR_NETWORK, "temporary network outage");
+  launcher_auth_failed (launcher, error);
+  nuvashalauncherAccount *stored = nuvashalauncher_accounts_get_active (accounts);
+  g_assert_nonnull (stored);
+  g_assert_cmpstr (stored->access_token, ==, account->access_token);
+  g_assert_cmpstr (stored->refresh_token, ==, account->refresh_token);
+  g_assert_cmpint (stored->expires_at, ==, account->expires_at);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_FAILED);
+  g_assert_cmpstr (nuvashalauncher_launcher_get_state_detail (launcher), ==,
+                   "The connection failed. Check your internet connection and try again.");
+  g_clear_error (&error);
+  gboolean slow = FALSE;
+  nuvashalauncher_auth_polling_error ("{\"error\":\"server_error\"}", -1, &slow, &error);
+  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_SERVICE);
+  launcher_auth_failed (launcher, error);
+  stored = nuvashalauncher_accounts_get_active (accounts);
+  g_assert_cmpstr (stored->access_token, ==, account->access_token);
+  g_assert_cmpstr (stored->refresh_token, ==, account->refresh_token);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_FAILED);
+  g_print ("ok - temporary authentication outages preserve saved credentials\n");
+}
+
+static void
 test_the_state_has_a_name (void)
 {
   g_assert_cmpstr (nuvashalauncher_launch_state_to_string (nuvashalauncher_LAUNCH_NEEDS_SIGN_IN), ==,
@@ -375,6 +413,7 @@ main (void)
   test_a_dead_token_asks_for_a_sign_in ();
   test_a_ready_account_gets_past_the_gate ();
   test_launch_can_use_another_account ();
+  test_network_failure_preserves_tokens ();
   test_the_state_has_a_name ();
 
   /* These tests exercise persistence with fixed identities. Do not leave

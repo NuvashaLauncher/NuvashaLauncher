@@ -43,6 +43,16 @@
     <color type="primary">#7774a5</color>
   </branding>
   <releases>
+    <release version="0.9" date="2026-10-30">
+      <description>
+        <p>Improved error handling throughout the launcher. User-facing errors
+        are now localized across account management, instances, Java and
+        loaders, Minecraft launching, content browsing, modpacks, skins, and
+        settings. Technical failures are presented with clear translated
+        summaries, hidden errors are revealed, and temporary authentication or
+        invalid-download failures are handled more safely.</p>
+      </description>
+    </release>
     <release version="0.8" date="2026-10-28">
       <description>
         <p>Account records now use the desktop Secret Service, preserving

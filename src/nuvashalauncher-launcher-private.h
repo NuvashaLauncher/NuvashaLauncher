@@ -76,6 +76,7 @@ void on_manifest_ready (GObject *source, GAsyncResult *result,
                         gpointer user_data);
 void launcher_needs_sign_in (nuvashalauncher *self, const char *reason);
 void launch_finished_with_error (nuvashalauncher *self, GError *error);
+void launcher_auth_failed (nuvashalauncher *self, const GError *error);
 const nuvashalauncherJava *choose_java (nuvashalauncher *self, GPtrArray *javas, int required,
                             char **instance_java);
 void remember_java (nuvashalauncher *self, const nuvashalauncherJava *java);
