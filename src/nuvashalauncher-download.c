@@ -338,7 +338,7 @@ nuvashalauncher_download_file_limited_async (nuvashalauncherDownloadService *ser
       nuvashalauncher_task_scope_return_error_deferred (
         scope,
         g_error_new_literal (nuvashalauncher_DOWNLOAD_ERROR,
-                             nuvashalauncher_DOWNLOAD_ERROR_CHECKSUM,
+                             nuvashalauncher_DOWNLOAD_ERROR_INVALID,
                              "the expected checksum is not valid"));
       return g_steal_pointer (&scope);
     }
@@ -350,7 +350,7 @@ nuvashalauncher_download_file_limited_async (nuvashalauncherDownloadService *ser
       nuvashalauncher_task_scope_return_error_deferred (
         scope,
         g_error_new (nuvashalauncher_DOWNLOAD_ERROR,
-                     nuvashalauncher_DOWNLOAD_ERROR_NETWORK,
+                     nuvashalauncher_DOWNLOAD_ERROR_INVALID,
                      "\"%s\" is not a usable download url", shown));
       return g_steal_pointer (&scope);
     }
@@ -408,7 +408,7 @@ nuvashalauncher_download_json_async (nuvashalauncherDownloadService *service, co
       nuvashalauncher_task_scope_return_error_deferred (
         scope,
         g_error_new (nuvashalauncher_DOWNLOAD_ERROR,
-                     nuvashalauncher_DOWNLOAD_ERROR_NETWORK,
+                     nuvashalauncher_DOWNLOAD_ERROR_INVALID,
                      "\"%s\" is not a usable download url", shown));
       return g_steal_pointer (&scope);
     }
@@ -467,7 +467,7 @@ nuvashalauncher_download_json_cached_async (nuvashalauncherDownloadService *serv
       nuvashalauncher_task_scope_return_error_deferred (
         scope,
         g_error_new (nuvashalauncher_DOWNLOAD_ERROR,
-                     nuvashalauncher_DOWNLOAD_ERROR_NETWORK,
+                     nuvashalauncher_DOWNLOAD_ERROR_INVALID,
                      "\"%s\" is not a usable download url", shown));
       return g_steal_pointer (&scope);
     }
@@ -509,7 +509,7 @@ nuvashalauncher_download_json_post_cached_async (nuvashalauncherDownloadService 
       g_autofree char *shown = url_for_message (url);
       nuvashalauncher_task_scope_return_error_deferred (
         scope,
-        g_error_new (nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_NETWORK,
+        g_error_new (nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_INVALID,
                      "\"%s\" is not a usable request url", shown));
       return g_steal_pointer (&scope);
     }

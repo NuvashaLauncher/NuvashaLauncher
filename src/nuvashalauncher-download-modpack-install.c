@@ -99,13 +99,13 @@ on_install_done (GObject *source G_GNUC_UNUSED,
           !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         {
           self->fail_is_install = TRUE;
-           push_error (self, _("Could not install the modpack"), error->message,
+           push_failure (self, _("Could not install the modpack"), error,
                       G_CALLBACK (on_error_retry_install));
         }
       else if (!g_error_matches (error, nuvashalauncher_MODPACK_ERROR,
                                  nuvashalauncher_MODPACK_ERROR_CANCELLED) &&
                !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-        g_warning ("the modpack could not be installed: %s", error->message);
+         g_warning ("%s", nuvashalauncher_error_message (error));
 
       install_job_free (job);
       return;
@@ -118,8 +118,7 @@ on_install_done (GObject *source G_GNUC_UNUSED,
       if (!nuvashalauncher_modpack_install_icon (self->manager, instance, self->icon_path,
                                      &error))
         if (!self->closed)
-          push_error (self, _("Could not copy the instance icon"),
-                      error != NULL ? error->message : _("Unknown error"),
+          push_failure (self, _("Could not copy the instance icon"), error,
                       G_CALLBACK (on_error_back));
     }
 
@@ -334,13 +333,11 @@ on_pack_downloaded (GObject *source G_GNUC_UNUSED,
           if (!self->closed)
             {
               self->fail_is_install = FALSE;
-               push_error (self, _("Pack could not be fetched"), error->message,
+               push_failure (self, _("Pack could not be fetched"), error,
                           G_CALLBACK (on_error_retry_fetch));
             }
           else
-            g_warning ("the modpack \"%s\" could not be fetched: %s",
-                       self->pack_path != NULL ? self->pack_path : "?",
-                       error->message);
+             g_warning ("%s", nuvashalauncher_error_message (error));
         }
 
       if (self->pack_download != NULL)
@@ -373,11 +370,11 @@ on_pack_parsed (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       if (!self->closed)
         {
           self->fail_is_install = FALSE;
-           push_error (self, _("Invalid pack"), error->message,
+           push_failure (self, _("Invalid pack"), error,
                       G_CALLBACK (on_error_retry_fetch));
         }
       else
-        g_warning ("the fetched modpack is not a pack: %s", error->message);
+         g_warning ("%s", nuvashalauncher_error_message (error));
 
       if (self->pack_download != NULL)
         nuvashalauncher_download_finish (self->pack_download);
@@ -392,12 +389,11 @@ on_pack_parsed (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       if (!self->closed)
         {
           self->fail_is_install = FALSE;
-           push_error (self, _("The pack does not define its install"),
-                      error->message, G_CALLBACK (on_error_retry_fetch));
+           push_failure (self, _("Could not install the modpack"),
+                       error, G_CALLBACK (on_error_retry_fetch));
         }
       else
-        g_warning ("the fetched modpack does not define its install: %s",
-                   error->message);
+         g_warning ("%s", nuvashalauncher_error_message (error));
 
       if (self->pack_download != NULL)
         nuvashalauncher_download_finish (self->pack_download);
@@ -464,7 +460,7 @@ dialog_start_features (nuvashalauncherDownloadModpackDialog *self)
     {
       self->fail_is_install = FALSE;
        push_error (self, _("This version has no pack file"),
-                   _("It carries files that Nuvasha Launcher does not recognize."),
+                   _("This project publishes no pack file Nuvasha Launcher can install."),
                   G_CALLBACK (on_error_retry_fetch));
       return FALSE;
     }
@@ -505,8 +501,8 @@ dialog_start_features (nuvashalauncherDownloadModpackDialog *self)
         g_set_error (&error, G_FILE_ERROR, g_file_error_from_errno (errno),
                      "cannot create a temporary modpack file: %s",
                      g_strerror (errno));
-        push_error (self, _("Pack could not be fetched"),
-                    error->message, G_CALLBACK (on_error_retry_fetch));
+        push_failure (self, _("Pack could not be fetched"),
+                    error, G_CALLBACK (on_error_retry_fetch));
         return FALSE;
       }
 

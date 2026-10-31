@@ -266,7 +266,12 @@ details_content (nuvashalauncherDownloadModpackDialog *self)
   details_watch (&self->body, gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
 
   if (self->details_problem != NULL)
-    gtk_box_append (GTK_BOX (self->body), plain_label (self->details_problem));
+    {
+      gtk_box_append (GTK_BOX (self->body), plain_label (self->details_problem));
+      const GError *error = g_object_get_data (G_OBJECT (self), "details-error");
+      if (error != NULL)
+        gtk_box_append (GTK_BOX (self->body), nuvashalauncher_ui_error_details (error));
+    }
   else if (self->details != NULL && self->details->body != NULL &&
            *self->details->body != '\0')
     nuvashalauncher_markdown_render (GTK_BOX (self->body), self->details->body);
@@ -362,6 +367,9 @@ show_details_error (nuvashalauncherDownloadModpackDialog *self, const char *mess
   gtk_label_set_text (GTK_LABEL (self->details_error),
                       message != NULL ? message : "");
   gtk_widget_set_visible (GTK_WIDGET (self->details_error), message != NULL);
+  const GError *error = g_object_get_data (G_OBJECT (self), "versions-error");
+  gtk_widget_set_tooltip_text (GTK_WIDGET (self->details_error),
+                               error != NULL ? nuvashalauncher_error_message (error) : NULL);
 }
 
 typedef struct
@@ -403,8 +411,11 @@ on_versions_answer (GObject *source G_GNUC_UNUSED,
         {
           g_free (self->versions_problem);
           self->versions_problem =
-            g_strdup (error != NULL ? error->message
-                                    : "the versions could not be read");
+            g_strdup (error != NULL ? nuvashalauncher_error_message (error)
+                                    : _("Could not load versions. Try again."));
+          g_object_set_data_full (G_OBJECT (self), "versions-error",
+                                  error != NULL ? g_error_copy (error) : NULL,
+                                  (GDestroyNotify) g_error_free);
         }
 
       versions_ask_free (ask);
@@ -417,7 +428,10 @@ on_versions_answer (GObject *source G_GNUC_UNUSED,
     {
       g_free (self->versions_problem);
       self->versions_problem =
-        g_strdup (error != NULL ? error->message : "the versions could not be read");
+        g_strdup (nuvashalauncher_error_message (error));
+      g_object_set_data_full (G_OBJECT (self), "versions-error",
+                              error != NULL ? g_error_copy (error) : NULL,
+                              (GDestroyNotify) g_error_free);
       versions_ask_free (ask);
       return;
     }
@@ -481,8 +495,11 @@ on_details_answer (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         {
           g_free (self->details_problem);
           self->details_problem =
-            g_strdup (error != NULL ? error->message
-                                    : "the pack cannot be read");
+            g_strdup (error != NULL ? nuvashalauncher_error_message (error)
+                                    : _("Could not load project details. Try again."));
+          g_object_set_data_full (G_OBJECT (self), "details-error",
+                                  error != NULL ? g_error_copy (error) : NULL,
+                                  (GDestroyNotify) g_error_free);
         }
     }
   else
@@ -546,6 +563,8 @@ dialog_details_open (nuvashalauncherDownloadModpackDialog *self)
   g_clear_pointer (&self->details, nuvashalauncher_modrinth_details_free);
   g_free (self->details_problem);
   self->details_problem = NULL;
+  g_object_set_data (G_OBJECT (self), "details-error", NULL);
+  g_object_set_data (G_OBJECT (self), "versions-error", NULL);
   g_free (self->versions_problem);
   self->versions_problem = NULL;
 

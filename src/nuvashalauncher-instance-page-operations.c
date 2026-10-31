@@ -35,7 +35,7 @@ on_open_folder_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 
   if (!nuvashalauncher_instance_manager_open_folder_finish (nuvashalauncher_INSTANCE_MANAGER (source),
                                                 result, &error))
-    instance_page_show_toast (self, error->message);
+    instance_page_show_error (self, error);
 
   g_object_unref (self);
   nuvashalauncher_operation_unref (operation);
@@ -75,7 +75,7 @@ on_export_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_autoptr (GError) error = NULL;
 
   if (!nuvashalauncher_modpack_export_finish (result, &error))
-    instance_page_show_toast (self, error->message);
+    instance_page_show_error (self, error);
   else
     instance_page_show_toast (self, _("Modpack exported"));
 
@@ -111,7 +111,7 @@ on_export_file_chosen (GObject *source, GAsyncResult *result,
                             GTK_DIALOG_ERROR_CANCELLED) &&
           !g_error_matches (error, GTK_DIALOG_ERROR,
                             GTK_DIALOG_ERROR_DISMISSED))
-        instance_page_show_toast (self, error->message);
+        instance_page_show_error (self, error);
       g_object_unref (self);
       return;
     }
@@ -435,7 +435,7 @@ on_change_directory_ready (GObject *source, GAsyncResult *result,
     }
   else if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
     {
-      instance_page_show_toast (self, error->message);
+      instance_page_show_error (self, error);
     }
 
   set_moving (self, FALSE);
@@ -462,7 +462,7 @@ on_directory_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
                             GTK_DIALOG_ERROR_CANCELLED) &&
           !g_error_matches (error, GTK_DIALOG_ERROR,
                             GTK_DIALOG_ERROR_DISMISSED))
-        instance_page_show_toast (self, error->message);
+        instance_page_show_error (self, error);
 
       g_object_unref (self);
       return;
@@ -478,7 +478,7 @@ on_directory_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
                                                    self->instance, path,
                                                    &canonical, &error))
       {
-        instance_page_show_toast (self, error->message);
+        instance_page_show_error (self, error);
         g_object_unref (self);
         return;
       }
@@ -532,7 +532,7 @@ on_duplicate_ready (GObject *source, GAsyncResult *result, gpointer user_data)
                                            result, &error);
 
   if (copy == NULL)
-    instance_page_show_toast (self, error->message);
+    instance_page_show_error (self, error);
   else
     {
       g_autofree char *name = instance_string (copy, "name");
@@ -569,7 +569,7 @@ on_delete_ready (GObject *source, GAsyncResult *result, gpointer user_data)
                                            result, &error))
     {
       /* The instance is still registered: stay on its page. */
-      instance_page_show_toast (self, error->message);
+      instance_page_show_error (self, error);
       g_object_unref (self);
       nuvashalauncher_operation_unref (wait->operation);
       g_free (wait);

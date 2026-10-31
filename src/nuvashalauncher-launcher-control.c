@@ -6,6 +6,7 @@
 #include "nuvashalauncher-auth-microsoft.h"
 #include "nuvashalauncher-instance-components.h"
 #include "nuvashalauncher-i18n.h"
+#include "nuvashalauncher-errors.h"
 
 /* Internal launch start/stop control workflow. */
 
@@ -59,18 +60,31 @@ launcher_needs_sign_in (nuvashalauncher *self, const char *reason)
       nuvashalauncher_account_free (without);
     }
 
-  detail = g_strdup_printf ("%s: open the users menu and sign in as \"%s\" "
-                            "again",
-                            reason,
-                            account != NULL && account->name != NULL
-                              ? account->name
-                              : "the account");
+  detail = g_strdup_printf ("%s (%s)",
+    _("Your saved sign-in is no longer valid. Sign in again."),
+    account != NULL && account->name != NULL ? account->name : "");
+  log_line (self, TAG_STATE, "%s", reason);
 
   log_line (self, TAG_STATE, "%s", detail);
   set_state (self, nuvashalauncher_LAUNCH_NEEDS_SIGN_IN, detail);
 }
 
 /* A new token for an account whose old one has run out. */
+void
+launcher_auth_failed (nuvashalauncher *self, const GError *error)
+{
+  /* A connection or service failure does not invalidate saved credentials. */
+  if (g_error_matches (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_REAUTH) ||
+      g_error_matches (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_DECLINED))
+    {
+      g_object_set_data_full (G_OBJECT (self), "launch-error", g_error_copy (error),
+                              (GDestroyNotify) g_error_free);
+      launcher_needs_sign_in (self, nuvashalauncher_error_message (error));
+    }
+  else
+    launch_finished_with_error (self, error != NULL ? g_error_copy (error) : NULL);
+}
+
 static void
 on_account_refreshed (GObject      *source G_GNUC_UNUSED,
                       GAsyncResult *result,
@@ -96,9 +110,7 @@ on_account_refreshed (GObject      *source G_GNUC_UNUSED,
           return;
         }
 
-      launcher_needs_sign_in (
-          self, error != NULL ? error->message : "the account could not be "
-                                                     "signed in again");
+      launcher_auth_failed (self, error);
       return;
     }
 
@@ -162,6 +174,7 @@ nuvashalauncher_launcher_start (nuvashalauncher *self)
 
   version = nuvashalauncher_instance_component_get_version (
     self->instance, nuvashalauncher_COMPONENT_MINECRAFT);
+  g_object_set_data (G_OBJECT (self), "launch-error", NULL);
 
   g_free (self->version);
   self->version = version;

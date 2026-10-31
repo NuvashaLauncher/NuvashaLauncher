@@ -28,8 +28,8 @@ static guint
 static void
 show_error (nuvashalauncherOfflineAccountDialog *self, const char *message)
 {
-  (void) message;
-  gtk_widget_set_visible (GTK_WIDGET (self->error_label), FALSE);
+  gtk_label_set_text (self->error_label, message);
+  gtk_widget_set_visible (GTK_WIDGET (self->error_label), message != NULL);
 }
 
 static gboolean
@@ -67,7 +67,8 @@ update_add_button (nuvashalauncherOfflineAccountDialog *self)
   g_strstrip (name);
   account = nuvashalauncher_account_new_offline (name, &error);
 
-  if (account != NULL && offline_name_exists (self, name))
+  gboolean duplicate = account != NULL && offline_name_exists (self, name);
+  if (duplicate)
     g_clear_pointer (&account, nuvashalauncher_account_free);
 
   gtk_widget_set_sensitive (GTK_WIDGET (self->add_button), account != NULL);
@@ -77,7 +78,8 @@ update_add_button (nuvashalauncherOfflineAccountDialog *self)
   if (account != NULL || name[0] == '\0')
     nuvashalauncher_ui_clear_error_label (self->error_label);
   else
-    nuvashalauncher_ui_clear_error_label (self->error_label);
+    show_error (self, duplicate ? _("An offline account with this name already exists.")
+                                 : nuvashalauncher_error_message (error));
 }
 
 static void
@@ -104,7 +106,9 @@ on_add_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   if (account == NULL || offline_name_exists (self, name))
     {
       if (account == NULL)
-        show_error (self, error->message);
+        show_error (self, nuvashalauncher_error_message (error));
+      else
+        show_error (self, _("An offline account with this name already exists."));
       return;
     }
 

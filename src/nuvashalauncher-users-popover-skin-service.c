@@ -86,6 +86,7 @@ skin_menu_free (SkinMenu *menu)
   g_clear_object (&menu->skins);
   g_clear_object (&menu->view);
   g_clear_object (&menu->image);
+  g_clear_object (&menu->operation_status);
   g_free (menu);
 }
 
@@ -102,20 +103,22 @@ skin_menu_unref (SkinMenu *menu)
 #define FACE_X 8
 #define FACE_Y 8
 
-static void
-show_minecraft_service_error (SkinMenu *menu, const char *title, GError *error)
+void
+skin_menu_show_error (SkinMenu *menu, const GError *error)
 {
-  AdwAlertDialog *alert;
-
-  if (menu == NULL || error == NULL || menu->dialog == NULL)
+  if (menu == NULL || nuvashalauncher_error_is_cancelled (error))
     return;
-  if (error->domain == nuvashalauncher_MINECRAFT_SERVICES_ERROR &&
-      error->code == nuvashalauncher_MINECRAFT_SERVICES_ERROR_RATE_LIMITED)
+  if (!menu->closed && menu->operation_status != NULL)
+    {
+      nuvashalauncher_ui_error_label (menu->operation_status, error);
+      return;
+    }
+  /* Automatic retries remain visible without repeatedly opening dialogs. */
+  if (g_error_matches (error, nuvashalauncher_MINECRAFT_SERVICES_ERROR,
+                        nuvashalauncher_MINECRAFT_SERVICES_ERROR_RATE_LIMITED))
     return;
-  alert = ADW_ALERT_DIALOG (adw_alert_dialog_new (title, error->message));
-  adw_alert_dialog_add_response (alert, "ok", _("OK"));
-  adw_alert_dialog_set_close_response (alert, "ok");
-  adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (menu->dialog));
+  nuvashalauncher_ui_show_error (menu->closed ? NULL : GTK_WIDGET (menu->dialog),
+                                _("Minecraft Services error"), error);
 }
 
 void
@@ -148,7 +151,7 @@ save_cape_choice (SkinMenu *menu)
     return;
   account = nuvashalauncher_account_copy (menu->account);
   if (!nuvashalauncher_accounts_update (menu->owner->accounts, account, &error) && error != NULL)
-    g_warning ("Could not save cape choice: %s", error->message);
+    skin_menu_show_error (menu, error);
 }
 
 static void
@@ -175,10 +178,10 @@ on_skin_upload_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         menu->skin_upload_pending_url = g_strdup (upload->url);
       menu->skin_upload_retry_after = g_get_real_time () / 1000000 + delay;
       schedule_pending_skin_upload (menu, delay);
+      skin_menu_show_error (menu, error);
     }
   else if (menu != NULL && (response == NULL || error != NULL))
-    g_debug ("skin upload failed: %s",
-             error != NULL ? error->message : "empty response");
+    skin_menu_show_error (menu, error);
 
   if (menu != NULL)
     {
@@ -188,6 +191,8 @@ on_skin_upload_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         {
           menu->skin_upload_retry_after = 0;
           menu->skin_upload_retry_attempt = 0;
+          if (!menu->closed && menu->operation_status != NULL)
+            nuvashalauncher_ui_clear_error_label (menu->operation_status);
         }
     }
   if (!rate_limited)
@@ -239,14 +244,14 @@ on_skin_download_done (GObject *source, GAsyncResult *result, gpointer user_data
     {
       g_clear_pointer (&bytes, g_bytes_unref);
       g_clear_error (&error);
-      g_set_error (&error, G_IO_ERROR, G_IO_ERROR_FAILED,
+      g_set_error (&error, nuvashalauncher_MINECRAFT_SERVICES_ERROR,
+                   nuvashalauncher_MINECRAFT_SERVICES_ERROR_HTTP,
                    "skin request returned HTTP status %u",
                    soup_message_get_status (upload->message));
     }
   if (bytes == NULL)
     {
-      g_warning ("Could not download skin for upload: %s",
-                 error != NULL ? error->message : "unknown error");
+      skin_menu_show_error (menu, error);
       upload->menu->skin_upload_in_flight = FALSE;
       g_clear_object (&upload->menu->skin_upload_cancellable);
       skin_upload_background_finish (upload);
@@ -269,7 +274,7 @@ on_skin_upload_file_loaded (GObject *source, GAsyncResult *result, gpointer user
     g_file_load_bytes_finish (G_FILE (source), result, NULL, &error);
   if (bytes == NULL)
     {
-      g_warning ("Could not read skin for upload: %s", error->message);
+      skin_menu_show_error (menu, error);
       menu->skin_upload_in_flight = FALSE;
       g_clear_object (&menu->skin_upload_cancellable);
       skin_upload_background_finish (upload);
@@ -440,6 +445,7 @@ on_capes_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   if (bytes == NULL || error != NULL)
     {
+      skin_menu_show_error (menu, error);
       g_hash_table_replace (menu->owner->profile_cache,
                             g_strdup (menu->account->uuid != NULL
                                         ? menu->account->uuid : menu->account->id),
@@ -619,7 +625,7 @@ on_model_toggled (GtkCheckButton *button, gpointer user_data)
       g_free (account->skin_model);
       account->skin_model = g_strdup (menu->slim_model == button ? "SLIM" : "CLASSIC");
       if (!nuvashalauncher_accounts_update (menu->owner->accounts, account, &error) && error != NULL)
-        g_warning ("Could not save skin model: %s", error->message);
+        skin_menu_show_error (menu, error);
       {
         GtkListBoxRow *row = gtk_list_box_get_selected_row (menu->skins);
         const char *url = row != NULL
@@ -658,9 +664,8 @@ on_active_skin_delete_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
           skin_menu_unref (menu);
           return;
         }
-      g_warning ("Could not change active Minecraft skin or cape: %s",
-                 error != NULL ? error->message : "empty response");
-      show_minecraft_service_error (menu, _("Minecraft Services error"), error);
+      g_warning ("%s", nuvashalauncher_error_message (error));
+      skin_menu_show_error (menu, error);
     }
   skin_menu_unref (menu);
 }

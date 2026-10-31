@@ -278,39 +278,6 @@ show_empty (nuvashalauncherLoaderRow *self)
   emit_changed (self);
 }
 
-static void
-show_unavailable (nuvashalauncherLoaderRow *self)
-{
-  g_autoptr (GtkStringList) list = NULL;
-  const char *unavailable[] = { _("Unavailable"), NULL };
-
-  self->ready = FALSE;
-  self->interactive = FALSE;
-  g_clear_pointer (&self->versions, g_ptr_array_unref);
-  self->versions = g_ptr_array_new_with_free_func (
-    (GDestroyNotify) nuvashalauncher_loader_version_free);
-
-  list = gtk_string_list_new (unavailable);
-  adw_combo_row_set_model (ADW_COMBO_ROW (self->version_row),
-                           G_LIST_MODEL (list));
-  adw_combo_row_set_selected (ADW_COMBO_ROW (self->version_row), 0);
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (self->version_row), NULL);
-  gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
-  update_sensitivity (self);
-  emit_changed (self);
-}
-
-static gboolean
-versions_are_unavailable (const GError *error)
-{
-  if (error == NULL ||
-      !g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_HTTP))
-    return FALSE;
-
-  return g_str_has_prefix (error->message, "HTTP 400 ") ||
-         g_str_has_prefix (error->message, "HTTP 404 ");
-}
-
 /* Fills the version row from the versions a loader published. */
 static void
 fill (nuvashalauncherLoaderRow *self, GPtrArray *published)
@@ -403,14 +370,16 @@ versions_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                g_error_matches (error, nuvashalauncher_LOADERS_ERROR,
                                  nuvashalauncher_LOADERS_ERROR_NO_VERSIONS))
         show_empty (self);
-      else if (versions_are_unavailable (error))
-        show_unavailable (self);
       else
         /* A failure that carries no error is still a failure: say what
            happened in words rather than reading a message that is not
            there. */
-        show_error (self, error != NULL ? error->message : NO_VERSION_MESSAGE,
-                    TRUE);
+        {
+          show_error (self, error != NULL ? nuvashalauncher_error_message (error) : NO_VERSION_MESSAGE,
+                      TRUE);
+          gtk_widget_set_tooltip_text (GTK_WIDGET (self->version_row),
+                                       error != NULL ? nuvashalauncher_error_message (error) : NULL);
+        }
     }
 
   versions_ask_free (ask);

@@ -14,6 +14,7 @@
 #include "nuvashalauncher-download.h"
 #include "nuvashalauncher-settings.h"
 #include "nuvashalauncher-accounts.h"
+#include "nuvashalauncher-errors.h"
 
 static void
 on_quit (GSimpleAction *action G_GNUC_UNUSED,
@@ -51,7 +52,7 @@ finish_delete (GObject *source G_GNUC_UNUSED, GAsyncResult *result, gpointer use
   g_autoptr (GError) error = NULL;
   *data->success = nuvashalauncher_instance_manager_delete_finish (data->manager, result, &error);
   if (error != NULL)
-    g_printerr ("%s\n", error->message);
+    g_printerr ("%s\n", nuvashalauncher_error_message (error));
   g_main_loop_quit (data->loop);
 }
 
@@ -65,7 +66,7 @@ list_instances (void)
 
   if (!nuvashalauncher_instance_manager_load (manager, &error))
     {
-      g_printerr ("cannot read the instance list: %s\n", error->message);
+      g_printerr ("%s\n", nuvashalauncher_error_message (error));
       return 1;
     }
 
@@ -128,7 +129,7 @@ change_account (const char *key, gboolean remove)
   if (remove ? !nuvashalauncher_accounts_remove (accounts, account->id, &error)
              : !nuvashalauncher_accounts_set_active (accounts, account->id, &error))
     {
-      g_printerr ("%s\n", error->message);
+      g_printerr ("%s\n", nuvashalauncher_error_message (error));
       return 1;
     }
   return 0;
@@ -144,7 +145,7 @@ remove_instance (const char *id)
   gboolean success = FALSE;
 
   if (!nuvashalauncher_instance_manager_load (manager, &error))
-    { g_printerr ("%s\n", error->message); return 1; }
+    { g_printerr ("%s\n", nuvashalauncher_error_message (error)); return 1; }
   instance = nuvashalauncher_instance_manager_get_by_id (manager, id);
   if (instance == NULL)
     { g_printerr ("no instance has ID \"%s\"\n", id); return 1; }
@@ -181,7 +182,7 @@ create_main_window (GApplication *app, gboolean present)
   nuvashalauncher_i18n_init (nuvashalauncher_settings_get_language (settings));
 
   if (!nuvashalauncher_instance_manager_load (manager, &error))
-    g_warning ("cannot read the instance list: %s", error->message);
+    g_warning ("%s", nuvashalauncher_error_message (error));
 
   window = nuvashalauncher_main_window_new (ADW_APPLICATION (app), manager);
   if (present)
@@ -323,7 +324,7 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
        if (!nuvashalauncher_main_window_launch_instance_as (window, launch_id, account_id, &error))
         {
           g_application_command_line_printerr (command_line, "%s\n",
-                                                error->message);
+                                                nuvashalauncher_error_message (error));
           gtk_window_present (GTK_WINDOW (window));
           return 1;
         }

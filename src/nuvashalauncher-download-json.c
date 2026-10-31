@@ -49,7 +49,7 @@ nuvashalauncher_download_json_process_body (DownloadRequest *request, GBytes *bo
   if (size > MAX_JSON_RESPONSE_SIZE)
     {
       nuvashalauncher_download_request_fail (request,
-                    g_error_new (nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_IO,
+                    g_error_new (nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_INVALID,
                                  "the JSON response is too large (%zu bytes)",
                                  size));
       return;
@@ -110,8 +110,8 @@ nuvashalauncher_download_json_stream_ready (GObject *source, GAsyncResult *resul
     {
       end_attempt (request,
                    g_error_new_literal (nuvashalauncher_DOWNLOAD_ERROR,
-                                        nuvashalauncher_DOWNLOAD_ERROR_IO,
-                                        "the JSON response is too large"));
+                                         nuvashalauncher_DOWNLOAD_ERROR_INVALID,
+                                         "the JSON response is too large"));
       return;
     }
   read_next_chunk (request);

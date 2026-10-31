@@ -28,6 +28,7 @@ struct _nuvashalauncherSignInDialog
   GtkLabel *uri_label;
   GtkButton *open_button;
   GtkLabel *error_label;
+  GtkWidget *error_details;
   GtkButton *retry_button;
   GtkBox *body;
 
@@ -47,22 +48,22 @@ static void finish_sign_in (GObject      *source,
 
 /* Show the service error and the retry action. */
 static void
-show_error (nuvashalauncherSignInDialog *self, const char *message)
+show_error (nuvashalauncherSignInDialog *self, const GError *error,
+            const char *explanation)
 {
-  const char *friendly = message;
-
-  if (message != NULL && (g_strstr_len (message, -1, "invalid_grant") != NULL ||
-                          g_strstr_len (message, -1, "AADSTS70000") != NULL))
-    friendly = _("The sign-in request expired. Start again to get a new code.");
-  else if (message != NULL && g_strstr_len (message, -1, "Network") != NULL)
-    friendly = _("Microsoft could not be reached. Check your connection and try again.");
-  else if (message != NULL)
-    friendly = _("Microsoft sign-in failed. Try again.");
-
-  if (message != NULL && friendly != message)
-    g_debug ("Microsoft sign-in failed: %s", message);
-  gtk_label_set_text (GTK_LABEL (self->error_label), friendly);
-  gtk_widget_set_visible (GTK_WIDGET (self->error_label), message != NULL);
+  nuvashalauncher_ui_error_label (self->error_label, error);
+  if (explanation != NULL)
+    gtk_label_set_text (self->error_label, explanation);
+  if (self->error_details != NULL)
+    {
+      gtk_box_remove (self->body, self->error_details);
+      self->error_details = NULL;
+    }
+  if (error != NULL)
+    {
+      self->error_details = nuvashalauncher_ui_error_details (error);
+      gtk_box_insert_child_after (self->body, self->error_details, GTK_WIDGET (self->error_label));
+    }
   gtk_widget_set_visible (GTK_WIDGET (self->retry_button), TRUE);
   gtk_widget_set_visible (GTK_WIDGET (self->waiting), FALSE);
 }
@@ -71,7 +72,10 @@ static void
 clear_error (nuvashalauncherSignInDialog *self)
 {
   gtk_label_set_text (GTK_LABEL (self->error_label), NULL);
+  gtk_widget_set_tooltip_text (GTK_WIDGET (self->error_label), NULL);
   gtk_widget_set_visible (GTK_WIDGET (self->error_label), FALSE);
+  if (self->error_details != NULL)
+    gtk_widget_set_visible (self->error_details, FALSE);
   gtk_widget_set_visible (GTK_WIDGET (self->retry_button), FALSE);
 }
 
@@ -115,26 +119,29 @@ is_safe_verification_uri (const char *address)
 
 /* Open Microsoft's page through GIO, not through a command found on PATH.
    The dialog also displays the address for manual opening. */
-static void
+static gboolean
 open_the_page (nuvashalauncherSignInDialog *self)
 {
   g_autoptr (GError) error = NULL;
 
   if (self->code == NULL)
-    return;
+    return FALSE;
 
   if (!is_safe_verification_uri (self->code->verification_uri))
     {
-       show_error (self, _("Microsoft returned an unsafe verification address"));
-      return;
+      show_error (self, NULL,
+        _("Microsoft returned an unsafe sign-in address. Update the launcher before trying again."));
+      return FALSE;
     }
 
   if (!g_app_info_launch_default_for_uri (self->code->verification_uri, NULL,
                                           &error))
     {
-      show_error (self, error->message);
-      return;
+      show_error (self, error,
+        _("Could not open the browser. Open the displayed address manually."));
+      gtk_widget_set_visible (GTK_WIDGET (self->uri_label), TRUE);
     }
+  return TRUE;
 }
 
 static void
@@ -154,9 +161,7 @@ on_code_ready (GObject      *source G_GNUC_UNUSED,
           g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         return;
 
-      show_error (self, error != NULL
-                          ? error->message
-                           : _("Microsoft would not give a code to sign in with"));
+      show_error (self, error, NULL);
       return;
     }
 
@@ -174,7 +179,8 @@ on_code_ready (GObject      *source G_GNUC_UNUSED,
 
   /* The page opens by itself, and the button is there for a user who
      closed the tab it opened. */
-  open_the_page (self);
+  if (!open_the_page (self))
+    return;
 
   set_step (self, STEP_SIGN_IN);
 
@@ -199,9 +205,7 @@ finish_sign_in (GObject      *source G_GNUC_UNUSED,
           g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         return;
 
-      show_error (self, error != NULL
-                          ? error->message
-                           : _("the sign-in did not finish"));
+      show_error (self, error, NULL);
       return;
     }
 

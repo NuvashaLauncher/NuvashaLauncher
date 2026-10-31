@@ -388,7 +388,7 @@ open_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_autoptr (GError) error = NULL;
 
   if (!g_app_info_launch_default_for_uri_finish (result, &error))
-    g_warning ("the log folder does not open: %s", error->message);
+    nuvashalauncher_ui_show_error (NULL, _("Technical Details"), error);
 
   /* The copy of the address the call needed. */
   g_free (user_data);

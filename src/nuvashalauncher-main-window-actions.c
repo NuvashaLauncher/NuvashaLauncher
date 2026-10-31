@@ -50,7 +50,7 @@ on_import_modpack_chosen (GObject *source, GAsyncResult *result,
                             GTK_DIALOG_ERROR_CANCELLED) &&
           !g_error_matches (error, GTK_DIALOG_ERROR,
                             GTK_DIALOG_ERROR_DISMISSED))
-        gtk_widget_set_tooltip_text (GTK_WIDGET (self), error->message);
+        nuvashalauncher_ui_error_banner (self->ui.banner, error);
       g_object_unref (self);
       return;
     }
@@ -60,6 +60,7 @@ on_import_modpack_chosen (GObject *source, GAsyncResult *result,
 
     if (path == NULL)
       {
+        nuvashalauncher_ui_error_banner (self->ui.banner, NULL);
         adw_banner_set_title (self->ui.banner,
                               _("The selected modpack file is not local."));
         adw_banner_set_revealed (self->ui.banner, TRUE);
@@ -116,7 +117,8 @@ on_show_unstable_versions_toggled (GObject *object,
     return;
 
   adw_switch_row_set_active (row, stored);
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), error->message);
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), nuvashalauncher_error_message (error));
+  gtk_widget_set_tooltip_text (GTK_WIDGET (row), nuvashalauncher_error_message (error));
 }
 
 /* Written the moment the value changes. A spin row can produce a value
@@ -129,15 +131,19 @@ on_log_limit_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
   nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   AdwSpinRow *row = ADW_SPIN_ROW (object);
   guint limit = (guint) adw_spin_row_get_value (row);
+  g_autoptr (GError) error = NULL;
 
   if (limit == nuvashalauncher_settings_get_log_line_limit (self->model->settings))
     return;
 
   /* A limit that cannot be written leaves the row showing the number the
      settings file holds. */
-  if (!nuvashalauncher_settings_set_log_line_limit (self->model->settings, limit, NULL))
-    adw_spin_row_set_value (
-      row, nuvashalauncher_settings_get_log_line_limit (self->model->settings));
+  if (!nuvashalauncher_settings_set_log_line_limit (self->model->settings, limit, &error))
+    {
+      adw_spin_row_set_value (
+        row, nuvashalauncher_settings_get_log_line_limit (self->model->settings));
+      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical Details"), error);
+    }
 }
 
 /* Same contract as the snapshots switch: written at once, and put back
@@ -150,13 +156,17 @@ on_show_unstable_loaders_toggled (GObject *object,
   nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   AdwSwitchRow *row = ADW_SWITCH_ROW (object);
   gboolean active = adw_switch_row_get_active (row);
+  g_autoptr (GError) error = NULL;
 
   if (active == nuvashalauncher_settings_get_show_unstable_loaders (self->model->settings))
     return;
 
-  if (!nuvashalauncher_settings_set_show_unstable_loaders (self->model->settings, active, NULL))
-    adw_switch_row_set_active (
-      row, nuvashalauncher_settings_get_show_unstable_loaders (self->model->settings));
+  if (!nuvashalauncher_settings_set_show_unstable_loaders (self->model->settings, active, &error))
+    {
+      adw_switch_row_set_active (
+        row, nuvashalauncher_settings_get_show_unstable_loaders (self->model->settings));
+      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical Details"), error);
+    }
 }
 
 static void
@@ -167,13 +177,17 @@ on_export_metadata_toggled (GObject *object,
   nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   AdwSwitchRow *row = ADW_SWITCH_ROW (object);
   gboolean active = adw_switch_row_get_active (row);
+  g_autoptr (GError) error = NULL;
 
   if (active == nuvashalauncher_settings_get_export_metadata (self->model->settings))
     return;
 
-  if (!nuvashalauncher_settings_set_export_metadata (self->model->settings, active, NULL))
-    adw_switch_row_set_active (
-      row, nuvashalauncher_settings_get_export_metadata (self->model->settings));
+  if (!nuvashalauncher_settings_set_export_metadata (self->model->settings, active, &error))
+    {
+      adw_switch_row_set_active (
+        row, nuvashalauncher_settings_get_export_metadata (self->model->settings));
+      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical Details"), error);
+    }
 }
 
 static void
@@ -184,13 +198,17 @@ on_delete_dependents_toggled (GObject *object,
   nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   AdwSwitchRow *row = ADW_SWITCH_ROW (object);
   gboolean active = adw_switch_row_get_active (row);
+  g_autoptr (GError) error = NULL;
 
   if (active == nuvashalauncher_settings_get_delete_dependents (self->model->settings))
     return;
 
-  if (!nuvashalauncher_settings_set_delete_dependents (self->model->settings, active, NULL))
-    adw_switch_row_set_active (
-      row, nuvashalauncher_settings_get_delete_dependents (self->model->settings));
+  if (!nuvashalauncher_settings_set_delete_dependents (self->model->settings, active, &error))
+    {
+      adw_switch_row_set_active (
+        row, nuvashalauncher_settings_get_delete_dependents (self->model->settings));
+      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical Details"), error);
+    }
 }
 
 static void
@@ -203,11 +221,13 @@ on_language_selected (GObject *object,
   gsize length = 0;
   const nuvashalauncherLanguage *languages = nuvashalauncher_i18n_languages (&length);
   guint selected = adw_combo_row_get_selected (row);
+  g_autoptr (GError) error = NULL;
 
   if (selected >= length)
     return;
 
-  nuvashalauncher_settings_set_language (self->model->settings, languages[selected].code, NULL);
+  if (!nuvashalauncher_settings_set_language (self->model->settings, languages[selected].code, &error))
+    nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical Details"), error);
 }
 
 static void
@@ -218,14 +238,18 @@ on_cache_modrinth_api_responses_toggled (GObject *object,
   nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   AdwSwitchRow *row = ADW_SWITCH_ROW (object);
   gboolean active = adw_switch_row_get_active (row);
+  g_autoptr (GError) error = NULL;
 
   if (active == nuvashalauncher_settings_get_cache_modrinth_api_responses (self->model->settings))
     return;
 
   if (!nuvashalauncher_settings_set_cache_modrinth_api_responses (self->model->settings, active,
-                                                      NULL))
-    adw_switch_row_set_active (
-      row, nuvashalauncher_settings_get_cache_modrinth_api_responses (self->model->settings));
+                                                      &error))
+    {
+      adw_switch_row_set_active (
+        row, nuvashalauncher_settings_get_cache_modrinth_api_responses (self->model->settings));
+      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical Details"), error);
+    }
 }
 
 static void
@@ -242,12 +266,13 @@ on_cache_expiration_selected (GObject *object,
     nuvashalauncher_SETTINGS_CACHE_EXPIRATION_7_DAYS
   };
   guint selected = adw_combo_row_get_selected (row);
+  g_autoptr (GError) error = NULL;
 
   if (selected >= G_N_ELEMENTS (values) ||
       values[selected] == nuvashalauncher_settings_get_cache_expiration (self->model->settings))
     return;
 
-  if (!nuvashalauncher_settings_set_cache_expiration (self->model->settings, values[selected], NULL))
+  if (!nuvashalauncher_settings_set_cache_expiration (self->model->settings, values[selected], &error))
     {
       nuvashalauncherSettingsCacheExpiration current =
         nuvashalauncher_settings_get_cache_expiration (self->model->settings);
@@ -257,6 +282,7 @@ on_cache_expiration_selected (GObject *object,
         if (values[i] == current)
           current_index = i;
       adw_combo_row_set_selected (row, current_index);
+      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical Details"), error);
     }
 }
 
@@ -305,17 +331,17 @@ on_cache_cleared (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       adw_alert_dialog_new (_("Cache Cleared"),
                              _("Nuvasha Launcher cache data was cleared successfully.")));
   else
-    alert = ADW_ALERT_DIALOG (
-      adw_alert_dialog_new (_("Cache Cleanup Failed"),
-                            error != NULL ? error->message
-                                          : _("The cache could not be cleared.")));
+    nuvashalauncher_ui_show_error (GTK_WIDGET (self), _("Cache Cleanup Failed"), error);
 
-  adw_alert_dialog_set_heading_use_markup (alert, FALSE);
-  adw_alert_dialog_set_body_use_markup (alert, FALSE);
-  adw_alert_dialog_add_response (alert, "ok", _("OK"));
-  adw_alert_dialog_set_default_response (alert, "ok");
-  adw_alert_dialog_set_close_response (alert, "ok");
-  adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (self));
+  if (alert != NULL)
+    {
+      adw_alert_dialog_set_heading_use_markup (alert, FALSE);
+      adw_alert_dialog_set_body_use_markup (alert, FALSE);
+      adw_alert_dialog_add_response (alert, "ok", _("OK"));
+      adw_alert_dialog_set_default_response (alert, "ok");
+      adw_alert_dialog_set_close_response (alert, "ok");
+      adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (self));
+    }
   g_object_unref (self);
   nuvashalauncher_operation_unref (wait->operation);
   g_free (wait);

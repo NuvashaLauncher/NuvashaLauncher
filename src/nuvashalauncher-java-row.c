@@ -341,7 +341,10 @@ detect_finished (GObject      *source G_GNUC_UNUSED,
         }
       else if (error != NULL &&
                !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-        show_error (self, error->message);
+        {
+          show_error (self, nuvashalauncher_error_message (error));
+          gtk_widget_set_tooltip_text (GTK_WIDGET (self), nuvashalauncher_error_message (error));
+        }
     }
 
   java_ask_free (ask);
@@ -430,8 +433,10 @@ add_probed (GObject      *source G_GNUC_UNUSED,
     {
       adw_action_row_set_subtitle (
         ADW_ACTION_ROW (self),
-        error != NULL ? error->message
-                      : _("the chosen file does not report a Java version"));
+        error != NULL ? nuvashalauncher_error_message (error)
+                       : _("The Java executable could not be used. Select a working Java runtime."));
+      gtk_widget_set_tooltip_text (GTK_WIDGET (self),
+                                   error != NULL ? nuvashalauncher_error_message (error) : NULL);
       java_ask_free (ask);
       return;
     }
@@ -477,7 +482,10 @@ add_chosen (GObject *dialog, GAsyncResult *result, gpointer user_data)
                             GTK_DIALOG_ERROR_DISMISSED) &&
           !g_error_matches (error, GTK_DIALOG_ERROR,
                             GTK_DIALOG_ERROR_CANCELLED))
-        adw_action_row_set_subtitle (ADW_ACTION_ROW (self), error->message);
+        {
+          adw_action_row_set_subtitle (ADW_ACTION_ROW (self), nuvashalauncher_error_message (error));
+          gtk_widget_set_tooltip_text (GTK_WIDGET (self), nuvashalauncher_error_message (error));
+        }
 
       g_object_unref (self);
       return;

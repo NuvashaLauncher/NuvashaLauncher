@@ -352,7 +352,11 @@ detail_fill (nuvashalauncherContentPage *self)
   if (self->project.versions_problem != NULL)
     show_toast (self, self->project.versions_problem);
   else if (self->project.details_versions != NULL && self->project.details_versions->len == 0)
-    show_toast (self, _("This project publishes nothing that fits this instance."));
+    {
+      g_autofree char *message = g_strdup_printf (
+        _("No compatible version found for Minecraft %s."), self->minecraft_version);
+      show_toast (self, message);
+    }
 
   if (self->project.details_versions != NULL && self->project.details_versions->len > 0)
     {
@@ -424,12 +428,11 @@ on_detail_versions_ready (GObject *source G_GNUC_UNUSED,
 
   if (versions == NULL)
     {
-      /* Show the normal no-compatible-version message. */
-      if (error != NULL && g_error_matches (error, nuvashalauncher_MODRINTH_ERROR,
-                                            nuvashalauncher_MODRINTH_ERROR_NOT_FOUND))
-        self->project.versions_problem = g_strdup (error->message);
-      else
-        self->project.versions_problem = g_strdup (_("no compatible version"));
+      if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+        self->project.versions_problem = g_strdup (
+          error != NULL ? nuvashalauncher_error_message (error) : _("Could not load versions. Try again."));
+      if (error != NULL && !nuvashalauncher_error_is_cancelled (error))
+        show_error (self, _("Could not load versions. Try again."), error);
     }
   else
     {
@@ -475,8 +478,10 @@ on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       /* Show the error in the open details page rather than only in a toast. */
       if (self->project.details_problem == NULL)
         self->project.details_problem =
-          g_strdup (error != NULL ? error->message
-                                  : "the project cannot be read");
+          g_strdup (error != NULL ? nuvashalauncher_error_message (error)
+                                   : _("Could not load project details. Try again."));
+      if (error != NULL && !nuvashalauncher_error_is_cancelled (error))
+        show_error (self, _("Could not search Modrinth"), error);
     }
   else
     {

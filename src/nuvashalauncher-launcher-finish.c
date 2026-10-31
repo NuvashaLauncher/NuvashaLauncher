@@ -71,7 +71,7 @@ crash_reports_listed (GObject *source, GAsyncResult *result,
     }
 
   if (crashed)
-    game_crashed (self, "the game wrote a crash report");
+    game_crashed (self, _("A new crash report was created. Open the logs for details."));
   else
     set_state (self, nuvashalauncher_LAUNCH_STOPPED, NULL);
 

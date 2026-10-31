@@ -9,6 +9,7 @@
 #include "nuvashalauncher-downloads.h"
 #include "nuvashalauncher-task-private.h"
 #include "nuvashalauncher-fs.h"
+#include "nuvashalauncher-errors.h"
 
 #include <errno.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -152,7 +153,7 @@ icon_downloaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   if (!nuvashalauncher_download_file_finish (result, &error))
     {
       g_debug ("the icon \"%s\" could not be fetched: %s", load->url,
-               error != NULL ? error->message : "unknown error");
+               nuvashalauncher_error_message (error));
       nuvashalauncher_task_scope_return_error (load->scope, g_steal_pointer (&error));
     }
   else if (!nuvashalauncher_icon_scale_file (load->path))

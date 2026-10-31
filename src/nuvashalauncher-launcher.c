@@ -36,6 +36,7 @@ nuvashalauncher_launch_error_quark (void)
  * ---------------------------------------------------------- */
 
 #include "nuvashalauncher-launcher-private.h"
+#include "nuvashalauncher-errors.h"
 
 G_DEFINE_FINAL_TYPE (nuvashalauncher, nuvashalauncher_launcher, G_TYPE_OBJECT)
 
@@ -94,8 +95,8 @@ launcher_failed (nuvashalauncher *self, const char *reason)
 void
 launch_finished_with_error (nuvashalauncher *self, GError *error)
 {
-  if (error != NULL &&
-      g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+  g_autoptr (GError) owned_error = error;
+  if (nuvashalauncher_error_is_cancelled (error))
     {
       log_line (self, TAG_STATE,
                 "the launch was cancelled before the game started");
@@ -103,8 +104,12 @@ launch_finished_with_error (nuvashalauncher *self, GError *error)
       return;
     }
 
-  launcher_failed (self, error != NULL ? error->message
-                                       : "the launch failed");
+  if (error != NULL)
+    log_line (self, TAG_STATE, "%s", error->message);
+  g_object_set_data_full (G_OBJECT (self), "launch-error",
+                          error != NULL ? g_error_copy (error) : NULL,
+                          (GDestroyNotify) g_error_free);
+  launcher_failed (self, nuvashalauncher_error_message (error));
 }
 
 /* ---------------------------------------------------------- *

@@ -18,16 +18,13 @@
 void
 show_error (nuvashalauncherContentPage *self, const char *what, GError *error)
 {
-  g_autofree char *message = g_strdup_printf (
-      "%s: %s", what,
-      error != NULL ? error->message : "something went wrong");
-
   if (self->banner == NULL)
     return;
 
-  adw_banner_set_use_markup (ADW_BANNER (self->banner), FALSE);
+  nuvashalauncher_ui_error_banner (self->banner, error);
+  g_autofree char *message = g_strdup_printf (
+    "%s: %s", what, nuvashalauncher_error_message (error));
   adw_banner_set_title (ADW_BANNER (self->banner), message);
-  adw_banner_set_revealed (ADW_BANNER (self->banner), TRUE);
 }
 
 /* Remove all rows from a preferences group. */

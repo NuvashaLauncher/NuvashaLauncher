@@ -39,6 +39,7 @@ void upload_selected_skin (SkinMenu *, const char *, const char *);
 void on_cape_selected (GObject *, GParamSpec *, gpointer);
 void on_active_skin_delete_done (GObject *, GAsyncResult *, gpointer);
 void delete_active_skin (SkinMenu *);
+void skin_menu_show_error (SkinMenu *, const GError *);
 void append_profile_skins (SkinMenu *, const char *);
 void select_saved_skin (SkinMenu *);
 void apply_profile_json (SkinMenu *, const char *);
@@ -59,6 +60,7 @@ struct _SkinMenu
   GHashTable *skin_urls;
   AdwActionRow *current_skin_row;
   GtkButton *remove_button;
+  GtkLabel *operation_status;
   GtkCheckButton *default_model;
   GtkCheckButton *slim_model;
   gboolean applying_profile;

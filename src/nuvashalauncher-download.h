@@ -41,7 +41,8 @@ typedef enum {
   nuvashalauncher_DOWNLOAD_ERROR_RATE_LIMITED,  /* HTTP 429 */
   nuvashalauncher_DOWNLOAD_ERROR_CHECKSUM,      /* received bytes have the wrong hash */
   nuvashalauncher_DOWNLOAD_ERROR_IO,            /* local file system failure */
-  nuvashalauncher_DOWNLOAD_ERROR_CANCELLED      /* the caller cancelled the request */
+  nuvashalauncher_DOWNLOAD_ERROR_CANCELLED,     /* the caller cancelled the request */
+  nuvashalauncher_DOWNLOAD_ERROR_INVALID        /* unsafe URL, malformed/oversized response */
 } nuvashalauncherDownloadError;
 
 GQuark nuvashalauncher_download_error_quark (void);

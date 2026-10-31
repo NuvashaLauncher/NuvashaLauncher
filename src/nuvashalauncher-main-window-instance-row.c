@@ -163,8 +163,7 @@ instance_row_drop (AdwActionRow *target,
     {
       g_list_store_remove (instances, target_position);
       g_list_store_insert (instances, source_position, instance);
-      adw_banner_set_title (self->ui.banner, error->message);
-      adw_banner_set_revealed (self->ui.banner, TRUE);
+      nuvashalauncher_ui_error_banner (self->ui.banner, error);
     }
 
   return TRUE;

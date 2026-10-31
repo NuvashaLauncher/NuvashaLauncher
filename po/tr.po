@@ -1075,3 +1075,102 @@ msgstr "Düzenleme Moduna Gir"
 
 msgid "Delete Selected"
 msgstr "Seçilenleri Sil"
+
+msgid "A new crash report was created. Open the logs for details."
+msgstr "Yeni bir çökme raporu oluşturuldu. Ayrıntılar için günlükleri açın."
+
+msgid "Access was denied. Check the folder permissions."
+msgstr "Erişim reddedildi. Klasör izinlerini kontrol edin."
+
+msgid "An offline account with this name already exists."
+msgstr "Bu ada sahip bir çevrimdışı hesap zaten var."
+
+msgid "Choose another instance name or directory."
+msgstr "Başka bir örnek adı veya klasör seçin."
+
+msgid "Could not install this mod loader. Choose another version or inspect Technical Details."
+msgstr "Bu mod yükleyicisi kurulamadı. Başka bir sürüm seçin veya teknik ayrıntılara bakın."
+
+msgid "Could not load project details. Try again."
+msgstr "Proje ayrıntıları yüklenemedi. Tekrar deneyin."
+
+msgid "Could not load versions. Try again."
+msgstr "Sürümler yüklenemedi. Tekrar deneyin."
+
+msgid "Could not open the browser. Open the displayed address manually."
+msgstr "Tarayıcı açılamadı. Gösterilen adresi elle açın."
+
+msgid "Could not read or write files. Check the location, permissions, and free disk space."
+msgstr "Dosyalar okunamadı veya yazılamadı. Konumu, izinleri ve boş disk alanını kontrol edin."
+
+msgid "Could not save the account. Check your system keyring and file permissions."
+msgstr "Hesap kaydedilemedi. Sistem anahtarlığını ve dosya izinlerini kontrol edin."
+
+msgid "Microsoft returned an unsafe sign-in address. Update the launcher before trying again."
+msgstr "Microsoft güvenli olmayan bir giriş adresi döndürdü. Yeniden denemeden önce başlatıcıyı güncelleyin."
+
+msgid "Microsoft sign-in is not configured in this build. Update the launcher."
+msgstr "Bu derlemede Microsoft girişi yapılandırılmamış. Başlatıcıyı güncelleyin."
+
+msgid "Select a Java runtime with desktop support, not a headless installation."
+msgstr "Başsız kurulum yerine masaüstü destekli bir Java çalışma ortamı seçin."
+
+msgid "Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
+msgstr "minecraft.net üzerinde Minecraft: Java Edition profili oluşturup tekrar deneyin."
+
+msgid "Sign-in was declined. Start again if you want to sign in."
+msgstr "Giriş reddedildi. Giriş yapmak istiyorsanız yeniden başlayın."
+
+msgid "Technical Details"
+msgstr "Teknik ayrıntılar"
+
+msgid "The Java executable could not be used. Select a working Java runtime."
+msgstr "Java çalıştırılabilir dosyası kullanılamadı. Çalışan bir Java ortamı seçin."
+
+msgid "The archive is invalid or unsafe. Download it again from a trusted source."
+msgstr "Arşiv geçersiz veya güvensiz. Güvenilir bir kaynaktan yeniden indirin."
+
+msgid "The connection failed. Check your internet connection and try again."
+msgstr "Bağlantı başarısız. İnternet bağlantısını kontrol edip tekrar deneyin."
+
+msgid "The destination already exists. Choose another location."
+msgstr "Hedef zaten var. Başka bir konum seçin."
+
+msgid "The downloaded file failed verification. It was not installed. Try downloading it again."
+msgstr "İndirilen dosya doğrulanamadığı için kurulmadı. Yeniden indirin."
+
+msgid "The file or folder was not found. Check its location."
+msgstr "Dosya veya klasör bulunamadı. Konumunu kontrol edin."
+
+msgid "The game metadata is invalid or unavailable. Refresh the version list and try again."
+msgstr "Oyun üst verileri geçersiz veya kullanılamıyor. Sürüm listesini yenileyip tekrar deneyin."
+
+msgid "The operation failed. See Technical Details for more information."
+msgstr "İşlem başarısız. Daha fazla bilgi için teknik ayrıntılara bakın."
+
+msgid "The requested file, project, or compatible version was not found."
+msgstr "İstenen dosya, proje veya uyumlu sürüm bulunamadı."
+
+msgid "The service rejected the request. Try again later."
+msgstr "Hizmet isteği reddetti. Daha sonra tekrar deneyin."
+
+msgid "The service returned an invalid response. Try again later."
+msgstr "Hizmet geçersiz bir yanıt döndürdü. Daha sonra tekrar deneyin."
+
+msgid "There is not enough free disk space."
+msgstr "Yeterli boş disk alanı yok."
+
+msgid "This account does not own Minecraft: Java Edition."
+msgstr "Bu hesap Minecraft: Java Edition sahibi değil."
+
+msgid "This instance is no longer available. Refresh the instance list."
+msgstr "Bu örnek artık kullanılamıyor. Örnek listesini yenileyin."
+
+msgid "Too many requests. Wait a moment and try again."
+msgstr "Çok fazla istek. Biraz bekleyip tekrar deneyin."
+
+msgid "Your instance settings are invalid. Check the selected version and JVM arguments."
+msgstr "Örnek ayarları geçersiz. Seçilen sürümü ve JVM bağımsız değişkenlerini kontrol edin."
+
+msgid "Your saved sign-in is no longer valid. Sign in again."
+msgstr "Kaydedilen giriş artık geçerli değil. Yeniden giriş yapın."

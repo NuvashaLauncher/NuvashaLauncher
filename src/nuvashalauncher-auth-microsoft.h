@@ -84,13 +84,20 @@ G_BEGIN_DECLS
 typedef enum {
   nuvashalauncher_AUTH_ERROR_NO_CLIENT_ID,  /* the constant is empty */
   nuvashalauncher_AUTH_ERROR_DEVICE_CODE,   /* Microsoft would not give a code */
-  nuvashalauncher_AUTH_ERROR_DECLINED,      /* the user said no, or the code ran out */
+  nuvashalauncher_AUTH_ERROR_DECLINED,      /* the user declined sign-in */
   nuvashalauncher_AUTH_ERROR_PENDING,       /* the user has not signed in yet */
   nuvashalauncher_AUTH_ERROR_XBOX,          /* Xbox Live or XSTS refused */
   nuvashalauncher_AUTH_ERROR_NO_GAME,       /* the account does not own Minecraft: Java */
   nuvashalauncher_AUTH_ERROR_NO_PROFILE,    /* it owns Minecraft but has no profile */
   nuvashalauncher_AUTH_ERROR_NETWORK,       /* the request never arrived */
-  nuvashalauncher_AUTH_ERROR_PARSE          /* an answer nuvashalauncher cannot read */
+  nuvashalauncher_AUTH_ERROR_PARSE,         /* an answer nuvashalauncher cannot read */
+  nuvashalauncher_AUTH_ERROR_EXPIRED,
+  nuvashalauncher_AUTH_ERROR_REAUTH,
+  nuvashalauncher_AUTH_ERROR_XBOX_PROFILE,
+  nuvashalauncher_AUTH_ERROR_XBOX_FAMILY,
+  nuvashalauncher_AUTH_ERROR_XBOX_COUNTRY,
+  nuvashalauncher_AUTH_ERROR_XBOX_AGE,
+  nuvashalauncher_AUTH_ERROR_SERVICE       /* other service refusals; keep saved credentials */
 } nuvashalauncherAuthError;
 
 GQuark nuvashalauncher_auth_error_quark (void);
@@ -129,7 +136,8 @@ nuvashalauncherDeviceCode *nuvashalauncher_auth_device_code_finish (GAsyncResult
  *
  * Cancellable: cancelling stops the polling and nothing is stored.
  *
- * nuvashalauncher_AUTH_ERROR_DECLINED when the user said no or the code ran out,
+ * nuvashalauncher_AUTH_ERROR_DECLINED when the user said no,
+ * nuvashalauncher_AUTH_ERROR_EXPIRED when the device code ran out,
  * nuvashalauncher_AUTH_ERROR_XBOX when the Microsoft account has no Xbox profile or
  * is a child account, nuvashalauncher_AUTH_ERROR_NO_GAME when it does not own
  * Minecraft: Java, and nuvashalauncher_AUTH_ERROR_NO_PROFILE when it owns it but
@@ -143,7 +151,7 @@ nuvashalauncherAccount *nuvashalauncher_auth_sign_in_finish (GAsyncResult *resul
 
 /* Refresh an account's access token and retrieve its current profile.
  *
- * nuvashalauncher_AUTH_ERROR_DECLINED when Microsoft requires sign-in again. */
+ * nuvashalauncher_AUTH_ERROR_REAUTH when Microsoft requires sign-in again. */
 nuvashalauncherTaskScope *nuvashalauncher_auth_refresh_async (const nuvashalauncherAccount *account,
                                       GAsyncReadyCallback callback,
                                       gpointer user_data);

@@ -175,7 +175,7 @@ send_ready (GObject *source, GAsyncResult *result, gpointer user_data)
         {
           end_attempt (request,
                        g_error_new_literal (nuvashalauncher_DOWNLOAD_ERROR,
-                                            nuvashalauncher_DOWNLOAD_ERROR_NETWORK,
+                                            nuvashalauncher_DOWNLOAD_ERROR_INVALID,
                                             "a modpack download redirected to an unapproved host"));
           return;
         }
@@ -202,7 +202,7 @@ send_ready (GObject *source, GAsyncResult *result, gpointer user_data)
     {
       end_attempt (request,
                    g_error_new_literal (nuvashalauncher_DOWNLOAD_ERROR,
-                                        nuvashalauncher_DOWNLOAD_ERROR_IO,
+                                        nuvashalauncher_DOWNLOAD_ERROR_INVALID,
                                         "the download is larger than the permitted size"));
       return;
     }
@@ -260,7 +260,7 @@ read_chunk_ready (GObject *source, GAsyncResult *result, gpointer user_data)
     {
       end_attempt (request,
                    g_error_new_literal (nuvashalauncher_DOWNLOAD_ERROR,
-                                        nuvashalauncher_DOWNLOAD_ERROR_IO,
+                                        nuvashalauncher_DOWNLOAD_ERROR_INVALID,
                                         "the download is larger than the permitted size"));
       return;
     }
@@ -271,7 +271,7 @@ read_chunk_ready (GObject *source, GAsyncResult *result, gpointer user_data)
         {
           end_attempt (request,
                        g_error_new_literal (nuvashalauncher_DOWNLOAD_ERROR,
-                                            nuvashalauncher_DOWNLOAD_ERROR_IO,
+                                            nuvashalauncher_DOWNLOAD_ERROR_INVALID,
                                             "the JSON response is too large"));
           return;
         }
@@ -493,7 +493,8 @@ attempt_failed (DownloadRequest *request, GError *error)
         }
     }
 
-  if (g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_IO))
+  if (g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_IO) ||
+      g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_INVALID))
     retry = FALSE;
   else if (g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR,
                             nuvashalauncher_DOWNLOAD_ERROR_CHECKSUM))
@@ -633,7 +634,7 @@ start_attempt (DownloadRequest *request)
       g_autofree char *url = url_for_message (request->url);
 
       nuvashalauncher_download_request_fail (request,
-                    g_error_new (nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_NETWORK,
+                    g_error_new (nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_INVALID,
                                  "\"%s\" is not a usable download url", url));
       return;
     }

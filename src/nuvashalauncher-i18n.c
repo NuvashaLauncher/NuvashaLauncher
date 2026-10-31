@@ -30,7 +30,6 @@ nuvashalauncher_i18n_template_strings (void)
   (void) _("The duplicate file \"%s\" could not be removed: %s");
   (void) _("The replaced file \"%s\" could not be removed");
   (void) _("Could not copy the instance icon");
-  (void) _("Unknown error");
 }
 
 #include <locale.h>

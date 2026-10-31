@@ -75,9 +75,9 @@ open_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     {
       g_autofree char *message =
         g_strdup_printf (_("The folder could not be opened: %s"),
-                         error->message);
+                         nuvashalauncher_error_message (error));
       if (request->page != NULL)
-        show_toast (request->page, message);
+        show_error (request->page, message, error);
     }
 
   folder_open_request_free (request);
@@ -97,9 +97,9 @@ nuvashalauncher_content_page_on_open_folder_clicked (GtkButton *button G_GNUC_UN
     {
       g_autofree char *message =
         g_strdup_printf (_("Cannot create \"%s\": %s"), self->folder,
-                          create_error->message);
+                           nuvashalauncher_error_message (create_error));
 
-      show_toast (self, message);
+      show_error (self, message, create_error);
       return;
     }
 

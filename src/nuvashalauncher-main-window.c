@@ -19,6 +19,7 @@
 #include "nuvashalauncher-launcher.h"
 #include "nuvashalauncher-settings.h"
 #include "nuvashalauncher-users-popover.h"
+#include "nuvashalauncher-ui-feedback.h"
 
 G_DEFINE_FINAL_TYPE (nuvashalauncherMainWindow, nuvashalauncher_main_window, ADW_TYPE_APPLICATION_WINDOW)
 
@@ -168,6 +169,9 @@ on_window_launcher_state (nuvashalauncher *launcher G_GNUC_UNUSED,
 
   if (self->ui.banner == NULL)
     return;
+
+  nuvashalauncher_ui_error_banner (self->ui.banner,
+    g_object_get_data (G_OBJECT (launcher), "launch-error"));
 
   if (detail != NULL && *detail != '\0')
     message = g_strdup_printf ("%s: %s", what, detail);

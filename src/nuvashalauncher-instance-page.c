@@ -61,6 +61,12 @@ loader_display_name (nuvashalauncherInstance *instance)
 }
 
 void
+instance_page_show_error (nuvashalauncherInstancePage *self, const GError *error)
+{
+  nuvashalauncher_ui_error_toast (GTK_WIDGET (self), GTK_WIDGET (self->toast_overlay), error);
+}
+
+void
 instance_page_show_toast (nuvashalauncherInstancePage *self, const char *message)
 {
   nuvashalauncher_ui_show_toast (GTK_WIDGET (self), GTK_WIDGET (self->toast_overlay), message);

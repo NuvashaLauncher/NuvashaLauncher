@@ -28,9 +28,26 @@ on_skin_file_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
   if (file == NULL)
     goto done;
 
+  {
+    static const guint8 png_signature[] = { 0x89, 'P', 'N', 'G', 0x0d, 0x0a, 0x1a, 0x0a };
+    guint8 signature[sizeof png_signature];
+    gsize read = 0;
+    g_autoptr (GFileInputStream) stream = g_file_read (file, NULL, &error);
+    if (stream == NULL ||
+        !g_input_stream_read_all (G_INPUT_STREAM (stream), signature, sizeof signature,
+                                  &read, NULL, &error))
+      goto done;
+    if (read != sizeof signature || memcmp (signature, png_signature, sizeof signature) != 0)
+      {
+        error = g_error_new_literal (G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
+          _("Skin images must be 64x64 or 64x32 PNG files"));
+        goto done;
+      }
+  }
   skin = gdk_texture_new_from_file (file, &error);
-  if (skin == NULL ||
-      gdk_texture_get_width (skin) != 64 ||
+  if (skin == NULL)
+    goto done;
+  if (gdk_texture_get_width (skin) != 64 ||
       (gdk_texture_get_height (skin) != 32 && gdk_texture_get_height (skin) != 64))
     {
       g_clear_error (&error);
@@ -46,7 +63,7 @@ on_skin_file_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
     g_autofree char *destination_path = NULL;
     g_autoptr (GFile) destination = NULL;
 
-    if (source_basename == NULL || !nuvashalauncher_fs_make_directory (directory, 0755, NULL))
+    if (source_basename == NULL || !nuvashalauncher_fs_make_directory (directory, 0755, &error))
       goto done;
     destination_basename = unique_skin_filename (directory, source_basename);
     destination_path = g_build_filename (directory, destination_basename, NULL);
@@ -78,10 +95,16 @@ on_skin_file_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 
 done:
   if (error != NULL &&
-      !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+      !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED) &&
+      !g_error_matches (error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_CANCELLED) &&
+      !g_error_matches (error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_DISMISSED))
     {
       AdwAlertDialog *alert = ADW_ALERT_DIALOG (
-        adw_alert_dialog_new (_("Invalid skin"), error->message));
+        adw_alert_dialog_new (_("Invalid skin"),
+          g_error_matches (error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA)
+            ? _("Skin images must be 64x64 or 64x32 PNG files")
+            : nuvashalauncher_error_message (error)));
+      adw_alert_dialog_set_extra_child (alert, nuvashalauncher_ui_error_details (error));
       adw_alert_dialog_add_response (alert, "ok", _("OK"));
       adw_alert_dialog_set_close_response (alert, "ok");
       adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (menu->dialog));
@@ -126,7 +149,14 @@ remove_skin_row (SkinMenu *menu, GtkListBoxRow *row)
       path = g_build_filename (skin_directory_path (), name, NULL);
     }
   if (path != NULL)
-    nuvashalauncher_fs_unlink (path, NULL);
+    {
+      g_autoptr (GError) error = NULL;
+      if (!nuvashalauncher_fs_unlink (path, &error))
+        {
+          skin_menu_show_error (menu, error);
+          return;
+        }
+    }
   if (url != NULL)
     g_hash_table_add (menu->deleted_skin_ids, g_strdup (skin_name_for_url (url)));
 
@@ -189,20 +219,23 @@ on_remove_skin_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 
 static void
 on_open_skins_clicked (GtkButton *button G_GNUC_UNUSED,
-                       gpointer user_data G_GNUC_UNUSED)
+                       gpointer user_data)
 {
   g_autofree char *directory =
     g_build_filename (g_get_user_data_dir (), "nuvashalauncher", "skins", NULL);
   g_autofree char *uri = NULL;
   g_autoptr (GError) error = NULL;
 
-  if (!nuvashalauncher_fs_make_directory (directory, 0755, NULL))
-    return;
+  if (!nuvashalauncher_fs_make_directory (directory, 0755, &error))
+    {
+      skin_menu_show_error (user_data, error);
+      return;
+    }
   uri = g_filename_to_uri (directory, NULL, NULL);
   if (uri == NULL ||
       !g_app_info_launch_default_for_uri (uri, NULL, &error))
     if (error != NULL)
-      g_warning ("Could not open skins folder: %s", error->message);
+      skin_menu_show_error (user_data, error);
 }
 
 static void
@@ -211,7 +244,7 @@ on_export_skin_copied (GObject *source, GAsyncResult *result, gpointer user_data
   g_autoptr (GError) error = NULL;
 
   if (!nuvashalauncher_fs_copy_finish (G_FILE (source), result, &error))
-    g_warning ("Could not export skin: %s", error->message);
+    nuvashalauncher_ui_show_error (NULL, _("Technical Details"), error);
 
   g_object_unref (user_data);
 }
@@ -229,7 +262,13 @@ on_export_skin_chosen (GObject *source, GAsyncResult *result, gpointer user_data
                            G_PRIORITY_DEFAULT, NULL, NULL, NULL,
                            on_export_skin_copied, source_file);
   else
-    g_object_unref (source_file);
+    {
+      if (error != NULL &&
+          !g_error_matches (error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_CANCELLED) &&
+          !g_error_matches (error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_DISMISSED))
+        nuvashalauncher_ui_show_error (NULL, _("Technical Details"), error);
+      g_object_unref (source_file);
+    }
 }
 
 static void
@@ -289,7 +328,8 @@ on_skin_selected (GtkListBox *list, GtkListBoxRow *row, gpointer user_data)
       account->skin_model = g_strdup (menu->slim_model != NULL &&
                                       gtk_check_button_get_active (menu->slim_model)
                                         ? "SLIM" : "CLASSIC");
-      nuvashalauncher_accounts_update (menu->owner->accounts, account, &error);
+      if (!nuvashalauncher_accounts_update (menu->owner->accounts, account, &error))
+        skin_menu_show_error (menu, error);
       upload_selected_skin (menu, url,
                             g_ascii_strcasecmp (account->skin_model, "SLIM") == 0
                               ? "SLIM" : "CLASSIC");
@@ -487,6 +527,17 @@ nuvashalauncher_users_skin_menu_new (nuvashalauncherUsersPopover *owner, GtkImag
   data->capes = capes;
   data->account = account;
   data->remove_button = remove;
+  data->operation_status = GTK_LABEL (g_object_ref_sink (gtk_label_new (NULL)));
+  gtk_label_set_wrap (data->operation_status, TRUE);
+  gtk_label_set_selectable (data->operation_status, TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (data->operation_status), FALSE);
+  gtk_box_append (right, GTK_WIDGET (data->operation_status));
+  GtkWidget *preview_error = gtk_label_new (NULL);
+  gtk_label_set_wrap (GTK_LABEL (preview_error), TRUE);
+  gtk_widget_set_visible (preview_error, FALSE);
+  gtk_box_append (right, preview_error);
+  g_object_set_data_full (G_OBJECT (preview), "preview-error",
+                          g_object_ref (preview_error), g_object_unref);
   data->default_model = default_model;
   data->slim_model = slim_model;
   data->cancellable = g_cancellable_new ();
@@ -495,7 +546,7 @@ nuvashalauncher_users_skin_menu_new (nuvashalauncherUsersPopover *owner, GtkImag
   g_object_set_data (G_OBJECT (slim_model), "nuvashalauncher-slim", GINT_TO_POINTER (1));
   g_signal_connect (import, "clicked", G_CALLBACK (on_import_skin_clicked), data);
   g_signal_connect (export, "clicked", G_CALLBACK (on_export_skin_clicked), data);
-  g_signal_connect (open_skins, "clicked", G_CALLBACK (on_open_skins_clicked), NULL);
+  g_signal_connect (open_skins, "clicked", G_CALLBACK (on_open_skins_clicked), data);
   g_signal_connect (remove, "clicked", G_CALLBACK (on_remove_skin_clicked), data);
   g_signal_connect (skins, "row-selected", G_CALLBACK (on_skin_selected), data);
   g_signal_connect (default_model, "toggled", G_CALLBACK (on_model_toggled), data);

@@ -292,7 +292,9 @@ on_bulk_duplicate_ready (GObject *source, GAsyncResult *result, gpointer user_da
       nuvashalauncher_INSTANCE_MANAGER (source), result, &error);
 
   if (copy == NULL && error != NULL)
-    adw_banner_set_title (self->ui.banner, error->message);
+    {
+      nuvashalauncher_ui_error_banner (self->ui.banner, error);
+    }
   g_object_unref (self);
 }
 
@@ -336,7 +338,9 @@ on_bulk_delete_ready (GObject *source, GAsyncResult *result, gpointer user_data)
   if (!nuvashalauncher_instance_manager_delete_finish (
         nuvashalauncher_INSTANCE_MANAGER (source), result, &error) &&
       !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-    adw_banner_set_title (wait->window->ui.banner, error->message);
+    {
+      nuvashalauncher_ui_error_banner (wait->window->ui.banner, error);
+    }
 
   bulk_delete_wait_free (wait);
 }
@@ -390,6 +394,13 @@ on_bulk_export_folder_chosen (GObject *source, GAsyncResult *result,
   if (folder != NULL)
     {
       g_autofree char *directory = g_file_get_path (folder);
+      if (directory == NULL)
+        {
+          nuvashalauncher_ui_error_banner (self->ui.banner, NULL);
+          adw_banner_set_title (self->ui.banner, _("The export location is not a local file"));
+          g_object_unref (self);
+          return;
+        }
       g_autoptr (GPtrArray) selected = g_ptr_array_new_with_free_func (g_free);
       GHashTableIter iter;
       gpointer key;
@@ -429,7 +440,9 @@ on_bulk_export_folder_chosen (GObject *source, GAsyncResult *result,
   else if (error != NULL &&
            !g_error_matches (error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_CANCELLED) &&
            !g_error_matches (error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_DISMISSED))
-    adw_banner_set_title (self->ui.banner, error->message);
+    {
+      nuvashalauncher_ui_error_banner (self->ui.banner, error);
+    }
 
   g_object_unref (self);
 }

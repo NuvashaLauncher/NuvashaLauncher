@@ -31,7 +31,7 @@ on_name_apply (AdwEntryRow *row, gpointer user_data)
     {
       /* The edit never reached the file: the row shows the stored name
        * again instead of a name that does not exist. */
-      instance_page_show_toast (self, error->message);
+      instance_page_show_error (self, error);
       gtk_editable_set_text (GTK_EDITABLE (row), current);
       return;
     }
@@ -62,7 +62,7 @@ on_jvm_args_apply (AdwEntryRow *row, gpointer user_data)
                                         "jvm-args", text, &error))
     {
       nuvashalauncher_instance_set_string (self->instance, "jvm-args", current, NULL);
-      instance_page_show_toast (self, error->message);
+      instance_page_show_error (self, error);
       gtk_editable_set_text (GTK_EDITABLE (row), current);
       return;
     }
@@ -121,7 +121,7 @@ on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
        * back to the version that is still stored. */
       nuvashalauncher_instance_set_string (self->instance, "minecraft-version", current,
                                NULL);
-      instance_page_show_toast (self, error->message);
+      instance_page_show_error (self, error);
       nuvashalauncher_version_row_select (row, current);
       return;
     }
@@ -194,7 +194,7 @@ on_loader_changed (nuvashalauncherLoaderRow *row, gpointer user_data)
          to the loader the instance runs. */
       nuvashalauncher_instance_set_loader (self->instance, self->loader,
                                self->loader_version, NULL);
-      instance_page_show_toast (self, error->message);
+      instance_page_show_error (self, error);
       nuvashalauncher_loader_row_load (row, self->settings, self->loader,
                            self->loader_version, minecraft);
       return;
@@ -273,8 +273,7 @@ java_status_refresh (nuvashalauncherInstancePage *self)
         effective = nuvashalauncher_java_select (detected, current, 0);
 
       if (effective != NULL && effective->headless)
-        message = _("Minecraft needs a non-headless Java: on Arch use the "
-                    "jre-openjdk package, not jre-openjdk-headless");
+        message = _("Select a Java runtime with desktop support, not a headless installation.");
     }
 
   adw_action_row_set_subtitle (ADW_ACTION_ROW (row), message);
@@ -377,7 +376,7 @@ on_java_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
                                         "java-path", next, &error))
     {
       nuvashalauncher_instance_set_string (self->instance, "java-path", current, NULL);
-      instance_page_show_toast (self, error->message);
+      instance_page_show_error (self, error);
       nuvashalauncher_java_row_select_path (row, current);
       return;
     }
@@ -450,7 +449,7 @@ on_icon_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
                             GTK_DIALOG_ERROR_CANCELLED) &&
           !g_error_matches (error, GTK_DIALOG_ERROR,
                             GTK_DIALOG_ERROR_DISMISSED))
-        instance_page_show_toast (self, error->message);
+        instance_page_show_error (self, error);
 
       g_object_unref (self);
       return;
@@ -471,7 +470,7 @@ on_icon_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
                                         "icon", path, &error))
     {
       nuvashalauncher_instance_set_string (self->instance, "icon", previous, NULL);
-      instance_page_show_toast (self, error->message);
+      instance_page_show_error (self, error);
       g_object_unref (self);
       return;
     }

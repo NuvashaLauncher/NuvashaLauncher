@@ -55,10 +55,10 @@ update_the_button (nuvashalauncherUsersPopover *self)
  * ------------------------------------------------------ */
 
 static void
-show_error (nuvashalauncherUsersPopover *self, const char *message)
+show_error (nuvashalauncherUsersPopover *self, const GError *error)
 {
-  gtk_label_set_text (GTK_LABEL (self->error_label), message);
-  gtk_widget_set_visible (GTK_WIDGET (self->error_label), TRUE);
+  nuvashalauncher_ui_error_label (self->error_label, error);
+  nuvashalauncher_ui_show_error (GTK_WIDGET (self), _("Technical Details"), error);
 }
 
 /* The account a widget in a row is about, which is the id of the account
@@ -136,7 +136,7 @@ on_row_activated (AdwActionRow *row, gpointer user_data G_GNUC_UNUSED)
     }
 
   if (id != NULL && !nuvashalauncher_accounts_set_active (self->accounts, id, &error))
-    show_error (self, error->message);
+    show_error (self, error);
   else
     gtk_popover_popdown (GTK_POPOVER (self));
 }
@@ -154,7 +154,7 @@ on_remove_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
       g_autoptr (GError) error = NULL;
 
       if (!nuvashalauncher_accounts_remove (self->accounts, id, &error))
-        show_error (self, error->message);
+        show_error (self, error);
     }
 
   g_object_unref (self);
@@ -306,7 +306,7 @@ add_account (nuvashalauncherUsersPopover *self, nuvashalauncherAccount *account)
   g_autoptr (GError) error = NULL;
 
   if (!nuvashalauncher_accounts_add (self->accounts, account, &error))
-    show_error (self, error->message);
+    show_error (self, error);
   else
     nuvashalauncher_ui_clear_error_label (self->error_label);
 }

@@ -11,6 +11,9 @@
 #include "nuvashalauncher-logs-page.h"
 #include "nuvashalauncher-download.h"
 #include "nuvashalauncher-downloads.h"
+#include "nuvashalauncher-ui-feedback.h"
+
+void instance_page_show_error (nuvashalauncherInstancePage *self, const GError *error);
 
 struct _nuvashalauncherInstancePage
 {
