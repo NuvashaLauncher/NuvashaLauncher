@@ -475,6 +475,12 @@ add_chosen (GObject *dialog, GAsyncResult *result, gpointer user_data)
 
   g_object_unref (dialog);
 
+  if (self->disposed)
+    {
+      g_object_unref (self);
+      return;
+    }
+
   if (file == NULL)
     {
       if (error != NULL &&

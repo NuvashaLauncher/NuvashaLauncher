@@ -98,6 +98,8 @@ report_how_it_ended (nuvashalauncher *self)
 void
 finish_launch (nuvashalauncher *self)
 {
+  g_clear_object (&self->process.process);
+
   /* Natives are launch artifacts, not instance data. They are extracted from
    * the cached jars again on the next launch, so removing this per-instance
    * directory prevents a game or mod from leaving native code behind. */

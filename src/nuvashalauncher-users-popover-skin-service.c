@@ -71,6 +71,8 @@ skin_menu_free (SkinMenu *menu)
   if (menu == NULL)
     return;
 
+  if (menu->owner != NULL)
+    g_object_remove_weak_pointer (G_OBJECT (menu->owner), (gpointer *) &menu->owner);
   if (menu->skin_upload_retry_source != 0)
     g_source_remove (menu->skin_upload_retry_source);
   g_clear_object (&menu->skin_upload_cancellable);
@@ -82,6 +84,7 @@ skin_menu_free (SkinMenu *menu)
   g_clear_pointer (&menu->cape_urls, g_ptr_array_unref);
   g_clear_pointer (&menu->skin_urls, g_hash_table_unref);
   g_clear_pointer (&menu->deleted_skin_ids, g_hash_table_unref);
+  g_clear_pointer (&menu->account, nuvashalauncher_account_free);
   g_clear_object (&menu->cape_list);
   g_clear_object (&menu->skins);
   g_clear_object (&menu->view);
@@ -425,20 +428,23 @@ on_capes_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   if (menu->closed)
     {
-      if (bytes != NULL && error == NULL)
+      if (menu->owner != NULL && menu->account != NULL)
         {
-          gsize length = 0;
-          const char *data = g_bytes_get_data (bytes, &length);
-          g_hash_table_replace (menu->owner->profile_cache,
-                                g_strdup (menu->account->uuid != NULL
-                                            ? menu->account->uuid : menu->account->id),
-                                g_strndup (data, length));
+          if (bytes != NULL && error == NULL)
+            {
+              gsize length = 0;
+              const char *data = g_bytes_get_data (bytes, &length);
+              g_hash_table_replace (menu->owner->profile_cache,
+                                    g_strdup (menu->account->uuid != NULL
+                                                ? menu->account->uuid : menu->account->id),
+                                    g_strndup (data, length));
+            }
+          else
+            g_hash_table_replace (menu->owner->profile_cache,
+                                  g_strdup (menu->account->uuid != NULL
+                                              ? menu->account->uuid : menu->account->id),
+                                  g_strdup (""));
         }
-      else
-        g_hash_table_replace (menu->owner->profile_cache,
-                              g_strdup (menu->account->uuid != NULL
-                                          ? menu->account->uuid : menu->account->id),
-                              g_strdup (""));
       skin_menu_unref (menu);
       return;
     }
@@ -446,10 +452,11 @@ on_capes_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   if (bytes == NULL || error != NULL)
     {
       skin_menu_show_error (menu, error);
-      g_hash_table_replace (menu->owner->profile_cache,
-                            g_strdup (menu->account->uuid != NULL
-                                        ? menu->account->uuid : menu->account->id),
-                            g_strdup (""));
+      if (menu->owner != NULL && menu->account != NULL)
+        g_hash_table_replace (menu->owner->profile_cache,
+                              g_strdup (menu->account->uuid != NULL
+                                          ? menu->account->uuid : menu->account->id),
+                              g_strdup (""));
       goto done;
     }
 
@@ -457,10 +464,11 @@ on_capes_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     gsize length = 0;
     const char *data = g_bytes_get_data (bytes, &length);
     g_autofree char *json = g_strndup (data, length);
-    g_hash_table_replace (menu->owner->profile_cache,
-                          g_strdup (menu->account->uuid != NULL
-                                      ? menu->account->uuid : menu->account->id),
-                          g_strdup (json));
+    if (menu->owner != NULL && menu->account != NULL)
+      g_hash_table_replace (menu->owner->profile_cache,
+                            g_strdup (menu->account->uuid != NULL
+                                        ? menu->account->uuid : menu->account->id),
+                            g_strdup (json));
     apply_profile_json (menu, json);
   }
 
@@ -598,9 +606,11 @@ send_pending_cape_change (SkinMenu *menu)
     "/minecraft/profile/capes/active", menu->account->access_token);
   if (cape_id != NULL && *cape_id != '\0')
     {
+      g_autoptr (GBytes) body_bytes = NULL;
       json = g_strdup_printf ("{\"capeId\":\"%s\"}", cape_id);
+      body_bytes = g_bytes_new (json, strlen (json));
       soup_message_set_request_body_from_bytes (message, "application/json",
-                                                g_bytes_new (json, strlen (json)));
+                                                body_bytes);
     }
   skin_background_operations++;
   nuvashalauncher_minecraft_services_send_async (message, menu->cancellable,
@@ -618,13 +628,14 @@ on_model_toggled (GtkCheckButton *button, gpointer user_data)
                             g_object_get_data (G_OBJECT (button), "nuvashalauncher-slim") != NULL);
 
   if (gtk_check_button_get_active (button) && !menu->applying_profile &&
-      menu->account != NULL && menu->owner != NULL)
+      menu->account != NULL)
     {
-      g_autoptr (nuvashalauncherAccount) account = nuvashalauncher_account_copy (menu->account);
       g_autoptr (GError) error = NULL;
-      g_free (account->skin_model);
-      account->skin_model = g_strdup (menu->slim_model == button ? "SLIM" : "CLASSIC");
-      if (!nuvashalauncher_accounts_update (menu->owner->accounts, account, &error) && error != NULL)
+      g_free (menu->account->skin_model);
+      menu->account->skin_model = g_strdup (menu->slim_model == button ? "SLIM" : "CLASSIC");
+      if (menu->owner != NULL &&
+          !nuvashalauncher_accounts_update (menu->owner->accounts, menu->account, &error) &&
+          error != NULL)
         skin_menu_show_error (menu, error);
       {
         GtkListBoxRow *row = gtk_list_box_get_selected_row (menu->skins);

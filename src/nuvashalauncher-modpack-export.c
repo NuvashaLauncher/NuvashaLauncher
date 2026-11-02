@@ -358,13 +358,25 @@ export_indexed_files (ExportRun *run, GCancellable *cancellable, GError **error)
           url = entry->download_url;
           env_client = entry->env_client;
           env_server = entry->env_server;
+          if (filename == NULL || *filename == '\0' ||
+              strchr (filename, '/') != NULL ||
+              strchr (filename, '\\') != NULL ||
+              g_str_equal (filename, ".") ||
+              g_str_equal (filename, ".."))
+            continue;
+
+          g_autofree char *relative =
+            g_build_filename (folders[folder_index], filename, NULL);
+          if (!nuvashalauncher_modpack_path_is_safe (relative))
+            continue;
+
           source = g_build_filename (run->instance_directory, folders[folder_index],
                                      filename, NULL);
 
-          if (g_stat (source, &stat_buf) != 0 || !S_ISREG (stat_buf.st_mode))
+          if (g_lstat (source, &stat_buf) != 0 || !S_ISREG (stat_buf.st_mode))
             {
               disabled_source = g_strconcat (source, ".disabled", NULL);
-              if (g_stat (disabled_source, &stat_buf) == 0 &&
+              if (g_lstat (disabled_source, &stat_buf) == 0 &&
                   S_ISREG (stat_buf.st_mode))
                 {
                   g_free (source);
@@ -373,13 +385,11 @@ export_indexed_files (ExportRun *run, GCancellable *cancellable, GError **error)
                 }
             }
 
-          if (*filename == '\0' || *sha1 == '\0' || *sha512 == '\0' ||
-              *url == '\0' || !nuvashalauncher_modpack_download_url_allowed (url) ||
-              g_stat (source, &stat_buf) != 0 || !S_ISREG (stat_buf.st_mode))
+          if (sha1 == NULL || *sha1 == '\0' || sha512 == NULL || *sha512 == '\0' ||
+              url == NULL || *url == '\0' ||
+              !nuvashalauncher_modpack_download_url_allowed (url) ||
+              g_lstat (source, &stat_buf) != 0 || !S_ISREG (stat_buf.st_mode))
             continue;
-
-          g_autofree char *relative =
-            g_build_filename (folders[folder_index], filename, NULL);
 
           file = json_object_new ();
           hashes = json_object_new ();
@@ -491,8 +501,7 @@ export_thread (GTask *task G_GNUC_UNUSED,
       return;
     }
 
-  run->total = g_hash_table_size (run->indexed_paths) +
-               export_count_directory (canonical_root, "", run->indexed_paths,
+  run->total = export_count_directory (canonical_root, "", run->indexed_paths,
                                        run->include_transient) + 1;
   if (run->icon_path != NULL)
     run->total++;
@@ -736,6 +745,10 @@ nuvashalauncher_modpack_export_async (nuvashalauncherInstance *instance, const c
 
   if (run->instance_directory == NULL || run->manifest == NULL)
     {
+      if (error == NULL)
+        g_set_error_literal (&error, nuvashalauncher_MODPACK_ERROR,
+                             nuvashalauncher_MODPACK_ERROR_IO,
+                             "the instance has no directory");
       export_run_free (run);
       nuvashalauncher_task_scope_return_error_deferred (task_scope,
                                             g_steal_pointer (&error));

@@ -1,6 +1,6 @@
 /* Minecraft version JSON object cleanup. */
 
-#include "nuvashalauncher-minecraft-versions.h"
+#include "nuvashalauncher-minecraft-versions-json-private.h"
 
 void
 nuvashalauncher_mc_free_download_info (gpointer data)

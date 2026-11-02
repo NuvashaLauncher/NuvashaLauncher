@@ -20,10 +20,21 @@ local_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_autoptr (GError) error = NULL;
   g_autofree char *path =
     nuvashalauncher_content_load_local_icon_finish (result, &error);
+  gboolean file_valid = FALSE;
 
   g_object_set_data (G_OBJECT (load->row), "nuvashalauncher-local-icon-loading", NULL);
 
-  if (path != NULL && file != NULL)
+  if (file != NULL && load->page->installed.files != NULL)
+    {
+      for (guint i = 0; i < load->page->installed.files->len; i++)
+        if (g_ptr_array_index (load->page->installed.files, i) == file)
+          {
+            file_valid = TRUE;
+            break;
+          }
+    }
+
+  if (path != NULL && file_valid)
     {
       g_free (file->local_icon_path);
       file->local_icon_path = g_steal_pointer (&path);

@@ -50,8 +50,16 @@ loose_json_string (const guint8 *data, gsize length, const char *name)
     return NULL;
   start++;
   for (end = start; (gsize) (end - (const char *) data) < length; end++)
-    if (*end == '"' && (end == start || end[-1] != '\\'))
-      return g_strndup (start, end - start);
+    {
+      /* A backslash escapes the next character, including another backslash. */
+      if (*end == '\\')
+        {
+          end++;
+          continue;
+        }
+      if (*end == '"')
+        return g_strndup (start, end - start);
+    }
   return NULL;
 }
 

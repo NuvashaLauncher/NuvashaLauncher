@@ -358,6 +358,21 @@ nuvashalauncher_launch_redact (GPtrArray *argv)
           continue;
         }
 
+      /* System properties such as -Dsome.token=... can carry credentials too. */
+      if (g_str_has_prefix (argument, "-D") && equals != NULL)
+        {
+          g_autofree char *key = g_ascii_strdown (argument, equals - argument);
+
+          if (strstr (key, "token") != NULL || strstr (key, "password") != NULL ||
+              strstr (key, "secret") != NULL || strstr (key, "session") != NULL)
+            {
+              g_string_append_len (out, argument, (gssize) (equals - argument));
+              g_string_append_c (out, '=');
+              append_argument (out, "***");
+              continue;
+            }
+        }
+
       append_argument (out, argument);
     }
 

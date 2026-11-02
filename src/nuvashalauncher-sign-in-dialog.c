@@ -334,6 +334,8 @@ nuvashalauncher_sign_in_dialog_dispose (GObject *object)
 
   /* A dialog that is going away stops waiting: the code stops being
      polled and nothing comes back to widgets that are not on screen. */
+  if (self->cancellable != NULL)
+    g_cancellable_cancel (self->cancellable);
   g_clear_object (&self->cancellable);
 
   G_OBJECT_CLASS (nuvashalauncher_sign_in_dialog_parent_class)->dispose (object);

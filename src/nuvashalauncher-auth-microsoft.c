@@ -177,10 +177,14 @@ nuvashalauncher_auth_send (AuthRequest         *self,
   self->message = soup_message_new (method, url);
 
   if (body != NULL)
-    soup_message_set_request_body_from_bytes (
-        self->message,
-        content_type != NULL ? content_type : "application/json",
-        g_bytes_new (body, strlen (body)));
+    {
+      g_autoptr (GBytes) request_body = g_bytes_new (body, strlen (body));
+
+      soup_message_set_request_body_from_bytes (
+          self->message,
+          content_type != NULL ? content_type : "application/json",
+          request_body);
+    }
 
   request_headers = soup_message_get_request_headers (self->message);
 
@@ -250,6 +254,10 @@ auth_read_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 
   if (chunk == NULL)
     {
+      if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED) &&
+          answer_if_cancelled (self))
+        return;
+
       fail (self, g_steal_pointer (&error));
       return;
     }

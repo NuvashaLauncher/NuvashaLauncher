@@ -198,6 +198,7 @@ on_instance_row_action (GtkButton *button, gpointer user_data)
                                         self->model->settings,
                                         window_launcher (self, id));
       g_object_ref_sink (page);
+      g_object_set_data (G_OBJECT (page), "nuvashalauncher-host-widget", self);
       nuvashalauncher_instance_page_trigger_export (page);
       g_object_unref (page);
       break;
@@ -206,6 +207,7 @@ on_instance_row_action (GtkButton *button, gpointer user_data)
                                         self->model->settings,
                                         window_launcher (self, id));
       g_object_ref_sink (page);
+      g_object_set_data (G_OBJECT (page), "nuvashalauncher-host-widget", self);
       nuvashalauncher_instance_page_trigger_duplicate (page);
       g_object_unref (page);
       break;
@@ -326,6 +328,7 @@ row_set_icon (GtkImage *image, nuvashalauncherInstance *instance)
 
   if (path == NULL || !g_file_test (path, G_FILE_TEST_IS_REGULAR))
     {
+      g_free (path);
       path = nuvashalauncher_instance_default_icon_path ();
     }
 

@@ -288,7 +288,7 @@ nuvashalauncher_modrinth_get_async (const char *url, GAsyncReadyCallback callbac
 
   nuvashalauncher_task_scope_release_when_done (
     nuvashalauncher_download_json_cached_async (nuvashalauncher_downloads_get_service (), url, json_flight_done, flight),
-    nuvashalauncher_task_scope_get_cancellable (scope));
+    NULL); /* shared by every waiter: one waiter cancelling must not cancel the others */
 
   return g_steal_pointer (&scope);
 }

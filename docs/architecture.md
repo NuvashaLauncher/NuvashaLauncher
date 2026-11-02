@@ -518,7 +518,7 @@ or live account. Download and Modrinth tests use local fixtures/servers. UI
 tests instantiate the compiled resource templates, and display-sensitive tests
 skip or use a virtual display when the environment does not provide one.
 
-CI builds both x86_64 and ARM64 Fedora containers, treats compiler warnings as
+CI builds both x86_64 and ARM64 Ubuntu containers, treats compiler warnings as
 errors for the release build, runs the test suite, and runs static analysis.
 
 ## Adding or changing a subsystem

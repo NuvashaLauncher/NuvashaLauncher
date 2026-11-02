@@ -371,8 +371,11 @@ nuvashalauncher_accounts_set_active (nuvashalauncherAccounts *self, const char *
   return TRUE;
 }
 
-gboolean
-nuvashalauncher_accounts_add (nuvashalauncherAccounts *self, const nuvashalauncherAccount *account, GError **error)
+static gboolean
+accounts_add_internal (nuvashalauncherAccounts       *self,
+                       const nuvashalauncherAccount *account,
+                       gboolean                      make_active,
+                       GError                      **error)
 {
   nuvashalauncherAccount *known = NULL;
   nuvashalauncherAccount *previous = NULL;
@@ -402,6 +405,15 @@ nuvashalauncher_accounts_add (nuvashalauncherAccounts *self, const nuvashalaunch
       previous = nuvashalauncher_account_copy (known);
       nuvashalauncherAccount *replacement = nuvashalauncher_account_copy (account);
 
+      /* A sign-in that did not say anything about the avatar, skin or cape
+         keeps what is already known about them. */
+      if (replacement->avatar_url == NULL)
+        replacement->avatar_url = g_strdup (known->avatar_url);
+      if (replacement->skin_model == NULL)
+        replacement->skin_model = g_strdup (known->skin_model);
+      if (replacement->cape_id == NULL)
+        replacement->cape_id = g_strdup (known->cape_id);
+
       g_free (known->id);
       g_free (known->name);
       g_free (known->uuid);
@@ -428,21 +440,32 @@ nuvashalauncher_accounts_add (nuvashalauncherAccounts *self, const nuvashalaunch
       g_ptr_array_add (self->accounts, nuvashalauncher_account_copy (account));
     }
 
-  /* A user who just signed in meant to play as that account: it becomes
-     the active one, and with it the only active one there is. */
-  g_free (self->active_id);
-  self->active_id = g_strdup (account->id);
+  if (make_active || self->active_id == NULL)
+    {
+      g_free (self->active_id);
+      self->active_id = g_strdup (account->id);
+    }
 
-  if (!save_account (account, error) || !save_active (account->id, error))
+  const nuvashalauncherAccount *target =
+    known != NULL ? known : g_ptr_array_index (self->accounts, added_index);
+
+  gboolean active_changed = make_active && g_strcmp0 (previous_active_id, account->id) != 0;
+
+  if (!save_account (target, error) ||
+      (active_changed && !save_active (account->id, error)))
     {
       if (known != NULL)
         save_account (previous, NULL);
       else
         nuvashalauncher_secret_store_remove_account (account->id, NULL);
-      if (previous_active_id != NULL)
-        save_active (previous_active_id, NULL);
-      else
-        nuvashalauncher_secret_store_clear_active (NULL);
+
+      if (active_changed)
+        {
+          if (previous_active_id != NULL)
+            save_active (previous_active_id, NULL);
+          else
+            nuvashalauncher_secret_store_clear_active (NULL);
+        }
 
       if (known != NULL)
         {
@@ -482,10 +505,16 @@ nuvashalauncher_accounts_add (nuvashalauncherAccounts *self, const nuvashalaunch
 }
 
 gboolean
+nuvashalauncher_accounts_add (nuvashalauncherAccounts *self, const nuvashalauncherAccount *account, GError **error)
+{
+  return accounts_add_internal (self, account, TRUE, error);
+}
+
+gboolean
 nuvashalauncher_accounts_update (nuvashalauncherAccounts *self, const nuvashalauncherAccount *account,
                      GError **error)
 {
-  return nuvashalauncher_accounts_add (self, account, error);
+  return accounts_add_internal (self, account, FALSE, error);
 }
 
 gboolean

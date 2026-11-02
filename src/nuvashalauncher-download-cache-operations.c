@@ -212,9 +212,15 @@ global_cache_copy_ready (GObject *source, GAsyncResult *result,
   DownloadRequest *request = user_data;
   g_autoptr (GError) error = NULL;
 
-  if (!nuvashalauncher_fs_copy_finish (G_FILE (source), result, &error) &&
-      !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-    g_debug ("the global file cache was not written: %s", error->message);
+  if (!nuvashalauncher_fs_copy_finish (G_FILE (source), result, &error))
+    {
+      /* A failed or cancelled copy may leave a partial cache entry. */
+      if (request->global_cache_path != NULL &&
+          !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_EXISTS))
+        nuvashalauncher_fs_unlink (request->global_cache_path, NULL);
+      if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+        g_debug ("the global file cache was not written: %s", error->message);
+    }
 
   if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)) ||
       g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
@@ -276,6 +282,11 @@ global_cache_hash_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       global_cache_restore (request);
       return;
     }
+
+  /* A corrupt cache entry would otherwise be hashed again by every download
+     of this file: drop it so the fresh download can replace it. */
+  if (digest != NULL && request->global_cache_path != NULL)
+    nuvashalauncher_fs_unlink (request->global_cache_path, NULL);
 
   start_attempt (request);
 }

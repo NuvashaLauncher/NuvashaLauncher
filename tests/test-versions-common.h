@@ -32,7 +32,7 @@ static char *cache_home;
  * Fixture documents
  * ---------------------------------------------------------- */
 
-static inline inline char *
+static inline char *
 fixture_text (const char *name)
 {
   g_autofree char *path = g_build_filename (nuvashalauncher_TEST_FIXTURES, name, NULL);
@@ -60,7 +60,7 @@ fixture_version (const char *name)
   return description;
 }
 
-static inline inline const nuvashalauncherLibrary *
+static inline const nuvashalauncherLibrary *
 find_library (nuvashalauncherVersionDescription *description, const char *name)
 {
   for (guint i = 0; i < description->libraries->len; i++)
@@ -75,7 +75,7 @@ find_library (nuvashalauncherVersionDescription *description, const char *name)
   return NULL;
 }
 
-static inline inline char *
+static inline char *
 hash_of (const void *data, gsize length)
 {
   return g_compute_checksum_for_data (G_CHECKSUM_SHA1, data, length);
@@ -150,7 +150,7 @@ typedef struct
 
 static Fixture fixture;
 
-static inline inline char *
+static inline char *
 served_body (const ServedVersion *version)
 {
   if (version->body != NULL)
@@ -199,7 +199,7 @@ server_handler (SoupServer *server, SoupServerMessage *message,
 
 /* The manifest the way Mojang writes it, with the address of the test
  * server in every entry. */
-static inline inline char *
+static inline char *
 manifest_json (void)
 {
   GString *json = g_string_new (
@@ -226,7 +226,7 @@ manifest_json (void)
   return g_string_free (json, FALSE);
 }
 
-static inline inline char *
+static inline char *
 server_url (const char *path)
 {
   return g_strconcat (fixture.base, path, NULL);
@@ -425,7 +425,7 @@ call_load (AsyncRun *run, AsyncCall *call, nuvashalauncherVersionManifest *manif
  * Fetching
  * ---------------------------------------------------------- */
 
-static inline inline char *
+static inline char *
 cache_file (const char *name)
 {
   g_autofree char *directory =

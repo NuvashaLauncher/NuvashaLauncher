@@ -65,10 +65,13 @@ remove_tree_at (int parent_fd, const char *name, GError **error)
 
     gboolean success = TRUE;
 
-    errno = 0;
-    for (struct dirent *entry = readdir (directory);
-         entry != NULL; entry = readdir (directory))
+    for (;;)
       {
+        errno = 0;
+        struct dirent *entry = readdir (directory);
+        if (entry == NULL)
+          break;
+
         if (g_str_equal (entry->d_name, ".") ||
             g_str_equal (entry->d_name, ".."))
           continue;
@@ -80,7 +83,7 @@ remove_tree_at (int parent_fd, const char *name, GError **error)
           }
       }
 
-    if (errno != 0 && (error == NULL || *error == NULL))
+    if (success && errno != 0 && (error == NULL || *error == NULL))
       {
         g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                      "cannot read \"%s\": %s", name, g_strerror (errno));
@@ -226,10 +229,30 @@ copy_tree_data_free (CopyTreeData *data)
 }
 
 static gboolean
+symlink_target_is_safe (const char *target)
+{
+  g_auto (GStrv) parts = NULL;
+
+  if (target == NULL || *target == '\0' || g_path_is_absolute (target) ||
+      strchr (target, '\\') != NULL)
+    return FALSE;
+
+  parts = g_strsplit (target, "/", -1);
+  for (guint i = 0; parts[i] != NULL; i++)
+    {
+      if (g_str_equal (parts[i], ".."))
+        return FALSE;
+    }
+
+  return TRUE;
+}
+
+static gboolean
 copy_tree_sync (GFile *source, GFile *destination, GCancellable *cancellable,
                 GError **error)
 {
   g_autoptr (GFileInfo) info = NULL;
+  g_autoptr (GError) local_error = NULL;
   GFileType type;
 
   if (g_cancellable_set_error_if_cancelled (cancellable, error))
@@ -249,10 +272,23 @@ copy_tree_sync (GFile *source, GFile *destination, GCancellable *cancellable,
       g_autoptr (GFileEnumerator) enumerator = NULL;
       GFileInfo *child_info = NULL;
 
-      if (!g_file_make_directory (destination, cancellable, error) &&
-          !g_error_matches (*error, G_IO_ERROR, G_IO_ERROR_EXISTS))
-        return FALSE;
-      g_clear_error (error);
+      if (!g_file_make_directory (destination, cancellable, &local_error))
+        {
+          if (!g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_EXISTS))
+            {
+              g_propagate_error (error, g_steal_pointer (&local_error));
+              return FALSE;
+            }
+          g_clear_error (&local_error);
+          if (g_file_query_file_type (destination,
+                                      G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+                                      cancellable) != G_FILE_TYPE_DIRECTORY)
+            {
+              g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_NOT_DIRECTORY,
+                                   "destination exists and is not a directory");
+              return FALSE;
+            }
+        }
 
       enumerator = g_file_enumerate_children (
         source, G_FILE_ATTRIBUTE_STANDARD_NAME ","
@@ -263,7 +299,8 @@ copy_tree_sync (GFile *source, GFile *destination, GCancellable *cancellable,
         return FALSE;
 
       while ((child_info = g_file_enumerator_next_file (enumerator,
-                                                         cancellable, error)) != NULL)
+                                                         cancellable,
+                                                         &local_error)) != NULL)
         {
           g_autoptr (GFile) child_source = g_file_get_child (
             source, g_file_info_get_name (child_info));
@@ -279,7 +316,13 @@ copy_tree_sync (GFile *source, GFile *destination, GCancellable *cancellable,
           g_object_unref (child_info);
         }
 
-      return *error == NULL;
+      if (local_error != NULL)
+        {
+          g_propagate_error (error, g_steal_pointer (&local_error));
+          return FALSE;
+        }
+
+      return TRUE;
     }
 
   if (type == G_FILE_TYPE_SYMBOLIC_LINK)
@@ -287,8 +330,13 @@ copy_tree_sync (GFile *source, GFile *destination, GCancellable *cancellable,
       const char *target = g_file_info_get_symlink_target (info);
       g_autofree char *destination_path = g_file_get_path (destination);
 
-      if (target == NULL || destination_path == NULL ||
-          symlink (target, destination_path) != 0)
+      if (!symlink_target_is_safe (target) || destination_path == NULL)
+        {
+          g_set_error_literal (error, G_FILE_ERROR, G_FILE_ERROR_INVAL,
+                               "cannot copy unsafe symlink target");
+          return FALSE;
+        }
+      if (symlink (target, destination_path) != 0)
         {
           g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                        "cannot copy symlink: %s", g_strerror (errno));
@@ -297,8 +345,8 @@ copy_tree_sync (GFile *source, GFile *destination, GCancellable *cancellable,
       return TRUE;
     }
 
-  return g_file_copy (source, destination, G_FILE_COPY_NONE, cancellable,
-                      NULL, NULL, error);
+  return g_file_copy (source, destination, G_FILE_COPY_NOFOLLOW_SYMLINKS,
+                      cancellable, NULL, NULL, error);
 }
 
 static void

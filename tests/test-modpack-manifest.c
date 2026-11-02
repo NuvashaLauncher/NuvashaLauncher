@@ -226,6 +226,25 @@ test_format_refusals (void)
     "\"name\":\"Odd Entry\",\"files\":[\"mods/x.jar\"],\"dependencies\":{}}",
     nuvashalauncher_MODPACK_ERROR_FORMAT, "an entry of files that is not an object");
 
+  /* A file with a negative fileSize. */
+  expect_refused (
+    "{\"formatVersion\":1,\"game\":\"minecraft\",\"versionId\":\"1\","
+    "\"name\":\"Negative Size\",\"files\":["
+    "{\"path\":\"mods/x.jar\",\"hashes\":{\"sha1\":\"aa\",\"sha512\":\"bb\"},"
+    "\"fileSize\":-1,"
+    "\"downloads\":[\"https://cdn.modrinth.com/x.jar\"]}],"
+    "\"dependencies\":{}}",
+    nuvashalauncher_MODPACK_ERROR_FORMAT, "a file with a negative file size");
+
+  /* A file with a non-string download URL. */
+  expect_refused (
+    "{\"formatVersion\":1,\"game\":\"minecraft\",\"versionId\":\"1\","
+    "\"name\":\"Bad Download\",\"files\":["
+    "{\"path\":\"mods/x.jar\",\"hashes\":{\"sha1\":\"aa\",\"sha512\":\"bb\"},"
+    "\"downloads\":[123]}],"
+    "\"dependencies\":{}}",
+    nuvashalauncher_MODPACK_ERROR_FORMAT, "a file with a non-string download URL");
+
   g_print ("ok - an index the format does not describe is refused\n");
 }
 
@@ -271,6 +290,16 @@ test_index_paths_are_refused (void)
     "\"downloads\":[\"https://cdn.modrinth.com/escape.jar\"]}],"
     "\"dependencies\":{}}",
     nuvashalauncher_MODPACK_ERROR_PATH, "a path with a drive name in it");
+
+  /* Launcher content index metadata directory. */
+  expect_refused (
+    "{\"formatVersion\":1,\"game\":\"minecraft\",\"versionId\":\"1\","
+    "\"name\":\"Index Metadata\",\"files\":["
+    "{\"path\":\"mods/.index/index.json\","
+    "\"hashes\":{\"sha1\":\"aa\",\"sha512\":\"bb\"},"
+    "\"downloads\":[\"https://cdn.modrinth.com/escape.jar\"]}],"
+    "\"dependencies\":{}}",
+    nuvashalauncher_MODPACK_ERROR_PATH, "a path inside .index metadata");
 
   g_print ("ok - a path the instance cannot hold is refused\n");
 }

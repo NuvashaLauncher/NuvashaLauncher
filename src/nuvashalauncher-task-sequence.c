@@ -42,6 +42,7 @@ sequence_finish (nuvashalauncherTaskSequence *sequence)
 
   /* Transfer the sequence's internal lifetime reference to the task. */
   g_task_set_task_data (sequence->task, sequence, sequence_finalize);
+  nuvashalauncher_task_scope_release_attached (sequence->task);
 
   /* The task goes out to whoever completes it, and the sequence rides
      along with it, so the reference taken in nuvashalauncher_task_sequence_new is
@@ -83,6 +84,7 @@ nuvashalauncher_task_sequence_new (GCancellable *cancellable,
   g_atomic_ref_count_inc (&sequence->refs);
   sequence->task = g_task_new (NULL, cancellable, callback, callback_data);
   g_task_set_source_tag (sequence->task, "nuvashalauncher-task-sequence");
+  nuvashalauncher_task_scope_attach_task (sequence->task);
   sequence->step = step;
   sequence->user_data = user_data;
   sequence->user_data_free = user_data_free;
@@ -106,6 +108,10 @@ nuvashalauncher_task_sequence_scope (nuvashalauncherTaskSequence *sequence)
   /* A scope that takes over a reference of its own: the sequence keeps
      the task running regardless, and this is the reference that lets the
      handle outlive the caller that stored it. */
+  scope = g_object_get_data (G_OBJECT (sequence->task), "nuvashalauncher-task-scope");
+  if (scope != NULL)
+    return nuvashalauncher_task_scope_ref (scope);
+
   scope = nuvashalauncher_task_scope_from_task (g_object_ref (sequence->task));
   nuvashalauncher_task_scope_take_task (scope);
   return scope;

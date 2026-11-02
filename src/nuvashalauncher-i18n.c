@@ -93,6 +93,7 @@ nuvashalauncher_i18n_language_name (const char *code)
 void
 nuvashalauncher_i18n_init (const char *override_code)
 {
+  g_autofree char *cwd = NULL;
   g_autofree char *local_locale_dir = NULL;
   g_autofree char *executable = NULL;
   g_autofree char *executable_dir = NULL;
@@ -115,8 +116,8 @@ nuvashalauncher_i18n_init (const char *override_code)
     }
 
   setlocale (LC_ALL, "");
-  local_locale_dir = g_build_filename (g_get_current_dir (), "build",
-                                       "locale", NULL);
+  cwd = g_get_current_dir ();
+  local_locale_dir = g_build_filename (cwd, "build", "locale", NULL);
   if (g_file_test (local_locale_dir, G_FILE_TEST_IS_DIR))
     locale_dir = local_locale_dir;
 

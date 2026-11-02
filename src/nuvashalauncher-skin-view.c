@@ -109,8 +109,7 @@ upload_texture (nuvashalauncherSkinView *self, GdkTexture *texture, GLuint *hand
    * geometry, those columns must not be sampled as part of the arm. */
   if (skin)
     {
-
-      self->slim_texture = height > 20 &&
+      self->slim_texture = width >= 56 && height > 20 &&
         source[(gsize) 20 * stride + 55 * 4 + 3] < 128 &&
         source[(gsize) 20 * stride + 40 * 4 + 3] >= 128;
     }
@@ -524,7 +523,13 @@ on_realize (GtkGLArea *area, gpointer user_data G_GNUC_UNUSED)
   GLuint vs = compile_shader (GL_VERTEX_SHADER, vs_source);
   GLuint fs = compile_shader (GL_FRAGMENT_SHADER, fs_source);
   if (vs == 0 || fs == 0)
-    return;
+    {
+      if (vs != 0)
+        glDeleteShader (vs);
+      if (fs != 0)
+        glDeleteShader (fs);
+      return;
+    }
   self->program = glCreateProgram (); glAttachShader (self->program, vs); glAttachShader (self->program, fs);
   glBindAttribLocation (self->program, 0, "position"); glBindAttribLocation (self->program, 1, "texcoord");
   glLinkProgram (self->program);

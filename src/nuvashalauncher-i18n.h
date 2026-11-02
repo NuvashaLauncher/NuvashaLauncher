@@ -21,6 +21,7 @@ typedef struct {
 const nuvashalauncherLanguage *nuvashalauncher_i18n_languages (gsize *length);
 const char *nuvashalauncher_i18n_language_name (const char *code);
 void nuvashalauncher_i18n_init (const char *override_code);
+void nuvashalauncher_i18n_template_strings (void);
 
 G_END_DECLS
 

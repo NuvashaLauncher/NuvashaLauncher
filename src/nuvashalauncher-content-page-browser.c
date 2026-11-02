@@ -205,6 +205,7 @@ results_arrived (nuvashalauncherContentPage *self, nuvashalauncherModrinthResult
           adw_preferences_group_remove (ADW_PREFERENCES_GROUP (
                                           self->browse.results_group),
                                         row);
+          g_object_unref (row);
         }
 
       gtk_adjustment_set_value (adjustment,

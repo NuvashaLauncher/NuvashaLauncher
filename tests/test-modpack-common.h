@@ -2,6 +2,9 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+#ifndef TEST_MODPACK_COMMON_H
+#define TEST_MODPACK_COMMON_H
+
 #define _GNU_SOURCE
 
 /* Tests for nuvashalauncher-modpack: what the index of a pack says, what its
@@ -31,7 +34,7 @@
  * Helpers
  * ---------------------------------------------------------- */
 
-static inline inline char *
+static inline char *
 make_tmp_dir (void)
 {
   g_autoptr (GError) error = NULL;
@@ -82,7 +85,7 @@ remove_recursive (const char *path)
   g_file_delete (file, NULL, NULL);
 }
 
-static inline inline char *
+static inline char *
 read_file (const char *path)
 {
   g_autoptr (GError) error = NULL;
@@ -97,7 +100,7 @@ read_file (const char *path)
 /* An index of a pack with the members the format requires. @files is
  * what goes inside the files array, brackets and commas included: an
  * empty pack passes "" and one file passes "{...}". */
-static inline inline char *
+static inline char *
 pack_index (const char *name, const char *files, const char *deps)
 {
   return g_strdup_printf (
@@ -431,31 +434,4 @@ manager_new (const char *data_dir)
   return g_steal_pointer (&manager);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-/* ---------------------------------------------------------- *
- * The dialog's own flow
- *
- * Reading a pack and installing it through the dialog is what a user does,
- * and it is a different path from the install this file otherwise tests:
- * the dialog hands its own references around and releases the operations
- * it started. Local only, so it runs without a network. The widgets need
- * a display; without one the flow is skipped rather than faked. */
-
-
-
-#if defined(__SANITIZE_ADDRESS__)
-
-#endif
-
-/* ---------------------------------------------------------- */
+#endif /* TEST_MODPACK_COMMON_H */

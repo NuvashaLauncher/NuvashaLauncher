@@ -177,7 +177,7 @@ fixture_stop (void)
   g_clear_pointer (&fixture.base, g_free);
 }
 
-static inline inline char *
+static inline char *
 server_url (const char *path)
 {
   return g_strconcat (fixture.base, path, NULL);
@@ -187,13 +187,13 @@ server_url (const char *path)
  * Helpers
  * ---------------------------------------------------------- */
 
-static inline inline char *
+static inline char *
 hash_of (const void *data, gsize length, GChecksumType type)
 {
   return g_compute_checksum_for_data (type, data, length);
 }
 
-static inline inline char *
+static inline char *
 make_test_dir (void)
 {
   g_autoptr (GError) error = NULL;
@@ -245,7 +245,7 @@ dir_entry_count (const char *path)
   return count;
 }
 
-static inline inline char *
+static inline char *
 read_text_file (const char *path)
 {
   char *contents = NULL;

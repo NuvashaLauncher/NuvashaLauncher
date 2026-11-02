@@ -24,7 +24,7 @@
 #define nuvashalauncher_TEST_FIXTURES "tests/fixtures"
 #endif
 
-static inline inline char *
+static inline char *
 read_fixture (const char *name)
 {
   g_autofree char *path = g_build_filename (nuvashalauncher_TEST_FIXTURES, name, NULL);

@@ -59,6 +59,13 @@ fsync_ready (GObject *source G_GNUC_UNUSED,
 
   if (!g_task_propagate_boolean (G_TASK (result), &error))
     {
+      if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+        {
+          /* fsync itself may have succeeded; only the GTask wrapper saw the
+             cancellation, so treat it as a plain cancellation. */
+          attempt_failed (request, g_steal_pointer (&error));
+          return;
+        }
       attempt_failed (request, g_steal_pointer (&error));
       return;
     }
@@ -82,7 +89,7 @@ retry_after_ms (DownloadRequest *request)
 
   seconds = g_ascii_strtoll (value, &end, 10);
 
-  if (end != value && *end == '\0')
+  if (end != value && *end == '\0' && seconds >= 0)
     {
       seconds = CLAMP (seconds, 0, MAX_RETRY_AFTER_MS / 1000);
       return seconds * 1000;
@@ -197,7 +204,7 @@ send_ready (GObject *source, GAsyncResult *result, gpointer user_data)
                          headers)
                      : -1;
 
-  if (!request->json && request->max_size >= 0 &&
+  if (!request->json && request->max_size >= 0 && request->total >= 0 &&
       request->total > request->max_size)
     {
       end_attempt (request,
@@ -534,8 +541,6 @@ attempt_failed (DownloadRequest *request, GError *error)
       request->retry_cancel_source =
         nuvashalauncher_cancellable_watch (g_task_get_cancellable (request->task),
                                retry_cancelled, request, NULL);
-      nuvashalauncher_task_scope_track_source (request->scope,
-                                   request->retry_cancel_source);
       return;
     }
 
@@ -549,12 +554,7 @@ retry_when_due (gpointer user_data)
 
   nuvashalauncher_task_scope_forget_source (request->scope, request->retry_source);
   request->retry_source = 0;
-  if (request->retry_cancel_source != 0)
-    {
-      nuvashalauncher_task_scope_remove_source (request->scope,
-                                    request->retry_cancel_source);
-      request->retry_cancel_source = 0;
-    }
+  nuvashalauncher_download_destroy_source (request, &request->retry_cancel_source);
 
   if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
     {
@@ -574,12 +574,7 @@ retry_cancelled (gpointer user_data)
 
   /* Off the scope before the answer, so nothing is left holding an id for
      a source this one is about to destroy. */
-  if (request->retry_cancel_source != 0)
-    {
-      nuvashalauncher_task_scope_remove_source (request->scope,
-                                    request->retry_cancel_source);
-      request->retry_cancel_source = 0;
-    }
+  nuvashalauncher_download_destroy_source (request, &request->retry_cancel_source);
 
   nuvashalauncher_download_request_fail (request, nuvashalauncher_download_cancelled_error ());
   return G_SOURCE_REMOVE;

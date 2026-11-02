@@ -124,10 +124,10 @@ on_process_exited (GObject *source, GAsyncResult *result, gpointer user_data)
   if (self->process.terminated_by_signal)
     self->process.term_signal = g_subprocess_get_term_sig (self->process.process);
 
-  g_clear_object (&self->process.process);
-
   /* The pipes can still hold the last lines of the game, so the launch
-     is over once they have been read. */
+     is over once they have been read. Keep self->process.process until
+     finish_launch() so process group signals can still be sent if
+     readers hang. */
   if (self->process.readers == 0)
     finish_launch (self);
 

@@ -121,6 +121,16 @@ hash_read_ready (GObject *source, GAsyncResult *result, gpointer user_data)
   gsize size = 0;
   const char *data = g_bytes_get_data (bytes, &size);
 
+  if (g_cancellable_is_cancelled (nuvashalauncher_task_scope_get_cancellable (hash->scope)))
+    {
+      nuvashalauncher_task_scope_return_error (
+        hash->scope,
+        g_error_new_literal (G_IO_ERROR, G_IO_ERROR_CANCELLED,
+                             "the operation was cancelled"));
+      hash_file_free (hash);
+      return;
+    }
+
   if (size == 0)
     {
       nuvashalauncher_task_scope_return_pointer (

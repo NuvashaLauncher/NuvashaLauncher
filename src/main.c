@@ -308,13 +308,6 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
   if (remove_instance_id != NULL)
     return remove_instance (remove_instance_id);
 
-  if (launch_id != NULL && (import_path != NULL || file_path != NULL))
-    {
-      g_application_command_line_printerr (
-        command_line, "--launch and --import cannot be used together.\n");
-      return 2;
-    }
-
   if (launch_id != NULL)
     {
       /* Keep the application window registered while launch work is active,
@@ -334,15 +327,23 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
 
   if (import_path != NULL)
     {
+      g_autoptr (GFile) import_file =
+        g_application_command_line_create_file_for_arg (command_line, import_path);
+      g_autofree char *resolved_path = g_file_get_path (import_file);
       nuvashalauncherMainWindow *window = ensure_main_window (app, TRUE);
-      nuvashalauncher_main_window_import_file (window, import_path);
+      nuvashalauncher_main_window_import_file (
+        window, resolved_path != NULL ? resolved_path : import_path);
       return 0;
     }
 
   if (file_path != NULL)
     {
+      g_autoptr (GFile) arg_file =
+        g_application_command_line_create_file_for_arg (command_line, file_path);
+      g_autofree char *resolved_path = g_file_get_path (arg_file);
       nuvashalauncherMainWindow *window = ensure_main_window (app, TRUE);
-      nuvashalauncher_main_window_import_file (window, file_path);
+      nuvashalauncher_main_window_import_file (
+        window, resolved_path != NULL ? resolved_path : file_path);
       return 0;
     }
 

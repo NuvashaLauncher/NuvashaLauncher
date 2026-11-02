@@ -33,8 +33,6 @@ void nuvashalauncher_auth_set_transport_for_tests (nuvashalauncherAuthTransportF
 void sent (SoupSession *session, GAsyncResult *result, gpointer user_data);
 void auth_read_ready (GObject *source, GAsyncResult *result, gpointer user_data);
 
-#endif
-
 gboolean client_id_is_set (void);
 GError *no_client_id_error (void);
 void fail (AuthRequest *self, GError *error);
@@ -57,3 +55,5 @@ void ask_xsts (AuthRequest *self);
 void ask_minecraft (AuthRequest *self);
 void ask_entitlements (AuthRequest *self);
 void ask_profile (AuthRequest *self);
+
+#endif /* nuvashalauncher_AUTH_MICROSOFT_PRIVATE_H */

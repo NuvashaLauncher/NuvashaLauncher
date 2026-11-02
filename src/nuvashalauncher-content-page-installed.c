@@ -31,15 +31,13 @@ show_error (nuvashalauncherContentPage *self, const char *what, GError *error)
 void
 take_rows_out (GList **rows, AdwPreferencesGroup *group)
 {
-  if (group == NULL)
-    {
-      g_list_free (*rows);
-      *rows = NULL;
-      return;
-    }
-
   for (GList *item = *rows; item != NULL; item = item->next)
-    adw_preferences_group_remove (group, item->data);
+    {
+      g_object_set_data (G_OBJECT (item->data), "nuvashalauncher-file", NULL);
+      if (group != NULL)
+        adw_preferences_group_remove (group, item->data);
+      g_object_unref (item->data);
+    }
 
   g_list_free (*rows);
   *rows = NULL;
@@ -80,8 +78,18 @@ toggle_file (nuvashalauncherContentPage *self, nuvashalauncherContentFile *file)
 
   if (row != NULL)
     {
+      GtkWidget *check = g_object_get_data (G_OBJECT (row),
+                                            "nuvashalauncher-file-check");
+
       g_hash_table_remove (self->installed.rows, old_path);
       g_hash_table_insert (self->installed.rows, g_strdup (file->path), row);
+      if (check != NULL)
+        g_object_set_data_full (G_OBJECT (check), "nuvashalauncher-file-path",
+                                g_strdup (file->path), g_free);
+      if (self->installed.selected_paths != NULL &&
+          g_hash_table_remove (self->installed.selected_paths, old_path))
+        g_hash_table_add (self->installed.selected_paths,
+                          g_strdup (file->path));
     }
 
   show_toast (self, file->enabled ? _("Enabled") : _("Disabled"));
@@ -300,6 +308,68 @@ on_mod_toggled (GtkSwitch *sw, gboolean state G_GNUC_UNUSED, gpointer user_data)
 }
 
 static void
+remove_installed_file_by_path (nuvashalauncherContentPage *self, const char *target_path)
+{
+  if (target_path == NULL || self->installed.files == NULL)
+    return;
+
+  if (self->instance != NULL)
+    {
+      g_autofree char *directory = NULL;
+      g_autofree char *filename = g_path_get_basename (target_path);
+
+      g_object_get (self->instance, "directory", &directory, NULL);
+      if (directory != NULL)
+        nuvashalauncher_operation_unref_when_done (
+          nuvashalauncher_content_index_remove_async (directory, self->type,
+                                                      filename, NULL, NULL));
+    }
+
+  if (self->installed.selected_paths != NULL)
+    g_hash_table_remove (self->installed.selected_paths, target_path);
+
+  for (guint i = 0; i < self->installed.files->len; i++)
+    {
+      nuvashalauncherContentFile *file =
+        g_ptr_array_index (self->installed.files, i);
+
+      if (g_strcmp0 (file->path, target_path) == 0)
+        {
+          GtkWidget *row = self->installed.rows != NULL
+                             ? GTK_WIDGET (g_hash_table_lookup (
+                                 self->installed.rows, target_path))
+                             : NULL;
+          GList *link = g_list_find (self->installed.rows_list, row);
+
+          if (row != NULL)
+            {
+              g_object_set_data (G_OBJECT (row), "nuvashalauncher-file", NULL);
+              if (self->installed.group != NULL)
+                adw_preferences_group_remove (
+                  ADW_PREFERENCES_GROUP (self->installed.group), row);
+              g_hash_table_remove (self->installed.rows, target_path);
+            }
+
+          if (link != NULL)
+            {
+              self->installed.rows_list =
+                g_list_delete_link (self->installed.rows_list, link);
+              g_object_unref (row);
+            }
+
+          g_ptr_array_remove_index (self->installed.files, i);
+          if (self->installed.status != NULL)
+            gtk_widget_set_visible (GTK_WIDGET (self->installed.status),
+                                    self->installed.files->len == 0);
+          if (self->installed.scroller != NULL)
+            gtk_widget_set_visible (GTK_WIDGET (self->installed.scroller),
+                                    self->installed.files->len != 0);
+          break;
+        }
+    }
+}
+
+static void
 on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
 {
   nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
@@ -308,9 +378,11 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
 
   if (!nuvashalauncher_content_delete_finish (G_FILE (source), result, &error))
       show_error (self, _("The file cannot be deleted"), error);
-    else
+    else if (self->installed.files != NULL)
     {
       g_autoptr (GPtrArray) dependent_paths =
+        g_ptr_array_new_with_free_func (g_free);
+      g_autoptr (GPtrArray) removed_dependents =
         g_ptr_array_new_with_free_func (g_free);
       g_autoptr (nuvashalauncherSettings) settings = nuvashalauncher_settings_new ();
       nuvashalauncherContentFile *deleted = NULL;
@@ -354,7 +426,11 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
           gboolean changed = FALSE;
 
           if (nuvashalauncher_settings_get_delete_dependents (settings))
-            changed = nuvashalauncher_content_remove_file (dependent, &dependent_error);
+            {
+              changed = nuvashalauncher_content_remove_file (dependent, &dependent_error);
+              if (changed)
+                g_ptr_array_add (removed_dependents, g_strdup (dependent));
+            }
           else
             {
               nuvashalauncherContentFile *dependent_file = NULL;
@@ -416,55 +492,21 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
         }
 
       show_toast (self, _("Deleted"));
-      {
-        g_autofree char *directory = NULL;
-        g_autofree char *filename = g_path_get_basename (path);
-
-        g_object_get (self->instance, "directory", &directory, NULL);
-        nuvashalauncher_operation_unref_when_done (nuvashalauncher_content_index_remove_async (
-          directory, self->type, filename, NULL, NULL));
-      }
       /* An identification request may still refer to one of the rows. Stop
          it before releasing the file it borrowed; the other rows remain in
          place and are not rebuilt. */
-      g_cancellable_cancel (self->installed.scan);
-      g_clear_object (&self->installed.scan);
-      self->installed.scan = g_cancellable_new ();
+      if (self->installed.scan != NULL)
+        {
+          g_cancellable_cancel (self->installed.scan);
+          g_clear_object (&self->installed.scan);
+          self->installed.scan = g_cancellable_new ();
+        }
       self->installed.identifying = FALSE;
 
-      for (guint i = 0; path != NULL && i < self->installed.files->len; i++)
-        {
-          nuvashalauncherContentFile *file = g_ptr_array_index (self->installed.files, i);
-
-          if (g_strcmp0 (file->path, path) == 0)
-            {
-              GtkWidget *row = GTK_WIDGET (
-                g_hash_table_lookup (self->installed.rows, path));
-              GList *link = g_list_find (self->installed.rows_list, row);
-
-              if (row != NULL)
-                {
-                  adw_preferences_group_remove (
-                      ADW_PREFERENCES_GROUP (self->installed.group), row);
-                  g_hash_table_remove (self->installed.rows, path);
-                }
-
-              if (link != NULL)
-                {
-                  self->installed.rows_list = g_list_delete_link (
-                      self->installed.rows_list, link);
-                }
-
-              g_ptr_array_remove_index (self->installed.files, i);
-              if (self->installed.status != NULL)
-                gtk_widget_set_visible (GTK_WIDGET (self->installed.status),
-                                        self->installed.files->len == 0);
-              if (self->installed.scroller != NULL)
-                gtk_widget_set_visible (GTK_WIDGET (self->installed.scroller),
-                                        self->installed.files->len != 0);
-              break;
-            }
-        }
+      for (guint i = 0; i < removed_dependents->len; i++)
+        remove_installed_file_by_path (self,
+                                       g_ptr_array_index (removed_dependents, i));
+      remove_installed_file_by_path (self, path);
     }
 
   g_object_unref (self);

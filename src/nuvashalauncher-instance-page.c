@@ -60,16 +60,39 @@ loader_display_name (nuvashalauncherInstance *instance)
   return name;
 }
 
+GtkWidget *
+instance_page_dialog_parent (nuvashalauncherInstancePage *self)
+{
+  GtkWidget *host;
+  GApplication *app;
+
+  if (gtk_widget_get_root (GTK_WIDGET (self)) != NULL)
+    return GTK_WIDGET (self);
+  host = g_object_get_data (G_OBJECT (self), "nuvashalauncher-host-widget");
+  if (GTK_IS_WIDGET (host))
+    return host;
+  app = g_application_get_default ();
+  if (GTK_IS_APPLICATION (app))
+    {
+      GtkWindow *win = gtk_application_get_active_window (GTK_APPLICATION (app));
+      if (win != NULL)
+        return GTK_WIDGET (win);
+    }
+  return GTK_WIDGET (self);
+}
+
 void
 instance_page_show_error (nuvashalauncherInstancePage *self, const GError *error)
 {
-  nuvashalauncher_ui_error_toast (GTK_WIDGET (self), GTK_WIDGET (self->toast_overlay), error);
+  nuvashalauncher_ui_error_toast (instance_page_dialog_parent (self),
+                                  GTK_WIDGET (self->toast_overlay), error);
 }
 
 void
 instance_page_show_toast (nuvashalauncherInstancePage *self, const char *message)
 {
-  nuvashalauncher_ui_show_toast (GTK_WIDGET (self), GTK_WIDGET (self->toast_overlay), message);
+  nuvashalauncher_ui_show_toast (instance_page_dialog_parent (self),
+                                 GTK_WIDGET (self->toast_overlay), message);
 }
 
 /* The list binds an item when it enters the store, so a row that was

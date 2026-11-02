@@ -45,7 +45,6 @@ nuvashalauncher_download_start_transfer (DownloadRequest *request)
      source would have done instead. */
   request->queue_cancel_source =
     nuvashalauncher_cancellable_watch (cancellable, queued_cancelled, request, NULL);
-  nuvashalauncher_task_scope_track_source (request->scope, request->queue_cancel_source);
 }
 
 void
@@ -86,12 +85,7 @@ nuvashalauncher_download_release_slot (DownloadRequest *request)
       if (next == NULL)
         break;
 
-      if (next->queue_cancel_source != 0)
-        {
-          nuvashalauncher_task_scope_remove_source (next->scope,
-                                        next->queue_cancel_source);
-          next->queue_cancel_source = 0;
-        }
+      nuvashalauncher_download_destroy_source (next, &next->queue_cancel_source);
 
       if (next->priority >= DOWNLOAD_PRIORITY_INTERACTIVE)
         {
@@ -126,24 +120,14 @@ nuvashalauncher_download_service_cancel_queued (nuvashalauncherDownloadService *
     {
       DownloadRequest *request =
         g_queue_pop_head (&service->interactive_waiting);
-      if (request->queue_cancel_source != 0)
-        {
-          nuvashalauncher_task_scope_remove_source (request->scope,
-                                        request->queue_cancel_source);
-          request->queue_cancel_source = 0;
-        }
+      nuvashalauncher_download_destroy_source (request, &request->queue_cancel_source);
       nuvashalauncher_download_request_fail (request, nuvashalauncher_download_cancelled_error ());
     }
 
   while (!g_queue_is_empty (&service->bulk_waiting))
     {
       DownloadRequest *request = g_queue_pop_head (&service->bulk_waiting);
-      if (request->queue_cancel_source != 0)
-        {
-          nuvashalauncher_task_scope_remove_source (request->scope,
-                                        request->queue_cancel_source);
-          request->queue_cancel_source = 0;
-        }
+      nuvashalauncher_download_destroy_source (request, &request->queue_cancel_source);
       nuvashalauncher_download_request_fail (request, nuvashalauncher_download_cancelled_error ());
     }
 }

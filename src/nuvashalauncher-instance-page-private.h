@@ -65,6 +65,7 @@ struct _nuvashalauncherInstancePage
 
 char *instance_string (nuvashalauncherInstance *instance, const char *property);
 char *loader_display_name (nuvashalauncherInstance *instance);
+GtkWidget *instance_page_dialog_parent (nuvashalauncherInstancePage *self);
 void refresh_in_list (nuvashalauncherInstancePage *self);
 void rebuild_content_pages (nuvashalauncherInstancePage *self);
 GtkWidget *create_settings_page (nuvashalauncherInstancePage *self);

@@ -27,7 +27,7 @@
 #define nuvashalauncher_TEST_FIXTURES "tests/fixtures"
 #endif
 
-static inline inline const nuvashalauncherLoaderVersion *
+static inline const nuvashalauncherLoaderVersion *
 version_at (GPtrArray *versions, guint index)
 {
   g_assert_cmpuint (index, <, versions->len);
@@ -74,7 +74,7 @@ version_at (GPtrArray *versions, guint index)
  * The document of a loader version
  * ---------------------------------------------------------- */
 
-static inline inline const nuvashalauncherLibrary *
+static inline const nuvashalauncherLibrary *
 find_library (nuvashalauncherVersionDescription *description, const char *name)
 {
   for (guint i = 0; i < description->libraries->len; i++)

@@ -92,7 +92,7 @@ server_handler (SoupServer *server, SoupServerMessage *message,
                                     SOUP_MEMORY_COPY, body->str, body->len);
 }
 
-static inline inline char *
+static inline char *
 server_url (const char *path)
 {
   return g_strconcat (fixture.base, path, NULL);
@@ -142,7 +142,7 @@ fixture_stop (void)
   g_clear_pointer (&fixture.base, g_free);
 }
 
-static inline inline char *
+static inline char *
 fixture_text (const char *name)
 {
   g_autofree char *path = g_build_filename (nuvashalauncher_TEST_FIXTURES, name, NULL);
@@ -191,13 +191,13 @@ find_library (nuvashalauncherVersionDescription *description, const char *name)
   return NULL;
 }
 
-static inline inline char *
+static inline char *
 sha1_of (const void *data, gsize length)
 {
   return g_compute_checksum_for_data (G_CHECKSUM_SHA1, data, length);
 }
 
-static inline inline char *
+static inline char *
 sha1_of_text (const char *text)
 {
   return sha1_of (text, strlen (text));
@@ -215,7 +215,7 @@ holds (GPtrArray *arguments, const char *needle)
   return FALSE;
 }
 
-static inline inline char *
+static inline char *
 make_test_dir (void)
 {
   g_autoptr (GError) error = NULL;
@@ -582,7 +582,7 @@ typedef struct
 } Served;
 
 /* The asset index the objects belong to. */
-static inline inline char *
+static inline char *
 asset_index_json (const Served *served)
 {
   GString *json = g_string_new ("{\"objects\": {");
@@ -610,7 +610,7 @@ asset_index_json (const Served *served)
 }
 
 /* The version document, with the address of the test server in it. */
-static inline inline char *
+static inline char *
 version_json (const Served *served)
 {
   g_autofree char *index = asset_index_json (served);
@@ -764,7 +764,7 @@ start_resolve (AsyncRun *run, ResolveCall *call, nuvashalauncherVersionManifest 
                                                resolve_finished, call);
 }
 
-static inline inline char *
+static inline char *
 read_text_file (const char *path)
 {
   char *contents = NULL;

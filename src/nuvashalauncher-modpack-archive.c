@@ -147,7 +147,8 @@ archive_read_entry (struct archive *archive, guint64 limit, GError **error)
           return NULL;
         }
 
-      if ((guint64) bytes->len + size > limit)
+      if ((guint64) bytes->len > limit ||
+          (guint64) size > limit - (guint64) bytes->len)
         {
           g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
                                nuvashalauncher_MODPACK_ERROR_BOMB,
@@ -253,20 +254,29 @@ nuvashalauncher_modpack_new_from_zip (const char *zip_path, GError **error)
 
       if (entry_size > 0)
         {
-          size += (guint64) entry_size;
-
-          if (size > max_content_size)
+          if (size > max_content_size ||
+              (guint64) entry_size > max_content_size - size)
             {
               g_set_error_literal (
                 error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_BOMB,
                 "the archive carries more content than one pack");
               goto error;
             }
+
+          size += (guint64) entry_size;
         }
 
       if (g_str_equal (path, MODRINTH_INDEX) &&
           archive_entry_filetype (header) == AE_IFREG)
         {
+          if (index_bytes != NULL)
+            {
+              g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
+                                   nuvashalauncher_MODPACK_ERROR_FORMAT,
+                                   "the archive has more than one modrinth.index.json");
+              goto error;
+            }
+
           index_bytes = archive_read_entry (archive, 8 * 1024 * 1024, error);
 
           if (index_bytes == NULL)

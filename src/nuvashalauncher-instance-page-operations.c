@@ -151,7 +151,7 @@ on_export_file_chosen (GObject *source, GAsyncResult *result,
 static void
 open_export_file_dialog (nuvashalauncherInstancePage *self)
 {
-  GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
+  GtkRoot *root = gtk_widget_get_root (instance_page_dialog_parent (self));
   g_autoptr (GtkFileDialog) dialog = gtk_file_dialog_new ();
   g_autoptr (GtkFileFilter) filter = gtk_file_filter_new ();
   g_autoptr (GListStore) filters = g_list_store_new (GTK_TYPE_FILE_FILTER);
@@ -192,7 +192,8 @@ static gboolean
 export_metadata_free_idle (gpointer user_data)
 {
   ExportMetadata *data = user_data;
-  nuvashalauncher_operation_forget_source (data->page->scope, data->page->export_idle);
+  if (data->page->scope != NULL)
+    nuvashalauncher_operation_forget_source (data->page->scope, data->page->export_idle);
   data->page->export_idle = 0;
   return G_SOURCE_REMOVE;
 }
@@ -313,7 +314,7 @@ show_export_metadata (nuvashalauncherInstancePage *self)
   g_signal_connect (export_button, "clicked",
                     G_CALLBACK (on_export_metadata_continue), data);
   adw_dialog_set_child (data->dialog, GTK_WIDGET (box));
-  adw_dialog_present (data->dialog, GTK_WIDGET (self));
+  adw_dialog_present (data->dialog, instance_page_dialog_parent (self));
 }
 
 static void
@@ -370,7 +371,7 @@ show_export_policy (nuvashalauncherInstancePage *self)
                                             ADW_RESPONSE_DESTRUCTIVE);
   adw_alert_dialog_set_default_response (alert, "clean");
   adw_alert_dialog_set_close_response (alert, "cancel");
-  adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL,
+  adw_alert_dialog_choose (alert, instance_page_dialog_parent (self), NULL,
                            on_export_policy_chosen, g_object_ref (self));
 }
 
@@ -404,8 +405,10 @@ update_directory_row (nuvashalauncherInstancePage *self)
 static void
 set_moving (nuvashalauncherInstancePage *self, gboolean moving)
 {
-  gtk_widget_set_visible (GTK_WIDGET (self->directory_spinner), moving);
-  gtk_widget_set_sensitive (GTK_WIDGET (self->directory_change), !moving);
+  if (self->directory_spinner != NULL)
+    gtk_widget_set_visible (GTK_WIDGET (self->directory_spinner), moving);
+  if (self->directory_change != NULL)
+    gtk_widget_set_sensitive (GTK_WIDGET (self->directory_change), !moving);
 }
 
 static void
@@ -622,8 +625,8 @@ on_delete_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   adw_alert_dialog_set_default_response (alert, "cancel");
   adw_alert_dialog_set_close_response (alert, "cancel");
 
-  adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL, on_delete_chosen,
-                           g_object_ref (self));
+  adw_alert_dialog_choose (alert, instance_page_dialog_parent (self), NULL,
+                           on_delete_chosen, g_object_ref (self));
 }
 
 void

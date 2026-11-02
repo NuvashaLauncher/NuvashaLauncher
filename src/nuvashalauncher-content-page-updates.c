@@ -18,9 +18,24 @@ typedef struct {
   nuvashalauncherContentPage *page; /* weakly held */
   guint index;
   GPtrArray *items; /* UpdateItem* */
+  char *current_sha1;
+  char *current_project_id;
+  char *current_filename;
+  char *current_path;
+  gboolean current_enabled;
 } UpdateRun;
 
 static void update_check_next (UpdateRun *run);
+
+static void
+update_run_clear_current (UpdateRun *run)
+{
+  g_clear_pointer (&run->current_sha1, g_free);
+  g_clear_pointer (&run->current_project_id, g_free);
+  g_clear_pointer (&run->current_filename, g_free);
+  g_clear_pointer (&run->current_path, g_free);
+  run->current_enabled = FALSE;
+}
 
 static void
 update_run_free (UpdateRun *run)
@@ -31,6 +46,7 @@ update_run_free (UpdateRun *run)
   if (run->page != NULL)
     g_object_remove_weak_pointer (G_OBJECT (run->page),
                                   (gpointer *) &run->page);
+  update_run_clear_current (run);
   g_clear_pointer (&run->items, g_ptr_array_unref);
   g_free (run);
 }
@@ -272,7 +288,6 @@ on_update_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   nuvashalauncherContentPage *self = watch->page;
   g_autoptr (GError) error = NULL;
   nuvashalauncherModrinthVersion *update = NULL;
-  nuvashalauncherContentFile *file = NULL;
   UpdateRun *run = NULL;
 
   if (self == NULL)
@@ -282,7 +297,6 @@ on_update_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     }
 
   update = nuvashalauncher_modrinth_update_by_hash_finish (result, &error);
-  file = g_object_get_data (G_OBJECT (self), "nuvashalauncher-update-file");
   run = g_object_get_data (G_OBJECT (self), "nuvashalauncher-update-run");
 
   if (run == NULL)
@@ -295,25 +309,25 @@ on_update_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   /* The update endpoint answers with the newest version that fits, which
      is still the installed one when the file is already the newest: a
      version that carries the very file on disk is not an update. */
-  if (update != NULL && file != NULL &&
-      !nuvashalauncher_modrinth_version_has_hash (update, file->sha1))
+  if (update != NULL && run->current_sha1 != NULL &&
+      !nuvashalauncher_modrinth_version_has_hash (update, run->current_sha1))
     {
       UpdateItem *item = g_new0 (UpdateItem, 1);
 
       item->version = update; /* owned from here */
        {
-         const char *title = file->project_id != NULL
+         const char *title = run->current_project_id != NULL
                                ? g_hash_table_lookup (self->browse.model->project_titles,
-                                                      file->project_id)
+                                                      run->current_project_id)
                                : NULL;
 
          /* Update dialogs use the project name, never the version label.
           * A filename is the safest fallback while its project metadata is
           * still being resolved. */
-         item->title = g_strdup (title != NULL ? title : file->filename);
+         item->title = g_strdup (title != NULL ? title : run->current_filename);
        }
-      item->path = g_strdup (file->path);
-      item->disabled = !file->enabled;
+      item->path = g_strdup (run->current_path);
+      item->disabled = !run->current_enabled;
       g_ptr_array_add (run->items, item);
     }
   else
@@ -324,6 +338,7 @@ on_update_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       g_clear_error (&error);
     }
 
+  update_run_clear_current (run);
   update_check_next (run);
   page_watch_free (watch);
 }
@@ -335,7 +350,7 @@ update_check_next (UpdateRun *run)
 {
   nuvashalauncherContentPage *self = run != NULL ? run->page : NULL;
 
-  if (self == NULL)
+  if (self == NULL || self->installed.files == NULL)
     {
       update_run_free (run);
       return;
@@ -351,12 +366,17 @@ update_check_next (UpdateRun *run)
       if (file->sha1 == NULL || file->project_id == NULL)
         continue;
 
-      g_object_set_data (G_OBJECT (self), "nuvashalauncher-update-file", file);
+      update_run_clear_current (run);
+      run->current_sha1 = g_strdup (file->sha1);
+      run->current_project_id = g_strdup (file->project_id);
+      run->current_filename = g_strdup (file->filename);
+      run->current_path = g_strdup (file->path);
+      run->current_enabled = file->enabled;
       {
         PageWatch *watch = page_watch_new (self);
 
         watch->operation = nuvashalauncher_modrinth_update_by_hash_async (
-          self->type, file->sha1, self->minecraft_version, self->loader,
+          self->type, run->current_sha1, self->minecraft_version, self->loader,
           on_update_ready, watch);
         nuvashalauncher_operation_follow (watch->operation,
                                            self->browse.model->cancellable);
