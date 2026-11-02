@@ -167,8 +167,8 @@ append_local_skins (SkinMenu *menu)
           g_hash_table_contains (menu->deleted_skin_ids, identity))
         continue;
       g_autofree char *display_name = skin_display_name (name);
-      gtk_list_box_append (menu->skins,
-                           GTK_WIDGET (skin_row_new (menu, display_name, uri)));
+      g_autoptr (AdwActionRow) row = skin_row_new (menu, display_name, uri);
+      gtk_list_box_append (menu->skins, GTK_WIDGET (row));
     }
 }
 
@@ -212,7 +212,7 @@ append_default_skins (SkinMenu *menu)
       if (uri != NULL && !g_hash_table_contains (menu->skin_urls, identity) &&
           !g_hash_table_contains (menu->deleted_skin_ids, identity))
         {
-          AdwActionRow *row = skin_row_new (menu, name, uri);
+          g_autoptr (AdwActionRow) row = skin_row_new (menu, name, uri);
           gtk_list_box_append (menu->skins, GTK_WIDGET (row));
           if (g_str_equal (name, "Steve"))
             steve_row = row;

@@ -14,8 +14,6 @@ void nuvashalauncher_mc_free_logging (gpointer data);
 void nuvashalauncher_mc_free_java_version (gpointer data);
 void nuvashalauncher_mc_free_entry (gpointer data);
 
-#endif
-
 gboolean nuvashalauncher_mc_missing_field (const char *member, GError **error);
 gboolean nuvashalauncher_mc_get_string (JsonObject *object, const char *member, gboolean required, char **value, GError **error);
 gboolean nuvashalauncher_mc_get_object (JsonObject *object, const char *member, gboolean required, JsonObject **value, GError **error);
@@ -27,3 +25,5 @@ nuvashalauncherRule *nuvashalauncher_mc_parse_rule (JsonObject *object, GError *
 GPtrArray *nuvashalauncher_mc_parse_rules (JsonNode *node, GError **error);
 
 gboolean nuvashalauncher_mc_get_rules_member (JsonObject *object, const char *member, GPtrArray **rules, GError **error);
+
+#endif /* nuvashalauncher_MINECRAFT_VERSIONS_JSON_PRIVATE_H */

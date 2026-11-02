@@ -195,8 +195,10 @@ version_matches (const char *pattern, const char *version)
 
   if (cached_regex == NULL)
     {
+      g_clear_pointer (&cached_pattern, g_free);
       g_warning ("the version pattern \"%s\" is not a regular expression: %s",
-                 pattern, error->message);
+                 pattern,
+                 error != NULL ? error->message : "invalid regular expression");
       return FALSE;
     }
 

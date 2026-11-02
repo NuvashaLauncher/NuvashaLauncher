@@ -103,7 +103,8 @@ make_parents (const char *root, const char *relative, GError **error)
       g_clear_object (&child);
       child = g_file_new_for_path (path);
 
-      if (g_file_query_exists (child, NULL))
+      if (g_file_query_file_type (child, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+                                  NULL) != G_FILE_TYPE_UNKNOWN)
         {
           if (!is_plain_directory (child, &local))
             {
@@ -313,8 +314,6 @@ extract_read_ready (GObject *source, GAsyncResult *result, gpointer user_data)
       return;
     }
 
-  step->request->extracted_bytes += g_bytes_get_size (step->bytes);
-
   extract_entries (step);
 }
 
@@ -365,10 +364,7 @@ read_entry (struct archive *archive, GBytes **data, GError **error)
           return FALSE;
         }
 
-      if (size > 0)
-        g_byte_array_append (buffer, block, size);
-
-      if (buffer->len > MAX_NATIVE_ENTRY_SIZE)
+      if (size > MAX_NATIVE_ENTRY_SIZE - buffer->len)
         {
           g_set_error (error, nuvashalauncher_RESOLVE_ERROR,
                        nuvashalauncher_RESOLVE_ERROR_INVALID,
@@ -376,6 +372,9 @@ read_entry (struct archive *archive, GBytes **data, GError **error)
                        MAX_NATIVE_ENTRY_SIZE / (1024 * 1024));
           return FALSE;
         }
+
+      if (size > 0)
+        g_byte_array_append (buffer, block, size);
     }
 
   if (buffer->len == 0)
@@ -407,7 +406,6 @@ extract_entries (ExtractStep *step)
     {
       const char *name = archive_entry_pathname (entry);
       g_autofree char *relative = NULL;
-      g_autofree char *path = NULL;
       g_autoptr (GBytes) data = NULL;
       g_autoptr (GError) error = NULL;
       gsize length = 0;
@@ -437,11 +435,10 @@ extract_entries (ExtractStep *step)
           return;
         }
 
-      path = g_build_filename (request->directory, relative, NULL);
-
       if (filetype == AE_IFDIR)
         {
-          if (!nuvashalauncher_resolve_ensure_directory (path, &error))
+          if (!nuvashalauncher_fs_make_directory_tree_nofollow (
+                request->directory, relative, 0755, &error))
             {
               extract_finished (request, g_steal_pointer (&error));
               extract_step_free (step);
@@ -485,8 +482,9 @@ extract_entries (ExtractStep *step)
           return;
         }
 
-       native_write_async (step, relative, data);
-       return;
+      request->extracted_bytes += g_bytes_get_size (data);
+      native_write_async (step, relative, data);
+      return;
     }
 
   if (status != ARCHIVE_EOF)

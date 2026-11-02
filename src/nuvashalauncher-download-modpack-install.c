@@ -424,6 +424,7 @@ on_pack_parsed (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
         adw_navigation_view_push (ADW_NAVIGATION_VIEW (self->nav),
                                   ADW_NAVIGATION_PAGE (page));
+        g_object_unref (page);
         operation_done (user_data);
         return;
       }

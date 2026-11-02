@@ -41,6 +41,7 @@ verify_run_free (VerifyRun *run)
   g_free (run->sha1);
   g_free (run->sha512);
   g_clear_object (&run->task);
+  nuvashalauncher_task_scope_unref (run->scope);
   g_free (run);
 }
 
@@ -126,9 +127,7 @@ nuvashalauncher_modpack_verify_file_async (const nuvashalauncherModpackFile *fil
   run->sha512 = g_strdup (file->sha512);
   run->stage = 0;
   run->task = g_object_ref (task);
-
-  /* Borrowed: the operation the caller owns until the answer. */
-  run->scope = scope;
+  run->scope = nuvashalauncher_task_scope_ref (scope);
 
   nuvashalauncher_task_scope_release_when_done (
     nuvashalauncher_download_file_hash_async (job_file, G_CHECKSUM_SHA1, verify_hash_ready,
@@ -186,11 +185,6 @@ extract_entry (struct archive *archive,
   if (relative[0] == '\0')
     return TRUE;
 
-  /* nuvashalauncher's content indexes are launcher metadata, never game files. */
-  if (g_str_has_prefix (relative, ".index/") ||
-      strstr (relative, "/.index/") != NULL)
-    return TRUE;
-
   /* A directory ends in a /: no name of its own to check against the
    * safety rules, only its contents. */
   {
@@ -199,6 +193,17 @@ extract_entry (struct archive *archive,
     if (length > 0 && relative[length - 1] == '/')
       relative[length - 1] = '\0';
   }
+
+  /* The prefix itself is no file. */
+  if (relative[0] == '\0')
+    return TRUE;
+
+  /* nuvashalauncher's content indexes are launcher metadata, never game files. */
+  if (g_str_equal (relative, ".index") ||
+      g_str_has_prefix (relative, ".index/") ||
+      strstr (relative, "/.index/") != NULL ||
+      g_str_has_suffix (relative, "/.index"))
+    return TRUE;
 
   if (!nuvashalauncher_modpack_path_is_safe (relative))
     {
@@ -211,8 +216,16 @@ extract_entry (struct archive *archive,
 
   if (archive_entry_filetype (header) == AE_IFDIR)
     {
-      return nuvashalauncher_fs_make_directory_tree_nofollow (directory, relative, 0755,
-                                                  error);
+      g_autoptr (GError) local_error = NULL;
+      if (!nuvashalauncher_fs_make_directory_tree_nofollow (directory, relative, 0755,
+                                                &local_error))
+        {
+          g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO,
+                       "\"%s\" cannot be made: %s", name,
+                       local_error != NULL ? local_error->message : g_strerror (errno));
+          return FALSE;
+        }
+      return TRUE;
     }
 
   if (archive_entry_filetype (header) != AE_IFREG)
@@ -223,21 +236,22 @@ extract_entry (struct archive *archive,
     }
 
   {
+    g_autoptr (GError) local_error = NULL;
     int fd = nuvashalauncher_fs_open_file_nofollow (directory, relative,
                                        O_WRONLY | O_CREAT | O_TRUNC, 0755, 0644,
-                                       error);
+                                       &local_error);
     if (fd >= 0)
       out = fdopen (fd, "wb");
     if (out == NULL && fd >= 0)
       close (fd);
+    if (out == NULL)
+      {
+        g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO,
+                     "\"%s\" cannot be written: %s", name,
+                     local_error != NULL ? local_error->message : g_strerror (errno));
+        return FALSE;
+      }
   }
-
-  if (out == NULL)
-    {
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO,
-                   "\"%s\" cannot be written: %s", name, g_strerror (errno));
-      return FALSE;
-    }
 
   for (;;)
     {
@@ -299,7 +313,7 @@ extract_entry (struct archive *archive,
 /* One archive read for one of the two folder layers of a pack. */
 static gboolean
 extract_layers (const char *archive_path, const char *directory,
-                guint64 *used, GError **error)
+                gboolean client_pass, guint64 *used, GError **error)
 {
   struct archive *archive = NULL;
   struct archive_entry *header = NULL;
@@ -353,12 +367,18 @@ extract_layers (const char *archive_path, const char *directory,
       const char *name = archive_entry_pathname (header);
       const char *prefix = NULL;
 
-      if (name != NULL && g_str_equal (name, "icon.png"))
-        prefix = "icon.png";
-      else if (name != NULL && g_str_has_prefix (name, "client-overrides/"))
-        prefix = "client-overrides/";
-      else if (name != NULL && g_str_has_prefix (name, "overrides/"))
-        prefix = "overrides/";
+      if (!client_pass)
+        {
+          if (name != NULL && g_str_equal (name, "icon.png"))
+            prefix = "icon.png";
+          else if (name != NULL && g_str_has_prefix (name, "overrides/"))
+            prefix = "overrides/";
+        }
+      else
+        {
+          if (name != NULL && g_str_has_prefix (name, "client-overrides/"))
+            prefix = "client-overrides/";
+        }
 
       if (prefix != NULL &&
           !extract_entry (archive, header, directory, prefix, used, error))
@@ -402,14 +422,25 @@ extract_layers (const char *archive_path, const char *directory,
   return TRUE;
 }
 
+gboolean
+nuvashalauncher_modpack_extract_overrides (const char *archive_path,
+                                           const char *directory,
+                                           GError **error)
+{
+  guint64 used = 0;
+
+  if (!extract_layers (archive_path, directory, FALSE, &used, error))
+    return FALSE;
+
+  return extract_layers (archive_path, directory, TRUE, &used, error);
+}
+
 static gboolean
 extract_overrides (const char *archive_path,
                    const char *directory,
                    GError **error)
 {
-  guint64 used = 0;
-
-  return extract_layers (archive_path, directory, &used, error);
+  return nuvashalauncher_modpack_extract_overrides (archive_path, directory, error);
 }
 
 typedef struct {

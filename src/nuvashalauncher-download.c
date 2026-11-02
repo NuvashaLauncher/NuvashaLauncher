@@ -201,6 +201,21 @@ compare_waiting_requests (gconstpointer left, gconstpointer right,
  * Ending a request
  * ---------------------------------------------------------- */
 
+void
+nuvashalauncher_download_destroy_source (DownloadRequest *request, guint *source_id)
+{
+  if (*source_id == 0)
+    return;
+
+  GMainContext *context =
+    request->task != NULL ? g_task_get_context (request->task) : NULL;
+  GSource *source = g_main_context_find_source_by_id (context, *source_id);
+
+  *source_id = 0;
+  if (source != NULL)
+    g_source_destroy (source);
+}
+
 static void
 request_free (DownloadRequest *request)
 {
@@ -213,16 +228,13 @@ request_free (DownloadRequest *request)
   if (request->retry_source != 0)
     nuvashalauncher_task_scope_remove_source (request->scope, request->retry_source);
 
-  /* Through the scope, which is where this source was registered: removing
-     it by hand would leave its id behind, and a scope that later tears that
-     id down removes whatever source has been given the same id since. */
-  if (request->retry_cancel_source != 0)
-    nuvashalauncher_task_scope_remove_source (request->scope,
-                                  request->retry_cancel_source);
-
-  if (request->queue_cancel_source != 0)
-    nuvashalauncher_task_scope_remove_source (request->scope,
-                                  request->queue_cancel_source);
+  nuvashalauncher_download_destroy_source (request, &request->retry_cancel_source);
+  nuvashalauncher_download_destroy_source (request, &request->queue_cancel_source);
+  if (request->service != NULL)
+    {
+      g_queue_remove (&request->service->interactive_waiting, request);
+      g_queue_remove (&request->service->bulk_waiting, request);
+    }
 
   nuvashalauncher_download_close_sink (request);
   g_clear_pointer (&request->chunk, g_bytes_unref);
@@ -320,6 +332,7 @@ nuvashalauncher_download_file_limited_async (nuvashalauncherDownloadService *ser
                           nuvashalauncherDownloadProgressFunc progress,
                           GAsyncReadyCallback callback, gpointer user_data)
 {
+  g_return_val_if_fail (service != NULL, NULL);
   g_return_val_if_fail (url != NULL, NULL);
   g_return_val_if_fail (dest_path != NULL, NULL);
   g_return_val_if_fail (g_path_is_absolute (dest_path), NULL);
@@ -355,25 +368,25 @@ nuvashalauncher_download_file_limited_async (nuvashalauncherDownloadService *ser
       return g_steal_pointer (&scope);
     }
 
-   DownloadRequest *request = g_new0 (DownloadRequest, 1);
-   request->parent_fd = -1;
+  DownloadRequest *request = g_new0 (DownloadRequest, 1);
+  request->parent_fd = -1;
 
   /* Borrowed: the caller's handle keeps the operation alive, and the
      request is answered before it goes away. */
   request->scope = scope;
-   request->service = service;
-   request->task = g_object_ref (nuvashalauncher_task_scope_task (scope));
-   request->url = g_strdup (url);
-   request->dest_path = g_strdup (dest_path);
-   request->expected_hash = g_strdup (expected_hash);
-   request->max_size = max_size;
+  request->service = service;
+  request->task = g_object_ref (nuvashalauncher_task_scope_task (scope));
+  request->url = g_strdup (url);
+  request->dest_path = g_strdup (dest_path);
+  request->expected_hash = g_strdup (expected_hash);
+  request->max_size = max_size;
   request->hash_type = hash_type;
   request->progress = progress;
   request->user_data = user_data;
   request->fd = -1;
   request->total = -1;
   request->priority = DOWNLOAD_PRIORITY_BULK;
-   request->begin = nuvashalauncher_download_file_cache_start;
+  request->begin = nuvashalauncher_download_file_cache_start;
 
   nuvashalauncher_download_start_transfer (request);
 
@@ -393,6 +406,7 @@ nuvashalauncher_download_json_async (nuvashalauncherDownloadService *service, co
                          GAsyncReadyCallback callback,
                          gpointer user_data)
 {
+  g_return_val_if_fail (service != NULL, NULL);
   g_return_val_if_fail (url != NULL, NULL);
 
   g_autoptr (nuvashalauncherTaskScope) scope =
@@ -438,6 +452,7 @@ void
 nuvashalauncher_download_set_cache_settings (nuvashalauncherDownloadService *service,
                                   nuvashalauncherSettings *settings)
 {
+  g_return_if_fail (service != NULL);
   g_return_if_fail (settings == NULL || nuvashalauncher_IS_SETTINGS (settings));
 
   g_set_object (&service->cache_settings, settings);
@@ -456,6 +471,7 @@ nuvashalauncher_download_json_cached_async (nuvashalauncherDownloadService *serv
                                 GAsyncReadyCallback callback,
                                 gpointer user_data)
 {
+  g_return_val_if_fail (service != NULL, NULL);
   g_return_val_if_fail (url != NULL, NULL);
   g_autoptr (nuvashalauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
@@ -498,6 +514,7 @@ nuvashalauncher_download_json_post_cached_async (nuvashalauncherDownloadService 
                                      GAsyncReadyCallback callback,
                                      gpointer user_data)
 {
+  g_return_val_if_fail (service != NULL, NULL);
   g_return_val_if_fail (url != NULL, NULL);
   g_return_val_if_fail (body != NULL, NULL);
   g_autoptr (nuvashalauncherTaskScope) scope =

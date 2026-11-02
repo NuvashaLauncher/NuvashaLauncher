@@ -625,12 +625,19 @@ test_archive_index_bomb_is_refused (void)
   g_print ("ok - an index of too many bytes is refused\n");
 }
 
+gboolean nuvashalauncher_modpack_extract_overrides (const char *archive_path,
+                                                   const char *directory,
+                                                   GError **error);
+
 static void
 test_safe_archive_opens (void)
 {
   g_autofree char *dir = make_tmp_dir ();
+  g_autofree char *extract_dir = g_build_filename (dir, "extracted", NULL);
   g_autofree char *index_json = pack_index ("Safe");
   g_autofree char *zip_path = g_build_filename (dir, "pack.mrpack", NULL);
+  g_autofree char *options_path = NULL;
+  g_autofree char *options_text = NULL;
   g_autoptr (GError) error = NULL;
   g_autoptr (nuvashalauncherModpack) pack = NULL;
 
@@ -638,8 +645,8 @@ test_safe_archive_opens (void)
     ZipEntry entries[] = {
       { "modrinth.index.json", index_json, strlen (index_json), AE_IFREG,
         NULL },
+      ZIP_FILE ("client-overrides/config/options.txt", "client"),
       ZIP_FILE ("overrides/config/options.txt", "options"),
-      ZIP_FILE ("client-overrides/config/client.txt", "client"),
     };
 
     zip_write (zip_path, entries, G_N_ELEMENTS (entries));
@@ -649,6 +656,16 @@ test_safe_archive_opens (void)
   g_assert_no_error (error);
   g_assert_nonnull (pack);
   g_assert_cmpstr (pack->archive_path, ==, zip_path);
+
+  g_assert_cmpint (g_mkdir_with_parents (extract_dir, 0755), ==, 0);
+  g_assert_true (nuvashalauncher_modpack_extract_overrides (zip_path,
+                                                            extract_dir,
+                                                            &error));
+  g_assert_no_error (error);
+  options_path = g_build_filename (extract_dir, "config", "options.txt", NULL);
+  g_assert_true (g_file_get_contents (options_path, &options_text, NULL, &error));
+  g_assert_no_error (error);
+  g_assert_cmpstr (options_text, ==, "client");
 
   remove_recursive (dir);
   g_print ("ok - an archive that is a pack opens\n");

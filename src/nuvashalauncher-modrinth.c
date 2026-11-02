@@ -526,6 +526,8 @@ nuvashalauncher_modrinth_resolve_install (nuvashalauncherModrinthVersion *versio
                                "this version requires a dependency that "
                                "names no project");
           g_ptr_array_unref (pending);
+          if (conflicts != NULL)
+            g_clear_pointer (conflicts, g_ptr_array_unref);
           return NULL;
         }
 

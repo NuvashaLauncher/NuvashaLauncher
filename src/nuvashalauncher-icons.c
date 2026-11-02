@@ -304,6 +304,9 @@ gboolean
 nuvashalauncher_icon_scale_file (const char *path)
 {
   g_autoptr (GdkPixbuf) pixbuf = NULL;
+  GdkPixbufFormat *format = NULL;
+  int info_width = 0;
+  int info_height = 0;
   g_autofree char *directory = NULL;
   g_autofree char *name = NULL;
   g_autofree char *temporary_name = NULL;
@@ -314,6 +317,18 @@ nuvashalauncher_icon_scale_file (const char *path)
 
   if (path == NULL)
     return FALSE;
+
+  format = gdk_pixbuf_get_file_info (path, &info_width, &info_height);
+  if (format != NULL)
+    {
+      g_autofree char *format_name = gdk_pixbuf_format_get_name (format);
+
+      if (g_strcmp0 (format_name, "png") == 0 &&
+          info_width > 0 && info_height > 0 &&
+          info_width <= nuvashalauncher_ICON_SIZE &&
+          info_height <= nuvashalauncher_ICON_SIZE)
+        return TRUE;
+    }
 
   pixbuf = gdk_pixbuf_new_from_file_at_scale (path, nuvashalauncher_ICON_SIZE,
                                               nuvashalauncher_ICON_SIZE, TRUE, NULL);

@@ -85,7 +85,7 @@ on_skin_file_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
         char *uri = g_file_get_uri (file);
         g_autofree char *basename = g_file_get_basename (file);
         g_autofree char *display_name = skin_display_name (basename);
-        AdwActionRow *row = skin_row_new (menu, display_name, uri);
+        g_autoptr (AdwActionRow) row = skin_row_new (menu, display_name, uri);
         gtk_list_box_insert (menu->skins, GTK_WIDGET (row), 0);
         gtk_list_box_select_row (menu->skins, GTK_LIST_BOX_ROW (row));
         load_view_texture (menu->view, uri, FALSE);
@@ -318,20 +318,20 @@ on_skin_selected (GtkListBox *list, GtkListBoxRow *row, gpointer user_data)
 
   /* Keep nuvashalauncher's cached profile in step with the selection so the account row
    * and the next opening of this manager show the selected skin. */
-  if (!menu->applying_profile && menu->owner != NULL && menu->account != NULL)
+  if (!menu->applying_profile && menu->account != NULL)
     {
-      g_autoptr (nuvashalauncherAccount) account = nuvashalauncher_account_copy (menu->account);
       g_autoptr (GError) error = NULL;
-      g_free (account->avatar_url);
-      account->avatar_url = g_strdup (url);
-      g_free (account->skin_model);
-      account->skin_model = g_strdup (menu->slim_model != NULL &&
-                                      gtk_check_button_get_active (menu->slim_model)
-                                        ? "SLIM" : "CLASSIC");
-      if (!nuvashalauncher_accounts_update (menu->owner->accounts, account, &error))
+      g_free (menu->account->avatar_url);
+      menu->account->avatar_url = g_strdup (url);
+      g_free (menu->account->skin_model);
+      menu->account->skin_model = g_strdup (menu->slim_model != NULL &&
+                                            gtk_check_button_get_active (menu->slim_model)
+                                              ? "SLIM" : "CLASSIC");
+      if (menu->owner != NULL &&
+          !nuvashalauncher_accounts_update (menu->owner->accounts, menu->account, &error))
         skin_menu_show_error (menu, error);
       upload_selected_skin (menu, url,
-                            g_ascii_strcasecmp (account->skin_model, "SLIM") == 0
+                            g_ascii_strcasecmp (menu->account->skin_model, "SLIM") == 0
                               ? "SLIM" : "CLASSIC");
     }
 }
@@ -366,7 +366,12 @@ skin_row_new (SkinMenu *menu, const char *name, const char *url)
         {
           g_autofree char *cached = cached_skin_path (url);
           if (cached == NULL || !nuvashalauncher_users_set_local_avatar (image, cached))
-            nuvashalauncher_users_set_avatar (menu->owner, image, url);
+            {
+              if (menu->owner != NULL)
+                nuvashalauncher_users_set_avatar (menu->owner, image, url);
+              else
+                nuvashalauncher_users_set_avatar_icon (image);
+            }
         }
     }
   adw_action_row_add_prefix (row, GTK_WIDGET (image));
@@ -403,8 +408,12 @@ select_saved_skin (SkinMenu *menu)
 
   if (match != NULL)
     {
+      const char *url =
+        g_object_get_data (G_OBJECT (match), "nuvashalauncher-skin-url");
       menu->current_skin_row = ADW_ACTION_ROW (match);
       gtk_list_box_select_row (menu->skins, match);
+      if (url != NULL)
+        load_view_texture (menu->view, url, FALSE);
     }
 }
 
@@ -449,11 +458,12 @@ append_profile_skins (SkinMenu *menu, const char *json)
             }
           if (alias == NULL || *alias == '\0')
             fallback_name = skin_name_for_url (url);
-          gtk_list_box_append (menu->skins,
-                               GTK_WIDGET (skin_row_new (menu,
-                                             alias != NULL && *alias != '\0'
-                                               ? alias : fallback_name,
-                                             url)));
+          {
+            g_autoptr (AdwActionRow) row = skin_row_new (
+              menu, alias != NULL && *alias != '\0' ? alias : fallback_name,
+              url);
+            gtk_list_box_append (menu->skins, GTK_WIDGET (row));
+          }
         }
     }
 }
@@ -468,7 +478,9 @@ load_profile_skins (SkinMenu *menu)
   if (menu->account == NULL || menu->account->access_token == NULL)
     return;
   key = menu->account->uuid != NULL ? menu->account->uuid : menu->account->id;
-  cached = g_hash_table_lookup (menu->owner->profile_cache, key);
+  cached = menu->owner != NULL
+             ? g_hash_table_lookup (menu->owner->profile_cache, key)
+             : NULL;
   if (cached != NULL)
     {
       apply_profile_json (menu, cached);
@@ -517,15 +529,17 @@ nuvashalauncher_users_skin_menu_new (nuvashalauncherUsersPopover *owner, GtkImag
   g_ref_count_init (&data->refs);
   data->view = g_object_ref (preview);
   data->owner = owner;
+  if (owner != NULL)
+    g_object_add_weak_pointer (G_OBJECT (owner), (gpointer *) &data->owner);
   data->dialog = dialog;
   data->skins = g_object_ref (skins);
-  data->cape_list = g_object_ref (cape_list);
+  data->cape_list = cape_list;
   data->cape_ids = g_ptr_array_new_with_free_func (g_free);
   data->cape_urls = g_ptr_array_new_with_free_func (g_free);
   data->skin_urls = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
   data->deleted_skin_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
   data->capes = capes;
-  data->account = account;
+  data->account = account != NULL ? nuvashalauncher_account_copy (account) : NULL;
   data->remove_button = remove;
   data->operation_status = GTK_LABEL (g_object_ref_sink (gtk_label_new (NULL)));
   gtk_label_set_wrap (data->operation_status, TRUE);
@@ -541,8 +555,9 @@ nuvashalauncher_users_skin_menu_new (nuvashalauncherUsersPopover *owner, GtkImag
   data->default_model = default_model;
   data->slim_model = slim_model;
   data->cancellable = g_cancellable_new ();
-  g_object_set_data (G_OBJECT (preview), "nuvashalauncher-deleted-skin-ids",
-                     data->deleted_skin_ids);
+  g_object_set_data_full (G_OBJECT (preview), "nuvashalauncher-deleted-skin-ids",
+                          g_hash_table_ref (data->deleted_skin_ids),
+                          (GDestroyNotify) g_hash_table_unref);
   g_object_set_data (G_OBJECT (slim_model), "nuvashalauncher-slim", GINT_TO_POINTER (1));
   g_signal_connect (import, "clicked", G_CALLBACK (on_import_skin_clicked), data);
   g_signal_connect (export, "clicked", G_CALLBACK (on_export_skin_clicked), data);
@@ -568,18 +583,15 @@ nuvashalauncher_users_skin_menu_new (nuvashalauncherUsersPopover *owner, GtkImag
   gtk_widget_set_size_request (GTK_WIDGET (preview), 220, 300);
   gtk_check_button_set_group (slim_model, default_model);
   data->applying_profile = TRUE;
-  gtk_check_button_set_active (default_model,
-                               g_ascii_strcasecmp (account->skin_model != NULL
-                                                     ? account->skin_model : "CLASSIC",
-                                                   "SLIM") != 0);
-  gtk_check_button_set_active (slim_model,
-                               g_ascii_strcasecmp (account->skin_model != NULL
-                                                     ? account->skin_model : "CLASSIC",
-                                                   "SLIM") == 0);
-  nuvashalauncher_skin_view_set_slim (preview,
-                              g_ascii_strcasecmp (account->skin_model != NULL
-                                                    ? account->skin_model : "CLASSIC",
-                                                  "SLIM") == 0);
+  {
+    gboolean is_slim =
+      account != NULL && account->skin_model != NULL &&
+      g_ascii_strcasecmp (account->skin_model, "SLIM") == 0;
+
+    gtk_check_button_set_active (default_model, !is_slim);
+    gtk_check_button_set_active (slim_model, is_slim);
+    nuvashalauncher_skin_view_set_slim (preview, is_slim);
+  }
   data->applying_profile = FALSE;
   nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (open_skins), _("Open Folder"));
   nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (remove), _("Delete"));
@@ -612,7 +624,7 @@ nuvashalauncher_users_skin_menu_new (nuvashalauncherUsersPopover *owner, GtkImag
   adw_dialog_set_child (dialog, GTK_WIDGET (toolbar));
   append_local_skins (data);
   append_default_skins (data);
-  if (account->avatar_url != NULL && *account->avatar_url != '\0')
+  if (account != NULL && account->avatar_url != NULL && *account->avatar_url != '\0')
     {
       g_autofree char *avatar_skin_name =
         skin_name_for_url (account->avatar_url);
@@ -620,21 +632,15 @@ nuvashalauncher_users_skin_menu_new (nuvashalauncherUsersPopover *owner, GtkImag
       if (!g_hash_table_contains (data->skin_urls, avatar_skin_name) &&
           !g_hash_table_contains (data->deleted_skin_ids, avatar_skin_name))
         {
-          if (!g_hash_table_contains (data->skin_urls, avatar_skin_name))
-            {
-              data->current_skin_row = skin_row_new (data, avatar_skin_name,
-                                                      account->avatar_url);
-              gtk_list_box_append (skins, GTK_WIDGET (data->current_skin_row));
-            }
-          load_view_texture (preview, account->avatar_url, FALSE);
+          g_autoptr (AdwActionRow) row =
+            skin_row_new (data, avatar_skin_name, account->avatar_url);
+          data->current_skin_row = row;
+          gtk_list_box_append (skins, GTK_WIDGET (row));
         }
     }
-  else
-    {
-      data->applying_profile = TRUE;
-      select_saved_skin (data);
-      data->applying_profile = FALSE;
-    }
+  data->applying_profile = TRUE;
+  select_saved_skin (data);
+  data->applying_profile = FALSE;
   g_signal_connect (capes, "notify::selected", G_CALLBACK (on_cape_selected), data);
   load_profile_skins (data);
   return dialog;

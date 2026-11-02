@@ -95,8 +95,7 @@ void nuvashalauncher_download_request_succeed_json (DownloadRequest *request,
                                         JsonParser *parser);
 void nuvashalauncher_download_cache_write (DownloadRequest *request, const char *response);
 
-#endif
-
+void nuvashalauncher_download_destroy_source (DownloadRequest *request, guint *source_id);
 void nuvashalauncher_download_close_sink (DownloadRequest *request);
 void nuvashalauncher_download_discard_temporary (DownloadRequest *request);
 gboolean nuvashalauncher_download_open_temporary (DownloadRequest *request, GError **error);
@@ -122,3 +121,5 @@ void nuvashalauncher_download_json_stream_ready (GObject *source, GAsyncResult *
 GError *check_status (DownloadRequest *request);
 void end_attempt (DownloadRequest *request, GError *error);
 void read_next_chunk (DownloadRequest *request);
+
+#endif /* nuvashalauncher_DOWNLOAD_PRIVATE_H */

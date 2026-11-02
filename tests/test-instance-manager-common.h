@@ -32,7 +32,7 @@ typedef struct
   nuvashalauncherTaskScope *operation;
 } AsyncCall;
 
-static inline inline char *
+static inline char *
 make_tmp_dir (void)
 {
   g_autoptr (GError) error = NULL;
@@ -95,7 +95,7 @@ write_file (const char *path, const char *contents)
     g_error ("cannot write %s: %s", path, error->message);
 }
 
-static inline inline char *
+static inline char *
 read_file (const char *path)
 {
   g_autoptr (GError) error = NULL;
@@ -123,7 +123,7 @@ count_entries (const char *path)
   return count;
 }
 
-static inline inline char *
+static inline char *
 prop_string (nuvashalauncherInstance *instance, const char *property)
 {
   char *value = NULL;

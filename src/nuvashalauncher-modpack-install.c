@@ -148,13 +148,13 @@ modpack_environment (nuvashalauncherModpackEnv environment)
   switch (environment)
     {
     case nuvashalauncher_MODPACK_ENV_OPTIONAL:
-      return "optional";
+      return (char *) "optional";
     case nuvashalauncher_MODPACK_ENV_UNSUPPORTED:
-      return "unsupported";
+      return (char *) "unsupported";
     case nuvashalauncher_MODPACK_ENV_REQUIRED:
     case nuvashalauncher_MODPACK_ENV_UNSPECIFIED:
     default:
-      return "required";
+      return (char *) "required";
     }
 }
 
@@ -216,7 +216,7 @@ seed_manifest_indexes (InstallRun *run)
       entry.download_url = (char *) url;
       entry.env_client = modpack_environment (file->env_client);
       entry.env_server = modpack_environment (file->env_server);
-      entry.provider = "Modrinth";
+      entry.provider = (char *) "Modrinth";
       entry.project_id = project_id;
       entry.version_id = version_id;
 
@@ -465,8 +465,8 @@ install_finish_registration (InstallRun *run)
 
       if (g_file_test (icon, G_FILE_TEST_IS_REGULAR))
         {
-          nuvashalauncher_instance_set_string (instance, "icon", icon, &error);
-          if (!nuvashalauncher_instance_manager_save (run->manager, &error))
+          if (!nuvashalauncher_instance_set_string (instance, "icon", icon, &error) ||
+              !nuvashalauncher_instance_manager_save (run->manager, &error))
             {
               install_fail (run, g_steal_pointer (&error));
               return;
@@ -584,7 +584,11 @@ dispatch_download (InstallRun *run)
       return;
     }
 
-  if (!nuvashalauncher_modpack_path_is_safe (file->path))
+  if (!nuvashalauncher_modpack_path_is_safe (file->path) ||
+      g_str_equal (file->path, ".index") ||
+      g_str_has_prefix (file->path, ".index/") ||
+      strstr (file->path, "/.index/") != NULL ||
+      g_str_has_suffix (file->path, "/.index"))
     {
       g_autoptr (GError) error = NULL;
 
@@ -845,20 +849,6 @@ nuvashalauncher_modpack_install_async (nuvashalauncherModpack *modpack,
       g_set_error (&error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO,
                    "the temporary directory cannot be made: %s",
                    temp_error->message);
-      install_refuse (run, g_steal_pointer (&error));
-      return nuvashalauncher_task_scope_ref (task_scope);
-    }
-
-  /* mkdtemp creates a private directory on supported POSIX systems, but
-   * enforce that contract explicitly: extraction and download paths below
-   * must never be writable by another local user. */
-  if (g_chmod (run->temp, 0700) != 0)
-    {
-      g_autoptr (GError) error = NULL;
-
-      g_set_error (&error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO,
-                   "the temporary directory cannot be secured: %s",
-                   g_strerror (errno));
       install_refuse (run, g_steal_pointer (&error));
       return nuvashalauncher_task_scope_ref (task_scope);
     }

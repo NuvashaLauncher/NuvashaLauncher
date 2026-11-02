@@ -233,13 +233,13 @@ nuvashalauncher_content_page_dispose (GObject *object)
   if (self->installed.update_popover != NULL &&
       gtk_widget_get_parent (GTK_WIDGET (self->installed.update_popover)) != NULL)
     gtk_widget_unparent (GTK_WIDGET (self->installed.update_popover));
+  watch_widget (&self->installed.update_popover, NULL);
   self->installed.group = NULL;
   self->installed.scroller = NULL;
   self->installed.status = NULL;
   self->installed.loading = NULL;
   self->installed.update_content = NULL;
   self->installed.update_spinner = NULL;
-  self->installed.update_popover = NULL;
   self->installed.update_phase = NULL;
   self->installed.update_count = NULL;
   self->installed.update_bar = NULL;
@@ -309,8 +309,8 @@ nuvashalauncher_content_page_finalize (GObject *object)
   g_clear_pointer (&self->installed.selected_paths, g_hash_table_unref);
   nuvashalauncher_content_browser_model_free (self->browse.model);
   self->browse.model = NULL;
-  g_list_free (self->installed.rows_list);
-  g_list_free (self->browse.result_rows);
+  g_list_free_full (self->installed.rows_list, g_object_unref);
+  g_list_free_full (self->browse.result_rows, g_object_unref);
   nuvashalauncher_content_install_model_free (self->install_model);
   self->install_model = NULL;
   g_free (self->minecraft_version);

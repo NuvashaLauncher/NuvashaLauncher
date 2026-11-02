@@ -45,8 +45,31 @@ main (void)
   g_assert_false (nuvashalauncher_fs_get_contents_within (outside, 3, &contents, &length,
                                               &error));
   g_assert_nonnull (error);
+  g_clear_error (&error);
   g_assert_false (nuvashalauncher_fs_directory_is_real (link));
   g_assert_true (nuvashalauncher_fs_directory_is_real (root));
+
+  {
+    g_autofree char *double_slash = g_strconcat (root, "//link", NULL);
+    g_autofree char *parent_escape = g_strconcat (root, "/..", NULL);
+
+    g_assert_false (nuvashalauncher_fs_directory_is_real (double_slash));
+    g_assert_false (nuvashalauncher_fs_directory_is_real (parent_escape));
+    g_assert_cmpint (nuvashalauncher_fs_open_directory_nofollow (double_slash, &error),
+                     ==, -1);
+    g_clear_error (&error);
+    g_assert_cmpint (nuvashalauncher_fs_open_directory_nofollow (parent_escape, &error),
+                     ==, -1);
+    g_clear_error (&error);
+    g_assert_cmpint (nuvashalauncher_fs_open_file_nofollow (root, "", O_RDONLY, 0755,
+                                                0644, &error),
+                     ==, -1);
+    g_clear_error (&error);
+    g_assert_cmpint (nuvashalauncher_fs_open_file_nofollow (root, "../outside", O_RDONLY,
+                                                0755, 0644, &error),
+                     ==, -1);
+    g_clear_error (&error);
+  }
 
   {
     int directory_fd = nuvashalauncher_fs_open_directory_nofollow (root, &error);
@@ -59,6 +82,7 @@ main (void)
     close (directory_fd);
   }
 
+  nuvashalauncher_fs_remove_tree (root);
   g_print ("ok - filesystem nofollow and bounds checks\n");
   return 0;
 }

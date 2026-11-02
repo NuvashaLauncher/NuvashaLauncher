@@ -168,7 +168,8 @@ nuvashalauncher_loader_read_zip_entry (const char *path, const char *entry, GErr
               break;
             }
 
-          if ((guint64) bytes->len + size > MAX_INSTALLER_ENTRY_SIZE)
+          if ((guint64) bytes->len > MAX_INSTALLER_ENTRY_SIZE ||
+              (guint64) size > MAX_INSTALLER_ENTRY_SIZE - (guint64) bytes->len)
             {
               g_set_error (error, nuvashalauncher_LOADERS_ERROR,
                            nuvashalauncher_LOADERS_ERROR_INSTALLER,
@@ -209,9 +210,11 @@ nuvashalauncher_loader_read_zip_entry (const char *path, const char *entry, GErr
   return g_byte_array_free_to_bytes (bytes);
 }
 
-/* Return manifest attribute @name from the JAR at @path, or NULL. */
-char *
-nuvashalauncher_loader_jar_manifest_attribute (const char *path, const char *name)
+#define MAX_MANIFEST_ENTRY_SIZE (8ULL * 1024ULL * 1024ULL)
+
+static char *
+jar_manifest_attribute_with_error (const char *path, const char *name,
+                                   GError **error)
 {
   g_autoptr (GBytes) manifest = NULL;
   g_autofree char *text = NULL;
@@ -220,7 +223,7 @@ nuvashalauncher_loader_jar_manifest_attribute (const char *path, const char *nam
   gsize size = 0;
   g_autofree char *prefix = NULL;
 
-  manifest = nuvashalauncher_loader_read_zip_entry (path, "META-INF/MANIFEST.MF", NULL);
+  manifest = nuvashalauncher_loader_read_zip_entry (path, "META-INF/MANIFEST.MF", error);
 
   if (manifest == NULL)
     return NULL;
@@ -232,16 +235,40 @@ nuvashalauncher_loader_jar_manifest_attribute (const char *path, const char *nam
 
   for (guint i = 0; lines[i] != NULL; i++)
     {
-      const char *line = g_strstrip (lines[i]);
+      gsize len = strlen (lines[i]);
+      while (len > 0 && lines[i][len - 1] == '\r')
+        lines[i][--len] = '\0';
+    }
 
-      if (*line == ' ' || *line == '\0')
+  for (guint i = 0; lines[i] != NULL; i++)
+    {
+      /* A line that starts with a space continues the one before it,
+         which a long class name can need. Check before stripping! */
+      if (lines[i][0] == ' ' || lines[i][0] == '\0')
         continue;
 
-      if (g_str_has_prefix (line, prefix))
-        return g_strstrip (g_strdup (line + strlen (prefix)));
+      if (g_str_has_prefix (lines[i], prefix))
+        {
+          GString *unfolded = g_string_new (lines[i] + strlen (prefix));
+
+          while (lines[i + 1] != NULL && lines[i + 1][0] == ' ')
+            {
+              i++;
+              g_string_append (unfolded, lines[i] + 1);
+            }
+
+          return g_strstrip (g_string_free (unfolded, FALSE));
+        }
     }
 
   return NULL;
+}
+
+/* Return manifest attribute @name from the JAR at @path, or NULL. */
+char *
+nuvashalauncher_loader_jar_manifest_attribute (const char *path, const char *name)
+{
+  return jar_manifest_attribute_with_error (path, name, NULL);
 }
 
 /* Writes @value for @name into the manifest of the jar at @path, writing
@@ -351,7 +378,9 @@ nuvashalauncher_loader_write_jar_manifest_attribute (const char *path, const cha
                                                           &offset);
               if (read_status == ARCHIVE_EOF)
                 break;
-              if (read_status != ARCHIVE_OK)
+              if (read_status != ARCHIVE_OK ||
+                  (guint64) manifest_bytes->len > MAX_MANIFEST_ENTRY_SIZE ||
+                  (guint64) size > MAX_MANIFEST_ENTRY_SIZE - (guint64) manifest_bytes->len)
                 {
                   g_byte_array_unref (manifest_bytes);
                   manifest_bytes = NULL;
@@ -409,10 +438,16 @@ nuvashalauncher_loader_write_jar_manifest_attribute (const char *path, const cha
 
           for (;;)
             {
-               copy_status = archive_read_data_block (in, &block, &size, &offset);
+              copy_status = archive_read_data_block (in, &block, &size, &offset);
 
-               if (copy_status != ARCHIVE_OK)
+              if (copy_status == ARCHIVE_EOF)
                 break;
+
+              if (copy_status != ARCHIVE_OK)
+                {
+                  ok = FALSE;
+                  break;
+                }
 
               if (archive_write_data (out, block, size) != (la_ssize_t) size)
                 {
@@ -478,34 +513,17 @@ nuvashalauncher_loader_write_jar_manifest_attribute (const char *path, const cha
 char *
 nuvashalauncher_loader_jar_main_class (const char *path, GError **error)
 {
-  g_autoptr (GBytes) manifest = NULL;
-  g_autofree char *text = NULL;
-  g_auto (GStrv) lines = NULL;
-  const char *data = NULL;
-  gsize size = 0;
+  g_autoptr (GError) local_error = NULL;
+  char *main_class = jar_manifest_attribute_with_error (path, "Main-Class",
+                                                        &local_error);
 
-  manifest = nuvashalauncher_loader_read_zip_entry (path, "META-INF/MANIFEST.MF", error);
+  if (main_class != NULL)
+    return main_class;
 
-  if (manifest == NULL)
-    return NULL;
-
-  /* A manifest is a file and not a string: it ends where its bytes end,
-     so the text of it is made before it is read line by line. */
-  data = g_bytes_get_data (manifest, &size);
-  text = g_strndup (data, size);
-  lines = g_strsplit (text, "\n", -1);
-
-  for (guint i = 0; lines[i] != NULL; i++)
+  if (local_error != NULL)
     {
-      const char *line = g_strstrip (lines[i]);
-
-      /* A line that starts with a space continues the one before it,
-         which a long class name can need. */
-      if (*line == ' ' || *line == '\0')
-        continue;
-
-      if (g_str_has_prefix (line, "Main-Class:"))
-        return g_strstrip (g_strdup (line + strlen ("Main-Class:")));
+      g_propagate_error (error, g_steal_pointer (&local_error));
+      return NULL;
     }
 
   g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,

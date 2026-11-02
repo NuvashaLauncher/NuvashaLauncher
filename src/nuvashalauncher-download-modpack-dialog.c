@@ -125,6 +125,8 @@ dialog_dispose (GObject *object)
   g_clear_object (&self->manager);
   g_clear_object (&self->search);
   g_clear_object (&self->fetch);
+  g_clear_object (&self->results_status);
+  g_clear_object (&self->error_status);
   nuvashalauncher_operation_unref (self->version_catalog);
   self->version_catalog = NULL;
   nuvashalauncher_operation_unref (self->scope);
@@ -338,6 +340,7 @@ push_failure (nuvashalauncherDownloadModpackDialog *self,
   if (error != NULL)
     gtk_box_append (GTK_BOX (content), nuvashalauncher_ui_error_details (error));
   adw_navigation_view_push (self->nav, ADW_NAVIGATION_PAGE (page));
+  g_object_unref (page);
 }
 
 void
@@ -351,6 +354,7 @@ push_error (nuvashalauncherDownloadModpackDialog *self,
 
   adw_navigation_view_push (ADW_NAVIGATION_VIEW (self->nav),
                             ADW_NAVIGATION_PAGE (page));
+  g_object_unref (page);
 }
 
 /* Handler buttons patched around the pages. */

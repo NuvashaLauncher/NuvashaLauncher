@@ -17,6 +17,7 @@ struct _nuvashalauncherTaskScope
   gatomicrefcount refs;
   guint64 id;
   gint state;
+  gint returned;
   GTask *task;
   GMainContext *context;
   GArray *sources;
@@ -148,8 +149,16 @@ nuvashalauncher_task_scope_new_tagged (GObject *source_object, GCancellable *can
 nuvashalauncherTaskScope *
 nuvashalauncher_task_scope_from_task (GTask *task)
 {
-  nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_alloc ();
+  nuvashalauncherTaskScope *existing;
+  nuvashalauncherTaskScope *scope;
 
+  g_return_val_if_fail (G_IS_TASK (task), NULL);
+
+  existing = g_object_get_data (G_OBJECT (task), "nuvashalauncher-task-scope");
+  if (existing != NULL)
+    return nuvashalauncher_task_scope_ref (existing);
+
+  scope = nuvashalauncher_task_scope_alloc ();
   scope->task = task;
   scope->context = g_main_context_ref (g_task_get_context (task));
   return scope;
@@ -176,16 +185,16 @@ nuvashalauncher_task_scope_unref (nuvashalauncherTaskScope *scope)
   for (guint i = 0; i < scope->sources->len; i++)
     {
       guint source_id = g_array_index (scope->sources, guint, i);
-       GSource *source = g_main_context_find_source_by_id (scope->context, source_id);
-       if (source != NULL)
-         g_source_destroy (source);
+      GSource *source = g_main_context_find_source_by_id (scope->context, source_id);
+      if (source != NULL)
+        g_source_destroy (source);
     }
   for (guint i = 0; i < scope->completions->len; i++)
     {
       guint source_id = g_array_index (scope->completions, guint, i);
-       GSource *source = g_main_context_find_source_by_id (scope->context, source_id);
-       if (source != NULL)
-         g_source_destroy (source);
+      GSource *source = g_main_context_find_source_by_id (scope->context, source_id);
+      if (source != NULL)
+        g_source_destroy (source);
     }
   g_array_unref (scope->sources);
   g_array_unref (scope->completions);
@@ -252,6 +261,18 @@ scope_release_when_done (nuvashalauncherTaskScope *scope)
   g_source_unref (source);
 }
 
+void
+nuvashalauncher_task_scope_release_attached (GTask *task)
+{
+  nuvashalauncherTaskScope *scope;
+
+  g_return_if_fail (G_IS_TASK (task));
+
+  scope = g_object_get_data (G_OBJECT (task), "nuvashalauncher-task-scope");
+  if (scope != NULL && g_atomic_int_get (&scope->unref_when_done))
+    scope_release_when_done (scope);
+}
+
 gboolean
 nuvashalauncher_task_scope_return_error_if_cancelled (nuvashalauncherTaskScope *scope)
 {
@@ -259,6 +280,12 @@ nuvashalauncher_task_scope_return_error_if_cancelled (nuvashalauncherTaskScope *
   nuvashalauncherTaskScope *hold;
 
   g_return_val_if_fail (scope != NULL, FALSE);
+
+  if (!g_cancellable_is_cancelled (g_task_get_cancellable (scope->task)))
+    return FALSE;
+
+  if (!g_atomic_int_compare_and_exchange (&scope->returned, 0, 1))
+    return TRUE;
 
   hold = nuvashalauncher_task_scope_ref (scope);
   cancelled = g_task_return_error_if_cancelled (scope->task);
@@ -279,6 +306,13 @@ nuvashalauncher_task_scope_return_pointer (nuvashalauncherTaskScope *scope, gpoi
   nuvashalauncherTaskScope *hold;
 
   g_return_if_fail (scope != NULL);
+  if (!g_atomic_int_compare_and_exchange (&scope->returned, 0, 1))
+    {
+      if (result_free != NULL)
+        result_free (result);
+      return;
+    }
+
   nuvashalauncher_task_scope_set_state (scope, nuvashalauncher_TASK_STATE_COMPLETED);
 
   hold = nuvashalauncher_task_scope_ref (scope);
@@ -296,6 +330,12 @@ nuvashalauncher_task_scope_return_error (nuvashalauncherTaskScope *scope, GError
   nuvashalauncherTaskScope *hold;
 
   g_return_if_fail (scope != NULL);
+  if (!g_atomic_int_compare_and_exchange (&scope->returned, 0, 1))
+    {
+      g_clear_error (&error);
+      return;
+    }
+
   nuvashalauncher_task_scope_set_state (scope, nuvashalauncher_TASK_STATE_FAILED);
 
   hold = nuvashalauncher_task_scope_ref (scope);
@@ -313,6 +353,9 @@ nuvashalauncher_task_scope_return_boolean (nuvashalauncherTaskScope *scope, gboo
   nuvashalauncherTaskScope *hold;
 
   g_return_if_fail (scope != NULL);
+  if (!g_atomic_int_compare_and_exchange (&scope->returned, 0, 1))
+    return;
+
   nuvashalauncher_task_scope_set_state (scope, result ? nuvashalauncher_TASK_STATE_COMPLETED
                                           : nuvashalauncher_TASK_STATE_FAILED);
 
@@ -523,19 +566,23 @@ nuvashalauncher_task_scope_forget_source (nuvashalauncherTaskScope *scope, guint
 void
 nuvashalauncher_task_scope_cancel (nuvashalauncherTaskScope *scope)
 {
+  g_autoptr (GArray) sources = NULL;
+
   g_return_if_fail (scope != NULL);
   nuvashalauncher_task_scope_set_state (scope, nuvashalauncher_TASK_STATE_CANCELLED);
   GCancellable *cancellable = g_task_get_cancellable (scope->task);
   if (cancellable != NULL)
     g_cancellable_cancel (cancellable);
-  for (guint i = 0; i < scope->sources->len; i++)
+
+  sources = g_steal_pointer (&scope->sources);
+  scope->sources = g_array_new (FALSE, FALSE, sizeof (guint));
+  for (guint i = 0; i < sources->len; i++)
     {
-      guint source_id = g_array_index (scope->sources, guint, i);
-       GSource *source = g_main_context_find_source_by_id (scope->context, source_id);
-       if (source != NULL)
-         g_source_destroy (source);
+      guint source_id = g_array_index (sources, guint, i);
+      GSource *source = g_main_context_find_source_by_id (scope->context, source_id);
+      if (source != NULL)
+        g_source_destroy (source);
     }
-  g_array_set_size (scope->sources, 0);
 }
 
 static void

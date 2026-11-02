@@ -151,6 +151,8 @@ nuvashalauncher_error_message (const GError *error)
         case nuvashalauncher_MODPACK_ERROR_DOWNLOAD: return _("Pack could not be fetched");
         case nuvashalauncher_MODPACK_ERROR_LOADER:
           return _("Could not install this mod loader. Choose another version or inspect Technical Details.");
+        case nuvashalauncher_MODPACK_ERROR_CANCELLED:
+          return _("The operation failed. See Technical Details for more information.");
         default: return archive;
         }
     }
@@ -170,20 +172,9 @@ nuvashalauncher_error_message (const GError *error)
     }
   if (error->domain == nuvashalauncher_INSTANCE_MANAGER_ERROR)
     {
-      if (g_str_has_prefix (error->message, "the instance directory must be an absolute path"))
-        return _("Choose another instance name or directory.");
-      if (g_str_has_prefix (error->message, "the instance directory must not contain"))
-        return _("Choose another instance name or directory.");
-      if (g_str_has_prefix (error->message, "the parent of the instance directory"))
-        return _("Choose another instance name or directory.");
-      if (g_str_has_prefix (error->message, "the filesystem root"))
-        return _("Choose another instance name or directory.");
-      if (g_str_has_prefix (error->message, "the nuvashalauncher data directory"))
-        return _("Choose another instance name or directory.");
-      if (g_str_has_prefix (error->message, "the directory is already used"))
+      if (error->message != NULL &&
+          g_str_has_prefix (error->message, "the directory is already used"))
         return _("The destination already exists. Choose another location.");
-      if (g_str_has_prefix (error->message, "the directory "))
-        return _("Choose another instance name or directory.");
       if (error->code == nuvashalauncher_INSTANCE_MANAGER_ERROR_IO)
         return io;
       if (error->code == nuvashalauncher_INSTANCE_MANAGER_ERROR_NOT_FOUND)

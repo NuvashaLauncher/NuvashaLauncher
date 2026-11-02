@@ -77,6 +77,7 @@ nuvashalauncher_fs_get_contents_within (const char *path, goffset maximum,
   struct stat info;
   int fd = -1;
   gsize used = 0;
+  gsize capacity = 0;
   char *data = NULL;
 
   g_return_val_if_fail (contents != NULL, FALSE);
@@ -84,24 +85,56 @@ nuvashalauncher_fs_get_contents_within (const char *path, goffset maximum,
   if (length != NULL)
     *length = 0;
 
+  if (path == NULL || maximum < 0)
+    {
+      errno = EINVAL;
+      g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_INVAL,
+                   "cannot securely read \"%s\"", path != NULL ? path : "");
+      return FALSE;
+    }
+
   fd = open (path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
-  if (fd < 0 || fstat (fd, &info) != 0 || !S_ISREG (info.st_mode) ||
-      info.st_size > maximum)
+  if (fd < 0 || fstat (fd, &info) != 0)
     {
       int saved_errno = errno;
       if (fd >= 0)
         close (fd);
-      g_set_error (error, G_FILE_ERROR,
-                   saved_errno != 0 ? g_file_error_from_errno (saved_errno)
-                                    : G_FILE_ERROR_INVAL,
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
+                   "cannot securely read \"%s\": %s", path,
+                   g_strerror (saved_errno));
+      return FALSE;
+    }
+
+  if (!S_ISREG (info.st_mode))
+    {
+      close (fd);
+      g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_INVAL,
                    "cannot securely read \"%s\"", path);
       return FALSE;
     }
 
-  data = g_malloc ((gsize) maximum + 1);
-  while (used < (gsize) maximum)
+  if (info.st_size < 0 || info.st_size > maximum)
     {
-      ssize_t got = read (fd, data + used, (gsize) maximum - used + 1);
+      close (fd);
+      g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
+                   "file \"%s\" exceeds the permitted size", path);
+      return FALSE;
+    }
+
+  capacity = (gsize) info.st_size + 1;
+  data = g_malloc (capacity);
+  while (used <= (gsize) maximum)
+    {
+      if (used >= capacity)
+        {
+          gsize next_capacity = MIN ((gsize) maximum + 1, MAX (capacity * 2, 4096));
+          if (next_capacity <= used)
+            next_capacity = (gsize) maximum + 1;
+          capacity = next_capacity;
+          data = g_realloc (data, capacity);
+        }
+
+      ssize_t got = read (fd, data + used, capacity - used);
       if (got == 0)
         break;
       if (got < 0 && errno == EINTR)
@@ -117,7 +150,7 @@ nuvashalauncher_fs_get_contents_within (const char *path, goffset maximum,
       used += (gsize) got;
       if (used > (gsize) maximum)
         {
-          g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_INVAL,
+          g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                        "file \"%s\" exceeds the permitted size", path);
           close (fd);
           g_free (data);
@@ -125,6 +158,8 @@ nuvashalauncher_fs_get_contents_within (const char *path, goffset maximum,
         }
     }
   close (fd);
+  if (used >= capacity)
+    data = g_realloc (data, used + 1);
   data[used] = '\0';
   *contents = data;
   if (length != NULL)
@@ -309,7 +344,10 @@ nuvashalauncher_fs_directory_is_real (const char *path)
   int current = -1;
 
   if (path == NULL || !g_path_is_absolute (path))
-    return FALSE;
+    {
+      errno = EINVAL;
+      return FALSE;
+    }
 
   parts = g_strsplit (path + 1, G_DIR_SEPARATOR_S, -1);
   current = open (G_DIR_SEPARATOR_S,
@@ -317,15 +355,39 @@ nuvashalauncher_fs_directory_is_real (const char *path)
   if (current < 0)
     return FALSE;
 
-  for (guint i = 0; parts[i] != NULL && parts[i][0] != '\0'; i++)
+  for (guint i = 0; parts[i] != NULL; i++)
     {
+      if (parts[i][0] == '\0')
+        continue;
+      if (g_str_equal (parts[i], ".") || g_str_equal (parts[i], ".."))
+        {
+          close (current);
+          errno = EINVAL;
+          return FALSE;
+        }
+
       int next = openat (current, parts[i],
                          O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
       if (next < 0)
         {
-          gboolean missing = errno == ENOENT;
+          if (errno == ENOENT)
+            {
+              for (guint j = i + 1; parts[j] != NULL; j++)
+                {
+                  if (parts[j][0] == '\0')
+                    continue;
+                  if (g_str_equal (parts[j], ".") || g_str_equal (parts[j], ".."))
+                    {
+                      close (current);
+                      errno = EINVAL;
+                      return FALSE;
+                    }
+                }
+              close (current);
+              return TRUE;
+            }
           close (current);
-          return missing;
+          return FALSE;
         }
       close (current);
       current = next;
@@ -342,14 +404,24 @@ nuvashalauncher_fs_open_directory_nofollow (const char *path, GError **error)
   int current = -1;
 
   if (path == NULL || !g_path_is_absolute (path))
-    goto failed;
+    {
+      errno = EINVAL;
+      goto failed;
+    }
   parts = g_strsplit (path + 1, G_DIR_SEPARATOR_S, -1);
   current = open (G_DIR_SEPARATOR_S,
                   O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
   if (current < 0)
     goto failed;
-  for (guint i = 0; parts[i] != NULL && parts[i][0] != '\0'; i++)
+  for (guint i = 0; parts[i] != NULL; i++)
     {
+      if (parts[i][0] == '\0')
+        continue;
+      if (g_str_equal (parts[i], ".") || g_str_equal (parts[i], ".."))
+        {
+          errno = EINVAL;
+          goto failed;
+        }
       int next = openat (current, parts[i],
                          O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
       if (next < 0)
@@ -360,12 +432,17 @@ nuvashalauncher_fs_open_directory_nofollow (const char *path, GError **error)
   return current;
 
 failed:
-  if (current >= 0)
-    close (current);
-  if (error != NULL)
-    g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
-                 "cannot securely open directory \"%s\": %s", path,
-                 g_strerror (errno));
+  {
+    int saved_errno = errno;
+    if (current >= 0)
+      close (current);
+    errno = saved_errno;
+    if (error != NULL)
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
+                   "cannot securely open directory \"%s\": %s",
+                   path != NULL ? path : "",
+                   g_strerror (saved_errno));
+  }
   return -1;
 }
 
@@ -439,11 +516,36 @@ gboolean
 nuvashalauncher_fs_make_directory_tree_nofollow (const char *directory, const char *relative,
                                      int mode, GError **error)
 {
-  g_auto (GStrv) parts = g_strsplit (relative, "/", -1);
-  int current = open (directory, O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
+  g_auto (GStrv) parts = NULL;
+  int current = -1;
 
+  if (relative == NULL || relative[0] == '\0')
+    {
+      errno = EINVAL;
+      goto failed;
+    }
+
+  parts = g_strsplit (relative, "/", -1);
+  if (parts[0] == NULL)
+    {
+      errno = EINVAL;
+      goto failed;
+    }
+  for (guint i = 0; parts[i] != NULL; i++)
+    {
+      if (parts[i][0] == '\0' ||
+          g_str_equal (parts[i], ".") ||
+          g_str_equal (parts[i], ".."))
+        {
+          errno = EINVAL;
+          goto failed;
+        }
+    }
+
+  current = nuvashalauncher_fs_open_directory_nofollow (directory, error);
   if (current < 0)
-    goto failed;
+    return FALSE;
+
   for (guint i = 0; parts[i] != NULL; i++)
     {
       int next;
@@ -460,11 +562,16 @@ nuvashalauncher_fs_make_directory_tree_nofollow (const char *directory, const ch
   return TRUE;
 
 failed:
-  if (current >= 0)
-    close (current);
-  g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
-               "cannot securely make \"%s\": %s", relative,
-               g_strerror (errno));
+  {
+    int saved_errno = errno;
+    if (current >= 0)
+      close (current);
+    errno = saved_errno;
+    g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
+                 "cannot securely make \"%s\": %s",
+                 relative != NULL ? relative : "",
+                 g_strerror (saved_errno));
+  }
   return FALSE;
 }
 
@@ -473,12 +580,37 @@ nuvashalauncher_fs_open_file_nofollow (const char *directory, const char *relati
                            int flags, int directory_mode, int mode,
                            GError **error)
 {
-  g_auto (GStrv) parts = g_strsplit (relative, "/", -1);
-  int current = open (directory, O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
+  g_auto (GStrv) parts = NULL;
+  int current = -1;
   guint last = 0;
 
+  if (relative == NULL || relative[0] == '\0')
+    {
+      errno = EINVAL;
+      goto failed;
+    }
+
+  parts = g_strsplit (relative, "/", -1);
+  if (parts[0] == NULL)
+    {
+      errno = EINVAL;
+      goto failed;
+    }
+  for (guint i = 0; parts[i] != NULL; i++)
+    {
+      if (parts[i][0] == '\0' ||
+          g_str_equal (parts[i], ".") ||
+          g_str_equal (parts[i], ".."))
+        {
+          errno = EINVAL;
+          goto failed;
+        }
+    }
+
+  current = nuvashalauncher_fs_open_directory_nofollow (directory, error);
   if (current < 0)
-    goto failed;
+    return -1;
+
   while (parts[last + 1] != NULL)
     last++;
   for (guint i = 0; i < last; i++)
@@ -505,10 +637,15 @@ nuvashalauncher_fs_open_file_nofollow (const char *directory, const char *relati
     errno = saved_errno;
   }
 failed:
-  if (current >= 0)
-    close (current);
-  g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
-               "cannot securely open \"%s\": %s", relative,
-               g_strerror (errno));
+  {
+    int saved_errno = errno;
+    if (current >= 0)
+      close (current);
+    errno = saved_errno;
+    g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
+                 "cannot securely open \"%s\": %s",
+                 relative != NULL ? relative : "",
+                 g_strerror (saved_errno));
+  }
   return -1;
 }

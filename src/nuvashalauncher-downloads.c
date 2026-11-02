@@ -307,6 +307,8 @@ nuvashalauncher_downloads_dispose (GObject *object)
 
   nuvashalauncher_download_service_free (self->service);
   self->service = NULL;
+  if (default_downloads == self)
+    default_downloads = NULL;
   g_clear_pointer (&self->jobs, g_ptr_array_unref);
 
   G_OBJECT_CLASS (nuvashalauncher_downloads_parent_class)->dispose (object);

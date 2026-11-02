@@ -535,6 +535,22 @@ install_step_done (InstallRequest *request)
     }
 }
 
+/* Version strings become directory and file names, so they must be a single
+ * plain path segment. */
+static gboolean
+version_is_path_segment (const char *version)
+{
+  if (version == NULL || *version == '\0' || g_str_equal (version, ".") ||
+      g_str_equal (version, ".."))
+    return FALSE;
+
+  for (const char *p = version; *p != '\0'; p++)
+    if (*p == '/' || *p == '\\' || (guchar) *p < 0x20)
+      return FALSE;
+
+  return TRUE;
+}
+
 nuvashalauncherTaskScope *
 nuvashalauncher_loaders_install_async (nuvashalauncherLoader              loader,
                            const char            *game_version,
@@ -557,6 +573,17 @@ nuvashalauncher_loaders_install_async (nuvashalauncherLoader              loader
   g_return_val_if_fail (loader_version != NULL, NULL);
   g_return_val_if_fail (nuvashalauncher_IS_VERSION_DESCRIPTION (game_document), NULL);
   g_return_val_if_fail (java_executable != NULL, NULL);
+
+  if (!version_is_path_segment (game_version) ||
+      !version_is_path_segment (loader_version))
+    {
+      nuvashalauncher_task_scope_return_error_deferred (
+        scope,
+        g_error_new_literal (nuvashalauncher_LOADERS_ERROR,
+                             nuvashalauncher_LOADERS_ERROR_INSTALLER,
+                             "a version is not usable as a file name"));
+      return g_steal_pointer (&scope);
+    }
 
   request = g_new0 (InstallRequest, 1);
 

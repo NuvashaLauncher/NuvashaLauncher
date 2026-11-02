@@ -363,13 +363,16 @@ update_controls (nuvashalauncherLogsPage *self)
 
   /* A game that ended by itself says nothing here: "Stopped" is the
      resting state of the page, not a piece of news. */
-  gtk_label_set_text (GTK_LABEL (self->state), "");
-  gtk_label_set_text (GTK_LABEL (self->detail), detail != NULL ? detail : "");
+  if (self->state != NULL)
+    gtk_label_set_text (GTK_LABEL (self->state), "");
+  if (self->detail != NULL)
+    gtk_label_set_text (GTK_LABEL (self->detail), detail != NULL ? detail : "");
 
   /* Offering to open a folder that is not there is offering something
      that cannot work. */
-  gtk_widget_set_sensitive (GTK_WIDGET (self->open),
-                            g_file_test (directory, G_FILE_TEST_IS_DIR));
+  if (self->open != NULL)
+    gtk_widget_set_sensitive (GTK_WIDGET (self->open),
+                              g_file_test (directory, G_FILE_TEST_IS_DIR));
 }
 
 static void
@@ -385,13 +388,13 @@ static void
 open_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                gpointer user_data)
 {
+  nuvashalauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
   g_autoptr (GError) error = NULL;
 
   if (!g_app_info_launch_default_for_uri_finish (result, &error))
-    nuvashalauncher_ui_show_error (NULL, _("Technical Details"), error);
+    nuvashalauncher_ui_show_error (GTK_WIDGET (self), _("Technical Details"), error);
 
-  /* The copy of the address the call needed. */
-  g_free (user_data);
+  g_object_unref (self);
 }
 
 static void
@@ -409,7 +412,7 @@ on_open_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 
   /* Open the folder through the desktop, without invoking a shell. */
   g_app_info_launch_default_for_uri_async (uri, NULL, NULL, open_finished,
-                                           g_strdup (uri));
+                                           g_object_ref (self));
 }
 
 /* ---------------------------------------------------------- *
@@ -552,9 +555,9 @@ nuvashalauncher_logs_page_new (nuvashalauncher *launcher)
     gtk_widget_set_margin_start (row, 0);
     gtk_widget_set_margin_end (row, 0);
 
-  self->state = GTK_LABEL (gtk_label_new (NULL));
+  self->state = GTK_LABEL (g_object_ref_sink (gtk_label_new (NULL)));
   gtk_widget_add_css_class (GTK_WIDGET (self->state), "heading");
-  self->detail = GTK_LABEL (gtk_label_new (NULL));
+  self->detail = GTK_LABEL (g_object_ref_sink (gtk_label_new (NULL)));
   gtk_label_set_ellipsize (GTK_LABEL (self->detail), PANGO_ELLIPSIZE_END);
   gtk_widget_add_css_class (GTK_WIDGET (self->detail), "dim-label");
 
@@ -684,6 +687,9 @@ nuvashalauncher_logs_page_dispose (GObject *object)
       g_source_remove (self->scroll_idle);
       self->scroll_idle = 0;
     }
+
+  g_clear_object (&self->state);
+  g_clear_object (&self->detail);
 
   G_OBJECT_CLASS (nuvashalauncher_logs_page_parent_class)->dispose (object);
 }

@@ -195,7 +195,6 @@ on_scroll_changed (GtkAdjustment *adjustment, gpointer user_data)
   if (gtk_adjustment_get_value (adjustment) < at_end)
     return;
 
-  self->offset += RESULTS_PER_PAGE;
   run_search (self, TRUE);
 }
 

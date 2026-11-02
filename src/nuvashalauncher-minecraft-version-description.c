@@ -225,6 +225,13 @@ parse_argument (JsonNode *node, GError **error)
       {
         JsonArray *array = json_node_get_array (value);
 
+        if (json_array_get_length (array) == 0)
+          {
+            g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+                         "field \"value\" must not be an empty array");
+            goto fail;
+          }
+
         for (guint i = 0; i < json_array_get_length (array); i++)
           {
             JsonNode *item = json_array_get_element (array, i);

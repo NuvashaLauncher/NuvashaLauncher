@@ -24,6 +24,18 @@ nuvashalauncher_download_json_process_body (DownloadRequest *request, GBytes *bo
           json_parser_get_root (stale) != NULL)
         {
           g_clear_error (&status_error);
+
+          /* The server confirmed the cached copy: renew its timestamp so it
+             is not revalidated on every request. */
+          if (request->api_cache && request->cache_path != NULL)
+            {
+              g_clear_pointer (&request->response_etag, g_free);
+              request->response_etag = g_strdup (request->cache_etag);
+              request->pending_parser = g_steal_pointer (&stale);
+              nuvashalauncher_download_cache_write (request, request->stale_json);
+              return;
+            }
+
           nuvashalauncher_download_request_succeed_json (request, g_steal_pointer (&stale));
           return;
         }
@@ -104,6 +116,19 @@ nuvashalauncher_download_json_stream_ready (GObject *source, GAsyncResult *resul
     }
 
   request->source = stream;
+
+  /* An error status is reported without streaming its body into memory. */
+  {
+    guint status = soup_message_get_status (request->message);
+
+    if (!SOUP_STATUS_IS_SUCCESSFUL (status) &&
+        status != SOUP_STATUS_NOT_MODIFIED)
+      {
+        end_attempt (request, check_status (request));
+        return;
+      }
+  }
+
   headers = soup_message_get_response_headers (request->message);
   length = soup_message_headers_get_content_length (headers);
   if (length > (goffset) MAX_JSON_RESPONSE_SIZE)

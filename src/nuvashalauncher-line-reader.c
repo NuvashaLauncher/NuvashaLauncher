@@ -42,8 +42,10 @@ emit_line (nuvashalauncherLineReader *reader)
       reader->line_buffer->data[reader->line_buffer->len - 1] == '\r')
     g_byte_array_set_size (reader->line_buffer, reader->line_buffer->len - 1);
 
-  line = g_strndup ((const char *) reader->line_buffer->data,
-                    reader->line_buffer->len);
+  /* Game output is not guaranteed to be UTF-8, and a truncated line can end
+     in the middle of a character. */
+  line = g_utf8_make_valid ((const char *) reader->line_buffer->data,
+                            (gssize) reader->line_buffer->len);
   if (reader->truncated)
     {
       g_autofree char *limited = g_strconcat (line, " [line truncated]", NULL);

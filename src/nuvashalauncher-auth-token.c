@@ -53,7 +53,7 @@ token_answered (AuthRequest *self)
 
   if (self->status == 200)
     {
-      token = nuvashalauncher_auth_oauth_token_from_json (self->body, -1, self->now, &error);
+      token = nuvashalauncher_auth_oauth_token_from_json (self->body, -1, g_get_real_time () / 1000000, &error);
 
       if (token == NULL)
         {

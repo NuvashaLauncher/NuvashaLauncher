@@ -432,6 +432,7 @@ on_bulk_export_folder_chosen (GObject *source, GAsyncResult *result,
                 self->model->manager, instance, self->model->settings,
                 window_launcher (self, id));
               g_object_ref_sink (page);
+              g_object_set_data (G_OBJECT (page), "nuvashalauncher-host-widget", self);
               nuvashalauncher_instance_page_export_to_path (page, path);
               g_object_unref (page);
             }
@@ -450,7 +451,7 @@ on_bulk_export_folder_chosen (GObject *source, GAsyncResult *result,
 void
 bulk_export_instances (nuvashalauncherMainWindow *self)
 {
-  GtkFileDialog *dialog = gtk_file_dialog_new ();
+  g_autoptr (GtkFileDialog) dialog = gtk_file_dialog_new ();
   gtk_file_dialog_set_title (dialog, _("Choose a Directory"));
   gtk_file_dialog_select_folder (dialog, GTK_WINDOW (self), NULL,
                                  on_bulk_export_folder_chosen,

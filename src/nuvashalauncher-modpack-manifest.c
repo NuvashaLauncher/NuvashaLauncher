@@ -84,7 +84,11 @@ file_from_node (JsonNode *node, GError **error)
       return NULL;
     }
 
-  if (!nuvashalauncher_modpack_path_is_safe (path))
+  if (!nuvashalauncher_modpack_path_is_safe (path) ||
+      g_str_equal (path, ".index") ||
+      g_str_has_prefix (path, ".index/") ||
+      strstr (path, "/.index/") != NULL ||
+      g_str_has_suffix (path, "/.index"))
     {
       g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_PATH,
                    "the manifest wants \"%s\", which is not a path the "
@@ -105,7 +109,7 @@ file_from_node (JsonNode *node, GError **error)
   sha1 = nuvashalauncher_json_string (hashes, "sha1");
   sha512 = nuvashalauncher_json_string (hashes, "sha512");
 
-  if (sha1 == NULL || sha512 == NULL)
+  if (sha1 == NULL || *sha1 == '\0' || sha512 == NULL || *sha512 == '\0')
     {
       g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_FORMAT,
                    "\"%s\" misses the two hashes the format requires", path);
@@ -135,8 +139,13 @@ file_from_node (JsonNode *node, GError **error)
 
     for (guint i = 0; i < json_array_get_length (downloads); i++)
       {
-        g_autofree char *url =
-          json_node_dup_string (json_array_get_element (downloads, i));
+        JsonNode *element = json_array_get_element (downloads, i);
+        g_autofree char *url = NULL;
+
+        if (element != NULL &&
+            JSON_NODE_HOLDS_VALUE (element) &&
+            json_node_get_value_type (element) == G_TYPE_STRING)
+          url = json_node_dup_string (element);
 
         if (url == NULL || *url == '\0')
           {
@@ -159,7 +168,6 @@ file_from_node (JsonNode *node, GError **error)
       g_set_error (error, nuvashalauncher_MODPACK_ERROR,
                    nuvashalauncher_MODPACK_ERROR_FORMAT,
                    "\"%s\" has an invalid file size", file->path);
-      nuvashalauncher_modpack_file_free (file);
       return NULL;
     }
 
@@ -357,6 +365,7 @@ nuvashalauncher_modpack_resolve (nuvashalauncherModpack *modpack, GError **error
       return FALSE;
     }
 
+  g_clear_pointer (&modpack->minecraft_version, g_free);
   modpack->minecraft_version = g_strdup (minecraft);
   modpack->loader = nuvashalauncher_LOADER_VANILLA;
   g_clear_pointer (&modpack->loader_version, g_free);

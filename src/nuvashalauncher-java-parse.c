@@ -22,9 +22,9 @@ parse_major (const char *version, int *major)
     return FALSE;
 
   if (g_strcmp0 (parts[0], "1") == 0 && parts[1] != NULL)
-    return sscanf (parts[1], "%d", major) == 1;
+    return sscanf (parts[1], "%d", major) == 1 && *major > 0;
 
-  return sscanf (parts[0], "%d", major) == 1;
+  return sscanf (parts[0], "%d", major) == 1 && *major > 0;
 }
 
 gboolean
@@ -34,8 +34,10 @@ nuvashalauncher_java_parse_version (const char  *output,
                         char       **architecture,
                         char       **vendor)
 {
-  g_auto (GStrv) lines =
-    g_strsplit (output != NULL ? output : "", "\n", 0);
+  g_autofree char *bounded = output == NULL ? NULL
+                             : length < 0 ? g_strdup (output)
+                                          : g_strndup (output, (gsize) length);
+  g_auto (GStrv) lines = g_strsplit (bounded != NULL ? bounded : "", "\n", 0);
   int major = 0;
   char *arch = NULL;
   char *arch_fallback = NULL;
@@ -52,7 +54,7 @@ nuvashalauncher_java_parse_version (const char  *output,
       char *end;
 
       /* The banner around `version "x.y.z"`. */
-      if (major == 0 && (banner = g_strstr_len (lines[i], length, "version \"")) != NULL)
+      if (major == 0 && (banner = g_strstr_len (lines[i], -1, "version \"")) != NULL)
         {
           start = banner + strlen ("version \"");
           end = strchr (start, '"');
@@ -65,28 +67,28 @@ nuvashalauncher_java_parse_version (const char  *output,
             }
         }
 
-      if (arch == NULL && g_strstr_len (lines[i], length, "os.arch =") != NULL)
+      if (arch == NULL && g_strstr_len (lines[i], -1, "os.arch =") != NULL)
         {
           char *equals = strchr (lines[i], '=');
 
           arch = g_strdup (g_strstrip (equals + 1));
         }
       else if (arch_fallback == NULL &&
-               g_strstr_len (lines[i], length, "64-Bit") != NULL)
+               g_strstr_len (lines[i], -1, "64-Bit") != NULL)
         arch_fallback = g_strdup ("64-bit");
       else if (arch_fallback == NULL &&
-               g_strstr_len (lines[i], length, "32-Bit") != NULL)
+               g_strstr_len (lines[i], -1, "32-Bit") != NULL)
         arch_fallback = g_strdup ("32-bit");
 
       if (vendor_property == NULL &&
-          g_strstr_len (lines[i], length, "java.vendor =") != NULL)
+          g_strstr_len (lines[i], -1, "java.vendor =") != NULL)
         {
           char *equals = strchr (lines[i], '=');
           vendor_property = g_strdup (g_strstrip (equals + 1));
         }
 
       if (vendor_version == NULL &&
-          g_strstr_len (lines[i], length, "java.vendor.version =") != NULL)
+          g_strstr_len (lines[i], -1, "java.vendor.version =") != NULL)
         {
           char *equals = strchr (lines[i], '=');
           vendor_version = g_strdup (g_strstrip (equals + 1));
@@ -121,7 +123,7 @@ nuvashalauncher_java_parse_version (const char  *output,
    * line does not belong to the exit report, so skip it. */
   for (guint i = 0; lines[i] != NULL; i++)
     {
-      char *cut = g_strstr_len (lines[i], length, "Runtime Environment");
+      char *cut = g_strstr_len (lines[i], -1, "Runtime Environment");
 
       if (vendor_out == NULL && cut != NULL && strchr (lines[i], '=') == NULL)
         {

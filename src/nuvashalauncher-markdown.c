@@ -423,9 +423,16 @@ nuvashalauncher_markdown_render (GtkBox *box, const char *markdown)
 
           i++;
 
-          while (lines[i] != NULL &&
-                 !g_str_has_prefix (g_strstrip (lines[i]), "```"))
+          while (lines[i] != NULL)
             {
+              const char *fence_check = lines[i];
+
+              while (*fence_check == ' ' || *fence_check == '\t')
+                fence_check++;
+
+              if (g_str_has_prefix (fence_check, "```"))
+                break;
+
               g_string_append (code, lines[i]);
               g_string_append_c (code, '\n');
               i++;

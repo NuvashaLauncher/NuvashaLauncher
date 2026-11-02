@@ -499,6 +499,8 @@ nuvashalauncher_users_popover_dispose (GObject *object)
 
   /* An avatar that is still on its way is not needed by anything any
      more. */
+  if (self->avatars != NULL)
+    g_cancellable_cancel (self->avatars);
   g_clear_object (&self->avatars);
 
   G_OBJECT_CLASS (nuvashalauncher_users_popover_parent_class)->dispose (object);
