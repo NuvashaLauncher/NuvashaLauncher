@@ -114,7 +114,10 @@ get_metadata_version (JsonObject *object, GError **error)
  * with a GError and returns NULL: a file is either fully understood or
  * treated as corrupt. */
 static GList *
-parse_instances_json (const char *contents, gssize length, GError **error)
+parse_instances_json (nuvashalauncherInstanceManager *self,
+                      const char                     *contents,
+                      gssize                          length,
+                      GError                        **error)
 {
   g_autoptr (JsonParser) parser = json_parser_new ();
 
@@ -152,8 +155,27 @@ parse_instances_json (const char *contents, gssize length, GError **error)
 
   for (guint i = 0; i < n_items; i++)
     {
+      JsonNode *elem_node = json_array_get_element (array, i);
+      if (elem_node != NULL && JSON_NODE_HOLDS_OBJECT (elem_node))
+        {
+          JsonObject *elem_obj = json_node_get_object (elem_node);
+          const char *dir_val = json_object_get_string_member (elem_obj, "directory");
+          if (dir_val != NULL && !g_path_is_absolute (dir_val))
+            {
+              g_autofree char *abs_path = g_build_filename (self->instances_dir, dir_val, NULL);
+              json_object_set_string_member (elem_obj, "directory", abs_path);
+            }
+          else if (dir_val != NULL && !g_file_test (dir_val, G_FILE_TEST_IS_DIR))
+            {
+              g_autofree char *base = g_path_get_basename (dir_val);
+              g_autofree char *candidate = g_build_filename (self->instances_dir, base, NULL);
+              if (g_file_test (candidate, G_FILE_TEST_IS_DIR))
+                json_object_set_string_member (elem_obj, "directory", candidate);
+            }
+        }
+
       nuvashalauncherInstance *instance =
-        nuvashalauncher_instance_new_from_json (json_array_get_element (array, i), error);
+        nuvashalauncher_instance_new_from_json (elem_node, error);
 
       if (instance == NULL)
         {
@@ -248,7 +270,7 @@ nuvashalauncher_instance_manager_load (nuvashalauncherInstanceManager *self, GEr
       return FALSE;
     }
 
-  GList *list = parse_instances_json (contents, length, &local_error);
+  GList *list = parse_instances_json (self, contents, length, &local_error);
 
   /* A failure is signalled by the error, not by the list: a file with
    * an empty "instances" array parses to a NULL list just fine. */
@@ -266,10 +288,28 @@ nuvashalauncher_instance_manager_load (nuvashalauncherInstanceManager *self, GEr
 
   g_list_store_remove_all (self->instances);
 
+  gboolean needs_resave = FALSE;
   for (GList *l = list; l != NULL; l = l->next)
-    g_list_store_append (self->instances, l->data);
+    {
+      nuvashalauncherInstance *instance = l->data;
+      g_autofree char *dir = instance_directory (instance);
+      if (!g_file_test (dir, G_FILE_TEST_IS_DIR))
+        {
+          g_autofree char *base = g_path_get_basename (dir);
+          g_autofree char *candidate = g_build_filename (self->instances_dir, base, NULL);
+          if (g_file_test (candidate, G_FILE_TEST_IS_DIR))
+            {
+              nuvashalauncher_instance_set_directory (instance, candidate, NULL);
+              needs_resave = TRUE;
+            }
+        }
+      g_list_store_append (self->instances, instance);
+    }
 
   g_list_free_full (list, g_object_unref);
+
+  if (needs_resave)
+    nuvashalauncher_instance_manager_save (self, NULL);
 
   /* A directory removed while nuvashalauncher was not running means the instance was
    * removed outside nuvashalauncher. Reflect that in the model and metadata as well. */

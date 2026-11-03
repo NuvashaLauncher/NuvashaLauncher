@@ -129,6 +129,22 @@ test_cache_cleanup (void)
   g_assert_true (g_file_test (installed, G_FILE_TEST_EXISTS));
 }
 
+static void
+test_missing_schema_fallback (void)
+{
+  g_autoptr (nuvashalauncherSettings) settings = g_object_new (nuvashalauncher_TYPE_SETTINGS, NULL);
+  g_assert_nonnull (settings);
+  g_assert_false (nuvashalauncher_settings_get_show_unstable_versions (settings));
+  g_assert_cmpuint (nuvashalauncher_settings_get_log_line_limit (settings), ==, 5000);
+  g_assert_cmpstr (nuvashalauncher_settings_get_language (settings), ==, "");
+
+  /* Setters and in-memory persistence should succeed without errors */
+  g_autoptr (GError) error = NULL;
+  g_assert_true (nuvashalauncher_settings_set_show_unstable_versions (settings, TRUE, &error));
+  g_assert_no_error (error);
+  g_assert_true (nuvashalauncher_settings_get_show_unstable_versions (settings));
+}
+
 int
 main (int argc, char **argv)
 {
@@ -148,6 +164,7 @@ main (int argc, char **argv)
   g_test_add_func ("/settings/defaults", test_defaults);
   g_test_add_func ("/settings/persistence", test_persistence);
   g_test_add_func ("/settings/invalid-expiration", test_invalid_expiration);
+  g_test_add_func ("/settings/missing-schema-fallback", test_missing_schema_fallback);
   g_test_add_func ("/cache/paths", test_cache_paths);
   g_test_add_func ("/cache/cleanup", test_cache_cleanup);
 
