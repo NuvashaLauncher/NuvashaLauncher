@@ -692,6 +692,21 @@ check_instance_directories (gpointer user_data)
       if (g_file_test (directory, G_FILE_TEST_IS_DIR))
         continue;
 
+      /* If the instance was moved with user data (e.g. username change or backup restore),
+       * check if it exists in the current instances directory before removing it. */
+      g_autofree char *basename = g_path_get_basename (directory);
+      g_autofree char *migrated = g_build_filename (self->instances_dir, basename, NULL);
+      if (g_file_test (migrated, G_FILE_TEST_IS_DIR))
+        {
+          g_autoptr (GError) error = NULL;
+          if (nuvashalauncher_instance_set_directory (instance, migrated, &error))
+            {
+              nuvashalauncher_instance_manager_save (self, NULL);
+              g_debug ("migrated instance directory to: %s", migrated);
+              continue;
+            }
+        }
+
       g_autoptr (GError) error = NULL;
       if (!remove_instance_and_save (self, instance, &error))
         {

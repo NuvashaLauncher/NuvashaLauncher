@@ -1,4 +1,5 @@
 #include "test-instance-manager-common.h"
+#include "nuvashalauncher-instance-manager-private.h"
 
 static void
 test_create_and_persist (void)
@@ -520,7 +521,79 @@ test_atomic_save_failure (void)
   g_print ("ok - failed save leaves the old file intact\n");
 }
 
+static void
+test_migrated_instance_directory (void)
+{
+  g_autofree char *data_dir = make_tmp_dir ();
+  g_autofree char *instances_root = g_build_filename (data_dir, "instances", NULL);
+  g_autofree char *target_dir = g_build_filename (instances_root, "MigratedPack", NULL);
+  g_mkdir_with_parents (target_dir, 0755);
 
+  /* Write metadata pointing to an old absolute path from a previous machine or username */
+  g_autofree char *metadata_path = g_build_filename (data_dir, "instances.json", NULL);
+  const char *json_text =
+    "{\"version\": 2, \"instances\": ["
+    "{\"id\": \"30eef7f3-eeb8-4ef7-bca9-59ebfcbc908c\", "
+    "\"name\": \"MigratedPack\", "
+    "\"directory\": \"/home/nonexistentuser/.local/share/nuvashalauncher/instances/MigratedPack\", "
+    "\"minecraft_version\": \"1.21.1\", "
+    "\"loader\": \"vanilla\"}]}";
+  g_assert_true (g_file_set_contents (metadata_path, json_text, -1, NULL));
+
+  g_autoptr (nuvashalauncherInstanceManager) manager = nuvashalauncher_instance_manager_new (data_dir);
+  g_autoptr (GError) error = NULL;
+  g_assert_true (nuvashalauncher_instance_manager_load (manager, &error));
+  g_assert_no_error (error);
+  g_assert_cmpuint (manager_count (manager), ==, 1);
+
+  nuvashalauncherInstance *instance =
+    g_list_model_get_item (G_LIST_MODEL (nuvashalauncher_instance_manager_get_instances (manager)), 0);
+  g_autofree char *loaded_dir = prop_string (instance, "directory");
+  g_assert_cmpstr (loaded_dir, ==, target_dir);
+  g_object_unref (instance);
+
+  /* check_instance_directories should not delete this migrated instance */
+  check_instance_directories (manager);
+  g_assert_cmpuint (manager_count (manager), ==, 1);
+
+  remove_recursive (data_dir);
+  g_print ("ok - migrated instance directory from another machine resolves and survives\n");
+}
+
+static void
+test_relative_instance_directory (void)
+{
+  g_autofree char *data_dir = make_tmp_dir ();
+  g_autofree char *instances_root = g_build_filename (data_dir, "instances", NULL);
+  g_autofree char *target_dir = g_build_filename (instances_root, "RelativePack", NULL);
+  g_mkdir_with_parents (target_dir, 0755);
+
+  /* Write metadata containing a relative directory subfolder */
+  g_autofree char *metadata_path = g_build_filename (data_dir, "instances.json", NULL);
+  const char *json_text =
+    "{\"version\": 2, \"instances\": ["
+    "{\"id\": \"5f73f8ad-7d72-46ce-aee7-4d989f66bb6b\", "
+    "\"name\": \"RelativePack\", "
+    "\"directory\": \"RelativePack\", "
+    "\"minecraft_version\": \"1.21.1\", "
+    "\"loader\": \"vanilla\"}]}";
+  g_assert_true (g_file_set_contents (metadata_path, json_text, -1, NULL));
+
+  g_autoptr (nuvashalauncherInstanceManager) manager = nuvashalauncher_instance_manager_new (data_dir);
+  g_autoptr (GError) error = NULL;
+  g_assert_true (nuvashalauncher_instance_manager_load (manager, &error));
+  g_assert_no_error (error);
+  g_assert_cmpuint (manager_count (manager), ==, 1);
+
+  nuvashalauncherInstance *instance =
+    g_list_model_get_item (G_LIST_MODEL (nuvashalauncher_instance_manager_get_instances (manager)), 0);
+  g_autofree char *loaded_dir = prop_string (instance, "directory");
+  g_assert_cmpstr (loaded_dir, ==, target_dir);
+  g_object_unref (instance);
+
+  remove_recursive (data_dir);
+  g_print ("ok - relative instance directory in instances.json loads properly\n");
+}
 
 int
 main (int argc, char **argv)
@@ -538,5 +611,7 @@ main (int argc, char **argv)
   test_version_mismatch ();
   test_duplicate_metadata_entries_are_quarantined ();
   test_atomic_save_failure ();
+  test_migrated_instance_directory ();
+  test_relative_instance_directory ();
   return 0;
 }

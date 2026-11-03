@@ -46,6 +46,9 @@ nuvashalauncher_settings_error_quark (void)
 static void
 load (nuvashalauncherSettings *self)
 {
+  if (self->desktop_settings == NULL)
+    return;
+
   self->show_unstable_versions = g_settings_get_boolean (
     self->desktop_settings, SHOW_UNSTABLE_VERSIONS_KEY);
   self->log_line_limit = MAX (LOG_LINE_LIMIT_FLOOR,
@@ -68,8 +71,10 @@ load (nuvashalauncherSettings *self)
 static gboolean
 save (nuvashalauncherSettings *self, GError **error)
 {
-  g_return_val_if_fail (self->desktop_settings != NULL, FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (self->desktop_settings == NULL)
+    return TRUE; /* In-memory fallback persists throughout session when GSettings schema is absent */
 
   g_settings_set_boolean (self->desktop_settings, SHOW_UNSTABLE_VERSIONS_KEY,
                           self->show_unstable_versions);
@@ -94,11 +99,7 @@ save (nuvashalauncherSettings *self, GError **error)
 nuvashalauncherSettings *
 nuvashalauncher_settings_new (void)
 {
-  nuvashalauncherSettings *self = g_object_new (nuvashalauncher_TYPE_SETTINGS, NULL);
-
-  load (self);
-
-  return self;
+  return g_object_new (nuvashalauncher_TYPE_SETTINGS, NULL);
 }
 
 gboolean
@@ -364,34 +365,136 @@ nuvashalauncher_settings_class_init (nuvashalauncherSettingsClass *klass)
   object_class->finalize = nuvashalauncher_settings_finalize;
 }
 
+static GSettingsSchema *
+lookup_nuvashalauncher_schema (GSettingsSchemaSource *source)
+{
+  if (source == NULL)
+    return NULL;
+  return g_settings_schema_source_lookup (source, "com.github.nuvashalauncher.nuvashalauncher", TRUE);
+}
+
+static GSettingsSchema *
+find_settings_schema (void)
+{
+  GSettingsSchemaSource *default_source = g_settings_schema_source_get_default ();
+  GSettingsSchema *schema = lookup_nuvashalauncher_schema (default_source);
+  if (schema != NULL)
+    return schema;
+
+  const char *env_dir = g_getenv ("GSETTINGS_SCHEMA_DIR");
+  if (env_dir != NULL && g_file_test (env_dir, G_FILE_TEST_IS_DIR))
+    {
+      GSettingsSchemaSource *src = g_settings_schema_source_new_from_directory (env_dir, default_source, FALSE, NULL);
+      if (src != NULL)
+        {
+          schema = lookup_nuvashalauncher_schema (src);
+          g_settings_schema_source_unref (src);
+          if (schema != NULL)
+            return schema;
+        }
+    }
+
+  const char *candidate_dirs[] = {
+    nuvashalauncher_BUILD_SCHEMA_DIR,
+    "build/schemas",
+    "../build/schemas",
+  };
+  for (gsize i = 0; i < G_N_ELEMENTS (candidate_dirs); i++)
+    {
+      if (candidate_dirs[i] != NULL && g_file_test (candidate_dirs[i], G_FILE_TEST_IS_DIR))
+        {
+          GSettingsSchemaSource *src = g_settings_schema_source_new_from_directory (candidate_dirs[i], default_source, FALSE, NULL);
+          if (src != NULL)
+            {
+              schema = lookup_nuvashalauncher_schema (src);
+              g_settings_schema_source_unref (src);
+              if (schema != NULL)
+                return schema;
+            }
+        }
+    }
+
+  g_autofree char *exe = g_file_read_link ("/proc/self/exe", NULL);
+  if (exe != NULL)
+    {
+      g_autofree char *bin_dir = g_path_get_dirname (exe);
+      g_autofree char *prefix_dir = g_path_get_dirname (bin_dir);
+      g_autofree char *share_dir = g_build_filename (prefix_dir, "share", "glib-2.0", "schemas", NULL);
+      if (g_file_test (share_dir, G_FILE_TEST_IS_DIR))
+        {
+          GSettingsSchemaSource *src = g_settings_schema_source_new_from_directory (share_dir, default_source, FALSE, NULL);
+          if (src != NULL)
+            {
+              schema = lookup_nuvashalauncher_schema (src);
+              g_settings_schema_source_unref (src);
+              if (schema != NULL)
+                return schema;
+            }
+        }
+    }
+
+  const char *xml_dirs[] = {
+    nuvashalauncher_SOURCE_DATA_DIR,
+    "data",
+    "../data",
+  };
+  for (gsize i = 0; i < G_N_ELEMENTS (xml_dirs); i++)
+    {
+      if (xml_dirs[i] == NULL)
+        continue;
+      g_autofree char *xml_file = g_build_filename (xml_dirs[i], "com.github.nuvashalauncher.nuvashalauncher.gschema.xml", NULL);
+      if (g_file_test (xml_file, G_FILE_TEST_EXISTS))
+        {
+          g_autofree char *cache_dir = g_build_filename (g_get_user_cache_dir (), "nuvashalauncher", "schemas", NULL);
+          g_mkdir_with_parents (cache_dir, 0700);
+          g_autofree char *cached_xml = g_build_filename (cache_dir, "com.github.nuvashalauncher.nuvashalauncher.gschema.xml", NULL);
+          g_autofree char *contents = NULL;
+          gsize len = 0;
+          if (g_file_get_contents (xml_file, &contents, &len, NULL) &&
+              g_file_set_contents (cached_xml, contents, len, NULL))
+            {
+              g_autofree char *cmd = g_strdup_printf ("glib-compile-schemas \"%s\"", cache_dir);
+              if (g_spawn_command_line_sync (cmd, NULL, NULL, NULL, NULL))
+                {
+                  GSettingsSchemaSource *src = g_settings_schema_source_new_from_directory (cache_dir, default_source, FALSE, NULL);
+                  if (src != NULL)
+                    {
+                      schema = lookup_nuvashalauncher_schema (src);
+                      g_settings_schema_source_unref (src);
+                      if (schema != NULL)
+                        return schema;
+                    }
+                }
+            }
+        }
+    }
+
+  return NULL;
+}
+
 static void
 nuvashalauncher_settings_init (nuvashalauncherSettings *self)
 {
-  {
-    GSettingsSchemaSource *source = NULL;
-    GSettingsSchemaSource *default_source;
-    g_autoptr (GError) schema_error = NULL;
+  GSettingsSchema *schema = find_settings_schema ();
+  if (schema != NULL)
+    {
+      self->desktop_settings = g_settings_new_full (schema, NULL, NULL);
+      g_settings_schema_unref (schema);
+    }
+  else
+    {
+      self->desktop_settings = NULL;
+    }
 
-    if (g_file_test (nuvashalauncher_BUILD_SCHEMA_DIR, G_FILE_TEST_IS_DIR))
-      source = g_settings_schema_source_new_from_directory (
-        nuvashalauncher_BUILD_SCHEMA_DIR, NULL, FALSE, &schema_error);
-    default_source = g_settings_schema_source_get_default ();
-    if (source == NULL)
-      source = default_source;
-    GSettingsSchema *schema = source != NULL
-      ? g_settings_schema_source_lookup (source,
-                                         "com.github.nuvashalauncher.nuvashalauncher",
-                                         TRUE)
-      : NULL;
-
-    g_return_if_fail (schema != NULL);
-    self->desktop_settings = g_settings_new_full (schema, NULL, NULL);
-    g_settings_schema_unref (schema);
-    if (source != default_source && source != NULL)
-      g_settings_schema_source_unref (source);
-  }
+  self->show_unstable_versions = FALSE;
   self->log_line_limit = nuvashalauncher_SETTINGS_DEFAULT_LOG_LINE_LIMIT;
+  self->show_unstable_loaders = FALSE;
+  self->language = g_strdup ("");
   self->cache_modrinth_api_responses = TRUE;
   self->cache_expiration = nuvashalauncher_SETTINGS_DEFAULT_CACHE_EXPIRATION;
-  self->export_metadata = TRUE;
+  self->export_metadata = FALSE;
+  self->delete_dependents = TRUE;
+
+  if (self->desktop_settings != NULL)
+    load (self);
 }
