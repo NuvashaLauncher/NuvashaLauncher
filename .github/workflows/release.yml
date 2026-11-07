@@ -231,11 +231,33 @@ jobs:
           VERSION=$(tr -d '[:space:]' < VERSION)
           TAG="v${VERSION}"
           ls -la dist/
+          if [ -f CHANGELOG.md ]; then
+            awk -v ver="$VERSION" '
+              /^## / {
+                if (in_section) exit
+                h = $2
+                gsub(/^\[|^v|\]$/, "", h)
+                if (h == ver) {
+                  in_section = 1
+                  next
+                }
+              }
+              in_section { print }
+            ' CHANGELOG.md > release-notes.md
+          fi
+          if [ -s release-notes.md ]; then
+            NOTES_ARGS="--notes-file release-notes.md"
+          else
+            NOTES_ARGS="--generate-notes"
+          fi
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" dist/* --clobber
+            if [ -s release-notes.md ]; then
+              gh release edit "$TAG" --title "Nuvasha Launcher ${VERSION}" --notes-file release-notes.md
+            fi
           else
             gh release create "$TAG" dist/* \
               --target "${{ github.sha }}" \
               --title "Nuvasha Launcher ${VERSION}" \
-              --generate-notes
+              $NOTES_ARGS
           fi
