@@ -109,7 +109,8 @@ nuvashalauncher_content_page_build_installed (nuvashalauncherContentPage *self)
       gtk_box_append (GTK_BOX (actions), GTK_WIDGET (actions_spacer));
 
      gtk_button_set_child (update_all, GTK_WIDGET (update_content));
-     nuvashalauncher_ui_set_action_label (GTK_WIDGET (update_all), _("Update All"));
+     gtk_widget_set_valign (GTK_WIDGET (update_all), GTK_ALIGN_CENTER);
+     nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (update_all), _("Update All"));
     g_signal_connect (update_all, "clicked",
                       G_CALLBACK (nuvashalauncher_content_page_on_update_all_clicked), self);
    gtk_stack_add_named (update_content, GTK_WIDGET (update_icon), "icon");

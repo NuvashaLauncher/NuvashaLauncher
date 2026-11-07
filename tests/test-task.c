@@ -713,6 +713,32 @@ test_sequence_survives_completing_twice (void)
   g_print ("ok - a sequence completed twice stays finished\n");
 }
 
+static void
+test_sequence_scope_survives_task_completion (void)
+{
+  SequenceData data = { 0 };
+  SequenceResult result = { 0 };
+  g_autoptr (nuvashalauncherTaskScope) scope = NULL;
+
+  result.loop = g_main_loop_new (NULL, FALSE);
+  data.sequence = nuvashalauncher_task_sequence_new (NULL, sequence_done, &result,
+                                          sequence_step, &data,
+                                          sequence_data_free);
+  scope = nuvashalauncher_task_sequence_scope (data.sequence);
+  nuvashalauncher_task_sequence_start (data.sequence);
+  nuvashalauncher_task_sequence_unref (data.sequence);
+  g_main_loop_run (result.loop);
+
+  /* Cancelling or inspecting a retained operation handle after the sequence's
+   * underlying GTask has finalized must not touch a dangling GTask pointer. */
+  g_assert_null (nuvashalauncher_task_scope_get_cancellable (scope));
+  nuvashalauncher_task_scope_cancel (scope);
+
+  g_free (result.answer);
+  g_main_loop_unref (result.loop);
+  g_print ("ok - retained sequence scope outlives its completed GTask safely\n");
+}
+
 int
 main (int argc, char **argv)
 {
@@ -726,6 +752,7 @@ main (int argc, char **argv)
   test_sequence_returns_errors ();
   test_sequence_honors_cancellation ();
   test_sequence_survives_completing_twice ();
+  test_sequence_scope_survives_task_completion ();
   test_scope_cancels_owned_sources ();
   test_scope_cancellation_stress ();
   test_scope_reference_keeps_operation_alive ();

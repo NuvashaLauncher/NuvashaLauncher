@@ -680,6 +680,14 @@ create_settings_page (nuvashalauncherInstancePage *self)
      runtime the automatic choice stands for and leaves it out of the
      list. The required version is not known yet and is set once the
      manifest loads. */
+  if (java_path != NULL &&
+      !(g_file_test (java_path, G_FILE_TEST_IS_REGULAR) &&
+        g_file_test (java_path, G_FILE_TEST_IS_EXECUTABLE)))
+    {
+      nuvashalauncher_instance_manager_set_string (self->manager, self->instance,
+                                        "java-path", NULL, NULL);
+      g_clear_pointer (&java_path, g_free);
+    }
   nuvashalauncher_java_row_set_required_major (nuvashalauncher_JAVA_ROW (java_row),
                                    self->required_java);
   nuvashalauncher_java_row_load (nuvashalauncher_JAVA_ROW (java_row), java_path);

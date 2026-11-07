@@ -1,0 +1,67 @@
+# Maintainer: Flia <43163973-anotherminecraftlauncher@users.noreply.gitlab.com>
+
+pkgname=nuvashalauncher
+pkgver=${_pkgver:-1.0}
+pkgrel=1
+pkgdesc='Minecraft launcher for Linux'
+arch=('x86_64' 'aarch64')
+url='https://github.com/NuvashaLauncher/NuvashaLauncher'
+license=('GPL-3.0-only' 'CC0-1.0')
+depends=(
+  'glib2'
+  'glibc'
+  'gtk4'
+  'hicolor-icon-theme'
+  'json-glib'
+  'libadwaita'
+  'libarchive'
+  'libepoxy'
+  'libsecret'
+  'libsoup3'
+  'shared-mime-info'
+)
+makedepends=(
+  'gcc'
+  'gettext'
+  'make'
+  'pkgconf'
+)
+checkdepends=(
+  'desktop-file-utils'
+)
+optdepends=(
+  'jre8-openjdk: Java 8 runtime for Minecraft 1.16.5 and older'
+  'jre17-openjdk: Java 17 runtime for Minecraft 1.17 to 1.20.4'
+  'jre21-openjdk: Java 21 runtime for Minecraft 1.20.5 to 1.21.x'
+  'jre25-openjdk: Java 25 runtime for Minecraft 26.1 and newer'
+)
+source=("${pkgname}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  local pkg_libs
+  pkg_libs="$(pkg-config --libs gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive gio-unix-2.0 epoxy libsecret-1) -lm"
+  make PREFIX=/usr \
+    RELFLAGS="${CFLAGS} ${CPPFLAGS}" \
+    PKG_LIBS="${LDFLAGS} ${pkg_libs}"
+}
+
+check() {
+  cd "${pkgname}-${pkgver}"
+  local pkg_libs
+  pkg_libs="$(pkg-config --libs gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive gio-unix-2.0 epoxy libsecret-1) -lm"
+  desktop-file-validate data/com.github.nuvashalauncher.nuvashalauncher.desktop
+  make test PREFIX=/usr \
+    RELFLAGS="${CFLAGS} ${CPPFLAGS}" \
+    PKG_LIBS="${LDFLAGS} ${pkg_libs}"
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" PREFIX=/usr install
+  rm -f "${pkgdir}/usr/share/glib-2.0/schemas/gschemas.compiled"
+  rm -f "${pkgdir}/usr/share/applications/mimeinfo.cache"
+  find "${pkgdir}/usr/share/mime" -mindepth 1 -maxdepth 1 ! -name packages -exec rm -rf {} +
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

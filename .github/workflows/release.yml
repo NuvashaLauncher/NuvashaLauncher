@@ -1,0 +1,240 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'VERSION'
+
+permissions:
+  contents: write
+
+jobs:
+  deb:
+    name: DEB ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    container: ubuntu:26.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-26.04
+          - arch: arm64
+            runner: ubuntu-26.04-arm
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Install DEB build dependencies
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            build-essential debhelper devscripts desktop-file-utils \
+            pkg-config gettext \
+            libglib2.0-dev libgtk-4-dev libadwaita-1-dev libepoxy-dev \
+            libjson-glib-dev libsoup-3.0-dev libarchive-dev libsecret-1-dev
+
+      - name: Build DEB package
+        run: |
+          VERSION=$(tr -d '[:space:]' < VERSION)
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git archive --format=tar.gz --prefix="nuvashalauncher-${VERSION}/" HEAD \
+            -o "../nuvashalauncher_${VERSION}.orig.tar.gz"
+          cp -r packaging/debian ./debian
+          chmod +x debian/rules
+          printf 'nuvashalauncher (%s-1) unstable; urgency=medium\n\n  * Release Nuvasha Launcher %s.\n\n -- Flia <43163973-anotherminecraftlauncher@users.noreply.gitlab.com>  %s\n' \
+            "$VERSION" "$VERSION" "$(date -R)" > debian/changelog
+          dpkg-buildpackage -us -uc -b
+          mkdir -p dist
+          cp -v ../nuvashalauncher_${VERSION}-1_${{ matrix.arch }}.deb \
+            dist/nuvashalauncher-${{ matrix.arch }}.deb
+          rm -rf ./debian
+
+      - name: Upload DEB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-${{ matrix.arch }}
+          path: dist/*.deb
+          if-no-files-found: error
+
+  rpm:
+    name: RPM ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    container: fedora:latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-26.04
+          - arch: aarch64
+            runner: ubuntu-26.04-arm
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Install RPM build dependencies
+        run: |
+          dnf install -y \
+            git rpm-build rpmdevtools \
+            gcc make gettext pkgconf-pkg-config \
+            glib2-devel gtk4-devel libadwaita-devel libepoxy-devel \
+            json-glib-devel libsoup3-devel libarchive-devel libsecret-devel \
+            desktop-file-utils libappstream-glib
+
+      - name: Build RPM package
+        run: |
+          VERSION=$(tr -d '[:space:]' < VERSION)
+          rpmdev-setuptree
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git archive --format=tar.gz --prefix="nuvashalauncher-${VERSION}/" HEAD \
+            -o ~/rpmbuild/SOURCES/"nuvashalauncher-${VERSION}.tar.gz"
+          rpmbuild -bb --define "_version ${VERSION}" packaging/rpm/nuvashalauncher.spec
+          mkdir -p dist
+          find ~/rpmbuild/RPMS -name "nuvashalauncher-${VERSION}-*.rpm" \
+            ! -name "*-debuginfo-*" ! -name "*-debugsource-*" \
+            -exec cp -v {} dist/nuvashalauncher-${{ matrix.arch }}.rpm \;
+
+      - name: Upload RPM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpm-${{ matrix.arch }}
+          path: dist/*.rpm
+          if-no-files-found: error
+
+  arch:
+    name: Arch Linux x86_64
+    runs-on: ubuntu-26.04
+    container: archlinux:latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Install Arch build dependencies
+        run: |
+          pacman -Syu --noconfirm --needed \
+            base-devel git gettext pkgconf desktop-file-utils \
+            gtk4 libadwaita libepoxy json-glib libsoup3 libarchive libsecret \
+            hicolor-icon-theme shared-mime-info
+
+      - name: Build Arch package
+        run: |
+          VERSION=$(tr -d '[:space:]' < VERSION)
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          useradd -m builder
+          sed -i 's/ debug/ !debug/' /etc/makepkg.conf
+          mkdir -p /tmp/archbuild
+          cp packaging/arch/PKGBUILD /tmp/archbuild/PKGBUILD
+          git archive --format=tar.gz --prefix="nuvashalauncher-${VERSION}/" HEAD \
+            -o /tmp/archbuild/"nuvashalauncher-${VERSION}.tar.gz"
+          chown -R builder:builder /tmp/archbuild
+          su builder -c "cd /tmp/archbuild && _pkgver=${VERSION} PKGEXT='.pkg.tar.zst' makepkg -sf --noconfirm"
+          mkdir -p dist
+          cp -v /tmp/archbuild/nuvashalauncher-${VERSION}-1-x86_64.pkg.tar.zst \
+            dist/nuvashalauncher-x86_64.pkg.tar.zst
+
+      - name: Upload Arch artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: arch-x86_64
+          path: dist/*.pkg.tar.zst
+          if-no-files-found: error
+
+  flatpak:
+    name: Flatpak ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    container:
+      image: ubuntu:26.04
+      options: --privileged
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-26.04
+          - arch: aarch64
+            runner: ubuntu-26.04-arm
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Install Flatpak tooling
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            ca-certificates \
+            flatpak \
+            flatpak-builder \
+            git \
+            make \
+            xvfb
+          flatpak remote-add --if-not-exists flathub \
+            https://flathub.org/repo/flathub.flatpakrepo
+
+      - name: Build Flatpak bundle
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: nuvashalauncher-${{ matrix.arch }}.flatpak
+          manifest-path: packaging/flatpak/com.github.nuvashalauncher.nuvashalauncher.yml
+          cache: true
+          cache-key: flatpak-builder-${{ matrix.arch }}-${{ github.sha }}
+
+      - name: Install Flatpak bundle
+        run: flatpak install --user --noninteractive nuvashalauncher-${{ matrix.arch }}.flatpak
+
+      - name: Run Flatpak smoke test
+        run: make test-flatpak-runtime
+
+      - name: Stage Flatpak bundle
+        run: |
+          mkdir -p dist
+          mv "nuvashalauncher-${{ matrix.arch }}.flatpak" \
+            "dist/nuvashalauncher-${{ matrix.arch }}.flatpak"
+
+      - name: Upload Flatpak artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: flatpak-${{ matrix.arch }}
+          path: dist/*.flatpak
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs:
+      - deb
+      - rpm
+      - arch
+      - flatpak
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(tr -d '[:space:]' < VERSION)
+          TAG="v${VERSION}"
+          ls -la dist/
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber
+          else
+            gh release create "$TAG" dist/* \
+              --target "${{ github.sha }}" \
+              --title "Nuvasha Launcher ${VERSION}" \
+              --generate-notes
+          fi

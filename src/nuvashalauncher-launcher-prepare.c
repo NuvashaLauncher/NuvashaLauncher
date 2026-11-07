@@ -53,6 +53,13 @@ choose_java (nuvashalauncher *self, GPtrArray *javas, int required,
   const nuvashalauncherJava *java = NULL;
 
   g_object_get (self->instance, "java-path", instance_java, NULL);
+  if (*instance_java != NULL && **instance_java != '\0' &&
+      !(g_file_test (*instance_java, G_FILE_TEST_IS_REGULAR) &&
+        g_file_test (*instance_java, G_FILE_TEST_IS_EXECUTABLE)))
+    {
+      nuvashalauncher_instance_set_string (self->instance, "java-path", NULL, NULL);
+      g_clear_pointer (instance_java, g_free);
+    }
 
   java = nuvashalauncher_java_select (javas, *instance_java, required);
 
@@ -183,12 +190,13 @@ on_custom_java_probed (GObject *source G_GNUC_UNUSED,
 
   if (custom == NULL)
     {
-      launch_finished_with_error (self, g_steal_pointer (&error));
-      java_search_free (search);
-      return;
+      nuvashalauncher_instance_set_string (self->instance, "java-path", NULL, NULL);
+    }
+  else
+    {
+      g_ptr_array_add (search->javas, g_steal_pointer (&custom));
     }
 
-  g_ptr_array_add (search->javas, g_steal_pointer (&custom));
   java = choose_java (self, search->javas,
                       self->preparation.resolved != NULL
                         ? self->preparation.resolved->java_major_version : 0,
@@ -231,6 +239,14 @@ on_java_detected (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     }
 
   g_object_get (self->instance, "java-path", &instance_java, NULL);
+  if (instance_java != NULL && *instance_java != '\0' &&
+      !(g_file_test (instance_java, G_FILE_TEST_IS_REGULAR) &&
+        g_file_test (instance_java, G_FILE_TEST_IS_EXECUTABLE)))
+    {
+      nuvashalauncher_instance_set_string (self->instance, "java-path", NULL, NULL);
+      g_clear_pointer (&instance_java, g_free);
+    }
+
   if (instance_java != NULL && *instance_java != '\0')
     {
       /* Explicit runtimes selected through Flatpak portals are not part of

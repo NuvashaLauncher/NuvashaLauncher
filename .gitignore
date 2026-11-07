@@ -11,3 +11,18 @@
 *~
 *.swp
 *.swo
+
+# Package artifacts
+/debian/
+/result
+/result-*
+packaging/arch/pkg/
+packaging/arch/src/
+*.deb
+*.ddeb
+*.buildinfo
+*.changes
+*.pkg.tar*
+*.rpm
+*.flatpak
+*.tar.gz

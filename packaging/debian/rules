@@ -1,0 +1,28 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+PKGS := gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive gio-unix-2.0 epoxy libsecret-1
+PKG_LIBS := $(shell pkg-config --libs $(PKGS)) -lm
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	dh_auto_build -- PREFIX=/usr \
+		RELFLAGS="$(CFLAGS) $(CPPFLAGS)" \
+		PKG_LIBS="$(LDFLAGS) $(PKG_LIBS)"
+
+override_dh_auto_test:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	desktop-file-validate data/com.github.nuvashalauncher.nuvashalauncher.desktop
+	$(MAKE) test PREFIX=/usr \
+		RELFLAGS="$(CFLAGS) $(CPPFLAGS)" \
+		PKG_LIBS="$(LDFLAGS) $(PKG_LIBS)"
+endif
+
+override_dh_auto_install:
+	dh_auto_install -- PREFIX=/usr
+	rm -f debian/nuvashalauncher/usr/share/glib-2.0/schemas/gschemas.compiled
+	rm -f debian/nuvashalauncher/usr/share/applications/mimeinfo.cache
+	find debian/nuvashalauncher/usr/share/mime -mindepth 1 -maxdepth 1 ! -name packages -exec rm -rf {} +

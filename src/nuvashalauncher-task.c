@@ -62,7 +62,8 @@ void
 nuvashalauncher_task_scope_set_source_tag (nuvashalauncherTaskScope *scope, gpointer source_tag)
 {
   g_return_if_fail (scope != NULL);
-  g_task_set_source_tag (scope->task, source_tag);
+  if (scope->task != NULL)
+    g_task_set_source_tag (scope->task, source_tag);
 }
 
 gboolean
@@ -204,6 +205,16 @@ nuvashalauncher_task_scope_unref (nuvashalauncherTaskScope *scope)
   g_free (scope);
 }
 
+static void
+attached_task_destroyed (gpointer user_data)
+{
+  nuvashalauncherTaskScope *scope = user_data;
+
+  if (!scope->owns_task)
+    scope->task = NULL;
+  nuvashalauncher_task_scope_unref (scope);
+}
+
 void
 nuvashalauncher_task_scope_attach_task (GTask *task)
 {
@@ -217,7 +228,7 @@ nuvashalauncher_task_scope_attach_task (GTask *task)
 
   g_object_set_data_full (G_OBJECT (task), "nuvashalauncher-task-scope",
                           nuvashalauncher_task_scope_from_task (task),
-                          (GDestroyNotify) nuvashalauncher_task_scope_unref);
+                          attached_task_destroyed);
 }
 
 GTask *
@@ -231,14 +242,15 @@ GCancellable *
 nuvashalauncher_task_scope_get_cancellable (const nuvashalauncherTaskScope *scope)
 {
   g_return_val_if_fail (scope != NULL, NULL);
-  return g_task_get_cancellable (scope->task);
+  return scope->task != NULL ? g_task_get_cancellable (scope->task) : NULL;
 }
 
 void
 nuvashalauncher_task_scope_set_check_cancellable (nuvashalauncherTaskScope *scope, gboolean check)
 {
   g_return_if_fail (scope != NULL);
-  g_task_set_check_cancellable (scope->task, check);
+  if (scope->task != NULL)
+    g_task_set_check_cancellable (scope->task, check);
 }
 
 /* Defer the caller's unref until the callback returns. This prevents callback
@@ -281,7 +293,8 @@ nuvashalauncher_task_scope_return_error_if_cancelled (nuvashalauncherTaskScope *
 
   g_return_val_if_fail (scope != NULL, FALSE);
 
-  if (!g_cancellable_is_cancelled (g_task_get_cancellable (scope->task)))
+  if (scope->task == NULL ||
+      !g_cancellable_is_cancelled (g_task_get_cancellable (scope->task)))
     return FALSE;
 
   if (!g_atomic_int_compare_and_exchange (&scope->returned, 0, 1))
@@ -570,7 +583,8 @@ nuvashalauncher_task_scope_cancel (nuvashalauncherTaskScope *scope)
 
   g_return_if_fail (scope != NULL);
   nuvashalauncher_task_scope_set_state (scope, nuvashalauncher_TASK_STATE_CANCELLED);
-  GCancellable *cancellable = g_task_get_cancellable (scope->task);
+  GCancellable *cancellable =
+    scope->task != NULL ? g_task_get_cancellable (scope->task) : NULL;
   if (cancellable != NULL)
     g_cancellable_cancel (cancellable);
 
@@ -607,7 +621,7 @@ nuvashalauncher_task_scope_follow_cancellable (nuvashalauncherTaskScope *scope, 
   /* Following the operation's own cancellable would call
      nuvashalauncher_task_scope_cancel() recursively when that cancellable is cancelled.
      Only a cancellable owned by some other object belongs here. */
-  if (cancellable == g_task_get_cancellable (scope->task))
+  if (scope->task != NULL && cancellable == g_task_get_cancellable (scope->task))
     return;
 
   followed.cancellable = g_object_ref (cancellable);

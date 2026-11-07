@@ -48,120 +48,44 @@ as a regular installation or packaged with Flatpak.
 
 ### Flatpak
 
-The repository includes a Flatpak manifest using the GNOME 51 runtime. Build it
-from the `main` branch:
-
 ```sh
-git clone --branch main https://github.com/nuvashalauncher/nuvashalauncher.git
-cd nuvashalauncher
-flatpak-builder --user --install --force-clean \
-    build/flatpak \
-    packaging/flatpak/com.github.nuvashalauncher.nuvashalauncher.yml
-flatpak run com.github.nuvashalauncher.nuvashalauncher
+curl -fLO "https://github.com/NuvashaLauncher/NuvashaLauncher/releases/latest/download/nuvashalauncher-$(uname -m).flatpak"
+flatpak install --user ./nuvashalauncher-$(uname -m).flatpak
 ```
 
-To uninstall the Flatpak and remove its sandbox data:
+### Fedora
 
 ```sh
-flatpak uninstall --user --delete-data \
-    com.github.nuvashalauncher.nuvashalauncher
+sudo dnf install "https://github.com/NuvashaLauncher/NuvashaLauncher/releases/latest/download/nuvashalauncher-$(uname -m).rpm"
 ```
 
-### Native
-
-#### Dependencies
-
-- C17-compatible compiler (GCC is used by default)
-- GNU Make
-- pkg-config
-- gettext
-- GLib
-- GTK 4.10 or newer
-- libadwaita 1.5 or newer
-- libepoxy
-- json-glib
-- libsoup
-- libarchive
-- libsecret
-
-#### Runtime dependencies
-
-- A Java runtime compatible with the Minecraft version being launched
-- A Secret Service provider, such as GNOME Keyring or KWallet
-
-#### Debian
+### Debian
 
 ```sh
-sudo apt install build-essential pkg-config gettext \
-    libglib2.0-dev libgtk-4-dev libadwaita-1-dev libepoxy-dev \
-    libjson-glib-dev libsoup-3.0-dev libarchive-dev libsecret-1-dev
+curl -fLO "https://github.com/NuvashaLauncher/NuvashaLauncher/releases/latest/download/nuvashalauncher-$(dpkg --print-architecture).deb"
+sudo apt install ./nuvashalauncher-$(dpkg --print-architecture).deb
 ```
 
-#### Fedora
+### Arch
 
 ```sh
-sudo dnf install gcc make gettext pkgconf-pkg-config \
-    glib2-devel gtk4-devel libadwaita-devel libepoxy-devel \
-    json-glib-devel libsoup3-devel libarchive-devel libsecret-devel
+sudo pacman -U "https://github.com/NuvashaLauncher/NuvashaLauncher/releases/latest/download/nuvashalauncher-x86_64.pkg.tar.zst"
 ```
 
-#### openSUSE
+### NixOS
 
 ```sh
-sudo zypper install gcc make gettext-tools pkg-config glib2-devel \
-    gtk4-devel libadwaita-devel libepoxy-devel json-glib-devel \
-    libsoup-devel libarchive-devel libsecret-devel
+nix profile install github:NuvashaLauncher/NuvashaLauncher
 ```
 
-#### Arch
+### Gentoo
 
 ```sh
-sudo pacman -S base-devel gettext pkgconf gtk4 libadwaita libepoxy \
-    json-glib libsoup libarchive libsecret
-```
-
-#### Gentoo
-
-```sh
-sudo emerge --ask sys-devel/gcc sys-devel/gettext dev-build/make \
-    dev-util/pkgconf dev-libs/glib gui-libs/gtk:4 gui-libs/libadwaita \
-    gui-libs/libepoxy dev-libs/json-glib net-libs/libsoup:3 \
-    app-arch/libarchive app-crypt/libsecret
-```
-
-#### NixOS
-
-```sh
-nix-shell -p gcc gnumake gettext pkg-config glib gtk4 libadwaita libepoxy \
-    json-glib libsoup libarchive libsecret
-```
-
-#### Building from source
-
-```sh
-git clone https://github.com/nuvashalauncher/nuvashalauncher.git nuvashalauncher
-cd nuvashalauncher
-make
-sudo make install PREFIX=/usr/local
-```
-
-The install target also refreshes the desktop entry, MIME, icon, and GSettings
-schemas used by the launcher when the corresponding system tools are available.
-For a staged or minimal installation, these caches can be refreshed manually:
-
-```sh
-sudo update-desktop-database /usr/local/share/applications
-sudo update-mime-database /usr/local/share/mime
-sudo gtk-update-icon-cache -f -t /usr/local/share/icons/hicolor
-sudo glib-compile-schemas /usr/local/share/glib-2.0/schemas
-```
-
-The launcher is installed as `/usr/local/bin/nuvashalauncher`.
-
-To uninstall it:
-
-```sh
-sudo make uninstall PREFIX=/usr/local
+sudo mkdir -p /var/db/repos/local/games-util/nuvashalauncher
+sudo curl -fL "https://raw.githubusercontent.com/NuvashaLauncher/NuvashaLauncher/main/packaging/gentoo/nuvashalauncher-9999.ebuild" \
+    -o /var/db/repos/local/games-util/nuvashalauncher/nuvashalauncher-9999.ebuild
+sudo ebuild /var/db/repos/local/games-util/nuvashalauncher/nuvashalauncher-9999.ebuild manifest
+sudo emerge --accept-keywords='**' games-util/nuvashalauncher
 ```
 
 ## License

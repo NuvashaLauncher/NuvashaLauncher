@@ -182,6 +182,13 @@ on_dialog_closed (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_data)
   self->import_idle = 0;
   self->closed = TRUE;
 
+  if (self->search != NULL)
+    g_cancellable_cancel (self->search);
+  if (!self->imported && self->fetch != NULL)
+    g_cancellable_cancel (self->fetch);
+  if (self->version_catalog != NULL)
+    nuvashalauncher_operation_cancel (self->version_catalog);
+
   /* Closing does not stop the pack download: it is the manager's, it
      shows in the header, and the install that follows it runs without
      the dialog. Only the optional-files choice, which needs the dialog,

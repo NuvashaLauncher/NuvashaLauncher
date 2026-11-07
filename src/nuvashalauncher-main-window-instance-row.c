@@ -312,7 +312,20 @@ on_play_clicked (GtkButton *button, gpointer user_data)
   if (nuvashalauncher_launch_state_is_busy (nuvashalauncher_launcher_get_state (launcher)))
     confirm_stop (self, launcher);
   else
-    nuvashalauncher_launcher_start (launcher);
+    {
+      nuvashalauncherInstance *instance = nuvashalauncher_launcher_get_instance (launcher);
+      g_autofree char *java_path = NULL;
+
+      if (instance != NULL)
+        g_object_get (instance, "java-path", &java_path, NULL);
+      if (java_path != NULL &&
+          !(g_file_test (java_path, G_FILE_TEST_IS_REGULAR) &&
+            g_file_test (java_path, G_FILE_TEST_IS_EXECUTABLE)))
+        nuvashalauncher_instance_manager_set_string (self->model->manager, instance,
+                                          "java-path", NULL, NULL);
+
+      nuvashalauncher_launcher_start (launcher);
+    }
 }
 
 /* Puts the icon of @instance in @image, or the game square when it has
