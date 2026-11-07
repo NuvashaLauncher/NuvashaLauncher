@@ -41,9 +41,9 @@ jobs:
       - name: Build DEB package
         run: |
           VERSION=$(tr -d '[:space:]' < VERSION)
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git archive --format=tar.gz --prefix="nuvashalauncher-${VERSION}/" HEAD \
-            -o "../nuvashalauncher_${VERSION}.orig.tar.gz"
+          tar --exclude='./.git' --exclude='./build' --exclude='./build-debug' --exclude='./dist' --exclude='./debian' \
+            --transform="s,^\.,nuvashalauncher-${VERSION}," \
+            -czf "../nuvashalauncher_${VERSION}.orig.tar.gz" .
           cp -r packaging/debian ./debian
           chmod +x debian/rules
           printf 'nuvashalauncher (%s-1) unstable; urgency=medium\n\n  * Release Nuvasha Launcher %s.\n\n -- Flia <43163973-anotherminecraftlauncher@users.noreply.gitlab.com>  %s\n' \
@@ -81,7 +81,7 @@ jobs:
       - name: Install RPM build dependencies
         run: |
           dnf install -y \
-            git rpm-build rpmdevtools \
+            tar git rpm-build rpmdevtools \
             gcc make gettext pkgconf-pkg-config \
             glib2-devel gtk4-devel libadwaita-devel libepoxy-devel \
             json-glib-devel libsoup3-devel libarchive-devel libsecret-devel \
@@ -91,9 +91,9 @@ jobs:
         run: |
           VERSION=$(tr -d '[:space:]' < VERSION)
           rpmdev-setuptree
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git archive --format=tar.gz --prefix="nuvashalauncher-${VERSION}/" HEAD \
-            -o ~/rpmbuild/SOURCES/"nuvashalauncher-${VERSION}.tar.gz"
+          tar --exclude='./.git' --exclude='./build' --exclude='./build-debug' --exclude='./dist' \
+            --transform="s,^\.,nuvashalauncher-${VERSION}," \
+            -czf ~/rpmbuild/SOURCES/"nuvashalauncher-${VERSION}.tar.gz" .
           rpmbuild -bb --define "_version ${VERSION}" packaging/rpm/nuvashalauncher.spec
           mkdir -p dist
           find ~/rpmbuild/RPMS -name "nuvashalauncher-${VERSION}-*.rpm" \
@@ -119,20 +119,20 @@ jobs:
       - name: Install Arch build dependencies
         run: |
           pacman -Syu --noconfirm --needed \
-            base-devel git gettext pkgconf desktop-file-utils \
+            base-devel tar git gettext pkgconf desktop-file-utils \
             gtk4 libadwaita libepoxy json-glib libsoup3 libarchive libsecret \
             hicolor-icon-theme shared-mime-info
 
       - name: Build Arch package
         run: |
           VERSION=$(tr -d '[:space:]' < VERSION)
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           useradd -m builder
           sed -i 's/ debug/ !debug/' /etc/makepkg.conf
           mkdir -p /tmp/archbuild
           cp packaging/arch/PKGBUILD /tmp/archbuild/PKGBUILD
-          git archive --format=tar.gz --prefix="nuvashalauncher-${VERSION}/" HEAD \
-            -o /tmp/archbuild/"nuvashalauncher-${VERSION}.tar.gz"
+          tar --exclude='./.git' --exclude='./build' --exclude='./build-debug' --exclude='./dist' \
+            --transform="s,^\.,nuvashalauncher-${VERSION}," \
+            -czf /tmp/archbuild/"nuvashalauncher-${VERSION}.tar.gz" .
           chown -R builder:builder /tmp/archbuild
           su builder -c "cd /tmp/archbuild && _pkgver=${VERSION} PKGEXT='.pkg.tar.zst' makepkg -sf --noconfirm"
           mkdir -p dist
@@ -183,6 +183,7 @@ jobs:
         with:
           bundle: nuvashalauncher-${{ matrix.arch }}.flatpak
           manifest-path: packaging/flatpak/com.github.nuvashalauncher.nuvashalauncher.yml
+          arch: ${{ matrix.arch }}
           cache: true
           cache-key: flatpak-builder-${{ matrix.arch }}-${{ github.sha }}
 
