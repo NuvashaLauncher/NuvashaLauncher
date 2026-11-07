@@ -293,6 +293,7 @@ nuvashalauncher_instance_manager_load (nuvashalauncherInstanceManager *self, GEr
     {
       nuvashalauncherInstance *instance = l->data;
       g_autofree char *dir = instance_directory (instance);
+      g_autofree char *java_path = NULL;
       if (!g_file_test (dir, G_FILE_TEST_IS_DIR))
         {
           g_autofree char *base = g_path_get_basename (dir);
@@ -302,6 +303,14 @@ nuvashalauncher_instance_manager_load (nuvashalauncherInstanceManager *self, GEr
               nuvashalauncher_instance_set_directory (instance, candidate, NULL);
               needs_resave = TRUE;
             }
+        }
+      g_object_get (instance, "java-path", &java_path, NULL);
+      if (java_path != NULL &&
+          !(g_file_test (java_path, G_FILE_TEST_IS_REGULAR) &&
+            g_file_test (java_path, G_FILE_TEST_IS_EXECUTABLE)))
+        {
+          nuvashalauncher_instance_set_string (instance, "java-path", NULL, NULL);
+          needs_resave = TRUE;
         }
       g_list_store_append (self->instances, instance);
     }

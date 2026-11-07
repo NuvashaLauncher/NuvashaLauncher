@@ -1,0 +1,46 @@
+Source: nuvashalauncher
+Section: games
+Priority: optional
+Maintainer: Flia <43163973-anotherminecraftlauncher@users.noreply.gitlab.com>
+Rules-Requires-Root: no
+Build-Depends:
+ debhelper-compat (= 13),
+ desktop-file-utils,
+ gettext,
+ libadwaita-1-dev (>= 1.5),
+ libarchive-dev,
+ libepoxy-dev,
+ libglib2.0-dev,
+ libgtk-4-dev (>= 4.10),
+ libjson-glib-dev,
+ libsecret-1-dev,
+ libsoup-3.0-dev,
+ pkgconf | pkg-config,
+Standards-Version: 4.7.0
+Homepage: https://github.com/NuvashaLauncher/NuvashaLauncher
+Vcs-Browser: https://github.com/NuvashaLauncher/NuvashaLauncher
+Vcs-Git: https://github.com/NuvashaLauncher/NuvashaLauncher.git
+
+Package: nuvashalauncher
+Architecture: any
+Depends:
+ hicolor-icon-theme,
+ shared-mime-info,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Suggests:
+ openjdk-8-jre,
+ openjdk-17-jre,
+ openjdk-21-jre,
+ openjdk-25-jre,
+Description: Minecraft launcher for Linux
+ Nuvasha Launcher keeps Minecraft installations separate, so each instance
+ can have its own version, loader, Java runtime, settings, mods, and worlds.
+ .
+ Browse Modrinth to install modpacks, mods, resource packs, and shaders.
+ Local .mrpack files can be imported and exported, with downloads checked
+ before they are installed.
+ .
+ The launcher supports vanilla Minecraft and the Fabric, Quilt, Forge, and
+ NeoForge loaders. It can use Microsoft or offline accounts, and includes
+ account-specific skins and capes.

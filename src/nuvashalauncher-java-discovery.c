@@ -278,12 +278,40 @@ add_jvm_home (GPtrArray  *candidates,
   add_candidate (candidates, jre_java);
 }
 
+static gboolean
+nix_store_entry_is_jvm_candidate (const char *name)
+{
+  static const char * const keywords[] = {
+    "jdk",
+    "jre",
+    "java",
+    "temurin",
+    "zulu",
+    "graalvm",
+    "corretto",
+    "semeru",
+    NULL
+  };
+
+  if (name == NULL || g_str_has_suffix (name, ".drv"))
+    return FALSE;
+
+  for (guint i = 0; keywords[i] != NULL; i++)
+    {
+      if (strstr (name, keywords[i]) != NULL)
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
 static void
 add_root_scandir (GPtrArray  *candidates,
                   const char *root)
 {
   g_autoptr (GError) error = NULL;
   g_autoptr (GDir) dir = g_dir_open (root, 0, &error);
+  gboolean is_nix_store = (g_strcmp0 (root, "/nix/store") == 0);
 
   if (dir == NULL)
     return;
@@ -291,6 +319,9 @@ add_root_scandir (GPtrArray  *candidates,
   for (const char *name = g_dir_read_name (dir); name != NULL;
        name = g_dir_read_name (dir))
     {
+      if (is_nix_store && !nix_store_entry_is_jvm_candidate (name))
+        continue;
+
       g_autofree char *home = g_build_filename (root, name, NULL);
 
       add_jvm_home (candidates, home);
@@ -308,6 +339,7 @@ default_roots (void)
     "/usr/java",
     "/usr/local/java",
     "/opt",
+    "/nix/store",
     NULL
   };
   g_autofree char *jdks = g_build_filename (home, ".jdks", NULL);
@@ -395,9 +427,27 @@ collect_candidates (void)
     g_autoptr (GSettings) settings = g_settings_new (
       "com.github.nuvashalauncher.nuvashalauncher");
     g_auto (GStrv) custom = g_settings_get_strv (settings, "custom-java-paths");
+    g_autoptr (GPtrArray) valid_custom = g_ptr_array_new_with_free_func (g_free);
+    gboolean pruned = FALSE;
 
     for (guint i = 0; custom != NULL && custom[i] != NULL; i++)
-      add_candidate (candidates, custom[i]);
+      {
+        if (g_file_test (custom[i], G_FILE_TEST_IS_REGULAR) &&
+            g_file_test (custom[i], G_FILE_TEST_IS_EXECUTABLE))
+          {
+            add_candidate (candidates, custom[i]);
+            g_ptr_array_add (valid_custom, g_strdup (custom[i]));
+          }
+        else
+          pruned = TRUE;
+      }
+
+    if (pruned)
+      {
+        g_ptr_array_add (valid_custom, NULL);
+        g_settings_set_strv (settings, "custom-java-paths",
+                             (const char * const *) valid_custom->pdata);
+      }
   }
 
   g_autofree char *on_path = g_find_program_in_path ("java");

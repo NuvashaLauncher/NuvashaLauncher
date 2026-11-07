@@ -188,9 +188,18 @@ fill (nuvashalauncherJavaRow *self)
   GPtrArray *names = g_ptr_array_new_with_free_func (g_free);
   GPtrArray *ids = g_ptr_array_new_with_free_func (g_free);
   const nuvashalauncherJava *fallback = NULL;
-  g_autofree char *wanted_real =
-    self->wanted != NULL ? realpath (self->wanted, NULL) : NULL;
+  g_autofree char *wanted_real = NULL;
   guint position = GTK_INVALID_LIST_POSITION;
+
+  if (self->wanted != NULL && *self->wanted != '\0' &&
+      !(g_file_test (self->wanted, G_FILE_TEST_IS_REGULAR) &&
+        g_file_test (self->wanted, G_FILE_TEST_IS_EXECUTABLE)))
+    {
+      g_clear_pointer (&self->wanted, g_free);
+      g_clear_pointer (&self->probed, nuvashalauncher_java_free);
+    }
+
+  wanted_real = self->wanted != NULL ? realpath (self->wanted, NULL) : NULL;
 
   /* The Java the automatic choice stands for: named in the first entry,
      and left out of the list below when it is one of the detected runtimes.
@@ -260,8 +269,7 @@ fill (nuvashalauncherJavaRow *self)
 
   g_clear_pointer (&self->ids, g_ptr_array_unref);
   self->ids = ids;
-  self->automatic_selection = fallback != NULL &&
-                              (self->wanted == NULL || *self->wanted == '\0');
+  self->automatic_selection = (self->wanted == NULL || *self->wanted == '\0');
   self->ready = TRUE;
 
   /* Keep a real item selected so the popup is usable even when no exact
@@ -379,10 +387,11 @@ custom_loaded (GObject      *source G_GNUC_UNUSED,
     }
   else
     {
-      /* Probing failed: the path is still a setting, just label it raw. */
+      /* Probing failed because the configured runtime was removed or is
+       * no longer usable: clear the selection back to automatic. */
       nuvashalauncher_java_free (self->probed);
-      self->probed = g_new0 (nuvashalauncherJava, 1);
-      self->probed->executable = g_strdup (self->wanted);
+      self->probed = NULL;
+      g_clear_pointer (&self->wanted, g_free);
     }
 
   fill (self);
@@ -443,6 +452,7 @@ add_probed (GObject      *source G_GNUC_UNUSED,
 
   {
       const char *executable = probe->executable;
+      nuvashalauncher_java_register_custom_path (executable);
       nuvashalauncher_java_row_set_custom (self, executable, g_steal_pointer (&probe));
       /* A custom runtime can occupy the same numeric selection as the
        * placeholder it replaces. GTK then quite correctly suppresses
@@ -552,6 +562,7 @@ on_picked (GObject    *object G_GNUC_UNUSED,
     {
       self->restore = selected;
       self->automatic_selection = self->ids->pdata[selected] == NULL;
+      g_set_str (&self->wanted, self->ids->pdata[selected]);
     }
 }
 
@@ -664,6 +675,7 @@ nuvashalauncher_java_row_select_path (nuvashalauncherJavaRow *self, const char *
     {
       guint automatic = self->ids->len > 0 && self->ids->pdata[0] == NULL
                           ? 0 : GTK_INVALID_LIST_POSITION;
+      g_clear_pointer (&self->wanted, g_free);
       self->automatic_selection = automatic != GTK_INVALID_LIST_POSITION;
       adw_combo_row_set_selected (ADW_COMBO_ROW (self), automatic);
       return;
@@ -673,6 +685,8 @@ nuvashalauncher_java_row_select_path (nuvashalauncherJavaRow *self, const char *
     {
       if (g_strcmp0 (self->ids->pdata[i], path) == 0)
         {
+          g_set_str (&self->wanted, path);
+          self->automatic_selection = FALSE;
           adw_combo_row_set_selected (ADW_COMBO_ROW (self), i);
           return;
         }
@@ -685,6 +699,8 @@ nuvashalauncher_java_row_set_custom (nuvashalauncherJavaRow *self,
                          nuvashalauncherJava    *probed)
 {
   g_return_if_fail (nuvashalauncher_IS_JAVA_ROW (self));
+
+  g_set_str (&self->wanted, path);
 
   /* Reuse an entry that detection already reports. */
   for (guint i = 0; self->javas != NULL && i < self->javas->len; i++)

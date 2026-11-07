@@ -43,6 +43,16 @@
     <color type="primary">#7774a5</color>
   </branding>
   <releases>
+    <release version="1.0" date="2026-11-07">
+      <description>
+        <p>Added distribution packaging (RPM, Debian/Ubuntu, Arch Linux, Gentoo,
+        NixOS flake, and automated GitHub release builds) with NixOS store Java
+        discovery. This release also hardens async task lifetimes, archive and
+        filesystem security, OAuth and download handling, portable instance
+        paths, GSettings schema discovery, automatic cleanup of removed custom
+        JDKs, and Modpack Browser and content toolbar stability.</p>
+      </description>
+    </release>
     <release version="0.9" date="2026-10-30">
       <description>
         <p>Improved error handling throughout the launcher. User-facing errors

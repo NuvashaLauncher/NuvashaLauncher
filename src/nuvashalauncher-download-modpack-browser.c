@@ -66,6 +66,7 @@ on_version_catalog_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
     }
 
+  g_clear_pointer (&self->version_catalog, nuvashalauncher_operation_unref);
   version_catalog_ask_free (ask);
 }
 
