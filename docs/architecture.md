@@ -180,9 +180,17 @@ layout:
 
 Directory checks happen before files are touched. A new instance directory
 must be absolute, must not contain `..`, and must not be the same as, inside,
-or a parent of another instance directory. Moves and deletes are asynchronous
-and update the model only after the filesystem operation succeeds, so a failed
-operation leaves the registered instance and its old files in place.
+or a parent of another instance directory. Default instance directories under
+`<user data>/nuvashalauncher/instances/<id>` are serialized as relative paths
+(`instances/<id>`) in `instances.json` and resolved against the active data
+directory at load time so moving a home directory or Flatpak sandbox preserves
+instances, while custom directories outside the default root remain absolute.
+Moves and deletes are asynchronous and update the model only after the
+filesystem operation succeeds, so a failed operation leaves the registered
+instance and its old files in place. When a custom Java runtime is removed (or
+an instance's saved `java_path` is no longer executable), the manager clears the
+stale path in memory and on disk so the instance falls back to automatic Java
+selection.
 
 ### Accounts and authentication
 
@@ -223,10 +231,14 @@ expire during startup. If refresh fails, the launcher enters
 
 `nuvashalauncherSettings` is a typed wrapper around the installed GSettings schema in
 `data/com.github.nuvashalauncher.nuvashalauncher.gschema.xml`. It validates values and
-writes each accepted change. The settings include version-list filters, log
-retention, language, Modrinth API caching, export behavior, dependency delete
- behavior. Window geometry is kept separately by
-the window code.
+writes each accepted change. To support custom installation prefixes,
+distribution build environments, and development runs, schema lookup searches
+`GSETTINGS_SCHEMA_DIR`, the default system schema source,
+`PREFIX/share/glib-2.0/schemas`, `<exe_dir>/../share/glib-2.0/schemas`,
+`XDG_DATA_DIRS`, and the local `build/` directory. The settings include
+version-list filters, log retention, language, Modrinth API caching, export
+behavior, dependency delete behavior, and custom Java runtime paths. Window
+geometry is kept separately by the window code.
 
 ## Asynchronous work and ownership
 
@@ -240,10 +252,13 @@ types:
 
 The scope is reference counted because the operation state and its caller may
 outlive one another. A caller can cancel an operation without freeing the
-state that a late callback still needs. Source IDs are tracked and removed
-before task data is destroyed. Immediate results are deferred to an idle
-callback where necessary, so an `_async()` function never calls its completion
-callback before it returns its handle.
+state that a late callback still needs, and `nuvashalauncher_task_cancel`
+verifies `G_IS_TASK` before cancelling. Dialogs and views that hold a borrowed
+`GTask *` pointer for cancellation must clear that pointer as soon as the step
+completes so teardown never cancels a finalized task. Source IDs are tracked
+and removed before task data is destroyed. Immediate results are deferred to an
+idle callback where necessary, so an `_async()` function never calls its
+completion callback before it returns its handle.
 
 When adding asynchronous code:
 
@@ -417,35 +432,38 @@ placeholders, the main class, and game arguments into an argv array. The
 redacted form is the only form used in logs. Access tokens and values after
 the relevant password/token options are replaced before output is recorded.
 
-Java detection probes candidates asynchronously and parses `java -version` and
-related properties, including whether the runtime has AWT's X11 bridge. It
-prefers a window-capable compatible runtime and chooses the instance's
-explicit Java when one is configured. Launch preparation rejects a selected
-headless runtime; it does not downgrade to a different major version.
+Java detection probes candidates asynchronously across `$JAVA_HOME`, `PATH`,
+standard Linux JVM roots (`/usr/lib/jvm`, `/usr/lib64/jvm`, `/usr/java`, `/opt`),
+`/nix/store` (`*-openjdk-*`, `*-temurin-*`, `*-zulu-*`, `*-graalvm-*`,
+`*-jetbrains-jdk-*`), and user-configured `custom-java-paths`. It parses
+`java -version` and related properties, including whether the runtime has AWT's
+X11 bridge. It prefers a window-capable compatible runtime and chooses the
+instance's explicit Java when one is configured. If an instance's saved custom
+Java path has been removed or is no longer executable, the selection is cleared
+automatically and the instance falls back to auto-detected Java. Launch
+preparation rejects a selected headless runtime; it does not downgrade to a
+different major version.
 
 Stopping sends `SIGTERM` first and escalates after five seconds. Process output
 is consumed by the line-reader helper, capped per line, and retained only up to
 the configured log-line limit. Crash reports are associated with the process start time so an
 old report is not mistaken for a crash from the current launch.
 
-## Flatpak boundary
+## Packaging and runtime boundaries
 
-Flatpak is a packaging and runtime variant, not a second launcher
-implementation. The manifest builds the same source with `FLATPAK=1`. Java
-runtimes selected by the user can be probed even when they are not in the
-runtime's normal host search paths.
+Nuvasha Launcher ships as a single native binary and supports both Flatpak and
+native Linux distribution packaging:
 
-The application manifest grants network access, Wayland and fallback X11,
-audio, and device access required by the graphics stack. It does not grant
-`filesystem=home`. Flatpak therefore remains the outer process boundary for
-the launcher and the game, while the application uses its normal GLib data and
-cache directories inside the per-application data area.
-
-Flatpak does not bundle a JRE. A custom runtime is added through the Java
-picker as a runtime directory containing `bin/java`; the executable is probed
-before it is accepted. The selected paths are registered in the shared
-`custom-java-paths` setting and are available to all instance pages in that
-Flatpak installation. An instance still stores its own selected Java path.
+- **Flatpak (`packaging/flatpak/com.github.nuvashalauncher.nuvashalauncher.yml`)**:
+  Builds the source with `FLATPAK=1` against the GNOME 51 runtime. The manifest
+  grants network access, Wayland and fallback X11, audio, `org.freedesktop.secrets`,
+  and GPU device access, without granting `filesystem=home`. Flatpak does not
+  bundle a JRE; custom runtimes added through the Java picker are stored in the
+  shared `custom-java-paths` setting and probed before acceptance.
+- **Native distribution packages**: Build recipes are maintained for
+  Fedora/RHEL (`packaging/rpm/nuvashalauncher.spec`), Debian/Ubuntu
+  (`packaging/debian/`), Arch Linux (`packaging/arch/PKGBUILD`), Gentoo
+  (`packaging/gentoo/nuvashalauncher-9999.ebuild`), and NixOS (`flake.nix`).
 
 ## Persistence and filesystem layout
 
@@ -455,7 +473,7 @@ The main files are:
 | Data | Location/purpose |
 | --- | --- |
 | Instance registry | `<user data>/nuvashalauncher/instances.json` |
-| Instance content | Registered instance directories, each with game files and logs |
+| Instance content | Registered instance directories (relative `instances/<id>` by default), each with game files and logs |
 | Account records | Desktop Secret Service, one item per account keyed by account ID |
 | Active account | Desktop Secret Service, separate active-account item |
 | Shared resolved content | `<user data>/nuvashalauncher/` shared client artifacts and assets |
@@ -474,11 +492,19 @@ format without preserving the module's failure behavior.
 The security-sensitive code is distributed across the file, archive, account,
 and process boundaries:
 
-- Downloaded files are hash-checked when the source publishes a hash and are
-  never installed directly over an existing destination.
-- Instance and archive paths reject traversal, absolute paths, backslashes,
-  links, and overlapping instance directories where those checks apply.
-- ZIP entry counts and inflated size are bounded.
+- Downloaded files require `https://` (allowing `http://` only for loopback test
+  endpoints), enforce strict TLS certificate validation, are hash-checked when
+  the source publishes a hash, and are never installed directly over an existing
+  destination.
+- Instance, archive, Maven, and remote version paths reject traversal (`..`),
+  absolute paths, backslashes, and overlapping instance directories where those
+  checks apply.
+- Recursive filesystem operations (instance copy, deletion, and `.mrpack`
+  override backup) do not follow symlinks (`G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS`),
+  and archive extraction (`tar`/`zip`) rejects symlinks and hardlinks and opens
+  destination files with `O_NOFOLLOW`.
+- Manifest JSON loads (64 MiB), ZIP entry counts, per-entry `.mrpack` size
+  (512 MiB), and total unpacked `.mrpack` size (4 GiB) are bounded.
 - Modpack download URLs are restricted to hosts allowed by the format.
 - Complete account records and tokens are stored in the desktop Secret Service.
   This is intentional: the launcher must read the tokens to authenticate the
@@ -518,8 +544,14 @@ or live account. Download and Modrinth tests use local fixtures/servers. UI
 tests instantiate the compiled resource templates, and display-sensitive tests
 skip or use a virtual display when the environment does not provide one.
 
-CI builds both x86_64 and ARM64 Ubuntu containers, treats compiler warnings as
-errors for the release build, runs the test suite, and runs static analysis.
+CI (`.github/workflows/build.yml` and `.github/workflows/flatpak.yml`) builds
+both x86_64 and ARM64 Ubuntu containers, treats compiler warnings as errors for
+the release build, runs the test suite, runs static analysis, and smoke-tests
+the Flatpak bundle. When `VERSION` is updated on `main`,
+`.github/workflows/release.yml` builds `.deb` (`amd64`, `arm64`), `.rpm`
+(`x86_64`, `aarch64`), Arch Linux (`.pkg.tar.zst`), and Flatpak (`x86_64`,
+`aarch64`) packages and publishes them to GitHub Releases using the matching
+section from `CHANGELOG.md`.
 
 ## Adding or changing a subsystem
 
