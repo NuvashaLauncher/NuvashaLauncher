@@ -78,12 +78,53 @@
         cleanup, Java discovery, and test coverage.</p>
       </description>
     </release>
-    <release version="0.6" date="2026-10-26"/>
-    <release version="0.5" date="2026-10-25"/>
-    <release version="0.4" date="2026-10-25"/>
-    <release version="0.3" date="2026-10-24"/>
-    <release version="0.2" date="2026-10-18"/>
-    <release version="0.1" date="2026-10-14"/>
+    <release version="0.6" date="2026-10-26">
+      <description>
+        <p>Unified technical branding under the nuvashalauncher application ID,
+        added CLI flags and Bash completion for managing instances and accounts,
+        cached skin and cape previews per session, hardened archive and
+        filesystem path validation, and split large modules and test suites.</p>
+      </description>
+    </release>
+    <release version="0.5" date="2026-10-25">
+      <description>
+        <p>Added Flatpak packaging for the GNOME 51 runtime, shared custom Java
+        runtime directories across instances, reported Java vendor names, and
+        removed the legacy nested Bubblewrap sandbox.</p>
+      </description>
+    </release>
+    <release version="0.4" date="2026-10-25">
+      <description>
+        <p>Added instance and content edit modes with multi-selection, bulk
+        duplicate/delete/export actions, persistent drag-and-drop instance
+        reordering, circular icons, and a cancellable Update All progress
+        popover.</p>
+      </description>
+    </release>
+    <release version="0.3" date="2026-10-24">
+      <description>
+        <p>Renamed the project to Nuvasha, migrated UI templates to GResource
+        and preferences to GSettings, added Minecraft skin and cape
+        synchronization, CLI instance launching, live log auto-scrolling, and
+        architecture documentation.</p>
+      </description>
+    </release>
+    <release version="0.2" date="2026-10-18">
+      <description>
+        <p>Added an OpenGL 3D skin preview renderer, redesigned the account
+        skin manager with legacy skin support, added X11 display backend
+        support alongside Wayland, and expanded multi-distribution CI.</p>
+      </description>
+    </release>
+    <release version="0.1" date="2026-10-14">
+      <description>
+        <p>Initial release featuring isolated Minecraft instances, Mojang
+        version resolution, Fabric/Quilt/Forge/NeoForge loader installation,
+        Modrinth browsing and .mrpack import/export, Microsoft and offline
+        accounts, automatic Java discovery, and translations across 22
+        languages.</p>
+      </description>
+    </release>
   </releases>
   <categories>
     <category>Game</category>
