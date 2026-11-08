@@ -29,10 +29,10 @@ Depends:
  ${misc:Depends},
  ${shlibs:Depends},
 Suggests:
- openjdk-8-jre,
- openjdk-17-jre,
- openjdk-21-jre,
- openjdk-25-jre,
+ temurin-8-jdk,
+ temurin-17-jdk,
+ temurin-21-jdk,
+ temurin-25-jdk,
 Description: Minecraft launcher for Linux
  Nuvasha Launcher keeps Minecraft installations separate, so each instance
  can have its own version, loader, Java runtime, settings, mods, and worlds.

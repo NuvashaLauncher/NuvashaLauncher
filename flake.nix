@@ -57,6 +57,15 @@
               find "$out/share/mime" -mindepth 1 -maxdepth 1 ! -name packages -exec rm -rf {} +
             '';
 
+            passthru = {
+              temurin = with pkgs; [
+                temurin-bin-8
+                temurin-bin-17
+                temurin-bin-21
+                temurin-bin-25
+              ];
+            };
+
             meta = with pkgs.lib; {
               description = "Minecraft launcher for Linux";
               longDescription = ''
@@ -93,6 +102,10 @@
             packages = with pkgs; [
               desktop-file-utils
               gdb
+              temurin-bin-8
+              temurin-bin-17
+              temurin-bin-21
+              temurin-bin-25
             ];
           };
         });
