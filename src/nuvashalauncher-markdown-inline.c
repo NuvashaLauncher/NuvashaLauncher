@@ -59,7 +59,22 @@ inline_link (GString *out, const char *text, gsize length, gboolean allow_html,
   if (close == NULL || close + 1 >= text + length || close[1] != '(')
     return FALSE;
 
-  paren = memchr (close + 2, ')', (text + length) - (close + 2));
+  /* Count nested parentheses to find the matching closing paren. */
+  depth = 0;
+  for (const char *p = close + 2; p < text + length; p++)
+    {
+      if (*p == '(')
+        depth++;
+      else if (*p == ')')
+        {
+          if (depth == 0)
+            {
+              paren = p;
+              break;
+            }
+          depth--;
+        }
+    }
 
   if (paren == NULL)
     return FALSE;

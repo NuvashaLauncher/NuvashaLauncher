@@ -34,9 +34,10 @@ nuvashalauncher_fs_replace_contents (const char *path, const void *contents,
    * not silently retain permissions such as 0644 from an older file. */
   if (g_chmod (path, mode) != 0)
     {
-      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+      int saved_errno = errno;
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
                    "cannot set permissions on \"%s\": %s", path,
-                   g_strerror (errno));
+                   g_strerror (saved_errno));
       return FALSE;
     }
 
@@ -50,8 +51,9 @@ nuvashalauncher_fs_make_private_directory (const char *path, GError **error)
     return FALSE;
   if (g_chmod (path, 0700) != 0)
     {
-      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
-                   "cannot secure \"%s\": %s", path, g_strerror (errno));
+      int saved_errno = errno;
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
+                   "cannot secure \"%s\": %s", path, g_strerror (saved_errno));
       return FALSE;
     }
   return TRUE;
@@ -62,8 +64,9 @@ nuvashalauncher_fs_make_directory (const char *path, int mode, GError **error)
 {
   if (g_mkdir_with_parents (path, mode) != 0)
     {
-      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
-                   "cannot create \"%s\": %s", path, g_strerror (errno));
+      int saved_errno = errno;
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
+                   "cannot create \"%s\": %s", path, g_strerror (saved_errno));
       return FALSE;
     }
 
@@ -141,8 +144,9 @@ nuvashalauncher_fs_get_contents_within (const char *path, goffset maximum,
         continue;
       if (got < 0)
         {
-          g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
-                       "cannot read \"%s\"", path);
+          int saved_errno = errno;
+          g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
+                       "cannot read \"%s\": %s", path, g_strerror (saved_errno));
           close (fd);
           g_free (data);
           return FALSE;
@@ -172,8 +176,9 @@ nuvashalauncher_fs_unlink (const char *path, GError **error)
 {
   if (g_unlink (path) != 0 && errno != ENOENT)
     {
-      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
-                   "cannot remove \"%s\": %s", path, g_strerror (errno));
+      int saved_errno = errno;
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
+                   "cannot remove \"%s\": %s", path, g_strerror (saved_errno));
       return FALSE;
     }
   return TRUE;
@@ -184,9 +189,10 @@ nuvashalauncher_fs_rename (const char *source, const char *destination, GError *
 {
   if (g_rename (source, destination) != 0)
     {
-      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+      int saved_errno = errno;
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
                    "cannot rename \"%s\" to \"%s\": %s", source,
-                   destination, g_strerror (errno));
+                   destination, g_strerror (saved_errno));
       return FALSE;
     }
   return TRUE;
@@ -203,9 +209,10 @@ nuvashalauncher_fs_open_temporary_file (const char *directory, const char *prefi
 
   if (fd < 0)
     {
-      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+      int saved_errno = errno;
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
                    "cannot create temporary file in \"%s\": %s", directory,
-                   g_strerror (errno));
+                   g_strerror (saved_errno));
       return -1;
     }
 
@@ -224,16 +231,18 @@ nuvashalauncher_fs_make_temporary_directory (const char *parent, const char *pre
 
   if (result == NULL)
     {
-      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+      int saved_errno = errno;
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
                    "cannot create temporary directory in \"%s\": %s",
-                   parent, g_strerror (errno));
+                   parent, g_strerror (saved_errno));
       return NULL;
     }
   if (g_chmod (result, 0700) != 0)
     {
-      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+      int saved_errno = errno;
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
                    "cannot secure temporary directory \"%s\": %s", result,
-                   g_strerror (errno));
+                   g_strerror (saved_errno));
       g_rmdir (result);
       return NULL;
     }
@@ -479,11 +488,14 @@ nuvashalauncher_fs_open_temporary_file_nofollow (const char *directory, char **n
         break;
     }
 
-  g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
-               "cannot create a temporary file in \"%s\": %s", directory,
-               g_strerror (errno));
-  close (directory_fd);
-  return -1;
+  {
+    int saved_errno = errno;
+    g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
+                 "cannot create a temporary file in \"%s\": %s", directory,
+                 g_strerror (saved_errno));
+    close (directory_fd);
+    return -1;
+  }
 }
 
 gboolean
@@ -491,8 +503,9 @@ nuvashalauncher_fs_unlink_at (int directory_fd, const char *name, GError **error
 {
   if (unlinkat (directory_fd, name, 0) != 0 && errno != ENOENT)
     {
-      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
-                   "cannot remove \"%s\": %s", name, g_strerror (errno));
+      int saved_errno = errno;
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
+                   "cannot remove \"%s\": %s", name, g_strerror (saved_errno));
       return FALSE;
     }
   return TRUE;
@@ -504,9 +517,10 @@ nuvashalauncher_fs_rename_at (int directory_fd, const char *source, const char *
 {
   if (renameat (directory_fd, source, directory_fd, destination) != 0)
     {
-      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+      int saved_errno = errno;
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
                    "cannot rename \"%s\" to \"%s\": %s", source,
-                   destination, g_strerror (errno));
+                   destination, g_strerror (saved_errno));
       return FALSE;
     }
   return TRUE;

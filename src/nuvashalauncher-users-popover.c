@@ -69,9 +69,6 @@ account_id_of (gpointer widget)
   return g_object_get_data (G_OBJECT (widget), "nuvashalauncher-account-id");
 }
 
-AdwDialog *nuvashalauncher_users_skin_menu_new (nuvashalauncherUsersPopover *owner, GtkImage *image,
-                                  nuvashalauncherAccount *account);
-
 static void on_account_added (AdwDialog *dialog, nuvashalauncherAccount *account,
                               gpointer user_data);
 

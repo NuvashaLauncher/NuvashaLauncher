@@ -115,6 +115,7 @@ loader_at (guint position)
   const nuvashalauncherLoader *loaders = nuvashalauncher_loaders_supported ();
 
   if (position == GTK_INVALID_LIST_POSITION ||
+      position >= nuvashalauncher_loaders_supported_count () ||
       loaders[position] == nuvashalauncher_LOADER_VANILLA)
     return nuvashalauncher_LOADER_VANILLA;
 

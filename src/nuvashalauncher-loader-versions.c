@@ -300,14 +300,22 @@ loader_version_own_part (nuvashalauncherLoader   loader,
                          const char *loader_version,
                          const char *game_version)
 {
+  g_autofree char *neo_prefix = NULL;
+  const char *prefix_str = game_version;
   gsize length;
 
   if (game_version == NULL)
     return loader_version;
 
-  length = strlen (game_version);
+  if (loader == nuvashalauncher_LOADER_NEOFORGE)
+    {
+      neo_prefix = neoforge_game_prefix (game_version);
+      prefix_str = neo_prefix;
+    }
 
-  if (strncmp (loader_version, game_version, length) != 0)
+  length = strlen (prefix_str);
+
+  if (strncmp (loader_version, prefix_str, length) != 0)
     return loader_version;
 
   loader_version += length;

@@ -453,8 +453,12 @@ find_settings_schema (void)
           if (g_file_get_contents (xml_file, &contents, &len, NULL) &&
               g_file_set_contents (cached_xml, contents, len, NULL))
             {
-              g_autofree char *cmd = g_strdup_printf ("glib-compile-schemas \"%s\"", cache_dir);
-              if (g_spawn_command_line_sync (cmd, NULL, NULL, NULL, NULL))
+              const char *argv[] = { "glib-compile-schemas", cache_dir, NULL };
+              int wait_status = 0;
+              if (g_spawn_sync (NULL, (char **) argv, NULL,
+                                G_SPAWN_SEARCH_PATH | G_SPAWN_STDOUT_TO_DEV_NULL | G_SPAWN_STDERR_TO_DEV_NULL,
+                                NULL, NULL, NULL, NULL, &wait_status, NULL) &&
+                  g_spawn_check_wait_status (wait_status, NULL))
                 {
                   GSettingsSchemaSource *src = g_settings_schema_source_new_from_directory (cache_dir, default_source, FALSE, NULL);
                   if (src != NULL)

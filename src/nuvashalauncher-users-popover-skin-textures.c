@@ -58,18 +58,20 @@ static void
 finish_view_texture_load (SkinTextureLoad *load, GBytes *bytes, GError *error)
 {
   g_autoptr (GdkTexture) texture = NULL;
+  g_autoptr (GError) decode_error = NULL;
 
   if (bytes != NULL)
-    texture = gdk_texture_new_from_bytes (bytes, &error);
+    texture = gdk_texture_new_from_bytes (bytes, &decode_error);
   if (bytes != NULL && load->url != NULL &&
       (g_str_has_prefix (load->url, "http://") ||
        g_str_has_prefix (load->url, "https://")))
      cache_skin_bytes (load->view, load->url, bytes, load->cape);
-  if (texture == NULL && error != NULL)
+  const GError *report_error = error != NULL ? error : decode_error;
+  if (texture == NULL && report_error != NULL)
     {
       GtkLabel *label = g_object_get_data (G_OBJECT (load->view), "preview-error");
-      if (label != NULL && !nuvashalauncher_error_is_cancelled (error))
-        nuvashalauncher_ui_error_label (label, error);
+      if (label != NULL && !nuvashalauncher_error_is_cancelled (report_error))
+        nuvashalauncher_ui_error_label (label, report_error);
     }
   if (texture != NULL)
     {

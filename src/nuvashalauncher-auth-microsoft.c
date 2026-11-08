@@ -136,20 +136,6 @@ answer_if_cancelled (AuthRequest *self)
   return TRUE;
 }
 
-void
-device_code_answered (AuthRequest *self);
-void token_answered (AuthRequest *self);
-void xbl_answered (AuthRequest *self);
-void xsts_answered (AuthRequest *self);
-void minecraft_answered (AuthRequest *self);
-void entitlements_answered (AuthRequest *self);
-void profile_answered (AuthRequest *self);
-void ask_xbl (AuthRequest *self, const char *access_token);
-void ask_xsts (AuthRequest *self);
-void ask_minecraft (AuthRequest *self);
-void ask_entitlements (AuthRequest *self);
-void ask_profile (AuthRequest *self);
-
 /* Sends one request and hands what came back to the step that asked for
  * it. The answer is kept as it arrived, whatever the status was: a
  * service that refuses something says why in the body of the refusal,
@@ -283,8 +269,10 @@ auth_read_ready (GObject *source, GAsyncResult *result, gpointer user_data)
     }
 
   g_free (self->body);
-  self->body = g_strndup ((const char *) self->response_bytes->data,
-                          self->response_bytes->len);
+  self->body = self->response_bytes->data != NULL
+                 ? g_strndup ((const char *) self->response_bytes->data,
+                              self->response_bytes->len)
+                 : g_strdup ("");
   g_clear_pointer (&self->response_bytes, g_byte_array_unref);
   g_clear_object (&self->response_stream);
   g_clear_object (&self->message);

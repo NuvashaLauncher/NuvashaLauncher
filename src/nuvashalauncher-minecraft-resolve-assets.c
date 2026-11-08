@@ -62,6 +62,8 @@ void
 resolve_copies (ResolveRequest *request)
 {
   guint started = 0;
+  GHashTableIter iter;
+  gpointer key, value;
 
   if (request->error != NULL)
     {
@@ -69,17 +71,18 @@ resolve_copies (ResolveRequest *request)
       return;
     }
 
-  for (guint i = 0; i < request->asset_hashes->len; i++)
+  g_hash_table_iter_init (&iter, request->asset_paths);
+  while (g_hash_table_iter_next (&iter, &key, &value))
     {
-      const char *hash = g_ptr_array_index (request->asset_hashes, i);
-      const char *path = g_hash_table_lookup (request->asset_paths, hash);
+      const char *path = key;
+      const char *hash = value;
       g_autofree char *source = NULL;
       g_autofree char *target = NULL;
       g_autoptr (GFile) source_file = NULL;
       g_autoptr (GFile) target_file = NULL;
       g_autoptr (GError) error = NULL;
 
-      if (path == NULL)
+      if (path == NULL || hash == NULL)
         continue;
 
       source = asset_object_path (request, hash, NULL);
@@ -220,6 +223,9 @@ resolve_objects (ResolveRequest *request)
     json_object_has_member (root, "map_to_resources") &&
     json_object_get_boolean_member (root, "map_to_resources");
 
+  g_autoptr (GHashTable) seen_hashes =
+    g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+
   request->total = request->done + json_object_get_size (objects);
   report (request);
 
@@ -267,20 +273,18 @@ resolve_objects (ResolveRequest *request)
           }
 
         if (json_object_has_member (object, "path"))
-          asset_path = json_object_get_string_member (object, "path");
+          {
+            JsonNode *path_node = json_object_get_member (object, "path");
+
+            if (JSON_NODE_HOLDS_VALUE (path_node) &&
+                json_node_get_value_type (path_node) == G_TYPE_STRING)
+              asset_path = json_node_get_string (path_node);
+          }
+        else if (request->asset_virtual)
+          {
+            asset_path = name;
+          }
       }
-
-      destination = asset_object_path (request, hash, &bucket);
-
-      if (destination == NULL)
-        {
-          request_fail_and_wait (request,
-                                 g_error_new (nuvashalauncher_RESOLVE_ERROR,
-                                              nuvashalauncher_RESOLVE_ERROR_ASSETS,
-                                              "\"%s\" is not a usable asset name",
-                                              hash));
-          return;
-        }
 
       if (asset_path != NULL && !nuvashalauncher_resolve_entry_name_is_safe (asset_path))
         {
@@ -293,44 +297,61 @@ resolve_objects (ResolveRequest *request)
           return;
         }
 
-      if (!nuvashalauncher_resolve_ensure_parent_directory (destination, &local))
-        {
-          request_fail_and_wait (request, g_steal_pointer (&local));
-          return;
-        }
-
-      g_ptr_array_add (request->asset_hashes, g_strdup (hash));
-
       if (asset_path != NULL)
         {
           /* A map_to_resources index already carries the prefix the
              game looks under; one that does not is read as a resource
              of the game. */
+          g_autofree char *target_rel = NULL;
           if (request->asset_virtual && request->asset_map_to_resources &&
               !g_str_has_prefix (asset_path, ASSET_RESOURCE_PREFIX))
-            g_hash_table_insert (
-                request->asset_paths, g_strdup (hash),
-                g_strconcat (ASSET_RESOURCE_PREFIX, asset_path, NULL));
+            target_rel = g_strconcat (ASSET_RESOURCE_PREFIX, asset_path, NULL);
           else
-            g_hash_table_insert (request->asset_paths, g_strdup (hash),
-                                 g_strdup (asset_path));
+            target_rel = g_strdup (asset_path);
+
+          g_hash_table_insert (request->asset_paths, g_steal_pointer (&target_rel),
+                               g_strdup (hash));
         }
 
-      url = g_strdup_printf ("%s/%s/%s", request->asset_base_url, bucket, hash);
+      if (!g_hash_table_contains (seen_hashes, hash))
+        {
+          g_hash_table_add (seen_hashes, g_strdup (hash));
+          g_ptr_array_add (request->asset_hashes, g_strdup (hash));
 
-      pending = g_new0 (PendingOperation, 1);
-      pending->request = request;
-      pending->next = assets_downloaded;
+          destination = asset_object_path (request, hash, &bucket);
 
-      operation_started (request);
-      started++;
+          if (destination == NULL)
+            {
+              request_fail_and_wait (request,
+                                     g_error_new (nuvashalauncher_RESOLVE_ERROR,
+                                                  nuvashalauncher_RESOLVE_ERROR_ASSETS,
+                                                  "\"%s\" is not a usable asset name",
+                                                  hash));
+              return;
+            }
 
-      /* An object is named after its own hash, so the bytes can be
-         checked against it. */
-      nuvashalauncher_task_scope_release_when_done (
-        nuvashalauncher_download_file_async (nuvashalauncher_downloads_get_service (), url, destination, hash, G_CHECKSUM_SHA1,
-                                 NULL, objects_downloaded, pending),
-        request->cancellable);
+          if (!nuvashalauncher_resolve_ensure_parent_directory (destination, &local))
+            {
+              request_fail_and_wait (request, g_steal_pointer (&local));
+              return;
+            }
+
+          url = g_strdup_printf ("%s/%s/%s", request->asset_base_url, bucket, hash);
+
+          pending = g_new0 (PendingOperation, 1);
+          pending->request = request;
+          pending->next = assets_downloaded;
+
+          operation_started (request);
+          started++;
+
+          /* An object is named after its own hash, so the bytes can be
+             checked against it. */
+          nuvashalauncher_task_scope_release_when_done (
+            nuvashalauncher_download_file_async (nuvashalauncher_downloads_get_service (), url, destination, hash, G_CHECKSUM_SHA1,
+                                     NULL, objects_downloaded, pending),
+            request->cancellable);
+        }
     }
 
   if (started == 0)

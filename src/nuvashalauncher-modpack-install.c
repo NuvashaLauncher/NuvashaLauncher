@@ -270,6 +270,9 @@ install_run_free (InstallRun *run)
   if (run == NULL)
     return;
 
+  if (run->temp != NULL)
+    nuvashalauncher_fs_remove_tree (run->temp);
+
   g_ptr_array_unref (run->files); /* elements stay with the pack */
   g_clear_object (&run->manager);
   g_clear_object (&run->cancellable);
@@ -307,12 +310,6 @@ install_refuse (InstallRun *run, GError *error)
   nuvashalauncher_task_scope_return_error_deferred (run->scope, error);
   install_run_free (run);
 }
-
-static void
-install_loader_versions (GObject *source G_GNUC_UNUSED,
-                         GAsyncResult *result,
-                         gpointer user_data);
-static void install_register (InstallRun *run);
 
 static void
 install_after_overrides (InstallRun *run)

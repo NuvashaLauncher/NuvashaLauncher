@@ -493,7 +493,7 @@ on_search_done (GObject *source G_GNUC_UNUSED,
   g_autoptr (GError) error = NULL;
   g_autoptr (JsonParser) parser = NULL;
   g_autoptr (nuvashalauncherModrinthResults) results = NULL;
-  const char *answer = NULL;
+  g_autofree char *answer = NULL;
 
   parser = nuvashalauncher_download_json_finish (result, &error);
 

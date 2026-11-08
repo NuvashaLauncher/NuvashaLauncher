@@ -159,7 +159,16 @@ parse_instances_json (nuvashalauncherInstanceManager *self,
       if (elem_node != NULL && JSON_NODE_HOLDS_OBJECT (elem_node))
         {
           JsonObject *elem_obj = json_node_get_object (elem_node);
-          const char *dir_val = json_object_get_string_member (elem_obj, "directory");
+          const char *dir_val = NULL;
+
+          if (json_object_has_member (elem_obj, "directory"))
+            {
+              JsonNode *dir_node = json_object_get_member (elem_obj, "directory");
+              if (JSON_NODE_HOLDS_VALUE (dir_node) &&
+                  json_node_get_value_type (dir_node) == G_TYPE_STRING)
+                dir_val = json_node_get_string (dir_node);
+            }
+
           if (dir_val != NULL && !g_path_is_absolute (dir_val))
             {
               g_autofree char *abs_path = g_build_filename (self->instances_dir, dir_val, NULL);
@@ -240,9 +249,11 @@ quarantine_corrupt_file (const char *path)
       g_clear_pointer (&corrupt_path, g_free);
     }
 
-  if (corrupt_path == NULL || !nuvashalauncher_fs_rename (path, corrupt_path, NULL))
+  g_autoptr (GError) rename_error = NULL;
+
+  if (corrupt_path == NULL || !nuvashalauncher_fs_rename (path, corrupt_path, &rename_error))
     g_warning ("could not rename the corrupt file to \"%s\": %s",
-               corrupt_path, g_strerror (errno));
+               corrupt_path, rename_error != NULL ? rename_error->message : "unknown error");
 }
 
 gboolean

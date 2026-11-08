@@ -469,6 +469,9 @@ probe_custom_path (nuvashalauncherJavaRow *self, const char *path)
 {
   JavaAsk *ask = g_new0 (JavaAsk, 1);
 
+  if (self->operation != NULL)
+    nuvashalauncher_task_scope_cancel (self->operation);
+
   ask->row = g_object_ref (self);
   ask->operation = nuvashalauncher_java_probe_async (path, add_probed, ask);
   nuvashalauncher_task_scope_follow_cancellable (ask->operation, self->cancellable);
@@ -748,7 +751,7 @@ nuvashalauncher_java_row_set_custom (nuvashalauncherJavaRow *self,
 
   /* The probed entry is the last one that has a path: the entry that
      asks for another runtime sits after it and has none. */
-  if (self->ready)
+  if (self->ready && self->ids->len > 0)
     adw_combo_row_set_selected (ADW_COMBO_ROW (self), self->ids->len - 1);
 }
 
@@ -846,8 +849,8 @@ nuvashalauncher_java_row_init (nuvashalauncherJavaRow *self)
    self->add_button = GTK_BUTTON (gtk_button_new_with_label (_("Add Java Runtime")));
    gtk_widget_set_valign (GTK_WIDGET (self->add_button), GTK_ALIGN_CENTER);
    gtk_widget_set_visible (GTK_WIDGET (self->add_button), FALSE);
-   g_signal_connect (self->add_button, "clicked",
-                     G_CALLBACK (on_add_clicked), self);
+   g_signal_connect_object (self->add_button, "clicked",
+                            G_CALLBACK (on_add_clicked), self, 0);
    adw_action_row_add_suffix (ADW_ACTION_ROW (self),
                               GTK_WIDGET (self->add_button));
 }

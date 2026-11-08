@@ -27,8 +27,9 @@ remove_tree_at (int parent_fd, const char *name, GError **error)
     {
       if (errno == ENOENT)
         return TRUE;
-      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
-                   "cannot inspect \"%s\": %s", name, g_strerror (errno));
+      int saved_errno = errno;
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
+                   "cannot inspect \"%s\": %s", name, g_strerror (saved_errno));
       return FALSE;
     }
 
@@ -36,8 +37,9 @@ remove_tree_at (int parent_fd, const char *name, GError **error)
     {
       if (unlinkat (parent_fd, name, 0) != 0 && errno != ENOENT)
         {
-          g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
-                       "cannot remove \"%s\": %s", name, g_strerror (errno));
+          int saved_errno = errno;
+          g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
+                       "cannot remove \"%s\": %s", name, g_strerror (saved_errno));
           return FALSE;
         }
       return TRUE;
@@ -47,8 +49,9 @@ remove_tree_at (int parent_fd, const char *name, GError **error)
                O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
   if (fd < 0)
     {
-      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
-                   "cannot open \"%s\": %s", name, g_strerror (errno));
+      int saved_errno = errno;
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
+                   "cannot open \"%s\": %s", name, g_strerror (saved_errno));
       return FALSE;
     }
 
@@ -57,9 +60,10 @@ remove_tree_at (int parent_fd, const char *name, GError **error)
 
     if (directory == NULL)
       {
+        int saved_errno = errno;
         close (fd);
-        g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
-                     "cannot read \"%s\": %s", name, g_strerror (errno));
+        g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
+                     "cannot read \"%s\": %s", name, g_strerror (saved_errno));
         return FALSE;
       }
 
@@ -85,8 +89,9 @@ remove_tree_at (int parent_fd, const char *name, GError **error)
 
     if (success && errno != 0 && (error == NULL || *error == NULL))
       {
-        g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
-                     "cannot read \"%s\": %s", name, g_strerror (errno));
+        int saved_errno = errno;
+        g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
+                     "cannot read \"%s\": %s", name, g_strerror (saved_errno));
         success = FALSE;
       }
 
@@ -100,9 +105,10 @@ remove_tree_at (int parent_fd, const char *name, GError **error)
    * while it was being cleaned, this fails rather than deleting a new tree. */
   if (unlinkat (parent_fd, name, AT_REMOVEDIR) != 0 && errno != ENOENT)
     {
-      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+      int saved_errno = errno;
+      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
                    "cannot remove directory \"%s\": %s", name,
-                   g_strerror (errno));
+                   g_strerror (saved_errno));
       return FALSE;
     }
 
@@ -342,8 +348,9 @@ copy_tree_sync (GFile *source, GFile *destination, GCancellable *cancellable,
         }
       if (symlink (target, destination_path) != 0)
         {
-          g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
-                       "cannot copy symlink: %s", g_strerror (errno));
+          int saved_errno = errno;
+          g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
+                       "cannot copy symlink: %s", g_strerror (saved_errno));
           return FALSE;
         }
       return TRUE;

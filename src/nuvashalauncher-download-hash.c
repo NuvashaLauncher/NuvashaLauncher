@@ -50,6 +50,7 @@ hash_file_free (HashFile *hash)
 {
   hash_file_close (hash);
   g_clear_pointer (&hash->checksum, g_checksum_free);
+  g_clear_pointer (&hash->scope, nuvashalauncher_task_scope_unref);
   g_clear_object (&hash->task);
   g_free (hash);
 }
@@ -62,9 +63,8 @@ nuvashalauncher_download_hash_file_async (GFile *file, GChecksumType type,
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   HashFile *hash = g_new0 (HashFile, 1);
 
-  /* Borrowed: the caller's handle keeps the operation alive, and the read
-     is answered before it goes away. */
-  hash->scope = scope;
+  /* Held: keeps the scope alive until hash computation is complete. */
+  hash->scope = nuvashalauncher_task_scope_ref (scope);
   hash->task = g_object_ref (nuvashalauncher_task_scope_task (scope));
   hash->checksum = g_checksum_new (type);
 

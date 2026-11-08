@@ -64,12 +64,6 @@ void
 log_line (nuvashalauncher *self,
           const char  *tag,
           const char  *format,
-          ...) G_GNUC_PRINTF (3, 4);
-
-void
-log_line (nuvashalauncher *self,
-          const char  *tag,
-          const char  *format,
           ...)
 {
   g_autoptr (GDateTime) now = g_date_time_new_now_local ();

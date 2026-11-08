@@ -214,6 +214,9 @@ nuvashalauncher_launcher_stop (nuvashalauncher *self)
      Java search behind it. */
   if (self->process.process == NULL)
     {
+      if (self->process.exited)
+        return;
+
       log_line (self, TAG_STATE, "stopping before the game starts");
       g_cancellable_cancel (self->preparation.cancellable);
       set_state (self, nuvashalauncher_LAUNCH_STOPPED, NULL);

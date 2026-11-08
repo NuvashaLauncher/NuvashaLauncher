@@ -84,6 +84,9 @@ instance_page_dialog_parent (nuvashalauncherInstancePage *self)
 void
 instance_page_show_error (nuvashalauncherInstancePage *self, const GError *error)
 {
+  if (self == NULL || self->toast_overlay == NULL)
+    return;
+
   nuvashalauncher_ui_error_toast (instance_page_dialog_parent (self),
                                   GTK_WIDGET (self->toast_overlay), error);
 }
@@ -91,6 +94,9 @@ instance_page_show_error (nuvashalauncherInstancePage *self, const GError *error
 void
 instance_page_show_toast (nuvashalauncherInstancePage *self, const char *message)
 {
+  if (self == NULL || self->toast_overlay == NULL)
+    return;
+
   nuvashalauncher_ui_show_toast (instance_page_dialog_parent (self),
                                  GTK_WIDGET (self->toast_overlay), message);
 }
@@ -355,6 +361,20 @@ nuvashalauncher_instance_page_dispose (GObject *object)
       nuvashalauncher_operation_cancel (self->versions_operation);
       nuvashalauncher_operation_unref (self->versions_operation);
       self->versions_operation = NULL;
+    }
+
+  if (self->export_download != NULL)
+    {
+      g_object_remove_weak_pointer (G_OBJECT (self->export_download),
+                                    (gpointer *) &self->export_download);
+      self->export_download = NULL;
+    }
+
+  if (self->export_operation != NULL)
+    {
+      nuvashalauncher_operation_cancel (self->export_operation);
+      nuvashalauncher_operation_unref (self->export_operation);
+      self->export_operation = NULL;
     }
 
   /* The loader rows are the page's. Their handlers go with them, so the

@@ -31,15 +31,15 @@ profile_answered (AuthRequest *self)
       /* The services answer 404 for an account that owns the game and has
          never played it, which the parser says in its own words rather
          than as a service that could not be reached. */
-      fail (self, g_steal_pointer (&error));
-      return;
-    }
-
-  if (self->status < 200 || self->status > 299)
-    {
-      fail (self, refusal (self->body, self->status, nuvashalauncher_AUTH_ERROR_NO_PROFILE,
-                           "the Minecraft services have no profile for this "
-                           "account"));
+      if (error != NULL)
+        fail (self, g_steal_pointer (&error));
+      else if (self->status == 404)
+        fail (self, refusal (self->body, self->status, nuvashalauncher_AUTH_ERROR_NO_PROFILE,
+                             "the Minecraft services have no profile for this "
+                             "account"));
+      else
+        fail (self, refusal (self->body, self->status, nuvashalauncher_AUTH_ERROR_SERVICE,
+                             "the Minecraft profile service refused the request"));
       return;
     }
 

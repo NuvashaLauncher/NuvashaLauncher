@@ -83,21 +83,27 @@ cached_skin_path (const char *url)
                       !g_str_has_prefix (url, "https://")))
     return NULL;
   {
-    g_autofree char *name = g_strconcat (skin_name_for_url (url), ".png", NULL);
-    return g_build_filename (skin_directory_path (), name, NULL);
+    g_autofree char *identity = skin_name_for_url (url);
+    g_autofree char *name = g_strconcat (identity, ".png", NULL);
+    g_autofree char *dir = skin_directory_path ();
+    return g_build_filename (dir, name, NULL);
   }
 }
 
 char *
 cached_cape_path (const char *url)
 {
+  g_autofree char *identity = NULL;
   g_autofree char *name = NULL;
+  g_autofree char *dir = NULL;
 
   if (url == NULL || (!g_str_has_prefix (url, "http://") &&
                       !g_str_has_prefix (url, "https://")))
     return NULL;
-  name = g_strconcat (skin_name_for_url (url), ".png", NULL);
-  return g_build_filename (skin_directory_path (), "capes", name, NULL);
+  identity = skin_name_for_url (url);
+  name = g_strconcat (identity, ".png", NULL);
+  dir = skin_directory_path ();
+  return g_build_filename (dir, "capes", name, NULL);
 }
 
 gboolean

@@ -51,9 +51,13 @@ static void
 show_error (nuvashalauncherSignInDialog *self, const GError *error,
             const char *explanation)
 {
-  nuvashalauncher_ui_error_label (self->error_label, error);
+  if (error != NULL)
+    nuvashalauncher_ui_error_label (self->error_label, error);
   if (explanation != NULL)
-    gtk_label_set_text (self->error_label, explanation);
+    {
+      gtk_label_set_text (self->error_label, explanation);
+      gtk_widget_set_visible (GTK_WIDGET (self->error_label), TRUE);
+    }
   if (self->error_details != NULL)
     {
       gtk_box_remove (self->body, self->error_details);

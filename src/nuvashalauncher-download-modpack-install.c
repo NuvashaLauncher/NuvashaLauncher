@@ -20,8 +20,6 @@ static void on_pack_downloaded (GObject *, GAsyncResult *, gpointer);
 static GtkWidget *build_optional_page (nuvashalauncherDownloadModpackDialog *, GPtrArray *);
 static void on_optional_cancel (GtkButton *, gpointer);
 static void on_optional_install (GtkButton *, gpointer);
-void start_install (nuvashalauncherDownloadModpackDialog *);
-void remove_pack_file (nuvashalauncherDownloadModpackDialog *);
 
 /* ---------------------------------------------------------- *
  * The pack fetched and the pack installed
@@ -470,6 +468,8 @@ dialog_start_features (nuvashalauncherDownloadModpackDialog *self)
      header's dropdown and the spinner, and its × cancels it. */
   if (self->pack_download != NULL)
     {
+      g_object_remove_weak_pointer (G_OBJECT (self->pack_download),
+                                    (gpointer *) &self->pack_download);
       nuvashalauncher_download_finish (self->pack_download);
       self->pack_download = NULL;
     }
@@ -498,6 +498,14 @@ dialog_start_features (nuvashalauncherDownloadModpackDialog *self)
     if (fd < 0)
       {
         g_autoptr (GError) error = NULL;
+
+        if (self->pack_download != NULL)
+          {
+            g_object_remove_weak_pointer (G_OBJECT (self->pack_download),
+                                          (gpointer *) &self->pack_download);
+            nuvashalauncher_download_finish (self->pack_download);
+            self->pack_download = NULL;
+          }
 
         g_set_error (&error, G_FILE_ERROR, g_file_error_from_errno (errno),
                      "cannot create a temporary modpack file: %s",

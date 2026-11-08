@@ -21,9 +21,7 @@
  * Browse
  * ---------------------------------------------------------- */
 
-void nuvashalauncher_content_page_on_result_activated (AdwActionRow *row, gpointer user_data);
 static void on_category_toggled (GtkCheckButton *button, gpointer user_data);
-void nuvashalauncher_content_page_on_scroll_changed (GtkAdjustment *adjustment, gpointer user_data);
 
 /* The list is scrolled to its end: ask for the next page. Only one page
  * is ever on its way, and there is nothing to ask for once the total is
@@ -255,11 +253,7 @@ search_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
           page_watch_free (watch);
           return;
         }
-      take_rows_out (&self->browse.result_rows,
-                 ADW_PREFERENCES_GROUP (self->browse.results_group));
-      g_clear_pointer (&self->browse.model->results, g_ptr_array_unref);
-      gtk_widget_set_visible (GTK_WIDGET (self->browse.results_status), TRUE);
-      gtk_widget_set_visible (GTK_WIDGET (self->browse.results_group), FALSE);
+
       gtk_widget_set_visible (GTK_WIDGET (self->browse.loading_more), FALSE);
 
       /* A page that failed is offered again from the list itself. */
@@ -274,14 +268,23 @@ search_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                                        error != NULL ? nuvashalauncher_error_message (error) : NULL);
           gtk_widget_set_visible (GTK_WIDGET (self->browse.retry_row), TRUE);
         }
-      else if (error != NULL &&
-               !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+      else
         {
-          g_autofree char *escaped = g_markup_escape_text (nuvashalauncher_error_message (error), -1);
-          show_error (self, _("Could not search Modrinth"), error);
+          take_rows_out (&self->browse.result_rows,
+                     ADW_PREFERENCES_GROUP (self->browse.results_group));
+          g_clear_pointer (&self->browse.model->results, g_ptr_array_unref);
+          gtk_widget_set_visible (GTK_WIDGET (self->browse.results_status), TRUE);
+          gtk_widget_set_visible (GTK_WIDGET (self->browse.results_group), FALSE);
 
-          adw_status_page_set_description (ADW_STATUS_PAGE (self->browse.results_status),
-                                           escaped);
+          if (error != NULL &&
+              !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+            {
+              g_autofree char *escaped = g_markup_escape_text (nuvashalauncher_error_message (error), -1);
+              show_error (self, _("Could not search Modrinth"), error);
+
+              adw_status_page_set_description (ADW_STATUS_PAGE (self->browse.results_status),
+                                               escaped);
+            }
         }
 
       page_watch_free (watch);

@@ -307,7 +307,7 @@ nuvashalauncher_content_metadata_async (GPtrArray *files, nuvashalauncherContent
   if (metadata_pool == NULL)
     metadata_pool = g_thread_pool_new (metadata_work, NULL, 4, FALSE, NULL);
 
-  if (files->len == 0)
+  if (files->len == 0 || metadata_pool == NULL)
     {
       task = g_task_new (NULL, nuvashalauncher_task_scope_get_cancellable (scope),
                          local_metadata_done, run);
@@ -321,9 +321,16 @@ nuvashalauncher_content_metadata_async (GPtrArray *files, nuvashalauncherContent
   for (guint i = 0; i < files->len; i++)
     {
       MetadataWork *work = g_new (MetadataWork, 1);
+      g_autoptr (GError) push_error = NULL;
+
       work->run = run;
       work->file = g_ptr_array_index (files, i);
-      g_thread_pool_push (metadata_pool, work, NULL);
+
+      if (!g_thread_pool_push (metadata_pool, work, &push_error))
+        {
+          metadata_run_complete (run);
+          g_free (work);
+        }
     }
 
   return g_steal_pointer (&scope);

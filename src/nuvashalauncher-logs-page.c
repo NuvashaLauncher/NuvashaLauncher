@@ -585,8 +585,8 @@ nuvashalauncher_logs_page_new (nuvashalauncher *launcher)
                            G_CALLBACK (on_search_changed), self, 0);
    nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (self->search_button), _("Search"));
    gtk_widget_set_valign (GTK_WIDGET (self->search_button), GTK_ALIGN_CENTER);
-   g_signal_connect (self->search_button, "clicked",
-                     G_CALLBACK (on_search_button_clicked), self);
+   g_signal_connect_object (self->search_button, "clicked",
+                            G_CALLBACK (on_search_button_clicked), self, 0);
    {
      GtkEventController *keys = gtk_event_controller_key_new ();
 

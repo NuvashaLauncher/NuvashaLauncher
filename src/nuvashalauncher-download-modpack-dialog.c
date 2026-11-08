@@ -105,6 +105,12 @@ dialog_dispose (GObject *object)
   if (self->version_catalog != NULL)
     nuvashalauncher_operation_cancel (self->version_catalog);
 
+  if (self->import_idle != 0)
+    {
+      g_source_remove (self->import_idle);
+      self->import_idle = 0;
+    }
+
   if (self->scope != NULL)
     {
       nuvashalauncher_operation_cancel (self->scope);

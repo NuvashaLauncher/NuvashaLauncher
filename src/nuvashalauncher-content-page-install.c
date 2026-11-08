@@ -712,13 +712,16 @@ plan_versions_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       plan->operation = NULL;
     }
 
-  if (versions == NULL)
+  if (versions == NULL || versions->len == 0)
     {
       /* What a project publishes for nothing that fits is said in the
        * words the page shows everywhere else. */
       if (self != NULL)
         {
-           show_error (self, _("Could not load versions. Try again."), error);
+          show_error (self,
+                      versions == NULL ? _("Could not load versions. Try again.")
+                                       : _("This project publishes nothing that fits this instance."),
+                      error);
           plan_stopped (self);
         }
 

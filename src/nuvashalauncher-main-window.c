@@ -263,9 +263,6 @@ on_window_close_request (GtkWindow *window, gpointer user_data)
   int width = 0;
   int height = 0;
 
-  if (self->window_settings == NULL)
-    return FALSE;
-
   if (window_has_background_work (self))
     {
       gtk_widget_set_visible (GTK_WIDGET (window), FALSE);
@@ -275,13 +272,17 @@ on_window_close_request (GtkWindow *window, gpointer user_data)
       return TRUE;
     }
 
-  gtk_window_get_default_size (window, &width, &height);
-  if (width > 0)
-    g_settings_set_int (self->window_settings, "window-width", width);
-  if (height > 0)
-    g_settings_set_int (self->window_settings, "window-height", height);
-  g_settings_set_boolean (self->window_settings, "window-maximized",
-                          gtk_window_is_maximized (window));
+  if (self->window_settings != NULL)
+    {
+      gtk_window_get_default_size (window, &width, &height);
+      if (width > 0)
+        g_settings_set_int (self->window_settings, "window-width", width);
+      if (height > 0)
+        g_settings_set_int (self->window_settings, "window-height", height);
+      g_settings_set_boolean (self->window_settings, "window-maximized",
+                              gtk_window_is_maximized (window));
+    }
+
   return FALSE;
 }
 

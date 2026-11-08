@@ -49,7 +49,15 @@ xsts_answered (AuthRequest *self)
 
   if (token == NULL)
     {
-      fail (self, g_steal_pointer (&error));
+      if (error != NULL)
+        fail (self, g_steal_pointer (&error));
+      else if (self->status < 200 || self->status > 299)
+        fail (self, refusal (self->body, self->status, nuvashalauncher_AUTH_ERROR_XBOX,
+                             "XSTS refused the token request"));
+      else
+        fail (self, g_error_new_literal (nuvashalauncher_AUTH_ERROR,
+                                         nuvashalauncher_AUTH_ERROR_PARSE,
+                                         "XSTS answered with no token"));
       return;
     }
 

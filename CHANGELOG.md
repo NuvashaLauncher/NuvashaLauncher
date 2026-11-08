@@ -2,18 +2,44 @@
 
 All notable changes to Nuvasha Launcher are documented in this file.
 
-## [1.0] - 2026-11-07
+## [1.0] - 2026-11-08
 
 ### Packaging & Distribution
 - **Linux Distribution Packaging**: Added native build recipes for Fedora/RHEL (`packaging/rpm/nuvashalauncher.spec`), Debian/Ubuntu (`packaging/debian/`), Arch Linux (`packaging/arch/PKGBUILD`), Gentoo (`packaging/gentoo/nuvashalauncher-9999.ebuild`), and NixOS (`flake.nix`).
 - **Automated Release Workflow**: Added `.github/workflows/release.yml` to automatically build and publish `.deb` (`amd64`, `arm64`), `.rpm` (`x86_64`, `aarch64`), Arch Linux (`.pkg.tar.zst`), and Flatpak (`x86_64`, `aarch64`) packages to GitHub Releases whenever `VERSION` is updated.
 - **NixOS Java Runtime Discovery**: Added `/nix/store` scanning (`*-openjdk-*/bin/java`, `*-temurin-*/bin/java`, `*-zulu-*/bin/java`, `*-graalvm-*/bin/java`, `*-jetbrains-jdk-*/bin/java`) and `$JAVA_HOME` probing so NixOS systems detect installed JDKs automatically.
 
-### Bug Fixes & UI Improvements
-- **Modpack Browser Close Crash Fix**: Fixed `g_task_get_cancellable: assertion 'G_IS_TASK (task)' failed` when closing the Modpack Browser dialog while an asynchronous operation was in progress by clearing dangling task pointers on completion and validating task lifetimes before cancellation.
-- **Removed Custom JDK Auto-Deselection**: Deleting a custom-added JDK now automatically clears stale `java_path` selections from instances in memory and on disk (`instances.json`) and refreshes open settings pages so instances immediately fall back to auto-detected Java.
-- **Content Toolbar Button Styling**: Fixed the "Update All" button in the Mods, Resource Packs, and Shaders tabs so it uses the `flat` icon button style and only highlights on hover.
-- **GSettings Schema Discovery**: Installed and compiled GSettings schemas are now automatically discovered across custom prefixes (`PREFIX`), `XDG_DATA_DIRS`, and relative binary paths so package builds outside `/usr` never abort on missing schemas.
+### Codebase Audit, Stability & Async Runtime Hardening
+- **Core Async Task & Download Runtime**:
+  - Prevented Use-After-Free in the download service by keeping strong task scope references across asynchronous transfers, SHA1/SHA256 hashing, and icon loading operations.
+  - Cleared `queue_cancel_source` properly before removal to prevent stale event sources from firing against destroyed download requests.
+  - Hardened task sequence cancellation and teardown to ensure scopes outlive in-flight operations safely without leaking state or memory.
+  - Replaced shell command string formatting with direct `argv` spawning in GSettings schema resolution to guard against command injection.
+  - Preserved `errno` values across filesystem error reporting in `fs` and `fs-tree` before invoking GLib helpers.
+- **Authentication, Accounts & 3D Skin Rendering**:
+  - Prevented skin uploads from clearing the user's currently selected cape when no cape change was requested.
+  - Released task scopes properly across asynchronous Minecraft profile and skin service requests, eliminating memory leaks.
+  - Handled 0-byte HTTP responses and preserved specific Xbox and Microsoft authentication error domains without crashing or misreporting as generic service errors.
+  - Eliminated memory leaks, dangling pointer references, and use-after-free hazards in the skin library dialog and texture generation.
+  - Fixed Red/Blue channel swap (`GDK_MEMORY_DEFAULT`), left-arm slim model texture alignment, 64x32 cape transparency, and HiDPI `glViewport` scaling in the OpenGL 3D skin preview.
+  - Ensured offline account dialogs and account manager activations properly retain and release account stores and persist active IDs.
+- **Instances, Launcher, Java Discovery & Loaders**:
+  - Fixed memory leak of patched JAR file names during loader construction.
+  - Guarded custom Java probe completion and process stop operations against cancellation races, ensuring instance crash logs and exit states are preserved.
+  - Cleaned up dangling export weak references and cancelled background export operations on instance page disposal.
+  - Added force-exit fallbacks when Java runtime discovery and loader processor subprocess pipes fail, preventing orphaned background processes.
+  - Deduplicated asset hash downloads so multiple virtual paths sharing identical content hashes download only once.
+  - Fixed bounds checks in loader selection, regex cache thread synchronization in version rule checks, and instance duplication metadata preservation.
+- **Modpacks & Modrinth Integration**:
+  - Fixed memory leak of Modrinth JSON response strings and guarded against out-of-bounds version index selections.
+  - Guaranteed dialog states complete and refresh on network or parsing errors so modpack dialogs never freeze on indefinite loading spinners.
+  - Removed dangling weak references, cleaned up temporary `.mrpack` files on extraction failure, and guarded division-by-zero during empty export runs.
+- **Content Management, Main Window & Markdown**:
+  - Handled projects with no compatible versions gracefully using localized messaging rather than out-of-bounds access.
+  - Preserved existing browser items when subsequent paginated searches fail, allowing seamless retry without clearing results.
+  - Prevented thread pool dispatch failures from deadlocking pending operation counters in content file scanning.
+  - Balanced nested parentheses in Markdown link parsers to ensure URLs containing parentheses (e.g. Wikipedia articles) parse accurately.
+  - Fixed window close request handling to prioritize background download checks before accessing window settings.
 
 ### Security, Stability & Portability
 - **Archive & Filesystem Hardening**:
@@ -24,6 +50,10 @@ All notable changes to Nuvasha Launcher are documented in this file.
   - Replaced manual `sscanf` HTTP request parsing in the loopback OAuth callback server with `SoupServer`.
   - Validated `https://` schemes on download URLs, enabled strict TLS certificate checks, and rejected `..` path segments in Maven identifiers and remote version IDs.
 - **Portable Instance Paths**: Default instance paths are now stored relative to the data directory and resolved dynamically at load time so moving a home directory or Flatpak sandbox preserves instances.
+
+### Verification & Testing
+- Added regression tests for nested Markdown link parentheses parsing ([`tests/test-markdown.c`](file:///home/joaquin/Proyectos/NuvashaLauncher/tests/test-markdown.c)), zero-byte HTTP authentication error handling ([`tests/test-auth.c`](file:///home/joaquin/Proyectos/NuvashaLauncher/tests/test-auth.c)), and NeoForge version metadata parsing ([`tests/test-loaders-metadata.c`](file:///home/joaquin/Proyectos/NuvashaLauncher/tests/test-loaders-metadata.c)).
+- All 127 tests pass with zero failures and zero compiler warnings under `-Wall -Wextra -Wpedantic`.
 
 **Full Changelog**: https://github.com/NuvashaLauncher/NuvashaLauncher/compare/v0.9...v1.0
 

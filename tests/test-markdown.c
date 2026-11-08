@@ -50,6 +50,14 @@ test_link (void)
 }
 
 static void
+test_link_nested_parens (void)
+{
+  check ("[Wiki](https://en.wikipedia.org/wiki/Minecraft_(video_game))",
+         "<a href=\"https://en.wikipedia.org/wiki/Minecraft_(video_game)\">Wiki</a>");
+  g_print ("ok - links with nested parentheses are parsed correctly\n");
+}
+
+static void
 test_null (void)
 {
   g_assert_null (nuvashalauncher_markdown_inline (NULL));
@@ -67,6 +75,7 @@ main (int argc, char **argv)
   test_escaped ();
   test_emphasis ();
   test_link ();
+  test_link_nested_parens ();
   test_null ();
 
   return 0;

@@ -121,8 +121,9 @@ save_icon_bytes (const gchar *buffer, gsize count, GError **error,
 
       if (result <= 0)
         {
-          g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
-                       "cannot write scaled icon: %s", g_strerror (errno));
+          int saved_errno = errno;
+          g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
+                       "cannot write scaled icon: %s", g_strerror (saved_errno));
           return FALSE;
         }
 
@@ -135,6 +136,7 @@ save_icon_bytes (const gchar *buffer, gsize count, GError **error,
 static void
 icon_load_free (IconLoad *load)
 {
+  g_clear_pointer (&load->scope, nuvashalauncher_task_scope_unref);
   g_clear_object (&load->task);
   g_free (load->url);
   g_free (load->path);
@@ -226,9 +228,8 @@ nuvashalauncher_icon_load_async (const char *url, GAsyncReadyCallback callback,
   load = g_new0 (IconLoad, 1);
   load->task = g_object_ref (task);
 
-  /* Borrowed: the caller holds the operation until the callback, and the
-     load is answered before it goes away. */
-  load->scope = scope;
+  /* Held: keeps the scope alive until loading completes. */
+  load->scope = nuvashalauncher_task_scope_ref (scope);
   load->url = g_strdup (url);
   load->path = cache_path_for (url);
 
@@ -248,11 +249,12 @@ nuvashalauncher_icon_load_async (const char *url, GAsyncReadyCallback callback,
 
   if (!nuvashalauncher_fs_make_directory (directory, 0755, NULL))
     {
+      int saved_errno = errno;
       nuvashalauncher_task_scope_return_error_deferred (
         scope,
         g_error_new (G_IO_ERROR, G_IO_ERROR_FAILED,
                      "cannot create \"%s\": %s", directory,
-                     g_strerror (errno)));
+                     g_strerror (saved_errno)));
       icon_load_free (load);
       return g_steal_pointer (&scope);
     }
@@ -347,8 +349,9 @@ nuvashalauncher_icon_scale_file (const char *path)
                                        NULL);
   if (saved && fsync (fd) != 0)
     {
-      g_set_error (&error, G_FILE_ERROR, g_file_error_from_errno (errno),
-                   "cannot flush scaled icon: %s", g_strerror (errno));
+      int saved_errno = errno;
+      g_set_error (&error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
+                   "cannot flush scaled icon: %s", g_strerror (saved_errno));
       saved = FALSE;
     }
 
