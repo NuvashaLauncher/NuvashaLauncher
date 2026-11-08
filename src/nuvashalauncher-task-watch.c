@@ -27,7 +27,7 @@ watch_free (gpointer user_data)
   CancellableWatch *watch = user_data;
 
   if (watch->handler != 0)
-    g_signal_handler_disconnect (watch->cancellable, watch->handler);
+    g_cancellable_disconnect (watch->cancellable, watch->handler);
   g_clear_object (&watch->cancellable);
 
   if (watch->notify != NULL)

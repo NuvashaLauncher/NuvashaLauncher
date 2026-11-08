@@ -589,6 +589,8 @@ typedef struct
 static void
 local_icon_extract_free (LocalIconExtract *extract)
 {
+  if (extract->scope != NULL)
+    nuvashalauncher_task_scope_unref (extract->scope);
   g_free (extract->archive_path);
   g_free (extract->member);
   g_free (extract->sha1);
@@ -602,6 +604,7 @@ local_icon_extract_thread (GTask *task G_GNUC_UNUSED,
                            GCancellable *cancellable)
 {
   LocalIconExtract *extract = task_data;
+  g_autoptr (nuvashalauncherTaskScope) scope = g_steal_pointer (&extract->scope);
   g_autoptr (GByteArray) icon = NULL;
   g_autofree char *directory = NULL;
   g_autofree char *name = NULL;
@@ -610,7 +613,7 @@ local_icon_extract_thread (GTask *task G_GNUC_UNUSED,
 
   if (g_cancellable_is_cancelled (cancellable))
     {
-      nuvashalauncher_task_scope_return_error (extract->scope,
+      nuvashalauncher_task_scope_return_error (scope,
         g_error_new_literal (G_IO_ERROR, G_IO_ERROR_CANCELLED, "cancelled"));
       return;
     }
@@ -618,7 +621,7 @@ local_icon_extract_thread (GTask *task G_GNUC_UNUSED,
   icon = read_archive_member (extract->archive_path, extract->member);
   if (icon == NULL)
     {
-      nuvashalauncher_task_scope_return_error (extract->scope,
+      nuvashalauncher_task_scope_return_error (scope,
         g_error_new_literal (G_IO_ERROR, G_IO_ERROR_NOT_FOUND,
                              "the local icon was not found"));
       return;
@@ -636,11 +639,11 @@ local_icon_extract_thread (GTask *task G_GNUC_UNUSED,
       if (error == NULL)
         error = g_error_new_literal (G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
                                      "the local icon could not be scaled");
-      nuvashalauncher_task_scope_return_error (extract->scope, g_steal_pointer (&error));
+      nuvashalauncher_task_scope_return_error (scope, g_steal_pointer (&error));
       return;
     }
 
-  nuvashalauncher_task_scope_return_pointer (extract->scope, g_steal_pointer (&path), g_free);
+  nuvashalauncher_task_scope_return_pointer (scope, g_steal_pointer (&path), g_free);
 }
 
 nuvashalauncherTaskScope *
@@ -661,7 +664,7 @@ nuvashalauncher_content_load_local_icon_async (nuvashalauncherContentFile *file,
     }
 
   extract = g_new0 (LocalIconExtract, 1);
-  extract->scope = scope;
+  extract->scope = nuvashalauncher_task_scope_ref (scope);
   extract->archive_path = g_strdup (file->path);
   extract->member = g_strdup (file->local_icon_member);
   extract->sha1 = g_strdup (file->sha1);

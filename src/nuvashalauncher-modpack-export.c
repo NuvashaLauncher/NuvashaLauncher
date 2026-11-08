@@ -38,14 +38,15 @@ typedef struct {
   guint64 done;
   guint64 total;
 
-  /* Borrowed. This run is the task's own data and the scope owns that
-   * task, so a reference here would make the two hold each other up. */
+  /* Owned until export_thread takes it. */
   nuvashalauncherTaskScope *scope;
 } ExportRun;
 
 static void
 export_run_free (ExportRun *run)
 {
+  if (run->scope != NULL)
+    nuvashalauncher_task_scope_unref (run->scope);
   g_free (run->instance_directory);
   g_free (run->archive_path);
   g_free (run->temporary_archive);
@@ -475,6 +476,7 @@ export_thread (GTask *task G_GNUC_UNUSED,
                gpointer task_data, GCancellable *cancellable)
 {
   ExportRun *run = task_data;
+  g_autoptr (nuvashalauncherTaskScope) scope = g_steal_pointer (&run->scope);
   g_autoptr (GError) error = NULL;
   struct archive *archive = NULL;
   struct archive_entry *manifest_entry = NULL;
@@ -489,7 +491,7 @@ export_thread (GTask *task G_GNUC_UNUSED,
   if (g_cancellable_is_cancelled (cancellable))
     {
       nuvashalauncher_task_scope_return_error (
-        run->scope,
+        scope,
         g_error_new_literal (nuvashalauncher_MODPACK_ERROR,
                              nuvashalauncher_MODPACK_ERROR_CANCELLED, "cancelled"));
       return;
@@ -497,7 +499,7 @@ export_thread (GTask *task G_GNUC_UNUSED,
 
   if (!export_indexed_files (run, cancellable, &error))
     {
-      nuvashalauncher_task_scope_return_error (run->scope, g_steal_pointer (&error));
+      nuvashalauncher_task_scope_return_error (scope, g_steal_pointer (&error));
       return;
     }
 
@@ -512,7 +514,7 @@ export_thread (GTask *task G_GNUC_UNUSED,
   if (g_str_has_prefix (canonical_archive, root_prefix))
     {
       nuvashalauncher_task_scope_return_error (
-        run->scope,
+        scope,
         g_error_new_literal (nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO,
                              "the export file cannot be inside the instance"));
       return;
@@ -529,7 +531,7 @@ export_thread (GTask *task G_GNUC_UNUSED,
     if (fd < 0)
       {
         nuvashalauncher_task_scope_return_error (
-          run->scope,
+          scope,
           g_error_new (nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO,
                        "cannot create a temporary archive: %s",
                        temporary_error->message));
@@ -548,7 +550,7 @@ export_thread (GTask *task G_GNUC_UNUSED,
                    archive_error_string (archive));
       archive_write_free (archive);
       nuvashalauncher_fs_unlink (run->temporary_archive, NULL);
-      nuvashalauncher_task_scope_return_error (run->scope, g_steal_pointer (&error));
+      nuvashalauncher_task_scope_return_error (scope, g_steal_pointer (&error));
       return;
     }
 
@@ -568,7 +570,7 @@ export_thread (GTask *task G_GNUC_UNUSED,
       archive_entry_free (manifest_entry);
       archive_write_free (archive);
       nuvashalauncher_fs_unlink (run->temporary_archive, NULL);
-       nuvashalauncher_task_scope_return_error (run->scope, g_steal_pointer (&error));
+      nuvashalauncher_task_scope_return_error (scope, g_steal_pointer (&error));
       return;
     }
 
@@ -594,7 +596,7 @@ export_thread (GTask *task G_GNUC_UNUSED,
       archive_entry_free (manifest_entry);
       archive_write_free (archive);
       nuvashalauncher_fs_unlink (run->temporary_archive, NULL);
-       nuvashalauncher_task_scope_return_error (run->scope, g_steal_pointer (&error));
+      nuvashalauncher_task_scope_return_error (scope, g_steal_pointer (&error));
       return;
     }
 
@@ -606,12 +608,12 @@ export_thread (GTask *task G_GNUC_UNUSED,
       g_prefix_error (&error, "cannot publish \"%s\": ",
                       run->archive_path);
       nuvashalauncher_fs_unlink (run->temporary_archive, NULL);
-      nuvashalauncher_task_scope_return_error (run->scope, g_steal_pointer (&error));
+      nuvashalauncher_task_scope_return_error (scope, g_steal_pointer (&error));
       return;
     }
 
   export_progress (run, run->total, run->total, _("Export complete"));
-  nuvashalauncher_task_scope_return_boolean (run->scope, TRUE);
+  nuvashalauncher_task_scope_return_boolean (scope, TRUE);
 }
 
 static char *
@@ -720,7 +722,6 @@ nuvashalauncher_modpack_export_async (nuvashalauncherInstance *instance, const c
   g_return_val_if_fail (path != NULL && g_path_is_absolute (path), NULL);
 
   run = g_new0 (ExportRun, 1);
-  run->scope = task_scope;
   g_object_get (instance, "directory", &directory, NULL);
   run->instance_directory = g_strdup (directory);
   run->archive_path = g_strdup (path);
@@ -755,6 +756,7 @@ nuvashalauncher_modpack_export_async (nuvashalauncherInstance *instance, const c
       return nuvashalauncher_task_scope_ref (task_scope);
     }
 
+  run->scope = nuvashalauncher_task_scope_ref (task_scope);
   g_task_set_task_data (task, run, (GDestroyNotify) export_run_free);
   g_task_run_in_thread (task, export_thread);
   return nuvashalauncher_task_scope_ref (task_scope);

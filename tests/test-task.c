@@ -5,6 +5,8 @@
 #include <gio/gio.h>
 #include <glib.h>
 
+#include "nuvashalauncher-content-index.h"
+#include "nuvashalauncher-fs.h"
 #include "nuvashalauncher-task.h"
 
 typedef struct {
@@ -739,6 +741,74 @@ test_sequence_scope_survives_task_completion (void)
   g_print ("ok - retained sequence scope outlives its completed GTask safely\n");
 }
 
+typedef struct {
+  GMainLoop *loop;
+  guint remaining;
+} ThreadedCancelWait;
+
+static void
+on_threaded_index_done (GObject *source G_GNUC_UNUSED,
+                        GAsyncResult *result,
+                        gpointer user_data)
+{
+  ThreadedCancelWait *wait = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GPtrArray) entries =
+    nuvashalauncher_content_index_load_finish (result, &error);
+
+  if (--wait->remaining == 0)
+    g_main_loop_quit (wait->loop);
+}
+
+static void
+on_threaded_remove_done (GObject *source G_GNUC_UNUSED,
+                         GAsyncResult *result,
+                         gpointer user_data)
+{
+  ThreadedCancelWait *wait = user_data;
+  g_autoptr (GError) error = NULL;
+
+  (void) nuvashalauncher_fs_remove_tree_finish (result, &error);
+  if (--wait->remaining == 0)
+    g_main_loop_quit (wait->loop);
+}
+
+static void
+test_threaded_scope_survives_early_cancel_and_unref (void)
+{
+  guint before = criticals;
+  g_autofree char *root = g_dir_make_tmp ("nuvashalauncher-thread-scope-XXXXXX", NULL);
+  g_autofree char *tree = g_build_filename (root, "tree", NULL);
+  ThreadedCancelWait wait = { 0 };
+
+  g_assert_nonnull (root);
+  g_assert_true (nuvashalauncher_fs_make_directory (tree, 0755, NULL));
+
+  wait.loop = g_main_loop_new (NULL, FALSE);
+  wait.remaining = 2;
+
+  /* Start worker-thread operations and immediately cancel + unref their
+   * scopes on the main thread before the worker threads finish. The worker
+   * threads must keep their own scope reference until they return. */
+  nuvashalauncherTaskScope *index_scope =
+    nuvashalauncher_content_index_load_async (root, nuvashalauncher_CONTENT_MOD,
+                                              on_threaded_index_done, &wait);
+  nuvashalauncher_task_scope_cancel (index_scope);
+  nuvashalauncher_task_scope_unref (index_scope);
+
+  nuvashalauncherTaskScope *remove_scope =
+    nuvashalauncher_fs_remove_tree_async (tree, on_threaded_remove_done, &wait);
+  nuvashalauncher_task_scope_cancel (remove_scope);
+  nuvashalauncher_task_scope_unref (remove_scope);
+
+  g_main_loop_run (wait.loop);
+  g_main_loop_unref (wait.loop);
+  nuvashalauncher_fs_remove_tree (root);
+
+  g_assert_cmpuint (criticals, ==, before);
+  g_print ("ok - threaded task scopes survive early cancel and unref\n");
+}
+
 int
 main (int argc, char **argv)
 {
@@ -753,6 +823,7 @@ main (int argc, char **argv)
   test_sequence_honors_cancellation ();
   test_sequence_survives_completing_twice ();
   test_sequence_scope_survives_task_completion ();
+  test_threaded_scope_survives_early_cancel_and_unref ();
   test_scope_cancels_owned_sources ();
   test_scope_cancellation_stress ();
   test_scope_reference_keeps_operation_alive ();

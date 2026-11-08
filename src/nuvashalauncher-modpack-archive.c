@@ -367,6 +367,8 @@ typedef struct {
 static void
 modpack_read_free (ModpackRead *read)
 {
+  if (read->scope != NULL)
+    nuvashalauncher_task_scope_unref (read->scope);
   g_free (read->path);
   g_free (read);
 }
@@ -377,6 +379,7 @@ modpack_read_thread (GTask *task G_GNUC_UNUSED,
                      gpointer task_data, GCancellable *cancellable)
 {
   ModpackRead *read = task_data;
+  g_autoptr (nuvashalauncherTaskScope) scope = g_steal_pointer (&read->scope);
   g_autoptr (GError) error = NULL;
   nuvashalauncherModpack *pack = nuvashalauncher_modpack_new_from_zip (read->path, &error);
 
@@ -384,7 +387,7 @@ modpack_read_thread (GTask *task G_GNUC_UNUSED,
     {
       nuvashalauncher_modpack_free (pack);
       nuvashalauncher_task_scope_return_error (
-        read->scope,
+        scope,
         g_error_new_literal (nuvashalauncher_MODPACK_ERROR,
                              nuvashalauncher_MODPACK_ERROR_CANCELLED, "cancelled"));
       return;
@@ -392,11 +395,11 @@ modpack_read_thread (GTask *task G_GNUC_UNUSED,
 
   if (pack == NULL)
     {
-      nuvashalauncher_task_scope_return_error (read->scope, g_steal_pointer (&error));
+      nuvashalauncher_task_scope_return_error (scope, g_steal_pointer (&error));
       return;
     }
 
-  nuvashalauncher_task_scope_return_pointer (read->scope, pack,
+  nuvashalauncher_task_scope_return_pointer (scope, pack,
                                  (GDestroyNotify) nuvashalauncher_modpack_free);
 }
 
@@ -414,9 +417,8 @@ nuvashalauncher_modpack_new_from_zip_async (const char *zip_path,
 
   read = g_new0 (ModpackRead, 1);
 
-  /* Borrowed: the read is the task's own data and the scope owns that
-     task. The caller keeps the operation alive until its callback. */
-  read->scope = scope;
+  /* Owned until modpack_read_thread takes it. */
+  read->scope = nuvashalauncher_task_scope_ref (scope);
   read->path = g_strdup (zip_path);
   g_task_set_task_data (task, read, (GDestroyNotify) modpack_read_free);
   g_task_run_in_thread (task, modpack_read_thread);

@@ -179,6 +179,8 @@ nuvashalauncher_task_scope_unref (nuvashalauncherTaskScope *scope)
   if (scope == NULL || !g_atomic_ref_count_dec (&scope->refs))
     return;
 
+  nuvashalauncher_task_scope_unfollow (scope);
+
   /* Drop the task first so borrower cleanup runs while the scope is valid. */
   if (scope->owns_task)
     g_clear_object (&scope->task);
@@ -199,7 +201,6 @@ nuvashalauncher_task_scope_unref (nuvashalauncherTaskScope *scope)
     }
   g_array_unref (scope->sources);
   g_array_unref (scope->completions);
-  nuvashalauncher_task_scope_unfollow (scope);
   g_array_unref (scope->followed);
   g_main_context_unref (scope->context);
   g_free (scope);
