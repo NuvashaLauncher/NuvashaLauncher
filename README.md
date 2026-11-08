@@ -50,7 +50,7 @@ as a regular installation or packaged with Flatpak.
 
 ```sh
 curl -fLO "https://github.com/NuvashaLauncher/NuvashaLauncher/releases/latest/download/nuvashalauncher-$(uname -m).flatpak"
-flatpak install --user ./nuvashalauncher-$(uname -m).flatpak
+flatpak install ./nuvashalauncher-$(uname -m).flatpak
 ```
 
 ### Fedora
@@ -76,16 +76,6 @@ sudo pacman -U "https://github.com/NuvashaLauncher/NuvashaLauncher/releases/late
 
 ```sh
 nix profile install github:NuvashaLauncher/NuvashaLauncher
-```
-
-### Gentoo
-
-```sh
-sudo mkdir -p /var/db/repos/local/games-util/nuvashalauncher
-sudo curl -fL "https://raw.githubusercontent.com/NuvashaLauncher/NuvashaLauncher/main/packaging/gentoo/nuvashalauncher-9999.ebuild" \
-    -o /var/db/repos/local/games-util/nuvashalauncher/nuvashalauncher-9999.ebuild
-sudo ebuild /var/db/repos/local/games-util/nuvashalauncher/nuvashalauncher-9999.ebuild manifest
-sudo emerge --accept-keywords='**' games-util/nuvashalauncher
 ```
 
 ## License

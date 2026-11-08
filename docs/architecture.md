@@ -462,8 +462,8 @@ native Linux distribution packaging:
   shared `custom-java-paths` setting and probed before acceptance.
 - **Native distribution packages**: Build recipes are maintained for
   Fedora/RHEL (`packaging/rpm/nuvashalauncher.spec`), Debian/Ubuntu
-  (`packaging/debian/`), Arch Linux (`packaging/arch/PKGBUILD`), Gentoo
-  (`packaging/gentoo/nuvashalauncher-9999.ebuild`), and NixOS (`flake.nix`).
+  (`packaging/debian/`), Arch Linux (`packaging/arch/PKGBUILD`), and NixOS
+  (`flake.nix`).
 
 ## Persistence and filesystem layout
 
