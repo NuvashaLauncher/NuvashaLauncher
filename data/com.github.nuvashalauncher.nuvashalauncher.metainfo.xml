@@ -45,7 +45,7 @@
   <releases>
     <release version="1.0" date="2026-11-08">
       <description>
-        <p>Added distribution packaging (RPM, Debian/Ubuntu, Arch Linux, Gentoo,
+        <p>Added distribution packaging (RPM, Debian/Ubuntu, Arch Linux,
         NixOS flake, and automated GitHub release builds) with NixOS store Java
         discovery. This release also includes an exhaustive codebase audit fixing
         async task lifetimes, memory management, 3D skin rendering, archive and
