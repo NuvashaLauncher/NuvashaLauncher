@@ -134,6 +134,9 @@ test: $(if $(SRCS),$(BIN)) $(TESTBINS) $(SCHEMA_COMPILED)
 	@set -e; test_tmp=$$(mktemp -d "$(CURDIR)/build/test-tmp-XXXXXX"); \
 	trap 'rm -rf "$$test_tmp"' EXIT HUP INT TERM; \
 	mkdir -p "$$test_tmp/config" "$$test_tmp/data" "$$test_tmp/cache" "$$test_tmp/state" "$$test_tmp/runtime"; chmod 700 "$$test_tmp/runtime"; \
+	if test -n "$$WAYLAND_DISPLAY" && test -e "$${XDG_RUNTIME_DIR:-/run/user/$$(id -u)}/$$WAYLAND_DISPLAY"; then \
+		ln -sf "$${XDG_RUNTIME_DIR:-/run/user/$$(id -u)}/$$WAYLAND_DISPLAY" "$$test_tmp/runtime/$$WAYLAND_DISPLAY"; \
+	fi; \
   pass=0; skip=0; test_output="$$test_tmp/output"; for t in $(TESTBINS); do echo "RUN  $$t"; if NUVASHA_TEST_SECRET_STORE=1 TMPDIR="$$test_tmp" XDG_CONFIG_HOME="$$test_tmp/config" XDG_DATA_HOME="$$test_tmp/data" XDG_CACHE_HOME="$$test_tmp/cache" XDG_STATE_HOME="$$test_tmp/state" XDG_RUNTIME_DIR="$$test_tmp/runtime" GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t >"$$test_output" 2>&1; then status=0; else status=$$?; fi; cat "$$test_output"; \
 		if test $$status -eq 77; then skip=$$((skip + 1)); \
 		elif test $$status -ne 0; then exit $$status; \
@@ -195,6 +198,9 @@ test-debug: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS) $(SCHEMA_COMPILED)
 	@set -e; test_tmp=$$(mktemp -d "$(CURDIR)/build/test-tmp-XXXXXX"); \
 	trap 'rm -rf "$$test_tmp"' EXIT HUP INT TERM; \
 	mkdir -p "$$test_tmp/config" "$$test_tmp/data" "$$test_tmp/cache" "$$test_tmp/state" "$$test_tmp/runtime"; chmod 700 "$$test_tmp/runtime"; \
+	if test -n "$$WAYLAND_DISPLAY" && test -e "$${XDG_RUNTIME_DIR:-/run/user/$$(id -u)}/$$WAYLAND_DISPLAY"; then \
+		ln -sf "$${XDG_RUNTIME_DIR:-/run/user/$$(id -u)}/$$WAYLAND_DISPLAY" "$$test_tmp/runtime/$$WAYLAND_DISPLAY"; \
+	fi; \
   pass=0; skip=0; test_output="$$test_tmp/output"; for t in $(TESTDBGBINS); do echo "RUN  $$t"; if NUVASHA_TEST_SECRET_STORE=1 ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 LSAN_OPTIONS=detect_leaks=1:exitcode=1:suppressions="$(CURDIR)/tests/gtk-lsan.supp" TMPDIR="$$test_tmp" XDG_CONFIG_HOME="$$test_tmp/config" XDG_DATA_HOME="$$test_tmp/data" XDG_CACHE_HOME="$$test_tmp/cache" XDG_STATE_HOME="$$test_tmp/state" XDG_RUNTIME_DIR="$$test_tmp/runtime" GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t >"$$test_output" 2>&1; then status=0; else status=$$?; fi; cat "$$test_output"; \
 		if test $$status -eq 77; then skip=$$((skip + 1)); \
 		elif test $$status -ne 0; then exit $$status; \
@@ -312,7 +318,7 @@ uninstall:
 	fi
 
 clean:
-	rm -rf build build-debug
+	rm -rf build build-debug *.flatpak *.rpm *.deb *.tar.gz
 
 build build-debug build/tests build-debug/tests:
 	mkdir -p $@
