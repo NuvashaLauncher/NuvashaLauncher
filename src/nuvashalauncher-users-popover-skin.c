@@ -162,7 +162,8 @@ remove_skin_row (SkinMenu *menu, GtkListBoxRow *row)
   if (url != NULL)
     g_hash_table_add (menu->deleted_skin_ids, skin_name_for_url (url));
 
-  if (menu->current_skin_row == row)
+  if (menu->current_skin_row != NULL &&
+      GTK_LIST_BOX_ROW (menu->current_skin_row) == row)
     menu->current_skin_row = NULL;
 
   int index = gtk_list_box_row_get_index (row);
