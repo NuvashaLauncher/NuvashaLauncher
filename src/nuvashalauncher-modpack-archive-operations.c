@@ -452,6 +452,8 @@ typedef struct {
 static void
 extract_run_free (ExtractRun *run)
 {
+  if (run->scope != NULL)
+    nuvashalauncher_task_scope_unref (run->scope);
   g_free (run->archive_path);
   g_free (run->directory);
   g_free (run);
@@ -463,12 +465,13 @@ extract_thread (GTask *task G_GNUC_UNUSED,
                 gpointer task_data, GCancellable *cancellable)
 {
   ExtractRun *run = task_data;
+  g_autoptr (nuvashalauncherTaskScope) scope = g_steal_pointer (&run->scope);
   g_autoptr (GError) error = NULL;
 
   if (g_cancellable_is_cancelled (cancellable))
     {
       nuvashalauncher_task_scope_return_error (
-        run->scope,
+        scope,
         g_error_new_literal (nuvashalauncher_MODPACK_ERROR,
                              nuvashalauncher_MODPACK_ERROR_CANCELLED, "cancelled"));
       return;
@@ -476,17 +479,17 @@ extract_thread (GTask *task G_GNUC_UNUSED,
 
   if (!extract_overrides (run->archive_path, run->directory, &error))
     {
-      nuvashalauncher_task_scope_return_error (run->scope, g_steal_pointer (&error));
+      nuvashalauncher_task_scope_return_error (scope, g_steal_pointer (&error));
       return;
     }
 
   if (g_cancellable_is_cancelled (cancellable))
     nuvashalauncher_task_scope_return_error (
-      run->scope,
+      scope,
       g_error_new_literal (nuvashalauncher_MODPACK_ERROR,
                            nuvashalauncher_MODPACK_ERROR_CANCELLED, "cancelled"));
   else
-    nuvashalauncher_task_scope_return_boolean (run->scope, TRUE);
+    nuvashalauncher_task_scope_return_boolean (scope, TRUE);
 }
 
 nuvashalauncherTaskScope *
@@ -498,9 +501,8 @@ extract_overrides_async (const char *archive_path, const char *directory,
   GTask *task = nuvashalauncher_task_scope_task (scope);
   ExtractRun *run = g_new0 (ExtractRun, 1);
 
-  /* Borrowed: the extract is the task's own data and the scope owns that
-     task. The caller keeps the operation alive until its callback. */
-  run->scope = scope;
+  /* Owned until extract_thread takes it. */
+  run->scope = nuvashalauncher_task_scope_ref (scope);
   run->archive_path = g_strdup (archive_path);
   run->directory = g_strdup (directory);
   g_task_set_task_data (task, run, (GDestroyNotify) extract_run_free);

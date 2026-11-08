@@ -242,13 +242,15 @@ typedef struct {
   char *instance_directory;
   nuvashalauncherContentType type;
 
-  /* Borrowed: this is the task's own data and the scope owns the task. */
+  /* Owned until load_thread takes it. */
   nuvashalauncherTaskScope *scope;
 } LoadArgs;
 
 static void
 load_args_free (LoadArgs *args)
 {
+  if (args->scope != NULL)
+    nuvashalauncher_task_scope_unref (args->scope);
   g_free (args->instance_directory);
   g_free (args);
 }
@@ -259,14 +261,15 @@ load_thread (GTask *task G_GNUC_UNUSED, gpointer source G_GNUC_UNUSED,
              GCancellable *cancellable G_GNUC_UNUSED)
 {
   LoadArgs *args = task_data;
+  g_autoptr (nuvashalauncherTaskScope) scope = g_steal_pointer (&args->scope);
   g_autoptr (GError) error = NULL;
   GPtrArray *entries = load_entries_sync (args->instance_directory, args->type,
                                           &error);
 
   if (entries == NULL)
-    nuvashalauncher_task_scope_return_error (args->scope, g_steal_pointer (&error));
+    nuvashalauncher_task_scope_return_error (scope, g_steal_pointer (&error));
   else
-    nuvashalauncher_task_scope_return_pointer (args->scope, entries,
+    nuvashalauncher_task_scope_return_pointer (scope, entries,
                                    (GDestroyNotify) g_ptr_array_unref);
 }
 
@@ -282,7 +285,7 @@ nuvashalauncher_content_index_load_async (const char *instance_directory,
 
   args->instance_directory = g_strdup (instance_directory);
   args->type = type;
-  args->scope = scope;
+  args->scope = nuvashalauncher_task_scope_ref (scope);
   g_task_set_task_data (task, args, (GDestroyNotify) load_args_free);
   g_task_run_in_thread (task, load_thread);
 

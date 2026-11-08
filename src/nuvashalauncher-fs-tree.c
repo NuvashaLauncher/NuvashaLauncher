@@ -163,6 +163,8 @@ typedef struct {
 static void
 remove_tree_data_free (RemoveTreeData *data)
 {
+  if (data->scope != NULL)
+    nuvashalauncher_task_scope_unref (data->scope);
   g_free (data->path);
   g_free (data);
 }
@@ -173,7 +175,7 @@ remove_tree_thread (GTask *task G_GNUC_UNUSED,
                     gpointer task_data, GCancellable *cancellable G_GNUC_UNUSED)
 {
   RemoveTreeData *data = task_data;
-  nuvashalauncherTaskScope *scope = data->scope;
+  g_autoptr (nuvashalauncherTaskScope) scope = g_steal_pointer (&data->scope);
 
   if (nuvashalauncher_task_scope_return_error_if_cancelled (scope))
     return;
@@ -200,7 +202,7 @@ nuvashalauncher_fs_remove_tree_async (const char *path, GAsyncReadyCallback call
   RemoveTreeData *data = g_new0 (RemoveTreeData, 1);
 
   data->path = g_strdup (path);
-  data->scope = scope;
+  data->scope = nuvashalauncher_task_scope_ref (scope);
   g_task_set_task_data (task, data,
                         (GDestroyNotify) remove_tree_data_free);
   g_task_run_in_thread (task, remove_tree_thread);
@@ -223,6 +225,8 @@ typedef struct {
 static void
 copy_tree_data_free (CopyTreeData *data)
 {
+  if (data->scope != NULL)
+    nuvashalauncher_task_scope_unref (data->scope);
   g_clear_object (&data->source);
   g_clear_object (&data->destination);
   g_free (data);
@@ -355,7 +359,7 @@ copy_tree_thread (GTask *task G_GNUC_UNUSED,
                   gpointer task_data, GCancellable *cancellable)
 {
   CopyTreeData *data = task_data;
-  nuvashalauncherTaskScope *scope = data->scope;
+  g_autoptr (nuvashalauncherTaskScope) scope = g_steal_pointer (&data->scope);
   g_autoptr (GError) error = NULL;
 
   if (copy_tree_sync (data->source, data->destination, cancellable,
@@ -376,7 +380,7 @@ nuvashalauncher_fs_copy_tree_async (GFile *source, GFile *destination,
 
   data->source = g_object_ref (source);
   data->destination = g_object_ref (destination);
-  data->scope = scope;
+  data->scope = nuvashalauncher_task_scope_ref (scope);
   g_task_set_task_data (task, data, (GDestroyNotify) copy_tree_data_free);
   g_task_run_in_thread (task, copy_tree_thread);
   return g_steal_pointer (&scope);
