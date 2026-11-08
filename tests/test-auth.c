@@ -608,6 +608,30 @@ test_expired_token_completes_sign_in (void)
 }
 
 static void
+test_empty_error_response_completes_sign_in (void)
+{
+  AuthWait wait = { 0 };
+  AuthRequest *request = NULL;
+
+  wait.loop = g_main_loop_new (NULL, FALSE);
+  wait.scope = nuvashalauncher_task_scope_new (NULL, NULL,
+                                               auth_error_finished, &wait);
+  request = request_new (wait.scope);
+  request->status = 500;
+  request->body = g_strdup ("");
+
+  token_answered (request);
+  g_main_loop_run (wait.loop);
+
+  g_assert_null (wait.scope);
+  g_assert_nonnull (wait.error);
+  g_clear_error (&wait.error);
+  g_main_loop_unref (wait.loop);
+
+  g_print ("ok - an empty error response body completes sign-in safely\n");
+}
+
+static void
 test_service_state_refusals_complete_sign_in (void)
 {
   /* These are the actual answer handlers, not just parser calls: every
@@ -748,6 +772,7 @@ main (void)
   test_entitlements ();
   test_profile ();
   test_expired_token_completes_sign_in ();
+  test_empty_error_response_completes_sign_in ();
   test_service_state_refusals_complete_sign_in ();
   test_successful_sign_in_refresh_and_persistence ();
   test_the_endpoints_are_the_documented_ones ();

@@ -188,6 +188,13 @@ on_custom_java_probed (GObject *source G_GNUC_UNUSED,
   g_autofree char *instance_java = NULL;
   const nuvashalauncherJava *java = NULL;
 
+  if (self->process.stop_requested ||
+      g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+    {
+      java_search_free (search);
+      return;
+    }
+
   if (custom == NULL)
     {
       nuvashalauncher_instance_set_string (self->instance, "java-path", NULL, NULL);

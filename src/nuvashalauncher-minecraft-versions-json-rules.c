@@ -168,6 +168,8 @@ arch_equals (const char *one, const char *two)
           g_ascii_strcasecmp (two, "aarch64") == 0);
 }
 
+G_LOCK_DEFINE_STATIC (version_regex_lock);
+
 /* The rule matches only when the regular expression covers the whole
  * value, which is how the launcher that wrote these rules reads it. */
 static gboolean
@@ -177,6 +179,7 @@ version_matches (const char *pattern, const char *version)
   static GRegex *cached_regex = NULL;
   g_autoptr (GError) error = NULL;
   g_autoptr (GMatchInfo) match = NULL;
+  gboolean matches = FALSE;
   gint start = 0;
   gint end = 0;
 
@@ -184,6 +187,8 @@ version_matches (const char *pattern, const char *version)
       strlen (pattern) > MAX_VERSION_REGEX_LENGTH ||
       strlen (version) > MAX_VERSION_VALUE_LENGTH)
     return FALSE;
+
+  G_LOCK (version_regex_lock);
 
   if (g_strcmp0 (cached_pattern, pattern) != 0)
     {
@@ -196,18 +201,22 @@ version_matches (const char *pattern, const char *version)
   if (cached_regex == NULL)
     {
       g_clear_pointer (&cached_pattern, g_free);
+      G_UNLOCK (version_regex_lock);
       g_warning ("the version pattern \"%s\" is not a regular expression: %s",
                  pattern,
                  error != NULL ? error->message : "invalid regular expression");
       return FALSE;
     }
 
-  if (!g_regex_match (cached_regex, version, 0, &match))
-    return FALSE;
+  if (g_regex_match (cached_regex, version, 0, &match))
+    {
+      g_match_info_fetch_pos (match, 0, &start, &end);
+      matches = (start == 0 && end == (gint) strlen (version));
+    }
 
-  g_match_info_fetch_pos (match, 0, &start, &end);
+  G_UNLOCK (version_regex_lock);
 
-  return start == 0 && end == (gint) strlen (version);
+  return matches;
 }
 
 gboolean

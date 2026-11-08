@@ -650,6 +650,7 @@ nuvashalauncher_loaders_install_async (nuvashalauncherLoader              loader
 
   versions_dir = g_build_filename (request->data_dir, "versions",
                                    game_version, NULL);
+  g_free (jar_name);
   jar_name = g_strdup_printf ("%s.jar", game_version);
   request->client_jar = g_build_filename (versions_dir, jar_name, NULL);
 

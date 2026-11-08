@@ -143,8 +143,8 @@ nuvashalauncher_auth_device_code_from_json (const char *json, gssize length,
   code->user_code = g_steal_pointer (&user_code);
   code->verification_uri = g_steal_pointer (&verification_uri);
   code->message = g_steal_pointer (&message);
-  code->expires_in = expires_in > 0 ? (guint) expires_in : 900;
-  code->interval = (guint) interval;
+  code->expires_in = (expires_in > 0 && expires_in <= G_MAXUINT) ? (guint) expires_in : 900;
+  code->interval = (interval > 0 && interval <= G_MAXUINT) ? (guint) interval : 5;
   code->device_code = g_steal_pointer (&device_code);
 
   return code;

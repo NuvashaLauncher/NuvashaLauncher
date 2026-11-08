@@ -71,6 +71,7 @@ processor_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   if (!g_subprocess_communicate_utf8_finish (process, result, &output, NULL,
                                              &error))
     {
+      g_subprocess_force_exit (process);
       install_failed (request, g_steal_pointer (&error));
       return;
     }

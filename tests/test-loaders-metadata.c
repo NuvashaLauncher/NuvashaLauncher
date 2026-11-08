@@ -233,6 +233,7 @@ test_neoforge_version_list (void)
   g_assert_no_error (error);
   g_assert_cmpuint (versions->len, ==, 3);
   g_assert_cmpstr (version_at (versions, 0)->version, ==, "21.1.256");
+  g_assert_true (version_at (versions, 0)->stable);
 
   g_assert_true (version_at (versions, 0)->stable);
   g_assert_true (version_at (versions, 2)->stable);
@@ -245,6 +246,7 @@ test_neoforge_version_list (void)
   g_assert_no_error (error);
   g_assert_cmpuint (versions->len, ==, 3);
   g_assert_cmpstr (version_at (versions, 0)->version, ==, "21.1.256");
+  g_assert_true (version_at (versions, 0)->stable);
 
   /* A game no version of NeoForge runs. */
   g_clear_pointer (&versions, g_ptr_array_unref);

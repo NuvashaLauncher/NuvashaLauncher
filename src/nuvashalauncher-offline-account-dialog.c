@@ -147,9 +147,23 @@ nuvashalauncher_offline_account_dialog_init (nuvashalauncherOfflineAccountDialog
 }
 
 static void
+nuvashalauncher_offline_account_dialog_dispose (GObject *object)
+{
+  nuvashalauncherOfflineAccountDialog *self = nuvashalauncher_OFFLINE_ACCOUNT_DIALOG (object);
+
+  g_clear_object (&self->accounts);
+
+  G_OBJECT_CLASS (nuvashalauncher_offline_account_dialog_parent_class)->dispose (object);
+}
+
+static void
 nuvashalauncher_offline_account_dialog_class_init (nuvashalauncherOfflineAccountDialogClass *klass)
 {
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+
+  object_class->dispose = nuvashalauncher_offline_account_dialog_dispose;
+
   gtk_widget_class_set_template_from_resource (widget_class,
       "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-offline-account.ui");
   gtk_widget_class_bind_template_child (widget_class, nuvashalauncherOfflineAccountDialog, name_row);
@@ -176,6 +190,6 @@ nuvashalauncher_offline_account_dialog_set_accounts (nuvashalauncherOfflineAccou
   g_return_if_fail (nuvashalauncher_IS_OFFLINE_ACCOUNT_DIALOG (self));
   g_return_if_fail (accounts == NULL || nuvashalauncher_IS_ACCOUNTS (accounts));
 
-  self->accounts = accounts;
+  g_set_object (&self->accounts, accounts);
   update_add_button (self);
 }

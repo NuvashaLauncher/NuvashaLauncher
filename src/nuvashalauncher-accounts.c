@@ -449,10 +449,10 @@ accounts_add_internal (nuvashalauncherAccounts       *self,
   const nuvashalauncherAccount *target =
     known != NULL ? known : g_ptr_array_index (self->accounts, added_index);
 
-  gboolean active_changed = make_active && g_strcmp0 (previous_active_id, account->id) != 0;
+  gboolean active_changed = g_strcmp0 (previous_active_id, self->active_id) != 0;
 
   if (!save_account (target, error) ||
-      (active_changed && !save_active (account->id, error)))
+      (active_changed && !save_active (self->active_id, error)))
     {
       if (known != NULL)
         save_account (previous, NULL);

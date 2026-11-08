@@ -234,6 +234,7 @@ request_free (DownloadRequest *request)
     {
       g_queue_remove (&request->service->interactive_waiting, request);
       g_queue_remove (&request->service->bulk_waiting, request);
+      request->service = NULL;
     }
 
   nuvashalauncher_download_close_sink (request);
@@ -242,7 +243,7 @@ request_free (DownloadRequest *request)
   g_clear_pointer (&request->checksum, g_checksum_free);
   g_clear_pointer (&request->tmp_path, g_free);
   g_clear_pointer (&request->tmp_name, g_free);
-  request->scope = NULL;
+  g_clear_pointer (&request->scope, nuvashalauncher_task_scope_unref);
   if (request->parent_fd >= 0)
     close (request->parent_fd);
   g_clear_object (&request->source);
@@ -271,42 +272,71 @@ request_free (DownloadRequest *request)
 void
 nuvashalauncher_download_request_fail (DownloadRequest *request, GError *error)
 {
-  nuvashalauncherTaskScope *scope = request->scope;
+  g_autoptr (nuvashalauncherTaskScope) scope =
+    request->scope != NULL ? nuvashalauncher_task_scope_ref (request->scope) : NULL;
   gboolean cancelled = g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR,
                                         nuvashalauncher_DOWNLOAD_ERROR_CANCELLED);
 
-  nuvashalauncher_task_scope_set_state (scope, cancelled ? nuvashalauncher_TASK_STATE_CANCELLED
-                                               : nuvashalauncher_TASK_STATE_FAILED);
-  g_debug ("download operation=%" G_GUINT64_FORMAT " %s",
-           nuvashalauncher_task_scope_get_id (scope), cancelled ? "cancelled" : "failed");
+  if (scope != NULL)
+    nuvashalauncher_task_scope_set_state (scope, cancelled ? nuvashalauncher_TASK_STATE_CANCELLED
+                                                           : nuvashalauncher_TASK_STATE_FAILED);
+  if (scope != NULL)
+    g_debug ("download operation=%" G_GUINT64_FORMAT " %s",
+             nuvashalauncher_task_scope_get_id (scope), cancelled ? "cancelled" : "failed");
   nuvashalauncher_download_discard_temporary (request);
+  if (request->service != NULL)
+    {
+      g_queue_remove (&request->service->interactive_waiting, request);
+      g_queue_remove (&request->service->bulk_waiting, request);
+    }
   nuvashalauncher_download_release_slot (request);
   request_free (request);
-  nuvashalauncher_task_scope_return_error (scope, error);
+  if (scope != NULL)
+    nuvashalauncher_task_scope_return_error (scope, error);
+  else
+    g_clear_error (&error);
 }
 
 void
 request_succeed (DownloadRequest *request)
 {
-  nuvashalauncherTaskScope *scope = request->scope;
-  g_debug ("download operation=%" G_GUINT64_FORMAT " completed",
-           nuvashalauncher_task_scope_get_id (scope));
+  g_autoptr (nuvashalauncherTaskScope) scope =
+    request->scope != NULL ? nuvashalauncher_task_scope_ref (request->scope) : NULL;
+  if (scope != NULL)
+    g_debug ("download operation=%" G_GUINT64_FORMAT " completed",
+             nuvashalauncher_task_scope_get_id (scope));
 
+  if (request->service != NULL)
+    {
+      g_queue_remove (&request->service->interactive_waiting, request);
+      g_queue_remove (&request->service->bulk_waiting, request);
+    }
   nuvashalauncher_download_release_slot (request);
   request_free (request);
-  nuvashalauncher_task_scope_return_boolean (scope, TRUE);
+  if (scope != NULL)
+    nuvashalauncher_task_scope_return_boolean (scope, TRUE);
 }
 
 void
 nuvashalauncher_download_request_succeed_json (DownloadRequest *request, JsonParser *parser)
 {
-  nuvashalauncherTaskScope *scope = request->scope;
-  g_debug ("download operation=%" G_GUINT64_FORMAT " completed",
-           nuvashalauncher_task_scope_get_id (scope));
+  g_autoptr (nuvashalauncherTaskScope) scope =
+    request->scope != NULL ? nuvashalauncher_task_scope_ref (request->scope) : NULL;
+  if (scope != NULL)
+    g_debug ("download operation=%" G_GUINT64_FORMAT " completed",
+             nuvashalauncher_task_scope_get_id (scope));
 
+  if (request->service != NULL)
+    {
+      g_queue_remove (&request->service->interactive_waiting, request);
+      g_queue_remove (&request->service->bulk_waiting, request);
+    }
   nuvashalauncher_download_release_slot (request);
   request_free (request);
-  nuvashalauncher_task_scope_return_pointer (scope, parser, g_object_unref);
+  if (scope != NULL)
+    nuvashalauncher_task_scope_return_pointer (scope, parser, g_object_unref);
+  else
+    g_clear_object (&parser);
 }
 
 /* Transfer and retry state machine lives in nuvashalauncher-download-transfer.c. */
@@ -371,9 +401,8 @@ nuvashalauncher_download_file_limited_async (nuvashalauncherDownloadService *ser
   DownloadRequest *request = g_new0 (DownloadRequest, 1);
   request->parent_fd = -1;
 
-  /* Borrowed: the caller's handle keeps the operation alive, and the
-     request is answered before it goes away. */
-  request->scope = scope;
+  /* Held: the request holds a reference until freed. */
+  request->scope = nuvashalauncher_task_scope_ref (scope);
   request->service = service;
   request->task = g_object_ref (nuvashalauncher_task_scope_task (scope));
   request->url = g_strdup (url);
@@ -430,9 +459,8 @@ nuvashalauncher_download_json_async (nuvashalauncherDownloadService *service, co
    DownloadRequest *request = g_new0 (DownloadRequest, 1);
    request->parent_fd = -1;
 
-  /* Borrowed: the caller's handle keeps the operation alive, and the
-     request is answered before it goes away. */
-  request->scope = scope;
+  /* Held: the request holds a reference until freed. */
+  request->scope = nuvashalauncher_task_scope_ref (scope);
    request->service = service;
    request->task = g_object_ref (nuvashalauncher_task_scope_task (scope));
   request->url = g_strdup (url);
@@ -490,9 +518,8 @@ nuvashalauncher_download_json_cached_async (nuvashalauncherDownloadService *serv
 
    DownloadRequest *request = g_new0 (DownloadRequest, 1);
    request->parent_fd = -1;
-  /* Borrowed: the caller's handle keeps the operation alive, and the
-     request is answered before it goes away. */
-  request->scope = scope;
+  /* Held: the request holds a reference until freed. */
+  request->scope = nuvashalauncher_task_scope_ref (scope);
    request->service = service;
    request->task = g_object_ref (nuvashalauncher_task_scope_task (scope));
   request->url = g_strdup (url);
@@ -533,9 +560,8 @@ nuvashalauncher_download_json_post_cached_async (nuvashalauncherDownloadService 
 
    DownloadRequest *request = g_new0 (DownloadRequest, 1);
    request->parent_fd = -1;
-  /* Borrowed: the caller's handle keeps the operation alive, and the
-     request is answered before it goes away. */
-  request->scope = scope;
+  /* Held: the request holds a reference until freed. */
+  request->scope = nuvashalauncher_task_scope_ref (scope);
    request->service = service;
    request->task = g_object_ref (nuvashalauncher_task_scope_task (scope));
   request->url = g_strdup (url);

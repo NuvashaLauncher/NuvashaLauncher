@@ -14,7 +14,6 @@ static void global_cache_copy_hash_ready (GObject *, GAsyncResult *, gpointer);
 static void global_cache_restore_ready (GObject *, GAsyncResult *, gpointer);
 static void global_cache_restore_hash_ready (GObject *, GAsyncResult *, gpointer);
 static void global_cache_files_ready (GObject *, GAsyncResult *, gpointer);
-void global_cache_directory_ready (GObject *, GAsyncResult *, gpointer);
 
 /* ---------------------------------------------------------- *
  * Checking the cache before downloading

@@ -508,7 +508,7 @@ nuvashalauncher_modrinth_search_url (const nuvashalauncherModrinthSearch *search
   facets = nuvashalauncher_modrinth_facets (search);
   query = g_uri_escape_string (search->query != NULL ? search->query : "",
                               NULL, FALSE);
-  escaped = g_uri_escape_string (facets, NULL, FALSE);
+  escaped = g_uri_escape_string (facets != NULL ? facets : "[]", NULL, FALSE);
 
   if (search->sort != NULL && *search->sort != '\0')
     return g_strdup_printf (

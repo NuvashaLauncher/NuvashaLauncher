@@ -143,9 +143,6 @@ report_progress (DownloadRequest *request)
     request->progress (request->done, request->total, request->user_data);
 }
 
-void read_next_chunk (DownloadRequest *request);
-void end_attempt (DownloadRequest *request, GError *error);
-
 static void
 send_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 {
@@ -586,10 +583,12 @@ gboolean
 queued_cancelled (gpointer user_data)
 {
   DownloadRequest *request = user_data;
-
   nuvashalauncherDownloadService *service = request->service;
 
-  if (g_queue_remove (request->priority >= DOWNLOAD_PRIORITY_INTERACTIVE
+  request->queue_cancel_source = 0;
+
+  if (service != NULL &&
+      g_queue_remove (request->priority >= DOWNLOAD_PRIORITY_INTERACTIVE
                         ? &service->interactive_waiting
                         : &service->bulk_waiting,
                       request))

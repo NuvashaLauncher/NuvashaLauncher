@@ -216,10 +216,6 @@ nuvashalauncher_content_page_build_installed (nuvashalauncherContentPage *self)
                                       "view-list-symbolic");
 }
 
-/* Load Modrinth content when Browse is opened. */
-/* Defined with the row it moves into, further down. */
-void nuvashalauncher_content_page_move_actions_into_bar (nuvashalauncherContentPage *self, gboolean browsing);
-
 void
 nuvashalauncher_content_page_on_stack_switched (GObject *stack, GParamSpec *pspec G_GNUC_UNUSED,
                    gpointer user_data)

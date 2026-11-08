@@ -86,6 +86,15 @@ token_answered (AuthRequest *self)
       return;
     }
 
+  /* A refresh request has no device code and must not poll. */
+  if (self->device_code == NULL)
+    {
+      fail (self,
+            refusal (self->body, self->status, nuvashalauncher_AUTH_ERROR_REAUTH,
+                     "the sign-in expired"));
+      return;
+    }
+
   /* Respect the service's request to slow down polling. */
   if (slow_down)
     self->interval += 5;

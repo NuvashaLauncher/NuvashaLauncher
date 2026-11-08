@@ -416,6 +416,8 @@ on_versions_answer (GObject *source G_GNUC_UNUSED,
           g_object_set_data_full (G_OBJECT (self), "versions-error",
                                   error != NULL ? g_error_copy (error) : NULL,
                                   (GDestroyNotify) g_error_free);
+          self->versions_ready = TRUE;
+          dialog_details_fill (self);
         }
 
       versions_ask_free (ask);
@@ -432,6 +434,8 @@ on_versions_answer (GObject *source G_GNUC_UNUSED,
       g_object_set_data_full (G_OBJECT (self), "versions-error",
                               error != NULL ? g_error_copy (error) : NULL,
                               (GDestroyNotify) g_error_free);
+      self->versions_ready = TRUE;
+      dialog_details_fill (self);
       versions_ask_free (ask);
       return;
     }
@@ -447,8 +451,6 @@ on_versions_answer (GObject *source G_GNUC_UNUSED,
 
   versions_ask_free (ask);
 }
-
-static void dialog_details_fill (nuvashalauncherDownloadModpackDialog *self);
 
 /* One answer the dialog asked for and has not released yet: the dialog it
  * belongs to, which can be closed while the request is on its way, and

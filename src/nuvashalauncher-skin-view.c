@@ -207,7 +207,7 @@ upload_texture (nuvashalauncherSkinView *self, GdkTexture *texture, GLuint *hand
    * transparent pixels in the base-layer atlas regions (often caused by
    * image editors or old skin converters).  Those regions are not optional
    * layers: they are the head, body and limbs and must be opaque. */
-  if (width == 64 && (height == 64 || height == 32))
+  if (skin && width == 64 && (height == 64 || height == 32))
     {
       int opaque_height = MIN (height, 16);
 
@@ -290,6 +290,10 @@ nuvashalauncher_skin_prepare_classic_upload (GBytes *skin)
     for (int x = 0; x < 2; x++)
       memcpy (pixels + (gsize) y * stride + (gsize) (54 + x) * 4,
               source + (gsize) y * stride + (gsize) (53 + x) * 4, 4);
+  for (int y = 48; y < 64; y++)
+    for (int x = 0; x < 2; x++)
+      memcpy (pixels + (gsize) y * stride + (gsize) (46 + x) * 4,
+              source + (gsize) y * stride + (gsize) 45 * 4, 4);
 
   /* Match the preview's base-layer alpha normalization as well. */
   for (int y = 0; y < 16; y++)
@@ -304,7 +308,7 @@ nuvashalauncher_skin_prepare_classic_upload (GBytes *skin)
 
   pixels_bytes = g_bytes_new_take (g_steal_pointer (&pixels), stride * height);
   g_clear_object (&texture);
-  texture = gdk_memory_texture_new (width, height, GDK_MEMORY_R8G8B8A8,
+  texture = gdk_memory_texture_new (width, height, GDK_MEMORY_DEFAULT,
                                     pixels_bytes, stride);
   result = gdk_texture_save_to_png_bytes (texture);
   return g_steal_pointer (&result);
@@ -569,8 +573,14 @@ static gboolean
 on_render (GtkGLArea *area, GdkGLContext *context G_GNUC_UNUSED)
 {
   nuvashalauncherSkinView *self = nuvashalauncher_SKIN_VIEW (area);
-  glViewport (0, 0, gtk_widget_get_width (GTK_WIDGET (area)),
-              gtk_widget_get_height (GTK_WIDGET (area)));
+  int scale = gtk_widget_get_scale_factor (GTK_WIDGET (area));
+  int width = gtk_widget_get_width (GTK_WIDGET (area)) * scale;
+  int height = gtk_widget_get_height (GTK_WIDGET (area)) * scale;
+
+  if (width <= 0 || height <= 0)
+    return TRUE;
+
+  glViewport (0, 0, width, height);
   glClearColor (0.f, 0.f, 0.f, 0.f);
   glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glEnable (GL_DEPTH_TEST); glEnable (GL_BLEND); glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

@@ -208,6 +208,7 @@ nuvashalauncher_launcher_spawn (nuvashalauncher *self, GPtrArray *argv, GError *
       return FALSE;
     }
 
+   self->process.stop_requested = FALSE;
    self->process.exited = FALSE;
   self->process.exited_normally = FALSE;
   self->process.terminated_by_signal = FALSE;

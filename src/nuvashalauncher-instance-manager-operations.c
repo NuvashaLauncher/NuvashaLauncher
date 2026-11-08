@@ -110,6 +110,9 @@ nuvashalauncher_instance_manager_duplicate_async (nuvashalauncherInstanceManager
   g_autofree char *icon = NULL;
   g_autofree char *java_path = NULL;
   g_autofree char *jvm_args = NULL;
+  g_autofree char *modpack_name = NULL;
+  g_autofree char *modpack_summary = NULL;
+  g_autofree char *modpack_version_id = NULL;
   nuvashalauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
 
   g_object_get (source_instance,
@@ -119,6 +122,9 @@ nuvashalauncher_instance_manager_duplicate_async (nuvashalauncherInstanceManager
                 "icon", &icon,
                 "java_path", &java_path,
                 "jvm_args", &jvm_args,
+                "modpack-name", &modpack_name,
+                "modpack-summary", &modpack_summary,
+                "modpack-version-id", &modpack_version_id,
                 NULL);
 
   g_autofree char *id = g_uuid_string_random ();
@@ -147,11 +153,24 @@ nuvashalauncher_instance_manager_duplicate_async (nuvashalauncherInstanceManager
         return nuvashalauncher_task_scope_ref (task_scope);
      }
 
+  if (icon != NULL && source_directory != NULL && g_str_has_prefix (icon, source_directory))
+    {
+      const char *rel = icon + strlen (source_directory);
+      while (*rel == G_DIR_SEPARATOR)
+        rel++;
+      g_autofree char *new_icon = g_build_filename (directory, rel, NULL);
+      g_free (icon);
+      icon = g_steal_pointer (&new_icon);
+    }
+
   g_object_set (copy,
                 "loader_version", loader_version,
                 "icon", icon,
                 "java_path", java_path,
                 "jvm_args", jvm_args,
+                "modpack-name", modpack_name,
+                "modpack-summary", modpack_summary,
+                "modpack-version-id", modpack_version_id,
                 NULL);
 
   g_autoptr (GError) instances_error = NULL;

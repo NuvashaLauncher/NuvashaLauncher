@@ -94,7 +94,7 @@ on_skin_file_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
     }
 
 done:
-  if (error != NULL &&
+  if (error != NULL && !menu->closed &&
       !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED) &&
       !g_error_matches (error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_CANCELLED) &&
       !g_error_matches (error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_DISMISSED))
@@ -121,7 +121,7 @@ on_import_skin_clicked (GtkButton *button, gpointer user_data)
   SkinMenu *source = user_data;
   GtkFileDialog *dialog = gtk_file_dialog_new ();
   GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (button));
-  GtkFileFilter *filter = gtk_file_filter_new ();
+  g_autoptr (GtkFileFilter) filter = gtk_file_filter_new ();
 
   gtk_file_filter_set_name (filter, _("PNG skin texture"));
   gtk_file_filter_add_mime_type (filter, "image/png");
@@ -145,8 +145,10 @@ remove_skin_row (SkinMenu *menu, GtkListBoxRow *row)
   else if (url != NULL && (g_str_has_prefix (url, "http://") ||
                            g_str_has_prefix (url, "https://")))
     {
-      g_autofree char *name = g_strconcat (skin_name_for_url (url), ".png", NULL);
-      path = g_build_filename (skin_directory_path (), name, NULL);
+      g_autofree char *identity = skin_name_for_url (url);
+      g_autofree char *name = g_strconcat (identity, ".png", NULL);
+      g_autofree char *dir = skin_directory_path ();
+      path = g_build_filename (dir, name, NULL);
     }
   if (path != NULL)
     {
@@ -158,7 +160,10 @@ remove_skin_row (SkinMenu *menu, GtkListBoxRow *row)
         }
     }
   if (url != NULL)
-    g_hash_table_add (menu->deleted_skin_ids, g_strdup (skin_name_for_url (url)));
+    g_hash_table_add (menu->deleted_skin_ids, skin_name_for_url (url));
+
+  if (menu->current_skin_row == row)
+    menu->current_skin_row = NULL;
 
   int index = gtk_list_box_row_get_index (row);
   gtk_list_box_remove (menu->skins, GTK_WIDGET (row));
@@ -187,6 +192,7 @@ on_remove_skin_confirmed (GObject *source, GAsyncResult *result, gpointer user_d
         delete_active_skin (menu);
       remove_skin_row (menu, row);
     }
+  skin_menu_unref (menu);
 }
 
 static void
@@ -211,9 +217,10 @@ on_remove_skin_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
                                               ADW_RESPONSE_DESTRUCTIVE);
     adw_alert_dialog_set_default_response (alert, "cancel");
     adw_alert_dialog_set_close_response (alert, "cancel");
-    g_object_set_data (G_OBJECT (alert), "nuvashalauncher-skin-row", row);
+    g_object_set_data_full (G_OBJECT (alert), "nuvashalauncher-skin-row",
+                            g_object_ref (row), g_object_unref);
     adw_alert_dialog_choose (alert, GTK_WIDGET (menu->dialog), NULL,
-                             on_remove_skin_confirmed, menu);
+                             on_remove_skin_confirmed, skin_menu_ref (menu));
   }
 }
 
@@ -313,7 +320,24 @@ on_skin_selected (GtkListBox *list, GtkListBoxRow *row, gpointer user_data)
     return;
 
   gtk_list_box_select_row (list, row);
-  nuvashalauncher_users_set_avatar_icon (menu->image);
+  if (g_str_has_prefix (url, "file://"))
+    {
+      g_autoptr (GFile) file = g_file_new_for_uri (url);
+      g_autofree char *path = g_file_get_path (file);
+      if (path == NULL || !nuvashalauncher_users_set_local_avatar (menu->image, path))
+        nuvashalauncher_users_set_avatar_icon (menu->image);
+    }
+  else
+    {
+      g_autofree char *cached = cached_skin_path (url);
+      if (cached == NULL || !nuvashalauncher_users_set_local_avatar (menu->image, cached))
+        {
+          if (menu->owner != NULL)
+            nuvashalauncher_users_set_avatar (menu->owner, menu->image, url);
+          else
+            nuvashalauncher_users_set_avatar_icon (menu->image);
+        }
+    }
   load_view_texture (menu->view, url, FALSE);
 
   /* Keep nuvashalauncher's cached profile in step with the selection so the account row
@@ -488,8 +512,9 @@ load_profile_skins (SkinMenu *menu)
     }
   message = nuvashalauncher_minecraft_services_message (
     SOUP_METHOD_GET, "/minecraft/profile", menu->account->access_token);
-  nuvashalauncher_minecraft_services_send_async (message, menu->cancellable,
-                                         on_capes_loaded, skin_menu_ref (menu));
+  nuvashalauncher_task_scope_unref_when_done (
+    nuvashalauncher_minecraft_services_send_async (message, menu->cancellable,
+                                           on_capes_loaded, skin_menu_ref (menu)));
   g_object_unref (message);
 }
 

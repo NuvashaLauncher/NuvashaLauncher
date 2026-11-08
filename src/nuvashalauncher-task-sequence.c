@@ -65,6 +65,13 @@ nuvashalauncher_task_sequence_unref (nuvashalauncherTaskSequence *sequence)
   if (sequence == NULL || !g_atomic_ref_count_dec (&sequence->refs))
     return;
 
+  if (sequence->user_data_free != NULL)
+    {
+      sequence->user_data_free (sequence->user_data);
+      sequence->user_data_free = NULL;
+      sequence->user_data = NULL;
+    }
+  g_clear_object (&sequence->task);
   g_free (sequence);
 }
 
@@ -104,6 +111,8 @@ nuvashalauncher_task_sequence_scope (nuvashalauncherTaskSequence *sequence)
   nuvashalauncherTaskScope *scope;
 
   g_return_val_if_fail (sequence != NULL, NULL);
+  if (sequence->task == NULL)
+    return NULL;
 
   /* A scope that takes over a reference of its own: the sequence keeps
      the task running regardless, and this is the reference that lets the

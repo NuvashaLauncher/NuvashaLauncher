@@ -40,6 +40,7 @@ probe_communicate (GObject      *source G_GNUC_UNUSED,
   if (!g_subprocess_communicate_utf8_finish (G_SUBPROCESS (source), result,
                                              &output, NULL, &error))
     {
+      g_subprocess_force_exit (G_SUBPROCESS (source));
       nuvashalauncher_task_scope_return_error (probe->scope, g_steal_pointer (&error));
       probe_destroyed (probe);
       return;

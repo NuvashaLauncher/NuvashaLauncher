@@ -178,6 +178,8 @@ export_file (ExportRun *run, struct archive *archive, const char *source,
   fclose (input);
   archive_entry_free (entry);
   run->done++;
+  if (run->done > run->total)
+    run->total = run->done;
   export_progress (run, run->done, run->total, _("Writing archive"));
   return TRUE;
 }
@@ -507,6 +509,8 @@ export_thread (GTask *task G_GNUC_UNUSED,
                                        run->include_transient) + 1;
   if (run->icon_path != NULL)
     run->total++;
+  if (run->total == 0)
+    run->total = 1;
   export_progress (run, 0, run->total, _("Writing archive"));
 
   manifest_length = strlen (run->manifest);

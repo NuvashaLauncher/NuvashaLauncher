@@ -15,6 +15,7 @@ void nuvashalauncher_mc_free_java_version (gpointer data);
 void nuvashalauncher_mc_free_entry (gpointer data);
 
 gboolean nuvashalauncher_mc_missing_field (const char *member, GError **error);
+gboolean nuvashalauncher_mc_wrong_field (const char *member, const char *expected, GError **error);
 gboolean nuvashalauncher_mc_get_string (JsonObject *object, const char *member, gboolean required, char **value, GError **error);
 gboolean nuvashalauncher_mc_get_object (JsonObject *object, const char *member, gboolean required, JsonObject **value, GError **error);
 gboolean nuvashalauncher_mc_get_array (JsonObject *object, const char *member, gboolean required, JsonArray **value, GError **error);

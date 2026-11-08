@@ -14,6 +14,9 @@ nuvashalauncherTaskScope *extract_overrides_async (const char *archive_path,
                                        GAsyncReadyCallback callback,
                                        gpointer user_data);
 gboolean extract_overrides_finish (GAsyncResult *result, GError **error);
+gboolean nuvashalauncher_modpack_extract_overrides (const char *archive_path,
+                                                   const char *directory,
+                                                   GError **error);
 gboolean nuvashalauncher_modpack_archive_entry_is_safe (const char *name, guint32 type,
                                             const char *hardlink,
                                             GError **error);

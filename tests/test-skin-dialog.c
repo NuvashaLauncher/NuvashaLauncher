@@ -179,9 +179,9 @@ test_missing_local_skin_cleans_upload_state (void)
   gtk_widget_set_focusable (GTK_WIDGET (window), FALSE);
   gtk_window_present (window);
   drain ();
-  dialog = nuvashalauncher_users_skin_menu_new (owner, image, account);
   account->access_token = g_strdup ("local-test-token");
   account->expires_at = G_MAXINT64;
+  dialog = nuvashalauncher_users_skin_menu_new (owner, image, account);
   adw_dialog_present (dialog, GTK_WIDGET (anchor));
   drain ();
   dialog_child = adw_dialog_get_child (dialog);

@@ -30,8 +30,6 @@ static void assign_default_instance_icon (nuvashalauncherInstance *instance,
 
 G_DEFINE_TYPE (nuvashalauncherInstanceManager, nuvashalauncher_instance_manager, G_TYPE_OBJECT)
 
-gboolean check_instance_directories (gpointer user_data);
-
 GQuark
 nuvashalauncher_instance_manager_error_quark (void)
 {

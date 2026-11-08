@@ -48,13 +48,8 @@ on_content_page_width_changed (GObject *object,
   gtk_widget_set_vexpand (GTK_WIDGET (self->bar_spacer), narrow);
 }
 
-void nuvashalauncher_content_page_run_search (nuvashalauncherContentPage *self, gboolean append);
 void update_batch_next (nuvashalauncherContentPage *self);
-void start_plan (nuvashalauncherContentPage *self, nuvashalauncherModrinthVersion *version,
-                        const char *title, const char *replaces,
-                        gboolean disabled);
 void batch_next (nuvashalauncherContentPage *self);
-
 void plan_stopped (nuvashalauncherContentPage *self);
 
 static void
