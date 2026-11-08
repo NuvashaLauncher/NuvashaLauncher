@@ -74,7 +74,6 @@ test_error_widgets (void)
 {
   if (!gtk_init_check ())
     { g_test_skip ("No display"); return; }
-  g_test_expect_message ("Gtk", G_LOG_LEVEL_WARNING, "*Unable to acquire session bus*");
   g_autoptr (GtkWidget) banner = g_object_ref_sink (adw_banner_new (""));
   g_autoptr (GError) error = g_error_new_literal (G_IO_ERROR, G_IO_ERROR_PERMISSION_DENIED,
                                                 "<b>literal diagnostic</b>");

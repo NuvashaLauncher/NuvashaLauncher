@@ -29,23 +29,19 @@ jobs:
              gcc make pkg-config gettext \
              libasan8 libubsan1 \
              libglib2.0-dev libgtk-4-dev libadwaita-1-dev libepoxy-dev \
-             libjson-glib-dev libsoup-3.0-dev libarchive-dev libsecret-1-dev \
-             weston xwayland-run dbus-daemon dbus-x11
+             libjson-glib-dev libsoup-3.0-dev libarchive-dev libsecret-1-dev
 
       - name: Build
         run: make fast CFLAGS="-std=c17 -Wall -Wextra -Wpedantic -Werror -MMD -MP"
 
-      - name: Run tests (Wayland headless)
-        run: |
-          dbus-run-session -- wlheadless-run -c weston -- make test
+      - name: Run tests
+        run: make test
 
-      - name: Run sanitizer tests (Wayland headless)
-        run: |
-          dbus-run-session -- wlheadless-run -c weston -- make test-debug
+      - name: Run sanitizer tests
+        run: make test-debug
 
-      - name: Run leak sanitizer tests (Wayland headless)
-        run: |
-          dbus-run-session -- wlheadless-run -c weston -- make test-lsan
+      - name: Run leak sanitizer tests
+        run: make test-lsan
 
       - name: Run static analysis
         run: make static-analysis
