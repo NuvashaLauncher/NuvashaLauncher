@@ -27,12 +27,7 @@ Depends:
  hicolor-icon-theme,
  shared-mime-info,
  ${misc:Depends},
- ${shlibs:Depends},
-Suggests:
- temurin-8-jdk,
- temurin-17-jdk,
- temurin-21-jdk,
- temurin-25-jdk,
+ ${shlibs:Depends}
 Description: Minecraft launcher for Linux
  Nuvasha Launcher keeps Minecraft installations separate, so each instance
  can have its own version, loader, Java runtime, settings, mods, and worlds.

@@ -29,12 +29,6 @@ makedepends=(
 checkdepends=(
   'desktop-file-utils'
 )
-optdepends=(
-  'jre8-openjdk: Java 8 runtime for Minecraft 1.16.5 and older'
-  'jre17-openjdk: Java 17 runtime for Minecraft 1.17 to 1.20.4'
-  'jre21-openjdk: Java 21 runtime for Minecraft 1.20.5 to 1.21.x'
-  'jre25-openjdk: Java 25 runtime for Minecraft 26.1 and newer'
-)
 source=("${pkgname}-${pkgver}.tar.gz")
 sha256sums=('SKIP')
 

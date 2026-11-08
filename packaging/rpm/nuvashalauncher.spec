@@ -24,10 +24,6 @@ BuildRequires:  pkgconfig(libsoup-3.0)
 
 Requires:       hicolor-icon-theme
 Requires:       shared-mime-info
-Suggests:       temurin-8-jdk
-Suggests:       temurin-17-jdk
-Suggests:       temurin-21-jdk
-Suggests:       temurin-25-jdk
 
 %description
 Nuvasha Launcher keeps Minecraft installations separate, so each instance
