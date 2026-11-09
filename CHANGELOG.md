@@ -4,8 +4,15 @@ All notable changes to Nuvasha Launcher are documented in this file.
 
 ## [1.0] - 2026-11-08
 
+### User Interface & GNOME Experience
+- **Microsoft Sign-In Dialog**: Added an `external-link-symbolic` icon to the right of the "Open in browser" action button.
+- **Instance Export Actions**: Replaced legacy save icons with GNOME standard `export-symbolic` across instance row actions, footer selection actions, and the instance settings page.
+- **Modernized Loading Indicators**: Replaced small spinners and redundant "Loading…" labels with centered 64×64 `AdwSpinner` widgets in the modpack browser, modpack detail pages, and content details (mods, resourcepacks, shaderpacks) views, aligned with GNOME application design.
+- **Bundled Symbolic Action Icons**: Bundled action icons (`export-symbolic` and `external-link-symbolic`) into application GResources and system icon directories, registering them dynamically with the GTK icon theme.
+
 ### Packaging & Distribution
 - **Linux Distribution Packaging**: Added native build recipes for Fedora/RHEL (`packaging/rpm/nuvashalauncher.spec`), Debian/Ubuntu (`packaging/debian/`), Arch Linux (`packaging/arch/PKGBUILD`), and NixOS (`flake.nix`).
+- **Streamlined Distro Dependencies**: Cleaned package definitions across RPM, Debian, Arch Linux, and NixOS by removing distro-specific optional Java dependencies in favor of user-managed JDKs and built-in Java discovery.
 - **Automated Release Workflow**: Added `.github/workflows/release.yml` to automatically build and publish `.deb` (`amd64`, `arm64`), `.rpm` (`x86_64`, `aarch64`), Arch Linux (`.pkg.tar.zst`), and Flatpak (`x86_64`, `aarch64`) packages to GitHub Releases whenever `VERSION` is updated.
 - **NixOS Java Runtime Discovery**: Added `/nix/store` scanning (`*-openjdk-*/bin/java`, `*-temurin-*/bin/java`, `*-zulu-*/bin/java`, `*-graalvm-*/bin/java`, `*-jetbrains-jdk-*/bin/java`) and `$JAVA_HOME` probing so NixOS systems detect installed JDKs automatically.
 
@@ -53,7 +60,7 @@ All notable changes to Nuvasha Launcher are documented in this file.
 
 ### Verification & Testing
 - Added regression tests for nested Markdown link parentheses parsing ([`tests/test-markdown.c`](file:///home/joaquin/Proyectos/NuvashaLauncher/tests/test-markdown.c)), zero-byte HTTP authentication error handling ([`tests/test-auth.c`](file:///home/joaquin/Proyectos/NuvashaLauncher/tests/test-auth.c)), and NeoForge version metadata parsing ([`tests/test-loaders-metadata.c`](file:///home/joaquin/Proyectos/NuvashaLauncher/tests/test-loaders-metadata.c)).
-- All 127 tests pass with zero failures and zero compiler warnings under `-Wall -Wextra -Wpedantic`.
+- All 128 tests pass with zero failures and zero compiler warnings under `-Wall -Wextra -Wpedantic -Werror`.
 
 **Full Changelog**: https://github.com/NuvashaLauncher/NuvashaLauncher/compare/v0.9...v1.0
 
