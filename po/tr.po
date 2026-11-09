@@ -216,8 +216,6 @@ msgstr "Oluştur"
 msgid "Download Modpack"
 msgstr "Modpack indir"
 
-msgid "Loading modpacks…"
-msgstr "Modpack’ler yükleniyor…"
 
 msgid "Search modpacks"
 msgstr "Modpack’lerde ara"

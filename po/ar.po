@@ -208,8 +208,6 @@ msgstr "يخلق"
 msgid "Download Modpack"
 msgstr "تحميل مودباك"
 
-msgid "Loading modpacks…"
-msgstr "جارٍ تحميل حزم التعديل…"
 
 msgid "Search modpacks"
 msgstr "ابحث في حزم التعديل"

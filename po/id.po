@@ -208,8 +208,6 @@ msgstr "Membuat"
 msgid "Download Modpack"
 msgstr "Unduh Modpack"
 
-msgid "Loading modpacks…"
-msgstr "Memuat modpack…"
 
 msgid "Search modpacks"
 msgstr "Cari modpack"

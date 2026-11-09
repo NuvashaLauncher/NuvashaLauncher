@@ -22,5 +22,7 @@
     <file>ui/nuvashalauncher-downloads-popover.ui</file>
     <file>ui/nuvashalauncher-main-shell.ui</file>
     <file>ui/nuvashalauncher-skin-content.ui</file>
+    <file alias="icons/scalable/actions/export-symbolic.svg">icons/scalable/actions/export-symbolic.svg</file>
+    <file alias="icons/scalable/actions/external-link-symbolic.svg">icons/scalable/actions/external-link-symbolic.svg</file>
   </gresource>
 </gresources>

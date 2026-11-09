@@ -11,6 +11,7 @@
 G_BEGIN_DECLS
 
 /* Shows a plain-text toast while @page is still attached to a window. */
+void nuvashalauncher_ui_ensure_icons (void);
 void nuvashalauncher_ui_show_toast (GtkWidget  *page,
                         GtkWidget  *overlay,
                         const char *message);

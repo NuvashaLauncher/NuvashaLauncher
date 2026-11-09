@@ -216,8 +216,6 @@ msgstr "Maken"
 msgid "Download Modpack"
 msgstr "Modpack downloaden"
 
-msgid "Loading modpacks…"
-msgstr "Modpacks laden…"
 
 msgid "Search modpacks"
 msgstr "Modpacks doorzoeken"

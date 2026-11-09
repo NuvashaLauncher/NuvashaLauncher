@@ -402,7 +402,7 @@ create_instance_row (gpointer item, gpointer user_data)
     "list-drag-handle-symbolic"));
   GtkBox *edit_actions = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
   GtkButton *row_export = GTK_BUTTON (gtk_button_new_from_icon_name (
-    "document-save-symbolic"));
+    "export-symbolic"));
   GtkButton *row_duplicate = GTK_BUTTON (gtk_button_new_from_icon_name (
     "edit-copy-symbolic"));
   GtkButton *row_delete = GTK_BUTTON (gtk_button_new_from_icon_name (

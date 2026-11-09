@@ -13,6 +13,7 @@
  * so it never turns a headless run into a failure. */
 
 #include <gtk/gtk.h>
+#include "nuvashalauncher-ui-feedback.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -125,6 +126,8 @@ main (int argc, char **argv)
       g_print ("skipped - no display, the icon theme cannot be opened\n");
       return 77;
     }
+
+  nuvashalauncher_ui_ensure_icons ();
 
   theme = gtk_icon_theme_get_for_display (gdk_display_get_default ());
 

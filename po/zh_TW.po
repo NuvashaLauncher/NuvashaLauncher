@@ -208,8 +208,6 @@ msgstr "創造"
 msgid "Download Modpack"
 msgstr "下載模組包"
 
-msgid "Loading modpacks…"
-msgstr "正在載入模組包..."
 
 msgid "Search modpacks"
 msgstr "搜尋模組包"

@@ -215,8 +215,6 @@ msgstr "作成"
 msgid "Download Modpack"
 msgstr "Modpack をダウンロード"
 
-msgid "Loading modpacks…"
-msgstr "Modpack を読み込んでいます…"
 
 msgid "Search modpacks"
 msgstr "Modpack を検索"

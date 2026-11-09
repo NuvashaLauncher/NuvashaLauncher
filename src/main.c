@@ -15,6 +15,7 @@
 #include "nuvashalauncher-settings.h"
 #include "nuvashalauncher-accounts.h"
 #include "nuvashalauncher-errors.h"
+#include "nuvashalauncher-ui-feedback.h"
 
 static void
 on_quit (GSimpleAction *action G_GNUC_UNUSED,
@@ -403,6 +404,7 @@ main (int argc, char **argv)
     }
 
   g_set_application_name ("Nuvasha Launcher");
+  nuvashalauncher_ui_ensure_icons ();
   load_application_css ();
 
   app = adw_application_new ("com.github.nuvashalauncher.nuvashalauncher",
