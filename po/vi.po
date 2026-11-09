@@ -208,8 +208,6 @@ msgstr "Tạo nên"
 msgid "Download Modpack"
 msgstr "Tải xuống Modpack"
 
-msgid "Loading modpacks…"
-msgstr "Đang tải modpack…"
 
 msgid "Search modpacks"
 msgstr "Tìm kiếm modpack"

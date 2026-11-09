@@ -208,8 +208,6 @@ msgstr "Luoda"
 msgid "Download Modpack"
 msgstr "Lataa Modpack"
 
-msgid "Loading modpacks…"
-msgstr "Ladataan modpackeja…"
 
 msgid "Search modpacks"
 msgstr "Etsi modpackeja"

@@ -208,8 +208,6 @@ msgstr "Teremt"
 msgid "Download Modpack"
 msgstr "Modpack letöltése"
 
-msgid "Loading modpacks…"
-msgstr "Modpackok betöltése…"
 
 msgid "Search modpacks"
 msgstr "Modpackok keresése"

@@ -213,8 +213,6 @@ msgstr "创建"
 msgid "Download Modpack"
 msgstr "下载Modpack"
 
-msgid "Loading modpacks…"
-msgstr "正在加载modpack…"
 
 msgid "Search modpacks"
 msgstr "搜索modpacks"

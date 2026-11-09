@@ -719,7 +719,7 @@ create_settings_page (nuvashalauncherInstancePage *self)
               self);
   button_row (actions, _("Export Modpack"),
               NULL,
-              "document-save-symbolic", G_CALLBACK (on_export_clicked), self);
+              "export-symbolic", G_CALLBACK (on_export_clicked), self);
   delete_row = button_row (actions, _("Delete Instance"),
                            NULL, "user-trash-symbolic",
                            G_CALLBACK (on_delete_clicked), self);

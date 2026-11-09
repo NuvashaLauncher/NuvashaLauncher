@@ -15,7 +15,7 @@ nuvashalauncher_i18n_template_strings (void)
   (void) _("Choose a folder"); (void) _("Create");
   (void) _("Download Modpack"); (void) _("Import Modpack");
   (void) _("Importing modpack…"); (void) _("Search modpacks");
-  (void) _("Close"); (void) _("Loading modpacks…");
+  (void) _("Close");
   (void) _("Loading more…"); (void) _("Nothing to show yet");
   (void) _("No modpack matches what was asked for. Try another word");
   (void) _("Choose Files"); (void) _("Could not install");

@@ -368,8 +368,6 @@ msgstr ""
 msgid "Browse"
 msgstr "Explorar"
 
-msgid "Loading modpacks…"
-msgstr "Cargando modpacks…"
 
 msgid "Open the page in your browser, then enter this code:"
 msgstr "Abrí la página en tu navegador e ingresá este código:"

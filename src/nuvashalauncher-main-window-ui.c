@@ -53,7 +53,7 @@ nuvashalauncher_main_window_build_ui (nuvashalauncherMainWindow *self)
   GtkButton *footer_delete = GTK_BUTTON (gtk_button_new_from_icon_name (
     "user-trash-symbolic"));
   GtkButton *footer_export = GTK_BUTTON (gtk_button_new_from_icon_name (
-    "document-save-symbolic"));
+    "export-symbolic"));
   GtkActionBar *selection_footer = GTK_ACTION_BAR (gtk_action_bar_new ());
   GtkLabel *selection_label = GTK_LABEL (gtk_label_new (""));
   GtkWidget *users_child = NULL;

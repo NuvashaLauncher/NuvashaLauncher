@@ -208,8 +208,6 @@ msgstr "Vytvořit"
 msgid "Download Modpack"
 msgstr "Stáhněte si Modpack"
 
-msgid "Loading modpacks…"
-msgstr "Načítání modpacků…"
 
 msgid "Search modpacks"
 msgstr "Prohledejte modpacky"

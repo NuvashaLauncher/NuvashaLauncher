@@ -234,6 +234,10 @@ install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS) $(SCHEMA_COMPILED)
 		"$(DESTDIR)$(PREFIX)/share/mime/packages/com.github.nuvashalauncher.nuvashalauncher.xml"
 	install -Dm644 data/icons/scalable/apps/com.github.nuvashalauncher.nuvashalauncher.svg \
 		"$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.nuvashalauncher.nuvashalauncher.svg"
+	install -Dm644 data/icons/scalable/actions/export-symbolic.svg \
+		"$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/actions/export-symbolic.svg"
+	install -Dm644 data/icons/scalable/actions/external-link-symbolic.svg \
+		"$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/actions/external-link-symbolic.svg"
 	install -Dm644 data/com.github.nuvashalauncher.nuvashalauncher.metainfo.xml \
 		"$(DESTDIR)$(PREFIX)/share/metainfo/com.github.nuvashalauncher.nuvashalauncher.metainfo.xml"
 	install -Dm644 $(SCHEMA_XML) \
@@ -270,6 +274,8 @@ uninstall:
 	rm -f "$(DESTDIR)$(PREFIX)/share/bash-completion/completions/nuvashalauncher"
 	rm -f "$(DESTDIR)$(PREFIX)/share/mime/packages/com.github.nuvashalauncher.nuvashalauncher.xml"
 	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.nuvashalauncher.nuvashalauncher.svg"
+	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/actions/export-symbolic.svg"
+	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/actions/external-link-symbolic.svg"
 	rm -f "$(DESTDIR)$(PREFIX)/share/metainfo/com.github.nuvashalauncher.nuvashalauncher.metainfo.xml"
 	rm -f "$(DESTDIR)$(PREFIX)/share/glib-2.0/schemas/com.github.nuvashalauncher.nuvashalauncher.gschema.xml"
 	@for lang in $(LOCALES); do \

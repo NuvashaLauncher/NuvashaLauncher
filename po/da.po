@@ -208,8 +208,6 @@ msgstr "Skabe"
 msgid "Download Modpack"
 msgstr "Download Modpack"
 
-msgid "Loading modpacks…"
-msgstr "Indlæser modpakker..."
 
 msgid "Search modpacks"
 msgstr "Søg modpacks"

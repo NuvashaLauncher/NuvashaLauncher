@@ -5,20 +5,37 @@
 #include "nuvashalauncher-ui-feedback.h"
 #include "nuvashalauncher-i18n.h"
 
+void
+nuvashalauncher_ui_ensure_icons (void)
+{
+  static gsize initialized = 0;
+  if (g_once_init_enter (&initialized))
+    {
+      GdkDisplay *display = gdk_display_get_default ();
+      if (display != NULL)
+        {
+          GtkIconTheme *icon_theme = gtk_icon_theme_get_for_display (display);
+          gtk_icon_theme_add_resource_path (
+            icon_theme, "/com/github/nuvashalauncher/nuvashalauncher/icons");
+        }
+      g_once_init_leave (&initialized, 1);
+    }
+}
+
 GtkWidget *
 nuvashalauncher_ui_loading_child (void)
 {
-  GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
+  GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   AdwSpinner *spinner = ADW_SPINNER (adw_spinner_new ());
-  GtkLabel *label = GTK_LABEL (gtk_label_new (_("Loading…")));
 
   gtk_widget_set_valign (GTK_WIDGET (box), GTK_ALIGN_CENTER);
   gtk_widget_set_halign (GTK_WIDGET (box), GTK_ALIGN_CENTER);
+  gtk_widget_set_hexpand (GTK_WIDGET (box), TRUE);
+  gtk_widget_set_vexpand (GTK_WIDGET (box), TRUE);
+  gtk_widget_set_size_request (GTK_WIDGET (spinner), 64, 64);
   gtk_widget_set_valign (GTK_WIDGET (spinner), GTK_ALIGN_CENTER);
   gtk_widget_set_halign (GTK_WIDGET (spinner), GTK_ALIGN_CENTER);
-  gtk_widget_add_css_class (GTK_WIDGET (label), "dim-label");
   gtk_box_append (box, GTK_WIDGET (spinner));
-  gtk_box_append (box, GTK_WIDGET (label));
 
   return GTK_WIDGET (box);
 }

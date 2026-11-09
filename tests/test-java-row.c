@@ -115,6 +115,7 @@ main (void)
         {
           nuvashalauncher_java_row_set_required_major (row, only->major_version);
           pump (20);
+          model = GTK_STRING_LIST (adw_combo_row_get_model (ADW_COMBO_ROW (row)));
           g_assert_cmpuint (count_name (model,
                                         gtk_string_list_get_string (model, 0)),
                             ==, 1);

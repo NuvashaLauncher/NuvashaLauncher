@@ -324,7 +324,15 @@ nuvashalauncher_sign_in_dialog_init (nuvashalauncherSignInDialog *self)
   gtk_widget_set_visible (GTK_WIDGET (self->error_label), FALSE);
   gtk_widget_set_visible (GTK_WIDGET (self->retry_button), FALSE);
 
-   gtk_button_set_label (self->open_button, _("Open in browser"));
+  nuvashalauncher_ui_ensure_icons ();
+
+  GtkWidget *open_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  GtkWidget *open_label = gtk_label_new (_("Open in browser"));
+  GtkWidget *open_icon = gtk_image_new_from_icon_name ("external-link-symbolic");
+  gtk_widget_set_halign (open_box, GTK_ALIGN_CENTER);
+  gtk_box_append (GTK_BOX (open_box), open_label);
+  gtk_box_append (GTK_BOX (open_box), open_icon);
+  gtk_button_set_child (self->open_button, open_box);
   gtk_button_set_label (self->retry_button, _("Try Again"));
   nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (self->retry_button), _("Try Again"));
   g_signal_connect_object (self->open_button, "clicked", G_CALLBACK (on_open_clicked), self, 0);

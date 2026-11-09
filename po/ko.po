@@ -216,8 +216,6 @@ msgstr "생성"
 msgid "Download Modpack"
 msgstr "모드팩 다운로드"
 
-msgid "Loading modpacks…"
-msgstr "모드팩 로드 중..."
 
 msgid "Search modpacks"
 msgstr "모드팩 검색"

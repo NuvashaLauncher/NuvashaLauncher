@@ -208,8 +208,6 @@ msgstr "Crea"
 msgid "Download Modpack"
 msgstr "Descărcați Modpack"
 
-msgid "Loading modpacks…"
-msgstr "Se încarcă modpack-uri..."
 
 msgid "Search modpacks"
 msgstr "Căutați modpack-uri"

@@ -216,8 +216,6 @@ msgstr "Создать"
 msgid "Download Modpack"
 msgstr "Скачать Modpack"
 
-msgid "Loading modpacks…"
-msgstr "Загрузка пакетов модов..."
 
 msgid "Search modpacks"
 msgstr "Поиск модпаков"

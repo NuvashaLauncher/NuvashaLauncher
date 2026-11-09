@@ -2,13 +2,14 @@
 <interface>
   <object class="GtkBox" id="loading">
     <property name="orientation">vertical</property>
-    <property name="spacing">6</property>
     <property name="halign">center</property>
     <property name="valign">center</property>
-    <child><object class="AdwSpinner"/></child>
+    <property name="hexpand">True</property>
+    <property name="vexpand">True</property>
     <child>
-      <object class="GtkLabel">
-        <property name="label" translatable="yes">Loading modpacks…</property>
+      <object class="AdwSpinner">
+        <property name="width_request">64</property>
+        <property name="height_request">64</property>
       </object>
     </child>
   </object>
