@@ -47,10 +47,12 @@
       <description>
         <p>Added distribution packaging (RPM, Debian/Ubuntu, Arch Linux,
         NixOS flake, and automated GitHub release builds) with NixOS store Java
-        discovery. This release also includes an exhaustive codebase audit fixing
-        async task lifetimes, memory management, 3D skin rendering, archive and
-        filesystem security, OAuth and download handling, portable instance
-        paths, GSettings schema discovery, and launcher stability.</p>
+        discovery. This release also introduces modern 64px loading spinners,
+        external link and export symbolic action icons, streamlined distribution
+        dependencies, and an exhaustive codebase audit fixing async task lifetimes,
+        memory management, 3D skin rendering, archive and filesystem security,
+        OAuth and download handling, portable instance paths, GSettings schema
+        discovery, and launcher stability.</p>
       </description>
     </release>
     <release version="0.9" date="2026-10-30">
