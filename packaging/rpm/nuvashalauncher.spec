@@ -73,6 +73,8 @@ appstream-util validate-relax --nonet %{buildroot}%{_datadir}/metainfo/com.githu
 %{_datadir}/bash-completion/completions/nuvashalauncher
 %{_datadir}/glib-2.0/schemas/com.github.nuvashalauncher.nuvashalauncher.gschema.xml
 %{_datadir}/icons/hicolor/scalable/apps/com.github.nuvashalauncher.nuvashalauncher.svg
+%{_datadir}/icons/hicolor/scalable/actions/export-symbolic.svg
+%{_datadir}/icons/hicolor/scalable/actions/external-link-symbolic.svg
 %{_datadir}/metainfo/com.github.nuvashalauncher.nuvashalauncher.metainfo.xml
 %{_datadir}/mime/packages/com.github.nuvashalauncher.nuvashalauncher.xml
 
