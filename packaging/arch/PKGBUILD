@@ -1,7 +1,7 @@
 # Maintainer: Flia <43163973-anotherminecraftlauncher@users.noreply.gitlab.com>
 
 pkgname=nuvashalauncher
-pkgver=${_pkgver:-1.0}
+pkgver=${_pkgver:-0.9}
 pkgrel=1
 pkgdesc='Minecraft launcher for Linux'
 arch=('x86_64' 'aarch64')

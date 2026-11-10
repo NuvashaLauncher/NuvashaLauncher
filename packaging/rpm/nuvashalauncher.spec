@@ -1,5 +1,5 @@
 Name:           nuvashalauncher
-Version:        %{?_version}%{!?_version:1.0}
+Version:        %{?_version}%{!?_version:0.9}
 Release:        1%{?dist}
 Summary:        Minecraft launcher for Linux
 
