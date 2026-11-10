@@ -240,12 +240,16 @@ nuvashalauncher_java_probe_list_async (char            **executables,
     cancellable, callback, user_data, probe_list_sequence_step, list,
     probe_list_destroyed);
 
+  /* Kept on the stack, not read back out of the list: a sequence that
+     answers at once frees the list, and unref is past that. */
+  nuvashalauncherTaskSequence *sequence = list->sequence;
+
   /* The handle the caller gets back stands for the whole run. The
      sequence keeps the task itself. */
-  scope = nuvashalauncher_task_sequence_scope (list->sequence);
+  scope = nuvashalauncher_task_sequence_scope (sequence);
 
-  nuvashalauncher_task_sequence_start (list->sequence);
-  nuvashalauncher_task_sequence_unref (list->sequence);
+  nuvashalauncher_task_sequence_start (sequence);
+  nuvashalauncher_task_sequence_unref (sequence);
   return scope;
 }
 
