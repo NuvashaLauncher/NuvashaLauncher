@@ -6,15 +6,14 @@
  * the source does, and the source's destroy notify tears it down. */
 typedef struct
 {
-  GCancellable *cancellable;
   GSourceFunc callback;
   gpointer user_data;
   GDestroyNotify notify;
-  gulong handler;
 } CancellableWatch;
 
 static gboolean
-watch_dispatch (gpointer user_data)
+watch_dispatch (GCancellable *cancellable G_GNUC_UNUSED,
+                gpointer      user_data)
 {
   CancellableWatch *watch = user_data;
 
@@ -26,20 +25,9 @@ watch_free (gpointer user_data)
 {
   CancellableWatch *watch = user_data;
 
-  if (watch->handler != 0)
-    g_cancellable_disconnect (watch->cancellable, watch->handler);
-  g_clear_object (&watch->cancellable);
-
   if (watch->notify != NULL)
     watch->notify (watch->user_data);
   g_free (watch);
-}
-
-static void
-watch_cancelled (GCancellable *cancellable G_GNUC_UNUSED,
-                 gpointer      user_data)
-{
-  g_source_set_ready_time (user_data, 0);
 }
 
 guint
@@ -48,24 +36,20 @@ nuvashalauncher_cancellable_watch (GCancellable  *cancellable,
                                    gpointer       user_data,
                                    GDestroyNotify notify)
 {
-  CancellableWatch *watch = g_new0 (CancellableWatch, 1);
+  CancellableWatch *watch;
   GSource *source;
   guint source_id;
 
   g_return_val_if_fail (G_IS_CANCELLABLE (cancellable), 0);
   g_return_val_if_fail (callback != NULL, 0);
 
+  watch = g_new0 (CancellableWatch, 1);
   watch->callback = callback;
   watch->user_data = user_data;
   watch->notify = notify;
-  watch->cancellable = g_object_ref (cancellable);
 
-  source = g_timeout_source_new (0);
-  g_source_set_ready_time (source, G_MAXINT64);
-  g_source_set_callback (source, watch_dispatch, watch, watch_free);
-  watch->handler =
-    g_cancellable_connect (cancellable, G_CALLBACK (watch_cancelled), source,
-                           NULL);
+  source = g_cancellable_source_new (cancellable);
+  g_source_set_callback (source, (GSourceFunc) watch_dispatch, watch, watch_free);
 
   source_id = g_source_attach (source, g_main_context_get_thread_default ());
   g_source_unref (source);

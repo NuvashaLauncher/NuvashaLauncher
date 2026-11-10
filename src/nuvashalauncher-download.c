@@ -100,6 +100,8 @@ nuvashalauncher_download_service_free (nuvashalauncherDownloadService *owned_ser
       owned_service->destroy_requested = TRUE;
       return;
     }
+  if (owned_service->session != NULL)
+    soup_session_abort (owned_service->session);
   g_clear_object (&owned_service->session);
   g_clear_object (&owned_service->cache_settings);
   g_free (owned_service);
@@ -112,6 +114,8 @@ service_destroy_if_requested (nuvashalauncherDownloadService *service)
       service->interactive_running != 0 || service->bulk_running != 0)
     return;
 
+  if (service->session != NULL)
+    soup_session_abort (service->session);
   g_clear_object (&service->session);
   g_clear_object (&service->cache_settings);
   g_free (service);
@@ -123,10 +127,12 @@ get_session (nuvashalauncherDownloadService *service)
   if (service->session == NULL)
      /* Set connection limits when constructing the session so they match
         the transfer scheduler. */
-    service->session = g_object_new (SOUP_TYPE_SESSION, "user-agent",
-                            "nuvashalauncher (nuvashalauncher)", "timeout",
-                            (guint) 60, "max-conns", (gint) MAX_CONCURRENT,
-                            "max-conns-per-host", (gint) MAX_CONCURRENT, NULL);
+    service->session = soup_session_new_with_options (
+      "user-agent", "nuvashalauncher (nuvashalauncher)",
+      "timeout", (guint) 60,
+      "max-conns", (gint) MAX_CONCURRENT,
+      "max-conns-per-host", (gint) MAX_CONCURRENT,
+      NULL);
 
   return service->session;
 }
@@ -164,9 +170,12 @@ request_was_cancelled (DownloadRequest *request, GError *error)
 static gboolean
 usable_url (const char *url)
 {
-  g_autoptr (SoupMessage) message = soup_message_new (SOUP_METHOD_GET, url);
+  if (url == NULL || *url == '\0')
+    return FALSE;
 
-  return message != NULL;
+  g_autoptr (GUri) uri = g_uri_parse (url, SOUP_HTTP_URI_FLAGS, NULL);
+
+  return uri != NULL;
 }
 
 static gboolean

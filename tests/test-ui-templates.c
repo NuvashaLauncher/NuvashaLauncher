@@ -54,7 +54,6 @@ test_builder_templates_parse (void)
     "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-content-file-row.ui",
     "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-download-row.ui",
     "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-skin-row.ui",
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-downloads-popover.ui",
     "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-content-details.ui",
   };
 

@@ -737,13 +737,26 @@ build_browse_page (nuvashalauncherDownloadModpackDialog *self, gboolean start_se
      ADW_NAVIGATION_SPLIT_VIEW (self->split),
      gtk_widget_get_width (GTK_WIDGET (self)) < 820);
 
-  adw_navigation_split_view_set_sidebar_width_fraction (
-    ADW_NAVIGATION_SPLIT_VIEW (self->split), 0.5);
+   adw_navigation_split_view_set_sidebar_width_fraction (
+     ADW_NAVIGATION_SPLIT_VIEW (self->split), 0.5);
    adw_navigation_split_view_set_min_sidebar_width (
      ADW_NAVIGATION_SPLIT_VIEW (self->split), 360);
    adw_navigation_split_view_set_max_sidebar_width (
      ADW_NAVIGATION_SPLIT_VIEW (self->split), 640);
   gtk_box_append (GTK_BOX (root), GTK_WIDGET (self->split));
+
+  {
+    AdwBreakpointCondition *narrow_condition =
+      adw_breakpoint_condition_new_length (ADW_BREAKPOINT_CONDITION_MAX_WIDTH,
+                                           820, ADW_LENGTH_UNIT_PX);
+    AdwBreakpoint *breakpoint = adw_breakpoint_new (narrow_condition);
+    GValue collapsed = G_VALUE_INIT;
+    g_value_init (&collapsed, G_TYPE_BOOLEAN);
+    g_value_set_boolean (&collapsed, TRUE);
+    adw_breakpoint_add_setter (breakpoint, G_OBJECT (self->split), "collapsed", &collapsed);
+    g_value_unset (&collapsed);
+    adw_dialog_add_breakpoint (ADW_DIALOG (self), breakpoint);
+  }
 
   page = GTK_WIDGET (adw_navigation_page_new (GTK_WIDGET (root), ""));
   adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (page), "browse");

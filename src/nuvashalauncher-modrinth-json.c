@@ -132,7 +132,7 @@ nuvashalauncher_modrinth_root_node (const char *json, gssize length, GError **er
       return NULL;
     }
 
-  root = json_parser_get_root (parser);
+  root = json_parser_steal_root (parser);
 
   if (root == NULL)
     {
@@ -142,8 +142,7 @@ nuvashalauncher_modrinth_root_node (const char *json, gssize length, GError **er
       return NULL;
     }
 
-  /* The copy is what outlives the parser. */
-  return json_node_copy (root);
+  return root;
 }
 
 /* The string @name of the object @node, or NULL. A field that is there

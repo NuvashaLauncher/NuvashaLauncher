@@ -45,21 +45,6 @@ nuvashalauncher_fs_replace_contents (const char *path, const void *contents,
 }
 
 gboolean
-nuvashalauncher_fs_make_private_directory (const char *path, GError **error)
-{
-  if (!nuvashalauncher_fs_make_directory (path, 0700, error))
-    return FALSE;
-  if (g_chmod (path, 0700) != 0)
-    {
-      int saved_errno = errno;
-      g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (saved_errno),
-                   "cannot secure \"%s\": %s", path, g_strerror (saved_errno));
-      return FALSE;
-    }
-  return TRUE;
-}
-
-gboolean
 nuvashalauncher_fs_make_directory (const char *path, int mode, GError **error)
 {
   if (g_mkdir_with_parents (path, mode) != 0)
@@ -293,25 +278,6 @@ nuvashalauncher_fs_replace_contents_async (GFile *file, const char *contents, gs
 gboolean
 nuvashalauncher_fs_replace_contents_finish (GFile *file, GAsyncResult *result,
                                 char **new_etag, GError **error)
-{
-  return g_file_replace_contents_finish (file, result, new_etag, error);
-}
-
-void
-nuvashalauncher_fs_replace_contents_bytes_async (GFile *file, GBytes *contents,
-                                     const char *etag, gboolean make_backup,
-                                     GFileCreateFlags flags,
-                                     GCancellable *cancellable,
-                                     GAsyncReadyCallback callback,
-                                     gpointer user_data)
-{
-  g_file_replace_contents_bytes_async (file, contents, etag, make_backup,
-                                       flags, cancellable, callback, user_data);
-}
-
-gboolean
-nuvashalauncher_fs_replace_contents_bytes_finish (GFile *file, GAsyncResult *result,
-                                      char **new_etag, GError **error)
 {
   return g_file_replace_contents_finish (file, result, new_etag, error);
 }

@@ -572,6 +572,7 @@ export_thread (GTask *task G_GNUC_UNUSED,
                    "cannot write the modpack manifest: %s",
                    archive_error_string (archive));
       archive_entry_free (manifest_entry);
+      archive_write_fail (archive);
       archive_write_free (archive);
       nuvashalauncher_fs_unlink (run->temporary_archive, NULL);
       nuvashalauncher_task_scope_return_error (scope, g_steal_pointer (&error));
@@ -598,6 +599,7 @@ export_thread (GTask *task G_GNUC_UNUSED,
                      g_cancellable_is_cancelled (cancellable)
                        ? "cancelled" : "cannot finish the modpack archive");
       archive_entry_free (manifest_entry);
+      archive_write_fail (archive);
       archive_write_free (archive);
       nuvashalauncher_fs_unlink (run->temporary_archive, NULL);
       nuvashalauncher_task_scope_return_error (scope, g_steal_pointer (&error));

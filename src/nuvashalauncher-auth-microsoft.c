@@ -161,6 +161,13 @@ nuvashalauncher_auth_send (AuthRequest         *self,
 
   self->step = step;
   self->message = soup_message_new (method, url);
+  if (self->message == NULL)
+    {
+      fail (self, g_error_new (nuvashalauncher_AUTH_ERROR,
+                               nuvashalauncher_AUTH_ERROR_SERVICE,
+                               "Invalid request URL \"%s\"", url));
+      return;
+    }
 
   if (body != NULL)
     {
@@ -173,10 +180,6 @@ nuvashalauncher_auth_send (AuthRequest         *self,
     }
 
   request_headers = soup_message_get_request_headers (self->message);
-
-  if (content_type != NULL)
-    soup_message_headers_replace (request_headers, "Content-Type",
-                                  content_type);
 
   for (guint i = 0; headers != NULL && headers[i] != NULL; i += 2)
     soup_message_headers_replace (request_headers, headers[i], headers[i + 1]);

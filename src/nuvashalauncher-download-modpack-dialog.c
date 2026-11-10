@@ -44,20 +44,6 @@ G_DEFINE_FINAL_TYPE (nuvashalauncherDownloadModpackDialog, nuvashalauncher_downl
 
 static void build_import_page (nuvashalauncherDownloadModpackDialog *self);
 
-static void
-on_modpack_dialog_width_changed (GObject *object,
-                                 GParamSpec *pspec G_GNUC_UNUSED,
-                                 gpointer user_data G_GNUC_UNUSED)
-{
-  nuvashalauncherDownloadModpackDialog *self =
-    nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (object);
-  int width = gtk_widget_get_width (GTK_WIDGET (self));
-
-  if (self->split == NULL || width <= 0)
-    return;
-  adw_navigation_split_view_set_collapsed (self->split, width < 820);
-}
-
 /* Store a weak pointer to @widget in @field. */
 void
 details_watch (gpointer field, GtkWidget *widget)
@@ -162,6 +148,8 @@ dialog_dispose (GObject *object)
   g_free (self->icon_path);
   self->icon_path = NULL;
 
+  gtk_widget_dispose_template (GTK_WIDGET (self), nuvashalauncher_TYPE_DOWNLOAD_MODPACK_DIALOG);
+
   G_OBJECT_CLASS (nuvashalauncher_download_modpack_dialog_parent_class)->dispose (object);
 }
 
@@ -215,9 +203,6 @@ nuvashalauncher_download_modpack_dialog_init (nuvashalauncherDownloadModpackDial
                                           NULL);
 
   g_signal_connect_object (self, "closed", G_CALLBACK (on_dialog_closed), self, 0);
-
-  g_signal_connect_object (self, "notify::width",
-                           G_CALLBACK (on_modpack_dialog_width_changed), self, 0);
 
   nuvashalauncher_dialog_set_standard_size (ADW_DIALOG (self));
   adw_dialog_set_content_width (ADW_DIALOG (self),

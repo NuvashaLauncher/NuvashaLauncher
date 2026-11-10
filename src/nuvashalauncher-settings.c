@@ -347,12 +347,21 @@ nuvashalauncher_settings_set_cache_expiration (nuvashalauncherSettings *self,
 }
 
 static void
+nuvashalauncher_settings_dispose (GObject *object)
+{
+  nuvashalauncherSettings *self = nuvashalauncher_SETTINGS (object);
+
+  g_clear_object (&self->desktop_settings);
+
+  G_OBJECT_CLASS (nuvashalauncher_settings_parent_class)->dispose (object);
+}
+
+static void
 nuvashalauncher_settings_finalize (GObject *object)
 {
   nuvashalauncherSettings *self = nuvashalauncher_SETTINGS (object);
 
-  g_free (self->language);
-  g_clear_object (&self->desktop_settings);
+  g_clear_pointer (&self->language, g_free);
 
   G_OBJECT_CLASS (nuvashalauncher_settings_parent_class)->finalize (object);
 }
@@ -362,6 +371,7 @@ nuvashalauncher_settings_class_init (nuvashalauncherSettingsClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
+  object_class->dispose = nuvashalauncher_settings_dispose;
   object_class->finalize = nuvashalauncher_settings_finalize;
 }
 

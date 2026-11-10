@@ -51,7 +51,7 @@ xsts_answered (AuthRequest *self)
     {
       if (error != NULL)
         fail (self, g_steal_pointer (&error));
-      else if (self->status < 200 || self->status > 299)
+      else if (!SOUP_STATUS_IS_SUCCESSFUL (self->status))
         fail (self, refusal (self->body, self->status, nuvashalauncher_AUTH_ERROR_XBOX,
                              "XSTS refused the token request"));
       else
@@ -61,7 +61,7 @@ xsts_answered (AuthRequest *self)
       return;
     }
 
-  if (self->status < 200 || self->status > 299)
+  if (!SOUP_STATUS_IS_SUCCESSFUL (self->status))
     {
       fail (self, refusal (self->body, self->status, nuvashalauncher_AUTH_ERROR_XBOX,
                            "Xbox services refused the sign-in"));

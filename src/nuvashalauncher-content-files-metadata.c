@@ -277,8 +277,8 @@ archive_entry_bytes (struct archive *archive, struct archive_entry *header,
   la_int64_t offset = 0;
   GByteArray *bytes = g_byte_array_new ();
 
-  if (!archive_entry_size_is_set (header) || size < 0 ||
-      size > MAX_LOCAL_ARCHIVE_MEMBER_SIZE)
+  if (archive_entry_size_is_set (header) &&
+      (size < 0 || size > (la_int64_t) MAX_LOCAL_ARCHIVE_MEMBER_SIZE))
     {
       g_byte_array_unref (bytes);
       return FALSE;
@@ -313,13 +313,15 @@ read_archive_member (const char *path, const char *member)
   int status = ARCHIVE_EOF;
   gboolean found = FALSE;
 
+  archive_read_support_filter_all (archive);
   archive_read_support_format_zip (archive);
   if (archive_read_open_filename (archive, path, 64 * 1024) != ARCHIVE_OK)
     {
       archive_read_free (archive);
       return NULL;
     }
-  while ((status = archive_read_next_header (archive, &header)) == ARCHIVE_OK)
+  while ((status = archive_read_next_header (archive, &header)) == ARCHIVE_OK ||
+         status == ARCHIVE_WARN)
     {
       if (++entries > MAX_LOCAL_ARCHIVE_ENTRIES)
         break;
@@ -546,36 +548,6 @@ apply_resource_metadata (nuvashalauncherContentFile *file)
         file->local_icon_path = g_steal_pointer (&path);
     }
   file->local_metadata = TRUE;
-}
-
-gboolean
-nuvashalauncher_content_load_local_icon (nuvashalauncherContentFile *file)
-{
-  g_autoptr (GByteArray) icon = NULL;
-  g_autofree char *directory = NULL;
-  g_autofree char *name = NULL;
-  g_autofree char *path = NULL;
-
-  if (file == NULL || file->local_icon_member == NULL ||
-      file->local_icon_path != NULL || file->sha1 == NULL)
-    return file != NULL && file->local_icon_path != NULL;
-
-  icon = read_archive_member (file->path, file->local_icon_member);
-  if (icon == NULL)
-    return FALSE;
-
-  directory = g_build_filename (g_get_user_cache_dir (), "nuvashalauncher", "icons",
-                                "local", NULL);
-  name = g_strconcat (file->sha1, ".png", NULL);
-  path = g_build_filename (directory, name, NULL);
-
-  if (!nuvashalauncher_fs_make_directory (directory, 0755, NULL) ||
-      !nuvashalauncher_fs_replace_contents (path, icon->data, icon->len, 0644, NULL) ||
-      !nuvashalauncher_icon_scale_file (path))
-    return FALSE;
-
-  file->local_icon_path = g_steal_pointer (&path);
-  return TRUE;
 }
 
 typedef struct

@@ -12,6 +12,10 @@ nuvashalauncher_modpack_path_is_safe (const char *path)
   if (path == NULL || *path == '\0')
     return FALSE;
 
+  /* 1. Leading slashes and tildes are not safe relative paths. */
+  if (path[0] == '/' || path[0] == '~')
+    return FALSE;
+
   /* Every byte a name has goes through here before it is a path on the
    * disk: a control character (NUL is one of them) or a DEL has no
    * business inside a file name. */
@@ -29,9 +33,8 @@ nuvashalauncher_modpack_path_is_safe (const char *path)
     return FALSE;
 
   /* A drive name, which a path has no business dragging to a client
-   * that has no drives: "C:/mods". */
-  if (g_ascii_isalpha (path[0]) && path[1] == ':' &&
-      (path[2] == '\0' || path[2] == '/'))
+   * that has no drives: "C:/mods" or drive-relative "C:mods". */
+  if (g_ascii_isalpha (path[0]) && path[1] == ':')
     return FALSE;
 
   parts = g_strsplit (path, "/", -1);

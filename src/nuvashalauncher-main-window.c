@@ -126,8 +126,7 @@ nuvashalauncher_main_window_import_file (nuvashalauncherMainWindow *self, const 
 
   dialog = nuvashalauncher_download_modpack_dialog_new_for_file (
     self->model->manager, path);
-  g_object_ref_sink (dialog);
-  g_object_unref (dialog);
+  adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
 }
 
 /* Keep launch failures in the window banner until they are dismissed. */

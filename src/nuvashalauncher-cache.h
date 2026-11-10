@@ -12,10 +12,6 @@ G_BEGIN_DECLS
 
 char *nuvashalauncher_cache_get_api_directory (void);
 char *nuvashalauncher_cache_get_files_directory (void);
-gboolean nuvashalauncher_cache_ensure_directory (const char *path, GError **error);
-
-nuvashalauncherTaskScope *nuvashalauncher_cache_clear_api_async (GAsyncReadyCallback callback,
-                                          gpointer            user_data);
 
 /* Removes the contents of the global nuvashalauncher cache tree. It never traverses
  * instance directories, so installed content and its metadata indexes stay

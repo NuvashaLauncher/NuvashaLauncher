@@ -350,6 +350,8 @@ nuvashalauncher_sign_in_dialog_dispose (GObject *object)
     g_cancellable_cancel (self->cancellable);
   g_clear_object (&self->cancellable);
 
+  gtk_widget_dispose_template (GTK_WIDGET (self), nuvashalauncher_TYPE_SIGN_IN_DIALOG);
+
   G_OBJECT_CLASS (nuvashalauncher_sign_in_dialog_parent_class)->dispose (object);
 }
 

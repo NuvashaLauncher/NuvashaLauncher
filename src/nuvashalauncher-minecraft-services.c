@@ -94,7 +94,7 @@ nuvashalauncher_minecraft_services_response_error (SoupMessage *message, GBytes 
     return g_error_new (nuvashalauncher_MINECRAFT_SERVICES_ERROR,
                         nuvashalauncher_MINECRAFT_SERVICES_ERROR_RATE_LIMITED,
                         "rate limited");
-  if (status < 200 || status >= 300)
+  if (!SOUP_STATUS_IS_SUCCESSFUL (status))
     return g_error_new (nuvashalauncher_MINECRAFT_SERVICES_ERROR,
                         nuvashalauncher_MINECRAFT_SERVICES_ERROR_HTTP,
                         _("Minecraft Services rejected the request (HTTP %u)%s%s"),
@@ -108,31 +108,22 @@ nuvashalauncher_minecraft_services_skin_multipart (GBytes *skin,
                                            const char *variant,
                                            char **content_type)
 {
-  GByteArray *payload;
-  const char *boundary = "------------------------nuvashalauncherSkin";
-  gsize length = 0;
-  gconstpointer data;
-
   if (variant == NULL || *variant == '\0')
     variant = "CLASSIC";
   g_return_val_if_fail (skin != NULL, NULL);
   g_return_val_if_fail (content_type != NULL, NULL);
 
-  data = g_bytes_get_data (skin, &length);
-  payload = g_byte_array_new ();
-  g_byte_array_append (payload, (const guint8 *) "--", 2);
-  g_byte_array_append (payload, (const guint8 *) boundary, strlen (boundary));
-  g_byte_array_append (payload, (const guint8 *) "\r\nContent-Disposition: form-data; name=\"file\"; filename=\"skin.png\"\r\nContent-Type: image/png\r\n\r\n", strlen ("\r\nContent-Disposition: form-data; name=\"file\"; filename=\"skin.png\"\r\nContent-Type: image/png\r\n\r\n"));
-  g_byte_array_append (payload, data, length);
-  g_byte_array_append (payload, (const guint8 *) "\r\n--", 4);
-  g_byte_array_append (payload, (const guint8 *) boundary, strlen (boundary));
-  g_byte_array_append (payload, (const guint8 *) "\r\nContent-Disposition: form-data; name=\"variant\"\r\n\r\n", strlen ("\r\nContent-Disposition: form-data; name=\"variant\"\r\n\r\n"));
-  g_byte_array_append (payload, (const guint8 *) variant, strlen (variant));
-  g_byte_array_append (payload, (const guint8 *) "\r\n--", 4);
-  g_byte_array_append (payload, (const guint8 *) boundary, strlen (boundary));
-  g_byte_array_append (payload, (const guint8 *) "--\r\n", 4);
-  *content_type = g_strdup_printf ("multipart/form-data; boundary=%s", boundary);
-  return g_byte_array_free_to_bytes (payload);
+  g_autoptr (SoupMultipart) multipart = soup_multipart_new ("multipart/form-data");
+  soup_multipart_append_form_file (multipart, "file", "skin.png", "image/png", skin);
+  soup_multipart_append_form_string (multipart, "variant", variant);
+
+  g_autoptr (SoupMessageHeaders) headers = soup_message_headers_new (SOUP_MESSAGE_HEADERS_MULTIPART);
+  GBytes *body = NULL;
+  soup_multipart_to_message (multipart, headers, &body);
+
+  const char *ct = soup_message_headers_get_one (headers, "Content-Type");
+  *content_type = g_strdup (ct != NULL ? ct : "multipart/form-data");
+  return body;
 }
 
 typedef struct {

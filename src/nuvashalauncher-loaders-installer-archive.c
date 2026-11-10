@@ -9,6 +9,7 @@
 #include "nuvashalauncher-loaders.h"
 #include "nuvashalauncher-loaders-private.h"
 #include "nuvashalauncher-fs.h"
+#include "nuvashalauncher-modpack.h"
 
 #include <archive.h>
 #include <fcntl.h>
@@ -68,33 +69,7 @@ gboolean
 nuvashalauncher_loader_write_install_file (const char *path, const void *data, gsize size,
                     GError **error)
 {
-  g_autofree char *directory = g_path_get_dirname (path);
-  g_autofree char *temporary = NULL;
-  g_autoptr (GError) local_error = NULL;
-  int fd = nuvashalauncher_fs_open_temporary_file (directory, ".nuvashalauncher-loader-XXXXXX",
-                                       &temporary, error);
-
-  if (fd < 0)
-    {
-      return FALSE;
-    }
-  close (fd);
-
-  if (!nuvashalauncher_fs_replace_contents (temporary, data, (gssize) size, 0600,
-                                &local_error) ||
-      !nuvashalauncher_fs_rename (temporary, path, &local_error))
-    {
-      if (local_error == NULL)
-        g_set_error (&local_error, nuvashalauncher_LOADERS_ERROR,
-                     nuvashalauncher_LOADERS_ERROR_INSTALLER,
-                     "cannot publish \"%s\": %s", path, g_strerror (errno));
-      nuvashalauncher_fs_unlink (temporary, NULL);
-      g_propagate_error (error, g_steal_pointer (&local_error));
-      return FALSE;
-    }
-
-  g_chmod (path, 0644);
-  return TRUE;
+  return nuvashalauncher_fs_replace_contents (path, data, (gssize) size, 0644, error);
 }
 
 /* Read @entry from the installer JAR at @path. */
@@ -110,20 +85,29 @@ nuvashalauncher_loader_read_zip_entry (const char *path, const char *entry, GErr
   archive = archive_read_new ();
 
   int fd = open (path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+  if (fd < 0)
+    {
+      int saved_errno = errno;
+      g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
+                   "cannot open \"%s\": %s", path, g_strerror (saved_errno));
+      archive_read_free (archive);
+      return NULL;
+    }
 
-  if (fd < 0 || archive_read_support_format_zip (archive) != ARCHIVE_OK ||
+  archive_read_support_filter_all (archive);
+  if (archive_read_support_format_zip (archive) != ARCHIVE_OK ||
       archive_read_open_fd (archive, fd, 65536) != ARCHIVE_OK)
     {
       g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
                    "the installer at \"%s\" cannot be read: %s", path,
                    archive_error_string (archive));
-      if (fd >= 0)
-        close (fd);
+      close (fd);
       archive_read_free (archive);
       return NULL;
     }
 
-  while ((status = archive_read_next_header (archive, &header)) == ARCHIVE_OK)
+  while ((status = archive_read_next_header (archive, &header)) == ARCHIVE_OK ||
+         status == ARCHIVE_WARN)
     {
       const char *name = NULL;
 
@@ -297,15 +281,23 @@ nuvashalauncher_loader_write_jar_manifest_attribute (const char *path, const cha
   in = archive_read_new ();
 
   int fd = open (path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+  if (fd < 0)
+    {
+      int saved_errno = errno;
+      g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
+                   "cannot open \"%s\": %s", path, g_strerror (saved_errno));
+      archive_read_free (in);
+      return FALSE;
+    }
 
-  if (fd < 0 || archive_read_support_format_zip (in) != ARCHIVE_OK ||
+  archive_read_support_filter_all (in);
+  if (archive_read_support_format_zip (in) != ARCHIVE_OK ||
       archive_read_open_fd (in, fd, 65536) != ARCHIVE_OK)
     {
       g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
                    "the patched client jar at \"%s\" cannot be read: %s", path,
                    archive_error_string (in));
-      if (fd >= 0)
-        close (fd);
+      close (fd);
       archive_read_free (in);
       return FALSE;
     }
@@ -347,7 +339,8 @@ nuvashalauncher_loader_write_jar_manifest_attribute (const char *path, const cha
       }
   }
 
-  while ((status = archive_read_next_header (in, &header)) == ARCHIVE_OK)
+  while ((status = archive_read_next_header (in, &header)) == ARCHIVE_OK ||
+         status == ARCHIVE_WARN)
     {
       struct archive_entry *copy = archive_entry_clone (header);
       g_autoptr (GBytes) bytes = NULL;
@@ -356,8 +349,13 @@ nuvashalauncher_loader_write_jar_manifest_attribute (const char *path, const cha
       size_t size = 0;
       la_int64_t offset = 0;
        int copy_status;
+      const char *entry_name = archive_entry_pathname (header);
 
-      if (archive_entry_pathname (header) == NULL)
+      if (entry_name == NULL ||
+          !nuvashalauncher_modpack_path_is_safe (entry_name) ||
+          archive_entry_filetype (header) == AE_IFLNK ||
+          archive_entry_symlink (header) != NULL ||
+          archive_entry_hardlink (header) != NULL)
         {
           archive_entry_free (copy);
           ok = FALSE;
@@ -470,6 +468,9 @@ nuvashalauncher_loader_write_jar_manifest_attribute (const char *path, const cha
   close (fd);
   fd = -1;
   archive_read_free (in);
+
+  if (!ok)
+    archive_write_fail (out);
 
   if (!ok || archive_write_close (out) != ARCHIVE_OK)
     {

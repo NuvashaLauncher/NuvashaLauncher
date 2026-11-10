@@ -25,7 +25,6 @@ G_BEGIN_DECLS
 
 gboolean nuvashalauncher_fs_replace_contents (const char *path, const void *contents,
                                   gssize length, int mode, GError **error);
-gboolean nuvashalauncher_fs_make_private_directory (const char *path, GError **error);
 gboolean nuvashalauncher_fs_make_directory (const char *path, int mode, GError **error);
 gboolean nuvashalauncher_fs_get_contents_within (const char *path, goffset maximum,
                                       char **contents, gsize *length,
@@ -57,14 +56,6 @@ void nuvashalauncher_fs_replace_contents_async (GFile *file, const char *content
                                     gpointer user_data);
 gboolean nuvashalauncher_fs_replace_contents_finish (GFile *file, GAsyncResult *result,
                                           char **new_etag, GError **error);
-void nuvashalauncher_fs_replace_contents_bytes_async (GFile *file, GBytes *contents,
-                                          const char *etag, gboolean make_backup,
-                                          GFileCreateFlags flags,
-                                          GCancellable *cancellable,
-                                          GAsyncReadyCallback callback,
-                                          gpointer user_data);
-gboolean nuvashalauncher_fs_replace_contents_bytes_finish (GFile *file, GAsyncResult *result,
-                                               char **new_etag, GError **error);
 void nuvashalauncher_fs_copy_async (GFile *source, GFile *destination, GFileCopyFlags flags,
                         int io_priority, GCancellable *cancellable,
                         GFileProgressCallback progress_callback,

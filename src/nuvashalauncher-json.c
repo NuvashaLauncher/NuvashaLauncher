@@ -25,28 +25,21 @@ char *
 nuvashalauncher_json_string (JsonNode *node, const char *name)
 {
   JsonObject *object = nuvashalauncher_json_object_of (node);
-  JsonNode *member = object != NULL ? json_object_get_member (object, name)
-                                    : NULL;
-
-  if (member == NULL || !JSON_NODE_HOLDS_VALUE (member) ||
-      json_node_get_value_type (member) != G_TYPE_STRING)
+  if (object == NULL)
     return NULL;
 
-  return json_node_dup_string (member);
+  const char *str = json_object_get_string_member_with_default (object, name, NULL);
+  return str != NULL ? g_strdup (str) : NULL;
 }
 
 gboolean
 nuvashalauncher_json_boolean (JsonNode *node, const char *name, gboolean fallback)
 {
   JsonObject *object = nuvashalauncher_json_object_of (node);
-  JsonNode *member = object != NULL ? json_object_get_member (object, name)
-                                    : NULL;
-
-  if (member == NULL || !JSON_NODE_HOLDS_VALUE (member) ||
-      json_node_get_value_type (member) != G_TYPE_BOOLEAN)
+  if (object == NULL)
     return fallback;
 
-  return json_node_get_boolean (member);
+  return json_object_get_boolean_member_with_default (object, name, fallback);
 }
 
 gint64

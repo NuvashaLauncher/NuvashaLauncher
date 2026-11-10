@@ -80,16 +80,6 @@ nuvashalauncher_i18n_languages (gsize *length)
   return languages;
 }
 
-const char *
-nuvashalauncher_i18n_language_name (const char *code)
-{
-  for (gsize i = 0; i < G_N_ELEMENTS (languages); i++)
-    if (g_strcmp0 (languages[i].code, code) == 0)
-      return languages[i].name;
-
-  return languages[0].name;
-}
-
 void
 nuvashalauncher_i18n_init (const char *override_code)
 {

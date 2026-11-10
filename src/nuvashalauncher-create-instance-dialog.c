@@ -291,6 +291,8 @@ nuvashalauncher_create_instance_dialog_dispose (GObject *object)
   /* The loader rows are the dialog's; their handlers go with them. */
   g_clear_object (&self->loader_row);
 
+  gtk_widget_dispose_template (GTK_WIDGET (self), nuvashalauncher_TYPE_CREATE_INSTANCE_DIALOG);
+
   G_OBJECT_CLASS (nuvashalauncher_create_instance_dialog_parent_class)->dispose (object);
 }
 

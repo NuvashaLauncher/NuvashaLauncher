@@ -323,23 +323,29 @@ extract_layers (const char *archive_path, const char *directory,
   archive = archive_read_new ();
 
   int fd = open (archive_path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+  if (fd < 0)
+    {
+      int saved_errno = errno;
+      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_ARCHIVE,
+                   "cannot open \"%s\": %s", archive_path, g_strerror (saved_errno));
+      archive_read_free (archive);
+      return FALSE;
+    }
 
-  if (fd < 0 || archive_read_support_format_zip (archive) != ARCHIVE_OK ||
+  archive_read_support_filter_all (archive);
+  if (archive_read_support_format_zip (archive) != ARCHIVE_OK ||
       archive_read_open_fd (archive, fd, 65536) != ARCHIVE_OK)
     {
       g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_ARCHIVE,
                    "the pack cannot be opened: %s",
                    archive_error_string (archive));
-      if (fd >= 0)
-        {
-          close (fd);
-          fd = -1;
-        }
+      close (fd);
       archive_read_free (archive);
       return FALSE;
     }
 
-  while ((status = archive_read_next_header (archive, &header)) == ARCHIVE_OK)
+  while ((status = archive_read_next_header (archive, &header)) == ARCHIVE_OK ||
+         status == ARCHIVE_WARN)
     {
       if (++paths > nuvashalauncher_MODPACK_MAX_ENTRIES)
         {

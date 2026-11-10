@@ -51,7 +51,7 @@ token_answered (AuthRequest *self)
   g_autoptr (GError) error = NULL;
   gboolean slow_down = FALSE;
 
-  if (self->status == 200)
+  if (self->status == SOUP_STATUS_OK)
     {
       token = nuvashalauncher_auth_oauth_token_from_json (self->body, -1, g_get_real_time () / 1000000, &error);
 

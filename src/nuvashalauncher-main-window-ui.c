@@ -20,21 +20,6 @@ on_main_window_banner_dismiss (AdwBanner *banner, gpointer user_data G_GNUC_UNUS
   adw_banner_set_revealed (banner, FALSE);
 }
 
-static void
-on_main_window_width_changed (GObject *object,
-                               GParamSpec *pspec G_GNUC_UNUSED,
-                               gpointer user_data G_GNUC_UNUSED)
-{
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (object);
-  int width = gtk_widget_get_width (GTK_WIDGET (self));
-
-  if (self->ui.toolbar == NULL || width <= 0)
-    return;
-  adw_toolbar_view_set_top_bar_style (
-    self->ui.toolbar,
-    width < 700 ? ADW_TOOLBAR_FLAT : ADW_TOOLBAR_RAISED);
-}
-
 void
 nuvashalauncher_main_window_build_ui (nuvashalauncherMainWindow *self)
 {
@@ -63,8 +48,17 @@ nuvashalauncher_main_window_build_ui (nuvashalauncherMainWindow *self)
   GtkWidget *add_popover = NULL;
 
   self->ui.toolbar = toolbar;
-  g_signal_connect_object (self, "notify::width",
-                           G_CALLBACK (on_main_window_width_changed), self, 0);
+
+  AdwBreakpointCondition *narrow_condition =
+    adw_breakpoint_condition_new_length (ADW_BREAKPOINT_CONDITION_MAX_WIDTH,
+                                         700, ADW_LENGTH_UNIT_PX);
+  AdwBreakpoint *breakpoint = adw_breakpoint_new (narrow_condition);
+  GValue flat_style = G_VALUE_INIT;
+  g_value_init (&flat_style, ADW_TYPE_TOOLBAR_STYLE);
+  g_value_set_enum (&flat_style, ADW_TOOLBAR_FLAT);
+  adw_breakpoint_add_setter (breakpoint, G_OBJECT (toolbar), "top-bar-style", &flat_style);
+  g_value_unset (&flat_style);
+  adw_application_window_add_breakpoint (ADW_APPLICATION_WINDOW (self), breakpoint);
 
   /* Use a raised header so it has its own surface. */
   gtk_widget_add_css_class (GTK_WIDGET (toolbar), "nuvashalauncher-main-toolbar");

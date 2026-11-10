@@ -9,7 +9,6 @@
 
 void nuvashalauncher_content_apply_local_metadata (nuvashalauncherContentFile *file,
                                        nuvashalauncherContentType type);
-gboolean nuvashalauncher_content_load_local_icon (nuvashalauncherContentFile *file);
 nuvashalauncherTaskScope *nuvashalauncher_content_load_local_icon_async (nuvashalauncherContentFile *file,
                                                 GAsyncReadyCallback callback,
                                                 gpointer user_data);

@@ -40,7 +40,7 @@ minecraft_answered (AuthRequest *self)
   g_autoptr (nuvashalauncherOAuthToken) token = NULL;
   g_autoptr (GError) error = NULL;
 
-  if (self->status < 200 || self->status > 299)
+  if (!SOUP_STATUS_IS_SUCCESSFUL (self->status))
     {
       /* "Invalid app registration" is what the services answer an Azure
          application that is not registered for Minecraft with, and it
