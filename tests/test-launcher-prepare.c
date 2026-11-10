@@ -126,6 +126,56 @@ test_on_resolved_lifecycle (void)
   g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_FAILED);
 }
 
+static void
+test_on_resolved_success_triggers_java_search (void)
+{
+  g_autoptr (nuvashalauncherInstance) instance = create_test_instance ("resolved-succ-inst");
+  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+
+  nuvashalauncherResolvedVersion *res = g_new0 (nuvashalauncherResolvedVersion, 1);
+  res->version_id = g_strdup ("1.20.1");
+  res->java_major_version = 17;
+
+  nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_new_tagged (
+    NULL, NULL, NULL, NULL, "nuvashalauncher-task-scope");
+  nuvashalauncher_task_scope_return_pointer (scope, res, (GDestroyNotify) nuvashalauncher_resolved_version_free);
+
+  g_object_ref (launcher);
+  on_resolved (NULL, G_ASYNC_RESULT (nuvashalauncher_task_scope_task (scope)), launcher);
+  nuvashalauncher_task_scope_unref (scope);
+
+  /* Should set state to launching and detail to choosing Java */
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_LAUNCHING);
+}
+
+static void
+test_on_resolved_with_preset_java_runs_game (void)
+{
+  g_autoptr (nuvashalauncherInstance) instance = create_test_instance ("resolved-preset-inst");
+  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+
+  /* Set up a preset java executable so on_resolved proceeds straight to run_the_game */
+  launcher->preparation.java_executable = g_strdup ("/usr/bin/fake-java-exec");
+  launcher->preparation.java_major_version = 17;
+
+  nuvashalauncherResolvedVersion *res = g_new0 (nuvashalauncherResolvedVersion, 1);
+  res->version_id = g_strdup ("1.20.1");
+  res->main_class = g_strdup ("net.minecraft.client.main.Main");
+  res->classpath = g_strdup ("/path/to/client.jar");
+  res->java_major_version = 17;
+
+  nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_new_tagged (
+    NULL, NULL, NULL, NULL, "nuvashalauncher-task-scope");
+  nuvashalauncher_task_scope_return_pointer (scope, res, (GDestroyNotify) nuvashalauncher_resolved_version_free);
+
+  g_object_ref (launcher);
+  on_resolved (NULL, G_ASYNC_RESULT (nuvashalauncher_task_scope_task (scope)), launcher);
+  nuvashalauncher_task_scope_unref (scope);
+
+  /* Fake java executable won't spawn successfully, so state becomes failed */
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_FAILED);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -135,6 +185,8 @@ main (int argc, char **argv)
   g_test_add_func ("/launcher/prepare/choose-java", test_choose_java_compatible_and_headless);
   g_test_add_func ("/launcher/prepare/progress", test_resolve_progress_tracking);
   g_test_add_func ("/launcher/prepare/resolved-lifecycle", test_on_resolved_lifecycle);
+  g_test_add_func ("/launcher/prepare/resolved-success", test_on_resolved_success_triggers_java_search);
+  g_test_add_func ("/launcher/prepare/resolved-preset-java", test_on_resolved_with_preset_java_runs_game);
 
   int ret = g_test_run ();
 

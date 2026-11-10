@@ -294,6 +294,90 @@ test_scan_and_toggle (void)
   g_print ("ok - the folder is read, and enable and disable rename it\n");
 }
 
+typedef struct
+{
+  GMainLoop *loop;
+  gboolean success;
+  GError *error;
+} ContentMetaWait;
+
+static void
+on_content_metadata_finished (GObject *source G_GNUC_UNUSED,
+                              GAsyncResult *result,
+                              gpointer user_data)
+{
+  ContentMetaWait *wait = user_data;
+  wait->success = nuvashalauncher_content_metadata_finish (result, &wait->error);
+  g_main_loop_quit (wait->loop);
+}
+
+static void
+test_content_metadata_and_helpers (void)
+{
+  /* Test folder creation and file operations */
+  g_autofree char *dir = g_dir_make_tmp ("nuvashalauncher-test-cf-XXXXXX", NULL);
+  g_assert_nonnull (dir);
+  g_autofree char *sub = g_build_filename (dir, "subfolder", NULL);
+  g_autoptr (GError) error = NULL;
+
+  g_assert_true (nuvashalauncher_content_ensure_folder (sub, &error));
+  g_assert_no_error (error);
+  g_assert_true (g_file_test (sub, G_FILE_TEST_IS_DIR));
+
+  g_autofree char *dummy_file = g_build_filename (sub, "test.txt", NULL);
+  g_assert_true (g_file_set_contents (dummy_file, "hello", 5, &error));
+  g_assert_no_error (error);
+
+  g_assert_true (nuvashalauncher_content_remove_file (dummy_file, &error));
+  g_assert_no_error (error);
+  g_assert_false (g_file_test (dummy_file, G_FILE_TEST_EXISTS));
+
+  /* Test nuvashalauncher_content_file_refresh_search_key */
+  nuvashalauncherContentFile cf = { 0 };
+  cf.filename = (char *) "mod-file.jar";
+  cf.project_name = (char *) "My Amazing Mod";
+  nuvashalauncher_content_file_refresh_search_key (&cf);
+  g_assert_nonnull (cf.search_key);
+  g_assert_true (strstr (cf.search_key, "amazing") != NULL);
+  g_free (cf.search_key);
+
+  /* Test async metadata extraction with empty and non-empty file lists */
+  g_autoptr (GPtrArray) files = g_ptr_array_new_with_free_func ((GDestroyNotify) nuvashalauncher_content_file_free);
+  GMainLoop *loop = g_main_loop_new (NULL, FALSE);
+  ContentMetaWait wait1 = { loop, FALSE, NULL };
+
+  /* Empty list finishes immediately */
+  nuvashalauncherTaskScope *scope1 = nuvashalauncher_content_metadata_async (files, nuvashalauncher_CONTENT_MOD, on_content_metadata_finished, &wait1);
+  g_assert_nonnull (scope1);
+  g_main_loop_run (loop);
+  g_assert_true (wait1.success);
+  g_assert_no_error (wait1.error);
+  nuvashalauncher_task_scope_unref (scope1);
+
+  /* List with a file finishes through worker pool */
+  nuvashalauncherContentFile *file_item = g_new0 (nuvashalauncherContentFile, 1);
+  file_item->path = g_strdup (sub);
+  file_item->filename = g_strdup ("nonexistent.jar");
+  g_ptr_array_add (files, file_item);
+
+  ContentMetaWait wait2 = { loop, FALSE, NULL };
+  nuvashalauncherTaskScope *scope2 = nuvashalauncher_content_metadata_async (files, nuvashalauncher_CONTENT_MOD, on_content_metadata_finished, &wait2);
+  g_assert_nonnull (scope2);
+  g_main_loop_run (loop);
+  g_assert_true (wait2.success);
+  g_assert_no_error (wait2.error);
+  nuvashalauncher_task_scope_unref (scope2);
+
+  g_main_loop_unref (loop);
+
+  g_autoptr (GFile) dir_gfile = g_file_new_for_path (dir);
+  g_autoptr (GFile) sub_gfile = g_file_new_for_path (sub);
+  g_file_delete (sub_gfile, NULL, NULL);
+  g_file_delete (dir_gfile, NULL, NULL);
+
+  g_print ("ok - content file helpers and metadata tasks succeed\n");
+}
+
 int
 main (int argc, char **argv)
 {
@@ -304,5 +388,6 @@ main (int argc, char **argv)
   g_test_add_func ("/modrinth/content_types", test_content_types);
   g_test_add_func ("/modrinth/folder_and_disabled_names", test_folder_and_disabled_names);
   g_test_add_func ("/modrinth/scan_and_toggle", test_scan_and_toggle);
+  g_test_add_func ("/modrinth/metadata_and_helpers", test_content_metadata_and_helpers);
   return g_test_run ();
 }
