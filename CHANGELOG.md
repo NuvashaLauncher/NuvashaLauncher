@@ -65,8 +65,14 @@ All notable changes to Nuvasha Launcher are documented in this file.
 - **Portable Instance Paths**: Default instance paths are now stored relative to the data directory and resolved dynamically at load time so moving a home directory or Flatpak sandbox preserves instances.
 
 ### Verification & Testing
-- Added regression tests for nested Markdown link parentheses parsing ([`tests/test-markdown.c`](file:///home/joaquin/Proyectos/NuvashaLauncher/tests/test-markdown.c)), zero-byte HTTP authentication error handling ([`tests/test-auth.c`](file:///home/joaquin/Proyectos/NuvashaLauncher/tests/test-auth.c)), and NeoForge version metadata parsing ([`tests/test-loaders-metadata.c`](file:///home/joaquin/Proyectos/NuvashaLauncher/tests/test-loaders-metadata.c)).
-- All 128 tests pass with zero failures and zero compiler warnings under `-Wall -Wextra -Wpedantic -Werror`.
+- **Comprehensive Headless Test Suite & Coverage**:
+  - Expanded non-display backend test coverage across the entire codebase to over 70%.
+  - Added test coverage for Modrinth async hash verification, modpack archive security, invalid argument validation, icon installation, and archive removal.
+  - Added unit tests for Markdown HTML named and numeric character entities, inline tags, entity safety, and URL sanitization.
+  - Added unit tests for in-memory JAR icon loading, mod dependency merging, and async background thread-pool metadata scanning.
+  - Added unit tests for launcher loader manifest failures, unsupported loaders, Java runtime candidate selection, preset Java execution, and process failure states.
+  - Added unit tests for filesystem directory creation, atomic file replacements, renames, and loader profile error diagnostics.
+  - Fixed latent use-after-free in inline Markdown entity string conversion and synchronous task sequence completion during Java probe list traversal.
 
 **Full Changelog**: https://github.com/NuvashaLauncher/NuvashaLauncher/compare/v0.9...v1.0
 
