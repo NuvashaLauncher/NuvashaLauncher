@@ -152,6 +152,9 @@ nuvashalauncher_secret_store_load (GPtrArray **accounts,
       g_autoptr (nuvashalauncherAccount) account =
         value != NULL ? account_from_payload (secret_value_get_text (value)) : NULL;
 
+      if (value != NULL)
+        secret_value_unref (value);
+
       if (account != NULL)
         g_ptr_array_add (loaded, g_steal_pointer (&account));
     }

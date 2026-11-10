@@ -469,9 +469,6 @@ nuvashalauncher_loader_write_jar_manifest_attribute (const char *path, const cha
   fd = -1;
   archive_read_free (in);
 
-  if (!ok)
-    archive_write_fail (out);
-
   if (!ok || archive_write_close (out) != ARCHIVE_OK)
     {
       g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
