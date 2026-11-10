@@ -49,7 +49,7 @@ nuvashalauncher_cancellable_watch (GCancellable  *cancellable,
   watch->notify = notify;
 
   source = g_cancellable_source_new (cancellable);
-  g_source_set_callback (source, (GSourceFunc) watch_dispatch, watch, watch_free);
+  g_source_set_callback (source, G_SOURCE_FUNC (watch_dispatch), watch, watch_free);
 
   source_id = g_source_attach (source, g_main_context_get_thread_default ());
   g_source_unref (source);
