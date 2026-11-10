@@ -145,6 +145,59 @@ test_missing_schema_fallback (void)
   g_assert_true (nuvashalauncher_settings_get_show_unstable_versions (settings));
 }
 
+static void
+test_settings_all_properties (void)
+{
+  g_autoptr (nuvashalauncherSettings) settings = nuvashalauncher_settings_new ();
+  g_autoptr (GError) error = NULL;
+
+  /* Export metadata */
+  g_assert_false (nuvashalauncher_settings_get_export_metadata (settings));
+  g_assert_true (nuvashalauncher_settings_set_export_metadata (settings, TRUE, &error));
+  g_assert_no_error (error);
+  g_assert_true (nuvashalauncher_settings_get_export_metadata (settings));
+  g_assert_true (nuvashalauncher_settings_set_export_metadata (settings, FALSE, &error));
+  g_assert_no_error (error);
+  g_assert_false (nuvashalauncher_settings_get_export_metadata (settings));
+
+  /* Delete dependents */
+  g_assert_true (nuvashalauncher_settings_get_delete_dependents (settings));
+  g_assert_true (nuvashalauncher_settings_set_delete_dependents (settings, FALSE, &error));
+  g_assert_no_error (error);
+  g_assert_false (nuvashalauncher_settings_get_delete_dependents (settings));
+  g_assert_true (nuvashalauncher_settings_set_delete_dependents (settings, TRUE, &error));
+  g_assert_no_error (error);
+  g_assert_true (nuvashalauncher_settings_get_delete_dependents (settings));
+
+  /* Log line limit */
+  g_assert_true (nuvashalauncher_settings_set_log_line_limit (settings, 2500, &error));
+  g_assert_no_error (error);
+  g_assert_cmpuint (nuvashalauncher_settings_get_log_line_limit (settings), ==, 2500);
+  g_assert_true (nuvashalauncher_settings_set_log_line_limit (settings, 5000, &error));
+  g_assert_no_error (error);
+  g_assert_cmpuint (nuvashalauncher_settings_get_log_line_limit (settings), ==, 5000);
+
+  /* Unstable loaders */
+  g_assert_false (nuvashalauncher_settings_get_show_unstable_loaders (settings));
+  g_assert_true (nuvashalauncher_settings_set_show_unstable_loaders (settings, TRUE, &error));
+  g_assert_no_error (error);
+  g_assert_true (nuvashalauncher_settings_get_show_unstable_loaders (settings));
+  g_assert_true (nuvashalauncher_settings_set_show_unstable_loaders (settings, FALSE, &error));
+  g_assert_no_error (error);
+  g_assert_false (nuvashalauncher_settings_get_show_unstable_loaders (settings));
+
+  /* Language */
+  g_autofree char *orig_lang = g_strdup (nuvashalauncher_settings_get_language (settings));
+  g_assert_true (nuvashalauncher_settings_set_language (settings, "es_ES", &error));
+  g_assert_no_error (error);
+  g_assert_cmpstr (nuvashalauncher_settings_get_language (settings), ==, "es_ES");
+  /* Restore language to what it was */
+  if (orig_lang != NULL && *orig_lang != '\0')
+    nuvashalauncher_settings_set_language (settings, orig_lang, NULL);
+  else
+    nuvashalauncher_settings_set_language (settings, "system", NULL);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -165,6 +218,7 @@ main (int argc, char **argv)
   g_test_add_func ("/settings/persistence", test_persistence);
   g_test_add_func ("/settings/invalid-expiration", test_invalid_expiration);
   g_test_add_func ("/settings/missing-schema-fallback", test_missing_schema_fallback);
+  g_test_add_func ("/settings/properties", test_settings_all_properties);
   g_test_add_func ("/cache/paths", test_cache_paths);
   g_test_add_func ("/cache/cleanup", test_cache_cleanup);
 

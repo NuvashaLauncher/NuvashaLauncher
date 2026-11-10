@@ -671,6 +671,76 @@ test_safe_archive_opens (void)
   g_print ("ok - an archive that is a pack opens\n");
 }
 
+typedef struct
+{
+  GMainLoop *loop;
+  gboolean success;
+  GError *error;
+} VerifyData;
+
+static void
+on_verify_done (GObject *source_object,
+                GAsyncResult *res,
+                gpointer user_data)
+{
+  (void) source_object;
+  VerifyData *data = user_data;
+  data->success = nuvashalauncher_modpack_verify_file_finish (res, &data->error);
+  g_main_loop_quit (data->loop);
+}
+
+static void
+test_verify_file_async_local (void)
+{
+  g_autofree char *dir = make_tmp_dir ();
+  g_autofree char *file_path = g_build_filename (dir, "testfile.dat", NULL);
+  g_autoptr (GError) error = NULL;
+  g_assert_true (g_file_set_contents (file_path, "hello verification", 18, &error));
+
+  nuvashalauncherModpackFile file = { 0 };
+  file.path = (char *) "testfile.dat";
+  file.sha1 = (char *) "01bf26627adb767bc7e06d4b9772ef405b364150";
+  file.sha512 = (char *) "c95ce72ee919a2d75edad3ee4a496ecb72ff499d9f5f4e7e21cd1b2480c32b010b3a3f3db5bfb907649007ae762f1f03ee9fffee2b0d25322874f27e9115a63d";
+  file.file_size = 18;
+
+  /* Test 1: Missing hashes triggers hash error */
+  nuvashalauncherModpackFile no_hash_file = { 0 };
+  no_hash_file.path = (char *) "testfile.dat";
+  GMainLoop *loop = g_main_loop_new (NULL, FALSE);
+  VerifyData data1 = { loop, FALSE, NULL };
+  nuvashalauncherTaskScope *scope1 = nuvashalauncher_modpack_verify_file_async (&no_hash_file, file_path, on_verify_done, &data1);
+  g_assert_nonnull (scope1);
+  g_main_loop_run (loop);
+  g_assert_false (data1.success);
+  g_assert_error (data1.error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_HASH);
+  g_clear_error (&data1.error);
+  nuvashalauncher_task_scope_unref (scope1);
+
+  /* Test 2: Valid hashes succeed */
+  VerifyData data2 = { loop, FALSE, NULL };
+  nuvashalauncherTaskScope *scope2 = nuvashalauncher_modpack_verify_file_async (&file, file_path, on_verify_done, &data2);
+  g_assert_nonnull (scope2);
+  g_main_loop_run (loop);
+  g_assert_true (data2.success);
+  g_assert_no_error (data2.error);
+  nuvashalauncher_task_scope_unref (scope2);
+
+  /* Test 3: Mismatched hash fails */
+  nuvashalauncherModpackFile bad_hash_file = file;
+  bad_hash_file.sha1 = (char *) "0000000000000000000000000000000000000000";
+  VerifyData data3 = { loop, FALSE, NULL };
+  nuvashalauncherTaskScope *scope3 = nuvashalauncher_modpack_verify_file_async (&bad_hash_file, file_path, on_verify_done, &data3);
+  g_assert_nonnull (scope3);
+  g_main_loop_run (loop);
+  g_assert_false (data3.success);
+  g_assert_error (data3.error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_HASH);
+  g_clear_error (&data3.error);
+  nuvashalauncher_task_scope_unref (scope3);
+
+  g_main_loop_unref (loop);
+  remove_recursive (dir);
+}
+
 /* ---------------------------------------------------------- */
 
 int
@@ -694,6 +764,7 @@ main (int argc, char **argv)
   g_test_add_func ("/mrpack/archive-index-bomb",
                    test_archive_index_bomb_is_refused);
   g_test_add_func ("/mrpack/safe-archive", test_safe_archive_opens);
+  g_test_add_func ("/mrpack/verify-async", test_verify_file_async_local);
 
   return g_test_run ();
 }

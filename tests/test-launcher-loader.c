@@ -72,6 +72,53 @@ test_java_for_install_failure_handling (void)
   g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_FAILED);
 }
 
+static void
+test_manifest_ready_error_handling (void)
+{
+  g_autoptr (nuvashalauncherInstance) instance = create_loader_instance ("manifest-fail");
+  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+
+  nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_new_tagged (
+    NULL, NULL, NULL, NULL, "nuvashalauncher-task-scope");
+  nuvashalauncher_task_scope_return_error (
+    scope, g_error_new_literal (G_IO_ERROR, G_IO_ERROR_FAILED, "failed to get manifest"));
+
+  on_manifest_ready (NULL, G_ASYNC_RESULT (nuvashalauncher_task_scope_task (scope)), g_object_ref (launcher));
+  nuvashalauncher_task_scope_unref (scope);
+
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_FAILED);
+}
+
+static void
+test_manifest_ready_unsupported_loader (void)
+{
+  /* Instance with unsupported loader or empty loader-version */
+  g_autofree char *dir = g_build_filename (root, "unsupported-loader-inst", NULL);
+  g_autoptr (GError) error = NULL;
+  g_assert_cmpint (g_mkdir_with_parents (dir, 0755), ==, 0);
+
+  /* Create instance with Fabric but no loader-version */
+  g_autoptr (nuvashalauncherInstance) instance =
+    nuvashalauncher_instance_new (NULL, "unsupported-loader-inst", dir, "1.20.1",
+                                  nuvashalauncher_LOADER_FABRIC, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+
+  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+
+  g_autoptr (nuvashalauncherVersionManifest) manifest =
+    g_object_new (nuvashalauncher_TYPE_VERSION_MANIFEST, NULL);
+
+  nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_new_tagged (
+    NULL, NULL, NULL, NULL, "nuvashalauncher-task-scope");
+  nuvashalauncher_task_scope_return_pointer (scope, g_object_ref (manifest), g_object_unref);
+
+  on_manifest_ready (NULL, G_ASYNC_RESULT (nuvashalauncher_task_scope_task (scope)), g_object_ref (launcher));
+  nuvashalauncher_task_scope_unref (scope);
+
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_FAILED);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -80,6 +127,8 @@ main (int argc, char **argv)
 
   g_test_add_func ("/launcher/loader/request-lifecycle", test_loader_request_lifecycle);
   g_test_add_func ("/launcher/loader/java-failure", test_java_for_install_failure_handling);
+  g_test_add_func ("/launcher/loader/manifest-error", test_manifest_ready_error_handling);
+  g_test_add_func ("/launcher/loader/unsupported-loader", test_manifest_ready_unsupported_loader);
 
   int ret = g_test_run ();
 

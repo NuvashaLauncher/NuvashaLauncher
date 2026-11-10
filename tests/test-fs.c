@@ -82,6 +82,46 @@ main (void)
     close (directory_fd);
   }
 
+  /* Additional tests for nuvashalauncher_fs functions */
+  {
+    g_autofree char *test_dir = g_build_filename (root, "nested", "dir", NULL);
+    g_autofree char *file_path = g_build_filename (test_dir, "test.txt", NULL);
+    g_autofree char *read_buf = NULL;
+    gsize read_len = 0;
+
+    g_assert_true (nuvashalauncher_fs_make_directory (test_dir, 0755, &error));
+    g_assert_no_error (error);
+
+    g_assert_true (nuvashalauncher_fs_replace_contents (file_path, "hello fs", 8, 0644, &error));
+    g_assert_no_error (error);
+
+    g_assert_true (nuvashalauncher_fs_get_contents_within (file_path, 1024, &read_buf, &read_len, &error));
+    g_assert_no_error (error);
+    g_assert_cmpuint (read_len, ==, 8);
+    g_assert_cmpstr (read_buf, ==, "hello fs");
+    g_clear_pointer (&read_buf, g_free);
+
+    /* Test nuvashalauncher_fs_unlink and rename */
+    g_autofree char *renamed_path = g_build_filename (test_dir, "renamed.txt", NULL);
+    g_assert_true (nuvashalauncher_fs_rename (file_path, renamed_path, &error));
+    g_assert_no_error (error);
+    g_assert_true (g_file_test (renamed_path, G_FILE_TEST_EXISTS));
+    g_assert_false (g_file_test (file_path, G_FILE_TEST_EXISTS));
+
+    g_assert_true (nuvashalauncher_fs_unlink (renamed_path, &error));
+    g_assert_no_error (error);
+    g_assert_false (g_file_test (renamed_path, G_FILE_TEST_EXISTS));
+
+    /* Test error paths */
+    g_assert_false (nuvashalauncher_fs_get_contents_within (NULL, 10, &read_buf, NULL, &error));
+    g_assert_nonnull (error);
+    g_clear_error (&error);
+
+    g_assert_false (nuvashalauncher_fs_get_contents_within (renamed_path, -1, &read_buf, NULL, &error));
+    g_assert_nonnull (error);
+    g_clear_error (&error);
+  }
+
   nuvashalauncher_fs_remove_tree (root);
   g_print ("ok - filesystem nofollow and bounds checks\n");
   return 0;

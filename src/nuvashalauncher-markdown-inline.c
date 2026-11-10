@@ -200,18 +200,17 @@ entity_into (GString *out, const char *text, gsize length, gsize *consumed)
       gunichar codepoint = 0;
       guint64 parsed = 0;
       char *end = NULL;
+      g_autofree char *num_str = NULL;
 
       if (body_len >= 2 && (body[1] == 'x' || body[1] == 'X'))
         {
-          g_autofree char *hex = g_strndup (body + 2, body_len - 2);
-
-          parsed = g_ascii_strtoull (hex, &end, 16);
+          num_str = g_strndup (body + 2, body_len - 2);
+          parsed = g_ascii_strtoull (num_str, &end, 16);
         }
       else
         {
-          g_autofree char *dec = g_strndup (body + 1, body_len - 1);
-
-          parsed = g_ascii_strtoull (dec, &end, 10);
+          num_str = g_strndup (body + 1, body_len - 1);
+          parsed = g_ascii_strtoull (num_str, &end, 10);
         }
 
       if (end == NULL || *end != '\0' || parsed == 0 || parsed > 0x10FFFF)

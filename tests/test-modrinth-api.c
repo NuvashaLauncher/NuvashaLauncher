@@ -105,6 +105,23 @@ test_category_labels (void)
   g_autofree char *acronym = nuvashalauncher_modrinth_category_label ("pbr");
   g_autofree char *heading = nuvashalauncher_modrinth_category_label ("performance impact");
   g_autofree char *worldgen = nuvashalauncher_modrinth_category_label ("worldgen");
+  g_autofree char *empty_label = nuvashalauncher_modrinth_category_label ("");
+  g_autofree char *null_label = nuvashalauncher_modrinth_category_label (NULL);
+  g_assert_cmpstr (empty_label, ==, "");
+  g_assert_cmpstr (null_label, ==, "");
+
+  g_autofree char *pt_mod = nuvashalauncher_modrinth_project_type_for_content (nuvashalauncher_CONTENT_MOD);
+  g_assert_cmpstr (pt_mod, ==, "mod");
+
+  g_autoptr (GError) cat_err = NULL;
+  g_autoptr (GPtrArray) bad_cats = nuvashalauncher_modrinth_categories_from_json ("not json", -1, "mod", &cat_err);
+  g_assert_null (bad_cats);
+  g_assert_error (cat_err, JSON_PARSER_ERROR, 4);
+  g_clear_error (&cat_err);
+
+  g_autoptr (GPtrArray) non_array_cats = nuvashalauncher_modrinth_categories_from_json ("{\"key\":\"val\"}", -1, "mod", &cat_err);
+  g_assert_null (non_array_cats);
+  g_assert_error (cat_err, nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_PARSE);
 
   g_assert_cmpstr (one, ==, "Colored Lighting");
   g_assert_cmpstr (two, ==, "512x+");

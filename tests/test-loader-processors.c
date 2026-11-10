@@ -223,6 +223,16 @@ test_malformed_install_profile_fails_cleanly (void)
   g_print ("ok - malformed loader profiles fail without continuing\n");
 }
 
+static void
+test_builtin_installer_variables (void)
+{
+  run_profile_fixture (
+    "{\"data\":{\"CUSTOM\":{\"client\":\"custom_val\"}},"
+    "\"processors\":[{\"sides\":[\"client\"],"
+    "\"args\":[\"{ROOT}\",\"{INSTALLER}\",\"{SIDE}\",\"{VERSION_NAME}\",\"{CUSTOM}\",\"{MISSING}\"]}],"
+    "\"json\":\"/version.json\"}", TRUE);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -233,5 +243,7 @@ main (int argc, char **argv)
                    test_profile_transformation_and_variable_failure);
   g_test_add_func ("/loaders/profile-malformed",
                    test_malformed_install_profile_fails_cleanly);
+  g_test_add_func ("/loaders/builtin-variables",
+                   test_builtin_installer_variables);
   return g_test_run ();
 }

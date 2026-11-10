@@ -756,6 +756,15 @@ test_the_endpoints_are_the_documented_ones (void)
   g_print ("ok - the chain asks the addresses the services document\n");
 }
 
+static void
+test_no_client_id_error_diagnostic (void)
+{
+  g_autoptr (GError) error = no_client_id_error ();
+  g_assert_nonnull (error);
+  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_NO_CLIENT_ID);
+  g_assert_nonnull (strstr (error->message, "signing in is not set up"));
+}
+
 int
 main (void)
 {
@@ -776,6 +785,7 @@ main (void)
   test_service_state_refusals_complete_sign_in ();
   test_successful_sign_in_refresh_and_persistence ();
   test_the_endpoints_are_the_documented_ones ();
+  test_no_client_id_error_diagnostic ();
 
   return EXIT_SUCCESS;
 }

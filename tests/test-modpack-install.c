@@ -271,6 +271,144 @@ test_install_needs_resolve (void)
   g_print ("ok - an install whose dependencies were never read is refused\n");
 }
 
+static void
+test_install_invalid_arguments (void)
+{
+  g_autofree char *dir = make_tmp_dir ();
+  g_autofree char *data_dir = g_build_filename (dir, "data", NULL);
+  g_autofree char *zip_path = g_build_filename (dir, "pack.mrpack", NULL);
+  g_autofree char *index_json =
+    pack_index ("Valid Pack", "", "\"minecraft\":\"1.20.1\"");
+  g_autoptr (GError) error = NULL;
+  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
+  g_autoptr (nuvashalauncherModpack) pack = NULL;
+  g_autoptr (nuvashalauncherInstance) instance = NULL;
+
+  ZipEntry entries[] = {
+    { "modrinth.index.json", index_json, strlen (index_json), AE_IFREG, NULL },
+  };
+
+  zip_write (zip_path, entries, G_N_ELEMENTS (entries));
+
+  manager = manager_new (data_dir);
+  pack = nuvashalauncher_modpack_new_from_zip (zip_path, &error);
+  g_assert_no_error (error);
+  g_assert_true (nuvashalauncher_modpack_resolve (pack, &error));
+  g_assert_no_error (error);
+
+  /* NULL pack */
+  instance = install_now (NULL, manager, "Pack", NULL, &error);
+  g_assert_null (instance);
+  g_assert_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_FORMAT);
+  g_clear_error (&error);
+
+  /* NULL manager */
+  instance = install_now (pack, NULL, "Pack", NULL, &error);
+  g_assert_null (instance);
+  g_assert_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_FORMAT);
+  g_clear_error (&error);
+
+  /* Empty name */
+  instance = install_now (pack, manager, "", NULL, &error);
+  g_assert_null (instance);
+  g_assert_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_FORMAT);
+  g_clear_error (&error);
+
+  remove_recursive (dir);
+}
+
+static void
+test_install_with_content_types (void)
+{
+  g_autofree char *dir = make_tmp_dir ();
+  g_autofree char *data_dir = g_build_filename (dir, "data", NULL);
+  g_autofree char *zip_path = g_build_filename (dir, "pack.mrpack", NULL);
+  g_autofree char *index_json =
+    pack_index ("Full Content Pack", "", "\"minecraft\":\"1.20.1\"");
+  g_autoptr (GError) error = NULL;
+  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
+  g_autoptr (nuvashalauncherModpack) pack = NULL;
+  g_autoptr (nuvashalauncherInstance) instance = NULL;
+  g_autofree char *instance_dir = NULL;
+
+  ZipEntry entries[] = {
+    { "modrinth.index.json", index_json, strlen (index_json), AE_IFREG, NULL },
+    ZIP_FILE ("overrides/resourcepacks/cool.zip", "resource pack data"),
+    ZIP_FILE ("overrides/shaderpacks/fancy.zip", "shader pack data"),
+    ZIP_FILE ("overrides/datapacks/extra.zip", "datapack data"),
+  };
+
+  zip_write (zip_path, entries, G_N_ELEMENTS (entries));
+
+  manager = manager_new (data_dir);
+  pack = nuvashalauncher_modpack_new_from_zip (zip_path, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (pack);
+  g_assert_true (nuvashalauncher_modpack_resolve (pack, &error));
+  g_assert_no_error (error);
+
+  instance = install_now (pack, manager, "Full Content Pack", NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+
+  g_object_get (instance, "directory", &instance_dir, NULL);
+  g_assert_nonnull (instance_dir);
+
+  g_autofree char *rp_file = g_build_filename (instance_dir, "resourcepacks", "cool.zip", NULL);
+  g_autofree char *sp_file = g_build_filename (instance_dir, "shaderpacks", "fancy.zip", NULL);
+  g_autofree char *dp_file = g_build_filename (instance_dir, "datapacks", "extra.zip", NULL);
+
+  g_assert_true (g_file_test (rp_file, G_FILE_TEST_EXISTS));
+  g_assert_true (g_file_test (sp_file, G_FILE_TEST_EXISTS));
+  g_assert_true (g_file_test (dp_file, G_FILE_TEST_EXISTS));
+
+  remove_recursive (dir);
+}
+
+static void
+test_install_icon_and_remove_archive (void)
+{
+  g_autofree char *dir = make_tmp_dir ();
+  g_autofree char *data_dir = g_build_filename (dir, "data", NULL);
+  g_autofree char *zip_path = g_build_filename (dir, "pack.mrpack", NULL);
+  g_autofree char *index_json = pack_index ("Icon Pack", "", "\"minecraft\":\"1.20.1\"");
+  g_autoptr (GError) error = NULL;
+  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
+  g_autoptr (nuvashalauncherModpack) pack = NULL;
+  g_autoptr (nuvashalauncherInstance) instance = NULL;
+  g_autofree char *src_icon = g_build_filename (dir, "source-icon.png", NULL);
+
+  ZipEntry entries[] = {
+    { "modrinth.index.json", index_json, strlen (index_json), AE_IFREG, NULL },
+  };
+  zip_write (zip_path, entries, G_N_ELEMENTS (entries));
+
+  manager = manager_new (data_dir);
+  pack = nuvashalauncher_modpack_new_from_zip (zip_path, &error);
+  g_assert_no_error (error);
+  g_assert_true (nuvashalauncher_modpack_resolve (pack, &error));
+  g_assert_no_error (error);
+
+  instance = install_now (pack, manager, "Icon Pack", NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (instance);
+
+  /* Write a source icon */
+  g_file_set_contents (src_icon, "custom icon data", -1, &error);
+  g_assert_no_error (error);
+
+  /* Test nuvashalauncher_modpack_install_icon */
+  g_assert_true (nuvashalauncher_modpack_install_icon (manager, instance, src_icon, &error));
+  g_assert_no_error (error);
+
+  /* Test nuvashalauncher_modpack_remove_archive */
+  g_assert_true (nuvashalauncher_modpack_remove_archive (zip_path, &error));
+  g_assert_no_error (error);
+  g_assert_false (g_file_test (zip_path, G_FILE_TEST_EXISTS));
+
+  remove_recursive (dir);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -279,5 +417,8 @@ main (int argc, char **argv)
   g_test_add_func ("/modpack/install-rollback", test_install_rolls_back);
   g_test_add_func ("/modpack/install-existing", test_install_leaves_user_data);
   g_test_add_func ("/modpack/install-unresolved", test_install_needs_resolve);
+  g_test_add_func ("/modpack/install-invalid-args", test_install_invalid_arguments);
+  g_test_add_func ("/modpack/install-content-types", test_install_with_content_types);
+  g_test_add_func ("/modpack/install-icon-and-remove", test_install_icon_and_remove_archive);
   return g_test_run ();
 }

@@ -11,7 +11,7 @@
 
 #include <glib.h>
 
-#include "nuvashalauncher-markdown.h"
+#include "nuvashalauncher-markdown-private.h"
 
 static void
 check (const char *input, const char *expected)
@@ -64,6 +64,27 @@ test_null (void)
   g_print ("ok - no text is no markup\n");
 }
 
+static void
+test_html_entities_and_tags (void)
+{
+  g_autofree char *entities = nuvashalauncher_markdown_inline ("&quot;hello &amp; world&quot; &copy; &#x20ac; &#65;");
+  g_assert_cmpstr (entities, ==, "&quot;hello &amp; world&quot; © € A");
+
+  /* Test allow_html */
+  g_autofree char *html = nuvashalauncher_markdown_inline_allow_html (
+    "<b>bold</b> and <i>italic</i> and <code>code</code> and <sub>sub</sub> and <sup>sup</sup> and <del>del</del>");
+  g_assert_cmpstr (html, ==,
+    "<b>bold</b> and <i>italic</i> and <span font_family=\"monospace\">code</span> and <sub>sub</sub> and <sup>sup</sup> and <s>del</s>");
+
+  /* Test safe URL checking */
+  g_assert_true (nuvashalauncher_markdown_url_is_safe ("https://modrinth.com"));
+  g_assert_true (nuvashalauncher_markdown_url_is_safe ("http://example.com"));
+  g_assert_true (nuvashalauncher_markdown_url_is_safe ("mailto:test@example.com"));
+  g_assert_false (nuvashalauncher_markdown_url_is_safe ("file:///etc/passwd"));
+  g_assert_false (nuvashalauncher_markdown_url_is_safe ("javascript:alert(1)"));
+  g_assert_false (nuvashalauncher_markdown_url_is_safe (NULL));
+}
+
 int
 main (int argc, char **argv)
 {
@@ -77,6 +98,7 @@ main (int argc, char **argv)
   test_link ();
   test_link_nested_parens ();
   test_null ();
+  test_html_entities_and_tags ();
 
   return 0;
 }

@@ -272,6 +272,63 @@ test_cancelled_versions_deliver_nothing (void)
   g_print ("ok - a cancelled version load hands nothing to a screen\n");
 }
 
+static void
+test_install_invalid_versions_and_missing_client (void)
+{
+  Wait wait = { 0 };
+  g_autoptr (nuvashalauncherVersionDescription) desc =
+    g_object_new (nuvashalauncher_TYPE_VERSION_DESCRIPTION, NULL);
+
+  wait.loop = g_main_loop_new (NULL, FALSE);
+  wait.watchdog = g_timeout_add_seconds (20, watchdog_fired, &wait);
+
+  /* Path traversal version segment */
+  wait.operation = nuvashalauncher_loaders_install_async (
+    nuvashalauncher_LOADER_FORGE, "../bad", "1.0", desc, "/bin/true",
+    NULL, NULL, NULL, on_install_finished, &wait);
+  g_main_loop_run (wait.loop);
+  g_source_remove (wait.watchdog);
+
+  g_assert_null (wait.install);
+  g_assert_error (wait.error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER);
+  g_clear_error (&wait.error);
+
+  /* Missing client jar in game description */
+  wait.watchdog = g_timeout_add_seconds (20, watchdog_fired, &wait);
+  wait.operation = nuvashalauncher_loaders_install_async (
+    nuvashalauncher_LOADER_FORGE, "1.20.1", "47.2.0", desc, "/bin/true",
+    NULL, NULL, NULL, on_install_finished, &wait);
+  g_main_loop_run (wait.loop);
+  g_source_remove (wait.watchdog);
+  g_main_loop_unref (wait.loop);
+
+  g_assert_null (wait.install);
+  g_assert_error (wait.error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER);
+  g_clear_error (&wait.error);
+}
+
+static void
+test_install_vanilla_refused (void)
+{
+  Wait wait = { 0 };
+  g_autoptr (nuvashalauncherVersionDescription) desc =
+    g_object_new (nuvashalauncher_TYPE_VERSION_DESCRIPTION, NULL);
+
+  wait.loop = g_main_loop_new (NULL, FALSE);
+  wait.watchdog = g_timeout_add_seconds (20, watchdog_fired, &wait);
+
+  wait.operation = nuvashalauncher_loaders_install_async (
+    nuvashalauncher_LOADER_VANILLA, "1.20.1", "1.0", desc, "/bin/true",
+    NULL, NULL, NULL, on_install_finished, &wait);
+  g_main_loop_run (wait.loop);
+  g_source_remove (wait.watchdog);
+  g_main_loop_unref (wait.loop);
+
+  g_assert_null (wait.install);
+  g_assert_error (wait.error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_UNSUPPORTED);
+  g_clear_error (&wait.error);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -282,5 +339,7 @@ main (int argc, char **argv)
   test_install_of_a_loader_that_publishes_none ();
   test_profile_of_a_loader_that_publishes_an_installer ();
   test_cancelled_versions_deliver_nothing ();
+  test_install_invalid_versions_and_missing_client ();
+  test_install_vanilla_refused ();
   return EXIT_SUCCESS;
 }
