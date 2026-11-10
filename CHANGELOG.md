@@ -23,25 +23,31 @@ All notable changes to Nuvasha Launcher are documented in this file.
   - Hardened task sequence cancellation and teardown to ensure scopes outlive in-flight operations safely without leaking state or memory.
   - Replaced shell command string formatting with direct `argv` spawning in GSettings schema resolution to guard against command injection.
   - Preserved `errno` values across filesystem error reporting in `fs` and `fs-tree` before invoking GLib helpers.
+  - Fixed `-Wcast-function-type` compiler error in `nuvashalauncher_cancellable_watch` by utilizing GLib's `G_SOURCE_FUNC` macro.
 - **Authentication, Accounts & 3D Skin Rendering**:
   - Prevented skin uploads from clearing the user's currently selected cape when no cape change was requested.
   - Released task scopes properly across asynchronous Minecraft profile and skin service requests, eliminating memory leaks.
+  - Resolved `SecretValue` memory leaks in `nuvashalauncher_secret_store_load` by releasing referenced secrets after reading payloads.
   - Handled 0-byte HTTP responses and preserved specific Xbox and Microsoft authentication error domains without crashing or misreporting as generic service errors.
   - Eliminated memory leaks, dangling pointer references, and use-after-free hazards in the skin library dialog and texture generation.
   - Fixed Red/Blue channel swap (`GDK_MEMORY_DEFAULT`), left-arm slim model texture alignment, 64x32 cape transparency, and HiDPI `glViewport` scaling in the OpenGL 3D skin preview.
   - Ensured offline account dialogs and account manager activations properly retain and release account stores and persist active IDs.
 - **Instances, Launcher, Java Discovery & Loaders**:
   - Fixed memory leak of patched JAR file names during loader construction.
+  - Resolved zlib `deflateInit2` stream buffer leaks in loader JAR manifest attribute patching by cleanly letting libarchive's write close and free handlers finalize compression.
   - Guarded custom Java probe completion and process stop operations against cancellation races, ensuring instance crash logs and exit states are preserved.
   - Cleaned up dangling export weak references and cancelled background export operations on instance page disposal.
   - Added force-exit fallbacks when Java runtime discovery and loader processor subprocess pipes fail, preventing orphaned background processes.
   - Deduplicated asset hash downloads so multiple virtual paths sharing identical content hashes download only once.
   - Fixed bounds checks in loader selection, regex cache thread synchronization in version rule checks, and instance duplication metadata preservation.
 - **Modpacks & Modrinth Integration**:
+  - Fixed silent dialog sink in `nuvashalauncher_main_window_import_file` so modpack import dialogs present reliably to the user.
   - Fixed memory leak of Modrinth JSON response strings and guarded against out-of-bounds version index selections.
   - Guaranteed dialog states complete and refresh on network or parsing errors so modpack dialogs never freeze on indefinite loading spinners.
   - Removed dangling weak references, cleaned up temporary `.mrpack` files on extraction failure, and guarded division-by-zero during empty export runs.
 - **Content Management, Main Window & Markdown**:
+  - Removed orphaned and dead UI template (`nuvashalauncher-downloads-popover.ui`) and purged unreferenced functions across cache, fs, accounts, and i18n modules.
+  - Fixed non-compatible function pointer casting (`GDestroyNotify`) in `nuvashalauncher_content_page_dispose` to prevent compiler warnings and crashes on strict GCC configurations.
   - Handled projects with no compatible versions gracefully using localized messaging rather than out-of-bounds access.
   - Preserved existing browser items when subsequent paginated searches fail, allowing seamless retry without clearing results.
   - Prevented thread pool dispatch failures from deadlocking pending operation counters in content file scanning.
