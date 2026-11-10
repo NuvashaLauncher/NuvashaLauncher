@@ -15,6 +15,7 @@
  *
  * Reads the tree and nothing else, and opens no display. */
 
+#include "nuvashalauncher-i18n.h"
 #include <glib.h>
 
 #include <stdlib.h>
@@ -483,6 +484,20 @@ main (void)
   g_print ("ok - every string is translated in every catalog%s\n",
            leftover > 0 ? " (what each catalog has left over is named)"
                         : "");
+
+  /* Exercise runtime language table and initialization */
+  {
+    gsize n_languages = 0;
+    const nuvashalauncherLanguage *languages = nuvashalauncher_i18n_languages (&n_languages);
+    g_assert_nonnull (languages);
+    g_assert_cmpuint (n_languages, >, 0);
+    g_assert_cmpstr (languages[0].code, ==, "system");
+
+    nuvashalauncher_i18n_template_strings ();
+    nuvashalauncher_i18n_init ("es_ES");
+    nuvashalauncher_i18n_init ("system");
+    nuvashalauncher_i18n_init (NULL);
+  }
 
   return EXIT_SUCCESS;
 }
