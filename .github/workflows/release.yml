@@ -231,6 +231,11 @@ jobs:
           VERSION=$(tr -d '[:space:]' < VERSION)
           TAG="v${VERSION}"
           ls -la dist/
+
+          # Generate SHA256 checksums for all release artifacts
+          (cd dist && sha256sum * > SHA256SUMS)
+          cat dist/SHA256SUMS
+
           if [ -f CHANGELOG.md ]; then
             awk -v ver="$VERSION" '
               /^## / {
