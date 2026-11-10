@@ -289,9 +289,15 @@ nuvashalauncher_content_page_dispose (GObject *object)
 
   g_clear_object (&self->instance);
   if (self->installed.rows_list != NULL)
-    g_clear_pointer (&self->installed.rows_list, (GDestroyNotify) g_list_free);
+    {
+      g_list_free (self->installed.rows_list);
+      self->installed.rows_list = NULL;
+    }
   if (self->browse.result_rows != NULL)
-    g_clear_pointer (&self->browse.result_rows, (GDestroyNotify) g_list_free);
+    {
+      g_list_free (self->browse.result_rows);
+      self->browse.result_rows = NULL;
+    }
 
   G_OBJECT_CLASS (nuvashalauncher_content_page_parent_class)->dispose (object);
 }
