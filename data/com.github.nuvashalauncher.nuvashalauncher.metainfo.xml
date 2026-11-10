@@ -43,6 +43,17 @@
     <color type="primary">#7774a5</color>
   </branding>
   <releases>
+    <release version="1.0" date="2026-11-10">
+      <description>
+        <p>Release 1.0 brings Linux distribution packaging (RPM, Debian/Ubuntu,
+        Arch Linux, and NixOS flake) with NixOS store Java discovery. This release
+        also introduces modern 64px loading spinners, external link and export symbolic
+        action icons, streamlined distribution dependencies, comprehensive unit test
+        coverage reaching over 70% of the backend codebase, and an exhaustive audit
+        fixing async task lifetimes, memory management, 3D skin rendering, archive
+        and filesystem security, OAuth, and launcher stability.</p>
+      </description>
+    </release>
     <release version="0.9" date="2026-10-30">
       <description>
         <p>Improved error handling throughout the launcher. User-facing errors
