@@ -19,7 +19,6 @@
     <file>ui/nuvashalauncher-content-details.ui</file>
     <file>ui/nuvashalauncher-download-row.ui</file>
     <file>ui/nuvashalauncher-skin-row.ui</file>
-    <file>ui/nuvashalauncher-downloads-popover.ui</file>
     <file>ui/nuvashalauncher-main-shell.ui</file>
     <file>ui/nuvashalauncher-skin-content.ui</file>
     <file alias="icons/scalable/actions/export-symbolic.svg">icons/scalable/actions/export-symbolic.svg</file>

@@ -123,9 +123,6 @@ nuvashalauncherAccounts *nuvashalauncher_accounts_new (void);
 /* Create a store backed by @filename. (transfer full) */
 nuvashalauncherAccounts *nuvashalauncher_accounts_new_for_path (const char *filename);
 
-/* The file the store keeps its accounts in. Never NULL. */
-const char *nuvashalauncher_accounts_path (nuvashalauncherAccounts *self);
-
 /* (transfer container) The accounts in the order they were added, as
    nuvashalauncherAccount* this store keeps. */
 GPtrArray *nuvashalauncher_accounts_list (nuvashalauncherAccounts *self);

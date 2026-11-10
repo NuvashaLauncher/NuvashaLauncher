@@ -33,7 +33,7 @@ profile_answered (AuthRequest *self)
          than as a service that could not be reached. */
       if (error != NULL)
         fail (self, g_steal_pointer (&error));
-      else if (self->status == 404)
+      else if (self->status == SOUP_STATUS_NOT_FOUND)
         fail (self, refusal (self->body, self->status, nuvashalauncher_AUTH_ERROR_NO_PROFILE,
                              "the Minecraft services have no profile for this "
                              "account"));

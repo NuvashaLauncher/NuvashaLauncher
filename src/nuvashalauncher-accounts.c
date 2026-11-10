@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 /* Copyright (C) 2026 Flia
  * SPDX-License-Identifier: GPL-3.0-only
  */
@@ -19,6 +21,17 @@ nuvashalauncher_accounts_error_quark (void)
  * One account
  * ---------------------------------------------------------- */
 
+static void
+secure_clear_string (char **str_ptr)
+{
+  if (str_ptr != NULL && *str_ptr != NULL)
+    {
+      explicit_bzero (*str_ptr, strlen (*str_ptr));
+      g_free (*str_ptr);
+      *str_ptr = NULL;
+    }
+}
+
 void
 nuvashalauncher_account_free (nuvashalauncherAccount *account)
 {
@@ -28,8 +41,8 @@ nuvashalauncher_account_free (nuvashalauncherAccount *account)
   g_free (account->id);
   g_free (account->name);
   g_free (account->uuid);
-  g_free (account->access_token);
-  g_free (account->refresh_token);
+  secure_clear_string (&account->access_token);
+  secure_clear_string (&account->refresh_token);
   g_free (account->avatar_url);
   g_free (account->skin_model);
   g_free (account->cape_id);
@@ -290,14 +303,6 @@ nuvashalauncher_accounts_new (void)
                                                 NULL);
 
   return nuvashalauncher_accounts_new_for_path (filename);
-}
-
-const char *
-nuvashalauncher_accounts_path (nuvashalauncherAccounts *self)
-{
-  g_return_val_if_fail (nuvashalauncher_IS_ACCOUNTS (self), NULL);
-
-  return self->filename;
 }
 
 GPtrArray *

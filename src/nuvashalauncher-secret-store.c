@@ -11,34 +11,42 @@
 /* This is deliberately a new schema. Older keyring entries are not part of
  * the current account store and are neither read nor migrated. */
 static const SecretSchema account_schema = {
-  "com.github.nuvashalauncher.Account",
-  SECRET_SCHEMA_NONE,
-  { { "account-id", SECRET_SCHEMA_ATTRIBUTE_STRING }, { NULL, 0 } },
-  0, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+  .name = "com.github.nuvashalauncher.Account",
+  .flags = SECRET_SCHEMA_NONE,
+  .attributes = {
+    { "account-id", SECRET_SCHEMA_ATTRIBUTE_STRING },
+    { NULL, 0 }
+  }
 };
 
 static const SecretSchema active_schema = {
-  "com.github.nuvashalauncher.ActiveAccount",
-  SECRET_SCHEMA_NONE,
-  { { "kind", SECRET_SCHEMA_ATTRIBUTE_STRING }, { NULL, 0 } },
-  0, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+  .name = "com.github.nuvashalauncher.ActiveAccount",
+  .flags = SECRET_SCHEMA_NONE,
+  .attributes = {
+    { "kind", SECRET_SCHEMA_ATTRIBUTE_STRING },
+    { NULL, 0 }
+  }
 };
 
 /* Tests run against a separate schema so they can never enumerate, update,
  * or remove a real user's account items, even when the test process has
  * access to the user's Secret Service. */
 static const SecretSchema test_account_schema = {
-  "com.github.nuvashalauncher.TestAccount",
-  SECRET_SCHEMA_NONE,
-  { { "account-id", SECRET_SCHEMA_ATTRIBUTE_STRING }, { NULL, 0 } },
-  0, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+  .name = "com.github.nuvashalauncher.TestAccount",
+  .flags = SECRET_SCHEMA_NONE,
+  .attributes = {
+    { "account-id", SECRET_SCHEMA_ATTRIBUTE_STRING },
+    { NULL, 0 }
+  }
 };
 
 static const SecretSchema test_active_schema = {
-  "com.github.nuvashalauncher.TestActiveAccount",
-  SECRET_SCHEMA_NONE,
-  { { "kind", SECRET_SCHEMA_ATTRIBUTE_STRING }, { NULL, 0 } },
-  0, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+  .name = "com.github.nuvashalauncher.TestActiveAccount",
+  .flags = SECRET_SCHEMA_NONE,
+  .attributes = {
+    { "kind", SECRET_SCHEMA_ATTRIBUTE_STRING },
+    { NULL, 0 }
+  }
 };
 
 static const SecretSchema *
@@ -130,7 +138,7 @@ nuvashalauncher_secret_store_load (GPtrArray **accounts,
     (GDestroyNotify) nuvashalauncher_account_free);
   attributes = g_hash_table_new (g_str_hash, g_str_equal);
   items = secret_service_search_sync (service, accounts_schema, attributes,
-                                      SECRET_SEARCH_ALL | SECRET_SEARCH_UNLOCK,
+                                      SECRET_SEARCH_ALL | SECRET_SEARCH_UNLOCK | SECRET_SEARCH_LOAD_SECRETS,
                                       NULL, &local_error);
   if (local_error != NULL)
     {
@@ -140,18 +148,9 @@ nuvashalauncher_secret_store_load (GPtrArray **accounts,
 
   for (GList *item = items; item != NULL; item = item->next)
     {
-      g_autoptr (SecretValue) value =
-        secret_retrievable_retrieve_secret_sync (SECRET_RETRIEVABLE (item->data),
-                                                 NULL, &local_error);
+      SecretValue *value = secret_item_get_secret (SECRET_ITEM (item->data));
       g_autoptr (nuvashalauncherAccount) account =
         value != NULL ? account_from_payload (secret_value_get_text (value)) : NULL;
-
-      if (local_error != NULL)
-        {
-          g_list_free_full (items, g_object_unref);
-          g_ptr_array_unref (loaded);
-          return secret_error (error, g_steal_pointer (&local_error));
-        }
 
       if (account != NULL)
         g_ptr_array_add (loaded, g_steal_pointer (&account));

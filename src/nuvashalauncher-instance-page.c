@@ -351,9 +351,12 @@ nuvashalauncher_instance_page_dispose (GObject *object)
   self->directory_path_label = NULL;
   self->directory_spinner = NULL;
 
-  nuvashalauncher_operation_cancel (self->scope);
-  nuvashalauncher_operation_unref (self->scope);
-  self->scope = NULL;
+  if (self->scope != NULL)
+    {
+      nuvashalauncher_operation_cancel (self->scope);
+      nuvashalauncher_operation_unref (self->scope);
+      self->scope = NULL;
+    }
 
   /* The Java warning's manifest read is this page's: it stops with it. */
   if (self->versions_operation != NULL)
@@ -382,6 +385,11 @@ nuvashalauncher_instance_page_dispose (GObject *object)
    * that is on its way out. */
   g_clear_object (&self->loader_row);
 
+  g_clear_object (&self->manager);
+  g_clear_object (&self->instance);
+  g_clear_object (&self->settings);
+  g_clear_object (&self->launcher);
+
   G_OBJECT_CLASS (nuvashalauncher_instance_page_parent_class)->dispose (object);
 }
 
@@ -390,10 +398,6 @@ nuvashalauncher_instance_page_finalize (GObject *object)
 {
   nuvashalauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (object);
 
-  g_clear_object (&self->manager);
-  g_clear_object (&self->instance);
-  g_clear_object (&self->settings);
-  g_clear_object (&self->launcher);
   g_free (self->loader_version);
   g_free (self->export_name);
   g_free (self->export_summary);

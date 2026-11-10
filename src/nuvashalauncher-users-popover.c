@@ -499,6 +499,10 @@ nuvashalauncher_users_popover_dispose (GObject *object)
   if (self->avatars != NULL)
     g_cancellable_cancel (self->avatars);
   g_clear_object (&self->avatars);
+  g_clear_object (&self->accounts);
+  g_clear_object (&self->button_content);
+  g_clear_pointer (&self->avatar_cache, g_hash_table_unref);
+  g_clear_pointer (&self->profile_cache, g_hash_table_unref);
 
   G_OBJECT_CLASS (nuvashalauncher_users_popover_parent_class)->dispose (object);
 }
@@ -508,11 +512,7 @@ nuvashalauncher_users_popover_finalize (GObject *object)
 {
   nuvashalauncherUsersPopover *self = nuvashalauncher_USERS_POPOVER (object);
 
-  g_clear_object (&self->accounts);
-  g_clear_object (&self->button_content);
-  g_clear_pointer (&self->avatar_cache, g_hash_table_unref);
-  g_clear_pointer (&self->profile_cache, g_hash_table_unref);
-  g_free (self->active_name);
+  g_clear_pointer (&self->active_name, g_free);
 
   G_OBJECT_CLASS (nuvashalauncher_users_popover_parent_class)->finalize (object);
 }
@@ -598,22 +598,6 @@ nuvashalauncher_users_popover_new (nuvashalauncherAccounts *accounts)
   g_return_val_if_fail (nuvashalauncher_IS_ACCOUNTS (accounts), NULL);
 
   return g_object_new (nuvashalauncher_TYPE_USERS_POPOVER, "accounts", accounts, NULL);
-}
-
-nuvashalauncherAccounts *
-nuvashalauncher_users_popover_get_accounts (nuvashalauncherUsersPopover *self)
-{
-  g_return_val_if_fail (nuvashalauncher_IS_USERS_POPOVER (self), NULL);
-
-  return self->accounts;
-}
-
-char *
-nuvashalauncher_users_popover_get_active_name (nuvashalauncherUsersPopover *self)
-{
-  g_return_val_if_fail (nuvashalauncher_IS_USERS_POPOVER (self), NULL);
-
-  return g_strdup (self->active_name);
 }
 
 /* The avatar and the name in the header, which is what the menu button of

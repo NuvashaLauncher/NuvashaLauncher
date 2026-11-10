@@ -153,6 +153,8 @@ nuvashalauncher_offline_account_dialog_dispose (GObject *object)
 
   g_clear_object (&self->accounts);
 
+  gtk_widget_dispose_template (GTK_WIDGET (self), nuvashalauncher_TYPE_OFFLINE_ACCOUNT_DIALOG);
+
   G_OBJECT_CLASS (nuvashalauncher_offline_account_dialog_parent_class)->dispose (object);
 }
 

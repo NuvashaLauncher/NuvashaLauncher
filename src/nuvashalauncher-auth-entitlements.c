@@ -28,7 +28,7 @@ entitlements_answered (AuthRequest *self)
 {
   g_autoptr (GError) error = NULL;
 
-  if (self->status < 200 || self->status > 299)
+  if (!SOUP_STATUS_IS_SUCCESSFUL (self->status))
     {
       fail (self, refusal (self->body, self->status, nuvashalauncher_AUTH_ERROR_XBOX,
                            "the Minecraft services did not answer with what "

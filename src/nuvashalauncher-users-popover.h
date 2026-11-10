@@ -32,13 +32,6 @@ G_DECLARE_FINAL_TYPE (nuvashalauncherUsersPopover, nuvashalauncher_users_popover
 /* The popover of @accounts, and it takes its own reference on them. */
 nuvashalauncherUsersPopover *nuvashalauncher_users_popover_new (nuvashalauncherAccounts *accounts);
 
-/* The store this shows. Borrowed. */
-nuvashalauncherAccounts *nuvashalauncher_users_popover_get_accounts (nuvashalauncherUsersPopover *self);
-
-/* The name of the active account, the empty string when there is none.
-   (transfer full) */
-char *nuvashalauncher_users_popover_get_active_name (nuvashalauncherUsersPopover *self);
-
 /* Return header-button content for the active account. The caller owns it. */
 GtkWidget *nuvashalauncher_users_popover_get_button_content (nuvashalauncherUsersPopover *self);
 

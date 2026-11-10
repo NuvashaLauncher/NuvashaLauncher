@@ -287,13 +287,21 @@ check_instance_directory (nuvashalauncherInstanceManager  *self,
 }
 
 static void
+nuvashalauncher_instance_manager_dispose (GObject *object)
+{
+  nuvashalauncherInstanceManager *self = nuvashalauncher_INSTANCE_MANAGER (object);
+
+  g_clear_handle_id (&self->directory_check_source, g_source_remove);
+  g_clear_object (&self->instances);
+
+  G_OBJECT_CLASS (nuvashalauncher_instance_manager_parent_class)->dispose (object);
+}
+
+static void
 nuvashalauncher_instance_manager_finalize (GObject *object)
 {
   nuvashalauncherInstanceManager *self = nuvashalauncher_INSTANCE_MANAGER (object);
 
-  if (self->directory_check_source != 0)
-    g_source_remove (self->directory_check_source);
-  g_clear_object (&self->instances);
   g_free (self->data_dir);
   g_free (self->metadata_path);
   g_free (self->instances_dir);
@@ -306,6 +314,7 @@ nuvashalauncher_instance_manager_class_init (nuvashalauncherInstanceManagerClass
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
+  object_class->dispose = nuvashalauncher_instance_manager_dispose;
   object_class->finalize = nuvashalauncher_instance_manager_finalize;
 }
 
@@ -729,7 +738,5 @@ copy_tree_async (GFile *source, GFile *destination,
 gboolean
 copy_tree_finish (GAsyncResult *result, GError **error)
 {
-  g_return_val_if_fail (nuvashalauncher_task_result_is_valid (result, "nuvashalauncher-task-scope"), FALSE);
-
-  return g_task_propagate_boolean (G_TASK (result), error);
+  return nuvashalauncher_fs_copy_tree_finish (result, error);
 }

@@ -31,12 +31,11 @@
 G_DEFINE_FINAL_TYPE (nuvashalauncherContentPage, nuvashalauncher_content_page, GTK_TYPE_BOX)
 
 static void
-on_content_page_width_changed (GObject *object,
-                                GParamSpec *pspec G_GNUC_UNUSED,
-                                gpointer user_data G_GNUC_UNUSED)
+nuvashalauncher_content_page_size_allocate (GtkWidget *widget, int width, int height, int baseline)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (object);
-  int width = gtk_widget_get_width (GTK_WIDGET (self));
+  GTK_WIDGET_CLASS (nuvashalauncher_content_page_parent_class)->size_allocate (widget, width, height, baseline);
+
+  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (widget);
   gboolean narrow = width > 0 && width < 720;
 
   if (self->bar == NULL)
@@ -200,8 +199,6 @@ nuvashalauncher_content_page_new (nuvashalauncherInstance *instance, nuvashalaun
 
   nuvashalauncher_content_page_build_bar (self);
   nuvashalauncher_content_page_move_actions_into_bar (self, FALSE);
-  g_signal_connect_object (self, "notify::width",
-                           G_CALLBACK (on_content_page_width_changed), self, 0);
 
   return self;
 }
@@ -290,6 +287,12 @@ nuvashalauncher_content_page_dispose (GObject *object)
      more: the plans and fetches hold the page weakly and stop. */
   self->install_model->updating = FALSE;
 
+  g_clear_object (&self->instance);
+  if (self->installed.rows_list != NULL)
+    g_clear_pointer (&self->installed.rows_list, (GDestroyNotify) g_list_free);
+  if (self->browse.result_rows != NULL)
+    g_clear_pointer (&self->browse.result_rows, (GDestroyNotify) g_list_free);
+
   G_OBJECT_CLASS (nuvashalauncher_content_page_parent_class)->dispose (object);
 }
 
@@ -298,14 +301,11 @@ nuvashalauncher_content_page_finalize (GObject *object)
 {
   nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (object);
 
-  g_clear_object (&self->instance);
   g_clear_pointer (&self->installed.files, g_ptr_array_unref);
   g_clear_pointer (&self->installed.rows, g_hash_table_unref);
   g_clear_pointer (&self->installed.selected_paths, g_hash_table_unref);
   nuvashalauncher_content_browser_model_free (self->browse.model);
   self->browse.model = NULL;
-  g_list_free_full (self->installed.rows_list, g_object_unref);
-  g_list_free_full (self->browse.result_rows, g_object_unref);
   nuvashalauncher_content_install_model_free (self->install_model);
   self->install_model = NULL;
   g_free (self->minecraft_version);
@@ -326,9 +326,11 @@ static void
 nuvashalauncher_content_page_class_init (nuvashalauncherContentPageClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
   object_class->dispose = nuvashalauncher_content_page_dispose;
   object_class->finalize = nuvashalauncher_content_page_finalize;
+  widget_class->size_allocate = nuvashalauncher_content_page_size_allocate;
 }
 
 static void

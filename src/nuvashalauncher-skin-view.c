@@ -498,7 +498,7 @@ draw_model (nuvashalauncherSkinView *self)
 }
 
 static void
-on_realize (GtkGLArea *area, gpointer user_data G_GNUC_UNUSED)
+on_realize (GtkGLArea *area)
 {
   nuvashalauncherSkinView *self = nuvashalauncher_SKIN_VIEW (area);
   const char *vs_source;
@@ -532,6 +532,10 @@ on_realize (GtkGLArea *area, gpointer user_data G_GNUC_UNUSED)
         glDeleteShader (vs);
       if (fs != 0)
         glDeleteShader (fs);
+      GError *err = g_error_new_literal (GDK_GL_ERROR, GDK_GL_ERROR_COMPILATION_FAILED,
+                                         "Skin preview shader compilation failed");
+      gtk_gl_area_set_error (area, err);
+      g_error_free (err);
       return;
     }
   self->program = glCreateProgram (); glAttachShader (self->program, vs); glAttachShader (self->program, fs);
@@ -542,6 +546,9 @@ on_realize (GtkGLArea *area, gpointer user_data G_GNUC_UNUSED)
     {
       glGetProgramInfoLog (self->program, sizeof log - 1, NULL, log);
       g_warning ("Skin preview shader link failed: %s", log);
+      GError *err = g_error_new_literal (GDK_GL_ERROR, GDK_GL_ERROR_LINK_FAILED, log);
+      gtk_gl_area_set_error (area, err);
+      g_error_free (err);
       glDeleteShader (vs); glDeleteShader (fs);
       glDeleteProgram (self->program); self->program = 0;
       return;
@@ -556,9 +563,11 @@ on_realize (GtkGLArea *area, gpointer user_data G_GNUC_UNUSED)
 }
 
 static void
-on_unrealize (GtkGLArea *area, gpointer user_data G_GNUC_UNUSED)
+on_unrealize (GtkGLArea *area)
 {
   nuvashalauncherSkinView *self = nuvashalauncher_SKIN_VIEW (area);
+  if (gtk_gl_area_get_context (area) == NULL)
+    return;
   gtk_gl_area_make_current (area);
   if (self->skin_texture) glDeleteTextures (1, &self->skin_texture);
   if (self->cape_texture) glDeleteTextures (1, &self->cape_texture);
@@ -567,6 +576,7 @@ on_unrealize (GtkGLArea *area, gpointer user_data G_GNUC_UNUSED)
   if (self->program) glDeleteProgram (self->program);
   self->skin_texture = self->cape_texture = self->program = self->vertex_buffer = self->vertex_array = 0;
   self->ready = FALSE;
+  gdk_gl_context_clear_current ();
 }
 
 static gboolean
@@ -619,11 +629,29 @@ nuvashalauncher_skin_view_dispose (GObject *object)
 }
 
 static void
+nuvashalauncher_skin_view_realize (GtkWidget *widget)
+{
+  GTK_WIDGET_CLASS (nuvashalauncher_skin_view_parent_class)->realize (widget);
+  on_realize (GTK_GL_AREA (widget));
+}
+
+static void
+nuvashalauncher_skin_view_unrealize (GtkWidget *widget)
+{
+  on_unrealize (GTK_GL_AREA (widget));
+  GTK_WIDGET_CLASS (nuvashalauncher_skin_view_parent_class)->unrealize (widget);
+}
+
+static void
 nuvashalauncher_skin_view_class_init (nuvashalauncherSkinViewClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
   GtkGLAreaClass *gl_class = GTK_GL_AREA_CLASS (klass);
+
   object_class->dispose = nuvashalauncher_skin_view_dispose;
+  widget_class->realize = nuvashalauncher_skin_view_realize;
+  widget_class->unrealize = nuvashalauncher_skin_view_unrealize;
   gl_class->render = on_render;
 }
 
@@ -633,8 +661,6 @@ nuvashalauncher_skin_view_init (nuvashalauncherSkinView *self)
   GtkGesture *drag = gtk_gesture_drag_new ();
   gtk_gl_area_set_has_depth_buffer (GTK_GL_AREA (self), TRUE);
   gtk_gl_area_set_auto_render (GTK_GL_AREA (self), TRUE);
-  g_signal_connect (self, "realize", G_CALLBACK (on_realize), NULL);
-  g_signal_connect (self, "unrealize", G_CALLBACK (on_unrealize), NULL);
   g_signal_connect (drag, "drag-begin", G_CALLBACK (on_drag_begin), self);
   g_signal_connect (drag, "drag-update", G_CALLBACK (on_drag_update), self);
   gtk_widget_add_controller (GTK_WIDGET (self), GTK_EVENT_CONTROLLER (drag));
