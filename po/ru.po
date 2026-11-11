@@ -1171,3 +1171,42 @@ msgstr "Некорректные настройки экземпляра. Про
 
 msgid "Your saved sign-in is no longer valid. Sign in again."
 msgstr "Сохранённый вход больше недействителен. Войдите заново."
+
+msgid "Minecraft launcher for Linux"
+msgstr "Лаунчер Minecraft для Linux"
+
+msgid "Services & Ecosystem"
+msgstr "Сервисы и экосистема"
+
+msgid "Minecraft Disclaimer"
+msgstr "Отказ от ответственности Minecraft"
+
+msgid ""
+"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n"
+"\n"
+"Minecraft is a trademark of Mojang AB. The launcher is developed independently and is not affiliated with Mojang Studios or Microsoft."
+msgstr ""
+"НЕ ЯВЛЯЕТСЯ ОФИЦИАЛЬНЫМ ПРОДУКТОМ MINECRAFT. НЕ ОДОБРЕНО И НЕ СВЯЗАНО С MOJANG ИЛИ MICROSOFT.\n"
+"\n"
+"Minecraft является товарным знаком Mojang AB. Лаунчер разрабатывается независимо и не связан с Mojang Studios или Microsoft."
+
+msgid "Modrinth & Mod Loaders"
+msgstr "Modrinth и загрузчики модов"
+
+msgid ""
+"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and created by their respective authors.\n"
+"\n"
+"Mod loaders are developed independently by the Fabric, Quilt, Forge, and NeoForge projects."
+msgstr ""
+"Модпаки, моды, ресурспаки и шейдеры размещены на Modrinth и созданы соответствующими авторами.\n"
+"\n"
+"Загрузчики модов разрабатываются независимо проектами Fabric, Quilt, Forge и NeoForge."
+
+msgid "AppStream Metadata"
+msgstr "Метаданные AppStream"
+
+msgid "The AppStream metadata (descriptions, summaries, and release notes) is released under the Creative Commons CC0 1.0 Universal Public Domain Dedication."
+msgstr "Метаданные AppStream (описания, сводки и примечания к выпуску) опубликованы в рамках Creative Commons CC0 1.0 Universal Public Domain Dedication."
+
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"

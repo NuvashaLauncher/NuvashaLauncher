@@ -85,6 +85,8 @@ on_import_modpack (GSimpleAction *action G_GNUC_UNUSED,
   g_autoptr (GListStore) filters = g_list_store_new (GTK_TYPE_FILE_FILTER);
 
   gtk_file_dialog_set_title (dialog, _("Import Modpack"));
+  g_autoptr (GFile) home = g_file_new_for_path (g_get_home_dir ());
+  gtk_file_dialog_set_initial_folder (dialog, home);
   gtk_file_filter_set_name (filter, _("Modrinth Modpacks (*.mrpack)"));
   gtk_file_filter_add_suffix (filter, "mrpack");
   g_list_store_append (filters, filter);
@@ -589,22 +591,66 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
 {
   nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   AdwDialog *dialog = adw_about_dialog_new ();
-  const char *app_ids[] = { "com.github.nuvashalauncher.nuvashalauncher", NULL };
+  const char *authors[] = { "Flia", NULL };
+  const char *services[] = {
+    "Modrinth API",
+    "Mojang & Microsoft Services",
+    "FabricMC",
+    "QuiltMC",
+    "Minecraft Forge",
+    "NeoForged",
+    NULL
+  };
 
   adw_about_dialog_set_application_name (ADW_ABOUT_DIALOG (dialog),
-                                         "nuvashalauncher");
-  adw_about_dialog_set_application_icon (ADW_ABOUT_DIALOG (dialog), app_ids[0]);
+                                         _("Nuvasha Launcher"));
+  adw_about_dialog_set_application_icon (ADW_ABOUT_DIALOG (dialog),
+                                         "com.github.nuvashalauncher.nuvashalauncher");
   adw_about_dialog_set_version (ADW_ABOUT_DIALOG (dialog), nuvashalauncher_VERSION);
   adw_about_dialog_set_developer_name (ADW_ABOUT_DIALOG (dialog), "Flia");
-
+  adw_about_dialog_set_developers (ADW_ABOUT_DIALOG (dialog), authors);
+  adw_about_dialog_set_designers (ADW_ABOUT_DIALOG (dialog), authors);
+  adw_about_dialog_set_artists (ADW_ABOUT_DIALOG (dialog), authors);
+  adw_about_dialog_set_translator_credits (ADW_ABOUT_DIALOG (dialog), "Flia");
+  adw_about_dialog_set_comments (ADW_ABOUT_DIALOG (dialog),
+                                 _("Minecraft launcher for Linux"));
   adw_about_dialog_set_website (ADW_ABOUT_DIALOG (dialog),
-                                 "https://github.com/nuvashalauncher/nuvashalauncher");
+                                "https://github.com/NuvashaLauncher/NuvashaLauncher");
+  adw_about_dialog_set_issue_url (ADW_ABOUT_DIALOG (dialog),
+                                  "https://github.com/NuvashaLauncher/NuvashaLauncher/issues");
+  adw_about_dialog_set_support_url (ADW_ABOUT_DIALOG (dialog),
+                                   "https://github.com/NuvashaLauncher/NuvashaLauncher#readme");
   adw_about_dialog_set_copyright (ADW_ABOUT_DIALOG (dialog),
-                                  "Copyright (C) 2026 Flia");
+                                  "© 2026 Flia");
   adw_about_dialog_set_license_type (ADW_ABOUT_DIALOG (dialog),
                                      GTK_LICENSE_GPL_3_0_ONLY);
+
   adw_about_dialog_add_credit_section (ADW_ABOUT_DIALOG (dialog),
-                                       "Application ID", app_ids);
+                                       _("Services & Ecosystem"), services);
+
+  adw_about_dialog_add_legal_section (
+    ADW_ABOUT_DIALOG (dialog),
+    _("Minecraft Disclaimer"),
+    NULL,
+    GTK_LICENSE_CUSTOM,
+    _("NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n\n"
+      "Minecraft is a trademark of Mojang AB. The launcher is developed independently and is not affiliated with Mojang Studios or Microsoft."));
+
+  adw_about_dialog_add_legal_section (
+    ADW_ABOUT_DIALOG (dialog),
+    _("Modrinth & Mod Loaders"),
+    NULL,
+    GTK_LICENSE_CUSTOM,
+    _("Modpacks, mods, resource packs, and shaders are hosted by Modrinth and created by their respective authors.\n\n"
+      "Mod loaders are developed independently by the Fabric, Quilt, Forge, and NeoForge projects."));
+
+  adw_about_dialog_add_legal_section (
+    ADW_ABOUT_DIALOG (dialog),
+    _("AppStream Metadata"),
+    "© 2026 Flia",
+    GTK_LICENSE_CUSTOM,
+    _("The AppStream metadata (descriptions, summaries, and release notes) is released under the Creative Commons CC0 1.0 Universal Public Domain Dedication."));
+
   adw_dialog_set_title (dialog, _("About Nuvasha Launcher"));
 
   adw_dialog_present (dialog, GTK_WIDGET (self));

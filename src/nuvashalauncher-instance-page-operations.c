@@ -517,6 +517,8 @@ on_change_directory_clicked (GtkButton *button G_GNUC_UNUSED,
     }
 
   gtk_file_dialog_set_title (dialog, _("Choose a Directory"));
+  g_autoptr (GFile) home = g_file_new_for_path (g_get_home_dir ());
+  gtk_file_dialog_set_initial_folder (dialog, home);
   gtk_file_dialog_select_folder (dialog,
                                  GTK_IS_WINDOW (root) ? GTK_WINDOW (root)
                                                       : NULL,

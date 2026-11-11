@@ -244,6 +244,7 @@ nuvashalauncher_content_page_dispose (GObject *object)
   self->browse.results_group = NULL;
   self->browse.results_scroller = NULL;
   self->browse.results_status = NULL;
+  self->browse.results_loading = NULL;
   self->browse.search_entry = NULL;
   self->browse.search_bar = NULL;
    self->browse.filter_box = NULL;

@@ -41,7 +41,7 @@
             <child><object class="GtkButton" id="export"><property name="label" translatable="yes">Export skin…</property></object></child>
             <child><object class="GtkBox" id="action-spacer"><property name="hexpand">True</property></object></child>
             <child><object class="GtkButton" id="open-skins"><property name="icon-name">folder-symbolic</property><property name="tooltip-text" translatable="yes">Open Folder</property></object></child>
-            <child><object class="GtkButton" id="remove"><property name="icon-name">user-trash-symbolic</property><property name="tooltip-text" translatable="yes">Delete</property></object></child>
+            <child><object class="GtkButton" id="remove"><property name="icon-name">edit-delete-symbolic</property><property name="tooltip-text" translatable="yes">Delete</property></object></child>
           </object>
         </child>
       </object>

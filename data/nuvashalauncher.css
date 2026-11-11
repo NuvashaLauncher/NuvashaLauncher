@@ -43,6 +43,33 @@
   border-radius: 50%;
 }
 
+checkbutton.nuvashalauncher-select-checkbox {
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  min-height: 0;
+  border-spacing: 0;
+}
+
+checkbutton.nuvashalauncher-select-checkbox > check {
+  all: unset;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  opacity: 0;
+  background: none;
+  -gtk-icon-size: 0;
+  -gtk-icon-source: none;
+}
+
+.nuvashalauncher-select-badge {
+  background-color: @accent_bg_color;
+  color: @accent_fg_color;
+  border-radius: 50%;
+}
+
 .nuvashalauncher-dialog-content {
   padding: 24px;
 }

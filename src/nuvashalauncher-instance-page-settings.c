@@ -565,7 +565,6 @@ create_settings_page (nuvashalauncherInstancePage *self)
   gtk_widget_add_css_class (GTK_WIDGET (java), "nuvashalauncher-preferences-surface");
   gtk_widget_add_css_class (GTK_WIDGET (actions), "nuvashalauncher-preferences-surface");
   GtkWidget *change_icon = NULL;
-  GtkWidget *delete_row = NULL;
 
   /* Names, paths and arguments are text from the user or the disk: none
      of them is markup. */
@@ -720,12 +719,9 @@ create_settings_page (nuvashalauncherInstancePage *self)
   button_row (actions, _("Export Modpack"),
               NULL,
               "export-symbolic", G_CALLBACK (on_export_clicked), self);
-  delete_row = button_row (actions, _("Delete Instance"),
-                           NULL, "user-trash-symbolic",
-                           G_CALLBACK (on_delete_clicked), self);
-  gtk_widget_add_css_class (
-    adw_action_row_get_activatable_widget (ADW_ACTION_ROW (delete_row)),
-    "destructive-action");
+  button_row (actions, _("Delete Instance"),
+              NULL, "edit-delete-symbolic",
+              G_CALLBACK (on_delete_clicked), self);
 
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                             general);

@@ -75,7 +75,7 @@ nuvashalauncher_content_page_build_installed (nuvashalauncherContentPage *self)
    GtkActionBar *selection_footer = GTK_ACTION_BAR (gtk_action_bar_new ());
    GtkLabel *selection_label = GTK_LABEL (gtk_label_new (""));
    GtkButton *selection_delete = GTK_BUTTON (gtk_button_new_from_icon_name (
-     "user-trash-symbolic"));
+     "edit-delete-symbolic"));
    GtkButton *update_all = GTK_BUTTON (gtk_button_new ());
     GtkPopover *update_popover = GTK_POPOVER (gtk_popover_new ());
     GtkScrolledWindow *update_scroller = GTK_SCROLLED_WINDOW (
@@ -176,6 +176,7 @@ nuvashalauncher_content_page_build_installed (nuvashalauncherContentPage *self)
 
    self->installed.status = ADW_STATUS_PAGE (adw_status_page_new ());
    self->installed.loading = loading;
+   gtk_widget_set_size_request (GTK_WIDGET (loading), 64, 64);
    gtk_widget_set_valign (GTK_WIDGET (loading), GTK_ALIGN_CENTER);
    gtk_widget_set_halign (GTK_WIDGET (loading), GTK_ALIGN_CENTER);
    gtk_widget_set_vexpand (GTK_WIDGET (loading), TRUE);
@@ -356,6 +357,14 @@ nuvashalauncher_content_page_build_browse (nuvashalauncherContentPage *self)
       ADW_STATUS_PAGE (self->browse.results_status),
         _("Type what to look for, or browse everything Modrinth has for this "
         "instance"));
+  gtk_widget_set_visible (GTK_WIDGET (self->browse.results_status), FALSE);
+
+  self->browse.results_loading = ADW_SPINNER (adw_spinner_new ());
+  gtk_widget_set_size_request (GTK_WIDGET (self->browse.results_loading), 64, 64);
+  gtk_widget_set_valign (GTK_WIDGET (self->browse.results_loading), GTK_ALIGN_CENTER);
+  gtk_widget_set_halign (GTK_WIDGET (self->browse.results_loading), GTK_ALIGN_CENTER);
+  gtk_widget_set_vexpand (GTK_WIDGET (self->browse.results_loading), TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (self->browse.results_loading), TRUE);
   /* The list starts where the row above it ends: its first row is not
      rounded at the top, so the two read as one piece. */
 
@@ -368,6 +377,7 @@ nuvashalauncher_content_page_build_browse (nuvashalauncherContentPage *self)
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 
   gtk_widget_set_vexpand (GTK_WIDGET (content), TRUE);
+  gtk_box_append (GTK_BOX (content), GTK_WIDGET (self->browse.results_loading));
   gtk_box_append (GTK_BOX (content), GTK_WIDGET (self->browse.results_status));
   gtk_box_append (GTK_BOX (content), GTK_WIDGET (scroller));
   gtk_widget_set_visible (GTK_WIDGET (scroller), FALSE);

@@ -33,8 +33,8 @@ row_update (GtkWidget *play, nuvashalauncher *launcher)
   nuvashalauncher_ui_set_action_label (GTK_WIDGET (play),
                                        busy ? _("Stop") : _("Play"));
   gtk_widget_set_visible (GTK_WIDGET (play), self == NULL || !self->ui.edit_mode);
-  gtk_widget_set_visible (check, self != NULL && self->ui.edit_mode);
-  gtk_widget_set_visible (instance_icon, self == NULL || !self->ui.edit_mode);
+  gtk_widget_set_visible (check, TRUE);
+  gtk_widget_set_visible (instance_icon, TRUE);
   gtk_widget_set_visible (edit_actions, self != NULL && self->ui.edit_mode);
 
   /* The green belongs to a game that is about to start, not to a stop:
@@ -50,6 +50,11 @@ on_instance_check_toggled (GtkCheckButton *check, gpointer user_data)
 {
   nuvashalauncherMainWindow *self = user_data;
   const char *id = g_object_get_data (G_OBJECT (check), "nuvashalauncher-instance-id");
+  GtkStack *stack = g_object_get_data (G_OBJECT (check), "nuvashalauncher-icon-stack");
+
+  if (stack != NULL)
+    gtk_stack_set_visible_child_name (stack,
+      gtk_check_button_get_active (check) ? "check" : "icon");
 
   if (id == NULL || !self->ui.edit_mode)
     return;
@@ -398,15 +403,13 @@ create_instance_row (gpointer item, gpointer user_data)
   GtkImage *icon = GTK_IMAGE (gtk_image_new_from_icon_name ("applications-games-symbolic"));
   GtkButton *play = GTK_BUTTON (gtk_button_new ());
   GtkCheckButton *check = GTK_CHECK_BUTTON (gtk_check_button_new ());
-  GtkImage *drag_handle = GTK_IMAGE (gtk_image_new_from_icon_name (
-    "list-drag-handle-symbolic"));
   GtkBox *edit_actions = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
   GtkButton *row_export = GTK_BUTTON (gtk_button_new_from_icon_name (
     "export-symbolic"));
   GtkButton *row_duplicate = GTK_BUTTON (gtk_button_new_from_icon_name (
     "edit-copy-symbolic"));
   GtkButton *row_delete = GTK_BUTTON (gtk_button_new_from_icon_name (
-    "user-trash-symbolic"));
+    "edit-delete-symbolic"));
   GtkBox *play_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
   GtkImage *play_icon = GTK_IMAGE (gtk_image_new_from_icon_name ("media-playback-start-symbolic"));
   GtkLabel *play_label = GTK_LABEL (gtk_label_new (_("Play")));
@@ -442,16 +445,39 @@ create_instance_row (gpointer item, gpointer user_data)
   gtk_widget_set_valign (GTK_WIDGET (icon), GTK_ALIGN_CENTER);
   gtk_widget_add_css_class (GTK_WIDGET (icon), "nuvashalauncher-instance-icon");
   gtk_widget_set_overflow (GTK_WIDGET (icon), GTK_OVERFLOW_HIDDEN);
-  /* add_prefix prepends: add the checkbox first so the handle appears on
-   * its left, matching the edit-mode order in the UI. */
+
+  GtkStack *icon_stack = GTK_STACK (gtk_stack_new ());
+  GtkBox *badge_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
+  GtkImage *check_icon = GTK_IMAGE (gtk_image_new_from_icon_name ("object-select-symbolic"));
+
+  gtk_widget_add_css_class (GTK_WIDGET (badge_box), "nuvashalauncher-instance-icon");
+  gtk_widget_add_css_class (GTK_WIDGET (badge_box), "nuvashalauncher-select-badge");
+  gtk_widget_set_size_request (GTK_WIDGET (badge_box), 48, 48);
+  gtk_widget_set_valign (GTK_WIDGET (badge_box), GTK_ALIGN_CENTER);
+  gtk_widget_set_halign (GTK_WIDGET (badge_box), GTK_ALIGN_CENTER);
+  gtk_widget_set_hexpand (GTK_WIDGET (badge_box), TRUE);
+  gtk_widget_set_vexpand (GTK_WIDGET (badge_box), TRUE);
+
+  gtk_image_set_pixel_size (check_icon, 24);
+  gtk_widget_set_valign (GTK_WIDGET (check_icon), GTK_ALIGN_CENTER);
+  gtk_widget_set_halign (GTK_WIDGET (check_icon), GTK_ALIGN_CENTER);
+  gtk_widget_set_hexpand (GTK_WIDGET (check_icon), TRUE);
+  gtk_widget_set_vexpand (GTK_WIDGET (check_icon), TRUE);
+  gtk_box_append (badge_box, GTK_WIDGET (check_icon));
+
+  gtk_stack_add_named (icon_stack, GTK_WIDGET (icon), "icon");
+  gtk_stack_add_named (icon_stack, GTK_WIDGET (badge_box), "check");
+  gtk_stack_set_visible_child_name (icon_stack, "icon");
+  gtk_widget_set_size_request (GTK_WIDGET (icon_stack), 48, 48);
+  gtk_widget_set_valign (GTK_WIDGET (icon_stack), GTK_ALIGN_CENTER);
+
+  gtk_check_button_set_child (check, GTK_WIDGET (icon_stack));
+  gtk_widget_add_css_class (GTK_WIDGET (check), "nuvashalauncher-select-checkbox");
+  gtk_widget_set_valign (GTK_WIDGET (check), GTK_ALIGN_CENTER);
+  g_object_set_data (G_OBJECT (check), "nuvashalauncher-icon-stack", icon_stack);
+
   adw_action_row_add_prefix (ADW_ACTION_ROW (row), GTK_WIDGET (check));
-  adw_action_row_add_prefix (ADW_ACTION_ROW (row), GTK_WIDGET (drag_handle));
-  adw_action_row_add_prefix (ADW_ACTION_ROW (row), GTK_WIDGET (icon));
-  gtk_widget_set_visible (GTK_WIDGET (check), self->ui.edit_mode);
-  gtk_widget_set_visible (GTK_WIDGET (drag_handle), self->ui.edit_mode);
-  gtk_image_set_pixel_size (drag_handle, 16);
-  gtk_widget_set_size_request (GTK_WIDGET (drag_handle), 16, 16);
-  gtk_widget_set_valign (GTK_WIDGET (drag_handle), GTK_ALIGN_CENTER);
+  gtk_widget_set_visible (GTK_WIDGET (check), TRUE);
 
   gtk_image_set_pixel_size (GTK_IMAGE (play_icon), 16);
   gtk_widget_set_size_request (GTK_WIDGET (play_icon), 16, 16);
@@ -471,7 +497,6 @@ create_instance_row (gpointer item, gpointer user_data)
   g_object_set_data (G_OBJECT (play), "nuvashalauncher-instance-icon", icon);
   g_object_set_data (G_OBJECT (play), "nuvashalauncher-label", play_label);
   g_object_set_data (G_OBJECT (play), "nuvashalauncher-check", check);
-  g_object_set_data (G_OBJECT (play), "nuvashalauncher-drag-handle", drag_handle);
   g_object_set_data (G_OBJECT (play), "nuvashalauncher-edit-actions", edit_actions);
   g_object_set_data (G_OBJECT (play), "nuvashalauncher-window", self);
   g_object_set_data_full (G_OBJECT (check), "nuvashalauncher-instance-id",

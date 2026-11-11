@@ -182,6 +182,11 @@ on_content_file_check_toggled (GtkCheckButton *check, gpointer user_data)
 {
   nuvashalauncherContentPage *self = user_data;
   const char *path = g_object_get_data (G_OBJECT (check), "nuvashalauncher-file-path");
+  GtkStack *stack = g_object_get_data (G_OBJECT (check), "nuvashalauncher-icon-stack");
+
+  if (stack != NULL)
+    gtk_stack_set_visible_child_name (stack,
+      gtk_check_button_get_active (check) ? "check" : "icon");
 
   if (path == NULL)
     return;
@@ -800,13 +805,43 @@ file_row (nuvashalauncherContentPage *self, nuvashalauncherContentFile *file)
   /* Use a fixed icon square and replace the placeholder when project data
      becomes available. */
   gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
-  gtk_widget_set_visible (GTK_WIDGET (check), TRUE);
+
+  GtkStack *icon_stack = GTK_STACK (gtk_stack_new ());
+  GtkBox *badge_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
+  GtkImage *check_icon = GTK_IMAGE (gtk_image_new_from_icon_name ("object-select-symbolic"));
+
+  gtk_widget_add_css_class (GTK_WIDGET (badge_box), "nuvashalauncher-content-icon");
+  gtk_widget_add_css_class (GTK_WIDGET (badge_box), "nuvashalauncher-select-badge");
+  gtk_widget_set_size_request (GTK_WIDGET (badge_box), nuvashalauncher_ICON_SIZE, nuvashalauncher_ICON_SIZE);
+  gtk_widget_set_valign (GTK_WIDGET (badge_box), GTK_ALIGN_CENTER);
+  gtk_widget_set_halign (GTK_WIDGET (badge_box), GTK_ALIGN_CENTER);
+  gtk_widget_set_hexpand (GTK_WIDGET (badge_box), TRUE);
+  gtk_widget_set_vexpand (GTK_WIDGET (badge_box), TRUE);
+
+  gtk_image_set_pixel_size (check_icon, 24);
+  gtk_widget_set_valign (GTK_WIDGET (check_icon), GTK_ALIGN_CENTER);
+  gtk_widget_set_halign (GTK_WIDGET (check_icon), GTK_ALIGN_CENTER);
+  gtk_widget_set_hexpand (GTK_WIDGET (check_icon), TRUE);
+  gtk_widget_set_vexpand (GTK_WIDGET (check_icon), TRUE);
+  gtk_box_append (badge_box, GTK_WIDGET (check_icon));
+
+  gtk_stack_add_named (icon_stack, GTK_WIDGET (icon), "icon");
+  gtk_stack_add_named (icon_stack, GTK_WIDGET (badge_box), "check");
+  gtk_stack_set_visible_child_name (icon_stack, "icon");
+  gtk_widget_set_size_request (GTK_WIDGET (icon_stack), nuvashalauncher_ICON_SIZE, nuvashalauncher_ICON_SIZE);
+  gtk_widget_set_valign (GTK_WIDGET (icon_stack), GTK_ALIGN_CENTER);
+
+  gtk_check_button_set_child (check, GTK_WIDGET (icon_stack));
+  gtk_widget_add_css_class (GTK_WIDGET (check), "nuvashalauncher-select-checkbox");
   gtk_widget_set_valign (GTK_WIDGET (check), GTK_ALIGN_CENTER);
+  g_object_set_data (G_OBJECT (check), "nuvashalauncher-icon-stack", icon_stack);
+
+  gtk_widget_set_visible (GTK_WIDGET (check), TRUE);
   g_object_set_data_full (G_OBJECT (check), "nuvashalauncher-file-path",
                           g_strdup (file->path), g_free);
   g_signal_connect (check, "toggled",
                     G_CALLBACK (on_content_file_check_toggled), self);
-  adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
+  adw_action_row_add_prefix (ADW_ACTION_ROW (row), GTK_WIDGET (check));
   g_object_set_data (G_OBJECT (row), "nuvashalauncher-icon", icon);
   g_object_set_data (G_OBJECT (row), "nuvashalauncher-file-check", check);
 
@@ -833,13 +868,10 @@ file_row (nuvashalauncherContentPage *self, nuvashalauncherContentFile *file)
       adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (sw));
     }
 
-  /* The selection check sits immediately to the left of the trash action. */
-  adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (check));
-
   /* Every kind of file can be deleted. On a mod the button sits after
      the switch, at the right end of the row. */
   {
-    GtkButton *trash = GTK_BUTTON (gtk_button_new_from_icon_name ("user-trash-symbolic"));
+    GtkButton *trash = GTK_BUTTON (gtk_button_new_from_icon_name ("edit-delete-symbolic"));
 
      nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (trash), _("Delete"));
     /* Do not let clicking delete move keyboard focus into a row that is

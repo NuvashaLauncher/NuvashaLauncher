@@ -205,6 +205,7 @@ nuvashalauncher_download_modpack_dialog_init (nuvashalauncherDownloadModpackDial
   g_signal_connect_object (self, "closed", G_CALLBACK (on_dialog_closed), self, 0);
 
   nuvashalauncher_dialog_set_standard_size (ADW_DIALOG (self));
+  gtk_widget_set_size_request (GTK_WIDGET (self), 360, 200);
   adw_dialog_set_content_width (ADW_DIALOG (self),
                                 nuvashalauncher_DIALOG_WIDE_CONTENT_WIDTH);
   adw_dialog_set_content_height (ADW_DIALOG (self), 580);

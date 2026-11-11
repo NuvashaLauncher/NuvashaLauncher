@@ -259,16 +259,13 @@ set_instance_edit_mode (nuvashalauncherMainWindow *self)
         ? g_object_get_data (G_OBJECT (play), "nuvashalauncher-instance-icon") : NULL;
       GtkWidget *edit_actions = play != NULL
         ? g_object_get_data (G_OBJECT (play), "nuvashalauncher-edit-actions") : NULL;
-      GtkWidget *drag_handle = play != NULL
-        ? g_object_get_data (G_OBJECT (play), "nuvashalauncher-drag-handle") : NULL;
 
       if (play == NULL)
         continue;
       gtk_widget_set_visible (play, !self->ui.edit_mode);
-      gtk_widget_set_visible (check, self->ui.edit_mode);
-      gtk_widget_set_visible (icon, !self->ui.edit_mode);
+      gtk_widget_set_visible (check, TRUE);
+      gtk_widget_set_visible (icon, TRUE);
       gtk_widget_set_visible (edit_actions, self->ui.edit_mode);
-      gtk_widget_set_visible (drag_handle, self->ui.edit_mode);
       if (check != NULL)
         gtk_check_button_set_active (
           GTK_CHECK_BUTTON (check),
@@ -452,6 +449,8 @@ void
 bulk_export_instances (nuvashalauncherMainWindow *self)
 {
   g_autoptr (GtkFileDialog) dialog = gtk_file_dialog_new ();
+  g_autoptr (GFile) home = g_file_new_for_path (g_get_home_dir ());
+  gtk_file_dialog_set_initial_folder (dialog, home);
   gtk_file_dialog_set_title (dialog, _("Choose a Directory"));
   gtk_file_dialog_select_folder (dialog, GTK_WINDOW (self), NULL,
                                  on_bulk_export_folder_chosen,
