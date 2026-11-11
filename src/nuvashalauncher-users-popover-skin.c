@@ -122,7 +122,9 @@ on_import_skin_clicked (GtkButton *button, gpointer user_data)
   GtkFileDialog *dialog = gtk_file_dialog_new ();
   GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (button));
   g_autoptr (GtkFileFilter) filter = gtk_file_filter_new ();
+  g_autoptr (GFile) home = g_file_new_for_path (g_get_home_dir ());
 
+  gtk_file_dialog_set_initial_folder (dialog, home);
   gtk_file_filter_set_name (filter, _("PNG skin texture"));
   gtk_file_filter_add_mime_type (filter, "image/png");
   gtk_file_dialog_set_default_filter (dialog, filter);
@@ -621,7 +623,6 @@ nuvashalauncher_users_skin_menu_new (nuvashalauncherUsersPopover *owner, GtkImag
   data->applying_profile = FALSE;
   nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (open_skins), _("Open Folder"));
   nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (remove), _("Delete"));
-  gtk_widget_add_css_class (GTK_WIDGET (remove), "destructive-action");
   gtk_widget_set_hexpand (GTK_WIDGET (export), FALSE);
   gtk_widget_set_hexpand (GTK_WIDGET (import), FALSE);
   gtk_widget_set_hexpand (GTK_WIDGET (remove), FALSE);

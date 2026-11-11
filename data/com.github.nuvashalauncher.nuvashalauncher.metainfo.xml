@@ -42,6 +42,45 @@
   <branding>
     <color type="primary">#7774a5</color>
   </branding>
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+  </supports>
+  <screenshots>
+    <screenshot type="default">
+      <caption>Main instance library (light theme)</caption>
+      <image>https://raw.githubusercontent.com/NuvashaLauncher/NuvashaLauncher/main/docs/screenshots/light/1.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>3D skin and cape manager (light theme)</caption>
+      <image>https://raw.githubusercontent.com/NuvashaLauncher/NuvashaLauncher/main/docs/screenshots/light/2.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Modpack browser and search (light theme)</caption>
+      <image>https://raw.githubusercontent.com/NuvashaLauncher/NuvashaLauncher/main/docs/screenshots/light/3.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Mod and content management with installation guide (light theme)</caption>
+      <image>https://raw.githubusercontent.com/NuvashaLauncher/NuvashaLauncher/main/docs/screenshots/light/4.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Main instance library (dark theme)</caption>
+      <image>https://raw.githubusercontent.com/NuvashaLauncher/NuvashaLauncher/main/docs/screenshots/dark/1.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>3D skin and cape manager (dark theme)</caption>
+      <image>https://raw.githubusercontent.com/NuvashaLauncher/NuvashaLauncher/main/docs/screenshots/dark/2.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Modpack browser and search (dark theme)</caption>
+      <image>https://raw.githubusercontent.com/NuvashaLauncher/NuvashaLauncher/main/docs/screenshots/dark/3.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Mod and content management with installation guide (dark theme)</caption>
+      <image>https://raw.githubusercontent.com/NuvashaLauncher/NuvashaLauncher/main/docs/screenshots/dark/4.png</image>
+    </screenshot>
+  </screenshots>
   <releases>
     <release version="1.0" date="2026-11-10">
       <description>

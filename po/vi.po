@@ -1135,3 +1135,42 @@ msgstr "Cài đặt không hợp lệ. Kiểm tra phiên bản đã chọn và �
 
 msgid "Your saved sign-in is no longer valid. Sign in again."
 msgstr "Phiên đăng nhập đã lưu không còn hợp lệ. Hãy đăng nhập lại."
+
+msgid "Minecraft launcher for Linux"
+msgstr "Trình khởi chạy Minecraft cho Linux"
+
+msgid "Services & Ecosystem"
+msgstr "Dịch vụ & Hệ sinh thái"
+
+msgid "Minecraft Disclaimer"
+msgstr "Tuyên bố từ chối trách nhiệm Minecraft"
+
+msgid ""
+"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n"
+"\n"
+"Minecraft is a trademark of Mojang AB. The launcher is developed independently and is not affiliated with Mojang Studios or Microsoft."
+msgstr ""
+"KHÔNG PHẢI LÀ SẢN PHẨM MINECRAFT CHÍNH THỨC. KHÔNG ĐƯỢC PHÊ DUYỆT BỞI HOẶC LIÊN KẾT VỚI MOJANG HOẶC MICROSOFT.\n"
+"\n"
+"Minecraft là thương hiệu của Mojang AB. Trình khởi chạy được phát triển độc lập và không liên kết với Mojang Studios hoặc Microsoft."
+
+msgid "Modrinth & Mod Loaders"
+msgstr "Modrinth & Trình tải mod"
+
+msgid ""
+"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and created by their respective authors.\n"
+"\n"
+"Mod loaders are developed independently by the Fabric, Quilt, Forge, and NeoForge projects."
+msgstr ""
+"Modpack, mod, gói tài nguyên và shader được lưu trữ bởi Modrinth và do các tác giả tương ứng tạo ra.\n"
+"\n"
+"Trình tải mod được phát triển độc lập bởi các dự án Fabric, Quilt, Forge và NeoForge."
+
+msgid "AppStream Metadata"
+msgstr "Metadata AppStream"
+
+msgid "The AppStream metadata (descriptions, summaries, and release notes) is released under the Creative Commons CC0 1.0 Universal Public Domain Dedication."
+msgstr "Metadata AppStream (mô tả, tóm tắt và ghi chú phát hành) được phát hành theo Creative Commons CC0 1.0 Universal Public Domain Dedication."
+
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"

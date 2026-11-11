@@ -1137,3 +1137,42 @@ msgstr "Setările instanței sunt invalide. Verifică versiunea selectată și a
 
 msgid "Your saved sign-in is no longer valid. Sign in again."
 msgstr "Conectarea salvată nu mai este validă. Conectează-te din nou."
+
+msgid "Minecraft launcher for Linux"
+msgstr "Lansator Minecraft pentru Linux"
+
+msgid "Services & Ecosystem"
+msgstr "Servicii și ecosistem"
+
+msgid "Minecraft Disclaimer"
+msgstr "Declinare de responsabilitate Minecraft"
+
+msgid ""
+"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n"
+"\n"
+"Minecraft is a trademark of Mojang AB. The launcher is developed independently and is not affiliated with Mojang Studios or Microsoft."
+msgstr ""
+"NU ESTE UN PRODUS OFICIAL MINECRAFT. NU ESTE APROBAT DE SAU ASOCIAT CU MOJANG SAU MICROSOFT.\n"
+"\n"
+"Minecraft este o marcă înregistrată a Mojang AB. Lansatorul este dezvoltat independent și nu este afiliat cu Mojang Studios sau Microsoft."
+
+msgid "Modrinth & Mod Loaders"
+msgstr "Modrinth și încărcătoare de moduri"
+
+msgid ""
+"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and created by their respective authors.\n"
+"\n"
+"Mod loaders are developed independently by the Fabric, Quilt, Forge, and NeoForge projects."
+msgstr ""
+"Pachetele de moduri, modurile, pachetele de resurse și shaderele sunt găzduite de Modrinth și create de autorii respectivi.\n"
+"\n"
+"Încărcătoarele de moduri sunt dezvoltate independent de proiectele Fabric, Quilt, Forge și NeoForge."
+
+msgid "AppStream Metadata"
+msgstr "Metadate AppStream"
+
+msgid "The AppStream metadata (descriptions, summaries, and release notes) is released under the Creative Commons CC0 1.0 Universal Public Domain Dedication."
+msgstr "Metadatele AppStream (descrieri, rezumate și note de lansare) sunt publicate sub Creative Commons CC0 1.0 Universal Public Domain Dedication."
+
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"

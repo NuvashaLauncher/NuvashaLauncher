@@ -36,7 +36,7 @@ nuvashalauncher_main_window_build_ui (nuvashalauncherMainWindow *self)
   GtkButton *edit_button = GTK_BUTTON (gtk_button_new_from_icon_name (
     "document-edit-symbolic"));
   GtkButton *footer_delete = GTK_BUTTON (gtk_button_new_from_icon_name (
-    "user-trash-symbolic"));
+    "edit-delete-symbolic"));
   GtkButton *footer_export = GTK_BUTTON (gtk_button_new_from_icon_name (
     "export-symbolic"));
   GtkActionBar *selection_footer = GTK_ACTION_BAR (gtk_action_bar_new ());

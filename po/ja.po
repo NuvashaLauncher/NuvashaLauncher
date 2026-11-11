@@ -1169,3 +1169,42 @@ msgstr "インスタンスの設定が無効です。選択したバージョン
 
 msgid "Your saved sign-in is no longer valid. Sign in again."
 msgstr "保存されたログイン情報は無効です。再度ログインしてください。"
+
+msgid "Minecraft launcher for Linux"
+msgstr "Linux用Minecraftランチャー"
+
+msgid "Services & Ecosystem"
+msgstr "サービスとエコシステム"
+
+msgid "Minecraft Disclaimer"
+msgstr "Minecraft免責事項"
+
+msgid ""
+"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n"
+"\n"
+"Minecraft is a trademark of Mojang AB. The launcher is developed independently and is not affiliated with Mojang Studios or Microsoft."
+msgstr ""
+"公式のMINECRAFT製品ではありません。MOJANGまたはMICROSOFTによって承認されておらず、関連もありません。\n"
+"\n"
+"MinecraftはMojang ABの商標です。このランチャーは独自に開発されたものであり、Mojang StudiosまたはMicrosoftとは提携していません。"
+
+msgid "Modrinth & Mod Loaders"
+msgstr "ModrinthとModローダー"
+
+msgid ""
+"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and created by their respective authors.\n"
+"\n"
+"Mod loaders are developed independently by the Fabric, Quilt, Forge, and NeoForge projects."
+msgstr ""
+"Modパック、Mod、リソースパック、およびシェーダーはModrinthによってホストされ、それぞれの作者によって作成されています。\n"
+"\n"
+"ModローダーはFabric、Quilt、Forge、およびNeoForgeプロジェクトによって独自に開発されています。"
+
+msgid "AppStream Metadata"
+msgstr "AppStreamメタデータ"
+
+msgid "The AppStream metadata (descriptions, summaries, and release notes) is released under the Creative Commons CC0 1.0 Universal Public Domain Dedication."
+msgstr "AppStreamメタデータ（説明、概要、リリースノート）は、Creative Commons CC0 1.0 Universal Public Domain Dedicationの下で公開されています。"
+
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"

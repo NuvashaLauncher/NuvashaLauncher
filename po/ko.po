@@ -1168,3 +1168,42 @@ msgstr "인스턴스 설정이 잘못되었습니다. 선택한 버전과 JVM �
 
 msgid "Your saved sign-in is no longer valid. Sign in again."
 msgstr "저장된 로그인 정보가 더 이상 유효하지 않습니다. 다시 로그인하세요."
+
+msgid "Minecraft launcher for Linux"
+msgstr "Linux용 Minecraft 런처"
+
+msgid "Services & Ecosystem"
+msgstr "서비스 및 생태계"
+
+msgid "Minecraft Disclaimer"
+msgstr "Minecraft 면책 조항"
+
+msgid ""
+"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n"
+"\n"
+"Minecraft is a trademark of Mojang AB. The launcher is developed independently and is not affiliated with Mojang Studios or Microsoft."
+msgstr ""
+"공식 MINECRAFT 제품이 아닙니다. MOJANG 또는 MICROSOFT의 승인을 받지 않았으며 이들과 관련이 없습니다.\n"
+"\n"
+"Minecraft는 Mojang AB의 상표입니다. 이 런처는 독립적으로 개발되었으며 Mojang Studios 또는 Microsoft와 제휴하지 않았습니다."
+
+msgid "Modrinth & Mod Loaders"
+msgstr "Modrinth 및 모드 로더"
+
+msgid ""
+"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and created by their respective authors.\n"
+"\n"
+"Mod loaders are developed independently by the Fabric, Quilt, Forge, and NeoForge projects."
+msgstr ""
+"모드팩, 모드, 리소스 팩 및 셰이더는 Modrinth에서 호스팅되며 각 작성자가 제작했습니다.\n"
+"\n"
+"모드 로더는 Fabric, Quilt, Forge 및 NeoForge 프로젝트에서 독립적으로 개발되었습니다."
+
+msgid "AppStream Metadata"
+msgstr "AppStream 메타데이터"
+
+msgid "The AppStream metadata (descriptions, summaries, and release notes) is released under the Creative Commons CC0 1.0 Universal Public Domain Dedication."
+msgstr "AppStream 메타데이터(설명, 요약 및 릴리스 정보)는 Creative Commons CC0 1.0 Universal Public Domain Dedication에 따라 배포됩니다."
+
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"

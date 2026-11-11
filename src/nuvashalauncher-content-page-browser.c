@@ -214,6 +214,8 @@ results_arrived (nuvashalauncherContentPage *self, nuvashalauncherModrinthResult
   {
     gboolean empty = self->browse.model->results->len == 0;
 
+    if (self->browse.results_loading != NULL)
+      gtk_widget_set_visible (GTK_WIDGET (self->browse.results_loading), FALSE);
     gtk_widget_set_visible (GTK_WIDGET (self->browse.results_status), empty);
     gtk_widget_set_visible (GTK_WIDGET (self->browse.results_scroller), !empty);
     gtk_widget_set_visible (GTK_WIDGET (self->browse.results_group), TRUE);
@@ -273,6 +275,8 @@ search_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
           take_rows_out (&self->browse.result_rows,
                      ADW_PREFERENCES_GROUP (self->browse.results_group));
           g_clear_pointer (&self->browse.model->results, g_ptr_array_unref);
+          if (self->browse.results_loading != NULL)
+            gtk_widget_set_visible (GTK_WIDGET (self->browse.results_loading), FALSE);
           gtk_widget_set_visible (GTK_WIDGET (self->browse.results_status), TRUE);
           gtk_widget_set_visible (GTK_WIDGET (self->browse.results_group), FALSE);
 
@@ -318,6 +322,13 @@ nuvashalauncher_content_page_run_search (nuvashalauncherContentPage *self, gbool
       g_clear_object (&self->browse.model->more);
       self->browse.model->more = g_cancellable_new ();
       self->browse.model->offset = 0;
+
+      if (self->browse.results_loading != NULL)
+        gtk_widget_set_visible (GTK_WIDGET (self->browse.results_loading), TRUE);
+      if (self->browse.results_status != NULL)
+        gtk_widget_set_visible (GTK_WIDGET (self->browse.results_status), FALSE);
+      if (self->browse.results_scroller != NULL)
+        gtk_widget_set_visible (GTK_WIDGET (self->browse.results_scroller), FALSE);
     }
 
   self->browse.model->loading_page = TRUE;

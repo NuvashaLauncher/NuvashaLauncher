@@ -198,7 +198,9 @@ on_pick_directory (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   nuvashalauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (user_data);
   GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
   g_autoptr (GtkFileDialog) dialog = gtk_file_dialog_new ();
+  g_autoptr (GFile) home = g_file_new_for_path (g_get_home_dir ());
 
+  gtk_file_dialog_set_initial_folder (dialog, home);
   gtk_file_dialog_select_folder (dialog,
                                  GTK_IS_WINDOW (root) ? GTK_WINDOW (root) : NULL,
                                  NULL, on_folder_selected,

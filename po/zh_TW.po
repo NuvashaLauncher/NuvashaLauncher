@@ -1135,3 +1135,42 @@ msgstr "實例設定無效。請檢查所選版本和 JVM 引數。"
 
 msgid "Your saved sign-in is no longer valid. Sign in again."
 msgstr "儲存的登入資訊已失效。請重新登入。"
+
+msgid "Minecraft launcher for Linux"
+msgstr "Linux 平台 Minecraft 啟動器"
+
+msgid "Services & Ecosystem"
+msgstr "服務與生態"
+
+msgid "Minecraft Disclaimer"
+msgstr "Minecraft 免責聲明"
+
+msgid ""
+"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n"
+"\n"
+"Minecraft is a trademark of Mojang AB. The launcher is developed independently and is not affiliated with Mojang Studios or Microsoft."
+msgstr ""
+"非 MINECRAFT 官方產品。未經 MOJANG 或 MICROSOFT 批准，亦不與其關聯。\n"
+"\n"
+"Minecraft 是 Mojang AB 的商標。本啟動器為獨立開發，不隸屬於 Mojang Studios 或 Microsoft。"
+
+msgid "Modrinth & Mod Loaders"
+msgstr "Modrinth 與模組載入器"
+
+msgid ""
+"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and created by their respective authors.\n"
+"\n"
+"Mod loaders are developed independently by the Fabric, Quilt, Forge, and NeoForge projects."
+msgstr ""
+"模組包、模組、資源包和著色器均由 Modrinth 託管並由各自的作者建立。\n"
+"\n"
+"模組載入器由 Fabric、Quilt、Forge 和 NeoForge 專案獨立開發。"
+
+msgid "AppStream Metadata"
+msgstr "AppStream 中繼資料"
+
+msgid "The AppStream metadata (descriptions, summaries, and release notes) is released under the Creative Commons CC0 1.0 Universal Public Domain Dedication."
+msgstr "AppStream 中繼資料（描述、摘要和版本資訊）遵循 Creative Commons CC0 1.0 Universal Public Domain Dedication 條款發布。"
+
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"

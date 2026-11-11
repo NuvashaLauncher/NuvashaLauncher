@@ -1135,3 +1135,42 @@ msgstr "A példány beállításai érvénytelenek. Ellenőrizze a kiválasztott
 
 msgid "Your saved sign-in is no longer valid. Sign in again."
 msgstr "A mentett bejelentkezés már nem érvényes. Jelentkezzen be újra."
+
+msgid "Minecraft launcher for Linux"
+msgstr "Minecraft indító Linuxra"
+
+msgid "Services & Ecosystem"
+msgstr "Szolgáltatások és ökoszisztéma"
+
+msgid "Minecraft Disclaimer"
+msgstr "Minecraft jogi nyilatkozat"
+
+msgid ""
+"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n"
+"\n"
+"Minecraft is a trademark of Mojang AB. The launcher is developed independently and is not affiliated with Mojang Studios or Microsoft."
+msgstr ""
+"NEM HIVATALOS MINECRAFT TERMÉK. A MOJANG VAGY A MICROSOFT NEM HAGYTA JÓVÁ ÉS NEM KAPCSOLÓDIK HOZZÁJUK.\n"
+"\n"
+"A Minecraft a Mojang AB védjegye. Az indító fejlesztése függetlenül történik, és nem áll kapcsolatban a Mojang Studios-szal vagy a Microsofttal."
+
+msgid "Modrinth & Mod Loaders"
+msgstr "Modrinth és mod-betöltők"
+
+msgid ""
+"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and created by their respective authors.\n"
+"\n"
+"Mod loaders are developed independently by the Fabric, Quilt, Forge, and NeoForge projects."
+msgstr ""
+"A modcsomagokat, modokat, erőforráscsomagokat és árnyékolókat a Modrinth tárolja, és a megfelelő szerzők készítették.\n"
+"\n"
+"A mod-betöltőket függetlenül fejlesztik a Fabric, Quilt, Forge és NeoForge projektek."
+
+msgid "AppStream Metadata"
+msgstr "AppStream metaadatok"
+
+msgid "The AppStream metadata (descriptions, summaries, and release notes) is released under the Creative Commons CC0 1.0 Universal Public Domain Dedication."
+msgstr "Az AppStream metaadatok (leírások, összegzések és kiadási megjegyzések) a Creative Commons CC0 1.0 Universal Public Domain Dedication licenc alatt jelennek meg."
+
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"
