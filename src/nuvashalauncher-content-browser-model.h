@@ -40,4 +40,26 @@ struct _NuvashaLauncherContentBrowserModel
   GCancellable *cancellable;
 };
 
+GCancellable *nuvashalauncher_content_browser_model_begin_search (
+  NuvashaLauncherContentBrowserModel *model,
+  gboolean                            append);
+gboolean nuvashalauncher_content_browser_model_finish_page (
+  NuvashaLauncherContentBrowserModel *model,
+  guint64                             total_hits);
+gboolean nuvashalauncher_content_browser_model_fail_page (
+  NuvashaLauncherContentBrowserModel *model);
+const NuvashaLauncherModrinthProject *nuvashalauncher_content_browser_model_accept_project (
+  NuvashaLauncherContentBrowserModel *model,
+  NuvashaLauncherModrinthProject     *project);
+void nuvashalauncher_content_browser_model_advance_offset (
+  NuvashaLauncherContentBrowserModel *model,
+  guint                               shown);
+gboolean nuvashalauncher_content_browser_model_has_more (
+  const NuvashaLauncherContentBrowserModel *model);
+void nuvashalauncher_content_browser_model_set_query (
+  NuvashaLauncherContentBrowserModel *model,
+  const char                         *query);
+GCancellable *nuvashalauncher_content_browser_model_reset_cancellable (
+  NuvashaLauncherContentBrowserModel *model);
+
 #endif /* nuvashalauncher_CONTENT_BROWSER_MODEL_H */

@@ -12,11 +12,9 @@ src/nuvashalauncher-content-format.c
 src/nuvashalauncher-content-index.c
 src/nuvashalauncher-content-install-model.c
 src/nuvashalauncher-content-page-browser.c
-src/nuvashalauncher-content-page-common.c
 src/nuvashalauncher-content-page-details.c
 src/nuvashalauncher-content-page-identify.c
 src/nuvashalauncher-content-page-install.c
-src/nuvashalauncher-content-page-installed-icons.c
 src/nuvashalauncher-content-page-installed-delete.c
 src/nuvashalauncher-content-page-installed.c
 src/nuvashalauncher-content-page-picks.c
