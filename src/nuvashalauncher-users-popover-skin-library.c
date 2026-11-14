@@ -138,7 +138,11 @@ skin_url_is_default (const char *url)
 }
 
 void
-append_local_skins (SkinMenu *menu)
+append_local_skins (GtkListBox                   *skins,
+                    GHashTable                   *skin_urls,
+                    GHashTable                   *deleted_skin_ids,
+                    NuvashaLauncherSkinRowFactory row_factory,
+                    gpointer                      user_data)
 {
   g_autofree char *directory = skin_directory_path ();
   g_autoptr (GDir) dir = NULL;
@@ -169,17 +173,22 @@ append_local_skins (SkinMenu *menu)
       path = g_build_filename (directory, name, NULL);
       uri = g_filename_to_uri (path, NULL, NULL);
       g_autofree char *identity = uri != NULL ? skin_name_for_url (uri) : NULL;
-      if (uri == NULL || g_hash_table_contains (menu->skin_urls, identity) ||
-          g_hash_table_contains (menu->deleted_skin_ids, identity))
+      if (uri == NULL || g_hash_table_contains (skin_urls, identity) ||
+          g_hash_table_contains (deleted_skin_ids, identity))
         continue;
       g_autofree char *display_name = skin_display_name (name);
-      g_autoptr (AdwActionRow) row = skin_row_new (menu, display_name, uri);
-      gtk_list_box_append (menu->skins, GTK_WIDGET (row));
+      g_autoptr (AdwActionRow) row = row_factory (display_name, uri, user_data);
+      gtk_list_box_append (skins, GTK_WIDGET (row));
     }
 }
 
 AdwActionRow *
-append_default_skins (SkinMenu *menu)
+append_default_skins (GtkListBox                   *skins,
+                      GHashTable                   *skin_urls,
+                      GHashTable                   *deleted_skin_ids,
+                      gboolean                     *defaults_added,
+                      NuvashaLauncherSkinRowFactory row_factory,
+                      gpointer                      user_data)
 {
   static const char *defaults[] = {
     "Steve", "Alex", "Sunny", "Kai", "Makena", "Zuri", "Efe", "Ari", "Noor"
@@ -189,7 +198,7 @@ append_default_skins (SkinMenu *menu)
   g_autofree char *target_dir = g_build_filename (g_get_user_data_dir (), "nuvashalauncher", "skins", "defaults", NULL);
   AdwActionRow *steve_row = NULL;
 
-  if (menu->defaults_added || !nuvashalauncher_fs_make_directory (target_dir, 0755, NULL))
+  if (*defaults_added || !nuvashalauncher_fs_make_directory (target_dir, 0755, NULL))
     return NULL;
   for (guint i = 0; i < G_N_ELEMENTS (defaults); i++)
     {
@@ -215,15 +224,15 @@ append_default_skins (SkinMenu *menu)
         nuvashalauncher_fs_copy_file (source, target, G_FILE_COPY_NONE, NULL, NULL);
       uri = g_filename_to_uri (target_path, NULL, NULL);
       g_autofree char *identity = uri != NULL ? skin_name_for_url (uri) : NULL;
-      if (uri != NULL && !g_hash_table_contains (menu->skin_urls, identity) &&
-          !g_hash_table_contains (menu->deleted_skin_ids, identity))
+      if (uri != NULL && !g_hash_table_contains (skin_urls, identity) &&
+          !g_hash_table_contains (deleted_skin_ids, identity))
         {
-          g_autoptr (AdwActionRow) row = skin_row_new (menu, name, uri);
-          gtk_list_box_append (menu->skins, GTK_WIDGET (row));
+          g_autoptr (AdwActionRow) row = row_factory (name, uri, user_data);
+          gtk_list_box_append (skins, GTK_WIDGET (row));
           if (g_str_equal (name, "Steve"))
             steve_row = row;
         }
     }
-  menu->defaults_added = TRUE;
+  *defaults_added = TRUE;
   return steve_row;
 }
