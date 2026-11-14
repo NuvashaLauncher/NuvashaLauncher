@@ -189,7 +189,8 @@ filesystem operation succeeds, so a failed operation leaves the registered
 instance and its old files in place. When a custom Java runtime is removed (or
 an instance's saved `java_path` is no longer executable), the manager clears the
 stale path in memory and on disk so the instance falls back to automatic Java
-selection.
+selection. The manager also watches the default instances root with `GFileMonitor`
+(plus a 30-second fallback check) to prune externally deleted instance directories.
 
 ### Accounts and authentication
 
@@ -293,11 +294,12 @@ retries and `Retry-After` where appropriate. A 404 and other non-retryable
 statuses fail directly. Cancellation or failure discards the temporary file
 and never replaces a valid destination.
 
-JSON requests use the same transfer and retry machinery. API responses can be
-cached with their creation time and ETag. When enabled, an expired entry is
-revalidated; if the network is unavailable, a stale response can be used as a
-fallback. Cache clearing only removes the global cache tree, not installed
-instance content or its indexes.
+JSON requests use the same transfer, in-flight deduplication, and retry machinery.
+API responses (including Mojang's version manifest) can be cached with their
+creation time and ETag. When enabled, an expired entry is revalidated without
+parsing the stale inner payload first; if the network is unavailable, a stale
+response can be used as a fallback. Cache clearing only removes the global cache
+tree, not installed instance content or its indexes.
 
 ### Minecraft metadata and resolution
 
@@ -531,6 +533,7 @@ The repository uses a hand-written `Makefile`:
   Minecraft.
 - `make test-debug` and `make test-lsan` exercise the sanitizer build.
 - `make static-analysis` runs GCC's analyzer over source files.
+- `make check-potfiles` verifies that `po/POTFILES.in` matches translatable source files.
 - `flatpak-builder` builds the manifest in
   `packaging/flatpak/com.github.NuvashaLauncher.NuvashaLauncher.yml` with the GNOME 51
   runtime.

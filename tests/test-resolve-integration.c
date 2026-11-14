@@ -286,6 +286,11 @@ main (int argc, char **argv)
   cache_start ();
   fixture_start ();
   test_resolve_modern ();
+  {
+    g_autofree char *api_cache = g_build_filename (cache_home, "nuvashalauncher", "api", NULL);
+    if (g_file_test (api_cache, G_FILE_TEST_IS_DIR))
+      remove_test_dir (api_cache);
+  }
   test_resolve_legacy_assets ();
   test_resolve_failures ();
   fixture_stop ();

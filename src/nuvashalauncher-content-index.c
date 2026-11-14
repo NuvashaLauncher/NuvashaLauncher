@@ -364,6 +364,7 @@ typedef struct {
   char *directory;
   char *data;
   gsize length;
+  gboolean mkdir_tried;
 
   /* Borrowed: the operation the caller owns until the callback runs. */
   NuvashaLauncherTaskScope *scope;
@@ -378,6 +379,35 @@ write_run_free (WriteRun *run)
   g_free (run);
 }
 
+static void write_done (GObject *source, GAsyncResult *result, gpointer user_data);
+
+static void
+write_mkdir_done (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  WriteRun *run = user_data;
+  g_autoptr (GError) error = NULL;
+
+  if (!nuvashalauncher_fs_make_directory_finish (G_FILE (source), result, &error) &&
+      !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_EXISTS))
+    {
+      nuvashalauncher_task_scope_return_error (
+        run->scope,
+        g_error_new (NUVASHALAUNCHER_CONTENT_INDEX_ERROR,
+                     NUVASHALAUNCHER_CONTENT_INDEX_ERROR_INVALID,
+                     "cannot create index directory \"%s\": %s",
+                     run->directory, error->message));
+      write_run_free (run);
+      return;
+    }
+
+  g_autoptr (GFile) file = g_file_new_for_path (run->path);
+  nuvashalauncher_fs_replace_contents_async (
+    file, run->data, run->length, NULL, FALSE,
+    G_FILE_CREATE_REPLACE_DESTINATION,
+    nuvashalauncher_task_scope_get_cancellable (run->scope),
+    write_done, run);
+}
+
 static void
 write_done (GObject *source, GAsyncResult *result, gpointer user_data)
 {
@@ -385,9 +415,25 @@ write_done (GObject *source, GAsyncResult *result, gpointer user_data)
   g_autoptr (GError) error = NULL;
 
   if (nuvashalauncher_fs_replace_contents_finish (G_FILE (source), result, NULL, &error))
-    nuvashalauncher_task_scope_return_boolean (run->scope, TRUE);
-  else
-    nuvashalauncher_task_scope_return_error (run->scope, g_steal_pointer (&error));
+    {
+      nuvashalauncher_task_scope_return_boolean (run->scope, TRUE);
+      write_run_free (run);
+      return;
+    }
+
+  if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND) &&
+      !run->mkdir_tried)
+    {
+      g_autoptr (GFile) dir = g_file_new_for_path (run->directory);
+      run->mkdir_tried = TRUE;
+      nuvashalauncher_fs_make_directory_async (
+        dir, G_PRIORITY_DEFAULT,
+        nuvashalauncher_task_scope_get_cancellable (run->scope),
+        write_mkdir_done, run);
+      return;
+    }
+
+  nuvashalauncher_task_scope_return_error (run->scope, g_steal_pointer (&error));
   write_run_free (run);
 }
 
@@ -405,19 +451,6 @@ write_entry_async (const char *instance_directory, NuvashaLauncherContentType ty
                                             entry->filename);
   run->data = entry_to_json (entry, &run->length);
   run->scope = scope;
-
-  g_autoptr (GError) directory_error = NULL;
-  if (!nuvashalauncher_fs_make_directory (run->directory, 0755, &directory_error))
-    {
-      nuvashalauncher_task_scope_return_error_deferred (
-        scope,
-        g_error_new (NUVASHALAUNCHER_CONTENT_INDEX_ERROR,
-                     NUVASHALAUNCHER_CONTENT_INDEX_ERROR_INVALID,
-                     "cannot create index directory \"%s\": %s",
-                     run->directory, directory_error->message));
-      write_run_free (run);
-      return g_steal_pointer (&scope);
-    }
 
   {
     g_autoptr (GFile) file = g_file_new_for_path (run->path);

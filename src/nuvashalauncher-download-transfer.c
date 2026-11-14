@@ -392,15 +392,9 @@ publish_download (DownloadRequest *request)
   g_clear_pointer (&request->tmp_path, g_free);
   if (request->expected_hash != NULL)
     {
-      g_autofree char *directory = nuvashalauncher_cache_get_files_directory ();
-      g_autoptr (GFile) directory_file = g_file_new_for_path (directory);
-      g_autoptr (GFile) parent = g_file_get_parent (directory_file);
-
       if (request->global_cache_path == NULL)
         request->global_cache_path = nuvashalauncher_download_global_cache_path (request->expected_hash);
-      nuvashalauncher_fs_make_directory_async (parent, G_PRIORITY_DEFAULT,
-                                   g_task_get_cancellable (request->task),
-                                   global_cache_directory_ready, request);
+      global_cache_copy (request);
       return;
     }
   request_succeed (request);

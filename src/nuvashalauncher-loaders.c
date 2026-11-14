@@ -114,6 +114,8 @@ install_failed (InstallRequest *request, GError *error)
  * The steps of an install
  * ---------------------------------------------------------- */
 
+static void stage_profile (InstallRequest *request);
+
 static void
 stage_installer (InstallRequest *request)
 {
@@ -123,6 +125,21 @@ stage_installer (InstallRequest *request)
   g_autofree char *file = NULL;
 
   request->stage = STAGE_INSTALLER;
+
+  {
+    GStatBuf info;
+
+    if (g_lstat (request->installer, &info) == 0 && S_ISREG (info.st_mode))
+      {
+        int fd = open (request->installer, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+        if (fd >= 0)
+          {
+            close (fd);
+            stage_profile (request);
+            return;
+          }
+      }
+  }
 
   maven = loader_maven (request->loader, &coordinate);
 

@@ -503,7 +503,12 @@ scan_children_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 
   if (enumerator == NULL)
     {
-       nuvashalauncher_task_scope_return_error (run->scope, g_steal_pointer (&error));
+      if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+        nuvashalauncher_task_scope_return_pointer (
+          run->scope, g_steal_pointer (&run->files),
+          (GDestroyNotify) g_ptr_array_unref);
+      else
+        nuvashalauncher_task_scope_return_error (run->scope, g_steal_pointer (&error));
       scan_free (run);
       return;
     }
@@ -561,10 +566,7 @@ scan_hash_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     run->hash_cancelled = TRUE;
 
   if (digest != NULL)
-    {
-      file->sha1 = g_steal_pointer (&digest);
-      apply_index_entry (run, file);
-    }
+    file->sha1 = g_steal_pointer (&digest);
   else
     {
       /* A file that cannot be read is still a file that is there: it is
@@ -654,17 +656,6 @@ nuvashalauncher_content_scan_async (const char *instance_directory, NuvashaLaunc
   run->extension = g_strdup (nuvashalauncher_content_type_extension (type));
   run->files =
     g_ptr_array_new_with_free_func ((GDestroyNotify) nuvashalauncher_content_file_free);
-
-  /* An instance that never installed anything of this kind has no such
-   * folder, which reads the same as an empty one. */
-  if (!g_file_query_exists (run->folder, NULL))
-    {
-      nuvashalauncher_task_scope_return_pointer_deferred (scope,
-                                              g_steal_pointer (&run->files),
-                                              (GDestroyNotify) g_ptr_array_unref);
-      scan_free (run);
-      return g_steal_pointer (&scope);
-    }
 
   run->index_operation = nuvashalauncher_content_index_load_async (instance_directory, type,
                                                        scan_index_ready, run);

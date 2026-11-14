@@ -73,6 +73,28 @@ nuvashalauncher_content_page_toggle_file (NuvashaLauncherContentPage *self,
   file->path = g_steal_pointer (&renamed);
   file->enabled = !file->enabled;
 
+  {
+    g_autofree char *old_base = g_path_get_basename (old_path);
+    g_autofree char *new_base = g_path_get_basename (file->path);
+    g_autofree char *directory = NULL;
+
+    g_free (file->filename);
+    file->filename = g_steal_pointer (&new_base);
+    if (self->instance != NULL)
+      {
+        g_object_get (self->instance, "directory", &directory, NULL);
+        if (directory != NULL)
+          {
+            nuvashalauncher_operation_release (
+              nuvashalauncher_content_index_remove_async (directory, self->type,
+                                                          old_base, NULL, NULL),
+              self->installed.scan);
+            if (file->sha1 != NULL)
+              persist_identified_file (self, file);
+          }
+      }
+  }
+
   /* The row the file is about follows the new path, and the table that
      finds a row by its path is told, so nothing else has to move. */
   row = g_hash_table_lookup (self->installed.rows, old_path);
@@ -111,6 +133,19 @@ nuvashalauncher_content_page_file_display_name (NuvashaLauncherContentFile *file
   return file != NULL ? file->filename : NULL;
 }
 
+static void
+installed_filter_row (GtkWidget *row, const char *needle)
+{
+  NuvashaLauncherContentFile *file = g_object_get_data (G_OBJECT (row), "nuvashalauncher-file");
+  gboolean visible = TRUE;
+
+  if (needle != NULL && *needle != '\0')
+    visible = file != NULL && file->search_key != NULL &&
+              strstr (file->search_key, needle) != NULL;
+
+  gtk_widget_set_visible (row, visible);
+}
+
 void
 installed_filter_rows (NuvashaLauncherContentPage *self)
 {
@@ -121,17 +156,7 @@ installed_filter_rows (NuvashaLauncherContentPage *self)
   g_autofree char *needle = g_utf8_casefold (query, -1);
 
   for (GList *item = self->installed.rows_list; item != NULL; item = item->next)
-    {
-      GtkWidget *row = GTK_WIDGET (item->data);
-      NuvashaLauncherContentFile *file = g_object_get_data (G_OBJECT (row), "nuvashalauncher-file");
-      gboolean visible = TRUE;
-
-      if (needle != NULL && *needle != '\0')
-        visible = file != NULL && file->search_key != NULL &&
-                  strstr (file->search_key, needle) != NULL;
-
-      gtk_widget_set_visible (GTK_WIDGET (row), visible);
-    }
+    installed_filter_row (GTK_WIDGET (item->data), needle);
 }
 
 void
@@ -175,7 +200,14 @@ file_row_refresh (GtkWidget *row)
   if (file->description != NULL && *file->description != '\0')
     row_show_description (row, file->description);
 
-  installed_filter_rows (self);
+  {
+    const char *query = self->installed.search_entry != NULL
+                          ? gtk_editable_get_text (
+                              GTK_EDITABLE (self->installed.search_entry))
+                          : "";
+    g_autofree char *needle = g_utf8_casefold (query, -1);
+    installed_filter_row (row, needle);
+  }
 }
 
 static void
@@ -474,7 +506,7 @@ local_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
           if (icon != NULL)
             nuvashalauncher_icon_widget_set_file (icon, file->local_icon_path);
         }
-      persist_identified_file (load->page, file);
+      queue_persist_identified_file (load->page, file);
     }
 
   g_object_unref (load->row);
@@ -502,10 +534,14 @@ load_row_icon (NuvashaLauncherContentPage *self, GtkWidget *row)
     return;
 
   if (file->local_icon_path != NULL &&
-      !g_file_test (file->local_icon_path, G_FILE_TEST_IS_REGULAR))
-    g_clear_pointer (&file->local_icon_path, g_free);
+      nuvashalauncher_icon_widget_set_file (icon, file->local_icon_path))
+    {
+      g_object_set_data (G_OBJECT (row), "nuvashalauncher-icon-loaded", GINT_TO_POINTER (1));
+      return;
+    }
 
-  if (file->local_icon_path == NULL &&
+  g_clear_pointer (&file->local_icon_path, g_free);
+  if (file->local_icon_member != NULL &&
       g_object_get_data (G_OBJECT (row), "nuvashalauncher-local-icon-loading") == NULL)
     {
       LocalIconLoad *load = g_new0 (LocalIconLoad, 1);
@@ -519,10 +555,6 @@ load_row_icon (NuvashaLauncherContentPage *self, GtkWidget *row)
         nuvashalauncher_content_load_local_icon_async (file, local_icon_ready, load),
         self->installed.scan);
     }
-
-  if (file->local_icon_path != NULL &&
-      nuvashalauncher_icon_widget_set_file (icon, file->local_icon_path))
-    g_object_set_data (G_OBJECT (row), "nuvashalauncher-icon-loaded", GINT_TO_POINTER (1));
 }
 
 void

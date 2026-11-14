@@ -43,14 +43,20 @@ nuvashalauncher_download_global_cache_path (const char *hash)
 }
 
 JsonParser *
-nuvashalauncher_download_cache_parser (const char *contents, gsize length, char **response,
-              char **etag, gint64 *created)
+nuvashalauncher_download_cache_parser (const char *contents, gsize length,
+              gint64 max_age_seconds, gboolean *out_fresh,
+              char **response, char **etag)
 {
   g_autoptr (JsonParser) envelope = json_parser_new ();
   JsonNode *root = NULL;
   JsonNode *node = NULL;
   const char *body = NULL;
+  gint64 created = 0;
+  gboolean fresh = FALSE;
   g_autoptr (JsonParser) parser = NULL;
+
+  if (out_fresh != NULL)
+    *out_fresh = FALSE;
 
   if (!json_parser_load_from_data (envelope, contents, length, NULL))
     return NULL;
@@ -63,7 +69,7 @@ nuvashalauncher_download_cache_parser (const char *contents, gsize length, char 
   if (node == NULL || !JSON_NODE_HOLDS_VALUE (node) ||
       json_node_get_value_type (node) != G_TYPE_INT64)
     return NULL;
-  *created = json_node_get_int (node);
+  created = json_node_get_int (node);
 
   node = json_object_get_member (json_node_get_object (root), "response");
   if (node == NULL || !JSON_NODE_HOLDS_VALUE (node) ||
@@ -71,10 +77,15 @@ nuvashalauncher_download_cache_parser (const char *contents, gsize length, char 
     return NULL;
   body = json_node_get_string (node);
 
-  parser = json_parser_new ();
-  if (!json_parser_load_from_data (parser, body, -1, NULL) ||
-      json_parser_get_root (parser) == NULL)
-    return NULL;
+  fresh = (g_get_real_time () / G_USEC_PER_SEC - created) <= max_age_seconds;
+
+  if (fresh)
+    {
+      parser = json_parser_new ();
+      if (!json_parser_load_from_data (parser, body, -1, NULL) ||
+          json_parser_get_root (parser) == NULL)
+        return NULL;
+    }
 
   if (response != NULL)
     *response = g_strdup (body);
@@ -84,11 +95,18 @@ nuvashalauncher_download_cache_parser (const char *contents, gsize length, char 
       json_node_get_value_type (node) == G_TYPE_STRING)
     *etag = g_strdup (json_node_get_string (node));
 
+  if (out_fresh != NULL)
+    *out_fresh = fresh;
+
   return g_steal_pointer (&parser);
 }
 
+static void nuvashalauncher_download_cache_write_cache_done (GObject *source,
+                                                             GAsyncResult *result,
+                                                             gpointer user_data);
+
 static void
-nuvashalauncher_download_cache_write_done (GObject *source G_GNUC_UNUSED,
+nuvashalauncher_download_cache_write_done (GObject *source,
                                GAsyncResult *result, gpointer user_data)
 {
   DownloadRequest *request = user_data;
@@ -98,6 +116,24 @@ nuvashalauncher_download_cache_write_done (GObject *source G_GNUC_UNUSED,
   if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
     {
       nuvashalauncher_download_request_fail (request, nuvashalauncher_download_cancelled_error ());
+      return;
+    }
+
+  if (error != NULL &&
+      g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND) &&
+      !request->api_cache_mkdir_tried)
+    {
+      g_autoptr (GFile) file = g_file_new_for_path (request->cache_path);
+      g_autoptr (GFile) directory = g_file_get_parent (file);
+      g_autoptr (GFile) parent = g_file_get_parent (directory);
+      g_autoptr (GFile) cache_root = g_file_get_parent (parent);
+
+      request->api_cache_mkdir_tried = TRUE;
+      g_object_set_data (G_OBJECT (file), "nuvashalauncher-cache-request", request);
+      nuvashalauncher_fs_make_directory_async (cache_root, G_PRIORITY_DEFAULT,
+                                   g_task_get_cancellable (request->task),
+                                   nuvashalauncher_download_cache_write_cache_done,
+                                   g_object_ref (file));
       return;
     }
 
@@ -233,9 +269,6 @@ nuvashalauncher_download_cache_write (DownloadRequest *request, const char *resp
   g_autoptr (JsonNode) root = NULL;
   g_autofree char *data = NULL;
   g_autoptr (GFile) file = g_file_new_for_path (request->cache_path);
-  g_autoptr (GFile) directory = g_file_get_parent (file);
-  g_autoptr (GFile) parent = g_file_get_parent (directory);
-  g_autoptr (GFile) cache_root = g_file_get_parent (parent);
   gsize length = 0;
 
   json_builder_begin_object (builder);
@@ -253,14 +286,14 @@ nuvashalauncher_download_cache_write (DownloadRequest *request, const char *resp
   json_generator_set_root (generator, root);
   data = json_generator_to_data (generator, &length);
 
-  /* The cache directory is normally already present. GIO's async mkdir
-   * also handles its first creation; the cache write itself is async. */
+  /* Try replacing directly first; directories are only created if missing. */
   request->pending_cache_data = g_steal_pointer (&data);
   g_debug ("writing Modrinth API cache entry (%zu bytes)",
            strlen (request->pending_cache_data));
-  g_object_set_data (G_OBJECT (file), "nuvashalauncher-cache-request", request);
-  nuvashalauncher_fs_make_directory_async (cache_root, G_PRIORITY_DEFAULT,
-                               g_task_get_cancellable (request->task),
-                               nuvashalauncher_download_cache_write_cache_done,
-                               g_object_ref (file));
+  nuvashalauncher_fs_replace_contents_async (file, request->pending_cache_data,
+                                  strlen (request->pending_cache_data),
+                                  NULL, FALSE,
+                                  G_FILE_CREATE_REPLACE_DESTINATION,
+                                  g_task_get_cancellable (request->task),
+                                  nuvashalauncher_download_cache_write_done, request);
 }

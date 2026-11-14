@@ -2,6 +2,38 @@
 
 All notable changes to Nuvasha Launcher are documented in this file.
 
+## [1.1] - 2026-11-14
+
+### Performance, Caching & Network Efficiency
+- **Mojang Manifest & Modrinth Caching**:
+  - Routed Minecraft version manifest fetches through `nuvashalauncher_download_json_metadata_cached_async` (TTL + ETag revalidation), eliminating redundant disk writes and network requests.
+  - Added in-flight `json_flights` deduplication for Modrinth version and category requests via `nuvashalauncher_modrinth_get_with_data_async`.
+  - Batched Modrinth content update checks into a single POST request and reused cached lookup results for modpacks, loaders, and Java probes.
+  - Skipped parsing the inner `"response"` payload when checking expired API cache entries, avoiding double JSON parsing on stale cache hits.
+- **Download & Cache I/O**:
+  - Removed redundant post-download SHA re-hashing when publishing from the global hash cache.
+  - Replaced unconditional sequential `mkdir` calls on every API/global cache and content index write with lazy directory creation on `G_IO_ERROR_NOT_FOUND`.
+  - Respected HTTP 429 `Retry-After` headers when uploading skins in `nuvashalauncher-skin-service.c`.
+  - Skipped re-downloading Forge/NeoForge installer JARs when a valid non-symlink installer already exists locally.
+- **Content Scanning, Metadata & Instance Monitoring**:
+  - Consolidated archive metadata and icon extraction into a single archive pass (`read_archive_members`) and cached scaled local icons on disk.
+  - Coalesced `.index` writes during content identification (50 ms batching), updated `.index` and filenames directly on `.disabled` toggles, and removed redundant synchronous existence checks during scans.
+  - Moved Java runtime candidate discovery off the GTK main thread into a worker thread, parallelized Java probing, and deduplicated custom Java path checks.
+  - Replaced fast polling in `NuvashaLauncherInstanceManager` with `GFileMonitor` directory watching plus a 30-second fallback, single-pass `instances.json` loading, and batched cleanup saves.
+- **UI Search & Filtering**:
+  - Debounced Modrinth category toggles and modpack filter/sort changes, skipped unchanged search queries, and parsed Modrinth search responses directly from `JsonNode` without re-serializing JSON.
+  - Updated installed content row refreshes to re-evaluate only the changed row rather than re-filtering the entire list.
+
+### User Interface & Branding
+- **Visual Polish & Assets**: Updated AppStream screenshots metadata, refined selection badges and row layouts, redesigned the README logo, and normalized the logo filename (`nuvashalauncher-logo.svg`).
+- **Markdown Renderer**: Fixed task scope, markup, and memory leak bugs and improved inline/block rendering.
+
+### Architecture, Refactoring & Build Tooling
+- **Module Consolidation & Normalization**: Normalized app ID, GResource paths, binary name, and symbol prefixes across the codebase; deepened and consolidated Microsoft auth, skin service, content models/pages, loader install, download plumbing, and main-window model modules.
+- **Build & QA Tooling**: Cleaned up the `Makefile`, refactored auth CLI/options, removed unused `.clang-format`, and added `make check-potfiles` to verify `po/POTFILES.in` stays in sync.
+
+**Full Changelog**: https://github.com/NuvashaLauncher/NuvashaLauncher/compare/v1.0...v1.1
+
 ## [1.0] - 2026-11-08
 
 ### User Interface & GNOME Experience

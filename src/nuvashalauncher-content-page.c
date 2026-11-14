@@ -272,6 +272,7 @@ nuvashalauncher_content_page_dispose (GObject *object)
       self->browse.model->debounce_source = 0;
     }
 
+  g_clear_handle_id (&self->installed.index_flush_source, g_source_remove);
   g_cancellable_cancel (self->installed.scan);
   g_clear_object (&self->installed.scan);
 

@@ -185,7 +185,6 @@ nuvashalauncher_modrinth_versions_async (const char *project_id, NuvashaLauncher
                              const char *minecraft_version, const char *loader,
                              GAsyncReadyCallback callback, gpointer user_data)
 {
-  g_autoptr (NuvashaLauncherTaskScope) scope = NULL;
   g_autofree char *game_versions = NULL;
   g_autofree char *loaders = NULL;
   g_autofree char *escaped_id = NULL;
@@ -225,17 +224,11 @@ nuvashalauncher_modrinth_versions_async (const char *project_id, NuvashaLauncher
         NUVASHALAUNCHER_MODRINTH_URL "/project/%s/version?game_versions=%s",
         escaped_id, escaped_game);
 
-  scope = nuvashalauncher_modrinth_request_new (callback, user_data, versions_answer,
-                       NUVASHALAUNCHER_NOT_FOUND_IS_ERROR,
-                       instance_ask_new (type, minecraft_version, loader),
-                       instance_ask_free);
-
-  nuvashalauncher_task_scope_release_when_done (
-    nuvashalauncher_download_json_cached_async (nuvashalauncher_downloads_get_service (), url, nuvashalauncher_modrinth_json_ready,
-                                    nuvashalauncher_task_scope_task (scope)),
-    nuvashalauncher_task_scope_get_cancellable (scope));
-
-  return g_steal_pointer (&scope);
+  return nuvashalauncher_modrinth_get_with_data_async (
+    url, callback, user_data, versions_answer,
+    NUVASHALAUNCHER_NOT_FOUND_IS_ERROR,
+    instance_ask_new (type, minecraft_version, loader),
+    instance_ask_free);
 }
 
 GPtrArray *
@@ -272,16 +265,10 @@ nuvashalauncher_modrinth_categories_async (const char        *project_type,
                                gpointer           user_data)
 {
   g_autofree char *url = g_strdup_printf (NUVASHALAUNCHER_MODRINTH_URL "/tag/category");
-  g_autoptr (NuvashaLauncherTaskScope) scope = NULL;
 
-  scope = nuvashalauncher_modrinth_request_new (callback, user_data, categories_answer,
-                       NUVASHALAUNCHER_NOT_FOUND_IS_ERROR, g_strdup (project_type), g_free);
-  nuvashalauncher_task_scope_release_when_done (
-    nuvashalauncher_download_json_cached_async (nuvashalauncher_downloads_get_service (), url, nuvashalauncher_modrinth_json_ready,
-                                    nuvashalauncher_task_scope_task (scope)),
-    nuvashalauncher_task_scope_get_cancellable (scope));
-
-  return g_steal_pointer (&scope);
+  return nuvashalauncher_modrinth_get_with_data_async (
+    url, callback, user_data, categories_answer,
+    NUVASHALAUNCHER_NOT_FOUND_IS_ERROR, g_strdup (project_type), g_free);
 }
 
 GPtrArray *

@@ -86,12 +86,14 @@ on_modpack_version_changed (GObject *object G_GNUC_UNUSED,
   on_modpack_filter_changed (NULL, self);
 }
 
+static void on_search_changed (GtkEditable *editable, gpointer user_data);
+
 static void
 on_modpack_filter_changed (GtkWidget *widget G_GNUC_UNUSED, gpointer user_data)
 {
   NuvashaLauncherDownloadModpackDialog *self = user_data;
   self->offset = 0;
-  run_search (self, FALSE);
+  on_search_changed (NULL, self);
 }
 
 static void
@@ -493,7 +495,6 @@ on_search_done (GObject *source G_GNUC_UNUSED,
   g_autoptr (GError) error = NULL;
   g_autoptr (JsonParser) parser = NULL;
   g_autoptr (NuvashaLauncherModrinthResults) results = NULL;
-  g_autofree char *answer = NULL;
 
   parser = nuvashalauncher_download_json_finish (result, &error);
 
@@ -539,8 +540,8 @@ on_search_done (GObject *source G_GNUC_UNUSED,
       return;
     }
 
-  answer = nuvashalauncher_modrinth_json_node_to_string (json_parser_get_root (parser));
-  results = nuvashalauncher_modrinth_results_from_json (answer, -1, &error);
+  results = nuvashalauncher_modrinth_results_from_node (
+    json_parser_get_root (parser), &error);
 
   if (results == NULL)
     {

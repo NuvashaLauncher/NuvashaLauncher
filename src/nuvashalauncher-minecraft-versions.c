@@ -130,37 +130,28 @@ load_sequence_step (NuvashaLauncherTaskSequence *sequence G_GNUC_UNUSED,
 }
 
 static void
-manifest_file_loaded (GObject *source, GAsyncResult *result,
-                      gpointer user_data)
+manifest_downloaded (GObject *source G_GNUC_UNUSED,
+                     GAsyncResult *result,
+                     gpointer user_data)
 {
   FetchRequest *request = user_data;
   g_autoptr (GError) error = NULL;
+  g_autoptr (JsonParser) parser = NULL;
   g_autofree char *contents = NULL;
-  gsize length = 0;
+  JsonNode *root;
   NuvashaLauncherVersionManifest *manifest;
 
-  if (!g_file_load_contents_finish (G_FILE (source), result, &contents,
-                                    &length, NULL, &error))
+  parser = nuvashalauncher_download_json_finish (result, &error);
+  if (parser == NULL)
     {
-      nuvashalauncher_task_sequence_return_error (
-        request->sequence,
-        g_error_new (NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_IO,
-                     "the downloaded manifest cannot be read: %s",
-                     error->message));
+      nuvashalauncher_task_sequence_return_error (request->sequence,
+                                      g_steal_pointer (&error));
       return;
     }
 
-  if (length > NUVASHALAUNCHER_FS_MAX_JSON_DOCUMENT_SIZE)
-    {
-      nuvashalauncher_task_sequence_return_error (
-        request->sequence,
-        g_error_new_literal (NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_IO,
-                             "the downloaded manifest is too large"));
-      return;
-    }
-
-  manifest = nuvashalauncher_version_manifest_new_from_json (contents, (gssize) length,
-                                                 &error);
+  root = json_parser_get_root (parser);
+  contents = root != NULL ? json_to_string (root, FALSE) : g_strdup ("");
+  manifest = nuvashalauncher_version_manifest_new_from_json (contents, -1, &error);
 
   if (manifest == NULL)
     {
@@ -174,37 +165,15 @@ manifest_file_loaded (GObject *source, GAsyncResult *result,
 }
 
 static void
-manifest_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
-{
-  FetchRequest *request = user_data;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (GFile) file = g_file_new_for_path (request->path);
-
-  (void) source;
-
-  if (!nuvashalauncher_download_file_finish (result, &error))
-    {
-      nuvashalauncher_task_sequence_return_error (request->sequence,
-                                      g_steal_pointer (&error));
-      return;
-    }
-
-  g_file_load_contents_async (
-    file,
-    nuvashalauncher_task_sequence_get_cancellable (request->sequence),
-                              manifest_file_loaded, request);
-}
-
-static void
 manifest_fetch_step (NuvashaLauncherTaskSequence *sequence G_GNUC_UNUSED,
                      gpointer user_data)
 {
   FetchRequest *request = user_data;
 
   nuvashalauncher_task_scope_release_when_done (
-    nuvashalauncher_download_file_async (nuvashalauncher_downloads_get_service (), request->url, request->path, NULL,
-                             G_CHECKSUM_SHA1, NULL, manifest_downloaded,
-                             request),
+    nuvashalauncher_download_json_metadata_cached_async (
+      nuvashalauncher_downloads_get_service (), request->url,
+      manifest_downloaded, request),
     nuvashalauncher_task_sequence_get_cancellable (request->sequence));
 }
 
@@ -216,28 +185,10 @@ nuvashalauncher_version_manifest_fetch_async (const char         *url,
   g_autoptr (GCancellable) cancellable = g_cancellable_new ();
   FetchRequest *request;
   NuvashaLauncherTaskScope *scope = NULL;
-  g_autoptr (GError) error = NULL;
-  g_autofree char *directory = NULL;
   g_return_val_if_fail (url != NULL, NULL);
-
-  directory = ensure_cache_directory (&error);
-
-  if (directory == NULL)
-    {
-      /* The task reports back through an idle, so the caller never
-       * hears from us before this function has returned. */
-      g_autoptr (NuvashaLauncherTaskScope) failure =
-        nuvashalauncher_task_scope_new (NULL, cancellable, callback, user_data);
-
-      nuvashalauncher_task_scope_set_check_cancellable (failure, FALSE);
-      nuvashalauncher_task_scope_return_error_deferred (failure,
-                                            g_steal_pointer (&error));
-      return g_steal_pointer (&failure);
-    }
 
   request = g_new0 (FetchRequest, 1);
   request->url = g_strdup (url);
-  request->path = g_build_filename (directory, MANIFEST_FILE, NULL);
   request->sequence =
     nuvashalauncher_task_sequence_new (cancellable, callback, user_data,
                            manifest_fetch_step, request,

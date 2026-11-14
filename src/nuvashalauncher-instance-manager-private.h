@@ -15,6 +15,7 @@ struct _NuvashaLauncherInstanceManager
   char *data_dir;
   char *metadata_path;
   char *instances_dir;
+  GFileMonitor *instances_monitor;
   guint directory_check_source;
 };
 

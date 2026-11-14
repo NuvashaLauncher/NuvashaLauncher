@@ -128,6 +128,47 @@ persist_identified_file (NuvashaLauncherContentPage *self, NuvashaLauncherConten
     self->installed.scan);
 }
 
+void
+flush_dirty_index_files (NuvashaLauncherContentPage *self)
+{
+  g_clear_handle_id (&self->installed.index_flush_source, g_source_remove);
+
+  if (self->installed.files == NULL)
+    return;
+
+  for (guint i = 0; i < self->installed.files->len; i++)
+    {
+      NuvashaLauncherContentFile *file = g_ptr_array_index (self->installed.files, i);
+      if (file != NULL && file->index_dirty)
+        {
+          file->index_dirty = FALSE;
+          queue_persist_identified_file (self, file);
+        }
+    }
+}
+
+static gboolean
+on_index_flush_timeout (gpointer user_data)
+{
+  NuvashaLauncherContentPage *self = user_data;
+  self->installed.index_flush_source = 0;
+  flush_dirty_index_files (self);
+  return G_SOURCE_REMOVE;
+}
+
+void
+queue_persist_identified_file (NuvashaLauncherContentPage *self,
+                               NuvashaLauncherContentFile *file)
+{
+  if (self == NULL || file == NULL)
+    return;
+
+  file->index_dirty = TRUE;
+  if (self->installed.index_flush_source == 0)
+    self->installed.index_flush_source =
+      g_timeout_add (50, on_index_flush_timeout, self);
+}
+
 static void
 project_title_request_free (ProjectTitleRequest *request)
 {
@@ -177,7 +218,7 @@ on_project_title_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
           g_free (file->project_name);
           file->project_name = g_strdup (details->title);
-          persist_identified_file (self, file);
+          queue_persist_identified_file (self, file);
 
           GtkWidget *row = self->installed.rows != NULL
                              ? GTK_WIDGET (g_hash_table_lookup (
@@ -307,7 +348,7 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       /* Persist the hash lookup immediately. Project details and the icon
        * are a second request; a failure there must not lose the metadata we
        * already obtained from the version-by-hash response. */
-      persist_identified_file (self, file);
+      queue_persist_identified_file (self, file);
 
       if (file->project_id != NULL && *file->project_id != '\0')
         g_hash_table_add (self->browse.model->projects, g_strdup (file->project_id));
@@ -488,7 +529,7 @@ metadata_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
            if (file->metadata_dirty)
              {
-               persist_identified_file (self, file);
+               queue_persist_identified_file (self, file);
                file->metadata_dirty = FALSE;
              }
         }
@@ -507,6 +548,7 @@ reload_installed (NuvashaLauncherContentPage *self)
   if (self->installed.scan == NULL || self->installed.group == NULL)
     return;
 
+  flush_dirty_index_files (self);
   self->installed.loaded = TRUE;
 
   g_object_get (self->instance, "directory", &directory, NULL);

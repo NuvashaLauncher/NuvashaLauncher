@@ -65,6 +65,7 @@ typedef struct {
   gboolean local_metadata;
   gboolean metadata_checked;
   gboolean metadata_dirty;
+  gboolean index_dirty;
   char *icon_url;
   char *local_icon_member;
   char *local_icon_path;
