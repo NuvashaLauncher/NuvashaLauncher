@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: Check out source
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Install DEB build dependencies
         run: |
@@ -76,7 +76,7 @@ jobs:
 
     steps:
       - name: Check out source
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Install RPM build dependencies
         run: |
@@ -114,7 +114,7 @@ jobs:
 
     steps:
       - name: Check out source
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Install Arch build dependencies
         run: |
@@ -163,7 +163,7 @@ jobs:
 
     steps:
       - name: Check out source
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Install Flatpak tooling
         run: |
@@ -216,7 +216,7 @@ jobs:
     runs-on: ubuntu-26.04
     steps:
       - name: Check out source
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Download package artifacts
         uses: actions/download-artifact@v4
