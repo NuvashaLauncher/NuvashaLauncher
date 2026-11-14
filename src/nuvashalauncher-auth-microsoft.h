@@ -40,6 +40,7 @@
 
 #include <gio/gio.h>
 #include <json-glib/json-glib.h>
+#include <libsoup/soup.h>
 
 #include "nuvashalauncher-accounts.h"
 #include "nuvashalauncher-task.h"
@@ -259,7 +260,7 @@ NuvashaLauncherMinecraftProfile *nuvashalauncher_auth_profile_from_json (const c
 char *nuvashalauncher_auth_profile_uuid (const char *id);
 
 /* ---------------------------------------------------------- *
- * Test seam
+ * Optional request configuration / test seam
  * ---------------------------------------------------------- */
 
 /* Substitutes HTTP transport during tests. Returns FALSE and sets @error
@@ -273,10 +274,29 @@ typedef gboolean (*NuvashaLauncherAuthTransportFunc) (const char  *url,
                                                       gpointer     user_data,
                                                       GError     **error);
 
-void nuvashalauncher_auth_set_transport_for_tests (NuvashaLauncherAuthTransportFunc transport,
-                                                   gpointer                         user_data);
+/* Optional per-request overrides (e.g. custom HTTP transport or client ID
+ * for tests). All fields are optional and default to production behavior
+ * when NULL. */
+typedef struct {
+  NuvashaLauncherAuthTransportFunc transport;
+  gpointer                         transport_data;
+  const char                      *client_id;
+  SoupSession                     *session;
+} NuvashaLauncherAuthOptions;
 
-void nuvashalauncher_auth_set_client_id_for_tests (const char *client_id);
+NuvashaLauncherTaskScope *nuvashalauncher_auth_device_code_async_with_options (const NuvashaLauncherAuthOptions *options,
+                                                                               GAsyncReadyCallback               callback,
+                                                                               gpointer                          user_data);
+
+NuvashaLauncherTaskScope *nuvashalauncher_auth_sign_in_async_with_options (const NuvashaLauncherDeviceCode  *code,
+                                                                           const NuvashaLauncherAuthOptions *options,
+                                                                           GAsyncReadyCallback               callback,
+                                                                           gpointer                          user_data);
+
+NuvashaLauncherTaskScope *nuvashalauncher_auth_refresh_async_with_options (const NuvashaLauncherAccount     *account,
+                                                                           const NuvashaLauncherAuthOptions *options,
+                                                                           GAsyncReadyCallback               callback,
+                                                                           gpointer                          user_data);
 
 G_END_DECLS
 

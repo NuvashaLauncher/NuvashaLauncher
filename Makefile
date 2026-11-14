@@ -5,6 +5,7 @@
 # Release objects live in build/, sanitizer objects in build-debug/.
 
 CC         := gcc
+AR         ?= ar
 PKG_CONFIG ?= pkg-config
 PREFIX     ?= /usr/local
 VERSION    := $(strip $(shell cat VERSION))
@@ -20,7 +21,7 @@ PKGS := gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive gio-unix-2.0 epox
 # Goals that compile nothing and so must keep working on hosts without the
 # development packages. test-flatpak-runtime only drives the flatpak CLI to
 # smoke-test an already-installed bundle; clean only deletes build output.
-NO_BUILD_GOALS := test-flatpak-runtime clean
+NO_BUILD_GOALS := test-flatpak-runtime check-potfiles clean
 ifneq ($(filter-out $(NO_BUILD_GOALS),$(MAKECMDGOALS)),)
 NEEDS_BUILD := 1
 else ifeq ($(MAKECMDGOALS),)
@@ -64,7 +65,7 @@ DBGFLAGS   := -g -O0 -fsanitize=address,undefined -fno-sanitize-recover=all
 BIN    := build/NuvashaLauncher
 DBGBIN := build-debug/NuvashaLauncher
 
-SRCS    := $(filter-out $(wildcard src/*-part.c),$(wildcard src/*.c))
+SRCS    := $(wildcard src/*.c)
 RELOBJS := $(patsubst src/%.c,build/%.o,$(SRCS))
 DBGOBJS := $(patsubst src/%.c,build-debug/%.o,$(SRCS))
 RESOURCE_C := build/nuvashalauncher-resources.c
@@ -80,15 +81,15 @@ DBGDEPS := $(DBGOBJS:.o=.d)
 TESTLIBSRCS := $(filter-out src/main.c,$(SRCS))
 TESTLIBOBJS := $(patsubst src/%.c,build/%.o,$(TESTLIBSRCS))
 TESTLIBDBGOBJS := $(patsubst src/%.c,build-debug/%.o,$(TESTLIBSRCS))
-TESTLIBOBJS += $(RESOURCE_O)
-TESTLIBDBGOBJS += $(RESOURCE_DBG_O)
+TESTLIBA    := build/libnuvashalauncher.a
+TESTLIBDBGA := build-debug/libnuvashalauncher.a
 TESTSRCS    := $(wildcard tests/test-*.c)
 TESTBINS    := $(patsubst tests/%.c,build/tests/%,$(TESTSRCS))
 TESTDEPS    := $(addsuffix .d,$(TESTBINS))
 TESTDBGBINS := $(patsubst tests/%.c,build-debug/tests/%,$(TESTSRCS))
 TESTDBGDEPS := $(addsuffix .d,$(TESTDBGBINS))
 
-.PHONY: all fast debug test test-display test-flatpak-runtime test-debug test-lsan static-analysis pot clean install uninstall
+.PHONY: all fast debug test test-display test-flatpak-runtime test-debug test-lsan static-analysis pot check-potfiles clean install uninstall
 
 all: $(if $(SRCS),$(BIN)) $(LOCALE_MOS) $(SCHEMA_COMPILED)
 
@@ -120,22 +121,23 @@ build-debug/%.o: src/%.c | build-debug
 $(RESOURCE_DBG_O): $(RESOURCE_C) | build-debug
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DBGFLAGS) $(PKG_CFLAGS) -Wno-overlength-strings -c -o $@ $(RESOURCE_C)
 
-build/tests/%: tests/%.c $(TESTLIBOBJS) | build/tests
+$(TESTLIBA): $(TESTLIBOBJS) | build
+	rm -f $@
+	$(AR) rcs $@ $(TESTLIBOBJS)
+
+build/tests/%: tests/%.c $(TESTLIBA) $(RESOURCE_O) | build/tests
 	$(CC) $(CFLAGS) $(RELFLAGS) $(RELLDFLAGS) -Isrc $(PKG_CFLAGS) \
 		-DNUVASHALAUNCHER_DATA_DIR=\"$(CURDIR)/data\" -DNUVASHALAUNCHER_BIN=\"$(CURDIR)/$(BIN)\" \
 		-DNUVASHALAUNCHER_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\" \
 		-DNUVASHALAUNCHER_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
 		-DNUVASHALAUNCHER_SRC_DIR=\"$(CURDIR)/src\" -DNUVASHALAUNCHER_PO_DIR=\"$(CURDIR)/po\" \
-		-o $@ $< $(TESTLIBOBJS) $(PKG_LIBS)
+		-o $@ $< $(RESOURCE_O) $(TESTLIBA) $(PKG_LIBS)
 
-# Tests never write to the real data directory and never touch the network.
-# Display-backed tests use invisible windows so they can exercise GTK without
-# covering the developer's desktop; they skip when no display is available.
-test: $(if $(SRCS),$(BIN)) $(TESTBINS) $(SCHEMA_COMPILED)
+define run_test_suite
 	@set -e; test_tmp=$$(mktemp -d "$(CURDIR)/build/test-tmp-XXXXXX"); \
 	trap 'rm -rf "$$test_tmp"' EXIT HUP INT TERM; \
 	mkdir -p "$$test_tmp/config" "$$test_tmp/data" "$$test_tmp/cache" "$$test_tmp/state" "$$test_tmp/runtime"; chmod 700 "$$test_tmp/runtime"; \
-  pass=0; skip=0; test_output="$$test_tmp/output"; for t in $(TESTBINS); do echo "RUN  $$t"; if NUVASHALAUNCHER_TEST_SECRET_STORE=1 TMPDIR="$$test_tmp" XDG_CONFIG_HOME="$$test_tmp/config" XDG_DATA_HOME="$$test_tmp/data" XDG_CACHE_HOME="$$test_tmp/cache" XDG_STATE_HOME="$$test_tmp/state" XDG_RUNTIME_DIR="$$test_tmp/runtime" GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t >"$$test_output" 2>&1; then status=0; else status=$$?; fi; cat "$$test_output"; \
+	pass=0; skip=0; test_output="$$test_tmp/output"; for t in $(1); do echo "RUN  $$t"; if $(2) NUVASHALAUNCHER_TEST_SECRET_STORE=1 TMPDIR="$$test_tmp" XDG_CONFIG_HOME="$$test_tmp/config" XDG_DATA_HOME="$$test_tmp/data" XDG_CACHE_HOME="$$test_tmp/cache" XDG_STATE_HOME="$$test_tmp/state" XDG_RUNTIME_DIR="$$test_tmp/runtime" GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t >"$$test_output" 2>&1; then status=0; else status=$$?; fi; cat "$$test_output"; \
 		if test $$status -eq 77; then skip=$$((skip + 1)); \
 		elif test $$status -ne 0; then exit $$status; \
 		elif grep -q '^TAP version' "$$test_output"; then \
@@ -143,6 +145,13 @@ test: $(if $(SRCS),$(BIN)) $(TESTBINS) $(SCHEMA_COMPILED)
 			pass=$$((pass + tap_pass - tap_skip)); skip=$$((skip + tap_skip)); \
 		else pass=$$((pass + 1)); fi; done; \
 		echo "PASS $$pass test(s), SKIP $$skip test(s)"
+endef
+
+# Tests never write to the real data directory and never touch the network.
+# Display-backed tests use invisible windows so they can exercise GTK without
+# covering the developer's desktop; they skip when no display is available.
+test: $(if $(SRCS),$(BIN)) $(TESTBINS) $(SCHEMA_COMPILED)
+	$(call run_test_suite,$(TESTBINS),)
 
 # Run the same suite with an existing Wayland session. Display-backed GTK
 # coverage is intentionally skipped when no Wayland compositor is available.
@@ -167,7 +176,7 @@ test-flatpak-runtime:
 	fi
 	@set -eu; \
 	version=$$(flatpak run com.github.NuvashaLauncher.NuvashaLauncher --version); \
-  test "$$version" = "Nuvasha Launcher $(VERSION)"; \
+	test "$$version" = "Nuvasha Launcher $(VERSION)"; \
 	flatpak run com.github.NuvashaLauncher.NuvashaLauncher --list-instances >/dev/null; \
 	flatpak run com.github.NuvashaLauncher.NuvashaLauncher --list-accounts >/dev/null; \
 	flatpak run --command=sh com.github.NuvashaLauncher.NuvashaLauncher -c '\
@@ -182,28 +191,22 @@ test-flatpak-runtime:
 
 # Same tests, but every test and every src object is built with
 # AddressSanitizer and UndefinedBehaviorSanitizer into build-debug/.
-build-debug/tests/%: tests/%.c $(TESTLIBDBGOBJS) | build-debug/tests
+$(TESTLIBDBGA): $(TESTLIBDBGOBJS) | build-debug
+	rm -f $@
+	$(AR) rcs $@ $(TESTLIBDBGOBJS)
+
+build-debug/tests/%: tests/%.c $(TESTLIBDBGA) $(RESOURCE_DBG_O) | build-debug/tests
 	$(CC) $(CFLAGS) $(DBGFLAGS) -Isrc $(PKG_CFLAGS) \
 		-DNUVASHALAUNCHER_DATA_DIR=\"$(CURDIR)/data\" -DNUVASHALAUNCHER_BIN=\"$(CURDIR)/$(BIN)\" \
 		-DNUVASHALAUNCHER_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\" \
 		-DNUVASHALAUNCHER_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
 		-DNUVASHALAUNCHER_SRC_DIR=\"$(CURDIR)/src\" -DNUVASHALAUNCHER_PO_DIR=\"$(CURDIR)/po\" \
-		-o $@ $< $(TESTLIBDBGOBJS) $(PKG_LIBS)
+		-o $@ $< $(RESOURCE_DBG_O) $(TESTLIBDBGA) $(PKG_LIBS)
 
 # The display guard test runs the release launcher, so test-debug builds both
 # binaries.
 test-debug: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS) $(SCHEMA_COMPILED)
-	@set -e; test_tmp=$$(mktemp -d "$(CURDIR)/build/test-tmp-XXXXXX"); \
-	trap 'rm -rf "$$test_tmp"' EXIT HUP INT TERM; \
-	mkdir -p "$$test_tmp/config" "$$test_tmp/data" "$$test_tmp/cache" "$$test_tmp/state" "$$test_tmp/runtime"; chmod 700 "$$test_tmp/runtime"; \
-  pass=0; skip=0; test_output="$$test_tmp/output"; for t in $(TESTDBGBINS); do echo "RUN  $$t"; if NUVASHALAUNCHER_TEST_SECRET_STORE=1 ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 LSAN_OPTIONS=detect_leaks=1:exitcode=1:suppressions="$(CURDIR)/tests/gtk-lsan.supp" TMPDIR="$$test_tmp" XDG_CONFIG_HOME="$$test_tmp/config" XDG_DATA_HOME="$$test_tmp/data" XDG_CACHE_HOME="$$test_tmp/cache" XDG_STATE_HOME="$$test_tmp/state" XDG_RUNTIME_DIR="$$test_tmp/runtime" GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t >"$$test_output" 2>&1; then status=0; else status=$$?; fi; cat "$$test_output"; \
-		if test $$status -eq 77; then skip=$$((skip + 1)); \
-		elif test $$status -ne 0; then exit $$status; \
-		elif grep -q '^TAP version' "$$test_output"; then \
-			tap_skip=$$(grep -c '^ok .*# SKIP' "$$test_output" || true); tap_pass=$$(grep -c '^ok ' "$$test_output" || true); \
-			pass=$$((pass + tap_pass - tap_skip)); skip=$$((skip + tap_skip)); \
-		else pass=$$((pass + 1)); fi; done; \
-		echo "PASS $$pass test(s), SKIP $$skip test(s)"
+	$(call run_test_suite,$(TESTDBGBINS),ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 LSAN_OPTIONS=detect_leaks=1:exitcode=1:suppressions="$(CURDIR)/tests/gtk-lsan.supp")
 
 # LeakSanitizer is included with the Linux AddressSanitizer runtime and is
 # enabled explicitly in test-debug above. Keep test-lsan as an alias so
@@ -212,13 +215,32 @@ test-lsan: test-debug
 
 static-analysis:
 	@set -e; for source in src/*.c; do \
-	    case "$$source" in *-part.c) continue;; esac; \
 	    $(CC) $(CPPFLAGS) -std=c17 -Wall -Wextra -Wpedantic -fanalyzer -c -o /dev/null \
 	    $(PKG_CFLAGS) -Isrc "$$source"; done
 
 pot:
 	xgettext --from-code=UTF-8 --keyword=_ --keyword=N_ \
 		--files-from=po/POTFILES.in --output=po/nuvashalauncher.pot
+
+check-potfiles:
+	@set -e; missing=0; \
+	for f in src/*.c; do \
+		if ! grep -Fxq "$$f" po/POTFILES.in; then \
+			echo "Missing from po/POTFILES.in: $$f"; missing=1; \
+		fi; \
+	done; \
+	for f in data/ui/*.ui; do \
+		if grep -q 'translatable="yes"' "$$f" && ! grep -Fxq "$$f" po/POTFILES.in; then \
+			echo "Missing translatable UI file from po/POTFILES.in: $$f"; missing=1; \
+		fi; \
+	done; \
+	while IFS= read -r line; do \
+		case "$$line" in ""|\#*) continue;; esac; \
+		if ! test -f "$$line"; then \
+			echo "Nonexistent file in po/POTFILES.in: $$line"; missing=1; \
+		fi; \
+	done < po/POTFILES.in; \
+	test $$missing -eq 0 && echo "PASS po/POTFILES.in is up to date"
 
 install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS) $(SCHEMA_COMPILED)
 	install -Dm755 $(BIN) "$(DESTDIR)$(PREFIX)/bin/NuvashaLauncher"

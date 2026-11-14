@@ -157,6 +157,10 @@ run_auth_error_step (const char *target_url_prefix, gint status,
     .raw_body = raw_body,
   };
   NuvashaLauncherDeviceCode device_code = { 0 };
+  NuvashaLauncherAuthOptions options = {
+    .transport = auth_fixture_transport,
+    .transport_data = &override,
+  };
   AuthWait wait = { 0 };
 
   device_code.device_code = (char *) "device-code-for-test";
@@ -164,11 +168,11 @@ run_auth_error_step (const char *target_url_prefix, gint status,
   device_code.expires_in = expires_in;
 
   wait.loop = g_main_loop_new (NULL, FALSE);
-  nuvashalauncher_auth_set_transport_for_tests (auth_fixture_transport, &override);
-  wait.scope = nuvashalauncher_auth_sign_in_async (&device_code,
-                                                   auth_error_finished, &wait);
+  wait.scope = nuvashalauncher_auth_sign_in_async_with_options (&device_code,
+                                                                &options,
+                                                                auth_error_finished,
+                                                                &wait);
   g_main_loop_run (wait.loop);
-  nuvashalauncher_auth_set_transport_for_tests (NULL, NULL);
 
   g_assert_null (wait.scope);
   g_assert_error (wait.error, NUVASHALAUNCHER_AUTH_ERROR, code);
@@ -651,13 +655,18 @@ test_successful_sign_in_refresh_and_persistence (void)
   g_autofree char *path = NULL;
   g_autoptr (GError) error = NULL;
 
+  NuvashaLauncherAuthOptions options = {
+    .transport = auth_fixture_transport,
+  };
+
   code.device_code = (char *) "device-code-for-test";
   code.interval = 1;
   code.expires_in = 600;
   wait.loop = g_main_loop_new (NULL, FALSE);
-  nuvashalauncher_auth_set_transport_for_tests (auth_fixture_transport, NULL);
 
-  wait.scope = nuvashalauncher_auth_sign_in_async (&code, auth_success_finished, &wait);
+  wait.scope = nuvashalauncher_auth_sign_in_async_with_options (&code, &options,
+                                                                auth_success_finished,
+                                                                &wait);
   g_main_loop_run (wait.loop);
   g_assert_null (wait.scope);
   g_assert_no_error (wait.error);
@@ -673,7 +682,9 @@ test_successful_sign_in_refresh_and_persistence (void)
   /* The refresh path starts with the stored Microsoft refresh token and the
    * same production service chain replaces the access token/profile state. */
   wait.refresh = TRUE;
-  wait.scope = nuvashalauncher_auth_refresh_async (account, auth_success_finished, &wait);
+  wait.scope = nuvashalauncher_auth_refresh_async_with_options (account, &options,
+                                                                auth_success_finished,
+                                                                &wait);
   g_main_loop_run (wait.loop);
   g_assert_null (wait.scope);
   g_assert_no_error (wait.error);
@@ -689,7 +700,6 @@ test_successful_sign_in_refresh_and_persistence (void)
   if (!nuvashalauncher_accounts_add (accounts, account, &error))
     {
       g_test_skip ("Secret Service is unavailable in this environment");
-      nuvashalauncher_auth_set_transport_for_tests (NULL, NULL);
       g_clear_error (&wait.error);
       g_main_loop_unref (wait.loop);
       return;
@@ -702,7 +712,6 @@ test_successful_sign_in_refresh_and_persistence (void)
   g_assert_cmpstr (nuvashalauncher_accounts_get_active (reopened)->refresh_token, ==,
                    account->refresh_token);
 
-  nuvashalauncher_auth_set_transport_for_tests (NULL, NULL);
   g_clear_error (&wait.error);
   g_main_loop_unref (wait.loop);
   g_assert_true (nuvashalauncher_accounts_remove (
@@ -760,14 +769,16 @@ device_code_error_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 test_no_client_id_error_diagnostic (void)
 {
+  NuvashaLauncherAuthOptions options = {
+    .client_id = "",
+  };
   AuthWait wait = { 0 };
 
   wait.loop = g_main_loop_new (NULL, FALSE);
-  nuvashalauncher_auth_set_client_id_for_tests ("");
-  wait.scope = nuvashalauncher_auth_device_code_async (device_code_error_finished,
-                                                       &wait);
+  wait.scope = nuvashalauncher_auth_device_code_async_with_options (&options,
+                                                                    device_code_error_finished,
+                                                                    &wait);
   g_main_loop_run (wait.loop);
-  nuvashalauncher_auth_set_client_id_for_tests (NULL);
 
   g_assert_null (wait.scope);
   g_assert_nonnull (wait.error);
