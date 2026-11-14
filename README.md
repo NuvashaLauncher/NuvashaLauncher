@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Nuvasha Launcher" src="data/nuvasha-logo.svg" width="40%">
+  <img alt="Nuvasha Launcher" src="data/nuvashalauncher-logo.svg" width="40%">
 </p>
 
 <p align="center">
