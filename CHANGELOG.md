@@ -2,6 +2,20 @@
 
 All notable changes to Nuvasha Launcher are documented in this file.
 
+## [1.2] - Unreleased
+
+### Command-Line Interface
+- **Headless `--help` & Option Parsing**: Replaced manual argument checks in `main.c` with `GOptionContext`-based parsing in `nuvashalauncher-cli.c`, allowing `--help` (`-h`, `-?`) and all CLI commands to run without a display.
+- **Name-Based Instance Lookup**: Added `nuvashalauncher_instance_manager_find` so `--launch`, `--remove-instance`, and `--export-instance` accept either an instance UUID or display name.
+- **Richer Listings & JSON Output**: Expanded `--list-instances` (UUID, name, Minecraft version, loader) and `--list-accounts` (UUID, name, account type, active marker), and added `--json` output support to both commands.
+- **Safer Instance Removal**: Added `--keep-files` to `--remove-instance` so an instance can be unregistered while preserving its directory on disk.
+- **New CLI Commands**:
+  - `--create-instance NAME --mc-version VERSION [--loader LOADER] [--loader-version VERSION]` to create instances headlessly.
+  - `--export-instance INSTANCE --output FILE` (`-o`) to export instances as `.mrpack` archives from the CLI.
+  - `--add-offline-account NAME` to create and activate an offline account.
+  - `--clear-cache` to clear the global download cache without opening the GUI.
+  - `--launch INSTANCE --headless [--account ACCOUNT]` to run an instance headlessly, streaming output to stdout/stderr and exiting with the game status.
+
 ## [1.1] - 2026-11-14
 
 ### Performance, Caching & Network Efficiency

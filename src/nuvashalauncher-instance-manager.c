@@ -449,6 +449,57 @@ nuvashalauncher_instance_manager_get_by_id (NuvashaLauncherInstanceManager *self
 }
 
 NuvashaLauncherInstance *
+nuvashalauncher_instance_manager_find (NuvashaLauncherInstanceManager *self,
+                                       const char *key,
+                                       GError **error)
+{
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (self), NULL);
+  g_return_val_if_fail (error == NULL || *error == NULL, NULL);
+
+  if (key == NULL || *key == '\0')
+    {
+      g_set_error_literal (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                           NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND,
+                           "no instance matches an empty identifier");
+      return NULL;
+    }
+
+  NuvashaLauncherInstance *by_id = nuvashalauncher_instance_manager_get_by_id (self, key);
+  if (by_id != NULL)
+    return by_id;
+
+  NuvashaLauncherInstance *match = NULL;
+  guint n_items = g_list_model_get_n_items (G_LIST_MODEL (self->instances));
+
+  for (guint i = 0; i < n_items; i++)
+    {
+      g_autoptr (NuvashaLauncherInstance) instance =
+        g_list_model_get_item (G_LIST_MODEL (self->instances), i);
+      g_autofree char *name = NULL;
+
+      g_object_get (instance, "name", &name, NULL);
+      if (g_strcmp0 (name, key) != 0)
+        continue;
+
+      if (match != NULL)
+        {
+          g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                       NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND,
+                       "multiple instances match name \"%s\"; specify the UUID", key);
+          return NULL;
+        }
+      match = instance;
+    }
+
+  if (match == NULL)
+    g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                 NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND,
+                 "no instance matches \"%s\"", key);
+
+  return match;
+}
+
+NuvashaLauncherInstance *
 nuvashalauncher_instance_manager_create (NuvashaLauncherInstanceManager *self,
                              const char *name,
                              const char *directory,
