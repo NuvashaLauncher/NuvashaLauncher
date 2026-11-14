@@ -3,7 +3,7 @@
 #include "nuvashalauncher-accounts-private.h"
 
 void
-account_to_json (JsonBuilder *builder, const nuvashalauncherAccount *account)
+account_to_json (JsonBuilder *builder, const NuvashaLauncherAccount *account)
 {
   json_builder_begin_object (builder);
   json_builder_set_member_name (builder, "type");
@@ -53,14 +53,14 @@ string_member (JsonObject *object, const char *name)
   return g_strdup (json_node_get_string (node));
 }
 
-nuvashalauncherAccount *
+NuvashaLauncherAccount *
 account_from_json (JsonObject *object)
 {
   g_autofree char *type = string_member (object, "type");
   g_autofree char *id = string_member (object, "id");
   g_autofree char *name = string_member (object, "name");
   g_autofree char *uuid = string_member (object, "uuid");
-  nuvashalauncherAccount *account;
+  NuvashaLauncherAccount *account;
 
   if (type == NULL || id == NULL || *id == '\0' || name == NULL ||
       *name == '\0' || uuid == NULL || *uuid == '\0')
@@ -68,7 +68,7 @@ account_from_json (JsonObject *object)
   if (!g_str_equal (type, "microsoft") && !g_str_equal (type, "offline"))
     return NULL;
 
-  account = g_new0 (nuvashalauncherAccount, 1);
+  account = g_new0 (NuvashaLauncherAccount, 1);
   account->type = g_str_equal (type, "microsoft") ? nuvashalauncher_ACCOUNT_MICROSOFT
                                                   : nuvashalauncher_ACCOUNT_OFFLINE;
   account->id = g_steal_pointer (&id);

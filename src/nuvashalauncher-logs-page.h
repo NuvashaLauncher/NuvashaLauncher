@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherLogsPage: output from a running game.
+/* NuvashaLauncherLogsPage: output from a running game.
  *
  * One page of the instance view that follows one nuvashalauncher: the state
  * of the launch and its detail, the buttons that clear the log and open
@@ -24,11 +24,11 @@ G_BEGIN_DECLS
 
 #define nuvashalauncher_TYPE_LOGS_PAGE (nuvashalauncher_logs_page_get_type ())
 
-G_DECLARE_FINAL_TYPE (nuvashalauncherLogsPage, nuvashalauncher_logs_page, nuvashalauncher, LOGS_PAGE, GtkBox)
+G_DECLARE_FINAL_TYPE (NuvashaLauncherLogsPage, nuvashalauncher_logs_page, nuvashalauncher, LOGS_PAGE, GtkBox)
 
 /* The page of @launcher. It follows that launcher, so two views of the
  * same instance show the same lines. */
-nuvashalauncherLogsPage *nuvashalauncher_logs_page_new (nuvashalauncher *launcher);
+NuvashaLauncherLogsPage *nuvashalauncher_logs_page_new (NuvashaLauncher *launcher);
 
 G_END_DECLS
 

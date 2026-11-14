@@ -38,7 +38,7 @@
  * the next launch of the same instance has nothing to do. */
 
 void
-nuvashalauncher_loader_install_free (nuvashalauncherLoaderInstall *install)
+nuvashalauncher_loader_install_free (NuvashaLauncherLoaderInstall *install)
 {
   if (install == NULL)
     return;

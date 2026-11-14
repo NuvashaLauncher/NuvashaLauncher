@@ -488,7 +488,7 @@ main (void)
   /* Exercise runtime language table and initialization */
   {
     gsize n_languages = 0;
-    const nuvashalauncherLanguage *languages = nuvashalauncher_i18n_languages (&n_languages);
+    const NuvashaLauncherLanguage *languages = nuvashalauncher_i18n_languages (&n_languages);
     g_assert_nonnull (languages);
     g_assert_cmpuint (n_languages, >, 0);
     g_assert_cmpstr (languages[0].code, ==, "system");

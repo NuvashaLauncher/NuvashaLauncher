@@ -19,13 +19,13 @@
  * of its own because an account that had to be signed in again carries
  * on from here with the token it just got. */
 static void
-start_preparing (nuvashalauncher *self)
+start_preparing (NuvashaLauncher *self)
 {
   log_line (self, TAG_STATE, "preparing Minecraft %s",
             self->version != NULL ? self->version : "this instance");
 
   {
-    nuvashalauncherTaskScope *fetching =
+    NuvashaLauncherTaskScope *fetching =
       nuvashalauncher_version_manifest_fetch_async (nuvashalauncher_VERSION_MANIFEST_URL,
                                         on_manifest_ready, g_object_ref (self));
 
@@ -42,14 +42,14 @@ start_preparing (nuvashalauncher *self)
  * from the store, so that the account says it needs a sign-in wherever it
  * is shown instead of pretending to be ready. */
 void
-launcher_needs_sign_in (nuvashalauncher *self, const char *reason)
+launcher_needs_sign_in (NuvashaLauncher *self, const char *reason)
 {
-  nuvashalauncherAccount *account = active_account (self);
+  NuvashaLauncherAccount *account = active_account (self);
   g_autofree char *detail = NULL;
 
   if (account != NULL)
     {
-      nuvashalauncherAccount *without = nuvashalauncher_account_copy (account);
+      NuvashaLauncherAccount *without = nuvashalauncher_account_copy (account);
       g_clear_pointer (&without->access_token, g_free);
       g_clear_pointer (&without->refresh_token, g_free);
       without->expires_at = 0;
@@ -71,7 +71,7 @@ launcher_needs_sign_in (nuvashalauncher *self, const char *reason)
 
 /* A new token for an account whose old one has run out. */
 void
-launcher_auth_failed (nuvashalauncher *self, const GError *error)
+launcher_auth_failed (NuvashaLauncher *self, const GError *error)
 {
   /* A connection or service failure does not invalidate saved credentials. */
   if (g_error_matches (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_REAUTH) ||
@@ -90,9 +90,9 @@ on_account_refreshed (GObject      *source G_GNUC_UNUSED,
                       GAsyncResult *result,
                       gpointer      user_data)
 {
-  g_autoptr (nuvashalauncher) self = user_data;
+  g_autoptr (NuvashaLauncher) self = user_data;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherAccount) account = NULL;
+  g_autoptr (NuvashaLauncherAccount) account = NULL;
 
   account = nuvashalauncher_auth_refresh_finish (result, &error);
 
@@ -129,9 +129,9 @@ on_account_refreshed (GObject      *source G_GNUC_UNUSED,
  * game that is going to need a token later can fail now in words
  * instead. */
 static gboolean
-account_for_launch (nuvashalauncher *self)
+account_for_launch (NuvashaLauncher *self)
 {
-  nuvashalauncherAccount *account = active_account (self);
+  NuvashaLauncherAccount *account = active_account (self);
 
   if (account == NULL)
     return TRUE;
@@ -153,7 +153,7 @@ account_for_launch (nuvashalauncher *self)
 }
 
 void
-nuvashalauncher_launcher_start (nuvashalauncher *self)
+nuvashalauncher_launcher_start (NuvashaLauncher *self)
 {
   /* Not g_autofree: the instance hands the string over and it becomes the
      version of this launch, which outlives this function. */
@@ -201,7 +201,7 @@ nuvashalauncher_launcher_start (nuvashalauncher *self)
 }
 
 void
-nuvashalauncher_launcher_stop (nuvashalauncher *self)
+nuvashalauncher_launcher_stop (NuvashaLauncher *self)
 {
   g_return_if_fail (nuvashalauncher_IS_LAUNCHER (self));
 

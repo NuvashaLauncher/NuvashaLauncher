@@ -23,7 +23,7 @@
  * ---------------------------------------------------------- */
 
 void
-nuvashalauncher_content_file_free (nuvashalauncherContentFile *file)
+nuvashalauncher_content_file_free (NuvashaLauncherContentFile *file)
 {
   if (file == NULL)
     return;
@@ -51,7 +51,7 @@ nuvashalauncher_content_file_free (nuvashalauncherContentFile *file)
 }
 
 void
-nuvashalauncher_content_file_refresh_search_key (nuvashalauncherContentFile *file)
+nuvashalauncher_content_file_refresh_search_key (NuvashaLauncherContentFile *file)
 {
   const char *title = file->project_name != NULL && *file->project_name != '\0'
                         ? file->project_name : file->filename;
@@ -67,7 +67,7 @@ nuvashalauncher_content_file_refresh_search_key (nuvashalauncherContentFile *fil
 }
 
 char *
-nuvashalauncher_content_folder_path (const char *instance_directory, nuvashalauncherContentType type)
+nuvashalauncher_content_folder_path (const char *instance_directory, NuvashaLauncherContentType type)
 {
   g_return_val_if_fail (instance_directory != NULL, NULL);
 
@@ -174,14 +174,14 @@ typedef struct
 {
   /* Borrowed: the caller's handle keeps the operation alive, and every
      path that frees this run has already answered it. */
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
   GFile *folder;
   GFileEnumerator *enumerator; /* while the batches are read */
   char *instance_directory;
-  nuvashalauncherContentType type;
+  NuvashaLauncherContentType type;
   char *extension;
-  GPtrArray *files; /* nuvashalauncherContentFile* */
-  GPtrArray *index_entries; /* nuvashalauncherContentIndexEntry* */
+  GPtrArray *files; /* NuvashaLauncherContentFile* */
+  GPtrArray *index_entries; /* NuvashaLauncherContentIndexEntry* */
   guint index;
   guint hash_pending;
   guint hash_next_index;
@@ -190,7 +190,7 @@ typedef struct
   gboolean local_cancelled;
 
   /* The index load that has to finish before the scan can move on. */
-  nuvashalauncherTaskScope *index_operation;
+  NuvashaLauncherTaskScope *index_operation;
 } ScanRun;
 
 static void scan_hash_next (ScanRun *run);
@@ -201,7 +201,7 @@ static void scan_free (ScanRun *run);
 
 typedef struct {
   ScanRun *run;
-  nuvashalauncherContentFile *file;
+  NuvashaLauncherContentFile *file;
 } HashInput;
 
 static void
@@ -215,16 +215,16 @@ scan_finish (ScanRun *run)
 
 typedef struct
 {
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
   GPtrArray *files;
-  nuvashalauncherContentType type;
+  NuvashaLauncherContentType type;
   gint pending;
 } MetadataRun;
 
 typedef struct
 {
   MetadataRun *run;
-  nuvashalauncherContentFile *file;
+  NuvashaLauncherContentFile *file;
 } MetadataWork;
 
 static GThreadPool *metadata_pool;
@@ -254,7 +254,7 @@ metadata_work (gpointer data, gpointer user_data G_GNUC_UNUSED)
 
   if (!g_cancellable_is_cancelled (nuvashalauncher_task_scope_get_cancellable (run->scope)))
     {
-      nuvashalauncherContentFile *file = work->file;
+      NuvashaLauncherContentFile *file = work->file;
       gboolean needs_metadata = !file->metadata_checked;
 
       if (needs_metadata)
@@ -291,11 +291,11 @@ local_metadata_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   metadata_run_free (run);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_content_metadata_async (GPtrArray *files, nuvashalauncherContentType type,
+NuvashaLauncherTaskScope *
+nuvashalauncher_content_metadata_async (GPtrArray *files, NuvashaLauncherContentType type,
                             GAsyncReadyCallback callback, gpointer user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   MetadataRun *run = g_new0 (MetadataRun, 1);
   GTask *task = NULL;
@@ -357,15 +357,15 @@ scan_free (ScanRun *run)
   g_free (run);
 }
 
-static nuvashalauncherContentIndexEntry *
-scan_index_entry (ScanRun *run, nuvashalauncherContentFile *file)
+static NuvashaLauncherContentIndexEntry *
+scan_index_entry (ScanRun *run, NuvashaLauncherContentFile *file)
 {
   g_autofree char *name = g_path_get_basename (file->path);
 
   for (guint i = 0; run->index_entries != NULL &&
                      i < run->index_entries->len; i++)
     {
-      nuvashalauncherContentIndexEntry *entry = g_ptr_array_index (run->index_entries, i);
+      NuvashaLauncherContentIndexEntry *entry = g_ptr_array_index (run->index_entries, i);
       if (g_strcmp0 (entry->filename, name) == 0)
         {
           if (entry->size == file->size &&
@@ -379,9 +379,9 @@ scan_index_entry (ScanRun *run, nuvashalauncherContentFile *file)
 }
 
 static void
-apply_index_entry (ScanRun *run, nuvashalauncherContentFile *file)
+apply_index_entry (ScanRun *run, NuvashaLauncherContentFile *file)
 {
-  nuvashalauncherContentIndexEntry *entry = scan_index_entry (run, file);
+  NuvashaLauncherContentIndexEntry *entry = scan_index_entry (run, file);
 
   if (entry == NULL)
     return;
@@ -453,7 +453,7 @@ batch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       /* Borrowed from @info, which is dropped with the list. */
       const char *name = g_file_info_get_name (info);
       g_autoptr (GFile) child = NULL;
-      nuvashalauncherContentFile *file = NULL;
+      NuvashaLauncherContentFile *file = NULL;
 
       if (name == NULL ||
           g_file_info_get_file_type (info) != G_FILE_TYPE_REGULAR)
@@ -463,7 +463,7 @@ batch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         continue;
 
       child = g_file_get_child (run->folder, name);
-      file = g_new0 (nuvashalauncherContentFile, 1);
+      file = g_new0 (NuvashaLauncherContentFile, 1);
       file->path = g_file_get_path (child);
       file->filename = nuvashalauncher_content_disabled_name (name, TRUE);
       file->size = g_file_info_get_size (info);
@@ -551,7 +551,7 @@ scan_hash_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 {
   HashInput *input = user_data;
   ScanRun *run = input->run;
-  nuvashalauncherContentFile *file = input->file;
+  NuvashaLauncherContentFile *file = input->file;
   g_autoptr (GError) error = NULL;
   g_autofree char *digest = NULL;
 
@@ -603,7 +603,7 @@ scan_hash_start_more (ScanRun *run)
 {
   while (run->hash_pending < 8 && run->hash_next_index < run->files->len)
     {
-      nuvashalauncherContentFile *file =
+      NuvashaLauncherContentFile *file =
         g_ptr_array_index (run->files, run->hash_next_index++);
 
       if (file->sha1 != NULL)
@@ -627,17 +627,17 @@ scan_hash_start_more (ScanRun *run)
 static int
 compare_files (gconstpointer a, gconstpointer b)
 {
-  const nuvashalauncherContentFile *left = *(const nuvashalauncherContentFile *const *) a;
-  const nuvashalauncherContentFile *right = *(const nuvashalauncherContentFile *const *) b;
+  const NuvashaLauncherContentFile *left = *(const NuvashaLauncherContentFile *const *) a;
+  const NuvashaLauncherContentFile *right = *(const NuvashaLauncherContentFile *const *) b;
 
   return g_utf8_collate (left->filename, right->filename);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_content_scan_async (const char *instance_directory, nuvashalauncherContentType type,
+NuvashaLauncherTaskScope *
+nuvashalauncher_content_scan_async (const char *instance_directory, NuvashaLauncherContentType type,
                         GAsyncReadyCallback callback, gpointer user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   ScanRun *run = NULL;
   g_autofree char *folder = NULL;

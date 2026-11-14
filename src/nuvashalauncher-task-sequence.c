@@ -2,11 +2,11 @@
 
 #include "nuvashalauncher-task-private.h"
 
-struct _nuvashalauncherTaskSequence
+struct _NuvashaLauncherTaskSequence
 {
   gatomicrefcount refs;
   GTask *task;
-  nuvashalauncherTaskSequenceStep step;
+  NuvashaLauncherTaskSequenceStep step;
   gpointer user_data;
   GDestroyNotify user_data_free;
   gboolean finished;
@@ -31,7 +31,7 @@ sequence_finalize (gpointer user_data)
  * as long as anyone can still hold the pointer, because a caller that
  * holds the pointer also holds the task. */
 static void
-sequence_finish (nuvashalauncherTaskSequence *sequence)
+sequence_finish (NuvashaLauncherTaskSequence *sequence)
 {
   if (sequence->user_data_free != NULL)
     {
@@ -51,8 +51,8 @@ sequence_finish (nuvashalauncherTaskSequence *sequence)
   g_clear_object (&sequence->task);
 }
 
-nuvashalauncherTaskSequence *
-nuvashalauncher_task_sequence_ref (nuvashalauncherTaskSequence *sequence)
+NuvashaLauncherTaskSequence *
+nuvashalauncher_task_sequence_ref (NuvashaLauncherTaskSequence *sequence)
 {
   g_return_val_if_fail (sequence != NULL, NULL);
   g_atomic_ref_count_inc (&sequence->refs);
@@ -60,7 +60,7 @@ nuvashalauncher_task_sequence_ref (nuvashalauncherTaskSequence *sequence)
 }
 
 void
-nuvashalauncher_task_sequence_unref (nuvashalauncherTaskSequence *sequence)
+nuvashalauncher_task_sequence_unref (NuvashaLauncherTaskSequence *sequence)
 {
   if (sequence == NULL || !g_atomic_ref_count_dec (&sequence->refs))
     return;
@@ -75,15 +75,15 @@ nuvashalauncher_task_sequence_unref (nuvashalauncherTaskSequence *sequence)
   g_free (sequence);
 }
 
-nuvashalauncherTaskSequence *
+NuvashaLauncherTaskSequence *
 nuvashalauncher_task_sequence_new (GCancellable *cancellable,
                        GAsyncReadyCallback callback,
                        gpointer callback_data,
-                       nuvashalauncherTaskSequenceStep step,
+                       NuvashaLauncherTaskSequenceStep step,
                        gpointer user_data,
                        GDestroyNotify user_data_free)
 {
-  nuvashalauncherTaskSequence *sequence = g_new0 (nuvashalauncherTaskSequence, 1);
+  NuvashaLauncherTaskSequence *sequence = g_new0 (NuvashaLauncherTaskSequence, 1);
 
   g_atomic_ref_count_init (&sequence->refs);
   /* One reference belongs to the caller; the other lasts until completion
@@ -99,16 +99,16 @@ nuvashalauncher_task_sequence_new (GCancellable *cancellable,
 }
 
 GCancellable *
-nuvashalauncher_task_sequence_get_cancellable (const nuvashalauncherTaskSequence *sequence)
+nuvashalauncher_task_sequence_get_cancellable (const NuvashaLauncherTaskSequence *sequence)
 {
   g_return_val_if_fail (sequence != NULL, NULL);
   return g_task_get_cancellable (sequence->task);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_task_sequence_scope (nuvashalauncherTaskSequence *sequence)
+NuvashaLauncherTaskScope *
+nuvashalauncher_task_sequence_scope (NuvashaLauncherTaskSequence *sequence)
 {
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
 
   g_return_val_if_fail (sequence != NULL, NULL);
   if (sequence->task == NULL)
@@ -127,7 +127,7 @@ nuvashalauncher_task_sequence_scope (nuvashalauncherTaskSequence *sequence)
 }
 
 void
-nuvashalauncher_task_sequence_start (nuvashalauncherTaskSequence *sequence)
+nuvashalauncher_task_sequence_start (NuvashaLauncherTaskSequence *sequence)
 {
   g_return_if_fail (sequence != NULL);
   g_return_if_fail (sequence->step != NULL);
@@ -143,7 +143,7 @@ nuvashalauncher_task_sequence_start (nuvashalauncherTaskSequence *sequence)
 }
 
 void
-nuvashalauncher_task_sequence_next (nuvashalauncherTaskSequence *sequence)
+nuvashalauncher_task_sequence_next (NuvashaLauncherTaskSequence *sequence)
 {
   g_return_if_fail (sequence != NULL);
 
@@ -161,7 +161,7 @@ nuvashalauncher_task_sequence_next (nuvashalauncherTaskSequence *sequence)
 }
 
 void
-nuvashalauncher_task_sequence_return_pointer (nuvashalauncherTaskSequence *sequence,
+nuvashalauncher_task_sequence_return_pointer (NuvashaLauncherTaskSequence *sequence,
                                   gpointer result,
                                   GDestroyNotify result_free)
 {
@@ -180,7 +180,7 @@ nuvashalauncher_task_sequence_return_pointer (nuvashalauncherTaskSequence *seque
 }
 
 void
-nuvashalauncher_task_sequence_return_error (nuvashalauncherTaskSequence *sequence, GError *error)
+nuvashalauncher_task_sequence_return_error (NuvashaLauncherTaskSequence *sequence, GError *error)
 {
   g_return_if_fail (sequence != NULL);
 

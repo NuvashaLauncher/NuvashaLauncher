@@ -177,9 +177,9 @@ test_metadata_dependencies_and_icon_loading (void)
   g_ptr_array_unref (null_dest);
 
   /* Test load local icon async without icon */
-  g_autoptr (nuvashalauncherContentFile) no_icon_file = g_new0 (nuvashalauncherContentFile, 1);
+  g_autoptr (NuvashaLauncherContentFile) no_icon_file = g_new0 (NuvashaLauncherContentFile, 1);
   IconLoadWait wait1 = { .loop = g_main_loop_new (NULL, FALSE) };
-  nuvashalauncherTaskScope *scope1 = nuvashalauncher_content_load_local_icon_async (
+  NuvashaLauncherTaskScope *scope1 = nuvashalauncher_content_load_local_icon_async (
     no_icon_file, on_icon_load_finished, &wait1);
   g_main_loop_run (wait1.loop);
   g_assert_null (wait1.result);
@@ -196,13 +196,13 @@ test_metadata_dependencies_and_icon_loading (void)
     "fabric.mod.json", "{\"id\":\"iconmod\",\"name\":\"Icon Mod\"}",
     "assets/iconmod/icon.png", (const guint8 *) png_data, png_len);
 
-  g_autoptr (nuvashalauncherContentFile) icon_file = g_new0 (nuvashalauncherContentFile, 1);
+  g_autoptr (NuvashaLauncherContentFile) icon_file = g_new0 (NuvashaLauncherContentFile, 1);
   icon_file->path = g_strdup (jar_with_icon);
   icon_file->local_icon_member = g_strdup ("assets/iconmod/icon.png");
   icon_file->sha1 = g_strdup ("e5b0661298642a8b9e67d2653245bb1640a2bbfa");
 
   IconLoadWait wait2 = { .loop = g_main_loop_new (NULL, FALSE) };
-  nuvashalauncherTaskScope *scope2 = nuvashalauncher_content_load_local_icon_async (
+  NuvashaLauncherTaskScope *scope2 = nuvashalauncher_content_load_local_icon_async (
     icon_file, on_icon_load_finished, &wait2);
   g_main_loop_run (wait2.loop);
   g_assert_nonnull (wait2.result);
@@ -244,18 +244,18 @@ main (void)
   g_autofree char *pack = make_jar_with_two_members (
     "pack.mcmeta", "{\"pack\":{\"description\":\"Resource description\"}}",
     "ignored.txt", "not metadata");
-  g_autoptr (nuvashalauncherContentFile) file = g_new0 (nuvashalauncherContentFile, 1);
-  g_autoptr (nuvashalauncherContentFile) broken = g_new0 (nuvashalauncherContentFile, 1);
-  g_autoptr (nuvashalauncherContentFile) oversized =
-    g_new0 (nuvashalauncherContentFile, 1);
-  g_autoptr (nuvashalauncherContentFile) quilt_file =
-    g_new0 (nuvashalauncherContentFile, 1);
-  g_autoptr (nuvashalauncherContentFile) forge_file =
-    g_new0 (nuvashalauncherContentFile, 1);
-  g_autoptr (nuvashalauncherContentFile) mcmod_file =
-    g_new0 (nuvashalauncherContentFile, 1);
-  g_autoptr (nuvashalauncherContentFile) pack_file =
-    g_new0 (nuvashalauncherContentFile, 1);
+  g_autoptr (NuvashaLauncherContentFile) file = g_new0 (NuvashaLauncherContentFile, 1);
+  g_autoptr (NuvashaLauncherContentFile) broken = g_new0 (NuvashaLauncherContentFile, 1);
+  g_autoptr (NuvashaLauncherContentFile) oversized =
+    g_new0 (NuvashaLauncherContentFile, 1);
+  g_autoptr (NuvashaLauncherContentFile) quilt_file =
+    g_new0 (NuvashaLauncherContentFile, 1);
+  g_autoptr (NuvashaLauncherContentFile) forge_file =
+    g_new0 (NuvashaLauncherContentFile, 1);
+  g_autoptr (NuvashaLauncherContentFile) mcmod_file =
+    g_new0 (NuvashaLauncherContentFile, 1);
+  g_autoptr (NuvashaLauncherContentFile) pack_file =
+    g_new0 (NuvashaLauncherContentFile, 1);
 
   file->path = g_strdup (valid);
   nuvashalauncher_content_apply_local_metadata (file, nuvashalauncher_CONTENT_MOD);

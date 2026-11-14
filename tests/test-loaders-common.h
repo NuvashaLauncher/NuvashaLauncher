@@ -27,7 +27,7 @@
 #define nuvashalauncher_TEST_FIXTURES "tests/fixtures"
 #endif
 
-static inline const nuvashalauncherLoaderVersion *
+static inline const NuvashaLauncherLoaderVersion *
 version_at (GPtrArray *versions, guint index)
 {
   g_assert_cmpuint (index, <, versions->len);
@@ -74,12 +74,12 @@ version_at (GPtrArray *versions, guint index)
  * The document of a loader version
  * ---------------------------------------------------------- */
 
-static inline const nuvashalauncherLibrary *
-find_library (nuvashalauncherVersionDescription *description, const char *name)
+static inline const NuvashaLauncherLibrary *
+find_library (NuvashaLauncherVersionDescription *description, const char *name)
 {
   for (guint i = 0; i < description->libraries->len; i++)
     {
-      const nuvashalauncherLibrary *library = g_ptr_array_index (description->libraries, i);
+      const NuvashaLauncherLibrary *library = g_ptr_array_index (description->libraries, i);
 
       if (g_strcmp0 (library->name, name) == 0)
         return library;
@@ -113,11 +113,11 @@ typedef struct
 {
   GMainLoop *loop;
   GError *error;
-  nuvashalauncherLoaderInstall *install;
-  nuvashalauncherVersionDescription *profile;
+  NuvashaLauncherLoaderInstall *install;
+  NuvashaLauncherVersionDescription *profile;
   GPtrArray *versions;
   guint watchdog;
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
 } Wait;
 
 static inline gboolean

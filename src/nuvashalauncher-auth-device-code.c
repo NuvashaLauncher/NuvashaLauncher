@@ -6,7 +6,7 @@
 void
 device_code_answered (AuthRequest *self)
 {
-  g_autoptr (nuvashalauncherDeviceCode) code = NULL;
+  g_autoptr (NuvashaLauncherDeviceCode) code = NULL;
   g_autoptr (GError) error = NULL;
 
   if (!SOUP_STATUS_IS_SUCCESSFUL (self->status))
@@ -26,10 +26,10 @@ device_code_answered (AuthRequest *self)
              (GDestroyNotify) nuvashalauncher_device_code_free);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_auth_device_code_async (GAsyncReadyCallback callback, gpointer user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   g_autofree char *form = NULL;
   AuthRequest *self = NULL;
@@ -51,11 +51,11 @@ nuvashalauncher_auth_device_code_async (GAsyncReadyCallback callback, gpointer u
   return g_steal_pointer (&scope);
 }
 
-nuvashalauncherDeviceCode *
+NuvashaLauncherDeviceCode *
 nuvashalauncher_auth_device_code_finish (GAsyncResult *result, GError **error)
 {
   g_return_val_if_fail (nuvashalauncher_task_result_is_valid (result, "nuvashalauncher-task-scope"), NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
-  return (nuvashalauncherDeviceCode *) g_task_propagate_pointer (G_TASK (result), error);
+  return (NuvashaLauncherDeviceCode *) g_task_propagate_pointer (G_TASK (result), error);
 }

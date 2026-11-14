@@ -20,12 +20,12 @@
 #define RESULTS_PER_PAGE 20
 #define SEARCH_DELAY_MS 500
 
-static void run_search (nuvashalauncherDownloadModpackDialog *self, gboolean append);
+static void run_search (NuvashaLauncherDownloadModpackDialog *self, gboolean append);
 static void on_search_done (GObject *, GAsyncResult *, gpointer);
 static void on_modpack_filter_changed (GtkWidget *, gpointer);
 
 typedef struct {
-  nuvashalauncherDownloadModpackDialog *dialog;
+  NuvashaLauncherDownloadModpackDialog *dialog;
 } VersionCatalogAsk;
 
 static void
@@ -36,7 +36,7 @@ version_catalog_ask_free (VersionCatalogAsk *ask)
 }
 
 static VersionCatalogAsk *
-version_catalog_ask_new (nuvashalauncherDownloadModpackDialog *dialog)
+version_catalog_ask_new (NuvashaLauncherDownloadModpackDialog *dialog)
 {
   VersionCatalogAsk *ask = g_new0 (VersionCatalogAsk, 1);
   ask->dialog = g_object_ref (dialog);
@@ -48,16 +48,16 @@ on_version_catalog_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                           gpointer user_data)
 {
   VersionCatalogAsk *ask = user_data;
-  nuvashalauncherDownloadModpackDialog *self = ask->dialog;
+  NuvashaLauncherDownloadModpackDialog *self = ask->dialog;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherVersionManifest) manifest =
+  g_autoptr (NuvashaLauncherVersionManifest) manifest =
     nuvashalauncher_version_manifest_fetch_finish (result, &error);
 
   if (manifest != NULL && self->filter_version_model != NULL)
     {
       for (guint i = 0; i < manifest->entries->len; i++)
         {
-          const nuvashalauncherVersionEntry *entry =
+          const NuvashaLauncherVersionEntry *entry =
             g_ptr_array_index (manifest->entries, i);
 
           if (entry->type == nuvashalauncher_MC_TYPE_RELEASE)
@@ -75,7 +75,7 @@ on_modpack_version_changed (GObject *object G_GNUC_UNUSED,
                             GParamSpec *pspec G_GNUC_UNUSED,
                             gpointer user_data)
 {
-  nuvashalauncherDownloadModpackDialog *self = user_data;
+  NuvashaLauncherDownloadModpackDialog *self = user_data;
   guint selected = gtk_drop_down_get_selected (self->filter_version_dropdown);
 
   g_ptr_array_set_size (self->filter_versions, 0);
@@ -89,7 +89,7 @@ on_modpack_version_changed (GObject *object G_GNUC_UNUSED,
 static void
 on_modpack_filter_changed (GtkWidget *widget G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherDownloadModpackDialog *self = user_data;
+  NuvashaLauncherDownloadModpackDialog *self = user_data;
   self->offset = 0;
   run_search (self, FALSE);
 }
@@ -98,7 +98,7 @@ static void
 on_modpack_sort_changed (GObject *object G_GNUC_UNUSED, GParamSpec *pspec G_GNUC_UNUSED,
                          gpointer user_data)
 {
-  nuvashalauncherDownloadModpackDialog *self = user_data;
+  NuvashaLauncherDownloadModpackDialog *self = user_data;
   GtkDropDown *drop = GTK_DROP_DOWN (object);
   /* API values follow the dropdown order, never its translated labels. */
   static const char *const sort_values[] = {
@@ -116,7 +116,7 @@ on_modpack_sort_changed (GObject *object G_GNUC_UNUSED, GParamSpec *pspec G_GNUC
 static void
 on_modpack_filter_toggled (GtkCheckButton *button, gpointer user_data)
 {
-  nuvashalauncherDownloadModpackDialog *self = user_data;
+  NuvashaLauncherDownloadModpackDialog *self = user_data;
   GPtrArray *values = g_object_get_data (G_OBJECT (button), "filter-values");
   const char *value = g_object_get_data (G_OBJECT (button), "filter-value");
 
@@ -132,7 +132,7 @@ on_modpack_filter_toggled (GtkCheckButton *button, gpointer user_data)
 
 static GtkWidget *
 filter_check (const char *label, const char *value, GPtrArray *values,
-             nuvashalauncherDownloadModpackDialog *self)
+             NuvashaLauncherDownloadModpackDialog *self)
 {
   GtkCheckButton *button = GTK_CHECK_BUTTON (gtk_check_button_new_with_label (label));
   gtk_widget_add_css_class (GTK_WIDGET (button), "flat");
@@ -149,7 +149,7 @@ filter_check (const char *label, const char *value, GPtrArray *values,
 static gboolean
 on_search_timeout (gpointer user_data)
 {
-  nuvashalauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   nuvashalauncher_operation_forget_source (self->scope, self->debounce);
   self->debounce = 0;
@@ -161,7 +161,7 @@ on_search_timeout (gpointer user_data)
 static void
 on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   if (self->debounce != 0)
     nuvashalauncher_operation_remove (self->scope, self->debounce);
@@ -180,7 +180,7 @@ on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
 static void
 on_scroll_changed (GtkAdjustment *adjustment, gpointer user_data)
 {
-  nuvashalauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
   gdouble at_end;
 
   if (self->loading_page)
@@ -201,7 +201,7 @@ on_scroll_changed (GtkAdjustment *adjustment, gpointer user_data)
 
 /* Retry a failed results page. */
 static void
-on_retry_page (nuvashalauncherDownloadModpackDialog *self)
+on_retry_page (NuvashaLauncherDownloadModpackDialog *self)
 {
   if (self->loading_page)
     return;
@@ -230,8 +230,8 @@ take_rows_out (GPtrArray **rows, AdwPreferencesGroup *group)
 static void
 result_row_activated (AdwActionRow *row, gpointer user_data)
 {
-  nuvashalauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
-  nuvashalauncherModrinthProject *project =
+  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherModrinthProject *project =
     g_object_get_data (G_OBJECT (row), "nuvashalauncher-project");
 
   if (project == NULL)
@@ -288,7 +288,7 @@ one_line (const char *text)
 }
 
 static void
-results_arrived (nuvashalauncherDownloadModpackDialog *self, nuvashalauncherModrinthResults *results,
+results_arrived (NuvashaLauncherDownloadModpackDialog *self, NuvashaLauncherModrinthResults *results,
                  gboolean append)
 {
   guint shown = 0;
@@ -324,7 +324,7 @@ results_arrived (nuvashalauncherDownloadModpackDialog *self, nuvashalauncherModr
     {
       for (guint i = 0; i < results->projects->len; i++)
         {
-          nuvashalauncherModrinthProject *project =
+          NuvashaLauncherModrinthProject *project =
               g_ptr_array_index (results->projects, i);
           GtkWidget *row = NULL;
           GtkWidget *icon = NULL;
@@ -402,15 +402,15 @@ results_arrived (nuvashalauncherDownloadModpackDialog *self, nuvashalauncherModr
 }
 
 static void
-run_search (nuvashalauncherDownloadModpackDialog *self, gboolean append)
+run_search (NuvashaLauncherDownloadModpackDialog *self, gboolean append)
 {
   const char *query =
     gtk_editable_get_text (GTK_EDITABLE (self->search_entry));
   g_autofree char *url = NULL;
-  g_autoptr (nuvashalauncherModrinthSearch) search =
-    g_new0 (nuvashalauncherModrinthSearch, 1);
+  g_autoptr (NuvashaLauncherModrinthSearch) search =
+    g_new0 (NuvashaLauncherModrinthSearch, 1);
   typedef struct {
-    nuvashalauncherDownloadModpackDialog *dialog;
+    NuvashaLauncherDownloadModpackDialog *dialog;
     guint generation;
   } SearchAsk;
   SearchAsk *ask = NULL;
@@ -485,14 +485,14 @@ on_search_done (GObject *source G_GNUC_UNUSED,
                 gpointer user_data)
 {
   typedef struct {
-    nuvashalauncherDownloadModpackDialog *dialog;
+    NuvashaLauncherDownloadModpackDialog *dialog;
     guint generation;
   } SearchAsk;
   SearchAsk *ask = user_data;
-  nuvashalauncherDownloadModpackDialog *self = ask->dialog;
+  NuvashaLauncherDownloadModpackDialog *self = ask->dialog;
   g_autoptr (GError) error = NULL;
   g_autoptr (JsonParser) parser = NULL;
-  g_autoptr (nuvashalauncherModrinthResults) results = NULL;
+  g_autoptr (NuvashaLauncherModrinthResults) results = NULL;
   g_autofree char *answer = NULL;
 
   parser = nuvashalauncher_download_json_finish (result, &error);
@@ -576,7 +576,7 @@ on_search_done (GObject *source G_GNUC_UNUSED,
 }
 
 void
-build_browse_page (nuvashalauncherDownloadModpackDialog *self, gboolean start_search)
+build_browse_page (NuvashaLauncherDownloadModpackDialog *self, gboolean start_search)
 {
   g_type_ensure (nuvashalauncher_TYPE_FILTER_ENTRY);
   GtkWidget *page = NULL;

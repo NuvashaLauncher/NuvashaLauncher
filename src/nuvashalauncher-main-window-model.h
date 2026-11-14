@@ -10,21 +10,21 @@
 #include "nuvashalauncher-settings.h"
 #include "nuvashalauncher-users-popover.h"
 
-typedef struct _nuvashalauncherMainWindowModel nuvashalauncherMainWindowModel;
+typedef struct _NuvashaLauncherMainWindowModel NuvashaLauncherMainWindowModel;
 
-nuvashalauncherMainWindowModel *nuvashalauncher_main_window_model_new (void);
-void nuvashalauncher_main_window_model_free (nuvashalauncherMainWindowModel *model);
+NuvashaLauncherMainWindowModel *nuvashalauncher_main_window_model_new (void);
+void nuvashalauncher_main_window_model_free (NuvashaLauncherMainWindowModel *model);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherMainWindowModel,
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherMainWindowModel,
                                nuvashalauncher_main_window_model_free)
 
-struct _nuvashalauncherMainWindowModel
+struct _NuvashaLauncherMainWindowModel
 {
-  nuvashalauncherInstanceManager *manager;
-  nuvashalauncherDownloadService *download_service;
-  nuvashalauncherSettings *settings;
-  nuvashalauncherAccounts *accounts;
-  nuvashalauncherUsersPopover *users_popover;
+  NuvashaLauncherInstanceManager *manager;
+  NuvashaLauncherDownloadService *download_service;
+  NuvashaLauncherSettings *settings;
+  NuvashaLauncherAccounts *accounts;
+  NuvashaLauncherUsersPopover *users_popover;
   GHashTable *launchers;
   GHashTable *instance_dialogs;
 };

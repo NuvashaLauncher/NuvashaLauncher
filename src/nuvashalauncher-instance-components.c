@@ -7,7 +7,7 @@
 #include <string.h>
 
 const char *
-nuvashalauncher_instance_component_id_for_loader (nuvashalauncherLoader loader)
+nuvashalauncher_instance_component_id_for_loader (NuvashaLauncherLoader loader)
 {
   switch (loader)
     {
@@ -20,10 +20,10 @@ nuvashalauncher_instance_component_id_for_loader (nuvashalauncherLoader loader)
 }
 
 char *
-nuvashalauncher_instance_component_get_version (nuvashalauncherInstance *instance,
+nuvashalauncher_instance_component_get_version (NuvashaLauncherInstance *instance,
                                     const char *component_id)
 {
-  nuvashalauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
   GHashTable *components = NULL;
   const char *version = NULL;
   const char *loader_id = NULL;
@@ -52,12 +52,12 @@ nuvashalauncher_instance_component_get_version (nuvashalauncherInstance *instanc
 }
 
 gboolean
-nuvashalauncher_instance_component_set_version (nuvashalauncherInstance *instance,
+nuvashalauncher_instance_component_set_version (NuvashaLauncherInstance *instance,
                                     const char *component_id,
                                     const char *version,
                                     GError **error)
 {
-  nuvashalauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
   const char *loader_id = NULL;
 
   g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (instance), FALSE);

@@ -28,7 +28,7 @@ typedef struct
   char *sha512;
   guint stage; /* 0: checking sha1, 1: checking sha512 */
   GTask *task; /* owned */
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
 } VerifyRun;
 
 static void
@@ -96,13 +96,13 @@ verify_hash_ready (GObject *source G_GNUC_UNUSED,
 }
 
 /* Both hashes of the manifest, out of the bytes on the disk. */
-nuvashalauncherTaskScope *
-nuvashalauncher_modpack_verify_file_async (const nuvashalauncherModpackFile *file,
+NuvashaLauncherTaskScope *
+nuvashalauncher_modpack_verify_file_async (const NuvashaLauncherModpackFile *file,
                                const char *path,
                                GAsyncReadyCallback callback,
                                gpointer user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   GTask *task = nuvashalauncher_task_scope_task (scope);
   g_autoptr (GFile) job_file = g_file_new_for_path (path);
@@ -452,7 +452,7 @@ extract_overrides (const char *archive_path,
 typedef struct {
   char *archive_path;
   char *directory;
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
 } ExtractRun;
 
 static void
@@ -471,7 +471,7 @@ extract_thread (GTask *task G_GNUC_UNUSED,
                 gpointer task_data, GCancellable *cancellable)
 {
   ExtractRun *run = task_data;
-  g_autoptr (nuvashalauncherTaskScope) scope = g_steal_pointer (&run->scope);
+  g_autoptr (NuvashaLauncherTaskScope) scope = g_steal_pointer (&run->scope);
   g_autoptr (GError) error = NULL;
 
   if (g_cancellable_is_cancelled (cancellable))
@@ -498,11 +498,11 @@ extract_thread (GTask *task G_GNUC_UNUSED,
     nuvashalauncher_task_scope_return_boolean (scope, TRUE);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 extract_overrides_async (const char *archive_path, const char *directory,
                          GAsyncReadyCallback callback, gpointer user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   GTask *task = nuvashalauncher_task_scope_task (scope);
   ExtractRun *run = g_new0 (ExtractRun, 1);

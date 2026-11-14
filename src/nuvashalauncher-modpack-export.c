@@ -33,13 +33,13 @@ typedef struct {
   char *icon_path;
   GHashTable *indexed_paths;
   gboolean include_transient;
-  nuvashalauncherModpackExportProgressFunc progress;
+  NuvashaLauncherModpackExportProgressFunc progress;
   gpointer progress_data;
   guint64 done;
   guint64 total;
 
   /* Owned until export_thread takes it. */
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
 } ExportRun;
 
 static void
@@ -57,7 +57,7 @@ export_run_free (ExportRun *run)
 }
 
 typedef struct {
-  nuvashalauncherModpackExportProgressFunc callback;
+  NuvashaLauncherModpackExportProgressFunc callback;
   gpointer data;
   guint64 done;
   guint64 total;
@@ -340,7 +340,7 @@ export_indexed_files (ExportRun *run, GCancellable *cancellable, GError **error)
               return FALSE;
             }
 
-          nuvashalauncherContentIndexEntry *entry = g_ptr_array_index (entries, i);
+          NuvashaLauncherContentIndexEntry *entry = g_ptr_array_index (entries, i);
           const char *filename = NULL;
           const char *sha1 = NULL;
           const char *sha512 = NULL;
@@ -478,7 +478,7 @@ export_thread (GTask *task G_GNUC_UNUSED,
                gpointer task_data, GCancellable *cancellable)
 {
   ExportRun *run = task_data;
-  g_autoptr (nuvashalauncherTaskScope) scope = g_steal_pointer (&run->scope);
+  g_autoptr (NuvashaLauncherTaskScope) scope = g_steal_pointer (&run->scope);
   g_autoptr (GError) error = NULL;
   struct archive *archive = NULL;
   struct archive_entry *manifest_entry = NULL;
@@ -623,7 +623,7 @@ export_thread (GTask *task G_GNUC_UNUSED,
 }
 
 static char *
-export_manifest (nuvashalauncherInstance *instance, const char *pack_name,
+export_manifest (NuvashaLauncherInstance *instance, const char *pack_name,
                  const char *summary, const char *version_id, GError **error)
 {
   g_autofree char *name = NULL;
@@ -637,7 +637,7 @@ export_manifest (nuvashalauncherInstance *instance, const char *pack_name,
   g_autoptr (JsonGenerator) generator = json_generator_new ();
   g_autoptr (JsonNode) root = NULL;
   g_autofree char *result = NULL;
-  nuvashalauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
   gsize length = 0;
 
   g_object_get (instance, "name", &name, "minecraft_version", &version,
@@ -708,18 +708,18 @@ export_manifest (nuvashalauncherInstance *instance, const char *pack_name,
   return g_steal_pointer (&result);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_modpack_export_async (nuvashalauncherInstance *instance, const char *path,
+NuvashaLauncherTaskScope *
+nuvashalauncher_modpack_export_async (NuvashaLauncherInstance *instance, const char *path,
                           const char *pack_name, const char *summary,
                           const char *version_id, gboolean include_transient,
-                          nuvashalauncherModpackExportProgressFunc progress,
+                          NuvashaLauncherModpackExportProgressFunc progress,
                           gpointer progress_data,
                           GAsyncReadyCallback callback, gpointer user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   GTask *task = nuvashalauncher_task_scope_task (scope);
-  nuvashalauncherTaskScope *task_scope = scope;
+  NuvashaLauncherTaskScope *task_scope = scope;
   g_autoptr (GError) error = NULL;
   g_autofree char *directory = NULL;
   ExportRun *run = NULL;

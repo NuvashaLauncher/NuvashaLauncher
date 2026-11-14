@@ -4,17 +4,17 @@
 
 #include "nuvashalauncher-content-install-model.h"
 
-nuvashalauncherContentInstallModel *
+NuvashaLauncherContentInstallModel *
 nuvashalauncher_content_install_model_new (GDestroyNotify pick_free)
 {
-  nuvashalauncherContentInstallModel *model = g_new0 (nuvashalauncherContentInstallModel, 1);
+  NuvashaLauncherContentInstallModel *model = g_new0 (NuvashaLauncherContentInstallModel, 1);
 
   model->picks = g_ptr_array_new_with_free_func (pick_free);
   return model;
 }
 
 void
-nuvashalauncher_content_install_model_free (nuvashalauncherContentInstallModel *model)
+nuvashalauncher_content_install_model_free (NuvashaLauncherContentInstallModel *model)
 {
   if (model == NULL)
     return;

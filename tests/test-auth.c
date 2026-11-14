@@ -25,15 +25,15 @@
 typedef struct
 {
   GMainLoop *loop;
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
   GError *error;
 } AuthWait;
 
 typedef struct
 {
   GMainLoop *loop;
-  nuvashalauncherTaskScope *scope;
-  nuvashalauncherAccount *account;
+  NuvashaLauncherTaskScope *scope;
+  NuvashaLauncherAccount *account;
   GError *error;
   gboolean refresh;
 } AuthSuccessWait;
@@ -138,7 +138,7 @@ auth_error_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
 static void
 run_auth_error_answer (const char *fixture_name, gint status,
-                       AuthAnswerFunc answer, nuvashalauncherAuthError code,
+                       AuthAnswerFunc answer, NuvashaLauncherAuthError code,
                        const char *message)
 {
   g_autofree char *body = fixture (fixture_name);
@@ -189,7 +189,7 @@ test_device_code (void)
 {
   g_autofree char *json = fixture ("auth-device-code.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherDeviceCode) code = NULL;
+  g_autoptr (NuvashaLauncherDeviceCode) code = NULL;
 
   code = nuvashalauncher_auth_device_code_from_json (json, -1, &error);
 
@@ -250,7 +250,7 @@ test_device_code_errors (void)
   /* The interval a service does not give is one nuvashalauncher asks about every five
      seconds, which is what the device code flow documents. */
   {
-    g_autoptr (nuvashalauncherDeviceCode) code =
+    g_autoptr (NuvashaLauncherDeviceCode) code =
       nuvashalauncher_auth_device_code_from_json (bare, -1, &error);
 
     g_assert_no_error (error);
@@ -268,7 +268,7 @@ test_token (void)
   g_autofree char *json = fixture ("auth-token-ok.json");
   const gint64 now = 1800000000;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherOAuthToken) token = NULL;
+  g_autoptr (NuvashaLauncherOAuthToken) token = NULL;
 
   token = nuvashalauncher_auth_oauth_token_from_json (json, -1, now, &error);
 
@@ -348,8 +348,8 @@ test_xbox_token (void)
   g_autofree char *user = fixture ("auth-xbl-user.json");
   g_autofree char *xsts = fixture ("auth-xsts-ok.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherXboxToken) from_user = NULL;
-  g_autoptr (nuvashalauncherXboxToken) from_xsts = NULL;
+  g_autoptr (NuvashaLauncherXboxToken) from_user = NULL;
+  g_autoptr (NuvashaLauncherXboxToken) from_xsts = NULL;
   g_autofree char *identity = NULL;
 
   from_user = nuvashalauncher_auth_xbox_token_from_json (user, -1, &error);
@@ -440,7 +440,7 @@ test_minecraft_token (void)
   g_autofree char *refused = fixture ("auth-minecraft-app-not-registered.json");
   const gint64 now = 1800000000;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherOAuthToken) token = NULL;
+  g_autoptr (NuvashaLauncherOAuthToken) token = NULL;
 
   token = nuvashalauncher_auth_minecraft_token_from_json (json, -1, now, &error);
   g_assert_no_error (error);
@@ -523,7 +523,7 @@ test_profile (void)
   g_autofree char *bare = fixture ("auth-profile-no-skin.json");
   g_autofree char *not_found = fixture ("auth-profile-not-found.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherMinecraftProfile) profile = NULL;
+  g_autoptr (NuvashaLauncherMinecraftProfile) profile = NULL;
   g_autofree char *uuid = NULL;
 
   profile = nuvashalauncher_auth_profile_from_json (json, -1, &error);
@@ -563,7 +563,7 @@ test_profile (void)
 
   /* A profile without a skin is a profile: it simply has no avatar. */
   {
-    g_autoptr (nuvashalauncherMinecraftProfile) none =
+    g_autoptr (NuvashaLauncherMinecraftProfile) none =
       nuvashalauncher_auth_profile_from_json (bare, -1, &error);
 
     g_assert_no_error (error);
@@ -653,11 +653,11 @@ test_service_state_refusals_complete_sign_in (void)
 static void
 test_successful_sign_in_refresh_and_persistence (void)
 {
-  nuvashalauncherDeviceCode code = { 0 };
+  NuvashaLauncherDeviceCode code = { 0 };
   AuthSuccessWait wait = { 0 };
-  g_autoptr (nuvashalauncherAccount) account = NULL;
-  g_autoptr (nuvashalauncherAccounts) accounts = NULL;
-  g_autoptr (nuvashalauncherAccounts) reopened = NULL;
+  g_autoptr (NuvashaLauncherAccount) account = NULL;
+  g_autoptr (NuvashaLauncherAccounts) accounts = NULL;
+  g_autoptr (NuvashaLauncherAccounts) reopened = NULL;
   g_autofree char *directory = NULL;
   g_autofree char *path = NULL;
   g_autoptr (GError) error = NULL;

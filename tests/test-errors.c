@@ -98,7 +98,7 @@ test_error_widgets (void)
   g_assert_cmpstr (gtk_label_get_text (GTK_LABEL (label)), ==,
                    "Access was denied. Check the folder permissions.");
 
-  g_autoptr (nuvashalauncherOfflineAccountDialog) dialog = g_object_ref_sink (
+  g_autoptr (NuvashaLauncherOfflineAccountDialog) dialog = g_object_ref_sink (
     nuvashalauncher_offline_account_dialog_new ());
   GtkWidget *content = adw_dialog_get_child (ADW_DIALOG (dialog));
   GtkWidget *entry = find_type (content, ADW_TYPE_ENTRY_ROW);

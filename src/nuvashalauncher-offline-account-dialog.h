@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherOfflineAccountDialog: an offline account, which is a name.
+/* NuvashaLauncherOfflineAccountDialog: an offline account, which is a name.
  *
  * There is nothing to sign in to: an offline account is a player name and
  * the UUID java derives from that name, and the game is told the session
@@ -26,7 +26,7 @@ G_BEGIN_DECLS
 #define nuvashalauncher_TYPE_OFFLINE_ACCOUNT_DIALOG \
   (nuvashalauncher_offline_account_dialog_get_type ())
 
-G_DECLARE_FINAL_TYPE (nuvashalauncherOfflineAccountDialog, nuvashalauncher_offline_account_dialog, nuvashalauncher,
+G_DECLARE_FINAL_TYPE (NuvashaLauncherOfflineAccountDialog, nuvashalauncher_offline_account_dialog, nuvashalauncher,
                       OFFLINE_ACCOUNT_DIALOG, AdwDialog)
 
 /* "account-added" carries the offline account, transfer full. */
@@ -36,12 +36,12 @@ enum {
 };
 
 /* The dialog, which starts with an empty name and nothing added. */
-nuvashalauncherOfflineAccountDialog *nuvashalauncher_offline_account_dialog_new (void);
+NuvashaLauncherOfflineAccountDialog *nuvashalauncher_offline_account_dialog_new (void);
 
 /* The store is optional for template/tests, but enables duplicate-name
  * validation when the dialog is opened from the account popover. */
-void nuvashalauncher_offline_account_dialog_set_accounts (nuvashalauncherOfflineAccountDialog *self,
-                                                  nuvashalauncherAccounts *accounts);
+void nuvashalauncher_offline_account_dialog_set_accounts (NuvashaLauncherOfflineAccountDialog *self,
+                                                  NuvashaLauncherAccounts *accounts);
 
 G_END_DECLS
 

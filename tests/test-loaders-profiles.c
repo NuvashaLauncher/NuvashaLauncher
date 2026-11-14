@@ -5,10 +5,10 @@ test_fabric_profile (void)
 {
   g_autofree char *json = NULL;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherVersionDescription) profile = NULL;
-  g_autoptr (nuvashalauncherVersionDescription) vanilla = NULL;
-  g_autoptr (nuvashalauncherVersionDescription) merged = NULL;
-  const nuvashalauncherLibrary *library = NULL;
+  g_autoptr (NuvashaLauncherVersionDescription) profile = NULL;
+  g_autoptr (NuvashaLauncherVersionDescription) vanilla = NULL;
+  g_autoptr (NuvashaLauncherVersionDescription) merged = NULL;
+  const NuvashaLauncherLibrary *library = NULL;
   const char *vanilla_document =
     "{\"id\": \"1.20.1\", \"type\": \"release\","
     " \"mainClass\": \"net.minecraft.client.main.Main\","
@@ -41,7 +41,7 @@ test_fabric_profile (void)
   g_assert_cmpuint (profile->libraries->len, ==, 4);
   g_assert_cmpuint (profile->jvm_arguments->len, ==, 1);
   {
-    const nuvashalauncherArgument *argument = g_ptr_array_index (profile->jvm_arguments, 0);
+    const NuvashaLauncherArgument *argument = g_ptr_array_index (profile->jvm_arguments, 0);
 
     g_assert_cmpuint (argument->values->len, ==, 1);
     g_assert_cmpstr (g_ptr_array_index (argument->values, 0), ==,
@@ -101,7 +101,7 @@ test_fabric_profile (void)
   /* The libraries of the version come first, the ones of the loader
      after them, and the arguments of both are there. */
   {
-    const nuvashalauncherLibrary *first = g_ptr_array_index (merged->libraries, 0);
+    const NuvashaLauncherLibrary *first = g_ptr_array_index (merged->libraries, 0);
 
     g_assert_cmpstr (first->name, ==, "org.lwjgl:lwjgl:3.3.3");
   }
@@ -116,8 +116,8 @@ test_quilt_profile (void)
 {
   g_autofree char *json = NULL;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherVersionDescription) profile = NULL;
-  const nuvashalauncherLibrary *library = NULL;
+  g_autoptr (NuvashaLauncherVersionDescription) profile = NULL;
+  const NuvashaLauncherLibrary *library = NULL;
 
   if (!g_file_get_contents (nuvashalauncher_TEST_FIXTURES "/quilt-profile.json", &json,
                             NULL, &error))
@@ -185,7 +185,7 @@ test_install_of_a_loader_that_publishes_none (void)
 {
   g_autofree char *json = NULL;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherVersionDescription) document = NULL;
+  g_autoptr (NuvashaLauncherVersionDescription) document = NULL;
   Wait wait = { 0 };
 
   if (!g_file_get_contents (nuvashalauncher_TEST_FIXTURES "/fabric-profile.json", &json,
@@ -276,7 +276,7 @@ static void
 test_install_invalid_versions_and_missing_client (void)
 {
   Wait wait = { 0 };
-  g_autoptr (nuvashalauncherVersionDescription) desc =
+  g_autoptr (NuvashaLauncherVersionDescription) desc =
     g_object_new (nuvashalauncher_TYPE_VERSION_DESCRIPTION, NULL);
 
   wait.loop = g_main_loop_new (NULL, FALSE);
@@ -311,7 +311,7 @@ static void
 test_install_vanilla_refused (void)
 {
   Wait wait = { 0 };
-  g_autoptr (nuvashalauncherVersionDescription) desc =
+  g_autoptr (NuvashaLauncherVersionDescription) desc =
     g_object_new (nuvashalauncher_TYPE_VERSION_DESCRIPTION, NULL);
 
   wait.loop = g_main_loop_new (NULL, FALSE);

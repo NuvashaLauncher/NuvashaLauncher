@@ -13,7 +13,7 @@
         <property name="orientation">vertical</property>
         <property name="spacing">10</property>
         <property name="width-request">220</property>
-        <child><object class="nuvashalauncherSkinView" id="preview"/></child>
+        <child><object class="NuvashaLauncherSkinView" id="preview"/></child>
         <child><object class="GtkDropDown" id="capes"/></child>
         <child><object class="GtkCheckButton" id="classic-model"><property name="label" translatable="yes">Classic model</property></object></child>
         <child><object class="GtkCheckButton" id="slim-model"><property name="label" translatable="yes">Slim model</property></object></child>

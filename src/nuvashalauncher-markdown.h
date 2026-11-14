@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherMarkdown: the Markdown a Modrinth project writes its description in,
+/* NuvashaLauncherMarkdown: the Markdown a Modrinth project writes its description in,
  * shown as widgets.
  *
  * Modrinth serves a project's long description as Markdown, with headings,

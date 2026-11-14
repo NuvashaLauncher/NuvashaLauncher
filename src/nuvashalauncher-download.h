@@ -22,16 +22,16 @@
 
 G_BEGIN_DECLS
 
-typedef struct _nuvashalauncherDownloadService nuvashalauncherDownloadService;
+typedef struct _NuvashaLauncherDownloadService NuvashaLauncherDownloadService;
 
-nuvashalauncherDownloadService *nuvashalauncher_download_service_new (void);
-void nuvashalauncher_download_service_free (nuvashalauncherDownloadService *service);
+NuvashaLauncherDownloadService *nuvashalauncher_download_service_new (void);
+void nuvashalauncher_download_service_free (NuvashaLauncherDownloadService *service);
 /* Cancel every request waiting for a transfer slot. Active transfers are
  * unaffected; their callers still own their individual cancellables. */
-void nuvashalauncher_download_service_cancel_queued (nuvashalauncherDownloadService *service);
-guint nuvashalauncher_download_service_active (const nuvashalauncherDownloadService *service);
-guint nuvashalauncher_download_service_queued_interactive (const nuvashalauncherDownloadService *service);
-guint nuvashalauncher_download_service_queued_bulk (const nuvashalauncherDownloadService *service);
+void nuvashalauncher_download_service_cancel_queued (NuvashaLauncherDownloadService *service);
+guint nuvashalauncher_download_service_active (const NuvashaLauncherDownloadService *service);
+guint nuvashalauncher_download_service_queued_interactive (const NuvashaLauncherDownloadService *service);
+guint nuvashalauncher_download_service_queued_bulk (const NuvashaLauncherDownloadService *service);
 
 #define nuvashalauncher_DOWNLOAD_ERROR (nuvashalauncher_download_error_quark ())
 
@@ -43,18 +43,18 @@ typedef enum {
   nuvashalauncher_DOWNLOAD_ERROR_IO,            /* local file system failure */
   nuvashalauncher_DOWNLOAD_ERROR_CANCELLED,     /* the caller cancelled the request */
   nuvashalauncher_DOWNLOAD_ERROR_INVALID        /* unsafe URL, malformed/oversized response */
-} nuvashalauncherDownloadError;
+} NuvashaLauncherDownloadError;
 
 GQuark nuvashalauncher_download_error_quark (void);
 
-void nuvashalauncher_download_set_cache_settings (nuvashalauncherDownloadService *service,
-                                      nuvashalauncherSettings *settings);
+void nuvashalauncher_download_set_cache_settings (NuvashaLauncherDownloadService *service,
+                                      NuvashaLauncherSettings *settings);
 
 /* Progress of a running transfer. @bytes_done is the received byte count,
  * @total is the announced length or -1 when the server did not say.
  * Called on the caller's main context; a download served from the
  * cache reports no progress at all. */
-typedef void (*nuvashalauncherDownloadProgressFunc) (goffset bytes_done,
+typedef void (*NuvashaLauncherDownloadProgressFunc) (goffset bytes_done,
                                          goffset total,
                                          gpointer user_data);
 
@@ -80,28 +80,28 @@ typedef void (*nuvashalauncherDownloadProgressFunc) (goffset bytes_done,
  * whose directory already exists.
  *
  * @progress and @callback both receive @user_data. */
-nuvashalauncherTaskScope *nuvashalauncher_download_file_async (nuvashalauncherDownloadService *service,
+NuvashaLauncherTaskScope *nuvashalauncher_download_file_async (NuvashaLauncherDownloadService *service,
                                         const char *url,
                                         const char *dest_path,
                                        const char *expected_hash,
                                        GChecksumType hash_type,
-                                       nuvashalauncherDownloadProgressFunc progress,
+                                       NuvashaLauncherDownloadProgressFunc progress,
                                         GAsyncReadyCallback callback,
                                         gpointer user_data);
 
 /* Like nuvashalauncher_download_file_async(), but rejects a response larger
  * than @max_size bytes. Pass -1 when no caller-supplied limit is available. */
-nuvashalauncherTaskScope *nuvashalauncher_download_file_limited_async (nuvashalauncherDownloadService *service,
+NuvashaLauncherTaskScope *nuvashalauncher_download_file_limited_async (NuvashaLauncherDownloadService *service,
                                                 const char *url,
                                                 const char *dest_path,
                                                 const char *expected_hash,
                                                 GChecksumType hash_type,
                                                 goffset max_size,
-                                                nuvashalauncherDownloadProgressFunc progress,
+                                                NuvashaLauncherDownloadProgressFunc progress,
                                                 GAsyncReadyCallback callback,
                                                 gpointer user_data);
 
-/* TRUE on success. Errors use nuvashalauncherDownloadError. */
+/* TRUE on success. Errors use NuvashaLauncherDownloadError. */
 gboolean nuvashalauncher_download_file_finish (GAsyncResult *result,
                                    GError     **error);
 
@@ -111,7 +111,7 @@ gboolean nuvashalauncher_download_file_finish (GAsyncResult *result,
  * The returned parser is owned by the caller; a body that does not
  * parse comes back as a JSON_PARSER_ERROR from json-glib and is not
  * retried. */
-nuvashalauncherTaskScope *nuvashalauncher_download_json_async (nuvashalauncherDownloadService *service,
+NuvashaLauncherTaskScope *nuvashalauncher_download_json_async (NuvashaLauncherDownloadService *service,
                                        const char *url,
                                        GAsyncReadyCallback callback,
                                        gpointer user_data);
@@ -125,7 +125,7 @@ JsonParser *nuvashalauncher_download_json_finish (GAsyncResult *result,
  * G_IO_ERROR_NOT_FOUND when there is no such file.
  *
  * (transfer full) lowercase hexadecimal digest. */
-nuvashalauncherTaskScope *nuvashalauncher_download_file_hash_async (GFile *file,
+NuvashaLauncherTaskScope *nuvashalauncher_download_file_hash_async (GFile *file,
                                              GChecksumType type,
                                              GAsyncReadyCallback callback,
                                              gpointer user_data);
@@ -134,19 +134,19 @@ nuvashalauncherTaskScope *nuvashalauncher_download_file_hash_async (GFile *file,
 char *nuvashalauncher_download_file_hash_finish (GAsyncResult *result,
                                      GError     **error);
 
-nuvashalauncherTaskScope *nuvashalauncher_download_json_cached_async (nuvashalauncherDownloadService *service,
+NuvashaLauncherTaskScope *nuvashalauncher_download_json_cached_async (NuvashaLauncherDownloadService *service,
                                                const char *url,
                                               GAsyncReadyCallback callback,
                                               gpointer user_data);
 
 /* Like nuvashalauncher_download_json_cached_async(), but always caches
  * regardless of the Modrinth API cache toggle. */
-nuvashalauncherTaskScope *nuvashalauncher_download_json_metadata_cached_async (nuvashalauncherDownloadService *service,
+NuvashaLauncherTaskScope *nuvashalauncher_download_json_metadata_cached_async (NuvashaLauncherDownloadService *service,
                                                         const char *url,
                                                         GAsyncReadyCallback callback,
                                                         gpointer user_data);
 
-nuvashalauncherTaskScope *nuvashalauncher_download_json_post_cached_async (nuvashalauncherDownloadService *service,
+NuvashaLauncherTaskScope *nuvashalauncher_download_json_post_cached_async (NuvashaLauncherDownloadService *service,
                                                     const char *url,
                                                    const char *body,
                                                    const char *user_agent,

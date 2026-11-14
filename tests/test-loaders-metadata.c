@@ -3,7 +3,7 @@
 static void
 test_supported_loaders (void)
 {
-  const nuvashalauncherLoader *loaders = nuvashalauncher_loaders_supported ();
+  const NuvashaLauncherLoader *loaders = nuvashalauncher_loaders_supported ();
   guint count = nuvashalauncher_loaders_supported_count ();
   gboolean vanilla = FALSE;
   gboolean fabric = FALSE;
@@ -362,7 +362,7 @@ test_versions_for_display (void)
 
     for (guint i = 0; i < G_N_ELEMENTS (betas_ids); i++)
       {
-        nuvashalauncherLoaderVersion *version = g_new0 (nuvashalauncherLoaderVersion, 1);
+        NuvashaLauncherLoaderVersion *version = g_new0 (NuvashaLauncherLoaderVersion, 1);
 
         version->version = g_strdup (betas_ids[i]);
         version->stable = FALSE;

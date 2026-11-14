@@ -30,9 +30,9 @@ typedef struct
   guint watchdog;
   gboolean timed_out;
 
-  nuvashalauncher *launcher;
-  nuvashalauncherLaunchState wanted;
-  nuvashalauncherLaunchState state;
+  NuvashaLauncher *launcher;
+  NuvashaLauncherLaunchState wanted;
+  NuvashaLauncherLaunchState state;
   const char *line;
   char *detail;
   guint changes;
@@ -50,7 +50,7 @@ watchdog_fired (gpointer user_data)
 }
 
 static void
-on_state (nuvashalauncher *launcher G_GNUC_UNUSED, nuvashalauncherLaunchState state,
+on_state (NuvashaLauncher *launcher G_GNUC_UNUSED, NuvashaLauncherLaunchState state,
           const char *detail, gpointer user_data)
 {
   Watch *watch = user_data;
@@ -70,7 +70,7 @@ on_state (nuvashalauncher *launcher G_GNUC_UNUSED, nuvashalauncherLaunchState st
 /* Runs the main loop until @wanted comes, or until the launch is over.
    @wanted nuvashalauncher_LAUNCH_STOPPED stands for "the launch is over". */
 static void
-watch_until (Watch *watch, nuvashalauncher *launcher, nuvashalauncherLaunchState wanted)
+watch_until (Watch *watch, NuvashaLauncher *launcher, NuvashaLauncherLaunchState wanted)
 {
   watch->launcher = launcher;
   watch->wanted = wanted;
@@ -113,7 +113,7 @@ watch_clear (Watch *watch)
 }
 
 static void
-on_output (nuvashalauncher *launcher G_GNUC_UNUSED, const char *line,
+on_output (NuvashaLauncher *launcher G_GNUC_UNUSED, const char *line,
            gboolean stderr G_GNUC_UNUSED, gpointer user_data)
 {
   Watch *watch = user_data;
@@ -126,7 +126,7 @@ on_output (nuvashalauncher *launcher G_GNUC_UNUSED, const char *line,
    worth testing once the game has said something: a signal that arrives
    before the script even started would prove nothing about it. */
 static void
-watch_for_line (Watch *watch, nuvashalauncher *launcher, const char *text)
+watch_for_line (Watch *watch, NuvashaLauncher *launcher, const char *text)
 {
   watch->launcher = launcher;
   watch->line = text;
@@ -147,7 +147,7 @@ watch_for_line (Watch *watch, nuvashalauncher *launcher, const char *text)
 }
 
 static void
-assert_log_has (nuvashalauncher *launcher, const char *text)
+assert_log_has (NuvashaLauncher *launcher, const char *text)
 {
   g_autofree char *log = nuvashalauncher_launcher_get_log_text (launcher);
 
@@ -191,12 +191,12 @@ remove_test_dir (const char *path)
   g_rmdir (path);
 }
 
-static nuvashalauncherInstance *
+static NuvashaLauncherInstance *
 new_instance (const char *name)
 {
   g_autofree char *directory = g_build_filename (root, name, NULL);
   g_autoptr (GError) error = NULL;
-  nuvashalauncherInstance *instance = NULL;
+  NuvashaLauncherInstance *instance = NULL;
 
   if (g_mkdir_with_parents (directory, 0755) != 0)
     g_error ("the instance directory \"%s\" cannot be made", directory);
@@ -255,8 +255,8 @@ make_an_hour_old (const char *path)
 static void
 test_output_and_clean_exit (void)
 {
-  g_autoptr (nuvashalauncherInstance) instance = new_instance ("clean");
-  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+  g_autoptr (NuvashaLauncherInstance) instance = new_instance ("clean");
+  g_autoptr (NuvashaLauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
   g_autoptr (GPtrArray) argv = NULL;
   g_autoptr (GError) error = NULL;
   Watch watch = { 0 };
@@ -297,8 +297,8 @@ test_output_and_clean_exit (void)
 static void
 test_exit_code_makes_a_crash (void)
 {
-  g_autoptr (nuvashalauncherInstance) instance = new_instance ("crash");
-  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+  g_autoptr (NuvashaLauncherInstance) instance = new_instance ("crash");
+  g_autoptr (NuvashaLauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
   g_autoptr (GPtrArray) argv = NULL;
   g_autoptr (GError) error = NULL;
   Watch watch = { 0 };
@@ -326,8 +326,8 @@ test_crash_report_makes_a_crash (void)
   g_autofree char *report = g_build_filename (reports,
                                               "crash-2026-10-05_21.00.00-"
                                               "client.txt", NULL);
-  g_autoptr (nuvashalauncherInstance) instance = NULL;
-  g_autoptr (nuvashalauncher) launcher = NULL;
+  g_autoptr (NuvashaLauncherInstance) instance = NULL;
+  g_autoptr (NuvashaLauncher) launcher = NULL;
   g_autoptr (GPtrArray) argv = NULL;
   g_autoptr (GError) error = NULL;
   Watch watch = { 0 };
@@ -366,8 +366,8 @@ test_old_crash_report_does_not_count (void)
   g_autofree char *reports = g_build_filename (directory, "crash-reports",
                                                NULL);
   g_autofree char *report = g_build_filename (reports, "crash-old.txt", NULL);
-  g_autoptr (nuvashalauncherInstance) instance = NULL;
-  g_autoptr (nuvashalauncher) launcher = NULL;
+  g_autoptr (NuvashaLauncherInstance) instance = NULL;
+  g_autoptr (NuvashaLauncher) launcher = NULL;
   g_autoptr (GPtrArray) argv = NULL;
   g_autoptr (GError) error = NULL;
   Watch watch = { 0 };
@@ -398,8 +398,8 @@ static void
 test_child_environment (void)
 {
   const char *display = g_getenv ("DISPLAY");
-  g_autoptr (nuvashalauncherInstance) instance = new_instance ("environment");
-  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+  g_autoptr (NuvashaLauncherInstance) instance = new_instance ("environment");
+  g_autoptr (NuvashaLauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
   g_autoptr (GPtrArray) argv = NULL;
   g_autoptr (GError) error = NULL;
   g_autofree char *expected_display =
@@ -439,8 +439,8 @@ test_child_environment (void)
 static void
 test_child_inherits_the_rest_of_the_environment (void)
 {
-  g_autoptr (nuvashalauncherInstance) instance = new_instance ("inherited");
-  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+  g_autoptr (NuvashaLauncherInstance) instance = new_instance ("inherited");
+  g_autoptr (NuvashaLauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
   g_autoptr (GPtrArray) argv = NULL;
   g_autoptr (GError) error = NULL;
   Watch watch = { 0 };
@@ -467,8 +467,8 @@ test_child_inherits_the_rest_of_the_environment (void)
 static void
 test_duplicate_launch_prevention (void)
 {
-  g_autoptr (nuvashalauncherInstance) instance = new_instance ("single");
-  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+  g_autoptr (NuvashaLauncherInstance) instance = new_instance ("single");
+  g_autoptr (NuvashaLauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
   g_autoptr (GPtrArray) argv = NULL;
   g_autoptr (GError) error = NULL;
   Watch watch = { 0 };
@@ -538,8 +538,8 @@ test_duplicate_launch_prevention (void)
 static void
 test_stop_ends_the_game (void)
 {
-  g_autoptr (nuvashalauncherInstance) instance = new_instance ("stop");
-  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+  g_autoptr (NuvashaLauncherInstance) instance = new_instance ("stop");
+  g_autoptr (NuvashaLauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
   g_autoptr (GPtrArray) argv = NULL;
   g_autoptr (GError) error = NULL;
   Watch running = { 0 };
@@ -575,8 +575,8 @@ test_stop_ends_the_game (void)
 static void
 test_stop_forces_a_game_that_ignores_sigterm (void)
 {
-  g_autoptr (nuvashalauncherInstance) instance = new_instance ("forced");
-  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+  g_autoptr (NuvashaLauncherInstance) instance = new_instance ("forced");
+  g_autoptr (NuvashaLauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
   g_autoptr (GPtrArray) argv = NULL;
   g_autoptr (GError) error = NULL;
   Watch running = { 0 };
@@ -613,8 +613,8 @@ test_stop_forces_a_game_that_ignores_sigterm (void)
 static void
 test_line_limit_and_clear (void)
 {
-  g_autoptr (nuvashalauncherInstance) instance = new_instance ("limit");
-  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+  g_autoptr (NuvashaLauncherInstance) instance = new_instance ("limit");
+  g_autoptr (NuvashaLauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
   g_autoptr (GPtrArray) argv = NULL;
   g_autoptr (GError) error = NULL;
   Watch watch = { 0 };
@@ -660,8 +660,8 @@ static void
 test_spawn_failure_is_a_failure (void)
 {
   g_autofree char *missing = g_build_filename (root, "not-a-java", NULL);
-  g_autoptr (nuvashalauncherInstance) instance = new_instance ("missing");
-  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+  g_autoptr (NuvashaLauncherInstance) instance = new_instance ("missing");
+  g_autoptr (NuvashaLauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
   g_autoptr (GPtrArray) argv = argv_of (g_steal_pointer (&missing));
   g_autoptr (GError) error = NULL;
 

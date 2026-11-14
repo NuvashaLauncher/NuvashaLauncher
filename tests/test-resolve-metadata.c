@@ -70,22 +70,22 @@ test_entry_names (void)
 static void
 test_native_classifiers (void)
 {
-  g_autoptr (nuvashalauncherVersionDescription) legacy =
+  g_autoptr (NuvashaLauncherVersionDescription) legacy =
     fixture_version ("version-legacy.json");
-  g_autoptr (nuvashalauncherVersionDescription) arch = architecture_document ();
-  g_autoptr (nuvashalauncherRuleContext) x86 =
+  g_autoptr (NuvashaLauncherVersionDescription) arch = architecture_document ();
+  g_autoptr (NuvashaLauncherRuleContext) x86 =
     nuvashalauncher_rule_context_new_for ("linux", "x86_64", NULL);
-  g_autoptr (nuvashalauncherRuleContext) arm =
+  g_autoptr (NuvashaLauncherRuleContext) arm =
     nuvashalauncher_rule_context_new_for ("linux", "aarch64", NULL);
-  g_autoptr (nuvashalauncherRuleContext) other =
+  g_autoptr (NuvashaLauncherRuleContext) other =
     nuvashalauncher_rule_context_new_for ("linux", "riscv64", NULL);
-  g_autoptr (nuvashalauncherRuleContext) windows =
+  g_autoptr (NuvashaLauncherRuleContext) windows =
     nuvashalauncher_rule_context_new_for ("windows", "x86_64", NULL);
-  nuvashalauncherLibrary *platform =
+  NuvashaLauncherLibrary *platform =
     find_library (legacy, "org.lwjgl.lwjgl:lwjgl-platform:2.9.0");
-  nuvashalauncherLibrary *scala =
+  NuvashaLauncherLibrary *scala =
     find_library (legacy, "org.scala-lang:scala-library:2.10.2");
-  nuvashalauncherLibrary *per_machine = find_library (arch, "org.lwjgl:lwjgl:3.3.3");
+  NuvashaLauncherLibrary *per_machine = find_library (arch, "org.lwjgl:lwjgl:3.3.3");
 
   /* The natives table names the classifier directly. */
   g_assert_cmpstr (nuvashalauncher_resolve_native_classifier (platform, x86), ==,
@@ -113,7 +113,7 @@ test_native_classifiers (void)
 static void
 test_classifier_is_not_natives (void)
 {
-  g_autoptr (nuvashalauncherVersionDescription) description = version_from_json (
+  g_autoptr (NuvashaLauncherVersionDescription) description = version_from_json (
       "{\"id\": \"x\", \"type\": \"release\", \"libraries\": ["
       " {\"name\": \"io.netty:netty-transport-native-epoll:4.2.16:linux-x86_64\","
       "  \"downloads\": {\"artifact\": {\"path\":"
@@ -123,7 +123,7 @@ test_classifier_is_not_natives (void)
       "  \"downloads\": {\"artifact\": {\"path\":"
       "   \"org/lwjgl/lwjgl/3.4.3/lwjgl-3.4.3-natives-linux.jar\","
       "   \"sha1\": \"bb\", \"url\": \"http://x/lwjgl-natives.jar\"}}}]}");
-  g_autoptr (nuvashalauncherRuleContext) context =
+  g_autoptr (NuvashaLauncherRuleContext) context =
     nuvashalauncher_rule_context_new_for ("linux", "x86_64", NULL);
   g_autofree char *libraries =
     g_build_filename ("/data", "libraries", NULL);
@@ -137,8 +137,8 @@ test_classifier_is_not_natives (void)
   g_assert_cmpuint (files->len, ==, 2);
 
   /* Neither of them is a jar to unpack. */
-  g_assert_false (((nuvashalauncherResolveFile *) g_ptr_array_index (files, 0))->natives);
-  g_assert_false (((nuvashalauncherResolveFile *) g_ptr_array_index (files, 1))->natives);
+  g_assert_false (((NuvashaLauncherResolveFile *) g_ptr_array_index (files, 0))->natives);
+  g_assert_false (((NuvashaLauncherResolveFile *) g_ptr_array_index (files, 1))->natives);
 
   entries = g_strsplit (classpath, ":", -1);
   g_assert_cmpuint (g_strv_length (entries), ==, 2);
@@ -155,16 +155,16 @@ test_classifier_is_not_natives (void)
 static void
 test_rule_filtering (void)
 {
-  g_autoptr (nuvashalauncherVersionDescription) legacy =
+  g_autoptr (NuvashaLauncherVersionDescription) legacy =
     fixture_version ("version-legacy.json");
-  g_autoptr (nuvashalauncherRuleContext) linux =
+  g_autoptr (NuvashaLauncherRuleContext) linux =
     nuvashalauncher_rule_context_new_for ("linux", "x86_64", NULL);
-  g_autoptr (nuvashalauncherRuleContext) mac =
+  g_autoptr (NuvashaLauncherRuleContext) mac =
     nuvashalauncher_rule_context_new_for ("osx", "x86_64", NULL);
-  nuvashalauncherLibrary *windows_only =
+  NuvashaLauncherLibrary *windows_only =
     find_library (legacy, "com.example:windows-only:1.0");
-  nuvashalauncherLibrary *linux_only = find_library (legacy, "com.example:linux-only:1.0");
-  nuvashalauncherLibrary *scala =
+  NuvashaLauncherLibrary *linux_only = find_library (legacy, "com.example:linux-only:1.0");
+  NuvashaLauncherLibrary *scala =
     find_library (legacy, "org.scala-lang:scala-library:2.10.2");
   g_autofree char *libraries =
     g_build_filename ("/data", "libraries", NULL);
@@ -187,7 +187,7 @@ test_rule_filtering (void)
 
   for (guint i = 0; i < files->len; i++)
     {
-      const nuvashalauncherResolveFile *file = g_ptr_array_index (files, i);
+      const NuvashaLauncherResolveFile *file = g_ptr_array_index (files, i);
 
       g_assert_nonnull (file->url);
       g_assert_nonnull (file->path);
@@ -199,11 +199,11 @@ test_rule_filtering (void)
   /* The one natives jar of the document is marked as one, and it is the
      first library of the document that has a jar at all. */
   {
-    const nuvashalauncherResolveFile *file = g_ptr_array_index (files, 0);
+    const NuvashaLauncherResolveFile *file = g_ptr_array_index (files, 0);
 
     g_assert_true (file->natives);
     g_assert_cmpstr (g_ptr_array_index (file->exclude, 0), ==, "META-INF/");
-    g_assert_false (((nuvashalauncherResolveFile *) g_ptr_array_index (files, 1))->natives);
+    g_assert_false (((NuvashaLauncherResolveFile *) g_ptr_array_index (files, 1))->natives);
   }
 
   g_print ("ok - rules decide which libraries this machine uses\n");
@@ -212,11 +212,11 @@ test_rule_filtering (void)
 static void
 test_classpath_order (void)
 {
-  g_autoptr (nuvashalauncherVersionDescription) modern =
+  g_autoptr (NuvashaLauncherVersionDescription) modern =
     fixture_version ("version-modern.json");
-  g_autoptr (nuvashalauncherVersionDescription) legacy =
+  g_autoptr (NuvashaLauncherVersionDescription) legacy =
     fixture_version ("version-legacy.json");
-  g_autoptr (nuvashalauncherRuleContext) context =
+  g_autoptr (NuvashaLauncherRuleContext) context =
     nuvashalauncher_rule_context_new_for ("linux", "x86_64", NULL);
   g_autofree char *libraries =
     g_build_filename ("/data", "libraries", NULL);
@@ -270,11 +270,11 @@ test_classpath_order (void)
 static void
 test_arguments (void)
 {
-  g_autoptr (nuvashalauncherVersionDescription) modern =
+  g_autoptr (NuvashaLauncherVersionDescription) modern =
     fixture_version ("version-modern.json");
-  g_autoptr (nuvashalauncherVersionDescription) legacy =
+  g_autoptr (NuvashaLauncherVersionDescription) legacy =
     fixture_version ("version-legacy.json");
-  g_autoptr (nuvashalauncherRuleContext) context =
+  g_autoptr (NuvashaLauncherRuleContext) context =
     nuvashalauncher_rule_context_new_for ("linux", "x86_64", NULL);
   g_autoptr (GPtrArray) jvm = nuvashalauncher_resolve_jvm_arguments (modern, context);
   g_autoptr (GPtrArray) game = nuvashalauncher_resolve_game_arguments (modern, context);

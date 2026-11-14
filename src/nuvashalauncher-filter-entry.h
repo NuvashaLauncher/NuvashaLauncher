@@ -9,10 +9,10 @@
 G_BEGIN_DECLS
 
 #define nuvashalauncher_TYPE_FILTER_ENTRY (nuvashalauncher_filter_entry_get_type ())
-G_DECLARE_FINAL_TYPE (nuvashalauncherFilterEntry, nuvashalauncher_filter_entry,
+G_DECLARE_FINAL_TYPE (NuvashaLauncherFilterEntry, nuvashalauncher_filter_entry,
                       nuvashalauncher, FILTER_ENTRY, GtkEntry)
 
-void nuvashalauncher_filter_entry_set_popover (nuvashalauncherFilterEntry *self,
+void nuvashalauncher_filter_entry_set_popover (NuvashaLauncherFilterEntry *self,
                                               GtkPopover *popover,
                                               const char *label);
 

@@ -131,8 +131,8 @@ make_parents (const char *root, const char *relative, GError **error)
 typedef struct
 {
   GTask *task;
-  nuvashalauncherTaskScope *scope;
-  GPtrArray *jars; /* nuvashalauncherResolveFile*, a reference */
+  NuvashaLauncherTaskScope *scope;
+  GPtrArray *jars; /* NuvashaLauncherResolveFile*, a reference */
   char *directory;
   guint index;
   guint64 extracted_bytes;
@@ -283,7 +283,7 @@ extract_read_ready (GObject *source, GAsyncResult *result, gpointer user_data)
   g_autoptr (GError) error = NULL;
 
   ExtractStep *step = user_data;
-  nuvashalauncherResolveFile *jar =
+  NuvashaLauncherResolveFile *jar =
     g_ptr_array_index (step->request->jars, step->request->index);
 
   bytes = g_file_load_bytes_finish (G_FILE (source), result, NULL, &error);
@@ -398,7 +398,7 @@ static void
 extract_entries (ExtractStep *step)
 {
   ExtractRequest *request = step->request;
-  nuvashalauncherResolveFile *jar = g_ptr_array_index (request->jars, request->index);
+  NuvashaLauncherResolveFile *jar = g_ptr_array_index (request->jars, request->index);
   struct archive_entry *entry = NULL;
   int status;
 
@@ -508,7 +508,7 @@ extract_entries (ExtractStep *step)
 static void
 extract_next_jar (ExtractRequest *request)
 {
-  nuvashalauncherResolveFile *jar;
+  NuvashaLauncherResolveFile *jar;
   ExtractStep *step;
   g_autoptr (GFile) file = NULL;
 
@@ -564,13 +564,13 @@ extract_jar_info_ready (GObject *source, GAsyncResult *result, gpointer user_dat
                            extract_read_ready, step);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_resolve_extract_natives_async (GPtrArray         *jars,
                                    const char        *natives_directory,
                                    GAsyncReadyCallback callback,
                                    gpointer            user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   ExtractRequest *request;
 

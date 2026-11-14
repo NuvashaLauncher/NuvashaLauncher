@@ -33,7 +33,7 @@ secure_clear_string (char **str_ptr)
 }
 
 void
-nuvashalauncher_account_free (nuvashalauncherAccount *account)
+nuvashalauncher_account_free (NuvashaLauncherAccount *account)
 {
   if (account == NULL)
     return;
@@ -49,14 +49,14 @@ nuvashalauncher_account_free (nuvashalauncherAccount *account)
   g_free (account);
 }
 
-nuvashalauncherAccount *
-nuvashalauncher_account_copy (const nuvashalauncherAccount *account)
+NuvashaLauncherAccount *
+nuvashalauncher_account_copy (const NuvashaLauncherAccount *account)
 {
-  nuvashalauncherAccount *copy = NULL;
+  NuvashaLauncherAccount *copy = NULL;
 
   g_return_val_if_fail (account != NULL, NULL);
 
-  copy = g_new0 (nuvashalauncherAccount, 1);
+  copy = g_new0 (NuvashaLauncherAccount, 1);
   *copy = *account;
   copy->id = g_strdup (account->id);
   copy->name = g_strdup (account->name);
@@ -71,7 +71,7 @@ nuvashalauncher_account_copy (const nuvashalauncherAccount *account)
 }
 
 const char *
-nuvashalauncher_account_type_name (nuvashalauncherAccountType type)
+nuvashalauncher_account_type_name (NuvashaLauncherAccountType type)
 {
   return type == nuvashalauncher_ACCOUNT_MICROSOFT ? _("Microsoft") : _("Offline");
 }
@@ -140,7 +140,7 @@ nuvashalauncher_account_get_type (void)
 
   if (g_once_init_enter (&type_id))
     {
-      GType type = g_boxed_type_register_static ("nuvashalauncherAccount",
+      GType type = g_boxed_type_register_static ("NuvashaLauncherAccount",
                                                 (GBoxedCopyFunc) nuvashalauncher_account_copy,
                                                 (GBoxedFreeFunc) nuvashalauncher_account_free);
 
@@ -150,11 +150,11 @@ nuvashalauncher_account_get_type (void)
   return type_id;
 }
 
-nuvashalauncherAccount *
+NuvashaLauncherAccount *
 nuvashalauncher_account_new_offline (const char *name, GError **error)
 {
   const char *why = NULL;
-  nuvashalauncherAccount *account = NULL;
+  NuvashaLauncherAccount *account = NULL;
 
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
@@ -165,7 +165,7 @@ nuvashalauncher_account_new_offline (const char *name, GError **error)
       return NULL;
     }
 
-  account = g_new0 (nuvashalauncherAccount, 1);
+  account = g_new0 (NuvashaLauncherAccount, 1);
   account->type = nuvashalauncher_ACCOUNT_OFFLINE;
   account->id = g_strdup (name);
   account->name = g_strdup (name);
@@ -175,7 +175,7 @@ nuvashalauncher_account_new_offline (const char *name, GError **error)
 }
 
 gboolean
-nuvashalauncher_account_token_is_valid (const nuvashalauncherAccount *account, gint64 now)
+nuvashalauncher_account_token_is_valid (const NuvashaLauncherAccount *account, gint64 now)
 {
   g_return_val_if_fail (account != NULL, FALSE);
 
@@ -196,33 +196,33 @@ nuvashalauncher_account_token_is_valid (const nuvashalauncherAccount *account, g
  * Secret Service-backed store
  * ---------------------------------------------------------- */
 
-struct _nuvashalauncherAccounts
+struct _NuvashaLauncherAccounts
 {
   GObject parent_instance;
 
   char *filename; /* retained for the path-constructor API; never persisted */
-  GPtrArray *accounts; /* nuvashalauncherAccount*, element free nuvashalauncher_account_free */
+  GPtrArray *accounts; /* NuvashaLauncherAccount*, element free nuvashalauncher_account_free */
   char *active_id;
 };
 
-G_DEFINE_FINAL_TYPE (nuvashalauncherAccounts, nuvashalauncher_accounts, G_TYPE_OBJECT)
+G_DEFINE_FINAL_TYPE (NuvashaLauncherAccounts, nuvashalauncher_accounts, G_TYPE_OBJECT)
 
 static guint nuvashalauncher_accounts_signals[nuvashalauncher_ACCOUNTS_N_SIGNALS];
 
 static void
-emit_changed (nuvashalauncherAccounts *self)
+emit_changed (NuvashaLauncherAccounts *self)
 {
   g_signal_emit (self, nuvashalauncher_accounts_signals[nuvashalauncher_ACCOUNTS_SIGNAL_CHANGED], 0);
 }
 
 static gboolean
-active_is (nuvashalauncherAccounts *self, const char *id)
+active_is (NuvashaLauncherAccounts *self, const char *id)
 {
   return self->active_id != NULL && g_str_equal (self->active_id, id);
 }
 
-nuvashalauncherAccount *
-nuvashalauncher_accounts_find (nuvashalauncherAccounts *self, const char *id)
+NuvashaLauncherAccount *
+nuvashalauncher_accounts_find (NuvashaLauncherAccounts *self, const char *id)
 {
   g_return_val_if_fail (nuvashalauncher_IS_ACCOUNTS (self), NULL);
 
@@ -231,7 +231,7 @@ nuvashalauncher_accounts_find (nuvashalauncherAccounts *self, const char *id)
 
   for (guint i = 0; i < self->accounts->len; i++)
     {
-      nuvashalauncherAccount *account = g_ptr_array_index (self->accounts, i);
+      NuvashaLauncherAccount *account = g_ptr_array_index (self->accounts, i);
 
       if (g_str_equal (account->id, id))
         return account;
@@ -241,7 +241,7 @@ nuvashalauncher_accounts_find (nuvashalauncherAccounts *self, const char *id)
 }
 
 static gboolean
-save_account (const nuvashalauncherAccount *account, GError **error)
+save_account (const NuvashaLauncherAccount *account, GError **error)
 {
   return nuvashalauncher_secret_store_save_account (account, error);
 }
@@ -252,10 +252,10 @@ save_active (const char *id, GError **error)
   return nuvashalauncher_secret_store_save_active (id, error);
 }
 
-nuvashalauncherAccounts *
+NuvashaLauncherAccounts *
 nuvashalauncher_accounts_new_for_path (const char *filename)
 {
-  nuvashalauncherAccounts *self = NULL;
+  NuvashaLauncherAccounts *self = NULL;
 
   g_return_val_if_fail (filename != NULL, NULL);
 
@@ -273,7 +273,7 @@ nuvashalauncher_accounts_new_for_path (const char *filename)
       {
         for (guint i = 0; i < loaded->len; i++)
           {
-            nuvashalauncherAccount *account = g_ptr_array_index (loaded, i);
+            NuvashaLauncherAccount *account = g_ptr_array_index (loaded, i);
 
             if (nuvashalauncher_accounts_find (self, account->id) == NULL)
               g_ptr_array_add (self->accounts,
@@ -294,7 +294,7 @@ nuvashalauncher_accounts_new_for_path (const char *filename)
   return self;
 }
 
-nuvashalauncherAccounts *
+NuvashaLauncherAccounts *
 nuvashalauncher_accounts_new (void)
 {
   g_autofree char *directory = g_build_filename (g_get_user_data_dir (), "nuvashalauncher",
@@ -306,7 +306,7 @@ nuvashalauncher_accounts_new (void)
 }
 
 GPtrArray *
-nuvashalauncher_accounts_list (nuvashalauncherAccounts *self)
+nuvashalauncher_accounts_list (NuvashaLauncherAccounts *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_ACCOUNTS (self), NULL);
 
@@ -314,15 +314,15 @@ nuvashalauncher_accounts_list (nuvashalauncherAccounts *self)
 }
 
 guint
-nuvashalauncher_accounts_count (nuvashalauncherAccounts *self)
+nuvashalauncher_accounts_count (NuvashaLauncherAccounts *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_ACCOUNTS (self), 0);
 
   return self->accounts->len;
 }
 
-nuvashalauncherAccount *
-nuvashalauncher_accounts_get_active (nuvashalauncherAccounts *self)
+NuvashaLauncherAccount *
+nuvashalauncher_accounts_get_active (NuvashaLauncherAccounts *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_ACCOUNTS (self), NULL);
 
@@ -333,7 +333,7 @@ nuvashalauncher_accounts_get_active (nuvashalauncherAccounts *self)
 }
 
 const char *
-nuvashalauncher_accounts_get_active_id (nuvashalauncherAccounts *self)
+nuvashalauncher_accounts_get_active_id (NuvashaLauncherAccounts *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_ACCOUNTS (self), NULL);
 
@@ -341,7 +341,7 @@ nuvashalauncher_accounts_get_active_id (nuvashalauncherAccounts *self)
 }
 
 gboolean
-nuvashalauncher_accounts_set_active (nuvashalauncherAccounts *self, const char *id, GError **error)
+nuvashalauncher_accounts_set_active (NuvashaLauncherAccounts *self, const char *id, GError **error)
 {
   g_return_val_if_fail (nuvashalauncher_IS_ACCOUNTS (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
@@ -377,13 +377,13 @@ nuvashalauncher_accounts_set_active (nuvashalauncherAccounts *self, const char *
 }
 
 static gboolean
-accounts_add_internal (nuvashalauncherAccounts       *self,
-                       const nuvashalauncherAccount *account,
+accounts_add_internal (NuvashaLauncherAccounts       *self,
+                       const NuvashaLauncherAccount *account,
                        gboolean                      make_active,
                        GError                      **error)
 {
-  nuvashalauncherAccount *known = NULL;
-  nuvashalauncherAccount *previous = NULL;
+  NuvashaLauncherAccount *known = NULL;
+  NuvashaLauncherAccount *previous = NULL;
   g_autofree char *previous_active_id = NULL;
   guint added_index = G_MAXUINT;
 
@@ -408,7 +408,7 @@ accounts_add_internal (nuvashalauncherAccounts       *self,
       /* Signing in again replaces what was there, which is how a
          refreshed token and a changed profile are stored. */
       previous = nuvashalauncher_account_copy (known);
-      nuvashalauncherAccount *replacement = nuvashalauncher_account_copy (account);
+      NuvashaLauncherAccount *replacement = nuvashalauncher_account_copy (account);
 
       /* A sign-in that did not say anything about the avatar, skin or cape
          keeps what is already known about them. */
@@ -451,7 +451,7 @@ accounts_add_internal (nuvashalauncherAccounts       *self,
       self->active_id = g_strdup (account->id);
     }
 
-  const nuvashalauncherAccount *target =
+  const NuvashaLauncherAccount *target =
     known != NULL ? known : g_ptr_array_index (self->accounts, added_index);
 
   gboolean active_changed = g_strcmp0 (previous_active_id, self->active_id) != 0;
@@ -510,20 +510,20 @@ accounts_add_internal (nuvashalauncherAccounts       *self,
 }
 
 gboolean
-nuvashalauncher_accounts_add (nuvashalauncherAccounts *self, const nuvashalauncherAccount *account, GError **error)
+nuvashalauncher_accounts_add (NuvashaLauncherAccounts *self, const NuvashaLauncherAccount *account, GError **error)
 {
   return accounts_add_internal (self, account, TRUE, error);
 }
 
 gboolean
-nuvashalauncher_accounts_update (nuvashalauncherAccounts *self, const nuvashalauncherAccount *account,
+nuvashalauncher_accounts_update (NuvashaLauncherAccounts *self, const NuvashaLauncherAccount *account,
                      GError **error)
 {
   return accounts_add_internal (self, account, FALSE, error);
 }
 
 gboolean
-nuvashalauncher_accounts_remove (nuvashalauncherAccounts *self, const char *id, GError **error)
+nuvashalauncher_accounts_remove (NuvashaLauncherAccounts *self, const char *id, GError **error)
 {
   g_return_val_if_fail (nuvashalauncher_IS_ACCOUNTS (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
@@ -537,7 +537,7 @@ nuvashalauncher_accounts_remove (nuvashalauncherAccounts *self, const char *id, 
 
   for (guint i = 0; i < self->accounts->len; i++)
     {
-      nuvashalauncherAccount *account = g_ptr_array_index (self->accounts, i);
+      NuvashaLauncherAccount *account = g_ptr_array_index (self->accounts, i);
       g_autofree char *old_active_id = NULL;
       if (!g_str_equal (account->id, id))
         continue;
@@ -553,7 +553,7 @@ nuvashalauncher_accounts_remove (nuvashalauncherAccounts *self, const char *id, 
 
           if (self->accounts->len > 0)
             self->active_id =
-              g_strdup (((nuvashalauncherAccount *) g_ptr_array_index (self->accounts, 0))
+              g_strdup (((NuvashaLauncherAccount *) g_ptr_array_index (self->accounts, 0))
                           ->id);
         }
 
@@ -593,7 +593,7 @@ nuvashalauncher_accounts_remove (nuvashalauncherAccounts *self, const char *id, 
 static void
 nuvashalauncher_accounts_finalize (GObject *object)
 {
-  nuvashalauncherAccounts *self = nuvashalauncher_ACCOUNTS (object);
+  NuvashaLauncherAccounts *self = nuvashalauncher_ACCOUNTS (object);
 
   g_clear_pointer (&self->accounts, g_ptr_array_unref);
   g_free (self->active_id);
@@ -603,7 +603,7 @@ nuvashalauncher_accounts_finalize (GObject *object)
 }
 
 static void
-nuvashalauncher_accounts_class_init (nuvashalauncherAccountsClass *klass)
+nuvashalauncher_accounts_class_init (NuvashaLauncherAccountsClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
@@ -615,7 +615,7 @@ nuvashalauncher_accounts_class_init (nuvashalauncherAccountsClass *klass)
 }
 
 static void
-nuvashalauncher_accounts_init (nuvashalauncherAccounts *self G_GNUC_UNUSED)
+nuvashalauncher_accounts_init (NuvashaLauncherAccounts *self G_GNUC_UNUSED)
 {
   /* Everything is built by the constructors, which know the file. */
 }

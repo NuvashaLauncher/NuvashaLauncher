@@ -79,7 +79,7 @@ int_of (JsonObject *object, const char *member, gint64 *value)
  * ---------------------------------------------------------- */
 
 void
-nuvashalauncher_device_code_free (nuvashalauncherDeviceCode *code)
+nuvashalauncher_device_code_free (NuvashaLauncherDeviceCode *code)
 {
   if (code == NULL)
     return;
@@ -91,7 +91,7 @@ nuvashalauncher_device_code_free (nuvashalauncherDeviceCode *code)
   g_free (code);
 }
 
-nuvashalauncherDeviceCode *
+NuvashaLauncherDeviceCode *
 nuvashalauncher_auth_device_code_from_json (const char *json, gssize length,
                                 GError **error)
 {
@@ -100,7 +100,7 @@ nuvashalauncher_auth_device_code_from_json (const char *json, gssize length,
   g_autofree char *verification_uri = NULL;
   g_autofree char *message = NULL;
   g_autofree char *device_code = NULL;
-  nuvashalauncherDeviceCode *code = NULL;
+  NuvashaLauncherDeviceCode *code = NULL;
   JsonObject *object = NULL;
   gint64 expires_in = 0;
   gint64 interval = 5;
@@ -139,7 +139,7 @@ nuvashalauncher_auth_device_code_from_json (const char *json, gssize length,
       return NULL;
     }
 
-  code = g_new0 (nuvashalauncherDeviceCode, 1);
+  code = g_new0 (NuvashaLauncherDeviceCode, 1);
   code->user_code = g_steal_pointer (&user_code);
   code->verification_uri = g_steal_pointer (&verification_uri);
   code->message = g_steal_pointer (&message);
@@ -155,7 +155,7 @@ nuvashalauncher_auth_device_code_from_json (const char *json, gssize length,
  * ---------------------------------------------------------- */
 
 void
-nuvashalauncher_oauth_token_free (nuvashalauncherOAuthToken *token)
+nuvashalauncher_oauth_token_free (NuvashaLauncherOAuthToken *token)
 {
   if (token == NULL)
     return;
@@ -165,12 +165,12 @@ nuvashalauncher_oauth_token_free (nuvashalauncherOAuthToken *token)
   g_free (token);
 }
 
-nuvashalauncherOAuthToken *
+NuvashaLauncherOAuthToken *
 nuvashalauncher_auth_oauth_token_from_json (const char *json, gssize length, gint64 now,
                                 GError **error)
 {
   g_autoptr (JsonParser) parser = NULL;
-  nuvashalauncherOAuthToken *token = NULL;
+  NuvashaLauncherOAuthToken *token = NULL;
   JsonObject *object = NULL;
   gint64 expires_in = 0;
 
@@ -183,7 +183,7 @@ nuvashalauncher_auth_oauth_token_from_json (const char *json, gssize length, gin
   object = json_node_get_object (json_parser_get_root (parser));
   int_of (object, "expires_in", &expires_in);
 
-  token = g_new0 (nuvashalauncherOAuthToken, 1);
+  token = g_new0 (NuvashaLauncherOAuthToken, 1);
   token->access_token = string_of (object, "access_token");
   token->refresh_token = string_of (object, "refresh_token");
   token->expires_at = (expires_in > 0 &&
@@ -277,7 +277,7 @@ nuvashalauncher_auth_polling_error (const char *json, gssize length, gboolean *s
  * ---------------------------------------------------------- */
 
 void
-nuvashalauncher_xbox_token_free (nuvashalauncherXboxToken *token)
+nuvashalauncher_xbox_token_free (NuvashaLauncherXboxToken *token)
 {
   if (token == NULL)
     return;
@@ -317,13 +317,13 @@ xsts_refusal (gint64 code)
     }
 }
 
-nuvashalauncherXboxToken *
+NuvashaLauncherXboxToken *
 nuvashalauncher_auth_xbox_token_from_json (const char *json, gssize length,
                                GError **error)
 {
   g_autoptr (JsonParser) parser = NULL;
   g_autofree char *message = NULL;
-  nuvashalauncherXboxToken *token = NULL;
+  NuvashaLauncherXboxToken *token = NULL;
   JsonObject *object = NULL;
   JsonNode *claims = NULL;
   gint64 xerr = 0;
@@ -335,7 +335,7 @@ nuvashalauncher_auth_xbox_token_from_json (const char *json, gssize length,
     return NULL;
 
   object = json_node_get_object (json_parser_get_root (parser));
-  token = g_new0 (nuvashalauncherXboxToken, 1);
+  token = g_new0 (NuvashaLauncherXboxToken, 1);
   token->token = string_of (object, "Token");
   message = string_of (object, "Message");
 
@@ -371,7 +371,7 @@ nuvashalauncher_auth_xbox_token_from_json (const char *json, gssize length,
   if (int_of (object, "XErr", &xerr))
     {
       const char *words = xsts_refusal (xerr);
-      nuvashalauncherAuthError code = nuvashalauncher_AUTH_ERROR_XBOX;
+      NuvashaLauncherAuthError code = nuvashalauncher_AUTH_ERROR_XBOX;
 
       switch (xerr)
         {
@@ -420,13 +420,13 @@ nuvashalauncher_auth_identity_token (const char *user_hash, const char *xsts_tok
  * The Minecraft services
  * ---------------------------------------------------------- */
 
-nuvashalauncherOAuthToken *
+NuvashaLauncherOAuthToken *
 nuvashalauncher_auth_minecraft_token_from_json (const char *json, gssize length,
                                     gint64 now, GError **error)
 {
   g_autoptr (JsonParser) parser = NULL;
   g_autofree char *message = NULL;
-  nuvashalauncherOAuthToken *token = NULL;
+  NuvashaLauncherOAuthToken *token = NULL;
   JsonObject *object = NULL;
   gint64 expires_in = 0;
 
@@ -439,7 +439,7 @@ nuvashalauncher_auth_minecraft_token_from_json (const char *json, gssize length,
   object = json_node_get_object (json_parser_get_root (parser));
   message = string_of (object, "errorMessage");
 
-  token = g_new0 (nuvashalauncherOAuthToken, 1);
+  token = g_new0 (NuvashaLauncherOAuthToken, 1);
   token->access_token = string_of (object, "access_token");
   int_of (object, "expires_in", &expires_in);
   token->expires_at = (expires_in > 0 &&
@@ -534,7 +534,7 @@ nuvashalauncher_auth_owns_minecraft_from_json (const char *json, gssize length,
 }
 
 void
-nuvashalauncher_minecraft_profile_free (nuvashalauncherMinecraftProfile *profile)
+nuvashalauncher_minecraft_profile_free (NuvashaLauncherMinecraftProfile *profile)
 {
   if (profile == NULL)
     return;
@@ -547,12 +547,12 @@ nuvashalauncher_minecraft_profile_free (nuvashalauncherMinecraftProfile *profile
   g_free (profile);
 }
 
-nuvashalauncherMinecraftProfile *
+NuvashaLauncherMinecraftProfile *
 nuvashalauncher_auth_profile_from_json (const char *json, gssize length, GError **error)
 {
   g_autoptr (JsonParser) parser = NULL;
   g_autofree char *message = NULL;
-  nuvashalauncherMinecraftProfile *profile = NULL;
+  NuvashaLauncherMinecraftProfile *profile = NULL;
   JsonNode *skins = NULL;
   JsonArray *array = NULL;
   JsonObject *object = NULL;
@@ -564,7 +564,7 @@ nuvashalauncher_auth_profile_from_json (const char *json, gssize length, GError 
     return NULL;
 
   object = json_node_get_object (json_parser_get_root (parser));
-  profile = g_new0 (nuvashalauncherMinecraftProfile, 1);
+  profile = g_new0 (NuvashaLauncherMinecraftProfile, 1);
   profile->id = string_of (object, "id");
   profile->name = string_of (object, "name");
 

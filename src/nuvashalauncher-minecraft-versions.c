@@ -86,18 +86,18 @@ version_cache_path (const char *id, char **path, GError **error)
 
 typedef struct
 {
-  nuvashalauncherTaskSequence *sequence;
+  NuvashaLauncherTaskSequence *sequence;
   char *url;
   char *path;
 } FetchRequest;
 
 typedef struct
 {
-  nuvashalauncherTaskSequence *sequence;
+  NuvashaLauncherTaskSequence *sequence;
   char *path;       /* cache file of the document being read */
   char *next_id;    /* the version to fetch next, NULL when there is none */
-  nuvashalauncherVersionManifest *manifest;
-  nuvashalauncherVersionDescription *merged;
+  NuvashaLauncherVersionManifest *manifest;
+  NuvashaLauncherVersionDescription *merged;
   GHashTable *seen;              /* ids already on this chain */
 } LoadRequest;
 
@@ -123,7 +123,7 @@ load_request_free (LoadRequest *request)
 static void load_step (LoadRequest *request);
 
 static void
-load_sequence_step (nuvashalauncherTaskSequence *sequence G_GNUC_UNUSED,
+load_sequence_step (NuvashaLauncherTaskSequence *sequence G_GNUC_UNUSED,
                     gpointer user_data)
 {
   load_step (user_data);
@@ -137,7 +137,7 @@ manifest_file_loaded (GObject *source, GAsyncResult *result,
   g_autoptr (GError) error = NULL;
   g_autofree char *contents = NULL;
   gsize length = 0;
-  nuvashalauncherVersionManifest *manifest;
+  NuvashaLauncherVersionManifest *manifest;
 
   if (!g_file_load_contents_finish (G_FILE (source), result, &contents,
                                     &length, NULL, &error))
@@ -196,7 +196,7 @@ manifest_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
 }
 
 static void
-manifest_fetch_step (nuvashalauncherTaskSequence *sequence G_GNUC_UNUSED,
+manifest_fetch_step (NuvashaLauncherTaskSequence *sequence G_GNUC_UNUSED,
                      gpointer user_data)
 {
   FetchRequest *request = user_data;
@@ -208,14 +208,14 @@ manifest_fetch_step (nuvashalauncherTaskSequence *sequence G_GNUC_UNUSED,
     nuvashalauncher_task_sequence_get_cancellable (request->sequence));
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_version_manifest_fetch_async (const char         *url,
                                   GAsyncReadyCallback callback,
                                   gpointer            user_data)
 {
   g_autoptr (GCancellable) cancellable = g_cancellable_new ();
   FetchRequest *request;
-  nuvashalauncherTaskScope *scope = NULL;
+  NuvashaLauncherTaskScope *scope = NULL;
   g_autoptr (GError) error = NULL;
   g_autofree char *directory = NULL;
   g_return_val_if_fail (url != NULL, NULL);
@@ -226,7 +226,7 @@ nuvashalauncher_version_manifest_fetch_async (const char         *url,
     {
       /* The task reports back through an idle, so the caller never
        * hears from us before this function has returned. */
-      g_autoptr (nuvashalauncherTaskScope) failure =
+      g_autoptr (NuvashaLauncherTaskScope) failure =
         nuvashalauncher_task_scope_new (NULL, cancellable, callback, user_data);
 
       nuvashalauncher_task_scope_set_check_cancellable (failure, FALSE);
@@ -246,7 +246,7 @@ nuvashalauncher_version_manifest_fetch_async (const char         *url,
   /* Kept on the stack, not read back out of the request: a sequence that
      answers at once frees the request, and this is past that. */
   {
-    nuvashalauncherTaskSequence *sequence = request->sequence;
+    NuvashaLauncherTaskSequence *sequence = request->sequence;
 
     /* The handle the caller gets back stands for the whole run. The
        sequence keeps the task itself. */
@@ -259,7 +259,7 @@ nuvashalauncher_version_manifest_fetch_async (const char         *url,
   return scope;
 }
 
-nuvashalauncherVersionManifest *
+NuvashaLauncherVersionManifest *
 nuvashalauncher_version_manifest_fetch_finish (GAsyncResult *result, GError **error)
 {
   g_return_val_if_fail (G_IS_TASK (result), NULL);
@@ -274,7 +274,7 @@ load_file_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
   g_autoptr (GError) error = NULL;
   g_autofree char *contents = NULL;
   gsize length = 0;
-  nuvashalauncherVersionDescription *document;
+  NuvashaLauncherVersionDescription *document;
 
   if (!g_file_load_contents_finish (G_FILE (source), result, &contents,
                                     &length, NULL, &error))
@@ -312,7 +312,7 @@ load_file_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
     {
       /* The document just read is the parent, the accumulator the
        * child built out of everything below it. */
-      nuvashalauncherVersionDescription *combined =
+      NuvashaLauncherVersionDescription *combined =
         nuvashalauncher_version_description_merge (document, request->merged);
 
       g_object_unref (document);
@@ -322,7 +322,7 @@ load_file_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
 
   if (request->merged->inherits_from == NULL)
     {
-      nuvashalauncherVersionDescription *merged_result =
+      NuvashaLauncherVersionDescription *merged_result =
         g_steal_pointer (&request->merged);
 
       nuvashalauncher_task_sequence_return_pointer (request->sequence, merged_result,
@@ -364,7 +364,7 @@ load_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
 static void
 load_step (LoadRequest *request)
 {
-  const nuvashalauncherVersionEntry *entry;
+  const NuvashaLauncherVersionEntry *entry;
   g_autoptr (GError) error = NULL;
   g_autofree char *path = NULL;
 
@@ -410,14 +410,14 @@ load_step (LoadRequest *request)
     nuvashalauncher_task_sequence_get_cancellable (request->sequence));
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_version_load_async (nuvashalauncherVersionManifest *manifest,
+NuvashaLauncherTaskScope *
+nuvashalauncher_version_load_async (NuvashaLauncherVersionManifest *manifest,
                         const char         *version_id,
                         GAsyncReadyCallback callback,
                         gpointer            user_data)
 {
   g_autoptr (GCancellable) cancellable = g_cancellable_new ();
-  nuvashalauncherTaskScope *scope = NULL;
+  NuvashaLauncherTaskScope *scope = NULL;
   LoadRequest *request;
 
   g_return_val_if_fail (nuvashalauncher_IS_VERSION_MANIFEST (manifest), NULL);
@@ -436,7 +436,7 @@ nuvashalauncher_version_load_async (nuvashalauncherVersionManifest *manifest,
   /* Kept on the stack, not read back out of the request: a sequence that
      answers at once frees the request, and this is past that. */
   {
-    nuvashalauncherTaskSequence *sequence = request->sequence;
+    NuvashaLauncherTaskSequence *sequence = request->sequence;
 
     /* The handle the caller gets back stands for the whole run. The
        sequence keeps the task itself. */
@@ -449,7 +449,7 @@ nuvashalauncher_version_load_async (nuvashalauncherVersionManifest *manifest,
   return scope;
 }
 
-nuvashalauncherVersionDescription *
+NuvashaLauncherVersionDescription *
 nuvashalauncher_version_load_finish (GAsyncResult *result, GError **error)
 {
   g_return_val_if_fail (G_IS_TASK (result), NULL);

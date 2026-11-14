@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherDownloadModpackDialog: browsing Modrinth for modpacks and putting
+/* NuvashaLauncherDownloadModpackDialog: browsing Modrinth for modpacks and putting
  * one into a new instance.
  *
  * The flow is a navigation view with a Browse page, a Details page and
@@ -23,18 +23,18 @@ G_BEGIN_DECLS
 #define nuvashalauncher_TYPE_DOWNLOAD_MODPACK_DIALOG \
   (nuvashalauncher_download_modpack_dialog_get_type ())
 
-G_DECLARE_FINAL_TYPE (nuvashalauncherDownloadModpackDialog,
+G_DECLARE_FINAL_TYPE (NuvashaLauncherDownloadModpackDialog,
                       nuvashalauncher_download_modpack_dialog, nuvashalauncher,
                       DOWNLOAD_MODPACK_DIALOG, AdwDialog)
 
 /* The dialog is handed the manager; it keeps its own reference so that
  * an install that outlives the closing of the window is still talking
  * to a live manager. */
-nuvashalauncherDownloadModpackDialog *nuvashalauncher_download_modpack_dialog_new (
-    nuvashalauncherInstanceManager *manager);
+NuvashaLauncherDownloadModpackDialog *nuvashalauncher_download_modpack_dialog_new (
+    NuvashaLauncherInstanceManager *manager);
 
-nuvashalauncherDownloadModpackDialog *nuvashalauncher_download_modpack_dialog_new_for_file (
-    nuvashalauncherInstanceManager *manager, const char *path);
+NuvashaLauncherDownloadModpackDialog *nuvashalauncher_download_modpack_dialog_new_for_file (
+    NuvashaLauncherInstanceManager *manager, const char *path);
 
 G_END_DECLS
 

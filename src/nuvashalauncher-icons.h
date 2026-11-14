@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherIcons: the icon of a project, fetched once and kept in a cache.
+/* NuvashaLauncherIcons: the icon of a project, fetched once and kept in a cache.
  *
  * A list of search results shows an icon for every row. Fetching them
  * with the same download module the rest of nuvashalauncher uses keeps the retry and
@@ -51,7 +51,7 @@ gboolean nuvashalauncher_icon_scale_file (const char *path);
  * (transfer full) the operation, released with nuvashalauncher_task_scope_unref().
  *
  * (transfer full) the path, which the caller frees. */
-nuvashalauncherTaskScope *nuvashalauncher_icon_load_async (const char        *url,
+NuvashaLauncherTaskScope *nuvashalauncher_icon_load_async (const char        *url,
                                    GAsyncReadyCallback callback,
                                    gpointer           user_data);
 

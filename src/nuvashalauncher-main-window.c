@@ -3,7 +3,7 @@
  */
 
 /* The nuvashalauncher main window: header bar menus and the vertical list of
- * instances, shown exactly as nuvashalauncherInstanceManager keeps them, with an
+ * instances, shown exactly as NuvashaLauncherInstanceManager keeps them, with an
  * empty state behind it. The Play button of a row starts the game
  * through the launcher of that instance and follows it while it runs. */
 
@@ -22,7 +22,7 @@
 #include "nuvashalauncher-users-popover.h"
 #include "nuvashalauncher-ui-feedback.h"
 
-G_DEFINE_FINAL_TYPE (nuvashalauncherMainWindow, nuvashalauncher_main_window, ADW_TYPE_APPLICATION_WINDOW)
+G_DEFINE_FINAL_TYPE (NuvashaLauncherMainWindow, nuvashalauncher_main_window, ADW_TYPE_APPLICATION_WINDOW)
 
 static gboolean
 on_main_window_key_pressed (GtkEventControllerKey *controller G_GNUC_UNUSED,
@@ -31,7 +31,7 @@ on_main_window_key_pressed (GtkEventControllerKey *controller G_GNUC_UNUSED,
                             GdkModifierType state,
                             gpointer user_data)
 {
-  nuvashalauncherMainWindow *self = user_data;
+  NuvashaLauncherMainWindow *self = user_data;
   GtkWidget *focus = gtk_window_get_focus (GTK_WINDOW (self));
 
   /* Let text fields and other controls keep their own Ctrl-key behavior. */
@@ -65,7 +65,7 @@ on_main_window_key_pressed (GtkEventControllerKey *controller G_GNUC_UNUSED,
 }
 
 gboolean
-nuvashalauncher_main_window_launch_instance (nuvashalauncherMainWindow *self,
+nuvashalauncher_main_window_launch_instance (NuvashaLauncherMainWindow *self,
                                      const char *instance_id,
                                      GError **error)
 {
@@ -73,13 +73,13 @@ nuvashalauncher_main_window_launch_instance (nuvashalauncherMainWindow *self,
 }
 
 gboolean
-nuvashalauncher_main_window_launch_instance_as (nuvashalauncherMainWindow *self,
+nuvashalauncher_main_window_launch_instance_as (NuvashaLauncherMainWindow *self,
                                         const char *instance_id,
                                         const char *account_id,
                                         GError **error)
 {
-  nuvashalauncherInstance *instance;
-  nuvashalauncher *launcher;
+  NuvashaLauncherInstance *instance;
+  NuvashaLauncher *launcher;
 
   g_return_val_if_fail (nuvashalauncher_IS_MAIN_WINDOW (self), FALSE);
   g_return_val_if_fail (instance_id != NULL && *instance_id != '\0', FALSE);
@@ -118,9 +118,9 @@ nuvashalauncher_main_window_launch_instance_as (nuvashalauncherMainWindow *self,
 }
 
 void
-nuvashalauncher_main_window_import_file (nuvashalauncherMainWindow *self, const char *path)
+nuvashalauncher_main_window_import_file (NuvashaLauncherMainWindow *self, const char *path)
 {
-  nuvashalauncherDownloadModpackDialog *dialog;
+  NuvashaLauncherDownloadModpackDialog *dialog;
 
   g_return_if_fail (nuvashalauncher_IS_MAIN_WINDOW (self));
   g_return_if_fail (path != NULL && *path != '\0');
@@ -132,11 +132,11 @@ nuvashalauncher_main_window_import_file (nuvashalauncherMainWindow *self, const 
 
 /* Keep launch failures in the window banner until they are dismissed. */
 static void
-on_window_launcher_state (nuvashalauncher *launcher G_GNUC_UNUSED,
-                          nuvashalauncherLaunchState state,
+on_window_launcher_state (NuvashaLauncher *launcher G_GNUC_UNUSED,
+                          NuvashaLauncherLaunchState state,
                           const char *detail, gpointer user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   g_autofree char *message = NULL;
   const char *what = NULL;
 
@@ -187,7 +187,7 @@ on_window_launcher_state (nuvashalauncher *launcher G_GNUC_UNUSED,
 }
 
 static gboolean
-window_has_background_work (nuvashalauncherMainWindow *self)
+window_has_background_work (NuvashaLauncherMainWindow *self)
 {
   GHashTableIter iter;
   gpointer value = NULL;
@@ -208,7 +208,7 @@ window_has_background_work (nuvashalauncherMainWindow *self)
 }
 
 void
-nuvashalauncher_main_window_maybe_quit_background (nuvashalauncherMainWindow *self)
+nuvashalauncher_main_window_maybe_quit_background (NuvashaLauncherMainWindow *self)
 {
   if (!gtk_widget_get_visible (GTK_WIDGET (self)) &&
       !window_has_background_work (self))
@@ -219,7 +219,7 @@ nuvashalauncher_main_window_maybe_quit_background (nuvashalauncherMainWindow *se
 static gboolean
 background_quit_tick (gpointer user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
 
   if (gtk_widget_get_visible (GTK_WIDGET (self)))
     {
@@ -259,7 +259,7 @@ window_settings_new (void)
 static gboolean
 on_window_close_request (GtkWindow *window, gpointer user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   int width = 0;
   int height = 0;
 
@@ -289,11 +289,11 @@ on_window_close_request (GtkWindow *window, gpointer user_data)
 /* The launcher of one instance, made when it is first asked for. It is
  * the one launcher the row and the page of that instance share, which
  * is what keeps a game from being started twice. */
- nuvashalauncher *
-window_launcher (nuvashalauncherMainWindow *self, const char *instance_id)
+ NuvashaLauncher *
+window_launcher (NuvashaLauncherMainWindow *self, const char *instance_id)
 {
-  nuvashalauncher *launcher = NULL;
-  nuvashalauncherInstance *instance = NULL;
+  NuvashaLauncher *launcher = NULL;
+  NuvashaLauncherInstance *instance = NULL;
 
   if (instance_id == NULL)
     return NULL;
@@ -322,7 +322,7 @@ window_launcher (nuvashalauncherMainWindow *self, const char *instance_id)
 }
 
 static void
-nuvashalauncher_main_window_init (nuvashalauncherMainWindow *self)
+nuvashalauncher_main_window_init (NuvashaLauncherMainWindow *self)
 {
   self->model = nuvashalauncher_main_window_model_new ();
   nuvashalauncher_task_scope_unref_when_done (
@@ -353,13 +353,13 @@ nuvashalauncher_main_window_init (nuvashalauncherMainWindow *self)
 }
 
 
-nuvashalauncherMainWindow *
-nuvashalauncher_main_window_new (AdwApplication *application, nuvashalauncherInstanceManager *manager)
+NuvashaLauncherMainWindow *
+nuvashalauncher_main_window_new (AdwApplication *application, NuvashaLauncherInstanceManager *manager)
 {
   g_return_val_if_fail (ADW_IS_APPLICATION (application), NULL);
   g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (manager), NULL);
 
-  nuvashalauncherMainWindow *self = g_object_new (nuvashalauncher_TYPE_MAIN_WINDOW,
+  NuvashaLauncherMainWindow *self = g_object_new (nuvashalauncher_TYPE_MAIN_WINDOW,
                                       "application", application,
                                       NULL);
   GListStore *instances = nuvashalauncher_instance_manager_get_instances (manager);
@@ -427,7 +427,7 @@ nuvashalauncher_main_window_new (AdwApplication *application, nuvashalauncherIns
 static void
 nuvashalauncher_main_window_dispose (GObject *object)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (object);
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (object);
 
   if (self->background_quit_source != 0)
     {
@@ -448,7 +448,7 @@ nuvashalauncher_main_window_dispose (GObject *object)
 }
 
 static void
-nuvashalauncher_main_window_class_init (nuvashalauncherMainWindowClass *klass)
+nuvashalauncher_main_window_class_init (NuvashaLauncherMainWindowClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 

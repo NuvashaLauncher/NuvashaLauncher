@@ -99,7 +99,7 @@ test_archive_readers_close_fds (void)
   guint before = open_fd_count ();
   for (guint i = 0; i < 32; i++)
     {
-      g_autoptr (nuvashalauncherModpack) pack =
+      g_autoptr (NuvashaLauncherModpack) pack =
         nuvashalauncher_modpack_new_from_zip (archive, &error);
       g_assert_no_error (error);
       g_assert_nonnull (pack);

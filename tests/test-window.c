@@ -71,7 +71,7 @@ count_widget_type (GtkWidget *widget, GType type)
 static void
 test_main_window_model_owns_services (void)
 {
-  g_autoptr (nuvashalauncherMainWindowModel) model = nuvashalauncher_main_window_model_new ();
+  g_autoptr (NuvashaLauncherMainWindowModel) model = nuvashalauncher_main_window_model_new ();
 
   g_assert_nonnull (model->settings);
   g_assert_nonnull (model->accounts);
@@ -293,8 +293,8 @@ on_activate (GApplication *application, gpointer user_data)
 {
   Run *run = user_data;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
-  g_autoptr (nuvashalauncherInstance) instance = NULL;
+  g_autoptr (NuvashaLauncherInstanceManager) manager = NULL;
+  g_autoptr (NuvashaLauncherInstance) instance = NULL;
 
   manager = nuvashalauncher_instance_manager_new (NULL);
   g_assert_nonnull (manager);

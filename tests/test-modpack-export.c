@@ -14,16 +14,16 @@ test_export_import_round_trip (void)
   g_autofree char *index =
     g_build_filename (source_dir, "mods", ".index", "index.json", NULL);
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherInstanceManager) source_manager = manager_new (source_data);
-  g_autoptr (nuvashalauncherInstanceManager) target_manager = manager_new (target_data);
-  g_autoptr (nuvashalauncherInstance) source = NULL;
-  g_autoptr (nuvashalauncherModpack) pack = NULL;
-  g_autoptr (nuvashalauncherInstance) imported = NULL;
+  g_autoptr (NuvashaLauncherInstanceManager) source_manager = manager_new (source_data);
+  g_autoptr (NuvashaLauncherInstanceManager) target_manager = manager_new (target_data);
+  g_autoptr (NuvashaLauncherInstance) source = NULL;
+  g_autoptr (NuvashaLauncherModpack) pack = NULL;
+  g_autoptr (NuvashaLauncherInstance) imported = NULL;
   g_autofree char *imported_dir = NULL;
   g_autofree char *imported_icon = NULL;
   g_autofree char *icon_bytes = NULL;
   g_autofree char *override_bytes = NULL;
-  nuvashalauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
 
   source = nuvashalauncher_instance_manager_create (source_manager, "Round Trip",
                                         source_dir, "1.20.1", nuvashalauncher_LOADER_FABRIC,
@@ -132,10 +132,10 @@ test_export_preserves_managed_datapack (void)
                                                 "example.zip", NULL);
   g_autofree char *archive = g_build_filename (root, "managed.mrpack", NULL);
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherInstanceManager) manager = manager_new (data_dir);
-  g_autoptr (nuvashalauncherInstance) instance = NULL;
-  g_autoptr (nuvashalauncherModpack) exported = NULL;
-  nuvashalauncherContentIndexEntry entry = { 0 };
+  g_autoptr (NuvashaLauncherInstanceManager) manager = manager_new (data_dir);
+  g_autoptr (NuvashaLauncherInstance) instance = NULL;
+  g_autoptr (NuvashaLauncherModpack) exported = NULL;
+  NuvashaLauncherContentIndexEntry entry = { 0 };
   GStatBuf stat_buf;
 
   instance = nuvashalauncher_instance_manager_create (manager, "Managed Pack",
@@ -183,7 +183,7 @@ test_export_preserves_managed_datapack (void)
   g_assert_cmpstr (exported->version_id, ==, "original-version");
   g_assert_cmpuint (exported->files->len, ==, 1);
   {
-    nuvashalauncherModpackFile *file = g_ptr_array_index (exported->files, 0);
+    NuvashaLauncherModpackFile *file = g_ptr_array_index (exported->files, 0);
 
     g_assert_cmpstr (file->path, ==, "datapacks/example.zip");
     g_assert_cmpstr (file->sha1, ==,
@@ -206,8 +206,8 @@ test_dialog_imports_and_installs (void)
   g_autofree char *zip_path = g_build_filename (dir, "pack.mrpack", NULL);
   g_autofree char *index_json =
     pack_index ("Dialog Pack", "", "\"minecraft\":\"1.20.1\"");
-  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
-  g_autoptr (nuvashalauncherDownloadModpackDialog) dialog = NULL;
+  g_autoptr (NuvashaLauncherInstanceManager) manager = NULL;
+  g_autoptr (NuvashaLauncherDownloadModpackDialog) dialog = NULL;
   g_autoptr (GtkWindow) window = NULL;
   GtkButton *anchor;
   ZipEntry entries[] = {

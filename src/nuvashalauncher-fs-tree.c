@@ -163,7 +163,7 @@ nuvashalauncher_fs_remove_tree (const char *path)
 
 typedef struct {
   char *path;
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
 } RemoveTreeData;
 
 static void
@@ -181,7 +181,7 @@ remove_tree_thread (GTask *task G_GNUC_UNUSED,
                     gpointer task_data, GCancellable *cancellable G_GNUC_UNUSED)
 {
   RemoveTreeData *data = task_data;
-  g_autoptr (nuvashalauncherTaskScope) scope = g_steal_pointer (&data->scope);
+  g_autoptr (NuvashaLauncherTaskScope) scope = g_steal_pointer (&data->scope);
 
   if (nuvashalauncher_task_scope_return_error_if_cancelled (scope))
     return;
@@ -198,11 +198,11 @@ remove_tree_thread (GTask *task G_GNUC_UNUSED,
     nuvashalauncher_task_scope_return_boolean (scope, TRUE);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_fs_remove_tree_async (const char *path, GAsyncReadyCallback callback,
                           gpointer user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   GTask *task = nuvashalauncher_task_scope_task (scope);
   RemoveTreeData *data = g_new0 (RemoveTreeData, 1);
@@ -225,7 +225,7 @@ nuvashalauncher_fs_remove_tree_finish (GAsyncResult *result, GError **error)
 typedef struct {
   GFile *source;
   GFile *destination;
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
 } CopyTreeData;
 
 static void
@@ -366,7 +366,7 @@ copy_tree_thread (GTask *task G_GNUC_UNUSED,
                   gpointer task_data, GCancellable *cancellable)
 {
   CopyTreeData *data = task_data;
-  g_autoptr (nuvashalauncherTaskScope) scope = g_steal_pointer (&data->scope);
+  g_autoptr (NuvashaLauncherTaskScope) scope = g_steal_pointer (&data->scope);
   g_autoptr (GError) error = NULL;
 
   if (copy_tree_sync (data->source, data->destination, cancellable,
@@ -376,11 +376,11 @@ copy_tree_thread (GTask *task G_GNUC_UNUSED,
     nuvashalauncher_task_scope_return_error (scope, g_steal_pointer (&error));
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_fs_copy_tree_async (GFile *source, GFile *destination,
                         GAsyncReadyCallback callback, gpointer user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   GTask *task = nuvashalauncher_task_scope_task (scope);
   CopyTreeData *data = g_new0 (CopyTreeData, 1);

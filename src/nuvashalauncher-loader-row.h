@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherLoaderRow: the two rows that choose the mod loader of an instance
+/* NuvashaLauncherLoaderRow: the two rows that choose the mod loader of an instance
  * and one of its versions.
  *
  * The first row is the loaders nuvashalauncher installs, and nothing else: a loader
@@ -38,7 +38,7 @@ G_BEGIN_DECLS
  * their popups the same way as every other dropdown on that page. An
  * AdwComboRow that is not a row of a group has no list box to press
  * into, and pressing it does nothing at all. */
-G_DECLARE_FINAL_TYPE (nuvashalauncherLoaderRow, nuvashalauncher_loader_row, nuvashalauncher, LOADER_ROW, GObject)
+G_DECLARE_FINAL_TYPE (NuvashaLauncherLoaderRow, nuvashalauncher_loader_row, nuvashalauncher, LOADER_ROW, GObject)
 
 /* "changed" is what a screen stores the choice with: ask get_loader()
  * and get_version() and write them down. It fires when the user picks a
@@ -51,37 +51,37 @@ enum {
 };
 
 /* Makes the two rows, holding vanilla and no version until loaded. */
-nuvashalauncherLoaderRow *nuvashalauncher_loader_row_new (void);
+NuvashaLauncherLoaderRow *nuvashalauncher_loader_row_new (void);
 
 /* The "Loader" row. Add it to the group of the page, next to the
  * dropdowns that are already there. */
-AdwComboRow *nuvashalauncher_loader_row_get_loader_row (nuvashalauncherLoaderRow *self);
+AdwComboRow *nuvashalauncher_loader_row_get_loader_row (NuvashaLauncherLoaderRow *self);
 
 /* The "Loader Version" row, for the same group. */
-AdwComboRow *nuvashalauncher_loader_row_get_version_row (nuvashalauncherLoaderRow *self);
+AdwComboRow *nuvashalauncher_loader_row_get_version_row (NuvashaLauncherLoaderRow *self);
 
 /* Loads the versions of @loader for @game_version, picking
    @loader_version, and remembers @game_version for the loads that come
    after it. This is what a screen calls when the Minecraft version
    changes. */
-void nuvashalauncher_loader_row_load (nuvashalauncherLoaderRow *self,
-                          nuvashalauncherSettings   *settings,
-                          nuvashalauncherLoader      loader,
+void nuvashalauncher_loader_row_load (NuvashaLauncherLoaderRow *self,
+                          NuvashaLauncherSettings   *settings,
+                          NuvashaLauncherLoader      loader,
                           const char    *loader_version,
                           const char    *game_version);
 
 /* The loader that is picked. Vanilla until something else is. */
-nuvashalauncherLoader nuvashalauncher_loader_row_get_loader (nuvashalauncherLoaderRow *self);
+NuvashaLauncherLoader nuvashalauncher_loader_row_get_loader (NuvashaLauncherLoaderRow *self);
 
 /* The version that is picked, or NULL when there is none to pick: while
  * loading, when the loader has nothing for that Minecraft version and
  * when the list could not be fetched. Vanilla has no version at all. */
-const char *nuvashalauncher_loader_row_get_version (nuvashalauncherLoaderRow *self);
+const char *nuvashalauncher_loader_row_get_version (NuvashaLauncherLoaderRow *self);
 
 /* Locks or unlocks both rows. While the game of the instance runs, a
  * loader cannot be changed under it, so a screen locks the rows and
  * unlocks them again when the game stops. */
-void nuvashalauncher_loader_row_set_blocked (nuvashalauncherLoaderRow *self, gboolean blocked);
+void nuvashalauncher_loader_row_set_blocked (NuvashaLauncherLoaderRow *self, gboolean blocked);
 
 G_END_DECLS
 

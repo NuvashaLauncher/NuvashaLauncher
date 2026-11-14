@@ -13,11 +13,11 @@
 #include "nuvashalauncher-settings.h"
 #include "nuvashalauncher-users-popover.h"
 
-struct _nuvashalauncherMainWindow
+struct _NuvashaLauncherMainWindow
 {
   AdwApplicationWindow parent_instance;
 
-  nuvashalauncherMainWindowModel *model;
+  NuvashaLauncherMainWindowModel *model;
   GSettings *window_settings;
   guint background_quit_source;
 
@@ -42,30 +42,30 @@ struct _nuvashalauncherMainWindow
     AdwSpinner *spinner;
     GtkImage *icon;        /* icon beside the spinner */
     GtkBox *list;          /* the box inside the dropdown */
-    GHashTable *rows;    /* nuvashalauncherDownload* -> DownloadRow* */
+    GHashTable *rows;    /* NuvashaLauncherDownload* -> DownloadRow* */
   } downloads;
 };
 
 
-void refresh_downloads (nuvashalauncherMainWindow *self);
-void on_downloads_changed (nuvashalauncherDownloads *downloads, gpointer user_data);
-void nuvashalauncher_main_window_build_ui (nuvashalauncherMainWindow *self);
+void refresh_downloads (NuvashaLauncherMainWindow *self);
+void on_downloads_changed (NuvashaLauncherDownloads *downloads, gpointer user_data);
+void nuvashalauncher_main_window_build_ui (NuvashaLauncherMainWindow *self);
 void download_row_free (gpointer data);
-nuvashalauncher *window_launcher (nuvashalauncherMainWindow *self, const char *instance_id);
-void update_visible_page (nuvashalauncherMainWindow *self);
-void nuvashalauncher_main_window_show_crash_logs (nuvashalauncherMainWindow *self,
-                                          nuvashalauncher *launcher);
-void nuvashalauncher_main_window_maybe_quit_background (nuvashalauncherMainWindow *self);
+NuvashaLauncher *window_launcher (NuvashaLauncherMainWindow *self, const char *instance_id);
+void update_visible_page (NuvashaLauncherMainWindow *self);
+void nuvashalauncher_main_window_show_crash_logs (NuvashaLauncherMainWindow *self,
+                                          NuvashaLauncher *launcher);
+void nuvashalauncher_main_window_maybe_quit_background (NuvashaLauncherMainWindow *self);
 GtkWidget *create_instance_row (gpointer item, gpointer user_data);
 void on_row_activate (GtkListBox *list, GtkListBoxRow *row,
                       gpointer user_data);
-void on_instances_changed (nuvashalauncherMainWindow *self, GListModel *model,
+void on_instances_changed (NuvashaLauncherMainWindow *self, GListModel *model,
                            guint position, guint removed, guint added);
-void set_instance_edit_mode (nuvashalauncherMainWindow *self);
-void update_instance_selection_ui (nuvashalauncherMainWindow *self);
-void bulk_export_instances (nuvashalauncherMainWindow *self);
-void bulk_duplicate_instances (nuvashalauncherMainWindow *self);
-void bulk_delete_instances (nuvashalauncherMainWindow *self);
+void set_instance_edit_mode (NuvashaLauncherMainWindow *self);
+void update_instance_selection_ui (NuvashaLauncherMainWindow *self);
+void bulk_export_instances (NuvashaLauncherMainWindow *self);
+void bulk_duplicate_instances (NuvashaLauncherMainWindow *self);
+void bulk_delete_instances (NuvashaLauncherMainWindow *self);
 GMenu *create_add_menu (void);
 GMenu *create_app_menu (void);
 void set_menu_item_tooltip (GtkWidget *root, const char *label_text,

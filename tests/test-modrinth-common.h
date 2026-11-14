@@ -38,11 +38,11 @@ read_fixture (const char *name)
 }
 
 /* A search for @version and @loader, with the strings it owns. */
-static inline nuvashalauncherModrinthSearch *
-search_new (nuvashalauncherContentType type, const char *query, const char *version,
+static inline NuvashaLauncherModrinthSearch *
+search_new (NuvashaLauncherContentType type, const char *query, const char *version,
             const char *loader)
 {
-  nuvashalauncherModrinthSearch *search = g_new0 (nuvashalauncherModrinthSearch, 1);
+  NuvashaLauncherModrinthSearch *search = g_new0 (NuvashaLauncherModrinthSearch, 1);
 
   search->type = type;
   search->query = g_strdup (query != NULL ? query : "");
@@ -102,7 +102,7 @@ search_new (nuvashalauncherContentType type, const char *query, const char *vers
 /* The version of the fixture with this number, whatever its game
    versions: the one object of the answer nuvashalauncher would refuse is needed on
    its own to be asked about. (transfer full) */
-static inline nuvashalauncherModrinthVersion *
+static inline NuvashaLauncherModrinthVersion *
 version_from_fixture (const char *json, const char *number)
 {
   g_autoptr (JsonParser) parser = json_parser_new ();
@@ -181,7 +181,7 @@ static GMainLoop *scanning = NULL;
 
 typedef struct
 {
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
 } ScanWait;
 
 static inline void
@@ -206,7 +206,7 @@ on_scan_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 /* Reads a content folder and waits for it, which is the asynchronous
  * way the page does the same. (transfer full) */
 static inline GPtrArray *
-scan (const char *instance, nuvashalauncherContentType type)
+scan (const char *instance, NuvashaLauncherContentType type)
 {
   GPtrArray *files = NULL;
 

@@ -11,7 +11,7 @@
 
 typedef struct
 {
-  nuvashalauncherSkinView *view;
+  NuvashaLauncherSkinView *view;
   gboolean cape;
   char *url;
   SoupMessage *message;
@@ -28,7 +28,7 @@ skin_texture_load_free (SkinTextureLoad *load)
 }
 
 static void
-cache_skin_bytes (nuvashalauncherSkinView *view, const char *url, GBytes *bytes,
+cache_skin_bytes (NuvashaLauncherSkinView *view, const char *url, GBytes *bytes,
                   gboolean cape)
 {
   g_autofree char *cache_directory = skin_directory_path ();
@@ -176,7 +176,7 @@ start_view_http_load (SkinTextureLoad *load)
 }
 
 void
-load_view_texture (nuvashalauncherSkinView *view, const char *url, gboolean cape)
+load_view_texture (NuvashaLauncherSkinView *view, const char *url, gboolean cape)
 {
   g_autoptr (GFile) file = NULL;
   g_autofree char *cached = NULL;

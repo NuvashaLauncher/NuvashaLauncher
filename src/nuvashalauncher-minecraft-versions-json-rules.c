@@ -10,10 +10,10 @@
 #define MAX_VERSION_VALUE_LENGTH 1024
 #include <string.h>
 
-nuvashalauncherRule *
+NuvashaLauncherRule *
 nuvashalauncher_mc_parse_rule (JsonObject *object, GError **error)
 {
-  nuvashalauncherRule *rule = g_new0 (nuvashalauncherRule, 1);
+  NuvashaLauncherRule *rule = g_new0 (NuvashaLauncherRule, 1);
   JsonObject *os = NULL;
   JsonObject *features = NULL;
   g_autofree char *action = NULL;
@@ -107,7 +107,7 @@ nuvashalauncher_mc_parse_rules (JsonNode *node, GError **error)
   for (guint i = 0; i < json_array_get_length (array); i++)
     {
       JsonNode *item = json_array_get_element (array, i);
-      nuvashalauncherRule *rule;
+      NuvashaLauncherRule *rule;
 
       if (!JSON_NODE_HOLDS_OBJECT (item))
         {
@@ -220,7 +220,7 @@ version_matches (const char *pattern, const char *version)
 }
 
 gboolean
-nuvashalauncher_rule_matches (const nuvashalauncherRule *rule, const nuvashalauncherRuleContext *context)
+nuvashalauncher_rule_matches (const NuvashaLauncherRule *rule, const NuvashaLauncherRuleContext *context)
 {
   g_return_val_if_fail (rule != NULL, FALSE);
   g_return_val_if_fail (context != NULL, FALSE);
@@ -267,7 +267,7 @@ nuvashalauncher_rule_matches (const nuvashalauncherRule *rule, const nuvashalaun
 }
 
 gboolean
-nuvashalauncher_rules_allow (GPtrArray *rules, const nuvashalauncherRuleContext *context)
+nuvashalauncher_rules_allow (GPtrArray *rules, const NuvashaLauncherRuleContext *context)
 {
   g_return_val_if_fail (context != NULL, FALSE);
 
@@ -281,7 +281,7 @@ nuvashalauncher_rules_allow (GPtrArray *rules, const nuvashalauncherRuleContext 
 
   for (guint i = 0; i < rules->len; i++)
     {
-      nuvashalauncherRule *rule = g_ptr_array_index (rules, i);
+      NuvashaLauncherRule *rule = g_ptr_array_index (rules, i);
 
       if (nuvashalauncher_rule_matches (rule, context))
         allowed = rule->allow;
@@ -291,7 +291,7 @@ nuvashalauncher_rules_allow (GPtrArray *rules, const nuvashalauncherRuleContext 
 }
 
 gboolean
-nuvashalauncher_argument_allowed (const nuvashalauncherArgument *argument, const nuvashalauncherRuleContext *context)
+nuvashalauncher_argument_allowed (const NuvashaLauncherArgument *argument, const NuvashaLauncherRuleContext *context)
 {
   g_return_val_if_fail (argument != NULL, FALSE);
   g_return_val_if_fail (context != NULL, FALSE);
@@ -300,7 +300,7 @@ nuvashalauncher_argument_allowed (const nuvashalauncherArgument *argument, const
 }
 
 gboolean
-nuvashalauncher_library_allowed (const nuvashalauncherLibrary *library, const nuvashalauncherRuleContext *context)
+nuvashalauncher_library_allowed (const NuvashaLauncherLibrary *library, const NuvashaLauncherRuleContext *context)
 {
   g_return_val_if_fail (library != NULL, FALSE);
   g_return_val_if_fail (context != NULL, FALSE);
@@ -308,12 +308,12 @@ nuvashalauncher_library_allowed (const nuvashalauncherLibrary *library, const nu
   return nuvashalauncher_rules_allow (library->rules, context);
 }
 
-nuvashalauncherRuleContext *
+NuvashaLauncherRuleContext *
 nuvashalauncher_rule_context_new_for (const char *os_name,
                           const char *os_arch,
                           const char *os_version)
 {
-  nuvashalauncherRuleContext *context = g_new0 (nuvashalauncherRuleContext, 1);
+  NuvashaLauncherRuleContext *context = g_new0 (NuvashaLauncherRuleContext, 1);
 
   context->os_name = g_strdup (os_name);
   context->os_arch = g_strdup (os_arch);
@@ -324,7 +324,7 @@ nuvashalauncher_rule_context_new_for (const char *os_name,
   return context;
 }
 
-nuvashalauncherRuleContext *
+NuvashaLauncherRuleContext *
 nuvashalauncher_rule_context_new (void)
 {
   struct utsname machine;
@@ -346,7 +346,7 @@ nuvashalauncher_rule_context_new (void)
 }
 
 void
-nuvashalauncher_rule_context_free (nuvashalauncherRuleContext *context)
+nuvashalauncher_rule_context_free (NuvashaLauncherRuleContext *context)
 {
   if (context == NULL)
     return;
@@ -359,7 +359,7 @@ nuvashalauncher_rule_context_free (nuvashalauncherRuleContext *context)
 }
 
 void
-nuvashalauncher_rule_context_set_feature (nuvashalauncherRuleContext *context,
+nuvashalauncher_rule_context_set_feature (NuvashaLauncherRuleContext *context,
                               const char     *name,
                               gboolean        value)
 {
@@ -374,7 +374,7 @@ nuvashalauncher_rule_context_set_feature (nuvashalauncherRuleContext *context,
 }
 
 gboolean
-nuvashalauncher_rule_context_get_feature (nuvashalauncherRuleContext *context, const char *name)
+nuvashalauncher_rule_context_get_feature (NuvashaLauncherRuleContext *context, const char *name)
 {
   g_return_val_if_fail (context != NULL, FALSE);
   g_return_val_if_fail (name != NULL, FALSE);

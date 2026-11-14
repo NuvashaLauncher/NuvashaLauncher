@@ -26,6 +26,7 @@ src/nuvashalauncher-content-page-details.c
 src/nuvashalauncher-content-page-identify.c
 src/nuvashalauncher-content-page-install.c
 src/nuvashalauncher-content-page-installed-icons.c
+src/nuvashalauncher-content-page-installed-delete.c
 src/nuvashalauncher-content-page-installed.c
 src/nuvashalauncher-content-page-picks.c
 src/nuvashalauncher-content-page-ui.c
@@ -62,6 +63,7 @@ src/nuvashalauncher-instance-page.c
 src/nuvashalauncher-instance.c
 src/nuvashalauncher-java-discovery.c
 src/nuvashalauncher-java-parse.c
+src/nuvashalauncher-java-row-discovery.c
 src/nuvashalauncher-java-row.c
 src/nuvashalauncher-java.c
 src/nuvashalauncher-json.c

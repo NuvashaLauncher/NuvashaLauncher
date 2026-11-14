@@ -4,10 +4,10 @@
 
 #include "nuvashalauncher-content-browser-model.h"
 
-nuvashalauncherContentBrowserModel *
+NuvashaLauncherContentBrowserModel *
 nuvashalauncher_content_browser_model_new (void)
 {
-  nuvashalauncherContentBrowserModel *model = g_new0 (nuvashalauncherContentBrowserModel, 1);
+  NuvashaLauncherContentBrowserModel *model = g_new0 (NuvashaLauncherContentBrowserModel, 1);
 
   model->more = g_cancellable_new ();
   model->cancellable = g_cancellable_new ();
@@ -28,7 +28,7 @@ nuvashalauncher_content_browser_model_new (void)
 }
 
 void
-nuvashalauncher_content_browser_model_free (nuvashalauncherContentBrowserModel *model)
+nuvashalauncher_content_browser_model_free (NuvashaLauncherContentBrowserModel *model)
 {
   if (model == NULL)
     return;

@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherContentPage shows installed content and the compatible Modrinth
+/* NuvashaLauncherContentPage shows installed content and the compatible Modrinth
  * catalog for one instance. The content type supplies the folder, loader
  * filter, file extensions, title, and icon.
  *
@@ -28,14 +28,14 @@
 #include "nuvashalauncher-content-files-private.h"
 #include "nuvashalauncher-operation.h"
 
-G_DEFINE_FINAL_TYPE (nuvashalauncherContentPage, nuvashalauncher_content_page, GTK_TYPE_BOX)
+G_DEFINE_FINAL_TYPE (NuvashaLauncherContentPage, nuvashalauncher_content_page, GTK_TYPE_BOX)
 
 static void
 nuvashalauncher_content_page_size_allocate (GtkWidget *widget, int width, int height, int baseline)
 {
   GTK_WIDGET_CLASS (nuvashalauncher_content_page_parent_class)->size_allocate (widget, width, height, baseline);
 
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (widget);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (widget);
   gboolean narrow = width > 0 && width < 720;
 
   if (self->bar == NULL)
@@ -47,9 +47,9 @@ nuvashalauncher_content_page_size_allocate (GtkWidget *widget, int width, int he
   gtk_widget_set_vexpand (GTK_WIDGET (self->bar_spacer), narrow);
 }
 
-void update_batch_next (nuvashalauncherContentPage *self);
-void batch_next (nuvashalauncherContentPage *self);
-void plan_stopped (nuvashalauncherContentPage *self);
+void update_batch_next (NuvashaLauncherContentPage *self);
+void batch_next (NuvashaLauncherContentPage *self);
+void plan_stopped (NuvashaLauncherContentPage *self);
 
 static void
 folder_open_request_free (gpointer data)
@@ -80,7 +80,7 @@ open_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 void
 nuvashalauncher_content_page_on_open_folder_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
   g_autofree char *uri = NULL;
 
   /* The folder may not exist yet on a fresh instance: asking the desktop
@@ -110,13 +110,13 @@ nuvashalauncher_content_page_on_open_folder_clicked (GtkButton *button G_GNUC_UN
   }
 }
 
-nuvashalauncherContentPage *
-nuvashalauncher_content_page_new (nuvashalauncherInstance *instance, nuvashalauncherContentType type)
+NuvashaLauncherContentPage *
+nuvashalauncher_content_page_new (NuvashaLauncherInstance *instance, NuvashaLauncherContentType type)
 {
-  nuvashalauncherContentPage *self = NULL;
+  NuvashaLauncherContentPage *self = NULL;
   g_autofree char *directory = NULL;
   const char *loader = NULL;
-  nuvashalauncherLoader value = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader value = nuvashalauncher_LOADER_VANILLA;
 
   g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (instance), NULL);
 
@@ -206,7 +206,7 @@ nuvashalauncher_content_page_new (nuvashalauncherInstance *instance, nuvashalaun
 static void
 nuvashalauncher_content_page_dispose (GObject *object)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (object);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (object);
 
   /* The widget tree may be freed while the page is still answering a
    * request of its own: nothing of it is touched afterwards. */
@@ -306,7 +306,7 @@ nuvashalauncher_content_page_dispose (GObject *object)
 static void
 nuvashalauncher_content_page_finalize (GObject *object)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (object);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (object);
 
   g_clear_pointer (&self->installed.files, g_ptr_array_unref);
   g_clear_pointer (&self->installed.rows, g_hash_table_unref);
@@ -330,7 +330,7 @@ nuvashalauncher_content_page_finalize (GObject *object)
 }
 
 static void
-nuvashalauncher_content_page_class_init (nuvashalauncherContentPageClass *klass)
+nuvashalauncher_content_page_class_init (NuvashaLauncherContentPageClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
@@ -341,7 +341,7 @@ nuvashalauncher_content_page_class_init (nuvashalauncherContentPageClass *klass)
 }
 
 static void
-nuvashalauncher_content_page_init (nuvashalauncherContentPage *self)
+nuvashalauncher_content_page_init (NuvashaLauncherContentPage *self)
 {
   /* Keep the selected-file list and required loader state. Everything else
      is built in nuvashalauncher_content_page_new(), which knows the instance and the

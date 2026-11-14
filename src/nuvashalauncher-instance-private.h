@@ -1,14 +1,14 @@
 #ifndef NUVASHA_INSTANCE_PRIVATE_H
 #define NUVASHA_INSTANCE_PRIVATE_H
 #include "nuvashalauncher-instance.h"
-struct _nuvashalauncherInstance
+struct _NuvashaLauncherInstance
 {
   GObject parent_instance;
   char *id;
   char *name;
   char *directory;
   char *minecraft_version;
-  nuvashalauncherLoader loader;
+  NuvashaLauncherLoader loader;
   char *loader_version;
   char *icon;
   char *java_path;

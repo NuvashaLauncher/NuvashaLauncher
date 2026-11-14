@@ -583,7 +583,7 @@ gboolean
 queued_cancelled (gpointer user_data)
 {
   DownloadRequest *request = user_data;
-  nuvashalauncherDownloadService *service = request->service;
+  NuvashaLauncherDownloadService *service = request->service;
 
   request->queue_cancel_source = 0;
 

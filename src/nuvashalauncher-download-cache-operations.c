@@ -293,7 +293,7 @@ global_cache_hash_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 void
 json_cache_start (DownloadRequest *request)
 {
-  nuvashalauncherSettings *settings = nuvashalauncher_download_get_cache_settings (request);
+  NuvashaLauncherSettings *settings = nuvashalauncher_download_get_cache_settings (request);
 
   request->api_cache = request->api_cache_always ||
     nuvashalauncher_settings_get_cache_modrinth_api_responses (settings);

@@ -20,7 +20,7 @@
 
 /* A loader is in this list once it has been seen to start a game here,
    and the combo rows show nothing else. */
-static const nuvashalauncherLoader supported[] = {
+static const NuvashaLauncherLoader supported[] = {
   nuvashalauncher_LOADER_VANILLA,
   nuvashalauncher_LOADER_FABRIC,
   nuvashalauncher_LOADER_QUILT,
@@ -30,7 +30,7 @@ static const nuvashalauncherLoader supported[] = {
 
 #define SUPPORTED_COUNT (G_N_ELEMENTS (supported))
 
-const nuvashalauncherLoader *
+const NuvashaLauncherLoader *
 nuvashalauncher_loaders_supported (void)
 {
   return supported;
@@ -43,7 +43,7 @@ nuvashalauncher_loaders_supported_count (void)
 }
 
 gboolean
-nuvashalauncher_loader_is_supported (nuvashalauncherLoader loader)
+nuvashalauncher_loader_is_supported (NuvashaLauncherLoader loader)
 {
   for (guint i = 0; i < SUPPORTED_COUNT; i++)
     {
@@ -55,7 +55,7 @@ nuvashalauncher_loader_is_supported (nuvashalauncherLoader loader)
 }
 
 const char *
-nuvashalauncher_loader_display_name (nuvashalauncherLoader loader)
+nuvashalauncher_loader_display_name (NuvashaLauncherLoader loader)
 {
   switch (loader)
     {
@@ -79,7 +79,7 @@ nuvashalauncher_loader_display_name (nuvashalauncherLoader loader)
 }
 
 void
-nuvashalauncher_loader_version_free (nuvashalauncherLoaderVersion *version)
+nuvashalauncher_loader_version_free (NuvashaLauncherLoaderVersion *version)
 {
   if (version == NULL)
     return;
@@ -177,7 +177,7 @@ version_is_final (const char *version)
  * and for the loaders that have no meta service: those are reached
  * through their own maven instead, see loader_maven(). */
 const char *
-loader_meta (nuvashalauncherLoader loader)
+loader_meta (NuvashaLauncherLoader loader)
 {
   switch (loader)
     {
@@ -196,7 +196,7 @@ loader_meta (nuvashalauncherLoader loader)
  * where in it the loader itself lives. NULL for a loader that has no
  * maven. */
 const char *
-loader_maven (nuvashalauncherLoader loader, const char **coordinate)
+loader_maven (NuvashaLauncherLoader loader, const char **coordinate)
 {
   switch (loader)
     {
@@ -219,7 +219,7 @@ loader_maven (nuvashalauncherLoader loader, const char **coordinate)
  * under /releases while its API is on the host itself, so asking
  * <repo>/api/... about it answers 404. NULL for a loader with no maven. */
 static const char *
-loader_maven_api (nuvashalauncherLoader loader)
+loader_maven_api (NuvashaLauncherLoader loader)
 {
   switch (loader)
     {
@@ -235,7 +235,7 @@ loader_maven_api (nuvashalauncherLoader loader)
 }
 
 gboolean
-nuvashalauncher_loader_publishes_an_installer (nuvashalauncherLoader loader)
+nuvashalauncher_loader_publishes_an_installer (NuvashaLauncherLoader loader)
 {
   const char *coordinate = NULL;
 
@@ -244,7 +244,7 @@ nuvashalauncher_loader_publishes_an_installer (nuvashalauncherLoader loader)
 
 /* Separator between the Minecraft and loader versions. */
 static char
-loader_version_separator (nuvashalauncherLoader loader)
+loader_version_separator (NuvashaLauncherLoader loader)
 {
   return loader == nuvashalauncher_LOADER_FORGE ? '-' : '.';
 }
@@ -269,7 +269,7 @@ neoforge_game_prefix (const char *game_version)
 }
 
 gboolean
-nuvashalauncher_loaders_version_runs_game (nuvashalauncherLoader      loader,
+nuvashalauncher_loaders_version_runs_game (NuvashaLauncherLoader      loader,
                                const char    *loader_version,
                                const char    *game_version)
 {
@@ -296,7 +296,7 @@ nuvashalauncher_loaders_version_runs_game (nuvashalauncherLoader      loader,
 
 /* Return the loader-owned portion of a Maven version string. */
 static const char *
-loader_version_own_part (nuvashalauncherLoader   loader,
+loader_version_own_part (NuvashaLauncherLoader   loader,
                          const char *loader_version,
                          const char *game_version)
 {
@@ -332,10 +332,10 @@ loader_version_own_part (nuvashalauncherLoader   loader,
 
 typedef struct {
   GTask *task;
-  nuvashalauncherTaskScope *scope;
-  nuvashalauncherLoader loader;
+  NuvashaLauncherTaskScope *scope;
+  NuvashaLauncherLoader loader;
   char *game_version;
-  GPtrArray *versions; /* nuvashalauncherLoaderVersion*, element free nuvashalauncher_loader_version_free */
+  GPtrArray *versions; /* NuvashaLauncherLoaderVersion*, element free nuvashalauncher_loader_version_free */
 } VersionsRequest;
 
 static void
@@ -350,13 +350,13 @@ versions_request_free (gpointer data)
 }
 
 /* Reads one entry of a version list: {"loader": {"version": …}}. */
-static nuvashalauncherLoaderVersion *
+static NuvashaLauncherLoaderVersion *
 version_from_entry (JsonNode *entry)
 {
   JsonNode *loader = NULL;
   JsonObject *object = NULL;
   const char *version = NULL;
-  nuvashalauncherLoaderVersion *result = NULL;
+  NuvashaLauncherLoaderVersion *result = NULL;
 
   if (!JSON_NODE_HOLDS_OBJECT (entry))
     return NULL;
@@ -381,7 +381,7 @@ version_from_entry (JsonNode *entry)
   if (version == NULL || *version == '\0')
     return NULL;
 
-  result = g_new0 (nuvashalauncherLoaderVersion, 1);
+  result = g_new0 (NuvashaLauncherLoaderVersion, 1);
   result->version = g_strdup (version);
     result->stable = version_is_final (version);
 
@@ -393,8 +393,8 @@ version_from_entry (JsonNode *entry)
 static int
 newest_first (gconstpointer left, gconstpointer right)
 {
-  const nuvashalauncherLoaderVersion *one = *(nuvashalauncherLoaderVersion *const *) left;
-  const nuvashalauncherLoaderVersion *other = *(nuvashalauncherLoaderVersion *const *) right;
+  const NuvashaLauncherLoaderVersion *one = *(NuvashaLauncherLoaderVersion *const *) left;
+  const NuvashaLauncherLoaderVersion *other = *(NuvashaLauncherLoaderVersion *const *) right;
 
   return -compare_versions (one->version, other->version);
 }
@@ -419,7 +419,7 @@ versions_from_root (JsonNode *root, GError **error)
 
     for (guint i = 0; i < json_array_get_length (array); i++)
       {
-        nuvashalauncherLoaderVersion *version =
+        NuvashaLauncherLoaderVersion *version =
           version_from_entry (json_array_get_element (array, i));
 
         if (version != NULL)
@@ -470,8 +470,8 @@ nuvashalauncher_loaders_versions_for_display (GPtrArray  *published,
 
   for (guint i = 0; i < published->len; i++)
     {
-      const nuvashalauncherLoaderVersion *version = g_ptr_array_index (published, i);
-      nuvashalauncherLoaderVersion *copy = NULL;
+      const NuvashaLauncherLoaderVersion *version = g_ptr_array_index (published, i);
+      NuvashaLauncherLoaderVersion *copy = NULL;
 
       /* The version an instance already runs stays in the list even
          when the user does not ask to see unstable versions. */
@@ -480,7 +480,7 @@ nuvashalauncher_loaders_versions_for_display (GPtrArray  *published,
       else if (!version->stable && !show_unstable)
         continue;
 
-      copy = g_new0 (nuvashalauncherLoaderVersion, 1);
+      copy = g_new0 (NuvashaLauncherLoaderVersion, 1);
       copy->version = g_strdup (version->version);
       copy->stable = version->stable;
       g_ptr_array_add (shown, copy);
@@ -496,7 +496,7 @@ nuvashalauncher_loaders_versions_for_display (GPtrArray  *published,
     {
       for (guint i = 0; i < shown->len; i++)
         {
-          const nuvashalauncherLoaderVersion *version = g_ptr_array_index (shown, i);
+          const NuvashaLauncherLoaderVersion *version = g_ptr_array_index (shown, i);
 
           if (version->stable)
             {
@@ -524,7 +524,7 @@ nuvashalauncher_loaders_versions_for_display (GPtrArray  *published,
  * though both names carry a dash. */
 static GPtrArray *
 versions_from_maven (JsonNode     *root,
-                     nuvashalauncherLoader     loader,
+                     NuvashaLauncherLoader     loader,
                      const char   *game_version,
                      GError      **error)
 {
@@ -548,7 +548,7 @@ versions_from_maven (JsonNode     *root,
   for (guint i = 0; i < json_array_get_length (array); i++)
     {
       JsonNode *element = json_array_get_element (array, i);
-      nuvashalauncherLoaderVersion *version = NULL;
+      NuvashaLauncherLoaderVersion *version = NULL;
 
       if (!JSON_NODE_HOLDS_VALUE (element) ||
           json_node_get_value_type (element) != G_TYPE_STRING)
@@ -558,7 +558,7 @@ versions_from_maven (JsonNode     *root,
                                           game_version))
         continue;
 
-      version = g_new0 (nuvashalauncherLoaderVersion, 1);
+      version = g_new0 (NuvashaLauncherLoaderVersion, 1);
       version->version = g_strdup (json_node_get_string (element));
       version->stable = version_is_final (
         loader_version_own_part (loader, version->version, game_version));
@@ -579,7 +579,7 @@ versions_from_maven (JsonNode     *root,
 }
 
 GPtrArray *
-nuvashalauncher_loaders_maven_versions_from_json (nuvashalauncherLoader      loader,
+nuvashalauncher_loaders_maven_versions_from_json (NuvashaLauncherLoader      loader,
                                       const char    *game_version,
                                       const char    *json,
                                       gssize         length,
@@ -632,13 +632,13 @@ versions_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   versions_request_free (request);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_loaders_versions_async (nuvashalauncherLoader           loader,
+NuvashaLauncherTaskScope *
+nuvashalauncher_loaders_versions_async (NuvashaLauncherLoader           loader,
                             const char         *game_version,
                             GAsyncReadyCallback callback,
                             gpointer            user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   VersionsRequest *request = NULL;
   const char *meta = NULL;

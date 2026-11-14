@@ -12,12 +12,12 @@
 
 static char *root;
 
-static nuvashalauncherInstance *
+static NuvashaLauncherInstance *
 create_loader_instance (const char *name)
 {
   g_autofree char *dir = g_build_filename (root, name, NULL);
   g_autoptr (GError) error = NULL;
-  nuvashalauncherInstance *instance = NULL;
+  NuvashaLauncherInstance *instance = NULL;
 
   g_assert_cmpint (g_mkdir_with_parents (dir, 0755), ==, 0);
   instance = nuvashalauncher_instance_new (NULL, name, dir, "1.20.1",
@@ -30,8 +30,8 @@ create_loader_instance (const char *name)
 static void
 test_loader_request_lifecycle (void)
 {
-  g_autoptr (nuvashalauncherInstance) instance = create_loader_instance ("req-inst");
-  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+  g_autoptr (NuvashaLauncherInstance) instance = create_loader_instance ("req-inst");
+  g_autoptr (NuvashaLauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
 
   LoaderRequest *request = g_new0 (LoaderRequest, 1);
   request->launcher = g_object_ref (launcher);
@@ -51,8 +51,8 @@ test_loader_request_lifecycle (void)
 static void
 test_java_for_install_failure_handling (void)
 {
-  g_autoptr (nuvashalauncherInstance) instance = create_loader_instance ("fail-inst");
-  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+  g_autoptr (NuvashaLauncherInstance) instance = create_loader_instance ("fail-inst");
+  g_autoptr (NuvashaLauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
 
   LoaderRequest *request = g_new0 (LoaderRequest, 1);
   request->launcher = g_object_ref (launcher);
@@ -61,7 +61,7 @@ test_java_for_install_failure_handling (void)
   request->loader_version = g_strdup ("0.15.0");
 
   /* Simulate failed Java detection result */
-  nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_new_tagged (
+  NuvashaLauncherTaskScope *scope = nuvashalauncher_task_scope_new_tagged (
     NULL, NULL, NULL, NULL, "nuvashalauncher-task-scope");
   nuvashalauncher_task_scope_return_error (
     scope, g_error_new_literal (G_IO_ERROR, G_IO_ERROR_NOT_FOUND, "no java found"));
@@ -75,10 +75,10 @@ test_java_for_install_failure_handling (void)
 static void
 test_manifest_ready_error_handling (void)
 {
-  g_autoptr (nuvashalauncherInstance) instance = create_loader_instance ("manifest-fail");
-  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+  g_autoptr (NuvashaLauncherInstance) instance = create_loader_instance ("manifest-fail");
+  g_autoptr (NuvashaLauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
 
-  nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_new_tagged (
+  NuvashaLauncherTaskScope *scope = nuvashalauncher_task_scope_new_tagged (
     NULL, NULL, NULL, NULL, "nuvashalauncher-task-scope");
   nuvashalauncher_task_scope_return_error (
     scope, g_error_new_literal (G_IO_ERROR, G_IO_ERROR_FAILED, "failed to get manifest"));
@@ -98,18 +98,18 @@ test_manifest_ready_unsupported_loader (void)
   g_assert_cmpint (g_mkdir_with_parents (dir, 0755), ==, 0);
 
   /* Create instance with Fabric but no loader-version */
-  g_autoptr (nuvashalauncherInstance) instance =
+  g_autoptr (NuvashaLauncherInstance) instance =
     nuvashalauncher_instance_new (NULL, "unsupported-loader-inst", dir, "1.20.1",
                                   nuvashalauncher_LOADER_FABRIC, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
-  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+  g_autoptr (NuvashaLauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
 
-  g_autoptr (nuvashalauncherVersionManifest) manifest =
+  g_autoptr (NuvashaLauncherVersionManifest) manifest =
     g_object_new (nuvashalauncher_TYPE_VERSION_MANIFEST, NULL);
 
-  nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_new_tagged (
+  NuvashaLauncherTaskScope *scope = nuvashalauncher_task_scope_new_tagged (
     NULL, NULL, NULL, NULL, "nuvashalauncher-task-scope");
   nuvashalauncher_task_scope_return_pointer (scope, g_object_ref (manifest), g_object_unref);
 

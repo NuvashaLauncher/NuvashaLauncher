@@ -19,10 +19,10 @@ ask_profile (AuthRequest *self)
 void
 profile_answered (AuthRequest *self)
 {
-  g_autoptr (nuvashalauncherMinecraftProfile) profile = NULL;
+  g_autoptr (NuvashaLauncherMinecraftProfile) profile = NULL;
   g_autoptr (GError) error = NULL;
   g_autofree char *uuid = NULL;
-  nuvashalauncherAccount *account = NULL;
+  NuvashaLauncherAccount *account = NULL;
 
   profile = nuvashalauncher_auth_profile_from_json (self->body, -1, &error);
 
@@ -56,7 +56,7 @@ profile_answered (AuthRequest *self)
 
   /* What the launcher is handed: who the player is, and the token it is
      run with. Nothing else of the chain is kept. */
-  account = g_new0 (nuvashalauncherAccount, 1);
+  account = g_new0 (NuvashaLauncherAccount, 1);
   account->type = nuvashalauncher_ACCOUNT_MICROSOFT;
   account->id = g_strdup (profile->id);
   account->name = g_strdup (profile->name);

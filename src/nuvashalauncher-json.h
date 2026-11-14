@@ -13,7 +13,7 @@ G_BEGIN_DECLS
 typedef enum {
   nuvashalauncher_JSON_ERROR_TYPE,
   nuvashalauncher_JSON_ERROR_MISSING
-} nuvashalauncherJsonError;
+} NuvashaLauncherJsonError;
 
 GQuark nuvashalauncher_json_error_quark (void);
 

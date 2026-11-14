@@ -39,9 +39,9 @@ test_index_is_read (void)
     pack_index ("Example Pack", FILES_JSON,
                 "\"minecraft\":\"1.20.1\",\"fabric-loader\":\"0.15.11\"");
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModpack) pack = NULL;
-  nuvashalauncherModpackFile *first = NULL;
-  nuvashalauncherModpackFile *last = NULL;
+  g_autoptr (NuvashaLauncherModpack) pack = NULL;
+  NuvashaLauncherModpackFile *first = NULL;
+  NuvashaLauncherModpackFile *last = NULL;
 
   pack = nuvashalauncher_modpack_new_from_json (json, -1, &error);
   g_assert_no_error (error);
@@ -86,7 +86,7 @@ test_client_files_by_env (void)
     pack_index ("Example Pack", FILES_JSON,
                 "\"minecraft\":\"1.20.1\",\"fabric-loader\":\"0.15.11\"");
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModpack) pack = NULL;
+  g_autoptr (NuvashaLauncherModpack) pack = NULL;
   g_autoptr (GPtrArray) required = NULL;
   g_autoptr (GPtrArray) optional = NULL;
 
@@ -97,13 +97,13 @@ test_client_files_by_env (void)
   optional = nuvashalauncher_modpack_optional_client_files (pack);
 
   g_assert_cmpuint (required->len, ==, 2);
-  g_assert_cmpstr (((nuvashalauncherModpackFile *) g_ptr_array_index (required, 0))->path,
+  g_assert_cmpstr (((NuvashaLauncherModpackFile *) g_ptr_array_index (required, 0))->path,
                    ==, "mods/sodium.jar");
-  g_assert_cmpstr (((nuvashalauncherModpackFile *) g_ptr_array_index (required, 1))->path,
+  g_assert_cmpstr (((NuvashaLauncherModpackFile *) g_ptr_array_index (required, 1))->path,
                    ==, "config/both.toml");
 
   g_assert_cmpuint (optional->len, ==, 1);
-  g_assert_cmpstr (((nuvashalauncherModpackFile *) g_ptr_array_index (optional, 0))->path,
+  g_assert_cmpstr (((NuvashaLauncherModpackFile *) g_ptr_array_index (optional, 0))->path,
                    ==, "mods/lithium.jar");
 
   g_print ("ok - the env of a file says which list it belongs to\n");
@@ -167,7 +167,7 @@ test_resolve_without_minecraft (void)
   g_autofree char *json =
     pack_index ("No Minecraft", "", "\"fabric-loader\":\"0.15.11\"");
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModpack) pack = NULL;
+  g_autoptr (NuvashaLauncherModpack) pack = NULL;
 
   pack = nuvashalauncher_modpack_new_from_json (json, -1, &error);
   g_assert_no_error (error);
@@ -308,7 +308,7 @@ static void
 test_broken_json_is_refused (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModpack) pack = NULL;
+  g_autoptr (NuvashaLauncherModpack) pack = NULL;
 
   /* Not JSON at all: the parser says so, in its own words. */
   pack = nuvashalauncher_modpack_new_from_json ("this is not json", -1, &error);
@@ -331,7 +331,7 @@ test_verify_hashes (void)
     G_CHECKSUM_SHA512, (const guchar *) payload, strlen (payload));
   g_autofree char *other_sha1 = g_compute_checksum_for_data (
     G_CHECKSUM_SHA1, (const guchar *) "something else", 14);
-  nuvashalauncherModpackFile file = { 0 };
+  NuvashaLauncherModpackFile file = { 0 };
 
   g_assert_true (g_file_set_contents (path, payload, -1, &error));
   g_assert_no_error (error);

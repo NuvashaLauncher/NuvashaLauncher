@@ -5,10 +5,10 @@
 #include "nuvashalauncher-skin-view.h"
 #include <libsoup/soup.h>
 
-struct _nuvashalauncherUsersPopover
+struct _NuvashaLauncherUsersPopover
 {
   GtkPopover parent_instance;
-  nuvashalauncherAccounts *accounts;
+  NuvashaLauncherAccounts *accounts;
   GtkListBox *list_box;
   GtkScrolledWindow *list_scroller;
   GtkLabel *error_label;
@@ -20,12 +20,12 @@ struct _nuvashalauncherUsersPopover
   char *active_name;
 };
 
-void nuvashalauncher_users_set_avatar (nuvashalauncherUsersPopover *, GtkImage *, const char *);
+void nuvashalauncher_users_set_avatar (NuvashaLauncherUsersPopover *, GtkImage *, const char *);
 GdkTexture *face_texture (GdkTexture *skin);
 void nuvashalauncher_users_set_avatar_icon (GtkImage *);
 gboolean nuvashalauncher_users_set_local_avatar (GtkImage *, const char *);
 char *nuvashalauncher_users_default_steve_path (void);
-AdwDialog *nuvashalauncher_users_skin_menu_new (nuvashalauncherUsersPopover *, GtkImage *, nuvashalauncherAccount *);
+AdwDialog *nuvashalauncher_users_skin_menu_new (NuvashaLauncherUsersPopover *, GtkImage *, NuvashaLauncherAccount *);
 
 typedef struct _SkinMenu SkinMenu;
 SkinMenu *skin_menu_ref (SkinMenu *);
@@ -34,7 +34,7 @@ void on_skin_dialog_close_attempt (AdwDialog *, gpointer);
 void on_skin_dialog_closed (AdwDialog *, gpointer);
 void on_model_toggled (GtkCheckButton *, gpointer);
 void load_profile_skins (SkinMenu *);
-void load_view_texture (nuvashalauncherSkinView *, const char *, gboolean);
+void load_view_texture (NuvashaLauncherSkinView *, const char *, gboolean);
 void upload_selected_skin (SkinMenu *, const char *, const char *);
 void on_cape_selected (GObject *, GParamSpec *, gpointer);
 void on_active_skin_delete_done (GObject *, GAsyncResult *, gpointer);
@@ -48,9 +48,9 @@ void on_capes_loaded (GObject *, GAsyncResult *, gpointer);
 struct _SkinMenu
 {
   grefcount refs;
-  nuvashalauncherUsersPopover *owner;
+  NuvashaLauncherUsersPopover *owner;
   GtkImage *image;
-  nuvashalauncherSkinView *view;
+  NuvashaLauncherSkinView *view;
   AdwDialog *dialog;
   GtkListBox *skins;
   GtkDropDown *capes;
@@ -76,7 +76,7 @@ struct _SkinMenu
   GCancellable *cancellable;
   gboolean defaults_added;
   GHashTable *deleted_skin_ids;
-  nuvashalauncherAccount *account;
+  NuvashaLauncherAccount *account;
 };
 
 AdwActionRow *skin_row_new (SkinMenu *, const char *, const char *);

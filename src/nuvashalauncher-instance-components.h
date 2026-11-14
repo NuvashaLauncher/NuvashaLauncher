@@ -18,13 +18,13 @@ G_BEGIN_DECLS
 /* Component-style access over nuvashalauncher's existing instance JSON. This keeps the
  * current format compatible while giving resolver and UI code stable IDs for
  * versioned components. */
-char *nuvashalauncher_instance_component_get_version (nuvashalauncherInstance *instance,
+char *nuvashalauncher_instance_component_get_version (NuvashaLauncherInstance *instance,
                                           const char *component_id);
-gboolean nuvashalauncher_instance_component_set_version (nuvashalauncherInstance *instance,
+gboolean nuvashalauncher_instance_component_set_version (NuvashaLauncherInstance *instance,
                                              const char *component_id,
                                              const char *version,
                                              GError **error);
-const char *nuvashalauncher_instance_component_id_for_loader (nuvashalauncherLoader loader);
+const char *nuvashalauncher_instance_component_id_for_loader (NuvashaLauncherLoader loader);
 
 G_END_DECLS
 

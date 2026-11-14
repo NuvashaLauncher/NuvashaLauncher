@@ -9,7 +9,7 @@
 
 #define nuvashalauncher_MODPACK_FORMAT_VERSION 1
 
-nuvashalauncherTaskScope *extract_overrides_async (const char *archive_path,
+NuvashaLauncherTaskScope *extract_overrides_async (const char *archive_path,
                                        const char *directory,
                                        GAsyncReadyCallback callback,
                                        gpointer user_data);

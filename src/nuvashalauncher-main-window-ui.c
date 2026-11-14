@@ -21,7 +21,7 @@ on_main_window_banner_dismiss (AdwBanner *banner, gpointer user_data G_GNUC_UNUS
 }
 
 void
-nuvashalauncher_main_window_build_ui (nuvashalauncherMainWindow *self)
+nuvashalauncher_main_window_build_ui (NuvashaLauncherMainWindow *self)
 {
 
   g_autoptr (GMenu) add_menu = create_add_menu ();

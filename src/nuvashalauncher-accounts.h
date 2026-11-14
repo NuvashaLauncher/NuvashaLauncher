@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherAccounts: the accounts a user can play as, and which one is active.
+/* NuvashaLauncherAccounts: the accounts a user can play as, and which one is active.
  *
  * There are two kinds of account and neither of them is a password:
  *
@@ -39,7 +39,7 @@ typedef enum {
   nuvashalauncher_ACCOUNTS_ERROR_IO,      /* the file cannot be read or written */
   nuvashalauncher_ACCOUNTS_ERROR_INVALID, /* invalid account data */
   nuvashalauncher_ACCOUNTS_ERROR_UNKNOWN   /* there is no such account */
-} nuvashalauncherAccountsError;
+} NuvashaLauncherAccountsError;
 
 GQuark nuvashalauncher_accounts_error_quark (void);
 
@@ -50,7 +50,7 @@ GQuark nuvashalauncher_accounts_error_quark (void);
 typedef enum {
   nuvashalauncher_ACCOUNT_OFFLINE,   /* a name and nothing else */
   nuvashalauncher_ACCOUNT_MICROSOFT  /* signed in with a Microsoft account */
-} nuvashalauncherAccountType;
+} NuvashaLauncherAccountType;
 
 /* One account. @id is the store key: the UUID of the
  * Minecraft profile for a Microsoft account, the name for an offline one,
@@ -61,7 +61,7 @@ typedef enum {
  * Microsoft account is put in when its refresh failed and the user has to
  * sign in again. */
 typedef struct {
-  nuvashalauncherAccountType type;
+  NuvashaLauncherAccountType type;
 
   char *id;
   char *name;         /* player name passed to the game */
@@ -74,42 +74,42 @@ typedef struct {
   char *avatar_url;   /* when the profile published one */
   char *skin_model;   /* CLASSIC or SLIM */
   char *cape_id;      /* currently selected cape, or NULL */
-} nuvashalauncherAccount;
+} NuvashaLauncherAccount;
 
-void nuvashalauncher_account_free (nuvashalauncherAccount *account);
+void nuvashalauncher_account_free (NuvashaLauncherAccount *account);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherAccount, nuvashalauncher_account_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherAccount, nuvashalauncher_account_free)
 
 /* (transfer full). The name has to be one java accepts as a player name:
  * 3 to 16 characters of letters, digits and underscores, or this fails
  * with nuvashalauncher_ACCOUNTS_ERROR_INVALID saying which of the two it is. */
-nuvashalauncherAccount *nuvashalauncher_account_new_offline (const char *name, GError **error);
+NuvashaLauncherAccount *nuvashalauncher_account_new_offline (const char *name, GError **error);
 
 /* (transfer full) */
-nuvashalauncherAccount *nuvashalauncher_account_copy (const nuvashalauncherAccount *account);
+NuvashaLauncherAccount *nuvashalauncher_account_copy (const NuvashaLauncherAccount *account);
 
 /* Boxed account type used by signals. */
 #define nuvashalauncher_TYPE_ACCOUNT (nuvashalauncher_account_get_type ())
 GType nuvashalauncher_account_get_type (void);
 
 /* Human-readable account type: "Microsoft" or "Offline". */
-const char *nuvashalauncher_account_type_name (nuvashalauncherAccountType type);
+const char *nuvashalauncher_account_type_name (NuvashaLauncherAccountType type);
 
 /* TRUE when the account can be played as at @now: an offline account
    always can, and a Microsoft account can while its access token has not
    come within nuvashalauncher_ACCOUNTS_TOKEN_MARGIN seconds of its expiry. */
-gboolean nuvashalauncher_account_token_is_valid (const nuvashalauncherAccount *account, gint64 now);
+gboolean nuvashalauncher_account_token_is_valid (const NuvashaLauncherAccount *account, gint64 now);
 
 /* The UUID java hands out for an offline player: the MD5 of
  * "OfflinePlayer:<name>" as a name based UUID, which means the version
  * nibble is 3 and the variant bits are the IETF ones. (transfer full) */
 char *nuvashalauncher_account_offline_uuid (const char *name);
 
-typedef struct _nuvashalauncherAccounts nuvashalauncherAccounts;
+typedef struct _NuvashaLauncherAccounts NuvashaLauncherAccounts;
 
 #define nuvashalauncher_TYPE_ACCOUNTS (nuvashalauncher_accounts_get_type ())
 
-G_DECLARE_FINAL_TYPE (nuvashalauncherAccounts, nuvashalauncher_accounts, nuvashalauncher, ACCOUNTS, GObject)
+G_DECLARE_FINAL_TYPE (NuvashaLauncherAccounts, nuvashalauncher_accounts, nuvashalauncher, ACCOUNTS, GObject)
 
 /* Emitted when the list, active account, or account tokens change. */
 enum {
@@ -118,44 +118,44 @@ enum {
 };
 
 /* The store of the user's own file. (transfer full) */
-nuvashalauncherAccounts *nuvashalauncher_accounts_new (void);
+NuvashaLauncherAccounts *nuvashalauncher_accounts_new (void);
 
 /* Create a store backed by @filename. (transfer full) */
-nuvashalauncherAccounts *nuvashalauncher_accounts_new_for_path (const char *filename);
+NuvashaLauncherAccounts *nuvashalauncher_accounts_new_for_path (const char *filename);
 
 /* (transfer container) The accounts in the order they were added, as
-   nuvashalauncherAccount* this store keeps. */
-GPtrArray *nuvashalauncher_accounts_list (nuvashalauncherAccounts *self);
+   NuvashaLauncherAccount* this store keeps. */
+GPtrArray *nuvashalauncher_accounts_list (NuvashaLauncherAccounts *self);
 
-guint nuvashalauncher_accounts_count (nuvashalauncherAccounts *self);
+guint nuvashalauncher_accounts_count (NuvashaLauncherAccounts *self);
 
 /* Return the active account, or NULL when none is selected. */
-nuvashalauncherAccount *nuvashalauncher_accounts_get_active (nuvashalauncherAccounts *self);
+NuvashaLauncherAccount *nuvashalauncher_accounts_get_active (NuvashaLauncherAccounts *self);
 
-const char *nuvashalauncher_accounts_get_active_id (nuvashalauncherAccounts *self);
+const char *nuvashalauncher_accounts_get_active_id (NuvashaLauncherAccounts *self);
 
 /* Makes @id the active account, which is the only one that can be.
    nuvashalauncher_ACCOUNTS_ERROR_UNKNOWN when there is no such account. */
-gboolean nuvashalauncher_accounts_set_active (nuvashalauncherAccounts *self, const char *id,
+gboolean nuvashalauncher_accounts_set_active (NuvashaLauncherAccounts *self, const char *id,
                                   GError **error);
 
 /* The account @id, or NULL. */
-nuvashalauncherAccount *nuvashalauncher_accounts_find (nuvashalauncherAccounts *self, const char *id);
+NuvashaLauncherAccount *nuvashalauncher_accounts_find (NuvashaLauncherAccounts *self, const char *id);
 
 /* Adds an account and makes it the active one, since a user who just
    signed in meant to play as it. Adding the identity of an account that
    is already there replaces it, which is how a refreshed token or a
    changed profile is stored. */
-gboolean nuvashalauncher_accounts_add (nuvashalauncherAccounts *self, const nuvashalauncherAccount *account,
+gboolean nuvashalauncher_accounts_add (NuvashaLauncherAccounts *self, const NuvashaLauncherAccount *account,
                            GError **error);
 
 /* Replace an existing account and keep it active. */
-gboolean nuvashalauncher_accounts_update (nuvashalauncherAccounts *self, const nuvashalauncherAccount *account,
+gboolean nuvashalauncher_accounts_update (NuvashaLauncherAccounts *self, const NuvashaLauncherAccount *account,
                               GError **error);
 
 /* Removes an account. The active one goes, the first of what is left
    takes its place, and the store can end up with none. */
-gboolean nuvashalauncher_accounts_remove (nuvashalauncherAccounts *self, const char *id,
+gboolean nuvashalauncher_accounts_remove (NuvashaLauncherAccounts *self, const char *id,
                               GError **error);
 
 G_END_DECLS

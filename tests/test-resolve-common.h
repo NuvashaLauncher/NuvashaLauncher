@@ -155,11 +155,11 @@ fixture_text (const char *name)
   return contents;
 }
 
-static inline nuvashalauncherVersionDescription *
+static inline NuvashaLauncherVersionDescription *
 version_from_json (const char *json)
 {
   g_autoptr (GError) error = NULL;
-  nuvashalauncherVersionDescription *description =
+  NuvashaLauncherVersionDescription *description =
     nuvashalauncher_version_description_new_from_json (json, -1, &error);
 
   g_assert_no_error (error);
@@ -168,7 +168,7 @@ version_from_json (const char *json)
   return description;
 }
 
-static inline nuvashalauncherVersionDescription *
+static inline NuvashaLauncherVersionDescription *
 fixture_version (const char *name)
 {
   g_autofree char *text = fixture_text (name);
@@ -176,12 +176,12 @@ fixture_version (const char *name)
   return version_from_json (text);
 }
 
-static inline nuvashalauncherLibrary *
-find_library (nuvashalauncherVersionDescription *description, const char *name)
+static inline NuvashaLauncherLibrary *
+find_library (NuvashaLauncherVersionDescription *description, const char *name)
 {
   for (guint i = 0; i < description->libraries->len; i++)
     {
-      nuvashalauncherLibrary *library = g_ptr_array_index (description->libraries, i);
+      NuvashaLauncherLibrary *library = g_ptr_array_index (description->libraries, i);
 
       if (g_str_equal (library->name, name))
         return library;
@@ -362,7 +362,7 @@ async_run_clear (AsyncRun *run)
 
 /* A document whose only library publishes one natives jar per
    machine. */
-static inline nuvashalauncherVersionDescription *
+static inline NuvashaLauncherVersionDescription *
 architecture_document (void)
 {
   return version_from_json (
@@ -463,7 +463,7 @@ typedef struct
   AsyncRun *run;
   gboolean success;
   GError *error;
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
 } ExtractCall;
 
 static inline void
@@ -487,7 +487,7 @@ extract_one (const char *jar, const char *natives_dir, GPtrArray *exclude,
 {
   g_autoptr (GPtrArray) jars =
     g_ptr_array_new_with_free_func ((GDestroyNotify) nuvashalauncher_resolve_file_free);
-  nuvashalauncherResolveFile *file = g_new0 (nuvashalauncherResolveFile, 1);
+  NuvashaLauncherResolveFile *file = g_new0 (NuvashaLauncherResolveFile, 1);
 
   file->path = g_strdup (jar);
   file->natives = TRUE;
@@ -517,14 +517,14 @@ extract_one (const char *jar, const char *natives_dir, GPtrArray *exclude,
 typedef struct
 {
   AsyncRun *run;
-  nuvashalauncherVersionManifest *manifest;
-  nuvashalauncherResolvedVersion *resolved;
+  NuvashaLauncherVersionManifest *manifest;
+  NuvashaLauncherResolvedVersion *resolved;
   GError *error;
   guint progress_calls;
   guint last_done;
   guint last_total;
   char *last_stage;
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
 } ResolveCall;
 
 static inline void
@@ -556,7 +556,7 @@ resolve_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 }
 
 static inline void
-resolve_progress (const nuvashalauncherResolveProgress *progress, gpointer user_data)
+resolve_progress (const NuvashaLauncherResolveProgress *progress, gpointer user_data)
 {
   ResolveCall *call = user_data;
 
@@ -751,7 +751,7 @@ fetch_manifest (AsyncRun *run, ResolveCall *call, const char *url)
 }
 
 static inline void
-start_resolve (AsyncRun *run, ResolveCall *call, nuvashalauncherVersionManifest *manifest,
+start_resolve (AsyncRun *run, ResolveCall *call, NuvashaLauncherVersionManifest *manifest,
                const char *version_id, const char *data_dir,
                const char *natives_dir, const char *asset_base_url)
 {

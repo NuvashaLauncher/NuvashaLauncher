@@ -11,8 +11,8 @@
 
 G_BEGIN_DECLS
 
-const char *loader_meta (nuvashalauncherLoader loader);
-const char *loader_maven (nuvashalauncherLoader loader, const char **coordinate);
+const char *loader_meta (NuvashaLauncherLoader loader);
+const char *loader_maven (NuvashaLauncherLoader loader, const char **coordinate);
 gboolean give_libraries_their_downloads (JsonNode *root, GError **error);
 
 char *nuvashalauncher_loader_jar_manifest_attribute (const char *path, const char *name);
@@ -54,8 +54,8 @@ typedef enum {
 
 typedef struct {
   GTask *task;
-  nuvashalauncherTaskScope *scope;
-  nuvashalauncherLoader loader;
+  NuvashaLauncherTaskScope *scope;
+  NuvashaLauncherLoader loader;
   InstallStage stage;
   char *data_dir;
   char *game_version;
@@ -67,14 +67,14 @@ typedef struct {
   char *client_jar;
   char *patched_jar;
   JsonParser *profile;
-  nuvashalauncherVersionDescription *description;
+  NuvashaLauncherVersionDescription *description;
   GPtrArray *processors;
   guint index;
   char *main_class;
   GHashTable *variables;
   GPtrArray *pending;
   guint done;
-  nuvashalauncherLoadersProgressFunc progress;
+  NuvashaLauncherLoadersProgressFunc progress;
   gpointer progress_data;
 } InstallRequest;
 

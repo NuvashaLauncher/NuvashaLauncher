@@ -18,7 +18,7 @@
  * ---------------------------------------------------------- */
 
 static void
-set_log_private_values (nuvashalauncher *self, const nuvashalauncherLaunchSession *session)
+set_log_private_values (NuvashaLauncher *self, const NuvashaLauncherLaunchSession *session)
 {
   g_clear_pointer (&self->log_access_token, g_free);
   g_clear_pointer (&self->log_session, g_free);
@@ -46,11 +46,11 @@ set_log_private_values (nuvashalauncher *self, const nuvashalauncherLaunchSessio
  *
  * @required is the Java the document of the game asks for, which the
  * merged document of a loader names as its Minecraft version does. */
-const nuvashalauncherJava *
-choose_java (nuvashalauncher *self, GPtrArray *javas, int required,
+const NuvashaLauncherJava *
+choose_java (NuvashaLauncher *self, GPtrArray *javas, int required,
              char       **instance_java)
 {
-  const nuvashalauncherJava *java = NULL;
+  const NuvashaLauncherJava *java = NULL;
 
   g_object_get (self->instance, "java-path", instance_java, NULL);
   if (*instance_java != NULL && **instance_java != '\0' &&
@@ -83,7 +83,7 @@ choose_java (nuvashalauncher *self, GPtrArray *javas, int required,
 }
 
 void
-remember_java (nuvashalauncher *self, const nuvashalauncherJava *java)
+remember_java (NuvashaLauncher *self, const NuvashaLauncherJava *java)
 {
   g_free (self->preparation.java_executable);
   self->preparation.java_executable = g_strdup (java->executable);
@@ -94,14 +94,14 @@ remember_java (nuvashalauncher *self, const nuvashalauncherJava *java)
  * and the game. Everything before this has only been deciding what they
  * will be. */
 static void
-run_the_game (nuvashalauncher *self)
+run_the_game (NuvashaLauncher *self)
 {
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
   g_autofree char *jvm_args = NULL;
   g_autofree char *offline_uuid = NULL;
-  nuvashalauncherAccount *account = NULL;
-  nuvashalauncherLaunchSession session;
+  NuvashaLauncherAccount *account = NULL;
+  NuvashaLauncherLaunchSession session;
 
   if (self->process.stop_requested || self->preparation.resolved == NULL)
     return;
@@ -158,8 +158,8 @@ run_the_game (nuvashalauncher *self)
 /* The Java search of a launch: the launcher, which a stop can take away
    while the search runs, and the handle the answer is meant to release. */
 typedef struct {
-  nuvashalauncher *launcher;
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncher *launcher;
+  NuvashaLauncherTaskScope *operation;
   GPtrArray *javas;
 } JavaSearch;
 
@@ -181,12 +181,12 @@ on_custom_java_probed (GObject *source G_GNUC_UNUSED,
                        gpointer user_data)
 {
   JavaSearch *search = user_data;
-  nuvashalauncher *self = search->launcher;
+  NuvashaLauncher *self = search->launcher;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherJava) custom =
+  g_autoptr (NuvashaLauncherJava) custom =
     nuvashalauncher_java_probe_finish (result, &error);
   g_autofree char *instance_java = NULL;
-  const nuvashalauncherJava *java = NULL;
+  const NuvashaLauncherJava *java = NULL;
 
   if (self->process.stop_requested ||
       g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
@@ -224,11 +224,11 @@ on_java_detected (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                   gpointer user_data)
 {
   JavaSearch *search = user_data;
-  nuvashalauncher *self = search->launcher;
+  NuvashaLauncher *self = search->launcher;
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) javas = nuvashalauncher_java_detect_finish (result, &error);
   g_autofree char *instance_java = NULL;
-  const nuvashalauncherJava *java = NULL;
+  const NuvashaLauncherJava *java = NULL;
 
   if (javas == NULL)
     {
@@ -291,9 +291,9 @@ void
 on_resolved (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
              gpointer user_data)
 {
-  nuvashalauncher *self = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (user_data);
   g_autoptr (GError) error = NULL;
-  nuvashalauncherResolvedVersion *resolved = nuvashalauncher_resolve_version_finish (result, &error);
+  NuvashaLauncherResolvedVersion *resolved = nuvashalauncher_resolve_version_finish (result, &error);
 
   if (resolved == NULL)
     {
@@ -343,9 +343,9 @@ on_resolved (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
    percentage they add up to changes: a view has no use for five
    thousand state changes that all say 63%. */
 void
-on_resolve_progress (const nuvashalauncherResolveProgress *progress, gpointer user_data)
+on_resolve_progress (const NuvashaLauncherResolveProgress *progress, gpointer user_data)
 {
-  nuvashalauncher *self = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (user_data);
   guint percent;
   g_autofree char *detail = NULL;
 

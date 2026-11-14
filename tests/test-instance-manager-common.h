@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* Tests for nuvashalauncherInstanceManager: persistence, atomic saves, duplication,
+/* Tests for NuvashaLauncherInstanceManager: persistence, atomic saves, duplication,
  * deletion and path validation. Only temporary directories are used
  * (never the real data directory) and everything runs headless: no
  * application is ever launched. */
@@ -29,7 +29,7 @@ typedef struct
   gboolean success;
   gboolean timed_out;
   guint watchdog;
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
 } AsyncCall;
 
 static inline char *
@@ -124,7 +124,7 @@ count_entries (const char *path)
 }
 
 static inline char *
-prop_string (nuvashalauncherInstance *instance, const char *property)
+prop_string (NuvashaLauncherInstance *instance, const char *property)
 {
   char *value = NULL;
 
@@ -133,7 +133,7 @@ prop_string (nuvashalauncherInstance *instance, const char *property)
 }
 
 static inline guint
-manager_count (nuvashalauncherInstanceManager *manager)
+manager_count (NuvashaLauncherInstanceManager *manager)
 {
   return g_list_model_get_n_items (
     G_LIST_MODEL (nuvashalauncher_instance_manager_get_instances (manager)));

@@ -9,24 +9,24 @@
 
 G_BEGIN_DECLS
 
-typedef void (*nuvashalauncherLineReaderLineFunc) (const char *line,
+typedef void (*NuvashaLauncherLineReaderLineFunc) (const char *line,
                                        gboolean    stderr_line,
                                        gpointer    user_data);
-typedef void (*nuvashalauncherLineReaderDoneFunc) (GError  *error,
+typedef void (*NuvashaLauncherLineReaderDoneFunc) (GError  *error,
                                        gpointer user_data);
 
-typedef struct _nuvashalauncherLineReader nuvashalauncherLineReader;
+typedef struct _NuvashaLauncherLineReader NuvashaLauncherLineReader;
 
 /* The reader owns @stream and @user_data until EOF or an error. It calls
  * @done and frees itself after the stream ends. */
-nuvashalauncherLineReader *nuvashalauncher_line_reader_new (GInputStream          *stream,
+NuvashaLauncherLineReader *nuvashalauncher_line_reader_new (GInputStream          *stream,
                                     gboolean               stderr_line,
-                                    nuvashalauncherLineReaderLineFunc  line,
-                                    nuvashalauncherLineReaderDoneFunc  done,
+                                    NuvashaLauncherLineReaderLineFunc  line,
+                                    NuvashaLauncherLineReaderDoneFunc  done,
                                     gpointer               user_data,
                                     GDestroyNotify         user_data_free);
 
-void nuvashalauncher_line_reader_start (nuvashalauncherLineReader *reader);
+void nuvashalauncher_line_reader_start (NuvashaLauncherLineReader *reader);
 
 G_END_DECLS
 

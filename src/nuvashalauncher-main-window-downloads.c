@@ -32,7 +32,7 @@ on_download_cancel (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 
 /* Format transfer progress for the download row. */
 static char *
-download_count_text (nuvashalauncherDownload *download)
+download_count_text (NuvashaLauncherDownload *download)
 {
   guint64 total = nuvashalauncher_download_get_total (download);
   guint64 done = nuvashalauncher_download_get_done (download);
@@ -56,7 +56,7 @@ download_count_text (nuvashalauncherDownload *download)
 }
 
 void
-refresh_downloads (nuvashalauncherMainWindow *self)
+refresh_downloads (NuvashaLauncherMainWindow *self)
 {
   GPtrArray *jobs = nuvashalauncher_downloads_get_all ();
   /* Include content-page selections in the header indicator. */
@@ -88,7 +88,7 @@ refresh_downloads (nuvashalauncherMainWindow *self)
 
   for (guint i = 0; i < jobs->len; i++)
     {
-      nuvashalauncherDownload *download = nuvashalauncher_DOWNLOAD (g_ptr_array_index (jobs, i));
+      NuvashaLauncherDownload *download = nuvashalauncher_DOWNLOAD (g_ptr_array_index (jobs, i));
       DownloadRow *row = g_hash_table_lookup (self->downloads.rows, download);
       const char *phase = nuvashalauncher_download_get_detail (download);
       g_autofree char *count = download_count_text (download);
@@ -158,9 +158,9 @@ refresh_downloads (nuvashalauncherMainWindow *self)
 }
 
 void
-on_downloads_changed (nuvashalauncherDownloads *downloads G_GNUC_UNUSED, gpointer user_data)
+on_downloads_changed (NuvashaLauncherDownloads *downloads G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherMainWindow *self = user_data;
+  NuvashaLauncherMainWindow *self = user_data;
 
   refresh_downloads (self);
   nuvashalauncher_main_window_maybe_quit_background (self);

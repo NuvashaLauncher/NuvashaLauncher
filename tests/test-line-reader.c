@@ -49,7 +49,7 @@ test_reads_lines_until_eof (void)
   static const char contents[] = "first line\nsecond line\n";
   ReaderResult result = { 0 };
   g_autoptr (GInputStream) stream = NULL;
-  nuvashalauncherLineReader *reader = NULL;
+  NuvashaLauncherLineReader *reader = NULL;
 
   result.loop = g_main_loop_new (NULL, FALSE);
   result.lines = g_ptr_array_new_with_free_func (g_free);
@@ -78,7 +78,7 @@ test_truncates_long_lines (void)
   ReaderResult result = { 0 };
   g_autofree char *contents = g_malloc (length + 1);
   g_autoptr (GInputStream) stream = NULL;
-  nuvashalauncherLineReader *reader = NULL;
+  NuvashaLauncherLineReader *reader = NULL;
 
   memset (contents, 'x', length);
   contents[length] = '\n';

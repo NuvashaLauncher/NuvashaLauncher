@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherModpack: the Modrinth modpack format (.mrpack).
+/* NuvashaLauncherModpack: the Modrinth modpack format (.mrpack).
  *
  * A .mrpack is a ZIP containing modrinth.index.json at its root. The manifest
  * lists installed files and dependencies;
@@ -38,7 +38,7 @@ typedef enum {
   nuvashalauncher_MODPACK_ERROR_LOADER,     /* the Minecraft version or loader is unknown */
   nuvashalauncher_MODPACK_ERROR_IO,         /* the file system said no */
   nuvashalauncher_MODPACK_ERROR_CANCELLED   /* the caller cancelled the install */
-} nuvashalauncherModpackError;
+} NuvashaLauncherModpackError;
 
 GQuark nuvashalauncher_modpack_error_quark (void);
 
@@ -58,7 +58,7 @@ typedef enum {
   nuvashalauncher_MODPACK_ENV_REQUIRED,
   nuvashalauncher_MODPACK_ENV_OPTIONAL,
   nuvashalauncher_MODPACK_ENV_UNSUPPORTED
-} nuvashalauncherModpackEnv;
+} NuvashaLauncherModpackEnv;
 
 /* One entry of the files array of the index. */
 typedef struct
@@ -67,14 +67,14 @@ typedef struct
   char *sha1;
   char *sha512;
   goffset file_size;       /* the size the manifest announces, or 0 */
-  nuvashalauncherModpackEnv env_client;
-  nuvashalauncherModpackEnv env_server;
+  NuvashaLauncherModpackEnv env_client;
+  NuvashaLauncherModpackEnv env_server;
   GPtrArray *downloads;    /* char*, tried in the order given */
-} nuvashalauncherModpackFile;
+} NuvashaLauncherModpackFile;
 
-void nuvashalauncher_modpack_file_free (nuvashalauncherModpackFile *file);
+void nuvashalauncher_modpack_file_free (NuvashaLauncherModpackFile *file);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherModpackFile, nuvashalauncher_modpack_file_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherModpackFile, nuvashalauncher_modpack_file_free)
 
 /* One entry in the dependency object: the required version for a name,
  * e.g. "minecraft" -> "1.20.1", "fabric-loader" -> "0.15.11". */
@@ -82,11 +82,11 @@ typedef struct
 {
   char *name;
   char *version;
-} nuvashalauncherModpackDependency;
+} NuvashaLauncherModpackDependency;
 
-void nuvashalauncher_modpack_dependency_free (nuvashalauncherModpackDependency *dependency);
+void nuvashalauncher_modpack_dependency_free (NuvashaLauncherModpackDependency *dependency);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherModpackDependency,
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherModpackDependency,
                                nuvashalauncher_modpack_dependency_free)
 
 /* Parsed index data plus resolved dependency information. */
@@ -98,54 +98,54 @@ typedef struct
   char *name;
   char *summary;
   char *icon;               /* relative path inside the installed pack */
-  GPtrArray *files;        /* nuvashalauncherModpackFile* */
-  GPtrArray *dependencies; /* nuvashalauncherModpackDependency* */
+  GPtrArray *files;        /* NuvashaLauncherModpackFile* */
+  GPtrArray *dependencies; /* NuvashaLauncherModpackDependency* */
 
   char *minecraft_version;
-  nuvashalauncherLoader loader;
+  NuvashaLauncherLoader loader;
   char *loader_version;
 
   /* The .mrpack this index was read from, for extracting the
    * overrides at install time. Set by nuvashalauncher_modpack_new_from_zip(). */
   char *archive_path;
-} nuvashalauncherModpack;
+} NuvashaLauncherModpack;
 
-void nuvashalauncher_modpack_free (nuvashalauncherModpack *modpack);
+void nuvashalauncher_modpack_free (NuvashaLauncherModpack *modpack);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherModpack, nuvashalauncher_modpack_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherModpack, nuvashalauncher_modpack_free)
 
 /* The manifest out of the JSON bytes. A path that leaves the instance,
  * a file with one hash missing or a format version other than the one
  * the format has today is a pack nuvashalauncher refuses to install. */
-nuvashalauncherModpack *nuvashalauncher_modpack_new_from_json (const char *json,
+NuvashaLauncherModpack *nuvashalauncher_modpack_new_from_json (const char *json,
                                        gssize length,
                                        GError **error);
 
 /* The manifest out of the .mrpack on disk. Every entry of the archive
  * is checked before the manifest is even parsed: no symlink, no
  * hardlink, no path outside the instance, no bomb. */
-nuvashalauncherModpack *nuvashalauncher_modpack_new_from_zip (const char *zip_path, GError **error);
+NuvashaLauncherModpack *nuvashalauncher_modpack_new_from_zip (const char *zip_path, GError **error);
 
-nuvashalauncherTaskScope *nuvashalauncher_modpack_new_from_zip_async (const char *zip_path,
+NuvashaLauncherTaskScope *nuvashalauncher_modpack_new_from_zip_async (const char *zip_path,
                                               GAsyncReadyCallback callback,
                                               gpointer user_data);
 
-nuvashalauncherModpack *nuvashalauncher_modpack_new_from_zip_finish (GAsyncResult *result,
+NuvashaLauncherModpack *nuvashalauncher_modpack_new_from_zip_finish (GAsyncResult *result,
                                              GError **error);
 
 /* The Minecraft version and the loader the pack runs on, out of its
  * dependencies. A loader the pack does not name leaves the instance on
  * vanilla. */
-gboolean nuvashalauncher_modpack_resolve (nuvashalauncherModpack *modpack, GError **error);
+gboolean nuvashalauncher_modpack_resolve (NuvashaLauncherModpack *modpack, GError **error);
 
 /* The files the pack requires to run on the client, and the ones it
  * only offers. (transfer full) one array per call, borrowing the
- * nuvashalauncherModpackFile* the pack owns, never NULL. */
-GPtrArray *nuvashalauncher_modpack_required_client_files (nuvashalauncherModpack *modpack);
-GPtrArray *nuvashalauncher_modpack_optional_client_files (nuvashalauncherModpack *modpack);
+ * NuvashaLauncherModpackFile* the pack owns, never NULL. */
+GPtrArray *nuvashalauncher_modpack_required_client_files (NuvashaLauncherModpack *modpack);
+GPtrArray *nuvashalauncher_modpack_optional_client_files (NuvashaLauncherModpack *modpack);
 
 /* Both hashes of the manifest, out of the bytes on the disk. */
-nuvashalauncherTaskScope *nuvashalauncher_modpack_verify_file_async (const nuvashalauncherModpackFile *file,
+NuvashaLauncherTaskScope *nuvashalauncher_modpack_verify_file_async (const NuvashaLauncherModpackFile *file,
                                             const char *path,
                                             GAsyncReadyCallback callback,
                                             gpointer user_data);
@@ -167,7 +167,7 @@ gboolean nuvashalauncher_modpack_redirect_allowed (const char *original,
                                                    const char *redirected);
 
 /* Progress reported between files during installation. */
-typedef void (*nuvashalauncherModpackProgressFunc) (guint files_done,
+typedef void (*NuvashaLauncherModpackProgressFunc) (guint files_done,
                                         guint files_total,
                                         const char *path,
                                         gpointer user_data);
@@ -177,7 +177,7 @@ typedef void (*nuvashalauncherModpackProgressFunc) (guint files_done,
  * @directory and registers the instance with @manager.
  *
  * @directory may be NULL: the manager's own default for @name is
- * taken. @optional_files borrows nuvashalauncherModpackFile* out of @modpack for
+ * taken. @optional_files borrows NuvashaLauncherModpackFile* out of @modpack for
  * the files the user picked, may be NULL.
  *
  * The install is built in a temporary directory next to the target.
@@ -187,37 +187,37 @@ typedef void (*nuvashalauncherModpackProgressFunc) (guint files_done,
  * Every download has to clear both hashes of the manifest. What the
  * user sees as "N of M files" goes to @progress. Both @callback and
  * @progress receive @user_data. */
-nuvashalauncherTaskScope *nuvashalauncher_modpack_install_async (nuvashalauncherModpack *modpack,
-                                         nuvashalauncherInstanceManager *manager,
+NuvashaLauncherTaskScope *nuvashalauncher_modpack_install_async (NuvashaLauncherModpack *modpack,
+                                         NuvashaLauncherInstanceManager *manager,
                                          const char *name,
                                          const char *directory,
                                          const GPtrArray *optional_files,
-                                         nuvashalauncherModpackProgressFunc progress,
+                                         NuvashaLauncherModpackProgressFunc progress,
                                          GAsyncReadyCallback callback,
                                          gpointer user_data);
 
 /* (transfer full) the new instance, registered. NULL on error. */
-nuvashalauncherInstance *nuvashalauncher_modpack_install_finish (GAsyncResult *result,
+NuvashaLauncherInstance *nuvashalauncher_modpack_install_finish (GAsyncResult *result,
                                            GError **error);
 
 gboolean nuvashalauncher_modpack_remove_archive (const char *path, GError **error);
-gboolean nuvashalauncher_modpack_install_icon (nuvashalauncherInstanceManager *manager,
-                                   nuvashalauncherInstance *instance,
+gboolean nuvashalauncher_modpack_install_icon (NuvashaLauncherInstanceManager *manager,
+                                   NuvashaLauncherInstance *instance,
                                    const char *source_path, GError **error);
 gboolean nuvashalauncher_modpack_icon_is_regular (const char *path);
 
 /* Writes @instance as a .mrpack at @path. The archive contains the
  * instance's manifest and its files under overrides/. Archive creation is
  * performed away from the GTK main loop. */
-typedef void (*nuvashalauncherModpackExportProgressFunc) (guint64 done, guint64 total,
+typedef void (*NuvashaLauncherModpackExportProgressFunc) (guint64 done, guint64 total,
                                                const char *detail,
                                                gpointer user_data);
 
-nuvashalauncherTaskScope *nuvashalauncher_modpack_export_async (nuvashalauncherInstance *instance, const char *path,
+NuvashaLauncherTaskScope *nuvashalauncher_modpack_export_async (NuvashaLauncherInstance *instance, const char *path,
                                         const char *pack_name, const char *summary,
                                         const char *version_id,
                                         gboolean include_transient,
-                                        nuvashalauncherModpackExportProgressFunc progress,
+                                        NuvashaLauncherModpackExportProgressFunc progress,
                                         gpointer progress_data,
                                         GAsyncReadyCallback callback,
                                         gpointer user_data);

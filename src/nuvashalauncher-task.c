@@ -12,7 +12,7 @@ typedef struct
   gulong handler;
 } FollowedCancellable;
 
-struct _nuvashalauncherTaskScope
+struct _NuvashaLauncherTaskScope
 {
   gatomicrefcount refs;
   guint64 id;
@@ -29,10 +29,10 @@ struct _nuvashalauncherTaskScope
 
 static gint next_task_id;
 
-static nuvashalauncherTaskScope *
+static NuvashaLauncherTaskScope *
 nuvashalauncher_task_scope_alloc (void)
 {
-  nuvashalauncherTaskScope *scope = g_new0 (nuvashalauncherTaskScope, 1);
+  NuvashaLauncherTaskScope *scope = g_new0 (NuvashaLauncherTaskScope, 1);
 
   g_atomic_ref_count_init (&scope->refs);
   scope->id = (guint64) g_atomic_int_add (&next_task_id, 1) + 1;
@@ -45,21 +45,21 @@ nuvashalauncher_task_scope_alloc (void)
 }
 
 guint64
-nuvashalauncher_task_scope_get_id (const nuvashalauncherTaskScope *scope)
+nuvashalauncher_task_scope_get_id (const NuvashaLauncherTaskScope *scope)
 {
   g_return_val_if_fail (scope != NULL, 0);
   return scope->id;
 }
 
-nuvashalauncherTaskState
-nuvashalauncher_task_scope_get_state (const nuvashalauncherTaskScope *scope)
+NuvashaLauncherTaskState
+nuvashalauncher_task_scope_get_state (const NuvashaLauncherTaskScope *scope)
 {
   g_return_val_if_fail (scope != NULL, nuvashalauncher_TASK_STATE_FAILED);
-  return (nuvashalauncherTaskState) g_atomic_int_get (&scope->state);
+  return (NuvashaLauncherTaskState) g_atomic_int_get (&scope->state);
 }
 
 void
-nuvashalauncher_task_scope_set_source_tag (nuvashalauncherTaskScope *scope, gpointer source_tag)
+nuvashalauncher_task_scope_set_source_tag (NuvashaLauncherTaskScope *scope, gpointer source_tag)
 {
   g_return_if_fail (scope != NULL);
   if (scope->task != NULL)
@@ -91,11 +91,11 @@ nuvashalauncher_task_result_is_valid (GAsyncResult *result, const char *expected
 }
 
 void
-nuvashalauncher_task_scope_set_state (nuvashalauncherTaskScope *scope, nuvashalauncherTaskState state)
+nuvashalauncher_task_scope_set_state (NuvashaLauncherTaskScope *scope, NuvashaLauncherTaskState state)
 {
   g_return_if_fail (scope != NULL);
-  nuvashalauncherTaskState previous =
-    (nuvashalauncherTaskState) g_atomic_int_get (&scope->state);
+  NuvashaLauncherTaskState previous =
+    (NuvashaLauncherTaskState) g_atomic_int_get (&scope->state);
   if (previous != state)
     g_debug ("operation=%" G_GUINT64_FORMAT " state=%d->%d", scope->id,
              previous, state);
@@ -103,7 +103,7 @@ nuvashalauncher_task_scope_set_state (nuvashalauncherTaskScope *scope, nuvashala
 }
 
 static void
-nuvashalauncher_task_scope_unfollow (nuvashalauncherTaskScope *scope)
+nuvashalauncher_task_scope_unfollow (NuvashaLauncherTaskScope *scope)
 {
   for (guint i = 0; i < scope->followed->len; i++)
     {
@@ -117,13 +117,13 @@ nuvashalauncher_task_scope_unfollow (nuvashalauncherTaskScope *scope)
   g_array_set_size (scope->followed, 0);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_task_scope_new_tagged (GObject *source_object, GCancellable *cancellable,
                                GAsyncReadyCallback callback, gpointer user_data,
                                const char *source_tag)
 {
   g_autoptr (GCancellable) owned = NULL;
-  nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_alloc ();
+  NuvashaLauncherTaskScope *scope = nuvashalauncher_task_scope_alloc ();
 
   /* A caller that owns the operation handle has to be able to stop it, so
    * an operation with no cancellable of its own is given one here rather
@@ -147,11 +147,11 @@ nuvashalauncher_task_scope_new_tagged (GObject *source_object, GCancellable *can
   return scope;
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_task_scope_from_task (GTask *task)
 {
-  nuvashalauncherTaskScope *existing;
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *existing;
+  NuvashaLauncherTaskScope *scope;
 
   g_return_val_if_fail (G_IS_TASK (task), NULL);
 
@@ -165,8 +165,8 @@ nuvashalauncher_task_scope_from_task (GTask *task)
   return scope;
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_task_scope_ref (nuvashalauncherTaskScope *scope)
+NuvashaLauncherTaskScope *
+nuvashalauncher_task_scope_ref (NuvashaLauncherTaskScope *scope)
 {
   g_return_val_if_fail (scope != NULL, NULL);
   g_atomic_ref_count_inc (&scope->refs);
@@ -174,7 +174,7 @@ nuvashalauncher_task_scope_ref (nuvashalauncherTaskScope *scope)
 }
 
 void
-nuvashalauncher_task_scope_unref (nuvashalauncherTaskScope *scope)
+nuvashalauncher_task_scope_unref (NuvashaLauncherTaskScope *scope)
 {
   if (scope == NULL || !g_atomic_ref_count_dec (&scope->refs))
     return;
@@ -209,7 +209,7 @@ nuvashalauncher_task_scope_unref (nuvashalauncherTaskScope *scope)
 static void
 attached_task_destroyed (gpointer user_data)
 {
-  nuvashalauncherTaskScope *scope = user_data;
+  NuvashaLauncherTaskScope *scope = user_data;
 
   if (!scope->owns_task)
     scope->task = NULL;
@@ -233,21 +233,21 @@ nuvashalauncher_task_scope_attach_task (GTask *task)
 }
 
 GTask *
-nuvashalauncher_task_scope_task (const nuvashalauncherTaskScope *scope)
+nuvashalauncher_task_scope_task (const NuvashaLauncherTaskScope *scope)
 {
   g_return_val_if_fail (scope != NULL, NULL);
   return scope->task;
 }
 
 GCancellable *
-nuvashalauncher_task_scope_get_cancellable (const nuvashalauncherTaskScope *scope)
+nuvashalauncher_task_scope_get_cancellable (const NuvashaLauncherTaskScope *scope)
 {
   g_return_val_if_fail (scope != NULL, NULL);
   return scope->task != NULL ? g_task_get_cancellable (scope->task) : NULL;
 }
 
 void
-nuvashalauncher_task_scope_set_check_cancellable (nuvashalauncherTaskScope *scope, gboolean check)
+nuvashalauncher_task_scope_set_check_cancellable (NuvashaLauncherTaskScope *scope, gboolean check)
 {
   g_return_if_fail (scope != NULL);
   if (scope->task != NULL)
@@ -264,7 +264,7 @@ release_when_done_idle (gpointer user_data)
 }
 
 static void
-scope_release_when_done (nuvashalauncherTaskScope *scope)
+scope_release_when_done (NuvashaLauncherTaskScope *scope)
 {
   g_atomic_int_set (&scope->unref_when_done, FALSE);
   GSource *source = g_idle_source_new ();
@@ -277,7 +277,7 @@ scope_release_when_done (nuvashalauncherTaskScope *scope)
 void
 nuvashalauncher_task_scope_release_attached (GTask *task)
 {
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
 
   g_return_if_fail (G_IS_TASK (task));
 
@@ -287,10 +287,10 @@ nuvashalauncher_task_scope_release_attached (GTask *task)
 }
 
 gboolean
-nuvashalauncher_task_scope_return_error_if_cancelled (nuvashalauncherTaskScope *scope)
+nuvashalauncher_task_scope_return_error_if_cancelled (NuvashaLauncherTaskScope *scope)
 {
   gboolean cancelled;
-  nuvashalauncherTaskScope *hold;
+  NuvashaLauncherTaskScope *hold;
 
   g_return_val_if_fail (scope != NULL, FALSE);
 
@@ -313,11 +313,11 @@ nuvashalauncher_task_scope_return_error_if_cancelled (nuvashalauncherTaskScope *
 }
 
 void
-nuvashalauncher_task_scope_return_pointer (nuvashalauncherTaskScope *scope, gpointer result,
+nuvashalauncher_task_scope_return_pointer (NuvashaLauncherTaskScope *scope, gpointer result,
                                GDestroyNotify result_free)
 {
   gboolean release;
-  nuvashalauncherTaskScope *hold;
+  NuvashaLauncherTaskScope *hold;
 
   g_return_if_fail (scope != NULL);
   if (!g_atomic_int_compare_and_exchange (&scope->returned, 0, 1))
@@ -338,10 +338,10 @@ nuvashalauncher_task_scope_return_pointer (nuvashalauncherTaskScope *scope, gpoi
 }
 
 void
-nuvashalauncher_task_scope_return_error (nuvashalauncherTaskScope *scope, GError *error)
+nuvashalauncher_task_scope_return_error (NuvashaLauncherTaskScope *scope, GError *error)
 {
   gboolean release;
-  nuvashalauncherTaskScope *hold;
+  NuvashaLauncherTaskScope *hold;
 
   g_return_if_fail (scope != NULL);
   if (!g_atomic_int_compare_and_exchange (&scope->returned, 0, 1))
@@ -361,10 +361,10 @@ nuvashalauncher_task_scope_return_error (nuvashalauncherTaskScope *scope, GError
 }
 
 void
-nuvashalauncher_task_scope_return_boolean (nuvashalauncherTaskScope *scope, gboolean result)
+nuvashalauncher_task_scope_return_boolean (NuvashaLauncherTaskScope *scope, gboolean result)
 {
   gboolean release;
-  nuvashalauncherTaskScope *hold;
+  NuvashaLauncherTaskScope *hold;
 
   g_return_if_fail (scope != NULL);
   if (!g_atomic_int_compare_and_exchange (&scope->returned, 0, 1))
@@ -381,8 +381,8 @@ nuvashalauncher_task_scope_return_boolean (nuvashalauncherTaskScope *scope, gboo
   nuvashalauncher_task_scope_unref (hold);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_task_scope_unref_when_done (nuvashalauncherTaskScope *scope)
+NuvashaLauncherTaskScope *
+nuvashalauncher_task_scope_unref_when_done (NuvashaLauncherTaskScope *scope)
 {
   g_return_val_if_fail (scope != NULL, NULL);
   g_atomic_int_set (&scope->unref_when_done, TRUE);
@@ -390,7 +390,7 @@ nuvashalauncher_task_scope_unref_when_done (nuvashalauncherTaskScope *scope)
 }
 
 void
-nuvashalauncher_task_scope_release_when_done (nuvashalauncherTaskScope *scope, GCancellable *cancellable)
+nuvashalauncher_task_scope_release_when_done (NuvashaLauncherTaskScope *scope, GCancellable *cancellable)
 {
   nuvashalauncher_task_scope_follow_cancellable (scope, cancellable);
   nuvashalauncher_task_scope_unref_when_done (scope);
@@ -407,7 +407,7 @@ typedef enum
 
 typedef struct
 {
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
   GTask *task;
   DeferredKind kind;
   gpointer value;
@@ -475,7 +475,7 @@ deferred_completion_return (gpointer user_data)
 }
 
 static void
-defer_completion (nuvashalauncherTaskScope *scope, DeferredCompletion *deferred)
+defer_completion (NuvashaLauncherTaskScope *scope, DeferredCompletion *deferred)
 {
   guint source_id;
 
@@ -495,7 +495,7 @@ defer_completion (nuvashalauncherTaskScope *scope, DeferredCompletion *deferred)
 }
 
 void
-nuvashalauncher_task_scope_return_pointer_deferred (nuvashalauncherTaskScope *scope, gpointer result,
+nuvashalauncher_task_scope_return_pointer_deferred (NuvashaLauncherTaskScope *scope, gpointer result,
                                         GDestroyNotify result_free)
 {
   g_return_if_fail (scope != NULL);
@@ -509,7 +509,7 @@ nuvashalauncher_task_scope_return_pointer_deferred (nuvashalauncherTaskScope *sc
 }
 
 void
-nuvashalauncher_task_scope_return_error_deferred (nuvashalauncherTaskScope *scope, GError *error)
+nuvashalauncher_task_scope_return_error_deferred (NuvashaLauncherTaskScope *scope, GError *error)
 {
   g_return_if_fail (scope != NULL);
 
@@ -521,7 +521,7 @@ nuvashalauncher_task_scope_return_error_deferred (nuvashalauncherTaskScope *scop
 }
 
 void
-nuvashalauncher_task_scope_return_boolean_deferred (nuvashalauncherTaskScope *scope, gboolean result)
+nuvashalauncher_task_scope_return_boolean_deferred (NuvashaLauncherTaskScope *scope, gboolean result)
 {
   DeferredCompletion *deferred;
 
@@ -534,7 +534,7 @@ nuvashalauncher_task_scope_return_boolean_deferred (nuvashalauncherTaskScope *sc
 }
 
 void
-nuvashalauncher_task_scope_track_source (nuvashalauncherTaskScope *scope, guint source_id)
+nuvashalauncher_task_scope_track_source (NuvashaLauncherTaskScope *scope, guint source_id)
 {
   g_return_if_fail (scope != NULL);
 
@@ -551,7 +551,7 @@ nuvashalauncher_task_scope_track_source (nuvashalauncherTaskScope *scope, guint 
 }
 
 void
-nuvashalauncher_task_scope_remove_source (nuvashalauncherTaskScope *scope, guint source_id)
+nuvashalauncher_task_scope_remove_source (NuvashaLauncherTaskScope *scope, guint source_id)
 {
   g_return_if_fail (scope != NULL);
   for (guint i = 0; i < scope->sources->len; i++)
@@ -566,7 +566,7 @@ nuvashalauncher_task_scope_remove_source (nuvashalauncherTaskScope *scope, guint
 }
 
 void
-nuvashalauncher_task_scope_forget_source (nuvashalauncherTaskScope *scope, guint source_id)
+nuvashalauncher_task_scope_forget_source (NuvashaLauncherTaskScope *scope, guint source_id)
 {
   g_return_if_fail (scope != NULL);
   for (guint i = 0; i < scope->sources->len; i++)
@@ -578,7 +578,7 @@ nuvashalauncher_task_scope_forget_source (nuvashalauncherTaskScope *scope, guint
 }
 
 void
-nuvashalauncher_task_scope_cancel (nuvashalauncherTaskScope *scope)
+nuvashalauncher_task_scope_cancel (NuvashaLauncherTaskScope *scope)
 {
   g_autoptr (GArray) sources = NULL;
 
@@ -608,7 +608,7 @@ on_followed_cancellable_cancelled (GCancellable *cancellable G_GNUC_UNUSED,
 }
 
 void
-nuvashalauncher_task_scope_follow_cancellable (nuvashalauncherTaskScope *scope, GCancellable *cancellable)
+nuvashalauncher_task_scope_follow_cancellable (NuvashaLauncherTaskScope *scope, GCancellable *cancellable)
 {
   FollowedCancellable followed;
 
@@ -636,7 +636,7 @@ nuvashalauncher_task_scope_follow_cancellable (nuvashalauncherTaskScope *scope, 
 
 
 void
-nuvashalauncher_task_scope_take_task (nuvashalauncherTaskScope *scope)
+nuvashalauncher_task_scope_take_task (NuvashaLauncherTaskScope *scope)
 {
   g_return_if_fail (scope != NULL);
   scope->owns_task = TRUE;

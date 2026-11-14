@@ -12,7 +12,7 @@
  * shown. This also catches old Minecraft versions that print their complete
  * legacy session as "Session ID is token:...". */
 static char *
-censor_private_text (nuvashalauncher *self, const char *text)
+censor_private_text (NuvashaLauncher *self, const char *text)
 {
   g_autofree char *result = g_strdup (text != NULL ? text : "");
   const char *secrets[] = { self->log_access_token, self->log_session,
@@ -42,7 +42,7 @@ censor_private_text (nuvashalauncher *self, const char *text)
  * ---------------------------------------------------------- */
 
 guint
-nuvashalauncher_launcher_get_line_limit (nuvashalauncher *self)
+nuvashalauncher_launcher_get_line_limit (NuvashaLauncher *self)
 {
   guint limit;
 
@@ -61,7 +61,7 @@ nuvashalauncher_launcher_get_line_limit (nuvashalauncher *self)
  * line itself. Everything a game prints goes through here, and so does
  * everything nuvashalauncher says about the launch. */
 void
-log_line (nuvashalauncher *self,
+log_line (NuvashaLauncher *self,
           const char  *tag,
           const char  *format,
           ...)
@@ -103,7 +103,7 @@ log_line (nuvashalauncher *self,
 }
 
 guint
-nuvashalauncher_launcher_get_line_count (nuvashalauncher *self)
+nuvashalauncher_launcher_get_line_count (NuvashaLauncher *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_LAUNCHER (self), 0);
 
@@ -111,7 +111,7 @@ nuvashalauncher_launcher_get_line_count (nuvashalauncher *self)
 }
 
 char *
-nuvashalauncher_launcher_get_log_text (nuvashalauncher *self)
+nuvashalauncher_launcher_get_log_text (NuvashaLauncher *self)
 {
   GString *text;
 
@@ -131,7 +131,7 @@ nuvashalauncher_launcher_get_log_text (nuvashalauncher *self)
 }
 
 void
-nuvashalauncher_launcher_clear_log (nuvashalauncher *self)
+nuvashalauncher_launcher_clear_log (NuvashaLauncher *self)
 {
   g_return_if_fail (nuvashalauncher_IS_LAUNCHER (self));
 

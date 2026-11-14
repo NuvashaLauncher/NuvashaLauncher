@@ -12,7 +12,7 @@
 typedef struct {
   GMainLoop *loop;
   guint *completed;
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
 } UpdateWait;
 
 static void
@@ -37,12 +37,12 @@ update_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
 typedef struct {
   GMainLoop *loop;
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
 } LoadWait;
 
 typedef struct {
   GMainLoop *loop;
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
   GError *error;
 } ErrorWait;
 
@@ -80,7 +80,7 @@ load_error_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 }
 
 static void
-start_update (const char *root, nuvashalauncherContentIndexEntry *entry, GMainLoop *loop,
+start_update (const char *root, NuvashaLauncherContentIndexEntry *entry, GMainLoop *loop,
               guint *completed)
 {
   UpdateWait *wait = g_new0 (UpdateWait, 1);
@@ -102,7 +102,7 @@ test_concurrent_updates_are_serialized (void)
   g_autofree char *mods_directory = g_build_filename (root, "mods", NULL);
   GMainLoop *loop = g_main_loop_new (NULL, FALSE);
   guint completed = 0;
-  nuvashalauncherContentIndexEntry first = {
+  NuvashaLauncherContentIndexEntry first = {
     .filename = "first.jar",
     .hash = "first-sha1",
     .hash512 = "first-sha512",
@@ -114,7 +114,7 @@ test_concurrent_updates_are_serialized (void)
     .version_id = "first-version",
     .version_name = "1.0",
   };
-  nuvashalauncherContentIndexEntry second = {
+  NuvashaLauncherContentIndexEntry second = {
     .filename = "second.jar",
     .hash = "second-sha1",
     .hash512 = "second-sha512",

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <template class="nuvashalauncherSignInDialog" parent="AdwDialog">
+  <template class="NuvashaLauncherSignInDialog" parent="AdwDialog">
     <property name="title" translatable="yes">Sign In</property>
     <property name="content-width">440</property>
     <child>

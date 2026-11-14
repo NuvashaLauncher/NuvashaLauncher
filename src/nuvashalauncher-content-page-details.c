@@ -12,15 +12,15 @@
 /* Tracks one asynchronous project-details request. The page is weakly
  * referenced because it can close before the request finishes. */
 typedef struct {
-  nuvashalauncherContentPage *page; /* weak */
+  NuvashaLauncherContentPage *page; /* weak */
   char *project_id;     /* owned */
 
   /* Handle for the request currently associated with this watch. */
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
 } DetailsWatch;
 
 static DetailsWatch *
-details_watch_new (nuvashalauncherContentPage *self, const char *project_id)
+details_watch_new (NuvashaLauncherContentPage *self, const char *project_id)
 {
   DetailsWatch *watch = g_new0 (DetailsWatch, 1);
 
@@ -52,8 +52,8 @@ details_watch_free (DetailsWatch *watch)
 static void
 on_version_picked (GtkCheckButton *check, gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
-  nuvashalauncherModrinthVersion *version = NULL;
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherModrinthVersion *version = NULL;
 
   /* The list is what moved the checkmark itself. */
   if (g_object_get_data (G_OBJECT (check), "nuvashalauncher-setting") != NULL)
@@ -78,13 +78,13 @@ static void
 on_version_selected (GObject *object G_GNUC_UNUSED,
                      GParamSpec *pspec G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
 
   refresh_pick_check (self);
   nuvashalauncher_content_page_refresh_picks (self);
 }
 
-/* Internal project-details workflow for nuvashalauncherContentPage. */
+/* Internal project-details workflow for NuvashaLauncherContentPage. */
 
 /* ---------------------------------------------------------- *
  * The page of one project
@@ -93,7 +93,7 @@ on_version_selected (GObject *object G_GNUC_UNUSED,
 
 
 /* Return the version selected in the download dropdown, or NULL. */
-nuvashalauncherModrinthVersion *
+NuvashaLauncherModrinthVersion *
 selected_version (GtkDropDown *dropdown, GPtrArray *versions)
 {
   guint index = gtk_drop_down_get_selected (GTK_DROP_DOWN (dropdown));
@@ -107,7 +107,7 @@ selected_version (GtkDropDown *dropdown, GPtrArray *versions)
 
 /* Return the best available display name for a version. */
 const char *
-version_name_of (nuvashalauncherModrinthVersion *version)
+version_name_of (NuvashaLauncherModrinthVersion *version)
 {
   if (version->name != NULL && *version->name != '\0')
     return version->name;
@@ -122,11 +122,11 @@ version_name_of (nuvashalauncherModrinthVersion *version)
 static void
 on_version_download_clicked (GtkButton *button, gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
   GtkWidget *dropdown =
     GTK_WIDGET (g_object_get_data (G_OBJECT (button), "nuvashalauncher-dropdown"));
   GPtrArray *versions = g_object_get_data (G_OBJECT (button), "nuvashalauncher-versions");
-  nuvashalauncherModrinthVersion *version = NULL;
+  NuvashaLauncherModrinthVersion *version = NULL;
 
   if (self == NULL || dropdown == NULL || versions == NULL)
     return;
@@ -148,7 +148,7 @@ on_version_download_clicked (GtkButton *button, gpointer user_data)
 
 /* Format a version label with its publication date. */
 static char *
-version_label (nuvashalauncherModrinthVersion *version)
+version_label (NuvashaLauncherModrinthVersion *version)
 {
   if (version->date_published != NULL && *version->date_published != '\0')
     {
@@ -204,7 +204,7 @@ version_factory (void)
 /* Close the project details view and return to the list. A late response is
  * ignored when the details view no longer exists. */
 void
-nuvashalauncher_content_page_close_detail (nuvashalauncherContentPage *self)
+nuvashalauncher_content_page_close_detail (NuvashaLauncherContentPage *self)
 {
   if (self->project.split == NULL)
     return;
@@ -219,7 +219,7 @@ nuvashalauncher_content_page_close_detail (nuvashalauncherContentPage *self)
 
 /* Build the project details after its metadata and versions are available. */
 static GtkWidget *
-details_content (nuvashalauncherContentPage *self)
+details_content (NuvashaLauncherContentPage *self)
 {
   GtkWidget *content = NULL;
   GtkWidget *scroller = NULL;
@@ -333,7 +333,7 @@ details_content (nuvashalauncherContentPage *self)
 /* Puts the real content in the page once both the description and the
  * versions are in. */
 static void
-detail_fill (nuvashalauncherContentPage *self)
+detail_fill (NuvashaLauncherContentPage *self)
 {
   if (self == NULL || self->project.details_page == NULL)
     return;
@@ -405,7 +405,7 @@ on_detail_versions_ready (GObject *source G_GNUC_UNUSED,
                           GAsyncResult *result, gpointer user_data)
 {
   DetailsWatch *watch = user_data;
-  nuvashalauncherContentPage *self = watch->page;
+  NuvashaLauncherContentPage *self = watch->page;
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
 
@@ -449,9 +449,9 @@ on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                   gpointer user_data)
 {
   DetailsWatch *watch = user_data;
-  nuvashalauncherContentPage *self = watch->page;
+  NuvashaLauncherContentPage *self = watch->page;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModrinthDetails) details = NULL;
+  g_autoptr (NuvashaLauncherModrinthDetails) details = NULL;
   g_autofree char *author = NULL;
 
   details = nuvashalauncher_modrinth_details_finish (result, &error);
@@ -504,7 +504,7 @@ on_details_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 /* Open the details page for @project and its compatible versions. The user
  * chooses the version; the description is rendered as Markdown. */
 void
-open_project_page (nuvashalauncherContentPage *self, nuvashalauncherModrinthProject *project)
+open_project_page (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthProject *project)
 {
   GtkWidget *page = NULL;
 
@@ -559,8 +559,8 @@ open_project_page (nuvashalauncherContentPage *self, nuvashalauncherModrinthProj
 void
 nuvashalauncher_content_page_on_result_activated (AdwActionRow *row, gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
-  nuvashalauncherModrinthProject *project =
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherModrinthProject *project =
     g_object_get_data (G_OBJECT (row), "nuvashalauncher-project");
 
   if (project == NULL)

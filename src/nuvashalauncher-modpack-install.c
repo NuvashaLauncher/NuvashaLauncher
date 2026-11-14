@@ -32,7 +32,7 @@ nuvashalauncher_modpack_remove_archive (const char *path, GError **error)
 }
 
 gboolean
-nuvashalauncher_modpack_install_icon (nuvashalauncherInstanceManager *manager, nuvashalauncherInstance *instance,
+nuvashalauncher_modpack_install_icon (NuvashaLauncherInstanceManager *manager, NuvashaLauncherInstance *instance,
                           const char *source_path, GError **error)
 {
   g_autofree char *directory = NULL;
@@ -75,7 +75,7 @@ nuvashalauncher_modpack_icon_is_regular (const char *path)
  * Fabric and Quilt publish no installer, and their versions are bare
  * numbers either way. The two spellings are the same version. */
 static gboolean
-loader_version_matches (nuvashalauncherLoader loader,
+loader_version_matches (NuvashaLauncherLoader loader,
                         const char *have,
                         const char *want,
                         const char *game_version)
@@ -107,8 +107,8 @@ loader_version_matches (nuvashalauncherLoader loader,
 
 typedef struct
 {
-  nuvashalauncherModpack *pack;     /* borrowed: alive until the last finish */
-  nuvashalauncherInstanceManager *manager;
+  NuvashaLauncherModpack *pack;     /* borrowed: alive until the last finish */
+  NuvashaLauncherInstanceManager *manager;
   char *name;
   char *target;
   char *temp;
@@ -125,10 +125,10 @@ typedef struct
   char *last_download_url;
   char *last_download_error;
   gboolean moved;
-  nuvashalauncherModpackProgressFunc progress;
+  NuvashaLauncherModpackProgressFunc progress;
   gpointer progress_data; /* user_data both for the result and progress */
   GTask *task;
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
 } InstallRun;
 
 static void install_next (InstallRun *run);
@@ -143,7 +143,7 @@ static void install_fail (InstallRun *run, GError *error);
 static void overrides_extracted (GObject *, GAsyncResult *, gpointer);
 
 static char *
-modpack_environment (nuvashalauncherModpackEnv environment)
+modpack_environment (NuvashaLauncherModpackEnv environment)
 {
   switch (environment)
     {
@@ -163,14 +163,14 @@ seed_manifest_indexes (InstallRun *run)
 {
   for (guint i = 0; i < run->files->len; i++)
     {
-      nuvashalauncherModpackFile *file = g_ptr_array_index (run->files, i);
-      nuvashalauncherContentType type;
+      NuvashaLauncherModpackFile *file = g_ptr_array_index (run->files, i);
+      NuvashaLauncherContentType type;
       const char *url = file->downloads != NULL && file->downloads->len > 0
                           ? g_ptr_array_index (file->downloads, 0) : NULL;
       g_autofree char *filename = NULL;
       g_autofree char *project_id = NULL;
       g_autofree char *version_id = NULL;
-      nuvashalauncherContentIndexEntry entry = { 0 };
+      NuvashaLauncherContentIndexEntry entry = { 0 };
 
       if (g_str_has_prefix (file->path, "mods/"))
         {
@@ -314,7 +314,7 @@ install_refuse (InstallRun *run, GError *error)
 static void
 install_after_overrides (InstallRun *run)
 {
-  nuvashalauncherModpack *pack = run->pack;
+  NuvashaLauncherModpack *pack = run->pack;
 
   if (pack->loader == nuvashalauncher_LOADER_VANILLA)
     {
@@ -323,7 +323,7 @@ install_after_overrides (InstallRun *run)
     }
 
   {
-    nuvashalauncherTaskScope *listing = nuvashalauncher_loaders_versions_async (pack->loader,
+    NuvashaLauncherTaskScope *listing = nuvashalauncher_loaders_versions_async (pack->loader,
                                                         pack->minecraft_version,
                                                         install_loader_versions,
                                                         run);
@@ -341,7 +341,7 @@ install_loader_versions (GObject *source G_GNUC_UNUSED,
   InstallRun *run = user_data;
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
-  nuvashalauncherModpack *pack = run->pack;
+  NuvashaLauncherModpack *pack = run->pack;
   gboolean found = FALSE;
 
   versions = nuvashalauncher_loaders_versions_finish (result, &error);
@@ -374,7 +374,7 @@ install_loader_versions (GObject *source G_GNUC_UNUSED,
 
   for (guint i = 0; i < versions->len && !found; i++)
     {
-      nuvashalauncherLoaderVersion *version = g_ptr_array_index (versions, i);
+      NuvashaLauncherLoaderVersion *version = g_ptr_array_index (versions, i);
 
       if (loader_version_matches (pack->loader, version->version,
                                   pack->loader_version, pack->minecraft_version))
@@ -430,9 +430,9 @@ install_register (InstallRun *run)
 static void
 install_finish_registration (InstallRun *run)
 {
-  g_autoptr (nuvashalauncherInstance) instance = NULL;
+  g_autoptr (NuvashaLauncherInstance) instance = NULL;
   g_autoptr (GError) error = NULL;
-  nuvashalauncherModpack *pack = run->pack;
+  NuvashaLauncherModpack *pack = run->pack;
 
   instance = nuvashalauncher_instance_manager_create (run->manager, run->name,
                                           run->target, pack->minecraft_version,
@@ -520,7 +520,7 @@ overrides_extracted (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 dispatch_download (InstallRun *run)
 {
-  nuvashalauncherModpackFile *file = g_ptr_array_index (run->files, run->current);
+  NuvashaLauncherModpackFile *file = g_ptr_array_index (run->files, run->current);
   const char *url = NULL;
 
   if (file->downloads == NULL || file->downloads->len == 0)
@@ -631,7 +631,7 @@ install_file_done (GObject *source G_GNUC_UNUSED,
 {
   InstallRun *run = user_data;
   g_autoptr (GError) error = NULL;
-  nuvashalauncherModpackFile *file =
+  NuvashaLauncherModpackFile *file =
     g_ptr_array_index (run->files, run->current);
   const char *failed_url = file->downloads != NULL && run->attempt < file->downloads->len
                              ? g_ptr_array_index (file->downloads, run->attempt)
@@ -678,7 +678,7 @@ install_file_verified (GObject *source G_GNUC_UNUSED,
 {
   InstallRun *run = user_data;
   g_autoptr (GError) error = NULL;
-  nuvashalauncherModpackFile *file = NULL;
+  NuvashaLauncherModpackFile *file = NULL;
   g_autofree char *dest = NULL;
 
   if (!nuvashalauncher_modpack_verify_file_finish (result, &error))
@@ -720,20 +720,20 @@ install_file_verified (GObject *source G_GNUC_UNUSED,
   install_next (run);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_modpack_install_async (nuvashalauncherModpack *modpack,
-                           nuvashalauncherInstanceManager *manager,
+NuvashaLauncherTaskScope *
+nuvashalauncher_modpack_install_async (NuvashaLauncherModpack *modpack,
+                           NuvashaLauncherInstanceManager *manager,
                            const char *name,
                            const char *directory,
                            const GPtrArray *optional_files,
-                           nuvashalauncherModpackProgressFunc progress,
+                           NuvashaLauncherModpackProgressFunc progress,
                            GAsyncReadyCallback callback,
                            gpointer user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   GTask *task = nuvashalauncher_task_scope_task (scope);
-  nuvashalauncherTaskScope *task_scope = scope;
+  NuvashaLauncherTaskScope *task_scope = scope;
   InstallRun *run = NULL;
   g_autofree char *parent = NULL;
 
@@ -857,7 +857,7 @@ nuvashalauncher_modpack_install_async (nuvashalauncherModpack *modpack,
   return nuvashalauncher_task_scope_ref (task_scope);
 }
 
-nuvashalauncherInstance *
+NuvashaLauncherInstance *
 nuvashalauncher_modpack_install_finish (GAsyncResult *result, GError **error)
 {
   g_return_val_if_fail (nuvashalauncher_task_result_is_valid (result, "nuvashalauncher-task-scope"), NULL);

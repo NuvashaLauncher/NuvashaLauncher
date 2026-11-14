@@ -346,7 +346,7 @@ read_archive_member (const char *path, const char *member)
 }
 
 static void
-apply_local_json (nuvashalauncherContentFile *file, const char *name,
+apply_local_json (NuvashaLauncherContentFile *file, const char *name,
                   const guint8 *data, gsize length, char **icon_member)
 {
   g_autoptr (JsonParser) parser = json_parser_new ();
@@ -419,7 +419,7 @@ apply_local_json (nuvashalauncherContentFile *file, const char *name,
 }
 
 static void
-apply_local_mcmod (nuvashalauncherContentFile *file, const guint8 *data, gsize length,
+apply_local_mcmod (NuvashaLauncherContentFile *file, const guint8 *data, gsize length,
                    char **icon_member)
 {
   g_autoptr (JsonParser) parser = json_parser_new ();
@@ -458,7 +458,7 @@ apply_local_mcmod (nuvashalauncherContentFile *file, const guint8 *data, gsize l
 }
 
 static void
-apply_local_toml (nuvashalauncherContentFile *file, const guint8 *data, gsize length,
+apply_local_toml (NuvashaLauncherContentFile *file, const guint8 *data, gsize length,
                   char **icon_member)
 {
   g_autofree char *contents = g_strndup ((const char *) data, length);
@@ -510,7 +510,7 @@ apply_local_toml (nuvashalauncherContentFile *file, const guint8 *data, gsize le
 }
 
 static void
-apply_resource_metadata (nuvashalauncherContentFile *file)
+apply_resource_metadata (NuvashaLauncherContentFile *file)
 {
   g_autoptr (GByteArray) metadata =
     read_archive_member (file->path, "pack.mcmeta");
@@ -552,7 +552,7 @@ apply_resource_metadata (nuvashalauncherContentFile *file)
 
 typedef struct
 {
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
   char *archive_path;
   char *member;
   char *sha1;
@@ -576,7 +576,7 @@ local_icon_extract_thread (GTask *task G_GNUC_UNUSED,
                            GCancellable *cancellable)
 {
   LocalIconExtract *extract = task_data;
-  g_autoptr (nuvashalauncherTaskScope) scope = g_steal_pointer (&extract->scope);
+  g_autoptr (NuvashaLauncherTaskScope) scope = g_steal_pointer (&extract->scope);
   g_autoptr (GByteArray) icon = NULL;
   g_autofree char *directory = NULL;
   g_autofree char *name = NULL;
@@ -618,12 +618,12 @@ local_icon_extract_thread (GTask *task G_GNUC_UNUSED,
   nuvashalauncher_task_scope_return_pointer (scope, g_steal_pointer (&path), g_free);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_content_load_local_icon_async (nuvashalauncherContentFile *file,
+NuvashaLauncherTaskScope *
+nuvashalauncher_content_load_local_icon_async (NuvashaLauncherContentFile *file,
                                    GAsyncReadyCallback callback,
                                    gpointer user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   LocalIconExtract *extract = NULL;
 
@@ -655,7 +655,7 @@ nuvashalauncher_content_load_local_icon_finish (GAsyncResult *result, GError **e
 }
 
 void
-nuvashalauncher_content_apply_local_metadata (nuvashalauncherContentFile *file, nuvashalauncherContentType type)
+nuvashalauncher_content_apply_local_metadata (NuvashaLauncherContentFile *file, NuvashaLauncherContentType type)
 {
   if (file->required_dependencies == NULL)
     file->required_dependencies = g_ptr_array_new_with_free_func (g_free);

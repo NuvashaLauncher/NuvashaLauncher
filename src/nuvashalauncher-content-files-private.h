@@ -7,9 +7,9 @@
 
 #include "nuvashalauncher-content-page.h"
 
-void nuvashalauncher_content_apply_local_metadata (nuvashalauncherContentFile *file,
-                                       nuvashalauncherContentType type);
-nuvashalauncherTaskScope *nuvashalauncher_content_load_local_icon_async (nuvashalauncherContentFile *file,
+void nuvashalauncher_content_apply_local_metadata (NuvashaLauncherContentFile *file,
+                                       NuvashaLauncherContentType type);
+NuvashaLauncherTaskScope *nuvashalauncher_content_load_local_icon_async (NuvashaLauncherContentFile *file,
                                                 GAsyncReadyCallback callback,
                                                 gpointer user_data);
 char *nuvashalauncher_content_load_local_icon_finish (GAsyncResult *result,

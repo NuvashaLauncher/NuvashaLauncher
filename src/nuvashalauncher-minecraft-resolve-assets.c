@@ -361,7 +361,7 @@ resolve_objects (ResolveRequest *request)
 void
 resolve_assets (ResolveRequest *request)
 {
-  nuvashalauncherVersionDescription *description = request->description;
+  NuvashaLauncherVersionDescription *description = request->description;
   g_autofree char *path = NULL;
   g_autoptr (GError) error = NULL;
 

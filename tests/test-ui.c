@@ -282,9 +282,9 @@ test_content_page_starts_single (void)
   g_autoptr (GError) error = NULL;
   g_autofree char *tmp = g_dir_make_tmp ("nuvashalauncher-ui-split-XXXXXX", &error);
   g_autofree char *data_dir = NULL;
-  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
-  nuvashalauncherInstance *instance = NULL;
-  nuvashalauncherContentPage *page = NULL;
+  g_autoptr (NuvashaLauncherInstanceManager) manager = NULL;
+  NuvashaLauncherInstance *instance = NULL;
+  NuvashaLauncherContentPage *page = NULL;
   GtkWidget *split = NULL;
   GtkWidget *installed = NULL;
 
@@ -334,9 +334,9 @@ test_page_disposed_while_scanning (void)
   g_autoptr (GError) error = NULL;
   g_autofree char *tmp = g_dir_make_tmp ("nuvashalauncher-ui-page-XXXXXX", &error);
   g_autofree char *data_dir = NULL;
-  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
-  nuvashalauncherInstance *instance = NULL;
-  nuvashalauncherContentPage *page = NULL;
+  g_autoptr (NuvashaLauncherInstanceManager) manager = NULL;
+  NuvashaLauncherInstance *instance = NULL;
+  NuvashaLauncherContentPage *page = NULL;
   gint64 deadline = 0;
 
   g_assert_no_error (error);
@@ -376,9 +376,9 @@ test_pick_button_starts_empty (void)
   g_autoptr (GError) error = NULL;
   g_autofree char *tmp = g_dir_make_tmp ("nuvashalauncher-ui-pick-XXXXXX", &error);
   g_autofree char *data_dir = NULL;
-  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
-  nuvashalauncherInstance *instance = NULL;
-  nuvashalauncherContentPage *page = NULL;
+  g_autoptr (NuvashaLauncherInstanceManager) manager = NULL;
+  NuvashaLauncherInstance *instance = NULL;
+  NuvashaLauncherContentPage *page = NULL;
   GtkWidget *icon = NULL;
   GtkWidget *button = NULL;
   GtkWidget *badge = NULL;

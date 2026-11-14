@@ -18,7 +18,7 @@
 #define CONTENT_INDEX_FORMAT_VERSION 2
 
 static char *
-index_directory (const char *instance_directory, nuvashalauncherContentType type)
+index_directory (const char *instance_directory, NuvashaLauncherContentType type)
 {
   g_autofree char *folder = nuvashalauncher_content_folder_path (instance_directory, type);
 
@@ -27,7 +27,7 @@ index_directory (const char *instance_directory, nuvashalauncherContentType type
 
 char *
 nuvashalauncher_content_index_entry_path (const char *instance_directory,
-                              nuvashalauncherContentType type, const char *filename)
+                              NuvashaLauncherContentType type, const char *filename)
 {
   g_autofree char *directory = index_directory (instance_directory, type);
   g_autofree char *key = g_compute_checksum_for_string (G_CHECKSUM_SHA256,
@@ -44,7 +44,7 @@ nuvashalauncher_content_index_error_quark (void)
 }
 
 void
-nuvashalauncher_content_index_entry_free (nuvashalauncherContentIndexEntry *entry)
+nuvashalauncher_content_index_entry_free (NuvashaLauncherContentIndexEntry *entry)
 {
   if (entry == NULL)
     return;
@@ -70,7 +70,7 @@ nuvashalauncher_content_index_entry_free (nuvashalauncherContentIndexEntry *entr
 }
 
 static void
-read_dependencies (JsonObject *object, nuvashalauncherContentIndexEntry *entry)
+read_dependencies (JsonObject *object, NuvashaLauncherContentIndexEntry *entry)
 {
   const char *names[] = { "required_dependencies", "optional_dependencies",
                           "incompatible_dependencies" };
@@ -94,10 +94,10 @@ read_dependencies (JsonObject *object, nuvashalauncherContentIndexEntry *entry)
     }
 }
 
-static nuvashalauncherContentIndexEntry *
+static NuvashaLauncherContentIndexEntry *
 entry_from_object (JsonObject *object, GError **error)
 {
-  nuvashalauncherContentIndexEntry *entry = g_new0 (nuvashalauncherContentIndexEntry, 1);
+  NuvashaLauncherContentIndexEntry *entry = g_new0 (NuvashaLauncherContentIndexEntry, 1);
   JsonNode *version = json_object_get_member (object, "version");
 
   if (version == NULL || !JSON_NODE_HOLDS_VALUE (version) ||
@@ -164,7 +164,7 @@ entry_from_object (JsonObject *object, GError **error)
   return entry;
 }
 
-static nuvashalauncherContentIndexEntry *
+static NuvashaLauncherContentIndexEntry *
 entry_from_json (const char *contents, gsize length, GError **error)
 {
   g_autoptr (JsonParser) parser = json_parser_new ();
@@ -193,7 +193,7 @@ entry_from_json (const char *contents, gsize length, GError **error)
 }
 
 static GPtrArray *
-load_entries_sync (const char *instance_directory, nuvashalauncherContentType type,
+load_entries_sync (const char *instance_directory, NuvashaLauncherContentType type,
                   GError **error)
 {
   g_autofree char *directory = index_directory (instance_directory, type);
@@ -211,7 +211,7 @@ load_entries_sync (const char *instance_directory, nuvashalauncherContentType ty
       g_autofree char *contents = NULL;
       g_autoptr (GError) local_error = NULL;
       gsize length = 0;
-      nuvashalauncherContentIndexEntry *entry = NULL;
+      NuvashaLauncherContentIndexEntry *entry = NULL;
 
       if (!g_str_has_suffix (name, ".json"))
         continue;
@@ -240,10 +240,10 @@ load_entries_sync (const char *instance_directory, nuvashalauncherContentType ty
 
 typedef struct {
   char *instance_directory;
-  nuvashalauncherContentType type;
+  NuvashaLauncherContentType type;
 
   /* Owned until load_thread takes it. */
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
 } LoadArgs;
 
 static void
@@ -261,7 +261,7 @@ load_thread (GTask *task G_GNUC_UNUSED, gpointer source G_GNUC_UNUSED,
              GCancellable *cancellable G_GNUC_UNUSED)
 {
   LoadArgs *args = task_data;
-  g_autoptr (nuvashalauncherTaskScope) scope = g_steal_pointer (&args->scope);
+  g_autoptr (NuvashaLauncherTaskScope) scope = g_steal_pointer (&args->scope);
   g_autoptr (GError) error = NULL;
   GPtrArray *entries = load_entries_sync (args->instance_directory, args->type,
                                           &error);
@@ -273,12 +273,12 @@ load_thread (GTask *task G_GNUC_UNUSED, gpointer source G_GNUC_UNUSED,
                                    (GDestroyNotify) g_ptr_array_unref);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_content_index_load_async (const char *instance_directory,
-                              nuvashalauncherContentType type,
+                              NuvashaLauncherContentType type,
                               GAsyncReadyCallback callback, gpointer user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   GTask *task = nuvashalauncher_task_scope_task (scope);
   LoadArgs *args = g_new0 (LoadArgs, 1);
@@ -299,7 +299,7 @@ nuvashalauncher_content_index_load_finish (GAsyncResult *result, GError **error)
 }
 
 GPtrArray *
-nuvashalauncher_content_index_load_sync (const char *instance_directory, nuvashalauncherContentType type,
+nuvashalauncher_content_index_load_sync (const char *instance_directory, NuvashaLauncherContentType type,
                              GError **error)
 {
   return load_entries_sync (instance_directory, type, error);
@@ -316,7 +316,7 @@ add_string_array (JsonBuilder *builder, const char *name, GPtrArray *values)
 }
 
 static char *
-entry_to_json (nuvashalauncherContentIndexEntry *entry, gsize *length)
+entry_to_json (NuvashaLauncherContentIndexEntry *entry, gsize *length)
 {
   g_autoptr (JsonBuilder) builder = json_builder_new ();
   g_autoptr (JsonGenerator) generator = json_generator_new ();
@@ -366,7 +366,7 @@ typedef struct {
   gsize length;
 
   /* Borrowed: the operation the caller owns until the callback runs. */
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
 } WriteRun;
 
 static void
@@ -391,12 +391,12 @@ write_done (GObject *source, GAsyncResult *result, gpointer user_data)
   write_run_free (run);
 }
 
-static nuvashalauncherTaskScope *
-write_entry_async (const char *instance_directory, nuvashalauncherContentType type,
-                   nuvashalauncherContentIndexEntry *entry, GAsyncReadyCallback callback,
+static NuvashaLauncherTaskScope *
+write_entry_async (const char *instance_directory, NuvashaLauncherContentType type,
+                   NuvashaLauncherContentIndexEntry *entry, GAsyncReadyCallback callback,
                    gpointer user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   WriteRun *run = g_new0 (WriteRun, 1);
 
@@ -435,7 +435,7 @@ typedef struct {
   char *path;
 
   /* Borrowed: the operation the caller owns until the callback runs. */
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
 } RemoveRun;
 
 static void
@@ -459,10 +459,10 @@ remove_done (GObject *source, GAsyncResult *result, gpointer user_data)
   remove_run_free (run);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_content_index_update_async (const char *instance_directory,
-                                nuvashalauncherContentType type,
-                                nuvashalauncherContentIndexEntry *entry,
+                                NuvashaLauncherContentType type,
+                                NuvashaLauncherContentIndexEntry *entry,
                                 GAsyncReadyCallback callback,
                                 gpointer user_data)
 {
@@ -472,12 +472,12 @@ nuvashalauncher_content_index_update_async (const char *instance_directory,
                             user_data);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_content_index_remove_async (const char *instance_directory,
-                                nuvashalauncherContentType type, const char *filename,
+                                NuvashaLauncherContentType type, const char *filename,
                                 GAsyncReadyCallback callback, gpointer user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   RemoveRun *run = g_new0 (RemoveRun, 1);
   g_autoptr (GFile) file = NULL;

@@ -12,10 +12,10 @@
  * ---------------------------------------------------------- */
 
 /* Build the player session values used by the version placeholders. */
-nuvashalauncherLaunchSession
-nuvashalauncher_launch_session_for (const nuvashalauncherAccount *account)
+NuvashaLauncherLaunchSession
+nuvashalauncher_launch_session_for (const NuvashaLauncherAccount *account)
 {
-  nuvashalauncherLaunchSession session = { NULL, NULL, NULL, NULL };
+  NuvashaLauncherLaunchSession session = { NULL, NULL, NULL, NULL };
 
   g_return_val_if_fail (account != NULL, session);
 
@@ -137,8 +137,8 @@ add_shell_words (GPtrArray *argv, const char *line, GError **error)
 }
 
 GPtrArray *
-nuvashalauncher_launch_build_arguments (const nuvashalauncherResolvedVersion *resolved,
-                            const nuvashalauncherLaunchSession   *session,
+nuvashalauncher_launch_build_arguments (const NuvashaLauncherResolvedVersion *resolved,
+                            const NuvashaLauncherLaunchSession   *session,
                             const char             *java_executable,
                             const char             *game_directory,
                             const char             *jvm_args,

@@ -19,7 +19,7 @@ count_free (gpointer value)
 static void
 test_browser_model (void)
 {
-  g_autoptr (nuvashalauncherContentBrowserModel) model =
+  g_autoptr (NuvashaLauncherContentBrowserModel) model =
     nuvashalauncher_content_browser_model_new ();
 
   g_assert_nonnull (model->projects);
@@ -45,7 +45,7 @@ static void
 test_install_model (void)
 {
   freed = 0;
-  g_autoptr (nuvashalauncherContentInstallModel) model =
+  g_autoptr (NuvashaLauncherContentInstallModel) model =
     nuvashalauncher_content_install_model_new (count_free);
 
   g_assert_nonnull (model->picks);

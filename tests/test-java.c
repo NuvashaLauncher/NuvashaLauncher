@@ -183,7 +183,7 @@ fake_java_list (void)
 
   for (guint i = 0; i < G_N_ELEMENTS (majors); i++)
     {
-      nuvashalauncherJava *java = g_new0 (nuvashalauncherJava, 1);
+      NuvashaLauncherJava *java = g_new0 (NuvashaLauncherJava, 1);
 
       java->executable =
         g_strdup_printf ("/fake/jdk/%d/bin/java", majors[i]);
@@ -200,7 +200,7 @@ static void
 test_best_compatible_prefers_closest (void)
 {
   g_autoptr (GPtrArray) list = fake_java_list ();
-  nuvashalauncherJava *best;
+  NuvashaLauncherJava *best;
 
   best = nuvashalauncher_java_best_compatible (list, 21);
   g_assert_nonnull (best);
@@ -226,9 +226,9 @@ test_best_compatible_prefers_windowed (void)
 {
   g_autoptr (GPtrArray) list =
     g_ptr_array_new_with_free_func ((GDestroyNotify) nuvashalauncher_java_free);
-  nuvashalauncherJava *head = g_new0 (nuvashalauncherJava, 1);
-  nuvashalauncherJava *windowed = g_new0 (nuvashalauncherJava, 1);
-  nuvashalauncherJava *best = NULL;
+  NuvashaLauncherJava *head = g_new0 (NuvashaLauncherJava, 1);
+  NuvashaLauncherJava *windowed = g_new0 (NuvashaLauncherJava, 1);
+  NuvashaLauncherJava *best = NULL;
 
   head->executable = g_strdup ("/headless/8/bin/java");
   head->major_version = 8;
@@ -259,7 +259,7 @@ static void
 test_compatibility_rule (void)
 {
   g_autoptr (GPtrArray) list = fake_java_list ();
-  nuvashalauncherJava *java = g_ptr_array_index (list, 0); /* major 8 */
+  NuvashaLauncherJava *java = g_ptr_array_index (list, 0); /* major 8 */
 
   g_assert_true (nuvashalauncher_java_is_compatible (java, 8));
   g_assert_true (nuvashalauncher_java_is_compatible (java, 1));
@@ -270,7 +270,7 @@ static void
 test_select_instance_then_closest (void)
 {
   g_autoptr (GPtrArray) list = fake_java_list ();
-  const nuvashalauncherJava *picked;
+  const NuvashaLauncherJava *picked;
 
   /* An explicitly selected runtime must match the required major too. */
   g_assert_null (nuvashalauncher_java_select (list, "/fake/jdk/25/bin/java", 8));
@@ -281,7 +281,7 @@ test_select_instance_then_closest (void)
 
   /* Selection itself does not hide the configured runtime's headless state;
    * the launcher can then explain why it cannot run the game with it. */
-  ((nuvashalauncherJava *) g_ptr_array_index (list, 1))->headless = TRUE;
+  ((NuvashaLauncherJava *) g_ptr_array_index (list, 1))->headless = TRUE;
   picked = nuvashalauncher_java_select (list, "/fake/jdk/17/bin/java", 17);
   g_assert_nonnull (picked);
   g_assert_true (picked->headless);
@@ -346,8 +346,8 @@ typedef struct
   AsyncRun run;
   GPtrArray *javas;
   GError *error;
-  nuvashalauncherJava *single;
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherJava *single;
+  NuvashaLauncherTaskScope *operation;
 } JavaCall;
 
 static void
@@ -411,7 +411,7 @@ test_probing_fake_scripts_and_dedup (void)
 
   for (guint i = 0; i < call.javas->len; i++)
     {
-      nuvashalauncherJava *java = g_ptr_array_index (call.javas, i);
+      NuvashaLauncherJava *java = g_ptr_array_index (call.javas, i);
 
       if (java->major_version == 8)
         found8++;
@@ -502,7 +502,7 @@ test_detect_list_jre_layout_and_dedup (void)
 
   for (guint i = 0; i < call.javas->len; i++)
     {
-      nuvashalauncherJava *java = g_ptr_array_index (call.javas, i);
+      NuvashaLauncherJava *java = g_ptr_array_index (call.javas, i);
 
       if (g_str_has_suffix (java->executable, "jre-8-home/jre/bin/java"))
         {
@@ -568,7 +568,7 @@ test_detect_headless_roots (void)
 
   for (guint i = 0; i < call.javas->len; i++)
     {
-      nuvashalauncherJava *java = g_ptr_array_index (call.javas, i);
+      NuvashaLauncherJava *java = g_ptr_array_index (call.javas, i);
 
       if (g_strstr_len (java->executable, -1, "jdk-full") != NULL)
         g_assert_false (java->headless);

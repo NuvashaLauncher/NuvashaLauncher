@@ -15,14 +15,14 @@
 #include <json-glib/json-glib.h>
 #include <string.h>
 
-static void show_details_error (nuvashalauncherDownloadModpackDialog *, const char *);
+static void show_details_error (NuvashaLauncherDownloadModpackDialog *, const char *);
 
 /* ---------------------------------------------------------- *
  * Versions of the details page
  * ---------------------------------------------------------- */
 
 static void
-version_row_label (nuvashalauncherModrinthVersion *version, char *out, guint size)
+version_row_label (NuvashaLauncherModrinthVersion *version, char *out, guint size)
 {
   const char *name = version->version_number != NULL ? version->version_number : version->name;
   const char *game =
@@ -40,8 +40,8 @@ version_row_label (nuvashalauncherModrinthVersion *version, char *out, guint siz
 static gint
 by_date_desc (gconstpointer a, gconstpointer b)
 {
-  const nuvashalauncherModrinthVersion *va = *(const nuvashalauncherModrinthVersion *const *) a;
-  const nuvashalauncherModrinthVersion *vb = *(const nuvashalauncherModrinthVersion *const *) b;
+  const NuvashaLauncherModrinthVersion *va = *(const NuvashaLauncherModrinthVersion *const *) a;
+  const NuvashaLauncherModrinthVersion *vb = *(const NuvashaLauncherModrinthVersion *const *) b;
 
   return g_strcmp0 (vb->date_published, va->date_published);
 }
@@ -53,7 +53,7 @@ build_version_strings (GPtrArray *versions)
 
   for (guint i = 0; i < versions->len; i++)
     {
-      nuvashalauncherModrinthVersion *version = g_ptr_array_index (versions, i);
+      NuvashaLauncherModrinthVersion *version = g_ptr_array_index (versions, i);
       char label[160];
 
       version_row_label (version, label, sizeof label);
@@ -86,7 +86,7 @@ versions_of_answer (JsonNode *root, GError **error)
     {
       JsonNode *element = json_array_get_element (array, i);
       g_autofree char *json = nuvashalauncher_modrinth_json_node_to_string (element);
-      nuvashalauncherModrinthVersion *version =
+      NuvashaLauncherModrinthVersion *version =
         nuvashalauncher_modrinth_version_from_json (json, -1, NULL);
 
       if (version == NULL)
@@ -99,7 +99,7 @@ versions_of_answer (JsonNode *root, GError **error)
              version->files != NULL && j < version->files->len;
              j++)
           {
-            nuvashalauncherModrinthFile *file = g_ptr_array_index (version->files, j);
+            NuvashaLauncherModrinthFile *file = g_ptr_array_index (version->files, j);
 
             if (file->filename != NULL &&
                 g_str_has_suffix (file->filename, ".mrpack"))
@@ -149,7 +149,7 @@ plain_label (const char *text)
    on their way. */
 /* Close the details view and return to the project list. */
 void
-close_details (nuvashalauncherDownloadModpackDialog *self)
+close_details (NuvashaLauncherDownloadModpackDialog *self)
 {
   if (self->split == NULL)
     return;
@@ -168,7 +168,7 @@ close_details (nuvashalauncherDownloadModpackDialog *self)
  * the whole width of the list back to half. A pack shown before is
  * replaced. */
 static void
-show_details_page (nuvashalauncherDownloadModpackDialog *self, GtkWidget *body)
+show_details_page (NuvashaLauncherDownloadModpackDialog *self, GtkWidget *body)
 {
   AdwNavigationPage *page = ADW_NAVIGATION_PAGE (adw_navigation_page_new (body,
                                                          self->project->title));
@@ -185,7 +185,7 @@ show_details_page (nuvashalauncherDownloadModpackDialog *self, GtkWidget *body)
 /* The author the search answer named. A project answer does not name one:
    it carries the team as the team's project id. */
 static const char *
-author_of (nuvashalauncherDownloadModpackDialog *self)
+author_of (NuvashaLauncherDownloadModpackDialog *self)
 {
   const char *who = self->project != NULL ? self->project->author : NULL;
 
@@ -197,7 +197,7 @@ author_of (nuvashalauncherDownloadModpackDialog *self)
 
 /* Build the details view after metadata and versions are available. */
 GtkWidget *
-details_content (nuvashalauncherDownloadModpackDialog *self)
+details_content (NuvashaLauncherDownloadModpackDialog *self)
 {
   GtkWidget *content = NULL;
   GtkScrolledWindow *scroller = NULL;
@@ -318,7 +318,7 @@ details_content (nuvashalauncherDownloadModpackDialog *self)
 /* Puts the real content in the half once both the description and the
    versions are in. */
 static void
-dialog_details_fill (nuvashalauncherDownloadModpackDialog *self)
+dialog_details_fill (NuvashaLauncherDownloadModpackDialog *self)
 {
   if (self->details_page == NULL)
     return;
@@ -359,7 +359,7 @@ dialog_details_fill (nuvashalauncherDownloadModpackDialog *self)
 /* Get the modpack's list of published versions and show it on the
  * already-pushed details page. */
 static void
-show_details_error (nuvashalauncherDownloadModpackDialog *self, const char *message)
+show_details_error (NuvashaLauncherDownloadModpackDialog *self, const char *message)
 {
   if (self->details_error == NULL)
     return;
@@ -374,7 +374,7 @@ show_details_error (nuvashalauncherDownloadModpackDialog *self, const char *mess
 
 typedef struct
 {
-  nuvashalauncherDownloadModpackDialog *dialog;
+  NuvashaLauncherDownloadModpackDialog *dialog;
   guint generation;
 } VersionsAsk;
 
@@ -391,7 +391,7 @@ on_versions_answer (GObject *source G_GNUC_UNUSED,
                     gpointer user_data)
 {
   VersionsAsk *ask = user_data;
-  nuvashalauncherDownloadModpackDialog *self = ask->dialog;
+  NuvashaLauncherDownloadModpackDialog *self = ask->dialog;
   g_autoptr (GError) error = NULL;
   g_autoptr (JsonParser) parser = NULL;
   g_autoptr (GPtrArray) versions = NULL;
@@ -457,8 +457,8 @@ on_versions_answer (GObject *source G_GNUC_UNUSED,
  * the operation handle the answer is meant to release. */
 typedef struct
 {
-  nuvashalauncherDownloadModpackDialog *dialog;
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherDownloadModpackDialog *dialog;
+  NuvashaLauncherTaskScope *operation;
   guint generation;
 } DetailsAsk;
 
@@ -479,9 +479,9 @@ on_details_answer (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                    gpointer user_data)
 {
   DetailsAsk *ask = user_data;
-  nuvashalauncherDownloadModpackDialog *self = ask->dialog;
+  NuvashaLauncherDownloadModpackDialog *self = ask->dialog;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModrinthDetails) details = NULL;
+  g_autoptr (NuvashaLauncherModrinthDetails) details = NULL;
 
   details = nuvashalauncher_modrinth_details_finish (result, &error);
 
@@ -522,8 +522,8 @@ on_details_answer (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
  * holds keeps the dialog alive until the answer is in. */
 typedef struct
 {
-  nuvashalauncherDownloadModpackDialog *dialog;
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherDownloadModpackDialog *dialog;
+  NuvashaLauncherTaskScope *operation;
 } ProjectIconLoad;
 
 static void
@@ -531,7 +531,7 @@ project_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                     gpointer user_data)
 {
   ProjectIconLoad *load = user_data;
-  nuvashalauncherDownloadModpackDialog *self = load->dialog;
+  NuvashaLauncherDownloadModpackDialog *self = load->dialog;
   g_autoptr (GError) error = NULL;
   g_autofree char *path = nuvashalauncher_icon_load_finish (result, &error);
 
@@ -548,7 +548,7 @@ project_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 }
 
 void
-dialog_details_open (nuvashalauncherDownloadModpackDialog *self)
+dialog_details_open (NuvashaLauncherDownloadModpackDialog *self)
 {
   g_autofree char *escaped_id = NULL;
   g_autofree char *url = NULL;

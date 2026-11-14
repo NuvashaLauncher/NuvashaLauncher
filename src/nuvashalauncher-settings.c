@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherSettings: desktop preferences backed by GSettings. */
+/* NuvashaLauncherSettings: desktop preferences backed by GSettings. */
 
 #include "nuvashalauncher-settings.h"
 
@@ -19,7 +19,7 @@
 /* A stored limit below this is not a number a log can be trimmed to. */
 #define LOG_LINE_LIMIT_FLOOR 1
 
-struct _nuvashalauncherSettings
+struct _NuvashaLauncherSettings
 {
   GObject parent_instance;
 
@@ -28,13 +28,13 @@ struct _nuvashalauncherSettings
   gboolean show_unstable_loaders;
   char *language;
   gboolean cache_modrinth_api_responses;
-  nuvashalauncherSettingsCacheExpiration cache_expiration;
+  NuvashaLauncherSettingsCacheExpiration cache_expiration;
   gboolean export_metadata;
   gboolean delete_dependents;
   GSettings *desktop_settings;
 };
 
-G_DEFINE_FINAL_TYPE (nuvashalauncherSettings, nuvashalauncher_settings, G_TYPE_OBJECT)
+G_DEFINE_FINAL_TYPE (NuvashaLauncherSettings, nuvashalauncher_settings, G_TYPE_OBJECT)
 
 GQuark
 nuvashalauncher_settings_error_quark (void)
@@ -44,7 +44,7 @@ nuvashalauncher_settings_error_quark (void)
 
 /* Settings are owned by the desktop settings backend. */
 static void
-load (nuvashalauncherSettings *self)
+load (NuvashaLauncherSettings *self)
 {
   if (self->desktop_settings == NULL)
     return;
@@ -69,7 +69,7 @@ load (nuvashalauncherSettings *self)
 }
 
 static gboolean
-save (nuvashalauncherSettings *self, GError **error)
+save (NuvashaLauncherSettings *self, GError **error)
 {
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
@@ -96,14 +96,14 @@ save (nuvashalauncherSettings *self, GError **error)
   return TRUE;
 }
 
-nuvashalauncherSettings *
+NuvashaLauncherSettings *
 nuvashalauncher_settings_new (void)
 {
   return g_object_new (nuvashalauncher_TYPE_SETTINGS, NULL);
 }
 
 gboolean
-nuvashalauncher_settings_get_export_metadata (nuvashalauncherSettings *self)
+nuvashalauncher_settings_get_export_metadata (NuvashaLauncherSettings *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_SETTINGS (self), TRUE);
 
@@ -111,7 +111,7 @@ nuvashalauncher_settings_get_export_metadata (nuvashalauncherSettings *self)
 }
 
 gboolean
-nuvashalauncher_settings_set_export_metadata (nuvashalauncherSettings *self, gboolean value,
+nuvashalauncher_settings_set_export_metadata (NuvashaLauncherSettings *self, gboolean value,
                                   GError **error)
 {
   gboolean previous;
@@ -129,14 +129,14 @@ nuvashalauncher_settings_set_export_metadata (nuvashalauncherSettings *self, gbo
 }
 
 gboolean
-nuvashalauncher_settings_get_delete_dependents (nuvashalauncherSettings *self)
+nuvashalauncher_settings_get_delete_dependents (NuvashaLauncherSettings *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_SETTINGS (self), FALSE);
   return self->delete_dependents;
 }
 
 gboolean
-nuvashalauncher_settings_set_delete_dependents (nuvashalauncherSettings *self, gboolean value,
+nuvashalauncher_settings_set_delete_dependents (NuvashaLauncherSettings *self, gboolean value,
                                     GError **error)
 {
   gboolean previous;
@@ -154,7 +154,7 @@ nuvashalauncher_settings_set_delete_dependents (nuvashalauncherSettings *self, g
 }
 
 gboolean
-nuvashalauncher_settings_get_show_unstable_versions (nuvashalauncherSettings *self)
+nuvashalauncher_settings_get_show_unstable_versions (NuvashaLauncherSettings *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_SETTINGS (self), FALSE);
 
@@ -162,7 +162,7 @@ nuvashalauncher_settings_get_show_unstable_versions (nuvashalauncherSettings *se
 }
 
 gboolean
-nuvashalauncher_settings_set_show_unstable_versions (nuvashalauncherSettings *self,
+nuvashalauncher_settings_set_show_unstable_versions (NuvashaLauncherSettings *self,
                                            gboolean     value,
                                            GError     **error)
 {
@@ -183,7 +183,7 @@ nuvashalauncher_settings_set_show_unstable_versions (nuvashalauncherSettings *se
 }
 
 guint
-nuvashalauncher_settings_get_log_line_limit (nuvashalauncherSettings *self)
+nuvashalauncher_settings_get_log_line_limit (NuvashaLauncherSettings *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_SETTINGS (self), 0);
 
@@ -191,7 +191,7 @@ nuvashalauncher_settings_get_log_line_limit (nuvashalauncherSettings *self)
 }
 
 gboolean
-nuvashalauncher_settings_set_log_line_limit (nuvashalauncherSettings *self,
+nuvashalauncher_settings_set_log_line_limit (NuvashaLauncherSettings *self,
                                  guint        limit,
                                  GError     **error)
 {
@@ -220,7 +220,7 @@ nuvashalauncher_settings_set_log_line_limit (nuvashalauncherSettings *self,
 }
 
 gboolean
-nuvashalauncher_settings_get_show_unstable_loaders (nuvashalauncherSettings *self)
+nuvashalauncher_settings_get_show_unstable_loaders (NuvashaLauncherSettings *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_SETTINGS (self), FALSE);
 
@@ -228,7 +228,7 @@ nuvashalauncher_settings_get_show_unstable_loaders (nuvashalauncherSettings *sel
 }
 
 gboolean
-nuvashalauncher_settings_set_show_unstable_loaders (nuvashalauncherSettings *self,
+nuvashalauncher_settings_set_show_unstable_loaders (NuvashaLauncherSettings *self,
                                         gboolean     value,
                                         GError     **error)
 {
@@ -249,7 +249,7 @@ nuvashalauncher_settings_set_show_unstable_loaders (nuvashalauncherSettings *sel
 }
 
 const char *
-nuvashalauncher_settings_get_language (nuvashalauncherSettings *self)
+nuvashalauncher_settings_get_language (NuvashaLauncherSettings *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_SETTINGS (self), "system");
 
@@ -257,7 +257,7 @@ nuvashalauncher_settings_get_language (nuvashalauncherSettings *self)
 }
 
 gboolean
-nuvashalauncher_settings_set_language (nuvashalauncherSettings *self,
+nuvashalauncher_settings_set_language (NuvashaLauncherSettings *self,
                            const char *language,
                            GError    **error)
 {
@@ -282,7 +282,7 @@ nuvashalauncher_settings_set_language (nuvashalauncherSettings *self,
 }
 
 gboolean
-nuvashalauncher_settings_get_cache_modrinth_api_responses (nuvashalauncherSettings *self)
+nuvashalauncher_settings_get_cache_modrinth_api_responses (NuvashaLauncherSettings *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_SETTINGS (self), FALSE);
 
@@ -290,7 +290,7 @@ nuvashalauncher_settings_get_cache_modrinth_api_responses (nuvashalauncherSettin
 }
 
 gboolean
-nuvashalauncher_settings_set_cache_modrinth_api_responses (nuvashalauncherSettings *self,
+nuvashalauncher_settings_set_cache_modrinth_api_responses (NuvashaLauncherSettings *self,
                                                gboolean     value,
                                                GError     **error)
 {
@@ -308,8 +308,8 @@ nuvashalauncher_settings_set_cache_modrinth_api_responses (nuvashalauncherSettin
   return FALSE;
 }
 
-nuvashalauncherSettingsCacheExpiration
-nuvashalauncher_settings_get_cache_expiration (nuvashalauncherSettings *self)
+NuvashaLauncherSettingsCacheExpiration
+nuvashalauncher_settings_get_cache_expiration (NuvashaLauncherSettings *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_SETTINGS (self),
                         nuvashalauncher_SETTINGS_DEFAULT_CACHE_EXPIRATION);
@@ -318,11 +318,11 @@ nuvashalauncher_settings_get_cache_expiration (nuvashalauncherSettings *self)
 }
 
 gboolean
-nuvashalauncher_settings_set_cache_expiration (nuvashalauncherSettings *self,
-                                   nuvashalauncherSettingsCacheExpiration value,
+nuvashalauncher_settings_set_cache_expiration (NuvashaLauncherSettings *self,
+                                   NuvashaLauncherSettingsCacheExpiration value,
                                    GError **error)
 {
-  nuvashalauncherSettingsCacheExpiration previous;
+  NuvashaLauncherSettingsCacheExpiration previous;
 
   g_return_val_if_fail (nuvashalauncher_IS_SETTINGS (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
@@ -349,7 +349,7 @@ nuvashalauncher_settings_set_cache_expiration (nuvashalauncherSettings *self,
 static void
 nuvashalauncher_settings_dispose (GObject *object)
 {
-  nuvashalauncherSettings *self = nuvashalauncher_SETTINGS (object);
+  NuvashaLauncherSettings *self = nuvashalauncher_SETTINGS (object);
 
   g_clear_object (&self->desktop_settings);
 
@@ -359,7 +359,7 @@ nuvashalauncher_settings_dispose (GObject *object)
 static void
 nuvashalauncher_settings_finalize (GObject *object)
 {
-  nuvashalauncherSettings *self = nuvashalauncher_SETTINGS (object);
+  NuvashaLauncherSettings *self = nuvashalauncher_SETTINGS (object);
 
   g_clear_pointer (&self->language, g_free);
 
@@ -367,7 +367,7 @@ nuvashalauncher_settings_finalize (GObject *object)
 }
 
 static void
-nuvashalauncher_settings_class_init (nuvashalauncherSettingsClass *klass)
+nuvashalauncher_settings_class_init (NuvashaLauncherSettingsClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
@@ -487,7 +487,7 @@ find_settings_schema (void)
 }
 
 static void
-nuvashalauncher_settings_init (nuvashalauncherSettings *self)
+nuvashalauncher_settings_init (NuvashaLauncherSettings *self)
 {
   GSettingsSchema *schema = find_settings_schema ();
   if (schema != NULL)

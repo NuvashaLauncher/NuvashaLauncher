@@ -9,7 +9,7 @@
 
 typedef struct { float x, y, z, u, v; } Vertex;
 
-struct _nuvashalauncherSkinView
+struct _NuvashaLauncherSkinView
 {
   GtkGLArea parent_instance;
   GdkTexture *skin;
@@ -28,7 +28,7 @@ struct _nuvashalauncherSkinView
   double drag_y;
 };
 
-G_DEFINE_FINAL_TYPE (nuvashalauncherSkinView, nuvashalauncher_skin_view, GTK_TYPE_GL_AREA)
+G_DEFINE_FINAL_TYPE (NuvashaLauncherSkinView, nuvashalauncher_skin_view, GTK_TYPE_GL_AREA)
 
 static const char *vertex_shader =
   "#version 330 core\n"
@@ -81,7 +81,7 @@ compile_shader (GLenum type, const char *source)
 }
 
 static void
-upload_texture (nuvashalauncherSkinView *self, GdkTexture *texture, GLuint *handle,
+upload_texture (NuvashaLauncherSkinView *self, GdkTexture *texture, GLuint *handle,
                 gboolean skin)
 {
   int width, height;
@@ -415,7 +415,7 @@ rotate_cape (GArray *vertices)
 }
 
 static void
-draw_model (nuvashalauncherSkinView *self)
+draw_model (NuvashaLauncherSkinView *self)
 {
   GArray *v = g_array_new (FALSE, FALSE, sizeof (Vertex));
   GArray *cape_v = g_array_new (FALSE, FALSE, sizeof (Vertex));
@@ -500,7 +500,7 @@ draw_model (nuvashalauncherSkinView *self)
 static void
 on_realize (GtkGLArea *area)
 {
-  nuvashalauncherSkinView *self = nuvashalauncher_SKIN_VIEW (area);
+  NuvashaLauncherSkinView *self = nuvashalauncher_SKIN_VIEW (area);
   const char *vs_source;
   const char *fs_source;
   GLint linked = GL_FALSE;
@@ -565,7 +565,7 @@ on_realize (GtkGLArea *area)
 static void
 on_unrealize (GtkGLArea *area)
 {
-  nuvashalauncherSkinView *self = nuvashalauncher_SKIN_VIEW (area);
+  NuvashaLauncherSkinView *self = nuvashalauncher_SKIN_VIEW (area);
   if (gtk_gl_area_get_context (area) == NULL)
     return;
   gtk_gl_area_make_current (area);
@@ -582,7 +582,7 @@ on_unrealize (GtkGLArea *area)
 static gboolean
 on_render (GtkGLArea *area, GdkGLContext *context G_GNUC_UNUSED)
 {
-  nuvashalauncherSkinView *self = nuvashalauncher_SKIN_VIEW (area);
+  NuvashaLauncherSkinView *self = nuvashalauncher_SKIN_VIEW (area);
   int scale = gtk_widget_get_scale_factor (GTK_WIDGET (area));
   int width = gtk_widget_get_width (GTK_WIDGET (area)) * scale;
   int height = gtk_widget_get_height (GTK_WIDGET (area)) * scale;
@@ -602,14 +602,14 @@ static void
 on_drag_begin (GtkGestureDrag *gesture G_GNUC_UNUSED, double start_x G_GNUC_UNUSED,
                double start_y G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherSkinView *self = user_data;
+  NuvashaLauncherSkinView *self = user_data;
   self->drag_x = self->drag_y = 0;
 }
 
 static void
 on_drag_update (GtkGestureDrag *gesture, double offset_x, double offset_y, gpointer user_data)
 {
-  nuvashalauncherSkinView *self = user_data;
+  NuvashaLauncherSkinView *self = user_data;
   self->yaw += (offset_x - self->drag_x) * .01;
   self->pitch += (offset_y - self->drag_y) * .01;
   self->drag_x = offset_x;
@@ -623,7 +623,7 @@ on_drag_update (GtkGestureDrag *gesture, double offset_x, double offset_y, gpoin
 static void
 nuvashalauncher_skin_view_dispose (GObject *object)
 {
-  nuvashalauncherSkinView *self = nuvashalauncher_SKIN_VIEW (object);
+  NuvashaLauncherSkinView *self = nuvashalauncher_SKIN_VIEW (object);
   g_clear_object (&self->skin); g_clear_object (&self->cape);
   G_OBJECT_CLASS (nuvashalauncher_skin_view_parent_class)->dispose (object);
 }
@@ -643,7 +643,7 @@ nuvashalauncher_skin_view_unrealize (GtkWidget *widget)
 }
 
 static void
-nuvashalauncher_skin_view_class_init (nuvashalauncherSkinViewClass *klass)
+nuvashalauncher_skin_view_class_init (NuvashaLauncherSkinViewClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
@@ -656,7 +656,7 @@ nuvashalauncher_skin_view_class_init (nuvashalauncherSkinViewClass *klass)
 }
 
 static void
-nuvashalauncher_skin_view_init (nuvashalauncherSkinView *self)
+nuvashalauncher_skin_view_init (NuvashaLauncherSkinView *self)
 {
   GtkGesture *drag = gtk_gesture_drag_new ();
   gtk_gl_area_set_has_depth_buffer (GTK_GL_AREA (self), TRUE);
@@ -668,14 +668,14 @@ nuvashalauncher_skin_view_init (nuvashalauncherSkinView *self)
   self->yaw = G_PI; self->pitch = 0;
 }
 
-nuvashalauncherSkinView *
+NuvashaLauncherSkinView *
 nuvashalauncher_skin_view_new (void)
 {
   return g_object_new (nuvashalauncher_TYPE_SKIN_VIEW, NULL);
 }
 
 void
-nuvashalauncher_skin_view_set_skin (nuvashalauncherSkinView *self, GdkTexture *texture)
+nuvashalauncher_skin_view_set_skin (NuvashaLauncherSkinView *self, GdkTexture *texture)
 {
   g_set_object (&self->skin, texture);
   if (self->ready) { gtk_gl_area_make_current (GTK_GL_AREA (self)); upload_texture (self, texture, &self->skin_texture, TRUE); }
@@ -683,7 +683,7 @@ nuvashalauncher_skin_view_set_skin (nuvashalauncherSkinView *self, GdkTexture *t
 }
 
 void
-nuvashalauncher_skin_view_set_cape (nuvashalauncherSkinView *self, GdkTexture *texture)
+nuvashalauncher_skin_view_set_cape (NuvashaLauncherSkinView *self, GdkTexture *texture)
 {
   g_set_object (&self->cape, texture);
   if (self->ready) { gtk_gl_area_make_current (GTK_GL_AREA (self)); upload_texture (self, texture, &self->cape_texture, FALSE); }
@@ -691,7 +691,7 @@ nuvashalauncher_skin_view_set_cape (nuvashalauncherSkinView *self, GdkTexture *t
 }
 
 void
-nuvashalauncher_skin_view_set_slim (nuvashalauncherSkinView *self, gboolean slim)
+nuvashalauncher_skin_view_set_slim (NuvashaLauncherSkinView *self, gboolean slim)
 {
   self->slim = slim;
   if (self->ready)

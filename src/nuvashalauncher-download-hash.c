@@ -28,7 +28,7 @@ static void hash_read_ready (GObject *, GAsyncResult *, gpointer);
 typedef struct
 {
   GTask *task;
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
   GInputStream *stream;
   GChecksum *checksum;
 } HashFile;
@@ -55,11 +55,11 @@ hash_file_free (HashFile *hash)
   g_free (hash);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_download_hash_file_async (GFile *file, GChecksumType type,
                               GAsyncReadyCallback callback, gpointer user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   HashFile *hash = g_new0 (HashFile, 1);
 
@@ -151,7 +151,7 @@ nuvashalauncher_download_hash_file_finish (GAsyncResult *result, GError **error)
   return g_task_propagate_pointer (G_TASK (result), error);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_download_file_hash_async (GFile *file, GChecksumType type,
                               GAsyncReadyCallback callback,
                               gpointer user_data)

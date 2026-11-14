@@ -18,7 +18,7 @@
 static guint changed = 0;
 
 static void
-on_changed (nuvashalauncherDownloads *downloads G_GNUC_UNUSED, gpointer user_data)
+on_changed (NuvashaLauncherDownloads *downloads G_GNUC_UNUSED, gpointer user_data)
 {
   guint *count = user_data;
 
@@ -28,9 +28,9 @@ on_changed (nuvashalauncherDownloads *downloads G_GNUC_UNUSED, gpointer user_dat
 static void
 test_add_and_finish (void)
 {
-  nuvashalauncherDownloads *downloads = nuvashalauncher_downloads_get_default ();
-  nuvashalauncherDownload *one = NULL;
-  nuvashalauncherDownload *two = NULL;
+  NuvashaLauncherDownloads *downloads = nuvashalauncher_downloads_get_default ();
+  NuvashaLauncherDownload *one = NULL;
+  NuvashaLauncherDownload *two = NULL;
 
   g_signal_connect (downloads, "changed", G_CALLBACK (on_changed), &changed);
 
@@ -60,7 +60,7 @@ test_add_and_finish (void)
 static void
 test_progress_and_detail (void)
 {
-  nuvashalauncherDownload *download = nuvashalauncher_downloads_add (nuvashalauncher_DOWNLOAD_SHADER, "Shaders");
+  NuvashaLauncherDownload *download = nuvashalauncher_downloads_add (nuvashalauncher_DOWNLOAD_SHADER, "Shaders");
   guint changes = 0;
 
   changed = 0;
@@ -100,7 +100,7 @@ test_progress_and_detail (void)
 static void
 test_cancel (void)
 {
-  nuvashalauncherDownload *download = nuvashalauncher_downloads_add (nuvashalauncher_DOWNLOAD_RESOURCE_PACK, "Pack");
+  NuvashaLauncherDownload *download = nuvashalauncher_downloads_add (nuvashalauncher_DOWNLOAD_RESOURCE_PACK, "Pack");
   GCancellable *cancellable = nuvashalauncher_download_get_cancellable (download);
 
   g_assert_false (g_cancellable_is_cancelled (cancellable));
@@ -116,8 +116,8 @@ static void
 test_all_lists_every_entry (void)
 {
   GPtrArray *all;
-  nuvashalauncherDownload *one = nuvashalauncher_downloads_add (nuvashalauncher_DOWNLOAD_UPDATE, "One");
-  nuvashalauncherDownload *two = nuvashalauncher_downloads_add (nuvashalauncher_DOWNLOAD_UPDATE, "Two");
+  NuvashaLauncherDownload *one = nuvashalauncher_downloads_add (nuvashalauncher_DOWNLOAD_UPDATE, "One");
+  NuvashaLauncherDownload *two = nuvashalauncher_downloads_add (nuvashalauncher_DOWNLOAD_UPDATE, "Two");
 
   all = nuvashalauncher_downloads_get_all ();
   g_assert_cmpuint (all->len, ==, 2);

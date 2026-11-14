@@ -8,10 +8,10 @@
 #include "nuvashalauncher-downloads.h"
 #include "nuvashalauncher-launcher.h"
 
-nuvashalauncherMainWindowModel *
+NuvashaLauncherMainWindowModel *
 nuvashalauncher_main_window_model_new (void)
 {
-  nuvashalauncherMainWindowModel *model = g_new0 (nuvashalauncherMainWindowModel, 1);
+  NuvashaLauncherMainWindowModel *model = g_new0 (NuvashaLauncherMainWindowModel, 1);
 
   model->settings = nuvashalauncher_settings_new ();
   model->download_service = nuvashalauncher_downloads_get_service ();
@@ -28,7 +28,7 @@ nuvashalauncher_main_window_model_new (void)
 }
 
 void
-nuvashalauncher_main_window_model_free (nuvashalauncherMainWindowModel *model)
+nuvashalauncher_main_window_model_free (NuvashaLauncherMainWindowModel *model)
 {
   if (model == NULL)
     return;

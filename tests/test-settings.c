@@ -14,7 +14,7 @@ static char *root;
 typedef struct
 {
   GMainLoop *loop;
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
 } CacheClearWait;
 
 static void
@@ -33,7 +33,7 @@ cache_clear_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 test_defaults (void)
 {
-  g_autoptr (nuvashalauncherSettings) settings = nuvashalauncher_settings_new ();
+  g_autoptr (NuvashaLauncherSettings) settings = nuvashalauncher_settings_new ();
 
   g_assert_false (nuvashalauncher_settings_get_show_unstable_versions (settings));
   g_assert_true (nuvashalauncher_settings_get_delete_dependents (settings));
@@ -45,8 +45,8 @@ test_defaults (void)
 static void
 test_persistence (void)
 {
-  g_autoptr (nuvashalauncherSettings) settings = nuvashalauncher_settings_new ();
-  g_autoptr (nuvashalauncherSettings) loaded = NULL;
+  g_autoptr (NuvashaLauncherSettings) settings = nuvashalauncher_settings_new ();
+  g_autoptr (NuvashaLauncherSettings) loaded = NULL;
   g_autoptr (GError) error = NULL;
 
   g_assert_true (nuvashalauncher_settings_set_cache_expiration (
@@ -64,9 +64,9 @@ test_persistence (void)
 static void
 test_invalid_expiration (void)
 {
-  g_autoptr (nuvashalauncherSettings) settings = nuvashalauncher_settings_new ();
+  g_autoptr (NuvashaLauncherSettings) settings = nuvashalauncher_settings_new ();
   g_autoptr (GError) error = NULL;
-  nuvashalauncherSettingsCacheExpiration previous =
+  NuvashaLauncherSettingsCacheExpiration previous =
     nuvashalauncher_settings_get_cache_expiration (settings);
 
   g_assert_false (nuvashalauncher_settings_set_cache_expiration (settings, 123, &error));
@@ -132,7 +132,7 @@ test_cache_cleanup (void)
 static void
 test_missing_schema_fallback (void)
 {
-  g_autoptr (nuvashalauncherSettings) settings = g_object_new (nuvashalauncher_TYPE_SETTINGS, NULL);
+  g_autoptr (NuvashaLauncherSettings) settings = g_object_new (nuvashalauncher_TYPE_SETTINGS, NULL);
   g_assert_nonnull (settings);
   g_assert_false (nuvashalauncher_settings_get_show_unstable_versions (settings));
   g_assert_cmpuint (nuvashalauncher_settings_get_log_line_limit (settings), ==, 5000);
@@ -148,7 +148,7 @@ test_missing_schema_fallback (void)
 static void
 test_settings_all_properties (void)
 {
-  g_autoptr (nuvashalauncherSettings) settings = nuvashalauncher_settings_new ();
+  g_autoptr (NuvashaLauncherSettings) settings = nuvashalauncher_settings_new ();
   g_autoptr (GError) error = NULL;
 
   /* Export metadata */

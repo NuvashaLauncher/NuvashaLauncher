@@ -6,7 +6,7 @@ test_dependencies_of_a_version (void)
   g_autofree char *json =
     read_fixture ("modrinth-version-dependencies.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModrinthVersion) version = NULL;
+  g_autoptr (NuvashaLauncherModrinthVersion) version = NULL;
   g_autoptr (GPtrArray) pending = NULL;
   g_autoptr (GPtrArray) conflicts = NULL;
 
@@ -20,7 +20,7 @@ test_dependencies_of_a_version (void)
   g_assert_cmpuint (conflicts->len, ==, 0);
 
   {
-    nuvashalauncherModrinthDependency *dependency = g_ptr_array_index (pending, 0);
+    NuvashaLauncherModrinthDependency *dependency = g_ptr_array_index (pending, 0);
 
     g_assert_cmpint (dependency->type, ==, nuvashalauncher_DEPENDENCY_REQUIRED);
     g_assert_cmpstr (dependency->project_id, ==, "AANobbMI");
@@ -51,7 +51,7 @@ test_dependency_kinds (void)
   g_autofree char *json =
     read_fixture ("modrinth-version-dependency-kinds.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModrinthVersion) version = NULL;
+  g_autoptr (NuvashaLauncherModrinthVersion) version = NULL;
   g_autoptr (GPtrArray) pending = NULL;
   g_autoptr (GPtrArray) conflicts = NULL;
   g_autoptr (GHashTable) installed =
@@ -73,16 +73,16 @@ test_dependency_kinds (void)
    * embedded ones are not fetched, and the duplicate of the required
    * dependency is one file, not two. */
   g_assert_cmpuint (pending->len, ==, 1);
-  g_assert_cmpstr (((nuvashalauncherModrinthDependency *) g_ptr_array_index (pending, 0))
+  g_assert_cmpstr (((NuvashaLauncherModrinthDependency *) g_ptr_array_index (pending, 0))
                        ->project_id,
                    ==, "AANobbMI");
 
   g_assert_cmpuint (conflicts->len, ==, 1);
-  g_assert_cmpstr (((nuvashalauncherModrinthDependency *) g_ptr_array_index (conflicts, 0))
+  g_assert_cmpstr (((NuvashaLauncherModrinthDependency *) g_ptr_array_index (conflicts, 0))
                        ->project_id,
                    ==, "4ZqxOvjD");
   g_assert_cmpstr (nuvashalauncher_modrinth_dependency_to_string (
-                       ((nuvashalauncherModrinthDependency *)
+                       ((NuvashaLauncherModrinthDependency *)
                             g_ptr_array_index (conflicts, 0))
                            ->type),
                    ==, "incompatible");
@@ -103,7 +103,7 @@ test_dependency_without_project (void)
     "\"dependencies\":[{\"version_id\":null,\"project_id\":null,"
     "\"file_name\":\"only-a-name.jar\",\"dependency_type\":\"required\"}]}";
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModrinthVersion) version = NULL;
+  g_autoptr (NuvashaLauncherModrinthVersion) version = NULL;
   GPtrArray *pending = NULL;
 
   version = nuvashalauncher_modrinth_version_from_json (json, -1, &error);
@@ -229,8 +229,8 @@ test_scan_and_toggle (void)
   g_assert_cmpuint (lithium->len, ==, 2);
 
   {
-    nuvashalauncherContentFile *disabled = g_ptr_array_index (lithium, 0);
-    nuvashalauncherContentFile *enabled = g_ptr_array_index (lithium, 1);
+    NuvashaLauncherContentFile *disabled = g_ptr_array_index (lithium, 0);
+    NuvashaLauncherContentFile *enabled = g_ptr_array_index (lithium, 1);
 
     /* Sorted by name, and the suffix is not part of the name a user
        reads. */
@@ -248,7 +248,7 @@ test_scan_and_toggle (void)
   /* Enabling it takes the suffix off, and disabling it puts it back. */
   {
     const char *disabled_path =
-      ((nuvashalauncherContentFile *) g_ptr_array_index (lithium, 0))->path;
+      ((NuvashaLauncherContentFile *) g_ptr_array_index (lithium, 0))->path;
     g_autofree char *enabled_path =
       g_build_filename (folder_path, "lithium.jar", NULL);
 
@@ -279,7 +279,7 @@ test_scan_and_toggle (void)
     g_autoptr (GPtrArray) again = scan (instance, nuvashalauncher_CONTENT_MOD);
 
     g_assert_cmpuint (again->len, ==, 2);
-    g_assert_false (((nuvashalauncherContentFile *) g_ptr_array_index (again, 0))->enabled);
+    g_assert_false (((NuvashaLauncherContentFile *) g_ptr_array_index (again, 0))->enabled);
   }
 
   {
@@ -333,7 +333,7 @@ test_content_metadata_and_helpers (void)
   g_assert_false (g_file_test (dummy_file, G_FILE_TEST_EXISTS));
 
   /* Test nuvashalauncher_content_file_refresh_search_key */
-  nuvashalauncherContentFile cf = { 0 };
+  NuvashaLauncherContentFile cf = { 0 };
   cf.filename = (char *) "mod-file.jar";
   cf.project_name = (char *) "My Amazing Mod";
   nuvashalauncher_content_file_refresh_search_key (&cf);
@@ -347,7 +347,7 @@ test_content_metadata_and_helpers (void)
   ContentMetaWait wait1 = { loop, FALSE, NULL };
 
   /* Empty list finishes immediately */
-  nuvashalauncherTaskScope *scope1 = nuvashalauncher_content_metadata_async (files, nuvashalauncher_CONTENT_MOD, on_content_metadata_finished, &wait1);
+  NuvashaLauncherTaskScope *scope1 = nuvashalauncher_content_metadata_async (files, nuvashalauncher_CONTENT_MOD, on_content_metadata_finished, &wait1);
   g_assert_nonnull (scope1);
   g_main_loop_run (loop);
   g_assert_true (wait1.success);
@@ -355,13 +355,13 @@ test_content_metadata_and_helpers (void)
   nuvashalauncher_task_scope_unref (scope1);
 
   /* List with a file finishes through worker pool */
-  nuvashalauncherContentFile *file_item = g_new0 (nuvashalauncherContentFile, 1);
+  NuvashaLauncherContentFile *file_item = g_new0 (NuvashaLauncherContentFile, 1);
   file_item->path = g_strdup (sub);
   file_item->filename = g_strdup ("nonexistent.jar");
   g_ptr_array_add (files, file_item);
 
   ContentMetaWait wait2 = { loop, FALSE, NULL };
-  nuvashalauncherTaskScope *scope2 = nuvashalauncher_content_metadata_async (files, nuvashalauncher_CONTENT_MOD, on_content_metadata_finished, &wait2);
+  NuvashaLauncherTaskScope *scope2 = nuvashalauncher_content_metadata_async (files, nuvashalauncher_CONTENT_MOD, on_content_metadata_finished, &wait2);
   g_assert_nonnull (scope2);
   g_main_loop_run (loop);
   g_assert_true (wait2.success);

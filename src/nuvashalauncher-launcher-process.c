@@ -20,7 +20,7 @@
 static void
 on_output_line (const char *line, gboolean stderr_line, gpointer user_data)
 {
-  nuvashalauncher *self = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (user_data);
 
   log_line (self, stderr_line ? TAG_STDERR : TAG_STDOUT, "%s", line);
 }
@@ -34,7 +34,7 @@ child_setup (gpointer user_data G_GNUC_UNUSED)
 }
 
 void
-nuvashalauncher_launcher_signal_process_group (nuvashalauncher *self,
+nuvashalauncher_launcher_signal_process_group (NuvashaLauncher *self,
                                                int signal_number)
 {
   const char *identifier = NULL;
@@ -60,7 +60,7 @@ nuvashalauncher_launcher_signal_process_group (nuvashalauncher *self,
 static void
 on_output_done (GError *error, gpointer user_data)
 {
-  nuvashalauncher *self = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (user_data);
 
   if (error != NULL)
     log_line (self, TAG_STDOUT, "the output of the game cannot be read: %s",
@@ -72,9 +72,9 @@ on_output_done (GError *error, gpointer user_data)
 
 /* Takes the stream it is given over. */
 static void
-watch_output (nuvashalauncher *self, GInputStream *stream, gboolean stderr_line)
+watch_output (NuvashaLauncher *self, GInputStream *stream, gboolean stderr_line)
 {
-  nuvashalauncherLineReader *reader = nuvashalauncher_line_reader_new (
+  NuvashaLauncherLineReader *reader = nuvashalauncher_line_reader_new (
     stream, stderr_line, on_output_line, on_output_done, g_object_ref (self),
     g_object_unref);
 
@@ -90,7 +90,7 @@ watch_output (nuvashalauncher *self, GInputStream *stream, gboolean stderr_line)
 gboolean
 on_stop_timeout (gpointer user_data)
 {
-  nuvashalauncher *self = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (user_data);
   guint source_id = self->process.stop_timeout;
 
   self->process.stop_timeout = 0;
@@ -108,7 +108,7 @@ on_stop_timeout (gpointer user_data)
 static void
 on_process_exited (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  nuvashalauncher *self = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (user_data);
 
   /* How it ended is read from the process itself: wait_finish() only
      says whether the exit was a clean one. */
@@ -135,7 +135,7 @@ on_process_exited (GObject *source, GAsyncResult *result, gpointer user_data)
 }
 
 gboolean
-nuvashalauncher_launcher_spawn (nuvashalauncher *self, GPtrArray *argv, GError **error)
+nuvashalauncher_launcher_spawn (NuvashaLauncher *self, GPtrArray *argv, GError **error)
 {
   g_autoptr (GSubprocessLauncher) launcher = NULL;
   g_autoptr (GError) spawn_error = NULL;

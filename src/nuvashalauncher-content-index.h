@@ -16,7 +16,7 @@ G_BEGIN_DECLS
 
 typedef enum {
   nuvashalauncher_CONTENT_INDEX_ERROR_INVALID
-} nuvashalauncherContentIndexError;
+} NuvashaLauncherContentIndexError;
 
 typedef struct {
   char *filename;
@@ -39,39 +39,39 @@ typedef struct {
   GPtrArray *required_dependencies;
   GPtrArray *optional_dependencies;
   GPtrArray *incompatible_dependencies;
-} nuvashalauncherContentIndexEntry;
+} NuvashaLauncherContentIndexEntry;
 
-void nuvashalauncher_content_index_entry_free (nuvashalauncherContentIndexEntry *entry);
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherContentIndexEntry,
+void nuvashalauncher_content_index_entry_free (NuvashaLauncherContentIndexEntry *entry);
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherContentIndexEntry,
                                nuvashalauncher_content_index_entry_free)
 
 GQuark nuvashalauncher_content_index_error_quark (void);
 
 char *nuvashalauncher_content_index_entry_path (const char *instance_directory,
-                                    nuvashalauncherContentType type,
+                                    NuvashaLauncherContentType type,
                                     const char *filename);
 GPtrArray *nuvashalauncher_content_index_load_sync (const char *instance_directory,
-                                        nuvashalauncherContentType type,
+                                        NuvashaLauncherContentType type,
                                         GError **error);
 
 /* (transfer full) the operation. The callback never runs before the call
  * that starts it returns, so the handle can be stored here and released
  * from the callback. */
-nuvashalauncherTaskScope *nuvashalauncher_content_index_load_async (const char *instance_directory,
-                                           nuvashalauncherContentType type,
+NuvashaLauncherTaskScope *nuvashalauncher_content_index_load_async (const char *instance_directory,
+                                           NuvashaLauncherContentType type,
                                            GAsyncReadyCallback callback,
                                            gpointer user_data);
 GPtrArray *nuvashalauncher_content_index_load_finish (GAsyncResult *result,
                                           GError **error);
 
-nuvashalauncherTaskScope *nuvashalauncher_content_index_update_async (const char *instance_directory,
-                                              nuvashalauncherContentType type,
-                                              nuvashalauncherContentIndexEntry *entry,
+NuvashaLauncherTaskScope *nuvashalauncher_content_index_update_async (const char *instance_directory,
+                                              NuvashaLauncherContentType type,
+                                              NuvashaLauncherContentIndexEntry *entry,
                                               GAsyncReadyCallback callback,
                                               gpointer user_data);
 
-nuvashalauncherTaskScope *nuvashalauncher_content_index_remove_async (const char *instance_directory,
-                                              nuvashalauncherContentType type,
+NuvashaLauncherTaskScope *nuvashalauncher_content_index_remove_async (const char *instance_directory,
+                                              NuvashaLauncherContentType type,
                                               const char *filename,
                                               GAsyncReadyCallback callback,
                                               gpointer user_data);

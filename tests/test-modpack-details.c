@@ -12,15 +12,15 @@ test_details_content_renders_validated_metadata (void)
 {
   g_autofree char *root = g_dir_make_tmp ("nuvashalauncher-details-XXXXXX", NULL);
   g_autofree char *instances = g_build_filename (root, "instances", NULL);
-  g_autoptr (nuvashalauncherInstanceManager) manager =
+  g_autoptr (NuvashaLauncherInstanceManager) manager =
     nuvashalauncher_instance_manager_new (instances);
-  g_autoptr (nuvashalauncherDownloadModpackDialog) dialog =
+  g_autoptr (NuvashaLauncherDownloadModpackDialog) dialog =
     g_object_ref_sink (g_object_new (
       nuvashalauncher_TYPE_DOWNLOAD_MODPACK_DIALOG, NULL));
-  g_autoptr (nuvashalauncherModrinthProject) project =
-    g_new0 (nuvashalauncherModrinthProject, 1);
-  g_autoptr (nuvashalauncherModrinthDetails) details =
-    g_new0 (nuvashalauncherModrinthDetails, 1);
+  g_autoptr (NuvashaLauncherModrinthProject) project =
+    g_new0 (NuvashaLauncherModrinthProject, 1);
+  g_autoptr (NuvashaLauncherModrinthDetails) details =
+    g_new0 (NuvashaLauncherModrinthDetails, 1);
   g_autoptr (GtkWidget) content = NULL;
 
   dialog->manager = g_object_ref (manager);

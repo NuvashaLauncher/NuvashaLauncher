@@ -17,7 +17,7 @@
 #include <unistd.h>
 
 static void on_pack_downloaded (GObject *, GAsyncResult *, gpointer);
-static GtkWidget *build_optional_page (nuvashalauncherDownloadModpackDialog *, GPtrArray *);
+static GtkWidget *build_optional_page (NuvashaLauncherDownloadModpackDialog *, GPtrArray *);
 static void on_optional_cancel (GtkButton *, gpointer);
 static void on_optional_install (GtkButton *, gpointer);
 
@@ -28,9 +28,9 @@ static void on_optional_install (GtkButton *, gpointer);
 /* References held by a background install so callbacks remain valid after
  * the dialog closes. */
 typedef struct {
-  nuvashalauncherDownloadModpackDialog *dialog;
-  nuvashalauncherDownload *download;
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherDownloadModpackDialog *dialog;
+  NuvashaLauncherDownload *download;
+  NuvashaLauncherTaskScope *operation;
 } InstallJob;
 
 static void
@@ -59,7 +59,7 @@ on_install_progress (guint done,
 }
 
 void
-remove_pack_file (nuvashalauncherDownloadModpackDialog *self)
+remove_pack_file (NuvashaLauncherDownloadModpackDialog *self)
 {
   if (!self->imported && self->pack_path != NULL)
     {
@@ -74,9 +74,9 @@ on_install_done (GObject *source G_GNUC_UNUSED,
                  gpointer user_data)
 {
   InstallJob *job = user_data;
-  nuvashalauncherDownloadModpackDialog *self = job->dialog;
+  NuvashaLauncherDownloadModpackDialog *self = job->dialog;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherInstance) instance = NULL;
+  g_autoptr (NuvashaLauncherInstance) instance = NULL;
 
   instance = nuvashalauncher_modpack_install_finish (result, &error);
 
@@ -124,7 +124,7 @@ on_install_done (GObject *source G_GNUC_UNUSED,
 }
 
 void
-start_install (nuvashalauncherDownloadModpackDialog *self)
+start_install (NuvashaLauncherDownloadModpackDialog *self)
 {
   g_autoptr (GPtrArray) chosen = NULL;
   const char *name = NULL;
@@ -158,7 +158,7 @@ start_install (nuvashalauncherDownloadModpackDialog *self)
 
           if (adw_switch_row_get_active (row))
             {
-              nuvashalauncherModpackFile *file = g_ptr_array_index (self->opt_files, i);
+              NuvashaLauncherModpackFile *file = g_ptr_array_index (self->opt_files, i);
 
               g_ptr_array_add (chosen, file);
             }
@@ -167,7 +167,7 @@ start_install (nuvashalauncherDownloadModpackDialog *self)
 
   {
     InstallJob *job = g_new0 (InstallJob, 1);
-    nuvashalauncherDownload *download = self->pack_download;
+    NuvashaLauncherDownload *download = self->pack_download;
 
     /* The same header entry carries on from the compressed pack into the
        extract: it is one operation with two phases. */
@@ -193,7 +193,7 @@ start_install (nuvashalauncherDownloadModpackDialog *self)
 }
 
 static GtkWidget *
-build_optional_page (nuvashalauncherDownloadModpackDialog *self,
+build_optional_page (NuvashaLauncherDownloadModpackDialog *self,
                      GPtrArray *optional_files)
 {
   g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
@@ -221,7 +221,7 @@ build_optional_page (nuvashalauncherDownloadModpackDialog *self,
 
   for (guint i = 0; i < optional_files->len; i++)
     {
-      nuvashalauncherModpackFile *file = g_ptr_array_index (optional_files, i);
+      NuvashaLauncherModpackFile *file = g_ptr_array_index (optional_files, i);
       AdwSwitchRow *row = ADW_SWITCH_ROW (adw_switch_row_new ());
 
       adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
@@ -249,7 +249,7 @@ build_optional_page (nuvashalauncherDownloadModpackDialog *self,
 static void
 on_optional_cancel (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   dialog_details_show_again (self);
 }
@@ -257,7 +257,7 @@ on_optional_cancel (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 static void
 on_optional_install (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   /* Pop ourselves off so the installing page is showing when
    * the install clocks in with the downloading files. */
@@ -271,7 +271,7 @@ on_optional_install (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
  * still holding that title, or holding nothing, is replaced by the pack's
  * own name. A name the user typed is kept exactly as typed. */
 static void
-adopt_pack_name (nuvashalauncherDownloadModpackDialog *self)
+adopt_pack_name (NuvashaLauncherDownloadModpackDialog *self)
 {
   const char *pack_name = self->modpack != NULL ? self->modpack->name : NULL;
   const char *typed = NULL;
@@ -305,7 +305,7 @@ adopt_pack_name (nuvashalauncherDownloadModpackDialog *self)
 static void
 on_pack_progress (goffset bytes_done, goffset total, gpointer user_data)
 {
-  nuvashalauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   if (self->pack_download != NULL)
     nuvashalauncher_download_set_bytes (self->pack_download, (guint64) bytes_done,
@@ -317,7 +317,7 @@ on_pack_downloaded (GObject *source G_GNUC_UNUSED,
                     GAsyncResult *result,
                     gpointer user_data)
 {
-  nuvashalauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
   g_autoptr (GError) error = NULL;
 
   if (!nuvashalauncher_download_file_finish (result, &error))
@@ -357,7 +357,7 @@ void
 on_pack_parsed (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                 gpointer user_data)
 {
-  nuvashalauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
   g_autoptr (GError) error = NULL;
 
   g_clear_pointer (&self->modpack, nuvashalauncher_modpack_free);
@@ -436,16 +436,16 @@ on_pack_parsed (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 }
 
 gboolean
-dialog_start_features (nuvashalauncherDownloadModpackDialog *self)
+dialog_start_features (NuvashaLauncherDownloadModpackDialog *self)
 {
-  nuvashalauncherModrinthFile *file = NULL;
+  NuvashaLauncherModrinthFile *file = NULL;
 
   if (self->version == NULL || self->version->files == NULL)
     return FALSE;
 
   for (guint i = 0; i < self->version->files->len; i++)
     {
-      nuvashalauncherModrinthFile *candidate = g_ptr_array_index (self->version->files, i);
+      NuvashaLauncherModrinthFile *candidate = g_ptr_array_index (self->version->files, i);
 
       if (candidate->filename != NULL &&
           g_str_has_suffix (candidate->filename, ".mrpack"))

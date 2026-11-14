@@ -10,12 +10,12 @@
 G_BEGIN_DECLS
 
 #define nuvashalauncher_TYPE_SKIN_VIEW (nuvashalauncher_skin_view_get_type ())
-G_DECLARE_FINAL_TYPE (nuvashalauncherSkinView, nuvashalauncher_skin_view, nuvashalauncher, SKIN_VIEW, GtkGLArea)
+G_DECLARE_FINAL_TYPE (NuvashaLauncherSkinView, nuvashalauncher_skin_view, nuvashalauncher, SKIN_VIEW, GtkGLArea)
 
-nuvashalauncherSkinView *nuvashalauncher_skin_view_new (void);
-void nuvashalauncher_skin_view_set_skin (nuvashalauncherSkinView *self, GdkTexture *texture);
-void nuvashalauncher_skin_view_set_cape (nuvashalauncherSkinView *self, GdkTexture *texture);
-void nuvashalauncher_skin_view_set_slim (nuvashalauncherSkinView *self, gboolean slim);
+NuvashaLauncherSkinView *nuvashalauncher_skin_view_new (void);
+void nuvashalauncher_skin_view_set_skin (NuvashaLauncherSkinView *self, GdkTexture *texture);
+void nuvashalauncher_skin_view_set_cape (NuvashaLauncherSkinView *self, GdkTexture *texture);
+void nuvashalauncher_skin_view_set_slim (NuvashaLauncherSkinView *self, gboolean slim);
 
 /* Return a PNG suitable for uploading as a classic skin.  Slim skin atlases
  * need their missing classic arm columns filled before Mojang's services

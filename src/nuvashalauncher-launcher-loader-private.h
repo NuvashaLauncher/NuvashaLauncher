@@ -8,15 +8,15 @@
 #include "nuvashalauncher-launcher-private.h"
 
 typedef struct {
-  nuvashalauncher *launcher; /* the reference this work holds */
-  nuvashalauncherVersionManifest *manifest;
-  nuvashalauncherLoader loader;
-  nuvashalauncherVersionDescription *profile; /* the document the loader adds */
+  NuvashaLauncher *launcher; /* the reference this work holds */
+  NuvashaLauncherVersionManifest *manifest;
+  NuvashaLauncherLoader loader;
+  NuvashaLauncherVersionDescription *profile; /* the document the loader adds */
   char *game_version;
   char *loader_version;
 
   /* The operation this request is waiting on, released with it. */
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
 } LoaderRequest;
 
 void loader_request_free (LoaderRequest *request);

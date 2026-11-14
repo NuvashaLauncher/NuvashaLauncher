@@ -318,7 +318,7 @@ static void
 expect_zip_refused (const char *what, const char *zip_path, guint code)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModpack) pack = NULL;
+  g_autoptr (NuvashaLauncherModpack) pack = NULL;
 
   pack = nuvashalauncher_modpack_new_from_zip (zip_path, &error);
   g_assert_null (pack);
@@ -639,7 +639,7 @@ test_safe_archive_opens (void)
   g_autofree char *options_path = NULL;
   g_autofree char *options_text = NULL;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModpack) pack = NULL;
+  g_autoptr (NuvashaLauncherModpack) pack = NULL;
 
   {
     ZipEntry entries[] = {
@@ -697,18 +697,18 @@ test_verify_file_async_local (void)
   g_autoptr (GError) error = NULL;
   g_assert_true (g_file_set_contents (file_path, "hello verification", 18, &error));
 
-  nuvashalauncherModpackFile file = { 0 };
+  NuvashaLauncherModpackFile file = { 0 };
   file.path = (char *) "testfile.dat";
   file.sha1 = (char *) "01bf26627adb767bc7e06d4b9772ef405b364150";
   file.sha512 = (char *) "c95ce72ee919a2d75edad3ee4a496ecb72ff499d9f5f4e7e21cd1b2480c32b010b3a3f3db5bfb907649007ae762f1f03ee9fffee2b0d25322874f27e9115a63d";
   file.file_size = 18;
 
   /* Test 1: Missing hashes triggers hash error */
-  nuvashalauncherModpackFile no_hash_file = { 0 };
+  NuvashaLauncherModpackFile no_hash_file = { 0 };
   no_hash_file.path = (char *) "testfile.dat";
   GMainLoop *loop = g_main_loop_new (NULL, FALSE);
   VerifyData data1 = { loop, FALSE, NULL };
-  nuvashalauncherTaskScope *scope1 = nuvashalauncher_modpack_verify_file_async (&no_hash_file, file_path, on_verify_done, &data1);
+  NuvashaLauncherTaskScope *scope1 = nuvashalauncher_modpack_verify_file_async (&no_hash_file, file_path, on_verify_done, &data1);
   g_assert_nonnull (scope1);
   g_main_loop_run (loop);
   g_assert_false (data1.success);
@@ -718,7 +718,7 @@ test_verify_file_async_local (void)
 
   /* Test 2: Valid hashes succeed */
   VerifyData data2 = { loop, FALSE, NULL };
-  nuvashalauncherTaskScope *scope2 = nuvashalauncher_modpack_verify_file_async (&file, file_path, on_verify_done, &data2);
+  NuvashaLauncherTaskScope *scope2 = nuvashalauncher_modpack_verify_file_async (&file, file_path, on_verify_done, &data2);
   g_assert_nonnull (scope2);
   g_main_loop_run (loop);
   g_assert_true (data2.success);
@@ -726,10 +726,10 @@ test_verify_file_async_local (void)
   nuvashalauncher_task_scope_unref (scope2);
 
   /* Test 3: Mismatched hash fails */
-  nuvashalauncherModpackFile bad_hash_file = file;
+  NuvashaLauncherModpackFile bad_hash_file = file;
   bad_hash_file.sha1 = (char *) "0000000000000000000000000000000000000000";
   VerifyData data3 = { loop, FALSE, NULL };
-  nuvashalauncherTaskScope *scope3 = nuvashalauncher_modpack_verify_file_async (&bad_hash_file, file_path, on_verify_done, &data3);
+  NuvashaLauncherTaskScope *scope3 = nuvashalauncher_modpack_verify_file_async (&bad_hash_file, file_path, on_verify_done, &data3);
   g_assert_nonnull (scope3);
   g_main_loop_run (loop);
   g_assert_false (data3.success);

@@ -2,12 +2,12 @@
 
 #include "nuvashalauncher-auth-microsoft-private.h"
 
-nuvashalauncherTaskScope *
-nuvashalauncher_auth_sign_in_async (const nuvashalauncherDeviceCode   *code,
+NuvashaLauncherTaskScope *
+nuvashalauncher_auth_sign_in_async (const NuvashaLauncherDeviceCode   *code,
                         GAsyncReadyCallback    callback,
                         gpointer               user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   AuthRequest *self = NULL;
 
@@ -33,22 +33,22 @@ nuvashalauncher_auth_sign_in_async (const nuvashalauncherDeviceCode   *code,
   return g_steal_pointer (&scope);
 }
 
-nuvashalauncherAccount *
+NuvashaLauncherAccount *
 nuvashalauncher_auth_sign_in_finish (GAsyncResult *result, GError **error)
 {
   g_return_val_if_fail (nuvashalauncher_task_result_is_valid (result,
                                                        "nuvashalauncher_auth_sign_in_async"), NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
-  return (nuvashalauncherAccount *) g_task_propagate_pointer (G_TASK (result), error);
+  return (NuvashaLauncherAccount *) g_task_propagate_pointer (G_TASK (result), error);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_auth_refresh_async (const nuvashalauncherAccount   *account,
+NuvashaLauncherTaskScope *
+nuvashalauncher_auth_refresh_async (const NuvashaLauncherAccount   *account,
                         GAsyncReadyCallback callback,
                         gpointer            user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   AuthRequest *self = NULL;
 
@@ -87,12 +87,12 @@ nuvashalauncher_auth_refresh_async (const nuvashalauncherAccount   *account,
   return g_steal_pointer (&scope);
 }
 
-nuvashalauncherAccount *
+NuvashaLauncherAccount *
 nuvashalauncher_auth_refresh_finish (GAsyncResult *result, GError **error)
 {
   g_return_val_if_fail (nuvashalauncher_task_result_is_valid (result,
                                                        "nuvashalauncher_auth_refresh_async"), NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
-  return (nuvashalauncherAccount *) g_task_propagate_pointer (G_TASK (result), error);
+  return (NuvashaLauncherAccount *) g_task_propagate_pointer (G_TASK (result), error);
 }

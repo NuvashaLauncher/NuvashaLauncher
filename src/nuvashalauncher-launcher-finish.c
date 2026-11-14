@@ -11,7 +11,7 @@
  * ---------------------------------------------------------- */
 
 static void
-game_crashed (nuvashalauncher *self, const char *reason)
+game_crashed (NuvashaLauncher *self, const char *reason)
 {
   log_line (self, TAG_STATE, "the game crashed: %s", reason);
   set_state (self, nuvashalauncher_LAUNCH_CRASHED, reason);
@@ -19,7 +19,7 @@ game_crashed (nuvashalauncher *self, const char *reason)
 
 static void finish_after_natives_removed (GObject *source, GAsyncResult *result,
                                           gpointer user_data);
-static void finish_launch_after_natives (nuvashalauncher *self);
+static void finish_launch_after_natives (NuvashaLauncher *self);
 
 /* Nothing else can make a game that ended with zero a crash except a
  * report it wrote while it was dying, so that is what is asked for. A
@@ -29,7 +29,7 @@ static void
 crash_reports_listed (GObject *source, GAsyncResult *result,
                       gpointer user_data)
 {
-  nuvashalauncher *self = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (user_data);
   g_autoptr (GError) error = NULL;
   g_autoptr (GFileEnumerator) files = NULL;
   g_autoptr (GFileInfo) info = NULL;
@@ -79,7 +79,7 @@ crash_reports_listed (GObject *source, GAsyncResult *result,
 }
 
 static void
-report_how_it_ended (nuvashalauncher *self)
+report_how_it_ended (NuvashaLauncher *self)
 {
   g_autofree char *reason = NULL;
 
@@ -96,7 +96,7 @@ report_how_it_ended (nuvashalauncher *self)
 /* The process is gone and both pipes have been read to the end, so the
  * launch is over and the state can be the final one. */
 void
-finish_launch (nuvashalauncher *self)
+finish_launch (NuvashaLauncher *self)
 {
   g_clear_object (&self->process.process);
 
@@ -106,7 +106,7 @@ finish_launch (nuvashalauncher *self)
   {
     g_autofree char *natives =
       g_build_filename (self->game_directory, "natives", NULL);
-    nuvashalauncherTaskScope *cleanup =
+    NuvashaLauncherTaskScope *cleanup =
       nuvashalauncher_fs_remove_tree_async (natives,
                                             finish_after_natives_removed,
                                             g_object_ref (self));
@@ -117,7 +117,7 @@ finish_launch (nuvashalauncher *self)
 }
 
 static void
-finish_launch_after_natives (nuvashalauncher *self)
+finish_launch_after_natives (NuvashaLauncher *self)
 {
 
   if (self->process.stop_timeout != 0)
@@ -166,7 +166,7 @@ finish_after_natives_removed (GObject *source G_GNUC_UNUSED,
                               GAsyncResult *result,
                               gpointer user_data)
 {
-  nuvashalauncher *self = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (user_data);
   g_autoptr (GError) error = NULL;
 
   if (!nuvashalauncher_fs_remove_tree_finish (result, &error) && error != NULL)

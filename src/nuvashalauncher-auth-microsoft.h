@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherAuthMicrosoft: signing in with a Microsoft account and trading the
+/* NuvashaLauncherAuthMicrosoft: signing in with a Microsoft account and trading the
  * sign-in for a Minecraft profile.
  *
  * The chain is the one the services document, and every step of it is one
@@ -98,7 +98,7 @@ typedef enum {
   nuvashalauncher_AUTH_ERROR_XBOX_COUNTRY,
   nuvashalauncher_AUTH_ERROR_XBOX_AGE,
   nuvashalauncher_AUTH_ERROR_SERVICE       /* other service refusals; keep saved credentials */
-} nuvashalauncherAuthError;
+} NuvashaLauncherAuthError;
 
 GQuark nuvashalauncher_auth_error_quark (void);
 
@@ -115,20 +115,20 @@ typedef struct {
   guint expires_in;
   guint interval; /* how often the token endpoint is to be asked */
   char *device_code;
-} nuvashalauncherDeviceCode;
+} NuvashaLauncherDeviceCode;
 
-void nuvashalauncher_device_code_free (nuvashalauncherDeviceCode *code);
+void nuvashalauncher_device_code_free (NuvashaLauncherDeviceCode *code);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherDeviceCode, nuvashalauncher_device_code_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherDeviceCode, nuvashalauncher_device_code_free)
 
 /* Asks Microsoft for a code to sign in with.
  *
  * nuvashalauncher_AUTH_ERROR_NO_CLIENT_ID when nuvashalauncher_MICROSOFT_CLIENT_ID is empty. */
-nuvashalauncherTaskScope *nuvashalauncher_auth_device_code_async (GAsyncReadyCallback callback,
+NuvashaLauncherTaskScope *nuvashalauncher_auth_device_code_async (GAsyncReadyCallback callback,
                                           gpointer user_data);
 
 /* (transfer full) */
-nuvashalauncherDeviceCode *nuvashalauncher_auth_device_code_finish (GAsyncResult *result,
+NuvashaLauncherDeviceCode *nuvashalauncher_auth_device_code_finish (GAsyncResult *result,
                                             GError      **error);
 
 /* Poll the token endpoint until sign-in completes, then retrieve the
@@ -142,22 +142,22 @@ nuvashalauncherDeviceCode *nuvashalauncher_auth_device_code_finish (GAsyncResult
  * is a child account, nuvashalauncher_AUTH_ERROR_NO_GAME when it does not own
  * Minecraft: Java, and nuvashalauncher_AUTH_ERROR_NO_PROFILE when it owns it but
  * has never played. */
-nuvashalauncherTaskScope *nuvashalauncher_auth_sign_in_async (const nuvashalauncherDeviceCode *code,
+NuvashaLauncherTaskScope *nuvashalauncher_auth_sign_in_async (const NuvashaLauncherDeviceCode *code,
                                       GAsyncReadyCallback callback,
                                       gpointer user_data);
 
 /* (transfer full). The caller owns and stores the returned account. */
-nuvashalauncherAccount *nuvashalauncher_auth_sign_in_finish (GAsyncResult *result, GError **error);
+NuvashaLauncherAccount *nuvashalauncher_auth_sign_in_finish (GAsyncResult *result, GError **error);
 
 /* Refresh an account's access token and retrieve its current profile.
  *
  * nuvashalauncher_AUTH_ERROR_REAUTH when Microsoft requires sign-in again. */
-nuvashalauncherTaskScope *nuvashalauncher_auth_refresh_async (const nuvashalauncherAccount *account,
+NuvashaLauncherTaskScope *nuvashalauncher_auth_refresh_async (const NuvashaLauncherAccount *account,
                                       GAsyncReadyCallback callback,
                                       gpointer user_data);
 
 /* (transfer full) */
-nuvashalauncherAccount *nuvashalauncher_auth_refresh_finish (GAsyncResult *result, GError **error);
+NuvashaLauncherAccount *nuvashalauncher_auth_refresh_finish (GAsyncResult *result, GError **error);
 
 /* ---------------------------------------------------------- *
  * Individual authentication responses
@@ -167,7 +167,7 @@ nuvashalauncherAccount *nuvashalauncher_auth_refresh_finish (GAsyncResult *resul
  * ---------------------------------------------------------- */
 
 /* The device authorization answer. (transfer full) */
-nuvashalauncherDeviceCode *nuvashalauncher_auth_device_code_from_json (const char *json,
+NuvashaLauncherDeviceCode *nuvashalauncher_auth_device_code_from_json (const char *json,
                                                gssize      length,
                                                GError    **error);
 
@@ -177,14 +177,14 @@ typedef struct {
   char *access_token;
   char *refresh_token;
   gint64 expires_at;
-} nuvashalauncherOAuthToken;
+} NuvashaLauncherOAuthToken;
 
-void nuvashalauncher_oauth_token_free (nuvashalauncherOAuthToken *token);
+void nuvashalauncher_oauth_token_free (NuvashaLauncherOAuthToken *token);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherOAuthToken, nuvashalauncher_oauth_token_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherOAuthToken, nuvashalauncher_oauth_token_free)
 
 /* (transfer full) */
-nuvashalauncherOAuthToken *nuvashalauncher_auth_oauth_token_from_json (const char  *json,
+NuvashaLauncherOAuthToken *nuvashalauncher_auth_oauth_token_from_json (const char  *json,
                                                gssize       length,
                                                gint64       now,
                                                GError     **error);
@@ -200,18 +200,18 @@ gboolean nuvashalauncher_auth_polling_error (const char *json, gssize length,
 typedef struct {
   char *token;
   char *user_hash;
-} nuvashalauncherXboxToken;
+} NuvashaLauncherXboxToken;
 
-void nuvashalauncher_xbox_token_free (nuvashalauncherXboxToken *token);
+void nuvashalauncher_xbox_token_free (NuvashaLauncherXboxToken *token);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherXboxToken, nuvashalauncher_xbox_token_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherXboxToken, nuvashalauncher_xbox_token_free)
 
 /* (transfer full). The refusals of XSTS come as a number, and the known
    ones are given the words a user can do something with: no Xbox
    profile behind the Microsoft account, a child account that has to be
    added to a family, an account from a country the services do not
    serve. */
-nuvashalauncherXboxToken *nuvashalauncher_auth_xbox_token_from_json (const char *json,
+NuvashaLauncherXboxToken *nuvashalauncher_auth_xbox_token_from_json (const char *json,
                                              gssize      length,
                                              GError    **error);
 
@@ -221,7 +221,7 @@ char *nuvashalauncher_auth_identity_token (const char *user_hash, const char *xs
 
 /* What the services answer a sign-in with: the token the game is run
  * with and the moment it stops being good. */
-nuvashalauncherOAuthToken *nuvashalauncher_auth_minecraft_token_from_json (const char  *json,
+NuvashaLauncherOAuthToken *nuvashalauncher_auth_minecraft_token_from_json (const char  *json,
                                                    gssize       length,
                                                    gint64       now,
                                                    GError     **error);
@@ -241,16 +241,16 @@ typedef struct {
   char *avatar_url;  /* the skin that is worn, NULL when there is none */
   char *skin_model;  /* CLASSIC or SLIM */
   char *cape_id;     /* currently selected cape, or NULL */
-} nuvashalauncherMinecraftProfile;
+} NuvashaLauncherMinecraftProfile;
 
-void nuvashalauncher_minecraft_profile_free (nuvashalauncherMinecraftProfile *profile);
+void nuvashalauncher_minecraft_profile_free (NuvashaLauncherMinecraftProfile *profile);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherMinecraftProfile, nuvashalauncher_minecraft_profile_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherMinecraftProfile, nuvashalauncher_minecraft_profile_free)
 
 /* (transfer full). nuvashalauncher_AUTH_ERROR_NO_PROFILE when the services answer
  * 404, which is what an account that owns the game and has never played
  * it says. */
-nuvashalauncherMinecraftProfile *nuvashalauncher_auth_profile_from_json (const char *json,
+NuvashaLauncherMinecraftProfile *nuvashalauncher_auth_profile_from_json (const char *json,
                                                  gssize      length,
                                                  GError    **error);
 

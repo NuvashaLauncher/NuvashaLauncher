@@ -15,9 +15,9 @@ test_row_toggle_and_selection_keep_state_consistent (void)
   g_autofree char *root =
     g_dir_make_tmp ("nuvashalauncher-content-installed-XXXXXX", &error);
   g_autofree char *data = g_build_filename (root, "data", NULL);
-  g_autoptr (nuvashalauncherInstanceManager) manager =
+  g_autoptr (NuvashaLauncherInstanceManager) manager =
     nuvashalauncher_instance_manager_new (data);
-  g_autoptr (nuvashalauncherInstance) instance =
+  g_autoptr (NuvashaLauncherInstance) instance =
     nuvashalauncher_instance_manager_create (
       manager, "Installed", NULL, "1.21.1", nuvashalauncher_LOADER_FABRIC,
       "0.15.0", &error);
@@ -25,8 +25,8 @@ test_row_toggle_and_selection_keep_state_consistent (void)
   g_autofree char *mods = NULL;
   g_autofree char *enabled_path = NULL;
   g_autofree char *disabled_path = NULL;
-  g_autoptr (nuvashalauncherContentPage) page = NULL;
-  nuvashalauncherContentFile *file = NULL;
+  g_autoptr (NuvashaLauncherContentPage) page = NULL;
+  NuvashaLauncherContentFile *file = NULL;
   GtkWidget *row = NULL;
   GtkSwitch *sw = NULL;
   GtkCheckButton *check = NULL;
@@ -47,7 +47,7 @@ test_row_toggle_and_selection_keep_state_consistent (void)
     (GDestroyNotify) nuvashalauncher_content_file_free);
   page->installed.rows = g_hash_table_new_full (g_str_hash, g_str_equal,
                                                 g_free, NULL);
-  file = g_new0 (nuvashalauncherContentFile, 1);
+  file = g_new0 (NuvashaLauncherContentFile, 1);
   file->path = g_strdup (enabled_path);
   file->filename = g_strdup ("example.jar");
   file->enabled = TRUE;

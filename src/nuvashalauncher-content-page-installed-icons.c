@@ -7,7 +7,7 @@
 #include "nuvashalauncher-i18n.h"
 
 typedef struct {
-  nuvashalauncherContentPage *page;
+  NuvashaLauncherContentPage *page;
   GtkWidget *row;
 } LocalIconLoad;
 
@@ -16,7 +16,7 @@ local_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                   gpointer user_data)
 {
   LocalIconLoad *load = user_data;
-  nuvashalauncherContentFile *file = g_object_get_data (G_OBJECT (load->row), "nuvashalauncher-file");
+  NuvashaLauncherContentFile *file = g_object_get_data (G_OBJECT (load->row), "nuvashalauncher-file");
   g_autoptr (GError) error = NULL;
   g_autofree char *path =
     nuvashalauncher_content_load_local_icon_finish (result, &error);
@@ -55,9 +55,9 @@ local_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 }
 
 static void
-load_row_icon (nuvashalauncherContentPage *self, GtkWidget *row)
+load_row_icon (NuvashaLauncherContentPage *self, GtkWidget *row)
 {
-  nuvashalauncherContentFile *file = g_object_get_data (G_OBJECT (row), "nuvashalauncher-file");
+  NuvashaLauncherContentFile *file = g_object_get_data (G_OBJECT (row), "nuvashalauncher-file");
   GtkWidget *icon =
     GTK_WIDGET (g_object_get_data (G_OBJECT (row), "nuvashalauncher-icon"));
   GtkWidget *scroller = GTK_WIDGET (self->installed.scroller);
@@ -98,7 +98,7 @@ load_row_icon (nuvashalauncherContentPage *self, GtkWidget *row)
 }
 
 void
-load_visible_icons (nuvashalauncherContentPage *self)
+load_visible_icons (NuvashaLauncherContentPage *self)
 {
   for (GList *item = self->installed.rows_list; item != NULL; item = item->next)
     load_row_icon (self, item->data);

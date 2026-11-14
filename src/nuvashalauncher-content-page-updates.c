@@ -5,36 +5,48 @@
 #include "nuvashalauncher-i18n.h"
 #include "nuvashalauncher-operation.h"
 
+#define UPDATE_CHECK_BATCH_SIZE 200
+
 /* One file with an available update. */
 typedef struct {
-  nuvashalauncherModrinthVersion *version; /* the newer version, owned */
+  NuvashaLauncherModrinthVersion *version; /* the newer version, owned */
   char *title;
   char *path;
   gboolean disabled;
 } UpdateItem;
 
+/* One installed file eligible for a batch update check. */
+typedef struct {
+  char *sha1;
+  char *project_id;
+  char *filename;
+  char *path;
+  gboolean enabled;
+} UpdateCandidate;
+
 /* State for an update check. */
 typedef struct {
-  nuvashalauncherContentPage *page; /* weakly held */
+  NuvashaLauncherContentPage *page; /* weakly held */
   guint index;
-  GPtrArray *items; /* UpdateItem* */
-  char *current_sha1;
-  char *current_project_id;
-  char *current_filename;
-  char *current_path;
-  gboolean current_enabled;
+  guint batch_end;
+  gboolean had_error;
+  GPtrArray *candidates; /* UpdateCandidate* */
+  GPtrArray *items;      /* UpdateItem* */
 } UpdateRun;
 
 static void update_check_next (UpdateRun *run);
 
 static void
-update_run_clear_current (UpdateRun *run)
+update_candidate_free (UpdateCandidate *candidate)
 {
-  g_clear_pointer (&run->current_sha1, g_free);
-  g_clear_pointer (&run->current_project_id, g_free);
-  g_clear_pointer (&run->current_filename, g_free);
-  g_clear_pointer (&run->current_path, g_free);
-  run->current_enabled = FALSE;
+  if (candidate == NULL)
+    return;
+
+  g_free (candidate->sha1);
+  g_free (candidate->project_id);
+  g_free (candidate->filename);
+  g_free (candidate->path);
+  g_free (candidate);
 }
 
 static void
@@ -46,7 +58,7 @@ update_run_free (UpdateRun *run)
   if (run->page != NULL)
     g_object_remove_weak_pointer (G_OBJECT (run->page),
                                   (gpointer *) &run->page);
-  update_run_clear_current (run);
+  g_clear_pointer (&run->candidates, g_ptr_array_unref);
   g_clear_pointer (&run->items, g_ptr_array_unref);
   g_free (run);
 }
@@ -65,7 +77,7 @@ update_item_free (UpdateItem *item)
 }
 
 static void
-position_update_popover (nuvashalauncherContentPage *self, GtkButton *button)
+position_update_popover (NuvashaLauncherContentPage *self, GtkButton *button)
 {
   graphene_rect_t bounds;
   GdkRectangle pointing_to;
@@ -88,7 +100,7 @@ position_update_popover (nuvashalauncherContentPage *self, GtkButton *button)
 }
 
 static void
-update_button_busy (nuvashalauncherContentPage *self, gboolean busy)
+update_button_busy (NuvashaLauncherContentPage *self, gboolean busy)
 {
   if (self->installed.update_content == NULL)
     return;
@@ -107,7 +119,7 @@ void
 nuvashalauncher_content_page_on_update_cancel (GtkButton *button G_GNUC_UNUSED,
                                        gpointer user_data)
 {
-  nuvashalauncherContentPage *self = user_data;
+  NuvashaLauncherContentPage *self = user_data;
   UpdateRun *run = g_object_get_data (G_OBJECT (self), "nuvashalauncher-update-run");
 
   if (run != NULL)
@@ -127,7 +139,7 @@ nuvashalauncher_content_page_on_update_cancel (GtkButton *button G_GNUC_UNUSED,
 }
 
 static void
-update_progress (nuvashalauncherContentPage *self, guint done, guint total)
+update_progress (NuvashaLauncherContentPage *self, guint done, guint total)
 {
   g_autofree char *count = g_strdup_printf ("%u/%u", done, total);
 
@@ -143,7 +155,7 @@ update_progress (nuvashalauncherContentPage *self, guint done, guint total)
 /* Starts the next one of a confirmed batch. When the last one is in, the
  * list is read again and the batch is over. */
 void
-update_batch_next (nuvashalauncherContentPage *self)
+update_batch_next (NuvashaLauncherContentPage *self)
 {
   UpdateItem *item = NULL;
 
@@ -181,7 +193,7 @@ update_batch_next (nuvashalauncherContentPage *self)
 }
 
 void
-plan_stopped (nuvashalauncherContentPage *self)
+plan_stopped (NuvashaLauncherContentPage *self)
 {
   if (self->install_model->updating)
     update_batch_next (self);
@@ -195,7 +207,7 @@ plan_stopped (nuvashalauncherContentPage *self)
 static void
 on_update_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
   UpdateRun *run = g_object_get_data (G_OBJECT (source), "nuvashalauncher-update-run");
   const char *response =
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
@@ -228,7 +240,7 @@ on_update_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 /* Finish the update check and show the confirmation dialog or an up-to-date
  * message. */
 static void
-update_check_done (nuvashalauncherContentPage *self, UpdateRun *run)
+update_check_done (NuvashaLauncherContentPage *self, UpdateRun *run)
 {
   update_button_busy (self, FALSE);
   if (self->installed.update_popover != NULL)
@@ -237,7 +249,8 @@ update_check_done (nuvashalauncherContentPage *self, UpdateRun *run)
 
   if (run->items->len == 0)
     {
-      show_toast (self, _("Everything is up to date"));
+      if (!run->had_error)
+        show_toast (self, _("Everything is up to date"));
       update_run_free (run);
       return;
     }
@@ -278,17 +291,18 @@ update_check_done (nuvashalauncherContentPage *self, UpdateRun *run)
   }
 }
 
-/* The newer version Modrinth has for one file, or nothing when there is
- * none. Either way the check goes on to the next file. */
+/* The newer versions Modrinth has for a batch of file hashes. */
 static void
-on_update_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
-                 gpointer user_data)
+on_updates_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                  gpointer user_data)
 {
   PageWatch *watch = user_data;
-  nuvashalauncherContentPage *self = watch->page;
+  NuvashaLauncherContentPage *self = watch->page;
   g_autoptr (GError) error = NULL;
-  nuvashalauncherModrinthVersion *update = NULL;
+  g_autoptr (GHashTable) updates = NULL;
   UpdateRun *run = NULL;
+
+  updates = nuvashalauncher_modrinth_updates_by_hashes_finish (result, &error);
 
   if (self == NULL)
     {
@@ -296,102 +310,112 @@ on_update_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
-  update = nuvashalauncher_modrinth_update_by_hash_finish (result, &error);
   run = g_object_get_data (G_OBJECT (self), "nuvashalauncher-update-run");
 
   if (run == NULL)
     {
-      nuvashalauncher_modrinth_version_free (update);
       page_watch_free (watch);
       return;
     }
 
-  /* The update endpoint answers with the newest version that fits, which
-     is still the installed one when the file is already the newest: a
-     version that carries the very file on disk is not an update. */
-  if (update != NULL && run->current_sha1 != NULL &&
-      !nuvashalauncher_modrinth_version_has_hash (update, run->current_sha1))
+  if (updates != NULL)
     {
-      UpdateItem *item = g_new0 (UpdateItem, 1);
+      for (guint i = run->index; i < run->batch_end; i++)
+        {
+          UpdateCandidate *cand = g_ptr_array_index (run->candidates, i);
+          NuvashaLauncherModrinthVersion *update =
+            g_hash_table_lookup (updates, cand->sha1);
 
-      item->version = update; /* owned from here */
-       {
-         const char *title = run->current_project_id != NULL
-                               ? g_hash_table_lookup (self->browse.model->project_titles,
-                                                      run->current_project_id)
-                               : NULL;
+          /* The update endpoint answers with the newest version that fits,
+             which is still the installed one when the file is already the
+             newest: a version that carries the very file on disk is not an
+             update. */
+          if (update != NULL &&
+              !nuvashalauncher_modrinth_version_has_hash (update, cand->sha1))
+            {
+              UpdateItem *item = g_new0 (UpdateItem, 1);
+              const char *title =
+                cand->project_id != NULL
+                  ? g_hash_table_lookup (self->browse.model->project_titles,
+                                         cand->project_id)
+                  : NULL;
 
-         /* Update dialogs use the project name, never the version label.
-          * A filename is the safest fallback while its project metadata is
-          * still being resolved. */
-         item->title = g_strdup (title != NULL ? title : run->current_filename);
-       }
-      item->path = g_strdup (run->current_path);
-      item->disabled = !run->current_enabled;
-      g_ptr_array_add (run->items, item);
+              item->version = nuvashalauncher_modrinth_version_copy (update);
+              /* Update dialogs use the project name, never the version label.
+               * A filename is the safest fallback while its project metadata is
+               * still being resolved. */
+              item->title = g_strdup (title != NULL ? title : cand->filename);
+              item->path = g_strdup (cand->path);
+              item->disabled = !cand->enabled;
+              g_ptr_array_add (run->items, item);
+            }
+        }
     }
-  else
+  else if (error != NULL &&
+           !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
     {
-      /* Nothing newer, or the question could not be answered: neither is
-         an update to install. */
-      nuvashalauncher_modrinth_version_free (update);
-      g_clear_error (&error);
+      run->had_error = TRUE;
+      show_toast (self, error->message);
     }
 
-  update_run_clear_current (run);
+  run->index = run->batch_end;
+  update_progress (self, run->index, run->candidates->len);
   update_check_next (run);
   page_watch_free (watch);
 }
 
-/* One file after another, so a folder of twenty does not open twenty
- * requests at once. */
+/* Check installed files in batches via Modrinth's bulk hash-update endpoint. */
 static void
 update_check_next (UpdateRun *run)
 {
-  nuvashalauncherContentPage *self = run != NULL ? run->page : NULL;
+  NuvashaLauncherContentPage *self = run != NULL ? run->page : NULL;
+  g_autoptr (GPtrArray) hashes = NULL;
+  g_autoptr (GHashTable) seen = NULL;
+  guint end = 0;
 
-  if (self == NULL || self->installed.files == NULL)
+  if (self == NULL || run->candidates == NULL)
     {
       update_run_free (run);
       return;
     }
 
-  while (run->index < self->installed.files->len)
+  if (run->index >= run->candidates->len)
     {
-      nuvashalauncherContentFile *file = g_ptr_array_index (self->installed.files, run->index);
-
-      run->index++;
-      update_progress (self, run->index, self->installed.files->len);
-
-      if (file->sha1 == NULL || file->project_id == NULL)
-        continue;
-
-      update_run_clear_current (run);
-      run->current_sha1 = g_strdup (file->sha1);
-      run->current_project_id = g_strdup (file->project_id);
-      run->current_filename = g_strdup (file->filename);
-      run->current_path = g_strdup (file->path);
-      run->current_enabled = file->enabled;
-      {
-        PageWatch *watch = page_watch_new (self);
-
-        watch->operation = nuvashalauncher_modrinth_update_by_hash_async (
-          self->type, run->current_sha1, self->minecraft_version, self->loader,
-          on_update_ready, watch);
-        nuvashalauncher_operation_follow (watch->operation,
-                                           self->browse.model->cancellable);
-      }
+      update_check_done (self, run);
       return;
     }
 
-  update_check_done (self, run);
+  end = MIN (run->index + UPDATE_CHECK_BATCH_SIZE, run->candidates->len);
+  run->batch_end = end;
+  hashes = g_ptr_array_new ();
+  seen = g_hash_table_new (g_str_hash, g_str_equal);
+
+  for (guint i = run->index; i < end; i++)
+    {
+      UpdateCandidate *cand = g_ptr_array_index (run->candidates, i);
+
+      if (g_hash_table_add (seen, cand->sha1))
+        g_ptr_array_add (hashes, cand->sha1);
+    }
+
+  update_progress (self, run->index, run->candidates->len);
+
+  {
+    PageWatch *watch = page_watch_new (self);
+
+    watch->operation = nuvashalauncher_modrinth_updates_by_hashes_async (
+      self->type, hashes, self->minecraft_version, self->loader,
+      on_updates_ready, watch);
+    nuvashalauncher_operation_follow (watch->operation,
+                                       self->browse.model->cancellable);
+  }
 }
 
 void
 nuvashalauncher_content_page_on_update_all_clicked (GtkButton *button,
                                                     gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
   UpdateRun *run = g_new0 (UpdateRun, 1);
 
   position_update_popover (self, button);
@@ -407,8 +431,34 @@ nuvashalauncher_content_page_on_update_all_clicked (GtkButton *button,
   update_button_busy (self, TRUE);
   run->page = self;
   g_object_add_weak_pointer (G_OBJECT (self), (gpointer *) &run->page);
+  run->candidates =
+    g_ptr_array_new_with_free_func ((GDestroyNotify) update_candidate_free);
   run->items =
-  g_ptr_array_new_with_free_func ((GDestroyNotify) update_item_free);
+    g_ptr_array_new_with_free_func ((GDestroyNotify) update_item_free);
+
+  if (self->installed.files != NULL)
+    {
+      for (guint i = 0; i < self->installed.files->len; i++)
+        {
+          NuvashaLauncherContentFile *file =
+            g_ptr_array_index (self->installed.files, i);
+
+          if (file->sha1 == NULL || file->project_id == NULL)
+            continue;
+
+          {
+            UpdateCandidate *cand = g_new0 (UpdateCandidate, 1);
+
+            cand->sha1 = g_strdup (file->sha1);
+            cand->project_id = g_strdup (file->project_id);
+            cand->filename = g_strdup (file->filename);
+            cand->path = g_strdup (file->path);
+            cand->enabled = file->enabled;
+            g_ptr_array_add (run->candidates, cand);
+          }
+        }
+    }
+
   g_object_set_data (G_OBJECT (self), "nuvashalauncher-update-run", run);
   if (self->installed.update_popover != NULL)
     gtk_popover_popup (self->installed.update_popover);

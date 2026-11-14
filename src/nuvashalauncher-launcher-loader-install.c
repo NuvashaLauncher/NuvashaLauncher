@@ -34,11 +34,11 @@ on_java_for_the_install (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                          gpointer user_data)
 {
   LoaderRequest *request = user_data;
-  nuvashalauncher *self = request->launcher;
+  NuvashaLauncher *self = request->launcher;
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) javas = nuvashalauncher_java_detect_finish (result, &error);
   g_autofree char *instance_java = NULL;
-  const nuvashalauncherJava *java = NULL;
+  const NuvashaLauncherJava *java = NULL;
   int required = 0;
 
   if (javas == NULL)
@@ -88,10 +88,10 @@ on_install_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                  gpointer user_data)
 {
   LoaderRequest *request = user_data;
-  nuvashalauncher *self = request->launcher;
+  NuvashaLauncher *self = request->launcher;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherLoaderInstall) install = NULL;
-  g_autoptr (nuvashalauncherVersionDescription) merged = NULL;
+  g_autoptr (NuvashaLauncherLoaderInstall) install = NULL;
+  g_autoptr (NuvashaLauncherVersionDescription) merged = NULL;
 
   install = nuvashalauncher_loaders_install_finish (result, &error);
 
@@ -117,7 +117,7 @@ on_install_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   {
     g_autofree char *natives_dir =
       g_build_filename (self->game_directory, "natives", NULL);
-    nuvashalauncherTaskScope *resolving = nuvashalauncher_resolve_description_async (
+    NuvashaLauncherTaskScope *resolving = nuvashalauncher_resolve_description_async (
       merged, merged->id, install->client_jar, NULL, natives_dir, NULL,
       on_resolve_progress, self, on_resolved, g_object_ref (self));
 
@@ -136,7 +136,7 @@ static void
 on_install_progress (const char *stage, guint done, guint total,
                      gpointer user_data)
 {
-  nuvashalauncher *self = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (user_data);
   guint percent;
   g_autofree char *detail = NULL;
 

@@ -3,16 +3,16 @@
 static void
 test_inheritance_merge (void)
 {
-  g_autoptr (nuvashalauncherVersionDescription) parent =
+  g_autoptr (NuvashaLauncherVersionDescription) parent =
     fixture_version ("version-parent.json");
-  g_autoptr (nuvashalauncherVersionDescription) child =
+  g_autoptr (NuvashaLauncherVersionDescription) child =
     fixture_version ("version-child.json");
-  g_autoptr (nuvashalauncherVersionDescription) grandchild =
+  g_autoptr (NuvashaLauncherVersionDescription) grandchild =
     fixture_version ("version-grandchild.json");
-  g_autoptr (nuvashalauncherVersionDescription) merged = NULL;
-  g_autoptr (nuvashalauncherVersionDescription) higher = NULL;
-  const nuvashalauncherLibrary *library;
-  const nuvashalauncherArgument *argument;
+  g_autoptr (NuvashaLauncherVersionDescription) merged = NULL;
+  g_autoptr (NuvashaLauncherVersionDescription) higher = NULL;
+  const NuvashaLauncherLibrary *library;
+  const NuvashaLauncherArgument *argument;
 
   merged = nuvashalauncher_version_description_merge (parent, child);
   g_assert_nonnull (merged);
@@ -63,7 +63,7 @@ test_inheritance_merge (void)
   g_assert_cmpuint (higher->jvm_arguments->len, ==, 1);
   g_assert_cmpuint (higher->game_arguments->len, ==, 2);
   g_assert_cmpstr (g_ptr_array_index (
-                     ((nuvashalauncherArgument *) g_ptr_array_index (
+                     ((NuvashaLauncherArgument *) g_ptr_array_index (
                         higher->game_arguments, 0))->values, 0),
                    ==, "--quickPlayPath");
 
@@ -119,7 +119,7 @@ test_manifest_fetch (void)
 static void
 test_version_load (void)
 {
-  g_autoptr (nuvashalauncherVersionManifest) manifest = local_manifest ();
+  g_autoptr (NuvashaLauncherVersionManifest) manifest = local_manifest ();
   g_autofree char *parent_cache = cache_file ("1.21.1.json");
   AsyncRun run = { 0 };
   AsyncCall call = { 0 };
@@ -201,7 +201,7 @@ test_version_load (void)
 static void
 test_version_load_errors (void)
 {
-  g_autoptr (nuvashalauncherVersionManifest) manifest = local_manifest ();
+  g_autoptr (NuvashaLauncherVersionManifest) manifest = local_manifest ();
   AsyncRun run = { 0 };
   AsyncCall call = { 0 };
 

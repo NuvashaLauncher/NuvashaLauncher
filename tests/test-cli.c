@@ -37,10 +37,10 @@ test_account_commands (void)
 {
   g_autofree char *accounts_path =
     g_build_filename (data_home, "nuvashalauncher", "accounts.json", NULL);
-  g_autoptr (nuvashalauncherAccounts) accounts =
+  g_autoptr (NuvashaLauncherAccounts) accounts =
     nuvashalauncher_accounts_new_for_path (accounts_path);
-  g_autoptr (nuvashalauncherAccount) first = NULL;
-  g_autoptr (nuvashalauncherAccount) second = NULL;
+  g_autoptr (NuvashaLauncherAccount) first = NULL;
+  g_autoptr (NuvashaLauncherAccount) second = NULL;
   g_autoptr (GError) error = NULL;
   g_autofree char *output = NULL;
   g_autofree char *accounts_dir = NULL;
@@ -99,10 +99,10 @@ test_remove_instance_command (void)
 {
   g_autofree char *manager_path =
     g_build_filename (data_home, "nuvashalauncher", NULL);
-  g_autoptr (nuvashalauncherInstanceManager) manager =
+  g_autoptr (NuvashaLauncherInstanceManager) manager =
     nuvashalauncher_instance_manager_new (manager_path);
-  g_autoptr (nuvashalauncherInstanceManager) reloaded = NULL;
-  g_autoptr (nuvashalauncherInstance) instance = NULL;
+  g_autoptr (NuvashaLauncherInstanceManager) reloaded = NULL;
+  g_autoptr (NuvashaLauncherInstance) instance = NULL;
   g_autoptr (GError) error = NULL;
   g_autofree char *output = NULL;
   g_autofree char *directory = NULL;

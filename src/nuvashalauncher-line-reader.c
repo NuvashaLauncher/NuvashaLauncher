@@ -7,12 +7,12 @@
 #define READ_SIZE (64 * 1024)
 #define MAX_LINE_SIZE (1024 * 1024)
 
-struct _nuvashalauncherLineReader
+struct _NuvashaLauncherLineReader
 {
   GInputStream *stream;
   gboolean stderr_line;
-  nuvashalauncherLineReaderLineFunc line;
-  nuvashalauncherLineReaderDoneFunc done;
+  NuvashaLauncherLineReaderLineFunc line;
+  NuvashaLauncherLineReaderDoneFunc done;
   gpointer user_data;
   GDestroyNotify user_data_free;
   GByteArray *line_buffer;
@@ -20,7 +20,7 @@ struct _nuvashalauncherLineReader
 };
 
 static void
-nuvashalauncher_line_reader_free (nuvashalauncherLineReader *reader)
+nuvashalauncher_line_reader_free (NuvashaLauncherLineReader *reader)
 {
   g_clear_object (&reader->stream);
   g_clear_pointer (&reader->line_buffer, g_byte_array_unref);
@@ -31,10 +31,10 @@ nuvashalauncher_line_reader_free (nuvashalauncherLineReader *reader)
   g_free (reader);
 }
 
-static void nuvashalauncher_line_reader_read (nuvashalauncherLineReader *reader);
+static void nuvashalauncher_line_reader_read (NuvashaLauncherLineReader *reader);
 
 static void
-emit_line (nuvashalauncherLineReader *reader)
+emit_line (NuvashaLauncherLineReader *reader)
 {
   g_autofree char *line = NULL;
 
@@ -59,7 +59,7 @@ emit_line (nuvashalauncherLineReader *reader)
 }
 
 static void
-consume_bytes (nuvashalauncherLineReader *reader, const guint8 *data, gsize size)
+consume_bytes (NuvashaLauncherLineReader *reader, const guint8 *data, gsize size)
 {
   for (gsize i = 0; i < size; i++)
     {
@@ -81,7 +81,7 @@ nuvashalauncher_line_reader_read_ready (GObject *source,
                                         GAsyncResult *result,
                                         gpointer user_data)
 {
-  nuvashalauncherLineReader *reader = user_data;
+  NuvashaLauncherLineReader *reader = user_data;
   g_autoptr (GError) error = NULL;
   g_autoptr (GBytes) bytes =
     g_input_stream_read_bytes_finish (G_INPUT_STREAM (source), result, &error);
@@ -109,22 +109,22 @@ nuvashalauncher_line_reader_read_ready (GObject *source,
 }
 
 static void
-nuvashalauncher_line_reader_read (nuvashalauncherLineReader *reader)
+nuvashalauncher_line_reader_read (NuvashaLauncherLineReader *reader)
 {
   g_input_stream_read_bytes_async (reader->stream, READ_SIZE, G_PRIORITY_DEFAULT,
                                    NULL, nuvashalauncher_line_reader_read_ready,
                                    reader);
 }
 
-nuvashalauncherLineReader *
+NuvashaLauncherLineReader *
 nuvashalauncher_line_reader_new (GInputStream *stream,
                                  gboolean stderr_line,
-                                 nuvashalauncherLineReaderLineFunc line,
-                                 nuvashalauncherLineReaderDoneFunc done,
+                                 NuvashaLauncherLineReaderLineFunc line,
+                                 NuvashaLauncherLineReaderDoneFunc done,
                                  gpointer user_data,
                                  GDestroyNotify user_data_free)
 {
-  nuvashalauncherLineReader *reader = g_new0 (nuvashalauncherLineReader, 1);
+  NuvashaLauncherLineReader *reader = g_new0 (NuvashaLauncherLineReader, 1);
 
   reader->stream = g_object_ref (stream);
   reader->stderr_line = stderr_line;
@@ -138,7 +138,7 @@ nuvashalauncher_line_reader_new (GInputStream *stream,
 }
 
 void
-nuvashalauncher_line_reader_start (nuvashalauncherLineReader *reader)
+nuvashalauncher_line_reader_start (NuvashaLauncherLineReader *reader)
 {
   g_return_if_fail (reader != NULL);
   nuvashalauncher_line_reader_read (reader);

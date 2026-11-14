@@ -37,7 +37,7 @@ ask_minecraft (AuthRequest *self)
 void
 minecraft_answered (AuthRequest *self)
 {
-  g_autoptr (nuvashalauncherOAuthToken) token = NULL;
+  g_autoptr (NuvashaLauncherOAuthToken) token = NULL;
   g_autoptr (GError) error = NULL;
 
   if (!SOUP_STATUS_IS_SUCCESSFUL (self->status))

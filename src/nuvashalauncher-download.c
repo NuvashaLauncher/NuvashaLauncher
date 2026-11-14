@@ -56,30 +56,30 @@ nuvashalauncher_download_error_quark (void)
  * throw away the connection pool. It lives until the process exits. */
 
 guint
-nuvashalauncher_download_service_active (const nuvashalauncherDownloadService *service)
+nuvashalauncher_download_service_active (const NuvashaLauncherDownloadService *service)
 {
   return service == NULL ? 0 : service->interactive_running +
                                 service->bulk_running;
 }
 
 guint
-nuvashalauncher_download_service_queued_interactive (const nuvashalauncherDownloadService *service)
+nuvashalauncher_download_service_queued_interactive (const NuvashaLauncherDownloadService *service)
 {
   return service == NULL ? 0 :
     g_queue_get_length ((GQueue *) &service->interactive_waiting);
 }
 
 guint
-nuvashalauncher_download_service_queued_bulk (const nuvashalauncherDownloadService *service)
+nuvashalauncher_download_service_queued_bulk (const NuvashaLauncherDownloadService *service)
 {
   return service == NULL ? 0 :
     g_queue_get_length ((GQueue *) &service->bulk_waiting);
 }
 
-nuvashalauncherDownloadService *
+NuvashaLauncherDownloadService *
 nuvashalauncher_download_service_new (void)
 {
-  nuvashalauncherDownloadService *service = g_new0 (nuvashalauncherDownloadService, 1);
+  NuvashaLauncherDownloadService *service = g_new0 (NuvashaLauncherDownloadService, 1);
   g_queue_init (&service->interactive_waiting);
   g_queue_init (&service->bulk_waiting);
   service->prefer_interactive = TRUE;
@@ -87,7 +87,7 @@ nuvashalauncher_download_service_new (void)
 }
 
 void
-nuvashalauncher_download_service_free (nuvashalauncherDownloadService *owned_service)
+nuvashalauncher_download_service_free (NuvashaLauncherDownloadService *owned_service)
 {
   if (owned_service == NULL)
     return;
@@ -108,7 +108,7 @@ nuvashalauncher_download_service_free (nuvashalauncherDownloadService *owned_ser
 }
 
 void
-service_destroy_if_requested (nuvashalauncherDownloadService *service)
+service_destroy_if_requested (NuvashaLauncherDownloadService *service)
 {
   if (!service->destroy_requested ||
       service->interactive_running != 0 || service->bulk_running != 0)
@@ -122,7 +122,7 @@ service_destroy_if_requested (nuvashalauncherDownloadService *service)
 }
 
 SoupSession *
-get_session (nuvashalauncherDownloadService *service)
+get_session (NuvashaLauncherDownloadService *service)
 {
   if (service->session == NULL)
      /* Set connection limits when constructing the session so they match
@@ -281,7 +281,7 @@ request_free (DownloadRequest *request)
 void
 nuvashalauncher_download_request_fail (DownloadRequest *request, GError *error)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     request->scope != NULL ? nuvashalauncher_task_scope_ref (request->scope) : NULL;
   gboolean cancelled = g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR,
                                         nuvashalauncher_DOWNLOAD_ERROR_CANCELLED);
@@ -309,7 +309,7 @@ nuvashalauncher_download_request_fail (DownloadRequest *request, GError *error)
 void
 request_succeed (DownloadRequest *request)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     request->scope != NULL ? nuvashalauncher_task_scope_ref (request->scope) : NULL;
   if (scope != NULL)
     g_debug ("download operation=%" G_GUINT64_FORMAT " completed",
@@ -329,7 +329,7 @@ request_succeed (DownloadRequest *request)
 void
 nuvashalauncher_download_request_succeed_json (DownloadRequest *request, JsonParser *parser)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     request->scope != NULL ? nuvashalauncher_task_scope_ref (request->scope) : NULL;
   if (scope != NULL)
     g_debug ("download operation=%" G_GUINT64_FORMAT " completed",
@@ -349,12 +349,12 @@ nuvashalauncher_download_request_succeed_json (DownloadRequest *request, JsonPar
 }
 
 /* Transfer and retry state machine lives in nuvashalauncher-download-transfer.c. */
-nuvashalauncherTaskScope *
-nuvashalauncher_download_file_async (nuvashalauncherDownloadService *service, const char *url,
+NuvashaLauncherTaskScope *
+nuvashalauncher_download_file_async (NuvashaLauncherDownloadService *service, const char *url,
                           const char *dest_path,
                          const char *expected_hash,
                          GChecksumType hash_type,
-                          nuvashalauncherDownloadProgressFunc progress,
+                          NuvashaLauncherDownloadProgressFunc progress,
                           GAsyncReadyCallback callback,
                           gpointer user_data)
 {
@@ -363,12 +363,12 @@ nuvashalauncher_download_file_async (nuvashalauncherDownloadService *service, co
     user_data);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_download_file_limited_async (nuvashalauncherDownloadService *service,
+NuvashaLauncherTaskScope *
+nuvashalauncher_download_file_limited_async (NuvashaLauncherDownloadService *service,
                           const char *url, const char *dest_path,
                           const char *expected_hash, GChecksumType hash_type,
                           goffset max_size,
-                          nuvashalauncherDownloadProgressFunc progress,
+                          NuvashaLauncherDownloadProgressFunc progress,
                           GAsyncReadyCallback callback, gpointer user_data)
 {
   g_return_val_if_fail (service != NULL, NULL);
@@ -377,7 +377,7 @@ nuvashalauncher_download_file_limited_async (nuvashalauncherDownloadService *ser
   g_return_val_if_fail (g_path_is_absolute (dest_path), NULL);
   g_return_val_if_fail (max_size >= -1, NULL);
 
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
 
   /* Cancellation is reported by this module, in its own error domain,
@@ -439,15 +439,15 @@ nuvashalauncher_download_file_finish (GAsyncResult *result, GError **error)
   return g_task_propagate_boolean (G_TASK (result), error);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_download_json_async (nuvashalauncherDownloadService *service, const char *url,
+NuvashaLauncherTaskScope *
+nuvashalauncher_download_json_async (NuvashaLauncherDownloadService *service, const char *url,
                          GAsyncReadyCallback callback,
                          gpointer user_data)
 {
   g_return_val_if_fail (service != NULL, NULL);
   g_return_val_if_fail (url != NULL, NULL);
 
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
 
   /* See nuvashalauncher_download_file_async(). */
@@ -486,8 +486,8 @@ nuvashalauncher_download_json_async (nuvashalauncherDownloadService *service, co
 }
 
 void
-nuvashalauncher_download_set_cache_settings (nuvashalauncherDownloadService *service,
-                                  nuvashalauncherSettings *settings)
+nuvashalauncher_download_set_cache_settings (NuvashaLauncherDownloadService *service,
+                                  NuvashaLauncherSettings *settings)
 {
   g_return_if_fail (service != NULL);
   g_return_if_fail (settings == NULL || nuvashalauncher_IS_SETTINGS (settings));
@@ -503,8 +503,8 @@ nuvashalauncher_download_json_finish (GAsyncResult *result, GError **error)
   return g_task_propagate_pointer (G_TASK (result), error);
 }
 
-static nuvashalauncherTaskScope *
-download_json_cached_internal (nuvashalauncherDownloadService *service,
+static NuvashaLauncherTaskScope *
+download_json_cached_internal (NuvashaLauncherDownloadService *service,
                                const char *url,
                                gboolean always_cache,
                                GAsyncReadyCallback callback,
@@ -512,7 +512,7 @@ download_json_cached_internal (nuvashalauncherDownloadService *service,
 {
   g_return_val_if_fail (service != NULL, NULL);
   g_return_val_if_fail (url != NULL, NULL);
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
 
   g_task_set_check_cancellable (nuvashalauncher_task_scope_task (scope), FALSE);
@@ -546,16 +546,16 @@ download_json_cached_internal (nuvashalauncherDownloadService *service,
   return g_steal_pointer (&scope);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_download_json_cached_async (nuvashalauncherDownloadService *service, const char *url,
+NuvashaLauncherTaskScope *
+nuvashalauncher_download_json_cached_async (NuvashaLauncherDownloadService *service, const char *url,
                                 GAsyncReadyCallback callback,
                                 gpointer user_data)
 {
   return download_json_cached_internal (service, url, FALSE, callback, user_data);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_download_json_metadata_cached_async (nuvashalauncherDownloadService *service,
+NuvashaLauncherTaskScope *
+nuvashalauncher_download_json_metadata_cached_async (NuvashaLauncherDownloadService *service,
                                          const char *url,
                                          GAsyncReadyCallback callback,
                                          gpointer user_data)
@@ -563,8 +563,8 @@ nuvashalauncher_download_json_metadata_cached_async (nuvashalauncherDownloadServ
   return download_json_cached_internal (service, url, TRUE, callback, user_data);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_download_json_post_cached_async (nuvashalauncherDownloadService *service,
+NuvashaLauncherTaskScope *
+nuvashalauncher_download_json_post_cached_async (NuvashaLauncherDownloadService *service,
                                      const char *url, const char *body,
                                      const char *user_agent,
                                      GAsyncReadyCallback callback,
@@ -573,7 +573,7 @@ nuvashalauncher_download_json_post_cached_async (nuvashalauncherDownloadService 
   g_return_val_if_fail (service != NULL, NULL);
   g_return_val_if_fail (url != NULL, NULL);
   g_return_val_if_fail (body != NULL, NULL);
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
 
   g_task_set_check_cancellable (nuvashalauncher_task_scope_task (scope), FALSE);

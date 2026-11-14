@@ -9,11 +9,11 @@
 #include <libsoup/soup.h>
 #include <string.h>
 
-static nuvashalauncherAuthTransportFunc test_transport = NULL;
+static NuvashaLauncherAuthTransportFunc test_transport = NULL;
 static gpointer test_transport_data = NULL;
 
 void
-nuvashalauncher_auth_set_transport_for_tests (nuvashalauncherAuthTransportFunc transport,
+nuvashalauncher_auth_set_transport_for_tests (NuvashaLauncherAuthTransportFunc transport,
                                               gpointer user_data)
 {
   test_transport = transport;
@@ -66,7 +66,7 @@ auth_session (void)
 /* A sign-in is the task: the request lives as long as the task does, and
    the task is what is answered when it is over. */
 AuthRequest *
-request_new (nuvashalauncherTaskScope *scope)
+request_new (NuvashaLauncherTaskScope *scope)
 {
   AuthRequest *self = g_new0 (AuthRequest, 1);
 
@@ -320,7 +320,7 @@ auth_read_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 GError *
 refusal (const char  *body,
          gint          status,
-         nuvashalauncherAuthError  code,
+         NuvashaLauncherAuthError  code,
          const char   *what)
 {
   g_autoptr (JsonParser) parser = NULL;

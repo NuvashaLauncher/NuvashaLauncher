@@ -6,8 +6,8 @@
 typedef struct
 {
   GMainLoop *loop;
-  nuvashalauncherTaskScope *scope;
-  nuvashalauncherLoaderInstall *install;
+  NuvashaLauncherTaskScope *scope;
+  NuvashaLauncherLoaderInstall *install;
   GError *error;
 } ProcessorWait;
 
@@ -37,7 +37,7 @@ run_processor_fixture (gboolean succeed)
   g_autofree char *json = NULL;
   g_autoptr (GError) error = NULL;
   g_autoptr (JsonParser) parser = NULL;
-  g_autoptr (nuvashalauncherVersionDescription) description = NULL;
+  g_autoptr (NuvashaLauncherVersionDescription) description = NULL;
   g_autoptr (GPtrArray) processors = NULL;
   g_autoptr (GPtrArray) pending = NULL;
   g_autoptr (GHashTable) variables = NULL;
