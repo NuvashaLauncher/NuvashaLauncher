@@ -251,7 +251,7 @@ nuvashalauncher_loaders_profile_async (nuvashalauncherLoader           loader,
                          quoted_game, quoted_loader);
 
   nuvashalauncher_task_scope_release_when_done (
-    nuvashalauncher_download_json_cached_async (nuvashalauncher_downloads_get_service (), url, profile_loaded, request),
+    nuvashalauncher_download_json_metadata_cached_async (nuvashalauncher_downloads_get_service (), url, profile_loaded, request),
     nuvashalauncher_task_scope_get_cancellable (scope));
 
   return g_steal_pointer (&scope);

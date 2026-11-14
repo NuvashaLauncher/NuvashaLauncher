@@ -249,26 +249,45 @@ nuvashalauncher_java_probe_finish (GAsyncResult  *result,
 }
 
 /* ---------------------------------------------------------- *
- * Dedup + sequential probing over a list of candidates
+ * Dedup + bounded-parallel probing over a list of candidates
  * ---------------------------------------------------------- */
+
+#define JAVA_PROBE_CONCURRENCY 4
 
 typedef struct
 {
   char **executables;
+  guint total;
   guint next;
+  guint in_flight;
+  nuvashalauncherJava **results;
   GPtrArray *javas;   /* nuvashalauncherJava*, element free nuvashalauncher_java_free */
   GHashTable *seen;   /* resolved real paths, for dedup */
-  nuvashalauncherTaskSequence *sequence;
+  nuvashalauncherTaskScope *scope;
+  gboolean finished;
 } ProbeList;
+
+typedef struct
+{
+  ProbeList *list;
+  guint index;
+} ProbeSlot;
 
 static void
 probe_list_destroyed (gpointer data)
 {
   ProbeList *list = data;
 
+  if (list->results != NULL)
+    {
+      for (guint i = 0; i < list->total; i++)
+        nuvashalauncher_java_free (list->results[i]);
+      g_free (list->results);
+    }
   g_strfreev (list->executables);
   g_clear_pointer (&list->javas, g_ptr_array_unref);
   g_clear_pointer (&list->seen, g_hash_table_unref);
+  g_clear_pointer (&list->scope, nuvashalauncher_task_scope_unref);
   g_free (list);
 }
 
@@ -291,53 +310,81 @@ nuvashalauncher_java_add_unique (GPtrArray  *javas,
   return java;
 }
 
-static void probe_list_probed (GObject *source, GAsyncResult *result,
-                               gpointer user_data);
+static void probe_list_slot_probed (GObject *source, GAsyncResult *result,
+                                    gpointer user_data);
 
 static void
-probe_list_sequence_step (nuvashalauncherTaskSequence *sequence G_GNUC_UNUSED,
-                          gpointer user_data)
+probe_list_pump (ProbeList *list)
 {
-  ProbeList *list = user_data;
+  GCancellable *cancellable = nuvashalauncher_task_scope_get_cancellable (list->scope);
 
-  if (list->executables[list->next] == NULL)
+  if (list->finished)
+    return;
+
+  while (!g_cancellable_is_cancelled (cancellable) &&
+         list->in_flight < JAVA_PROBE_CONCURRENCY &&
+         list->next < list->total)
     {
-      nuvashalauncher_task_sequence_return_pointer (
-        list->sequence, g_steal_pointer (&list->javas),
-        (GDestroyNotify) g_ptr_array_unref);
-      return;
+      ProbeSlot *slot = g_new0 (ProbeSlot, 1);
+      nuvashalauncherTaskScope *probe = NULL;
+
+      slot->list = list;
+      slot->index = list->next++;
+      list->in_flight++;
+
+      probe = nuvashalauncher_java_probe_async (list->executables[slot->index],
+                                                probe_list_slot_probed, slot);
+      nuvashalauncher_task_scope_follow_cancellable (probe, cancellable);
+      nuvashalauncher_task_scope_unref_when_done (probe);
     }
 
-  {
-    nuvashalauncherTaskScope *probe =
-      nuvashalauncher_java_probe_async (list->executables[list->next], probe_list_probed,
-                            list);
-
-    nuvashalauncher_task_scope_follow_cancellable (
-      probe, nuvashalauncher_task_sequence_get_cancellable (list->sequence));
-    nuvashalauncher_task_scope_unref_when_done (probe);
-  }
-
-  list->next++;
+  if (list->in_flight == 0 &&
+      (g_cancellable_is_cancelled (cancellable) || list->next >= list->total))
+    {
+      list->finished = TRUE;
+      if (g_cancellable_is_cancelled (cancellable))
+        {
+          nuvashalauncher_task_scope_return_error_deferred (
+            list->scope,
+            g_error_new_literal (G_IO_ERROR, G_IO_ERROR_CANCELLED, "Cancelled"));
+        }
+      else
+        {
+          for (guint i = 0; i < list->total; i++)
+            {
+              if (list->results[i] != NULL)
+                {
+                  nuvashalauncher_java_add_unique (list->javas, list->seen,
+                                                   list->results[i]);
+                  list->results[i] = NULL;
+                }
+            }
+          nuvashalauncher_task_scope_return_pointer_deferred (
+            list->scope, g_steal_pointer (&list->javas),
+            (GDestroyNotify) g_ptr_array_unref);
+        }
+      probe_list_destroyed (list);
+    }
 }
 
 static void
-probe_list_probed (GObject      *source G_GNUC_UNUSED,
-                   GAsyncResult *result,
-                   gpointer      user_data)
+probe_list_slot_probed (GObject      *source G_GNUC_UNUSED,
+                        GAsyncResult *result,
+                        gpointer      user_data)
 {
-  ProbeList *list = user_data;
+  ProbeSlot *slot = user_data;
+  ProbeList *list = slot->list;
+  guint index = slot->index;
   g_autoptr (GError) error = NULL;
   nuvashalauncherJava *java = nuvashalauncher_java_probe_finish (result, &error);
 
+  g_free (slot);
+  list->in_flight--;
+
   if (java != NULL)
-    {
-      nuvashalauncher_java_add_unique (list->javas, list->seen, java);
+    list->results[index] = java;
 
-      /* The finished probe stays alive while its result points into it. */
-    }
-
-  nuvashalauncher_task_sequence_next (list->sequence);
+  probe_list_pump (list);
 }
 
 nuvashalauncherTaskScope *
@@ -345,33 +392,25 @@ nuvashalauncher_java_probe_list_async (char            **executables,
                            GAsyncReadyCallback callback,
                            gpointer         user_data)
 {
+  g_autoptr (nuvashalauncherTaskScope) scope =
+    nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   ProbeList *list = NULL;
-  nuvashalauncherTaskScope *scope = NULL;
-  g_autoptr (GCancellable) cancellable = g_cancellable_new ();
 
   g_return_val_if_fail (executables != NULL, NULL);
 
+  nuvashalauncher_task_scope_set_check_cancellable (scope, FALSE);
+
   list = g_new0 (ProbeList, 1);
   list->executables = executables; /* the caller gives up the array */
+  list->total = g_strv_length (executables);
+  list->results = list->total > 0 ? g_new0 (nuvashalauncherJava *, list->total) : NULL;
   list->javas = g_ptr_array_new_with_free_func (
     (GDestroyNotify) nuvashalauncher_java_free);
   list->seen = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+  list->scope = nuvashalauncher_task_scope_ref (scope);
 
-  list->sequence = nuvashalauncher_task_sequence_new (
-    cancellable, callback, user_data, probe_list_sequence_step, list,
-    probe_list_destroyed);
-
-  /* Kept on the stack, not read back out of the list: a sequence that
-     answers at once frees the list, and unref is past that. */
-  nuvashalauncherTaskSequence *sequence = list->sequence;
-
-  /* The handle the caller gets back stands for the whole run. The
-     sequence keeps the task itself. */
-  scope = nuvashalauncher_task_sequence_scope (sequence);
-
-  nuvashalauncher_task_sequence_start (sequence);
-  nuvashalauncher_task_sequence_unref (sequence);
-  return scope;
+  probe_list_pump (list);
+  return g_steal_pointer (&scope);
 }
 
 GPtrArray *

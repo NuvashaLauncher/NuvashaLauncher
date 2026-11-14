@@ -295,7 +295,8 @@ json_cache_start (DownloadRequest *request)
 {
   nuvashalauncherSettings *settings = nuvashalauncher_download_get_cache_settings (request);
 
-  request->api_cache = nuvashalauncher_settings_get_cache_modrinth_api_responses (settings);
+  request->api_cache = request->api_cache_always ||
+    nuvashalauncher_settings_get_cache_modrinth_api_responses (settings);
   request->cache_expiration = nuvashalauncher_settings_get_cache_expiration (settings);
 
   if (!request->api_cache)

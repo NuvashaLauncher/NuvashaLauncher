@@ -7,7 +7,7 @@
 #include "nuvashalauncher-i18n.h"
 #include <libsoup/soup.h>
 
-static SoupSession *skin_session;
+#define MAX_SKIN_TEXTURE_RETRIES 2
 
 typedef struct
 {
@@ -15,6 +15,7 @@ typedef struct
   gboolean cape;
   char *url;
   SoupMessage *message;
+  guint attempt;
 } SkinTextureLoad;
 
 static void
@@ -97,6 +98,31 @@ on_view_file_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
   finish_view_texture_load (load, bytes, error);
 }
 
+static void start_view_http_load (SkinTextureLoad *load);
+
+static gboolean
+retry_view_http_load (gpointer user_data)
+{
+  SkinTextureLoad *load = user_data;
+
+  start_view_http_load (load);
+  return G_SOURCE_REMOVE;
+}
+
+static gboolean
+skin_http_should_retry (SoupMessage *message, const GError *error, guint attempt)
+{
+  guint status = message != NULL ? soup_message_get_status (message) : 0;
+
+  if (attempt >= MAX_SKIN_TEXTURE_RETRIES)
+    return FALSE;
+  if (nuvashalauncher_error_is_cancelled (error))
+    return FALSE;
+  if (status == 429 || status >= 500)
+    return TRUE;
+  return error != NULL && status == 0;
+}
+
 static void
 on_view_http_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
 {
@@ -104,19 +130,49 @@ on_view_http_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
   g_autoptr (GError) error = NULL;
   g_autoptr (GBytes) bytes = soup_session_send_and_read_finish (
     SOUP_SESSION (source), result, &error);
+  guint status = load->message != NULL ? soup_message_get_status (load->message) : 0;
 
-  if (load->message != NULL &&
-      SOUP_STATUS_IS_SUCCESSFUL (soup_message_get_status (load->message)) == FALSE)
+  if (load->message != NULL && !SOUP_STATUS_IS_SUCCESSFUL (status))
     {
       g_clear_pointer (&bytes, g_bytes_unref);
+      if (skin_http_should_retry (load->message, error, load->attempt))
+        {
+          guint delay = nuvashalauncher_minecraft_services_retry_delay (
+            load->message, load->attempt);
+          load->attempt++;
+          g_clear_object (&load->message);
+          g_timeout_add_seconds (MIN (delay, 10u), retry_view_http_load, load);
+          return;
+        }
       g_clear_error (&error);
       g_set_error (&error, nuvashalauncher_MINECRAFT_SERVICES_ERROR,
                    nuvashalauncher_MINECRAFT_SERVICES_ERROR_HTTP,
-                   "skin request returned HTTP status %u",
-                   soup_message_get_status (load->message));
+                   "skin request returned HTTP status %u", status);
+    }
+  else if (bytes == NULL &&
+           skin_http_should_retry (load->message, error, load->attempt))
+    {
+      guint delay = nuvashalauncher_minecraft_services_retry_delay (
+        load->message, load->attempt);
+      load->attempt++;
+      g_clear_object (&load->message);
+      g_timeout_add_seconds (MIN (delay, 10u), retry_view_http_load, load);
+      return;
     }
 
   finish_view_texture_load (load, bytes, error);
+}
+
+static void
+start_view_http_load (SkinTextureLoad *load)
+{
+  g_autoptr (SoupSession) session = nuvashalauncher_minecraft_services_session ();
+
+  g_clear_object (&load->message);
+  load->message = soup_message_new ("GET", load->url);
+  soup_session_send_and_read_async (session, load->message,
+                                    G_PRIORITY_DEFAULT, NULL,
+                                    on_view_http_loaded, load);
 }
 
 void
@@ -148,14 +204,7 @@ load_view_texture (nuvashalauncherSkinView *view, const char *url, gboolean cape
   if ((g_str_has_prefix (url, "http://") ||
        g_str_has_prefix (url, "https://")) &&
       (cached == NULL || !g_file_test (cached, G_FILE_TEST_IS_REGULAR)))
-    {
-      if (skin_session == NULL)
-        skin_session = soup_session_new ();
-      load->message = soup_message_new ("GET", url);
-      soup_session_send_and_read_async (skin_session, load->message,
-                                        G_PRIORITY_DEFAULT, NULL,
-                                        on_view_http_loaded, load);
-    }
+    start_view_http_load (load);
   else
     g_file_load_bytes_async (file, NULL, on_view_file_loaded, load);
 }

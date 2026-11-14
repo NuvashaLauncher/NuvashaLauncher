@@ -693,7 +693,7 @@ nuvashalauncher_loaders_versions_async (nuvashalauncherLoader           loader,
     }
 
   nuvashalauncher_task_scope_release_when_done (
-    nuvashalauncher_download_json_cached_async (nuvashalauncher_downloads_get_service (), url, versions_loaded, request),
+    nuvashalauncher_download_json_metadata_cached_async (nuvashalauncher_downloads_get_service (), url, versions_loaded, request),
     nuvashalauncher_task_scope_get_cancellable (scope));
 
   return g_steal_pointer (&scope);

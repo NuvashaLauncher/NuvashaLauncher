@@ -139,6 +139,13 @@ nuvashalauncherTaskScope *nuvashalauncher_download_json_cached_async (nuvashalau
                                               GAsyncReadyCallback callback,
                                               gpointer user_data);
 
+/* Like nuvashalauncher_download_json_cached_async(), but always caches
+ * regardless of the Modrinth API cache toggle. */
+nuvashalauncherTaskScope *nuvashalauncher_download_json_metadata_cached_async (nuvashalauncherDownloadService *service,
+                                                        const char *url,
+                                                        GAsyncReadyCallback callback,
+                                                        gpointer user_data);
+
 nuvashalauncherTaskScope *nuvashalauncher_download_json_post_cached_async (nuvashalauncherDownloadService *service,
                                                     const char *url,
                                                    const char *body,

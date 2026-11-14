@@ -42,6 +42,7 @@ typedef struct _DownloadRequest
   gpointer user_data;
   gboolean json;
   gboolean api_cache;
+  gboolean api_cache_always;
   char *cache_path;
   char *global_cache_path;
   char *stale_json;

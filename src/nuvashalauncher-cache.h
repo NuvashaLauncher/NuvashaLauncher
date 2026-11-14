@@ -19,6 +19,12 @@ char *nuvashalauncher_cache_get_files_directory (void);
 nuvashalauncherTaskScope *nuvashalauncher_cache_clear_all_async (GAsyncReadyCallback callback,
                                          gpointer            user_data);
 
+/* Prunes expired or oversized entries from the global cache tree
+ * (api, icons/external, and files) in a background thread. */
+nuvashalauncherTaskScope *nuvashalauncher_cache_prune_async (gint64              api_max_age_seconds,
+                                         GAsyncReadyCallback callback,
+                                         gpointer            user_data);
+
 G_END_DECLS
 
 #endif /* nuvashalauncher_CACHE_H */

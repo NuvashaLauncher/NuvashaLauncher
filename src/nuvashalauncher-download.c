@@ -503,10 +503,12 @@ nuvashalauncher_download_json_finish (GAsyncResult *result, GError **error)
   return g_task_propagate_pointer (G_TASK (result), error);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_download_json_cached_async (nuvashalauncherDownloadService *service, const char *url,
-                                GAsyncReadyCallback callback,
-                                gpointer user_data)
+static nuvashalauncherTaskScope *
+download_json_cached_internal (nuvashalauncherDownloadService *service,
+                               const char *url,
+                               gboolean always_cache,
+                               GAsyncReadyCallback callback,
+                               gpointer user_data)
 {
   g_return_val_if_fail (service != NULL, NULL);
   g_return_val_if_fail (url != NULL, NULL);
@@ -525,15 +527,16 @@ nuvashalauncher_download_json_cached_async (nuvashalauncherDownloadService *serv
       return g_steal_pointer (&scope);
     }
 
-   DownloadRequest *request = g_new0 (DownloadRequest, 1);
-   request->parent_fd = -1;
+  DownloadRequest *request = g_new0 (DownloadRequest, 1);
+  request->parent_fd = -1;
   /* Held: the request holds a reference until freed. */
   request->scope = nuvashalauncher_task_scope_ref (scope);
-   request->service = service;
-   request->task = g_object_ref (nuvashalauncher_task_scope_task (scope));
+  request->service = service;
+  request->task = g_object_ref (nuvashalauncher_task_scope_task (scope));
   request->url = g_strdup (url);
   request->json = TRUE;
   request->api_cache = TRUE;
+  request->api_cache_always = always_cache;
   request->fd = -1;
   request->total = -1;
   request->priority = DOWNLOAD_PRIORITY_INTERACTIVE;
@@ -541,6 +544,23 @@ nuvashalauncher_download_json_cached_async (nuvashalauncherDownloadService *serv
   nuvashalauncher_download_start_transfer (request);
 
   return g_steal_pointer (&scope);
+}
+
+nuvashalauncherTaskScope *
+nuvashalauncher_download_json_cached_async (nuvashalauncherDownloadService *service, const char *url,
+                                GAsyncReadyCallback callback,
+                                gpointer user_data)
+{
+  return download_json_cached_internal (service, url, FALSE, callback, user_data);
+}
+
+nuvashalauncherTaskScope *
+nuvashalauncher_download_json_metadata_cached_async (nuvashalauncherDownloadService *service,
+                                         const char *url,
+                                         GAsyncReadyCallback callback,
+                                         gpointer user_data)
+{
+  return download_json_cached_internal (service, url, TRUE, callback, user_data);
 }
 
 nuvashalauncherTaskScope *
