@@ -232,15 +232,12 @@ on_batch_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 void
 batch_next (NuvashaLauncherContentPage *self)
 {
-  Pick *pick = NULL;
+  Pick *pick = nuvashalauncher_content_install_model_next_pick (self->install_model);
 
-  if (self->install_model->batch == NULL || self->install_model->pick_index >= self->install_model->batch->len)
+  if (pick == NULL)
     {
-      guint done = self->install_model->batch != NULL ? self->install_model->batch->len : 0;
+      guint done = nuvashalauncher_content_install_model_finish_picks (self->install_model);
 
-      g_clear_pointer (&self->install_model->batch, g_ptr_array_unref);
-      self->install_model->picking = FALSE;
-      self->install_model->pick_index = 0;
       set_busy (self, FALSE);
 
       if (done > 0)
@@ -255,9 +252,6 @@ batch_next (NuvashaLauncherContentPage *self)
       return;
     }
 
-  pick = g_ptr_array_index (self->install_model->batch, self->install_model->pick_index);
-  self->install_model->pick_index++;
-
   set_busy (self, TRUE);
   start_plan (self, nuvashalauncher_modrinth_version_copy (pick->version), pick->title,
               NULL, FALSE);
@@ -268,16 +262,13 @@ batch_next (NuvashaLauncherContentPage *self)
 void
 batch_stopped (NuvashaLauncherContentPage *self)
 {
-  g_clear_pointer (&self->install_model->batch, g_ptr_array_unref);
-  self->install_model->picking = FALSE;
-  self->install_model->pick_index = 0;
+  nuvashalauncher_content_install_model_finish_picks (self->install_model);
 }
 
 void
 nuvashalauncher_content_page_clear_picks (NuvashaLauncherContentPage *self)
 {
-  g_clear_pointer (&self->install_model->picks, g_ptr_array_unref);
-  self->install_model->picks = g_ptr_array_new_with_free_func ((GDestroyNotify) pick_free);
+  nuvashalauncher_content_install_model_clear_picks (self->install_model);
   nuvashalauncher_content_page_refresh_picks (self);
 }
 
@@ -374,9 +365,7 @@ nuvashalauncher_content_page_on_pick_button_clicked (GtkButton *button G_GNUC_UN
 
   /* The list goes into the batch here: what is installed is the list
      this question is about, whatever is picked while it is up. */
-  g_clear_pointer (&self->install_model->batch, g_ptr_array_unref);
-  self->install_model->batch = g_steal_pointer (&self->install_model->picks);
-  self->install_model->picks = g_ptr_array_new_with_free_func ((GDestroyNotify) pick_free);
+  nuvashalauncher_content_install_model_start_pick_batch (self->install_model);
   nuvashalauncher_content_page_refresh_picks (self);
 
   adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL, on_batch_chosen,

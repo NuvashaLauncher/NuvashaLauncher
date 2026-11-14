@@ -17,6 +17,7 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherContentInstallModel,
 
 struct _NuvashaLauncherContentInstallModel
 {
+  GDestroyNotify pick_free;
   gboolean updating;
   GPtrArray *updates; /* UpdateItem* */
   guint update_index;
@@ -25,5 +26,24 @@ struct _NuvashaLauncherContentInstallModel
   gboolean picking;
   guint pick_index;
 };
+
+void nuvashalauncher_content_install_model_clear_picks (
+  NuvashaLauncherContentInstallModel *model);
+void nuvashalauncher_content_install_model_start_pick_batch (
+  NuvashaLauncherContentInstallModel *model);
+gpointer nuvashalauncher_content_install_model_next_pick (
+  NuvashaLauncherContentInstallModel *model);
+guint nuvashalauncher_content_install_model_finish_picks (
+  NuvashaLauncherContentInstallModel *model);
+
+void nuvashalauncher_content_install_model_start_updates (
+  NuvashaLauncherContentInstallModel *model,
+  GPtrArray                          *items);
+gpointer nuvashalauncher_content_install_model_next_update (
+  NuvashaLauncherContentInstallModel *model,
+  guint                              *out_index,
+  guint                              *out_total);
+guint nuvashalauncher_content_install_model_finish_updates (
+  NuvashaLauncherContentInstallModel *model);
 
 #endif /* nuvashalauncher_CONTENT_INSTALL_MODEL_H */

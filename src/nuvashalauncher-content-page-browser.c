@@ -40,7 +40,7 @@ nuvashalauncher_content_page_on_scroll_changed (GtkAdjustment *adjustment, gpoin
   if (self->browse.model->loading_page)
     return;
 
-  if (self->browse.model->offset >= self->browse.model->total_hits)
+  if (!nuvashalauncher_content_browser_model_has_more (self->browse.model))
     return;
 
   at_end = gtk_adjustment_get_upper (adjustment) -
@@ -83,11 +83,6 @@ results_arrived (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthResult
     {
       take_rows_out (&self->browse.result_rows,
                      ADW_PREFERENCES_GROUP (self->browse.results_group));
-      g_clear_pointer (&self->browse.model->results, g_ptr_array_unref);
-      self->browse.model->results = g_ptr_array_new_with_free_func (
-          (GDestroyNotify) nuvashalauncher_modrinth_project_free);
-      self->browse.model->total_hits = results->total_hits;
-      g_hash_table_remove_all (self->browse.model->seen_ids);
 
       /* A new search starts at the top of the list. */
       {
@@ -102,12 +97,14 @@ results_arrived (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthResult
   for (guint i = 0; i < results->projects->len; i++)
     {
       NuvashaLauncherModrinthProject *project = g_ptr_array_index (results->projects, i);
+      const NuvashaLauncherModrinthProject *stored =
+        nuvashalauncher_content_browser_model_accept_project (self->browse.model, project);
       GtkWidget *row = NULL;
       GtkWidget *icon = NULL;
 
       /* A project already listed is not listed twice: the same answer can
        * come back for two pages that overlap. */
-      if (g_hash_table_contains (self->browse.model->seen_ids, project->project_id))
+      if (stored == NULL)
         continue;
 
       {
@@ -117,31 +114,13 @@ results_arrived (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthResult
       }
       icon = nuvashalauncher_icon_widget_new (nuvashalauncher_content_type_icon (self->type));
 
-      g_hash_table_add (self->browse.model->seen_ids, g_strdup (project->project_id));
-
-      /* Cache project metadata for installed rows. */
-      if (project->icon_url != NULL && *project->icon_url != '\0')
-        g_hash_table_insert (self->browse.model->project_icons,
-                             g_strdup (project->project_id),
-                             g_strdup (project->icon_url));
-
-      if (project->description != NULL && *project->description != '\0')
-        g_hash_table_insert (self->browse.model->project_descriptions,
-                             g_strdup (project->project_id),
-                             g_strdup (project->description));
-
-      if (project->title != NULL && *project->title != '\0')
-        g_hash_table_insert (self->browse.model->project_titles,
-                             g_strdup (project->project_id),
-                             g_strdup (project->title));
-
       /* Show the icon, title, and short description. Details contain the
          author, downloads, game version, and loader. */
       adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
       adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
-                                     project->title);
+                                     stored->title);
       {
-        g_autofree char *line = description_line (project->description, 0);
+        g_autofree char *line = description_line (stored->description, 0);
 
         adw_action_row_set_subtitle (ADW_ACTION_ROW (row), line);
       }
@@ -151,14 +130,12 @@ results_arrived (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthResult
       adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (row), FALSE);
 
       gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
-      nuvashalauncher_icon_load_start (icon, project->icon_url);
+      nuvashalauncher_icon_load_start (icon, stored->icon_url);
 
-      /* The rows point into the list the page owns, so the projects
+      /* The rows point into the list the model owns, so the projects
        * live exactly as long as the rows that show them. */
-      g_ptr_array_add (self->browse.model->results, nuvashalauncher_modrinth_project_copy (project));
       g_object_set_data (G_OBJECT (row), "nuvashalauncher-project",
-                         g_ptr_array_index (self->browse.model->results,
-                                            self->browse.model->results->len - 1));
+                         (gpointer) stored);
 
       adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
 
@@ -177,7 +154,7 @@ results_arrived (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthResult
 
   /* The offset is where the next page starts, which is the end of what
      is listed now. */
-  self->browse.model->offset += shown;
+  nuvashalauncher_content_browser_model_advance_offset (self->browse.model, shown);
 
   /* The list does not grow without end: past the cap the oldest rows go,
      and the scroll is put back where it was, so the user stays on the
@@ -222,7 +199,7 @@ results_arrived (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthResult
     gtk_widget_set_visible (GTK_WIDGET (self->browse.loading_more), FALSE);
     gtk_widget_set_visible (GTK_WIDGET (self->browse.retry_row), FALSE);
 
-    if (self->browse.model->offset >= self->browse.model->total_hits)
+    if (!nuvashalauncher_content_browser_model_has_more (self->browse.model))
       gtk_widget_set_visible (GTK_WIDGET (self->browse.loading_more), FALSE);
   }
 }
@@ -243,13 +220,13 @@ search_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
-  append = self->browse.model->pending_append;
   results = nuvashalauncher_modrinth_search_finish (result, &error);
   set_busy (self, FALSE);
-  self->browse.model->loading_page = FALSE;
 
   if (results == NULL)
     {
+      append = nuvashalauncher_content_browser_model_fail_page (self->browse.model);
+
       if (nuvashalauncher_error_is_cancelled (error))
         {
           page_watch_free (watch);
@@ -274,7 +251,6 @@ search_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         {
           take_rows_out (&self->browse.result_rows,
                      ADW_PREFERENCES_GROUP (self->browse.results_group));
-          g_clear_pointer (&self->browse.model->results, g_ptr_array_unref);
           if (self->browse.results_loading != NULL)
             gtk_widget_set_visible (GTK_WIDGET (self->browse.results_loading), FALSE);
           gtk_widget_set_visible (GTK_WIDGET (self->browse.results_status), TRUE);
@@ -295,6 +271,8 @@ search_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
+  append = nuvashalauncher_content_browser_model_finish_page (self->browse.model,
+                                                              results->total_hits);
   results_arrived (self, results, append);
   page_watch_free (watch);
 }
@@ -316,13 +294,12 @@ nuvashalauncher_content_page_run_search (NuvashaLauncherContentPage *self, gbool
 
   /* A new search or a new filter cancels the page that was on its way
    * and starts the list over. */
+  GCancellable *cancellable =
+    nuvashalauncher_content_browser_model_begin_search (self->browse.model, append);
+  search->offset = self->browse.model->offset;
+
   if (!append)
     {
-      g_cancellable_cancel (self->browse.model->more);
-      g_clear_object (&self->browse.model->more);
-      self->browse.model->more = g_cancellable_new ();
-      self->browse.model->offset = 0;
-
       if (self->browse.results_loading != NULL)
         gtk_widget_set_visible (GTK_WIDGET (self->browse.results_loading), TRUE);
       if (self->browse.results_status != NULL)
@@ -331,8 +308,6 @@ nuvashalauncher_content_page_run_search (NuvashaLauncherContentPage *self, gbool
         gtk_widget_set_visible (GTK_WIDGET (self->browse.results_scroller), FALSE);
     }
 
-  self->browse.model->loading_page = TRUE;
-  self->browse.model->pending_append = append;
   set_busy (self, TRUE);
 
   /* Show a spinner while loading the next page. */
@@ -343,8 +318,7 @@ nuvashalauncher_content_page_run_search (NuvashaLauncherContentPage *self, gbool
     PageWatch *watch = page_watch_new (self);
 
     watch->operation = nuvashalauncher_modrinth_search_async (search, search_ready, watch);
-    nuvashalauncher_operation_follow (watch->operation,
-                                       self->browse.model->more);
+    nuvashalauncher_operation_follow (watch->operation, cancellable);
   }
 }
 
@@ -356,10 +330,9 @@ on_search_timeout (gpointer user_data)
   nuvashalauncher_operation_forget_source (self->browse.model->scope,
                                 self->browse.model->debounce_source);
   self->browse.model->debounce_source = 0;
-  g_free (self->browse.model->query);
-  self->browse.model->query =
-    g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->browse.search_entry)));
-  self->browse.model->offset = 0;
+  nuvashalauncher_content_browser_model_set_query (
+    self->browse.model,
+    gtk_editable_get_text (GTK_EDITABLE (self->browse.search_entry)));
   nuvashalauncher_content_page_run_search (self, FALSE);
 
   return G_SOURCE_REMOVE;

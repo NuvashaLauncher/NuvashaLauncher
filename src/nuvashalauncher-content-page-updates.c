@@ -127,12 +127,8 @@ nuvashalauncher_content_page_on_update_cancel (GtkButton *button G_GNUC_UNUSED,
       g_object_set_data (G_OBJECT (self), "nuvashalauncher-update-run", NULL);
       update_run_free (run);
     }
-  g_cancellable_cancel (self->browse.model->cancellable);
-  g_clear_object (&self->browse.model->cancellable);
-  self->browse.model->cancellable = g_cancellable_new ();
-  g_clear_pointer (&self->install_model->updates, g_ptr_array_unref);
-  self->install_model->update_index = 0;
-  self->install_model->updating = FALSE;
+  nuvashalauncher_content_browser_model_reset_cancellable (self->browse.model);
+  nuvashalauncher_content_install_model_finish_updates (self->install_model);
   update_button_busy (self, FALSE);
   if (self->installed.update_popover != NULL)
     gtk_popover_popdown (self->installed.update_popover);
@@ -157,15 +153,16 @@ update_progress (NuvashaLauncherContentPage *self, guint done, guint total)
 void
 update_batch_next (NuvashaLauncherContentPage *self)
 {
-  UpdateItem *item = NULL;
+  guint index = 0;
+  guint total = 0;
+  UpdateItem *item =
+    nuvashalauncher_content_install_model_next_update (self->install_model,
+                                                       &index, &total);
 
-  if (self->install_model->updates == NULL || self->install_model->update_index >= self->install_model->updates->len)
+  if (item == NULL)
     {
-      guint done = self->install_model->updates != NULL ? self->install_model->updates->len : 0;
+      guint done = nuvashalauncher_content_install_model_finish_updates (self->install_model);
 
-      g_clear_pointer (&self->install_model->updates, g_ptr_array_unref);
-      self->install_model->update_index = 0;
-      self->install_model->updating = FALSE;
       update_button_busy (self, FALSE);
       if (self->installed.update_popover != NULL)
         gtk_popover_popdown (self->installed.update_popover);
@@ -182,10 +179,7 @@ update_batch_next (NuvashaLauncherContentPage *self)
       return;
     }
 
-  item = g_ptr_array_index (self->install_model->updates, self->install_model->update_index);
-  update_progress (self, self->install_model->update_index,
-                   self->install_model->updates->len);
-  self->install_model->update_index++;
+  update_progress (self, index, total);
 
   update_button_busy (self, TRUE);
   start_plan (self, nuvashalauncher_modrinth_version_copy (item->version), item->title,
@@ -227,9 +221,8 @@ on_update_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
     }
 
   /* The whole list was confirmed: install each one. */
-  self->install_model->updates = g_steal_pointer (&run->items);
-  self->install_model->update_index = 0;
-  self->install_model->updating = TRUE;
+  nuvashalauncher_content_install_model_start_updates (self->install_model,
+                                                       g_steal_pointer (&run->items));
   g_object_set_data (G_OBJECT (self), "nuvashalauncher-update-run", NULL);
   update_run_free (run);
   update_batch_next (self);
