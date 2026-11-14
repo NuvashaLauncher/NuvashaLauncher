@@ -135,26 +135,46 @@ prune_directory (const char   *directory,
     }
 }
 
+typedef struct
+{
+  gint64 api_max_age_seconds;
+  NuvashaLauncherTaskScope *scope;
+} CachePruneData;
+
 static void
-cache_prune_thread (GTask        *task,
+cache_prune_data_free (CachePruneData *data)
+{
+  if (data == NULL)
+    return;
+  g_clear_pointer (&data->scope, nuvashalauncher_task_scope_unref);
+  g_free (data);
+}
+
+static void
+cache_prune_thread (GTask        *task G_GNUC_UNUSED,
                     gpointer      source_object G_GNUC_UNUSED,
                     gpointer      task_data,
                     GCancellable *cancellable)
 {
-  gint64 api_max_age = *(gint64 *) task_data;
+  CachePruneData *data = task_data;
   g_autofree char *api_dir = nuvashalauncher_cache_get_api_directory ();
   g_autofree char *icons_dir =
     g_build_filename (g_get_user_cache_dir (), CACHE_SUBDIR, "icons",
                       "external", NULL);
   g_autofree char *files_dir = nuvashalauncher_cache_get_files_directory ();
 
-  prune_directory (api_dir, MAX (api_max_age, CACHE_API_MIN_STALE_SECONDS),
+  prune_directory (api_dir,
+                   MAX (data->api_max_age_seconds, CACHE_API_MIN_STALE_SECONDS),
                    CACHE_API_MAX_BYTES, cancellable);
   prune_directory (icons_dir, CACHE_ICONS_MAX_AGE_SECONDS,
                    CACHE_ICONS_MAX_BYTES, cancellable);
   prune_directory (files_dir, 0, CACHE_FILES_MAX_BYTES, cancellable);
 
-  g_task_return_boolean (task, TRUE);
+  if (!nuvashalauncher_task_scope_return_error_if_cancelled (data->scope))
+    nuvashalauncher_task_scope_return_boolean (data->scope, TRUE);
+
+  /* Break the scope -> task -> task_data -> scope cycle before returning to GLib. */
+  g_clear_pointer (&data->scope, nuvashalauncher_task_scope_unref);
 }
 
 NuvashaLauncherTaskScope *
@@ -165,10 +185,11 @@ nuvashalauncher_cache_prune_async (gint64              api_max_age_seconds,
   g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   GTask *task = nuvashalauncher_task_scope_task (scope);
-  gint64 *data = g_new (gint64, 1);
+  CachePruneData *data = g_new0 (CachePruneData, 1);
 
-  *data = api_max_age_seconds;
-  g_task_set_task_data (task, data, g_free);
+  data->api_max_age_seconds = api_max_age_seconds;
+  data->scope = nuvashalauncher_task_scope_ref (scope);
+  g_task_set_task_data (task, data, (GDestroyNotify) cache_prune_data_free);
   g_task_run_in_thread (task, cache_prune_thread);
   return g_steal_pointer (&scope);
 }

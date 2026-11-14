@@ -372,6 +372,7 @@ skin_row_new (SkinMenu *menu, const char *name, const char *url)
     gtk_builder_get_object (builder, "row")));
   GtkImage *image = GTK_IMAGE (gtk_builder_get_object (builder, "avatar"));
 
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
                                  name != NULL && *name != '\0' ? name : _("Skin"));
   gtk_image_set_from_icon_name (image, "image-x-generic-symbolic");

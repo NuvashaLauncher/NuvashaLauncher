@@ -203,10 +203,10 @@ seed_manifest_indexes (InstallRun *run)
             {
               if (g_strcmp0 (parts[part], "data") == 0 &&
                   parts[part + 1] != NULL)
-                project_id = g_strdup (parts[part + 1]);
+                g_set_str (&project_id, parts[part + 1]);
               if (g_strcmp0 (parts[part], "versions") == 0 &&
                   parts[part + 1] != NULL)
-                version_id = g_strdup (parts[part + 1]);
+                g_set_str (&version_id, parts[part + 1]);
             }
         }
       entry.filename = filename;

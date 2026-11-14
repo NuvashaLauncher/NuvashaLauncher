@@ -34,9 +34,13 @@ test_emphasis (void)
 {
   check ("**bold**", "<b>bold</b>");
   check ("*italic*", "<i>italic</i>");
+  check ("_italic_", "<i>italic</i>");
+  check ("my_mod_id", "my_mod_id");
   check ("~~gone~~", "<s>gone</s>");
   check ("`code`", "<span font_family=\"monospace\">code</span>");
-  g_print ("ok - emphasis and code spans become markup\n");
+  check ("\\*not italic\\* and \\[not link\\](https://example.com)",
+         "*not italic* and [not link](https://example.com)");
+  g_print ("ok - emphasis, escapes and code spans become markup\n");
 }
 
 static void
@@ -46,6 +50,7 @@ test_link (void)
          "<a href=\"https://modrinth.com\">Modrinth</a>");
 
   check ("[click](file:///etc/passwd)", "click");
+  check ("[![badge](https://img.example/a.png)](https://example.com)", "");
   g_print ("ok - only a link that can be opened becomes one\n");
 }
 
