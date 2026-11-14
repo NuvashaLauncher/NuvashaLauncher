@@ -372,7 +372,7 @@ nuvashalauncher_sign_in_dialog_class_init (NuvashaLauncherSignInDialogClass *kla
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
   gtk_widget_class_set_template_from_resource (widget_class,
-      "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-sign-in.ui");
+      "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-sign-in.ui");
   gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherSignInDialog, spinner);
   gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherSignInDialog, waiting);
   gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherSignInDialog, waiting_label);

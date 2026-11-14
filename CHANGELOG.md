@@ -181,7 +181,7 @@ Nuvasha Launcher 0.7 is a broad reliability, usability, testing, and native GTK 
 - Runtime flows reauthenticate accounts when required.
 
 ### Branding and Identity
-- Unified technical branding under the `nuvashalauncher` name; the application ID is now `com.github.nuvashalauncher.nuvashalauncher` (desktop file, GSettings schema, metainfo, MIME type, GResources, and UI resources follow suit).
+- Unified technical branding under the `nuvashalauncher` name; the application ID is now `com.github.NuvashaLauncher.NuvashaLauncher` (desktop file, GSettings schema, metainfo, MIME type, GResources, and UI resources follow suit).
 - Window title finalized as "Nuvasha Launcher" and the logo asset corrected (two-line wordmark, no clipped README logo).
 
 ### Documentation and Packaging
@@ -256,7 +256,7 @@ Nuvasha Launcher 0.7 is a broad reliability, usability, testing, and native GTK 
 ## [0.3] - 2026-10-24
 
 ### Branding & UI Architecture
-- Renamed project to **Nuvasha** (`0cbfac3`) with updated application metadata, icons, repository links, and README logo lockup.
+- Renamed project to **Nuvasha Launcher** (`0cbfac3`) with updated application metadata, icons, repository links, and README logo lockup.
 - Migrated launcher UI construction to compiled `GResource` GtkBuilder `.ui` templates and `AdwViewStack` pages (`727fc9b`, `ead8f5d`).
 - Moved desktop preferences to `GSettings` (`568781c`) and added initial `libsecret` Secret Service token storage (`727fc9b`).
 - Rebuilt the logs tab layout (`5c9b1b3`), fixed modpack browser Adwaita header and dialog sizing (`a5427ca`, `c3ce271`), and fixed instance list hover painting (`46773c7`).

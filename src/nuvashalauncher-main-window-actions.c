@@ -605,7 +605,7 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
   adw_about_dialog_set_application_name (ADW_ABOUT_DIALOG (dialog),
                                          _("Nuvasha Launcher"));
   adw_about_dialog_set_application_icon (ADW_ABOUT_DIALOG (dialog),
-                                         "com.github.nuvashalauncher.nuvashalauncher");
+                                         "com.github.NuvashaLauncher.NuvashaLauncher");
   adw_about_dialog_set_version (ADW_ABOUT_DIALOG (dialog), NUVASHALAUNCHER_VERSION);
   adw_about_dialog_set_developer_name (ADW_ABOUT_DIALOG (dialog), "Flia");
   adw_about_dialog_set_developers (ADW_ABOUT_DIALOG (dialog), authors);

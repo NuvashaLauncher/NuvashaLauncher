@@ -583,11 +583,11 @@ build_browse_page (NuvashaLauncherDownloadModpackDialog *self, gboolean start_se
   GtkBox *root = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   g_autoptr (GtkBuilder) toolbar_builder = gtk_builder_new_from_resource (
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-browser-toolbar.ui");
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-browser-toolbar.ui");
   GtkBox *top = GTK_BOX (gtk_builder_get_object (toolbar_builder, "top"));
   GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
   g_autoptr (GtkBuilder) states_builder = gtk_builder_new_from_resource (
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-browser-states.ui");
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-browser-states.ui");
   GtkBox *loading = GTK_BOX (gtk_builder_get_object (states_builder, "loading"));
   GtkBox *loading_more = GTK_BOX (gtk_builder_get_object (states_builder, "loading_more"));
   GtkBox *retry_row = GTK_BOX (gtk_builder_get_object (states_builder, "retry_row"));

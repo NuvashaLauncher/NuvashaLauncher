@@ -109,7 +109,7 @@ results_arrived (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthResult
 
       {
         g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
-          "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-content-result-row.ui");
+          "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-content-result-row.ui");
         row = GTK_WIDGET (g_object_ref (gtk_builder_get_object (builder, "row")));
       }
       icon = nuvashalauncher_icon_widget_new (nuvashalauncher_content_type_icon (self->type));

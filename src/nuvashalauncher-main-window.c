@@ -235,7 +235,7 @@ window_settings_new (void)
   GSettingsSchemaSource *source = g_settings_schema_source_get_default ();
   GSettingsSchema *schema = source != NULL
     ? g_settings_schema_source_lookup (source,
-                                       "com.github.nuvashalauncher.nuvashalauncher",
+                                       "com.github.NuvashaLauncher.NuvashaLauncher",
                                        TRUE)
     : NULL;
 

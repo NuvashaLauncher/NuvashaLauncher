@@ -160,7 +160,7 @@ nuvashalauncher_download_modpack_dialog_class_init (NuvashaLauncherDownloadModpa
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
   gtk_widget_class_set_template_from_resource (widget_class,
-      "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-dialog.ui");
+      "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-dialog.ui");
   gtk_widget_class_bind_template_child (widget_class,
                                         NuvashaLauncherDownloadModpackDialog, nav);
 
@@ -233,7 +233,7 @@ static void
 build_import_page (NuvashaLauncherDownloadModpackDialog *self)
 {
   g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-import.ui");
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-import.ui");
   AdwNavigationPage *page = ADW_NAVIGATION_PAGE (
     g_object_ref (gtk_builder_get_object (builder, "page")));
 
@@ -302,7 +302,7 @@ build_error_page (NuvashaLauncherDownloadModpackDialog *self,
                   GCallback cancel)
 {
   g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-error.ui");
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-error.ui");
   GtkWidget *page = GTK_WIDGET (g_object_ref (
     gtk_builder_get_object (builder, "page")));
   AdwStatusPage *status = ADW_STATUS_PAGE (

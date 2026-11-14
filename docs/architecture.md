@@ -227,7 +227,7 @@ expire during startup. If refresh fails, the launcher enters
 ### Settings
 
 `NuvashaLauncherSettings` is a typed wrapper around the installed GSettings schema in
-`data/com.github.nuvashalauncher.nuvashalauncher.gschema.xml`. It validates values and
+`data/com.github.NuvashaLauncher.NuvashaLauncher.gschema.xml`. It validates values and
 writes each accepted change. To support custom installation prefixes,
 distribution build environments, and development runs, schema lookup searches
 `GSETTINGS_SCHEMA_DIR`, the default system schema source,
@@ -451,7 +451,7 @@ old report is not mistaken for a crash from the current launch.
 Nuvasha Launcher ships as a single native binary and supports both Flatpak and
 native Linux distribution packaging:
 
-- **Flatpak (`packaging/flatpak/com.github.nuvashalauncher.nuvashalauncher.yml`)**:
+- **Flatpak (`packaging/flatpak/com.github.NuvashaLauncher.NuvashaLauncher.yml`)**:
   Builds the source with `FLATPAK=1` against the GNOME 51 runtime. The manifest
   grants network access, Wayland and fallback X11, audio, `org.freedesktop.secrets`,
   and GPU device access, without granting `filesystem=home`. Flatpak does not
@@ -532,7 +532,7 @@ The repository uses a hand-written `Makefile`:
 - `make test-debug` and `make test-lsan` exercise the sanitizer build.
 - `make static-analysis` runs GCC's analyzer over source files.
 - `flatpak-builder` builds the manifest in
-  `packaging/flatpak/com.github.nuvashalauncher.nuvashalauncher.yml` with the GNOME 51
+  `packaging/flatpak/com.github.NuvashaLauncher.NuvashaLauncher.yml` with the GNOME 51
   runtime.
 
 Tests are layered. Parsers, path rules, argument builders,

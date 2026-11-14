@@ -11,7 +11,7 @@
 static void
 test_templates_are_bundled (void)
 {
-  const char *directory = "/com/github/nuvashalauncher/nuvashalauncher/ui";
+  const char *directory = "/com/github/NuvashaLauncher/NuvashaLauncher/ui";
   g_autoptr (GError) error = NULL;
   g_auto (GStrv) names = g_resources_enumerate_children (
     directory, G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
@@ -42,19 +42,19 @@ test_builder_templates_parse (void)
 {
   g_type_ensure (NUVASHALAUNCHER_TYPE_FILTER_ENTRY);
   static const char *paths[] = {
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-import.ui",
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-main-shell.ui",
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-browser-toolbar.ui",
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-browser-states.ui",
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-details-toolbar.ui",
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-details-body.ui",
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-optional.ui",
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-error.ui",
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-content-result-row.ui",
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-content-file-row.ui",
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-download-row.ui",
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-skin-row.ui",
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-content-details.ui",
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-import.ui",
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-main-shell.ui",
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-browser-toolbar.ui",
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-browser-states.ui",
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-details-toolbar.ui",
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-details-body.ui",
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-optional.ui",
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-error.ui",
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-content-result-row.ui",
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-content-file-row.ui",
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-download-row.ui",
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-skin-row.ui",
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-content-details.ui",
   };
 
   for (guint i = 0; i < G_N_ELEMENTS (paths); i++)
@@ -74,7 +74,7 @@ test_stylesheet_parses (void)
   GtkCssProvider *provider = gtk_css_provider_new ();
 
   gtk_css_provider_load_from_resource (
-    provider, "/com/github/nuvashalauncher/nuvashalauncher/nuvashalauncher.css");
+    provider, "/com/github/NuvashaLauncher/NuvashaLauncher/nuvashalauncher.css");
   g_assert_true (GTK_IS_CSS_PROVIDER (provider));
 
   g_object_unref (provider);

@@ -182,7 +182,7 @@ jobs:
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
           bundle: nuvashalauncher-${{ matrix.arch }}.flatpak
-          manifest-path: packaging/flatpak/com.github.nuvashalauncher.nuvashalauncher.yml
+          manifest-path: packaging/flatpak/com.github.NuvashaLauncher.NuvashaLauncher.yml
           arch: ${{ matrix.arch }}
           cache: true
           cache-key: flatpak-builder-${{ matrix.arch }}-${{ github.sha }}

@@ -167,7 +167,7 @@ nuvashalauncher_offline_account_dialog_class_init (NuvashaLauncherOfflineAccount
   object_class->dispose = nuvashalauncher_offline_account_dialog_dispose;
 
   gtk_widget_class_set_template_from_resource (widget_class,
-      "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-offline-account.ui");
+      "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-offline-account.ui");
   gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherOfflineAccountDialog, name_row);
   gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherOfflineAccountDialog, error_label);
   gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherOfflineAccountDialog, add_button);

@@ -315,7 +315,7 @@ nuvashalauncher_create_instance_dialog_class_init (NuvashaLauncherCreateInstance
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
   gtk_widget_class_set_template_from_resource (widget_class,
-      "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-create-instance.ui");
+      "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-create-instance.ui");
   gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherCreateInstanceDialog, name_row);
   gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherCreateInstanceDialog, group);
   gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherCreateInstanceDialog, toast_overlay);

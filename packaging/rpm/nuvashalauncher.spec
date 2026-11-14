@@ -58,8 +58,8 @@ find %{buildroot}%{_datadir}/mime -mindepth 1 -maxdepth 1 ! -name packages -exec
 %find_lang %{name}
 
 %check
-desktop-file-validate %{buildroot}%{_datadir}/applications/com.github.nuvashalauncher.nuvashalauncher.desktop
-appstream-util validate-relax --nonet %{buildroot}%{_datadir}/metainfo/com.github.nuvashalauncher.nuvashalauncher.metainfo.xml
+desktop-file-validate %{buildroot}%{_datadir}/applications/com.github.NuvashaLauncher.NuvashaLauncher.desktop
+appstream-util validate-relax --nonet %{buildroot}%{_datadir}/metainfo/com.github.NuvashaLauncher.NuvashaLauncher.metainfo.xml
 %make_build test CC="%{__cc}" PREFIX="%{_prefix}" \
     RELFLAGS="%{build_cflags}" \
     PKG_LIBS="%{build_ldflags} %{pkg_libs}"
@@ -67,16 +67,16 @@ appstream-util validate-relax --nonet %{buildroot}%{_datadir}/metainfo/com.githu
 %files -f %{name}.lang
 %license LICENSE
 %doc README.md
-%{_bindir}/nuvashalauncher
+%{_bindir}/NuvashaLauncher
 %{_datadir}/nuvashalauncher/
-%{_datadir}/applications/com.github.nuvashalauncher.nuvashalauncher.desktop
-%{_datadir}/bash-completion/completions/nuvashalauncher
-%{_datadir}/glib-2.0/schemas/com.github.nuvashalauncher.nuvashalauncher.gschema.xml
-%{_datadir}/icons/hicolor/scalable/apps/com.github.nuvashalauncher.nuvashalauncher.svg
+%{_datadir}/applications/com.github.NuvashaLauncher.NuvashaLauncher.desktop
+%{_datadir}/bash-completion/completions/NuvashaLauncher
+%{_datadir}/glib-2.0/schemas/com.github.NuvashaLauncher.NuvashaLauncher.gschema.xml
+%{_datadir}/icons/hicolor/scalable/apps/com.github.NuvashaLauncher.NuvashaLauncher.svg
 %{_datadir}/icons/hicolor/scalable/actions/export-symbolic.svg
 %{_datadir}/icons/hicolor/scalable/actions/external-link-symbolic.svg
-%{_datadir}/metainfo/com.github.nuvashalauncher.nuvashalauncher.metainfo.xml
-%{_datadir}/mime/packages/com.github.nuvashalauncher.nuvashalauncher.xml
+%{_datadir}/metainfo/com.github.NuvashaLauncher.NuvashaLauncher.metainfo.xml
+%{_datadir}/mime/packages/com.github.NuvashaLauncher.NuvashaLauncher.xml
 
 %changelog
 * Sat Nov 07 2026 Flia <43163973-anotherminecraftlauncher@users.noreply.gitlab.com> - 1.0-1

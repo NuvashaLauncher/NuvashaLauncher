@@ -10,6 +10,6 @@ Install `flatpak` and `flatpak-builder`, then run from the repository root:
 ```sh
 flatpak-builder --user --install --force-clean \
   build/flatpak \
-  packaging/flatpak/com.github.nuvashalauncher.nuvashalauncher.yml
-flatpak run com.github.nuvashalauncher.nuvashalauncher
+  packaging/flatpak/com.github.NuvashaLauncher.NuvashaLauncher.yml
+flatpak run com.github.NuvashaLauncher.NuvashaLauncher
 ```

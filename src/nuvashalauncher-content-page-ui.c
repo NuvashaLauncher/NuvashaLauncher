@@ -81,7 +81,7 @@ nuvashalauncher_content_page_build_installed (NuvashaLauncherContentPage *self)
     GtkScrolledWindow *update_scroller = GTK_SCROLLED_WINDOW (
       gtk_scrolled_window_new ());
     g_autoptr (GtkBuilder) update_builder = gtk_builder_new_from_resource (
-      "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-download-row.ui");
+      "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-download-row.ui");
     GtkBox *update_box = GTK_BOX (gtk_builder_get_object (update_builder, "box"));
     GtkLabel *update_title = GTK_LABEL (gtk_builder_get_object (update_builder, "title"));
     GtkLabel *update_phase = GTK_LABEL (gtk_builder_get_object (update_builder, "phase"));

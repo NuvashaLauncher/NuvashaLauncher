@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>com.github.nuvashalauncher.nuvashalauncher</id>
+  <id>com.github.NuvashaLauncher.NuvashaLauncher</id>
   <name>Nuvasha Launcher</name>
   <summary>Minecraft launcher for Linux</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-only</project_license>
-  <developer id="com.github.nuvashalauncher">
+  <developer id="com.github.NuvashaLauncher">
     <name>Flia</name>
   </developer>
   <project_group>NuvashaLauncher</project_group>
@@ -27,7 +27,7 @@
   <url type="bugtracker">https://github.com/NuvashaLauncher/NuvashaLauncher/issues</url>
   <url type="vcs-browser">https://github.com/NuvashaLauncher/NuvashaLauncher</url>
   <url type="help">https://github.com/NuvashaLauncher/NuvashaLauncher#readme</url>
-  <launchable type="desktop-id">com.github.nuvashalauncher.nuvashalauncher.desktop</launchable>
+  <launchable type="desktop-id">com.github.NuvashaLauncher.NuvashaLauncher.desktop</launchable>
   <translation type="gettext">nuvashalauncher</translation>
   <provides>
     <binary>nuvashalauncher</binary>
@@ -143,7 +143,7 @@
     </release>
     <release version="0.3" date="2026-10-24">
       <description>
-        <p>Renamed the project to Nuvasha, migrated UI templates to GResource
+        <p>Renamed the project to Nuvasha Launcher, migrated UI templates to GResource
         and preferences to GSettings, added Minecraft skin and cape
         synchronization, CLI instance launching, live log auto-scrolling, and
         architecture documentation.</p>

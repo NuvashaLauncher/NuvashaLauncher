@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
-  <gresource prefix="/com/github/nuvashalauncher/nuvashalauncher">
+  <gresource prefix="/com/github/NuvashaLauncher/NuvashaLauncher">
     <file>nuvashalauncher.css</file>
     <file>pack.png</file>
     <file>ui/nuvashalauncher-sign-in.ui</file>
