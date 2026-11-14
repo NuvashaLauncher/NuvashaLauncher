@@ -17,21 +17,21 @@ test_supported_loaders (void)
       g_assert_true (nuvashalauncher_loader_is_supported (loaders[i]));
       g_assert_nonnull (nuvashalauncher_loader_display_name (loaders[i]));
 
-      if (loaders[i] == nuvashalauncher_LOADER_VANILLA)
+      if (loaders[i] == NUVASHALAUNCHER_LOADER_VANILLA)
         vanilla = TRUE;
 
-      if (loaders[i] == nuvashalauncher_LOADER_FABRIC)
+      if (loaders[i] == NUVASHALAUNCHER_LOADER_FABRIC)
         fabric = TRUE;
     }
 
   g_assert_true (vanilla);
   g_assert_true (fabric);
 
-  g_assert_cmpstr (nuvashalauncher_loader_display_name (nuvashalauncher_LOADER_VANILLA), ==, "Vanilla");
-  g_assert_cmpstr (nuvashalauncher_loader_display_name (nuvashalauncher_LOADER_FABRIC), ==, "Fabric");
-  g_assert_cmpstr (nuvashalauncher_loader_display_name (nuvashalauncher_LOADER_QUILT), ==, "Quilt");
+  g_assert_cmpstr (nuvashalauncher_loader_display_name (NUVASHALAUNCHER_LOADER_VANILLA), ==, "Vanilla");
+  g_assert_cmpstr (nuvashalauncher_loader_display_name (NUVASHALAUNCHER_LOADER_FABRIC), ==, "Fabric");
+  g_assert_cmpstr (nuvashalauncher_loader_display_name (NUVASHALAUNCHER_LOADER_QUILT), ==, "Quilt");
 
-  g_print ("ok - the loader lists hold the loaders nuvashalauncher installs\n");
+  g_print ("ok - the loader lists hold the loaders Nuvasha Launcher installs\n");
 }
 
 static void
@@ -41,7 +41,7 @@ test_fabric_version_list (void)
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
 
-  if (!g_file_get_contents (nuvashalauncher_TEST_FIXTURES "/fabric-loader-list.json",
+  if (!g_file_get_contents (NUVASHALAUNCHER_TEST_FIXTURES "/fabric-loader-list.json",
                             &json, NULL, &error))
     g_error ("the fixture cannot be read: %s", error->message);
 
@@ -75,7 +75,7 @@ test_quilt_version_list (void)
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
 
-  if (!g_file_get_contents (nuvashalauncher_TEST_FIXTURES "/quilt-loader-list.json",
+  if (!g_file_get_contents (NUVASHALAUNCHER_TEST_FIXTURES "/quilt-loader-list.json",
                             &json, NULL, &error))
     g_error ("the fixture cannot be read: %s", error->message);
 
@@ -111,14 +111,14 @@ test_empty_and_broken_answers (void)
      twice. */
   versions = nuvashalauncher_loaders_versions_from_json ("[]", -1, &error);
   g_assert_null (versions);
-  g_assert_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_NO_VERSIONS);
+  g_assert_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_NO_VERSIONS);
   g_clear_error (&error);
 
   /* Something that is not a list at all is refused as well. */
   versions = nuvashalauncher_loaders_versions_from_json ("{\"error\": \"nope\"}", -1,
                                              &error);
   g_assert_null (versions);
-  g_assert_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_NO_VERSIONS);
+  g_assert_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_NO_VERSIONS);
   g_clear_error (&error);
 
   /* An entry that says nothing about a version is left out instead of
@@ -138,11 +138,11 @@ test_which_loaders_publish_an_installer (void)
   /* The two that serve a version document of their own and the two that
      publish an installer are installed in different ways, and the launcher
      asks which it is dealing with. */
-  g_assert_false (nuvashalauncher_loader_publishes_an_installer (nuvashalauncher_LOADER_VANILLA));
-  g_assert_false (nuvashalauncher_loader_publishes_an_installer (nuvashalauncher_LOADER_FABRIC));
-  g_assert_false (nuvashalauncher_loader_publishes_an_installer (nuvashalauncher_LOADER_QUILT));
-  g_assert_true (nuvashalauncher_loader_publishes_an_installer (nuvashalauncher_LOADER_NEOFORGE));
-  g_assert_true (nuvashalauncher_loader_publishes_an_installer (nuvashalauncher_LOADER_FORGE));
+  g_assert_false (nuvashalauncher_loader_publishes_an_installer (NUVASHALAUNCHER_LOADER_VANILLA));
+  g_assert_false (nuvashalauncher_loader_publishes_an_installer (NUVASHALAUNCHER_LOADER_FABRIC));
+  g_assert_false (nuvashalauncher_loader_publishes_an_installer (NUVASHALAUNCHER_LOADER_QUILT));
+  g_assert_true (nuvashalauncher_loader_publishes_an_installer (NUVASHALAUNCHER_LOADER_NEOFORGE));
+  g_assert_true (nuvashalauncher_loader_publishes_an_installer (NUVASHALAUNCHER_LOADER_FORGE));
 
   g_print ("ok - the loaders that publish an installer are told apart\n");
 }
@@ -152,47 +152,47 @@ test_compatibility_filtering (void)
 {
   /* Forge: "1.20.1-47.2.0" runs 1.20.1 and nothing else, so a longer game
      version is not a prefix match. */
-  g_assert_true (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_FORGE,
+  g_assert_true (nuvashalauncher_loaders_version_runs_game (NUVASHALAUNCHER_LOADER_FORGE,
                                                 "1.20.1-47.2.0", "1.20.1"));
-  g_assert_false (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_FORGE,
+  g_assert_false (nuvashalauncher_loaders_version_runs_game (NUVASHALAUNCHER_LOADER_FORGE,
                                                  "1.20.1-47.2.0", "1.20"));
-  g_assert_false (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_FORGE,
+  g_assert_false (nuvashalauncher_loaders_version_runs_game (NUVASHALAUNCHER_LOADER_FORGE,
                                                  "1.20.1-47.2.0", "1.20.2"));
-  g_assert_true (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_FORGE,
+  g_assert_true (nuvashalauncher_loaders_version_runs_game (NUVASHALAUNCHER_LOADER_FORGE,
                                                 "1.21-51.0.33", "1.21"));
 
   /* NeoForge: "26.3.0.51-beta" runs 26.3, and a version of another game
      does not. */
-  g_assert_true (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE,
+  g_assert_true (nuvashalauncher_loaders_version_runs_game (NUVASHALAUNCHER_LOADER_NEOFORGE,
                                                 "26.3.0.51-beta", "26.3"));
-  g_assert_true (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE,
+  g_assert_true (nuvashalauncher_loaders_version_runs_game (NUVASHALAUNCHER_LOADER_NEOFORGE,
                                                 "21.1.256", "21.1"));
-  g_assert_false (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE,
+  g_assert_false (nuvashalauncher_loaders_version_runs_game (NUVASHALAUNCHER_LOADER_NEOFORGE,
                                                  "21.1.256", "21.11"));
-  g_assert_false (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE,
+  g_assert_false (nuvashalauncher_loaders_version_runs_game (NUVASHALAUNCHER_LOADER_NEOFORGE,
                                                  "20.2.3-beta", "26.3"));
 
   /* Modern NeoForge drops the leading "1." of a Minecraft version and
      writes a missing patch as 0, so the question is asked with the real
      Minecraft version the user picked. */
-  g_assert_true (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE,
+  g_assert_true (nuvashalauncher_loaders_version_runs_game (NUVASHALAUNCHER_LOADER_NEOFORGE,
                                                 "21.1.256", "1.21.1"));
-  g_assert_false (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE,
+  g_assert_false (nuvashalauncher_loaders_version_runs_game (NUVASHALAUNCHER_LOADER_NEOFORGE,
                                                  "21.1.256", "1.21"));
-  g_assert_true (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE,
+  g_assert_true (nuvashalauncher_loaders_version_runs_game (NUVASHALAUNCHER_LOADER_NEOFORGE,
                                                 "21.0.5", "1.21"));
-  g_assert_true (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE,
+  g_assert_true (nuvashalauncher_loaders_version_runs_game (NUVASHALAUNCHER_LOADER_NEOFORGE,
                                                 "20.2.3-beta", "1.20.2"));
-  g_assert_false (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE,
+  g_assert_false (nuvashalauncher_loaders_version_runs_game (NUVASHALAUNCHER_LOADER_NEOFORGE,
                                                  "20.2.3-beta", "1.20.1"));
 
   /* A loader that publishes no installer is not asked the question: its
      versions are its own and name no game. */
-  g_assert_false (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_FABRIC,
+  g_assert_false (nuvashalauncher_loaders_version_runs_game (NUVASHALAUNCHER_LOADER_FABRIC,
                                                  "0.19.5", "26.3"));
-  g_assert_false (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE, NULL,
+  g_assert_false (nuvashalauncher_loaders_version_runs_game (NUVASHALAUNCHER_LOADER_NEOFORGE, NULL,
                                                  "26.3"));
-  g_assert_false (nuvashalauncher_loaders_version_runs_game (nuvashalauncher_LOADER_NEOFORGE,
+  g_assert_false (nuvashalauncher_loaders_version_runs_game (NUVASHALAUNCHER_LOADER_NEOFORGE,
                                                  "26.3.0.51-beta", NULL));
 
   g_print ("ok - the versions of a loader are told apart by their names\n");
@@ -205,14 +205,14 @@ test_neoforge_version_list (void)
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
 
-  if (!g_file_get_contents (nuvashalauncher_TEST_FIXTURES "/neoforge-versions.json", &json,
+  if (!g_file_get_contents (NUVASHALAUNCHER_TEST_FIXTURES "/neoforge-versions.json", &json,
                             NULL, &error))
     g_error ("the fixture cannot be read: %s", error->message);
 
   /* The maven holds every version NeoForge ever published, for every game;
      only the ones named after the game that was asked for are versions of
      it. */
-  versions = nuvashalauncher_loaders_maven_versions_from_json (nuvashalauncher_LOADER_NEOFORGE, "26.3",
+  versions = nuvashalauncher_loaders_maven_versions_from_json (NUVASHALAUNCHER_LOADER_NEOFORGE, "26.3",
                                                     json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (versions);
@@ -228,7 +228,7 @@ test_neoforge_version_list (void)
 
   /* Another game version out of the same answer. */
   g_clear_pointer (&versions, g_ptr_array_unref);
-  versions = nuvashalauncher_loaders_maven_versions_from_json (nuvashalauncher_LOADER_NEOFORGE,
+  versions = nuvashalauncher_loaders_maven_versions_from_json (NUVASHALAUNCHER_LOADER_NEOFORGE,
                                                     "21.1", json, -1, &error);
   g_assert_no_error (error);
   g_assert_cmpuint (versions->len, ==, 3);
@@ -241,7 +241,7 @@ test_neoforge_version_list (void)
   /* The same list asked for with the real Minecraft version the user
      picked, which NeoForge spells without the leading "1.". */
   g_clear_pointer (&versions, g_ptr_array_unref);
-  versions = nuvashalauncher_loaders_maven_versions_from_json (nuvashalauncher_LOADER_NEOFORGE,
+  versions = nuvashalauncher_loaders_maven_versions_from_json (NUVASHALAUNCHER_LOADER_NEOFORGE,
                                                    "1.21.1", json, -1, &error);
   g_assert_no_error (error);
   g_assert_cmpuint (versions->len, ==, 3);
@@ -250,11 +250,11 @@ test_neoforge_version_list (void)
 
   /* A game no version of NeoForge runs. */
   g_clear_pointer (&versions, g_ptr_array_unref);
-  versions = nuvashalauncher_loaders_maven_versions_from_json (nuvashalauncher_LOADER_NEOFORGE,
+  versions = nuvashalauncher_loaders_maven_versions_from_json (NUVASHALAUNCHER_LOADER_NEOFORGE,
                                                     "1.20.1", json, -1,
                                                     &error);
   g_assert_null (versions);
-  g_assert_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_NO_VERSIONS);
+  g_assert_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_NO_VERSIONS);
 
   g_print ("ok - a NeoForge maven is read and filtered by game version\n");
 }
@@ -266,11 +266,11 @@ test_forge_version_list (void)
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
 
-  if (!g_file_get_contents (nuvashalauncher_TEST_FIXTURES "/forge-versions.json", &json,
+  if (!g_file_get_contents (NUVASHALAUNCHER_TEST_FIXTURES "/forge-versions.json", &json,
                             NULL, &error))
     g_error ("the fixture cannot be read: %s", error->message);
 
-  versions = nuvashalauncher_loaders_maven_versions_from_json (nuvashalauncher_LOADER_FORGE, "1.20.1",
+  versions = nuvashalauncher_loaders_maven_versions_from_json (NUVASHALAUNCHER_LOADER_FORGE, "1.20.1",
                                                     json, -1, &error);
   g_assert_no_error (error);
   g_assert_nonnull (versions);
@@ -288,7 +288,7 @@ test_forge_version_list (void)
   g_assert_true (version_at (versions, 2)->stable);
 
   g_clear_pointer (&versions, g_ptr_array_unref);
-  versions = nuvashalauncher_loaders_maven_versions_from_json (nuvashalauncher_LOADER_FORGE, "1.16.5",
+  versions = nuvashalauncher_loaders_maven_versions_from_json (NUVASHALAUNCHER_LOADER_FORGE, "1.16.5",
                                                     json, -1, &error);
   g_assert_no_error (error);
   g_assert_cmpuint (versions->len, ==, 1);
@@ -304,9 +304,9 @@ test_a_maven_that_answers_nothing (void)
   g_autoptr (GPtrArray) versions = NULL;
 
   versions = nuvashalauncher_loaders_maven_versions_from_json (
-    nuvashalauncher_LOADER_FORGE, "1.20.1", "{\"status\": 404}", -1, &error);
+    NUVASHALAUNCHER_LOADER_FORGE, "1.20.1", "{\"status\": 404}", -1, &error);
   g_assert_null (versions);
-  g_assert_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_NO_VERSIONS);
+  g_assert_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_NO_VERSIONS);
 
   g_print ("ok - a maven that answers nothing is refused\n");
 }
@@ -320,7 +320,7 @@ test_versions_for_display (void)
   g_autoptr (GPtrArray) shown = NULL;
   guint selected = 0;
 
-  if (!g_file_get_contents (nuvashalauncher_TEST_FIXTURES "/fabric-loader-list.json",
+  if (!g_file_get_contents (NUVASHALAUNCHER_TEST_FIXTURES "/fabric-loader-list.json",
                             &json, NULL, &error))
     g_error ("the fixture cannot be read: %s", error->message);
 

@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_TASK_PRIVATE_H
-#define nuvashalauncher_TASK_PRIVATE_H
+#ifndef NUVASHALAUNCHER_TASK_PRIVATE_H
+#define NUVASHALAUNCHER_TASK_PRIVATE_H
 
 #include "nuvashalauncher-task.h"
 
@@ -21,4 +21,4 @@ guint nuvashalauncher_cancellable_watch (GCancellable  *cancellable,
                              gpointer       user_data,
                              GDestroyNotify notify);
 
-#endif /* nuvashalauncher_TASK_PRIVATE_H */
+#endif /* NUVASHALAUNCHER_TASK_PRIVATE_H */

@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_DOWNLOAD_MODPACK_DIALOG_PRIVATE_H
-#define nuvashalauncher_DOWNLOAD_MODPACK_DIALOG_PRIVATE_H
+#ifndef NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG_PRIVATE_H
+#define NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG_PRIVATE_H
 #include "nuvashalauncher-ui-feedback.h"
 
 #include "nuvashalauncher-download-modpack-dialog.h"

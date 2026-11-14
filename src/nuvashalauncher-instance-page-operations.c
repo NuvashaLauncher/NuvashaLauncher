@@ -33,7 +33,7 @@ on_open_folder_ready (GObject *source, GAsyncResult *result, gpointer user_data)
   NuvashaLauncherTaskScope *operation = wait->operation;
   g_autoptr (GError) error = NULL;
 
-  if (!nuvashalauncher_instance_manager_open_folder_finish (nuvashalauncher_INSTANCE_MANAGER (source),
+  if (!nuvashalauncher_instance_manager_open_folder_finish (NUVASHALAUNCHER_INSTANCE_MANAGER (source),
                                                 result, &error))
     instance_page_show_error (self, error);
 
@@ -45,7 +45,7 @@ on_open_folder_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 void
 on_open_folder_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
 
   OpenFolderWait *wait = g_new0 (OpenFolderWait, 1);
   wait->page = g_object_ref (self);
@@ -58,7 +58,7 @@ static void
 on_export_progress (guint64 done, guint64 total, const char *detail,
                     gpointer user_data)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
 
   if (self->export_download != NULL)
     {
@@ -71,7 +71,7 @@ static void
 on_export_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                 gpointer user_data)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
   g_autoptr (GError) error = NULL;
 
   if (!nuvashalauncher_modpack_export_finish (result, &error))
@@ -99,7 +99,7 @@ static void
 on_export_file_chosen (GObject *source, GAsyncResult *result,
                        gpointer user_data)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
   g_autoptr (GError) error = NULL;
   g_autoptr (GFile) file =
     gtk_file_dialog_save_finish (GTK_FILE_DIALOG (source), result, &error);
@@ -126,7 +126,7 @@ on_export_file_chosen (GObject *source, GAsyncResult *result,
         g_autofree char *name = instance_string (self->instance, "name");
 
         self->export_download =
-          nuvashalauncher_downloads_add (nuvashalauncher_DOWNLOAD_UPDATE,
+          nuvashalauncher_downloads_add (NUVASHALAUNCHER_DOWNLOAD_UPDATE,
                              name != NULL ? name : _("Modpack export"));
         nuvashalauncher_download_set_detail (self->export_download,
                                  _("Exporting modpack"));
@@ -321,7 +321,7 @@ static void
 on_export_policy_chosen (GObject *source, GAsyncResult *result,
                          gpointer user_data)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
   const char *response =
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
 
@@ -337,7 +337,7 @@ on_export_policy_chosen (GObject *source, GAsyncResult *result,
 void
 on_export_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
 
   if (self->export_operation != NULL)
     {
@@ -430,7 +430,7 @@ on_change_directory_ready (GObject *source, GAsyncResult *result,
   g_autoptr (GError) error = NULL;
 
   if (nuvashalauncher_instance_manager_change_directory_finish (
-        nuvashalauncher_INSTANCE_MANAGER (source), result, &error))
+        NUVASHALAUNCHER_INSTANCE_MANAGER (source), result, &error))
     {
       /* The instance stores the new path; the row reads it from there, so
          what it says is what the file says. */
@@ -452,7 +452,7 @@ on_change_directory_ready (GObject *source, GAsyncResult *result,
 static void
 on_directory_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
   g_autoptr (GError) error = NULL;
   g_autoptr (GFile) file =
     gtk_file_dialog_select_folder_finish (GTK_FILE_DIALOG (source), result,
@@ -502,7 +502,7 @@ void
 on_change_directory_clicked (GtkButton *button G_GNUC_UNUSED,
                              gpointer user_data)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
   GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
   g_autoptr (GtkFileDialog) dialog = gtk_file_dialog_new ();
 
@@ -533,7 +533,7 @@ on_duplicate_ready (GObject *source, GAsyncResult *result, gpointer user_data)
   NuvashaLauncherInstancePage *self = wait->page;
   g_autoptr (GError) error = NULL;
   g_autoptr (NuvashaLauncherInstance) copy =
-    nuvashalauncher_instance_manager_duplicate_finish (nuvashalauncher_INSTANCE_MANAGER (source),
+    nuvashalauncher_instance_manager_duplicate_finish (NUVASHALAUNCHER_INSTANCE_MANAGER (source),
                                            result, &error);
 
   if (copy == NULL)
@@ -555,7 +555,7 @@ on_duplicate_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 void
 on_duplicate_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
 
   ChangeDirectoryWait *wait = g_new0 (ChangeDirectoryWait, 1);
   wait->page = g_object_ref (self);
@@ -570,7 +570,7 @@ on_delete_ready (GObject *source, GAsyncResult *result, gpointer user_data)
   NuvashaLauncherInstancePage *self = wait->page;
   g_autoptr (GError) error = NULL;
 
-  if (!nuvashalauncher_instance_manager_delete_finish (nuvashalauncher_INSTANCE_MANAGER (source),
+  if (!nuvashalauncher_instance_manager_delete_finish (NUVASHALAUNCHER_INSTANCE_MANAGER (source),
                                            result, &error))
     {
       /* The instance is still registered: stay on its page. */
@@ -593,7 +593,7 @@ on_delete_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 static void
 on_delete_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
   const char *response =
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
 
@@ -611,7 +611,7 @@ on_delete_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 void
 on_delete_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
   g_autofree char *name = instance_string (self->instance, "name");
   g_autofree char *heading = g_strdup_printf (_("Delete \"%s\"?"), name);
   AdwAlertDialog *alert = ADW_ALERT_DIALOG (
@@ -634,21 +634,21 @@ on_delete_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 void
 nuvashalauncher_instance_page_trigger_export (NuvashaLauncherInstancePage *self)
 {
-  g_return_if_fail (nuvashalauncher_IS_INSTANCE_PAGE (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_INSTANCE_PAGE (self));
   on_export_clicked (NULL, self);
 }
 
 void
 nuvashalauncher_instance_page_trigger_delete (NuvashaLauncherInstancePage *self)
 {
-  g_return_if_fail (nuvashalauncher_IS_INSTANCE_PAGE (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_INSTANCE_PAGE (self));
   on_delete_clicked (NULL, self);
 }
 
 void
 nuvashalauncher_instance_page_trigger_duplicate (NuvashaLauncherInstancePage *self)
 {
-  g_return_if_fail (nuvashalauncher_IS_INSTANCE_PAGE (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_INSTANCE_PAGE (self));
   on_duplicate_clicked (NULL, self);
 }
 
@@ -658,7 +658,7 @@ nuvashalauncher_instance_page_export_to_path (NuvashaLauncherInstancePage *self,
 {
   g_autofree char *name = NULL;
 
-  g_return_if_fail (nuvashalauncher_IS_INSTANCE_PAGE (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_INSTANCE_PAGE (self));
   g_return_if_fail (path != NULL && *path != '\0');
 
   if (self->export_operation != NULL)
@@ -667,7 +667,7 @@ nuvashalauncher_instance_page_export_to_path (NuvashaLauncherInstancePage *self,
   g_object_get (self->instance, "name", &name, NULL);
   self->export_include_transient = FALSE;
   self->export_download = nuvashalauncher_downloads_add (
-    nuvashalauncher_DOWNLOAD_UPDATE, name != NULL ? name : _("Modpack export"));
+    NUVASHALAUNCHER_DOWNLOAD_UPDATE, name != NULL ? name : _("Modpack export"));
   nuvashalauncher_download_set_detail (self->export_download, _("Exporting modpack"));
   g_object_add_weak_pointer (G_OBJECT (self->export_download),
                              (gpointer *) &self->export_download);

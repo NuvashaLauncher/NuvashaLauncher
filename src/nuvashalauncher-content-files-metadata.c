@@ -663,13 +663,13 @@ nuvashalauncher_content_apply_local_metadata (NuvashaLauncherContentFile *file, 
     file->optional_dependencies = g_ptr_array_new_with_free_func (g_free);
   if (file->incompatible_dependencies == NULL)
     file->incompatible_dependencies = g_ptr_array_new_with_free_func (g_free);
-  if (type == nuvashalauncher_CONTENT_RESOURCE_PACK)
+  if (type == NUVASHALAUNCHER_CONTENT_RESOURCE_PACK)
     {
       g_clear_pointer (&file->project_name, g_free);
       apply_resource_metadata (file);
       return;
     }
-  if (type == nuvashalauncher_CONTENT_SHADER_PACK)
+  if (type == NUVASHALAUNCHER_CONTENT_SHADER_PACK)
     {
       g_clear_pointer (&file->project_name, g_free);
       file->local_metadata = TRUE;

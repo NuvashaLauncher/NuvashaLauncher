@@ -7,7 +7,7 @@
 gboolean
 nuvashalauncher_mc_missing_field (const char *member, GError **error)
 {
-  g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_MISSING,
+  g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_MISSING,
                "required field \"%s\" is missing", member);
   return FALSE;
 }
@@ -15,7 +15,7 @@ nuvashalauncher_mc_missing_field (const char *member, GError **error)
 gboolean
 nuvashalauncher_mc_wrong_field (const char *member, const char *expected, GError **error)
 {
-  g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+  g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
                "field \"%s\" must be %s", member, expected);
   return FALSE;
 }
@@ -45,7 +45,7 @@ nuvashalauncher_mc_get_string (JsonObject  *object,
   if (required && (*value)[0] == '\0')
     {
       g_clear_pointer (value, g_free);
-      g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_MISSING,
+      g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_MISSING,
                    "required field \"%s\" is empty", member);
       return FALSE;
     }
@@ -150,8 +150,8 @@ nuvashalauncher_mc_root_object (const char *json, gssize length, JsonParser **pa
   if (!json_parser_load_from_data (document, json, length, &json_error))
     {
       /* The domain changes so that a caller only has to know
-       * nuvashalauncher_MC_ERROR for a document that will not read. */
-      g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+       * NUVASHALAUNCHER_MC_ERROR for a document that will not read. */
+      g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
                    "the document is not JSON: %s", json_error->message);
       g_object_unref (document);
       return NULL;
@@ -161,7 +161,7 @@ nuvashalauncher_mc_root_object (const char *json, gssize length, JsonParser **pa
 
   if (root == NULL || !JSON_NODE_HOLDS_OBJECT (root))
     {
-      g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
                    "the document is not a JSON object");
       g_object_unref (document);
       return NULL;

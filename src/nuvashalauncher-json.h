@@ -2,17 +2,17 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_JSON_H
-#define nuvashalauncher_JSON_H
+#ifndef NUVASHALAUNCHER_JSON_H
+#define NUVASHALAUNCHER_JSON_H
 
 #include <json-glib/json-glib.h>
 
 G_BEGIN_DECLS
 
-#define nuvashalauncher_JSON_ERROR (nuvashalauncher_json_error_quark ())
+#define NUVASHALAUNCHER_JSON_ERROR (nuvashalauncher_json_error_quark ())
 typedef enum {
-  nuvashalauncher_JSON_ERROR_TYPE,
-  nuvashalauncher_JSON_ERROR_MISSING
+  NUVASHALAUNCHER_JSON_ERROR_TYPE,
+  NUVASHALAUNCHER_JSON_ERROR_MISSING
 } NuvashaLauncherJsonError;
 
 GQuark nuvashalauncher_json_error_quark (void);
@@ -33,4 +33,4 @@ gboolean nuvashalauncher_json_require_string (JsonNode *node, const char *name,
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_JSON_H */
+#endif /* NUVASHALAUNCHER_JSON_H */

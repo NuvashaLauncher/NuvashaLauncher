@@ -63,8 +63,8 @@ test_index_is_read (void)
   g_assert_cmpstr (first->sha512, ==,
                    "0123456789abcdef0123456789abcdef");
   g_assert_cmpint ((gint) first->file_size, ==, 12345);
-  g_assert_cmpint (first->env_client, ==, nuvashalauncher_MODPACK_ENV_REQUIRED);
-  g_assert_cmpint (first->env_server, ==, nuvashalauncher_MODPACK_ENV_UNSUPPORTED);
+  g_assert_cmpint (first->env_client, ==, NUVASHALAUNCHER_MODPACK_ENV_REQUIRED);
+  g_assert_cmpint (first->env_server, ==, NUVASHALAUNCHER_MODPACK_ENV_UNSUPPORTED);
   g_assert_cmpuint (first->downloads->len, ==, 1);
   g_assert_cmpstr (g_ptr_array_index (first->downloads, 0), ==,
                    "https://cdn.modrinth.com/data/aa/v1/sodium.jar");
@@ -72,8 +72,8 @@ test_index_is_read (void)
   /* The last file has no env object: what both sides can run. */
   last = g_ptr_array_index (pack->files, 3);
   g_assert_cmpstr (last->path, ==, "config/both.toml");
-  g_assert_cmpint (last->env_client, ==, nuvashalauncher_MODPACK_ENV_UNSPECIFIED);
-  g_assert_cmpint (last->env_server, ==, nuvashalauncher_MODPACK_ENV_UNSPECIFIED);
+  g_assert_cmpint (last->env_client, ==, NUVASHALAUNCHER_MODPACK_ENV_UNSPECIFIED);
+  g_assert_cmpint (last->env_server, ==, NUVASHALAUNCHER_MODPACK_ENV_UNSPECIFIED);
   g_assert_cmpint ((gint) last->file_size, ==, 42);
 
   g_print ("ok - the index of a pack is read whole\n");
@@ -113,7 +113,7 @@ static void
 test_resolve_fabric (void)
 {
   assert_loader ("\"minecraft\":\"1.20.1\",\"fabric-loader\":\"0.15.11\"",
-                 nuvashalauncher_LOADER_FABRIC, "1.20.1", "0.15.11");
+                 NUVASHALAUNCHER_LOADER_FABRIC, "1.20.1", "0.15.11");
   g_print ("ok - a pack that names fabric-loader resolves to fabric\n");
 }
 
@@ -121,7 +121,7 @@ static void
 test_resolve_quilt (void)
 {
   assert_loader ("\"minecraft\":\"1.20.1\",\"quilt-loader\":\"0.21.0\"",
-                 nuvashalauncher_LOADER_QUILT, "1.20.1", "0.21.0");
+                 NUVASHALAUNCHER_LOADER_QUILT, "1.20.1", "0.21.0");
   g_print ("ok - a pack that names quilt-loader resolves to quilt\n");
 }
 
@@ -129,7 +129,7 @@ static void
 test_resolve_forge (void)
 {
   assert_loader ("\"minecraft\":\"1.20.1\",\"forge\":\"47.2.0\"",
-                 nuvashalauncher_LOADER_FORGE, "1.20.1", "47.2.0");
+                 NUVASHALAUNCHER_LOADER_FORGE, "1.20.1", "47.2.0");
   g_print ("ok - a pack that names forge resolves to forge\n");
 }
 
@@ -137,7 +137,7 @@ static void
 test_resolve_neoforge (void)
 {
   assert_loader ("\"minecraft\":\"1.20.1\",\"neoforge\":\"20.4.0\"",
-                 nuvashalauncher_LOADER_NEOFORGE, "1.20.1", "20.4.0");
+                 NUVASHALAUNCHER_LOADER_NEOFORGE, "1.20.1", "20.4.0");
   g_print ("ok - a pack that names neoforge resolves to neoforge\n");
 }
 
@@ -147,7 +147,7 @@ test_resolve_vanilla (void)
   /* A pack that names no loader runs on vanilla, and a name the
    * format does not know is ignored rather than refused. */
   assert_loader ("\"minecraft\":\"1.21\",\"some-future-loader\":\"9.9\"",
-                 nuvashalauncher_LOADER_VANILLA, "1.21", NULL);
+                 NUVASHALAUNCHER_LOADER_VANILLA, "1.21", NULL);
   g_print ("ok - a pack that names no loader resolves to vanilla\n");
 }
 
@@ -157,7 +157,7 @@ test_resolve_loader_choice (void)
   /* Two loaders named: the one the format puts first wins. */
   assert_loader ("\"minecraft\":\"1.20.1\",\"forge\":\"47.2.0\","
                  "\"fabric-loader\":\"0.15.11\"",
-                 nuvashalauncher_LOADER_FABRIC, "1.20.1", "0.15.11");
+                 NUVASHALAUNCHER_LOADER_FABRIC, "1.20.1", "0.15.11");
   g_print ("ok - of two loaders named, the first of the format wins\n");
 }
 
@@ -173,7 +173,7 @@ test_resolve_without_minecraft (void)
   g_assert_no_error (error);
   g_assert_nonnull (pack);
   g_assert_false (nuvashalauncher_modpack_resolve (pack, &error));
-  g_assert_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_LOADER);
+  g_assert_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_LOADER);
 
   g_print ("ok - a pack that names no Minecraft version is refused\n");
 }
@@ -185,13 +185,13 @@ test_format_refusals (void)
   expect_refused (
     "{\"formatVersion\":2,\"game\":\"minecraft\",\"versionId\":\"2\","
     "\"name\":\"Too New\",\"files\":[],\"dependencies\":{}}",
-    nuvashalauncher_MODPACK_ERROR_FORMAT, "a format version nuvashalauncher does not know");
+    NUVASHALAUNCHER_MODPACK_ERROR_FORMAT, "a format version Nuvasha Launcher does not know");
 
   /* A pack for another game. */
   expect_refused (
     "{\"formatVersion\":1,\"game\":\"dwarf-fortress\",\"versionId\":\"1\","
     "\"name\":\"Not Minecraft\",\"files\":[],\"dependencies\":{}}",
-    nuvashalauncher_MODPACK_ERROR_FORMAT, "a pack for another game");
+    NUVASHALAUNCHER_MODPACK_ERROR_FORMAT, "a pack for another game");
 
   /* A file with one hash missing. */
   expect_refused (
@@ -200,31 +200,31 @@ test_format_refusals (void)
     "{\"path\":\"mods/x.jar\",\"hashes\":{\"sha1\":\"aa\"},"
     "\"downloads\":[\"https://cdn.modrinth.com/x.jar\"]}],"
     "\"dependencies\":{}}",
-    nuvashalauncher_MODPACK_ERROR_FORMAT, "a file with one hash missing");
+    NUVASHALAUNCHER_MODPACK_ERROR_FORMAT, "a file with one hash missing");
 
   /* No files array at all. */
   expect_refused (
     "{\"formatVersion\":1,\"game\":\"minecraft\",\"versionId\":\"1\","
     "\"name\":\"No Files\",\"dependencies\":{}}",
-    nuvashalauncher_MODPACK_ERROR_FORMAT, "an index without a files array");
+    NUVASHALAUNCHER_MODPACK_ERROR_FORMAT, "an index without a files array");
 
   /* No name. */
   expect_refused (
     "{\"formatVersion\":1,\"game\":\"minecraft\",\"versionId\":\"1\","
     "\"files\":[],\"dependencies\":{}}",
-    nuvashalauncher_MODPACK_ERROR_FORMAT, "an index without a name");
+    NUVASHALAUNCHER_MODPACK_ERROR_FORMAT, "an index without a name");
 
   /* A files member that is not an array. */
   expect_refused (
     "{\"formatVersion\":1,\"game\":\"minecraft\",\"versionId\":\"1\","
     "\"name\":\"Odd Files\",\"files\":{},\"dependencies\":{}}",
-    nuvashalauncher_MODPACK_ERROR_FORMAT, "a files member that is not an array");
+    NUVASHALAUNCHER_MODPACK_ERROR_FORMAT, "a files member that is not an array");
 
   /* An entry of files that is not an object. */
   expect_refused (
     "{\"formatVersion\":1,\"game\":\"minecraft\",\"versionId\":\"1\","
     "\"name\":\"Odd Entry\",\"files\":[\"mods/x.jar\"],\"dependencies\":{}}",
-    nuvashalauncher_MODPACK_ERROR_FORMAT, "an entry of files that is not an object");
+    NUVASHALAUNCHER_MODPACK_ERROR_FORMAT, "an entry of files that is not an object");
 
   /* A file with a negative fileSize. */
   expect_refused (
@@ -234,7 +234,7 @@ test_format_refusals (void)
     "\"fileSize\":-1,"
     "\"downloads\":[\"https://cdn.modrinth.com/x.jar\"]}],"
     "\"dependencies\":{}}",
-    nuvashalauncher_MODPACK_ERROR_FORMAT, "a file with a negative file size");
+    NUVASHALAUNCHER_MODPACK_ERROR_FORMAT, "a file with a negative file size");
 
   /* A file with a non-string download URL. */
   expect_refused (
@@ -243,7 +243,7 @@ test_format_refusals (void)
     "{\"path\":\"mods/x.jar\",\"hashes\":{\"sha1\":\"aa\",\"sha512\":\"bb\"},"
     "\"downloads\":[123]}],"
     "\"dependencies\":{}}",
-    nuvashalauncher_MODPACK_ERROR_FORMAT, "a file with a non-string download URL");
+    NUVASHALAUNCHER_MODPACK_ERROR_FORMAT, "a file with a non-string download URL");
 
   g_print ("ok - an index the format does not describe is refused\n");
 }
@@ -259,7 +259,7 @@ test_index_paths_are_refused (void)
     "\"hashes\":{\"sha1\":\"aa\",\"sha512\":\"bb\"},"
     "\"downloads\":[\"https://cdn.modrinth.com/escape.jar\"]}],"
     "\"dependencies\":{}}",
-    nuvashalauncher_MODPACK_ERROR_PATH, "a path that steps out of the instance");
+    NUVASHALAUNCHER_MODPACK_ERROR_PATH, "a path that steps out of the instance");
 
   /* An absolute path. */
   expect_refused (
@@ -269,7 +269,7 @@ test_index_paths_are_refused (void)
     "\"hashes\":{\"sha1\":\"aa\",\"sha512\":\"bb\"},"
     "\"downloads\":[\"https://cdn.modrinth.com/escape.jar\"]}],"
     "\"dependencies\":{}}",
-    nuvashalauncher_MODPACK_ERROR_PATH, "an absolute path");
+    NUVASHALAUNCHER_MODPACK_ERROR_PATH, "an absolute path");
 
   /* A path with the separator of another system. */
   expect_refused (
@@ -279,7 +279,7 @@ test_index_paths_are_refused (void)
     "\"hashes\":{\"sha1\":\"aa\",\"sha512\":\"bb\"},"
     "\"downloads\":[\"https://cdn.modrinth.com/escape.jar\"]}],"
     "\"dependencies\":{}}",
-    nuvashalauncher_MODPACK_ERROR_PATH, "a path with a backslash in it");
+    NUVASHALAUNCHER_MODPACK_ERROR_PATH, "a path with a backslash in it");
 
   /* A drive name. */
   expect_refused (
@@ -289,7 +289,7 @@ test_index_paths_are_refused (void)
     "\"hashes\":{\"sha1\":\"aa\",\"sha512\":\"bb\"},"
     "\"downloads\":[\"https://cdn.modrinth.com/escape.jar\"]}],"
     "\"dependencies\":{}}",
-    nuvashalauncher_MODPACK_ERROR_PATH, "a path with a drive name in it");
+    NUVASHALAUNCHER_MODPACK_ERROR_PATH, "a path with a drive name in it");
 
   /* Launcher content index metadata directory. */
   expect_refused (
@@ -299,7 +299,7 @@ test_index_paths_are_refused (void)
     "\"hashes\":{\"sha1\":\"aa\",\"sha512\":\"bb\"},"
     "\"downloads\":[\"https://cdn.modrinth.com/escape.jar\"]}],"
     "\"dependencies\":{}}",
-    nuvashalauncher_MODPACK_ERROR_PATH, "a path inside .index metadata");
+    NUVASHALAUNCHER_MODPACK_ERROR_PATH, "a path inside .index metadata");
 
   g_print ("ok - a path the instance cannot hold is refused\n");
 }
@@ -347,7 +347,7 @@ test_verify_hashes (void)
   /* A sha1 that does not match. */
   file.sha1 = other_sha1;
   g_assert_false (verify_now (&file, path, &error));
-  g_assert_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_HASH);
+  g_assert_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_HASH);
   g_assert_nonnull (strstr (error->message, "sha1"));
   g_clear_error (&error);
 
@@ -358,7 +358,7 @@ test_verify_hashes (void)
                 "000000000000000000000000000000000000000000000000000000000000"
                 "000000000000000000000000000000000000000000000000000000000000";
   g_assert_false (verify_now (&file, path, &error));
-  g_assert_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_HASH);
+  g_assert_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_HASH);
   g_assert_nonnull (strstr (error->message, "sha512"));
   g_clear_error (&error);
 

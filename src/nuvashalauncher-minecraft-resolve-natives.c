@@ -74,7 +74,7 @@ is_plain_directory (GFile *file, GError **error)
 
   if (g_file_info_get_file_type (info) != G_FILE_TYPE_DIRECTORY)
     {
-      g_set_error (error, nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_UNSAFE_PATH,
+      g_set_error (error, NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_UNSAFE_PATH,
                    "\"%s\" is not a directory", g_file_peek_path (file));
       return FALSE;
     }
@@ -307,7 +307,7 @@ extract_read_ready (GObject *source, GAsyncResult *result, gpointer user_data)
     {
       extract_finished (
           step->request,
-          g_error_new (nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_INVALID,
+          g_error_new (NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_INVALID,
                        "\"%s\" is not a jar nuvashalauncher can read: %s", jar->path,
                        archive_error_string (step->archive)));
       extract_step_free (step);
@@ -358,7 +358,7 @@ read_entry (struct archive *archive, GBytes **data, GError **error)
 
       if (status < ARCHIVE_WARN)
         {
-          g_set_error (error, nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_INVALID,
+          g_set_error (error, NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_INVALID,
                        "cannot read an entry of the jar: %s",
                        archive_error_string (archive));
           return FALSE;
@@ -366,8 +366,8 @@ read_entry (struct archive *archive, GBytes **data, GError **error)
 
       if (size > MAX_NATIVE_ENTRY_SIZE - buffer->len)
         {
-          g_set_error (error, nuvashalauncher_RESOLVE_ERROR,
-                       nuvashalauncher_RESOLVE_ERROR_INVALID,
+          g_set_error (error, NUVASHALAUNCHER_RESOLVE_ERROR,
+                       NUVASHALAUNCHER_RESOLVE_ERROR_INVALID,
                        "a native entry is larger than %u MiB",
                        MAX_NATIVE_ENTRY_SIZE / (1024 * 1024));
           return FALSE;
@@ -427,7 +427,7 @@ extract_entries (ExtractStep *step)
         {
           extract_finished (
               request,
-              g_error_new (nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_UNSAFE_PATH,
+              g_error_new (NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_UNSAFE_PATH,
                            "\"%s\" holds an entry that would be written "
                            "outside the natives directory: \"%s\"",
                            jar->path, name));
@@ -474,8 +474,8 @@ extract_entries (ExtractStep *step)
         {
           extract_finished (
               request,
-              g_error_new (nuvashalauncher_RESOLVE_ERROR,
-                           nuvashalauncher_RESOLVE_ERROR_INVALID,
+              g_error_new (NUVASHALAUNCHER_RESOLVE_ERROR,
+                           NUVASHALAUNCHER_RESOLVE_ERROR_INVALID,
                            "native libraries are larger than %u MiB",
                            MAX_NATIVE_TOTAL_SIZE / (1024 * 1024)));
           extract_step_free (step);
@@ -491,8 +491,8 @@ extract_entries (ExtractStep *step)
     {
       extract_finished (
           request,
-          g_error_new (nuvashalauncher_RESOLVE_ERROR,
-                       nuvashalauncher_RESOLVE_ERROR_INVALID,
+          g_error_new (NUVASHALAUNCHER_RESOLVE_ERROR,
+                       NUVASHALAUNCHER_RESOLVE_ERROR_INVALID,
                        "cannot read native archive \"%s\": %s",
                        jar->path, archive_error_string (step->archive)));
       extract_step_free (step);
@@ -552,8 +552,8 @@ extract_jar_info_ready (GObject *source, GAsyncResult *result, gpointer user_dat
     {
       extract_finished (
           step->request,
-          g_error_new_literal (nuvashalauncher_RESOLVE_ERROR,
-                               nuvashalauncher_RESOLVE_ERROR_INVALID,
+          g_error_new_literal (NUVASHALAUNCHER_RESOLVE_ERROR,
+                               NUVASHALAUNCHER_RESOLVE_ERROR_INVALID,
                                "a native archive is too large or is not a regular file"));
       extract_step_free (step);
       return;

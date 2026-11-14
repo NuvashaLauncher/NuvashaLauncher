@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_CONTENT_FILES_PRIVATE_H
-#define nuvashalauncher_CONTENT_FILES_PRIVATE_H
+#ifndef NUVASHALAUNCHER_CONTENT_FILES_PRIVATE_H
+#define NUVASHALAUNCHER_CONTENT_FILES_PRIVATE_H
 
 #include "nuvashalauncher-content-page.h"
 

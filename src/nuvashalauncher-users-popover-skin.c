@@ -99,8 +99,8 @@ skin_menu_show_error (SkinMenu *menu, const GError *error)
       return;
     }
   /* Automatic retries remain visible without repeatedly opening dialogs. */
-  if (g_error_matches (error, nuvashalauncher_MINECRAFT_SERVICES_ERROR,
-                        nuvashalauncher_MINECRAFT_SERVICES_ERROR_RATE_LIMITED))
+  if (g_error_matches (error, NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR,
+                        NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR_RATE_LIMITED))
     return;
   nuvashalauncher_ui_show_error (menu->closed ? NULL : GTK_WIDGET (menu->dialog),
                                 _("Minecraft Services error"), error);
@@ -881,7 +881,7 @@ nuvashalauncher_users_skin_menu_new (NuvashaLauncherUsersPopover *owner, GtkImag
   GtkBox *right = GTK_BOX (gtk_builder_get_object (content_builder, "right"));
   GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_builder_get_object (content_builder, "scroller"));
   GtkListBox *skins = GTK_LIST_BOX (gtk_builder_get_object (content_builder, "skins"));
-  NuvashaLauncherSkinView *preview = nuvashalauncher_SKIN_VIEW (gtk_builder_get_object (content_builder, "preview"));
+  NuvashaLauncherSkinView *preview = NUVASHALAUNCHER_SKIN_VIEW (gtk_builder_get_object (content_builder, "preview"));
   GtkCheckButton *default_model = GTK_CHECK_BUTTON (gtk_builder_get_object (content_builder, "classic-model"));
   GtkCheckButton *slim_model = GTK_CHECK_BUTTON (gtk_builder_get_object (content_builder, "slim-model"));
   GtkStringList *cape_list = gtk_string_list_new ((const char *[]) { _("No cape"), NULL });

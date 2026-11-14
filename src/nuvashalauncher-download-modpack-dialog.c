@@ -80,7 +80,7 @@ dialog_forget_widgets (NuvashaLauncherDownloadModpackDialog *self)
 static void
 dialog_dispose (GObject *object)
 {
-  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (object);
+  NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (object);
 
   if (self->search != NULL)
     g_cancellable_cancel (self->search);
@@ -148,7 +148,7 @@ dialog_dispose (GObject *object)
   g_free (self->icon_path);
   self->icon_path = NULL;
 
-  gtk_widget_dispose_template (GTK_WIDGET (self), nuvashalauncher_TYPE_DOWNLOAD_MODPACK_DIALOG);
+  gtk_widget_dispose_template (GTK_WIDGET (self), NUVASHALAUNCHER_TYPE_DOWNLOAD_MODPACK_DIALOG);
 
   G_OBJECT_CLASS (nuvashalauncher_download_modpack_dialog_parent_class)->dispose (object);
 }
@@ -170,7 +170,7 @@ nuvashalauncher_download_modpack_dialog_class_init (NuvashaLauncherDownloadModpa
 static void
 on_dialog_closed (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
   if (self->import_idle != 0)
     nuvashalauncher_operation_remove (self->scope, self->import_idle);
   self->import_idle = 0;
@@ -207,7 +207,7 @@ nuvashalauncher_download_modpack_dialog_init (NuvashaLauncherDownloadModpackDial
   nuvashalauncher_dialog_set_standard_size (ADW_DIALOG (self));
   gtk_widget_set_size_request (GTK_WIDGET (self), 360, 200);
   adw_dialog_set_content_width (ADW_DIALOG (self),
-                                nuvashalauncher_DIALOG_WIDE_CONTENT_WIDTH);
+                                NUVASHALAUNCHER_DIALOG_WIDE_CONTENT_WIDTH);
   adw_dialog_set_content_height (ADW_DIALOG (self), 580);
 
   /* The installing page appears in place instead of sliding in: the
@@ -221,7 +221,7 @@ NuvashaLauncherDownloadModpackDialog *
 nuvashalauncher_download_modpack_dialog_new (NuvashaLauncherInstanceManager *manager)
 {
   NuvashaLauncherDownloadModpackDialog *self =
-    g_object_new (nuvashalauncher_TYPE_DOWNLOAD_MODPACK_DIALOG, NULL);
+    g_object_new (NUVASHALAUNCHER_TYPE_DOWNLOAD_MODPACK_DIALOG, NULL);
 
   self->manager = g_object_ref (manager);
   build_browse_page (self, TRUE);
@@ -244,7 +244,7 @@ build_import_page (NuvashaLauncherDownloadModpackDialog *self)
 static gboolean
 start_import_idle (gpointer user_data)
 {
-  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
   nuvashalauncher_operation_forget_source (self->scope, self->import_idle);
   self->import_idle = 0;
 
@@ -264,7 +264,7 @@ nuvashalauncher_download_modpack_dialog_new_for_file (NuvashaLauncherInstanceMan
                                           const char *path)
 {
   NuvashaLauncherDownloadModpackDialog *self =
-    g_object_new (nuvashalauncher_TYPE_DOWNLOAD_MODPACK_DIALOG, NULL);
+    g_object_new (NUVASHALAUNCHER_TYPE_DOWNLOAD_MODPACK_DIALOG, NULL);
 
   self->manager = g_object_ref (manager);
   build_browse_page (self, FALSE);
@@ -274,7 +274,7 @@ nuvashalauncher_download_modpack_dialog_new_for_file (NuvashaLauncherInstanceMan
   {
     g_autofree char *name = g_path_get_basename (path);
 
-    self->pack_download = nuvashalauncher_downloads_add (nuvashalauncher_DOWNLOAD_MODPACK, name);
+    self->pack_download = nuvashalauncher_downloads_add (NUVASHALAUNCHER_DOWNLOAD_MODPACK, name);
   }
   nuvashalauncher_download_set_detail (self->pack_download, _("Reading modpack"));
   g_object_add_weak_pointer (G_OBJECT (self->pack_download),
@@ -369,7 +369,7 @@ dialog_details_show_again (NuvashaLauncherDownloadModpackDialog *self)
 void
 on_error_back (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   dialog_details_show_again (self);
 }
@@ -377,7 +377,7 @@ on_error_back (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 void
 on_error_retry_fetch (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   self->fail_is_install = FALSE;
 
@@ -390,7 +390,7 @@ on_error_retry_fetch (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 void
 on_error_retry_install (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   /* Back onto the installing page of the attempt that failed. */
   adw_navigation_view_pop (ADW_NAVIGATION_VIEW (self->nav));
@@ -403,7 +403,7 @@ void
 on_modpack_download_clicked (GtkButton *button G_GNUC_UNUSED,
                              gpointer user_data)
 {
-  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
   guint selected = 0;
 
   if (self->dropdown == NULL || self->versions == NULL)

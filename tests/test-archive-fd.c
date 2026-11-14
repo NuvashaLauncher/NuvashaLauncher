@@ -41,7 +41,7 @@ test_artifact_queue_does_not_trust_symlinks (void)
   g_autofree char *artifact_dir = NULL;
   InstallRequest request = { 0 };
 
-  request.loader = nuvashalauncher_LOADER_FORGE;
+  request.loader = NUVASHALAUNCHER_LOADER_FORGE;
   request.libraries_dir = g_strdup (libraries);
   request.pending = g_ptr_array_new_with_free_func (install_file_free_for_test);
   artifact = g_build_filename (libraries, relative, "forge-47.2.0.jar", NULL);

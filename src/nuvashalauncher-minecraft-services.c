@@ -5,7 +5,7 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#define MINECRAFT_SERVICES_USER_AGENT "nuvashalauncher/" nuvashalauncher_VERSION
+#define MINECRAFT_SERVICES_USER_AGENT "nuvashalauncher/" NUVASHALAUNCHER_VERSION
 
 GQuark
 nuvashalauncher_minecraft_services_error_quark (void)
@@ -91,12 +91,12 @@ nuvashalauncher_minecraft_services_response_error (SoupMessage *message, GBytes 
     g_clear_pointer (&detail, g_free);
 
   if (status == 429)
-    return g_error_new (nuvashalauncher_MINECRAFT_SERVICES_ERROR,
-                        nuvashalauncher_MINECRAFT_SERVICES_ERROR_RATE_LIMITED,
+    return g_error_new (NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR,
+                        NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR_RATE_LIMITED,
                         "rate limited");
   if (!SOUP_STATUS_IS_SUCCESSFUL (status))
-    return g_error_new (nuvashalauncher_MINECRAFT_SERVICES_ERROR,
-                        nuvashalauncher_MINECRAFT_SERVICES_ERROR_HTTP,
+    return g_error_new (NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR,
+                        NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR_HTTP,
                         _("Minecraft Services rejected the request (HTTP %u)%s%s"),
                         status, detail != NULL && *detail != '\0' ? ": " : "",
                         detail != NULL ? detail : "");
@@ -151,8 +151,8 @@ minecraft_send_done (GObject *source, GAsyncResult *result, gpointer user_data)
   if (bytes == NULL)
     {
       if (error == NULL)
-        error = g_error_new_literal (nuvashalauncher_MINECRAFT_SERVICES_ERROR,
-                                     nuvashalauncher_MINECRAFT_SERVICES_ERROR_NETWORK,
+        error = g_error_new_literal (NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR,
+                                     NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR_NETWORK,
                                      "Minecraft Services request failed");
       nuvashalauncher_task_scope_return_error (send->scope, g_steal_pointer (&error));
     }

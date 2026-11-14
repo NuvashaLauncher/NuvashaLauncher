@@ -58,7 +58,7 @@ struct _NuvashaLauncherLoaderRow
 
 G_DEFINE_FINAL_TYPE (NuvashaLauncherLoaderRow, nuvashalauncher_loader_row, G_TYPE_OBJECT)
 
-static guint nuvashalauncher_loader_row_signals[nuvashalauncher_LOADER_ROW_N_SIGNALS];
+static guint nuvashalauncher_loader_row_signals[NUVASHALAUNCHER_LOADER_ROW_N_SIGNALS];
 
 /* ---------------------------------------------------------- *
  * The two rows
@@ -71,12 +71,12 @@ static void
 on_version_selected (GObject *object G_GNUC_UNUSED,
                      GParamSpec *pspec G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherLoaderRow *self = nuvashalauncher_LOADER_ROW (user_data);
+  NuvashaLauncherLoaderRow *self = NUVASHALAUNCHER_LOADER_ROW (user_data);
 
   if (!self->ready || self->blocked)
     return;
 
-  g_signal_emit (self, nuvashalauncher_loader_row_signals[nuvashalauncher_LOADER_ROW_SIGNAL_CHANGED], 0);
+  g_signal_emit (self, nuvashalauncher_loader_row_signals[NUVASHALAUNCHER_LOADER_ROW_SIGNAL_CHANGED], 0);
 }
 
 static void start_versions (NuvashaLauncherLoaderRow *self, NuvashaLauncherLoader loader,
@@ -89,8 +89,8 @@ static void
 on_loader_selected (GObject *object G_GNUC_UNUSED,
                     GParamSpec *pspec G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherLoaderRow *self = nuvashalauncher_LOADER_ROW (user_data);
-  NuvashaLauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoaderRow *self = NUVASHALAUNCHER_LOADER_ROW (user_data);
+  NuvashaLauncherLoader loader = NUVASHALAUNCHER_LOADER_VANILLA;
 
   if (self->blocked)
     return;
@@ -116,8 +116,8 @@ loader_at (guint position)
 
   if (position == GTK_INVALID_LIST_POSITION ||
       position >= nuvashalauncher_loaders_supported_count () ||
-      loaders[position] == nuvashalauncher_LOADER_VANILLA)
-    return nuvashalauncher_LOADER_VANILLA;
+      loaders[position] == NUVASHALAUNCHER_LOADER_VANILLA)
+    return NUVASHALAUNCHER_LOADER_VANILLA;
 
   return loaders[position];
 }
@@ -135,7 +135,7 @@ update_visibility (NuvashaLauncherLoaderRow *self)
   /* The loader combo can still be emitting its selection notification while
    * a new request is being started. @current is the request's authoritative
    * loader, so use it instead of rereading the combo during that transition. */
-  gboolean vanilla = self->current == nuvashalauncher_LOADER_VANILLA;
+  gboolean vanilla = self->current == NUVASHALAUNCHER_LOADER_VANILLA;
 
   gtk_widget_set_visible (GTK_WIDGET (self->version_row), !vanilla);
 }
@@ -192,7 +192,7 @@ set_versions (NuvashaLauncherLoaderRow *self, GPtrArray *versions, guint positio
 static void
 emit_changed (NuvashaLauncherLoaderRow *self)
 {
-  g_signal_emit (self, nuvashalauncher_loader_row_signals[nuvashalauncher_LOADER_ROW_SIGNAL_CHANGED], 0);
+  g_signal_emit (self, nuvashalauncher_loader_row_signals[NUVASHALAUNCHER_LOADER_ROW_SIGNAL_CHANGED], 0);
 }
 
 static void
@@ -368,8 +368,8 @@ versions_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       if (versions != NULL)
         fill (self, versions);
       else if (error != NULL &&
-               g_error_matches (error, nuvashalauncher_LOADERS_ERROR,
-                                 nuvashalauncher_LOADERS_ERROR_NO_VERSIONS))
+               g_error_matches (error, NUVASHALAUNCHER_LOADERS_ERROR,
+                                 NUVASHALAUNCHER_LOADERS_ERROR_NO_VERSIONS))
         show_empty (self);
       else
         /* A failure that carries no error is still a failure: say what
@@ -389,7 +389,7 @@ versions_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 on_retry_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherLoaderRow *self = nuvashalauncher_LOADER_ROW (user_data);
+  NuvashaLauncherLoaderRow *self = NUVASHALAUNCHER_LOADER_ROW (user_data);
   g_autofree char *wanted = NULL;
   g_autofree char *game_version = NULL;
 
@@ -430,7 +430,7 @@ start_versions (NuvashaLauncherLoaderRow *self, NuvashaLauncherLoader loader, co
   g_clear_object (&self->cancellable);
   self->cancellable = g_cancellable_new ();
 
-  if (loader == nuvashalauncher_LOADER_VANILLA)
+  if (loader == NUVASHALAUNCHER_LOADER_VANILLA)
     {
       self->ready = FALSE;
       self->interactive = FALSE;
@@ -470,7 +470,7 @@ start_versions (NuvashaLauncherLoaderRow *self, NuvashaLauncherLoader loader, co
 NuvashaLauncherLoaderRow *
 nuvashalauncher_loader_row_new (void)
 {
-  NuvashaLauncherLoaderRow *self = g_object_new (nuvashalauncher_TYPE_LOADER_ROW, NULL);
+  NuvashaLauncherLoaderRow *self = g_object_new (NUVASHALAUNCHER_TYPE_LOADER_ROW, NULL);
   const NuvashaLauncherLoader *loaders = nuvashalauncher_loaders_supported ();
   g_autofree const char **names = NULL;
   guint count = 0;
@@ -506,7 +506,7 @@ nuvashalauncher_loader_row_new (void)
   gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
   adw_action_row_add_suffix (ADW_ACTION_ROW (self->version_row), GTK_WIDGET (self->retry));
 
-  self->current = nuvashalauncher_LOADER_VANILLA;
+  self->current = NUVASHALAUNCHER_LOADER_VANILLA;
 
   /* Every handler is connected with the object, so a row that a group
      still holds after this is gone cannot call back into it. */
@@ -526,7 +526,7 @@ nuvashalauncher_loader_row_new (void)
 AdwComboRow *
 nuvashalauncher_loader_row_get_loader_row (NuvashaLauncherLoaderRow *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_LOADER_ROW (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_LOADER_ROW (self), NULL);
 
   return self->loader_row;
 }
@@ -534,7 +534,7 @@ nuvashalauncher_loader_row_get_loader_row (NuvashaLauncherLoaderRow *self)
 AdwComboRow *
 nuvashalauncher_loader_row_get_version_row (NuvashaLauncherLoaderRow *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_LOADER_ROW (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_LOADER_ROW (self), NULL);
 
   return self->version_row;
 }
@@ -546,8 +546,8 @@ nuvashalauncher_loader_row_load (NuvashaLauncherLoaderRow *self,
                      const char    *loader_version,
                      const char    *game_version)
 {
-  g_return_if_fail (nuvashalauncher_IS_LOADER_ROW (self));
-  g_return_if_fail (settings == NULL || nuvashalauncher_IS_SETTINGS (settings));
+  g_return_if_fail (NUVASHALAUNCHER_IS_LOADER_ROW (self));
+  g_return_if_fail (settings == NULL || NUVASHALAUNCHER_IS_SETTINGS (settings));
 
   g_set_object (&self->settings, settings);
 
@@ -560,7 +560,7 @@ nuvashalauncher_loader_row_load (NuvashaLauncherLoaderRow *self,
 void
 nuvashalauncher_loader_row_set_blocked (NuvashaLauncherLoaderRow *self, gboolean blocked)
 {
-  g_return_if_fail (nuvashalauncher_IS_LOADER_ROW (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_LOADER_ROW (self));
 
   blocked = !!blocked;
 
@@ -574,7 +574,7 @@ nuvashalauncher_loader_row_set_blocked (NuvashaLauncherLoaderRow *self, gboolean
 NuvashaLauncherLoader
 nuvashalauncher_loader_row_get_loader (NuvashaLauncherLoaderRow *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_LOADER_ROW (self), nuvashalauncher_LOADER_VANILLA);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_LOADER_ROW (self), NUVASHALAUNCHER_LOADER_VANILLA);
 
   return selected_loader (self);
 }
@@ -584,7 +584,7 @@ nuvashalauncher_loader_row_get_version (NuvashaLauncherLoaderRow *self)
 {
   guint position;
 
-  g_return_val_if_fail (nuvashalauncher_IS_LOADER_ROW (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_LOADER_ROW (self), NULL);
 
   if (!self->ready)
     return NULL;
@@ -609,7 +609,7 @@ nuvashalauncher_loader_row_get_version (NuvashaLauncherLoaderRow *self)
 static void
 nuvashalauncher_loader_row_dispose (GObject *object)
 {
-  NuvashaLauncherLoaderRow *self = nuvashalauncher_LOADER_ROW (object);
+  NuvashaLauncherLoaderRow *self = NUVASHALAUNCHER_LOADER_ROW (object);
 
   /* A load still in flight only holds a reference on this object;
      cancelling it and dropping the settings stops it from writing into a
@@ -628,7 +628,7 @@ nuvashalauncher_loader_row_dispose (GObject *object)
 static void
 nuvashalauncher_loader_row_finalize (GObject *object)
 {
-  NuvashaLauncherLoaderRow *self = nuvashalauncher_LOADER_ROW (object);
+  NuvashaLauncherLoaderRow *self = NUVASHALAUNCHER_LOADER_ROW (object);
 
   g_clear_pointer (&self->versions, g_ptr_array_unref);
   g_free (self->game_version);
@@ -645,7 +645,7 @@ nuvashalauncher_loader_row_class_init (NuvashaLauncherLoaderRowClass *klass)
   object_class->dispose = nuvashalauncher_loader_row_dispose;
   object_class->finalize = nuvashalauncher_loader_row_finalize;
 
-  nuvashalauncher_loader_row_signals[nuvashalauncher_LOADER_ROW_SIGNAL_CHANGED] =
+  nuvashalauncher_loader_row_signals[NUVASHALAUNCHER_LOADER_ROW_SIGNAL_CHANGED] =
     g_signal_new ("changed", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0,
                   NULL, NULL, NULL, G_TYPE_NONE, 0);
 }

@@ -88,7 +88,7 @@ parse_library (JsonObject *object, GError **error)
 
               if (!JSON_NODE_HOLDS_OBJECT (node))
                 {
-                  g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+                  g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
                                "classifier \"%s\" must be an object", name);
                   goto fail;
                 }
@@ -123,7 +123,7 @@ parse_library (JsonObject *object, GError **error)
           if (!JSON_NODE_HOLDS_VALUE (node) ||
               json_node_get_value_type (node) != G_TYPE_STRING)
             {
-              g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+              g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
                            "native \"%s\" must be a string", name);
               goto fail;
             }
@@ -157,7 +157,7 @@ parse_library (JsonObject *object, GError **error)
               if (!JSON_NODE_HOLDS_VALUE (item) ||
                   json_node_get_value_type (item) != G_TYPE_STRING)
                 {
-                  g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+                  g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
                                "exclude %u must be a string", i);
                   goto fail;
                 }
@@ -194,7 +194,7 @@ parse_argument (JsonNode *node, GError **error)
 
   if (!JSON_NODE_HOLDS_OBJECT (node))
     {
-      g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
                    "an argument must be a string or an object");
       goto fail;
     }
@@ -208,7 +208,7 @@ parse_argument (JsonNode *node, GError **error)
 
     if (value == NULL || JSON_NODE_HOLDS_NULL (value))
       {
-        g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_MISSING,
+        g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_MISSING,
                      "required field \"value\" is missing");
         goto fail;
       }
@@ -227,7 +227,7 @@ parse_argument (JsonNode *node, GError **error)
 
         if (json_array_get_length (array) == 0)
           {
-            g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+            g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
                          "field \"value\" must not be an empty array");
             goto fail;
           }
@@ -239,7 +239,7 @@ parse_argument (JsonNode *node, GError **error)
             if (!JSON_NODE_HOLDS_VALUE (item) ||
                 json_node_get_value_type (item) != G_TYPE_STRING)
               {
-                g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+                g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
                              "argument value %u must be a string", i);
                 goto fail;
               }
@@ -251,7 +251,7 @@ parse_argument (JsonNode *node, GError **error)
         return argument;
       }
 
-    g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+    g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
                  "field \"value\" must be a string or an array");
   }
 
@@ -278,7 +278,7 @@ parse_argument_group (JsonObject   *object,
 
   if (!JSON_NODE_HOLDS_ARRAY (node))
     {
-      g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
                    "field \"%s\" must be an array", member);
       return FALSE;
     }
@@ -340,7 +340,7 @@ parse_libraries (JsonObject *root, GPtrArray **value, GError **error)
 
   if (!JSON_NODE_HOLDS_ARRAY (node))
     {
-      g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
                    "field \"libraries\" must be an array");
       return FALSE;
     }
@@ -355,7 +355,7 @@ parse_libraries (JsonObject *root, GPtrArray **value, GError **error)
 
         if (!JSON_NODE_HOLDS_OBJECT (item))
           {
-            g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+            g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
                          "library %u is not an object", i);
             return FALSE;
           }
@@ -437,7 +437,7 @@ parse_java_version (JsonObject *root, NuvashaLauncherJavaVersion **version, GErr
 
   if (major < 0 || major > G_MAXINT)
     {
-      g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
                    "the Java major version is out of range");
       nuvashalauncher_mc_free_java_version (java_version);
       return FALSE;
@@ -470,7 +470,7 @@ fill_version (JsonObject *root, NuvashaLauncherVersionDescription *self, GError 
 
   if (!nuvashalauncher_mc_version_type_from_string (type_name, &self->type))
     {
-      g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
                    "unknown version type \"%s\"", type_name);
       return FALSE;
     }
@@ -523,7 +523,7 @@ nuvashalauncher_version_description_new_from_json (const char *json,
   if (root == NULL)
     return NULL;
 
-  self = g_object_new (nuvashalauncher_TYPE_VERSION_DESCRIPTION, NULL);
+  self = g_object_new (NUVASHALAUNCHER_TYPE_VERSION_DESCRIPTION, NULL);
 
   if (!fill_version (root, self, error))
     {
@@ -537,7 +537,7 @@ nuvashalauncher_version_description_new_from_json (const char *json,
 static void
 nuvashalauncher_version_description_finalize (GObject *object)
 {
-  NuvashaLauncherVersionDescription *self = nuvashalauncher_VERSION_DESCRIPTION (object);
+  NuvashaLauncherVersionDescription *self = NUVASHALAUNCHER_VERSION_DESCRIPTION (object);
 
   g_free (self->id);
   g_free (self->main_class);

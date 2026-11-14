@@ -28,7 +28,7 @@ open_object (const char          *json,
 
   if (!json_parser_load_from_data (*parser, json, length, &local_error))
     {
-      g_set_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_PARSE,
+      g_set_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_PARSE,
                    "the service answered something that is not a document: "
                    "%s", local_error->message);
       g_clear_object (parser);
@@ -39,7 +39,7 @@ open_object (const char          *json,
 
   if (root == NULL || !JSON_NODE_HOLDS_OBJECT (root))
     {
-      g_set_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_PARSE,
+      g_set_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_PARSE,
                    "the service answered something that is not a document");
       g_clear_object (parser);
       return FALSE;
@@ -134,7 +134,7 @@ nuvashalauncher_auth_device_code_from_json (const char *json, gssize length,
       verification_uri == NULL || *verification_uri == '\0' ||
       device_code == NULL || *device_code == '\0')
     {
-      g_set_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_DEVICE_CODE,
+      g_set_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_DEVICE_CODE,
                    "Microsoft did not answer with a code to sign in with");
       return NULL;
     }
@@ -195,7 +195,7 @@ nuvashalauncher_auth_oauth_token_from_json (const char *json, gssize length, gin
    * the same shape with a refresh token as well. */
   if (token->access_token == NULL || *token->access_token == '\0')
     {
-      g_set_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_PARSE,
+      g_set_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_PARSE,
                    "the service answered with no access token");
       nuvashalauncher_oauth_token_free (token);
       return NULL;
@@ -228,7 +228,7 @@ nuvashalauncher_auth_polling_error (const char *json, gssize length, gboolean *s
 
   if (error_code == NULL)
     {
-      g_set_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_PARSE,
+      g_set_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_PARSE,
                    "the service refused the sign-in without saying why");
       return TRUE;
     }
@@ -250,7 +250,7 @@ nuvashalauncher_auth_polling_error (const char *json, gssize length, gboolean *s
 
   if (g_str_equal (error_code, "authorization_declined"))
     {
-      g_set_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_DECLINED,
+      g_set_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_DECLINED,
                    "the sign-in was declined%s%s", said != NULL ? ": " : "",
                    said != NULL ? said : "");
       return TRUE;
@@ -258,14 +258,14 @@ nuvashalauncher_auth_polling_error (const char *json, gssize length, gboolean *s
 
   if (g_str_equal (error_code, "expired_token"))
     {
-      g_set_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_EXPIRED,
+      g_set_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_EXPIRED,
                    "the code ran out before the sign-in was finished");
       return TRUE;
     }
 
-  g_set_error (error, nuvashalauncher_AUTH_ERROR,
+  g_set_error (error, NUVASHALAUNCHER_AUTH_ERROR,
                g_str_equal (error_code, "invalid_grant")
-                 ? nuvashalauncher_AUTH_ERROR_REAUTH : nuvashalauncher_AUTH_ERROR_SERVICE, "%s%s%s",
+                 ? NUVASHALAUNCHER_AUTH_ERROR_REAUTH : NUVASHALAUNCHER_AUTH_ERROR_SERVICE, "%s%s%s",
                error_code, said != NULL ? ": " : "",
                said != NULL ? said : "");
 
@@ -371,20 +371,20 @@ nuvashalauncher_auth_xbox_token_from_json (const char *json, gssize length,
   if (int_of (object, "XErr", &xerr))
     {
       const char *words = xsts_refusal (xerr);
-      NuvashaLauncherAuthError code = nuvashalauncher_AUTH_ERROR_XBOX;
+      NuvashaLauncherAuthError code = NUVASHALAUNCHER_AUTH_ERROR_XBOX;
 
       switch (xerr)
         {
-        case 2148916233: code = nuvashalauncher_AUTH_ERROR_XBOX_PROFILE; break;
-        case 2148916238: code = nuvashalauncher_AUTH_ERROR_XBOX_FAMILY; break;
+        case 2148916233: code = NUVASHALAUNCHER_AUTH_ERROR_XBOX_PROFILE; break;
+        case 2148916238: code = NUVASHALAUNCHER_AUTH_ERROR_XBOX_FAMILY; break;
         case 2148916235:
-        case 2148916236: code = nuvashalauncher_AUTH_ERROR_XBOX_COUNTRY; break;
+        case 2148916236: code = NUVASHALAUNCHER_AUTH_ERROR_XBOX_COUNTRY; break;
         case 2148916222:
-        case 2148916223: code = nuvashalauncher_AUTH_ERROR_XBOX_AGE; break;
+        case 2148916223: code = NUVASHALAUNCHER_AUTH_ERROR_XBOX_AGE; break;
         default: break;
         }
 
-      g_set_error (error, nuvashalauncher_AUTH_ERROR, code, "%s (XErr %"
+      g_set_error (error, NUVASHALAUNCHER_AUTH_ERROR, code, "%s (XErr %"
                    G_GINT64_FORMAT ")%s%s", words != NULL ? words
                                                           : "Xbox services "
                                                             "refused the "
@@ -394,7 +394,7 @@ nuvashalauncher_auth_xbox_token_from_json (const char *json, gssize length,
     }
   else
     {
-      g_set_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX,
+      g_set_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_XBOX,
                    "Xbox services answered with no token and no reason%s%s",
                    message != NULL ? ": " : "",
                    message != NULL ? message : "");
@@ -454,7 +454,7 @@ nuvashalauncher_auth_minecraft_token_from_json (const char *json, gssize length,
      application that is not registered for Minecraft with, and it is the
      one refusal here that is about this build rather than about the
      user. */
-  g_set_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX,
+  g_set_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_XBOX,
                "the Minecraft services refused the sign-in%s%s",
                message != NULL ? ": " : "",
                message != NULL ? message : "");
@@ -495,7 +495,7 @@ nuvashalauncher_auth_owns_minecraft_from_json (const char *json, gssize length,
       {
         message = string_of (object, "errorMessage");
 
-        g_set_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX,
+        g_set_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_XBOX,
                      "the Minecraft services did not answer with what the "
                      "account owns%s%s", message != NULL ? ": " : "",
                      message != NULL ? message : "");
@@ -526,7 +526,7 @@ nuvashalauncher_auth_owns_minecraft_from_json (const char *json, gssize length,
         return TRUE;
     }
 
-  g_set_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_NO_GAME,
+  g_set_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_NO_GAME,
                "this account does not own Minecraft: Java, which is what it "
                "would have to own to play it");
 
@@ -576,7 +576,7 @@ nuvashalauncher_auth_profile_from_json (const char *json, gssize length, GError 
          of yet, which is not the same as not owning it. */
       message = string_of (object, "errorMessage");
 
-      g_set_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_NO_PROFILE,
+      g_set_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_NO_PROFILE,
                    "this account owns Minecraft: Java but has never played "
                    "it, so it has no profile yet%s%s",
                    message != NULL ? ": " : "",

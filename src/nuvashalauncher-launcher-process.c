@@ -20,7 +20,7 @@
 static void
 on_output_line (const char *line, gboolean stderr_line, gpointer user_data)
 {
-  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *self = NUVASHALAUNCHER_LAUNCHER (user_data);
 
   log_line (self, stderr_line ? TAG_STDERR : TAG_STDOUT, "%s", line);
 }
@@ -41,7 +41,7 @@ nuvashalauncher_launcher_signal_process_group (NuvashaLauncher *self,
   char *end = NULL;
   gint64 pid = 0;
 
-  g_return_if_fail (nuvashalauncher_IS_LAUNCHER (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_LAUNCHER (self));
 
   if (self->process.process != NULL)
     identifier = g_subprocess_get_identifier (self->process.process);
@@ -60,7 +60,7 @@ nuvashalauncher_launcher_signal_process_group (NuvashaLauncher *self,
 static void
 on_output_done (GError *error, gpointer user_data)
 {
-  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *self = NUVASHALAUNCHER_LAUNCHER (user_data);
 
   if (error != NULL)
     log_line (self, TAG_STDOUT, "the output of the game cannot be read: %s",
@@ -90,7 +90,7 @@ watch_output (NuvashaLauncher *self, GInputStream *stream, gboolean stderr_line)
 gboolean
 on_stop_timeout (gpointer user_data)
 {
-  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *self = NUVASHALAUNCHER_LAUNCHER (user_data);
   guint source_id = self->process.stop_timeout;
 
   self->process.stop_timeout = 0;
@@ -98,7 +98,7 @@ on_stop_timeout (gpointer user_data)
 
   log_line (self, TAG_STATE,
             "the game did not stop within %d seconds, ending it now",
-            nuvashalauncher_LAUNCH_STOP_TIMEOUT);
+            NUVASHALAUNCHER_LAUNCH_STOP_TIMEOUT);
 
   nuvashalauncher_launcher_signal_process_group (self, SIGKILL);
 
@@ -108,7 +108,7 @@ on_stop_timeout (gpointer user_data)
 static void
 on_process_exited (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *self = NUVASHALAUNCHER_LAUNCHER (user_data);
 
   /* How it ended is read from the process itself: wait_finish() only
      says whether the exit was a clean one. */
@@ -144,7 +144,7 @@ nuvashalauncher_launcher_spawn (NuvashaLauncher *self, GPtrArray *argv, GError *
   char **vector = NULL;
   const char *const *arguments = NULL;
 
-  g_return_val_if_fail (nuvashalauncher_IS_LAUNCHER (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_LAUNCHER (self), FALSE);
   g_return_val_if_fail (argv != NULL && argv->len > 0, FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
@@ -155,7 +155,7 @@ nuvashalauncher_launcher_spawn (NuvashaLauncher *self, GPtrArray *argv, GError *
      this is how a launch ends. */
   if (self->process.process != NULL)
     {
-      g_set_error (error, nuvashalauncher_LAUNCH_ERROR, nuvashalauncher_LAUNCH_ERROR_ALREADY_RUNNING,
+      g_set_error (error, NUVASHALAUNCHER_LAUNCH_ERROR, NUVASHALAUNCHER_LAUNCH_ERROR_ALREADY_RUNNING,
                    "this instance is already %s",
                    nuvashalauncher_launch_state_to_string (self->state));
       return FALSE;
@@ -184,7 +184,7 @@ nuvashalauncher_launcher_spawn (NuvashaLauncher *self, GPtrArray *argv, GError *
      logs, its crash reports. */
   g_subprocess_launcher_set_cwd (launcher, self->game_directory);
 
-  set_state (self, nuvashalauncher_LAUNCH_LAUNCHING, "starting the game");
+  set_state (self, NUVASHALAUNCHER_LAUNCH_LAUNCHING, "starting the game");
 
   /* What is about to run, with the token of the session taken out: the
      command line is worth having in the log, the token is not. */
@@ -226,7 +226,7 @@ nuvashalauncher_launcher_spawn (NuvashaLauncher *self, GPtrArray *argv, GError *
                            g_object_ref (self));
 
   /* The process is up: that is the event the Running state comes from. */
-  set_state (self, nuvashalauncher_LAUNCH_RUNNING, NULL);
+  set_state (self, NUVASHALAUNCHER_LAUNCH_RUNNING, NULL);
 
   return TRUE;
 }

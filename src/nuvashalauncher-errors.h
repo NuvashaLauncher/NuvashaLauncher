@@ -1,8 +1,8 @@
 /* Copyright (C) 2026 Flia
  * SPDX-License-Identifier: GPL-3.0-only
  */
-#ifndef nuvashalauncher_ERRORS_H
-#define nuvashalauncher_ERRORS_H
+#ifndef NUVASHALAUNCHER_ERRORS_H
+#define NUVASHALAUNCHER_ERRORS_H
 
 #include <gio/gio.h>
 

@@ -33,7 +33,7 @@ static InstallRequest
 request_for (char *root, GPtrArray *pending)
 {
   InstallRequest request = { 0 };
-  request.loader = nuvashalauncher_LOADER_FORGE;
+  request.loader = NUVASHALAUNCHER_LOADER_FORGE;
   request.root = root;
   request.libraries_dir = g_build_filename (root, "libraries", NULL);
   request.pending = pending;

@@ -266,7 +266,7 @@ row_set_launcher (GtkWidget *play, NuvashaLauncher *launcher)
 static void
 on_stop_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  NuvashaLauncher *launcher = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *launcher = NUVASHALAUNCHER_LAUNCHER (user_data);
   const char *response =
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
 
@@ -306,7 +306,7 @@ confirm_stop (NuvashaLauncherMainWindow *self, NuvashaLauncher *launcher)
 static void
 on_play_clicked (GtkButton *button, gpointer user_data)
 {
-  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
   const char *id = g_object_get_data (G_OBJECT (button), "nuvashalauncher-instance-id");
   NuvashaLauncher *launcher = window_launcher (self, id);
 
@@ -379,7 +379,7 @@ static void
 on_row_icon_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
                      gpointer user_data)
 {
-  row_set_icon (GTK_IMAGE (user_data), nuvashalauncher_INSTANCE (object));
+  row_set_icon (GTK_IMAGE (user_data), NUVASHALAUNCHER_INSTANCE (object));
 }
 
 /* One row of the instance list: an AdwActionRow of the boxed list,
@@ -390,12 +390,12 @@ on_row_icon_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
 GtkWidget *
 create_instance_row (gpointer item, gpointer user_data)
 {
-  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
-  NuvashaLauncherInstance *instance = nuvashalauncher_INSTANCE (item);
+  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
+  NuvashaLauncherInstance *instance = NUVASHALAUNCHER_INSTANCE (item);
   g_autofree char *name = NULL;
   g_autofree char *minecraft_version = NULL;
   g_autofree char *subtitle = NULL;
-  NuvashaLauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader loader = NUVASHALAUNCHER_LOADER_VANILLA;
   const char *id = NULL;
   const char *loader_name = NULL;
   NuvashaLauncher *launcher = NULL;

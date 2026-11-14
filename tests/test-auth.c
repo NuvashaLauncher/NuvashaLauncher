@@ -73,41 +73,41 @@ auth_fixture_transport (const char *url, const char *method,
   const AuthTransportOverride *override = user_data;
   const char *name = NULL;
 
-  if (g_strcmp0 (url, nuvashalauncher_MICROSOFT_TOKEN_URL) == 0)
+  if (g_strcmp0 (url, NUVASHALAUNCHER_MICROSOFT_TOKEN_URL) == 0)
     {
       g_assert_cmpstr (method, ==, SOUP_METHOD_POST);
       g_assert_nonnull (body);
       name = "auth-token-ok.json";
     }
-  else if (g_strcmp0 (url, nuvashalauncher_XBOX_USER_URL) == 0)
+  else if (g_strcmp0 (url, NUVASHALAUNCHER_XBOX_USER_URL) == 0)
     {
       g_assert_cmpstr (method, ==, SOUP_METHOD_POST);
       g_assert_nonnull (body);
       g_assert_nonnull (headers);
       name = "auth-xbl-user.json";
     }
-  else if (g_strcmp0 (url, nuvashalauncher_XBOX_XSTS_URL) == 0)
+  else if (g_strcmp0 (url, NUVASHALAUNCHER_XBOX_XSTS_URL) == 0)
     {
       g_assert_cmpstr (method, ==, SOUP_METHOD_POST);
       g_assert_nonnull (body);
       g_assert_nonnull (headers);
       name = "auth-xsts-ok.json";
     }
-  else if (g_strcmp0 (url, nuvashalauncher_MINECRAFT_SERVICES_URL "/launcher/login") == 0)
+  else if (g_strcmp0 (url, NUVASHALAUNCHER_MINECRAFT_SERVICES_URL "/launcher/login") == 0)
     {
       g_assert_cmpstr (method, ==, SOUP_METHOD_POST);
       g_assert_nonnull (body);
       g_assert_nonnull (headers);
       name = "auth-minecraft-token.json";
     }
-  else if (g_str_has_prefix (url, nuvashalauncher_MINECRAFT_SERVICES_URL
+  else if (g_str_has_prefix (url, NUVASHALAUNCHER_MINECRAFT_SERVICES_URL
                             "/entitlements/license?requestId="))
     {
       g_assert_cmpstr (method, ==, SOUP_METHOD_GET);
       g_assert_nonnull (headers);
       name = "auth-entitlements-owned.json";
     }
-  else if (g_strcmp0 (url, nuvashalauncher_MINECRAFT_SERVICES_URL "/minecraft/profile") == 0)
+  else if (g_strcmp0 (url, NUVASHALAUNCHER_MINECRAFT_SERVICES_URL "/minecraft/profile") == 0)
     {
       g_assert_cmpstr (method, ==, SOUP_METHOD_GET);
       g_assert_nonnull (headers);
@@ -171,15 +171,15 @@ run_auth_error_step (const char *target_url_prefix, gint status,
   nuvashalauncher_auth_set_transport_for_tests (NULL, NULL);
 
   g_assert_null (wait.scope);
-  g_assert_error (wait.error, nuvashalauncher_AUTH_ERROR, code);
+  g_assert_error (wait.error, NUVASHALAUNCHER_AUTH_ERROR, code);
   if (message != NULL)
     g_assert_nonnull (strstr (wait.error->message, message));
   g_clear_error (&wait.error);
   g_main_loop_unref (wait.loop);
 }
 
-#ifndef nuvashalauncher_TEST_FIXTURES
-#define nuvashalauncher_TEST_FIXTURES "tests/fixtures"
+#ifndef NUVASHALAUNCHER_TEST_FIXTURES
+#define NUVASHALAUNCHER_TEST_FIXTURES "tests/fixtures"
 #endif
 
 /* The document of a fixture, which is what every answer of the chain is
@@ -187,7 +187,7 @@ run_auth_error_step (const char *target_url_prefix, gint status,
 static char *
 fixture (const char *name)
 {
-  g_autofree char *path = g_build_filename (nuvashalauncher_TEST_FIXTURES, name, NULL);
+  g_autofree char *path = g_build_filename (NUVASHALAUNCHER_TEST_FIXTURES, name, NULL);
   g_autofree char *json = NULL;
   g_autoptr (GError) error = NULL;
 
@@ -249,22 +249,22 @@ test_device_code_errors (void)
   /* A refusal is not a code: there is nothing for a user to type. */
   g_assert_null (
       nuvashalauncher_auth_device_code_from_json (error_json, -1, &error));
-  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_DEVICE_CODE);
+  g_assert_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_DEVICE_CODE);
   g_assert_nonnull (strstr (error->message, "code to sign in with"));
   g_clear_error (&error);
 
   /* Neither is a document that is not one. */
   g_assert_null (nuvashalauncher_auth_device_code_from_json (not_a_document, -1, &error));
-  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_PARSE);
+  g_assert_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_PARSE);
   g_clear_error (&error);
 
   /* A code without a place to type it would be nothing a user could do
      with, so it is refused rather than shown empty. */
   g_assert_null (nuvashalauncher_auth_device_code_from_json (no_place, -1, &error));
-  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_DEVICE_CODE);
+  g_assert_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_DEVICE_CODE);
   g_clear_error (&error);
 
-  /* The interval a service does not give is one nuvashalauncher asks about every five
+  /* The interval a service does not give is one Nuvasha Launcher asks about every five
      seconds, which is what the device code flow documents. */
   {
     g_autoptr (NuvashaLauncherDeviceCode) code =
@@ -331,13 +331,13 @@ test_polling (void)
   g_assert_true (slow);
 
   g_assert_true (nuvashalauncher_auth_polling_error (declined, -1, &slow, &error));
-  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_DECLINED);
+  g_assert_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_DECLINED);
   g_assert_nonnull (strstr (error->message, "declined"));
   g_clear_error (&error);
 
   /* A code that ran out ends it too, and says to ask for a new one. */
   g_assert_true (nuvashalauncher_auth_polling_error (expired, -1, &slow, &error));
-  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_EXPIRED);
+  g_assert_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_EXPIRED);
   g_assert_nonnull (strstr (error->message, "ran out"));
   g_clear_error (&error);
 
@@ -347,7 +347,7 @@ test_polling (void)
     g_autofree char *unknown = g_strdup ("{\"error\":\"something_new\"}");
 
     g_assert_true (nuvashalauncher_auth_polling_error (unknown, -1, &slow, &error));
-    g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_SERVICE);
+    g_assert_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_SERVICE);
     g_assert_nonnull (strstr (error->message, "something_new"));
     g_clear_error (&error);
   }
@@ -407,28 +407,28 @@ test_xsts_refusals (void)
   /* A Microsoft account that has never been an Xbox one: what a user can
      do about it is sign in to xbox.com once. */
   g_assert_null (nuvashalauncher_auth_xbox_token_from_json (no_profile, -1, &error));
-  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX_PROFILE);
+  g_assert_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_XBOX_PROFILE);
   g_assert_nonnull (strstr (error->message, "xbox.com"));
   g_assert_nonnull (strstr (error->message, "2148916233"));
   g_clear_error (&error);
 
   /* A child account has to be added to a family before it can play. */
   g_assert_null (nuvashalauncher_auth_xbox_token_from_json (child, -1, &error));
-  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX_FAMILY);
+  g_assert_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_XBOX_FAMILY);
   g_assert_nonnull (strstr (error->message, "family"));
   g_assert_nonnull (strstr (error->message, "2148916238"));
   g_clear_error (&error);
 
   /* An account from a country the services do not serve says so. */
   g_assert_null (nuvashalauncher_auth_xbox_token_from_json (country, -1, &error));
-  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX_COUNTRY);
+  g_assert_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_XBOX_COUNTRY);
   g_assert_nonnull (strstr (error->message, "country"));
   g_clear_error (&error);
 
-  /* A number nuvashalauncher does not know is still said as a number, with what the
+  /* A number Nuvasha Launcher does not know is still said as a number, with what the
      service said about it: a launcher must not invent a reason. */
   g_assert_null (nuvashalauncher_auth_xbox_token_from_json (unknown, -1, &error));
-  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX_AGE);
+  g_assert_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_XBOX_AGE);
   g_assert_nonnull (strstr (error->message, "2148916222"));
   g_assert_nonnull (strstr (error->message, "South Korea"));
   g_clear_error (&error);
@@ -439,7 +439,7 @@ test_xsts_refusals (void)
     g_autofree char *nothing = g_strdup ("{\"Token\":\"\"}");
 
     g_assert_null (nuvashalauncher_auth_xbox_token_from_json (nothing, -1, &error));
-    g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX);
+    g_assert_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_XBOX);
     g_clear_error (&error);
   }
 
@@ -474,7 +474,7 @@ test_minecraft_token (void)
      application that is not registered for Minecraft with, and it comes
      through in their own words rather than as a status code. */
   g_assert_null (nuvashalauncher_auth_minecraft_token_from_json (refused, -1, now, &error));
-  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX);
+  g_assert_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_XBOX);
   g_assert_nonnull (strstr (error->message, "Invalid app registration"));
   g_clear_error (&error);
 
@@ -510,14 +510,14 @@ test_entitlements (void)
   /* Owning something else is not owning the game: an account of a family
      that only bought the game says what is missing. */
   g_assert_false (nuvashalauncher_auth_owns_minecraft_from_json (not_owned, -1, &error));
-  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_NO_GAME);
+  g_assert_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_NO_GAME);
   g_assert_nonnull (strstr (error->message, "Minecraft: Java"));
   g_clear_error (&error);
 
   /* A document with no list in it is a refusal rather than a list of
      nothing, and the two say different things. */
   g_assert_false (nuvashalauncher_auth_owns_minecraft_from_json (refused, -1, &error));
-  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX);
+  g_assert_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_XBOX);
   g_assert_nonnull (strstr (error->message, "The user token is invalid"));
   g_clear_error (&error);
 
@@ -526,7 +526,7 @@ test_entitlements (void)
     g_autofree char *empty = g_strdup ("{\"items\":[]}");
 
     g_assert_false (nuvashalauncher_auth_owns_minecraft_from_json (empty, -1, &error));
-    g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_NO_GAME);
+    g_assert_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_NO_GAME);
     g_clear_error (&error);
   }
 
@@ -566,7 +566,7 @@ test_profile (void)
     g_assert_cmpstr (dashed, ==, "069a79f4-44e9-4726-a5be-fca90e38aaf5");
   }
 
-  /* An id that is not a uuid is not one, and nuvashalauncher does not turn it into
+  /* An id that is not a uuid is not one, and Nuvasha Launcher does not turn it into
      one by guessing. */
   g_assert_null (nuvashalauncher_auth_profile_uuid ("not-a-uuid"));
   g_assert_null (nuvashalauncher_auth_profile_uuid ("069a79f444e94726a5befca90e38aaf"));
@@ -574,7 +574,7 @@ test_profile (void)
   /* An account that owns the game and has never played it has no profile
      yet, which is not the same as not owning it. */
   g_assert_null (nuvashalauncher_auth_profile_from_json (not_found, -1, &error));
-  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_NO_PROFILE);
+  g_assert_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_NO_PROFILE);
   g_assert_nonnull (strstr (error->message, "never played"));
   g_clear_error (&error);
 
@@ -601,9 +601,9 @@ test_expired_token_completes_sign_in (void)
 {
   /* expires_in = 0 places deadline at now, so a pending/expired poll finishes
    * immediately without arming a retry timer. */
-  run_auth_error_step (nuvashalauncher_MICROSOFT_TOKEN_URL, 400,
+  run_auth_error_step (NUVASHALAUNCHER_MICROSOFT_TOKEN_URL, 400,
                        "auth-token-expired.json", NULL, 0,
-                       nuvashalauncher_AUTH_ERROR_EXPIRED, "code ran out");
+                       NUVASHALAUNCHER_AUTH_ERROR_EXPIRED, "code ran out");
 
   g_print ("ok - an expired token response completes sign-in as expired\n");
 }
@@ -611,9 +611,9 @@ test_expired_token_completes_sign_in (void)
 static void
 test_empty_error_response_completes_sign_in (void)
 {
-  run_auth_error_step (nuvashalauncher_MICROSOFT_TOKEN_URL, 500,
+  run_auth_error_step (NUVASHALAUNCHER_MICROSOFT_TOKEN_URL, 500,
                        NULL, "", 600,
-                       nuvashalauncher_AUTH_ERROR_PARSE, NULL);
+                       NUVASHALAUNCHER_AUTH_ERROR_PARSE, NULL);
 
   g_print ("ok - an empty error response body completes sign-in safely\n");
 }
@@ -623,18 +623,18 @@ test_service_state_refusals_complete_sign_in (void)
 {
   /* Every refusal is driven end-to-end through the public sign-in entry point
    * and transport seam so each state finishes the same request once. */
-  run_auth_error_step (nuvashalauncher_XBOX_XSTS_URL, 401,
+  run_auth_error_step (NUVASHALAUNCHER_XBOX_XSTS_URL, 401,
                        "auth-xsts-child-account.json", NULL, 600,
-                       nuvashalauncher_AUTH_ERROR_XBOX_FAMILY, "child account");
-  run_auth_error_step (nuvashalauncher_MINECRAFT_SERVICES_URL "/launcher/login", 403,
+                       NUVASHALAUNCHER_AUTH_ERROR_XBOX_FAMILY, "child account");
+  run_auth_error_step (NUVASHALAUNCHER_MINECRAFT_SERVICES_URL "/launcher/login", 403,
                        "auth-minecraft-app-not-registered.json", NULL, 600,
-                       nuvashalauncher_AUTH_ERROR_XBOX, "Invalid app registration");
-  run_auth_error_step (nuvashalauncher_MINECRAFT_SERVICES_URL "/entitlements/license?requestId=", 200,
+                       NUVASHALAUNCHER_AUTH_ERROR_XBOX, "Invalid app registration");
+  run_auth_error_step (NUVASHALAUNCHER_MINECRAFT_SERVICES_URL "/entitlements/license?requestId=", 200,
                        "auth-entitlements-not-owned.json", NULL, 600,
-                       nuvashalauncher_AUTH_ERROR_NO_GAME, "Minecraft: Java");
-  run_auth_error_step (nuvashalauncher_MINECRAFT_SERVICES_URL "/minecraft/profile", 404,
+                       NUVASHALAUNCHER_AUTH_ERROR_NO_GAME, "Minecraft: Java");
+  run_auth_error_step (NUVASHALAUNCHER_MINECRAFT_SERVICES_URL "/minecraft/profile", 404,
                        "auth-profile-not-found.json", NULL, 600,
-                       nuvashalauncher_AUTH_ERROR_NO_PROFILE, "never played");
+                       NUVASHALAUNCHER_AUTH_ERROR_NO_PROFILE, "never played");
 
   g_print ("ok - service refusals complete each authentication state\n");
 }
@@ -663,7 +663,7 @@ test_successful_sign_in_refresh_and_persistence (void)
   g_assert_no_error (wait.error);
   g_assert_nonnull (wait.account);
   account = g_steal_pointer (&wait.account);
-  g_assert_cmpint (account->type, ==, nuvashalauncher_ACCOUNT_MICROSOFT);
+  g_assert_cmpint (account->type, ==, NUVASHALAUNCHER_ACCOUNT_MICROSOFT);
   g_assert_cmpstr (account->name, ==, "Notch");
   g_assert_cmpstr (account->uuid, ==, "069a79f4-44e9-4726-a5be-fca90e38aaf5");
   g_assert_cmpstr (account->access_token, ==,
@@ -720,27 +720,27 @@ test_successful_sign_in_refresh_and_persistence (void)
 static void
 test_the_endpoints_are_the_documented_ones (void)
 {
-  g_assert_cmpstr (nuvashalauncher_MICROSOFT_TENANT, ==, "consumers");
-  g_assert_cmpstr (nuvashalauncher_MICROSOFT_SCOPE, ==, "XboxLive.signin offline_access");
-  g_assert_cmpstr (nuvashalauncher_MINECRAFT_RELYING_PARTY, ==,
+  g_assert_cmpstr (NUVASHALAUNCHER_MICROSOFT_TENANT, ==, "consumers");
+  g_assert_cmpstr (NUVASHALAUNCHER_MICROSOFT_SCOPE, ==, "XboxLive.signin offline_access");
+  g_assert_cmpstr (NUVASHALAUNCHER_MINECRAFT_RELYING_PARTY, ==,
                    "rp://api.minecraftservices.com/");
-  g_assert_cmpstr (nuvashalauncher_XBOX_CONTRACT_VERSION, ==, "1");
+  g_assert_cmpstr (NUVASHALAUNCHER_XBOX_CONTRACT_VERSION, ==, "1");
 
-  g_assert_cmpstr (nuvashalauncher_MICROSOFT_DEVICE_CODE_URL, ==,
+  g_assert_cmpstr (NUVASHALAUNCHER_MICROSOFT_DEVICE_CODE_URL, ==,
                    "https://login.microsoftonline.com/consumers/oauth2/v2.0/"
                    "devicecode");
-  g_assert_cmpstr (nuvashalauncher_MICROSOFT_TOKEN_URL, ==,
+  g_assert_cmpstr (NUVASHALAUNCHER_MICROSOFT_TOKEN_URL, ==,
                    "https://login.microsoftonline.com/consumers/oauth2/v2.0/"
                    "token");
-  g_assert_cmpstr (nuvashalauncher_XBOX_USER_URL, ==,
+  g_assert_cmpstr (NUVASHALAUNCHER_XBOX_USER_URL, ==,
                    "https://user.auth.xboxlive.com/user/authenticate");
-  g_assert_cmpstr (nuvashalauncher_XBOX_XSTS_URL, ==,
+  g_assert_cmpstr (NUVASHALAUNCHER_XBOX_XSTS_URL, ==,
                    "https://xsts.auth.xboxlive.com/xsts/authorize");
 
   /* The token is never a password and never a secret of the build: what
      is configured is the application id, which Microsoft publishes for
      every application it has. */
-  g_assert_cmpuint (strlen (nuvashalauncher_MICROSOFT_CLIENT_ID), >, 0);
+  g_assert_cmpuint (strlen (NUVASHALAUNCHER_MICROSOFT_CLIENT_ID), >, 0);
 
   g_print ("ok - the chain asks the addresses the services document\n");
 }
@@ -771,7 +771,7 @@ test_no_client_id_error_diagnostic (void)
 
   g_assert_null (wait.scope);
   g_assert_nonnull (wait.error);
-  g_assert_error (wait.error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_NO_CLIENT_ID);
+  g_assert_error (wait.error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_NO_CLIENT_ID);
   g_assert_nonnull (strstr (wait.error->message, "signing in is not set up"));
   g_clear_error (&wait.error);
   g_main_loop_unref (wait.loop);
@@ -780,7 +780,7 @@ test_no_client_id_error_diagnostic (void)
 int
 main (void)
 {
-  g_setenv ("NUVASHA_TEST_SECRET_STORE", "1", TRUE);
+  g_setenv ("NUVASHALAUNCHER_TEST_SECRET_STORE", "1", TRUE);
   g_print ("# Microsoft sign-in tests\n");
 
   test_device_code ();

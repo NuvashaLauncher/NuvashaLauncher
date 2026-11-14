@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_LOADERS_PRIVATE_H
-#define nuvashalauncher_LOADERS_PRIVATE_H
+#ifndef NUVASHALAUNCHER_LOADERS_PRIVATE_H
+#define NUVASHALAUNCHER_LOADERS_PRIVATE_H
 
 #include "nuvashalauncher-loaders.h"
 #include <json-glib/json-glib.h>
@@ -91,4 +91,4 @@ JsonObject *install_profile (InstallRequest *);
 void stage_processor (InstallRequest *);
 void stage_run (InstallRequest *);
 
-#endif /* nuvashalauncher_LOADERS_PRIVATE_H */
+#endif /* NUVASHALAUNCHER_LOADERS_PRIVATE_H */

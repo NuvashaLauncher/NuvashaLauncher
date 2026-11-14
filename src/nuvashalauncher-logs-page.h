@@ -13,8 +13,8 @@
  * The view is read only and stays at the end of the log as long as the
  * user has not scrolled up to read something. */
 
-#ifndef nuvashalauncher_LOGS_PAGE_H
-#define nuvashalauncher_LOGS_PAGE_H
+#ifndef NUVASHALAUNCHER_LOGS_PAGE_H
+#define NUVASHALAUNCHER_LOGS_PAGE_H
 
 #include <adwaita.h>
 
@@ -22,9 +22,9 @@
 
 G_BEGIN_DECLS
 
-#define nuvashalauncher_TYPE_LOGS_PAGE (nuvashalauncher_logs_page_get_type ())
+#define NUVASHALAUNCHER_TYPE_LOGS_PAGE (nuvashalauncher_logs_page_get_type ())
 
-G_DECLARE_FINAL_TYPE (NuvashaLauncherLogsPage, nuvashalauncher_logs_page, nuvashalauncher, LOGS_PAGE, GtkBox)
+G_DECLARE_FINAL_TYPE (NuvashaLauncherLogsPage, nuvashalauncher_logs_page, NUVASHALAUNCHER, LOGS_PAGE, GtkBox)
 
 /* The page of @launcher. It follows that launcher, so two views of the
  * same instance show the same lines. */
@@ -32,4 +32,4 @@ NuvashaLauncherLogsPage *nuvashalauncher_logs_page_new (NuvashaLauncher *launche
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_LOGS_PAGE_H */
+#endif /* NUVASHALAUNCHER_LOGS_PAGE_H */

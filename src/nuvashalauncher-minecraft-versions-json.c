@@ -82,7 +82,7 @@ parse_entry (JsonObject *object, GError **error)
 
   if (!nuvashalauncher_mc_version_type_from_string (type_name, &entry->type))
     {
-      g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
                    "unknown version type \"%s\"", type_name);
       nuvashalauncher_mc_free_entry (entry);
       return NULL;
@@ -122,7 +122,7 @@ fill_manifest (JsonObject *root, NuvashaLauncherVersionManifest *self, GError **
 
       if (!JSON_NODE_HOLDS_OBJECT (item))
         {
-          g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+          g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
                        "version %u is not an object", i);
           return FALSE;
         }
@@ -155,7 +155,7 @@ nuvashalauncher_version_manifest_new_from_json (const char *json,
   if (root == NULL)
     return NULL;
 
-  self = g_object_new (nuvashalauncher_TYPE_VERSION_MANIFEST, NULL);
+  self = g_object_new (NUVASHALAUNCHER_TYPE_VERSION_MANIFEST, NULL);
 
   if (!fill_manifest (root, self, error))
     {
@@ -169,7 +169,7 @@ nuvashalauncher_version_manifest_new_from_json (const char *json,
 const NuvashaLauncherVersionEntry *
 nuvashalauncher_version_manifest_find (NuvashaLauncherVersionManifest *self, const char *id)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_VERSION_MANIFEST (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_VERSION_MANIFEST (self), NULL);
   g_return_val_if_fail (id != NULL, NULL);
 
   if (self->entries == NULL)
@@ -189,7 +189,7 @@ nuvashalauncher_version_manifest_find (NuvashaLauncherVersionManifest *self, con
 static void
 nuvashalauncher_version_manifest_finalize (GObject *object)
 {
-  NuvashaLauncherVersionManifest *self = nuvashalauncher_VERSION_MANIFEST (object);
+  NuvashaLauncherVersionManifest *self = NUVASHALAUNCHER_VERSION_MANIFEST (object);
 
   g_free (self->latest_release);
   g_free (self->latest_snapshot);
@@ -432,10 +432,10 @@ nuvashalauncher_version_description_merge (NuvashaLauncherVersionDescription *pa
 {
   NuvashaLauncherVersionDescription *self;
 
-  g_return_val_if_fail (nuvashalauncher_IS_VERSION_DESCRIPTION (parent), NULL);
-  g_return_val_if_fail (nuvashalauncher_IS_VERSION_DESCRIPTION (child), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_VERSION_DESCRIPTION (parent), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_VERSION_DESCRIPTION (child), NULL);
 
-  self = g_object_new (nuvashalauncher_TYPE_VERSION_DESCRIPTION, NULL);
+  self = g_object_new (NUVASHALAUNCHER_TYPE_VERSION_DESCRIPTION, NULL);
 
   /* The identity of the merged version is the child's: that is the
    * name the user picked. */
@@ -480,7 +480,7 @@ nuvashalauncher_version_description_legacy_argv (NuvashaLauncherVersionDescripti
   gchar **argv = NULL;
   gint argc = 0;
 
-  g_return_val_if_fail (nuvashalauncher_IS_VERSION_DESCRIPTION (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_VERSION_DESCRIPTION (self), NULL);
 
   words = g_ptr_array_new_with_free_func (g_free);
 

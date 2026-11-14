@@ -12,7 +12,7 @@ check_filter_entry (GtkEntry *entry)
   gint64 deadline;
 
   nuvashalauncher_filter_entry_set_popover (
-    nuvashalauncher_FILTER_ENTRY (entry), popover, "Filters");
+    NUVASHALAUNCHER_FILTER_ENTRY (entry), popover, "Filters");
   gtk_popover_set_child (popover, gtk_label_new ("Filter options"));
   gtk_window_set_child (GTK_WINDOW (window), GTK_WIDGET (entry));
   gtk_window_set_default_size (GTK_WINDOW (window), 400, 60);
@@ -62,7 +62,7 @@ check_filter_entry (GtkEntry *entry)
 static void
 test_content_filter_entry (void)
 {
-  check_filter_entry (GTK_ENTRY (g_object_new (nuvashalauncher_TYPE_FILTER_ENTRY, NULL)));
+  check_filter_entry (GTK_ENTRY (g_object_new (NUVASHALAUNCHER_TYPE_FILTER_ENTRY, NULL)));
 }
 
 static void
@@ -73,7 +73,7 @@ test_modpack_filter_entry (void)
   GtkEntry *entry = GTK_ENTRY (gtk_builder_get_object (builder, "search-entry"));
   GtkBox *parent = GTK_BOX (gtk_widget_get_parent (GTK_WIDGET (entry)));
 
-  g_assert_true (nuvashalauncher_IS_FILTER_ENTRY (entry));
+  g_assert_true (NUVASHALAUNCHER_IS_FILTER_ENTRY (entry));
   g_object_ref (entry);
   gtk_box_remove (parent, GTK_WIDGET (entry));
   check_filter_entry (entry);
@@ -86,7 +86,7 @@ main (int argc, char **argv)
   g_test_init (&argc, &argv, NULL);
   if (!gtk_init_check ())
     return 77;
-  g_type_ensure (nuvashalauncher_TYPE_FILTER_ENTRY);
+  g_type_ensure (NUVASHALAUNCHER_TYPE_FILTER_ENTRY);
   g_test_add_func ("/filter-entry/content", test_content_filter_entry);
   g_test_add_func ("/filter-entry/modpack", test_modpack_filter_entry);
   return g_test_run ();

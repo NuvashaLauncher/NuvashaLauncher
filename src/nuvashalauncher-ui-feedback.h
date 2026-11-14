@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_UI_FEEDBACK_H
-#define nuvashalauncher_UI_FEEDBACK_H
+#ifndef NUVASHALAUNCHER_UI_FEEDBACK_H
+#define NUVASHALAUNCHER_UI_FEEDBACK_H
 
 #include <adwaita.h>
 #include "nuvashalauncher-errors.h"
@@ -34,4 +34,4 @@ void nuvashalauncher_ui_prepare_dialog_content (GtkWidget *content);
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_UI_FEEDBACK_H */
+#endif /* NUVASHALAUNCHER_UI_FEEDBACK_H */

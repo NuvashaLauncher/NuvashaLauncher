@@ -301,7 +301,7 @@ on_activate (GApplication *application, gpointer user_data)
   g_assert_nonnull (manager);
 
   instance = nuvashalauncher_instance_manager_create (manager, "Test", NULL, "1.21.1",
-                                          nuvashalauncher_LOADER_VANILLA, NULL, &error);
+                                          NUVASHALAUNCHER_LOADER_VANILLA, NULL, &error);
 
   if (instance == NULL)
     g_error ("the instance cannot be created: %s", error->message);

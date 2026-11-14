@@ -37,15 +37,15 @@ nuvashalauncher_content_type_to_string (NuvashaLauncherContentType type)
 {
   switch (type)
     {
-    case nuvashalauncher_CONTENT_RESOURCE_PACK:
+    case NUVASHALAUNCHER_CONTENT_RESOURCE_PACK:
       return "resourcepack";
-    case nuvashalauncher_CONTENT_SHADER_PACK:
+    case NUVASHALAUNCHER_CONTENT_SHADER_PACK:
       return "shader";
-    case nuvashalauncher_CONTENT_DATAPACK:
+    case NUVASHALAUNCHER_CONTENT_DATAPACK:
       return "datapack";
-    case nuvashalauncher_CONTENT_MODPACK:
+    case NUVASHALAUNCHER_CONTENT_MODPACK:
       return "modpack";
-    case nuvashalauncher_CONTENT_MOD:
+    case NUVASHALAUNCHER_CONTENT_MOD:
     default:
       return "mod";
     }
@@ -56,13 +56,13 @@ nuvashalauncher_content_type_title (NuvashaLauncherContentType type)
 {
   switch (type)
     {
-    case nuvashalauncher_CONTENT_RESOURCE_PACK:
+    case NUVASHALAUNCHER_CONTENT_RESOURCE_PACK:
       return _("Resource Packs");
-    case nuvashalauncher_CONTENT_SHADER_PACK:
+    case NUVASHALAUNCHER_CONTENT_SHADER_PACK:
       return _("Shader Packs");
-    case nuvashalauncher_CONTENT_DATAPACK:
+    case NUVASHALAUNCHER_CONTENT_DATAPACK:
       return "Datapacks";
-    case nuvashalauncher_CONTENT_MOD:
+    case NUVASHALAUNCHER_CONTENT_MOD:
     default:
       return _("Mods");
     }
@@ -73,13 +73,13 @@ nuvashalauncher_content_type_folder (NuvashaLauncherContentType type)
 {
   switch (type)
     {
-    case nuvashalauncher_CONTENT_RESOURCE_PACK:
+    case NUVASHALAUNCHER_CONTENT_RESOURCE_PACK:
       return "resourcepacks";
-    case nuvashalauncher_CONTENT_SHADER_PACK:
+    case NUVASHALAUNCHER_CONTENT_SHADER_PACK:
       return "shaderpacks";
-    case nuvashalauncher_CONTENT_DATAPACK:
+    case NUVASHALAUNCHER_CONTENT_DATAPACK:
       return "datapacks";
-    case nuvashalauncher_CONTENT_MOD:
+    case NUVASHALAUNCHER_CONTENT_MOD:
     default:
       return "mods";
     }
@@ -88,7 +88,7 @@ nuvashalauncher_content_type_folder (NuvashaLauncherContentType type)
 gboolean
 nuvashalauncher_content_type_needs_loader (NuvashaLauncherContentType type)
 {
-  return type == nuvashalauncher_CONTENT_MOD;
+  return type == NUVASHALAUNCHER_CONTENT_MOD;
 }
 
 const char *
@@ -102,13 +102,13 @@ nuvashalauncher_content_type_icon (NuvashaLauncherContentType type)
 {
   switch (type)
     {
-    case nuvashalauncher_CONTENT_RESOURCE_PACK:
+    case NUVASHALAUNCHER_CONTENT_RESOURCE_PACK:
       return "image-x-generic-symbolic";
-    case nuvashalauncher_CONTENT_SHADER_PACK:
+    case NUVASHALAUNCHER_CONTENT_SHADER_PACK:
       return "applications-graphics-symbolic";
-    case nuvashalauncher_CONTENT_DATAPACK:
+    case NUVASHALAUNCHER_CONTENT_DATAPACK:
       return "package-x-generic-symbolic";
-    case nuvashalauncher_CONTENT_MOD:
+    case NUVASHALAUNCHER_CONTENT_MOD:
     default:
       return "view-list-symbolic";
     }
@@ -136,8 +136,8 @@ nuvashalauncher_modrinth_root_node (const char *json, gssize length, GError **er
 
   if (root == NULL)
     {
-      g_set_error_literal (error, nuvashalauncher_MODRINTH_ERROR,
-                           nuvashalauncher_MODRINTH_ERROR_PARSE,
+      g_set_error_literal (error, NUVASHALAUNCHER_MODRINTH_ERROR,
+                           NUVASHALAUNCHER_MODRINTH_ERROR_PARSE,
                            "the answer holds no JSON");
       return NULL;
     }
@@ -343,8 +343,8 @@ nuvashalauncher_modrinth_details_from_json (const char *json, gssize length,
 
   if (details->project_id == NULL)
     {
-      g_set_error_literal (error, nuvashalauncher_MODRINTH_ERROR,
-                           nuvashalauncher_MODRINTH_ERROR_PARSE,
+      g_set_error_literal (error, NUVASHALAUNCHER_MODRINTH_ERROR,
+                           NUVASHALAUNCHER_MODRINTH_ERROR_PARSE,
                            "the project answer holds no id");
       nuvashalauncher_modrinth_details_free (details);
       return NULL;
@@ -511,11 +511,11 @@ nuvashalauncher_modrinth_search_url (const NuvashaLauncherModrinthSearch *search
 
   if (search->sort != NULL && *search->sort != '\0')
     return g_strdup_printf (
-        nuvashalauncher_MODRINTH_URL "/search?query=%s&facets=%s&index=%s&offset=%u&limit=%u", query,
+        NUVASHALAUNCHER_MODRINTH_URL "/search?query=%s&facets=%s&index=%s&offset=%u&limit=%u", query,
         escaped, search->sort, search->offset, search->limit > 0 ? search->limit : 20);
 
   return g_strdup_printf (
-      nuvashalauncher_MODRINTH_URL "/search?query=%s&facets=%s&offset=%u&limit=%u", query,
+      NUVASHALAUNCHER_MODRINTH_URL "/search?query=%s&facets=%s&offset=%u&limit=%u", query,
       escaped, search->offset, search->limit > 0 ? search->limit : 20);
 }
 
@@ -534,8 +534,8 @@ nuvashalauncher_modrinth_results_from_json (const char *json, gssize length,
 
   if (hits == NULL || !JSON_NODE_HOLDS_ARRAY (hits))
     {
-      g_set_error_literal (error, nuvashalauncher_MODRINTH_ERROR,
-                           nuvashalauncher_MODRINTH_ERROR_PARSE,
+      g_set_error_literal (error, NUVASHALAUNCHER_MODRINTH_ERROR,
+                           NUVASHALAUNCHER_MODRINTH_ERROR_PARSE,
                            "the search answer holds no hits");
       return NULL;
     }
@@ -564,7 +564,7 @@ nuvashalauncher_modrinth_results_from_json (const char *json, gssize length,
 
           if (project == NULL)
             {
-              g_set_error (error, nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_PARSE,
+              g_set_error (error, NUVASHALAUNCHER_MODRINTH_ERROR, NUVASHALAUNCHER_MODRINTH_ERROR_PARSE,
                            "invalid search result: %s",
                            result_error != NULL ? result_error->message
                                                  : "invalid project");

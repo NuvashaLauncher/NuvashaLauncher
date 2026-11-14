@@ -329,9 +329,9 @@ write_fake_java (const char *dir,
   g_autofree char *script = NULL;
 
   script = g_strdup_printf ("#!/bin/sh\n"
-                            "cat <<'nuvashalauncher_REPORT'\n"
+                            "cat <<'NUVASHALAUNCHER_REPORT'\n"
                             "%s"
-                            "nuvashalauncher_REPORT\n",
+                            "NUVASHALAUNCHER_REPORT\n",
                             report);
 
   if (!g_file_set_contents (path, script, -1, NULL) ||
@@ -611,18 +611,18 @@ test_probing_caches_and_invalidates (void)
   g_autofree char *script_v21 = g_strdup_printf (
     "#!/bin/sh\n"
     "echo x >> \"%s\"\n"
-    "cat <<'nuvashalauncher_REPORT'\n"
+    "cat <<'NUVASHALAUNCHER_REPORT'\n"
     "%s"
-    "nuvashalauncher_REPORT\n",
+    "NUVASHALAUNCHER_REPORT\n",
     counter_path, report_with_settings);
   g_autofree char *script_v17 = g_strdup_printf (
     "#!/bin/sh\n"
     "echo x >> \"%s\"\n"
-    "cat <<'nuvashalauncher_REPORT'\n"
+    "cat <<'NUVASHALAUNCHER_REPORT'\n"
     "openjdk version \"17.0.10\" 2024-01-16\n"
     "OpenJDK Runtime Environment (build 17.0.10+7)\n"
     "OpenJDK 64-Bit Server VM (build 17.0.10+7, mixed mode)\n"
-    "nuvashalauncher_REPORT\n",
+    "NUVASHALAUNCHER_REPORT\n",
     counter_path);
   g_autofree char *counts = NULL;
   gsize len = 0;

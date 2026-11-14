@@ -53,7 +53,7 @@ nuvashalauncher_main_window_model_has_active_launch (NuvashaLauncherMainWindowMo
   g_hash_table_iter_init (&iter, model->launchers);
   while (g_hash_table_iter_next (&iter, NULL, &value))
     if (nuvashalauncher_launch_state_is_busy (
-          nuvashalauncher_launcher_get_state (nuvashalauncher_LAUNCHER (value))))
+          nuvashalauncher_launcher_get_state (NUVASHALAUNCHER_LAUNCHER (value))))
       return TRUE;
 
   return FALSE;

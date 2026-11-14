@@ -11,15 +11,15 @@
 /* One table for the enum type of the signal parameter and the names the
  * enum members are spelled with. */
 static const GEnumValue launch_state_values[] = {
-  { nuvashalauncher_LAUNCH_PREPARING,      "nuvashalauncher_LAUNCH_PREPARING",      "Preparing"     },
-  { nuvashalauncher_LAUNCH_DOWNLOADING,    "nuvashalauncher_LAUNCH_DOWNLOADING",    "Downloading"   },
-  { nuvashalauncher_LAUNCH_LAUNCHING,      "nuvashalauncher_LAUNCH_LAUNCHING",      "Launching"     },
-  { nuvashalauncher_LAUNCH_RUNNING,        "nuvashalauncher_LAUNCH_RUNNING",        "Running"       },
-  { nuvashalauncher_LAUNCH_STOPPING,       "nuvashalauncher_LAUNCH_STOPPING",       "Stopping"      },
-  { nuvashalauncher_LAUNCH_STOPPED,        "nuvashalauncher_LAUNCH_STOPPED",        "Stopped"       },
-  { nuvashalauncher_LAUNCH_CRASHED,        "nuvashalauncher_LAUNCH_CRASHED",        "Crashed"       },
-  { nuvashalauncher_LAUNCH_FAILED,         "nuvashalauncher_LAUNCH_FAILED",         "Failed"        },
-  { nuvashalauncher_LAUNCH_NEEDS_SIGN_IN,  "nuvashalauncher_LAUNCH_NEEDS_SIGN_IN",  "Needs sign-in" },
+  { NUVASHALAUNCHER_LAUNCH_PREPARING,      "NUVASHALAUNCHER_LAUNCH_PREPARING",      "Preparing"     },
+  { NUVASHALAUNCHER_LAUNCH_DOWNLOADING,    "NUVASHALAUNCHER_LAUNCH_DOWNLOADING",    "Downloading"   },
+  { NUVASHALAUNCHER_LAUNCH_LAUNCHING,      "NUVASHALAUNCHER_LAUNCH_LAUNCHING",      "Launching"     },
+  { NUVASHALAUNCHER_LAUNCH_RUNNING,        "NUVASHALAUNCHER_LAUNCH_RUNNING",        "Running"       },
+  { NUVASHALAUNCHER_LAUNCH_STOPPING,       "NUVASHALAUNCHER_LAUNCH_STOPPING",       "Stopping"      },
+  { NUVASHALAUNCHER_LAUNCH_STOPPED,        "NUVASHALAUNCHER_LAUNCH_STOPPED",        "Stopped"       },
+  { NUVASHALAUNCHER_LAUNCH_CRASHED,        "NUVASHALAUNCHER_LAUNCH_CRASHED",        "Crashed"       },
+  { NUVASHALAUNCHER_LAUNCH_FAILED,         "NUVASHALAUNCHER_LAUNCH_FAILED",         "Failed"        },
+  { NUVASHALAUNCHER_LAUNCH_NEEDS_SIGN_IN,  "NUVASHALAUNCHER_LAUNCH_NEEDS_SIGN_IN",  "Needs sign-in" },
   { 0, NULL, NULL }
 };
 
@@ -53,7 +53,7 @@ nuvashalauncher_launch_state_to_string (NuvashaLauncherLaunchState state)
 gboolean
 nuvashalauncher_launch_state_is_busy (NuvashaLauncherLaunchState state)
 {
-  return state == nuvashalauncher_LAUNCH_PREPARING || state == nuvashalauncher_LAUNCH_DOWNLOADING ||
-         state == nuvashalauncher_LAUNCH_LAUNCHING || state == nuvashalauncher_LAUNCH_RUNNING ||
-         state == nuvashalauncher_LAUNCH_STOPPING;
+  return state == NUVASHALAUNCHER_LAUNCH_PREPARING || state == NUVASHALAUNCHER_LAUNCH_DOWNLOADING ||
+         state == NUVASHALAUNCHER_LAUNCH_LAUNCHING || state == NUVASHALAUNCHER_LAUNCH_RUNNING ||
+         state == NUVASHALAUNCHER_LAUNCH_STOPPING;
 }

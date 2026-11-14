@@ -109,7 +109,7 @@ persist_identified_file (NuvashaLauncherContentPage *self, NuvashaLauncherConten
   entry.hash512 = file->sha512;
   entry.download_url = file->download_url;
   entry.env_client = "required";
-  entry.env_server = self->type == nuvashalauncher_CONTENT_MOD ? "required"
+  entry.env_server = self->type == NUVASHALAUNCHER_CONTENT_MOD ? "required"
                                                     : "unsupported";
   entry.provider = "Modrinth";
   entry.project_id = file->project_id;
@@ -293,13 +293,13 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
           if (dependency->project_id == NULL)
             continue;
-          if (dependency->type == nuvashalauncher_DEPENDENCY_REQUIRED)
+          if (dependency->type == NUVASHALAUNCHER_DEPENDENCY_REQUIRED)
             add_remote_dependency (&file->required_dependencies,
                                    dependency->project_id);
-          else if (dependency->type == nuvashalauncher_DEPENDENCY_OPTIONAL)
+          else if (dependency->type == NUVASHALAUNCHER_DEPENDENCY_OPTIONAL)
             add_remote_dependency (&file->optional_dependencies,
                                    dependency->project_id);
-          else if (dependency->type == nuvashalauncher_DEPENDENCY_INCOMPATIBLE)
+          else if (dependency->type == NUVASHALAUNCHER_DEPENDENCY_INCOMPATIBLE)
             add_remote_dependency (&file->incompatible_dependencies,
                                    dependency->project_id);
         }
@@ -470,7 +470,7 @@ static void
 metadata_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                 gpointer user_data)
 {
-  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
   g_autoptr (GError) error = NULL;
 
   if (nuvashalauncher_content_metadata_finish (result, &error))

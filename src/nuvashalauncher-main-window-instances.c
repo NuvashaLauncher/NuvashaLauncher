@@ -48,7 +48,7 @@ restore_instance_list_focus (gpointer user_data)
 static void
 on_instance_dialog_closed (AdwDialog *dialog, gpointer user_data)
 {
-  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
   const char *id = g_object_get_data (G_OBJECT (dialog), "nuvashalauncher-instance-id");
 
   /* A closed dialog is removed from the reopen table. Detach its page now
@@ -78,7 +78,7 @@ static void
 on_instance_renamed (NuvashaLauncherInstance *instance, GParamSpec *pspec G_GNUC_UNUSED,
                      gpointer user_data)
 {
-  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
   const char *id = nuvashalauncher_instance_get_id (instance);
   AdwDialog *dialog = NULL;
   char *name = NULL;
@@ -164,8 +164,8 @@ nuvashalauncher_main_window_show_crash_logs (NuvashaLauncherMainWindow *self,
   AdwDialog *dialog;
   GtkWidget *child;
 
-  g_return_if_fail (nuvashalauncher_IS_MAIN_WINDOW (self));
-  g_return_if_fail (nuvashalauncher_IS_LAUNCHER (launcher));
+  g_return_if_fail (NUVASHALAUNCHER_IS_MAIN_WINDOW (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_LAUNCHER (launcher));
 
   instance = nuvashalauncher_launcher_get_instance (launcher);
   id = instance != NULL ? nuvashalauncher_instance_get_id (instance) : NULL;
@@ -178,8 +178,8 @@ nuvashalauncher_main_window_show_crash_logs (NuvashaLauncherMainWindow *self,
     return;
 
   child = adw_dialog_get_child (dialog);
-  if (child != NULL && nuvashalauncher_IS_INSTANCE_PAGE (child))
-    nuvashalauncher_instance_page_show_logs (nuvashalauncher_INSTANCE_PAGE (child));
+  if (child != NULL && NUVASHALAUNCHER_IS_INSTANCE_PAGE (child))
+    nuvashalauncher_instance_page_show_logs (NUVASHALAUNCHER_INSTANCE_PAGE (child));
   adw_dialog_present (dialog, GTK_WIDGET (self));
 }
 
@@ -286,7 +286,7 @@ on_bulk_duplicate_ready (GObject *source, GAsyncResult *result, gpointer user_da
   g_autoptr (GError) error = NULL;
   g_autoptr (NuvashaLauncherInstance) copy =
     nuvashalauncher_instance_manager_duplicate_finish (
-      nuvashalauncher_INSTANCE_MANAGER (source), result, &error);
+      NUVASHALAUNCHER_INSTANCE_MANAGER (source), result, &error);
 
   if (copy == NULL && error != NULL)
     {
@@ -333,7 +333,7 @@ on_bulk_delete_ready (GObject *source, GAsyncResult *result, gpointer user_data)
   g_autoptr (GError) error = NULL;
 
   if (!nuvashalauncher_instance_manager_delete_finish (
-        nuvashalauncher_INSTANCE_MANAGER (source), result, &error) &&
+        NUVASHALAUNCHER_INSTANCE_MANAGER (source), result, &error) &&
       !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
     {
       nuvashalauncher_ui_error_banner (wait->window->ui.banner, error);
@@ -531,7 +531,7 @@ void
 on_row_activate (GtkListBox *list G_GNUC_UNUSED, GtkListBoxRow *row,
                  gpointer user_data)
 {
-  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
 
   if (self->ui.edit_mode)
     {
@@ -592,7 +592,7 @@ drop_launchers_of_removed_instances (NuvashaLauncherMainWindow *self)
 
   while (g_hash_table_iter_next (&iter, &key, &value))
     {
-      NuvashaLauncher *launcher = nuvashalauncher_LAUNCHER (value);
+      NuvashaLauncher *launcher = NUVASHALAUNCHER_LAUNCHER (value);
 
       if (nuvashalauncher_instance_manager_get_by_id (self->model->manager, (const char *) key)
             != NULL)

@@ -159,8 +159,8 @@ nuvashalauncher_modrinth_categories_from_json (const char *json, gssize length,
 
   if (root == NULL || !JSON_NODE_HOLDS_ARRAY (root))
     {
-      g_set_error_literal (error, nuvashalauncher_MODRINTH_ERROR,
-                           nuvashalauncher_MODRINTH_ERROR_PARSE,
+      g_set_error_literal (error, NUVASHALAUNCHER_MODRINTH_ERROR,
+                           NUVASHALAUNCHER_MODRINTH_ERROR_PARSE,
                            "the categories answer is not a list");
       return NULL;
     }

@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_CONTENT_FORMAT_H
-#define nuvashalauncher_CONTENT_FORMAT_H
+#ifndef NUVASHALAUNCHER_CONTENT_FORMAT_H
+#define NUVASHALAUNCHER_CONTENT_FORMAT_H
 
 #include <glib.h>
 
@@ -17,4 +17,4 @@ char *nuvashalauncher_content_format_author (const char *license, const char *au
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_CONTENT_FORMAT_H */
+#endif /* NUVASHALAUNCHER_CONTENT_FORMAT_H */

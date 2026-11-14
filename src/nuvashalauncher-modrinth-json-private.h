@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_MODRINTH_JSON_PRIVATE_H
-#define nuvashalauncher_MODRINTH_JSON_PRIVATE_H
+#ifndef NUVASHALAUNCHER_MODRINTH_JSON_PRIVATE_H
+#define NUVASHALAUNCHER_MODRINTH_JSON_PRIVATE_H
 
 #include "nuvashalauncher-modrinth.h"
 

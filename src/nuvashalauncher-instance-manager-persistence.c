@@ -51,7 +51,7 @@ build_metadata_json (NuvashaLauncherInstanceManager *self, GError **error)
 gboolean
 nuvashalauncher_instance_manager_save (NuvashaLauncherInstanceManager *self, GError **error)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   g_autofree char *json = build_metadata_json (self, error);
@@ -62,8 +62,8 @@ nuvashalauncher_instance_manager_save (NuvashaLauncherInstanceManager *self, GEr
   g_autoptr (GError) directory_error = NULL;
   if (!nuvashalauncher_fs_make_directory (self->data_dir, 0700, &directory_error))
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                   nuvashalauncher_INSTANCE_MANAGER_ERROR_IO,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                   NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_IO,
                    "cannot create \"%s\": %s",
                     self->data_dir, directory_error->message);
       return FALSE;
@@ -97,15 +97,15 @@ get_metadata_version (JsonObject *object, GError **error)
       if (json_node_get_int (node) == INSTANCES_FORMAT_VERSION)
         return TRUE;
 
-      g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                   nuvashalauncher_INSTANCE_MANAGER_ERROR_CORRUPT,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                   NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_CORRUPT,
                    "unsupported instances.json version %" G_GINT64_FORMAT,
                    json_node_get_int (node));
       return FALSE;
     }
 
-  g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-               nuvashalauncher_INSTANCE_MANAGER_ERROR_CORRUPT,
+  g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+               NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_CORRUPT,
                "instances.json has no integer \"version\"");
   return FALSE;
 }
@@ -128,8 +128,8 @@ parse_instances_json (NuvashaLauncherInstanceManager *self,
 
   if (root == NULL || !JSON_NODE_HOLDS_OBJECT (root))
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                   nuvashalauncher_INSTANCE_MANAGER_ERROR_CORRUPT,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                   NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_CORRUPT,
                    "instances.json is not a JSON object");
       return NULL;
     }
@@ -143,8 +143,8 @@ parse_instances_json (NuvashaLauncherInstanceManager *self,
 
   if (array_node == NULL || !JSON_NODE_HOLDS_ARRAY (array_node))
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                   nuvashalauncher_INSTANCE_MANAGER_ERROR_CORRUPT,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                   NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_CORRUPT,
                    "instances.json has no \"instances\" array");
       return NULL;
     }
@@ -206,8 +206,8 @@ parse_instances_json (NuvashaLauncherInstanceManager *self,
 
           if (g_str_equal (nuvashalauncher_instance_get_id (seen), id))
             {
-              g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                           nuvashalauncher_INSTANCE_MANAGER_ERROR_CORRUPT,
+              g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                           NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_CORRUPT,
                            "instances.json lists the id \"%s\" twice", id);
               g_object_unref (instance);
               g_list_free_full (list, g_object_unref);
@@ -216,8 +216,8 @@ parse_instances_json (NuvashaLauncherInstanceManager *self,
 
           if (g_str_equal (seen_key, instance_key))
             {
-              g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                           nuvashalauncher_INSTANCE_MANAGER_ERROR_CORRUPT,
+              g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                           NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_CORRUPT,
                            "instances.json lists the normalized name \"%s\" "
                            "more than once",
                            instance_name_value);
@@ -259,7 +259,7 @@ quarantine_corrupt_file (const char *path)
 gboolean
 nuvashalauncher_instance_manager_load (NuvashaLauncherInstanceManager *self, GError **error)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   g_autofree char *contents = NULL;
@@ -267,7 +267,7 @@ nuvashalauncher_instance_manager_load (NuvashaLauncherInstanceManager *self, GEr
   g_autoptr (GError) local_error = NULL;
 
   if (!nuvashalauncher_fs_get_contents_within (self->metadata_path,
-                                   nuvashalauncher_FS_MAX_INSTANCE_METADATA_SIZE,
+                                   NUVASHALAUNCHER_FS_MAX_INSTANCE_METADATA_SIZE,
                                    &contents, &length, &local_error))
     {
 

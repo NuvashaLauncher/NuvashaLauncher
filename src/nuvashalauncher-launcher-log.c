@@ -23,7 +23,8 @@ censor_private_text (NuvashaLauncher *self, const char *text)
       g_auto (GStrv) parts = NULL;
       g_autofree char *joined = NULL;
 
-      if (secrets[i] == NULL || secrets[i][0] == '\0')
+      if (secrets[i] == NULL || secrets[i][0] == '\0' ||
+          strstr (result, secrets[i]) == NULL)
         continue;
 
       parts = g_strsplit (result, secrets[i], -1);
@@ -46,15 +47,15 @@ nuvashalauncher_launcher_get_line_limit (NuvashaLauncher *self)
 {
   guint limit;
 
-  g_return_val_if_fail (nuvashalauncher_IS_LAUNCHER (self), 0);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_LAUNCHER (self), 0);
 
   /* Read for every line that comes in, so a limit the user changes
      while a game runs takes effect at once. */
   limit = self->settings != NULL
             ? nuvashalauncher_settings_get_log_line_limit (self->settings)
-            : nuvashalauncher_SETTINGS_DEFAULT_LOG_LINE_LIMIT;
+            : NUVASHALAUNCHER_SETTINGS_DEFAULT_LOG_LINE_LIMIT;
 
-  return limit > 0 ? limit : nuvashalauncher_SETTINGS_DEFAULT_LOG_LINE_LIMIT;
+  return limit > 0 ? limit : NUVASHALAUNCHER_SETTINGS_DEFAULT_LOG_LINE_LIMIT;
 }
 
 /* One line of the log: the time it happened, where it came from and the
@@ -98,14 +99,14 @@ log_line (NuvashaLauncher *self,
   while (g_queue_get_length (self->lines) > limit)
     g_free (g_queue_pop_head (self->lines));
 
-  g_signal_emit (self, nuvashalauncher_launcher_signals[nuvashalauncher_LAUNCHER_SIGNAL_OUTPUT], 0,
+  g_signal_emit (self, nuvashalauncher_launcher_signals[NUVASHALAUNCHER_LAUNCHER_SIGNAL_OUTPUT], 0,
                  line, g_strcmp0 (tag, TAG_STDERR) == 0);
 }
 
 guint
 nuvashalauncher_launcher_get_line_count (NuvashaLauncher *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_LAUNCHER (self), 0);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_LAUNCHER (self), 0);
 
   return g_queue_get_length (self->lines);
 }
@@ -115,7 +116,7 @@ nuvashalauncher_launcher_get_log_text (NuvashaLauncher *self)
 {
   GString *text;
 
-  g_return_val_if_fail (nuvashalauncher_IS_LAUNCHER (self), g_strdup (""));
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_LAUNCHER (self), g_strdup (""));
 
   text = g_string_new (NULL);
 
@@ -133,7 +134,7 @@ nuvashalauncher_launcher_get_log_text (NuvashaLauncher *self)
 void
 nuvashalauncher_launcher_clear_log (NuvashaLauncher *self)
 {
-  g_return_if_fail (nuvashalauncher_IS_LAUNCHER (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_LAUNCHER (self));
 
   g_queue_clear_full (self->lines, g_free);
 }

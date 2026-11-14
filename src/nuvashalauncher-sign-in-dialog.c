@@ -38,7 +38,7 @@ struct _NuvashaLauncherSignInDialog
 
 G_DEFINE_FINAL_TYPE (NuvashaLauncherSignInDialog, nuvashalauncher_sign_in_dialog, ADW_TYPE_DIALOG)
 
-static guint nuvashalauncher_sign_in_dialog_signals[nuvashalauncher_SIGN_IN_DIALOG_N_SIGNALS];
+static guint nuvashalauncher_sign_in_dialog_signals[NUVASHALAUNCHER_SIGN_IN_DIALOG_N_SIGNALS];
 
 static void begin_sign_in (NuvashaLauncherSignInDialog *self);
 
@@ -214,7 +214,7 @@ finish_sign_in (GObject      *source G_GNUC_UNUSED,
     }
 
   g_signal_emit (self,
-                 nuvashalauncher_sign_in_dialog_signals[nuvashalauncher_SIGN_IN_DIALOG_SIGNAL_SIGNED_IN],
+                 nuvashalauncher_sign_in_dialog_signals[NUVASHALAUNCHER_SIGN_IN_DIALOG_SIGNAL_SIGNED_IN],
                  0, account);
 }
 
@@ -244,7 +244,7 @@ begin_sign_in (NuvashaLauncherSignInDialog *self)
 void
 nuvashalauncher_sign_in_dialog_retry (NuvashaLauncherSignInDialog *self)
 {
-  g_return_if_fail (nuvashalauncher_IS_SIGN_IN_DIALOG (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_SIGN_IN_DIALOG (self));
 
   begin_sign_in (self);
 }
@@ -266,7 +266,7 @@ on_open_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 static void
 on_closed (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherSignInDialog *self = nuvashalauncher_SIGN_IN_DIALOG (user_data);
+  NuvashaLauncherSignInDialog *self = NUVASHALAUNCHER_SIGN_IN_DIALOG (user_data);
 
   g_cancellable_cancel (self->cancellable);
 }
@@ -342,7 +342,7 @@ nuvashalauncher_sign_in_dialog_init (NuvashaLauncherSignInDialog *self)
 static void
 nuvashalauncher_sign_in_dialog_dispose (GObject *object)
 {
-  NuvashaLauncherSignInDialog *self = nuvashalauncher_SIGN_IN_DIALOG (object);
+  NuvashaLauncherSignInDialog *self = NUVASHALAUNCHER_SIGN_IN_DIALOG (object);
 
   /* A dialog that is going away stops waiting: the code stops being
      polled and nothing comes back to widgets that are not on screen. */
@@ -350,7 +350,7 @@ nuvashalauncher_sign_in_dialog_dispose (GObject *object)
     g_cancellable_cancel (self->cancellable);
   g_clear_object (&self->cancellable);
 
-  gtk_widget_dispose_template (GTK_WIDGET (self), nuvashalauncher_TYPE_SIGN_IN_DIALOG);
+  gtk_widget_dispose_template (GTK_WIDGET (self), NUVASHALAUNCHER_TYPE_SIGN_IN_DIALOG);
 
   G_OBJECT_CLASS (nuvashalauncher_sign_in_dialog_parent_class)->dispose (object);
 }
@@ -358,7 +358,7 @@ nuvashalauncher_sign_in_dialog_dispose (GObject *object)
 static void
 nuvashalauncher_sign_in_dialog_finalize (GObject *object)
 {
-  NuvashaLauncherSignInDialog *self = nuvashalauncher_SIGN_IN_DIALOG (object);
+  NuvashaLauncherSignInDialog *self = NUVASHALAUNCHER_SIGN_IN_DIALOG (object);
 
   g_clear_pointer (&self->code, nuvashalauncher_device_code_free);
 
@@ -387,15 +387,15 @@ nuvashalauncher_sign_in_dialog_class_init (NuvashaLauncherSignInDialogClass *kla
   object_class->dispose = nuvashalauncher_sign_in_dialog_dispose;
   object_class->finalize = nuvashalauncher_sign_in_dialog_finalize;
 
-  nuvashalauncher_sign_in_dialog_signals[nuvashalauncher_SIGN_IN_DIALOG_SIGNAL_SIGNED_IN] =
+  nuvashalauncher_sign_in_dialog_signals[NUVASHALAUNCHER_SIGN_IN_DIALOG_SIGNAL_SIGNED_IN] =
     g_signal_new ("signed-in", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0,
-                  NULL, NULL, NULL, G_TYPE_NONE, 1, nuvashalauncher_TYPE_ACCOUNT);
+                  NULL, NULL, NULL, G_TYPE_NONE, 1, NUVASHALAUNCHER_TYPE_ACCOUNT);
 }
 
 NuvashaLauncherSignInDialog *
 nuvashalauncher_sign_in_dialog_new (void)
 {
-  NuvashaLauncherSignInDialog *self = g_object_new (nuvashalauncher_TYPE_SIGN_IN_DIALOG, NULL);
+  NuvashaLauncherSignInDialog *self = g_object_new (NUVASHALAUNCHER_TYPE_SIGN_IN_DIALOG, NULL);
 
   /* Weak, so that the handler does not keep the dialog alive for as long
      as it is connected to it. */

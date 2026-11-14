@@ -13,8 +13,8 @@
  * detail, progress, and cancellable needed by its row,
  * so cancelling is one call away from the UI that shows it. */
 
-#ifndef nuvashalauncher_DOWNLOADS_H
-#define nuvashalauncher_DOWNLOADS_H
+#ifndef NUVASHALAUNCHER_DOWNLOADS_H
+#define NUVASHALAUNCHER_DOWNLOADS_H
 
 #include <gio/gio.h>
 #include <glib-object.h>
@@ -24,26 +24,26 @@ typedef struct _NuvashaLauncherDownloadService NuvashaLauncherDownloadService;
 G_BEGIN_DECLS
 
 typedef enum {
-  nuvashalauncher_DOWNLOAD_MODPACK,
-  nuvashalauncher_DOWNLOAD_MOD,
-  nuvashalauncher_DOWNLOAD_RESOURCE_PACK,
-  nuvashalauncher_DOWNLOAD_SHADER,
-  nuvashalauncher_DOWNLOAD_UPDATE
+  NUVASHALAUNCHER_DOWNLOAD_MODPACK,
+  NUVASHALAUNCHER_DOWNLOAD_MOD,
+  NUVASHALAUNCHER_DOWNLOAD_RESOURCE_PACK,
+  NUVASHALAUNCHER_DOWNLOAD_SHADER,
+  NUVASHALAUNCHER_DOWNLOAD_UPDATE
 } NuvashaLauncherDownloadKind;
 
 /* Progress units: files for installs, bytes for transfers. */
 typedef enum {
-  nuvashalauncher_DOWNLOAD_UNIT_COUNT,
-  nuvashalauncher_DOWNLOAD_UNIT_BYTES
+  NUVASHALAUNCHER_DOWNLOAD_UNIT_COUNT,
+  NUVASHALAUNCHER_DOWNLOAD_UNIT_BYTES
 } NuvashaLauncherDownloadUnit;
 
-#define nuvashalauncher_TYPE_DOWNLOAD (nuvashalauncher_download_get_type ())
+#define NUVASHALAUNCHER_TYPE_DOWNLOAD (nuvashalauncher_download_get_type ())
 
-G_DECLARE_FINAL_TYPE (NuvashaLauncherDownload, nuvashalauncher_download, nuvashalauncher, DOWNLOAD, GObject)
+G_DECLARE_FINAL_TYPE (NuvashaLauncherDownload, nuvashalauncher_download, NUVASHALAUNCHER, DOWNLOAD, GObject)
 
-#define nuvashalauncher_TYPE_DOWNLOADS (nuvashalauncher_downloads_get_type ())
+#define NUVASHALAUNCHER_TYPE_DOWNLOADS (nuvashalauncher_downloads_get_type ())
 
-G_DECLARE_FINAL_TYPE (NuvashaLauncherDownloads, nuvashalauncher_downloads, nuvashalauncher, DOWNLOADS, GObject)
+G_DECLARE_FINAL_TYPE (NuvashaLauncherDownloads, nuvashalauncher_downloads, NUVASHALAUNCHER, DOWNLOADS, GObject)
 
 /* Process-wide download manager. */
 NuvashaLauncherDownloads *nuvashalauncher_downloads_get_default (void);
@@ -97,4 +97,4 @@ guint64 nuvashalauncher_download_get_total (NuvashaLauncherDownload *self);
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_DOWNLOADS_H */
+#endif /* NUVASHALAUNCHER_DOWNLOADS_H */

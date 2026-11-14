@@ -55,7 +55,7 @@ nuvashalauncher_loader_ensure_directory (const char *path, GError **error)
   if (nuvashalauncher_fs_make_directory (path, 0755, &local_error))
     return TRUE;
 
-  g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
+  g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                "the directory \"%s\" cannot be made: %s", path,
                local_error->message);
 
@@ -88,7 +88,7 @@ nuvashalauncher_loader_read_zip_entry (const char *path, const char *entry, GErr
   if (fd < 0)
     {
       int saved_errno = errno;
-      g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
+      g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                    "cannot open \"%s\": %s", path, g_strerror (saved_errno));
       archive_read_free (archive);
       return NULL;
@@ -98,7 +98,7 @@ nuvashalauncher_loader_read_zip_entry (const char *path, const char *entry, GErr
   if (archive_read_support_format_zip (archive) != ARCHIVE_OK ||
       archive_read_open_fd (archive, fd, 65536) != ARCHIVE_OK)
     {
-      g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
+      g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                    "the installer at \"%s\" cannot be read: %s", path,
                    archive_error_string (archive));
       close (fd);
@@ -122,8 +122,8 @@ nuvashalauncher_loader_read_zip_entry (const char *path, const char *entry, GErr
       if (archive_entry_size_is_set (header) &&
           archive_entry_size (header) > (la_int64_t) MAX_INSTALLER_ENTRY_SIZE)
         {
-          g_set_error (error, nuvashalauncher_LOADERS_ERROR,
-                       nuvashalauncher_LOADERS_ERROR_INSTALLER,
+          g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR,
+                       NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                        "the \"%s\" of the installer is too large", entry);
           break;
         }
@@ -143,8 +143,8 @@ nuvashalauncher_loader_read_zip_entry (const char *path, const char *entry, GErr
 
            if (read_status != ARCHIVE_OK)
             {
-              g_set_error (error, nuvashalauncher_LOADERS_ERROR,
-                           nuvashalauncher_LOADERS_ERROR_INSTALLER,
+              g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR,
+                           NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                            "the \"%s\" of the installer cannot be read: %s",
                            entry, archive_error_string (archive));
               g_byte_array_unref (bytes);
@@ -155,8 +155,8 @@ nuvashalauncher_loader_read_zip_entry (const char *path, const char *entry, GErr
           if ((guint64) bytes->len > MAX_INSTALLER_ENTRY_SIZE ||
               (guint64) size > MAX_INSTALLER_ENTRY_SIZE - (guint64) bytes->len)
             {
-              g_set_error (error, nuvashalauncher_LOADERS_ERROR,
-                           nuvashalauncher_LOADERS_ERROR_INSTALLER,
+              g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR,
+                           NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                            "the \"%s\" of the installer is too large", entry);
               g_byte_array_unref (bytes);
               bytes = NULL;
@@ -180,11 +180,11 @@ nuvashalauncher_loader_read_zip_entry (const char *path, const char *entry, GErr
   if (bytes == NULL && error != NULL && *error == NULL)
     {
       if (status != ARCHIVE_EOF)
-        g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
+        g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                      "the installer at \"%s\" cannot be read: %s", path,
                      archive_message != NULL ? archive_message : "unknown error");
       else
-        g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
+        g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                      "the installer at \"%s\" has no \"%s\"", path, entry);
     }
 
@@ -284,7 +284,7 @@ nuvashalauncher_loader_write_jar_manifest_attribute (const char *path, const cha
   if (fd < 0)
     {
       int saved_errno = errno;
-      g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
+      g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                    "cannot open \"%s\": %s", path, g_strerror (saved_errno));
       archive_read_free (in);
       return FALSE;
@@ -294,7 +294,7 @@ nuvashalauncher_loader_write_jar_manifest_attribute (const char *path, const cha
   if (archive_read_support_format_zip (in) != ARCHIVE_OK ||
       archive_read_open_fd (in, fd, 65536) != ARCHIVE_OK)
     {
-      g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
+      g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                    "the patched client jar at \"%s\" cannot be read: %s", path,
                    archive_error_string (in));
       close (fd);
@@ -324,8 +324,8 @@ nuvashalauncher_loader_write_jar_manifest_attribute (const char *path, const cha
 
     if (archive_write_open_fd (out, temporary_fd) != ARCHIVE_OK)
       {
-        g_set_error (error, nuvashalauncher_LOADERS_ERROR,
-                     nuvashalauncher_LOADERS_ERROR_INSTALLER,
+        g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR,
+                     NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                      "the patched client jar at \"%s\" cannot be written: %s",
                      path, archive_error_string (out));
         close (fd);
@@ -471,7 +471,7 @@ nuvashalauncher_loader_write_jar_manifest_attribute (const char *path, const cha
 
   if (!ok || archive_write_close (out) != ARCHIVE_OK)
     {
-      g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
+      g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                    "the patched client jar at \"%s\" cannot be written: %s",
                    path, out != NULL ? archive_error_string (out) : "");
       archive_write_free (out);
@@ -488,7 +488,7 @@ nuvashalauncher_loader_write_jar_manifest_attribute (const char *path, const cha
 
   if (!written)
     {
-      g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
+      g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                    "the patched client jar at \"%s\" has no manifest to "
                    "write %s into", path, name);
       nuvashalauncher_fs_unlink (temporary, NULL);
@@ -497,7 +497,7 @@ nuvashalauncher_loader_write_jar_manifest_attribute (const char *path, const cha
 
   if (!nuvashalauncher_fs_rename (temporary, path, &local_error))
     {
-      g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
+      g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                    "the patched client jar at \"%s\" cannot be replaced: %s",
                     path, local_error->message);
       nuvashalauncher_fs_unlink (temporary, NULL);
@@ -524,7 +524,7 @@ nuvashalauncher_loader_jar_main_class (const char *path, GError **error)
       return NULL;
     }
 
-  g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
+  g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                "the jar \"%s\" says no class to run it with", path);
 
   return NULL;

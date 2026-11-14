@@ -34,7 +34,7 @@ test_install_offline (void)
   g_autofree char *name = NULL;
   g_autofree char *minecraft = NULL;
   g_autofree char *icon = NULL;
-  NuvashaLauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader loader = NUVASHALAUNCHER_LOADER_VANILLA;
   g_autofree char *options = NULL;
   g_autofree char *client = NULL;
   g_autofree char *server = NULL;
@@ -71,7 +71,7 @@ test_install_offline (void)
                 "icon", &icon, NULL);
   g_assert_cmpstr (name, ==, "Offline Pack");
   g_assert_cmpstr (minecraft, ==, "1.20.1");
-  g_assert_cmpint (loader, ==, nuvashalauncher_LOADER_VANILLA);
+  g_assert_cmpint (loader, ==, NUVASHALAUNCHER_LOADER_VANILLA);
   g_assert_true (g_str_has_prefix (instance_dir, instances_dir));
   g_assert_true (g_file_test (instance_dir, G_FILE_TEST_IS_DIR));
   g_assert_nonnull (icon);
@@ -171,7 +171,7 @@ test_install_rolls_back (void)
 
   instance = install_now (pack, manager, "Bad Pack", target, &error);
   g_assert_null (instance);
-  g_assert_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_URL);
+  g_assert_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_URL);
   g_clear_error (&error);
 
   /* Nothing of the pack is where it wanted to go, nothing of it is
@@ -225,7 +225,7 @@ test_install_leaves_user_data (void)
 
   instance = install_now (pack, manager, "Taken Pack", target, &error);
   g_assert_null (instance);
-  g_assert_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO);
+  g_assert_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_IO);
   g_clear_error (&error);
 
   /* The user data is as it was, and no temporary directory was even
@@ -262,7 +262,7 @@ test_install_needs_resolve (void)
    * guessing a Minecraft version. */
   instance = install_now (pack, manager, "Unread Pack", NULL, &error);
   g_assert_null (instance);
-  g_assert_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_LOADER);
+  g_assert_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_LOADER);
   g_clear_error (&error);
 
   g_assert_cmpuint (manager_count (manager), ==, 0);
@@ -299,19 +299,19 @@ test_install_invalid_arguments (void)
   /* NULL pack */
   instance = install_now (NULL, manager, "Pack", NULL, &error);
   g_assert_null (instance);
-  g_assert_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_FORMAT);
+  g_assert_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_FORMAT);
   g_clear_error (&error);
 
   /* NULL manager */
   instance = install_now (pack, NULL, "Pack", NULL, &error);
   g_assert_null (instance);
-  g_assert_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_FORMAT);
+  g_assert_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_FORMAT);
   g_clear_error (&error);
 
   /* Empty name */
   instance = install_now (pack, manager, "", NULL, &error);
   g_assert_null (instance);
-  g_assert_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_FORMAT);
+  g_assert_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_FORMAT);
   g_clear_error (&error);
 
   remove_recursive (dir);

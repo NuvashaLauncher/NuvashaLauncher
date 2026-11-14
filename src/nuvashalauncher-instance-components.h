@@ -2,18 +2,18 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_INSTANCE_COMPONENTS_H
-#define nuvashalauncher_INSTANCE_COMPONENTS_H
+#ifndef NUVASHALAUNCHER_INSTANCE_COMPONENTS_H
+#define NUVASHALAUNCHER_INSTANCE_COMPONENTS_H
 
 #include "nuvashalauncher-instance.h"
 
 G_BEGIN_DECLS
 
-#define nuvashalauncher_COMPONENT_MINECRAFT "net.minecraft"
-#define nuvashalauncher_COMPONENT_FABRIC "net.fabricmc.fabric-loader"
-#define nuvashalauncher_COMPONENT_FORGE "net.minecraftforge"
-#define nuvashalauncher_COMPONENT_NEOFORGE "net.neoforged.neoforge"
-#define nuvashalauncher_COMPONENT_QUILT "org.quiltmc.quilt-loader"
+#define NUVASHALAUNCHER_COMPONENT_MINECRAFT "net.minecraft"
+#define NUVASHALAUNCHER_COMPONENT_FABRIC "net.fabricmc.fabric-loader"
+#define NUVASHALAUNCHER_COMPONENT_FORGE "net.minecraftforge"
+#define NUVASHALAUNCHER_COMPONENT_NEOFORGE "net.neoforged.neoforge"
+#define NUVASHALAUNCHER_COMPONENT_QUILT "org.quiltmc.quilt-loader"
 
 /* Component-style access over nuvashalauncher's existing instance JSON. This keeps the
  * current format compatible while giving resolver and UI code stable IDs for
@@ -28,4 +28,4 @@ const char *nuvashalauncher_instance_component_id_for_loader (NuvashaLauncherLoa
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_INSTANCE_COMPONENTS_H */
+#endif /* NUVASHALAUNCHER_INSTANCE_COMPONENTS_H */

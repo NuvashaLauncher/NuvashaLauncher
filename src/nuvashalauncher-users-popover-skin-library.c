@@ -193,8 +193,8 @@ append_default_skins (GtkListBox                   *skins,
   static const char *defaults[] = {
     "Steve", "Alex", "Sunny", "Kai", "Makena", "Zuri", "Efe", "Ari", "Noor"
   };
-  g_autofree char *source_dir = g_build_filename (nuvashalauncher_DATA_DIR, "skins", "defaults", NULL);
-  g_autofree char *source_fallback = g_build_filename (nuvashalauncher_SOURCE_DATA_DIR, "skins", "defaults", NULL);
+  g_autofree char *source_dir = g_build_filename (NUVASHALAUNCHER_DATA_DIR, "skins", "defaults", NULL);
+  g_autofree char *source_fallback = g_build_filename (NUVASHALAUNCHER_SOURCE_DATA_DIR, "skins", "defaults", NULL);
   g_autofree char *target_dir = g_build_filename (g_get_user_data_dir (), "nuvashalauncher", "skins", "defaults", NULL);
   AdwActionRow *steve_row = NULL;
 

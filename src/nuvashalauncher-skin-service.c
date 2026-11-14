@@ -154,8 +154,8 @@ on_skin_upload_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_autoptr (GBytes) response =
     g_task_propagate_pointer (G_TASK (result), &error);
   gboolean rate_limited = error != NULL &&
-                          error->domain == nuvashalauncher_MINECRAFT_SERVICES_ERROR &&
-                          error->code == nuvashalauncher_MINECRAFT_SERVICES_ERROR_RATE_LIMITED;
+                          error->domain == NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR &&
+                          error->code == NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR_RATE_LIMITED;
 
   if (self != NULL && (response == NULL || error != NULL) && rate_limited)
     {
@@ -238,8 +238,8 @@ on_skin_download_done (GObject *source, GAsyncResult *result, gpointer user_data
     {
       g_clear_pointer (&bytes, g_bytes_unref);
       g_clear_error (&error);
-      g_set_error (&error, nuvashalauncher_MINECRAFT_SERVICES_ERROR,
-                   nuvashalauncher_MINECRAFT_SERVICES_ERROR_HTTP,
+      g_set_error (&error, NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR,
+                   NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR_HTTP,
                    "skin request returned HTTP status %u",
                    soup_message_get_status (upload->message));
     }
@@ -432,8 +432,8 @@ on_active_skin_delete_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   else
     {
       if (error != NULL &&
-          error->domain == nuvashalauncher_MINECRAFT_SERVICES_ERROR &&
-          error->code == nuvashalauncher_MINECRAFT_SERVICES_ERROR_RATE_LIMITED)
+          error->domain == NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR &&
+          error->code == NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR_RATE_LIMITED)
         {
           nuvashalauncher_skin_service_unref (self);
           return;
@@ -500,7 +500,7 @@ nuvashalauncher_skin_service_delete_active_skin (NuvashaLauncherSkinService *sel
   SoupMessage *message;
 
   if (self == NULL || self->account == NULL ||
-      self->account->type != nuvashalauncher_ACCOUNT_MICROSOFT ||
+      self->account->type != NUVASHALAUNCHER_ACCOUNT_MICROSOFT ||
       self->account->access_token == NULL)
     return;
 

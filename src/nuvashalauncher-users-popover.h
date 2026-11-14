@@ -15,8 +15,8 @@
  * offline account opens a dialog that asks for a name and checks it is
  * one the game accepts. */
 
-#ifndef nuvashalauncher_USERS_POPOVER_H
-#define nuvashalauncher_USERS_POPOVER_H
+#ifndef NUVASHALAUNCHER_USERS_POPOVER_H
+#define NUVASHALAUNCHER_USERS_POPOVER_H
 
 #include <adwaita.h>
 
@@ -24,9 +24,9 @@
 
 G_BEGIN_DECLS
 
-#define nuvashalauncher_TYPE_USERS_POPOVER (nuvashalauncher_users_popover_get_type ())
+#define NUVASHALAUNCHER_TYPE_USERS_POPOVER (nuvashalauncher_users_popover_get_type ())
 
-G_DECLARE_FINAL_TYPE (NuvashaLauncherUsersPopover, nuvashalauncher_users_popover, nuvashalauncher, USERS_POPOVER,
+G_DECLARE_FINAL_TYPE (NuvashaLauncherUsersPopover, nuvashalauncher_users_popover, NUVASHALAUNCHER, USERS_POPOVER,
                       GtkPopover)
 
 /* The popover of @accounts, and it takes its own reference on them. */
@@ -40,4 +40,4 @@ gboolean nuvashalauncher_users_skin_background_work_active (void);
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_USERS_POPOVER_H */
+#endif /* NUVASHALAUNCHER_USERS_POPOVER_H */

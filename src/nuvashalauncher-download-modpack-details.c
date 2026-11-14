@@ -71,8 +71,8 @@ versions_of_answer (JsonNode *root, GError **error)
 
   if (!JSON_NODE_HOLDS_ARRAY (root))
     {
-      g_set_error_literal (error, nuvashalauncher_MODRINTH_ERROR,
-                           nuvashalauncher_MODRINTH_ERROR_PARSE,
+      g_set_error_literal (error, NUVASHALAUNCHER_MODRINTH_ERROR,
+                           NUVASHALAUNCHER_MODRINTH_ERROR_PARSE,
                            "the answer is not a list of versions");
       return NULL;
     }
@@ -406,8 +406,8 @@ on_versions_answer (GObject *source G_GNUC_UNUSED,
 
   if (parser == NULL)
     {
-      if (!g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR,
-                            nuvashalauncher_DOWNLOAD_ERROR_CANCELLED))
+      if (!g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                            NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED))
         {
           g_free (self->versions_problem);
           self->versions_problem =
@@ -557,7 +557,7 @@ dialog_details_open (NuvashaLauncherDownloadModpackDialog *self)
     return;
 
   escaped_id = g_uri_escape_string (self->project->project_id, NULL, FALSE);
-  url = g_strdup_printf (nuvashalauncher_MODRINTH_URL "/project/%s/version", escaped_id);
+  url = g_strdup_printf (NUVASHALAUNCHER_MODRINTH_URL "/project/%s/version", escaped_id);
 
   self->details_ready = FALSE;
   self->versions_ready = FALSE;

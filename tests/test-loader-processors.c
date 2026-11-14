@@ -90,7 +90,7 @@ run_processor_fixture (gboolean succeed)
                                                processor_finished, &wait);
   request->task = g_object_ref (nuvashalauncher_task_scope_task (wait.scope));
   request->scope = wait.scope;
-  request->loader = nuvashalauncher_LOADER_FORGE;
+  request->loader = NUVASHALAUNCHER_LOADER_FORGE;
   request->stage = STAGE_RUN;
   request->index = 0;
   request->loader_version = g_strdup ("47.2.0");
@@ -122,8 +122,8 @@ run_processor_fixture (gboolean succeed)
   else
     {
       g_assert_null (wait.install);
-      g_assert_error (wait.error, nuvashalauncher_LOADERS_ERROR,
-                      nuvashalauncher_LOADERS_ERROR_INSTALLER);
+      g_assert_error (wait.error, NUVASHALAUNCHER_LOADERS_ERROR,
+                      NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER);
       g_assert_nonnull (strstr (wait.error->message, "final processor failure"));
     }
 
@@ -174,7 +174,7 @@ run_profile_fixture (const char *profile, gboolean valid_profile)
                                                processor_finished, &wait);
   request->task = g_object_ref (nuvashalauncher_task_scope_task (wait.scope));
   request->scope = wait.scope;
-  request->loader = nuvashalauncher_LOADER_FORGE;
+  request->loader = NUVASHALAUNCHER_LOADER_FORGE;
   request->stage = STAGE_INSTALLER;
   request->loader_version = g_strdup ("47.2.0");
   request->game_version = g_strdup ("1.20.1");
@@ -191,8 +191,8 @@ run_profile_fixture (const char *profile, gboolean valid_profile)
   g_assert_null (wait.install);
   if (valid_profile)
     {
-      g_assert_error (wait.error, nuvashalauncher_LOADERS_ERROR,
-                      nuvashalauncher_LOADERS_ERROR_INSTALLER);
+      g_assert_error (wait.error, NUVASHALAUNCHER_LOADERS_ERROR,
+                      NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER);
       g_assert_nonnull (strstr (wait.error->message,
                                 "says nothing about {MISSING}"));
     }

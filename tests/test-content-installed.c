@@ -19,7 +19,7 @@ test_row_toggle_and_selection_keep_state_consistent (void)
     nuvashalauncher_instance_manager_new (data);
   g_autoptr (NuvashaLauncherInstance) instance =
     nuvashalauncher_instance_manager_create (
-      manager, "Installed", NULL, "1.21.1", nuvashalauncher_LOADER_FABRIC,
+      manager, "Installed", NULL, "1.21.1", NUVASHALAUNCHER_LOADER_FABRIC,
       "0.15.0", &error);
   g_autofree char *instance_directory = NULL;
   g_autofree char *mods = NULL;
@@ -38,11 +38,11 @@ test_row_toggle_and_selection_keep_state_consistent (void)
   g_assert_cmpint (g_mkdir_with_parents (mods, 0700), ==, 0);
   enabled_path = g_build_filename (mods, "example.jar", NULL);
   disabled_path = g_strconcat (enabled_path,
-                               nuvashalauncher_CONTENT_DISABLED_SUFFIX, NULL);
+                               NUVASHALAUNCHER_CONTENT_DISABLED_SUFFIX, NULL);
   g_assert_true (g_file_set_contents (enabled_path, "jar bytes", -1, NULL));
 
   page = g_object_ref_sink (nuvashalauncher_content_page_new (
-    instance, nuvashalauncher_CONTENT_MOD));
+    instance, NUVASHALAUNCHER_CONTENT_MOD));
   page->installed.files = g_ptr_array_new_with_free_func (
     (GDestroyNotify) nuvashalauncher_content_file_free);
   page->installed.rows = g_hash_table_new_full (g_str_hash, g_str_equal,

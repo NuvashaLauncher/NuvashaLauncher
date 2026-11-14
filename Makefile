@@ -10,8 +10,8 @@ PREFIX     ?= /usr/local
 VERSION    := $(strip $(shell cat VERSION))
 FLATPAK    ?= 0
 
-# Libraries nuvashalauncher links against. GTK loads the available display backend at
-# runtime, so nuvashalauncher does not link to a window-system backend directly.
+# Libraries Nuvasha Launcher links against. GTK loads the available display backend at
+# runtime, so Nuvasha Launcher does not link to a window-system backend directly.
 # gio-unix-2.0 is the Linux part of GIO itself (no display involved) and
 # provides the output stream that writes a download into its temporary
 # file descriptor.
@@ -43,22 +43,23 @@ else
 PKG_CFLAGS :=
 PKG_LIBS    :=
 endif
-CPPFLAGS += -Dnuvashalauncher_LOCALE_DIR=\"$(PREFIX)/share/locale\"
-CPPFLAGS += -Dnuvashalauncher_VERSION=\"$(VERSION)\"
-CPPFLAGS += -Dnuvashalauncher_DATA_DIR=\"$(PREFIX)/share/nuvashalauncher\"
-CPPFLAGS += -Dnuvashalauncher_SOURCE_DATA_DIR=\"$(CURDIR)/data\"
-CPPFLAGS += -Dnuvashalauncher_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\"
+CPPFLAGS += -DNUVASHALAUNCHER_LOCALE_DIR=\"$(PREFIX)/share/locale\"
+CPPFLAGS += -DNUVASHALAUNCHER_VERSION=\"$(VERSION)\"
+CPPFLAGS += -DNUVASHALAUNCHER_DATA_DIR=\"$(PREFIX)/share/nuvashalauncher\"
+CPPFLAGS += -DNUVASHALAUNCHER_SOURCE_DATA_DIR=\"$(CURDIR)/data\"
+CPPFLAGS += -DNUVASHALAUNCHER_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\"
 ifeq ($(FLATPAK),1)
-CPPFLAGS += -Dnuvashalauncher_FLATPAK
+CPPFLAGS += -DNUVASHALAUNCHER_FLATPAK
 endif
 LOCALES := es_AR es_ES pt_BR pt_PT fr de it ja ko zh_CN zh_TW ru pl uk tr nl cs hu sv da fi nb ro vi id ar
 LOCALE_MOS := $(LOCALES:%=build/locale/%/LC_MESSAGES/nuvashalauncher.mo)
 SCHEMA_XML := data/com.github.nuvashalauncher.nuvashalauncher.gschema.xml
 SCHEMA_COMPILED := build/schemas/gschemas.compiled
 
-CFLAGS   := -std=c17 -Wall -Wextra -Wpedantic -MMD -MP
-RELFLAGS := -O2
-DBGFLAGS := -g -O0 -fsanitize=address,undefined -fno-sanitize-recover=all
+CFLAGS     ?= -std=c17 -Wall -Wextra -Wpedantic -MMD -MP
+RELFLAGS   := -O2 -D_FORTIFY_SOURCE=2 -fstack-protector-strong -fPIE
+RELLDFLAGS := -pie -Wl,-z,relro,-z,now
+DBGFLAGS   := -g -O0 -fsanitize=address,undefined -fno-sanitize-recover=all
 
 BIN    := build/nuvashalauncher
 DBGBIN := build-debug/nuvashalauncher
@@ -99,7 +100,7 @@ fast:
 debug: $(if $(SRCS),$(DBGBIN))
 
 $(BIN): $(RELOBJS) | build
-	$(CC) $(RELFLAGS) -o $@ $(RELOBJS) $(PKG_LIBS)
+	$(CC) $(RELFLAGS) $(RELLDFLAGS) -o $@ $(RELOBJS) $(PKG_LIBS)
 
 $(DBGBIN): $(DBGOBJS) | build-debug
 	$(CC) $(DBGFLAGS) -o $@ $(DBGOBJS) $(PKG_LIBS)
@@ -114,17 +115,17 @@ $(RESOURCE_O): $(RESOURCE_C) | build
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(RELFLAGS) $(PKG_CFLAGS) -Wno-overlength-strings -c -o $@ $<
 
 build-debug/%.o: src/%.c | build-debug
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(DBGFLAGS) $(PKG_CFLAGS) -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DBGFLAGS) $(PKG_CFLAGS) -Wno-overlength-strings -c -o $@ $<
 
 $(RESOURCE_DBG_O): $(RESOURCE_C) | build-debug
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DBGFLAGS) $(PKG_CFLAGS) -Wno-overlength-strings -c -o $@ $(RESOURCE_C)
 
 build/tests/%: tests/%.c $(TESTLIBOBJS) | build/tests
-	$(CC) $(CFLAGS) $(RELFLAGS) -Isrc $(PKG_CFLAGS) \
-		-Dnuvashalauncher_DATA_DIR=\"$(CURDIR)/data\" -Dnuvashalauncher_BIN=\"$(CURDIR)/$(BIN)\" \
-		-Dnuvashalauncher_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\" \
-		-Dnuvashalauncher_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
-		-Dnuvashalauncher_SRC_DIR=\"$(CURDIR)/src\" -Dnuvashalauncher_PO_DIR=\"$(CURDIR)/po\" \
+	$(CC) $(CFLAGS) $(RELFLAGS) $(RELLDFLAGS) -Isrc $(PKG_CFLAGS) \
+		-DNUVASHALAUNCHER_DATA_DIR=\"$(CURDIR)/data\" -DNUVASHALAUNCHER_BIN=\"$(CURDIR)/$(BIN)\" \
+		-DNUVASHALAUNCHER_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\" \
+		-DNUVASHALAUNCHER_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
+		-DNUVASHALAUNCHER_SRC_DIR=\"$(CURDIR)/src\" -DNUVASHALAUNCHER_PO_DIR=\"$(CURDIR)/po\" \
 		-o $@ $< $(TESTLIBOBJS) $(PKG_LIBS)
 
 # Tests never write to the real data directory and never touch the network.
@@ -134,7 +135,7 @@ test: $(if $(SRCS),$(BIN)) $(TESTBINS) $(SCHEMA_COMPILED)
 	@set -e; test_tmp=$$(mktemp -d "$(CURDIR)/build/test-tmp-XXXXXX"); \
 	trap 'rm -rf "$$test_tmp"' EXIT HUP INT TERM; \
 	mkdir -p "$$test_tmp/config" "$$test_tmp/data" "$$test_tmp/cache" "$$test_tmp/state" "$$test_tmp/runtime"; chmod 700 "$$test_tmp/runtime"; \
-  pass=0; skip=0; test_output="$$test_tmp/output"; for t in $(TESTBINS); do echo "RUN  $$t"; if NUVASHA_TEST_SECRET_STORE=1 TMPDIR="$$test_tmp" XDG_CONFIG_HOME="$$test_tmp/config" XDG_DATA_HOME="$$test_tmp/data" XDG_CACHE_HOME="$$test_tmp/cache" XDG_STATE_HOME="$$test_tmp/state" XDG_RUNTIME_DIR="$$test_tmp/runtime" GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t >"$$test_output" 2>&1; then status=0; else status=$$?; fi; cat "$$test_output"; \
+  pass=0; skip=0; test_output="$$test_tmp/output"; for t in $(TESTBINS); do echo "RUN  $$t"; if NUVASHALAUNCHER_TEST_SECRET_STORE=1 TMPDIR="$$test_tmp" XDG_CONFIG_HOME="$$test_tmp/config" XDG_DATA_HOME="$$test_tmp/data" XDG_CACHE_HOME="$$test_tmp/cache" XDG_STATE_HOME="$$test_tmp/state" XDG_RUNTIME_DIR="$$test_tmp/runtime" GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t >"$$test_output" 2>&1; then status=0; else status=$$?; fi; cat "$$test_output"; \
 		if test $$status -eq 77; then skip=$$((skip + 1)); \
 		elif test $$status -ne 0; then exit $$status; \
 		elif grep -q '^TAP version' "$$test_output"; then \
@@ -183,10 +184,10 @@ test-flatpak-runtime:
 # AddressSanitizer and UndefinedBehaviorSanitizer into build-debug/.
 build-debug/tests/%: tests/%.c $(TESTLIBDBGOBJS) | build-debug/tests
 	$(CC) $(CFLAGS) $(DBGFLAGS) -Isrc $(PKG_CFLAGS) \
-		-Dnuvashalauncher_DATA_DIR=\"$(CURDIR)/data\" -Dnuvashalauncher_BIN=\"$(CURDIR)/$(BIN)\" \
-		-Dnuvashalauncher_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\" \
-		-Dnuvashalauncher_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
-		-Dnuvashalauncher_SRC_DIR=\"$(CURDIR)/src\" -Dnuvashalauncher_PO_DIR=\"$(CURDIR)/po\" \
+		-DNUVASHALAUNCHER_DATA_DIR=\"$(CURDIR)/data\" -DNUVASHALAUNCHER_BIN=\"$(CURDIR)/$(BIN)\" \
+		-DNUVASHALAUNCHER_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\" \
+		-DNUVASHALAUNCHER_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
+		-DNUVASHALAUNCHER_SRC_DIR=\"$(CURDIR)/src\" -DNUVASHALAUNCHER_PO_DIR=\"$(CURDIR)/po\" \
 		-o $@ $< $(TESTLIBDBGOBJS) $(PKG_LIBS)
 
 # The display guard test runs the release launcher, so test-debug builds both
@@ -195,7 +196,7 @@ test-debug: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS) $(SCHEMA_COMPILED)
 	@set -e; test_tmp=$$(mktemp -d "$(CURDIR)/build/test-tmp-XXXXXX"); \
 	trap 'rm -rf "$$test_tmp"' EXIT HUP INT TERM; \
 	mkdir -p "$$test_tmp/config" "$$test_tmp/data" "$$test_tmp/cache" "$$test_tmp/state" "$$test_tmp/runtime"; chmod 700 "$$test_tmp/runtime"; \
-  pass=0; skip=0; test_output="$$test_tmp/output"; for t in $(TESTDBGBINS); do echo "RUN  $$t"; if NUVASHA_TEST_SECRET_STORE=1 ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 LSAN_OPTIONS=detect_leaks=1:exitcode=1:suppressions="$(CURDIR)/tests/gtk-lsan.supp" TMPDIR="$$test_tmp" XDG_CONFIG_HOME="$$test_tmp/config" XDG_DATA_HOME="$$test_tmp/data" XDG_CACHE_HOME="$$test_tmp/cache" XDG_STATE_HOME="$$test_tmp/state" XDG_RUNTIME_DIR="$$test_tmp/runtime" GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t >"$$test_output" 2>&1; then status=0; else status=$$?; fi; cat "$$test_output"; \
+  pass=0; skip=0; test_output="$$test_tmp/output"; for t in $(TESTDBGBINS); do echo "RUN  $$t"; if NUVASHALAUNCHER_TEST_SECRET_STORE=1 ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 LSAN_OPTIONS=detect_leaks=1:exitcode=1:suppressions="$(CURDIR)/tests/gtk-lsan.supp" TMPDIR="$$test_tmp" XDG_CONFIG_HOME="$$test_tmp/config" XDG_DATA_HOME="$$test_tmp/data" XDG_CACHE_HOME="$$test_tmp/cache" XDG_STATE_HOME="$$test_tmp/state" XDG_RUNTIME_DIR="$$test_tmp/runtime" GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t >"$$test_output" 2>&1; then status=0; else status=$$?; fi; cat "$$test_output"; \
 		if test $$status -eq 77; then skip=$$((skip + 1)); \
 		elif test $$status -ne 0; then exit $$status; \
 		elif grep -q '^TAP version' "$$test_output"; then \
@@ -216,7 +217,7 @@ static-analysis:
 	    $(PKG_CFLAGS) -Isrc "$$source"; done
 
 pot:
-	xgettext --from-code=UTF-8 --language=C --keyword=_ --keyword=N_ \
+	xgettext --from-code=UTF-8 --keyword=_ --keyword=N_ \
 		--files-from=po/POTFILES.in --output=po/nuvashalauncher.pot
 
 install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS) $(SCHEMA_COMPILED)

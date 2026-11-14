@@ -35,12 +35,12 @@ static char *
 ensure_cache_directory (GError **error)
 {
   g_autofree char *directory =
-    g_build_filename (g_get_user_cache_dir (), nuvashalauncher_VERSIONS_CACHE_SUBDIR, NULL);
+    g_build_filename (g_get_user_cache_dir (), NUVASHALAUNCHER_VERSIONS_CACHE_SUBDIR, NULL);
 
   g_autoptr (GError) local_error = NULL;
   if (!nuvashalauncher_fs_make_directory (directory, 0755, &local_error))
     {
-      g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_IO,
+      g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_IO,
                    "cannot create \"%s\": %s", directory,
                    local_error->message);
       return NULL;
@@ -144,17 +144,17 @@ manifest_file_loaded (GObject *source, GAsyncResult *result,
     {
       nuvashalauncher_task_sequence_return_error (
         request->sequence,
-        g_error_new (nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_IO,
+        g_error_new (NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_IO,
                      "the downloaded manifest cannot be read: %s",
                      error->message));
       return;
     }
 
-  if (length > nuvashalauncher_FS_MAX_JSON_DOCUMENT_SIZE)
+  if (length > NUVASHALAUNCHER_FS_MAX_JSON_DOCUMENT_SIZE)
     {
       nuvashalauncher_task_sequence_return_error (
         request->sequence,
-        g_error_new_literal (nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_IO,
+        g_error_new_literal (NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_IO,
                              "the downloaded manifest is too large"));
       return;
     }
@@ -281,17 +281,17 @@ load_file_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
     {
       nuvashalauncher_task_sequence_return_error (
         request->sequence,
-        g_error_new (nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_IO,
+        g_error_new (NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_IO,
                      "the downloaded version cannot be read: %s",
                      error->message));
       return;
     }
 
-  if (length > nuvashalauncher_FS_MAX_JSON_DOCUMENT_SIZE)
+  if (length > NUVASHALAUNCHER_FS_MAX_JSON_DOCUMENT_SIZE)
     {
       nuvashalauncher_task_sequence_return_error (
         request->sequence,
-        g_error_new_literal (nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_IO,
+        g_error_new_literal (NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_IO,
                              "the downloaded version document is too large"));
       return;
     }
@@ -374,7 +374,7 @@ load_step (LoadRequest *request)
     {
       nuvashalauncher_task_sequence_return_error (
         request->sequence,
-        g_error_new (nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_NOT_FOUND,
+        g_error_new (NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_NOT_FOUND,
                      "the manifest knows no version \"%s\"",
                      request->next_id));
       return;
@@ -384,7 +384,7 @@ load_step (LoadRequest *request)
     {
       nuvashalauncher_task_sequence_return_error (
         request->sequence,
-        g_error_new (nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_CYCLE,
+        g_error_new (NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_CYCLE,
                      "\"%s\" inherits from a version that inherits from it",
                      request->next_id));
       return;
@@ -420,7 +420,7 @@ nuvashalauncher_version_load_async (NuvashaLauncherVersionManifest *manifest,
   NuvashaLauncherTaskScope *scope = NULL;
   LoadRequest *request;
 
-  g_return_val_if_fail (nuvashalauncher_IS_VERSION_MANIFEST (manifest), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_VERSION_MANIFEST (manifest), NULL);
   g_return_val_if_fail (version_id != NULL, NULL);
 
   request = g_new0 (LoadRequest, 1);

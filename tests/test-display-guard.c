@@ -13,7 +13,7 @@
 static void
 test_refuses_to_start_without_display (void)
 {
-  gchar *argv[] = { (gchar *) nuvashalauncher_BIN, NULL };
+  gchar *argv[] = { (gchar *) NUVASHALAUNCHER_BIN, NULL };
   g_auto (GStrv) env = g_get_environ ();
   g_autoptr (GError) error = NULL;
   gchar *child_stdout = NULL;

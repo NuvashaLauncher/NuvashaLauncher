@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_FS_H
-#define nuvashalauncher_FS_H
+#ifndef NUVASHALAUNCHER_FS_H
+#define NUVASHALAUNCHER_FS_H
 
 #include <gio/gio.h>
 #include "nuvashalauncher-task.h"
@@ -16,12 +16,12 @@ G_BEGIN_DECLS
  * The arithmetic is done in a 64-bit type on purpose: a limit written as
  * plain `1024 * 1024` is an `int` product, which silently overflows as soon
  * as a limit grows past 2 GiB instead of failing loudly. */
-#define nuvashalauncher_FS_MAX_SMALL_METADATA_SIZE G_GINT64_CONSTANT (1024 * 1024)
-#define nuvashalauncher_FS_MAX_CONTENT_INDEX_SIZE G_GINT64_CONSTANT (4 * 1024 * 1024)
-#define nuvashalauncher_FS_MAX_INSTANCE_METADATA_SIZE G_GINT64_CONSTANT (16 * 1024 * 1024)
-#define nuvashalauncher_FS_MAX_REMOTE_JSON_SIZE G_GINT64_CONSTANT (64 * 1024 * 1024)
-#define nuvashalauncher_FS_MAX_ASSET_INDEX_SIZE nuvashalauncher_FS_MAX_REMOTE_JSON_SIZE
-#define nuvashalauncher_FS_MAX_JSON_DOCUMENT_SIZE nuvashalauncher_FS_MAX_REMOTE_JSON_SIZE
+#define NUVASHALAUNCHER_FS_MAX_SMALL_METADATA_SIZE G_GINT64_CONSTANT (1024 * 1024)
+#define NUVASHALAUNCHER_FS_MAX_CONTENT_INDEX_SIZE G_GINT64_CONSTANT (4 * 1024 * 1024)
+#define NUVASHALAUNCHER_FS_MAX_INSTANCE_METADATA_SIZE G_GINT64_CONSTANT (16 * 1024 * 1024)
+#define NUVASHALAUNCHER_FS_MAX_REMOTE_JSON_SIZE G_GINT64_CONSTANT (64 * 1024 * 1024)
+#define NUVASHALAUNCHER_FS_MAX_ASSET_INDEX_SIZE NUVASHALAUNCHER_FS_MAX_REMOTE_JSON_SIZE
+#define NUVASHALAUNCHER_FS_MAX_JSON_DOCUMENT_SIZE NUVASHALAUNCHER_FS_MAX_REMOTE_JSON_SIZE
 
 gboolean nuvashalauncher_fs_replace_contents (const char *path, const void *contents,
                                   gssize length, int mode, GError **error);
@@ -104,4 +104,4 @@ gboolean nuvashalauncher_fs_copy_tree_finish (GAsyncResult *result, GError **err
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_FS_H */
+#endif /* NUVASHALAUNCHER_FS_H */

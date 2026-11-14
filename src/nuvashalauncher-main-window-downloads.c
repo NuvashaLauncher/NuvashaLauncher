@@ -27,7 +27,7 @@ download_row_free (gpointer data)
 static void
 on_download_cancel (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncher_download_cancel (nuvashalauncher_DOWNLOAD (user_data));
+  nuvashalauncher_download_cancel (NUVASHALAUNCHER_DOWNLOAD (user_data));
 }
 
 /* Format transfer progress for the download row. */
@@ -40,7 +40,7 @@ download_count_text (NuvashaLauncherDownload *download)
   if (total == 0)
     return g_strdup ("");
 
-  if (nuvashalauncher_download_get_unit (download) == nuvashalauncher_DOWNLOAD_UNIT_BYTES)
+  if (nuvashalauncher_download_get_unit (download) == NUVASHALAUNCHER_DOWNLOAD_UNIT_BYTES)
     {
       gboolean gigabytes = total >= (G_GUINT64_CONSTANT (1) << 30);
       double divisor = gigabytes ? 1024.0 * 1024.0 * 1024.0
@@ -88,7 +88,7 @@ refresh_downloads (NuvashaLauncherMainWindow *self)
 
   for (guint i = 0; i < jobs->len; i++)
     {
-      NuvashaLauncherDownload *download = nuvashalauncher_DOWNLOAD (g_ptr_array_index (jobs, i));
+      NuvashaLauncherDownload *download = NUVASHALAUNCHER_DOWNLOAD (g_ptr_array_index (jobs, i));
       DownloadRow *row = g_hash_table_lookup (self->downloads.rows, download);
       const char *phase = nuvashalauncher_download_get_detail (download);
       g_autofree char *count = download_count_text (download);

@@ -21,11 +21,11 @@
 /* A loader is in this list once it has been seen to start a game here,
    and the combo rows show nothing else. */
 static const NuvashaLauncherLoader supported[] = {
-  nuvashalauncher_LOADER_VANILLA,
-  nuvashalauncher_LOADER_FABRIC,
-  nuvashalauncher_LOADER_QUILT,
-  nuvashalauncher_LOADER_NEOFORGE,
-  nuvashalauncher_LOADER_FORGE
+  NUVASHALAUNCHER_LOADER_VANILLA,
+  NUVASHALAUNCHER_LOADER_FABRIC,
+  NUVASHALAUNCHER_LOADER_QUILT,
+  NUVASHALAUNCHER_LOADER_NEOFORGE,
+  NUVASHALAUNCHER_LOADER_FORGE
 };
 
 #define SUPPORTED_COUNT (G_N_ELEMENTS (supported))
@@ -59,19 +59,19 @@ nuvashalauncher_loader_display_name (NuvashaLauncherLoader loader)
 {
   switch (loader)
     {
-    case nuvashalauncher_LOADER_VANILLA:
+    case NUVASHALAUNCHER_LOADER_VANILLA:
       return _("Vanilla");
 
-    case nuvashalauncher_LOADER_FABRIC:
+    case NUVASHALAUNCHER_LOADER_FABRIC:
       return _("Fabric");
 
-    case nuvashalauncher_LOADER_QUILT:
+    case NUVASHALAUNCHER_LOADER_QUILT:
       return _("Quilt");
 
-    case nuvashalauncher_LOADER_FORGE:
+    case NUVASHALAUNCHER_LOADER_FORGE:
       return _("Forge");
 
-    case nuvashalauncher_LOADER_NEOFORGE:
+    case NUVASHALAUNCHER_LOADER_NEOFORGE:
       return _("NeoForge");
     }
 
@@ -181,11 +181,11 @@ loader_meta (NuvashaLauncherLoader loader)
 {
   switch (loader)
     {
-    case nuvashalauncher_LOADER_FABRIC:
-      return nuvashalauncher_FABRIC_META_URL;
+    case NUVASHALAUNCHER_LOADER_FABRIC:
+      return NUVASHALAUNCHER_FABRIC_META_URL;
 
-    case nuvashalauncher_LOADER_QUILT:
-      return nuvashalauncher_QUILT_META_URL;
+    case NUVASHALAUNCHER_LOADER_QUILT:
+      return NUVASHALAUNCHER_QUILT_META_URL;
 
     default:
       return NULL;
@@ -200,13 +200,13 @@ loader_maven (NuvashaLauncherLoader loader, const char **coordinate)
 {
   switch (loader)
     {
-    case nuvashalauncher_LOADER_NEOFORGE:
+    case NUVASHALAUNCHER_LOADER_NEOFORGE:
       *coordinate = "net/neoforged/neoforge";
-      return nuvashalauncher_NEOFORGE_MAVEN_URL;
+      return NUVASHALAUNCHER_NEOFORGE_MAVEN_URL;
 
-    case nuvashalauncher_LOADER_FORGE:
+    case NUVASHALAUNCHER_LOADER_FORGE:
       *coordinate = "net/minecraftforge/forge";
-      return nuvashalauncher_FORGE_MAVEN_URL;
+      return NUVASHALAUNCHER_FORGE_MAVEN_URL;
 
     default:
       *coordinate = NULL;
@@ -223,11 +223,11 @@ loader_maven_api (NuvashaLauncherLoader loader)
 {
   switch (loader)
     {
-    case nuvashalauncher_LOADER_NEOFORGE:
-      return nuvashalauncher_NEOFORGE_API_URL;
+    case NUVASHALAUNCHER_LOADER_NEOFORGE:
+      return NUVASHALAUNCHER_NEOFORGE_API_URL;
 
-    case nuvashalauncher_LOADER_FORGE:
-      return nuvashalauncher_FORGE_API_URL;
+    case NUVASHALAUNCHER_LOADER_FORGE:
+      return NUVASHALAUNCHER_FORGE_API_URL;
 
     default:
       return NULL;
@@ -246,7 +246,7 @@ nuvashalauncher_loader_publishes_an_installer (NuvashaLauncherLoader loader)
 static char
 loader_version_separator (NuvashaLauncherLoader loader)
 {
-  return loader == nuvashalauncher_LOADER_FORGE ? '-' : '.';
+  return loader == NUVASHALAUNCHER_LOADER_FORGE ? '-' : '.';
 }
 
 /* The prefix NeoForge writes in front of its own numbers for a Minecraft
@@ -285,7 +285,7 @@ nuvashalauncher_loaders_version_runs_game (NuvashaLauncherLoader      loader,
 
   /* NeoForge names its versions after the Minecraft version in its own
      way, so the prefix is not just the version and a separator. */
-  if (loader == nuvashalauncher_LOADER_NEOFORGE)
+  if (loader == NUVASHALAUNCHER_LOADER_NEOFORGE)
     prefix = neoforge_game_prefix (game_version);
   else
     prefix = g_strdup_printf ("%s%c", game_version,
@@ -307,7 +307,7 @@ loader_version_own_part (NuvashaLauncherLoader   loader,
   if (game_version == NULL)
     return loader_version;
 
-  if (loader == nuvashalauncher_LOADER_NEOFORGE)
+  if (loader == NUVASHALAUNCHER_LOADER_NEOFORGE)
     {
       neo_prefix = neoforge_game_prefix (game_version);
       prefix_str = neo_prefix;
@@ -409,7 +409,7 @@ versions_from_root (JsonNode *root, GError **error)
 
   if (root == NULL || !JSON_NODE_HOLDS_ARRAY (root))
     {
-      g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_NO_VERSIONS,
+      g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_NO_VERSIONS,
                    "the loader did not answer with a list of versions");
       return NULL;
     }
@@ -429,7 +429,7 @@ versions_from_root (JsonNode *root, GError **error)
 
   if (versions->len == 0)
     {
-      g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_NO_VERSIONS,
+      g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_NO_VERSIONS,
                    "this loader has no version for this Minecraft version");
       return NULL;
     }
@@ -538,7 +538,7 @@ versions_from_maven (JsonNode     *root,
 
   if (node == NULL || !JSON_NODE_HOLDS_ARRAY (node))
     {
-      g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_NO_VERSIONS,
+      g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_NO_VERSIONS,
                    "the loader did not answer with a list of versions");
       return NULL;
     }
@@ -568,7 +568,7 @@ versions_from_maven (JsonNode     *root,
 
   if (versions->len == 0)
     {
-      g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_NO_VERSIONS,
+      g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_NO_VERSIONS,
                    "this loader has no version for this Minecraft version");
       return NULL;
     }
@@ -685,7 +685,7 @@ nuvashalauncher_loaders_versions_async (NuvashaLauncherLoader           loader,
     {
       nuvashalauncher_task_scope_return_error_deferred (
         request->scope,
-        g_error_new (nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_UNSUPPORTED,
+        g_error_new (NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_UNSUPPORTED,
                      "nuvashalauncher does not install %s",
                      nuvashalauncher_loader_display_name (loader)));
       versions_request_free (request);

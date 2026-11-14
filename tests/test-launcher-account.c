@@ -100,7 +100,7 @@ new_instance (void)
     g_error ("the instance directory \"%s\" cannot be made", directory);
 
   instance = nuvashalauncher_instance_new (NULL, "one", directory, "1.20.1",
-                               nuvashalauncher_LOADER_VANILLA, &error);
+                               NUVASHALAUNCHER_LOADER_VANILLA, &error);
 
   if (instance == NULL)
     g_error ("the test instance cannot be made: %s", error->message);
@@ -142,7 +142,7 @@ microsoft_account (gboolean with_refresh_token)
 {
   NuvashaLauncherAccount *account = g_new0 (NuvashaLauncherAccount, 1);
 
-  account->type = nuvashalauncher_ACCOUNT_MICROSOFT;
+  account->type = NUVASHALAUNCHER_ACCOUNT_MICROSOFT;
   account->id = g_strdup ("069a79f444e94726a5befca90e38aaf5");
   account->name = g_strdup ("Notch");
   account->uuid = g_strdup ("069a79f4-44e9-4726-a5be-fca90e38aaf5");
@@ -170,13 +170,13 @@ test_no_account_plays_offline (void)
   g_autoptr (NuvashaLauncher) launcher =
     nuvashalauncher_launcher_new (instance, NULL, accounts);
 
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_STOPPED);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_STOPPED);
 
   nuvashalauncher_launcher_start (launcher);
 
   /* Preparing means the gate let it through: a launch that stopped at an
      account would be Failed before this. */
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_PREPARING);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_PREPARING);
   assert_log_lacks (launcher, "no account to play as");
   assert_log_has (launcher, "preparing Minecraft 1.20.1");
 
@@ -190,7 +190,7 @@ test_no_account_plays_offline (void)
     g_assert_null (nuvashalauncher_launcher_get_accounts (bare));
 
     nuvashalauncher_launcher_start (bare);
-    g_assert_cmpint (nuvashalauncher_launcher_get_state (bare), ==, nuvashalauncher_LAUNCH_PREPARING);
+    g_assert_cmpint (nuvashalauncher_launcher_get_state (bare), ==, NUVASHALAUNCHER_LAUNCH_PREPARING);
     assert_log_lacks (bare, "no account to play as");
 
     nuvashalauncher_launcher_stop (bare);
@@ -233,10 +233,10 @@ test_a_dead_token_asks_for_a_sign_in (void)
 
   nuvashalauncher_launcher_start (launcher);
 
-  watch_until (&watch, launcher, nuvashalauncher_LAUNCH_NEEDS_SIGN_IN);
+  watch_until (&watch, launcher, NUVASHALAUNCHER_LAUNCH_NEEDS_SIGN_IN);
 
   g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==,
-                   nuvashalauncher_LAUNCH_NEEDS_SIGN_IN);
+                   NUVASHALAUNCHER_LAUNCH_NEEDS_SIGN_IN);
     assert_log_has (launcher, "Sign in again");
   assert_log_has (launcher, "Notch");
 
@@ -300,7 +300,7 @@ test_a_ready_account_gets_past_the_gate (void)
   /* Preparing means the account was good: a launch that stops at the
      account never gets there. */
   g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==,
-                   nuvashalauncher_LAUNCH_PREPARING);
+                   NUVASHALAUNCHER_LAUNCH_PREPARING);
   assert_log_lacks (launcher, "no account to play as");
   assert_log_has (launcher, "preparing Minecraft 1.20.1");
 
@@ -356,40 +356,40 @@ test_network_failure_preserves_tokens (void)
   if (!nuvashalauncher_accounts_add (accounts, account, &error))
     { g_test_skip ("Secret Service is unavailable"); return; }
   g_assert_no_error (error);
-  error = g_error_new_literal (nuvashalauncher_AUTH_ERROR,
-    nuvashalauncher_AUTH_ERROR_NETWORK, "temporary network outage");
+  error = g_error_new_literal (NUVASHALAUNCHER_AUTH_ERROR,
+    NUVASHALAUNCHER_AUTH_ERROR_NETWORK, "temporary network outage");
   launcher_auth_failed (launcher, error);
   NuvashaLauncherAccount *stored = nuvashalauncher_accounts_get_active (accounts);
   g_assert_nonnull (stored);
   g_assert_cmpstr (stored->access_token, ==, account->access_token);
   g_assert_cmpstr (stored->refresh_token, ==, account->refresh_token);
   g_assert_cmpint (stored->expires_at, ==, account->expires_at);
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_FAILED);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_FAILED);
   g_assert_cmpstr (nuvashalauncher_launcher_get_state_detail (launcher), ==,
                    "The connection failed. Check your internet connection and try again.");
   g_clear_error (&error);
   gboolean slow = FALSE;
   nuvashalauncher_auth_polling_error ("{\"error\":\"server_error\"}", -1, &slow, &error);
-  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_SERVICE);
+  g_assert_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_SERVICE);
   launcher_auth_failed (launcher, error);
   stored = nuvashalauncher_accounts_get_active (accounts);
   g_assert_cmpstr (stored->access_token, ==, account->access_token);
   g_assert_cmpstr (stored->refresh_token, ==, account->refresh_token);
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_FAILED);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_FAILED);
   g_print ("ok - temporary authentication outages preserve saved credentials\n");
 }
 
 static void
 test_the_state_has_a_name (void)
 {
-  g_assert_cmpstr (nuvashalauncher_launch_state_to_string (nuvashalauncher_LAUNCH_NEEDS_SIGN_IN), ==,
+  g_assert_cmpstr (nuvashalauncher_launch_state_to_string (NUVASHALAUNCHER_LAUNCH_NEEDS_SIGN_IN), ==,
                    "Needs sign-in");
-  g_assert_cmpstr (nuvashalauncher_launch_state_to_string (nuvashalauncher_LAUNCH_PREPARING), ==,
+  g_assert_cmpstr (nuvashalauncher_launch_state_to_string (NUVASHALAUNCHER_LAUNCH_PREPARING), ==,
                    "Preparing");
-  g_assert_cmpstr (nuvashalauncher_launch_state_to_string (nuvashalauncher_LAUNCH_FAILED), ==,
+  g_assert_cmpstr (nuvashalauncher_launch_state_to_string (NUVASHALAUNCHER_LAUNCH_FAILED), ==,
                    "Failed");
-  g_assert_false (nuvashalauncher_launch_state_is_busy (nuvashalauncher_LAUNCH_NEEDS_SIGN_IN));
-  g_assert_true (nuvashalauncher_launch_state_is_busy (nuvashalauncher_LAUNCH_PREPARING));
+  g_assert_false (nuvashalauncher_launch_state_is_busy (NUVASHALAUNCHER_LAUNCH_NEEDS_SIGN_IN));
+  g_assert_true (nuvashalauncher_launch_state_is_busy (NUVASHALAUNCHER_LAUNCH_PREPARING));
 
   g_print ("ok - the sign-in state is a state with a name\n");
 }
@@ -399,7 +399,7 @@ main (void)
 {
   g_autofree char *directory = NULL;
 
-  g_setenv ("NUVASHA_TEST_SECRET_STORE", "1", TRUE);
+  g_setenv ("NUVASHALAUNCHER_TEST_SECRET_STORE", "1", TRUE);
   g_print ("# Launcher account tests\n");
 
   directory = g_dir_make_tmp ("nuvashalauncher-launcher-account-XXXXXX", NULL);

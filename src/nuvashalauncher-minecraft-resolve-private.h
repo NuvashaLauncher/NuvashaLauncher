@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_MINECRAFT_RESOLVE_PRIVATE_H
-#define nuvashalauncher_MINECRAFT_RESOLVE_PRIVATE_H
+#ifndef NUVASHALAUNCHER_MINECRAFT_RESOLVE_PRIVATE_H
+#define NUVASHALAUNCHER_MINECRAFT_RESOLVE_PRIVATE_H
 
 #include "nuvashalauncher-minecraft-resolve.h"
 

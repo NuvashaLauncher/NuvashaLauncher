@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_DOWNLOAD_PRIVATE_H
-#define nuvashalauncher_DOWNLOAD_PRIVATE_H
+#ifndef NUVASHALAUNCHER_DOWNLOAD_PRIVATE_H
+#define NUVASHALAUNCHER_DOWNLOAD_PRIVATE_H
 
 #include "nuvashalauncher-download.h"
 
@@ -119,4 +119,4 @@ GError *check_status (DownloadRequest *request);
 void end_attempt (DownloadRequest *request, GError *error);
 void read_next_chunk (DownloadRequest *request);
 
-#endif /* nuvashalauncher_DOWNLOAD_PRIVATE_H */
+#endif /* NUVASHALAUNCHER_DOWNLOAD_PRIVATE_H */

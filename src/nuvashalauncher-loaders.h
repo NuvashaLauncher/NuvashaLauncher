@@ -44,8 +44,8 @@
  * directory under the shared data directory, and the launcher runs the
  * game from the instance. */
 
-#ifndef nuvashalauncher_LOADERS_H
-#define nuvashalauncher_LOADERS_H
+#ifndef NUVASHALAUNCHER_LOADERS_H
+#define NUVASHALAUNCHER_LOADERS_H
 
 #include <gio/gio.h>
 
@@ -56,34 +56,34 @@
 G_BEGIN_DECLS
 
 /* Fabric Meta. */
-#define nuvashalauncher_FABRIC_META_URL "https://meta.fabricmc.net/v2"
+#define NUVASHALAUNCHER_FABRIC_META_URL "https://meta.fabricmc.net/v2"
 
 /* Quilt Meta. */
-#define nuvashalauncher_QUILT_META_URL "https://meta.quiltmc.org/v3"
+#define NUVASHALAUNCHER_QUILT_META_URL "https://meta.quiltmc.org/v3"
 
 /* The maven repository NeoForge and Forge publish their installers in,
  * and where the artifacts of a profile are fetched from. */
-#define nuvashalauncher_NEOFORGE_MAVEN_URL "https://maven.neoforged.net/releases"
-#define nuvashalauncher_FORGE_MAVEN_URL "https://maven.minecraftforge.net"
+#define NUVASHALAUNCHER_NEOFORGE_MAVEN_URL "https://maven.neoforged.net/releases"
+#define NUVASHALAUNCHER_FORGE_MAVEN_URL "https://maven.minecraftforge.net"
 
 /* The host the version list API of those two hangs off. NeoForge keeps
  * its repository under /releases but its API on the host itself, so the
  * two are not the same base. */
-#define nuvashalauncher_NEOFORGE_API_URL "https://maven.neoforged.net"
-#define nuvashalauncher_FORGE_API_URL "https://maven.minecraftforge.net"
+#define NUVASHALAUNCHER_NEOFORGE_API_URL "https://maven.neoforged.net"
+#define NUVASHALAUNCHER_FORGE_API_URL "https://maven.minecraftforge.net"
 
 /* Where a loader is installed, under the same data directory the resolve
  * module writes the games it fetches into. */
-#define nuvashalauncher_LOADERS_SUBDIR "loaders"
+#define NUVASHALAUNCHER_LOADERS_SUBDIR "loaders"
 
-#define nuvashalauncher_LOADERS_ERROR (nuvashalauncher_loaders_error_quark ())
+#define NUVASHALAUNCHER_LOADERS_ERROR (nuvashalauncher_loaders_error_quark ())
 
 typedef enum {
-  nuvashalauncher_LOADERS_ERROR_UNSUPPORTED, /* nuvashalauncher does not install this loader */
-  nuvashalauncher_LOADERS_ERROR_NO_VERSIONS, /* the loader has nothing for that game version */
-  nuvashalauncher_LOADERS_ERROR_NO_MAVEN,    /* a library names no maven address */
-  nuvashalauncher_LOADERS_ERROR_INSTALLER,   /* the installer could not be read or run */
-  nuvashalauncher_LOADERS_ERROR_GENERATION   /* the version is of a generation whose
+  NUVASHALAUNCHER_LOADERS_ERROR_UNSUPPORTED, /* nuvashalauncher does not install this loader */
+  NUVASHALAUNCHER_LOADERS_ERROR_NO_VERSIONS, /* the loader has nothing for that game version */
+  NUVASHALAUNCHER_LOADERS_ERROR_NO_MAVEN,    /* a library names no maven address */
+  NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,   /* the installer could not be read or run */
+  NUVASHALAUNCHER_LOADERS_ERROR_GENERATION   /* the version is of a generation whose
                                   * install profile is not run here */
 } NuvashaLauncherLoadersError;
 
@@ -141,8 +141,8 @@ gboolean nuvashalauncher_loaders_version_runs_game (NuvashaLauncherLoader      l
  * asked to see is decided where the list is shown, so that a list that
  * is asked for again keeps what was asked for.
  *
- * nuvashalauncher_LOADERS_ERROR_UNSUPPORTED for a loader this module does not know,
- * nuvashalauncher_LOADERS_ERROR_NO_VERSIONS when the loader has no version for that
+ * NUVASHALAUNCHER_LOADERS_ERROR_UNSUPPORTED for a loader this module does not know,
+ * NUVASHALAUNCHER_LOADERS_ERROR_NO_VERSIONS when the loader has no version for that
  * game version. */
 NuvashaLauncherTaskScope *nuvashalauncher_loaders_versions_async (NuvashaLauncherLoader loader,
                                           const char *game_version,
@@ -159,7 +159,7 @@ GPtrArray *nuvashalauncher_loaders_versions_finish (GAsyncResult  *result,
  * Quilt Meta publish for one Minecraft version. This is what the fetch
  * above parses, and what a test hands a fixture to.
  *
- * nuvashalauncher_LOADERS_ERROR_NO_VERSIONS when the answer holds no version at all.
+ * NUVASHALAUNCHER_LOADERS_ERROR_NO_VERSIONS when the answer holds no version at all.
  * (transfer full) */
 GPtrArray *nuvashalauncher_loaders_versions_from_json (const char  *json,
                                            gssize       length,
@@ -173,7 +173,7 @@ GPtrArray *nuvashalauncher_loaders_versions_from_json (const char  *json,
  * "26.3.0.51-beta" is not stable and "1.20.1-47.2.0" is, even though
  * both names carry a dash.
  *
- * nuvashalauncher_LOADERS_ERROR_NO_VERSIONS when the answer holds no version of that
+ * NUVASHALAUNCHER_LOADERS_ERROR_NO_VERSIONS when the answer holds no version of that
  * game. (transfer full) */
 GPtrArray *nuvashalauncher_loaders_maven_versions_from_json (NuvashaLauncherLoader      loader,
                                                  const char    *game_version,
@@ -201,7 +201,7 @@ GPtrArray *nuvashalauncher_loaders_versions_for_display (GPtrArray  *published,
  * else is touched. The document inherits from @game_version, so merging
  * it over the document of that version is all a loader instance needs.
  *
- * nuvashalauncher_LOADERS_ERROR_UNSUPPORTED for a loader this module does not know. */
+ * NUVASHALAUNCHER_LOADERS_ERROR_UNSUPPORTED for a loader this module does not know. */
 NuvashaLauncherTaskScope *nuvashalauncher_loaders_profile_async (NuvashaLauncherLoader loader,
                                          const char *game_version,
                                          const char *loader_version,
@@ -257,14 +257,14 @@ typedef void (*NuvashaLauncherLoadersProgressFunc) (const char *stage,
  * is corrupted" when the jar says nothing. A jar that already says it is
  * left as it is.
  *
- * nuvashalauncher_LOADERS_ERROR_INSTALLER when the installer cannot be read or one of
+ * NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER when the installer cannot be read or one of
  * its processors fails, in which case the error carries what the
- * processor printed, and nuvashalauncher_LOADERS_ERROR_GENERATION for a version whose
+ * processor printed, and NUVASHALAUNCHER_LOADERS_ERROR_GENERATION for a version whose
  * install profile is of a shape this does not run. Either way the install
  * stops with what went wrong in words rather than going on to a game that
  * would not start.
  *
- * nuvashalauncher_LOADERS_ERROR_UNSUPPORTED for a loader that publishes no installer. */
+ * NUVASHALAUNCHER_LOADERS_ERROR_UNSUPPORTED for a loader that publishes no installer. */
 NuvashaLauncherTaskScope *nuvashalauncher_loaders_install_async (NuvashaLauncherLoader loader,
                                          const char *game_version,
                                          const char *loader_version,
@@ -289,4 +289,4 @@ NuvashaLauncherVersionDescription *nuvashalauncher_loaders_profile_from_json (co
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_LOADERS_H */
+#endif /* NUVASHALAUNCHER_LOADERS_H */

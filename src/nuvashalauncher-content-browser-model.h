@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_CONTENT_BROWSER_MODEL_H
-#define nuvashalauncher_CONTENT_BROWSER_MODEL_H
+#ifndef NUVASHALAUNCHER_CONTENT_BROWSER_MODEL_H
+#define NUVASHALAUNCHER_CONTENT_BROWSER_MODEL_H
 
 #include <gio/gio.h>
 
@@ -62,4 +62,4 @@ void nuvashalauncher_content_browser_model_set_query (
 GCancellable *nuvashalauncher_content_browser_model_reset_cancellable (
   NuvashaLauncherContentBrowserModel *model);
 
-#endif /* nuvashalauncher_CONTENT_BROWSER_MODEL_H */
+#endif /* NUVASHALAUNCHER_CONTENT_BROWSER_MODEL_H */

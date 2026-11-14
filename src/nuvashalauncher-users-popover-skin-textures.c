@@ -145,8 +145,8 @@ on_view_http_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
           return;
         }
       g_clear_error (&error);
-      g_set_error (&error, nuvashalauncher_MINECRAFT_SERVICES_ERROR,
-                   nuvashalauncher_MINECRAFT_SERVICES_ERROR_HTTP,
+      g_set_error (&error, NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR,
+                   NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR_HTTP,
                    "skin request returned HTTP status %u", status);
     }
   else if (bytes == NULL &&

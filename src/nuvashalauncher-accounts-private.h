@@ -1,5 +1,5 @@
-#ifndef nuvashalauncher_ACCOUNTS_PRIVATE_H
-#define nuvashalauncher_ACCOUNTS_PRIVATE_H
+#ifndef NUVASHALAUNCHER_ACCOUNTS_PRIVATE_H
+#define NUVASHALAUNCHER_ACCOUNTS_PRIVATE_H
 
 #include "nuvashalauncher-accounts.h"
 

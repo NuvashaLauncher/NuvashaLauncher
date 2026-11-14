@@ -14,8 +14,8 @@
  * are checked, archives are bounded and downloads have to come from the
  * hosts the format names. */
 
-#ifndef nuvashalauncher_MODPACK_H
-#define nuvashalauncher_MODPACK_H
+#ifndef NUVASHALAUNCHER_MODPACK_H
+#define NUVASHALAUNCHER_MODPACK_H
 
 #include <gio/gio.h>
 #include <json-glib/json-glib.h>
@@ -25,19 +25,19 @@
 
 G_BEGIN_DECLS
 
-#define nuvashalauncher_MODPACK_ERROR (nuvashalauncher_modpack_error_quark ())
+#define NUVASHALAUNCHER_MODPACK_ERROR (nuvashalauncher_modpack_error_quark ())
 
 typedef enum {
-  nuvashalauncher_MODPACK_ERROR_FORMAT,     /* the index is not what the format says */
-  nuvashalauncher_MODPACK_ERROR_PATH,       /* a path would write outside the instance */
-  nuvashalauncher_MODPACK_ERROR_ARCHIVE,    /* the .mrpack cannot be read as a zip */
-  nuvashalauncher_MODPACK_ERROR_BOMB,       /* the archive is far larger than a pack */
-  nuvashalauncher_MODPACK_ERROR_URL,        /* a download URL is not one nuvashalauncher accepts */
-  nuvashalauncher_MODPACK_ERROR_HASH,       /* downloaded data failed verification */
-  nuvashalauncher_MODPACK_ERROR_DOWNLOAD,   /* a file could not be downloaded */
-  nuvashalauncher_MODPACK_ERROR_LOADER,     /* the Minecraft version or loader is unknown */
-  nuvashalauncher_MODPACK_ERROR_IO,         /* the file system said no */
-  nuvashalauncher_MODPACK_ERROR_CANCELLED   /* the caller cancelled the install */
+  NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,     /* the index is not what the format says */
+  NUVASHALAUNCHER_MODPACK_ERROR_PATH,       /* a path would write outside the instance */
+  NUVASHALAUNCHER_MODPACK_ERROR_ARCHIVE,    /* the .mrpack cannot be read as a zip */
+  NUVASHALAUNCHER_MODPACK_ERROR_BOMB,       /* the archive is far larger than a pack */
+  NUVASHALAUNCHER_MODPACK_ERROR_URL,        /* a download URL is not one nuvashalauncher accepts */
+  NUVASHALAUNCHER_MODPACK_ERROR_HASH,       /* downloaded data failed verification */
+  NUVASHALAUNCHER_MODPACK_ERROR_DOWNLOAD,   /* a file could not be downloaded */
+  NUVASHALAUNCHER_MODPACK_ERROR_LOADER,     /* the Minecraft version or loader is unknown */
+  NUVASHALAUNCHER_MODPACK_ERROR_IO,         /* the file system said no */
+  NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED   /* the caller cancelled the install */
 } NuvashaLauncherModpackError;
 
 GQuark nuvashalauncher_modpack_error_quark (void);
@@ -49,15 +49,15 @@ GQuark nuvashalauncher_modpack_error_quark (void);
  * is generous. It is the *actual* inflated bytes that are counted while
  * the overrides are extracted, not what an entry announces, so a small
  * archive that claims to expand without end is still stopped. */
-#define nuvashalauncher_MODPACK_MAX_ENTRIES     (65536)
-#define nuvashalauncher_MODPACK_MAX_CONTENT_SIZE (4ULL * 1024 * 1024 * 1024)
+#define NUVASHALAUNCHER_MODPACK_MAX_ENTRIES     (65536)
+#define NUVASHALAUNCHER_MODPACK_MAX_CONTENT_SIZE (4ULL * 1024 * 1024 * 1024)
 
 /* Client-side availability of a file. */
 typedef enum {
-  nuvashalauncher_MODPACK_ENV_UNSPECIFIED, /* no environment restriction */
-  nuvashalauncher_MODPACK_ENV_REQUIRED,
-  nuvashalauncher_MODPACK_ENV_OPTIONAL,
-  nuvashalauncher_MODPACK_ENV_UNSUPPORTED
+  NUVASHALAUNCHER_MODPACK_ENV_UNSPECIFIED, /* no environment restriction */
+  NUVASHALAUNCHER_MODPACK_ENV_REQUIRED,
+  NUVASHALAUNCHER_MODPACK_ENV_OPTIONAL,
+  NUVASHALAUNCHER_MODPACK_ENV_UNSUPPORTED
 } NuvashaLauncherModpackEnv;
 
 /* One entry of the files array of the index. */
@@ -156,7 +156,7 @@ gboolean nuvashalauncher_modpack_verify_file_finish (GAsyncResult *result, GErro
 gboolean nuvashalauncher_modpack_path_is_safe (const char *path);
 
 /* The cap on how much an archive may hold, in bytes. It defaults to
- * nuvashalauncher_MODPACK_MAX_CONTENT_SIZE; a test that cannot build a multi
+ * NUVASHALAUNCHER_MODPACK_MAX_CONTENT_SIZE; a test that cannot build a multi
  * gigabyte archive lowers it. The launcher never changes it. */
 void nuvashalauncher_modpack_set_content_limit (guint64 bytes);
 guint64 nuvashalauncher_modpack_get_content_limit (void);
@@ -226,4 +226,4 @@ gboolean nuvashalauncher_modpack_export_finish (GAsyncResult *result, GError **e
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_MODPACK_H */
+#endif /* NUVASHALAUNCHER_MODPACK_H */

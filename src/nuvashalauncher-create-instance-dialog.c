@@ -53,14 +53,14 @@ update_create_button (NuvashaLauncherCreateInstanceDialog *self)
   g_autofree char *name = nuvashalauncher_instance_normalize_name (
     gtk_editable_get_text (GTK_EDITABLE (self->name_row)));
   const char *version =
-    nuvashalauncher_version_row_get_selected (nuvashalauncher_VERSION_ROW (self->version_row));
+    nuvashalauncher_version_row_get_selected (NUVASHALAUNCHER_VERSION_ROW (self->version_row));
   NuvashaLauncherLoader loader =
     nuvashalauncher_loader_row_get_loader (self->loader_row);
   gboolean loader_ready = TRUE;
 
   /* A loader that is not vanilla needs a version of it, and its row only
    * answers when it knows one. */
-  if (loader != nuvashalauncher_LOADER_VANILLA)
+  if (loader != NUVASHALAUNCHER_LOADER_VANILLA)
     loader_ready =
       nuvashalauncher_loader_row_get_version (self->loader_row) != NULL;
 
@@ -78,9 +78,9 @@ static void
 on_version_selected (GObject *object G_GNUC_UNUSED,
                      GParamSpec *pspec G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (user_data);
+  NuvashaLauncherCreateInstanceDialog *self = NUVASHALAUNCHER_CREATE_INSTANCE_DIALOG (user_data);
   const char *version =
-    nuvashalauncher_version_row_get_selected (nuvashalauncher_VERSION_ROW (self->version_row));
+    nuvashalauncher_version_row_get_selected (NUVASHALAUNCHER_VERSION_ROW (self->version_row));
 
   /* While the Minecraft list loads, or when it failed, there is no
      version to tell the loader row about. */
@@ -99,7 +99,7 @@ on_version_selected (GObject *object G_GNUC_UNUSED,
 static void
 on_loader_changed (NuvashaLauncherLoaderRow *row G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (user_data);
+  NuvashaLauncherCreateInstanceDialog *self = NUVASHALAUNCHER_CREATE_INSTANCE_DIALOG (user_data);
 
   /* The row reloads its own versions when the loader changes and tells
      this handler again once one is picked; the dialog only has to say
@@ -112,7 +112,7 @@ on_input_changed (GObject *object G_GNUC_UNUSED,
                   GParamSpec *pspec G_GNUC_UNUSED,
                   gpointer user_data)
 {
-  NuvashaLauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (user_data);
+  NuvashaLauncherCreateInstanceDialog *self = NUVASHALAUNCHER_CREATE_INSTANCE_DIALOG (user_data);
 
   update_create_button (self);
 }
@@ -120,11 +120,11 @@ on_input_changed (GObject *object G_GNUC_UNUSED,
 static void
 on_create_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (user_data);
+  NuvashaLauncherCreateInstanceDialog *self = NUVASHALAUNCHER_CREATE_INSTANCE_DIALOG (user_data);
   g_autofree char *name = nuvashalauncher_instance_normalize_name (
     gtk_editable_get_text (GTK_EDITABLE (self->name_row)));
   const char *version =
-    nuvashalauncher_version_row_get_selected (nuvashalauncher_VERSION_ROW (self->version_row));
+    nuvashalauncher_version_row_get_selected (NUVASHALAUNCHER_VERSION_ROW (self->version_row));
   NuvashaLauncherLoader loader =
     nuvashalauncher_loader_row_get_loader (self->loader_row);
   const char *loader_version =
@@ -140,7 +140,7 @@ on_create_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
       return;
     }
 
-  if (loader != nuvashalauncher_LOADER_VANILLA && loader_version == NULL)
+  if (loader != NUVASHALAUNCHER_LOADER_VANILLA && loader_version == NULL)
     {
       show_error (self,
                   _("Pick a version of the loader, or pick another loader."));
@@ -162,7 +162,7 @@ on_create_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 static void
 on_folder_selected (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  NuvashaLauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (user_data);
+  NuvashaLauncherCreateInstanceDialog *self = NUVASHALAUNCHER_CREATE_INSTANCE_DIALOG (user_data);
   g_autoptr (GError) error = NULL;
   g_autoptr (GFile) file =
     gtk_file_dialog_select_folder_finish (GTK_FILE_DIALOG (source), result,
@@ -195,7 +195,7 @@ on_folder_selected (GObject *source, GAsyncResult *result, gpointer user_data)
 static void
 on_pick_directory (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (user_data);
+  NuvashaLauncherCreateInstanceDialog *self = NUVASHALAUNCHER_CREATE_INSTANCE_DIALOG (user_data);
   GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
   g_autoptr (GtkFileDialog) dialog = gtk_file_dialog_new ();
   g_autoptr (GFile) home = g_file_new_for_path (g_get_home_dir ());
@@ -260,11 +260,11 @@ NuvashaLauncherCreateInstanceDialog *
 nuvashalauncher_create_instance_dialog_new (NuvashaLauncherInstanceManager *manager,
                                 NuvashaLauncherSettings        *settings)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (manager), NULL);
-  g_return_val_if_fail (nuvashalauncher_IS_SETTINGS (settings), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (manager), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_SETTINGS (settings), NULL);
 
   NuvashaLauncherCreateInstanceDialog *self =
-    g_object_new (nuvashalauncher_TYPE_CREATE_INSTANCE_DIALOG, NULL);
+    g_object_new (NUVASHALAUNCHER_TYPE_CREATE_INSTANCE_DIALOG, NULL);
 
   self->manager = g_object_ref (manager);
   self->settings = g_object_ref (settings);
@@ -272,13 +272,13 @@ nuvashalauncher_create_instance_dialog_new (NuvashaLauncherInstanceManager *mana
   /* The widget tree is built before there are settings to ask, so the
    * versions are fetched now. Nothing is picked until the user picks
    * it: the row knows no version of its own. */
-  nuvashalauncher_version_row_load (nuvashalauncher_VERSION_ROW (self->version_row), self->settings,
+  nuvashalauncher_version_row_load (NUVASHALAUNCHER_VERSION_ROW (self->version_row), self->settings,
                         NULL);
 
   /* Vanilla is picked from the start: it is what an instance is without a
      loader, and it has no versions of its own to wait for. */
   nuvashalauncher_loader_row_load (self->loader_row, self->settings,
-                       nuvashalauncher_LOADER_VANILLA, NULL, NULL);
+                       NUVASHALAUNCHER_LOADER_VANILLA, NULL, NULL);
 
   return self;
 }
@@ -286,7 +286,7 @@ nuvashalauncher_create_instance_dialog_new (NuvashaLauncherInstanceManager *mana
 static void
 nuvashalauncher_create_instance_dialog_dispose (GObject *object)
 {
-  NuvashaLauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (object);
+  NuvashaLauncherCreateInstanceDialog *self = NUVASHALAUNCHER_CREATE_INSTANCE_DIALOG (object);
 
   g_clear_object (&self->manager);
   g_clear_object (&self->settings);
@@ -294,7 +294,7 @@ nuvashalauncher_create_instance_dialog_dispose (GObject *object)
   /* The loader rows are the dialog's; their handlers go with them. */
   g_clear_object (&self->loader_row);
 
-  gtk_widget_dispose_template (GTK_WIDGET (self), nuvashalauncher_TYPE_CREATE_INSTANCE_DIALOG);
+  gtk_widget_dispose_template (GTK_WIDGET (self), NUVASHALAUNCHER_TYPE_CREATE_INSTANCE_DIALOG);
 
   G_OBJECT_CLASS (nuvashalauncher_create_instance_dialog_parent_class)->dispose (object);
 }
@@ -302,7 +302,7 @@ nuvashalauncher_create_instance_dialog_dispose (GObject *object)
 static void
 nuvashalauncher_create_instance_dialog_finalize (GObject *object)
 {
-  NuvashaLauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (object);
+  NuvashaLauncherCreateInstanceDialog *self = NUVASHALAUNCHER_CREATE_INSTANCE_DIALOG (object);
 
   g_free (self->directory);
 

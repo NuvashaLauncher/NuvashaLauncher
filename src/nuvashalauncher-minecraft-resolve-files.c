@@ -35,7 +35,7 @@ nuvashalauncher_resolve_ensure_directory (const char *path, GError **error)
   g_autoptr (GError) local_error = NULL;
   if (!nuvashalauncher_fs_make_directory (path, 0755, &local_error))
     {
-      g_set_error (error, nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_IO,
+      g_set_error (error, NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_IO,
                    "cannot create \"%s\": %s", path,
                    local_error->message);
       return FALSE;

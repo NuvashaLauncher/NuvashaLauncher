@@ -33,8 +33,8 @@
  * in the Needs sign-in state, which is a state a user can act on rather
  * than a game that will not start. */
 
-#ifndef nuvashalauncher_LAUNCHER_H
-#define nuvashalauncher_LAUNCHER_H
+#ifndef NUVASHALAUNCHER_LAUNCHER_H
+#define NUVASHALAUNCHER_LAUNCHER_H
 
 #include <gio/gio.h>
 
@@ -46,53 +46,53 @@
 G_BEGIN_DECLS
 
 /* The name the game is told about through ${launcher_name}. */
-#define nuvashalauncher_LAUNCHER_NAME "nuvashalauncher"
+#define NUVASHALAUNCHER_LAUNCHER_NAME "nuvashalauncher"
 
 /* ${launcher_version}. Keep the value aligned with the application release. */
-#define nuvashalauncher_LAUNCHER_VERSION nuvashalauncher_VERSION
+#define NUVASHALAUNCHER_LAUNCHER_VERSION NUVASHALAUNCHER_VERSION
 
 /* Values passed to the game for offline and Microsoft sessions. */
-#define nuvashalauncher_LAUNCH_OFFLINE_TOKEN "0"
-#define nuvashalauncher_LAUNCH_OFFLINE_USER_TYPE "legacy"
-#define nuvashalauncher_LAUNCH_MICROSOFT_USER_TYPE "msa"
+#define NUVASHALAUNCHER_LAUNCH_OFFLINE_TOKEN "0"
+#define NUVASHALAUNCHER_LAUNCH_OFFLINE_USER_TYPE "legacy"
+#define NUVASHALAUNCHER_LAUNCH_MICROSOFT_USER_TYPE "msa"
 
 /* Default name used for offline sessions and UUID generation. */
-#define nuvashalauncher_LAUNCH_OFFLINE_NAME "Player"
+#define NUVASHALAUNCHER_LAUNCH_OFFLINE_NAME "Player"
 
 /* Default values for ${resolution_width} and ${resolution_height}. */
-#define nuvashalauncher_LAUNCH_WIDTH 854
-#define nuvashalauncher_LAUNCH_HEIGHT 480
+#define NUVASHALAUNCHER_LAUNCH_WIDTH 854
+#define NUVASHALAUNCHER_LAUNCH_HEIGHT 480
 
 /* Seconds a game gets to end by itself after a SIGTERM before it is
  * stopped for good. */
-#define nuvashalauncher_LAUNCH_STOP_TIMEOUT 5
+#define NUVASHALAUNCHER_LAUNCH_STOP_TIMEOUT 5
 
-#define nuvashalauncher_LAUNCH_ERROR (nuvashalauncher_launch_error_quark ())
+#define NUVASHALAUNCHER_LAUNCH_ERROR (nuvashalauncher_launch_error_quark ())
 
 typedef enum {
-  nuvashalauncher_LAUNCH_ERROR_NO_JAVA,       /* nothing usable for this version */
-  nuvashalauncher_LAUNCH_ERROR_NO_MAIN_CLASS, /* the document says no main class */
-  nuvashalauncher_LAUNCH_ERROR_ARGUMENTS,     /* the command line cannot be built */
-  nuvashalauncher_LAUNCH_ERROR_ALREADY_RUNNING /* the game is already up */
+  NUVASHALAUNCHER_LAUNCH_ERROR_NO_JAVA,       /* nothing usable for this version */
+  NUVASHALAUNCHER_LAUNCH_ERROR_NO_MAIN_CLASS, /* the document says no main class */
+  NUVASHALAUNCHER_LAUNCH_ERROR_ARGUMENTS,     /* the command line cannot be built */
+  NUVASHALAUNCHER_LAUNCH_ERROR_ALREADY_RUNNING /* the game is already up */
 } NuvashaLauncherLaunchError;
 
 GQuark nuvashalauncher_launch_error_quark (void);
 
 /* Current or final state of a launch. */
 typedef enum {
-  nuvashalauncher_LAUNCH_PREPARING,        /* the manifest, the resolve and the Java */
-  nuvashalauncher_LAUNCH_DOWNLOADING,      /* the resolve is fetching files */
-  nuvashalauncher_LAUNCH_LAUNCHING,        /* the command line is being built and run */
-  nuvashalauncher_LAUNCH_RUNNING,          /* the game is up */
-  nuvashalauncher_LAUNCH_STOPPING,         /* a stop was asked for and not finished */
-  nuvashalauncher_LAUNCH_STOPPED,          /* the game ended by itself, or was stopped */
-  nuvashalauncher_LAUNCH_CRASHED,          /* it ended with a failure */
-  nuvashalauncher_LAUNCH_FAILED,            /* launch preparation failed */
-  nuvashalauncher_LAUNCH_NEEDS_SIGN_IN     /* the account has to sign in again */
+  NUVASHALAUNCHER_LAUNCH_PREPARING,        /* the manifest, the resolve and the Java */
+  NUVASHALAUNCHER_LAUNCH_DOWNLOADING,      /* the resolve is fetching files */
+  NUVASHALAUNCHER_LAUNCH_LAUNCHING,        /* the command line is being built and run */
+  NUVASHALAUNCHER_LAUNCH_RUNNING,          /* the game is up */
+  NUVASHALAUNCHER_LAUNCH_STOPPING,         /* a stop was asked for and not finished */
+  NUVASHALAUNCHER_LAUNCH_STOPPED,          /* the game ended by itself, or was stopped */
+  NUVASHALAUNCHER_LAUNCH_CRASHED,          /* it ended with a failure */
+  NUVASHALAUNCHER_LAUNCH_FAILED,            /* launch preparation failed */
+  NUVASHALAUNCHER_LAUNCH_NEEDS_SIGN_IN     /* the account has to sign in again */
 } NuvashaLauncherLaunchState;
 
 /* The type of the state, which the "state" signal carries. */
-#define nuvashalauncher_TYPE_LAUNCH_STATE (nuvashalauncher_launch_state_get_type ())
+#define NUVASHALAUNCHER_TYPE_LAUNCH_STATE (nuvashalauncher_launch_state_get_type ())
 GType nuvashalauncher_launch_state_get_type (void);
 
 /* Returns the stable display name of @state. */
@@ -150,8 +150,8 @@ char *nuvashalauncher_launch_substitute (const char  *value,
  * runs in, which is also the ${game_directory} of the arguments, and
  * @jvm_args the line the instance stores.
  *
- * Fails with nuvashalauncher_LAUNCH_ERROR_NO_MAIN_CLASS when the document names no
- * main class and with nuvashalauncher_LAUNCH_ERROR_ARGUMENTS when the JVM arguments
+ * Fails with NUVASHALAUNCHER_LAUNCH_ERROR_NO_MAIN_CLASS when the document names no
+ * main class and with NUVASHALAUNCHER_LAUNCH_ERROR_ARGUMENTS when the JVM arguments
  * of the instance do not parse as a command line. (transfer full) */
 GPtrArray *nuvashalauncher_launch_build_arguments (const NuvashaLauncherResolvedVersion *resolved,
                                       const NuvashaLauncherLaunchSession   *session,
@@ -171,9 +171,9 @@ char *nuvashalauncher_launch_redact (GPtrArray *argv);
  * The launch itself
  * ---------------------------------------------------------- */
 
-#define nuvashalauncher_TYPE_LAUNCHER (nuvashalauncher_launcher_get_type ())
+#define NUVASHALAUNCHER_TYPE_LAUNCHER (nuvashalauncher_launcher_get_type ())
 
-G_DECLARE_FINAL_TYPE (NuvashaLauncher, nuvashalauncher_launcher, nuvashalauncher, LAUNCHER, GObject)
+G_DECLARE_FINAL_TYPE (NuvashaLauncher, nuvashalauncher_launcher, NUVASHALAUNCHER, LAUNCHER, GObject)
 
 /* "state" carries the new state and the detail that goes with it, which
  * is what a view shows next to it: "assets 12/340" while downloading,
@@ -183,9 +183,9 @@ G_DECLARE_FINAL_TYPE (NuvashaLauncher, nuvashalauncher_launcher, nuvashalauncher
  * tagged. @tag is "stdout", "stderr" or "state": the first two come
  * from the game, the last one from nuvashalauncher itself. */
 enum {
-  nuvashalauncher_LAUNCHER_SIGNAL_STATE,
-  nuvashalauncher_LAUNCHER_SIGNAL_OUTPUT,
-  nuvashalauncher_LAUNCHER_N_SIGNALS
+  NUVASHALAUNCHER_LAUNCHER_SIGNAL_STATE,
+  NUVASHALAUNCHER_LAUNCHER_SIGNAL_OUTPUT,
+  NUVASHALAUNCHER_LAUNCHER_N_SIGNALS
 };
 
 /* An instance to launch, the settings that decide how much of its log is
@@ -234,7 +234,7 @@ char *nuvashalauncher_launcher_get_crash_report_directory (NuvashaLauncher *self
 void nuvashalauncher_launcher_start (NuvashaLauncher *self);
 
 /* Asks a running game to end: SIGTERM first, and when it is still up
- * after nuvashalauncher_LAUNCH_STOP_TIMEOUT seconds it is stopped for good. A
+ * after NUVASHALAUNCHER_LAUNCH_STOP_TIMEOUT seconds it is stopped for good. A
  * launch that did not reach the process yet is cancelled where it is.
  * A launcher that is not busy does nothing. */
 void nuvashalauncher_launcher_stop (NuvashaLauncher *self);
@@ -246,7 +246,7 @@ void nuvashalauncher_launcher_stop (NuvashaLauncher *self);
  * This is public because it is the one step a headless test can drive on
  * its own with a fake java: the state machine, the two output readers
  * and the stop are then exactly the ones a real launch goes through.
- * Fails with nuvashalauncher_LAUNCH_ERROR_ALREADY_RUNNING while a process of this
+ * Fails with NUVASHALAUNCHER_LAUNCH_ERROR_ALREADY_RUNNING while a process of this
  * instance is up, and ends in the Failed state with the reason in the
  * log when the process cannot be started at all. */
 gboolean nuvashalauncher_launcher_spawn (NuvashaLauncher *self,
@@ -266,4 +266,4 @@ void nuvashalauncher_launcher_clear_log (NuvashaLauncher *self);
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_LAUNCHER_H */
+#endif /* NUVASHALAUNCHER_LAUNCHER_H */

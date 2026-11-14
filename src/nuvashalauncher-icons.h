@@ -13,8 +13,8 @@
  * in it when it arrives. A project with no icon, or one that could not
  * be fetched, keeps the placeholder the caller put there. */
 
-#ifndef nuvashalauncher_ICONS_H
-#define nuvashalauncher_ICONS_H
+#ifndef NUVASHALAUNCHER_ICONS_H
+#define NUVASHALAUNCHER_ICONS_H
 
 #include <adwaita.h>
 
@@ -23,7 +23,7 @@
 G_BEGIN_DECLS
 
 /* The square every icon of a list is shown in. */
-#define nuvashalauncher_ICON_SIZE 64
+#define NUVASHALAUNCHER_ICON_SIZE 64
 
 /* A square widget for one row: it shows @placeholder until an icon is
  * put in it. Nothing is downloaded here. */
@@ -64,4 +64,4 @@ char *nuvashalauncher_icon_cache_directory (void);
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_ICONS_H */
+#endif /* NUVASHALAUNCHER_ICONS_H */

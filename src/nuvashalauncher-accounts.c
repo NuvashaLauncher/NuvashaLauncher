@@ -73,7 +73,7 @@ nuvashalauncher_account_copy (const NuvashaLauncherAccount *account)
 const char *
 nuvashalauncher_account_type_name (NuvashaLauncherAccountType type)
 {
-  return type == nuvashalauncher_ACCOUNT_MICROSOFT ? _("Microsoft") : _("Offline");
+  return type == NUVASHALAUNCHER_ACCOUNT_MICROSOFT ? _("Microsoft") : _("Offline");
 }
 
 char *
@@ -160,13 +160,13 @@ nuvashalauncher_account_new_offline (const char *name, GError **error)
 
   if (!name_is_a_player_name (name, &why))
     {
-      g_set_error (error, nuvashalauncher_ACCOUNTS_ERROR, nuvashalauncher_ACCOUNTS_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_ACCOUNTS_ERROR, NUVASHALAUNCHER_ACCOUNTS_ERROR_INVALID,
                    "%s", why);
       return NULL;
     }
 
   account = g_new0 (NuvashaLauncherAccount, 1);
-  account->type = nuvashalauncher_ACCOUNT_OFFLINE;
+  account->type = NUVASHALAUNCHER_ACCOUNT_OFFLINE;
   account->id = g_strdup (name);
   account->name = g_strdup (name);
   account->uuid = nuvashalauncher_account_offline_uuid (name);
@@ -180,7 +180,7 @@ nuvashalauncher_account_token_is_valid (const NuvashaLauncherAccount *account, g
   g_return_val_if_fail (account != NULL, FALSE);
 
   /* An offline account has no token and needs none. */
-  if (account->type == nuvashalauncher_ACCOUNT_OFFLINE)
+  if (account->type == NUVASHALAUNCHER_ACCOUNT_OFFLINE)
     return TRUE;
 
   if (account->access_token == NULL || *account->access_token == '\0')
@@ -189,7 +189,7 @@ nuvashalauncher_account_token_is_valid (const NuvashaLauncherAccount *account, g
   if (account->expires_at == 0)
     return FALSE;
 
-  return now < account->expires_at - nuvashalauncher_ACCOUNTS_TOKEN_MARGIN;
+  return now < account->expires_at - NUVASHALAUNCHER_ACCOUNTS_TOKEN_MARGIN;
 }
 
 /* ---------------------------------------------------------- *
@@ -207,12 +207,12 @@ struct _NuvashaLauncherAccounts
 
 G_DEFINE_FINAL_TYPE (NuvashaLauncherAccounts, nuvashalauncher_accounts, G_TYPE_OBJECT)
 
-static guint nuvashalauncher_accounts_signals[nuvashalauncher_ACCOUNTS_N_SIGNALS];
+static guint nuvashalauncher_accounts_signals[NUVASHALAUNCHER_ACCOUNTS_N_SIGNALS];
 
 static void
 emit_changed (NuvashaLauncherAccounts *self)
 {
-  g_signal_emit (self, nuvashalauncher_accounts_signals[nuvashalauncher_ACCOUNTS_SIGNAL_CHANGED], 0);
+  g_signal_emit (self, nuvashalauncher_accounts_signals[NUVASHALAUNCHER_ACCOUNTS_SIGNAL_CHANGED], 0);
 }
 
 static gboolean
@@ -224,7 +224,7 @@ active_is (NuvashaLauncherAccounts *self, const char *id)
 NuvashaLauncherAccount *
 nuvashalauncher_accounts_find (NuvashaLauncherAccounts *self, const char *id)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_ACCOUNTS (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_ACCOUNTS (self), NULL);
 
   if (id == NULL)
     return NULL;
@@ -259,7 +259,7 @@ nuvashalauncher_accounts_new_for_path (const char *filename)
 
   g_return_val_if_fail (filename != NULL, NULL);
 
-  self = g_object_new (nuvashalauncher_TYPE_ACCOUNTS, NULL);
+  self = g_object_new (NUVASHALAUNCHER_TYPE_ACCOUNTS, NULL);
   self->filename = g_strdup (filename);
   self->accounts = g_ptr_array_new_with_free_func (
     (GDestroyNotify) nuvashalauncher_account_free);
@@ -308,7 +308,7 @@ nuvashalauncher_accounts_new (void)
 GPtrArray *
 nuvashalauncher_accounts_list (NuvashaLauncherAccounts *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_ACCOUNTS (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_ACCOUNTS (self), NULL);
 
   return self->accounts;
 }
@@ -316,7 +316,7 @@ nuvashalauncher_accounts_list (NuvashaLauncherAccounts *self)
 guint
 nuvashalauncher_accounts_count (NuvashaLauncherAccounts *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_ACCOUNTS (self), 0);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_ACCOUNTS (self), 0);
 
   return self->accounts->len;
 }
@@ -324,7 +324,7 @@ nuvashalauncher_accounts_count (NuvashaLauncherAccounts *self)
 NuvashaLauncherAccount *
 nuvashalauncher_accounts_get_active (NuvashaLauncherAccounts *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_ACCOUNTS (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_ACCOUNTS (self), NULL);
 
   if (self->active_id == NULL)
     return NULL;
@@ -335,7 +335,7 @@ nuvashalauncher_accounts_get_active (NuvashaLauncherAccounts *self)
 const char *
 nuvashalauncher_accounts_get_active_id (NuvashaLauncherAccounts *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_ACCOUNTS (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_ACCOUNTS (self), NULL);
 
   return self->active_id;
 }
@@ -343,12 +343,12 @@ nuvashalauncher_accounts_get_active_id (NuvashaLauncherAccounts *self)
 gboolean
 nuvashalauncher_accounts_set_active (NuvashaLauncherAccounts *self, const char *id, GError **error)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_ACCOUNTS (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_ACCOUNTS (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   if (nuvashalauncher_accounts_find (self, id) == NULL)
     {
-      g_set_error (error, nuvashalauncher_ACCOUNTS_ERROR, nuvashalauncher_ACCOUNTS_ERROR_UNKNOWN,
+      g_set_error (error, NUVASHALAUNCHER_ACCOUNTS_ERROR, NUVASHALAUNCHER_ACCOUNTS_ERROR_UNKNOWN,
                    "there is no account \"%s\"", id != NULL ? id : "");
       return FALSE;
     }
@@ -387,7 +387,7 @@ accounts_add_internal (NuvashaLauncherAccounts       *self,
   g_autofree char *previous_active_id = NULL;
   guint added_index = G_MAXUINT;
 
-  g_return_val_if_fail (nuvashalauncher_IS_ACCOUNTS (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_ACCOUNTS (self), FALSE);
   g_return_val_if_fail (account != NULL, FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
@@ -395,7 +395,7 @@ accounts_add_internal (NuvashaLauncherAccounts       *self,
       account->name == NULL || *account->name == '\0' ||
       account->uuid == NULL || *account->uuid == '\0')
     {
-      g_set_error (error, nuvashalauncher_ACCOUNTS_ERROR, nuvashalauncher_ACCOUNTS_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_ACCOUNTS_ERROR, NUVASHALAUNCHER_ACCOUNTS_ERROR_INVALID,
                    "an account needs a name, an id and a uuid to be stored");
       return FALSE;
     }
@@ -525,12 +525,12 @@ nuvashalauncher_accounts_update (NuvashaLauncherAccounts *self, const NuvashaLau
 gboolean
 nuvashalauncher_accounts_remove (NuvashaLauncherAccounts *self, const char *id, GError **error)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_ACCOUNTS (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_ACCOUNTS (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   if (id == NULL)
     {
-      g_set_error (error, nuvashalauncher_ACCOUNTS_ERROR, nuvashalauncher_ACCOUNTS_ERROR_UNKNOWN,
+      g_set_error (error, NUVASHALAUNCHER_ACCOUNTS_ERROR, NUVASHALAUNCHER_ACCOUNTS_ERROR_UNKNOWN,
                    "there is no account to remove");
       return FALSE;
     }
@@ -580,7 +580,7 @@ nuvashalauncher_accounts_remove (NuvashaLauncherAccounts *self, const char *id, 
       return TRUE;
     }
 
-  g_set_error (error, nuvashalauncher_ACCOUNTS_ERROR, nuvashalauncher_ACCOUNTS_ERROR_UNKNOWN,
+  g_set_error (error, NUVASHALAUNCHER_ACCOUNTS_ERROR, NUVASHALAUNCHER_ACCOUNTS_ERROR_UNKNOWN,
                "there is no account \"%s\" to remove", id != NULL ? id : "");
 
   return FALSE;
@@ -593,7 +593,7 @@ nuvashalauncher_accounts_remove (NuvashaLauncherAccounts *self, const char *id, 
 static void
 nuvashalauncher_accounts_finalize (GObject *object)
 {
-  NuvashaLauncherAccounts *self = nuvashalauncher_ACCOUNTS (object);
+  NuvashaLauncherAccounts *self = NUVASHALAUNCHER_ACCOUNTS (object);
 
   g_clear_pointer (&self->accounts, g_ptr_array_unref);
   g_free (self->active_id);
@@ -609,7 +609,7 @@ nuvashalauncher_accounts_class_init (NuvashaLauncherAccountsClass *klass)
 
   object_class->finalize = nuvashalauncher_accounts_finalize;
 
-  nuvashalauncher_accounts_signals[nuvashalauncher_ACCOUNTS_SIGNAL_CHANGED] =
+  nuvashalauncher_accounts_signals[NUVASHALAUNCHER_ACCOUNTS_SIGNAL_CHANGED] =
     g_signal_new ("changed", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0,
                   NULL, NULL, NULL, G_TYPE_NONE, 0);
 }

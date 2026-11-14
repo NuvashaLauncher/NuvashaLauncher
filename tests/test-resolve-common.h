@@ -31,8 +31,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#ifndef nuvashalauncher_TEST_FIXTURES
-#define nuvashalauncher_TEST_FIXTURES "tests/fixtures"
+#ifndef NUVASHALAUNCHER_TEST_FIXTURES
+#define NUVASHALAUNCHER_TEST_FIXTURES "tests/fixtures"
 #endif
 
 /* The version documents these tests resolve go to the cache directory of
@@ -145,7 +145,7 @@ fixture_stop (void)
 static inline char *
 fixture_text (const char *name)
 {
-  g_autofree char *path = g_build_filename (nuvashalauncher_TEST_FIXTURES, name, NULL);
+  g_autofree char *path = g_build_filename (NUVASHALAUNCHER_TEST_FIXTURES, name, NULL);
   g_autoptr (GError) error = NULL;
   char *contents = NULL;
 
@@ -246,8 +246,8 @@ cache_start (void)
 static inline void
 cache_stop (void)
 {
-  g_autofree char *nuvashalauncher = g_build_filename (cache_home, "nuvashalauncher", NULL);
-  g_autoptr (GDir) dir = g_dir_open (nuvashalauncher, 0, NULL);
+  g_autofree char *cache_dir = g_build_filename (cache_home, "nuvashalauncher", NULL);
+  g_autoptr (GDir) dir = g_dir_open (cache_dir, 0, NULL);
 
   if (dir != NULL)
     {
@@ -255,13 +255,13 @@ cache_stop (void)
 
       while ((name = g_dir_read_name (dir)) != NULL)
         {
-          g_autofree char *path = g_build_filename (nuvashalauncher, name, NULL);
+          g_autofree char *path = g_build_filename (cache_dir, name, NULL);
 
           g_remove (path);
         }
     }
 
-  g_rmdir (nuvashalauncher);
+  g_rmdir (cache_dir);
   g_rmdir (cache_home);
 }
 

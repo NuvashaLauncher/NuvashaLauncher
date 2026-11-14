@@ -25,31 +25,31 @@
  * desktop Secret Service. The filename accepted by the test/path constructor
  * remains only as an API compatibility value; it is not read or written. */
 
-#ifndef nuvashalauncher_ACCOUNTS_H
-#define nuvashalauncher_ACCOUNTS_H
+#ifndef NUVASHALAUNCHER_ACCOUNTS_H
+#define NUVASHALAUNCHER_ACCOUNTS_H
 
 #include <gio/gio.h>
 #include <json-glib/json-glib.h>
 
 G_BEGIN_DECLS
 
-#define nuvashalauncher_ACCOUNTS_ERROR (nuvashalauncher_accounts_error_quark ())
+#define NUVASHALAUNCHER_ACCOUNTS_ERROR (nuvashalauncher_accounts_error_quark ())
 
 typedef enum {
-  nuvashalauncher_ACCOUNTS_ERROR_IO,      /* the file cannot be read or written */
-  nuvashalauncher_ACCOUNTS_ERROR_INVALID, /* invalid account data */
-  nuvashalauncher_ACCOUNTS_ERROR_UNKNOWN   /* there is no such account */
+  NUVASHALAUNCHER_ACCOUNTS_ERROR_IO,      /* the file cannot be read or written */
+  NUVASHALAUNCHER_ACCOUNTS_ERROR_INVALID, /* invalid account data */
+  NUVASHALAUNCHER_ACCOUNTS_ERROR_UNKNOWN   /* there is no such account */
 } NuvashaLauncherAccountsError;
 
 GQuark nuvashalauncher_accounts_error_quark (void);
 
 /* How far ahead of its expiry a token stops being good: the game would
  * be handed a token that dies while it is still booting. */
-#define nuvashalauncher_ACCOUNTS_TOKEN_MARGIN 60
+#define NUVASHALAUNCHER_ACCOUNTS_TOKEN_MARGIN 60
 
 typedef enum {
-  nuvashalauncher_ACCOUNT_OFFLINE,   /* a name and nothing else */
-  nuvashalauncher_ACCOUNT_MICROSOFT  /* signed in with a Microsoft account */
+  NUVASHALAUNCHER_ACCOUNT_OFFLINE,   /* a name and nothing else */
+  NUVASHALAUNCHER_ACCOUNT_MICROSOFT  /* signed in with a Microsoft account */
 } NuvashaLauncherAccountType;
 
 /* One account. @id is the store key: the UUID of the
@@ -82,14 +82,14 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherAccount, nuvashalauncher_account_f
 
 /* (transfer full). The name has to be one java accepts as a player name:
  * 3 to 16 characters of letters, digits and underscores, or this fails
- * with nuvashalauncher_ACCOUNTS_ERROR_INVALID saying which of the two it is. */
+ * with NUVASHALAUNCHER_ACCOUNTS_ERROR_INVALID saying which of the two it is. */
 NuvashaLauncherAccount *nuvashalauncher_account_new_offline (const char *name, GError **error);
 
 /* (transfer full) */
 NuvashaLauncherAccount *nuvashalauncher_account_copy (const NuvashaLauncherAccount *account);
 
 /* Boxed account type used by signals. */
-#define nuvashalauncher_TYPE_ACCOUNT (nuvashalauncher_account_get_type ())
+#define NUVASHALAUNCHER_TYPE_ACCOUNT (nuvashalauncher_account_get_type ())
 GType nuvashalauncher_account_get_type (void);
 
 /* Human-readable account type: "Microsoft" or "Offline". */
@@ -97,7 +97,7 @@ const char *nuvashalauncher_account_type_name (NuvashaLauncherAccountType type);
 
 /* TRUE when the account can be played as at @now: an offline account
    always can, and a Microsoft account can while its access token has not
-   come within nuvashalauncher_ACCOUNTS_TOKEN_MARGIN seconds of its expiry. */
+   come within NUVASHALAUNCHER_ACCOUNTS_TOKEN_MARGIN seconds of its expiry. */
 gboolean nuvashalauncher_account_token_is_valid (const NuvashaLauncherAccount *account, gint64 now);
 
 /* The UUID java hands out for an offline player: the MD5 of
@@ -107,14 +107,14 @@ char *nuvashalauncher_account_offline_uuid (const char *name);
 
 typedef struct _NuvashaLauncherAccounts NuvashaLauncherAccounts;
 
-#define nuvashalauncher_TYPE_ACCOUNTS (nuvashalauncher_accounts_get_type ())
+#define NUVASHALAUNCHER_TYPE_ACCOUNTS (nuvashalauncher_accounts_get_type ())
 
-G_DECLARE_FINAL_TYPE (NuvashaLauncherAccounts, nuvashalauncher_accounts, nuvashalauncher, ACCOUNTS, GObject)
+G_DECLARE_FINAL_TYPE (NuvashaLauncherAccounts, nuvashalauncher_accounts, NUVASHALAUNCHER, ACCOUNTS, GObject)
 
 /* Emitted when the list, active account, or account tokens change. */
 enum {
-  nuvashalauncher_ACCOUNTS_SIGNAL_CHANGED,
-  nuvashalauncher_ACCOUNTS_N_SIGNALS
+  NUVASHALAUNCHER_ACCOUNTS_SIGNAL_CHANGED,
+  NUVASHALAUNCHER_ACCOUNTS_N_SIGNALS
 };
 
 /* The store of the user's own file. (transfer full) */
@@ -135,7 +135,7 @@ NuvashaLauncherAccount *nuvashalauncher_accounts_get_active (NuvashaLauncherAcco
 const char *nuvashalauncher_accounts_get_active_id (NuvashaLauncherAccounts *self);
 
 /* Makes @id the active account, which is the only one that can be.
-   nuvashalauncher_ACCOUNTS_ERROR_UNKNOWN when there is no such account. */
+   NUVASHALAUNCHER_ACCOUNTS_ERROR_UNKNOWN when there is no such account. */
 gboolean nuvashalauncher_accounts_set_active (NuvashaLauncherAccounts *self, const char *id,
                                   GError **error);
 
@@ -160,4 +160,4 @@ gboolean nuvashalauncher_accounts_remove (NuvashaLauncherAccounts *self, const c
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_ACCOUNTS_H */
+#endif /* NUVASHALAUNCHER_ACCOUNTS_H */

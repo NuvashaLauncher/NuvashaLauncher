@@ -76,7 +76,7 @@ remove_installed_file_by_path (NuvashaLauncherContentPage *self, const char *tar
 static void
 on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
   const char *path = g_object_get_data (G_OBJECT (source), "nuvashalauncher-path");
   g_autoptr (GError) error = NULL;
 
@@ -222,7 +222,7 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
 static void
 on_delete_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
   const char *path = g_object_get_data (G_OBJECT (source), "nuvashalauncher-path");
   GPtrArray *dependent_paths =
     g_object_get_data (G_OBJECT (source), "nuvashalauncher-dependent-paths");
@@ -253,7 +253,7 @@ void
 nuvashalauncher_content_page_on_trash_clicked (GtkButton *button G_GNUC_UNUSED,
                                                gpointer   user_data)
 {
-  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
   NuvashaLauncherContentFile *file = g_object_get_data (G_OBJECT (button), "nuvashalauncher-file");
   g_autofree char *heading = NULL;
   g_autofree char *body = NULL;
@@ -455,9 +455,9 @@ content_page_bulk_delete (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
         }
     }
 
-  const char *kind = self->type == nuvashalauncher_CONTENT_MOD ? "mods" :
-                     self->type == nuvashalauncher_CONTENT_SHADER_PACK ? "shaderpacks" :
-                     self->type == nuvashalauncher_CONTENT_RESOURCE_PACK ? "resourcepacks" :
+  const char *kind = self->type == NUVASHALAUNCHER_CONTENT_MOD ? "mods" :
+                     self->type == NUVASHALAUNCHER_CONTENT_SHADER_PACK ? "shaderpacks" :
+                     self->type == NUVASHALAUNCHER_CONTENT_RESOURCE_PACK ? "resourcepacks" :
                      "datapacks";
   heading = g_strdup_printf (_("Delete selected %s?"), kind);
   if (dependencies->len > 0)

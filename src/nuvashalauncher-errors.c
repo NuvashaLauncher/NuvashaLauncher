@@ -22,8 +22,8 @@ gboolean
 nuvashalauncher_error_is_cancelled (const GError *error)
 {
   return g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED) ||
-    g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_CANCELLED) ||
-    g_error_matches (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_CANCELLED);
+    g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR, NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED) ||
+    g_error_matches (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED);
 }
 
 const char *
@@ -79,118 +79,118 @@ nuvashalauncher_error_message (const GError *error)
         return _("There is not enough free disk space.");
       return io;
     }
-  if (error->domain == nuvashalauncher_AUTH_ERROR)
+  if (error->domain == NUVASHALAUNCHER_AUTH_ERROR)
     {
       switch (error->code)
         {
-        case nuvashalauncher_AUTH_ERROR_NETWORK: return network;
-        case nuvashalauncher_AUTH_ERROR_PARSE: return response;
-        case nuvashalauncher_AUTH_ERROR_EXPIRED:
+        case NUVASHALAUNCHER_AUTH_ERROR_NETWORK: return network;
+        case NUVASHALAUNCHER_AUTH_ERROR_PARSE: return response;
+        case NUVASHALAUNCHER_AUTH_ERROR_EXPIRED:
           return _("The sign-in request expired. Start again to get a new code.");
-        case nuvashalauncher_AUTH_ERROR_REAUTH:
+        case NUVASHALAUNCHER_AUTH_ERROR_REAUTH:
           return _("Your saved sign-in is no longer valid. Sign in again.");
-        case nuvashalauncher_AUTH_ERROR_DECLINED:
+        case NUVASHALAUNCHER_AUTH_ERROR_DECLINED:
           return _("Sign-in was declined. Start again if you want to sign in.");
-        case nuvashalauncher_AUTH_ERROR_NO_GAME:
+        case NUVASHALAUNCHER_AUTH_ERROR_NO_GAME:
           return _("This account does not own Minecraft: Java Edition.");
-        case nuvashalauncher_AUTH_ERROR_NO_PROFILE:
+        case NUVASHALAUNCHER_AUTH_ERROR_NO_PROFILE:
           return _("Set up a Minecraft: Java Edition profile on minecraft.net, then try again.");
-        case nuvashalauncher_AUTH_ERROR_NO_CLIENT_ID:
+        case NUVASHALAUNCHER_AUTH_ERROR_NO_CLIENT_ID:
           return _("Microsoft sign-in is not configured in this build. Update the launcher.");
-        case nuvashalauncher_AUTH_ERROR_XBOX_PROFILE:
+        case NUVASHALAUNCHER_AUTH_ERROR_XBOX_PROFILE:
           return _("this Microsoft account has no Xbox profile behind it yet: sign in to xbox.com once with it, then sign in here again");
-        case nuvashalauncher_AUTH_ERROR_XBOX_FAMILY:
+        case NUVASHALAUNCHER_AUTH_ERROR_XBOX_FAMILY:
           return _("this is a child account: it has to be added to a Microsoft family by an adult before it can play");
-        case nuvashalauncher_AUTH_ERROR_XBOX_COUNTRY:
+        case NUVASHALAUNCHER_AUTH_ERROR_XBOX_COUNTRY:
           return _("Xbox Live is not available for the country this account is registered in");
-        case nuvashalauncher_AUTH_ERROR_XBOX_AGE:
+        case NUVASHALAUNCHER_AUTH_ERROR_XBOX_AGE:
           return _("this account needs an adult to verify it before it can play, which is what South Korean accounts have to do");
         default: return _("Microsoft sign-in failed. Try again.");
         }
     }
-  if (error->domain == nuvashalauncher_DOWNLOAD_ERROR)
+  if (error->domain == NUVASHALAUNCHER_DOWNLOAD_ERROR)
     {
       switch (error->code)
         {
-        case nuvashalauncher_DOWNLOAD_ERROR_NETWORK: return network;
-        case nuvashalauncher_DOWNLOAD_ERROR_HTTP: return http;
-        case nuvashalauncher_DOWNLOAD_ERROR_RATE_LIMITED: return rate;
-        case nuvashalauncher_DOWNLOAD_ERROR_CHECKSUM: return hash;
-        case nuvashalauncher_DOWNLOAD_ERROR_INVALID: return response;
+        case NUVASHALAUNCHER_DOWNLOAD_ERROR_NETWORK: return network;
+        case NUVASHALAUNCHER_DOWNLOAD_ERROR_HTTP: return http;
+        case NUVASHALAUNCHER_DOWNLOAD_ERROR_RATE_LIMITED: return rate;
+        case NUVASHALAUNCHER_DOWNLOAD_ERROR_CHECKSUM: return hash;
+        case NUVASHALAUNCHER_DOWNLOAD_ERROR_INVALID: return response;
         default: return io;
         }
     }
-  if (error->domain == nuvashalauncher_MODRINTH_ERROR)
+  if (error->domain == NUVASHALAUNCHER_MODRINTH_ERROR)
     {
       switch (error->code)
         {
-        case nuvashalauncher_MODRINTH_ERROR_NETWORK: return network;
-        case nuvashalauncher_MODRINTH_ERROR_HTTP: return http;
-        case nuvashalauncher_MODRINTH_ERROR_RATE_LIMIT: return rate;
-        case nuvashalauncher_MODRINTH_ERROR_NOT_FOUND:
+        case NUVASHALAUNCHER_MODRINTH_ERROR_NETWORK: return network;
+        case NUVASHALAUNCHER_MODRINTH_ERROR_HTTP: return http;
+        case NUVASHALAUNCHER_MODRINTH_ERROR_RATE_LIMIT: return rate;
+        case NUVASHALAUNCHER_MODRINTH_ERROR_NOT_FOUND:
           return _("The requested file, project, or compatible version was not found.");
         default: return response;
         }
     }
-  if (error->domain == nuvashalauncher_MINECRAFT_SERVICES_ERROR)
+  if (error->domain == NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR)
     {
       switch (error->code)
         {
-        case nuvashalauncher_MINECRAFT_SERVICES_ERROR_NETWORK: return network;
-        case nuvashalauncher_MINECRAFT_SERVICES_ERROR_RATE_LIMITED: return rate;
-        case nuvashalauncher_MINECRAFT_SERVICES_ERROR_HTTP: return http;
+        case NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR_NETWORK: return network;
+        case NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR_RATE_LIMITED: return rate;
+        case NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR_HTTP: return http;
         default: return response;
         }
     }
-  if (error->domain == nuvashalauncher_MODPACK_ERROR)
+  if (error->domain == NUVASHALAUNCHER_MODPACK_ERROR)
     {
       switch (error->code)
         {
-        case nuvashalauncher_MODPACK_ERROR_HASH: return hash;
-        case nuvashalauncher_MODPACK_ERROR_IO: return io;
-        case nuvashalauncher_MODPACK_ERROR_DOWNLOAD: return _("Pack could not be fetched");
-        case nuvashalauncher_MODPACK_ERROR_LOADER:
+        case NUVASHALAUNCHER_MODPACK_ERROR_HASH: return hash;
+        case NUVASHALAUNCHER_MODPACK_ERROR_IO: return io;
+        case NUVASHALAUNCHER_MODPACK_ERROR_DOWNLOAD: return _("Pack could not be fetched");
+        case NUVASHALAUNCHER_MODPACK_ERROR_LOADER:
           return _("Could not install this mod loader. Choose another version or inspect Technical Details.");
-        case nuvashalauncher_MODPACK_ERROR_CANCELLED:
+        case NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED:
           return _("The operation failed. See Technical Details for more information.");
         default: return archive;
         }
     }
-  if (error->domain == nuvashalauncher_LOADERS_ERROR)
+  if (error->domain == NUVASHALAUNCHER_LOADERS_ERROR)
     return _("Could not install this mod loader. Choose another version or inspect Technical Details.");
-  if (error->domain == nuvashalauncher_JAVA_ERROR)
+  if (error->domain == NUVASHALAUNCHER_JAVA_ERROR)
     return _("The Java executable could not be used. Select a working Java runtime.");
-  if (error->domain == nuvashalauncher_MC_ERROR)
+  if (error->domain == NUVASHALAUNCHER_MC_ERROR)
     return _("The game metadata is invalid or unavailable. Refresh the version list and try again.");
-  if (error->domain == nuvashalauncher_RESOLVE_ERROR)
+  if (error->domain == NUVASHALAUNCHER_RESOLVE_ERROR)
     {
-      if (error->code == nuvashalauncher_RESOLVE_ERROR_IO)
+      if (error->code == NUVASHALAUNCHER_RESOLVE_ERROR_IO)
         return io;
-      if (error->code == nuvashalauncher_RESOLVE_ERROR_UNSAFE_PATH)
+      if (error->code == NUVASHALAUNCHER_RESOLVE_ERROR_UNSAFE_PATH)
         return archive;
       return _("The game metadata is invalid or unavailable. Refresh the version list and try again.");
     }
-  if (error->domain == nuvashalauncher_INSTANCE_MANAGER_ERROR)
+  if (error->domain == NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR)
     {
       if (error->message != NULL &&
           g_str_has_prefix (error->message, "the directory is already used"))
         return _("The destination already exists. Choose another location.");
-      if (error->code == nuvashalauncher_INSTANCE_MANAGER_ERROR_IO)
+      if (error->code == NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_IO)
         return io;
-      if (error->code == nuvashalauncher_INSTANCE_MANAGER_ERROR_NOT_FOUND)
+      if (error->code == NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND)
         return _("This instance is no longer available. Refresh the instance list.");
       return _("Choose another instance name or directory.");
     }
-  if (error->domain == nuvashalauncher_LAUNCH_ERROR)
+  if (error->domain == NUVASHALAUNCHER_LAUNCH_ERROR)
     return _("Your instance settings are invalid. Check the selected version and JVM arguments.");
-  if (error->domain == nuvashalauncher_INSTANCE_ERROR)
+  if (error->domain == NUVASHALAUNCHER_INSTANCE_ERROR)
     return _("Choose another instance name or directory.");
-  if (error->domain == nuvashalauncher_SETTINGS_ERROR)
+  if (error->domain == NUVASHALAUNCHER_SETTINGS_ERROR)
     return io;
-  if (g_error_matches (error, nuvashalauncher_ACCOUNTS_ERROR, nuvashalauncher_ACCOUNTS_ERROR_IO))
+  if (g_error_matches (error, NUVASHALAUNCHER_ACCOUNTS_ERROR, NUVASHALAUNCHER_ACCOUNTS_ERROR_IO))
     return _("Could not save the account. Check your system keyring and file permissions.");
-  if (g_error_matches (error, nuvashalauncher_ACCOUNTS_ERROR,
-                       nuvashalauncher_ACCOUNTS_ERROR_INVALID))
+  if (g_error_matches (error, NUVASHALAUNCHER_ACCOUNTS_ERROR,
+                       NUVASHALAUNCHER_ACCOUNTS_ERROR_INVALID))
     return error->message;
   return _("The operation failed. See Technical Details for more information.");
 }

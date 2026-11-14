@@ -13,7 +13,7 @@ get_required_string (JsonObject  *object,
 
   if (node == NULL)
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_MISSING_FIELD,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_MISSING_FIELD,
                    "instance is missing \"%s\"", member);
       return NULL;
     }
@@ -21,7 +21,7 @@ get_required_string (JsonObject  *object,
   if (!JSON_NODE_HOLDS_VALUE (node) ||
       json_node_get_value_type (node) != G_TYPE_STRING)
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,
                    "instance field \"%s\" must be a string", member);
       return NULL;
     }
@@ -47,7 +47,7 @@ get_optional_string (JsonObject   *object,
   if (!JSON_NODE_HOLDS_VALUE (node) ||
       json_node_get_value_type (node) != G_TYPE_STRING)
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,
                    "instance field \"%s\" must be a string", member);
       return FALSE;
     }
@@ -70,7 +70,7 @@ get_loader (JsonObject *object, NuvashaLauncherLoader *loader, GError **error)
 
   if (!nuvashalauncher_loader_from_string (string, loader))
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,
                    "unknown mod loader \"%s\"", string);
       return FALSE;
     }
@@ -95,7 +95,7 @@ get_jvm_args (JsonObject *object, const char **jvm_args, GError **error)
   if (!JSON_NODE_HOLDS_VALUE (node) ||
       json_node_get_value_type (node) != G_TYPE_STRING)
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,
                    "instance field \"jvm_args\" must be a string");
       return FALSE;
     }
@@ -104,7 +104,7 @@ get_jvm_args (JsonObject *object, const char **jvm_args, GError **error)
 
   if (string == NULL)
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,
                    "instance field \"jvm_args\" must not be null");
       return FALSE;
     }
@@ -120,7 +120,7 @@ nuvashalauncher_instance_new_from_json (JsonNode *node, GError **error)
 
   if (node == NULL || !JSON_NODE_HOLDS_OBJECT (node))
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,
                    "instance entry is not a JSON object");
       return NULL;
     }
@@ -218,7 +218,7 @@ add_optional_member (JsonBuilder *builder,
 JsonNode *
 nuvashalauncher_instance_to_json (NuvashaLauncherInstance *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (self), NULL);
 
   if (!nuvashalauncher_instance_validate (self, NULL))
     {

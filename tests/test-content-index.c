@@ -87,7 +87,7 @@ start_update (const char *root, NuvashaLauncherContentIndexEntry *entry, GMainLo
 
   wait->loop = loop;
   wait->completed = completed;
-  wait->operation = nuvashalauncher_content_index_update_async (root, nuvashalauncher_CONTENT_MOD,
+  wait->operation = nuvashalauncher_content_index_update_async (root, NUVASHALAUNCHER_CONTENT_MOD,
                                                      entry, update_done, wait);
 }
 
@@ -133,9 +133,9 @@ test_concurrent_updates_are_serialized (void)
   start_update (root, &second, loop, &completed);
   g_main_loop_run (loop);
 
-  first_path = nuvashalauncher_content_index_entry_path (root, nuvashalauncher_CONTENT_MOD,
+  first_path = nuvashalauncher_content_index_entry_path (root, NUVASHALAUNCHER_CONTENT_MOD,
                                              first.filename);
-  second_path = nuvashalauncher_content_index_entry_path (root, nuvashalauncher_CONTENT_MOD,
+  second_path = nuvashalauncher_content_index_entry_path (root, NUVASHALAUNCHER_CONTENT_MOD,
                                               second.filename);
   g_assert_true (g_file_test (first_path, G_FILE_TEST_IS_REGULAR));
   g_assert_true (g_file_test (second_path, G_FILE_TEST_IS_REGULAR));
@@ -153,7 +153,7 @@ test_concurrent_updates_are_serialized (void)
     LoadWait *load = g_new0 (LoadWait, 1);
 
     load->loop = loop;
-    load->operation = nuvashalauncher_content_index_load_async (root, nuvashalauncher_CONTENT_MOD,
+    load->operation = nuvashalauncher_content_index_load_async (root, NUVASHALAUNCHER_CONTENT_MOD,
                                                     load_done, load);
   }
   g_main_loop_run (loop);
@@ -183,12 +183,12 @@ test_invalid_entry_fails_without_partial_results (void)
                                       "{\"version\":1,\"filename\":\"x.jar\"}",
                                       -1, NULL));
   wait.operation = nuvashalauncher_content_index_load_async (
-    root, nuvashalauncher_CONTENT_MOD, load_error_done, &wait);
+    root, NUVASHALAUNCHER_CONTENT_MOD, load_error_done, &wait);
   g_main_loop_run (loop);
 
   g_assert_null (wait.operation);
-  g_assert_error (wait.error, nuvashalauncher_CONTENT_INDEX_ERROR,
-                  nuvashalauncher_CONTENT_INDEX_ERROR_INVALID);
+  g_assert_error (wait.error, NUVASHALAUNCHER_CONTENT_INDEX_ERROR,
+                  NUVASHALAUNCHER_CONTENT_INDEX_ERROR_INVALID);
   g_clear_error (&wait.error);
   g_main_loop_unref (loop);
   g_remove (path);

@@ -18,8 +18,8 @@
  * function that has to parse an answer also exists in a form a test can
  * hand a fixture to. */
 
-#ifndef nuvashalauncher_MODRINTH_H
-#define nuvashalauncher_MODRINTH_H
+#ifndef NUVASHALAUNCHER_MODRINTH_H
+#define NUVASHALAUNCHER_MODRINTH_H
 
 #include <gio/gio.h>
 #include <json-glib/json-glib.h>
@@ -29,21 +29,21 @@
 G_BEGIN_DECLS
 
 /* The Modrinth API v2. */
-#define nuvashalauncher_MODRINTH_URL "https://api.modrinth.com/v2"
+#define NUVASHALAUNCHER_MODRINTH_URL "https://api.modrinth.com/v2"
 
 /* Modrinth asks every client to name itself, and to carry an address its
  * operators can reach it at if they need to. */
-#define nuvashalauncher_MODRINTH_USER_AGENT \
+#define NUVASHALAUNCHER_MODRINTH_USER_AGENT \
   "nuvashalauncher (https://github.com/nuvashalauncher/nuvashalauncher)"
 
-#define nuvashalauncher_MODRINTH_ERROR (nuvashalauncher_modrinth_error_quark ())
+#define NUVASHALAUNCHER_MODRINTH_ERROR (nuvashalauncher_modrinth_error_quark ())
 
 typedef enum {
-  nuvashalauncher_MODRINTH_ERROR_NETWORK,   /* the API could not be reached */
-  nuvashalauncher_MODRINTH_ERROR_HTTP,      /* an HTTP status that is not success */
-  nuvashalauncher_MODRINTH_ERROR_RATE_LIMIT, /* HTTP 429, too many requests */
-  nuvashalauncher_MODRINTH_ERROR_PARSE,
-  nuvashalauncher_MODRINTH_ERROR_NOT_FOUND  /* no such project, version or hash */
+  NUVASHALAUNCHER_MODRINTH_ERROR_NETWORK,   /* the API could not be reached */
+  NUVASHALAUNCHER_MODRINTH_ERROR_HTTP,      /* an HTTP status that is not success */
+  NUVASHALAUNCHER_MODRINTH_ERROR_RATE_LIMIT, /* HTTP 429, too many requests */
+  NUVASHALAUNCHER_MODRINTH_ERROR_PARSE,
+  NUVASHALAUNCHER_MODRINTH_ERROR_NOT_FOUND  /* no such project, version or hash */
 } NuvashaLauncherModrinthError;
 
 GQuark nuvashalauncher_modrinth_error_quark (void);
@@ -56,11 +56,11 @@ char *nuvashalauncher_modrinth_json_node_to_string (JsonNode *node);
 /* What a content page shows. Mods need a loader, the other content types only
  * need the Minecraft version. */
 typedef enum {
-  nuvashalauncher_CONTENT_MOD,
-  nuvashalauncher_CONTENT_RESOURCE_PACK,
-  nuvashalauncher_CONTENT_SHADER_PACK,
-  nuvashalauncher_CONTENT_DATAPACK,
-  nuvashalauncher_CONTENT_MODPACK,
+  NUVASHALAUNCHER_CONTENT_MOD,
+  NUVASHALAUNCHER_CONTENT_RESOURCE_PACK,
+  NUVASHALAUNCHER_CONTENT_SHADER_PACK,
+  NUVASHALAUNCHER_CONTENT_DATAPACK,
+  NUVASHALAUNCHER_CONTENT_MODPACK,
 } NuvashaLauncherContentType;
 
 /* What Modrinth calls this kind of content in a facet: "mod", "resourcepack",
@@ -237,10 +237,10 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherModrinthFile, nuvashalauncher_modr
 
 /* What a version depends on, as Modrinth publishes it. */
 typedef enum {
-  nuvashalauncher_DEPENDENCY_REQUIRED,      /* the version does not run without it */
-  nuvashalauncher_DEPENDENCY_OPTIONAL,      /* it runs better with it */
-  nuvashalauncher_DEPENDENCY_EMBEDDED,      /* already inside this file */
-  nuvashalauncher_DEPENDENCY_INCOMPATIBLE   /* it does not run with this */
+  NUVASHALAUNCHER_DEPENDENCY_REQUIRED,      /* the version does not run without it */
+  NUVASHALAUNCHER_DEPENDENCY_OPTIONAL,      /* it runs better with it */
+  NUVASHALAUNCHER_DEPENDENCY_EMBEDDED,      /* already inside this file */
+  NUVASHALAUNCHER_DEPENDENCY_INCOMPATIBLE   /* it does not run with this */
 } NuvashaLauncherModrinthDependencyType;
 
 const char *nuvashalauncher_modrinth_dependency_to_string (NuvashaLauncherModrinthDependencyType type);
@@ -304,7 +304,7 @@ gboolean nuvashalauncher_modrinth_version_has_hash (const NuvashaLauncherModrint
  * that does not fit is left out here rather than shown and refused
  * later.
  *
- * nuvashalauncher_MODRINTH_ERROR_NOT_FOUND when the project publishes nothing for
+ * NUVASHALAUNCHER_MODRINTH_ERROR_NOT_FOUND when the project publishes nothing for
  * that Minecraft version and loader, which is what the page shows as
  * "No compatible version found for Minecraft <version> and <Loader>." */
 NuvashaLauncherTaskScope *nuvashalauncher_modrinth_versions_async (const char *project_id,
@@ -410,7 +410,7 @@ char *nuvashalauncher_modrinth_no_compatible_message (NuvashaLauncherContentType
 
 /* Which project, and which version, a file belongs to.
  *
- * nuvashalauncher_MODRINTH_ERROR_NOT_FOUND when Modrinth does not know the hash:
+ * NUVASHALAUNCHER_MODRINTH_ERROR_NOT_FOUND when Modrinth does not know the hash:
  * the file is not from Modrinth, or is not the exact file it
  * published, and nuvashalauncher says so rather than guessing. */
 NuvashaLauncherTaskScope *nuvashalauncher_modrinth_version_by_hash_async (const char *sha1,
@@ -478,7 +478,7 @@ GHashTable *nuvashalauncher_modrinth_updates_by_hashes_finish (GAsyncResult  *re
  * filled with the dependencies @version says it does not run with, and
  * only for the projects that are in @installed.
  *
- * nuvashalauncher_MODRINTH_ERROR_PARSE when @version requires a dependency that
+ * NUVASHALAUNCHER_MODRINTH_ERROR_PARSE when @version requires a dependency that
  * names no project, which is the one dependency that cannot be
  * fetched.
  *
@@ -490,4 +490,4 @@ GPtrArray *nuvashalauncher_modrinth_resolve_install (NuvashaLauncherModrinthVers
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_MODRINTH_H */
+#endif /* NUVASHALAUNCHER_MODRINTH_H */

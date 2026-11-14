@@ -71,8 +71,7 @@ External services are used directly by their owning modules:
   `nuvashalauncher-auth-microsoft.c`.
 - Account records and the active-account selection are stored through the
   desktop Secret Service by `nuvashalauncher-secret-store.c`. The launcher
-  requires a Secret Service provider for account persistence; no account data
-  is migrated from the old JSON or legacy keyring formats.
+  requires a Secret Service provider for account persistence.
 - `GAppInfo` opens URIs through the desktop.
 
 ## Static structure
@@ -130,22 +129,22 @@ flowchart TD
 
 ### Application and UI
 
-`main.c` creates the `AdwApplication`, initializes translations, loads the
-instance store and normally presents the one `nuvashalauncherMainWindow`. A second
-activation focuses the existing window rather than creating another one. The
-same executable also accepts a command-line instance ID and can launch that
-instance through the normal launcher state machine without presenting the main
-window; the window/model is still created to reuse the normal ownership and
-launcher state machine, while live output remains owned by the launcher's log
-buffer.
+`main.c` initializes translations early in startup (before creating threads),
+creates the `AdwApplication`, loads the instance store, and normally presents
+the one `NuvashaLauncherMainWindow`. A second activation focuses the existing
+window rather than creating another one. The same executable also accepts a
+command-line instance ID and can launch that instance through the normal
+launcher state machine without presenting the main window; the window/model is
+still created to reuse the normal ownership and launcher state machine, while
+live output remains owned by the launcher's log buffer.
 
-The main window owns a `nuvashalauncherMainWindowModel`. The model groups the
+The main window owns a `NuvashaLauncherMainWindowModel`. The model groups the
 process-wide objects used by the UI:
 
-- `nuvashalauncherInstanceManager`
-- `nuvashalauncherDownloadService` and the `nuvashalauncherDownloads` display manager
-- `nuvashalauncherSettings`
-- `nuvashalauncherAccounts`
+- `NuvashaLauncherInstanceManager`
+- `NuvashaLauncherDownloadService` and the `NuvashaLauncherDownloads` display manager
+- `NuvashaLauncherSettings`
+- `NuvashaLauncherAccounts`
 - the users popover
 - launchers and instance dialogs, keyed by instance
 
@@ -156,18 +155,18 @@ into a GResource by the Makefile. The UI is therefore available from the
 installed binary; it is not read from the source tree at runtime.
 
 The downloads display is separate from the dialog that started a
-download. `nuvashalauncherDownloads` is process-wide, owns entries while they run, and
+download. `NuvashaLauncherDownloads` is process-wide, owns entries while they run, and
 lets the header show work started from any page. Closing an installer dialog
 does not cancel its operation.
 
 ### Instances
 
-`nuvashalauncherInstance` is a validated, serializable model for one Minecraft
+`NuvashaLauncherInstance` is a validated, serializable model for one Minecraft
 installation. It contains a stable ID, display name, directory, Minecraft
 version, loader, loader version, Java choice, JVM arguments, and component
 metadata. It has no widgets, network calls, or persistence side effects.
 
-`nuvashalauncherInstanceManager` owns the `GListStore` of instances and persists the
+`NuvashaLauncherInstanceManager` owns the `GListStore` of instances and persists the
 list to `instances.json`. It also owns operations that change the directory
 layout:
 
@@ -201,12 +200,10 @@ Accounts support two modes:
 - **Microsoft:** a Minecraft profile, access token, expiry, refresh token, and
   cosmetic profile data.
 
-`nuvashalauncherAccounts` owns the active account and emits changes for the UI. Complete
+`NuvashaLauncherAccounts` owns the active account and emits changes for the UI. Complete
 account records—including offline accounts, cosmetic selections, and Microsoft
 credentials—are stored as separate items in the desktop Secret Service, keyed by the
 stable account ID. The active account ID is stored in a separate Secret Service item.
-The account JSON file is no longer read or written; this storage format is a clean break
-and does not migrate older account files or keyring entries.
 
 The skin menu keeps the fetched profile, skin list, and cape list in memory for
 the lifetime of the launcher. Skin and cape textures are cached separately so
@@ -229,7 +226,7 @@ expire during startup. If refresh fails, the launcher enters
 
 ### Settings
 
-`nuvashalauncherSettings` is a typed wrapper around the installed GSettings schema in
+`NuvashaLauncherSettings` is a typed wrapper around the installed GSettings schema in
 `data/com.github.nuvashalauncher.nuvashalauncher.gschema.xml`. It validates values and
 writes each accepted change. To support custom installation prefixes,
 distribution build environments, and development runs, schema lookup searches
@@ -245,9 +242,9 @@ geometry is kept separately by the window code.
 `nuvashalauncher-task.c` provides the common operation contract. There are two related
 types:
 
-- `nuvashalauncherTaskScope` owns one asynchronous operation, its cancellable, tracked
+- `NuvashaLauncherTaskScope` owns one asynchronous operation, its cancellable, tracked
   GLib sources, callback result, and lifecycle state.
-- `nuvashalauncherTaskSequence` runs a series of asynchronous steps. A step starts one
+- `NuvashaLauncherTaskSequence` runs a series of asynchronous steps. A step starts one
   operation and advances the sequence from its completion callback.
 
 The scope is reference counted because the operation state and its caller may
@@ -275,10 +272,10 @@ that the widget that started an operation still exists.
 
 ### Transfer service
 
-`nuvashalauncherDownloadService` owns one `SoupSession`, two waiting queues, and the
+`NuvashaLauncherDownloadService` owns one `SoupSession`, two waiting queues, and the
 active-transfer counts. Interactive work has priority over bulk installation
 work. The current limits are eight concurrent transfers overall and six bulk
-transfers; the exact scheduling behavior lives in `nuvashalauncher-download-slots.c`.
+transfers; the scheduling logic lives in `nuvashalauncher-download.c`.
 
 File transfers follow this sequence:
 
@@ -310,7 +307,7 @@ documents. It evaluates the document's OS and feature rules, resolves
 structured arguments and legacy `minecraftArguments`.
 
 `nuvashalauncher-minecraft-resolve.c` turns a version description into a
-`nuvashalauncherResolvedVersion`:
+`NuvashaLauncherResolvedVersion`:
 
 - applicable libraries are converted to Maven paths;
 - native classifiers are selected for the current Linux architecture;
@@ -484,8 +481,8 @@ The main files are:
 
 Writes that represent a complete document use temporary files and replacement
 where the module contract promises atomicity. Do not add a direct
-`g_file_set_contents()` write to an existing registry, account file, or cache
-format without preserving the module's failure behavior.
+`g_file_set_contents()` write to an existing registry or cache format without
+preserving the module's failure behavior.
 
 ## Security properties
 
@@ -557,10 +554,10 @@ section from `CHANGELOG.md`.
 
 Use the existing boundary that owns the behavior:
 
-- Add a persisted instance field to `nuvashalauncherInstance`, its JSON conversion,
+- Add a persisted instance field to `NuvashaLauncherInstance`, its JSON conversion,
   validation, manager update path, and relevant tests together.
 - Add a preference to the GSettings schema, then expose validated accessors in
-  `nuvashalauncherSettings` and bind it in the settings UI.
+  `NuvashaLauncherSettings` and bind it in the settings UI.
 - Add a network operation through the download service rather than creating a
   second `SoupSession` or an ad-hoc retry loop.
 - Keep response parsing in a plain data function with fixture-based tests;
@@ -570,9 +567,9 @@ Use the existing boundary that owns the behavior:
 - Keep long-lived operations owned by their manager or launcher, not by the
   dialog that happened to start them.
 
-When a change alters one of the decisions above, update this document and add
-an ADR if the change affects security, persistence, external interfaces,
-dependency choice, or a quality property such as cancellability or atomicity.
+When a change alters one of the decisions above, update this document if the
+change affects security, persistence, external interfaces, dependency choice, or
+a quality property such as cancellability or atomicity.
 
 ## Decisions worth preserving
 

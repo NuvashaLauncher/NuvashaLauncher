@@ -39,10 +39,10 @@ use_development_schema (void)
     return;
 
   const char *candidates[] = {
-    nuvashalauncher_BUILD_SCHEMA_DIR,
+    NUVASHALAUNCHER_BUILD_SCHEMA_DIR,
     "build/schemas",
     "../build/schemas",
-    nuvashalauncher_DATA_DIR "/glib-2.0/schemas",
+    NUVASHALAUNCHER_DATA_DIR "/glib-2.0/schemas",
   };
 
   for (gsize i = 0; i < G_N_ELEMENTS (candidates); i++)
@@ -195,11 +195,8 @@ create_main_window (GApplication *app, gboolean present)
 {
   g_autoptr (NuvashaLauncherInstanceManager) manager =
     nuvashalauncher_instance_manager_new (NULL);
-  g_autoptr (NuvashaLauncherSettings) settings = nuvashalauncher_settings_new ();
   g_autoptr (GError) error = NULL;
   NuvashaLauncherMainWindow *window;
-
-  nuvashalauncher_i18n_init (nuvashalauncher_settings_get_language (settings));
 
   if (!nuvashalauncher_instance_manager_load (manager, &error))
     g_warning ("%s", nuvashalauncher_error_message (error));
@@ -250,7 +247,7 @@ ensure_main_window (GApplication *app, gboolean present)
     {
       if (present)
         gtk_window_present (existing);
-      return nuvashalauncher_MAIN_WINDOW (existing);
+      return NUVASHALAUNCHER_MAIN_WINDOW (existing);
     }
 
   return create_main_window (app, present);
@@ -313,7 +310,7 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
   if (show_version)
     {
        g_application_command_line_print (command_line, "Nuvasha Launcher %s\n",
-                                        nuvashalauncher_VERSION);
+                                        NUVASHALAUNCHER_VERSION);
       return 0;
     }
 
@@ -377,10 +374,14 @@ main (int argc, char **argv)
   g_autoptr (AdwApplication) app = NULL;
 
   use_development_schema ();
+  {
+    g_autoptr (NuvashaLauncherSettings) settings = nuvashalauncher_settings_new ();
+    nuvashalauncher_i18n_init (nuvashalauncher_settings_get_language (settings));
+  }
 
   if (argc == 2 && g_strcmp0 (argv[1], "--version") == 0)
     {
-       g_print ("Nuvasha Launcher %s\n", nuvashalauncher_VERSION);
+       g_print ("Nuvasha Launcher %s\n", NUVASHALAUNCHER_VERSION);
       return 0;
     }
 

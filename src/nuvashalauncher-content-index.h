@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_CONTENT_INDEX_H
-#define nuvashalauncher_CONTENT_INDEX_H
+#ifndef NUVASHALAUNCHER_CONTENT_INDEX_H
+#define NUVASHALAUNCHER_CONTENT_INDEX_H
 
 #include <gio/gio.h>
 
@@ -12,10 +12,10 @@
 
 G_BEGIN_DECLS
 
-#define nuvashalauncher_CONTENT_INDEX_ERROR (nuvashalauncher_content_index_error_quark ())
+#define NUVASHALAUNCHER_CONTENT_INDEX_ERROR (nuvashalauncher_content_index_error_quark ())
 
 typedef enum {
-  nuvashalauncher_CONTENT_INDEX_ERROR_INVALID
+  NUVASHALAUNCHER_CONTENT_INDEX_ERROR_INVALID
 } NuvashaLauncherContentIndexError;
 
 typedef struct {
@@ -82,4 +82,4 @@ gboolean nuvashalauncher_content_index_modify_finish (GAsyncResult *result,
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_CONTENT_INDEX_H */
+#endif /* NUVASHALAUNCHER_CONTENT_INDEX_H */

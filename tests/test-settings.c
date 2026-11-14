@@ -39,7 +39,7 @@ test_defaults (void)
   g_assert_true (nuvashalauncher_settings_get_delete_dependents (settings));
   g_assert_true (nuvashalauncher_settings_get_cache_modrinth_api_responses (settings));
   g_assert_cmpint (nuvashalauncher_settings_get_cache_expiration (settings), ==,
-                   nuvashalauncher_SETTINGS_CACHE_EXPIRATION_1_HOUR);
+                   NUVASHALAUNCHER_SETTINGS_CACHE_EXPIRATION_1_HOUR);
 }
 
 static void
@@ -50,7 +50,7 @@ test_persistence (void)
   g_autoptr (GError) error = NULL;
 
   g_assert_true (nuvashalauncher_settings_set_cache_expiration (
-    settings, nuvashalauncher_SETTINGS_CACHE_EXPIRATION_7_DAYS, &error));
+    settings, NUVASHALAUNCHER_SETTINGS_CACHE_EXPIRATION_7_DAYS, &error));
   g_assert_no_error (error);
   g_assert_true (nuvashalauncher_settings_set_cache_modrinth_api_responses (
     settings, FALSE, &error));
@@ -58,7 +58,7 @@ test_persistence (void)
   loaded = nuvashalauncher_settings_new ();
   g_assert_false (nuvashalauncher_settings_get_cache_modrinth_api_responses (loaded));
   g_assert_cmpint (nuvashalauncher_settings_get_cache_expiration (loaded), ==,
-                   nuvashalauncher_SETTINGS_CACHE_EXPIRATION_7_DAYS);
+                   NUVASHALAUNCHER_SETTINGS_CACHE_EXPIRATION_7_DAYS);
 }
 
 static void
@@ -70,7 +70,7 @@ test_invalid_expiration (void)
     nuvashalauncher_settings_get_cache_expiration (settings);
 
   g_assert_false (nuvashalauncher_settings_set_cache_expiration (settings, 123, &error));
-  g_assert_error (error, nuvashalauncher_SETTINGS_ERROR, nuvashalauncher_SETTINGS_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_SETTINGS_ERROR, NUVASHALAUNCHER_SETTINGS_ERROR_INVALID);
   g_assert_cmpint (nuvashalauncher_settings_get_cache_expiration (settings), ==, previous);
 }
 
@@ -132,7 +132,7 @@ test_cache_cleanup (void)
 static void
 test_missing_schema_fallback (void)
 {
-  g_autoptr (NuvashaLauncherSettings) settings = g_object_new (nuvashalauncher_TYPE_SETTINGS, NULL);
+  g_autoptr (NuvashaLauncherSettings) settings = g_object_new (NUVASHALAUNCHER_TYPE_SETTINGS, NULL);
   g_assert_nonnull (settings);
   g_assert_false (nuvashalauncher_settings_get_show_unstable_versions (settings));
   g_assert_cmpuint (nuvashalauncher_settings_get_log_line_limit (settings), ==, 5000);

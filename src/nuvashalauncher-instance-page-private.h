@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_INSTANCE_PAGE_PRIVATE_H
-#define nuvashalauncher_INSTANCE_PAGE_PRIVATE_H
+#ifndef NUVASHALAUNCHER_INSTANCE_PAGE_PRIVATE_H
+#define NUVASHALAUNCHER_INSTANCE_PAGE_PRIVATE_H
 
 #include "nuvashalauncher-instance-page.h"
 #include "nuvashalauncher-java-row.h"

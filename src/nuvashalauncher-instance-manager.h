@@ -8,26 +8,26 @@
  * The object exposes a GListStore so that a UI can bind to it later.
  * No widgets are created here. */
 
-#ifndef nuvashalauncher_INSTANCE_MANAGER_H
-#define nuvashalauncher_INSTANCE_MANAGER_H
+#ifndef NUVASHALAUNCHER_INSTANCE_MANAGER_H
+#define NUVASHALAUNCHER_INSTANCE_MANAGER_H
 
 #include "nuvashalauncher-instance.h"
 #include "nuvashalauncher-task.h"
 
 G_BEGIN_DECLS
 
-#define nuvashalauncher_TYPE_INSTANCE_MANAGER (nuvashalauncher_instance_manager_get_type ())
+#define NUVASHALAUNCHER_TYPE_INSTANCE_MANAGER (nuvashalauncher_instance_manager_get_type ())
 
 G_DECLARE_FINAL_TYPE (NuvashaLauncherInstanceManager, nuvashalauncher_instance_manager,
-                      nuvashalauncher, INSTANCE_MANAGER, GObject)
+                      NUVASHALAUNCHER, INSTANCE_MANAGER, GObject)
 
-#define nuvashalauncher_INSTANCE_MANAGER_ERROR (nuvashalauncher_instance_manager_error_quark ())
+#define NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR (nuvashalauncher_instance_manager_error_quark ())
 
 typedef enum {
-  nuvashalauncher_INSTANCE_MANAGER_ERROR_NOT_FOUND,  /* unknown instance */
-  nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH, /* unusable directory */
-  nuvashalauncher_INSTANCE_MANAGER_ERROR_CORRUPT,    /* instances.json unreadable */
-  nuvashalauncher_INSTANCE_MANAGER_ERROR_IO          /* file could not be read or written */
+  NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND,  /* unknown instance */
+  NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH, /* unusable directory */
+  NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_CORRUPT,    /* instances.json unreadable */
+  NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_IO          /* file could not be read or written */
 } NuvashaLauncherInstanceManagerError;
 
 GQuark nuvashalauncher_instance_manager_error_quark (void);
@@ -172,4 +172,4 @@ gboolean nuvashalauncher_instance_manager_open_folder_finish (NuvashaLauncherIns
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_INSTANCE_MANAGER_H */
+#endif /* NUVASHALAUNCHER_INSTANCE_MANAGER_H */

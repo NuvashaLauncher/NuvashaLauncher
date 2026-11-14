@@ -1,5 +1,5 @@
-#ifndef nuvashalauncher_MINECRAFT_VERSIONS_JSON_PRIVATE_H
-#define nuvashalauncher_MINECRAFT_VERSIONS_JSON_PRIVATE_H
+#ifndef NUVASHALAUNCHER_MINECRAFT_VERSIONS_JSON_PRIVATE_H
+#define NUVASHALAUNCHER_MINECRAFT_VERSIONS_JSON_PRIVATE_H
 
 #include "nuvashalauncher-minecraft-versions.h"
 
@@ -27,4 +27,4 @@ GPtrArray *nuvashalauncher_mc_parse_rules (JsonNode *node, GError **error);
 
 gboolean nuvashalauncher_mc_get_rules_member (JsonObject *object, const char *member, GPtrArray **rules, GError **error);
 
-#endif /* nuvashalauncher_MINECRAFT_VERSIONS_JSON_PRIVATE_H */
+#endif /* NUVASHALAUNCHER_MINECRAFT_VERSIONS_JSON_PRIVATE_H */

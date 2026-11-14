@@ -20,7 +20,7 @@ create_loader_instance (const char *name)
 
   g_assert_cmpint (g_mkdir_with_parents (dir, 0755), ==, 0);
   instance = nuvashalauncher_instance_new (NULL, name, dir, "1.20.1",
-                                           nuvashalauncher_LOADER_FABRIC, &error);
+                                           NUVASHALAUNCHER_LOADER_FABRIC, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
   return instance;
@@ -40,7 +40,7 @@ test_manifest_ready_error_handling (void)
   on_manifest_ready (NULL, G_ASYNC_RESULT (nuvashalauncher_task_scope_task (scope)), g_object_ref (launcher));
   nuvashalauncher_task_scope_unref (scope);
 
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_FAILED);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_FAILED);
 }
 
 static void
@@ -54,14 +54,14 @@ test_manifest_ready_unsupported_loader (void)
   /* Create instance with Fabric but no loader-version */
   g_autoptr (NuvashaLauncherInstance) instance =
     nuvashalauncher_instance_new (NULL, "unsupported-loader-inst", dir, "1.20.1",
-                                  nuvashalauncher_LOADER_FABRIC, &error);
+                                  NUVASHALAUNCHER_LOADER_FABRIC, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
   g_autoptr (NuvashaLauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
 
   g_autoptr (NuvashaLauncherVersionManifest) manifest =
-    g_object_new (nuvashalauncher_TYPE_VERSION_MANIFEST, NULL);
+    g_object_new (NUVASHALAUNCHER_TYPE_VERSION_MANIFEST, NULL);
 
   NuvashaLauncherTaskScope *scope = nuvashalauncher_task_scope_new_tagged (
     NULL, NULL, NULL, NULL, "nuvashalauncher-task-scope");
@@ -70,7 +70,7 @@ test_manifest_ready_unsupported_loader (void)
   on_manifest_ready (NULL, G_ASYNC_RESULT (nuvashalauncher_task_scope_task (scope)), g_object_ref (launcher));
   nuvashalauncher_task_scope_unref (scope);
 
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_FAILED);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_FAILED);
 }
 
 int

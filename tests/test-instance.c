@@ -52,8 +52,8 @@ static void
 test_loader_strings (void)
 {
   const NuvashaLauncherLoader loaders[] = {
-    nuvashalauncher_LOADER_VANILLA, nuvashalauncher_LOADER_FABRIC, nuvashalauncher_LOADER_FORGE,
-    nuvashalauncher_LOADER_NEOFORGE, nuvashalauncher_LOADER_QUILT
+    NUVASHALAUNCHER_LOADER_VANILLA, NUVASHALAUNCHER_LOADER_FABRIC, NUVASHALAUNCHER_LOADER_FORGE,
+    NUVASHALAUNCHER_LOADER_NEOFORGE, NUVASHALAUNCHER_LOADER_QUILT
   };
   const char *names[] = {
     "vanilla", "fabric", "forge", "neoforge", "quilt"
@@ -63,12 +63,12 @@ test_loader_strings (void)
     {
       g_assert_cmpstr (nuvashalauncher_loader_to_string (loaders[i]), ==, names[i]);
 
-      NuvashaLauncherLoader parsed = nuvashalauncher_LOADER_VANILLA;
+      NuvashaLauncherLoader parsed = NUVASHALAUNCHER_LOADER_VANILLA;
       g_assert_true (nuvashalauncher_loader_from_string (names[i], &parsed));
       g_assert_cmpint (parsed, ==, loaders[i]);
     }
 
-  NuvashaLauncherLoader unknown = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader unknown = NUVASHALAUNCHER_LOADER_VANILLA;
   g_assert_false (nuvashalauncher_loader_from_string ("sodium", &unknown));
   g_assert_false (nuvashalauncher_loader_from_string (NULL, &unknown));
   g_assert_null (nuvashalauncher_loader_to_string ((NuvashaLauncherLoader) 99));
@@ -136,7 +136,7 @@ test_normalize_name (void)
   g_autoptr (GError) error = NULL;
   g_autoptr (NuvashaLauncherInstance) instance =
     nuvashalauncher_instance_new (NULL, " \tCafe\xCC\x81  ", "/tmp/normalized-instance",
-                      "1.21.1", nuvashalauncher_LOADER_VANILLA, &error);
+                      "1.21.1", NUVASHALAUNCHER_LOADER_VANILLA, &error);
 
   g_assert_cmpstr (trimmed, ==, "Caf\xC3\xA9");
   g_assert_cmpstr (composed, ==, "Caf\xC3\xA9");
@@ -153,7 +153,7 @@ test_jvm_args_survive_null (void)
   g_autoptr (GError) error = NULL;
   g_autoptr (NuvashaLauncherInstance) instance =
     nuvashalauncher_instance_new (NULL, "Test", "/tmp/nuvashalauncher-jvm-args-test", "1.21.1",
-                      nuvashalauncher_LOADER_VANILLA, &error);
+                      NUVASHALAUNCHER_LOADER_VANILLA, &error);
   g_autofree char *stored = NULL;
   g_autofree char *round_tripped = NULL;
   g_autoptr (JsonNode) node = NULL;
@@ -192,7 +192,7 @@ test_new_defaults (void)
   g_autoptr (GError) error = NULL;
   g_autoptr (NuvashaLauncherInstance) instance =
     nuvashalauncher_instance_new (NULL, "Test", "/tmp/nuvashalauncher-instance-test", "1.21.1",
-                      nuvashalauncher_LOADER_VANILLA, &error);
+                      NUVASHALAUNCHER_LOADER_VANILLA, &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (instance);
@@ -225,38 +225,38 @@ test_new_rejects_bad_values (void)
   /* A relative directory is not usable as an instance directory. */
   g_autoptr (NuvashaLauncherInstance) relative =
     nuvashalauncher_instance_new (NULL, "Test", "relative/path", "1.21.1",
-                      nuvashalauncher_LOADER_VANILLA, &error);
+                      NUVASHALAUNCHER_LOADER_VANILLA, &error);
   g_assert_null (relative);
-  g_assert_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
   g_autoptr (NuvashaLauncherInstance) no_directory =
     nuvashalauncher_instance_new (NULL, "Test", NULL, "1.21.1",
-                      nuvashalauncher_LOADER_VANILLA, &error);
+                      NUVASHALAUNCHER_LOADER_VANILLA, &error);
   g_assert_null (no_directory);
-  g_assert_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
   /* An empty name must never become an instance. */
   g_autoptr (NuvashaLauncherInstance) blank_name =
     nuvashalauncher_instance_new (NULL, "", "/tmp/nuvashalauncher-instance-test", "1.21.1",
-                      nuvashalauncher_LOADER_VANILLA, &error);
+                      NUVASHALAUNCHER_LOADER_VANILLA, &error);
   g_assert_null (blank_name);
-  g_assert_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
   g_autoptr (NuvashaLauncherInstance) spaces_name =
     nuvashalauncher_instance_new (NULL, "   ", "/tmp/nuvashalauncher-instance-test", "1.21.1",
-                      nuvashalauncher_LOADER_VANILLA, &error);
+                      NUVASHALAUNCHER_LOADER_VANILLA, &error);
   g_assert_null (spaces_name);
-  g_assert_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
   g_autoptr (NuvashaLauncherInstance) no_version =
     nuvashalauncher_instance_new (NULL, "Test", "/tmp/nuvashalauncher-instance-test", "",
-                      nuvashalauncher_LOADER_VANILLA, &error);
+                      NUVASHALAUNCHER_LOADER_VANILLA, &error);
   g_assert_null (no_version);
-  g_assert_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
   /* An unknown loader value is refused before it reaches the property. */
@@ -264,22 +264,22 @@ test_new_rejects_bad_values (void)
     nuvashalauncher_instance_new (NULL, "Test", "/tmp/nuvashalauncher-instance-test", "1.21.1",
                       (NuvashaLauncherLoader) 99, &error);
   g_assert_null (bad_loader);
-  g_assert_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
   g_autoptr (NuvashaLauncherInstance) bad_id =
     nuvashalauncher_instance_new ("not-a-uuid", "Test", "/tmp/nuvashalauncher-instance-test",
-                      "1.21.1", nuvashalauncher_LOADER_VANILLA, &error);
+                      "1.21.1", NUVASHALAUNCHER_LOADER_VANILLA, &error);
   g_assert_null (bad_id);
-  g_assert_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
   /* The root directory is never an instance directory. */
   g_autoptr (NuvashaLauncherInstance) root =
     nuvashalauncher_instance_new (NULL, "Test", "/", "1.21.1",
-                      nuvashalauncher_LOADER_VANILLA, &error);
+                      NUVASHALAUNCHER_LOADER_VANILLA, &error);
   g_assert_null (root);
-  g_assert_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
   g_print ("ok - invalid instance values are rejected\n");
@@ -291,7 +291,7 @@ test_validate (void)
   g_autoptr (GError) error = NULL;
   g_autoptr (NuvashaLauncherInstance) instance =
     nuvashalauncher_instance_new (NULL, "Valid", "/tmp/nuvashalauncher-instance-test", "1.21.1",
-                      nuvashalauncher_LOADER_NEOFORGE, &error);
+                      NUVASHALAUNCHER_LOADER_NEOFORGE, &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (instance);
@@ -301,7 +301,7 @@ test_validate (void)
   /* An empty name breaks validation. */
   g_object_set (instance, "name", "", NULL);
   g_assert_false (nuvashalauncher_instance_validate (instance, &error));
-  g_assert_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
   g_object_set (instance, "name", "Valid", NULL);
 
@@ -314,21 +314,21 @@ test_validate (void)
 
   /* A directory with ".." inside is not canonical. */
   g_autoptr (NuvashaLauncherInstance) escaping =
-    g_object_new (nuvashalauncher_TYPE_INSTANCE,
+    g_object_new (NUVASHALAUNCHER_TYPE_INSTANCE,
                   "id", TEST_UUID,
                   "name", "Escaping",
                   "directory", "/tmp/nuvashalauncher-instance-test/../elsewhere",
                   "minecraft-version", "1.21.1",
-                  "loader", nuvashalauncher_LOADER_VANILLA,
+                  "loader", NUVASHALAUNCHER_LOADER_VANILLA,
                   NULL);
   g_assert_false (nuvashalauncher_instance_validate (escaping, &error));
-  g_assert_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID);
   g_clear_error (&error);
 
   /* An object built without any field reports the missing id. */
-  g_autoptr (NuvashaLauncherInstance) empty = g_object_new (nuvashalauncher_TYPE_INSTANCE, NULL);
+  g_autoptr (NuvashaLauncherInstance) empty = g_object_new (NUVASHALAUNCHER_TYPE_INSTANCE, NULL);
   g_assert_false (nuvashalauncher_instance_validate (empty, &error));
-  g_assert_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_MISSING_FIELD);
+  g_assert_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_MISSING_FIELD);
   g_clear_error (&error);
 
   /* Empty means "not set" for the nullable fields. */
@@ -346,7 +346,7 @@ test_json_round_trip (void)
   g_autoptr (GError) error = NULL;
   g_autoptr (NuvashaLauncherInstance) original =
     nuvashalauncher_instance_new (NULL, "Fabric Pack", "/tmp/nuvashalauncher-instance-fabric",
-                      "1.21.1", nuvashalauncher_LOADER_FABRIC, &error);
+                      "1.21.1", NUVASHALAUNCHER_LOADER_FABRIC, &error);
 
   g_assert_no_error (error);
   g_assert_nonnull (original);
@@ -383,9 +383,9 @@ test_json_round_trip (void)
       g_assert_cmpstr (actual, ==, expected);
     }
 
-  NuvashaLauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader loader = NUVASHALAUNCHER_LOADER_VANILLA;
   g_object_get (copy, "loader", &loader, NULL);
-  g_assert_cmpint (loader, ==, nuvashalauncher_LOADER_FABRIC);
+  g_assert_cmpint (loader, ==, NUVASHALAUNCHER_LOADER_FABRIC);
 
   g_print ("ok - json round trip\n");
 }
@@ -439,8 +439,8 @@ test_missing_fields (void)
       json_node_unref (node);
 
       g_assert_null (instance);
-      g_assert_error (error, nuvashalauncher_INSTANCE_ERROR,
-                      nuvashalauncher_INSTANCE_ERROR_MISSING_FIELD);
+      g_assert_error (error, NUVASHALAUNCHER_INSTANCE_ERROR,
+                      NUVASHALAUNCHER_INSTANCE_ERROR_MISSING_FIELD);
     }
 
   g_print ("ok - missing fields fail cleanly\n");
@@ -457,7 +457,7 @@ test_malformed_json (void)
     g_autoptr (NuvashaLauncherInstance) instance =
       nuvashalauncher_instance_new_from_json (json_parser_get_root (parser), &error);
     g_assert_null (instance);
-    g_assert_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID);
+    g_assert_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID);
     g_clear_error (&error);
   }
 
@@ -466,7 +466,7 @@ test_malformed_json (void)
     g_autoptr (NuvashaLauncherInstance) instance =
       nuvashalauncher_instance_new_from_json (json_parser_get_root (parser), &error);
     g_assert_null (instance);
-    g_assert_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID);
+    g_assert_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID);
     g_clear_error (&error);
   }
 
@@ -481,7 +481,7 @@ test_malformed_json (void)
     g_autoptr (NuvashaLauncherInstance) instance =
       nuvashalauncher_instance_new_from_json (json_parser_get_root (parser), &error);
     g_assert_null (instance);
-    g_assert_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID);
+    g_assert_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID);
     g_clear_error (&error);
   }
 
@@ -496,7 +496,7 @@ test_malformed_json (void)
     g_autoptr (NuvashaLauncherInstance) instance =
       nuvashalauncher_instance_new_from_json (json_parser_get_root (parser), &error);
     g_assert_null (instance);
-    g_assert_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID);
+    g_assert_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID);
     g_clear_error (&error);
   }
 
@@ -512,7 +512,7 @@ test_malformed_json (void)
     g_autoptr (NuvashaLauncherInstance) instance =
       nuvashalauncher_instance_new_from_json (json_parser_get_root (parser), &error);
     g_assert_null (instance);
-    g_assert_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID);
+    g_assert_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID);
     g_clear_error (&error);
   }
 
@@ -549,7 +549,7 @@ test_malformed_json (void)
       nuvashalauncher_instance_new_from_json (json_parser_get_root (parser), &error);
 
     g_assert_null (instance);
-    g_assert_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID);
+    g_assert_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID);
     g_clear_error (&error);
   }
 
@@ -593,25 +593,25 @@ test_components (void)
   g_autoptr (GError) error = NULL;
   g_autoptr (NuvashaLauncherInstance) instance =
     nuvashalauncher_instance_new (TEST_UUID, "Components", "/tmp/components-instance",
-                      "1.20.1", nuvashalauncher_LOADER_FABRIC, &error);
+                      "1.20.1", NUVASHALAUNCHER_LOADER_FABRIC, &error);
   g_autofree char *minecraft = NULL;
   g_autofree char *loader = NULL;
 
   g_assert_no_error (error);
   g_assert_true (g_str_equal (nuvashalauncher_instance_component_id_for_loader (
-                                nuvashalauncher_LOADER_FABRIC), nuvashalauncher_COMPONENT_FABRIC));
+                                NUVASHALAUNCHER_LOADER_FABRIC), NUVASHALAUNCHER_COMPONENT_FABRIC));
 
   minecraft = nuvashalauncher_instance_component_get_version (instance,
-                                                   nuvashalauncher_COMPONENT_MINECRAFT);
-  loader = nuvashalauncher_instance_component_get_version (instance, nuvashalauncher_COMPONENT_FABRIC);
+                                                   NUVASHALAUNCHER_COMPONENT_MINECRAFT);
+  loader = nuvashalauncher_instance_component_get_version (instance, NUVASHALAUNCHER_COMPONENT_FABRIC);
   g_assert_cmpstr (minecraft, ==, "1.20.1");
   g_assert_null (loader);
 
   g_assert_true (nuvashalauncher_instance_component_set_version (
-    instance, nuvashalauncher_COMPONENT_FABRIC, "0.15.11", &error));
+    instance, NUVASHALAUNCHER_COMPONENT_FABRIC, "0.15.11", &error));
   g_assert_no_error (error);
   g_clear_pointer (&loader, g_free);
-  loader = nuvashalauncher_instance_component_get_version (instance, nuvashalauncher_COMPONENT_FABRIC);
+  loader = nuvashalauncher_instance_component_get_version (instance, NUVASHALAUNCHER_COMPONENT_FABRIC);
   g_assert_cmpstr (loader, ==, "0.15.11");
 
   g_print ("ok - component versions use stable component ids\n");

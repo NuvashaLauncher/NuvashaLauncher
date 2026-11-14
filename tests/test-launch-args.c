@@ -115,8 +115,8 @@ test_session_of_an_account (void)
   session = nuvashalauncher_launch_session_for (offline);
   g_assert_cmpstr (session.name, ==, "TestUser");
   g_assert_cmpstr (session.uuid, ==, "097d3392-865a-3f3c-8b4a-da1c3473466c");
-  g_assert_cmpstr (session.access_token, ==, nuvashalauncher_LAUNCH_OFFLINE_TOKEN);
-  g_assert_cmpstr (session.user_type, ==, nuvashalauncher_LAUNCH_OFFLINE_USER_TYPE);
+  g_assert_cmpstr (session.access_token, ==, NUVASHALAUNCHER_LAUNCH_OFFLINE_TOKEN);
+  g_assert_cmpstr (session.user_type, ==, NUVASHALAUNCHER_LAUNCH_OFFLINE_USER_TYPE);
 
   /* A Microsoft account is its own name, its own UUID and its own token,
      and the user type that says it is a real one. */
@@ -124,7 +124,7 @@ test_session_of_an_account (void)
     g_autoptr (NuvashaLauncherAccount) microsoft = g_new0 (NuvashaLauncherAccount, 1);
     g_autoptr (NuvashaLauncherAccount) without_token = NULL;
 
-    microsoft->type = nuvashalauncher_ACCOUNT_MICROSOFT;
+    microsoft->type = NUVASHALAUNCHER_ACCOUNT_MICROSOFT;
     microsoft->id = g_strdup ("069a79f444e94726a5befca90e38aaf5");
     microsoft->name = g_strdup ("Notch");
     microsoft->uuid = g_strdup ("069a79f4-44e9-4726-a5be-fca90e38aaf5");
@@ -134,7 +134,7 @@ test_session_of_an_account (void)
     g_assert_cmpstr (session.name, ==, "Notch");
     g_assert_cmpstr (session.uuid, ==, "069a79f4-44e9-4726-a5be-fca90e38aaf5");
     g_assert_cmpstr (session.access_token, ==, "the-token-of-the-session");
-    g_assert_cmpstr (session.user_type, ==, nuvashalauncher_LAUNCH_MICROSOFT_USER_TYPE);
+    g_assert_cmpstr (session.user_type, ==, NUVASHALAUNCHER_LAUNCH_MICROSOFT_USER_TYPE);
 
     /* An account whose token is gone cannot be given one that is not
        there: the offline token is what the game is told rather than a
@@ -143,8 +143,8 @@ test_session_of_an_account (void)
     g_clear_pointer (&without_token->access_token, g_free);
 
     session = nuvashalauncher_launch_session_for (without_token);
-    g_assert_cmpstr (session.access_token, ==, nuvashalauncher_LAUNCH_OFFLINE_TOKEN);
-    g_assert_cmpstr (session.user_type, ==, nuvashalauncher_LAUNCH_MICROSOFT_USER_TYPE);
+    g_assert_cmpstr (session.access_token, ==, NUVASHALAUNCHER_LAUNCH_OFFLINE_TOKEN);
+    g_assert_cmpstr (session.user_type, ==, NUVASHALAUNCHER_LAUNCH_MICROSOFT_USER_TYPE);
   }
 }
 
@@ -159,7 +159,7 @@ test_arguments_carry_the_account (void)
   g_autoptr (NuvashaLauncherAccount) account = g_new0 (NuvashaLauncherAccount, 1);
   NuvashaLauncherLaunchSession session;
 
-  account->type = nuvashalauncher_ACCOUNT_MICROSOFT;
+  account->type = NUVASHALAUNCHER_ACCOUNT_MICROSOFT;
   account->id = g_strdup ("069a79f444e94726a5befca90e38aaf5");
   account->name = g_strdup ("Notch");
   account->uuid = g_strdup ("069a79f4-44e9-4726-a5be-fca90e38aaf5");
@@ -181,7 +181,7 @@ test_arguments_carry_the_account (void)
   g_assert_nonnull (argv);
 
   /* This document says nothing about the natives or the classpath, so
-     nuvashalauncher adds both before the main class: java, the library path, "-cp",
+     Nuvasha Launcher adds both before the main class: java, the library path, "-cp",
      the classpath, the main class and then the six words of the game
      arguments. */
   g_assert_cmpstr (at (argv, 4), ==, "net.minecraft.client.main.Main");
@@ -195,7 +195,7 @@ test_arguments_carry_the_account (void)
   g_assert_cmpstr (at (argv, 12), ==, "msa");
 
   /* The token is in the command line and never in what is shown of it: the
-     only form of a command line nuvashalauncher prints is the redacted one. */
+     only form of a command line Nuvasha Launcher prints is the redacted one. */
   {
     g_autofree char *shown = nuvashalauncher_launch_redact (argv);
 
@@ -320,7 +320,7 @@ test_build_arguments_modern (void)
   g_assert_cmpstr (at (argv, 15), ==, "/home/u/.local/share/nuvashalauncher/assets");
   g_assert_cmpstr (at (argv, 17), ==, "12");
   g_assert_cmpstr (at (argv, 19), ==, account->uuid);
-  g_assert_cmpstr (at (argv, 21), ==, nuvashalauncher_LAUNCH_OFFLINE_USER_TYPE);
+  g_assert_cmpstr (at (argv, 21), ==, NUVASHALAUNCHER_LAUNCH_OFFLINE_USER_TYPE);
   g_assert_cmpstr (at (argv, 23), ==, "release");
 }
 
@@ -435,7 +435,7 @@ test_build_arguments_legacy (void)
   g_assert_nonnull (argv);
 
   /* An old document says nothing about where the natives are and which
-     jars are on the classpath, so nuvashalauncher adds both. */
+     jars are on the classpath, so Nuvasha Launcher adds both. */
   g_assert_cmpstr (at (argv, 0), ==, "/usr/bin/java");
   g_assert_cmpstr (at (argv, 1), ==,
                    "-Djava.library.path=/home/u/.local/share/nuvashalauncher/natives");
@@ -473,7 +473,7 @@ test_build_arguments_legacy_session (void)
   NuvashaLauncherLaunchSession session;
   guint main_class = 0;
 
-  account->type = nuvashalauncher_ACCOUNT_MICROSOFT;
+  account->type = NUVASHALAUNCHER_ACCOUNT_MICROSOFT;
   account->name = g_strdup ("Notch");
   account->uuid = g_strdup ("069a79f4-44e9-4726-a5be-fca90e38aaf5");
   account->access_token = g_strdup ("the-access-token");
@@ -521,7 +521,7 @@ test_build_arguments_failures (void)
                                      "/home/u/games/one", NULL, &error);
 
   g_assert_null (argv);
-  g_assert_error (error, nuvashalauncher_LAUNCH_ERROR, nuvashalauncher_LAUNCH_ERROR_NO_MAIN_CLASS);
+  g_assert_error (error, NUVASHALAUNCHER_LAUNCH_ERROR, NUVASHALAUNCHER_LAUNCH_ERROR_NO_MAIN_CLASS);
   g_assert_nonnull (strstr (error->message, "1.20.1"));
   g_clear_error (&error);
 
@@ -533,7 +533,7 @@ test_build_arguments_failures (void)
                                      &error);
 
   g_assert_null (argv);
-  g_assert_error (error, nuvashalauncher_LAUNCH_ERROR, nuvashalauncher_LAUNCH_ERROR_ARGUMENTS);
+  g_assert_error (error, NUVASHALAUNCHER_LAUNCH_ERROR, NUVASHALAUNCHER_LAUNCH_ERROR_ARGUMENTS);
 }
 
 /* ---------------------------------------------------------- *

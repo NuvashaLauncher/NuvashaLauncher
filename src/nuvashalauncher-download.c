@@ -150,7 +150,7 @@ url_for_message (const char *url)
 GError *
 nuvashalauncher_download_cancelled_error (void)
 {
-  return g_error_new (nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_CANCELLED,
+  return g_error_new (NUVASHALAUNCHER_DOWNLOAD_ERROR, NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED,
                       "the download was cancelled");
 }
 
@@ -226,7 +226,7 @@ nuvashalauncher_download_start_transfer (DownloadRequest *request)
       else
         service->bulk_running++;
       request->holds_slot = TRUE;
-      nuvashalauncher_task_scope_set_state (request->scope, nuvashalauncher_TASK_STATE_RUNNING);
+      nuvashalauncher_task_scope_set_state (request->scope, NUVASHALAUNCHER_TASK_STATE_RUNNING);
       g_debug ("download operation=%" G_GUINT64_FORMAT " start pool=%s active=%u queued=%u/%u",
                nuvashalauncher_task_scope_get_id (request->scope), interactive ? "interactive" : "bulk",
                nuvashalauncher_download_service_active (service),
@@ -258,7 +258,7 @@ static void
 nuvashalauncher_download_release_slot (DownloadRequest *request)
 {
   NuvashaLauncherDownloadService *service = request->service;
-  if (!request->holds_slot)
+  if (service == NULL || !request->holds_slot)
     return;
 
   request->holds_slot = FALSE;
@@ -305,7 +305,7 @@ nuvashalauncher_download_release_slot (DownloadRequest *request)
           service->prefer_interactive = TRUE;
         }
       next->holds_slot = TRUE;
-      nuvashalauncher_task_scope_set_state (next->scope, nuvashalauncher_TASK_STATE_RUNNING);
+      nuvashalauncher_task_scope_set_state (next->scope, NUVASHALAUNCHER_TASK_STATE_RUNNING);
       g_debug ("download operation=%" G_GUINT64_FORMAT " dequeued active=%u queued=%u/%u",
                nuvashalauncher_task_scope_get_id (next->scope), nuvashalauncher_download_service_active (service),
                nuvashalauncher_download_service_queued_interactive (service),
@@ -363,7 +363,7 @@ request_free (DownloadRequest *request)
 {
   if (request->scope != NULL)
     {
-      nuvashalauncher_task_scope_set_state (request->scope, nuvashalauncher_TASK_STATE_CLEANING);
+      nuvashalauncher_task_scope_set_state (request->scope, NUVASHALAUNCHER_TASK_STATE_CLEANING);
       g_debug ("download operation=%" G_GUINT64_FORMAT " cleaning",
                nuvashalauncher_task_scope_get_id (request->scope));
     }
@@ -416,12 +416,12 @@ nuvashalauncher_download_request_fail (DownloadRequest *request, GError *error)
 {
   g_autoptr (NuvashaLauncherTaskScope) scope =
     request->scope != NULL ? nuvashalauncher_task_scope_ref (request->scope) : NULL;
-  gboolean cancelled = g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR,
-                                        nuvashalauncher_DOWNLOAD_ERROR_CANCELLED);
+  gboolean cancelled = g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                                        NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED);
 
   if (scope != NULL)
-    nuvashalauncher_task_scope_set_state (scope, cancelled ? nuvashalauncher_TASK_STATE_CANCELLED
-                                                           : nuvashalauncher_TASK_STATE_FAILED);
+    nuvashalauncher_task_scope_set_state (scope, cancelled ? NUVASHALAUNCHER_TASK_STATE_CANCELLED
+                                                           : NUVASHALAUNCHER_TASK_STATE_FAILED);
   if (scope != NULL)
     g_debug ("download operation=%" G_GUINT64_FORMAT " %s",
              nuvashalauncher_task_scope_get_id (scope), cancelled ? "cancelled" : "failed");
@@ -522,8 +522,8 @@ nuvashalauncher_download_file_limited_async (NuvashaLauncherDownloadService *ser
     {
       nuvashalauncher_task_scope_return_error_deferred (
         scope,
-        g_error_new_literal (nuvashalauncher_DOWNLOAD_ERROR,
-                             nuvashalauncher_DOWNLOAD_ERROR_INVALID,
+        g_error_new_literal (NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                             NUVASHALAUNCHER_DOWNLOAD_ERROR_INVALID,
                              "the expected checksum is not valid"));
       return g_steal_pointer (&scope);
     }
@@ -534,8 +534,8 @@ nuvashalauncher_download_file_limited_async (NuvashaLauncherDownloadService *ser
 
       nuvashalauncher_task_scope_return_error_deferred (
         scope,
-        g_error_new (nuvashalauncher_DOWNLOAD_ERROR,
-                     nuvashalauncher_DOWNLOAD_ERROR_INVALID,
+        g_error_new (NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                     NUVASHALAUNCHER_DOWNLOAD_ERROR_INVALID,
                      "\"%s\" is not a usable download url", shown));
       return g_steal_pointer (&scope);
     }
@@ -592,8 +592,8 @@ nuvashalauncher_download_json_async (NuvashaLauncherDownloadService *service, co
 
       nuvashalauncher_task_scope_return_error_deferred (
         scope,
-        g_error_new (nuvashalauncher_DOWNLOAD_ERROR,
-                     nuvashalauncher_DOWNLOAD_ERROR_INVALID,
+        g_error_new (NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                     NUVASHALAUNCHER_DOWNLOAD_ERROR_INVALID,
                      "\"%s\" is not a usable download url", shown));
       return g_steal_pointer (&scope);
     }
@@ -623,7 +623,7 @@ nuvashalauncher_download_set_cache_settings (NuvashaLauncherDownloadService *ser
                                   NuvashaLauncherSettings *settings)
 {
   g_return_if_fail (service != NULL);
-  g_return_if_fail (settings == NULL || nuvashalauncher_IS_SETTINGS (settings));
+  g_return_if_fail (settings == NULL || NUVASHALAUNCHER_IS_SETTINGS (settings));
 
   g_set_object (&service->cache_settings, settings);
 }
@@ -654,8 +654,8 @@ download_json_cached_internal (NuvashaLauncherDownloadService *service,
       g_autofree char *shown = url_for_message (url);
       nuvashalauncher_task_scope_return_error_deferred (
         scope,
-        g_error_new (nuvashalauncher_DOWNLOAD_ERROR,
-                     nuvashalauncher_DOWNLOAD_ERROR_INVALID,
+        g_error_new (NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                     NUVASHALAUNCHER_DOWNLOAD_ERROR_INVALID,
                      "\"%s\" is not a usable download url", shown));
       return g_steal_pointer (&scope);
     }
@@ -715,7 +715,7 @@ nuvashalauncher_download_json_post_cached_async (NuvashaLauncherDownloadService 
       g_autofree char *shown = url_for_message (url);
       nuvashalauncher_task_scope_return_error_deferred (
         scope,
-        g_error_new (nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_INVALID,
+        g_error_new (NUVASHALAUNCHER_DOWNLOAD_ERROR, NUVASHALAUNCHER_DOWNLOAD_ERROR_INVALID,
                      "\"%s\" is not a usable request url", shown));
       return g_steal_pointer (&scope);
     }

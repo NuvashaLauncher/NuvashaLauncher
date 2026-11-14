@@ -7,8 +7,8 @@
  * get_selected_path() returns NULL while loading or failed, an empty string
  * for the automatic entry, and the executable path otherwise. */
 
-#ifndef nuvashalauncher_JAVA_ROW_H
-#define nuvashalauncher_JAVA_ROW_H
+#ifndef NUVASHALAUNCHER_JAVA_ROW_H
+#define NUVASHALAUNCHER_JAVA_ROW_H
 
 #include <adwaita.h>
 
@@ -16,9 +16,9 @@
 
 G_BEGIN_DECLS
 
-#define nuvashalauncher_TYPE_JAVA_ROW (nuvashalauncher_java_row_get_type ())
+#define NUVASHALAUNCHER_TYPE_JAVA_ROW (nuvashalauncher_java_row_get_type ())
 
-G_DECLARE_FINAL_TYPE (NuvashaLauncherJavaRow, nuvashalauncher_java_row, nuvashalauncher, JAVA_ROW,
+G_DECLARE_FINAL_TYPE (NuvashaLauncherJavaRow, nuvashalauncher_java_row, NUVASHALAUNCHER, JAVA_ROW,
                       AdwComboRow)
 
 NuvashaLauncherJavaRow *nuvashalauncher_java_row_new (void);
@@ -59,4 +59,4 @@ void nuvashalauncher_java_row_set_custom (NuvashaLauncherJavaRow *self,
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_JAVA_ROW_H */
+#endif /* NUVASHALAUNCHER_JAVA_ROW_H */

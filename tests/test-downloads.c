@@ -37,15 +37,15 @@ test_add_and_finish (void)
   g_assert_cmpuint (nuvashalauncher_downloads_count (), ==, 0);
   changed = 0;
 
-  one = nuvashalauncher_downloads_add (nuvashalauncher_DOWNLOAD_MODPACK, "A pack");
+  one = nuvashalauncher_downloads_add (NUVASHALAUNCHER_DOWNLOAD_MODPACK, "A pack");
   g_assert_nonnull (one);
   g_assert_cmpuint (nuvashalauncher_downloads_count (), ==, 1);
   g_assert_cmpuint (changed, ==, 1);
   g_assert_cmpstr (nuvashalauncher_download_get_title (one), ==, "A pack");
-  g_assert_cmpint (nuvashalauncher_download_get_kind (one), ==, nuvashalauncher_DOWNLOAD_MODPACK);
+  g_assert_cmpint (nuvashalauncher_download_get_kind (one), ==, NUVASHALAUNCHER_DOWNLOAD_MODPACK);
   g_assert_nonnull (nuvashalauncher_download_get_cancellable (one));
 
-  two = nuvashalauncher_downloads_add (nuvashalauncher_DOWNLOAD_MOD, "A mod");
+  two = nuvashalauncher_downloads_add (NUVASHALAUNCHER_DOWNLOAD_MOD, "A mod");
   g_assert_cmpuint (nuvashalauncher_downloads_count (), ==, 2);
 
   nuvashalauncher_download_finish (one);
@@ -60,7 +60,7 @@ test_add_and_finish (void)
 static void
 test_progress_and_detail (void)
 {
-  NuvashaLauncherDownload *download = nuvashalauncher_downloads_add (nuvashalauncher_DOWNLOAD_SHADER, "Shaders");
+  NuvashaLauncherDownload *download = nuvashalauncher_downloads_add (NUVASHALAUNCHER_DOWNLOAD_SHADER, "Shaders");
   guint changes = 0;
 
   changed = 0;
@@ -68,7 +68,7 @@ test_progress_and_detail (void)
   g_assert_cmpuint ((guint) nuvashalauncher_download_get_done (download), ==, 0);
   g_assert_cmpuint ((guint) nuvashalauncher_download_get_total (download), ==, 0);
   g_assert_cmpint (nuvashalauncher_download_get_unit (download), ==,
-                   nuvashalauncher_DOWNLOAD_UNIT_COUNT);
+                   NUVASHALAUNCHER_DOWNLOAD_UNIT_COUNT);
   g_assert_null (nuvashalauncher_download_get_detail (download));
 
   nuvashalauncher_download_set_detail (download, "0 of 4 files");
@@ -78,7 +78,7 @@ test_progress_and_detail (void)
   g_assert_cmpuint ((guint) nuvashalauncher_download_get_done (download), ==, 2);
   g_assert_cmpuint ((guint) nuvashalauncher_download_get_total (download), ==, 4);
   g_assert_cmpint (nuvashalauncher_download_get_unit (download), ==,
-                   nuvashalauncher_DOWNLOAD_UNIT_COUNT);
+                   NUVASHALAUNCHER_DOWNLOAD_UNIT_COUNT);
 
   changes = changed;
   nuvashalauncher_download_set_progress (download, 2, 4);
@@ -88,7 +88,7 @@ test_progress_and_detail (void)
   /* A single transfer is counted in bytes and says so. */
   nuvashalauncher_download_set_bytes (download, 300, 500);
   g_assert_cmpint (nuvashalauncher_download_get_unit (download), ==,
-                   nuvashalauncher_DOWNLOAD_UNIT_BYTES);
+                   NUVASHALAUNCHER_DOWNLOAD_UNIT_BYTES);
   g_assert_cmpuint ((guint) nuvashalauncher_download_get_done (download), ==, 300);
   g_assert_cmpuint ((guint) nuvashalauncher_download_get_total (download), ==, 500);
   g_assert_cmpuint (changed, >, changes);
@@ -100,7 +100,7 @@ test_progress_and_detail (void)
 static void
 test_cancel (void)
 {
-  NuvashaLauncherDownload *download = nuvashalauncher_downloads_add (nuvashalauncher_DOWNLOAD_RESOURCE_PACK, "Pack");
+  NuvashaLauncherDownload *download = nuvashalauncher_downloads_add (NUVASHALAUNCHER_DOWNLOAD_RESOURCE_PACK, "Pack");
   GCancellable *cancellable = nuvashalauncher_download_get_cancellable (download);
 
   g_assert_false (g_cancellable_is_cancelled (cancellable));
@@ -116,8 +116,8 @@ static void
 test_all_lists_every_entry (void)
 {
   GPtrArray *all;
-  NuvashaLauncherDownload *one = nuvashalauncher_downloads_add (nuvashalauncher_DOWNLOAD_UPDATE, "One");
-  NuvashaLauncherDownload *two = nuvashalauncher_downloads_add (nuvashalauncher_DOWNLOAD_UPDATE, "Two");
+  NuvashaLauncherDownload *one = nuvashalauncher_downloads_add (NUVASHALAUNCHER_DOWNLOAD_UPDATE, "One");
+  NuvashaLauncherDownload *two = nuvashalauncher_downloads_add (NUVASHALAUNCHER_DOWNLOAD_UPDATE, "Two");
 
   all = nuvashalauncher_downloads_get_all ();
   g_assert_cmpuint (all->len, ==, 2);

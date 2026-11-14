@@ -23,10 +23,10 @@ test_export_import_round_trip (void)
   g_autofree char *imported_icon = NULL;
   g_autofree char *icon_bytes = NULL;
   g_autofree char *override_bytes = NULL;
-  NuvashaLauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader loader = NUVASHALAUNCHER_LOADER_VANILLA;
 
   source = nuvashalauncher_instance_manager_create (source_manager, "Round Trip",
-                                        source_dir, "1.20.1", nuvashalauncher_LOADER_FABRIC,
+                                        source_dir, "1.20.1", NUVASHALAUNCHER_LOADER_FABRIC,
                                         "0.15.11", &error);
   g_assert_no_error (error);
   g_assert_nonnull (source);
@@ -82,12 +82,12 @@ test_export_import_round_trip (void)
   g_assert_nonnull (pack);
   g_assert_true (nuvashalauncher_modpack_resolve (pack, &error));
   g_assert_no_error (error);
-  g_assert_cmpint (pack->loader, ==, nuvashalauncher_LOADER_FABRIC);
+  g_assert_cmpint (pack->loader, ==, NUVASHALAUNCHER_LOADER_FABRIC);
 
   /* The manifest loader is what this round trip verifies. Avoid asking the
    * live Fabric service during tests; the actual files, icon and overrides
    * are independent of the loader installer lookup. */
-  pack->loader = nuvashalauncher_LOADER_VANILLA;
+  pack->loader = NUVASHALAUNCHER_LOADER_VANILLA;
   g_clear_pointer (&pack->loader_version, g_free);
 
   imported = install_now (pack, target_manager, "Round Trip", NULL, &error);
@@ -95,7 +95,7 @@ test_export_import_round_trip (void)
   g_assert_nonnull (imported);
   g_object_get (imported, "loader", &loader, "directory", &imported_dir,
                 "icon", &imported_icon, NULL);
-  g_assert_cmpint (loader, ==, nuvashalauncher_LOADER_VANILLA);
+  g_assert_cmpint (loader, ==, NUVASHALAUNCHER_LOADER_VANILLA);
   g_assert_nonnull (imported_icon);
   icon_bytes = read_file (imported_icon);
   g_assert_cmpstr (icon_bytes, ==, "icon bytes");
@@ -140,7 +140,7 @@ test_export_preserves_managed_datapack (void)
 
   instance = nuvashalauncher_instance_manager_create (manager, "Managed Pack",
                                                source_dir, "1.20.1",
-                                               nuvashalauncher_LOADER_FABRIC, "0.15.11",
+                                               NUVASHALAUNCHER_LOADER_FABRIC, "0.15.11",
                                                &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
@@ -162,7 +162,7 @@ test_export_preserves_managed_datapack (void)
   entry.project_id = "pack";
   entry.version_id = "v1";
 
-  g_assert_true (index_update_now (source_dir, nuvashalauncher_CONTENT_DATAPACK,
+  g_assert_true (index_update_now (source_dir, NUVASHALAUNCHER_CONTENT_DATAPACK,
                                    &entry, &error));
   g_assert_no_error (error);
   g_object_set (instance,
@@ -188,8 +188,8 @@ test_export_preserves_managed_datapack (void)
     g_assert_cmpstr (file->path, ==, "datapacks/example.zip");
     g_assert_cmpstr (file->sha1, ==,
                      "0123456789abcdef0123456789abcdef01234567");
-    g_assert_cmpint (file->env_client, ==, nuvashalauncher_MODPACK_ENV_REQUIRED);
-    g_assert_cmpint (file->env_server, ==, nuvashalauncher_MODPACK_ENV_REQUIRED);
+    g_assert_cmpint (file->env_client, ==, NUVASHALAUNCHER_MODPACK_ENV_REQUIRED);
+    g_assert_cmpint (file->env_server, ==, NUVASHALAUNCHER_MODPACK_ENV_REQUIRED);
     g_assert_cmpstr (g_ptr_array_index (file->downloads, 0), ==,
                      "https://cdn.modrinth.com/data/pack/v1/example.zip");
   }

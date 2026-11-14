@@ -85,11 +85,11 @@ install_file_of (NuvashaLauncherModrinthVersion *version, const char *replaces,
     {
       NuvashaLauncherModrinthDependency *dependency =
         g_ptr_array_index (version->dependencies, i);
-      GPtrArray *target = dependency->type == nuvashalauncher_DEPENDENCY_REQUIRED
+      GPtrArray *target = dependency->type == NUVASHALAUNCHER_DEPENDENCY_REQUIRED
                             ? install->required_dependencies
-                            : dependency->type == nuvashalauncher_DEPENDENCY_OPTIONAL
+                            : dependency->type == NUVASHALAUNCHER_DEPENDENCY_OPTIONAL
                                 ? install->optional_dependencies
-                                : dependency->type == nuvashalauncher_DEPENDENCY_INCOMPATIBLE
+                                : dependency->type == NUVASHALAUNCHER_DEPENDENCY_INCOMPATIBLE
                                     ? install->incompatible_dependencies : NULL;
       if (target != NULL && dependency->project_id != NULL)
         g_ptr_array_add (target, g_strdup (dependency->project_id));
@@ -213,8 +213,8 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
    * reaches the folder complete and verified. */
   if (!ok)
     {
-      gboolean cancelled = g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR,
-                                            nuvashalauncher_DOWNLOAD_ERROR_CANCELLED);
+      gboolean cancelled = g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                                            NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED);
 
       if (run->page != NULL)
         {
@@ -277,7 +277,7 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
          entry.hash512 = file->sha512;
          entry.download_url = file->url;
          entry.env_client = "required";
-         entry.env_server = run->page->type == nuvashalauncher_CONTENT_MOD
+         entry.env_server = run->page->type == NUVASHALAUNCHER_CONTENT_MOD
                               ? "required" : "unsupported";
         entry.provider = "Modrinth";
         entry.project_id = file->project_id;
@@ -288,7 +288,7 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         entry.optional_dependencies = file->optional_dependencies;
          entry.incompatible_dependencies = file->incompatible_dependencies;
          entry.env_client = "required";
-         entry.env_server = run->page->type == nuvashalauncher_CONTENT_MOD
+         entry.env_server = run->page->type == NUVASHALAUNCHER_CONTENT_MOD
                               ? "required" : "unsupported";
         nuvashalauncher_operation_release (
           nuvashalauncher_content_index_update_async (instance_directory,
@@ -360,15 +360,15 @@ content_download_kind (NuvashaLauncherContentType type)
 {
   switch (type)
     {
-    case nuvashalauncher_CONTENT_RESOURCE_PACK:
-      return nuvashalauncher_DOWNLOAD_RESOURCE_PACK;
+    case NUVASHALAUNCHER_CONTENT_RESOURCE_PACK:
+      return NUVASHALAUNCHER_DOWNLOAD_RESOURCE_PACK;
 
-    case nuvashalauncher_CONTENT_SHADER_PACK:
-      return nuvashalauncher_DOWNLOAD_SHADER;
+    case NUVASHALAUNCHER_CONTENT_SHADER_PACK:
+      return NUVASHALAUNCHER_DOWNLOAD_SHADER;
 
-    case nuvashalauncher_CONTENT_MOD:
+    case NUVASHALAUNCHER_CONTENT_MOD:
     default:
-      return nuvashalauncher_DOWNLOAD_MOD;
+      return NUVASHALAUNCHER_DOWNLOAD_MOD;
     }
 }
 
@@ -545,7 +545,7 @@ plan_text (NuvashaLauncherContentPage *self, PlanRun *plan)
           NuvashaLauncherModrinthDependency *dependency =
             g_ptr_array_index (plan->version->dependencies, i);
 
-          if (dependency->type != nuvashalauncher_DEPENDENCY_INCOMPATIBLE)
+          if (dependency->type != NUVASHALAUNCHER_DEPENDENCY_INCOMPATIBLE)
             continue;
 
           g_string_append_printf (
@@ -577,7 +577,7 @@ plan_text (NuvashaLauncherContentPage *self, PlanRun *plan)
 static void
 on_plan_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
   PlanRun *plan = g_object_get_data (G_OBJECT (source), "nuvashalauncher-plan");
   const char *response =
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);

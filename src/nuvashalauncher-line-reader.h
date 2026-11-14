@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_LINE_READER_H
-#define nuvashalauncher_LINE_READER_H
+#ifndef NUVASHALAUNCHER_LINE_READER_H
+#define NUVASHALAUNCHER_LINE_READER_H
 
 #include <gio/gio.h>
 
@@ -30,4 +30,4 @@ void nuvashalauncher_line_reader_start (NuvashaLauncherLineReader *reader);
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_LINE_READER_H */
+#endif /* NUVASHALAUNCHER_LINE_READER_H */

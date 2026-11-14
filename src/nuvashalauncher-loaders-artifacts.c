@@ -137,8 +137,8 @@ file_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     {
       /* A maven that does not hold an artifact a name of the profile says
          nothing about: only the processors know, and they are run next. */
-      if (file->optional && g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR,
-                                             nuvashalauncher_DOWNLOAD_ERROR_HTTP))
+      if (file->optional && g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                                             NUVASHALAUNCHER_DOWNLOAD_ERROR_HTTP))
         g_clear_error (&error);
       else
         {

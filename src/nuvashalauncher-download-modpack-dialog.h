@@ -11,8 +11,8 @@
  * pack needs for its Minecraft version or its loader is asked of the
  * user: both come from what the pack says about itself. */
 
-#ifndef nuvashalauncher_DOWNLOAD_MODPACK_DIALOG_H
-#define nuvashalauncher_DOWNLOAD_MODPACK_DIALOG_H
+#ifndef NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG_H
+#define NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG_H
 
 #include <adwaita.h>
 
@@ -20,11 +20,11 @@
 
 G_BEGIN_DECLS
 
-#define nuvashalauncher_TYPE_DOWNLOAD_MODPACK_DIALOG \
+#define NUVASHALAUNCHER_TYPE_DOWNLOAD_MODPACK_DIALOG \
   (nuvashalauncher_download_modpack_dialog_get_type ())
 
 G_DECLARE_FINAL_TYPE (NuvashaLauncherDownloadModpackDialog,
-                      nuvashalauncher_download_modpack_dialog, nuvashalauncher,
+                      nuvashalauncher_download_modpack_dialog, NUVASHALAUNCHER,
                       DOWNLOAD_MODPACK_DIALOG, AdwDialog)
 
 /* The dialog is handed the manager; it keeps its own reference so that
@@ -38,4 +38,4 @@ NuvashaLauncherDownloadModpackDialog *nuvashalauncher_download_modpack_dialog_ne
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_DOWNLOAD_MODPACK_DIALOG_H */
+#endif /* NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG_H */

@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_TASK_H
-#define nuvashalauncher_TASK_H
+#ifndef NUVASHALAUNCHER_TASK_H
+#define NUVASHALAUNCHER_TASK_H
 
 #include <gio/gio.h>
 
@@ -12,13 +12,13 @@ G_BEGIN_DECLS
 typedef struct _NuvashaLauncherTaskSequence NuvashaLauncherTaskSequence;
 typedef struct _NuvashaLauncherTaskScope NuvashaLauncherTaskScope;
 typedef enum {
-  nuvashalauncher_TASK_STATE_QUEUED,
-  nuvashalauncher_TASK_STATE_RUNNING,
-  nuvashalauncher_TASK_STATE_RETRYING,
-  nuvashalauncher_TASK_STATE_COMPLETED,
-  nuvashalauncher_TASK_STATE_FAILED,
-  nuvashalauncher_TASK_STATE_CANCELLED,
-  nuvashalauncher_TASK_STATE_CLEANING
+  NUVASHALAUNCHER_TASK_STATE_QUEUED,
+  NUVASHALAUNCHER_TASK_STATE_RUNNING,
+  NUVASHALAUNCHER_TASK_STATE_RETRYING,
+  NUVASHALAUNCHER_TASK_STATE_COMPLETED,
+  NUVASHALAUNCHER_TASK_STATE_FAILED,
+  NUVASHALAUNCHER_TASK_STATE_CANCELLED,
+  NUVASHALAUNCHER_TASK_STATE_CLEANING
 } NuvashaLauncherTaskState;
 typedef void (*NuvashaLauncherTaskSequenceStep) (NuvashaLauncherTaskSequence *sequence,
                                      gpointer         user_data);
@@ -125,4 +125,4 @@ void nuvashalauncher_task_scope_follow_cancellable (NuvashaLauncherTaskScope *sc
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_TASK_H */
+#endif /* NUVASHALAUNCHER_TASK_H */

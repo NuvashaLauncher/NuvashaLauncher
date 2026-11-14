@@ -99,27 +99,27 @@ nuvashalauncher_modrinth_fail (GTask *task, GError *error)
       return;
     }
 
-  if (error->domain == nuvashalauncher_DOWNLOAD_ERROR)
+  if (error->domain == NUVASHALAUNCHER_DOWNLOAD_ERROR)
     {
-      if (error->code == nuvashalauncher_DOWNLOAD_ERROR_RATE_LIMITED)
+      if (error->code == NUVASHALAUNCHER_DOWNLOAD_ERROR_RATE_LIMITED)
         wrapped = g_error_new_literal (
-            nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_RATE_LIMIT,
+            NUVASHALAUNCHER_MODRINTH_ERROR, NUVASHALAUNCHER_MODRINTH_ERROR_RATE_LIMIT,
             _("Modrinth is asking Nuvasha Launcher to slow down, too many requests"));
-      else if (error->code == nuvashalauncher_DOWNLOAD_ERROR_HTTP)
-        wrapped = g_error_new (nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_HTTP,
+      else if (error->code == NUVASHALAUNCHER_DOWNLOAD_ERROR_HTTP)
+        wrapped = g_error_new (NUVASHALAUNCHER_MODRINTH_ERROR, NUVASHALAUNCHER_MODRINTH_ERROR_HTTP,
                                "%s", error->message);
-      else if (error->code == nuvashalauncher_DOWNLOAD_ERROR_INVALID)
-        wrapped = g_error_new (nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_PARSE,
+      else if (error->code == NUVASHALAUNCHER_DOWNLOAD_ERROR_INVALID)
+        wrapped = g_error_new (NUVASHALAUNCHER_MODRINTH_ERROR, NUVASHALAUNCHER_MODRINTH_ERROR_PARSE,
                                "%s", error->message);
-      else if (error->code == nuvashalauncher_DOWNLOAD_ERROR_IO ||
-               error->code == nuvashalauncher_DOWNLOAD_ERROR_CANCELLED)
+      else if (error->code == NUVASHALAUNCHER_DOWNLOAD_ERROR_IO ||
+               error->code == NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED)
         wrapped = g_steal_pointer (&error);
       else
-        wrapped = g_error_new (nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_NETWORK,
+        wrapped = g_error_new (NUVASHALAUNCHER_MODRINTH_ERROR, NUVASHALAUNCHER_MODRINTH_ERROR_NETWORK,
                                "%s", error->message);
     }
   else
-    wrapped = g_error_new (nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_PARSE,
+    wrapped = g_error_new (NUVASHALAUNCHER_MODRINTH_ERROR, NUVASHALAUNCHER_MODRINTH_ERROR_PARSE,
                            "%s", error->message);
 
   g_clear_error (&error);
@@ -130,8 +130,8 @@ nuvashalauncher_modrinth_fail (GTask *task, GError *error)
 gboolean
 nuvashalauncher_modrinth_error_is_not_found (const GError *error)
 {
-  return error->domain == nuvashalauncher_DOWNLOAD_ERROR &&
-         error->code == nuvashalauncher_DOWNLOAD_ERROR_HTTP &&
+  return error->domain == NUVASHALAUNCHER_DOWNLOAD_ERROR &&
+         error->code == NUVASHALAUNCHER_DOWNLOAD_ERROR_HTTP &&
          strstr (error->message, "HTTP 404") != NULL;
 }
 
@@ -159,7 +159,7 @@ json_flight_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       if (parser == NULL)
         {
           if (nuvashalauncher_modrinth_error_is_not_found (error) &&
-              request->not_found == nuvashalauncher_NOT_FOUND_IS_ABSENT)
+              request->not_found == NUVASHALAUNCHER_NOT_FOUND_IS_ABSENT)
             {
                nuvashalauncher_task_scope_return_pointer (request->scope, NULL, NULL);
               continue;
@@ -169,8 +169,8 @@ json_flight_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
             {
                nuvashalauncher_task_scope_return_error (
                  request->scope,
-                 g_error_new_literal (nuvashalauncher_MODRINTH_ERROR,
-                                      nuvashalauncher_MODRINTH_ERROR_NOT_FOUND,
+                 g_error_new_literal (NUVASHALAUNCHER_MODRINTH_ERROR,
+                                      NUVASHALAUNCHER_MODRINTH_ERROR_NOT_FOUND,
                                        _("Modrinth does not know this file")));
               continue;
             }
@@ -183,8 +183,8 @@ json_flight_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         {
            nuvashalauncher_task_scope_return_error (
              request->scope,
-             g_error_new_literal (nuvashalauncher_MODRINTH_ERROR,
-                                  nuvashalauncher_MODRINTH_ERROR_PARSE,
+             g_error_new_literal (NUVASHALAUNCHER_MODRINTH_ERROR,
+                                  NUVASHALAUNCHER_MODRINTH_ERROR_PARSE,
                                   "the answer holds no JSON"));
           continue;
         }
@@ -216,7 +216,7 @@ nuvashalauncher_modrinth_json_ready (GObject *source G_GNUC_UNUSED,
   if (parser == NULL)
     {
       if (nuvashalauncher_modrinth_error_is_not_found (error) &&
-          request->not_found == nuvashalauncher_NOT_FOUND_IS_ABSENT)
+          request->not_found == NUVASHALAUNCHER_NOT_FOUND_IS_ABSENT)
         {
           g_clear_error (&error);
           nuvashalauncher_modrinth_request_return_pointer (task, NULL, NULL);
@@ -228,8 +228,8 @@ nuvashalauncher_modrinth_json_ready (GObject *source G_GNUC_UNUSED,
           g_clear_error (&error);
           nuvashalauncher_modrinth_request_return_error (
             task,
-            g_error_new_literal (nuvashalauncher_MODRINTH_ERROR,
-                                 nuvashalauncher_MODRINTH_ERROR_NOT_FOUND,
+            g_error_new_literal (NUVASHALAUNCHER_MODRINTH_ERROR,
+                                 NUVASHALAUNCHER_MODRINTH_ERROR_NOT_FOUND,
                                   _("Modrinth does not know this file")));
           return;
         }
@@ -244,7 +244,7 @@ nuvashalauncher_modrinth_json_ready (GObject *source G_GNUC_UNUSED,
     {
       nuvashalauncher_modrinth_request_return_error (
         task,
-        g_error_new_literal (nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_PARSE,
+        g_error_new_literal (NUVASHALAUNCHER_MODRINTH_ERROR, NUVASHALAUNCHER_MODRINTH_ERROR_PARSE,
                              "the answer holds no JSON"));
       return;
     }

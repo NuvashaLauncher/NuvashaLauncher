@@ -68,7 +68,7 @@ on_state (NuvashaLauncher *launcher G_GNUC_UNUSED, NuvashaLauncherLaunchState st
 }
 
 /* Runs the main loop until @wanted comes, or until the launch is over.
-   @wanted nuvashalauncher_LAUNCH_STOPPED stands for "the launch is over". */
+   @wanted NUVASHALAUNCHER_LAUNCH_STOPPED stands for "the launch is over". */
 static void
 watch_until (Watch *watch, NuvashaLauncher *launcher, NuvashaLauncherLaunchState wanted)
 {
@@ -202,7 +202,7 @@ new_instance (const char *name)
     g_error ("the instance directory \"%s\" cannot be made", directory);
 
   instance = nuvashalauncher_instance_new (NULL, name, directory, "1.20.1",
-                               nuvashalauncher_LOADER_VANILLA, &error);
+                               NUVASHALAUNCHER_LOADER_VANILLA, &error);
 
   if (instance == NULL)
     g_error ("the test instance cannot be made: %s", error->message);
@@ -269,12 +269,12 @@ test_output_and_clean_exit (void)
 
   g_assert_true (nuvashalauncher_launcher_spawn (launcher, argv, &error));
   g_assert_no_error (error);
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_RUNNING);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_RUNNING);
 
-  watch_until (&watch, launcher, nuvashalauncher_LAUNCH_STOPPED);
+  watch_until (&watch, launcher, NUVASHALAUNCHER_LAUNCH_STOPPED);
 
-  g_assert_cmpint (watch.state, ==, nuvashalauncher_LAUNCH_STOPPED);
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_STOPPED);
+  g_assert_cmpint (watch.state, ==, NUVASHALAUNCHER_LAUNCH_STOPPED);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_STOPPED);
 
   /* What the game printed is in the log, tagged and timestamped. */
   assert_log_has (launcher, "[stdout] first line");
@@ -308,9 +308,9 @@ test_exit_code_makes_a_crash (void)
                                 "exit 3"));
 
   g_assert_true (nuvashalauncher_launcher_spawn (launcher, argv, &error));
-  watch_until (&watch, launcher, nuvashalauncher_LAUNCH_CRASHED);
+  watch_until (&watch, launcher, NUVASHALAUNCHER_LAUNCH_CRASHED);
 
-  g_assert_cmpint (watch.state, ==, nuvashalauncher_LAUNCH_CRASHED);
+  g_assert_cmpint (watch.state, ==, NUVASHALAUNCHER_LAUNCH_CRASHED);
   g_assert_cmpstr (watch.detail, ==, "the game exited with code 3");
   assert_log_has (launcher, "the game crashed");
 
@@ -351,9 +351,9 @@ test_crash_report_makes_a_crash (void)
   }
 
   g_assert_true (nuvashalauncher_launcher_spawn (launcher, argv, &error));
-  watch_until (&watch, launcher, nuvashalauncher_LAUNCH_CRASHED);
+  watch_until (&watch, launcher, NUVASHALAUNCHER_LAUNCH_CRASHED);
 
-  g_assert_cmpint (watch.state, ==, nuvashalauncher_LAUNCH_CRASHED);
+  g_assert_cmpint (watch.state, ==, NUVASHALAUNCHER_LAUNCH_CRASHED);
   g_assert_cmpstr (watch.detail, ==, "A new crash report was created. Open the logs for details.");
 
   watch_clear (&watch);
@@ -383,9 +383,9 @@ test_old_crash_report_does_not_count (void)
   argv = argv_of (write_script ("oldreport.sh", "exit 0"));
 
   g_assert_true (nuvashalauncher_launcher_spawn (launcher, argv, &error));
-  watch_until (&watch, launcher, nuvashalauncher_LAUNCH_STOPPED);
+  watch_until (&watch, launcher, NUVASHALAUNCHER_LAUNCH_STOPPED);
 
-  g_assert_cmpint (watch.state, ==, nuvashalauncher_LAUNCH_STOPPED);
+  g_assert_cmpint (watch.state, ==, NUVASHALAUNCHER_LAUNCH_STOPPED);
 
   watch_clear (&watch);
 }
@@ -407,7 +407,7 @@ test_child_environment (void)
   Watch watch = { 0 };
 
   /* The launcher process has a backend selection in its environment. The
-     game is not nuvashalauncher and must not inherit it. */
+     game is not Nuvasha Launcher and must not inherit it. */
   g_setenv ("GDK_BACKEND", "test-backend", TRUE);
 
   argv = argv_of (write_script (
@@ -417,7 +417,7 @@ test_child_environment (void)
     "echo \"CWD=$(pwd)\""));
 
   g_assert_true (nuvashalauncher_launcher_spawn (launcher, argv, &error));
-  watch_until (&watch, launcher, nuvashalauncher_LAUNCH_STOPPED);
+  watch_until (&watch, launcher, NUVASHALAUNCHER_LAUNCH_STOPPED);
 
   assert_log_has (launcher, "[stdout] GDK_BACKEND=unset");
 
@@ -445,17 +445,17 @@ test_child_inherits_the_rest_of_the_environment (void)
   g_autoptr (GError) error = NULL;
   Watch watch = { 0 };
 
-  g_setenv ("nuvashalauncher_TEST_ENVIRONMENT_MARK", "inherited-value", TRUE);
+  g_setenv ("NUVASHALAUNCHER_TEST_ENVIRONMENT_MARK", "inherited-value", TRUE);
 
   argv = argv_of (write_script (
-    "inherited.sh", "echo \"$nuvashalauncher_TEST_ENVIRONMENT_MARK\""));
+    "inherited.sh", "echo \"$NUVASHALAUNCHER_TEST_ENVIRONMENT_MARK\""));
 
   g_assert_true (nuvashalauncher_launcher_spawn (launcher, argv, &error));
-  watch_until (&watch, launcher, nuvashalauncher_LAUNCH_STOPPED);
+  watch_until (&watch, launcher, NUVASHALAUNCHER_LAUNCH_STOPPED);
 
   assert_log_has (launcher, "[stdout] inherited-value");
 
-  g_unsetenv ("nuvashalauncher_TEST_ENVIRONMENT_MARK");
+  g_unsetenv ("NUVASHALAUNCHER_TEST_ENVIRONMENT_MARK");
 
   watch_clear (&watch);
 }
@@ -481,13 +481,13 @@ test_duplicate_launch_prevention (void)
 
   g_assert_true (nuvashalauncher_launcher_spawn (launcher, argv, &error));
   g_assert_no_error (error);
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_RUNNING);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_RUNNING);
 
   /* While the process of this instance is up, a second one is refused:
      that is what keeps a game from being started twice. */
   g_assert_false (nuvashalauncher_launcher_spawn (launcher, argv, &error));
-  g_assert_error (error, nuvashalauncher_LAUNCH_ERROR, nuvashalauncher_LAUNCH_ERROR_ALREADY_RUNNING);
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_RUNNING);
+  g_assert_error (error, NUVASHALAUNCHER_LAUNCH_ERROR, NUVASHALAUNCHER_LAUNCH_ERROR_ALREADY_RUNNING);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_RUNNING);
 
   /* A start of a busy instance does nothing at all: it does not go out
      to the network and it does not change the state. */
@@ -497,14 +497,14 @@ test_duplicate_launch_prevention (void)
     nuvashalauncher_launcher_start (launcher);
     g_assert_cmpuint (nuvashalauncher_launcher_get_line_count (launcher), ==, before + 1);
     assert_log_has (launcher, "already Running, nothing was started");
-    g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_RUNNING);
+    g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_RUNNING);
   }
 
   /* The game is stopped so the test leaves nothing behind. */
   nuvashalauncher_launcher_stop (launcher);
-  watch_until (&watch, launcher, nuvashalauncher_LAUNCH_STOPPED);
+  watch_until (&watch, launcher, NUVASHALAUNCHER_LAUNCH_STOPPED);
 
-  g_assert_cmpint (watch.state, ==, nuvashalauncher_LAUNCH_STOPPED);
+  g_assert_cmpint (watch.state, ==, NUVASHALAUNCHER_LAUNCH_STOPPED);
 
   /* Now that the launch is over the instance is not busy any more, so a
      second launch is allowed and a stop has nothing left to stop. */
@@ -515,7 +515,7 @@ test_duplicate_launch_prevention (void)
 
     nuvashalauncher_launcher_stop (launcher);
     g_assert_cmpuint (nuvashalauncher_launcher_get_line_count (launcher), ==, before);
-    g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_STOPPED);
+    g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_STOPPED);
   }
 
   /* Only a running process is refused: a launch that is preparing is
@@ -525,8 +525,8 @@ test_duplicate_launch_prevention (void)
   g_assert_true (nuvashalauncher_launcher_spawn (launcher, argv, &error));
   g_assert_no_error (error);
   nuvashalauncher_launcher_stop (launcher);
-  watch_until (&watch, launcher, nuvashalauncher_LAUNCH_STOPPED);
-  g_assert_cmpint (watch.state, ==, nuvashalauncher_LAUNCH_STOPPED);
+  watch_until (&watch, launcher, NUVASHALAUNCHER_LAUNCH_STOPPED);
+  g_assert_cmpint (watch.state, ==, NUVASHALAUNCHER_LAUNCH_STOPPED);
 
   watch_clear (&watch);
 }
@@ -555,16 +555,16 @@ test_stop_ends_the_game (void)
 
   /* Wait for the game to say it is up before asking it to stop. */
   watch_for_line (&running, launcher, "the game is running");
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_RUNNING);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_RUNNING);
   watch_clear (&running);
 
   nuvashalauncher_launcher_stop (launcher);
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_STOPPING);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_STOPPING);
 
-  watch_until (&stopped, launcher, nuvashalauncher_LAUNCH_STOPPED);
+  watch_until (&stopped, launcher, NUVASHALAUNCHER_LAUNCH_STOPPED);
 
   /* SIGTERM first: the game ends by itself and says so. */
-  g_assert_cmpint (stopped.state, ==, nuvashalauncher_LAUNCH_STOPPED);
+  g_assert_cmpint (stopped.state, ==, NUVASHALAUNCHER_LAUNCH_STOPPED);
   assert_log_has (launcher, "asking the game to stop");
   assert_log_has (launcher, "the game was asked to stop");
   assert_log_has (launcher, "the game stopped");
@@ -596,10 +596,10 @@ test_stop_forces_a_game_that_ignores_sigterm (void)
   watch_clear (&running);
 
   nuvashalauncher_launcher_stop (launcher);
-  watch_until (&stopped, launcher, nuvashalauncher_LAUNCH_STOPPED);
+  watch_until (&stopped, launcher, NUVASHALAUNCHER_LAUNCH_STOPPED);
 
   /* A game that was asked to stop and did not crashed: it stopped. */
-  g_assert_cmpint (stopped.state, ==, nuvashalauncher_LAUNCH_STOPPED);
+  g_assert_cmpint (stopped.state, ==, NUVASHALAUNCHER_LAUNCH_STOPPED);
   assert_log_has (launcher, "did not stop within");
   assert_log_has (launcher, "the game stopped");
 
@@ -629,7 +629,7 @@ test_line_limit_and_clear (void)
     "exit 0"));
 
   g_assert_true (nuvashalauncher_launcher_spawn (launcher, argv, &error));
-  watch_until (&watch, launcher, nuvashalauncher_LAUNCH_STOPPED);
+  watch_until (&watch, launcher, NUVASHALAUNCHER_LAUNCH_STOPPED);
 
   g_assert_cmpuint (nuvashalauncher_launcher_get_line_count (launcher), ==, 5000);
 
@@ -669,7 +669,7 @@ test_spawn_failure_is_a_failure (void)
   g_assert_nonnull (error);
 
   /* Nothing was started: the launch failed and said why. */
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_FAILED);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_FAILED);
   g_assert_false (nuvashalauncher_launch_state_is_busy (nuvashalauncher_launcher_get_state (launcher)));
   assert_log_has (launcher, "not-a-java");
 }

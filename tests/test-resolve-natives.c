@@ -145,8 +145,8 @@ test_malicious_jar (void)
   async_run_clear (&run);
 
   g_assert_null (call.success);
-  g_assert_error (call.error, nuvashalauncher_RESOLVE_ERROR,
-                  nuvashalauncher_RESOLVE_ERROR_UNSAFE_PATH);
+  g_assert_error (call.error, NUVASHALAUNCHER_RESOLVE_ERROR,
+                  NUVASHALAUNCHER_RESOLVE_ERROR_UNSAFE_PATH);
   {
     g_autofree char *escaped = g_build_filename (dir, "escaped.so", NULL);
 
@@ -162,8 +162,8 @@ test_malicious_jar (void)
   async_run_clear (&run);
 
   g_assert_null (call.success);
-  g_assert_error (call.error, nuvashalauncher_RESOLVE_ERROR,
-                  nuvashalauncher_RESOLVE_ERROR_UNSAFE_PATH);
+  g_assert_error (call.error, NUVASHALAUNCHER_RESOLVE_ERROR,
+                  NUVASHALAUNCHER_RESOLVE_ERROR_UNSAFE_PATH);
   g_assert_false (g_file_test ("/tmp/nuvashalauncher-resolve-escaped.so",
                                G_FILE_TEST_EXISTS));
   g_clear_error (&call.error);
@@ -175,8 +175,8 @@ test_malicious_jar (void)
   async_run_clear (&run);
 
   g_assert_null (call.success);
-  g_assert_error (call.error, nuvashalauncher_RESOLVE_ERROR,
-                  nuvashalauncher_RESOLVE_ERROR_UNSAFE_PATH);
+  g_assert_error (call.error, NUVASHALAUNCHER_RESOLVE_ERROR,
+                  NUVASHALAUNCHER_RESOLVE_ERROR_UNSAFE_PATH);
   g_clear_error (&call.error);
 
   /* A link inside a jar is skipped: honouring one would put a name of

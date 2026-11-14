@@ -251,7 +251,7 @@ test_json_not_found (void)
   call_json (&run, &call, url);
   async_run_wait (&run);
 
-  g_assert_error (call.error, nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_HTTP);
+  g_assert_error (call.error, NUVASHALAUNCHER_DOWNLOAD_ERROR, NUVASHALAUNCHER_DOWNLOAD_ERROR_HTTP);
   g_assert_null (call.parser);
   g_assert_cmpuint (fixture.hits, ==, 1);
 
@@ -342,7 +342,7 @@ test_api_cache_expiration_and_failed_response (void)
 
   clear_api_cache ();
   g_assert_true (nuvashalauncher_settings_set_cache_expiration (
-    cache_settings, nuvashalauncher_SETTINGS_CACHE_EXPIRATION_7_DAYS, NULL));
+    cache_settings, NUVASHALAUNCHER_SETTINGS_CACHE_EXPIRATION_7_DAYS, NULL));
   fixture.hits = 0;
   async_run_init (&run);
   call_cached_json (&run, &call, url);
@@ -364,7 +364,7 @@ test_api_cache_expiration_and_failed_response (void)
   async_run_clear (&run);
 
   g_assert_true (nuvashalauncher_settings_set_cache_expiration (
-    cache_settings, nuvashalauncher_SETTINGS_CACHE_EXPIRATION_1_HOUR, NULL));
+    cache_settings, NUVASHALAUNCHER_SETTINGS_CACHE_EXPIRATION_1_HOUR, NULL));
   async_run_init (&run);
   call_cached_json (&run, &call, url);
   async_run_wait (&run);
@@ -410,7 +410,7 @@ test_api_cache_etag (void)
   g_assert_true (nuvashalauncher_settings_set_cache_modrinth_api_responses (
     cache_settings, TRUE, NULL));
   g_assert_true (nuvashalauncher_settings_set_cache_expiration (
-    cache_settings, nuvashalauncher_SETTINGS_CACHE_EXPIRATION_1_HOUR, NULL));
+    cache_settings, NUVASHALAUNCHER_SETTINGS_CACHE_EXPIRATION_1_HOUR, NULL));
   fixture.hits = 0;
 
   async_run_init (&run);
@@ -487,8 +487,8 @@ test_api_cache_cancellation (void)
   call_cached_json (&run, &call, "http://127.0.0.1:1/cancel");
   g_cancellable_cancel (run.cancellable);
   async_run_wait (&run);
-  g_assert_error (call.error, nuvashalauncher_DOWNLOAD_ERROR,
-                  nuvashalauncher_DOWNLOAD_ERROR_CANCELLED);
+  g_assert_error (call.error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                  NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED);
   async_call_clear (&call);
   async_run_clear (&run);
 

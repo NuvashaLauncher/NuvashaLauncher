@@ -69,7 +69,7 @@ main (int argc, char **argv)
   manager = nuvashalauncher_instance_manager_new (data_dir);
 
   instance = nuvashalauncher_instance_manager_create (manager, "Content", NULL, "1.21.1",
-                                          nuvashalauncher_LOADER_FABRIC, "0.15.0", &error);
+                                          NUVASHALAUNCHER_LOADER_FABRIC, "0.15.0", &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
@@ -79,7 +79,7 @@ main (int argc, char **argv)
   mods_dir = g_build_filename (directory, "mods", NULL);
   g_assert_false (g_file_test (mods_dir, G_FILE_TEST_IS_DIR));
 
-  page = nuvashalauncher_content_page_new (instance, nuvashalauncher_CONTENT_MOD);
+  page = nuvashalauncher_content_page_new (instance, NUVASHALAUNCHER_CONTENT_MOD);
 
   {
     GtkWidget *button = find_open_folder_button (GTK_WIDGET (page));

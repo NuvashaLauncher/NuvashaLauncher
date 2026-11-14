@@ -36,7 +36,7 @@ duplicate_finished (GObject *source, GAsyncResult *result, gpointer user_data)
 {
   AsyncCall *call = user_data;
   call->result = nuvashalauncher_instance_manager_duplicate_finish (
-    nuvashalauncher_INSTANCE_MANAGER (source), result, &call->error);
+    NUVASHALAUNCHER_INSTANCE_MANAGER (source), result, &call->error);
   nuvashalauncher_task_scope_unref (call->operation);
   call->operation = NULL;
   g_main_loop_quit (call->loop);
@@ -47,7 +47,7 @@ delete_finished (GObject *source, GAsyncResult *result, gpointer user_data)
 {
   AsyncCall *call = user_data;
   call->success = nuvashalauncher_instance_manager_delete_finish (
-    nuvashalauncher_INSTANCE_MANAGER (source), result, &call->error);
+    NUVASHALAUNCHER_INSTANCE_MANAGER (source), result, &call->error);
   nuvashalauncher_task_scope_unref (call->operation);
   call->operation = NULL;
   g_main_loop_quit (call->loop);
@@ -58,7 +58,7 @@ open_folder_finished (GObject *source, GAsyncResult *result, gpointer user_data)
 {
   AsyncCall *call = user_data;
   call->success = nuvashalauncher_instance_manager_open_folder_finish (
-    nuvashalauncher_INSTANCE_MANAGER (source), result, &call->error);
+    NUVASHALAUNCHER_INSTANCE_MANAGER (source), result, &call->error);
   nuvashalauncher_task_scope_unref (call->operation);
   call->operation = NULL;
   g_main_loop_quit (call->loop);
@@ -70,7 +70,7 @@ change_directory_finished (GObject *source, GAsyncResult *result,
 {
   AsyncCall *call = user_data;
   call->success = nuvashalauncher_instance_manager_change_directory_finish (
-    nuvashalauncher_INSTANCE_MANAGER (source), result, &call->error);
+    NUVASHALAUNCHER_INSTANCE_MANAGER (source), result, &call->error);
   nuvashalauncher_task_scope_unref (call->operation);
   call->operation = NULL;
   g_main_loop_quit (call->loop);
@@ -87,7 +87,7 @@ test_rename (void)
 
   NuvashaLauncherInstance *instance =
     nuvashalauncher_instance_manager_create (manager, "Original", NULL, "1.21.1",
-                                 nuvashalauncher_LOADER_VANILLA, NULL, &error);
+                                 NUVASHALAUNCHER_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
@@ -123,8 +123,8 @@ test_rename (void)
   /* A path separator is reported specifically and leaves the old name. */
   g_assert_false (nuvashalauncher_instance_manager_rename (manager, instance, "/",
                                                &error));
-  g_assert_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                  nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                  NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_assert_cmpstr (error->message, ==,
                    "Instances cannot contain / in their name");
   g_clear_error (&error);
@@ -132,14 +132,14 @@ test_rename (void)
   /* Renaming an instance the manager does not know fails. */
   g_autoptr (NuvashaLauncherInstance) stranger =
     nuvashalauncher_instance_new (NULL, "Stranger", "/tmp/nuvashalauncher-test-stranger", "1.21.1",
-                      nuvashalauncher_LOADER_VANILLA, &error);
+                      NUVASHALAUNCHER_LOADER_VANILLA, &error);
   g_assert_no_error (error);
   g_assert_nonnull (stranger);
 
   g_assert_false (nuvashalauncher_instance_manager_rename (manager, stranger,
                                                "Renamed", &error));
-  g_assert_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                  nuvashalauncher_INSTANCE_MANAGER_ERROR_NOT_FOUND);
+  g_assert_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                  NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND);
   g_clear_error (&error);
 
   g_object_unref (instance);
@@ -158,19 +158,19 @@ test_model_updates_are_atomic (void)
     nuvashalauncher_instance_manager_new (data_dir);
   g_autoptr (NuvashaLauncherInstance) instance =
     nuvashalauncher_instance_manager_create (manager, "Model", NULL, "1.21.1",
-                                 nuvashalauncher_LOADER_VANILLA, NULL, &error);
+                                 NUVASHALAUNCHER_LOADER_VANILLA, NULL, &error);
 
   g_assert_no_error (error);
   g_assert_true (nuvashalauncher_instance_manager_set_string (
     manager, instance, "jvm-args", "-Xmx2G", &error));
   g_assert_no_error (error);
   g_assert_true (nuvashalauncher_instance_manager_set_loader (
-    manager, instance, nuvashalauncher_LOADER_FABRIC, "0.15.0", &error));
+    manager, instance, NUVASHALAUNCHER_LOADER_FABRIC, "0.15.0", &error));
   g_assert_no_error (error);
   g_assert_false (nuvashalauncher_instance_manager_set_string (
     manager, instance, "not-a-property", "value", &error));
-  g_assert_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                  nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                  NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_clear_error (&error);
 
   g_autoptr (NuvashaLauncherInstanceManager) fresh = nuvashalauncher_instance_manager_new (data_dir);
@@ -197,7 +197,7 @@ test_duplicate (void)
 
   NuvashaLauncherInstance *instance =
     nuvashalauncher_instance_manager_create (manager, "Original", NULL, "1.21.1",
-                                 nuvashalauncher_LOADER_FABRIC, "0.16.9", &error);
+                                 NUVASHALAUNCHER_LOADER_FABRIC, "0.16.9", &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
@@ -289,7 +289,7 @@ test_duplicate_without_directory (void)
 
   NuvashaLauncherInstance *instance =
     nuvashalauncher_instance_manager_create (manager, "Vanishing", NULL, "1.21.1",
-                                 nuvashalauncher_LOADER_VANILLA, NULL, &error);
+                                 NUVASHALAUNCHER_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
@@ -338,7 +338,7 @@ test_delete_metadata_only (void)
 
   NuvashaLauncherInstance *instance =
     nuvashalauncher_instance_manager_create (manager, "Kept", NULL, "1.21.1",
-                                 nuvashalauncher_LOADER_VANILLA, NULL, &error);
+                                 NUVASHALAUNCHER_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
@@ -380,7 +380,7 @@ test_delete_with_directory (void)
 
   NuvashaLauncherInstance *instance =
     nuvashalauncher_instance_manager_create (manager, "Gone", NULL, "1.21.1",
-                                 nuvashalauncher_LOADER_VANILLA, NULL, &error);
+                                 NUVASHALAUNCHER_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
@@ -426,7 +426,7 @@ test_delete_unregistered (void)
 
   g_autoptr (NuvashaLauncherInstance) stranger =
     nuvashalauncher_instance_new (NULL, "Stranger", "/tmp/nuvashalauncher-test-stranger", "1.21.1",
-                      nuvashalauncher_LOADER_VANILLA, &error);
+                      NUVASHALAUNCHER_LOADER_VANILLA, &error);
   g_assert_no_error (error);
   g_assert_nonnull (stranger);
 
@@ -436,8 +436,8 @@ test_delete_unregistered (void)
    call.operation = nuvashalauncher_instance_manager_delete_async (
      manager, stranger, FALSE, delete_finished, &call);
   async_call_run (&call);
-  g_assert_error (call.error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                  nuvashalauncher_INSTANCE_MANAGER_ERROR_NOT_FOUND);
+  g_assert_error (call.error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                  NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND);
   g_assert_false (call.success);
 
   async_call_clear (&call);
@@ -458,7 +458,7 @@ test_open_folder_without_directory (void)
 
   NuvashaLauncherInstance *instance =
     nuvashalauncher_instance_manager_create (manager, "Folderless", NULL, "1.21.1",
-                                 nuvashalauncher_LOADER_VANILLA, NULL, &error);
+                                 NUVASHALAUNCHER_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
@@ -477,8 +477,8 @@ test_open_folder_without_directory (void)
     nuvashalauncher_instance_manager_open_folder_async (manager, instance,
                                             open_folder_finished, &call);
   async_call_run (&call);
-  g_assert_error (call.error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                  nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_error (call.error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                  NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_assert_false (call.success);
 
   async_call_clear (&call);
@@ -500,13 +500,13 @@ test_change_directory_validation (void)
 
   NuvashaLauncherInstance *first =
     nuvashalauncher_instance_manager_create (manager, "One", NULL, "1.21.1",
-                                 nuvashalauncher_LOADER_VANILLA, NULL, &error);
+                                 NUVASHALAUNCHER_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (first);
 
   NuvashaLauncherInstance *second =
     nuvashalauncher_instance_manager_create (manager, "Two", NULL, "1.21.1",
-                                 nuvashalauncher_LOADER_VANILLA, NULL, &error);
+                                 NUVASHALAUNCHER_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (second);
 
@@ -529,8 +529,8 @@ test_change_directory_validation (void)
   /* A relative path is not. */
   g_assert_false (nuvashalauncher_instance_manager_check_new_directory (
     manager, first, "relative/path", NULL, &error));
-  g_assert_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                  nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                  NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_clear_error (&error);
 
   {
@@ -539,31 +539,31 @@ test_change_directory_validation (void)
 
     g_assert_false (nuvashalauncher_instance_manager_check_new_directory (
       manager, first, escape, NULL, &error));
-    g_assert_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                    nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+    g_assert_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                    NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH);
     g_clear_error (&error);
   }
 
   /* The filesystem root is not. */
   g_assert_false (nuvashalauncher_instance_manager_check_new_directory (
     manager, first, G_DIR_SEPARATOR_S, NULL, &error));
-  g_assert_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                  nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                  NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_clear_error (&error);
 
   /* The directory the instance already has is not a change. */
   g_assert_false (nuvashalauncher_instance_manager_check_new_directory (
     manager, first, first_directory, NULL, &error));
-  g_assert_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                  nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                  NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_clear_error (&error);
 
   /* The directory of another instance is not, neither is one inside it
      or one that would contain it. */
   g_assert_false (nuvashalauncher_instance_manager_check_new_directory (
     manager, first, second_directory, NULL, &error));
-  g_assert_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                  nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+  g_assert_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                  NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_clear_error (&error);
 
   {
@@ -572,8 +572,8 @@ test_change_directory_validation (void)
 
     g_assert_false (nuvashalauncher_instance_manager_check_new_directory (
       manager, first, inside, NULL, &error));
-    g_assert_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                    nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+    g_assert_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                    NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH);
     g_clear_error (&error);
   }
 
@@ -582,8 +582,8 @@ test_change_directory_validation (void)
 
     g_assert_false (nuvashalauncher_instance_manager_check_new_directory (
       manager, first, parent, NULL, &error));
-    g_assert_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                    nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+    g_assert_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                    NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH);
     g_clear_error (&error);
   }
 
@@ -596,8 +596,8 @@ test_change_directory_validation (void)
 
     g_assert_false (nuvashalauncher_instance_manager_check_new_directory (
       manager, first, taken, NULL, &error));
-    g_assert_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                    nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+    g_assert_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                    NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH);
     g_clear_error (&error);
 
     {
@@ -615,8 +615,8 @@ test_change_directory_validation (void)
 
     g_assert_false (nuvashalauncher_instance_manager_check_new_directory (
       manager, first, orphan, NULL, &error));
-    g_assert_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                    nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH);
+    g_assert_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                    NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH);
     g_clear_error (&error);
     g_assert_false (g_file_test (orphan, G_FILE_TEST_EXISTS));
   }
@@ -649,7 +649,7 @@ test_change_directory_moves_files (void)
 
   NuvashaLauncherInstance *instance =
     nuvashalauncher_instance_manager_create (manager, "Mover", NULL, "1.21.1",
-                                 nuvashalauncher_LOADER_VANILLA, NULL, &error);
+                                 NUVASHALAUNCHER_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
@@ -744,7 +744,7 @@ test_change_directory_failure_keeps_everything (void)
 
   NuvashaLauncherInstance *instance =
     nuvashalauncher_instance_manager_create (manager, "Keeper", NULL, "1.21.1",
-                                 nuvashalauncher_LOADER_VANILLA, NULL, &error);
+                                 NUVASHALAUNCHER_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 

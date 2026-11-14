@@ -35,7 +35,7 @@ nuvashalauncher_content_page_size_allocate (GtkWidget *widget, int width, int he
 {
   GTK_WIDGET_CLASS (nuvashalauncher_content_page_parent_class)->size_allocate (widget, width, height, baseline);
 
-  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (widget);
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (widget);
   gboolean narrow = width > 0 && width < 720;
 
   if (self->bar == NULL)
@@ -80,7 +80,7 @@ open_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 void
 nuvashalauncher_content_page_on_open_folder_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
   g_autofree char *uri = NULL;
 
   /* The folder may not exist yet on a fresh instance: asking the desktop
@@ -116,11 +116,11 @@ nuvashalauncher_content_page_new (NuvashaLauncherInstance *instance, NuvashaLaun
   NuvashaLauncherContentPage *self = NULL;
   g_autofree char *directory = NULL;
   const char *loader = NULL;
-  NuvashaLauncherLoader value = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader value = NUVASHALAUNCHER_LOADER_VANILLA;
 
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (instance), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (instance), NULL);
 
-  self = g_object_new (nuvashalauncher_TYPE_CONTENT_PAGE, NULL);
+  self = g_object_new (NUVASHALAUNCHER_TYPE_CONTENT_PAGE, NULL);
   self->instance = g_object_ref (instance);
   self->type = type;
   self->minecraft_version = instance_string (instance, "minecraft-version");
@@ -141,7 +141,7 @@ nuvashalauncher_content_page_new (NuvashaLauncherInstance *instance, NuvashaLaun
 
   if (nuvashalauncher_content_type_needs_loader (type))
     {
-      if (value == nuvashalauncher_LOADER_VANILLA)
+      if (value == NUVASHALAUNCHER_LOADER_VANILLA)
         {
           AdwStatusPage *status = ADW_STATUS_PAGE (adw_status_page_new ());
 
@@ -206,7 +206,7 @@ nuvashalauncher_content_page_new (NuvashaLauncherInstance *instance, NuvashaLaun
 static void
 nuvashalauncher_content_page_dispose (GObject *object)
 {
-  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (object);
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (object);
 
   /* The widget tree may be freed while the page is still answering a
    * request of its own: nothing of it is touched afterwards. */
@@ -306,7 +306,7 @@ nuvashalauncher_content_page_dispose (GObject *object)
 static void
 nuvashalauncher_content_page_finalize (GObject *object)
 {
-  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (object);
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (object);
 
   g_clear_pointer (&self->installed.files, g_ptr_array_unref);
   g_clear_pointer (&self->installed.rows, g_hash_table_unref);
@@ -417,7 +417,7 @@ plain_label (const char *text)
 void
 on_banner_dismiss (AdwBanner *banner G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
 
   if (self->banner != NULL)
     adw_banner_set_revealed (ADW_BANNER (self->banner), FALSE);

@@ -258,7 +258,7 @@ main (void)
     g_new0 (NuvashaLauncherContentFile, 1);
 
   file->path = g_strdup (valid);
-  nuvashalauncher_content_apply_local_metadata (file, nuvashalauncher_CONTENT_MOD);
+  nuvashalauncher_content_apply_local_metadata (file, NUVASHALAUNCHER_CONTENT_MOD);
   g_assert_true (file->local_metadata);
   g_assert_cmpstr (file->project_name, ==, "Example");
   g_assert_cmpstr (file->local_id, ==, "example");
@@ -268,17 +268,17 @@ main (void)
                    "other");
 
   broken->path = g_strdup (truncated);
-  nuvashalauncher_content_apply_local_metadata (broken, nuvashalauncher_CONTENT_MOD);
+  nuvashalauncher_content_apply_local_metadata (broken, NUVASHALAUNCHER_CONTENT_MOD);
   g_assert_false (broken->local_metadata);
   oversized->path = g_strdup (large);
   nuvashalauncher_content_apply_local_metadata (oversized,
-                                                nuvashalauncher_CONTENT_MOD);
+                                                NUVASHALAUNCHER_CONTENT_MOD);
   g_assert_false (oversized->local_metadata);
   g_assert_cmpint (g_unlink (valid), ==, 0);
   g_assert_cmpint (g_unlink (truncated), ==, 0);
   g_assert_cmpint (g_unlink (large), ==, 0);
   quilt_file->path = g_strdup (quilt);
-  nuvashalauncher_content_apply_local_metadata (quilt_file, nuvashalauncher_CONTENT_MOD);
+  nuvashalauncher_content_apply_local_metadata (quilt_file, NUVASHALAUNCHER_CONTENT_MOD);
   g_assert_true (quilt_file->local_metadata);
   g_assert_cmpstr (quilt_file->project_name, ==, "Quilt Example");
   g_assert_cmpstr (quilt_file->local_id, ==, "quilt-example");
@@ -287,7 +287,7 @@ main (void)
   g_assert_cmpstr (quilt_file->local_icon_member, ==, "large.png");
 
   forge_file->path = g_strdup (forge);
-  nuvashalauncher_content_apply_local_metadata (forge_file, nuvashalauncher_CONTENT_MOD);
+  nuvashalauncher_content_apply_local_metadata (forge_file, NUVASHALAUNCHER_CONTENT_MOD);
   g_assert_true (forge_file->local_metadata);
   g_assert_cmpstr (forge_file->project_name, ==, "Forge Example");
   g_assert_cmpstr (forge_file->local_id, ==, "forge_example");
@@ -295,7 +295,7 @@ main (void)
   g_assert_cmpstr (forge_file->local_icon_member, ==, "logo.png");
 
   mcmod_file->path = g_strdup (mcmod);
-  nuvashalauncher_content_apply_local_metadata (mcmod_file, nuvashalauncher_CONTENT_MOD);
+  nuvashalauncher_content_apply_local_metadata (mcmod_file, NUVASHALAUNCHER_CONTENT_MOD);
   g_assert_true (mcmod_file->local_metadata);
   g_assert_cmpstr (mcmod_file->project_name, ==, "Legacy Example");
   g_assert_cmpstr (mcmod_file->local_id, ==, "legacy");
@@ -303,7 +303,7 @@ main (void)
 
   pack_file->path = g_strdup (pack);
   nuvashalauncher_content_apply_local_metadata (
-    pack_file, nuvashalauncher_CONTENT_RESOURCE_PACK);
+    pack_file, NUVASHALAUNCHER_CONTENT_RESOURCE_PACK);
   g_assert_true (pack_file->local_metadata);
   g_assert_cmpstr (pack_file->description, ==, "Resource description");
 

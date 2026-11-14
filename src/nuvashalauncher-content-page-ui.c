@@ -221,7 +221,7 @@ void
 nuvashalauncher_content_page_on_stack_switched (GObject *stack, GParamSpec *pspec G_GNUC_UNUSED,
                    gpointer user_data)
 {
-  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
   const char *visible = adw_view_stack_get_visible_child_name (
       ADW_VIEW_STACK (stack));
   gboolean browsing = g_strcmp0 (visible, "browse") == 0;
@@ -254,7 +254,7 @@ nuvashalauncher_content_page_on_stack_switched (GObject *stack, GParamSpec *pspe
 void
 nuvashalauncher_content_page_reset_for_tab_switch (NuvashaLauncherContentPage *self)
 {
-  g_return_if_fail (nuvashalauncher_IS_CONTENT_PAGE (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_CONTENT_PAGE (self));
 
    if (self->browse.filter_popover != NULL)
      {
@@ -274,7 +274,7 @@ nuvashalauncher_content_page_build_browse (NuvashaLauncherContentPage *self)
 {
   GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   GtkBox *top = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
-  GtkEntry *search_bar = GTK_ENTRY (g_object_new (nuvashalauncher_TYPE_FILTER_ENTRY, NULL));
+  GtkEntry *search_bar = GTK_ENTRY (g_object_new (NUVASHALAUNCHER_TYPE_FILTER_ENTRY, NULL));
   GtkPopover *popover = GTK_POPOVER (gtk_popover_new ());
   GtkBox *filter_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   GtkScrolledWindow *filter_scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
@@ -317,7 +317,7 @@ nuvashalauncher_content_page_build_browse (NuvashaLauncherContentPage *self)
   }
 
    nuvashalauncher_filter_entry_set_popover (
-     nuvashalauncher_FILTER_ENTRY (search_bar), popover, _("Filter by category"));
+     NUVASHALAUNCHER_FILTER_ENTRY (search_bar), popover, _("Filter by category"));
    gtk_box_append (GTK_BOX (top), GTK_WIDGET (search_bar));
   /* Load categories when the leading filter icon opens the popover. */
    g_signal_connect_object (popover, "show",
@@ -486,7 +486,7 @@ nuvashalauncher_content_page_build_browse (NuvashaLauncherContentPage *self)
 static void
 on_switcher_toggled (GtkToggleButton *button, gpointer user_data)
 {
-  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
 
   if (!gtk_toggle_button_get_active (button) || self->stack == NULL)
     return;

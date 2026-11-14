@@ -120,7 +120,7 @@ fill (NuvashaLauncherVersionRow *self, NuvashaLauncherVersionManifest *manifest)
            * even when the filter would hide its type. */
           position = ids->len;
         }
-      else if (!unstable && entry->type != nuvashalauncher_MC_TYPE_RELEASE)
+      else if (!unstable && entry->type != NUVASHALAUNCHER_MC_TYPE_RELEASE)
         continue;
 
       g_ptr_array_add (ids, g_strdup (entry->id));
@@ -220,7 +220,7 @@ manifest_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 on_retry_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherVersionRow *self = nuvashalauncher_VERSION_ROW (user_data);
+  NuvashaLauncherVersionRow *self = NUVASHALAUNCHER_VERSION_ROW (user_data);
   g_autofree char *wanted = NULL;
 
   if (self->settings == NULL)
@@ -237,7 +237,7 @@ on_retry_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 NuvashaLauncherVersionRow *
 nuvashalauncher_version_row_new (void)
 {
-  return g_object_new (nuvashalauncher_TYPE_VERSION_ROW, NULL);
+  return g_object_new (NUVASHALAUNCHER_TYPE_VERSION_ROW, NULL);
 }
 
 void
@@ -245,8 +245,8 @@ nuvashalauncher_version_row_load (NuvashaLauncherVersionRow *self,
                       NuvashaLauncherSettings   *settings,
                       const char    *selected)
 {
-  g_return_if_fail (nuvashalauncher_IS_VERSION_ROW (self));
-  g_return_if_fail (nuvashalauncher_IS_SETTINGS (settings));
+  g_return_if_fail (NUVASHALAUNCHER_IS_VERSION_ROW (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_SETTINGS (settings));
 
   if (self->cancellable != NULL)
     g_cancellable_cancel (self->cancellable);
@@ -264,7 +264,7 @@ nuvashalauncher_version_row_load (NuvashaLauncherVersionRow *self,
     ManifestAsk *ask = g_new0 (ManifestAsk, 1);
 
     ask->row = g_object_ref (self);
-    ask->operation = nuvashalauncher_version_manifest_fetch_async (nuvashalauncher_VERSION_MANIFEST_URL,
+    ask->operation = nuvashalauncher_version_manifest_fetch_async (NUVASHALAUNCHER_VERSION_MANIFEST_URL,
                                                        manifest_loaded, ask);
     nuvashalauncher_task_scope_follow_cancellable (ask->operation, self->cancellable);
     self->operation = ask->operation;
@@ -276,7 +276,7 @@ nuvashalauncher_version_row_get_selected (NuvashaLauncherVersionRow *self)
 {
   guint position;
 
-  g_return_val_if_fail (nuvashalauncher_IS_VERSION_ROW (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_VERSION_ROW (self), NULL);
 
   /* The model is replaced while the row loads, so a position in it
    * means nothing until the versions are there. */
@@ -294,7 +294,7 @@ nuvashalauncher_version_row_get_selected (NuvashaLauncherVersionRow *self)
 void
 nuvashalauncher_version_row_select (NuvashaLauncherVersionRow *self, const char *version)
 {
-  g_return_if_fail (nuvashalauncher_IS_VERSION_ROW (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_VERSION_ROW (self));
 
   if (version == NULL || !self->ready)
     return;
@@ -316,7 +316,7 @@ nuvashalauncher_version_row_select (NuvashaLauncherVersionRow *self, const char 
 static void
 nuvashalauncher_version_row_dispose (GObject *object)
 {
-  NuvashaLauncherVersionRow *self = nuvashalauncher_VERSION_ROW (object);
+  NuvashaLauncherVersionRow *self = NUVASHALAUNCHER_VERSION_ROW (object);
 
   /* A load still in flight only holds a reference on this row;
    * cancelling it and dropping the settings stops it from writing
@@ -332,7 +332,7 @@ nuvashalauncher_version_row_dispose (GObject *object)
 static void
 nuvashalauncher_version_row_finalize (GObject *object)
 {
-  NuvashaLauncherVersionRow *self = nuvashalauncher_VERSION_ROW (object);
+  NuvashaLauncherVersionRow *self = NUVASHALAUNCHER_VERSION_ROW (object);
 
   g_clear_pointer (&self->ids, g_ptr_array_unref);
   g_free (self->wanted);

@@ -28,15 +28,15 @@
  * nobody else: they are never logged, never put in an error and never
  * written outside the accounts file, which is 0600.
  *
- * A build must define nuvashalauncher_MICROSOFT_CLIENT_ID as the application (client)
+ * A build must define NUVASHALAUNCHER_MICROSOFT_CLIENT_ID as the application (client)
  * ID of an Azure application
  * registered for the device code flow of a public client. When it is
- * empty, signing in fails here with nuvashalauncher_AUTH_ERROR_NO_CLIENT_ID and says
+ * empty, signing in fails here with NUVASHALAUNCHER_AUTH_ERROR_NO_CLIENT_ID and says
  * which constant to fill in, rather than asking a user for a sign-in
  * this build cannot finish. */
 
-#ifndef nuvashalauncher_AUTH_MICROSOFT_H
-#define nuvashalauncher_AUTH_MICROSOFT_H
+#ifndef NUVASHALAUNCHER_AUTH_MICROSOFT_H
+#define NUVASHALAUNCHER_AUTH_MICROSOFT_H
 
 #include <gio/gio.h>
 #include <json-glib/json-glib.h>
@@ -50,54 +50,54 @@ G_BEGIN_DECLS
  * with. It has to be registered for the device code flow of a public
  * client, and it is the only place a sign-in is configured: an empty
  * constant is what a build without one says out loud. */
-#define nuvashalauncher_MICROSOFT_CLIENT_ID "fe820571-8833-4058-b29a-e4d2c28f6beb"
+#define NUVASHALAUNCHER_MICROSOFT_CLIENT_ID "fe820571-8833-4058-b29a-e4d2c28f6beb"
 
 /* Tenant used for personal Microsoft accounts. */
-#define nuvashalauncher_MICROSOFT_TENANT "consumers"
+#define NUVASHALAUNCHER_MICROSOFT_TENANT "consumers"
 
 /* Permissions for Xbox Live sign-in and refresh tokens. */
-#define nuvashalauncher_MICROSOFT_SCOPE "XboxLive.signin offline_access"
+#define NUVASHALAUNCHER_MICROSOFT_SCOPE "XboxLive.signin offline_access"
 
-#define nuvashalauncher_MICROSOFT_DEVICE_CODE_URL \
-  "https://login.microsoftonline.com/" nuvashalauncher_MICROSOFT_TENANT "/oauth2/v2.0/devicecode"
-#define nuvashalauncher_MICROSOFT_TOKEN_URL \
-  "https://login.microsoftonline.com/" nuvashalauncher_MICROSOFT_TENANT "/oauth2/v2.0/token"
-#define nuvashalauncher_XBOX_USER_URL "https://user.auth.xboxlive.com/user/authenticate"
-#define nuvashalauncher_XBOX_XSTS_URL "https://xsts.auth.xboxlive.com/xsts/authorize"
-#define nuvashalauncher_MINECRAFT_SERVICES_URL "https://api.minecraftservices.com"
+#define NUVASHALAUNCHER_MICROSOFT_DEVICE_CODE_URL \
+  "https://login.microsoftonline.com/" NUVASHALAUNCHER_MICROSOFT_TENANT "/oauth2/v2.0/devicecode"
+#define NUVASHALAUNCHER_MICROSOFT_TOKEN_URL \
+  "https://login.microsoftonline.com/" NUVASHALAUNCHER_MICROSOFT_TENANT "/oauth2/v2.0/token"
+#define NUVASHALAUNCHER_XBOX_USER_URL "https://user.auth.xboxlive.com/user/authenticate"
+#define NUVASHALAUNCHER_XBOX_XSTS_URL "https://xsts.auth.xboxlive.com/xsts/authorize"
+#define NUVASHALAUNCHER_MINECRAFT_SERVICES_URL "https://api.minecraftservices.com"
 
-#define nuvashalauncher_AUTH_USER_AGENT "nuvashalauncher"
+#define NUVASHALAUNCHER_AUTH_USER_AGENT "nuvashalauncher"
 
 /* The contract version the Xbox services answer the version they are
  * asked for with. */
-#define nuvashalauncher_XBOX_CONTRACT_VERSION "1"
+#define NUVASHALAUNCHER_XBOX_CONTRACT_VERSION "1"
 
 /* The relying party of the X token the Minecraft services accept. */
-#define nuvashalauncher_MINECRAFT_RELYING_PARTY "rp://api.minecraftservices.com/"
+#define NUVASHALAUNCHER_MINECRAFT_RELYING_PARTY "rp://api.minecraftservices.com/"
 
 /* How long a service is given to answer before the chain gives up on it,
  * so that a request that never comes back cannot hang a sign-in. */
-#define nuvashalauncher_AUTH_TIMEOUT_SECONDS 30
+#define NUVASHALAUNCHER_AUTH_TIMEOUT_SECONDS 30
 
-#define nuvashalauncher_AUTH_ERROR (nuvashalauncher_auth_error_quark ())
+#define NUVASHALAUNCHER_AUTH_ERROR (nuvashalauncher_auth_error_quark ())
 
 typedef enum {
-  nuvashalauncher_AUTH_ERROR_NO_CLIENT_ID,  /* the constant is empty */
-  nuvashalauncher_AUTH_ERROR_DEVICE_CODE,   /* Microsoft would not give a code */
-  nuvashalauncher_AUTH_ERROR_DECLINED,      /* the user declined sign-in */
-  nuvashalauncher_AUTH_ERROR_PENDING,       /* the user has not signed in yet */
-  nuvashalauncher_AUTH_ERROR_XBOX,          /* Xbox Live or XSTS refused */
-  nuvashalauncher_AUTH_ERROR_NO_GAME,       /* the account does not own Minecraft: Java */
-  nuvashalauncher_AUTH_ERROR_NO_PROFILE,    /* it owns Minecraft but has no profile */
-  nuvashalauncher_AUTH_ERROR_NETWORK,       /* the request never arrived */
-  nuvashalauncher_AUTH_ERROR_PARSE,         /* an answer nuvashalauncher cannot read */
-  nuvashalauncher_AUTH_ERROR_EXPIRED,
-  nuvashalauncher_AUTH_ERROR_REAUTH,
-  nuvashalauncher_AUTH_ERROR_XBOX_PROFILE,
-  nuvashalauncher_AUTH_ERROR_XBOX_FAMILY,
-  nuvashalauncher_AUTH_ERROR_XBOX_COUNTRY,
-  nuvashalauncher_AUTH_ERROR_XBOX_AGE,
-  nuvashalauncher_AUTH_ERROR_SERVICE       /* other service refusals; keep saved credentials */
+  NUVASHALAUNCHER_AUTH_ERROR_NO_CLIENT_ID,  /* the constant is empty */
+  NUVASHALAUNCHER_AUTH_ERROR_DEVICE_CODE,   /* Microsoft would not give a code */
+  NUVASHALAUNCHER_AUTH_ERROR_DECLINED,      /* the user declined sign-in */
+  NUVASHALAUNCHER_AUTH_ERROR_PENDING,       /* the user has not signed in yet */
+  NUVASHALAUNCHER_AUTH_ERROR_XBOX,          /* Xbox Live or XSTS refused */
+  NUVASHALAUNCHER_AUTH_ERROR_NO_GAME,       /* the account does not own Minecraft: Java */
+  NUVASHALAUNCHER_AUTH_ERROR_NO_PROFILE,    /* it owns Minecraft but has no profile */
+  NUVASHALAUNCHER_AUTH_ERROR_NETWORK,       /* the request never arrived */
+  NUVASHALAUNCHER_AUTH_ERROR_PARSE,         /* an answer nuvashalauncher cannot read */
+  NUVASHALAUNCHER_AUTH_ERROR_EXPIRED,
+  NUVASHALAUNCHER_AUTH_ERROR_REAUTH,
+  NUVASHALAUNCHER_AUTH_ERROR_XBOX_PROFILE,
+  NUVASHALAUNCHER_AUTH_ERROR_XBOX_FAMILY,
+  NUVASHALAUNCHER_AUTH_ERROR_XBOX_COUNTRY,
+  NUVASHALAUNCHER_AUTH_ERROR_XBOX_AGE,
+  NUVASHALAUNCHER_AUTH_ERROR_SERVICE       /* other service refusals; keep saved credentials */
 } NuvashaLauncherAuthError;
 
 GQuark nuvashalauncher_auth_error_quark (void);
@@ -123,7 +123,7 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherDeviceCode, nuvashalauncher_device
 
 /* Asks Microsoft for a code to sign in with.
  *
- * nuvashalauncher_AUTH_ERROR_NO_CLIENT_ID when nuvashalauncher_MICROSOFT_CLIENT_ID is empty. */
+ * NUVASHALAUNCHER_AUTH_ERROR_NO_CLIENT_ID when NUVASHALAUNCHER_MICROSOFT_CLIENT_ID is empty. */
 NuvashaLauncherTaskScope *nuvashalauncher_auth_device_code_async (GAsyncReadyCallback callback,
                                           gpointer user_data);
 
@@ -136,11 +136,11 @@ NuvashaLauncherDeviceCode *nuvashalauncher_auth_device_code_finish (GAsyncResult
  *
  * Cancellable: cancelling stops the polling and nothing is stored.
  *
- * nuvashalauncher_AUTH_ERROR_DECLINED when the user said no,
- * nuvashalauncher_AUTH_ERROR_EXPIRED when the device code ran out,
- * nuvashalauncher_AUTH_ERROR_XBOX when the Microsoft account has no Xbox profile or
- * is a child account, nuvashalauncher_AUTH_ERROR_NO_GAME when it does not own
- * Minecraft: Java, and nuvashalauncher_AUTH_ERROR_NO_PROFILE when it owns it but
+ * NUVASHALAUNCHER_AUTH_ERROR_DECLINED when the user said no,
+ * NUVASHALAUNCHER_AUTH_ERROR_EXPIRED when the device code ran out,
+ * NUVASHALAUNCHER_AUTH_ERROR_XBOX when the Microsoft account has no Xbox profile or
+ * is a child account, NUVASHALAUNCHER_AUTH_ERROR_NO_GAME when it does not own
+ * Minecraft: Java, and NUVASHALAUNCHER_AUTH_ERROR_NO_PROFILE when it owns it but
  * has never played. */
 NuvashaLauncherTaskScope *nuvashalauncher_auth_sign_in_async (const NuvashaLauncherDeviceCode *code,
                                       GAsyncReadyCallback callback,
@@ -151,7 +151,7 @@ NuvashaLauncherAccount *nuvashalauncher_auth_sign_in_finish (GAsyncResult *resul
 
 /* Refresh an account's access token and retrieve its current profile.
  *
- * nuvashalauncher_AUTH_ERROR_REAUTH when Microsoft requires sign-in again. */
+ * NUVASHALAUNCHER_AUTH_ERROR_REAUTH when Microsoft requires sign-in again. */
 NuvashaLauncherTaskScope *nuvashalauncher_auth_refresh_async (const NuvashaLauncherAccount *account,
                                       GAsyncReadyCallback callback,
                                       gpointer user_data);
@@ -230,7 +230,7 @@ NuvashaLauncherOAuthToken *nuvashalauncher_auth_minecraft_token_from_json (const
  * everything the account owns, and an account that owns nothing gets an
  * empty list rather than an error, so that nuvashalauncher can say what is missing
  * instead of repeating that something failed.
- * nuvashalauncher_AUTH_ERROR_NO_GAME when it does not own it. */
+ * NUVASHALAUNCHER_AUTH_ERROR_NO_GAME when it does not own it. */
 gboolean nuvashalauncher_auth_owns_minecraft_from_json (const char *json, gssize length,
                                             GError    **error);
 
@@ -247,7 +247,7 @@ void nuvashalauncher_minecraft_profile_free (NuvashaLauncherMinecraftProfile *pr
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherMinecraftProfile, nuvashalauncher_minecraft_profile_free)
 
-/* (transfer full). nuvashalauncher_AUTH_ERROR_NO_PROFILE when the services answer
+/* (transfer full). NUVASHALAUNCHER_AUTH_ERROR_NO_PROFILE when the services answer
  * 404, which is what an account that owns the game and has never played
  * it says. */
 NuvashaLauncherMinecraftProfile *nuvashalauncher_auth_profile_from_json (const char *json,
@@ -280,4 +280,4 @@ void nuvashalauncher_auth_set_client_id_for_tests (const char *client_id);
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_AUTH_MICROSOFT_H */
+#endif /* NUVASHALAUNCHER_AUTH_MICROSOFT_H */
