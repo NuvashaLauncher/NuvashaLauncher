@@ -248,11 +248,11 @@ types:
   operation and advances the sequence from its completion callback.
 
 The scope is reference counted because the operation state and its caller may
-outlive one another. A caller can cancel an operation without freeing the
-state that a late callback still needs, and `nuvashalauncher_task_cancel`
-verifies `G_IS_TASK` before cancelling. Dialogs and views that hold a borrowed
-`GTask *` pointer for cancellation must clear that pointer as soon as the step
-completes so teardown never cancels a finalized task. Source IDs are tracked
+outlive one another. A caller holds a `NuvashaLauncherTaskScope *` (or ties
+it to a `GCancellable` via `nuvashalauncher_task_scope_follow_cancellable()`)
+and can cancel an operation via `nuvashalauncher_task_scope_cancel()` without
+freeing the state that a late callback still needs; callers clear their scope
+reference when the step completes. Source IDs are tracked
 and removed before task data is destroyed. Immediate results are deferred to an
 idle callback where necessary, so an `_async()` function never calls its
 completion callback before it returns its handle.

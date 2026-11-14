@@ -42,3 +42,6 @@ jobs:
 
       - name: Run static analysis
         run: make static-analysis
+
+      - name: Check POTFILES.in
+        run: make check-potfiles

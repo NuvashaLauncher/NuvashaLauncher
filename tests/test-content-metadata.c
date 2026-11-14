@@ -12,15 +12,22 @@
 #include <unistd.h>
 
 static char *
-make_jar (const char *member, const char *contents)
+create_temp_jar_path (const char *name_template)
 {
-  char *path = g_strdup ("/tmp/nuvashalauncher-metadata-XXXXXX.jar");
+  char *path = g_build_filename (g_get_tmp_dir (), name_template, NULL);
   int fd = g_mkstemp (path);
-  struct archive *archive = archive_write_new ();
-  struct archive_entry *entry = archive_entry_new ();
 
   g_assert_cmpint (fd, >=, 0);
   close (fd);
+  return path;
+}
+
+static char *
+make_jar (const char *member, const char *contents)
+{
+  char *path = create_temp_jar_path ("nuvashalauncher-metadata-XXXXXX.jar");
+  struct archive *archive = archive_write_new ();
+  struct archive_entry *entry = archive_entry_new ();
   g_assert_cmpint (archive_write_set_format_zip (archive), ==, ARCHIVE_OK);
   g_assert_cmpint (archive_write_open_filename (archive, path), ==, ARCHIVE_OK);
   archive_entry_set_pathname (entry, member);
@@ -40,14 +47,11 @@ static char *
 make_jar_with_two_members (const char *member_one, const char *contents_one,
                            const char *member_two, const char *contents_two)
 {
-  char *path = g_strdup ("/tmp/nuvashalauncher-metadata-two-XXXXXX.jar");
-  int fd = g_mkstemp (path);
+  char *path = create_temp_jar_path ("nuvashalauncher-metadata-two-XXXXXX.jar");
   struct archive *archive = archive_write_new ();
   const char *members[] = { member_one, member_two };
   const char *contents[] = { contents_one, contents_two };
 
-  g_assert_cmpint (fd, >=, 0);
-  close (fd);
   g_assert_cmpint (archive_write_set_format_zip (archive), ==, ARCHIVE_OK);
   g_assert_cmpint (archive_write_open_filename (archive, path), ==, ARCHIVE_OK);
   for (guint i = 0; i < G_N_ELEMENTS (members); i++)
@@ -71,13 +75,10 @@ static char *
 make_large_jar (void)
 {
   g_autofree char *contents = g_malloc0 (1024 * 1024 + 1);
-  char *path = g_strdup ("/tmp/nuvashalauncher-metadata-large-XXXXXX.jar");
-  int fd = g_mkstemp (path);
+  char *path = create_temp_jar_path ("nuvashalauncher-metadata-large-XXXXXX.jar");
   struct archive *archive = archive_write_new ();
   struct archive_entry *entry = archive_entry_new ();
 
-  g_assert_cmpint (fd, >=, 0);
-  close (fd);
   g_assert_cmpint (archive_write_set_format_zip (archive), ==, ARCHIVE_OK);
   g_assert_cmpint (archive_write_open_filename (archive, path), ==, ARCHIVE_OK);
   archive_entry_set_pathname (entry, "fabric.mod.json");
@@ -97,12 +98,9 @@ static char *
 make_jar_with_binary_member (const char *member_one, const char *contents_one,
                              const char *member_two, const guint8 *data_two, gsize len_two)
 {
-  char *path = g_strdup ("/tmp/nuvashalauncher-metadata-bin-XXXXXX.jar");
-  int fd = g_mkstemp (path);
+  char *path = create_temp_jar_path ("nuvashalauncher-metadata-bin-XXXXXX.jar");
   struct archive *archive = archive_write_new ();
 
-  g_assert_cmpint (fd, >=, 0);
-  close (fd);
   g_assert_cmpint (archive_write_set_format_zip (archive), ==, ARCHIVE_OK);
   g_assert_cmpint (archive_write_open_filename (archive, path), ==, ARCHIVE_OK);
 

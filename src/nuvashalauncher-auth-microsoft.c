@@ -42,11 +42,11 @@ typedef struct _AuthRequest {
   char *xsts_token;
   char *mc_access_token;
   gint64 mc_expires_at;
+  NuvashaLauncherAuthTransportFunc transport;
+  gpointer transport_data;
+  char *client_id;
+  SoupSession *session;
 } AuthRequest;
-
-static NuvashaLauncherAuthTransportFunc test_transport = NULL;
-static gpointer test_transport_data = NULL;
-static const char *test_client_id = NULL;
 
 static void auth_send (AuthRequest *self, const char *url, const char *method,
                        const char *body, const char *content_type,
@@ -68,20 +68,6 @@ static void entitlements_answered (AuthRequest *self);
 static void ask_profile (AuthRequest *self);
 static void profile_answered (AuthRequest *self);
 
-void
-nuvashalauncher_auth_set_transport_for_tests (NuvashaLauncherAuthTransportFunc transport,
-                                              gpointer                         user_data)
-{
-  test_transport = transport;
-  test_transport_data = user_data;
-}
-
-void
-nuvashalauncher_auth_set_client_id_for_tests (const char *client_id)
-{
-  test_client_id = client_id;
-}
-
 GQuark
 nuvashalauncher_auth_error_quark (void)
 {
@@ -89,16 +75,19 @@ nuvashalauncher_auth_error_quark (void)
 }
 
 static const char *
-active_client_id (void)
+active_client_id (const AuthRequest *self)
 {
-  return test_client_id != NULL ? test_client_id : NUVASHALAUNCHER_MICROSOFT_CLIENT_ID;
+  if (self != NULL && self->client_id != NULL)
+    return self->client_id;
+
+  return NUVASHALAUNCHER_MICROSOFT_CLIENT_ID;
 }
 
 /* Whether an Azure application is configured for sign-in. */
 static gboolean
-client_id_is_set (void)
+client_id_is_set (const AuthRequest *self)
 {
-  return active_client_id ()[0] != '\0';
+  return active_client_id (self)[0] != '\0';
 }
 
 /* Error returned when sign-in is unavailable in this build. */
@@ -141,6 +130,7 @@ auth_request_free (gpointer data)
      was waiting on. */
 
   g_clear_object (&self->task);
+  g_clear_object (&self->session);
   g_clear_object (&self->message);
   g_clear_object (&self->response_stream);
   g_clear_pointer (&self->response_bytes, g_byte_array_unref);
@@ -152,13 +142,15 @@ auth_request_free (gpointer data)
   g_free (self->xbl_user_hash);
   g_free (self->xsts_token);
   g_free (self->mc_access_token);
+  g_free (self->client_id);
   g_free (self);
 }
 
 /* A sign-in is the task: the request lives as long as the task does, and
    the task is what is answered when it is over. */
 static AuthRequest *
-request_new (NuvashaLauncherTaskScope *scope)
+request_new (NuvashaLauncherTaskScope         *scope,
+             const NuvashaLauncherAuthOptions *options)
 {
   AuthRequest *self = g_new0 (AuthRequest, 1);
 
@@ -167,6 +159,16 @@ request_new (NuvashaLauncherTaskScope *scope)
   self->task = g_object_ref (nuvashalauncher_task_scope_task (scope));
   self->scope = scope;
   self->now = g_get_real_time () / 1000000;
+  if (options != NULL)
+    {
+      self->transport = options->transport;
+      self->transport_data = options->transport_data;
+      self->client_id = g_strdup (options->client_id);
+      if (options->session != NULL)
+        self->session = g_object_ref (options->session);
+    }
+  if (self->transport == NULL && self->session == NULL)
+    self->session = g_object_ref (auth_session ());
 
   /* The cancellation of the task is this module's own: a sign-in that is
      cancelled stops waiting, and nothing is answered twice. */
@@ -331,14 +333,14 @@ auth_send (AuthRequest  *self,
 
   self->step = step;
 
-  if (test_transport != NULL)
+  if (self->transport != NULL)
     {
       g_autoptr (GError) transport_error = NULL;
       gint status = 0;
       char *response_body = NULL;
 
-      if (!test_transport (url, method, body, headers, &status, &response_body,
-                           test_transport_data, &transport_error))
+      if (!self->transport (url, method, body, headers, &status, &response_body,
+                            self->transport_data, &transport_error))
         {
           if (transport_error == NULL)
             transport_error = g_error_new_literal (
@@ -382,12 +384,12 @@ auth_send (AuthRequest  *self,
     soup_message_headers_replace (request_headers, headers[i], headers[i + 1]);
 
   soup_session_send_async (
-       auth_session (), self->message, G_PRIORITY_DEFAULT,
+       self->session, self->message, G_PRIORITY_DEFAULT,
        g_task_get_cancellable (self->task), (GAsyncReadyCallback) sent, self);
 }
 
 static void
-sent (SoupSession  *session G_GNUC_UNUSED,
+sent (SoupSession  *session,
       GAsyncResult *result,
       gpointer      user_data)
 {
@@ -397,7 +399,7 @@ sent (SoupSession  *session G_GNUC_UNUSED,
   g_autoptr (GError) transport_error = NULL;
 
   self->status = soup_message_get_status (self->message);
-  self->response_stream = soup_session_send_finish (auth_session (), result,
+  self->response_stream = soup_session_send_finish (session, result,
                                                     &transport_error);
 
   /* A request that never came back is not a service that said no. */
@@ -507,28 +509,36 @@ device_code_answered (AuthRequest *self)
 }
 
 NuvashaLauncherTaskScope *
-nuvashalauncher_auth_device_code_async (GAsyncReadyCallback callback, gpointer user_data)
+nuvashalauncher_auth_device_code_async_with_options (const NuvashaLauncherAuthOptions *options,
+                                                     GAsyncReadyCallback               callback,
+                                                     gpointer                          user_data)
 {
   g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   g_autofree char *form = NULL;
   AuthRequest *self = NULL;
 
-  self = request_new (scope);
+  self = request_new (scope, options);
 
-  if (!client_id_is_set ())
+  if (!client_id_is_set (self))
     {
       fail (self, no_client_id_error ());
       return g_steal_pointer (&scope);
     }
 
-  form = soup_form_encode ("client_id", active_client_id (), "scope",
+  form = soup_form_encode ("client_id", active_client_id (self), "scope",
                            NUVASHALAUNCHER_MICROSOFT_SCOPE, NULL);
 
   auth_send (self, NUVASHALAUNCHER_MICROSOFT_DEVICE_CODE_URL, SOUP_METHOD_POST, form,
              "application/x-www-form-urlencoded", NULL, STEP_DEVICE_CODE);
 
   return g_steal_pointer (&scope);
+}
+
+NuvashaLauncherTaskScope *
+nuvashalauncher_auth_device_code_async (GAsyncReadyCallback callback, gpointer user_data)
+{
+  return nuvashalauncher_auth_device_code_async_with_options (NULL, callback, user_data);
 }
 
 NuvashaLauncherDeviceCode *
@@ -547,7 +557,7 @@ nuvashalauncher_auth_device_code_finish (GAsyncResult *result, GError **error)
 static char *
 token_form (AuthRequest *self)
 {
-  const char *client_id = active_client_id ();
+  const char *client_id = active_client_id (self);
 
   if (self->refresh_token != NULL)
     return soup_form_encode ("client_id", client_id,
@@ -1006,9 +1016,10 @@ profile_answered (AuthRequest *self)
  * ---------------------------------------------------------- */
 
 NuvashaLauncherTaskScope *
-nuvashalauncher_auth_sign_in_async (const NuvashaLauncherDeviceCode *code,
-                                    GAsyncReadyCallback              callback,
-                                    gpointer                         user_data)
+nuvashalauncher_auth_sign_in_async_with_options (const NuvashaLauncherDeviceCode  *code,
+                                                 const NuvashaLauncherAuthOptions *options,
+                                                 GAsyncReadyCallback               callback,
+                                                 gpointer                          user_data)
 {
   g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
@@ -1019,9 +1030,9 @@ nuvashalauncher_auth_sign_in_async (const NuvashaLauncherDeviceCode *code,
   g_return_val_if_fail (code != NULL, NULL);
   g_return_val_if_fail (code->device_code != NULL, NULL);
 
-  self = request_new (scope);
+  self = request_new (scope, options);
 
-  if (!client_id_is_set ())
+  if (!client_id_is_set (self))
     {
       fail (self, no_client_id_error ());
       return g_steal_pointer (&scope);
@@ -1036,6 +1047,14 @@ nuvashalauncher_auth_sign_in_async (const NuvashaLauncherDeviceCode *code,
   return g_steal_pointer (&scope);
 }
 
+NuvashaLauncherTaskScope *
+nuvashalauncher_auth_sign_in_async (const NuvashaLauncherDeviceCode *code,
+                                    GAsyncReadyCallback              callback,
+                                    gpointer                         user_data)
+{
+  return nuvashalauncher_auth_sign_in_async_with_options (code, NULL, callback, user_data);
+}
+
 NuvashaLauncherAccount *
 nuvashalauncher_auth_sign_in_finish (GAsyncResult *result, GError **error)
 {
@@ -1047,9 +1066,10 @@ nuvashalauncher_auth_sign_in_finish (GAsyncResult *result, GError **error)
 }
 
 NuvashaLauncherTaskScope *
-nuvashalauncher_auth_refresh_async (const NuvashaLauncherAccount *account,
-                                    GAsyncReadyCallback           callback,
-                                    gpointer                      user_data)
+nuvashalauncher_auth_refresh_async_with_options (const NuvashaLauncherAccount     *account,
+                                                 const NuvashaLauncherAuthOptions *options,
+                                                 GAsyncReadyCallback               callback,
+                                                 gpointer                          user_data)
 {
   g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
@@ -1059,9 +1079,9 @@ nuvashalauncher_auth_refresh_async (const NuvashaLauncherAccount *account,
 
   g_return_val_if_fail (account != NULL, NULL);
 
-  self = request_new (scope);
+  self = request_new (scope, options);
 
-  if (!client_id_is_set ())
+  if (!client_id_is_set (self))
     {
       fail (self, no_client_id_error ());
       return g_steal_pointer (&scope);
@@ -1088,6 +1108,14 @@ nuvashalauncher_auth_refresh_async (const NuvashaLauncherAccount *account,
   ask_for_token (self);
 
   return g_steal_pointer (&scope);
+}
+
+NuvashaLauncherTaskScope *
+nuvashalauncher_auth_refresh_async (const NuvashaLauncherAccount *account,
+                                    GAsyncReadyCallback           callback,
+                                    gpointer                      user_data)
+{
+  return nuvashalauncher_auth_refresh_async_with_options (account, NULL, callback, user_data);
 }
 
 NuvashaLauncherAccount *
