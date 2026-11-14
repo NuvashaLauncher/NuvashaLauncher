@@ -4,7 +4,7 @@ static void
 test_facets_of_a_mod_search (void)
 {
   g_autoptr (NuvashaLauncherModrinthSearch) search =
-    search_new (nuvashalauncher_CONTENT_MOD, "", "1.20.1", "fabric");
+    search_new (NUVASHALAUNCHER_CONTENT_MOD, "", "1.20.1", "fabric");
   g_autofree char *facets = NULL;
 
   facets = nuvashalauncher_modrinth_facets (search);
@@ -23,7 +23,7 @@ static void
 test_facets_of_a_quilt_search (void)
 {
   g_autoptr (NuvashaLauncherModrinthSearch) search =
-    search_new (nuvashalauncher_CONTENT_MOD, "", "1.20.1", "quilt");
+    search_new (NUVASHALAUNCHER_CONTENT_MOD, "", "1.20.1", "quilt");
   g_autofree char *facets = nuvashalauncher_modrinth_facets (search);
 
   g_assert_cmpstr (
@@ -38,7 +38,7 @@ static void
 test_facets_of_a_pack_search (void)
 {
   g_autoptr (NuvashaLauncherModrinthSearch) search =
-    search_new (nuvashalauncher_CONTENT_RESOURCE_PACK, NULL, "1.20.1", NULL);
+    search_new (NUVASHALAUNCHER_CONTENT_RESOURCE_PACK, NULL, "1.20.1", NULL);
   g_autofree char *facets = NULL;
   g_autofree char *shaders = NULL;
 
@@ -53,7 +53,7 @@ test_facets_of_a_pack_search (void)
                    "[[\"project_type:resourcepack\"],[\"versions:1.20.1\"],"
                    "[\"categories:32x\"]]");
 
-  search->type = nuvashalauncher_CONTENT_SHADER_PACK;
+  search->type = NUVASHALAUNCHER_CONTENT_SHADER_PACK;
   shaders = nuvashalauncher_modrinth_facets (search);
   g_assert_cmpstr (shaders, ==,
                    "[[\"project_type:shader\"],[\"versions:1.20.1\"],"
@@ -110,7 +110,7 @@ test_category_labels (void)
   g_assert_cmpstr (empty_label, ==, "");
   g_assert_cmpstr (null_label, ==, "");
 
-  g_autofree char *pt_mod = nuvashalauncher_modrinth_project_type_for_content (nuvashalauncher_CONTENT_MOD);
+  g_autofree char *pt_mod = nuvashalauncher_modrinth_project_type_for_content (NUVASHALAUNCHER_CONTENT_MOD);
   g_assert_cmpstr (pt_mod, ==, "mod");
 
   g_autoptr (GError) cat_err = NULL;
@@ -121,7 +121,7 @@ test_category_labels (void)
 
   g_autoptr (GPtrArray) non_array_cats = nuvashalauncher_modrinth_categories_from_json ("{\"key\":\"val\"}", -1, "mod", &cat_err);
   g_assert_null (non_array_cats);
-  g_assert_error (cat_err, nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_PARSE);
+  g_assert_error (cat_err, NUVASHALAUNCHER_MODRINTH_ERROR, NUVASHALAUNCHER_MODRINTH_ERROR_PARSE);
 
   g_assert_cmpstr (one, ==, "Colored Lighting");
   g_assert_cmpstr (two, ==, "512x+");
@@ -138,7 +138,7 @@ static void
 test_facets_with_categories (void)
 {
   g_autoptr (NuvashaLauncherModrinthSearch) search =
-    search_new (nuvashalauncher_CONTENT_SHADER_PACK, "", "1.20.1", NULL);
+    search_new (NUVASHALAUNCHER_CONTENT_SHADER_PACK, "", "1.20.1", NULL);
   g_autofree char *facets = NULL;
 
   search->categories = g_ptr_array_new_with_free_func (g_free);
@@ -157,7 +157,7 @@ static void
 test_search_url_paginates (void)
 {
   g_autoptr (NuvashaLauncherModrinthSearch) search =
-    search_new (nuvashalauncher_CONTENT_MOD, "sodium", "1.20.1", "fabric");
+    search_new (NUVASHALAUNCHER_CONTENT_MOD, "sodium", "1.20.1", "fabric");
   g_autofree char *url = NULL;
   g_autofree char *expected = NULL;
 
@@ -166,7 +166,7 @@ test_search_url_paginates (void)
 
   url = nuvashalauncher_modrinth_search_url (search);
   expected = g_strdup_printf (
-      nuvashalauncher_MODRINTH_URL "/search?query=sodium&facets=%s&offset=40&limit=20",
+      NUVASHALAUNCHER_MODRINTH_URL "/search?query=sodium&facets=%s&offset=40&limit=20",
       "%5B%5B%22project_type%3Amod%22%5D%2C%5B%22versions%3A1.20.1%22%5D%2C"
       "%5B%22categories%3Afabric%22%5D%5D");
 
@@ -179,7 +179,7 @@ static void
 test_modpack_filters_are_or_groups_and_sort (void)
 {
   g_autoptr (NuvashaLauncherModrinthSearch) search =
-    search_new (nuvashalauncher_CONTENT_MODPACK, "pack", NULL, NULL);
+    search_new (NUVASHALAUNCHER_CONTENT_MODPACK, "pack", NULL, NULL);
   g_autofree char *facets = NULL;
   g_autofree char *url = NULL;
 
@@ -256,7 +256,7 @@ test_search_rejects_malformed_hit (void)
     nuvashalauncher_modrinth_results_from_json (json, -1, &error);
 
   g_assert_null (results);
-  g_assert_error (error, nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_PARSE);
+  g_assert_error (error, NUVASHALAUNCHER_MODRINTH_ERROR, NUVASHALAUNCHER_MODRINTH_ERROR_PARSE);
 }
 
 static void
@@ -295,7 +295,7 @@ test_versions_of_a_mod (void)
   NuvashaLauncherModrinthVersion *version = NULL;
 
   versions = nuvashalauncher_modrinth_versions_from_json (
-      json, -1, nuvashalauncher_CONTENT_MOD, "1.20.1", "fabric", &error);
+      json, -1, NUVASHALAUNCHER_CONTENT_MOD, "1.20.1", "fabric", &error);
   g_assert_no_error (error);
   g_assert_nonnull (versions);
 
@@ -337,7 +337,7 @@ test_versions_of_a_pack (void)
 
   /* No loader is asked for: the game loads a pack itself. */
   versions = nuvashalauncher_modrinth_versions_from_json (
-      json, -1, nuvashalauncher_CONTENT_RESOURCE_PACK, "1.20.1", NULL, &error);
+      json, -1, NUVASHALAUNCHER_CONTENT_RESOURCE_PACK, "1.20.1", NULL, &error);
   g_assert_no_error (error);
   g_assert_cmpuint (versions->len, ==, 1);
 
@@ -348,7 +348,7 @@ test_versions_of_a_pack (void)
    * that says "minecraft" runs whatever runs the game. */
   {
     g_autoptr (GPtrArray) any = nuvashalauncher_modrinth_versions_from_json (
-        json, -1, nuvashalauncher_CONTENT_RESOURCE_PACK, "1.20", "forge", &error);
+        json, -1, NUVASHALAUNCHER_CONTENT_RESOURCE_PACK, "1.20", "forge", &error);
 
     g_assert_no_error (error);
     g_assert_cmpuint (any->len, ==, 2);
@@ -370,7 +370,7 @@ test_versions_of_a_shader (void)
      publishes are the programs that can read it, not the one running
      beside the game. */
   versions = nuvashalauncher_modrinth_versions_from_json (
-      json, -1, nuvashalauncher_CONTENT_SHADER_PACK, "1.20.1", "fabric", &error);
+      json, -1, NUVASHALAUNCHER_CONTENT_SHADER_PACK, "1.20.1", "fabric", &error);
   g_assert_no_error (error);
   g_assert_nonnull (versions);
 
@@ -400,11 +400,11 @@ test_versions_of_a_shader (void)
     g_assert_nonnull (other_game);
 
     /* Whatever runs beside the game, the shader fits its version. */
-    g_assert_true (nuvashalauncher_modrinth_version_fits (fitted, nuvashalauncher_CONTENT_SHADER_PACK,
+    g_assert_true (nuvashalauncher_modrinth_version_fits (fitted, NUVASHALAUNCHER_CONTENT_SHADER_PACK,
                                              "1.20.1", "fabric"));
-    g_assert_true (nuvashalauncher_modrinth_version_fits (fitted, nuvashalauncher_CONTENT_SHADER_PACK,
+    g_assert_true (nuvashalauncher_modrinth_version_fits (fitted, NUVASHALAUNCHER_CONTENT_SHADER_PACK,
                                              "1.20.1", "iris"));
-    g_assert_true (nuvashalauncher_modrinth_version_fits (fitted, nuvashalauncher_CONTENT_SHADER_PACK,
+    g_assert_true (nuvashalauncher_modrinth_version_fits (fitted, NUVASHALAUNCHER_CONTENT_SHADER_PACK,
                                              "1.20.1", "optifine"));
 
     /* A game version it does not list is refused, and a mod is still
@@ -413,15 +413,15 @@ test_versions_of_a_shader (void)
     /* r5.9.3 lists 76 game versions and r2.1 lists neither 1.20.1 nor
        1.21, so each is refused a version it does not name. */
     g_assert_false (nuvashalauncher_modrinth_version_fits (fitted,
-                                              nuvashalauncher_CONTENT_SHADER_PACK,
+                                              NUVASHALAUNCHER_CONTENT_SHADER_PACK,
                                               "1.4.7", "iris"));
     g_assert_false (nuvashalauncher_modrinth_version_fits (other_game,
-                                              nuvashalauncher_CONTENT_SHADER_PACK,
+                                              NUVASHALAUNCHER_CONTENT_SHADER_PACK,
                                               "1.21", "iris"));
     g_assert_false (nuvashalauncher_modrinth_version_fits (other_game,
-                                              nuvashalauncher_CONTENT_SHADER_PACK,
+                                              NUVASHALAUNCHER_CONTENT_SHADER_PACK,
                                               "1.20.1", "iris"));
-    g_assert_false (nuvashalauncher_modrinth_version_fits (fitted, nuvashalauncher_CONTENT_MOD,
+    g_assert_false (nuvashalauncher_modrinth_version_fits (fitted, NUVASHALAUNCHER_CONTENT_MOD,
                                                "1.20.1", "fabric"));
   }
 
@@ -440,22 +440,22 @@ test_no_compatible_version (void)
   /* Nothing in the fixture runs on Minecraft 1.7.10, and nothing is
    * listed rather than something listed and refused afterwards. */
   versions = nuvashalauncher_modrinth_versions_from_json (
-      json, -1, nuvashalauncher_CONTENT_MOD, "1.7.10", "fabric", &error);
+      json, -1, NUVASHALAUNCHER_CONTENT_MOD, "1.7.10", "fabric", &error);
   g_assert_null (versions);
-  g_assert_error (error, nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_NOT_FOUND);
+  g_assert_error (error, NUVASHALAUNCHER_MODRINTH_ERROR, NUVASHALAUNCHER_MODRINTH_ERROR_NOT_FOUND);
 
   /* The words a user reads are the ones the page shows. */
   g_assert_cmpstr (error->message, ==,
                    "No compatible version found for Minecraft 1.7.10 and "
                    "fabric.");
 
-  message = nuvashalauncher_modrinth_no_compatible_message (nuvashalauncher_CONTENT_MOD, "1.7.10",
+  message = nuvashalauncher_modrinth_no_compatible_message (NUVASHALAUNCHER_CONTENT_MOD, "1.7.10",
                                                 "quilt");
   g_assert_cmpstr (message, ==,
                    "No compatible version found for Minecraft 1.7.10 and "
                    "quilt.");
 
-  shaders = nuvashalauncher_modrinth_no_compatible_message (nuvashalauncher_CONTENT_SHADER_PACK,
+  shaders = nuvashalauncher_modrinth_no_compatible_message (NUVASHALAUNCHER_CONTENT_SHADER_PACK,
                                                  "1.7.10", NULL);
   g_assert_cmpstr (shaders, ==,
                    "No compatible version found for Minecraft 1.7.10.");
@@ -489,10 +489,10 @@ test_version_by_hash (void)
   g_assert_cmpint (file->size, ==, 942134);
 
   /* And it is a version this instance could run. */
-  g_assert_true (nuvashalauncher_modrinth_version_fits (version, nuvashalauncher_CONTENT_MOD, "1.20.1",
+  g_assert_true (nuvashalauncher_modrinth_version_fits (version, NUVASHALAUNCHER_CONTENT_MOD, "1.20.1",
                                            "fabric"));
   g_assert_false (
-      nuvashalauncher_modrinth_version_fits (version, nuvashalauncher_CONTENT_MOD, "1.21", "fabric"));
+      nuvashalauncher_modrinth_version_fits (version, NUVASHALAUNCHER_CONTENT_MOD, "1.21", "fabric"));
 
   /* Quilt runs Fabric mods, so a version that names only Fabric is a
      version of a Quilt instance too, and nothing else gets it. */
@@ -500,9 +500,9 @@ test_version_by_hash (void)
   version->loaders = g_ptr_array_new_with_free_func (g_free);
   g_ptr_array_add (version->loaders, g_strdup ("fabric"));
 
-  g_assert_true (nuvashalauncher_modrinth_version_fits (version, nuvashalauncher_CONTENT_MOD, "1.20.1",
+  g_assert_true (nuvashalauncher_modrinth_version_fits (version, NUVASHALAUNCHER_CONTENT_MOD, "1.20.1",
                                             "quilt"));
-  g_assert_false (nuvashalauncher_modrinth_version_fits (version, nuvashalauncher_CONTENT_MOD,
+  g_assert_false (nuvashalauncher_modrinth_version_fits (version, NUVASHALAUNCHER_CONTENT_MOD,
                                              "1.20.1", "neoforge"));
 
   g_print ("ok - the hash of a file says which version it is\n");
@@ -532,7 +532,7 @@ test_update_by_hash (void)
   g_assert_cmpstr (update->version_id, ==, "OihdIimA");
   g_assert_true (strcmp (update->version_id, installed_version->version_id) != 0);
   g_assert_true (
-      nuvashalauncher_modrinth_version_fits (update, nuvashalauncher_CONTENT_MOD, "1.20.1", "fabric"));
+      nuvashalauncher_modrinth_version_fits (update, NUVASHALAUNCHER_CONTENT_MOD, "1.20.1", "fabric"));
 
   file = nuvashalauncher_modrinth_version_primary_file (update);
   g_assert_cmpstr (file->filename, ==, "sodium-fabric-0.5.13+mc1.20.1.jar");
@@ -581,8 +581,8 @@ test_batch_updates_from_json (void)
 
   bad_updates = nuvashalauncher_modrinth_updates_from_json ("[]", -1, &error);
   g_assert_null (bad_updates);
-  g_assert_error (error, nuvashalauncher_MODRINTH_ERROR,
-                  nuvashalauncher_MODRINTH_ERROR_PARSE);
+  g_assert_error (error, NUVASHALAUNCHER_MODRINTH_ERROR,
+                  NUVASHALAUNCHER_MODRINTH_ERROR_PARSE);
 
   g_print ("ok - batch hash update responses parse into a hash table\n");
 }

@@ -16,7 +16,7 @@ static char *data_home;
 static char *
 run_cli (const char *first, const char *second, int *status)
 {
-  const char *argv[] = { nuvashalauncher_BIN, first, second, NULL };
+  const char *argv[] = { NUVASHALAUNCHER_BIN, first, second, NULL };
   gchar **env = g_get_environ ();
   char *output = NULL;
   char *errors = NULL;
@@ -111,7 +111,7 @@ test_remove_instance_command (void)
   g_assert_true (nuvashalauncher_instance_manager_load (manager, &error));
   g_assert_no_error (error);
   instance = nuvashalauncher_instance_manager_create (manager, "CLI Test Instance", NULL,
-                                               "1.20.1", nuvashalauncher_LOADER_VANILLA,
+                                               "1.20.1", NUVASHALAUNCHER_LOADER_VANILLA,
                                                NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
@@ -134,7 +134,7 @@ test_remove_instance_command (void)
 int
 main (void)
 {
-  g_setenv ("NUVASHA_TEST_SECRET_STORE", "1", TRUE);
+  g_setenv ("NUVASHALAUNCHER_TEST_SECRET_STORE", "1", TRUE);
   data_home = g_dir_make_tmp ("nuvashalauncher-cli-XXXXXX", NULL);
   if (data_home == NULL)
     g_error ("could not make a temporary data directory");

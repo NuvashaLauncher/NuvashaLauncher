@@ -11,11 +11,11 @@ nuvashalauncher_instance_component_id_for_loader (NuvashaLauncherLoader loader)
 {
   switch (loader)
     {
-    case nuvashalauncher_LOADER_FABRIC: return nuvashalauncher_COMPONENT_FABRIC;
-    case nuvashalauncher_LOADER_FORGE: return nuvashalauncher_COMPONENT_FORGE;
-    case nuvashalauncher_LOADER_NEOFORGE: return nuvashalauncher_COMPONENT_NEOFORGE;
-    case nuvashalauncher_LOADER_QUILT: return nuvashalauncher_COMPONENT_QUILT;
-    case nuvashalauncher_LOADER_VANILLA: default: return NULL;
+    case NUVASHALAUNCHER_LOADER_FABRIC: return NUVASHALAUNCHER_COMPONENT_FABRIC;
+    case NUVASHALAUNCHER_LOADER_FORGE: return NUVASHALAUNCHER_COMPONENT_FORGE;
+    case NUVASHALAUNCHER_LOADER_NEOFORGE: return NUVASHALAUNCHER_COMPONENT_NEOFORGE;
+    case NUVASHALAUNCHER_LOADER_QUILT: return NUVASHALAUNCHER_COMPONENT_QUILT;
+    case NUVASHALAUNCHER_LOADER_VANILLA: default: return NULL;
     }
 }
 
@@ -23,12 +23,12 @@ char *
 nuvashalauncher_instance_component_get_version (NuvashaLauncherInstance *instance,
                                     const char *component_id)
 {
-  NuvashaLauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader loader = NUVASHALAUNCHER_LOADER_VANILLA;
   GHashTable *components = NULL;
   const char *version = NULL;
   const char *loader_id = NULL;
 
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (instance), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (instance), NULL);
   g_return_val_if_fail (component_id != NULL, NULL);
 
   components = nuvashalauncher_instance_get_components (instance);
@@ -36,7 +36,7 @@ nuvashalauncher_instance_component_get_version (NuvashaLauncherInstance *instanc
   if (version != NULL)
     return g_strdup (version);
 
-  if (g_str_equal (component_id, nuvashalauncher_COMPONENT_MINECRAFT))
+  if (g_str_equal (component_id, NUVASHALAUNCHER_COMPONENT_MINECRAFT))
     {
       return NULL;
     }
@@ -57,20 +57,20 @@ nuvashalauncher_instance_component_set_version (NuvashaLauncherInstance *instanc
                                     const char *version,
                                     GError **error)
 {
-  NuvashaLauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader loader = NUVASHALAUNCHER_LOADER_VANILLA;
   const char *loader_id = NULL;
 
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (instance), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (instance), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   if (version == NULL || *version == '\0')
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,
                    "component \"%s\" has no version", component_id);
       return FALSE;
     }
 
-  if (g_str_equal (component_id, nuvashalauncher_COMPONENT_MINECRAFT))
+  if (g_str_equal (component_id, NUVASHALAUNCHER_COMPONENT_MINECRAFT))
     {
       return nuvashalauncher_instance_set_string (instance, "minecraft-version", version,
                                       error);
@@ -84,7 +84,7 @@ nuvashalauncher_instance_component_set_version (NuvashaLauncherInstance *instanc
                                       error);
     }
 
-  g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID,
+  g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,
                "component \"%s\" is not part of this instance", component_id);
   return FALSE;
 }

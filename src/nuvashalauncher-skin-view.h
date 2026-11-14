@@ -2,15 +2,15 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_SKIN_VIEW_H
-#define nuvashalauncher_SKIN_VIEW_H
+#ifndef NUVASHALAUNCHER_SKIN_VIEW_H
+#define NUVASHALAUNCHER_SKIN_VIEW_H
 
 #include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-#define nuvashalauncher_TYPE_SKIN_VIEW (nuvashalauncher_skin_view_get_type ())
-G_DECLARE_FINAL_TYPE (NuvashaLauncherSkinView, nuvashalauncher_skin_view, nuvashalauncher, SKIN_VIEW, GtkGLArea)
+#define NUVASHALAUNCHER_TYPE_SKIN_VIEW (nuvashalauncher_skin_view_get_type ())
+G_DECLARE_FINAL_TYPE (NuvashaLauncherSkinView, nuvashalauncher_skin_view, NUVASHALAUNCHER, SKIN_VIEW, GtkGLArea)
 
 NuvashaLauncherSkinView *nuvashalauncher_skin_view_new (void);
 void nuvashalauncher_skin_view_set_skin (NuvashaLauncherSkinView *self, GdkTexture *texture);

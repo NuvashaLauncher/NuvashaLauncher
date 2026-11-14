@@ -141,8 +141,8 @@ global_cache_restore_hash_ready (GObject *source G_GNUC_UNUSED,
       {
         nuvashalauncher_download_request_fail (
           request,
-          g_error_new (nuvashalauncher_DOWNLOAD_ERROR,
-                       nuvashalauncher_DOWNLOAD_ERROR_IO,
+          g_error_new (NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                       NUVASHALAUNCHER_DOWNLOAD_ERROR_IO,
                        "cannot restore \"%s\": %s", request->dest_path,
                        rename_error->message));
         return;
@@ -341,7 +341,7 @@ cache_info_ready (GObject *source, GAsyncResult *result, gpointer user_data)
     }
 
   if (g_file_info_get_file_type (info) != G_FILE_TYPE_REGULAR ||
-      g_file_info_get_size (info) > nuvashalauncher_FS_MAX_REMOTE_JSON_SIZE)
+      g_file_info_get_size (info) > NUVASHALAUNCHER_FS_MAX_REMOTE_JSON_SIZE)
     {
       start_attempt (request);
       return;

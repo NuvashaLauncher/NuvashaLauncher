@@ -192,7 +192,7 @@ test_icon_decode (void)
 
     g_assert_true (GTK_IS_IMAGE (shown));
     g_assert_cmpint (gtk_image_get_pixel_size (GTK_IMAGE (shown)), ==,
-                     nuvashalauncher_ICON_SIZE);
+                     NUVASHALAUNCHER_ICON_SIZE);
   }
 
   g_assert_false (nuvashalauncher_icon_widget_set_file (icon, NULL));
@@ -294,12 +294,12 @@ test_content_page_starts_single (void)
   data_dir = g_build_filename (tmp, "data", NULL);
   manager = nuvashalauncher_instance_manager_new (data_dir);
   instance = nuvashalauncher_instance_manager_create (manager, "Split", NULL, "1.21.1",
-                                          nuvashalauncher_LOADER_FABRIC, "0.15.0",
+                                          NUVASHALAUNCHER_LOADER_FABRIC, "0.15.0",
                                           &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
-  page = nuvashalauncher_content_page_new (instance, nuvashalauncher_CONTENT_MOD);
+  page = nuvashalauncher_content_page_new (instance, NUVASHALAUNCHER_CONTENT_MOD);
   g_assert_nonnull (page);
 
   split = find_by_type (GTK_WIDGET (page), ADW_TYPE_NAVIGATION_SPLIT_VIEW);
@@ -345,13 +345,13 @@ test_page_disposed_while_scanning (void)
   data_dir = g_build_filename (tmp, "data", NULL);
   manager = nuvashalauncher_instance_manager_new (data_dir);
   instance = nuvashalauncher_instance_manager_create (manager, "Dispose", NULL, "1.21.1",
-                                          nuvashalauncher_LOADER_FABRIC, "0.15.0",
+                                          NUVASHALAUNCHER_LOADER_FABRIC, "0.15.0",
                                           &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
   /* Start the lazy scan before the page is dropped. */
-  page = nuvashalauncher_content_page_new (instance, nuvashalauncher_CONTENT_MOD);
+  page = nuvashalauncher_content_page_new (instance, NUVASHALAUNCHER_CONTENT_MOD);
   nuvashalauncher_content_page_reset_for_tab_switch (page);
   g_object_ref_sink (page);
   g_object_unref (page);
@@ -389,12 +389,12 @@ test_pick_button_starts_empty (void)
   data_dir = g_build_filename (tmp, "data", NULL);
   manager = nuvashalauncher_instance_manager_new (data_dir);
   instance = nuvashalauncher_instance_manager_create (manager, "Pick", NULL, "1.21.1",
-                                          nuvashalauncher_LOADER_FABRIC, "0.15.0",
+                                          NUVASHALAUNCHER_LOADER_FABRIC, "0.15.0",
                                           &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
 
-  page = nuvashalauncher_content_page_new (instance, nuvashalauncher_CONTENT_MOD);
+  page = nuvashalauncher_content_page_new (instance, NUVASHALAUNCHER_CONTENT_MOD);
   g_assert_nonnull (page);
 
   /* The download icon of the foot is the button itself, and the number

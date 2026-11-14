@@ -52,14 +52,14 @@ static const SecretSchema test_active_schema = {
 static const SecretSchema *
 account_schema_for_store (void)
 {
-  return g_strcmp0 (g_getenv ("NUVASHA_TEST_SECRET_STORE"), "1") == 0
+  return g_strcmp0 (g_getenv ("NUVASHALAUNCHER_TEST_SECRET_STORE"), "1") == 0
     ? &test_account_schema : &account_schema;
 }
 
 static const SecretSchema *
 active_schema_for_store (void)
 {
-  return g_strcmp0 (g_getenv ("NUVASHA_TEST_SECRET_STORE"), "1") == 0
+  return g_strcmp0 (g_getenv ("NUVASHALAUNCHER_TEST_SECRET_STORE"), "1") == 0
     ? &test_active_schema : &active_schema;
 }
 
@@ -70,13 +70,13 @@ secret_error (GError **error, GError *cause)
     {
       /* Keep the diagnostic, but identify keyring failures as account errors
        * rather than mistaking D-Bus failures for network or file errors. */
-      g_set_error_literal (error, nuvashalauncher_ACCOUNTS_ERROR,
-                            nuvashalauncher_ACCOUNTS_ERROR_IO, cause->message);
+      g_set_error_literal (error, NUVASHALAUNCHER_ACCOUNTS_ERROR,
+                            NUVASHALAUNCHER_ACCOUNTS_ERROR_IO, cause->message);
       g_error_free (cause);
     }
   else
-    g_set_error (error, nuvashalauncher_ACCOUNTS_ERROR,
-                 nuvashalauncher_ACCOUNTS_ERROR_IO,
+    g_set_error (error, NUVASHALAUNCHER_ACCOUNTS_ERROR,
+                 NUVASHALAUNCHER_ACCOUNTS_ERROR_IO,
                  "Secret Service returned no account data");
   return FALSE;
 }

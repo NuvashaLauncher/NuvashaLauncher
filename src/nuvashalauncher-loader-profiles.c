@@ -65,7 +65,7 @@ give_libraries_their_downloads (JsonNode *root, GError **error)
             address == NULL || !JSON_NODE_HOLDS_VALUE (address) ||
             json_node_get_value_type (address) != G_TYPE_STRING)
           {
-            g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_NO_MAVEN,
+            g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_NO_MAVEN,
                          "a library of the loader profile names no jar to "
                          "download");
             return FALSE;
@@ -76,8 +76,8 @@ give_libraries_their_downloads (JsonNode *root, GError **error)
 
         if (!g_str_has_prefix (repository, "https://"))
           {
-            g_set_error (error, nuvashalauncher_LOADERS_ERROR,
-                         nuvashalauncher_LOADERS_ERROR_NO_MAVEN,
+            g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR,
+                         NUVASHALAUNCHER_LOADERS_ERROR_NO_MAVEN,
                          "the loader repository is not an HTTPS address");
             return FALSE;
           }
@@ -88,7 +88,7 @@ give_libraries_their_downloads (JsonNode *root, GError **error)
            has to be a name and nothing else. */
         if (path == NULL || !nuvashalauncher_resolve_entry_name_is_safe (path))
           {
-            g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_NO_MAVEN,
+            g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_NO_MAVEN,
                          "the coordinates \"%s\" are no library path", path);
             return FALSE;
           }
@@ -147,7 +147,7 @@ profile_from_root (JsonNode *root, GError **error)
 
   if (root == NULL || !JSON_NODE_HOLDS_OBJECT (root))
     {
-      g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
+      g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                    "the loader did not answer with a version document");
       return NULL;
     }
@@ -236,7 +236,7 @@ nuvashalauncher_loaders_profile_async (NuvashaLauncherLoader           loader,
     {
       nuvashalauncher_task_scope_return_error_deferred (
         request->scope,
-        g_error_new (nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_UNSUPPORTED,
+        g_error_new (NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_UNSUPPORTED,
                      "%s publishes an installer instead of a version "
                      "document: nuvashalauncher_loaders_install_async() is what "
                      "installs it", nuvashalauncher_loader_display_name (loader)));

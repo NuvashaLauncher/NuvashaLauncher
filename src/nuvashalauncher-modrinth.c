@@ -69,7 +69,7 @@ nuvashalauncher_modrinth_search_async (const NuvashaLauncherModrinthSearch *sear
 
   url = nuvashalauncher_modrinth_search_url (search);
   return nuvashalauncher_modrinth_get_async (url, callback, user_data, search_answer,
-                    nuvashalauncher_NOT_FOUND_IS_ERROR);
+                    NUVASHALAUNCHER_NOT_FOUND_IS_ERROR);
 }
 
 NuvashaLauncherModrinthResults *
@@ -111,10 +111,10 @@ nuvashalauncher_modrinth_details_async (const char *project_id, GAsyncReadyCallb
     g_autofree char *escaped_id =
       g_uri_escape_string (project_id, NULL, FALSE);
 
-    url = g_strdup_printf (nuvashalauncher_MODRINTH_URL "/project/%s", escaped_id);
+    url = g_strdup_printf (NUVASHALAUNCHER_MODRINTH_URL "/project/%s", escaped_id);
   }
   return nuvashalauncher_modrinth_get_async (url, callback, user_data, details_answer,
-                    nuvashalauncher_NOT_FOUND_IS_ERROR);
+                    NUVASHALAUNCHER_NOT_FOUND_IS_ERROR);
 }
 NuvashaLauncherModrinthDetails *
 nuvashalauncher_modrinth_details_finish (GAsyncResult *result, GError **error)
@@ -218,15 +218,15 @@ nuvashalauncher_modrinth_versions_async (const char *project_id, NuvashaLauncher
 
   if (escaped_loaders != NULL)
     url = g_strdup_printf (
-        nuvashalauncher_MODRINTH_URL "/project/%s/version?game_versions=%s&loaders=%s",
+        NUVASHALAUNCHER_MODRINTH_URL "/project/%s/version?game_versions=%s&loaders=%s",
         escaped_id, escaped_game, escaped_loaders);
   else
     url = g_strdup_printf (
-        nuvashalauncher_MODRINTH_URL "/project/%s/version?game_versions=%s",
+        NUVASHALAUNCHER_MODRINTH_URL "/project/%s/version?game_versions=%s",
         escaped_id, escaped_game);
 
   scope = nuvashalauncher_modrinth_request_new (callback, user_data, versions_answer,
-                       nuvashalauncher_NOT_FOUND_IS_ERROR,
+                       NUVASHALAUNCHER_NOT_FOUND_IS_ERROR,
                        instance_ask_new (type, minecraft_version, loader),
                        instance_ask_free);
 
@@ -271,11 +271,11 @@ nuvashalauncher_modrinth_categories_async (const char        *project_type,
                                GAsyncReadyCallback callback,
                                gpointer           user_data)
 {
-  g_autofree char *url = g_strdup_printf (nuvashalauncher_MODRINTH_URL "/tag/category");
+  g_autofree char *url = g_strdup_printf (NUVASHALAUNCHER_MODRINTH_URL "/tag/category");
   g_autoptr (NuvashaLauncherTaskScope) scope = NULL;
 
   scope = nuvashalauncher_modrinth_request_new (callback, user_data, categories_answer,
-                       nuvashalauncher_NOT_FOUND_IS_ERROR, g_strdup (project_type), g_free);
+                       NUVASHALAUNCHER_NOT_FOUND_IS_ERROR, g_strdup (project_type), g_free);
   nuvashalauncher_task_scope_release_when_done (
     nuvashalauncher_download_json_cached_async (nuvashalauncher_downloads_get_service (), url, nuvashalauncher_modrinth_json_ready,
                                     nuvashalauncher_task_scope_task (scope)),
@@ -328,11 +328,11 @@ nuvashalauncher_modrinth_version_by_hash_async (const char *sha1,
     g_autofree char *escaped_sha1 =
       g_uri_escape_string (sha1, NULL, FALSE);
 
-    url = g_strdup_printf (nuvashalauncher_MODRINTH_URL "/version_file/%s?algorithm=sha1",
+    url = g_strdup_printf (NUVASHALAUNCHER_MODRINTH_URL "/version_file/%s?algorithm=sha1",
                            escaped_sha1);
   }
   return nuvashalauncher_modrinth_get_async (url, callback, user_data, version_answer,
-                    nuvashalauncher_NOT_FOUND_IS_ERROR);
+                    NUVASHALAUNCHER_NOT_FOUND_IS_ERROR);
 }
 
 NuvashaLauncherModrinthVersion *
@@ -349,11 +349,11 @@ nuvashalauncher_modrinth_version_by_id_async (const char *version_id,
                                   gpointer user_data)
 {
   g_autofree char *escaped = g_uri_escape_string (version_id, NULL, FALSE);
-  g_autofree char *url = g_strdup_printf (nuvashalauncher_MODRINTH_URL "/version/%s",
+  g_autofree char *url = g_strdup_printf (NUVASHALAUNCHER_MODRINTH_URL "/version/%s",
                                           escaped);
 
   return nuvashalauncher_modrinth_get_async (url, callback, user_data, version_answer,
-                    nuvashalauncher_NOT_FOUND_IS_ERROR);
+                    NUVASHALAUNCHER_NOT_FOUND_IS_ERROR);
 }
 
 /* ---------------------------------------------------------- *
@@ -422,17 +422,17 @@ nuvashalauncher_modrinth_update_by_hash_async (NuvashaLauncherContentType type, 
       g_uri_escape_string (sha1, NULL, FALSE);
 
     url = g_strdup_printf (
-        nuvashalauncher_MODRINTH_URL "/version_file/%s/update?algorithm=sha1",
+        NUVASHALAUNCHER_MODRINTH_URL "/version_file/%s/update?algorithm=sha1",
         escaped_sha1);
   }
 
   scope = nuvashalauncher_modrinth_request_new (callback, user_data, update_answer,
-                       nuvashalauncher_NOT_FOUND_IS_ABSENT,
+                       NUVASHALAUNCHER_NOT_FOUND_IS_ABSENT,
                        instance_ask_new (type, minecraft_version, loader),
                        instance_ask_free);
 
   nuvashalauncher_task_scope_release_when_done (
-    nuvashalauncher_download_json_post_cached_async (nuvashalauncher_downloads_get_service (), url, body, nuvashalauncher_MODRINTH_USER_AGENT,
+    nuvashalauncher_download_json_post_cached_async (nuvashalauncher_downloads_get_service (), url, body, NUVASHALAUNCHER_MODRINTH_USER_AGENT,
                                          nuvashalauncher_modrinth_json_ready,
                                          nuvashalauncher_task_scope_task (scope)),
     nuvashalauncher_task_scope_get_cancellable (scope));
@@ -540,7 +540,7 @@ nuvashalauncher_modrinth_updates_by_hashes_url_async (
   g_return_val_if_fail (minecraft_version != NULL, NULL);
 
   scope = nuvashalauncher_modrinth_request_new (callback, user_data, updates_answer,
-                                                nuvashalauncher_NOT_FOUND_IS_ABSENT,
+                                                NUVASHALAUNCHER_NOT_FOUND_IS_ABSENT,
                                                 instance_ask_new (type, minecraft_version, loader),
                                                 instance_ask_free);
 
@@ -560,7 +560,7 @@ nuvashalauncher_modrinth_updates_by_hashes_url_async (
   nuvashalauncher_task_scope_release_when_done (
     nuvashalauncher_download_json_post_cached_async (
       nuvashalauncher_downloads_get_service (), url, body,
-      nuvashalauncher_MODRINTH_USER_AGENT,
+      NUVASHALAUNCHER_MODRINTH_USER_AGENT,
       nuvashalauncher_modrinth_json_ready,
       nuvashalauncher_task_scope_task (scope)),
     nuvashalauncher_task_scope_get_cancellable (scope));
@@ -578,7 +578,7 @@ nuvashalauncher_modrinth_updates_by_hashes_async (
   gpointer                    user_data)
 {
   return nuvashalauncher_modrinth_updates_by_hashes_url_async (
-    nuvashalauncher_MODRINTH_URL "/version_files/update",
+    NUVASHALAUNCHER_MODRINTH_URL "/version_files/update",
     type, hashes, minecraft_version, loader, callback, user_data);
 }
 
@@ -634,7 +634,7 @@ nuvashalauncher_modrinth_resolve_install (NuvashaLauncherModrinthVersion *versio
           NuvashaLauncherModrinthDependency *dependency =
             g_ptr_array_index (version->dependencies, i);
 
-          if (dependency->type != nuvashalauncher_DEPENDENCY_INCOMPATIBLE ||
+          if (dependency->type != NUVASHALAUNCHER_DEPENDENCY_INCOMPATIBLE ||
               dependency->project_id == NULL || installed == NULL)
             continue;
 
@@ -657,15 +657,15 @@ nuvashalauncher_modrinth_resolve_install (NuvashaLauncherModrinthVersion *versio
       /* Embedded is inside the file, optional is a choice and
        * incompatible is a conflict: only dependencies the version cannot run
        * without is fetched. */
-      if (dependency->type != nuvashalauncher_DEPENDENCY_REQUIRED)
+      if (dependency->type != NUVASHALAUNCHER_DEPENDENCY_REQUIRED)
         continue;
 
       /* A dependency that names no project names nothing that could be
        * fetched, so the install cannot go on as if it did not exist. */
       if (dependency->project_id == NULL)
         {
-          g_set_error_literal (error, nuvashalauncher_MODRINTH_ERROR,
-                               nuvashalauncher_MODRINTH_ERROR_PARSE,
+          g_set_error_literal (error, NUVASHALAUNCHER_MODRINTH_ERROR,
+                               NUVASHALAUNCHER_MODRINTH_ERROR_PARSE,
                                "this version requires a dependency that "
                                "names no project");
           g_ptr_array_unref (pending);

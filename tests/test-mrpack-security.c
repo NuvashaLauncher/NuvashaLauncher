@@ -322,7 +322,7 @@ expect_zip_refused (const char *what, const char *zip_path, guint code)
 
   pack = nuvashalauncher_modpack_new_from_zip (zip_path, &error);
   g_assert_null (pack);
-  g_assert_error (error, nuvashalauncher_MODPACK_ERROR, code);
+  g_assert_error (error, NUVASHALAUNCHER_MODPACK_ERROR, code);
   g_print ("ok - %s\n", what);
 }
 
@@ -435,7 +435,7 @@ test_archive_paths_are_refused (void)
 
     zip_write (zip_path, entries, G_N_ELEMENTS (entries));
     expect_zip_refused ("an entry that steps out of the instance", zip_path,
-                        nuvashalauncher_MODPACK_ERROR_PATH);
+                        NUVASHALAUNCHER_MODPACK_ERROR_PATH);
   }
 
   /* An absolute path. */
@@ -448,7 +448,7 @@ test_archive_paths_are_refused (void)
 
     zip_write (zip_path, entries, G_N_ELEMENTS (entries));
     expect_zip_refused ("an entry with an absolute path", zip_path,
-                        nuvashalauncher_MODPACK_ERROR_PATH);
+                        NUVASHALAUNCHER_MODPACK_ERROR_PATH);
   }
 
   /* A path with the separator of another system. */
@@ -461,7 +461,7 @@ test_archive_paths_are_refused (void)
 
     zip_write (zip_path, entries, G_N_ELEMENTS (entries));
     expect_zip_refused ("an entry with a backslash in it", zip_path,
-                        nuvashalauncher_MODPACK_ERROR_PATH);
+                        NUVASHALAUNCHER_MODPACK_ERROR_PATH);
   }
 
   /* A drive name. */
@@ -474,7 +474,7 @@ test_archive_paths_are_refused (void)
 
     zip_write (zip_path, entries, G_N_ELEMENTS (entries));
     expect_zip_refused ("an entry with a drive name in it", zip_path,
-                        nuvashalauncher_MODPACK_ERROR_PATH);
+                        NUVASHALAUNCHER_MODPACK_ERROR_PATH);
   }
 
   remove_recursive (dir);
@@ -498,7 +498,7 @@ test_archive_links_are_refused (void)
 
     zip_write (zip_path, entries, G_N_ELEMENTS (entries));
     expect_zip_refused ("an archive that holds a symlink", zip_path,
-                        nuvashalauncher_MODPACK_ERROR_PATH);
+                        NUVASHALAUNCHER_MODPACK_ERROR_PATH);
   }
 
   /* A file through a symlink: the archive is refused at the symlink,
@@ -516,7 +516,7 @@ test_archive_links_are_refused (void)
 
     zip_write (zip_path, entries, G_N_ELEMENTS (entries));
     expect_zip_refused ("a file written through a symlink", zip_path,
-                        nuvashalauncher_MODPACK_ERROR_PATH);
+                        NUVASHALAUNCHER_MODPACK_ERROR_PATH);
   }
 
   remove_recursive (dir);
@@ -532,7 +532,7 @@ test_archive_nul_index_is_refused (void)
 
   zip_write_nul_index (zip_path, index_json);
   expect_zip_refused ("an index that carries a NUL byte", zip_path,
-                      nuvashalauncher_MODPACK_ERROR_PATH);
+                      NUVASHALAUNCHER_MODPACK_ERROR_PATH);
 
   remove_recursive (dir);
   g_print ("ok - an index with a raw NUL byte is refused\n");
@@ -549,7 +549,7 @@ test_archive_without_index_is_refused (void)
 
     zip_write (zip_path, entries, G_N_ELEMENTS (entries));
     expect_zip_refused ("an archive with no modrinth.index.json", zip_path,
-                        nuvashalauncher_MODPACK_ERROR_FORMAT);
+                        NUVASHALAUNCHER_MODPACK_ERROR_FORMAT);
   }
 
   remove_recursive (dir);
@@ -564,7 +564,7 @@ test_not_a_zip_is_refused (void)
 
   write_not_a_zip (zip_path);
   expect_zip_refused ("a file that is not a zip", zip_path,
-                      nuvashalauncher_MODPACK_ERROR_ARCHIVE);
+                      NUVASHALAUNCHER_MODPACK_ERROR_ARCHIVE);
 
   remove_recursive (dir);
   g_print ("ok - a file that is not a zip is refused\n");
@@ -579,9 +579,9 @@ test_archive_entry_bomb_is_refused (void)
 
   /* The index plus ten thousand small files: one more entry than one
    * pack carries. */
-  zip_write_entry_bomb (zip_path, index_json, nuvashalauncher_MODPACK_MAX_ENTRIES);
+  zip_write_entry_bomb (zip_path, index_json, NUVASHALAUNCHER_MODPACK_MAX_ENTRIES);
   expect_zip_refused ("an archive with more entries than one pack", zip_path,
-                      nuvashalauncher_MODPACK_ERROR_BOMB);
+                      NUVASHALAUNCHER_MODPACK_ERROR_BOMB);
 
   remove_recursive (dir);
   g_print ("ok - an archive of too many entries is refused\n");
@@ -603,9 +603,9 @@ test_archive_size_bomb_is_refused (void)
   /* One entry that announces more content than one pack carries. */
   zip_write_size_bomb (zip_path, index_json, 129);
   expect_zip_refused ("an archive that announces too much content", zip_path,
-                      nuvashalauncher_MODPACK_ERROR_BOMB);
+                      NUVASHALAUNCHER_MODPACK_ERROR_BOMB);
 
-  nuvashalauncher_modpack_set_content_limit (nuvashalauncher_MODPACK_MAX_CONTENT_SIZE);
+  nuvashalauncher_modpack_set_content_limit (NUVASHALAUNCHER_MODPACK_MAX_CONTENT_SIZE);
   remove_recursive (dir);
   g_print ("ok - an archive of too much content is refused\n");
 }
@@ -619,7 +619,7 @@ test_archive_index_bomb_is_refused (void)
   /* An index that is larger than one manifest can be. */
   zip_write_index_bomb (zip_path, 9);
   expect_zip_refused ("an index that decodes past one manifest", zip_path,
-                      nuvashalauncher_MODPACK_ERROR_BOMB);
+                      NUVASHALAUNCHER_MODPACK_ERROR_BOMB);
 
   remove_recursive (dir);
   g_print ("ok - an index of too many bytes is refused\n");
@@ -712,7 +712,7 @@ test_verify_file_async_local (void)
   g_assert_nonnull (scope1);
   g_main_loop_run (loop);
   g_assert_false (data1.success);
-  g_assert_error (data1.error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_HASH);
+  g_assert_error (data1.error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_HASH);
   g_clear_error (&data1.error);
   nuvashalauncher_task_scope_unref (scope1);
 
@@ -733,7 +733,7 @@ test_verify_file_async_local (void)
   g_assert_nonnull (scope3);
   g_main_loop_run (loop);
   g_assert_false (data3.success);
-  g_assert_error (data3.error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_HASH);
+  g_assert_error (data3.error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_HASH);
   g_clear_error (&data3.error);
   nuvashalauncher_task_scope_unref (scope3);
 

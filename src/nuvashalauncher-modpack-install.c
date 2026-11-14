@@ -40,8 +40,8 @@ nuvashalauncher_modpack_install_icon (NuvashaLauncherInstanceManager *manager, N
   g_autoptr (GFile) source = NULL;
   g_autoptr (GFile) destination = NULL;
 
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (manager), FALSE);
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (instance), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (manager), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (instance), FALSE);
   g_return_val_if_fail (source_path != NULL, FALSE);
 
   g_object_get (instance, "directory", &directory, NULL);
@@ -85,7 +85,7 @@ loader_version_matches (NuvashaLauncherLoader loader,
 
   if (game_version != NULL && nuvashalauncher_loader_publishes_an_installer (loader))
     {
-      const char separator = loader == nuvashalauncher_LOADER_FORGE ? '-' : '.';
+      const char separator = loader == NUVASHALAUNCHER_LOADER_FORGE ? '-' : '.';
       g_autofree char *prefix =
         g_strdup_printf ("%s%c", game_version, separator);
 
@@ -147,12 +147,12 @@ modpack_environment (NuvashaLauncherModpackEnv environment)
 {
   switch (environment)
     {
-    case nuvashalauncher_MODPACK_ENV_OPTIONAL:
+    case NUVASHALAUNCHER_MODPACK_ENV_OPTIONAL:
       return (char *) "optional";
-    case nuvashalauncher_MODPACK_ENV_UNSUPPORTED:
+    case NUVASHALAUNCHER_MODPACK_ENV_UNSUPPORTED:
       return (char *) "unsupported";
-    case nuvashalauncher_MODPACK_ENV_REQUIRED:
-    case nuvashalauncher_MODPACK_ENV_UNSPECIFIED:
+    case NUVASHALAUNCHER_MODPACK_ENV_REQUIRED:
+    case NUVASHALAUNCHER_MODPACK_ENV_UNSPECIFIED:
     default:
       return (char *) "required";
     }
@@ -174,19 +174,19 @@ seed_manifest_indexes (InstallRun *run)
 
       if (g_str_has_prefix (file->path, "mods/"))
         {
-          type = nuvashalauncher_CONTENT_MOD;
+          type = NUVASHALAUNCHER_CONTENT_MOD;
         }
       else if (g_str_has_prefix (file->path, "resourcepacks/"))
         {
-          type = nuvashalauncher_CONTENT_RESOURCE_PACK;
+          type = NUVASHALAUNCHER_CONTENT_RESOURCE_PACK;
         }
       else if (g_str_has_prefix (file->path, "shaderpacks/"))
         {
-          type = nuvashalauncher_CONTENT_SHADER_PACK;
+          type = NUVASHALAUNCHER_CONTENT_SHADER_PACK;
         }
       else if (g_str_has_prefix (file->path, "datapacks/"))
         {
-          type = nuvashalauncher_CONTENT_DATAPACK;
+          type = NUVASHALAUNCHER_CONTENT_DATAPACK;
         }
       else
         continue;
@@ -316,7 +316,7 @@ install_after_overrides (InstallRun *run)
 {
   NuvashaLauncherModpack *pack = run->pack;
 
-  if (pack->loader == nuvashalauncher_LOADER_VANILLA)
+  if (pack->loader == NUVASHALAUNCHER_LOADER_VANILLA)
     {
       install_register (run);
       return;
@@ -348,13 +348,13 @@ install_loader_versions (GObject *source G_GNUC_UNUSED,
 
   if (versions == NULL)
     {
-      if (g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR,
-                           nuvashalauncher_DOWNLOAD_ERROR_CANCELLED) ||
+      if (g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                           NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED) ||
           g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         {
           g_clear_error (&error);
-          error = g_error_new_literal (nuvashalauncher_MODPACK_ERROR,
-                                       nuvashalauncher_MODPACK_ERROR_CANCELLED,
+          error = g_error_new_literal (NUVASHALAUNCHER_MODPACK_ERROR,
+                                       NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED,
                                        "cancelled");
         }
       else
@@ -364,8 +364,8 @@ install_loader_versions (GObject *source G_GNUC_UNUSED,
                              error->message);
 
           g_clear_error (&error);
-          error = g_error_new_literal (nuvashalauncher_MODPACK_ERROR,
-                                       nuvashalauncher_MODPACK_ERROR_LOADER, message);
+          error = g_error_new_literal (NUVASHALAUNCHER_MODPACK_ERROR,
+                                       NUVASHALAUNCHER_MODPACK_ERROR_LOADER, message);
         }
 
       install_fail (run, g_steal_pointer (&error));
@@ -388,8 +388,8 @@ install_loader_versions (GObject *source G_GNUC_UNUSED,
         pack->name != NULL ? pack->name : "the pack", pack->loader_version,
         pack->minecraft_version != NULL ? pack->minecraft_version : "?");
 
-      g_set_error_literal (&error, nuvashalauncher_MODPACK_ERROR,
-                           nuvashalauncher_MODPACK_ERROR_LOADER, message);
+      g_set_error_literal (&error, NUVASHALAUNCHER_MODPACK_ERROR,
+                           NUVASHALAUNCHER_MODPACK_ERROR_LOADER, message);
       install_fail (run, g_steal_pointer (&error));
       return;
     }
@@ -526,8 +526,8 @@ dispatch_download (InstallRun *run)
   if (file->downloads == NULL || file->downloads->len == 0)
     {
       g_autoptr (GError) error = NULL;
-      g_set_error (&error, nuvashalauncher_MODPACK_ERROR,
-                   nuvashalauncher_MODPACK_ERROR_DOWNLOAD,
+      g_set_error (&error, NUVASHALAUNCHER_MODPACK_ERROR,
+                   NUVASHALAUNCHER_MODPACK_ERROR_DOWNLOAD,
                    "\"%s\" has no download URL", file->path);
       install_fail (run, g_steal_pointer (&error));
       return;
@@ -550,15 +550,15 @@ dispatch_download (InstallRun *run)
 
       if (run->saw_hash_error)
         {
-          g_set_error (&error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_HASH,
+          g_set_error (&error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_HASH,
                        "what arrived for \"%s\" did not match the hashes of "
                        "the manifest",
                        file->path);
         }
       else if (run->saw_download_error)
         {
-          g_set_error (&error, nuvashalauncher_MODPACK_ERROR,
-                       nuvashalauncher_MODPACK_ERROR_DOWNLOAD,
+          g_set_error (&error, NUVASHALAUNCHER_MODPACK_ERROR,
+                       NUVASHALAUNCHER_MODPACK_ERROR_DOWNLOAD,
                        "\"%s\" could not be downloaded from %s: %s",
                        file->path,
                        run->last_download_url != NULL ? run->last_download_url : "an available URL",
@@ -566,14 +566,14 @@ dispatch_download (InstallRun *run)
         }
       else if (run->saw_disallowed)
         {
-          g_set_error (&error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_URL,
+          g_set_error (&error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_URL,
                        "every URL the manifest gives for \"%s\" is from a "
                        "host this launcher cannot ask",
                        file->path);
         }
       else
         {
-          g_set_error (&error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_DOWNLOAD,
+          g_set_error (&error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_DOWNLOAD,
                        "\"%s\" has no download URL", file->path);
         }
 
@@ -589,7 +589,7 @@ dispatch_download (InstallRun *run)
     {
       g_autoptr (GError) error = NULL;
 
-      g_set_error (&error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_PATH,
+      g_set_error (&error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_PATH,
                    "the manifest wants \"%s\", which is not a path the "
                    "instance can hold",
                    file->path);
@@ -606,7 +606,7 @@ dispatch_download (InstallRun *run)
       {
         g_autoptr (GError) error = NULL;
 
-        g_set_error (&error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO,
+        g_set_error (&error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_IO,
                      "a directory under the instance cannot be made: %s",
                      directory_error->message);
         install_fail (run, g_steal_pointer (&error));
@@ -639,14 +639,14 @@ install_file_done (GObject *source G_GNUC_UNUSED,
 
   if (!nuvashalauncher_download_file_finish (result, &error))
     {
-      if (g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR,
-                           nuvashalauncher_DOWNLOAD_ERROR_CANCELLED) ||
+      if (g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                           NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED) ||
           g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         {
           install_fail (
             run,
-            g_error_new_literal (nuvashalauncher_MODPACK_ERROR,
-                                 nuvashalauncher_MODPACK_ERROR_CANCELLED, "cancelled"));
+            g_error_new_literal (NUVASHALAUNCHER_MODPACK_ERROR,
+                                 NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED, "cancelled"));
           return;
         }
 
@@ -685,14 +685,14 @@ install_file_verified (GObject *source G_GNUC_UNUSED,
     {
       /* A hash that does not match is no good download: wrong in a way
        * a try of the next URL may put right. */
-      if (g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR,
-                           nuvashalauncher_DOWNLOAD_ERROR_CANCELLED) ||
+      if (g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                           NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED) ||
           g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         {
           install_fail (
             run,
-            g_error_new_literal (nuvashalauncher_MODPACK_ERROR,
-                                 nuvashalauncher_MODPACK_ERROR_CANCELLED, "cancelled"));
+            g_error_new_literal (NUVASHALAUNCHER_MODPACK_ERROR,
+                                 NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED, "cancelled"));
           return;
         }
 
@@ -741,8 +741,8 @@ nuvashalauncher_modpack_install_async (NuvashaLauncherModpack *modpack,
     {
       nuvashalauncher_task_scope_return_error_deferred (
         task_scope,
-        g_error_new_literal (nuvashalauncher_MODPACK_ERROR,
-                             nuvashalauncher_MODPACK_ERROR_FORMAT,
+        g_error_new_literal (NUVASHALAUNCHER_MODPACK_ERROR,
+                             NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                              "the install is missing its modpack, its "
                              "manager or its name"));
       return nuvashalauncher_task_scope_ref (task_scope);
@@ -752,8 +752,8 @@ nuvashalauncher_modpack_install_async (NuvashaLauncherModpack *modpack,
     {
       nuvashalauncher_task_scope_return_error_deferred (
         task_scope,
-        g_error_new_literal (nuvashalauncher_MODPACK_ERROR,
-                             nuvashalauncher_MODPACK_ERROR_LOADER,
+        g_error_new_literal (NUVASHALAUNCHER_MODPACK_ERROR,
+                             NUVASHALAUNCHER_MODPACK_ERROR_LOADER,
                              "the dependencies were never read: call "
                              "nuvashalauncher_modpack_resolve() first"));
       return nuvashalauncher_task_scope_ref (task_scope);
@@ -782,8 +782,8 @@ nuvashalauncher_modpack_install_async (NuvashaLauncherModpack *modpack,
     {
       g_autoptr (GError) error = NULL;
 
-      g_set_error_literal (&error, nuvashalauncher_MODPACK_ERROR,
-                           nuvashalauncher_MODPACK_ERROR_IO,
+      g_set_error_literal (&error, NUVASHALAUNCHER_MODPACK_ERROR,
+                           NUVASHALAUNCHER_MODPACK_ERROR_IO,
                            "the directory of the instance is not usable");
       install_refuse (run, g_steal_pointer (&error));
       return nuvashalauncher_task_scope_ref (task_scope);
@@ -794,7 +794,7 @@ nuvashalauncher_modpack_install_async (NuvashaLauncherModpack *modpack,
     {
       g_autoptr (GError) error = NULL;
 
-      g_set_error (&error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO,
+      g_set_error (&error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_IO,
                    "a directory already exists at \"%s\"", run->target);
       install_refuse (run, g_steal_pointer (&error));
       return nuvashalauncher_task_scope_ref (task_scope);
@@ -828,7 +828,7 @@ nuvashalauncher_modpack_install_async (NuvashaLauncherModpack *modpack,
     {
       g_autoptr (GError) error = NULL;
 
-      g_set_error (&error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO,
+      g_set_error (&error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_IO,
                    "a directory under the instance cannot be made: %s",
                    parent_error->message);
       install_refuse (run, g_steal_pointer (&error));
@@ -843,7 +843,7 @@ nuvashalauncher_modpack_install_async (NuvashaLauncherModpack *modpack,
     {
       g_autoptr (GError) error = NULL;
 
-      g_set_error (&error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO,
+      g_set_error (&error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_IO,
                    "the temporary directory cannot be made: %s",
                    temp_error->message);
       install_refuse (run, g_steal_pointer (&error));

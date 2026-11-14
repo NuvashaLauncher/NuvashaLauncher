@@ -40,7 +40,7 @@ nuvashalauncher_launch_error_quark (void)
 
 G_DEFINE_FINAL_TYPE (NuvashaLauncher, nuvashalauncher_launcher, G_TYPE_OBJECT)
 
-guint nuvashalauncher_launcher_signals[nuvashalauncher_LAUNCHER_N_SIGNALS];
+guint nuvashalauncher_launcher_signals[NUVASHALAUNCHER_LAUNCHER_N_SIGNALS];
 
 
 /* The account a launch plays as, or NULL when there is none. A launcher
@@ -79,7 +79,7 @@ set_state (NuvashaLauncher *self,
   self->state = state;
 
   if (changed)
-    g_signal_emit (self, nuvashalauncher_launcher_signals[nuvashalauncher_LAUNCHER_SIGNAL_STATE], 0,
+    g_signal_emit (self, nuvashalauncher_launcher_signals[NUVASHALAUNCHER_LAUNCHER_SIGNAL_STATE], 0,
                    state, detail);
 }
 
@@ -87,7 +87,7 @@ void
 launcher_failed (NuvashaLauncher *self, const char *reason)
 {
   log_line (self, TAG_STATE, "%s", reason);
-  set_state (self, nuvashalauncher_LAUNCH_FAILED, reason);
+  set_state (self, NUVASHALAUNCHER_LAUNCH_FAILED, reason);
 }
 
 /* A launch that could not finish because the caller cancelled it, which
@@ -100,7 +100,7 @@ launch_finished_with_error (NuvashaLauncher *self, GError *error)
     {
       log_line (self, TAG_STATE,
                 "the launch was cancelled before the game started");
-      set_state (self, nuvashalauncher_LAUNCH_STOPPED, NULL);
+      set_state (self, NUVASHALAUNCHER_LAUNCH_STOPPED, NULL);
       return;
     }
 
@@ -119,7 +119,7 @@ launch_finished_with_error (NuvashaLauncher *self, GError *error)
 NuvashaLauncherInstance *
 nuvashalauncher_launcher_get_instance (NuvashaLauncher *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_LAUNCHER (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_LAUNCHER (self), NULL);
 
   return self->instance;
 }
@@ -127,7 +127,7 @@ nuvashalauncher_launcher_get_instance (NuvashaLauncher *self)
 NuvashaLauncherLaunchState
 nuvashalauncher_launcher_get_state (NuvashaLauncher *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_LAUNCHER (self), nuvashalauncher_LAUNCH_STOPPED);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_LAUNCHER (self), NUVASHALAUNCHER_LAUNCH_STOPPED);
 
   return self->state;
 }
@@ -135,7 +135,7 @@ nuvashalauncher_launcher_get_state (NuvashaLauncher *self)
 const char *
 nuvashalauncher_launcher_get_state_detail (NuvashaLauncher *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_LAUNCHER (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_LAUNCHER (self), NULL);
 
   return self->detail;
 }
@@ -143,7 +143,7 @@ nuvashalauncher_launcher_get_state_detail (NuvashaLauncher *self)
 const char *
 nuvashalauncher_launcher_get_game_directory (NuvashaLauncher *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_LAUNCHER (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_LAUNCHER (self), NULL);
 
   return self->game_directory;
 }
@@ -151,7 +151,7 @@ nuvashalauncher_launcher_get_game_directory (NuvashaLauncher *self)
 char *
 nuvashalauncher_launcher_get_log_directory (NuvashaLauncher *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_LAUNCHER (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_LAUNCHER (self), NULL);
 
   return g_build_filename (self->game_directory, "logs", NULL);
 }
@@ -159,7 +159,7 @@ nuvashalauncher_launcher_get_log_directory (NuvashaLauncher *self)
 char *
 nuvashalauncher_launcher_get_crash_report_directory (NuvashaLauncher *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_LAUNCHER (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_LAUNCHER (self), NULL);
 
   return g_build_filename (self->game_directory, "crash-reports", NULL);
 }
@@ -171,11 +171,11 @@ nuvashalauncher_launcher_new (NuvashaLauncherInstance *instance,
 {
   NuvashaLauncher *self;
 
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (instance), NULL);
-  g_return_val_if_fail (settings == NULL || nuvashalauncher_IS_SETTINGS (settings), NULL);
-  g_return_val_if_fail (accounts == NULL || nuvashalauncher_IS_ACCOUNTS (accounts), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (instance), NULL);
+  g_return_val_if_fail (settings == NULL || NUVASHALAUNCHER_IS_SETTINGS (settings), NULL);
+  g_return_val_if_fail (accounts == NULL || NUVASHALAUNCHER_IS_ACCOUNTS (accounts), NULL);
 
-  self = g_object_new (nuvashalauncher_TYPE_LAUNCHER, NULL);
+  self = g_object_new (NUVASHALAUNCHER_TYPE_LAUNCHER, NULL);
   self->instance = g_object_ref (instance);
 
   if (settings != NULL)
@@ -192,7 +192,7 @@ nuvashalauncher_launcher_new (NuvashaLauncherInstance *instance,
 NuvashaLauncherAccounts *
 nuvashalauncher_launcher_get_accounts (NuvashaLauncher *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_LAUNCHER (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_LAUNCHER (self), NULL);
 
   return self->accounts;
 }
@@ -203,7 +203,7 @@ nuvashalauncher_launcher_set_account (NuvashaLauncher *self, const char *account
 {
   NuvashaLauncherAccount *account;
 
-  g_return_val_if_fail (nuvashalauncher_IS_LAUNCHER (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_LAUNCHER (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   account = NULL;
@@ -221,7 +221,7 @@ nuvashalauncher_launcher_set_account (NuvashaLauncher *self, const char *account
     }
   if (account == NULL)
     {
-      g_set_error (error, nuvashalauncher_ACCOUNTS_ERROR, nuvashalauncher_ACCOUNTS_ERROR_UNKNOWN,
+      g_set_error (error, NUVASHALAUNCHER_ACCOUNTS_ERROR, NUVASHALAUNCHER_ACCOUNTS_ERROR_UNKNOWN,
                    "there is no account \"%s\"", account_id != NULL ? account_id : "");
       return FALSE;
     }
@@ -234,7 +234,7 @@ nuvashalauncher_launcher_set_account (NuvashaLauncher *self, const char *account
 static void
 nuvashalauncher_launcher_dispose (GObject *object)
 {
-  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (object);
+  NuvashaLauncher *self = NUVASHALAUNCHER_LAUNCHER (object);
 
   /* Downloads in flight stop when the owner lets go of the launcher.
      The game itself is not killed: the readers and the wait hold a
@@ -248,7 +248,7 @@ nuvashalauncher_launcher_dispose (GObject *object)
 static void
 nuvashalauncher_launcher_finalize (GObject *object)
 {
-  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (object);
+  NuvashaLauncher *self = NUVASHALAUNCHER_LAUNCHER (object);
 
   g_clear_object (&self->preparation.cancellable);
   nuvashalauncher_task_scope_unref (self->scope);
@@ -285,12 +285,12 @@ nuvashalauncher_launcher_class_init (NuvashaLauncherClass *klass)
 
   /* g_cclosure_marshal_generic marshals these: the state is an enum and
      the other arguments are strings, all of which it can copy. */
-  nuvashalauncher_launcher_signals[nuvashalauncher_LAUNCHER_SIGNAL_STATE] =
+  nuvashalauncher_launcher_signals[NUVASHALAUNCHER_LAUNCHER_SIGNAL_STATE] =
     g_signal_new ("state", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0,
-                  NULL, NULL, NULL, G_TYPE_NONE, 2, nuvashalauncher_TYPE_LAUNCH_STATE,
+                  NULL, NULL, NULL, G_TYPE_NONE, 2, NUVASHALAUNCHER_TYPE_LAUNCH_STATE,
                   G_TYPE_STRING);
 
-  nuvashalauncher_launcher_signals[nuvashalauncher_LAUNCHER_SIGNAL_OUTPUT] =
+  nuvashalauncher_launcher_signals[NUVASHALAUNCHER_LAUNCHER_SIGNAL_OUTPUT] =
     g_signal_new ("output", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0,
                   NULL, NULL, NULL, G_TYPE_NONE, 2, G_TYPE_STRING,
                   G_TYPE_BOOLEAN);
@@ -301,5 +301,5 @@ nuvashalauncher_launcher_init (NuvashaLauncher *self)
 {
   self->lines = g_queue_new ();
   self->scope = nuvashalauncher_task_scope_new (NULL, NULL, NULL, NULL);
-  self->state = nuvashalauncher_LAUNCH_STOPPED;
+  self->state = NUVASHALAUNCHER_LAUNCH_STOPPED;
 }

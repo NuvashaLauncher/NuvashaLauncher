@@ -63,7 +63,7 @@ static void
 on_install_progress (const char *stage, guint done, guint total,
                      gpointer user_data)
 {
-  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *self = NUVASHALAUNCHER_LAUNCHER (user_data);
   guint percent;
   g_autofree char *detail = NULL;
 
@@ -77,7 +77,7 @@ on_install_progress (const char *stage, guint done, guint total,
 
   self->process.last_percent = percent;
   detail = g_strdup_printf ("%s %u%%", stage, percent);
-  set_state (self, nuvashalauncher_LAUNCH_DOWNLOADING, detail);
+  set_state (self, NUVASHALAUNCHER_LAUNCH_DOWNLOADING, detail);
 }
 
 static void
@@ -207,7 +207,7 @@ on_game_document (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
-  set_state (self, nuvashalauncher_LAUNCH_LAUNCHING, "choosing Java");
+  set_state (self, NUVASHALAUNCHER_LAUNCH_LAUNCHING, "choosing Java");
 
   request->operation = nuvashalauncher_java_detect_async (on_java_for_the_install, request);
   nuvashalauncher_task_scope_follow_cancellable (request->operation,
@@ -320,7 +320,7 @@ void
 on_manifest_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                    gpointer user_data)
 {
-  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *self = NUVASHALAUNCHER_LAUNCHER (user_data);
   g_autoptr (GError) error = NULL;
   g_autoptr (NuvashaLauncherVersionManifest) manifest =
     nuvashalauncher_version_manifest_fetch_finish (result, &error);
@@ -340,12 +340,12 @@ on_manifest_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   {
     g_autofree char *loader_version = NULL;
-    NuvashaLauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
+    NuvashaLauncherLoader loader = NUVASHALAUNCHER_LOADER_VANILLA;
 
     g_object_get (self->instance, "loader", &loader, "loader-version",
                   &loader_version, NULL);
 
-    if (loader != nuvashalauncher_LOADER_VANILLA)
+    if (loader != NUVASHALAUNCHER_LOADER_VANILLA)
       {
         /* An instance that names a loader this build does not install, or
            that has no loader version, is a broken instance rather than a

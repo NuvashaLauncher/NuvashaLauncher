@@ -129,8 +129,8 @@ stage_installer (InstallRequest *request)
   if (maven == NULL || coordinate == NULL)
     {
       install_failed (request,
-                      g_error_new (nuvashalauncher_LOADERS_ERROR,
-                                   nuvashalauncher_LOADERS_ERROR_UNSUPPORTED,
+                      g_error_new (NUVASHALAUNCHER_LOADERS_ERROR,
+                                   NUVASHALAUNCHER_LOADERS_ERROR_UNSUPPORTED,
                                    "nuvashalauncher does not install %s",
                                    nuvashalauncher_loader_display_name (request->loader)));
       return;
@@ -224,7 +224,7 @@ document_with_install_libraries (InstallRequest *request, const char *json,
 
   if (root == NULL || !JSON_NODE_HOLDS_OBJECT (root))
     {
-      g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
+      g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                    "the version document of %s %s is not a document nuvashalauncher can "
                    "read", nuvashalauncher_loader_display_name (request->loader),
                    request->loader_version);
@@ -349,8 +349,8 @@ stage_profile (InstallRequest *request)
     {
       g_object_unref (parser);
       install_failed (request,
-                      g_error_new (nuvashalauncher_LOADERS_ERROR,
-                                   nuvashalauncher_LOADERS_ERROR_INSTALLER,
+                      g_error_new (NUVASHALAUNCHER_LOADERS_ERROR,
+                                   NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                                    "the install profile of %s %s is not a "
                                    "document nuvashalauncher can read",
                                    nuvashalauncher_loader_display_name (request->loader),
@@ -409,8 +409,8 @@ stage_profile (InstallRequest *request)
   if (request->processors->len == 0)
     {
       install_failed (request,
-                      g_error_new (nuvashalauncher_LOADERS_ERROR,
-                                   nuvashalauncher_LOADERS_ERROR_GENERATION,
+                      g_error_new (NUVASHALAUNCHER_LOADERS_ERROR,
+                                   NUVASHALAUNCHER_LOADERS_ERROR_GENERATION,
                                    "the install profile of %s %s runs no "
                                    "processor for the client, which is not a "
                                    "shape nuvashalauncher knows how to install",
@@ -469,8 +469,8 @@ install_done (InstallRequest *request)
       !g_file_test (request->patched_jar, G_FILE_TEST_IS_REGULAR))
     {
       install_failed (request,
-                      g_error_new (nuvashalauncher_LOADERS_ERROR,
-                                   nuvashalauncher_LOADERS_ERROR_GENERATION,
+                      g_error_new (NUVASHALAUNCHER_LOADERS_ERROR,
+                                   NUVASHALAUNCHER_LOADERS_ERROR_GENERATION,
                                    "the processors of %s %s did not leave a "
                                    "patched client jar behind, which is not a "
                                    "shape nuvashalauncher knows how to install",
@@ -571,7 +571,7 @@ nuvashalauncher_loaders_install_async (NuvashaLauncherLoader              loader
 
   g_return_val_if_fail (game_version != NULL, NULL);
   g_return_val_if_fail (loader_version != NULL, NULL);
-  g_return_val_if_fail (nuvashalauncher_IS_VERSION_DESCRIPTION (game_document), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_VERSION_DESCRIPTION (game_document), NULL);
   g_return_val_if_fail (java_executable != NULL, NULL);
 
   if (!version_is_path_segment (game_version) ||
@@ -579,8 +579,8 @@ nuvashalauncher_loaders_install_async (NuvashaLauncherLoader              loader
     {
       nuvashalauncher_task_scope_return_error_deferred (
         scope,
-        g_error_new_literal (nuvashalauncher_LOADERS_ERROR,
-                             nuvashalauncher_LOADERS_ERROR_INSTALLER,
+        g_error_new_literal (NUVASHALAUNCHER_LOADERS_ERROR,
+                             NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                              "a version is not usable as a file name"));
       return g_steal_pointer (&scope);
     }
@@ -604,8 +604,8 @@ nuvashalauncher_loaders_install_async (NuvashaLauncherLoader              loader
   if (!nuvashalauncher_loader_publishes_an_installer (loader))
     {
       install_failed (request,
-                      g_error_new (nuvashalauncher_LOADERS_ERROR,
-                                   nuvashalauncher_LOADERS_ERROR_UNSUPPORTED,
+                      g_error_new (NUVASHALAUNCHER_LOADERS_ERROR,
+                                   NUVASHALAUNCHER_LOADERS_ERROR_UNSUPPORTED,
                                    "%s publishes no installer to run",
                                    nuvashalauncher_loader_display_name (loader)));
       return g_steal_pointer (&scope);
@@ -620,7 +620,7 @@ nuvashalauncher_loaders_install_async (NuvashaLauncherLoader              loader
      artifacts of its profile in a maven beside it, so that the games and
      the installers share nothing and an unused version can be thrown away
      whole. */
-  request->root = g_build_filename (request->data_dir, nuvashalauncher_LOADERS_SUBDIR,
+  request->root = g_build_filename (request->data_dir, NUVASHALAUNCHER_LOADERS_SUBDIR,
                                     nuvashalauncher_loader_to_string (loader),
                                     loader_version, NULL);
 
@@ -641,8 +641,8 @@ nuvashalauncher_loaders_install_async (NuvashaLauncherLoader              loader
   if (game_document->client == NULL || game_document->client->url == NULL)
     {
       install_failed (request,
-                      g_error_new (nuvashalauncher_LOADERS_ERROR,
-                                   nuvashalauncher_LOADERS_ERROR_INSTALLER,
+                      g_error_new (NUVASHALAUNCHER_LOADERS_ERROR,
+                                   NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                                    "Minecraft %s has no client jar to patch",
                                    game_version));
       return g_steal_pointer (&scope);

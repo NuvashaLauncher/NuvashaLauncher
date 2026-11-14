@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_I18N_H
-#define nuvashalauncher_I18N_H
+#ifndef NUVASHALAUNCHER_I18N_H
+#define NUVASHALAUNCHER_I18N_H
 
 #include <glib.h>
 

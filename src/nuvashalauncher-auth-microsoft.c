@@ -91,7 +91,7 @@ nuvashalauncher_auth_error_quark (void)
 static const char *
 active_client_id (void)
 {
-  return test_client_id != NULL ? test_client_id : nuvashalauncher_MICROSOFT_CLIENT_ID;
+  return test_client_id != NULL ? test_client_id : NUVASHALAUNCHER_MICROSOFT_CLIENT_ID;
 }
 
 /* Whether an Azure application is configured for sign-in. */
@@ -106,8 +106,8 @@ static GError *
 no_client_id_error (void)
 {
   return g_error_new (
-      nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_NO_CLIENT_ID,
-      "signing in is not set up in this build: nuvashalauncher_MICROSOFT_CLIENT_ID in "
+      NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_NO_CLIENT_ID,
+      "signing in is not set up in this build: NUVASHALAUNCHER_MICROSOFT_CLIENT_ID in "
       "src/nuvashalauncher-auth-microsoft.h is empty, and it has to hold the application "
       "(client) ID of an Azure application registered for the device code "
       "flow of a public client");
@@ -125,8 +125,8 @@ auth_session (void)
 
   if (session == NULL)
     session = soup_session_new_with_options (
-        "timeout", (guint) nuvashalauncher_AUTH_TIMEOUT_SECONDS, "user-agent",
-        nuvashalauncher_AUTH_USER_AGENT, NULL);
+        "timeout", (guint) NUVASHALAUNCHER_AUTH_TIMEOUT_SECONDS, "user-agent",
+        NUVASHALAUNCHER_AUTH_USER_AGENT, NULL);
 
   return session;
 }
@@ -269,7 +269,7 @@ refusal (const char               *body,
         }
     }
 
-  return g_error_new (nuvashalauncher_AUTH_ERROR, code, "%s (HTTP %d)%s%s", what, status,
+  return g_error_new (NUVASHALAUNCHER_AUTH_ERROR, code, "%s (HTTP %d)%s%s", what, status,
                       said != NULL && *said != '\0' ? ": " : "",
                       said != NULL ? said : "");
 }
@@ -342,7 +342,7 @@ auth_send (AuthRequest  *self,
         {
           if (transport_error == NULL)
             transport_error = g_error_new_literal (
-                nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_NETWORK,
+                NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_NETWORK,
                 "the sign-in service could not be reached");
           fail (self, g_steal_pointer (&transport_error));
           return;
@@ -360,8 +360,8 @@ auth_send (AuthRequest  *self,
   self->message = soup_message_new (method, url);
   if (self->message == NULL)
     {
-      fail (self, g_error_new (nuvashalauncher_AUTH_ERROR,
-                               nuvashalauncher_AUTH_ERROR_SERVICE,
+      fail (self, g_error_new (NUVASHALAUNCHER_AUTH_ERROR,
+                               NUVASHALAUNCHER_AUTH_ERROR_SERVICE,
                                "Invalid request URL \"%s\"", url));
       return;
     }
@@ -408,7 +408,7 @@ sent (SoupSession  *session G_GNUC_UNUSED,
         return;
 
       fail (self,
-            g_error_new (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_NETWORK,
+            g_error_new (NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_NETWORK,
                          "the sign-in service could not be reached: %s",
                          transport_error->message));
       return;
@@ -419,7 +419,7 @@ sent (SoupSession  *session G_GNUC_UNUSED,
         soup_message_get_response_headers (self->message)) >
       (goffset) MAX_AUTH_RESPONSE_SIZE)
     {
-      fail (self, g_error_new_literal (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_PARSE,
+      fail (self, g_error_new_literal (NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_PARSE,
                                        "the sign-in response is too large"));
       return;
     }
@@ -451,7 +451,7 @@ auth_read_ready (GObject *source, GAsyncResult *result, gpointer user_data)
   size = g_bytes_get_size (chunk);
   if (self->response_bytes->len + size > MAX_AUTH_RESPONSE_SIZE)
     {
-      fail (self, g_error_new_literal (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_PARSE,
+      fail (self, g_error_new_literal (NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_PARSE,
                                        "the sign-in response is too large"));
       return;
     }
@@ -492,7 +492,7 @@ device_code_answered (AuthRequest *self)
   if (!SOUP_STATUS_IS_SUCCESSFUL (self->status))
     {
       fail (self,
-            refusal (self->body, self->status, nuvashalauncher_AUTH_ERROR_DEVICE_CODE,
+            refusal (self->body, self->status, NUVASHALAUNCHER_AUTH_ERROR_DEVICE_CODE,
                      _("Microsoft would not give a code to sign in with")));
       return;
     }
@@ -523,9 +523,9 @@ nuvashalauncher_auth_device_code_async (GAsyncReadyCallback callback, gpointer u
     }
 
   form = soup_form_encode ("client_id", active_client_id (), "scope",
-                           nuvashalauncher_MICROSOFT_SCOPE, NULL);
+                           NUVASHALAUNCHER_MICROSOFT_SCOPE, NULL);
 
-  auth_send (self, nuvashalauncher_MICROSOFT_DEVICE_CODE_URL, SOUP_METHOD_POST, form,
+  auth_send (self, NUVASHALAUNCHER_MICROSOFT_DEVICE_CODE_URL, SOUP_METHOD_POST, form,
              "application/x-www-form-urlencoded", NULL, STEP_DEVICE_CODE);
 
   return g_steal_pointer (&scope);
@@ -553,12 +553,12 @@ token_form (AuthRequest *self)
     return soup_form_encode ("client_id", client_id,
                              "grant_type", "refresh_token", "refresh_token",
                              self->refresh_token, "scope",
-                             nuvashalauncher_MICROSOFT_SCOPE, NULL);
+                             NUVASHALAUNCHER_MICROSOFT_SCOPE, NULL);
 
   return soup_form_encode ("client_id", client_id, "grant_type",
                            "urn:ietf:params:oauth:grant-type:device_code",
                            "device_code", self->device_code, "scope",
-                           nuvashalauncher_MICROSOFT_SCOPE, NULL);
+                           NUVASHALAUNCHER_MICROSOFT_SCOPE, NULL);
 }
 
 static void
@@ -566,7 +566,7 @@ ask_for_token (AuthRequest *self)
 {
   g_autofree char *form = token_form (self);
 
-  auth_send (self, nuvashalauncher_MICROSOFT_TOKEN_URL, SOUP_METHOD_POST, form,
+  auth_send (self, NUVASHALAUNCHER_MICROSOFT_TOKEN_URL, SOUP_METHOD_POST, form,
              "application/x-www-form-urlencoded", NULL, STEP_TOKEN);
 }
 
@@ -622,7 +622,7 @@ token_answered (AuthRequest *self)
   if (nuvashalauncher_auth_polling_error (self->body, -1, &slow_down, &error))
     {
       if (error == NULL)
-        error = g_error_new_literal (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_PARSE,
+        error = g_error_new_literal (NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_PARSE,
                                      "the service refused the sign-in without "
                                      "saying why");
 
@@ -634,7 +634,7 @@ token_answered (AuthRequest *self)
   if (self->device_code == NULL)
     {
       fail (self,
-            refusal (self->body, self->status, nuvashalauncher_AUTH_ERROR_REAUTH,
+            refusal (self->body, self->status, NUVASHALAUNCHER_AUTH_ERROR_REAUTH,
                      "the sign-in expired"));
       return;
     }
@@ -649,7 +649,7 @@ token_answered (AuthRequest *self)
       g_get_real_time () / 1000000 >= self->deadline)
     {
       fail (self,
-            g_error_new_literal (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_EXPIRED,
+            g_error_new_literal (NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_EXPIRED,
                                  "the code ran out before the sign-in was "
                                  "finished: ask for a new one"));
       return;
@@ -673,7 +673,7 @@ ask_xbl (AuthRequest *self, const char *access_token)
   g_autofree char *body = NULL;
   g_autofree char *rps_ticket = NULL;
   const char *headers[] = { "x-xbl-contract-version",
-                            nuvashalauncher_XBOX_CONTRACT_VERSION, "Accept",
+                            NUVASHALAUNCHER_XBOX_CONTRACT_VERSION, "Accept",
                             "application/json", NULL };
 
   json_builder_begin_object (builder);
@@ -697,7 +697,7 @@ ask_xbl (AuthRequest *self, const char *access_token)
   root = json_builder_get_root (builder);
   json_generator_set_root (generator, root);
   body = json_generator_to_data (generator, NULL);
-  auth_send (self, nuvashalauncher_XBOX_USER_URL, SOUP_METHOD_POST, body,
+  auth_send (self, NUVASHALAUNCHER_XBOX_USER_URL, SOUP_METHOD_POST, body,
              "application/json", headers, STEP_XBL);
 }
 
@@ -709,7 +709,7 @@ xbl_answered (AuthRequest *self)
 
   if (!SOUP_STATUS_IS_SUCCESSFUL (self->status))
     {
-      fail (self, refusal (self->body, self->status, nuvashalauncher_AUTH_ERROR_XBOX,
+      fail (self, refusal (self->body, self->status, NUVASHALAUNCHER_AUTH_ERROR_XBOX,
                            "Xbox Live refused the sign-in"));
       return;
     }
@@ -742,7 +742,7 @@ ask_xsts (AuthRequest *self)
   g_autoptr (JsonNode) root = NULL;
   g_autofree char *body = NULL;
   const char *headers[] = { "x-xbl-contract-version",
-                            nuvashalauncher_XBOX_CONTRACT_VERSION, "Accept",
+                            NUVASHALAUNCHER_XBOX_CONTRACT_VERSION, "Accept",
                             "application/json", NULL };
 
   /* The relying party is what says which services the token is for, and
@@ -758,7 +758,7 @@ ask_xsts (AuthRequest *self)
   json_builder_end_array (builder);
   json_builder_end_object (builder);
   json_builder_set_member_name (builder, "RelyingParty");
-  json_builder_add_string_value (builder, nuvashalauncher_MINECRAFT_RELYING_PARTY);
+  json_builder_add_string_value (builder, NUVASHALAUNCHER_MINECRAFT_RELYING_PARTY);
   json_builder_set_member_name (builder, "TokenType");
   json_builder_add_string_value (builder, "JWT");
   json_builder_end_object (builder);
@@ -767,7 +767,7 @@ ask_xsts (AuthRequest *self)
   json_generator_set_root (generator, root);
   body = json_generator_to_data (generator, NULL);
 
-  auth_send (self, nuvashalauncher_XBOX_XSTS_URL, SOUP_METHOD_POST, body, "application/json",
+  auth_send (self, NUVASHALAUNCHER_XBOX_XSTS_URL, SOUP_METHOD_POST, body, "application/json",
              headers, STEP_XSTS);
 }
 
@@ -784,18 +784,18 @@ xsts_answered (AuthRequest *self)
       if (error != NULL)
         fail (self, g_steal_pointer (&error));
       else if (!SOUP_STATUS_IS_SUCCESSFUL (self->status))
-        fail (self, refusal (self->body, self->status, nuvashalauncher_AUTH_ERROR_XBOX,
+        fail (self, refusal (self->body, self->status, NUVASHALAUNCHER_AUTH_ERROR_XBOX,
                              "XSTS refused the token request"));
       else
-        fail (self, g_error_new_literal (nuvashalauncher_AUTH_ERROR,
-                                         nuvashalauncher_AUTH_ERROR_PARSE,
+        fail (self, g_error_new_literal (NUVASHALAUNCHER_AUTH_ERROR,
+                                         NUVASHALAUNCHER_AUTH_ERROR_PARSE,
                                          "XSTS answered with no token"));
       return;
     }
 
   if (!SOUP_STATUS_IS_SUCCESSFUL (self->status))
     {
-      fail (self, refusal (self->body, self->status, nuvashalauncher_AUTH_ERROR_XBOX,
+      fail (self, refusal (self->body, self->status, NUVASHALAUNCHER_AUTH_ERROR_XBOX,
                            "Xbox services refused the sign-in"));
       return;
     }
@@ -807,7 +807,7 @@ xsts_answered (AuthRequest *self)
      came with, and without it there is nobody to sign in as. */
   if (self->xbl_user_hash == NULL)
     {
-      fail (self, g_error_new_literal (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_PARSE,
+      fail (self, g_error_new_literal (NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_PARSE,
                                        "Xbox services answered with a token "
                                        "and no user"));
       return;
@@ -848,7 +848,7 @@ ask_minecraft (AuthRequest *self)
   json_generator_set_root (generator, root);
   body = json_generator_to_data (generator, NULL);
 
-  auth_send (self, nuvashalauncher_MINECRAFT_SERVICES_URL "/launcher/login",
+  auth_send (self, NUVASHALAUNCHER_MINECRAFT_SERVICES_URL "/launcher/login",
              SOUP_METHOD_POST, body, "application/json", headers, STEP_MINECRAFT);
 }
 
@@ -863,7 +863,7 @@ minecraft_answered (AuthRequest *self)
       /* "Invalid app registration" is what the services answer an Azure
          application that is not registered for Minecraft with, and it
          comes through in the sentence they give. */
-      fail (self, refusal (self->body, self->status, nuvashalauncher_AUTH_ERROR_XBOX,
+      fail (self, refusal (self->body, self->status, NUVASHALAUNCHER_AUTH_ERROR_XBOX,
                            "the Minecraft services refused the sign-in"));
       return;
     }
@@ -904,7 +904,7 @@ ask_entitlements (AuthRequest *self)
   /* Current Minecraft services use the license endpoint with a request id.
      The older mcstore endpoint can return a legacy-shaped
      response or reject otherwise valid accounts. */
-  url = g_strdup_printf (nuvashalauncher_MINECRAFT_SERVICES_URL
+  url = g_strdup_printf (NUVASHALAUNCHER_MINECRAFT_SERVICES_URL
                          "/entitlements/license?requestId=%s", request_id);
   auth_send (self, url, SOUP_METHOD_GET, NULL, NULL, headers, STEP_ENTITLEMENTS);
 }
@@ -916,7 +916,7 @@ entitlements_answered (AuthRequest *self)
 
   if (!SOUP_STATUS_IS_SUCCESSFUL (self->status))
     {
-      fail (self, refusal (self->body, self->status, nuvashalauncher_AUTH_ERROR_XBOX,
+      fail (self, refusal (self->body, self->status, NUVASHALAUNCHER_AUTH_ERROR_XBOX,
                            "the Minecraft services did not answer with what "
                            "this account owns"));
       return;
@@ -942,7 +942,7 @@ ask_profile (AuthRequest *self)
   authorization = g_strconcat ("Bearer ", self->mc_access_token, NULL);
   headers[1] = authorization;
 
-  auth_send (self, nuvashalauncher_MINECRAFT_SERVICES_URL "/minecraft/profile",
+  auth_send (self, NUVASHALAUNCHER_MINECRAFT_SERVICES_URL "/minecraft/profile",
              SOUP_METHOD_GET, NULL, NULL, headers, STEP_PROFILE);
 }
 
@@ -964,11 +964,11 @@ profile_answered (AuthRequest *self)
       if (error != NULL)
         fail (self, g_steal_pointer (&error));
       else if (self->status == SOUP_STATUS_NOT_FOUND)
-        fail (self, refusal (self->body, self->status, nuvashalauncher_AUTH_ERROR_NO_PROFILE,
+        fail (self, refusal (self->body, self->status, NUVASHALAUNCHER_AUTH_ERROR_NO_PROFILE,
                              "the Minecraft services have no profile for this "
                              "account"));
       else
-        fail (self, refusal (self->body, self->status, nuvashalauncher_AUTH_ERROR_SERVICE,
+        fail (self, refusal (self->body, self->status, NUVASHALAUNCHER_AUTH_ERROR_SERVICE,
                              "the Minecraft profile service refused the request"));
       return;
     }
@@ -978,7 +978,7 @@ profile_answered (AuthRequest *self)
   if (uuid == NULL)
     {
       fail (self,
-            g_error_new (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_PARSE,
+            g_error_new (NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_PARSE,
                          "the Minecraft services answered with a profile id "
                          "that is not a uuid"));
       return;
@@ -987,7 +987,7 @@ profile_answered (AuthRequest *self)
   /* What the launcher is handed: who the player is, and the token it is
      run with. Nothing else of the chain is kept. */
   account = g_new0 (NuvashaLauncherAccount, 1);
-  account->type = nuvashalauncher_ACCOUNT_MICROSOFT;
+  account->type = NUVASHALAUNCHER_ACCOUNT_MICROSOFT;
   account->id = g_strdup (profile->id);
   account->name = g_strdup (profile->name);
   account->uuid = g_steal_pointer (&uuid);
@@ -1073,7 +1073,7 @@ nuvashalauncher_auth_refresh_async (const NuvashaLauncherAccount *account,
   if (account->refresh_token == NULL || *account->refresh_token == '\0')
     {
       fail (self,
-            g_error_new (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_REAUTH,
+            g_error_new (NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_REAUTH,
                          "\"%s\" has to sign in again before it can play",
                          account->name != NULL ? account->name
                                                : "this account"));

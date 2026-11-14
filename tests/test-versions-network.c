@@ -214,7 +214,7 @@ test_version_load_errors (void)
   async_run_wait (&run);
 
   g_assert_null (call.description);
-  g_assert_error (call.error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_NOT_FOUND);
+  g_assert_error (call.error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_NOT_FOUND);
   g_assert_cmpuint (fixture.hits, ==, 0);
   async_call_clear (&call);
 
@@ -222,7 +222,7 @@ test_version_load_errors (void)
   async_run_wait (&run);
 
   g_assert_null (call.description);
-  g_assert_error (call.error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_CYCLE);
+  g_assert_error (call.error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_CYCLE);
   g_assert_cmpuint (fixture.hits, ==, 2);
   async_call_clear (&call);
 
@@ -230,7 +230,7 @@ test_version_load_errors (void)
   async_run_wait (&run);
 
   g_assert_null (call.description);
-  g_assert_error (call.error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_CYCLE);
+  g_assert_error (call.error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_CYCLE);
   g_assert_cmpuint (fixture.hits, ==, 2);
   async_call_clear (&call);
 

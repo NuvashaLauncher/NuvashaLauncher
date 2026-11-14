@@ -113,7 +113,7 @@ test_resolve_modern (void)
   g_assert_true (g_file_test (logging_file, G_FILE_TEST_EXISTS));
   g_assert_cmpstr (call.resolved->logging_argument, ==, path);
 
-  /* The placeholders nuvashalauncher knows are in, the ones it does not are not. */
+  /* The placeholders Nuvasha Launcher knows are in, the ones it does not are not. */
   g_assert_cmpuint (call.resolved->jvm_arguments->len, ==, 3);
   g_free (path);
   path = g_strdup_printf ("-Djava.library.path=%s", natives_dir);
@@ -267,7 +267,7 @@ test_resolve_failures (void)
   async_run_wait (&run);
 
   g_assert_null (call.resolved);
-  g_assert_error (call.error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_NOT_FOUND);
+  g_assert_error (call.error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_NOT_FOUND);
 
   g_clear_error (&call.error);
   g_clear_object (&call.manifest);

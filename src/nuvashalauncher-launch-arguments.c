@@ -21,14 +21,14 @@ nuvashalauncher_launch_session_for (const NuvashaLauncherAccount *account)
 
   session.name = account->name != NULL ? account->name : "";
   session.uuid = account->uuid != NULL ? account->uuid : "";
-  session.user_type = account->type == nuvashalauncher_ACCOUNT_MICROSOFT
-                        ? nuvashalauncher_LAUNCH_MICROSOFT_USER_TYPE
-                        : nuvashalauncher_LAUNCH_OFFLINE_USER_TYPE;
-  session.access_token = account->type == nuvashalauncher_ACCOUNT_MICROSOFT &&
+  session.user_type = account->type == NUVASHALAUNCHER_ACCOUNT_MICROSOFT
+                        ? NUVASHALAUNCHER_LAUNCH_MICROSOFT_USER_TYPE
+                        : NUVASHALAUNCHER_LAUNCH_OFFLINE_USER_TYPE;
+  session.access_token = account->type == NUVASHALAUNCHER_ACCOUNT_MICROSOFT &&
                                  account->access_token != NULL &&
                                  *account->access_token != '\0'
                            ? account->access_token
-                           : nuvashalauncher_LAUNCH_OFFLINE_TOKEN;
+                           : NUVASHALAUNCHER_LAUNCH_OFFLINE_TOKEN;
 
   return session;
 }
@@ -124,7 +124,7 @@ add_shell_words (GPtrArray *argv, const char *line, GError **error)
 
   if (!g_shell_parse_argv (line, &count, &words, NULL))
     {
-      g_set_error (error, nuvashalauncher_LAUNCH_ERROR, nuvashalauncher_LAUNCH_ERROR_ARGUMENTS,
+      g_set_error (error, NUVASHALAUNCHER_LAUNCH_ERROR, NUVASHALAUNCHER_LAUNCH_ERROR_ARGUMENTS,
                    "the JVM arguments of the instance are not a command "
                    "line: \"%s\"", line);
       return FALSE;
@@ -147,7 +147,7 @@ nuvashalauncher_launch_build_arguments (const NuvashaLauncherResolvedVersion *re
   g_autoptr (GHashTable) placeholders = NULL;
   g_autoptr (GPtrArray) argv = NULL;
   g_autofree char *legacy_session = NULL;
-  const char *auth_session = nuvashalauncher_LAUNCH_OFFLINE_TOKEN;
+  const char *auth_session = NUVASHALAUNCHER_LAUNCH_OFFLINE_TOKEN;
 
   g_return_val_if_fail (resolved != NULL, NULL);
   g_return_val_if_fail (session != NULL, NULL);
@@ -155,7 +155,7 @@ nuvashalauncher_launch_build_arguments (const NuvashaLauncherResolvedVersion *re
 
   if (resolved->main_class == NULL || resolved->main_class[0] == '\0')
     {
-      g_set_error (error, nuvashalauncher_LAUNCH_ERROR, nuvashalauncher_LAUNCH_ERROR_NO_MAIN_CLASS,
+      g_set_error (error, NUVASHALAUNCHER_LAUNCH_ERROR, NUVASHALAUNCHER_LAUNCH_ERROR_NO_MAIN_CLASS,
                    "the version document of %s names no main class",
                    resolved->version_id != NULL ? resolved->version_id
                                                 : "this version");
@@ -167,9 +167,9 @@ nuvashalauncher_launch_build_arguments (const NuvashaLauncherResolvedVersion *re
   /* Minecraft versions through 1.6 use one legacy session argument rather
      than the separate UUID and access-token arguments used by newer
      versions. The old launcher format is token:<access-token>:<uuid>. */
-  if (g_strcmp0 (session->user_type, nuvashalauncher_LAUNCH_MICROSOFT_USER_TYPE) == 0 &&
+  if (g_strcmp0 (session->user_type, NUVASHALAUNCHER_LAUNCH_MICROSOFT_USER_TYPE) == 0 &&
       session->access_token != NULL && *session->access_token != '\0' &&
-      g_strcmp0 (session->access_token, nuvashalauncher_LAUNCH_OFFLINE_TOKEN) != 0)
+      g_strcmp0 (session->access_token, NUVASHALAUNCHER_LAUNCH_OFFLINE_TOKEN) != 0)
     {
       legacy_session = g_strdup_printf ("token:%s:%s", session->access_token,
                                         session->uuid != NULL ? session->uuid
@@ -186,8 +186,8 @@ nuvashalauncher_launch_build_arguments (const NuvashaLauncherResolvedVersion *re
   put_placeholder (placeholders, "clientid", "");
   put_placeholder (placeholders, "user_type", session->user_type);
   put_placeholder (placeholders, "user_properties", "{}");
-  put_placeholder (placeholders, "launcher_name", nuvashalauncher_LAUNCHER_NAME);
-  put_placeholder (placeholders, "launcher_version", nuvashalauncher_LAUNCHER_VERSION);
+  put_placeholder (placeholders, "launcher_name", NUVASHALAUNCHER_LAUNCHER_NAME);
+  put_placeholder (placeholders, "launcher_version", NUVASHALAUNCHER_LAUNCHER_VERSION);
 
   put_placeholder (placeholders, "game_directory", game_directory);
   put_placeholder (placeholders, "version_name", resolved->version_id);
@@ -208,9 +208,9 @@ nuvashalauncher_launch_build_arguments (const NuvashaLauncherResolvedVersion *re
   put_placeholder (placeholders, "classpath_separator",
                    G_SEARCHPATH_SEPARATOR_S);
   put_placeholder (placeholders, "resolution_width",
-                   G_STRINGIFY (nuvashalauncher_LAUNCH_WIDTH));
+                   G_STRINGIFY (NUVASHALAUNCHER_LAUNCH_WIDTH));
   put_placeholder (placeholders, "resolution_height",
-                   G_STRINGIFY (nuvashalauncher_LAUNCH_HEIGHT));
+                   G_STRINGIFY (NUVASHALAUNCHER_LAUNCH_HEIGHT));
 
   argv = g_ptr_array_new_with_free_func (g_free);
   g_ptr_array_add (argv, g_strdup (java_executable));

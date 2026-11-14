@@ -36,8 +36,8 @@ nuvashalauncher_i18n_template_strings (void)
 
 #define N_(string) string
 
-#ifndef nuvashalauncher_LOCALE_DIR
-#define nuvashalauncher_LOCALE_DIR "/usr/local/share/locale"
+#ifndef NUVASHALAUNCHER_LOCALE_DIR
+#define NUVASHALAUNCHER_LOCALE_DIR "/usr/local/share/locale"
 #endif
 
 static const NuvashaLauncherLanguage languages[] = {
@@ -89,7 +89,7 @@ nuvashalauncher_i18n_init (const char *override_code)
   g_autofree char *executable_dir = NULL;
   g_autofree char *executable_locale_dir = NULL;
   g_autofree char *development_locale_dir = NULL;
-  const char *locale_dir = nuvashalauncher_LOCALE_DIR;
+  const char *locale_dir = NUVASHALAUNCHER_LOCALE_DIR;
 
   if (override_code != NULL &&
       *override_code != '\0' &&

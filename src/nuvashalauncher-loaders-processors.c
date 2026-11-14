@@ -86,7 +86,7 @@ processor_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   /* Processor output provides details not present in the exit status. */
   said = what_a_processor_said (output, 12);
 
-  g_set_error (&error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
+  g_set_error (&error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                "the processor that patches the game for %s %s failed with "
                "status %d%s%s", nuvashalauncher_loader_display_name (request->loader),
                request->loader_version, g_subprocess_get_exit_status (process),
@@ -199,7 +199,7 @@ resolve_variable (InstallRequest *request, const char *name, GError **error)
 
       if (value == NULL)
         {
-          g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER,
+          g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                        "the install profile of %s %s says nothing about "
                        "{%s}, which its processors ask for",
                        nuvashalauncher_loader_display_name (request->loader),
@@ -222,7 +222,7 @@ resolve_variable (InstallRequest *request, const char *name, GError **error)
 
       if (path == NULL)
         {
-          g_set_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_NO_MAVEN,
+          g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_NO_MAVEN,
                        "\"%s\" is no path an artifact of %s can live at",
                        coordinate, nuvashalauncher_loader_display_name (request->loader));
           return FALSE;
@@ -253,8 +253,8 @@ resolve_variable (InstallRequest *request, const char *name, GError **error)
       if (*entry == '\0' || strstr (entry, "..") != NULL ||
           !nuvashalauncher_resolve_entry_name_is_safe (entry))
         {
-          g_set_error (error, nuvashalauncher_LOADERS_ERROR,
-                       nuvashalauncher_LOADERS_ERROR_INSTALLER,
+          g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR,
+                       NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                        "the installer names an unsafe unpacked path \"%s\"",
                        value);
           return FALSE;
@@ -330,8 +330,8 @@ stage_processor (InstallRequest *request)
   if (request->index >= request->processors->len)
     {
       install_failed (request,
-                      g_error_new (nuvashalauncher_LOADERS_ERROR,
-                                   nuvashalauncher_LOADERS_ERROR_INSTALLER,
+                      g_error_new (NUVASHALAUNCHER_LOADERS_ERROR,
+                                   NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                                    "the install of %s %s has no processor to "
                                    "run",
                                    nuvashalauncher_loader_display_name (request->loader),
@@ -424,8 +424,8 @@ stage_run (InstallRequest *request)
       json_node_get_value_type (node) != G_TYPE_STRING)
     {
       install_failed (request,
-                      g_error_new (nuvashalauncher_LOADERS_ERROR,
-                                   nuvashalauncher_LOADERS_ERROR_INSTALLER,
+                      g_error_new (NUVASHALAUNCHER_LOADERS_ERROR,
+                                   NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
                                    "a processor of %s %s names no jar to run",
                                    nuvashalauncher_loader_display_name (request->loader),
                                    request->loader_version));
@@ -441,7 +441,7 @@ stage_run (InstallRequest *request)
       {
         install_failed (
           request,
-          g_error_new (nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_NO_MAVEN,
+          g_error_new (NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_NO_MAVEN,
                        "\"%s\" is no path a processor of %s can live at", tool,
                        nuvashalauncher_loader_display_name (request->loader)));
         return;

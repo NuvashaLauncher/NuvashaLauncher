@@ -75,7 +75,7 @@ make_manager (char **root_out, char **instance_directory_out,
     nuvashalauncher_instance_manager_new (data);
   NuvashaLauncherInstance *instance =
     nuvashalauncher_instance_manager_create (
-      manager, "Identify", NULL, "1.21.1", nuvashalauncher_LOADER_FABRIC,
+      manager, "Identify", NULL, "1.21.1", NUVASHALAUNCHER_LOADER_FABRIC,
       "0.15.0", &error);
 
   g_assert_no_error (error);
@@ -102,7 +102,7 @@ test_empty_folder_finishes_identification (void)
   g_assert_cmpint (g_mkdir_with_parents (mods, 0700), ==, 0);
 
   page = g_object_ref_sink (nuvashalauncher_content_page_new (
-    instance, nuvashalauncher_CONTENT_MOD));
+    instance, NUVASHALAUNCHER_CONTENT_MOD));
   reload_installed (page);
   wait_for_page (page);
 
@@ -135,7 +135,7 @@ test_unreadable_folder_shows_failure_state (void)
   g_assert_true (g_file_set_contents (mods, "not a directory", -1, NULL));
 
   page = g_object_ref_sink (nuvashalauncher_content_page_new (
-    instance, nuvashalauncher_CONTENT_MOD));
+    instance, NUVASHALAUNCHER_CONTENT_MOD));
   reload_installed (page);
   wait_for_page (page);
 

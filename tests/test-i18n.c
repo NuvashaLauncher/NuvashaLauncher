@@ -21,12 +21,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef nuvashalauncher_SRC_DIR
-#define nuvashalauncher_SRC_DIR "../src"
+#ifndef NUVASHALAUNCHER_SRC_DIR
+#define NUVASHALAUNCHER_SRC_DIR "../src"
 #endif
 
-#ifndef nuvashalauncher_PO_DIR
-#define nuvashalauncher_PO_DIR "../po"
+#ifndef NUVASHALAUNCHER_PO_DIR
+#define NUVASHALAUNCHER_PO_DIR "../po"
 #endif
 
 /* ---------------------------------------------------------- *
@@ -361,7 +361,7 @@ compare_names (gconstpointer a,
 static GPtrArray *
 catalog_paths (void)
 {
-  g_autoptr (GDir) directory = g_dir_open (nuvashalauncher_PO_DIR, 0, NULL);
+  g_autoptr (GDir) directory = g_dir_open (NUVASHALAUNCHER_PO_DIR, 0, NULL);
   GPtrArray *names;
   const char *entry;
 
@@ -393,7 +393,7 @@ main (void)
   /* Every msgid the source hands to gettext. */
   used = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
   {
-    g_autoptr (GDir) sources = g_dir_open (nuvashalauncher_SRC_DIR, 0, NULL);
+    g_autoptr (GDir) sources = g_dir_open (NUVASHALAUNCHER_SRC_DIR, 0, NULL);
     const char *entry;
 
     g_assert_nonnull (sources);
@@ -405,7 +405,7 @@ main (void)
         if (!g_str_has_suffix (entry, ".c"))
           continue;
 
-        path = g_build_filename (nuvashalauncher_SRC_DIR, entry, NULL);
+        path = g_build_filename (NUVASHALAUNCHER_SRC_DIR, entry, NULL);
         scan_file (path, used);
       }
   }
@@ -413,7 +413,7 @@ main (void)
   {
     guint n = g_hash_table_size (used);
 
-    g_print ("found %u translated string(s) in %s\n", n, nuvashalauncher_SRC_DIR);
+    g_print ("found %u translated string(s) in %s\n", n, NUVASHALAUNCHER_SRC_DIR);
     g_assert_cmpuint (n, >, 0);
   }
 
@@ -425,7 +425,7 @@ main (void)
   for (guint i = 0; i < paths->len; i++)
     {
       g_autofree char *path =
-        g_build_filename (nuvashalauncher_PO_DIR, g_ptr_array_index (paths, i), NULL);
+        g_build_filename (NUVASHALAUNCHER_PO_DIR, g_ptr_array_index (paths, i), NULL);
 
       g_ptr_array_add (catalogs, read_catalog (path));
     }

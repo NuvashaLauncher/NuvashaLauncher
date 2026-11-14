@@ -21,8 +21,8 @@
  * The row answers nothing at all while it is loading, empty or failed:
  * a screen that saves what it is told then saves nothing. */
 
-#ifndef nuvashalauncher_LOADER_ROW_H
-#define nuvashalauncher_LOADER_ROW_H
+#ifndef NUVASHALAUNCHER_LOADER_ROW_H
+#define NUVASHALAUNCHER_LOADER_ROW_H
 
 #include <adwaita.h>
 
@@ -31,14 +31,14 @@
 
 G_BEGIN_DECLS
 
-#define nuvashalauncher_TYPE_LOADER_ROW (nuvashalauncher_loader_row_get_type ())
+#define NUVASHALAUNCHER_TYPE_LOADER_ROW (nuvashalauncher_loader_row_get_type ())
 
 /* Not a widget: the two rows are plain AdwComboRows that a screen adds
  * to the AdwPreferencesGroup it already has, so they are drawn and drop
  * their popups the same way as every other dropdown on that page. An
  * AdwComboRow that is not a row of a group has no list box to press
  * into, and pressing it does nothing at all. */
-G_DECLARE_FINAL_TYPE (NuvashaLauncherLoaderRow, nuvashalauncher_loader_row, nuvashalauncher, LOADER_ROW, GObject)
+G_DECLARE_FINAL_TYPE (NuvashaLauncherLoaderRow, nuvashalauncher_loader_row, NUVASHALAUNCHER, LOADER_ROW, GObject)
 
 /* "changed" is what a screen stores the choice with: ask get_loader()
  * and get_version() and write them down. It fires when the user picks a
@@ -46,8 +46,8 @@ G_DECLARE_FINAL_TYPE (NuvashaLauncherLoaderRow, nuvashalauncher_loader_row, nuva
  * preselected version too. Changing the loader reloads the version row
  * here, with no help from the screen. */
 enum {
-  nuvashalauncher_LOADER_ROW_SIGNAL_CHANGED,
-  nuvashalauncher_LOADER_ROW_N_SIGNALS
+  NUVASHALAUNCHER_LOADER_ROW_SIGNAL_CHANGED,
+  NUVASHALAUNCHER_LOADER_ROW_N_SIGNALS
 };
 
 /* Makes the two rows, holding vanilla and no version until loaded. */
@@ -85,4 +85,4 @@ void nuvashalauncher_loader_row_set_blocked (NuvashaLauncherLoaderRow *self, gbo
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_LOADER_ROW_H */
+#endif /* NUVASHALAUNCHER_LOADER_ROW_H */

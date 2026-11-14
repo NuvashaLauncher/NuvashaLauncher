@@ -23,7 +23,7 @@ G_DEFINE_FINAL_TYPE (NuvashaLauncherOfflineAccountDialog, nuvashalauncher_offlin
                      ADW_TYPE_DIALOG)
 
 static guint
-  nuvashalauncher_offline_account_dialog_signals[nuvashalauncher_OFFLINE_ACCOUNT_DIALOG_N_SIGNALS];
+  nuvashalauncher_offline_account_dialog_signals[NUVASHALAUNCHER_OFFLINE_ACCOUNT_DIALOG_N_SIGNALS];
 
 static void
 show_error (NuvashaLauncherOfflineAccountDialog *self, const char *message)
@@ -44,7 +44,7 @@ offline_name_exists (NuvashaLauncherOfflineAccountDialog *self, const char *name
     {
       NuvashaLauncherAccount *existing = g_ptr_array_index (accounts, i);
 
-      if (existing->type == nuvashalauncher_ACCOUNT_OFFLINE &&
+      if (existing->type == NUVASHALAUNCHER_ACCOUNT_OFFLINE &&
           g_strcmp0 (existing->name, name) == 0)
         return TRUE;
     }
@@ -92,7 +92,7 @@ on_input_changed (GObject *object G_GNUC_UNUSED, GParamSpec *pspec G_GNUC_UNUSED
 static void
 on_add_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherOfflineAccountDialog *self = nuvashalauncher_OFFLINE_ACCOUNT_DIALOG (user_data);
+  NuvashaLauncherOfflineAccountDialog *self = NUVASHALAUNCHER_OFFLINE_ACCOUNT_DIALOG (user_data);
   g_autofree char *name =
     g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->name_row)));
   g_autoptr (GError) error = NULL;
@@ -113,7 +113,7 @@ on_add_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
     }
 
   g_signal_emit (self,
-                 nuvashalauncher_offline_account_dialog_signals[nuvashalauncher_OFFLINE_ACCOUNT_DIALOG_SIGNAL_ACCOUNT_ADDED],
+                 nuvashalauncher_offline_account_dialog_signals[NUVASHALAUNCHER_OFFLINE_ACCOUNT_DIALOG_SIGNAL_ACCOUNT_ADDED],
                  0, account);
 }
 
@@ -149,11 +149,11 @@ nuvashalauncher_offline_account_dialog_init (NuvashaLauncherOfflineAccountDialog
 static void
 nuvashalauncher_offline_account_dialog_dispose (GObject *object)
 {
-  NuvashaLauncherOfflineAccountDialog *self = nuvashalauncher_OFFLINE_ACCOUNT_DIALOG (object);
+  NuvashaLauncherOfflineAccountDialog *self = NUVASHALAUNCHER_OFFLINE_ACCOUNT_DIALOG (object);
 
   g_clear_object (&self->accounts);
 
-  gtk_widget_dispose_template (GTK_WIDGET (self), nuvashalauncher_TYPE_OFFLINE_ACCOUNT_DIALOG);
+  gtk_widget_dispose_template (GTK_WIDGET (self), NUVASHALAUNCHER_TYPE_OFFLINE_ACCOUNT_DIALOG);
 
   G_OBJECT_CLASS (nuvashalauncher_offline_account_dialog_parent_class)->dispose (object);
 }
@@ -173,24 +173,24 @@ nuvashalauncher_offline_account_dialog_class_init (NuvashaLauncherOfflineAccount
   gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherOfflineAccountDialog, add_button);
   gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherOfflineAccountDialog, cancel_button);
   gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherOfflineAccountDialog, content);
-  nuvashalauncher_offline_account_dialog_signals[nuvashalauncher_OFFLINE_ACCOUNT_DIALOG_SIGNAL_ACCOUNT_ADDED] =
+  nuvashalauncher_offline_account_dialog_signals[NUVASHALAUNCHER_OFFLINE_ACCOUNT_DIALOG_SIGNAL_ACCOUNT_ADDED] =
     g_signal_new ("account-added", G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 1,
-                  nuvashalauncher_TYPE_ACCOUNT);
+                  NUVASHALAUNCHER_TYPE_ACCOUNT);
 }
 
 NuvashaLauncherOfflineAccountDialog *
 nuvashalauncher_offline_account_dialog_new (void)
 {
-  return g_object_new (nuvashalauncher_TYPE_OFFLINE_ACCOUNT_DIALOG, NULL);
+  return g_object_new (NUVASHALAUNCHER_TYPE_OFFLINE_ACCOUNT_DIALOG, NULL);
 }
 
 void
 nuvashalauncher_offline_account_dialog_set_accounts (NuvashaLauncherOfflineAccountDialog *self,
                                              NuvashaLauncherAccounts *accounts)
 {
-  g_return_if_fail (nuvashalauncher_IS_OFFLINE_ACCOUNT_DIALOG (self));
-  g_return_if_fail (accounts == NULL || nuvashalauncher_IS_ACCOUNTS (accounts));
+  g_return_if_fail (NUVASHALAUNCHER_IS_OFFLINE_ACCOUNT_DIALOG (self));
+  g_return_if_fail (accounts == NULL || NUVASHALAUNCHER_IS_ACCOUNTS (accounts));
 
   g_set_object (&self->accounts, accounts);
   update_add_button (self);

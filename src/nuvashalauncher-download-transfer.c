@@ -43,8 +43,8 @@ fsync_thread (GTask *task,
     }
 
   errsv = errno;
-  g_task_return_new_error (task, nuvashalauncher_DOWNLOAD_ERROR,
-                           nuvashalauncher_DOWNLOAD_ERROR_IO,
+  g_task_return_new_error (task, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                           NUVASHALAUNCHER_DOWNLOAD_ERROR_IO,
                            "cannot flush \"%s\": %s", request->tmp_path,
                            g_strerror (errsv));
 }
@@ -123,12 +123,12 @@ check_status (DownloadRequest *request)
   url = url_for_message (request->url);
 
   if (status == 429)
-    return g_error_new (nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_RATE_LIMITED,
+    return g_error_new (NUVASHALAUNCHER_DOWNLOAD_ERROR, NUVASHALAUNCHER_DOWNLOAD_ERROR_RATE_LIMITED,
                         "HTTP 429 too many requests for %s", url);
 
   reason = soup_message_get_reason_phrase (request->message);
 
-  return g_error_new (nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_HTTP, "HTTP %u %s for %s",
+  return g_error_new (NUVASHALAUNCHER_DOWNLOAD_ERROR, NUVASHALAUNCHER_DOWNLOAD_ERROR_HTTP, "HTTP %u %s for %s",
                       status, reason != NULL ? reason : "Error", url);
 }
 
@@ -178,8 +178,8 @@ send_ready (GObject *source, GAsyncResult *result, gpointer user_data)
           !nuvashalauncher_modpack_redirect_allowed (request->url, final_url))
         {
           end_attempt (request,
-                       g_error_new_literal (nuvashalauncher_DOWNLOAD_ERROR,
-                                            nuvashalauncher_DOWNLOAD_ERROR_INVALID,
+                       g_error_new_literal (NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                                            NUVASHALAUNCHER_DOWNLOAD_ERROR_INVALID,
                                             "a modpack download redirected to an unapproved host"));
           return;
         }
@@ -205,8 +205,8 @@ send_ready (GObject *source, GAsyncResult *result, gpointer user_data)
       request->total > request->max_size)
     {
       end_attempt (request,
-                   g_error_new_literal (nuvashalauncher_DOWNLOAD_ERROR,
-                                        nuvashalauncher_DOWNLOAD_ERROR_INVALID,
+                   g_error_new_literal (NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                                        NUVASHALAUNCHER_DOWNLOAD_ERROR_INVALID,
                                         "the download is larger than the permitted size"));
       return;
     }
@@ -263,8 +263,8 @@ read_chunk_ready (GObject *source, GAsyncResult *result, gpointer user_data)
        (goffset) size > request->max_size - request->done))
     {
       end_attempt (request,
-                   g_error_new_literal (nuvashalauncher_DOWNLOAD_ERROR,
-                                        nuvashalauncher_DOWNLOAD_ERROR_INVALID,
+                   g_error_new_literal (NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                                        NUVASHALAUNCHER_DOWNLOAD_ERROR_INVALID,
                                         "the download is larger than the permitted size"));
       return;
     }
@@ -274,8 +274,8 @@ read_chunk_ready (GObject *source, GAsyncResult *result, gpointer user_data)
       if (request->json_body->len + size > MAX_JSON_RESPONSE_SIZE)
         {
           end_attempt (request,
-                       g_error_new_literal (nuvashalauncher_DOWNLOAD_ERROR,
-                                            nuvashalauncher_DOWNLOAD_ERROR_INVALID,
+                       g_error_new_literal (NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                                            NUVASHALAUNCHER_DOWNLOAD_ERROR_INVALID,
                                             "the JSON response is too large"));
           return;
         }
@@ -306,7 +306,7 @@ write_chunk_ready (GObject *source, GAsyncResult *result, gpointer user_data)
       if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         {
           /* The bytes arrived, putting them on disk did not work. */
-          GError *io = g_error_new (nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_IO,
+          GError *io = g_error_new (NUVASHALAUNCHER_DOWNLOAD_ERROR, NUVASHALAUNCHER_DOWNLOAD_ERROR_IO,
                                     "cannot write to \"%s\": %s",
                                     request->tmp_path, error->message);
 
@@ -349,8 +349,8 @@ verify_and_install (DownloadRequest *request)
         g_strdup (g_checksum_get_string (request->checksum));
 
       attempt_failed (request,
-                      g_error_new (nuvashalauncher_DOWNLOAD_ERROR,
-                                   nuvashalauncher_DOWNLOAD_ERROR_CHECKSUM,
+                      g_error_new (NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                                   NUVASHALAUNCHER_DOWNLOAD_ERROR_CHECKSUM,
                                    "checksum of \"%s\" does not match: "
                                    "expected %s, got %s",
                                    request->dest_path, request->expected_hash,
@@ -382,7 +382,7 @@ publish_download (DownloadRequest *request)
                          destination_name, &rename_error))
     {
       attempt_failed (request,
-                      g_error_new (nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_IO,
+                      g_error_new (NUVASHALAUNCHER_DOWNLOAD_ERROR, NUVASHALAUNCHER_DOWNLOAD_ERROR_IO,
                                    "cannot rename \"%s\" to \"%s\": %s",
                                    request->tmp_path, request->dest_path,
                                    rename_error->message));
@@ -470,12 +470,12 @@ attempt_failed (DownloadRequest *request, GError *error)
       return;
     }
 
-  if (error->domain != nuvashalauncher_DOWNLOAD_ERROR)
+  if (error->domain != NUVASHALAUNCHER_DOWNLOAD_ERROR)
     {
       /* The transport reports in its own domains: refused connection,
          name resolution, timeout, broken pipe. The caller sees one. */
       GError *wrapped =
-        g_error_new (nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_NETWORK, "%s",
+        g_error_new (NUVASHALAUNCHER_DOWNLOAD_ERROR, NUVASHALAUNCHER_DOWNLOAD_ERROR_NETWORK, "%s",
                      error->message);
 
       g_error_free (error);
@@ -483,8 +483,8 @@ attempt_failed (DownloadRequest *request, GError *error)
     }
 
   if (request->stale_json != NULL &&
-      g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR,
-                       nuvashalauncher_DOWNLOAD_ERROR_NETWORK))
+      g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                       NUVASHALAUNCHER_DOWNLOAD_ERROR_NETWORK))
     {
       g_autoptr (JsonParser) parser = json_parser_new ();
 
@@ -497,20 +497,20 @@ attempt_failed (DownloadRequest *request, GError *error)
         }
     }
 
-  if (g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_IO) ||
-      g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_INVALID))
+  if (g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR, NUVASHALAUNCHER_DOWNLOAD_ERROR_IO) ||
+      g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR, NUVASHALAUNCHER_DOWNLOAD_ERROR_INVALID))
     retry = FALSE;
-  else if (g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR,
-                            nuvashalauncher_DOWNLOAD_ERROR_CHECKSUM))
+  else if (g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                            NUVASHALAUNCHER_DOWNLOAD_ERROR_CHECKSUM))
     {
 
       retry = !request->hash_retried && request->attempts < MAX_ATTEMPTS;
       request->hash_retried = retry;
     }
-  else if (g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_HTTP))
+  else if (g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR, NUVASHALAUNCHER_DOWNLOAD_ERROR_HTTP))
     retry = request->http_status >= 500 && request->attempts < MAX_ATTEMPTS;
-  else if (g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR,
-                            nuvashalauncher_DOWNLOAD_ERROR_RATE_LIMITED))
+  else if (g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                            NUVASHALAUNCHER_DOWNLOAD_ERROR_RATE_LIMITED))
     {
       retry = request->attempts < MAX_ATTEMPTS;
 
@@ -529,7 +529,7 @@ attempt_failed (DownloadRequest *request, GError *error)
     {
       nuvashalauncher_download_discard_temporary (request);
       g_clear_error (&error);
-      nuvashalauncher_task_scope_set_state (request->scope, nuvashalauncher_TASK_STATE_RETRYING);
+      nuvashalauncher_task_scope_set_state (request->scope, NUVASHALAUNCHER_TASK_STATE_RETRYING);
       g_debug ("download operation=%" G_GUINT64_FORMAT " retry attempt=%u",
                nuvashalauncher_task_scope_get_id (request->scope), request->attempts + 1);
       request->retry_source = g_timeout_add (delay_ms, retry_when_due, request);
@@ -628,7 +628,7 @@ start_attempt (DownloadRequest *request)
       g_autofree char *url = url_for_message (request->url);
 
       nuvashalauncher_download_request_fail (request,
-                    g_error_new (nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_INVALID,
+                    g_error_new (NUVASHALAUNCHER_DOWNLOAD_ERROR, NUVASHALAUNCHER_DOWNLOAD_ERROR_INVALID,
                                  "\"%s\" is not a usable download url", url));
       return;
     }

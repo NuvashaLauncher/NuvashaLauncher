@@ -19,8 +19,8 @@
  * and argument helpers are plain functions over data that is already in
  * memory; the tests use them on their own without a network. */
 
-#ifndef nuvashalauncher_MINECRAFT_RESOLVE_H
-#define nuvashalauncher_MINECRAFT_RESOLVE_H
+#ifndef NUVASHALAUNCHER_MINECRAFT_RESOLVE_H
+#define NUVASHALAUNCHER_MINECRAFT_RESOLVE_H
 
 #include <gio/gio.h>
 
@@ -31,19 +31,19 @@ G_BEGIN_DECLS
 
 /* Directory below g_get_user_data_dir() holding the client jars, the
  * libraries, the assets, the natives and the logging configurations. */
-#define nuvashalauncher_RESOLVE_DATA_SUBDIR "nuvashalauncher"
+#define NUVASHALAUNCHER_RESOLVE_DATA_SUBDIR "nuvashalauncher"
 
 /* Where Mojang serves the objects of an asset index: the hash of the
  * object, split after two characters. */
-#define nuvashalauncher_RESOLVE_ASSET_BASE_URL "https://resources.download.minecraft.net"
+#define NUVASHALAUNCHER_RESOLVE_ASSET_BASE_URL "https://resources.download.minecraft.net"
 
-#define nuvashalauncher_RESOLVE_ERROR (nuvashalauncher_resolve_error_quark ())
+#define NUVASHALAUNCHER_RESOLVE_ERROR (nuvashalauncher_resolve_error_quark ())
 
 typedef enum {
-  nuvashalauncher_RESOLVE_ERROR_IO,          /* a directory or file could not be made */
-  nuvashalauncher_RESOLVE_ERROR_INVALID,      /* the version cannot be resolved as it is */
-  nuvashalauncher_RESOLVE_ERROR_UNSAFE_PATH,  /* a jar entry points out of its directory */
-  nuvashalauncher_RESOLVE_ERROR_ASSETS
+  NUVASHALAUNCHER_RESOLVE_ERROR_IO,          /* a directory or file could not be made */
+  NUVASHALAUNCHER_RESOLVE_ERROR_INVALID,      /* the version cannot be resolved as it is */
+  NUVASHALAUNCHER_RESOLVE_ERROR_UNSAFE_PATH,  /* a jar entry points out of its directory */
+  NUVASHALAUNCHER_RESOLVE_ERROR_ASSETS
 } NuvashaLauncherResolveError;
 
 GQuark nuvashalauncher_resolve_error_quark (void);
@@ -171,7 +171,7 @@ GPtrArray *nuvashalauncher_resolve_game_arguments (NuvashaLauncherVersionDescrip
  * cannot make a name of the natives directory point somewhere else on
  * the disk, and every directory on the way has to be a real one. An
  * entry name that is not safe fails the whole jar with
- * nuvashalauncher_RESOLVE_ERROR_UNSAFE_PATH instead of being written.
+ * NUVASHALAUNCHER_RESOLVE_ERROR_UNSAFE_PATH instead of being written.
  *
  * A jar that lists no prefixes of its own is taken to exclude META-INF,
  * which is what every launcher does with the metadata a jar carries. */
@@ -231,14 +231,14 @@ typedef void (*NuvashaLauncherResolveProgressFunc) (const NuvashaLauncherResolve
  * live; NULL means g_get_user_data_dir()/nuvashalauncher. @natives_dir is where the
  * natives are unpacked; NULL means <data_dir>/natives.
  * @asset_base_url is where the asset objects come from; NULL means
- * nuvashalauncher_RESOLVE_ASSET_BASE_URL.
+ * NUVASHALAUNCHER_RESOLVE_ASSET_BASE_URL.
  *
  * The placeholders this module knows the value of are substituted in
  * both argument lists; the ones that depend on an account or on a window
  * are left as the document wrote them.
  *
- * Errors come from the download module while fetching, from nuvashalauncher_MC_ERROR
- * while parsing a document and from nuvashalauncher_RESOLVE_ERROR for everything
+ * Errors come from the download module while fetching, from NUVASHALAUNCHER_MC_ERROR
+ * while parsing a document and from NUVASHALAUNCHER_RESOLVE_ERROR for everything
  * this module adds itself. */
 NuvashaLauncherTaskScope *nuvashalauncher_resolve_version_async (NuvashaLauncherVersionManifest *manifest,
                                          const char *version_id,
@@ -279,4 +279,4 @@ NuvashaLauncherTaskScope *nuvashalauncher_resolve_description_async (NuvashaLaun
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_MINECRAFT_RESOLVE_H */
+#endif /* NUVASHALAUNCHER_MINECRAFT_RESOLVE_H */

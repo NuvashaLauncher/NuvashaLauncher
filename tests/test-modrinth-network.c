@@ -141,9 +141,9 @@ test_success_and_deduplication (NetworkFixture *fixture)
 
   fixture->hits = 0;
   first.operation = nuvashalauncher_modrinth_get_async (
-    url, request_finished, &first, answer_json, nuvashalauncher_NOT_FOUND_IS_ERROR);
+    url, request_finished, &first, answer_json, NUVASHALAUNCHER_NOT_FOUND_IS_ERROR);
   second.operation = nuvashalauncher_modrinth_get_async (
-    url, request_finished_two, &second, answer_json, nuvashalauncher_NOT_FOUND_IS_ERROR);
+    url, request_finished_two, &second, answer_json, NUVASHALAUNCHER_NOT_FOUND_IS_ERROR);
   g_main_loop_run (first.loop);
 
   g_assert_no_error (first.error);
@@ -168,12 +168,12 @@ test_malformed_response (NetworkFixture *fixture)
   wait.pending = 1;
 
   wait.operation = nuvashalauncher_modrinth_get_async (
-    url, request_finished, &wait, answer_json, nuvashalauncher_NOT_FOUND_IS_ERROR);
+    url, request_finished, &wait, answer_json, NUVASHALAUNCHER_NOT_FOUND_IS_ERROR);
   g_main_loop_run (wait.loop);
 
   g_assert_null (wait.answer);
-  g_assert_error (wait.error, nuvashalauncher_MODRINTH_ERROR,
-                  nuvashalauncher_MODRINTH_ERROR_PARSE);
+  g_assert_error (wait.error, NUVASHALAUNCHER_MODRINTH_ERROR,
+                  NUVASHALAUNCHER_MODRINTH_ERROR_PARSE);
   g_clear_error (&wait.error);
   g_main_loop_unref (wait.loop);
   g_print ("ok - malformed Modrinth JSON is reported as a parse failure\n");
@@ -190,7 +190,7 @@ test_not_found_and_cancellation (NetworkFixture *fixture)
   absent.pending = 1;
 
   absent.operation = nuvashalauncher_modrinth_get_async (
-    missing, request_finished, &absent, answer_json, nuvashalauncher_NOT_FOUND_IS_ABSENT);
+    missing, request_finished, &absent, answer_json, NUVASHALAUNCHER_NOT_FOUND_IS_ABSENT);
   g_main_loop_run (absent.loop);
   g_assert_no_error (absent.error);
   g_assert_null (absent.answer);
@@ -205,7 +205,7 @@ test_not_found_and_cancellation (NetworkFixture *fixture)
     cancelled.pending = 1;
     cancelled.operation = nuvashalauncher_modrinth_get_async (
       url, request_finished, &cancelled, answer_json,
-      nuvashalauncher_NOT_FOUND_IS_ERROR);
+      NUVASHALAUNCHER_NOT_FOUND_IS_ERROR);
     nuvashalauncher_task_scope_follow_cancellable (cancelled.operation, cancellable);
     g_cancellable_cancel (cancellable);
     g_main_loop_run (cancelled.loop);
@@ -253,7 +253,7 @@ test_batch_updates_network (NetworkFixture *fixture)
 
   wait.loop = g_main_loop_new (NULL, FALSE);
   wait.operation = nuvashalauncher_modrinth_updates_by_hashes_url_async (
-    url, nuvashalauncher_CONTENT_MOD, hashes, "1.20.1", "fabric",
+    url, NUVASHALAUNCHER_CONTENT_MOD, hashes, "1.20.1", "fabric",
     batch_updates_finished, &wait);
   g_main_loop_run (wait.loop);
 
@@ -273,7 +273,7 @@ test_batch_updates_network (NetworkFixture *fixture)
   hits_before = fixture->hits;
   empty_wait.loop = g_main_loop_new (NULL, FALSE);
   empty_wait.operation = nuvashalauncher_modrinth_updates_by_hashes_url_async (
-    url, nuvashalauncher_CONTENT_MOD, empty_hashes, "1.20.1", "fabric",
+    url, NUVASHALAUNCHER_CONTENT_MOD, empty_hashes, "1.20.1", "fabric",
     batch_updates_finished, &empty_wait);
   g_main_loop_run (empty_wait.loop);
 

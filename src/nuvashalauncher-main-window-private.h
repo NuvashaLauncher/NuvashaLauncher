@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_MAIN_WINDOW_PRIVATE_H
-#define nuvashalauncher_MAIN_WINDOW_PRIVATE_H
+#ifndef NUVASHALAUNCHER_MAIN_WINDOW_PRIVATE_H
+#define NUVASHALAUNCHER_MAIN_WINDOW_PRIVATE_H
 
 #include "nuvashalauncher-main-window.h"
 #include "nuvashalauncher-main-window-model.h"
@@ -73,4 +73,4 @@ void set_menu_item_tooltip (GtkWidget *root, const char *label_text,
 extern const GActionEntry window_entries[];
 extern const guint window_entries_count;
 
-#endif /* nuvashalauncher_MAIN_WINDOW_PRIVATE_H */
+#endif /* NUVASHALAUNCHER_MAIN_WINDOW_PRIVATE_H */

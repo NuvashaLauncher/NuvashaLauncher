@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_CONTENT_INSTALL_MODEL_H
-#define nuvashalauncher_CONTENT_INSTALL_MODEL_H
+#ifndef NUVASHALAUNCHER_CONTENT_INSTALL_MODEL_H
+#define NUVASHALAUNCHER_CONTENT_INSTALL_MODEL_H
 
 #include <glib.h>
 
@@ -46,4 +46,4 @@ gpointer nuvashalauncher_content_install_model_next_update (
 guint nuvashalauncher_content_install_model_finish_updates (
   NuvashaLauncherContentInstallModel *model);
 
-#endif /* nuvashalauncher_CONTENT_INSTALL_MODEL_H */
+#endif /* NUVASHALAUNCHER_CONTENT_INSTALL_MODEL_H */

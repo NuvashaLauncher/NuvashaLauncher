@@ -92,16 +92,16 @@ on_install_done (GObject *source G_GNUC_UNUSED,
       /* The error page only makes sense while the dialog is up; a closed
          dialog that failed in the background just leaves the header. */
       if (!self->closed &&
-          !g_error_matches (error, nuvashalauncher_MODPACK_ERROR,
-                            nuvashalauncher_MODPACK_ERROR_CANCELLED) &&
+          !g_error_matches (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                            NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED) &&
           !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         {
           self->fail_is_install = TRUE;
            push_failure (self, _("Could not install the modpack"), error,
                       G_CALLBACK (on_error_retry_install));
         }
-      else if (!g_error_matches (error, nuvashalauncher_MODPACK_ERROR,
-                                 nuvashalauncher_MODPACK_ERROR_CANCELLED) &&
+      else if (!g_error_matches (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                                 NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED) &&
                !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
          g_warning ("%s", nuvashalauncher_error_message (error));
 
@@ -172,7 +172,7 @@ start_install (NuvashaLauncherDownloadModpackDialog *self)
     /* The same header entry carries on from the compressed pack into the
        extract: it is one operation with two phases. */
     if (download == NULL)
-      download = nuvashalauncher_downloads_add (nuvashalauncher_DOWNLOAD_MODPACK, name);
+      download = nuvashalauncher_downloads_add (NUVASHALAUNCHER_DOWNLOAD_MODPACK, name);
 
     nuvashalauncher_download_set_detail (
       download, self->modpack->files->len > 0 ? _("Downloading files")
@@ -249,7 +249,7 @@ build_optional_page (NuvashaLauncherDownloadModpackDialog *self,
 static void
 on_optional_cancel (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   dialog_details_show_again (self);
 }
@@ -257,7 +257,7 @@ on_optional_cancel (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 static void
 on_optional_install (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   /* Pop ourselves off so the installing page is showing when
    * the install clocks in with the downloading files. */
@@ -305,7 +305,7 @@ adopt_pack_name (NuvashaLauncherDownloadModpackDialog *self)
 static void
 on_pack_progress (goffset bytes_done, goffset total, gpointer user_data)
 {
-  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   if (self->pack_download != NULL)
     nuvashalauncher_download_set_bytes (self->pack_download, (guint64) bytes_done,
@@ -317,13 +317,13 @@ on_pack_downloaded (GObject *source G_GNUC_UNUSED,
                     GAsyncResult *result,
                     gpointer user_data)
 {
-  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
   g_autoptr (GError) error = NULL;
 
   if (!nuvashalauncher_download_file_finish (result, &error))
     {
-      if (!g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR,
-                            nuvashalauncher_DOWNLOAD_ERROR_CANCELLED))
+      if (!g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                            NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED))
         {
           /* A pack that failed after the dialog was closed has nowhere
              to say so; the reason goes to the journal and the entry
@@ -357,7 +357,7 @@ void
 on_pack_parsed (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                 gpointer user_data)
 {
-  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
   g_autoptr (GError) error = NULL;
 
   g_clear_pointer (&self->modpack, nuvashalauncher_modpack_free);
@@ -483,7 +483,7 @@ dialog_start_features (NuvashaLauncherDownloadModpackDialog *self)
     if (name == NULL || *name == '\0')
       name = "modpack";
 
-    self->pack_download = nuvashalauncher_downloads_add (nuvashalauncher_DOWNLOAD_MODPACK, name);
+    self->pack_download = nuvashalauncher_downloads_add (NUVASHALAUNCHER_DOWNLOAD_MODPACK, name);
   }
 
   nuvashalauncher_download_set_detail (self->pack_download, _("Downloading Modpack"));

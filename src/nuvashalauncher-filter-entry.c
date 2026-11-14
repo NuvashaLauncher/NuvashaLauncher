@@ -37,7 +37,7 @@ on_icon_pressed (GtkEntry *entry, GtkEntryIconPosition position,
                  gpointer user_data G_GNUC_UNUSED)
 {
   if (position == GTK_ENTRY_ICON_PRIMARY)
-    show_filters (nuvashalauncher_FILTER_ENTRY (entry));
+    show_filters (NUVASHALAUNCHER_FILTER_ENTRY (entry));
   else
     {
       gtk_editable_set_text (GTK_EDITABLE (entry), "");
@@ -66,7 +66,7 @@ on_key_pressed (GtkEventControllerKey *controller G_GNUC_UNUSED,
 static void
 nuvashalauncher_filter_entry_dispose (GObject *object)
 {
-  NuvashaLauncherFilterEntry *self = nuvashalauncher_FILTER_ENTRY (object);
+  NuvashaLauncherFilterEntry *self = NUVASHALAUNCHER_FILTER_ENTRY (object);
 
   if (self->popover != NULL)
     {
@@ -81,7 +81,7 @@ static void
 nuvashalauncher_filter_entry_size_allocate (GtkWidget *widget,
                                            int width, int height, int baseline)
 {
-  NuvashaLauncherFilterEntry *self = nuvashalauncher_FILTER_ENTRY (widget);
+  NuvashaLauncherFilterEntry *self = NUVASHALAUNCHER_FILTER_ENTRY (widget);
 
   GTK_WIDGET_CLASS (nuvashalauncher_filter_entry_parent_class)->size_allocate (
     widget, width, height, baseline);
@@ -118,7 +118,7 @@ nuvashalauncher_filter_entry_set_popover (NuvashaLauncherFilterEntry *self,
                                          GtkPopover *popover,
                                          const char *label)
 {
-  g_return_if_fail (nuvashalauncher_IS_FILTER_ENTRY (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_FILTER_ENTRY (self));
   g_return_if_fail (GTK_IS_POPOVER (popover));
   g_return_if_fail (self->popover == NULL);
 

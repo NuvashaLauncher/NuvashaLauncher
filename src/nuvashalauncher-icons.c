@@ -289,12 +289,12 @@ nuvashalauncher_icon_widget_new (const char *placeholder_icon_name)
   gtk_widget_set_overflow (GTK_WIDGET (stack), GTK_OVERFLOW_HIDDEN);
 
   gtk_image_set_pixel_size (GTK_IMAGE (placeholder), 32);
-  gtk_widget_set_size_request (GTK_WIDGET (placeholder), nuvashalauncher_ICON_SIZE, nuvashalauncher_ICON_SIZE);
+  gtk_widget_set_size_request (GTK_WIDGET (placeholder), NUVASHALAUNCHER_ICON_SIZE, NUVASHALAUNCHER_ICON_SIZE);
   gtk_widget_set_halign (GTK_WIDGET (placeholder), GTK_ALIGN_CENTER);
   gtk_widget_set_valign (GTK_WIDGET (placeholder), GTK_ALIGN_CENTER);
 
   /* The same square for every row, whatever is in it. */
-  gtk_widget_set_size_request (GTK_WIDGET (stack), nuvashalauncher_ICON_SIZE, nuvashalauncher_ICON_SIZE);
+  gtk_widget_set_size_request (GTK_WIDGET (stack), NUVASHALAUNCHER_ICON_SIZE, NUVASHALAUNCHER_ICON_SIZE);
 
   gtk_stack_add_named (GTK_STACK (stack), GTK_WIDGET (placeholder), "placeholder");
   gtk_stack_set_visible_child_name (GTK_STACK (stack), "placeholder");
@@ -327,13 +327,13 @@ nuvashalauncher_icon_scale_file (const char *path)
 
       if (g_strcmp0 (format_name, "png") == 0 &&
           info_width > 0 && info_height > 0 &&
-          info_width <= nuvashalauncher_ICON_SIZE &&
-          info_height <= nuvashalauncher_ICON_SIZE)
+          info_width <= NUVASHALAUNCHER_ICON_SIZE &&
+          info_height <= NUVASHALAUNCHER_ICON_SIZE)
         return TRUE;
     }
 
-  pixbuf = gdk_pixbuf_new_from_file_at_scale (path, nuvashalauncher_ICON_SIZE,
-                                              nuvashalauncher_ICON_SIZE, TRUE, NULL);
+  pixbuf = gdk_pixbuf_new_from_file_at_scale (path, NUVASHALAUNCHER_ICON_SIZE,
+                                              NUVASHALAUNCHER_ICON_SIZE, TRUE, NULL);
   if (pixbuf == NULL)
     return FALSE;
 
@@ -383,8 +383,8 @@ nuvashalauncher_icon_widget_set_file (GtkWidget *widget, const char *path)
   /* Decode at display size rather than retaining a full-size source texture
      for a 64-pixel row. Large modpack icons can otherwise consume megabytes
      each even though the UI never displays those extra pixels. */
-  pixbuf = gdk_pixbuf_new_from_file_at_scale (path, nuvashalauncher_ICON_SIZE,
-                                              nuvashalauncher_ICON_SIZE, TRUE, NULL);
+  pixbuf = gdk_pixbuf_new_from_file_at_scale (path, NUVASHALAUNCHER_ICON_SIZE,
+                                              NUVASHALAUNCHER_ICON_SIZE, TRUE, NULL);
   if (pixbuf != NULL)
     {
       G_GNUC_BEGIN_IGNORE_DEPRECATIONS
@@ -404,8 +404,8 @@ nuvashalauncher_icon_widget_set_file (GtkWidget *widget, const char *path)
      square whatever the source holds, and it is contained in it, never
      stretched. */
   icon = gtk_image_new_from_paintable (GDK_PAINTABLE (texture));
-  gtk_image_set_pixel_size (GTK_IMAGE (icon), nuvashalauncher_ICON_SIZE);
-  gtk_widget_set_size_request (icon, nuvashalauncher_ICON_SIZE, nuvashalauncher_ICON_SIZE);
+  gtk_image_set_pixel_size (GTK_IMAGE (icon), NUVASHALAUNCHER_ICON_SIZE);
+  gtk_widget_set_size_request (icon, NUVASHALAUNCHER_ICON_SIZE, NUVASHALAUNCHER_ICON_SIZE);
   gtk_widget_set_overflow (icon, GTK_OVERFLOW_HIDDEN);
 
   old_icon = gtk_stack_get_child_by_name (GTK_STACK (widget), "icon");

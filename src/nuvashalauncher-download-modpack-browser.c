@@ -60,7 +60,7 @@ on_version_catalog_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
           const NuvashaLauncherVersionEntry *entry =
             g_ptr_array_index (manifest->entries, i);
 
-          if (entry->type == nuvashalauncher_MC_TYPE_RELEASE)
+          if (entry->type == NUVASHALAUNCHER_MC_TYPE_RELEASE)
             gtk_string_list_append (self->filter_version_model, entry->id);
         }
 
@@ -149,7 +149,7 @@ filter_check (const char *label, const char *value, GPtrArray *values,
 static gboolean
 on_search_timeout (gpointer user_data)
 {
-  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   nuvashalauncher_operation_forget_source (self->scope, self->debounce);
   self->debounce = 0;
@@ -161,7 +161,7 @@ on_search_timeout (gpointer user_data)
 static void
 on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   if (self->debounce != 0)
     nuvashalauncher_operation_remove (self->scope, self->debounce);
@@ -180,7 +180,7 @@ on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
 static void
 on_scroll_changed (GtkAdjustment *adjustment, gpointer user_data)
 {
-  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
   gdouble at_end;
 
   if (self->loading_page)
@@ -230,7 +230,7 @@ take_rows_out (GPtrArray **rows, AdwPreferencesGroup *group)
 static void
 result_row_activated (AdwActionRow *row, gpointer user_data)
 {
-  NuvashaLauncherDownloadModpackDialog *self = nuvashalauncher_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
   NuvashaLauncherModrinthProject *project =
     g_object_get_data (G_OBJECT (row), "nuvashalauncher-project");
 
@@ -450,7 +450,7 @@ run_search (NuvashaLauncherDownloadModpackDialog *self, gboolean append)
       gtk_widget_set_visible (GTK_WIDGET (self->retry_row), FALSE);
     }
 
-  search->type = nuvashalauncher_CONTENT_MODPACK;
+  search->type = NUVASHALAUNCHER_CONTENT_MODPACK;
   search->query = g_strdup (query != NULL ? query : "");
   search->minecraft_versions = self->filter_versions != NULL
     ? g_ptr_array_ref (self->filter_versions) : NULL;
@@ -506,8 +506,8 @@ on_search_done (GObject *source G_GNUC_UNUSED,
 
   if (parser == NULL)
     {
-      if (!g_error_matches (error, nuvashalauncher_DOWNLOAD_ERROR,
-                            nuvashalauncher_DOWNLOAD_ERROR_CANCELLED))
+      if (!g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                            NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED))
         {
           self->loading_page = FALSE;
 
@@ -578,7 +578,7 @@ on_search_done (GObject *source G_GNUC_UNUSED,
 void
 build_browse_page (NuvashaLauncherDownloadModpackDialog *self, gboolean start_search)
 {
-  g_type_ensure (nuvashalauncher_TYPE_FILTER_ENTRY);
+  g_type_ensure (NUVASHALAUNCHER_TYPE_FILTER_ENTRY);
   GtkWidget *page = NULL;
   GtkBox *root = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
@@ -644,7 +644,7 @@ build_browse_page (NuvashaLauncherDownloadModpackDialog *self, gboolean start_se
     gtk_box_append (filters, filter_check ("Quilt", "quilt", self->filter_loaders, self));
     gtk_box_append (filters, GTK_WIDGET (sort));
     nuvashalauncher_filter_entry_set_popover (
-      nuvashalauncher_FILTER_ENTRY (self->search_entry), popover, _("Filter modpacks"));
+      NUVASHALAUNCHER_FILTER_ENTRY (self->search_entry), popover, _("Filter modpacks"));
     gtk_popover_set_child (popover, GTK_WIDGET (filters));
     g_signal_connect (sort, "notify::selected", G_CALLBACK (on_modpack_sort_changed), self);
     gtk_widget_set_hexpand (GTK_WIDGET (toolbar), TRUE);
@@ -655,7 +655,7 @@ build_browse_page (NuvashaLauncherDownloadModpackDialog *self, gboolean start_se
                       G_CALLBACK (on_modpack_version_changed), self);
 
     self->version_catalog = nuvashalauncher_version_manifest_fetch_async (
-      nuvashalauncher_VERSION_MANIFEST_URL, on_version_catalog_ready,
+      NUVASHALAUNCHER_VERSION_MANIFEST_URL, on_version_catalog_ready,
       version_catalog_ask_new (self));
   }
 

@@ -25,7 +25,7 @@ create_test_instance (const char *name)
 
   g_assert_cmpint (g_mkdir_with_parents (dir, 0755), ==, 0);
   instance = nuvashalauncher_instance_new (NULL, name, dir, "1.20.1",
-                                           nuvashalauncher_LOADER_VANILLA, &error);
+                                           NUVASHALAUNCHER_LOADER_VANILLA, &error);
   g_assert_no_error (error);
   g_assert_nonnull (instance);
   return instance;
@@ -43,7 +43,7 @@ test_choose_java_compatible_and_headless (void)
   /* No Javas available */
   chosen = choose_java (launcher, javas, 17, &inst_java);
   g_assert_null (chosen);
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_FAILED);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_FAILED);
 
   /* Add headless Java runtime */
   NuvashaLauncherJava *headless = g_new0 (NuvashaLauncherJava, 1);
@@ -54,7 +54,7 @@ test_choose_java_compatible_and_headless (void)
 
   chosen = choose_java (launcher, javas, 17, &inst_java);
   g_assert_null (chosen);
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_FAILED);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_FAILED);
 
   /* Add compatible desktop Java */
   NuvashaLauncherJava *desktop = g_new0 (NuvashaLauncherJava, 1);
@@ -85,7 +85,7 @@ test_resolve_progress_tracking (void)
   prog.total = 100;
 
   on_resolve_progress (&prog, launcher);
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_DOWNLOADING);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_DOWNLOADING);
   g_assert_cmpuint (launcher->process.last_percent, ==, 50);
 
   /* Identical percentage should be debounced and ignored */
@@ -97,14 +97,14 @@ test_resolve_progress_tracking (void)
   prog.done = 100;
   prog.total = 100;
   on_resolve_progress (&prog, launcher);
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_PREPARING);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_PREPARING);
 
   /* Stop requested stops processing */
   launcher->process.stop_requested = TRUE;
   prog.done = 10;
   prog.total = 100;
   on_resolve_progress (&prog, launcher);
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_PREPARING);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_PREPARING);
 }
 
 static void
@@ -123,7 +123,7 @@ test_on_resolved_lifecycle (void)
   on_resolved (NULL, G_ASYNC_RESULT (nuvashalauncher_task_scope_task (scope)), launcher);
   nuvashalauncher_task_scope_unref (scope);
 
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_FAILED);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_FAILED);
 }
 
 static void
@@ -145,7 +145,7 @@ test_on_resolved_success_triggers_java_search (void)
   nuvashalauncher_task_scope_unref (scope);
 
   /* Should set state to launching and detail to choosing Java */
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_LAUNCHING);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_LAUNCHING);
 }
 
 static void
@@ -173,7 +173,7 @@ test_on_resolved_with_preset_java_runs_game (void)
   nuvashalauncher_task_scope_unref (scope);
 
   /* Fake java executable won't spawn successfully, so state becomes failed */
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_FAILED);
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_FAILED);
 }
 
 int

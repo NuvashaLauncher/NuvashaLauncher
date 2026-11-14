@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_MAIN_WINDOW_MODEL_H
-#define nuvashalauncher_MAIN_WINDOW_MODEL_H
+#ifndef NUVASHALAUNCHER_MAIN_WINDOW_MODEL_H
+#define NUVASHALAUNCHER_MAIN_WINDOW_MODEL_H
 
 #include "nuvashalauncher-accounts.h"
 #include "nuvashalauncher-download.h"
@@ -34,4 +34,4 @@ struct _NuvashaLauncherMainWindowModel
   GHashTable *instance_dialogs;
 };
 
-#endif /* nuvashalauncher_MAIN_WINDOW_MODEL_H */
+#endif /* NUVASHALAUNCHER_MAIN_WINDOW_MODEL_H */

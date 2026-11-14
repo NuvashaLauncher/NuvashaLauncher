@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_LAUNCHER_PRIVATE_H
-#define nuvashalauncher_LAUNCHER_PRIVATE_H
+#ifndef NUVASHALAUNCHER_LAUNCHER_PRIVATE_H
+#define NUVASHALAUNCHER_LAUNCHER_PRIVATE_H
 
 #include "nuvashalauncher-launcher.h"
 #include "nuvashalauncher-java.h"
@@ -62,7 +62,7 @@ struct _NuvashaLauncher
 
 };
 
-extern guint nuvashalauncher_launcher_signals[nuvashalauncher_LAUNCHER_N_SIGNALS];
+extern guint nuvashalauncher_launcher_signals[NUVASHALAUNCHER_LAUNCHER_N_SIGNALS];
 
 void log_line (NuvashaLauncher *self, const char *tag, const char *format, ...)
   G_GNUC_PRINTF (3, 4);
@@ -86,4 +86,4 @@ void on_resolve_progress (const NuvashaLauncherResolveProgress *progress,
 void nuvashalauncher_launcher_signal_process_group (NuvashaLauncher *self,
                                                     int signal_number);
 
-#endif /* nuvashalauncher_LAUNCHER_PRIVATE_H */
+#endif /* NUVASHALAUNCHER_LAUNCHER_PRIVATE_H */

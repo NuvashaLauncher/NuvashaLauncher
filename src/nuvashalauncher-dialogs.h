@@ -9,8 +9,8 @@
  * that has to be a different size, such as the sign-in form that is one
  * column of a code, sets its own and does not use these. */
 
-#ifndef nuvashalauncher_DIALOGS_H
-#define nuvashalauncher_DIALOGS_H
+#ifndef NUVASHALAUNCHER_DIALOGS_H
+#define NUVASHALAUNCHER_DIALOGS_H
 
 #include <adwaita.h>
 
@@ -19,9 +19,9 @@ G_BEGIN_DECLS
 /* Wide enough for a row of results with a description under it, and tall
  * enough for a list plus the buttons below it, so a dialog of this kind
  * opens without a scrollbar on a laptop and does not fill a desktop. */
-#define nuvashalauncher_DIALOG_CONTENT_WIDTH 720
-#define nuvashalauncher_DIALOG_WIDE_CONTENT_WIDTH 1040
-#define nuvashalauncher_DIALOG_CONTENT_HEIGHT 560
+#define NUVASHALAUNCHER_DIALOG_CONTENT_WIDTH 720
+#define NUVASHALAUNCHER_DIALOG_WIDE_CONTENT_WIDTH 1040
+#define NUVASHALAUNCHER_DIALOG_CONTENT_HEIGHT 560
 
 /* Gives @dialog the size the dialogs of this kind share. Both width and
  * height are set, so no dialog of this kind follows its content and ends
@@ -31,8 +31,8 @@ nuvashalauncher_dialog_set_standard_size (AdwDialog *dialog)
 {
   g_return_if_fail (ADW_IS_DIALOG (dialog));
 
-  adw_dialog_set_content_width (dialog, nuvashalauncher_DIALOG_CONTENT_WIDTH);
-  adw_dialog_set_content_height (dialog, nuvashalauncher_DIALOG_CONTENT_HEIGHT);
+  adw_dialog_set_content_width (dialog, NUVASHALAUNCHER_DIALOG_CONTENT_WIDTH);
+  adw_dialog_set_content_height (dialog, NUVASHALAUNCHER_DIALOG_CONTENT_HEIGHT);
 }
 
 /* AdwBreakpoint takes ownership of its condition. Keep that transfer in one
@@ -70,4 +70,4 @@ nuvashalauncher_dialog_add_content_margin_breakpoint (AdwDialog *dialog,
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_DIALOGS_H */
+#endif /* NUVASHALAUNCHER_DIALOGS_H */

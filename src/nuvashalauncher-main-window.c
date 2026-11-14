@@ -81,7 +81,7 @@ nuvashalauncher_main_window_launch_instance_as (NuvashaLauncherMainWindow *self,
   NuvashaLauncherInstance *instance;
   NuvashaLauncher *launcher;
 
-  g_return_val_if_fail (nuvashalauncher_IS_MAIN_WINDOW (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_MAIN_WINDOW (self), FALSE);
   g_return_val_if_fail (instance_id != NULL && *instance_id != '\0', FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
@@ -122,7 +122,7 @@ nuvashalauncher_main_window_import_file (NuvashaLauncherMainWindow *self, const 
 {
   NuvashaLauncherDownloadModpackDialog *dialog;
 
-  g_return_if_fail (nuvashalauncher_IS_MAIN_WINDOW (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_MAIN_WINDOW (self));
   g_return_if_fail (path != NULL && *path != '\0');
 
   dialog = nuvashalauncher_download_modpack_dialog_new_for_file (
@@ -136,21 +136,21 @@ on_window_launcher_state (NuvashaLauncher *launcher G_GNUC_UNUSED,
                           NuvashaLauncherLaunchState state,
                           const char *detail, gpointer user_data)
 {
-  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
   g_autofree char *message = NULL;
   const char *what = NULL;
 
   switch (state)
     {
-    case nuvashalauncher_LAUNCH_CRASHED:
+    case NUVASHALAUNCHER_LAUNCH_CRASHED:
       what = _("Minecraft crashed");
       break;
 
-    case nuvashalauncher_LAUNCH_FAILED:
+    case NUVASHALAUNCHER_LAUNCH_FAILED:
       what = _("Minecraft could not start");
       break;
 
-    case nuvashalauncher_LAUNCH_NEEDS_SIGN_IN:
+    case NUVASHALAUNCHER_LAUNCH_NEEDS_SIGN_IN:
       what = _("Minecraft needs a sign-in");
       break;
 
@@ -160,7 +160,7 @@ on_window_launcher_state (NuvashaLauncher *launcher G_GNUC_UNUSED,
       return;
     }
 
-  if (state == nuvashalauncher_LAUNCH_CRASHED)
+  if (state == NUVASHALAUNCHER_LAUNCH_CRASHED)
     {
       gtk_widget_set_visible (GTK_WIDGET (self), TRUE);
       gtk_window_present (GTK_WINDOW (self));
@@ -182,7 +182,7 @@ on_window_launcher_state (NuvashaLauncher *launcher G_GNUC_UNUSED,
   adw_banner_set_title (ADW_BANNER (self->ui.banner), message);
   adw_banner_set_revealed (ADW_BANNER (self->ui.banner), TRUE);
 
-  if (state != nuvashalauncher_LAUNCH_CRASHED)
+  if (state != NUVASHALAUNCHER_LAUNCH_CRASHED)
     nuvashalauncher_main_window_maybe_quit_background (self);
 }
 
@@ -210,7 +210,7 @@ nuvashalauncher_main_window_maybe_quit_background (NuvashaLauncherMainWindow *se
 static gboolean
 background_quit_tick (gpointer user_data)
 {
-  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
 
   if (gtk_widget_get_visible (GTK_WIDGET (self)))
     {
@@ -250,7 +250,7 @@ window_settings_new (void)
 static gboolean
 on_window_close_request (GtkWindow *window, gpointer user_data)
 {
-  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
   int width = 0;
   int height = 0;
 
@@ -334,9 +334,9 @@ NuvashaLauncherMainWindow *
 nuvashalauncher_main_window_new (AdwApplication *application, NuvashaLauncherInstanceManager *manager)
 {
   g_return_val_if_fail (ADW_IS_APPLICATION (application), NULL);
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (manager), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (manager), NULL);
 
-  NuvashaLauncherMainWindow *self = g_object_new (nuvashalauncher_TYPE_MAIN_WINDOW,
+  NuvashaLauncherMainWindow *self = g_object_new (NUVASHALAUNCHER_TYPE_MAIN_WINDOW,
                                       "application", application,
                                       NULL);
   GListStore *instances = nuvashalauncher_instance_manager_get_instances (manager);
@@ -404,7 +404,7 @@ nuvashalauncher_main_window_new (AdwApplication *application, NuvashaLauncherIns
 static void
 nuvashalauncher_main_window_dispose (GObject *object)
 {
-  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (object);
+  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (object);
 
   if (self->background_quit_source != 0)
     {

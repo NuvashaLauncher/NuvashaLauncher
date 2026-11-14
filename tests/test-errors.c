@@ -27,7 +27,7 @@ test_auth_errors_are_typed (void)
   gboolean slow = FALSE;
   nuvashalauncher_auth_polling_error (
     "{\"error\":\"invalid_grant\",\"error_description\":\"Network expired\"}", -1, &slow, &error);
-  g_assert_error (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_REAUTH);
+  g_assert_error (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_REAUTH);
   g_assert_cmpstr (nuvashalauncher_error_message (error), ==,
                    "Your saved sign-in is no longer valid. Sign in again.");
   g_clear_error (&error);
@@ -41,12 +41,12 @@ static void
 test_error_categories (void)
 {
   g_autoptr (GError) disk = g_error_new_literal (G_IO_ERROR, G_IO_ERROR_NO_SPACE, "raw disk failure");
-  g_autoptr (GError) hash = g_error_new_literal (nuvashalauncher_DOWNLOAD_ERROR,
-    nuvashalauncher_DOWNLOAD_ERROR_CHECKSUM, "raw checksum mismatch");
-  g_autoptr (GError) network = g_error_new_literal (nuvashalauncher_MODRINTH_ERROR,
-    nuvashalauncher_MODRINTH_ERROR_NETWORK, "raw connection failure");
-  g_autoptr (GError) cancel = g_error_new_literal (nuvashalauncher_DOWNLOAD_ERROR,
-    nuvashalauncher_DOWNLOAD_ERROR_CANCELLED, "cancelled");
+  g_autoptr (GError) hash = g_error_new_literal (NUVASHALAUNCHER_DOWNLOAD_ERROR,
+    NUVASHALAUNCHER_DOWNLOAD_ERROR_CHECKSUM, "raw checksum mismatch");
+  g_autoptr (GError) network = g_error_new_literal (NUVASHALAUNCHER_MODRINTH_ERROR,
+    NUVASHALAUNCHER_MODRINTH_ERROR_NETWORK, "raw connection failure");
+  g_autoptr (GError) cancel = g_error_new_literal (NUVASHALAUNCHER_DOWNLOAD_ERROR,
+    NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED, "cancelled");
   g_assert_cmpstr (nuvashalauncher_error_message (disk), ==, "There is not enough free disk space.");
   g_assert_nonnull (strstr (nuvashalauncher_error_message (hash), "failed verification"));
   g_assert_null (strstr (nuvashalauncher_error_message (network), "compatible"));
@@ -157,91 +157,91 @@ test_error_domains_exhaustive (void)
   g_autoptr (GError) file_other = g_error_new_literal (G_FILE_ERROR, G_FILE_ERROR_IO, "generic io");
   g_assert_cmpstr (nuvashalauncher_error_message (file_other), ==, "Could not read or write files. Check the location, permissions, and free disk space.");
 
-  /* nuvashalauncher_AUTH_ERROR codes */
-  g_autoptr (GError) auth_exp = g_error_new_literal (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_EXPIRED, "exp");
+  /* NUVASHALAUNCHER_AUTH_ERROR codes */
+  g_autoptr (GError) auth_exp = g_error_new_literal (NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_EXPIRED, "exp");
   g_assert_cmpstr (nuvashalauncher_error_message (auth_exp), ==, "The sign-in request expired. Start again to get a new code.");
 
-  g_autoptr (GError) auth_dec = g_error_new_literal (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_DECLINED, "dec");
+  g_autoptr (GError) auth_dec = g_error_new_literal (NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_DECLINED, "dec");
   g_assert_cmpstr (nuvashalauncher_error_message (auth_dec), ==, "Sign-in was declined. Start again if you want to sign in.");
 
-  g_autoptr (GError) auth_nogame = g_error_new_literal (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_NO_GAME, "nogame");
+  g_autoptr (GError) auth_nogame = g_error_new_literal (NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_NO_GAME, "nogame");
   g_assert_cmpstr (nuvashalauncher_error_message (auth_nogame), ==, "This account does not own Minecraft: Java Edition.");
 
-  g_autoptr (GError) auth_noprof = g_error_new_literal (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_NO_PROFILE, "noprof");
+  g_autoptr (GError) auth_noprof = g_error_new_literal (NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_NO_PROFILE, "noprof");
   g_assert_cmpstr (nuvashalauncher_error_message (auth_noprof), ==, "Set up a Minecraft: Java Edition profile on minecraft.net, then try again.");
 
-  g_autoptr (GError) auth_nocli = g_error_new_literal (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_NO_CLIENT_ID, "nocli");
+  g_autoptr (GError) auth_nocli = g_error_new_literal (NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_NO_CLIENT_ID, "nocli");
   g_assert_cmpstr (nuvashalauncher_error_message (auth_nocli), ==, "Microsoft sign-in is not configured in this build. Update the launcher.");
 
-  g_autoptr (GError) auth_xprof = g_error_new_literal (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX_PROFILE, "xprof");
+  g_autoptr (GError) auth_xprof = g_error_new_literal (NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_XBOX_PROFILE, "xprof");
   g_assert_cmpstr (nuvashalauncher_error_message (auth_xprof), ==, "this Microsoft account has no Xbox profile behind it yet: sign in to xbox.com once with it, then sign in here again");
 
-  g_autoptr (GError) auth_xfam = g_error_new_literal (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX_FAMILY, "xfam");
+  g_autoptr (GError) auth_xfam = g_error_new_literal (NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_XBOX_FAMILY, "xfam");
   g_assert_cmpstr (nuvashalauncher_error_message (auth_xfam), ==, "this is a child account: it has to be added to a Microsoft family by an adult before it can play");
 
-  g_autoptr (GError) auth_xctry = g_error_new_literal (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX_COUNTRY, "xctry");
+  g_autoptr (GError) auth_xctry = g_error_new_literal (NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_XBOX_COUNTRY, "xctry");
   g_assert_cmpstr (nuvashalauncher_error_message (auth_xctry), ==, "Xbox Live is not available for the country this account is registered in");
 
-  g_autoptr (GError) auth_xage = g_error_new_literal (nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_XBOX_AGE, "xage");
+  g_autoptr (GError) auth_xage = g_error_new_literal (NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_XBOX_AGE, "xage");
   g_assert_cmpstr (nuvashalauncher_error_message (auth_xage), ==, "this account needs an adult to verify it before it can play, which is what South Korean accounts have to do");
 
-  /* nuvashalauncher_DOWNLOAD_ERROR codes */
-  g_autoptr (GError) dl_http = g_error_new_literal (nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_HTTP, "http");
+  /* NUVASHALAUNCHER_DOWNLOAD_ERROR codes */
+  g_autoptr (GError) dl_http = g_error_new_literal (NUVASHALAUNCHER_DOWNLOAD_ERROR, NUVASHALAUNCHER_DOWNLOAD_ERROR_HTTP, "http");
   g_assert_cmpstr (nuvashalauncher_error_message (dl_http), ==, "The service rejected the request. Try again later.");
 
-  g_autoptr (GError) dl_rate = g_error_new_literal (nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_RATE_LIMITED, "rate");
+  g_autoptr (GError) dl_rate = g_error_new_literal (NUVASHALAUNCHER_DOWNLOAD_ERROR, NUVASHALAUNCHER_DOWNLOAD_ERROR_RATE_LIMITED, "rate");
   g_assert_cmpstr (nuvashalauncher_error_message (dl_rate), ==, "Too many requests. Wait a moment and try again.");
 
-  /* nuvashalauncher_MODRINTH_ERROR codes */
-  g_autoptr (GError) mr_nf = g_error_new_literal (nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_NOT_FOUND, "nf");
+  /* NUVASHALAUNCHER_MODRINTH_ERROR codes */
+  g_autoptr (GError) mr_nf = g_error_new_literal (NUVASHALAUNCHER_MODRINTH_ERROR, NUVASHALAUNCHER_MODRINTH_ERROR_NOT_FOUND, "nf");
   g_assert_cmpstr (nuvashalauncher_error_message (mr_nf), ==, "The requested file, project, or compatible version was not found.");
 
-  /* nuvashalauncher_MINECRAFT_SERVICES_ERROR */
-  g_autoptr (GError) ms_rate = g_error_new_literal (nuvashalauncher_MINECRAFT_SERVICES_ERROR, nuvashalauncher_MINECRAFT_SERVICES_ERROR_RATE_LIMITED, "rate");
+  /* NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR */
+  g_autoptr (GError) ms_rate = g_error_new_literal (NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR, NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR_RATE_LIMITED, "rate");
   g_assert_cmpstr (nuvashalauncher_error_message (ms_rate), ==, "Too many requests. Wait a moment and try again.");
 
-  /* nuvashalauncher_MODPACK_ERROR */
-  g_autoptr (GError) mp_dl = g_error_new_literal (nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_DOWNLOAD, "dl");
+  /* NUVASHALAUNCHER_MODPACK_ERROR */
+  g_autoptr (GError) mp_dl = g_error_new_literal (NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_DOWNLOAD, "dl");
   g_assert_cmpstr (nuvashalauncher_error_message (mp_dl), ==, "Pack could not be fetched");
 
-  g_autoptr (GError) mp_load = g_error_new_literal (nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_LOADER, "ldr");
+  g_autoptr (GError) mp_load = g_error_new_literal (NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_LOADER, "ldr");
   g_assert_cmpstr (nuvashalauncher_error_message (mp_load), ==, "Could not install this mod loader. Choose another version or inspect Technical Details.");
 
   /* Other subsystems */
-  g_autoptr (GError) loaders_err = g_error_new_literal (nuvashalauncher_LOADERS_ERROR, 1, "ldr");
+  g_autoptr (GError) loaders_err = g_error_new_literal (NUVASHALAUNCHER_LOADERS_ERROR, 1, "ldr");
   g_assert_cmpstr (nuvashalauncher_error_message (loaders_err), ==, "Could not install this mod loader. Choose another version or inspect Technical Details.");
 
-  g_autoptr (GError) java_err = g_error_new_literal (nuvashalauncher_JAVA_ERROR, 1, "java");
+  g_autoptr (GError) java_err = g_error_new_literal (NUVASHALAUNCHER_JAVA_ERROR, 1, "java");
   g_assert_cmpstr (nuvashalauncher_error_message (java_err), ==, "The Java executable could not be used. Select a working Java runtime.");
 
-  g_autoptr (GError) mc_err = g_error_new_literal (nuvashalauncher_MC_ERROR, 1, "mc");
+  g_autoptr (GError) mc_err = g_error_new_literal (NUVASHALAUNCHER_MC_ERROR, 1, "mc");
   g_assert_cmpstr (nuvashalauncher_error_message (mc_err), ==, "The game metadata is invalid or unavailable. Refresh the version list and try again.");
 
-  g_autoptr (GError) r_io = g_error_new_literal (nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_IO, "io");
+  g_autoptr (GError) r_io = g_error_new_literal (NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_IO, "io");
   g_assert_cmpstr (nuvashalauncher_error_message (r_io), ==, "Could not read or write files. Check the location, permissions, and free disk space.");
 
-  g_autoptr (GError) r_path = g_error_new_literal (nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_UNSAFE_PATH, "path");
+  g_autoptr (GError) r_path = g_error_new_literal (NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_UNSAFE_PATH, "path");
   g_assert_cmpstr (nuvashalauncher_error_message (r_path), ==, "The archive is invalid or unsafe. Download it again from a trusted source.");
 
-  g_autoptr (GError) im_used = g_error_new_literal (nuvashalauncher_INSTANCE_MANAGER_ERROR, 1, "the directory is already used");
+  g_autoptr (GError) im_used = g_error_new_literal (NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR, 1, "the directory is already used");
   g_assert_cmpstr (nuvashalauncher_error_message (im_used), ==, "The destination already exists. Choose another location.");
 
-  g_autoptr (GError) im_nf = g_error_new_literal (nuvashalauncher_INSTANCE_MANAGER_ERROR, nuvashalauncher_INSTANCE_MANAGER_ERROR_NOT_FOUND, "nf");
+  g_autoptr (GError) im_nf = g_error_new_literal (NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND, "nf");
   g_assert_cmpstr (nuvashalauncher_error_message (im_nf), ==, "This instance is no longer available. Refresh the instance list.");
 
-  g_autoptr (GError) launch_err = g_error_new_literal (nuvashalauncher_LAUNCH_ERROR, 1, "launch");
+  g_autoptr (GError) launch_err = g_error_new_literal (NUVASHALAUNCHER_LAUNCH_ERROR, 1, "launch");
   g_assert_cmpstr (nuvashalauncher_error_message (launch_err), ==, "Your instance settings are invalid. Check the selected version and JVM arguments.");
 
-  g_autoptr (GError) inst_err = g_error_new_literal (nuvashalauncher_INSTANCE_ERROR, 1, "inst");
+  g_autoptr (GError) inst_err = g_error_new_literal (NUVASHALAUNCHER_INSTANCE_ERROR, 1, "inst");
   g_assert_cmpstr (nuvashalauncher_error_message (inst_err), ==, "Choose another instance name or directory.");
 
-  g_autoptr (GError) sett_err = g_error_new_literal (nuvashalauncher_SETTINGS_ERROR, 1, "sett");
+  g_autoptr (GError) sett_err = g_error_new_literal (NUVASHALAUNCHER_SETTINGS_ERROR, 1, "sett");
   g_assert_cmpstr (nuvashalauncher_error_message (sett_err), ==, "Could not read or write files. Check the location, permissions, and free disk space.");
 
-  g_autoptr (GError) acc_io = g_error_new_literal (nuvashalauncher_ACCOUNTS_ERROR, nuvashalauncher_ACCOUNTS_ERROR_IO, "accio");
+  g_autoptr (GError) acc_io = g_error_new_literal (NUVASHALAUNCHER_ACCOUNTS_ERROR, NUVASHALAUNCHER_ACCOUNTS_ERROR_IO, "accio");
   g_assert_cmpstr (nuvashalauncher_error_message (acc_io), ==, "Could not save the account. Check your system keyring and file permissions.");
 
-  g_autoptr (GError) acc_inv = g_error_new_literal (nuvashalauncher_ACCOUNTS_ERROR, nuvashalauncher_ACCOUNTS_ERROR_INVALID, "custom invalid msg");
+  g_autoptr (GError) acc_inv = g_error_new_literal (NUVASHALAUNCHER_ACCOUNTS_ERROR, NUVASHALAUNCHER_ACCOUNTS_ERROR_INVALID, "custom invalid msg");
   g_assert_cmpstr (nuvashalauncher_error_message (acc_inv), ==, "custom invalid msg");
 }
 

@@ -75,7 +75,7 @@ static void on_account_added (AdwDialog *dialog, NuvashaLauncherAccount *account
 static gboolean
 account_needs_sign_in (const NuvashaLauncherAccount *account)
 {
-  return account != NULL && account->type == nuvashalauncher_ACCOUNT_MICROSOFT &&
+  return account != NULL && account->type == NUVASHALAUNCHER_ACCOUNT_MICROSOFT &&
          !nuvashalauncher_account_token_is_valid (account,
                                                    g_get_real_time () / 1000000);
 }
@@ -110,7 +110,7 @@ open_skin_menu_for_account (NuvashaLauncherUsersPopover *self, const char *id,
 static void
 on_skin_menu_clicked (GtkButton *button, gpointer user_data)
 {
-  NuvashaLauncherUsersPopover *self = nuvashalauncher_USERS_POPOVER (user_data);
+  NuvashaLauncherUsersPopover *self = NUVASHALAUNCHER_USERS_POPOVER (user_data);
   const char *id = account_id_of (button);
   GtkImage *image = g_object_get_data (G_OBJECT (button),
                                        "nuvashalauncher-account-image");
@@ -121,7 +121,7 @@ on_skin_menu_clicked (GtkButton *button, gpointer user_data)
 static void
 on_row_activated (AdwActionRow *row, gpointer user_data G_GNUC_UNUSED)
 {
-  NuvashaLauncherUsersPopover *self = nuvashalauncher_USERS_POPOVER (user_data);
+  NuvashaLauncherUsersPopover *self = NUVASHALAUNCHER_USERS_POPOVER (user_data);
   const char *id = account_id_of (row);
   g_autoptr (GError) error = NULL;
   NuvashaLauncherAccount *account = nuvashalauncher_accounts_find (self->accounts, id);
@@ -141,7 +141,7 @@ on_row_activated (AdwActionRow *row, gpointer user_data G_GNUC_UNUSED)
 static void
 on_remove_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  NuvashaLauncherUsersPopover *self = nuvashalauncher_USERS_POPOVER (user_data);
+  NuvashaLauncherUsersPopover *self = NUVASHALAUNCHER_USERS_POPOVER (user_data);
   const char *id = g_object_get_data (G_OBJECT (source), "nuvashalauncher-account-id");
   const char *response =
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
@@ -162,7 +162,7 @@ on_remove_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 static void
 on_remove_clicked (GtkButton *button, gpointer user_data)
 {
-  NuvashaLauncherUsersPopover *self = nuvashalauncher_USERS_POPOVER (user_data);
+  NuvashaLauncherUsersPopover *self = NUVASHALAUNCHER_USERS_POPOVER (user_data);
   const char *id = account_id_of (button);
   const char *name = g_object_get_data (G_OBJECT (button), "nuvashalauncher-account-name");
   g_autofree char *heading = NULL;
@@ -232,7 +232,7 @@ append_account_row (NuvashaLauncherUsersPopover *self, const NuvashaLauncherAcco
     gtk_widget_add_css_class (GTK_WIDGET (row), "warning");
 
   nuvashalauncher_users_set_avatar_icon (GTK_IMAGE (image));
-  if (account->type == nuvashalauncher_ACCOUNT_OFFLINE)
+  if (account->type == NUVASHALAUNCHER_ACCOUNT_OFFLINE)
     {
       if (account->avatar_url != NULL && *account->avatar_url != '\0')
         nuvashalauncher_users_set_avatar (self, GTK_IMAGE (image), account->avatar_url);
@@ -311,7 +311,7 @@ add_account (NuvashaLauncherUsersPopover *self, NuvashaLauncherAccount *account)
 static void
 on_account_added (AdwDialog *dialog, NuvashaLauncherAccount *account, gpointer user_data)
 {
-  NuvashaLauncherUsersPopover *self = nuvashalauncher_USERS_POPOVER (user_data);
+  NuvashaLauncherUsersPopover *self = NUVASHALAUNCHER_USERS_POPOVER (user_data);
 
   add_account (self, account);
   adw_dialog_close (ADW_DIALOG (dialog));
@@ -321,7 +321,7 @@ on_account_added (AdwDialog *dialog, NuvashaLauncherAccount *account, gpointer u
 static void
 on_add_microsoft_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherUsersPopover *self = nuvashalauncher_USERS_POPOVER (user_data);
+  NuvashaLauncherUsersPopover *self = NUVASHALAUNCHER_USERS_POPOVER (user_data);
 
   open_microsoft_sign_in (self);
 }
@@ -329,7 +329,7 @@ on_add_microsoft_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 static void
 on_add_offline_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherUsersPopover *self = nuvashalauncher_USERS_POPOVER (user_data);
+  NuvashaLauncherUsersPopover *self = NUVASHALAUNCHER_USERS_POPOVER (user_data);
   NuvashaLauncherOfflineAccountDialog *dialog = nuvashalauncher_offline_account_dialog_new ();
 
   nuvashalauncher_offline_account_dialog_set_accounts (dialog, self->accounts);
@@ -374,7 +374,7 @@ rebuild (NuvashaLauncherUsersPopover *self)
     for (guint i = 0; i < accounts->len; i++)
       {
         NuvashaLauncherAccount *account = g_ptr_array_index (accounts, i);
-        gboolean microsoft = account->type == nuvashalauncher_ACCOUNT_MICROSOFT;
+        gboolean microsoft = account->type == NUVASHALAUNCHER_ACCOUNT_MICROSOFT;
 
         if ((pass == 0 && microsoft) || (pass == 1 && !microsoft))
           append_account_row (self, account);
@@ -472,7 +472,7 @@ nuvashalauncher_users_popover_init (NuvashaLauncherUsersPopover *self)
 static void
 nuvashalauncher_users_popover_constructed (GObject *object)
 {
-  NuvashaLauncherUsersPopover *self = nuvashalauncher_USERS_POPOVER (object);
+  NuvashaLauncherUsersPopover *self = NUVASHALAUNCHER_USERS_POPOVER (object);
 
   /* Weak, so that the handler does not keep the store alive for as long
      as the popover is connected to it. */
@@ -492,7 +492,7 @@ nuvashalauncher_users_popover_constructed (GObject *object)
 static void
 nuvashalauncher_users_popover_dispose (GObject *object)
 {
-  NuvashaLauncherUsersPopover *self = nuvashalauncher_USERS_POPOVER (object);
+  NuvashaLauncherUsersPopover *self = NUVASHALAUNCHER_USERS_POPOVER (object);
 
   /* An avatar that is still on its way is not needed by anything any
      more. */
@@ -510,7 +510,7 @@ nuvashalauncher_users_popover_dispose (GObject *object)
 static void
 nuvashalauncher_users_popover_finalize (GObject *object)
 {
-  NuvashaLauncherUsersPopover *self = nuvashalauncher_USERS_POPOVER (object);
+  NuvashaLauncherUsersPopover *self = NUVASHALAUNCHER_USERS_POPOVER (object);
 
   g_clear_pointer (&self->active_name, g_free);
 
@@ -531,7 +531,7 @@ nuvashalauncher_users_popover_get_property (GObject    *object,
                                 GValue     *value,
                                 GParamSpec *pspec)
 {
-  NuvashaLauncherUsersPopover *self = nuvashalauncher_USERS_POPOVER (object);
+  NuvashaLauncherUsersPopover *self = NUVASHALAUNCHER_USERS_POPOVER (object);
 
   switch (property_id)
     {
@@ -551,7 +551,7 @@ nuvashalauncher_users_popover_set_property (GObject      *object,
                                 const GValue *value,
                                 GParamSpec   *pspec)
 {
-  NuvashaLauncherUsersPopover *self = nuvashalauncher_USERS_POPOVER (object);
+  NuvashaLauncherUsersPopover *self = NUVASHALAUNCHER_USERS_POPOVER (object);
 
   switch (property_id)
     {
@@ -580,7 +580,7 @@ nuvashalauncher_users_popover_class_init (NuvashaLauncherUsersPopoverClass *klas
      is built is what the store holds. */
   g_object_class_install_property (
       object_class, PROP_ACCOUNTS,
-      g_param_spec_object ("accounts", NULL, NULL, nuvashalauncher_TYPE_ACCOUNTS,
+      g_param_spec_object ("accounts", NULL, NULL, NUVASHALAUNCHER_TYPE_ACCOUNTS,
                            G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 }
 
@@ -595,9 +595,9 @@ nuvashalauncher_users_popover_set_accounts (NuvashaLauncherUsersPopover *self, N
 NuvashaLauncherUsersPopover *
 nuvashalauncher_users_popover_new (NuvashaLauncherAccounts *accounts)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_ACCOUNTS (accounts), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_ACCOUNTS (accounts), NULL);
 
-  return g_object_new (nuvashalauncher_TYPE_USERS_POPOVER, "accounts", accounts, NULL);
+  return g_object_new (NUVASHALAUNCHER_TYPE_USERS_POPOVER, "accounts", accounts, NULL);
 }
 
 /* The avatar and the name in the header, which is what the menu button of
@@ -606,7 +606,7 @@ nuvashalauncher_users_popover_new (NuvashaLauncherAccounts *accounts)
 GtkWidget *
 nuvashalauncher_users_popover_get_button_content (NuvashaLauncherUsersPopover *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_USERS_POPOVER (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_USERS_POPOVER (self), NULL);
 
   /* The same widget every time: a caller that asked twice is holding two
      references to one button, which is what it would want, and never two

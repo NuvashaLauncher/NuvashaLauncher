@@ -13,8 +13,8 @@
  * Only the parts Modrinth bodies use are understood. Anything else is
  * shown as the plain text it is rather than dropped. */
 
-#ifndef nuvashalauncher_MARKDOWN_H
-#define nuvashalauncher_MARKDOWN_H
+#ifndef NUVASHALAUNCHER_MARKDOWN_H
+#define NUVASHALAUNCHER_MARKDOWN_H
 
 #include <adwaita.h>
 
@@ -31,4 +31,4 @@ char *nuvashalauncher_markdown_inline (const char *text);
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_MARKDOWN_H */
+#endif /* NUVASHALAUNCHER_MARKDOWN_H */

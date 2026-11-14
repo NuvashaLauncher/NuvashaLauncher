@@ -2,21 +2,21 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_MINECRAFT_SERVICES_H
-#define nuvashalauncher_MINECRAFT_SERVICES_H
+#ifndef NUVASHALAUNCHER_MINECRAFT_SERVICES_H
+#define NUVASHALAUNCHER_MINECRAFT_SERVICES_H
 
 #include <libsoup/soup.h>
 #include "nuvashalauncher-task.h"
 
 G_BEGIN_DECLS
 
-#define nuvashalauncher_MINECRAFT_SERVICES_ERROR (nuvashalauncher_minecraft_services_error_quark ())
+#define NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR (nuvashalauncher_minecraft_services_error_quark ())
 
 typedef enum {
-  nuvashalauncher_MINECRAFT_SERVICES_ERROR_NETWORK,
-  nuvashalauncher_MINECRAFT_SERVICES_ERROR_HTTP,
-  nuvashalauncher_MINECRAFT_SERVICES_ERROR_RESPONSE,
-  nuvashalauncher_MINECRAFT_SERVICES_ERROR_RATE_LIMITED
+  NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR_NETWORK,
+  NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR_HTTP,
+  NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR_RESPONSE,
+  NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR_RATE_LIMITED
 } NuvashaLauncherMinecraftServicesError;
 
 GQuark nuvashalauncher_minecraft_services_error_quark (void);
@@ -44,4 +44,4 @@ NuvashaLauncherTaskScope *nuvashalauncher_minecraft_services_send_async (SoupMes
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_MINECRAFT_SERVICES_H */
+#endif /* NUVASHALAUNCHER_MINECRAFT_SERVICES_H */

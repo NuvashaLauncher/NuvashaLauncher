@@ -5,8 +5,8 @@
 /* NuvashaLauncherMainWindow: the one window of the launcher. It shows the instances
  * of its NuvashaLauncherInstanceManager and holds the header bar actions. */
 
-#ifndef nuvashalauncher_MAIN_WINDOW_H
-#define nuvashalauncher_MAIN_WINDOW_H
+#ifndef NUVASHALAUNCHER_MAIN_WINDOW_H
+#define NUVASHALAUNCHER_MAIN_WINDOW_H
 
 #include <adwaita.h>
 
@@ -14,9 +14,9 @@
 
 G_BEGIN_DECLS
 
-#define nuvashalauncher_TYPE_MAIN_WINDOW (nuvashalauncher_main_window_get_type ())
+#define NUVASHALAUNCHER_TYPE_MAIN_WINDOW (nuvashalauncher_main_window_get_type ())
 
-G_DECLARE_FINAL_TYPE (NuvashaLauncherMainWindow, nuvashalauncher_main_window, nuvashalauncher, MAIN_WINDOW,
+G_DECLARE_FINAL_TYPE (NuvashaLauncherMainWindow, nuvashalauncher_main_window, NUVASHALAUNCHER, MAIN_WINDOW,
                       AdwApplicationWindow)
 
 /* Shows the instances of @manager and follows the manager's store. The
@@ -39,4 +39,4 @@ void nuvashalauncher_main_window_import_file (NuvashaLauncherMainWindow *self,
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_MAIN_WINDOW_H */
+#endif /* NUVASHALAUNCHER_MAIN_WINDOW_H */

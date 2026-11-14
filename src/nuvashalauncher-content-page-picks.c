@@ -194,7 +194,7 @@ pick_remove (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthVersion *v
 static void
 on_batch_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
   const char *response =
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
 
@@ -277,7 +277,7 @@ nuvashalauncher_content_page_clear_picks (NuvashaLauncherContentPage *self)
 void
 nuvashalauncher_content_page_on_pick_button_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
   g_autoptr (GString) body = NULL;
   g_autoptr (GHashTable) listed = NULL;
   AdwAlertDialog *alert = NULL;
@@ -321,7 +321,7 @@ nuvashalauncher_content_page_on_pick_button_clicked (GtkButton *button G_GNUC_UN
               g_ptr_array_index (pick->version->dependencies, j);
             const char *title = NULL;
 
-            if (dependency->type != nuvashalauncher_DEPENDENCY_REQUIRED ||
+            if (dependency->type != NUVASHALAUNCHER_DEPENDENCY_REQUIRED ||
                 dependency->project_id == NULL ||
                 g_hash_table_contains (listed, dependency->project_id))
               continue;

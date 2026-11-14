@@ -201,7 +201,7 @@ plan_stopped (NuvashaLauncherContentPage *self)
 static void
 on_update_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
   UpdateRun *run = g_object_get_data (G_OBJECT (source), "nuvashalauncher-update-run");
   const char *response =
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
@@ -249,9 +249,9 @@ update_check_done (NuvashaLauncherContentPage *self, UpdateRun *run)
     }
 
   {
-    const char *what = self->type == nuvashalauncher_CONTENT_MOD
+    const char *what = self->type == NUVASHALAUNCHER_CONTENT_MOD
                          ? "mods"
-                         : self->type == nuvashalauncher_CONTENT_RESOURCE_PACK
+                         : self->type == NUVASHALAUNCHER_CONTENT_RESOURCE_PACK
                              ? "resource packs"
                              : "shader packs";
     g_autofree char *heading =
@@ -408,7 +408,7 @@ void
 nuvashalauncher_content_page_on_update_all_clicked (GtkButton *button,
                                                     gpointer user_data)
 {
-  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
   UpdateRun *run = g_new0 (UpdateRun, 1);
 
   position_update_popover (self, button);

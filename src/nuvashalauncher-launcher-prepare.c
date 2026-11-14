@@ -28,7 +28,7 @@ set_log_private_values (NuvashaLauncher *self, const NuvashaLauncherLaunchSessio
     return;
 
   if (session->access_token != NULL &&
-      g_strcmp0 (session->access_token, nuvashalauncher_LAUNCH_OFFLINE_TOKEN) != 0)
+      g_strcmp0 (session->access_token, NUVASHALAUNCHER_LAUNCH_OFFLINE_TOKEN) != 0)
     {
       self->log_access_token = g_strdup (session->access_token);
       self->log_session = g_strdup_printf ("token:%s:%s",
@@ -118,11 +118,11 @@ run_the_game (NuvashaLauncher *self)
       /* Nobody signed in: the game plays offline as Player, the name a
          fresh Minecraft falls back to, with the UUID the game derives
          from it so the same player is the same player every time. */
-      offline_uuid = nuvashalauncher_account_offline_uuid (nuvashalauncher_LAUNCH_OFFLINE_NAME);
-      session.name = nuvashalauncher_LAUNCH_OFFLINE_NAME;
+      offline_uuid = nuvashalauncher_account_offline_uuid (NUVASHALAUNCHER_LAUNCH_OFFLINE_NAME);
+      session.name = NUVASHALAUNCHER_LAUNCH_OFFLINE_NAME;
       session.uuid = offline_uuid;
-      session.user_type = nuvashalauncher_LAUNCH_OFFLINE_USER_TYPE;
-      session.access_token = nuvashalauncher_LAUNCH_OFFLINE_TOKEN;
+      session.user_type = NUVASHALAUNCHER_LAUNCH_OFFLINE_USER_TYPE;
+      session.access_token = NUVASHALAUNCHER_LAUNCH_OFFLINE_TOKEN;
     }
 
   set_log_private_values (self, &session);
@@ -143,7 +143,7 @@ run_the_game (NuvashaLauncher *self)
      command line that is logged by the spawn carries it redacted, and
      this one is about the account. */
   log_line (self, TAG_STATE, "playing as %s (%s)",
-            account != NULL ? account->name : nuvashalauncher_LAUNCH_OFFLINE_NAME,
+            account != NULL ? account->name : NUVASHALAUNCHER_LAUNCH_OFFLINE_NAME,
             account != NULL ? nuvashalauncher_account_type_name (account->type)
                             : "Offline");
 
@@ -291,7 +291,7 @@ void
 on_resolved (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
              gpointer user_data)
 {
-  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *self = NUVASHALAUNCHER_LAUNCHER (user_data);
   g_autoptr (GError) error = NULL;
   NuvashaLauncherResolvedVersion *resolved = nuvashalauncher_resolve_version_finish (result, &error);
 
@@ -323,7 +323,7 @@ on_resolved (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       return;
     }
 
-  set_state (self, nuvashalauncher_LAUNCH_LAUNCHING, "choosing Java");
+  set_state (self, NUVASHALAUNCHER_LAUNCH_LAUNCHING, "choosing Java");
 
   {
     JavaSearch *search = g_new0 (JavaSearch, 1);
@@ -345,7 +345,7 @@ on_resolved (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 void
 on_resolve_progress (const NuvashaLauncherResolveProgress *progress, gpointer user_data)
 {
-  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *self = NUVASHALAUNCHER_LAUNCHER (user_data);
   guint percent;
   g_autofree char *detail = NULL;
 
@@ -361,10 +361,10 @@ on_resolve_progress (const NuvashaLauncherResolveProgress *progress, gpointer us
 
       self->process.last_percent = percent;
       detail = g_strdup_printf ("%s %u%%", progress->stage, percent);
-      set_state (self, nuvashalauncher_LAUNCH_DOWNLOADING, detail);
+      set_state (self, NUVASHALAUNCHER_LAUNCH_DOWNLOADING, detail);
       return;
     }
 
-  if (self->state == nuvashalauncher_LAUNCH_DOWNLOADING)
-    set_state (self, nuvashalauncher_LAUNCH_PREPARING, self->version);
+  if (self->state == NUVASHALAUNCHER_LAUNCH_DOWNLOADING)
+    set_state (self, NUVASHALAUNCHER_LAUNCH_PREPARING, self->version);
 }

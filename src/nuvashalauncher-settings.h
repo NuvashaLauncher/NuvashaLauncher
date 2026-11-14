@@ -13,38 +13,38 @@
  * names another runtime. The file is read once when the object is
  * created and written on every change through GSettings. */
 
-#ifndef nuvashalauncher_SETTINGS_H
-#define nuvashalauncher_SETTINGS_H
+#ifndef NUVASHALAUNCHER_SETTINGS_H
+#define NUVASHALAUNCHER_SETTINGS_H
 
 #include <gio/gio.h>
 
 G_BEGIN_DECLS
 
-#define nuvashalauncher_TYPE_SETTINGS (nuvashalauncher_settings_get_type ())
+#define NUVASHALAUNCHER_TYPE_SETTINGS (nuvashalauncher_settings_get_type ())
 
-G_DECLARE_FINAL_TYPE (NuvashaLauncherSettings, nuvashalauncher_settings, nuvashalauncher, SETTINGS, GObject)
+G_DECLARE_FINAL_TYPE (NuvashaLauncherSettings, nuvashalauncher_settings, NUVASHALAUNCHER, SETTINGS, GObject)
 
-#define nuvashalauncher_SETTINGS_ERROR (nuvashalauncher_settings_error_quark ())
+#define NUVASHALAUNCHER_SETTINGS_ERROR (nuvashalauncher_settings_error_quark ())
 
 typedef enum {
-  nuvashalauncher_SETTINGS_ERROR_IO,      /* the settings file could not be written */
-  nuvashalauncher_SETTINGS_ERROR_INVALID  /* the value asked for is not a usable one */
+  NUVASHALAUNCHER_SETTINGS_ERROR_IO,      /* the settings file could not be written */
+  NUVASHALAUNCHER_SETTINGS_ERROR_INVALID  /* the value asked for is not a usable one */
 } NuvashaLauncherSettingsError;
 
 typedef enum {
-  nuvashalauncher_SETTINGS_CACHE_EXPIRATION_1_HOUR = 60 * 60,
-  nuvashalauncher_SETTINGS_CACHE_EXPIRATION_6_HOURS = 6 * 60 * 60,
-  nuvashalauncher_SETTINGS_CACHE_EXPIRATION_1_DAY = 24 * 60 * 60,
-  nuvashalauncher_SETTINGS_CACHE_EXPIRATION_7_DAYS = 7 * 24 * 60 * 60
+  NUVASHALAUNCHER_SETTINGS_CACHE_EXPIRATION_1_HOUR = 60 * 60,
+  NUVASHALAUNCHER_SETTINGS_CACHE_EXPIRATION_6_HOURS = 6 * 60 * 60,
+  NUVASHALAUNCHER_SETTINGS_CACHE_EXPIRATION_1_DAY = 24 * 60 * 60,
+  NUVASHALAUNCHER_SETTINGS_CACHE_EXPIRATION_7_DAYS = 7 * 24 * 60 * 60
 } NuvashaLauncherSettingsCacheExpiration;
 
 GQuark nuvashalauncher_settings_error_quark (void);
 
 /* How many lines the log of a running game keeps before the oldest ones
  * are dropped. */
-#define nuvashalauncher_SETTINGS_DEFAULT_LOG_LINE_LIMIT 5000
-#define nuvashalauncher_SETTINGS_DEFAULT_CACHE_EXPIRATION \
-  nuvashalauncher_SETTINGS_CACHE_EXPIRATION_1_HOUR
+#define NUVASHALAUNCHER_SETTINGS_DEFAULT_LOG_LINE_LIMIT 5000
+#define NUVASHALAUNCHER_SETTINGS_DEFAULT_CACHE_EXPIRATION \
+  NUVASHALAUNCHER_SETTINGS_CACHE_EXPIRATION_1_HOUR
 
 /* Reads the installed GSettings schema and defaults. Never returns NULL. */
 NuvashaLauncherSettings *nuvashalauncher_settings_new (void);
@@ -60,12 +60,12 @@ gboolean nuvashalauncher_settings_set_show_unstable_versions (NuvashaLauncherSet
                                                    GError     **error);
 
 /* How many lines the log of a running game keeps, oldest dropped first.
- * Never below one: nuvashalauncher_SETTINGS_DEFAULT_LOG_LINE_LIMIT when the file
+ * Never below one: NUVASHALAUNCHER_SETTINGS_DEFAULT_LOG_LINE_LIMIT when the file
  * says nothing usable. */
 guint nuvashalauncher_settings_get_log_line_limit (NuvashaLauncherSettings *self);
 
 /* @limit has to be at least one or the call fails with
- * nuvashalauncher_SETTINGS_ERROR_INVALID and the stored value stays in place. */
+ * NUVASHALAUNCHER_SETTINGS_ERROR_INVALID and the stored value stays in place. */
 gboolean nuvashalauncher_settings_set_log_line_limit (NuvashaLauncherSettings *self,
                                           guint        limit,
                                           GError     **error);
@@ -108,4 +108,4 @@ gboolean nuvashalauncher_settings_set_delete_dependents (NuvashaLauncherSettings
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_SETTINGS_H */
+#endif /* NUVASHALAUNCHER_SETTINGS_H */

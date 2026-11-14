@@ -7,7 +7,7 @@ account_to_json (JsonBuilder *builder, const NuvashaLauncherAccount *account)
 {
   json_builder_begin_object (builder);
   json_builder_set_member_name (builder, "type");
-  json_builder_add_string_value (builder, account->type == nuvashalauncher_ACCOUNT_MICROSOFT ? "microsoft" : "offline");
+  json_builder_add_string_value (builder, account->type == NUVASHALAUNCHER_ACCOUNT_MICROSOFT ? "microsoft" : "offline");
   json_builder_set_member_name (builder, "id");
   json_builder_add_string_value (builder, account->id);
   json_builder_set_member_name (builder, "name");
@@ -15,7 +15,7 @@ account_to_json (JsonBuilder *builder, const NuvashaLauncherAccount *account)
   json_builder_set_member_name (builder, "uuid");
   json_builder_add_string_value (builder, account->uuid);
 
-  if (account->type == nuvashalauncher_ACCOUNT_MICROSOFT)
+  if (account->type == NUVASHALAUNCHER_ACCOUNT_MICROSOFT)
     {
       json_builder_set_member_name (builder, "access-token");
       if (account->access_token != NULL)
@@ -69,12 +69,12 @@ account_from_json (JsonObject *object)
     return NULL;
 
   account = g_new0 (NuvashaLauncherAccount, 1);
-  account->type = g_str_equal (type, "microsoft") ? nuvashalauncher_ACCOUNT_MICROSOFT
-                                                  : nuvashalauncher_ACCOUNT_OFFLINE;
+  account->type = g_str_equal (type, "microsoft") ? NUVASHALAUNCHER_ACCOUNT_MICROSOFT
+                                                  : NUVASHALAUNCHER_ACCOUNT_OFFLINE;
   account->id = g_steal_pointer (&id);
   account->name = g_steal_pointer (&name);
   account->uuid = g_steal_pointer (&uuid);
-  if (account->type == nuvashalauncher_ACCOUNT_MICROSOFT)
+  if (account->type == NUVASHALAUNCHER_ACCOUNT_MICROSOFT)
     {
       account->access_token = string_member (object, "access-token");
       account->refresh_token = string_member (object, "refresh-token");

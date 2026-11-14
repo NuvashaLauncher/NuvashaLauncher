@@ -8,8 +8,8 @@
  * Plain data object with JSON serialization: no widgets and no file or
  * network I/O live here. */
 
-#ifndef nuvashalauncher_INSTANCE_H
-#define nuvashalauncher_INSTANCE_H
+#ifndef NUVASHALAUNCHER_INSTANCE_H
+#define NUVASHALAUNCHER_INSTANCE_H
 
 #include <gio/gio.h>
 #include <json-glib/json-glib.h>
@@ -19,22 +19,22 @@ G_BEGIN_DECLS
 /* Mod loaders nuvashalauncher knows about. In JSON the loader is the lowercase
  * string, e.g. "fabric". */
 typedef enum {
-  nuvashalauncher_LOADER_VANILLA,
-  nuvashalauncher_LOADER_FABRIC,
-  nuvashalauncher_LOADER_FORGE,
-  nuvashalauncher_LOADER_NEOFORGE,
-  nuvashalauncher_LOADER_QUILT,
+  NUVASHALAUNCHER_LOADER_VANILLA,
+  NUVASHALAUNCHER_LOADER_FABRIC,
+  NUVASHALAUNCHER_LOADER_FORGE,
+  NUVASHALAUNCHER_LOADER_NEOFORGE,
+  NUVASHALAUNCHER_LOADER_QUILT,
 } NuvashaLauncherLoader;
 
-#define nuvashalauncher_TYPE_INSTANCE (nuvashalauncher_instance_get_type ())
+#define NUVASHALAUNCHER_TYPE_INSTANCE (nuvashalauncher_instance_get_type ())
 
-G_DECLARE_FINAL_TYPE (NuvashaLauncherInstance, nuvashalauncher_instance, nuvashalauncher, INSTANCE, GObject)
+G_DECLARE_FINAL_TYPE (NuvashaLauncherInstance, nuvashalauncher_instance, NUVASHALAUNCHER, INSTANCE, GObject)
 
-#define nuvashalauncher_INSTANCE_ERROR (nuvashalauncher_instance_error_quark ())
+#define NUVASHALAUNCHER_INSTANCE_ERROR (nuvashalauncher_instance_error_quark ())
 
 typedef enum {
-  nuvashalauncher_INSTANCE_ERROR_INVALID,      /* a field holds a bad value */
-  nuvashalauncher_INSTANCE_ERROR_MISSING_FIELD /* a required field is absent */
+  NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,      /* a field holds a bad value */
+  NUVASHALAUNCHER_INSTANCE_ERROR_MISSING_FIELD /* a required field is absent */
 } NuvashaLauncherInstanceError;
 
 GQuark nuvashalauncher_instance_error_quark (void);
@@ -104,4 +104,4 @@ GHashTable *nuvashalauncher_instance_get_components (NuvashaLauncherInstance *se
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_INSTANCE_H */
+#endif /* NUVASHALAUNCHER_INSTANCE_H */

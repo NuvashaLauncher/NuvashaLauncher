@@ -24,10 +24,10 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#define nuvashalauncher_MODPACK_FORMAT_VERSION 1
+#define NUVASHALAUNCHER_MODPACK_FORMAT_VERSION 1
 
 /* Maximum inflated archive size. Tests may lower this limit. */
-static guint64 max_content_size = nuvashalauncher_MODPACK_MAX_CONTENT_SIZE;
+static guint64 max_content_size = NUVASHALAUNCHER_MODPACK_MAX_CONTENT_SIZE;
 
 void
 nuvashalauncher_modpack_set_content_limit (guint64 bytes)
@@ -106,15 +106,15 @@ nuvashalauncher_modpack_archive_entry_is_safe (const char *name, guint32 type,
 {
   if (type == AE_IFLNK || hardlink != NULL)
     {
-      g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
-                           nuvashalauncher_MODPACK_ERROR_PATH,
+      g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                           NUVASHALAUNCHER_MODPACK_ERROR_PATH,
                            "the archive holds a symlink or a hardlink");
       return FALSE;
     }
 
   if (type != AE_IFDIR && type != AE_IFREG)
     {
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_ARCHIVE,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_ARCHIVE,
                    "\"%s\" is not a file or a directory", name != NULL ? name : "?");
       return FALSE;
     }
@@ -141,7 +141,7 @@ archive_read_entry (struct archive *archive, guint64 limit, GError **error)
 
       if (status != ARCHIVE_OK)
         {
-          g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_ARCHIVE,
+          g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_ARCHIVE,
                        "an entry of the archive cannot be read: %s",
                        archive_error_string (archive));
           return NULL;
@@ -150,8 +150,8 @@ archive_read_entry (struct archive *archive, guint64 limit, GError **error)
       if ((guint64) bytes->len > limit ||
           (guint64) size > limit - (guint64) bytes->len)
         {
-          g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
-                               nuvashalauncher_MODPACK_ERROR_BOMB,
+          g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                               NUVASHALAUNCHER_MODPACK_ERROR_BOMB,
                                "an entry of the archive decodes past the "
                                "size one manifest wants");
           return NULL;
@@ -188,7 +188,7 @@ nuvashalauncher_modpack_new_from_zip (const char *zip_path, GError **error)
   if (fd < 0)
     {
       int saved_errno = errno;
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_ARCHIVE,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_ARCHIVE,
                    "cannot open \"%s\": %s", zip_path, g_strerror (saved_errno));
       archive_read_free (archive);
       return NULL;
@@ -198,7 +198,7 @@ nuvashalauncher_modpack_new_from_zip (const char *zip_path, GError **error)
   if (archive_read_support_format_zip (archive) != ARCHIVE_OK ||
       archive_read_open_fd (archive, fd, 65536) != ARCHIVE_OK)
     {
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_ARCHIVE,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_ARCHIVE,
                    "the modpack cannot be read: %s",
                    archive_error_string (archive));
       close (fd);
@@ -219,10 +219,10 @@ nuvashalauncher_modpack_new_from_zip (const char *zip_path, GError **error)
        * archive with no limit on its entries, or that announces more
        * content than a pack can have, fails before the index is even
        * asked for. */
-      if (paths > nuvashalauncher_MODPACK_MAX_ENTRIES)
+      if (paths > NUVASHALAUNCHER_MODPACK_MAX_ENTRIES)
         {
-          g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
-                               nuvashalauncher_MODPACK_ERROR_BOMB,
+          g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                               NUVASHALAUNCHER_MODPACK_ERROR_BOMB,
                                "the archive has more entries than one pack");
           goto error;
         }
@@ -246,7 +246,7 @@ nuvashalauncher_modpack_new_from_zip (const char *zip_path, GError **error)
 
       if (!nuvashalauncher_modpack_path_is_safe (path))
         {
-          g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_PATH,
+          g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_PATH,
                        "the archive names \"%s\", which is not a path the "
                        "instance can hold",
                        name);
@@ -264,7 +264,7 @@ nuvashalauncher_modpack_new_from_zip (const char *zip_path, GError **error)
               (guint64) entry_size > max_content_size - size)
             {
               g_set_error_literal (
-                error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_BOMB,
+                error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_BOMB,
                 "the archive carries more content than one pack");
               goto error;
             }
@@ -277,8 +277,8 @@ nuvashalauncher_modpack_new_from_zip (const char *zip_path, GError **error)
         {
           if (index_bytes != NULL)
             {
-              g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
-                                   nuvashalauncher_MODPACK_ERROR_FORMAT,
+              g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                                   NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                                    "the archive has more than one modrinth.index.json");
               goto error;
             }
@@ -293,7 +293,7 @@ nuvashalauncher_modpack_new_from_zip (const char *zip_path, GError **error)
 
       if (archive_read_data_skip (archive) != ARCHIVE_OK)
         {
-          g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_ARCHIVE,
+          g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_ARCHIVE,
                        "an entry of the archive cannot be skipped: %s",
                        archive_error_string (archive));
           goto error;
@@ -302,7 +302,7 @@ nuvashalauncher_modpack_new_from_zip (const char *zip_path, GError **error)
 
   if (status != ARCHIVE_EOF)
     {
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_ARCHIVE,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_ARCHIVE,
                    "the archive cannot be read all the way through: %s",
                    archive_error_string (archive));
       goto error;
@@ -315,8 +315,8 @@ nuvashalauncher_modpack_new_from_zip (const char *zip_path, GError **error)
 
   if (index_bytes == NULL)
     {
-      g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
-                           nuvashalauncher_MODPACK_ERROR_FORMAT,
+      g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                           NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                            "the archive has no modrinth.index.json at its "
                            "root");
       return NULL;
@@ -332,8 +332,8 @@ nuvashalauncher_modpack_new_from_zip (const char *zip_path, GError **error)
      * parser saw another. */
     if (memchr (data, '\0', length) != NULL)
       {
-        g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
-                             nuvashalauncher_MODPACK_ERROR_PATH,
+        g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                             NUVASHALAUNCHER_MODPACK_ERROR_PATH,
                              "the index carries a NUL byte");
         return NULL;
       }
@@ -394,8 +394,8 @@ modpack_read_thread (GTask *task G_GNUC_UNUSED,
       nuvashalauncher_modpack_free (pack);
       nuvashalauncher_task_scope_return_error (
         scope,
-        g_error_new_literal (nuvashalauncher_MODPACK_ERROR,
-                             nuvashalauncher_MODPACK_ERROR_CANCELLED, "cancelled"));
+        g_error_new_literal (NUVASHALAUNCHER_MODPACK_ERROR,
+                             NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED, "cancelled"));
       return;
     }
 

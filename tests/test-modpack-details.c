@@ -16,7 +16,7 @@ test_details_content_renders_validated_metadata (void)
     nuvashalauncher_instance_manager_new (instances);
   g_autoptr (NuvashaLauncherDownloadModpackDialog) dialog =
     g_object_ref_sink (g_object_new (
-      nuvashalauncher_TYPE_DOWNLOAD_MODPACK_DIALOG, NULL));
+      NUVASHALAUNCHER_TYPE_DOWNLOAD_MODPACK_DIALOG, NULL));
   g_autoptr (NuvashaLauncherModrinthProject) project =
     g_new0 (NuvashaLauncherModrinthProject, 1);
   g_autoptr (NuvashaLauncherModrinthDetails) details =

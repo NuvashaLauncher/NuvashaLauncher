@@ -11,8 +11,8 @@
  * result passed to the callback has no source object: give it straight
  * to the matching _finish() function. */
 
-#ifndef nuvashalauncher_DOWNLOAD_H
-#define nuvashalauncher_DOWNLOAD_H
+#ifndef NUVASHALAUNCHER_DOWNLOAD_H
+#define NUVASHALAUNCHER_DOWNLOAD_H
 
 #include <gio/gio.h>
 #include <json-glib/json-glib.h>
@@ -33,16 +33,16 @@ guint nuvashalauncher_download_service_active (const NuvashaLauncherDownloadServ
 guint nuvashalauncher_download_service_queued_interactive (const NuvashaLauncherDownloadService *service);
 guint nuvashalauncher_download_service_queued_bulk (const NuvashaLauncherDownloadService *service);
 
-#define nuvashalauncher_DOWNLOAD_ERROR (nuvashalauncher_download_error_quark ())
+#define NUVASHALAUNCHER_DOWNLOAD_ERROR (nuvashalauncher_download_error_quark ())
 
 typedef enum {
-  nuvashalauncher_DOWNLOAD_ERROR_NETWORK,       /* connection, DNS, socket, timeout */
-  nuvashalauncher_DOWNLOAD_ERROR_HTTP,          /* an HTTP status that is not success */
-  nuvashalauncher_DOWNLOAD_ERROR_RATE_LIMITED,  /* HTTP 429 */
-  nuvashalauncher_DOWNLOAD_ERROR_CHECKSUM,      /* received bytes have the wrong hash */
-  nuvashalauncher_DOWNLOAD_ERROR_IO,            /* local file system failure */
-  nuvashalauncher_DOWNLOAD_ERROR_CANCELLED,     /* the caller cancelled the request */
-  nuvashalauncher_DOWNLOAD_ERROR_INVALID        /* unsafe URL, malformed/oversized response */
+  NUVASHALAUNCHER_DOWNLOAD_ERROR_NETWORK,       /* connection, DNS, socket, timeout */
+  NUVASHALAUNCHER_DOWNLOAD_ERROR_HTTP,          /* an HTTP status that is not success */
+  NUVASHALAUNCHER_DOWNLOAD_ERROR_RATE_LIMITED,  /* HTTP 429 */
+  NUVASHALAUNCHER_DOWNLOAD_ERROR_CHECKSUM,      /* received bytes have the wrong hash */
+  NUVASHALAUNCHER_DOWNLOAD_ERROR_IO,            /* local file system failure */
+  NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED,     /* the caller cancelled the request */
+  NUVASHALAUNCHER_DOWNLOAD_ERROR_INVALID        /* unsafe URL, malformed/oversized response */
 } NuvashaLauncherDownloadError;
 
 GQuark nuvashalauncher_download_error_quark (void);
@@ -155,4 +155,4 @@ NuvashaLauncherTaskScope *nuvashalauncher_download_json_post_cached_async (Nuvas
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_DOWNLOAD_H */
+#endif /* NUVASHALAUNCHER_DOWNLOAD_H */

@@ -24,12 +24,12 @@ char *
 nuvashalauncher_instance_default_icon_path (void)
 {
   g_autofree char *installed =
-    g_build_filename (nuvashalauncher_DATA_DIR, "pack.png", NULL);
+    g_build_filename (NUVASHALAUNCHER_DATA_DIR, "pack.png", NULL);
   if (g_file_test (installed, G_FILE_TEST_IS_REGULAR))
     return g_steal_pointer (&installed);
 
   g_autofree char *source =
-    g_build_filename (nuvashalauncher_SOURCE_DATA_DIR, "pack.png", NULL);
+    g_build_filename (NUVASHALAUNCHER_SOURCE_DATA_DIR, "pack.png", NULL);
   if (g_file_test (source, G_FILE_TEST_IS_REGULAR))
     return g_steal_pointer (&source);
 
@@ -63,11 +63,11 @@ static GParamSpec *properties[N_PROPS];
 /* One table feeds both the enum type of the "loader" property and the
  * string conversion used when serializing to JSON. */
 static const GEnumValue nuvashalauncher_loader_values[] = {
-  { nuvashalauncher_LOADER_VANILLA,  "nuvashalauncher_LOADER_VANILLA",  "vanilla"  },
-  { nuvashalauncher_LOADER_FABRIC,   "nuvashalauncher_LOADER_FABRIC",   "fabric"   },
-  { nuvashalauncher_LOADER_FORGE,    "nuvashalauncher_LOADER_FORGE",    "forge"    },
-  { nuvashalauncher_LOADER_NEOFORGE, "nuvashalauncher_LOADER_NEOFORGE", "neoforge" },
-  { nuvashalauncher_LOADER_QUILT,    "nuvashalauncher_LOADER_QUILT",    "quilt"    },
+  { NUVASHALAUNCHER_LOADER_VANILLA,  "NUVASHALAUNCHER_LOADER_VANILLA",  "vanilla"  },
+  { NUVASHALAUNCHER_LOADER_FABRIC,   "NUVASHALAUNCHER_LOADER_FABRIC",   "fabric"   },
+  { NUVASHALAUNCHER_LOADER_FORGE,    "NUVASHALAUNCHER_LOADER_FORGE",    "forge"    },
+  { NUVASHALAUNCHER_LOADER_NEOFORGE, "NUVASHALAUNCHER_LOADER_NEOFORGE", "neoforge" },
+  { NUVASHALAUNCHER_LOADER_QUILT,    "NUVASHALAUNCHER_LOADER_QUILT",    "quilt"    },
   { 0, NULL, NULL }
 };
 
@@ -225,7 +225,7 @@ validate_text (const char  *value,
       if (nullable)
         return TRUE;
 
-      g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_MISSING_FIELD,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_MISSING_FIELD,
                    "instance %s is missing", field);
       return FALSE;
     }
@@ -237,14 +237,14 @@ validate_text (const char  *value,
 
   if (stripped[0] == '\0')
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,
                    "instance %s must not be empty", field);
       return FALSE;
     }
 
   if (!g_utf8_validate (value, -1, NULL))
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,
                    "instance %s must be valid UTF-8", field);
       return FALSE;
     }
@@ -252,7 +252,7 @@ validate_text (const char  *value,
   for (const char *p = value; *p != '\0'; p = g_utf8_next_char (p))
     if (g_unichar_iscntrl (g_utf8_get_char (p)))
       {
-        g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID,
+        g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,
                      "instance %s must not contain control characters", field);
         return FALSE;
       }
@@ -263,19 +263,19 @@ validate_text (const char  *value,
 gboolean
 nuvashalauncher_instance_validate (NuvashaLauncherInstance *self, GError **error)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   if (self->id == NULL || self->id[0] == '\0')
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_MISSING_FIELD,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_MISSING_FIELD,
                    "instance id is missing");
       return FALSE;
     }
 
   if (!g_uuid_string_is_valid (self->id))
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,
                    "instance id \"%s\" is not a valid uuid", self->id);
       return FALSE;
     }
@@ -285,7 +285,7 @@ nuvashalauncher_instance_validate (NuvashaLauncherInstance *self, GError **error
 
   if (self->directory == NULL || !g_path_is_absolute (self->directory))
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,
                    "instance directory must be an absolute path");
       return FALSE;
     }
@@ -295,7 +295,7 @@ nuvashalauncher_instance_validate (NuvashaLauncherInstance *self, GError **error
 
   if (g_strcmp0 (canonical, self->directory) != 0)
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,
                    "instance directory \"%s\" is not canonical",
                    self->directory);
       return FALSE;
@@ -303,7 +303,7 @@ nuvashalauncher_instance_validate (NuvashaLauncherInstance *self, GError **error
 
   if (g_strcmp0 (self->directory, G_DIR_SEPARATOR_S) == 0)
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,
                    "the filesystem root cannot be an instance directory");
       return FALSE;
     }
@@ -314,7 +314,7 @@ nuvashalauncher_instance_validate (NuvashaLauncherInstance *self, GError **error
 
   if (nuvashalauncher_loader_to_string (self->loader) == NULL)
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,
                    "unknown mod loader");
       return FALSE;
     }
@@ -348,7 +348,7 @@ nuvashalauncher_instance_set_string (NuvashaLauncherInstance *self, const char *
   };
   g_autofree char *old = NULL;
 
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (self), FALSE);
   g_return_val_if_fail (property != NULL, FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
@@ -357,7 +357,7 @@ nuvashalauncher_instance_set_string (NuvashaLauncherInstance *self, const char *
     known |= g_str_equal (property, allowed[i]);
   if (!known)
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,
                    "instance property \"%s\" cannot be changed", property);
       return FALSE;
     }
@@ -376,10 +376,10 @@ gboolean
 nuvashalauncher_instance_set_loader (NuvashaLauncherInstance *self, NuvashaLauncherLoader loader,
                          const char *version, GError **error)
 {
-  NuvashaLauncherLoader old_loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader old_loader = NUVASHALAUNCHER_LOADER_VANILLA;
   g_autofree char *old_version = NULL;
 
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   g_object_get (self, "loader", &old_loader, "loader-version", &old_version,
@@ -400,7 +400,7 @@ nuvashalauncher_instance_set_name (NuvashaLauncherInstance *self, const char *na
   g_autofree char *old = NULL;
   g_autofree char *normalized = nuvashalauncher_instance_normalize_name (name);
 
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
   old = g_strdup (self->name);
   g_object_set (self, "name", normalized, NULL);
@@ -418,7 +418,7 @@ nuvashalauncher_instance_set_directory (NuvashaLauncherInstance *self, const cha
 {
   g_autofree char *old = NULL;
 
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
   old = g_strdup (self->directory);
   g_object_set (self, "directory", directory, NULL);
@@ -445,14 +445,14 @@ nuvashalauncher_instance_new (const char  *id,
 
   if (directory == NULL || !g_path_is_absolute (directory))
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,
                    "instance directory must be an absolute path");
       return NULL;
     }
 
   if (nuvashalauncher_loader_to_string (loader) == NULL)
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_ERROR, nuvashalauncher_INSTANCE_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_ERROR, NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,
                    "unknown mod loader");
       return NULL;
     }
@@ -467,7 +467,7 @@ nuvashalauncher_instance_new (const char  *id,
 
   g_autofree char *normalized_name = nuvashalauncher_instance_normalize_name (name);
   NuvashaLauncherInstance *self =
-    g_object_new (nuvashalauncher_TYPE_INSTANCE,
+    g_object_new (NUVASHALAUNCHER_TYPE_INSTANCE,
                   "id", id,
                   "name", normalized_name,
                   "directory", canonical,
@@ -487,7 +487,7 @@ nuvashalauncher_instance_new (const char  *id,
 const char *
 nuvashalauncher_instance_get_id (NuvashaLauncherInstance *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (self), NULL);
 
   return self->id;
 }
@@ -495,7 +495,7 @@ nuvashalauncher_instance_get_id (NuvashaLauncherInstance *self)
 GHashTable *
 nuvashalauncher_instance_get_components (NuvashaLauncherInstance *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (self), NULL);
 
   return self->components;
 }
@@ -517,7 +517,7 @@ nuvashalauncher_instance_set_property (GObject      *object,
                            const GValue *value,
                            GParamSpec   *pspec)
 {
-  NuvashaLauncherInstance *self = nuvashalauncher_INSTANCE (object);
+  NuvashaLauncherInstance *self = NUVASHALAUNCHER_INSTANCE (object);
 
   switch (prop_id)
     {
@@ -568,13 +568,13 @@ nuvashalauncher_instance_set_property (GObject      *object,
         {
           const char *component = NULL;
 
-          if (self->loader == nuvashalauncher_LOADER_FABRIC)
+          if (self->loader == NUVASHALAUNCHER_LOADER_FABRIC)
             component = "net.fabricmc.fabric-loader";
-          else if (self->loader == nuvashalauncher_LOADER_FORGE)
+          else if (self->loader == NUVASHALAUNCHER_LOADER_FORGE)
             component = "net.minecraftforge";
-          else if (self->loader == nuvashalauncher_LOADER_NEOFORGE)
+          else if (self->loader == NUVASHALAUNCHER_LOADER_NEOFORGE)
             component = "net.neoforged.neoforge";
-          else if (self->loader == nuvashalauncher_LOADER_QUILT)
+          else if (self->loader == NUVASHALAUNCHER_LOADER_QUILT)
             component = "org.quiltmc.quilt-loader";
 
           if (component != NULL)
@@ -590,13 +590,13 @@ nuvashalauncher_instance_set_property (GObject      *object,
         {
           const char *component = NULL;
 
-          if (self->loader == nuvashalauncher_LOADER_FABRIC)
+          if (self->loader == NUVASHALAUNCHER_LOADER_FABRIC)
             component = "net.fabricmc.fabric-loader";
-          else if (self->loader == nuvashalauncher_LOADER_FORGE)
+          else if (self->loader == NUVASHALAUNCHER_LOADER_FORGE)
             component = "net.minecraftforge";
-          else if (self->loader == nuvashalauncher_LOADER_NEOFORGE)
+          else if (self->loader == NUVASHALAUNCHER_LOADER_NEOFORGE)
             component = "net.neoforged.neoforge";
-          else if (self->loader == nuvashalauncher_LOADER_QUILT)
+          else if (self->loader == NUVASHALAUNCHER_LOADER_QUILT)
             component = "org.quiltmc.quilt-loader";
 
           if (component != NULL)
@@ -658,7 +658,7 @@ nuvashalauncher_instance_get_property (GObject    *object,
                            GValue     *value,
                            GParamSpec *pspec)
 {
-  NuvashaLauncherInstance *self = nuvashalauncher_INSTANCE (object);
+  NuvashaLauncherInstance *self = NUVASHALAUNCHER_INSTANCE (object);
 
   switch (prop_id)
     {
@@ -719,7 +719,7 @@ nuvashalauncher_instance_get_property (GObject    *object,
 static void
 nuvashalauncher_instance_finalize (GObject *object)
 {
-  NuvashaLauncherInstance *self = nuvashalauncher_INSTANCE (object);
+  NuvashaLauncherInstance *self = NUVASHALAUNCHER_INSTANCE (object);
 
   g_free (self->id);
   g_free (self->name);
@@ -774,7 +774,7 @@ nuvashalauncher_instance_class_init (NuvashaLauncherInstanceClass *klass)
   properties[PROP_LOADER] =
     g_param_spec_enum ("loader", "Loader", "Mod loader",
                        nuvashalauncher_loader_get_type (),
-                       nuvashalauncher_LOADER_VANILLA,
+                       NUVASHALAUNCHER_LOADER_VANILLA,
                        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   properties[PROP_LOADER_VERSION] =
@@ -825,7 +825,7 @@ nuvashalauncher_instance_init (NuvashaLauncherInstance *self)
   /* Property defaults only apply to construct properties, so the JVM
    * arguments are set here. */
   self->jvm_args = g_strdup (DEFAULT_JVM_ARGS);
-  self->loader = nuvashalauncher_LOADER_VANILLA;
+  self->loader = NUVASHALAUNCHER_LOADER_VANILLA;
   self->components = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                              g_free);
 }

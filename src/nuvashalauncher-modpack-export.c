@@ -111,7 +111,7 @@ export_file (ExportRun *run, struct archive *archive, const char *source,
     {
       if (fd >= 0)
         close (fd);
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_IO,
                    "cannot read instance file \"%s\": %s", source,
                    g_strerror (errno));
       return FALSE;
@@ -121,7 +121,7 @@ export_file (ExportRun *run, struct archive *archive, const char *source,
   if (input == NULL)
     {
       close (fd);
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_IO,
                    "cannot open instance file \"%s\": %s", source,
                    g_strerror (errno));
       return FALSE;
@@ -135,7 +135,7 @@ export_file (ExportRun *run, struct archive *archive, const char *source,
 
   if (archive_write_header (archive, entry) != ARCHIVE_OK)
     {
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_ARCHIVE,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_ARCHIVE,
                    "cannot write \"%s\": %s", target,
                    archive_error_string (archive));
       archive_entry_free (entry);
@@ -147,8 +147,8 @@ export_file (ExportRun *run, struct archive *archive, const char *source,
     {
       if (g_cancellable_is_cancelled (cancellable))
         {
-          g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
-                               nuvashalauncher_MODPACK_ERROR_CANCELLED, "cancelled");
+          g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                               NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED, "cancelled");
           archive_entry_free (entry);
           fclose (input);
           return FALSE;
@@ -156,7 +156,7 @@ export_file (ExportRun *run, struct archive *archive, const char *source,
 
       if (archive_write_data (archive, buffer, length) != (la_ssize_t) length)
       {
-        g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_ARCHIVE,
+        g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_ARCHIVE,
                      "cannot write \"%s\": %s", target,
                      archive_error_string (archive));
         archive_entry_free (entry);
@@ -167,7 +167,7 @@ export_file (ExportRun *run, struct archive *archive, const char *source,
 
   if (ferror (input))
     {
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_IO,
                    "cannot read instance file \"%s\": %s", source,
                    g_strerror (errno));
       archive_entry_free (entry);
@@ -222,8 +222,8 @@ export_directory (ExportRun *run, struct archive *archive, const char *root,
     {
       if (g_cancellable_is_cancelled (cancellable))
         {
-          g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
-                               nuvashalauncher_MODPACK_ERROR_CANCELLED, "cancelled");
+          g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                               NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED, "cancelled");
           return FALSE;
         }
 
@@ -240,7 +240,7 @@ export_directory (ExportRun *run, struct archive *archive, const char *root,
 
       if (g_lstat (source, &stat_buf) != 0)
         {
-          g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO,
+          g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_IO,
                        "cannot inspect instance file \"%s\": %s", source,
                        g_strerror (errno));
           return FALSE;
@@ -283,7 +283,7 @@ export_directory (ExportRun *run, struct archive *archive, const char *root,
         }
       else if (S_ISLNK (stat_buf.st_mode))
         {
-          g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_PATH,
+          g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_PATH,
                        "cannot export symlink \"%s\"", source);
           return FALSE;
         }
@@ -318,8 +318,8 @@ export_indexed_files (ExportRun *run, GCancellable *cancellable, GError **error)
     {
       if (g_cancellable_is_cancelled (cancellable))
         {
-          g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
-                               nuvashalauncher_MODPACK_ERROR_CANCELLED, "cancelled");
+          g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                               NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED, "cancelled");
           return FALSE;
         }
 
@@ -335,8 +335,8 @@ export_indexed_files (ExportRun *run, GCancellable *cancellable, GError **error)
         {
           if (g_cancellable_is_cancelled (cancellable))
             {
-              g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
-                                   nuvashalauncher_MODPACK_ERROR_CANCELLED, "cancelled");
+              g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                                   NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED, "cancelled");
               return FALSE;
             }
 
@@ -494,8 +494,8 @@ export_thread (GTask *task G_GNUC_UNUSED,
     {
       nuvashalauncher_task_scope_return_error (
         scope,
-        g_error_new_literal (nuvashalauncher_MODPACK_ERROR,
-                             nuvashalauncher_MODPACK_ERROR_CANCELLED, "cancelled"));
+        g_error_new_literal (NUVASHALAUNCHER_MODPACK_ERROR,
+                             NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED, "cancelled"));
       return;
     }
 
@@ -519,7 +519,7 @@ export_thread (GTask *task G_GNUC_UNUSED,
     {
       nuvashalauncher_task_scope_return_error (
         scope,
-        g_error_new_literal (nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO,
+        g_error_new_literal (NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_IO,
                              "the export file cannot be inside the instance"));
       return;
     }
@@ -536,7 +536,7 @@ export_thread (GTask *task G_GNUC_UNUSED,
       {
         nuvashalauncher_task_scope_return_error (
           scope,
-          g_error_new (nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO,
+          g_error_new (NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_IO,
                        "cannot create a temporary archive: %s",
                        temporary_error->message));
         return;
@@ -549,7 +549,7 @@ export_thread (GTask *task G_GNUC_UNUSED,
 
   if (archive_write_open_filename (archive, run->temporary_archive) != ARCHIVE_OK)
     {
-      g_set_error (&error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_ARCHIVE,
+      g_set_error (&error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_ARCHIVE,
                    "cannot create \"%s\": %s", run->archive_path,
                    archive_error_string (archive));
       archive_write_free (archive);
@@ -568,7 +568,7 @@ export_thread (GTask *task G_GNUC_UNUSED,
       archive_write_data (archive, run->manifest, manifest_length) !=
         (la_ssize_t) manifest_length)
     {
-      g_set_error (&error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_ARCHIVE,
+      g_set_error (&error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_ARCHIVE,
                    "cannot write the modpack manifest: %s",
                    archive_error_string (archive));
       archive_entry_free (manifest_entry);
@@ -592,10 +592,10 @@ export_thread (GTask *task G_GNUC_UNUSED,
       archive_write_close (archive) != ARCHIVE_OK)
     {
       if (error == NULL)
-        g_set_error (&error, nuvashalauncher_MODPACK_ERROR,
+        g_set_error (&error, NUVASHALAUNCHER_MODPACK_ERROR,
                      g_cancellable_is_cancelled (cancellable)
-                       ? nuvashalauncher_MODPACK_ERROR_CANCELLED
-                       : nuvashalauncher_MODPACK_ERROR_ARCHIVE,
+                       ? NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED
+                       : NUVASHALAUNCHER_MODPACK_ERROR_ARCHIVE,
                      g_cancellable_is_cancelled (cancellable)
                        ? "cancelled" : "cannot finish the modpack archive");
       archive_entry_free (manifest_entry);
@@ -637,7 +637,7 @@ export_manifest (NuvashaLauncherInstance *instance, const char *pack_name,
   g_autoptr (JsonGenerator) generator = json_generator_new ();
   g_autoptr (JsonNode) root = NULL;
   g_autofree char *result = NULL;
-  NuvashaLauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader loader = NUVASHALAUNCHER_LOADER_VANILLA;
   gsize length = 0;
 
   g_object_get (instance, "name", &name, "minecraft_version", &version,
@@ -657,14 +657,14 @@ export_manifest (NuvashaLauncherInstance *instance, const char *pack_name,
 
   if (version == NULL || *version == '\0')
     {
-      g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_FORMAT,
+      g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                            "the instance has no Minecraft version");
       return NULL;
     }
 
   json_builder_begin_object (builder);
   json_builder_set_member_name (builder, "formatVersion");
-  json_builder_add_int_value (builder, nuvashalauncher_MODPACK_FORMAT_VERSION);
+  json_builder_add_int_value (builder, NUVASHALAUNCHER_MODPACK_FORMAT_VERSION);
   json_builder_set_member_name (builder, "game");
   json_builder_add_string_value (builder, "minecraft");
   json_builder_set_member_name (builder, "name");
@@ -685,13 +685,13 @@ export_manifest (NuvashaLauncherInstance *instance, const char *pack_name,
   json_builder_begin_object (builder);
   json_builder_set_member_name (builder, "minecraft");
   json_builder_add_string_value (builder, version);
-  if (loader != nuvashalauncher_LOADER_VANILLA && loader_version != NULL)
+  if (loader != NUVASHALAUNCHER_LOADER_VANILLA && loader_version != NULL)
     {
       const char *loader_name = nuvashalauncher_loader_to_string (loader);
 
-      if (loader == nuvashalauncher_LOADER_FABRIC)
+      if (loader == NUVASHALAUNCHER_LOADER_FABRIC)
         loader_name = "fabric-loader";
-      else if (loader == nuvashalauncher_LOADER_QUILT)
+      else if (loader == NUVASHALAUNCHER_LOADER_QUILT)
         loader_name = "quilt-loader";
 
       json_builder_set_member_name (builder, loader_name);
@@ -724,7 +724,7 @@ nuvashalauncher_modpack_export_async (NuvashaLauncherInstance *instance, const c
   g_autofree char *directory = NULL;
   ExportRun *run = NULL;
 
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (instance), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (instance), NULL);
   g_return_val_if_fail (path != NULL && g_path_is_absolute (path), NULL);
 
   run = g_new0 (ExportRun, 1);
@@ -753,8 +753,8 @@ nuvashalauncher_modpack_export_async (NuvashaLauncherInstance *instance, const c
   if (run->instance_directory == NULL || run->manifest == NULL)
     {
       if (error == NULL)
-        g_set_error_literal (&error, nuvashalauncher_MODPACK_ERROR,
-                             nuvashalauncher_MODPACK_ERROR_IO,
+        g_set_error_literal (&error, NUVASHALAUNCHER_MODPACK_ERROR,
+                             NUVASHALAUNCHER_MODPACK_ERROR_IO,
                              "the instance has no directory");
       export_run_free (run);
       nuvashalauncher_task_scope_return_error_deferred (task_scope,

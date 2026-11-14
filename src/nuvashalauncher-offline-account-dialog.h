@@ -14,8 +14,8 @@
  * entry rather than only refusing the Add button: a name the user typed
  * wrong is not something to guess at. */
 
-#ifndef nuvashalauncher_OFFLINE_ACCOUNT_DIALOG_H
-#define nuvashalauncher_OFFLINE_ACCOUNT_DIALOG_H
+#ifndef NUVASHALAUNCHER_OFFLINE_ACCOUNT_DIALOG_H
+#define NUVASHALAUNCHER_OFFLINE_ACCOUNT_DIALOG_H
 
 #include <adwaita.h>
 
@@ -23,16 +23,16 @@
 
 G_BEGIN_DECLS
 
-#define nuvashalauncher_TYPE_OFFLINE_ACCOUNT_DIALOG \
+#define NUVASHALAUNCHER_TYPE_OFFLINE_ACCOUNT_DIALOG \
   (nuvashalauncher_offline_account_dialog_get_type ())
 
-G_DECLARE_FINAL_TYPE (NuvashaLauncherOfflineAccountDialog, nuvashalauncher_offline_account_dialog, nuvashalauncher,
+G_DECLARE_FINAL_TYPE (NuvashaLauncherOfflineAccountDialog, nuvashalauncher_offline_account_dialog, NUVASHALAUNCHER,
                       OFFLINE_ACCOUNT_DIALOG, AdwDialog)
 
 /* "account-added" carries the offline account, transfer full. */
 enum {
-  nuvashalauncher_OFFLINE_ACCOUNT_DIALOG_SIGNAL_ACCOUNT_ADDED,
-  nuvashalauncher_OFFLINE_ACCOUNT_DIALOG_N_SIGNALS
+  NUVASHALAUNCHER_OFFLINE_ACCOUNT_DIALOG_SIGNAL_ACCOUNT_ADDED,
+  NUVASHALAUNCHER_OFFLINE_ACCOUNT_DIALOG_N_SIGNALS
 };
 
 /* The dialog, which starts with an empty name and nothing added. */
@@ -45,4 +45,4 @@ void nuvashalauncher_offline_account_dialog_set_accounts (NuvashaLauncherOffline
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_OFFLINE_ACCOUNT_DIALOG_H */
+#endif /* NUVASHALAUNCHER_OFFLINE_ACCOUNT_DIALOG_H */

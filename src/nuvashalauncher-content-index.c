@@ -104,8 +104,8 @@ entry_from_object (JsonObject *object, GError **error)
       json_node_get_value_type (version) != G_TYPE_INT64 ||
       json_node_get_int (version) != CONTENT_INDEX_FORMAT_VERSION)
     {
-      g_set_error (error, nuvashalauncher_CONTENT_INDEX_ERROR,
-                   nuvashalauncher_CONTENT_INDEX_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_CONTENT_INDEX_ERROR,
+                   NUVASHALAUNCHER_CONTENT_INDEX_ERROR_INVALID,
                    "content metadata has unsupported format version");
       g_free (entry);
       return NULL;
@@ -115,8 +115,8 @@ entry_from_object (JsonObject *object, GError **error)
     object, "filename", ""));
   if (*entry->filename == '\0')
     {
-      g_set_error_literal (error, nuvashalauncher_CONTENT_INDEX_ERROR,
-                           nuvashalauncher_CONTENT_INDEX_ERROR_INVALID,
+      g_set_error_literal (error, NUVASHALAUNCHER_CONTENT_INDEX_ERROR,
+                           NUVASHALAUNCHER_CONTENT_INDEX_ERROR_INVALID,
                            "content metadata has no filename");
       nuvashalauncher_content_index_entry_free (entry);
       return NULL;
@@ -176,16 +176,16 @@ entry_from_json (const char *contents, gsize length, GError **error)
   if (!json_parser_load_from_data (parser, contents, (gssize) length,
                                   &parse_error))
     {
-      g_set_error (error, nuvashalauncher_CONTENT_INDEX_ERROR,
-                   nuvashalauncher_CONTENT_INDEX_ERROR_INVALID, "%s",
+      g_set_error (error, NUVASHALAUNCHER_CONTENT_INDEX_ERROR,
+                   NUVASHALAUNCHER_CONTENT_INDEX_ERROR_INVALID, "%s",
                    parse_error->message);
       return NULL;
     }
   root = json_parser_get_root (parser);
   if (root == NULL || !JSON_NODE_HOLDS_OBJECT (root))
     {
-      g_set_error_literal (error, nuvashalauncher_CONTENT_INDEX_ERROR,
-                           nuvashalauncher_CONTENT_INDEX_ERROR_INVALID,
+      g_set_error_literal (error, NUVASHALAUNCHER_CONTENT_INDEX_ERROR,
+                           NUVASHALAUNCHER_CONTENT_INDEX_ERROR_INVALID,
                            "content metadata is not an object");
       return NULL;
     }
@@ -216,7 +216,7 @@ load_entries_sync (const char *instance_directory, NuvashaLauncherContentType ty
       if (!g_str_has_suffix (name, ".json"))
         continue;
       path = g_build_filename (directory, name, NULL);
-      if (!nuvashalauncher_fs_get_contents_within (path, nuvashalauncher_FS_MAX_CONTENT_INDEX_SIZE,
+      if (!nuvashalauncher_fs_get_contents_within (path, NUVASHALAUNCHER_FS_MAX_CONTENT_INDEX_SIZE,
                                        &contents, &length, &local_error))
         {
           g_propagate_error (error, g_steal_pointer (&local_error));
@@ -411,8 +411,8 @@ write_entry_async (const char *instance_directory, NuvashaLauncherContentType ty
     {
       nuvashalauncher_task_scope_return_error_deferred (
         scope,
-        g_error_new (nuvashalauncher_CONTENT_INDEX_ERROR,
-                     nuvashalauncher_CONTENT_INDEX_ERROR_INVALID,
+        g_error_new (NUVASHALAUNCHER_CONTENT_INDEX_ERROR,
+                     NUVASHALAUNCHER_CONTENT_INDEX_ERROR_INVALID,
                      "cannot create index directory \"%s\": %s",
                      run->directory, directory_error->message));
       write_run_free (run);

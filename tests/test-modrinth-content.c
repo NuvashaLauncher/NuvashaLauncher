@@ -22,7 +22,7 @@ test_dependencies_of_a_version (void)
   {
     NuvashaLauncherModrinthDependency *dependency = g_ptr_array_index (pending, 0);
 
-    g_assert_cmpint (dependency->type, ==, nuvashalauncher_DEPENDENCY_REQUIRED);
+    g_assert_cmpint (dependency->type, ==, NUVASHALAUNCHER_DEPENDENCY_REQUIRED);
     g_assert_cmpstr (dependency->project_id, ==, "AANobbMI");
     g_assert_cmpstr (dependency->version_id, ==, "ryOMVRuG");
   }
@@ -113,7 +113,7 @@ test_dependency_without_project (void)
    * fetched, and the install says so instead of going on without it. */
   pending = nuvashalauncher_modrinth_resolve_install (version, NULL, NULL, &error);
   g_assert_null (pending);
-  g_assert_error (error, nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_PARSE);
+  g_assert_error (error, NUVASHALAUNCHER_MODRINTH_ERROR, NUVASHALAUNCHER_MODRINTH_ERROR_PARSE);
 
   g_print ("ok - a dependency that cannot be fetched stops the install\n");
 }
@@ -121,34 +121,34 @@ test_dependency_without_project (void)
 static void
 test_content_types (void)
 {
-  g_assert_cmpstr (nuvashalauncher_content_type_to_string (nuvashalauncher_CONTENT_MOD), ==, "mod");
-  g_assert_cmpstr (nuvashalauncher_content_type_to_string (nuvashalauncher_CONTENT_RESOURCE_PACK), ==,
+  g_assert_cmpstr (nuvashalauncher_content_type_to_string (NUVASHALAUNCHER_CONTENT_MOD), ==, "mod");
+  g_assert_cmpstr (nuvashalauncher_content_type_to_string (NUVASHALAUNCHER_CONTENT_RESOURCE_PACK), ==,
                    "resourcepack");
-  g_assert_cmpstr (nuvashalauncher_content_type_to_string (nuvashalauncher_CONTENT_SHADER_PACK), ==,
+  g_assert_cmpstr (nuvashalauncher_content_type_to_string (NUVASHALAUNCHER_CONTENT_SHADER_PACK), ==,
                    "shader");
-  g_assert_cmpstr (nuvashalauncher_content_type_to_string (nuvashalauncher_CONTENT_DATAPACK), ==,
+  g_assert_cmpstr (nuvashalauncher_content_type_to_string (NUVASHALAUNCHER_CONTENT_DATAPACK), ==,
                    "datapack");
 
-  g_assert_cmpstr (nuvashalauncher_content_type_folder (nuvashalauncher_CONTENT_MOD), ==, "mods");
-  g_assert_cmpstr (nuvashalauncher_content_type_folder (nuvashalauncher_CONTENT_RESOURCE_PACK), ==,
+  g_assert_cmpstr (nuvashalauncher_content_type_folder (NUVASHALAUNCHER_CONTENT_MOD), ==, "mods");
+  g_assert_cmpstr (nuvashalauncher_content_type_folder (NUVASHALAUNCHER_CONTENT_RESOURCE_PACK), ==,
                    "resourcepacks");
-  g_assert_cmpstr (nuvashalauncher_content_type_folder (nuvashalauncher_CONTENT_SHADER_PACK), ==,
+  g_assert_cmpstr (nuvashalauncher_content_type_folder (NUVASHALAUNCHER_CONTENT_SHADER_PACK), ==,
                    "shaderpacks");
-  g_assert_cmpstr (nuvashalauncher_content_type_folder (nuvashalauncher_CONTENT_DATAPACK), ==,
+  g_assert_cmpstr (nuvashalauncher_content_type_folder (NUVASHALAUNCHER_CONTENT_DATAPACK), ==,
                    "datapacks");
 
-  g_assert_cmpstr (nuvashalauncher_content_type_extension (nuvashalauncher_CONTENT_MOD), ==, ".jar");
-  g_assert_cmpstr (nuvashalauncher_content_type_extension (nuvashalauncher_CONTENT_RESOURCE_PACK), ==,
+  g_assert_cmpstr (nuvashalauncher_content_type_extension (NUVASHALAUNCHER_CONTENT_MOD), ==, ".jar");
+  g_assert_cmpstr (nuvashalauncher_content_type_extension (NUVASHALAUNCHER_CONTENT_RESOURCE_PACK), ==,
                    ".zip");
-  g_assert_cmpstr (nuvashalauncher_content_type_extension (nuvashalauncher_CONTENT_DATAPACK), ==,
+  g_assert_cmpstr (nuvashalauncher_content_type_extension (NUVASHALAUNCHER_CONTENT_DATAPACK), ==,
                    ".zip");
 
   /* Only a mod needs a loader, which makes all content pages share the same
    * page implementation with a different content type. */
-  g_assert_true (nuvashalauncher_content_type_needs_loader (nuvashalauncher_CONTENT_MOD));
-  g_assert_false (nuvashalauncher_content_type_needs_loader (nuvashalauncher_CONTENT_RESOURCE_PACK));
-  g_assert_false (nuvashalauncher_content_type_needs_loader (nuvashalauncher_CONTENT_SHADER_PACK));
-  g_assert_false (nuvashalauncher_content_type_needs_loader (nuvashalauncher_CONTENT_DATAPACK));
+  g_assert_true (nuvashalauncher_content_type_needs_loader (NUVASHALAUNCHER_CONTENT_MOD));
+  g_assert_false (nuvashalauncher_content_type_needs_loader (NUVASHALAUNCHER_CONTENT_RESOURCE_PACK));
+  g_assert_false (nuvashalauncher_content_type_needs_loader (NUVASHALAUNCHER_CONTENT_SHADER_PACK));
+  g_assert_false (nuvashalauncher_content_type_needs_loader (NUVASHALAUNCHER_CONTENT_DATAPACK));
 
   g_print ("ok - the content kinds name their own folders and loaders\n");
 }
@@ -162,9 +162,9 @@ test_folder_and_disabled_names (void)
   g_autofree char *enabled = NULL;
   g_autofree char *again = NULL;
 
-  mods = nuvashalauncher_content_folder_path ("/tmp/instance", nuvashalauncher_CONTENT_MOD);
+  mods = nuvashalauncher_content_folder_path ("/tmp/instance", NUVASHALAUNCHER_CONTENT_MOD);
   packs = nuvashalauncher_content_folder_path ("/tmp/instance",
-                                   nuvashalauncher_CONTENT_RESOURCE_PACK);
+                                   NUVASHALAUNCHER_CONTENT_RESOURCE_PACK);
   g_assert_cmpstr (mods, ==, "/tmp/instance/mods");
   g_assert_cmpstr (packs, ==, "/tmp/instance/resourcepacks");
 
@@ -199,7 +199,7 @@ test_scan_and_toggle (void)
   instance = g_dir_make_tmp ("nuvashalauncher-content-XXXXXX", NULL);
   g_assert_nonnull (instance);
 
-  folder_path = nuvashalauncher_content_folder_path (instance, nuvashalauncher_CONTENT_MOD);
+  folder_path = nuvashalauncher_content_folder_path (instance, NUVASHALAUNCHER_CONTENT_MOD);
   folder = g_file_new_for_path (folder_path);
   g_assert_true (g_file_make_directory_with_parents (folder, NULL, &error));
   g_assert_no_error (error);
@@ -221,7 +221,7 @@ test_scan_and_toggle (void)
                                           &error));
   g_assert_no_error (error);
 
-  lithium = scan (instance, nuvashalauncher_CONTENT_MOD);
+  lithium = scan (instance, NUVASHALAUNCHER_CONTENT_MOD);
 
   /* Only the mods are listed, and both are: a disabled one is still in
      the folder and the user has to see it to enable it again. */
@@ -276,14 +276,14 @@ test_scan_and_toggle (void)
      and the resource pack folder of an instance that has none is
      simply empty. */
   {
-    g_autoptr (GPtrArray) again = scan (instance, nuvashalauncher_CONTENT_MOD);
+    g_autoptr (GPtrArray) again = scan (instance, NUVASHALAUNCHER_CONTENT_MOD);
 
     g_assert_cmpuint (again->len, ==, 2);
     g_assert_false (((NuvashaLauncherContentFile *) g_ptr_array_index (again, 0))->enabled);
   }
 
   {
-    g_autoptr (GPtrArray) none = scan (instance, nuvashalauncher_CONTENT_SHADER_PACK);
+    g_autoptr (GPtrArray) none = scan (instance, NUVASHALAUNCHER_CONTENT_SHADER_PACK);
 
     /* A folder that does not exist holds no files, which is what an
        instance that never installed a shader pack looks like. */
@@ -347,7 +347,7 @@ test_content_metadata_and_helpers (void)
   ContentMetaWait wait1 = { loop, FALSE, NULL };
 
   /* Empty list finishes immediately */
-  NuvashaLauncherTaskScope *scope1 = nuvashalauncher_content_metadata_async (files, nuvashalauncher_CONTENT_MOD, on_content_metadata_finished, &wait1);
+  NuvashaLauncherTaskScope *scope1 = nuvashalauncher_content_metadata_async (files, NUVASHALAUNCHER_CONTENT_MOD, on_content_metadata_finished, &wait1);
   g_assert_nonnull (scope1);
   g_main_loop_run (loop);
   g_assert_true (wait1.success);
@@ -361,7 +361,7 @@ test_content_metadata_and_helpers (void)
   g_ptr_array_add (files, file_item);
 
   ContentMetaWait wait2 = { loop, FALSE, NULL };
-  NuvashaLauncherTaskScope *scope2 = nuvashalauncher_content_metadata_async (files, nuvashalauncher_CONTENT_MOD, on_content_metadata_finished, &wait2);
+  NuvashaLauncherTaskScope *scope2 = nuvashalauncher_content_metadata_async (files, NUVASHALAUNCHER_CONTENT_MOD, on_content_metadata_finished, &wait2);
   g_assert_nonnull (scope2);
   g_main_loop_run (loop);
   g_assert_true (wait2.success);

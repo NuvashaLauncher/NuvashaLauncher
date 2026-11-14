@@ -1,5 +1,5 @@
-#ifndef NUVASHA_INSTANCE_PRIVATE_H
-#define NUVASHA_INSTANCE_PRIVATE_H
+#ifndef NUVASHALAUNCHER_INSTANCE_PRIVATE_H
+#define NUVASHALAUNCHER_INSTANCE_PRIVATE_H
 #include "nuvashalauncher-instance.h"
 struct _NuvashaLauncherInstance
 {

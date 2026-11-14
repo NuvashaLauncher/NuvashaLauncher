@@ -40,8 +40,8 @@ test_error_domain (void)
   g_autoptr (GError) error =
     nuvashalauncher_minecraft_services_response_error (NULL, NULL);
 
-  g_assert_error (error, nuvashalauncher_MINECRAFT_SERVICES_ERROR,
-                  nuvashalauncher_MINECRAFT_SERVICES_ERROR_HTTP);
+  g_assert_error (error, NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR,
+                  NUVASHALAUNCHER_MINECRAFT_SERVICES_ERROR_HTTP);
 }
 
 static void

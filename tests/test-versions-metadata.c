@@ -6,7 +6,7 @@ test_manifest_parsing (void)
   g_autofree char *text = fixture_text ("manifest.json");
   g_autoptr (GError) error = NULL;
   g_autoptr (NuvashaLauncherVersionManifest) manifest = NULL;
-  NuvashaLauncherMcVersionType type = nuvashalauncher_MC_TYPE_RELEASE;
+  NuvashaLauncherMcVersionType type = NUVASHALAUNCHER_MC_TYPE_RELEASE;
   const NuvashaLauncherVersionEntry *entry;
 
   manifest = nuvashalauncher_version_manifest_new_from_json (text, -1, &error);
@@ -19,7 +19,7 @@ test_manifest_parsing (void)
 
   entry = g_ptr_array_index (manifest->entries, 0);
   g_assert_cmpstr (entry->id, ==, "24w33one");
-  g_assert_cmpint (entry->type, ==, nuvashalauncher_MC_TYPE_SNAPSHOT);
+  g_assert_cmpint (entry->type, ==, NUVASHALAUNCHER_MC_TYPE_SNAPSHOT);
   g_assert_cmpstr (entry->sha1, ==,
                    "655c2da7d6815e84864a0f9a055c90e36337b0b4");
   g_assert_cmpstr (entry->release_time, ==, "2024-08-15T10:00:00+00:00");
@@ -28,20 +28,20 @@ test_manifest_parsing (void)
 
   entry = nuvashalauncher_version_manifest_find (manifest, "b1.7.3");
   g_assert_nonnull (entry);
-  g_assert_cmpint (entry->type, ==, nuvashalauncher_MC_TYPE_OLD_BETA);
+  g_assert_cmpint (entry->type, ==, NUVASHALAUNCHER_MC_TYPE_OLD_BETA);
 
   entry = nuvashalauncher_version_manifest_find (manifest, "rd-132211");
   g_assert_nonnull (entry);
-  g_assert_cmpint (entry->type, ==, nuvashalauncher_MC_TYPE_OLD_ALPHA);
+  g_assert_cmpint (entry->type, ==, NUVASHALAUNCHER_MC_TYPE_OLD_ALPHA);
 
   g_assert_null (nuvashalauncher_version_manifest_find (manifest, "not-a-version"));
 
   /* The type strings are the four Mojang writes, no others. */
   g_assert_true (nuvashalauncher_mc_version_type_from_string ("old_beta", &type));
-  g_assert_cmpint (type, ==, nuvashalauncher_MC_TYPE_OLD_BETA);
+  g_assert_cmpint (type, ==, NUVASHALAUNCHER_MC_TYPE_OLD_BETA);
   g_assert_false (nuvashalauncher_mc_version_type_from_string ("beta", &type));
   g_assert_false (nuvashalauncher_mc_version_type_from_string (NULL, &type));
-  g_assert_cmpstr (nuvashalauncher_mc_version_type_to_string (nuvashalauncher_MC_TYPE_RELEASE), ==,
+  g_assert_cmpstr (nuvashalauncher_mc_version_type_to_string (NUVASHALAUNCHER_MC_TYPE_RELEASE), ==,
                    "release");
   g_assert_null (nuvashalauncher_mc_version_type_to_string ((NuvashaLauncherMcVersionType) 99));
 
@@ -58,34 +58,34 @@ test_manifest_malformed (void)
   /* Not JSON at all. */
   manifest = nuvashalauncher_version_manifest_new_from_json ("{\"latest\":", -1, &error);
   g_assert_null (manifest);
-  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID);
   g_clear_error (&error);
 
   /* JSON, but not the shape of a manifest. */
   manifest = nuvashalauncher_version_manifest_new_from_json ("[]", -1, &error);
   g_assert_null (manifest);
-  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID);
   g_clear_error (&error);
 
   /* Nothing says which version is the latest. */
   manifest = nuvashalauncher_version_manifest_new_from_json ("{\"versions\": []}", -1,
                                                  &error);
   g_assert_null (manifest);
-  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_MISSING);
+  g_assert_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_MISSING);
   g_clear_error (&error);
 
   /* A latest without its snapshot. */
   manifest = nuvashalauncher_version_manifest_new_from_json (
     "{\"latest\": {\"release\": \"1.21.1\"}, \"versions\": []}", -1, &error);
   g_assert_null (manifest);
-  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_MISSING);
+  g_assert_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_MISSING);
   g_clear_error (&error);
 
   /* An entry without a sha1 cannot be verified, so it is not an
    * entry. */
   manifest = nuvashalauncher_version_manifest_new_from_json (incomplete, -1, &error);
   g_assert_null (manifest);
-  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_MISSING);
+  g_assert_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_MISSING);
   g_clear_error (&error);
 
   /* A type outside the four. */
@@ -96,7 +96,7 @@ test_manifest_malformed (void)
     " \"sha1\": \"1111111111111111111111111111111111111111\","
     " \"releaseTime\": \"2024-01-01T00:00:00+00:00\"}]}", -1, &error);
   g_assert_null (manifest);
-  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID);
   g_clear_error (&error);
 
   g_print ("ok - a manifest that is not a manifest is rejected\n");
@@ -112,7 +112,7 @@ test_modern_version (void)
   const NuvashaLauncherLibrary *library;
 
   g_assert_cmpstr (version->id, ==, "1.21.1");
-  g_assert_cmpint (version->type, ==, nuvashalauncher_MC_TYPE_RELEASE);
+  g_assert_cmpint (version->type, ==, NUVASHALAUNCHER_MC_TYPE_RELEASE);
   g_assert_cmpstr (version->main_class, ==, "net.minecraft.client.main.Main");
   g_assert_cmpstr (version->assets, ==, "1.21");
   g_assert_null (version->inherits_from);
@@ -273,13 +273,13 @@ test_missing_fields (void)
   /* The identity of a document is what it must carry. */
   version = nuvashalauncher_version_description_new_from_json (incomplete, -1, &error);
   g_assert_null (version);
-  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_MISSING);
+  g_assert_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_MISSING);
   g_clear_error (&error);
 
   version = nuvashalauncher_version_description_new_from_json ("{\"id\": \"x\"}", -1,
                                                    &error);
   g_assert_null (version);
-  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_MISSING);
+  g_assert_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_MISSING);
   g_clear_error (&error);
 
   g_print ("ok - a version without id or type is rejected\n");
@@ -294,33 +294,33 @@ test_malformed_fields (void)
   /* Not JSON. */
   version = nuvashalauncher_version_description_new_from_json ("<html>", -1, &error);
   g_assert_null (version);
-  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID);
   g_clear_error (&error);
 
   /* JSON that is not an object. */
   version = nuvashalauncher_version_description_new_from_json ("\"1.21.1\"", -1, &error);
   g_assert_null (version);
-  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID);
   g_clear_error (&error);
 
   /* A type outside the four. */
   version = nuvashalauncher_version_description_new_from_json (
     "{\"id\": \"x\", \"type\": \"beta\"}", -1, &error);
   g_assert_null (version);
-  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID);
   g_clear_error (&error);
 
   /* A field of the wrong shape. */
   version = nuvashalauncher_version_description_new_from_json (
     "{\"id\": \"x\", \"type\": \"release\", \"mainClass\": 42}", -1, &error);
   g_assert_null (version);
-  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID);
   g_clear_error (&error);
 
   version = nuvashalauncher_version_description_new_from_json (
     "{\"id\": \"x\", \"type\": \"release\", \"libraries\": {}}", -1, &error);
   g_assert_null (version);
-  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID);
   g_clear_error (&error);
 
   /* A rule nobody can obey. */
@@ -329,7 +329,7 @@ test_malformed_fields (void)
     " [{\"name\": \"a:b:c\", \"rules\": [{\"action\": \"maybe\"}]}]}", -1,
     &error);
   g_assert_null (version);
-  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID);
   g_clear_error (&error);
 
   /* An argument without anything to say. */
@@ -337,7 +337,7 @@ test_malformed_fields (void)
     "{\"id\": \"x\", \"type\": \"release\", \"arguments\":"
     " {\"game\": [{\"rules\": [{\"action\": \"allow\"}]}]}}", -1, &error);
   g_assert_null (version);
-  g_assert_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_MISSING);
+  g_assert_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_MISSING);
   g_clear_error (&error);
 
   g_print ("ok - a version document with malformed fields is rejected\n");

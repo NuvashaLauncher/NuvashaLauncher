@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_SECRET_STORE_H
-#define nuvashalauncher_SECRET_STORE_H
+#ifndef NUVASHALAUNCHER_SECRET_STORE_H
+#define NUVASHALAUNCHER_SECRET_STORE_H
 
 #include "nuvashalauncher-accounts.h"
 

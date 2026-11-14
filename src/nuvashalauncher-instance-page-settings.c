@@ -18,7 +18,7 @@
 static void
 on_name_apply (AdwEntryRow *row, gpointer user_data)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
   const char *text = gtk_editable_get_text (GTK_EDITABLE (row));
   g_autofree char *current = instance_string (self->instance, "name");
   g_autoptr (GError) error = NULL;
@@ -48,7 +48,7 @@ on_name_apply (AdwEntryRow *row, gpointer user_data)
 static void
 on_jvm_args_apply (AdwEntryRow *row, gpointer user_data)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
   const char *text = gtk_editable_get_text (GTK_EDITABLE (row));
   g_autofree char *current = instance_string (self->instance, "jvm-args");
   g_autoptr (GError) error = NULL;
@@ -100,8 +100,8 @@ static void
 on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
                      gpointer user_data)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
-  NuvashaLauncherVersionRow *row = nuvashalauncher_VERSION_ROW (object);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
+  NuvashaLauncherVersionRow *row = NUVASHALAUNCHER_VERSION_ROW (object);
   const char *version = nuvashalauncher_version_row_get_selected (row);
   g_autofree char *current =
     instance_string (self->instance, "minecraft-version");
@@ -147,7 +147,7 @@ on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
       nuvashalauncher_operation_unref (self->versions_operation);
     }
   self->versions_operation = nuvashalauncher_version_manifest_fetch_async (
-    nuvashalauncher_VERSION_MANIFEST_URL, on_manifest_loaded,
+    NUVASHALAUNCHER_VERSION_MANIFEST_URL, on_manifest_loaded,
     version_wait_new (self, ++self->versions_generation));
 }
 
@@ -162,7 +162,7 @@ on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
 static void
 on_loader_changed (NuvashaLauncherLoaderRow *row, gpointer user_data)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
   NuvashaLauncherLoader loader = nuvashalauncher_loader_row_get_loader (row);
   const char *version = nuvashalauncher_loader_row_get_version (row);
   g_autofree char *minecraft =
@@ -176,19 +176,19 @@ on_loader_changed (NuvashaLauncherLoaderRow *row, gpointer user_data)
 
   /* While the row is loading, or when the loader has no version for this
      Minecraft version, there is no choice to store. */
-  if (loader != nuvashalauncher_LOADER_VANILLA && version == NULL)
+  if (loader != NUVASHALAUNCHER_LOADER_VANILLA && version == NULL)
     return;
 
   /* A load that settled on the version the instance already runs is not
      a change. */
   if (loader == self->loader &&
-      g_strcmp0 (loader == nuvashalauncher_LOADER_VANILLA ? NULL : version,
+      g_strcmp0 (loader == NUVASHALAUNCHER_LOADER_VANILLA ? NULL : version,
                  self->loader_version) == 0)
     return;
 
   if (!nuvashalauncher_instance_manager_set_loader (
         self->manager, self->instance, loader,
-        loader == nuvashalauncher_LOADER_VANILLA ? NULL : version, &error))
+        loader == NUVASHALAUNCHER_LOADER_VANILLA ? NULL : version, &error))
     {
       /* The edit never reached the file: the instance and the row go back
          to the loader the instance runs. */
@@ -202,7 +202,7 @@ on_loader_changed (NuvashaLauncherLoaderRow *row, gpointer user_data)
 
   self->loader = loader;
   g_free (self->loader_version);
-  self->loader_version = g_strdup (loader == nuvashalauncher_LOADER_VANILLA
+  self->loader_version = g_strdup (loader == NUVASHALAUNCHER_LOADER_VANILLA
                                      ? NULL
                                      : version);
 
@@ -223,7 +223,7 @@ on_loader_changed (NuvashaLauncherLoaderRow *row, gpointer user_data)
 static void
 java_status_refresh (NuvashaLauncherInstancePage *self)
 {
-  NuvashaLauncherJavaRow *row = nuvashalauncher_JAVA_ROW (self->java_row);
+  NuvashaLauncherJavaRow *row = NUVASHALAUNCHER_JAVA_ROW (self->java_row);
   const NuvashaLauncherJava *effective = NULL;
   const char *message = NULL;
   GPtrArray *detected;
@@ -354,8 +354,8 @@ static void
 on_java_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
                   gpointer user_data)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
-  NuvashaLauncherJavaRow *row = nuvashalauncher_JAVA_ROW (object);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
+  NuvashaLauncherJavaRow *row = NUVASHALAUNCHER_JAVA_ROW (object);
   const char *path = nuvashalauncher_java_row_get_selected_path (row);
   g_autofree char *current = instance_string (self->instance, "java-path");
   g_autoptr (GError) error = NULL;
@@ -436,7 +436,7 @@ update_icon_row (NuvashaLauncherInstancePage *self)
 static void
 on_icon_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
   g_autoptr (GError) error = NULL;
   g_autoptr (GFile) file =
     gtk_file_dialog_open_finish (GTK_FILE_DIALOG (source), result, &error);
@@ -482,7 +482,7 @@ on_icon_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 static void
 on_change_icon_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
   GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
   g_autoptr (GtkFileDialog) dialog = gtk_file_dialog_new ();
   g_autoptr (GtkFileFilter) filter = gtk_file_filter_new ();
@@ -638,13 +638,13 @@ create_settings_page (NuvashaLauncherInstancePage *self)
                                     _("Minecraft"));
   g_signal_connect_object (version_row, "notify::selected",
                            G_CALLBACK (on_version_selected), self, 0);
-  nuvashalauncher_version_row_load (nuvashalauncher_VERSION_ROW (version_row), self->settings,
+  nuvashalauncher_version_row_load (NUVASHALAUNCHER_VERSION_ROW (version_row), self->settings,
                         minecraft_version);
   adw_preferences_group_add (minecraft, version_row);
   /* The loader and one of its versions: changing either of them changes
      what this instance runs, so both are stored like the version above. */
   {
-    NuvashaLauncherLoader instance_loader = nuvashalauncher_LOADER_VANILLA;
+    NuvashaLauncherLoader instance_loader = NUVASHALAUNCHER_LOADER_VANILLA;
 
     g_object_get (self->instance, "loader", &instance_loader, NULL);
     self->loader = instance_loader;
@@ -687,10 +687,10 @@ create_settings_page (NuvashaLauncherInstancePage *self)
                                         "java-path", NULL, NULL);
       g_clear_pointer (&java_path, g_free);
     }
-  nuvashalauncher_java_row_set_required_major (nuvashalauncher_JAVA_ROW (java_row),
+  nuvashalauncher_java_row_set_required_major (NUVASHALAUNCHER_JAVA_ROW (java_row),
                                    self->required_java);
-  nuvashalauncher_java_row_load (nuvashalauncher_JAVA_ROW (java_row), java_path);
-  self->java_row = nuvashalauncher_JAVA_ROW (java_row);
+  nuvashalauncher_java_row_load (NUVASHALAUNCHER_JAVA_ROW (java_row), java_path);
+  self->java_row = NUVASHALAUNCHER_JAVA_ROW (java_row);
 
   adw_preferences_group_add (java, java_row);
 
@@ -706,7 +706,7 @@ create_settings_page (NuvashaLauncherInstancePage *self)
    * the instance's version document; fetching is offline-friendly via
    * the cache. */
   self->versions_operation = nuvashalauncher_version_manifest_fetch_async (
-    nuvashalauncher_VERSION_MANIFEST_URL, on_manifest_loaded,
+    NUVASHALAUNCHER_VERSION_MANIFEST_URL, on_manifest_loaded,
     version_wait_new (self, ++self->versions_generation));
 
   /* Actions */

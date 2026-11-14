@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_CACHE_H
-#define nuvashalauncher_CACHE_H
+#ifndef NUVASHALAUNCHER_CACHE_H
+#define NUVASHALAUNCHER_CACHE_H
 
 #include <gio/gio.h>
 #include "nuvashalauncher-task.h"
@@ -27,4 +27,4 @@ NuvashaLauncherTaskScope *nuvashalauncher_cache_prune_async (gint64             
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_CACHE_H */
+#endif /* NUVASHALAUNCHER_CACHE_H */

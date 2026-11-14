@@ -400,7 +400,7 @@ expect_refused (const char *json, guint code, const char *what)
 
   pack = nuvashalauncher_modpack_new_from_json (json, -1, &error);
   g_assert_null (pack);
-  g_assert_error (error, nuvashalauncher_MODPACK_ERROR, code);
+  g_assert_error (error, NUVASHALAUNCHER_MODPACK_ERROR, code);
   g_print ("ok - %s\n", what);
 }
 

@@ -75,7 +75,7 @@ build_result (ResolveRequest *request, GError **error)
   /* The request has a version description at this point. */
   if (request->description->main_class == NULL)
     {
-      g_set_error (error, nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_INVALID,
                    "%s", NO_MAIN_CLASS_MESSAGE);
       g_free (resolved);
       return NULL;

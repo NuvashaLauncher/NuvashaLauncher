@@ -20,13 +20,13 @@ nuvashalauncher_modrinth_dependency_to_string (NuvashaLauncherModrinthDependency
 {
   switch (type)
     {
-    case nuvashalauncher_DEPENDENCY_OPTIONAL:
+    case NUVASHALAUNCHER_DEPENDENCY_OPTIONAL:
       return "optional";
-    case nuvashalauncher_DEPENDENCY_EMBEDDED:
+    case NUVASHALAUNCHER_DEPENDENCY_EMBEDDED:
       return "embedded";
-    case nuvashalauncher_DEPENDENCY_INCOMPATIBLE:
+    case NUVASHALAUNCHER_DEPENDENCY_INCOMPATIBLE:
       return "incompatible";
-    case nuvashalauncher_DEPENDENCY_REQUIRED:
+    case NUVASHALAUNCHER_DEPENDENCY_REQUIRED:
     default:
       return "required";
     }
@@ -38,13 +38,13 @@ static NuvashaLauncherModrinthDependencyType
 dependency_type_from_string (const char *value)
 {
   if (g_strcmp0 (value, "optional") == 0)
-    return nuvashalauncher_DEPENDENCY_OPTIONAL;
+    return NUVASHALAUNCHER_DEPENDENCY_OPTIONAL;
   if (g_strcmp0 (value, "embedded") == 0)
-    return nuvashalauncher_DEPENDENCY_EMBEDDED;
+    return NUVASHALAUNCHER_DEPENDENCY_EMBEDDED;
   if (g_strcmp0 (value, "incompatible") == 0)
-    return nuvashalauncher_DEPENDENCY_INCOMPATIBLE;
+    return NUVASHALAUNCHER_DEPENDENCY_INCOMPATIBLE;
 
-  return nuvashalauncher_DEPENDENCY_REQUIRED;
+  return NUVASHALAUNCHER_DEPENDENCY_REQUIRED;
 }
 
 void
@@ -394,8 +394,8 @@ nuvashalauncher_modrinth_version_from_json (const char *json, gssize length,
 
   if (version == NULL)
     {
-      g_set_error_literal (error, nuvashalauncher_MODRINTH_ERROR,
-                           nuvashalauncher_MODRINTH_ERROR_PARSE,
+      g_set_error_literal (error, NUVASHALAUNCHER_MODRINTH_ERROR,
+                           NUVASHALAUNCHER_MODRINTH_ERROR_PARSE,
                            "the answer is not a version with a file");
       return NULL;
     }
@@ -412,8 +412,8 @@ nuvashalauncher_modrinth_updates_from_node (JsonNode *root, GError **error)
 
   if (object == NULL)
     {
-      g_set_error_literal (error, nuvashalauncher_MODRINTH_ERROR,
-                           nuvashalauncher_MODRINTH_ERROR_PARSE,
+      g_set_error_literal (error, NUVASHALAUNCHER_MODRINTH_ERROR,
+                           NUVASHALAUNCHER_MODRINTH_ERROR_PARSE,
                            "the updates answer is not a JSON object");
       return NULL;
     }
@@ -524,8 +524,8 @@ nuvashalauncher_modrinth_versions_from_json (const char *json, gssize length,
 
   if (root == NULL || !JSON_NODE_HOLDS_ARRAY (root))
     {
-      g_set_error_literal (error, nuvashalauncher_MODRINTH_ERROR,
-                           nuvashalauncher_MODRINTH_ERROR_PARSE,
+      g_set_error_literal (error, NUVASHALAUNCHER_MODRINTH_ERROR,
+                           NUVASHALAUNCHER_MODRINTH_ERROR_PARSE,
                            "the versions answer is not a list");
       return NULL;
     }
@@ -562,7 +562,7 @@ nuvashalauncher_modrinth_versions_from_json (const char *json, gssize length,
           type, minecraft_version, loader);
 
       g_ptr_array_unref (versions);
-      g_set_error (error, nuvashalauncher_MODRINTH_ERROR, nuvashalauncher_MODRINTH_ERROR_NOT_FOUND,
+      g_set_error (error, NUVASHALAUNCHER_MODRINTH_ERROR, NUVASHALAUNCHER_MODRINTH_ERROR_NOT_FOUND,
                    "%s", message);
       return NULL;
     }

@@ -194,16 +194,16 @@ check_instance_directory (NuvashaLauncherInstanceManager  *self,
 {
   if (directory == NULL || !g_path_is_absolute (directory))
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                   nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                   NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH,
                    "the instance directory must be an absolute path");
       return FALSE;
     }
 
   if (path_has_parent_reference (directory))
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                   nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                   NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH,
                    "the instance directory must not contain \"..\"");
       return FALSE;
     }
@@ -227,8 +227,8 @@ check_instance_directory (NuvashaLauncherInstanceManager  *self,
   g_autofree char *parent = g_path_get_dirname (path);
   if (!nuvashalauncher_fs_directory_is_real (parent))
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                   nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                   NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH,
                    "the parent of the instance directory must not contain "
                    "symlinks and must already exist");
       return FALSE;
@@ -236,8 +236,8 @@ check_instance_directory (NuvashaLauncherInstanceManager  *self,
 
   if (g_strcmp0 (path, G_DIR_SEPARATOR_S) == 0)
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                   nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                   NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH,
                    "the filesystem root cannot be an instance directory");
       return FALSE;
     }
@@ -246,8 +246,8 @@ check_instance_directory (NuvashaLauncherInstanceManager  *self,
      data directory itself, or its files would sit beside the metadata. */
   if (self->data_dir != NULL && g_strcmp0 (path, self->data_dir) == 0)
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                   nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                   NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH,
                    "the nuvashalauncher data directory cannot be an instance directory");
       return FALSE;
     }
@@ -268,13 +268,13 @@ check_instance_directory (NuvashaLauncherInstanceManager  *self,
           path_contains (other_directory, path))
         {
           if (g_strcmp0 (path, other_directory) == 0)
-            g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                         nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+            g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                         NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH,
                          "the directory is already used by instance \"%s\"",
                          other_name);
           else
-            g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                         nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+            g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                         NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH,
                          "the directory \"%s\" overlaps the directory of "
                          "instance \"%s\"",
                          path, other_name);
@@ -289,7 +289,7 @@ check_instance_directory (NuvashaLauncherInstanceManager  *self,
 static void
 nuvashalauncher_instance_manager_dispose (GObject *object)
 {
-  NuvashaLauncherInstanceManager *self = nuvashalauncher_INSTANCE_MANAGER (object);
+  NuvashaLauncherInstanceManager *self = NUVASHALAUNCHER_INSTANCE_MANAGER (object);
 
   g_clear_handle_id (&self->directory_check_source, g_source_remove);
   g_clear_object (&self->instances);
@@ -300,7 +300,7 @@ nuvashalauncher_instance_manager_dispose (GObject *object)
 static void
 nuvashalauncher_instance_manager_finalize (GObject *object)
 {
-  NuvashaLauncherInstanceManager *self = nuvashalauncher_INSTANCE_MANAGER (object);
+  NuvashaLauncherInstanceManager *self = NUVASHALAUNCHER_INSTANCE_MANAGER (object);
 
   g_free (self->data_dir);
   g_free (self->metadata_path);
@@ -321,7 +321,7 @@ nuvashalauncher_instance_manager_class_init (NuvashaLauncherInstanceManagerClass
 static void
 nuvashalauncher_instance_manager_init (NuvashaLauncherInstanceManager *self)
 {
-  self->instances = g_list_store_new (nuvashalauncher_TYPE_INSTANCE);
+  self->instances = g_list_store_new (NUVASHALAUNCHER_TYPE_INSTANCE);
   self->directory_check_source =
     g_timeout_add_seconds (1, check_instance_directories, self);
   g_source_set_name_by_id (self->directory_check_source,
@@ -335,7 +335,7 @@ nuvashalauncher_instance_manager_new (const char *data_dir)
                         NULL);
 
   NuvashaLauncherInstanceManager *self =
-    g_object_new (nuvashalauncher_TYPE_INSTANCE_MANAGER, NULL);
+    g_object_new (NUVASHALAUNCHER_TYPE_INSTANCE_MANAGER, NULL);
 
   if (data_dir == NULL)
     {
@@ -357,7 +357,7 @@ nuvashalauncher_instance_manager_new (const char *data_dir)
 GListStore *
 nuvashalauncher_instance_manager_get_instances (NuvashaLauncherInstanceManager *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (self), NULL);
 
   return self->instances;
 }
@@ -369,7 +369,7 @@ nuvashalauncher_instance_manager_default_directory (NuvashaLauncherInstanceManag
   g_autofree char *normalized = NULL;
   g_autofree char *unique = NULL;
 
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (self), NULL);
 
   normalized = nuvashalauncher_instance_normalize_name (name);
   if (normalized[0] == '\0')
@@ -400,7 +400,7 @@ assign_default_instance_icon (NuvashaLauncherInstance *instance, const char *dir
 NuvashaLauncherInstance *
 nuvashalauncher_instance_manager_get_by_id (NuvashaLauncherInstanceManager *self, const char *id)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (self), NULL);
 
   if (id == NULL)
     return NULL;
@@ -428,7 +428,7 @@ nuvashalauncher_instance_manager_create (NuvashaLauncherInstanceManager *self,
                              const char *loader_version,
                              GError **error)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (self), NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
   g_autofree char *id = g_uuid_string_random ();
@@ -440,8 +440,8 @@ nuvashalauncher_instance_manager_create (NuvashaLauncherInstanceManager *self,
     {
       const char *forbidden = instance_name_forbidden_character (normalized_name);
 
-      g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                   nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                   NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH,
                    normalized_name[0] == '\0'
                       ? _("the instance name is empty")
                       : forbidden != NULL
@@ -487,8 +487,8 @@ nuvashalauncher_instance_manager_create (NuvashaLauncherInstanceManager *self,
   if (!g_file_test (path, G_FILE_TEST_IS_DIR) &&
       !nuvashalauncher_fs_make_directory (path, 0755, &path_error))
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                   nuvashalauncher_INSTANCE_MANAGER_ERROR_IO,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                   NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_IO,
                     "cannot create \"%s\": %s", path,
                     path_error->message);
       return NULL;
@@ -514,14 +514,14 @@ nuvashalauncher_instance_manager_rename (NuvashaLauncherInstanceManager *self,
                              const char *new_name,
                              GError **error)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (self), FALSE);
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (instance), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (instance), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   if (!g_list_store_find (self->instances, instance, NULL))
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                   nuvashalauncher_INSTANCE_MANAGER_ERROR_NOT_FOUND,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                   NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND,
                    "the instance is not registered");
       return FALSE;
     }
@@ -535,8 +535,8 @@ nuvashalauncher_instance_manager_rename (NuvashaLauncherInstanceManager *self,
     {
       const char *forbidden = instance_name_forbidden_character (stripped);
 
-      g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                   nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                   NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH,
                     stripped[0] == '\0'
                       ? _("the instance name is empty")
                       : forbidden != NULL
@@ -549,8 +549,8 @@ nuvashalauncher_instance_manager_rename (NuvashaLauncherInstanceManager *self,
 
   if (name_is_taken (self, instance, stripped))
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                   nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                   NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH,
                    "an instance with that name already exists");
       return FALSE;
     }
@@ -586,15 +586,15 @@ nuvashalauncher_instance_manager_set_string (NuvashaLauncherInstanceManager *sel
   };
   g_autofree char *old = NULL;
 
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (self), FALSE);
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (instance), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (instance), FALSE);
   g_return_val_if_fail (property != NULL, FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   if (!g_list_store_find (self->instances, instance, NULL))
     {
-      g_set_error_literal (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                           nuvashalauncher_INSTANCE_MANAGER_ERROR_NOT_FOUND,
+      g_set_error_literal (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                           NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND,
                            "the instance is not registered");
       return FALSE;
     }
@@ -604,8 +604,8 @@ nuvashalauncher_instance_manager_set_string (NuvashaLauncherInstanceManager *sel
     known |= g_str_equal (property, allowed[i]);
   if (!known)
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                   nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                   NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH,
                    "instance property \"%s\" cannot be edited here", property);
       return FALSE;
     }
@@ -627,17 +627,17 @@ nuvashalauncher_instance_manager_set_loader (NuvashaLauncherInstanceManager *sel
                                  const char *version,
                                  GError **error)
 {
-  NuvashaLauncherLoader old_loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader old_loader = NUVASHALAUNCHER_LOADER_VANILLA;
   g_autofree char *old_version = NULL;
 
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (self), FALSE);
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (instance), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (instance), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   if (!g_list_store_find (self->instances, instance, NULL))
     {
-      g_set_error_literal (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                           nuvashalauncher_INSTANCE_MANAGER_ERROR_NOT_FOUND,
+      g_set_error_literal (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                           NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND,
                            "the instance is not registered");
       return FALSE;
     }
@@ -662,8 +662,8 @@ remove_instance_and_save (NuvashaLauncherInstanceManager *self,
 
   if (!g_list_store_find (self->instances, instance, &position))
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                   nuvashalauncher_INSTANCE_MANAGER_ERROR_NOT_FOUND,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                   NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND,
                    "the instance is not registered");
       return FALSE;
     }
@@ -685,7 +685,7 @@ remove_instance_and_save (NuvashaLauncherInstanceManager *self,
 gboolean
 check_instance_directories (gpointer user_data)
 {
-  NuvashaLauncherInstanceManager *self = nuvashalauncher_INSTANCE_MANAGER (user_data);
+  NuvashaLauncherInstanceManager *self = NUVASHALAUNCHER_INSTANCE_MANAGER (user_data);
 
   for (guint i = g_list_model_get_n_items (G_LIST_MODEL (self->instances));
        i > 0;

@@ -129,7 +129,7 @@ request_end (ResolveRequest *request, NuvashaLauncherResolvedVersion *resolved)
   else
     nuvashalauncher_task_scope_return_error (
       request->scope,
-      g_error_new_literal (nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_INVALID,
+      g_error_new_literal (NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_INVALID,
                            "the version cannot be resolved"));
 
   request_free (request);
@@ -284,7 +284,7 @@ resolve_dependencies (ResolveRequest *request)
   if (description->client == NULL || description->client->url == NULL)
     {
       request_fail (request,
-                    g_error_new (nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_INVALID,
+                    g_error_new (NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_INVALID,
                                  "%s", NO_CLIENT_MESSAGE));
       resolve_finish (request);
       return;
@@ -508,7 +508,7 @@ request_new (const char         *version_id,
   request->data_dir = data_dir != NULL
                         ? g_strdup (data_dir)
                         : g_build_filename (g_get_user_data_dir (),
-                                            nuvashalauncher_RESOLVE_DATA_SUBDIR, NULL);
+                                            NUVASHALAUNCHER_RESOLVE_DATA_SUBDIR, NULL);
   request->libraries_dir =
     g_build_filename (request->data_dir, "libraries", NULL);
   request->assets_dir = g_build_filename (request->data_dir, "assets", NULL);
@@ -524,7 +524,7 @@ request_new (const char         *version_id,
                                                NULL);
   request->asset_base_url = asset_base_url != NULL
                               ? g_strdup (asset_base_url)
-                              : g_strdup (nuvashalauncher_RESOLVE_ASSET_BASE_URL);
+                              : g_strdup (NUVASHALAUNCHER_RESOLVE_ASSET_BASE_URL);
   request->context = nuvashalauncher_rule_context_new ();
   request->progress = progress;
   request->progress_data = progress_data;
@@ -579,7 +579,7 @@ nuvashalauncher_resolve_version_async (NuvashaLauncherVersionManifest *manifest,
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   ResolveRequest *request;
 
-  g_return_val_if_fail (nuvashalauncher_IS_VERSION_MANIFEST (manifest), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_VERSION_MANIFEST (manifest), NULL);
   g_return_val_if_fail (version_id != NULL, NULL);
 
   request = request_new (version_id, data_dir, natives_dir, asset_base_url,
@@ -619,7 +619,7 @@ nuvashalauncher_resolve_description_async (NuvashaLauncherVersionDescription *de
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   ResolveRequest *request;
 
-  g_return_val_if_fail (nuvashalauncher_IS_VERSION_DESCRIPTION (description), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_VERSION_DESCRIPTION (description), NULL);
   g_return_val_if_fail (version_id != NULL, NULL);
   g_return_val_if_fail (client_jar == NULL || g_file_test (client_jar,
                                                            G_FILE_TEST_IS_REGULAR),

@@ -26,7 +26,7 @@ start_preparing (NuvashaLauncher *self)
 
   {
     NuvashaLauncherTaskScope *fetching =
-      nuvashalauncher_version_manifest_fetch_async (nuvashalauncher_VERSION_MANIFEST_URL,
+      nuvashalauncher_version_manifest_fetch_async (NUVASHALAUNCHER_VERSION_MANIFEST_URL,
                                         on_manifest_ready, g_object_ref (self));
 
     /* One read of a launch: it stops with the launch, and releases itself
@@ -66,7 +66,7 @@ launcher_needs_sign_in (NuvashaLauncher *self, const char *reason)
   log_line (self, TAG_STATE, "%s", reason);
 
   log_line (self, TAG_STATE, "%s", detail);
-  set_state (self, nuvashalauncher_LAUNCH_NEEDS_SIGN_IN, detail);
+  set_state (self, NUVASHALAUNCHER_LAUNCH_NEEDS_SIGN_IN, detail);
 }
 
 /* A new token for an account whose old one has run out. */
@@ -74,8 +74,8 @@ void
 launcher_auth_failed (NuvashaLauncher *self, const GError *error)
 {
   /* A connection or service failure does not invalidate saved credentials. */
-  if (g_error_matches (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_REAUTH) ||
-      g_error_matches (error, nuvashalauncher_AUTH_ERROR, nuvashalauncher_AUTH_ERROR_DECLINED))
+  if (g_error_matches (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_REAUTH) ||
+      g_error_matches (error, NUVASHALAUNCHER_AUTH_ERROR, NUVASHALAUNCHER_AUTH_ERROR_DECLINED))
     {
       g_object_set_data_full (G_OBJECT (self), "launch-error", g_error_copy (error),
                               (GDestroyNotify) g_error_free);
@@ -106,7 +106,7 @@ on_account_refreshed (GObject      *source G_GNUC_UNUSED,
         {
           log_line (self, TAG_STATE,
                     "the launch was cancelled before the game started");
-          set_state (self, nuvashalauncher_LAUNCH_STOPPED, NULL);
+          set_state (self, NUVASHALAUNCHER_LAUNCH_STOPPED, NULL);
           return;
         }
 
@@ -136,7 +136,7 @@ account_for_launch (NuvashaLauncher *self)
   if (account == NULL)
     return TRUE;
 
-  if (account->type == nuvashalauncher_ACCOUNT_OFFLINE)
+  if (account->type == NUVASHALAUNCHER_ACCOUNT_OFFLINE)
     return TRUE;
 
   if (nuvashalauncher_account_token_is_valid (account, g_get_real_time () / 1000000))
@@ -159,7 +159,7 @@ nuvashalauncher_launcher_start (NuvashaLauncher *self)
      version of this launch, which outlives this function. */
   char *version = NULL;
 
-  g_return_if_fail (nuvashalauncher_IS_LAUNCHER (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_LAUNCHER (self));
 
   /* The state is the whole answer to "is this instance already being
      launched": a second launch is refused instead of racing the first. */
@@ -173,7 +173,7 @@ nuvashalauncher_launcher_start (NuvashaLauncher *self)
     }
 
   version = nuvashalauncher_instance_component_get_version (
-    self->instance, nuvashalauncher_COMPONENT_MINECRAFT);
+    self->instance, NUVASHALAUNCHER_COMPONENT_MINECRAFT);
   g_object_set_data (G_OBJECT (self), "launch-error", NULL);
 
   g_free (self->version);
@@ -189,7 +189,7 @@ nuvashalauncher_launcher_start (NuvashaLauncher *self)
   g_clear_pointer (&self->preparation.java_executable, g_free);
   self->preparation.java_major_version = 0;
 
-  set_state (self, nuvashalauncher_LAUNCH_PREPARING, self->version);
+  set_state (self, NUVASHALAUNCHER_LAUNCH_PREPARING, self->version);
 
   /* Without an account there is nobody to play as, and nothing to
      download for. An account that has to be signed in again is signed in
@@ -203,7 +203,7 @@ nuvashalauncher_launcher_start (NuvashaLauncher *self)
 void
 nuvashalauncher_launcher_stop (NuvashaLauncher *self)
 {
-  g_return_if_fail (nuvashalauncher_IS_LAUNCHER (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_LAUNCHER (self));
 
   if (!nuvashalauncher_launch_state_is_busy (self->state))
     return;
@@ -219,11 +219,11 @@ nuvashalauncher_launcher_stop (NuvashaLauncher *self)
 
       log_line (self, TAG_STATE, "stopping before the game starts");
       g_cancellable_cancel (self->preparation.cancellable);
-      set_state (self, nuvashalauncher_LAUNCH_STOPPED, NULL);
+      set_state (self, NUVASHALAUNCHER_LAUNCH_STOPPED, NULL);
       return;
     }
 
-  set_state (self, nuvashalauncher_LAUNCH_STOPPING, "asking the game to stop");
+  set_state (self, NUVASHALAUNCHER_LAUNCH_STOPPING, "asking the game to stop");
   log_line (self, TAG_STATE, "asking the game to stop");
 
   /* Minecraft has its own way of ending; SIGTERM is what every launcher
@@ -234,7 +234,7 @@ nuvashalauncher_launcher_stop (NuvashaLauncher *self)
   if (self->process.stop_timeout == 0)
     {
       self->process.stop_timeout = g_timeout_add_seconds (
-        nuvashalauncher_LAUNCH_STOP_TIMEOUT, on_stop_timeout, self);
+        NUVASHALAUNCHER_LAUNCH_STOP_TIMEOUT, on_stop_timeout, self);
       g_source_set_name_by_id (self->process.stop_timeout,
                                "nuvashalauncher-launch-stop-timeout");
       nuvashalauncher_task_scope_track_source (self->scope, self->process.stop_timeout);

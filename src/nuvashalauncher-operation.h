@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_OPERATION_H
-#define nuvashalauncher_OPERATION_H
+#ifndef NUVASHALAUNCHER_OPERATION_H
+#define NUVASHALAUNCHER_OPERATION_H
 
 #include "nuvashalauncher-task.h"
 
@@ -28,4 +28,4 @@ void nuvashalauncher_operation_forget_source (NuvashaLauncherOperation *operatio
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_OPERATION_H */
+#endif /* NUVASHALAUNCHER_OPERATION_H */

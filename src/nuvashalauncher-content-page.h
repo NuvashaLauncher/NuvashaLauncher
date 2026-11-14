@@ -20,8 +20,8 @@
  * puts the file in place. The dependencies a version requires are
  * fetched and shown before anything is written. */
 
-#ifndef nuvashalauncher_CONTENT_PAGE_H
-#define nuvashalauncher_CONTENT_PAGE_H
+#ifndef NUVASHALAUNCHER_CONTENT_PAGE_H
+#define NUVASHALAUNCHER_CONTENT_PAGE_H
 
 #include <adwaita.h>
 
@@ -31,9 +31,9 @@
 
 G_BEGIN_DECLS
 
-#define nuvashalauncher_TYPE_CONTENT_PAGE (nuvashalauncher_content_page_get_type ())
+#define NUVASHALAUNCHER_TYPE_CONTENT_PAGE (nuvashalauncher_content_page_get_type ())
 
-G_DECLARE_FINAL_TYPE (NuvashaLauncherContentPage, nuvashalauncher_content_page, nuvashalauncher, CONTENT_PAGE,
+G_DECLARE_FINAL_TYPE (NuvashaLauncherContentPage, nuvashalauncher_content_page, NUVASHALAUNCHER, CONTENT_PAGE,
                       GtkBox)
 
 void nuvashalauncher_content_page_reset_for_tab_switch (NuvashaLauncherContentPage *self);
@@ -41,7 +41,7 @@ void nuvashalauncher_content_page_reset_for_tab_switch (NuvashaLauncherContentPa
 
 /* What the loaders and the game ignore: a file whose name ends with
  * this is not loaded, and taking it off the name loads it again. */
-#define nuvashalauncher_CONTENT_DISABLED_SUFFIX ".disabled"
+#define NUVASHALAUNCHER_CONTENT_DISABLED_SUFFIX ".disabled"
 
 /* One file of the instance folder of this content, and what Modrinth
  * knows about it. */
@@ -135,4 +135,4 @@ NuvashaLauncherContentPage *nuvashalauncher_content_page_new (NuvashaLauncherIns
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_CONTENT_PAGE_H */
+#endif /* NUVASHALAUNCHER_CONTENT_PAGE_H */

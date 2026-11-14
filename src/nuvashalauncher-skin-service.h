@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef NUVASHA_SKIN_SERVICE_H
-#define NUVASHA_SKIN_SERVICE_H
+#ifndef NUVASHALAUNCHER_SKIN_SERVICE_H
+#define NUVASHALAUNCHER_SKIN_SERVICE_H
 
 #include "nuvashalauncher-accounts.h"
 #include <gio/gio.h>
@@ -45,4 +45,4 @@ gboolean nuvashalauncher_skin_service_background_work_active (void);
 
 G_END_DECLS
 
-#endif /* NUVASHA_SKIN_SERVICE_H */
+#endif /* NUVASHALAUNCHER_SKIN_SERVICE_H */

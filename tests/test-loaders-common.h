@@ -4,7 +4,7 @@
 
 /* Tests for nuvashalauncher-loaders.
  *
- * Every loader answers with a document of its own, and what nuvashalauncher has to
+ * Every loader answers with a document of its own, and what Nuvasha Launcher has to
  * get right is reading it: which versions a loader has for one Minecraft
  * version, which of those it calls stable, and the document those
  * versions are, whose libraries publish a maven address instead of a
@@ -23,8 +23,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef nuvashalauncher_TEST_FIXTURES
-#define nuvashalauncher_TEST_FIXTURES "tests/fixtures"
+#ifndef NUVASHALAUNCHER_TEST_FIXTURES
+#define NUVASHALAUNCHER_TEST_FIXTURES "tests/fixtures"
 #endif
 
 static inline const NuvashaLauncherLoaderVersion *

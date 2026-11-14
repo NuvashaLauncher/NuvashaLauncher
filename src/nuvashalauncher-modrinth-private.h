@@ -2,16 +2,16 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_MODRINTH_PRIVATE_H
-#define nuvashalauncher_MODRINTH_PRIVATE_H
+#ifndef NUVASHALAUNCHER_MODRINTH_PRIVATE_H
+#define NUVASHALAUNCHER_MODRINTH_PRIVATE_H
 
 #include "nuvashalauncher-modrinth.h"
 
 typedef void (*NuvashaLauncherModrinthAnswerFunc) (GTask *task, JsonNode *root);
 
 typedef enum {
-  nuvashalauncher_NOT_FOUND_IS_ERROR,
-  nuvashalauncher_NOT_FOUND_IS_ABSENT
+  NUVASHALAUNCHER_NOT_FOUND_IS_ERROR,
+  NUVASHALAUNCHER_NOT_FOUND_IS_ABSENT
 } NuvashaLauncherNotFoundRule;
 
 typedef struct {

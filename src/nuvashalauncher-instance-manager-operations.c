@@ -86,8 +86,8 @@ nuvashalauncher_instance_manager_duplicate_async (NuvashaLauncherInstanceManager
                                       GAsyncReadyCallback callback,
                                       gpointer user_data)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (self), NULL);
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (source_instance), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (source_instance), NULL);
 
   g_autoptr (GTask) task = g_task_new (self, NULL, callback, user_data);
   nuvashalauncher_task_scope_attach_task (task);
@@ -97,8 +97,8 @@ nuvashalauncher_instance_manager_duplicate_async (NuvashaLauncherInstanceManager
     {
       nuvashalauncher_task_scope_return_error (
         task_scope,
-        g_error_new_literal (nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                             nuvashalauncher_INSTANCE_MANAGER_ERROR_NOT_FOUND,
+        g_error_new_literal (NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                             NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND,
                              "the instance is not registered"));
        return nuvashalauncher_task_scope_ref (task_scope);
     }
@@ -113,7 +113,7 @@ nuvashalauncher_instance_manager_duplicate_async (NuvashaLauncherInstanceManager
   g_autofree char *modpack_name = NULL;
   g_autofree char *modpack_summary = NULL;
   g_autofree char *modpack_version_id = NULL;
-  NuvashaLauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader loader = NUVASHALAUNCHER_LOADER_VANILLA;
 
   g_object_get (source_instance,
                 "minecraft_version", &minecraft_version,
@@ -179,8 +179,8 @@ nuvashalauncher_instance_manager_duplicate_async (NuvashaLauncherInstanceManager
     {
       nuvashalauncher_task_scope_return_error (
         task_scope,
-        g_error_new (nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                     nuvashalauncher_INSTANCE_MANAGER_ERROR_IO,
+        g_error_new (NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                     NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_IO,
                      "cannot create \"%s\": %s",
                      self->instances_dir, instances_error->message));
         return nuvashalauncher_task_scope_ref (task_scope);
@@ -291,8 +291,8 @@ nuvashalauncher_instance_manager_delete_async (NuvashaLauncherInstanceManager *s
                                    GAsyncReadyCallback callback,
                                    gpointer user_data)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (self), NULL);
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (instance), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (instance), NULL);
 
   g_autoptr (GTask) task = g_task_new (self, NULL, callback, user_data);
   nuvashalauncher_task_scope_attach_task (task);
@@ -302,8 +302,8 @@ nuvashalauncher_instance_manager_delete_async (NuvashaLauncherInstanceManager *s
     {
       nuvashalauncher_task_scope_return_error (
         task_scope,
-        g_error_new_literal (nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                             nuvashalauncher_INSTANCE_MANAGER_ERROR_NOT_FOUND,
+        g_error_new_literal (NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                             NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND,
                              "the instance is not registered"));
        return nuvashalauncher_task_scope_ref (task_scope);
     }
@@ -365,14 +365,14 @@ nuvashalauncher_instance_manager_check_new_directory (NuvashaLauncherInstanceMan
   g_autofree char *path = NULL;
   g_autofree char *current = NULL;
 
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (self), FALSE);
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (instance), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (instance), FALSE);
   g_return_val_if_fail (canonical == NULL || *canonical == NULL, FALSE);
 
   if (!g_list_store_find (self->instances, instance, NULL))
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                   nuvashalauncher_INSTANCE_MANAGER_ERROR_NOT_FOUND,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                   NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND,
                    "the instance is not registered");
       return FALSE;
     }
@@ -386,8 +386,8 @@ nuvashalauncher_instance_manager_check_new_directory (NuvashaLauncherInstanceMan
      would move a directory onto itself. */
   if (g_strcmp0 (path, current) == 0)
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                   nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                   NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH,
                    "the directory is already \"%s\"", path);
       return FALSE;
     }
@@ -396,8 +396,8 @@ nuvashalauncher_instance_manager_check_new_directory (NuvashaLauncherInstanceMan
      and the files of this instance must not land on top of it. */
   if (g_file_test (path, G_FILE_TEST_EXISTS))
     {
-      g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                   nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+      g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                   NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH,
                    "\"%s\" already exists", path);
       return FALSE;
     }
@@ -410,8 +410,8 @@ nuvashalauncher_instance_manager_check_new_directory (NuvashaLauncherInstanceMan
 
     if (!g_file_test (parent, G_FILE_TEST_IS_DIR))
       {
-        g_set_error (error, nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                     nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+        g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                     NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH,
                      "the directory \"%s\" does not exist", parent);
         return FALSE;
       }
@@ -561,8 +561,8 @@ nuvashalauncher_instance_manager_change_directory_async (NuvashaLauncherInstance
                                              GAsyncReadyCallback callback,
                                              gpointer user_data)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (self), NULL);
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (instance), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (instance), NULL);
 
   g_autoptr (GTask) task = g_task_new (self, NULL, callback, user_data);
   nuvashalauncher_task_scope_attach_task (task);
@@ -670,8 +670,8 @@ nuvashalauncher_instance_manager_open_folder_async (NuvashaLauncherInstanceManag
                                          GAsyncReadyCallback callback,
                                          gpointer user_data)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (self), NULL);
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (instance), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (instance), NULL);
 
   g_autoptr (GTask) task = g_task_new (self, NULL, callback, user_data);
    nuvashalauncher_task_scope_attach_task (task);
@@ -682,8 +682,8 @@ nuvashalauncher_instance_manager_open_folder_async (NuvashaLauncherInstanceManag
     {
       nuvashalauncher_task_scope_return_error (
         scope,
-        g_error_new_literal (nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                             nuvashalauncher_INSTANCE_MANAGER_ERROR_NOT_FOUND,
+        g_error_new_literal (NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                             NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND,
                              "the instance is not registered"));
       return nuvashalauncher_task_scope_ref (scope);
     }
@@ -694,8 +694,8 @@ nuvashalauncher_instance_manager_open_folder_async (NuvashaLauncherInstanceManag
     {
       nuvashalauncher_task_scope_return_error (
         scope,
-        g_error_new (nuvashalauncher_INSTANCE_MANAGER_ERROR,
-                     nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH,
+        g_error_new (NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                     NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_INVALID_PATH,
                      "the directory \"%s\" does not exist", directory));
       return nuvashalauncher_task_scope_ref (scope);
     }

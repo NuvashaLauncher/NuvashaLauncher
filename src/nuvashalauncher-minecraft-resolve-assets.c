@@ -185,7 +185,7 @@ resolve_objects (ResolveRequest *request)
 
   path = g_build_filename (request->indexes_dir, request->asset_index_id, NULL);
 
-  if (!nuvashalauncher_fs_get_contents_within (path, nuvashalauncher_FS_MAX_ASSET_INDEX_SIZE,
+  if (!nuvashalauncher_fs_get_contents_within (path, NUVASHALAUNCHER_FS_MAX_ASSET_INDEX_SIZE,
                                    &text, &length, &error) ||
       !json_parser_load_from_data (parser, text, (gssize) length, &error) ||
       !JSON_NODE_HOLDS_OBJECT (json_parser_get_root (parser)))
@@ -193,7 +193,7 @@ resolve_objects (ResolveRequest *request)
       g_autoptr (GError) local = g_steal_pointer (&error);
 
       request_fail (request,
-                    g_error_new (nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_ASSETS,
+                    g_error_new (NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_ASSETS,
                                  "the asset index \"%s\" cannot be read: %s",
                                  path,
                                  local != NULL ? local->message
@@ -209,7 +209,7 @@ resolve_objects (ResolveRequest *request)
       !JSON_NODE_HOLDS_OBJECT (json_object_get_member (root, "objects")))
     {
       request_fail (request,
-                    g_error_new (nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_ASSETS,
+                    g_error_new (NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_ASSETS,
                                  "the asset index \"%s\" has no objects",
                                  path));
       resolve_finish (request);
@@ -245,7 +245,7 @@ resolve_objects (ResolveRequest *request)
         {
           request_fail_and_wait (
               request,
-              g_error_new (nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_ASSETS,
+              g_error_new (NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_ASSETS,
                            "the asset \"%s\" of \"%s\" is not an object",
                            name, path));
           return;
@@ -263,8 +263,8 @@ resolve_objects (ResolveRequest *request)
               {
                 request_fail_and_wait (
                   request,
-                  g_error_new (nuvashalauncher_RESOLVE_ERROR,
-                               nuvashalauncher_RESOLVE_ERROR_ASSETS,
+                  g_error_new (NUVASHALAUNCHER_RESOLVE_ERROR,
+                               NUVASHALAUNCHER_RESOLVE_ERROR_ASSETS,
                                "the asset \"%s\" has an invalid hash", name));
                 return;
               }
@@ -290,7 +290,7 @@ resolve_objects (ResolveRequest *request)
         {
           request_fail_and_wait (
               request,
-              g_error_new (nuvashalauncher_RESOLVE_ERROR, nuvashalauncher_RESOLVE_ERROR_UNSAFE_PATH,
+              g_error_new (NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_UNSAFE_PATH,
                            "the asset \"%s\" of \"%s\" would be copied to "
                            "\"%s\", outside the assets directory",
                            hash, path, asset_path));
@@ -323,8 +323,8 @@ resolve_objects (ResolveRequest *request)
           if (destination == NULL)
             {
               request_fail_and_wait (request,
-                                     g_error_new (nuvashalauncher_RESOLVE_ERROR,
-                                                  nuvashalauncher_RESOLVE_ERROR_ASSETS,
+                                     g_error_new (NUVASHALAUNCHER_RESOLVE_ERROR,
+                                                  NUVASHALAUNCHER_RESOLVE_ERROR_ASSETS,
                                                   "\"%s\" is not a usable asset name",
                                                   hash));
               return;

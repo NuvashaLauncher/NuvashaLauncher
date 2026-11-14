@@ -146,7 +146,7 @@ file_row_refresh (GtkWidget *row)
 {
   NuvashaLauncherContentFile *file = g_object_get_data (G_OBJECT (row), "nuvashalauncher-file");
   NuvashaLauncherContentPage *self =
-    nuvashalauncher_CONTENT_PAGE (g_object_get_data (G_OBJECT (row), "nuvashalauncher-page"));
+    NUVASHALAUNCHER_CONTENT_PAGE (g_object_get_data (G_OBJECT (row), "nuvashalauncher-page"));
   const char *title = NULL;
 
   if (file == NULL || !GTK_IS_WIDGET (row))
@@ -301,7 +301,7 @@ row_show_description (GtkWidget *row, const char *description)
 static gboolean
 on_mod_toggled (GtkSwitch *sw, gboolean state G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
   NuvashaLauncherContentFile *file = g_object_get_data (G_OBJECT (sw), "nuvashalauncher-file");
 
   if (file == NULL || !nuvashalauncher_content_page_toggle_file (self, file))
@@ -316,7 +316,7 @@ on_mod_toggled (GtkSwitch *sw, gboolean state G_GNUC_UNUSED, gpointer user_data)
 GtkWidget *
 file_row (NuvashaLauncherContentPage *self, NuvashaLauncherContentFile *file)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_CONTENT_PAGE (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_CONTENT_PAGE (self), NULL);
   g_return_val_if_fail (file != NULL, NULL);
 
   g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
@@ -347,7 +347,7 @@ file_row (NuvashaLauncherContentPage *self, NuvashaLauncherContentFile *file)
 
   gtk_widget_add_css_class (GTK_WIDGET (badge_box), "nuvashalauncher-content-icon");
   gtk_widget_add_css_class (GTK_WIDGET (badge_box), "nuvashalauncher-select-badge");
-  gtk_widget_set_size_request (GTK_WIDGET (badge_box), nuvashalauncher_ICON_SIZE, nuvashalauncher_ICON_SIZE);
+  gtk_widget_set_size_request (GTK_WIDGET (badge_box), NUVASHALAUNCHER_ICON_SIZE, NUVASHALAUNCHER_ICON_SIZE);
   gtk_widget_set_valign (GTK_WIDGET (badge_box), GTK_ALIGN_CENTER);
   gtk_widget_set_halign (GTK_WIDGET (badge_box), GTK_ALIGN_CENTER);
   gtk_widget_set_hexpand (GTK_WIDGET (badge_box), TRUE);
@@ -363,7 +363,7 @@ file_row (NuvashaLauncherContentPage *self, NuvashaLauncherContentFile *file)
   gtk_stack_add_named (icon_stack, GTK_WIDGET (icon), "icon");
   gtk_stack_add_named (icon_stack, GTK_WIDGET (badge_box), "check");
   gtk_stack_set_visible_child_name (icon_stack, "icon");
-  gtk_widget_set_size_request (GTK_WIDGET (icon_stack), nuvashalauncher_ICON_SIZE, nuvashalauncher_ICON_SIZE);
+  gtk_widget_set_size_request (GTK_WIDGET (icon_stack), NUVASHALAUNCHER_ICON_SIZE, NUVASHALAUNCHER_ICON_SIZE);
   gtk_widget_set_valign (GTK_WIDGET (icon_stack), GTK_ALIGN_CENTER);
 
   gtk_check_button_set_child (check, GTK_WIDGET (icon_stack));
@@ -383,7 +383,7 @@ file_row (NuvashaLauncherContentPage *self, NuvashaLauncherContentFile *file)
   /* Only a mod is something that can be turned off: a resource pack or a
      shader pack is loaded whenever it is present, so neither has a
      switch. */
-  if (self->type == nuvashalauncher_CONTENT_MOD)
+  if (self->type == NUVASHALAUNCHER_CONTENT_MOD)
     {
       GtkSwitch *sw = GTK_SWITCH (gtk_switch_new ());
 

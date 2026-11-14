@@ -55,14 +55,14 @@ test_offline_account (void)
 
   /* An offline account is a name and nothing else: no token, nothing to
      refresh, and it says so wherever it is shown. */
-  g_assert_cmpint (account->type, ==, nuvashalauncher_ACCOUNT_OFFLINE);
+  g_assert_cmpint (account->type, ==, NUVASHALAUNCHER_ACCOUNT_OFFLINE);
   g_assert_cmpstr (account->id, ==, "TestUser");
   g_assert_cmpstr (account->name, ==, "TestUser");
   g_assert_cmpstr (account->uuid, ==, "097d3392-865a-3f3c-8b4a-da1c3473466c");
   g_assert_null (account->access_token);
   g_assert_null (account->refresh_token);
   g_assert_cmpstr (nuvashalauncher_account_type_name (account->type), ==, "Offline");
-  g_assert_cmpstr (nuvashalauncher_account_type_name (nuvashalauncher_ACCOUNT_MICROSOFT), ==,
+  g_assert_cmpstr (nuvashalauncher_account_type_name (NUVASHALAUNCHER_ACCOUNT_MICROSOFT), ==,
                    "Microsoft");
 
   /* An offline account needs no token and is therefore always good. */
@@ -73,7 +73,7 @@ test_offline_account (void)
 }
 
 /* The UUID java hands out for an offline player is the MD5 of
-   "OfflinePlayer:<name>" as a name based UUID, and nuvashalauncher has to hand out the
+   "OfflinePlayer:<name>" as a name based UUID, and Nuvasha Launcher has to hand out the
    same one or the worlds of a player are not found where they are. */
 static void
 test_offline_uuid_derivation (void)
@@ -124,21 +124,21 @@ test_offline_name_validation (void)
 
   account = nuvashalauncher_account_new_offline ("ab", &error);
   g_assert_null (account);
-  g_assert_error (error, nuvashalauncher_ACCOUNTS_ERROR, nuvashalauncher_ACCOUNTS_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_ACCOUNTS_ERROR, NUVASHALAUNCHER_ACCOUNTS_ERROR_INVALID);
   g_assert_nonnull (strstr (error->message, "3 to 16"));
   g_clear_error (&error);
 
   g_assert_null (nuvashalauncher_account_new_offline ("0123456789abcdefg", &error));
-  g_assert_error (error, nuvashalauncher_ACCOUNTS_ERROR, nuvashalauncher_ACCOUNTS_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_ACCOUNTS_ERROR, NUVASHALAUNCHER_ACCOUNTS_ERROR_INVALID);
   g_clear_error (&error);
 
   g_assert_null (nuvashalauncher_account_new_offline ("Fe lia", &error));
-  g_assert_error (error, nuvashalauncher_ACCOUNTS_ERROR, nuvashalauncher_ACCOUNTS_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_ACCOUNTS_ERROR, NUVASHALAUNCHER_ACCOUNTS_ERROR_INVALID);
   g_assert_nonnull (strstr (error->message, "letters"));
   g_clear_error (&error);
 
   g_assert_null (nuvashalauncher_account_new_offline ("", &error));
-  g_assert_error (error, nuvashalauncher_ACCOUNTS_ERROR, nuvashalauncher_ACCOUNTS_ERROR_INVALID);
+  g_assert_error (error, NUVASHALAUNCHER_ACCOUNTS_ERROR, NUVASHALAUNCHER_ACCOUNTS_ERROR_INVALID);
   g_clear_error (&error);
 
   account = nuvashalauncher_account_new_offline ("abc", &error);
@@ -168,7 +168,7 @@ microsoft_account (gint64 expires_at, const char *access_token)
 {
   NuvashaLauncherAccount *account = g_new0 (NuvashaLauncherAccount, 1);
 
-  account->type = nuvashalauncher_ACCOUNT_MICROSOFT;
+  account->type = NUVASHALAUNCHER_ACCOUNT_MICROSOFT;
   account->id = g_strdup ("069a79f444e94726a5befca90e38aaf5");
   account->name = g_strdup ("Notch");
   account->uuid = g_strdup ("069a79f4-44e9-4726-a5be-fca90e38aaf5");
@@ -191,11 +191,11 @@ test_token_expiry (void)
   /* A token that is about to run out is not: the game would be handed
      one that dies while it is still booting. */
   g_assert_false (
-    nuvashalauncher_account_token_is_valid (account, now + 3600 - nuvashalauncher_ACCOUNTS_TOKEN_MARGIN));
+    nuvashalauncher_account_token_is_valid (account, now + 3600 - NUVASHALAUNCHER_ACCOUNTS_TOKEN_MARGIN));
   g_assert_false (
-    nuvashalauncher_account_token_is_valid (account, now + 3600 - nuvashalauncher_ACCOUNTS_TOKEN_MARGIN + 1));
+    nuvashalauncher_account_token_is_valid (account, now + 3600 - NUVASHALAUNCHER_ACCOUNTS_TOKEN_MARGIN + 1));
   g_assert_true (nuvashalauncher_account_token_is_valid (
-    account, now + 3600 - nuvashalauncher_ACCOUNTS_TOKEN_MARGIN - 1));
+    account, now + 3600 - NUVASHALAUNCHER_ACCOUNTS_TOKEN_MARGIN - 1));
 
   /* A token that is gone, an account that never had one and a moment with
      no sense of time all mean the same thing: sign in again. */
@@ -270,7 +270,7 @@ test_one_active_account (void)
 
   /* An account that is not there cannot be made active. */
   g_assert_false (nuvashalauncher_accounts_set_active (store, "nobody", &error));
-  g_assert_error (error, nuvashalauncher_ACCOUNTS_ERROR, nuvashalauncher_ACCOUNTS_ERROR_UNKNOWN);
+  g_assert_error (error, NUVASHALAUNCHER_ACCOUNTS_ERROR, NUVASHALAUNCHER_ACCOUNTS_ERROR_UNKNOWN);
   g_clear_error (&error);
   g_assert_cmpstr (nuvashalauncher_accounts_get_active_id (store), ==, "TestUser");
 
@@ -288,7 +288,7 @@ test_one_active_account (void)
   g_assert_null (nuvashalauncher_accounts_get_active (store));
 
   g_assert_false (nuvashalauncher_accounts_remove (store, "jeb_", &error));
-  g_assert_error (error, nuvashalauncher_ACCOUNTS_ERROR, nuvashalauncher_ACCOUNTS_ERROR_UNKNOWN);
+  g_assert_error (error, NUVASHALAUNCHER_ACCOUNTS_ERROR, NUVASHALAUNCHER_ACCOUNTS_ERROR_UNKNOWN);
 
   remove_temporary_path (path);
 
@@ -330,7 +330,7 @@ test_persistence (void)
   g_assert_cmpuint (nuvashalauncher_accounts_count (reopened), ==, 1);
   found = nuvashalauncher_accounts_get_active (reopened);
   g_assert_nonnull (found);
-  g_assert_cmpint (found->type, ==, nuvashalauncher_ACCOUNT_MICROSOFT);
+  g_assert_cmpint (found->type, ==, NUVASHALAUNCHER_ACCOUNT_MICROSOFT);
   g_assert_cmpstr (found->name, ==, "Notch");
   g_assert_cmpstr (found->access_token, ==, "the-access-token");
   g_assert_cmpstr (found->refresh_token, ==, "the-refresh-token");
@@ -428,7 +428,7 @@ test_adding_the_same_account_twice (void)
 int
 main (void)
 {
-  g_setenv ("NUVASHA_TEST_SECRET_STORE", "1", TRUE);
+  g_setenv ("NUVASHALAUNCHER_TEST_SECRET_STORE", "1", TRUE);
   g_print ("# Account tests\n");
 
   test_offline_account ();

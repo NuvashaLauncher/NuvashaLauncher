@@ -4,7 +4,7 @@
 
 /* Tests for nuvashalauncher-modrinth.
  *
- * What nuvashalauncher has to get right when it reads Modrinth is not the network
+ * What Nuvasha Launcher has to get right when it reads Modrinth is not the network
  * but the two things around it: the facets that narrow a search to the
  * instance it is for, and the rule that keeps an incompatible version
  * out of every list. Both are decided from data here, so nothing in
@@ -20,14 +20,14 @@
 
 #include <glib.h>
 
-#ifndef nuvashalauncher_TEST_FIXTURES
-#define nuvashalauncher_TEST_FIXTURES "tests/fixtures"
+#ifndef NUVASHALAUNCHER_TEST_FIXTURES
+#define NUVASHALAUNCHER_TEST_FIXTURES "tests/fixtures"
 #endif
 
 static inline char *
 read_fixture (const char *name)
 {
-  g_autofree char *path = g_build_filename (nuvashalauncher_TEST_FIXTURES, name, NULL);
+  g_autofree char *path = g_build_filename (NUVASHALAUNCHER_TEST_FIXTURES, name, NULL);
   g_autofree char *json = NULL;
   g_autoptr (GError) error = NULL;
 
@@ -100,7 +100,7 @@ search_new (NuvashaLauncherContentType type, const char *query, const char *vers
 
 
 /* The version of the fixture with this number, whatever its game
-   versions: the one object of the answer nuvashalauncher would refuse is needed on
+   versions: the one object of the answer Nuvasha Launcher would refuse is needed on
    its own to be asked about. (transfer full) */
 static inline NuvashaLauncherModrinthVersion *
 version_from_fixture (const char *json, const char *number)

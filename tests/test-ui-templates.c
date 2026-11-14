@@ -40,7 +40,7 @@ test_templates_are_bundled (void)
 static void
 test_builder_templates_parse (void)
 {
-  g_type_ensure (nuvashalauncher_TYPE_FILTER_ENTRY);
+  g_type_ensure (NUVASHALAUNCHER_TYPE_FILTER_ENTRY);
   static const char *paths[] = {
     "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-import.ui",
     "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-main-shell.ui",
@@ -93,9 +93,9 @@ test_custom_templates_instantiate (void)
   g_autoptr (NuvashaLauncherSignInDialog) sign_in =
     g_object_ref_sink (nuvashalauncher_sign_in_dialog_new ());
 
-  g_assert_true (nuvashalauncher_IS_OFFLINE_ACCOUNT_DIALOG (offline));
-  g_assert_true (nuvashalauncher_IS_CREATE_INSTANCE_DIALOG (create));
-  g_assert_true (nuvashalauncher_IS_SIGN_IN_DIALOG (sign_in));
+  g_assert_true (NUVASHALAUNCHER_IS_OFFLINE_ACCOUNT_DIALOG (offline));
+  g_assert_true (NUVASHALAUNCHER_IS_CREATE_INSTANCE_DIALOG (create));
+  g_assert_true (NUVASHALAUNCHER_IS_SIGN_IN_DIALOG (sign_in));
   g_assert_true (GTK_IS_WIDGET (offline));
 }
 

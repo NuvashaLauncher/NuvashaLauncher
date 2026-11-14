@@ -19,8 +19,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef nuvashalauncher_TEST_FIXTURES
-#define nuvashalauncher_TEST_FIXTURES "tests/fixtures"
+#ifndef NUVASHALAUNCHER_TEST_FIXTURES
+#define NUVASHALAUNCHER_TEST_FIXTURES "tests/fixtures"
 #endif
 
 /* The cache these tests write into. g_get_user_cache_dir() remembers
@@ -35,7 +35,7 @@ static char *cache_home;
 static inline char *
 fixture_text (const char *name)
 {
-  g_autofree char *path = g_build_filename (nuvashalauncher_TEST_FIXTURES, name, NULL);
+  g_autofree char *path = g_build_filename (NUVASHALAUNCHER_TEST_FIXTURES, name, NULL);
   g_autoptr (GError) error = NULL;
   char *contents = NULL;
 

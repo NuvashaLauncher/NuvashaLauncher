@@ -50,7 +50,7 @@ NuvashaLauncherDownloads *
 nuvashalauncher_downloads_get_default (void)
 {
   if (default_downloads == NULL)
-    default_downloads = g_object_new (nuvashalauncher_TYPE_DOWNLOADS, NULL);
+    default_downloads = g_object_new (NUVASHALAUNCHER_TYPE_DOWNLOADS, NULL);
 
   return default_downloads;
 }
@@ -79,7 +79,7 @@ emit_changed (void)
 const char *
 nuvashalauncher_download_get_title (NuvashaLauncherDownload *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_DOWNLOAD (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_DOWNLOAD (self), NULL);
 
   return self->title;
 }
@@ -87,7 +87,7 @@ nuvashalauncher_download_get_title (NuvashaLauncherDownload *self)
 const char *
 nuvashalauncher_download_get_detail (NuvashaLauncherDownload *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_DOWNLOAD (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_DOWNLOAD (self), NULL);
 
   return self->detail;
 }
@@ -95,7 +95,7 @@ nuvashalauncher_download_get_detail (NuvashaLauncherDownload *self)
 NuvashaLauncherDownloadKind
 nuvashalauncher_download_get_kind (NuvashaLauncherDownload *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_DOWNLOAD (self), nuvashalauncher_DOWNLOAD_MOD);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_DOWNLOAD (self), NUVASHALAUNCHER_DOWNLOAD_MOD);
 
   return self->kind;
 }
@@ -103,7 +103,7 @@ nuvashalauncher_download_get_kind (NuvashaLauncherDownload *self)
 NuvashaLauncherDownloadUnit
 nuvashalauncher_download_get_unit (NuvashaLauncherDownload *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_DOWNLOAD (self), nuvashalauncher_DOWNLOAD_UNIT_COUNT);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_DOWNLOAD (self), NUVASHALAUNCHER_DOWNLOAD_UNIT_COUNT);
 
   return self->unit;
 }
@@ -111,7 +111,7 @@ nuvashalauncher_download_get_unit (NuvashaLauncherDownload *self)
 guint64
 nuvashalauncher_download_get_done (NuvashaLauncherDownload *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_DOWNLOAD (self), 0);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_DOWNLOAD (self), 0);
 
   return self->done;
 }
@@ -119,7 +119,7 @@ nuvashalauncher_download_get_done (NuvashaLauncherDownload *self)
 guint64
 nuvashalauncher_download_get_total (NuvashaLauncherDownload *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_DOWNLOAD (self), 0);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_DOWNLOAD (self), 0);
 
   return self->total;
 }
@@ -127,7 +127,7 @@ nuvashalauncher_download_get_total (NuvashaLauncherDownload *self)
 static void
 nuvashalauncher_download_dispose (GObject *object)
 {
-  NuvashaLauncherDownload *self = nuvashalauncher_DOWNLOAD (object);
+  NuvashaLauncherDownload *self = NUVASHALAUNCHER_DOWNLOAD (object);
 
   g_clear_object (&self->cancellable);
 
@@ -137,7 +137,7 @@ nuvashalauncher_download_dispose (GObject *object)
 static void
 nuvashalauncher_download_finalize (GObject *object)
 {
-  NuvashaLauncherDownload *self = nuvashalauncher_DOWNLOAD (object);
+  NuvashaLauncherDownload *self = NUVASHALAUNCHER_DOWNLOAD (object);
 
   g_free (self->title);
   g_free (self->detail);
@@ -163,7 +163,7 @@ nuvashalauncher_download_init (NuvashaLauncherDownload *self)
 GCancellable *
 nuvashalauncher_download_get_cancellable (NuvashaLauncherDownload *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_DOWNLOAD (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_DOWNLOAD (self), NULL);
 
   return self->cancellable;
 }
@@ -171,7 +171,7 @@ nuvashalauncher_download_get_cancellable (NuvashaLauncherDownload *self)
 void
 nuvashalauncher_download_set_detail (NuvashaLauncherDownload *self, const char *detail)
 {
-  g_return_if_fail (nuvashalauncher_IS_DOWNLOAD (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_DOWNLOAD (self));
 
   if (g_strcmp0 (self->detail, detail) == 0)
     return;
@@ -185,13 +185,13 @@ nuvashalauncher_download_set_detail (NuvashaLauncherDownload *self, const char *
 void
 nuvashalauncher_download_set_progress (NuvashaLauncherDownload *self, guint64 done, guint64 total)
 {
-  g_return_if_fail (nuvashalauncher_IS_DOWNLOAD (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_DOWNLOAD (self));
 
-  if (self->unit == nuvashalauncher_DOWNLOAD_UNIT_COUNT && self->done == done &&
+  if (self->unit == NUVASHALAUNCHER_DOWNLOAD_UNIT_COUNT && self->done == done &&
       self->total == total)
     return;
 
-  self->unit = nuvashalauncher_DOWNLOAD_UNIT_COUNT;
+  self->unit = NUVASHALAUNCHER_DOWNLOAD_UNIT_COUNT;
   self->done = done;
   self->total = total;
 
@@ -201,13 +201,13 @@ nuvashalauncher_download_set_progress (NuvashaLauncherDownload *self, guint64 do
 void
 nuvashalauncher_download_set_bytes (NuvashaLauncherDownload *self, guint64 done, guint64 total)
 {
-  g_return_if_fail (nuvashalauncher_IS_DOWNLOAD (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_DOWNLOAD (self));
 
-  if (self->unit == nuvashalauncher_DOWNLOAD_UNIT_BYTES && self->done == done &&
+  if (self->unit == NUVASHALAUNCHER_DOWNLOAD_UNIT_BYTES && self->done == done &&
       self->total == total)
     return;
 
-  self->unit = nuvashalauncher_DOWNLOAD_UNIT_BYTES;
+  self->unit = NUVASHALAUNCHER_DOWNLOAD_UNIT_BYTES;
   self->done = done;
   self->total = total;
 
@@ -217,7 +217,7 @@ nuvashalauncher_download_set_bytes (NuvashaLauncherDownload *self, guint64 done,
 void
 nuvashalauncher_download_cancel (NuvashaLauncherDownload *self)
 {
-  g_return_if_fail (nuvashalauncher_IS_DOWNLOAD (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_DOWNLOAD (self));
 
   if (self->cancellable != NULL)
     g_cancellable_cancel (self->cancellable);
@@ -231,7 +231,7 @@ NuvashaLauncherDownload *
 nuvashalauncher_downloads_add (NuvashaLauncherDownloadKind kind, const char *title)
 {
   NuvashaLauncherDownloads *self = nuvashalauncher_downloads_get_default ();
-  NuvashaLauncherDownload *download = g_object_new (nuvashalauncher_TYPE_DOWNLOAD, NULL);
+  NuvashaLauncherDownload *download = g_object_new (NUVASHALAUNCHER_TYPE_DOWNLOAD, NULL);
 
   download->kind = kind;
   download->title = g_strdup (title != NULL ? title : _("Download"));
@@ -246,7 +246,7 @@ nuvashalauncher_downloads_add (NuvashaLauncherDownloadKind kind, const char *tit
 void
 nuvashalauncher_download_finish (NuvashaLauncherDownload *self)
 {
-  g_return_if_fail (nuvashalauncher_IS_DOWNLOAD (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_DOWNLOAD (self));
 
   if (default_downloads == NULL)
     return;
@@ -303,7 +303,7 @@ nuvashalauncher_downloads_get_all (void)
 static void
 nuvashalauncher_downloads_dispose (GObject *object)
 {
-  NuvashaLauncherDownloads *self = nuvashalauncher_DOWNLOADS (object);
+  NuvashaLauncherDownloads *self = NUVASHALAUNCHER_DOWNLOADS (object);
 
   nuvashalauncher_download_service_free (self->service);
   self->service = NULL;

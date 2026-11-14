@@ -10,8 +10,8 @@
  * synchronous work; probing a candidate is a GSubprocess on the main
  * context. */
 
-#ifndef nuvashalauncher_JAVA_H
-#define nuvashalauncher_JAVA_H
+#ifndef NUVASHALAUNCHER_JAVA_H
+#define NUVASHALAUNCHER_JAVA_H
 
 #include <gio/gio.h>
 
@@ -19,11 +19,11 @@
 
 G_BEGIN_DECLS
 
-#define nuvashalauncher_JAVA_ERROR (nuvashalauncher_java_error_quark ())
+#define NUVASHALAUNCHER_JAVA_ERROR (nuvashalauncher_java_error_quark ())
 
 typedef enum {
-  nuvashalauncher_JAVA_ERROR_IO,   /* the subprocess could not be run or read */
-  nuvashalauncher_JAVA_ERROR_PARSE /* the output was not a version report */
+  NUVASHALAUNCHER_JAVA_ERROR_IO,   /* the subprocess could not be run or read */
+  NUVASHALAUNCHER_JAVA_ERROR_PARSE /* the output was not a version report */
 } NuvashaLauncherJavaError;
 
 GQuark nuvashalauncher_java_error_quark (void);
@@ -84,7 +84,7 @@ NuvashaLauncherTaskScope *nuvashalauncher_java_probe_async (const char *executab
 /* Persists a successfully probed custom runtime for all instance rows. */
 void nuvashalauncher_java_register_custom_path (const char *executable);
 
-/* (transfer full). Errors from the spawn, from nuvashalauncher_JAVA_ERROR and
+/* (transfer full). Errors from the spawn, from NUVASHALAUNCHER_JAVA_ERROR and
  * G_IO_ERROR_CANCELLED for a cancelled caller. */
 NuvashaLauncherJava *nuvashalauncher_java_probe_finish (GAsyncResult  *result,
                                 GError       **error);
@@ -127,4 +127,4 @@ NuvashaLauncherTaskScope *nuvashalauncher_java_detect_list_async (char **roots,
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_JAVA_H */
+#endif /* NUVASHALAUNCHER_JAVA_H */

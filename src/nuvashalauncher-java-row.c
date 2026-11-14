@@ -279,13 +279,13 @@ nuvashalauncher_java_row_fill (NuvashaLauncherJavaRow *self)
 NuvashaLauncherJavaRow *
 nuvashalauncher_java_row_new (void)
 {
-  return g_object_new (nuvashalauncher_TYPE_JAVA_ROW, NULL);
+  return g_object_new (NUVASHALAUNCHER_TYPE_JAVA_ROW, NULL);
 }
 
 void
 nuvashalauncher_java_row_set_required_major (NuvashaLauncherJavaRow *self, int required_major)
 {
-  g_return_if_fail (nuvashalauncher_IS_JAVA_ROW (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_JAVA_ROW (self));
 
   /* Filling the list again makes the combo row emit its selection, which
    * lands back here through the caller's handler. Doing nothing when the
@@ -303,7 +303,7 @@ nuvashalauncher_java_row_set_required_major (NuvashaLauncherJavaRow *self, int r
 void
 nuvashalauncher_java_row_load (NuvashaLauncherJavaRow *self, const char *wanted)
 {
-  g_return_if_fail (nuvashalauncher_IS_JAVA_ROW (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_JAVA_ROW (self));
 
   g_cancellable_cancel (self->cancellable);
   g_clear_object (&self->cancellable);
@@ -329,7 +329,7 @@ nuvashalauncher_java_row_load (NuvashaLauncherJavaRow *self, const char *wanted)
 GPtrArray *
 nuvashalauncher_java_row_get_detected (NuvashaLauncherJavaRow *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_JAVA_ROW (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_JAVA_ROW (self), NULL);
 
   return self->javas;
 }
@@ -337,7 +337,7 @@ nuvashalauncher_java_row_get_detected (NuvashaLauncherJavaRow *self)
 gboolean
 nuvashalauncher_java_row_get_ready (NuvashaLauncherJavaRow *self)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_JAVA_ROW (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_JAVA_ROW (self), FALSE);
 
   return self->ready;
 }
@@ -347,7 +347,7 @@ nuvashalauncher_java_row_get_selected_path (NuvashaLauncherJavaRow *self)
 {
   guint position;
 
-  g_return_val_if_fail (nuvashalauncher_IS_JAVA_ROW (self), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_JAVA_ROW (self), NULL);
 
   if (!self->ready)
     return NULL;
@@ -373,7 +373,7 @@ nuvashalauncher_java_row_get_selected_path (NuvashaLauncherJavaRow *self)
 void
 nuvashalauncher_java_row_select_path (NuvashaLauncherJavaRow *self, const char *path)
 {
-  g_return_if_fail (nuvashalauncher_IS_JAVA_ROW (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_JAVA_ROW (self));
 
   if (!self->ready)
     return;
@@ -405,7 +405,7 @@ nuvashalauncher_java_row_set_custom (NuvashaLauncherJavaRow *self,
                          const char *path,
                          NuvashaLauncherJava    *probed)
 {
-  g_return_if_fail (nuvashalauncher_IS_JAVA_ROW (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_JAVA_ROW (self));
 
   g_set_str (&self->wanted, path);
 
@@ -466,7 +466,7 @@ nuvashalauncher_java_row_set_custom (NuvashaLauncherJavaRow *self,
 static void
 nuvashalauncher_java_row_dispose (GObject *object)
 {
-  NuvashaLauncherJavaRow *self = nuvashalauncher_JAVA_ROW (object);
+  NuvashaLauncherJavaRow *self = NUVASHALAUNCHER_JAVA_ROW (object);
 
   self->disposed = TRUE;
   g_cancellable_cancel (self->cancellable);
@@ -480,7 +480,7 @@ nuvashalauncher_java_row_dispose (GObject *object)
 static void
 nuvashalauncher_java_row_finalize (GObject *object)
 {
-  NuvashaLauncherJavaRow *self = nuvashalauncher_JAVA_ROW (object);
+  NuvashaLauncherJavaRow *self = NUVASHALAUNCHER_JAVA_ROW (object);
 
   g_clear_pointer (&self->ids, g_ptr_array_unref);
   g_clear_pointer (&self->names, g_ptr_array_unref);

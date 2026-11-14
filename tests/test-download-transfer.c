@@ -70,8 +70,8 @@ test_file_size_limit (void)
   call_file_limited (&run, &call, url, dest, FILE_BODY_SIZE - 1);
   async_run_wait (&run);
 
-  g_assert_error (call.error, nuvashalauncher_DOWNLOAD_ERROR,
-                  nuvashalauncher_DOWNLOAD_ERROR_INVALID);
+  g_assert_error (call.error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                  NUVASHALAUNCHER_DOWNLOAD_ERROR_INVALID);
   g_assert_false (call.success);
   g_assert_cmpuint (fixture.hits, ==, 1);
   g_assert_false (g_file_test (dest, G_FILE_TEST_EXISTS));
@@ -102,8 +102,8 @@ test_checksum_mismatch (void)
   call_file (&run, &call, url, dest, expected, G_CHECKSUM_SHA256);
   async_run_wait (&run);
 
-  g_assert_error (call.error, nuvashalauncher_DOWNLOAD_ERROR,
-                  nuvashalauncher_DOWNLOAD_ERROR_CHECKSUM);
+  g_assert_error (call.error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                  NUVASHALAUNCHER_DOWNLOAD_ERROR_CHECKSUM);
   g_assert_false (call.success);
   /* A wrong hash repeats the transfer exactly once. */
   g_assert_cmpuint (fixture.hits, ==, 2);
@@ -131,8 +131,8 @@ test_invalid_expected_hash (void)
   call_file (&run, &call, url, dest, "../outside", G_CHECKSUM_SHA256);
   async_run_wait (&run);
 
-  g_assert_error (call.error, nuvashalauncher_DOWNLOAD_ERROR,
-                  nuvashalauncher_DOWNLOAD_ERROR_INVALID);
+  g_assert_error (call.error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                  NUVASHALAUNCHER_DOWNLOAD_ERROR_INVALID);
   g_assert_false (call.success);
   g_assert_cmpuint (fixture.hits, ==, 0);
   g_assert_false (g_file_test (dest, G_FILE_TEST_EXISTS));
@@ -166,7 +166,7 @@ test_cancellation (void)
   call_file (&run, &call, url, dest, expected, G_CHECKSUM_SHA256);
   async_run_wait (&run);
 
-  g_assert_error (call.error, nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_CANCELLED);
+  g_assert_error (call.error, NUVASHALAUNCHER_DOWNLOAD_ERROR, NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED);
   g_assert_false (call.success);
   g_assert_cmpuint (fixture.hits, ==, 1);
   g_assert_cmpuint (call.progress_calls, >=, 2);
@@ -202,7 +202,7 @@ test_cancellation_before_start (void)
   call_file (&run, &call, url, dest, expected, G_CHECKSUM_SHA256);
   async_run_wait (&run);
 
-  g_assert_error (call.error, nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_CANCELLED);
+  g_assert_error (call.error, NUVASHALAUNCHER_DOWNLOAD_ERROR, NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED);
   g_assert_cmpuint (fixture.hits, ==, 0);
   g_assert_cmpuint (dir_entry_count (dir), ==, 0);
 
@@ -264,7 +264,7 @@ test_not_found_is_not_retried (void)
   call_file (&run, &call, url, dest, NULL, G_CHECKSUM_SHA256);
   async_run_wait (&run);
 
-  g_assert_error (call.error, nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_HTTP);
+  g_assert_error (call.error, NUVASHALAUNCHER_DOWNLOAD_ERROR, NUVASHALAUNCHER_DOWNLOAD_ERROR_HTTP);
   g_assert_false (call.success);
   g_assert_cmpuint (fixture.hits, ==, 1);
   g_assert_false (g_file_test (dest, G_FILE_TEST_EXISTS));
@@ -292,8 +292,8 @@ test_rate_limit (void)
   call_file (&run, &call, url, dest, NULL, G_CHECKSUM_SHA256);
   async_run_wait (&run);
 
-  g_assert_error (call.error, nuvashalauncher_DOWNLOAD_ERROR,
-                  nuvashalauncher_DOWNLOAD_ERROR_RATE_LIMITED);
+  g_assert_error (call.error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                  NUVASHALAUNCHER_DOWNLOAD_ERROR_RATE_LIMITED);
   g_assert_false (call.success);
   /* Retry-After: 0 makes every wait immediate, the attempts remain. */
   g_assert_cmpuint (fixture.hits, ==, 3);
@@ -320,7 +320,7 @@ test_invalid_url (void)
   call_file (&run, &call, "not a url at all", dest, NULL, G_CHECKSUM_SHA256);
   async_run_wait (&run);
 
-  g_assert_error (call.error, nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_INVALID);
+  g_assert_error (call.error, NUVASHALAUNCHER_DOWNLOAD_ERROR, NUVASHALAUNCHER_DOWNLOAD_ERROR_INVALID);
   g_assert_cmpuint (fixture.hits, ==, 0);
   g_assert_cmpuint (dir_entry_count (dir), ==, 0);
 
@@ -346,7 +346,7 @@ test_connection_refused (void)
              G_CHECKSUM_SHA256);
   async_run_wait (&run);
 
-  g_assert_error (call.error, nuvashalauncher_DOWNLOAD_ERROR, nuvashalauncher_DOWNLOAD_ERROR_NETWORK);
+  g_assert_error (call.error, NUVASHALAUNCHER_DOWNLOAD_ERROR, NUVASHALAUNCHER_DOWNLOAD_ERROR_NETWORK);
   g_assert_false (call.success);
   g_assert_cmpuint (fixture.hits, ==, 0);
   g_assert_cmpuint (dir_entry_count (dir), ==, 0);

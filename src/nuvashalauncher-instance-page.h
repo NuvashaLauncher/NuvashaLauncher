@@ -13,8 +13,8 @@
  * the page is put in an AdwDialog, that bar becomes the header of the
  * dialog. */
 
-#ifndef nuvashalauncher_INSTANCE_PAGE_H
-#define nuvashalauncher_INSTANCE_PAGE_H
+#ifndef NUVASHALAUNCHER_INSTANCE_PAGE_H
+#define NUVASHALAUNCHER_INSTANCE_PAGE_H
 
 #include <adwaita.h>
 
@@ -24,12 +24,12 @@
 
 G_BEGIN_DECLS
 
-#define nuvashalauncher_TYPE_INSTANCE_PAGE (nuvashalauncher_instance_page_get_type ())
+#define NUVASHALAUNCHER_TYPE_INSTANCE_PAGE (nuvashalauncher_instance_page_get_type ())
 
 /* A box holding the toolbar view of the instance. AdwToolbarView is a
  * final type and cannot be subclassed, so it is a child here rather than
  * the parent. */
-G_DECLARE_FINAL_TYPE (NuvashaLauncherInstancePage, nuvashalauncher_instance_page, nuvashalauncher, INSTANCE_PAGE,
+G_DECLARE_FINAL_TYPE (NuvashaLauncherInstancePage, nuvashalauncher_instance_page, NUVASHALAUNCHER, INSTANCE_PAGE,
                       GtkBox)
 
 /* Builds the page for @instance. @launcher is the launcher of that same
@@ -53,4 +53,4 @@ void nuvashalauncher_instance_page_export_to_path (NuvashaLauncherInstancePage *
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_INSTANCE_PAGE_H */
+#endif /* NUVASHALAUNCHER_INSTANCE_PAGE_H */

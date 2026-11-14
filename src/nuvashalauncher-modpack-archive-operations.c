@@ -68,7 +68,7 @@ verify_hash_ready (GObject *source G_GNUC_UNUSED,
 
   if (g_ascii_strcasecmp (expect, digest) != 0)
     {
-      g_set_error (&error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_HASH,
+      g_set_error (&error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_HASH,
                    "\"%s\" arrived with a different %s than the index says",
                    run->path, run->stage == 0 ? "sha1" : "sha512");
       nuvashalauncher_task_scope_return_error (run->scope, g_steal_pointer (&error));
@@ -115,7 +115,7 @@ nuvashalauncher_modpack_verify_file_async (const NuvashaLauncherModpackFile *fil
     {
       nuvashalauncher_task_scope_return_error_deferred (
         scope,
-        g_error_new (nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_HASH,
+        g_error_new (NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_HASH,
                      "\"%s\" does not carry the two hashes the format "
                      "requires", file->path != NULL ? file->path : "file"));
       return g_steal_pointer (&scope);
@@ -163,7 +163,7 @@ extract_entry (struct archive *archive,
 
   if (name == NULL)
     {
-      g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_FORMAT,
+      g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                            "an override has no pathname");
       return FALSE;
     }
@@ -207,7 +207,7 @@ extract_entry (struct archive *archive,
 
   if (!nuvashalauncher_modpack_path_is_safe (relative))
     {
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_PATH,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_PATH,
                    "the overrides hold \"%s\", which is not a path the "
                    "instance can hold",
                    name);
@@ -220,7 +220,7 @@ extract_entry (struct archive *archive,
       if (!nuvashalauncher_fs_make_directory_tree_nofollow (directory, relative, 0755,
                                                 &local_error))
         {
-          g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO,
+          g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_IO,
                        "\"%s\" cannot be made: %s", name,
                        local_error != NULL ? local_error->message : g_strerror (errno));
           return FALSE;
@@ -230,7 +230,7 @@ extract_entry (struct archive *archive,
 
   if (archive_entry_filetype (header) != AE_IFREG)
     {
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_FORMAT,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                    "\"%s\" is not a file", name);
       return FALSE;
     }
@@ -246,7 +246,7 @@ extract_entry (struct archive *archive,
       close (fd);
     if (out == NULL)
       {
-        g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO,
+        g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_IO,
                      "\"%s\" cannot be written: %s", name,
                      local_error != NULL ? local_error->message : g_strerror (errno));
         return FALSE;
@@ -266,7 +266,7 @@ extract_entry (struct archive *archive,
       if (status != ARCHIVE_OK)
         {
           fclose (out);
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_ARCHIVE,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_ARCHIVE,
                        "\"%s\" cannot be read out of the archive: %s", name,
                        archive_error_string (archive));
           return FALSE;
@@ -280,8 +280,8 @@ extract_entry (struct archive *archive,
               (guint64) size > nuvashalauncher_modpack_get_content_limit () - *used)
             {
               fclose (out);
-              g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
-                                   nuvashalauncher_MODPACK_ERROR_BOMB,
+              g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                                   NUVASHALAUNCHER_MODPACK_ERROR_BOMB,
                                    "the overrides decode past the size one "
                                    "pack carries");
               return FALSE;
@@ -290,7 +290,7 @@ extract_entry (struct archive *archive,
           if (fwrite (block, 1, size, out) != size)
             {
               fclose (out);
-              g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO,
+              g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_IO,
                            "\"%s\" cannot be written: %s", name,
                            g_strerror (errno));
               return FALSE;
@@ -302,7 +302,7 @@ extract_entry (struct archive *archive,
 
   if (fclose (out) != 0)
     {
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_IO,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_IO,
                    "\"%s\" cannot be closed: %s", name, g_strerror (errno));
       return FALSE;
     }
@@ -326,7 +326,7 @@ extract_layers (const char *archive_path, const char *directory,
   if (fd < 0)
     {
       int saved_errno = errno;
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_ARCHIVE,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_ARCHIVE,
                    "cannot open \"%s\": %s", archive_path, g_strerror (saved_errno));
       archive_read_free (archive);
       return FALSE;
@@ -336,7 +336,7 @@ extract_layers (const char *archive_path, const char *directory,
   if (archive_read_support_format_zip (archive) != ARCHIVE_OK ||
       archive_read_open_fd (archive, fd, 65536) != ARCHIVE_OK)
     {
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_ARCHIVE,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_ARCHIVE,
                    "the pack cannot be opened: %s",
                    archive_error_string (archive));
       close (fd);
@@ -347,10 +347,10 @@ extract_layers (const char *archive_path, const char *directory,
   while ((status = archive_read_next_header (archive, &header)) == ARCHIVE_OK ||
          status == ARCHIVE_WARN)
     {
-      if (++paths > nuvashalauncher_MODPACK_MAX_ENTRIES)
+      if (++paths > NUVASHALAUNCHER_MODPACK_MAX_ENTRIES)
         {
-          g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
-                               nuvashalauncher_MODPACK_ERROR_BOMB,
+          g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                               NUVASHALAUNCHER_MODPACK_ERROR_BOMB,
                                "the archive has more entries than one pack");
           archive_read_close (archive);
           close (fd);
@@ -402,7 +402,7 @@ extract_layers (const char *archive_path, const char *directory,
           close (fd);
           fd = -1;
           archive_read_free (archive);
-          g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_ARCHIVE,
+          g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_ARCHIVE,
                        "the archive cannot be read all the way through");
           return FALSE;
         }
@@ -410,7 +410,7 @@ extract_layers (const char *archive_path, const char *directory,
 
   if (status != ARCHIVE_EOF)
     {
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_ARCHIVE,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_ARCHIVE,
                    "the overrides cannot be read: %s",
                    archive_error_string (archive));
       archive_read_close (archive);
@@ -478,8 +478,8 @@ extract_thread (GTask *task G_GNUC_UNUSED,
     {
       nuvashalauncher_task_scope_return_error (
         scope,
-        g_error_new_literal (nuvashalauncher_MODPACK_ERROR,
-                             nuvashalauncher_MODPACK_ERROR_CANCELLED, "cancelled"));
+        g_error_new_literal (NUVASHALAUNCHER_MODPACK_ERROR,
+                             NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED, "cancelled"));
       return;
     }
 
@@ -492,8 +492,8 @@ extract_thread (GTask *task G_GNUC_UNUSED,
   if (g_cancellable_is_cancelled (cancellable))
     nuvashalauncher_task_scope_return_error (
       scope,
-      g_error_new_literal (nuvashalauncher_MODPACK_ERROR,
-                           nuvashalauncher_MODPACK_ERROR_CANCELLED, "cancelled"));
+      g_error_new_literal (NUVASHALAUNCHER_MODPACK_ERROR,
+                           NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED, "cancelled"));
   else
     nuvashalauncher_task_scope_return_boolean (scope, TRUE);
 }

@@ -1,5 +1,5 @@
-#ifndef nuvashalauncher_JAVA_PRIVATE_H
-#define nuvashalauncher_JAVA_PRIVATE_H
+#ifndef NUVASHALAUNCHER_JAVA_PRIVATE_H
+#define NUVASHALAUNCHER_JAVA_PRIVATE_H
 
 #include "nuvashalauncher-java.h"
 

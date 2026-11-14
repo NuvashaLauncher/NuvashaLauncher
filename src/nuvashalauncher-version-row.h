@@ -6,8 +6,8 @@
  * settings editing. It loads versions from Mojang's manifest and exposes
  * loading and retry states. */
 
-#ifndef nuvashalauncher_VERSION_ROW_H
-#define nuvashalauncher_VERSION_ROW_H
+#ifndef NUVASHALAUNCHER_VERSION_ROW_H
+#define NUVASHALAUNCHER_VERSION_ROW_H
 
 #include <adwaita.h>
 
@@ -15,9 +15,9 @@
 
 G_BEGIN_DECLS
 
-#define nuvashalauncher_TYPE_VERSION_ROW (nuvashalauncher_version_row_get_type ())
+#define NUVASHALAUNCHER_TYPE_VERSION_ROW (nuvashalauncher_version_row_get_type ())
 
-G_DECLARE_FINAL_TYPE (NuvashaLauncherVersionRow, nuvashalauncher_version_row, nuvashalauncher, VERSION_ROW,
+G_DECLARE_FINAL_TYPE (NuvashaLauncherVersionRow, nuvashalauncher_version_row, NUVASHALAUNCHER, VERSION_ROW,
                       AdwComboRow)
 
 /* A row with an empty list, waiting for a load(). */
@@ -50,4 +50,4 @@ void nuvashalauncher_version_row_select (NuvashaLauncherVersionRow *self, const 
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_VERSION_ROW_H */
+#endif /* NUVASHALAUNCHER_VERSION_ROW_H */

@@ -108,7 +108,7 @@ nuvashalauncher_json_require_string (JsonNode *node, const char *name,
 
   if (member == NULL)
     {
-      g_set_error (error, nuvashalauncher_JSON_ERROR, nuvashalauncher_JSON_ERROR_MISSING,
+      g_set_error (error, NUVASHALAUNCHER_JSON_ERROR, NUVASHALAUNCHER_JSON_ERROR_MISSING,
                    "required JSON field \"%s\" is missing", name);
       return FALSE;
     }
@@ -118,7 +118,7 @@ nuvashalauncher_json_require_string (JsonNode *node, const char *name,
       json_node_get_string (member) == NULL ||
       *json_node_get_string (member) == '\0')
     {
-      g_set_error (error, nuvashalauncher_JSON_ERROR, nuvashalauncher_JSON_ERROR_TYPE,
+      g_set_error (error, NUVASHALAUNCHER_JSON_ERROR, NUVASHALAUNCHER_JSON_ERROR_TYPE,
                    "JSON field \"%s\" is not a non-empty string", name);
       return FALSE;
     }

@@ -46,7 +46,7 @@ instance_string (NuvashaLauncherInstance *instance, const char *property)
 char *
 loader_display_name (NuvashaLauncherInstance *instance)
 {
-  NuvashaLauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader loader = NUVASHALAUNCHER_LOADER_VANILLA;
   const char *nick = NULL;
 
   g_object_get (instance, "loader", &loader, NULL);
@@ -136,11 +136,11 @@ rebuild_content_pages (NuvashaLauncherInstancePage *self)
     const char *title;
     const char *icon;
   } pages[] = {
-    { nuvashalauncher_CONTENT_RESOURCE_PACK, "resource-packs", "Resource Packs",
+    { NUVASHALAUNCHER_CONTENT_RESOURCE_PACK, "resource-packs", "Resource Packs",
       "image-x-generic-symbolic" },
-    { nuvashalauncher_CONTENT_SHADER_PACK, "shader-packs", "Shader Packs",
+    { NUVASHALAUNCHER_CONTENT_SHADER_PACK, "shader-packs", "Shader Packs",
       "applications-graphics-symbolic" },
-    { nuvashalauncher_CONTENT_MOD, "mods", "Mods", "view-list-symbolic" },
+    { NUVASHALAUNCHER_CONTENT_MOD, "mods", "Mods", "view-list-symbolic" },
   };
   g_autofree char *visible = NULL;
 
@@ -191,8 +191,8 @@ on_content_tab_switched (GObject *stack, GParamSpec *pspec G_GNUC_UNUSED,
   GtkWidget *child = adw_view_stack_get_child_by_name (
     ADW_VIEW_STACK (stack), name);
 
-  if (child != NULL && nuvashalauncher_IS_CONTENT_PAGE (child))
-    nuvashalauncher_content_page_reset_for_tab_switch (nuvashalauncher_CONTENT_PAGE (child));
+  if (child != NULL && NUVASHALAUNCHER_IS_CONTENT_PAGE (child))
+    nuvashalauncher_content_page_reset_for_tab_switch (NUVASHALAUNCHER_CONTENT_PAGE (child));
 }
 
 static void
@@ -200,7 +200,7 @@ on_instance_page_width_changed (GObject *object,
                                 GParamSpec *pspec G_GNUC_UNUSED,
                                 gpointer user_data G_GNUC_UNUSED)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (object);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (object);
   int width = gtk_widget_get_width (GTK_WIDGET (self));
 
   if (self->switcher == NULL || width <= 0)
@@ -222,7 +222,7 @@ on_page_launcher_state (NuvashaLauncher *launcher G_GNUC_UNUSED,
                         NuvashaLauncherLaunchState state, const char *detail G_GNUC_UNUSED,
                         gpointer user_data)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
 
   update_directory_row (self);
 
@@ -236,12 +236,12 @@ NuvashaLauncherInstancePage *
 nuvashalauncher_instance_page_new (NuvashaLauncherInstanceManager *manager, NuvashaLauncherInstance *instance,
                        NuvashaLauncherSettings *settings, NuvashaLauncher *launcher)
 {
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (manager), NULL);
-  g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (instance), NULL);
-  g_return_val_if_fail (nuvashalauncher_IS_SETTINGS (settings), NULL);
-  g_return_val_if_fail (nuvashalauncher_IS_LAUNCHER (launcher), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (manager), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (instance), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_SETTINGS (settings), NULL);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_LAUNCHER (launcher), NULL);
 
-  NuvashaLauncherInstancePage *self = g_object_new (nuvashalauncher_TYPE_INSTANCE_PAGE, NULL);
+  NuvashaLauncherInstancePage *self = g_object_new (NUVASHALAUNCHER_TYPE_INSTANCE_PAGE, NULL);
   AdwViewStack *stack = ADW_VIEW_STACK (adw_view_stack_new ());
   AdwViewSwitcher *switcher = ADW_VIEW_SWITCHER (adw_view_switcher_new ());
   AdwHeaderBar *header = ADW_HEADER_BAR (adw_header_bar_new ());
@@ -273,15 +273,15 @@ nuvashalauncher_instance_page_new (NuvashaLauncherInstanceManager *manager, Nuva
                                         "emblem-system-symbolic");
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack),
-    GTK_WIDGET (nuvashalauncher_content_page_new (instance, nuvashalauncher_CONTENT_RESOURCE_PACK)),
+    GTK_WIDGET (nuvashalauncher_content_page_new (instance, NUVASHALAUNCHER_CONTENT_RESOURCE_PACK)),
      "resource-packs", _("Resource Packs"), "image-x-generic-symbolic");
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack),
-    GTK_WIDGET (nuvashalauncher_content_page_new (instance, nuvashalauncher_CONTENT_SHADER_PACK)),
+    GTK_WIDGET (nuvashalauncher_content_page_new (instance, NUVASHALAUNCHER_CONTENT_SHADER_PACK)),
      "shader-packs", _("Shader Packs"), "applications-graphics-symbolic");
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack),
-    GTK_WIDGET (nuvashalauncher_content_page_new (instance, nuvashalauncher_CONTENT_MOD)),
+    GTK_WIDGET (nuvashalauncher_content_page_new (instance, NUVASHALAUNCHER_CONTENT_MOD)),
      "mods", _("Mods"), "view-list-symbolic");
 
   /* The logs of the instance are the logs of the launcher the window
@@ -326,7 +326,7 @@ nuvashalauncher_instance_page_new (NuvashaLauncherInstanceManager *manager, Nuva
 void
 nuvashalauncher_instance_page_show_logs (NuvashaLauncherInstancePage *self)
 {
-  g_return_if_fail (nuvashalauncher_IS_INSTANCE_PAGE (self));
+  g_return_if_fail (NUVASHALAUNCHER_IS_INSTANCE_PAGE (self));
 
   if (self->stack != NULL)
     adw_view_stack_set_visible_child_name (ADW_VIEW_STACK (self->stack), "logs");
@@ -335,7 +335,7 @@ nuvashalauncher_instance_page_show_logs (NuvashaLauncherInstancePage *self)
 static void
 nuvashalauncher_instance_page_dispose (GObject *object)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (object);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (object);
 
   /* The widget tree may be freed while the page object is kept alive
    * by a running operation: never touch it afterwards. The manager and
@@ -396,7 +396,7 @@ nuvashalauncher_instance_page_dispose (GObject *object)
 static void
 nuvashalauncher_instance_page_finalize (GObject *object)
 {
-  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (object);
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (object);
 
   g_free (self->loader_version);
   g_free (self->export_name);

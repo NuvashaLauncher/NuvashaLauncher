@@ -2,12 +2,12 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_MODPACK_PRIVATE_H
-#define nuvashalauncher_MODPACK_PRIVATE_H
+#ifndef NUVASHALAUNCHER_MODPACK_PRIVATE_H
+#define NUVASHALAUNCHER_MODPACK_PRIVATE_H
 
 #include "nuvashalauncher-modpack.h"
 
-#define nuvashalauncher_MODPACK_FORMAT_VERSION 1
+#define NUVASHALAUNCHER_MODPACK_FORMAT_VERSION 1
 
 NuvashaLauncherTaskScope *extract_overrides_async (const char *archive_path,
                                        const char *directory,
@@ -21,4 +21,4 @@ gboolean nuvashalauncher_modpack_archive_entry_is_safe (const char *name, guint3
                                             const char *hardlink,
                                             GError **error);
 
-#endif /* nuvashalauncher_MODPACK_PRIVATE_H */
+#endif /* NUVASHALAUNCHER_MODPACK_PRIVATE_H */

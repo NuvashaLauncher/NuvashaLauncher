@@ -122,3 +122,16 @@ src/nuvashalauncher-users-popover-skin-textures.c
 src/nuvashalauncher-users-popover-skin.c
 src/nuvashalauncher-users-popover.c
 src/nuvashalauncher-version-row.c
+data/ui/nuvashalauncher-content-details.ui
+data/ui/nuvashalauncher-create-instance.ui
+data/ui/nuvashalauncher-download-row.ui
+data/ui/nuvashalauncher-modpack-browser-states.ui
+data/ui/nuvashalauncher-modpack-browser-toolbar.ui
+data/ui/nuvashalauncher-modpack-details-toolbar.ui
+data/ui/nuvashalauncher-modpack-dialog.ui
+data/ui/nuvashalauncher-modpack-error.ui
+data/ui/nuvashalauncher-modpack-import.ui
+data/ui/nuvashalauncher-modpack-optional.ui
+data/ui/nuvashalauncher-offline-account.ui
+data/ui/nuvashalauncher-sign-in.ui
+data/ui/nuvashalauncher-skin-content.ui

@@ -14,8 +14,8 @@
  *
  * Nothing here knows a version id: every id comes out of the manifest. */
 
-#ifndef nuvashalauncher_MINECRAFT_VERSIONS_H
-#define nuvashalauncher_MINECRAFT_VERSIONS_H
+#ifndef NUVASHALAUNCHER_MINECRAFT_VERSIONS_H
+#define NUVASHALAUNCHER_MINECRAFT_VERSIONS_H
 
 #include <gio/gio.h>
 #include <json-glib/json-glib.h>
@@ -24,31 +24,31 @@
 
 G_BEGIN_DECLS
 
-#define nuvashalauncher_VERSION_MANIFEST_URL \
+#define NUVASHALAUNCHER_VERSION_MANIFEST_URL \
   "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
 
 /* Directory below g_get_user_cache_dir() holding the manifest and the
  * version documents nuvashalauncher has downloaded. */
-#define nuvashalauncher_VERSIONS_CACHE_SUBDIR "nuvashalauncher/versions"
+#define NUVASHALAUNCHER_VERSIONS_CACHE_SUBDIR "nuvashalauncher/versions"
 
-#define nuvashalauncher_MC_ERROR (nuvashalauncher_mc_error_quark ())
+#define NUVASHALAUNCHER_MC_ERROR (nuvashalauncher_mc_error_quark ())
 
 typedef enum {
-  nuvashalauncher_MC_ERROR_INVALID,    /* the document is not the metadata we expect */
-  nuvashalauncher_MC_ERROR_MISSING,    /* a required field is absent */
-  nuvashalauncher_MC_ERROR_NOT_FOUND,  /* the manifest knows no such version */
-  nuvashalauncher_MC_ERROR_CYCLE,      /* inheritsFrom walks in a circle */
-  nuvashalauncher_MC_ERROR_IO          /* the cache directory or file is unusable */
+  NUVASHALAUNCHER_MC_ERROR_INVALID,    /* the document is not the metadata we expect */
+  NUVASHALAUNCHER_MC_ERROR_MISSING,    /* a required field is absent */
+  NUVASHALAUNCHER_MC_ERROR_NOT_FOUND,  /* the manifest knows no such version */
+  NUVASHALAUNCHER_MC_ERROR_CYCLE,      /* inheritsFrom walks in a circle */
+  NUVASHALAUNCHER_MC_ERROR_IO          /* the cache directory or file is unusable */
 } NuvashaLauncherMcError;
 
 GQuark nuvashalauncher_mc_error_quark (void);
 
 /* The four values Mojang's "type" field can hold. */
 typedef enum {
-  nuvashalauncher_MC_TYPE_RELEASE,
-  nuvashalauncher_MC_TYPE_SNAPSHOT,
-  nuvashalauncher_MC_TYPE_OLD_BETA,
-  nuvashalauncher_MC_TYPE_OLD_ALPHA
+  NUVASHALAUNCHER_MC_TYPE_RELEASE,
+  NUVASHALAUNCHER_MC_TYPE_SNAPSHOT,
+  NUVASHALAUNCHER_MC_TYPE_OLD_BETA,
+  NUVASHALAUNCHER_MC_TYPE_OLD_ALPHA
 } NuvashaLauncherMcVersionType;
 
 gboolean nuvashalauncher_mc_version_type_from_string (const char       *string,
@@ -164,10 +164,10 @@ typedef struct {
   NuvashaLauncherDownloadInfo *file;
 } NuvashaLauncherLogging;
 
-#define nuvashalauncher_TYPE_VERSION_MANIFEST (nuvashalauncher_version_manifest_get_type ())
+#define NUVASHALAUNCHER_TYPE_VERSION_MANIFEST (nuvashalauncher_version_manifest_get_type ())
 
 G_DECLARE_FINAL_TYPE (NuvashaLauncherVersionManifest, nuvashalauncher_version_manifest,
-                      nuvashalauncher, VERSION_MANIFEST, GObject)
+                      NUVASHALAUNCHER, VERSION_MANIFEST, GObject)
 
 /* One manifest entry, owned by its manifest. */
 typedef struct {
@@ -200,10 +200,10 @@ NuvashaLauncherVersionManifest *nuvashalauncher_version_manifest_new_from_json (
 const NuvashaLauncherVersionEntry *nuvashalauncher_version_manifest_find (NuvashaLauncherVersionManifest *self,
                                                   const char         *id);
 
-#define nuvashalauncher_TYPE_VERSION_DESCRIPTION (nuvashalauncher_version_description_get_type ())
+#define NUVASHALAUNCHER_TYPE_VERSION_DESCRIPTION (nuvashalauncher_version_description_get_type ())
 
 G_DECLARE_FINAL_TYPE (NuvashaLauncherVersionDescription, nuvashalauncher_version_description,
-                      nuvashalauncher, VERSION_DESCRIPTION, GObject)
+                      NUVASHALAUNCHER, VERSION_DESCRIPTION, GObject)
 
 /* Read only: a parsed version document, or the result of merging one
  * over the version it inherits from. NULL members are fields the
@@ -271,7 +271,7 @@ NuvashaLauncherTaskScope *nuvashalauncher_version_manifest_fetch_async (const ch
                                                 gpointer user_data);
 
 /* (transfer full). Errors come from the download module while
- * fetching and from nuvashalauncher_MC_ERROR while parsing. */
+ * fetching and from NUVASHALAUNCHER_MC_ERROR while parsing. */
 NuvashaLauncherVersionManifest *nuvashalauncher_version_manifest_fetch_finish (GAsyncResult *result,
                                                        GError     **error);
 
@@ -284,14 +284,14 @@ NuvashaLauncherTaskScope *nuvashalauncher_version_load_async (NuvashaLauncherVer
                                       GAsyncReadyCallback callback,
                                       gpointer user_data);
 
-/* (transfer full). nuvashalauncher_MC_ERROR_NOT_FOUND when the manifest has no
- * such version, nuvashalauncher_MC_ERROR_CYCLE when inheritsFrom walks in a
- * circle, nuvashalauncher_MC_ERROR_INVALID/MISSING for a document that will not
- * parse and nuvashalauncher_MC_ERROR_NOT_FOUND when a parent is missing from the
+/* (transfer full). NUVASHALAUNCHER_MC_ERROR_NOT_FOUND when the manifest has no
+ * such version, NUVASHALAUNCHER_MC_ERROR_CYCLE when inheritsFrom walks in a
+ * circle, NUVASHALAUNCHER_MC_ERROR_INVALID/MISSING for a document that will not
+ * parse and NUVASHALAUNCHER_MC_ERROR_NOT_FOUND when a parent is missing from the
  * manifest. Fetching failures keep the download error domain. */
 NuvashaLauncherVersionDescription *nuvashalauncher_version_load_finish (GAsyncResult *result,
                                                 GError     **error);
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_MINECRAFT_VERSIONS_H */
+#endif /* NUVASHALAUNCHER_MINECRAFT_VERSIONS_H */

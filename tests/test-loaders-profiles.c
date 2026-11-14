@@ -23,7 +23,7 @@ test_fabric_profile (void)
     "   \"downloads\": {\"artifact\": {\"path\": \"org/lwjgl/lwjgl/3.3.3/lwjgl.jar\","
     "     \"sha1\": \"ef\", \"url\": \"https://example.invalid/lwjgl.jar\"}}}]}";
 
-  if (!g_file_get_contents (nuvashalauncher_TEST_FIXTURES "/fabric-profile.json", &json,
+  if (!g_file_get_contents (NUVASHALAUNCHER_TEST_FIXTURES "/fabric-profile.json", &json,
                             NULL, &error))
     g_error ("the fixture cannot be read: %s", error->message);
 
@@ -119,7 +119,7 @@ test_quilt_profile (void)
   g_autoptr (NuvashaLauncherVersionDescription) profile = NULL;
   const NuvashaLauncherLibrary *library = NULL;
 
-  if (!g_file_get_contents (nuvashalauncher_TEST_FIXTURES "/quilt-profile.json", &json,
+  if (!g_file_get_contents (NUVASHALAUNCHER_TEST_FIXTURES "/quilt-profile.json", &json,
                             NULL, &error))
     g_error ("the fixture cannot be read: %s", error->message);
 
@@ -166,7 +166,7 @@ test_profile_without_a_maven_address (void)
   g_assert_null (nuvashalauncher_loaders_profile_from_json (
     "{\"id\": \"x\", \"type\": \"release\","
     " \"libraries\": [{\"name\": \"no:where:1.0\"}]}", -1, &error));
-  g_assert_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_NO_MAVEN);
+  g_assert_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_NO_MAVEN);
   g_clear_error (&error);
 
   /* Coordinates that make no path are refused as well, because the path
@@ -175,7 +175,7 @@ test_profile_without_a_maven_address (void)
     "{\"id\": \"x\", \"type\": \"release\","
     " \"libraries\": [{\"name\": \"../evil:evil:1.0\","
     "                 \"url\": \"https://example.invalid/\"}]}", -1, &error));
-  g_assert_error (error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_NO_MAVEN);
+  g_assert_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_NO_MAVEN);
 
   g_print ("ok - a profile with no usable maven address is refused\n");
 }
@@ -188,7 +188,7 @@ test_install_of_a_loader_that_publishes_none (void)
   g_autoptr (NuvashaLauncherVersionDescription) document = NULL;
   Wait wait = { 0 };
 
-  if (!g_file_get_contents (nuvashalauncher_TEST_FIXTURES "/fabric-profile.json", &json,
+  if (!g_file_get_contents (NUVASHALAUNCHER_TEST_FIXTURES "/fabric-profile.json", &json,
                             NULL, &error))
     g_error ("the fixture cannot be read: %s", error->message);
 
@@ -199,7 +199,7 @@ test_install_of_a_loader_that_publishes_none (void)
   wait.loop = g_main_loop_new (NULL, FALSE);
   wait.watchdog = g_timeout_add_seconds (20, watchdog_fired, &wait);
 
-  wait.operation = nuvashalauncher_loaders_install_async (nuvashalauncher_LOADER_FABRIC, "1.20.1",
+  wait.operation = nuvashalauncher_loaders_install_async (NUVASHALAUNCHER_LOADER_FABRIC, "1.20.1",
                                               "0.19.5", document, "/bin/true",
                                               NULL, NULL, NULL,
                                               on_install_finished, &wait);
@@ -209,7 +209,7 @@ test_install_of_a_loader_that_publishes_none (void)
   g_main_loop_unref (wait.loop);
 
   g_assert_null (wait.install);
-  g_assert_error (wait.error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_UNSUPPORTED);
+  g_assert_error (wait.error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_UNSUPPORTED);
   g_assert_nonnull (strstr (wait.error->message, "Fabric"));
   g_clear_error (&wait.error);
 
@@ -224,7 +224,7 @@ test_profile_of_a_loader_that_publishes_an_installer (void)
   wait.loop = g_main_loop_new (NULL, FALSE);
   wait.watchdog = g_timeout_add_seconds (20, watchdog_fired, &wait);
 
-  wait.operation = nuvashalauncher_loaders_profile_async (nuvashalauncher_LOADER_FORGE, "1.20.1",
+  wait.operation = nuvashalauncher_loaders_profile_async (NUVASHALAUNCHER_LOADER_FORGE, "1.20.1",
                                               "1.20.1-47.2.0",
                                               on_profile_finished, &wait);
 
@@ -233,7 +233,7 @@ test_profile_of_a_loader_that_publishes_an_installer (void)
   g_main_loop_unref (wait.loop);
 
   g_assert_null (wait.profile);
-  g_assert_error (wait.error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_UNSUPPORTED);
+  g_assert_error (wait.error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_UNSUPPORTED);
   g_assert_nonnull (strstr (wait.error->message, "nuvashalauncher_loaders_install_async"));
   g_clear_error (&wait.error);
 
@@ -253,7 +253,7 @@ test_cancelled_versions_deliver_nothing (void)
      request is what the last screen left behind. */
   g_cancellable_cancel (cancellable);
 
-  wait.operation = nuvashalauncher_loaders_versions_async (nuvashalauncher_LOADER_FABRIC, "1.20.1",
+  wait.operation = nuvashalauncher_loaders_versions_async (NUVASHALAUNCHER_LOADER_FABRIC, "1.20.1",
                                                on_versions_finished, &wait);
   nuvashalauncher_task_scope_follow_cancellable (wait.operation, cancellable);
 
@@ -264,8 +264,8 @@ test_cancelled_versions_deliver_nothing (void)
   g_assert_null (wait.versions);
   g_assert_nonnull (wait.error);
   g_assert_true (
-    g_error_matches (wait.error, nuvashalauncher_DOWNLOAD_ERROR,
-                     nuvashalauncher_DOWNLOAD_ERROR_CANCELLED) ||
+    g_error_matches (wait.error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                     NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED) ||
     g_error_matches (wait.error, G_IO_ERROR, G_IO_ERROR_CANCELLED));
   g_clear_error (&wait.error);
 
@@ -277,33 +277,33 @@ test_install_invalid_versions_and_missing_client (void)
 {
   Wait wait = { 0 };
   g_autoptr (NuvashaLauncherVersionDescription) desc =
-    g_object_new (nuvashalauncher_TYPE_VERSION_DESCRIPTION, NULL);
+    g_object_new (NUVASHALAUNCHER_TYPE_VERSION_DESCRIPTION, NULL);
 
   wait.loop = g_main_loop_new (NULL, FALSE);
   wait.watchdog = g_timeout_add_seconds (20, watchdog_fired, &wait);
 
   /* Path traversal version segment */
   wait.operation = nuvashalauncher_loaders_install_async (
-    nuvashalauncher_LOADER_FORGE, "../bad", "1.0", desc, "/bin/true",
+    NUVASHALAUNCHER_LOADER_FORGE, "../bad", "1.0", desc, "/bin/true",
     NULL, NULL, NULL, on_install_finished, &wait);
   g_main_loop_run (wait.loop);
   g_source_remove (wait.watchdog);
 
   g_assert_null (wait.install);
-  g_assert_error (wait.error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER);
+  g_assert_error (wait.error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER);
   g_clear_error (&wait.error);
 
   /* Missing client jar in game description */
   wait.watchdog = g_timeout_add_seconds (20, watchdog_fired, &wait);
   wait.operation = nuvashalauncher_loaders_install_async (
-    nuvashalauncher_LOADER_FORGE, "1.20.1", "47.2.0", desc, "/bin/true",
+    NUVASHALAUNCHER_LOADER_FORGE, "1.20.1", "47.2.0", desc, "/bin/true",
     NULL, NULL, NULL, on_install_finished, &wait);
   g_main_loop_run (wait.loop);
   g_source_remove (wait.watchdog);
   g_main_loop_unref (wait.loop);
 
   g_assert_null (wait.install);
-  g_assert_error (wait.error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_INSTALLER);
+  g_assert_error (wait.error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER);
   g_clear_error (&wait.error);
 }
 
@@ -312,20 +312,20 @@ test_install_vanilla_refused (void)
 {
   Wait wait = { 0 };
   g_autoptr (NuvashaLauncherVersionDescription) desc =
-    g_object_new (nuvashalauncher_TYPE_VERSION_DESCRIPTION, NULL);
+    g_object_new (NUVASHALAUNCHER_TYPE_VERSION_DESCRIPTION, NULL);
 
   wait.loop = g_main_loop_new (NULL, FALSE);
   wait.watchdog = g_timeout_add_seconds (20, watchdog_fired, &wait);
 
   wait.operation = nuvashalauncher_loaders_install_async (
-    nuvashalauncher_LOADER_VANILLA, "1.20.1", "1.0", desc, "/bin/true",
+    NUVASHALAUNCHER_LOADER_VANILLA, "1.20.1", "1.0", desc, "/bin/true",
     NULL, NULL, NULL, on_install_finished, &wait);
   g_main_loop_run (wait.loop);
   g_source_remove (wait.watchdog);
   g_main_loop_unref (wait.loop);
 
   g_assert_null (wait.install);
-  g_assert_error (wait.error, nuvashalauncher_LOADERS_ERROR, nuvashalauncher_LOADERS_ERROR_UNSUPPORTED);
+  g_assert_error (wait.error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_UNSUPPORTED);
   g_clear_error (&wait.error);
 }
 

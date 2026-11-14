@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* Starter test: parses the desktop entry and checks the keys nuvashalauncher relies
+/* Starter test: parses the desktop entry and checks the keys Nuvasha Launcher relies
  * on, including that no X11 specific key slipped in. Runs headless. */
 
 #include <glib.h>
@@ -12,7 +12,7 @@ static void
 test_desktop_entry (void)
 {
   g_autofree gchar *path =
-    g_build_filename (nuvashalauncher_DATA_DIR,
+    g_build_filename (NUVASHALAUNCHER_DATA_DIR,
                       "com.github.nuvashalauncher.nuvashalauncher.desktop", NULL);
   g_autoptr (GKeyFile) keys = g_key_file_new ();
   g_autoptr (GError) error = NULL;

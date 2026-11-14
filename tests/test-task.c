@@ -91,18 +91,18 @@ test_scope_ids_and_states (void)
   g_assert_cmpuint (nuvashalauncher_task_scope_get_id (first), !=,
                     nuvashalauncher_task_scope_get_id (second));
   g_assert_cmpint (nuvashalauncher_task_scope_get_state (first), ==,
-                   nuvashalauncher_TASK_STATE_QUEUED);
+                   NUVASHALAUNCHER_TASK_STATE_QUEUED);
 
-  nuvashalauncher_task_scope_set_state (first, nuvashalauncher_TASK_STATE_RUNNING);
+  nuvashalauncher_task_scope_set_state (first, NUVASHALAUNCHER_TASK_STATE_RUNNING);
   g_assert_cmpint (nuvashalauncher_task_scope_get_state (first), ==,
-                   nuvashalauncher_TASK_STATE_RUNNING);
+                   NUVASHALAUNCHER_TASK_STATE_RUNNING);
   nuvashalauncher_task_scope_cancel (first);
   g_assert_cmpint (nuvashalauncher_task_scope_get_state (first), ==,
-                   nuvashalauncher_TASK_STATE_CANCELLED);
+                   NUVASHALAUNCHER_TASK_STATE_CANCELLED);
 
   nuvashalauncher_task_scope_return_boolean (second, TRUE);
   g_assert_cmpint (nuvashalauncher_task_scope_get_state (second), ==,
-                   nuvashalauncher_TASK_STATE_COMPLETED);
+                   NUVASHALAUNCHER_TASK_STATE_COMPLETED);
   g_print ("ok - operation ids and lifecycle states are observable\n");
 }
 
@@ -791,7 +791,7 @@ test_threaded_scope_survives_early_cancel_and_unref (void)
    * scopes on the main thread before the worker threads finish. The worker
    * threads must keep their own scope reference until they return. */
   NuvashaLauncherTaskScope *index_scope =
-    nuvashalauncher_content_index_load_async (root, nuvashalauncher_CONTENT_MOD,
+    nuvashalauncher_content_index_load_async (root, NUVASHALAUNCHER_CONTENT_MOD,
                                               on_threaded_index_done, &wait);
   nuvashalauncher_task_scope_cancel (index_scope);
   nuvashalauncher_task_scope_unref (index_scope);

@@ -78,7 +78,7 @@ nuvashalauncher_content_folder_path (const char *instance_directory, NuvashaLaun
 char *
 nuvashalauncher_content_disabled_name (const char *filename, gboolean enabled)
 {
-  const char *suffix = nuvashalauncher_CONTENT_DISABLED_SUFFIX;
+  const char *suffix = NUVASHALAUNCHER_CONTENT_DISABLED_SUFFIX;
   gsize length = 0;
 
   g_return_val_if_fail (filename != NULL, NULL);

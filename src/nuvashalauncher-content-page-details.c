@@ -52,7 +52,7 @@ details_watch_free (DetailsWatch *watch)
 static void
 on_version_picked (GtkCheckButton *check, gpointer user_data)
 {
-  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
   NuvashaLauncherModrinthVersion *version = NULL;
 
   /* The list is what moved the checkmark itself. */
@@ -78,7 +78,7 @@ static void
 on_version_selected (GObject *object G_GNUC_UNUSED,
                      GParamSpec *pspec G_GNUC_UNUSED, gpointer user_data)
 {
-  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
 
   refresh_pick_check (self);
   nuvashalauncher_content_page_refresh_picks (self);
@@ -122,7 +122,7 @@ version_name_of (NuvashaLauncherModrinthVersion *version)
 static void
 on_version_download_clicked (GtkButton *button, gpointer user_data)
 {
-  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
   GtkWidget *dropdown =
     GTK_WIDGET (g_object_get_data (G_OBJECT (button), "nuvashalauncher-dropdown"));
   GPtrArray *versions = g_object_get_data (G_OBJECT (button), "nuvashalauncher-versions");
@@ -559,7 +559,7 @@ open_project_page (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthProj
 void
 nuvashalauncher_content_page_on_result_activated (AdwActionRow *row, gpointer user_data)
 {
-  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
   NuvashaLauncherModrinthProject *project =
     g_object_get_data (G_OBJECT (row), "nuvashalauncher-project");
 

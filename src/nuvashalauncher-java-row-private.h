@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_JAVA_ROW_PRIVATE_H
-#define nuvashalauncher_JAVA_ROW_PRIVATE_H
+#ifndef NUVASHALAUNCHER_JAVA_ROW_PRIVATE_H
+#define NUVASHALAUNCHER_JAVA_ROW_PRIVATE_H
 
 #include "nuvashalauncher-java-row.h"
 
@@ -78,4 +78,4 @@ void nuvashalauncher_java_row_on_picked (GObject    *object,
                                          GParamSpec *pspec,
                                          gpointer    user_data);
 
-#endif /* nuvashalauncher_JAVA_ROW_PRIVATE_H */
+#endif /* NUVASHALAUNCHER_JAVA_ROW_PRIVATE_H */

@@ -89,7 +89,7 @@ void
 nuvashalauncher_java_row_on_retry_clicked (GtkButton *button G_GNUC_UNUSED,
                                            gpointer   user_data)
 {
-  NuvashaLauncherJavaRow *self = nuvashalauncher_JAVA_ROW (user_data);
+  NuvashaLauncherJavaRow *self = NUVASHALAUNCHER_JAVA_ROW (user_data);
 
   nuvashalauncher_java_row_load (self, self->wanted);
 }
@@ -166,7 +166,7 @@ probe_custom_path (NuvashaLauncherJavaRow *self, const char *path)
 static void
 add_chosen (GObject *dialog, GAsyncResult *result, gpointer user_data)
 {
-  NuvashaLauncherJavaRow *self = nuvashalauncher_JAVA_ROW (user_data);
+  NuvashaLauncherJavaRow *self = NUVASHALAUNCHER_JAVA_ROW (user_data);
   g_autoptr (GError) error = NULL;
   g_autoptr (GFile) file =
     gtk_file_dialog_open_finish (GTK_FILE_DIALOG (dialog), result, &error);
@@ -228,7 +228,7 @@ void
 nuvashalauncher_java_row_on_add_clicked (GtkButton *button G_GNUC_UNUSED,
                                          gpointer   user_data)
 {
-  open_add_dialog (nuvashalauncher_JAVA_ROW (user_data));
+  open_add_dialog (NUVASHALAUNCHER_JAVA_ROW (user_data));
 }
 
 void
@@ -236,7 +236,7 @@ nuvashalauncher_java_row_on_picked (GObject    *object G_GNUC_UNUSED,
                                     GParamSpec *pspec G_GNUC_UNUSED,
                                     gpointer    user_data)
 {
-  NuvashaLauncherJavaRow *self = nuvashalauncher_JAVA_ROW (user_data);
+  NuvashaLauncherJavaRow *self = NUVASHALAUNCHER_JAVA_ROW (user_data);
   guint selected = adw_combo_row_get_selected (ADW_COMBO_ROW (self));
 
   if (self->rebuilding)

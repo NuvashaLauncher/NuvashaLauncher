@@ -166,7 +166,7 @@ probe_communicate (GObject      *source G_GNUC_UNUSED,
     {
       nuvashalauncher_task_scope_return_error (
         probe->scope,
-        g_error_new (nuvashalauncher_JAVA_ERROR, nuvashalauncher_JAVA_ERROR_PARSE,
+        g_error_new (NUVASHALAUNCHER_JAVA_ERROR, NUVASHALAUNCHER_JAVA_ERROR_PARSE,
                      "\"%s\" did not report a version", probe->executable));
       g_free (arch);
       g_free (vendor_out);

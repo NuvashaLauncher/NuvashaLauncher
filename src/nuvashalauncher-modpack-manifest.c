@@ -5,7 +5,7 @@
 
 #include <string.h>
 
-#define nuvashalauncher_MODPACK_FORMAT_VERSION 1
+#define NUVASHALAUNCHER_MODPACK_FORMAT_VERSION 1
 
 static JsonNode *
 parse_json (const char *json, gssize length, GError **error)
@@ -25,8 +25,8 @@ parse_json (const char *json, gssize length, GError **error)
 
   if (root == NULL)
     {
-      g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
-                           nuvashalauncher_MODPACK_ERROR_FORMAT,
+      g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                           NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                            "the index holds no JSON document");
       return NULL;
     }
@@ -38,17 +38,17 @@ static NuvashaLauncherModpackEnv
 env_from_node (JsonNode *env_node, const char *name)
 {
   char *value = nuvashalauncher_json_string (env_node, name);
-  NuvashaLauncherModpackEnv env = nuvashalauncher_MODPACK_ENV_UNSPECIFIED;
+  NuvashaLauncherModpackEnv env = NUVASHALAUNCHER_MODPACK_ENV_UNSPECIFIED;
 
   if (value == NULL)
     return env;
 
   if (g_str_equal (value, "required"))
-    env = nuvashalauncher_MODPACK_ENV_REQUIRED;
+    env = NUVASHALAUNCHER_MODPACK_ENV_REQUIRED;
   else if (g_str_equal (value, "optional"))
-    env = nuvashalauncher_MODPACK_ENV_OPTIONAL;
+    env = NUVASHALAUNCHER_MODPACK_ENV_OPTIONAL;
   else if (g_str_equal (value, "unsupported"))
-    env = nuvashalauncher_MODPACK_ENV_UNSUPPORTED;
+    env = NUVASHALAUNCHER_MODPACK_ENV_UNSUPPORTED;
 
   g_free (value);
 
@@ -70,16 +70,16 @@ file_from_node (JsonNode *node, GError **error)
 
   if (object == NULL)
     {
-      g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
-                           nuvashalauncher_MODPACK_ERROR_FORMAT,
+      g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                           NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                            "an entry of files is not an object");
       return NULL;
     }
 
   if (path == NULL || *path == '\0')
     {
-      g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
-                           nuvashalauncher_MODPACK_ERROR_FORMAT,
+      g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                           NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                            "an entry of files has no path");
       return NULL;
     }
@@ -90,7 +90,7 @@ file_from_node (JsonNode *node, GError **error)
       strstr (path, "/.index/") != NULL ||
       g_str_has_suffix (path, "/.index"))
     {
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_PATH,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_PATH,
                    "the manifest wants \"%s\", which is not a path the "
                    "instance can hold",
                    path);
@@ -101,7 +101,7 @@ file_from_node (JsonNode *node, GError **error)
 
   if (hashes == NULL || !JSON_NODE_HOLDS_OBJECT (hashes))
     {
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_FORMAT,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                    "\"%s\" has no hashes object", path);
       return NULL;
     }
@@ -111,7 +111,7 @@ file_from_node (JsonNode *node, GError **error)
 
   if (sha1 == NULL || *sha1 == '\0' || sha512 == NULL || *sha512 == '\0')
     {
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_FORMAT,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                    "\"%s\" misses the two hashes the format requires", path);
       return NULL;
     }
@@ -120,7 +120,7 @@ file_from_node (JsonNode *node, GError **error)
 
   if (downloads_node == NULL || !JSON_NODE_HOLDS_ARRAY (downloads_node))
     {
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_FORMAT,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                    "\"%s\" has no downloads array", path);
       return NULL;
     }
@@ -132,7 +132,7 @@ file_from_node (JsonNode *node, GError **error)
 
     if (json_array_get_length (downloads) == 0)
       {
-        g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_FORMAT,
+        g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                      "\"%s\" has no download URL", path);
         return NULL;
       }
@@ -149,7 +149,7 @@ file_from_node (JsonNode *node, GError **error)
 
         if (url == NULL || *url == '\0')
           {
-            g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_FORMAT,
+            g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                          "\"%s\" has an empty download URL", path);
             return NULL;
           }
@@ -165,8 +165,8 @@ file_from_node (JsonNode *node, GError **error)
 
   if (file->file_size < 0)
     {
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR,
-                   nuvashalauncher_MODPACK_ERROR_FORMAT,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                   NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                    "\"%s\" has an invalid file size", file->path);
       return NULL;
     }
@@ -199,17 +199,17 @@ nuvashalauncher_modpack_new_from_json (const char *json, gssize length, GError *
 
   if (object == NULL)
     {
-      g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
-                           nuvashalauncher_MODPACK_ERROR_FORMAT,
+      g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                           NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                            "the index is not a JSON object");
       return NULL;
     }
 
   format_version = nuvashalauncher_json_int (root, "formatVersion", -1);
 
-  if (format_version != nuvashalauncher_MODPACK_FORMAT_VERSION)
+  if (format_version != NUVASHALAUNCHER_MODPACK_FORMAT_VERSION)
     {
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_FORMAT,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                    "the format version \"%ld\" is one this launcher does "
                    "not know",
                    (long) format_version);
@@ -220,7 +220,7 @@ nuvashalauncher_modpack_new_from_json (const char *json, gssize length, GError *
 
   if (g_strcmp0 (game, "minecraft") != 0)
     {
-      g_set_error (error, nuvashalauncher_MODPACK_ERROR, nuvashalauncher_MODPACK_ERROR_FORMAT,
+      g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                    "this launcher only installs Minecraft modpacks, and the "
                    "index holds \"%s\"",
                    game != NULL ? game : "(none)");
@@ -237,12 +237,12 @@ nuvashalauncher_modpack_new_from_json (const char *json, gssize length, GError *
     nuvashalauncher_modpack_file_free);
   pack->dependencies = g_ptr_array_new_with_free_func ((GDestroyNotify)
     nuvashalauncher_modpack_dependency_free);
-  pack->loader = nuvashalauncher_LOADER_VANILLA;
+  pack->loader = NUVASHALAUNCHER_LOADER_VANILLA;
 
   if (pack->name == NULL || *pack->name == '\0')
     {
-      g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
-                           nuvashalauncher_MODPACK_ERROR_FORMAT,
+      g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                           NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                             "the index has no name");
       return NULL;
     }
@@ -252,8 +252,8 @@ nuvashalauncher_modpack_new_from_json (const char *json, gssize length, GError *
 
     if (files_node == NULL || !JSON_NODE_HOLDS_ARRAY (files_node))
       {
-        g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
-                             nuvashalauncher_MODPACK_ERROR_FORMAT,
+        g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                             NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                              "the index has no files array");
         return NULL;
       }
@@ -279,8 +279,8 @@ nuvashalauncher_modpack_new_from_json (const char *json, gssize length, GError *
     if (dependencies_node != NULL &&
         !JSON_NODE_HOLDS_OBJECT (dependencies_node))
       {
-        g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
-                             nuvashalauncher_MODPACK_ERROR_FORMAT,
+        g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                             NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                              "dependencies is not a JSON object");
         return NULL;
       }
@@ -308,8 +308,8 @@ nuvashalauncher_modpack_new_from_json (const char *json, gssize length, GError *
 
             if (dep->version == NULL || *dep->version == '\0')
               {
-                g_set_error (error, nuvashalauncher_MODPACK_ERROR,
-                             nuvashalauncher_MODPACK_ERROR_FORMAT,
+                g_set_error (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                             NUVASHALAUNCHER_MODPACK_ERROR_FORMAT,
                              "dependency \"%s\" has no version", dep->name);
                 return NULL;
               }
@@ -345,10 +345,10 @@ nuvashalauncher_modpack_resolve (NuvashaLauncherModpack *modpack, GError **error
     const char *name;
     NuvashaLauncherLoader loader;
   } loaders[] = {
-    { "fabric-loader", nuvashalauncher_LOADER_FABRIC },
-    { "quilt-loader", nuvashalauncher_LOADER_QUILT },
-    { "forge", nuvashalauncher_LOADER_FORGE },
-    { "neoforge", nuvashalauncher_LOADER_NEOFORGE },
+    { "fabric-loader", NUVASHALAUNCHER_LOADER_FABRIC },
+    { "quilt-loader", NUVASHALAUNCHER_LOADER_QUILT },
+    { "forge", NUVASHALAUNCHER_LOADER_FORGE },
+    { "neoforge", NUVASHALAUNCHER_LOADER_NEOFORGE },
   };
 
   const char *minecraft = NULL;
@@ -359,15 +359,15 @@ nuvashalauncher_modpack_resolve (NuvashaLauncherModpack *modpack, GError **error
 
   if (minecraft == NULL || *minecraft == '\0')
     {
-      g_set_error_literal (error, nuvashalauncher_MODPACK_ERROR,
-                           nuvashalauncher_MODPACK_ERROR_LOADER,
+      g_set_error_literal (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                           NUVASHALAUNCHER_MODPACK_ERROR_LOADER,
                            "the pack names no Minecraft version");
       return FALSE;
     }
 
   g_clear_pointer (&modpack->minecraft_version, g_free);
   modpack->minecraft_version = g_strdup (minecraft);
-  modpack->loader = nuvashalauncher_LOADER_VANILLA;
+  modpack->loader = NUVASHALAUNCHER_LOADER_VANILLA;
   g_clear_pointer (&modpack->loader_version, g_free);
 
   /* One name in what is effectively a set of loader names selects what
@@ -401,8 +401,8 @@ nuvashalauncher_modpack_required_client_files (NuvashaLauncherModpack *modpack)
 
       /* A file with no env object belongs to what both sides can run:
        * the client can run everything it is not told to refuse. */
-      if (file->env_client == nuvashalauncher_MODPACK_ENV_UNSUPPORTED ||
-          file->env_client == nuvashalauncher_MODPACK_ENV_OPTIONAL)
+      if (file->env_client == NUVASHALAUNCHER_MODPACK_ENV_UNSUPPORTED ||
+          file->env_client == NUVASHALAUNCHER_MODPACK_ENV_OPTIONAL)
         continue;
 
       g_ptr_array_add (files, file);
@@ -422,7 +422,7 @@ nuvashalauncher_modpack_optional_client_files (NuvashaLauncherModpack *modpack)
     {
       NuvashaLauncherModpackFile *file = g_ptr_array_index (modpack->files, i);
 
-      if (file->env_client == nuvashalauncher_MODPACK_ENV_OPTIONAL)
+      if (file->env_client == NUVASHALAUNCHER_MODPACK_ENV_OPTIONAL)
         g_ptr_array_add (files, file);
     }
 

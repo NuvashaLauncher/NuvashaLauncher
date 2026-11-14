@@ -159,8 +159,8 @@ char *
 nuvashalauncher_users_default_steve_path (void)
 {
   g_autofree char *global = g_build_filename (g_get_user_data_dir (), "nuvashalauncher", "skins", "defaults", "Steve.png", NULL);
-  g_autofree char *installed = g_build_filename (nuvashalauncher_DATA_DIR, "skins", "defaults", "Steve.png", NULL);
-  g_autofree char *source = g_build_filename (nuvashalauncher_SOURCE_DATA_DIR, "skins", "defaults", "Steve.png", NULL);
+  g_autofree char *installed = g_build_filename (NUVASHALAUNCHER_DATA_DIR, "skins", "defaults", "Steve.png", NULL);
+  g_autofree char *source = g_build_filename (NUVASHALAUNCHER_SOURCE_DATA_DIR, "skins", "defaults", "Steve.png", NULL);
   if (g_file_test (global, G_FILE_TEST_IS_REGULAR)) return g_steal_pointer (&global);
   if (g_file_test (installed, G_FILE_TEST_IS_REGULAR)) return g_steal_pointer (&installed);
   return g_steal_pointer (&source);

@@ -14,7 +14,7 @@ static void
 game_crashed (NuvashaLauncher *self, const char *reason)
 {
   log_line (self, TAG_STATE, "the game crashed: %s", reason);
-  set_state (self, nuvashalauncher_LAUNCH_CRASHED, reason);
+  set_state (self, NUVASHALAUNCHER_LAUNCH_CRASHED, reason);
 }
 
 static void finish_after_natives_removed (GObject *source, GAsyncResult *result,
@@ -29,7 +29,7 @@ static void
 crash_reports_listed (GObject *source, GAsyncResult *result,
                       gpointer user_data)
 {
-  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *self = NUVASHALAUNCHER_LAUNCHER (user_data);
   g_autoptr (GError) error = NULL;
   g_autoptr (GFileEnumerator) files = NULL;
   g_autoptr (GFileInfo) info = NULL;
@@ -73,7 +73,7 @@ crash_reports_listed (GObject *source, GAsyncResult *result,
   if (crashed)
     game_crashed (self, _("A new crash report was created. Open the logs for details."));
   else
-    set_state (self, nuvashalauncher_LAUNCH_STOPPED, NULL);
+    set_state (self, NUVASHALAUNCHER_LAUNCH_STOPPED, NULL);
 
   g_object_unref (self);
 }
@@ -132,7 +132,7 @@ finish_launch_after_natives (NuvashaLauncher *self)
   if (self->process.stop_requested)
     {
       log_line (self, TAG_STATE, "the game stopped");
-      set_state (self, nuvashalauncher_LAUNCH_STOPPED, NULL);
+      set_state (self, NUVASHALAUNCHER_LAUNCH_STOPPED, NULL);
       return;
     }
 
@@ -148,7 +148,7 @@ finish_launch_after_natives (NuvashaLauncher *self)
 
     if (!g_file_query_exists (reports, NULL))
       {
-        set_state (self, nuvashalauncher_LAUNCH_STOPPED, NULL);
+        set_state (self, NUVASHALAUNCHER_LAUNCH_STOPPED, NULL);
         return;
       }
 
@@ -166,7 +166,7 @@ finish_after_natives_removed (GObject *source G_GNUC_UNUSED,
                               GAsyncResult *result,
                               gpointer user_data)
 {
-  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *self = NUVASHALAUNCHER_LAUNCHER (user_data);
   g_autoptr (GError) error = NULL;
 
   if (!nuvashalauncher_fs_remove_tree_finish (result, &error) && error != NULL)

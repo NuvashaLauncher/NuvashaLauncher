@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_CONTENT_PAGE_PRIVATE_H
-#define nuvashalauncher_CONTENT_PAGE_PRIVATE_H
+#ifndef NUVASHALAUNCHER_CONTENT_PAGE_PRIVATE_H
+#define NUVASHALAUNCHER_CONTENT_PAGE_PRIVATE_H
 
 #include "nuvashalauncher-content-page.h"
 #include "nuvashalauncher-ui-feedback.h"
@@ -219,4 +219,4 @@ void nuvashalauncher_content_page_on_trash_clicked (GtkButton *button,
 
 G_END_DECLS
 
-#endif /* nuvashalauncher_CONTENT_PAGE_PRIVATE_H */
+#endif /* NUVASHALAUNCHER_CONTENT_PAGE_PRIVATE_H */

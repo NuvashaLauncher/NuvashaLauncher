@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef nuvashalauncher_MARKDOWN_PRIVATE_H
-#define nuvashalauncher_MARKDOWN_PRIVATE_H
+#ifndef NUVASHALAUNCHER_MARKDOWN_PRIVATE_H
+#define NUVASHALAUNCHER_MARKDOWN_PRIVATE_H
 
 #include "nuvashalauncher-markdown.h"
 

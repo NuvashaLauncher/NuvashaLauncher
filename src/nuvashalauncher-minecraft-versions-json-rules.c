@@ -27,7 +27,7 @@ nuvashalauncher_mc_parse_rule (JsonObject *object, GError **error)
     rule->allow = FALSE;
   else
     {
-      g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
                    "unknown rule action \"%s\"", action);
       goto fail;
     }
@@ -65,7 +65,7 @@ nuvashalauncher_mc_parse_rule (JsonObject *object, GError **error)
           if (!JSON_NODE_HOLDS_VALUE (feature_value) ||
               json_node_get_value_type (feature_value) != G_TYPE_BOOLEAN)
             {
-              g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+              g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
                            "feature \"%s\" must be true or false",
                            feature_name);
               goto fail;
@@ -96,7 +96,7 @@ nuvashalauncher_mc_parse_rules (JsonNode *node, GError **error)
 
   if (!JSON_NODE_HOLDS_ARRAY (node))
     {
-      g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+      g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
                    "\"rules\" must be an array");
       return NULL;
     }
@@ -111,7 +111,7 @@ nuvashalauncher_mc_parse_rules (JsonNode *node, GError **error)
 
       if (!JSON_NODE_HOLDS_OBJECT (item))
         {
-          g_set_error (error, nuvashalauncher_MC_ERROR, nuvashalauncher_MC_ERROR_INVALID,
+          g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
                        "rule %u is not an object", i);
           g_ptr_array_unref (rules);
           return NULL;

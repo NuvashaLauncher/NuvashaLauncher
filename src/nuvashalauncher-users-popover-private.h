@@ -1,5 +1,5 @@
-#ifndef NUVASHA_USERS_POPOVER_PRIVATE_H
-#define NUVASHA_USERS_POPOVER_PRIVATE_H
+#ifndef NUVASHALAUNCHER_USERS_POPOVER_PRIVATE_H
+#define NUVASHALAUNCHER_USERS_POPOVER_PRIVATE_H
 
 #include "nuvashalauncher-users-popover.h"
 #include "nuvashalauncher-skin-view.h"
