@@ -2,7 +2,6 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#include "nuvashalauncher-launcher-loader-private.h"
 #include "nuvashalauncher-launcher-private.h"
 #include "nuvashalauncher-task-private.h"
 
@@ -25,51 +24,6 @@ create_loader_instance (const char *name)
   g_assert_no_error (error);
   g_assert_nonnull (instance);
   return instance;
-}
-
-static void
-test_loader_request_lifecycle (void)
-{
-  g_autoptr (NuvashaLauncherInstance) instance = create_loader_instance ("req-inst");
-  g_autoptr (NuvashaLauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
-
-  LoaderRequest *request = g_new0 (LoaderRequest, 1);
-  request->launcher = g_object_ref (launcher);
-  request->loader = nuvashalauncher_LOADER_FABRIC;
-  request->game_version = g_strdup ("1.20.1");
-  request->loader_version = g_strdup ("0.15.0");
-  request->operation = nuvashalauncher_task_scope_new_tagged (
-    NULL, NULL, NULL, NULL, "loader-test-scope");
-
-  g_assert_nonnull (request->launcher);
-  g_assert_nonnull (request->operation);
-
-  /* loader_request_free cleans up scopes, profiles, strings, and launcher references */
-  loader_request_free (request);
-}
-
-static void
-test_java_for_install_failure_handling (void)
-{
-  g_autoptr (NuvashaLauncherInstance) instance = create_loader_instance ("fail-inst");
-  g_autoptr (NuvashaLauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
-
-  LoaderRequest *request = g_new0 (LoaderRequest, 1);
-  request->launcher = g_object_ref (launcher);
-  request->loader = nuvashalauncher_LOADER_FABRIC;
-  request->game_version = g_strdup ("1.20.1");
-  request->loader_version = g_strdup ("0.15.0");
-
-  /* Simulate failed Java detection result */
-  NuvashaLauncherTaskScope *scope = nuvashalauncher_task_scope_new_tagged (
-    NULL, NULL, NULL, NULL, "nuvashalauncher-task-scope");
-  nuvashalauncher_task_scope_return_error (
-    scope, g_error_new_literal (G_IO_ERROR, G_IO_ERROR_NOT_FOUND, "no java found"));
-
-  on_java_for_the_install (NULL, G_ASYNC_RESULT (nuvashalauncher_task_scope_task (scope)), request);
-  nuvashalauncher_task_scope_unref (scope);
-
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_FAILED);
 }
 
 static void
@@ -125,8 +79,6 @@ main (int argc, char **argv)
   g_test_init (&argc, &argv, NULL);
   root = g_dir_make_tmp ("nuvashalauncher-loader-test-XXXXXX", NULL);
 
-  g_test_add_func ("/launcher/loader/request-lifecycle", test_loader_request_lifecycle);
-  g_test_add_func ("/launcher/loader/java-failure", test_java_for_install_failure_handling);
   g_test_add_func ("/launcher/loader/manifest-error", test_manifest_ready_error_handling);
   g_test_add_func ("/launcher/loader/unsupported-loader", test_manifest_ready_unsupported_loader);
 

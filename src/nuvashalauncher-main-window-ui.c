@@ -160,11 +160,15 @@ nuvashalauncher_main_window_build_ui (NuvashaLauncherMainWindow *self)
                            G_CALLBACK (on_downloads_changed), self, 0);
 
   /* Add the account selector and application menu to the header. */
-  /* The model owns the popover and its account store. */
-  users_child = nuvashalauncher_users_popover_get_button_content (self->model->users_popover);
-  gtk_menu_button_set_child (GTK_MENU_BUTTON (users_button), users_child);
-  gtk_menu_button_set_popover (GTK_MENU_BUTTON (users_button),
-                              GTK_WIDGET (self->model->users_popover));
+  {
+    NuvashaLauncherUsersPopover *users_popover =
+      nuvashalauncher_users_popover_new (self->model->accounts);
+
+    users_child = nuvashalauncher_users_popover_get_button_content (users_popover);
+    gtk_menu_button_set_child (GTK_MENU_BUTTON (users_button), users_child);
+    gtk_menu_button_set_popover (GTK_MENU_BUTTON (users_button),
+                                 GTK_WIDGET (users_popover));
+  }
   /* The child is a box around the avatar, so the menu button does not
      recognize it as an icon button and would draw a frame behind it. */
    nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (users_button), _("Accounts"));

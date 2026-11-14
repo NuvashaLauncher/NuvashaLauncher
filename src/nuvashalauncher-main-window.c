@@ -189,22 +189,13 @@ on_window_launcher_state (NuvashaLauncher *launcher G_GNUC_UNUSED,
 static gboolean
 window_has_background_work (NuvashaLauncherMainWindow *self)
 {
-  GHashTableIter iter;
-  gpointer value = NULL;
-
   if (nuvashalauncher_downloads_count () > 0)
     return TRUE;
 
   if (nuvashalauncher_users_skin_background_work_active ())
     return TRUE;
 
-  g_hash_table_iter_init (&iter, self->model->launchers);
-  while (g_hash_table_iter_next (&iter, NULL, &value))
-    if (nuvashalauncher_launch_state_is_busy (
-          nuvashalauncher_launcher_get_state (nuvashalauncher_LAUNCHER (value))))
-      return TRUE;
-
-  return FALSE;
+  return nuvashalauncher_main_window_model_has_active_launch (self->model);
 }
 
 void
@@ -292,31 +283,17 @@ on_window_close_request (GtkWindow *window, gpointer user_data)
  NuvashaLauncher *
 window_launcher (NuvashaLauncherMainWindow *self, const char *instance_id)
 {
-  NuvashaLauncher *launcher = NULL;
-  NuvashaLauncherInstance *instance = NULL;
+  gboolean created = FALSE;
+  NuvashaLauncher *launcher =
+    nuvashalauncher_main_window_model_get_or_create_launcher (
+      self->model, instance_id, &created);
 
-  if (instance_id == NULL)
-    return NULL;
-
-  launcher = g_hash_table_lookup (self->model->launchers, instance_id);
-
-  if (launcher != NULL)
-    return launcher;
-
-  instance = nuvashalauncher_instance_manager_get_by_id (self->model->manager, instance_id);
-
-  if (instance == NULL)
-    return NULL;
-
-  launcher = nuvashalauncher_launcher_new (instance, self->model->settings, self->model->accounts);
-
-  /* g_signal_connect_object drops the connection when either side goes
-     away, so the window outliving a launcher is not a dangling
-     pointer. */
-  g_signal_connect_object (launcher, "state",
-                           G_CALLBACK (on_window_launcher_state), self, 0);
-
-  g_hash_table_insert (self->model->launchers, g_strdup (instance_id), launcher);
+  if (launcher != NULL && created)
+    /* g_signal_connect_object drops the connection when either side goes
+       away, so the window outliving a launcher is not a dangling
+       pointer. */
+    g_signal_connect_object (launcher, "state",
+                             G_CALLBACK (on_window_launcher_state), self, 0);
 
   return launcher;
 }

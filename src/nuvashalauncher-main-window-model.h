@@ -5,15 +5,21 @@
 #ifndef nuvashalauncher_MAIN_WINDOW_MODEL_H
 #define nuvashalauncher_MAIN_WINDOW_MODEL_H
 
-#include "nuvashalauncher-instance-manager.h"
+#include "nuvashalauncher-accounts.h"
 #include "nuvashalauncher-download.h"
+#include "nuvashalauncher-instance-manager.h"
+#include "nuvashalauncher-launcher.h"
 #include "nuvashalauncher-settings.h"
-#include "nuvashalauncher-users-popover.h"
 
 typedef struct _NuvashaLauncherMainWindowModel NuvashaLauncherMainWindowModel;
 
 NuvashaLauncherMainWindowModel *nuvashalauncher_main_window_model_new (void);
 void nuvashalauncher_main_window_model_free (NuvashaLauncherMainWindowModel *model);
+gboolean nuvashalauncher_main_window_model_has_active_launch (NuvashaLauncherMainWindowModel *model);
+NuvashaLauncher *nuvashalauncher_main_window_model_get_or_create_launcher (
+  NuvashaLauncherMainWindowModel *model,
+  const char                     *instance_id,
+  gboolean                       *created);
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherMainWindowModel,
                                nuvashalauncher_main_window_model_free)
@@ -24,7 +30,6 @@ struct _NuvashaLauncherMainWindowModel
   NuvashaLauncherDownloadService *download_service;
   NuvashaLauncherSettings *settings;
   NuvashaLauncherAccounts *accounts;
-  NuvashaLauncherUsersPopover *users_popover;
   GHashTable *launchers;
   GHashTable *instance_dialogs;
 };

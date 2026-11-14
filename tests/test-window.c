@@ -75,10 +75,11 @@ test_main_window_model_owns_services (void)
 
   g_assert_nonnull (model->settings);
   g_assert_nonnull (model->accounts);
-  g_assert_nonnull (model->users_popover);
   g_assert_nonnull (model->launchers);
   g_assert_nonnull (model->instance_dialogs);
   g_assert_null (model->manager);
+  g_assert_false (nuvashalauncher_main_window_model_has_active_launch (model));
+  g_assert_null (nuvashalauncher_main_window_model_get_or_create_launcher (model, NULL, NULL));
 }
 
 static GLogWriterOutput
