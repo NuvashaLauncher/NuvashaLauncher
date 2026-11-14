@@ -8,7 +8,117 @@
 #include <gio/gio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
+
+typedef struct
+{
+  nuvashalauncherJava *java;
+  dev_t dev;
+  ino_t ino;
+  off_t size;
+  time_t mtime_sec;
+  long mtime_nsec;
+} ProbeCacheEntry;
+
+G_LOCK_DEFINE_STATIC (probe_cache);
+static GHashTable *probe_cache;
+
+static nuvashalauncherJava *
+java_copy (const nuvashalauncherJava *src)
+{
+  nuvashalauncherJava *copy = g_new0 (nuvashalauncherJava, 1);
+
+  copy->executable = g_strdup (src->executable);
+  copy->arch = g_strdup (src->arch);
+  copy->vendor = g_strdup (src->vendor);
+  copy->major_version = src->major_version;
+  copy->headless = src->headless;
+  return copy;
+}
+
+static void
+probe_cache_entry_free (gpointer data)
+{
+  ProbeCacheEntry *entry = data;
+
+  if (entry == NULL)
+    return;
+  nuvashalauncher_java_free (entry->java);
+  g_free (entry);
+}
+
+static gboolean
+probe_cache_stat (const char *executable, struct stat *st)
+{
+  g_autofree char *resolved = NULL;
+  const char *target = executable;
+
+  if (executable == NULL || *executable == '\0')
+    return FALSE;
+
+  if (strchr (executable, G_DIR_SEPARATOR) == NULL)
+    {
+      resolved = g_find_program_in_path (executable);
+      if (resolved == NULL)
+        return FALSE;
+      target = resolved;
+    }
+
+  return stat (target, st) == 0 && S_ISREG (st->st_mode);
+}
+
+static nuvashalauncherJava *
+probe_cache_lookup (const char *executable)
+{
+  struct stat st;
+  ProbeCacheEntry *entry = NULL;
+
+  if (!probe_cache_stat (executable, &st))
+    return NULL;
+
+  G_LOCK (probe_cache);
+  if (probe_cache != NULL)
+    entry = g_hash_table_lookup (probe_cache, executable);
+  if (entry != NULL &&
+      entry->dev == st.st_dev &&
+      entry->ino == st.st_ino &&
+      entry->size == st.st_size &&
+      entry->mtime_sec == st.st_mtim.tv_sec &&
+      entry->mtime_nsec == st.st_mtim.tv_nsec)
+    {
+      nuvashalauncherJava *copy = java_copy (entry->java);
+      G_UNLOCK (probe_cache);
+      return copy;
+    }
+  G_UNLOCK (probe_cache);
+  return NULL;
+}
+
+static void
+probe_cache_store (const char *executable, const nuvashalauncherJava *java)
+{
+  struct stat st;
+  ProbeCacheEntry *entry = NULL;
+
+  if (!probe_cache_stat (executable, &st))
+    return;
+
+  entry = g_new0 (ProbeCacheEntry, 1);
+  entry->java = java_copy (java);
+  entry->dev = st.st_dev;
+  entry->ino = st.st_ino;
+  entry->size = st.st_size;
+  entry->mtime_sec = st.st_mtim.tv_sec;
+  entry->mtime_nsec = st.st_mtim.tv_nsec;
+
+  G_LOCK (probe_cache);
+  if (probe_cache == NULL)
+    probe_cache = g_hash_table_new_full (g_str_hash, g_str_equal,
+                                         g_free, probe_cache_entry_free);
+  g_hash_table_replace (probe_cache, g_strdup (executable), entry);
+  G_UNLOCK (probe_cache);
+}
 
 typedef struct
 {
@@ -72,6 +182,8 @@ probe_communicate (GObject      *source G_GNUC_UNUSED,
   java->vendor = g_steal_pointer (&vendor_out);
   java->headless = !java_has_xawt (java->executable);
 
+  probe_cache_store (java->executable, java);
+
   nuvashalauncher_task_scope_return_pointer (probe->scope, java,
                                  (GDestroyNotify) nuvashalauncher_java_free);
   probe_destroyed (probe);
@@ -87,9 +199,18 @@ nuvashalauncher_java_probe_async (const char         *executable,
   g_autoptr (GError) error = NULL;
   const char * const argv[] = { executable, "-XshowSettings:properties", "-version",
                    NULL };
+  nuvashalauncherJava *cached = NULL;
   Probe *probe = NULL;
 
   nuvashalauncher_task_scope_set_check_cancellable (scope, FALSE);
+
+  cached = probe_cache_lookup (executable);
+  if (cached != NULL)
+    {
+      nuvashalauncher_task_scope_return_pointer_deferred (
+        scope, cached, (GDestroyNotify) nuvashalauncher_java_free);
+      return g_steal_pointer (&scope);
+    }
 
   probe = g_new0 (Probe, 1);
 

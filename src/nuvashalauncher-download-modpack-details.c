@@ -612,7 +612,7 @@ dialog_details_open (nuvashalauncherDownloadModpackDialog *self)
     ask->dialog = g_object_ref (self);
     ask->generation = self->details_generation;
     nuvashalauncher_operation_release (
-      nuvashalauncher_download_json_async (nuvashalauncher_downloads_get_service (), url,
+      nuvashalauncher_download_json_cached_async (nuvashalauncher_downloads_get_service (), url,
                                on_versions_answer, ask),
       self->fetch);
   }

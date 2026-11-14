@@ -602,6 +602,67 @@ test_probing_parses_the_report (void)
   nuvashalauncher_java_free (call.single);
 }
 
+static void
+test_probing_caches_and_invalidates (void)
+{
+  g_autofree char *dir = fake_java_dir ();
+  g_autofree char *counter_path = g_build_filename (dir, "count", NULL);
+  g_autofree char *script_path = g_build_filename (dir, "java-cached", NULL);
+  g_autofree char *script_v21 = g_strdup_printf (
+    "#!/bin/sh\n"
+    "echo x >> \"%s\"\n"
+    "cat <<'nuvashalauncher_REPORT'\n"
+    "%s"
+    "nuvashalauncher_REPORT\n",
+    counter_path, report_with_settings);
+  g_autofree char *script_v17 = g_strdup_printf (
+    "#!/bin/sh\n"
+    "echo x >> \"%s\"\n"
+    "cat <<'nuvashalauncher_REPORT'\n"
+    "openjdk version \"17.0.10\" 2024-01-16\n"
+    "OpenJDK Runtime Environment (build 17.0.10+7)\n"
+    "OpenJDK 64-Bit Server VM (build 17.0.10+7, mixed mode)\n"
+    "nuvashalauncher_REPORT\n",
+    counter_path);
+  g_autofree char *counts = NULL;
+  gsize len = 0;
+
+  g_assert_true (g_file_set_contents (script_path, script_v21, -1, NULL));
+  g_assert_cmpint (g_chmod (script_path, 0755), ==, 0);
+
+  for (int i = 0; i < 2; i++)
+    {
+      JavaCall call = { 0 };
+      call.operation = nuvashalauncher_java_probe_async (script_path, single_finished, &call);
+      run_one (&call.run);
+      g_assert_no_error (call.error);
+      g_assert_nonnull (call.single);
+      g_assert_cmpint (call.single->major_version, ==, 21);
+      nuvashalauncher_java_free (call.single);
+    }
+
+  g_assert_true (g_file_get_contents (counter_path, &counts, &len, NULL));
+  g_assert_cmpuint (len, ==, 2); /* one "x\n" */
+  g_clear_pointer (&counts, g_free);
+
+  /* Replacing the binary invalidates the cache entry. */
+  g_assert_true (g_file_set_contents (script_path, script_v17, -1, NULL));
+  g_assert_cmpint (g_chmod (script_path, 0755), ==, 0);
+
+  {
+    JavaCall call = { 0 };
+    call.operation = nuvashalauncher_java_probe_async (script_path, single_finished, &call);
+    run_one (&call.run);
+    g_assert_no_error (call.error);
+    g_assert_nonnull (call.single);
+    g_assert_cmpint (call.single->major_version, ==, 17);
+    nuvashalauncher_java_free (call.single);
+  }
+
+  g_assert_true (g_file_get_contents (counter_path, &counts, &len, NULL));
+  g_assert_cmpuint (len, ==, 4); /* two "x\n" */
+}
+
 int
 main (void)
 {
@@ -635,6 +696,9 @@ main (void)
 
   test_probing_parses_the_report ();
   g_print ("ok - probing a script parses its known report\n");
+
+  test_probing_caches_and_invalidates ();
+  g_print ("ok - probing caches unchanged executables and invalidates on change\n");
 
   test_detect_list_jre_layout_and_dedup ();
   g_print ("ok - jre layout is found, symlink dirs dedup and non-executables are skipped\n");
