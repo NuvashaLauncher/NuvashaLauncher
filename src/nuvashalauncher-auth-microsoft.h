@@ -258,6 +258,26 @@ NuvashaLauncherMinecraftProfile *nuvashalauncher_auth_profile_from_json (const c
  * (transfer full) */
 char *nuvashalauncher_auth_profile_uuid (const char *id);
 
+/* ---------------------------------------------------------- *
+ * Test seam
+ * ---------------------------------------------------------- */
+
+/* Substitutes HTTP transport during tests. Returns FALSE and sets @error
+ * to simulate a network/transport failure. */
+typedef gboolean (*NuvashaLauncherAuthTransportFunc) (const char  *url,
+                                                      const char  *method,
+                                                      const char  *body,
+                                                      const char **headers,
+                                                      gint        *out_status,
+                                                      char       **out_body,
+                                                      gpointer     user_data,
+                                                      GError     **error);
+
+void nuvashalauncher_auth_set_transport_for_tests (NuvashaLauncherAuthTransportFunc transport,
+                                                   gpointer                         user_data);
+
+void nuvashalauncher_auth_set_client_id_for_tests (const char *client_id);
+
 G_END_DECLS
 
 #endif /* nuvashalauncher_AUTH_MICROSOFT_H */
