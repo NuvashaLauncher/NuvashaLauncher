@@ -1,4 +1,4 @@
-/* JSON serialization and parsing for nuvashalauncherInstance. */
+/* JSON serialization and parsing for NuvashaLauncherInstance. */
 #include "nuvashalauncher-instance-private.h"
 #include <string.h>
 
@@ -61,7 +61,7 @@ get_optional_string (JsonObject   *object,
 }
 
 static gboolean
-get_loader (JsonObject *object, nuvashalauncherLoader *loader, GError **error)
+get_loader (JsonObject *object, NuvashaLauncherLoader *loader, GError **error)
 {
   const char *string = get_required_string (object, "loader", error);
 
@@ -113,7 +113,7 @@ get_jvm_args (JsonObject *object, const char **jvm_args, GError **error)
   return TRUE;
 }
 
-nuvashalauncherInstance *
+NuvashaLauncherInstance *
 nuvashalauncher_instance_new_from_json (JsonNode *node, GError **error)
 {
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
@@ -144,7 +144,7 @@ nuvashalauncher_instance_new_from_json (JsonNode *node, GError **error)
   if (minecraft_version == NULL)
     return NULL;
 
-  nuvashalauncherLoader loader;
+  NuvashaLauncherLoader loader;
   if (!get_loader (object, &loader, error))
     return NULL;
 
@@ -177,7 +177,7 @@ nuvashalauncher_instance_new_from_json (JsonNode *node, GError **error)
                             error))
     return NULL;
 
-  nuvashalauncherInstance *self =
+  NuvashaLauncherInstance *self =
     nuvashalauncher_instance_new (id, name, directory, minecraft_version, loader, error);
 
   if (self == NULL)
@@ -216,13 +216,13 @@ add_optional_member (JsonBuilder *builder,
 }
 
 JsonNode *
-nuvashalauncher_instance_to_json (nuvashalauncherInstance *self)
+nuvashalauncher_instance_to_json (NuvashaLauncherInstance *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (self), NULL);
 
   if (!nuvashalauncher_instance_validate (self, NULL))
     {
-      g_critical ("nuvashalauncherInstance: refusing to serialize an invalid instance");
+      g_critical ("NuvashaLauncherInstance: refusing to serialize an invalid instance");
       return NULL;
     }
 

@@ -17,7 +17,7 @@ typedef enum {
   nuvashalauncher_MINECRAFT_SERVICES_ERROR_HTTP,
   nuvashalauncher_MINECRAFT_SERVICES_ERROR_RESPONSE,
   nuvashalauncher_MINECRAFT_SERVICES_ERROR_RATE_LIMITED
-} nuvashalauncherMinecraftServicesError;
+} NuvashaLauncherMinecraftServicesError;
 
 GQuark nuvashalauncher_minecraft_services_error_quark (void);
 
@@ -37,7 +37,7 @@ GBytes *nuvashalauncher_minecraft_services_skin_multipart (GBytes *skin,
                                                    const char *variant,
                                                    char **content_type);
 
-nuvashalauncherTaskScope *nuvashalauncher_minecraft_services_send_async (SoupMessage *message,
+NuvashaLauncherTaskScope *nuvashalauncher_minecraft_services_send_async (SoupMessage *message,
                                                          GCancellable *cancellable,
                                                          GAsyncReadyCallback callback,
                                                          gpointer user_data);

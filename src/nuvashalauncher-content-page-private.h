@@ -13,45 +13,45 @@
 G_BEGIN_DECLS
 
 typedef struct {
-  nuvashalauncherContentPage *page; /* weak */
+  NuvashaLauncherContentPage *page; /* weak */
 
   /* The operation this watch was made for, when the caller started one.
      Released with the watch, so the answer never outlives its handle. */
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
 } PageWatch;
 
 typedef struct _Pick Pick;
 void pick_free (Pick *pick);
-void batch_next (nuvashalauncherContentPage *self);
-void batch_stopped (nuvashalauncherContentPage *self);
-void update_batch_next (nuvashalauncherContentPage *self);
-void plan_stopped (nuvashalauncherContentPage *self);
+void batch_next (NuvashaLauncherContentPage *self);
+void batch_stopped (NuvashaLauncherContentPage *self);
+void update_batch_next (NuvashaLauncherContentPage *self);
+void plan_stopped (NuvashaLauncherContentPage *self);
 
-PageWatch *page_watch_new (nuvashalauncherContentPage *self);
+PageWatch *page_watch_new (NuvashaLauncherContentPage *self);
 void page_watch_free (PageWatch *watch);
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (PageWatch, page_watch_free)
 void take_rows_out (GList **rows, AdwPreferencesGroup *group);
 void file_row_refresh (GtkWidget *row);
 void content_page_toggle_edit (GtkButton *button, gpointer user_data);
-void content_page_update_selection (nuvashalauncherContentPage *self);
+void content_page_update_selection (NuvashaLauncherContentPage *self);
 void content_page_bulk_delete (GtkButton *button, gpointer user_data);
-void installed_filter_rows (nuvashalauncherContentPage *self);
-GtkWidget *file_row (nuvashalauncherContentPage *self, nuvashalauncherContentFile *file);
-void load_visible_icons (nuvashalauncherContentPage *self);
-void persist_identified_file (nuvashalauncherContentPage *self,
-                              nuvashalauncherContentFile *file);
+void installed_filter_rows (NuvashaLauncherContentPage *self);
+GtkWidget *file_row (NuvashaLauncherContentPage *self, NuvashaLauncherContentFile *file);
+void load_visible_icons (NuvashaLauncherContentPage *self);
+void persist_identified_file (NuvashaLauncherContentPage *self,
+                              NuvashaLauncherContentFile *file);
 char *description_line (const char *text, guint max_sentences);
 void row_show_description (GtkWidget *row, const char *description);
-void reload_installed (nuvashalauncherContentPage *self);
+void reload_installed (NuvashaLauncherContentPage *self);
 void nuvashalauncher_content_page_on_installed_scroll_changed (GtkAdjustment *adjustment,
                                                    gpointer user_data);
 
-struct _nuvashalauncherContentPage
+struct _NuvashaLauncherContentPage
 {
   GtkBox parent_instance;
 
-  nuvashalauncherInstance *instance; /* own reference */
-  nuvashalauncherContentType type;
+  NuvashaLauncherInstance *instance; /* own reference */
+  NuvashaLauncherContentType type;
   char *minecraft_version;
   char *loader; /* NULL for the content that needs none */
   char *folder; /* the folder of the instance this content lives in */
@@ -86,7 +86,7 @@ struct _nuvashalauncherContentPage
     GtkLabel *update_count;
     GtkProgressBar *update_bar;
     GtkButton *update_cancel;
-    GPtrArray *files;     /* nuvashalauncherContentFile* */
+    GPtrArray *files;     /* NuvashaLauncherContentFile* */
     GHashTable *rows;     /* path -> row */
     GList *rows_list;     /* rows of the Installed group */
     GCancellable *scan;
@@ -99,7 +99,7 @@ struct _nuvashalauncherContentPage
   } installed;
   GtkBox *browse_actions;
 
-  nuvashalauncherContentInstallModel *install_model;
+  NuvashaLauncherContentInstallModel *install_model;
 
   struct {
     AdwPreferencesGroup *results_group;
@@ -116,7 +116,7 @@ struct _nuvashalauncherContentPage
     AdwSpinner *spinner;
 
     GList *result_rows;
-    nuvashalauncherContentBrowserModel *model;
+    NuvashaLauncherContentBrowserModel *model;
   } browse;
 
   /* Browse state is grouped below. */
@@ -126,7 +126,7 @@ struct _nuvashalauncherContentPage
   struct {
     gboolean details_ready;
     gboolean versions_ready;
-    nuvashalauncherModrinthDetails *details;         /* owned */
+    NuvashaLauncherModrinthDetails *details;         /* owned */
     GPtrArray *details_versions;         /* owned */
     char *details_problem;
     char *versions_problem;
@@ -149,12 +149,12 @@ struct _nuvashalauncherContentPage
 
 
 /* Internal page-construction callbacks shared with the UI module. */
-void nuvashalauncher_content_page_build_installed (nuvashalauncherContentPage *self);
+void nuvashalauncher_content_page_build_installed (NuvashaLauncherContentPage *self);
 void nuvashalauncher_content_page_set_installed_search_visible (
-  nuvashalauncherContentPage *self, gboolean visible);
-void nuvashalauncher_content_page_build_browse (nuvashalauncherContentPage *self);
-void nuvashalauncher_content_page_build_bar (nuvashalauncherContentPage *self);
-void nuvashalauncher_content_page_move_actions_into_bar (nuvashalauncherContentPage *self,
+  NuvashaLauncherContentPage *self, gboolean visible);
+void nuvashalauncher_content_page_build_browse (NuvashaLauncherContentPage *self);
+void nuvashalauncher_content_page_build_bar (NuvashaLauncherContentPage *self);
+void nuvashalauncher_content_page_move_actions_into_bar (NuvashaLauncherContentPage *self,
                                              gboolean browsing);
 
 void nuvashalauncher_content_page_on_installed_search_changed (GtkEditable *editable,
@@ -183,34 +183,39 @@ gboolean nuvashalauncher_content_page_on_content_search_key (GtkEventControllerK
                                                  guint keyval, guint keycode,
                                                  GdkModifierType state,
                                                  gpointer user_data);
-void nuvashalauncher_content_page_refresh_picks (nuvashalauncherContentPage *self);
-void nuvashalauncher_content_page_clear_picks (nuvashalauncherContentPage *self);
-void nuvashalauncher_content_page_close_detail (nuvashalauncherContentPage *self);
-void nuvashalauncher_content_page_reset_for_tab_switch (nuvashalauncherContentPage *self);
-void nuvashalauncher_content_page_run_search (nuvashalauncherContentPage *self, gboolean append);
+void nuvashalauncher_content_page_refresh_picks (NuvashaLauncherContentPage *self);
+void nuvashalauncher_content_page_clear_picks (NuvashaLauncherContentPage *self);
+void nuvashalauncher_content_page_close_detail (NuvashaLauncherContentPage *self);
+void nuvashalauncher_content_page_reset_for_tab_switch (NuvashaLauncherContentPage *self);
+void nuvashalauncher_content_page_run_search (NuvashaLauncherContentPage *self, gboolean append);
 void nuvashalauncher_content_page_on_stack_switched (GObject *stack, GParamSpec *pspec,
                                          gpointer user_data);
 void on_banner_dismiss (AdwBanner *banner, gpointer user_data);
-void set_busy (nuvashalauncherContentPage *self, gboolean busy);
-void show_toast (nuvashalauncherContentPage *self, const char *message);
+void set_busy (NuvashaLauncherContentPage *self, gboolean busy);
+void show_toast (NuvashaLauncherContentPage *self, const char *message);
 GtkWidget *plain_label (const char *text);
 void watch_widget (gpointer field, GtkWidget *widget);
-void start_plan (nuvashalauncherContentPage *self, nuvashalauncherModrinthVersion *version,
+void start_plan (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthVersion *version,
                  const char *title, const char *replaces, gboolean disabled);
-nuvashalauncherContentFile *installed_project_file (nuvashalauncherContentPage *self,
+NuvashaLauncherContentFile *installed_project_file (NuvashaLauncherContentPage *self,
                                        const char *project_id);
-void remove_duplicate_project_files (nuvashalauncherContentPage *self,
+void remove_duplicate_project_files (NuvashaLauncherContentPage *self,
                                      const char *project_id,
                                      const char *keep_path);
-void show_error (nuvashalauncherContentPage *self, const char *what, GError *error);
+void show_error (NuvashaLauncherContentPage *self, const char *what, GError *error);
 void nuvashalauncher_content_page_on_result_activated (AdwActionRow *row, gpointer user_data);
-void open_project_page (nuvashalauncherContentPage *self, nuvashalauncherModrinthProject *project);
-nuvashalauncherModrinthVersion *selected_version (GtkDropDown *dropdown,
+void open_project_page (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthProject *project);
+NuvashaLauncherModrinthVersion *selected_version (GtkDropDown *dropdown,
                                       GPtrArray *versions);
-const char *version_name_of (nuvashalauncherModrinthVersion *version);
-void pick_add (nuvashalauncherContentPage *self, nuvashalauncherModrinthVersion *version);
-void pick_remove (nuvashalauncherContentPage *self, nuvashalauncherModrinthVersion *version);
-void refresh_pick_check (nuvashalauncherContentPage *self);
+const char *version_name_of (NuvashaLauncherModrinthVersion *version);
+void pick_add (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthVersion *version);
+void pick_remove (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthVersion *version);
+void refresh_pick_check (NuvashaLauncherContentPage *self);
+gboolean nuvashalauncher_content_page_toggle_file (NuvashaLauncherContentPage *self,
+                                                   NuvashaLauncherContentFile *file);
+const char *nuvashalauncher_content_page_file_display_name (NuvashaLauncherContentFile *file);
+void nuvashalauncher_content_page_on_trash_clicked (GtkButton *button,
+                                                    gpointer   user_data);
 
 G_END_DECLS
 

@@ -522,7 +522,7 @@ load_profile_skins (SkinMenu *menu)
 }
 
 AdwDialog *
-nuvashalauncher_users_skin_menu_new (nuvashalauncherUsersPopover *owner, GtkImage *image, nuvashalauncherAccount *account)
+nuvashalauncher_users_skin_menu_new (NuvashaLauncherUsersPopover *owner, GtkImage *image, NuvashaLauncherAccount *account)
 {
   nuvashalauncher_skin_view_get_type ();
   AdwDialog *dialog = adw_dialog_new ();
@@ -535,7 +535,7 @@ nuvashalauncher_users_skin_menu_new (nuvashalauncherUsersPopover *owner, GtkImag
   GtkBox *right = GTK_BOX (gtk_builder_get_object (content_builder, "right"));
   GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_builder_get_object (content_builder, "scroller"));
   GtkListBox *skins = GTK_LIST_BOX (gtk_builder_get_object (content_builder, "skins"));
-  nuvashalauncherSkinView *preview = nuvashalauncher_SKIN_VIEW (gtk_builder_get_object (content_builder, "preview"));
+  NuvashaLauncherSkinView *preview = nuvashalauncher_SKIN_VIEW (gtk_builder_get_object (content_builder, "preview"));
   GtkCheckButton *default_model = GTK_CHECK_BUTTON (gtk_builder_get_object (content_builder, "classic-model"));
   GtkCheckButton *slim_model = GTK_CHECK_BUTTON (gtk_builder_get_object (content_builder, "slim-model"));
   GtkStringList *cape_list = gtk_string_list_new ((const char *[]) { _("No cape"), NULL });

@@ -4,7 +4,7 @@
 
 /* The "Create Instance" dialog: one page of rows plus Cancel and Create.
  * Create really builds and persists an instance through
- * nuvashalauncherInstanceManager; a failure is reported inline in the dialog. */
+ * NuvashaLauncherInstanceManager; a failure is reported inline in the dialog. */
 
 #include "nuvashalauncher-create-instance-dialog.h"
 #include "nuvashalauncher-dialogs.h"
@@ -15,19 +15,19 @@
 #include "nuvashalauncher-loaders.h"
 #include "nuvashalauncher-version-row.h"
 
-struct _nuvashalauncherCreateInstanceDialog
+struct _NuvashaLauncherCreateInstanceDialog
 {
   AdwDialog parent_instance;
 
-  nuvashalauncherInstanceManager *manager;
-  nuvashalauncherSettings *settings;
+  NuvashaLauncherInstanceManager *manager;
+  NuvashaLauncherSettings *settings;
 
   /* Directory picked with the file chooser, or NULL to keep the default. */
   char *directory;
 
   AdwEntryRow *name_row;
-  nuvashalauncherVersionRow *version_row;
-  nuvashalauncherLoaderRow *loader_row; /* its two rows are filled when it opens */
+  NuvashaLauncherVersionRow *version_row;
+  NuvashaLauncherLoaderRow *loader_row; /* its two rows are filled when it opens */
   AdwActionRow *directory_row;
   AdwPreferencesGroup *group;
   AdwToastOverlay *toast_overlay;
@@ -36,11 +36,11 @@ struct _nuvashalauncherCreateInstanceDialog
   GtkButton *cancel_button;
 };
 
-G_DEFINE_FINAL_TYPE (nuvashalauncherCreateInstanceDialog, nuvashalauncher_create_instance_dialog,
+G_DEFINE_FINAL_TYPE (NuvashaLauncherCreateInstanceDialog, nuvashalauncher_create_instance_dialog,
                      ADW_TYPE_DIALOG)
 
 static void
-show_error (nuvashalauncherCreateInstanceDialog *self,
+show_error (NuvashaLauncherCreateInstanceDialog *self,
             const char              *message)
 {
   nuvashalauncher_ui_show_toast (GTK_WIDGET (self), GTK_WIDGET (self->toast_overlay),
@@ -48,13 +48,13 @@ show_error (nuvashalauncherCreateInstanceDialog *self,
 }
 
 static void
-update_create_button (nuvashalauncherCreateInstanceDialog *self)
+update_create_button (NuvashaLauncherCreateInstanceDialog *self)
 {
   g_autofree char *name = nuvashalauncher_instance_normalize_name (
     gtk_editable_get_text (GTK_EDITABLE (self->name_row)));
   const char *version =
     nuvashalauncher_version_row_get_selected (nuvashalauncher_VERSION_ROW (self->version_row));
-  nuvashalauncherLoader loader =
+  NuvashaLauncherLoader loader =
     nuvashalauncher_loader_row_get_loader (self->loader_row);
   gboolean loader_ready = TRUE;
 
@@ -78,7 +78,7 @@ static void
 on_version_selected (GObject *object G_GNUC_UNUSED,
                      GParamSpec *pspec G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (user_data);
+  NuvashaLauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (user_data);
   const char *version =
     nuvashalauncher_version_row_get_selected (nuvashalauncher_VERSION_ROW (self->version_row));
 
@@ -97,9 +97,9 @@ on_version_selected (GObject *object G_GNUC_UNUSED,
 }
 
 static void
-on_loader_changed (nuvashalauncherLoaderRow *row G_GNUC_UNUSED, gpointer user_data)
+on_loader_changed (NuvashaLauncherLoaderRow *row G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (user_data);
+  NuvashaLauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (user_data);
 
   /* The row reloads its own versions when the loader changes and tells
      this handler again once one is picked; the dialog only has to say
@@ -112,7 +112,7 @@ on_input_changed (GObject *object G_GNUC_UNUSED,
                   GParamSpec *pspec G_GNUC_UNUSED,
                   gpointer user_data)
 {
-  nuvashalauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (user_data);
+  NuvashaLauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (user_data);
 
   update_create_button (self);
 }
@@ -120,17 +120,17 @@ on_input_changed (GObject *object G_GNUC_UNUSED,
 static void
 on_create_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (user_data);
+  NuvashaLauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (user_data);
   g_autofree char *name = nuvashalauncher_instance_normalize_name (
     gtk_editable_get_text (GTK_EDITABLE (self->name_row)));
   const char *version =
     nuvashalauncher_version_row_get_selected (nuvashalauncher_VERSION_ROW (self->version_row));
-  nuvashalauncherLoader loader =
+  NuvashaLauncherLoader loader =
     nuvashalauncher_loader_row_get_loader (self->loader_row);
   const char *loader_version =
     nuvashalauncher_loader_row_get_version (self->loader_row);
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherInstance) instance = NULL;
+  g_autoptr (NuvashaLauncherInstance) instance = NULL;
 
   /* The Create button is insensitive without a version, so this only
    * guards against the row being emptied underneath it. */
@@ -162,7 +162,7 @@ on_create_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 static void
 on_folder_selected (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  nuvashalauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (user_data);
+  NuvashaLauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (user_data);
   g_autoptr (GError) error = NULL;
   g_autoptr (GFile) file =
     gtk_file_dialog_select_folder_finish (GTK_FILE_DIALOG (source), result,
@@ -195,7 +195,7 @@ on_folder_selected (GObject *source, GAsyncResult *result, gpointer user_data)
 static void
 on_pick_directory (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (user_data);
+  NuvashaLauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (user_data);
   GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
   g_autoptr (GtkFileDialog) dialog = gtk_file_dialog_new ();
   g_autoptr (GFile) home = g_file_new_for_path (g_get_home_dir ());
@@ -208,7 +208,7 @@ on_pick_directory (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 }
 
 static void
-nuvashalauncher_create_instance_dialog_init (nuvashalauncherCreateInstanceDialog *self)
+nuvashalauncher_create_instance_dialog_init (NuvashaLauncherCreateInstanceDialog *self)
 {
   g_autofree char *default_directory =
     g_build_filename (g_get_user_data_dir (), "nuvashalauncher", "instances", NULL);
@@ -255,14 +255,14 @@ nuvashalauncher_create_instance_dialog_init (nuvashalauncherCreateInstanceDialog
   update_create_button (self);
 }
 
-nuvashalauncherCreateInstanceDialog *
-nuvashalauncher_create_instance_dialog_new (nuvashalauncherInstanceManager *manager,
-                                nuvashalauncherSettings        *settings)
+NuvashaLauncherCreateInstanceDialog *
+nuvashalauncher_create_instance_dialog_new (NuvashaLauncherInstanceManager *manager,
+                                NuvashaLauncherSettings        *settings)
 {
   g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (manager), NULL);
   g_return_val_if_fail (nuvashalauncher_IS_SETTINGS (settings), NULL);
 
-  nuvashalauncherCreateInstanceDialog *self =
+  NuvashaLauncherCreateInstanceDialog *self =
     g_object_new (nuvashalauncher_TYPE_CREATE_INSTANCE_DIALOG, NULL);
 
   self->manager = g_object_ref (manager);
@@ -285,7 +285,7 @@ nuvashalauncher_create_instance_dialog_new (nuvashalauncherInstanceManager *mana
 static void
 nuvashalauncher_create_instance_dialog_dispose (GObject *object)
 {
-  nuvashalauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (object);
+  NuvashaLauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (object);
 
   g_clear_object (&self->manager);
   g_clear_object (&self->settings);
@@ -301,7 +301,7 @@ nuvashalauncher_create_instance_dialog_dispose (GObject *object)
 static void
 nuvashalauncher_create_instance_dialog_finalize (GObject *object)
 {
-  nuvashalauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (object);
+  NuvashaLauncherCreateInstanceDialog *self = nuvashalauncher_CREATE_INSTANCE_DIALOG (object);
 
   g_free (self->directory);
 
@@ -309,18 +309,18 @@ nuvashalauncher_create_instance_dialog_finalize (GObject *object)
 }
 
 static void
-nuvashalauncher_create_instance_dialog_class_init (nuvashalauncherCreateInstanceDialogClass *klass)
+nuvashalauncher_create_instance_dialog_class_init (NuvashaLauncherCreateInstanceDialogClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
   gtk_widget_class_set_template_from_resource (widget_class,
       "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-create-instance.ui");
-  gtk_widget_class_bind_template_child (widget_class, nuvashalauncherCreateInstanceDialog, name_row);
-  gtk_widget_class_bind_template_child (widget_class, nuvashalauncherCreateInstanceDialog, group);
-  gtk_widget_class_bind_template_child (widget_class, nuvashalauncherCreateInstanceDialog, toast_overlay);
-  gtk_widget_class_bind_template_child (widget_class, nuvashalauncherCreateInstanceDialog, content);
-  gtk_widget_class_bind_template_child (widget_class, nuvashalauncherCreateInstanceDialog, cancel_button);
-  gtk_widget_class_bind_template_child (widget_class, nuvashalauncherCreateInstanceDialog, create_button);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherCreateInstanceDialog, name_row);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherCreateInstanceDialog, group);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherCreateInstanceDialog, toast_overlay);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherCreateInstanceDialog, content);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherCreateInstanceDialog, cancel_button);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherCreateInstanceDialog, create_button);
 
   object_class->dispose = nuvashalauncher_create_instance_dialog_dispose;
   object_class->finalize = nuvashalauncher_create_instance_dialog_finalize;

@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherSignInDialog: signing in with a Microsoft account.
+/* NuvashaLauncherSignInDialog: signing in with a Microsoft account.
  *
  * The user reads a short code and types it into a page Microsoft serves,
  * in a browser of their own, while this dialog waits. No password is ever
@@ -34,7 +34,7 @@ G_BEGIN_DECLS
 
 #define nuvashalauncher_TYPE_SIGN_IN_DIALOG (nuvashalauncher_sign_in_dialog_get_type ())
 
-G_DECLARE_FINAL_TYPE (nuvashalauncherSignInDialog, nuvashalauncher_sign_in_dialog, nuvashalauncher, SIGN_IN_DIALOG,
+G_DECLARE_FINAL_TYPE (NuvashaLauncherSignInDialog, nuvashalauncher_sign_in_dialog, nuvashalauncher, SIGN_IN_DIALOG,
                       AdwDialog)
 
 /* "signed-in" carries the account that was signed in to, transfer full. */
@@ -47,11 +47,11 @@ enum {
    the code is there by the time a user looks at it, and follows the
    sign-in from there. A dialog that is made and never shown has asked for
    one code and stopped there. */
-nuvashalauncherSignInDialog *nuvashalauncher_sign_in_dialog_new (void);
+NuvashaLauncherSignInDialog *nuvashalauncher_sign_in_dialog_new (void);
 
 /* Asks for a new code and starts over, which is what the Try again button
    does after a refusal the user can fix. */
-void nuvashalauncher_sign_in_dialog_retry (nuvashalauncherSignInDialog *self);
+void nuvashalauncher_sign_in_dialog_retry (NuvashaLauncherSignInDialog *self);
 
 G_END_DECLS
 

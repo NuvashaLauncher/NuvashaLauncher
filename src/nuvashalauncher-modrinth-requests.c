@@ -54,12 +54,12 @@ nuvashalauncher_modrinth_request_return_pointer (GTask *task, gpointer value, GD
   nuvashalauncher_task_scope_return_pointer (request->scope, value, free_value);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_modrinth_request_new (GAsyncReadyCallback callback, gpointer user_data,
-             AnswerFunc answer, nuvashalauncherNotFoundRule not_found, void *data,
+             AnswerFunc answer, NuvashaLauncherNotFoundRule not_found, void *data,
              GDestroyNotify free_data)
 {
-  nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
+  NuvashaLauncherTaskScope *scope = nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   GTask *task = nuvashalauncher_task_scope_task (scope);
   Request *request = g_new0 (Request, 1);
 
@@ -257,11 +257,11 @@ nuvashalauncher_modrinth_json_ready (GObject *source G_GNUC_UNUSED,
   }
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_modrinth_get_async (const char *url, GAsyncReadyCallback callback, gpointer user_data,
-           AnswerFunc answer, nuvashalauncherNotFoundRule not_found)
+           AnswerFunc answer, NuvashaLauncherNotFoundRule not_found)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_modrinth_request_new (callback, user_data, answer, not_found, NULL, NULL);
   GTask *task = nuvashalauncher_task_scope_task (scope);
   JsonFlight *flight = NULL;

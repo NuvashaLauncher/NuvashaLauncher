@@ -34,11 +34,11 @@ parse_json (const char *json, gssize length, GError **error)
   return json_node_copy (root);
 }
 
-static nuvashalauncherModpackEnv
+static NuvashaLauncherModpackEnv
 env_from_node (JsonNode *env_node, const char *name)
 {
   char *value = nuvashalauncher_json_string (env_node, name);
-  nuvashalauncherModpackEnv env = nuvashalauncher_MODPACK_ENV_UNSPECIFIED;
+  NuvashaLauncherModpackEnv env = nuvashalauncher_MODPACK_ENV_UNSPECIFIED;
 
   if (value == NULL)
     return env;
@@ -55,10 +55,10 @@ env_from_node (JsonNode *env_node, const char *name)
   return env;
 }
 
-static nuvashalauncherModpackFile *
+static NuvashaLauncherModpackFile *
 file_from_node (JsonNode *node, GError **error)
 {
-  g_autoptr (nuvashalauncherModpackFile) file = g_new0 (nuvashalauncherModpackFile, 1);
+  g_autoptr (NuvashaLauncherModpackFile) file = g_new0 (NuvashaLauncherModpackFile, 1);
   g_autofree char *path = nuvashalauncher_json_string (node, "path");
   g_autofree char *sha1 = NULL;
   g_autofree char *sha512 = NULL;
@@ -181,10 +181,10 @@ file_from_node (JsonNode *node, GError **error)
   return g_steal_pointer (&file);
 }
 
-nuvashalauncherModpack *
+NuvashaLauncherModpack *
 nuvashalauncher_modpack_new_from_json (const char *json, gssize length, GError **error)
 {
-  g_autoptr (nuvashalauncherModpack) pack = NULL;
+  g_autoptr (NuvashaLauncherModpack) pack = NULL;
   g_autoptr (JsonNode) root = NULL;
   g_autofree char *game = NULL;
   gint64 format_version = 0;
@@ -227,7 +227,7 @@ nuvashalauncher_modpack_new_from_json (const char *json, gssize length, GError *
       return NULL;
     }
 
-  pack = g_new0 (nuvashalauncherModpack, 1);
+  pack = g_new0 (NuvashaLauncherModpack, 1);
   pack->format_version = (guint) format_version;
   pack->game = g_strdup (game);
   pack->version_id = nuvashalauncher_json_string (root, "versionId");
@@ -262,7 +262,7 @@ nuvashalauncher_modpack_new_from_json (const char *json, gssize length, GError *
 
     for (guint i = 0; i < json_array_get_length (files); i++)
       {
-        nuvashalauncherModpackFile *file =
+        NuvashaLauncherModpackFile *file =
           file_from_node (json_array_get_element (files, i), error);
 
         if (file == NULL)
@@ -296,8 +296,8 @@ nuvashalauncher_modpack_new_from_json (const char *json, gssize length, GError *
 
         while (json_object_iter_next (&iter, &member_name, &member_value))
           {
-            g_autoptr (nuvashalauncherModpackDependency) dep =
-              g_new0 (nuvashalauncherModpackDependency, 1);
+            g_autoptr (NuvashaLauncherModpackDependency) dep =
+              g_new0 (NuvashaLauncherModpackDependency, 1);
 
             dep->name = g_strdup (member_name);
 
@@ -324,11 +324,11 @@ nuvashalauncher_modpack_new_from_json (const char *json, gssize length, GError *
 
 /* One out of the name->version pairs, or NULL. Borrowed. */
 static const char *
-dependency_version (nuvashalauncherModpack *modpack, const char *name)
+dependency_version (NuvashaLauncherModpack *modpack, const char *name)
 {
   for (guint i = 0; i < modpack->dependencies->len; i++)
     {
-      nuvashalauncherModpackDependency *dependency =
+      NuvashaLauncherModpackDependency *dependency =
         g_ptr_array_index (modpack->dependencies, i);
 
       if (g_str_equal (dependency->name, name))
@@ -339,11 +339,11 @@ dependency_version (nuvashalauncherModpack *modpack, const char *name)
 }
 
 gboolean
-nuvashalauncher_modpack_resolve (nuvashalauncherModpack *modpack, GError **error)
+nuvashalauncher_modpack_resolve (NuvashaLauncherModpack *modpack, GError **error)
 {
   static const struct {
     const char *name;
-    nuvashalauncherLoader loader;
+    NuvashaLauncherLoader loader;
   } loaders[] = {
     { "fabric-loader", nuvashalauncher_LOADER_FABRIC },
     { "quilt-loader", nuvashalauncher_LOADER_QUILT },
@@ -389,7 +389,7 @@ nuvashalauncher_modpack_resolve (nuvashalauncherModpack *modpack, GError **error
 }
 
 GPtrArray *
-nuvashalauncher_modpack_required_client_files (nuvashalauncherModpack *modpack)
+nuvashalauncher_modpack_required_client_files (NuvashaLauncherModpack *modpack)
 {
   GPtrArray *files = g_ptr_array_new_with_free_func (NULL);
 
@@ -397,7 +397,7 @@ nuvashalauncher_modpack_required_client_files (nuvashalauncherModpack *modpack)
 
   for (guint i = 0; i < modpack->files->len; i++)
     {
-      nuvashalauncherModpackFile *file = g_ptr_array_index (modpack->files, i);
+      NuvashaLauncherModpackFile *file = g_ptr_array_index (modpack->files, i);
 
       /* A file with no env object belongs to what both sides can run:
        * the client can run everything it is not told to refuse. */
@@ -412,7 +412,7 @@ nuvashalauncher_modpack_required_client_files (nuvashalauncherModpack *modpack)
 }
 
 GPtrArray *
-nuvashalauncher_modpack_optional_client_files (nuvashalauncherModpack *modpack)
+nuvashalauncher_modpack_optional_client_files (NuvashaLauncherModpack *modpack)
 {
   GPtrArray *files = g_ptr_array_new_with_free_func (NULL);
 
@@ -420,7 +420,7 @@ nuvashalauncher_modpack_optional_client_files (nuvashalauncherModpack *modpack)
 
   for (guint i = 0; i < modpack->files->len; i++)
     {
-      nuvashalauncherModpackFile *file = g_ptr_array_index (modpack->files, i);
+      NuvashaLauncherModpackFile *file = g_ptr_array_index (modpack->files, i);
 
       if (file->env_client == nuvashalauncher_MODPACK_ENV_OPTIONAL)
         g_ptr_array_add (files, file);

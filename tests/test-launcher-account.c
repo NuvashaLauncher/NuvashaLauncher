@@ -34,7 +34,7 @@ typedef struct
   GMainLoop *loop;
   guint watchdog;
   gboolean timed_out;
-  nuvashalauncherLaunchState wanted;
+  NuvashaLauncherLaunchState wanted;
 } Watch;
 
 static gboolean
@@ -49,7 +49,7 @@ watchdog_fired (gpointer user_data)
 }
 
 static void
-on_state (nuvashalauncher *launcher G_GNUC_UNUSED, nuvashalauncherLaunchState state,
+on_state (NuvashaLauncher *launcher G_GNUC_UNUSED, NuvashaLauncherLaunchState state,
           const char *detail G_GNUC_UNUSED, gpointer user_data)
 {
   Watch *watch = user_data;
@@ -59,7 +59,7 @@ on_state (nuvashalauncher *launcher G_GNUC_UNUSED, nuvashalauncherLaunchState st
 }
 
 static void
-watch_until (Watch *watch, nuvashalauncher *launcher, nuvashalauncherLaunchState wanted)
+watch_until (Watch *watch, NuvashaLauncher *launcher, NuvashaLauncherLaunchState wanted)
 {
   watch->wanted = wanted;
 
@@ -89,12 +89,12 @@ watch_until (Watch *watch, nuvashalauncher *launcher, nuvashalauncherLaunchState
  * A place to work and something to work on
  * ---------------------------------------------------------- */
 
-static nuvashalauncherInstance *
+static NuvashaLauncherInstance *
 new_instance (void)
 {
   g_autofree char *directory = g_build_filename (root, "instance", NULL);
   g_autoptr (GError) error = NULL;
-  nuvashalauncherInstance *instance = NULL;
+  NuvashaLauncherInstance *instance = NULL;
 
   if (g_mkdir_with_parents (directory, 0755) != 0)
     g_error ("the instance directory \"%s\" cannot be made", directory);
@@ -108,7 +108,7 @@ new_instance (void)
   return instance;
 }
 
-static nuvashalauncherAccounts *
+static NuvashaLauncherAccounts *
 new_store (const char *name)
 {
   g_autofree char *path = g_build_filename (root, name, NULL);
@@ -117,7 +117,7 @@ new_store (const char *name)
 }
 
 static void
-assert_log_has (nuvashalauncher *launcher, const char *needle)
+assert_log_has (NuvashaLauncher *launcher, const char *needle)
 {
   g_autofree char *log = nuvashalauncher_launcher_get_log_text (launcher);
 
@@ -126,7 +126,7 @@ assert_log_has (nuvashalauncher *launcher, const char *needle)
 }
 
 static void
-assert_log_lacks (nuvashalauncher *launcher, const char *needle)
+assert_log_lacks (NuvashaLauncher *launcher, const char *needle)
 {
   g_autofree char *log = nuvashalauncher_launcher_get_log_text (launcher);
 
@@ -137,10 +137,10 @@ assert_log_lacks (nuvashalauncher *launcher, const char *needle)
 /* A Microsoft account as it is after a sign-in: a profile, a token that
  * is good for another hour and a refresh token to trade for the next
  * one. */
-static nuvashalauncherAccount *
+static NuvashaLauncherAccount *
 microsoft_account (gboolean with_refresh_token)
 {
-  nuvashalauncherAccount *account = g_new0 (nuvashalauncherAccount, 1);
+  NuvashaLauncherAccount *account = g_new0 (NuvashaLauncherAccount, 1);
 
   account->type = nuvashalauncher_ACCOUNT_MICROSOFT;
   account->id = g_strdup ("069a79f444e94726a5befca90e38aaf5");
@@ -165,9 +165,9 @@ microsoft_account (gboolean with_refresh_token)
 static void
 test_no_account_plays_offline (void)
 {
-  g_autoptr (nuvashalauncherInstance) instance = new_instance ();
-  g_autoptr (nuvashalauncherAccounts) accounts = new_store ("no-accounts.json");
-  g_autoptr (nuvashalauncher) launcher =
+  g_autoptr (NuvashaLauncherInstance) instance = new_instance ();
+  g_autoptr (NuvashaLauncherAccounts) accounts = new_store ("no-accounts.json");
+  g_autoptr (NuvashaLauncher) launcher =
     nuvashalauncher_launcher_new (instance, NULL, accounts);
 
   g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_STOPPED);
@@ -185,7 +185,7 @@ test_no_account_plays_offline (void)
   /* A launcher without any accounts at all behaves the same rather than
      refusing to read a store that is not there. */
   {
-    g_autoptr (nuvashalauncher) bare = nuvashalauncher_launcher_new (instance, NULL, NULL);
+    g_autoptr (NuvashaLauncher) bare = nuvashalauncher_launcher_new (instance, NULL, NULL);
 
     g_assert_null (nuvashalauncher_launcher_get_accounts (bare));
 
@@ -209,13 +209,13 @@ test_no_account_plays_offline (void)
 static void
 test_a_dead_token_asks_for_a_sign_in (void)
 {
-  g_autoptr (nuvashalauncherInstance) instance = new_instance ();
-  g_autoptr (nuvashalauncherAccounts) accounts = new_store ("dead-token.json");
-  g_autoptr (nuvashalauncher) launcher =
+  g_autoptr (NuvashaLauncherInstance) instance = new_instance ();
+  g_autoptr (NuvashaLauncherAccounts) accounts = new_store ("dead-token.json");
+  g_autoptr (NuvashaLauncher) launcher =
     nuvashalauncher_launcher_new (instance, NULL, accounts);
-  g_autoptr (nuvashalauncherAccount) account = NULL;
+  g_autoptr (NuvashaLauncherAccount) account = NULL;
   g_autoptr (GError) error = NULL;
-  nuvashalauncherAccount *active = NULL;
+  NuvashaLauncherAccount *active = NULL;
   Watch watch = { 0 };
 
   /* An account of a family whose Microsoft sign-in has gone: the token
@@ -281,11 +281,11 @@ test_a_dead_token_asks_for_a_sign_in (void)
 static void
 test_a_ready_account_gets_past_the_gate (void)
 {
-  g_autoptr (nuvashalauncherInstance) instance = new_instance ();
-  g_autoptr (nuvashalauncherAccounts) accounts = new_store ("ready.json");
-  g_autoptr (nuvashalauncher) launcher =
+  g_autoptr (NuvashaLauncherInstance) instance = new_instance ();
+  g_autoptr (NuvashaLauncherAccounts) accounts = new_store ("ready.json");
+  g_autoptr (NuvashaLauncher) launcher =
     nuvashalauncher_launcher_new (instance, NULL, accounts);
-  g_autoptr (nuvashalauncherAccount) account = microsoft_account (TRUE);
+  g_autoptr (NuvashaLauncherAccount) account = microsoft_account (TRUE);
   g_autoptr (GError) error = NULL;
 
   if (!nuvashalauncher_accounts_add (accounts, account, &error))
@@ -313,12 +313,12 @@ test_a_ready_account_gets_past_the_gate (void)
 static void
 test_launch_can_use_another_account (void)
 {
-  g_autoptr (nuvashalauncherInstance) instance = new_instance ();
-  g_autoptr (nuvashalauncherAccounts) accounts = new_store ("launch-account.json");
-  g_autoptr (nuvashalauncher) launcher =
+  g_autoptr (NuvashaLauncherInstance) instance = new_instance ();
+  g_autoptr (NuvashaLauncherAccounts) accounts = new_store ("launch-account.json");
+  g_autoptr (NuvashaLauncher) launcher =
     nuvashalauncher_launcher_new (instance, NULL, accounts);
-  g_autoptr (nuvashalauncherAccount) first = NULL;
-  g_autoptr (nuvashalauncherAccount) second = NULL;
+  g_autoptr (NuvashaLauncherAccount) first = NULL;
+  g_autoptr (NuvashaLauncherAccount) second = NULL;
   g_autoptr (GError) error = NULL;
 
   first = nuvashalauncher_account_new_offline ("Alex", &error);
@@ -346,11 +346,11 @@ test_launch_can_use_another_account (void)
 static void
 test_network_failure_preserves_tokens (void)
 {
-  g_autoptr (nuvashalauncherInstance) instance = new_instance ();
-  g_autoptr (nuvashalauncherAccounts) accounts = new_store ("temporary-outage.json");
-  g_autoptr (nuvashalauncher) launcher =
+  g_autoptr (NuvashaLauncherInstance) instance = new_instance ();
+  g_autoptr (NuvashaLauncherAccounts) accounts = new_store ("temporary-outage.json");
+  g_autoptr (NuvashaLauncher) launcher =
     nuvashalauncher_launcher_new (instance, NULL, accounts);
-  g_autoptr (nuvashalauncherAccount) account = microsoft_account (TRUE);
+  g_autoptr (NuvashaLauncherAccount) account = microsoft_account (TRUE);
   g_autoptr (GError) error = NULL;
 
   if (!nuvashalauncher_accounts_add (accounts, account, &error))
@@ -359,7 +359,7 @@ test_network_failure_preserves_tokens (void)
   error = g_error_new_literal (nuvashalauncher_AUTH_ERROR,
     nuvashalauncher_AUTH_ERROR_NETWORK, "temporary network outage");
   launcher_auth_failed (launcher, error);
-  nuvashalauncherAccount *stored = nuvashalauncher_accounts_get_active (accounts);
+  NuvashaLauncherAccount *stored = nuvashalauncher_accounts_get_active (accounts);
   g_assert_nonnull (stored);
   g_assert_cmpstr (stored->access_token, ==, account->access_token);
   g_assert_cmpstr (stored->refresh_token, ==, account->refresh_token);

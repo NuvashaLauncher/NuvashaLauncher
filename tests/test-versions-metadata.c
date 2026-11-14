@@ -5,9 +5,9 @@ test_manifest_parsing (void)
 {
   g_autofree char *text = fixture_text ("manifest.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherVersionManifest) manifest = NULL;
-  nuvashalauncherMcVersionType type = nuvashalauncher_MC_TYPE_RELEASE;
-  const nuvashalauncherVersionEntry *entry;
+  g_autoptr (NuvashaLauncherVersionManifest) manifest = NULL;
+  NuvashaLauncherMcVersionType type = nuvashalauncher_MC_TYPE_RELEASE;
+  const NuvashaLauncherVersionEntry *entry;
 
   manifest = nuvashalauncher_version_manifest_new_from_json (text, -1, &error);
   g_assert_no_error (error);
@@ -43,7 +43,7 @@ test_manifest_parsing (void)
   g_assert_false (nuvashalauncher_mc_version_type_from_string (NULL, &type));
   g_assert_cmpstr (nuvashalauncher_mc_version_type_to_string (nuvashalauncher_MC_TYPE_RELEASE), ==,
                    "release");
-  g_assert_null (nuvashalauncher_mc_version_type_to_string ((nuvashalauncherMcVersionType) 99));
+  g_assert_null (nuvashalauncher_mc_version_type_to_string ((NuvashaLauncherMcVersionType) 99));
 
   g_print ("ok - the manifest lists releases, snapshots and the old versions\n");
 }
@@ -52,7 +52,7 @@ static void
 test_manifest_malformed (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherVersionManifest) manifest = NULL;
+  g_autoptr (NuvashaLauncherVersionManifest) manifest = NULL;
   g_autofree char *incomplete = fixture_text ("manifest-incomplete.json");
 
   /* Not JSON at all. */
@@ -105,11 +105,11 @@ test_manifest_malformed (void)
 static void
 test_modern_version (void)
 {
-  g_autoptr (nuvashalauncherVersionDescription) version =
+  g_autoptr (NuvashaLauncherVersionDescription) version =
     fixture_version ("version-modern.json");
-  const nuvashalauncherDownloadInfo *asset_index;
-  const nuvashalauncherArgument *argument;
-  const nuvashalauncherLibrary *library;
+  const NuvashaLauncherDownloadInfo *asset_index;
+  const NuvashaLauncherArgument *argument;
+  const NuvashaLauncherLibrary *library;
 
   g_assert_cmpstr (version->id, ==, "1.21.1");
   g_assert_cmpint (version->type, ==, nuvashalauncher_MC_TYPE_RELEASE);
@@ -201,9 +201,9 @@ test_modern_version (void)
 static void
 test_legacy_version (void)
 {
-  g_autoptr (nuvashalauncherVersionDescription) version =
+  g_autoptr (NuvashaLauncherVersionDescription) version =
     fixture_version ("version-legacy.json");
-  const nuvashalauncherLibrary *library;
+  const NuvashaLauncherLibrary *library;
   g_autoptr (GPtrArray) argv = NULL;
 
   g_assert_cmpstr (version->id, ==, "1.5.2");
@@ -239,7 +239,7 @@ test_legacy_version (void)
                    "natives-osx");
 
   {
-    const nuvashalauncherDownloadInfo *info =
+    const NuvashaLauncherDownloadInfo *info =
       g_hash_table_lookup (library->classifiers, "natives-linux");
 
     g_assert_cmpstr (info->path, ==,
@@ -268,7 +268,7 @@ test_missing_fields (void)
 {
   g_autofree char *incomplete = fixture_text ("version-incomplete.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherVersionDescription) version = NULL;
+  g_autoptr (NuvashaLauncherVersionDescription) version = NULL;
 
   /* The identity of a document is what it must carry. */
   version = nuvashalauncher_version_description_new_from_json (incomplete, -1, &error);
@@ -289,7 +289,7 @@ static void
 test_malformed_fields (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherVersionDescription) version = NULL;
+  g_autoptr (NuvashaLauncherVersionDescription) version = NULL;
 
   /* Not JSON. */
   version = nuvashalauncher_version_description_new_from_json ("<html>", -1, &error);
@@ -346,22 +346,22 @@ test_malformed_fields (void)
 static void
 test_rules (void)
 {
-  g_autoptr (nuvashalauncherVersionDescription) rules =
+  g_autoptr (NuvashaLauncherVersionDescription) rules =
     fixture_version ("version-rules.json");
-  g_autoptr (nuvashalauncherVersionDescription) modern =
+  g_autoptr (NuvashaLauncherVersionDescription) modern =
     fixture_version ("version-modern.json");
-  g_autoptr (nuvashalauncherRuleContext) host = nuvashalauncher_rule_context_new ();
-  g_autoptr (nuvashalauncherRuleContext) linux64 =
+  g_autoptr (NuvashaLauncherRuleContext) host = nuvashalauncher_rule_context_new ();
+  g_autoptr (NuvashaLauncherRuleContext) linux64 =
     nuvashalauncher_rule_context_new_for ("linux", "x86_64", "6.8.0-nuvashalauncher");
-  g_autoptr (nuvashalauncherRuleContext) linux32 =
+  g_autoptr (NuvashaLauncherRuleContext) linux32 =
     nuvashalauncher_rule_context_new_for ("linux", "x86", "6.8.0-nuvashalauncher");
-  g_autoptr (nuvashalauncherRuleContext) linux_arm =
+  g_autoptr (NuvashaLauncherRuleContext) linux_arm =
     nuvashalauncher_rule_context_new_for ("linux", "aarch64", "5.15.0-arm");
-  g_autoptr (nuvashalauncherRuleContext) windows =
+  g_autoptr (NuvashaLauncherRuleContext) windows =
     nuvashalauncher_rule_context_new_for ("windows", "amd64", "10.0");
-  g_autoptr (nuvashalauncherRuleContext) demo =
+  g_autoptr (NuvashaLauncherRuleContext) demo =
     nuvashalauncher_rule_context_new_for ("linux", "x86_64", "6.8.0-nuvashalauncher");
-  nuvashalauncherArgument *argument;
+  NuvashaLauncherArgument *argument;
 
   /* This machine is Linux, whatever the kernel calls itself. */
   g_assert_cmpstr (host->os_name, ==, "linux");

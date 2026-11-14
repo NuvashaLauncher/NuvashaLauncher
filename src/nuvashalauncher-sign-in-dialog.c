@@ -14,7 +14,7 @@
 #define STEP_CODE _("asking Microsoft for a code")
 #define STEP_SIGN_IN _("waiting for the sign-in in the browser")
 
-struct _nuvashalauncherSignInDialog
+struct _NuvashaLauncherSignInDialog
 {
   AdwDialog parent_instance;
 
@@ -33,14 +33,14 @@ struct _nuvashalauncherSignInDialog
   GtkBox *body;
 
   /* Device-code state used while the user signs in in the browser. */
-  nuvashalauncherDeviceCode *code;
+  NuvashaLauncherDeviceCode *code;
 };
 
-G_DEFINE_FINAL_TYPE (nuvashalauncherSignInDialog, nuvashalauncher_sign_in_dialog, ADW_TYPE_DIALOG)
+G_DEFINE_FINAL_TYPE (NuvashaLauncherSignInDialog, nuvashalauncher_sign_in_dialog, ADW_TYPE_DIALOG)
 
 static guint nuvashalauncher_sign_in_dialog_signals[nuvashalauncher_SIGN_IN_DIALOG_N_SIGNALS];
 
-static void begin_sign_in (nuvashalauncherSignInDialog *self);
+static void begin_sign_in (NuvashaLauncherSignInDialog *self);
 
 static void finish_sign_in (GObject      *source,
                            GAsyncResult *result,
@@ -48,7 +48,7 @@ static void finish_sign_in (GObject      *source,
 
 /* Show the service error and the retry action. */
 static void
-show_error (nuvashalauncherSignInDialog *self, const GError *error,
+show_error (NuvashaLauncherSignInDialog *self, const GError *error,
             const char *explanation)
 {
   if (error != NULL)
@@ -73,7 +73,7 @@ show_error (nuvashalauncherSignInDialog *self, const GError *error,
 }
 
 static void
-clear_error (nuvashalauncherSignInDialog *self)
+clear_error (NuvashaLauncherSignInDialog *self)
 {
   gtk_label_set_text (GTK_LABEL (self->error_label), NULL);
   gtk_widget_set_tooltip_text (GTK_WIDGET (self->error_label), NULL);
@@ -85,7 +85,7 @@ clear_error (nuvashalauncherSignInDialog *self)
 
 /* Show the current sign-in step. */
 static void
-set_step (nuvashalauncherSignInDialog *self, const char *step)
+set_step (NuvashaLauncherSignInDialog *self, const char *step)
 {
   gtk_label_set_text (GTK_LABEL (self->waiting_label), step);
   gtk_widget_set_visible (GTK_WIDGET (self->waiting), TRUE);
@@ -124,7 +124,7 @@ is_safe_verification_uri (const char *address)
 /* Open Microsoft's page through GIO, not through a command found on PATH.
    The dialog also displays the address for manual opening. */
 static gboolean
-open_the_page (nuvashalauncherSignInDialog *self)
+open_the_page (NuvashaLauncherSignInDialog *self)
 {
   g_autoptr (GError) error = NULL;
 
@@ -153,9 +153,9 @@ on_code_ready (GObject      *source G_GNUC_UNUSED,
                GAsyncResult *result,
                gpointer      user_data)
 {
-  g_autoptr (nuvashalauncherSignInDialog) self = user_data;
+  g_autoptr (NuvashaLauncherSignInDialog) self = user_data;
   g_autoptr (GError) error = NULL;
-  nuvashalauncherDeviceCode *code = NULL;
+  NuvashaLauncherDeviceCode *code = NULL;
 
   code = nuvashalauncher_auth_device_code_finish (result, &error);
 
@@ -198,9 +198,9 @@ finish_sign_in (GObject      *source G_GNUC_UNUSED,
                 GAsyncResult *result,
                 gpointer      user_data)
 {
-  g_autoptr (nuvashalauncherSignInDialog) self = user_data;
+  g_autoptr (NuvashaLauncherSignInDialog) self = user_data;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherAccount) account = nuvashalauncher_auth_sign_in_finish (result, &error);
+  g_autoptr (NuvashaLauncherAccount) account = nuvashalauncher_auth_sign_in_finish (result, &error);
 
   if (account == NULL)
     {
@@ -220,7 +220,7 @@ finish_sign_in (GObject      *source G_GNUC_UNUSED,
 
 /* Request a device code and restart the sign-in flow. */
 static void
-begin_sign_in (nuvashalauncherSignInDialog *self)
+begin_sign_in (NuvashaLauncherSignInDialog *self)
 {
   g_cancellable_cancel (self->cancellable);
 
@@ -242,7 +242,7 @@ begin_sign_in (nuvashalauncherSignInDialog *self)
 }
 
 void
-nuvashalauncher_sign_in_dialog_retry (nuvashalauncherSignInDialog *self)
+nuvashalauncher_sign_in_dialog_retry (NuvashaLauncherSignInDialog *self)
 {
   g_return_if_fail (nuvashalauncher_IS_SIGN_IN_DIALOG (self));
 
@@ -266,7 +266,7 @@ on_open_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 static void
 on_closed (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherSignInDialog *self = nuvashalauncher_SIGN_IN_DIALOG (user_data);
+  NuvashaLauncherSignInDialog *self = nuvashalauncher_SIGN_IN_DIALOG (user_data);
 
   g_cancellable_cancel (self->cancellable);
 }
@@ -274,7 +274,7 @@ on_closed (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_data)
 /* A button with an icon and a word, as used for actions that do
  * one clear thing is written. */
 static void
-nuvashalauncher_sign_in_dialog_init (nuvashalauncherSignInDialog *self)
+nuvashalauncher_sign_in_dialog_init (NuvashaLauncherSignInDialog *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
   gtk_widget_set_size_request (GTK_WIDGET (self), 360, 280);
@@ -342,7 +342,7 @@ nuvashalauncher_sign_in_dialog_init (nuvashalauncherSignInDialog *self)
 static void
 nuvashalauncher_sign_in_dialog_dispose (GObject *object)
 {
-  nuvashalauncherSignInDialog *self = nuvashalauncher_SIGN_IN_DIALOG (object);
+  NuvashaLauncherSignInDialog *self = nuvashalauncher_SIGN_IN_DIALOG (object);
 
   /* A dialog that is going away stops waiting: the code stops being
      polled and nothing comes back to widgets that are not on screen. */
@@ -358,7 +358,7 @@ nuvashalauncher_sign_in_dialog_dispose (GObject *object)
 static void
 nuvashalauncher_sign_in_dialog_finalize (GObject *object)
 {
-  nuvashalauncherSignInDialog *self = nuvashalauncher_SIGN_IN_DIALOG (object);
+  NuvashaLauncherSignInDialog *self = nuvashalauncher_SIGN_IN_DIALOG (object);
 
   g_clear_pointer (&self->code, nuvashalauncher_device_code_free);
 
@@ -366,23 +366,23 @@ nuvashalauncher_sign_in_dialog_finalize (GObject *object)
 }
 
 static void
-nuvashalauncher_sign_in_dialog_class_init (nuvashalauncherSignInDialogClass *klass)
+nuvashalauncher_sign_in_dialog_class_init (NuvashaLauncherSignInDialogClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
   gtk_widget_class_set_template_from_resource (widget_class,
       "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-sign-in.ui");
-  gtk_widget_class_bind_template_child (widget_class, nuvashalauncherSignInDialog, spinner);
-  gtk_widget_class_bind_template_child (widget_class, nuvashalauncherSignInDialog, waiting);
-  gtk_widget_class_bind_template_child (widget_class, nuvashalauncherSignInDialog, waiting_label);
-  gtk_widget_class_bind_template_child (widget_class, nuvashalauncherSignInDialog, instruction_label);
-  gtk_widget_class_bind_template_child (widget_class, nuvashalauncherSignInDialog, code_label);
-  gtk_widget_class_bind_template_child (widget_class, nuvashalauncherSignInDialog, uri_label);
-  gtk_widget_class_bind_template_child (widget_class, nuvashalauncherSignInDialog, open_button);
-  gtk_widget_class_bind_template_child (widget_class, nuvashalauncherSignInDialog, error_label);
-  gtk_widget_class_bind_template_child (widget_class, nuvashalauncherSignInDialog, retry_button);
-  gtk_widget_class_bind_template_child (widget_class, nuvashalauncherSignInDialog, body);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherSignInDialog, spinner);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherSignInDialog, waiting);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherSignInDialog, waiting_label);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherSignInDialog, instruction_label);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherSignInDialog, code_label);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherSignInDialog, uri_label);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherSignInDialog, open_button);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherSignInDialog, error_label);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherSignInDialog, retry_button);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherSignInDialog, body);
 
   object_class->dispose = nuvashalauncher_sign_in_dialog_dispose;
   object_class->finalize = nuvashalauncher_sign_in_dialog_finalize;
@@ -392,10 +392,10 @@ nuvashalauncher_sign_in_dialog_class_init (nuvashalauncherSignInDialogClass *kla
                   NULL, NULL, NULL, G_TYPE_NONE, 1, nuvashalauncher_TYPE_ACCOUNT);
 }
 
-nuvashalauncherSignInDialog *
+NuvashaLauncherSignInDialog *
 nuvashalauncher_sign_in_dialog_new (void)
 {
-  nuvashalauncherSignInDialog *self = g_object_new (nuvashalauncher_TYPE_SIGN_IN_DIALOG, NULL);
+  NuvashaLauncherSignInDialog *self = g_object_new (nuvashalauncher_TYPE_SIGN_IN_DIALOG, NULL);
 
   /* Weak, so that the handler does not keep the dialog alive for as long
      as it is connected to it. */

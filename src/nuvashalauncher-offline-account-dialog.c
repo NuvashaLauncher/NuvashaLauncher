@@ -7,7 +7,7 @@
 #include "nuvashalauncher-i18n.h"
 #include "nuvashalauncher-ui-feedback.h"
 
-struct _nuvashalauncherOfflineAccountDialog
+struct _NuvashaLauncherOfflineAccountDialog
 {
   AdwDialog parent_instance;
 
@@ -16,24 +16,24 @@ struct _nuvashalauncherOfflineAccountDialog
   GtkButton *add_button;
   GtkButton *cancel_button;
   GtkBox *content;
-  nuvashalauncherAccounts *accounts;
+  NuvashaLauncherAccounts *accounts;
 };
 
-G_DEFINE_FINAL_TYPE (nuvashalauncherOfflineAccountDialog, nuvashalauncher_offline_account_dialog,
+G_DEFINE_FINAL_TYPE (NuvashaLauncherOfflineAccountDialog, nuvashalauncher_offline_account_dialog,
                      ADW_TYPE_DIALOG)
 
 static guint
   nuvashalauncher_offline_account_dialog_signals[nuvashalauncher_OFFLINE_ACCOUNT_DIALOG_N_SIGNALS];
 
 static void
-show_error (nuvashalauncherOfflineAccountDialog *self, const char *message)
+show_error (NuvashaLauncherOfflineAccountDialog *self, const char *message)
 {
   gtk_label_set_text (self->error_label, message);
   gtk_widget_set_visible (GTK_WIDGET (self->error_label), message != NULL);
 }
 
 static gboolean
-offline_name_exists (nuvashalauncherOfflineAccountDialog *self, const char *name)
+offline_name_exists (NuvashaLauncherOfflineAccountDialog *self, const char *name)
 {
   if (self->accounts == NULL)
     return FALSE;
@@ -42,7 +42,7 @@ offline_name_exists (nuvashalauncherOfflineAccountDialog *self, const char *name
 
   for (guint i = 0; i < accounts->len; i++)
     {
-      nuvashalauncherAccount *existing = g_ptr_array_index (accounts, i);
+      NuvashaLauncherAccount *existing = g_ptr_array_index (accounts, i);
 
       if (existing->type == nuvashalauncher_ACCOUNT_OFFLINE &&
           g_strcmp0 (existing->name, name) == 0)
@@ -57,12 +57,12 @@ offline_name_exists (nuvashalauncherOfflineAccountDialog *self, const char *name
  * comes from the same check the store makes, so the dialog cannot accept
  * what the store would refuse. */
 static void
-update_add_button (nuvashalauncherOfflineAccountDialog *self)
+update_add_button (NuvashaLauncherOfflineAccountDialog *self)
 {
   g_autofree char *name =
     g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->name_row)));
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherAccount) account = NULL;
+  g_autoptr (NuvashaLauncherAccount) account = NULL;
 
   g_strstrip (name);
   account = nuvashalauncher_account_new_offline (name, &error);
@@ -92,11 +92,11 @@ on_input_changed (GObject *object G_GNUC_UNUSED, GParamSpec *pspec G_GNUC_UNUSED
 static void
 on_add_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherOfflineAccountDialog *self = nuvashalauncher_OFFLINE_ACCOUNT_DIALOG (user_data);
+  NuvashaLauncherOfflineAccountDialog *self = nuvashalauncher_OFFLINE_ACCOUNT_DIALOG (user_data);
   g_autofree char *name =
     g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->name_row)));
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherAccount) account = NULL;
+  g_autoptr (NuvashaLauncherAccount) account = NULL;
 
   g_strstrip (name);
   account = nuvashalauncher_account_new_offline (name, &error);
@@ -118,7 +118,7 @@ on_add_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 }
 
 static void
-nuvashalauncher_offline_account_dialog_init (nuvashalauncherOfflineAccountDialog *self)
+nuvashalauncher_offline_account_dialog_init (NuvashaLauncherOfflineAccountDialog *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
   /* Keep a nonzero baseline for Adwaita's surface sizing, but let the
@@ -149,7 +149,7 @@ nuvashalauncher_offline_account_dialog_init (nuvashalauncherOfflineAccountDialog
 static void
 nuvashalauncher_offline_account_dialog_dispose (GObject *object)
 {
-  nuvashalauncherOfflineAccountDialog *self = nuvashalauncher_OFFLINE_ACCOUNT_DIALOG (object);
+  NuvashaLauncherOfflineAccountDialog *self = nuvashalauncher_OFFLINE_ACCOUNT_DIALOG (object);
 
   g_clear_object (&self->accounts);
 
@@ -159,7 +159,7 @@ nuvashalauncher_offline_account_dialog_dispose (GObject *object)
 }
 
 static void
-nuvashalauncher_offline_account_dialog_class_init (nuvashalauncherOfflineAccountDialogClass *klass)
+nuvashalauncher_offline_account_dialog_class_init (NuvashaLauncherOfflineAccountDialogClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
@@ -168,26 +168,26 @@ nuvashalauncher_offline_account_dialog_class_init (nuvashalauncherOfflineAccount
 
   gtk_widget_class_set_template_from_resource (widget_class,
       "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-offline-account.ui");
-  gtk_widget_class_bind_template_child (widget_class, nuvashalauncherOfflineAccountDialog, name_row);
-  gtk_widget_class_bind_template_child (widget_class, nuvashalauncherOfflineAccountDialog, error_label);
-  gtk_widget_class_bind_template_child (widget_class, nuvashalauncherOfflineAccountDialog, add_button);
-  gtk_widget_class_bind_template_child (widget_class, nuvashalauncherOfflineAccountDialog, cancel_button);
-  gtk_widget_class_bind_template_child (widget_class, nuvashalauncherOfflineAccountDialog, content);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherOfflineAccountDialog, name_row);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherOfflineAccountDialog, error_label);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherOfflineAccountDialog, add_button);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherOfflineAccountDialog, cancel_button);
+  gtk_widget_class_bind_template_child (widget_class, NuvashaLauncherOfflineAccountDialog, content);
   nuvashalauncher_offline_account_dialog_signals[nuvashalauncher_OFFLINE_ACCOUNT_DIALOG_SIGNAL_ACCOUNT_ADDED] =
     g_signal_new ("account-added", G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 1,
                   nuvashalauncher_TYPE_ACCOUNT);
 }
 
-nuvashalauncherOfflineAccountDialog *
+NuvashaLauncherOfflineAccountDialog *
 nuvashalauncher_offline_account_dialog_new (void)
 {
   return g_object_new (nuvashalauncher_TYPE_OFFLINE_ACCOUNT_DIALOG, NULL);
 }
 
 void
-nuvashalauncher_offline_account_dialog_set_accounts (nuvashalauncherOfflineAccountDialog *self,
-                                             nuvashalauncherAccounts *accounts)
+nuvashalauncher_offline_account_dialog_set_accounts (NuvashaLauncherOfflineAccountDialog *self,
+                                             NuvashaLauncherAccounts *accounts)
 {
   g_return_if_fail (nuvashalauncher_IS_OFFLINE_ACCOUNT_DIALOG (self));
   g_return_if_fail (accounts == NULL || nuvashalauncher_IS_ACCOUNTS (accounts));

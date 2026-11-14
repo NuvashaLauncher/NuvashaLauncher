@@ -6,10 +6,10 @@
 
 /* @url_required is FALSE for the places where Mojang gives a path but
  * no address, which the launcher fills in later. */
-static nuvashalauncherDownloadInfo *
+static NuvashaLauncherDownloadInfo *
 parse_download_info (JsonObject *object, gboolean url_required, GError **error)
 {
-  nuvashalauncherDownloadInfo *info = g_new0 (nuvashalauncherDownloadInfo, 1);
+  NuvashaLauncherDownloadInfo *info = g_new0 (NuvashaLauncherDownloadInfo, 1);
 
   if (!nuvashalauncher_mc_get_string (object, "url", url_required, &info->url, error) ||
       !nuvashalauncher_mc_get_string (object, "sha1", FALSE, &info->sha1, error) ||
@@ -30,7 +30,7 @@ static gboolean
 get_download_member (JsonObject     *object,
                      const char     *member,
                      gboolean        url_required,
-                     nuvashalauncherDownloadInfo **value,
+                     NuvashaLauncherDownloadInfo **value,
                      GError        **error)
 {
   JsonObject *child = NULL;
@@ -47,10 +47,10 @@ get_download_member (JsonObject     *object,
   return *value != NULL;
 }
 
-static nuvashalauncherLibrary *
+static NuvashaLauncherLibrary *
 parse_library (JsonObject *object, GError **error)
 {
-  nuvashalauncherLibrary *library = g_new0 (nuvashalauncherLibrary, 1);
+  NuvashaLauncherLibrary *library = g_new0 (NuvashaLauncherLibrary, 1);
   JsonObject *downloads = NULL;
   JsonObject *classifiers = NULL;
   JsonObject *natives = NULL;
@@ -84,7 +84,7 @@ parse_library (JsonObject *object, GError **error)
 
           while (json_object_iter_next (&iter, &name, &node))
             {
-              nuvashalauncherDownloadInfo *info;
+              NuvashaLauncherDownloadInfo *info;
 
               if (!JSON_NODE_HOLDS_OBJECT (node))
                 {
@@ -177,10 +177,10 @@ fail:
 
 /* One entry of arguments.jvm or arguments.game: either a plain string
  * or an object carrying rules and one or several values. */
-static nuvashalauncherArgument *
+static NuvashaLauncherArgument *
 parse_argument (JsonNode *node, GError **error)
 {
-  nuvashalauncherArgument *argument = g_new0 (nuvashalauncherArgument, 1);
+  NuvashaLauncherArgument *argument = g_new0 (NuvashaLauncherArgument, 1);
 
   argument->values = g_ptr_array_new_with_free_func (g_free);
 
@@ -288,7 +288,7 @@ parse_argument_group (JsonObject   *object,
 
     for (guint i = 0; i < json_array_get_length (array); i++)
       {
-        nuvashalauncherArgument *argument =
+        NuvashaLauncherArgument *argument =
           parse_argument (json_array_get_element (array, i), error);
 
         if (argument == NULL)
@@ -303,7 +303,7 @@ parse_argument_group (JsonObject   *object,
 
 static gboolean
 parse_arguments (JsonObject *root,
-                 nuvashalauncherVersionDescription *self,
+                 NuvashaLauncherVersionDescription *self,
                  GError **error)
 {
   JsonObject *arguments = NULL;
@@ -351,7 +351,7 @@ parse_libraries (JsonObject *root, GPtrArray **value, GError **error)
     for (guint i = 0; i < json_array_get_length (array); i++)
       {
         JsonNode *item = json_array_get_element (array, i);
-        nuvashalauncherLibrary *library;
+        NuvashaLauncherLibrary *library;
 
         if (!JSON_NODE_HOLDS_OBJECT (item))
           {
@@ -375,7 +375,7 @@ parse_libraries (JsonObject *root, GPtrArray **value, GError **error)
 /* *logging is NULL when the document has nothing to say about the
  * log4j configuration. */
 static gboolean
-parse_logging (JsonObject *root, nuvashalauncherLogging **logging, GError **error)
+parse_logging (JsonObject *root, NuvashaLauncherLogging **logging, GError **error)
 {
   JsonObject *entry = NULL;
   JsonObject *client = NULL;
@@ -395,7 +395,7 @@ parse_logging (JsonObject *root, nuvashalauncherLogging **logging, GError **erro
     return TRUE;
 
   {
-    nuvashalauncherLogging *logging_client = g_new0 (nuvashalauncherLogging, 1);
+    NuvashaLauncherLogging *logging_client = g_new0 (NuvashaLauncherLogging, 1);
 
     if (!nuvashalauncher_mc_get_string (client, "argument", TRUE, &logging_client->argument, error) ||
         !nuvashalauncher_mc_get_string (client, "type", TRUE, &logging_client->type, error) ||
@@ -412,10 +412,10 @@ parse_logging (JsonObject *root, nuvashalauncherLogging **logging, GError **erro
 }
 
 static gboolean
-parse_java_version (JsonObject *root, nuvashalauncherJavaVersion **version, GError **error)
+parse_java_version (JsonObject *root, NuvashaLauncherJavaVersion **version, GError **error)
 {
   JsonObject *object = NULL;
-  nuvashalauncherJavaVersion *java_version;
+  NuvashaLauncherJavaVersion *java_version;
   gint64 major = 0;
 
   *version = NULL;
@@ -426,7 +426,7 @@ parse_java_version (JsonObject *root, nuvashalauncherJavaVersion **version, GErr
   if (object == NULL)
     return TRUE;
 
-  java_version = g_new0 (nuvashalauncherJavaVersion, 1);
+  java_version = g_new0 (NuvashaLauncherJavaVersion, 1);
 
   if (!nuvashalauncher_mc_get_string (object, "component", TRUE, &java_version->component, error) ||
       !nuvashalauncher_mc_get_int64 (object, "majorVersion", TRUE, &major, error))
@@ -450,14 +450,14 @@ parse_java_version (JsonObject *root, nuvashalauncherJavaVersion **version, GErr
 }
 
 /* ---------------------------------------------------------- *
- * nuvashalauncherVersionDescription
+ * NuvashaLauncherVersionDescription
  * ---------------------------------------------------------- */
 
-G_DEFINE_FINAL_TYPE (nuvashalauncherVersionDescription, nuvashalauncher_version_description,
+G_DEFINE_FINAL_TYPE (NuvashaLauncherVersionDescription, nuvashalauncher_version_description,
                      G_TYPE_OBJECT)
 
 static gboolean
-fill_version (JsonObject *root, nuvashalauncherVersionDescription *self, GError **error)
+fill_version (JsonObject *root, NuvashaLauncherVersionDescription *self, GError **error)
 {
   JsonObject *downloads = NULL;
   g_autofree char *type_name = NULL;
@@ -506,13 +506,13 @@ fill_version (JsonObject *root, nuvashalauncherVersionDescription *self, GError 
   return parse_java_version (root, &self->java_version, error);
 }
 
-nuvashalauncherVersionDescription *
+NuvashaLauncherVersionDescription *
 nuvashalauncher_version_description_new_from_json (const char *json,
                                        gssize      length,
                                        GError    **error)
 {
   g_autoptr (JsonParser) parser = NULL;
-  nuvashalauncherVersionDescription *self;
+  NuvashaLauncherVersionDescription *self;
   JsonObject *root;
 
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
@@ -537,7 +537,7 @@ nuvashalauncher_version_description_new_from_json (const char *json,
 static void
 nuvashalauncher_version_description_finalize (GObject *object)
 {
-  nuvashalauncherVersionDescription *self = nuvashalauncher_VERSION_DESCRIPTION (object);
+  NuvashaLauncherVersionDescription *self = nuvashalauncher_VERSION_DESCRIPTION (object);
 
   g_free (self->id);
   g_free (self->main_class);
@@ -556,7 +556,7 @@ nuvashalauncher_version_description_finalize (GObject *object)
 }
 
 static void
-nuvashalauncher_version_description_class_init (nuvashalauncherVersionDescriptionClass *klass)
+nuvashalauncher_version_description_class_init (NuvashaLauncherVersionDescriptionClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
@@ -564,11 +564,11 @@ nuvashalauncher_version_description_class_init (nuvashalauncherVersionDescriptio
 }
 
 static void
-nuvashalauncher_version_description_init (nuvashalauncherVersionDescription *self)
+nuvashalauncher_version_description_init (NuvashaLauncherVersionDescription *self)
 {
   (void) self;
 }
 
 /* ---------------------------------------------------------- *
- * nuvashalauncherVersionManifest
+ * NuvashaLauncherVersionManifest
  * ---------------------------------------------------------- */

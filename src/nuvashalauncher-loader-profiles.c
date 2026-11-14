@@ -124,7 +124,7 @@ give_libraries_their_downloads (JsonNode *root, GError **error)
 
 typedef struct {
   GTask *task;
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
 } ProfileRequest;
 
 static void
@@ -138,7 +138,7 @@ profile_request_free (gpointer data)
 
 /* The document a profile is, with the downloads its libraries mean, in
    the shape nuvashalauncher resolves. */
-static nuvashalauncherVersionDescription *
+static NuvashaLauncherVersionDescription *
 profile_from_root (JsonNode *root, GError **error)
 {
   g_autoptr (JsonGenerator) generator = NULL;
@@ -162,7 +162,7 @@ profile_from_root (JsonNode *root, GError **error)
   return nuvashalauncher_version_description_new_from_json (data, length, error);
 }
 
-nuvashalauncherVersionDescription *
+NuvashaLauncherVersionDescription *
 nuvashalauncher_loaders_profile_from_json (const char *json, gssize length,
                                GError **error)
 {
@@ -186,7 +186,7 @@ profile_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   ProfileRequest *request = user_data;
   g_autoptr (GError) error = NULL;
   g_autoptr (JsonParser) parser = NULL;
-  nuvashalauncherVersionDescription *description = NULL;
+  NuvashaLauncherVersionDescription *description = NULL;
 
   parser = nuvashalauncher_download_json_finish (result, &error);
 
@@ -201,14 +201,14 @@ profile_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   profile_request_free (request);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_loaders_profile_async (nuvashalauncherLoader           loader,
+NuvashaLauncherTaskScope *
+nuvashalauncher_loaders_profile_async (NuvashaLauncherLoader           loader,
                            const char         *game_version,
                            const char         *loader_version,
                            GAsyncReadyCallback callback,
                            gpointer            user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   ProfileRequest *request = NULL;
   const char *base = NULL;
@@ -257,7 +257,7 @@ nuvashalauncher_loaders_profile_async (nuvashalauncherLoader           loader,
   return g_steal_pointer (&scope);
 }
 
-nuvashalauncherVersionDescription *
+NuvashaLauncherVersionDescription *
 nuvashalauncher_loaders_profile_finish (GAsyncResult *result, GError **error)
 {
   g_return_val_if_fail (nuvashalauncher_task_result_is_valid (result, "nuvashalauncher-task-scope"), NULL);

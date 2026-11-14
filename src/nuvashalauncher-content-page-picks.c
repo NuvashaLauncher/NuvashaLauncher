@@ -29,7 +29,7 @@
 struct _Pick {
   char *project_id;
   char *title;
-  nuvashalauncherModrinthVersion *version; /* owned */
+  NuvashaLauncherModrinthVersion *version; /* owned */
 };
 
 void
@@ -47,7 +47,7 @@ pick_free (Pick *pick)
 /* The entry of @project_id in the list, or NULL when the project has
    nothing picked. */
 static Pick *
-pick_of_project (nuvashalauncherContentPage *self, const char *project_id)
+pick_of_project (NuvashaLauncherContentPage *self, const char *project_id)
 {
   if (self->install_model->picks == NULL || project_id == NULL)
     return NULL;
@@ -67,7 +67,7 @@ pick_of_project (nuvashalauncherContentPage *self, const char *project_id)
    same project: the copy in the list is not the one the page shows, so
    the ids are what say they are the same. */
 static gboolean
-pick_is_version (Pick *pick, nuvashalauncherModrinthVersion *version)
+pick_is_version (Pick *pick, NuvashaLauncherModrinthVersion *version)
 {
   if (pick == NULL || version == NULL || pick->version == NULL)
     return FALSE;
@@ -80,9 +80,9 @@ pick_is_version (Pick *pick, nuvashalauncherModrinthVersion *version)
    set with the click handler held back, which is what keeps the two from
    calling each other. */
 void
-refresh_pick_check (nuvashalauncherContentPage *self)
+refresh_pick_check (NuvashaLauncherContentPage *self)
 {
-  nuvashalauncherModrinthVersion *version = NULL;
+  NuvashaLauncherModrinthVersion *version = NULL;
   gboolean on;
 
   if (self->project.details_check == NULL || self->project.details_dropdown == NULL)
@@ -105,7 +105,7 @@ refresh_pick_check (nuvashalauncherContentPage *self)
    list. Called after every change of the list, and once when the list is
    built, so that the button starts where the picks start. */
 void
-nuvashalauncher_content_page_refresh_picks (nuvashalauncherContentPage *self)
+nuvashalauncher_content_page_refresh_picks (NuvashaLauncherContentPage *self)
 {
   guint count = self->install_model->picks != NULL ? self->install_model->picks->len : 0;
   if (self->pick_badge != NULL)
@@ -144,7 +144,7 @@ nuvashalauncher_content_page_refresh_picks (nuvashalauncherContentPage *self)
 /* @version of @project_id is now picked: it replaces whatever that
    project had on the list, or joins it. */
 void
-pick_add (nuvashalauncherContentPage *self, nuvashalauncherModrinthVersion *version)
+pick_add (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthVersion *version)
 {
   Pick *pick = NULL;
 
@@ -175,7 +175,7 @@ pick_add (nuvashalauncherContentPage *self, nuvashalauncherModrinthVersion *vers
 /* The project of @version has nothing picked any more. Only its own
    entry goes: another version of the same project is a different pick. */
 void
-pick_remove (nuvashalauncherContentPage *self, nuvashalauncherModrinthVersion *version)
+pick_remove (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthVersion *version)
 {
   Pick *pick = NULL;
 
@@ -194,7 +194,7 @@ pick_remove (nuvashalauncherContentPage *self, nuvashalauncherModrinthVersion *v
 static void
 on_batch_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
   const char *response =
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
 
@@ -230,7 +230,7 @@ on_batch_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
    of it is in. Each one is planned and fetched like any other install;
    the confirmation is not asked again for the ones that follow. */
 void
-batch_next (nuvashalauncherContentPage *self)
+batch_next (NuvashaLauncherContentPage *self)
 {
   Pick *pick = NULL;
 
@@ -266,7 +266,7 @@ batch_next (nuvashalauncherContentPage *self)
 /* A file of the batch could not be installed: what it would take is not
    there, so the list goes no further. */
 void
-batch_stopped (nuvashalauncherContentPage *self)
+batch_stopped (NuvashaLauncherContentPage *self)
 {
   g_clear_pointer (&self->install_model->batch, g_ptr_array_unref);
   self->install_model->picking = FALSE;
@@ -274,7 +274,7 @@ batch_stopped (nuvashalauncherContentPage *self)
 }
 
 void
-nuvashalauncher_content_page_clear_picks (nuvashalauncherContentPage *self)
+nuvashalauncher_content_page_clear_picks (NuvashaLauncherContentPage *self)
 {
   g_clear_pointer (&self->install_model->picks, g_ptr_array_unref);
   self->install_model->picks = g_ptr_array_new_with_free_func ((GDestroyNotify) pick_free);
@@ -286,7 +286,7 @@ nuvashalauncher_content_page_clear_picks (nuvashalauncherContentPage *self)
 void
 nuvashalauncher_content_page_on_pick_button_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
   g_autoptr (GString) body = NULL;
   g_autoptr (GHashTable) listed = NULL;
   AdwAlertDialog *alert = NULL;
@@ -326,7 +326,7 @@ nuvashalauncher_content_page_on_pick_button_clicked (GtkButton *button G_GNUC_UN
         for (guint j = 0; pick->version->dependencies != NULL &&
                          j < pick->version->dependencies->len; j++)
           {
-            nuvashalauncherModrinthDependency *dependency =
+            NuvashaLauncherModrinthDependency *dependency =
               g_ptr_array_index (pick->version->dependencies, j);
             const char *title = NULL;
 

@@ -7,7 +7,7 @@
 
 #include "nuvashalauncher-instance-manager.h"
 
-struct _nuvashalauncherInstanceManager
+struct _NuvashaLauncherInstanceManager
 {
   GObject parent_instance;
 
@@ -18,18 +18,18 @@ struct _nuvashalauncherInstanceManager
   guint directory_check_source;
 };
 
-char *instance_directory (nuvashalauncherInstance *instance);
-char *instance_name (nuvashalauncherInstance *instance);
+char *instance_directory (NuvashaLauncherInstance *instance);
+char *instance_name (NuvashaLauncherInstance *instance);
 char *instance_name_key (const char *name);
-char *unique_instance_name (nuvashalauncherInstanceManager *self, const char *name);
-char *default_instance_directory (nuvashalauncherInstanceManager *self, const char *name);
-gboolean check_instance_directory (nuvashalauncherInstanceManager *self,
+char *unique_instance_name (NuvashaLauncherInstanceManager *self, const char *name);
+char *default_instance_directory (NuvashaLauncherInstanceManager *self, const char *name);
+gboolean check_instance_directory (NuvashaLauncherInstanceManager *self,
                                    const char *directory,
-                                   nuvashalauncherInstance *moved,
+                                   NuvashaLauncherInstance *moved,
                                    char **canonical, GError **error);
-gboolean remove_instance_and_save (nuvashalauncherInstanceManager *self,
-                                   nuvashalauncherInstance *instance, GError **error);
-nuvashalauncherTaskScope *copy_tree_async (GFile *source, GFile *destination,
+gboolean remove_instance_and_save (NuvashaLauncherInstanceManager *self,
+                                   NuvashaLauncherInstance *instance, GError **error);
+NuvashaLauncherTaskScope *copy_tree_async (GFile *source, GFile *destination,
                                GAsyncReadyCallback callback,
                                gpointer user_data);
 gboolean copy_tree_finish (GAsyncResult *result, GError **error);

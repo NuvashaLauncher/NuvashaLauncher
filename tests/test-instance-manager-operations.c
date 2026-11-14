@@ -82,10 +82,10 @@ test_rename (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (nuvashalauncherInstanceManager) manager =
+  g_autoptr (NuvashaLauncherInstanceManager) manager =
     nuvashalauncher_instance_manager_new (data_dir);
 
-  nuvashalauncherInstance *instance =
+  NuvashaLauncherInstance *instance =
     nuvashalauncher_instance_manager_create (manager, "Original", NULL, "1.21.1",
                                  nuvashalauncher_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
@@ -99,12 +99,12 @@ test_rename (void)
   g_assert_cmpstr (name, ==, "Renamed Pack");
 
   /* The new name is on disk. */
-  g_autoptr (nuvashalauncherInstanceManager) fresh = nuvashalauncher_instance_manager_new (data_dir);
+  g_autoptr (NuvashaLauncherInstanceManager) fresh = nuvashalauncher_instance_manager_new (data_dir);
   g_assert_true (nuvashalauncher_instance_manager_load (fresh, &error));
   g_assert_no_error (error);
   g_assert_cmpuint (manager_count (fresh), ==, 1);
 
-  g_autoptr (nuvashalauncherInstance) loaded =
+  g_autoptr (NuvashaLauncherInstance) loaded =
     g_list_model_get_item (
       G_LIST_MODEL (nuvashalauncher_instance_manager_get_instances (fresh)), 0);
   g_autofree char *loaded_name = prop_string (loaded, "name");
@@ -130,7 +130,7 @@ test_rename (void)
   g_clear_error (&error);
 
   /* Renaming an instance the manager does not know fails. */
-  g_autoptr (nuvashalauncherInstance) stranger =
+  g_autoptr (NuvashaLauncherInstance) stranger =
     nuvashalauncher_instance_new (NULL, "Stranger", "/tmp/nuvashalauncher-test-stranger", "1.21.1",
                       nuvashalauncher_LOADER_VANILLA, &error);
   g_assert_no_error (error);
@@ -154,9 +154,9 @@ test_model_updates_are_atomic (void)
 {
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherInstanceManager) manager =
+  g_autoptr (NuvashaLauncherInstanceManager) manager =
     nuvashalauncher_instance_manager_new (data_dir);
-  g_autoptr (nuvashalauncherInstance) instance =
+  g_autoptr (NuvashaLauncherInstance) instance =
     nuvashalauncher_instance_manager_create (manager, "Model", NULL, "1.21.1",
                                  nuvashalauncher_LOADER_VANILLA, NULL, &error);
 
@@ -173,10 +173,10 @@ test_model_updates_are_atomic (void)
                   nuvashalauncher_INSTANCE_MANAGER_ERROR_INVALID_PATH);
   g_clear_error (&error);
 
-  g_autoptr (nuvashalauncherInstanceManager) fresh = nuvashalauncher_instance_manager_new (data_dir);
+  g_autoptr (NuvashaLauncherInstanceManager) fresh = nuvashalauncher_instance_manager_new (data_dir);
   g_assert_true (nuvashalauncher_instance_manager_load (fresh, &error));
   g_assert_no_error (error);
-  g_autoptr (nuvashalauncherInstance) loaded = g_list_model_get_item (
+  g_autoptr (NuvashaLauncherInstance) loaded = g_list_model_get_item (
     G_LIST_MODEL (nuvashalauncher_instance_manager_get_instances (fresh)), 0);
   g_autofree char *args = prop_string (loaded, "jvm-args");
   g_assert_cmpstr (args, ==, "-Xmx2G");
@@ -192,10 +192,10 @@ test_duplicate (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (nuvashalauncherInstanceManager) manager =
+  g_autoptr (NuvashaLauncherInstanceManager) manager =
     nuvashalauncher_instance_manager_new (data_dir);
 
-  nuvashalauncherInstance *instance =
+  NuvashaLauncherInstance *instance =
     nuvashalauncher_instance_manager_create (manager, "Original", NULL, "1.21.1",
                                  nuvashalauncher_LOADER_FABRIC, "0.16.9", &error);
   g_assert_no_error (error);
@@ -225,7 +225,7 @@ test_duplicate (void)
   g_assert_no_error (call.error);
   g_assert_nonnull (call.result);
 
-  nuvashalauncherInstance *copy = call.result;
+  NuvashaLauncherInstance *copy = call.result;
   g_assert_cmpstr (nuvashalauncher_instance_get_id (copy), !=,
                    nuvashalauncher_instance_get_id (instance));
   g_assert_cmpstr (nuvashalauncher_instance_get_id (copy), !=, "");
@@ -260,7 +260,7 @@ test_duplicate (void)
   /* Both instances are registered and both survive a reload. */
   g_assert_cmpuint (manager_count (manager), ==, 2);
 
-  g_autoptr (nuvashalauncherInstanceManager) fresh = nuvashalauncher_instance_manager_new (data_dir);
+  g_autoptr (NuvashaLauncherInstanceManager) fresh = nuvashalauncher_instance_manager_new (data_dir);
   g_assert_true (nuvashalauncher_instance_manager_load (fresh, &error));
   g_assert_no_error (error);
   g_assert_cmpuint (manager_count (fresh), ==, 2);
@@ -284,10 +284,10 @@ test_duplicate_without_directory (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (nuvashalauncherInstanceManager) manager =
+  g_autoptr (NuvashaLauncherInstanceManager) manager =
     nuvashalauncher_instance_manager_new (data_dir);
 
-  nuvashalauncherInstance *instance =
+  NuvashaLauncherInstance *instance =
     nuvashalauncher_instance_manager_create (manager, "Vanishing", NULL, "1.21.1",
                                  nuvashalauncher_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
@@ -333,10 +333,10 @@ test_delete_metadata_only (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (nuvashalauncherInstanceManager) manager =
+  g_autoptr (NuvashaLauncherInstanceManager) manager =
     nuvashalauncher_instance_manager_new (data_dir);
 
-  nuvashalauncherInstance *instance =
+  NuvashaLauncherInstance *instance =
     nuvashalauncher_instance_manager_create (manager, "Kept", NULL, "1.21.1",
                                  nuvashalauncher_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
@@ -356,7 +356,7 @@ test_delete_metadata_only (void)
   g_assert_cmpuint (manager_count (manager), ==, 0);
   g_assert_true (g_file_test (directory, G_FILE_TEST_IS_DIR));
 
-  g_autoptr (nuvashalauncherInstanceManager) fresh = nuvashalauncher_instance_manager_new (data_dir);
+  g_autoptr (NuvashaLauncherInstanceManager) fresh = nuvashalauncher_instance_manager_new (data_dir);
   g_assert_true (nuvashalauncher_instance_manager_load (fresh, &error));
   g_assert_no_error (error);
   g_assert_cmpuint (manager_count (fresh), ==, 0);
@@ -375,10 +375,10 @@ test_delete_with_directory (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (nuvashalauncherInstanceManager) manager =
+  g_autoptr (NuvashaLauncherInstanceManager) manager =
     nuvashalauncher_instance_manager_new (data_dir);
 
-  nuvashalauncherInstance *instance =
+  NuvashaLauncherInstance *instance =
     nuvashalauncher_instance_manager_create (manager, "Gone", NULL, "1.21.1",
                                  nuvashalauncher_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
@@ -402,7 +402,7 @@ test_delete_with_directory (void)
   g_assert_cmpuint (manager_count (manager), ==, 0);
   g_assert_false (g_file_test (directory, G_FILE_TEST_EXISTS));
 
-  g_autoptr (nuvashalauncherInstanceManager) fresh = nuvashalauncher_instance_manager_new (data_dir);
+  g_autoptr (NuvashaLauncherInstanceManager) fresh = nuvashalauncher_instance_manager_new (data_dir);
   g_assert_true (nuvashalauncher_instance_manager_load (fresh, &error));
   g_assert_no_error (error);
   g_assert_cmpuint (manager_count (fresh), ==, 0);
@@ -421,10 +421,10 @@ test_delete_unregistered (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (nuvashalauncherInstanceManager) manager =
+  g_autoptr (NuvashaLauncherInstanceManager) manager =
     nuvashalauncher_instance_manager_new (data_dir);
 
-  g_autoptr (nuvashalauncherInstance) stranger =
+  g_autoptr (NuvashaLauncherInstance) stranger =
     nuvashalauncher_instance_new (NULL, "Stranger", "/tmp/nuvashalauncher-test-stranger", "1.21.1",
                       nuvashalauncher_LOADER_VANILLA, &error);
   g_assert_no_error (error);
@@ -453,10 +453,10 @@ test_open_folder_without_directory (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (nuvashalauncherInstanceManager) manager =
+  g_autoptr (NuvashaLauncherInstanceManager) manager =
     nuvashalauncher_instance_manager_new (data_dir);
 
-  nuvashalauncherInstance *instance =
+  NuvashaLauncherInstance *instance =
     nuvashalauncher_instance_manager_create (manager, "Folderless", NULL, "1.21.1",
                                  nuvashalauncher_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
@@ -495,16 +495,16 @@ test_change_directory_validation (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (nuvashalauncherInstanceManager) manager =
+  g_autoptr (NuvashaLauncherInstanceManager) manager =
     nuvashalauncher_instance_manager_new (data_dir);
 
-  nuvashalauncherInstance *first =
+  NuvashaLauncherInstance *first =
     nuvashalauncher_instance_manager_create (manager, "One", NULL, "1.21.1",
                                  nuvashalauncher_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (first);
 
-  nuvashalauncherInstance *second =
+  NuvashaLauncherInstance *second =
     nuvashalauncher_instance_manager_create (manager, "Two", NULL, "1.21.1",
                                  nuvashalauncher_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
@@ -644,10 +644,10 @@ test_change_directory_moves_files (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (nuvashalauncherInstanceManager) manager =
+  g_autoptr (NuvashaLauncherInstanceManager) manager =
     nuvashalauncher_instance_manager_new (data_dir);
 
-  nuvashalauncherInstance *instance =
+  NuvashaLauncherInstance *instance =
     nuvashalauncher_instance_manager_create (manager, "Mover", NULL, "1.21.1",
                                  nuvashalauncher_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);
@@ -718,7 +718,7 @@ test_change_directory_moves_files (void)
 
   /* A manager that reads the file back agrees. */
   {
-    g_autoptr (nuvashalauncherInstanceManager) reloaded =
+    g_autoptr (NuvashaLauncherInstanceManager) reloaded =
       nuvashalauncher_instance_manager_new (data_dir);
 
     g_assert_true (nuvashalauncher_instance_manager_load (reloaded, &error));
@@ -739,10 +739,10 @@ test_change_directory_failure_keeps_everything (void)
   g_autofree char *data_dir = make_tmp_dir ();
   g_autoptr (GError) error = NULL;
 
-  g_autoptr (nuvashalauncherInstanceManager) manager =
+  g_autoptr (NuvashaLauncherInstanceManager) manager =
     nuvashalauncher_instance_manager_new (data_dir);
 
-  nuvashalauncherInstance *instance =
+  NuvashaLauncherInstance *instance =
     nuvashalauncher_instance_manager_create (manager, "Keeper", NULL, "1.21.1",
                                  nuvashalauncher_LOADER_VANILLA, NULL, &error);
   g_assert_no_error (error);

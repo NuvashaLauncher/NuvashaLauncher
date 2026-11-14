@@ -21,21 +21,21 @@ static void metadata_ready (GObject *source, GAsyncResult *result,
 typedef struct _IdentifyRun IdentifyRun;
 typedef struct {
   IdentifyRun *run;
-  nuvashalauncherContentFile *file;
+  NuvashaLauncherContentFile *file;
   GtkWidget *row;
 
   /* The operation that answers for this file, released with the request. */
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
 } IdentifyRequest;
 
 typedef struct {
-  nuvashalauncherContentPage *page; /* weakly held */
+  NuvashaLauncherContentPage *page; /* weakly held */
   char *project_id;
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
 } ProjectTitleRequest;
 
 struct _IdentifyRun {
-  nuvashalauncherContentPage *page; /* weakly held */
+  NuvashaLauncherContentPage *page; /* weakly held */
   GCancellable *cancellable;
   guint next_index;
   guint in_flight;
@@ -95,11 +95,11 @@ identify_request_free (IdentifyRequest *request)
 }
 
 void
-persist_identified_file (nuvashalauncherContentPage *self, nuvashalauncherContentFile *file)
+persist_identified_file (NuvashaLauncherContentPage *self, NuvashaLauncherContentFile *file)
 {
   g_autofree char *directory = NULL;
   g_autofree char *filename = g_path_get_basename (file->path);
-  nuvashalauncherContentIndexEntry entry = { 0 };
+  NuvashaLauncherContentIndexEntry entry = { 0 };
 
   g_object_get (self->instance, "directory", &directory, NULL);
   entry.filename = filename;
@@ -145,9 +145,9 @@ on_project_title_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                          gpointer user_data)
 {
   ProjectTitleRequest *request = user_data;
-  nuvashalauncherContentPage *self = request->page;
+  NuvashaLauncherContentPage *self = request->page;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModrinthDetails) details =
+  g_autoptr (NuvashaLauncherModrinthDetails) details =
     nuvashalauncher_modrinth_details_finish (result, &error);
 
   if (self != NULL && details != NULL && details->title != NULL &&
@@ -165,7 +165,7 @@ on_project_title_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
       for (guint i = 0; i < self->installed.files->len; i++)
         {
-          nuvashalauncherContentFile *file =
+          NuvashaLauncherContentFile *file =
             g_ptr_array_index (self->installed.files, i);
 
           if (g_strcmp0 (file->project_id, request->project_id) != 0)
@@ -192,7 +192,7 @@ on_project_title_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 }
 
 static void
-request_project_title (nuvashalauncherContentPage *self, const char *project_id)
+request_project_title (NuvashaLauncherContentPage *self, const char *project_id)
 {
   ProjectTitleRequest *request = NULL;
 
@@ -232,10 +232,10 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 {
   IdentifyRequest *request = user_data;
   IdentifyRun *run = request->run;
-  nuvashalauncherContentPage *self = run->page;
+  NuvashaLauncherContentPage *self = run->page;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModrinthVersion) version = NULL;
-  nuvashalauncherContentFile *file = request->file;
+  g_autoptr (NuvashaLauncherModrinthVersion) version = NULL;
+  NuvashaLauncherContentFile *file = request->file;
   GtkWidget *row = request->row;
 
   version = nuvashalauncher_modrinth_version_by_hash_finish (result, &error);
@@ -277,7 +277,7 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       file->version_name = g_strdup (version->name);
       file->version_number = g_strdup (version->version_number);
       {
-        nuvashalauncherModrinthFile *primary =
+        NuvashaLauncherModrinthFile *primary =
           nuvashalauncher_modrinth_version_primary_file (version);
 
         g_free (file->sha512);
@@ -288,7 +288,7 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       for (guint i = 0; version->dependencies != NULL &&
                        i < version->dependencies->len; i++)
         {
-          nuvashalauncherModrinthDependency *dependency =
+          NuvashaLauncherModrinthDependency *dependency =
             g_ptr_array_index (version->dependencies, i);
 
           if (dependency->project_id == NULL)
@@ -329,7 +329,7 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 identify_start (IdentifyRun *run)
 {
-  nuvashalauncherContentPage *self = run->page;
+  NuvashaLauncherContentPage *self = run->page;
 
   if (self == NULL)
     {
@@ -340,7 +340,7 @@ identify_start (IdentifyRun *run)
   while (run->next_index < self->installed.files->len &&
          run->in_flight < IDENTIFY_CONCURRENCY)
     {
-      nuvashalauncherContentFile *file =
+      NuvashaLauncherContentFile *file =
         g_ptr_array_index (self->installed.files, run->next_index++);
       g_autofree char *key = NULL;
       GtkWidget *row = NULL;
@@ -382,7 +382,7 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
             gpointer user_data)
 {
   PageWatch *watch = user_data;
-  nuvashalauncherContentPage *self = watch->page;
+  NuvashaLauncherContentPage *self = watch->page;
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) files = NULL;
 
@@ -421,7 +421,7 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   for (guint i = 0; i < self->installed.files->len; i++)
     {
-      nuvashalauncherContentFile *file = g_ptr_array_index (self->installed.files, i);
+      NuvashaLauncherContentFile *file = g_ptr_array_index (self->installed.files, i);
 
       if (file->project_id != NULL && file->project_name != NULL &&
           *file->project_name != '\0')
@@ -470,7 +470,7 @@ static void
 metadata_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                 gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
   g_autoptr (GError) error = NULL;
 
   if (nuvashalauncher_content_metadata_finish (result, &error))
@@ -478,7 +478,7 @@ metadata_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       for (guint i = 0; self->installed.files != NULL &&
                         i < self->installed.files->len; i++)
         {
-           nuvashalauncherContentFile *file =
+           NuvashaLauncherContentFile *file =
              g_ptr_array_index (self->installed.files, i);
           GtkWidget *row = GTK_WIDGET (
             g_hash_table_lookup (self->installed.rows, file->path));
@@ -499,7 +499,7 @@ metadata_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 }
 
 void
-reload_installed (nuvashalauncherContentPage *self)
+reload_installed (NuvashaLauncherContentPage *self)
 {
   g_autofree char *directory = NULL;
   GCancellable *previous = self->installed.scan;

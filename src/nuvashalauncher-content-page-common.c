@@ -7,7 +7,7 @@
 #include "nuvashalauncher-operation.h"
 
 PageWatch *
-page_watch_new (nuvashalauncherContentPage *self)
+page_watch_new (NuvashaLauncherContentPage *self)
 {
   PageWatch *watch = g_new0 (PageWatch, 1);
 
@@ -50,7 +50,7 @@ watch_widget (gpointer field, GtkWidget *widget)
 }
 
 void
-show_toast (nuvashalauncherContentPage *self, const char *message)
+show_toast (NuvashaLauncherContentPage *self, const char *message)
 {
   nuvashalauncher_ui_show_toast (GTK_WIDGET (self), GTK_WIDGET (self->toasts), message);
 }
@@ -71,14 +71,14 @@ plain_label (const char *text)
 void
 on_banner_dismiss (AdwBanner *banner G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
 
   if (self->banner != NULL)
     adw_banner_set_revealed (ADW_BANNER (self->banner), FALSE);
 }
 
 void
-set_busy (nuvashalauncherContentPage *self, gboolean busy)
+set_busy (NuvashaLauncherContentPage *self, gboolean busy)
 {
   if (self->browse.spinner != NULL)
     gtk_widget_set_visible (GTK_WIDGET (self->browse.spinner), busy);

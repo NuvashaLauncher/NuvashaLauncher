@@ -5,7 +5,7 @@
 void
 nuvashalauncher_mc_free_download_info (gpointer data)
 {
-  nuvashalauncherDownloadInfo *info = data;
+  NuvashaLauncherDownloadInfo *info = data;
 
   if (info == NULL)
     return;
@@ -20,7 +20,7 @@ nuvashalauncher_mc_free_download_info (gpointer data)
 void
 nuvashalauncher_mc_free_rule (gpointer data)
 {
-  nuvashalauncherRule *rule = data;
+  NuvashaLauncherRule *rule = data;
 
   if (rule == NULL)
     return;
@@ -35,7 +35,7 @@ nuvashalauncher_mc_free_rule (gpointer data)
 void
 nuvashalauncher_mc_free_library (gpointer data)
 {
-  nuvashalauncherLibrary *library = data;
+  NuvashaLauncherLibrary *library = data;
 
   if (library == NULL)
     return;
@@ -52,7 +52,7 @@ nuvashalauncher_mc_free_library (gpointer data)
 void
 nuvashalauncher_mc_free_argument (gpointer data)
 {
-  nuvashalauncherArgument *argument = data;
+  NuvashaLauncherArgument *argument = data;
 
   if (argument == NULL)
     return;
@@ -65,7 +65,7 @@ nuvashalauncher_mc_free_argument (gpointer data)
 void
 nuvashalauncher_mc_free_logging (gpointer data)
 {
-  nuvashalauncherLogging *logging = data;
+  NuvashaLauncherLogging *logging = data;
 
   if (logging == NULL)
     return;
@@ -79,7 +79,7 @@ nuvashalauncher_mc_free_logging (gpointer data)
 void
 nuvashalauncher_mc_free_java_version (gpointer data)
 {
-  nuvashalauncherJavaVersion *version = data;
+  NuvashaLauncherJavaVersion *version = data;
 
   if (version == NULL)
     return;
@@ -91,7 +91,7 @@ nuvashalauncher_mc_free_java_version (gpointer data)
 void
 nuvashalauncher_mc_free_entry (gpointer data)
 {
-  nuvashalauncherVersionEntry *entry = data;
+  NuvashaLauncherVersionEntry *entry = data;
 
   if (entry == NULL)
     return;

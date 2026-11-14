@@ -14,7 +14,7 @@
 #define DOWNLOAD_PRIORITY_BULK 0
 #define DOWNLOAD_PRIORITY_INTERACTIVE 100
 
-struct _nuvashalauncherDownloadService {
+struct _NuvashaLauncherDownloadService {
   SoupSession *session;
   guint interactive_running;
   guint bulk_running;
@@ -22,13 +22,13 @@ struct _nuvashalauncherDownloadService {
   GQueue bulk_waiting;
   gboolean prefer_interactive;
   gboolean destroy_requested;
-  nuvashalauncherSettings *cache_settings;
+  NuvashaLauncherSettings *cache_settings;
 };
 
 typedef struct _DownloadRequest
 {
   GTask *task; /* the only reference: dropped when the request ends */
-  nuvashalauncherDownloadService *service; /* application-owned transfer scheduler */
+  NuvashaLauncherDownloadService *service; /* application-owned transfer scheduler */
 
   /* Set once when the request is created. */
   char *url;
@@ -38,7 +38,7 @@ typedef struct _DownloadRequest
   GChecksumType hash_type;
   char *body;            /* NULL: a GET request */
   char *user_agent;      /* NULL: the session's own */
-  nuvashalauncherDownloadProgressFunc progress;
+  NuvashaLauncherDownloadProgressFunc progress;
   gpointer user_data;
   gboolean json;
   gboolean api_cache;
@@ -48,7 +48,7 @@ typedef struct _DownloadRequest
   char *stale_json;
   char *cache_etag;
   char *response_etag;
-  nuvashalauncherSettingsCacheExpiration cache_expiration;
+  NuvashaLauncherSettingsCacheExpiration cache_expiration;
   JsonParser *pending_parser;
   char *pending_cache_data;
 
@@ -77,16 +77,16 @@ typedef struct _DownloadRequest
   guint retry_source;    /* pending retry timeout, 0 while there is none */
   guint retry_cancel_source; /* cancellation watch for a pending retry */
   guint queue_cancel_source; /* cancellation watch while queued */
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
 } DownloadRequest;
-nuvashalauncherSettings *nuvashalauncher_download_get_cache_settings (DownloadRequest *request);
+NuvashaLauncherSettings *nuvashalauncher_download_get_cache_settings (DownloadRequest *request);
 char *nuvashalauncher_download_api_cache_path (DownloadRequest *request);
 char *nuvashalauncher_download_global_cache_path (const char *hash);
 JsonParser *nuvashalauncher_download_cache_parser (const char *contents, gsize length,
                                        char **response, char **etag,
                                        gint64 *created);
 
-nuvashalauncherTaskScope *nuvashalauncher_download_hash_file_async (GFile *file, GChecksumType type,
+NuvashaLauncherTaskScope *nuvashalauncher_download_hash_file_async (GFile *file, GChecksumType type,
                                             GAsyncReadyCallback callback,
                                             gpointer user_data);
 char *nuvashalauncher_download_hash_file_finish (GAsyncResult *result, GError **error);
@@ -103,7 +103,7 @@ gboolean nuvashalauncher_download_open_temporary (DownloadRequest *request, GErr
 
 void nuvashalauncher_download_start_transfer (DownloadRequest *request);
 void start_attempt (DownloadRequest *request);
-SoupSession *get_session (nuvashalauncherDownloadService *service);
+SoupSession *get_session (NuvashaLauncherDownloadService *service);
 char *url_for_message (const char *url);
 gboolean request_was_cancelled (DownloadRequest *request, GError *error);
 void request_succeed (DownloadRequest *request);
@@ -113,7 +113,7 @@ void global_cache_directory_ready (GObject *, GAsyncResult *, gpointer);
 void nuvashalauncher_download_release_slot (DownloadRequest *request);
 gint compare_waiting_requests (gconstpointer left, gconstpointer right, gpointer user_data);
 gboolean queued_cancelled (gpointer user_data);
-void service_destroy_if_requested (nuvashalauncherDownloadService *service);
+void service_destroy_if_requested (NuvashaLauncherDownloadService *service);
 
 void nuvashalauncher_download_json_process_body (DownloadRequest *request, GBytes *body);
 void nuvashalauncher_download_json_stream_ready (GObject *source, GAsyncResult *result, gpointer user_data);

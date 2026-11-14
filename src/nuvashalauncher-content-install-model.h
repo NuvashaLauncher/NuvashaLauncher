@@ -7,15 +7,15 @@
 
 #include <glib.h>
 
-typedef struct _nuvashalauncherContentInstallModel nuvashalauncherContentInstallModel;
+typedef struct _NuvashaLauncherContentInstallModel NuvashaLauncherContentInstallModel;
 
-nuvashalauncherContentInstallModel *nuvashalauncher_content_install_model_new (GDestroyNotify pick_free);
-void nuvashalauncher_content_install_model_free (nuvashalauncherContentInstallModel *model);
+NuvashaLauncherContentInstallModel *nuvashalauncher_content_install_model_new (GDestroyNotify pick_free);
+void nuvashalauncher_content_install_model_free (NuvashaLauncherContentInstallModel *model);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherContentInstallModel,
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherContentInstallModel,
                                nuvashalauncher_content_install_model_free)
 
-struct _nuvashalauncherContentInstallModel
+struct _NuvashaLauncherContentInstallModel
 {
   gboolean updating;
   GPtrArray *updates; /* UpdateItem* */

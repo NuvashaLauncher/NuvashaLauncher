@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <template class="nuvashalauncherOfflineAccountDialog" parent="AdwDialog">
+  <template class="NuvashaLauncherOfflineAccountDialog" parent="AdwDialog">
     <property name="title" translatable="yes">Add Offline Account</property>
     <child>
       <object class="AdwToolbarView">

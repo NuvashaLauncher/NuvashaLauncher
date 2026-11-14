@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherModrinth: reading the Modrinth API v2 for the three kinds of
+/* NuvashaLauncherModrinth: reading the Modrinth API v2 for the three kinds of
  * content an instance carries: mods, resource packs and shader packs.
  *
  * This module speaks the Modrinth API directly.
@@ -44,7 +44,7 @@ typedef enum {
   nuvashalauncher_MODRINTH_ERROR_RATE_LIMIT, /* HTTP 429, too many requests */
   nuvashalauncher_MODRINTH_ERROR_PARSE,
   nuvashalauncher_MODRINTH_ERROR_NOT_FOUND  /* no such project, version or hash */
-} nuvashalauncherModrinthError;
+} NuvashaLauncherModrinthError;
 
 GQuark nuvashalauncher_modrinth_error_quark (void);
 char *nuvashalauncher_modrinth_json_node_to_string (JsonNode *node);
@@ -61,28 +61,28 @@ typedef enum {
   nuvashalauncher_CONTENT_SHADER_PACK,
   nuvashalauncher_CONTENT_DATAPACK,
   nuvashalauncher_CONTENT_MODPACK,
-} nuvashalauncherContentType;
+} NuvashaLauncherContentType;
 
 /* What Modrinth calls this kind of content in a facet: "mod", "resourcepack",
  * "shader" or "datapack". Never NULL. */
-const char *nuvashalauncher_content_type_to_string (nuvashalauncherContentType type);
+const char *nuvashalauncher_content_type_to_string (NuvashaLauncherContentType type);
 
 /* What the page and the rows are titled. Never NULL. */
-const char *nuvashalauncher_content_type_title (nuvashalauncherContentType type);
+const char *nuvashalauncher_content_type_title (NuvashaLauncherContentType type);
 
 /* The folder of the instance this content goes in. Never NULL. */
-const char *nuvashalauncher_content_type_folder (nuvashalauncherContentType type);
+const char *nuvashalauncher_content_type_folder (NuvashaLauncherContentType type);
 
 /* TRUE for the kind that only runs on a mod loader. */
-gboolean nuvashalauncher_content_type_needs_loader (nuvashalauncherContentType type);
+gboolean nuvashalauncher_content_type_needs_loader (NuvashaLauncherContentType type);
 
 /* The file extension of this content: ".jar" for a mod, ".zip" for the
  * other two. Never NULL. */
-const char *nuvashalauncher_content_type_extension (nuvashalauncherContentType type);
+const char *nuvashalauncher_content_type_extension (NuvashaLauncherContentType type);
 
 /* The symbolic icon the instance page shows for this content. Never
  * NULL. */
-const char *nuvashalauncher_content_type_icon (nuvashalauncherContentType type);
+const char *nuvashalauncher_content_type_icon (NuvashaLauncherContentType type);
 
 /* ---------------------------------------------------------- *
  * What a search answers
@@ -102,21 +102,21 @@ typedef struct {
    * project lists itself for, and what it tags itself with. */
   GPtrArray *versions;
   GPtrArray *categories;
-} nuvashalauncherModrinthProject;
+} NuvashaLauncherModrinthProject;
 
-void nuvashalauncher_modrinth_project_free (nuvashalauncherModrinthProject *project);
+void nuvashalauncher_modrinth_project_free (NuvashaLauncherModrinthProject *project);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherModrinthProject, nuvashalauncher_modrinth_project_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherModrinthProject, nuvashalauncher_modrinth_project_free)
 
 /* A copy of @project, so that a list of rows can own its own of what it
  * shows. (transfer full) */
-nuvashalauncherModrinthProject *nuvashalauncher_modrinth_project_copy (nuvashalauncherModrinthProject *project);
+NuvashaLauncherModrinthProject *nuvashalauncher_modrinth_project_copy (NuvashaLauncherModrinthProject *project);
 
 /* What one search asked for. @loader is NULL for the content that does
  * not need one, and @categories is a GPtrArray of const char* that may
  * be NULL. */
 typedef struct {
-  nuvashalauncherContentType type;
+  NuvashaLauncherContentType type;
   char *query;            /* "" asks for everything */
   char *minecraft_version;
   char *loader;           /* "fabric", "forge", ... or NULL */
@@ -126,54 +126,54 @@ typedef struct {
   char *sort;              /* relevance, downloads, newest, updated, follows */
   guint offset;
   guint limit;
-} nuvashalauncherModrinthSearch;
+} NuvashaLauncherModrinthSearch;
 
-void nuvashalauncher_modrinth_search_free (nuvashalauncherModrinthSearch *search);
+void nuvashalauncher_modrinth_search_free (NuvashaLauncherModrinthSearch *search);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherModrinthSearch, nuvashalauncher_modrinth_search_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherModrinthSearch, nuvashalauncher_modrinth_search_free)
 
 /* What a search answers: the projects that matched and how many there
  * are in all, which is what the pagination is read from. */
 typedef struct {
   GPtrArray *projects;
   guint64 total_hits;
-} nuvashalauncherModrinthResults;
+} NuvashaLauncherModrinthResults;
 
-void nuvashalauncher_modrinth_results_free (nuvashalauncherModrinthResults *results);
+void nuvashalauncher_modrinth_results_free (NuvashaLauncherModrinthResults *results);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherModrinthResults, nuvashalauncher_modrinth_results_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherModrinthResults, nuvashalauncher_modrinth_results_free)
 
 /* The URL of a search, built from its facets and its pagination. The
  * facets are what makes the answer compatible with the instance: the
  * project type, and for a mod the Minecraft version and the loader.
  *
  * (transfer full). What a test builds and what the client asks with. */
-char *nuvashalauncher_modrinth_search_url (const nuvashalauncherModrinthSearch *search);
+char *nuvashalauncher_modrinth_search_url (const NuvashaLauncherModrinthSearch *search);
 
 /* The same facets on their own, the way Modrinth wants them: an array
  * of arrays of "name:value" strings.
  *
  * (transfer full). */
-char *nuvashalauncher_modrinth_facets (const nuvashalauncherModrinthSearch *search);
+char *nuvashalauncher_modrinth_facets (const NuvashaLauncherModrinthSearch *search);
 
 /* Searches. The answers are only the projects that fit the Minecraft
  * version and the loader the search asked for. */
-nuvashalauncherTaskScope *nuvashalauncher_modrinth_search_async (const nuvashalauncherModrinthSearch *search,
+NuvashaLauncherTaskScope *nuvashalauncher_modrinth_search_async (const NuvashaLauncherModrinthSearch *search,
                                           GAsyncReadyCallback callback,
                                           gpointer user_data);
 
 /* (transfer full). NULL on error. */
-nuvashalauncherModrinthResults *nuvashalauncher_modrinth_search_finish (GAsyncResult  *result,
+NuvashaLauncherModrinthResults *nuvashalauncher_modrinth_search_finish (GAsyncResult  *result,
                                                           GError       **error);
 
-nuvashalauncherTaskScope *nuvashalauncher_modrinth_version_by_id_async (const char *version_id,
+NuvashaLauncherTaskScope *nuvashalauncher_modrinth_version_by_id_async (const char *version_id,
                                                 GAsyncReadyCallback callback,
                                                 gpointer user_data);
 
 /* The projects out of what /search answered, and the total it counted.
  * This is what the fetch above parses, and what a test hands a fixture
  * to. (transfer full) */
-nuvashalauncherModrinthResults *nuvashalauncher_modrinth_results_from_json (const char *json,
+NuvashaLauncherModrinthResults *nuvashalauncher_modrinth_results_from_json (const char *json,
                                                     gssize      length,
                                                     GError     **error);
 
@@ -199,22 +199,22 @@ typedef struct {
   GPtrArray *game_versions; /* const char* */
   GPtrArray *categories;    /* const char* */
   GPtrArray *loaders;       /* const char* */
-} nuvashalauncherModrinthDetails;
+} NuvashaLauncherModrinthDetails;
 
-void nuvashalauncher_modrinth_details_free (nuvashalauncherModrinthDetails *details);
+void nuvashalauncher_modrinth_details_free (NuvashaLauncherModrinthDetails *details);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherModrinthDetails, nuvashalauncher_modrinth_details_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherModrinthDetails, nuvashalauncher_modrinth_details_free)
 
-nuvashalauncherTaskScope *nuvashalauncher_modrinth_details_async (const char *project_id,
+NuvashaLauncherTaskScope *nuvashalauncher_modrinth_details_async (const char *project_id,
                                            GAsyncReadyCallback callback,
                                            gpointer user_data);
 
 /* (transfer full). NULL on error. */
-nuvashalauncherModrinthDetails *nuvashalauncher_modrinth_details_finish (GAsyncResult  *result,
+NuvashaLauncherModrinthDetails *nuvashalauncher_modrinth_details_finish (GAsyncResult  *result,
                                                  GError       **error);
 
 /* One project out of what /project answered. (transfer full) */
-nuvashalauncherModrinthDetails *nuvashalauncher_modrinth_details_from_json (const char *json,
+NuvashaLauncherModrinthDetails *nuvashalauncher_modrinth_details_from_json (const char *json,
                                                    gssize      length,
                                                    GError     **error);
 
@@ -229,11 +229,11 @@ typedef struct {
   char *sha512;
   goffset size;
   gboolean primary;
-} nuvashalauncherModrinthFile;
+} NuvashaLauncherModrinthFile;
 
-void nuvashalauncher_modrinth_file_free (nuvashalauncherModrinthFile *file);
+void nuvashalauncher_modrinth_file_free (NuvashaLauncherModrinthFile *file);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherModrinthFile, nuvashalauncher_modrinth_file_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherModrinthFile, nuvashalauncher_modrinth_file_free)
 
 /* What a version depends on, as Modrinth publishes it. */
 typedef enum {
@@ -241,26 +241,26 @@ typedef enum {
   nuvashalauncher_DEPENDENCY_OPTIONAL,      /* it runs better with it */
   nuvashalauncher_DEPENDENCY_EMBEDDED,      /* already inside this file */
   nuvashalauncher_DEPENDENCY_INCOMPATIBLE   /* it does not run with this */
-} nuvashalauncherModrinthDependencyType;
+} NuvashaLauncherModrinthDependencyType;
 
-const char *nuvashalauncher_modrinth_dependency_to_string (nuvashalauncherModrinthDependencyType type);
+const char *nuvashalauncher_modrinth_dependency_to_string (NuvashaLauncherModrinthDependencyType type);
 
 typedef struct {
-  nuvashalauncherModrinthDependencyType type;
+  NuvashaLauncherModrinthDependencyType type;
   char *project_id;  /* NULL: only a file name was given */
   char *version_id;  /* NULL: any version of the project will do */
   char *file_name;   /* NULL: the primary file of the project */
-} nuvashalauncherModrinthDependency;
+} NuvashaLauncherModrinthDependency;
 
-void nuvashalauncher_modrinth_dependency_free (nuvashalauncherModrinthDependency *dependency);
+void nuvashalauncher_modrinth_dependency_free (NuvashaLauncherModrinthDependency *dependency);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherModrinthDependency,
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherModrinthDependency,
                                nuvashalauncher_modrinth_dependency_free)
 
 /* A copy of @dependency, so that a caller can hold it without keeping
  * the version it came from alive. (transfer full) */
-nuvashalauncherModrinthDependency *nuvashalauncher_modrinth_dependency_copy (
-    nuvashalauncherModrinthDependency *dependency);
+NuvashaLauncherModrinthDependency *nuvashalauncher_modrinth_dependency_copy (
+    NuvashaLauncherModrinthDependency *dependency);
 
 /* One published version of a project: the files it is made of and what
  * it needs beside them. */
@@ -274,27 +274,27 @@ typedef struct {
   guint64 downloads;
   GPtrArray *game_versions;  /* const char* */
   GPtrArray *loaders;        /* const char* */
-  GPtrArray *files;          /* nuvashalauncherModrinthFile* */
-  GPtrArray *dependencies;   /* nuvashalauncherModrinthDependency* */
-} nuvashalauncherModrinthVersion;
+  GPtrArray *files;          /* NuvashaLauncherModrinthFile* */
+  GPtrArray *dependencies;   /* NuvashaLauncherModrinthDependency* */
+} NuvashaLauncherModrinthVersion;
 
-void nuvashalauncher_modrinth_version_free (nuvashalauncherModrinthVersion *version);
+void nuvashalauncher_modrinth_version_free (NuvashaLauncherModrinthVersion *version);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherModrinthVersion, nuvashalauncher_modrinth_version_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherModrinthVersion, nuvashalauncher_modrinth_version_free)
 
 /* A copy of @version, so that something can be kept after the list it
  * was read from is gone. (transfer full) */
-nuvashalauncherModrinthVersion *nuvashalauncher_modrinth_version_copy (nuvashalauncherModrinthVersion *version);
+NuvashaLauncherModrinthVersion *nuvashalauncher_modrinth_version_copy (NuvashaLauncherModrinthVersion *version);
 
 /* The file an install writes: the primary one, or the first when the
  * version marks none as primary. NULL when the version holds no file.
  * Borrowed from @version. */
-nuvashalauncherModrinthFile *nuvashalauncher_modrinth_version_primary_file (nuvashalauncherModrinthVersion *version);
+NuvashaLauncherModrinthFile *nuvashalauncher_modrinth_version_primary_file (NuvashaLauncherModrinthVersion *version);
 
 /* TRUE when @version carries a file whose sha1 is @sha1: the update
  * endpoint answers with the newest version that fits, and that version
  * can be the one already installed. */
-gboolean nuvashalauncher_modrinth_version_has_hash (const nuvashalauncherModrinthVersion *version,
+gboolean nuvashalauncher_modrinth_version_has_hash (const NuvashaLauncherModrinthVersion *version,
                                         const char               *sha1);
 
 /* The versions of @project_id that run @minecraft_version and, for a
@@ -307,14 +307,14 @@ gboolean nuvashalauncher_modrinth_version_has_hash (const nuvashalauncherModrint
  * nuvashalauncher_MODRINTH_ERROR_NOT_FOUND when the project publishes nothing for
  * that Minecraft version and loader, which is what the page shows as
  * "No compatible version found for Minecraft <version> and <Loader>." */
-nuvashalauncherTaskScope *nuvashalauncher_modrinth_versions_async (const char *project_id,
-                                           nuvashalauncherContentType type,
+NuvashaLauncherTaskScope *nuvashalauncher_modrinth_versions_async (const char *project_id,
+                                           NuvashaLauncherContentType type,
                                            const char *minecraft_version,
                                            const char *loader,
                                            GAsyncReadyCallback callback,
                                            gpointer user_data);
 
-/* (transfer full) the nuvashalauncherModrinthVersion* of what fits, newest first.
+/* (transfer full) the NuvashaLauncherModrinthVersion* of what fits, newest first.
  * NULL on error. */
 GPtrArray *nuvashalauncher_modrinth_versions_finish (GAsyncResult  *result,
                                          GError       **error);
@@ -328,11 +328,11 @@ GPtrArray *nuvashalauncher_modrinth_versions_finish (GAsyncResult  *result,
 typedef struct {
   char *name;
   char *header;
-} nuvashalauncherModrinthCategory;
+} NuvashaLauncherModrinthCategory;
 
-void nuvashalauncher_modrinth_category_free (nuvashalauncherModrinthCategory *category);
+void nuvashalauncher_modrinth_category_free (NuvashaLauncherModrinthCategory *category);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherModrinthCategory,
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherModrinthCategory,
                                nuvashalauncher_modrinth_category_free)
 
 /* What a user reads for @name: "colored-lighting" becomes "Colored
@@ -342,7 +342,7 @@ char *nuvashalauncher_modrinth_category_label (const char *name);
 
 /* What Modrinth calls a kind of project in the tags endpoint: "mod",
  * "resourcepack", "shader" or "modpack". (transfer full) */
-char *nuvashalauncher_modrinth_project_type_for_content (nuvashalauncherContentType type);
+char *nuvashalauncher_modrinth_project_type_for_content (NuvashaLauncherContentType type);
 
 /* The categories Modrinth publishes for @project_type, which is what
  * the filter of a Browse page offers. They come from the tags projects
@@ -355,11 +355,11 @@ char *nuvashalauncher_modrinth_project_type_for_content (nuvashalauncherContentT
  * again. A caller that waits while the fetch is in flight and cancels
  * stops waiting and is answered as cancelled; the fetch itself carries
  * on for the others. */
-nuvashalauncherTaskScope *nuvashalauncher_modrinth_categories_async (const char *project_type,
+NuvashaLauncherTaskScope *nuvashalauncher_modrinth_categories_async (const char *project_type,
                                               GAsyncReadyCallback callback,
                                               gpointer user_data);
 
-/* (transfer full) the nuvashalauncherModrinthCategory*, sorted by name. NULL on
+/* (transfer full) the NuvashaLauncherModrinthCategory*, sorted by name. NULL on
  * error. */
 GPtrArray *nuvashalauncher_modrinth_categories_finish (GAsyncResult  *result,
                                            GError       **error);
@@ -376,7 +376,7 @@ GPtrArray *nuvashalauncher_modrinth_categories_from_json (const char     *json,
  * only that, newest first. (transfer full) */
 GPtrArray *nuvashalauncher_modrinth_versions_from_json (const char  *json,
                                             gssize       length,
-                                            nuvashalauncherContentType    type,
+                                            NuvashaLauncherContentType    type,
                                             const char  *minecraft_version,
                                             const char  *loader,
                                             GError      **error);
@@ -384,7 +384,7 @@ GPtrArray *nuvashalauncher_modrinth_versions_from_json (const char  *json,
 /* One version out of one version object. NULL when the answer is not a
  * version with a file to install. What a hash lookup and an update check
  * both parse. */
-nuvashalauncherModrinthVersion *nuvashalauncher_modrinth_version_from_json (const char  *json,
+NuvashaLauncherModrinthVersion *nuvashalauncher_modrinth_version_from_json (const char  *json,
                                                    gssize       length,
                                                    GError     **error);
 
@@ -395,8 +395,8 @@ nuvashalauncherModrinthVersion *nuvashalauncher_modrinth_version_from_json (cons
  * and a shader pack are loaded by the game itself, so the Minecraft
  * version is all that decides them. FALSE means the version must not be
  * offered for that instance. */
-gboolean nuvashalauncher_modrinth_version_fits (nuvashalauncherModrinthVersion *version,
-                                    nuvashalauncherContentType      type,
+gboolean nuvashalauncher_modrinth_version_fits (NuvashaLauncherModrinthVersion *version,
+                                    NuvashaLauncherContentType      type,
                                     const char         *minecraft_version,
                                     const char         *loader);
 
@@ -404,7 +404,7 @@ gboolean nuvashalauncher_modrinth_version_fits (nuvashalauncherModrinthVersion *
  * instance: "No compatible version found for Minecraft 1.20.1 and
  * Fabric." for a mod and the same without the loader for the other two.
  * (transfer full) */
-char *nuvashalauncher_modrinth_no_compatible_message (nuvashalauncherContentType type,
+char *nuvashalauncher_modrinth_no_compatible_message (NuvashaLauncherContentType type,
                                           const char    *minecraft_version,
                                           const char    *loader);
 
@@ -413,12 +413,12 @@ char *nuvashalauncher_modrinth_no_compatible_message (nuvashalauncherContentType
  * nuvashalauncher_MODRINTH_ERROR_NOT_FOUND when Modrinth does not know the hash:
  * the file is not from Modrinth, or is not the exact file it
  * published, and nuvashalauncher says so rather than guessing. */
-nuvashalauncherTaskScope *nuvashalauncher_modrinth_version_by_hash_async (const char *sha1,
+NuvashaLauncherTaskScope *nuvashalauncher_modrinth_version_by_hash_async (const char *sha1,
                                                    GAsyncReadyCallback callback,
                                                    gpointer user_data);
 
 /* (transfer full). NULL on error. */
-nuvashalauncherModrinthVersion *nuvashalauncher_modrinth_version_by_hash_finish (GAsyncResult  *result,
+NuvashaLauncherModrinthVersion *nuvashalauncher_modrinth_version_by_hash_finish (GAsyncResult  *result,
                                                          GError       **error);
 
 /* A newer version of the project the file @sha1 belongs to, for
@@ -430,7 +430,7 @@ nuvashalauncherModrinthVersion *nuvashalauncher_modrinth_version_by_hash_finish 
  *
  * NULL is the answer when Modrinth has nothing newer that fits, which
  * is what a page shows as up to date; it is not an error. */
-nuvashalauncherTaskScope *nuvashalauncher_modrinth_update_by_hash_async (nuvashalauncherContentType type,
+NuvashaLauncherTaskScope *nuvashalauncher_modrinth_update_by_hash_async (NuvashaLauncherContentType type,
                                                    const char *sha1,
                                                    const char *minecraft_version,
                                                    const char *loader,
@@ -438,8 +438,30 @@ nuvashalauncherTaskScope *nuvashalauncher_modrinth_update_by_hash_async (nuvasha
                                                    gpointer user_data);
 
 /* (transfer full). NULL when there is no update, and on error. */
-nuvashalauncherModrinthVersion *nuvashalauncher_modrinth_update_by_hash_finish (GAsyncResult  *result,
+NuvashaLauncherModrinthVersion *nuvashalauncher_modrinth_update_by_hash_finish (GAsyncResult  *result,
                                                          GError       **error);
+
+/* Parse a batch hash-update response object (hash -> version) from JSON.
+ * (transfer full) GHashTable* mapping char* sha1 -> NuvashaLauncherModrinthVersion*. */
+GHashTable *nuvashalauncher_modrinth_updates_from_json (const char  *json,
+                                                        gssize       length,
+                                                        GError     **error);
+
+/* Batch version of nuvashalauncher_modrinth_update_by_hash_async() using
+ * Modrinth's POST /v2/version_files/update endpoint for @hashes (GPtrArray of
+ * const char* sha1 strings). */
+NuvashaLauncherTaskScope *nuvashalauncher_modrinth_updates_by_hashes_async (
+  NuvashaLauncherContentType  type,
+  GPtrArray                  *hashes,
+  const char                 *minecraft_version,
+  const char                 *loader,
+  GAsyncReadyCallback         callback,
+  gpointer                    user_data);
+
+/* (transfer full) GHashTable* mapping char* sha1 -> NuvashaLauncherModrinthVersion*.
+ * NULL on error. */
+GHashTable *nuvashalauncher_modrinth_updates_by_hashes_finish (GAsyncResult  *result,
+                                                               GError       **error);
 
 /* ---------------------------------------------------------- *
  * What an install of a version needs
@@ -460,8 +482,8 @@ nuvashalauncherModrinthVersion *nuvashalauncher_modrinth_update_by_hash_finish (
  * names no project, which is the one dependency that cannot be
  * fetched.
  *
- * (transfer full) the nuvashalauncherModrinthDependency*. */
-GPtrArray *nuvashalauncher_modrinth_resolve_install (nuvashalauncherModrinthVersion *version,
+ * (transfer full) the NuvashaLauncherModrinthDependency*. */
+GPtrArray *nuvashalauncher_modrinth_resolve_install (NuvashaLauncherModrinthVersion *version,
                                          GHashTable        *installed,
                                          GPtrArray        **conflicts,
                                          GError           **error);

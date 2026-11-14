@@ -12,11 +12,11 @@
 #define NO_VERSION_MESSAGE \
   _("the versions of this loader could not be read")
 
-struct _nuvashalauncherLoaderRow
+struct _NuvashaLauncherLoaderRow
 {
   GObject parent_instance;
 
-  nuvashalauncherSettings *settings;
+  NuvashaLauncherSettings *settings;
 
   /* Plain AdwComboRows, owned here and added to a group by whoever made
      this. Both hold a reference back, so either may go first. */
@@ -30,18 +30,18 @@ struct _nuvashalauncherLoaderRow
   /* The load the row is waiting for. Borrowed from the VersionsAsk that
      started it: that one releases it when the answer arrives, and a newer
      load replaces it before an older answer can arrive. */
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
 
   /* The versions of the loader, in the order the row shows them, and the
      game version they were fetched for. */
-  GPtrArray *versions; /* nuvashalauncherLoaderVersion* */
+  GPtrArray *versions; /* NuvashaLauncherLoaderVersion* */
   char *game_version;
   char *wanted;
 
   /* The loader the row is showing or fetching for, so that a change the
      row itself makes to the combo (putting the stored loader in place)
      is not read back as a choice the user made. */
-  nuvashalauncherLoader current;
+  NuvashaLauncherLoader current;
 
   /* TRUE while the game runs: neither combo answers then, and a screen
      must not write down a choice made under it. */
@@ -56,7 +56,7 @@ struct _nuvashalauncherLoaderRow
   gboolean ready;
 };
 
-G_DEFINE_FINAL_TYPE (nuvashalauncherLoaderRow, nuvashalauncher_loader_row, G_TYPE_OBJECT)
+G_DEFINE_FINAL_TYPE (NuvashaLauncherLoaderRow, nuvashalauncher_loader_row, G_TYPE_OBJECT)
 
 static guint nuvashalauncher_loader_row_signals[nuvashalauncher_LOADER_ROW_N_SIGNALS];
 
@@ -71,7 +71,7 @@ static void
 on_version_selected (GObject *object G_GNUC_UNUSED,
                      GParamSpec *pspec G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherLoaderRow *self = nuvashalauncher_LOADER_ROW (user_data);
+  NuvashaLauncherLoaderRow *self = nuvashalauncher_LOADER_ROW (user_data);
 
   if (!self->ready || self->blocked)
     return;
@@ -79,9 +79,9 @@ on_version_selected (GObject *object G_GNUC_UNUSED,
   g_signal_emit (self, nuvashalauncher_loader_row_signals[nuvashalauncher_LOADER_ROW_SIGNAL_CHANGED], 0);
 }
 
-static void start_versions (nuvashalauncherLoaderRow *self, nuvashalauncherLoader loader,
+static void start_versions (NuvashaLauncherLoaderRow *self, NuvashaLauncherLoader loader,
                             const char *wanted);
-static nuvashalauncherLoader loader_at (guint position);
+static NuvashaLauncherLoader loader_at (guint position);
 
 /* Picking another loader is a question for the version list, so the row
    asks it again itself: a screen never has to tell it to. */
@@ -89,8 +89,8 @@ static void
 on_loader_selected (GObject *object G_GNUC_UNUSED,
                     GParamSpec *pspec G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherLoaderRow *self = nuvashalauncher_LOADER_ROW (user_data);
-  nuvashalauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoaderRow *self = nuvashalauncher_LOADER_ROW (user_data);
+  NuvashaLauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
 
   if (self->blocked)
     return;
@@ -109,10 +109,10 @@ on_loader_selected (GObject *object G_GNUC_UNUSED,
 /* The model of the first row holds one name per loader nuvashalauncher installs, in
    the order nuvashalauncher_loaders_supported() gives, so a position in it is that
    position in the list. */
-static nuvashalauncherLoader
+static NuvashaLauncherLoader
 loader_at (guint position)
 {
-  const nuvashalauncherLoader *loaders = nuvashalauncher_loaders_supported ();
+  const NuvashaLauncherLoader *loaders = nuvashalauncher_loaders_supported ();
 
   if (position == GTK_INVALID_LIST_POSITION ||
       position >= nuvashalauncher_loaders_supported_count () ||
@@ -122,15 +122,15 @@ loader_at (guint position)
   return loaders[position];
 }
 
-static nuvashalauncherLoader
-selected_loader (nuvashalauncherLoaderRow *self)
+static NuvashaLauncherLoader
+selected_loader (NuvashaLauncherLoaderRow *self)
 {
   return loader_at (adw_combo_row_get_selected (ADW_COMBO_ROW (self->loader_row)));
 }
 
 /* Vanilla has no loader version: the row is not part of a choice then. */
 static void
-update_visibility (nuvashalauncherLoaderRow *self)
+update_visibility (NuvashaLauncherLoaderRow *self)
 {
   /* The loader combo can still be emitting its selection notification while
    * a new request is being started. @current is the request's authoritative
@@ -144,7 +144,7 @@ update_visibility (nuvashalauncherLoaderRow *self)
    game locks both, and the version row also locks itself while it is
    loading or has nothing to show. */
 static void
-update_sensitivity (nuvashalauncherLoaderRow *self)
+update_sensitivity (NuvashaLauncherLoaderRow *self)
 {
   gtk_widget_set_sensitive (GTK_WIDGET (self->loader_row), !self->blocked);
   gtk_widget_set_sensitive (GTK_WIDGET (self->version_row),
@@ -154,7 +154,7 @@ update_sensitivity (nuvashalauncherLoaderRow *self)
 /* Puts @labels behind the model of the version row and picks @position,
    which is GTK_INVALID_LIST_POSITION for nothing. */
 static void
-set_versions (nuvashalauncherLoaderRow *self, GPtrArray *versions, guint position)
+set_versions (NuvashaLauncherLoaderRow *self, GPtrArray *versions, guint position)
 {
   g_autoptr (GtkStringList) list = NULL;
   g_autofree const char **labels = NULL;
@@ -166,7 +166,7 @@ set_versions (nuvashalauncherLoaderRow *self, GPtrArray *versions, guint positio
 
   for (guint i = 0; i < self->versions->len; i++)
     {
-      const nuvashalauncherLoaderVersion *version = g_ptr_array_index (self->versions, i);
+      const NuvashaLauncherLoaderVersion *version = g_ptr_array_index (self->versions, i);
 
       /* What a user reads says which of these the loader does not call
          stable. */
@@ -190,13 +190,13 @@ set_versions (nuvashalauncherLoaderRow *self, GPtrArray *versions, guint positio
    a list loads (nothing to store then, which the guards on the screens
    know). */
 static void
-emit_changed (nuvashalauncherLoaderRow *self)
+emit_changed (NuvashaLauncherLoaderRow *self)
 {
   g_signal_emit (self, nuvashalauncher_loader_row_signals[nuvashalauncher_LOADER_ROW_SIGNAL_CHANGED], 0);
 }
 
 static void
-show_loading (nuvashalauncherLoaderRow *self)
+show_loading (NuvashaLauncherLoaderRow *self)
 {
   g_autoptr (GtkStringList) list = NULL;
   const char * const loading[] = { _("Loading…"), NULL };
@@ -224,7 +224,7 @@ show_loading (nuvashalauncherLoaderRow *self)
    for a loader that cannot say anything before a Minecraft version is
    picked. */
 static void
-show_error (nuvashalauncherLoaderRow *self, const char *message, gboolean retry)
+show_error (NuvashaLauncherLoaderRow *self, const char *message, gboolean retry)
 {
   g_autoptr (GtkStringList) list = NULL;
   const char *nothing[] = { _("None"), NULL };
@@ -252,7 +252,7 @@ show_error (nuvashalauncherLoaderRow *self, const char *message, gboolean retry)
    Minecraft version: not a failure a Retry could fix, so the row says
    what is missing instead of offering one. */
 static void
-show_empty (nuvashalauncherLoaderRow *self)
+show_empty (NuvashaLauncherLoaderRow *self)
 {
   g_autoptr (GtkStringList) list = NULL;
   g_autofree char *message = NULL;
@@ -281,7 +281,7 @@ show_empty (nuvashalauncherLoaderRow *self)
 
 /* Fills the version row from the versions a loader published. */
 static void
-fill (nuvashalauncherLoaderRow *self, GPtrArray *published)
+fill (NuvashaLauncherLoaderRow *self, GPtrArray *published)
 {
   gboolean unstable =
     self->settings != NULL && nuvashalauncher_settings_get_show_unstable_loaders (self->settings);
@@ -329,14 +329,14 @@ fill (nuvashalauncherLoaderRow *self, GPtrArray *published)
    answer is on its way, and the handle that answer is meant to release. */
 typedef struct
 {
-  nuvashalauncherLoaderRow *row;
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherLoaderRow *row;
+  NuvashaLauncherTaskScope *operation;
 } VersionsAsk;
 
 static void
 versions_ask_free (VersionsAsk *ask)
 {
-  nuvashalauncherLoaderRow *row = ask->row;
+  NuvashaLauncherLoaderRow *row = ask->row;
 
   /* The row's own pointer is a loan of this reference, so it is given
      back before the reference goes. */
@@ -356,7 +356,7 @@ versions_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                  gpointer user_data)
 {
   VersionsAsk *ask = user_data;
-  nuvashalauncherLoaderRow *self = ask->row;
+  NuvashaLauncherLoaderRow *self = ask->row;
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
 
@@ -389,7 +389,7 @@ versions_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 on_retry_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherLoaderRow *self = nuvashalauncher_LOADER_ROW (user_data);
+  NuvashaLauncherLoaderRow *self = nuvashalauncher_LOADER_ROW (user_data);
   g_autofree char *wanted = NULL;
   g_autofree char *game_version = NULL;
 
@@ -405,9 +405,9 @@ on_retry_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 /* Starts the fetch for @loader and remembers what was wanted. The
    caller has already set the game version and the settings. */
 static void
-start_versions (nuvashalauncherLoaderRow *self, nuvashalauncherLoader loader, const char *wanted)
+start_versions (NuvashaLauncherLoaderRow *self, NuvashaLauncherLoader loader, const char *wanted)
 {
-  const nuvashalauncherLoader *loaders = nuvashalauncher_loaders_supported ();
+  const NuvashaLauncherLoader *loaders = nuvashalauncher_loaders_supported ();
 
   /* What the row is showing is this loader now, so the change the combo
      below is about to report is not read back as a user choice. */
@@ -467,11 +467,11 @@ start_versions (nuvashalauncherLoaderRow *self, nuvashalauncherLoader loader, co
  * The public face
  * ---------------------------------------------------------- */
 
-nuvashalauncherLoaderRow *
+NuvashaLauncherLoaderRow *
 nuvashalauncher_loader_row_new (void)
 {
-  nuvashalauncherLoaderRow *self = g_object_new (nuvashalauncher_TYPE_LOADER_ROW, NULL);
-  const nuvashalauncherLoader *loaders = nuvashalauncher_loaders_supported ();
+  NuvashaLauncherLoaderRow *self = g_object_new (nuvashalauncher_TYPE_LOADER_ROW, NULL);
+  const NuvashaLauncherLoader *loaders = nuvashalauncher_loaders_supported ();
   g_autofree const char **names = NULL;
   guint count = 0;
 
@@ -524,7 +524,7 @@ nuvashalauncher_loader_row_new (void)
 }
 
 AdwComboRow *
-nuvashalauncher_loader_row_get_loader_row (nuvashalauncherLoaderRow *self)
+nuvashalauncher_loader_row_get_loader_row (NuvashaLauncherLoaderRow *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_LOADER_ROW (self), NULL);
 
@@ -532,7 +532,7 @@ nuvashalauncher_loader_row_get_loader_row (nuvashalauncherLoaderRow *self)
 }
 
 AdwComboRow *
-nuvashalauncher_loader_row_get_version_row (nuvashalauncherLoaderRow *self)
+nuvashalauncher_loader_row_get_version_row (NuvashaLauncherLoaderRow *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_LOADER_ROW (self), NULL);
 
@@ -540,9 +540,9 @@ nuvashalauncher_loader_row_get_version_row (nuvashalauncherLoaderRow *self)
 }
 
 void
-nuvashalauncher_loader_row_load (nuvashalauncherLoaderRow *self,
-                     nuvashalauncherSettings   *settings,
-                     nuvashalauncherLoader      loader,
+nuvashalauncher_loader_row_load (NuvashaLauncherLoaderRow *self,
+                     NuvashaLauncherSettings   *settings,
+                     NuvashaLauncherLoader      loader,
                      const char    *loader_version,
                      const char    *game_version)
 {
@@ -558,7 +558,7 @@ nuvashalauncher_loader_row_load (nuvashalauncherLoaderRow *self,
 }
 
 void
-nuvashalauncher_loader_row_set_blocked (nuvashalauncherLoaderRow *self, gboolean blocked)
+nuvashalauncher_loader_row_set_blocked (NuvashaLauncherLoaderRow *self, gboolean blocked)
 {
   g_return_if_fail (nuvashalauncher_IS_LOADER_ROW (self));
 
@@ -571,8 +571,8 @@ nuvashalauncher_loader_row_set_blocked (nuvashalauncherLoaderRow *self, gboolean
   update_sensitivity (self);
 }
 
-nuvashalauncherLoader
-nuvashalauncher_loader_row_get_loader (nuvashalauncherLoaderRow *self)
+NuvashaLauncherLoader
+nuvashalauncher_loader_row_get_loader (NuvashaLauncherLoaderRow *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_LOADER_ROW (self), nuvashalauncher_LOADER_VANILLA);
 
@@ -580,7 +580,7 @@ nuvashalauncher_loader_row_get_loader (nuvashalauncherLoaderRow *self)
 }
 
 const char *
-nuvashalauncher_loader_row_get_version (nuvashalauncherLoaderRow *self)
+nuvashalauncher_loader_row_get_version (NuvashaLauncherLoaderRow *self)
 {
   guint position;
 
@@ -595,7 +595,7 @@ nuvashalauncher_loader_row_get_version (nuvashalauncherLoaderRow *self)
     return NULL;
 
   {
-    const nuvashalauncherLoaderVersion *version = g_ptr_array_index (self->versions,
+    const NuvashaLauncherLoaderVersion *version = g_ptr_array_index (self->versions,
                                                         position);
 
     return version->version;
@@ -609,7 +609,7 @@ nuvashalauncher_loader_row_get_version (nuvashalauncherLoaderRow *self)
 static void
 nuvashalauncher_loader_row_dispose (GObject *object)
 {
-  nuvashalauncherLoaderRow *self = nuvashalauncher_LOADER_ROW (object);
+  NuvashaLauncherLoaderRow *self = nuvashalauncher_LOADER_ROW (object);
 
   /* A load still in flight only holds a reference on this object;
      cancelling it and dropping the settings stops it from writing into a
@@ -628,7 +628,7 @@ nuvashalauncher_loader_row_dispose (GObject *object)
 static void
 nuvashalauncher_loader_row_finalize (GObject *object)
 {
-  nuvashalauncherLoaderRow *self = nuvashalauncher_LOADER_ROW (object);
+  NuvashaLauncherLoaderRow *self = nuvashalauncher_LOADER_ROW (object);
 
   g_clear_pointer (&self->versions, g_ptr_array_unref);
   g_free (self->game_version);
@@ -638,7 +638,7 @@ nuvashalauncher_loader_row_finalize (GObject *object)
 }
 
 static void
-nuvashalauncher_loader_row_class_init (nuvashalauncherLoaderRowClass *klass)
+nuvashalauncher_loader_row_class_init (NuvashaLauncherLoaderRowClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
@@ -651,7 +651,7 @@ nuvashalauncher_loader_row_class_init (nuvashalauncherLoaderRowClass *klass)
 }
 
 static void
-nuvashalauncher_loader_row_init (nuvashalauncherLoaderRow *self)
+nuvashalauncher_loader_row_init (NuvashaLauncherLoaderRow *self)
 {
   /* Everything is built in nuvashalauncher_loader_row_new(), which needs the loaders
      nuvashalauncher installs. */

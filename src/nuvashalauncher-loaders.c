@@ -81,7 +81,7 @@ install_finished (InstallRequest *request, GError *error)
     }
   else
     {
-      nuvashalauncherLoaderInstall *install = g_new0 (nuvashalauncherLoaderInstall, 1);
+      NuvashaLauncherLoaderInstall *install = g_new0 (NuvashaLauncherLoaderInstall, 1);
 
       install->description = g_object_ref (request->description);
       install->client_jar = g_strdup (request->patched_jar);
@@ -200,13 +200,13 @@ is_a_processor_tool (InstallRequest *request, const char *name)
  * document already names are left as they are, and the tools of the
  * processors are left out, because they install the loader rather than
  * run the game with it. */
-static nuvashalauncherVersionDescription *
+static NuvashaLauncherVersionDescription *
 document_with_install_libraries (InstallRequest *request, const char *json,
                                  gssize length, GError **error)
 {
   g_autoptr (JsonParser) parser = NULL;
   g_autoptr (JsonGenerator) generator = NULL;
-  g_autoptr (nuvashalauncherVersionDescription) document = NULL;
+  g_autoptr (NuvashaLauncherVersionDescription) document = NULL;
   g_autofree char *data = NULL;
   gsize written = 0;
   JsonNode *root = NULL;
@@ -314,7 +314,7 @@ stage_profile (InstallRequest *request)
 {
   g_autoptr (GBytes) profile_bytes = NULL;
   g_autoptr (GBytes) document_bytes = NULL;
-  g_autoptr (nuvashalauncherVersionDescription) description = NULL;
+  g_autoptr (NuvashaLauncherVersionDescription) description = NULL;
   g_autoptr (GError) error = NULL;
   JsonParser *parser = NULL;
   const char *json_entry = "version.json";
@@ -551,19 +551,19 @@ version_is_path_segment (const char *version)
   return TRUE;
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_loaders_install_async (nuvashalauncherLoader              loader,
+NuvashaLauncherTaskScope *
+nuvashalauncher_loaders_install_async (NuvashaLauncherLoader              loader,
                            const char            *game_version,
                            const char            *loader_version,
-                           nuvashalauncherVersionDescription *game_document,
+                           NuvashaLauncherVersionDescription *game_document,
                            const char            *java_executable,
                            const char            *data_dir,
-                           nuvashalauncherLoadersProgressFunc  progress,
+                           NuvashaLauncherLoadersProgressFunc  progress,
                            gpointer                progress_data,
                            GAsyncReadyCallback     callback,
                            gpointer                user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   InstallRequest *request = NULL;
   g_autofree char *versions_dir = NULL;
@@ -669,7 +669,7 @@ nuvashalauncher_loaders_install_async (nuvashalauncherLoader              loader
   return g_steal_pointer (&scope);
 }
 
-nuvashalauncherLoaderInstall *
+NuvashaLauncherLoaderInstall *
 nuvashalauncher_loaders_install_finish (GAsyncResult *result, GError **error)
 {
   g_return_val_if_fail (nuvashalauncher_task_result_is_valid (result, "nuvashalauncher-task-scope"), NULL);

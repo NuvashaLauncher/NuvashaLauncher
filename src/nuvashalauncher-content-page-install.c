@@ -10,7 +10,7 @@
 #include "nuvashalauncher-modrinth.h"
 #include "nuvashalauncher-operation.h"
 
-/* Internal install/download workflow for nuvashalauncherContentPage. */
+/* Internal install/download workflow for NuvashaLauncherContentPage. */
 
 /* ---------------------------------------------------------- *
  * Writing files
@@ -58,10 +58,10 @@ install_file_free (InstallFile *file)
 
 /* The file of @version, named as it has to land in the folder. */
 static InstallFile *
-install_file_of (nuvashalauncherModrinthVersion *version, const char *replaces,
+install_file_of (NuvashaLauncherModrinthVersion *version, const char *replaces,
                  gboolean disabled, const char *project_name)
 {
-  nuvashalauncherModrinthFile *file = nuvashalauncher_modrinth_version_primary_file (version);
+  NuvashaLauncherModrinthFile *file = nuvashalauncher_modrinth_version_primary_file (version);
   InstallFile *install = NULL;
   g_autofree char *name = NULL;
   g_autofree char *old_name = NULL;
@@ -83,7 +83,7 @@ install_file_of (nuvashalauncherModrinthVersion *version, const char *replaces,
   for (guint i = 0; version->dependencies != NULL &&
                    i < version->dependencies->len; i++)
     {
-      nuvashalauncherModrinthDependency *dependency =
+      NuvashaLauncherModrinthDependency *dependency =
         g_ptr_array_index (version->dependencies, i);
       GPtrArray *target = dependency->type == nuvashalauncher_DEPENDENCY_REQUIRED
                             ? install->required_dependencies
@@ -114,15 +114,15 @@ install_file_of (nuvashalauncherModrinthVersion *version, const char *replaces,
   return install;
 }
 
- nuvashalauncherContentFile *
-installed_project_file (nuvashalauncherContentPage *self, const char *project_id)
+ NuvashaLauncherContentFile *
+installed_project_file (NuvashaLauncherContentPage *self, const char *project_id)
 {
   if (self == NULL || project_id == NULL || self->installed.files == NULL)
     return NULL;
 
   for (guint i = 0; i < self->installed.files->len; i++)
     {
-      nuvashalauncherContentFile *file = g_ptr_array_index (self->installed.files, i);
+      NuvashaLauncherContentFile *file = g_ptr_array_index (self->installed.files, i);
 
       if (g_strcmp0 (file->project_id, project_id) == 0)
         return file;
@@ -132,7 +132,7 @@ installed_project_file (nuvashalauncherContentPage *self, const char *project_id
 }
 
 void
-remove_duplicate_project_files (nuvashalauncherContentPage *self, const char *project_id,
+remove_duplicate_project_files (NuvashaLauncherContentPage *self, const char *project_id,
                                 const char *keep_path)
 {
   if (self == NULL || project_id == NULL || self->installed.files == NULL)
@@ -140,7 +140,7 @@ remove_duplicate_project_files (nuvashalauncherContentPage *self, const char *pr
 
   for (guint i = 0; i < self->installed.files->len; i++)
     {
-      nuvashalauncherContentFile *installed = g_ptr_array_index (self->installed.files, i);
+      NuvashaLauncherContentFile *installed = g_ptr_array_index (self->installed.files, i);
       g_autoptr (GError) error = NULL;
 
       if (g_strcmp0 (installed->project_id, project_id) != 0 ||
@@ -173,11 +173,11 @@ remove_duplicate_project_files (nuvashalauncherContentPage *self, const char *pr
  * file of it is still on its way, and the folder is kept here so the
  * download finishes without it. */
 typedef struct {
-  nuvashalauncherContentPage *page;   /* weak: the page can go during the run */
+  NuvashaLauncherContentPage *page;   /* weak: the page can go during the run */
   char *folder;           /* where the files go, kept for the whole run */
   GPtrArray *files;       /* InstallFile* */
   guint index;
-  nuvashalauncherDownload *download;  /* the manager's entry, held while the run lives */
+  NuvashaLauncherDownload *download;  /* the manager's entry, held while the run lives */
 } FetchRun;
 
 static void fetch_next (FetchRun *run);
@@ -218,7 +218,7 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
       if (run->page != NULL)
         {
-          nuvashalauncherContentPage *page = run->page;
+          NuvashaLauncherContentPage *page = run->page;
 
           /* A batch stops at the first file that fails rather than going
              on to the next with half of it missing. */
@@ -269,7 +269,7 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
       {
         g_autofree char *instance_directory = NULL;
-        nuvashalauncherContentIndexEntry entry = { 0 };
+        NuvashaLauncherContentIndexEntry entry = { 0 };
         g_object_get (run->page->instance, "directory", &instance_directory,
                       NULL);
         entry.filename = file->filename;
@@ -303,7 +303,7 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 fetch_next (FetchRun *run)
 {
-  nuvashalauncherContentPage *self = run->page;
+  NuvashaLauncherContentPage *self = run->page;
   InstallFile *file = NULL;
   g_autofree char *path = NULL;
 
@@ -355,8 +355,8 @@ fetch_next (FetchRun *run)
     nuvashalauncher_download_get_cancellable (run->download));
 }
 
-static nuvashalauncherDownloadKind
-content_download_kind (nuvashalauncherContentType type)
+static NuvashaLauncherDownloadKind
+content_download_kind (NuvashaLauncherContentType type)
 {
   switch (type)
     {
@@ -375,7 +375,7 @@ content_download_kind (nuvashalauncherContentType type)
 /* Takes the files of an install and writes them in order. The run owns
  * @files from here. */
 static void
-start_fetch (nuvashalauncherContentPage *self, GPtrArray *files)
+start_fetch (NuvashaLauncherContentPage *self, GPtrArray *files)
 {
   FetchRun *run = g_new0 (FetchRun, 1);
   guint count = files != NULL ? files->len : 0;
@@ -419,31 +419,31 @@ start_fetch (nuvashalauncherContentPage *self, GPtrArray *files)
  * ---------------------------------------------------------- */
 
 typedef struct {
-  nuvashalauncherContentPage *page;        /* weakly held */
-  nuvashalauncherModrinthVersion *version; /* transfer full, the version asked for */
+  NuvashaLauncherContentPage *page;        /* weakly held */
+  NuvashaLauncherModrinthVersion *version; /* transfer full, the version asked for */
   char *title;
   char *replaces;             /* the file an update takes the place of */
   gboolean stays_disabled;    /* an update of a disabled file stays so */
-  GPtrArray *queue;           /* nuvashalauncherModrinthDependency* to resolve */
+  GPtrArray *queue;           /* NuvashaLauncherModrinthDependency* to resolve */
   GPtrArray *files;           /* InstallFile* collected, dependencies */
   GHashTable *seen;           /* project ids already in the plan */
   GCancellable *cancellable;
 
   /* The versions request that has to answer before the plan moves on. */
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
 } PlanRun;
 
 static void plan_free (PlanRun *plan);
-static void show_plan (nuvashalauncherContentPage *self, PlanRun *plan);
+static void show_plan (NuvashaLauncherContentPage *self, PlanRun *plan);
 static void plan_versions_ready (GObject *source, GAsyncResult *result,
                                 gpointer user_data);
 
 static void
 plan_next (PlanRun *plan)
 {
-  nuvashalauncherModrinthDependency *dependency = NULL;
+  NuvashaLauncherModrinthDependency *dependency = NULL;
   g_autofree char *project_id = NULL;
-  nuvashalauncherContentPage *self = plan->page;
+  NuvashaLauncherContentPage *self = plan->page;
 
   if (self == NULL)
     {
@@ -507,7 +507,7 @@ plan_free (PlanRun *plan)
 /* Build confirmation text for dependencies and conflicts, or NULL when
  * the install needs no additional explanation. */
 static char *
-plan_text (nuvashalauncherContentPage *self, PlanRun *plan)
+plan_text (NuvashaLauncherContentPage *self, PlanRun *plan)
 {
   g_autoptr (GString) text = g_string_new (NULL);
   gboolean listed = FALSE;
@@ -542,7 +542,7 @@ plan_text (nuvashalauncherContentPage *self, PlanRun *plan)
 
       for (guint i = 0; i < plan->version->dependencies->len; i++)
         {
-          nuvashalauncherModrinthDependency *dependency =
+          NuvashaLauncherModrinthDependency *dependency =
             g_ptr_array_index (plan->version->dependencies, i);
 
           if (dependency->type != nuvashalauncher_DEPENDENCY_INCOMPATIBLE)
@@ -577,7 +577,7 @@ plan_text (nuvashalauncherContentPage *self, PlanRun *plan)
 static void
 on_plan_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
   PlanRun *plan = g_object_get_data (G_OBJECT (source), "nuvashalauncher-plan");
   const char *response =
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
@@ -611,7 +611,7 @@ on_plan_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 }
 
 static void
-show_plan (nuvashalauncherContentPage *self, PlanRun *plan)
+show_plan (NuvashaLauncherContentPage *self, PlanRun *plan)
 {
   /* An update of the whole list was confirmed once, as a whole: this plan
      is not asked for again, it is simply carried out. So is one pick of a
@@ -655,9 +655,9 @@ show_plan (nuvashalauncherContentPage *self, PlanRun *plan)
  * that names nothing to fetch stops the plan instead of writing half of
  * it. */
 static gboolean
-plan_take (PlanRun *plan, nuvashalauncherModrinthVersion *version)
+plan_take (PlanRun *plan, NuvashaLauncherModrinthVersion *version)
 {
-  nuvashalauncherContentPage *self = plan->page;
+  NuvashaLauncherContentPage *self = plan->page;
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) pending = NULL;
 
@@ -676,7 +676,7 @@ plan_take (PlanRun *plan, nuvashalauncherModrinthVersion *version)
 
   for (guint i = 0; i < pending->len; i++)
     {
-      nuvashalauncherModrinthDependency *dependency = g_ptr_array_index (pending, i);
+      NuvashaLauncherModrinthDependency *dependency = g_ptr_array_index (pending, i);
 
       /* One copy of a project is one file: the second time round it is
        * already in the plan. */
@@ -696,10 +696,10 @@ plan_versions_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                      gpointer user_data)
 {
   PlanRun *plan = user_data;
-  nuvashalauncherContentPage *self = plan->page;
+  NuvashaLauncherContentPage *self = plan->page;
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
-  nuvashalauncherModrinthVersion *version = NULL;
+  NuvashaLauncherModrinthVersion *version = NULL;
   InstallFile *file = NULL;
 
   versions = nuvashalauncher_modrinth_versions_finish (result, &error);
@@ -733,7 +733,7 @@ plan_versions_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   version = g_ptr_array_steal_index (versions, 0);
   {
     const char *project_name = NULL;
-    nuvashalauncherContentFile *installed = installed_project_file (self,
+    NuvashaLauncherContentFile *installed = installed_project_file (self,
                                                          version->project_id);
 
     if (self != NULL && self->browse.model != NULL)
@@ -766,7 +766,7 @@ plan_versions_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
 /* The install of one version and of everything it requires. */
 void
-start_plan (nuvashalauncherContentPage *self, nuvashalauncherModrinthVersion *version,
+start_plan (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthVersion *version,
             const char *title, const char *replaces, gboolean disabled)
 {
   PlanRun *plan = g_new0 (PlanRun, 1);
@@ -777,7 +777,7 @@ start_plan (nuvashalauncherContentPage *self, nuvashalauncherModrinthVersion *ve
   plan->title = g_strdup (title);
   if (replaces == NULL)
     {
-      nuvashalauncherContentFile *installed = installed_project_file (self,
+      NuvashaLauncherContentFile *installed = installed_project_file (self,
                                                            version->project_id);
 
       replaces = installed != NULL ? installed->path : NULL;

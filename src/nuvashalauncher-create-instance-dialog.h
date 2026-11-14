@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherCreateInstanceDialog: the single page dialog that creates a new
- * instance through nuvashalauncherInstanceManager. */
+/* NuvashaLauncherCreateInstanceDialog: the single page dialog that creates a new
+ * instance through NuvashaLauncherInstanceManager. */
 
 #ifndef nuvashalauncher_CREATE_INSTANCE_DIALOG_H
 #define nuvashalauncher_CREATE_INSTANCE_DIALOG_H
@@ -17,15 +17,15 @@ G_BEGIN_DECLS
 
 #define nuvashalauncher_TYPE_CREATE_INSTANCE_DIALOG (nuvashalauncher_create_instance_dialog_get_type ())
 
-G_DECLARE_FINAL_TYPE (nuvashalauncherCreateInstanceDialog, nuvashalauncher_create_instance_dialog,
+G_DECLARE_FINAL_TYPE (NuvashaLauncherCreateInstanceDialog, nuvashalauncher_create_instance_dialog,
                       nuvashalauncher, CREATE_INSTANCE_DIALOG, AdwDialog)
 
 /* Returns a floating dialog, like every other GTK widget. Presenting it
  * takes ownership of that reference. The dialog keeps its own
  * references on @manager and @settings until it is destroyed. The
  * Minecraft versions are fetched when the dialog opens. */
-nuvashalauncherCreateInstanceDialog *nuvashalauncher_create_instance_dialog_new (nuvashalauncherInstanceManager *manager,
-                                                         nuvashalauncherSettings        *settings);
+NuvashaLauncherCreateInstanceDialog *nuvashalauncher_create_instance_dialog_new (NuvashaLauncherInstanceManager *manager,
+                                                         NuvashaLauncherSettings        *settings);
 
 G_END_DECLS
 

@@ -54,7 +54,7 @@ face_texture (GdkTexture *skin)
 
 typedef struct
 {
-  nuvashalauncherUsersPopover *owner;
+  NuvashaLauncherUsersPopover *owner;
   GtkImage *image;
   GHashTable *cache;
   char *url;
@@ -107,7 +107,7 @@ done:
 
 /* Load the face from @url without blocking the UI. */
 void
-nuvashalauncher_users_set_avatar (nuvashalauncherUsersPopover *self,
+nuvashalauncher_users_set_avatar (NuvashaLauncherUsersPopover *self,
             GtkImage        *image,
             const char       *url)
 {

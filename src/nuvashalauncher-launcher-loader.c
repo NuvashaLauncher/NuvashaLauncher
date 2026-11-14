@@ -29,9 +29,9 @@ on_game_document (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                   gpointer user_data)
 {
   LoaderRequest *request = user_data;
-  nuvashalauncher *self = request->launcher;
+  NuvashaLauncher *self = request->launcher;
   g_autoptr (GError) error = NULL;
-  nuvashalauncherVersionDescription *document = nuvashalauncher_version_load_finish (result, &error);
+  NuvashaLauncherVersionDescription *document = nuvashalauncher_version_load_finish (result, &error);
 
   if (document == NULL)
     {
@@ -60,11 +60,11 @@ on_vanilla_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                    gpointer user_data)
 {
   LoaderRequest *request = user_data;
-  nuvashalauncher *self = request->launcher;
+  NuvashaLauncher *self = request->launcher;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherVersionDescription) vanilla =
+  g_autoptr (NuvashaLauncherVersionDescription) vanilla =
     nuvashalauncher_version_load_finish (result, &error);
-  g_autoptr (nuvashalauncherVersionDescription) merged = NULL;
+  g_autoptr (NuvashaLauncherVersionDescription) merged = NULL;
 
   if (vanilla == NULL)
     {
@@ -80,7 +80,7 @@ on_vanilla_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   {
     g_autofree char *natives_dir =
       g_build_filename (self->game_directory, "natives", NULL);
-    nuvashalauncherTaskScope *resolving = nuvashalauncher_resolve_description_async (
+    NuvashaLauncherTaskScope *resolving = nuvashalauncher_resolve_description_async (
       merged, merged->id, NULL, NULL, natives_dir, NULL, on_resolve_progress,
       self, on_resolved, g_object_ref (self));
 
@@ -97,9 +97,9 @@ on_profile_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                    gpointer user_data)
 {
   LoaderRequest *request = user_data;
-  nuvashalauncher *self = request->launcher;
+  NuvashaLauncher *self = request->launcher;
   g_autoptr (GError) error = NULL;
-  nuvashalauncherVersionDescription *profile =
+  NuvashaLauncherVersionDescription *profile =
     nuvashalauncher_loaders_profile_finish (result, &error);
 
   if (profile == NULL)
@@ -127,9 +127,9 @@ on_profile_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 }
 
 static void
-resolve_with_a_loader (nuvashalauncher        *self,
-                       nuvashalauncherVersionManifest *manifest,
-                       nuvashalauncherLoader           loader,
+resolve_with_a_loader (NuvashaLauncher *self,
+                       NuvashaLauncherVersionManifest *manifest,
+                       NuvashaLauncherLoader           loader,
                        const char         *loader_version)
 {
   LoaderRequest *request = g_new0 (LoaderRequest, 1);
@@ -171,9 +171,9 @@ void
 on_manifest_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                    gpointer user_data)
 {
-  nuvashalauncher *self = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *self = nuvashalauncher_LAUNCHER (user_data);
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherVersionManifest) manifest =
+  g_autoptr (NuvashaLauncherVersionManifest) manifest =
     nuvashalauncher_version_manifest_fetch_finish (result, &error);
 
   if (manifest == NULL)
@@ -191,7 +191,7 @@ on_manifest_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   {
     g_autofree char *loader_version = NULL;
-    nuvashalauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
+    NuvashaLauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
 
     g_object_get (self->instance, "loader", &loader, "loader-version",
                   &loader_version, NULL);
@@ -216,7 +216,7 @@ on_manifest_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   {
     g_autofree char *natives_dir =
       g_build_filename (self->game_directory, "natives", NULL);
-    nuvashalauncherTaskScope *resolving = nuvashalauncher_resolve_version_async (
+    NuvashaLauncherTaskScope *resolving = nuvashalauncher_resolve_version_async (
       manifest, self->version, NULL, natives_dir, NULL, on_resolve_progress,
       self, on_resolved, g_object_ref (self));
 

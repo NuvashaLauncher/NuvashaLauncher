@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <template class="nuvashalauncherCreateInstanceDialog" parent="AdwDialog">
+  <template class="NuvashaLauncherCreateInstanceDialog" parent="AdwDialog">
     <property name="title" translatable="yes">Create Instance</property>
     <child>
       <object class="AdwToastOverlay" id="toast_overlay">

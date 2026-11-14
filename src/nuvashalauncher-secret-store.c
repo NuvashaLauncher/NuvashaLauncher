@@ -82,7 +82,7 @@ secret_error (GError **error, GError *cause)
 }
 
 static char *
-account_payload (const nuvashalauncherAccount *account)
+account_payload (const NuvashaLauncherAccount *account)
 {
   g_autoptr (JsonBuilder) builder = json_builder_new ();
   g_autoptr (JsonGenerator) generator = json_generator_new ();
@@ -96,7 +96,7 @@ account_payload (const nuvashalauncherAccount *account)
   return payload;
 }
 
-static nuvashalauncherAccount *
+static NuvashaLauncherAccount *
 account_from_payload (const char *payload)
 {
   g_autoptr (JsonParser) parser = json_parser_new ();
@@ -149,7 +149,7 @@ nuvashalauncher_secret_store_load (GPtrArray **accounts,
   for (GList *item = items; item != NULL; item = item->next)
     {
       SecretValue *value = secret_item_get_secret (SECRET_ITEM (item->data));
-      g_autoptr (nuvashalauncherAccount) account =
+      g_autoptr (NuvashaLauncherAccount) account =
         value != NULL ? account_from_payload (secret_value_get_text (value)) : NULL;
 
       if (value != NULL)
@@ -174,7 +174,7 @@ nuvashalauncher_secret_store_load (GPtrArray **accounts,
 }
 
 gboolean
-nuvashalauncher_secret_store_save_account (const nuvashalauncherAccount *account,
+nuvashalauncher_secret_store_save_account (const NuvashaLauncherAccount *account,
                                            GError **error)
 {
   g_autofree char *payload = NULL;

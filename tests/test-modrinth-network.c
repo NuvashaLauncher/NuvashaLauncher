@@ -19,7 +19,7 @@ typedef struct _RequestWait RequestWait;
 struct _RequestWait
 {
   GMainLoop *loop;
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
   GError *error;
   char *answer;
   RequestWait *group;
@@ -45,6 +45,42 @@ server_handler (SoupServer *server G_GNUC_UNUSED, SoupServerMessage *message,
   fixture->hits++;
   if (g_str_equal (path, "/ok"))
     reply (message, 200, "{\"kind\":\"fixture\",\"value\":42}");
+  else if (g_str_equal (path, "/version_files/update"))
+    {
+      SoupMessageBody *req_body = soup_server_message_get_request_body (message);
+      const char *method = soup_server_message_get_method (message);
+
+      g_assert_cmpstr (method, ==, "POST");
+      g_assert_nonnull (req_body);
+      g_assert_nonnull (req_body->data);
+      g_assert_nonnull (strstr (req_body->data, "\"hash1\""));
+      g_assert_nonnull (strstr (req_body->data, "\"hash2\""));
+      g_assert_nonnull (strstr (req_body->data, "\"algorithm\":\"sha1\""));
+      g_assert_nonnull (strstr (req_body->data, "\"loaders\":[\"fabric\"]"));
+      g_assert_nonnull (strstr (req_body->data, "\"game_versions\":[\"1.20.1\"]"));
+
+      reply (message, 200,
+             "{"
+             "\"hash1\":{"
+               "\"id\":\"v2\","
+               "\"project_id\":\"proj1\","
+               "\"name\":\"Update 2\","
+               "\"version_number\":\"2.0.0\","
+               "\"game_versions\":[\"1.20.1\"],"
+               "\"loaders\":[\"fabric\"],"
+               "\"files\":[{\"url\":\"https://example.invalid/mod2.jar\",\"filename\":\"mod2.jar\",\"primary\":true,\"hashes\":{\"sha1\":\"newsha1\"}}]"
+             "},"
+             "\"hash2\":{"
+               "\"id\":\"v3\","
+               "\"project_id\":\"proj2\","
+               "\"name\":\"Wrong Loader\","
+               "\"version_number\":\"3.0.0\","
+               "\"game_versions\":[\"1.20.1\"],"
+               "\"loaders\":[\"forge\"],"
+               "\"files\":[{\"url\":\"https://example.invalid/mod3.jar\",\"filename\":\"mod3.jar\",\"primary\":true,\"hashes\":{\"sha1\":\"newsha2\"}}]"
+             "}"
+             "}");
+    }
   else if (g_str_equal (path, "/bad"))
     reply (message, 200, "not json");
   else if (g_str_equal (path, "/missing"))
@@ -181,6 +217,77 @@ test_not_found_and_cancellation (NetworkFixture *fixture)
   g_print ("ok - not-found and cancelled Modrinth requests finish cleanly\n");
 }
 
+typedef struct
+{
+  GMainLoop *loop;
+  NuvashaLauncherTaskScope *operation;
+  GHashTable *updates;
+  GError *error;
+} BatchUpdatesWait;
+
+static void
+batch_updates_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                        gpointer user_data)
+{
+  BatchUpdatesWait *wait = user_data;
+
+  wait->updates = nuvashalauncher_modrinth_updates_by_hashes_finish (result, &wait->error);
+  nuvashalauncher_task_scope_unref (wait->operation);
+  wait->operation = NULL;
+  g_main_loop_quit (wait->loop);
+}
+
+static void
+test_batch_updates_network (NetworkFixture *fixture)
+{
+  g_autofree char *url = url_for (fixture, "/version_files/update");
+  g_autoptr (GPtrArray) hashes = g_ptr_array_new ();
+  g_autoptr (GPtrArray) empty_hashes = g_ptr_array_new ();
+  BatchUpdatesWait wait = { 0 };
+  BatchUpdatesWait empty_wait = { 0 };
+  NuvashaLauncherModrinthVersion *v1 = NULL;
+  guint hits_before = fixture->hits;
+
+  g_ptr_array_add (hashes, "hash1");
+  g_ptr_array_add (hashes, "hash2");
+
+  wait.loop = g_main_loop_new (NULL, FALSE);
+  wait.operation = nuvashalauncher_modrinth_updates_by_hashes_url_async (
+    url, nuvashalauncher_CONTENT_MOD, hashes, "1.20.1", "fabric",
+    batch_updates_finished, &wait);
+  g_main_loop_run (wait.loop);
+
+  g_assert_no_error (wait.error);
+  g_assert_nonnull (wait.updates);
+  g_assert_cmpuint (fixture->hits, ==, hits_before + 1);
+  g_assert_cmpuint (g_hash_table_size (wait.updates), ==, 1);
+
+  v1 = g_hash_table_lookup (wait.updates, "hash1");
+  g_assert_nonnull (v1);
+  g_assert_cmpstr (v1->version_id, ==, "v2");
+  g_assert_null (g_hash_table_lookup (wait.updates, "hash2"));
+
+  g_hash_table_unref (wait.updates);
+  g_main_loop_unref (wait.loop);
+
+  hits_before = fixture->hits;
+  empty_wait.loop = g_main_loop_new (NULL, FALSE);
+  empty_wait.operation = nuvashalauncher_modrinth_updates_by_hashes_url_async (
+    url, nuvashalauncher_CONTENT_MOD, empty_hashes, "1.20.1", "fabric",
+    batch_updates_finished, &empty_wait);
+  g_main_loop_run (empty_wait.loop);
+
+  g_assert_no_error (empty_wait.error);
+  g_assert_nonnull (empty_wait.updates);
+  g_assert_cmpuint (g_hash_table_size (empty_wait.updates), ==, 0);
+  g_assert_cmpuint (fixture->hits, ==, hits_before);
+
+  g_hash_table_unref (empty_wait.updates);
+  g_main_loop_unref (empty_wait.loop);
+
+  g_print ("ok - batch Modrinth updates send one POST and filter incompatible versions\n");
+}
+
 int
 main (void)
 {
@@ -188,7 +295,7 @@ main (void)
   g_autofree char *root = g_dir_make_tmp ("nuvashalauncher-modrinth-XXXXXX", &error);
   g_autofree char *config = g_build_filename (root, "config", NULL);
   g_autofree char *cache = g_build_filename (root, "cache", NULL);
-  nuvashalauncherSettings *settings = NULL;
+  NuvashaLauncherSettings *settings = NULL;
   NetworkFixture fixture = { 0 };
   GSList *uris = NULL;
   char *uri = NULL;
@@ -214,6 +321,7 @@ main (void)
   test_success_and_deduplication (&fixture);
   test_malformed_response (&fixture);
   test_not_found_and_cancellation (&fixture);
+  test_batch_updates_network (&fixture);
 
   soup_server_disconnect (fixture.server);
   g_clear_object (&fixture.server);

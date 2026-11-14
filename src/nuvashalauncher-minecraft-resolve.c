@@ -86,7 +86,7 @@ request_fail_and_wait (ResolveRequest *request, GError *error)
 void
 report (ResolveRequest *request)
 {
-  nuvashalauncherResolveProgress progress = { request->stage, request->done,
+  NuvashaLauncherResolveProgress progress = { request->stage, request->done,
                                   request->total };
 
   if (request->progress != NULL)
@@ -118,7 +118,7 @@ operation_finished (ResolveRequest *request, ResolveStep next, GError *error)
 
 /* Complete the request with the resolved version or an error. */
 static void
-request_end (ResolveRequest *request, nuvashalauncherResolvedVersion *resolved)
+request_end (ResolveRequest *request, NuvashaLauncherResolvedVersion *resolved)
 {
   if (resolved != NULL)
     nuvashalauncher_task_scope_return_pointer (request->scope, resolved,
@@ -214,7 +214,7 @@ download_file (ResolveRequest *request, ResolveStep next, const char *url,
  * ---------------------------------------------------------- */
 
 void
-nuvashalauncher_resolved_version_free (nuvashalauncherResolvedVersion *resolved)
+nuvashalauncher_resolved_version_free (NuvashaLauncherResolvedVersion *resolved)
 {
   if (resolved == NULL)
     return;
@@ -238,7 +238,7 @@ void
 resolve_finish (ResolveRequest *request)
 {
   g_autoptr (GError) error = NULL;
-  nuvashalauncherResolvedVersion *resolved = NULL;
+  NuvashaLauncherResolvedVersion *resolved = NULL;
 
   if (request->error == NULL)
     {
@@ -277,7 +277,7 @@ natives_extracted (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 resolve_dependencies (ResolveRequest *request)
 {
-  nuvashalauncherVersionDescription *description = request->description;
+  NuvashaLauncherVersionDescription *description = request->description;
   g_autoptr (GPtrArray) files = NULL;
   g_autoptr (GError) error = NULL;
 
@@ -296,7 +296,7 @@ resolve_dependencies (ResolveRequest *request)
   /* Unpack the native JARs collected during planning. */
   for (guint i = 0; i < files->len; i++)
     {
-      const nuvashalauncherResolveFile *file = g_ptr_array_index (files, i);
+      const NuvashaLauncherResolveFile *file = g_ptr_array_index (files, i);
 
       if (file->natives)
         g_ptr_array_add (request->natives,
@@ -339,7 +339,7 @@ resolve_dependencies (ResolveRequest *request)
   /* The download module writes into a directory that already exists. */
   for (guint i = 0; i < files->len; i++)
     {
-      const nuvashalauncherResolveFile *file = g_ptr_array_index (files, i);
+      const NuvashaLauncherResolveFile *file = g_ptr_array_index (files, i);
 
       if (!nuvashalauncher_resolve_ensure_parent_directory (file->path, &error))
         {
@@ -351,7 +351,7 @@ resolve_dependencies (ResolveRequest *request)
 
   for (guint i = 0; i < files->len; i++)
     {
-      const nuvashalauncherResolveFile *file = g_ptr_array_index (files, i);
+      const NuvashaLauncherResolveFile *file = g_ptr_array_index (files, i);
 
       download_file (request, resolve_natives, file->url, file->path,
                      file->sha1);
@@ -402,7 +402,7 @@ resolve_natives (ResolveRequest *request)
     }
 
   {
-    nuvashalauncherTaskScope *extracting = nuvashalauncher_resolve_extract_natives_async (
+    NuvashaLauncherTaskScope *extracting = nuvashalauncher_resolve_extract_natives_async (
       request->natives, request->natives_dir, natives_extracted, request);
 
     nuvashalauncher_task_scope_follow_cancellable (extracting, request->cancellable);
@@ -491,8 +491,8 @@ request_new (const char         *version_id,
              const char         *data_dir,
              const char         *natives_dir,
              const char         *asset_base_url,
-             nuvashalauncherTaskScope       *scope,
-             nuvashalauncherResolveProgressFunc progress,
+             NuvashaLauncherTaskScope       *scope,
+             NuvashaLauncherResolveProgressFunc progress,
              gpointer              progress_data)
 {
   ResolveRequest *request = g_new0 (ResolveRequest, 1);
@@ -564,18 +564,18 @@ request_make_directories (ResolveRequest *request)
   return TRUE;
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_resolve_version_async (nuvashalauncherVersionManifest *manifest,
+NuvashaLauncherTaskScope *
+nuvashalauncher_resolve_version_async (NuvashaLauncherVersionManifest *manifest,
                            const char         *version_id,
                            const char         *data_dir,
                            const char         *natives_dir,
                            const char         *asset_base_url,
-                           nuvashalauncherResolveProgressFunc progress,
+                           NuvashaLauncherResolveProgressFunc progress,
                            gpointer              progress_data,
                            GAsyncReadyCallback   callback,
                            gpointer              user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   ResolveRequest *request;
 
@@ -593,7 +593,7 @@ nuvashalauncher_resolve_version_async (nuvashalauncherVersionManifest *manifest,
     }
 
   {
-    nuvashalauncherTaskScope *loading = nuvashalauncher_version_load_async (manifest, version_id,
+    NuvashaLauncherTaskScope *loading = nuvashalauncher_version_load_async (manifest, version_id,
                                                     version_loaded, request);
 
     nuvashalauncher_task_scope_follow_cancellable (loading, request->cancellable);
@@ -603,19 +603,19 @@ nuvashalauncher_resolve_version_async (nuvashalauncherVersionManifest *manifest,
   return g_steal_pointer (&scope);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_resolve_description_async (nuvashalauncherVersionDescription *description,
+NuvashaLauncherTaskScope *
+nuvashalauncher_resolve_description_async (NuvashaLauncherVersionDescription *description,
                                const char             *version_id,
                                const char             *client_jar,
                                const char             *data_dir,
                                const char             *natives_dir,
                                const char             *asset_base_url,
-                               nuvashalauncherResolveProgressFunc   progress,
+                               NuvashaLauncherResolveProgressFunc   progress,
                                gpointer                progress_data,
                                GAsyncReadyCallback     callback,
                                gpointer                user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   ResolveRequest *request;
 
@@ -646,7 +646,7 @@ nuvashalauncher_resolve_description_async (nuvashalauncherVersionDescription *de
   return g_steal_pointer (&scope);
 }
 
-nuvashalauncherResolvedVersion *
+NuvashaLauncherResolvedVersion *
 nuvashalauncher_resolve_version_finish (GAsyncResult *result, GError **error)
 {
   g_return_val_if_fail (nuvashalauncher_task_result_is_valid (result, "nuvashalauncher-task-scope"), NULL);

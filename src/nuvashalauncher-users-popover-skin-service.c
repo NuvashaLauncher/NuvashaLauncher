@@ -147,7 +147,7 @@ on_skin_dialog_closed (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_data)
 static void
 save_cape_choice (SkinMenu *menu)
 {
-  g_autoptr (nuvashalauncherAccount) account = NULL;
+  g_autoptr (NuvashaLauncherAccount) account = NULL;
   g_autoptr (GError) error = NULL;
   if (menu->owner == NULL || menu->account == NULL)
     return;

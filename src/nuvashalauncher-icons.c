@@ -17,7 +17,7 @@
 #include <string.h>
 
 void
-nuvashalauncher_icon_load_free (nuvashalauncherIconLoad *load)
+nuvashalauncher_icon_load_free (NuvashaLauncherIconLoad *load)
 {
   g_clear_object (&load->icon);
   if (load->operation != NULL)
@@ -26,7 +26,7 @@ nuvashalauncher_icon_load_free (nuvashalauncherIconLoad *load)
 }
 
 void
-nuvashalauncher_icon_load_apply (nuvashalauncherIconLoad *load, GAsyncResult *result)
+nuvashalauncher_icon_load_apply (NuvashaLauncherIconLoad *load, GAsyncResult *result)
 {
   g_autoptr (GError) error = NULL;
   g_autofree char *path = nuvashalauncher_icon_load_finish (result, &error);
@@ -41,15 +41,15 @@ void
 nuvashalauncher_icon_load_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                      gpointer user_data)
 {
-  nuvashalauncherIconLoad *load = user_data;
+  NuvashaLauncherIconLoad *load = user_data;
   nuvashalauncher_icon_load_apply (load, result);
   nuvashalauncher_icon_load_free (load);
 }
 
-nuvashalauncherIconLoad *
+NuvashaLauncherIconLoad *
 nuvashalauncher_icon_load_start (GtkWidget *icon, const char *url)
 {
-  nuvashalauncherIconLoad *load = g_new0 (nuvashalauncherIconLoad, 1);
+  NuvashaLauncherIconLoad *load = g_new0 (NuvashaLauncherIconLoad, 1);
 
   g_object_set_data_full (G_OBJECT (icon), "nuvashalauncher-icon-url", g_strdup (url),
                           g_free);
@@ -94,7 +94,7 @@ typedef struct
 
   /* Borrowed from the operation the caller owns, except while the load
      waits in the queue: the caller's reference is what keeps it alive. */
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
   char *url;
   char *path;
 } IconLoad;
@@ -203,11 +203,11 @@ icon_pump (void)
     }
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_icon_load_async (const char *url, GAsyncReadyCallback callback,
                      gpointer user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   GTask *task = nuvashalauncher_task_scope_task (scope);
   g_autofree char *directory = NULL;

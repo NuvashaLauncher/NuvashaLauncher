@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherJavaRow: the first entry names the runtime the automatic choice
+/* NuvashaLauncherJavaRow: the first entry names the runtime the automatic choice
  * stands for and that runtime is left out of the list below, so it is
  * shown once.
  *
@@ -21,7 +21,7 @@
 #include <adwaita.h>
 #include <gtk/gtk.h>
 
-static nuvashalauncherJavaRow *watched_row = NULL;
+static NuvashaLauncherJavaRow *watched_row = NULL;
 static guint selected_calls = 0;
 
 static void
@@ -64,7 +64,7 @@ pump (int millis)
 int
 main (void)
 {
-  nuvashalauncherJavaRow *row = NULL;
+  NuvashaLauncherJavaRow *row = NULL;
   GtkStringList *model = NULL;
   GPtrArray *detected = NULL;
   guint n = 0;
@@ -107,7 +107,7 @@ main (void)
    * this is checked where the answer is unambiguous. */
   if (detected->len == 1)
     {
-      nuvashalauncherJava *only = g_ptr_array_index (detected, 0);
+      NuvashaLauncherJava *only = g_ptr_array_index (detected, 0);
 
       /* Asking for what that one runtime offers makes it the automatic
        * choice. */

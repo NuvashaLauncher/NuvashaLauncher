@@ -52,7 +52,7 @@ nuvashalauncher_modpack_error_quark (void)
  * ---------------------------------------------------------- */
 
 void
-nuvashalauncher_modpack_file_free (nuvashalauncherModpackFile *file)
+nuvashalauncher_modpack_file_free (NuvashaLauncherModpackFile *file)
 {
   if (file == NULL)
     return;
@@ -65,7 +65,7 @@ nuvashalauncher_modpack_file_free (nuvashalauncherModpackFile *file)
 }
 
 void
-nuvashalauncher_modpack_dependency_free (nuvashalauncherModpackDependency *dependency)
+nuvashalauncher_modpack_dependency_free (NuvashaLauncherModpackDependency *dependency)
 {
   if (dependency == NULL)
     return;
@@ -76,7 +76,7 @@ nuvashalauncher_modpack_dependency_free (nuvashalauncherModpackDependency *depen
 }
 
 void
-nuvashalauncher_modpack_free (nuvashalauncherModpack *modpack)
+nuvashalauncher_modpack_free (NuvashaLauncherModpack *modpack)
 {
   if (modpack == NULL)
     return;
@@ -167,12 +167,12 @@ archive_read_entry (struct archive *archive, guint64 limit, GError **error)
 
 /* The index of the pack from a zip, and only a safe one: every entry
  * is checked on the way in. */
-nuvashalauncherModpack *
+NuvashaLauncherModpack *
 nuvashalauncher_modpack_new_from_zip (const char *zip_path, GError **error)
 {
   struct archive *archive = NULL;
   struct archive_entry *header = NULL;
-  g_autoptr (nuvashalauncherModpack) pack = NULL;
+  g_autoptr (NuvashaLauncherModpack) pack = NULL;
   g_autoptr (GBytes) index_bytes = NULL;
   guint64 paths = 0;
   guint64 size = 0;
@@ -367,7 +367,7 @@ error:
 
 typedef struct {
   char *path;
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
 } ModpackRead;
 
 static void
@@ -385,9 +385,9 @@ modpack_read_thread (GTask *task G_GNUC_UNUSED,
                      gpointer task_data, GCancellable *cancellable)
 {
   ModpackRead *read = task_data;
-  g_autoptr (nuvashalauncherTaskScope) scope = g_steal_pointer (&read->scope);
+  g_autoptr (NuvashaLauncherTaskScope) scope = g_steal_pointer (&read->scope);
   g_autoptr (GError) error = NULL;
-  nuvashalauncherModpack *pack = nuvashalauncher_modpack_new_from_zip (read->path, &error);
+  NuvashaLauncherModpack *pack = nuvashalauncher_modpack_new_from_zip (read->path, &error);
 
   if (g_cancellable_is_cancelled (cancellable))
     {
@@ -409,12 +409,12 @@ modpack_read_thread (GTask *task G_GNUC_UNUSED,
                                  (GDestroyNotify) nuvashalauncher_modpack_free);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_modpack_new_from_zip_async (const char *zip_path,
                                 GAsyncReadyCallback callback,
                                 gpointer user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   GTask *task = nuvashalauncher_task_scope_task (scope);
   ModpackRead *read = NULL;
@@ -432,7 +432,7 @@ nuvashalauncher_modpack_new_from_zip_async (const char *zip_path,
   return g_steal_pointer (&scope);
 }
 
-nuvashalauncherModpack *
+NuvashaLauncherModpack *
 nuvashalauncher_modpack_new_from_zip_finish (GAsyncResult *result, GError **error)
 {
   return g_task_propagate_pointer (G_TASK (result), error);

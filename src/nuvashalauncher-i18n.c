@@ -40,7 +40,7 @@ nuvashalauncher_i18n_template_strings (void)
 #define nuvashalauncher_LOCALE_DIR "/usr/local/share/locale"
 #endif
 
-static const nuvashalauncherLanguage languages[] = {
+static const NuvashaLauncherLanguage languages[] = {
   { "system", N_("System default") },
   { "en", N_("English") },
   { "es_AR", N_("Español (Argentina)") },
@@ -71,7 +71,7 @@ static const nuvashalauncherLanguage languages[] = {
   { "ar", N_("العربية") },
 };
 
-const nuvashalauncherLanguage *
+const NuvashaLauncherLanguage *
 nuvashalauncher_i18n_languages (gsize *length)
 {
   if (length != NULL)

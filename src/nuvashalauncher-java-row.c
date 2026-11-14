@@ -2,79 +2,23 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherJavaRow: Java picker with loading, retry, automatic, and custom
+/* NuvashaLauncherJavaRow: Java picker with loading, retry, automatic, and custom
  * runtime entries. */
 
 /* realpath() is provided by glibc; nuvashalauncher targets Linux. */
 #define _GNU_SOURCE
 
-#include "nuvashalauncher-java-row.h"
+#include "nuvashalauncher-java-row-private.h"
 #include "nuvashalauncher-ui-feedback.h"
 #include "nuvashalauncher-i18n.h"
 
 #include <stdlib.h>
 #include <unistd.h>
 
-static void custom_loaded (GObject*, GAsyncResult*, gpointer);
-static void on_picked (GObject*, GParamSpec*, gpointer);
-static void fill (nuvashalauncherJavaRow *self);
-
-struct _nuvashalauncherJavaRow
+void
+nuvashalauncher_java_row_ask_free (JavaAsk *ask)
 {
-  AdwComboRow parent_instance;
-
-  /* Cancelled on reload and on dispose. */
-  GCancellable *cancellable;
-
-  /* The detected installations, GPtrArray<nuvashalauncherJava*> owned by the row. */
-  GPtrArray *javas;
-
-  /* Model contents: the automatic runtime is index 0 with a NULL path;
-   * the remaining entries are detected/custom runtimes and a trailing entry
-   * that asks for another runtime instead of naming one. */
-  GPtrArray *ids;   /* strdupped paths; the automatic entry has a NULL id */
-  GPtrArray *names; /* the titles shown in the model */
-
-  guint add_index;
-  guint restore;
-
-  /* Runtime represented by the automatic entry, when available.
-   * That runtime is named in the first entry and left out of the list below
-   * so it is not shown twice. */
-  int required_major;
-
-  /* Selection the instance asked for; NULL is the automatic entry. */
-  char *wanted;
-  gboolean probe_started;
-
-  /* Custom Java probe result, including failed probes with only a path. */
-  nuvashalauncherJava *probed;
-
-  gboolean ready;
-  gboolean disposed;
-  gboolean automatic_selection;
-  gboolean rebuilding;
-  GtkButton *retry;
-  GtkButton *add_button;
-
-  /* The request the row is waiting for. Borrowed from the JavaAsk that
-     started it: that one releases it when the answer arrives, and a
-     newer request replaces it before an older answer can arrive. */
-  nuvashalauncherTaskScope *operation;
-};
-
-/* One Java request the row started: the row, which can be disposed while
-   the answer is on its way, and the handle that answer is to release. */
-typedef struct
-{
-  nuvashalauncherJavaRow *row;
-  nuvashalauncherTaskScope *operation;
-} JavaAsk;
-
-static void
-java_ask_free (JavaAsk *ask)
-{
-  nuvashalauncherJavaRow *row = ask->row;
+  NuvashaLauncherJavaRow *row = ask->row;
 
   /* The row's own pointer is a loan of this reference, so it is given
      back before the reference goes. */
@@ -89,7 +33,7 @@ java_ask_free (JavaAsk *ask)
   g_free (ask);
 }
 
-G_DEFINE_FINAL_TYPE (nuvashalauncherJavaRow, nuvashalauncher_java_row, ADW_TYPE_COMBO_ROW)
+G_DEFINE_FINAL_TYPE (NuvashaLauncherJavaRow, nuvashalauncher_java_row, ADW_TYPE_COMBO_ROW)
 
 static void
 java_factory_setup (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
@@ -120,7 +64,7 @@ java_list_item_bind (GtkSignalListItemFactory *factory G_GNUC_UNUSED,
  * ---------------------------------------------------------- */
 
 static void
-put_model (nuvashalauncherJavaRow *self, GPtrArray *names, guint position)
+put_model (NuvashaLauncherJavaRow *self, GPtrArray *names, guint position)
 {
   g_autofree const char **strings = NULL;
   g_autoptr (GtkStringList) list = NULL;
@@ -141,7 +85,7 @@ put_model (nuvashalauncherJavaRow *self, GPtrArray *names, guint position)
 }
 
 static void
-show_loading (nuvashalauncherJavaRow *self)
+show_loading (NuvashaLauncherJavaRow *self)
 {
   g_autoptr (GPtrArray) names = g_ptr_array_new_with_free_func (g_free);
 
@@ -156,19 +100,19 @@ show_loading (nuvashalauncherJavaRow *self)
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self), NULL);
 }
 
-static void
-show_error (nuvashalauncherJavaRow *self, const char *message)
+void
+nuvashalauncher_java_row_show_error (NuvashaLauncherJavaRow *self, const char *message)
 {
   /* Reuse the normal model construction so the combo keeps its factory,
    * selection and Add Java Runtime entry exactly as it does after a
    * successful scan. */
-  fill (self);
+  nuvashalauncher_java_row_fill (self);
   adw_action_row_set_subtitle (ADW_ACTION_ROW (self), message);
   gtk_widget_set_visible (GTK_WIDGET (self->retry), TRUE);
 }
 
 static char *
-java_label (nuvashalauncherJava *java)
+java_label (NuvashaLauncherJava *java)
 {
   if (java->major_version == 0)
     return g_strdup_printf (_("Custom: %s"), java->executable);
@@ -182,12 +126,12 @@ java_label (nuvashalauncherJava *java)
                           java->major_version);
 }
 
-static void
-fill (nuvashalauncherJavaRow *self)
+void
+nuvashalauncher_java_row_fill (NuvashaLauncherJavaRow *self)
 {
   GPtrArray *names = g_ptr_array_new_with_free_func (g_free);
   GPtrArray *ids = g_ptr_array_new_with_free_func (g_free);
-  const nuvashalauncherJava *fallback = NULL;
+  const NuvashaLauncherJava *fallback = NULL;
   g_autofree char *wanted_real = NULL;
   guint position = GTK_INVALID_LIST_POSITION;
 
@@ -214,14 +158,14 @@ fill (nuvashalauncherJavaRow *self)
 
   if (fallback != NULL)
     {
-      g_ptr_array_add (names, java_label ((nuvashalauncherJava *) fallback));
+      g_ptr_array_add (names, java_label ((NuvashaLauncherJava *) fallback));
       g_ptr_array_add (ids, NULL);
       position = 0;
     }
 
   for (guint i = 0; self->javas != NULL && i < self->javas->len; i++)
     {
-      nuvashalauncherJava *java = g_ptr_array_index (self->javas, i);
+      NuvashaLauncherJava *java = g_ptr_array_index (self->javas, i);
       g_autofree char *real = realpath (java->executable, NULL);
       gboolean is_wanted =
         wanted_real != NULL &&
@@ -297,7 +241,7 @@ fill (nuvashalauncherJavaRow *self)
 
       for (guint i = 0; self->javas != NULL && i < self->javas->len; i++)
         {
-          nuvashalauncherJava *java = g_ptr_array_index (self->javas, i);
+          NuvashaLauncherJava *java = g_ptr_array_index (self->javas, i);
           g_autofree char *real = realpath (java->executable, NULL);
 
           if (g_strcmp0 (real != NULL ? real : java->executable,
@@ -314,7 +258,8 @@ fill (nuvashalauncherJavaRow *self)
 
           self->probe_started = TRUE;
           ask->row = g_object_ref (self);
-          ask->operation = nuvashalauncher_java_probe_async (self->wanted, custom_loaded,
+          ask->operation = nuvashalauncher_java_probe_async (
+            self->wanted, nuvashalauncher_java_row_custom_loaded,
                                                  ask);
           nuvashalauncher_task_scope_follow_cancellable (ask->operation,
                                              self->cancellable);
@@ -327,260 +272,18 @@ fill (nuvashalauncherJavaRow *self)
  * Async completion
  * ---------------------------------------------------------- */
 
-static void
-detect_finished (GObject      *source G_GNUC_UNUSED,
-                 GAsyncResult *result,
-                 gpointer      user_data)
-{
-  JavaAsk *ask = user_data;
-  nuvashalauncherJavaRow *self = ask->row;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (GPtrArray) javas = nuvashalauncher_java_detect_finish (result, &error);
-
-  /* A detection of a row that has been reloaded since is about a machine
-     state that is gone: it fills nothing. */
-  if (self != NULL && self->operation == ask->operation && !self->disposed)
-    {
-      if (javas != NULL)
-        {
-          g_clear_pointer (&self->javas, g_ptr_array_unref);
-          self->javas = g_steal_pointer (&javas);
-          fill (self);
-        }
-      else if (error != NULL &&
-               !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-        {
-          show_error (self, nuvashalauncher_error_message (error));
-          gtk_widget_set_tooltip_text (GTK_WIDGET (self), nuvashalauncher_error_message (error));
-        }
-    }
-
-  java_ask_free (ask);
-}
-
-static void
-custom_loaded (GObject      *source G_GNUC_UNUSED,
-               GAsyncResult *result,
-               gpointer      user_data)
-{
-  JavaAsk *ask = user_data;
-  nuvashalauncherJavaRow *self = ask->row;
-  g_autoptr (GError) error = NULL;
-  nuvashalauncherJava *custom = nuvashalauncher_java_probe_finish (result, &error);
-
-  /* Disposing or reloading the row cancels a custom probe. Do not rebuild
-   * a row whose state has already been torn down for that cancellation. */
-  if (self == NULL || self->disposed || self->operation != ask->operation ||
-      (error != NULL &&
-       g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED)))
-    {
-      nuvashalauncher_java_free (custom);
-      java_ask_free (ask);
-      return;
-    }
-
-  if (custom != NULL)
-    {
-      nuvashalauncher_java_register_custom_path (custom->executable);
-      nuvashalauncher_java_free (self->probed);
-      self->probed = custom;
-    }
-  else
-    {
-      /* Probing failed because the configured runtime was removed or is
-       * no longer usable: clear the selection back to automatic. */
-      nuvashalauncher_java_free (self->probed);
-      self->probed = NULL;
-      g_clear_pointer (&self->wanted, g_free);
-    }
-
-  fill (self);
-  /* Reloading a configured custom runtime can keep the same numeric combo
-   * selection, so notify the owner even when GTK suppresses a selected-value
-   * change. The instance page must revalidate its status subtitle. */
-  g_object_notify (G_OBJECT (self), "selected");
-  java_ask_free (ask);
-}
-
-static void
-on_retry_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
-{
-  nuvashalauncherJavaRow *self = nuvashalauncher_JAVA_ROW (user_data);
-
-  nuvashalauncher_java_row_load (self, self->wanted);
-}
-
-/* ---------------------------------------------------------- *
- * Adding a runtime the scan did not report
- *
- * The last entry of the list asks for one instead of naming one, so it
- * carries no path and the caller's handler has nothing to store. Picking
- * it puts the row back to the entry it came from, so the list never
- * shows the ask as the answer, and opens the chooser. What comes back is
- * probed and appended like any other runtime, and selected: the selection
- * is what tells the caller which Java the user wants.
- * ---------------------------------------------------------- */
-
-static void
-add_probed (GObject      *source G_GNUC_UNUSED,
-            GAsyncResult *result,
-            gpointer      user_data)
-{
-  JavaAsk *ask = user_data;
-  nuvashalauncherJavaRow *self = ask->row;
-  g_autoptr (GError) error = NULL;
-  nuvashalauncherJava *probe = nuvashalauncher_java_probe_finish (result, &error);
-
-  if (self == NULL || self->disposed || self->operation != ask->operation)
-    {
-      nuvashalauncher_java_free (probe);
-      java_ask_free (ask);
-      return;
-    }
-
-  if (probe == NULL)
-    {
-      adw_action_row_set_subtitle (
-        ADW_ACTION_ROW (self),
-        error != NULL ? nuvashalauncher_error_message (error)
-                       : _("The Java executable could not be used. Select a working Java runtime."));
-      gtk_widget_set_tooltip_text (GTK_WIDGET (self),
-                                   error != NULL ? nuvashalauncher_error_message (error) : NULL);
-      java_ask_free (ask);
-      return;
-    }
-
-  {
-      const char *executable = probe->executable;
-      nuvashalauncher_java_register_custom_path (executable);
-      nuvashalauncher_java_row_set_custom (self, executable, g_steal_pointer (&probe));
-      /* A custom runtime can occupy the same numeric selection as the
-       * placeholder it replaces. GTK then quite correctly suppresses
-       * notify::selected, but the owning instance still needs to persist the
-       * newly probed executable. */
-      g_object_notify (G_OBJECT (self), "selected");
-  }
-
-  java_ask_free (ask);
-}
-
-static void
-probe_custom_path (nuvashalauncherJavaRow *self, const char *path)
-{
-  JavaAsk *ask = g_new0 (JavaAsk, 1);
-
-  if (self->operation != NULL)
-    nuvashalauncher_task_scope_cancel (self->operation);
-
-  ask->row = g_object_ref (self);
-  ask->operation = nuvashalauncher_java_probe_async (path, add_probed, ask);
-  nuvashalauncher_task_scope_follow_cancellable (ask->operation, self->cancellable);
-  self->operation = ask->operation;
-}
-
-static void
-add_chosen (GObject *dialog, GAsyncResult *result, gpointer user_data)
-{
-  nuvashalauncherJavaRow *self = nuvashalauncher_JAVA_ROW (user_data);
-  g_autoptr (GError) error = NULL;
-  g_autoptr (GFile) file =
-    gtk_file_dialog_open_finish (GTK_FILE_DIALOG (dialog), result, &error);
-
-  g_object_unref (dialog);
-
-  if (self->disposed)
-    {
-      g_object_unref (self);
-      return;
-    }
-
-  if (file == NULL)
-    {
-      if (error != NULL &&
-          !g_error_matches (error, GTK_DIALOG_ERROR,
-                            GTK_DIALOG_ERROR_DISMISSED) &&
-          !g_error_matches (error, GTK_DIALOG_ERROR,
-                            GTK_DIALOG_ERROR_CANCELLED))
-        {
-          adw_action_row_set_subtitle (ADW_ACTION_ROW (self), nuvashalauncher_error_message (error));
-          gtk_widget_set_tooltip_text (GTK_WIDGET (self), nuvashalauncher_error_message (error));
-        }
-
-      g_object_unref (self);
-      return;
-    }
-
-  {
-    g_autofree char *path = g_file_get_path (file);
-
-    if (path == NULL)
-      adw_action_row_set_subtitle (
-        ADW_ACTION_ROW (self),
-        _("the chosen file does not report a Java version"));
-    else
-      {
-        probe_custom_path (self, path);
-      }
-  }
-
-  g_object_unref (self);
-}
-
-static void
-open_add_dialog (nuvashalauncherJavaRow *self)
-{
-  GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
-  GtkFileDialog *dialog = gtk_file_dialog_new ();
-  g_autoptr (GFile) home = g_file_new_for_path (g_get_home_dir ());
-
-  gtk_file_dialog_set_initial_folder (dialog, home);
-  gtk_file_dialog_set_title (dialog, _("Choose Java executable"));
-  gtk_file_dialog_open (dialog, GTK_IS_WINDOW (root) ? GTK_WINDOW (root) : NULL,
-                        NULL, add_chosen, g_object_ref (self));
-}
-
-static void
-on_add_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
-{
-  open_add_dialog (nuvashalauncher_JAVA_ROW (user_data));
-}
-
-static void
-on_picked (GObject    *object G_GNUC_UNUSED,
-           GParamSpec *pspec G_GNUC_UNUSED,
-           gpointer    user_data)
-{
-  nuvashalauncherJavaRow *self = nuvashalauncher_JAVA_ROW (user_data);
-  guint selected = adw_combo_row_get_selected (ADW_COMBO_ROW (self));
-
-  if (self->rebuilding)
-    return;
-
-  if (selected == self->add_index)
-    {
-      adw_combo_row_set_selected (ADW_COMBO_ROW (self), self->restore);
-      open_add_dialog (self);
-    }
-  else if (selected < self->ids->len)
-    {
-      self->restore = selected;
-      self->automatic_selection = self->ids->pdata[selected] == NULL;
-      g_set_str (&self->wanted, self->ids->pdata[selected]);
-    }
-}
-
 /* ---------------------------------------------------------- *
  * Public API
  * ---------------------------------------------------------- */
 
-nuvashalauncherJavaRow *
+NuvashaLauncherJavaRow *
 nuvashalauncher_java_row_new (void)
 {
   return g_object_new (nuvashalauncher_TYPE_JAVA_ROW, NULL);
 }
 
 void
-nuvashalauncher_java_row_set_required_major (nuvashalauncherJavaRow *self, int required_major)
+nuvashalauncher_java_row_set_required_major (NuvashaLauncherJavaRow *self, int required_major)
 {
   g_return_if_fail (nuvashalauncher_IS_JAVA_ROW (self));
 
@@ -594,11 +297,11 @@ nuvashalauncher_java_row_set_required_major (nuvashalauncherJavaRow *self, int r
   self->required_major = required_major;
 
   if (self->ready)
-    fill (self);
+    nuvashalauncher_java_row_fill (self);
 }
 
 void
-nuvashalauncher_java_row_load (nuvashalauncherJavaRow *self, const char *wanted)
+nuvashalauncher_java_row_load (NuvashaLauncherJavaRow *self, const char *wanted)
 {
   g_return_if_fail (nuvashalauncher_IS_JAVA_ROW (self));
 
@@ -616,14 +319,15 @@ nuvashalauncher_java_row_load (nuvashalauncherJavaRow *self, const char *wanted)
     JavaAsk *ask = g_new0 (JavaAsk, 1);
 
     ask->row = g_object_ref (self);
-    ask->operation = nuvashalauncher_java_detect_async (detect_finished, ask);
+    ask->operation = nuvashalauncher_java_detect_async (
+      nuvashalauncher_java_row_detect_finished, ask);
     nuvashalauncher_task_scope_follow_cancellable (ask->operation, self->cancellable);
     self->operation = ask->operation;
   }
 }
 
 GPtrArray *
-nuvashalauncher_java_row_get_detected (nuvashalauncherJavaRow *self)
+nuvashalauncher_java_row_get_detected (NuvashaLauncherJavaRow *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_JAVA_ROW (self), NULL);
 
@@ -631,7 +335,7 @@ nuvashalauncher_java_row_get_detected (nuvashalauncherJavaRow *self)
 }
 
 gboolean
-nuvashalauncher_java_row_get_ready (nuvashalauncherJavaRow *self)
+nuvashalauncher_java_row_get_ready (NuvashaLauncherJavaRow *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_JAVA_ROW (self), FALSE);
 
@@ -639,7 +343,7 @@ nuvashalauncher_java_row_get_ready (nuvashalauncherJavaRow *self)
 }
 
 const char *
-nuvashalauncher_java_row_get_selected_path (nuvashalauncherJavaRow *self)
+nuvashalauncher_java_row_get_selected_path (NuvashaLauncherJavaRow *self)
 {
   guint position;
 
@@ -667,7 +371,7 @@ nuvashalauncher_java_row_get_selected_path (nuvashalauncherJavaRow *self)
 }
 
 void
-nuvashalauncher_java_row_select_path (nuvashalauncherJavaRow *self, const char *path)
+nuvashalauncher_java_row_select_path (NuvashaLauncherJavaRow *self, const char *path)
 {
   g_return_if_fail (nuvashalauncher_IS_JAVA_ROW (self));
 
@@ -697,9 +401,9 @@ nuvashalauncher_java_row_select_path (nuvashalauncherJavaRow *self, const char *
 }
 
 void
-nuvashalauncher_java_row_set_custom (nuvashalauncherJavaRow *self,
+nuvashalauncher_java_row_set_custom (NuvashaLauncherJavaRow *self,
                          const char *path,
-                         nuvashalauncherJava    *probed)
+                         NuvashaLauncherJava    *probed)
 {
   g_return_if_fail (nuvashalauncher_IS_JAVA_ROW (self));
 
@@ -708,7 +412,7 @@ nuvashalauncher_java_row_set_custom (nuvashalauncherJavaRow *self,
   /* Reuse an entry that detection already reports. */
   for (guint i = 0; self->javas != NULL && i < self->javas->len; i++)
     {
-      nuvashalauncherJava *java = g_ptr_array_index (self->javas, i);
+      NuvashaLauncherJava *java = g_ptr_array_index (self->javas, i);
       g_autofree char *java_real = realpath (java->executable, NULL);
       g_autofree char *real = realpath (path, NULL);
 
@@ -743,11 +447,11 @@ nuvashalauncher_java_row_set_custom (nuvashalauncherJavaRow *self,
     self->probed = probed;
   else
     {
-      self->probed = g_new0 (nuvashalauncherJava, 1);
+      self->probed = g_new0 (NuvashaLauncherJava, 1);
       self->probed->executable = g_strdup (path);
     }
 
-  fill (self);
+  nuvashalauncher_java_row_fill (self);
 
   /* The probed entry is the last one that has a path: the entry that
      asks for another runtime sits after it and has none. */
@@ -762,7 +466,7 @@ nuvashalauncher_java_row_set_custom (nuvashalauncherJavaRow *self,
 static void
 nuvashalauncher_java_row_dispose (GObject *object)
 {
-  nuvashalauncherJavaRow *self = nuvashalauncher_JAVA_ROW (object);
+  NuvashaLauncherJavaRow *self = nuvashalauncher_JAVA_ROW (object);
 
   self->disposed = TRUE;
   g_cancellable_cancel (self->cancellable);
@@ -776,7 +480,7 @@ nuvashalauncher_java_row_dispose (GObject *object)
 static void
 nuvashalauncher_java_row_finalize (GObject *object)
 {
-  nuvashalauncherJavaRow *self = nuvashalauncher_JAVA_ROW (object);
+  NuvashaLauncherJavaRow *self = nuvashalauncher_JAVA_ROW (object);
 
   g_clear_pointer (&self->ids, g_ptr_array_unref);
   g_clear_pointer (&self->names, g_ptr_array_unref);
@@ -788,7 +492,7 @@ nuvashalauncher_java_row_finalize (GObject *object)
 }
 
 static void
-nuvashalauncher_java_row_class_init (nuvashalauncherJavaRowClass *klass)
+nuvashalauncher_java_row_class_init (NuvashaLauncherJavaRowClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
@@ -797,7 +501,7 @@ nuvashalauncher_java_row_class_init (nuvashalauncherJavaRowClass *klass)
 }
 
 static void
-nuvashalauncher_java_row_init (nuvashalauncherJavaRow *self)
+nuvashalauncher_java_row_init (NuvashaLauncherJavaRow *self)
 {
   /* A Java path is a file name and may hold an "&": it is plain text. */
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self), FALSE);
@@ -838,19 +542,22 @@ nuvashalauncher_java_row_init (nuvashalauncherJavaRow *self)
    nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (self->retry), _("Retry"));
   gtk_widget_set_valign (GTK_WIDGET (self->retry), GTK_ALIGN_CENTER);
   gtk_widget_set_visible (GTK_WIDGET (self->retry), FALSE);
-  g_signal_connect_object (self->retry, "clicked", G_CALLBACK (on_retry_clicked),
+  g_signal_connect_object (self->retry, "clicked",
+                           G_CALLBACK (nuvashalauncher_java_row_on_retry_clicked),
                            self, 0);
   adw_action_row_add_suffix (ADW_ACTION_ROW (self), GTK_WIDGET (self->retry));
 
   /* First, so the entry that asks for a runtime can put the selection
      back before whoever uses the row sees it. */
-   g_signal_connect_object (self, "notify::selected", G_CALLBACK (on_picked), self, 0);
+  g_signal_connect_object (self, "notify::selected",
+                           G_CALLBACK (nuvashalauncher_java_row_on_picked), self, 0);
 
-   self->add_button = GTK_BUTTON (gtk_button_new_with_label (_("Add Java Runtime")));
-   gtk_widget_set_valign (GTK_WIDGET (self->add_button), GTK_ALIGN_CENTER);
-   gtk_widget_set_visible (GTK_WIDGET (self->add_button), FALSE);
-   g_signal_connect_object (self->add_button, "clicked",
-                            G_CALLBACK (on_add_clicked), self, 0);
+  self->add_button = GTK_BUTTON (gtk_button_new_with_label (_("Add Java Runtime")));
+  gtk_widget_set_valign (GTK_WIDGET (self->add_button), GTK_ALIGN_CENTER);
+  gtk_widget_set_visible (GTK_WIDGET (self->add_button), FALSE);
+  g_signal_connect_object (self->add_button, "clicked",
+                           G_CALLBACK (nuvashalauncher_java_row_on_add_clicked),
+                           self, 0);
    adw_action_row_add_suffix (ADW_ACTION_ROW (self),
                               GTK_WIDGET (self->add_button));
 }

@@ -3,7 +3,7 @@
 static void
 test_facets_of_a_mod_search (void)
 {
-  g_autoptr (nuvashalauncherModrinthSearch) search =
+  g_autoptr (NuvashaLauncherModrinthSearch) search =
     search_new (nuvashalauncher_CONTENT_MOD, "", "1.20.1", "fabric");
   g_autofree char *facets = NULL;
 
@@ -22,7 +22,7 @@ test_facets_of_a_mod_search (void)
 static void
 test_facets_of_a_quilt_search (void)
 {
-  g_autoptr (nuvashalauncherModrinthSearch) search =
+  g_autoptr (NuvashaLauncherModrinthSearch) search =
     search_new (nuvashalauncher_CONTENT_MOD, "", "1.20.1", "quilt");
   g_autofree char *facets = nuvashalauncher_modrinth_facets (search);
 
@@ -37,7 +37,7 @@ test_facets_of_a_quilt_search (void)
 static void
 test_facets_of_a_pack_search (void)
 {
-  g_autoptr (nuvashalauncherModrinthSearch) search =
+  g_autoptr (NuvashaLauncherModrinthSearch) search =
     search_new (nuvashalauncher_CONTENT_RESOURCE_PACK, NULL, "1.20.1", NULL);
   g_autofree char *facets = NULL;
   g_autofree char *shaders = NULL;
@@ -69,7 +69,7 @@ test_categories_filter_by_project_type (void)
   g_autoptr (GPtrArray) shaders = NULL;
   g_autoptr (GPtrArray) modpacks = NULL;
   g_autoptr (GPtrArray) resourcepacks = NULL;
-  nuvashalauncherModrinthCategory *category = NULL;
+  NuvashaLauncherModrinthCategory *category = NULL;
 
   shaders = nuvashalauncher_modrinth_categories_from_json (json, -1, "shader", NULL);
   g_assert_nonnull (shaders);
@@ -85,7 +85,7 @@ test_categories_filter_by_project_type (void)
   modpacks = nuvashalauncher_modrinth_categories_from_json (json, -1, "modpack", NULL);
   g_assert_cmpuint (modpacks->len, ==, 1);
   g_assert_cmpstr (
-      ((nuvashalauncherModrinthCategory *) g_ptr_array_index (modpacks, 0))->name, ==,
+      ((NuvashaLauncherModrinthCategory *) g_ptr_array_index (modpacks, 0))->name, ==,
       "kitchen-sink");
 
   resourcepacks =
@@ -137,7 +137,7 @@ test_category_labels (void)
 static void
 test_facets_with_categories (void)
 {
-  g_autoptr (nuvashalauncherModrinthSearch) search =
+  g_autoptr (NuvashaLauncherModrinthSearch) search =
     search_new (nuvashalauncher_CONTENT_SHADER_PACK, "", "1.20.1", NULL);
   g_autofree char *facets = NULL;
 
@@ -156,7 +156,7 @@ test_facets_with_categories (void)
 static void
 test_search_url_paginates (void)
 {
-  g_autoptr (nuvashalauncherModrinthSearch) search =
+  g_autoptr (NuvashaLauncherModrinthSearch) search =
     search_new (nuvashalauncher_CONTENT_MOD, "sodium", "1.20.1", "fabric");
   g_autofree char *url = NULL;
   g_autofree char *expected = NULL;
@@ -178,7 +178,7 @@ test_search_url_paginates (void)
 static void
 test_modpack_filters_are_or_groups_and_sort (void)
 {
-  g_autoptr (nuvashalauncherModrinthSearch) search =
+  g_autoptr (NuvashaLauncherModrinthSearch) search =
     search_new (nuvashalauncher_CONTENT_MODPACK, "pack", NULL, NULL);
   g_autofree char *facets = NULL;
   g_autofree char *url = NULL;
@@ -208,8 +208,8 @@ test_search_results (void)
 {
   g_autofree char *json = read_fixture ("modrinth-search-mods.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModrinthResults) results = NULL;
-  nuvashalauncherModrinthProject *first = NULL;
+  g_autoptr (NuvashaLauncherModrinthResults) results = NULL;
+  NuvashaLauncherModrinthProject *first = NULL;
 
   results = nuvashalauncher_modrinth_results_from_json (json, -1, &error);
   g_assert_no_error (error);
@@ -235,7 +235,7 @@ test_search_without_hits (void)
 {
   g_autofree char *json = read_fixture ("modrinth-search-empty.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModrinthResults) results = NULL;
+  g_autoptr (NuvashaLauncherModrinthResults) results = NULL;
 
   results = nuvashalauncher_modrinth_results_from_json (json, -1, &error);
   g_assert_no_error (error);
@@ -252,7 +252,7 @@ test_search_rejects_malformed_hit (void)
   const char *json =
     "{\"total_hits\":1,\"hits\":[{\"slug\":\"missing-id\"}]}";
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModrinthResults) results =
+  g_autoptr (NuvashaLauncherModrinthResults) results =
     nuvashalauncher_modrinth_results_from_json (json, -1, &error);
 
   g_assert_null (results);
@@ -264,7 +264,7 @@ test_project_details (void)
 {
   g_autofree char *json = read_fixture ("modrinth-project.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModrinthDetails) details = NULL;
+  g_autoptr (NuvashaLauncherModrinthDetails) details = NULL;
 
   details = nuvashalauncher_modrinth_details_from_json (json, -1, &error);
   g_assert_no_error (error);
@@ -292,7 +292,7 @@ test_versions_of_a_mod (void)
   g_autofree char *json = read_fixture ("modrinth-versions-mods.json");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
-  nuvashalauncherModrinthVersion *version = NULL;
+  NuvashaLauncherModrinthVersion *version = NULL;
 
   versions = nuvashalauncher_modrinth_versions_from_json (
       json, -1, nuvashalauncher_CONTENT_MOD, "1.20.1", "fabric", &error);
@@ -314,7 +314,7 @@ test_versions_of_a_mod (void)
   /* The file of a version is what gets installed, with its hash, so that
    * the download can be verified against what Modrinth published. */
   {
-    nuvashalauncherModrinthFile *file = nuvashalauncher_modrinth_version_primary_file (version);
+    NuvashaLauncherModrinthFile *file = nuvashalauncher_modrinth_version_primary_file (version);
 
     g_assert_nonnull (file);
     g_assert_cmpstr (file->filename, ==, "cloth-config-11.1.118-fabric.jar");
@@ -333,7 +333,7 @@ test_versions_of_a_pack (void)
     read_fixture ("modrinth-versions-resource-pack.json");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
-  nuvashalauncherModrinthVersion *version = NULL;
+  NuvashaLauncherModrinthVersion *version = NULL;
 
   /* No loader is asked for: the game loads a pack itself. */
   versions = nuvashalauncher_modrinth_versions_from_json (
@@ -364,7 +364,7 @@ test_versions_of_a_shader (void)
     read_fixture ("modrinth-shader-versions.json");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) versions = NULL;
-  nuvashalauncherModrinthVersion *version = NULL;
+  NuvashaLauncherModrinthVersion *version = NULL;
 
   /* A loader is not asked for, and not asked about: the loaders a shader
      publishes are the programs that can read it, not the one running
@@ -391,9 +391,9 @@ test_versions_of_a_shader (void)
      game version whatever loaders it names, and does not fit a game
      version it does not list. */
   {
-    g_autoptr (nuvashalauncherModrinthVersion) fitted =
+    g_autoptr (NuvashaLauncherModrinthVersion) fitted =
       nuvashalauncher_modrinth_version_copy (g_ptr_array_index (versions, 0));
-    g_autoptr (nuvashalauncherModrinthVersion) other_game =
+    g_autoptr (NuvashaLauncherModrinthVersion) other_game =
       version_from_fixture (json, "r2.1");
 
     g_assert_nonnull (fitted);
@@ -469,8 +469,8 @@ test_version_by_hash (void)
 {
   g_autofree char *json = read_fixture ("modrinth-version-by-hash.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModrinthVersion) version = NULL;
-  nuvashalauncherModrinthFile *file = NULL;
+  g_autoptr (NuvashaLauncherModrinthVersion) version = NULL;
+  NuvashaLauncherModrinthFile *file = NULL;
 
   version = nuvashalauncher_modrinth_version_from_json (json, -1, &error);
   g_assert_no_error (error);
@@ -514,9 +514,9 @@ test_update_by_hash (void)
   g_autofree char *json = read_fixture ("modrinth-update-by-hash.json");
   g_autofree char *installed = read_fixture ("modrinth-version-by-hash.json");
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModrinthVersion) installed_version = NULL;
-  g_autoptr (nuvashalauncherModrinthVersion) update = NULL;
-  nuvashalauncherModrinthFile *file = NULL;
+  g_autoptr (NuvashaLauncherModrinthVersion) installed_version = NULL;
+  g_autoptr (NuvashaLauncherModrinthVersion) update = NULL;
+  NuvashaLauncherModrinthFile *file = NULL;
 
   installed_version = nuvashalauncher_modrinth_version_from_json (installed, -1, &error);
   g_assert_no_error (error);
@@ -552,6 +552,41 @@ test_update_by_hash (void)
            "project\n");
 }
 
+static void
+test_batch_updates_from_json (void)
+{
+  g_autofree char *version_json = read_fixture ("modrinth-update-by-hash.json");
+  g_autofree char *batch_json = g_strdup_printf (
+    "{\"bdd6b8ac84b46ae56a3bbb761ce430c48e42e00d\":%s,\"missing_null\":null}",
+    version_json);
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GHashTable) updates = NULL;
+  g_autoptr (GHashTable) empty_updates = NULL;
+  g_autoptr (GHashTable) bad_updates = NULL;
+  NuvashaLauncherModrinthVersion *update = NULL;
+
+  updates = nuvashalauncher_modrinth_updates_from_json (batch_json, -1, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (updates);
+  g_assert_cmpuint (g_hash_table_size (updates), ==, 1);
+
+  update = g_hash_table_lookup (updates, "bdd6b8ac84b46ae56a3bbb761ce430c48e42e00d");
+  g_assert_nonnull (update);
+  g_assert_cmpstr (update->version_id, ==, "OihdIimA");
+
+  empty_updates = nuvashalauncher_modrinth_updates_from_json ("{}", -1, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (empty_updates);
+  g_assert_cmpuint (g_hash_table_size (empty_updates), ==, 0);
+
+  bad_updates = nuvashalauncher_modrinth_updates_from_json ("[]", -1, &error);
+  g_assert_null (bad_updates);
+  g_assert_error (error, nuvashalauncher_MODRINTH_ERROR,
+                  nuvashalauncher_MODRINTH_ERROR_PARSE);
+
+  g_print ("ok - batch hash update responses parse into a hash table\n");
+}
+
 int
 main (int argc, char **argv)
 {
@@ -574,5 +609,6 @@ main (int argc, char **argv)
   g_test_add_func ("/modrinth/no_compatible_version", test_no_compatible_version);
   g_test_add_func ("/modrinth/version_by_hash", test_version_by_hash);
   g_test_add_func ("/modrinth/update_by_hash", test_update_by_hash);
+  g_test_add_func ("/modrinth/batch_updates_from_json", test_batch_updates_from_json);
   return g_test_run ();
 }

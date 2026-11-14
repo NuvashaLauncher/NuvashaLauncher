@@ -198,8 +198,8 @@ arch_spellings (const char *arch)
 }
 
 const char *
-nuvashalauncher_resolve_native_classifier (const nuvashalauncherLibrary       *library,
-                               const nuvashalauncherRuleContext *context)
+nuvashalauncher_resolve_native_classifier (const NuvashaLauncherLibrary       *library,
+                               const NuvashaLauncherRuleContext *context)
 {
   const char *value = NULL;
   const char *const *spellings = NULL;
@@ -273,7 +273,7 @@ nuvashalauncher_resolve_entry_name_is_safe (const char *entry_name)
  * ---------------------------------------------------------- */
 
 void
-nuvashalauncher_resolve_file_free (nuvashalauncherResolveFile *file)
+nuvashalauncher_resolve_file_free (NuvashaLauncherResolveFile *file)
 {
   if (file == NULL)
     return;
@@ -284,11 +284,11 @@ nuvashalauncher_resolve_file_free (nuvashalauncherResolveFile *file)
   g_free (file);
 }
 
-nuvashalauncherResolveFile *
+NuvashaLauncherResolveFile *
 nuvashalauncher_resolve_file_new (const char *path, const char *url, const char *sha1,
                       gboolean natives, GPtrArray *exclude)
 {
-  nuvashalauncherResolveFile *file = g_new0 (nuvashalauncherResolveFile, 1);
+  NuvashaLauncherResolveFile *file = g_new0 (NuvashaLauncherResolveFile, 1);
 
   file->path = g_strdup (path);
   file->url = g_strdup (url);
@@ -303,7 +303,7 @@ nuvashalauncher_resolve_file_new (const char *path, const char *url, const char 
    carries the classifier of a natives jar. NULL when the coordinates
    make no path. */
 static char *
-library_file_path (const nuvashalauncherLibrary *library, const char *classifier,
+library_file_path (const NuvashaLauncherLibrary *library, const char *classifier,
                    const char *libraries_dir)
 {
   g_autofree char *from_coordinates = NULL;
@@ -329,7 +329,7 @@ file_already_listed (GPtrArray *files, const char *path)
 {
   for (guint i = 0; i < files->len; i++)
     {
-      const nuvashalauncherResolveFile *file = g_ptr_array_index (files, i);
+      const NuvashaLauncherResolveFile *file = g_ptr_array_index (files, i);
 
       if (g_str_equal (file->path, path))
         return TRUE;
@@ -343,8 +343,8 @@ file_already_listed (GPtrArray *files, const char *path)
    not say where it comes from, and that is not worth failing a whole
    version over. */
 static void
-add_file (GPtrArray *files, const nuvashalauncherLibrary *library,
-          const nuvashalauncherDownloadInfo *info, const char *classifier,
+add_file (GPtrArray *files, const NuvashaLauncherLibrary *library,
+          const NuvashaLauncherDownloadInfo *info, const char *classifier,
           const char *libraries_dir, gboolean natives)
 {
   g_autofree char *path = NULL;
@@ -368,8 +368,8 @@ add_file (GPtrArray *files, const nuvashalauncherLibrary *library,
 }
 
 GPtrArray *
-nuvashalauncher_resolve_library_files (nuvashalauncherVersionDescription *description,
-                           const nuvashalauncherRuleContext   *context,
+nuvashalauncher_resolve_library_files (NuvashaLauncherVersionDescription *description,
+                           const NuvashaLauncherRuleContext   *context,
                            const char             *libraries_dir)
 {
   g_autoptr (GPtrArray) files =
@@ -381,7 +381,7 @@ nuvashalauncher_resolve_library_files (nuvashalauncherVersionDescription *descri
 
   for (guint i = 0; i < description->libraries->len; i++)
     {
-      nuvashalauncherLibrary *library = g_ptr_array_index (description->libraries, i);
+      NuvashaLauncherLibrary *library = g_ptr_array_index (description->libraries, i);
       const char *classifier = NULL;
 
       if (!nuvashalauncher_library_allowed (library, context))
@@ -413,8 +413,8 @@ nuvashalauncher_resolve_library_files (nuvashalauncherVersionDescription *descri
 }
 
 char *
-nuvashalauncher_resolve_classpath (nuvashalauncherVersionDescription *description,
-                       const nuvashalauncherRuleContext   *context,
+nuvashalauncher_resolve_classpath (NuvashaLauncherVersionDescription *description,
+                       const NuvashaLauncherRuleContext   *context,
                        const char             *libraries_dir,
                        const char             *client_jar)
 {
@@ -426,7 +426,7 @@ nuvashalauncher_resolve_classpath (nuvashalauncherVersionDescription *descriptio
 
   for (guint i = 0; i < files->len; i++)
     {
-      const nuvashalauncherResolveFile *file = g_ptr_array_index (files, i);
+      const NuvashaLauncherResolveFile *file = g_ptr_array_index (files, i);
 
       /* A natives jar is unpacked, not put on the classpath. */
       if (file->natives)
@@ -456,8 +456,8 @@ nuvashalauncher_resolve_classpath (nuvashalauncherVersionDescription *descriptio
  * ---------------------------------------------------------- */
 
 static GPtrArray *
-arguments_of (nuvashalauncherVersionDescription *description,
-              const nuvashalauncherRuleContext   *context, gboolean jvm)
+arguments_of (NuvashaLauncherVersionDescription *description,
+              const NuvashaLauncherRuleContext   *context, gboolean jvm)
 {
   GPtrArray *arguments =
     jvm ? description->jvm_arguments : description->game_arguments;
@@ -465,7 +465,7 @@ arguments_of (nuvashalauncherVersionDescription *description,
 
   for (guint i = 0; i < arguments->len; i++)
     {
-      const nuvashalauncherArgument *argument = g_ptr_array_index (arguments, i);
+      const NuvashaLauncherArgument *argument = g_ptr_array_index (arguments, i);
 
       if (!nuvashalauncher_argument_allowed (argument, context))
         continue;
@@ -479,8 +479,8 @@ arguments_of (nuvashalauncherVersionDescription *description,
 }
 
 GPtrArray *
-nuvashalauncher_resolve_jvm_arguments (nuvashalauncherVersionDescription *description,
-                           const nuvashalauncherRuleContext   *context)
+nuvashalauncher_resolve_jvm_arguments (NuvashaLauncherVersionDescription *description,
+                           const NuvashaLauncherRuleContext   *context)
 {
   g_return_val_if_fail (description != NULL, NULL);
   g_return_val_if_fail (context != NULL, NULL);
@@ -489,8 +489,8 @@ nuvashalauncher_resolve_jvm_arguments (nuvashalauncherVersionDescription *descri
 }
 
 GPtrArray *
-nuvashalauncher_resolve_game_arguments (nuvashalauncherVersionDescription *description,
-                            const nuvashalauncherRuleContext   *context)
+nuvashalauncher_resolve_game_arguments (NuvashaLauncherVersionDescription *description,
+                            const NuvashaLauncherRuleContext   *context)
 {
   g_return_val_if_fail (description != NULL, NULL);
   g_return_val_if_fail (context != NULL, NULL);

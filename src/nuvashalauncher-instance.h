@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherInstance: one launcher instance, a Minecraft installation with its
+/* NuvashaLauncherInstance: one launcher instance, a Minecraft installation with its
  * own directory, game version, mod loader and Java settings.
  *
  * Plain data object with JSON serialization: no widgets and no file or
@@ -24,18 +24,18 @@ typedef enum {
   nuvashalauncher_LOADER_FORGE,
   nuvashalauncher_LOADER_NEOFORGE,
   nuvashalauncher_LOADER_QUILT,
-} nuvashalauncherLoader;
+} NuvashaLauncherLoader;
 
 #define nuvashalauncher_TYPE_INSTANCE (nuvashalauncher_instance_get_type ())
 
-G_DECLARE_FINAL_TYPE (nuvashalauncherInstance, nuvashalauncher_instance, nuvashalauncher, INSTANCE, GObject)
+G_DECLARE_FINAL_TYPE (NuvashaLauncherInstance, nuvashalauncher_instance, nuvashalauncher, INSTANCE, GObject)
 
 #define nuvashalauncher_INSTANCE_ERROR (nuvashalauncher_instance_error_quark ())
 
 typedef enum {
   nuvashalauncher_INSTANCE_ERROR_INVALID,      /* a field holds a bad value */
   nuvashalauncher_INSTANCE_ERROR_MISSING_FIELD /* a required field is absent */
-} nuvashalauncherInstanceError;
+} NuvashaLauncherInstanceError;
 
 GQuark nuvashalauncher_instance_error_quark (void);
 
@@ -43,10 +43,10 @@ GType nuvashalauncher_loader_get_type (void);
 
 /* String form of @loader as written to JSON, or NULL if @loader is not
  * a known value. */
-const char *nuvashalauncher_loader_to_string (nuvashalauncherLoader loader);
+const char *nuvashalauncher_loader_to_string (NuvashaLauncherLoader loader);
 
 /* Parse the JSON form of a loader. Returns FALSE for unknown values. */
-gboolean nuvashalauncher_loader_from_string (const char *string, nuvashalauncherLoader *loader);
+gboolean nuvashalauncher_loader_from_string (const char *string, NuvashaLauncherLoader *loader);
 
 /* A name that is safe to use as a directory component: no slashes, no
  * "..", no leading or trailing dots or spaces, never empty. Never
@@ -65,42 +65,42 @@ char *nuvashalauncher_instance_normalize_name (const char *name);
 /* Creates an instance and validates every field. @id may be NULL to
  * generate a random UUID. @directory must be an absolute path and is
  * canonicalized; it must exist or be creatable by the caller. */
-nuvashalauncherInstance *nuvashalauncher_instance_new (const char *id,
+NuvashaLauncherInstance *nuvashalauncher_instance_new (const char *id,
                                const char *name,
                                const char *directory,
                                const char *minecraft_version,
-                               nuvashalauncherLoader   loader,
+                               NuvashaLauncherLoader   loader,
                                GError    **error);
 
 /* Reads one instance from a JSON object. Malformed or incomplete input
  * fails with a GError instead of producing a half built instance. */
-nuvashalauncherInstance *nuvashalauncher_instance_new_from_json (JsonNode *node, GError **error);
+NuvashaLauncherInstance *nuvashalauncher_instance_new_from_json (JsonNode *node, GError **error);
 
 /* (transfer full). The instance must be valid, see
  * nuvashalauncher_instance_validate(). */
-JsonNode *nuvashalauncher_instance_to_json (nuvashalauncherInstance *self);
+JsonNode *nuvashalauncher_instance_to_json (NuvashaLauncherInstance *self);
 
 /* TRUE when every field of @self holds a usable value. */
-gboolean nuvashalauncher_instance_validate (nuvashalauncherInstance *self, GError **error);
+gboolean nuvashalauncher_instance_validate (NuvashaLauncherInstance *self, GError **error);
 
 /* Model-level mutation helpers. Callers should use these instead of writing
  * instance properties directly; validation is performed before the value is
  * accepted. */
-gboolean nuvashalauncher_instance_set_string (nuvashalauncherInstance *self, const char *property,
+gboolean nuvashalauncher_instance_set_string (NuvashaLauncherInstance *self, const char *property,
                                   const char *value, GError **error);
-gboolean nuvashalauncher_instance_set_loader (nuvashalauncherInstance *self, nuvashalauncherLoader loader,
+gboolean nuvashalauncher_instance_set_loader (NuvashaLauncherInstance *self, NuvashaLauncherLoader loader,
                                   const char *version, GError **error);
-gboolean nuvashalauncher_instance_set_name (nuvashalauncherInstance *self, const char *name,
+gboolean nuvashalauncher_instance_set_name (NuvashaLauncherInstance *self, const char *name,
                                 GError **error);
-gboolean nuvashalauncher_instance_set_directory (nuvashalauncherInstance *self, const char *directory,
+gboolean nuvashalauncher_instance_set_directory (NuvashaLauncherInstance *self, const char *directory,
                                      GError **error);
 
 /* The unique id, never NULL. */
-const char *nuvashalauncher_instance_get_id (nuvashalauncherInstance *self);
+const char *nuvashalauncher_instance_get_id (NuvashaLauncherInstance *self);
 
 /* Borrowed component map keyed by stable component id. Property access and
  * legacy JSON remain compatibility views over this map. */
-GHashTable *nuvashalauncher_instance_get_components (nuvashalauncherInstance *self);
+GHashTable *nuvashalauncher_instance_get_components (NuvashaLauncherInstance *self);
 
 G_END_DECLS
 

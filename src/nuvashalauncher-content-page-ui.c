@@ -27,7 +27,7 @@ toolbar_button (const char *icon_name, const char *label, GCallback callback,
 
 void
 nuvashalauncher_content_page_set_installed_search_visible (
-  nuvashalauncherContentPage *self, gboolean visible)
+  NuvashaLauncherContentPage *self, gboolean visible)
 {
   gtk_widget_set_visible (GTK_WIDGET (self->installed.search_entry), visible);
   gtk_widget_set_hexpand (GTK_WIDGET (self->installed.search_entry), visible);
@@ -44,7 +44,7 @@ nuvashalauncher_content_page_set_installed_search_visible (
 static void
 on_installed_search_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherContentPage *self = user_data;
+  NuvashaLauncherContentPage *self = user_data;
 
   nuvashalauncher_content_page_set_installed_search_visible (
     self, !gtk_widget_get_visible (GTK_WIDGET (self->installed.search_entry)));
@@ -56,7 +56,7 @@ on_installed_search_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data
  * ---------------------------------------------------------- */
 
 void
-nuvashalauncher_content_page_build_installed (nuvashalauncherContentPage *self)
+nuvashalauncher_content_page_build_installed (NuvashaLauncherContentPage *self)
 {
   GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
    GtkBox *actions = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
@@ -221,7 +221,7 @@ void
 nuvashalauncher_content_page_on_stack_switched (GObject *stack, GParamSpec *pspec G_GNUC_UNUSED,
                    gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
   const char *visible = adw_view_stack_get_visible_child_name (
       ADW_VIEW_STACK (stack));
   gboolean browsing = g_strcmp0 (visible, "browse") == 0;
@@ -252,7 +252,7 @@ nuvashalauncher_content_page_on_stack_switched (GObject *stack, GParamSpec *pspe
 }
 
 void
-nuvashalauncher_content_page_reset_for_tab_switch (nuvashalauncherContentPage *self)
+nuvashalauncher_content_page_reset_for_tab_switch (NuvashaLauncherContentPage *self)
 {
   g_return_if_fail (nuvashalauncher_IS_CONTENT_PAGE (self));
 
@@ -270,7 +270,7 @@ nuvashalauncher_content_page_reset_for_tab_switch (nuvashalauncherContentPage *s
 }
 
 void
-nuvashalauncher_content_page_build_browse (nuvashalauncherContentPage *self)
+nuvashalauncher_content_page_build_browse (NuvashaLauncherContentPage *self)
 {
   GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
   GtkBox *top = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
@@ -486,7 +486,7 @@ nuvashalauncher_content_page_build_browse (nuvashalauncherContentPage *self)
 static void
 on_switcher_toggled (GtkToggleButton *button, gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
 
   if (!gtk_toggle_button_get_active (button) || self->stack == NULL)
     return;
@@ -510,7 +510,7 @@ switcher_button (const char *icon_name, const char *label)
 }
 
 void
-nuvashalauncher_content_page_build_bar (nuvashalauncherContentPage *self)
+nuvashalauncher_content_page_build_bar (NuvashaLauncherContentPage *self)
 {
   GtkBox *inner = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
 
@@ -617,7 +617,7 @@ nuvashalauncher_content_page_build_bar (nuvashalauncherContentPage *self)
    has to push the switcher to the right for it. Installed has no such
    row, so the spacer does that. */
 void
-nuvashalauncher_content_page_move_actions_into_bar (nuvashalauncherContentPage *self, gboolean browsing)
+nuvashalauncher_content_page_move_actions_into_bar (NuvashaLauncherContentPage *self, gboolean browsing)
 {
   GtkWidget *wanted = browsing ? GTK_WIDGET (self->browse_actions)
                                : GTK_WIDGET (self->installed.actions);

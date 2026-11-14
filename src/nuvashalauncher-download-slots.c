@@ -6,7 +6,7 @@
 void
 nuvashalauncher_download_start_transfer (DownloadRequest *request)
 {
-  nuvashalauncherDownloadService *service = request->service;
+  NuvashaLauncherDownloadService *service = request->service;
   gboolean interactive = request->priority >= DOWNLOAD_PRIORITY_INTERACTIVE;
   guint total = service->interactive_running + service->bulk_running;
   gboolean has_slot = total < MAX_CONCURRENT &&
@@ -50,7 +50,7 @@ nuvashalauncher_download_start_transfer (DownloadRequest *request)
 void
 nuvashalauncher_download_release_slot (DownloadRequest *request)
 {
-  nuvashalauncherDownloadService *service = request->service;
+  NuvashaLauncherDownloadService *service = request->service;
   if (!request->holds_slot)
     return;
 
@@ -110,11 +110,11 @@ nuvashalauncher_download_release_slot (DownloadRequest *request)
 }
 
 void
-nuvashalauncher_download_service_cancel_queued (nuvashalauncherDownloadService *owned_service)
+nuvashalauncher_download_service_cancel_queued (NuvashaLauncherDownloadService *owned_service)
 {
   if (owned_service == NULL)
     return;
-  nuvashalauncherDownloadService *service = owned_service;
+  NuvashaLauncherDownloadService *service = owned_service;
 
   while (!g_queue_is_empty (&service->interactive_waiting))
     {

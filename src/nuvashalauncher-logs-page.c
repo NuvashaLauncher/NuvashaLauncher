@@ -8,11 +8,11 @@
 
 #include <gdk/gdkevents.h>
 
-struct _nuvashalauncherLogsPage
+struct _NuvashaLauncherLogsPage
 {
   GtkBox parent_instance;
 
-  nuvashalauncher *launcher;
+  NuvashaLauncher *launcher;
 
   GtkLabel *state;
   GtkLabel *detail;
@@ -39,15 +39,15 @@ struct _nuvashalauncherLogsPage
   guint scroll_idle;
 };
 
-G_DEFINE_FINAL_TYPE (nuvashalauncherLogsPage, nuvashalauncher_logs_page, GTK_TYPE_BOX)
+G_DEFINE_FINAL_TYPE (NuvashaLauncherLogsPage, nuvashalauncher_logs_page, GTK_TYPE_BOX)
 
-static void scroll_to_end (nuvashalauncherLogsPage *self);
-static void show_lines (nuvashalauncherLogsPage *self);
+static void scroll_to_end (NuvashaLauncherLogsPage *self);
+static void show_lines (NuvashaLauncherLogsPage *self);
 
 static gboolean
 scroll_to_end_idle (gpointer user_data)
 {
-  nuvashalauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
+  NuvashaLauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
 
   self->scroll_idle = 0;
   if (self->following)
@@ -57,7 +57,7 @@ scroll_to_end_idle (gpointer user_data)
 }
 
 static void
-schedule_scroll_to_end (nuvashalauncherLogsPage *self)
+schedule_scroll_to_end (NuvashaLauncherLogsPage *self)
 {
   if (self->scroll_idle == 0)
     self->scroll_idle = g_idle_add_full (G_PRIORITY_DEFAULT_IDLE,
@@ -142,7 +142,7 @@ display_line (const char *line)
    end. A search that matches nothing leaves the view empty rather than
    showing the last line it happened to have. */
 static void
-show_lines (nuvashalauncherLogsPage *self)
+show_lines (NuvashaLauncherLogsPage *self)
 {
   GtkTextBuffer *buffer =
     gtk_text_view_get_buffer (GTK_TEXT_VIEW (self->view));
@@ -180,7 +180,7 @@ show_lines (nuvashalauncherLogsPage *self)
 /* The whole log as it is now: what the page shows when it appears and
    after a clear. */
 static void
-reload_log (nuvashalauncherLogsPage *self)
+reload_log (NuvashaLauncherLogsPage *self)
 {
   g_autofree char *text = nuvashalauncher_launcher_get_log_text (self->launcher);
 
@@ -206,7 +206,7 @@ reload_log (nuvashalauncherLogsPage *self)
 }
 
 static void
-append_line (nuvashalauncherLogsPage *self, const char *line)
+append_line (NuvashaLauncherLogsPage *self, const char *line)
 {
   g_autofree char *display = display_line (line);
 
@@ -276,7 +276,7 @@ append_line (nuvashalauncherLogsPage *self, const char *line)
 static void
 on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
+  NuvashaLauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
   gboolean had_search = self->filtered;
 
   self->filtered =
@@ -298,7 +298,7 @@ on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
 static void
 on_search_button_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherLogsPage *self = user_data;
+  NuvashaLauncherLogsPage *self = user_data;
   gboolean visible = gtk_widget_get_visible (GTK_WIDGET (self->search_entry));
 
   gtk_widget_set_visible (GTK_WIDGET (self->search_entry), !visible);
@@ -327,7 +327,7 @@ on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED, guint keyval,
                  G_GNUC_UNUSED,
                gpointer user_data)
 {
-  nuvashalauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
+  NuvashaLauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
 
   if (keyval == GDK_KEY_f && (state & GDK_CONTROL_MASK))
     {
@@ -355,7 +355,7 @@ on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED, guint keyval,
  * ---------------------------------------------------------- */
 
 static void
-update_controls (nuvashalauncherLogsPage *self)
+update_controls (NuvashaLauncherLogsPage *self)
 {
   g_autofree char *directory =
     nuvashalauncher_launcher_get_log_directory (self->launcher);
@@ -378,7 +378,7 @@ update_controls (nuvashalauncherLogsPage *self)
 static void
 on_clear_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
+  NuvashaLauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
 
   nuvashalauncher_launcher_clear_log (self->launcher);
   reload_log (self);
@@ -388,7 +388,7 @@ static void
 open_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                gpointer user_data)
 {
-  nuvashalauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
+  NuvashaLauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
   g_autoptr (GError) error = NULL;
 
   if (!g_app_info_launch_default_for_uri_finish (result, &error))
@@ -400,7 +400,7 @@ open_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 on_open_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
+  NuvashaLauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
   g_autofree char *directory =
     nuvashalauncher_launcher_get_log_directory (self->launcher);
   g_autofree char *uri = NULL;
@@ -420,20 +420,20 @@ on_open_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
  * ---------------------------------------------------------- */
 
 static void
-on_state_changed (nuvashalauncher *launcher G_GNUC_UNUSED,
-                  nuvashalauncherLaunchState state G_GNUC_UNUSED,
+on_state_changed (NuvashaLauncher *launcher G_GNUC_UNUSED,
+                  NuvashaLauncherLaunchState state G_GNUC_UNUSED,
                   const char *detail G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
+  NuvashaLauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
 
   update_controls (self);
 }
 
 static void
-on_output (nuvashalauncher *launcher G_GNUC_UNUSED, const char *line,
+on_output (NuvashaLauncher *launcher G_GNUC_UNUSED, const char *line,
            gboolean stderr G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
+  NuvashaLauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
 
   append_line (self, line);
 }
@@ -443,7 +443,7 @@ on_output (nuvashalauncher *launcher G_GNUC_UNUSED, const char *line,
  * ---------------------------------------------------------- */
 
 static void
-scroll_to_end (nuvashalauncherLogsPage *self)
+scroll_to_end (NuvashaLauncherLogsPage *self)
 {
   GtkAdjustment *adjustment =
     gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (self->scroller));
@@ -460,7 +460,7 @@ scroll_to_end (nuvashalauncherLogsPage *self)
 static void
 on_adjustment_changed (GtkAdjustment *adjustment, gpointer user_data)
 {
-  nuvashalauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
+  NuvashaLauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
   gdouble at_end;
 
   if (self->auto_scrolling)
@@ -484,7 +484,7 @@ static void
 on_adjustment_bounds_changed (GtkAdjustment *adjustment G_GNUC_UNUSED,
                               gpointer user_data)
 {
-  nuvashalauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
+  NuvashaLauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
 
   if (self->following)
     schedule_scroll_to_end (self);
@@ -496,7 +496,7 @@ on_adjustment_bounds_changed (GtkAdjustment *adjustment G_GNUC_UNUSED,
 static void
 on_first_map (GtkWidget *widget G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
+  NuvashaLauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (user_data);
 
   scroll_to_end (self);
   g_signal_handlers_disconnect_by_data (self, self);
@@ -521,10 +521,10 @@ toolbar_button (const char *icon_name, const char *label, GCallback callback,
   return GTK_WIDGET (button);
 }
 
-nuvashalauncherLogsPage *
-nuvashalauncher_logs_page_new (nuvashalauncher *launcher)
+NuvashaLauncherLogsPage *
+nuvashalauncher_logs_page_new (NuvashaLauncher *launcher)
 {
-  nuvashalauncherLogsPage *self;
+  NuvashaLauncherLogsPage *self;
   GtkWidget *row;
   GtkWidget *actions;
   GtkWidget *card;
@@ -675,7 +675,7 @@ nuvashalauncher_logs_page_new (nuvashalauncher *launcher)
 static void
 nuvashalauncher_logs_page_dispose (GObject *object)
 {
-  nuvashalauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (object);
+  NuvashaLauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (object);
 
   /* The launcher outlives this page while a game is still running, so
      the connections go before anything else can arrive. */
@@ -697,7 +697,7 @@ nuvashalauncher_logs_page_dispose (GObject *object)
 static void
 nuvashalauncher_logs_page_finalize (GObject *object)
 {
-  nuvashalauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (object);
+  NuvashaLauncherLogsPage *self = nuvashalauncher_LOGS_PAGE (object);
 
   g_clear_object (&self->launcher);
   if (self->lines != NULL)
@@ -710,7 +710,7 @@ nuvashalauncher_logs_page_finalize (GObject *object)
 }
 
 static void
-nuvashalauncher_logs_page_class_init (nuvashalauncherLogsPageClass *klass)
+nuvashalauncher_logs_page_class_init (NuvashaLauncherLogsPageClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
@@ -719,7 +719,7 @@ nuvashalauncher_logs_page_class_init (nuvashalauncherLogsPageClass *klass)
 }
 
 static void
-nuvashalauncher_logs_page_init (nuvashalauncherLogsPage *self)
+nuvashalauncher_logs_page_init (NuvashaLauncherLogsPage *self)
 {
   /* Everything is built in nuvashalauncher_logs_page_new(), which knows the launcher
      the page follows. */

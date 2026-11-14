@@ -10,15 +10,15 @@
 #include "nuvashalauncher-modrinth.h"
 #include "nuvashalauncher-task.h"
 
-typedef struct _nuvashalauncherContentBrowserModel nuvashalauncherContentBrowserModel;
+typedef struct _NuvashaLauncherContentBrowserModel NuvashaLauncherContentBrowserModel;
 
-nuvashalauncherContentBrowserModel *nuvashalauncher_content_browser_model_new (void);
-void nuvashalauncher_content_browser_model_free (nuvashalauncherContentBrowserModel *model);
+NuvashaLauncherContentBrowserModel *nuvashalauncher_content_browser_model_new (void);
+void nuvashalauncher_content_browser_model_free (NuvashaLauncherContentBrowserModel *model);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherContentBrowserModel,
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherContentBrowserModel,
                                nuvashalauncher_content_browser_model_free)
 
-struct _nuvashalauncherContentBrowserModel
+struct _NuvashaLauncherContentBrowserModel
 {
   GHashTable *projects;             /* project id -> NULL */
   GHashTable *project_icons;        /* project id -> icon URL */
@@ -26,7 +26,7 @@ struct _nuvashalauncherContentBrowserModel
   GHashTable *project_titles;       /* project id -> title */
   char *query;
   GPtrArray *categories;            /* char* */
-  GPtrArray *results;               /* nuvashalauncherModrinthProject* */
+  GPtrArray *results;               /* NuvashaLauncherModrinthProject* */
   guint offset;
   guint64 total_hits;
   gboolean categories_loaded;
@@ -36,7 +36,7 @@ struct _nuvashalauncherContentBrowserModel
   GHashTable *seen_ids;
   GCancellable *more;
   guint debounce_source;
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
   GCancellable *cancellable;
 };
 

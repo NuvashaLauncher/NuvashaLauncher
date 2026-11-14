@@ -42,7 +42,7 @@ ask_xsts (AuthRequest *self)
 void
 xsts_answered (AuthRequest *self)
 {
-  g_autoptr (nuvashalauncherXboxToken) token = NULL;
+  g_autoptr (NuvashaLauncherXboxToken) token = NULL;
   g_autoptr (GError) error = NULL;
 
   token = nuvashalauncher_auth_xbox_token_from_json (self->body, -1, &error);

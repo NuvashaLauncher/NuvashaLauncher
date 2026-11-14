@@ -9,22 +9,22 @@
 
 G_BEGIN_DECLS
 
-typedef nuvashalauncherTaskScope nuvashalauncherOperation;
+typedef NuvashaLauncherTaskScope NuvashaLauncherOperation;
 
-nuvashalauncherOperation *nuvashalauncher_operation_new (GObject *source_object,
+NuvashaLauncherOperation *nuvashalauncher_operation_new (GObject *source_object,
                                  GCancellable *cancellable,
                                  GAsyncReadyCallback callback,
                                  gpointer user_data);
-void nuvashalauncher_operation_unref (nuvashalauncherOperation *operation);
-void nuvashalauncher_operation_release (nuvashalauncherOperation *operation,
+void nuvashalauncher_operation_unref (NuvashaLauncherOperation *operation);
+void nuvashalauncher_operation_release (NuvashaLauncherOperation *operation,
                             GCancellable *cancellable);
-nuvashalauncherOperation *nuvashalauncher_operation_unref_when_done (nuvashalauncherOperation *operation);
-void nuvashalauncher_operation_follow (nuvashalauncherOperation *operation,
+NuvashaLauncherOperation *nuvashalauncher_operation_unref_when_done (NuvashaLauncherOperation *operation);
+void nuvashalauncher_operation_follow (NuvashaLauncherOperation *operation,
                            GCancellable *cancellable);
-void nuvashalauncher_operation_cancel (nuvashalauncherOperation *operation);
-void nuvashalauncher_operation_track (nuvashalauncherOperation *operation, guint source_id);
-void nuvashalauncher_operation_remove (nuvashalauncherOperation *operation, guint source_id);
-void nuvashalauncher_operation_forget_source (nuvashalauncherOperation *operation, guint source_id);
+void nuvashalauncher_operation_cancel (NuvashaLauncherOperation *operation);
+void nuvashalauncher_operation_track (NuvashaLauncherOperation *operation, guint source_id);
+void nuvashalauncher_operation_remove (NuvashaLauncherOperation *operation, guint source_id);
+void nuvashalauncher_operation_forget_source (NuvashaLauncherOperation *operation, guint source_id);
 
 G_END_DECLS
 

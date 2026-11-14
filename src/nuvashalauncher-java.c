@@ -78,7 +78,7 @@ nuvashalauncher_java_error_quark (void)
 }
 
 void
-nuvashalauncher_java_free (nuvashalauncherJava *java)
+nuvashalauncher_java_free (NuvashaLauncherJava *java)
 {
   if (java == NULL)
     return;
@@ -90,7 +90,7 @@ nuvashalauncher_java_free (nuvashalauncherJava *java)
 }
 
 gboolean
-nuvashalauncher_java_is_compatible (const nuvashalauncherJava *java, int required_major)
+nuvashalauncher_java_is_compatible (const NuvashaLauncherJava *java, int required_major)
 {
   g_return_val_if_fail (java != NULL, FALSE);
 
@@ -112,17 +112,17 @@ real_path (const char *path)
   return resolved;
 }
 
-nuvashalauncherJava *
+NuvashaLauncherJava *
 nuvashalauncher_java_best_compatible (GPtrArray *javas, int required_major)
 {
-  nuvashalauncherJava *best = NULL;          /* the closest one that can open a window */
-  nuvashalauncherJava *best_headless = NULL; /* fallback when no windowed runtime fits */
+  NuvashaLauncherJava *best = NULL;          /* the closest one that can open a window */
+  NuvashaLauncherJava *best_headless = NULL; /* fallback when no windowed runtime fits */
 
   g_return_val_if_fail (javas != NULL, NULL);
 
   for (guint i = 0; i < javas->len; i++)
     {
-      nuvashalauncherJava *java = g_ptr_array_index (javas, i);
+      NuvashaLauncherJava *java = g_ptr_array_index (javas, i);
 
       if (!nuvashalauncher_java_is_compatible (java, required_major))
         continue;
@@ -143,10 +143,10 @@ nuvashalauncher_java_best_compatible (GPtrArray *javas, int required_major)
   return best != NULL ? best : best_headless;
 }
 
-/* True when @path resolves to the same file as the nuvashalauncherJava this
+/* True when @path resolves to the same file as the NuvashaLauncherJava this
  * entry matches, comparing resolved real paths. */
 static gboolean
-java_matches (nuvashalauncherJava   *java,
+java_matches (NuvashaLauncherJava   *java,
               const char *path)
 {
   g_autofree char *java_real = real_path (java->executable);
@@ -155,7 +155,7 @@ java_matches (nuvashalauncherJava   *java,
   return g_strcmp0 (java_real, path_real) == 0;
 }
 
-const nuvashalauncherJava *
+const NuvashaLauncherJava *
 nuvashalauncher_java_select (GPtrArray  *javas,
                  const char *instance_java_path,
                  int         required_major)
@@ -166,7 +166,7 @@ nuvashalauncher_java_select (GPtrArray  *javas,
     {
       for (guint i = 0; i < javas->len; i++)
         {
-          nuvashalauncherJava *java = g_ptr_array_index (javas, i);
+          NuvashaLauncherJava *java = g_ptr_array_index (javas, i);
 
           if (java_matches (java, instance_java_path))
             {
@@ -194,7 +194,7 @@ nuvashalauncher_java_select (GPtrArray  *javas,
    * Leave the automatic choice unset until the required major is present. */
   for (guint i = 0; i < javas->len; i++)
     {
-      nuvashalauncherJava *java = g_ptr_array_index (javas, i);
+      NuvashaLauncherJava *java = g_ptr_array_index (javas, i);
 
       if (java->major_version == required_major && !java->headless)
         return java;

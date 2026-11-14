@@ -11,7 +11,7 @@
 #define CORRUPT_SUFFIX ".corrupt"
 
 static char *
-build_metadata_json (nuvashalauncherInstanceManager *self, GError **error)
+build_metadata_json (NuvashaLauncherInstanceManager *self, GError **error)
 {
   g_autoptr (JsonBuilder) builder = json_builder_new ();
   guint n_items = g_list_model_get_n_items (G_LIST_MODEL (self->instances));
@@ -26,7 +26,7 @@ build_metadata_json (nuvashalauncherInstanceManager *self, GError **error)
 
   for (guint i = 0; i < n_items; i++)
     {
-      g_autoptr (nuvashalauncherInstance) instance =
+      g_autoptr (NuvashaLauncherInstance) instance =
         g_list_model_get_item (G_LIST_MODEL (self->instances), i);
 
       if (!nuvashalauncher_instance_validate (instance, error))
@@ -49,7 +49,7 @@ build_metadata_json (nuvashalauncherInstanceManager *self, GError **error)
 }
 
 gboolean
-nuvashalauncher_instance_manager_save (nuvashalauncherInstanceManager *self, GError **error)
+nuvashalauncher_instance_manager_save (NuvashaLauncherInstanceManager *self, GError **error)
 {
   g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
@@ -114,7 +114,7 @@ get_metadata_version (JsonObject *object, GError **error)
  * with a GError and returns NULL: a file is either fully understood or
  * treated as corrupt. */
 static GList *
-parse_instances_json (nuvashalauncherInstanceManager *self,
+parse_instances_json (NuvashaLauncherInstanceManager *self,
                       const char                     *contents,
                       gssize                          length,
                       GError                        **error)
@@ -183,7 +183,7 @@ parse_instances_json (nuvashalauncherInstanceManager *self,
             }
         }
 
-      nuvashalauncherInstance *instance =
+      NuvashaLauncherInstance *instance =
         nuvashalauncher_instance_new_from_json (elem_node, error);
 
       if (instance == NULL)
@@ -199,7 +199,7 @@ parse_instances_json (nuvashalauncherInstanceManager *self,
 
       for (GList *l = list; l != NULL; l = l->next)
         {
-          nuvashalauncherInstance *seen = l->data;
+          NuvashaLauncherInstance *seen = l->data;
           g_autofree char *seen_name = instance_name (seen);
           g_autofree char *seen_key =
             instance_name_key (seen_name);
@@ -257,7 +257,7 @@ quarantine_corrupt_file (const char *path)
 }
 
 gboolean
-nuvashalauncher_instance_manager_load (nuvashalauncherInstanceManager *self, GError **error)
+nuvashalauncher_instance_manager_load (NuvashaLauncherInstanceManager *self, GError **error)
 {
   g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
@@ -302,7 +302,7 @@ nuvashalauncher_instance_manager_load (nuvashalauncherInstanceManager *self, GEr
   gboolean needs_resave = FALSE;
   for (GList *l = list; l != NULL; l = l->next)
     {
-      nuvashalauncherInstance *instance = l->data;
+      NuvashaLauncherInstance *instance = l->data;
       g_autofree char *dir = instance_directory (instance);
       g_autofree char *java_path = NULL;
       if (!g_file_test (dir, G_FILE_TEST_IS_DIR))

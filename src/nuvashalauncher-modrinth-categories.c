@@ -11,7 +11,7 @@
  * ---------------------------------------------------------- */
 
 void
-nuvashalauncher_modrinth_category_free (nuvashalauncherModrinthCategory *category)
+nuvashalauncher_modrinth_category_free (NuvashaLauncherModrinthCategory *category)
 {
   if (category == NULL)
     return;
@@ -124,7 +124,7 @@ nuvashalauncher_modrinth_category_label (const char *name)
 }
 
 char *
-nuvashalauncher_modrinth_project_type_for_content (nuvashalauncherContentType type)
+nuvashalauncher_modrinth_project_type_for_content (NuvashaLauncherContentType type)
 {
   return g_strdup (nuvashalauncher_content_type_to_string (type));
 }
@@ -132,8 +132,8 @@ nuvashalauncher_modrinth_project_type_for_content (nuvashalauncherContentType ty
 static int
 compare_by_name (gconstpointer a, gconstpointer b)
 {
-  const nuvashalauncherModrinthCategory *left = *(nuvashalauncherModrinthCategory *const *) a;
-  const nuvashalauncherModrinthCategory *right = *(nuvashalauncherModrinthCategory *const *) b;
+  const NuvashaLauncherModrinthCategory *left = *(NuvashaLauncherModrinthCategory *const *) a;
+  const NuvashaLauncherModrinthCategory *right = *(NuvashaLauncherModrinthCategory *const *) b;
 
   return g_strcmp0 (left->name, right->name);
 }
@@ -174,7 +174,7 @@ nuvashalauncher_modrinth_categories_from_json (const char *json, gssize length,
       g_autofree char *item_type = NULL;
       g_autofree char *name = NULL;
       g_autofree char *header = NULL;
-      nuvashalauncherModrinthCategory *category = NULL;
+      NuvashaLauncherModrinthCategory *category = NULL;
       JsonNode *item = json_array_get_element (array, i);
 
       if (nuvashalauncher_json_object_of (item) == NULL)
@@ -189,7 +189,7 @@ nuvashalauncher_modrinth_categories_from_json (const char *json, gssize length,
 
       header = nuvashalauncher_json_string (item, "header");
 
-      category = g_new0 (nuvashalauncherModrinthCategory, 1);
+      category = g_new0 (NuvashaLauncherModrinthCategory, 1);
       category->name = g_steal_pointer (&name);
       category->header = g_steal_pointer (&header);
       g_ptr_array_add (categories, category);

@@ -12,14 +12,14 @@ typedef enum {
 } Step;
 
 typedef struct _AuthRequest {
-  GTask *task; SoupMessage *message; guint poll_source; nuvashalauncherTaskScope *scope; Step step;
+  GTask *task; SoupMessage *message; guint poll_source; NuvashaLauncherTaskScope *scope; Step step;
   gint status; char *body; GInputStream *response_stream; GByteArray *response_bytes;
   char *device_code; char *refresh_token; guint interval; gint64 deadline; gint64 now;
   char *microsoft_refresh_token; char *xbl_token; char *xbl_user_hash;
   char *xsts_token; char *mc_access_token; gint64 mc_expires_at;
 } AuthRequest;
 
-typedef void (*nuvashalauncherAuthTransportFunc) (AuthRequest *self,
+typedef void (*NuvashaLauncherAuthTransportFunc) (AuthRequest *self,
                                                   const char *url,
                                                   const char *method,
                                                   const char *body,
@@ -28,7 +28,7 @@ typedef void (*nuvashalauncherAuthTransportFunc) (AuthRequest *self,
                                                   gpointer user_data);
 
 void nuvashalauncher_auth_request_free (gpointer data);
-void nuvashalauncher_auth_set_transport_for_tests (nuvashalauncherAuthTransportFunc transport,
+void nuvashalauncher_auth_set_transport_for_tests (NuvashaLauncherAuthTransportFunc transport,
                                                    gpointer user_data);
 void sent (SoupSession *session, GAsyncResult *result, gpointer user_data);
 void auth_read_ready (GObject *source, GAsyncResult *result, gpointer user_data);
@@ -37,9 +37,9 @@ gboolean client_id_is_set (void);
 GError *no_client_id_error (void);
 void fail (AuthRequest *self, GError *error);
 void succeed (AuthRequest *self, gpointer result, GDestroyNotify free_result);
-AuthRequest *request_new (nuvashalauncherTaskScope *scope);
+AuthRequest *request_new (NuvashaLauncherTaskScope *scope);
 void nuvashalauncher_auth_send (AuthRequest *self, const char *url, const char *method, const char *body, const char *content_type, const char **headers, Step step);
-GError *refusal (const char *body, gint status, nuvashalauncherAuthError kind, const char *fallback);
+GError *refusal (const char *body, gint status, NuvashaLauncherAuthError kind, const char *fallback);
 void device_code_answered (AuthRequest *self);
 
 gboolean answer_if_cancelled (AuthRequest *self);

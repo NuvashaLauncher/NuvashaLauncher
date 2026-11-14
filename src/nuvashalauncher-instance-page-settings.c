@@ -18,7 +18,7 @@
 static void
 on_name_apply (AdwEntryRow *row, gpointer user_data)
 {
-  nuvashalauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
   const char *text = gtk_editable_get_text (GTK_EDITABLE (row));
   g_autofree char *current = instance_string (self->instance, "name");
   g_autoptr (GError) error = NULL;
@@ -48,7 +48,7 @@ on_name_apply (AdwEntryRow *row, gpointer user_data)
 static void
 on_jvm_args_apply (AdwEntryRow *row, gpointer user_data)
 {
-  nuvashalauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
   const char *text = gtk_editable_get_text (GTK_EDITABLE (row));
   g_autofree char *current = instance_string (self->instance, "jvm-args");
   g_autoptr (GError) error = NULL;
@@ -56,7 +56,7 @@ on_jvm_args_apply (AdwEntryRow *row, gpointer user_data)
   if (g_strcmp0 (text, current) == 0)
     return;
 
-  /* nuvashalauncherInstanceManager validates before it writes, so an empty line
+  /* NuvashaLauncherInstanceManager validates before it writes, so an empty line
    * fails here and never reaches instances.json. */
   if (!nuvashalauncher_instance_manager_set_string (self->manager, self->instance,
                                         "jvm-args", text, &error))
@@ -70,7 +70,7 @@ on_jvm_args_apply (AdwEntryRow *row, gpointer user_data)
 
 typedef struct
 {
-  nuvashalauncherInstancePage *page;
+  NuvashaLauncherInstancePage *page;
   guint generation;
 } VersionWait;
 
@@ -82,7 +82,7 @@ version_wait_free (VersionWait *wait)
 }
 
 static VersionWait *
-version_wait_new (nuvashalauncherInstancePage *self, guint generation)
+version_wait_new (NuvashaLauncherInstancePage *self, guint generation)
 {
   VersionWait *wait = g_new (VersionWait, 1);
   wait->generation = generation;
@@ -100,8 +100,8 @@ static void
 on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
                      gpointer user_data)
 {
-  nuvashalauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
-  nuvashalauncherVersionRow *row = nuvashalauncher_VERSION_ROW (object);
+  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherVersionRow *row = nuvashalauncher_VERSION_ROW (object);
   const char *version = nuvashalauncher_version_row_get_selected (row);
   g_autofree char *current =
     instance_string (self->instance, "minecraft-version");
@@ -160,10 +160,10 @@ on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
    written through the manager the way the Minecraft version above is. A
    version the row answers nothing for is nothing to store. */
 static void
-on_loader_changed (nuvashalauncherLoaderRow *row, gpointer user_data)
+on_loader_changed (NuvashaLauncherLoaderRow *row, gpointer user_data)
 {
-  nuvashalauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
-  nuvashalauncherLoader loader = nuvashalauncher_loader_row_get_loader (row);
+  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherLoader loader = nuvashalauncher_loader_row_get_loader (row);
   const char *version = nuvashalauncher_loader_row_get_version (row);
   g_autofree char *minecraft =
     instance_string (self->instance, "minecraft-version");
@@ -221,10 +221,10 @@ on_loader_changed (nuvashalauncherLoaderRow *row, gpointer user_data)
  * ---------------------------------------------------------- */
 
 static void
-java_status_refresh (nuvashalauncherInstancePage *self)
+java_status_refresh (NuvashaLauncherInstancePage *self)
 {
-  nuvashalauncherJavaRow *row = nuvashalauncher_JAVA_ROW (self->java_row);
-  const nuvashalauncherJava *effective = NULL;
+  NuvashaLauncherJavaRow *row = nuvashalauncher_JAVA_ROW (self->java_row);
+  const NuvashaLauncherJava *effective = NULL;
   const char *message = NULL;
   GPtrArray *detected;
   const char *selected_path;
@@ -285,9 +285,9 @@ on_description_loaded (GObject *source G_GNUC_UNUSED,
                        gpointer user_data)
 {
   VersionWait *wait = user_data;
-  nuvashalauncherInstancePage *self = wait->page;
+  NuvashaLauncherInstancePage *self = wait->page;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherVersionDescription) description =
+  g_autoptr (NuvashaLauncherVersionDescription) description =
     nuvashalauncher_version_load_finish (result, &error);
 
   if (wait->generation != self->versions_generation)
@@ -315,9 +315,9 @@ on_manifest_loaded (GObject *source G_GNUC_UNUSED,
                     gpointer user_data)
 {
   VersionWait *wait = user_data;
-  nuvashalauncherInstancePage *self = wait->page;
+  NuvashaLauncherInstancePage *self = wait->page;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherVersionManifest) manifest =
+  g_autoptr (NuvashaLauncherVersionManifest) manifest =
     nuvashalauncher_version_manifest_fetch_finish (result, &error);
   g_autofree char *version = instance_string (self->instance,
                                               "minecraft-version");
@@ -354,8 +354,8 @@ static void
 on_java_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
                   gpointer user_data)
 {
-  nuvashalauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
-  nuvashalauncherJavaRow *row = nuvashalauncher_JAVA_ROW (object);
+  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherJavaRow *row = nuvashalauncher_JAVA_ROW (object);
   const char *path = nuvashalauncher_java_row_get_selected_path (row);
   g_autofree char *current = instance_string (self->instance, "java-path");
   g_autoptr (GError) error = NULL;
@@ -422,7 +422,7 @@ path_button (const char *path, GtkLabel **label)
 }
 
 static void
-update_icon_row (nuvashalauncherInstancePage *self)
+update_icon_row (NuvashaLauncherInstancePage *self)
 {
   g_autofree char *icon = instance_string (self->instance, "icon");
 
@@ -436,7 +436,7 @@ update_icon_row (nuvashalauncherInstancePage *self)
 static void
 on_icon_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  nuvashalauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
   g_autoptr (GError) error = NULL;
   g_autoptr (GFile) file =
     gtk_file_dialog_open_finish (GTK_FILE_DIALOG (source), result, &error);
@@ -482,7 +482,7 @@ on_icon_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 static void
 on_change_icon_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
   GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
   g_autoptr (GtkFileDialog) dialog = gtk_file_dialog_new ();
   g_autoptr (GtkFileFilter) filter = gtk_file_filter_new ();
@@ -538,7 +538,7 @@ button_row (AdwPreferencesGroup *group,
  * ---------------------------------------------------------- */
 
 GtkWidget *
-create_settings_page (nuvashalauncherInstancePage *self)
+create_settings_page (NuvashaLauncherInstancePage *self)
 {
   AdwPreferencesPage *page = ADW_PREFERENCES_PAGE (adw_preferences_page_new ());
   gtk_widget_add_css_class (GTK_WIDGET (page), "nuvashalauncher-settings-page");
@@ -644,7 +644,7 @@ create_settings_page (nuvashalauncherInstancePage *self)
   /* The loader and one of its versions: changing either of them changes
      what this instance runs, so both are stored like the version above. */
   {
-    nuvashalauncherLoader instance_loader = nuvashalauncher_LOADER_VANILLA;
+    NuvashaLauncherLoader instance_loader = nuvashalauncher_LOADER_VANILLA;
 
     g_object_get (self->instance, "loader", &instance_loader, NULL);
     self->loader = instance_loader;

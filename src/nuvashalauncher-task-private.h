@@ -8,12 +8,12 @@
 #include "nuvashalauncher-task.h"
 
 /* Internal bridge for operations implemented on top of an existing GTask.
- * Public callers own nuvashalauncherTaskScope; the task keeps its own reference. */
-nuvashalauncherTaskScope *nuvashalauncher_task_scope_from_task (GTask *task);
+ * Public callers own NuvashaLauncherTaskScope; the task keeps its own reference. */
+NuvashaLauncherTaskScope *nuvashalauncher_task_scope_from_task (GTask *task);
 void nuvashalauncher_task_scope_attach_task (GTask *task);
 void nuvashalauncher_task_scope_release_attached (GTask *task);
-GTask *nuvashalauncher_task_scope_task (const nuvashalauncherTaskScope *scope);
-void nuvashalauncher_task_scope_take_task (nuvashalauncherTaskScope *scope);
+GTask *nuvashalauncher_task_scope_task (const NuvashaLauncherTaskScope *scope);
+void nuvashalauncher_task_scope_take_task (NuvashaLauncherTaskScope *scope);
 
 /* Internal cancellable watch with caller-owned callback data. */
 guint nuvashalauncher_cancellable_watch (GCancellable  *cancellable,

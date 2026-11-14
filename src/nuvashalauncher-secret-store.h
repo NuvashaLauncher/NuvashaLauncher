@@ -12,7 +12,7 @@ G_BEGIN_DECLS
 gboolean nuvashalauncher_secret_store_load (GPtrArray **accounts,
                                              char      **active_id,
                                              GError    **error);
-gboolean nuvashalauncher_secret_store_save_account (const nuvashalauncherAccount *account,
+gboolean nuvashalauncher_secret_store_save_account (const NuvashaLauncherAccount *account,
                                                      GError **error);
 gboolean nuvashalauncher_secret_store_save_active (const char *account_id,
                                                     GError **error);

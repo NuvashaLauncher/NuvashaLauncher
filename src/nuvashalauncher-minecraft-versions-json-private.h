@@ -22,7 +22,7 @@ gboolean nuvashalauncher_mc_get_array (JsonObject *object, const char *member, g
 gboolean nuvashalauncher_mc_get_int64 (JsonObject *object, const char *member, gboolean required, gint64 *value, GError **error);
 JsonObject *nuvashalauncher_mc_root_object (const char *json, gssize length, JsonParser **parser, GError **error);
 
-nuvashalauncherRule *nuvashalauncher_mc_parse_rule (JsonObject *object, GError **error);
+NuvashaLauncherRule *nuvashalauncher_mc_parse_rule (JsonObject *object, GError **error);
 GPtrArray *nuvashalauncher_mc_parse_rules (JsonNode *node, GError **error);
 
 gboolean nuvashalauncher_mc_get_rules_member (JsonObject *object, const char *member, GPtrArray **rules, GError **error);

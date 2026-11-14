@@ -92,12 +92,12 @@ int nuvashalauncher_fs_open_file_nofollow (const char *directory, const char *re
  * originally failed rather than replacing it with cleanup failure. */
 void nuvashalauncher_fs_remove_tree (const char *path);
 
-nuvashalauncherTaskScope *nuvashalauncher_fs_remove_tree_async (const char *path,
+NuvashaLauncherTaskScope *nuvashalauncher_fs_remove_tree_async (const char *path,
                                         GAsyncReadyCallback callback,
                                         gpointer user_data);
 gboolean nuvashalauncher_fs_remove_tree_finish (GAsyncResult *result, GError **error);
 
-nuvashalauncherTaskScope *nuvashalauncher_fs_copy_tree_async (GFile *source, GFile *destination,
+NuvashaLauncherTaskScope *nuvashalauncher_fs_copy_tree_async (GFile *source, GFile *destination,
                                       GAsyncReadyCallback callback,
                                       gpointer user_data);
 gboolean nuvashalauncher_fs_copy_tree_finish (GAsyncResult *result, GError **error);

@@ -16,9 +16,9 @@ G_BEGIN_DECLS
 typedef struct {
   const char *code;
   const char *name;
-} nuvashalauncherLanguage;
+} NuvashaLauncherLanguage;
 
-const nuvashalauncherLanguage *nuvashalauncher_i18n_languages (gsize *length);
+const NuvashaLauncherLanguage *nuvashalauncher_i18n_languages (gsize *length);
 void nuvashalauncher_i18n_init (const char *override_code);
 void nuvashalauncher_i18n_template_strings (void);
 

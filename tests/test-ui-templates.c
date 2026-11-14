@@ -83,14 +83,14 @@ test_stylesheet_parses (void)
 static void
 test_custom_templates_instantiate (void)
 {
-  g_autoptr (nuvashalauncherOfflineAccountDialog) offline =
+  g_autoptr (NuvashaLauncherOfflineAccountDialog) offline =
     g_object_ref_sink (nuvashalauncher_offline_account_dialog_new ());
-  g_autoptr (nuvashalauncherInstanceManager) manager =
+  g_autoptr (NuvashaLauncherInstanceManager) manager =
     nuvashalauncher_instance_manager_new (NULL);
-  g_autoptr (nuvashalauncherSettings) settings = nuvashalauncher_settings_new ();
-  g_autoptr (nuvashalauncherCreateInstanceDialog) create =
+  g_autoptr (NuvashaLauncherSettings) settings = nuvashalauncher_settings_new ();
+  g_autoptr (NuvashaLauncherCreateInstanceDialog) create =
     g_object_ref_sink (nuvashalauncher_create_instance_dialog_new (manager, settings));
-  g_autoptr (nuvashalauncherSignInDialog) sign_in =
+  g_autoptr (NuvashaLauncherSignInDialog) sign_in =
     g_object_ref_sink (nuvashalauncher_sign_in_dialog_new ());
 
   g_assert_true (nuvashalauncher_IS_OFFLINE_ACCOUNT_DIALOG (offline));

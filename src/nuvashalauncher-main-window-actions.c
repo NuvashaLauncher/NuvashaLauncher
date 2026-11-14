@@ -15,8 +15,8 @@ on_create_instance (GSimpleAction *action G_GNUC_UNUSED,
                     GVariant      *parameter G_GNUC_UNUSED,
                     gpointer       user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
-  nuvashalauncherCreateInstanceDialog *dialog =
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherCreateInstanceDialog *dialog =
     nuvashalauncher_create_instance_dialog_new (self->model->manager, self->model->settings);
 
   adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
@@ -27,8 +27,8 @@ on_download_modpack (GSimpleAction *action G_GNUC_UNUSED,
                      GVariant      *parameter G_GNUC_UNUSED,
                      gpointer       user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
-  nuvashalauncherDownloadModpackDialog *dialog =
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherDownloadModpackDialog *dialog =
     nuvashalauncher_download_modpack_dialog_new (self->model->manager);
 
   adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
@@ -38,7 +38,7 @@ static void
 on_import_modpack_chosen (GObject *source, GAsyncResult *result,
                           gpointer user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   g_autoptr (GError) error = NULL;
   g_autoptr (GFile) file =
     gtk_file_dialog_open_finish (GTK_FILE_DIALOG (source), result, &error);
@@ -78,7 +78,7 @@ static void
 on_import_modpack (GSimpleAction *action G_GNUC_UNUSED,
                    GVariant *parameter G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
   g_autoptr (GtkFileDialog) dialog = gtk_file_dialog_new ();
   g_autoptr (GtkFileFilter) filter = gtk_file_filter_new ();
@@ -104,7 +104,7 @@ on_show_unstable_versions_toggled (GObject *object,
                                    GParamSpec *pspec G_GNUC_UNUSED,
                                    gpointer user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   AdwSwitchRow *row = ADW_SWITCH_ROW (object);
   gboolean active = adw_switch_row_get_active (row);
   gboolean stored =
@@ -130,7 +130,7 @@ static void
 on_log_limit_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
                       gpointer user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   AdwSpinRow *row = ADW_SPIN_ROW (object);
   guint limit = (guint) adw_spin_row_get_value (row);
   g_autoptr (GError) error = NULL;
@@ -155,7 +155,7 @@ on_show_unstable_loaders_toggled (GObject *object,
                                   GParamSpec *pspec G_GNUC_UNUSED,
                                   gpointer user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   AdwSwitchRow *row = ADW_SWITCH_ROW (object);
   gboolean active = adw_switch_row_get_active (row);
   g_autoptr (GError) error = NULL;
@@ -176,7 +176,7 @@ on_export_metadata_toggled (GObject *object,
                             GParamSpec *pspec G_GNUC_UNUSED,
                             gpointer user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   AdwSwitchRow *row = ADW_SWITCH_ROW (object);
   gboolean active = adw_switch_row_get_active (row);
   g_autoptr (GError) error = NULL;
@@ -197,7 +197,7 @@ on_delete_dependents_toggled (GObject *object,
                                GParamSpec *pspec G_GNUC_UNUSED,
                                gpointer user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   AdwSwitchRow *row = ADW_SWITCH_ROW (object);
   gboolean active = adw_switch_row_get_active (row);
   g_autoptr (GError) error = NULL;
@@ -218,10 +218,10 @@ on_language_selected (GObject *object,
                       GParamSpec *pspec G_GNUC_UNUSED,
                       gpointer user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   AdwComboRow *row = ADW_COMBO_ROW (object);
   gsize length = 0;
-  const nuvashalauncherLanguage *languages = nuvashalauncher_i18n_languages (&length);
+  const NuvashaLauncherLanguage *languages = nuvashalauncher_i18n_languages (&length);
   guint selected = adw_combo_row_get_selected (row);
   g_autoptr (GError) error = NULL;
 
@@ -237,7 +237,7 @@ on_cache_modrinth_api_responses_toggled (GObject *object,
                                          GParamSpec *pspec G_GNUC_UNUSED,
                                          gpointer user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   AdwSwitchRow *row = ADW_SWITCH_ROW (object);
   gboolean active = adw_switch_row_get_active (row);
   g_autoptr (GError) error = NULL;
@@ -259,9 +259,9 @@ on_cache_expiration_selected (GObject *object,
                                GParamSpec *pspec G_GNUC_UNUSED,
                                gpointer user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   AdwComboRow *row = ADW_COMBO_ROW (object);
-  static const nuvashalauncherSettingsCacheExpiration values[] = {
+  static const NuvashaLauncherSettingsCacheExpiration values[] = {
     nuvashalauncher_SETTINGS_CACHE_EXPIRATION_1_HOUR,
     nuvashalauncher_SETTINGS_CACHE_EXPIRATION_6_HOURS,
     nuvashalauncher_SETTINGS_CACHE_EXPIRATION_1_DAY,
@@ -276,7 +276,7 @@ on_cache_expiration_selected (GObject *object,
 
   if (!nuvashalauncher_settings_set_cache_expiration (self->model->settings, values[selected], &error))
     {
-      nuvashalauncherSettingsCacheExpiration current =
+      NuvashaLauncherSettingsCacheExpiration current =
         nuvashalauncher_settings_get_cache_expiration (self->model->settings);
       guint current_index = 0;
 
@@ -296,7 +296,7 @@ static void
 on_clear_cache_clicked (GtkButton *button G_GNUC_UNUSED,
                         gpointer user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   AdwAlertDialog *alert = ADW_ALERT_DIALOG (
      adw_alert_dialog_new (_("Clear Nuvasha Launcher Cache?"), NULL));
 
@@ -314,8 +314,8 @@ on_clear_cache_clicked (GtkButton *button G_GNUC_UNUSED,
 
 typedef struct
 {
-  nuvashalauncherMainWindow *window;
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherMainWindow *window;
+  NuvashaLauncherTaskScope *operation;
 } CacheClearWait;
 
 static void
@@ -323,7 +323,7 @@ on_cache_cleared (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                   gpointer user_data)
 {
   CacheClearWait *wait = user_data;
-  nuvashalauncherMainWindow *self = wait->window;
+  NuvashaLauncherMainWindow *self = wait->window;
   g_autoptr (GError) error = NULL;
   gboolean success = g_task_propagate_boolean (G_TASK (result), &error);
   AdwAlertDialog *alert = NULL;
@@ -353,7 +353,7 @@ static void
 on_clear_cache_confirmed (GObject *source, GAsyncResult *result,
                           gpointer user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   const char *response =
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
 
@@ -369,7 +369,7 @@ on_clear_cache_confirmed (GObject *source, GAsyncResult *result,
 }
 
 static AdwDialog *
-create_settings_dialog (nuvashalauncherMainWindow *self)
+create_settings_dialog (NuvashaLauncherMainWindow *self)
 {
   AdwDialog *dialog = adw_preferences_dialog_new ();
   AdwPreferencesPage *page = ADW_PREFERENCES_PAGE (adw_preferences_page_new ());
@@ -465,7 +465,7 @@ create_settings_dialog (nuvashalauncherMainWindow *self)
 
   {
     gsize length = 0;
-    const nuvashalauncherLanguage *languages = nuvashalauncher_i18n_languages (&length);
+    const NuvashaLauncherLanguage *languages = nuvashalauncher_i18n_languages (&length);
     GtkStringList *model = gtk_string_list_new (NULL);
     guint selected = 0;
     const char *current = nuvashalauncher_settings_get_language (self->model->settings);
@@ -518,10 +518,10 @@ create_settings_dialog (nuvashalauncherMainWindow *self)
   {
     GtkStringList *model = gtk_string_list_new (NULL);
     const char *labels[] = { _("1 hour"), _("6 hours"), _("1 day"), _("7 days") };
-    nuvashalauncherSettingsCacheExpiration current =
+    NuvashaLauncherSettingsCacheExpiration current =
       nuvashalauncher_settings_get_cache_expiration (self->model->settings);
     guint selected = 0;
-    const nuvashalauncherSettingsCacheExpiration values[] = {
+    const NuvashaLauncherSettingsCacheExpiration values[] = {
       nuvashalauncher_SETTINGS_CACHE_EXPIRATION_1_HOUR,
       nuvashalauncher_SETTINGS_CACHE_EXPIRATION_6_HOURS,
       nuvashalauncher_SETTINGS_CACHE_EXPIRATION_1_DAY,
@@ -578,7 +578,7 @@ on_settings (GSimpleAction *action G_GNUC_UNUSED,
              GVariant      *parameter G_GNUC_UNUSED,
              gpointer       user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   AdwDialog *dialog = create_settings_dialog (self);
 
   adw_dialog_present (dialog, GTK_WIDGET (self));
@@ -589,7 +589,7 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
           GVariant      *parameter G_GNUC_UNUSED,
           gpointer       user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   AdwDialog *dialog = adw_about_dialog_new ();
   const char *authors[] = { "Flia", NULL };
   const char *services[] = {
@@ -663,7 +663,7 @@ on_shortcuts (GSimpleAction *action G_GNUC_UNUSED,
               GVariant      *parameter G_GNUC_UNUSED,
               gpointer       user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   AdwDialog *dialog = adw_shortcuts_dialog_new ();
   AdwShortcutsSection *general = adw_shortcuts_section_new (_("General"));
 

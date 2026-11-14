@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherResolve: download and prepare a Minecraft version without starting it.
+/* NuvashaLauncherResolve: download and prepare a Minecraft version without starting it.
  *
  * A version document names a client JAR, libraries (some with
  * them carrying natives for Linux) and an asset index. This module works
@@ -44,7 +44,7 @@ typedef enum {
   nuvashalauncher_RESOLVE_ERROR_INVALID,      /* the version cannot be resolved as it is */
   nuvashalauncher_RESOLVE_ERROR_UNSAFE_PATH,  /* a jar entry points out of its directory */
   nuvashalauncher_RESOLVE_ERROR_ASSETS
-} nuvashalauncherResolveError;
+} NuvashaLauncherResolveError;
 
 GQuark nuvashalauncher_resolve_error_quark (void);
 
@@ -81,8 +81,8 @@ char *nuvashalauncher_resolve_maven_path_classified (const char *coordinate,
  * are then looked for under the architecture of @context:
  * "natives-linux-x86_64", "natives-linux-amd64", "natives-linux-arm64",
  * each tried in turn for that architecture. */
-const char *nuvashalauncher_resolve_native_classifier (const nuvashalauncherLibrary       *library,
-                                           const nuvashalauncherRuleContext *context);
+const char *nuvashalauncher_resolve_native_classifier (const NuvashaLauncherLibrary       *library,
+                                           const NuvashaLauncherRuleContext *context);
 
 /* TRUE when @entry_name may be written below the directory it came
  * from: not absolute, no "..", no "." component, no empty component, no
@@ -106,11 +106,11 @@ typedef struct {
   char *sha1;
   gboolean natives;
   GPtrArray *exclude;
-} nuvashalauncherResolveFile;
+} NuvashaLauncherResolveFile;
 
-void nuvashalauncher_resolve_file_free (nuvashalauncherResolveFile *file);
+void nuvashalauncher_resolve_file_free (NuvashaLauncherResolveFile *file);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherResolveFile, nuvashalauncher_resolve_file_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherResolveFile, nuvashalauncher_resolve_file_free)
 
 /* Every jar this version needs on this machine, in the order of the
  * document: the artifact of each applicable library, followed by its
@@ -129,16 +129,16 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherResolveFile, nuvashalauncher_resol
  * no jar to fetch is left out. Nothing is created here: the paths are
  * what they are, and the caller makes the directories the download
  * module needs. */
-GPtrArray *nuvashalauncher_resolve_library_files (nuvashalauncherVersionDescription *description,
-                                      const nuvashalauncherRuleContext   *context,
+GPtrArray *nuvashalauncher_resolve_library_files (NuvashaLauncherVersionDescription *description,
+                                      const NuvashaLauncherRuleContext   *context,
                                       const char             *libraries_dir);
 
 /* The classpath of this version on this machine: every applicable
  * library jar in the order of the document, then @client_jar, joined
  * with the separator java expects for -cp and CLASSPATH_PATH_SEPARATOR.
  * (transfer full) */
-char *nuvashalauncher_resolve_classpath (nuvashalauncherVersionDescription *description,
-                             const nuvashalauncherRuleContext   *context,
+char *nuvashalauncher_resolve_classpath (NuvashaLauncherVersionDescription *description,
+                             const NuvashaLauncherRuleContext   *context,
                              const char             *libraries_dir,
                              const char             *client_jar);
 
@@ -149,20 +149,20 @@ char *nuvashalauncher_resolve_classpath (nuvashalauncherVersionDescription *desc
 /* The jvm arguments of the document that apply here, as a flat array of
  * strings holding the values of every allowed entry in order, with the
  * placeholders the document wrote left in. (transfer full) */
-GPtrArray *nuvashalauncher_resolve_jvm_arguments (nuvashalauncherVersionDescription *description,
-                                      const nuvashalauncherRuleContext   *context);
+GPtrArray *nuvashalauncher_resolve_jvm_arguments (NuvashaLauncherVersionDescription *description,
+                                      const NuvashaLauncherRuleContext   *context);
 
 /* The game arguments of the document that apply here, as a flat array
  * of strings. A document without the modern "arguments" object has one
  * line instead, which is split the way a shell would. (transfer full) */
-GPtrArray *nuvashalauncher_resolve_game_arguments (nuvashalauncherVersionDescription *description,
-                                       const nuvashalauncherRuleContext   *context);
+GPtrArray *nuvashalauncher_resolve_game_arguments (NuvashaLauncherVersionDescription *description,
+                                       const NuvashaLauncherRuleContext   *context);
 
 /* ---------------------------------------------------------- *
  * Unpacking the natives
  * ---------------------------------------------------------- */
 
-/* Unpacks every jar of @jars (nuvashalauncherResolveFile*) into @natives_directory,
+/* Unpacks every jar of @jars (NuvashaLauncherResolveFile*) into @natives_directory,
  * honouring the exclude list of each one, which is where "META-INF/"
  * ends up.
  *
@@ -175,7 +175,7 @@ GPtrArray *nuvashalauncher_resolve_game_arguments (nuvashalauncherVersionDescrip
  *
  * A jar that lists no prefixes of its own is taken to exclude META-INF,
  * which is what every launcher does with the metadata a jar carries. */
-nuvashalauncherTaskScope *nuvashalauncher_resolve_extract_natives_async (GPtrArray *jars,
+NuvashaLauncherTaskScope *nuvashalauncher_resolve_extract_natives_async (GPtrArray *jars,
                                                  const char *natives_directory,
                                                  GAsyncReadyCallback callback,
                                                  gpointer user_data);
@@ -201,11 +201,11 @@ typedef struct {
   GPtrArray *jvm_arguments;  /* char*, known placeholders substituted */
   GPtrArray *game_arguments; /* char*, the rest left in */
   int java_major_version;   /* 0 when the document names no Java version */
-} nuvashalauncherResolvedVersion;
+} NuvashaLauncherResolvedVersion;
 
-void nuvashalauncher_resolved_version_free (nuvashalauncherResolvedVersion *resolved);
+void nuvashalauncher_resolved_version_free (NuvashaLauncherResolvedVersion *resolved);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherResolvedVersion, nuvashalauncher_resolved_version_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherResolvedVersion, nuvashalauncher_resolved_version_free)
 
 /* What the resolve is doing and how much of it is done. @stage is
  * "dependencies" while the jars, the client and the logging file are
@@ -216,9 +216,9 @@ typedef struct {
   const char *stage;
   guint done;
   guint total;
-} nuvashalauncherResolveProgress;
+} NuvashaLauncherResolveProgress;
 
-typedef void (*nuvashalauncherResolveProgressFunc) (const nuvashalauncherResolveProgress *progress,
+typedef void (*NuvashaLauncherResolveProgressFunc) (const NuvashaLauncherResolveProgress *progress,
                                         gpointer                 user_data);
 
 /* Fetches @version_id from @manifest and puts everything it needs on
@@ -240,18 +240,18 @@ typedef void (*nuvashalauncherResolveProgressFunc) (const nuvashalauncherResolve
  * Errors come from the download module while fetching, from nuvashalauncher_MC_ERROR
  * while parsing a document and from nuvashalauncher_RESOLVE_ERROR for everything
  * this module adds itself. */
-nuvashalauncherTaskScope *nuvashalauncher_resolve_version_async (nuvashalauncherVersionManifest *manifest,
+NuvashaLauncherTaskScope *nuvashalauncher_resolve_version_async (NuvashaLauncherVersionManifest *manifest,
                                          const char *version_id,
                                          const char *data_dir,
                                          const char *natives_dir,
                                          const char *asset_base_url,
-                                         nuvashalauncherResolveProgressFunc progress,
+                                         NuvashaLauncherResolveProgressFunc progress,
                                          gpointer progress_data,
                                          GAsyncReadyCallback callback,
                                          gpointer user_data);
 
 /* (transfer full) */
-nuvashalauncherResolvedVersion *nuvashalauncher_resolve_version_finish (GAsyncResult  *result,
+NuvashaLauncherResolvedVersion *nuvashalauncher_resolve_version_finish (GAsyncResult  *result,
                                                 GError       **error);
 
 /* The same work for a document that is not in @manifest: the loader
@@ -266,13 +266,13 @@ nuvashalauncherResolvedVersion *nuvashalauncher_resolve_version_finish (GAsyncRe
  * @client_jar, when it is not NULL, is a jar on disk that runs instead
  * of the one the document names, which is what a loader that patches the
  * client installs; nothing is fetched for it and it has to exist. */
-nuvashalauncherTaskScope *nuvashalauncher_resolve_description_async (nuvashalauncherVersionDescription *description,
+NuvashaLauncherTaskScope *nuvashalauncher_resolve_description_async (NuvashaLauncherVersionDescription *description,
                                              const char *version_id,
                                              const char *client_jar,
                                              const char *data_dir,
                                              const char *natives_dir,
                                              const char *asset_base_url,
-                                             nuvashalauncherResolveProgressFunc progress,
+                                             NuvashaLauncherResolveProgressFunc progress,
                                              gpointer progress_data,
                                              GAsyncReadyCallback callback,
                                              gpointer user_data);

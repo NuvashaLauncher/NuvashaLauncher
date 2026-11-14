@@ -129,7 +129,7 @@ nuvashalauncher_minecraft_services_skin_multipart (GBytes *skin,
 typedef struct {
   SoupSession *session;
   SoupMessage *message;
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
 } MinecraftSend;
 
 static void
@@ -172,14 +172,14 @@ minecraft_send_done (GObject *source, GAsyncResult *result, gpointer user_data)
   minecraft_send_free (send);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_minecraft_services_send_async (SoupMessage *message,
                                        GCancellable *cancellable,
                                        GAsyncReadyCallback callback,
                                        gpointer user_data)
 {
   MinecraftSend *send;
-  g_autoptr (nuvashalauncherTaskScope) scope = NULL;
+  g_autoptr (NuvashaLauncherTaskScope) scope = NULL;
 
   g_return_val_if_fail (SOUP_IS_MESSAGE (message), NULL);
   scope = nuvashalauncher_task_scope_new (NULL, cancellable, callback, user_data);

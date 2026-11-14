@@ -30,7 +30,7 @@ nuvashalauncher_launch_state_get_type (void)
 
   if (g_once_init_enter (&type_id))
     {
-      GType state_type = g_enum_register_static ("nuvashalauncherLaunchState",
+      GType state_type = g_enum_register_static ("NuvashaLauncherLaunchState",
                                                  launch_state_values);
       g_once_init_leave (&type_id, state_type);
     }
@@ -39,11 +39,11 @@ nuvashalauncher_launch_state_get_type (void)
 }
 
 const char *
-nuvashalauncher_launch_state_to_string (nuvashalauncherLaunchState state)
+nuvashalauncher_launch_state_to_string (NuvashaLauncherLaunchState state)
 {
   for (guint i = 0; launch_state_values[i].value_name != NULL; i++)
     {
-      if ((nuvashalauncherLaunchState) launch_state_values[i].value == state)
+      if ((NuvashaLauncherLaunchState) launch_state_values[i].value == state)
         return launch_state_values[i].value_nick;
     }
 
@@ -51,7 +51,7 @@ nuvashalauncher_launch_state_to_string (nuvashalauncherLaunchState state)
 }
 
 gboolean
-nuvashalauncher_launch_state_is_busy (nuvashalauncherLaunchState state)
+nuvashalauncher_launch_state_is_busy (NuvashaLauncherLaunchState state)
 {
   return state == nuvashalauncher_LAUNCH_PREPARING || state == nuvashalauncher_LAUNCH_DOWNLOADING ||
          state == nuvashalauncher_LAUNCH_LAUNCHING || state == nuvashalauncher_LAUNCH_RUNNING ||

@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void assign_default_instance_icon (nuvashalauncherInstance *instance,
+static void assign_default_instance_icon (NuvashaLauncherInstance *instance,
                                           const char *directory);
 
 /* Layout version of instances.json. */
@@ -28,7 +28,7 @@ static void assign_default_instance_icon (nuvashalauncherInstance *instance,
 #define METADATA_FILE "instances.json"
 #define CORRUPT_SUFFIX ".corrupt"
 
-G_DEFINE_TYPE (nuvashalauncherInstanceManager, nuvashalauncher_instance_manager, G_TYPE_OBJECT)
+G_DEFINE_TYPE (NuvashaLauncherInstanceManager, nuvashalauncher_instance_manager, G_TYPE_OBJECT)
 
 GQuark
 nuvashalauncher_instance_manager_error_quark (void)
@@ -37,7 +37,7 @@ nuvashalauncher_instance_manager_error_quark (void)
 }
 
 char *
-instance_directory (nuvashalauncherInstance *instance)
+instance_directory (NuvashaLauncherInstance *instance)
 {
   char *directory = NULL;
 
@@ -46,7 +46,7 @@ instance_directory (nuvashalauncherInstance *instance)
 }
 
 char *
-instance_name (nuvashalauncherInstance *instance)
+instance_name (NuvashaLauncherInstance *instance)
 {
   char *name = NULL;
 
@@ -93,7 +93,7 @@ instance_name_forbidden_character (const char *name)
 }
 
 static gboolean
-name_is_taken (nuvashalauncherInstanceManager *self, nuvashalauncherInstance *except,
+name_is_taken (NuvashaLauncherInstanceManager *self, NuvashaLauncherInstance *except,
                const char *name)
 {
   g_autofree char *wanted = instance_name_key (name);
@@ -101,7 +101,7 @@ name_is_taken (nuvashalauncherInstanceManager *self, nuvashalauncherInstance *ex
 
   for (guint i = 0; i < count; i++)
     {
-      g_autoptr (nuvashalauncherInstance) other =
+      g_autoptr (NuvashaLauncherInstance) other =
         g_list_model_get_item (G_LIST_MODEL (self->instances), i);
       g_autofree char *other_name = instance_name (other);
       g_autofree char *other_key = instance_name_key (other_name);
@@ -150,7 +150,7 @@ path_contains (const char *parent, const char *child)
 }
 
 char *
-default_instance_directory (nuvashalauncherInstanceManager *self,
+default_instance_directory (NuvashaLauncherInstanceManager *self,
                             const char *name)
 {
   g_autofree char *safe_name = nuvashalauncher_instance_sanitize_name (name);
@@ -162,7 +162,7 @@ default_instance_directory (nuvashalauncherInstanceManager *self,
  * name unchanged and give later instances the smallest numeric suffix that
  * is still available: test, test 1, test 2, ... . */
 char *
-unique_instance_name (nuvashalauncherInstanceManager *self, const char *name)
+unique_instance_name (NuvashaLauncherInstanceManager *self, const char *name)
 {
   if (!name_is_taken (self, NULL, name))
     return g_strdup (name);
@@ -186,9 +186,9 @@ unique_instance_name (nuvashalauncherInstanceManager *self, const char *name)
  * a new one is being made: an instance never overlaps itself, so the one
  * being moved is not counted against it. */
 gboolean
-check_instance_directory (nuvashalauncherInstanceManager  *self,
+check_instance_directory (NuvashaLauncherInstanceManager  *self,
                           const char          *directory,
-                          nuvashalauncherInstance         *moved,
+                          NuvashaLauncherInstance         *moved,
                           char               **canonical,
                           GError             **error)
 {
@@ -256,7 +256,7 @@ check_instance_directory (nuvashalauncherInstanceManager  *self,
 
   for (guint i = 0; i < n_items; i++)
     {
-      g_autoptr (nuvashalauncherInstance) other =
+      g_autoptr (NuvashaLauncherInstance) other =
         g_list_model_get_item (G_LIST_MODEL (self->instances), i);
       g_autofree char *other_name = instance_name (other);
       g_autofree char *other_directory = instance_directory (other);
@@ -289,7 +289,7 @@ check_instance_directory (nuvashalauncherInstanceManager  *self,
 static void
 nuvashalauncher_instance_manager_dispose (GObject *object)
 {
-  nuvashalauncherInstanceManager *self = nuvashalauncher_INSTANCE_MANAGER (object);
+  NuvashaLauncherInstanceManager *self = nuvashalauncher_INSTANCE_MANAGER (object);
 
   g_clear_handle_id (&self->directory_check_source, g_source_remove);
   g_clear_object (&self->instances);
@@ -300,7 +300,7 @@ nuvashalauncher_instance_manager_dispose (GObject *object)
 static void
 nuvashalauncher_instance_manager_finalize (GObject *object)
 {
-  nuvashalauncherInstanceManager *self = nuvashalauncher_INSTANCE_MANAGER (object);
+  NuvashaLauncherInstanceManager *self = nuvashalauncher_INSTANCE_MANAGER (object);
 
   g_free (self->data_dir);
   g_free (self->metadata_path);
@@ -310,7 +310,7 @@ nuvashalauncher_instance_manager_finalize (GObject *object)
 }
 
 static void
-nuvashalauncher_instance_manager_class_init (nuvashalauncherInstanceManagerClass *klass)
+nuvashalauncher_instance_manager_class_init (NuvashaLauncherInstanceManagerClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
@@ -319,7 +319,7 @@ nuvashalauncher_instance_manager_class_init (nuvashalauncherInstanceManagerClass
 }
 
 static void
-nuvashalauncher_instance_manager_init (nuvashalauncherInstanceManager *self)
+nuvashalauncher_instance_manager_init (NuvashaLauncherInstanceManager *self)
 {
   self->instances = g_list_store_new (nuvashalauncher_TYPE_INSTANCE);
   self->directory_check_source =
@@ -328,13 +328,13 @@ nuvashalauncher_instance_manager_init (nuvashalauncherInstanceManager *self)
                            "nuvashalauncher-instance-directory-check");
 }
 
-nuvashalauncherInstanceManager *
+NuvashaLauncherInstanceManager *
 nuvashalauncher_instance_manager_new (const char *data_dir)
 {
   g_return_val_if_fail (data_dir == NULL || g_path_is_absolute (data_dir),
                         NULL);
 
-  nuvashalauncherInstanceManager *self =
+  NuvashaLauncherInstanceManager *self =
     g_object_new (nuvashalauncher_TYPE_INSTANCE_MANAGER, NULL);
 
   if (data_dir == NULL)
@@ -355,7 +355,7 @@ nuvashalauncher_instance_manager_new (const char *data_dir)
 }
 
 GListStore *
-nuvashalauncher_instance_manager_get_instances (nuvashalauncherInstanceManager *self)
+nuvashalauncher_instance_manager_get_instances (NuvashaLauncherInstanceManager *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (self), NULL);
 
@@ -363,7 +363,7 @@ nuvashalauncher_instance_manager_get_instances (nuvashalauncherInstanceManager *
 }
 
 char *
-nuvashalauncher_instance_manager_default_directory (nuvashalauncherInstanceManager *self,
+nuvashalauncher_instance_manager_default_directory (NuvashaLauncherInstanceManager *self,
                                         const char *name)
 {
   g_autofree char *normalized = NULL;
@@ -380,7 +380,7 @@ nuvashalauncher_instance_manager_default_directory (nuvashalauncherInstanceManag
 }
 
 static void
-assign_default_instance_icon (nuvashalauncherInstance *instance, const char *directory)
+assign_default_instance_icon (NuvashaLauncherInstance *instance, const char *directory)
 {
   g_autofree char *source_path = nuvashalauncher_instance_default_icon_path ();
   g_autofree char *target_path = g_build_filename (directory, "icon.png", NULL);
@@ -397,8 +397,8 @@ assign_default_instance_icon (nuvashalauncherInstance *instance, const char *dir
     }
 }
 
-nuvashalauncherInstance *
-nuvashalauncher_instance_manager_get_by_id (nuvashalauncherInstanceManager *self, const char *id)
+NuvashaLauncherInstance *
+nuvashalauncher_instance_manager_get_by_id (NuvashaLauncherInstanceManager *self, const char *id)
 {
   g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (self), NULL);
 
@@ -409,7 +409,7 @@ nuvashalauncher_instance_manager_get_by_id (nuvashalauncherInstanceManager *self
 
   for (guint i = 0; i < n_items; i++)
     {
-      g_autoptr (nuvashalauncherInstance) instance =
+      g_autoptr (NuvashaLauncherInstance) instance =
         g_list_model_get_item (G_LIST_MODEL (self->instances), i);
 
       if (g_str_equal (nuvashalauncher_instance_get_id (instance), id))
@@ -419,12 +419,12 @@ nuvashalauncher_instance_manager_get_by_id (nuvashalauncherInstanceManager *self
   return NULL;
 }
 
-nuvashalauncherInstance *
-nuvashalauncher_instance_manager_create (nuvashalauncherInstanceManager *self,
+NuvashaLauncherInstance *
+nuvashalauncher_instance_manager_create (NuvashaLauncherInstanceManager *self,
                              const char *name,
                              const char *directory,
                              const char *minecraft_version,
-                             nuvashalauncherLoader loader,
+                             NuvashaLauncherLoader loader,
                              const char *loader_version,
                              GError **error)
 {
@@ -473,7 +473,7 @@ nuvashalauncher_instance_manager_create (nuvashalauncherInstanceManager *self,
         return NULL;
     }
 
-  g_autoptr (nuvashalauncherInstance) instance =
+  g_autoptr (NuvashaLauncherInstance) instance =
      nuvashalauncher_instance_new (id, normalized_name, path, minecraft_version, loader,
                        error);
 
@@ -509,8 +509,8 @@ nuvashalauncher_instance_manager_create (nuvashalauncherInstanceManager *self,
 }
 
 gboolean
-nuvashalauncher_instance_manager_rename (nuvashalauncherInstanceManager *self,
-                             nuvashalauncherInstance *instance,
+nuvashalauncher_instance_manager_rename (NuvashaLauncherInstanceManager *self,
+                             NuvashaLauncherInstance *instance,
                              const char *new_name,
                              GError **error)
 {
@@ -574,8 +574,8 @@ nuvashalauncher_instance_manager_rename (nuvashalauncherInstanceManager *self,
 }
 
 gboolean
-nuvashalauncher_instance_manager_set_string (nuvashalauncherInstanceManager *self,
-                                 nuvashalauncherInstance *instance,
+nuvashalauncher_instance_manager_set_string (NuvashaLauncherInstanceManager *self,
+                                 NuvashaLauncherInstance *instance,
                                  const char *property,
                                  const char *value,
                                  GError **error)
@@ -621,13 +621,13 @@ nuvashalauncher_instance_manager_set_string (nuvashalauncherInstanceManager *sel
 }
 
 gboolean
-nuvashalauncher_instance_manager_set_loader (nuvashalauncherInstanceManager *self,
-                                 nuvashalauncherInstance *instance,
-                                 nuvashalauncherLoader loader,
+nuvashalauncher_instance_manager_set_loader (NuvashaLauncherInstanceManager *self,
+                                 NuvashaLauncherInstance *instance,
+                                 NuvashaLauncherLoader loader,
                                  const char *version,
                                  GError **error)
 {
-  nuvashalauncherLoader old_loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader old_loader = nuvashalauncher_LOADER_VANILLA;
   g_autofree char *old_version = NULL;
 
   g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (self), FALSE);
@@ -654,8 +654,8 @@ nuvashalauncher_instance_manager_set_loader (nuvashalauncherInstanceManager *sel
 }
 
 gboolean
-remove_instance_and_save (nuvashalauncherInstanceManager *self,
-                          nuvashalauncherInstance *instance,
+remove_instance_and_save (NuvashaLauncherInstanceManager *self,
+                          NuvashaLauncherInstance *instance,
                           GError **error)
 {
   guint position = 0;
@@ -685,14 +685,14 @@ remove_instance_and_save (nuvashalauncherInstanceManager *self,
 gboolean
 check_instance_directories (gpointer user_data)
 {
-  nuvashalauncherInstanceManager *self = nuvashalauncher_INSTANCE_MANAGER (user_data);
+  NuvashaLauncherInstanceManager *self = nuvashalauncher_INSTANCE_MANAGER (user_data);
 
   for (guint i = g_list_model_get_n_items (G_LIST_MODEL (self->instances));
        i > 0;
        i--)
     {
       guint position = i - 1;
-      g_autoptr (nuvashalauncherInstance) instance =
+      g_autoptr (NuvashaLauncherInstance) instance =
         g_list_model_get_item (G_LIST_MODEL (self->instances), position);
       g_autofree char *directory = instance_directory (instance);
 
@@ -728,7 +728,7 @@ check_instance_directories (gpointer user_data)
   return G_SOURCE_CONTINUE;
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 copy_tree_async (GFile *source, GFile *destination,
                  GAsyncReadyCallback callback, gpointer user_data)
 {

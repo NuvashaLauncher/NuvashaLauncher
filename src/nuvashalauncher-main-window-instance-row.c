@@ -11,7 +11,7 @@
 
 /* Play while the instance is idle, Stop while it is busy. */
 static void
-row_update (GtkWidget *play, nuvashalauncher *launcher)
+row_update (GtkWidget *play, NuvashaLauncher *launcher)
 {
   gboolean busy = nuvashalauncher_launch_state_is_busy (nuvashalauncher_launcher_get_state (launcher));
   GtkWidget *icon =
@@ -24,7 +24,7 @@ row_update (GtkWidget *play, nuvashalauncher *launcher)
     GTK_WIDGET (g_object_get_data (G_OBJECT (play), "nuvashalauncher-instance-icon"));
   GtkWidget *edit_actions =
     GTK_WIDGET (g_object_get_data (G_OBJECT (play), "nuvashalauncher-edit-actions"));
-  nuvashalauncherMainWindow *self = g_object_get_data (G_OBJECT (play), "nuvashalauncher-window");
+  NuvashaLauncherMainWindow *self = g_object_get_data (G_OBJECT (play), "nuvashalauncher-window");
 
   gtk_label_set_label (GTK_LABEL (label), busy ? _("Stop") : _("Play"));
   gtk_image_set_from_icon_name (GTK_IMAGE (icon),
@@ -48,7 +48,7 @@ row_update (GtkWidget *play, nuvashalauncher *launcher)
 static void
 on_instance_check_toggled (GtkCheckButton *check, gpointer user_data)
 {
-  nuvashalauncherMainWindow *self = user_data;
+  NuvashaLauncherMainWindow *self = user_data;
   const char *id = g_object_get_data (G_OBJECT (check), "nuvashalauncher-instance-id");
   GtkStack *stack = g_object_get_data (G_OBJECT (check), "nuvashalauncher-icon-stack");
 
@@ -72,7 +72,7 @@ instance_row_drag_prepare (AdwActionRow *row,
                            double        x G_GNUC_UNUSED,
                            double        y G_GNUC_UNUSED)
 {
-  nuvashalauncherMainWindow *self = g_object_get_data (G_OBJECT (row),
+  NuvashaLauncherMainWindow *self = g_object_get_data (G_OBJECT (row),
                                                 "nuvashalauncher-window");
 
   if (self == NULL || !self->ui.edit_mode)
@@ -125,14 +125,14 @@ instance_row_drop (AdwActionRow *target,
                    double        y G_GNUC_UNUSED)
 {
   AdwActionRow *source;
-  nuvashalauncherMainWindow *self;
+  NuvashaLauncherMainWindow *self;
   GListStore *instances;
-  nuvashalauncherInstance *source_instance;
+  NuvashaLauncherInstance *source_instance;
   GtkWidget *source_list;
   GtkWidget *target_list;
   guint source_position;
   guint target_position;
-  g_autoptr (nuvashalauncherInstance) instance = NULL;
+  g_autoptr (NuvashaLauncherInstance) instance = NULL;
   g_autoptr (GError) error = NULL;
 
   if (!G_VALUE_HOLDS (value, ADW_TYPE_ACTION_ROW))
@@ -183,13 +183,13 @@ typedef enum {
 static void
 on_instance_row_action (GtkButton *button, gpointer user_data)
 {
-  nuvashalauncherMainWindow *self = user_data;
+  NuvashaLauncherMainWindow *self = user_data;
   const char *id = g_object_get_data (G_OBJECT (button), "nuvashalauncher-instance-id");
   InstanceRowAction action = GPOINTER_TO_INT (
     g_object_get_data (G_OBJECT (button), "nuvashalauncher-row-action"));
-  nuvashalauncherInstance *instance = nuvashalauncher_instance_manager_get_by_id (
+  NuvashaLauncherInstance *instance = nuvashalauncher_instance_manager_get_by_id (
     self->model->manager, id);
-  nuvashalauncherInstancePage *page;
+  NuvashaLauncherInstancePage *page;
 
   if (instance == NULL)
     return;
@@ -227,7 +227,7 @@ on_instance_row_action (GtkButton *button, gpointer user_data)
 }
 
 static void
-on_row_launcher_state (nuvashalauncher *launcher, nuvashalauncherLaunchState state G_GNUC_UNUSED,
+on_row_launcher_state (NuvashaLauncher *launcher, NuvashaLauncherLaunchState state G_GNUC_UNUSED,
                        const char *detail G_GNUC_UNUSED, gpointer user_data)
 {
   row_update (GTK_WIDGET (user_data), launcher);
@@ -237,7 +237,7 @@ on_row_launcher_state (nuvashalauncher *launcher, nuvashalauncherLaunchState sta
  * reference of its own, so a launcher that goes away first cannot leave
  * the row pointing at nothing. */
 static void
-row_set_launcher (GtkWidget *play, nuvashalauncher *launcher)
+row_set_launcher (GtkWidget *play, NuvashaLauncher *launcher)
 {
   /* Stealing keeps the reference the row took in one place instead of
    * leaving it to the notify of whatever is put there next. */
@@ -266,7 +266,7 @@ row_set_launcher (GtkWidget *play, nuvashalauncher *launcher)
 static void
 on_stop_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
-  nuvashalauncher *launcher = nuvashalauncher_LAUNCHER (user_data);
+  NuvashaLauncher *launcher = nuvashalauncher_LAUNCHER (user_data);
   const char *response =
     adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
 
@@ -277,9 +277,9 @@ on_stop_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 }
 
 static void
-confirm_stop (nuvashalauncherMainWindow *self, nuvashalauncher *launcher)
+confirm_stop (NuvashaLauncherMainWindow *self, NuvashaLauncher *launcher)
 {
-  nuvashalauncherInstance *instance = nuvashalauncher_launcher_get_instance (launcher);
+  NuvashaLauncherInstance *instance = nuvashalauncher_launcher_get_instance (launcher);
   g_autofree char *name = NULL;
   g_autofree char *heading = NULL;
   AdwAlertDialog *alert = NULL;
@@ -306,9 +306,9 @@ confirm_stop (nuvashalauncherMainWindow *self, nuvashalauncher *launcher)
 static void
 on_play_clicked (GtkButton *button, gpointer user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
   const char *id = g_object_get_data (G_OBJECT (button), "nuvashalauncher-instance-id");
-  nuvashalauncher *launcher = window_launcher (self, id);
+  NuvashaLauncher *launcher = window_launcher (self, id);
 
   if (launcher == NULL)
     return;
@@ -318,7 +318,7 @@ on_play_clicked (GtkButton *button, gpointer user_data)
     confirm_stop (self, launcher);
   else
     {
-      nuvashalauncherInstance *instance = nuvashalauncher_launcher_get_instance (launcher);
+      NuvashaLauncherInstance *instance = nuvashalauncher_launcher_get_instance (launcher);
       g_autofree char *java_path = NULL;
 
       if (instance != NULL)
@@ -338,7 +338,7 @@ on_play_clicked (GtkButton *button, gpointer user_data)
  * instance, so an icon chosen on the instance page and the icon a
  * modpack install gives an instance both land here. */
 static void
-row_set_icon (GtkImage *image, nuvashalauncherInstance *instance)
+row_set_icon (GtkImage *image, NuvashaLauncherInstance *instance)
 {
   g_autofree char *path = NULL;
 
@@ -390,15 +390,15 @@ on_row_icon_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
 GtkWidget *
 create_instance_row (gpointer item, gpointer user_data)
 {
-  nuvashalauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
-  nuvashalauncherInstance *instance = nuvashalauncher_INSTANCE (item);
+  NuvashaLauncherMainWindow *self = nuvashalauncher_MAIN_WINDOW (user_data);
+  NuvashaLauncherInstance *instance = nuvashalauncher_INSTANCE (item);
   g_autofree char *name = NULL;
   g_autofree char *minecraft_version = NULL;
   g_autofree char *subtitle = NULL;
-  nuvashalauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
   const char *id = NULL;
   const char *loader_name = NULL;
-  nuvashalauncher *launcher = NULL;
+  NuvashaLauncher *launcher = NULL;
   AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
   GtkImage *icon = GTK_IMAGE (gtk_image_new_from_icon_name ("applications-games-symbolic"));
   GtkButton *play = GTK_BUTTON (gtk_button_new ());

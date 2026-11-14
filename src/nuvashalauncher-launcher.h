@@ -74,7 +74,7 @@ typedef enum {
   nuvashalauncher_LAUNCH_ERROR_NO_MAIN_CLASS, /* the document says no main class */
   nuvashalauncher_LAUNCH_ERROR_ARGUMENTS,     /* the command line cannot be built */
   nuvashalauncher_LAUNCH_ERROR_ALREADY_RUNNING /* the game is already up */
-} nuvashalauncherLaunchError;
+} NuvashaLauncherLaunchError;
 
 GQuark nuvashalauncher_launch_error_quark (void);
 
@@ -89,20 +89,20 @@ typedef enum {
   nuvashalauncher_LAUNCH_CRASHED,          /* it ended with a failure */
   nuvashalauncher_LAUNCH_FAILED,            /* launch preparation failed */
   nuvashalauncher_LAUNCH_NEEDS_SIGN_IN     /* the account has to sign in again */
-} nuvashalauncherLaunchState;
+} NuvashaLauncherLaunchState;
 
 /* The type of the state, which the "state" signal carries. */
 #define nuvashalauncher_TYPE_LAUNCH_STATE (nuvashalauncher_launch_state_get_type ())
 GType nuvashalauncher_launch_state_get_type (void);
 
 /* Returns the stable display name of @state. */
-const char *nuvashalauncher_launch_state_to_string (nuvashalauncherLaunchState state);
+const char *nuvashalauncher_launch_state_to_string (NuvashaLauncherLaunchState state);
 
 /* TRUE for the states a launch passes through and lives in: everything
  * from Preparing to Stopping. A game in any of them is a game that must
  * not be started a second time. A launch that needs a sign-in is not
  * busy: nothing is running and the user can start it again. */
-gboolean nuvashalauncher_launch_state_is_busy (nuvashalauncherLaunchState state);
+gboolean nuvashalauncher_launch_state_is_busy (NuvashaLauncherLaunchState state);
 
 /* Account values passed to the game. */
 typedef struct {
@@ -112,12 +112,12 @@ typedef struct {
                              * cannot use, so the argument is never
                              * missing */
   const char *user_type;    /* "msa" or "legacy" */
-} nuvashalauncherLaunchSession;
+} NuvashaLauncherLaunchSession;
 
 /* The session of an account: its own name and UUID, its token, and the
  * user type that says which kind of account it is. Every member points
  * into @account, which the caller keeps. */
-nuvashalauncherLaunchSession nuvashalauncher_launch_session_for (const nuvashalauncherAccount *account);
+NuvashaLauncherLaunchSession nuvashalauncher_launch_session_for (const NuvashaLauncherAccount *account);
 
 /* Replace each ${name} placeholder in @value with its corresponding value.
  * A name the table does not hold is left exactly as the
@@ -153,8 +153,8 @@ char *nuvashalauncher_launch_substitute (const char  *value,
  * Fails with nuvashalauncher_LAUNCH_ERROR_NO_MAIN_CLASS when the document names no
  * main class and with nuvashalauncher_LAUNCH_ERROR_ARGUMENTS when the JVM arguments
  * of the instance do not parse as a command line. (transfer full) */
-GPtrArray *nuvashalauncher_launch_build_arguments (const nuvashalauncherResolvedVersion *resolved,
-                                      const nuvashalauncherLaunchSession   *session,
+GPtrArray *nuvashalauncher_launch_build_arguments (const NuvashaLauncherResolvedVersion *resolved,
+                                      const NuvashaLauncherLaunchSession   *session,
                                       const char             *java_executable,
                                       const char             *game_directory,
                                       const char             *jvm_args,
@@ -173,7 +173,7 @@ char *nuvashalauncher_launch_redact (GPtrArray *argv);
 
 #define nuvashalauncher_TYPE_LAUNCHER (nuvashalauncher_launcher_get_type ())
 
-G_DECLARE_FINAL_TYPE (nuvashalauncher, nuvashalauncher_launcher, nuvashalauncher, LAUNCHER, GObject)
+G_DECLARE_FINAL_TYPE (NuvashaLauncher, nuvashalauncher_launcher, nuvashalauncher, LAUNCHER, GObject)
 
 /* "state" carries the new state and the detail that goes with it, which
  * is what a view shows next to it: "assets 12/340" while downloading,
@@ -193,36 +193,36 @@ enum {
  * launch runs as. @settings may be NULL in a test that does not care
  * about them, and so may @accounts, in which case there is no account to
  * play as and a launch says so. */
-nuvashalauncher *nuvashalauncher_launcher_new (nuvashalauncherInstance  *instance,
-                               nuvashalauncherSettings  *settings,
-                               nuvashalauncherAccounts  *accounts);
+NuvashaLauncher *nuvashalauncher_launcher_new (NuvashaLauncherInstance  *instance,
+                               NuvashaLauncherSettings  *settings,
+                               NuvashaLauncherAccounts  *accounts);
 
 /* The accounts a launch runs as, or NULL when the launcher was made
  * without any. Borrowed. */
-nuvashalauncherAccounts *nuvashalauncher_launcher_get_accounts (nuvashalauncher *self);
+NuvashaLauncherAccounts *nuvashalauncher_launcher_get_accounts (NuvashaLauncher *self);
 
 /* Select an account only for this launch; does not change the saved active
  * account.  @account_id may be an account id, UUID, or name. */
-gboolean nuvashalauncher_launcher_set_account (nuvashalauncher *self,
+gboolean nuvashalauncher_launcher_set_account (NuvashaLauncher *self,
                                        const char *account_id,
                                        GError **error);
 
 /* The instance this launcher belongs to. Borrowed. */
-nuvashalauncherInstance *nuvashalauncher_launcher_get_instance (nuvashalauncher *self);
+NuvashaLauncherInstance *nuvashalauncher_launcher_get_instance (NuvashaLauncher *self);
 
-nuvashalauncherLaunchState nuvashalauncher_launcher_get_state (nuvashalauncher *self);
+NuvashaLauncherLaunchState nuvashalauncher_launcher_get_state (NuvashaLauncher *self);
 
 /* Optional state detail: progress while downloading or a failure reason.
  * Borrowed. */
-const char *nuvashalauncher_launcher_get_state_detail (nuvashalauncher *self);
+const char *nuvashalauncher_launcher_get_state_detail (NuvashaLauncher *self);
 
 /* The directory the game runs in and writes its own files to. Borrowed
  * from the instance. */
-const char *nuvashalauncher_launcher_get_game_directory (nuvashalauncher *self);
+const char *nuvashalauncher_launcher_get_game_directory (NuvashaLauncher *self);
 
 /* Return the game's log and crash-report directories. (transfer full) */
-char *nuvashalauncher_launcher_get_log_directory (nuvashalauncher *self);
-char *nuvashalauncher_launcher_get_crash_report_directory (nuvashalauncher *self);
+char *nuvashalauncher_launcher_get_log_directory (NuvashaLauncher *self);
+char *nuvashalauncher_launcher_get_crash_report_directory (NuvashaLauncher *self);
 
 /* Starts a launch: the manifest, the resolve, the Java and the process.
  *
@@ -231,13 +231,13 @@ char *nuvashalauncher_launcher_get_crash_report_directory (nuvashalauncher *self
  * happening. A launch that cannot finish ends in the Failed state with
  * the reason in the log, never with an error, so a caller has nothing
  * to do but watch the state. */
-void nuvashalauncher_launcher_start (nuvashalauncher *self);
+void nuvashalauncher_launcher_start (NuvashaLauncher *self);
 
 /* Asks a running game to end: SIGTERM first, and when it is still up
  * after nuvashalauncher_LAUNCH_STOP_TIMEOUT seconds it is stopped for good. A
  * launch that did not reach the process yet is cancelled where it is.
  * A launcher that is not busy does nothing. */
-void nuvashalauncher_launcher_stop (nuvashalauncher *self);
+void nuvashalauncher_launcher_stop (NuvashaLauncher *self);
 
 /* The last step of a launch: runs @argv, java included as its first
  * element, with the instance directory as the working directory and
@@ -249,20 +249,20 @@ void nuvashalauncher_launcher_stop (nuvashalauncher *self);
  * Fails with nuvashalauncher_LAUNCH_ERROR_ALREADY_RUNNING while a process of this
  * instance is up, and ends in the Failed state with the reason in the
  * log when the process cannot be started at all. */
-gboolean nuvashalauncher_launcher_spawn (nuvashalauncher *self,
+gboolean nuvashalauncher_launcher_spawn (NuvashaLauncher *self,
                              GPtrArray    *argv,
                              GError      **error);
 
 /* Maximum number of retained log lines. */
-guint nuvashalauncher_launcher_get_line_limit (nuvashalauncher *self);
+guint nuvashalauncher_launcher_get_line_limit (NuvashaLauncher *self);
 
 /* The number of lines the log holds right now. */
-guint nuvashalauncher_launcher_get_line_count (nuvashalauncher *self);
+guint nuvashalauncher_launcher_get_line_count (NuvashaLauncher *self);
 
-char *nuvashalauncher_launcher_get_log_text (nuvashalauncher *self);
+char *nuvashalauncher_launcher_get_log_text (NuvashaLauncher *self);
 
 /* Drops every line logged so far. */
-void nuvashalauncher_launcher_clear_log (nuvashalauncher *self);
+void nuvashalauncher_launcher_clear_log (NuvashaLauncher *self);
 
 G_END_DECLS
 

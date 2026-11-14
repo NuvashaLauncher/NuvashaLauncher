@@ -10,7 +10,7 @@
 
 typedef struct {
   GMainLoop *loop;
-  nuvashalauncherContentPage *page;
+  NuvashaLauncherContentPage *page;
   gboolean timed_out;
 } Wait;
 
@@ -41,7 +41,7 @@ wait_timeout (gpointer user_data)
 }
 
 static void
-wait_for_page (nuvashalauncherContentPage *page)
+wait_for_page (NuvashaLauncherContentPage *page)
 {
   Wait wait = {
     .loop = g_main_loop_new (NULL, FALSE),
@@ -63,17 +63,17 @@ wait_for_page (nuvashalauncherContentPage *page)
   g_main_loop_unref (wait.loop);
 }
 
-static nuvashalauncherInstanceManager *
+static NuvashaLauncherInstanceManager *
 make_manager (char **root_out, char **instance_directory_out,
-              nuvashalauncherInstance **instance_out)
+              NuvashaLauncherInstance **instance_out)
 {
   g_autoptr (GError) error = NULL;
   g_autofree char *root =
     g_dir_make_tmp ("nuvashalauncher-content-identify-XXXXXX", &error);
   g_autofree char *data = g_build_filename (root, "data", NULL);
-  g_autoptr (nuvashalauncherInstanceManager) manager =
+  g_autoptr (NuvashaLauncherInstanceManager) manager =
     nuvashalauncher_instance_manager_new (data);
-  nuvashalauncherInstance *instance =
+  NuvashaLauncherInstance *instance =
     nuvashalauncher_instance_manager_create (
       manager, "Identify", NULL, "1.21.1", nuvashalauncher_LOADER_FABRIC,
       "0.15.0", &error);
@@ -91,10 +91,10 @@ test_empty_folder_finishes_identification (void)
 {
   g_autofree char *root = NULL;
   g_autofree char *instance_directory = NULL;
-  g_autoptr (nuvashalauncherInstance) instance = NULL;
-  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
+  g_autoptr (NuvashaLauncherInstance) instance = NULL;
+  g_autoptr (NuvashaLauncherInstanceManager) manager = NULL;
   g_autofree char *mods = NULL;
-  g_autoptr (nuvashalauncherContentPage) page = NULL;
+  g_autoptr (NuvashaLauncherContentPage) page = NULL;
   g_autoptr (GError) error = NULL;
 
   manager = make_manager (&root, &instance_directory, &instance);
@@ -125,10 +125,10 @@ test_unreadable_folder_shows_failure_state (void)
 {
   g_autofree char *root = NULL;
   g_autofree char *instance_directory = NULL;
-  g_autoptr (nuvashalauncherInstance) instance = NULL;
-  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
+  g_autoptr (NuvashaLauncherInstance) instance = NULL;
+  g_autoptr (NuvashaLauncherInstanceManager) manager = NULL;
   g_autofree char *mods = NULL;
-  g_autoptr (nuvashalauncherContentPage) page = NULL;
+  g_autoptr (NuvashaLauncherContentPage) page = NULL;
 
   manager = make_manager (&root, &instance_directory, &instance);
   mods = g_build_filename (instance_directory, "mods", NULL);

@@ -41,7 +41,7 @@ ask_xbl (AuthRequest *self, const char *access_token)
 void
 xbl_answered (AuthRequest *self)
 {
-  g_autoptr (nuvashalauncherXboxToken) token = NULL;
+  g_autoptr (NuvashaLauncherXboxToken) token = NULL;
   g_autoptr (GError) error = NULL;
 
   if (!SOUP_STATUS_IS_SUCCESSFUL (self->status))

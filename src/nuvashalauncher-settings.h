@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherSettings: the desktop preferences shared by the application.
+/* NuvashaLauncherSettings: the desktop preferences shared by the application.
  *
  * One object, ten options so far: whether the version lists also show
  * unstable Minecraft versions, whether the loader lists also show the
@@ -22,21 +22,21 @@ G_BEGIN_DECLS
 
 #define nuvashalauncher_TYPE_SETTINGS (nuvashalauncher_settings_get_type ())
 
-G_DECLARE_FINAL_TYPE (nuvashalauncherSettings, nuvashalauncher_settings, nuvashalauncher, SETTINGS, GObject)
+G_DECLARE_FINAL_TYPE (NuvashaLauncherSettings, nuvashalauncher_settings, nuvashalauncher, SETTINGS, GObject)
 
 #define nuvashalauncher_SETTINGS_ERROR (nuvashalauncher_settings_error_quark ())
 
 typedef enum {
   nuvashalauncher_SETTINGS_ERROR_IO,      /* the settings file could not be written */
   nuvashalauncher_SETTINGS_ERROR_INVALID  /* the value asked for is not a usable one */
-} nuvashalauncherSettingsError;
+} NuvashaLauncherSettingsError;
 
 typedef enum {
   nuvashalauncher_SETTINGS_CACHE_EXPIRATION_1_HOUR = 60 * 60,
   nuvashalauncher_SETTINGS_CACHE_EXPIRATION_6_HOURS = 6 * 60 * 60,
   nuvashalauncher_SETTINGS_CACHE_EXPIRATION_1_DAY = 24 * 60 * 60,
   nuvashalauncher_SETTINGS_CACHE_EXPIRATION_7_DAYS = 7 * 24 * 60 * 60
-} nuvashalauncherSettingsCacheExpiration;
+} NuvashaLauncherSettingsCacheExpiration;
 
 GQuark nuvashalauncher_settings_error_quark (void);
 
@@ -47,62 +47,62 @@ GQuark nuvashalauncher_settings_error_quark (void);
   nuvashalauncher_SETTINGS_CACHE_EXPIRATION_1_HOUR
 
 /* Reads the installed GSettings schema and defaults. Never returns NULL. */
-nuvashalauncherSettings *nuvashalauncher_settings_new (void);
+NuvashaLauncherSettings *nuvashalauncher_settings_new (void);
 
 /* Whether unstable Minecraft versions are shown. */
-gboolean nuvashalauncher_settings_get_show_unstable_versions (nuvashalauncherSettings *self);
+gboolean nuvashalauncher_settings_get_show_unstable_versions (NuvashaLauncherSettings *self);
 
 /* Stores @value and writes the file. On failure the old value stays
  * in place, so the object never disagrees with what is on disk, and
  * FALSE comes back with the reason. */
-gboolean nuvashalauncher_settings_set_show_unstable_versions (nuvashalauncherSettings *self,
+gboolean nuvashalauncher_settings_set_show_unstable_versions (NuvashaLauncherSettings *self,
                                                    gboolean     value,
                                                    GError     **error);
 
 /* How many lines the log of a running game keeps, oldest dropped first.
  * Never below one: nuvashalauncher_SETTINGS_DEFAULT_LOG_LINE_LIMIT when the file
  * says nothing usable. */
-guint nuvashalauncher_settings_get_log_line_limit (nuvashalauncherSettings *self);
+guint nuvashalauncher_settings_get_log_line_limit (NuvashaLauncherSettings *self);
 
 /* @limit has to be at least one or the call fails with
  * nuvashalauncher_SETTINGS_ERROR_INVALID and the stored value stays in place. */
-gboolean nuvashalauncher_settings_set_log_line_limit (nuvashalauncherSettings *self,
+gboolean nuvashalauncher_settings_set_log_line_limit (NuvashaLauncherSettings *self,
                                           guint        limit,
                                           GError     **error);
 
 /* Whether unstable loader versions are shown. */
-gboolean nuvashalauncher_settings_get_show_unstable_loaders (nuvashalauncherSettings *self);
+gboolean nuvashalauncher_settings_get_show_unstable_loaders (NuvashaLauncherSettings *self);
 
-gboolean nuvashalauncher_settings_set_show_unstable_loaders (nuvashalauncherSettings *self,
+gboolean nuvashalauncher_settings_set_show_unstable_loaders (NuvashaLauncherSettings *self,
                                                  gboolean     value,
                                                  GError     **error);
 
-const char *nuvashalauncher_settings_get_language (nuvashalauncherSettings *self);
-gboolean nuvashalauncher_settings_set_language (nuvashalauncherSettings *self,
+const char *nuvashalauncher_settings_get_language (NuvashaLauncherSettings *self);
+gboolean nuvashalauncher_settings_set_language (NuvashaLauncherSettings *self,
                                     const char *language,
                                     GError    **error);
 
-gboolean nuvashalauncher_settings_get_cache_modrinth_api_responses (nuvashalauncherSettings *self);
-gboolean nuvashalauncher_settings_set_cache_modrinth_api_responses (nuvashalauncherSettings *self,
+gboolean nuvashalauncher_settings_get_cache_modrinth_api_responses (NuvashaLauncherSettings *self);
+gboolean nuvashalauncher_settings_set_cache_modrinth_api_responses (NuvashaLauncherSettings *self,
                                                         gboolean     value,
                                                         GError     **error);
 
-nuvashalauncherSettingsCacheExpiration
-nuvashalauncher_settings_get_cache_expiration (nuvashalauncherSettings *self);
-gboolean nuvashalauncher_settings_set_cache_expiration (nuvashalauncherSettings *self,
-                                            nuvashalauncherSettingsCacheExpiration value,
+NuvashaLauncherSettingsCacheExpiration
+nuvashalauncher_settings_get_cache_expiration (NuvashaLauncherSettings *self);
+gboolean nuvashalauncher_settings_set_cache_expiration (NuvashaLauncherSettings *self,
+                                            NuvashaLauncherSettingsCacheExpiration value,
                                             GError **error);
 
 /* TRUE asks for pack metadata before an export; FALSE performs a direct
  * export using the instance name and no optional metadata. */
-gboolean nuvashalauncher_settings_get_export_metadata (nuvashalauncherSettings *self);
-gboolean nuvashalauncher_settings_set_export_metadata (nuvashalauncherSettings *self,
+gboolean nuvashalauncher_settings_get_export_metadata (NuvashaLauncherSettings *self);
+gboolean nuvashalauncher_settings_set_export_metadata (NuvashaLauncherSettings *self,
                                            gboolean value,
                                            GError **error);
 
 /* TRUE by default: deleting a dependency also deletes its dependents. */
-gboolean nuvashalauncher_settings_get_delete_dependents (nuvashalauncherSettings *self);
-gboolean nuvashalauncher_settings_set_delete_dependents (nuvashalauncherSettings *self,
+gboolean nuvashalauncher_settings_get_delete_dependents (NuvashaLauncherSettings *self);
+gboolean nuvashalauncher_settings_set_delete_dependents (NuvashaLauncherSettings *self,
                                               gboolean value,
                                               GError **error);
 

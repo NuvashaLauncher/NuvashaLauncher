@@ -201,10 +201,10 @@ typedef struct
   GMainLoop *loop;
   GError *error;
   gboolean value;
-  nuvashalauncherInstance *instance;
+  NuvashaLauncherInstance *instance;
   gboolean timed_out;
   guint watchdog;
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
 } AsyncWait;
 
 static inline gboolean
@@ -249,7 +249,7 @@ verify_file_done (GObject *source G_GNUC_UNUSED,
 
 /* Both hashes of the manifest against the bytes on disk, in place. */
 static inline gboolean
-verify_now (const nuvashalauncherModpackFile *file, const char *path, GError **error)
+verify_now (const NuvashaLauncherModpackFile *file, const char *path, GError **error)
 {
   AsyncWait wait = { 0 };
 
@@ -302,8 +302,8 @@ index_update_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 }
 
 /* The whole install, in place. */
-static inline nuvashalauncherInstance *
-install_now (nuvashalauncherModpack *pack, nuvashalauncherInstanceManager *manager, const char *name,
+static inline NuvashaLauncherInstance *
+install_now (NuvashaLauncherModpack *pack, NuvashaLauncherInstanceManager *manager, const char *name,
              const char *directory, GError **error)
 {
   AsyncWait wait = { 0 };
@@ -317,7 +317,7 @@ install_now (nuvashalauncherModpack *pack, nuvashalauncherInstanceManager *manag
 }
 
 static inline gboolean
-export_now (nuvashalauncherInstance *instance, const char *path, GError **error)
+export_now (NuvashaLauncherInstance *instance, const char *path, GError **error)
 {
   AsyncWait wait = { 0 };
 
@@ -331,8 +331,8 @@ export_now (nuvashalauncherInstance *instance, const char *path, GError **error)
 }
 
 static inline gboolean
-index_update_now (const char *directory, nuvashalauncherContentType type,
-                  nuvashalauncherContentIndexEntry *entry, GError **error)
+index_update_now (const char *directory, NuvashaLauncherContentType type,
+                  NuvashaLauncherContentIndexEntry *entry, GError **error)
 {
   AsyncWait wait = { 0 };
 
@@ -345,7 +345,7 @@ index_update_now (const char *directory, nuvashalauncherContentType type,
 }
 
 static inline guint
-manager_count (nuvashalauncherInstanceManager *manager)
+manager_count (NuvashaLauncherInstanceManager *manager)
 {
   return g_list_model_get_n_items (
     G_LIST_MODEL (nuvashalauncher_instance_manager_get_instances (manager)));
@@ -356,12 +356,12 @@ manager_count (nuvashalauncherInstanceManager *manager)
  * ---------------------------------------------------------- */
 
 static inline void
-assert_loader (const char *deps_json, nuvashalauncherLoader loader,
+assert_loader (const char *deps_json, NuvashaLauncherLoader loader,
                const char *minecraft, const char *loader_version)
 {
   g_autofree char *json = pack_index ("Resolve Pack", "", deps_json);
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModpack) pack = NULL;
+  g_autoptr (NuvashaLauncherModpack) pack = NULL;
 
   pack = nuvashalauncher_modpack_new_from_json (json, -1, &error);
   g_assert_no_error (error);
@@ -396,7 +396,7 @@ static inline void
 expect_refused (const char *json, guint code, const char *what)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModpack) pack = NULL;
+  g_autoptr (NuvashaLauncherModpack) pack = NULL;
 
   pack = nuvashalauncher_modpack_new_from_json (json, -1, &error);
   g_assert_null (pack);
@@ -420,11 +420,11 @@ expect_refused (const char *json, guint code, const char *what)
  * What an install leaves behind
  * ---------------------------------------------------------- */
 
-static inline nuvashalauncherInstanceManager *
+static inline NuvashaLauncherInstanceManager *
 manager_new (const char *data_dir)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherInstanceManager) manager = nuvashalauncher_instance_manager_new (data_dir);
+  g_autoptr (NuvashaLauncherInstanceManager) manager = nuvashalauncher_instance_manager_new (data_dir);
 
   g_assert_nonnull (manager);
   g_assert_true (nuvashalauncher_instance_manager_load (manager, &error));

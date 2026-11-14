@@ -36,14 +36,14 @@ nuvashalauncher_cache_get_files_directory (void)
   return cache_directory ("files");
 }
 
-static nuvashalauncherTaskScope *
+static NuvashaLauncherTaskScope *
 cache_clear_async (const char *path, GAsyncReadyCallback callback,
                    gpointer user_data)
 {
   return nuvashalauncher_fs_remove_tree_async (path, callback, user_data);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_cache_clear_all_async (GAsyncReadyCallback callback, gpointer user_data)
 {
   g_autofree char *path =
@@ -157,12 +157,12 @@ cache_prune_thread (GTask        *task,
   g_task_return_boolean (task, TRUE);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_cache_prune_async (gint64              api_max_age_seconds,
                                  GAsyncReadyCallback callback,
                                  gpointer            user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   GTask *task = nuvashalauncher_task_scope_task (scope);
   gint64 *data = g_new (gint64, 1);

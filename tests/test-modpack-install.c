@@ -27,14 +27,14 @@ test_install_offline (void)
     pack_index ("Offline Pack", "", "\"minecraft\":\"1.20.1\"");
   g_autofree char *instances_dir = g_build_filename (data_dir, "instances", NULL);
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
-  g_autoptr (nuvashalauncherModpack) pack = NULL;
-  g_autoptr (nuvashalauncherInstance) instance = NULL;
+  g_autoptr (NuvashaLauncherInstanceManager) manager = NULL;
+  g_autoptr (NuvashaLauncherModpack) pack = NULL;
+  g_autoptr (NuvashaLauncherInstance) instance = NULL;
   g_autofree char *instance_dir = NULL;
   g_autofree char *name = NULL;
   g_autofree char *minecraft = NULL;
   g_autofree char *icon = NULL;
-  nuvashalauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
   g_autofree char *options = NULL;
   g_autofree char *client = NULL;
   g_autofree char *server = NULL;
@@ -121,7 +121,7 @@ test_install_offline (void)
       g_autofree char *repeat_name = g_strdup_printf ("Offline Pack %u", i);
       g_autofree char *repeat_directory =
         g_build_filename (instances_dir, repeat_name, NULL);
-      g_autoptr (nuvashalauncherInstance) repeat =
+      g_autoptr (NuvashaLauncherInstance) repeat =
         install_now (pack, manager, repeat_name, repeat_directory, &error);
 
       g_assert_no_error (error);
@@ -150,9 +150,9 @@ test_install_rolls_back (void)
   g_autofree char *index_json =
     pack_index ("Bad Pack", files_json, "\"minecraft\":\"1.20.1\"");
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
-  g_autoptr (nuvashalauncherModpack) pack = NULL;
-  g_autoptr (nuvashalauncherInstance) instance = NULL;
+  g_autoptr (NuvashaLauncherInstanceManager) manager = NULL;
+  g_autoptr (NuvashaLauncherModpack) pack = NULL;
+  g_autoptr (NuvashaLauncherInstance) instance = NULL;
 
   ZipEntry entries[] = {
     { "modrinth.index.json", index_json, strlen (index_json), AE_IFREG,
@@ -197,9 +197,9 @@ test_install_leaves_user_data (void)
   g_autofree char *index_json =
     pack_index ("Taken Pack", "", "\"minecraft\":\"1.20.1\"");
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
-  g_autoptr (nuvashalauncherModpack) pack = NULL;
-  g_autoptr (nuvashalauncherInstance) instance = NULL;
+  g_autoptr (NuvashaLauncherInstanceManager) manager = NULL;
+  g_autoptr (NuvashaLauncherModpack) pack = NULL;
+  g_autoptr (NuvashaLauncherInstance) instance = NULL;
 
   ZipEntry entries[] = {
     { "modrinth.index.json", index_json, strlen (index_json), AE_IFREG,
@@ -248,9 +248,9 @@ test_install_needs_resolve (void)
   g_autofree char *index_json =
     pack_index ("Unread Pack", "", "\"minecraft\":\"1.20.1\"");
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
-  g_autoptr (nuvashalauncherModpack) pack = NULL;
-  g_autoptr (nuvashalauncherInstance) instance = NULL;
+  g_autoptr (NuvashaLauncherInstanceManager) manager = NULL;
+  g_autoptr (NuvashaLauncherModpack) pack = NULL;
+  g_autoptr (NuvashaLauncherInstance) instance = NULL;
 
   manager = manager_new (data_dir);
 
@@ -280,9 +280,9 @@ test_install_invalid_arguments (void)
   g_autofree char *index_json =
     pack_index ("Valid Pack", "", "\"minecraft\":\"1.20.1\"");
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
-  g_autoptr (nuvashalauncherModpack) pack = NULL;
-  g_autoptr (nuvashalauncherInstance) instance = NULL;
+  g_autoptr (NuvashaLauncherInstanceManager) manager = NULL;
+  g_autoptr (NuvashaLauncherModpack) pack = NULL;
+  g_autoptr (NuvashaLauncherInstance) instance = NULL;
 
   ZipEntry entries[] = {
     { "modrinth.index.json", index_json, strlen (index_json), AE_IFREG, NULL },
@@ -326,9 +326,9 @@ test_install_with_content_types (void)
   g_autofree char *index_json =
     pack_index ("Full Content Pack", "", "\"minecraft\":\"1.20.1\"");
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
-  g_autoptr (nuvashalauncherModpack) pack = NULL;
-  g_autoptr (nuvashalauncherInstance) instance = NULL;
+  g_autoptr (NuvashaLauncherInstanceManager) manager = NULL;
+  g_autoptr (NuvashaLauncherModpack) pack = NULL;
+  g_autoptr (NuvashaLauncherInstance) instance = NULL;
   g_autofree char *instance_dir = NULL;
 
   ZipEntry entries[] = {
@@ -373,9 +373,9 @@ test_install_icon_and_remove_archive (void)
   g_autofree char *zip_path = g_build_filename (dir, "pack.mrpack", NULL);
   g_autofree char *index_json = pack_index ("Icon Pack", "", "\"minecraft\":\"1.20.1\"");
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
-  g_autoptr (nuvashalauncherModpack) pack = NULL;
-  g_autoptr (nuvashalauncherInstance) instance = NULL;
+  g_autoptr (NuvashaLauncherInstanceManager) manager = NULL;
+  g_autoptr (NuvashaLauncherModpack) pack = NULL;
+  g_autoptr (NuvashaLauncherInstance) instance = NULL;
   g_autofree char *src_icon = g_build_filename (dir, "source-icon.png", NULL);
 
   ZipEntry entries[] = {

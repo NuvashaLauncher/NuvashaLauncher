@@ -20,11 +20,11 @@
 
 typedef struct
 {
-  nuvashalauncherInstanceManager *self;
+  NuvashaLauncherInstanceManager *self;
   GTask *task;
-  nuvashalauncherTaskScope *scope;
-  nuvashalauncherTaskScope *copy_scope;
-  nuvashalauncherInstance *copy; /* built, not registered yet */
+  NuvashaLauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *copy_scope;
+  NuvashaLauncherInstance *copy; /* built, not registered yet */
 } DuplicateData;
 
 static void
@@ -80,9 +80,9 @@ duplicate_copy_ready (GObject *source G_GNUC_UNUSED,
   duplicate_data_free (data);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_instance_manager_duplicate_async (nuvashalauncherInstanceManager *self,
-                                      nuvashalauncherInstance *source_instance,
+NuvashaLauncherTaskScope *
+nuvashalauncher_instance_manager_duplicate_async (NuvashaLauncherInstanceManager *self,
+                                      NuvashaLauncherInstance *source_instance,
                                       GAsyncReadyCallback callback,
                                       gpointer user_data)
 {
@@ -91,7 +91,7 @@ nuvashalauncher_instance_manager_duplicate_async (nuvashalauncherInstanceManager
 
   g_autoptr (GTask) task = g_task_new (self, NULL, callback, user_data);
   nuvashalauncher_task_scope_attach_task (task);
-  nuvashalauncherTaskScope *task_scope = g_object_get_data (G_OBJECT (task),
+  NuvashaLauncherTaskScope *task_scope = g_object_get_data (G_OBJECT (task),
                                                  "nuvashalauncher-task-scope");
   if (!g_list_store_find (self->instances, source_instance, NULL))
     {
@@ -113,7 +113,7 @@ nuvashalauncher_instance_manager_duplicate_async (nuvashalauncherInstanceManager
   g_autofree char *modpack_name = NULL;
   g_autofree char *modpack_summary = NULL;
   g_autofree char *modpack_version_id = NULL;
-  nuvashalauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
 
   g_object_get (source_instance,
                 "minecraft_version", &minecraft_version,
@@ -143,7 +143,7 @@ nuvashalauncher_instance_manager_duplicate_async (nuvashalauncherInstanceManager
   g_free (directory);
   directory = g_steal_pointer (&canonical);
 
-  g_autoptr (nuvashalauncherInstance) copy =
+  g_autoptr (NuvashaLauncherInstance) copy =
      nuvashalauncher_instance_new (id, unique_name, directory, minecraft_version, loader,
                       &local_error);
 
@@ -200,8 +200,8 @@ nuvashalauncher_instance_manager_duplicate_async (nuvashalauncherInstanceManager
   return nuvashalauncher_task_scope_ref (task_scope);
 }
 
-nuvashalauncherInstance *
-nuvashalauncher_instance_manager_duplicate_finish (nuvashalauncherInstanceManager *self,
+NuvashaLauncherInstance *
+nuvashalauncher_instance_manager_duplicate_finish (NuvashaLauncherInstanceManager *self,
                                        GAsyncResult *result,
                                        GError **error)
 {
@@ -210,7 +210,7 @@ nuvashalauncher_instance_manager_duplicate_finish (nuvashalauncherInstanceManage
   return g_task_propagate_pointer (G_TASK (result), error);
 }
 
-static nuvashalauncherTaskScope *
+static NuvashaLauncherTaskScope *
 delete_tree_async (GFile *file, GCancellable *cancellable,
                    GAsyncReadyCallback callback, gpointer user_data)
 {
@@ -234,11 +234,11 @@ delete_tree_finish (GAsyncResult *result, GError **error)
 
 typedef struct
 {
-  nuvashalauncherInstanceManager *self;
+  NuvashaLauncherInstanceManager *self;
   GTask *task;
-  nuvashalauncherTaskScope *scope;
-  nuvashalauncherTaskScope *tree_scope;
-  nuvashalauncherInstance *instance;
+  NuvashaLauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *tree_scope;
+  NuvashaLauncherInstance *instance;
 } DeleteData;
 
 static void
@@ -284,9 +284,9 @@ delete_directory_ready (GObject *source G_GNUC_UNUSED,
   delete_data_free (data);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_instance_manager_delete_async (nuvashalauncherInstanceManager *self,
-                                   nuvashalauncherInstance *instance,
+NuvashaLauncherTaskScope *
+nuvashalauncher_instance_manager_delete_async (NuvashaLauncherInstanceManager *self,
+                                   NuvashaLauncherInstance *instance,
                                    gboolean delete_directory,
                                    GAsyncReadyCallback callback,
                                    gpointer user_data)
@@ -296,7 +296,7 @@ nuvashalauncher_instance_manager_delete_async (nuvashalauncherInstanceManager *s
 
   g_autoptr (GTask) task = g_task_new (self, NULL, callback, user_data);
   nuvashalauncher_task_scope_attach_task (task);
-  nuvashalauncherTaskScope *task_scope = g_object_get_data (G_OBJECT (task),
+  NuvashaLauncherTaskScope *task_scope = g_object_get_data (G_OBJECT (task),
                                                  "nuvashalauncher-task-scope");
   if (!g_list_store_find (self->instances, instance, NULL))
     {
@@ -335,7 +335,7 @@ nuvashalauncher_instance_manager_delete_async (nuvashalauncherInstanceManager *s
 }
 
 gboolean
-nuvashalauncher_instance_manager_delete_finish (nuvashalauncherInstanceManager *self,
+nuvashalauncher_instance_manager_delete_finish (NuvashaLauncherInstanceManager *self,
                                     GAsyncResult *result,
                                     GError **error)
 {
@@ -356,8 +356,8 @@ nuvashalauncher_instance_manager_delete_finish (nuvashalauncherInstanceManager *
  * ---------------------------------------------------------- */
 
 gboolean
-nuvashalauncher_instance_manager_check_new_directory (nuvashalauncherInstanceManager  *self,
-                                          nuvashalauncherInstance         *instance,
+nuvashalauncher_instance_manager_check_new_directory (NuvashaLauncherInstanceManager  *self,
+                                          NuvashaLauncherInstance         *instance,
                                           const char          *directory,
                                           char               **canonical,
                                           GError             **error)
@@ -425,12 +425,12 @@ nuvashalauncher_instance_manager_check_new_directory (nuvashalauncherInstanceMan
 
 typedef struct
 {
-  nuvashalauncherInstanceManager *self;
+  NuvashaLauncherInstanceManager *self;
   GTask *task;
-  nuvashalauncherTaskScope *scope;
-  nuvashalauncherTaskScope *copy_scope;
-  nuvashalauncherTaskScope *tree_scope;
-  nuvashalauncherInstance *instance;
+  NuvashaLauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *copy_scope;
+  NuvashaLauncherTaskScope *tree_scope;
+  NuvashaLauncherInstance *instance;
 
   char *old_directory;
   char *new_directory;
@@ -554,9 +554,9 @@ move_copy_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   }
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_instance_manager_change_directory_async (nuvashalauncherInstanceManager *self,
-                                             nuvashalauncherInstance *instance,
+NuvashaLauncherTaskScope *
+nuvashalauncher_instance_manager_change_directory_async (NuvashaLauncherInstanceManager *self,
+                                             NuvashaLauncherInstance *instance,
                                              const char *directory,
                                              GAsyncReadyCallback callback,
                                              gpointer user_data)
@@ -566,7 +566,7 @@ nuvashalauncher_instance_manager_change_directory_async (nuvashalauncherInstance
 
   g_autoptr (GTask) task = g_task_new (self, NULL, callback, user_data);
   nuvashalauncher_task_scope_attach_task (task);
-  nuvashalauncherTaskScope *task_scope = g_object_get_data (G_OBJECT (task),
+  NuvashaLauncherTaskScope *task_scope = g_object_get_data (G_OBJECT (task),
                                                  "nuvashalauncher-task-scope");
   g_autofree char *path = NULL;
   g_autofree char *old_directory = NULL;
@@ -634,7 +634,7 @@ nuvashalauncher_instance_manager_change_directory_async (nuvashalauncherInstance
 }
 
 gboolean
-nuvashalauncher_instance_manager_change_directory_finish (nuvashalauncherInstanceManager *self,
+nuvashalauncher_instance_manager_change_directory_finish (NuvashaLauncherInstanceManager *self,
                                                GAsyncResult *result,
                                                GError **error)
 {
@@ -652,7 +652,7 @@ open_folder_launch_ready (GObject *source G_GNUC_UNUSED,
                           GAsyncResult *result, gpointer user_data)
 {
   GTask *task = user_data; /* holds its own reference */
-  nuvashalauncherTaskScope *scope = g_object_get_data (G_OBJECT (task),
+  NuvashaLauncherTaskScope *scope = g_object_get_data (G_OBJECT (task),
                                            "nuvashalauncher-task-scope");
   g_autoptr (GError) error = NULL;
 
@@ -664,9 +664,9 @@ open_folder_launch_ready (GObject *source G_GNUC_UNUSED,
   g_object_unref (task);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_instance_manager_open_folder_async (nuvashalauncherInstanceManager *self,
-                                         nuvashalauncherInstance *instance,
+NuvashaLauncherTaskScope *
+nuvashalauncher_instance_manager_open_folder_async (NuvashaLauncherInstanceManager *self,
+                                         NuvashaLauncherInstance *instance,
                                          GAsyncReadyCallback callback,
                                          gpointer user_data)
 {
@@ -675,7 +675,7 @@ nuvashalauncher_instance_manager_open_folder_async (nuvashalauncherInstanceManag
 
   g_autoptr (GTask) task = g_task_new (self, NULL, callback, user_data);
    nuvashalauncher_task_scope_attach_task (task);
-   nuvashalauncherTaskScope *scope = g_object_get_data (G_OBJECT (task),
+   NuvashaLauncherTaskScope *scope = g_object_get_data (G_OBJECT (task),
                                             "nuvashalauncher-task-scope");
 
   if (!g_list_store_find (self->instances, instance, NULL))
@@ -717,7 +717,7 @@ nuvashalauncher_instance_manager_open_folder_async (nuvashalauncherInstanceManag
 }
 
 gboolean
-nuvashalauncher_instance_manager_open_folder_finish (nuvashalauncherInstanceManager *self,
+nuvashalauncher_instance_manager_open_folder_finish (NuvashaLauncherInstanceManager *self,
                                          GAsyncResult *result,
                                          GError **error)
 {

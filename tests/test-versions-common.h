@@ -45,12 +45,12 @@ fixture_text (const char *name)
   return contents;
 }
 
-static inline nuvashalauncherVersionDescription *
+static inline NuvashaLauncherVersionDescription *
 fixture_version (const char *name)
 {
   g_autofree char *text = fixture_text (name);
   g_autoptr (GError) error = NULL;
-  nuvashalauncherVersionDescription *description;
+  NuvashaLauncherVersionDescription *description;
 
   description = nuvashalauncher_version_description_new_from_json (text, -1, &error);
 
@@ -60,12 +60,12 @@ fixture_version (const char *name)
   return description;
 }
 
-static inline const nuvashalauncherLibrary *
-find_library (nuvashalauncherVersionDescription *description, const char *name)
+static inline const NuvashaLauncherLibrary *
+find_library (NuvashaLauncherVersionDescription *description, const char *name)
 {
   for (guint i = 0; i < description->libraries->len; i++)
     {
-      nuvashalauncherLibrary *library = g_ptr_array_index (description->libraries, i);
+      NuvashaLauncherLibrary *library = g_ptr_array_index (description->libraries, i);
 
       if (g_str_equal (library->name, name))
         return library;
@@ -310,9 +310,9 @@ typedef struct
 {
   AsyncRun *run;
   GError *error;
-  nuvashalauncherVersionManifest *manifest;
-  nuvashalauncherVersionDescription *description;
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherVersionManifest *manifest;
+  NuvashaLauncherVersionDescription *description;
+  NuvashaLauncherTaskScope *operation;
 } AsyncCall;
 
 static inline void
@@ -410,7 +410,7 @@ call_manifest (AsyncRun *run, AsyncCall *call, const char *url)
 }
 
 static inline void
-call_load (AsyncRun *run, AsyncCall *call, nuvashalauncherVersionManifest *manifest,
+call_load (AsyncRun *run, AsyncCall *call, NuvashaLauncherVersionManifest *manifest,
            const char *version_id)
 {
   call->run = run;
@@ -438,12 +438,12 @@ cache_file (const char *name)
 
 /* The manifest of the tests, parsed without going through the
  * network. */
-static inline nuvashalauncherVersionManifest *
+static inline NuvashaLauncherVersionManifest *
 local_manifest (void)
 {
   g_autofree char *json = manifest_json ();
   g_autoptr (GError) error = NULL;
-  nuvashalauncherVersionManifest *manifest;
+  NuvashaLauncherVersionManifest *manifest;
 
   manifest = nuvashalauncher_version_manifest_new_from_json (json, -1, &error);
 

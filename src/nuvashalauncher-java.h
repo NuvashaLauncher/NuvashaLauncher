@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherJava: a usable Java runtime on this machine, and how to find it.
+/* NuvashaLauncherJava: a usable Java runtime on this machine, and how to find it.
  *
  * Detection runs the well-known locations of a JDK on Linux and asks
  * each candidate executable what it is, so nothing here hard-codes a
@@ -24,7 +24,7 @@ G_BEGIN_DECLS
 typedef enum {
   nuvashalauncher_JAVA_ERROR_IO,   /* the subprocess could not be run or read */
   nuvashalauncher_JAVA_ERROR_PARSE /* the output was not a version report */
-} nuvashalauncherJavaError;
+} NuvashaLauncherJavaError;
 
 GQuark nuvashalauncher_java_error_quark (void);
 
@@ -39,15 +39,15 @@ typedef struct {
   char *vendor;
   int major_version; /* 8, 17, 21, 25, ... */
   gboolean headless;
-} nuvashalauncherJava;
+} NuvashaLauncherJava;
 
-void nuvashalauncher_java_free (nuvashalauncherJava *java);
+void nuvashalauncher_java_free (NuvashaLauncherJava *java);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherJava, nuvashalauncher_java_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherJava, nuvashalauncher_java_free)
 
 /* FALSE when this Java is older than the one the version document
  * wants (its javaVersion.majorVersion). */
-gboolean nuvashalauncher_java_is_compatible (const nuvashalauncherJava *java, int required_major);
+gboolean nuvashalauncher_java_is_compatible (const NuvashaLauncherJava *java, int required_major);
 
 /* The argument of `java -version`, straight from the executable:
  * "1.8.0_x" is 8, "17.0.x" is 17, "21" is 21. Works on the banner
@@ -63,7 +63,7 @@ gboolean nuvashalauncher_java_parse_version (const char  *output,
  * one with the smallest major version, NULL when none fits. A runtime
  * that can open a window beats a headless one, even a newer major,
  * because a headless runtime cannot show the game at all. */
-nuvashalauncherJava *nuvashalauncher_java_best_compatible (GPtrArray *javas, int required_major);
+NuvashaLauncherJava *nuvashalauncher_java_best_compatible (GPtrArray *javas, int required_major);
 
 /* Picks the Java an instance will run with: the instance setting wins,
  * and when it names none the exact required major is selected when it is
@@ -71,13 +71,13 @@ nuvashalauncherJava *nuvashalauncher_java_best_compatible (GPtrArray *javas, int
  * default: a runtime is the instance's own choice.
  * @javas holds what detection found; nothing here requires every
  * candidate to be in it. */
-const nuvashalauncherJava *nuvashalauncher_java_select (GPtrArray *javas,
+const NuvashaLauncherJava *nuvashalauncher_java_select (GPtrArray *javas,
                                 const char *instance_java_path,
                                 int         required_major);
 
 /* Runs "<executable> -version" (stderr is merged into stdout, the
  * flags Go answers) and parses what comes back. */
-nuvashalauncherTaskScope *nuvashalauncher_java_probe_async (const char *executable,
+NuvashaLauncherTaskScope *nuvashalauncher_java_probe_async (const char *executable,
                                      GAsyncReadyCallback callback,
                                      gpointer user_data);
 
@@ -86,18 +86,18 @@ void nuvashalauncher_java_register_custom_path (const char *executable);
 
 /* (transfer full). Errors from the spawn, from nuvashalauncher_JAVA_ERROR and
  * G_IO_ERROR_CANCELLED for a cancelled caller. */
-nuvashalauncherJava *nuvashalauncher_java_probe_finish (GAsyncResult  *result,
+NuvashaLauncherJava *nuvashalauncher_java_probe_finish (GAsyncResult  *result,
                                 GError       **error);
 
 /* One async probe per candidate, skipping the ones that do not report a
  * version, deduplicated by the resolved real path of @executables
  * (elements are stolen into the result in the order they were probed).
  * @executables is NULL-terminated. */
-nuvashalauncherTaskScope *nuvashalauncher_java_probe_list_async (char **executables,
+NuvashaLauncherTaskScope *nuvashalauncher_java_probe_list_async (char **executables,
                                          GAsyncReadyCallback callback,
                                          gpointer user_data);
 
-/* (transfer full). The array holds nuvashalauncherJava* with nuvashalauncher_java_free() as
+/* (transfer full). The array holds NuvashaLauncherJava* with nuvashalauncher_java_free() as
  * the element and the array free function, so
  * g_ptr_array_unref() drops everything. */
 GPtrArray *nuvashalauncher_java_probe_list_finish (GAsyncResult  *result,
@@ -109,7 +109,7 @@ GPtrArray *nuvashalauncher_java_probe_list_finish (GAsyncResult  *result,
  * ~/.jdks, ~/.sdkman/candidates/java, ~/.asdf/installs/java,
  * ~/.local/share/mise/installs/java), $JAVA_HOME/bin/java and the
  * "java" on $PATH. Same result shape as nuvashalauncher_java_probe_list_finish(). */
-nuvashalauncherTaskScope *nuvashalauncher_java_detect_async (GAsyncReadyCallback callback,
+NuvashaLauncherTaskScope *nuvashalauncher_java_detect_async (GAsyncReadyCallback callback,
                                      gpointer user_data);
 
 GPtrArray *nuvashalauncher_java_detect_finish (GAsyncResult  *result,
@@ -121,7 +121,7 @@ GPtrArray *nuvashalauncher_java_detect_finish (GAsyncResult  *result,
  * what a headless test uses to scan fake VMs in a temp directory.
  * Unlike nuvashalauncher_java_detect_async() it never reaches $JAVA_HOME, $PATH
  * or anything outside the given roots. */
-nuvashalauncherTaskScope *nuvashalauncher_java_detect_list_async (char **roots,
+NuvashaLauncherTaskScope *nuvashalauncher_java_detect_list_async (char **roots,
                                           GAsyncReadyCallback callback,
                                           gpointer user_data);
 

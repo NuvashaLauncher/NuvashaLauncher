@@ -39,7 +39,7 @@ typedef struct
 } Fixture;
 
 static Fixture fixture;
-static nuvashalauncherSettings *cache_settings;
+static NuvashaLauncherSettings *cache_settings;
 
 static inline void
 reply_with (SoupServerMessage *message, guint status,
@@ -278,7 +278,7 @@ typedef struct
   goffset progress_done;
   goffset progress_total;
   gboolean cancel_on_progress;
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
 } AsyncCall;
 
 static inline void

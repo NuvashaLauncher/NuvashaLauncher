@@ -25,7 +25,7 @@ nuvashalauncher_mc_error_quark (void)
   return g_quark_from_static_string ("nuvashalauncher-minecraft-versions-error");
 }
 
-/* The order has to match nuvashalauncherMcVersionType. */
+/* The order has to match NuvashaLauncherMcVersionType. */
 static const char * const version_type_names[] = {
   "release",
   "snapshot",
@@ -34,7 +34,7 @@ static const char * const version_type_names[] = {
 };
 
 gboolean
-nuvashalauncher_mc_version_type_from_string (const char *string, nuvashalauncherMcVersionType *type)
+nuvashalauncher_mc_version_type_from_string (const char *string, NuvashaLauncherMcVersionType *type)
 {
   g_return_val_if_fail (type != NULL, FALSE);
 
@@ -45,7 +45,7 @@ nuvashalauncher_mc_version_type_from_string (const char *string, nuvashalauncher
     {
       if (g_str_equal (string, version_type_names[i]))
         {
-          *type = (nuvashalauncherMcVersionType) i;
+          *type = (NuvashaLauncherMcVersionType) i;
           return TRUE;
         }
     }
@@ -54,7 +54,7 @@ nuvashalauncher_mc_version_type_from_string (const char *string, nuvashalauncher
 }
 
 const char *
-nuvashalauncher_mc_version_type_to_string (nuvashalauncherMcVersionType type)
+nuvashalauncher_mc_version_type_to_string (NuvashaLauncherMcVersionType type)
 {
   if ((guint) type >= G_N_ELEMENTS (version_type_names))
     return NULL;
@@ -62,12 +62,12 @@ nuvashalauncher_mc_version_type_to_string (nuvashalauncherMcVersionType type)
   return version_type_names[type];
 }
 
-G_DEFINE_FINAL_TYPE (nuvashalauncherVersionManifest, nuvashalauncher_version_manifest, G_TYPE_OBJECT)
+G_DEFINE_FINAL_TYPE (NuvashaLauncherVersionManifest, nuvashalauncher_version_manifest, G_TYPE_OBJECT)
 
-static nuvashalauncherVersionEntry *
+static NuvashaLauncherVersionEntry *
 parse_entry (JsonObject *object, GError **error)
 {
-  nuvashalauncherVersionEntry *entry = g_new0 (nuvashalauncherVersionEntry, 1);
+  NuvashaLauncherVersionEntry *entry = g_new0 (NuvashaLauncherVersionEntry, 1);
   g_autofree char *type_name = NULL;
 
   if (!nuvashalauncher_mc_get_string (object, "id", TRUE, &entry->id, error) ||
@@ -92,7 +92,7 @@ parse_entry (JsonObject *object, GError **error)
 }
 
 static gboolean
-fill_manifest (JsonObject *root, nuvashalauncherVersionManifest *self, GError **error)
+fill_manifest (JsonObject *root, NuvashaLauncherVersionManifest *self, GError **error)
 {
   JsonObject *latest = NULL;
   JsonArray *versions = NULL;
@@ -118,7 +118,7 @@ fill_manifest (JsonObject *root, nuvashalauncherVersionManifest *self, GError **
   for (guint i = 0; i < json_array_get_length (versions); i++)
     {
       JsonNode *item = json_array_get_element (versions, i);
-      nuvashalauncherVersionEntry *entry;
+      NuvashaLauncherVersionEntry *entry;
 
       if (!JSON_NODE_HOLDS_OBJECT (item))
         {
@@ -138,13 +138,13 @@ fill_manifest (JsonObject *root, nuvashalauncherVersionManifest *self, GError **
   return TRUE;
 }
 
-nuvashalauncherVersionManifest *
+NuvashaLauncherVersionManifest *
 nuvashalauncher_version_manifest_new_from_json (const char *json,
                                     gssize      length,
                                     GError    **error)
 {
   g_autoptr (JsonParser) parser = NULL;
-  nuvashalauncherVersionManifest *self;
+  NuvashaLauncherVersionManifest *self;
   JsonObject *root;
 
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
@@ -166,8 +166,8 @@ nuvashalauncher_version_manifest_new_from_json (const char *json,
   return self;
 }
 
-const nuvashalauncherVersionEntry *
-nuvashalauncher_version_manifest_find (nuvashalauncherVersionManifest *self, const char *id)
+const NuvashaLauncherVersionEntry *
+nuvashalauncher_version_manifest_find (NuvashaLauncherVersionManifest *self, const char *id)
 {
   g_return_val_if_fail (nuvashalauncher_IS_VERSION_MANIFEST (self), NULL);
   g_return_val_if_fail (id != NULL, NULL);
@@ -177,7 +177,7 @@ nuvashalauncher_version_manifest_find (nuvashalauncherVersionManifest *self, con
 
   for (guint i = 0; i < self->entries->len; i++)
     {
-      nuvashalauncherVersionEntry *entry = g_ptr_array_index (self->entries, i);
+      NuvashaLauncherVersionEntry *entry = g_ptr_array_index (self->entries, i);
 
       if (g_str_equal (entry->id, id))
         return entry;
@@ -189,7 +189,7 @@ nuvashalauncher_version_manifest_find (nuvashalauncherVersionManifest *self, con
 static void
 nuvashalauncher_version_manifest_finalize (GObject *object)
 {
-  nuvashalauncherVersionManifest *self = nuvashalauncher_VERSION_MANIFEST (object);
+  NuvashaLauncherVersionManifest *self = nuvashalauncher_VERSION_MANIFEST (object);
 
   g_free (self->latest_release);
   g_free (self->latest_snapshot);
@@ -199,7 +199,7 @@ nuvashalauncher_version_manifest_finalize (GObject *object)
 }
 
 static void
-nuvashalauncher_version_manifest_class_init (nuvashalauncherVersionManifestClass *klass)
+nuvashalauncher_version_manifest_class_init (NuvashaLauncherVersionManifestClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
@@ -207,7 +207,7 @@ nuvashalauncher_version_manifest_class_init (nuvashalauncherVersionManifestClass
 }
 
 static void
-nuvashalauncher_version_manifest_init (nuvashalauncherVersionManifest *self)
+nuvashalauncher_version_manifest_init (NuvashaLauncherVersionManifest *self)
 {
   (void) self;
 }
@@ -222,15 +222,15 @@ either (const char *child_value, const char *parent_value)
   return g_strdup (child_value != NULL ? child_value : parent_value);
 }
 
-static nuvashalauncherDownloadInfo *
-download_copy (const nuvashalauncherDownloadInfo *source)
+static NuvashaLauncherDownloadInfo *
+download_copy (const NuvashaLauncherDownloadInfo *source)
 {
-  nuvashalauncherDownloadInfo *copy;
+  NuvashaLauncherDownloadInfo *copy;
 
   if (source == NULL)
     return NULL;
 
-  copy = g_new0 (nuvashalauncherDownloadInfo, 1);
+  copy = g_new0 (NuvashaLauncherDownloadInfo, 1);
   copy->id = g_strdup (source->id);
   copy->url = g_strdup (source->url);
   copy->sha1 = g_strdup (source->sha1);
@@ -241,10 +241,10 @@ download_copy (const nuvashalauncherDownloadInfo *source)
   return copy;
 }
 
-static nuvashalauncherRule *
-rule_copy (const nuvashalauncherRule *source)
+static NuvashaLauncherRule *
+rule_copy (const NuvashaLauncherRule *source)
 {
-  nuvashalauncherRule *copy = g_new0 (nuvashalauncherRule, 1);
+  NuvashaLauncherRule *copy = g_new0 (NuvashaLauncherRule, 1);
 
   copy->allow = source->allow;
   copy->os_name = g_strdup (source->os_name);
@@ -341,10 +341,10 @@ natives_copy (GHashTable *source)
   return copy;
 }
 
-static nuvashalauncherLibrary *
-library_copy (const nuvashalauncherLibrary *source)
+static NuvashaLauncherLibrary *
+library_copy (const NuvashaLauncherLibrary *source)
 {
-  nuvashalauncherLibrary *copy = g_new0 (nuvashalauncherLibrary, 1);
+  NuvashaLauncherLibrary *copy = g_new0 (NuvashaLauncherLibrary, 1);
 
   copy->name = g_strdup (source->name);
   copy->artifact = download_copy (source->artifact);
@@ -356,10 +356,10 @@ library_copy (const nuvashalauncherLibrary *source)
   return copy;
 }
 
-static nuvashalauncherArgument *
-argument_copy (const nuvashalauncherArgument *source)
+static NuvashaLauncherArgument *
+argument_copy (const NuvashaLauncherArgument *source)
 {
-  nuvashalauncherArgument *copy = g_new0 (nuvashalauncherArgument, 1);
+  NuvashaLauncherArgument *copy = g_new0 (NuvashaLauncherArgument, 1);
 
   copy->rules = rules_copy (source->rules);
   copy->values = strings_copy (source->values);
@@ -367,15 +367,15 @@ argument_copy (const nuvashalauncherArgument *source)
   return copy;
 }
 
-static nuvashalauncherLogging *
-logging_copy (const nuvashalauncherLogging *source)
+static NuvashaLauncherLogging *
+logging_copy (const NuvashaLauncherLogging *source)
 {
-  nuvashalauncherLogging *copy;
+  NuvashaLauncherLogging *copy;
 
   if (source == NULL)
     return NULL;
 
-  copy = g_new0 (nuvashalauncherLogging, 1);
+  copy = g_new0 (NuvashaLauncherLogging, 1);
   copy->argument = g_strdup (source->argument);
   copy->type = g_strdup (source->type);
   copy->file = download_copy (source->file);
@@ -383,15 +383,15 @@ logging_copy (const nuvashalauncherLogging *source)
   return copy;
 }
 
-static nuvashalauncherJavaVersion *
-java_version_copy (const nuvashalauncherJavaVersion *source)
+static NuvashaLauncherJavaVersion *
+java_version_copy (const NuvashaLauncherJavaVersion *source)
 {
-  nuvashalauncherJavaVersion *copy;
+  NuvashaLauncherJavaVersion *copy;
 
   if (source == NULL)
     return NULL;
 
-  copy = g_new0 (nuvashalauncherJavaVersion, 1);
+  copy = g_new0 (NuvashaLauncherJavaVersion, 1);
   copy->component = g_strdup (source->component);
   copy->major_version = source->major_version;
 
@@ -426,11 +426,11 @@ concat_arguments (GPtrArray *parent, GPtrArray *child)
   return all;
 }
 
-nuvashalauncherVersionDescription *
-nuvashalauncher_version_description_merge (nuvashalauncherVersionDescription *parent,
-                               nuvashalauncherVersionDescription *child)
+NuvashaLauncherVersionDescription *
+nuvashalauncher_version_description_merge (NuvashaLauncherVersionDescription *parent,
+                               NuvashaLauncherVersionDescription *child)
 {
-  nuvashalauncherVersionDescription *self;
+  NuvashaLauncherVersionDescription *self;
 
   g_return_val_if_fail (nuvashalauncher_IS_VERSION_DESCRIPTION (parent), NULL);
   g_return_val_if_fail (nuvashalauncher_IS_VERSION_DESCRIPTION (child), NULL);
@@ -474,7 +474,7 @@ nuvashalauncher_version_description_merge (nuvashalauncherVersionDescription *pa
 }
 
 GPtrArray *
-nuvashalauncher_version_description_legacy_argv (nuvashalauncherVersionDescription *self)
+nuvashalauncher_version_description_legacy_argv (NuvashaLauncherVersionDescription *self)
 {
   GPtrArray *words;
   gchar **argv = NULL;

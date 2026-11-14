@@ -70,10 +70,10 @@ at (GPtrArray *argv, guint index)
 
 /* A resolved version with everything filled in, the way the resolve
  * module hands it over after substituting what it knows. */
-static nuvashalauncherResolvedVersion *
+static NuvashaLauncherResolvedVersion *
 resolved_new (const char *version_id)
 {
-  nuvashalauncherResolvedVersion *resolved = g_new0 (nuvashalauncherResolvedVersion, 1);
+  NuvashaLauncherResolvedVersion *resolved = g_new0 (NuvashaLauncherResolvedVersion, 1);
 
   resolved->version_id = g_strdup (version_id);
   resolved->version_type = g_strdup ("release");
@@ -107,8 +107,8 @@ static void
 test_session_of_an_account (void)
 {
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherAccount) offline = nuvashalauncher_account_new_offline ("TestUser", &error);
-  nuvashalauncherLaunchSession session;
+  g_autoptr (NuvashaLauncherAccount) offline = nuvashalauncher_account_new_offline ("TestUser", &error);
+  NuvashaLauncherLaunchSession session;
 
   g_assert_no_error (error);
 
@@ -121,8 +121,8 @@ test_session_of_an_account (void)
   /* A Microsoft account is its own name, its own UUID and its own token,
      and the user type that says it is a real one. */
   {
-    g_autoptr (nuvashalauncherAccount) microsoft = g_new0 (nuvashalauncherAccount, 1);
-    g_autoptr (nuvashalauncherAccount) without_token = NULL;
+    g_autoptr (NuvashaLauncherAccount) microsoft = g_new0 (NuvashaLauncherAccount, 1);
+    g_autoptr (NuvashaLauncherAccount) without_token = NULL;
 
     microsoft->type = nuvashalauncher_ACCOUNT_MICROSOFT;
     microsoft->id = g_strdup ("069a79f444e94726a5befca90e38aaf5");
@@ -153,11 +153,11 @@ test_session_of_an_account (void)
 static void
 test_arguments_carry_the_account (void)
 {
-  g_autoptr (nuvashalauncherResolvedVersion) resolved = resolved_new ("1.20.1");
+  g_autoptr (NuvashaLauncherResolvedVersion) resolved = resolved_new ("1.20.1");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
-  g_autoptr (nuvashalauncherAccount) account = g_new0 (nuvashalauncherAccount, 1);
-  nuvashalauncherLaunchSession session;
+  g_autoptr (NuvashaLauncherAccount) account = g_new0 (NuvashaLauncherAccount, 1);
+  NuvashaLauncherLaunchSession session;
 
   account->type = nuvashalauncher_ACCOUNT_MICROSOFT;
   account->id = g_strdup ("069a79f444e94726a5befca90e38aaf5");
@@ -244,11 +244,11 @@ test_substitute_known_and_unknown (void)
 static void
 test_build_arguments_modern (void)
 {
-  g_autoptr (nuvashalauncherResolvedVersion) resolved = resolved_new ("1.20.1");
+  g_autoptr (NuvashaLauncherResolvedVersion) resolved = resolved_new ("1.20.1");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
-  g_autoptr (nuvashalauncherAccount) account = nuvashalauncher_account_new_offline ("TestUser", NULL);
-  nuvashalauncherLaunchSession session;
+  g_autoptr (NuvashaLauncherAccount) account = nuvashalauncher_account_new_offline ("TestUser", NULL);
+  NuvashaLauncherLaunchSession session;
   guint classpaths = 0;
   guint library_paths = 0;
 
@@ -335,12 +335,12 @@ test_build_arguments_modern (void)
 static void
 test_build_arguments_without_jvm_args (void)
 {
-  g_autoptr (nuvashalauncherResolvedVersion) resolved = resolved_new ("1.20.1");
+  g_autoptr (NuvashaLauncherResolvedVersion) resolved = resolved_new ("1.20.1");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) with_empty = NULL;
   g_autoptr (GPtrArray) with_none = NULL;
-  g_autoptr (nuvashalauncherAccount) account = nuvashalauncher_account_new_offline ("TestUser", NULL);
-  nuvashalauncherLaunchSession session;
+  g_autoptr (NuvashaLauncherAccount) account = nuvashalauncher_account_new_offline ("TestUser", NULL);
+  NuvashaLauncherLaunchSession session;
 
   resolved->jvm_arguments =
     strings ("-Djava.library.path=${natives_directory}", "-cp",
@@ -382,11 +382,11 @@ test_build_arguments_without_jvm_args (void)
 static void
 test_version_type_fallback (void)
 {
-  g_autoptr (nuvashalauncherResolvedVersion) resolved = resolved_new ("1.20.1");
+  g_autoptr (NuvashaLauncherResolvedVersion) resolved = resolved_new ("1.20.1");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
-  g_autoptr (nuvashalauncherAccount) account = nuvashalauncher_account_new_offline ("TestUser", NULL);
-  nuvashalauncherLaunchSession session = nuvashalauncher_launch_session_for (account);
+  g_autoptr (NuvashaLauncherAccount) account = nuvashalauncher_account_new_offline ("TestUser", NULL);
+  NuvashaLauncherLaunchSession session = nuvashalauncher_launch_session_for (account);
 
   g_clear_pointer (&resolved->version_type, g_free);
   resolved->jvm_arguments = strings (NULL);
@@ -407,11 +407,11 @@ test_version_type_fallback (void)
 static void
 test_build_arguments_legacy (void)
 {
-  g_autoptr (nuvashalauncherResolvedVersion) resolved = resolved_new ("1.8.9");
+  g_autoptr (NuvashaLauncherResolvedVersion) resolved = resolved_new ("1.8.9");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
-  g_autoptr (nuvashalauncherAccount) account = nuvashalauncher_account_new_offline ("TestUser", NULL);
-  nuvashalauncherLaunchSession session;
+  g_autoptr (NuvashaLauncherAccount) account = nuvashalauncher_account_new_offline ("TestUser", NULL);
+  NuvashaLauncherLaunchSession session;
   guint classpath = 0;
   guint main_class = 0;
 
@@ -466,11 +466,11 @@ test_build_arguments_legacy (void)
 static void
 test_build_arguments_legacy_session (void)
 {
-  g_autoptr (nuvashalauncherResolvedVersion) resolved = resolved_new ("1.6.4");
+  g_autoptr (NuvashaLauncherResolvedVersion) resolved = resolved_new ("1.6.4");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
-  g_autoptr (nuvashalauncherAccount) account = g_new0 (nuvashalauncherAccount, 1);
-  nuvashalauncherLaunchSession session;
+  g_autoptr (NuvashaLauncherAccount) account = g_new0 (NuvashaLauncherAccount, 1);
+  NuvashaLauncherLaunchSession session;
   guint main_class = 0;
 
   account->type = nuvashalauncher_ACCOUNT_MICROSOFT;
@@ -506,11 +506,11 @@ test_build_arguments_legacy_session (void)
 static void
 test_build_arguments_failures (void)
 {
-  g_autoptr (nuvashalauncherResolvedVersion) resolved = resolved_new ("1.20.1");
+  g_autoptr (NuvashaLauncherResolvedVersion) resolved = resolved_new ("1.20.1");
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) argv = NULL;
-  g_autoptr (nuvashalauncherAccount) account = nuvashalauncher_account_new_offline ("TestUser", NULL);
-  nuvashalauncherLaunchSession session;
+  g_autoptr (NuvashaLauncherAccount) account = nuvashalauncher_account_new_offline ("TestUser", NULL);
+  NuvashaLauncherLaunchSession session;
 
   session = nuvashalauncher_launch_session_for (account);
   resolved->jvm_arguments = strings (NULL);

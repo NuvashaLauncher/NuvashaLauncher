@@ -2,8 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherUsersPopover: account selector shown in the window header.
- * It follows nuvashalauncherAccounts and rebuilds when the account list or active
+/* NuvashaLauncherUsersPopover: account selector shown in the window header.
+ * It follows NuvashaLauncherAccounts and rebuilds when the account list or active
  * account changes.
  *
  * An offline account is a name and nothing else, so it says "Offline"
@@ -26,14 +26,14 @@ G_BEGIN_DECLS
 
 #define nuvashalauncher_TYPE_USERS_POPOVER (nuvashalauncher_users_popover_get_type ())
 
-G_DECLARE_FINAL_TYPE (nuvashalauncherUsersPopover, nuvashalauncher_users_popover, nuvashalauncher, USERS_POPOVER,
+G_DECLARE_FINAL_TYPE (NuvashaLauncherUsersPopover, nuvashalauncher_users_popover, nuvashalauncher, USERS_POPOVER,
                       GtkPopover)
 
 /* The popover of @accounts, and it takes its own reference on them. */
-nuvashalauncherUsersPopover *nuvashalauncher_users_popover_new (nuvashalauncherAccounts *accounts);
+NuvashaLauncherUsersPopover *nuvashalauncher_users_popover_new (NuvashaLauncherAccounts *accounts);
 
 /* Return header-button content for the active account. The caller owns it. */
-GtkWidget *nuvashalauncher_users_popover_get_button_content (nuvashalauncherUsersPopover *self);
+GtkWidget *nuvashalauncher_users_popover_get_button_content (NuvashaLauncherUsersPopover *self);
 
 /* TRUE while a skin or cape request is active or waiting to retry. */
 gboolean nuvashalauncher_users_skin_background_work_active (void);

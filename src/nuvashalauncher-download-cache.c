@@ -10,10 +10,10 @@
 
 #include <json-glib/json-glib.h>
 
-nuvashalauncherSettings *
+NuvashaLauncherSettings *
 nuvashalauncher_download_get_cache_settings (DownloadRequest *request)
 {
-  nuvashalauncherDownloadService *service = request->service;
+  NuvashaLauncherDownloadService *service = request->service;
   if (service->cache_settings == NULL)
     service->cache_settings = nuvashalauncher_settings_new ();
 

@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherInstance: instance data with validation and JSON serialization. */
+/* NuvashaLauncherInstance: instance data with validation and JSON serialization. */
 
 #include "nuvashalauncher-instance.h"
 
@@ -38,7 +38,7 @@ nuvashalauncher_instance_default_icon_path (void)
 
 #include "nuvashalauncher-instance-private.h"
 
-G_DEFINE_TYPE (nuvashalauncherInstance, nuvashalauncher_instance, G_TYPE_OBJECT)
+G_DEFINE_TYPE (NuvashaLauncherInstance, nuvashalauncher_instance, G_TYPE_OBJECT)
 
 enum
 {
@@ -85,7 +85,7 @@ nuvashalauncher_loader_get_type (void)
   if (g_once_init_enter (&type_id))
     {
       GType loader_type =
-        g_enum_register_static ("nuvashalauncherLoader", nuvashalauncher_loader_values);
+        g_enum_register_static ("NuvashaLauncherLoader", nuvashalauncher_loader_values);
       g_once_init_leave (&type_id, loader_type);
     }
 
@@ -93,11 +93,11 @@ nuvashalauncher_loader_get_type (void)
 }
 
 const char *
-nuvashalauncher_loader_to_string (nuvashalauncherLoader loader)
+nuvashalauncher_loader_to_string (NuvashaLauncherLoader loader)
 {
   for (guint i = 0; nuvashalauncher_loader_values[i].value_name != NULL; i++)
     {
-      if ((nuvashalauncherLoader) nuvashalauncher_loader_values[i].value == loader)
+      if ((NuvashaLauncherLoader) nuvashalauncher_loader_values[i].value == loader)
         return nuvashalauncher_loader_values[i].value_nick;
     }
 
@@ -105,7 +105,7 @@ nuvashalauncher_loader_to_string (nuvashalauncherLoader loader)
 }
 
 gboolean
-nuvashalauncher_loader_from_string (const char *string, nuvashalauncherLoader *loader)
+nuvashalauncher_loader_from_string (const char *string, NuvashaLauncherLoader *loader)
 {
   g_return_val_if_fail (loader != NULL, FALSE);
 
@@ -116,7 +116,7 @@ nuvashalauncher_loader_from_string (const char *string, nuvashalauncherLoader *l
     {
       if (g_str_equal (nuvashalauncher_loader_values[i].value_nick, string))
         {
-          *loader = (nuvashalauncherLoader) nuvashalauncher_loader_values[i].value;
+          *loader = (NuvashaLauncherLoader) nuvashalauncher_loader_values[i].value;
           return TRUE;
         }
     }
@@ -261,7 +261,7 @@ validate_text (const char  *value,
 }
 
 gboolean
-nuvashalauncher_instance_validate (nuvashalauncherInstance *self, GError **error)
+nuvashalauncher_instance_validate (NuvashaLauncherInstance *self, GError **error)
 {
   g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
@@ -339,7 +339,7 @@ nuvashalauncher_instance_validate (nuvashalauncherInstance *self, GError **error
 }
 
 gboolean
-nuvashalauncher_instance_set_string (nuvashalauncherInstance *self, const char *property,
+nuvashalauncher_instance_set_string (NuvashaLauncherInstance *self, const char *property,
                          const char *value, GError **error)
 {
   static const char *allowed[] = {
@@ -373,10 +373,10 @@ nuvashalauncher_instance_set_string (nuvashalauncherInstance *self, const char *
 }
 
 gboolean
-nuvashalauncher_instance_set_loader (nuvashalauncherInstance *self, nuvashalauncherLoader loader,
+nuvashalauncher_instance_set_loader (NuvashaLauncherInstance *self, NuvashaLauncherLoader loader,
                          const char *version, GError **error)
 {
-  nuvashalauncherLoader old_loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader old_loader = nuvashalauncher_LOADER_VANILLA;
   g_autofree char *old_version = NULL;
 
   g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (self), FALSE);
@@ -395,7 +395,7 @@ nuvashalauncher_instance_set_loader (nuvashalauncherInstance *self, nuvashalaunc
 }
 
 gboolean
-nuvashalauncher_instance_set_name (nuvashalauncherInstance *self, const char *name, GError **error)
+nuvashalauncher_instance_set_name (NuvashaLauncherInstance *self, const char *name, GError **error)
 {
   g_autofree char *old = NULL;
   g_autofree char *normalized = nuvashalauncher_instance_normalize_name (name);
@@ -413,7 +413,7 @@ nuvashalauncher_instance_set_name (nuvashalauncherInstance *self, const char *na
 }
 
 gboolean
-nuvashalauncher_instance_set_directory (nuvashalauncherInstance *self, const char *directory,
+nuvashalauncher_instance_set_directory (NuvashaLauncherInstance *self, const char *directory,
                             GError **error)
 {
   g_autofree char *old = NULL;
@@ -430,12 +430,12 @@ nuvashalauncher_instance_set_directory (nuvashalauncherInstance *self, const cha
   return TRUE;
 }
 
-nuvashalauncherInstance *
+NuvashaLauncherInstance *
 nuvashalauncher_instance_new (const char  *id,
                   const char  *name,
                   const char  *directory,
                   const char  *minecraft_version,
-                  nuvashalauncherLoader    loader,
+                  NuvashaLauncherLoader    loader,
                   GError     **error)
 {
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
@@ -466,7 +466,7 @@ nuvashalauncher_instance_new (const char  *id,
     }
 
   g_autofree char *normalized_name = nuvashalauncher_instance_normalize_name (name);
-  nuvashalauncherInstance *self =
+  NuvashaLauncherInstance *self =
     g_object_new (nuvashalauncher_TYPE_INSTANCE,
                   "id", id,
                   "name", normalized_name,
@@ -485,7 +485,7 @@ nuvashalauncher_instance_new (const char  *id,
 }
 
 const char *
-nuvashalauncher_instance_get_id (nuvashalauncherInstance *self)
+nuvashalauncher_instance_get_id (NuvashaLauncherInstance *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (self), NULL);
 
@@ -493,7 +493,7 @@ nuvashalauncher_instance_get_id (nuvashalauncherInstance *self)
 }
 
 GHashTable *
-nuvashalauncher_instance_get_components (nuvashalauncherInstance *self)
+nuvashalauncher_instance_get_components (NuvashaLauncherInstance *self)
 {
   g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (self), NULL);
 
@@ -517,7 +517,7 @@ nuvashalauncher_instance_set_property (GObject      *object,
                            const GValue *value,
                            GParamSpec   *pspec)
 {
-  nuvashalauncherInstance *self = nuvashalauncher_INSTANCE (object);
+  NuvashaLauncherInstance *self = nuvashalauncher_INSTANCE (object);
 
   switch (prop_id)
     {
@@ -658,7 +658,7 @@ nuvashalauncher_instance_get_property (GObject    *object,
                            GValue     *value,
                            GParamSpec *pspec)
 {
-  nuvashalauncherInstance *self = nuvashalauncher_INSTANCE (object);
+  NuvashaLauncherInstance *self = nuvashalauncher_INSTANCE (object);
 
   switch (prop_id)
     {
@@ -719,7 +719,7 @@ nuvashalauncher_instance_get_property (GObject    *object,
 static void
 nuvashalauncher_instance_finalize (GObject *object)
 {
-  nuvashalauncherInstance *self = nuvashalauncher_INSTANCE (object);
+  NuvashaLauncherInstance *self = nuvashalauncher_INSTANCE (object);
 
   g_free (self->id);
   g_free (self->name);
@@ -738,7 +738,7 @@ nuvashalauncher_instance_finalize (GObject *object)
 }
 
 static void
-nuvashalauncher_instance_class_init (nuvashalauncherInstanceClass *klass)
+nuvashalauncher_instance_class_init (NuvashaLauncherInstanceClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
@@ -820,7 +820,7 @@ nuvashalauncher_instance_class_init (nuvashalauncherInstanceClass *klass)
 }
 
 static void
-nuvashalauncher_instance_init (nuvashalauncherInstance *self)
+nuvashalauncher_instance_init (NuvashaLauncherInstance *self)
 {
   /* Property defaults only apply to construct properties, so the JVM
    * arguments are set here. */

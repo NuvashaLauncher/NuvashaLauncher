@@ -4,13 +4,13 @@
 #include "nuvashalauncher-filter-entry.h"
 #include <glib/gi18n.h>
 
-struct _nuvashalauncherFilterEntry
+struct _NuvashaLauncherFilterEntry
 {
   GtkEntry parent_instance;
   GtkPopover *popover;
 };
 
-G_DEFINE_TYPE (nuvashalauncherFilterEntry, nuvashalauncher_filter_entry, GTK_TYPE_ENTRY)
+G_DEFINE_TYPE (NuvashaLauncherFilterEntry, nuvashalauncher_filter_entry, GTK_TYPE_ENTRY)
 
 static void
 update_clear_icon (GtkEditable *editable, gpointer user_data G_GNUC_UNUSED)
@@ -20,7 +20,7 @@ update_clear_icon (GtkEditable *editable, gpointer user_data G_GNUC_UNUSED)
 }
 
 static void
-show_filters (nuvashalauncherFilterEntry *self)
+show_filters (NuvashaLauncherFilterEntry *self)
 {
   GdkRectangle rect;
 
@@ -50,7 +50,7 @@ on_key_pressed (GtkEventControllerKey *controller G_GNUC_UNUSED,
                 guint keyval, guint keycode G_GNUC_UNUSED,
                 GdkModifierType state, gpointer user_data)
 {
-  nuvashalauncherFilterEntry *self = user_data;
+  NuvashaLauncherFilterEntry *self = user_data;
 
   if (keyval == GDK_KEY_F4 ||
       (keyval == GDK_KEY_Down && (state & GDK_ALT_MASK) != 0))
@@ -66,7 +66,7 @@ on_key_pressed (GtkEventControllerKey *controller G_GNUC_UNUSED,
 static void
 nuvashalauncher_filter_entry_dispose (GObject *object)
 {
-  nuvashalauncherFilterEntry *self = nuvashalauncher_FILTER_ENTRY (object);
+  NuvashaLauncherFilterEntry *self = nuvashalauncher_FILTER_ENTRY (object);
 
   if (self->popover != NULL)
     {
@@ -81,7 +81,7 @@ static void
 nuvashalauncher_filter_entry_size_allocate (GtkWidget *widget,
                                            int width, int height, int baseline)
 {
-  nuvashalauncherFilterEntry *self = nuvashalauncher_FILTER_ENTRY (widget);
+  NuvashaLauncherFilterEntry *self = nuvashalauncher_FILTER_ENTRY (widget);
 
   GTK_WIDGET_CLASS (nuvashalauncher_filter_entry_parent_class)->size_allocate (
     widget, width, height, baseline);
@@ -90,14 +90,14 @@ nuvashalauncher_filter_entry_size_allocate (GtkWidget *widget,
 }
 
 static void
-nuvashalauncher_filter_entry_class_init (nuvashalauncherFilterEntryClass *klass)
+nuvashalauncher_filter_entry_class_init (NuvashaLauncherFilterEntryClass *klass)
 {
   G_OBJECT_CLASS (klass)->dispose = nuvashalauncher_filter_entry_dispose;
   GTK_WIDGET_CLASS (klass)->size_allocate = nuvashalauncher_filter_entry_size_allocate;
 }
 
 static void
-nuvashalauncher_filter_entry_init (nuvashalauncherFilterEntry *self)
+nuvashalauncher_filter_entry_init (NuvashaLauncherFilterEntry *self)
 {
   GtkEventController *keys = gtk_event_controller_key_new ();
 
@@ -114,7 +114,7 @@ nuvashalauncher_filter_entry_init (nuvashalauncherFilterEntry *self)
 }
 
 void
-nuvashalauncher_filter_entry_set_popover (nuvashalauncherFilterEntry *self,
+nuvashalauncher_filter_entry_set_popover (NuvashaLauncherFilterEntry *self,
                                          GtkPopover *popover,
                                          const char *label)
 {

@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherContentPage: the page of one kind of content of one instance.
+/* NuvashaLauncherContentPage: the page of one kind of content of one instance.
  *
  * There is one of these for mods, for resource packs and for shader
  * packs, and the content type is what makes them different: the folder
@@ -33,10 +33,10 @@ G_BEGIN_DECLS
 
 #define nuvashalauncher_TYPE_CONTENT_PAGE (nuvashalauncher_content_page_get_type ())
 
-G_DECLARE_FINAL_TYPE (nuvashalauncherContentPage, nuvashalauncher_content_page, nuvashalauncher, CONTENT_PAGE,
+G_DECLARE_FINAL_TYPE (NuvashaLauncherContentPage, nuvashalauncher_content_page, nuvashalauncher, CONTENT_PAGE,
                       GtkBox)
 
-void nuvashalauncher_content_page_reset_for_tab_switch (nuvashalauncherContentPage *self);
+void nuvashalauncher_content_page_reset_for_tab_switch (NuvashaLauncherContentPage *self);
 
 
 /* What the loaders and the game ignore: a file whose name ends with
@@ -74,17 +74,17 @@ typedef struct {
   GPtrArray *required_dependencies; /* project ids this file requires */
   GPtrArray *optional_dependencies;
   GPtrArray *incompatible_dependencies;
-} nuvashalauncherContentFile;
+} NuvashaLauncherContentFile;
 
-void nuvashalauncher_content_file_free (nuvashalauncherContentFile *file);
-void nuvashalauncher_content_file_refresh_search_key (nuvashalauncherContentFile *file);
+void nuvashalauncher_content_file_free (NuvashaLauncherContentFile *file);
+void nuvashalauncher_content_file_refresh_search_key (NuvashaLauncherContentFile *file);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherContentFile, nuvashalauncher_content_file_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherContentFile, nuvashalauncher_content_file_free)
 
 /* The folder of @instance_directory that @type lives in. (transfer
  * full) */
 char *nuvashalauncher_content_folder_path (const char    *instance_directory,
-                               nuvashalauncherContentType type);
+                               NuvashaLauncherContentType type);
 
 /* The name @filename has when the content is enabled or disabled.
  * @enabled is TRUE to remove the ".disabled" suffix, or FALSE to add it.
@@ -110,19 +110,19 @@ gboolean nuvashalauncher_content_delete_finish (GFile *file, GAsyncResult *resul
  * hashed. A folder that does not exist holds no files, which is what an
  * instance that never installed anything of this kind looks like.
  *
- * (transfer full) the nuvashalauncherContentFile*. */
-nuvashalauncherTaskScope *nuvashalauncher_content_scan_async (const char         *instance_directory,
-                                      nuvashalauncherContentType      type,
+ * (transfer full) the NuvashaLauncherContentFile*. */
+NuvashaLauncherTaskScope *nuvashalauncher_content_scan_async (const char         *instance_directory,
+                                      NuvashaLauncherContentType      type,
                                       GAsyncReadyCallback callback,
                                       gpointer            user_data);
 
-/* (transfer full) the nuvashalauncherContentFile*. NULL on error. */
+/* (transfer full) the NuvashaLauncherContentFile*. NULL on error. */
 GPtrArray *nuvashalauncher_content_scan_finish (GAsyncResult  *result,
                                     GError       **error);
 
 /* Completes local archive metadata extraction after the file list is shown. */
-nuvashalauncherTaskScope *nuvashalauncher_content_metadata_async (GPtrArray          *files,
-                                          nuvashalauncherContentType       type,
+NuvashaLauncherTaskScope *nuvashalauncher_content_metadata_async (GPtrArray          *files,
+                                          NuvashaLauncherContentType       type,
                                           GAsyncReadyCallback  callback,
                                           gpointer             user_data);
 gboolean nuvashalauncher_content_metadata_finish (GAsyncResult *result, GError **error);
@@ -130,8 +130,8 @@ gboolean nuvashalauncher_content_metadata_finish (GAsyncResult *result, GError *
 /* The page for @type of @instance. It keeps its own reference on the
  * instance until it is destroyed. Like every widget it starts with a
  * floating reference. */
-nuvashalauncherContentPage *nuvashalauncher_content_page_new (nuvashalauncherInstance     *instance,
-                                      nuvashalauncherContentType  type);
+NuvashaLauncherContentPage *nuvashalauncher_content_page_new (NuvashaLauncherInstance     *instance,
+                                      NuvashaLauncherContentType  type);
 
 G_END_DECLS
 

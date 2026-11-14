@@ -25,6 +25,7 @@
 
 #include "nuvashalauncher-modrinth.h"
 #include "nuvashalauncher-modrinth-private.h"
+#include "nuvashalauncher-modrinth-json-private.h"
 #include "nuvashalauncher-task-private.h"
 
 #include "nuvashalauncher-download.h"
@@ -44,7 +45,7 @@ search_answer (GTask *task, JsonNode *root)
 {
   g_autofree char *json = json_to_string (root, FALSE);
   g_autoptr (GError) error = NULL;
-  nuvashalauncherModrinthResults *results = NULL;
+  NuvashaLauncherModrinthResults *results = NULL;
 
   results = nuvashalauncher_modrinth_results_from_json (json, -1, &error);
 
@@ -58,8 +59,8 @@ search_answer (GTask *task, JsonNode *root)
                          (GDestroyNotify) nuvashalauncher_modrinth_results_free);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_modrinth_search_async (const nuvashalauncherModrinthSearch *search,
+NuvashaLauncherTaskScope *
+nuvashalauncher_modrinth_search_async (const NuvashaLauncherModrinthSearch *search,
                            GAsyncReadyCallback callback, gpointer user_data)
 {
   g_autofree char *url = NULL;
@@ -71,7 +72,7 @@ nuvashalauncher_modrinth_search_async (const nuvashalauncherModrinthSearch *sear
                     nuvashalauncher_NOT_FOUND_IS_ERROR);
 }
 
-nuvashalauncherModrinthResults *
+NuvashaLauncherModrinthResults *
 nuvashalauncher_modrinth_search_finish (GAsyncResult *result, GError **error)
 {
   g_return_val_if_fail (nuvashalauncher_task_result_is_valid (result, "nuvashalauncher-task-scope"), NULL);
@@ -84,7 +85,7 @@ details_answer (GTask *task, JsonNode *root)
 {
   g_autofree char *json = json_to_string (root, FALSE);
   g_autoptr (GError) error = NULL;
-  nuvashalauncherModrinthDetails *details = NULL;
+  NuvashaLauncherModrinthDetails *details = NULL;
 
   details = nuvashalauncher_modrinth_details_from_json (json, -1, &error);
 
@@ -98,7 +99,7 @@ details_answer (GTask *task, JsonNode *root)
                          (GDestroyNotify) nuvashalauncher_modrinth_details_free);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_modrinth_details_async (const char *project_id, GAsyncReadyCallback callback,
                             gpointer user_data)
 {
@@ -115,7 +116,7 @@ nuvashalauncher_modrinth_details_async (const char *project_id, GAsyncReadyCallb
   return nuvashalauncher_modrinth_get_async (url, callback, user_data, details_answer,
                     nuvashalauncher_NOT_FOUND_IS_ERROR);
 }
-nuvashalauncherModrinthDetails *
+NuvashaLauncherModrinthDetails *
 nuvashalauncher_modrinth_details_finish (GAsyncResult *result, GError **error)
 {
   g_return_val_if_fail (nuvashalauncher_task_result_is_valid (result, "nuvashalauncher-task-scope"), NULL);
@@ -129,7 +130,7 @@ nuvashalauncher_modrinth_details_finish (GAsyncResult *result, GError **error)
 
 /* Instance context used to validate a request's response. */
 typedef struct {
-  nuvashalauncherContentType type;
+  NuvashaLauncherContentType type;
   char *minecraft_version;
   char *loader;
 } InstanceAsk;
@@ -145,7 +146,7 @@ instance_ask_free (gpointer data)
 }
 
 static InstanceAsk *
-instance_ask_new (nuvashalauncherContentType type, const char *minecraft_version,
+instance_ask_new (NuvashaLauncherContentType type, const char *minecraft_version,
                   const char *loader)
 {
   InstanceAsk *ask = g_new0 (InstanceAsk, 1);
@@ -160,7 +161,7 @@ instance_ask_new (nuvashalauncherContentType type, const char *minecraft_version
 static void
 versions_answer (GTask *task, JsonNode *root)
 {
-  nuvashalauncherModrinthRequest *request = g_task_get_task_data (task);
+  NuvashaLauncherModrinthRequest *request = g_task_get_task_data (task);
   InstanceAsk *asked = request->data;
   g_autofree char *json = json_to_string (root, FALSE);
   g_autoptr (GError) error = NULL;
@@ -179,12 +180,12 @@ versions_answer (GTask *task, JsonNode *root)
   nuvashalauncher_modrinth_request_return_pointer (task, versions, (GDestroyNotify) g_ptr_array_unref);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_modrinth_versions_async (const char *project_id, nuvashalauncherContentType type,
+NuvashaLauncherTaskScope *
+nuvashalauncher_modrinth_versions_async (const char *project_id, NuvashaLauncherContentType type,
                              const char *minecraft_version, const char *loader,
                              GAsyncReadyCallback callback, gpointer user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope = NULL;
+  g_autoptr (NuvashaLauncherTaskScope) scope = NULL;
   g_autofree char *game_versions = NULL;
   g_autofree char *loaders = NULL;
   g_autofree char *escaped_id = NULL;
@@ -250,7 +251,7 @@ categories_answer (GTask *task, JsonNode *root)
 {
   g_autofree char *json = json_to_string (root, FALSE);
   g_autoptr (GError) error = NULL;
-  nuvashalauncherModrinthRequest *request = g_task_get_task_data (task);
+  NuvashaLauncherModrinthRequest *request = g_task_get_task_data (task);
   GPtrArray *categories = NULL;
 
   categories = nuvashalauncher_modrinth_categories_from_json (
@@ -265,13 +266,13 @@ categories_answer (GTask *task, JsonNode *root)
   nuvashalauncher_modrinth_request_return_pointer (task, categories, (GDestroyNotify) g_ptr_array_unref);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_modrinth_categories_async (const char        *project_type,
                                GAsyncReadyCallback callback,
                                gpointer           user_data)
 {
   g_autofree char *url = g_strdup_printf (nuvashalauncher_MODRINTH_URL "/tag/category");
-  g_autoptr (nuvashalauncherTaskScope) scope = NULL;
+  g_autoptr (NuvashaLauncherTaskScope) scope = NULL;
 
   scope = nuvashalauncher_modrinth_request_new (callback, user_data, categories_answer,
                        nuvashalauncher_NOT_FOUND_IS_ERROR, g_strdup (project_type), g_free);
@@ -300,7 +301,7 @@ version_answer (GTask *task, JsonNode *root)
 {
   g_autofree char *json = json_to_string (root, FALSE);
   g_autoptr (GError) error = NULL;
-  nuvashalauncherModrinthVersion *version = NULL;
+  NuvashaLauncherModrinthVersion *version = NULL;
 
   version = nuvashalauncher_modrinth_version_from_json (json, -1, &error);
 
@@ -314,7 +315,7 @@ version_answer (GTask *task, JsonNode *root)
                          (GDestroyNotify) nuvashalauncher_modrinth_version_free);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_modrinth_version_by_hash_async (const char *sha1,
                                     GAsyncReadyCallback callback,
                                     gpointer user_data)
@@ -334,7 +335,7 @@ nuvashalauncher_modrinth_version_by_hash_async (const char *sha1,
                     nuvashalauncher_NOT_FOUND_IS_ERROR);
 }
 
-nuvashalauncherModrinthVersion *
+NuvashaLauncherModrinthVersion *
 nuvashalauncher_modrinth_version_by_hash_finish (GAsyncResult *result, GError **error)
 {
   g_return_val_if_fail (nuvashalauncher_task_result_is_valid (result, "nuvashalauncher-task-scope"), NULL);
@@ -342,7 +343,7 @@ nuvashalauncher_modrinth_version_by_hash_finish (GAsyncResult *result, GError **
   return g_task_propagate_pointer (G_TASK (result), error);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_modrinth_version_by_id_async (const char *version_id,
                                   GAsyncReadyCallback callback,
                                   gpointer user_data)
@@ -362,11 +363,11 @@ nuvashalauncher_modrinth_version_by_id_async (const char *version_id,
 static void
 update_answer (GTask *task, JsonNode *root)
 {
-  nuvashalauncherModrinthRequest *request = g_task_get_task_data (task);
+  NuvashaLauncherModrinthRequest *request = g_task_get_task_data (task);
   InstanceAsk *asked = request->data;
   g_autofree char *json = json_to_string (root, FALSE);
   g_autoptr (GError) error = NULL;
-  nuvashalauncherModrinthVersion *version = NULL;
+  NuvashaLauncherModrinthVersion *version = NULL;
 
   version = nuvashalauncher_modrinth_version_from_json (json, -1, &error);
 
@@ -390,14 +391,14 @@ update_answer (GTask *task, JsonNode *root)
                          (GDestroyNotify) nuvashalauncher_modrinth_version_free);
 }
 
-nuvashalauncherTaskScope *
-nuvashalauncher_modrinth_update_by_hash_async (nuvashalauncherContentType type, const char *sha1,
+NuvashaLauncherTaskScope *
+nuvashalauncher_modrinth_update_by_hash_async (NuvashaLauncherContentType type, const char *sha1,
                                    const char *minecraft_version,
                                    const char *loader,
                                    GAsyncReadyCallback callback,
                                    gpointer user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope = NULL;
+  g_autoptr (NuvashaLauncherTaskScope) scope = NULL;
   g_autofree char *url = NULL;
   g_autofree char *game_versions = NULL;
   g_autofree char *loaders = NULL;
@@ -439,8 +440,150 @@ nuvashalauncher_modrinth_update_by_hash_async (nuvashalauncherContentType type, 
   return g_steal_pointer (&scope);
 }
 
-nuvashalauncherModrinthVersion *
+NuvashaLauncherModrinthVersion *
 nuvashalauncher_modrinth_update_by_hash_finish (GAsyncResult *result, GError **error)
+{
+  g_return_val_if_fail (nuvashalauncher_task_result_is_valid (result, "nuvashalauncher-task-scope"), NULL);
+
+  return g_task_propagate_pointer (G_TASK (result), error);
+}
+
+static void
+updates_answer (GTask *task, JsonNode *root)
+{
+  NuvashaLauncherModrinthRequest *request = g_task_get_task_data (task);
+  InstanceAsk *asked = request->data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GHashTable) updates = NULL;
+  GHashTableIter iter;
+  gpointer key, value;
+
+  updates = nuvashalauncher_modrinth_updates_from_node (root, &error);
+  if (updates == NULL)
+    {
+      nuvashalauncher_modrinth_request_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  g_hash_table_iter_init (&iter, updates);
+  while (g_hash_table_iter_next (&iter, &key, &value))
+    {
+      NuvashaLauncherModrinthVersion *version = value;
+
+      if (!nuvashalauncher_modrinth_version_fits (version, asked->type,
+                                                asked->minecraft_version,
+                                                asked->loader))
+        g_hash_table_iter_remove (&iter);
+    }
+
+  nuvashalauncher_modrinth_request_return_pointer (task, g_steal_pointer (&updates),
+                                                   (GDestroyNotify) g_hash_table_unref);
+}
+
+static char *
+build_batch_update_body (GPtrArray *hashes, NuvashaLauncherContentType type,
+                         const char *minecraft_version, const char *loader)
+{
+  g_autoptr (JsonBuilder) builder = json_builder_new ();
+  g_autoptr (JsonNode) root = NULL;
+  const char *loader_name =
+    nuvashalauncher_content_type_needs_loader (type) && loader != NULL
+      ? loader
+      : "minecraft";
+
+  json_builder_begin_object (builder);
+
+  json_builder_set_member_name (builder, "hashes");
+  json_builder_begin_array (builder);
+  for (guint i = 0; i < hashes->len; i++)
+    {
+      const char *hash = g_ptr_array_index (hashes, i);
+
+      if (hash != NULL && *hash != '\0')
+        json_builder_add_string_value (builder, hash);
+    }
+  json_builder_end_array (builder);
+
+  json_builder_set_member_name (builder, "algorithm");
+  json_builder_add_string_value (builder, "sha1");
+
+  json_builder_set_member_name (builder, "loaders");
+  json_builder_begin_array (builder);
+  json_builder_add_string_value (builder, loader_name);
+  json_builder_end_array (builder);
+
+  json_builder_set_member_name (builder, "game_versions");
+  json_builder_begin_array (builder);
+  json_builder_add_string_value (builder, minecraft_version);
+  json_builder_end_array (builder);
+
+  json_builder_end_object (builder);
+
+  root = json_builder_get_root (builder);
+  return json_to_string (root, FALSE);
+}
+
+NuvashaLauncherTaskScope *
+nuvashalauncher_modrinth_updates_by_hashes_url_async (
+  const char                 *url,
+  NuvashaLauncherContentType  type,
+  GPtrArray                  *hashes,
+  const char                 *minecraft_version,
+  const char                 *loader,
+  GAsyncReadyCallback         callback,
+  gpointer                    user_data)
+{
+  g_autoptr (NuvashaLauncherTaskScope) scope = NULL;
+  g_autofree char *body = NULL;
+
+  g_return_val_if_fail (url != NULL, NULL);
+  g_return_val_if_fail (minecraft_version != NULL, NULL);
+
+  scope = nuvashalauncher_modrinth_request_new (callback, user_data, updates_answer,
+                                                nuvashalauncher_NOT_FOUND_IS_ABSENT,
+                                                instance_ask_new (type, minecraft_version, loader),
+                                                instance_ask_free);
+
+  if (hashes == NULL || hashes->len == 0)
+    {
+      GHashTable *empty = g_hash_table_new_full (
+        g_str_hash, g_str_equal, g_free,
+        (GDestroyNotify) nuvashalauncher_modrinth_version_free);
+
+      nuvashalauncher_task_scope_return_pointer (scope, empty,
+                                                 (GDestroyNotify) g_hash_table_unref);
+      return g_steal_pointer (&scope);
+    }
+
+  body = build_batch_update_body (hashes, type, minecraft_version, loader);
+
+  nuvashalauncher_task_scope_release_when_done (
+    nuvashalauncher_download_json_post_cached_async (
+      nuvashalauncher_downloads_get_service (), url, body,
+      nuvashalauncher_MODRINTH_USER_AGENT,
+      nuvashalauncher_modrinth_json_ready,
+      nuvashalauncher_task_scope_task (scope)),
+    nuvashalauncher_task_scope_get_cancellable (scope));
+
+  return g_steal_pointer (&scope);
+}
+
+NuvashaLauncherTaskScope *
+nuvashalauncher_modrinth_updates_by_hashes_async (
+  NuvashaLauncherContentType  type,
+  GPtrArray                  *hashes,
+  const char                 *minecraft_version,
+  const char                 *loader,
+  GAsyncReadyCallback         callback,
+  gpointer                    user_data)
+{
+  return nuvashalauncher_modrinth_updates_by_hashes_url_async (
+    nuvashalauncher_MODRINTH_URL "/version_files/update",
+    type, hashes, minecraft_version, loader, callback, user_data);
+}
+
+GHashTable *
+nuvashalauncher_modrinth_updates_by_hashes_finish (GAsyncResult *result, GError **error)
 {
   g_return_val_if_fail (nuvashalauncher_task_result_is_valid (result, "nuvashalauncher-task-scope"), NULL);
 
@@ -452,7 +595,7 @@ nuvashalauncher_modrinth_update_by_hash_finish (GAsyncResult *result, GError **e
  * ---------------------------------------------------------- */
 
 char *
-nuvashalauncher_modrinth_no_compatible_message (nuvashalauncherContentType type,
+nuvashalauncher_modrinth_no_compatible_message (NuvashaLauncherContentType type,
                                     const char *minecraft_version,
                                     const char *loader)
 {
@@ -467,7 +610,7 @@ nuvashalauncher_modrinth_no_compatible_message (nuvashalauncherContentType type,
 }
 
 GPtrArray *
-nuvashalauncher_modrinth_resolve_install (nuvashalauncherModrinthVersion *version,
+nuvashalauncher_modrinth_resolve_install (NuvashaLauncherModrinthVersion *version,
                               GHashTable *installed, GPtrArray **conflicts,
                               GError **error)
 {
@@ -488,7 +631,7 @@ nuvashalauncher_modrinth_resolve_install (nuvashalauncherModrinthVersion *versio
     {
       for (guint i = 0; i < version->dependencies->len; i++)
         {
-          nuvashalauncherModrinthDependency *dependency =
+          NuvashaLauncherModrinthDependency *dependency =
             g_ptr_array_index (version->dependencies, i);
 
           if (dependency->type != nuvashalauncher_DEPENDENCY_INCOMPATIBLE ||
@@ -507,7 +650,7 @@ nuvashalauncher_modrinth_resolve_install (nuvashalauncherModrinthVersion *versio
 
   for (guint i = 0; i < version->dependencies->len; i++)
     {
-      nuvashalauncherModrinthDependency *dependency =
+      NuvashaLauncherModrinthDependency *dependency =
         g_ptr_array_index (version->dependencies, i);
       gboolean already = FALSE;
 
@@ -539,7 +682,7 @@ nuvashalauncher_modrinth_resolve_install (nuvashalauncherModrinthVersion *versio
        * leave two copies of it in the folder. */
       for (guint j = 0; j < pending->len && !already; j++)
         {
-          nuvashalauncherModrinthDependency *one = g_ptr_array_index (pending, j);
+          NuvashaLauncherModrinthDependency *one = g_ptr_array_index (pending, j);
 
           already = g_strcmp0 (one->project_id, dependency->project_id) == 0;
         }

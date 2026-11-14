@@ -45,12 +45,12 @@ find_open_folder_button (GtkWidget *w)
 int
 main (int argc, char **argv)
 {
-  g_autoptr (nuvashalauncherInstanceManager) manager = NULL;
+  g_autoptr (NuvashaLauncherInstanceManager) manager = NULL;
   g_autoptr (GError) error = NULL;
   g_autofree char *directory = NULL;
   g_autofree char *mods_dir = NULL;
-  nuvashalauncherInstance *instance = NULL;
-  nuvashalauncherContentPage *page = NULL;
+  NuvashaLauncherInstance *instance = NULL;
+  NuvashaLauncherContentPage *page = NULL;
 
   (void) argc;
   (void) argv;

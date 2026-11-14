@@ -47,7 +47,7 @@ poll_again (gpointer user_data)
 void
 token_answered (AuthRequest *self)
 {
-  g_autoptr (nuvashalauncherOAuthToken) token = NULL;
+  g_autoptr (NuvashaLauncherOAuthToken) token = NULL;
   g_autoptr (GError) error = NULL;
   gboolean slow_down = FALSE;
 

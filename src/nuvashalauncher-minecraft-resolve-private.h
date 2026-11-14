@@ -19,9 +19,9 @@ typedef struct
 struct ResolveRequest
 {
   GTask *task;
-  nuvashalauncherTaskScope *scope;
-  nuvashalauncherVersionManifest *manifest;
-  nuvashalauncherVersionDescription *description;
+  NuvashaLauncherTaskScope *scope;
+  NuvashaLauncherVersionManifest *manifest;
+  NuvashaLauncherVersionDescription *description;
   char *version_id;
   char *data_dir;
   char *libraries_dir;
@@ -37,8 +37,8 @@ struct ResolveRequest
   char *asset_index_id;
   char *asset_index_name;
   char *asset_base_url;
-  nuvashalauncherRuleContext *context;
-  nuvashalauncherResolveProgressFunc progress;
+  NuvashaLauncherRuleContext *context;
+  NuvashaLauncherResolveProgressFunc progress;
   gpointer progress_data;
   GCancellable *cancellable;
   GError *error;
@@ -57,10 +57,10 @@ char *nuvashalauncher_resolve_safe_name (const char *id);
 gboolean nuvashalauncher_resolve_ensure_directory (const char *path, GError **error);
 gboolean nuvashalauncher_resolve_ensure_parent_directory (const char *path,
                                               GError **error);
-nuvashalauncherResolveFile *nuvashalauncher_resolve_file_new (const char *path, const char *url,
+NuvashaLauncherResolveFile *nuvashalauncher_resolve_file_new (const char *path, const char *url,
                                       const char *sha1, gboolean natives,
                                        GPtrArray *exclude);
-nuvashalauncherResolvedVersion *build_result (ResolveRequest *request, GError **error);
+NuvashaLauncherResolvedVersion *build_result (ResolveRequest *request, GError **error);
 void request_fail (ResolveRequest *, GError *);
 void request_fail_and_wait (ResolveRequest *, GError *);
 void report (ResolveRequest *);

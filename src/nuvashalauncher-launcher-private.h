@@ -13,16 +13,16 @@
 #define TAG_STDOUT "stdout"
 #define TAG_STDERR "stderr"
 
-struct _nuvashalauncher
+struct _NuvashaLauncher
 {
   GObject parent_instance;
 
-  nuvashalauncherInstance *instance;
-  nuvashalauncherSettings *settings;
+  NuvashaLauncherInstance *instance;
+  NuvashaLauncherSettings *settings;
   char *version;
   char *game_directory;
 
-  nuvashalauncherLaunchState state;
+  NuvashaLauncherLaunchState state;
   char *detail; /* optional state detail */
 
   /* Per-launch values that must not appear in game output or launcher logs. */
@@ -36,7 +36,7 @@ struct _nuvashalauncher
   /* Values selected during launch preparation. */
   struct {
     GCancellable *cancellable;
-    nuvashalauncherResolvedVersion *resolved;
+    NuvashaLauncherResolvedVersion *resolved;
     char *java_executable;
     int java_major_version;
   } preparation;
@@ -56,34 +56,34 @@ struct _nuvashalauncher
 
   /* Accounts used by the launch; the active account is read when building
    * the command line. */
-  nuvashalauncherAccounts *accounts;
+  NuvashaLauncherAccounts *accounts;
   char *account_id_override;
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
 
 };
 
 extern guint nuvashalauncher_launcher_signals[nuvashalauncher_LAUNCHER_N_SIGNALS];
 
-void log_line (nuvashalauncher *self, const char *tag, const char *format, ...)
+void log_line (NuvashaLauncher *self, const char *tag, const char *format, ...)
   G_GNUC_PRINTF (3, 4);
-void set_state (nuvashalauncher *self, nuvashalauncherLaunchState state,
+void set_state (NuvashaLauncher *self, NuvashaLauncherLaunchState state,
                 const char *detail);
-void launcher_failed (nuvashalauncher *self, const char *reason);
+void launcher_failed (NuvashaLauncher *self, const char *reason);
 gboolean on_stop_timeout (gpointer user_data);
-void finish_launch (nuvashalauncher *self);
-nuvashalauncherAccount *active_account (nuvashalauncher *self);
+void finish_launch (NuvashaLauncher *self);
+NuvashaLauncherAccount *active_account (NuvashaLauncher *self);
 void on_manifest_ready (GObject *source, GAsyncResult *result,
                         gpointer user_data);
-void launcher_needs_sign_in (nuvashalauncher *self, const char *reason);
-void launch_finished_with_error (nuvashalauncher *self, GError *error);
-void launcher_auth_failed (nuvashalauncher *self, const GError *error);
-const nuvashalauncherJava *choose_java (nuvashalauncher *self, GPtrArray *javas, int required,
+void launcher_needs_sign_in (NuvashaLauncher *self, const char *reason);
+void launch_finished_with_error (NuvashaLauncher *self, GError *error);
+void launcher_auth_failed (NuvashaLauncher *self, const GError *error);
+const NuvashaLauncherJava *choose_java (NuvashaLauncher *self, GPtrArray *javas, int required,
                             char **instance_java);
-void remember_java (nuvashalauncher *self, const nuvashalauncherJava *java);
+void remember_java (NuvashaLauncher *self, const NuvashaLauncherJava *java);
 void on_resolved (GObject *source, GAsyncResult *result, gpointer user_data);
-void on_resolve_progress (const nuvashalauncherResolveProgress *progress,
+void on_resolve_progress (const NuvashaLauncherResolveProgress *progress,
                           gpointer user_data);
-void nuvashalauncher_launcher_signal_process_group (nuvashalauncher *self,
+void nuvashalauncher_launcher_signal_process_group (NuvashaLauncher *self,
                                                     int signal_number);
 
 #endif /* nuvashalauncher_LAUNCHER_PRIVATE_H */

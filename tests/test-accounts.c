@@ -47,7 +47,7 @@ static void
 test_offline_account (void)
 {
   g_autoptr (GError) error = NULL;
-  nuvashalauncherAccount *account = NULL;
+  NuvashaLauncherAccount *account = NULL;
 
   account = nuvashalauncher_account_new_offline ("TestUser", &error);
   g_assert_no_error (error);
@@ -120,7 +120,7 @@ static void
 test_offline_name_validation (void)
 {
   g_autoptr (GError) error = NULL;
-  nuvashalauncherAccount *account = NULL;
+  NuvashaLauncherAccount *account = NULL;
 
   account = nuvashalauncher_account_new_offline ("ab", &error);
   g_assert_null (account);
@@ -163,10 +163,10 @@ test_offline_name_validation (void)
  * When a token is good
  * ---------------------------------------------------------- */
 
-static nuvashalauncherAccount *
+static NuvashaLauncherAccount *
 microsoft_account (gint64 expires_at, const char *access_token)
 {
-  nuvashalauncherAccount *account = g_new0 (nuvashalauncherAccount, 1);
+  NuvashaLauncherAccount *account = g_new0 (NuvashaLauncherAccount, 1);
 
   account->type = nuvashalauncher_ACCOUNT_MICROSOFT;
   account->id = g_strdup ("069a79f444e94726a5befca90e38aaf5");
@@ -181,7 +181,7 @@ microsoft_account (gint64 expires_at, const char *access_token)
 static void
 test_token_expiry (void)
 {
-  g_autoptr (nuvashalauncherAccount) account = NULL;
+  g_autoptr (NuvashaLauncherAccount) account = NULL;
   const gint64 now = 1000000;
 
   /* A token with an hour left is good. */
@@ -220,9 +220,9 @@ static void
 test_one_active_account (void)
 {
   g_autofree char *path = temporary_path ("accounts.json");
-  g_autoptr (nuvashalauncherAccounts) store = NULL;
-  g_autoptr (nuvashalauncherAccount) one = NULL;
-  g_autoptr (nuvashalauncherAccount) two = NULL;
+  g_autoptr (NuvashaLauncherAccounts) store = NULL;
+  g_autoptr (NuvashaLauncherAccount) one = NULL;
+  g_autoptr (NuvashaLauncherAccount) two = NULL;
   g_autoptr (GError) error = NULL;
 
   nuvashalauncher_secret_store_remove_account ("TestUser", NULL);
@@ -301,10 +301,10 @@ static void
 test_persistence (void)
 {
   g_autofree char *path = temporary_path ("accounts.json");
-  g_autoptr (nuvashalauncherAccounts) store = NULL;
-  g_autoptr (nuvashalauncherAccounts) reopened = NULL;
-  g_autoptr (nuvashalauncherAccount) account = NULL;
-  nuvashalauncherAccount *found = NULL;
+  g_autoptr (NuvashaLauncherAccounts) store = NULL;
+  g_autoptr (NuvashaLauncherAccounts) reopened = NULL;
+  g_autoptr (NuvashaLauncherAccount) account = NULL;
+  NuvashaLauncherAccount *found = NULL;
   g_autoptr (GError) error = NULL;
 
   store = nuvashalauncher_accounts_new_for_path (path);
@@ -351,7 +351,7 @@ test_persistence (void)
 }
 
 static void
-on_changed (nuvashalauncherAccounts *store G_GNUC_UNUSED, gpointer user_data)
+on_changed (NuvashaLauncherAccounts *store G_GNUC_UNUSED, gpointer user_data)
 {
   guint *changed = user_data;
 
@@ -364,9 +364,9 @@ static void
 test_adding_the_same_account_twice (void)
 {
   g_autofree char *path = temporary_path ("accounts.json");
-  g_autoptr (nuvashalauncherAccounts) store = NULL;
-  g_autoptr (nuvashalauncherAccount) account = NULL;
-  g_autoptr (nuvashalauncherAccount) other = NULL;
+  g_autoptr (NuvashaLauncherAccounts) store = NULL;
+  g_autoptr (NuvashaLauncherAccount) account = NULL;
+  g_autoptr (NuvashaLauncherAccount) other = NULL;
   g_autoptr (GError) error = NULL;
   guint changed = 0;
 

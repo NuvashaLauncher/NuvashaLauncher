@@ -2,10 +2,10 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherInstancePage: settings, content, and logs for one instance.
+/* NuvashaLauncherInstancePage: settings, content, and logs for one instance.
  *
  * The settings page is where the instance itself is edited: every edit
- * Settings are persisted through nuvashalauncherInstanceManager. Content pages share
+ * Settings are persisted through NuvashaLauncherInstanceManager. Content pages share
  * one implementation with different content types. Logs shows this instance's
  * game output. File operations use asynchronous GIO calls. */
 
@@ -26,7 +26,7 @@
 #include "nuvashalauncher-task.h"
 #include "nuvashalauncher-operation.h"
 
-G_DEFINE_FINAL_TYPE (nuvashalauncherInstancePage, nuvashalauncher_instance_page,
+G_DEFINE_FINAL_TYPE (NuvashaLauncherInstancePage, nuvashalauncher_instance_page,
                      GTK_TYPE_BOX)
 
 /* ---------------------------------------------------------- *
@@ -34,7 +34,7 @@ G_DEFINE_FINAL_TYPE (nuvashalauncherInstancePage, nuvashalauncher_instance_page,
  * ---------------------------------------------------------- */
 
 char *
-instance_string (nuvashalauncherInstance *instance, const char *property)
+instance_string (NuvashaLauncherInstance *instance, const char *property)
 {
   char *value = NULL;
 
@@ -44,9 +44,9 @@ instance_string (nuvashalauncherInstance *instance, const char *property)
 
 /* "fabric" is shown as "Fabric", the same way the instance list writes it. */
 char *
-loader_display_name (nuvashalauncherInstance *instance)
+loader_display_name (NuvashaLauncherInstance *instance)
 {
-  nuvashalauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
+  NuvashaLauncherLoader loader = nuvashalauncher_LOADER_VANILLA;
   const char *nick = NULL;
 
   g_object_get (instance, "loader", &loader, NULL);
@@ -61,7 +61,7 @@ loader_display_name (nuvashalauncherInstance *instance)
 }
 
 GtkWidget *
-instance_page_dialog_parent (nuvashalauncherInstancePage *self)
+instance_page_dialog_parent (NuvashaLauncherInstancePage *self)
 {
   GtkWidget *host;
   GApplication *app;
@@ -82,7 +82,7 @@ instance_page_dialog_parent (nuvashalauncherInstancePage *self)
 }
 
 void
-instance_page_show_error (nuvashalauncherInstancePage *self, const GError *error)
+instance_page_show_error (NuvashaLauncherInstancePage *self, const GError *error)
 {
   if (self == NULL || self->toast_overlay == NULL)
     return;
@@ -92,7 +92,7 @@ instance_page_show_error (nuvashalauncherInstancePage *self, const GError *error
 }
 
 void
-instance_page_show_toast (nuvashalauncherInstancePage *self, const char *message)
+instance_page_show_toast (NuvashaLauncherInstancePage *self, const char *message)
 {
   if (self == NULL || self->toast_overlay == NULL)
     return;
@@ -106,7 +106,7 @@ instance_page_show_toast (nuvashalauncherInstancePage *self, const char *message
  * and come back at the same place for the row to be bound again. The
  * order of the rows does not change. */
 void
-refresh_in_list (nuvashalauncherInstancePage *self)
+refresh_in_list (NuvashaLauncherInstancePage *self)
 {
   GListStore *store = nuvashalauncher_instance_manager_get_instances (self->manager);
   guint position = 0;
@@ -128,10 +128,10 @@ refresh_in_list (nuvashalauncherInstancePage *self)
  * them again: the Mods page in particular keeps saying "No mod loader"
  * until it is built for the loader the instance now runs. */
 void
-rebuild_content_pages (nuvashalauncherInstancePage *self)
+rebuild_content_pages (NuvashaLauncherInstancePage *self)
 {
   static const struct {
-    nuvashalauncherContentType type;
+    NuvashaLauncherContentType type;
     const char *name;
     const char *title;
     const char *icon;
@@ -200,7 +200,7 @@ on_instance_page_width_changed (GObject *object,
                                 GParamSpec *pspec G_GNUC_UNUSED,
                                 gpointer user_data G_GNUC_UNUSED)
 {
-  nuvashalauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (object);
+  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (object);
   int width = gtk_widget_get_width (GTK_WIDGET (self));
 
   if (self->switcher == NULL || width <= 0)
@@ -218,11 +218,11 @@ on_instance_page_width_changed (GObject *object,
    loader cannot be changed under a running game either, so both of its
    rows follow the same state. */
 static void
-on_page_launcher_state (nuvashalauncher *launcher G_GNUC_UNUSED,
-                        nuvashalauncherLaunchState state, const char *detail G_GNUC_UNUSED,
+on_page_launcher_state (NuvashaLauncher *launcher G_GNUC_UNUSED,
+                        NuvashaLauncherLaunchState state, const char *detail G_GNUC_UNUSED,
                         gpointer user_data)
 {
-  nuvashalauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
+  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (user_data);
 
   update_directory_row (self);
 
@@ -232,16 +232,16 @@ on_page_launcher_state (nuvashalauncher *launcher G_GNUC_UNUSED,
       nuvashalauncher_launch_state_is_busy (state));
 }
 
-nuvashalauncherInstancePage *
-nuvashalauncher_instance_page_new (nuvashalauncherInstanceManager *manager, nuvashalauncherInstance *instance,
-                       nuvashalauncherSettings *settings, nuvashalauncher *launcher)
+NuvashaLauncherInstancePage *
+nuvashalauncher_instance_page_new (NuvashaLauncherInstanceManager *manager, NuvashaLauncherInstance *instance,
+                       NuvashaLauncherSettings *settings, NuvashaLauncher *launcher)
 {
   g_return_val_if_fail (nuvashalauncher_IS_INSTANCE_MANAGER (manager), NULL);
   g_return_val_if_fail (nuvashalauncher_IS_INSTANCE (instance), NULL);
   g_return_val_if_fail (nuvashalauncher_IS_SETTINGS (settings), NULL);
   g_return_val_if_fail (nuvashalauncher_IS_LAUNCHER (launcher), NULL);
 
-  nuvashalauncherInstancePage *self = g_object_new (nuvashalauncher_TYPE_INSTANCE_PAGE, NULL);
+  NuvashaLauncherInstancePage *self = g_object_new (nuvashalauncher_TYPE_INSTANCE_PAGE, NULL);
   AdwViewStack *stack = ADW_VIEW_STACK (adw_view_stack_new ());
   AdwViewSwitcher *switcher = ADW_VIEW_SWITCHER (adw_view_switcher_new ());
   AdwHeaderBar *header = ADW_HEADER_BAR (adw_header_bar_new ());
@@ -324,7 +324,7 @@ nuvashalauncher_instance_page_new (nuvashalauncherInstanceManager *manager, nuva
 }
 
 void
-nuvashalauncher_instance_page_show_logs (nuvashalauncherInstancePage *self)
+nuvashalauncher_instance_page_show_logs (NuvashaLauncherInstancePage *self)
 {
   g_return_if_fail (nuvashalauncher_IS_INSTANCE_PAGE (self));
 
@@ -335,7 +335,7 @@ nuvashalauncher_instance_page_show_logs (nuvashalauncherInstancePage *self)
 static void
 nuvashalauncher_instance_page_dispose (GObject *object)
 {
-  nuvashalauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (object);
+  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (object);
 
   /* The widget tree may be freed while the page object is kept alive
    * by a running operation: never touch it afterwards. The manager and
@@ -396,7 +396,7 @@ nuvashalauncher_instance_page_dispose (GObject *object)
 static void
 nuvashalauncher_instance_page_finalize (GObject *object)
 {
-  nuvashalauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (object);
+  NuvashaLauncherInstancePage *self = nuvashalauncher_INSTANCE_PAGE (object);
 
   g_free (self->loader_version);
   g_free (self->export_name);
@@ -407,7 +407,7 @@ nuvashalauncher_instance_page_finalize (GObject *object)
 }
 
 static void
-nuvashalauncher_instance_page_class_init (nuvashalauncherInstancePageClass *klass)
+nuvashalauncher_instance_page_class_init (NuvashaLauncherInstancePageClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   object_class->dispose = nuvashalauncher_instance_page_dispose;
@@ -415,7 +415,7 @@ nuvashalauncher_instance_page_class_init (nuvashalauncherInstancePageClass *klas
 }
 
 static void
-nuvashalauncher_instance_page_init (nuvashalauncherInstancePage *self)
+nuvashalauncher_instance_page_init (NuvashaLauncherInstancePage *self)
 {
   /* Everything is built in nuvashalauncher_instance_page_new(), which knows the
    * instance the page is for. */

@@ -64,10 +64,10 @@ expand_arguments (GPtrArray *arguments, GHashTable *known)
 }
 
 /* Build the resolved version from the files on disk. */
-nuvashalauncherResolvedVersion *
+NuvashaLauncherResolvedVersion *
 build_result (ResolveRequest *request, GError **error)
 {
-  nuvashalauncherResolvedVersion *resolved = g_new0 (nuvashalauncherResolvedVersion, 1);
+  NuvashaLauncherResolvedVersion *resolved = g_new0 (NuvashaLauncherResolvedVersion, 1);
   g_autoptr (GPtrArray) jvm = NULL;
   g_autoptr (GPtrArray) game = NULL;
   g_autoptr (GHashTable) known = g_hash_table_new (g_str_hash, g_str_equal);

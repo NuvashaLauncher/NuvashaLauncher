@@ -13,7 +13,7 @@
 
 typedef struct
 {
-  nuvashalauncherJava *java;
+  NuvashaLauncherJava *java;
   dev_t dev;
   ino_t ino;
   off_t size;
@@ -24,10 +24,10 @@ typedef struct
 G_LOCK_DEFINE_STATIC (probe_cache);
 static GHashTable *probe_cache;
 
-static nuvashalauncherJava *
-java_copy (const nuvashalauncherJava *src)
+static NuvashaLauncherJava *
+java_copy (const NuvashaLauncherJava *src)
 {
-  nuvashalauncherJava *copy = g_new0 (nuvashalauncherJava, 1);
+  NuvashaLauncherJava *copy = g_new0 (NuvashaLauncherJava, 1);
 
   copy->executable = g_strdup (src->executable);
   copy->arch = g_strdup (src->arch);
@@ -68,7 +68,7 @@ probe_cache_stat (const char *executable, struct stat *st)
   return stat (target, st) == 0 && S_ISREG (st->st_mode);
 }
 
-static nuvashalauncherJava *
+static NuvashaLauncherJava *
 probe_cache_lookup (const char *executable)
 {
   struct stat st;
@@ -87,7 +87,7 @@ probe_cache_lookup (const char *executable)
       entry->mtime_sec == st.st_mtim.tv_sec &&
       entry->mtime_nsec == st.st_mtim.tv_nsec)
     {
-      nuvashalauncherJava *copy = java_copy (entry->java);
+      NuvashaLauncherJava *copy = java_copy (entry->java);
       G_UNLOCK (probe_cache);
       return copy;
     }
@@ -96,7 +96,7 @@ probe_cache_lookup (const char *executable)
 }
 
 static void
-probe_cache_store (const char *executable, const nuvashalauncherJava *java)
+probe_cache_store (const char *executable, const NuvashaLauncherJava *java)
 {
   struct stat st;
   ProbeCacheEntry *entry = NULL;
@@ -123,7 +123,7 @@ probe_cache_store (const char *executable, const nuvashalauncherJava *java)
 typedef struct
 {
   /* Borrowed from the operation the caller owns until the answer. */
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
   char *executable;
   GSubprocess *process;
 } Probe;
@@ -174,7 +174,7 @@ probe_communicate (GObject      *source G_GNUC_UNUSED,
       return;
     }
 
-  nuvashalauncherJava *java = g_new0 (nuvashalauncherJava, 1);
+  NuvashaLauncherJava *java = g_new0 (NuvashaLauncherJava, 1);
 
   java->executable = g_steal_pointer (&probe->executable);
   java->major_version = major;
@@ -189,17 +189,17 @@ probe_communicate (GObject      *source G_GNUC_UNUSED,
   probe_destroyed (probe);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_java_probe_async (const char         *executable,
                       GAsyncReadyCallback callback,
                       gpointer            user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   g_autoptr (GError) error = NULL;
   const char * const argv[] = { executable, "-XshowSettings:properties", "-version",
                    NULL };
-  nuvashalauncherJava *cached = NULL;
+  NuvashaLauncherJava *cached = NULL;
   Probe *probe = NULL;
 
   nuvashalauncher_task_scope_set_check_cancellable (scope, FALSE);
@@ -239,7 +239,7 @@ nuvashalauncher_java_probe_async (const char         *executable,
   return g_steal_pointer (&scope);
 }
 
-nuvashalauncherJava *
+NuvashaLauncherJava *
 nuvashalauncher_java_probe_finish (GAsyncResult  *result,
                        GError       **error)
 {
@@ -260,10 +260,10 @@ typedef struct
   guint total;
   guint next;
   guint in_flight;
-  nuvashalauncherJava **results;
-  GPtrArray *javas;   /* nuvashalauncherJava*, element free nuvashalauncher_java_free */
+  NuvashaLauncherJava **results;
+  GPtrArray *javas;   /* NuvashaLauncherJava*, element free nuvashalauncher_java_free */
   GHashTable *seen;   /* resolved real paths, for dedup */
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
   gboolean finished;
 } ProbeList;
 
@@ -291,10 +291,10 @@ probe_list_destroyed (gpointer data)
   g_free (list);
 }
 
-static nuvashalauncherJava *
+static NuvashaLauncherJava *
 nuvashalauncher_java_add_unique (GPtrArray  *javas,
                      GHashTable *seen,
-                     nuvashalauncherJava    *java)
+                     NuvashaLauncherJava    *java)
 {
   g_autofree char *resolved = real_path (java->executable);
 
@@ -326,7 +326,7 @@ probe_list_pump (ProbeList *list)
          list->next < list->total)
     {
       ProbeSlot *slot = g_new0 (ProbeSlot, 1);
-      nuvashalauncherTaskScope *probe = NULL;
+      NuvashaLauncherTaskScope *probe = NULL;
 
       slot->list = list;
       slot->index = list->next++;
@@ -376,7 +376,7 @@ probe_list_slot_probed (GObject      *source G_GNUC_UNUSED,
   ProbeList *list = slot->list;
   guint index = slot->index;
   g_autoptr (GError) error = NULL;
-  nuvashalauncherJava *java = nuvashalauncher_java_probe_finish (result, &error);
+  NuvashaLauncherJava *java = nuvashalauncher_java_probe_finish (result, &error);
 
   g_free (slot);
   list->in_flight--;
@@ -387,12 +387,12 @@ probe_list_slot_probed (GObject      *source G_GNUC_UNUSED,
   probe_list_pump (list);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_java_probe_list_async (char            **executables,
                            GAsyncReadyCallback callback,
                            gpointer         user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   ProbeList *list = NULL;
 
@@ -403,7 +403,7 @@ nuvashalauncher_java_probe_list_async (char            **executables,
   list = g_new0 (ProbeList, 1);
   list->executables = executables; /* the caller gives up the array */
   list->total = g_strv_length (executables);
-  list->results = list->total > 0 ? g_new0 (nuvashalauncherJava *, list->total) : NULL;
+  list->results = list->total > 0 ? g_new0 (NuvashaLauncherJava *, list->total) : NULL;
   list->javas = g_ptr_array_new_with_free_func (
     (GDestroyNotify) nuvashalauncher_java_free);
   list->seen = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
@@ -669,7 +669,7 @@ dedupe_candidates (char **candidates)
 
 typedef struct
 {
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
 } Detect;
 
 static void
@@ -696,10 +696,10 @@ detected (GObject      *source G_GNUC_UNUSED,
   g_free (detect);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_java_detect_async (GAsyncReadyCallback callback, gpointer user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   g_auto (GStrv) collected = collect_candidates ();
   g_auto (GStrv) candidates = dedupe_candidates (collected);
@@ -711,7 +711,7 @@ nuvashalauncher_java_detect_async (GAsyncReadyCallback callback, gpointer user_d
   detect->scope = nuvashalauncher_task_scope_ref (scope);
 
   {
-    nuvashalauncherTaskScope *listing =
+    NuvashaLauncherTaskScope *listing =
       nuvashalauncher_java_probe_list_async (g_steal_pointer (&candidates), detected,
                                  detect);
 
@@ -723,12 +723,12 @@ nuvashalauncher_java_detect_async (GAsyncReadyCallback callback, gpointer user_d
   return g_steal_pointer (&scope);
 }
 
-nuvashalauncherTaskScope *
+NuvashaLauncherTaskScope *
 nuvashalauncher_java_detect_list_async (char            **roots,
                             GAsyncReadyCallback callback,
                             gpointer         user_data)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope =
+  g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   g_auto (GStrv) collected = collect_candidates_list (roots);
   g_auto (GStrv) candidates = dedupe_candidates (collected);
@@ -740,7 +740,7 @@ nuvashalauncher_java_detect_list_async (char            **roots,
   detect->scope = nuvashalauncher_task_scope_ref (scope);
 
   {
-    nuvashalauncherTaskScope *listing =
+    NuvashaLauncherTaskScope *listing =
       nuvashalauncher_java_probe_list_async (g_steal_pointer (&candidates), detected,
                                  detect);
 

@@ -12,5 +12,7 @@ JsonNode *nuvashalauncher_modrinth_root_node (const char *json, gssize length,
 gboolean nuvashalauncher_modrinth_string_array_has (GPtrArray *strings, const char *value);
 gboolean nuvashalauncher_modrinth_loader_runs (const char *instance_loader,
                                    const char *version_loader);
+GHashTable *nuvashalauncher_modrinth_updates_from_node (JsonNode *root,
+                                                        GError **error);
 
 #endif

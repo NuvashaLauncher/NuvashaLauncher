@@ -62,9 +62,9 @@ find_slim_button (GtkWidget *root)
 static void
 test_skin_dialog_close (void)
 {
-  g_autoptr (nuvashalauncherAccounts) accounts = NULL;
-  g_autoptr (nuvashalauncherAccount) account = NULL;
-  g_autoptr (nuvashalauncherUsersPopover) owner = NULL;
+  g_autoptr (NuvashaLauncherAccounts) accounts = NULL;
+  g_autoptr (NuvashaLauncherAccount) account = NULL;
+  g_autoptr (NuvashaLauncherUsersPopover) owner = NULL;
   g_autoptr (GError) error = NULL;
   AdwDialog *dialog = NULL;
   g_autoptr (GtkImage) image = NULL;
@@ -128,9 +128,9 @@ find_error_label (GtkWidget *widget, const char *diagnostic)
 static void
 test_missing_local_skin_cleans_upload_state (void)
 {
-  g_autoptr (nuvashalauncherAccounts) accounts = NULL;
-  g_autoptr (nuvashalauncherAccount) account = NULL;
-  g_autoptr (nuvashalauncherUsersPopover) owner = NULL;
+  g_autoptr (NuvashaLauncherAccounts) accounts = NULL;
+  g_autoptr (NuvashaLauncherAccount) account = NULL;
+  g_autoptr (NuvashaLauncherUsersPopover) owner = NULL;
   g_autoptr (GError) error = NULL;
   g_autofree char *root = g_dir_make_tmp ("nuvashalauncher-skin-upload-XXXXXX", NULL);
   g_autofree char *accounts_path = g_build_filename (root, "accounts.json", NULL);

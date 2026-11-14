@@ -12,11 +12,11 @@
 #include "nuvashalauncher-modpack.h"
 #include "nuvashalauncher-modrinth.h"
 
-struct _nuvashalauncherDownloadModpackDialog
+struct _NuvashaLauncherDownloadModpackDialog
 {
   AdwDialog parent_instance;
 
-  nuvashalauncherInstanceManager *manager; /* owned */
+  NuvashaLauncherInstanceManager *manager; /* owned */
 
   AdwNavigationView *nav;
 
@@ -25,16 +25,16 @@ struct _nuvashalauncherDownloadModpackDialog
   gboolean imported;
 
   /* User selections from the details page. */
-  nuvashalauncherModrinthProject *project;
-  nuvashalauncherModrinthVersion *version;
+  NuvashaLauncherModrinthProject *project;
+  NuvashaLauncherModrinthVersion *version;
 
-  nuvashalauncherModpack *modpack; /* owned, parsed from pack_path */
+  NuvashaLauncherModpack *modpack; /* owned, parsed from pack_path */
 
   /* Browse page widgets. */
   GtkEntry *search_entry;
   GtkDropDown *filter_version_dropdown;
   GtkStringList *filter_version_model;
-  nuvashalauncherTaskScope *version_catalog;
+  NuvashaLauncherTaskScope *version_catalog;
   GtkPopover *filter_popover;
   GPtrArray *filter_versions; /* selected strings */
   GPtrArray *filter_loaders;  /* selected strings */
@@ -66,7 +66,7 @@ struct _nuvashalauncherDownloadModpackDialog
   GtkLabel *count;             /* the download count, at the left */
 
   /* State for the pack details dialog. */
-  GPtrArray *versions; /* nuvashalauncherModrinthVersion* of the details dialog */
+  GPtrArray *versions; /* NuvashaLauncherModrinthVersion* of the details dialog */
   AdwEntryRow *name_entry;
   AdwActionRow *directory_row;
   GtkLabel *details_error; /* inline words when versions fail or are empty */
@@ -75,7 +75,7 @@ struct _nuvashalauncherDownloadModpackDialog
   gboolean details_ready;
   gboolean versions_ready;
   guint details_generation;  /* rejects answers from older projects */
-  nuvashalauncherModrinthDetails *details; /* owned, the answer read while the dialog is up */
+  NuvashaLauncherModrinthDetails *details; /* owned, the answer read while the dialog is up */
   char *details_problem;       /* why the description is not there */
   char *versions_problem;      /* why the versions are not there */
 
@@ -85,7 +85,7 @@ struct _nuvashalauncherDownloadModpackDialog
   /* Pack download shown in the header. Weak: the
      manager owns it, and the pointer goes NULL when it is let go. It is
      the same entry for both phases, the compressed pack and the extract. */
-  nuvashalauncherDownload *pack_download;
+  NuvashaLauncherDownload *pack_download;
 
   /* Operation being retried after an error. */
   gboolean fail_is_install;
@@ -105,7 +105,7 @@ struct _nuvashalauncherDownloadModpackDialog
   GCancellable *fetch;  /* kills a version fetch, the pack get and install */
   guint debounce;
   guint import_idle;
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
   GPtrArray *rows;
   GPtrArray *hits;
 
@@ -118,21 +118,21 @@ struct _nuvashalauncherDownloadModpackDialog
 
 void operation_done (gpointer user_data);
 void details_watch (gpointer field, GtkWidget *widget);
-void build_browse_page (nuvashalauncherDownloadModpackDialog *, gboolean start_search);
-void close_details (nuvashalauncherDownloadModpackDialog *);
-GtkWidget *details_content (nuvashalauncherDownloadModpackDialog *);
-void dialog_details_open (nuvashalauncherDownloadModpackDialog *);
+void build_browse_page (NuvashaLauncherDownloadModpackDialog *, gboolean start_search);
+void close_details (NuvashaLauncherDownloadModpackDialog *);
+GtkWidget *details_content (NuvashaLauncherDownloadModpackDialog *);
+void dialog_details_open (NuvashaLauncherDownloadModpackDialog *);
 void on_modpack_download_clicked (GtkButton *, gpointer);
-GtkWidget *build_error_page (nuvashalauncherDownloadModpackDialog *, const char *,
+GtkWidget *build_error_page (NuvashaLauncherDownloadModpackDialog *, const char *,
                              const char *, GCallback, GCallback);
-void push_failure (nuvashalauncherDownloadModpackDialog *, const char *, const GError *, GCallback);
-void push_error (nuvashalauncherDownloadModpackDialog *, const char *, const char *,
+void push_failure (NuvashaLauncherDownloadModpackDialog *, const char *, const GError *, GCallback);
+void push_error (NuvashaLauncherDownloadModpackDialog *, const char *, const char *,
                  GCallback);
-void dialog_details_show_again (nuvashalauncherDownloadModpackDialog *);
+void dialog_details_show_again (NuvashaLauncherDownloadModpackDialog *);
 void on_pack_parsed (GObject *, GAsyncResult *, gpointer);
-gboolean dialog_start_features (nuvashalauncherDownloadModpackDialog *);
-void start_install (nuvashalauncherDownloadModpackDialog *);
-void remove_pack_file (nuvashalauncherDownloadModpackDialog *);
+gboolean dialog_start_features (NuvashaLauncherDownloadModpackDialog *);
+void start_install (NuvashaLauncherDownloadModpackDialog *);
+void remove_pack_file (NuvashaLauncherDownloadModpackDialog *);
 void on_error_back (GtkButton *, gpointer);
 void on_error_retry_fetch (GtkButton *, gpointer);
 void on_error_retry_install (GtkButton *, gpointer);

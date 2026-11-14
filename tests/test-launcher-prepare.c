@@ -16,12 +16,12 @@
 
 static char *root;
 
-static nuvashalauncherInstance *
+static NuvashaLauncherInstance *
 create_test_instance (const char *name)
 {
   g_autofree char *dir = g_build_filename (root, name, NULL);
   g_autoptr (GError) error = NULL;
-  nuvashalauncherInstance *instance = NULL;
+  NuvashaLauncherInstance *instance = NULL;
 
   g_assert_cmpint (g_mkdir_with_parents (dir, 0755), ==, 0);
   instance = nuvashalauncher_instance_new (NULL, name, dir, "1.20.1",
@@ -34,11 +34,11 @@ create_test_instance (const char *name)
 static void
 test_choose_java_compatible_and_headless (void)
 {
-  g_autoptr (nuvashalauncherInstance) instance = create_test_instance ("java-inst");
-  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+  g_autoptr (NuvashaLauncherInstance) instance = create_test_instance ("java-inst");
+  g_autoptr (NuvashaLauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
   g_autoptr (GPtrArray) javas = g_ptr_array_new_with_free_func ((GDestroyNotify) nuvashalauncher_java_free);
   g_autofree char *inst_java = NULL;
-  const nuvashalauncherJava *chosen = NULL;
+  const NuvashaLauncherJava *chosen = NULL;
 
   /* No Javas available */
   chosen = choose_java (launcher, javas, 17, &inst_java);
@@ -46,7 +46,7 @@ test_choose_java_compatible_and_headless (void)
   g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_FAILED);
 
   /* Add headless Java runtime */
-  nuvashalauncherJava *headless = g_new0 (nuvashalauncherJava, 1);
+  NuvashaLauncherJava *headless = g_new0 (NuvashaLauncherJava, 1);
   headless->executable = g_strdup ("/usr/bin/fake-headless-java");
   headless->major_version = 17;
   headless->headless = TRUE;
@@ -57,7 +57,7 @@ test_choose_java_compatible_and_headless (void)
   g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, nuvashalauncher_LAUNCH_FAILED);
 
   /* Add compatible desktop Java */
-  nuvashalauncherJava *desktop = g_new0 (nuvashalauncherJava, 1);
+  NuvashaLauncherJava *desktop = g_new0 (NuvashaLauncherJava, 1);
   desktop->executable = g_strdup ("/usr/bin/fake-desktop-java");
   desktop->major_version = 17;
   desktop->headless = FALSE;
@@ -76,9 +76,9 @@ test_choose_java_compatible_and_headless (void)
 static void
 test_resolve_progress_tracking (void)
 {
-  g_autoptr (nuvashalauncherInstance) instance = create_test_instance ("progress-inst");
-  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
-  nuvashalauncherResolveProgress prog = { 0 };
+  g_autoptr (NuvashaLauncherInstance) instance = create_test_instance ("progress-inst");
+  g_autoptr (NuvashaLauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+  NuvashaLauncherResolveProgress prog = { 0 };
 
   prog.stage = "Downloading assets";
   prog.done = 50;
@@ -110,11 +110,11 @@ test_resolve_progress_tracking (void)
 static void
 test_on_resolved_lifecycle (void)
 {
-  g_autoptr (nuvashalauncherInstance) instance = create_test_instance ("resolved-inst");
-  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+  g_autoptr (NuvashaLauncherInstance) instance = create_test_instance ("resolved-inst");
+  g_autoptr (NuvashaLauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
 
   /* Create a task scope tagged "nuvashalauncher-task-scope" */
-  nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_new_tagged (
+  NuvashaLauncherTaskScope *scope = nuvashalauncher_task_scope_new_tagged (
     NULL, NULL, NULL, NULL, "nuvashalauncher-task-scope");
   nuvashalauncher_task_scope_return_error (
     scope, g_error_new_literal (G_IO_ERROR, G_IO_ERROR_FAILED, "failed resolve"));
@@ -129,14 +129,14 @@ test_on_resolved_lifecycle (void)
 static void
 test_on_resolved_success_triggers_java_search (void)
 {
-  g_autoptr (nuvashalauncherInstance) instance = create_test_instance ("resolved-succ-inst");
-  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+  g_autoptr (NuvashaLauncherInstance) instance = create_test_instance ("resolved-succ-inst");
+  g_autoptr (NuvashaLauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
 
-  nuvashalauncherResolvedVersion *res = g_new0 (nuvashalauncherResolvedVersion, 1);
+  NuvashaLauncherResolvedVersion *res = g_new0 (NuvashaLauncherResolvedVersion, 1);
   res->version_id = g_strdup ("1.20.1");
   res->java_major_version = 17;
 
-  nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_new_tagged (
+  NuvashaLauncherTaskScope *scope = nuvashalauncher_task_scope_new_tagged (
     NULL, NULL, NULL, NULL, "nuvashalauncher-task-scope");
   nuvashalauncher_task_scope_return_pointer (scope, res, (GDestroyNotify) nuvashalauncher_resolved_version_free);
 
@@ -151,20 +151,20 @@ test_on_resolved_success_triggers_java_search (void)
 static void
 test_on_resolved_with_preset_java_runs_game (void)
 {
-  g_autoptr (nuvashalauncherInstance) instance = create_test_instance ("resolved-preset-inst");
-  g_autoptr (nuvashalauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
+  g_autoptr (NuvashaLauncherInstance) instance = create_test_instance ("resolved-preset-inst");
+  g_autoptr (NuvashaLauncher) launcher = nuvashalauncher_launcher_new (instance, NULL, NULL);
 
   /* Set up a preset java executable so on_resolved proceeds straight to run_the_game */
   launcher->preparation.java_executable = g_strdup ("/usr/bin/fake-java-exec");
   launcher->preparation.java_major_version = 17;
 
-  nuvashalauncherResolvedVersion *res = g_new0 (nuvashalauncherResolvedVersion, 1);
+  NuvashaLauncherResolvedVersion *res = g_new0 (NuvashaLauncherResolvedVersion, 1);
   res->version_id = g_strdup ("1.20.1");
   res->main_class = g_strdup ("net.minecraft.client.main.Main");
   res->classpath = g_strdup ("/path/to/client.jar");
   res->java_major_version = 17;
 
-  nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_new_tagged (
+  NuvashaLauncherTaskScope *scope = nuvashalauncher_task_scope_new_tagged (
     NULL, NULL, NULL, NULL, "nuvashalauncher-task-scope");
   nuvashalauncher_task_scope_return_pointer (scope, res, (GDestroyNotify) nuvashalauncher_resolved_version_free);
 

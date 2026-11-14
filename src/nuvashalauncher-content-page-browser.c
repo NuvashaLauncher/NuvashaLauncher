@@ -15,7 +15,7 @@
 #define RESULT_ROWS_TRIM 200
 #define SEARCH_DELAY_MS 300
 
-/* Internal Browse/search workflow for nuvashalauncherContentPage. */
+/* Internal Browse/search workflow for NuvashaLauncherContentPage. */
 
 /* ---------------------------------------------------------- *
  * Browse
@@ -34,7 +34,7 @@ static void on_category_toggled (GtkCheckButton *button, gpointer user_data);
 void
 nuvashalauncher_content_page_on_scroll_changed (GtkAdjustment *adjustment, gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
   gdouble at_end;
 
   if (self->browse.model->loading_page)
@@ -57,7 +57,7 @@ nuvashalauncher_content_page_on_scroll_changed (GtkAdjustment *adjustment, gpoin
 void
 nuvashalauncher_content_page_on_retry_page_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
 
   if (self->browse.model->loading_page)
     return;
@@ -74,7 +74,7 @@ nuvashalauncher_content_page_on_retry_page_clicked (GtkButton *button G_GNUC_UNU
    length of the fetch, so a row that goes away first is still a widget
    when the answer arrives. */
 static void
-results_arrived (nuvashalauncherContentPage *self, nuvashalauncherModrinthResults *results,
+results_arrived (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthResults *results,
                  gboolean append)
 {
   guint shown = 0;
@@ -101,7 +101,7 @@ results_arrived (nuvashalauncherContentPage *self, nuvashalauncherModrinthResult
 
   for (guint i = 0; i < results->projects->len; i++)
     {
-      nuvashalauncherModrinthProject *project = g_ptr_array_index (results->projects, i);
+      NuvashaLauncherModrinthProject *project = g_ptr_array_index (results->projects, i);
       GtkWidget *row = NULL;
       GtkWidget *icon = NULL;
 
@@ -232,9 +232,9 @@ search_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
               gpointer user_data)
 {
   PageWatch *watch = user_data;
-  nuvashalauncherContentPage *self = watch->page;
+  NuvashaLauncherContentPage *self = watch->page;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherModrinthResults) results = NULL;
+  g_autoptr (NuvashaLauncherModrinthResults) results = NULL;
   gboolean append = FALSE;
 
   if (self == NULL)
@@ -300,9 +300,9 @@ search_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 }
 
 void
-nuvashalauncher_content_page_run_search (nuvashalauncherContentPage *self, gboolean append)
+nuvashalauncher_content_page_run_search (NuvashaLauncherContentPage *self, gboolean append)
 {
-  g_autoptr (nuvashalauncherModrinthSearch) search = g_new0 (nuvashalauncherModrinthSearch, 1);
+  g_autoptr (NuvashaLauncherModrinthSearch) search = g_new0 (NuvashaLauncherModrinthSearch, 1);
 
   search->type = self->type;
   search->query = g_strdup (self->browse.model->query != NULL ? self->browse.model->query : "");
@@ -351,7 +351,7 @@ nuvashalauncher_content_page_run_search (nuvashalauncherContentPage *self, gbool
 static gboolean
 on_search_timeout (gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
 
   nuvashalauncher_operation_forget_source (self->browse.model->scope,
                                 self->browse.model->debounce_source);
@@ -368,7 +368,7 @@ on_search_timeout (gpointer user_data)
 void
 nuvashalauncher_content_page_on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
 
   if (self->browse.model->debounce_source != 0)
     nuvashalauncher_operation_remove (self->browse.model->scope,
@@ -393,7 +393,7 @@ nuvashalauncher_content_page_on_search_key (GtkEventControllerKey *controller G_
                guint keyval, guint keycode G_GNUC_UNUSED,
                GdkModifierType state G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
 
   if (keyval != GDK_KEY_Escape)
     return GDK_EVENT_PROPAGATE;
@@ -406,7 +406,7 @@ nuvashalauncher_content_page_on_search_key (GtkEventControllerKey *controller G_
 }
 
 static GtkWidget *
-active_search_entry (nuvashalauncherContentPage *self)
+active_search_entry (NuvashaLauncherContentPage *self)
 {
   const char *visible = self->stack != NULL
     ? adw_view_stack_get_visible_child_name (ADW_VIEW_STACK (self->stack))
@@ -418,7 +418,7 @@ active_search_entry (nuvashalauncherContentPage *self)
 }
 
 static void
-close_installed_search (nuvashalauncherContentPage *self)
+close_installed_search (NuvashaLauncherContentPage *self)
 {
   if (self->installed.search_entry == NULL ||
       !gtk_widget_get_visible (GTK_WIDGET (self->installed.search_entry)))
@@ -432,7 +432,7 @@ nuvashalauncher_content_page_on_content_search_key (GtkEventControllerKey *contr
                        guint keyval, guint keycode G_GNUC_UNUSED,
                        GdkModifierType state, gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
   GtkWidget *entry;
 
   if (keyval == GDK_KEY_Escape &&
@@ -485,10 +485,10 @@ nuvashalauncher_content_page_on_content_search_key (GtkEventControllerKey *contr
 
 static void categories_ready (GObject *source, GAsyncResult *result,
                               gpointer user_data);
-static void fill_categories (nuvashalauncherContentPage *self, GPtrArray *categories);
+static void fill_categories (NuvashaLauncherContentPage *self, GPtrArray *categories);
 
 static void
-load_categories (nuvashalauncherContentPage *self)
+load_categories (NuvashaLauncherContentPage *self)
 {
   g_autofree char *project_type =
     nuvashalauncher_modrinth_project_type_for_content (self->type);
@@ -507,7 +507,7 @@ load_categories (nuvashalauncherContentPage *self)
 static void
 load_categories_again (GtkWidget *button G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
 
   self->browse.model->categories_loaded = FALSE;
   load_categories (self);
@@ -516,7 +516,7 @@ load_categories_again (GtkWidget *button G_GNUC_UNUSED, gpointer user_data)
 /* Fills the popover with the categories, grouped under the heading
  * Modrinth puts them under, with readable labels. */
 static void
-fill_categories (nuvashalauncherContentPage *self, GPtrArray *categories)
+fill_categories (NuvashaLauncherContentPage *self, GPtrArray *categories)
 {
   GtkWidget *child = gtk_widget_get_first_child (GTK_WIDGET (self->browse.filter_box));
 
@@ -533,7 +533,7 @@ fill_categories (nuvashalauncherContentPage *self, GPtrArray *categories)
 
     for (guint i = 0; i < categories->len; i++)
       {
-        nuvashalauncherModrinthCategory *category = g_ptr_array_index (categories, i);
+        NuvashaLauncherModrinthCategory *category = g_ptr_array_index (categories, i);
         GtkWidget *button = NULL;
 
         if (g_strcmp0 (current, category->header) != 0)
@@ -581,7 +581,7 @@ categories_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                   gpointer user_data)
 {
   PageWatch *watch = user_data;
-  nuvashalauncherContentPage *self = watch->page;
+  NuvashaLauncherContentPage *self = watch->page;
   g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) categories = NULL;
 
@@ -642,7 +642,7 @@ categories_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 void
 nuvashalauncher_content_page_on_filter_clicked (GtkWidget *widget G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
 
   if (self->browse.model->categories_loaded)
     return;
@@ -653,7 +653,7 @@ nuvashalauncher_content_page_on_filter_clicked (GtkWidget *widget G_GNUC_UNUSED,
 static void
 on_category_toggled (GtkCheckButton *button, gpointer user_data)
 {
-  nuvashalauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
+  NuvashaLauncherContentPage *self = nuvashalauncher_CONTENT_PAGE (user_data);
   const char *category =
     g_object_get_data (G_OBJECT (button), "nuvashalauncher-category");
 

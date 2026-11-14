@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherVersionRow: Minecraft version picker backed by Mojang's manifest.
+/* NuvashaLauncherVersionRow: Minecraft version picker backed by Mojang's manifest.
  * It exposes loading and retry states and returns no selection until a
  * version has been chosen. */
 
@@ -12,11 +12,11 @@
 
 #include "nuvashalauncher-minecraft-versions.h"
 
-struct _nuvashalauncherVersionRow
+struct _NuvashaLauncherVersionRow
 {
   AdwComboRow parent_instance;
 
-  nuvashalauncherSettings *settings;
+  NuvashaLauncherSettings *settings;
 
   /* Cancelled when a load replaces it or when the row goes away. */
   GCancellable *cancellable;
@@ -24,7 +24,7 @@ struct _nuvashalauncherVersionRow
   /* The load the row is waiting for. Borrowed from the ManifestAsk that
      started it: that one releases it when the answer arrives, and a newer
      load replaces it before an older answer can arrive. */
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
 
   /* The version ids behind the model, in the order the row shows
    * them. Never NULL, empty while there is no list. */
@@ -41,7 +41,7 @@ struct _nuvashalauncherVersionRow
   GtkButton *retry;
 };
 
-G_DEFINE_FINAL_TYPE (nuvashalauncherVersionRow, nuvashalauncher_version_row, ADW_TYPE_COMBO_ROW)
+G_DEFINE_FINAL_TYPE (NuvashaLauncherVersionRow, nuvashalauncher_version_row, ADW_TYPE_COMBO_ROW)
 
 /* ---------------------------------------------------------- *
  * Showing one state
@@ -51,7 +51,7 @@ G_DEFINE_FINAL_TYPE (nuvashalauncherVersionRow, nuvashalauncher_version_row, ADW
  * which is a position in @ids or GTK_INVALID_LIST_POSITION for
  * nothing. @ids is taken over. */
 static void
-set_entries (nuvashalauncherVersionRow *self, GPtrArray *ids, guint position)
+set_entries (NuvashaLauncherVersionRow *self, GPtrArray *ids, guint position)
 {
   g_autofree const char **strings = g_new0 (const char *, ids->len + 1);
   g_autoptr (GtkStringList) list = NULL;
@@ -69,7 +69,7 @@ set_entries (nuvashalauncherVersionRow *self, GPtrArray *ids, guint position)
 }
 
 static void
-show_loading (nuvashalauncherVersionRow *self)
+show_loading (NuvashaLauncherVersionRow *self)
 {
   g_autoptr (GPtrArray) ids = g_ptr_array_new_with_free_func (g_free);
 
@@ -85,7 +85,7 @@ show_loading (nuvashalauncherVersionRow *self)
 }
 
 static void
-show_error (nuvashalauncherVersionRow *self, const char *message)
+show_error (NuvashaLauncherVersionRow *self, const char *message)
 {
   g_autoptr (GPtrArray) ids = g_ptr_array_new_with_free_func (g_free);
 
@@ -101,7 +101,7 @@ show_error (nuvashalauncherVersionRow *self, const char *message)
 
 /* Fills the row from a manifest that arrived. */
 static void
-fill (nuvashalauncherVersionRow *self, nuvashalauncherVersionManifest *manifest)
+fill (NuvashaLauncherVersionRow *self, NuvashaLauncherVersionManifest *manifest)
 {
   g_autoptr (GPtrArray) ids = g_ptr_array_new_with_free_func (g_free);
   gboolean unstable =
@@ -112,7 +112,7 @@ fill (nuvashalauncherVersionRow *self, nuvashalauncherVersionManifest *manifest)
 
   for (guint i = 0; i < manifest->entries->len; i++)
     {
-      nuvashalauncherVersionEntry *entry = g_ptr_array_index (manifest->entries, i);
+      NuvashaLauncherVersionEntry *entry = g_ptr_array_index (manifest->entries, i);
 
       if (self->wanted != NULL && g_str_equal (entry->id, self->wanted))
         {
@@ -168,14 +168,14 @@ fill (nuvashalauncherVersionRow *self, nuvashalauncherVersionManifest *manifest)
    answer is on its way, and the handle that answer is meant to release. */
 typedef struct
 {
-  nuvashalauncherVersionRow *row;
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherVersionRow *row;
+  NuvashaLauncherTaskScope *operation;
 } ManifestAsk;
 
 static void
 manifest_ask_free (ManifestAsk *ask)
 {
-  nuvashalauncherVersionRow *row = ask->row;
+  NuvashaLauncherVersionRow *row = ask->row;
 
   /* The row's own pointer is a loan of this reference, so it is given
      back before the reference goes. */
@@ -195,9 +195,9 @@ manifest_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                  gpointer user_data)
 {
   ManifestAsk *ask = user_data;
-  nuvashalauncherVersionRow *self = ask->row;
+  NuvashaLauncherVersionRow *self = ask->row;
   g_autoptr (GError) error = NULL;
-  g_autoptr (nuvashalauncherVersionManifest) manifest = NULL;
+  g_autoptr (NuvashaLauncherVersionManifest) manifest = NULL;
 
   /* Ignore results from an operation replaced by a newer load. */
   if (self != NULL && self->operation == ask->operation)
@@ -220,7 +220,7 @@ manifest_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 static void
 on_retry_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
-  nuvashalauncherVersionRow *self = nuvashalauncher_VERSION_ROW (user_data);
+  NuvashaLauncherVersionRow *self = nuvashalauncher_VERSION_ROW (user_data);
   g_autofree char *wanted = NULL;
 
   if (self->settings == NULL)
@@ -234,15 +234,15 @@ on_retry_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
  * The public face
  * ---------------------------------------------------------- */
 
-nuvashalauncherVersionRow *
+NuvashaLauncherVersionRow *
 nuvashalauncher_version_row_new (void)
 {
   return g_object_new (nuvashalauncher_TYPE_VERSION_ROW, NULL);
 }
 
 void
-nuvashalauncher_version_row_load (nuvashalauncherVersionRow *self,
-                      nuvashalauncherSettings   *settings,
+nuvashalauncher_version_row_load (NuvashaLauncherVersionRow *self,
+                      NuvashaLauncherSettings   *settings,
                       const char    *selected)
 {
   g_return_if_fail (nuvashalauncher_IS_VERSION_ROW (self));
@@ -272,7 +272,7 @@ nuvashalauncher_version_row_load (nuvashalauncherVersionRow *self,
 }
 
 const char *
-nuvashalauncher_version_row_get_selected (nuvashalauncherVersionRow *self)
+nuvashalauncher_version_row_get_selected (NuvashaLauncherVersionRow *self)
 {
   guint position;
 
@@ -292,7 +292,7 @@ nuvashalauncher_version_row_get_selected (nuvashalauncherVersionRow *self)
 }
 
 void
-nuvashalauncher_version_row_select (nuvashalauncherVersionRow *self, const char *version)
+nuvashalauncher_version_row_select (NuvashaLauncherVersionRow *self, const char *version)
 {
   g_return_if_fail (nuvashalauncher_IS_VERSION_ROW (self));
 
@@ -316,7 +316,7 @@ nuvashalauncher_version_row_select (nuvashalauncherVersionRow *self, const char 
 static void
 nuvashalauncher_version_row_dispose (GObject *object)
 {
-  nuvashalauncherVersionRow *self = nuvashalauncher_VERSION_ROW (object);
+  NuvashaLauncherVersionRow *self = nuvashalauncher_VERSION_ROW (object);
 
   /* A load still in flight only holds a reference on this row;
    * cancelling it and dropping the settings stops it from writing
@@ -332,7 +332,7 @@ nuvashalauncher_version_row_dispose (GObject *object)
 static void
 nuvashalauncher_version_row_finalize (GObject *object)
 {
-  nuvashalauncherVersionRow *self = nuvashalauncher_VERSION_ROW (object);
+  NuvashaLauncherVersionRow *self = nuvashalauncher_VERSION_ROW (object);
 
   g_clear_pointer (&self->ids, g_ptr_array_unref);
   g_free (self->wanted);
@@ -341,7 +341,7 @@ nuvashalauncher_version_row_finalize (GObject *object)
 }
 
 static void
-nuvashalauncher_version_row_class_init (nuvashalauncherVersionRowClass *klass)
+nuvashalauncher_version_row_class_init (NuvashaLauncherVersionRowClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
@@ -350,7 +350,7 @@ nuvashalauncher_version_row_class_init (nuvashalauncherVersionRowClass *klass)
 }
 
 static void
-nuvashalauncher_version_row_init (nuvashalauncherVersionRow *self)
+nuvashalauncher_version_row_init (NuvashaLauncherVersionRow *self)
 {
   g_autoptr (GPtrArray) ids = g_ptr_array_new_with_free_func (g_free);
 

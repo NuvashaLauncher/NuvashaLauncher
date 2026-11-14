@@ -16,12 +16,12 @@ char *nuvashalauncher_cache_get_files_directory (void);
 /* Removes the contents of the global nuvashalauncher cache tree. It never traverses
  * instance directories, so installed content and its metadata indexes stay
  * untouched. The callback receives a GTask boolean result. */
-nuvashalauncherTaskScope *nuvashalauncher_cache_clear_all_async (GAsyncReadyCallback callback,
+NuvashaLauncherTaskScope *nuvashalauncher_cache_clear_all_async (GAsyncReadyCallback callback,
                                          gpointer            user_data);
 
 /* Prunes expired or oversized entries from the global cache tree
  * (api, icons/external, and files) in a background thread. */
-nuvashalauncherTaskScope *nuvashalauncher_cache_prune_async (gint64              api_max_age_seconds,
+NuvashaLauncherTaskScope *nuvashalauncher_cache_prune_async (gint64              api_max_age_seconds,
                                          GAsyncReadyCallback callback,
                                          gpointer            user_data);
 

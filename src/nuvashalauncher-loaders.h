@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* nuvashalauncherLoaders: the mod loaders nuvashalauncher can install and run.
+/* NuvashaLauncherLoaders: the mod loaders nuvashalauncher can install and run.
  *
  * A loader is a version document of its own that inherits from a
  * Minecraft version, so what a loader instance runs is that document
@@ -85,7 +85,7 @@ typedef enum {
   nuvashalauncher_LOADERS_ERROR_INSTALLER,   /* the installer could not be read or run */
   nuvashalauncher_LOADERS_ERROR_GENERATION   /* the version is of a generation whose
                                   * install profile is not run here */
-} nuvashalauncherLoadersError;
+} NuvashaLauncherLoadersError;
 
 GQuark nuvashalauncher_loaders_error_quark (void);
 
@@ -101,38 +101,38 @@ GQuark nuvashalauncher_loaders_error_quark (void);
 typedef struct {
   char *version;
   gboolean stable;
-} nuvashalauncherLoaderVersion;
+} NuvashaLauncherLoaderVersion;
 
-void nuvashalauncher_loader_version_free (nuvashalauncherLoaderVersion *version);
+void nuvashalauncher_loader_version_free (NuvashaLauncherLoaderVersion *version);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherLoaderVersion, nuvashalauncher_loader_version_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherLoaderVersion, nuvashalauncher_loader_version_free)
 
 /* The loaders nuvashalauncher installs and runs a game with, in the order a user
  * reads them: Vanilla, Fabric, Quilt, Forge, NeoForge. A loader is in
  * that list only once it has been seen to start a game here. */
-const nuvashalauncherLoader *nuvashalauncher_loaders_supported (void);
+const NuvashaLauncherLoader *nuvashalauncher_loaders_supported (void);
 
 /* How many loaders that list holds. Vanilla is one of them, so the list
  * has a length of its own rather than a sentinel. */
 guint nuvashalauncher_loaders_supported_count (void);
 
 /* TRUE when nuvashalauncher installs @loader and runs a game with it. */
-gboolean nuvashalauncher_loader_is_supported (nuvashalauncherLoader loader);
+gboolean nuvashalauncher_loader_is_supported (NuvashaLauncherLoader loader);
 
-const char *nuvashalauncher_loader_display_name (nuvashalauncherLoader loader);
+const char *nuvashalauncher_loader_display_name (NuvashaLauncherLoader loader);
 
 /* TRUE when a loader is installed by running the installer it publishes
  * rather than by fetching a version document of its own: NeoForge and
  * Forge do, Fabric and Quilt do not. This is what tells the launcher
  * which of the two ways of running a loader an instance needs. */
-gboolean nuvashalauncher_loader_publishes_an_installer (nuvashalauncherLoader loader);
+gboolean nuvashalauncher_loader_publishes_an_installer (NuvashaLauncherLoader loader);
 
 /* TRUE when @loader_version of @loader is a version that runs
  * @game_version. Both of the loaders that publish an installer name
  * their versions after the Minecraft version they run, so the question is
  * answered by the name: Forge puts a dash between the two
  * ("1.20.1-47.2.0") and NeoForge a dot ("26.3.0.51-beta"). */
-gboolean nuvashalauncher_loaders_version_runs_game (nuvashalauncherLoader      loader,
+gboolean nuvashalauncher_loaders_version_runs_game (NuvashaLauncherLoader      loader,
                                         const char    *loader_version,
                                         const char    *game_version);
 
@@ -144,12 +144,12 @@ gboolean nuvashalauncher_loaders_version_runs_game (nuvashalauncherLoader      l
  * nuvashalauncher_LOADERS_ERROR_UNSUPPORTED for a loader this module does not know,
  * nuvashalauncher_LOADERS_ERROR_NO_VERSIONS when the loader has no version for that
  * game version. */
-nuvashalauncherTaskScope *nuvashalauncher_loaders_versions_async (nuvashalauncherLoader loader,
+NuvashaLauncherTaskScope *nuvashalauncher_loaders_versions_async (NuvashaLauncherLoader loader,
                                           const char *game_version,
                                           GAsyncReadyCallback callback,
                                           gpointer user_data);
 
-/* (transfer full). The array holds nuvashalauncherLoaderVersion* with
+/* (transfer full). The array holds NuvashaLauncherLoaderVersion* with
    nuvashalauncher_loader_version_free() as the element free function. */
 GPtrArray *nuvashalauncher_loaders_versions_finish (GAsyncResult  *result,
                                         GError       **error);
@@ -175,7 +175,7 @@ GPtrArray *nuvashalauncher_loaders_versions_from_json (const char  *json,
  *
  * nuvashalauncher_LOADERS_ERROR_NO_VERSIONS when the answer holds no version of that
  * game. (transfer full) */
-GPtrArray *nuvashalauncher_loaders_maven_versions_from_json (nuvashalauncherLoader      loader,
+GPtrArray *nuvashalauncher_loaders_maven_versions_from_json (NuvashaLauncherLoader      loader,
                                                  const char    *game_version,
                                                  const char    *json,
                                                  gssize         length,
@@ -202,14 +202,14 @@ GPtrArray *nuvashalauncher_loaders_versions_for_display (GPtrArray  *published,
  * it over the document of that version is all a loader instance needs.
  *
  * nuvashalauncher_LOADERS_ERROR_UNSUPPORTED for a loader this module does not know. */
-nuvashalauncherTaskScope *nuvashalauncher_loaders_profile_async (nuvashalauncherLoader loader,
+NuvashaLauncherTaskScope *nuvashalauncher_loaders_profile_async (NuvashaLauncherLoader loader,
                                          const char *game_version,
                                          const char *loader_version,
                                          GAsyncReadyCallback callback,
                                          gpointer user_data);
 
 /* (transfer full) */
-nuvashalauncherVersionDescription *nuvashalauncher_loaders_profile_finish (GAsyncResult  *result,
+NuvashaLauncherVersionDescription *nuvashalauncher_loaders_profile_finish (GAsyncResult  *result,
                                                   GError       **error);
 
 /* ---------------------------------------------------------- *
@@ -219,18 +219,18 @@ nuvashalauncherVersionDescription *nuvashalauncher_loaders_profile_finish (GAsyn
 /* What an installer leaves behind for the game: the version document to
  * merge over the Minecraft one, and the jar the game starts from. */
 typedef struct {
-  nuvashalauncherVersionDescription *description; /* transfer full, never NULL */
+  NuvashaLauncherVersionDescription *description; /* transfer full, never NULL */
   char *client_jar;                       /* transfer full, never NULL */
-} nuvashalauncherLoaderInstall;
+} NuvashaLauncherLoaderInstall;
 
-void nuvashalauncher_loader_install_free (nuvashalauncherLoaderInstall *install);
+void nuvashalauncher_loader_install_free (NuvashaLauncherLoaderInstall *install);
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (nuvashalauncherLoaderInstall, nuvashalauncher_loader_install_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherLoaderInstall, nuvashalauncher_loader_install_free)
 
 /* What an install is doing, for a caller that shows it: @stage is a short
  * line of words, @done of @total files is how far along it is. Called on
  * the caller's main context. */
-typedef void (*nuvashalauncherLoadersProgressFunc) (const char *stage,
+typedef void (*NuvashaLauncherLoadersProgressFunc) (const char *stage,
                                         guint       done,
                                         guint       total,
                                         gpointer    user_data);
@@ -265,25 +265,25 @@ typedef void (*nuvashalauncherLoadersProgressFunc) (const char *stage,
  * would not start.
  *
  * nuvashalauncher_LOADERS_ERROR_UNSUPPORTED for a loader that publishes no installer. */
-nuvashalauncherTaskScope *nuvashalauncher_loaders_install_async (nuvashalauncherLoader loader,
+NuvashaLauncherTaskScope *nuvashalauncher_loaders_install_async (NuvashaLauncherLoader loader,
                                          const char *game_version,
                                          const char *loader_version,
-                                         nuvashalauncherVersionDescription *game_document,
+                                         NuvashaLauncherVersionDescription *game_document,
                                          const char *java_executable,
                                          const char *data_dir,
-                                         nuvashalauncherLoadersProgressFunc progress,
+                                         NuvashaLauncherLoadersProgressFunc progress,
                                          gpointer progress_data,
                                          GAsyncReadyCallback callback,
                                          gpointer user_data);
 
 /* (transfer full). NULL on error. */
-nuvashalauncherLoaderInstall *nuvashalauncher_loaders_install_finish (GAsyncResult  *result,
+NuvashaLauncherLoaderInstall *nuvashalauncher_loaders_install_finish (GAsyncResult  *result,
                                               GError       **error);
 
 /* The document a profile is, with the downloads its libraries mean: the
  * same work the fetch above does once the answer is parsed, and what a
  * test hands a fixture to. (transfer full) */
-nuvashalauncherVersionDescription *nuvashalauncher_loaders_profile_from_json (const char  *json,
+NuvashaLauncherVersionDescription *nuvashalauncher_loaders_profile_from_json (const char  *json,
                                                       gssize       length,
                                                       GError      **error);
 

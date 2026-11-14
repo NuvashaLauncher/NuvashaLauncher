@@ -33,7 +33,7 @@ nuvashalauncher_modrinth_json_node_to_string (JsonNode *node)
  * ---------------------------------------------------------- */
 
 const char *
-nuvashalauncher_content_type_to_string (nuvashalauncherContentType type)
+nuvashalauncher_content_type_to_string (NuvashaLauncherContentType type)
 {
   switch (type)
     {
@@ -52,7 +52,7 @@ nuvashalauncher_content_type_to_string (nuvashalauncherContentType type)
 }
 
 const char *
-nuvashalauncher_content_type_title (nuvashalauncherContentType type)
+nuvashalauncher_content_type_title (NuvashaLauncherContentType type)
 {
   switch (type)
     {
@@ -69,7 +69,7 @@ nuvashalauncher_content_type_title (nuvashalauncherContentType type)
 }
 
 const char *
-nuvashalauncher_content_type_folder (nuvashalauncherContentType type)
+nuvashalauncher_content_type_folder (NuvashaLauncherContentType type)
 {
   switch (type)
     {
@@ -86,19 +86,19 @@ nuvashalauncher_content_type_folder (nuvashalauncherContentType type)
 }
 
 gboolean
-nuvashalauncher_content_type_needs_loader (nuvashalauncherContentType type)
+nuvashalauncher_content_type_needs_loader (NuvashaLauncherContentType type)
 {
   return type == nuvashalauncher_CONTENT_MOD;
 }
 
 const char *
-nuvashalauncher_content_type_extension (nuvashalauncherContentType type)
+nuvashalauncher_content_type_extension (NuvashaLauncherContentType type)
 {
   return nuvashalauncher_content_type_needs_loader (type) ? ".jar" : ".zip";
 }
 
 const char *
-nuvashalauncher_content_type_icon (nuvashalauncherContentType type)
+nuvashalauncher_content_type_icon (NuvashaLauncherContentType type)
 {
   switch (type)
     {
@@ -216,7 +216,7 @@ nuvashalauncher_modrinth_loaders_json (const char *loader)
  * ---------------------------------------------------------- */
 
 void
-nuvashalauncher_modrinth_project_free (nuvashalauncherModrinthProject *project)
+nuvashalauncher_modrinth_project_free (NuvashaLauncherModrinthProject *project)
 {
   if (project == NULL)
     return;
@@ -234,10 +234,10 @@ nuvashalauncher_modrinth_project_free (nuvashalauncherModrinthProject *project)
 
 /* One entry of a /search answer. Everything a result row shows is here,
  * so that listing a page of results costs no request per row. */
-static nuvashalauncherModrinthProject *
+static NuvashaLauncherModrinthProject *
 project_from_hit (JsonNode *hit, GError **error)
 {
-  nuvashalauncherModrinthProject *project = g_new0 (nuvashalauncherModrinthProject, 1);
+  NuvashaLauncherModrinthProject *project = g_new0 (NuvashaLauncherModrinthProject, 1);
 
   if (!nuvashalauncher_json_require_string (hit, "project_id", &project->project_id,
                                 error) ||
@@ -272,7 +272,7 @@ project_from_hit (JsonNode *hit, GError **error)
 }
 
 void
-nuvashalauncher_modrinth_details_free (nuvashalauncherModrinthDetails *details)
+nuvashalauncher_modrinth_details_free (NuvashaLauncherModrinthDetails *details)
 {
   if (details == NULL)
     return;
@@ -294,18 +294,18 @@ nuvashalauncher_modrinth_details_free (nuvashalauncherModrinthDetails *details)
   g_free (details);
 }
 
-nuvashalauncherModrinthDetails *
+NuvashaLauncherModrinthDetails *
 nuvashalauncher_modrinth_details_from_json (const char *json, gssize length,
                                 GError **error)
 {
   g_autoptr (JsonNode) root = nuvashalauncher_modrinth_root_node (json, length, error);
   JsonNode *team = NULL; /* borrowed from @root */
-  nuvashalauncherModrinthDetails *details = NULL;
+  NuvashaLauncherModrinthDetails *details = NULL;
 
   if (root == NULL)
     return NULL;
 
-  details = g_new0 (nuvashalauncherModrinthDetails, 1);
+  details = g_new0 (NuvashaLauncherModrinthDetails, 1);
   details->project_id = nuvashalauncher_json_string (root, "id");
   details->slug = nuvashalauncher_json_string (root, "slug");
   details->title = nuvashalauncher_json_string (root, "title");
@@ -370,7 +370,7 @@ nuvashalauncher_modrinth_details_from_json (const char *json, gssize length,
  * ---------------------------------------------------------- */
 
 void
-nuvashalauncher_modrinth_search_free (nuvashalauncherModrinthSearch *search)
+nuvashalauncher_modrinth_search_free (NuvashaLauncherModrinthSearch *search)
 {
   if (search == NULL)
     return;
@@ -386,7 +386,7 @@ nuvashalauncher_modrinth_search_free (nuvashalauncherModrinthSearch *search)
 }
 
 void
-nuvashalauncher_modrinth_results_free (nuvashalauncherModrinthResults *results)
+nuvashalauncher_modrinth_results_free (NuvashaLauncherModrinthResults *results)
 {
   if (results == NULL)
     return;
@@ -424,7 +424,7 @@ facet_add_loaders (GPtrArray *facets, const char *loader)
 }
 
 char *
-nuvashalauncher_modrinth_facets (const nuvashalauncherModrinthSearch *search)
+nuvashalauncher_modrinth_facets (const NuvashaLauncherModrinthSearch *search)
 {
   g_autoptr (GPtrArray) facets =
     g_ptr_array_new_with_free_func ((GDestroyNotify) g_ptr_array_unref);
@@ -496,7 +496,7 @@ nuvashalauncher_modrinth_facets (const nuvashalauncherModrinthSearch *search)
 }
 
 char *
-nuvashalauncher_modrinth_search_url (const nuvashalauncherModrinthSearch *search)
+nuvashalauncher_modrinth_search_url (const NuvashaLauncherModrinthSearch *search)
 {
   g_autofree char *facets = NULL;
   g_autofree char *query = NULL;
@@ -519,12 +519,12 @@ nuvashalauncher_modrinth_search_url (const nuvashalauncherModrinthSearch *search
       escaped, search->offset, search->limit > 0 ? search->limit : 20);
 }
 
-nuvashalauncherModrinthResults *
+NuvashaLauncherModrinthResults *
 nuvashalauncher_modrinth_results_from_json (const char *json, gssize length,
                                 GError **error)
 {
   g_autoptr (JsonNode) root = nuvashalauncher_modrinth_root_node (json, length, error);
-  nuvashalauncherModrinthResults *results = NULL;
+  NuvashaLauncherModrinthResults *results = NULL;
   JsonNode *hits = NULL;
 
   if (root == NULL)
@@ -540,7 +540,7 @@ nuvashalauncher_modrinth_results_from_json (const char *json, gssize length,
       return NULL;
     }
 
-  results = g_new0 (nuvashalauncherModrinthResults, 1);
+  results = g_new0 (NuvashaLauncherModrinthResults, 1);
   results->projects =
     g_ptr_array_new_with_free_func ((GDestroyNotify) nuvashalauncher_modrinth_project_free);
   results->total_hits = (guint64) nuvashalauncher_json_int (root, "total_hits", 0);
@@ -560,7 +560,7 @@ nuvashalauncher_modrinth_results_from_json (const char *json, gssize length,
 
         {
           g_autoptr (GError) result_error = NULL;
-          nuvashalauncherModrinthProject *project = project_from_hit (hit, &result_error);
+          NuvashaLauncherModrinthProject *project = project_from_hit (hit, &result_error);
 
           if (project == NULL)
             {

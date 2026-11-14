@@ -10,7 +10,7 @@
 #include "nuvashalauncher-task.h"
 
 typedef struct {
-  nuvashalauncherTaskSequence *sequence;
+  NuvashaLauncherTaskSequence *sequence;
   guint calls;
   gboolean data_freed;
 } SequenceData;
@@ -29,7 +29,7 @@ sequence_data_free (gpointer user_data)
 }
 
 static void
-sequence_step (nuvashalauncherTaskSequence *sequence G_GNUC_UNUSED, gpointer user_data)
+sequence_step (NuvashaLauncherTaskSequence *sequence G_GNUC_UNUSED, gpointer user_data)
 {
   SequenceData *data = user_data;
 
@@ -84,8 +84,8 @@ test_sequence_progresses_and_cleans_up (void)
 static void
 test_scope_ids_and_states (void)
 {
-  g_autoptr (nuvashalauncherTaskScope) first = nuvashalauncher_task_scope_new (NULL, NULL, NULL, NULL);
-  g_autoptr (nuvashalauncherTaskScope) second = nuvashalauncher_task_scope_new (NULL, NULL, NULL, NULL);
+  g_autoptr (NuvashaLauncherTaskScope) first = nuvashalauncher_task_scope_new (NULL, NULL, NULL, NULL);
+  g_autoptr (NuvashaLauncherTaskScope) second = nuvashalauncher_task_scope_new (NULL, NULL, NULL, NULL);
 
   g_assert_cmpuint (nuvashalauncher_task_scope_get_id (first), >, 0);
   g_assert_cmpuint (nuvashalauncher_task_scope_get_id (first), !=,
@@ -130,7 +130,7 @@ test_scope_uses_task_context (void)
 {
   GMainContext *context = g_main_context_new ();
   ContextResult result = { 0 };
-  g_autoptr (nuvashalauncherTaskScope) scope = NULL;
+  g_autoptr (NuvashaLauncherTaskScope) scope = NULL;
 
   result.loop = g_main_loop_new (context, FALSE);
   g_main_context_push_thread_default (context);
@@ -148,7 +148,7 @@ test_scope_uses_task_context (void)
 }
 
 static void
-error_step (nuvashalauncherTaskSequence *sequence G_GNUC_UNUSED, gpointer user_data)
+error_step (NuvashaLauncherTaskSequence *sequence G_GNUC_UNUSED, gpointer user_data)
 {
   SequenceData *data = user_data;
 
@@ -299,7 +299,7 @@ test_scope_free_releases_a_source_that_fired (void)
   guint fired = 0;
   guint before = criticals;
   g_autoptr (GCancellable) cancellable = g_cancellable_new ();
-  nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_new (NULL, cancellable, NULL, NULL);
+  NuvashaLauncherTaskScope *scope = nuvashalauncher_task_scope_new (NULL, cancellable, NULL, NULL);
   guint source = fire_and_dissolve (&fired);
 
   nuvashalauncher_task_scope_track_source (scope, source);
@@ -315,7 +315,7 @@ test_scope_cancel_releases_a_source_that_fired (void)
   guint fired = 0;
   guint before = criticals;
   g_autoptr (GCancellable) cancellable = g_cancellable_new ();
-  nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_new (NULL, cancellable, NULL, NULL);
+  NuvashaLauncherTaskScope *scope = nuvashalauncher_task_scope_new (NULL, cancellable, NULL, NULL);
   guint source = fire_and_dissolve (&fired);
 
   nuvashalauncher_task_scope_track_source (scope, source);
@@ -332,7 +332,7 @@ test_scope_removes_a_source_that_fired (void)
   guint fired = 0;
   guint before = criticals;
   g_autoptr (GCancellable) cancellable = g_cancellable_new ();
-  nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_new (NULL, cancellable, NULL, NULL);
+  NuvashaLauncherTaskScope *scope = nuvashalauncher_task_scope_new (NULL, cancellable, NULL, NULL);
   guint source = fire_and_dissolve (&fired);
 
   nuvashalauncher_task_scope_track_source (scope, source);
@@ -350,7 +350,7 @@ test_scope_releases_mixed_sources (void)
   gboolean live_ran = FALSE;
   guint before = criticals;
   g_autoptr (GCancellable) cancellable = g_cancellable_new ();
-  nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_new (NULL, cancellable, NULL, NULL);
+  NuvashaLauncherTaskScope *scope = nuvashalauncher_task_scope_new (NULL, cancellable, NULL, NULL);
   guint spent = fire_and_dissolve (&fired);
   guint live = g_idle_add (scope_probe, &live_ran);
 
@@ -371,7 +371,7 @@ test_scope_cancels_owned_sources (void)
 {
   gboolean ran = FALSE;
   g_autoptr (GCancellable) cancellable = g_cancellable_new ();
-  nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_new (NULL, cancellable, NULL, NULL);
+  NuvashaLauncherTaskScope *scope = nuvashalauncher_task_scope_new (NULL, cancellable, NULL, NULL);
   guint source = g_idle_add (scope_probe, &ran);
 
   nuvashalauncher_task_scope_track_source (scope, source);
@@ -392,7 +392,7 @@ test_scope_cancellation_stress (void)
   for (guint i = 0; i < 1000; i++)
     {
       g_autoptr (GCancellable) cancellable = g_cancellable_new ();
-      nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_new (NULL, cancellable, NULL,
+      NuvashaLauncherTaskScope *scope = nuvashalauncher_task_scope_new (NULL, cancellable, NULL,
                                                 NULL);
       guint source = g_idle_add_full (
         G_PRIORITY_DEFAULT, scope_stress_probe, &callbacks, NULL);
@@ -412,8 +412,8 @@ test_scope_cancellation_stress (void)
 static void
 test_scope_reference_keeps_operation_alive (void)
 {
-  nuvashalauncherTaskScope *scope = nuvashalauncher_task_scope_new (NULL, NULL, NULL, NULL);
-  nuvashalauncherTaskScope *held = nuvashalauncher_task_scope_ref (scope);
+  NuvashaLauncherTaskScope *scope = nuvashalauncher_task_scope_new (NULL, NULL, NULL, NULL);
+  NuvashaLauncherTaskScope *held = nuvashalauncher_task_scope_ref (scope);
   g_autoptr (GCancellable) cancellable =
     g_object_ref (nuvashalauncher_task_scope_get_cancellable (held));
 
@@ -431,7 +431,7 @@ test_scope_reference_keeps_operation_alive (void)
  * constructor has returned it. */
 typedef struct
 {
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
   gboolean finished;
   gpointer value;
   char *path;
@@ -496,7 +496,7 @@ test_immediate_failure_completes_after_the_constructor (void)
  * to stop the operation. */
 typedef struct
 {
-  nuvashalauncherTaskScope *operation;
+  NuvashaLauncherTaskScope *operation;
   gboolean finished;
   gboolean cancelled;
   GError *error;
@@ -558,7 +558,7 @@ test_scope_follows_a_cancellable_it_does_not_own (void)
  * That state has to find the scope still there. */
 typedef struct
 {
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
   gboolean answered;
 } BorrowedState;
 
@@ -608,7 +608,7 @@ test_a_released_operation_outlives_the_code_that_completed_it (void)
  * g_task_return_* call has returned, not merely until the callback starts. */
 typedef struct
 {
-  nuvashalauncherTaskScope *scope;
+  NuvashaLauncherTaskScope *scope;
 } CallbackRelease;
 
 static void
@@ -644,7 +644,7 @@ test_callback_can_release_owned_operation (void)
 static void
 test_scope_does_not_follow_its_own_cancellable (void)
 {
-  g_autoptr (nuvashalauncherTaskScope) scope = nuvashalauncher_task_scope_new (NULL, NULL, NULL, NULL);
+  g_autoptr (NuvashaLauncherTaskScope) scope = nuvashalauncher_task_scope_new (NULL, NULL, NULL, NULL);
   guint before = criticals;
 
   nuvashalauncher_task_scope_follow_cancellable (scope,
@@ -658,7 +658,7 @@ test_scope_does_not_follow_its_own_cancellable (void)
 /* A step that starts nothing and finishes nothing, so the test decides
  * when and how the sequence completes. */
 static void
-manual_step (nuvashalauncherTaskSequence *sequence G_GNUC_UNUSED, gpointer user_data)
+manual_step (NuvashaLauncherTaskSequence *sequence G_GNUC_UNUSED, gpointer user_data)
 {
   guint *steps = user_data;
   (*steps)++;
@@ -673,7 +673,7 @@ test_sequence_survives_completing_twice (void)
 {
   guint steps = 0;
   SequenceResult result = { 0 };
-  nuvashalauncherTaskSequence *sequence;
+  NuvashaLauncherTaskSequence *sequence;
   g_autofree char *first = g_strdup ("the one that counts");
 
   result.loop = g_main_loop_new (NULL, FALSE);
@@ -720,7 +720,7 @@ test_sequence_scope_survives_task_completion (void)
 {
   SequenceData data = { 0 };
   SequenceResult result = { 0 };
-  g_autoptr (nuvashalauncherTaskScope) scope = NULL;
+  g_autoptr (NuvashaLauncherTaskScope) scope = NULL;
 
   result.loop = g_main_loop_new (NULL, FALSE);
   data.sequence = nuvashalauncher_task_sequence_new (NULL, sequence_done, &result,
@@ -790,13 +790,13 @@ test_threaded_scope_survives_early_cancel_and_unref (void)
   /* Start worker-thread operations and immediately cancel + unref their
    * scopes on the main thread before the worker threads finish. The worker
    * threads must keep their own scope reference until they return. */
-  nuvashalauncherTaskScope *index_scope =
+  NuvashaLauncherTaskScope *index_scope =
     nuvashalauncher_content_index_load_async (root, nuvashalauncher_CONTENT_MOD,
                                               on_threaded_index_done, &wait);
   nuvashalauncher_task_scope_cancel (index_scope);
   nuvashalauncher_task_scope_unref (index_scope);
 
-  nuvashalauncherTaskScope *remove_scope =
+  NuvashaLauncherTaskScope *remove_scope =
     nuvashalauncher_fs_remove_tree_async (tree, on_threaded_remove_done, &wait);
   nuvashalauncher_task_scope_cancel (remove_scope);
   nuvashalauncher_task_scope_unref (remove_scope);

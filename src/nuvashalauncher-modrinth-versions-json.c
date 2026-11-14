@@ -16,7 +16,7 @@
  * ---------------------------------------------------------- */
 
 const char *
-nuvashalauncher_modrinth_dependency_to_string (nuvashalauncherModrinthDependencyType type)
+nuvashalauncher_modrinth_dependency_to_string (NuvashaLauncherModrinthDependencyType type)
 {
   switch (type)
     {
@@ -34,7 +34,7 @@ nuvashalauncher_modrinth_dependency_to_string (nuvashalauncherModrinthDependency
 
 /* Modrinth writes nothing for "required", which is the kind an install
  * has to fetch, so a dependency without the field is that one. */
-static nuvashalauncherModrinthDependencyType
+static NuvashaLauncherModrinthDependencyType
 dependency_type_from_string (const char *value)
 {
   if (g_strcmp0 (value, "optional") == 0)
@@ -48,7 +48,7 @@ dependency_type_from_string (const char *value)
 }
 
 void
-nuvashalauncher_modrinth_file_free (nuvashalauncherModrinthFile *file)
+nuvashalauncher_modrinth_file_free (NuvashaLauncherModrinthFile *file)
 {
   if (file == NULL)
     return;
@@ -61,7 +61,7 @@ nuvashalauncher_modrinth_file_free (nuvashalauncherModrinthFile *file)
 }
 
 void
-nuvashalauncher_modrinth_dependency_free (nuvashalauncherModrinthDependency *dependency)
+nuvashalauncher_modrinth_dependency_free (NuvashaLauncherModrinthDependency *dependency)
 {
   if (dependency == NULL)
     return;
@@ -74,15 +74,15 @@ nuvashalauncher_modrinth_dependency_free (nuvashalauncherModrinthDependency *dep
 
 /* A copy of a dependency, so a caller can hold it without keeping the
  * version it came from alive. (transfer full) */
-nuvashalauncherModrinthDependency *
-nuvashalauncher_modrinth_dependency_copy (nuvashalauncherModrinthDependency *dependency)
+NuvashaLauncherModrinthDependency *
+nuvashalauncher_modrinth_dependency_copy (NuvashaLauncherModrinthDependency *dependency)
 {
-  nuvashalauncherModrinthDependency *copy = NULL;
+  NuvashaLauncherModrinthDependency *copy = NULL;
 
   if (dependency == NULL)
     return NULL;
 
-  copy = g_new0 (nuvashalauncherModrinthDependency, 1);
+  copy = g_new0 (NuvashaLauncherModrinthDependency, 1);
   copy->type = dependency->type;
   copy->project_id = g_strdup (dependency->project_id);
   copy->version_id = g_strdup (dependency->version_id);
@@ -91,15 +91,15 @@ nuvashalauncher_modrinth_dependency_copy (nuvashalauncherModrinthDependency *dep
   return copy;
 }
 
-nuvashalauncherModrinthProject *
-nuvashalauncher_modrinth_project_copy (nuvashalauncherModrinthProject *project)
+NuvashaLauncherModrinthProject *
+nuvashalauncher_modrinth_project_copy (NuvashaLauncherModrinthProject *project)
 {
-  nuvashalauncherModrinthProject *copy = NULL;
+  NuvashaLauncherModrinthProject *copy = NULL;
 
   if (project == NULL)
     return NULL;
 
-  copy = g_new0 (nuvashalauncherModrinthProject, 1);
+  copy = g_new0 (NuvashaLauncherModrinthProject, 1);
   copy->project_id = g_strdup (project->project_id);
   copy->slug = g_strdup (project->slug);
   copy->title = g_strdup (project->title);
@@ -133,7 +133,7 @@ nuvashalauncher_modrinth_project_copy (nuvashalauncherModrinthProject *project)
 }
 
 void
-nuvashalauncher_modrinth_version_free (nuvashalauncherModrinthVersion *version)
+nuvashalauncher_modrinth_version_free (NuvashaLauncherModrinthVersion *version)
 {
   if (version == NULL)
     return;
@@ -151,15 +151,15 @@ nuvashalauncher_modrinth_version_free (nuvashalauncherModrinthVersion *version)
   g_free (version);
 }
 
-nuvashalauncherModrinthVersion *
-nuvashalauncher_modrinth_version_copy (nuvashalauncherModrinthVersion *version)
+NuvashaLauncherModrinthVersion *
+nuvashalauncher_modrinth_version_copy (NuvashaLauncherModrinthVersion *version)
 {
-  nuvashalauncherModrinthVersion *copy = NULL;
+  NuvashaLauncherModrinthVersion *copy = NULL;
 
   if (version == NULL)
     return NULL;
 
-  copy = g_new0 (nuvashalauncherModrinthVersion, 1);
+  copy = g_new0 (NuvashaLauncherModrinthVersion, 1);
   copy->version_id = g_strdup (version->version_id);
   copy->project_id = g_strdup (version->project_id);
   copy->name = g_strdup (version->name);
@@ -184,8 +184,8 @@ nuvashalauncher_modrinth_version_copy (nuvashalauncherModrinthVersion *version)
 
   for (guint i = 0; i < version->files->len; i++)
     {
-      nuvashalauncherModrinthFile *file = g_ptr_array_index (version->files, i);
-      nuvashalauncherModrinthFile *file_copy = g_new0 (nuvashalauncherModrinthFile, 1);
+      NuvashaLauncherModrinthFile *file = g_ptr_array_index (version->files, i);
+      NuvashaLauncherModrinthFile *file_copy = g_new0 (NuvashaLauncherModrinthFile, 1);
 
       file_copy->filename = g_strdup (file->filename);
       file_copy->url = g_strdup (file->url);
@@ -205,17 +205,17 @@ nuvashalauncher_modrinth_version_copy (nuvashalauncherModrinthVersion *version)
   return copy;
 }
 
-nuvashalauncherModrinthFile *
-nuvashalauncher_modrinth_version_primary_file (nuvashalauncherModrinthVersion *version)
+NuvashaLauncherModrinthFile *
+nuvashalauncher_modrinth_version_primary_file (NuvashaLauncherModrinthVersion *version)
 {
-  nuvashalauncherModrinthFile *first = NULL;
+  NuvashaLauncherModrinthFile *first = NULL;
 
   if (version == NULL || version->files == NULL)
     return NULL;
 
   for (guint i = 0; i < version->files->len; i++)
     {
-      nuvashalauncherModrinthFile *file = g_ptr_array_index (version->files, i);
+      NuvashaLauncherModrinthFile *file = g_ptr_array_index (version->files, i);
 
       if (first == NULL)
         first = file;
@@ -228,7 +228,7 @@ nuvashalauncher_modrinth_version_primary_file (nuvashalauncherModrinthVersion *v
 }
 
 gboolean
-nuvashalauncher_modrinth_version_has_hash (const nuvashalauncherModrinthVersion *version,
+nuvashalauncher_modrinth_version_has_hash (const NuvashaLauncherModrinthVersion *version,
                                const char               *sha1)
 {
   g_return_val_if_fail (version != NULL, FALSE);
@@ -238,7 +238,7 @@ nuvashalauncher_modrinth_version_has_hash (const nuvashalauncherModrinthVersion 
 
   for (guint i = 0; i < version->files->len; i++)
     {
-      const nuvashalauncherModrinthFile *file = g_ptr_array_index (version->files, i);
+      const NuvashaLauncherModrinthFile *file = g_ptr_array_index (version->files, i);
 
       if (file->sha1 != NULL && g_ascii_strcasecmp (file->sha1, sha1) == 0)
         return TRUE;
@@ -249,14 +249,14 @@ nuvashalauncher_modrinth_version_has_hash (const nuvashalauncherModrinthVersion 
 
 /* One file of a version answer, or NULL when it names no file and no
  * url, which is nothing to download. */
-static nuvashalauncherModrinthFile *
+static NuvashaLauncherModrinthFile *
 file_from_node (JsonNode *node)
 {
   g_autofree char *filename = nuvashalauncher_json_string (node, "filename");
   g_autofree char *url = nuvashalauncher_json_string (node, "url");
   g_autofree char *sha1 = NULL;
   g_autofree char *sha512 = NULL;
-  nuvashalauncherModrinthFile *file = NULL;
+  NuvashaLauncherModrinthFile *file = NULL;
 
   if (filename == NULL || url == NULL)
     return NULL;
@@ -271,7 +271,7 @@ file_from_node (JsonNode *node)
       }
   }
 
-  file = g_new0 (nuvashalauncherModrinthFile, 1);
+  file = g_new0 (NuvashaLauncherModrinthFile, 1);
   file->filename = g_steal_pointer (&filename);
   file->url = g_steal_pointer (&url);
   file->sha1 = g_steal_pointer (&sha1);
@@ -282,11 +282,11 @@ file_from_node (JsonNode *node)
   return file;
 }
 
-static nuvashalauncherModrinthDependency *
+static NuvashaLauncherModrinthDependency *
 dependency_from_node (JsonNode *node)
 {
   g_autofree char *type = nuvashalauncher_json_string (node, "dependency_type");
-  nuvashalauncherModrinthDependency *dependency = g_new0 (nuvashalauncherModrinthDependency, 1);
+  NuvashaLauncherModrinthDependency *dependency = g_new0 (NuvashaLauncherModrinthDependency, 1);
 
   dependency->type = dependency_type_from_string (type);
   dependency->project_id = nuvashalauncher_json_string (node, "project_id");
@@ -299,16 +299,16 @@ dependency_from_node (JsonNode *node)
 /* One version answer, or NULL when there is nothing installable in it:
  * without an id it cannot be asked about again, and without a file
  * there is nothing to download. */
-static nuvashalauncherModrinthVersion *
+static NuvashaLauncherModrinthVersion *
 version_from_node (JsonNode *node)
 {
-  nuvashalauncherModrinthVersion *version = NULL;
+  NuvashaLauncherModrinthVersion *version = NULL;
   JsonNode *array_node = NULL;
 
   if (nuvashalauncher_json_object_of (node) == NULL)
     return NULL;
 
-  version = g_new0 (nuvashalauncherModrinthVersion, 1);
+  version = g_new0 (NuvashaLauncherModrinthVersion, 1);
   version->version_id = nuvashalauncher_json_string (node, "id");
   version->project_id = nuvashalauncher_json_string (node, "project_id");
   version->name = nuvashalauncher_json_string (node, "name");
@@ -330,7 +330,7 @@ version_from_node (JsonNode *node)
 
       for (guint i = 0; i < length; i++)
         {
-          nuvashalauncherModrinthFile *file =
+          NuvashaLauncherModrinthFile *file =
             file_from_node (json_array_get_element (array, i));
 
           if (file != NULL)
@@ -380,12 +380,12 @@ version_from_node (JsonNode *node)
   return version;
 }
 
-nuvashalauncherModrinthVersion *
+NuvashaLauncherModrinthVersion *
 nuvashalauncher_modrinth_version_from_json (const char *json, gssize length,
                                 GError **error)
 {
   g_autoptr (JsonNode) root = nuvashalauncher_modrinth_root_node (json, length, error);
-  nuvashalauncherModrinthVersion *version = NULL;
+  NuvashaLauncherModrinthVersion *version = NULL;
 
   if (root == NULL)
     return NULL;
@@ -403,6 +403,55 @@ nuvashalauncher_modrinth_version_from_json (const char *json, gssize length,
   return version;
 }
 
+GHashTable *
+nuvashalauncher_modrinth_updates_from_node (JsonNode *root, GError **error)
+{
+  JsonObject *object = nuvashalauncher_json_object_of (root);
+  g_autoptr (GHashTable) updates = NULL;
+  g_autoptr (GList) keys = NULL;
+
+  if (object == NULL)
+    {
+      g_set_error_literal (error, nuvashalauncher_MODRINTH_ERROR,
+                           nuvashalauncher_MODRINTH_ERROR_PARSE,
+                           "the updates answer is not a JSON object");
+      return NULL;
+    }
+
+  updates = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
+                                   (GDestroyNotify) nuvashalauncher_modrinth_version_free);
+  keys = json_object_get_members (object);
+
+  for (GList *l = keys; l != NULL; l = l->next)
+    {
+      const char *hash = l->data;
+      JsonNode *member = json_object_get_member (object, hash);
+      NuvashaLauncherModrinthVersion *version = NULL;
+
+      if (hash == NULL || *hash == '\0' || member == NULL ||
+          JSON_NODE_HOLDS_NULL (member))
+        continue;
+
+      version = version_from_node (member);
+      if (version != NULL)
+        g_hash_table_insert (updates, g_strdup (hash), version);
+    }
+
+  return g_steal_pointer (&updates);
+}
+
+GHashTable *
+nuvashalauncher_modrinth_updates_from_json (const char *json, gssize length,
+                                            GError **error)
+{
+  g_autoptr (JsonNode) root = nuvashalauncher_modrinth_root_node (json, length, error);
+
+  if (root == NULL)
+    return NULL;
+
+  return nuvashalauncher_modrinth_updates_from_node (root, error);
+}
+
 /* The one rule of compatibility.
  *
  * A mod runs on one Minecraft version and one loader; a resource pack
@@ -410,7 +459,7 @@ nuvashalauncher_modrinth_version_from_json (const char *json, gssize length,
  * version is all that decides them. FALSE is the answer that keeps an
  * incompatible version out of every list. */
 gboolean
-nuvashalauncher_modrinth_version_fits (nuvashalauncherModrinthVersion *version, nuvashalauncherContentType type,
+nuvashalauncher_modrinth_version_fits (NuvashaLauncherModrinthVersion *version, NuvashaLauncherContentType type,
                           const char *minecraft_version, const char *loader)
 {
   if (version == NULL || minecraft_version == NULL ||
@@ -444,15 +493,15 @@ nuvashalauncher_modrinth_version_fits (nuvashalauncherModrinthVersion *version, 
 static int
 compare_by_date (gconstpointer a, gconstpointer b)
 {
-  const nuvashalauncherModrinthVersion *left = *(const nuvashalauncherModrinthVersion *const *) a;
-  const nuvashalauncherModrinthVersion *right = *(const nuvashalauncherModrinthVersion *const *) b;
+  const NuvashaLauncherModrinthVersion *left = *(const NuvashaLauncherModrinthVersion *const *) a;
+  const NuvashaLauncherModrinthVersion *right = *(const NuvashaLauncherModrinthVersion *const *) b;
 
   return strcmp (right->date_published, left->date_published);
 }
 
 GPtrArray *
 nuvashalauncher_modrinth_versions_from_json (const char *json, gssize length,
-                                 nuvashalauncherContentType type,
+                                 NuvashaLauncherContentType type,
                                  const char *minecraft_version,
                                  const char *loader, GError **error)
 {
@@ -488,7 +537,7 @@ nuvashalauncher_modrinth_versions_from_json (const char *json, gssize length,
 
   for (guint i = 0; i < count; i++)
     {
-      nuvashalauncherModrinthVersion *version =
+      NuvashaLauncherModrinthVersion *version =
         version_from_node (json_array_get_element (array, i));
 
       if (version == NULL)
