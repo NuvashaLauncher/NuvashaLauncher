@@ -101,7 +101,6 @@ void nuvashalauncher_download_close_sink (DownloadRequest *request);
 void nuvashalauncher_download_discard_temporary (DownloadRequest *request);
 gboolean nuvashalauncher_download_open_temporary (DownloadRequest *request, GError **error);
 
-void nuvashalauncher_download_start_transfer (DownloadRequest *request);
 void start_attempt (DownloadRequest *request);
 SoupSession *get_session (NuvashaLauncherDownloadService *service);
 char *url_for_message (const char *url);
@@ -110,10 +109,7 @@ void request_succeed (DownloadRequest *request);
 void nuvashalauncher_download_file_cache_start (DownloadRequest *request);
 void json_cache_start (DownloadRequest *request);
 void global_cache_directory_ready (GObject *, GAsyncResult *, gpointer);
-void nuvashalauncher_download_release_slot (DownloadRequest *request);
-gint compare_waiting_requests (gconstpointer left, gconstpointer right, gpointer user_data);
 gboolean queued_cancelled (gpointer user_data);
-void service_destroy_if_requested (NuvashaLauncherDownloadService *service);
 
 void nuvashalauncher_download_json_process_body (DownloadRequest *request, GBytes *body);
 void nuvashalauncher_download_json_stream_ready (GObject *source, GAsyncResult *result, gpointer user_data);

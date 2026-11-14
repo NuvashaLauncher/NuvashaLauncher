@@ -30,8 +30,6 @@ src/nuvashalauncher-download-modpack-browser.c
 src/nuvashalauncher-download-modpack-details.c
 src/nuvashalauncher-download-modpack-dialog.c
 src/nuvashalauncher-download-modpack-install.c
-src/nuvashalauncher-download-slots.c
-src/nuvashalauncher-download-temporary.c
 src/nuvashalauncher-download-transfer.c
 src/nuvashalauncher-download.c
 src/nuvashalauncher-downloads.c
@@ -60,7 +58,6 @@ src/nuvashalauncher-launch-arguments.c
 src/nuvashalauncher-launch-state.c
 src/nuvashalauncher-launcher-control.c
 src/nuvashalauncher-launcher-finish.c
-src/nuvashalauncher-launcher-loader-install.c
 src/nuvashalauncher-launcher-loader.c
 src/nuvashalauncher-launcher-log.c
 src/nuvashalauncher-launcher-prepare.c
