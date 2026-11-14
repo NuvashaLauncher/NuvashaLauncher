@@ -55,7 +55,7 @@ jobs:
           rm -rf ./debian
 
       - name: Upload DEB artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: deb-${{ matrix.arch }}
           path: dist/*.deb
@@ -101,7 +101,7 @@ jobs:
             -exec cp -v {} dist/nuvashalauncher-${{ matrix.arch }}.rpm \;
 
       - name: Upload RPM artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: rpm-${{ matrix.arch }}
           path: dist/*.rpm
@@ -140,7 +140,7 @@ jobs:
             dist/nuvashalauncher-x86_64.pkg.tar.zst
 
       - name: Upload Arch artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: arch-x86_64
           path: dist/*.pkg.tar.zst
@@ -200,7 +200,7 @@ jobs:
             "dist/nuvashalauncher-${{ matrix.arch }}.flatpak"
 
       - name: Upload Flatpak artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: flatpak-${{ matrix.arch }}
           path: dist/*.flatpak
