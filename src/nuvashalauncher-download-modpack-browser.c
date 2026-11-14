@@ -466,7 +466,7 @@ run_search (nuvashalauncherDownloadModpackDialog *self, gboolean append)
    * is in flight finalizes it, and a callback that then reads self would
    * be reading freed memory. */
   nuvashalauncher_operation_release (
-    nuvashalauncher_download_json_async (nuvashalauncher_downloads_get_service (), url, on_search_done, ask),
+    nuvashalauncher_download_json_cached_async (nuvashalauncher_downloads_get_service (), url, on_search_done, ask),
     self->search);
 }
 
