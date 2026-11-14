@@ -18,6 +18,7 @@
 #include "nuvashalauncher-i18n.h"
 #include "nuvashalauncher-launcher.h"
 #include "nuvashalauncher-settings.h"
+#include "nuvashalauncher-task-private.h"
 #include "nuvashalauncher-users-popover.h"
 #include "nuvashalauncher-ui-feedback.h"
 
@@ -324,6 +325,10 @@ static void
 nuvashalauncher_main_window_init (nuvashalauncherMainWindow *self)
 {
   self->model = nuvashalauncher_main_window_model_new ();
+  nuvashalauncher_task_scope_unref_when_done (
+    nuvashalauncher_cache_prune_async (
+      nuvashalauncher_settings_get_cache_expiration (self->model->settings),
+      NULL, NULL));
   self->ui.edit_mode = FALSE;
   self->window_settings = window_settings_new ();
   if (self->window_settings != NULL)

@@ -24,7 +24,6 @@ typedef struct {
 } SkinUpload;
 
 static guint skin_background_operations;
-static SoupSession *skin_upload_session;
 
 gboolean
 nuvashalauncher_users_skin_background_work_active (void)
@@ -362,10 +361,9 @@ start_pending_skin_upload (SkinMenu *menu)
         upload->background_counted = TRUE;
         skin_background_operations++;
         menu->skin_upload_cancellable = g_object_ref (upload->cancellable);
-        if (skin_upload_session == NULL)
-          skin_upload_session = soup_session_new ();
+        g_autoptr (SoupSession) session = nuvashalauncher_minecraft_services_session ();
         upload->message = soup_message_new (SOUP_METHOD_GET, upload->url);
-        soup_session_send_and_read_async (skin_upload_session, upload->message,
+        soup_session_send_and_read_async (session, upload->message,
                                           G_PRIORITY_DEFAULT, upload->cancellable,
                                           on_skin_download_done, upload);
         return;
