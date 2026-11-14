@@ -82,6 +82,17 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="1.1" date="2026-11-14">
+      <description>
+        <p>Release 1.1 focuses on performance, caching, and reduced disk and network
+        overhead across the launcher. Highlights include API cache support for the
+        Mojang version manifest, Modrinth request deduplication and batched update
+        checks, parallel Java runtime probing off the main thread, single-pass archive
+        metadata and cached local icon extraction, coalesced content index writes,
+        GFileMonitor-based instance directory tracking, and debounced search and
+        category filtering.</p>
+      </description>
+    </release>
     <release version="1.0" date="2026-11-10">
       <description>
         <p>Release 1.0 brings Linux distribution packaging (RPM, Debian/Ubuntu,

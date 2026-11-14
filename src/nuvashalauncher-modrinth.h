@@ -176,6 +176,8 @@ NuvashaLauncherTaskScope *nuvashalauncher_modrinth_version_by_id_async (const ch
 NuvashaLauncherModrinthResults *nuvashalauncher_modrinth_results_from_json (const char *json,
                                                     gssize      length,
                                                     GError     **error);
+NuvashaLauncherModrinthResults *nuvashalauncher_modrinth_results_from_node (JsonNode   *root,
+                                                                            GError     **error);
 
 /* ---------------------------------------------------------- *
  * What a project answers

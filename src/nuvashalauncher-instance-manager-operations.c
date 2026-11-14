@@ -276,6 +276,14 @@ delete_directory_ready (GObject *source G_GNUC_UNUSED,
 
   if (!remove_instance_and_save (data->self, data->instance, &error))
     {
+      if (g_error_matches (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                           NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND))
+        {
+          g_clear_error (&error);
+          nuvashalauncher_task_scope_return_boolean_deferred (data->scope, TRUE);
+          delete_data_free (data);
+          return;
+        }
       delete_data_return_error (data, g_steal_pointer (&error));
       return;
     }

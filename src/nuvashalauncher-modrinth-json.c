@@ -520,15 +520,18 @@ nuvashalauncher_modrinth_search_url (const NuvashaLauncherModrinthSearch *search
 }
 
 NuvashaLauncherModrinthResults *
-nuvashalauncher_modrinth_results_from_json (const char *json, gssize length,
-                                GError **error)
+nuvashalauncher_modrinth_results_from_node (JsonNode *root, GError **error)
 {
-  g_autoptr (JsonNode) root = nuvashalauncher_modrinth_root_node (json, length, error);
   NuvashaLauncherModrinthResults *results = NULL;
   JsonNode *hits = NULL;
 
-  if (root == NULL)
-    return NULL;
+  if (root == NULL || !JSON_NODE_HOLDS_OBJECT (root))
+    {
+      g_set_error_literal (error, NUVASHALAUNCHER_MODRINTH_ERROR,
+                           NUVASHALAUNCHER_MODRINTH_ERROR_PARSE,
+                           "the search answer is not a JSON object");
+      return NULL;
+    }
 
   hits = json_object_get_member (nuvashalauncher_json_object_of (root), "hits");
 
@@ -578,4 +581,16 @@ nuvashalauncher_modrinth_results_from_json (const char *json, gssize length,
   }
 
   return results;
+}
+
+NuvashaLauncherModrinthResults *
+nuvashalauncher_modrinth_results_from_json (const char *json, gssize length,
+                                            GError **error)
+{
+  g_autoptr (JsonNode) root = nuvashalauncher_modrinth_root_node (json, length, error);
+
+  if (root == NULL)
+    return NULL;
+
+  return nuvashalauncher_modrinth_results_from_node (root, error);
 }

@@ -566,19 +566,24 @@ nuvashalauncher_java_register_custom_path (const char *executable)
                        (const char * const *) paths->pdata);
 }
 
-/* The system the Fedora, Arch etc. layout plus $JAVA_HOME and PATH. */
+/* The system the Fedora, Arch etc. layout plus $JAVA_HOME and PATH.
+ * Inputs from GSettings/env are captured on the main thread so the filesystem
+ * scan and realpath() deduplication can run safely on a worker thread. */
 static char **
-collect_candidates (void)
+collect_candidates_from_inputs (char * const *roots,
+                                const char   *java_home,
+                                const char   *on_path,
+                                char * const *custom,
+                                char       ***out_valid_custom,
+                                gboolean     *out_pruned)
 {
   g_autoptr (GPtrArray) candidates =
     g_ptr_array_new_with_free_func (g_free);
-  const char *java_home = g_getenv ("JAVA_HOME");
-  char **roots = default_roots ();
+  g_autoptr (GPtrArray) valid_custom = g_ptr_array_new_with_free_func (g_free);
+  gboolean pruned = FALSE;
 
-  for (guint i = 0; roots[i] != NULL; i++)
+  for (guint i = 0; roots != NULL && roots[i] != NULL; i++)
     add_root_scandir (candidates, roots[i]);
-
-  g_strfreev (roots);
 
   if (java_home != NULL && *java_home != '\0')
     {
@@ -588,38 +593,29 @@ collect_candidates (void)
       add_candidate (candidates, candidate);
     }
 
-  {
-    g_autoptr (GSettings) settings = g_settings_new (
-      "com.github.NuvashaLauncher.NuvashaLauncher");
-    g_auto (GStrv) custom = g_settings_get_strv (settings, "custom-java-paths");
-    g_autoptr (GPtrArray) valid_custom = g_ptr_array_new_with_free_func (g_free);
-    gboolean pruned = FALSE;
+  for (guint i = 0; custom != NULL && custom[i] != NULL; i++)
+    {
+      if (g_file_test (custom[i], G_FILE_TEST_IS_REGULAR) &&
+          g_file_test (custom[i], G_FILE_TEST_IS_EXECUTABLE))
+        {
+          g_ptr_array_add (candidates, g_strdup (custom[i]));
+          g_ptr_array_add (valid_custom, g_strdup (custom[i]));
+        }
+      else
+        pruned = TRUE;
+    }
 
-    for (guint i = 0; custom != NULL && custom[i] != NULL; i++)
-      {
-        if (g_file_test (custom[i], G_FILE_TEST_IS_REGULAR) &&
-            g_file_test (custom[i], G_FILE_TEST_IS_EXECUTABLE))
-          {
-            add_candidate (candidates, custom[i]);
-            g_ptr_array_add (valid_custom, g_strdup (custom[i]));
-          }
-        else
-          pruned = TRUE;
-      }
-
-    if (pruned)
-      {
-        g_ptr_array_add (valid_custom, NULL);
-        g_settings_set_strv (settings, "custom-java-paths",
-                             (const char * const *) valid_custom->pdata);
-      }
-  }
-
-  g_autofree char *on_path = g_find_program_in_path ("java");
   add_candidate (candidates, on_path);
 
-  g_ptr_array_add (candidates, NULL);
+  if (out_pruned != NULL)
+    *out_pruned = pruned;
+  if (out_valid_custom != NULL && pruned)
+    {
+      g_ptr_array_add (valid_custom, NULL);
+      *out_valid_custom = (char **) g_ptr_array_free (g_steal_pointer (&valid_custom), FALSE);
+    }
 
+  g_ptr_array_add (candidates, NULL);
   return (char **) g_ptr_array_free (g_steal_pointer (&candidates), FALSE);
 }
 
@@ -696,29 +692,117 @@ detected (GObject      *source G_GNUC_UNUSED,
   g_free (detect);
 }
 
+typedef struct
+{
+  NuvashaLauncherTaskScope *scope;
+  gboolean use_custom_roots;
+  GStrv roots;
+  char *java_home;
+  char *on_path;
+  GStrv custom;
+  GStrv valid_custom;
+  gboolean pruned;
+  GStrv candidates;
+} CandidateScan;
+
+static void
+candidate_scan_free (CandidateScan *scan)
+{
+  if (scan->scope != NULL)
+    nuvashalauncher_task_scope_unref (scan->scope);
+  g_strfreev (scan->roots);
+  g_free (scan->java_home);
+  g_free (scan->on_path);
+  g_strfreev (scan->custom);
+  g_strfreev (scan->valid_custom);
+  g_strfreev (scan->candidates);
+  g_free (scan);
+}
+
+static void
+candidate_scan_thread (GTask *task,
+                       gpointer source_object G_GNUC_UNUSED,
+                       gpointer task_data,
+                       GCancellable *cancellable G_GNUC_UNUSED)
+{
+  CandidateScan *scan = task_data;
+  g_auto (GStrv) collected = NULL;
+
+  if (scan->use_custom_roots)
+    collected = collect_candidates_list (scan->roots);
+  else
+    collected = collect_candidates_from_inputs (
+      scan->roots, scan->java_home, scan->on_path, scan->custom,
+      &scan->valid_custom, &scan->pruned);
+
+  scan->candidates = dedupe_candidates (collected);
+  g_task_return_boolean (task, TRUE);
+}
+
+static void
+candidate_scan_ready (GObject *source G_GNUC_UNUSED,
+                      GAsyncResult *result,
+                      gpointer user_data)
+{
+  CandidateScan *scan = user_data;
+  g_autoptr (GError) error = NULL;
+  NuvashaLauncherTaskScope *scope = scan->scope;
+  Detect *detect = NULL;
+  NuvashaLauncherTaskScope *listing = NULL;
+
+  g_task_propagate_boolean (G_TASK (result), &error);
+
+  if (g_cancellable_is_cancelled (nuvashalauncher_task_scope_get_cancellable (scope)))
+    {
+      nuvashalauncher_task_scope_return_error (
+        scope, g_error_new_literal (G_IO_ERROR, G_IO_ERROR_CANCELLED, "cancelled"));
+      candidate_scan_free (scan);
+      return;
+    }
+
+  if (!scan->use_custom_roots && scan->pruned && scan->valid_custom != NULL)
+    {
+      g_autoptr (GSettings) settings = g_settings_new (
+        "com.github.NuvashaLauncher.NuvashaLauncher");
+      g_settings_set_strv (settings, "custom-java-paths",
+                           (const char * const *) scan->valid_custom);
+    }
+
+  detect = g_new0 (Detect, 1);
+  detect->scope = nuvashalauncher_task_scope_ref (scope);
+
+  listing = nuvashalauncher_java_probe_list_async (
+    g_steal_pointer (&scan->candidates), detected, detect);
+  nuvashalauncher_task_scope_follow_cancellable (
+    listing, nuvashalauncher_task_scope_get_cancellable (scope));
+  nuvashalauncher_task_scope_unref_when_done (listing);
+
+  candidate_scan_free (scan);
+}
+
 NuvashaLauncherTaskScope *
 nuvashalauncher_java_detect_async (GAsyncReadyCallback callback, gpointer user_data)
 {
   g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
-  g_auto (GStrv) collected = collect_candidates ();
-  g_auto (GStrv) candidates = dedupe_candidates (collected);
-  Detect *detect = NULL;
+  g_autoptr (GSettings) settings = g_settings_new (
+    "com.github.NuvashaLauncher.NuvashaLauncher");
+  CandidateScan *scan = g_new0 (CandidateScan, 1);
+  g_autoptr (GTask) task = NULL;
 
   nuvashalauncher_task_scope_set_check_cancellable (scope, FALSE);
 
-  detect = g_new0 (Detect, 1);
-  detect->scope = nuvashalauncher_task_scope_ref (scope);
+  scan->scope = nuvashalauncher_task_scope_ref (scope);
+  scan->use_custom_roots = FALSE;
+  scan->roots = default_roots ();
+  scan->java_home = g_strdup (g_getenv ("JAVA_HOME"));
+  scan->on_path = g_find_program_in_path ("java");
+  scan->custom = g_settings_get_strv (settings, "custom-java-paths");
 
-  {
-    NuvashaLauncherTaskScope *listing =
-      nuvashalauncher_java_probe_list_async (g_steal_pointer (&candidates), detected,
-                                 detect);
-
-    nuvashalauncher_task_scope_follow_cancellable (listing,
-                                       nuvashalauncher_task_scope_get_cancellable (scope));
-    nuvashalauncher_task_scope_unref_when_done (listing);
-  }
+  task = g_task_new (NULL, nuvashalauncher_task_scope_get_cancellable (scope),
+                     candidate_scan_ready, scan);
+  g_task_set_task_data (task, scan, NULL);
+  g_task_run_in_thread (task, candidate_scan_thread);
 
   return g_steal_pointer (&scope);
 }
@@ -730,24 +814,19 @@ nuvashalauncher_java_detect_list_async (char            **roots,
 {
   g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
-  g_auto (GStrv) collected = collect_candidates_list (roots);
-  g_auto (GStrv) candidates = dedupe_candidates (collected);
-  Detect *detect = NULL;
+  CandidateScan *scan = g_new0 (CandidateScan, 1);
+  g_autoptr (GTask) task = NULL;
 
   nuvashalauncher_task_scope_set_check_cancellable (scope, FALSE);
 
-  detect = g_new0 (Detect, 1);
-  detect->scope = nuvashalauncher_task_scope_ref (scope);
+  scan->scope = nuvashalauncher_task_scope_ref (scope);
+  scan->use_custom_roots = TRUE;
+  scan->roots = g_strdupv (roots);
 
-  {
-    NuvashaLauncherTaskScope *listing =
-      nuvashalauncher_java_probe_list_async (g_steal_pointer (&candidates), detected,
-                                 detect);
-
-    nuvashalauncher_task_scope_follow_cancellable (listing,
-                                       nuvashalauncher_task_scope_get_cancellable (scope));
-    nuvashalauncher_task_scope_unref_when_done (listing);
-  }
+  task = g_task_new (NULL, nuvashalauncher_task_scope_get_cancellable (scope),
+                     candidate_scan_ready, scan);
+  g_task_set_task_data (task, scan, NULL);
+  g_task_run_in_thread (task, candidate_scan_thread);
 
   return g_steal_pointer (&scope);
 }

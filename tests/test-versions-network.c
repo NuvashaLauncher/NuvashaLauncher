@@ -74,8 +74,6 @@ static void
 test_manifest_fetch (void)
 {
   g_autofree char *url = server_url ("/manifest.json");
-  g_autofree char *cached = cache_file ("manifest.json");
-  g_autofree char *text = NULL;
   AsyncRun run = { 0 };
   AsyncCall call = { 0 };
 
@@ -92,14 +90,8 @@ test_manifest_fetch (void)
   g_assert_cmpstr (call.manifest->latest_release, ==, "1.21.1");
   g_assert_cmpuint (fixture.hits, ==, 1);
 
-  /* The manifest is kept where the header says it is, and below the
-   * cache directory the test made for itself. */
-  g_assert_true (g_str_has_prefix (cached, cache_home));
-  g_assert_true (g_file_get_contents (cached, &text, NULL, NULL));
-  g_assert_nonnull (strstr (text, "\"cycle-a\""));
-
-  /* It is fetched again rather than answered from the copy: a list
-   * nobody can check is worse than a visible failure. */
+  /* Subsequent fetches within the metadata cache TTL are served from the
+   * API cache without hitting the server again. */
   g_clear_object (&call.manifest);
   g_clear_error (&call.error);
 
@@ -108,7 +100,7 @@ test_manifest_fetch (void)
 
   g_assert_no_error (call.error);
   g_assert_nonnull (call.manifest);
-  g_assert_cmpuint (fixture.hits, ==, 2);
+  g_assert_cmpuint (fixture.hits, ==, 1);
 
   async_call_clear (&call);
   async_run_clear (&run);

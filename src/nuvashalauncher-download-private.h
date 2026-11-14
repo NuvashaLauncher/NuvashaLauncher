@@ -72,6 +72,8 @@ typedef struct _DownloadRequest
   guint http_status;     /* status of a failed attempt */
   guint attempts;        /* attempts used, MAX_ATTEMPTS at most */
   gboolean hash_retried; /* a wrong hash is retried only once */
+  gboolean api_cache_mkdir_tried;
+  gboolean global_cache_mkdir_tried;
   gboolean holds_slot;
   guint priority;
   guint retry_source;    /* pending retry timeout, 0 while there is none */
@@ -83,8 +85,9 @@ NuvashaLauncherSettings *nuvashalauncher_download_get_cache_settings (DownloadRe
 char *nuvashalauncher_download_api_cache_path (DownloadRequest *request);
 char *nuvashalauncher_download_global_cache_path (const char *hash);
 JsonParser *nuvashalauncher_download_cache_parser (const char *contents, gsize length,
-                                       char **response, char **etag,
-                                       gint64 *created);
+                                       gint64 max_age_seconds,
+                                       gboolean *out_fresh,
+                                       char **response, char **etag);
 
 NuvashaLauncherTaskScope *nuvashalauncher_download_hash_file_async (GFile *file, GChecksumType type,
                                             GAsyncReadyCallback callback,
@@ -108,7 +111,7 @@ gboolean request_was_cancelled (DownloadRequest *request, GError *error);
 void request_succeed (DownloadRequest *request);
 void nuvashalauncher_download_file_cache_start (DownloadRequest *request);
 void json_cache_start (DownloadRequest *request);
-void global_cache_directory_ready (GObject *, GAsyncResult *, gpointer);
+void global_cache_copy (DownloadRequest *request);
 gboolean queued_cancelled (gpointer user_data);
 
 void nuvashalauncher_download_json_process_body (DownloadRequest *request, GBytes *body);

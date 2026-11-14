@@ -13,6 +13,7 @@
 
 #include <archive.h>
 #include <archive_entry.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
 
 #define MAX_LOCAL_ARCHIVE_MEMBER_SIZE (1024 * 1024)
 #define MAX_LOCAL_ARCHIVE_ENTRIES 10000
@@ -303,46 +304,136 @@ archive_entry_bytes (struct archive *archive, struct archive_entry *header,
   return TRUE;
 }
 
-static GByteArray *
-read_archive_member (const char *path, const char *member)
+static void
+read_archive_members (const char *path, const char * const *members,
+                      gsize count, GByteArray **out_results)
 {
   struct archive *archive = archive_read_new ();
   struct archive_entry *header = NULL;
-  GByteArray *bytes = NULL;
   guint entries = 0;
+  gsize remaining = count;
   int status = ARCHIVE_EOF;
-  gboolean found = FALSE;
+
+  for (gsize i = 0; i < count; i++)
+    out_results[i] = NULL;
 
   archive_read_support_filter_all (archive);
   archive_read_support_format_zip (archive);
   if (archive_read_open_filename (archive, path, 64 * 1024) != ARCHIVE_OK)
     {
       archive_read_free (archive);
-      return NULL;
+      return;
     }
-  while ((status = archive_read_next_header (archive, &header)) == ARCHIVE_OK ||
-         status == ARCHIVE_WARN)
+
+  while (remaining > 0 &&
+         ((status = archive_read_next_header (archive, &header)) == ARCHIVE_OK ||
+          status == ARCHIVE_WARN))
     {
+      const char *entry_name;
+      gboolean matched = FALSE;
+
       if (++entries > MAX_LOCAL_ARCHIVE_ENTRIES)
         break;
 
-      if (g_strcmp0 (archive_entry_pathname (header), member) == 0 &&
-          archive_entry_filetype (header) == AE_IFREG)
+      entry_name = archive_entry_pathname (header);
+      if (archive_entry_filetype (header) == AE_IFREG && entry_name != NULL)
         {
-          found = TRUE;
-          archive_entry_bytes (archive, header, &bytes);
-          break;
+          for (gsize i = 0; i < count; i++)
+            {
+              if (out_results[i] == NULL && g_strcmp0 (entry_name, members[i]) == 0)
+                {
+                  if (archive_entry_bytes (archive, header, &out_results[i]) &&
+                      out_results[i] != NULL)
+                    remaining--;
+                  matched = TRUE;
+                  break;
+                }
+            }
         }
-      archive_read_data_skip (archive);
+      if (!matched)
+        archive_read_data_skip (archive);
     }
 
-  if (!found && status != ARCHIVE_EOF)
-    g_clear_pointer (&bytes, g_byte_array_unref);
+  if (status != ARCHIVE_EOF && status != ARCHIVE_OK && status != ARCHIVE_WARN)
+    {
+      for (gsize i = 0; i < count; i++)
+        g_clear_pointer (&out_results[i], g_byte_array_unref);
+    }
 
   archive_read_close (archive);
   archive_read_free (archive);
+}
 
-  return bytes;
+static char *
+local_icon_cache_path (const char *sha1, char **out_directory)
+{
+  g_autofree char *directory = g_build_filename (
+    g_get_user_cache_dir (), "nuvashalauncher", "icons", "local", NULL);
+  g_autofree char *name = g_strconcat (sha1, ".png", NULL);
+  char *path = g_build_filename (directory, name, NULL);
+
+  if (out_directory != NULL)
+    *out_directory = g_steal_pointer (&directory);
+  return path;
+}
+
+static gboolean
+write_cached_local_icon (const char *sha1, const guint8 *data, gsize len,
+                         char **out_path, GError **error)
+{
+  g_autofree char *directory = NULL;
+  g_autofree char *path = local_icon_cache_path (sha1, &directory);
+  g_autoptr (GInputStream) stream = NULL;
+  g_autoptr (GdkPixbuf) pixbuf = NULL;
+  g_autoptr (GdkPixbuf) scaled = NULL;
+  g_autofree char *png_buf = NULL;
+  gsize png_len = 0;
+  int width = 0;
+  int height = 0;
+
+  if (g_file_test (path, G_FILE_TEST_IS_REGULAR))
+    {
+      *out_path = g_steal_pointer (&path);
+      return TRUE;
+    }
+
+  stream = g_memory_input_stream_new_from_data (data, (gssize) len, NULL);
+  pixbuf = gdk_pixbuf_new_from_stream (stream, NULL, error);
+  if (pixbuf == NULL)
+    return FALSE;
+
+  width = gdk_pixbuf_get_width (pixbuf);
+  height = gdk_pixbuf_get_height (pixbuf);
+  if (width > NUVASHALAUNCHER_ICON_SIZE || height > NUVASHALAUNCHER_ICON_SIZE)
+    {
+      int target_w = NUVASHALAUNCHER_ICON_SIZE;
+      int target_h = NUVASHALAUNCHER_ICON_SIZE;
+      if (width > height)
+        target_h = MAX (1, (int) ((gint64) height * NUVASHALAUNCHER_ICON_SIZE / width));
+      else if (height > width)
+        target_w = MAX (1, (int) ((gint64) width * NUVASHALAUNCHER_ICON_SIZE / height));
+      scaled = gdk_pixbuf_scale_simple (pixbuf, target_w, target_h, GDK_INTERP_BILINEAR);
+      if (scaled == NULL)
+        {
+          g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
+                               "the local icon could not be scaled");
+          return FALSE;
+        }
+    }
+
+  if (!gdk_pixbuf_save_to_buffer (scaled != NULL ? scaled : pixbuf,
+                                  &png_buf, &png_len, "png", error, NULL))
+    return FALSE;
+
+  if (!nuvashalauncher_fs_make_directory (directory, 0755, error))
+    return FALSE;
+
+  if (!g_file_set_contents_full (path, png_buf, (gssize) png_len,
+                                 G_FILE_SET_CONTENTS_NONE, 0644, error))
+    return FALSE;
+
+  *out_path = g_steal_pointer (&path);
+  return TRUE;
 }
 
 static void
@@ -512,10 +603,26 @@ apply_local_toml (NuvashaLauncherContentFile *file, const guint8 *data, gsize le
 static void
 apply_resource_metadata (NuvashaLauncherContentFile *file)
 {
-  g_autoptr (GByteArray) metadata =
-    read_archive_member (file->path, "pack.mcmeta");
-  g_autoptr (GByteArray) icon =
-    read_archive_member (file->path, "pack.png");
+  static const char * const members[] = { "pack.mcmeta", "pack.png" };
+  GByteArray *results[2] = { NULL, NULL };
+  g_autoptr (GByteArray) metadata = NULL;
+  g_autoptr (GByteArray) icon = NULL;
+  g_autofree char *cached_icon = NULL;
+  gsize query_count = 2;
+
+  if (file->sha1 != NULL)
+    {
+      cached_icon = local_icon_cache_path (file->sha1, NULL);
+      if (g_file_test (cached_icon, G_FILE_TEST_IS_REGULAR))
+        {
+          file->local_icon_path = g_steal_pointer (&cached_icon);
+          query_count = 1;
+        }
+    }
+
+  read_archive_members (file->path, members, query_count, results);
+  metadata = results[0];
+  icon = results[1];
 
   if (metadata != NULL)
     {
@@ -536,15 +643,10 @@ apply_resource_metadata (NuvashaLauncherContentFile *file)
             file->description = json_node_dup_string (description);
         }
     }
-  if (icon != NULL && file->sha1 != NULL)
+  if (icon != NULL && file->sha1 != NULL && file->local_icon_path == NULL)
     {
-      g_autofree char *directory = g_build_filename (g_get_user_cache_dir (),
-                                                      "nuvashalauncher", "icons", "local", NULL);
-      g_autofree char *name = g_strconcat (file->sha1, ".png", NULL);
-      g_autofree char *path = g_build_filename (directory, name, NULL);
-      if (nuvashalauncher_fs_make_directory (directory, 0755, NULL) &&
-          nuvashalauncher_fs_replace_contents (path, icon->data, icon->len, 0644, NULL) &&
-          nuvashalauncher_icon_scale_file (path))
+      g_autofree char *path = NULL;
+      if (write_cached_local_icon (file->sha1, icon->data, icon->len, &path, NULL))
         file->local_icon_path = g_steal_pointer (&path);
     }
   file->local_metadata = TRUE;
@@ -578,8 +680,7 @@ local_icon_extract_thread (GTask *task G_GNUC_UNUSED,
   LocalIconExtract *extract = task_data;
   g_autoptr (NuvashaLauncherTaskScope) scope = g_steal_pointer (&extract->scope);
   g_autoptr (GByteArray) icon = NULL;
-  g_autofree char *directory = NULL;
-  g_autofree char *name = NULL;
+  g_autofree char *cached_path = NULL;
   g_autofree char *path = NULL;
   g_autoptr (GError) error = NULL;
 
@@ -590,7 +691,15 @@ local_icon_extract_thread (GTask *task G_GNUC_UNUSED,
       return;
     }
 
-  icon = read_archive_member (extract->archive_path, extract->member);
+  cached_path = local_icon_cache_path (extract->sha1, NULL);
+  if (g_file_test (cached_path, G_FILE_TEST_IS_REGULAR))
+    {
+      nuvashalauncher_task_scope_return_pointer (scope, g_steal_pointer (&cached_path), g_free);
+      return;
+    }
+
+  read_archive_members (extract->archive_path, (const char * const *) &extract->member,
+                        1, &icon);
   if (icon == NULL)
     {
       nuvashalauncher_task_scope_return_error (scope,
@@ -599,14 +708,7 @@ local_icon_extract_thread (GTask *task G_GNUC_UNUSED,
       return;
     }
 
-  directory = g_build_filename (g_get_user_cache_dir (), "nuvashalauncher", "icons",
-                                "local", NULL);
-  name = g_strconcat (extract->sha1, ".png", NULL);
-  path = g_build_filename (directory, name, NULL);
-
-  if (!nuvashalauncher_fs_make_directory (directory, 0755, &error) ||
-      !nuvashalauncher_fs_replace_contents (path, icon->data, icon->len, 0644, &error) ||
-      !nuvashalauncher_icon_scale_file (path))
+  if (!write_cached_local_icon (extract->sha1, icon->data, icon->len, &path, &error))
     {
       if (error == NULL)
         error = g_error_new_literal (G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
@@ -675,38 +777,34 @@ nuvashalauncher_content_apply_local_metadata (NuvashaLauncherContentFile *file, 
       file->local_metadata = TRUE;
       return;
     }
+  static const char * const mod_members[] = {
+    "fabric.mod.json",
+    "quilt.mod.json",
+    "META-INF/mods.toml",
+    "META-INF/neoforge.mods.toml",
+    "mcmod.info",
+  };
+  GByteArray *results[G_N_ELEMENTS (mod_members)] = { NULL };
   char *icon_member = NULL;
-  g_autoptr (GByteArray) metadata = NULL;
 
-  /* Read the declared metadata files directly so Forge/NeoForge sections are
-   * parsed reliably. */
-  metadata = read_archive_member (file->path, "fabric.mod.json");
-  if (metadata != NULL)
-    apply_local_json (file, "fabric.mod.json", metadata->data, metadata->len,
+  /* Read all declared metadata candidates in a single archive pass. */
+  read_archive_members (file->path, mod_members, G_N_ELEMENTS (mod_members), results);
+
+  if (results[0] != NULL)
+    apply_local_json (file, "fabric.mod.json", results[0]->data, results[0]->len,
                       &icon_member);
-  else
-    {
-      metadata = read_archive_member (file->path, "quilt.mod.json");
-      if (metadata != NULL)
-        apply_local_json (file, "quilt.mod.json", metadata->data, metadata->len,
-                          &icon_member);
-    }
-  if (!file->local_metadata)
-    {
-      g_clear_pointer (&metadata, g_byte_array_unref);
-      metadata = read_archive_member (file->path, "META-INF/mods.toml");
-      if (metadata == NULL)
-        metadata = read_archive_member (file->path,
-                                        "META-INF/neoforge.mods.toml");
-      if (metadata != NULL)
-        apply_local_toml (file, metadata->data, metadata->len, &icon_member);
-    }
-  if (!file->local_metadata && metadata == NULL)
-    {
-      metadata = read_archive_member (file->path, "mcmod.info");
-      if (metadata != NULL)
-        apply_local_mcmod (file, metadata->data, metadata->len, &icon_member);
-    }
+  else if (results[1] != NULL)
+    apply_local_json (file, "quilt.mod.json", results[1]->data, results[1]->len,
+                      &icon_member);
+  else if (results[2] != NULL)
+    apply_local_toml (file, results[2]->data, results[2]->len, &icon_member);
+  else if (results[3] != NULL)
+    apply_local_toml (file, results[3]->data, results[3]->len, &icon_member);
+  else if (results[4] != NULL)
+    apply_local_mcmod (file, results[4]->data, results[4]->len, &icon_member);
+
+  for (gsize i = 0; i < G_N_ELEMENTS (results); i++)
+    g_clear_pointer (&results[i], g_byte_array_unref);
 
   file->local_icon_member = icon_member;
 }

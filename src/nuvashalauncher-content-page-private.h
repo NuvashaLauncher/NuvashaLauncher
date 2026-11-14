@@ -40,6 +40,9 @@ GtkWidget *file_row (NuvashaLauncherContentPage *self, NuvashaLauncherContentFil
 void load_visible_icons (NuvashaLauncherContentPage *self);
 void persist_identified_file (NuvashaLauncherContentPage *self,
                               NuvashaLauncherContentFile *file);
+void queue_persist_identified_file (NuvashaLauncherContentPage *self,
+                                    NuvashaLauncherContentFile *file);
+void flush_dirty_index_files (NuvashaLauncherContentPage *self);
 char *description_line (const char *text, guint max_sentences);
 void row_show_description (GtkWidget *row, const char *description);
 void reload_installed (NuvashaLauncherContentPage *self);
@@ -96,6 +99,7 @@ struct _NuvashaLauncherContentPage
     GtkLabel *selection_label;
     GtkButton *selection_delete;
     GHashTable *selected_paths; /* path -> TRUE */
+    guint index_flush_source;
   } installed;
   GtkBox *browse_actions;
 

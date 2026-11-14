@@ -10,9 +10,9 @@ static void cache_ready (GObject *, GAsyncResult *, gpointer);
 static void cache_info_ready (GObject *, GAsyncResult *, gpointer);
 static void cache_load_ready (GObject *, GAsyncResult *, gpointer);
 static void global_cache_copy_ready (GObject *, GAsyncResult *, gpointer);
-static void global_cache_copy_hash_ready (GObject *, GAsyncResult *, gpointer);
 static void global_cache_restore_ready (GObject *, GAsyncResult *, gpointer);
 static void global_cache_restore_hash_ready (GObject *, GAsyncResult *, gpointer);
+static void global_cache_directory_ready (GObject *, GAsyncResult *, gpointer);
 static void global_cache_files_ready (GObject *, GAsyncResult *, gpointer);
 
 /* ---------------------------------------------------------- *
@@ -38,7 +38,7 @@ nuvashalauncher_download_file_cache_start (DownloadRequest *request)
     g_task_get_cancellable (request->task));
 }
 
-static void
+void
 global_cache_copy (DownloadRequest *request)
 {
   g_autoptr (GFile) source = g_file_new_for_path (request->dest_path);
@@ -152,7 +152,7 @@ global_cache_restore_hash_ready (GObject *source G_GNUC_UNUSED,
   request_succeed (request);
 }
 
-void
+static void
 global_cache_directory_ready (GObject *source, GAsyncResult *result,
                                gpointer user_data)
 {
@@ -228,37 +228,24 @@ global_cache_copy_ready (GObject *source, GAsyncResult *result,
       return;
     }
 
-  /* The source was hashed before the asynchronous copy.  Hash the bytes
-   * actually adopted at the destination as well, so a replacement during
-   * the copy cannot satisfy the request. */
-  {
-    g_autoptr (GFile) destination = g_file_new_for_path (request->dest_path);
-    nuvashalauncher_task_scope_release_when_done (
-      nuvashalauncher_download_hash_file_async (destination, request->hash_type,
-                                    global_cache_copy_hash_ready, request),
-      g_task_get_cancellable (request->task));
-  }
-}
-
-static void
-global_cache_copy_hash_ready (GObject *source G_GNUC_UNUSED,
-                              GAsyncResult *result, gpointer user_data)
-{
-  DownloadRequest *request = user_data;
-  g_autoptr (GError) error = NULL;
-  g_autofree char *digest = nuvashalauncher_download_file_hash_finish (result, &error);
-
-  if (request_was_cancelled (request, error))
+  if (error != NULL &&
+      g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND) &&
+      !request->global_cache_mkdir_tried)
     {
-      nuvashalauncher_download_request_fail (request, nuvashalauncher_download_cancelled_error ());
+      g_autofree char *directory = nuvashalauncher_cache_get_files_directory ();
+      g_autoptr (GFile) directory_file = g_file_new_for_path (directory);
+      g_autoptr (GFile) parent = g_file_get_parent (directory_file);
+
+      request->global_cache_mkdir_tried = TRUE;
+      nuvashalauncher_fs_make_directory_async (parent, G_PRIORITY_DEFAULT,
+                                   g_task_get_cancellable (request->task),
+                                   global_cache_directory_ready, request);
       return;
     }
 
-  if (digest != NULL &&
-      g_ascii_strcasecmp (digest, request->expected_hash) == 0)
-    request_succeed (request);
-  else
-    start_attempt (request);
+  /* dest_path was already verified by hash and atomically renamed into place
+   * before global_cache_copy() ran, so no second disk re-hash is needed. */
+  request_succeed (request);
 }
 
 static void
@@ -360,7 +347,7 @@ cache_load_ready (GObject *source, GAsyncResult *result, gpointer user_data)
   g_autofree char *contents = NULL;
   g_autoptr (JsonParser) parser = NULL;
   g_autofree char *response = NULL;
-  gint64 created = 0;
+  gboolean fresh = FALSE;
   gsize length = 0;
 
   if (!g_file_load_contents_finish (G_FILE (source), result, &contents,
@@ -379,18 +366,19 @@ cache_load_ready (GObject *source, GAsyncResult *result, gpointer user_data)
     {
       g_autofree char *etag = NULL;
 
-      parser = nuvashalauncher_download_cache_parser (contents, length, &response, &etag, &created);
+      parser = nuvashalauncher_download_cache_parser (
+        contents, length, (gint64) request->cache_expiration,
+        &fresh, &response, &etag);
       g_clear_pointer (&request->cache_etag, g_free);
       request->cache_etag = g_steal_pointer (&etag);
     }
-  if (parser == NULL)
+  if (response == NULL)
     {
       start_attempt (request);
       return;
     }
 
-  if (g_get_real_time () / G_USEC_PER_SEC - created <=
-      (gint64) request->cache_expiration)
+  if (fresh && parser != NULL)
     {
       if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
         {

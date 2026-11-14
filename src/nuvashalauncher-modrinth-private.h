@@ -42,6 +42,11 @@ NuvashaLauncherTaskScope *nuvashalauncher_modrinth_get_async (
   const char *url, GAsyncReadyCallback callback, gpointer user_data,
   NuvashaLauncherModrinthAnswerFunc answer,
   NuvashaLauncherNotFoundRule not_found);
+NuvashaLauncherTaskScope *nuvashalauncher_modrinth_get_with_data_async (
+  const char *url, GAsyncReadyCallback callback, gpointer user_data,
+  NuvashaLauncherModrinthAnswerFunc answer,
+  NuvashaLauncherNotFoundRule not_found, gpointer data,
+  GDestroyNotify free_data);
 void nuvashalauncher_modrinth_json_ready (GObject *source, GAsyncResult *result,
                                           gpointer user_data);
 

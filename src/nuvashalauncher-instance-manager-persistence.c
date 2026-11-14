@@ -174,13 +174,6 @@ parse_instances_json (NuvashaLauncherInstanceManager *self,
               g_autofree char *abs_path = g_build_filename (self->instances_dir, dir_val, NULL);
               json_object_set_string_member (elem_obj, "directory", abs_path);
             }
-          else if (dir_val != NULL && !g_file_test (dir_val, G_FILE_TEST_IS_DIR))
-            {
-              g_autofree char *base = g_path_get_basename (dir_val);
-              g_autofree char *candidate = g_build_filename (self->instances_dir, base, NULL);
-              if (g_file_test (candidate, G_FILE_TEST_IS_DIR))
-                json_object_set_string_member (elem_obj, "directory", candidate);
-            }
         }
 
       NuvashaLauncherInstance *instance =
@@ -314,6 +307,14 @@ nuvashalauncher_instance_manager_load (NuvashaLauncherInstanceManager *self, GEr
               nuvashalauncher_instance_set_directory (instance, candidate, NULL);
               needs_resave = TRUE;
             }
+          else
+            {
+              /* A directory removed while nuvashalauncher was not running means
+               * the instance was removed outside nuvashalauncher. */
+              needs_resave = TRUE;
+              g_debug ("removed instance whose directory disappeared: %s", dir);
+              continue;
+            }
         }
       g_object_get (instance, "java-path", &java_path, NULL);
       if (java_path != NULL &&
@@ -330,10 +331,6 @@ nuvashalauncher_instance_manager_load (NuvashaLauncherInstanceManager *self, GEr
 
   if (needs_resave)
     nuvashalauncher_instance_manager_save (self, NULL);
-
-  /* A directory removed while nuvashalauncher was not running means the instance was
-   * removed outside nuvashalauncher. Reflect that in the model and metadata as well. */
-  check_instance_directories (self);
 
   return TRUE;
 }

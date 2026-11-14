@@ -326,13 +326,19 @@ static gboolean
 on_search_timeout (gpointer user_data)
 {
   NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
+  const char *text = gtk_editable_get_text (GTK_EDITABLE (self->browse.search_entry));
+  gboolean filter_dirty = GPOINTER_TO_INT (
+    g_object_get_data (G_OBJECT (self), "nuvashalauncher-filter-dirty"));
 
   nuvashalauncher_operation_forget_source (self->browse.model->scope,
                                 self->browse.model->debounce_source);
   self->browse.model->debounce_source = 0;
-  nuvashalauncher_content_browser_model_set_query (
-    self->browse.model,
-    gtk_editable_get_text (GTK_EDITABLE (self->browse.search_entry)));
+  g_object_set_data (G_OBJECT (self), "nuvashalauncher-filter-dirty", NULL);
+
+  if (!filter_dirty && g_strcmp0 (text, self->browse.model->query) == 0)
+    return G_SOURCE_REMOVE;
+
+  nuvashalauncher_content_browser_model_set_query (self->browse.model, text);
   nuvashalauncher_content_page_run_search (self, FALSE);
 
   return G_SOURCE_REMOVE;
@@ -653,5 +659,7 @@ on_category_toggled (GtkCheckButton *button, gpointer user_data)
     }
 
   self->browse.model->offset = 0;
-  nuvashalauncher_content_page_run_search (self, FALSE);
+  g_object_set_data (G_OBJECT (self), "nuvashalauncher-filter-dirty",
+                     GINT_TO_POINTER (1));
+  nuvashalauncher_content_page_on_search_changed (NULL, self);
 }

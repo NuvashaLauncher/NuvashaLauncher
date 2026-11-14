@@ -160,7 +160,7 @@ on_skin_upload_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   if (self != NULL && (response == NULL || error != NULL) && rate_limited)
     {
       guint delay = nuvashalauncher_minecraft_services_retry_delay (
-        NULL, self->upload_retry_attempt++);
+        upload != NULL ? upload->message : NULL, self->upload_retry_attempt++);
 
       /* Keep the failed selection unless the user has already selected a
        * newer one. The next attempt always uses the latest pending URL. */
@@ -218,10 +218,11 @@ send_skin_upload (SkinUpload *upload, GBytes *bytes)
   body = nuvashalauncher_minecraft_services_skin_multipart (prepared, upload->variant,
                                                             &content_type);
   soup_message_set_request_body_from_bytes (message, content_type, body);
+  g_clear_object (&upload->message);
+  upload->message = message;
   nuvashalauncher_task_scope_unref_when_done (
     nuvashalauncher_minecraft_services_send_async (message, upload->cancellable,
                                                    on_skin_upload_done, upload));
-  g_object_unref (message);
 }
 
 static void

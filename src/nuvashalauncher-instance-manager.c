@@ -287,11 +287,31 @@ check_instance_directory (NuvashaLauncherInstanceManager  *self,
 }
 
 static void
+on_instances_dir_changed (GFileMonitor      *monitor G_GNUC_UNUSED,
+                          GFile             *file G_GNUC_UNUSED,
+                          GFile             *other_file G_GNUC_UNUSED,
+                          GFileMonitorEvent  event_type,
+                          gpointer           user_data)
+{
+  NuvashaLauncherInstanceManager *self = NUVASHALAUNCHER_INSTANCE_MANAGER (user_data);
+
+  if (event_type == G_FILE_MONITOR_EVENT_DELETED ||
+      event_type == G_FILE_MONITOR_EVENT_MOVED_OUT ||
+      event_type == G_FILE_MONITOR_EVENT_RENAMED)
+    check_instance_directories (self);
+}
+
+static void
 nuvashalauncher_instance_manager_dispose (GObject *object)
 {
   NuvashaLauncherInstanceManager *self = NUVASHALAUNCHER_INSTANCE_MANAGER (object);
 
   g_clear_handle_id (&self->directory_check_source, g_source_remove);
+  if (self->instances_monitor != NULL)
+    {
+      g_file_monitor_cancel (self->instances_monitor);
+      g_clear_object (&self->instances_monitor);
+    }
   g_clear_object (&self->instances);
 
   G_OBJECT_CLASS (nuvashalauncher_instance_manager_parent_class)->dispose (object);
@@ -323,7 +343,7 @@ nuvashalauncher_instance_manager_init (NuvashaLauncherInstanceManager *self)
 {
   self->instances = g_list_store_new (NUVASHALAUNCHER_TYPE_INSTANCE);
   self->directory_check_source =
-    g_timeout_add_seconds (1, check_instance_directories, self);
+    g_timeout_add_seconds (30, check_instance_directories, self);
   g_source_set_name_by_id (self->directory_check_source,
                            "nuvashalauncher-instance-directory-check");
 }
@@ -350,6 +370,15 @@ nuvashalauncher_instance_manager_new (const char *data_dir)
     g_build_filename (self->data_dir, METADATA_FILE, NULL);
   self->instances_dir =
     g_build_filename (self->data_dir, "instances", NULL);
+
+  {
+    g_autoptr (GFile) instances_file = g_file_new_for_path (self->instances_dir);
+    self->instances_monitor = g_file_monitor_directory (
+      instances_file, G_FILE_MONITOR_WATCH_MOVES, NULL, NULL);
+    if (self->instances_monitor != NULL)
+      g_signal_connect (self->instances_monitor, "changed",
+                        G_CALLBACK (on_instances_dir_changed), self);
+  }
 
   return self;
 }
@@ -686,6 +715,7 @@ gboolean
 check_instance_directories (gpointer user_data)
 {
   NuvashaLauncherInstanceManager *self = NUVASHALAUNCHER_INSTANCE_MANAGER (user_data);
+  gboolean changed = FALSE;
 
   for (guint i = g_list_model_get_n_items (G_LIST_MODEL (self->instances));
        i > 0;
@@ -708,21 +738,23 @@ check_instance_directories (gpointer user_data)
           g_autoptr (GError) error = NULL;
           if (nuvashalauncher_instance_set_directory (instance, migrated, &error))
             {
-              nuvashalauncher_instance_manager_save (self, NULL);
+              changed = TRUE;
               g_debug ("migrated instance directory to: %s", migrated);
               continue;
             }
         }
 
-      g_autoptr (GError) error = NULL;
-      if (!remove_instance_and_save (self, instance, &error))
-        {
-          g_warning ("could not remove missing instance directory from the "
-                     "instance list: %s", error->message);
-          continue;
-        }
-
+      g_list_store_remove (self->instances, position);
+      changed = TRUE;
       g_debug ("removed instance whose directory disappeared: %s", directory);
+    }
+
+  if (changed)
+    {
+      g_autoptr (GError) error = NULL;
+      if (!nuvashalauncher_instance_manager_save (self, &error))
+        g_warning ("could not persist instance directory changes: %s",
+                   error->message);
     }
 
   return G_SOURCE_CONTINUE;
