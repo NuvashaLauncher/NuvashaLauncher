@@ -226,7 +226,7 @@ details_content (NuvashaLauncherContentPage *self)
   GtkWidget *box = NULL;
   GtkWidget *heading = NULL;
   g_autoptr (GtkBuilder) details_builder = gtk_builder_new_from_resource (
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-content-details.ui");
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-content-details.ui");
   GtkWidget *title = NULL;
   GtkWidget *meta = NULL;
   GtkWidget *count = NULL;

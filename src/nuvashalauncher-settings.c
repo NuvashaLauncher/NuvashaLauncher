@@ -380,7 +380,7 @@ lookup_nuvashalauncher_schema (GSettingsSchemaSource *source)
 {
   if (source == NULL)
     return NULL;
-  return g_settings_schema_source_lookup (source, "com.github.nuvashalauncher.nuvashalauncher", TRUE);
+  return g_settings_schema_source_lookup (source, "com.github.NuvashaLauncher.NuvashaLauncher", TRUE);
 }
 
 static GSettingsSchema *
@@ -452,12 +452,12 @@ find_settings_schema (void)
     {
       if (xml_dirs[i] == NULL)
         continue;
-      g_autofree char *xml_file = g_build_filename (xml_dirs[i], "com.github.nuvashalauncher.nuvashalauncher.gschema.xml", NULL);
+      g_autofree char *xml_file = g_build_filename (xml_dirs[i], "com.github.NuvashaLauncher.NuvashaLauncher.gschema.xml", NULL);
       if (g_file_test (xml_file, G_FILE_TEST_EXISTS))
         {
           g_autofree char *cache_dir = g_build_filename (g_get_user_cache_dir (), "nuvashalauncher", "schemas", NULL);
           g_mkdir_with_parents (cache_dir, 0700);
-          g_autofree char *cached_xml = g_build_filename (cache_dir, "com.github.nuvashalauncher.nuvashalauncher.gschema.xml", NULL);
+          g_autofree char *cached_xml = g_build_filename (cache_dir, "com.github.NuvashaLauncher.NuvashaLauncher.gschema.xml", NULL);
           g_autofree char *contents = NULL;
           gsize len = 0;
           if (g_file_get_contents (xml_file, &contents, &len, NULL) &&

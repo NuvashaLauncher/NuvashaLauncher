@@ -16,7 +16,7 @@ nuvashalauncher_ui_ensure_icons (void)
         {
           GtkIconTheme *icon_theme = gtk_icon_theme_get_for_display (display);
           gtk_icon_theme_add_resource_path (
-            icon_theme, "/com/github/nuvashalauncher/nuvashalauncher/icons");
+            icon_theme, "/com/github/NuvashaLauncher/NuvashaLauncher/icons");
         }
       g_once_init_leave (&initialized, 1);
     }

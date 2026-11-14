@@ -98,7 +98,7 @@ refresh_downloads (NuvashaLauncherMainWindow *self)
       if (row == NULL)
         {
           g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
-            "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-download-row.ui");
+            "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-download-row.ui");
           GtkBox *box = GTK_BOX (gtk_builder_get_object (builder, "box"));
            GtkLabel *title = GTK_LABEL (gtk_builder_get_object (builder, "title"));
           GtkButton *cancel = GTK_BUTTON (gtk_builder_get_object (builder, "cancel"));

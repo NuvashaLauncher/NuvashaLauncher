@@ -68,7 +68,7 @@
               homepage = "https://github.com/NuvashaLauncher/NuvashaLauncher";
               changelog = "https://github.com/NuvashaLauncher/NuvashaLauncher/releases/tag/v${version}";
               license = with licenses; [ gpl3Only cc0 ];
-              mainProgram = "nuvashalauncher";
+              mainProgram = "NuvashaLauncher";
               platforms = platforms.linux;
             };
           };
@@ -79,7 +79,7 @@
       apps = forAllSystems (system: {
         default = {
           type = "app";
-          program = "${self.packages.${system}.default}/bin/nuvashalauncher";
+          program = "${self.packages.${system}.default}/bin/NuvashaLauncher";
         };
       });
 

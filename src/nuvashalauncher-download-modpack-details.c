@@ -206,9 +206,9 @@ details_content (NuvashaLauncherDownloadModpackDialog *self)
   GtkWidget *heading = NULL;
   GtkWidget *bar = NULL;
   g_autoptr (GtkBuilder) body_builder = gtk_builder_new_from_resource (
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-details-body.ui");
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-details-body.ui");
   g_autoptr (GtkBuilder) toolbar_builder = gtk_builder_new_from_resource (
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-details-toolbar.ui");
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-details-toolbar.ui");
   g_autofree char *downloads = NULL;
   const char *who = author_of (self);
 

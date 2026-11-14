@@ -69,7 +69,7 @@ static void
 test_modpack_filter_entry (void)
 {
   g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-browser-toolbar.ui");
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-browser-toolbar.ui");
   GtkEntry *entry = GTK_ENTRY (gtk_builder_get_object (builder, "search-entry"));
   GtkBox *parent = GTK_BOX (gtk_widget_get_parent (GTK_WIDGET (entry)));
 

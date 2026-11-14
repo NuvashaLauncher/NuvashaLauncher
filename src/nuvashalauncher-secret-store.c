@@ -11,7 +11,7 @@
 /* This is deliberately a new schema. Older keyring entries are not part of
  * the current account store and are neither read nor migrated. */
 static const SecretSchema account_schema = {
-  .name = "com.github.nuvashalauncher.Account",
+  .name = "com.github.NuvashaLauncher.Account",
   .flags = SECRET_SCHEMA_NONE,
   .attributes = {
     { "account-id", SECRET_SCHEMA_ATTRIBUTE_STRING },
@@ -20,7 +20,7 @@ static const SecretSchema account_schema = {
 };
 
 static const SecretSchema active_schema = {
-  .name = "com.github.nuvashalauncher.ActiveAccount",
+  .name = "com.github.NuvashaLauncher.ActiveAccount",
   .flags = SECRET_SCHEMA_NONE,
   .attributes = {
     { "kind", SECRET_SCHEMA_ATTRIBUTE_STRING },
@@ -32,7 +32,7 @@ static const SecretSchema active_schema = {
  * or remove a real user's account items, even when the test process has
  * access to the user's Secret Service. */
 static const SecretSchema test_account_schema = {
-  .name = "com.github.nuvashalauncher.TestAccount",
+  .name = "com.github.NuvashaLauncher.TestAccount",
   .flags = SECRET_SCHEMA_NONE,
   .attributes = {
     { "account-id", SECRET_SCHEMA_ATTRIBUTE_STRING },
@@ -41,7 +41,7 @@ static const SecretSchema test_account_schema = {
 };
 
 static const SecretSchema test_active_schema = {
-  .name = "com.github.nuvashalauncher.TestActiveAccount",
+  .name = "com.github.NuvashaLauncher.TestActiveAccount",
   .flags = SECRET_SCHEMA_NONE,
   .attributes = {
     { "kind", SECRET_SCHEMA_ATTRIBUTE_STRING },

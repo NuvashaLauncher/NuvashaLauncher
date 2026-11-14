@@ -364,7 +364,7 @@ row_set_icon (GtkImage *image, NuvashaLauncherInstance *instance)
 
   {
     g_autoptr (GdkTexture) fallback = gdk_texture_new_from_resource (
-      "/com/github/nuvashalauncher/nuvashalauncher/pack.png");
+      "/com/github/NuvashaLauncher/NuvashaLauncher/pack.png");
     if (fallback != NULL)
       {
         gtk_image_set_from_paintable (image, GDK_PAINTABLE (fallback));

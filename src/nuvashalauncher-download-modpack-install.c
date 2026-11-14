@@ -197,7 +197,7 @@ build_optional_page (NuvashaLauncherDownloadModpackDialog *self,
                      GPtrArray *optional_files)
 {
   g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-modpack-optional.ui");
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-optional.ui");
   AdwPreferencesGroup *heading = ADW_PREFERENCES_GROUP (
     adw_preferences_group_new ());
   GtkButton *cancel = GTK_BUTTON (gtk_builder_get_object (builder, "cancel-button"));

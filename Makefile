@@ -53,7 +53,7 @@ CPPFLAGS += -DNUVASHALAUNCHER_FLATPAK
 endif
 LOCALES := es_AR es_ES pt_BR pt_PT fr de it ja ko zh_CN zh_TW ru pl uk tr nl cs hu sv da fi nb ro vi id ar
 LOCALE_MOS := $(LOCALES:%=build/locale/%/LC_MESSAGES/nuvashalauncher.mo)
-SCHEMA_XML := data/com.github.nuvashalauncher.nuvashalauncher.gschema.xml
+SCHEMA_XML := data/com.github.NuvashaLauncher.NuvashaLauncher.gschema.xml
 SCHEMA_COMPILED := build/schemas/gschemas.compiled
 
 CFLAGS     ?= -std=c17 -Wall -Wextra -Wpedantic -MMD -MP
@@ -61,8 +61,8 @@ RELFLAGS   := -O2 -D_FORTIFY_SOURCE=2 -fstack-protector-strong -fPIE
 RELLDFLAGS := -pie -Wl,-z,relro,-z,now
 DBGFLAGS   := -g -O0 -fsanitize=address,undefined -fno-sanitize-recover=all
 
-BIN    := build/nuvashalauncher
-DBGBIN := build-debug/nuvashalauncher
+BIN    := build/NuvashaLauncher
+DBGBIN := build-debug/NuvashaLauncher
 
 SRCS    := $(filter-out $(wildcard src/*-part.c),$(wildcard src/*.c))
 RELOBJS := $(patsubst src/%.c,build/%.o,$(SRCS))
@@ -162,15 +162,15 @@ test-flatpak-runtime:
 	@if ! command -v flatpak >/dev/null 2>&1; then \
 		echo "SKIP test-flatpak-runtime: flatpak is unavailable"; exit 77; \
 	fi
-	@if ! flatpak info com.github.nuvashalauncher.nuvashalauncher >/dev/null 2>&1; then \
+	@if ! flatpak info com.github.NuvashaLauncher.NuvashaLauncher >/dev/null 2>&1; then \
 		echo "SKIP test-flatpak-runtime: application is not installed"; exit 77; \
 	fi
 	@set -eu; \
-	version=$$(flatpak run com.github.nuvashalauncher.nuvashalauncher --version); \
+	version=$$(flatpak run com.github.NuvashaLauncher.NuvashaLauncher --version); \
   test "$$version" = "Nuvasha Launcher $(VERSION)"; \
-	flatpak run com.github.nuvashalauncher.nuvashalauncher --list-instances >/dev/null; \
-	flatpak run com.github.nuvashalauncher.nuvashalauncher --list-accounts >/dev/null; \
-	flatpak run --command=sh com.github.nuvashalauncher.nuvashalauncher -c '\
+	flatpak run com.github.NuvashaLauncher.NuvashaLauncher --list-instances >/dev/null; \
+	flatpak run com.github.NuvashaLauncher.NuvashaLauncher --list-accounts >/dev/null; \
+	flatpak run --command=sh com.github.NuvashaLauncher.NuvashaLauncher -c '\
 		set -eu; \
 		test -w "$$XDG_DATA_HOME"; \
 		probe="$$XDG_DATA_HOME/.runtime-smoke"; \
@@ -221,28 +221,28 @@ pot:
 		--files-from=po/POTFILES.in --output=po/nuvashalauncher.pot
 
 install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS) $(SCHEMA_COMPILED)
-	install -Dm755 $(BIN) "$(DESTDIR)$(PREFIX)/bin/nuvashalauncher"
+	install -Dm755 $(BIN) "$(DESTDIR)$(PREFIX)/bin/NuvashaLauncher"
 	install -Dm644 data/pack.png "$(DESTDIR)$(PREFIX)/share/nuvashalauncher/pack.png"
 	install -Dm644 data/nuvashalauncher.css "$(DESTDIR)$(PREFIX)/share/nuvashalauncher/nuvashalauncher.css"
 	@for skin in data/skins/defaults/*.png; do \
 		install -Dm644 "$$skin" "$(DESTDIR)$(PREFIX)/share/nuvashalauncher/skins/defaults/$$(basename "$$skin")"; \
 	done
-	install -Dm644 data/com.github.nuvashalauncher.nuvashalauncher.desktop \
-		"$(DESTDIR)$(PREFIX)/share/applications/com.github.nuvashalauncher.nuvashalauncher.desktop"
+	install -Dm644 data/com.github.NuvashaLauncher.NuvashaLauncher.desktop \
+		"$(DESTDIR)$(PREFIX)/share/applications/com.github.NuvashaLauncher.NuvashaLauncher.desktop"
 	install -Dm644 data/nuvashalauncher.bash \
-		"$(DESTDIR)$(PREFIX)/share/bash-completion/completions/nuvashalauncher"
-	install -Dm644 data/com.github.nuvashalauncher.nuvashalauncher.xml \
-		"$(DESTDIR)$(PREFIX)/share/mime/packages/com.github.nuvashalauncher.nuvashalauncher.xml"
-	install -Dm644 data/icons/scalable/apps/com.github.nuvashalauncher.nuvashalauncher.svg \
-		"$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.nuvashalauncher.nuvashalauncher.svg"
+		"$(DESTDIR)$(PREFIX)/share/bash-completion/completions/NuvashaLauncher"
+	install -Dm644 data/com.github.NuvashaLauncher.NuvashaLauncher.xml \
+		"$(DESTDIR)$(PREFIX)/share/mime/packages/com.github.NuvashaLauncher.NuvashaLauncher.xml"
+	install -Dm644 data/icons/scalable/apps/com.github.NuvashaLauncher.NuvashaLauncher.svg \
+		"$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.NuvashaLauncher.NuvashaLauncher.svg"
 	install -Dm644 data/icons/scalable/actions/export-symbolic.svg \
 		"$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/actions/export-symbolic.svg"
 	install -Dm644 data/icons/scalable/actions/external-link-symbolic.svg \
 		"$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/actions/external-link-symbolic.svg"
-	install -Dm644 data/com.github.nuvashalauncher.nuvashalauncher.metainfo.xml \
-		"$(DESTDIR)$(PREFIX)/share/metainfo/com.github.nuvashalauncher.nuvashalauncher.metainfo.xml"
+	install -Dm644 data/com.github.NuvashaLauncher.NuvashaLauncher.metainfo.xml \
+		"$(DESTDIR)$(PREFIX)/share/metainfo/com.github.NuvashaLauncher.NuvashaLauncher.metainfo.xml"
 	install -Dm644 $(SCHEMA_XML) \
-		"$(DESTDIR)$(PREFIX)/share/glib-2.0/schemas/com.github.nuvashalauncher.nuvashalauncher.gschema.xml"
+		"$(DESTDIR)$(PREFIX)/share/glib-2.0/schemas/com.github.NuvashaLauncher.NuvashaLauncher.gschema.xml"
 	@for lang in $(LOCALES); do \
 		install -Dm644 build/locale/$$lang/LC_MESSAGES/nuvashalauncher.mo \
 			"$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/nuvashalauncher.mo"; \
@@ -267,18 +267,18 @@ install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS) $(SCHEMA_COMPILED)
 # The same list the install loop uses, so the catalogs go back out with
 # the rest of the launcher.
 uninstall:
-	rm -f "$(DESTDIR)$(PREFIX)/bin/nuvashalauncher"
+	rm -f "$(DESTDIR)$(PREFIX)/bin/NuvashaLauncher"
 	rm -f "$(DESTDIR)$(PREFIX)/share/nuvashalauncher/pack.png"
 	rm -f "$(DESTDIR)$(PREFIX)/share/nuvashalauncher/nuvashalauncher.css"
 	rm -rf "$(DESTDIR)$(PREFIX)/share/nuvashalauncher/skins/defaults"
-	rm -f "$(DESTDIR)$(PREFIX)/share/applications/com.github.nuvashalauncher.nuvashalauncher.desktop"
-	rm -f "$(DESTDIR)$(PREFIX)/share/bash-completion/completions/nuvashalauncher"
-	rm -f "$(DESTDIR)$(PREFIX)/share/mime/packages/com.github.nuvashalauncher.nuvashalauncher.xml"
-	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.nuvashalauncher.nuvashalauncher.svg"
+	rm -f "$(DESTDIR)$(PREFIX)/share/applications/com.github.NuvashaLauncher.NuvashaLauncher.desktop"
+	rm -f "$(DESTDIR)$(PREFIX)/share/bash-completion/completions/NuvashaLauncher"
+	rm -f "$(DESTDIR)$(PREFIX)/share/mime/packages/com.github.NuvashaLauncher.NuvashaLauncher.xml"
+	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.NuvashaLauncher.NuvashaLauncher.svg"
 	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/actions/export-symbolic.svg"
 	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/actions/external-link-symbolic.svg"
-	rm -f "$(DESTDIR)$(PREFIX)/share/metainfo/com.github.nuvashalauncher.nuvashalauncher.metainfo.xml"
-	rm -f "$(DESTDIR)$(PREFIX)/share/glib-2.0/schemas/com.github.nuvashalauncher.nuvashalauncher.gschema.xml"
+	rm -f "$(DESTDIR)$(PREFIX)/share/metainfo/com.github.NuvashaLauncher.NuvashaLauncher.metainfo.xml"
+	rm -f "$(DESTDIR)$(PREFIX)/share/glib-2.0/schemas/com.github.NuvashaLauncher.NuvashaLauncher.gschema.xml"
 	@for lang in $(LOCALES); do \
 		rm -f "$(DESTDIR)$(PREFIX)/share/locale/$$lang/LC_MESSAGES/nuvashalauncher.mo"; \
 	done

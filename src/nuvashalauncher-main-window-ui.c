@@ -27,7 +27,7 @@ nuvashalauncher_main_window_build_ui (NuvashaLauncherMainWindow *self)
   g_autoptr (GMenu) add_menu = create_add_menu ();
   g_autoptr (GMenu) app_menu = create_app_menu ();
   g_autoptr (GtkBuilder) shell_builder = gtk_builder_new_from_resource (
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-main-shell.ui");
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-main-shell.ui");
   AdwHeaderBar *header = ADW_HEADER_BAR (gtk_builder_get_object (
     shell_builder, "header"));
   GtkMenuButton *add_button = GTK_MENU_BUTTON (gtk_menu_button_new ());

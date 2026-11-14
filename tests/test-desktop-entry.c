@@ -13,7 +13,7 @@ test_desktop_entry (void)
 {
   g_autofree gchar *path =
     g_build_filename (NUVASHALAUNCHER_DATA_DIR,
-                      "com.github.nuvashalauncher.nuvashalauncher.desktop", NULL);
+                      "com.github.NuvashaLauncher.NuvashaLauncher.desktop", NULL);
   g_autoptr (GKeyFile) keys = g_key_file_new ();
   g_autoptr (GError) error = NULL;
   g_autofree gchar *type = NULL;
@@ -36,14 +36,14 @@ test_desktop_entry (void)
   g_assert_cmpstr (comment, ==, "Minecraft launcher for Linux");
 
   exec = g_key_file_get_string (keys, "Desktop Entry", "Exec", NULL);
-  g_assert_cmpstr (exec, ==, "nuvashalauncher %f");
+  g_assert_cmpstr (exec, ==, "NuvashaLauncher %f");
 
   g_autofree gchar *mime_type =
     g_key_file_get_string (keys, "Desktop Entry", "MimeType", NULL);
   g_assert_cmpstr (mime_type, ==, "application/x-modrinth-modpack;");
 
   icon = g_key_file_get_string (keys, "Desktop Entry", "Icon", NULL);
-  g_assert_cmpstr (icon, ==, "com.github.nuvashalauncher.nuvashalauncher");
+  g_assert_cmpstr (icon, ==, "com.github.NuvashaLauncher.NuvashaLauncher");
 
   g_assert_true (g_key_file_has_key (keys, "Desktop Entry", "Terminal", NULL));
   g_assert_false (g_key_file_get_boolean (keys, "Desktop Entry", "Terminal",

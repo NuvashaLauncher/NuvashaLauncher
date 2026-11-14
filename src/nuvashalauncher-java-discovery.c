@@ -551,7 +551,7 @@ nuvashalauncher_java_register_custom_path (const char *executable)
   if (executable == NULL || *executable == '\0')
     return;
 
-  settings = g_settings_new ("com.github.nuvashalauncher.nuvashalauncher");
+  settings = g_settings_new ("com.github.NuvashaLauncher.NuvashaLauncher");
   stored = g_settings_get_strv (settings, "custom-java-paths");
   for (guint i = 0; stored != NULL && stored[i] != NULL; i++)
     {
@@ -590,7 +590,7 @@ collect_candidates (void)
 
   {
     g_autoptr (GSettings) settings = g_settings_new (
-      "com.github.nuvashalauncher.nuvashalauncher");
+      "com.github.NuvashaLauncher.NuvashaLauncher");
     g_auto (GStrv) custom = g_settings_get_strv (settings, "custom-java-paths");
     g_autoptr (GPtrArray) valid_custom = g_ptr_array_new_with_free_func (g_free);
     gboolean pruned = FALSE;

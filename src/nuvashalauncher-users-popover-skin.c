@@ -521,7 +521,7 @@ static AdwActionRow *
 skin_row_new (SkinMenu *menu, const char *name, const char *url)
 {
   g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-skin-row.ui");
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-skin-row.ui");
   AdwActionRow *row = ADW_ACTION_ROW (g_object_ref (
     gtk_builder_get_object (builder, "row")));
   GtkImage *image = GTK_IMAGE (gtk_builder_get_object (builder, "avatar"));
@@ -875,7 +875,7 @@ nuvashalauncher_users_skin_menu_new (NuvashaLauncherUsersPopover *owner, GtkImag
   AdwHeaderBar *header = ADW_HEADER_BAR (adw_header_bar_new ());
   AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
   g_autoptr (GtkBuilder) content_builder = gtk_builder_new_from_resource (
-    "/com/github/nuvashalauncher/nuvashalauncher/ui/nuvashalauncher-skin-content.ui");
+    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-skin-content.ui");
   GtkBox *root = GTK_BOX (gtk_builder_get_object (content_builder, "root"));
   GtkBox *left = GTK_BOX (gtk_builder_get_object (content_builder, "left"));
   GtkBox *right = GTK_BOX (gtk_builder_get_object (content_builder, "right"));

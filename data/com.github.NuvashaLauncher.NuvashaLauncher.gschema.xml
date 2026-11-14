@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
-  <schema id="com.github.nuvashalauncher.nuvashalauncher" path="/com/github/nuvashalauncher/nuvashalauncher/">
+  <schema id="com.github.NuvashaLauncher.NuvashaLauncher" path="/com/github/NuvashaLauncher/NuvashaLauncher/">
     <key name="show-unstable-versions" type="b"><default>false</default></key>
     <key name="log-line-limit" type="u"><default>5000</default></key>
     <key name="show-unstable-loaders" type="b"><default>false</default></key>

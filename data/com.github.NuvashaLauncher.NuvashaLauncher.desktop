@@ -5,8 +5,8 @@
 Type=Application
 Name=Nuvasha Launcher
 Comment=Minecraft launcher for Linux
-Exec=nuvashalauncher %f
-Icon=com.github.nuvashalauncher.nuvashalauncher
+Exec=NuvashaLauncher %f
+Icon=com.github.NuvashaLauncher.NuvashaLauncher
 Terminal=false
 Categories=Game;
 MimeType=application/x-modrinth-modpack;
