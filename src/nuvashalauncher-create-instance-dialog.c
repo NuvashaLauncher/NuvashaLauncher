@@ -230,6 +230,7 @@ nuvashalauncher_create_instance_dialog_init (NuvashaLauncherCreateInstanceDialog
   self->version_row = nuvashalauncher_version_row_new ();
   self->loader_row = nuvashalauncher_loader_row_new ();
   self->directory_row = ADW_ACTION_ROW (adw_action_row_new ());
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->directory_row), FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->directory_row), _("Directory"));
   adw_action_row_set_subtitle (self->directory_row, default_directory);
   pick_button = GTK_BUTTON (gtk_button_new_from_icon_name ("folder-symbolic"));

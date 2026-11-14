@@ -91,20 +91,16 @@ inline_link (GString *out, const char *text, gsize length, gboolean allow_html,
 
   if (nuvashalauncher_markdown_url_is_safe (url))
     {
-      g_autofree char *escaped = g_markup_escape_text (url, -1);
-
-      g_string_append_printf (out, "<a href=\"%s\">", escaped);
-
       /* Images are intentionally hidden in descriptions, including an
          image wrapped in a link. */
-      if (g_str_has_prefix (label, "!["))
+      if (!g_str_has_prefix (label, "!["))
         {
-          /* Keep consuming the outer link, but emit no text or markup. */
-        }
-      else
-        inline_into (out, label, strlen (label), allow_html);
+          g_autofree char *escaped = g_markup_escape_text (url, -1);
 
-      g_string_append (out, "</a>");
+          g_string_append_printf (out, "<a href=\"%s\">", escaped);
+          inline_into (out, label, strlen (label), allow_html);
+          g_string_append (out, "</a>");
+        }
     }
   else
     {
@@ -327,6 +323,13 @@ inline_into (GString *out, const char *text, gsize length, gboolean allow_html)
     {
       char c = text[i];
 
+      if (c == '\\' && i + 1 < length && g_ascii_ispunct (text[i + 1]))
+        {
+          inline_char (out, text[i + 1]);
+          i += 2;
+          continue;
+        }
+
       if (allow_html && c == '<')
         {
           gsize used = 0;
@@ -434,14 +437,16 @@ inline_into (GString *out, const char *text, gsize length, gboolean allow_html)
         }
 
       if ((c == '*' || c == '_') && i + 1 < length && text[i + 1] != ' ' &&
-          text[i + 1] != c)
+          text[i + 1] != c &&
+          (c != '_' || i == 0 || !g_ascii_isalnum (text[i - 1])))
         {
           const char *hay = text + i + 1;
           gsize hay_len = length - i - 1;
           const char *end = NULL;
 
           for (gsize j = 1; j < hay_len; j++)
-            if (hay[j] == c && hay[j - 1] != ' ')
+            if (hay[j] == c && hay[j - 1] != ' ' &&
+                (c != '_' || j + 1 >= hay_len || !g_ascii_isalnum (hay[j + 1])))
               {
                 end = hay + j;
                 break;

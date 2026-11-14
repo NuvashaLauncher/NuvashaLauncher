@@ -50,7 +50,7 @@ html_to_markdown (const char *text)
   g_autofree char *step = NULL;
   char *out = NULL;
 
-  step = regex_replace (text, "<!--.*?-->", "", G_REGEX_DOTALL);
+  step = regex_replace (text, "\r\n?", "\n", 0);
   out = g_steal_pointer (&step);
 
 #define REPLACE(pattern, replacement, flags)                                 \
@@ -62,8 +62,11 @@ html_to_markdown (const char *text)
   }                                                                          \
   G_STMT_END
 
-  /* A block of code, kept verbatim. */
-  REPLACE ("<pre[^>]*>(.*?)</pre>", "\n\n```\n\\1\n```\n\n",
+  REPLACE ("<!--.*?-->", "", G_REGEX_DOTALL);
+
+  /* A block of code, kept verbatim (stripping optional inner <code> wrapper). */
+  REPLACE ("<pre[^>]*>\\s*(?:<code[^>]*>)?(.*?)(?:</code>)?\\s*</pre>",
+           "\n\n```\n\\1\n```\n\n",
            G_REGEX_CASELESS | G_REGEX_DOTALL);
 
   /* A video embed becomes a link that opens it. */
@@ -221,20 +224,40 @@ heading_level (const char *line)
 }
 
 /* "- ", "* " or "1. " at the start, after indentation. @content is what
- * follows the marker, and @bullet is the marker a user sees. */
+ * follows the marker, @bullet is the marker a user sees, and @depth is
+ * the nesting level (0-4). */
 static gboolean
-list_item (const char *line, const char **content, char **bullet)
+list_item (const char *line, const char **content, char **bullet, guint *depth)
 {
   guint i = 0;
+  guint spaces = 0;
   guint digits = 0;
 
   while (line[i] == ' ' || line[i] == '\t')
-    i++;
+    {
+      spaces += (line[i] == '\t') ? 4 : 1;
+      i++;
+    }
+
+  if (depth != NULL)
+    *depth = MIN (spaces / 2, 4);
 
   if ((line[i] == '-' || line[i] == '*' || line[i] == '+') &&
       line[i + 1] == ' ')
     {
-      *content = line + i + 2;
+      const char *rest = line + i + 2;
+
+      if (rest[0] == '[' &&
+          (rest[1] == ' ' || rest[1] == 'x' || rest[1] == 'X') &&
+          rest[2] == ']' && rest[3] == ' ')
+        {
+          *content = rest + 4;
+          if (bullet != NULL)
+            *bullet = g_strdup (rest[1] == ' ' ? "☐" : "☑");
+          return TRUE;
+        }
+
+      *content = rest;
 
       if (bullet != NULL)
         *bullet = g_strdup ("•");
@@ -326,14 +349,43 @@ is_table_separator (const char *line)
   return saw_dash;
 }
 
-/* The pipe rows of a table, laid out as a grid. */
+/* Parse column alignments ("---", ":---", ":---:", "---:") from a GFM
+ * separator row into @alignments (float xalign values). */
+static void
+parse_table_alignments (const char *line, GArray *alignments)
+{
+  g_auto (GStrv) cells = g_strsplit (line, "|", -1);
+  guint n = g_strv_length (cells);
+
+  for (guint c = 0; c < n; c++)
+    {
+      g_autofree char *copy = g_strdup (cells[c]);
+      const char *cell = g_strstrip (copy);
+      gsize len = strlen (cell);
+      float align = 0.0f;
+
+      if ((c == 0 || c + 1 == n) && len == 0)
+        continue;
+
+      if (len >= 2 && cell[0] == ':' && cell[len - 1] == ':')
+        align = 0.5f;
+      else if (len >= 1 && cell[len - 1] == ':')
+        align = 1.0f;
+
+      g_array_append_val (alignments, align);
+    }
+}
+
+/* The pipe rows of a table, laid out as a horizontally scrollable grid. */
 static GtkWidget *
-table_block (GPtrArray *rows)
+table_block (GPtrArray *rows, GArray *alignments, gboolean has_header)
 {
   GtkGrid *grid = GTK_GRID (gtk_grid_new ());
+  GtkScrolledWindow *scroller =
+    GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
 
-  gtk_grid_set_row_spacing (GTK_GRID (grid), 4);
-  gtk_grid_set_column_spacing (GTK_GRID (grid), 12);
+  gtk_grid_set_row_spacing (grid, 6);
+  gtk_grid_set_column_spacing (grid, 16);
   gtk_widget_set_hexpand (GTK_WIDGET (grid), TRUE);
   gtk_widget_set_margin_top (GTK_WIDGET (grid), 4);
   gtk_widget_set_margin_bottom (GTK_WIDGET (grid), 4);
@@ -343,6 +395,7 @@ table_block (GPtrArray *rows)
       char **cells = g_ptr_array_index (rows, r);
       guint n = g_strv_length (cells);
       guint column = 0;
+      gboolean is_header_row = has_header && r == 0;
 
       for (guint c = 0; c < n; c++)
         {
@@ -353,17 +406,30 @@ table_block (GPtrArray *rows)
           {
             g_autofree char *cell = g_strdup (cells[c]);
             const char *text = g_strstrip (cell);
-            GtkWidget *widget = text_block (text, NULL);
+            GtkWidget *widget =
+              text_block (text, is_header_row ? "heading" : NULL);
+
+            if (alignments != NULL && column < alignments->len)
+              {
+                float xalign = g_array_index (alignments, float, column);
+
+                gtk_label_set_xalign (GTK_LABEL (widget), xalign);
+              }
 
             gtk_widget_set_hexpand (widget, TRUE);
             gtk_widget_set_valign (widget, GTK_ALIGN_START);
-            gtk_grid_attach (GTK_GRID (grid), widget, column, r, 1, 1);
+            gtk_grid_attach (grid, widget, column, r, 1, 1);
             column++;
           }
         }
     }
 
-  return GTK_WIDGET (grid);
+  gtk_scrolled_window_set_policy (scroller, GTK_POLICY_AUTOMATIC,
+                                  GTK_POLICY_NEVER);
+  gtk_scrolled_window_set_propagate_natural_height (scroller, TRUE);
+  gtk_scrolled_window_set_child (scroller, GTK_WIDGET (grid));
+
+  return GTK_WIDGET (scroller);
 }
 
 /* TRUE when @line begins a block that is not a paragraph line. */
@@ -371,16 +437,14 @@ static gboolean
 starts_block (const char *line)
 {
   const char *content = NULL;
-  char *bullet = NULL;
   gboolean block =
     heading_level (line) > 0 || g_str_has_prefix (line, "```") ||
     g_str_has_prefix (line, ">") || is_rule (line) ||
     is_table_row (line);
 
-  if (!block && list_item (line, &content, &bullet))
+  if (!block && list_item (line, &content, NULL, NULL))
     block = TRUE;
 
-  g_free (bullet);
   return block;
 }
 
@@ -401,10 +465,10 @@ nuvashalauncher_markdown_render (GtkBox *box, const char *markdown)
     {
       g_autofree char *trimmed = g_strdup (lines[i]);
       const char *line = g_strstrip (trimmed);
-      g_autoptr (GString) paragraph = g_string_new (NULL);
       guint level = 0;
       const char *content = NULL;
       g_autofree char *bullet = NULL;
+      guint depth = 0;
 
       if (is_blank (line))
         {
@@ -413,13 +477,15 @@ nuvashalauncher_markdown_render (GtkBox *box, const char *markdown)
         }
 
       /* A fenced code block: every line up to the closing fence is one
-         label, monospace and never read as markup. */
+         monospace label inside a scrollable card, never read as markup. */
       if (g_str_has_prefix (line, "```"))
         {
           g_autoptr (GString) code = g_string_new (NULL);
           g_autofree char *escaped = NULL;
           g_autofree char *markup = NULL;
           GtkWidget *label = NULL;
+          GtkScrolledWindow *scroller = NULL;
+          GtkFrame *frame = NULL;
 
           i++;
 
@@ -433,8 +499,10 @@ nuvashalauncher_markdown_render (GtkBox *box, const char *markdown)
               if (g_str_has_prefix (fence_check, "```"))
                 break;
 
+              if (code->len > 0)
+                g_string_append_c (code, '\n');
+
               g_string_append (code, lines[i]);
-              g_string_append_c (code, '\n');
               i++;
             }
 
@@ -445,7 +513,22 @@ nuvashalauncher_markdown_render (GtkBox *box, const char *markdown)
           markup = g_strdup_printf (
               "<span font_family=\"monospace\">%s</span>", escaped);
           label = wrapped_label (markup);
-          gtk_box_append (GTK_BOX (box), GTK_WIDGET (label));
+          gtk_label_set_wrap (GTK_LABEL (label), FALSE);
+          gtk_widget_set_margin_start (label, 12);
+          gtk_widget_set_margin_end (label, 12);
+          gtk_widget_set_margin_top (label, 8);
+          gtk_widget_set_margin_bottom (label, 8);
+
+          scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
+          gtk_scrolled_window_set_policy (scroller, GTK_POLICY_AUTOMATIC,
+                                          GTK_POLICY_NEVER);
+          gtk_scrolled_window_set_propagate_natural_height (scroller, TRUE);
+          gtk_scrolled_window_set_child (scroller, label);
+
+          frame = GTK_FRAME (gtk_frame_new (NULL));
+          gtk_widget_add_css_class (GTK_WIDGET (frame), "card");
+          gtk_frame_set_child (frame, GTK_WIDGET (scroller));
+          gtk_box_append (GTK_BOX (box), GTK_WIDGET (frame));
           continue;
         }
 
@@ -466,6 +549,9 @@ nuvashalauncher_markdown_render (GtkBox *box, const char *markdown)
         {
           g_autoptr (GPtrArray) rows =
             g_ptr_array_new_with_free_func ((GDestroyNotify) g_strfreev);
+          g_autoptr (GArray) alignments =
+            g_array_new (FALSE, FALSE, sizeof (float));
+          gboolean has_header = FALSE;
 
           while (lines[i] != NULL)
             {
@@ -475,23 +561,37 @@ nuvashalauncher_markdown_render (GtkBox *box, const char *markdown)
               if (!is_table_row (row))
                 break;
 
-              if (!is_table_separator (row))
-                g_ptr_array_add (rows, g_strsplit (row, "|", -1));
+              if (is_table_separator (row))
+                {
+                  if (rows->len == 1 && alignments->len == 0)
+                    {
+                      has_header = TRUE;
+                      parse_table_alignments (row, alignments);
+                    }
+                }
+              else
+                {
+                  g_ptr_array_add (rows, g_strsplit (row, "|", -1));
+                }
 
               i++;
             }
 
           if (rows->len > 0)
-            gtk_box_append (GTK_BOX (box), table_block (rows));
+            gtk_box_append (GTK_BOX (box),
+                            table_block (rows, alignments, has_header));
 
           continue;
         }
 
-      if (list_item (line, &content, &bullet))
+      if (list_item (lines[i], &content, &bullet, &depth))
         {
           GtkBox *row = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
           GtkLabel *dot = GTK_LABEL (gtk_label_new (bullet));
           GtkWidget *item = text_block (content, NULL);
+
+          if (depth > 0)
+            gtk_widget_set_margin_start (GTK_WIDGET (row), (int) (depth * 16));
 
           gtk_widget_set_valign (GTK_WIDGET (dot), GTK_ALIGN_START);
           gtk_widget_add_css_class (GTK_WIDGET (dot), "dim-label");
@@ -506,16 +606,32 @@ nuvashalauncher_markdown_render (GtkBox *box, const char *markdown)
 
       if (g_str_has_prefix (line, ">"))
         {
-          GtkBox *row = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
-          GtkSeparator *bar = GTK_SEPARATOR (gtk_separator_new (GTK_ORIENTATION_VERTICAL));
-          GtkWidget *label =
-            text_block (g_strstrip ((char *) line + 1), "dim-label");
+          g_autoptr (GString) quote = g_string_new (NULL);
+          GtkBox *row = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8));
+          GtkSeparator *bar =
+            GTK_SEPARATOR (gtk_separator_new (GTK_ORIENTATION_VERTICAL));
+          GtkWidget *label = NULL;
 
+          while (lines[i] != NULL)
+            {
+              g_autofree char *raw = g_strdup (lines[i]);
+              const char *current = g_strstrip (raw);
+
+              if (!g_str_has_prefix (current, ">"))
+                break;
+
+              current = g_strstrip ((char *) current + 1);
+              if (quote->len > 0)
+                g_string_append_c (quote, *current == '\0' ? '\n' : ' ');
+              g_string_append (quote, current);
+              i++;
+            }
+
+          label = text_block (quote->str, "dim-label");
           gtk_widget_set_hexpand (GTK_WIDGET (label), TRUE);
           gtk_box_append (GTK_BOX (row), GTK_WIDGET (bar));
           gtk_box_append (GTK_BOX (row), GTK_WIDGET (label));
           gtk_box_append (GTK_BOX (box), GTK_WIDGET (row));
-          i++;
           continue;
         }
 
@@ -527,24 +643,28 @@ nuvashalauncher_markdown_render (GtkBox *box, const char *markdown)
         }
 
       /* A paragraph: every line up to the next blank or block. */
-      while (lines[i] != NULL)
-        {
-          g_autofree char *next = g_strdup (lines[i]);
-          const char *current = g_strstrip (next);
+      {
+        g_autoptr (GString) paragraph = g_string_new (NULL);
 
-          if (is_blank (current) || starts_block (current))
-            break;
+        while (lines[i] != NULL)
+          {
+            g_autofree char *next = g_strdup (lines[i]);
+            const char *current = g_strstrip (next);
 
-          if (paragraph->len > 0)
-            g_string_append_c (paragraph, ' ');
+            if (is_blank (current) || starts_block (current))
+              break;
 
-          g_string_append (paragraph, current);
+            if (paragraph->len > 0)
+              g_string_append_c (paragraph, ' ');
+
+            g_string_append (paragraph, current);
+            i++;
+          }
+
+        if (paragraph->len > 0)
+          gtk_box_append (GTK_BOX (box), text_block (paragraph->str, NULL));
+        else
           i++;
-        }
-
-      if (paragraph->len > 0)
-        gtk_box_append (GTK_BOX (box), text_block (paragraph->str, NULL));
-      else
-        i++;
+      }
     }
 }
