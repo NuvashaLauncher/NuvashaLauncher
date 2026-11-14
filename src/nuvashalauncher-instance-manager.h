@@ -64,6 +64,13 @@ char *nuvashalauncher_instance_manager_default_directory (NuvashaLauncherInstanc
 NuvashaLauncherInstance *nuvashalauncher_instance_manager_get_by_id (NuvashaLauncherInstanceManager *self,
                                              const char *id);
 
+/* The registered instance matching @key by exact ID or display name.
+ * Fails with NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND if none
+ * matches or if multiple instances share the display name. Borrowed. */
+NuvashaLauncherInstance *nuvashalauncher_instance_manager_find (NuvashaLauncherInstanceManager *self,
+                                                                 const char *key,
+                                                                 GError **error);
+
  /* Creates an instance and registers it. @directory is the directory the
   * user picked; NULL derives it from the unique name under
   * <data dir>/instances/<name>. If the requested name is already in use,

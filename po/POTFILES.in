@@ -5,6 +5,7 @@ src/nuvashalauncher-accounts.c
 src/nuvashalauncher-auth-microsoft-json.c
 src/nuvashalauncher-auth-microsoft.c
 src/nuvashalauncher-cache.c
+src/nuvashalauncher-cli.c
 src/nuvashalauncher-content-browser-model.c
 src/nuvashalauncher-content-files-metadata.c
 src/nuvashalauncher-content-files.c

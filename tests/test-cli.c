@@ -14,22 +14,36 @@
 static char *data_home;
 
 static char *
-run_cli (const char *first, const char *second, int *status)
+run_cli_v (const char * const *args, int *status)
 {
-  const char *argv[] = { NUVASHALAUNCHER_BIN, first, second, NULL };
+  g_autoptr (GPtrArray) argv = g_ptr_array_new ();
   gchar **env = g_get_environ ();
   char *output = NULL;
   char *errors = NULL;
   g_autoptr (GError) error = NULL;
 
+  g_ptr_array_add (argv, (gpointer) NUVASHALAUNCHER_BIN);
+  for (guint i = 0; args[i] != NULL; i++)
+    g_ptr_array_add (argv, (gpointer) args[i]);
+  g_ptr_array_add (argv, NULL);
+
   env = g_environ_setenv (env, "XDG_DATA_HOME", data_home, TRUE);
   env = g_environ_setenv (env, "GSETTINGS_BACKEND", "memory", TRUE);
-  g_assert_true (g_spawn_sync (NULL, (char **) argv, env, G_SPAWN_SEARCH_PATH,
+  env = g_environ_unsetenv (env, "DISPLAY");
+  env = g_environ_unsetenv (env, "WAYLAND_DISPLAY");
+  g_assert_true (g_spawn_sync (NULL, (char **) argv->pdata, env, G_SPAWN_SEARCH_PATH,
                                NULL, NULL, &output, &errors, status, &error));
   g_assert_no_error (error);
   g_strfreev (env);
   g_free (errors);
   return output;
+}
+
+static char *
+run_cli (const char *first, const char *second, int *status)
+{
+  const char *args[] = { first, second, NULL };
+  return run_cli_v (args, status);
 }
 
 static void
@@ -131,6 +145,106 @@ test_remove_instance_command (void)
   g_print ("ok - the instance CLI command removes metadata and files\n");
 }
 
+static void
+test_extended_cli_commands (void)
+{
+  g_autofree char *manager_path =
+    g_build_filename (data_home, "nuvashalauncher", NULL);
+  g_autofree char *mrpack_path =
+    g_build_filename (data_home, "exported.mrpack", NULL);
+  g_autofree char *output = NULL;
+  int status = -1;
+
+  /* Headless --help works without DISPLAY/WAYLAND_DISPLAY. */
+  output = run_cli ("--help", NULL, &status);
+  g_assert_cmpint (status, ==, 0);
+  g_assert_nonnull (strstr (output, "--create-instance"));
+  g_clear_pointer (&output, g_free);
+
+  /* --add-offline-account creates an offline account and --list-accounts --json lists it. */
+  output = run_cli ("--add-offline-account", "CliOffline", &status);
+  g_assert_cmpint (status, ==, 0);
+  g_assert_nonnull (strstr (output, "CliOffline"));
+  g_clear_pointer (&output, g_free);
+
+  {
+    const char *args[] = { "--list-accounts", "--json", NULL };
+    output = run_cli_v (args, &status);
+    g_assert_cmpint (status, ==, 0);
+    g_assert_nonnull (strstr (output, "\"name\" : \"CliOffline\""));
+    g_assert_nonnull (strstr (output, "\"type\" : \"offline\""));
+    g_clear_pointer (&output, g_free);
+  }
+
+  output = run_cli ("--remove-account", "CliOffline", &status);
+  g_assert_cmpint (status, ==, 0);
+  g_clear_pointer (&output, g_free);
+
+  /* --create-instance creates a Fabric instance, --list-instances --json shows it,
+   * --export-instance writes a .mrpack, and --remove-instance by name with --keep-files
+   * unregisters it while preserving its directory. */
+  {
+    const char *args[] = { "--create-instance", "CliPack", "--mc-version", "1.20.4",
+                           "--loader", "fabric", NULL };
+    output = run_cli_v (args, &status);
+    g_assert_cmpint (status, ==, 0);
+    g_assert_nonnull (strstr (output, "CliPack"));
+    g_clear_pointer (&output, g_free);
+  }
+
+  {
+    const char *args[] = { "--list-instances", "--json", NULL };
+    output = run_cli_v (args, &status);
+    g_assert_cmpint (status, ==, 0);
+    g_assert_nonnull (strstr (output, "\"name\" : \"CliPack\""));
+    g_assert_nonnull (strstr (output, "\"loader\" : \"fabric\""));
+    g_clear_pointer (&output, g_free);
+  }
+
+  {
+    const char *args[] = { "--export-instance", "CliPack", "--output", mrpack_path, NULL };
+    output = run_cli_v (args, &status);
+    g_assert_cmpint (status, ==, 0);
+    g_assert_true (g_file_test (mrpack_path, G_FILE_TEST_EXISTS));
+    g_clear_pointer (&output, g_free);
+  }
+
+  g_autoptr (NuvashaLauncherInstanceManager) manager =
+    nuvashalauncher_instance_manager_new (manager_path);
+  g_autoptr (GError) error = NULL;
+  g_assert_true (nuvashalauncher_instance_manager_load (manager, &error));
+  g_assert_no_error (error);
+  NuvashaLauncherInstance *created =
+    nuvashalauncher_instance_manager_find (manager, "CliPack", &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (created);
+  g_autofree char *created_dir = NULL;
+  g_object_get (created, "directory", &created_dir, NULL);
+
+  {
+    const char *args[] = { "--remove-instance", "CliPack", "--keep-files", NULL };
+    output = run_cli_v (args, &status);
+    g_assert_cmpint (status, ==, 0);
+    g_clear_pointer (&output, g_free);
+  }
+  g_assert_true (g_file_test (created_dir, G_FILE_TEST_IS_DIR));
+
+  /* --clear-cache succeeds headlessly. */
+  output = run_cli ("--clear-cache", NULL, &status);
+  g_assert_cmpint (status, ==, 0);
+  g_clear_pointer (&output, g_free);
+
+  /* --launch --headless on a missing instance exits non-zero cleanly without a display. */
+  {
+    const char *args[] = { "--launch", "DoesNotExist", "--headless", NULL };
+    output = run_cli_v (args, &status);
+    g_assert_cmpint (status, !=, 0);
+    g_clear_pointer (&output, g_free);
+  }
+
+  g_print ("ok - extended CLI commands work headlessly\n");
+}
+
 int
 main (void)
 {
@@ -142,6 +256,7 @@ main (void)
 
   test_account_commands ();
   test_remove_instance_command ();
+  test_extended_cli_commands ();
   nuvashalauncher_fs_remove_tree (data_home);
   g_free (data_home);
   g_print ("ok - account CLI commands list, switch and remove accounts\n");

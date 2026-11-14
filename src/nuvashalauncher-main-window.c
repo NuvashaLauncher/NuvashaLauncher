@@ -85,16 +85,12 @@ nuvashalauncher_main_window_launch_instance_as (NuvashaLauncherMainWindow *self,
   g_return_val_if_fail (instance_id != NULL && *instance_id != '\0', FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
-  instance = nuvashalauncher_instance_manager_get_by_id (self->model->manager,
-                                                  instance_id);
+  instance = nuvashalauncher_instance_manager_find (self->model->manager,
+                                               instance_id, error);
   if (instance == NULL)
-    {
-      g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND,
-                   "no instance has ID \"%s\"", instance_id);
-      return FALSE;
-    }
+    return FALSE;
 
-  launcher = window_launcher (self, instance_id);
+  launcher = window_launcher (self, nuvashalauncher_instance_get_id (instance));
   if (launcher == NULL)
     {
       g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_FAILED,
