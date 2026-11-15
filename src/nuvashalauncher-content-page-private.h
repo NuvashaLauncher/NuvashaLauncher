@@ -57,6 +57,7 @@ struct _NuvashaLauncherContentPage
   NuvashaLauncherContentType type;
   char *minecraft_version;
   char *loader; /* NULL for the content that needs none */
+  char *base_directory; /* override directory (e.g. a world folder for datapacks) */
   char *folder; /* the folder of the instance this content lives in */
 
   /* Borrowed widget-tree references; cleared in dispose() before async
@@ -69,6 +70,8 @@ struct _NuvashaLauncherContentPage
   GtkBox *bar;
   GtkBox *bar_spacer; /* expands between actions and switcher */
   GtkBox *switcher;
+  AdwHeaderBar *header_bar;
+  AdwClamp *header_search_clamp;
   GtkToggleButton *switcher_installed; /* the Installed button of the pair */
   GtkToggleButton *switcher_browse;    /* the Browse button of the pair */
   struct {
@@ -125,27 +128,6 @@ struct _NuvashaLauncherContentPage
 
   /* Browse state is grouped below. */
 
-
-  /* State for the currently open project and its details page. */
-  struct {
-    gboolean details_ready;
-    gboolean versions_ready;
-    NuvashaLauncherModrinthDetails *details;         /* owned */
-    GPtrArray *details_versions;         /* owned */
-    char *details_problem;
-    char *versions_problem;
-    char *current_project_title;
-    char *current_project_id;
-    guint64 current_project_downloads;
-    char *details_author;
-    GtkBox *details_body;
-    GtkDropDown *details_dropdown;
-    GtkButton *details_download;
-    AdwNavigationPage *details_page;     /* weak */
-    AdwNavigationSplitView *split;
-    GtkCheckButton *details_check;
-  } project;
-
   GtkButton *pick_button;
   GtkLabel *pick_badge;
   GtkActionBar *pick_footer;
@@ -189,7 +171,6 @@ gboolean nuvashalauncher_content_page_on_content_search_key (GtkEventControllerK
                                                  gpointer user_data);
 void nuvashalauncher_content_page_refresh_picks (NuvashaLauncherContentPage *self);
 void nuvashalauncher_content_page_clear_picks (NuvashaLauncherContentPage *self);
-void nuvashalauncher_content_page_close_detail (NuvashaLauncherContentPage *self);
 void nuvashalauncher_content_page_reset_for_tab_switch (NuvashaLauncherContentPage *self);
 void nuvashalauncher_content_page_run_search (NuvashaLauncherContentPage *self, gboolean append);
 void nuvashalauncher_content_page_on_stack_switched (GObject *stack, GParamSpec *pspec,
@@ -207,10 +188,11 @@ void remove_duplicate_project_files (NuvashaLauncherContentPage *self,
                                      const char *project_id,
                                      const char *keep_path);
 void show_error (NuvashaLauncherContentPage *self, const char *what, GError *error);
-void nuvashalauncher_content_page_on_result_activated (AdwActionRow *row, gpointer user_data);
-void open_project_page (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthProject *project);
-NuvashaLauncherModrinthVersion *selected_version (GtkDropDown *dropdown,
-                                      GPtrArray *versions);
+char *content_page_base_directory (NuvashaLauncherContentPage *self);
+void nuvashalauncher_content_page_quick_install_project (NuvashaLauncherContentPage *self,
+                                                         NuvashaLauncherModrinthProject *project);
+void nuvashalauncher_content_page_choose_version (NuvashaLauncherContentPage *self,
+                                                  NuvashaLauncherModrinthProject *project);
 const char *version_name_of (NuvashaLauncherModrinthVersion *version);
 void pick_add (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthVersion *version);
 void pick_remove (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthVersion *version);

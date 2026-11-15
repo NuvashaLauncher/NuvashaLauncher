@@ -10,13 +10,10 @@
     <file>ui/nuvashalauncher-modpack-dialog.ui</file>
     <file>ui/nuvashalauncher-modpack-browser-toolbar.ui</file>
     <file>ui/nuvashalauncher-modpack-browser-states.ui</file>
-    <file>ui/nuvashalauncher-modpack-details-toolbar.ui</file>
     <file>ui/nuvashalauncher-modpack-optional.ui</file>
     <file>ui/nuvashalauncher-modpack-error.ui</file>
-    <file>ui/nuvashalauncher-modpack-details-body.ui</file>
     <file>ui/nuvashalauncher-content-result-row.ui</file>
     <file>ui/nuvashalauncher-content-file-row.ui</file>
-    <file>ui/nuvashalauncher-content-details.ui</file>
     <file>ui/nuvashalauncher-download-row.ui</file>
     <file>ui/nuvashalauncher-skin-row.ui</file>
     <file>ui/nuvashalauncher-main-shell.ui</file>

@@ -534,6 +534,212 @@ button_row (AdwPreferencesGroup *group,
 
 
 /* ---------------------------------------------------------- *
+ * Settings search
+ * ---------------------------------------------------------- */
+
+#define SETTINGS_SEARCH_KEY "nuvashalauncher-settings-search"
+
+typedef struct {
+  AdwPreferencesGroup *group;
+  GPtrArray *rows;
+} SettingsSearchGroup;
+
+typedef struct {
+  GtkSearchBar *search_bar;
+  GtkSearchEntry *search_entry;
+  AdwClamp *header_search_clamp;
+  GPtrArray *groups;
+} SettingsSearchState;
+
+static void
+settings_search_group_free (gpointer data)
+{
+  SettingsSearchGroup *group = data;
+  g_clear_pointer (&group->rows, g_ptr_array_unref);
+  g_free (group);
+}
+
+static void
+settings_search_state_free (gpointer data)
+{
+  SettingsSearchState *state = data;
+  g_clear_object (&state->header_search_clamp);
+  g_clear_pointer (&state->groups, g_ptr_array_unref);
+  g_free (state);
+}
+
+static SettingsSearchGroup *
+settings_search_add_group (SettingsSearchState *state, AdwPreferencesGroup *group)
+{
+  SettingsSearchGroup *entry = g_new0 (SettingsSearchGroup, 1);
+  entry->group = group;
+  entry->rows = g_ptr_array_new ();
+  g_ptr_array_add (state->groups, entry);
+  return entry;
+}
+
+static void
+settings_search_add_row (SettingsSearchGroup *group, GtkWidget *row)
+{
+  g_ptr_array_add (group->rows, row);
+}
+
+static gboolean
+row_matches_query (GtkWidget *row, const char *folded_query)
+{
+  const char *title = adw_preferences_row_get_title (ADW_PREFERENCES_ROW (row));
+  const char *subtitle = NULL;
+  g_autofree char *folded_title = NULL;
+  g_autofree char *folded_subtitle = NULL;
+
+  if (title != NULL && *title != '\0')
+    {
+      folded_title = g_utf8_casefold (title, -1);
+      if (strstr (folded_title, folded_query) != NULL)
+        return TRUE;
+    }
+
+  if (ADW_IS_ACTION_ROW (row))
+    subtitle = adw_action_row_get_subtitle (ADW_ACTION_ROW (row));
+
+  if (subtitle != NULL && *subtitle != '\0')
+    {
+      folded_subtitle = g_utf8_casefold (subtitle, -1);
+      if (strstr (folded_subtitle, folded_query) != NULL)
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
+static void
+apply_settings_filter (SettingsSearchState *state)
+{
+  const char *raw = gtk_editable_get_text (GTK_EDITABLE (state->search_entry));
+  g_autofree char *trimmed = g_strdup (raw != NULL ? raw : "");
+  g_autofree char *folded = NULL;
+  gboolean empty;
+
+  g_strstrip (trimmed);
+  empty = (*trimmed == '\0');
+  if (!empty)
+    folded = g_utf8_casefold (trimmed, -1);
+
+  for (guint g = 0; g < state->groups->len; g++)
+    {
+      SettingsSearchGroup *group = g_ptr_array_index (state->groups, g);
+      gboolean any_visible = FALSE;
+
+      for (guint r = 0; r < group->rows->len; r++)
+        {
+          GtkWidget *row = g_ptr_array_index (group->rows, r);
+          gboolean visible = empty || row_matches_query (row, folded);
+          gtk_widget_set_visible (row, visible);
+          if (visible)
+            any_visible = TRUE;
+        }
+
+      gtk_widget_set_visible (GTK_WIDGET (group->group), empty || any_visible);
+    }
+}
+
+static void
+on_settings_search_changed (GtkSearchEntry *entry G_GNUC_UNUSED, gpointer user_data)
+{
+  apply_settings_filter ((SettingsSearchState *) user_data);
+}
+
+static void
+on_settings_search_mode_changed (GObject *object G_GNUC_UNUSED,
+                                 GParamSpec *pspec G_GNUC_UNUSED,
+                                 gpointer user_data)
+{
+  SettingsSearchState *state = user_data;
+  gboolean enabled = gtk_search_bar_get_search_mode (state->search_bar);
+
+  gtk_widget_set_visible (GTK_WIDGET (state->search_bar), enabled);
+  if (state->header_search_clamp != NULL)
+    gtk_widget_set_visible (GTK_WIDGET (state->header_search_clamp), enabled);
+  if (!enabled)
+    gtk_editable_set_text (GTK_EDITABLE (state->search_entry), "");
+}
+
+static SettingsSearchState *
+settings_search_state_from_widget (GtkWidget *widget)
+{
+  if (widget == NULL || !G_IS_OBJECT (widget))
+    return NULL;
+
+  return g_object_get_data (G_OBJECT (widget), SETTINGS_SEARCH_KEY);
+}
+
+gboolean
+nuvashalauncher_settings_page_has_search (GtkWidget *widget)
+{
+  return settings_search_state_from_widget (widget) != NULL;
+}
+
+gboolean
+nuvashalauncher_settings_page_is_search_visible (GtkWidget *widget)
+{
+  SettingsSearchState *state = settings_search_state_from_widget (widget);
+
+  return state != NULL &&
+         state->search_bar != NULL &&
+         gtk_widget_get_visible (GTK_WIDGET (state->search_bar));
+}
+
+void
+nuvashalauncher_settings_page_set_search_visible (GtkWidget *widget, gboolean visible)
+{
+  SettingsSearchState *state = settings_search_state_from_widget (widget);
+
+  if (state == NULL || state->search_bar == NULL)
+    return;
+
+  gtk_widget_set_visible (GTK_WIDGET (state->search_bar), visible);
+  if (state->header_search_clamp != NULL)
+    gtk_widget_set_visible (GTK_WIDGET (state->header_search_clamp), visible);
+  gtk_search_bar_set_search_mode (state->search_bar, visible);
+  if (visible && state->search_entry != NULL)
+    gtk_widget_grab_focus (GTK_WIDGET (state->search_entry));
+  else if (!visible && state->search_entry != NULL)
+    gtk_editable_set_text (GTK_EDITABLE (state->search_entry), "");
+}
+
+void
+nuvashalauncher_settings_page_attach_header (GtkWidget *widget, AdwHeaderBar *header)
+{
+  SettingsSearchState *state = settings_search_state_from_widget (widget);
+
+  if (state == NULL || header == NULL)
+    return;
+
+  if (state->header_search_clamp == NULL)
+    {
+      state->header_search_clamp = g_object_ref_sink (ADW_CLAMP (adw_clamp_new ()));
+      adw_clamp_set_maximum_size (state->header_search_clamp, 460);
+      adw_clamp_set_child (state->header_search_clamp, GTK_WIDGET (state->search_bar));
+    }
+
+  gtk_widget_set_visible (GTK_WIDGET (state->header_search_clamp),
+                          gtk_widget_get_visible (GTK_WIDGET (state->search_bar)));
+  adw_header_bar_set_title_widget (header, GTK_WIDGET (state->header_search_clamp));
+}
+
+void
+nuvashalauncher_settings_page_detach_header (GtkWidget *widget, AdwHeaderBar *header)
+{
+  SettingsSearchState *state = settings_search_state_from_widget (widget);
+
+  if (state == NULL || header == NULL)
+    return;
+
+  if (adw_header_bar_get_title_widget (header) == GTK_WIDGET (state->header_search_clamp))
+    adw_header_bar_set_title_widget (header, NULL);
+}
+
+/* ---------------------------------------------------------- *
  * The five pages
  * ---------------------------------------------------------- */
 
@@ -559,6 +765,33 @@ create_settings_page (NuvashaLauncherInstancePage *self)
   AdwPreferencesGroup *minecraft = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwPreferencesGroup *java = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwPreferencesGroup *actions = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+  SettingsSearchState *search_state = g_new0 (SettingsSearchState, 1);
+  SettingsSearchGroup *general_group;
+  SettingsSearchGroup *minecraft_group;
+  SettingsSearchGroup *java_group;
+  SettingsSearchGroup *actions_group;
+
+  search_state->groups = g_ptr_array_new_with_free_func (settings_search_group_free);
+  search_state->search_bar = GTK_SEARCH_BAR (gtk_search_bar_new ());
+  search_state->search_entry = GTK_SEARCH_ENTRY (gtk_search_entry_new ());
+  gtk_search_entry_set_placeholder_text (search_state->search_entry, _("Search"));
+  gtk_search_bar_set_child (search_state->search_bar, GTK_WIDGET (search_state->search_entry));
+  gtk_search_bar_connect_entry (search_state->search_bar,
+                                GTK_EDITABLE (search_state->search_entry));
+  gtk_search_bar_set_show_close_button (search_state->search_bar, FALSE);
+  gtk_widget_set_hexpand (GTK_WIDGET (search_state->search_bar), TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (search_state->search_bar), FALSE);
+  g_signal_connect (search_state->search_entry, "search-changed",
+                    G_CALLBACK (on_settings_search_changed), search_state);
+  g_signal_connect (search_state->search_bar, "notify::search-mode-enabled",
+                    G_CALLBACK (on_settings_search_mode_changed), search_state);
+  g_object_set_data_full (G_OBJECT (page), SETTINGS_SEARCH_KEY, search_state,
+                          settings_search_state_free);
+
+  general_group = settings_search_add_group (search_state, general);
+  minecraft_group = settings_search_add_group (search_state, minecraft);
+  java_group = settings_search_add_group (search_state, java);
+  actions_group = settings_search_add_group (search_state, actions);
 
   gtk_widget_add_css_class (GTK_WIDGET (general), "nuvashalauncher-preferences-surface");
   gtk_widget_add_css_class (GTK_WIDGET (minecraft), "nuvashalauncher-preferences-surface");
@@ -582,6 +815,7 @@ create_settings_page (NuvashaLauncherInstancePage *self)
   gtk_editable_set_text (GTK_EDITABLE (name_row), name);
   g_signal_connect_object (name_row, "apply", G_CALLBACK (on_name_apply), self, 0);
   adw_preferences_group_add (general, GTK_WIDGET (name_row));
+  settings_search_add_row (general_group, GTK_WIDGET (name_row));
 
   self->icon_row = ADW_ACTION_ROW (adw_action_row_new ());
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->icon_row),
@@ -599,6 +833,7 @@ create_settings_page (NuvashaLauncherInstancePage *self)
   adw_action_row_set_activatable_widget (ADW_ACTION_ROW (self->icon_row),
                                          change_icon);
   adw_preferences_group_add (general, GTK_WIDGET (self->icon_row));
+  settings_search_add_row (general_group, GTK_WIDGET (self->icon_row));
   update_icon_row (self);
 
   /* Directory: where the files are. Pressing the button moves every file
@@ -629,6 +864,7 @@ create_settings_page (NuvashaLauncherInstancePage *self)
                                          GTK_WIDGET (self->directory_change));
   adw_preferences_group_add (general,
                              GTK_WIDGET (self->directory_row));
+  settings_search_add_row (general_group, GTK_WIDGET (self->directory_row));
   update_directory_row (self);
 
   /* Minecraft: the list of versions comes from Mojang's manifest,
@@ -641,6 +877,7 @@ create_settings_page (NuvashaLauncherInstancePage *self)
   nuvashalauncher_version_row_load (NUVASHALAUNCHER_VERSION_ROW (version_row), self->settings,
                         minecraft_version);
   adw_preferences_group_add (minecraft, version_row);
+  settings_search_add_row (minecraft_group, version_row);
   /* The loader and one of its versions: changing either of them changes
      what this instance runs, so both are stored like the version above. */
   {
@@ -662,9 +899,15 @@ create_settings_page (NuvashaLauncherInstancePage *self)
   adw_preferences_group_add (minecraft,
                               GTK_WIDGET (nuvashalauncher_loader_row_get_loader_row (
                                 self->loader_row)));
+  settings_search_add_row (minecraft_group,
+                           GTK_WIDGET (nuvashalauncher_loader_row_get_loader_row (
+                             self->loader_row)));
   adw_preferences_group_add (minecraft,
                               GTK_WIDGET (nuvashalauncher_loader_row_get_version_row (
                                 self->loader_row)));
+  settings_search_add_row (minecraft_group,
+                           GTK_WIDGET (nuvashalauncher_loader_row_get_version_row (
+                             self->loader_row)));
 
   /* Java: the installations detection found. The row ends in an entry
      that adds one it did not report, so that is where they are added
@@ -693,6 +936,7 @@ create_settings_page (NuvashaLauncherInstancePage *self)
   self->java_row = NUVASHALAUNCHER_JAVA_ROW (java_row);
 
   adw_preferences_group_add (java, java_row);
+  settings_search_add_row (java_group, java_row);
 
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (jvm_args_row),
                                  _("JVM Arguments"));
@@ -701,6 +945,7 @@ create_settings_page (NuvashaLauncherInstancePage *self)
   g_signal_connect_object (jvm_args_row, "apply", G_CALLBACK (on_jvm_args_apply),
                            self, 0);
   adw_preferences_group_add (java, GTK_WIDGET (jvm_args_row));
+  settings_search_add_row (java_group, GTK_WIDGET (jvm_args_row));
 
   /* The Java row's compatibility warning needs the javaVersion field of
    * the instance's version document; fetching is offline-friendly via
@@ -711,17 +956,21 @@ create_settings_page (NuvashaLauncherInstancePage *self)
 
   /* Actions */
   adw_preferences_group_set_title (actions, _("Actions"));
-  button_row (actions, _("Duplicate"), NULL,
-              "edit-copy-symbolic", G_CALLBACK (on_duplicate_clicked), self);
-  button_row (actions, _("Open Folder"), NULL,
-              "folder-symbolic", G_CALLBACK (on_open_folder_clicked),
-              self);
-  button_row (actions, _("Export Modpack"),
-              NULL,
-              "export-symbolic", G_CALLBACK (on_export_clicked), self);
-  button_row (actions, _("Delete Instance"),
-              NULL, "edit-delete-symbolic",
-              G_CALLBACK (on_delete_clicked), self);
+  settings_search_add_row (actions_group,
+    button_row (actions, _("Duplicate"), NULL,
+                "edit-copy-symbolic", G_CALLBACK (on_duplicate_clicked), self));
+  settings_search_add_row (actions_group,
+    button_row (actions, _("Open Folder"), NULL,
+                "folder-symbolic", G_CALLBACK (on_open_folder_clicked),
+                self));
+  settings_search_add_row (actions_group,
+    button_row (actions, _("Export Modpack"),
+                NULL,
+                "export-symbolic", G_CALLBACK (on_export_clicked), self));
+  settings_search_add_row (actions_group,
+    button_row (actions, _("Delete Instance"),
+                NULL, "edit-delete-symbolic",
+                G_CALLBACK (on_delete_clicked), self));
 
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                             general);

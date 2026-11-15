@@ -1210,3 +1210,99 @@ msgstr "Метадані AppStream (описи, резюме та примітк
 
 msgid "Nuvasha Launcher"
 msgstr "Nuvasha Launcher"
+
+msgid "Copy"
+msgstr "Копіювати"
+
+msgid "Rename"
+msgstr "Перейменувати"
+
+msgid "Reset Icon"
+msgstr "Скинути піктограму"
+
+msgid "Delete World"
+msgstr "Видалити світ"
+
+msgid "Seed copied to clipboard"
+msgstr "Зерно скопійовано в буфер обміну"
+
+msgid "Remove server \"%s\"?"
+msgstr "Вилучити сервер «%s»?"
+
+msgid "Refresh"
+msgstr "Оновити"
+
+msgid "Remove Server"
+msgstr "Вилучити сервер"
+
+msgid "Survival"
+msgstr "Виживання"
+
+msgid "Edit"
+msgstr "Редагувати"
+
+msgid "Ask to download"
+msgstr "Запитувати перед завантаженням"
+
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr "Світи, збережені Minecraft або імпортовані сюди, з'являться в цьому списку."
+
+msgid "Rename World"
+msgstr "Перейменувати світ"
+
+msgid "Servers"
+msgstr "Сервери"
+
+msgid "Save"
+msgstr "Зберегти"
+
+msgid "Add World"
+msgstr "Додати світ"
+
+msgid "Spectator"
+msgstr "Спостерігач"
+
+msgid "Delete world \"%s\"? This cannot be undone."
+msgstr "Видалити світ «%s»? Цю дію не можна скасувати."
+
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "Додані тут сервери зберігаються у servers.dat цього екземпляра."
+
+msgid "Add Server"
+msgstr "Додати сервер"
+
+msgid "Edit Server"
+msgstr "Редагувати сервер"
+
+msgid "Address"
+msgstr "Адреса"
+
+msgid "Datapacks"
+msgstr "Пакети даних"
+
+msgid "No Worlds"
+msgstr "Немає світів"
+
+msgid "Creative"
+msgstr "Творчий"
+
+msgid "Move Up"
+msgstr "Перемістити вгору"
+
+msgid "No Servers"
+msgstr "Немає серверів"
+
+msgid "Never download"
+msgstr "Ніколи не завантажувати"
+
+msgid "Worlds"
+msgstr "Світи"
+
+msgid "Always download"
+msgstr "Завжди завантажувати"
+
+msgid "Move Down"
+msgstr "Перемістити вниз"
+
+msgid "Copy Seed"
+msgstr "Копіювати зерно"

@@ -69,6 +69,44 @@ nuvashalauncher_content_page_on_retry_page_clicked (GtkButton *button G_GNUC_UNU
 /* The rows of a page of results. @append is FALSE for a new search or a
  * new filter, which starts the list over, and TRUE for the next page,
  * which is added to what is already there. */
+static void
+on_row_quick_install_clicked (GtkButton *button, gpointer user_data)
+{
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
+  NuvashaLauncherModrinthProject *project =
+    g_object_get_data (G_OBJECT (button), "nuvashalauncher-project");
+
+  nuvashalauncher_content_page_quick_install_project (self, project);
+}
+
+static void
+on_row_versions_clicked (GtkButton *button, gpointer user_data)
+{
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
+  NuvashaLauncherModrinthProject *project =
+    g_object_get_data (G_OBJECT (button), "nuvashalauncher-project");
+
+  nuvashalauncher_content_page_choose_version (self, project);
+}
+
+static GtkWidget *
+row_action_button (const char *icon_name, const char *tooltip,
+                   const NuvashaLauncherModrinthProject *project,
+                   GCallback callback, NuvashaLauncherContentPage *self)
+{
+  GtkWidget *button = gtk_button_new_from_icon_name (icon_name);
+
+  gtk_widget_add_css_class (button, "flat");
+  gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
+  gtk_widget_set_tooltip_text (button, tooltip);
+  gtk_accessible_update_property (GTK_ACCESSIBLE (button),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL, tooltip, -1);
+  g_object_set_data (G_OBJECT (button), "nuvashalauncher-project",
+                     (gpointer) project);
+  g_signal_connect_object (button, "clicked", callback, self, 0);
+  return button;
+}
+
 /* Puts the project icon in @icon when it has been fetched, and leaves
    the placeholder in it when there is none. The widget is held for the
    length of the fetch, so a row that goes away first is still a widget
@@ -139,12 +177,14 @@ results_arrived (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthResult
 
       adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
 
-      /* The whole row opens the project, where the version is chosen.
-       * An AdwActionRow is not activatable by default, so the row
-       * itself is made one: a click on it activates the row. */
-      gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
-       g_signal_connect_object (row, "activated", G_CALLBACK (nuvashalauncher_content_page_on_result_activated),
-                                self, 0);
+      adw_action_row_add_suffix (
+        ADW_ACTION_ROW (row),
+        row_action_button ("pan-down-symbolic", _("Versions"), stored,
+                           G_CALLBACK (on_row_versions_clicked), self));
+      adw_action_row_add_suffix (
+        ADW_ACTION_ROW (row),
+        row_action_button ("folder-download-symbolic", _("Install"), stored,
+                           G_CALLBACK (on_row_quick_install_clicked), self));
 
       adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->browse.results_group),
                                  row);
@@ -415,6 +455,15 @@ nuvashalauncher_content_page_on_content_search_key (GtkEventControllerKey *contr
   GtkWidget *entry;
 
   if (keyval == GDK_KEY_Escape &&
+      nuvashalauncher_content_page_is_browsing (self) &&
+      self->browse.search_bar != NULL &&
+      gtk_widget_get_visible (GTK_WIDGET (self->browse.search_bar)))
+    {
+      nuvashalauncher_content_page_set_installed_search_visible (self, FALSE);
+      return GDK_EVENT_STOP;
+    }
+
+  if (keyval == GDK_KEY_Escape &&
       g_strcmp0 (adw_view_stack_get_visible_child_name (self->stack), "installed") == 0)
     {
       close_installed_search (self);
@@ -449,15 +498,7 @@ nuvashalauncher_content_page_on_content_search_key (GtkEventControllerKey *contr
 
   entry = active_search_entry (self);
   if (entry != NULL)
-    {
-      if (g_strcmp0 (adw_view_stack_get_visible_child_name (self->stack), "installed") == 0)
-        nuvashalauncher_content_page_set_installed_search_visible (self, TRUE);
-      else
-        {
-          gtk_widget_set_visible (entry, TRUE);
-          gtk_widget_grab_focus (entry);
-        }
-    }
+    nuvashalauncher_content_page_set_installed_search_visible (self, TRUE);
 
   return GDK_EVENT_STOP;
 }

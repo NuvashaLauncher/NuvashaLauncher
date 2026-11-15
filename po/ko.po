@@ -1207,3 +1207,99 @@ msgstr "AppStream 메타데이터(설명, 요약 및 릴리스 정보)는 Creati
 
 msgid "Nuvasha Launcher"
 msgstr "Nuvasha Launcher"
+
+msgid "Copy"
+msgstr "복사"
+
+msgid "Rename"
+msgstr "이름 바꾸기"
+
+msgid "Reset Icon"
+msgstr "아이콘 초기화"
+
+msgid "Delete World"
+msgstr "월드 삭제"
+
+msgid "Seed copied to clipboard"
+msgstr "시드가 클립보드에 복사되었습니다"
+
+msgid "Remove server \"%s\"?"
+msgstr "\"%s\" 서버를 제거할까요?"
+
+msgid "Refresh"
+msgstr "새로 고침"
+
+msgid "Remove Server"
+msgstr "서버 제거"
+
+msgid "Survival"
+msgstr "서바이벌"
+
+msgid "Edit"
+msgstr "편집"
+
+msgid "Ask to download"
+msgstr "다운로드할지 묻기"
+
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr "Minecraft에서 저장하거나 여기로 가져온 월드가 이 목록에 표시됩니다."
+
+msgid "Rename World"
+msgstr "월드 이름 바꾸기"
+
+msgid "Servers"
+msgstr "서버"
+
+msgid "Save"
+msgstr "저장"
+
+msgid "Add World"
+msgstr "월드 추가"
+
+msgid "Spectator"
+msgstr "관전자"
+
+msgid "Delete world \"%s\"? This cannot be undone."
+msgstr "\"%s\" 월드를 삭제할까요? 되돌릴 수 없습니다."
+
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "여기에 추가한 서버는 이 인스턴스의 servers.dat에 저장됩니다."
+
+msgid "Add Server"
+msgstr "서버 추가"
+
+msgid "Edit Server"
+msgstr "서버 편집"
+
+msgid "Address"
+msgstr "주소"
+
+msgid "Datapacks"
+msgstr "데이터 팩"
+
+msgid "No Worlds"
+msgstr "월드 없음"
+
+msgid "Creative"
+msgstr "크리에이티브"
+
+msgid "Move Up"
+msgstr "위로 이동"
+
+msgid "No Servers"
+msgstr "서버 없음"
+
+msgid "Never download"
+msgstr "다운로드 안 함"
+
+msgid "Worlds"
+msgstr "월드"
+
+msgid "Always download"
+msgstr "항상 다운로드"
+
+msgid "Move Down"
+msgstr "아래로 이동"
+
+msgid "Copy Seed"
+msgstr "시드 복사"

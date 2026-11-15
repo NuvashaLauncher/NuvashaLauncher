@@ -153,6 +153,19 @@ account_for_launch (NuvashaLauncher *self)
 }
 
 void
+nuvashalauncher_launcher_set_quick_play (NuvashaLauncher *self,
+                                         const char *world,
+                                         const char *server)
+{
+  g_return_if_fail (NUVASHALAUNCHER_IS_LAUNCHER (self));
+
+  g_object_set_data_full (G_OBJECT (self), "nuvashalauncher-quick-play-world",
+                          g_strdup (world), g_free);
+  g_object_set_data_full (G_OBJECT (self), "nuvashalauncher-quick-play-server",
+                          g_strdup (server), g_free);
+}
+
+void
 nuvashalauncher_launcher_start (NuvashaLauncher *self)
 {
   /* Not g_autofree: the instance hands the string over and it becomes the

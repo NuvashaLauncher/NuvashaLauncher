@@ -1208,3 +1208,99 @@ msgstr "AppStreamメタデータ（説明、概要、リリースノート）は
 
 msgid "Nuvasha Launcher"
 msgstr "Nuvasha Launcher"
+
+msgid "Copy"
+msgstr "コピー"
+
+msgid "Rename"
+msgstr "名前を変更"
+
+msgid "Reset Icon"
+msgstr "アイコンをリセット"
+
+msgid "Delete World"
+msgstr "ワールドを削除"
+
+msgid "Seed copied to clipboard"
+msgstr "シード値をクリップボードにコピーしました"
+
+msgid "Remove server \"%s\"?"
+msgstr "サーバー「%s」を削除しますか？"
+
+msgid "Refresh"
+msgstr "更新"
+
+msgid "Remove Server"
+msgstr "サーバーを削除"
+
+msgid "Survival"
+msgstr "サバイバル"
+
+msgid "Edit"
+msgstr "編集"
+
+msgid "Ask to download"
+msgstr "ダウンロード時に確認する"
+
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr "Minecraft で保存されたワールドやインポートしたワールドがここに表示されます。"
+
+msgid "Rename World"
+msgstr "ワールド名を変更"
+
+msgid "Servers"
+msgstr "サーバー"
+
+msgid "Save"
+msgstr "保存"
+
+msgid "Add World"
+msgstr "ワールドを追加"
+
+msgid "Spectator"
+msgstr "スペクテイター"
+
+msgid "Delete world \"%s\"? This cannot be undone."
+msgstr "ワールド「%s」を削除しますか？この操作は取り消せません。"
+
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "ここに追加されたサーバーはこのインスタンスの servers.dat に保存されます。"
+
+msgid "Add Server"
+msgstr "サーバーを追加"
+
+msgid "Edit Server"
+msgstr "サーバーを編集"
+
+msgid "Address"
+msgstr "アドレス"
+
+msgid "Datapacks"
+msgstr "データパック"
+
+msgid "No Worlds"
+msgstr "ワールドがありません"
+
+msgid "Creative"
+msgstr "クリエイティブ"
+
+msgid "Move Up"
+msgstr "上へ移動"
+
+msgid "No Servers"
+msgstr "サーバーがありません"
+
+msgid "Never download"
+msgstr "ダウンロードしない"
+
+msgid "Worlds"
+msgstr "ワールド"
+
+msgid "Always download"
+msgstr "常にダウンロード"
+
+msgid "Move Down"
+msgstr "下へ移動"
+
+msgid "Copy Seed"
+msgstr "シード値をコピー"

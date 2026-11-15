@@ -78,6 +78,18 @@ nuvashalauncher_main_window_launch_instance_as (NuvashaLauncherMainWindow *self,
                                         const char *account_id,
                                         GError **error)
 {
+  return nuvashalauncher_main_window_launch_instance_with_options (
+    self, instance_id, account_id, NULL, NULL, error);
+}
+
+gboolean
+nuvashalauncher_main_window_launch_instance_with_options (NuvashaLauncherMainWindow *self,
+                                                  const char *instance_id,
+                                                  const char *account_id,
+                                                  const char *world_name,
+                                                  const char *server_address,
+                                                  GError **error)
+{
   NuvashaLauncherInstance *instance;
   NuvashaLauncher *launcher;
 
@@ -108,6 +120,9 @@ nuvashalauncher_main_window_launch_instance_as (NuvashaLauncherMainWindow *self,
                    "instance \"%s\" is already running", instance_id);
       return FALSE;
     }
+
+  if (world_name != NULL || server_address != NULL)
+    nuvashalauncher_launcher_set_quick_play (launcher, world_name, server_address);
 
   nuvashalauncher_launcher_start (launcher);
   return TRUE;

@@ -25,6 +25,8 @@ typedef struct {
   char *import_path;
   char *launch_key;
   char *account_key;
+  char *server_address;
+  char *world_name;
   char *switch_account;
   char *remove_account;
   char *add_offline_account;
@@ -43,6 +45,8 @@ cli_options_clear (CliOptions *opts)
   g_free (opts->import_path);
   g_free (opts->launch_key);
   g_free (opts->account_key);
+  g_free (opts->server_address);
+  g_free (opts->world_name);
   g_free (opts->switch_account);
   g_free (opts->remove_account);
   g_free (opts->add_offline_account);
@@ -69,6 +73,10 @@ build_option_context (CliOptions *opts)
       "Run --launch without opening a window", NULL },
     { "account", 0, 0, G_OPTION_ARG_STRING, &opts->account_key,
       "Use this account for --launch", "ACCOUNT" },
+    { "server", 's', 0, G_OPTION_ARG_STRING, &opts->server_address,
+      "Join a server directly when using --launch", "ADDRESS" },
+    { "world", 0, 0, G_OPTION_ARG_STRING, &opts->world_name,
+      "Join a singleplayer world directly when using --launch", "WORLD" },
     { "list-instances", 0, 0, G_OPTION_ARG_NONE, &opts->show_instances,
       "List instances", NULL },
     { "list-accounts", 0, 0, G_OPTION_ARG_NONE, &opts->show_accounts,
@@ -118,6 +126,8 @@ nuvashalauncher_cli_add_options (GApplication *app)
     { "launch", 'l', 0, G_OPTION_ARG_STRING, NULL, "Launch an instance by UUID or name", "INSTANCE" },
     { "headless", 0, 0, G_OPTION_ARG_NONE, NULL, "Run --launch without opening a window", NULL },
     { "account", 0, 0, G_OPTION_ARG_STRING, NULL, "Use this account for --launch", "ACCOUNT" },
+    { "server", 's', 0, G_OPTION_ARG_STRING, NULL, "Join a server directly when using --launch", "ADDRESS" },
+    { "world", 0, 0, G_OPTION_ARG_STRING, NULL, "Join a singleplayer world directly when using --launch", "WORLD" },
     { "list-instances", 0, 0, G_OPTION_ARG_NONE, NULL, "List instances", NULL },
     { "list-accounts", 0, 0, G_OPTION_ARG_NONE, NULL, "List accounts", NULL },
     { "json", 0, 0, G_OPTION_ARG_NONE, NULL, "Format --list-instances or --list-accounts output as JSON", NULL },
@@ -557,7 +567,10 @@ on_launch_state (NuvashaLauncher *launcher,
 }
 
 static int
-launch_headless (const char *key, const char *account_key)
+launch_headless (const char *key,
+                 const char *account_key,
+                 const char *world_name,
+                 const char *server_address)
 {
   g_autoptr (NuvashaLauncherInstanceManager) manager =
     nuvashalauncher_instance_manager_new (NULL);
@@ -588,6 +601,9 @@ launch_headless (const char *key, const char *account_key)
       g_printerr ("%s\n", nuvashalauncher_error_message (error));
       return 1;
     }
+
+  if (world_name != NULL || server_address != NULL)
+    nuvashalauncher_launcher_set_quick_play (launcher, world_name, server_address);
 
   GMainLoop *loop = g_main_loop_new (NULL, FALSE);
   HeadlessLaunchData data = { loop, 1 };
@@ -664,6 +680,8 @@ nuvashalauncher_cli_try_run (int *argc, char ***argv, int *exit_code)
 
   if (actions > 1 ||
       (opts.account_key != NULL && opts.launch_key == NULL) ||
+      ((opts.server_address != NULL || opts.world_name != NULL) && opts.launch_key == NULL) ||
+      (opts.server_address != NULL && opts.world_name != NULL) ||
       (opts.headless && opts.launch_key == NULL) ||
       (opts.keep_files && opts.remove_instance == NULL) ||
       ((opts.mc_version != NULL || opts.loader_name != NULL || opts.loader_version != NULL) &&
@@ -704,7 +722,8 @@ nuvashalauncher_cli_try_run (int *argc, char ***argv, int *exit_code)
   else if (opts.clear_cache)
     *exit_code = clear_cache ();
   else if (opts.launch_key != NULL && opts.headless)
-    *exit_code = launch_headless (opts.launch_key, opts.account_key);
+    *exit_code = launch_headless (opts.launch_key, opts.account_key,
+                                  opts.world_name, opts.server_address);
   else
     {
       cli_options_clear (&opts);

@@ -157,9 +157,8 @@ remove_duplicate_project_files (NuvashaLauncherContentPage *self, const char *pr
          }
       else
         {
-          g_autofree char *directory = NULL;
+          g_autofree char *directory = content_page_base_directory (self);
           g_autofree char *filename = g_path_get_basename (installed->path);
-          g_object_get (self->instance, "directory", &directory, NULL);
           nuvashalauncher_operation_release (
             nuvashalauncher_content_index_remove_async (directory, self->type, filename,
                                             NULL, NULL), NULL);
@@ -268,10 +267,8 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       remove_duplicate_project_files (run->page, file->project_id, keep);
 
       {
-        g_autofree char *instance_directory = NULL;
+        g_autofree char *instance_directory = content_page_base_directory (run->page);
         NuvashaLauncherContentIndexEntry entry = { 0 };
-        g_object_get (run->page->instance, "directory", &instance_directory,
-                      NULL);
         entry.filename = file->filename;
          entry.hash = file->sha1;
          entry.hash512 = file->sha512;
@@ -390,9 +387,6 @@ start_fetch (NuvashaLauncherContentPage *self, GPtrArray *files)
 
     if (files != NULL && files->len > 0)
       title = ((InstallFile *) g_ptr_array_index (files, 0))->label;
-
-    if (title == NULL)
-      title = self->project.current_project_title;
 
     if (title == NULL)
        title = _("Content");

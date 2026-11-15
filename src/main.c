@@ -143,6 +143,8 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
   const char *file_path = NULL;
   const char *launch_id = NULL;
   const char *account_id = NULL;
+  const char *server_address = NULL;
+  const char *world_name = NULL;
   g_auto (GStrv) arguments = NULL;
   int argument_count = 0;
   g_autoptr (GError) error = NULL;
@@ -150,6 +152,8 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
   g_variant_dict_lookup (options, "import", "&s", &import_path);
   g_variant_dict_lookup (options, "launch", "&s", &launch_id);
   g_variant_dict_lookup (options, "account", "&s", &account_id);
+  g_variant_dict_lookup (options, "server", "&s", &server_address);
+  g_variant_dict_lookup (options, "world", "&s", &world_name);
 
   arguments = g_application_command_line_get_arguments (command_line,
                                                         &argument_count);
@@ -163,11 +167,14 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
   {
     guint actions = (launch_id != NULL) + (import_path != NULL || file_path != NULL);
 
-    if (actions > 1 || (account_id != NULL && launch_id == NULL))
+    if (actions > 1 ||
+        (account_id != NULL && launch_id == NULL) ||
+        ((server_address != NULL || world_name != NULL) && launch_id == NULL) ||
+        (server_address != NULL && world_name != NULL))
       {
         g_application_command_line_printerr (
           command_line,
-          "choose one command at a time; --account requires --launch INSTANCE.\n");
+          "invalid combination of options; run with --help for usage.\n");
         return 2;
       }
   }
@@ -178,7 +185,8 @@ on_command_line (GApplication *app, GApplicationCommandLine *command_line,
        * without presenting it. */
       NuvashaLauncherMainWindow *window = ensure_main_window (app, FALSE);
 
-       if (!nuvashalauncher_main_window_launch_instance_as (window, launch_id, account_id, &error))
+       if (!nuvashalauncher_main_window_launch_instance_with_options (
+             window, launch_id, account_id, world_name, server_address, &error))
         {
           g_application_command_line_printerr (command_line, "%s\n",
                                                 nuvashalauncher_error_message (error));

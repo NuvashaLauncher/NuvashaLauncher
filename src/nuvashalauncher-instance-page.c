@@ -22,7 +22,9 @@
 #include "nuvashalauncher-logs-page.h"
 #include "nuvashalauncher-minecraft-versions.h"
 #include "nuvashalauncher-modpack.h"
+#include "nuvashalauncher-servers-page.h"
 #include "nuvashalauncher-ui-feedback.h"
+#include "nuvashalauncher-worlds-page.h"
 #include "nuvashalauncher-task.h"
 #include "nuvashalauncher-operation.h"
 
@@ -123,6 +125,221 @@ refresh_in_list (NuvashaLauncherInstancePage *self)
   g_list_store_splice (store, position, 1, &item, 1);
 }
 
+static GtkWidget *
+settings_page_widget (GtkWidget *page)
+{
+  AdwNavigationPage *nav_page;
+  GtkWidget *child;
+
+  if (page == NULL || !ADW_IS_NAVIGATION_VIEW (page))
+    return NULL;
+
+  nav_page = adw_navigation_view_get_visible_page (ADW_NAVIGATION_VIEW (page));
+  if (nav_page == NULL)
+    return NULL;
+
+  child = adw_navigation_page_get_child (nav_page);
+  return nuvashalauncher_settings_page_has_search (child) ? child : NULL;
+}
+
+static void
+sync_sidebar_search_button (NuvashaLauncherInstancePage *self)
+{
+  GtkWidget *page = self->attached_header_page;
+  GtkWidget *settings_widget = settings_page_widget (page);
+
+  if (self->sidebar_search_button == NULL)
+    return;
+
+  self->syncing_search_button = TRUE;
+  if (settings_widget != NULL)
+    {
+      gtk_widget_set_visible (GTK_WIDGET (self->sidebar_search_button), TRUE);
+      gtk_toggle_button_set_active (
+        self->sidebar_search_button,
+        nuvashalauncher_settings_page_is_search_visible (settings_widget));
+    }
+  else if (page != NULL && NUVASHALAUNCHER_IS_CONTENT_PAGE (page))
+    {
+      NuvashaLauncherContentPage *cp = NUVASHALAUNCHER_CONTENT_PAGE (page);
+      gtk_widget_set_visible (GTK_WIDGET (self->sidebar_search_button), TRUE);
+      gtk_toggle_button_set_active (
+        self->sidebar_search_button,
+        nuvashalauncher_content_page_is_installed_search_visible (cp));
+    }
+  else if (page != NULL && NUVASHALAUNCHER_IS_LOGS_PAGE (page))
+    {
+      NuvashaLauncherLogsPage *lp = NUVASHALAUNCHER_LOGS_PAGE (page);
+      gtk_widget_set_visible (GTK_WIDGET (self->sidebar_search_button), TRUE);
+      gtk_toggle_button_set_active (
+        self->sidebar_search_button,
+        nuvashalauncher_logs_page_is_search_visible (lp));
+    }
+  else if (page != NULL && NUVASHALAUNCHER_IS_WORLDS_PAGE (page))
+    {
+      NuvashaLauncherWorldsPage *wp = NUVASHALAUNCHER_WORLDS_PAGE (page);
+      gtk_widget_set_visible (GTK_WIDGET (self->sidebar_search_button), TRUE);
+      gtk_toggle_button_set_active (
+        self->sidebar_search_button,
+        nuvashalauncher_worlds_page_is_search_visible (wp));
+    }
+  else if (page != NULL && NUVASHALAUNCHER_IS_SERVERS_PAGE (page))
+    {
+      NuvashaLauncherServersPage *sp = NUVASHALAUNCHER_SERVERS_PAGE (page);
+      gtk_widget_set_visible (GTK_WIDGET (self->sidebar_search_button), TRUE);
+      gtk_toggle_button_set_active (
+        self->sidebar_search_button,
+        nuvashalauncher_servers_page_is_search_visible (sp));
+    }
+  else
+    {
+      gtk_widget_set_visible (GTK_WIDGET (self->sidebar_search_button), FALSE);
+      gtk_toggle_button_set_active (self->sidebar_search_button, FALSE);
+    }
+  self->syncing_search_button = FALSE;
+}
+
+static void
+on_sidebar_search_toggled (GtkToggleButton *button, gpointer user_data)
+{
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
+  GtkWidget *page = self->attached_header_page;
+  gboolean active;
+
+  if (self->syncing_search_button || page == NULL)
+    return;
+
+  active = gtk_toggle_button_get_active (button);
+  {
+    GtkWidget *settings_widget = settings_page_widget (page);
+    if (settings_widget != NULL)
+      {
+        nuvashalauncher_settings_page_set_search_visible (settings_widget, active);
+        return;
+      }
+  }
+  if (NUVASHALAUNCHER_IS_CONTENT_PAGE (page))
+    nuvashalauncher_content_page_set_installed_search_visible (
+      NUVASHALAUNCHER_CONTENT_PAGE (page), active);
+  else if (NUVASHALAUNCHER_IS_LOGS_PAGE (page))
+    nuvashalauncher_logs_page_set_search_visible (
+      NUVASHALAUNCHER_LOGS_PAGE (page), active);
+  else if (NUVASHALAUNCHER_IS_WORLDS_PAGE (page))
+    nuvashalauncher_worlds_page_set_search_visible (
+      NUVASHALAUNCHER_WORLDS_PAGE (page), active);
+  else if (NUVASHALAUNCHER_IS_SERVERS_PAGE (page))
+    nuvashalauncher_servers_page_set_search_visible (
+      NUVASHALAUNCHER_SERVERS_PAGE (page), active);
+}
+
+static void
+on_content_page_subview_changed (GObject *obj G_GNUC_UNUSED,
+                                 GParamSpec *pspec G_GNUC_UNUSED,
+                                 gpointer user_data)
+{
+  sync_sidebar_search_button (NUVASHALAUNCHER_INSTANCE_PAGE (user_data));
+}
+
+static void
+detach_header_page (NuvashaLauncherInstancePage *self)
+{
+  GtkWidget *page = self->attached_header_page;
+
+  if (page == NULL || self->content_header == NULL)
+    {
+      self->attached_header_page = NULL;
+      return;
+    }
+
+  self->attached_header_page = NULL;
+  GtkWidget *title_widget = adw_header_bar_get_title_widget (self->content_header);
+  if (title_widget != NULL)
+    g_signal_handlers_disconnect_by_data (title_widget, self);
+
+  GtkWidget *settings_widget = settings_page_widget (page);
+  if (settings_widget != NULL)
+    nuvashalauncher_settings_page_detach_header (settings_widget, self->content_header);
+  else if (NUVASHALAUNCHER_IS_CONTENT_PAGE (page))
+    nuvashalauncher_content_page_detach_header (
+      NUVASHALAUNCHER_CONTENT_PAGE (page), self->content_header);
+  else if (NUVASHALAUNCHER_IS_LOGS_PAGE (page))
+    nuvashalauncher_logs_page_detach_header (
+      NUVASHALAUNCHER_LOGS_PAGE (page), self->content_header);
+  else if (NUVASHALAUNCHER_IS_WORLDS_PAGE (page))
+    nuvashalauncher_worlds_page_detach_header (
+      NUVASHALAUNCHER_WORLDS_PAGE (page), self->content_header);
+  else if (NUVASHALAUNCHER_IS_SERVERS_PAGE (page))
+    nuvashalauncher_servers_page_detach_header (
+      NUVASHALAUNCHER_SERVERS_PAGE (page), self->content_header);
+  adw_header_bar_set_title_widget (self->content_header, NULL);
+}
+
+static void
+sync_header_to_visible_page (NuvashaLauncherInstancePage *self)
+{
+  GtkWidget *child;
+
+  if (self->stack == NULL || self->content_header == NULL)
+    return;
+
+  child = adw_view_stack_get_visible_child (self->stack);
+  if (child == self->attached_header_page)
+    {
+      sync_sidebar_search_button (self);
+      return;
+    }
+
+  detach_header_page (self);
+  if (child == NULL)
+    {
+      sync_sidebar_search_button (self);
+      return;
+    }
+
+  GtkWidget *settings_widget = settings_page_widget (child);
+  if (settings_widget != NULL)
+    {
+      nuvashalauncher_settings_page_attach_header (settings_widget, self->content_header);
+      self->attached_header_page = child;
+    }
+  else if (NUVASHALAUNCHER_IS_CONTENT_PAGE (child))
+    {
+      nuvashalauncher_content_page_attach_header (
+        NUVASHALAUNCHER_CONTENT_PAGE (child), self->content_header);
+      self->attached_header_page = child;
+    }
+  else if (NUVASHALAUNCHER_IS_LOGS_PAGE (child))
+    {
+      nuvashalauncher_logs_page_attach_header (
+        NUVASHALAUNCHER_LOGS_PAGE (child), self->content_header);
+      self->attached_header_page = child;
+    }
+  else if (NUVASHALAUNCHER_IS_WORLDS_PAGE (child))
+    {
+      nuvashalauncher_worlds_page_attach_header (
+        NUVASHALAUNCHER_WORLDS_PAGE (child), self->content_header);
+      self->attached_header_page = child;
+    }
+  else if (NUVASHALAUNCHER_IS_SERVERS_PAGE (child))
+    {
+      nuvashalauncher_servers_page_attach_header (
+        NUVASHALAUNCHER_SERVERS_PAGE (child), self->content_header);
+      self->attached_header_page = child;
+    }
+
+  GtkWidget *title_widget = adw_header_bar_get_title_widget (self->content_header);
+  if (title_widget != NULL)
+    {
+      g_signal_connect_object (title_widget, "notify::visible",
+                               G_CALLBACK (on_content_page_subview_changed), self, 0);
+      if (ADW_IS_CLAMP (title_widget))
+        g_signal_connect_object (title_widget, "notify::child",
+                                 G_CALLBACK (on_content_page_subview_changed), self, 0);
+    }
+
+  sync_sidebar_search_button (self);
+}
+
 /* The content pages read the loader and the Minecraft version of the
  * instance when they are built, so changing either of them has to build
  * them again: the Mods page in particular keeps saying "No mod loader"
@@ -140,12 +357,16 @@ rebuild_content_pages (NuvashaLauncherInstancePage *self)
       "image-x-generic-symbolic" },
     { NUVASHALAUNCHER_CONTENT_SHADER_PACK, "shader-packs", "Shader Packs",
       "applications-graphics-symbolic" },
+    { NUVASHALAUNCHER_CONTENT_DATAPACK, "datapacks", "Datapacks",
+      "package-x-generic-symbolic" },
     { NUVASHALAUNCHER_CONTENT_MOD, "mods", "Mods", "view-list-symbolic" },
   };
   g_autofree char *visible = NULL;
 
   if (self->stack == NULL)
     return;
+
+  detach_header_page (self);
 
   visible = g_strdup (adw_view_stack_get_visible_child_name (
                         ADW_VIEW_STACK (self->stack)));
@@ -173,24 +394,106 @@ rebuild_content_pages (NuvashaLauncherInstancePage *self)
                              GTK_WIDGET (self->logs_page));
       adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (self->stack),
                                             GTK_WIDGET (self->logs_page), "logs", _("Logs"),
-                                        "edit-clear-all-symbolic");
+                                            "utilities-terminal-symbolic");
     }
 
   if (visible != NULL)
     adw_view_stack_set_visible_child_name (ADW_VIEW_STACK (self->stack),
                                            visible);
+  sync_header_to_visible_page (self);
+}
+
+typedef struct {
+  const char *name;
+  const char *title;
+  const char *icon;
+} InstanceSidebarSection;
+
+static const InstanceSidebarSection instance_sections[] = {
+  { "settings", "Settings", "emblem-system-symbolic" },
+  { "resource-packs", "Resource Packs", "image-x-generic-symbolic" },
+  { "shader-packs", "Shader Packs", "applications-graphics-symbolic" },
+  { "datapacks", "Datapacks", "package-x-generic-symbolic" },
+  { "worlds", "Worlds", "folder-saved-search-symbolic" },
+  { "servers", "Servers", "network-server-symbolic" },
+  { "mods", "Mods", "view-list-symbolic" },
+  { "logs", "Logs", "utilities-terminal-symbolic" },
+};
+
+static void
+sync_sidebar_to_page (NuvashaLauncherInstancePage *self, const char *name)
+{
+  if (self->sidebar_list == NULL || name == NULL)
+    return;
+
+  self->syncing_sidebar = TRUE;
+  for (int i = 0; ; i++)
+    {
+      GtkListBoxRow *row = gtk_list_box_get_row_at_index (self->sidebar_list, i);
+      if (row == NULL)
+        break;
+      const char *row_name = g_object_get_data (G_OBJECT (row), "nuvashalauncher-page-name");
+      if (g_strcmp0 (row_name, name) == 0)
+        {
+          gtk_list_box_select_row (self->sidebar_list, row);
+          break;
+        }
+    }
+  self->syncing_sidebar = FALSE;
+}
+
+static void
+on_sidebar_row_selected (GtkListBox    *box G_GNUC_UNUSED,
+                         GtkListBoxRow *row,
+                         gpointer       user_data)
+{
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
+
+  if (row == NULL || self->syncing_sidebar || self->stack == NULL)
+    return;
+
+  const char *name = g_object_get_data (G_OBJECT (row), "nuvashalauncher-page-name");
+  if (name == NULL)
+    return;
+
+  adw_view_stack_set_visible_child_name (ADW_VIEW_STACK (self->stack), name);
+  if (self->split_view != NULL)
+    adw_navigation_split_view_set_show_content (self->split_view, TRUE);
+}
+
+static GtkWidget *
+create_sidebar_row (const InstanceSidebarSection *section)
+{
+  GtkWidget *row = gtk_list_box_row_new ();
+  GtkWidget *box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
+  GtkWidget *icon = gtk_image_new_from_icon_name (section->icon);
+  GtkWidget *label = gtk_label_new (_(section->title));
+
+  gtk_widget_set_margin_top (box, 8);
+  gtk_widget_set_margin_bottom (box, 8);
+  gtk_widget_set_margin_start (box, 6);
+  gtk_widget_set_margin_end (box, 6);
+  gtk_label_set_xalign (GTK_LABEL (label), 0.0f);
+  gtk_box_append (GTK_BOX (box), icon);
+  gtk_box_append (GTK_BOX (box), label);
+  gtk_list_box_row_set_child (GTK_LIST_BOX_ROW (row), box);
+  g_object_set_data (G_OBJECT (row), "nuvashalauncher-page-name",
+                     (gpointer) section->name);
+  return row;
 }
 
 static void
 on_content_tab_switched (GObject *stack, GParamSpec *pspec G_GNUC_UNUSED,
                          gpointer user_data)
 {
-  (void) user_data;
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
   const char *name = adw_view_stack_get_visible_child_name (
     ADW_VIEW_STACK (stack));
   GtkWidget *child = adw_view_stack_get_child_by_name (
     ADW_VIEW_STACK (stack), name);
 
+  sync_sidebar_to_page (self, name);
+  sync_header_to_visible_page (self);
   if (child != NULL && NUVASHALAUNCHER_IS_CONTENT_PAGE (child))
     nuvashalauncher_content_page_reset_for_tab_switch (NUVASHALAUNCHER_CONTENT_PAGE (child));
 }
@@ -203,12 +506,9 @@ on_instance_page_width_changed (GObject *object,
   NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (object);
   int width = gtk_widget_get_width (GTK_WIDGET (self));
 
-  if (self->switcher == NULL || width <= 0)
+  if (self->split_view == NULL || width <= 0)
     return;
-  adw_view_switcher_set_policy (
-    self->switcher,
-    width < 700 ? ADW_VIEW_SWITCHER_POLICY_NARROW
-                : ADW_VIEW_SWITCHER_POLICY_WIDE);
+  adw_navigation_split_view_set_collapsed (self->split_view, width < 600);
 }
 
 /* Settings-page implementation lives in nuvashalauncher-instance-page-settings.c. */
@@ -243,9 +543,8 @@ nuvashalauncher_instance_page_new (NuvashaLauncherInstanceManager *manager, Nuva
 
   NuvashaLauncherInstancePage *self = g_object_new (NUVASHALAUNCHER_TYPE_INSTANCE_PAGE, NULL);
   AdwViewStack *stack = ADW_VIEW_STACK (adw_view_stack_new ());
-  AdwViewSwitcher *switcher = ADW_VIEW_SWITCHER (adw_view_switcher_new ());
-  AdwHeaderBar *header = ADW_HEADER_BAR (adw_header_bar_new ());
-  AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
+  AdwNavigationSplitView *split_view =
+    ADW_NAVIGATION_SPLIT_VIEW (adw_navigation_split_view_new ());
   AdwNavigationView *settings_navigation;
   AdwNavigationPage *settings_page;
   g_autofree char *name = instance_string (instance, "name");
@@ -254,7 +553,7 @@ nuvashalauncher_instance_page_new (NuvashaLauncherInstanceManager *manager, Nuva
   self->instance = g_object_ref (instance);
   self->settings = g_object_ref (settings);
   self->launcher = g_object_ref (launcher);
-  self->switcher = switcher;
+  self->split_view = split_view;
   g_signal_connect_object (self, "notify::width",
                            G_CALLBACK (on_instance_page_width_changed), self, 0);
   settings_navigation = ADW_NAVIGATION_VIEW (adw_navigation_view_new ());
@@ -281,6 +580,18 @@ nuvashalauncher_instance_page_new (NuvashaLauncherInstanceManager *manager, Nuva
      "shader-packs", _("Shader Packs"), "applications-graphics-symbolic");
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack),
+    GTK_WIDGET (nuvashalauncher_content_page_new (instance, NUVASHALAUNCHER_CONTENT_DATAPACK)),
+     "datapacks", _("Datapacks"), "package-x-generic-symbolic");
+  adw_view_stack_add_titled_with_icon (
+    ADW_VIEW_STACK (stack),
+    GTK_WIDGET (nuvashalauncher_worlds_page_new (instance, launcher)),
+     "worlds", _("Worlds"), "folder-saved-search-symbolic");
+  adw_view_stack_add_titled_with_icon (
+    ADW_VIEW_STACK (stack),
+    GTK_WIDGET (nuvashalauncher_servers_page_new (instance, launcher)),
+     "servers", _("Servers"), "network-server-symbolic");
+  adw_view_stack_add_titled_with_icon (
+    ADW_VIEW_STACK (stack),
     GTK_WIDGET (nuvashalauncher_content_page_new (instance, NUVASHALAUNCHER_CONTENT_MOD)),
      "mods", _("Mods"), "view-list-symbolic");
 
@@ -297,22 +608,63 @@ nuvashalauncher_instance_page_new (NuvashaLauncherInstanceManager *manager, Nuva
   g_signal_connect_object (stack, "notify::visible-child",
                            G_CALLBACK (on_content_tab_switched), self, 0);
 
-  /* The header holds only this switcher. There is no back button here:
-   the dialog is named after the instance and its close button is what
-   leaves it. */
-  adw_view_switcher_set_policy (ADW_VIEW_SWITCHER (switcher),
-                                ADW_VIEW_SWITCHER_POLICY_WIDE);
-  adw_view_switcher_set_stack (ADW_VIEW_SWITCHER (switcher),
-                                ADW_VIEW_STACK (stack));
-  adw_header_bar_set_title_widget (header, GTK_WIDGET (switcher));
+  /* Build the Nautilus-style left sidebar (navigation-sidebar list) and
+   * content pane inside an AdwNavigationSplitView. */
   self->stack = stack;
   self->toast_overlay = ADW_TOAST_OVERLAY (adw_toast_overlay_new ());
   adw_toast_overlay_set_child (self->toast_overlay, GTK_WIDGET (stack));
-  gtk_box_append (GTK_BOX (self), GTK_WIDGET (toolbar));
-  adw_toolbar_view_add_top_bar (toolbar, GTK_WIDGET (header));
-  adw_toolbar_view_set_content (toolbar, GTK_WIDGET (self->toast_overlay));
-  gtk_widget_set_vexpand (GTK_WIDGET (toolbar), TRUE);
-  gtk_widget_set_hexpand (GTK_WIDGET (toolbar), TRUE);
+
+  GtkListBox *sidebar_list = GTK_LIST_BOX (gtk_list_box_new ());
+  gtk_widget_add_css_class (GTK_WIDGET (sidebar_list), "navigation-sidebar");
+  gtk_list_box_set_selection_mode (sidebar_list, GTK_SELECTION_SINGLE);
+  for (guint i = 0; i < G_N_ELEMENTS (instance_sections); i++)
+    gtk_list_box_append (sidebar_list, create_sidebar_row (&instance_sections[i]));
+  g_signal_connect_object (sidebar_list, "row-selected",
+                           G_CALLBACK (on_sidebar_row_selected), self, 0);
+  self->sidebar_list = sidebar_list;
+
+  GtkScrolledWindow *sidebar_scroll = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
+  gtk_scrolled_window_set_policy (sidebar_scroll, GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+  gtk_scrolled_window_set_child (sidebar_scroll, GTK_WIDGET (sidebar_list));
+  gtk_widget_set_vexpand (GTK_WIDGET (sidebar_scroll), TRUE);
+
+  AdwHeaderBar *sidebar_header = ADW_HEADER_BAR (adw_header_bar_new ());
+  adw_header_bar_set_show_title (sidebar_header, FALSE);
+  GtkToggleButton *sidebar_search_button = GTK_TOGGLE_BUTTON (gtk_toggle_button_new ());
+  gtk_button_set_icon_name (GTK_BUTTON (sidebar_search_button), "system-search-symbolic");
+  nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (sidebar_search_button), _("Search"));
+  gtk_widget_set_visible (GTK_WIDGET (sidebar_search_button), FALSE);
+  g_signal_connect_object (sidebar_search_button, "toggled",
+                           G_CALLBACK (on_sidebar_search_toggled), self, 0);
+  adw_header_bar_pack_start (sidebar_header, GTK_WIDGET (sidebar_search_button));
+  self->sidebar_search_button = sidebar_search_button;
+  AdwToolbarView *sidebar_toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
+  adw_toolbar_view_add_top_bar (sidebar_toolbar, GTK_WIDGET (sidebar_header));
+  adw_toolbar_view_set_content (sidebar_toolbar, GTK_WIDGET (sidebar_scroll));
+  AdwNavigationPage *sidebar_nav_page = adw_navigation_page_new (
+    GTK_WIDGET (sidebar_toolbar), name != NULL && *name != '\0' ? name : " ");
+
+  AdwHeaderBar *content_header = ADW_HEADER_BAR (adw_header_bar_new ());
+  adw_header_bar_set_centering_policy (content_header, ADW_CENTERING_POLICY_STRICT);
+  self->content_header = content_header;
+
+  AdwToolbarView *content_toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
+  adw_toolbar_view_add_top_bar (content_toolbar, GTK_WIDGET (content_header));
+  adw_toolbar_view_set_content (content_toolbar, GTK_WIDGET (self->toast_overlay));
+  AdwNavigationPage *content_nav_page = adw_navigation_page_new (
+    GTK_WIDGET (content_toolbar), " ");
+  self->content_nav_page = content_nav_page;
+
+  adw_navigation_split_view_set_min_sidebar_width (split_view, 180);
+  adw_navigation_split_view_set_max_sidebar_width (split_view, 240);
+  adw_navigation_split_view_set_sidebar (split_view, sidebar_nav_page);
+  adw_navigation_split_view_set_content (split_view, content_nav_page);
+  gtk_widget_set_vexpand (GTK_WIDGET (split_view), TRUE);
+  gtk_widget_set_hexpand (GTK_WIDGET (split_view), TRUE);
+  gtk_box_append (GTK_BOX (self), GTK_WIDGET (split_view));
+
+  sync_sidebar_to_page (self, "settings");
+  sync_header_to_visible_page (self);
 
   /* The dialog holds this box, and the box holds the toolbar view of the
      instance: there is no navigation page and no back button between the
@@ -340,10 +692,16 @@ nuvashalauncher_instance_page_dispose (GObject *object)
   /* The widget tree may be freed while the page object is kept alive
    * by a running operation: never touch it afterwards. The manager and
    * the instance stay, so those operations can still finish. */
+  detach_header_page (self);
   self->toast_overlay = NULL;
   self->icon_row = NULL;
   self->icon_path_label = NULL;
   self->stack = NULL;
+  self->split_view = NULL;
+  self->content_nav_page = NULL;
+  self->content_header = NULL;
+  self->sidebar_search_button = NULL;
+  self->sidebar_list = NULL;
   g_clear_object (&self->logs_page);
   self->java_row = NULL;
   self->directory_row = NULL;

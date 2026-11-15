@@ -37,6 +37,15 @@ G_DECLARE_FINAL_TYPE (NuvashaLauncherContentPage, nuvashalauncher_content_page, 
                       GtkBox)
 
 void nuvashalauncher_content_page_reset_for_tab_switch (NuvashaLauncherContentPage *self);
+void nuvashalauncher_content_page_attach_header (NuvashaLauncherContentPage *self,
+                                                 AdwHeaderBar *header);
+void nuvashalauncher_content_page_detach_header (NuvashaLauncherContentPage *self,
+                                                 AdwHeaderBar *header);
+void nuvashalauncher_content_page_set_installed_search_visible (
+  NuvashaLauncherContentPage *self, gboolean visible);
+gboolean nuvashalauncher_content_page_is_browsing (NuvashaLauncherContentPage *self);
+gboolean nuvashalauncher_content_page_is_installed_search_visible (
+  NuvashaLauncherContentPage *self);
 
 
 /* What the loaders and the game ignore: a file whose name ends with
@@ -133,6 +142,9 @@ gboolean nuvashalauncher_content_metadata_finish (GAsyncResult *result, GError *
  * floating reference. */
 NuvashaLauncherContentPage *nuvashalauncher_content_page_new (NuvashaLauncherInstance     *instance,
                                       NuvashaLauncherContentType  type);
+NuvashaLauncherContentPage *nuvashalauncher_content_page_new_with_base (NuvashaLauncherInstance *instance,
+                                                NuvashaLauncherContentType type,
+                                                const char *base_directory);
 
 G_END_DECLS
 

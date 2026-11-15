@@ -2,19 +2,33 @@
 
 All notable changes to Nuvasha Launcher are documented in this file.
 
-## [1.2] - Unreleased
+## [1.2] - 2026-11-14
+
+### Instance Management & Content
+- **Datapacks, Worlds & Servers Tabs**: Added dedicated `Datapacks`, `Worlds`, and `Servers` tabs to the instance view (`Settings`, `Resource Packs`, `Shader Packs`, `Datapacks`, `Worlds`, `Servers`, `Mods`, `Logs`) with `level.dat` / `servers.dat` NBT parsing (`nuvashalauncher-nbt`), server editing/reordering/deletion, world import/deletion, and direct QuickPlay launch into a world or server.
+- **Lazy Version Loading & UI Responsiveness**: Added incremental/lazy loading for Modrinth version selectors in the modpack browser and content details to prevent UI stalls on projects with many versions, prevented duplicate version-selector popovers on rapid clicks, and shortened the modpack browser height.
+- **Translations**: Added localized strings for the new tabs, actions, and QuickPlay controls across all 26 `po/*.po` translations.
+
+### User Interface & Search
+- **Unified Header Bar & Search**: Moved action buttons (`Update All`, `Open Folder`, filter controls, `Installed | Browse` switcher, `+`, `Refresh`, `Clear`) into the top `AdwHeaderBar` with `ADW_CENTERING_POLICY_STRICT`, placed the magnifying glass toggle at the top-left of the sidebar, and added centered header search across `Settings`, `Content` (`Installed` and `Browse`), `Worlds`, `Servers`, and `Logs`.
 
 ### Command-Line Interface
 - **Headless `--help` & Option Parsing**: Replaced manual argument checks in `main.c` with `GOptionContext`-based parsing in `nuvashalauncher-cli.c`, allowing `--help` (`-h`, `-?`) and all CLI commands to run without a display.
 - **Name-Based Instance Lookup**: Added `nuvashalauncher_instance_manager_find` so `--launch`, `--remove-instance`, and `--export-instance` accept either an instance UUID or display name.
 - **Richer Listings & JSON Output**: Expanded `--list-instances` (UUID, name, Minecraft version, loader) and `--list-accounts` (UUID, name, account type, active marker), and added `--json` output support to both commands.
 - **Safer Instance Removal**: Added `--keep-files` to `--remove-instance` so an instance can be unregistered while preserving its directory on disk.
+- **Direct World & Server Launch**: Added `--server ADDRESS` (`-s`) and `--world WORLD` options to `--launch` (both GUI and `--headless`) using QuickPlay.
 - **New CLI Commands**:
   - `--create-instance NAME --mc-version VERSION [--loader LOADER] [--loader-version VERSION]` to create instances headlessly.
   - `--export-instance INSTANCE --output FILE` (`-o`) to export instances as `.mrpack` archives from the CLI.
   - `--add-offline-account NAME` to create and activate an offline account.
   - `--clear-cache` to clear the global download cache without opening the GUI.
   - `--launch INSTANCE --headless [--account ACCOUNT]` to run an instance headlessly, streaming output to stdout/stderr and exiting with the game status.
+
+### Build & Packaging
+- **CI & Packaging Compatibility**: Fixed a GCC predefined `linux` macro collision in `tests/test-resolve-metadata.c` when packaging builds omit `-std=c17`, and guarded Secret Service CLI tests in `tests/test-cli.c` for headless containers without a Secret Service daemon.
+
+**Full Changelog**: https://github.com/NuvashaLauncher/NuvashaLauncher/compare/v1.1...v1.2
 
 ## [1.1] - 2026-11-14
 

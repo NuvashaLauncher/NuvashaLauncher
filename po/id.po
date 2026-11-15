@@ -1174,3 +1174,99 @@ msgstr "Metadata AppStream (deskripsi, ringkasan, dan catatan rilis) dirilis di 
 
 msgid "Nuvasha Launcher"
 msgstr "Nuvasha Launcher"
+
+msgid "Copy"
+msgstr "Salin"
+
+msgid "Rename"
+msgstr "Ubah Nama"
+
+msgid "Reset Icon"
+msgstr "Atur Ulang Ikon"
+
+msgid "Delete World"
+msgstr "Hapus Dunia"
+
+msgid "Seed copied to clipboard"
+msgstr "Seed disalin ke papan klip"
+
+msgid "Remove server \"%s\"?"
+msgstr "Hapus server \"%s\"?"
+
+msgid "Refresh"
+msgstr "Segarkan"
+
+msgid "Remove Server"
+msgstr "Hapus Server"
+
+msgid "Survival"
+msgstr "Bertahan Hidup"
+
+msgid "Edit"
+msgstr "Sunting"
+
+msgid "Ask to download"
+msgstr "Tanya sebelum mengunduh"
+
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr "Dunia yang disimpan oleh Minecraft atau diimpor ke sini akan muncul di daftar ini."
+
+msgid "Rename World"
+msgstr "Ubah Nama Dunia"
+
+msgid "Servers"
+msgstr "Server"
+
+msgid "Save"
+msgstr "Simpan"
+
+msgid "Add World"
+msgstr "Tambah Dunia"
+
+msgid "Spectator"
+msgstr "Penonton"
+
+msgid "Delete world \"%s\"? This cannot be undone."
+msgstr "Hapus dunia \"%s\"? Tindakan ini tidak dapat dibatalkan."
+
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "Server yang ditambahkan di sini disimpan ke servers.dat untuk instans ini."
+
+msgid "Add Server"
+msgstr "Tambah Server"
+
+msgid "Edit Server"
+msgstr "Sunting Server"
+
+msgid "Address"
+msgstr "Alamat"
+
+msgid "Datapacks"
+msgstr "Paket Data"
+
+msgid "No Worlds"
+msgstr "Tidak Ada Dunia"
+
+msgid "Creative"
+msgstr "Kreatif"
+
+msgid "Move Up"
+msgstr "Pindah ke Atas"
+
+msgid "No Servers"
+msgstr "Tidak Ada Server"
+
+msgid "Never download"
+msgstr "Jangan pernah mengunduh"
+
+msgid "Worlds"
+msgstr "Dunia"
+
+msgid "Always download"
+msgstr "Selalu unduh"
+
+msgid "Move Down"
+msgstr "Pindah ke Bawah"
+
+msgid "Copy Seed"
+msgstr "Salin Seed"

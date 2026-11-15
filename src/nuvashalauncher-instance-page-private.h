@@ -34,7 +34,14 @@ struct _NuvashaLauncherInstancePage
   AdwActionRow *icon_row;
   GtkLabel *icon_path_label; /* the icon path inside the chooser button */
   AdwViewStack *stack; /* the view stack holding the pages of the instance */
-  AdwViewSwitcher *switcher;
+  AdwNavigationSplitView *split_view;
+  AdwNavigationPage *content_nav_page;
+  AdwHeaderBar *content_header;
+  GtkToggleButton *sidebar_search_button;
+  gboolean syncing_search_button;
+  GtkWidget *attached_header_page;
+  GtkListBox *sidebar_list;
+  gboolean syncing_sidebar;
   NuvashaLauncherLogsPage *logs_page; /* the last page, kept so a rebuild can move it back */
 
   /* Directory chooser and move-progress spinner. */
@@ -69,6 +76,11 @@ GtkWidget *instance_page_dialog_parent (NuvashaLauncherInstancePage *self);
 void refresh_in_list (NuvashaLauncherInstancePage *self);
 void rebuild_content_pages (NuvashaLauncherInstancePage *self);
 GtkWidget *create_settings_page (NuvashaLauncherInstancePage *self);
+gboolean nuvashalauncher_settings_page_has_search (GtkWidget *widget);
+gboolean nuvashalauncher_settings_page_is_search_visible (GtkWidget *widget);
+void nuvashalauncher_settings_page_set_search_visible (GtkWidget *widget, gboolean visible);
+void nuvashalauncher_settings_page_attach_header (GtkWidget *widget, AdwHeaderBar *header);
+void nuvashalauncher_settings_page_detach_header (GtkWidget *widget, AdwHeaderBar *header);
 void instance_page_show_toast (NuvashaLauncherInstancePage *self, const char *message);
 void update_directory_row (NuvashaLauncherInstancePage *self);
 void on_change_directory_clicked (GtkButton *, gpointer);

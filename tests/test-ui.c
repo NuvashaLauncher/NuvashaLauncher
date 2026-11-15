@@ -304,11 +304,7 @@ test_content_page_starts_single (void)
 
   split = find_by_type (GTK_WIDGET (page), ADW_TYPE_NAVIGATION_SPLIT_VIEW);
 
-  g_assert_nonnull (split);
-  g_assert_true (adw_navigation_split_view_get_collapsed (
-    ADW_NAVIGATION_SPLIT_VIEW (split)));
-  g_assert_null (adw_navigation_split_view_get_content (
-    ADW_NAVIGATION_SPLIT_VIEW (split)));
+  g_assert_null (split);
 
   /* The switcher is icons only: the two buttons carry an icon and no
      label, which is what keeps the row one line, and the Installed one

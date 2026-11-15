@@ -1211,3 +1211,99 @@ msgstr "De AppStream-metadata (beschrijvingen, samenvattingen en release-opmerki
 
 msgid "Nuvasha Launcher"
 msgstr "Nuvasha Launcher"
+
+msgid "Copy"
+msgstr "Kopiëren"
+
+msgid "Rename"
+msgstr "Hernoemen"
+
+msgid "Reset Icon"
+msgstr "Pictogram herstellen"
+
+msgid "Delete World"
+msgstr "Wereld verwijderen"
+
+msgid "Seed copied to clipboard"
+msgstr "Seed gekopieerd naar klembord"
+
+msgid "Remove server \"%s\"?"
+msgstr "Server '%s' verwijderen?"
+
+msgid "Refresh"
+msgstr "Vernieuwen"
+
+msgid "Remove Server"
+msgstr "Server verwijderen"
+
+msgid "Survival"
+msgstr "Overleven"
+
+msgid "Edit"
+msgstr "Bewerken"
+
+msgid "Ask to download"
+msgstr "Vragen om te downloaden"
+
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr "Werelden die door Minecraft zijn opgeslagen of hier zijn geïmporteerd verschijnen in deze lijst."
+
+msgid "Rename World"
+msgstr "Wereld hernoemen"
+
+msgid "Servers"
+msgstr "Servers"
+
+msgid "Save"
+msgstr "Opslaan"
+
+msgid "Add World"
+msgstr "Wereld toevoegen"
+
+msgid "Spectator"
+msgstr "Toeschouwer"
+
+msgid "Delete world \"%s\"? This cannot be undone."
+msgstr "Wereld '%s' verwijderen? Dit kan niet ongedaan worden gemaakt."
+
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "Servers die hier worden toegevoegd worden opgeslagen in servers.dat van deze instantie."
+
+msgid "Add Server"
+msgstr "Server toevoegen"
+
+msgid "Edit Server"
+msgstr "Server bewerken"
+
+msgid "Address"
+msgstr "Adres"
+
+msgid "Datapacks"
+msgstr "Datapacks"
+
+msgid "No Worlds"
+msgstr "Geen werelden"
+
+msgid "Creative"
+msgstr "Creatief"
+
+msgid "Move Up"
+msgstr "Omhoog verplaatsen"
+
+msgid "No Servers"
+msgstr "Geen servers"
+
+msgid "Never download"
+msgstr "Nooit downloaden"
+
+msgid "Worlds"
+msgstr "Werelden"
+
+msgid "Always download"
+msgstr "Altijd downloaden"
+
+msgid "Move Down"
+msgstr "Omlaag verplaatsen"
+
+msgid "Copy Seed"
+msgstr "Seed kopiëren"

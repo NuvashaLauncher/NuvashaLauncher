@@ -1176,3 +1176,99 @@ msgstr "Metadata AppStream (popisy, souhrny a poznámky k vydání) jsou vydána
 
 msgid "Nuvasha Launcher"
 msgstr "Nuvasha Launcher"
+
+msgid "Copy"
+msgstr "Kopírovat"
+
+msgid "Rename"
+msgstr "Přejmenovat"
+
+msgid "Reset Icon"
+msgstr "Obnovit ikonu"
+
+msgid "Delete World"
+msgstr "Smazat svět"
+
+msgid "Seed copied to clipboard"
+msgstr "Seed zkopírován do schránky"
+
+msgid "Remove server \"%s\"?"
+msgstr "Odebrat server „%s“?"
+
+msgid "Refresh"
+msgstr "Obnovit"
+
+msgid "Remove Server"
+msgstr "Odebrat server"
+
+msgid "Survival"
+msgstr "Přežití"
+
+msgid "Edit"
+msgstr "Upravit"
+
+msgid "Ask to download"
+msgstr "Zeptat se před stažením"
+
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr "Světy uložené hrou Minecraft nebo importované zde se zobrazí v tomto seznamu."
+
+msgid "Rename World"
+msgstr "Přejmenovat svět"
+
+msgid "Servers"
+msgstr "Servery"
+
+msgid "Save"
+msgstr "Uložit"
+
+msgid "Add World"
+msgstr "Přidat svět"
+
+msgid "Spectator"
+msgstr "Pozorovatel"
+
+msgid "Delete world \"%s\"? This cannot be undone."
+msgstr "Smazat svět „%s“? Tuto akci nelze vrátit zpět."
+
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "Zde přidané servery se ukládají do servers.dat této instance."
+
+msgid "Add Server"
+msgstr "Přidat server"
+
+msgid "Edit Server"
+msgstr "Upravit server"
+
+msgid "Address"
+msgstr "Adresa"
+
+msgid "Datapacks"
+msgstr "Datapacky"
+
+msgid "No Worlds"
+msgstr "Žádné světy"
+
+msgid "Creative"
+msgstr "Tvořivý"
+
+msgid "Move Up"
+msgstr "Posunout nahoru"
+
+msgid "No Servers"
+msgstr "Žádné servery"
+
+msgid "Never download"
+msgstr "Nikdy nestahovat"
+
+msgid "Worlds"
+msgstr "Světy"
+
+msgid "Always download"
+msgstr "Vždy stahovat"
+
+msgid "Move Down"
+msgstr "Posunout dolů"
+
+msgid "Copy Seed"
+msgstr "Kopírovat seed"

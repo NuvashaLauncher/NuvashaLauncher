@@ -24,6 +24,10 @@ struct _NuvashaLauncherLogsPage
   GtkSearchEntry *search_entry;
   GtkButton *search_button;
   GtkBox *search_spacer;
+  GtkBox *bar;
+  GtkBox *actions_box;
+  AdwHeaderBar *header_bar;
+  AdwClamp *header_search_clamp;
 
   /* Number of rendered lines and whether the view follows the end. */
   guint rendered;
@@ -295,22 +299,48 @@ on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
     }
 }
 
-static void
-on_search_button_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+void
+nuvashalauncher_logs_page_set_search_visible (NuvashaLauncherLogsPage *self,
+                                              gboolean visible)
 {
-  NuvashaLauncherLogsPage *self = user_data;
-  gboolean visible = gtk_widget_get_visible (GTK_WIDGET (self->search_entry));
+  g_return_if_fail (NUVASHALAUNCHER_IS_LOGS_PAGE (self));
 
-  gtk_widget_set_visible (GTK_WIDGET (self->search_entry), !visible);
-  gtk_widget_set_hexpand (GTK_WIDGET (self->search_entry), !visible);
-  gtk_widget_set_hexpand (GTK_WIDGET (self->search_spacer), visible);
-  if (!visible)
+  if (self->search_entry == NULL || !GTK_IS_WIDGET (self->search_entry))
+    return;
+
+  gtk_widget_set_visible (GTK_WIDGET (self->search_entry), visible);
+  gtk_widget_set_hexpand (GTK_WIDGET (self->search_entry), visible);
+  if (self->header_bar != NULL && self->header_search_clamp != NULL)
+    gtk_widget_set_visible (GTK_WIDGET (self->header_search_clamp), visible);
+  if (self->header_bar == NULL && self->search_spacer != NULL)
+    gtk_widget_set_hexpand (GTK_WIDGET (self->search_spacer), !visible);
+
+  if (visible)
     gtk_widget_grab_focus (GTK_WIDGET (self->search_entry));
   else
     {
       gtk_editable_set_text (GTK_EDITABLE (self->search_entry), "");
       gtk_widget_grab_focus (GTK_WIDGET (self));
     }
+}
+
+gboolean
+nuvashalauncher_logs_page_is_search_visible (NuvashaLauncherLogsPage *self)
+{
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_LOGS_PAGE (self), FALSE);
+
+  return self->search_entry != NULL &&
+         GTK_IS_WIDGET (self->search_entry) &&
+         gtk_widget_get_visible (GTK_WIDGET (self->search_entry));
+}
+
+static void
+on_search_button_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  NuvashaLauncherLogsPage *self = user_data;
+  gboolean visible = nuvashalauncher_logs_page_is_search_visible (self);
+
+  nuvashalauncher_logs_page_set_search_visible (self, !visible);
 }
 
 /* Escape means "forget what I typed". This bar can be closed as well, so
@@ -331,22 +361,14 @@ on_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED, guint keyval,
 
   if (keyval == GDK_KEY_f && (state & GDK_CONTROL_MASK))
     {
-      gtk_widget_set_visible (GTK_WIDGET (self->search_bar), TRUE);
-      gtk_widget_set_hexpand (GTK_WIDGET (self->search_entry), TRUE);
-      gtk_widget_set_hexpand (GTK_WIDGET (self->search_spacer), FALSE);
-      gtk_widget_grab_focus (GTK_WIDGET (self->search_entry));
+      nuvashalauncher_logs_page_set_search_visible (self, TRUE);
       return GDK_EVENT_STOP;
     }
 
   if (keyval != GDK_KEY_Escape)
     return GDK_EVENT_PROPAGATE;
 
-  gtk_widget_set_visible (GTK_WIDGET (self->search_bar), FALSE);
-  gtk_widget_set_hexpand (GTK_WIDGET (self->search_entry), FALSE);
-  gtk_widget_set_hexpand (GTK_WIDGET (self->search_spacer), TRUE);
-  gtk_editable_set_text (GTK_EDITABLE (self->search_entry), "");
-  gtk_widget_grab_focus (GTK_WIDGET (self));
-
+  nuvashalauncher_logs_page_set_search_visible (self, FALSE);
   return GDK_EVENT_STOP;
 }
 
@@ -605,6 +627,10 @@ nuvashalauncher_logs_page_new (NuvashaLauncher *launcher)
     gtk_box_append (GTK_BOX (row), actions);
    gtk_widget_set_hexpand (row, TRUE);
    gtk_box_append (GTK_BOX (inner), row);
+  self->bar = GTK_BOX (row);
+  self->actions_box = g_object_ref_sink (GTK_BOX (actions));
+   g_object_ref (self->search_bar);
+   g_object_ref (self->search_button);
 
   /* The lines themselves. Read only: this is what the game printed,
      nothing to write into. */
@@ -677,6 +703,14 @@ nuvashalauncher_logs_page_dispose (GObject *object)
 {
   NuvashaLauncherLogsPage *self = NUVASHALAUNCHER_LOGS_PAGE (object);
 
+  if (self->header_bar != NULL)
+    nuvashalauncher_logs_page_detach_header (self, self->header_bar);
+  g_clear_object (&self->header_search_clamp);
+  g_clear_object (&self->search_bar);
+  self->search_entry = NULL;
+  g_clear_object (&self->search_button);
+  g_clear_object (&self->actions_box);
+
   /* The launcher outlives this page while a game is still running, so
      the connections go before anything else can arrive. */
   if (self->launcher != NULL)
@@ -724,4 +758,62 @@ nuvashalauncher_logs_page_init (NuvashaLauncherLogsPage *self)
   /* Everything is built in nuvashalauncher_logs_page_new(), which knows the launcher
      the page follows. */
   (void) self;
+}
+
+void
+nuvashalauncher_logs_page_attach_header (NuvashaLauncherLogsPage *self,
+                                          AdwHeaderBar *header)
+{
+  g_return_if_fail (NUVASHALAUNCHER_IS_LOGS_PAGE (self));
+  g_return_if_fail (ADW_IS_HEADER_BAR (header));
+
+  if (self->header_bar == header)
+    return;
+  if (self->header_bar != NULL)
+    nuvashalauncher_logs_page_detach_header (self, self->header_bar);
+
+  self->header_bar = header;
+  if (self->header_search_clamp == NULL)
+    {
+      self->header_search_clamp = ADW_CLAMP (g_object_ref_sink (adw_clamp_new ()));
+      adw_clamp_set_maximum_size (self->header_search_clamp, 460);
+      gtk_widget_set_hexpand (GTK_WIDGET (self->header_search_clamp), TRUE);
+    }
+
+  gtk_widget_set_visible (GTK_WIDGET (self->search_button), FALSE);
+
+  gtk_box_remove (self->bar, GTK_WIDGET (self->search_bar));
+  adw_clamp_set_child (self->header_search_clamp, GTK_WIDGET (self->search_bar));
+  gtk_widget_set_hexpand (GTK_WIDGET (self->search_bar), TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (self->header_search_clamp),
+                          gtk_widget_get_visible (GTK_WIDGET (self->search_bar)));
+  adw_header_bar_set_title_widget (header, GTK_WIDGET (self->header_search_clamp));
+
+  if (gtk_widget_get_parent (GTK_WIDGET (self->actions_box)) == GTK_WIDGET (self->bar))
+    gtk_box_remove (self->bar, GTK_WIDGET (self->actions_box));
+  adw_header_bar_pack_end (header, GTK_WIDGET (self->actions_box));
+  gtk_widget_set_visible (GTK_WIDGET (self->bar), FALSE);
+}
+
+void
+nuvashalauncher_logs_page_detach_header (NuvashaLauncherLogsPage *self,
+                                          AdwHeaderBar *header)
+{
+  g_return_if_fail (NUVASHALAUNCHER_IS_LOGS_PAGE (self));
+  if (self->header_bar != header || header == NULL)
+    return;
+
+  self->header_bar = NULL;
+  adw_header_bar_set_title_widget (header, NULL);
+  gtk_widget_set_visible (GTK_WIDGET (self->search_button), TRUE);
+  if (gtk_widget_is_ancestor (GTK_WIDGET (self->actions_box), GTK_WIDGET (header)))
+    adw_header_bar_remove (header, GTK_WIDGET (self->actions_box));
+  if (gtk_widget_get_parent (GTK_WIDGET (self->actions_box)) != GTK_WIDGET (self->bar))
+    gtk_box_append (self->bar, GTK_WIDGET (self->actions_box));
+  gtk_widget_set_visible (GTK_WIDGET (self->bar), TRUE);
+
+  adw_clamp_set_child (self->header_search_clamp, NULL);
+  gtk_box_prepend (self->bar, GTK_WIDGET (self->search_bar));
+  gtk_widget_set_hexpand (GTK_WIDGET (self->search_bar),
+                          gtk_widget_get_visible (GTK_WIDGET (self->search_bar)));
 }

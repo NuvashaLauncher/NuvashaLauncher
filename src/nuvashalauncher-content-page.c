@@ -18,7 +18,6 @@
 #include "nuvashalauncher-downloads.h"
 #include "nuvashalauncher-i18n.h"
 #include "nuvashalauncher-icons.h"
-#include "nuvashalauncher-markdown.h"
 #include "nuvashalauncher-settings.h"
 
 #include <glib/gstdio.h>
@@ -110,8 +109,28 @@ nuvashalauncher_content_page_on_open_folder_clicked (GtkButton *button G_GNUC_UN
   }
 }
 
+char *
+content_page_base_directory (NuvashaLauncherContentPage *self)
+{
+  char *directory = NULL;
+
+  if (self->base_directory != NULL)
+    return g_strdup (self->base_directory);
+
+  g_object_get (self->instance, "directory", &directory, NULL);
+  return directory;
+}
+
 NuvashaLauncherContentPage *
 nuvashalauncher_content_page_new (NuvashaLauncherInstance *instance, NuvashaLauncherContentType type)
+{
+  return nuvashalauncher_content_page_new_with_base (instance, type, NULL);
+}
+
+NuvashaLauncherContentPage *
+nuvashalauncher_content_page_new_with_base (NuvashaLauncherInstance *instance,
+                                            NuvashaLauncherContentType type,
+                                            const char *base_directory)
 {
   NuvashaLauncherContentPage *self = NULL;
   g_autofree char *directory = NULL;
@@ -127,10 +146,17 @@ nuvashalauncher_content_page_new (NuvashaLauncherInstance *instance, NuvashaLaun
   self->browse.model = nuvashalauncher_content_browser_model_new ();
   self->installed.scan = g_cancellable_new ();
 
-  g_object_get (instance, "directory", &directory, NULL);
-
-  if (directory != NULL)
-    self->folder = nuvashalauncher_content_folder_path (directory, type);
+  if (base_directory != NULL && *base_directory != '\0')
+    {
+      self->base_directory = g_strdup (base_directory);
+      self->folder = nuvashalauncher_content_folder_path (base_directory, type);
+    }
+  else
+    {
+      g_object_get (instance, "directory", &directory, NULL);
+      if (directory != NULL)
+        self->folder = nuvashalauncher_content_folder_path (directory, type);
+    }
 
   gtk_orientable_set_orientation (GTK_ORIENTABLE (self),
                                   GTK_ORIENTATION_VERTICAL);
@@ -164,26 +190,11 @@ nuvashalauncher_content_page_new (NuvashaLauncherInstance *instance, NuvashaLaun
   loader = nuvashalauncher_loader_to_string (value);
   self->loader = loader != NULL ? g_strdup (loader) : NULL;
 
-  self->project.details_ready = FALSE;
-  self->project.versions_ready = FALSE;
-  self->project.details = NULL;
-  self->project.details_versions = NULL;
-  self->project.details_problem = NULL;
-  self->project.versions_problem = NULL;
-  self->project.current_project_title = NULL;
-  self->project.current_project_id = NULL;
-  self->project.current_project_downloads = 0;
-  self->project.details_author = NULL;
-  self->project.details_body = NULL;
-  self->project.details_dropdown = NULL;
-  self->project.details_download = NULL;
   self->installed.identifying = FALSE;
-  self->project.details_check = NULL;
-  self->project.details_page = NULL;
-  self->project.split = NULL;
   self->install_model->batch = NULL;
   self->install_model->picking = FALSE;
   self->install_model->pick_index = 0;
+
   self->pick_button = NULL;
   self->pick_badge = NULL;
 
@@ -213,7 +224,6 @@ nuvashalauncher_content_page_dispose (GObject *object)
   self->toasts = NULL;
   self->banner = NULL;
   self->stack = NULL;
-  self->project.split = NULL;
   self->bar = NULL;
   self->bar_spacer = NULL;
   self->switcher = NULL;
@@ -253,6 +263,15 @@ nuvashalauncher_content_page_dispose (GObject *object)
   self->browse.retry_row = NULL;
   self->browse.retry_label = NULL;
   self->browse.spinner = NULL;
+  if (self->header_bar != NULL)
+    nuvashalauncher_content_page_detach_header (self, self->header_bar);
+  g_clear_object (&self->header_search_clamp);
+  g_clear_object (&self->installed.search_bar);
+  self->installed.search_entry = NULL;
+  g_clear_object (&self->installed.search_button);
+  g_clear_object (&self->browse.search_bar);
+  self->browse.search_entry = NULL;
+
   self->pick_button = NULL;
   self->pick_badge = NULL;
 
@@ -276,18 +295,15 @@ nuvashalauncher_content_page_dispose (GObject *object)
   g_cancellable_cancel (self->installed.scan);
   g_clear_object (&self->installed.scan);
 
-  /* The page of a project and the widgets in it are owned by the
-     page; the fields only watch them, so they are dropped and not
-     unrefed. */
-  watch_widget (&self->project.details_body, NULL);
-  watch_widget (&self->project.details_check, NULL);
-  watch_widget (&self->project.details_dropdown, NULL);
-  watch_widget (&self->project.details_download, NULL);
-  watch_widget (&self->project.details_page, NULL);
-
   /* A batch of updates that was still being applied is not applied any
      more: the plans and fetches hold the page weakly and stop. */
   self->install_model->updating = FALSE;
+
+  if (self->header_bar != NULL)
+    nuvashalauncher_content_page_detach_header (self, self->header_bar);
+  g_clear_object (&self->header_search_clamp);
+  g_clear_object (&self->switcher);
+  g_clear_object (&self->installed.actions);
 
   g_clear_object (&self->instance);
   if (self->installed.rows_list != NULL)
@@ -318,14 +334,8 @@ nuvashalauncher_content_page_finalize (GObject *object)
   self->install_model = NULL;
   g_free (self->minecraft_version);
   g_free (self->loader);
+  g_free (self->base_directory);
   g_free (self->folder);
-  g_free (self->project.current_project_title);
-  g_free (self->project.current_project_id);
-  g_free (self->project.details_author);
-  g_clear_pointer (&self->project.details, nuvashalauncher_modrinth_details_free);
-  g_clear_pointer (&self->project.details_versions, g_ptr_array_unref);
-  g_free (self->project.details_problem);
-  g_free (self->project.versions_problem);
 
   G_OBJECT_CLASS (nuvashalauncher_content_page_parent_class)->finalize (object);
 }
