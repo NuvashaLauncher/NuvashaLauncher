@@ -144,6 +144,20 @@ nuvashalauncher_launch_build_arguments (const NuvashaLauncherResolvedVersion *re
                             const char             *jvm_args,
                             GError                **error)
 {
+  return nuvashalauncher_launch_build_arguments_with_memory (
+    resolved, session, java_executable, game_directory, jvm_args, 0, error);
+}
+
+GPtrArray *
+nuvashalauncher_launch_build_arguments_with_memory (
+                            const NuvashaLauncherResolvedVersion *resolved,
+                            const NuvashaLauncherLaunchSession   *session,
+                            const char             *java_executable,
+                            const char             *game_directory,
+                            const char             *jvm_args,
+                            guint                   memory_mib,
+                            GError                **error)
+{
   g_autoptr (GHashTable) placeholders = NULL;
   g_autoptr (GPtrArray) argv = NULL;
   g_autofree char *legacy_session = NULL;
@@ -226,8 +240,27 @@ nuvashalauncher_launch_build_arguments (const NuvashaLauncherResolvedVersion *re
     }
 
   /* Then what the instance adds, which is one line the user wrote. */
+  guint user_args_start = argv->len;
   if (!add_shell_words (argv, jvm_args, error))
     return NULL;
+
+  /* Add -Xmx<memory_mib>M only when the user did not specify -Xmx in jvm_args. */
+  if (memory_mib > 0)
+    {
+      gboolean has_user_xmx = FALSE;
+      for (guint i = user_args_start; i < argv->len; i++)
+        {
+          const char *arg = g_ptr_array_index (argv, i);
+          if (g_str_has_prefix (arg, "-Xmx"))
+            {
+              has_user_xmx = TRUE;
+              break;
+            }
+        }
+      if (!has_user_xmx)
+        g_ptr_array_insert (argv, (gint) user_args_start,
+                            g_strdup_printf ("-Xmx%uM", memory_mib));
+    }
 
   /* LWJGL 2 tries to execute xrandr without checking whether it exists. This
    * disables that path and lets LWJGL use its XF86VidMode fallback when

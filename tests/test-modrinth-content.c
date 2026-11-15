@@ -126,21 +126,15 @@ test_content_types (void)
                    "resourcepack");
   g_assert_cmpstr (nuvashalauncher_content_type_to_string (NUVASHALAUNCHER_CONTENT_SHADER_PACK), ==,
                    "shader");
-  g_assert_cmpstr (nuvashalauncher_content_type_to_string (NUVASHALAUNCHER_CONTENT_DATAPACK), ==,
-                   "datapack");
 
   g_assert_cmpstr (nuvashalauncher_content_type_folder (NUVASHALAUNCHER_CONTENT_MOD), ==, "mods");
   g_assert_cmpstr (nuvashalauncher_content_type_folder (NUVASHALAUNCHER_CONTENT_RESOURCE_PACK), ==,
                    "resourcepacks");
   g_assert_cmpstr (nuvashalauncher_content_type_folder (NUVASHALAUNCHER_CONTENT_SHADER_PACK), ==,
                    "shaderpacks");
-  g_assert_cmpstr (nuvashalauncher_content_type_folder (NUVASHALAUNCHER_CONTENT_DATAPACK), ==,
-                   "datapacks");
 
   g_assert_cmpstr (nuvashalauncher_content_type_extension (NUVASHALAUNCHER_CONTENT_MOD), ==, ".jar");
   g_assert_cmpstr (nuvashalauncher_content_type_extension (NUVASHALAUNCHER_CONTENT_RESOURCE_PACK), ==,
-                   ".zip");
-  g_assert_cmpstr (nuvashalauncher_content_type_extension (NUVASHALAUNCHER_CONTENT_DATAPACK), ==,
                    ".zip");
 
   /* Only a mod needs a loader, which makes all content pages share the same
@@ -148,7 +142,6 @@ test_content_types (void)
   g_assert_true (nuvashalauncher_content_type_needs_loader (NUVASHALAUNCHER_CONTENT_MOD));
   g_assert_false (nuvashalauncher_content_type_needs_loader (NUVASHALAUNCHER_CONTENT_RESOURCE_PACK));
   g_assert_false (nuvashalauncher_content_type_needs_loader (NUVASHALAUNCHER_CONTENT_SHADER_PACK));
-  g_assert_false (nuvashalauncher_content_type_needs_loader (NUVASHALAUNCHER_CONTENT_DATAPACK));
 
   g_print ("ok - the content kinds name their own folders and loaders\n");
 }

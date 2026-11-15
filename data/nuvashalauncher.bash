@@ -22,4 +22,4 @@ _nuvashalauncher()
          --switch-account --remove-account --remove-instance --account" \
         -- "$cur") )
 }
-complete -F _nuvashalauncher NuvashaLauncher
+complete -F _nuvashalauncher nuvashalauncher

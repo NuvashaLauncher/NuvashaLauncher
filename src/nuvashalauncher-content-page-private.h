@@ -57,7 +57,7 @@ struct _NuvashaLauncherContentPage
   NuvashaLauncherContentType type;
   char *minecraft_version;
   char *loader; /* NULL for the content that needs none */
-  char *base_directory; /* override directory (e.g. a world folder for datapacks) */
+  char *base_directory; /* override directory for the content page */
   char *folder; /* the folder of the instance this content lives in */
 
   /* Borrowed widget-tree references; cleared in dispose() before async

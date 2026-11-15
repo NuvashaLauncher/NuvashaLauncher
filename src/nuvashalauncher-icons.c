@@ -370,12 +370,38 @@ nuvashalauncher_icon_scale_file (const char *path)
 }
 
 gboolean
+nuvashalauncher_icon_widget_set_texture (GtkWidget *widget, GdkTexture *texture)
+{
+  GtkWidget *icon = NULL;
+  GtkWidget *old_icon = NULL;
+
+  if (widget == NULL || !GTK_IS_STACK (widget) || texture == NULL)
+    return FALSE;
+
+  /* An image of the square and no more: a picture reports the size of
+     its source as its natural size, so a 512 by 512 icon made its row
+     taller than the one next to it. The pixel size pins the icon to the
+     square whatever the source holds, and it is contained in it, never
+     stretched. */
+  icon = gtk_image_new_from_paintable (GDK_PAINTABLE (texture));
+  gtk_image_set_pixel_size (GTK_IMAGE (icon), NUVASHALAUNCHER_ICON_SIZE);
+  gtk_widget_set_size_request (icon, NUVASHALAUNCHER_ICON_SIZE, NUVASHALAUNCHER_ICON_SIZE);
+  gtk_widget_set_overflow (icon, GTK_OVERFLOW_HIDDEN);
+
+  old_icon = gtk_stack_get_child_by_name (GTK_STACK (widget), "icon");
+  if (old_icon != NULL)
+    gtk_stack_remove (GTK_STACK (widget), old_icon);
+  gtk_stack_add_named (GTK_STACK (widget), icon, "icon");
+  gtk_stack_set_visible_child_name (GTK_STACK (widget), "icon");
+
+  return TRUE;
+}
+
+gboolean
 nuvashalauncher_icon_widget_set_file (GtkWidget *widget, const char *path)
 {
   g_autoptr (GdkPixbuf) pixbuf = NULL;
   g_autoptr (GdkTexture) texture = NULL;
-  GtkWidget *icon = NULL;
-  GtkWidget *old_icon = NULL;
 
   if (widget == NULL || !GTK_IS_STACK (widget) || path == NULL)
     return FALSE;
@@ -398,21 +424,5 @@ nuvashalauncher_icon_widget_set_file (GtkWidget *widget, const char *path)
       return FALSE;
     }
 
-  /* An image of the square and no more: a picture reports the size of
-     its source as its natural size, so a 512 by 512 icon made its row
-     taller than the one next to it. The pixel size pins the icon to the
-     square whatever the source holds, and it is contained in it, never
-     stretched. */
-  icon = gtk_image_new_from_paintable (GDK_PAINTABLE (texture));
-  gtk_image_set_pixel_size (GTK_IMAGE (icon), NUVASHALAUNCHER_ICON_SIZE);
-  gtk_widget_set_size_request (icon, NUVASHALAUNCHER_ICON_SIZE, NUVASHALAUNCHER_ICON_SIZE);
-  gtk_widget_set_overflow (icon, GTK_OVERFLOW_HIDDEN);
-
-  old_icon = gtk_stack_get_child_by_name (GTK_STACK (widget), "icon");
-  if (old_icon != NULL)
-    gtk_stack_remove (GTK_STACK (widget), old_icon);
-  gtk_stack_add_named (GTK_STACK (widget), icon, "icon");
-  gtk_stack_set_visible_child_name (GTK_STACK (widget), "icon");
-
-  return TRUE;
+  return nuvashalauncher_icon_widget_set_texture (widget, texture);
 }

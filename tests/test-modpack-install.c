@@ -335,7 +335,6 @@ test_install_with_content_types (void)
     { "modrinth.index.json", index_json, strlen (index_json), AE_IFREG, NULL },
     ZIP_FILE ("overrides/resourcepacks/cool.zip", "resource pack data"),
     ZIP_FILE ("overrides/shaderpacks/fancy.zip", "shader pack data"),
-    ZIP_FILE ("overrides/datapacks/extra.zip", "datapack data"),
   };
 
   zip_write (zip_path, entries, G_N_ELEMENTS (entries));
@@ -356,11 +355,9 @@ test_install_with_content_types (void)
 
   g_autofree char *rp_file = g_build_filename (instance_dir, "resourcepacks", "cool.zip", NULL);
   g_autofree char *sp_file = g_build_filename (instance_dir, "shaderpacks", "fancy.zip", NULL);
-  g_autofree char *dp_file = g_build_filename (instance_dir, "datapacks", "extra.zip", NULL);
 
   g_assert_true (g_file_test (rp_file, G_FILE_TEST_EXISTS));
   g_assert_true (g_file_test (sp_file, G_FILE_TEST_EXISTS));
-  g_assert_true (g_file_test (dp_file, G_FILE_TEST_EXISTS));
 
   remove_recursive (dir);
 }

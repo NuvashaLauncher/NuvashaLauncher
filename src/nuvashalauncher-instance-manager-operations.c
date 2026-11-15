@@ -113,6 +113,7 @@ nuvashalauncher_instance_manager_duplicate_async (NuvashaLauncherInstanceManager
   g_autofree char *modpack_name = NULL;
   g_autofree char *modpack_summary = NULL;
   g_autofree char *modpack_version_id = NULL;
+  guint memory_mib = 0;
   NuvashaLauncherLoader loader = NUVASHALAUNCHER_LOADER_VANILLA;
 
   g_object_get (source_instance,
@@ -122,6 +123,7 @@ nuvashalauncher_instance_manager_duplicate_async (NuvashaLauncherInstanceManager
                 "icon", &icon,
                 "java_path", &java_path,
                 "jvm_args", &jvm_args,
+                "memory-mib", &memory_mib,
                 "modpack-name", &modpack_name,
                 "modpack-summary", &modpack_summary,
                 "modpack-version-id", &modpack_version_id,
@@ -168,6 +170,7 @@ nuvashalauncher_instance_manager_duplicate_async (NuvashaLauncherInstanceManager
                 "icon", icon,
                 "java_path", java_path,
                 "jvm_args", jvm_args,
+                "memory-mib", memory_mib,
                 "modpack-name", modpack_name,
                 "modpack-summary", modpack_summary,
                 "modpack-version-id", modpack_version_id,

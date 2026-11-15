@@ -455,8 +455,7 @@ content_page_bulk_delete (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 
   const char *kind = self->type == NUVASHALAUNCHER_CONTENT_MOD ? "mods" :
                      self->type == NUVASHALAUNCHER_CONTENT_SHADER_PACK ? "shaderpacks" :
-                     self->type == NUVASHALAUNCHER_CONTENT_RESOURCE_PACK ? "resourcepacks" :
-                     "datapacks";
+                     "resourcepacks";
   heading = g_strdup_printf (_("Delete selected %s?"), kind);
   if (dependencies->len > 0)
     body = g_strdup_printf (_("Selected %s:\n%s\n\nDependencies:\n%s"),

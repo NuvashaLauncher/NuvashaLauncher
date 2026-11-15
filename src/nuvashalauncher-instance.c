@@ -52,6 +52,7 @@ enum
   PROP_ICON,
   PROP_JAVA_PATH,
   PROP_JVM_ARGS,
+  PROP_MEMORY_MIB,
   PROP_MODPACK_NAME,
   PROP_MODPACK_SUMMARY,
   PROP_MODPACK_VERSION_ID,
@@ -631,6 +632,10 @@ nuvashalauncher_instance_set_property (GObject      *object,
                                     ? g_value_get_string (value) : "");
       break;
 
+    case PROP_MEMORY_MIB:
+      self->memory_mib = g_value_get_uint (value);
+      break;
+
     case PROP_MODPACK_NAME:
       g_free (self->modpack_name);
       self->modpack_name = optional_string (g_value_get_string (value));
@@ -696,6 +701,10 @@ nuvashalauncher_instance_get_property (GObject    *object,
 
     case PROP_JVM_ARGS:
       g_value_set_string (value, self->jvm_args);
+      break;
+
+    case PROP_MEMORY_MIB:
+      g_value_set_uint (value, self->memory_mib);
       break;
 
     case PROP_MODPACK_NAME:
@@ -800,6 +809,12 @@ nuvashalauncher_instance_class_init (NuvashaLauncherInstanceClass *klass)
                          "Command line arguments passed to the JVM",
                          DEFAULT_JVM_ARGS,
                           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  properties[PROP_MEMORY_MIB] =
+    g_param_spec_uint ("memory-mib", "Maximum memory (MiB)",
+                       "Maximum JVM heap memory in MiB (0 for default)",
+                       0, 1048576, 0,
+                       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   properties[PROP_MODPACK_NAME] =
     g_param_spec_string ("modpack-name", "Modpack name",

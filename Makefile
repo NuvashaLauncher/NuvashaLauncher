@@ -62,8 +62,8 @@ RELFLAGS   := -O2 -D_FORTIFY_SOURCE=2 -fstack-protector-strong -fPIE
 RELLDFLAGS := -pie -Wl,-z,relro,-z,now
 DBGFLAGS   := -g -O0 -fsanitize=address,undefined -fno-sanitize-recover=all
 
-BIN    := build/NuvashaLauncher
-DBGBIN := build-debug/NuvashaLauncher
+BIN    := build/nuvashalauncher
+DBGBIN := build-debug/nuvashalauncher
 
 SRCS    := $(wildcard src/*.c)
 RELOBJS := $(patsubst src/%.c,build/%.o,$(SRCS))
@@ -243,7 +243,7 @@ check-potfiles:
 	test $$missing -eq 0 && echo "PASS po/POTFILES.in is up to date"
 
 install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS) $(SCHEMA_COMPILED)
-	install -Dm755 $(BIN) "$(DESTDIR)$(PREFIX)/bin/NuvashaLauncher"
+	install -Dm755 $(BIN) "$(DESTDIR)$(PREFIX)/bin/nuvashalauncher"
 	install -Dm644 data/pack.png "$(DESTDIR)$(PREFIX)/share/nuvashalauncher/pack.png"
 	install -Dm644 data/nuvashalauncher.css "$(DESTDIR)$(PREFIX)/share/nuvashalauncher/nuvashalauncher.css"
 	@for skin in data/skins/defaults/*.png; do \
@@ -252,7 +252,7 @@ install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS) $(SCHEMA_COMPILED)
 	install -Dm644 data/com.github.NuvashaLauncher.NuvashaLauncher.desktop \
 		"$(DESTDIR)$(PREFIX)/share/applications/com.github.NuvashaLauncher.NuvashaLauncher.desktop"
 	install -Dm644 data/nuvashalauncher.bash \
-		"$(DESTDIR)$(PREFIX)/share/bash-completion/completions/NuvashaLauncher"
+		"$(DESTDIR)$(PREFIX)/share/bash-completion/completions/nuvashalauncher"
 	install -Dm644 data/com.github.NuvashaLauncher.NuvashaLauncher.xml \
 		"$(DESTDIR)$(PREFIX)/share/mime/packages/com.github.NuvashaLauncher.NuvashaLauncher.xml"
 	install -Dm644 data/icons/scalable/apps/com.github.NuvashaLauncher.NuvashaLauncher.svg \
@@ -289,12 +289,12 @@ install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS) $(SCHEMA_COMPILED)
 # The same list the install loop uses, so the catalogs go back out with
 # the rest of the launcher.
 uninstall:
-	rm -f "$(DESTDIR)$(PREFIX)/bin/NuvashaLauncher"
+	rm -f "$(DESTDIR)$(PREFIX)/bin/nuvashalauncher"
 	rm -f "$(DESTDIR)$(PREFIX)/share/nuvashalauncher/pack.png"
 	rm -f "$(DESTDIR)$(PREFIX)/share/nuvashalauncher/nuvashalauncher.css"
 	rm -rf "$(DESTDIR)$(PREFIX)/share/nuvashalauncher/skins/defaults"
 	rm -f "$(DESTDIR)$(PREFIX)/share/applications/com.github.NuvashaLauncher.NuvashaLauncher.desktop"
-	rm -f "$(DESTDIR)$(PREFIX)/share/bash-completion/completions/NuvashaLauncher"
+	rm -f "$(DESTDIR)$(PREFIX)/share/bash-completion/completions/nuvashalauncher"
 	rm -f "$(DESTDIR)$(PREFIX)/share/mime/packages/com.github.NuvashaLauncher.NuvashaLauncher.xml"
 	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.NuvashaLauncher.NuvashaLauncher.svg"
 	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/actions/export-symbolic.svg"

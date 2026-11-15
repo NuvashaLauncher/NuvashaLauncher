@@ -676,8 +676,6 @@ on_shortcuts (GSimpleAction *action G_GNUC_UNUSED,
   adw_shortcuts_section_add (
     general, adw_shortcuts_item_new (_("Quit"), "<primary>q"));
   adw_shortcuts_section_add (
-    general, adw_shortcuts_item_new (_("Enter Edit Mode"), "<primary>e"));
-  adw_shortcuts_section_add (
     general, adw_shortcuts_item_new (_("Delete Selected"), "<primary>d"));
   adw_shortcuts_section_add (
     general, adw_shortcuts_item_new (_("Search"), "<primary>f"));

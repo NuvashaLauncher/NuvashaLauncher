@@ -20,6 +20,8 @@
         <property name="orientation">horizontal</property>
         <property name="spacing">6</property>
         <property name="hexpand">True</property>
+        <property name="margin-start">12</property>
+        <property name="margin-end">12</property>
         <child>
           <object class="NuvashaLauncherFilterEntry" id="search-entry">
             <property name="hexpand">True</property>

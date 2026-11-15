@@ -38,9 +38,11 @@ on_main_window_key_pressed (GtkEventControllerKey *controller G_GNUC_UNUSED,
   if (focus != NULL && GTK_IS_EDITABLE (focus))
     return FALSE;
 
-  if (keyval == GDK_KEY_Escape && self->ui.edit_mode)
+  if (keyval == GDK_KEY_Escape &&
+      self->ui.selected_instances != NULL &&
+      g_hash_table_size (self->ui.selected_instances) > 0)
     {
-      set_instance_edit_mode (self);
+      clear_instance_selection (self);
       return TRUE;
     }
 
@@ -48,13 +50,8 @@ on_main_window_key_pressed (GtkEventControllerKey *controller G_GNUC_UNUSED,
                  "instances") != 0 || !(state & GDK_CONTROL_MASK))
     return FALSE;
 
-  if (keyval == GDK_KEY_e && !self->ui.edit_mode)
-    {
-      set_instance_edit_mode (self);
-      return TRUE;
-    }
-
-  if (keyval == GDK_KEY_d && self->ui.edit_mode &&
+  if (keyval == GDK_KEY_d &&
+      self->ui.selected_instances != NULL &&
       g_hash_table_size (self->ui.selected_instances) > 0)
     {
       bulk_delete_instances (self);
@@ -317,7 +314,6 @@ nuvashalauncher_main_window_init (NuvashaLauncherMainWindow *self)
     nuvashalauncher_cache_prune_async (
       nuvashalauncher_settings_get_cache_expiration (self->model->settings),
       NULL, NULL));
-  self->ui.edit_mode = FALSE;
   self->window_settings = window_settings_new ();
   if (self->window_settings != NULL)
     {

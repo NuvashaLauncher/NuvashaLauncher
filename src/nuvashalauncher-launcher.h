@@ -160,6 +160,15 @@ GPtrArray *nuvashalauncher_launch_build_arguments (const NuvashaLauncherResolved
                                       const char             *jvm_args,
                                       GError                **error);
 
+GPtrArray *nuvashalauncher_launch_build_arguments_with_memory (
+                                      const NuvashaLauncherResolvedVersion *resolved,
+                                      const NuvashaLauncherLaunchSession   *session,
+                                      const char             *java_executable,
+                                      const char             *game_directory,
+                                      const char             *jvm_args,
+                                      guint                   memory_mib,
+                                      GError                **error);
+
 /* The command line as one string, with every argument that carries a
  * secret replaced by "***": --accessToken and its value, and anything
  * that follows a --password or a --token. This is the only form of a

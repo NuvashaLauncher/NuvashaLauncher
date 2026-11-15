@@ -7,7 +7,7 @@
 #include "nuvashalauncher-i18n.h"
 #include "nuvashalauncher-ui-feedback.h"
 
-/* Instance-list row rendering, drag-and-drop, and row actions. */
+/* Instance-list row rendering and row actions. */
 
 /* Play while the instance is idle, Stop while it is busy. */
 static void
@@ -18,13 +18,6 @@ row_update (GtkWidget *play, NuvashaLauncher *launcher)
     GTK_WIDGET (g_object_get_data (G_OBJECT (play), "nuvashalauncher-icon"));
   GtkWidget *label =
     GTK_WIDGET (g_object_get_data (G_OBJECT (play), "nuvashalauncher-label"));
-  GtkWidget *check =
-    GTK_WIDGET (g_object_get_data (G_OBJECT (play), "nuvashalauncher-check"));
-  GtkWidget *instance_icon =
-    GTK_WIDGET (g_object_get_data (G_OBJECT (play), "nuvashalauncher-instance-icon"));
-  GtkWidget *edit_actions =
-    GTK_WIDGET (g_object_get_data (G_OBJECT (play), "nuvashalauncher-edit-actions"));
-  NuvashaLauncherMainWindow *self = g_object_get_data (G_OBJECT (play), "nuvashalauncher-window");
 
   gtk_label_set_label (GTK_LABEL (label), busy ? _("Stop") : _("Play"));
   gtk_image_set_from_icon_name (GTK_IMAGE (icon),
@@ -32,10 +25,6 @@ row_update (GtkWidget *play, NuvashaLauncher *launcher)
                                      : "media-playback-start-symbolic");
   nuvashalauncher_ui_set_action_label (GTK_WIDGET (play),
                                        busy ? _("Stop") : _("Play"));
-  gtk_widget_set_visible (GTK_WIDGET (play), self == NULL || !self->ui.edit_mode);
-  gtk_widget_set_visible (check, TRUE);
-  gtk_widget_set_visible (instance_icon, TRUE);
-  gtk_widget_set_visible (edit_actions, self != NULL && self->ui.edit_mode);
 
   /* The green belongs to a game that is about to start, not to a stop:
      an idle row asks, a running one only allows stopping. */
@@ -56,7 +45,7 @@ on_instance_check_toggled (GtkCheckButton *check, gpointer user_data)
     gtk_stack_set_visible_child_name (stack,
       gtk_check_button_get_active (check) ? "check" : "icon");
 
-  if (id == NULL || !self->ui.edit_mode)
+  if (id == NULL)
     return;
 
   if (gtk_check_button_get_active (check))
@@ -67,163 +56,16 @@ on_instance_check_toggled (GtkCheckButton *check, gpointer user_data)
   update_instance_selection_ui (self);
 }
 
-static GdkContentProvider *
-instance_row_drag_prepare (AdwActionRow *row,
-                           double        x G_GNUC_UNUSED,
-                           double        y G_GNUC_UNUSED)
-{
-  NuvashaLauncherMainWindow *self = g_object_get_data (G_OBJECT (row),
-                                                "nuvashalauncher-window");
-
-  if (self == NULL || !self->ui.edit_mode)
-    return NULL;
-
-  return gdk_content_provider_new_typed (ADW_TYPE_ACTION_ROW, row);
-}
-
 static void
-instance_row_drag_begin (AdwActionRow *row, GdkDrag *drag)
-{
-  GtkWidget *drag_list = gtk_list_box_new ();
-  GtkWidget *drag_row = adw_action_row_new ();
-  GtkWidget *drag_icon = gtk_image_new_from_icon_name (
-    "applications-games-symbolic");
-  GtkWidget *instance_icon = g_object_get_data (
-    G_OBJECT (row), "nuvashalauncher-instance-icon");
-  GtkWidget *drag_surface;
-  int width = gtk_widget_get_width (GTK_WIDGET (row));
-  int height = gtk_widget_get_height (GTK_WIDGET (row));
-
-  gtk_widget_set_size_request (drag_list, width, height);
-  gtk_widget_add_css_class (drag_list, "boxed-list");
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (drag_row), FALSE);
-  adw_preferences_row_set_title (
-    ADW_PREFERENCES_ROW (drag_row),
-    adw_preferences_row_get_title (ADW_PREFERENCES_ROW (row)));
-  adw_action_row_set_subtitle (
-    ADW_ACTION_ROW (drag_row), adw_action_row_get_subtitle (row));
-  if (instance_icon != NULL &&
-      gtk_image_get_paintable (GTK_IMAGE (instance_icon)) != NULL)
-    gtk_image_set_from_paintable (
-      GTK_IMAGE (drag_icon),
-      gtk_image_get_paintable (GTK_IMAGE (instance_icon)));
-  gtk_widget_add_css_class (drag_icon, "nuvashalauncher-instance-icon");
-  gtk_widget_set_overflow (drag_icon, GTK_OVERFLOW_HIDDEN);
-  gtk_image_set_pixel_size (GTK_IMAGE (drag_icon), 48);
-  adw_action_row_add_prefix (ADW_ACTION_ROW (drag_row), drag_icon);
-  gtk_list_box_append (GTK_LIST_BOX (drag_list), drag_row);
-
-  drag_surface = gtk_drag_icon_get_for_drag (drag);
-  gtk_widget_add_css_class (drag_surface, "boxed-list");
-  gtk_drag_icon_set_child (GTK_DRAG_ICON (drag_surface), drag_list);
-}
-
-static gboolean
-instance_row_drop (AdwActionRow *target,
-                   const GValue *value,
-                   double        x G_GNUC_UNUSED,
-                   double        y G_GNUC_UNUSED)
-{
-  AdwActionRow *source;
-  NuvashaLauncherMainWindow *self;
-  GListStore *instances;
-  NuvashaLauncherInstance *source_instance;
-  GtkWidget *source_list;
-  GtkWidget *target_list;
-  guint source_position;
-  guint target_position;
-  g_autoptr (NuvashaLauncherInstance) instance = NULL;
-  g_autoptr (GError) error = NULL;
-
-  if (!G_VALUE_HOLDS (value, ADW_TYPE_ACTION_ROW))
-    return FALSE;
-
-  source = g_value_get_object (value);
-  self = g_object_get_data (G_OBJECT (target), "nuvashalauncher-window");
-  if (self == NULL || !self->ui.edit_mode)
-    return FALSE;
-
-  instances = nuvashalauncher_instance_manager_get_instances (self->model->manager);
-  source_list = gtk_widget_get_parent (GTK_WIDGET (source));
-  target_list = gtk_widget_get_parent (GTK_WIDGET (target));
-
-  if (source_list == NULL || source_list != target_list ||
-      !GTK_IS_LIST_BOX (source_list))
-    return FALSE;
-
-  source_instance = nuvashalauncher_instance_manager_get_by_id (
-    self->model->manager,
-    g_object_get_data (G_OBJECT (source), "nuvashalauncher-instance-id"));
-
-  if (source == target || source_instance == NULL)
-    return FALSE;
-
-  source_position = gtk_list_box_row_get_index (GTK_LIST_BOX_ROW (source));
-  target_position = gtk_list_box_row_get_index (GTK_LIST_BOX_ROW (target));
-  instance = g_list_model_get_item (G_LIST_MODEL (instances), source_position);
-  g_list_store_remove (instances, source_position);
-  g_list_store_insert (instances, target_position, instance);
-
-  if (!nuvashalauncher_instance_manager_save (self->model->manager, &error))
-    {
-      g_list_store_remove (instances, target_position);
-      g_list_store_insert (instances, source_position, instance);
-      nuvashalauncher_ui_error_banner (self->ui.banner, error);
-    }
-
-  return TRUE;
-}
-
-typedef enum {
-  INSTANCE_ROW_EXPORT,
-  INSTANCE_ROW_DUPLICATE,
-  INSTANCE_ROW_DELETE
-} InstanceRowAction;
-
-static void
-on_instance_row_action (GtkButton *button, gpointer user_data)
+on_instance_settings_clicked (GtkButton *button, gpointer user_data)
 {
   NuvashaLauncherMainWindow *self = user_data;
   const char *id = g_object_get_data (G_OBJECT (button), "nuvashalauncher-instance-id");
-  InstanceRowAction action = GPOINTER_TO_INT (
-    g_object_get_data (G_OBJECT (button), "nuvashalauncher-row-action"));
   NuvashaLauncherInstance *instance = nuvashalauncher_instance_manager_get_by_id (
     self->model->manager, id);
-  NuvashaLauncherInstancePage *page;
 
-  if (instance == NULL)
-    return;
-
-  switch (action)
-    {
-    case INSTANCE_ROW_EXPORT:
-      /* Reuse the export flow without showing the settings page. The page
-       * owns the popup operation. */
-      page = nuvashalauncher_instance_page_new (self->model->manager, instance,
-                                        self->model->settings,
-                                        window_launcher (self, id));
-      g_object_ref_sink (page);
-      g_object_set_data (G_OBJECT (page), "nuvashalauncher-host-widget", self);
-      nuvashalauncher_instance_page_trigger_export (page);
-      g_object_unref (page);
-      break;
-    case INSTANCE_ROW_DUPLICATE:
-      page = nuvashalauncher_instance_page_new (self->model->manager, instance,
-                                        self->model->settings,
-                                        window_launcher (self, id));
-      g_object_ref_sink (page);
-      g_object_set_data (G_OBJECT (page), "nuvashalauncher-host-widget", self);
-      nuvashalauncher_instance_page_trigger_duplicate (page);
-      g_object_unref (page);
-      break;
-    case INSTANCE_ROW_DELETE:
-      /* Use the same confirmation popup as the bulk action, without opening
-       * the instance settings dialog. */
-      g_hash_table_remove_all (self->ui.selected_instances);
-      g_hash_table_add (self->ui.selected_instances, g_strdup (id));
-      bulk_delete_instances (self);
-      break;
-    }
+  if (instance != NULL)
+    open_instance_dialog (self, instance);
 }
 
 static void
@@ -401,15 +243,10 @@ create_instance_row (gpointer item, gpointer user_data)
   NuvashaLauncher *launcher = NULL;
   AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
   GtkImage *icon = GTK_IMAGE (gtk_image_new_from_icon_name ("applications-games-symbolic"));
+  GtkButton *settings_button = GTK_BUTTON (gtk_button_new_from_icon_name (
+    "emblem-system-symbolic"));
   GtkButton *play = GTK_BUTTON (gtk_button_new ());
   GtkCheckButton *check = GTK_CHECK_BUTTON (gtk_check_button_new ());
-  GtkBox *edit_actions = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
-  GtkButton *row_export = GTK_BUTTON (gtk_button_new_from_icon_name (
-    "export-symbolic"));
-  GtkButton *row_duplicate = GTK_BUTTON (gtk_button_new_from_icon_name (
-    "edit-copy-symbolic"));
-  GtkButton *row_delete = GTK_BUTTON (gtk_button_new_from_icon_name (
-    "edit-delete-symbolic"));
   GtkBox *play_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
   GtkImage *play_icon = GTK_IMAGE (gtk_image_new_from_icon_name ("media-playback-start-symbolic"));
   GtkLabel *play_label = GTK_LABEL (gtk_label_new (_("Play")));
@@ -494,64 +331,29 @@ create_instance_row (gpointer item, gpointer user_data)
   /* The play state swaps the icon and the label, so they are known by
      the button itself rather than walked for. */
   g_object_set_data (G_OBJECT (play), "nuvashalauncher-icon", play_icon);
-  g_object_set_data (G_OBJECT (play), "nuvashalauncher-instance-icon", icon);
   g_object_set_data (G_OBJECT (play), "nuvashalauncher-label", play_label);
   g_object_set_data (G_OBJECT (play), "nuvashalauncher-check", check);
-  g_object_set_data (G_OBJECT (play), "nuvashalauncher-edit-actions", edit_actions);
-  g_object_set_data (G_OBJECT (play), "nuvashalauncher-window", self);
   g_object_set_data_full (G_OBJECT (check), "nuvashalauncher-instance-id",
                           g_strdup (id), g_free);
-  gtk_check_button_set_active (check, FALSE);
+  {
+    gboolean selected = id != NULL && self->ui.selected_instances != NULL &&
+      g_hash_table_contains (self->ui.selected_instances, id);
+    gtk_check_button_set_active (check, selected);
+    gtk_stack_set_visible_child_name (icon_stack, selected ? "check" : "icon");
+  }
   g_signal_connect (check, "toggled",
                     G_CALLBACK (on_instance_check_toggled), self);
 
-  gtk_widget_set_visible (GTK_WIDGET (edit_actions), self->ui.edit_mode);
-  nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (row_export), _("Export"));
-  nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (row_duplicate), _("Duplicate"));
-  nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (row_delete), _("Delete"));
-  gtk_box_append (edit_actions, GTK_WIDGET (row_export));
-  gtk_box_append (edit_actions, GTK_WIDGET (row_duplicate));
-  gtk_box_append (edit_actions, GTK_WIDGET (row_delete));
-  for (guint i = 0; i < 3; i++)
-    {
-      GtkButton *button = GTK_BUTTON (gtk_widget_get_first_child (
-        GTK_WIDGET (edit_actions)));
-      for (guint j = 0; j < i; j++)
-        button = GTK_BUTTON (gtk_widget_get_next_sibling (GTK_WIDGET (button)));
-      g_object_set_data_full (G_OBJECT (button), "nuvashalauncher-instance-id",
-                              g_strdup (id), g_free);
-      g_object_set_data (G_OBJECT (button), "nuvashalauncher-row-action",
-                         GINT_TO_POINTER (i));
-      g_signal_connect (button, "clicked",
-                        G_CALLBACK (on_instance_row_action), self);
-    }
-
-  adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (play));
-  adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (edit_actions));
-
-  g_object_set_data (G_OBJECT (row), "nuvashalauncher-window", self);
-  g_object_set_data_full (G_OBJECT (row), "nuvashalauncher-instance-id",
+  nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (settings_button),
+                                          _("Settings"));
+  gtk_widget_set_valign (GTK_WIDGET (settings_button), GTK_ALIGN_CENTER);
+  g_object_set_data_full (G_OBJECT (settings_button), "nuvashalauncher-instance-id",
                           g_strdup (id), g_free);
-  g_object_set_data (G_OBJECT (row), "nuvashalauncher-instance-icon", icon);
-  {
-    GtkDragSource *source = gtk_drag_source_new ();
-    GtkDropTarget *target = gtk_drop_target_new (ADW_TYPE_ACTION_ROW,
-                                                  GDK_ACTION_MOVE);
-    gtk_drag_source_set_actions (source, GDK_ACTION_MOVE);
-    g_signal_connect_swapped (source, "prepare",
-                              G_CALLBACK (instance_row_drag_prepare), row);
-    g_signal_connect_swapped (source, "drag-begin",
-                              G_CALLBACK (instance_row_drag_begin), row);
-    /* The whole row is draggable in edit mode. Interactive child widgets
-     * (checkboxes and action buttons) keep handling their own clicks. */
-    gtk_widget_add_controller (GTK_WIDGET (row),
-                               GTK_EVENT_CONTROLLER (source));
-    gtk_drop_target_set_preload (target, TRUE);
-    g_signal_connect_swapped (target, "drop",
-                              G_CALLBACK (instance_row_drop), row);
-    gtk_widget_add_controller (GTK_WIDGET (row),
-                               GTK_EVENT_CONTROLLER (target));
-  }
+  g_signal_connect (settings_button, "clicked",
+                    G_CALLBACK (on_instance_settings_clicked), self);
+
+  adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (settings_button));
+  adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (play));
 
   g_signal_connect_object (play, "clicked", G_CALLBACK (on_play_clicked), self, 0);
   g_object_set_data (G_OBJECT (row), "nuvashalauncher-play", play);
@@ -574,8 +376,8 @@ create_instance_row (gpointer item, gpointer user_data)
   if (launcher != NULL)
     row_update (GTK_WIDGET (play), launcher);
 
-  /* A click anywhere on the row, outside its buttons, opens the
-     instance. An AdwActionRow is not activatable by default. */
+  /* A click anywhere on the row, outside its buttons, toggles selection.
+     An AdwActionRow is not activatable by default. */
   gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
 
   return GTK_WIDGET (row);

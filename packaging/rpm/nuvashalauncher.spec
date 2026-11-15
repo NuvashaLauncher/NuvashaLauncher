@@ -67,10 +67,10 @@ appstream-util validate-relax --nonet %{buildroot}%{_datadir}/metainfo/com.githu
 %files -f %{name}.lang
 %license LICENSE
 %doc README.md
-%{_bindir}/NuvashaLauncher
+%{_bindir}/nuvashalauncher
 %{_datadir}/nuvashalauncher/
 %{_datadir}/applications/com.github.NuvashaLauncher.NuvashaLauncher.desktop
-%{_datadir}/bash-completion/completions/NuvashaLauncher
+%{_datadir}/bash-completion/completions/nuvashalauncher
 %{_datadir}/glib-2.0/schemas/com.github.NuvashaLauncher.NuvashaLauncher.gschema.xml
 %{_datadir}/icons/hicolor/scalable/apps/com.github.NuvashaLauncher.NuvashaLauncher.svg
 %{_datadir}/icons/hicolor/scalable/actions/export-symbolic.svg

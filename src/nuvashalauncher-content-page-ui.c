@@ -12,6 +12,19 @@
 /* Create a flat toolbar button with a symbolic icon. The label is used as
  * both the tooltip and the accessible name. */
 static GtkWidget *
+clamped_group (AdwPreferencesGroup *group)
+{
+  AdwClamp *clamp = ADW_CLAMP (adw_clamp_new ());
+
+  gtk_widget_set_margin_top (GTK_WIDGET (clamp), 8);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (clamp), 16);
+  gtk_widget_set_margin_start (GTK_WIDGET (clamp), 12);
+  gtk_widget_set_margin_end (GTK_WIDGET (clamp), 12);
+  adw_clamp_set_child (clamp, GTK_WIDGET (group));
+  return GTK_WIDGET (clamp);
+}
+
+static GtkWidget *
 toolbar_button (const char *icon_name, const char *label, GCallback callback,
                 gpointer user_data)
 {
@@ -202,6 +215,7 @@ nuvashalauncher_content_page_build_installed (NuvashaLauncherContentPage *self)
   g_object_ref_sink (actions);
 
    self->installed.status = ADW_STATUS_PAGE (adw_status_page_new ());
+   gtk_widget_set_vexpand (GTK_WIDGET (self->installed.status), TRUE);
    self->installed.loading = loading;
    gtk_widget_set_size_request (GTK_WIDGET (loading), 64, 64);
    gtk_widget_set_valign (GTK_WIDGET (loading), GTK_ALIGN_CENTER);
@@ -221,12 +235,20 @@ nuvashalauncher_content_page_build_installed (NuvashaLauncherContentPage *self)
 
    self->installed.group = group;
    self->installed.scroller = GTK_SCROLLED_WINDOW (scroller);
-    g_signal_connect_object (
-      gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (scroller)),
-      "value-changed", G_CALLBACK (nuvashalauncher_content_page_on_installed_scroll_changed),
-      self, 0);
+   {
+     GtkAdjustment *vadj =
+       gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (scroller));
+     g_signal_connect_object (
+       vadj, "value-changed",
+       G_CALLBACK (nuvashalauncher_content_page_on_installed_scroll_changed),
+       self, 0);
+     g_signal_connect_object (
+       vadj, "changed",
+       G_CALLBACK (nuvashalauncher_content_page_on_installed_scroll_changed),
+       self, 0);
+   }
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
-                                 GTK_WIDGET (group));
+                                 clamped_group (group));
   gtk_widget_set_vexpand (GTK_WIDGET (scroller), TRUE);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
@@ -370,6 +392,7 @@ nuvashalauncher_content_page_build_browse (NuvashaLauncherContentPage *self)
   g_object_ref_sink (top);
 
    self->browse.results_status = ADW_STATUS_PAGE (adw_status_page_new ());
+   gtk_widget_set_vexpand (GTK_WIDGET (self->browse.results_status), TRUE);
   adw_status_page_set_icon_name (ADW_STATUS_PAGE (self->browse.results_status),
                                  "system-search-symbolic");
   adw_status_page_set_title (ADW_STATUS_PAGE (self->browse.results_status),
@@ -392,7 +415,7 @@ nuvashalauncher_content_page_build_browse (NuvashaLauncherContentPage *self)
    self->browse.results_group = group;
    self->browse.results_scroller = GTK_SCROLLED_WINDOW (scroller);
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scroller),
-                                 GTK_WIDGET (group));
+                                 clamped_group (group));
   gtk_widget_set_vexpand (GTK_WIDGET (scroller), TRUE);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroller),
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
@@ -694,6 +717,7 @@ sync_header_mode (NuvashaLauncherContentPage *self)
       if (!gtk_widget_is_ancestor (GTK_WIDGET (self->installed.actions), GTK_WIDGET (header)))
         {
           remove_widget_from_parent (GTK_WIDGET (self->installed.actions));
+          gtk_widget_set_hexpand (GTK_WIDGET (self->installed.actions), FALSE);
           adw_header_bar_pack_start (header, GTK_WIDGET (self->installed.actions));
         }
       if (self->installed.search_spacer != NULL)
@@ -701,6 +725,7 @@ sync_header_mode (NuvashaLauncherContentPage *self)
       if (!gtk_widget_is_ancestor (GTK_WIDGET (self->browse_actions), GTK_WIDGET (header)))
         {
           remove_widget_from_parent (GTK_WIDGET (self->browse_actions));
+          gtk_widget_set_hexpand (GTK_WIDGET (self->browse_actions), FALSE);
           adw_header_bar_pack_start (header, GTK_WIDGET (self->browse_actions));
         }
     }
@@ -726,6 +751,7 @@ sync_header_mode (NuvashaLauncherContentPage *self)
       if (!gtk_widget_is_ancestor (GTK_WIDGET (self->installed.actions), GTK_WIDGET (header)))
         {
           remove_widget_from_parent (GTK_WIDGET (self->installed.actions));
+          gtk_widget_set_hexpand (GTK_WIDGET (self->installed.actions), FALSE);
           adw_header_bar_pack_start (header, GTK_WIDGET (self->installed.actions));
         }
       if (self->installed.search_spacer != NULL)
@@ -740,6 +766,9 @@ nuvashalauncher_content_page_attach_header (NuvashaLauncherContentPage *self,
   g_return_if_fail (NUVASHALAUNCHER_IS_CONTENT_PAGE (self));
   g_return_if_fail (ADW_IS_HEADER_BAR (header));
 
+  if (self->stack == NULL)
+    return;
+
   if (self->header_bar == header)
     {
       sync_header_mode (self);
@@ -752,8 +781,10 @@ nuvashalauncher_content_page_attach_header (NuvashaLauncherContentPage *self,
   if (self->header_search_clamp == NULL)
     {
       self->header_search_clamp = ADW_CLAMP (g_object_ref_sink (adw_clamp_new ()));
-      adw_clamp_set_maximum_size (self->header_search_clamp, 460);
+      adw_clamp_set_maximum_size (self->header_search_clamp, 520);
       gtk_widget_set_hexpand (GTK_WIDGET (self->header_search_clamp), TRUE);
+      gtk_widget_set_margin_start (GTK_WIDGET (self->header_search_clamp), 6);
+      gtk_widget_set_margin_end (GTK_WIDGET (self->header_search_clamp), 6);
     }
 
   sync_header_mode (self);
@@ -771,8 +802,13 @@ nuvashalauncher_content_page_detach_header (NuvashaLauncherContentPage *self,
 
   self->header_bar = NULL;
   adw_header_bar_set_title_widget (header, NULL);
+  if (self->stack == NULL)
+    return;
+
   remove_widget_from_parent (GTK_WIDGET (self->installed.actions));
+  gtk_widget_set_hexpand (GTK_WIDGET (self->installed.actions), TRUE);
   remove_widget_from_parent (GTK_WIDGET (self->browse_actions));
+  gtk_widget_set_hexpand (GTK_WIDGET (self->browse_actions), TRUE);
   remove_widget_from_parent (GTK_WIDGET (self->switcher));
   if (gtk_widget_get_parent (GTK_WIDGET (self->switcher)) != GTK_WIDGET (self->bar))
     gtk_box_append (self->bar, GTK_WIDGET (self->switcher));

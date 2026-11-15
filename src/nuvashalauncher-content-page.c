@@ -171,6 +171,8 @@ nuvashalauncher_content_page_new_with_base (NuvashaLauncherInstance *instance,
         {
           AdwStatusPage *status = ADW_STATUS_PAGE (adw_status_page_new ());
 
+          gtk_widget_set_hexpand (GTK_WIDGET (status), TRUE);
+          gtk_widget_set_vexpand (GTK_WIDGET (status), TRUE);
           adw_status_page_set_icon_name (ADW_STATUS_PAGE (status),
                                          nuvashalauncher_content_type_icon (type));
           adw_status_page_set_title (ADW_STATUS_PAGE (status),
@@ -219,6 +221,9 @@ nuvashalauncher_content_page_dispose (GObject *object)
 {
   NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (object);
 
+  if (self->header_bar != NULL)
+    nuvashalauncher_content_page_detach_header (self, self->header_bar);
+
   /* The widget tree may be freed while the page is still answering a
    * request of its own: nothing of it is touched afterwards. */
   self->toasts = NULL;
@@ -263,8 +268,6 @@ nuvashalauncher_content_page_dispose (GObject *object)
   self->browse.retry_row = NULL;
   self->browse.retry_label = NULL;
   self->browse.spinner = NULL;
-  if (self->header_bar != NULL)
-    nuvashalauncher_content_page_detach_header (self, self->header_bar);
   g_clear_object (&self->header_search_clamp);
   g_clear_object (&self->installed.search_bar);
   self->installed.search_entry = NULL;

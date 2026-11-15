@@ -100,7 +100,7 @@ on_instance_renamed (NuvashaLauncherInstance *instance, GParamSpec *pspec G_GNUC
  * one over the launcher. The page's header bar carries the view switcher
  * and, because it is inside an AdwDialog, the close button of the
  * dialog. */
-static void
+void
 open_instance_dialog (NuvashaLauncherMainWindow *self, NuvashaLauncherInstance *instance)
 {
   const char *id = nuvashalauncher_instance_get_id (instance);
@@ -225,92 +225,40 @@ update_instance_selection_ui (NuvashaLauncherMainWindow *self)
     }
 
   if (self->ui.selection_footer != NULL)
-    gtk_action_bar_set_revealed (self->ui.selection_footer,
-                                 self->ui.edit_mode && selected > 0);
+    gtk_action_bar_set_revealed (self->ui.selection_footer, selected > 0);
 
   if (self->ui.footer_delete != NULL)
     {
       gtk_widget_set_sensitive (GTK_WIDGET (self->ui.footer_delete), selected > 0);
-      gtk_widget_set_visible (GTK_WIDGET (self->ui.footer_delete),
-                              self->ui.edit_mode && selected > 0);
+      gtk_widget_set_visible (GTK_WIDGET (self->ui.footer_delete), selected > 0);
     }
   if (self->ui.footer_export != NULL)
     {
       gtk_widget_set_sensitive (GTK_WIDGET (self->ui.footer_export), selected > 0);
-      gtk_widget_set_visible (GTK_WIDGET (self->ui.footer_export),
-                              self->ui.edit_mode && selected > 0);
+      gtk_widget_set_visible (GTK_WIDGET (self->ui.footer_export), selected > 0);
     }
 }
 
 void
-set_instance_edit_mode (NuvashaLauncherMainWindow *self)
+clear_instance_selection (NuvashaLauncherMainWindow *self)
 {
-  self->ui.edit_mode = !self->ui.edit_mode;
-  if (!self->ui.edit_mode)
-    g_hash_table_remove_all (self->ui.selected_instances);
+  g_hash_table_remove_all (self->ui.selected_instances);
 
-  for (GtkWidget *row = gtk_widget_get_first_child (GTK_WIDGET (self->ui.instances));
-       row != NULL; row = gtk_widget_get_next_sibling (row))
+  if (self->ui.instances != NULL)
     {
-      GtkWidget *play = g_object_get_data (G_OBJECT (row), "nuvashalauncher-play");
-      GtkWidget *check = play != NULL
-        ? g_object_get_data (G_OBJECT (play), "nuvashalauncher-check") : NULL;
-      GtkWidget *icon = play != NULL
-        ? g_object_get_data (G_OBJECT (play), "nuvashalauncher-instance-icon") : NULL;
-      GtkWidget *edit_actions = play != NULL
-        ? g_object_get_data (G_OBJECT (play), "nuvashalauncher-edit-actions") : NULL;
+      for (GtkWidget *row = gtk_widget_get_first_child (GTK_WIDGET (self->ui.instances));
+           row != NULL; row = gtk_widget_get_next_sibling (row))
+        {
+          GtkWidget *play = g_object_get_data (G_OBJECT (row), "nuvashalauncher-play");
+          GtkWidget *check = play != NULL
+            ? g_object_get_data (G_OBJECT (play), "nuvashalauncher-check") : NULL;
 
-      if (play == NULL)
-        continue;
-      gtk_widget_set_visible (play, !self->ui.edit_mode);
-      gtk_widget_set_visible (check, TRUE);
-      gtk_widget_set_visible (icon, TRUE);
-      gtk_widget_set_visible (edit_actions, self->ui.edit_mode);
-      if (check != NULL)
-        gtk_check_button_set_active (
-          GTK_CHECK_BUTTON (check),
-          self->ui.selected_instances != NULL &&
-          g_object_get_data (G_OBJECT (check), "nuvashalauncher-instance-id") != NULL &&
-          g_hash_table_contains (self->ui.selected_instances,
-                                 g_object_get_data (G_OBJECT (check),
-                                                    "nuvashalauncher-instance-id")));
+          if (check != NULL && gtk_check_button_get_active (GTK_CHECK_BUTTON (check)))
+            gtk_check_button_set_active (GTK_CHECK_BUTTON (check), FALSE);
+        }
     }
 
   update_instance_selection_ui (self);
-}
-
-static void
-on_bulk_duplicate_ready (GObject *source, GAsyncResult *result, gpointer user_data)
-{
-  NuvashaLauncherMainWindow *self = user_data;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaLauncherInstance) copy =
-    nuvashalauncher_instance_manager_duplicate_finish (
-      NUVASHALAUNCHER_INSTANCE_MANAGER (source), result, &error);
-
-  if (copy == NULL && error != NULL)
-    {
-      nuvashalauncher_ui_error_banner (self->ui.banner, error);
-    }
-  g_object_unref (self);
-}
-
-void
-bulk_duplicate_instances (NuvashaLauncherMainWindow *self)
-{
-  GListStore *instances = nuvashalauncher_instance_manager_get_instances (self->model->manager);
-
-  for (guint i = 0; i < g_list_model_get_n_items (G_LIST_MODEL (instances)); i++)
-    {
-      g_autoptr (NuvashaLauncherInstance) instance =
-        g_list_model_get_item (G_LIST_MODEL (instances), i);
-      if (nuvashalauncher_instance_get_id (instance) != NULL &&
-          g_hash_table_contains (self->ui.selected_instances,
-                                 nuvashalauncher_instance_get_id (instance)))
-        nuvashalauncher_instance_manager_duplicate_async (self->model->manager, instance,
-                                                   on_bulk_duplicate_ready,
-                                                   g_object_ref (self));
-    }
 }
 
 typedef struct {
@@ -364,8 +312,7 @@ on_bulk_delete_chosen (GObject *source, GAsyncResult *result, gpointer user_data
             g_ptr_array_add (selected, g_object_ref (instance));
         }
 
-      g_hash_table_remove_all (self->ui.selected_instances);
-      set_instance_edit_mode (self);
+      clear_instance_selection (self);
       for (guint i = 0; i < selected->len; i++)
         {
           BulkDeleteWait *wait = g_new0 (BulkDeleteWait, 1);
@@ -406,8 +353,7 @@ on_bulk_export_folder_chosen (GObject *source, GAsyncResult *result,
       while (g_hash_table_iter_next (&iter, &key, NULL))
         g_ptr_array_add (selected, g_strdup (key));
 
-      g_hash_table_remove_all (self->ui.selected_instances);
-      set_instance_edit_mode (self);
+      clear_instance_selection (self);
 
       for (guint i = 0; i < selected->len; i++)
         {
@@ -524,41 +470,20 @@ bulk_delete_instances (NuvashaLauncherMainWindow *self)
                            on_bulk_delete_chosen, g_object_ref (self));
 }
 
-/* A row clicked anywhere but on its buttons opens the instance. The
- * row's index comes from the boxed list, which holds the rows in the
- * same order as the manager. */
+/* A row clicked anywhere outside its buttons toggles selection. */
 void
 on_row_activate (GtkListBox *list G_GNUC_UNUSED, GtkListBoxRow *row,
-                 gpointer user_data)
+                 gpointer user_data G_GNUC_UNUSED)
 {
-  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
+  GtkWidget *play = g_object_get_data (G_OBJECT (row),
+                                       "nuvashalauncher-play");
+  GtkWidget *check = play != NULL
+    ? g_object_get_data (G_OBJECT (play), "nuvashalauncher-check") : NULL;
 
-  if (self->ui.edit_mode)
-    {
-      GtkWidget *play = g_object_get_data (G_OBJECT (row),
-                                           "nuvashalauncher-play");
-      GtkWidget *check = play != NULL
-        ? g_object_get_data (G_OBJECT (play), "nuvashalauncher-check") : NULL;
-
-      if (check != NULL)
-        {
-          gtk_check_button_set_active (
-            GTK_CHECK_BUTTON (check),
-            !gtk_check_button_get_active (GTK_CHECK_BUTTON (check)));
-          return;
-        }
-    }
-
-  GListStore *instances = nuvashalauncher_instance_manager_get_instances (self->model->manager);
-  NuvashaLauncherInstance *instance =
-    g_list_model_get_item (G_LIST_MODEL (instances),
-                           gtk_list_box_row_get_index (row));
-
-  if (instance == NULL)
-    return;
-
-  open_instance_dialog (self, instance);
-  g_object_unref (instance);
+  if (check != NULL)
+    gtk_check_button_set_active (
+      GTK_CHECK_BUTTON (check),
+      !gtk_check_button_get_active (GTK_CHECK_BUTTON (check)));
 }
 
 void
@@ -567,12 +492,10 @@ update_visible_page (NuvashaLauncherMainWindow *self)
   GListStore *instances = nuvashalauncher_instance_manager_get_instances (self->model->manager);
   guint n_items = g_list_model_get_n_items (G_LIST_MODEL (instances));
 
-  if (self->ui.edit != NULL)
-    {
-      if (n_items == 0 && self->ui.edit_mode)
-        set_instance_edit_mode (self);
-      gtk_widget_set_visible (GTK_WIDGET (self->ui.edit), n_items > 0);
-    }
+  if (n_items == 0 &&
+      self->ui.selected_instances != NULL &&
+      g_hash_table_size (self->ui.selected_instances) > 0)
+    clear_instance_selection (self);
 
   adw_view_stack_set_visible_child_name (self->ui.stack,
                                          n_items > 0 ? "instances" : "empty");

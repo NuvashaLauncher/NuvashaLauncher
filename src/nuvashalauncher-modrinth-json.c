@@ -41,8 +41,6 @@ nuvashalauncher_content_type_to_string (NuvashaLauncherContentType type)
       return "resourcepack";
     case NUVASHALAUNCHER_CONTENT_SHADER_PACK:
       return "shader";
-    case NUVASHALAUNCHER_CONTENT_DATAPACK:
-      return "datapack";
     case NUVASHALAUNCHER_CONTENT_MODPACK:
       return "modpack";
     case NUVASHALAUNCHER_CONTENT_MOD:
@@ -60,8 +58,6 @@ nuvashalauncher_content_type_title (NuvashaLauncherContentType type)
       return _("Resource Packs");
     case NUVASHALAUNCHER_CONTENT_SHADER_PACK:
       return _("Shader Packs");
-    case NUVASHALAUNCHER_CONTENT_DATAPACK:
-      return _("Datapacks");
     case NUVASHALAUNCHER_CONTENT_MOD:
     default:
       return _("Mods");
@@ -77,8 +73,6 @@ nuvashalauncher_content_type_folder (NuvashaLauncherContentType type)
       return "resourcepacks";
     case NUVASHALAUNCHER_CONTENT_SHADER_PACK:
       return "shaderpacks";
-    case NUVASHALAUNCHER_CONTENT_DATAPACK:
-      return "datapacks";
     case NUVASHALAUNCHER_CONTENT_MOD:
     default:
       return "mods";
@@ -106,11 +100,9 @@ nuvashalauncher_content_type_icon (NuvashaLauncherContentType type)
       return "image-x-generic-symbolic";
     case NUVASHALAUNCHER_CONTENT_SHADER_PACK:
       return "applications-graphics-symbolic";
-    case NUVASHALAUNCHER_CONTENT_DATAPACK:
-      return "package-x-generic-symbolic";
     case NUVASHALAUNCHER_CONTENT_MOD:
     default:
-      return "view-list-symbolic";
+      return "package-x-generic-symbolic";
     }
 }
 

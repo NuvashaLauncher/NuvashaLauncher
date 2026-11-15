@@ -33,8 +33,6 @@ nuvashalauncher_main_window_build_ui (NuvashaLauncherMainWindow *self)
   GtkMenuButton *add_button = GTK_MENU_BUTTON (gtk_menu_button_new ());
   GtkMenuButton *users_button = GTK_MENU_BUTTON (gtk_menu_button_new ());
   GtkMenuButton *app_menu_button = GTK_MENU_BUTTON (gtk_menu_button_new ());
-  GtkButton *edit_button = GTK_BUTTON (gtk_button_new_from_icon_name (
-    "document-edit-symbolic"));
   GtkButton *footer_delete = GTK_BUTTON (gtk_button_new_from_icon_name (
     "edit-delete-symbolic"));
   GtkButton *footer_export = GTK_BUTTON (gtk_button_new_from_icon_name (
@@ -76,12 +74,10 @@ nuvashalauncher_main_window_build_ui (NuvashaLauncherMainWindow *self)
                                   G_MENU_MODEL (add_menu));
   adw_header_bar_pack_start (ADW_HEADER_BAR (header), GTK_WIDGET (add_button));
 
-  self->ui.edit = edit_button;
   self->ui.footer_delete = footer_delete;
   self->ui.footer_export = footer_export;
   self->ui.selection_footer = selection_footer;
   self->ui.selection_label = selection_label;
-  nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (edit_button), _("Edit mode"));
   nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (footer_delete), _("Delete"));
   nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (footer_export), _("Export"));
   gtk_widget_set_visible (GTK_WIDGET (footer_delete), FALSE);
@@ -90,12 +86,9 @@ nuvashalauncher_main_window_build_ui (NuvashaLauncherMainWindow *self)
   gtk_action_bar_pack_end (selection_footer, GTK_WIDGET (footer_export));
   gtk_action_bar_pack_end (selection_footer, GTK_WIDGET (footer_delete));
   gtk_action_bar_set_revealed (selection_footer, FALSE);
-  adw_header_bar_pack_start (ADW_HEADER_BAR (header), GTK_WIDGET (edit_button));
   adw_toolbar_view_add_bottom_bar (toolbar, GTK_WIDGET (selection_footer));
   adw_toolbar_view_set_bottom_bar_style (toolbar, ADW_TOOLBAR_RAISED);
   adw_toolbar_view_set_reveal_bottom_bars (toolbar, TRUE);
-  g_signal_connect_swapped (edit_button, "clicked",
-                            G_CALLBACK (set_instance_edit_mode), self);
   g_signal_connect_swapped (footer_delete, "clicked",
                             G_CALLBACK (bulk_delete_instances), self);
   g_signal_connect_swapped (footer_export, "clicked",

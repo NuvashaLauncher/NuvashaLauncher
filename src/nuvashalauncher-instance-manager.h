@@ -100,6 +100,11 @@ gboolean nuvashalauncher_instance_manager_set_string (NuvashaLauncherInstanceMan
                                           const char *property,
                                           const char *value,
                                           GError **error);
+
+gboolean nuvashalauncher_instance_manager_set_memory_mib (NuvashaLauncherInstanceManager *self,
+                                              NuvashaLauncherInstance *instance,
+                                              guint memory_mib,
+                                              GError **error);
 gboolean nuvashalauncher_instance_manager_set_loader (NuvashaLauncherInstanceManager *self,
                                           NuvashaLauncherInstance *instance,
                                           NuvashaLauncherLoader loader,

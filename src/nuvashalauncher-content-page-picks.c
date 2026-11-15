@@ -220,8 +220,6 @@ batch_next (NuvashaLauncherContentPage *self)
     {
       guint done = nuvashalauncher_content_install_model_finish_picks (self->install_model);
 
-      set_busy (self, FALSE);
-
       if (done > 0)
         {
           g_autofree char *message = g_strdup_printf (
@@ -234,7 +232,6 @@ batch_next (NuvashaLauncherContentPage *self)
       return;
     }
 
-  set_busy (self, TRUE);
   start_plan (self, nuvashalauncher_modrinth_version_copy (pick->version), pick->title,
               NULL, FALSE);
 }

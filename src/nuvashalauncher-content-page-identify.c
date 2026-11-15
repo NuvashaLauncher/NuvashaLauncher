@@ -179,33 +179,53 @@ on_project_title_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_autoptr (NuvashaLauncherModrinthDetails) details =
     nuvashalauncher_modrinth_details_finish (result, &error);
 
-  if (self != NULL && details != NULL && details->title != NULL &&
-      *details->title != '\0')
+  if (self != NULL && details != NULL)
     {
+      gboolean icons_updated = FALSE;
+
       if (self->browse.model == NULL || self->installed.files == NULL)
         {
           project_title_request_free (request);
           return;
         }
 
-      g_hash_table_replace (self->browse.model->project_titles,
-                            g_strdup (request->project_id),
-                            g_strdup (details->title));
+      if (details->title != NULL && *details->title != '\0')
+        g_hash_table_replace (self->browse.model->project_titles,
+                              g_strdup (request->project_id),
+                              g_strdup (details->title));
+      if (details->icon_url != NULL && *details->icon_url != '\0')
+        g_hash_table_replace (self->browse.model->project_icons,
+                              g_strdup (request->project_id),
+                              g_strdup (details->icon_url));
 
       for (guint i = 0; i < self->installed.files->len; i++)
         {
           NuvashaLauncherContentFile *file =
             g_ptr_array_index (self->installed.files, i);
+          gboolean changed = FALSE;
 
           if (g_strcmp0 (file->project_id, request->project_id) != 0)
             continue;
-          if (file->project_name != NULL &&
-              *file->project_name != '\0' &&
-              g_strcmp0 (file->project_name, file->project_id) != 0)
+          if (details->title != NULL && *details->title != '\0' &&
+              (file->project_name == NULL || *file->project_name == '\0' ||
+               g_strcmp0 (file->project_name, file->project_id) == 0))
+            {
+              g_free (file->project_name);
+              file->project_name = g_strdup (details->title);
+              changed = TRUE;
+            }
+          if (details->icon_url != NULL && *details->icon_url != '\0' &&
+              (file->icon_url == NULL || *file->icon_url == '\0'))
+            {
+              g_free (file->icon_url);
+              file->icon_url = g_strdup (details->icon_url);
+              changed = TRUE;
+              icons_updated = TRUE;
+            }
+
+          if (!changed)
             continue;
 
-          g_free (file->project_name);
-          file->project_name = g_strdup (details->title);
           queue_persist_identified_file (self, file);
 
           GtkWidget *row = self->installed.rows != NULL
@@ -214,7 +234,12 @@ on_project_title_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                              : NULL;
           if (row != NULL)
             file_row_refresh (row);
+      if (file->icon_url != NULL && *file->icon_url != '\0')
+        load_visible_icons (self);
         }
+
+      if (icons_updated)
+        load_visible_icons (self);
     }
 
   project_title_request_free (request);
@@ -292,6 +317,10 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       {
         const char *known_name = g_hash_table_lookup (self->browse.model->project_titles,
                                                       version->project_id);
+        const char *known_icon = g_hash_table_lookup (self->browse.model->project_icons,
+                                                      version->project_id);
+        gboolean needs_details = known_name == NULL;
+
         if (!file->local_metadata || file->project_name == NULL ||
             *file->project_name == '\0' ||
             g_strcmp0 (file->project_name, version->project_id) == 0)
@@ -299,7 +328,16 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
             g_free (file->project_name);
             file->project_name = g_strdup (known_name);
           }
-        if (known_name == NULL)
+        if ((file->icon_url == NULL || *file->icon_url == '\0') &&
+            known_icon != NULL && *known_icon != '\0')
+          {
+            g_free (file->icon_url);
+            file->icon_url = g_strdup (known_icon);
+          }
+        if ((file->icon_url == NULL || *file->icon_url == '\0') &&
+            file->local_icon_path == NULL && file->local_icon_member == NULL)
+          needs_details = TRUE;
+        if (needs_details)
           request_project_title (self, version->project_id);
       }
       file->version_id = g_strdup (version->version_id);
@@ -342,6 +380,8 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         g_hash_table_add (self->browse.model->projects, g_strdup (file->project_id));
 
       file_row_refresh (row);
+      if (file->icon_url != NULL && *file->icon_url != '\0')
+        load_visible_icons (self);
 
       /* The browser's icon of the project the file belongs to, which the
          row carries from here on. */
@@ -514,6 +554,8 @@ metadata_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
            if (row != NULL)
              file_row_refresh (row);
+      if (file->icon_url != NULL && *file->icon_url != '\0')
+        load_visible_icons (self);
 
            if (file->metadata_dirty)
              {
@@ -522,6 +564,7 @@ metadata_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
              }
         }
       installed_filter_rows (self);
+      load_visible_icons (self);
     }
 
   g_object_unref (self);

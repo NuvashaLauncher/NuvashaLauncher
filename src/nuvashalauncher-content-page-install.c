@@ -231,8 +231,6 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
           if (page->install_model->picking)
             batch_stopped (page);
 
-          set_busy (page, FALSE);
-
           /* A cancel is not a failure worth a message. */
           if (!cancelled)
              show_error (page, _("The file could not be installed"), error);
@@ -279,6 +277,10 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         entry.provider = "Modrinth";
         entry.project_id = file->project_id;
         entry.project_name = file->project_name;
+        entry.icon_url = file->project_id != NULL && run->page->browse.model != NULL
+                           ? g_hash_table_lookup (run->page->browse.model->project_icons,
+                                                  file->project_id)
+                           : NULL;
         entry.version_id = file->version_id;
         entry.version_name = file->version_name;
         entry.required_dependencies = file->required_dependencies;
@@ -316,10 +318,7 @@ fetch_next (FetchRun *run)
 
             batch_next (self);
           else
-            {
-              set_busy (self, FALSE);
-              reload_installed (self);
-            }
+            reload_installed (self);
         }
 
       fetch_free (run);
@@ -333,10 +332,7 @@ fetch_next (FetchRun *run)
     if (!nuvashalauncher_content_ensure_folder (run->folder, &error))
       {
         if (self != NULL)
-          {
-            set_busy (self, FALSE);
-       show_error (self, _("The folder cannot be created"), error);
-          }
+          show_error (self, _("The folder cannot be created"), error);
 
         fetch_free (run);
         return;
@@ -588,8 +584,6 @@ on_plan_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
       g_object_unref (self);
       return;
     }
-
-  set_busy (self, TRUE);
 
   {
     g_autofree char *message =

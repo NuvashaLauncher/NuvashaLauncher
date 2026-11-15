@@ -2,7 +2,7 @@ app-id: com.github.NuvashaLauncher.NuvashaLauncher
 runtime: org.gnome.Platform
 runtime-version: '51'
 sdk: org.gnome.Sdk
-command: NuvashaLauncher
+command: nuvashalauncher
 finish-args:
   - --share=ipc
   - --share=network

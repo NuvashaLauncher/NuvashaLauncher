@@ -184,10 +184,6 @@ seed_manifest_indexes (InstallRun *run)
         {
           type = NUVASHALAUNCHER_CONTENT_SHADER_PACK;
         }
-      else if (g_str_has_prefix (file->path, "datapacks/"))
-        {
-          type = NUVASHALAUNCHER_CONTENT_DATAPACK;
-        }
       else
         continue;
 

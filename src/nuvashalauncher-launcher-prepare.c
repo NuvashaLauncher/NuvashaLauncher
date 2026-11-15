@@ -127,11 +127,14 @@ run_the_game (NuvashaLauncher *self)
 
   set_log_private_values (self, &session);
 
-  g_object_get (self->instance, "jvm-args", &jvm_args, NULL);
+  guint memory_mib = 0;
 
-  argv = nuvashalauncher_launch_build_arguments (self->preparation.resolved, &session,
+  g_object_get (self->instance, "jvm-args", &jvm_args, "memory-mib", &memory_mib, NULL);
+
+  argv = nuvashalauncher_launch_build_arguments_with_memory (
+                                     self->preparation.resolved, &session,
                                      self->preparation.java_executable,
-                                     self->game_directory, jvm_args, &error);
+                                     self->game_directory, jvm_args, memory_mib, &error);
 
   if (argv == NULL)
     {
