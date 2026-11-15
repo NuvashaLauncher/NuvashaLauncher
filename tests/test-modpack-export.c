@@ -121,84 +121,6 @@ test_export_import_round_trip (void)
 }
 
 static void
-test_export_preserves_managed_datapack (void)
-{
-  g_autofree char *root = make_tmp_dir ();
-  g_autofree char *data_dir = g_build_filename (root, "data", NULL);
-  g_autofree char *source_dir = g_build_filename (root, "source", NULL);
-  g_autofree char *datapack_dir = g_build_filename (source_dir, "datapacks",
-                                                    NULL);
-  g_autofree char *datapack = g_build_filename (source_dir, "datapacks",
-                                                "example.zip", NULL);
-  g_autofree char *archive = g_build_filename (root, "managed.mrpack", NULL);
-  g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaLauncherInstanceManager) manager = manager_new (data_dir);
-  g_autoptr (NuvashaLauncherInstance) instance = NULL;
-  g_autoptr (NuvashaLauncherModpack) exported = NULL;
-  NuvashaLauncherContentIndexEntry entry = { 0 };
-  GStatBuf stat_buf;
-
-  instance = nuvashalauncher_instance_manager_create (manager, "Managed Pack",
-                                               source_dir, "1.20.1",
-                                               NUVASHALAUNCHER_LOADER_FABRIC, "0.15.11",
-                                               &error);
-  g_assert_no_error (error);
-  g_assert_nonnull (instance);
-  g_assert_cmpint (g_mkdir_with_parents (datapack_dir, 0755), ==, 0);
-  g_assert_true (g_file_set_contents (datapack, "datapack bytes", -1, &error));
-  g_assert_no_error (error);
-  g_assert_cmpint (g_stat (datapack, &stat_buf), ==, 0);
-
-  entry.filename = "example.zip";
-  entry.size = stat_buf.st_size;
-  entry.mtime_usec = (gint64) stat_buf.st_mtim.tv_sec * G_USEC_PER_SEC +
-                     stat_buf.st_mtim.tv_nsec / 1000;
-  entry.hash = "0123456789abcdef0123456789abcdef01234567";
-  entry.hash512 = "0123456789abcdef0123456789abcdef";
-  entry.download_url = "https://cdn.modrinth.com/data/pack/v1/example.zip";
-  entry.env_client = "required";
-  entry.env_server = "required";
-  entry.provider = "Modrinth";
-  entry.project_id = "pack";
-  entry.version_id = "v1";
-
-  g_assert_true (index_update_now (source_dir, NUVASHALAUNCHER_CONTENT_DATAPACK,
-                                   &entry, &error));
-  g_assert_no_error (error);
-  g_object_set (instance,
-                "modpack-name", "Managed Pack Original",
-                "modpack-summary", "kept summary",
-                "modpack-version-id", "original-version",
-                NULL);
-  g_assert_true (nuvashalauncher_instance_manager_save (manager, &error));
-  g_assert_no_error (error);
-
-  g_assert_true (export_now (instance, archive, &error));
-  g_assert_no_error (error);
-  exported = nuvashalauncher_modpack_new_from_zip (archive, &error);
-  g_assert_no_error (error);
-  g_assert_nonnull (exported);
-  g_assert_cmpstr (exported->name, ==, "Managed Pack Original");
-  g_assert_cmpstr (exported->summary, ==, "kept summary");
-  g_assert_cmpstr (exported->version_id, ==, "original-version");
-  g_assert_cmpuint (exported->files->len, ==, 1);
-  {
-    NuvashaLauncherModpackFile *file = g_ptr_array_index (exported->files, 0);
-
-    g_assert_cmpstr (file->path, ==, "datapacks/example.zip");
-    g_assert_cmpstr (file->sha1, ==,
-                     "0123456789abcdef0123456789abcdef01234567");
-    g_assert_cmpint (file->env_client, ==, NUVASHALAUNCHER_MODPACK_ENV_REQUIRED);
-    g_assert_cmpint (file->env_server, ==, NUVASHALAUNCHER_MODPACK_ENV_REQUIRED);
-    g_assert_cmpstr (g_ptr_array_index (file->downloads, 0), ==,
-                     "https://cdn.modrinth.com/data/pack/v1/example.zip");
-  }
-
-  remove_recursive (root);
-  g_print ("ok - export preserves managed datapacks and metadata\n");
-}
-
-static void
 test_dialog_imports_and_installs (void)
 {
   g_autofree char *dir = make_tmp_dir ();
@@ -268,7 +190,6 @@ main (int argc, char **argv)
 {
   g_test_init (&argc, &argv, NULL);
   g_test_add_func ("/modpack/export-import-round-trip", test_export_import_round_trip);
-  g_test_add_func ("/modpack/export-managed-datapack", test_export_preserves_managed_datapack);
   if (gtk_init_check ())
     {
       g_test_add_func ("/modpack/dialog-import", test_dialog_imports_and_installs);

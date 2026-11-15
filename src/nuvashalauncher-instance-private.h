@@ -13,6 +13,7 @@ struct _NuvashaLauncherInstance
   char *icon;
   char *java_path;
   char *jvm_args;
+  guint memory_mib;
   char *modpack_name;
   char *modpack_summary;
   char *modpack_version_id;

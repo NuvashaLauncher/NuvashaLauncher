@@ -200,36 +200,40 @@ sync_sidebar_search_button (NuvashaLauncherInstancePage *self)
 }
 
 static void
+set_page_search_visible (GtkWidget *page, gboolean visible)
+{
+  GtkWidget *settings_widget = settings_page_widget (page);
+
+  if (settings_widget != NULL)
+    {
+      nuvashalauncher_settings_page_set_search_visible (settings_widget, visible);
+      return;
+    }
+
+  if (NUVASHALAUNCHER_IS_CONTENT_PAGE (page))
+    nuvashalauncher_content_page_set_installed_search_visible (
+      NUVASHALAUNCHER_CONTENT_PAGE (page), visible);
+  else if (NUVASHALAUNCHER_IS_LOGS_PAGE (page))
+    nuvashalauncher_logs_page_set_search_visible (
+      NUVASHALAUNCHER_LOGS_PAGE (page), visible);
+  else if (NUVASHALAUNCHER_IS_WORLDS_PAGE (page))
+    nuvashalauncher_worlds_page_set_search_visible (
+      NUVASHALAUNCHER_WORLDS_PAGE (page), visible);
+  else if (NUVASHALAUNCHER_IS_SERVERS_PAGE (page))
+    nuvashalauncher_servers_page_set_search_visible (
+      NUVASHALAUNCHER_SERVERS_PAGE (page), visible);
+}
+
+static void
 on_sidebar_search_toggled (GtkToggleButton *button, gpointer user_data)
 {
   NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
   GtkWidget *page = self->attached_header_page;
-  gboolean active;
 
   if (self->syncing_search_button || page == NULL)
     return;
 
-  active = gtk_toggle_button_get_active (button);
-  {
-    GtkWidget *settings_widget = settings_page_widget (page);
-    if (settings_widget != NULL)
-      {
-        nuvashalauncher_settings_page_set_search_visible (settings_widget, active);
-        return;
-      }
-  }
-  if (NUVASHALAUNCHER_IS_CONTENT_PAGE (page))
-    nuvashalauncher_content_page_set_installed_search_visible (
-      NUVASHALAUNCHER_CONTENT_PAGE (page), active);
-  else if (NUVASHALAUNCHER_IS_LOGS_PAGE (page))
-    nuvashalauncher_logs_page_set_search_visible (
-      NUVASHALAUNCHER_LOGS_PAGE (page), active);
-  else if (NUVASHALAUNCHER_IS_WORLDS_PAGE (page))
-    nuvashalauncher_worlds_page_set_search_visible (
-      NUVASHALAUNCHER_WORLDS_PAGE (page), active);
-  else if (NUVASHALAUNCHER_IS_SERVERS_PAGE (page))
-    nuvashalauncher_servers_page_set_search_visible (
-      NUVASHALAUNCHER_SERVERS_PAGE (page), active);
+  set_page_search_visible (page, gtk_toggle_button_get_active (button));
 }
 
 static void
@@ -252,6 +256,7 @@ detach_header_page (NuvashaLauncherInstancePage *self)
     }
 
   self->attached_header_page = NULL;
+  set_page_search_visible (page, FALSE);
   GtkWidget *title_widget = adw_header_bar_get_title_widget (self->content_header);
   if (title_widget != NULL)
     g_signal_handlers_disconnect_by_data (title_widget, self);
@@ -357,9 +362,7 @@ rebuild_content_pages (NuvashaLauncherInstancePage *self)
       "image-x-generic-symbolic" },
     { NUVASHALAUNCHER_CONTENT_SHADER_PACK, "shader-packs", "Shader Packs",
       "applications-graphics-symbolic" },
-    { NUVASHALAUNCHER_CONTENT_DATAPACK, "datapacks", "Datapacks",
-      "package-x-generic-symbolic" },
-    { NUVASHALAUNCHER_CONTENT_MOD, "mods", "Mods", "view-list-symbolic" },
+    { NUVASHALAUNCHER_CONTENT_MOD, "mods", "Mods", "package-x-generic-symbolic" },
   };
   g_autofree char *visible = NULL;
 
@@ -413,10 +416,9 @@ static const InstanceSidebarSection instance_sections[] = {
   { "settings", "Settings", "emblem-system-symbolic" },
   { "resource-packs", "Resource Packs", "image-x-generic-symbolic" },
   { "shader-packs", "Shader Packs", "applications-graphics-symbolic" },
-  { "datapacks", "Datapacks", "package-x-generic-symbolic" },
+  { "mods", "Mods", "package-x-generic-symbolic" },
   { "worlds", "Worlds", "folder-saved-search-symbolic" },
   { "servers", "Servers", "network-server-symbolic" },
-  { "mods", "Mods", "view-list-symbolic" },
   { "logs", "Logs", "utilities-terminal-symbolic" },
 };
 
@@ -580,8 +582,8 @@ nuvashalauncher_instance_page_new (NuvashaLauncherInstanceManager *manager, Nuva
      "shader-packs", _("Shader Packs"), "applications-graphics-symbolic");
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack),
-    GTK_WIDGET (nuvashalauncher_content_page_new (instance, NUVASHALAUNCHER_CONTENT_DATAPACK)),
-     "datapacks", _("Datapacks"), "package-x-generic-symbolic");
+    GTK_WIDGET (nuvashalauncher_content_page_new (instance, NUVASHALAUNCHER_CONTENT_MOD)),
+     "mods", _("Mods"), "package-x-generic-symbolic");
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack),
     GTK_WIDGET (nuvashalauncher_worlds_page_new (instance, launcher)),
@@ -590,10 +592,6 @@ nuvashalauncher_instance_page_new (NuvashaLauncherInstanceManager *manager, Nuva
     ADW_VIEW_STACK (stack),
     GTK_WIDGET (nuvashalauncher_servers_page_new (instance, launcher)),
      "servers", _("Servers"), "network-server-symbolic");
-  adw_view_stack_add_titled_with_icon (
-    ADW_VIEW_STACK (stack),
-    GTK_WIDGET (nuvashalauncher_content_page_new (instance, NUVASHALAUNCHER_CONTENT_MOD)),
-     "mods", _("Mods"), "view-list-symbolic");
 
   /* The logs of the instance are the logs of the launcher the window
      shares with the row, so the game can be watched from here. */
@@ -645,7 +643,7 @@ nuvashalauncher_instance_page_new (NuvashaLauncherInstanceManager *manager, Nuva
     GTK_WIDGET (sidebar_toolbar), name != NULL && *name != '\0' ? name : " ");
 
   AdwHeaderBar *content_header = ADW_HEADER_BAR (adw_header_bar_new ());
-  adw_header_bar_set_centering_policy (content_header, ADW_CENTERING_POLICY_STRICT);
+  adw_header_bar_set_centering_policy (content_header, ADW_CENTERING_POLICY_LOOSE);
   self->content_header = content_header;
 
   AdwToolbarView *content_toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());

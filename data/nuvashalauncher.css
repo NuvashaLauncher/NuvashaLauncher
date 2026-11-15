@@ -21,6 +21,11 @@
   padding-bottom: 12px;
 }
 
+.nuvashalauncher-settings-page > scrolledwindow > viewport > clamp > box {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
 .nuvashalauncher-content-toolbar {
   padding: 6px 0;
 }

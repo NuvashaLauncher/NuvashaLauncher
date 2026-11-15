@@ -59,12 +59,11 @@ typedef enum {
   NUVASHALAUNCHER_CONTENT_MOD,
   NUVASHALAUNCHER_CONTENT_RESOURCE_PACK,
   NUVASHALAUNCHER_CONTENT_SHADER_PACK,
-  NUVASHALAUNCHER_CONTENT_DATAPACK,
   NUVASHALAUNCHER_CONTENT_MODPACK,
 } NuvashaLauncherContentType;
 
 /* What Modrinth calls this kind of content in a facet: "mod", "resourcepack",
- * "shader" or "datapack". Never NULL. */
+ * or "shader". Never NULL. */
 const char *nuvashalauncher_content_type_to_string (NuvashaLauncherContentType type);
 
 /* What the page and the rows are titled. Never NULL. */

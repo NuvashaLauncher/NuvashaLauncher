@@ -77,7 +77,6 @@ on_quick_install_versions_ready (GObject *source G_GNUC_UNUSED,
 
   if (error != NULL)
     {
-      set_busy (self, FALSE);
       if (!nuvashalauncher_error_is_cancelled (error))
         show_error (self, _("Could not load versions. Try again."), error);
       row_version_fetch_free (fetch);
@@ -88,7 +87,6 @@ on_quick_install_versions_ready (GObject *source G_GNUC_UNUSED,
     {
       g_autofree char *msg = g_strdup_printf (
         _("No compatible version found for Minecraft %s."), self->minecraft_version);
-      set_busy (self, FALSE);
       show_toast (self, msg);
       row_version_fetch_free (fetch);
       return;
@@ -109,7 +107,6 @@ nuvashalauncher_content_page_quick_install_project (NuvashaLauncherContentPage *
   if (self == NULL || project == NULL || project->project_id == NULL)
     return;
 
-  set_busy (self, TRUE);
   RowVersionFetch *fetch = g_new0 (RowVersionFetch, 1);
   fetch->page = self;
   fetch->project_title = g_strdup (project->title);
@@ -158,7 +155,6 @@ on_picker_version_activated (AdwActionRow *row, gpointer user_data)
   if (dialog != NULL)
     adw_dialog_close (dialog);
 
-  set_busy (self, TRUE);
   start_plan (self, copy, title, NULL, FALSE);
 }
 

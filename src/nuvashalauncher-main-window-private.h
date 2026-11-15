@@ -27,13 +27,11 @@ struct _NuvashaLauncherMainWindow
     AdwBanner *banner;  /* launch failures and crash details */
     AdwToolbarView *toolbar;
     GtkListBox *instances;
-    GtkButton *edit;
     GtkButton *footer_delete;
     GtkButton *footer_export;
     GtkActionBar *selection_footer;
     GtkLabel *selection_label;
     GHashTable *selected_instances; /* instance ID -> TRUE */
-    gboolean edit_mode;
   } ui;
 
   /* Active downloads shown next to the "+" menu. */
@@ -61,10 +59,10 @@ void on_row_activate (GtkListBox *list, GtkListBoxRow *row,
                       gpointer user_data);
 void on_instances_changed (NuvashaLauncherMainWindow *self, GListModel *model,
                            guint position, guint removed, guint added);
-void set_instance_edit_mode (NuvashaLauncherMainWindow *self);
+void open_instance_dialog (NuvashaLauncherMainWindow *self, NuvashaLauncherInstance *instance);
+void clear_instance_selection (NuvashaLauncherMainWindow *self);
 void update_instance_selection_ui (NuvashaLauncherMainWindow *self);
 void bulk_export_instances (NuvashaLauncherMainWindow *self);
-void bulk_duplicate_instances (NuvashaLauncherMainWindow *self);
 void bulk_delete_instances (NuvashaLauncherMainWindow *self);
 GMenu *create_add_menu (void);
 GMenu *create_app_menu (void);

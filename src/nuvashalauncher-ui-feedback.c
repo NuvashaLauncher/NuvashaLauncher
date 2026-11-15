@@ -3,6 +3,7 @@
  */
 
 #include "nuvashalauncher-ui-feedback.h"
+#include "nuvashalauncher-icons.h"
 #include "nuvashalauncher-i18n.h"
 
 void
@@ -224,4 +225,89 @@ nuvashalauncher_ui_prepare_dialog_content (GtkWidget *content)
   gtk_widget_add_css_class (content, "nuvashalauncher-dialog-content");
   gtk_widget_set_hexpand (content, TRUE);
   gtk_widget_set_vexpand (content, TRUE);
+}
+
+GtkCheckButton *
+nuvashalauncher_ui_selection_prefix_new (GtkWidget *icon, GtkStack **out_stack)
+{
+  g_return_val_if_fail (GTK_IS_WIDGET (icon), NULL);
+
+  GtkCheckButton *check = GTK_CHECK_BUTTON (gtk_check_button_new ());
+  GtkStack *icon_stack = GTK_STACK (gtk_stack_new ());
+  GtkBox *badge_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
+  GtkImage *check_icon = GTK_IMAGE (gtk_image_new_from_icon_name ("object-select-symbolic"));
+
+  gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
+
+  gtk_widget_add_css_class (GTK_WIDGET (badge_box), "nuvashalauncher-content-icon");
+  gtk_widget_add_css_class (GTK_WIDGET (badge_box), "nuvashalauncher-select-badge");
+  gtk_widget_set_size_request (GTK_WIDGET (badge_box),
+                               NUVASHALAUNCHER_ICON_SIZE, NUVASHALAUNCHER_ICON_SIZE);
+  gtk_widget_set_valign (GTK_WIDGET (badge_box), GTK_ALIGN_CENTER);
+  gtk_widget_set_halign (GTK_WIDGET (badge_box), GTK_ALIGN_CENTER);
+  gtk_widget_set_hexpand (GTK_WIDGET (badge_box), TRUE);
+  gtk_widget_set_vexpand (GTK_WIDGET (badge_box), TRUE);
+
+  gtk_image_set_pixel_size (check_icon, 24);
+  gtk_widget_set_valign (GTK_WIDGET (check_icon), GTK_ALIGN_CENTER);
+  gtk_widget_set_halign (GTK_WIDGET (check_icon), GTK_ALIGN_CENTER);
+  gtk_widget_set_hexpand (GTK_WIDGET (check_icon), TRUE);
+  gtk_widget_set_vexpand (GTK_WIDGET (check_icon), TRUE);
+  gtk_box_append (badge_box, GTK_WIDGET (check_icon));
+
+  gtk_stack_add_named (icon_stack, icon, "icon");
+  gtk_stack_add_named (icon_stack, GTK_WIDGET (badge_box), "check");
+  gtk_stack_set_visible_child_name (icon_stack, "icon");
+  gtk_widget_set_size_request (GTK_WIDGET (icon_stack),
+                               NUVASHALAUNCHER_ICON_SIZE, NUVASHALAUNCHER_ICON_SIZE);
+  gtk_widget_set_valign (GTK_WIDGET (icon_stack), GTK_ALIGN_CENTER);
+
+  gtk_check_button_set_child (check, GTK_WIDGET (icon_stack));
+  gtk_widget_add_css_class (GTK_WIDGET (check), "nuvashalauncher-select-checkbox");
+  gtk_widget_set_valign (GTK_WIDGET (check), GTK_ALIGN_CENTER);
+
+  if (out_stack != NULL)
+    *out_stack = icon_stack;
+  return check;
+}
+
+GtkActionBar *
+nuvashalauncher_ui_selection_footer_new (GtkLabel **out_label,
+                                         GtkButton **out_delete_button)
+{
+  GtkActionBar *footer = GTK_ACTION_BAR (gtk_action_bar_new ());
+  GtkLabel *label = GTK_LABEL (gtk_label_new (""));
+  GtkButton *del = GTK_BUTTON (gtk_button_new_from_icon_name ("edit-delete-symbolic"));
+
+  gtk_action_bar_set_center_widget (footer, GTK_WIDGET (label));
+  gtk_action_bar_pack_end (footer, GTK_WIDGET (del));
+  nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (del), _("Delete"));
+  gtk_widget_set_visible (GTK_WIDGET (del), FALSE);
+  gtk_action_bar_set_revealed (footer, FALSE);
+
+  if (out_label != NULL)
+    *out_label = label;
+  if (out_delete_button != NULL)
+    *out_delete_button = del;
+  return footer;
+}
+
+void
+nuvashalauncher_ui_selection_footer_update (GtkActionBar *footer,
+                                            GtkLabel *label,
+                                            GtkButton *delete_button,
+                                            guint selected,
+                                            guint total)
+{
+  g_autofree char *text = g_strdup_printf (_("%u/%u selected"), selected, total);
+
+  if (label != NULL)
+    gtk_label_set_text (label, text);
+  if (footer != NULL)
+    gtk_action_bar_set_revealed (footer, selected > 0);
+  if (delete_button != NULL)
+    {
+      gtk_widget_set_visible (GTK_WIDGET (delete_button), selected > 0);
+      gtk_widget_set_sensitive (GTK_WIDGET (delete_button), selected > 0);
+    }
 }

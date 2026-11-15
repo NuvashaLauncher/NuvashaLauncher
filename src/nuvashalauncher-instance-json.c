@@ -164,6 +164,32 @@ nuvashalauncher_instance_new_from_json (JsonNode *node, GError **error)
   if (!get_jvm_args (object, &jvm_args, error))
     return NULL;
 
+  guint memory_mib = 0;
+  if (json_object_has_member (object, "memory_mib"))
+    {
+      JsonNode *node = json_object_get_member (object, "memory_mib");
+      if (!JSON_NODE_HOLDS_NULL (node))
+        {
+          if (!JSON_NODE_HOLDS_VALUE (node) ||
+              json_node_get_value_type (node) != G_TYPE_INT64)
+            {
+              g_set_error_literal (error, NUVASHALAUNCHER_INSTANCE_ERROR,
+                                   NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,
+                                   "instance field \"memory_mib\" must be an integer");
+              return NULL;
+            }
+          gint64 val = json_node_get_int (node);
+          if (val < 0 || val > 1048576)
+            {
+              g_set_error_literal (error, NUVASHALAUNCHER_INSTANCE_ERROR,
+                                   NUVASHALAUNCHER_INSTANCE_ERROR_INVALID,
+                                   "instance field \"memory_mib\" is out of range");
+              return NULL;
+            }
+          memory_mib = (guint) val;
+        }
+    }
+
   const char *modpack_name = NULL;
   if (!get_optional_string (object, "modpack_name", &modpack_name, error))
     return NULL;
@@ -188,6 +214,7 @@ nuvashalauncher_instance_new_from_json (JsonNode *node, GError **error)
                 "icon", icon,
                  "java_path", java_path,
                  "jvm_args", jvm_args,
+                 "memory-mib", memory_mib,
                  "modpack_name", modpack_name,
                  "modpack_summary", modpack_summary,
                  "modpack_version_id", modpack_version_id,
@@ -251,6 +278,11 @@ nuvashalauncher_instance_to_json (NuvashaLauncherInstance *self)
   add_optional_member (builder, "java_path", self->java_path);
 
   add_optional_member (builder, "jvm_args", self->jvm_args);
+  if (self->memory_mib > 0)
+    {
+      json_builder_set_member_name (builder, "memory_mib");
+      json_builder_add_int_value (builder, (gint64) self->memory_mib);
+    }
   add_optional_member (builder, "modpack_name", self->modpack_name);
   add_optional_member (builder, "modpack_summary", self->modpack_summary);
   add_optional_member (builder, "modpack_version_id", self->modpack_version_id);

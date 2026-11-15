@@ -299,7 +299,7 @@ static gboolean
 export_indexed_files (ExportRun *run, GCancellable *cancellable, GError **error)
 {
   static const char *folders[] = {
-    "mods", "resourcepacks", "shaderpacks", "datapacks"
+    "mods", "resourcepacks", "shaderpacks"
   };
   g_autoptr (JsonParser) manifest_parser = json_parser_new ();
   JsonNode *manifest_root = NULL;

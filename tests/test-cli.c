@@ -5,6 +5,7 @@
 #include "nuvashalauncher-accounts.h"
 #include "nuvashalauncher-fs.h"
 #include "nuvashalauncher-instance-manager.h"
+#include "nuvashalauncher-nbt.h"
 #include "nuvashalauncher-secret-store.h"
 
 #include <glib.h>
@@ -162,6 +163,8 @@ test_extended_cli_commands (void)
   g_assert_nonnull (strstr (output, "--create-instance"));
   g_assert_nonnull (strstr (output, "--server"));
   g_assert_nonnull (strstr (output, "--world"));
+  g_assert_nonnull (strstr (output, "--list-worlds"));
+  g_assert_nonnull (strstr (output, "--list-servers"));
   g_clear_pointer (&output, g_free);
 
   /* --server/--world require --launch and cannot be combined together. */
@@ -256,6 +259,52 @@ test_extended_cli_commands (void)
   g_assert_nonnull (created);
   g_autofree char *created_dir = NULL;
   g_object_get (created, "directory", &created_dir, NULL);
+
+  {
+    g_autofree char *world_dir = g_build_filename (created_dir, "saves", "MyWorld", NULL);
+    g_autofree char *level_dat = g_build_filename (world_dir, "level.dat", NULL);
+    g_autofree char *servers_dat = g_build_filename (created_dir, "servers.dat", NULL);
+    g_autoptr (NuvashaLauncherNbtTag) level_root =
+      nuvashalauncher_nbt_tag_new (NUVASHALAUNCHER_NBT_COMPOUND, "");
+    NuvashaLauncherNbtTag *level_data =
+      nuvashalauncher_nbt_tag_new (NUVASHALAUNCHER_NBT_COMPOUND, "Data");
+    g_autoptr (NuvashaLauncherNbtTag) servers_root =
+      nuvashalauncher_nbt_tag_new (NUVASHALAUNCHER_NBT_COMPOUND, "");
+    NuvashaLauncherNbtTag *servers_list =
+      nuvashalauncher_nbt_new_list ("servers", NUVASHALAUNCHER_NBT_COMPOUND);
+    NuvashaLauncherNbtTag *srv =
+      nuvashalauncher_nbt_tag_new (NUVASHALAUNCHER_NBT_COMPOUND, NULL);
+
+    g_assert_cmpint (g_mkdir_with_parents (world_dir, 0755), ==, 0);
+    nuvashalauncher_nbt_compound_set (level_data,
+                                      nuvashalauncher_nbt_new_string ("LevelName", "My World"));
+    nuvashalauncher_nbt_compound_set (level_root, level_data);
+    g_assert_true (nuvashalauncher_nbt_write_file (level_root, level_dat, TRUE, &error));
+    g_assert_no_error (error);
+
+    nuvashalauncher_nbt_compound_set (srv,
+                                      nuvashalauncher_nbt_new_string ("name", "Test Server"));
+    nuvashalauncher_nbt_compound_set (srv,
+                                      nuvashalauncher_nbt_new_string ("ip", "play.example.com"));
+    g_ptr_array_add (servers_list->v_list.items, srv);
+    nuvashalauncher_nbt_compound_set (servers_root, servers_list);
+    g_assert_true (nuvashalauncher_nbt_write_file (servers_root, servers_dat, FALSE, &error));
+    g_assert_no_error (error);
+
+    const char *worlds_args[] = { "--list-worlds", "CliPack", "--json", NULL };
+    output = run_cli_v (worlds_args, &status);
+    g_assert_cmpint (status, ==, 0);
+    g_assert_nonnull (strstr (output, "\"folder\" : \"MyWorld\""));
+    g_assert_nonnull (strstr (output, "\"name\" : \"My World\""));
+    g_clear_pointer (&output, g_free);
+
+    const char *servers_args[] = { "--list-servers", "CliPack", "--json", NULL };
+    output = run_cli_v (servers_args, &status);
+    g_assert_cmpint (status, ==, 0);
+    g_assert_nonnull (strstr (output, "\"name\" : \"Test Server\""));
+    g_assert_nonnull (strstr (output, "\"ip\" : \"play.example.com\""));
+    g_clear_pointer (&output, g_free);
+  }
 
   {
     const char *args[] = { "--remove-instance", "CliPack", "--keep-files", NULL };

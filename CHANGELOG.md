@@ -2,6 +2,27 @@
 
 All notable changes to Nuvasha Launcher are documented in this file.
 
+## [1.3] - 2026-11-15
+
+### Main Window & Instance Selection
+- **Direct Multi-Selection & Row Settings Button**: Removed the main window's old edit mode (header edit toggle, `Ctrl+E`, per-row edit action buttons, and drag-and-drop row reordering). Clicking an instance row now toggles its circular selection badge directly and reveals the selection footer (`Delete`, `Export`, `Escape` to clear, `Ctrl+D` to delete), while a new Settings gear button (`emblem-system-symbolic`) to the left of the Play button opens instance settings.
+
+### Instance Settings, Content Tabs & UI Polish
+- **Easy Java Memory Setting**: Added a **Memory (MiB)** spin row (`memory-mib` property persisted in `instances.json`) to the Java section of instance settings. Explicit `-Xmx` flags in custom Java arguments take precedence over the memory setting.
+- **Worlds & Servers Multi-Selection**: Added circular selection checkboxes and a shared selection footer (`nuvashalauncher-ui-feedback`) to the Worlds and Servers tabs for bulk deletion.
+- **Search Bars, Spacing & Empty States**: Reduced excess top spacing in the Settings tab, improved header search entries across Settings and Mods/Resource Packs/Shader Packs/Datapacks tabs, and centered empty-state status pages in the Worlds tab and the "No Mod Loader" state.
+- **Worlds Tab Cleanup**: Removed the "Reset Icon" option from world row menus.
+- **GTK Critical Fixes**: Fixed `GTK_IS_WIDGET` assertions in content page UI and icon handling (`nuvashalauncher-icons.c`, `nuvashalauncher-content-page-ui.c`, `nuvashalauncher-content-page-identify.c`).
+
+### Command-Line Interface
+- **World & Server Listings**: Added `--list-worlds INSTANCE` and `--list-servers INSTANCE` CLI flags (with `--json` output support) to list an instance's singleplayer worlds and saved servers.
+
+### Binary, Packaging & Tests
+- **Lowercase `nuvashalauncher` Binary**: Renamed the built and installed binary and CLI command from `NuvashaLauncher` to `nuvashalauncher` across `Makefile`, `.desktop`, bash completion, RPM spec, Flatpak manifest, and Nix `flake.nix`.
+- **Tests**: Updated `test-cli`, `test-desktop-entry`, `test-launch-args`, and `test-window` for the new CLI listing flags, `-Xmx` precedence, `Exec=nuvashalauncher %f`, and row selection/settings button behavior.
+
+**Full Changelog**: https://github.com/NuvashaLauncher/NuvashaLauncher/compare/v1.2...v1.3
+
 ## [1.2] - 2026-11-14
 
 ### Instance Management & Content

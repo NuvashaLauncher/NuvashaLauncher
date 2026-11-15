@@ -8,6 +8,7 @@
 #include "nuvashalauncher-content-files-private.h"
 #include "nuvashalauncher-operation.h"
 #include "nuvashalauncher-icons.h"
+#include "nuvashalauncher-icon-load-private.h"
 #include "nuvashalauncher-settings.h"
 #include "nuvashalauncher-ui-feedback.h"
 #include "nuvashalauncher-fs.h"
@@ -524,7 +525,8 @@ load_row_icon (NuvashaLauncherContentPage *self, GtkWidget *row)
   graphene_rect_t bounds;
 
   if (file == NULL || icon == NULL ||
-      (file->local_icon_path == NULL && file->local_icon_member == NULL) ||
+      (file->local_icon_path == NULL && file->local_icon_member == NULL &&
+       (file->icon_url == NULL || *file->icon_url == '\0')) ||
       g_object_get_data (G_OBJECT (row), "nuvashalauncher-icon-loaded") != NULL ||
       !gtk_widget_compute_bounds (row, scroller, &bounds))
     return;
@@ -554,6 +556,13 @@ load_row_icon (NuvashaLauncherContentPage *self, GtkWidget *row)
       nuvashalauncher_operation_release (
         nuvashalauncher_content_load_local_icon_async (file, local_icon_ready, load),
         self->installed.scan);
+      return;
+    }
+
+  if (file->icon_url != NULL && *file->icon_url != '\0')
+    {
+      g_object_set_data (G_OBJECT (row), "nuvashalauncher-icon-loaded", GINT_TO_POINTER (1));
+      nuvashalauncher_icon_load_start (icon, file->icon_url);
     }
 }
 

@@ -68,6 +68,27 @@ on_jvm_args_apply (AdwEntryRow *row, gpointer user_data)
     }
 }
 
+static void
+on_memory_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED, gpointer user_data)
+{
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
+  AdwSpinRow *row = ADW_SPIN_ROW (object);
+  guint value = (guint) adw_spin_row_get_value (row);
+  guint current = 0;
+  g_autoptr (GError) error = NULL;
+
+  g_object_get (self->instance, "memory-mib", &current, NULL);
+  if (value == current)
+    return;
+
+  if (!nuvashalauncher_instance_manager_set_memory_mib (self->manager, self->instance,
+                                                        value, &error))
+    {
+      instance_page_show_error (self, error);
+      adw_spin_row_set_value (row, (double) current);
+    }
+}
+
 typedef struct
 {
   NuvashaLauncherInstancePage *page;
@@ -545,7 +566,6 @@ typedef struct {
 } SettingsSearchGroup;
 
 typedef struct {
-  GtkSearchBar *search_bar;
   GtkSearchEntry *search_entry;
   AdwClamp *header_search_clamp;
   GPtrArray *groups;
@@ -563,6 +583,7 @@ static void
 settings_search_state_free (gpointer data)
 {
   SettingsSearchState *state = data;
+  g_clear_object (&state->search_entry);
   g_clear_object (&state->header_search_clamp);
   g_clear_pointer (&state->groups, g_ptr_array_unref);
   g_free (state);
@@ -649,21 +670,6 @@ on_settings_search_changed (GtkSearchEntry *entry G_GNUC_UNUSED, gpointer user_d
   apply_settings_filter ((SettingsSearchState *) user_data);
 }
 
-static void
-on_settings_search_mode_changed (GObject *object G_GNUC_UNUSED,
-                                 GParamSpec *pspec G_GNUC_UNUSED,
-                                 gpointer user_data)
-{
-  SettingsSearchState *state = user_data;
-  gboolean enabled = gtk_search_bar_get_search_mode (state->search_bar);
-
-  gtk_widget_set_visible (GTK_WIDGET (state->search_bar), enabled);
-  if (state->header_search_clamp != NULL)
-    gtk_widget_set_visible (GTK_WIDGET (state->header_search_clamp), enabled);
-  if (!enabled)
-    gtk_editable_set_text (GTK_EDITABLE (state->search_entry), "");
-}
-
 static SettingsSearchState *
 settings_search_state_from_widget (GtkWidget *widget)
 {
@@ -685,8 +691,8 @@ nuvashalauncher_settings_page_is_search_visible (GtkWidget *widget)
   SettingsSearchState *state = settings_search_state_from_widget (widget);
 
   return state != NULL &&
-         state->search_bar != NULL &&
-         gtk_widget_get_visible (GTK_WIDGET (state->search_bar));
+         state->search_entry != NULL &&
+         gtk_widget_get_visible (GTK_WIDGET (state->search_entry));
 }
 
 void
@@ -694,16 +700,15 @@ nuvashalauncher_settings_page_set_search_visible (GtkWidget *widget, gboolean vi
 {
   SettingsSearchState *state = settings_search_state_from_widget (widget);
 
-  if (state == NULL || state->search_bar == NULL)
+  if (state == NULL || state->search_entry == NULL)
     return;
 
-  gtk_widget_set_visible (GTK_WIDGET (state->search_bar), visible);
+  gtk_widget_set_visible (GTK_WIDGET (state->search_entry), visible);
   if (state->header_search_clamp != NULL)
     gtk_widget_set_visible (GTK_WIDGET (state->header_search_clamp), visible);
-  gtk_search_bar_set_search_mode (state->search_bar, visible);
-  if (visible && state->search_entry != NULL)
+  if (visible)
     gtk_widget_grab_focus (GTK_WIDGET (state->search_entry));
-  else if (!visible && state->search_entry != NULL)
+  else
     gtk_editable_set_text (GTK_EDITABLE (state->search_entry), "");
 }
 
@@ -719,11 +724,12 @@ nuvashalauncher_settings_page_attach_header (GtkWidget *widget, AdwHeaderBar *he
     {
       state->header_search_clamp = g_object_ref_sink (ADW_CLAMP (adw_clamp_new ()));
       adw_clamp_set_maximum_size (state->header_search_clamp, 460);
-      adw_clamp_set_child (state->header_search_clamp, GTK_WIDGET (state->search_bar));
+      gtk_widget_set_hexpand (GTK_WIDGET (state->header_search_clamp), TRUE);
+      adw_clamp_set_child (state->header_search_clamp, GTK_WIDGET (state->search_entry));
     }
 
   gtk_widget_set_visible (GTK_WIDGET (state->header_search_clamp),
-                          gtk_widget_get_visible (GTK_WIDGET (state->search_bar)));
+                          gtk_widget_get_visible (GTK_WIDGET (state->search_entry)));
   adw_header_bar_set_title_widget (header, GTK_WIDGET (state->header_search_clamp));
 }
 
@@ -772,19 +778,12 @@ create_settings_page (NuvashaLauncherInstancePage *self)
   SettingsSearchGroup *actions_group;
 
   search_state->groups = g_ptr_array_new_with_free_func (settings_search_group_free);
-  search_state->search_bar = GTK_SEARCH_BAR (gtk_search_bar_new ());
-  search_state->search_entry = GTK_SEARCH_ENTRY (gtk_search_entry_new ());
+  search_state->search_entry = GTK_SEARCH_ENTRY (g_object_ref_sink (gtk_search_entry_new ()));
   gtk_search_entry_set_placeholder_text (search_state->search_entry, _("Search"));
-  gtk_search_bar_set_child (search_state->search_bar, GTK_WIDGET (search_state->search_entry));
-  gtk_search_bar_connect_entry (search_state->search_bar,
-                                GTK_EDITABLE (search_state->search_entry));
-  gtk_search_bar_set_show_close_button (search_state->search_bar, FALSE);
-  gtk_widget_set_hexpand (GTK_WIDGET (search_state->search_bar), TRUE);
-  gtk_widget_set_visible (GTK_WIDGET (search_state->search_bar), FALSE);
+  gtk_widget_set_hexpand (GTK_WIDGET (search_state->search_entry), TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (search_state->search_entry), FALSE);
   g_signal_connect (search_state->search_entry, "search-changed",
                     G_CALLBACK (on_settings_search_changed), search_state);
-  g_signal_connect (search_state->search_bar, "notify::search-mode-enabled",
-                    G_CALLBACK (on_settings_search_mode_changed), search_state);
   g_object_set_data_full (G_OBJECT (page), SETTINGS_SEARCH_KEY, search_state,
                           settings_search_state_free);
 
@@ -937,6 +936,17 @@ create_settings_page (NuvashaLauncherInstancePage *self)
 
   adw_preferences_group_add (java, java_row);
   settings_search_add_row (java_group, java_row);
+
+  guint memory_mib = 0;
+  g_object_get (self->instance, "memory-mib", &memory_mib, NULL);
+  AdwSpinRow *memory_row = ADW_SPIN_ROW (adw_spin_row_new_with_range (0, 65536, 512));
+  adw_spin_row_set_digits (memory_row, 0);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (memory_row), "RAM (MiB)");
+  adw_spin_row_set_value (memory_row, (double) memory_mib);
+  g_signal_connect_object (memory_row, "notify::value",
+                           G_CALLBACK (on_memory_changed), self, 0);
+  adw_preferences_group_add (java, GTK_WIDGET (memory_row));
+  settings_search_add_row (java_group, GTK_WIDGET (memory_row));
 
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (jvm_args_row),
                                  _("JVM Arguments"));

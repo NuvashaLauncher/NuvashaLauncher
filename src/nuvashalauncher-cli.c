@@ -10,6 +10,7 @@
 #include "nuvashalauncher-instance-manager.h"
 #include "nuvashalauncher-launcher.h"
 #include "nuvashalauncher-modpack.h"
+#include "nuvashalauncher-nbt.h"
 #include "nuvashalauncher-settings.h"
 
 #include <json-glib/json-glib.h>
@@ -27,6 +28,8 @@ typedef struct {
   char *account_key;
   char *server_address;
   char *world_name;
+  char *list_worlds;
+  char *list_servers;
   char *switch_account;
   char *remove_account;
   char *add_offline_account;
@@ -47,6 +50,8 @@ cli_options_clear (CliOptions *opts)
   g_free (opts->account_key);
   g_free (opts->server_address);
   g_free (opts->world_name);
+  g_free (opts->list_worlds);
+  g_free (opts->list_servers);
   g_free (opts->switch_account);
   g_free (opts->remove_account);
   g_free (opts->add_offline_account);
@@ -81,8 +86,12 @@ build_option_context (CliOptions *opts)
       "List instances", NULL },
     { "list-accounts", 0, 0, G_OPTION_ARG_NONE, &opts->show_accounts,
       "List accounts", NULL },
+    { "list-worlds", 0, 0, G_OPTION_ARG_STRING, &opts->list_worlds,
+      "List singleplayer worlds for an instance", "INSTANCE" },
+    { "list-servers", 0, 0, G_OPTION_ARG_STRING, &opts->list_servers,
+      "List saved servers for an instance", "INSTANCE" },
     { "json", 0, 0, G_OPTION_ARG_NONE, &opts->json_output,
-      "Format --list-instances or --list-accounts output as JSON", NULL },
+      "Format --list-* output as JSON", NULL },
     { "switch-account", 0, 0, G_OPTION_ARG_STRING, &opts->switch_account,
       "Make an account active", "ACCOUNT" },
     { "remove-account", 0, 0, G_OPTION_ARG_STRING, &opts->remove_account,
@@ -130,7 +139,9 @@ nuvashalauncher_cli_add_options (GApplication *app)
     { "world", 0, 0, G_OPTION_ARG_STRING, NULL, "Join a singleplayer world directly when using --launch", "WORLD" },
     { "list-instances", 0, 0, G_OPTION_ARG_NONE, NULL, "List instances", NULL },
     { "list-accounts", 0, 0, G_OPTION_ARG_NONE, NULL, "List accounts", NULL },
-    { "json", 0, 0, G_OPTION_ARG_NONE, NULL, "Format --list-instances or --list-accounts output as JSON", NULL },
+    { "list-worlds", 0, 0, G_OPTION_ARG_STRING, NULL, "List singleplayer worlds for an instance", "INSTANCE" },
+    { "list-servers", 0, 0, G_OPTION_ARG_STRING, NULL, "List saved servers for an instance", "INSTANCE" },
+    { "json", 0, 0, G_OPTION_ARG_NONE, NULL, "Format --list-* output as JSON", NULL },
     { "switch-account", 0, 0, G_OPTION_ARG_STRING, NULL, "Make an account active", "ACCOUNT" },
     { "remove-account", 0, 0, G_OPTION_ARG_STRING, NULL, "Remove an account by UUID or name", "ACCOUNT" },
     { "add-offline-account", 0, 0, G_OPTION_ARG_STRING, NULL, "Create and activate an offline account", "NAME" },
@@ -245,6 +256,155 @@ list_instances (gboolean json_output)
                nuvashalauncher_loader_to_string (loader));
     }
 
+  return 0;
+}
+
+static char *
+find_instance_directory (const char *key)
+{
+  g_autoptr (NuvashaLauncherInstanceManager) manager =
+    nuvashalauncher_instance_manager_new (NULL);
+  g_autoptr (GError) error = NULL;
+
+  if (!nuvashalauncher_instance_manager_load (manager, &error))
+    {
+      g_printerr ("%s\n", nuvashalauncher_error_message (error));
+      return NULL;
+    }
+
+  NuvashaLauncherInstance *instance =
+    nuvashalauncher_instance_manager_find (manager, key, &error);
+  if (instance == NULL)
+    {
+      g_printerr ("%s\n", nuvashalauncher_error_message (error));
+      return NULL;
+    }
+
+  char *directory = NULL;
+  g_object_get (instance, "directory", &directory, NULL);
+  return directory;
+}
+
+static int
+list_worlds (const char *instance_key, gboolean json_output)
+{
+  g_autofree char *instance_dir = find_instance_directory (instance_key);
+  if (instance_dir == NULL)
+    return 1;
+
+  g_autofree char *saves_dir = g_build_filename (instance_dir, "saves", NULL);
+  g_autoptr (GPtrArray) folders = g_ptr_array_new_with_free_func (g_free);
+  g_autoptr (GPtrArray) names = g_ptr_array_new_with_free_func (g_free);
+
+  if (g_file_test (saves_dir, G_FILE_TEST_IS_DIR))
+    {
+      g_autoptr (GDir) dir = g_dir_open (saves_dir, 0, NULL);
+      const char *entry = NULL;
+
+      while (dir != NULL && (entry = g_dir_read_name (dir)) != NULL)
+        {
+          g_autofree char *world_dir = g_build_filename (saves_dir, entry, NULL);
+          g_autofree char *level_dat = g_build_filename (world_dir, "level.dat", NULL);
+          if (!g_file_test (world_dir, G_FILE_TEST_IS_DIR) ||
+              !g_file_test (level_dat, G_FILE_TEST_IS_REGULAR))
+            continue;
+
+          g_autoptr (NuvashaLauncherNbtTag) root =
+            nuvashalauncher_nbt_parse_file (level_dat, NULL);
+          NuvashaLauncherNbtTag *data =
+            root != NULL ? nuvashalauncher_nbt_compound_get (root, "Data") : NULL;
+          const char *level_name =
+            data != NULL ? nuvashalauncher_nbt_compound_get_string (data, "LevelName") : NULL;
+
+          g_ptr_array_add (folders, g_strdup (entry));
+          g_ptr_array_add (names, g_strdup (level_name != NULL && *level_name != '\0'
+                                            ? level_name : entry));
+        }
+    }
+
+  if (json_output)
+    {
+      g_autoptr (JsonBuilder) builder = json_builder_new ();
+      json_builder_begin_array (builder);
+      for (guint i = 0; i < folders->len; i++)
+        {
+          json_builder_begin_object (builder);
+          json_builder_set_member_name (builder, "folder");
+          json_builder_add_string_value (builder, g_ptr_array_index (folders, i));
+          json_builder_set_member_name (builder, "name");
+          json_builder_add_string_value (builder, g_ptr_array_index (names, i));
+          json_builder_end_object (builder);
+        }
+      json_builder_end_array (builder);
+      print_json_builder (builder);
+      return 0;
+    }
+
+  g_print ("%-32s  %s\n", "FOLDER", "NAME");
+  for (guint i = 0; i < folders->len; i++)
+    g_print ("%-32s  %s\n",
+             (const char *) g_ptr_array_index (folders, i),
+             (const char *) g_ptr_array_index (names, i));
+  return 0;
+}
+
+static int
+list_servers (const char *instance_key, gboolean json_output)
+{
+  g_autofree char *instance_dir = find_instance_directory (instance_key);
+  if (instance_dir == NULL)
+    return 1;
+
+  g_autofree char *servers_dat = g_build_filename (instance_dir, "servers.dat", NULL);
+  g_autoptr (GPtrArray) names = g_ptr_array_new_with_free_func (g_free);
+  g_autoptr (GPtrArray) ips = g_ptr_array_new_with_free_func (g_free);
+
+  if (g_file_test (servers_dat, G_FILE_TEST_IS_REGULAR))
+    {
+      g_autoptr (NuvashaLauncherNbtTag) root =
+        nuvashalauncher_nbt_parse_file (servers_dat, NULL);
+      NuvashaLauncherNbtTag *list =
+        root != NULL ? nuvashalauncher_nbt_compound_get (root, "servers") : NULL;
+
+      if (list != NULL && list->type == NUVASHALAUNCHER_NBT_LIST &&
+          list->v_list.items != NULL)
+        {
+          for (guint i = 0; i < list->v_list.items->len; i++)
+            {
+              NuvashaLauncherNbtTag *item = g_ptr_array_index (list->v_list.items, i);
+              if (item->type != NUVASHALAUNCHER_NBT_COMPOUND)
+                continue;
+              const char *name = nuvashalauncher_nbt_compound_get_string (item, "name");
+              const char *ip = nuvashalauncher_nbt_compound_get_string (item, "ip");
+              g_ptr_array_add (names, g_strdup (name != NULL ? name : ""));
+              g_ptr_array_add (ips, g_strdup (ip != NULL ? ip : ""));
+            }
+        }
+    }
+
+  if (json_output)
+    {
+      g_autoptr (JsonBuilder) builder = json_builder_new ();
+      json_builder_begin_array (builder);
+      for (guint i = 0; i < ips->len; i++)
+        {
+          json_builder_begin_object (builder);
+          json_builder_set_member_name (builder, "name");
+          json_builder_add_string_value (builder, g_ptr_array_index (names, i));
+          json_builder_set_member_name (builder, "ip");
+          json_builder_add_string_value (builder, g_ptr_array_index (ips, i));
+          json_builder_end_object (builder);
+        }
+      json_builder_end_array (builder);
+      print_json_builder (builder);
+      return 0;
+    }
+
+  g_print ("%-32s  %s\n", "NAME", "ADDRESS");
+  for (guint i = 0; i < ips->len; i++)
+    g_print ("%-32s  %s\n",
+             (const char *) g_ptr_array_index (names, i),
+             (const char *) g_ptr_array_index (ips, i));
   return 0;
 }
 
@@ -668,6 +828,8 @@ nuvashalauncher_cli_try_run (int *argc, char ***argv, int *exit_code)
   guint actions = (opts.show_version ? 1u : 0u) +
                   (opts.show_instances ? 1u : 0u) +
                   (opts.show_accounts ? 1u : 0u) +
+                  (opts.list_worlds != NULL ? 1u : 0u) +
+                  (opts.list_servers != NULL ? 1u : 0u) +
                   (opts.switch_account != NULL ? 1u : 0u) +
                   (opts.remove_account != NULL ? 1u : 0u) +
                   (opts.add_offline_account != NULL ? 1u : 0u) +
@@ -689,7 +851,8 @@ nuvashalauncher_cli_try_run (int *argc, char ***argv, int *exit_code)
       (opts.create_instance != NULL && (opts.mc_version == NULL || *opts.mc_version == '\0')) ||
       (opts.output_path != NULL && opts.export_instance == NULL) ||
       (opts.export_instance != NULL && (opts.output_path == NULL || *opts.output_path == '\0')) ||
-      (opts.json_output && !opts.show_instances && !opts.show_accounts))
+      (opts.json_output && !opts.show_instances && !opts.show_accounts &&
+       opts.list_worlds == NULL && opts.list_servers == NULL))
     {
       g_printerr ("invalid combination of options; run with --help for usage.\n");
       cli_options_clear (&opts);
@@ -706,6 +869,10 @@ nuvashalauncher_cli_try_run (int *argc, char ***argv, int *exit_code)
     *exit_code = list_instances (opts.json_output);
   else if (opts.show_accounts)
     *exit_code = list_accounts (opts.json_output);
+  else if (opts.list_worlds != NULL)
+    *exit_code = list_worlds (opts.list_worlds, opts.json_output);
+  else if (opts.list_servers != NULL)
+    *exit_code = list_servers (opts.list_servers, opts.json_output);
   else if (opts.switch_account != NULL)
     *exit_code = change_account (opts.switch_account, FALSE);
   else if (opts.remove_account != NULL)

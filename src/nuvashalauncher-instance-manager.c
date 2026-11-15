@@ -701,6 +701,36 @@ nuvashalauncher_instance_manager_set_string (NuvashaLauncherInstanceManager *sel
 }
 
 gboolean
+nuvashalauncher_instance_manager_set_memory_mib (NuvashaLauncherInstanceManager *self,
+                                      NuvashaLauncherInstance *instance,
+                                      guint memory_mib,
+                                      GError **error)
+{
+  guint old = 0;
+
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (instance), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (!g_list_store_find (self->instances, instance, NULL))
+    {
+      g_set_error_literal (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                           NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND,
+                           "the instance is not registered");
+      return FALSE;
+    }
+
+  g_object_get (instance, "memory-mib", &old, NULL);
+  g_object_set (instance, "memory-mib", memory_mib, NULL);
+  if (!nuvashalauncher_instance_manager_save (self, error))
+    {
+      g_object_set (instance, "memory-mib", old, NULL);
+      return FALSE;
+    }
+  return TRUE;
+}
+
+gboolean
 nuvashalauncher_instance_manager_set_loader (NuvashaLauncherInstanceManager *self,
                                  NuvashaLauncherInstance *instance,
                                  NuvashaLauncherLoader loader,

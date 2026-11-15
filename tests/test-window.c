@@ -96,8 +96,30 @@ count_criticals (GLogLevelFlags   log_level,
   return g_log_writer_default (log_level, fields, n_fields, NULL);
 }
 
-/* The row of the instance list: opening an instance is activating its
- * row, and the row is the only activatable one in the window. */
+static GtkWidget *
+find_settings_button (GtkWidget *widget)
+{
+  for (GtkWidget *child = gtk_widget_get_first_child (widget); child != NULL;
+       child = gtk_widget_get_next_sibling (child))
+    {
+      GtkWidget *found = NULL;
+
+      if (GTK_IS_BUTTON (child) &&
+          g_strcmp0 (gtk_button_get_icon_name (GTK_BUTTON (child)),
+                     "emblem-system-symbolic") == 0)
+        return child;
+
+      found = find_settings_button (child);
+
+      if (found != NULL)
+        return found;
+    }
+
+  return NULL;
+}
+
+/* The row of the instance list: opening an instance is clicking its
+ * settings button, and activating the row toggles its selection. */
 static GtkWidget *
 find_activatable_row (GtkWidget *widget)
 {
@@ -247,9 +269,20 @@ advance (gpointer user_data)
           return G_SOURCE_CONTINUE;
         }
 
-      g_signal_emit_by_name (
-        gtk_widget_get_ancestor (widget, GTK_TYPE_LIST_BOX), "row-activated",
-        widget);
+      {
+        GtkWidget *settings_button = find_settings_button (widget);
+        GtkWidget *check = find_widget_type (widget, GTK_TYPE_CHECK_BUTTON);
+
+        g_assert_nonnull (check);
+        g_assert_false (gtk_check_button_get_active (GTK_CHECK_BUTTON (check)));
+        g_signal_emit_by_name (
+          gtk_widget_get_ancestor (widget, GTK_TYPE_LIST_BOX), "row-activated",
+          widget);
+        g_assert_true (gtk_check_button_get_active (GTK_CHECK_BUTTON (check)));
+
+        g_assert_nonnull (settings_button);
+        g_signal_emit_by_name (settings_button, "clicked");
+      }
       return G_SOURCE_CONTINUE;
 
     case 2: /* the dialog of the instance is presented */

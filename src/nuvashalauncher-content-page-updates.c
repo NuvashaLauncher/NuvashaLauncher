@@ -193,8 +193,6 @@ plan_stopped (NuvashaLauncherContentPage *self)
     update_batch_next (self);
   else if (self->install_model->picking)
     batch_next (self);
-  else
-    set_busy (self, FALSE);
 }
 
 /* Handle the update confirmation result. */
@@ -253,9 +251,7 @@ update_check_done (NuvashaLauncherContentPage *self, UpdateRun *run)
                          ? "mods"
                          : self->type == NUVASHALAUNCHER_CONTENT_RESOURCE_PACK
                              ? "resource packs"
-                             : self->type == NUVASHALAUNCHER_CONTENT_DATAPACK
-                                 ? "datapacks"
-                                 : "shader packs";
+                             : "shader packs";
     g_autofree char *heading =
       g_strdup_printf (_("Update the following %s"), what);
     g_autoptr (GString) body = g_string_new (NULL);

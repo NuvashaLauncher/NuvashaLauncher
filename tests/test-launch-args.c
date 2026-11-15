@@ -536,6 +536,51 @@ test_build_arguments_failures (void)
   g_assert_error (error, NUVASHALAUNCHER_LAUNCH_ERROR, NUVASHALAUNCHER_LAUNCH_ERROR_ARGUMENTS);
 }
 
+static gboolean
+argv_contains (GPtrArray *argv, const char *needle)
+{
+  for (guint i = 0; i < argv->len; i++)
+    if (g_strcmp0 (at (argv, i), needle) == 0)
+      return TRUE;
+  return FALSE;
+}
+
+static void
+test_memory_override (void)
+{
+  g_autoptr (NuvashaLauncherAccount) account =
+    nuvashalauncher_account_new_offline ("TestUser", NULL);
+  g_autoptr (NuvashaLauncherResolvedVersion) resolved = resolved_new ("1.20.1");
+  g_autoptr (GPtrArray) with_ram = NULL;
+  g_autoptr (GPtrArray) with_xmx = NULL;
+  g_autoptr (GError) error = NULL;
+  NuvashaLauncherLaunchSession session;
+
+  g_assert_nonnull (account);
+  session = nuvashalauncher_launch_session_for (account);
+  resolved->jvm_arguments = strings ("-Djava.library.path=${natives_directory}",
+                                     "-cp", "${classpath}", NULL);
+  resolved->game_arguments = strings ("--demo", NULL);
+
+  /* Memory setting adds -Xmx<MiB>M when user JVM args have no -Xmx. */
+  with_ram = nuvashalauncher_launch_build_arguments_with_memory (
+    resolved, &session, "/usr/bin/java", "/home/u/games/one",
+    "-XX:+UseG1GC", 2048, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (with_ram);
+  g_assert_true (argv_contains (with_ram, "-Xmx2048M"));
+  g_assert_true (argv_contains (with_ram, "-XX:+UseG1GC"));
+
+  /* Explicit -Xmx in JVM args takes precedence over the RAM setting. */
+  with_xmx = nuvashalauncher_launch_build_arguments_with_memory (
+    resolved, &session, "/usr/bin/java", "/home/u/games/one",
+    "-Xmx5G -XX:+UseG1GC", 2048, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (with_xmx);
+  g_assert_true (argv_contains (with_xmx, "-Xmx5G"));
+  g_assert_false (argv_contains (with_xmx, "-Xmx2048M"));
+}
+
 /* ---------------------------------------------------------- *
  * Redaction
  * ---------------------------------------------------------- */
@@ -612,6 +657,9 @@ main (void)
 
   test_redact ();
   g_print ("ok - the token is redacted everywhere the command line shows\n");
+
+  test_memory_override ();
+  g_print ("ok - memory setting adds -Xmx unless overridden in jvm args\n");
 
   return EXIT_SUCCESS;
 }
