@@ -1,5 +1,5 @@
 Name:           nuvashalauncher
-Version:        %{?_version}%{!?_version:1.2}
+Version:        %{?_version}%{!?_version:1.3}
 Release:        1%{?dist}
 Summary:        Minecraft launcher for Linux
 
@@ -79,6 +79,9 @@ appstream-util validate-relax --nonet %{buildroot}%{_datadir}/metainfo/com.githu
 %{_datadir}/mime/packages/com.github.NuvashaLauncher.NuvashaLauncher.xml
 
 %changelog
+* Sun Nov 15 2026 Flia <43163973-anotherminecraftlauncher@users.noreply.gitlab.com> - 1.3-1
+- Release Nuvasha Launcher 1.3
+
 * Sat Nov 14 2026 Flia <43163973-anotherminecraftlauncher@users.noreply.gitlab.com> - 1.2-1
 - Release Nuvasha Launcher 1.2
 

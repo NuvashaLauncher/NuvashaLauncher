@@ -82,6 +82,16 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="1.3" date="2026-11-15">
+      <description>
+        <p>Release 1.3 replaces the main window edit mode with direct row
+        multi-selection and a per-row Settings button, adds a Java Memory (MiB)
+        setting with custom -Xmx precedence, adds multi-selection to Worlds and
+        Servers tabs, improves search bars and empty-state centering, adds
+        --list-worlds and --list-servers CLI flags, and renames the binary to
+        nuvashalauncher.</p>
+      </description>
+    </release>
     <release version="1.2" date="2026-11-14">
       <description>
         <p>Release 1.2 adds Worlds and Servers tabs with NBT support

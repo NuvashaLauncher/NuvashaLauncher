@@ -132,11 +132,13 @@ flowchart TD
 `main.c` initializes translations early in startup (before creating threads),
 creates the `AdwApplication`, loads the instance store, and normally presents
 the one `NuvashaLauncherMainWindow`. A second activation focuses the existing
-window rather than creating another one. The same executable also accepts a
-command-line instance ID and can launch that instance through the normal
-launcher state machine without presenting the main window; the window/model is
-still created to reuse the normal ownership and launcher state machine, while
-live output remains owned by the launcher's log buffer.
+window rather than creating another one. Headless CLI commands (such as listing
+instances, accounts, worlds, or servers, creating/removing/exporting instances,
+clearing the cache, or launching with `--headless`, `--world`, or `--server`)
+are handled directly by `nuvashalauncher-cli.c` without requiring a display.
+When launching through the GUI path, the window/model is created to reuse the
+normal ownership and launcher state machine, while live output remains owned by
+the launcher's log buffer.
 
 The main window owns a `NuvashaLauncherMainWindowModel`. The model groups the
 process-wide objects used by the UI:
@@ -163,8 +165,9 @@ does not cancel its operation.
 
 `NuvashaLauncherInstance` is a validated, serializable model for one Minecraft
 installation. It contains a stable ID, display name, directory, Minecraft
-version, loader, loader version, Java choice, JVM arguments, and component
-metadata. It has no widgets, network calls, or persistence side effects.
+version, loader, loader version, Java choice, memory limit (`memory-mib`), JVM
+arguments, and component metadata. It has no widgets, network calls, or
+persistence side effects.
 
 `NuvashaLauncherInstanceManager` owns the `GListStore` of instances and persists the
 list to `instances.json`. It also owns operations that change the directory
@@ -356,12 +359,14 @@ reaches the UI:
 
 Content pages use models and rows, not raw API JSON. Details are converted from
 Modrinth Markdown to the restricted GTK markup the UI expects. Installed
-content pages share an edit/selection model: checkboxes can select files for
-bulk deletion, the action footer appears only when something is selected, and
-the existing dependency-delete policy is applied by the same deletion pipeline
-as a single-file delete. Update All uses that page's asynchronous operation
-state and exposes its scan/install progress and cancellation through a
-downloads-style popover.
+content pages, Worlds, Servers, and the main instance list share a direct
+selection model: clicking a row or its circular badge toggles selection, and the
+action footer appears only when something is selected. On the main instance
+list, each row exposes a dedicated Settings button alongside Play to open the
+instance dialog; on installed content pages, bulk deletion uses the same
+dependency-delete policy and deletion pipeline as a single-file delete. Update
+All uses that page's asynchronous operation state and exposes its scan/install
+progress and cancellation through a downloads-style popover.
 
 `nuvashalauncher-content-index.c` maintains local metadata for installed content. The
 index records hashes, filenames, provider/project identity, versions,
