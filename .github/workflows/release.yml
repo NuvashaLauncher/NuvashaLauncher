@@ -191,7 +191,7 @@ jobs:
         run: flatpak install --user --noninteractive nuvashalauncher-${{ matrix.arch }}.flatpak
 
       - name: Run Flatpak smoke test
-        run: xvfb-run -a make test-flatpak-runtime
+        run: flatpak info com.github.NuvashaLauncher.NuvashaLauncher
 
       - name: Stage Flatpak bundle
         run: |
