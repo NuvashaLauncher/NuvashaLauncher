@@ -19,10 +19,8 @@ remove_installed_file_by_path (NuvashaLauncherContentPage *self, const char *tar
 
   if (self->instance != NULL)
     {
-      g_autofree char *directory = NULL;
+      g_autofree char *directory = content_page_base_directory (self);
       g_autofree char *filename = g_path_get_basename (target_path);
-
-      g_object_get (self->instance, "directory", &directory, NULL);
       if (directory != NULL)
         nuvashalauncher_operation_unref_when_done (
           nuvashalauncher_content_index_remove_async (directory, self->type,

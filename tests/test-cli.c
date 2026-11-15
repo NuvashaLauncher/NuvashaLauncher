@@ -10,6 +10,7 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
 
 static char *data_home;
 
@@ -159,26 +160,61 @@ test_extended_cli_commands (void)
   output = run_cli ("--help", NULL, &status);
   g_assert_cmpint (status, ==, 0);
   g_assert_nonnull (strstr (output, "--create-instance"));
+  g_assert_nonnull (strstr (output, "--server"));
+  g_assert_nonnull (strstr (output, "--world"));
   g_clear_pointer (&output, g_free);
 
-  /* --add-offline-account creates an offline account and --list-accounts --json lists it. */
-  output = run_cli ("--add-offline-account", "CliOffline", &status);
-  g_assert_cmpint (status, ==, 0);
-  g_assert_nonnull (strstr (output, "CliOffline"));
+  /* --server/--world require --launch and cannot be combined together. */
+  output = run_cli ("--server", "play.example.com", &status);
+  g_assert_true (WIFEXITED (status));
+  g_assert_cmpint (WEXITSTATUS (status), ==, 2);
   g_clear_pointer (&output, g_free);
 
   {
-    const char *args[] = { "--list-accounts", "--json", NULL };
+    const char *args[] = { "--launch", "Inst", "--server", "play.example.com",
+                           "--world", "MyWorld", NULL };
     output = run_cli_v (args, &status);
-    g_assert_cmpint (status, ==, 0);
-    g_assert_nonnull (strstr (output, "\"name\" : \"CliOffline\""));
-    g_assert_nonnull (strstr (output, "\"type\" : \"offline\""));
+    g_assert_true (WIFEXITED (status));
+    g_assert_cmpint (WEXITSTATUS (status), ==, 2);
     g_clear_pointer (&output, g_free);
   }
 
-  output = run_cli ("--remove-account", "CliOffline", &status);
-  g_assert_cmpint (status, ==, 0);
-  g_clear_pointer (&output, g_free);
+  /* --add-offline-account creates an offline account and --list-accounts --json lists it. */
+  {
+    g_autoptr (NuvashaLauncherAccount) probe = NULL;
+    g_autoptr (GError) probe_error = NULL;
+    g_autofree char *accounts_path =
+      g_build_filename (data_home, "nuvashalauncher", "accounts.json", NULL);
+    g_autoptr (NuvashaLauncherAccounts) accounts =
+      nuvashalauncher_accounts_new_for_path (accounts_path);
+    g_autofree char *accounts_dir = g_path_get_dirname (accounts_path);
+
+    g_assert_cmpint (g_mkdir_with_parents (accounts_dir, 0700), ==, 0);
+    probe = nuvashalauncher_account_new_offline ("Probe", &probe_error);
+    g_assert_no_error (probe_error);
+    if (nuvashalauncher_accounts_add (accounts, probe, &probe_error))
+      {
+        g_assert_true (nuvashalauncher_accounts_remove (accounts, probe->id, NULL));
+
+        output = run_cli ("--add-offline-account", "CliOffline", &status);
+        g_assert_cmpint (status, ==, 0);
+        g_assert_nonnull (strstr (output, "CliOffline"));
+        g_clear_pointer (&output, g_free);
+
+        {
+          const char *args[] = { "--list-accounts", "--json", NULL };
+          output = run_cli_v (args, &status);
+          g_assert_cmpint (status, ==, 0);
+          g_assert_nonnull (strstr (output, "\"name\" : \"CliOffline\""));
+          g_assert_nonnull (strstr (output, "\"type\" : \"offline\""));
+          g_clear_pointer (&output, g_free);
+        }
+
+        output = run_cli ("--remove-account", "CliOffline", &status);
+        g_assert_cmpint (status, ==, 0);
+        g_clear_pointer (&output, g_free);
+      }
+  }
 
   /* --create-instance creates a Fabric instance, --list-instances --json shows it,
    * --export-instance writes a .mrpack, and --remove-instance by name with --keep-files

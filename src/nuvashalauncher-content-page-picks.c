@@ -80,24 +80,8 @@ pick_is_version (Pick *pick, NuvashaLauncherModrinthVersion *version)
    set with the click handler held back, which is what keeps the two from
    calling each other. */
 void
-refresh_pick_check (NuvashaLauncherContentPage *self)
+refresh_pick_check (NuvashaLauncherContentPage *self G_GNUC_UNUSED)
 {
-  NuvashaLauncherModrinthVersion *version = NULL;
-  gboolean on;
-
-  if (self->project.details_check == NULL || self->project.details_dropdown == NULL)
-    return;
-
-  version = selected_version (self->project.details_dropdown,
-                              self->project.details_versions);
-  on = pick_is_version (pick_of_project (
-                          self, version != NULL ? version->project_id : NULL),
-                        version);
-
-  g_object_set_data (G_OBJECT (self->project.details_check), "nuvashalauncher-setting",
-                     GINT_TO_POINTER (1));
-  gtk_check_button_set_active (GTK_CHECK_BUTTON (self->project.details_check), on);
-  g_object_set_data (G_OBJECT (self->project.details_check), "nuvashalauncher-setting", NULL);
 }
 
 /* What the page has picked is said to the header, which counts it on the
@@ -165,9 +149,7 @@ pick_add (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthVersion *vers
 
   pick = g_new0 (Pick, 1);
   pick->project_id = g_strdup (version->project_id);
-  pick->title = g_strdup (self->project.current_project_title != NULL
-                            ? self->project.current_project_title
-                            : version_name_of (version));
+  pick->title = g_strdup (version_name_of (version));
   pick->version = nuvashalauncher_modrinth_version_copy (version);
   g_ptr_array_add (self->install_model->picks, pick);
 }

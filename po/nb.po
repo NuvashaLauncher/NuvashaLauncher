@@ -1174,3 +1174,99 @@ msgstr "AppStream-metadataene (beskrivelser, sammendrag og utgivelsesmerknader) 
 
 msgid "Nuvasha Launcher"
 msgstr "Nuvasha Launcher"
+
+msgid "Copy"
+msgstr "Kopier"
+
+msgid "Rename"
+msgstr "Gi nytt navn"
+
+msgid "Reset Icon"
+msgstr "Tilbakestill ikon"
+
+msgid "Delete World"
+msgstr "Slett verden"
+
+msgid "Seed copied to clipboard"
+msgstr "Seed kopiert til utklippstavlen"
+
+msgid "Remove server \"%s\"?"
+msgstr "Fjerne serveren «%s»?"
+
+msgid "Refresh"
+msgstr "Oppdater"
+
+msgid "Remove Server"
+msgstr "Fjern server"
+
+msgid "Survival"
+msgstr "Overlevelse"
+
+msgid "Edit"
+msgstr "Rediger"
+
+msgid "Ask to download"
+msgstr "Spør før nedlasting"
+
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr "Verdener lagret av Minecraft eller importert hit vil vises i denne listen."
+
+msgid "Rename World"
+msgstr "Gi verden nytt navn"
+
+msgid "Servers"
+msgstr "Servere"
+
+msgid "Save"
+msgstr "Lagre"
+
+msgid "Add World"
+msgstr "Legg til verden"
+
+msgid "Spectator"
+msgstr "Tilskuer"
+
+msgid "Delete world \"%s\"? This cannot be undone."
+msgstr "Slette verdenen «%s»? Dette kan ikke angres."
+
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "Servere lagt til her lagres i servers.dat for denne instansen."
+
+msgid "Add Server"
+msgstr "Legg til server"
+
+msgid "Edit Server"
+msgstr "Rediger server"
+
+msgid "Address"
+msgstr "Adresse"
+
+msgid "Datapacks"
+msgstr "Datapakker"
+
+msgid "No Worlds"
+msgstr "Ingen verdener"
+
+msgid "Creative"
+msgstr "Kreativ"
+
+msgid "Move Up"
+msgstr "Flytt opp"
+
+msgid "No Servers"
+msgstr "Ingen servere"
+
+msgid "Never download"
+msgstr "Aldri last ned"
+
+msgid "Worlds"
+msgstr "Verdener"
+
+msgid "Always download"
+msgstr "Last ned alltid"
+
+msgid "Move Down"
+msgstr "Flytt ned"
+
+msgid "Copy Seed"
+msgstr "Kopier seed"

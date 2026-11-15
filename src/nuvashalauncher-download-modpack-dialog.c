@@ -20,7 +20,6 @@
 #include "nuvashalauncher-ui-feedback.h"
 #include "nuvashalauncher-i18n.h"
 #include "nuvashalauncher-icons.h"
-#include "nuvashalauncher-markdown.h"
 #include "nuvashalauncher-modpack.h"
 #include "nuvashalauncher-modrinth.h"
 #include "nuvashalauncher-task.h"
@@ -63,17 +62,9 @@ details_watch (gpointer field, GtkWidget *widget)
 static void
 dialog_forget_widgets (NuvashaLauncherDownloadModpackDialog *self)
 {
-  self->split = NULL;
   self->filter_version_dropdown = NULL;
   self->filter_version_model = NULL;
 
-  details_watch (&self->details_page, NULL);
-  details_watch (&self->dropdown, NULL);
-  details_watch (&self->download_button, NULL);
-  details_watch (&self->body, NULL);
-  details_watch (&self->meta, NULL);
-  details_watch (&self->count, NULL);
-  details_watch (&self->details_error, NULL);
   details_watch (&self->name_entry, NULL);
 }
 
@@ -126,10 +117,6 @@ dialog_dispose (GObject *object)
   g_clear_pointer (&self->project, nuvashalauncher_modrinth_project_free);
   g_clear_pointer (&self->version, nuvashalauncher_modrinth_version_free);
   g_clear_pointer (&self->modpack, nuvashalauncher_modpack_free);
-  g_clear_pointer (&self->versions, g_ptr_array_unref);
-  g_clear_pointer (&self->details, nuvashalauncher_modrinth_details_free);
-  g_free (self->details_problem);
-  g_free (self->versions_problem);
   g_clear_pointer (&self->rows, g_ptr_array_unref);
   g_clear_pointer (&self->hits, g_ptr_array_unref);
   g_clear_pointer (&self->opt_switch_rows, g_ptr_array_unref);
@@ -198,7 +185,6 @@ nuvashalauncher_download_modpack_dialog_init (NuvashaLauncherDownloadModpackDial
   self->scope = nuvashalauncher_operation_new (NULL, self->search, NULL, NULL);
   self->rows = NULL;
   self->hits = NULL;
-  self->versions = NULL;
   self->seen_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                           NULL);
 
@@ -206,9 +192,6 @@ nuvashalauncher_download_modpack_dialog_init (NuvashaLauncherDownloadModpackDial
 
   nuvashalauncher_dialog_set_standard_size (ADW_DIALOG (self));
   gtk_widget_set_size_request (GTK_WIDGET (self), 360, 200);
-  adw_dialog_set_content_width (ADW_DIALOG (self),
-                                NUVASHALAUNCHER_DIALOG_WIDE_CONTENT_WIDTH);
-  adw_dialog_set_content_height (ADW_DIALOG (self), 580);
 
   /* The installing page appears in place instead of sliding in: the
      movement is not information, and the pages of this dialog are few
@@ -395,42 +378,4 @@ on_error_retry_install (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   /* Back onto the installing page of the attempt that failed. */
   adw_navigation_view_pop (ADW_NAVIGATION_VIEW (self->nav));
   start_install (self);
-}
-
-/* The Download button under the versions: it installs the version the
-   drop-down shows, and the dialog it was in has done its work. */
-void
-on_modpack_download_clicked (GtkButton *button G_GNUC_UNUSED,
-                             gpointer user_data)
-{
-  NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
-  guint selected = 0;
-
-  if (self->dropdown == NULL || self->versions == NULL)
-    return;
-
-  selected = gtk_drop_down_get_selected (GTK_DROP_DOWN (self->dropdown));
-
-  if (selected == GTK_INVALID_LIST_POSITION || selected >= self->versions->len)
-    return;
-
-  g_free (self->instance_name);
-  self->instance_name = g_strdup (self->project->title);
-
-  if (self->version != NULL)
-    nuvashalauncher_modrinth_version_free (self->version);
-
-  self->version = nuvashalauncher_modrinth_version_copy (
-      g_ptr_array_index (self->versions, selected));
-
-  /* The pack download and the install that follows are the manager's:
-     the dialog has nothing left to show, so it closes and lets both run
-     in the background with the header showing what is on its way. The
-     flag is set first, so a fast (cached) pack can never race the close
-     and put the optional page back up. */
-  if (dialog_start_features (self))
-    {
-      self->closed = TRUE;
-      adw_dialog_close (ADW_DIALOG (self));
-    }
 }

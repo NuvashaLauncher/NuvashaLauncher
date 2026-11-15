@@ -56,28 +56,8 @@ struct _NuvashaLauncherDownloadModpackDialog
   guint search_generation;   /* rejects answers from older searches */
   GHashTable *seen_ids;       /* project id -> NULL, no duplicate rows */
 
-  /* Split view: browser on the left, selected pack on the right. */
-  AdwNavigationSplitView *split;
-  AdwNavigationPage *details_page; /* weak: the page of the open pack */
-  GtkDropDown *dropdown;       /* the versions to install */
-  GtkButton *download_button;
-  GtkBox *body;                /* the box the Markdown description goes in */
-  GtkLabel *meta;              /* license and author under the title */
-  GtkLabel *count;             /* the download count, at the left */
-
-  /* State for the pack details dialog. */
-  GPtrArray *versions; /* NuvashaLauncherModrinthVersion* of the details dialog */
+  /* State for the pack details / version selection. */
   AdwEntryRow *name_entry;
-  AdwActionRow *directory_row;
-  GtkLabel *details_error; /* inline words when versions fail or are empty */
-
-  /* Whether the description and versions have loaded. */
-  gboolean details_ready;
-  gboolean versions_ready;
-  guint details_generation;  /* rejects answers from older projects */
-  NuvashaLauncherModrinthDetails *details; /* owned, the answer read while the dialog is up */
-  char *details_problem;       /* why the description is not there */
-  char *versions_problem;      /* why the versions are not there */
 
   /* No install page is needed; installation appears in the header and the
    * dialog closes when it starts. */
@@ -119,10 +99,10 @@ struct _NuvashaLauncherDownloadModpackDialog
 void operation_done (gpointer user_data);
 void details_watch (gpointer field, GtkWidget *widget);
 void build_browse_page (NuvashaLauncherDownloadModpackDialog *, gboolean start_search);
-void close_details (NuvashaLauncherDownloadModpackDialog *);
-GtkWidget *details_content (NuvashaLauncherDownloadModpackDialog *);
-void dialog_details_open (NuvashaLauncherDownloadModpackDialog *);
-void on_modpack_download_clicked (GtkButton *, gpointer);
+void modpack_quick_install_project (NuvashaLauncherDownloadModpackDialog *,
+                                    NuvashaLauncherModrinthProject *);
+void modpack_choose_version (NuvashaLauncherDownloadModpackDialog *,
+                             NuvashaLauncherModrinthProject *);
 GtkWidget *build_error_page (NuvashaLauncherDownloadModpackDialog *, const char *,
                              const char *, GCallback, GCallback);
 void push_failure (NuvashaLauncherDownloadModpackDialog *, const char *, const GError *, GCallback);

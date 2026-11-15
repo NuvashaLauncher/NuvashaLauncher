@@ -139,6 +139,27 @@ run_the_game (NuvashaLauncher *self)
       return;
     }
 
+  {
+    const char *qp_world =
+      g_object_get_data (G_OBJECT (self), "nuvashalauncher-quick-play-world");
+    const char *qp_server =
+      g_object_get_data (G_OBJECT (self), "nuvashalauncher-quick-play-server");
+
+    if (qp_world != NULL && *qp_world != '\0')
+      {
+        g_ptr_array_add (argv, g_strdup ("--quickPlaySingleplayer"));
+        g_ptr_array_add (argv, g_strdup (qp_world));
+      }
+    else if (qp_server != NULL && *qp_server != '\0')
+      {
+        g_ptr_array_add (argv, g_strdup ("--quickPlayMultiplayer"));
+        g_ptr_array_add (argv, g_strdup (qp_server));
+      }
+
+    g_object_set_data (G_OBJECT (self), "nuvashalauncher-quick-play-world", NULL);
+    g_object_set_data (G_OBJECT (self), "nuvashalauncher-quick-play-server", NULL);
+  }
+
   /* Who the game is about to run as. The token is not in this line: the
      command line that is logged by the spawn carries it redacted, and
      this one is about the account. */

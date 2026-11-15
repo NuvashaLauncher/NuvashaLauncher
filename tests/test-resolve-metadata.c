@@ -157,7 +157,7 @@ test_rule_filtering (void)
 {
   g_autoptr (NuvashaLauncherVersionDescription) legacy =
     fixture_version ("version-legacy.json");
-  g_autoptr (NuvashaLauncherRuleContext) linux =
+  g_autoptr (NuvashaLauncherRuleContext) linux_ctx =
     nuvashalauncher_rule_context_new_for ("linux", "x86_64", NULL);
   g_autoptr (NuvashaLauncherRuleContext) mac =
     nuvashalauncher_rule_context_new_for ("osx", "x86_64", NULL);
@@ -172,16 +172,16 @@ test_rule_filtering (void)
 
   /* A rule that names another system does not match, and when no rule
      matches the library is out. */
-  g_assert_false (nuvashalauncher_library_allowed (windows_only, linux));
+  g_assert_false (nuvashalauncher_library_allowed (windows_only, linux_ctx));
   g_assert_false (nuvashalauncher_library_allowed (windows_only, mac));
-  g_assert_true (nuvashalauncher_library_allowed (linux_only, linux));
+  g_assert_true (nuvashalauncher_library_allowed (linux_only, linux_ctx));
   g_assert_false (nuvashalauncher_library_allowed (linux_only, mac));
   /* No rules at all means allowed everywhere. */
   g_assert_true (nuvashalauncher_library_allowed (scala, mac));
 
   /* Only the libraries that apply here are planned, and a library that
      names no jar of its own contributes nothing. */
-  files = nuvashalauncher_resolve_library_files (legacy, linux, libraries);
+  files = nuvashalauncher_resolve_library_files (legacy, linux_ctx, libraries);
   g_assert_nonnull (files);
   g_assert_cmpuint (files->len, ==, 2); /* the scala jar, the natives jar */
 

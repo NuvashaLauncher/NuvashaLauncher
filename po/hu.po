@@ -1174,3 +1174,99 @@ msgstr "Az AppStream metaadatok (leírások, összegzések és kiadási megjegyz
 
 msgid "Nuvasha Launcher"
 msgstr "Nuvasha Launcher"
+
+msgid "Copy"
+msgstr "Másolás"
+
+msgid "Rename"
+msgstr "Átnevezés"
+
+msgid "Reset Icon"
+msgstr "Ikon visszaállítása"
+
+msgid "Delete World"
+msgstr "Világ törlése"
+
+msgid "Seed copied to clipboard"
+msgstr "Mag a vágólapra másolva"
+
+msgid "Remove server \"%s\"?"
+msgstr "Eltávolítja a(z) „%s” szervert?"
+
+msgid "Refresh"
+msgstr "Frissítés"
+
+msgid "Remove Server"
+msgstr "Szerver eltávolítása"
+
+msgid "Survival"
+msgstr "Túlélő"
+
+msgid "Edit"
+msgstr "Szerkesztés"
+
+msgid "Ask to download"
+msgstr "Kérdezzen rá letöltés előtt"
+
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr "A Minecraft által mentett vagy ide importált világok jelennek meg ebben a listában."
+
+msgid "Rename World"
+msgstr "Világ átnevezése"
+
+msgid "Servers"
+msgstr "Szerverek"
+
+msgid "Save"
+msgstr "Mentés"
+
+msgid "Add World"
+msgstr "Világ hozzáadása"
+
+msgid "Spectator"
+msgstr "Szemlélő"
+
+msgid "Delete world \"%s\"? This cannot be undone."
+msgstr "Törli a(z) „%s” világot? Ez nem vonható vissza."
+
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "Az itt hozzáadott szerverek a példány servers.dat fájljába kerülnek."
+
+msgid "Add Server"
+msgstr "Szerver hozzáadása"
+
+msgid "Edit Server"
+msgstr "Szerver szerkesztése"
+
+msgid "Address"
+msgstr "Cím"
+
+msgid "Datapacks"
+msgstr "Adatcsomagok"
+
+msgid "No Worlds"
+msgstr "Nincsenek világok"
+
+msgid "Creative"
+msgstr "Kreatív"
+
+msgid "Move Up"
+msgstr "Mozgatás felfelé"
+
+msgid "No Servers"
+msgstr "Nincsenek szerverek"
+
+msgid "Never download"
+msgstr "Soha ne töltse le"
+
+msgid "Worlds"
+msgstr "Világok"
+
+msgid "Always download"
+msgstr "Mindig töltse le"
+
+msgid "Move Down"
+msgstr "Mozgatás lefelé"
+
+msgid "Copy Seed"
+msgstr "Mag másolása"

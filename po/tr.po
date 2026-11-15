@@ -1211,3 +1211,99 @@ msgstr "AppStream meta verileri (açıklamalar, özetler ve sürüm notları) Cr
 
 msgid "Nuvasha Launcher"
 msgstr "Nuvasha Launcher"
+
+msgid "Copy"
+msgstr "Kopyala"
+
+msgid "Rename"
+msgstr "Yeniden Adlandır"
+
+msgid "Reset Icon"
+msgstr "Simgeyi Sıfırla"
+
+msgid "Delete World"
+msgstr "Dünyayı Sil"
+
+msgid "Seed copied to clipboard"
+msgstr "Tohum panoya kopyalandı"
+
+msgid "Remove server \"%s\"?"
+msgstr "\"%s\" sunucusu kaldırılsın mı?"
+
+msgid "Refresh"
+msgstr "Yenile"
+
+msgid "Remove Server"
+msgstr "Sunucuyu Kaldır"
+
+msgid "Survival"
+msgstr "Hayatta Kalma"
+
+msgid "Edit"
+msgstr "Düzenle"
+
+msgid "Ask to download"
+msgstr "İndirmeden önce sor"
+
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr "Minecraft tarafından kaydedilen veya buraya aktarılan dünyalar bu listede görünecektir."
+
+msgid "Rename World"
+msgstr "Dünyayı Yeniden Adlandır"
+
+msgid "Servers"
+msgstr "Sunucular"
+
+msgid "Save"
+msgstr "Kaydet"
+
+msgid "Add World"
+msgstr "Dünya Ekle"
+
+msgid "Spectator"
+msgstr "İzleyici"
+
+msgid "Delete world \"%s\"? This cannot be undone."
+msgstr "\"%s\" dünyası silinsin mi? Bu işlem geri alınamaz."
+
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "Buraya eklenen sunucular bu örneğin servers.dat dosyasına kaydedilir."
+
+msgid "Add Server"
+msgstr "Sunucu Ekle"
+
+msgid "Edit Server"
+msgstr "Sunucuyu Düzenle"
+
+msgid "Address"
+msgstr "Adres"
+
+msgid "Datapacks"
+msgstr "Veri Paketleri"
+
+msgid "No Worlds"
+msgstr "Dünya Yok"
+
+msgid "Creative"
+msgstr "Yaratıcı"
+
+msgid "Move Up"
+msgstr "Yukarı Taşı"
+
+msgid "No Servers"
+msgstr "Sunucu Yok"
+
+msgid "Never download"
+msgstr "Asla indirme"
+
+msgid "Worlds"
+msgstr "Dünyalar"
+
+msgid "Always download"
+msgstr "Her zaman indir"
+
+msgid "Move Down"
+msgstr "Aşağı Taşı"
+
+msgid "Copy Seed"
+msgstr "Tohumu Kopyala"

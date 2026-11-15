@@ -233,6 +233,12 @@ char *nuvashalauncher_launcher_get_crash_report_directory (NuvashaLauncher *self
  * to do but watch the state. */
 void nuvashalauncher_launcher_start (NuvashaLauncher *self);
 
+/* Sets a one-shot QuickPlay target (world folder name or server address)
+ * for the next launch of @self. */
+void nuvashalauncher_launcher_set_quick_play (NuvashaLauncher *self,
+                                              const char *world,
+                                              const char *server);
+
 /* Asks a running game to end: SIGTERM first, and when it is still up
  * after NUVASHALAUNCHER_LAUNCH_STOP_TIMEOUT seconds it is stopped for good. A
  * launch that did not reach the process yet is cancelled where it is.

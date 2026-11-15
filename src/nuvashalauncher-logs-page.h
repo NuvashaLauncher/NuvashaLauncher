@@ -29,6 +29,13 @@ G_DECLARE_FINAL_TYPE (NuvashaLauncherLogsPage, nuvashalauncher_logs_page, NUVASH
 /* The page of @launcher. It follows that launcher, so two views of the
  * same instance show the same lines. */
 NuvashaLauncherLogsPage *nuvashalauncher_logs_page_new (NuvashaLauncher *launcher);
+void nuvashalauncher_logs_page_attach_header (NuvashaLauncherLogsPage *self,
+                                              AdwHeaderBar *header);
+void nuvashalauncher_logs_page_detach_header (NuvashaLauncherLogsPage *self,
+                                              AdwHeaderBar *header);
+void nuvashalauncher_logs_page_set_search_visible (NuvashaLauncherLogsPage *self,
+                                                   gboolean visible);
+gboolean nuvashalauncher_logs_page_is_search_visible (NuvashaLauncherLogsPage *self);
 
 G_END_DECLS
 

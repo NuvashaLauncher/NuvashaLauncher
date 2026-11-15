@@ -1215,3 +1215,99 @@ msgstr "Les métadonnées AppStream (descriptions, résumés et notes de publica
 
 msgid "Nuvasha Launcher"
 msgstr "Nuvasha Launcher"
+
+msgid "Copy"
+msgstr "Copier"
+
+msgid "Rename"
+msgstr "Renommer"
+
+msgid "Reset Icon"
+msgstr "Réinitialiser l'icône"
+
+msgid "Delete World"
+msgstr "Supprimer le monde"
+
+msgid "Seed copied to clipboard"
+msgstr "Graine copiée dans le presse-papiers"
+
+msgid "Remove server \"%s\"?"
+msgstr "Supprimer le serveur « %s » ?"
+
+msgid "Refresh"
+msgstr "Actualiser"
+
+msgid "Remove Server"
+msgstr "Supprimer le serveur"
+
+msgid "Survival"
+msgstr "Survie"
+
+msgid "Edit"
+msgstr "Modifier"
+
+msgid "Ask to download"
+msgstr "Demander avant de télécharger"
+
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr "Les mondes enregistrés par Minecraft ou importés ici apparaîtront dans cette liste."
+
+msgid "Rename World"
+msgstr "Renommer le monde"
+
+msgid "Servers"
+msgstr "Serveurs"
+
+msgid "Save"
+msgstr "Enregistrer"
+
+msgid "Add World"
+msgstr "Ajouter un monde"
+
+msgid "Spectator"
+msgstr "Spectateur"
+
+msgid "Delete world \"%s\"? This cannot be undone."
+msgstr "Supprimer le monde « %s » ? Cette action est irréversible."
+
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "Les serveurs ajoutés ici sont enregistrés dans servers.dat pour cette instance."
+
+msgid "Add Server"
+msgstr "Ajouter un serveur"
+
+msgid "Edit Server"
+msgstr "Modifier le serveur"
+
+msgid "Address"
+msgstr "Adresse"
+
+msgid "Datapacks"
+msgstr "Packs de données"
+
+msgid "No Worlds"
+msgstr "Aucun monde"
+
+msgid "Creative"
+msgstr "Créatif"
+
+msgid "Move Up"
+msgstr "Monter"
+
+msgid "No Servers"
+msgstr "Aucun serveur"
+
+msgid "Never download"
+msgstr "Ne jamais télécharger"
+
+msgid "Worlds"
+msgstr "Mondes"
+
+msgid "Always download"
+msgstr "Toujours télécharger"
+
+msgid "Move Down"
+msgstr "Descendre"
+
+msgid "Copy Seed"
+msgstr "Copier la graine"

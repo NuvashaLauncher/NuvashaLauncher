@@ -1,25 +1,21 @@
-/* Modrinth modpack details and version selection. */
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
+/* Modrinth modpack quick-install and version selection. */
 #include "nuvashalauncher-download-modpack-dialog-private.h"
 #include "nuvashalauncher-icon-load-private.h"
-#include "nuvashalauncher-content-format.h"
 #include "nuvashalauncher-downloads.h"
 #include "nuvashalauncher-download.h"
 #include "nuvashalauncher-operation.h"
 #include "nuvashalauncher-ui-feedback.h"
 #include "nuvashalauncher-i18n.h"
 #include "nuvashalauncher-icons.h"
-#include "nuvashalauncher-markdown.h"
-#include "nuvashalauncher-modpack.h"
 #include "nuvashalauncher-modrinth.h"
 #include "nuvashalauncher-task.h"
 #include <json-glib/json-glib.h>
-#include <string.h>
 
-static void show_details_error (NuvashaLauncherDownloadModpackDialog *, const char *);
-
-/* ---------------------------------------------------------- *
- * Versions of the details page
- * ---------------------------------------------------------- */
+#define VERSION_PICKER_BATCH_SIZE 25
 
 static void
 version_row_label (NuvashaLauncherModrinthVersion *version, char *out, guint size)
@@ -44,23 +40,6 @@ by_date_desc (gconstpointer a, gconstpointer b)
   const NuvashaLauncherModrinthVersion *vb = *(const NuvashaLauncherModrinthVersion *const *) b;
 
   return g_strcmp0 (vb->date_published, va->date_published);
-}
-
-static GtkStringList *
-build_version_strings (GPtrArray *versions)
-{
-  GtkStringList *strings = gtk_string_list_new (NULL);
-
-  for (guint i = 0; i < versions->len; i++)
-    {
-      NuvashaLauncherModrinthVersion *version = g_ptr_array_index (versions, i);
-      char label[160];
-
-      version_row_label (version, label, sizeof label);
-      gtk_string_list_append (strings, label);
-    }
-
-  return strings;
 }
 
 static GPtrArray *
@@ -121,405 +100,6 @@ versions_of_answer (JsonNode *root, GError **error)
   return versions;
 }
 
-/* ---------------------------------------------------------- *
- * The dialog of a pack
- *
- * The same one the mods, resource packs and shader packs open: the
- * description in Markdown, and a foot with the versions in a drop-down
- * over the button that installs the one shown. A pack becomes an
- * instance of its own rather than a file in one, so the name it takes
- * and where it goes are asked for here too, below the description.
- * ---------------------------------------------------------- */
-
-/* Words that are not Markdown and must read exactly as they are. */
-static GtkWidget *
-plain_label (const char *text)
-{
-  GtkLabel *label = GTK_LABEL (gtk_label_new (text != NULL ? text : ""));
-
-  gtk_label_set_wrap (GTK_LABEL (label), TRUE);
-  gtk_label_set_wrap_mode (GTK_LABEL (label), PANGO_WRAP_WORD_CHAR);
-  gtk_label_set_xalign (GTK_LABEL (label), 0);
-  gtk_label_set_selectable (GTK_LABEL (label), TRUE);
-
-  return GTK_WIDGET (label);
-}
-
-/* The words the dialog shows while the description and the versions are
-   on their way. */
-/* Close the details view and return to the project list. */
-void
-close_details (NuvashaLauncherDownloadModpackDialog *self)
-{
-  if (self->split == NULL)
-    return;
-
-  adw_navigation_split_view_set_content (
-    ADW_NAVIGATION_SPLIT_VIEW (self->split), NULL);
-  adw_navigation_split_view_set_collapsed (
-    ADW_NAVIGATION_SPLIT_VIEW (self->split), TRUE);
-  details_watch (&self->details_page, NULL);
-
-  /* Keep the browser at its wide size even when the details half is closed,
-     matching the other content browsers. */
-}
-
-/* Puts @body in the right half of the browser, beside the list, and takes
- * the whole width of the list back to half. A pack shown before is
- * replaced. */
-static void
-show_details_page (NuvashaLauncherDownloadModpackDialog *self, GtkWidget *body)
-{
-  AdwNavigationPage *page = ADW_NAVIGATION_PAGE (adw_navigation_page_new (body,
-                                                         self->project->title));
-
-  details_watch (&self->details_page, GTK_WIDGET (page));
-  adw_navigation_split_view_set_content (
-    ADW_NAVIGATION_SPLIT_VIEW (self->split), ADW_NAVIGATION_PAGE (page));
-  adw_navigation_split_view_set_collapsed (
-    ADW_NAVIGATION_SPLIT_VIEW (self->split), FALSE);
-
-  /* The dialog is already wide enough for both halves. */
-}
-
-/* The author the search answer named. A project answer does not name one:
-   it carries the team as the team's project id. */
-static const char *
-author_of (NuvashaLauncherDownloadModpackDialog *self)
-{
-  const char *who = self->project != NULL ? self->project->author : NULL;
-
-  if (who == NULL || *who == '\0')
-    who = self->details != NULL ? self->details->author : NULL;
-
-  return who != NULL && *who != '\0' ? who : NULL;
-}
-
-/* Build the details view after metadata and versions are available. */
-GtkWidget *
-details_content (NuvashaLauncherDownloadModpackDialog *self)
-{
-  GtkWidget *content = NULL;
-  GtkScrolledWindow *scroller = NULL;
-  GtkWidget *box = NULL;
-  GtkWidget *page = NULL;
-  GtkWidget *heading = NULL;
-  GtkWidget *bar = NULL;
-  g_autoptr (GtkBuilder) body_builder = gtk_builder_new_from_resource (
-    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-details-body.ui");
-  g_autoptr (GtkBuilder) toolbar_builder = gtk_builder_new_from_resource (
-    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-details-toolbar.ui");
-  g_autofree char *downloads = NULL;
-  const char *who = author_of (self);
-
-  if (self->project == NULL)
-    return gtk_label_new ("");
-
-  /* Keep the builder's root alive after the builder is released below. */
-  content = GTK_WIDGET (g_object_ref (gtk_builder_get_object (
-    body_builder, "content")));
-  nuvashalauncher_ui_prepare_dialog_content (content);
-  gtk_widget_add_css_class (content, "nuvashalauncher-modpack-details-content");
-  scroller = GTK_SCROLLED_WINDOW (gtk_builder_get_object (body_builder, "scroller"));
-  {
-    GtkWidget *error_label = GTK_WIDGET (gtk_builder_get_object (
-      body_builder, "error-label"));
-    GtkWidget *parent = gtk_widget_get_parent (error_label);
-
-    /* The template starts the label under @content, but the details page
-     * places it below the Markdown body instead. Move it before appending. */
-    if (parent != NULL && GTK_IS_BOX (parent))
-      gtk_box_remove (GTK_BOX (parent), error_label);
-    details_watch (&self->details_error, error_label);
-  }
-  box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 18);
-  heading = adw_preferences_group_new ();
-
-  /* Show the title, author/license, and download count. */
-  page = gtk_label_new (self->project != NULL && self->project->title != NULL
-                          ? self->project->title
-                          : "");
-  gtk_label_set_wrap (GTK_LABEL (page), TRUE);
-  gtk_label_set_xalign (GTK_LABEL (page), 0);
-  gtk_widget_add_css_class (GTK_WIDGET (page), "title-2");
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), GTK_WIDGET (page));
-
-  {
-    g_autofree char *text = NULL;
-
-    text = nuvashalauncher_content_format_author (
-      self->details != NULL ? self->details->license : NULL, who);
-
-    details_watch (&self->meta, gtk_label_new (text));
-    gtk_label_set_xalign (GTK_LABEL (self->meta), 0);
-    gtk_widget_add_css_class (GTK_WIDGET (self->meta), "dim-label");
-    adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), GTK_WIDGET (self->meta));
-  }
-
-   downloads = nuvashalauncher_content_format_downloads (self->project->downloads);
-  details_watch (&self->count, gtk_label_new (downloads));
-  gtk_label_set_xalign (GTK_LABEL (self->count), 0);
-  gtk_widget_add_css_class (GTK_WIDGET (self->count), "dim-label");
-  adw_preferences_group_add (ADW_PREFERENCES_GROUP (heading), GTK_WIDGET (self->count));
-
-  /* The long description, in Markdown. */
-  details_watch (&self->body, gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
-
-  if (self->details_problem != NULL)
-    {
-      gtk_box_append (GTK_BOX (self->body), plain_label (self->details_problem));
-      const GError *error = g_object_get_data (G_OBJECT (self), "details-error");
-      if (error != NULL)
-        gtk_box_append (GTK_BOX (self->body), nuvashalauncher_ui_error_details (error));
-    }
-  else if (self->details != NULL && self->details->body != NULL &&
-           *self->details->body != '\0')
-    nuvashalauncher_markdown_render (GTK_BOX (self->body), self->details->body);
-  else
-    gtk_box_append (GTK_BOX (self->body),
-                    plain_label (self->project->description));
-
-  gtk_box_append (GTK_BOX (box), GTK_WIDGET (heading));
-  gtk_box_append (GTK_BOX (box), GTK_WIDGET (self->body));
-
-  /* Explain missing or failed version lists instead of disabling the button
-   * without feedback. */
-  gtk_widget_add_css_class (GTK_WIDGET (self->details_error), "dim-label");
-  gtk_box_append (GTK_BOX (box), GTK_WIDGET (self->details_error));
-
-  gtk_widget_set_margin_top (GTK_WIDGET (box), 12);
-  gtk_widget_set_margin_bottom (GTK_WIDGET (box), 12);
-  gtk_widget_set_margin_start (GTK_WIDGET (box), 18);
-  gtk_widget_set_margin_end (GTK_WIDGET (box), 18);
-
-  gtk_scrolled_window_set_child (scroller, GTK_WIDGET (box));
-
-  /* Version selector and download action. */
-  bar = GTK_WIDGET (gtk_builder_get_object (toolbar_builder, "toolbar"));
-  details_watch (&self->dropdown, GTK_WIDGET (gtk_builder_get_object (toolbar_builder, "dropdown")));
-  details_watch (&self->download_button,
-                 GTK_WIDGET (gtk_builder_get_object (toolbar_builder, "download-button")));
-
-  gtk_widget_set_sensitive (GTK_WIDGET (self->download_button), FALSE);
-  g_signal_connect_object (self->download_button, "clicked",
-                           G_CALLBACK (on_modpack_download_clicked), self, 0);
-
-  {
-    GtkWidget *parent = gtk_widget_get_parent (bar);
-
-    if (parent != NULL && GTK_IS_BOX (parent))
-      gtk_box_remove (GTK_BOX (parent), bar);
-    gtk_box_append (GTK_BOX (content), bar);
-  }
-
-  return content;
-}
-
-/* Puts the real content in the half once both the description and the
-   versions are in. */
-static void
-dialog_details_fill (NuvashaLauncherDownloadModpackDialog *self)
-{
-  if (self->details_page == NULL)
-    return;
-  if (!self->details_ready || !self->versions_ready)
-    return;
-
-   {
-     GtkWidget *content = details_content (self);
-
-     adw_navigation_page_set_child (ADW_NAVIGATION_PAGE (self->details_page),
-                                    content);
-     g_object_unref (content);
-   }
-
-  if (self->versions_problem != NULL)
-    show_details_error (self, self->versions_problem);
-  else if (self->versions != NULL && self->versions->len == 0)
-    show_details_error (self,
-                         _("This project publishes no pack file Nuvasha Launcher can "
-                           "install."));
-
-  if (self->versions != NULL && self->versions->len > 0)
-    {
-      GtkStringList *strings = build_version_strings (self->versions);
-
-      gtk_drop_down_set_model (GTK_DROP_DOWN (self->dropdown),
-                               G_LIST_MODEL (strings));
-       /* Select the newest version by default. */
-      gtk_drop_down_set_selected (GTK_DROP_DOWN (self->dropdown), 0);
-      g_object_unref (strings);
-    }
-
-  if (self->download_button != NULL)
-    gtk_widget_set_sensitive (GTK_WIDGET (self->download_button),
-                              self->versions != NULL && self->versions->len > 0);
-}
-
-/* Get the modpack's list of published versions and show it on the
- * already-pushed details page. */
-static void
-show_details_error (NuvashaLauncherDownloadModpackDialog *self, const char *message)
-{
-  if (self->details_error == NULL)
-    return;
-
-  gtk_label_set_text (GTK_LABEL (self->details_error),
-                      message != NULL ? message : "");
-  gtk_widget_set_visible (GTK_WIDGET (self->details_error), message != NULL);
-  const GError *error = g_object_get_data (G_OBJECT (self), "versions-error");
-  gtk_widget_set_tooltip_text (GTK_WIDGET (self->details_error),
-                               error != NULL ? nuvashalauncher_error_message (error) : NULL);
-}
-
-typedef struct
-{
-  NuvashaLauncherDownloadModpackDialog *dialog;
-  guint generation;
-} VersionsAsk;
-
-static void
-versions_ask_free (VersionsAsk *ask)
-{
-  g_object_unref (ask->dialog);
-  g_free (ask);
-}
-
-static void
-on_versions_answer (GObject *source G_GNUC_UNUSED,
-                    GAsyncResult *result,
-                    gpointer user_data)
-{
-  VersionsAsk *ask = user_data;
-  NuvashaLauncherDownloadModpackDialog *self = ask->dialog;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (JsonParser) parser = NULL;
-  g_autoptr (GPtrArray) versions = NULL;
-
-  parser = nuvashalauncher_download_json_finish (result, &error);
-
-  if (ask->generation != self->details_generation)
-    {
-      versions_ask_free (ask);
-      return;
-    }
-
-  if (parser == NULL)
-    {
-      if (!g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
-                            NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED))
-        {
-          g_free (self->versions_problem);
-          self->versions_problem =
-            g_strdup (error != NULL ? nuvashalauncher_error_message (error)
-                                    : _("Could not load versions. Try again."));
-          g_object_set_data_full (G_OBJECT (self), "versions-error",
-                                  error != NULL ? g_error_copy (error) : NULL,
-                                  (GDestroyNotify) g_error_free);
-          self->versions_ready = TRUE;
-          dialog_details_fill (self);
-        }
-
-      versions_ask_free (ask);
-      return;
-    }
-
-  versions = versions_of_answer (json_parser_get_root (parser), &error);
-
-  if (versions == NULL)
-    {
-      g_free (self->versions_problem);
-      self->versions_problem =
-        g_strdup (nuvashalauncher_error_message (error));
-      g_object_set_data_full (G_OBJECT (self), "versions-error",
-                              error != NULL ? g_error_copy (error) : NULL,
-                              (GDestroyNotify) g_error_free);
-      self->versions_ready = TRUE;
-      dialog_details_fill (self);
-      versions_ask_free (ask);
-      return;
-    }
-
-  g_ptr_array_sort (versions, by_date_desc);
-
-  g_clear_pointer (&self->versions, g_ptr_array_unref);
-  self->versions = versions;
-  versions = NULL;
-
-  self->versions_ready = TRUE;
-  dialog_details_fill (self);
-
-  versions_ask_free (ask);
-}
-
-/* One answer the dialog asked for and has not released yet: the dialog it
- * belongs to, which can be closed while the request is on its way, and
- * the operation handle the answer is meant to release. */
-typedef struct
-{
-  NuvashaLauncherDownloadModpackDialog *dialog;
-  NuvashaLauncherTaskScope *operation;
-  guint generation;
-} DetailsAsk;
-
-static void
-ask_free (DetailsAsk *ask)
-{
-  g_clear_object (&ask->dialog);
-
-  if (ask->operation != NULL)
-    nuvashalauncher_operation_unref (ask->operation);
-
-  g_free (ask);
-}
-
-/* The long description of the pack, read once the dialog is up. */
-static void
-on_details_answer (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
-                   gpointer user_data)
-{
-  DetailsAsk *ask = user_data;
-  NuvashaLauncherDownloadModpackDialog *self = ask->dialog;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (NuvashaLauncherModrinthDetails) details = NULL;
-
-  details = nuvashalauncher_modrinth_details_finish (result, &error);
-
-  if (ask->generation != self->details_generation)
-    {
-      ask_free (ask);
-      return;
-    }
-
-  if (details == NULL)
-    {
-      if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-        {
-          g_free (self->details_problem);
-          self->details_problem =
-            g_strdup (error != NULL ? nuvashalauncher_error_message (error)
-                                    : _("Could not load project details. Try again."));
-          g_object_set_data_full (G_OBJECT (self), "details-error",
-                                  error != NULL ? g_error_copy (error) : NULL,
-                                  (GDestroyNotify) g_error_free);
-        }
-    }
-  else
-    {
-      g_clear_pointer (&self->details, nuvashalauncher_modrinth_details_free);
-      self->details = g_steal_pointer (&details);
-    }
-
-  self->details_ready = TRUE;
-  dialog_details_fill (self);
-
-  ask_free (ask);
-}
-
-/* The icon of the project is previewed from the shared icon cache. It is
- * copied into the new instance before that instance points at it: clearing
- * nuvashalauncher's cache must never remove an instance's icon. The reference the load
- * holds keeps the dialog alive until the answer is in. */
 typedef struct
 {
   NuvashaLauncherDownloadModpackDialog *dialog;
@@ -547,73 +127,383 @@ project_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_free (load);
 }
 
-void
-dialog_details_open (NuvashaLauncherDownloadModpackDialog *self)
+static void
+start_modpack_install (NuvashaLauncherDownloadModpackDialog *self,
+                       NuvashaLauncherModrinthProject *project,
+                       NuvashaLauncherModrinthVersion *version)
 {
-  g_autofree char *escaped_id = NULL;
-  g_autofree char *url = NULL;
+  g_clear_pointer (&self->project, nuvashalauncher_modrinth_project_free);
+  self->project = nuvashalauncher_modrinth_project_copy (project);
 
-  if (self->project == NULL)
+  g_free (self->instance_name);
+  self->instance_name = g_strdup (project->title);
+
+  g_clear_pointer (&self->version, nuvashalauncher_modrinth_version_free);
+  self->version = nuvashalauncher_modrinth_version_copy (version);
+
+  g_clear_pointer (&self->icon_path, g_free);
+  if (project->icon_url != NULL && *project->icon_url != '\0')
+    {
+      ProjectIconLoad *load = g_new0 (ProjectIconLoad, 1);
+      load->dialog = g_object_ref (self);
+      load->operation = nuvashalauncher_icon_load_async (project->icon_url,
+                                                         project_icon_ready, load);
+      if (self->fetch != NULL)
+        nuvashalauncher_operation_follow (load->operation, self->fetch);
+    }
+
+  if (dialog_start_features (self))
+    {
+      self->closed = TRUE;
+      adw_dialog_close (ADW_DIALOG (self));
+    }
+}
+
+typedef struct {
+  NuvashaLauncherDownloadModpackDialog *dialog;
+  NuvashaLauncherModrinthProject *project;
+  AdwDialog *picker;
+  GCancellable *cancellable;
+} ModpackVersionFetch;
+
+static void
+modpack_version_fetch_free (ModpackVersionFetch *fetch)
+{
+  if (fetch == NULL)
     return;
+  g_clear_object (&fetch->dialog);
+  g_clear_pointer (&fetch->project, nuvashalauncher_modrinth_project_free);
+  g_clear_object (&fetch->picker);
+  g_clear_object (&fetch->cancellable);
+  g_free (fetch);
+}
 
-  escaped_id = g_uri_escape_string (self->project->project_id, NULL, FALSE);
-  url = g_strdup_printf (NUVASHALAUNCHER_MODRINTH_URL "/project/%s/version", escaped_id);
+static void
+on_modpack_quick_versions_ready (GObject *source G_GNUC_UNUSED,
+                                 GAsyncResult *result,
+                                 gpointer user_data)
+{
+  ModpackVersionFetch *fetch = user_data;
+  NuvashaLauncherDownloadModpackDialog *self = fetch->dialog;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (JsonParser) parser =
+    nuvashalauncher_download_json_finish (result, &error);
 
-  self->details_ready = FALSE;
-  self->versions_ready = FALSE;
-  self->details_generation++;
-  g_clear_pointer (&self->details, nuvashalauncher_modrinth_details_free);
-  g_free (self->details_problem);
-  self->details_problem = NULL;
-  g_object_set_data (G_OBJECT (self), "details-error", NULL);
-  g_object_set_data (G_OBJECT (self), "versions-error", NULL);
-  g_free (self->versions_problem);
-  self->versions_problem = NULL;
+  if (self == NULL || self->closed || g_cancellable_is_cancelled (fetch->cancellable))
+    {
+      modpack_version_fetch_free (fetch);
+      return;
+    }
 
-  show_details_page (self, nuvashalauncher_ui_loading_child ());
+  if (error != NULL)
+    {
+      if (!nuvashalauncher_error_is_cancelled (error))
+        push_failure (self, _("Could not load versions. Try again."), error, NULL);
+      modpack_version_fetch_free (fetch);
+      return;
+    }
+
+  g_autoptr (GPtrArray) versions =
+    versions_of_answer (json_parser_get_root (parser), &error);
+  if (versions == NULL)
+    {
+      push_failure (self, _("Could not load versions. Try again."), error, NULL);
+      modpack_version_fetch_free (fetch);
+      return;
+    }
+
+  if (versions->len == 0)
+    {
+      push_error (self, _("Could not load versions. Try again."),
+                  _("The requested file, project, or compatible version was not found."),
+                  NULL);
+      modpack_version_fetch_free (fetch);
+      return;
+    }
+
+  NuvashaLauncherModrinthVersion *latest = g_ptr_array_index (versions, 0);
+  start_modpack_install (self, fetch->project, latest);
+  modpack_version_fetch_free (fetch);
+}
+
+void
+modpack_quick_install_project (NuvashaLauncherDownloadModpackDialog *self,
+                               NuvashaLauncherModrinthProject *project)
+{
+  if (self == NULL || project == NULL || project->project_id == NULL)
+    return;
 
   if (self->fetch != NULL)
     g_cancellable_cancel (self->fetch);
-
   g_clear_object (&self->fetch);
   self->fetch = g_cancellable_new ();
 
-  /* A stale icon of another project has no business on this one. */
-  g_clear_pointer (&self->icon_path, g_free);
+  g_autofree char *escaped_id = g_uri_escape_string (project->project_id, NULL, FALSE);
+  g_autofree char *url =
+    g_strdup_printf (NUVASHALAUNCHER_MODRINTH_URL "/project/%s/version", escaped_id);
 
-  if (self->project->icon_url != NULL && *self->project->icon_url != '\0')
+  ModpackVersionFetch *fetch = g_new0 (ModpackVersionFetch, 1);
+  fetch->dialog = g_object_ref (self);
+  fetch->project = nuvashalauncher_modrinth_project_copy (project);
+  fetch->cancellable = g_object_ref (self->fetch);
+
+  nuvashalauncher_operation_release (
+    nuvashalauncher_download_json_cached_async (
+      nuvashalauncher_downloads_get_service (), url,
+      on_modpack_quick_versions_ready, fetch),
+    self->fetch);
+}
+
+typedef struct {
+  GPtrArray *versions;
+  guint loaded;
+  AdwPreferencesGroup *group;
+  AdwDialog *picker;
+  NuvashaLauncherModrinthProject *project;
+} ModpackPickerList;
+
+static void
+modpack_picker_list_free (ModpackPickerList *list)
+{
+  if (list == NULL)
+    return;
+  g_clear_pointer (&list->versions, g_ptr_array_unref);
+  g_clear_pointer (&list->project, nuvashalauncher_modrinth_project_free);
+  g_free (list);
+}
+
+static void
+on_modpack_picker_version_activated (AdwActionRow *row, gpointer user_data)
+{
+  NuvashaLauncherDownloadModpackDialog *self =
+    NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherModrinthProject *project =
+    g_object_get_data (G_OBJECT (row), "nuvashalauncher-project");
+  NuvashaLauncherModrinthVersion *version =
+    g_object_get_data (G_OBJECT (row), "nuvashalauncher-version");
+  AdwDialog *picker =
+    g_object_get_data (G_OBJECT (row), "nuvashalauncher-picker-dialog");
+
+  if (self == NULL || project == NULL || version == NULL)
+    return;
+
+  g_autoptr (NuvashaLauncherModrinthProject) project_copy =
+    nuvashalauncher_modrinth_project_copy (project);
+  g_autoptr (NuvashaLauncherModrinthVersion) version_copy =
+    nuvashalauncher_modrinth_version_copy (version);
+
+  if (picker != NULL)
+    adw_dialog_close (picker);
+
+  start_modpack_install (self, project_copy, version_copy);
+}
+
+static void
+append_modpack_version_rows (ModpackPickerList *list,
+                             NuvashaLauncherDownloadModpackDialog *self,
+                             guint batch_size)
+{
+  guint end = MIN (list->loaded + batch_size, list->versions->len);
+
+  for (; list->loaded < end; list->loaded++)
     {
-      ProjectIconLoad *load = g_new0 (ProjectIconLoad, 1);
+      NuvashaLauncherModrinthVersion *v = g_ptr_array_index (list->versions, list->loaded);
+      char label[160];
+      AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
+      GtkWidget *icon = gtk_image_new_from_icon_name ("folder-download-symbolic");
 
-      load->dialog = g_object_ref (self);
-      load->operation = nuvashalauncher_icon_load_async (self->project->icon_url,
-                                             project_icon_ready, load);
-      /* The same fetch cancellable the details and versions use, so one
-         new project cancels all three. */
-      nuvashalauncher_operation_follow (load->operation, self->fetch);
+      version_row_label (v, label, sizeof label);
+      adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
+      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), label);
+      if (v->name != NULL && *v->name != '\0' &&
+          v->version_number != NULL && g_strcmp0 (v->name, v->version_number) != 0)
+        adw_action_row_set_subtitle (ADW_ACTION_ROW (row), v->name);
+
+      gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
+      adw_action_row_add_suffix (row, icon);
+      gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
+
+      g_object_set_data_full (G_OBJECT (row), "nuvashalauncher-project",
+                              nuvashalauncher_modrinth_project_copy (list->project),
+                              (GDestroyNotify) nuvashalauncher_modrinth_project_free);
+      g_object_set_data_full (G_OBJECT (row), "nuvashalauncher-version",
+                              nuvashalauncher_modrinth_version_copy (v),
+                              (GDestroyNotify) nuvashalauncher_modrinth_version_free);
+      g_object_set_data (G_OBJECT (row), "nuvashalauncher-picker-dialog",
+                         list->picker);
+      g_signal_connect_object (row, "activated",
+                               G_CALLBACK (on_modpack_picker_version_activated),
+                               self, 0);
+      adw_preferences_group_add (list->group, GTK_WIDGET (row));
+    }
+}
+
+static void
+on_modpack_picker_scroll_changed (GtkAdjustment *adjustment, gpointer user_data)
+{
+  NuvashaLauncherDownloadModpackDialog *self =
+    NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
+  ModpackPickerList *list =
+    g_object_get_data (G_OBJECT (adjustment), "nuvashalauncher-version-list");
+  double value, page_size, upper;
+
+  if (list == NULL || list->versions == NULL || list->loaded >= list->versions->len)
+    return;
+
+  value = gtk_adjustment_get_value (adjustment);
+  page_size = gtk_adjustment_get_page_size (adjustment);
+  upper = gtk_adjustment_get_upper (adjustment);
+
+  if (value + page_size >= upper - 120.0)
+    append_modpack_version_rows (list, self, VERSION_PICKER_BATCH_SIZE);
+}
+
+static void
+on_modpack_picker_closed (AdwDialog *dialog, gpointer user_data)
+{
+  NuvashaLauncherDownloadModpackDialog *self =
+    NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
+  GCancellable *cancellable =
+    g_object_get_data (G_OBJECT (dialog), "nuvashalauncher-cancellable");
+
+  if (cancellable != NULL)
+    g_cancellable_cancel (cancellable);
+
+  if (g_object_get_data (G_OBJECT (self), "nuvashalauncher-version-picker") == dialog)
+    g_object_set_data (G_OBJECT (self), "nuvashalauncher-version-picker", NULL);
+}
+
+static void
+on_modpack_choose_versions_ready (GObject *source G_GNUC_UNUSED,
+                                  GAsyncResult *result,
+                                  gpointer user_data)
+{
+  ModpackVersionFetch *fetch = user_data;
+  NuvashaLauncherDownloadModpackDialog *self = fetch->dialog;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (JsonParser) parser =
+    nuvashalauncher_download_json_finish (result, &error);
+
+  if (fetch->picker == NULL || g_cancellable_is_cancelled (fetch->cancellable) ||
+      self == NULL || self->closed)
+    {
+      modpack_version_fetch_free (fetch);
+      return;
     }
 
-  /* The long description, and the versions of the pack beside it. */
-  {
-    DetailsAsk *ask = g_new0 (DetailsAsk, 1);
+  if (error != NULL)
+    {
+      adw_dialog_close (fetch->picker);
+      if (!nuvashalauncher_error_is_cancelled (error))
+        push_failure (self, _("Could not load versions. Try again."), error, NULL);
+      modpack_version_fetch_free (fetch);
+      return;
+    }
 
-    ask->dialog = g_object_ref (self);
-    ask->generation = self->details_generation;
-    ask->operation = nuvashalauncher_modrinth_details_async (self->project->project_id,
-                                                  on_details_answer, ask);
-    /* The same fetch cancellable the versions answer uses, so opening
-       another project stops this one. */
-    nuvashalauncher_operation_follow (ask->operation, self->fetch);
-  }
+  g_autoptr (GPtrArray) versions =
+    versions_of_answer (json_parser_get_root (parser), &error);
+  if (versions == NULL)
+    {
+      adw_dialog_close (fetch->picker);
+      push_failure (self, _("Could not load versions. Try again."), error, NULL);
+      modpack_version_fetch_free (fetch);
+      return;
+    }
 
-  {
-    VersionsAsk *ask = g_new0 (VersionsAsk, 1);
+  if (versions->len == 0)
+    {
+      AdwStatusPage *status = ADW_STATUS_PAGE (adw_status_page_new ());
+      adw_status_page_set_icon_name (status, "package-x-generic-symbolic");
+      adw_status_page_set_title (
+        status,
+        _("The requested file, project, or compatible version was not found."));
+      AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
+      adw_toolbar_view_add_top_bar (toolbar, GTK_WIDGET (adw_header_bar_new ()));
+      adw_toolbar_view_set_content (toolbar, GTK_WIDGET (status));
+      adw_dialog_set_child (fetch->picker, GTK_WIDGET (toolbar));
+      modpack_version_fetch_free (fetch);
+      return;
+    }
 
-    ask->dialog = g_object_ref (self);
-    ask->generation = self->details_generation;
-    nuvashalauncher_operation_release (
-      nuvashalauncher_download_json_cached_async (nuvashalauncher_downloads_get_service (), url,
-                               on_versions_answer, ask),
-      self->fetch);
-  }
+  AdwPreferencesGroup *group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+  ModpackPickerList *list = g_new0 (ModpackPickerList, 1);
+  list->versions = g_ptr_array_ref (versions);
+  list->loaded = 0;
+  list->group = group;
+  list->picker = fetch->picker;
+  list->project = nuvashalauncher_modrinth_project_copy (fetch->project);
+
+  g_object_set_data_full (G_OBJECT (fetch->picker), "nuvashalauncher-version-list",
+                          list, (GDestroyNotify) modpack_picker_list_free);
+
+  append_modpack_version_rows (list, self, VERSION_PICKER_BATCH_SIZE);
+
+  AdwClamp *clamp = ADW_CLAMP (adw_clamp_new ());
+  gtk_widget_set_margin_top (GTK_WIDGET (clamp), 12);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (clamp), 12);
+  gtk_widget_set_margin_start (GTK_WIDGET (clamp), 12);
+  gtk_widget_set_margin_end (GTK_WIDGET (clamp), 12);
+  adw_clamp_set_child (clamp, GTK_WIDGET (group));
+
+  GtkScrolledWindow *scroller = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
+  gtk_scrolled_window_set_policy (scroller, GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+  gtk_scrolled_window_set_child (scroller, GTK_WIDGET (clamp));
+  gtk_widget_set_vexpand (GTK_WIDGET (scroller), TRUE);
+
+  GtkAdjustment *adjustment = gtk_scrolled_window_get_vadjustment (scroller);
+  g_object_set_data (G_OBJECT (adjustment), "nuvashalauncher-version-list", list);
+  g_signal_connect_object (adjustment, "value-changed",
+                           G_CALLBACK (on_modpack_picker_scroll_changed), self, 0);
+
+  AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
+  adw_toolbar_view_add_top_bar (toolbar, GTK_WIDGET (adw_header_bar_new ()));
+  adw_toolbar_view_set_content (toolbar, GTK_WIDGET (scroller));
+  adw_dialog_set_child (fetch->picker, GTK_WIDGET (toolbar));
+  modpack_version_fetch_free (fetch);
+}
+
+void
+modpack_choose_version (NuvashaLauncherDownloadModpackDialog *self,
+                        NuvashaLauncherModrinthProject *project)
+{
+  if (self == NULL || project == NULL || project->project_id == NULL)
+    return;
+
+  if (g_object_get_data (G_OBJECT (self), "nuvashalauncher-version-picker") != NULL)
+    return;
+
+  AdwDialog *picker = adw_dialog_new ();
+  adw_dialog_set_title (picker, project->title != NULL ? project->title : _("Versions"));
+  adw_dialog_set_content_width (picker, 420);
+  adw_dialog_set_content_height (picker, 440);
+
+  AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
+  adw_toolbar_view_add_top_bar (toolbar, GTK_WIDGET (adw_header_bar_new ()));
+  adw_toolbar_view_set_content (toolbar, nuvashalauncher_ui_loading_child ());
+  adw_dialog_set_child (picker, GTK_WIDGET (toolbar));
+
+  ModpackVersionFetch *fetch = g_new0 (ModpackVersionFetch, 1);
+  fetch->dialog = g_object_ref (self);
+  fetch->project = nuvashalauncher_modrinth_project_copy (project);
+  fetch->picker = g_object_ref (picker);
+  fetch->cancellable = g_cancellable_new ();
+
+  g_object_set_data (G_OBJECT (self), "nuvashalauncher-version-picker", picker);
+  g_object_set_data_full (G_OBJECT (picker), "nuvashalauncher-cancellable",
+                          g_object_ref (fetch->cancellable), g_object_unref);
+  g_signal_connect_object (picker, "closed",
+                           G_CALLBACK (on_modpack_picker_closed),
+                           self, 0);
+
+  adw_dialog_present (picker, GTK_WIDGET (self));
+
+  g_autofree char *escaped_id = g_uri_escape_string (project->project_id, NULL, FALSE);
+  g_autofree char *url =
+    g_strdup_printf (NUVASHALAUNCHER_MODRINTH_URL "/project/%s/version", escaped_id);
+
+  nuvashalauncher_operation_release (
+    nuvashalauncher_download_json_cached_async (
+      nuvashalauncher_downloads_get_service (), url,
+      on_modpack_choose_versions_ready, fetch),
+    fetch->cancellable);
 }

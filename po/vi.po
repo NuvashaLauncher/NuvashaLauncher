@@ -1174,3 +1174,99 @@ msgstr "Metadata AppStream (mô tả, tóm tắt và ghi chú phát hành) đư�
 
 msgid "Nuvasha Launcher"
 msgstr "Nuvasha Launcher"
+
+msgid "Copy"
+msgstr "Sao chép"
+
+msgid "Rename"
+msgstr "Đổi tên"
+
+msgid "Reset Icon"
+msgstr "Đặt lại biểu tượng"
+
+msgid "Delete World"
+msgstr "Xóa thế giới"
+
+msgid "Seed copied to clipboard"
+msgstr "Đã sao chép seed vào khay nhớ tạm"
+
+msgid "Remove server \"%s\"?"
+msgstr "Xóa máy chủ \"%s\"?"
+
+msgid "Refresh"
+msgstr "Làm mới"
+
+msgid "Remove Server"
+msgstr "Xóa máy chủ"
+
+msgid "Survival"
+msgstr "Sinh tồn"
+
+msgid "Edit"
+msgstr "Chỉnh sửa"
+
+msgid "Ask to download"
+msgstr "Hỏi trước khi tải xuống"
+
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr "Các thế giới được Minecraft lưu hoặc nhập vào đây sẽ xuất hiện trong danh sách này."
+
+msgid "Rename World"
+msgstr "Đổi tên thế giới"
+
+msgid "Servers"
+msgstr "Máy chủ"
+
+msgid "Save"
+msgstr "Lưu"
+
+msgid "Add World"
+msgstr "Thêm thế giới"
+
+msgid "Spectator"
+msgstr "Khán giả"
+
+msgid "Delete world \"%s\"? This cannot be undone."
+msgstr "Xóa thế giới \"%s\"? Không thể hoàn tác thao tác này."
+
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "Máy chủ thêm ở đây được lưu vào servers.dat cho phiên bản này."
+
+msgid "Add Server"
+msgstr "Thêm máy chủ"
+
+msgid "Edit Server"
+msgstr "Chỉnh sửa máy chủ"
+
+msgid "Address"
+msgstr "Địa chỉ"
+
+msgid "Datapacks"
+msgstr "Gói dữ liệu"
+
+msgid "No Worlds"
+msgstr "Không có thế giới nào"
+
+msgid "Creative"
+msgstr "Sáng tạo"
+
+msgid "Move Up"
+msgstr "Di chuyển lên"
+
+msgid "No Servers"
+msgstr "Không có máy chủ nào"
+
+msgid "Never download"
+msgstr "Không bao giờ tải xuống"
+
+msgid "Worlds"
+msgstr "Thế giới"
+
+msgid "Always download"
+msgstr "Luôn tải xuống"
+
+msgid "Move Down"
+msgstr "Di chuyển xuống"
+
+msgid "Copy Seed"
+msgstr "Sao chép seed"

@@ -1174,3 +1174,99 @@ msgstr "AppStream 中繼資料（描述、摘要和版本資訊）遵循 Creativ
 
 msgid "Nuvasha Launcher"
 msgstr "Nuvasha Launcher"
+
+msgid "Copy"
+msgstr "複製"
+
+msgid "Rename"
+msgstr "重新命名"
+
+msgid "Reset Icon"
+msgstr "重設圖示"
+
+msgid "Delete World"
+msgstr "刪除世界"
+
+msgid "Seed copied to clipboard"
+msgstr "種子碼已複製到剪貼簿"
+
+msgid "Remove server \"%s\"?"
+msgstr "移除伺服器「%s」？"
+
+msgid "Refresh"
+msgstr "重新整理"
+
+msgid "Remove Server"
+msgstr "移除伺服器"
+
+msgid "Survival"
+msgstr "生存"
+
+msgid "Edit"
+msgstr "編輯"
+
+msgid "Ask to download"
+msgstr "下載前詢問"
+
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr "由 Minecraft 儲存或匯入至此的世界將會顯示於此清單。"
+
+msgid "Rename World"
+msgstr "重新命名世界"
+
+msgid "Servers"
+msgstr "伺服器"
+
+msgid "Save"
+msgstr "儲存"
+
+msgid "Add World"
+msgstr "新增世界"
+
+msgid "Spectator"
+msgstr "旁觀者"
+
+msgid "Delete world \"%s\"? This cannot be undone."
+msgstr "刪除世界「%s」？此操作無法復原。"
+
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "在此新增的伺服器會儲存至此執行個體的 servers.dat。"
+
+msgid "Add Server"
+msgstr "新增伺服器"
+
+msgid "Edit Server"
+msgstr "編輯伺服器"
+
+msgid "Address"
+msgstr "位址"
+
+msgid "Datapacks"
+msgstr "資料包"
+
+msgid "No Worlds"
+msgstr "沒有世界"
+
+msgid "Creative"
+msgstr "創造"
+
+msgid "Move Up"
+msgstr "上移"
+
+msgid "No Servers"
+msgstr "沒有伺服器"
+
+msgid "Never download"
+msgstr "永不下載"
+
+msgid "Worlds"
+msgstr "世界"
+
+msgid "Always download"
+msgstr "一律下載"
+
+msgid "Move Down"
+msgstr "下移"
+
+msgid "Copy Seed"
+msgstr "複製種子碼"

@@ -1202,3 +1202,99 @@ msgstr "AppStream 元数据（描述、摘要和发行说明）遵循 Creative C
 
 msgid "Nuvasha Launcher"
 msgstr "Nuvasha Launcher"
+
+msgid "Copy"
+msgstr "复制"
+
+msgid "Rename"
+msgstr "重命名"
+
+msgid "Reset Icon"
+msgstr "重置图标"
+
+msgid "Delete World"
+msgstr "删除世界"
+
+msgid "Seed copied to clipboard"
+msgstr "种子已复制到剪贴板"
+
+msgid "Remove server \"%s\"?"
+msgstr "移除服务器“%s”？"
+
+msgid "Refresh"
+msgstr "刷新"
+
+msgid "Remove Server"
+msgstr "移除服务器"
+
+msgid "Survival"
+msgstr "生存"
+
+msgid "Edit"
+msgstr "编辑"
+
+msgid "Ask to download"
+msgstr "下载前询问"
+
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr "Minecraft 保存或导入到此处的世界将显示在此列表中。"
+
+msgid "Rename World"
+msgstr "重命名世界"
+
+msgid "Servers"
+msgstr "服务器"
+
+msgid "Save"
+msgstr "保存"
+
+msgid "Add World"
+msgstr "添加世界"
+
+msgid "Spectator"
+msgstr "旁观"
+
+msgid "Delete world \"%s\"? This cannot be undone."
+msgstr "删除世界“%s”？此操作无法撤销。"
+
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "在此添加的服务器将保存到该实例的 servers.dat 中。"
+
+msgid "Add Server"
+msgstr "添加服务器"
+
+msgid "Edit Server"
+msgstr "编辑服务器"
+
+msgid "Address"
+msgstr "地址"
+
+msgid "Datapacks"
+msgstr "数据包"
+
+msgid "No Worlds"
+msgstr "无世界"
+
+msgid "Creative"
+msgstr "创造"
+
+msgid "Move Up"
+msgstr "上移"
+
+msgid "No Servers"
+msgstr "无服务器"
+
+msgid "Never download"
+msgstr "从不下载"
+
+msgid "Worlds"
+msgstr "世界"
+
+msgid "Always download"
+msgstr "始终下载"
+
+msgid "Move Down"
+msgstr "下移"
+
+msgid "Copy Seed"
+msgstr "复制种子"

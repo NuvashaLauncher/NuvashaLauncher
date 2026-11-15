@@ -64,19 +64,7 @@ identify_complete (IdentifyRun *run)
     {
       run->finished = TRUE;
       if (run->page != NULL)
-        {
-          run->page->installed.identifying = FALSE;
-          if (run->page->project.details_versions != NULL &&
-              run->page->project.details_download != NULL)
-            {
-              gboolean have_versions =
-                run->page->project.details_versions->len > 0;
-              gtk_widget_set_sensitive (
-                GTK_WIDGET (run->page->project.details_download), have_versions);
-              gtk_widget_set_sensitive (
-                GTK_WIDGET (run->page->project.details_check), have_versions);
-            }
-        }
+        run->page->installed.identifying = FALSE;
     }
   identify_run_maybe_free (run);
 }
@@ -101,7 +89,7 @@ persist_identified_file (NuvashaLauncherContentPage *self, NuvashaLauncherConten
   g_autofree char *filename = g_path_get_basename (file->path);
   NuvashaLauncherContentIndexEntry entry = { 0 };
 
-  g_object_get (self->instance, "directory", &directory, NULL);
+  directory = content_page_base_directory (self);
   entry.filename = filename;
   entry.size = file->size;
   entry.mtime_usec = file->mtime_usec;
@@ -551,7 +539,7 @@ reload_installed (NuvashaLauncherContentPage *self)
   flush_dirty_index_files (self);
   self->installed.loaded = TRUE;
 
-  g_object_get (self->instance, "directory", &directory, NULL);
+  directory = content_page_base_directory (self);
 
   if (directory == NULL)
     return;

@@ -1210,3 +1210,99 @@ msgstr "Metadane AppStream (opisy, podsumowania i informacje o wydaniu) są publ
 
 msgid "Nuvasha Launcher"
 msgstr "Nuvasha Launcher"
+
+msgid "Copy"
+msgstr "Kopiuj"
+
+msgid "Rename"
+msgstr "Zmień nazwę"
+
+msgid "Reset Icon"
+msgstr "Przywróć ikonę"
+
+msgid "Delete World"
+msgstr "Usuń świat"
+
+msgid "Seed copied to clipboard"
+msgstr "Ziarno skopiowano do schowka"
+
+msgid "Remove server \"%s\"?"
+msgstr "Usunąć serwer „%s”?"
+
+msgid "Refresh"
+msgstr "Odśwież"
+
+msgid "Remove Server"
+msgstr "Usuń serwer"
+
+msgid "Survival"
+msgstr "Przetrwanie"
+
+msgid "Edit"
+msgstr "Edytuj"
+
+msgid "Ask to download"
+msgstr "Pytaj przed pobraniem"
+
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr "Światy zapisane przez Minecrafta lub zaimportowane tutaj pojawią się na tej liście."
+
+msgid "Rename World"
+msgstr "Zmień nazwę świata"
+
+msgid "Servers"
+msgstr "Serwery"
+
+msgid "Save"
+msgstr "Zapisz"
+
+msgid "Add World"
+msgstr "Dodaj świat"
+
+msgid "Spectator"
+msgstr "Widz"
+
+msgid "Delete world \"%s\"? This cannot be undone."
+msgstr "Usunąć świat „%s”? Tego nie można cofnąć."
+
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "Serwery dodane tutaj są zapisywane w servers.dat tej instancji."
+
+msgid "Add Server"
+msgstr "Dodaj serwer"
+
+msgid "Edit Server"
+msgstr "Edytuj serwer"
+
+msgid "Address"
+msgstr "Adres"
+
+msgid "Datapacks"
+msgstr "Paczki danych"
+
+msgid "No Worlds"
+msgstr "Brak światów"
+
+msgid "Creative"
+msgstr "Kreatywny"
+
+msgid "Move Up"
+msgstr "Przesuń w górę"
+
+msgid "No Servers"
+msgstr "Brak serwerów"
+
+msgid "Never download"
+msgstr "Nigdy nie pobieraj"
+
+msgid "Worlds"
+msgstr "Światy"
+
+msgid "Always download"
+msgstr "Zawsze pobieraj"
+
+msgid "Move Down"
+msgstr "Przesuń w dół"
+
+msgid "Copy Seed"
+msgstr "Kopiuj ziarno"

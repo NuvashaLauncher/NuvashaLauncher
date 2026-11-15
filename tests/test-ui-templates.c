@@ -46,15 +46,12 @@ test_builder_templates_parse (void)
     "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-main-shell.ui",
     "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-browser-toolbar.ui",
     "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-browser-states.ui",
-    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-details-toolbar.ui",
-    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-details-body.ui",
     "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-optional.ui",
     "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-modpack-error.ui",
     "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-content-result-row.ui",
     "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-content-file-row.ui",
     "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-download-row.ui",
     "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-skin-row.ui",
-    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-content-details.ui",
   };
 
   for (guint i = 0; i < G_N_ELEMENTS (paths); i++)

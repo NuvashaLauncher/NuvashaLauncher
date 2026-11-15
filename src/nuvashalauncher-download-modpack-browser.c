@@ -9,7 +9,6 @@
 #include "nuvashalauncher-filter-entry.h"
 #include "nuvashalauncher-i18n.h"
 #include "nuvashalauncher-icons.h"
-#include "nuvashalauncher-markdown.h"
 #include "nuvashalauncher-modpack.h"
 #include "nuvashalauncher-modrinth.h"
 #include "nuvashalauncher-minecraft-versions.h"
@@ -228,29 +227,44 @@ take_rows_out (GPtrArray **rows, AdwPreferencesGroup *group)
   *rows = g_ptr_array_new ();
 }
 
-/* Open the selected pack, or close its details view if it is already open. */
 static void
-result_row_activated (AdwActionRow *row, gpointer user_data)
+on_modpack_quick_install_clicked (GtkButton *button, gpointer user_data)
 {
-  NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherDownloadModpackDialog *self =
+    NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
   NuvashaLauncherModrinthProject *project =
-    g_object_get_data (G_OBJECT (row), "nuvashalauncher-project");
+    g_object_get_data (G_OBJECT (button), "nuvashalauncher-project");
 
-  if (project == NULL)
-    return;
+  modpack_quick_install_project (self, project);
+}
 
-  if (self->details_page != NULL && self->project != NULL &&
-      g_strcmp0 (self->project->project_id, project->project_id) == 0)
-    {
-      close_details (self);
-      return;
-    }
+static void
+on_modpack_versions_clicked (GtkButton *button, gpointer user_data)
+{
+  NuvashaLauncherDownloadModpackDialog *self =
+    NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
+  NuvashaLauncherModrinthProject *project =
+    g_object_get_data (G_OBJECT (button), "nuvashalauncher-project");
 
-  g_clear_pointer (&self->project, nuvashalauncher_modrinth_project_free);
-  g_clear_pointer (&self->version, nuvashalauncher_modrinth_version_free);
-  self->project = nuvashalauncher_modrinth_project_copy (project);
+  modpack_choose_version (self, project);
+}
 
-  dialog_details_open (self);
+static GtkWidget *
+modpack_row_action_button (const char *icon_name, const char *tooltip,
+                           NuvashaLauncherModrinthProject *project,
+                           GCallback callback,
+                           NuvashaLauncherDownloadModpackDialog *self)
+{
+  GtkWidget *button = gtk_button_new_from_icon_name (icon_name);
+
+  gtk_widget_add_css_class (button, "flat");
+  gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
+  gtk_widget_set_tooltip_text (button, tooltip);
+  gtk_accessible_update_property (GTK_ACCESSIBLE (button),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL, tooltip, -1);
+  g_object_set_data (G_OBJECT (button), "nuvashalauncher-project", project);
+  g_signal_connect_object (button, "clicked", callback, self, 0);
+  return button;
 }
 
 /* State retained while loading one row icon. */
@@ -366,20 +380,27 @@ results_arrived (NuvashaLauncherDownloadModpackDialog *self, NuvashaLauncherModr
 
           adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
 
-          /* An AdwActionRow is not activatable by default, so the row
-             itself is made one: a click anywhere on it opens the
-             details page. */
-          gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
-
           g_ptr_array_add (self->hits,
                            nuvashalauncher_modrinth_project_copy (project));
-          g_object_set_data (G_OBJECT (row), "nuvashalauncher-project",
-                             g_ptr_array_index (self->hits,
-                                                self->hits->len - 1));
+          {
+            NuvashaLauncherModrinthProject *stored =
+              g_ptr_array_index (self->hits, self->hits->len - 1);
+
+            adw_action_row_add_suffix (
+              ADW_ACTION_ROW (row),
+              modpack_row_action_button ("pan-down-symbolic", _("Versions"),
+                                         stored,
+                                         G_CALLBACK (on_modpack_versions_clicked),
+                                         self));
+            adw_action_row_add_suffix (
+              ADW_ACTION_ROW (row),
+              modpack_row_action_button ("folder-download-symbolic", _("Install"),
+                                         stored,
+                                         G_CALLBACK (on_modpack_quick_install_clicked),
+                                         self));
+          }
           g_ptr_array_add (self->rows, row);
 
-          g_signal_connect_object (row, "activated",
-                                   G_CALLBACK (result_row_activated), self, 0);
           adw_preferences_group_add (
               ADW_PREFERENCES_GROUP (self->results_group), row);
           shown++;
@@ -719,47 +740,10 @@ build_browse_page (NuvashaLauncherDownloadModpackDialog *self, gboolean start_se
                              G_CALLBACK (on_scroll_changed), self, 0);
   }
 
-  /* The list is the left half; the pack that is opened is the right half,
-     empty until one is opened. Collapsed shows one page at a time, which
-     is the list alone. */
-  self->split = ADW_NAVIGATION_SPLIT_VIEW (adw_navigation_split_view_new ());
-  gtk_widget_add_css_class (GTK_WIDGET (self->split), "background");
-  gtk_widget_set_vexpand (GTK_WIDGET (self->split), TRUE);
-   /* Named so the navigation split view can identify the browse page. */
-   {
-     AdwNavigationPage *sidebar = ADW_NAVIGATION_PAGE (
-       adw_navigation_page_new (GTK_WIDGET (box), _("Browse Modpacks")));
+  gtk_widget_set_vexpand (GTK_WIDGET (box), TRUE);
+  gtk_box_append (GTK_BOX (root), GTK_WIDGET (box));
 
-     gtk_widget_add_css_class (GTK_WIDGET (sidebar), "background");
-     adw_navigation_split_view_set_sidebar (
-       ADW_NAVIGATION_SPLIT_VIEW (self->split), sidebar);
-   }
-   adw_navigation_split_view_set_collapsed (
-     ADW_NAVIGATION_SPLIT_VIEW (self->split),
-     gtk_widget_get_width (GTK_WIDGET (self)) < 820);
-
-   adw_navigation_split_view_set_sidebar_width_fraction (
-     ADW_NAVIGATION_SPLIT_VIEW (self->split), 0.5);
-   adw_navigation_split_view_set_min_sidebar_width (
-     ADW_NAVIGATION_SPLIT_VIEW (self->split), 360);
-   adw_navigation_split_view_set_max_sidebar_width (
-     ADW_NAVIGATION_SPLIT_VIEW (self->split), 640);
-  gtk_box_append (GTK_BOX (root), GTK_WIDGET (self->split));
-
-  {
-    AdwBreakpointCondition *narrow_condition =
-      adw_breakpoint_condition_new_length (ADW_BREAKPOINT_CONDITION_MAX_WIDTH,
-                                           820, ADW_LENGTH_UNIT_PX);
-    AdwBreakpoint *breakpoint = adw_breakpoint_new (narrow_condition);
-    GValue collapsed = G_VALUE_INIT;
-    g_value_init (&collapsed, G_TYPE_BOOLEAN);
-    g_value_set_boolean (&collapsed, TRUE);
-    adw_breakpoint_add_setter (breakpoint, G_OBJECT (self->split), "collapsed", &collapsed);
-    g_value_unset (&collapsed);
-    adw_dialog_add_breakpoint (ADW_DIALOG (self), breakpoint);
-  }
-
-  page = GTK_WIDGET (adw_navigation_page_new (GTK_WIDGET (root), ""));
+  page = GTK_WIDGET (adw_navigation_page_new (GTK_WIDGET (root), _("Browse Modpacks")));
   adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (page), "browse");
 
   adw_navigation_view_add (ADW_NAVIGATION_VIEW (self->nav),

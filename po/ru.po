@@ -1210,3 +1210,99 @@ msgstr "Метаданные AppStream (описания, сводки и при
 
 msgid "Nuvasha Launcher"
 msgstr "Nuvasha Launcher"
+
+msgid "Copy"
+msgstr "Копировать"
+
+msgid "Rename"
+msgstr "Переименовать"
+
+msgid "Reset Icon"
+msgstr "Сбросить значок"
+
+msgid "Delete World"
+msgstr "Удалить мир"
+
+msgid "Seed copied to clipboard"
+msgstr "Сид скопирован в буфер обмена"
+
+msgid "Remove server \"%s\"?"
+msgstr "Удалить сервер «%s»?"
+
+msgid "Refresh"
+msgstr "Обновить"
+
+msgid "Remove Server"
+msgstr "Удалить сервер"
+
+msgid "Survival"
+msgstr "Выживание"
+
+msgid "Edit"
+msgstr "Изменить"
+
+msgid "Ask to download"
+msgstr "Спрашивать перед загрузкой"
+
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr "Миры, сохранённые Minecraft или импортированные сюда, появятся в этом списке."
+
+msgid "Rename World"
+msgstr "Переименовать мир"
+
+msgid "Servers"
+msgstr "Серверы"
+
+msgid "Save"
+msgstr "Сохранить"
+
+msgid "Add World"
+msgstr "Добавить мир"
+
+msgid "Spectator"
+msgstr "Наблюдатель"
+
+msgid "Delete world \"%s\"? This cannot be undone."
+msgstr "Удалить мир «%s»? Это действие нельзя отменить."
+
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "Добавленные здесь серверы сохраняются в servers.dat этого экземпляра."
+
+msgid "Add Server"
+msgstr "Добавить сервер"
+
+msgid "Edit Server"
+msgstr "Изменить сервер"
+
+msgid "Address"
+msgstr "Адрес"
+
+msgid "Datapacks"
+msgstr "Наборы данных"
+
+msgid "No Worlds"
+msgstr "Нет миров"
+
+msgid "Creative"
+msgstr "Творческий"
+
+msgid "Move Up"
+msgstr "Переместить вверх"
+
+msgid "No Servers"
+msgstr "Нет серверов"
+
+msgid "Never download"
+msgstr "Никогда не загружать"
+
+msgid "Worlds"
+msgstr "Миры"
+
+msgid "Always download"
+msgstr "Всегда загружать"
+
+msgid "Move Down"
+msgstr "Переместить вниз"
+
+msgid "Copy Seed"
+msgstr "Копировать сид"

@@ -1176,3 +1176,99 @@ msgstr "Metadatele AppStream (descrieri, rezumate și note de lansare) sunt publ
 
 msgid "Nuvasha Launcher"
 msgstr "Nuvasha Launcher"
+
+msgid "Copy"
+msgstr "Copiază"
+
+msgid "Rename"
+msgstr "Redenumește"
+
+msgid "Reset Icon"
+msgstr "Resetează pictograma"
+
+msgid "Delete World"
+msgstr "Șterge lumea"
+
+msgid "Seed copied to clipboard"
+msgstr "Seed copiat în clipboard"
+
+msgid "Remove server \"%s\"?"
+msgstr "Elimini serverul „%s”?"
+
+msgid "Refresh"
+msgstr "Reîmprospătează"
+
+msgid "Remove Server"
+msgstr "Elimină serverul"
+
+msgid "Survival"
+msgstr "Supraviețuire"
+
+msgid "Edit"
+msgstr "Editează"
+
+msgid "Ask to download"
+msgstr "Întreabă înainte de descărcare"
+
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr "Lumile salvate de Minecraft sau importate aici vor apărea în această listă."
+
+msgid "Rename World"
+msgstr "Redenumește lumea"
+
+msgid "Servers"
+msgstr "Servere"
+
+msgid "Save"
+msgstr "Salvează"
+
+msgid "Add World"
+msgstr "Adaugă lume"
+
+msgid "Spectator"
+msgstr "Spectator"
+
+msgid "Delete world \"%s\"? This cannot be undone."
+msgstr "Ștergi lumea „%s”? Această acțiune nu poate fi anulată."
+
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "Serverele adăugate aici sunt salvate în servers.dat pentru această instanță."
+
+msgid "Add Server"
+msgstr "Adaugă server"
+
+msgid "Edit Server"
+msgstr "Editează serverul"
+
+msgid "Address"
+msgstr "Adresă"
+
+msgid "Datapacks"
+msgstr "Pachete de date"
+
+msgid "No Worlds"
+msgstr "Nicio lume"
+
+msgid "Creative"
+msgstr "Creativ"
+
+msgid "Move Up"
+msgstr "Mută în sus"
+
+msgid "No Servers"
+msgstr "Niciun server"
+
+msgid "Never download"
+msgstr "Nu descărca niciodată"
+
+msgid "Worlds"
+msgstr "Lumi"
+
+msgid "Always download"
+msgstr "Descarcă întotdeauna"
+
+msgid "Move Down"
+msgstr "Mută în jos"
+
+msgid "Copy Seed"
+msgstr "Copiază seed-ul"

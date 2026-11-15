@@ -1174,3 +1174,99 @@ msgstr "AppStream-metadata (beskrivningar, sammanfattningar och versionsmeddelan
 
 msgid "Nuvasha Launcher"
 msgstr "Nuvasha Launcher"
+
+msgid "Copy"
+msgstr "Kopiera"
+
+msgid "Rename"
+msgstr "Byt namn"
+
+msgid "Reset Icon"
+msgstr "Återställ ikon"
+
+msgid "Delete World"
+msgstr "Ta bort värld"
+
+msgid "Seed copied to clipboard"
+msgstr "Frö kopierat till urklipp"
+
+msgid "Remove server \"%s\"?"
+msgstr "Ta bort servern \"%s\"?"
+
+msgid "Refresh"
+msgstr "Uppdatera"
+
+msgid "Remove Server"
+msgstr "Ta bort server"
+
+msgid "Survival"
+msgstr "Överlevnad"
+
+msgid "Edit"
+msgstr "Redigera"
+
+msgid "Ask to download"
+msgstr "Fråga innan nedladdning"
+
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr "Världar som sparats av Minecraft eller importerats hit visas i den här listan."
+
+msgid "Rename World"
+msgstr "Byt namn på värld"
+
+msgid "Servers"
+msgstr "Servrar"
+
+msgid "Save"
+msgstr "Spara"
+
+msgid "Add World"
+msgstr "Lägg till värld"
+
+msgid "Spectator"
+msgstr "Åskådare"
+
+msgid "Delete world \"%s\"? This cannot be undone."
+msgstr "Ta bort världen \"%s\"? Detta går inte att ångra."
+
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "Servrar som läggs till här sparas i servers.dat för den här instansen."
+
+msgid "Add Server"
+msgstr "Lägg till server"
+
+msgid "Edit Server"
+msgstr "Redigera server"
+
+msgid "Address"
+msgstr "Adress"
+
+msgid "Datapacks"
+msgstr "Datapaket"
+
+msgid "No Worlds"
+msgstr "Inga världar"
+
+msgid "Creative"
+msgstr "Kreativ"
+
+msgid "Move Up"
+msgstr "Flytta upp"
+
+msgid "No Servers"
+msgstr "Inga servrar"
+
+msgid "Never download"
+msgstr "Ladda aldrig ner"
+
+msgid "Worlds"
+msgstr "Världar"
+
+msgid "Always download"
+msgstr "Ladda alltid ner"
+
+msgid "Move Down"
+msgstr "Flytta ner"
+
+msgid "Copy Seed"
+msgstr "Kopiera frö"

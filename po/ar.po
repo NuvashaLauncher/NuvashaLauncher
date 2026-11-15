@@ -1182,3 +1182,99 @@ msgstr "يتم إصدار بيانات AppStream الوصفية (الأوصاف 
 
 msgid "Nuvasha Launcher"
 msgstr "Nuvasha Launcher"
+
+msgid "Copy"
+msgstr "نسخ"
+
+msgid "Rename"
+msgstr "إعادة التسمية"
+
+msgid "Reset Icon"
+msgstr "إعادة تعيين الأيقونة"
+
+msgid "Delete World"
+msgstr "حذف العالم"
+
+msgid "Seed copied to clipboard"
+msgstr "تم نسخ البذرة إلى الحافظة"
+
+msgid "Remove server \"%s\"?"
+msgstr "هل تريد إزالة الخادم «%s»؟"
+
+msgid "Refresh"
+msgstr "تحديث"
+
+msgid "Remove Server"
+msgstr "إزالة الخادم"
+
+msgid "Survival"
+msgstr "البقاء"
+
+msgid "Edit"
+msgstr "تحرير"
+
+msgid "Ask to download"
+msgstr "اسأل قبل التنزيل"
+
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr "ستظهر العوالم المحفوظة في Minecraft أو المستوردة هنا في هذه القائمة."
+
+msgid "Rename World"
+msgstr "إعادة تسمية العالم"
+
+msgid "Servers"
+msgstr "الخوادم"
+
+msgid "Save"
+msgstr "حفظ"
+
+msgid "Add World"
+msgstr "إضافة عالم"
+
+msgid "Spectator"
+msgstr "المشاهد"
+
+msgid "Delete world \"%s\"? This cannot be undone."
+msgstr "هل تريد حذف العالم «%s»؟ لا يمكن التراجع عن هذا الإجراء."
+
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "تُحفظ الخوادم المضافة هنا في servers.dat لهذه النسخة."
+
+msgid "Add Server"
+msgstr "إضافة خادم"
+
+msgid "Edit Server"
+msgstr "تحرير الخادم"
+
+msgid "Address"
+msgstr "العنوان"
+
+msgid "Datapacks"
+msgstr "حزم البيانات"
+
+msgid "No Worlds"
+msgstr "لا توجد عوالم"
+
+msgid "Creative"
+msgstr "الإبداعي"
+
+msgid "Move Up"
+msgstr "تحريك لأعلى"
+
+msgid "No Servers"
+msgstr "لا توجد خوادم"
+
+msgid "Never download"
+msgstr "عدم التنزيل مطلقًا"
+
+msgid "Worlds"
+msgstr "العوالم"
+
+msgid "Always download"
+msgstr "التنزيل دائمًا"
+
+msgid "Move Down"
+msgstr "تحريك لأسفل"
+
+msgid "Copy Seed"
+msgstr "نسخ البذرة"

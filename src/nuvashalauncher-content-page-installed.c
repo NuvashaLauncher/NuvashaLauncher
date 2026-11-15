@@ -82,7 +82,7 @@ nuvashalauncher_content_page_toggle_file (NuvashaLauncherContentPage *self,
     file->filename = g_steal_pointer (&new_base);
     if (self->instance != NULL)
       {
-        g_object_get (self->instance, "directory", &directory, NULL);
+        directory = content_page_base_directory (self);
         if (directory != NULL)
           {
             nuvashalauncher_operation_release (

@@ -32,6 +32,12 @@ gboolean nuvashalauncher_main_window_launch_instance_as (NuvashaLauncherMainWind
                                                 const char *instance_id,
                                                 const char *account_id,
                                                 GError **error);
+gboolean nuvashalauncher_main_window_launch_instance_with_options (NuvashaLauncherMainWindow *self,
+                                                          const char *instance_id,
+                                                          const char *account_id,
+                                                          const char *world_name,
+                                                          const char *server_address,
+                                                          GError **error);
 
 /* Starts the normal import flow for a local .mrpack file. */
 void nuvashalauncher_main_window_import_file (NuvashaLauncherMainWindow *self,

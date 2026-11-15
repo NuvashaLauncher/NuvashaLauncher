@@ -61,7 +61,7 @@ nuvashalauncher_content_type_title (NuvashaLauncherContentType type)
     case NUVASHALAUNCHER_CONTENT_SHADER_PACK:
       return _("Shader Packs");
     case NUVASHALAUNCHER_CONTENT_DATAPACK:
-      return "Datapacks";
+      return _("Datapacks");
     case NUVASHALAUNCHER_CONTENT_MOD:
     default:
       return _("Mods");

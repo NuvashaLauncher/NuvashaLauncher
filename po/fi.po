@@ -1174,3 +1174,99 @@ msgstr "AppStream-metatiedot (kuvaukset, yhteenvedot ja julkaisutiedot) julkaist
 
 msgid "Nuvasha Launcher"
 msgstr "Nuvasha Launcher"
+
+msgid "Copy"
+msgstr "Kopioi"
+
+msgid "Rename"
+msgstr "Nimeä uudelleen"
+
+msgid "Reset Icon"
+msgstr "Nollaa kuvake"
+
+msgid "Delete World"
+msgstr "Poista maailma"
+
+msgid "Seed copied to clipboard"
+msgstr "Siemen kopioitu leikepöydälle"
+
+msgid "Remove server \"%s\"?"
+msgstr "Poistetaanko palvelin \"%s\"?"
+
+msgid "Refresh"
+msgstr "Päivitä"
+
+msgid "Remove Server"
+msgstr "Poista palvelin"
+
+msgid "Survival"
+msgstr "Selviytyminen"
+
+msgid "Edit"
+msgstr "Muokkaa"
+
+msgid "Ask to download"
+msgstr "Kysy ennen lataamista"
+
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr "Minecraftin tallentamat tai tänne tuodut maailmat näkyvät tässä luettelossa."
+
+msgid "Rename World"
+msgstr "Nimeä maailma uudelleen"
+
+msgid "Servers"
+msgstr "Palvelimet"
+
+msgid "Save"
+msgstr "Tallenna"
+
+msgid "Add World"
+msgstr "Lisää maailma"
+
+msgid "Spectator"
+msgstr "Katsoja"
+
+msgid "Delete world \"%s\"? This cannot be undone."
+msgstr "Poistetaanko maailma \"%s\"? Tätä ei voi kumota."
+
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "Tänne lisätyt palvelimet tallennetaan tämän instanssin servers.dat-tiedostoon."
+
+msgid "Add Server"
+msgstr "Lisää palvelin"
+
+msgid "Edit Server"
+msgstr "Muokkaa palvelinta"
+
+msgid "Address"
+msgstr "Osoite"
+
+msgid "Datapacks"
+msgstr "Datapaketit"
+
+msgid "No Worlds"
+msgstr "Ei maailmoja"
+
+msgid "Creative"
+msgstr "Luova"
+
+msgid "Move Up"
+msgstr "Siirrä ylös"
+
+msgid "No Servers"
+msgstr "Ei palvelimia"
+
+msgid "Never download"
+msgstr "Älä lataa koskaan"
+
+msgid "Worlds"
+msgstr "Maailmat"
+
+msgid "Always download"
+msgstr "Lataa aina"
+
+msgid "Move Down"
+msgstr "Siirrä alas"
+
+msgid "Copy Seed"
+msgstr "Kopioi siemen"

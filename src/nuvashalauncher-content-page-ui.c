@@ -4,7 +4,6 @@
 
 #include "nuvashalauncher-content-page-private.h"
 #include "nuvashalauncher-i18n.h"
-#include "nuvashalauncher-markdown.h"
 #include "nuvashalauncher-ui-feedback.h"
 #include "nuvashalauncher-filter-entry.h"
 
@@ -29,9 +28,37 @@ void
 nuvashalauncher_content_page_set_installed_search_visible (
   NuvashaLauncherContentPage *self, gboolean visible)
 {
+  if (nuvashalauncher_content_page_is_browsing (self))
+    {
+      if (self->browse.search_bar == NULL ||
+          !GTK_IS_WIDGET (self->browse.search_bar))
+        return;
+
+      gtk_widget_set_visible (GTK_WIDGET (self->browse.search_bar), visible);
+      gtk_widget_set_hexpand (GTK_WIDGET (self->browse.search_bar), visible);
+      if (self->header_bar != NULL && self->header_search_clamp != NULL)
+        gtk_widget_set_visible (GTK_WIDGET (self->header_search_clamp), visible);
+      if (visible && self->browse.search_entry != NULL)
+        gtk_widget_grab_focus (GTK_WIDGET (self->browse.search_entry));
+      else if (!visible)
+        {
+          if (self->browse.search_entry != NULL)
+            gtk_editable_set_text (GTK_EDITABLE (self->browse.search_entry), "");
+          gtk_widget_grab_focus (GTK_WIDGET (self));
+        }
+      return;
+    }
+
+  if (self->installed.search_entry == NULL ||
+      !GTK_IS_WIDGET (self->installed.search_entry))
+    return;
+
   gtk_widget_set_visible (GTK_WIDGET (self->installed.search_entry), visible);
   gtk_widget_set_hexpand (GTK_WIDGET (self->installed.search_entry), visible);
-  gtk_widget_set_hexpand (GTK_WIDGET (self->installed.search_spacer), !visible);
+  if (self->header_bar != NULL && self->header_search_clamp != NULL)
+    gtk_widget_set_visible (GTK_WIDGET (self->header_search_clamp), visible);
+  if (self->header_bar == NULL && self->installed.search_spacer != NULL)
+    gtk_widget_set_hexpand (GTK_WIDGET (self->installed.search_spacer), !visible);
   if (visible)
     gtk_widget_grab_focus (GTK_WIDGET (self->installed.search_entry));
   else
@@ -90,9 +117,9 @@ nuvashalauncher_content_page_build_installed (NuvashaLauncherContentPage *self)
     GtkButton *update_cancel = GTK_BUTTON (gtk_builder_get_object (update_builder, "cancel"));
 
    gtk_widget_set_hexpand (GTK_WIDGET (actions), TRUE);
-   self->installed.search_bar = GTK_SEARCH_ENTRY (search_bar);
+   self->installed.search_bar = GTK_SEARCH_ENTRY (g_object_ref (search_bar));
     self->installed.search_entry = GTK_SEARCH_ENTRY (search_bar);
-     self->installed.search_button = search_button;
+     self->installed.search_button = GTK_BUTTON (g_object_ref (search_button));
     self->installed.search_spacer = actions_spacer;
     gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_bar),
                                             _("Search"));
@@ -161,7 +188,7 @@ nuvashalauncher_content_page_build_installed (NuvashaLauncherContentPage *self)
      switched, so this one is held here: without it, taking it out would
      be the last reference to it and would destroy the box and the
      spinner inside it while self->browse.spinner still points at them. */
-   self->installed.actions = GTK_BOX (actions);
+   self->installed.actions = g_object_ref_sink (GTK_BOX (actions));
    self->installed.selection_footer = selection_footer;
    self->installed.selection_label = selection_label;
    self->installed.selection_delete = selection_delete;
@@ -236,13 +263,8 @@ nuvashalauncher_content_page_on_stack_switched (GObject *stack, GParamSpec *pspe
   /* The row shows the actions of whichever list is on top. */
   nuvashalauncher_content_page_move_actions_into_bar (self, browsing);
 
-  /* Installed is a list of its own: the project page opened from Browse
-     is left with the list it was picked from. */
   if (!browsing)
-    {
-      nuvashalauncher_content_page_clear_picks (self);
-      nuvashalauncher_content_page_close_detail (self);
-    }
+    nuvashalauncher_content_page_clear_picks (self);
 
   if (!browsing || self->browse.model->searched)
     return;
@@ -261,7 +283,6 @@ nuvashalauncher_content_page_reset_for_tab_switch (NuvashaLauncherContentPage *s
        gtk_popover_popdown (self->browse.filter_popover);
      }
 
-  nuvashalauncher_content_page_close_detail (self);
   if (self->stack != NULL)
     adw_view_stack_set_visible_child_name (self->stack, "installed");
 
@@ -297,13 +318,13 @@ nuvashalauncher_content_page_build_browse (NuvashaLauncherContentPage *self)
     ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
 
    self->browse.search_entry = search_bar;
-   self->browse.search_bar = search_bar;
+   self->browse.search_bar = GTK_ENTRY (g_object_ref (search_bar));
   /* The field takes the room the row has, the way the modpack browser's
      search does, rather than a fixed width of its own. */
   gtk_widget_set_hexpand (GTK_WIDGET (search_bar), TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (search_bar), FALSE);
   gtk_entry_set_placeholder_text (search_bar,
                                             _("Search"));
-  gtk_widget_set_visible (GTK_WIDGET (search_bar), TRUE);
 
   g_signal_connect_object (search_bar, "changed",
                            G_CALLBACK (nuvashalauncher_content_page_on_search_changed), self, 0);
@@ -533,7 +554,7 @@ nuvashalauncher_content_page_build_bar (NuvashaLauncherContentPage *self)
   gtk_widget_set_hexpand (GTK_WIDGET (self->bar_spacer), TRUE);
 
   /* Use linked toggle buttons to keep this compact toolbar to one line. */
-  self->switcher = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+  self->switcher = g_object_ref_sink (GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0)));
   gtk_widget_add_css_class (GTK_WIDGET (self->switcher), "linked");
 
   self->switcher_installed = GTK_TOGGLE_BUTTON (
@@ -572,40 +593,11 @@ nuvashalauncher_content_page_build_bar (NuvashaLauncherContentPage *self)
   gtk_box_append (GTK_BOX (inner), GTK_WIDGET (self->banner));
   gtk_box_append (GTK_BOX (inner), GTK_WIDGET (self->bar));
   gtk_box_append (GTK_BOX (inner), GTK_WIDGET (self->stack));
+  gtk_widget_set_vexpand (GTK_WIDGET (inner), TRUE);
 
-  /* The list is the left half; the project that is opened is the right
-     half, and is empty until one is opened. Collapsed shows one page at a
-     time, which is the list alone. */
-   self->project.split = ADW_NAVIGATION_SPLIT_VIEW (
-     adw_navigation_split_view_new ());
-   gtk_widget_add_css_class (GTK_WIDGET (self->project.split), "background");
-  gtk_widget_set_vexpand (GTK_WIDGET (self->project.split), TRUE);
-   /* Named so the navigation split view can identify the browse page. */
-   {
-     AdwNavigationPage *sidebar = ADW_NAVIGATION_PAGE (
-       adw_navigation_page_new (GTK_WIDGET (inner),
-                                nuvashalauncher_content_type_title (self->type)));
-
-     gtk_widget_add_css_class (GTK_WIDGET (sidebar), "background");
-     adw_navigation_split_view_set_sidebar (
-       ADW_NAVIGATION_SPLIT_VIEW (self->project.split), sidebar);
-   }
-  adw_navigation_split_view_set_collapsed (
-    ADW_NAVIGATION_SPLIT_VIEW (self->project.split), TRUE);
-  adw_navigation_split_view_set_sidebar_width_fraction (
-    ADW_NAVIGATION_SPLIT_VIEW (self->project.split), 0.5);
-  /* Half the page, rather than the narrow column a split view gives a
-     sidebar by default: this half holds the search row and the list. */
-  adw_navigation_split_view_set_min_sidebar_width (
-    ADW_NAVIGATION_SPLIT_VIEW (self->project.split), 360);
-  adw_navigation_split_view_set_max_sidebar_width (
-    ADW_NAVIGATION_SPLIT_VIEW (self->project.split), 640);
-
-  /* One overlay over the list and the project, so a message about either
-     one is said in the same place. */
   self->toasts = ADW_TOAST_OVERLAY (adw_toast_overlay_new ());
   adw_toast_overlay_set_child (ADW_TOAST_OVERLAY (self->toasts),
-                               GTK_WIDGET (self->project.split));
+                               GTK_WIDGET (inner));
   gtk_box_append (GTK_BOX (self), GTK_WIDGET (self->toasts));
 }
 
@@ -616,9 +608,210 @@ nuvashalauncher_content_page_build_bar (NuvashaLauncherContentPage *self)
    Browse brings its own row, whose search field takes the room; nothing
    has to push the switcher to the right for it. Installed has no such
    row, so the spacer does that. */
+static void
+remove_widget_from_parent (GtkWidget *widget)
+{
+  GtkWidget *parent = widget != NULL ? gtk_widget_get_parent (widget) : NULL;
+
+  if (parent == NULL)
+    return;
+  if (ADW_IS_CLAMP (parent))
+    adw_clamp_set_child (ADW_CLAMP (parent), NULL);
+  else if (ADW_IS_HEADER_BAR (parent))
+    adw_header_bar_remove (ADW_HEADER_BAR (parent), widget);
+  else if (GTK_IS_BOX (parent))
+    {
+      GtkWidget *grandparent = gtk_widget_get_parent (parent);
+      if (grandparent != NULL && ADW_IS_HEADER_BAR (grandparent))
+        adw_header_bar_remove (ADW_HEADER_BAR (grandparent), widget);
+      else
+        gtk_box_remove (GTK_BOX (parent), widget);
+    }
+}
+
+gboolean
+nuvashalauncher_content_page_is_browsing (NuvashaLauncherContentPage *self)
+{
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_CONTENT_PAGE (self), FALSE);
+
+  return self->stack != NULL &&
+         g_strcmp0 (adw_view_stack_get_visible_child_name (self->stack), "browse") == 0;
+}
+
+gboolean
+nuvashalauncher_content_page_is_installed_search_visible (NuvashaLauncherContentPage *self)
+{
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_CONTENT_PAGE (self), FALSE);
+
+  if (nuvashalauncher_content_page_is_browsing (self))
+    return self->browse.search_bar != NULL &&
+           GTK_IS_WIDGET (self->browse.search_bar) &&
+           gtk_widget_get_visible (GTK_WIDGET (self->browse.search_bar));
+
+  return self->installed.search_entry != NULL &&
+         GTK_IS_WIDGET (self->installed.search_entry) &&
+         gtk_widget_get_visible (GTK_WIDGET (self->installed.search_entry));
+}
+
+static void
+sync_header_mode (NuvashaLauncherContentPage *self)
+{
+  AdwHeaderBar *header = self->header_bar;
+  gboolean browsing;
+
+  if (header == NULL || self->stack == NULL)
+    return;
+
+  browsing = g_strcmp0 (adw_view_stack_get_visible_child_name (self->stack),
+                        "browse") == 0;
+
+  gtk_widget_set_visible (GTK_WIDGET (self->installed.search_button), FALSE);
+  gtk_widget_set_visible (GTK_WIDGET (self->bar), FALSE);
+
+  if (!gtk_widget_is_ancestor (GTK_WIDGET (self->switcher), GTK_WIDGET (header)))
+    {
+      remove_widget_from_parent (GTK_WIDGET (self->switcher));
+      adw_header_bar_pack_end (header, GTK_WIDGET (self->switcher));
+    }
+
+  if (browsing)
+    {
+      if (gtk_widget_get_parent (GTK_WIDGET (self->installed.search_bar)) != NULL &&
+          gtk_widget_get_parent (GTK_WIDGET (self->installed.search_bar)) != GTK_WIDGET (self->header_search_clamp))
+        remove_widget_from_parent (GTK_WIDGET (self->installed.search_bar));
+      if (gtk_widget_get_parent (GTK_WIDGET (self->installed.search_bar)) == GTK_WIDGET (self->header_search_clamp))
+        adw_clamp_set_child (self->header_search_clamp, NULL);
+
+      if (gtk_widget_get_parent (GTK_WIDGET (self->browse.search_bar)) != GTK_WIDGET (self->header_search_clamp))
+        {
+          remove_widget_from_parent (GTK_WIDGET (self->browse.search_bar));
+          adw_clamp_set_child (self->header_search_clamp, GTK_WIDGET (self->browse.search_bar));
+        }
+      gtk_widget_set_visible (GTK_WIDGET (self->header_search_clamp),
+                              gtk_widget_get_visible (GTK_WIDGET (self->browse.search_bar)));
+      adw_header_bar_set_title_widget (header, GTK_WIDGET (self->header_search_clamp));
+
+      if (!gtk_widget_is_ancestor (GTK_WIDGET (self->installed.actions), GTK_WIDGET (header)))
+        {
+          remove_widget_from_parent (GTK_WIDGET (self->installed.actions));
+          adw_header_bar_pack_start (header, GTK_WIDGET (self->installed.actions));
+        }
+      if (self->installed.search_spacer != NULL)
+        gtk_widget_set_visible (GTK_WIDGET (self->installed.search_spacer), FALSE);
+      if (!gtk_widget_is_ancestor (GTK_WIDGET (self->browse_actions), GTK_WIDGET (header)))
+        {
+          remove_widget_from_parent (GTK_WIDGET (self->browse_actions));
+          adw_header_bar_pack_start (header, GTK_WIDGET (self->browse_actions));
+        }
+    }
+  else
+    {
+      if (gtk_widget_get_parent (GTK_WIDGET (self->browse.search_bar)) != NULL &&
+          gtk_widget_get_parent (GTK_WIDGET (self->browse.search_bar)) != GTK_WIDGET (self->header_search_clamp))
+        remove_widget_from_parent (GTK_WIDGET (self->browse.search_bar));
+      if (gtk_widget_get_parent (GTK_WIDGET (self->browse.search_bar)) == GTK_WIDGET (self->header_search_clamp))
+        adw_clamp_set_child (self->header_search_clamp, NULL);
+
+      if (gtk_widget_get_parent (GTK_WIDGET (self->installed.search_bar)) != GTK_WIDGET (self->header_search_clamp))
+        {
+          remove_widget_from_parent (GTK_WIDGET (self->installed.search_bar));
+          adw_clamp_set_child (self->header_search_clamp, GTK_WIDGET (self->installed.search_bar));
+          gtk_widget_set_hexpand (GTK_WIDGET (self->installed.search_bar), TRUE);
+        }
+      gtk_widget_set_visible (GTK_WIDGET (self->header_search_clamp),
+                              gtk_widget_get_visible (GTK_WIDGET (self->installed.search_bar)));
+      adw_header_bar_set_title_widget (header, GTK_WIDGET (self->header_search_clamp));
+
+      remove_widget_from_parent (GTK_WIDGET (self->browse_actions));
+      if (!gtk_widget_is_ancestor (GTK_WIDGET (self->installed.actions), GTK_WIDGET (header)))
+        {
+          remove_widget_from_parent (GTK_WIDGET (self->installed.actions));
+          adw_header_bar_pack_start (header, GTK_WIDGET (self->installed.actions));
+        }
+      if (self->installed.search_spacer != NULL)
+        gtk_widget_set_visible (GTK_WIDGET (self->installed.search_spacer), FALSE);
+    }
+}
+
+void
+nuvashalauncher_content_page_attach_header (NuvashaLauncherContentPage *self,
+                                           AdwHeaderBar *header)
+{
+  g_return_if_fail (NUVASHALAUNCHER_IS_CONTENT_PAGE (self));
+  g_return_if_fail (ADW_IS_HEADER_BAR (header));
+
+  if (self->header_bar == header)
+    {
+      sync_header_mode (self);
+      return;
+    }
+  if (self->header_bar != NULL)
+    nuvashalauncher_content_page_detach_header (self, self->header_bar);
+
+  self->header_bar = header;
+  if (self->header_search_clamp == NULL)
+    {
+      self->header_search_clamp = ADW_CLAMP (g_object_ref_sink (adw_clamp_new ()));
+      adw_clamp_set_maximum_size (self->header_search_clamp, 460);
+      gtk_widget_set_hexpand (GTK_WIDGET (self->header_search_clamp), TRUE);
+    }
+
+  sync_header_mode (self);
+}
+
+void
+nuvashalauncher_content_page_detach_header (NuvashaLauncherContentPage *self,
+                                           AdwHeaderBar *header)
+{
+  gboolean browsing;
+
+  g_return_if_fail (NUVASHALAUNCHER_IS_CONTENT_PAGE (self));
+  if (self->header_bar != header || header == NULL)
+    return;
+
+  self->header_bar = NULL;
+  adw_header_bar_set_title_widget (header, NULL);
+  remove_widget_from_parent (GTK_WIDGET (self->installed.actions));
+  remove_widget_from_parent (GTK_WIDGET (self->browse_actions));
+  remove_widget_from_parent (GTK_WIDGET (self->switcher));
+  if (gtk_widget_get_parent (GTK_WIDGET (self->switcher)) != GTK_WIDGET (self->bar))
+    gtk_box_append (self->bar, GTK_WIDGET (self->switcher));
+  gtk_widget_set_visible (GTK_WIDGET (self->bar), TRUE);
+  if (self->bar_spacer != NULL)
+    gtk_widget_set_visible (GTK_WIDGET (self->bar_spacer), TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (self->installed.search_button), TRUE);
+  if (self->installed.search_spacer != NULL)
+    gtk_widget_set_visible (GTK_WIDGET (self->installed.search_spacer), TRUE);
+
+  if (gtk_widget_get_parent (GTK_WIDGET (self->browse.search_bar)) != GTK_WIDGET (self->browse_actions))
+    {
+      remove_widget_from_parent (GTK_WIDGET (self->browse.search_bar));
+      gtk_box_append (self->browse_actions, GTK_WIDGET (self->browse.search_bar));
+    }
+
+  if (gtk_widget_get_parent (GTK_WIDGET (self->installed.search_bar)) != GTK_WIDGET (self->installed.actions))
+    {
+      remove_widget_from_parent (GTK_WIDGET (self->installed.search_bar));
+      gtk_box_prepend (self->installed.actions,
+                       GTK_WIDGET (self->installed.search_bar));
+      gtk_widget_set_hexpand (GTK_WIDGET (self->installed.search_bar),
+                              gtk_widget_get_visible (GTK_WIDGET (self->installed.search_bar)));
+    }
+
+  browsing = self->stack != NULL &&
+             g_strcmp0 (adw_view_stack_get_visible_child_name (self->stack), "browse") == 0;
+  nuvashalauncher_content_page_move_actions_into_bar (self, browsing);
+}
+
 void
 nuvashalauncher_content_page_move_actions_into_bar (NuvashaLauncherContentPage *self, gboolean browsing)
 {
+  if (self->header_bar != NULL)
+    {
+      sync_header_mode (self);
+      return;
+    }
+
   GtkWidget *wanted = browsing ? GTK_WIDGET (self->browse_actions)
                                : GTK_WIDGET (self->installed.actions);
   GtkWidget *other = browsing ? GTK_WIDGET (self->installed.actions)

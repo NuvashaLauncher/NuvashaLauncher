@@ -80,8 +80,6 @@ src/nuvashalauncher-main-window-instances.c
 src/nuvashalauncher-main-window-model.c
 src/nuvashalauncher-main-window-ui.c
 src/nuvashalauncher-main-window.c
-src/nuvashalauncher-markdown-inline.c
-src/nuvashalauncher-markdown.c
 src/nuvashalauncher-minecraft-resolve-arguments.c
 src/nuvashalauncher-minecraft-resolve-assets.c
 src/nuvashalauncher-minecraft-resolve-files.c
@@ -106,9 +104,11 @@ src/nuvashalauncher-modrinth-json.c
 src/nuvashalauncher-modrinth-requests.c
 src/nuvashalauncher-modrinth-versions-json.c
 src/nuvashalauncher-modrinth.c
+src/nuvashalauncher-nbt.c
 src/nuvashalauncher-offline-account-dialog.c
 src/nuvashalauncher-operation.c
 src/nuvashalauncher-secret-store.c
+src/nuvashalauncher-servers-page.c
 src/nuvashalauncher-settings.c
 src/nuvashalauncher-sign-in-dialog.c
 src/nuvashalauncher-skin-view.c
@@ -123,12 +123,11 @@ src/nuvashalauncher-users-popover-skin-textures.c
 src/nuvashalauncher-users-popover-skin.c
 src/nuvashalauncher-users-popover.c
 src/nuvashalauncher-version-row.c
-data/ui/nuvashalauncher-content-details.ui
+src/nuvashalauncher-worlds-page.c
 data/ui/nuvashalauncher-create-instance.ui
 data/ui/nuvashalauncher-download-row.ui
 data/ui/nuvashalauncher-modpack-browser-states.ui
 data/ui/nuvashalauncher-modpack-browser-toolbar.ui
-data/ui/nuvashalauncher-modpack-details-toolbar.ui
 data/ui/nuvashalauncher-modpack-dialog.ui
 data/ui/nuvashalauncher-modpack-error.ui
 data/ui/nuvashalauncher-modpack-import.ui
