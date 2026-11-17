@@ -1304,3 +1304,117 @@ msgstr "下へ移動"
 
 msgid "Copy Seed"
 msgstr "シード値をコピー"
+
+msgid "Stats"
+msgstr "統計"
+
+msgid "Playtime"
+msgstr "プレイ時間"
+
+msgid "Time played"
+msgstr "合計プレイ時間"
+
+msgid "Not played yet"
+msgstr "まだプレイしていません"
+
+msgid "Less than a minute"
+msgstr "1分未満"
+
+msgid "%llu min"
+msgstr "%llu 分"
+
+msgid "%llu h %llu min"
+msgstr "%llu 時間 %llu 分"
+
+msgid "Runs on"
+msgstr "動作環境"
+
+msgid "Activity"
+msgstr "アクティビティ"
+
+msgid "Last session"
+msgstr "前回のセッション"
+
+msgid "Last played"
+msgstr "最終プレイ"
+
+msgid "Total launches"
+msgstr "合計起動回数"
+
+msgid "Total crashes"
+msgstr "合計クラッシュ数"
+
+msgid "Server joins"
+msgstr "サーバー参加回数"
+
+msgid "World loads"
+msgstr "ワールド読込回数"
+
+msgid "Player Profile"
+msgstr "プレイヤープロファイル"
+
+msgid "Player type"
+msgstr "プレイスタイル"
+
+msgid "Pack style"
+msgstr "構成スタイル"
+
+msgid "Average session"
+msgstr "平均セッション"
+
+msgid "Stability"
+msgstr "安定性"
+
+msgid "Instance"
+msgstr "インスタンス"
+
+msgid "Total size"
+msgstr "合計サイズ"
+
+msgid "Created on"
+msgstr "作成日"
+
+msgid "Calculating…"
+msgstr "計算中…"
+
+msgid "Never"
+msgstr "なし"
+
+msgid "Today, %s"
+msgstr "今日 %s"
+
+msgid "Hybrid"
+msgstr "ハイブリッド"
+
+msgid "Server Player"
+msgstr "サーバープレイヤー"
+
+msgid "Singleplayer"
+msgstr "シングルプレイヤー"
+
+msgid "Unplayed"
+msgstr "未プレイ"
+
+msgid "Modpack"
+msgstr "Modpack"
+
+msgid "Lightweight"
+msgstr "軽量"
+
+msgid "Kitchen Sink"
+msgstr "大型パック"
+
+msgid "Quick"
+msgstr "短時間"
+
+msgid "Standard"
+msgstr "標準"
+
+msgid "Marathon"
+msgstr "長時間"
+
+msgid "Stable"
+msgstr "安定"
+
+msgid "%u%% crash rate"
+msgstr "クラッシュ率 %u%%"

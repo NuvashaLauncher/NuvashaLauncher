@@ -113,6 +113,29 @@ get_jvm_args (JsonObject *object, const char **jvm_args, GError **error)
   return TRUE;
 }
 
+static gint64
+get_nonneg_int64 (JsonObject *object, const char *member)
+{
+  if (!json_object_has_member (object, member))
+    return 0;
+
+  JsonNode *node = json_object_get_member (object, member);
+  if (JSON_NODE_HOLDS_VALUE (node) &&
+      json_node_get_value_type (node) == G_TYPE_INT64 &&
+      json_node_get_int (node) > 0)
+    return json_node_get_int (node);
+
+  return 0;
+}
+
+static guint
+get_nonneg_uint (JsonObject *object, const char *member)
+{
+  gint64 val = get_nonneg_int64 (object, member);
+
+  return val > G_MAXUINT ? G_MAXUINT : (guint) val;
+}
+
 NuvashaLauncherInstance *
 nuvashalauncher_instance_new_from_json (JsonNode *node, GError **error)
 {
@@ -190,6 +213,12 @@ nuvashalauncher_instance_new_from_json (JsonNode *node, GError **error)
         }
     }
 
+  guint64 play_seconds = (guint64) get_nonneg_int64 (object, "play_seconds");
+  gint64 last_played_at = get_nonneg_int64 (object, "last_played_at");
+  gint64 created_at = get_nonneg_int64 (object, "created_at");
+  guint launch_count = get_nonneg_uint (object, "launch_count");
+  guint crash_count = get_nonneg_uint (object, "crash_count");
+
   const char *modpack_name = NULL;
   if (!get_optional_string (object, "modpack_name", &modpack_name, error))
     return NULL;
@@ -215,6 +244,11 @@ nuvashalauncher_instance_new_from_json (JsonNode *node, GError **error)
                  "java_path", java_path,
                  "jvm_args", jvm_args,
                  "memory-mib", memory_mib,
+                 "play-seconds", play_seconds,
+                 "last-played-at", last_played_at,
+                 "created-at", created_at,
+                 "launch-count", launch_count,
+                 "crash-count", crash_count,
                  "modpack_name", modpack_name,
                  "modpack_summary", modpack_summary,
                  "modpack_version_id", modpack_version_id,
@@ -240,6 +274,18 @@ add_optional_member (JsonBuilder *builder,
     json_builder_add_null_value (builder);
   else
     json_builder_add_string_value (builder, value);
+}
+
+static void
+add_positive_int64 (JsonBuilder *builder,
+                    const char  *member_name,
+                    gint64       value)
+{
+  if (value <= 0)
+    return;
+
+  json_builder_set_member_name (builder, member_name);
+  json_builder_add_int_value (builder, value);
 }
 
 JsonNode *
@@ -278,11 +324,12 @@ nuvashalauncher_instance_to_json (NuvashaLauncherInstance *self)
   add_optional_member (builder, "java_path", self->java_path);
 
   add_optional_member (builder, "jvm_args", self->jvm_args);
-  if (self->memory_mib > 0)
-    {
-      json_builder_set_member_name (builder, "memory_mib");
-      json_builder_add_int_value (builder, (gint64) self->memory_mib);
-    }
+  add_positive_int64 (builder, "memory_mib", (gint64) self->memory_mib);
+  add_positive_int64 (builder, "play_seconds", (gint64) self->play_seconds);
+  add_positive_int64 (builder, "last_played_at", self->last_played_at);
+  add_positive_int64 (builder, "created_at", self->created_at);
+  add_positive_int64 (builder, "launch_count", (gint64) self->launch_count);
+  add_positive_int64 (builder, "crash_count", (gint64) self->crash_count);
   add_optional_member (builder, "modpack_name", self->modpack_name);
   add_optional_member (builder, "modpack_summary", self->modpack_summary);
   add_optional_member (builder, "modpack_version_id", self->modpack_version_id);

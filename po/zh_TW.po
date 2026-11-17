@@ -1270,3 +1270,117 @@ msgstr "下移"
 
 msgid "Copy Seed"
 msgstr "複製種子碼"
+
+msgid "Stats"
+msgstr "統計"
+
+msgid "Playtime"
+msgstr "遊玩時間"
+
+msgid "Time played"
+msgstr "已遊玩"
+
+msgid "Not played yet"
+msgstr "尚未遊玩"
+
+msgid "Less than a minute"
+msgstr "少於 1 分鐘"
+
+msgid "%llu min"
+msgstr "%llu 分鐘"
+
+msgid "%llu h %llu min"
+msgstr "%llu 小時 %llu 分鐘"
+
+msgid "Runs on"
+msgstr "執行環境"
+
+msgid "Activity"
+msgstr "活動"
+
+msgid "Last session"
+msgstr "上次遊玩"
+
+msgid "Last played"
+msgstr "最後遊玩"
+
+msgid "Total launches"
+msgstr "啟動次數"
+
+msgid "Total crashes"
+msgstr "當機次數"
+
+msgid "Server joins"
+msgstr "加入伺服器次數"
+
+msgid "World loads"
+msgstr "載入世界次數"
+
+msgid "Player Profile"
+msgstr "玩家檔案"
+
+msgid "Player type"
+msgstr "玩家類型"
+
+msgid "Pack style"
+msgstr "整合風格"
+
+msgid "Average session"
+msgstr "平均時長"
+
+msgid "Stability"
+msgstr "穩定性"
+
+msgid "Instance"
+msgstr "實例"
+
+msgid "Total size"
+msgstr "佔用空間"
+
+msgid "Created on"
+msgstr "建立於"
+
+msgid "Calculating…"
+msgstr "計算中…"
+
+msgid "Never"
+msgstr "從未"
+
+msgid "Today, %s"
+msgstr "今天 %s"
+
+msgid "Hybrid"
+msgstr "混合"
+
+msgid "Server Player"
+msgstr "伺服器玩家"
+
+msgid "Singleplayer"
+msgstr "單人玩家"
+
+msgid "Unplayed"
+msgstr "尚未遊玩"
+
+msgid "Modpack"
+msgstr "模組包"
+
+msgid "Lightweight"
+msgstr "輕量"
+
+msgid "Kitchen Sink"
+msgstr "大型整合"
+
+msgid "Quick"
+msgstr "短時"
+
+msgid "Standard"
+msgstr "標準"
+
+msgid "Marathon"
+msgstr "馬拉松"
+
+msgid "Stable"
+msgstr "穩定"
+
+msgid "%u%% crash rate"
+msgstr "%u%% 當機率"

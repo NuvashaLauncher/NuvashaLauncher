@@ -1270,3 +1270,117 @@ msgstr "Mozgatás lefelé"
 
 msgid "Copy Seed"
 msgstr "Mag másolása"
+
+msgid "Stats"
+msgstr "Statisztikák"
+
+msgid "Playtime"
+msgstr "Játékidő"
+
+msgid "Time played"
+msgstr "Játszott idő"
+
+msgid "Not played yet"
+msgstr "Még nem játszott"
+
+msgid "Less than a minute"
+msgstr "Kevesebb mint egy perc"
+
+msgid "%llu min"
+msgstr "%llu perc"
+
+msgid "%llu h %llu min"
+msgstr "%llu ó %llu perc"
+
+msgid "Runs on"
+msgstr "Környezet"
+
+msgid "Activity"
+msgstr "Aktivitás"
+
+msgid "Last session"
+msgstr "Utolsó munkamenet"
+
+msgid "Last played"
+msgstr "Utoljára játszva"
+
+msgid "Total launches"
+msgstr "Összes indítás"
+
+msgid "Total crashes"
+msgstr "Összes összeomlás"
+
+msgid "Server joins"
+msgstr "Szervercsatlakozások"
+
+msgid "World loads"
+msgstr "Világbetöltések"
+
+msgid "Player Profile"
+msgstr "Játékosprofil"
+
+msgid "Player type"
+msgstr "Játékostípus"
+
+msgid "Pack style"
+msgstr "Csomag stílusa"
+
+msgid "Average session"
+msgstr "Átlagos munkamenet"
+
+msgid "Stability"
+msgstr "Stabilitás"
+
+msgid "Instance"
+msgstr "Példány"
+
+msgid "Total size"
+msgstr "Teljes méret"
+
+msgid "Created on"
+msgstr "Létrehozva"
+
+msgid "Calculating…"
+msgstr "Számítás…"
+
+msgid "Never"
+msgstr "Soha"
+
+msgid "Today, %s"
+msgstr "Ma, %s"
+
+msgid "Hybrid"
+msgstr "Hibrid"
+
+msgid "Server Player"
+msgstr "Szerverjátékos"
+
+msgid "Singleplayer"
+msgstr "Egyjátékos"
+
+msgid "Unplayed"
+msgstr "Nem játszott"
+
+msgid "Modpack"
+msgstr "Modpack"
+
+msgid "Lightweight"
+msgstr "Könnyű"
+
+msgid "Kitchen Sink"
+msgstr "Mindenes"
+
+msgid "Quick"
+msgstr "Gyors"
+
+msgid "Standard"
+msgstr "Normál"
+
+msgid "Marathon"
+msgstr "Maraton"
+
+msgid "Stable"
+msgstr "Stabil"
+
+msgid "%u%% crash rate"
+msgstr "%u%% összeomlási arány"

@@ -1270,3 +1270,117 @@ msgstr "Siirrä alas"
 
 msgid "Copy Seed"
 msgstr "Kopioi siemen"
+
+msgid "Stats"
+msgstr "Tilastot"
+
+msgid "Playtime"
+msgstr "Peliaika"
+
+msgid "Time played"
+msgstr "Pelattu aika"
+
+msgid "Not played yet"
+msgstr "Ei vielä pelattu"
+
+msgid "Less than a minute"
+msgstr "Alle minuutti"
+
+msgid "%llu min"
+msgstr "%llu min"
+
+msgid "%llu h %llu min"
+msgstr "%llu t %llu min"
+
+msgid "Runs on"
+msgstr "Alusta"
+
+msgid "Activity"
+msgstr "Toiminta"
+
+msgid "Last session"
+msgstr "Viimeisin istunto"
+
+msgid "Last played"
+msgstr "Viimeksi pelattu"
+
+msgid "Total launches"
+msgstr "Käynnistykset yhteensä"
+
+msgid "Total crashes"
+msgstr "Kaatumiset yhteensä"
+
+msgid "Server joins"
+msgstr "Palvelinliittymiset"
+
+msgid "World loads"
+msgstr "Maailman lataukset"
+
+msgid "Player Profile"
+msgstr "Pelaajaprofiili"
+
+msgid "Player type"
+msgstr "Pelaajatyyppi"
+
+msgid "Pack style"
+msgstr "Paketin tyyli"
+
+msgid "Average session"
+msgstr "Keskimääräinen istunto"
+
+msgid "Stability"
+msgstr "Vakaus"
+
+msgid "Instance"
+msgstr "Instanssi"
+
+msgid "Total size"
+msgstr "Kokonaiskoko"
+
+msgid "Created on"
+msgstr "Luotu"
+
+msgid "Calculating…"
+msgstr "Lasketaan…"
+
+msgid "Never"
+msgstr "Ei koskaan"
+
+msgid "Today, %s"
+msgstr "Tänään, %s"
+
+msgid "Hybrid"
+msgstr "Hybridi"
+
+msgid "Server Player"
+msgstr "Palvelinpelaaja"
+
+msgid "Singleplayer"
+msgstr "Yksinpeli"
+
+msgid "Unplayed"
+msgstr "Pelaamaton"
+
+msgid "Modpack"
+msgstr "Modipaketti"
+
+msgid "Lightweight"
+msgstr "Kevyt"
+
+msgid "Kitchen Sink"
+msgstr "Kaikki mukana"
+
+msgid "Quick"
+msgstr "Lyhyt"
+
+msgid "Standard"
+msgstr "Tavallinen"
+
+msgid "Marathon"
+msgstr "Maraton"
+
+msgid "Stable"
+msgstr "Vakaa"
+
+msgid "%u%% crash rate"
+msgstr "%u%% kaatumisaste"

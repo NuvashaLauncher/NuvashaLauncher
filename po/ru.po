@@ -1306,3 +1306,117 @@ msgstr "Переместить вниз"
 
 msgid "Copy Seed"
 msgstr "Копировать сид"
+
+msgid "Stats"
+msgstr "Статистика"
+
+msgid "Playtime"
+msgstr "Время игры"
+
+msgid "Time played"
+msgstr "Сыграно времени"
+
+msgid "Not played yet"
+msgstr "Ещё не запускалась"
+
+msgid "Less than a minute"
+msgstr "Меньше минуты"
+
+msgid "%llu min"
+msgstr "%llu мин"
+
+msgid "%llu h %llu min"
+msgstr "%llu ч %llu мин"
+
+msgid "Runs on"
+msgstr "Платформа"
+
+msgid "Activity"
+msgstr "Активность"
+
+msgid "Last session"
+msgstr "Последний сеанс"
+
+msgid "Last played"
+msgstr "Последний запуск"
+
+msgid "Total launches"
+msgstr "Всего запусков"
+
+msgid "Total crashes"
+msgstr "Всего сбоев"
+
+msgid "Server joins"
+msgstr "Входов на серверы"
+
+msgid "World loads"
+msgstr "Загрузок миров"
+
+msgid "Player Profile"
+msgstr "Профиль игрока"
+
+msgid "Player type"
+msgstr "Тип игрока"
+
+msgid "Pack style"
+msgstr "Стиль сборки"
+
+msgid "Average session"
+msgstr "Средний сеанс"
+
+msgid "Stability"
+msgstr "Стабильность"
+
+msgid "Instance"
+msgstr "Сборка"
+
+msgid "Total size"
+msgstr "Общий размер"
+
+msgid "Created on"
+msgstr "Создана"
+
+msgid "Calculating…"
+msgstr "Вычисление…"
+
+msgid "Never"
+msgstr "Никогда"
+
+msgid "Today, %s"
+msgstr "Сегодня, %s"
+
+msgid "Hybrid"
+msgstr "Смешанный"
+
+msgid "Server Player"
+msgstr "Сетевой игрок"
+
+msgid "Singleplayer"
+msgstr "Одиночная игра"
+
+msgid "Unplayed"
+msgstr "Не запускалась"
+
+msgid "Modpack"
+msgstr "Модпак"
+
+msgid "Lightweight"
+msgstr "Лёгкая"
+
+msgid "Kitchen Sink"
+msgstr "Крупная"
+
+msgid "Quick"
+msgstr "Короткий"
+
+msgid "Standard"
+msgstr "Обычный"
+
+msgid "Marathon"
+msgstr "Марафон"
+
+msgid "Stable"
+msgstr "Стабильная"
+
+msgid "%u%% crash rate"
+msgstr "%u%% сбоев"

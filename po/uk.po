@@ -1306,3 +1306,117 @@ msgstr "Перемістити вниз"
 
 msgid "Copy Seed"
 msgstr "Копіювати зерно"
+
+msgid "Stats"
+msgstr "Статистика"
+
+msgid "Playtime"
+msgstr "Час гри"
+
+msgid "Time played"
+msgstr "Зіграно часу"
+
+msgid "Not played yet"
+msgstr "Ще не грали"
+
+msgid "Less than a minute"
+msgstr "Менше хвилини"
+
+msgid "%llu min"
+msgstr "%llu хв"
+
+msgid "%llu h %llu min"
+msgstr "%llu год %llu хв"
+
+msgid "Runs on"
+msgstr "Платформа"
+
+msgid "Activity"
+msgstr "Активність"
+
+msgid "Last session"
+msgstr "Останній сеанс"
+
+msgid "Last played"
+msgstr "Востаннє грали"
+
+msgid "Total launches"
+msgstr "Усього запусків"
+
+msgid "Total crashes"
+msgstr "Усього збоїв"
+
+msgid "Server joins"
+msgstr "Входів на сервери"
+
+msgid "World loads"
+msgstr "Завантажень світів"
+
+msgid "Player Profile"
+msgstr "Профіль гравця"
+
+msgid "Player type"
+msgstr "Тип гравця"
+
+msgid "Pack style"
+msgstr "Стиль збірки"
+
+msgid "Average session"
+msgstr "Середній сеанс"
+
+msgid "Stability"
+msgstr "Стабільність"
+
+msgid "Instance"
+msgstr "Збірка"
+
+msgid "Total size"
+msgstr "Загальний розмір"
+
+msgid "Created on"
+msgstr "Створено"
+
+msgid "Calculating…"
+msgstr "Обчислення…"
+
+msgid "Never"
+msgstr "Ніколи"
+
+msgid "Today, %s"
+msgstr "Сьогодні, %s"
+
+msgid "Hybrid"
+msgstr "Змішаний"
+
+msgid "Server Player"
+msgstr "Мережевий гравець"
+
+msgid "Singleplayer"
+msgstr "Одиночна гра"
+
+msgid "Unplayed"
+msgstr "Ще не грали"
+
+msgid "Modpack"
+msgstr "Модпак"
+
+msgid "Lightweight"
+msgstr "Легка"
+
+msgid "Kitchen Sink"
+msgstr "Велика"
+
+msgid "Quick"
+msgstr "Короткий"
+
+msgid "Standard"
+msgstr "Звичайний"
+
+msgid "Marathon"
+msgstr "Марафон"
+
+msgid "Stable"
+msgstr "Стабільна"
+
+msgid "%u%% crash rate"
+msgstr "%u%% збоїв"

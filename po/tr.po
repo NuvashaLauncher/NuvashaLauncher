@@ -1307,3 +1307,117 @@ msgstr "Aşağı Taşı"
 
 msgid "Copy Seed"
 msgstr "Tohumu Kopyala"
+
+msgid "Stats"
+msgstr "İstatistikler"
+
+msgid "Playtime"
+msgstr "Oynama süresi"
+
+msgid "Time played"
+msgstr "Oynanan süre"
+
+msgid "Not played yet"
+msgstr "Henüz oynanmadı"
+
+msgid "Less than a minute"
+msgstr "Bir dakikadan az"
+
+msgid "%llu min"
+msgstr "%llu dk"
+
+msgid "%llu h %llu min"
+msgstr "%llu sa %llu dk"
+
+msgid "Runs on"
+msgstr "Çalıştığı ortam"
+
+msgid "Activity"
+msgstr "Etkinlik"
+
+msgid "Last session"
+msgstr "Son oturum"
+
+msgid "Last played"
+msgstr "Son oynama"
+
+msgid "Total launches"
+msgstr "Toplam başlatma"
+
+msgid "Total crashes"
+msgstr "Toplam çökme"
+
+msgid "Server joins"
+msgstr "Sunucuya katılma"
+
+msgid "World loads"
+msgstr "Dünya yükleme"
+
+msgid "Player Profile"
+msgstr "Oyuncu Profili"
+
+msgid "Player type"
+msgstr "Oyuncu türü"
+
+msgid "Pack style"
+msgstr "Paket tarzı"
+
+msgid "Average session"
+msgstr "Ortalama oturum"
+
+msgid "Stability"
+msgstr "Kararlılık"
+
+msgid "Instance"
+msgstr "Örnek"
+
+msgid "Total size"
+msgstr "Toplam boyut"
+
+msgid "Created on"
+msgstr "Oluşturulma"
+
+msgid "Calculating…"
+msgstr "Hesaplanıyor…"
+
+msgid "Never"
+msgstr "Hiç"
+
+msgid "Today, %s"
+msgstr "Bugün, %s"
+
+msgid "Hybrid"
+msgstr "Karma"
+
+msgid "Server Player"
+msgstr "Sunucu Oyuncusu"
+
+msgid "Singleplayer"
+msgstr "Tek Oyunculu"
+
+msgid "Unplayed"
+msgstr "Oynanmadı"
+
+msgid "Modpack"
+msgstr "Mod Paketi"
+
+msgid "Lightweight"
+msgstr "Hafif"
+
+msgid "Kitchen Sink"
+msgstr "Kapsamlı"
+
+msgid "Quick"
+msgstr "Kısa"
+
+msgid "Standard"
+msgstr "Standart"
+
+msgid "Marathon"
+msgstr "Maraton"
+
+msgid "Stable"
+msgstr "Kararlı"
+
+msgid "%u%% crash rate"
+msgstr "%%%u çökme oranı"

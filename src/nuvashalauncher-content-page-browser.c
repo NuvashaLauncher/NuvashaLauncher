@@ -261,7 +261,6 @@ search_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     }
 
   results = nuvashalauncher_modrinth_search_finish (result, &error);
-  set_busy (self, FALSE);
 
   if (results == NULL)
     {
@@ -347,8 +346,6 @@ nuvashalauncher_content_page_run_search (NuvashaLauncherContentPage *self, gbool
       if (self->browse.results_scroller != NULL)
         gtk_widget_set_visible (GTK_WIDGET (self->browse.results_scroller), FALSE);
     }
-
-  set_busy (self, TRUE);
 
   /* Show a spinner while loading the next page. */
   gtk_widget_set_visible (GTK_WIDGET (self->browse.loading_more), TRUE);

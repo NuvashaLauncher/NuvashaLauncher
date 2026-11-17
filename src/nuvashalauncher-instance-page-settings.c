@@ -745,6 +745,35 @@ nuvashalauncher_settings_page_detach_header (GtkWidget *widget, AdwHeaderBar *he
     adw_header_bar_set_title_widget (header, NULL);
 }
 
+gpointer
+nuvashalauncher_preferences_search_attach (AdwPreferencesPage *page)
+{
+  SettingsSearchState *search_state = g_new0 (SettingsSearchState, 1);
+
+  search_state->groups = g_ptr_array_new_with_free_func (settings_search_group_free);
+  search_state->search_entry = GTK_SEARCH_ENTRY (g_object_ref_sink (gtk_search_entry_new ()));
+  gtk_search_entry_set_placeholder_text (search_state->search_entry, _("Search"));
+  gtk_widget_set_hexpand (GTK_WIDGET (search_state->search_entry), TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (search_state->search_entry), FALSE);
+  g_signal_connect (search_state->search_entry, "search-changed",
+                    G_CALLBACK (on_settings_search_changed), search_state);
+  g_object_set_data_full (G_OBJECT (page), SETTINGS_SEARCH_KEY, search_state,
+                          settings_search_state_free);
+  return search_state;
+}
+
+gpointer
+nuvashalauncher_preferences_search_add_group (gpointer search, AdwPreferencesGroup *group)
+{
+  return settings_search_add_group (search, group);
+}
+
+void
+nuvashalauncher_preferences_search_add_row (gpointer group, GtkWidget *row)
+{
+  settings_search_add_row (group, row);
+}
+
 /* ---------------------------------------------------------- *
  * The five pages
  * ---------------------------------------------------------- */
@@ -771,21 +800,11 @@ create_settings_page (NuvashaLauncherInstancePage *self)
   AdwPreferencesGroup *minecraft = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwPreferencesGroup *java = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwPreferencesGroup *actions = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
-  SettingsSearchState *search_state = g_new0 (SettingsSearchState, 1);
+  SettingsSearchState *search_state = nuvashalauncher_preferences_search_attach (page);
   SettingsSearchGroup *general_group;
   SettingsSearchGroup *minecraft_group;
   SettingsSearchGroup *java_group;
   SettingsSearchGroup *actions_group;
-
-  search_state->groups = g_ptr_array_new_with_free_func (settings_search_group_free);
-  search_state->search_entry = GTK_SEARCH_ENTRY (g_object_ref_sink (gtk_search_entry_new ()));
-  gtk_search_entry_set_placeholder_text (search_state->search_entry, _("Search"));
-  gtk_widget_set_hexpand (GTK_WIDGET (search_state->search_entry), TRUE);
-  gtk_widget_set_visible (GTK_WIDGET (search_state->search_entry), FALSE);
-  g_signal_connect (search_state->search_entry, "search-changed",
-                    G_CALLBACK (on_settings_search_changed), search_state);
-  g_object_set_data_full (G_OBJECT (page), SETTINGS_SEARCH_KEY, search_state,
-                          settings_search_state_free);
 
   general_group = settings_search_add_group (search_state, general);
   minecraft_group = settings_search_add_group (search_state, minecraft);

@@ -14,6 +14,11 @@ struct _NuvashaLauncherInstance
   char *java_path;
   char *jvm_args;
   guint memory_mib;
+  guint64 play_seconds;
+  gint64 last_played_at;
+  gint64 created_at;
+  guint launch_count;
+  guint crash_count;
   char *modpack_name;
   char *modpack_summary;
   char *modpack_version_id;

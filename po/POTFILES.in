@@ -47,6 +47,7 @@ src/nuvashalauncher-instance-manager-persistence.c
 src/nuvashalauncher-instance-manager.c
 src/nuvashalauncher-instance-page-operations.c
 src/nuvashalauncher-instance-page-settings.c
+src/nuvashalauncher-instance-page-stats.c
 src/nuvashalauncher-instance-page.c
 src/nuvashalauncher-instance.c
 src/nuvashalauncher-java-discovery.c

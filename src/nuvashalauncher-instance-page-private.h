@@ -41,6 +41,7 @@ struct _NuvashaLauncherInstancePage
   gboolean syncing_search_button;
   GtkWidget *attached_header_page;
   GtkListBox *sidebar_list;
+  GtkListBox *stats_list; /* the Stats row, pinned under the sidebar */
   gboolean syncing_sidebar;
   NuvashaLauncherLogsPage *logs_page; /* the last page, kept so a rebuild can move it back */
 
@@ -76,11 +77,15 @@ GtkWidget *instance_page_dialog_parent (NuvashaLauncherInstancePage *self);
 void refresh_in_list (NuvashaLauncherInstancePage *self);
 void rebuild_content_pages (NuvashaLauncherInstancePage *self);
 GtkWidget *create_settings_page (NuvashaLauncherInstancePage *self);
+GtkWidget *create_stats_page (NuvashaLauncherInstancePage *self);
 gboolean nuvashalauncher_settings_page_has_search (GtkWidget *widget);
 gboolean nuvashalauncher_settings_page_is_search_visible (GtkWidget *widget);
 void nuvashalauncher_settings_page_set_search_visible (GtkWidget *widget, gboolean visible);
 void nuvashalauncher_settings_page_attach_header (GtkWidget *widget, AdwHeaderBar *header);
 void nuvashalauncher_settings_page_detach_header (GtkWidget *widget, AdwHeaderBar *header);
+gpointer nuvashalauncher_preferences_search_attach (AdwPreferencesPage *page);
+gpointer nuvashalauncher_preferences_search_add_group (gpointer search, AdwPreferencesGroup *group);
+void nuvashalauncher_preferences_search_add_row (gpointer group, GtkWidget *row);
 void instance_page_show_toast (NuvashaLauncherInstancePage *self, const char *message);
 void update_directory_row (NuvashaLauncherInstancePage *self);
 void on_change_directory_clicked (GtkButton *, gpointer);

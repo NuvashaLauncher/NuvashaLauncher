@@ -1272,3 +1272,117 @@ msgstr "Posunout dolů"
 
 msgid "Copy Seed"
 msgstr "Kopírovat seed"
+
+msgid "Stats"
+msgstr "Statistiky"
+
+msgid "Playtime"
+msgstr "Doba hraní"
+
+msgid "Time played"
+msgstr "Odehraný čas"
+
+msgid "Not played yet"
+msgstr "Zatím nehráno"
+
+msgid "Less than a minute"
+msgstr "Méně než minuta"
+
+msgid "%llu min"
+msgstr "%llu min"
+
+msgid "%llu h %llu min"
+msgstr "%llu h %llu min"
+
+msgid "Runs on"
+msgstr "Běží na"
+
+msgid "Activity"
+msgstr "Aktivita"
+
+msgid "Last session"
+msgstr "Poslední relace"
+
+msgid "Last played"
+msgstr "Naposledy hráno"
+
+msgid "Total launches"
+msgstr "Celkem spuštění"
+
+msgid "Total crashes"
+msgstr "Celkem pádů"
+
+msgid "Server joins"
+msgstr "Připojení k serveru"
+
+msgid "World loads"
+msgstr "Načtení světů"
+
+msgid "Player Profile"
+msgstr "Profil hráče"
+
+msgid "Player type"
+msgstr "Typ hráče"
+
+msgid "Pack style"
+msgstr "Styl balíčku"
+
+msgid "Average session"
+msgstr "Průměrná relace"
+
+msgid "Stability"
+msgstr "Stabilita"
+
+msgid "Instance"
+msgstr "Instance"
+
+msgid "Total size"
+msgstr "Celková velikost"
+
+msgid "Created on"
+msgstr "Vytvořeno"
+
+msgid "Calculating…"
+msgstr "Výpočet…"
+
+msgid "Never"
+msgstr "Nikdy"
+
+msgid "Today, %s"
+msgstr "Dnes, %s"
+
+msgid "Hybrid"
+msgstr "Hybridní"
+
+msgid "Server Player"
+msgstr "Hráč na serverech"
+
+msgid "Singleplayer"
+msgstr "Hra pro jednoho"
+
+msgid "Unplayed"
+msgstr "Nehráno"
+
+msgid "Modpack"
+msgstr "Modpack"
+
+msgid "Lightweight"
+msgstr "Lehký"
+
+msgid "Kitchen Sink"
+msgstr "Vše v jednom"
+
+msgid "Quick"
+msgstr "Krátké"
+
+msgid "Standard"
+msgstr "Standardní"
+
+msgid "Marathon"
+msgstr "Maraton"
+
+msgid "Stable"
+msgstr "Stabilní"
+
+msgid "%u%% crash rate"
+msgstr "%u%% pádů"

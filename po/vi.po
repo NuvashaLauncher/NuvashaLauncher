@@ -1270,3 +1270,117 @@ msgstr "Di chuyển xuống"
 
 msgid "Copy Seed"
 msgstr "Sao chép seed"
+
+msgid "Stats"
+msgstr "Thống kê"
+
+msgid "Playtime"
+msgstr "Thời gian chơi"
+
+msgid "Time played"
+msgstr "Đã chơi"
+
+msgid "Not played yet"
+msgstr "Chưa chơi lần nào"
+
+msgid "Less than a minute"
+msgstr "Dưới một phút"
+
+msgid "%llu min"
+msgstr "%llu phút"
+
+msgid "%llu h %llu min"
+msgstr "%llu giờ %llu phút"
+
+msgid "Runs on"
+msgstr "Chạy trên"
+
+msgid "Activity"
+msgstr "Hoạt động"
+
+msgid "Last session"
+msgstr "Phiên gần nhất"
+
+msgid "Last played"
+msgstr "Lần chơi cuối"
+
+msgid "Total launches"
+msgstr "Tổng số lần chạy"
+
+msgid "Total crashes"
+msgstr "Tổng số lần lỗi"
+
+msgid "Server joins"
+msgstr "Số lần vào máy chủ"
+
+msgid "World loads"
+msgstr "Số lần tải thế giới"
+
+msgid "Player Profile"
+msgstr "Hồ sơ người chơi"
+
+msgid "Player type"
+msgstr "Kiểu người chơi"
+
+msgid "Pack style"
+msgstr "Kiểu gói"
+
+msgid "Average session"
+msgstr "Phiên trung bình"
+
+msgid "Stability"
+msgstr "Độ ổn định"
+
+msgid "Instance"
+msgstr "Phiên bản"
+
+msgid "Total size"
+msgstr "Tổng dung lượng"
+
+msgid "Created on"
+msgstr "Ngày tạo"
+
+msgid "Calculating…"
+msgstr "Đang tính…"
+
+msgid "Never"
+msgstr "Chưa từng"
+
+msgid "Today, %s"
+msgstr "Hôm nay, %s"
+
+msgid "Hybrid"
+msgstr "Kết hợp"
+
+msgid "Server Player"
+msgstr "Người chơi máy chủ"
+
+msgid "Singleplayer"
+msgstr "Chơi đơn"
+
+msgid "Unplayed"
+msgstr "Chưa chơi"
+
+msgid "Modpack"
+msgstr "Modpack"
+
+msgid "Lightweight"
+msgstr "Nhẹ"
+
+msgid "Kitchen Sink"
+msgstr "Đầy đủ"
+
+msgid "Quick"
+msgstr "Nhanh"
+
+msgid "Standard"
+msgstr "Tiêu chuẩn"
+
+msgid "Marathon"
+msgstr "Dài"
+
+msgid "Stable"
+msgstr "Ổn định"
+
+msgid "%u%% crash rate"
+msgstr "%u%% tỉ lệ lỗi"

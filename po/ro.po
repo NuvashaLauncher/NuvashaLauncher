@@ -1272,3 +1272,117 @@ msgstr "Mută în jos"
 
 msgid "Copy Seed"
 msgstr "Copiază seed-ul"
+
+msgid "Stats"
+msgstr "Statistici"
+
+msgid "Playtime"
+msgstr "Timp de joc"
+
+msgid "Time played"
+msgstr "Timp jucat"
+
+msgid "Not played yet"
+msgstr "Încă nejucat"
+
+msgid "Less than a minute"
+msgstr "Mai puțin de un minut"
+
+msgid "%llu min"
+msgstr "%llu min"
+
+msgid "%llu h %llu min"
+msgstr "%llu h %llu min"
+
+msgid "Runs on"
+msgstr "Rulează pe"
+
+msgid "Activity"
+msgstr "Activitate"
+
+msgid "Last session"
+msgstr "Ultima sesiune"
+
+msgid "Last played"
+msgstr "Ultima dată jucat"
+
+msgid "Total launches"
+msgstr "Total lansări"
+
+msgid "Total crashes"
+msgstr "Total blocări"
+
+msgid "Server joins"
+msgstr "Conectări la servere"
+
+msgid "World loads"
+msgstr "Încărcări de lumi"
+
+msgid "Player Profile"
+msgstr "Profil jucător"
+
+msgid "Player type"
+msgstr "Tip jucător"
+
+msgid "Pack style"
+msgstr "Stil pachet"
+
+msgid "Average session"
+msgstr "Sesiune medie"
+
+msgid "Stability"
+msgstr "Stabilitate"
+
+msgid "Instance"
+msgstr "Instanță"
+
+msgid "Total size"
+msgstr "Dimensiune totală"
+
+msgid "Created on"
+msgstr "Creată la"
+
+msgid "Calculating…"
+msgstr "Se calculează…"
+
+msgid "Never"
+msgstr "Niciodată"
+
+msgid "Today, %s"
+msgstr "Astăzi, %s"
+
+msgid "Hybrid"
+msgstr "Hibrid"
+
+msgid "Server Player"
+msgstr "Jucător pe servere"
+
+msgid "Singleplayer"
+msgstr "Un singur jucător"
+
+msgid "Unplayed"
+msgstr "Nejucat"
+
+msgid "Modpack"
+msgstr "Modpack"
+
+msgid "Lightweight"
+msgstr "Ușor"
+
+msgid "Kitchen Sink"
+msgstr "Complet"
+
+msgid "Quick"
+msgstr "Scurtă"
+
+msgid "Standard"
+msgstr "Standard"
+
+msgid "Marathon"
+msgstr "Maraton"
+
+msgid "Stable"
+msgstr "Stabilă"
+
+msgid "%u%% crash rate"
+msgstr "%u%% rată de blocare"
