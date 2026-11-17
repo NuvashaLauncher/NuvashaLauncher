@@ -1311,3 +1311,117 @@ msgstr "Descendre"
 
 msgid "Copy Seed"
 msgstr "Copier la graine"
+
+msgid "Stats"
+msgstr "Statistiques"
+
+msgid "Playtime"
+msgstr "Temps de jeu"
+
+msgid "Time played"
+msgstr "Temps joué"
+
+msgid "Not played yet"
+msgstr "Pas encore joué"
+
+msgid "Less than a minute"
+msgstr "Moins d'une minute"
+
+msgid "%llu min"
+msgstr "%llu min"
+
+msgid "%llu h %llu min"
+msgstr "%llu h %llu min"
+
+msgid "Runs on"
+msgstr "Fonctionne sur"
+
+msgid "Activity"
+msgstr "Activité"
+
+msgid "Last session"
+msgstr "Dernière session"
+
+msgid "Last played"
+msgstr "Dernière partie"
+
+msgid "Total launches"
+msgstr "Lancements totaux"
+
+msgid "Total crashes"
+msgstr "Plantages totaux"
+
+msgid "Server joins"
+msgstr "Connexions serveur"
+
+msgid "World loads"
+msgstr "Chargements de monde"
+
+msgid "Player Profile"
+msgstr "Profil du joueur"
+
+msgid "Player type"
+msgstr "Type de joueur"
+
+msgid "Pack style"
+msgstr "Style de pack"
+
+msgid "Average session"
+msgstr "Session moyenne"
+
+msgid "Stability"
+msgstr "Stabilité"
+
+msgid "Instance"
+msgstr "Instance"
+
+msgid "Total size"
+msgstr "Taille totale"
+
+msgid "Created on"
+msgstr "Créée le"
+
+msgid "Calculating…"
+msgstr "Calcul…"
+
+msgid "Never"
+msgstr "Jamais"
+
+msgid "Today, %s"
+msgstr "Aujourd'hui, %s"
+
+msgid "Hybrid"
+msgstr "Hybride"
+
+msgid "Server Player"
+msgstr "Joueur serveur"
+
+msgid "Singleplayer"
+msgstr "Solo"
+
+msgid "Unplayed"
+msgstr "Non joué"
+
+msgid "Modpack"
+msgstr "Modpack"
+
+msgid "Lightweight"
+msgstr "Léger"
+
+msgid "Kitchen Sink"
+msgstr "Complet"
+
+msgid "Quick"
+msgstr "Rapide"
+
+msgid "Standard"
+msgstr "Standard"
+
+msgid "Marathon"
+msgstr "Marathon"
+
+msgid "Stable"
+msgstr "Stable"
+
+msgid "%u%% crash rate"
+msgstr "%u%% de plantages"

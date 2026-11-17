@@ -267,7 +267,6 @@ nuvashalauncher_content_page_dispose (GObject *object)
   self->browse.loading_more = NULL;
   self->browse.retry_row = NULL;
   self->browse.retry_label = NULL;
-  self->browse.spinner = NULL;
   g_clear_object (&self->header_search_clamp);
   g_clear_object (&self->installed.search_bar);
   self->installed.search_entry = NULL;
@@ -435,11 +434,4 @@ on_banner_dismiss (AdwBanner *banner G_GNUC_UNUSED, gpointer user_data)
 
   if (self->banner != NULL)
     adw_banner_set_revealed (ADW_BANNER (self->banner), FALSE);
-}
-
-void
-set_busy (NuvashaLauncherContentPage *self, gboolean busy)
-{
-  if (self->browse.spinner != NULL)
-    gtk_widget_set_visible (GTK_WIDGET (self->browse.spinner), busy);
 }

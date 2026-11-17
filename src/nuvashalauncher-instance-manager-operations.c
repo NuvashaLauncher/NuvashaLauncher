@@ -171,6 +171,7 @@ nuvashalauncher_instance_manager_duplicate_async (NuvashaLauncherInstanceManager
                 "java_path", java_path,
                 "jvm_args", jvm_args,
                 "memory-mib", memory_mib,
+                "created-at", g_get_real_time () / G_USEC_PER_SEC,
                 "modpack-name", modpack_name,
                 "modpack-summary", modpack_summary,
                 "modpack-version-id", modpack_version_id,

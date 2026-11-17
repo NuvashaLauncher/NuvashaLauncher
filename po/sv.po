@@ -1270,3 +1270,117 @@ msgstr "Flytta ner"
 
 msgid "Copy Seed"
 msgstr "Kopiera frö"
+
+msgid "Stats"
+msgstr "Statistik"
+
+msgid "Playtime"
+msgstr "Speltid"
+
+msgid "Time played"
+msgstr "Spelad tid"
+
+msgid "Not played yet"
+msgstr "Inte spelad ännu"
+
+msgid "Less than a minute"
+msgstr "Mindre än en minut"
+
+msgid "%llu min"
+msgstr "%llu min"
+
+msgid "%llu h %llu min"
+msgstr "%llu tim %llu min"
+
+msgid "Runs on"
+msgstr "Körs på"
+
+msgid "Activity"
+msgstr "Aktivitet"
+
+msgid "Last session"
+msgstr "Senaste sessionen"
+
+msgid "Last played"
+msgstr "Senast spelad"
+
+msgid "Total launches"
+msgstr "Antal starter"
+
+msgid "Total crashes"
+msgstr "Antal krascher"
+
+msgid "Server joins"
+msgstr "Serveranslutningar"
+
+msgid "World loads"
+msgstr "Världsladdningar"
+
+msgid "Player Profile"
+msgstr "Spelarprofil"
+
+msgid "Player type"
+msgstr "Spelartyp"
+
+msgid "Pack style"
+msgstr "Paketstil"
+
+msgid "Average session"
+msgstr "Genomsnittlig session"
+
+msgid "Stability"
+msgstr "Stabilitet"
+
+msgid "Instance"
+msgstr "Instans"
+
+msgid "Total size"
+msgstr "Total storlek"
+
+msgid "Created on"
+msgstr "Skapad"
+
+msgid "Calculating…"
+msgstr "Beräknar…"
+
+msgid "Never"
+msgstr "Aldrig"
+
+msgid "Today, %s"
+msgstr "Idag, %s"
+
+msgid "Hybrid"
+msgstr "Hybrid"
+
+msgid "Server Player"
+msgstr "Serverspelare"
+
+msgid "Singleplayer"
+msgstr "Enspelarläge"
+
+msgid "Unplayed"
+msgstr "Ospelad"
+
+msgid "Modpack"
+msgstr "Modpaket"
+
+msgid "Lightweight"
+msgstr "Lättvikt"
+
+msgid "Kitchen Sink"
+msgstr "Allt-i-ett"
+
+msgid "Quick"
+msgstr "Kort"
+
+msgid "Standard"
+msgstr "Standard"
+
+msgid "Marathon"
+msgstr "Maraton"
+
+msgid "Stable"
+msgstr "Stabil"
+
+msgid "%u%% crash rate"
+msgstr "%u%% kraschfrekvens"

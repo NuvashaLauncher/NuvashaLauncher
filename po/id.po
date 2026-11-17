@@ -1270,3 +1270,117 @@ msgstr "Pindah ke Bawah"
 
 msgid "Copy Seed"
 msgstr "Salin Seed"
+
+msgid "Stats"
+msgstr "Statistik"
+
+msgid "Playtime"
+msgstr "Waktu bermain"
+
+msgid "Time played"
+msgstr "Lama dimainkan"
+
+msgid "Not played yet"
+msgstr "Belum dimainkan"
+
+msgid "Less than a minute"
+msgstr "Kurang dari semenit"
+
+msgid "%llu min"
+msgstr "%llu mnt"
+
+msgid "%llu h %llu min"
+msgstr "%llu j %llu mnt"
+
+msgid "Runs on"
+msgstr "Berjalan di"
+
+msgid "Activity"
+msgstr "Aktivitas"
+
+msgid "Last session"
+msgstr "Sesi terakhir"
+
+msgid "Last played"
+msgstr "Terakhir dimainkan"
+
+msgid "Total launches"
+msgstr "Total peluncuran"
+
+msgid "Total crashes"
+msgstr "Total crash"
+
+msgid "Server joins"
+msgstr "Gabung server"
+
+msgid "World loads"
+msgstr "Muat dunia"
+
+msgid "Player Profile"
+msgstr "Profil Pemain"
+
+msgid "Player type"
+msgstr "Tipe pemain"
+
+msgid "Pack style"
+msgstr "Gaya paket"
+
+msgid "Average session"
+msgstr "Rata-rata sesi"
+
+msgid "Stability"
+msgstr "Stabilitas"
+
+msgid "Instance"
+msgstr "Instans"
+
+msgid "Total size"
+msgstr "Ukuran total"
+
+msgid "Created on"
+msgstr "Dibuat pada"
+
+msgid "Calculating…"
+msgstr "Menghitung…"
+
+msgid "Never"
+msgstr "Tidak pernah"
+
+msgid "Today, %s"
+msgstr "Hari ini, %s"
+
+msgid "Hybrid"
+msgstr "Hibrida"
+
+msgid "Server Player"
+msgstr "Pemain Server"
+
+msgid "Singleplayer"
+msgstr "Pemain Tunggal"
+
+msgid "Unplayed"
+msgstr "Belum dimainkan"
+
+msgid "Modpack"
+msgstr "Modpack"
+
+msgid "Lightweight"
+msgstr "Ringan"
+
+msgid "Kitchen Sink"
+msgstr "Lengkap"
+
+msgid "Quick"
+msgstr "Singkat"
+
+msgid "Standard"
+msgstr "Standar"
+
+msgid "Marathon"
+msgstr "Maraton"
+
+msgid "Stable"
+msgstr "Stabil"
+
+msgid "%u%% crash rate"
+msgstr "%u%% tingkat crash"

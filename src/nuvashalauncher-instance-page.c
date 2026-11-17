@@ -128,18 +128,19 @@ refresh_in_list (NuvashaLauncherInstancePage *self)
 static GtkWidget *
 settings_page_widget (GtkWidget *page)
 {
-  AdwNavigationPage *nav_page;
-  GtkWidget *child;
-
-  if (page == NULL || !ADW_IS_NAVIGATION_VIEW (page))
+  if (page == NULL)
     return NULL;
 
-  nav_page = adw_navigation_view_get_visible_page (ADW_NAVIGATION_VIEW (page));
-  if (nav_page == NULL)
-    return NULL;
+  if (ADW_IS_NAVIGATION_VIEW (page))
+    {
+      AdwNavigationPage *nav_page =
+        adw_navigation_view_get_visible_page (ADW_NAVIGATION_VIEW (page));
+      GtkWidget *child = nav_page != NULL ? adw_navigation_page_get_child (nav_page) : NULL;
 
-  child = adw_navigation_page_get_child (nav_page);
-  return nuvashalauncher_settings_page_has_search (child) ? child : NULL;
+      return nuvashalauncher_settings_page_has_search (child) ? child : NULL;
+    }
+
+  return nuvashalauncher_settings_page_has_search (page) ? page : NULL;
 }
 
 static void
@@ -410,17 +411,41 @@ typedef struct {
   const char *name;
   const char *title;
   const char *icon;
+  gboolean group_start; /* a line is drawn above, like Nautilus does */
 } InstanceSidebarSection;
 
+/* Settings, then the content, then the saves, then the logs; Stats is
+ * pinned under the list. */
 static const InstanceSidebarSection instance_sections[] = {
-  { "settings", "Settings", "emblem-system-symbolic" },
-  { "resource-packs", "Resource Packs", "image-x-generic-symbolic" },
-  { "shader-packs", "Shader Packs", "applications-graphics-symbolic" },
-  { "mods", "Mods", "package-x-generic-symbolic" },
-  { "worlds", "Worlds", "folder-saved-search-symbolic" },
-  { "servers", "Servers", "network-server-symbolic" },
-  { "logs", "Logs", "utilities-terminal-symbolic" },
+  { "settings", "Settings", "emblem-system-symbolic", FALSE },
+  { "resource-packs", "Resource Packs", "image-x-generic-symbolic", TRUE },
+  { "shader-packs", "Shader Packs", "applications-graphics-symbolic", FALSE },
+  { "mods", "Mods", "package-x-generic-symbolic", FALSE },
+  { "worlds", "Worlds", "checkbox-symbolic", TRUE },
+  { "servers", "Servers", "network-server-symbolic", FALSE },
+  { "logs", "Logs", "utilities-terminal-symbolic", TRUE },
 };
+
+static const InstanceSidebarSection stats_section =
+  { "stats", "Stats", "power-profile-performance-symbolic", FALSE };
+
+/* The line between two groups of rows. */
+static void
+sidebar_header_func (GtkListBoxRow *row, GtkListBoxRow *before G_GNUC_UNUSED,
+                     gpointer user_data G_GNUC_UNUSED)
+{
+  if (GPOINTER_TO_INT (g_object_get_data (G_OBJECT (row),
+                                          "nuvashalauncher-group-start")))
+    {
+      GtkWidget *separator = gtk_separator_new (GTK_ORIENTATION_HORIZONTAL);
+
+      gtk_widget_set_margin_top (separator, 6);
+      gtk_widget_set_margin_bottom (separator, 6);
+      gtk_list_box_row_set_header (row, separator);
+    }
+  else
+    gtk_list_box_row_set_header (row, NULL);
+}
 
 static void
 sync_sidebar_to_page (NuvashaLauncherInstancePage *self, const char *name)
@@ -429,16 +454,27 @@ sync_sidebar_to_page (NuvashaLauncherInstancePage *self, const char *name)
     return;
 
   self->syncing_sidebar = TRUE;
-  for (int i = 0; ; i++)
+  if (g_strcmp0 (name, stats_section.name) == 0 && self->stats_list != NULL)
     {
-      GtkListBoxRow *row = gtk_list_box_get_row_at_index (self->sidebar_list, i);
-      if (row == NULL)
-        break;
-      const char *row_name = g_object_get_data (G_OBJECT (row), "nuvashalauncher-page-name");
-      if (g_strcmp0 (row_name, name) == 0)
+      gtk_list_box_unselect_all (self->sidebar_list);
+      gtk_list_box_select_row (self->stats_list,
+                               gtk_list_box_get_row_at_index (self->stats_list, 0));
+    }
+  else
+    {
+      if (self->stats_list != NULL)
+        gtk_list_box_unselect_all (self->stats_list);
+      for (int i = 0; ; i++)
         {
-          gtk_list_box_select_row (self->sidebar_list, row);
-          break;
+          GtkListBoxRow *row = gtk_list_box_get_row_at_index (self->sidebar_list, i);
+          if (row == NULL)
+            break;
+          const char *row_name = g_object_get_data (G_OBJECT (row), "nuvashalauncher-page-name");
+          if (g_strcmp0 (row_name, name) == 0)
+            {
+              gtk_list_box_select_row (self->sidebar_list, row);
+              break;
+            }
         }
     }
   self->syncing_sidebar = FALSE;
@@ -481,6 +517,8 @@ create_sidebar_row (const InstanceSidebarSection *section)
   gtk_list_box_row_set_child (GTK_LIST_BOX_ROW (row), box);
   g_object_set_data (G_OBJECT (row), "nuvashalauncher-page-name",
                      (gpointer) section->name);
+  g_object_set_data (G_OBJECT (row), "nuvashalauncher-group-start",
+                     GINT_TO_POINTER (section->group_start));
   return row;
 }
 
@@ -587,7 +625,7 @@ nuvashalauncher_instance_page_new (NuvashaLauncherInstanceManager *manager, Nuva
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack),
     GTK_WIDGET (nuvashalauncher_worlds_page_new (instance, launcher)),
-     "worlds", _("Worlds"), "folder-saved-search-symbolic");
+     "worlds", _("Worlds"), "checkbox-symbolic");
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack),
     GTK_WIDGET (nuvashalauncher_servers_page_new (instance, launcher)),
@@ -600,6 +638,10 @@ nuvashalauncher_instance_page_new (NuvashaLauncherInstanceManager *manager, Nuva
   adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (stack),
                                         GTK_WIDGET (self->logs_page), "logs", _("Logs"),
                                        "utilities-terminal-symbolic");
+
+  adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (stack), create_stats_page (self),
+                                       stats_section.name, _("Stats"),
+                                       stats_section.icon);
 
   /* Kept so that the content pages can be built again when the loader or
      the Minecraft version changes. */
@@ -619,7 +661,16 @@ nuvashalauncher_instance_page_new (NuvashaLauncherInstanceManager *manager, Nuva
     gtk_list_box_append (sidebar_list, create_sidebar_row (&instance_sections[i]));
   g_signal_connect_object (sidebar_list, "row-selected",
                            G_CALLBACK (on_sidebar_row_selected), self, 0);
+  gtk_list_box_set_header_func (sidebar_list, sidebar_header_func, NULL, NULL);
   self->sidebar_list = sidebar_list;
+
+  GtkListBox *stats_list = GTK_LIST_BOX (gtk_list_box_new ());
+  gtk_widget_add_css_class (GTK_WIDGET (stats_list), "navigation-sidebar");
+  gtk_list_box_set_selection_mode (stats_list, GTK_SELECTION_SINGLE);
+  gtk_list_box_append (stats_list, create_sidebar_row (&stats_section));
+  g_signal_connect_object (stats_list, "row-selected",
+                           G_CALLBACK (on_sidebar_row_selected), self, 0);
+  self->stats_list = stats_list;
 
   GtkScrolledWindow *sidebar_scroll = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
   gtk_scrolled_window_set_policy (sidebar_scroll, GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
@@ -638,7 +689,11 @@ nuvashalauncher_instance_page_new (NuvashaLauncherInstanceManager *manager, Nuva
   self->sidebar_search_button = sidebar_search_button;
   AdwToolbarView *sidebar_toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
   adw_toolbar_view_add_top_bar (sidebar_toolbar, GTK_WIDGET (sidebar_header));
-  adw_toolbar_view_set_content (sidebar_toolbar, GTK_WIDGET (sidebar_scroll));
+  GtkWidget *sidebar_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  gtk_box_append (GTK_BOX (sidebar_box), GTK_WIDGET (sidebar_scroll));
+  gtk_box_append (GTK_BOX (sidebar_box), gtk_separator_new (GTK_ORIENTATION_HORIZONTAL));
+  gtk_box_append (GTK_BOX (sidebar_box), GTK_WIDGET (stats_list));
+  adw_toolbar_view_set_content (sidebar_toolbar, sidebar_box);
   AdwNavigationPage *sidebar_nav_page = adw_navigation_page_new (
     GTK_WIDGET (sidebar_toolbar), name != NULL && *name != '\0' ? name : " ");
 
@@ -700,6 +755,7 @@ nuvashalauncher_instance_page_dispose (GObject *object)
   self->content_header = NULL;
   self->sidebar_search_button = NULL;
   self->sidebar_list = NULL;
+  self->stats_list = NULL;
   g_clear_object (&self->logs_page);
   self->java_row = NULL;
   self->directory_row = NULL;

@@ -1307,3 +1307,117 @@ msgstr "Omlaag verplaatsen"
 
 msgid "Copy Seed"
 msgstr "Seed kopiëren"
+
+msgid "Stats"
+msgstr "Statistieken"
+
+msgid "Playtime"
+msgstr "Speeltijd"
+
+msgid "Time played"
+msgstr "Gespeelde tijd"
+
+msgid "Not played yet"
+msgstr "Nog niet gespeeld"
+
+msgid "Less than a minute"
+msgstr "Minder dan een minuut"
+
+msgid "%llu min"
+msgstr "%llu min"
+
+msgid "%llu h %llu min"
+msgstr "%llu u %llu min"
+
+msgid "Runs on"
+msgstr "Draait op"
+
+msgid "Activity"
+msgstr "Activiteit"
+
+msgid "Last session"
+msgstr "Laatste sessie"
+
+msgid "Last played"
+msgstr "Laatst gespeeld"
+
+msgid "Total launches"
+msgstr "Aantal starts"
+
+msgid "Total crashes"
+msgstr "Aantal crashes"
+
+msgid "Server joins"
+msgstr "Serverbezoeken"
+
+msgid "World loads"
+msgstr "Werelden geladen"
+
+msgid "Player Profile"
+msgstr "Spelersprofiel"
+
+msgid "Player type"
+msgstr "Spelertype"
+
+msgid "Pack style"
+msgstr "Pakketstijl"
+
+msgid "Average session"
+msgstr "Gemiddelde sessie"
+
+msgid "Stability"
+msgstr "Stabiliteit"
+
+msgid "Instance"
+msgstr "Instantie"
+
+msgid "Total size"
+msgstr "Totale grootte"
+
+msgid "Created on"
+msgstr "Aangemaakt op"
+
+msgid "Calculating…"
+msgstr "Berekenen…"
+
+msgid "Never"
+msgstr "Nooit"
+
+msgid "Today, %s"
+msgstr "Vandaag, %s"
+
+msgid "Hybrid"
+msgstr "Hybride"
+
+msgid "Server Player"
+msgstr "Serverspeler"
+
+msgid "Singleplayer"
+msgstr "Singleplayer"
+
+msgid "Unplayed"
+msgstr "Ongespeeld"
+
+msgid "Modpack"
+msgstr "Modpack"
+
+msgid "Lightweight"
+msgstr "Lichtgewicht"
+
+msgid "Kitchen Sink"
+msgstr "Uitgebreid"
+
+msgid "Quick"
+msgstr "Kort"
+
+msgid "Standard"
+msgstr "Standaard"
+
+msgid "Marathon"
+msgstr "Marathon"
+
+msgid "Stable"
+msgstr "Stabiel"
+
+msgid "%u%% crash rate"
+msgstr "%u%% crashratio"

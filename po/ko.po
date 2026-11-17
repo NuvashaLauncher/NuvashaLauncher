@@ -1303,3 +1303,117 @@ msgstr "아래로 이동"
 
 msgid "Copy Seed"
 msgstr "시드 복사"
+
+msgid "Stats"
+msgstr "통계"
+
+msgid "Playtime"
+msgstr "플레이 시간"
+
+msgid "Time played"
+msgstr "플레이한 시간"
+
+msgid "Not played yet"
+msgstr "아직 플레이하지 않음"
+
+msgid "Less than a minute"
+msgstr "1분 미만"
+
+msgid "%llu min"
+msgstr "%llu분"
+
+msgid "%llu h %llu min"
+msgstr "%llu시간 %llu분"
+
+msgid "Runs on"
+msgstr "실행 환경"
+
+msgid "Activity"
+msgstr "활동"
+
+msgid "Last session"
+msgstr "마지막 세션"
+
+msgid "Last played"
+msgstr "마지막 플레이"
+
+msgid "Total launches"
+msgstr "총 실행 횟수"
+
+msgid "Total crashes"
+msgstr "총 충돌 횟수"
+
+msgid "Server joins"
+msgstr "서버 접속 횟수"
+
+msgid "World loads"
+msgstr "월드 불러오기 횟수"
+
+msgid "Player Profile"
+msgstr "플레이어 프로필"
+
+msgid "Player type"
+msgstr "플레이어 유형"
+
+msgid "Pack style"
+msgstr "팩 스타일"
+
+msgid "Average session"
+msgstr "평균 세션"
+
+msgid "Stability"
+msgstr "안정성"
+
+msgid "Instance"
+msgstr "인스턴스"
+
+msgid "Total size"
+msgstr "전체 크기"
+
+msgid "Created on"
+msgstr "생성일"
+
+msgid "Calculating…"
+msgstr "계산 중…"
+
+msgid "Never"
+msgstr "없음"
+
+msgid "Today, %s"
+msgstr "오늘, %s"
+
+msgid "Hybrid"
+msgstr "혼합"
+
+msgid "Server Player"
+msgstr "서버 플레이어"
+
+msgid "Singleplayer"
+msgstr "싱글플레이어"
+
+msgid "Unplayed"
+msgstr "플레이 안 함"
+
+msgid "Modpack"
+msgstr "모드팩"
+
+msgid "Lightweight"
+msgstr "경량"
+
+msgid "Kitchen Sink"
+msgstr "대형"
+
+msgid "Quick"
+msgstr "짧음"
+
+msgid "Standard"
+msgstr "보통"
+
+msgid "Marathon"
+msgstr "장시간"
+
+msgid "Stable"
+msgstr "안정적"
+
+msgid "%u%% crash rate"
+msgstr "충돌률 %u%%"

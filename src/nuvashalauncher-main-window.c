@@ -138,6 +138,42 @@ nuvashalauncher_main_window_import_file (NuvashaLauncherMainWindow *self, const 
   adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
 }
 
+/* Tracks launch count, play time, last session, and crashes on @instance. */
+static void
+track_play_time (NuvashaLauncherMainWindow *self, NuvashaLauncher *launcher,
+                 NuvashaLauncherLaunchState state)
+{
+  NuvashaLauncherInstance *instance = nuvashalauncher_launcher_get_instance (launcher);
+
+  if (state == NUVASHALAUNCHER_LAUNCH_RUNNING)
+    {
+      if (g_object_get_data (G_OBJECT (launcher), "nuvashalauncher-play-start") == NULL)
+        {
+          g_object_set_data_full (G_OBJECT (launcher), "nuvashalauncher-play-start",
+                                  g_memdup2 (&(gint64) { g_get_monotonic_time () },
+                                             sizeof (gint64)), g_free);
+          if (instance != NULL)
+            nuvashalauncher_instance_manager_record_launch (
+              self->model->manager, instance, NULL);
+        }
+    }
+  else if (!nuvashalauncher_launch_state_is_busy (state))
+    {
+      g_autofree gint64 *start = g_object_steal_data (
+        G_OBJECT (launcher), "nuvashalauncher-play-start");
+      gboolean crashed = (state == NUVASHALAUNCHER_LAUNCH_CRASHED);
+
+      if (instance != NULL && (start != NULL || crashed))
+        {
+          guint64 elapsed = start != NULL
+            ? (guint64) ((g_get_monotonic_time () - *start) / G_USEC_PER_SEC)
+            : 0;
+          nuvashalauncher_instance_manager_finish_session (
+            self->model->manager, instance, elapsed, crashed, NULL);
+        }
+    }
+}
+
 /* Keep launch failures in the window banner until they are dismissed. */
 static void
 on_window_launcher_state (NuvashaLauncher *launcher G_GNUC_UNUSED,
@@ -147,6 +183,8 @@ on_window_launcher_state (NuvashaLauncher *launcher G_GNUC_UNUSED,
   NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
   g_autofree char *message = NULL;
   const char *what = NULL;
+
+  track_play_time (self, launcher, state);
 
   switch (state)
     {

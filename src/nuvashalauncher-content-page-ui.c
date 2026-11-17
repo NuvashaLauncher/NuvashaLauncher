@@ -187,10 +187,6 @@ nuvashalauncher_content_page_build_installed (NuvashaLauncherContentPage *self)
   gtk_box_append (GTK_BOX (actions),
                   toolbar_button ("folder-symbolic", _("Open Folder"),
                                   G_CALLBACK (nuvashalauncher_content_page_on_open_folder_clicked), self));
-    self->browse.spinner = ADW_SPINNER (adw_spinner_new ());
-   gtk_widget_set_valign (GTK_WIDGET (self->browse.spinner), GTK_ALIGN_CENTER);
-  gtk_widget_set_visible (GTK_WIDGET (self->browse.spinner), FALSE);
-  gtk_box_append (GTK_BOX (actions), GTK_WIDGET (self->browse.spinner));
 
   /* The actions belong to the toolbar row above both lists, not to this
      one of them: they are the same row whichever list is shown, and
@@ -199,8 +195,7 @@ nuvashalauncher_content_page_build_installed (NuvashaLauncherContentPage *self)
 
      The row of the other list is taken out of the bar when the lists are
      switched, so this one is held here: without it, taking it out would
-     be the last reference to it and would destroy the box and the
-     spinner inside it while self->browse.spinner still points at them. */
+     be the last reference to it and would destroy the box. */
    self->installed.actions = g_object_ref_sink (GTK_BOX (actions));
    self->installed.selection_footer = selection_footer;
    self->installed.selection_label = selection_label;

@@ -120,7 +120,6 @@ struct _NuvashaLauncherContentPage
     GtkBox *loading_more; /* spinner row at the bottom of the list */
     GtkBox *retry_row;    /* inline retry row when a page fails */
     GtkLabel *retry_label;
-    AdwSpinner *spinner;
 
     GList *result_rows;
     NuvashaLauncherContentBrowserModel *model;
@@ -176,7 +175,6 @@ void nuvashalauncher_content_page_run_search (NuvashaLauncherContentPage *self, 
 void nuvashalauncher_content_page_on_stack_switched (GObject *stack, GParamSpec *pspec,
                                          gpointer user_data);
 void on_banner_dismiss (AdwBanner *banner, gpointer user_data);
-void set_busy (NuvashaLauncherContentPage *self, gboolean busy);
 void show_toast (NuvashaLauncherContentPage *self, const char *message);
 GtkWidget *plain_label (const char *text);
 void watch_widget (gpointer field, GtkWidget *widget);

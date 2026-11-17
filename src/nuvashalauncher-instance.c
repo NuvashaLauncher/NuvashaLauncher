@@ -53,6 +53,11 @@ enum
   PROP_JAVA_PATH,
   PROP_JVM_ARGS,
   PROP_MEMORY_MIB,
+  PROP_PLAY_SECONDS,
+  PROP_LAST_PLAYED_AT,
+  PROP_CREATED_AT,
+  PROP_LAUNCH_COUNT,
+  PROP_CRASH_COUNT,
   PROP_MODPACK_NAME,
   PROP_MODPACK_SUMMARY,
   PROP_MODPACK_VERSION_ID,
@@ -636,6 +641,26 @@ nuvashalauncher_instance_set_property (GObject      *object,
       self->memory_mib = g_value_get_uint (value);
       break;
 
+    case PROP_PLAY_SECONDS:
+      self->play_seconds = g_value_get_uint64 (value);
+      break;
+
+    case PROP_LAST_PLAYED_AT:
+      self->last_played_at = g_value_get_int64 (value);
+      break;
+
+    case PROP_CREATED_AT:
+      self->created_at = g_value_get_int64 (value);
+      break;
+
+    case PROP_LAUNCH_COUNT:
+      self->launch_count = g_value_get_uint (value);
+      break;
+
+    case PROP_CRASH_COUNT:
+      self->crash_count = g_value_get_uint (value);
+      break;
+
     case PROP_MODPACK_NAME:
       g_free (self->modpack_name);
       self->modpack_name = optional_string (g_value_get_string (value));
@@ -705,6 +730,26 @@ nuvashalauncher_instance_get_property (GObject    *object,
 
     case PROP_MEMORY_MIB:
       g_value_set_uint (value, self->memory_mib);
+      break;
+
+    case PROP_PLAY_SECONDS:
+      g_value_set_uint64 (value, self->play_seconds);
+      break;
+
+    case PROP_LAST_PLAYED_AT:
+      g_value_set_int64 (value, self->last_played_at);
+      break;
+
+    case PROP_CREATED_AT:
+      g_value_set_int64 (value, self->created_at);
+      break;
+
+    case PROP_LAUNCH_COUNT:
+      g_value_set_uint (value, self->launch_count);
+      break;
+
+    case PROP_CRASH_COUNT:
+      g_value_set_uint (value, self->crash_count);
       break;
 
     case PROP_MODPACK_NAME:
@@ -814,6 +859,36 @@ nuvashalauncher_instance_class_init (NuvashaLauncherInstanceClass *klass)
     g_param_spec_uint ("memory-mib", "Maximum memory (MiB)",
                        "Maximum JVM heap memory in MiB (0 for default)",
                        0, 1048576, 0,
+                       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  properties[PROP_PLAY_SECONDS] =
+    g_param_spec_uint64 ("play-seconds", "Play time (seconds)",
+                         "Total time the instance has been played",
+                         0, G_MAXINT64, 0,
+                         G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  properties[PROP_LAST_PLAYED_AT] =
+    g_param_spec_int64 ("last-played-at", "Last played at",
+                        "Unix timestamp when the instance was last played",
+                        0, G_MAXINT64, 0,
+                        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  properties[PROP_CREATED_AT] =
+    g_param_spec_int64 ("created-at", "Created at",
+                        "Unix timestamp when the instance was created",
+                        0, G_MAXINT64, 0,
+                        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  properties[PROP_LAUNCH_COUNT] =
+    g_param_spec_uint ("launch-count", "Launch count",
+                       "Number of times the instance was launched",
+                       0, G_MAXUINT, 0,
+                       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  properties[PROP_CRASH_COUNT] =
+    g_param_spec_uint ("crash-count", "Crash count",
+                       "Number of times the instance crashed",
+                       0, G_MAXUINT, 0,
                        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   properties[PROP_MODPACK_NAME] =

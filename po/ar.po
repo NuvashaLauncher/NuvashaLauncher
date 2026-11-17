@@ -1278,3 +1278,117 @@ msgstr "تحريك لأسفل"
 
 msgid "Copy Seed"
 msgstr "نسخ البذرة"
+
+msgid "Stats"
+msgstr "الإحصائيات"
+
+msgid "Playtime"
+msgstr "وقت اللعب"
+
+msgid "Time played"
+msgstr "الوقت المُستغرق"
+
+msgid "Not played yet"
+msgstr "لم يُلعب بعد"
+
+msgid "Less than a minute"
+msgstr "أقل من دقيقة"
+
+msgid "%llu min"
+msgstr "%llu د"
+
+msgid "%llu h %llu min"
+msgstr "%llu س %llu د"
+
+msgid "Runs on"
+msgstr "يعمل على"
+
+msgid "Activity"
+msgstr "النشاط"
+
+msgid "Last session"
+msgstr "آخر جلسة"
+
+msgid "Last played"
+msgstr "آخر لعب"
+
+msgid "Total launches"
+msgstr "إجمالي مرات التشغيل"
+
+msgid "Total crashes"
+msgstr "إجمالي الأعطال"
+
+msgid "Server joins"
+msgstr "مرات دخول الخوادم"
+
+msgid "World loads"
+msgstr "مرات تحميل العوالم"
+
+msgid "Player Profile"
+msgstr "ملف اللاعب"
+
+msgid "Player type"
+msgstr "نوع اللاعب"
+
+msgid "Pack style"
+msgstr "نمط الحزمة"
+
+msgid "Average session"
+msgstr "متوسط الجلسة"
+
+msgid "Stability"
+msgstr "الاستقرار"
+
+msgid "Instance"
+msgstr "النسخة"
+
+msgid "Total size"
+msgstr "الحجم الإجمالي"
+
+msgid "Created on"
+msgstr "تاريخ الإنشاء"
+
+msgid "Calculating…"
+msgstr "جارٍ الحساب…"
+
+msgid "Never"
+msgstr "أبداً"
+
+msgid "Today, %s"
+msgstr "اليوم، %s"
+
+msgid "Hybrid"
+msgstr "مختلط"
+
+msgid "Server Player"
+msgstr "لاعب خوادم"
+
+msgid "Singleplayer"
+msgstr "لاعب فردي"
+
+msgid "Unplayed"
+msgstr "غير مُلعب"
+
+msgid "Modpack"
+msgstr "حزمة تعديلات"
+
+msgid "Lightweight"
+msgstr "خفيف"
+
+msgid "Kitchen Sink"
+msgstr "شامل"
+
+msgid "Quick"
+msgstr "سريع"
+
+msgid "Standard"
+msgstr "قياسي"
+
+msgid "Marathon"
+msgstr "ماراثون"
+
+msgid "Stable"
+msgstr "مستقر"
+
+msgid "%u%% crash rate"
+msgstr "نسبة الأعطال %u%%"

@@ -105,6 +105,15 @@ gboolean nuvashalauncher_instance_manager_set_memory_mib (NuvashaLauncherInstanc
                                               NuvashaLauncherInstance *instance,
                                               guint memory_mib,
                                               GError **error);
+/* Records that @instance started running or finished a session, and saves. */
+gboolean nuvashalauncher_instance_manager_record_launch (NuvashaLauncherInstanceManager *self,
+                                                NuvashaLauncherInstance *instance,
+                                                GError **error);
+gboolean nuvashalauncher_instance_manager_finish_session (NuvashaLauncherInstanceManager *self,
+                                                 NuvashaLauncherInstance *instance,
+                                                 guint64 seconds,
+                                                 gboolean crashed,
+                                                 GError **error);
 gboolean nuvashalauncher_instance_manager_set_loader (NuvashaLauncherInstanceManager *self,
                                           NuvashaLauncherInstance *instance,
                                           NuvashaLauncherLoader loader,

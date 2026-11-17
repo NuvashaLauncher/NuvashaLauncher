@@ -562,6 +562,7 @@ nuvashalauncher_instance_manager_create (NuvashaLauncherInstanceManager *self,
 
   if (loader_version != NULL)
     g_object_set (instance, "loader_version", loader_version, NULL);
+  g_object_set (instance, "created-at", g_get_real_time () / G_USEC_PER_SEC, NULL);
 
   g_autoptr (GError) path_error = NULL;
   if (!g_file_test (path, G_FILE_TEST_IS_DIR) &&
@@ -725,6 +726,94 @@ nuvashalauncher_instance_manager_set_memory_mib (NuvashaLauncherInstanceManager 
   if (!nuvashalauncher_instance_manager_save (self, error))
     {
       g_object_set (instance, "memory-mib", old, NULL);
+      return FALSE;
+    }
+  return TRUE;
+}
+
+static gboolean
+ensure_registered (NuvashaLauncherInstanceManager *self,
+                   NuvashaLauncherInstance *instance,
+                   GError **error)
+{
+  if (g_list_store_find (self->instances, instance, NULL))
+    return TRUE;
+
+  g_set_error_literal (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                       NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND,
+                       "the instance is not registered");
+  return FALSE;
+}
+
+gboolean
+nuvashalauncher_instance_manager_record_launch (NuvashaLauncherInstanceManager *self,
+                                       NuvashaLauncherInstance *instance,
+                                       GError **error)
+{
+  guint old_launches = 0;
+  gint64 old_played = 0;
+
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (instance), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (!ensure_registered (self, instance, error))
+    return FALSE;
+
+  g_object_get (instance,
+                "launch-count", &old_launches,
+                "last-played-at", &old_played,
+                NULL);
+  g_object_set (instance,
+                "launch-count", old_launches + 1,
+                "last-played-at", g_get_real_time () / G_USEC_PER_SEC,
+                NULL);
+  if (!nuvashalauncher_instance_manager_save (self, error))
+    {
+      g_object_set (instance,
+                    "launch-count", old_launches,
+                    "last-played-at", old_played,
+                    NULL);
+      return FALSE;
+    }
+  return TRUE;
+}
+
+gboolean
+nuvashalauncher_instance_manager_finish_session (NuvashaLauncherInstanceManager *self,
+                                        NuvashaLauncherInstance *instance,
+                                        guint64 seconds,
+                                        gboolean crashed,
+                                        GError **error)
+{
+  guint64 old_play = 0;
+  gint64 old_played = 0;
+  guint old_crashes = 0;
+
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (instance), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (!ensure_registered (self, instance, error))
+    return FALSE;
+
+  g_object_get (instance,
+                "play-seconds", &old_play,
+                "last-played-at", &old_played,
+                "crash-count", &old_crashes,
+                NULL);
+  g_object_set (instance,
+                "play-seconds", old_play + seconds,
+                "last-played-at", g_get_real_time () / G_USEC_PER_SEC,
+                "crash-count", crashed ? old_crashes + 1 : old_crashes,
+                NULL);
+  if (!nuvashalauncher_instance_manager_save (self, error))
+    {
+      g_object_set (instance,
+                    "play-seconds", old_play,
+                    "last-played-at", old_played,
+                    "crash-count", old_crashes,
+                    NULL);
       return FALSE;
     }
   return TRUE;
