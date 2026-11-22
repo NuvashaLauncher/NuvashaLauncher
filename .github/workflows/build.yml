@@ -4,6 +4,10 @@ on:
   push:
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   linux:
     name: Linux ${{ matrix.arch }}
@@ -20,12 +24,12 @@ jobs:
 
     steps:
       - name: Check out source
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Install dependencies
         run: |
           apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y \
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
              gcc make pkg-config gettext \
              libasan8 libubsan1 \
              libglib2.0-dev libgtk-4-dev libadwaita-1-dev libepoxy-dev \
@@ -41,7 +45,7 @@ jobs:
         run: make -j$(nproc) test-debug
 
       - name: Run static analysis
-        run: make static-analysis
+        run: make -j$(nproc) static-analysis
 
       - name: Check POTFILES.in
         run: make check-potfiles

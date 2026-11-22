@@ -208,10 +208,17 @@ test-debug: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTRUNNER) $(TESTDBGBINS) $(SCHEMA
 # existing scripts and CI invocations continue to work.
 test-lsan: test-debug
 
-static-analysis:
-	@set -e; for source in src/*.c; do \
-	    $(CC) $(CPPFLAGS) -std=c17 -Wall -Wextra -Wpedantic -fanalyzer -c -o /dev/null \
-	    $(PKG_CFLAGS) -Isrc "$$source"; done
+ANALYZER_STAMPS := $(patsubst src/%.c,build/.analyzer/%.stamp,$(SRCS))
+
+build/.analyzer:
+	@mkdir -p $@
+
+build/.analyzer/%.stamp: src/%.c $(SCHEMA_COMPILED) | build/.analyzer
+	$(CC) $(CPPFLAGS) -std=c17 -Wall -Wextra -Wpedantic -fanalyzer -c -o /dev/null \
+		$(PKG_CFLAGS) -Isrc $<
+	@touch $@
+
+static-analysis: $(ANALYZER_STAMPS)
 
 pot:
 	xgettext --from-code=UTF-8 --keyword=_ --keyword=N_ \
