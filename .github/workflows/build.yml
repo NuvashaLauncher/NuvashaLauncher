@@ -28,6 +28,9 @@ jobs:
           - arch: ARM64
             runner: ubuntu-26.04-arm
 
+    env:
+      CCACHE_COMPRESS: "1"
+      CCACHE_MAXSIZE: 256M
     steps:
       - name: Check out source
         uses: actions/checkout@v7

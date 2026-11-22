@@ -4,7 +4,7 @@
 # Hand-written Makefile for nuvashalauncher.
 # Release objects live in build/, sanitizer objects in build-debug/.
 
-CC         := gcc
+CC         ?= gcc
 AR         ?= ar
 PKG_CONFIG ?= pkg-config
 PREFIX     ?= /usr/local
@@ -21,7 +21,7 @@ PKGS := gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive gio-unix-2.0 epox
 # Goals that compile nothing and so must keep working on hosts without the
 # development packages. test-flatpak-runtime only drives the flatpak CLI to
 # smoke-test an already-installed bundle; clean only deletes build output.
-NO_BUILD_GOALS := test-flatpak-runtime check-potfiles clean
+NO_BUILD_GOALS := test-flatpak-runtime check-potfiles pot uninstall clean
 ifneq ($(filter-out $(NO_BUILD_GOALS),$(MAKECMDGOALS)),)
 NEEDS_BUILD := 1
 else ifeq ($(MAKECMDGOALS),)
@@ -125,13 +125,16 @@ $(TESTLIBA): $(TESTLIBOBJS) | build
 	rm -f $@
 	$(AR) rcs $@ $(TESTLIBOBJS)
 
+TEST_CPPFLAGS := -DNUVASHALAUNCHER_DATA_DIR=\"$(CURDIR)/data\" \
+	-DNUVASHALAUNCHER_BIN=\"$(CURDIR)/$(BIN)\" \
+	-DNUVASHALAUNCHER_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\" \
+	-DNUVASHALAUNCHER_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
+	-DNUVASHALAUNCHER_SRC_DIR=\"$(CURDIR)/src\" \
+	-DNUVASHALAUNCHER_PO_DIR=\"$(CURDIR)/po\"
+
 build/tests/%: tests/%.c $(TESTLIBA) $(RESOURCE_O) | build/tests
 	$(CC) $(CFLAGS) $(RELFLAGS) $(RELLDFLAGS) -Wl,--as-needed -Isrc $(PKG_CFLAGS) \
-		-DNUVASHALAUNCHER_DATA_DIR=\"$(CURDIR)/data\" -DNUVASHALAUNCHER_BIN=\"$(CURDIR)/$(BIN)\" \
-		-DNUVASHALAUNCHER_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\" \
-		-DNUVASHALAUNCHER_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
-		-DNUVASHALAUNCHER_SRC_DIR=\"$(CURDIR)/src\" -DNUVASHALAUNCHER_PO_DIR=\"$(CURDIR)/po\" \
-		-o $@ $< $(RESOURCE_O) $(TESTLIBA) $(PKG_LIBS)
+		$(TEST_CPPFLAGS) -o $@ $< $(RESOURCE_O) $(TESTLIBA) $(PKG_LIBS)
 
 TESTRUNNER  := build/test-runner
 
@@ -192,11 +195,7 @@ $(TESTLIBDBGA): $(TESTLIBDBGOBJS) | build-debug
 
 build-debug/tests/%: tests/%.c $(TESTLIBDBGA) $(RESOURCE_DBG_O) | build-debug/tests
 	$(CC) $(CFLAGS) $(DBGFLAGS) -Wl,--as-needed -Isrc $(PKG_CFLAGS) \
-		-DNUVASHALAUNCHER_DATA_DIR=\"$(CURDIR)/data\" -DNUVASHALAUNCHER_BIN=\"$(CURDIR)/$(BIN)\" \
-		-DNUVASHALAUNCHER_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\" \
-		-DNUVASHALAUNCHER_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
-		-DNUVASHALAUNCHER_SRC_DIR=\"$(CURDIR)/src\" -DNUVASHALAUNCHER_PO_DIR=\"$(CURDIR)/po\" \
-		-o $@ $< $(RESOURCE_DBG_O) $(TESTLIBDBGA) $(PKG_LIBS)
+		$(TEST_CPPFLAGS) -o $@ $< $(RESOURCE_DBG_O) $(TESTLIBDBGA) $(PKG_LIBS)
 
 # The display guard test runs the release launcher, so test-debug builds both
 # binaries.
@@ -209,12 +208,13 @@ test-debug: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTRUNNER) $(TESTDBGBINS) $(SCHEMA
 test-lsan: test-debug
 
 ANALYZER_STAMPS := $(patsubst src/%.c,build/.analyzer/%.stamp,$(SRCS))
+ANALYZER_DEPS   := $(ANALYZER_STAMPS:.stamp=.d)
 
 build/.analyzer:
 	@mkdir -p $@
 
 build/.analyzer/%.stamp: src/%.c $(SCHEMA_COMPILED) | build/.analyzer
-	$(CC) $(CPPFLAGS) -std=c17 -Wall -Wextra -Wpedantic -fanalyzer -c -o /dev/null \
+	$(CC) $(CPPFLAGS) -std=c17 -Wall -Wextra -Wpedantic -fanalyzer -MMD -MP -MF $(@:.stamp=.d) -c -o /dev/null \
 		$(PKG_CFLAGS) -Isrc $<
 	@touch $@
 
@@ -339,4 +339,4 @@ build/locale/%/LC_MESSAGES/nuvashalauncher.mo: po/%.po
 	mkdir -p $(dir $@)
 	msgfmt -o $@ $<
 
--include $(RELDEPS) $(DBGDEPS) $(TESTDEPS) $(TESTDBGDEPS)
+-include $(RELDEPS) $(DBGDEPS) $(TESTDEPS) $(TESTDBGDEPS) $(ANALYZER_DEPS)
