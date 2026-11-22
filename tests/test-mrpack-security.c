@@ -151,10 +151,11 @@ static void
 zip_write_entry_bomb (const char *path, const char *index_json, guint count)
 {
   struct archive *archive = archive_write_new ();
-  g_autofree char *block = g_malloc0 (1024);
 
   g_assert_nonnull (archive);
   g_assert_cmpint (archive_write_set_format_zip (archive), ==, ARCHIVE_OK);
+  g_assert_cmpint (archive_write_set_options (archive, "compression=store"),
+                   ==, ARCHIVE_OK);
   g_assert_cmpint (archive_write_open_filename (archive, path), ==,
                    ARCHIVE_OK);
 
@@ -180,10 +181,8 @@ zip_write_entry_bomb (const char *path, const char *index_json, guint count)
       archive_entry_set_pathname (entry, name);
       archive_entry_set_filetype (entry, AE_IFREG);
       archive_entry_set_perm (entry, 0644);
-      archive_entry_set_size (entry, 1024);
+      archive_entry_set_size (entry, 0);
       g_assert_cmpint (archive_write_header (archive, entry), ==, ARCHIVE_OK);
-      g_assert_cmpint ((int) archive_write_data (archive, block, 1024), ==,
-                       1024);
       archive_entry_free (entry);
     }
 
