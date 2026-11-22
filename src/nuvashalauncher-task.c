@@ -266,12 +266,18 @@ release_when_done_idle (gpointer user_data)
 static void
 scope_release_when_done (NuvashaLauncherTaskScope *scope)
 {
-  g_atomic_int_set (&scope->unref_when_done, FALSE);
   GSource *source = g_idle_source_new ();
   g_source_set_priority (source, G_PRIORITY_DEFAULT);
   g_source_set_callback (source, release_when_done_idle, scope, NULL);
   g_source_attach (source, scope->context);
   g_source_unref (source);
+}
+
+static void
+scope_try_release_when_done (NuvashaLauncherTaskScope *scope)
+{
+  if (g_atomic_int_compare_and_exchange (&scope->unref_when_done, TRUE, FALSE))
+    scope_release_when_done (scope);
 }
 
 void
@@ -282,8 +288,8 @@ nuvashalauncher_task_scope_release_attached (GTask *task)
   g_return_if_fail (G_IS_TASK (task));
 
   scope = g_object_get_data (G_OBJECT (task), "nuvashalauncher-task-scope");
-  if (scope != NULL && g_atomic_int_get (&scope->unref_when_done))
-    scope_release_when_done (scope);
+  if (scope != NULL)
+    scope_try_release_when_done (scope);
 }
 
 gboolean
@@ -304,9 +310,10 @@ nuvashalauncher_task_scope_return_error_if_cancelled (NuvashaLauncherTaskScope *
   hold = nuvashalauncher_task_scope_ref (scope);
   cancelled = g_task_return_error_if_cancelled (scope->task);
   if (cancelled)
-    nuvashalauncher_task_scope_set_state (scope, NUVASHALAUNCHER_TASK_STATE_CANCELLED);
-  if (cancelled && g_atomic_int_get (&scope->unref_when_done))
-    scope_release_when_done (scope);
+    {
+      nuvashalauncher_task_scope_set_state (scope, NUVASHALAUNCHER_TASK_STATE_CANCELLED);
+      scope_try_release_when_done (scope);
+    }
 
   nuvashalauncher_task_scope_unref (hold);
   return cancelled;
@@ -316,7 +323,6 @@ void
 nuvashalauncher_task_scope_return_pointer (NuvashaLauncherTaskScope *scope, gpointer result,
                                GDestroyNotify result_free)
 {
-  gboolean release;
   NuvashaLauncherTaskScope *hold;
 
   g_return_if_fail (scope != NULL);
@@ -330,17 +336,14 @@ nuvashalauncher_task_scope_return_pointer (NuvashaLauncherTaskScope *scope, gpoi
   nuvashalauncher_task_scope_set_state (scope, NUVASHALAUNCHER_TASK_STATE_COMPLETED);
 
   hold = nuvashalauncher_task_scope_ref (scope);
-  release = g_atomic_int_get (&scope->unref_when_done);
   g_task_return_pointer (scope->task, result, result_free);
-  if (release && g_atomic_int_get (&scope->unref_when_done))
-    scope_release_when_done (scope);
+  scope_try_release_when_done (scope);
   nuvashalauncher_task_scope_unref (hold);
 }
 
 void
 nuvashalauncher_task_scope_return_error (NuvashaLauncherTaskScope *scope, GError *error)
 {
-  gboolean release;
   NuvashaLauncherTaskScope *hold;
 
   g_return_if_fail (scope != NULL);
@@ -353,17 +356,14 @@ nuvashalauncher_task_scope_return_error (NuvashaLauncherTaskScope *scope, GError
   nuvashalauncher_task_scope_set_state (scope, NUVASHALAUNCHER_TASK_STATE_FAILED);
 
   hold = nuvashalauncher_task_scope_ref (scope);
-  release = g_atomic_int_get (&scope->unref_when_done);
   g_task_return_error (scope->task, error);
-  if (release && g_atomic_int_get (&scope->unref_when_done))
-    scope_release_when_done (scope);
+  scope_try_release_when_done (scope);
   nuvashalauncher_task_scope_unref (hold);
 }
 
 void
 nuvashalauncher_task_scope_return_boolean (NuvashaLauncherTaskScope *scope, gboolean result)
 {
-  gboolean release;
   NuvashaLauncherTaskScope *hold;
 
   g_return_if_fail (scope != NULL);
@@ -374,10 +374,8 @@ nuvashalauncher_task_scope_return_boolean (NuvashaLauncherTaskScope *scope, gboo
                                           : NUVASHALAUNCHER_TASK_STATE_FAILED);
 
   hold = nuvashalauncher_task_scope_ref (scope);
-  release = g_atomic_int_get (&scope->unref_when_done);
   g_task_return_boolean (scope->task, result);
-  if (release && g_atomic_int_get (&scope->unref_when_done))
-    scope_release_when_done (scope);
+  scope_try_release_when_done (scope);
   nuvashalauncher_task_scope_unref (hold);
 }
 
@@ -386,6 +384,8 @@ nuvashalauncher_task_scope_unref_when_done (NuvashaLauncherTaskScope *scope)
 {
   g_return_val_if_fail (scope != NULL, NULL);
   g_atomic_int_set (&scope->unref_when_done, TRUE);
+  if (g_atomic_int_get (&scope->returned))
+    scope_try_release_when_done (scope);
   return scope;
 }
 
