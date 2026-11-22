@@ -231,6 +231,26 @@ test_version_load_errors (void)
   g_print ("ok - an unknown version and an inheritance cycle both fail\n");
 }
 
+static void
+test_version_load_cancellation (void)
+{
+  g_autoptr (NuvashaLauncherVersionManifest) manifest = local_manifest ();
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+
+  async_run_init (&run);
+  call_load (&run, &call, manifest, "1.21.1");
+  g_cancellable_cancel (run.cancellable);
+  async_run_wait (&run);
+
+  g_assert_null (call.description);
+  g_assert_nonnull (call.error);
+  async_call_clear (&call);
+  async_run_clear (&run);
+
+  g_print ("ok - cancelling a version load cleans up without leaks\n");
+}
+
 int
 main (int argc, char **argv)
 {
@@ -241,6 +261,7 @@ main (int argc, char **argv)
   test_manifest_fetch ();
   test_version_load ();
   test_version_load_errors ();
+  test_version_load_cancellation ();
   fixture_stop ();
   cache_stop ();
   return 0;
